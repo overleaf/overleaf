@@ -12,7 +12,7 @@ define [
 			@changesTracker.track_changes = true
 			@changeIdToMarkerIdMap = {}
 			@enabled = false
-			window.changesTracker ?= @changesTracker
+			window.trackChangesManager ?= @
 
 			@changesTracker.on "insert:added", (change) =>
 				sl_console.log "[insert:added]", change
@@ -29,6 +29,13 @@ define [
 			@changesTracker.on "changes:moved", (changes) =>
 				sl_console.log "[changes:moved]", changes
 				@_onChangesMoved(changes)
+
+			@changesTracker.on "comment:added", (comment) =>
+				sl_console.log "[comment:added]", comment
+				@_onCommentAdded(comment)
+			@changesTracker.on "comment:moved", (comment) =>
+				sl_console.log "[comment:moved]", comment
+				@_onCommentMoved(comment)
 
 			onChange = (e) =>
 				if !@editor.initing and @enabled
@@ -61,6 +68,19 @@ define [
 			
 			@editor.renderer.on "resize", () =>
 				@recalculateReviewEntriesScreenPositions()
+
+		addComment: (offset, length, comment) ->
+			@changesTracker.addComment offset, length, {
+				comment: comment
+				user_id: window.user_id
+			}
+		
+		addCommentToSelection: (comment) ->
+			range = @editor.getSelectionRange()
+			offset = @_aceRangeToShareJs(range.start)
+			end = @_aceRangeToShareJs(range.end)
+			length = end - offset
+			@addComment(offset, length, comment)
 
 		checkMapping: () ->
 			session = @editor.getSession()
@@ -104,6 +124,12 @@ define [
 					content: change.op.i or change.op.d
 					offset: change.op.p
 				}
+			for comment in @changesTracker.comments
+				@$scope.reviewPanel.entries[comment.id] = {
+					content: comment.metadata.comment
+					offset: comment.offset
+				}
+				
 			@recalculateReviewEntriesScreenPositions()
 		
 		recalculateReviewEntriesScreenPositions: () ->
@@ -178,16 +204,52 @@ define [
 			session.removeMarker marker_id
 			@updateReviewEntriesScope()
 		
-		_aceChangeToShareJs: (delta) ->
-			start = delta.start
-			lines = @editor.getSession().getDocument().getLines 0, start.row
+		_onCommentAdded: (comment) ->
+			start = @_shareJsOffsetToAcePosition(comment.offset)
+			end = @_shareJsOffsetToAcePosition(comment.offset + comment.length)
+			session = @editor.getSession()
+			doc = session.getDocument()
+			ace_range = new Range(start.row, start.column, end.row, end.column)
+
+			hue = ColorManager.getHueForUserId(comment.metadata.user_id)
+			colorScheme = ColorManager.getColorScheme(hue, @element)
+			markerLayer = @editor.renderer.$markerBack
+			klass = "track-changes-comment-marker"
+			style = "border-color: #{colorScheme.cursor}"
+			marker_id = session.addMarker ace_range, klass, (html, range, left, top, config) ->
+				if range.isMultiLine()
+					markerLayer.drawTextMarker(html, range, klass, config, style)
+				else
+					markerLayer.drawSingleLineMarker(html, range, "#{klass} ace_start", config, 0, style)
+			
+			@changeIdToMarkerIdMap[comment.id] = marker_id
+			@updateReviewEntriesScope()
+		
+		_onCommentMoved: (comment) ->
+			start = @_shareJsOffsetToAcePosition(comment.offset)
+			end = @_shareJsOffsetToAcePosition(comment.offset + comment.length)
+			session = @editor.getSession()
+			ace_range = new Range(start.row, start.column, end.row, end.column)
+			marker_id = @changeIdToMarkerIdMap[comment.id]
+			markers = session.getMarkers()
+			marker = markers[marker_id]
+			marker.range.start = start
+			marker.range.end = end
+			@editor.renderer.updateBackMarkers()
+			@updateReviewEntriesScope()
+
+		_aceRangeToShareJs: (range) ->
+			lines = @editor.getSession().getDocument().getLines 0, range.row
 			offset = 0
 			for line, i in lines
-				offset += if i < start.row
+				offset += if i < range.row
 					line.length
 				else
-					start.column
-			offset += start.row # Include newlines
+					range.column
+			offset += range.row # Include newlines
+
+		_aceChangeToShareJs: (delta) ->
+			offset = @_aceRangeToShareJs(delta.start)
 
 			text = delta.lines.join('\n')
 			switch delta.action

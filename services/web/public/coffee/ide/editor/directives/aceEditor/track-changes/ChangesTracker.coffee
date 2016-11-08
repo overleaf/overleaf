@@ -49,16 +49,57 @@ define [
 			# Ids are used to uniquely identify a change, e.g. for updating it in the database, or keeping in
 			# sync with Ace ranges.
 			@changes = []
+			@comments = []
 			@id = 0
+		
+		addComment: (offset, length, metadata) ->
+			# TODO: Don't allow overlapping comments?
+			@comments.push comment = {
+				id: @_newId()
+				offset, length, metadata
+			}
+			@emit "comment:added", comment
 		
 		applyOp: (op, metadata) ->
 			# Apply an op that has been applied to the document to our changes to keep them up to date
 			if op.i?
-				@applyInsert(op, metadata)
+				@applyInsertToChanges(op, metadata)
+				@applyInsertToComments(op)
 			else if op.d?
-				@applyDelete(op, metadata)
-			
-		applyInsert: (op, metadata) ->
+				@applyDeleteToChanges(op, metadata)
+				@applyDeleteToComments(op)
+		
+		applyInsertToComments: (op) ->
+			for comment in @comments
+				if op.p <= comment.offset
+					comment.offset += op.i.length
+					@emit "comment:moved", comment
+				else if op.p < comment.offset + comment.length
+					comment.length += op.i.length
+					@emit "comment:moved", comment
+
+		applyDeleteToComments: (op) ->
+			op_start = op.p
+			op_length = op.d.length
+			op_end = op.p + op_length
+			for comment in @comments
+				comment_end = comment.offset + comment.length
+				if op_end <= comment.offset
+					# delete is fully before comment
+					comment.offset -= op_length
+					@emit "comment:moved", comment
+				else if op_start >= comment_end
+					# delete is fully after comment, nothing to do
+				else
+					# delete and comment overlap
+					delete_length_before = Math.max(0, comment.offset - op_start)
+					delete_length_after = Math.max(0, op_end - comment_end)
+					delete_length_overlapping = op_length - delete_length_before - delete_length_after
+					comment.offset = Math.min(comment.offset, op_start)
+					comment.length -= delete_length_overlapping
+					@emit "comment:moved", comment
+
+		applyInsertToChanges: (op, metadata) ->
 			op_start = op.p
 			op_length = op.i.length
 			op_end = op.p + op_length
@@ -148,7 +189,7 @@ define [
 			if moved_changes.length > 0
 				@emit "changes:moved", moved_changes
 		
-		applyDelete: (op, metadata) ->
+		applyDeleteToChanges: (op, metadata) ->
 			op_start = op.p
 			op_length = op.d.length
 			op_end = op.p + op_length
