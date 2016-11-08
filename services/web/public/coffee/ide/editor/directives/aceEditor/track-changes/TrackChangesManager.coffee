@@ -9,9 +9,7 @@ define [
 		
 		constructor: (@$scope, @editor, @element) ->
 			@changesTracker = new ChangesTracker()
-			@changesTracker.track_changes = true
 			@changeIdToMarkerIdMap = {}
-			@enabled = false
 			window.trackChangesManager ?= @
 
 			@changesTracker.on "insert:added", (change) =>
@@ -68,6 +66,18 @@ define [
 			
 			@editor.renderer.on "resize", () =>
 				@recalculateReviewEntriesScreenPositions()
+		
+		enable: () ->
+			@enabled = true
+	
+		disable: () ->
+			@disabled = false
+		
+		turn_on_tracking: () ->
+			@changesTracker.track_changes = true
+		
+		turn_off_tracking: () ->
+			@changesTracker.track_changes = false
 
 		addComment: (offset, length, comment) ->
 			@changesTracker.addComment offset, length, {

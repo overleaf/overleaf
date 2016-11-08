@@ -5,6 +5,7 @@ define [
 	App.controller "ReviewPanelController", ($scope, $element, ide) ->
 		$scope.reviewPanel =
 			entries: {}
+			trackNewChanges: false
 			
 		scroller = $element.find(".review-panel-scroller")
 		list = $element.find(".review-entry-list")

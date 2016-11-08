@@ -90,7 +90,15 @@ div(ng-if="!shouldABTestHeaderLabels")
 								) {{ user.name.slice(0,1) }}
 								| {{ user.name }}
 
-		
+			a.btn.btn-full-height(
+				href,
+				ng-if="trackChangesFeatureFlag",
+				ng-class="{ active: ui.reviewPanelOpen }"
+				tooltip="#{translate('review')}",
+				tooltip-placement="bottom",
+				ng-click="toggleReviewPanel()"
+			)
+				| Review
 			a.btn.btn-full-height(
 				href,
 				ng-if="permissions.admin",

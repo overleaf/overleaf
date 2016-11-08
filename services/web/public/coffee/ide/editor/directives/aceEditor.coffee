@@ -55,6 +55,7 @@ define [
 				reviewPanel: "="
 				onScroll: "="
 				scrollEvents: "="
+				trackNewChanges: "="
 				trackChangesEnabled: "="
 			}
 			link: (scope, element, attrs) ->
@@ -87,8 +88,6 @@ define [
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
 				trackChangesManager   = new TrackChangesManager(scope, editor, element)
-				if scope.trackChangesEnabled and window.location.search.match /tcon=true/ # track changes on
-					trackChangesManager.enabled = true
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				editor.commands.addCommand
@@ -216,6 +215,21 @@ define [
 					if value? and syntaxValidationEnabled
 						session = editor.getSession()
 						session.setOption("useWorker", value);
+
+				scope.$watch "trackNewChanges", (track_new_changes) ->
+					return if !track_new_changes?
+					if track_new_changes
+						trackChangesManager.turn_on_tracking()
+					else
+						trackChangesManager.turn_off_tracking()
+
+				scope.$watch "trackChangesEnabled", (enabled) ->
+					return if !enabled?
+					if enabled
+						trackChangesManager.enable()
+					else
+						trackChangesManager.disable()
+
 
 				editor.setOption("scrollPastEnd", true)
 

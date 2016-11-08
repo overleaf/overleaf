@@ -57,6 +57,9 @@ define [
 			else
 				this.$originalApply(fn);
 
+		if window.location.search.match /tcon=true/ # track changes on
+			$scope.trackChangesFeatureFlag = true
+	
 		$scope.state = {
 			loading: true
 			load_progress: 40
@@ -67,11 +70,10 @@ define [
 			view: "editor"
 			chatOpen: false
 			pdfLayout: 'sideBySide'
-			reviewPanelOpen: false
+			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}") and $scope.trackChangesFeatureFlag
 			showCodeCheckerOnboarding: !window.userSettings.syntaxValidation?
 		}
 		$scope.user = window.user
-
 
 		$scope.shouldABTestPlans = false
 		if $scope.user.signUpDate >= '2016-10-27'
@@ -82,9 +84,12 @@ define [
 
 		$scope.chat = {}
 
-		ide.toggleReviewPanel = () ->
+		ide.toggleReviewPanel = $scope.toggleReviewPanel = () ->
 			$scope.ui.reviewPanelOpen = !$scope.ui.reviewPanelOpen
-			$scope.$digest()
+
+		$scope.$watch "ui.reviewPanelOpen", (value) ->
+			if value?
+				localStorage "ui.reviewPanelOpen.#{window.project_id}", value
 
 		# Only run the header AB test for newly registered users.
 		_abTestStartDate = new Date(Date.UTC(2016, 8, 28))

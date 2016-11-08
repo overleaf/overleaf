@@ -41,9 +41,13 @@ div.full-size(
 			review-panel="reviewPanel",
 			on-scroll="onScroll",
 			scroll-events="scrollEvents",
-			track-changes-enabled="true"
+			track-changes-enabled="trackChangesFeatureFlag"
+			track-new-changes= "reviewPanel.trackNewChanges"
 		)
 		#review-panel
+			.review-panel-toolbar
+				| Track Changes 
+				input(type="checkbox", ng-model="reviewPanel.trackNewChanges")
 			.review-panel-scroller
 				.review-entry-list(review-panel-sorted)
 					.review-entry(ng-repeat="(entry_id, entry) in reviewPanel.entries", ng-style="{'top': top}")
