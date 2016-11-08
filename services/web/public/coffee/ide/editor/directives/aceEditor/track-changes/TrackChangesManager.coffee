@@ -103,23 +103,21 @@ define [
 			expected_markers = []
 			for change in @changesTracker.changes
 				op = change.op
-				{background_marker_id} = @changeIdToMarkerIdMap[change.id]
+				{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[change.id]
 				start = @_shareJsOffsetToAcePosition(op.p)
 				if op.i?
 					end = @_shareJsOffsetToAcePosition(op.p + op.i.length)
 				else if op.d?
 					end = start
-				expected_markers.push {
-					marker_id: background_marker_id, start, end
-				}
+				expected_markers.push { marker_id: background_marker_id, start, end }
+				expected_markers.push { marker_id: callout_marker_id, start, end: start }
 			
 			for comment in @changesTracker.comments
-				{background_marker_id} = @changeIdToMarkerIdMap[comment.id]
+				{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[comment.id]
 				start = @_shareJsOffsetToAcePosition(comment.offset)
 				end = @_shareJsOffsetToAcePosition(comment.offset + comment.length)
-				expected_markers.push {
-					marker_id: background_marker_id, start, end
-				}
+				expected_markers.push { marker_id: background_marker_id, start, end }
+				expected_markers.push { marker_id: callout_marker_id, start, end: start }
 			
 			for {marker_id, start, end} in expected_markers
 				marker = markers[marker_id]
@@ -213,15 +211,17 @@ define [
 			@updateReviewEntriesScope()
 		
 		_onInsertRemoved: (change) ->
-			marker_id = @changeIdToMarkerIdMap[change.id]
+			{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[change.id]
 			session = @editor.getSession()
-			session.removeMarker marker_id
+			session.removeMarker background_marker_id
+			session.removeMarker callout_marker_id
 			@updateReviewEntriesScope()
 		
 		_onDeleteRemoved: (change) ->
-			marker_id = @changeIdToMarkerIdMap[change.id]
+			{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[change.id]
 			session = @editor.getSession()
-			session.removeMarker marker_id
+			session.removeMarker background_marker_id
+			session.removeMarker callout_marker_id
 			@updateReviewEntriesScope()
 		
 		_onCommentAdded: (comment) ->
