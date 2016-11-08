@@ -103,22 +103,22 @@ define [
 			expected_markers = []
 			for change in @changesTracker.changes
 				op = change.op
-				marker_id = @changeIdToMarkerIdMap[change.id]
+				{background_marker_id} = @changeIdToMarkerIdMap[change.id]
 				start = @_shareJsOffsetToAcePosition(op.p)
 				if op.i?
 					end = @_shareJsOffsetToAcePosition(op.p + op.i.length)
 				else if op.d?
 					end = start
 				expected_markers.push {
-					marker_id, start, end
+					marker_id: background_marker_id, start, end
 				}
 			
 			for comment in @changesTracker.comments
-				marker_id = @changeIdToMarkerIdMap[comment.id]
+				{background_marker_id} = @changeIdToMarkerIdMap[comment.id]
 				start = @_shareJsOffsetToAcePosition(comment.offset)
 				end = @_shareJsOffsetToAcePosition(comment.offset + comment.length)
 				expected_markers.push {
-					marker_id, start, end
+					marker_id: background_marker_id, start, end
 				}
 			
 			for {marker_id, start, end} in expected_markers
@@ -163,34 +163,9 @@ define [
 				y = screen_position.row * renderer.lineHeight
 				entry.screenPos = { y }
 			@$scope.$apply()
-				
-		_onInsertAdded: (change) ->
-			start = @_shareJsOffsetToAcePosition(change.op.p)
-			end = @_shareJsOffsetToAcePosition(change.op.p + change.op.i.length)
-			session = @editor.getSession()
-			doc = session.getDocument()
-			ace_range = new Range(start.row, start.column, end.row, end.column)
 
-			hue = ColorManager.getHueForUserId(change.metadata.user_id)
-			colorScheme = ColorManager.getColorScheme(hue, @element)
-			markerLayer = @editor.renderer.$markerBack
-			klass = "track-changes-added-marker"
-			style = "border-color: #{colorScheme.cursor}"
-			marker_id = session.addMarker ace_range, klass, (html, range, left, top, config) ->
-				if range.isMultiLine()
-					markerLayer.drawTextMarker(html, range, klass, config, style)
-				else
-					markerLayer.drawSingleLineMarker(html, range, "#{klass} ace_start", config, 0, style)
-			
-			@changeIdToMarkerIdMap[change.id] = marker_id
-			@updateReviewEntriesScope()
-		
-		_onDeleteAdded: (change) ->
-			position = @_shareJsOffsetToAcePosition(change.op.p)
-			session = @editor.getSession()
-			doc = session.getDocument()
+		_makeZeroWidthRange: (position) ->
 			ace_range = new Range(position.row, position.column, position.row, position.column)
-			
 			# Our delete marker is zero characters wide, but Ace doesn't draw ranges
 			# that are empty. So we monkey patch the range to tell Ace it's not empty.
 			# This is the code we need to trick:
@@ -202,16 +177,39 @@ define [
 				range.isEmpty = () ->
 					false
 				return range
+			return ace_range
+		
+		_createCalloutMarker: (position, klass) ->
+			session = @editor.getSession()
+			callout_range = @_makeZeroWidthRange(position)
+			markerLayer = @editor.renderer.$markerBack
+			callout_marker_id = session.addMarker callout_range, klass, (html, range, left, top, config) ->
+				markerLayer.drawSingleLineMarker(html, range, "#{klass} ace_start", config, 0, "width: auto; right: 0;")
 
-			hue = ColorManager.getHueForUserId(change.metadata.user_id)
-			colorScheme = ColorManager.getColorScheme(hue, @element)
+		_onInsertAdded: (change) ->
+			start = @_shareJsOffsetToAcePosition(change.op.p)
+			end = @_shareJsOffsetToAcePosition(change.op.p + change.op.i.length)
+			session = @editor.getSession()
+			doc = session.getDocument()
+			background_range = new Range(start.row, start.column, end.row, end.column)
+			background_marker_id = session.addMarker background_range, "track-changes-added-marker", "text"
+			callout_marker_id = @_createCalloutMarker(start, "track-changes-added-marker-callout")
+			@changeIdToMarkerIdMap[change.id] = { background_marker_id, callout_marker_id }
+			@updateReviewEntriesScope()
+
+		_onDeleteAdded: (change) ->
+			position = @_shareJsOffsetToAcePosition(change.op.p)
+			session = @editor.getSession()
+			doc = session.getDocument()
+
 			markerLayer = @editor.renderer.$markerBack
 			klass = "track-changes-deleted-marker"
-			style = "border-color: #{colorScheme.cursor}"
-			marker_id = session.addMarker ace_range, klass, (html, range, left, top, config) ->
-				markerLayer.drawSingleLineMarker(html, range, "#{klass} ace_start", config, 0, style)
+			background_range = @_makeZeroWidthRange(position)
+			background_marker_id = session.addMarker background_range, klass, (html, range, left, top, config) ->
+				markerLayer.drawSingleLineMarker(html, range, "#{klass} ace_start", config, 0, "")
 
-			@changeIdToMarkerIdMap[change.id] = marker_id
+			callout_marker_id = @_createCalloutMarker(position, "track-changes-deleted-marker-callout")
+			@changeIdToMarkerIdMap[change.id] = { background_marker_id, callout_marker_id }
 			@updateReviewEntriesScope()
 		
 		_onInsertRemoved: (change) ->
@@ -231,33 +229,10 @@ define [
 			end = @_shareJsOffsetToAcePosition(comment.offset + comment.length)
 			session = @editor.getSession()
 			doc = session.getDocument()
-			ace_range = new Range(start.row, start.column, end.row, end.column)
-
-			hue = ColorManager.getHueForUserId(comment.metadata.user_id)
-			colorScheme = ColorManager.getColorScheme(hue, @element)
-			markerLayer = @editor.renderer.$markerBack
-			klass = "track-changes-comment-marker"
-			style = "border-color: #{colorScheme.cursor}"
-			marker_id = session.addMarker ace_range, klass, (html, range, left, top, config) ->
-				if range.isMultiLine()
-					markerLayer.drawTextMarker(html, range, klass, config, style)
-				else
-					markerLayer.drawSingleLineMarker(html, range, "#{klass} ace_start", config, 0, style)
-			
-			@changeIdToMarkerIdMap[comment.id] = marker_id
-			@updateReviewEntriesScope()
-		
-		_onCommentMoved: (comment) ->
-			start = @_shareJsOffsetToAcePosition(comment.offset)
-			end = @_shareJsOffsetToAcePosition(comment.offset + comment.length)
-			session = @editor.getSession()
-			ace_range = new Range(start.row, start.column, end.row, end.column)
-			marker_id = @changeIdToMarkerIdMap[comment.id]
-			markers = session.getMarkers()
-			marker = markers[marker_id]
-			marker.range.start = start
-			marker.range.end = end
-			@editor.renderer.updateBackMarkers()
+			background_range = new Range(start.row, start.column, end.row, end.column)
+			background_marker_id = session.addMarker background_range, "track-changes-comment-marker", "text"
+			callout_marker_id = @_createCalloutMarker(start, "track-changes-comment-marker-callout")
+			@changeIdToMarkerIdMap[comment.id] = { background_marker_id, callout_marker_id }
 			@updateReviewEntriesScope()
 
 		_aceRangeToShareJs: (range) ->
@@ -290,8 +265,6 @@ define [
 			return {row:row, column:offset}
 		
 		_onChangesMoved: (changes) ->
-			session = @editor.getSession()
-			markers = session.getMarkers()
 			# TODO: PERFORMANCE: Only run through the Ace lines once, and calculate all
 			# change positions as we go.
 			for change in changes
@@ -300,9 +273,24 @@ define [
 					end = @_shareJsOffsetToAcePosition(change.op.p + change.op.i.length)
 				else
 					end = start
-				marker_id = @changeIdToMarkerIdMap[change.id]
-				marker = markers[marker_id]
-				marker.range.start = start
-				marker.range.end = end
+				@_updateMarker(change.id, start, end)
 			@editor.renderer.updateBackMarkers()
 			@updateReviewEntriesScope()
+		
+		_onCommentMoved: (comment) ->
+			start = @_shareJsOffsetToAcePosition(comment.offset)
+			end = @_shareJsOffsetToAcePosition(comment.offset + comment.length)
+			@_updateMarker(comment.id, start, end)
+			@editor.renderer.updateBackMarkers()
+			@updateReviewEntriesScope()
+	
+		_updateMarker: (change_id, start, end) ->
+			session = @editor.getSession()
+			markers = session.getMarkers()
+			{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[change_id]
+			background_marker = markers[background_marker_id]
+			background_marker.range.start = start
+			background_marker.range.end = end
+			callout_marker = markers[callout_marker_id]
+			callout_marker.range.start = start
+			callout_marker.range.end = start
