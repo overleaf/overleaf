@@ -8,7 +8,9 @@ expressLocals = require('./ExpressLocals')
 Router = require('../router')
 metrics.inc("startup")
 redis = require("redis-sharelatex")
-rclient = redis.createClient(Settings.redis.web)
+UserSessionsRedis = require('../Features/User/UserSessionsRedis')
+
+sessionsRedisClient = UserSessionsRedis.client()
 
 session = require("express-session")
 RedisStore = require('connect-redis')(session)
@@ -19,7 +21,8 @@ csrf = require('csurf')
 csrfProtection = csrf()
 cookieParser = require('cookie-parser')
 
-sessionStore = new RedisStore(client:rclient)
+# Init the session store
+sessionStore = new RedisStore(client:sessionsRedisClient)
 
 passport = require('passport')
 LocalStrategy = require('passport-local').Strategy

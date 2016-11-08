@@ -3,13 +3,15 @@ redis = require('redis-sharelatex')
 logger = require("logger-sharelatex")
 Async = require('async')
 _ = require('underscore')
+UserSessionsRedis = require('./UserSessionsRedis')
 
-rclient = redis.createClient(Settings.redis.web)
+# rclient = redis.createClient(Settings.redis.web)
+rclient = UserSessionsRedis.client()
 
 module.exports = UserSessionsManager =
 
 	_sessionSetKey: (user) ->
-		return "UserSessions:#{user._id}"
+		return "UserSessions:{#{user._id}}"
 
 	# mimic the key used by the express sessions
 	_sessionKey: (sessionId) ->
