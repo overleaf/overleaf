@@ -33,7 +33,7 @@ describe 'UserSessionsManager', ->
 		@rclient.exec.callsArgWith(0, null)
 
 		@redis =
-			createClient: () => @rclient
+			client: () => @rclient
 		@logger =
 			err:   sinon.stub()
 			error: sinon.stub()
@@ -42,15 +42,15 @@ describe 'UserSessionsManager', ->
 			redis:
 				web: {}
 		@UserSessionsManager = SandboxedModule.require modulePath, requires:
-			"redis-sharelatex":    @redis
 			"logger-sharelatex":   @logger
 			"settings-sharelatex": @settings
+			'./UserSessionsRedis': @redis
 
 	describe '_sessionSetKey', ->
 
 		it 'should build the correct key', ->
 			result = @UserSessionsManager._sessionSetKey(@user)
-			result.should.equal 'UserSessions:abcd'
+			result.should.equal 'UserSessions:{abcd}'
 
 	describe '_sessionKey', ->
 
