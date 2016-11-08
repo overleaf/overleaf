@@ -14,7 +14,7 @@ define [
 						}
 					entries.sort (a,b) -> a.scope.entry.offset - b.scope.entry.offset
 					
-					previousBottom = 0
+					previousBottom = 28 # This should start at the height of the toolbar
 					for entry in entries
 						height = $(entry.el).height()
 						top = entry.scope.entry.screenPos.y
