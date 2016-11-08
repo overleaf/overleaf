@@ -90,16 +90,28 @@ define [
 			for marker_id, marker of session.getMarkers()
 				markers[marker_id] = marker
 
+			expected_markers = []
 			for change in @changesTracker.changes
 				op = change.op
 				marker_id = @changeIdToMarkerIdMap[change.id]
-				
 				start = @_shareJsOffsetToAcePosition(op.p)
 				if op.i?
 					end = @_shareJsOffsetToAcePosition(op.p + op.i.length)
 				else if op.d?
 					end = start
-					
+				expected_markers.push {
+					marker_id, start, end
+				}
+			
+			for comment in @changesTracker.comments
+				marker_id = @changeIdToMarkerIdMap[comment.id]
+				start = @_shareJsOffsetToAcePosition(comment.offset)
+				end = @_shareJsOffsetToAcePosition(comment.offset + comment.length)
+				expected_markers.push {
+					marker_id, start, end
+				}
+			
+			for {marker_id, start, end} in expected_markers
 				marker = markers[marker_id]
 				delete markers[marker_id]
 				if marker.range.start.row != start.row or
