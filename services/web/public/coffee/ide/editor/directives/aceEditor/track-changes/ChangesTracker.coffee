@@ -277,7 +277,11 @@ define [
 			for change in remove_changes
 				@_removeChange change
 			
-			op.d = @_applyOpModifications(op.d, op_modifications)
+			# Copy rather than modify because we still need to apply it to comments
+			op = {
+				p: op.p
+				d: @_applyOpModifications(op.d, op_modifications)
+			}
 			if @track_changes and op.d.length > 0
 				@_addOp op, metadata
 			else
