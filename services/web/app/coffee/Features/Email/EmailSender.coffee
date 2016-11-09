@@ -25,7 +25,7 @@ else if Settings?.email?.parameters?.sendgridApiKey?
 	logger.log "using sendgrid for email"
 	nm_client = nodemailer.createTransport(sgTransport({auth:{api_key:Settings?.email?.parameters?.sendgridApiKey}}))
 else if Settings?.email?.parameters?
-	smtp = _.pick(Settings?.email?.parameters, "host", "port", "secure", "auth")
+	smtp = _.pick(Settings?.email?.parameters, "host", "port", "secure", "auth", "ignoreTLS")
 
 
 	logger.log "using smtp for email"

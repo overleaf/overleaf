@@ -19,11 +19,16 @@ define [
 			, 200
 
 		INFINITE_COLLABORATORS = -1
-		$scope.$watch "(project.members.length + project.invites.length)", (noOfMembers) ->
-			allowedNoOfMembers = $scope.project.features.collaborators
-			$scope.canAddCollaborators = noOfMembers < allowedNoOfMembers or allowedNoOfMembers == INFINITE_COLLABORATORS
 
-		window._m = projectMembers
+		$scope.refreshCanAddCollaborators = () ->
+			allowedNoOfMembers = $scope.project.features.collaborators
+			$scope.canAddCollaborators = (
+				($scope.project.members.length + $scope.project.invites.length) < allowedNoOfMembers or allowedNoOfMembers == INFINITE_COLLABORATORS
+			)
+		$scope.refreshCanAddCollaborators()
+
+		$scope.$watch "(project.members.length + project.invites.length)", (_noOfMembers) ->
+			$scope.refreshCanAddCollaborators()
 
 		$scope.autocompleteContacts = []
 		do loadAutocompleteUsers = () ->
