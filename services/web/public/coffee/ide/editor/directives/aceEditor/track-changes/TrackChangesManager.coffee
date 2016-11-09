@@ -158,7 +158,7 @@ define [
 			@$scope.reviewPanel.entries = {}
 			for change in @changesTracker.changes
 				@$scope.reviewPanel.entries[change.id] = {
-					type: "change"
+					type: if change.op.i then "insert" else "delete"
 					content: change.op.i or change.op.d
 					offset: change.op.p
 					metadata: change.metadata

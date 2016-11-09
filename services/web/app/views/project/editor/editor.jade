@@ -50,8 +50,12 @@ div.full-size(
 				input(type="checkbox", ng-model="reviewPanel.trackNewChanges")
 			.review-panel-scroller
 				.review-entry-list(review-panel-sorted)
-					.review-entry(ng-repeat="(entry_id, entry) in reviewPanel.entries", ng-style="{'top': top}")
-						div(ng-if="entry.type == 'change'")
+					.review-entry(
+						ng-repeat="(entry_id, entry) in reviewPanel.entries"
+						ng-class="'review-entry-' + entry.type"
+						ng-style="{'top': top}"
+					)
+						div(ng-if="entry.type == 'insert' || entry.type == 'delete'")
 							div.small {{ entry.metadata.ts }}
 							{{ entry.content }}
 						div(ng-if="entry.type == 'comment'")
