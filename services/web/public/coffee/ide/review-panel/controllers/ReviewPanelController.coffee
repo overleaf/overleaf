@@ -6,6 +6,10 @@ define [
 		$scope.reviewPanel =
 			entries: {}
 			trackNewChanges: false
+		
+		$scope.commentState =
+			adding: false
+			content: ""
 			
 		scroller = $element.find(".review-panel-scroller")
 		list = $element.find(".review-entry-list")
@@ -55,3 +59,12 @@ define [
 			# console.log "mousewheel", deltaY
 			scroller.scrollTop(scroller.scrollTop() + deltaY * 4)
 			e.preventDefault()
+		
+		$scope.startAddingComment = () ->
+			$scope.commentState.adding = true
+			$scope.$broadcast "comment:select_line"
+		
+		$scope.submitComment = () ->
+			$scope.commentState.adding = false
+			console.log "ADDING COMMENT", $scope.commentState.content
+			$scope.$broadcast "comment:add", $scope.commentState.content

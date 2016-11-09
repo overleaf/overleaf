@@ -34,6 +34,16 @@ define [
 			@changesTracker.on "comment:moved", (comment) =>
 				sl_console.log "[comment:moved]", comment
 				@_onCommentMoved(comment)
+			
+			@editor.on "changeSelection", (e) =>
+				# TODO: Make this only update focus when we get a more optimised updating system
+				@updateReviewEntriesScope()
+			
+			@$scope.$on "comment:add", (e, comment) =>
+				@addCommentToSelection(comment)
+
+			@$scope.$on "comment:select_line", (e) =>
+				@selectLineIfNoSelection()
 
 			onChange = (e) =>
 				if !@editor.initing and @enabled
@@ -91,6 +101,10 @@ define [
 			end = @_aceRangeToShareJs(range.end)
 			length = end - offset
 			@addComment(offset, length, comment)
+		
+		selectLineIfNoSelection: () ->
+			if @editor.selection.isEmpty()
+				@editor.selection.selectLine()
 
 		checkMapping: () ->
 			session = @editor.getSession()
@@ -141,16 +155,25 @@ define [
 			@$scope.reviewPanel.entries = {}
 			for change in @changesTracker.changes
 				@$scope.reviewPanel.entries[change.id] = {
+					type: "change"
 					content: change.op.i or change.op.d
 					offset: change.op.p
 					metadata: change.metadata
 				}
 			for comment in @changesTracker.comments
 				@$scope.reviewPanel.entries[comment.id] = {
+					type: "comment"
 					content: comment.metadata.comment
 					offset: comment.offset
 				}
-				
+			@updateFocus()
+			@recalculateReviewEntriesScreenPositions()
+		
+		updateFocus: () ->
+			@$scope.reviewPanel.entries["focus-position"] = {
+				type: "focus-position"
+				offset: @_aceRangeToShareJs(@editor.getSelectionRange().start)
+			}
 			@recalculateReviewEntriesScreenPositions()
 		
 		recalculateReviewEntriesScreenPositions: () ->
@@ -161,6 +184,7 @@ define [
 				screen_position = session.documentToScreenPosition(doc_position.row, doc_position.column)
 				y = screen_position.row * renderer.lineHeight
 				entry.screenPos = { y }
+
 			@$scope.$apply()
 
 		_makeZeroWidthRange: (position) ->

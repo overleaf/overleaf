@@ -51,8 +51,15 @@ div.full-size(
 			.review-panel-scroller
 				.review-entry-list(review-panel-sorted)
 					.review-entry(ng-repeat="(entry_id, entry) in reviewPanel.entries", ng-style="{'top': top}")
-						div.small {{ entry.metadata.ts }}
-						{{ entry.content }}
+						div(ng-if="entry.type != 'focus-position'")
+							div.small {{ entry.metadata.ts }}
+							{{ entry.content }}
+						div(ng-if="entry.type == 'focus-position'")
+							
+							a.btn.btn-sm(href, ng-if="!commentState.adding", ng-click="startAddingComment()") Add comment
+							div(ng-if="commentState.adding")
+								textarea(ng-model="commentState.content")
+								a.btn.btn-sm.btm-primary(href, ng-click="submitComment()") Submit
 
 	.ui-layout-east
 		div(ng-if="ui.pdfLayout == 'sideBySide'")
