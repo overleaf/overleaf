@@ -70,8 +70,12 @@ define [
 			$scope.commentState.content = ""
 			$scope.$broadcast "review-panel:layout"
 		
+		$scope.cancelNewComment = (entry) ->
+			$scope.commentState.adding = false
+			$scope.commentState.content = ""
+			$scope.$broadcast "review-panel:layout"
+		
 		$scope.startReply = (entry) ->
-			console.log "Start new reply"
 			entry.replying = true
 			$scope.$broadcast "review-panel:layout"
 		
@@ -83,4 +87,9 @@ define [
 			}
 			entry.replyContent = ""
 			entry.replying = false
+			$scope.$broadcast "review-panel:layout"
+		
+		$scope.cancelReply = (entry) ->
+			entry.replying = false
+			entry.replyContent = ""
 			$scope.$broadcast "review-panel:layout"

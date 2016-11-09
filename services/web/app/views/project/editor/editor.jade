@@ -62,12 +62,14 @@ div.full-size(
 							div(ng-if="entry.replying")
 								textarea(ng-model="entry.replyContent")
 								a.btn.btn-sm.btn-primary(href, ng-click="submitReply(entry)") Submit
+								a(href, ng-click="cancelReply(entry)") X
 							a.btn.btn-sm.btn-primary(href, ng-click="startReply(entry)", ng-if="!entry.replying") Reply
 						div(ng-if="entry.type == 'focus-position'")
 							a.btn.btn-sm(href, ng-if="!commentState.adding", ng-click="startNewComment()") Add comment
 							div(ng-if="commentState.adding")
 								textarea(ng-model="commentState.content")
 								a.btn.btn-sm.btn-primary(href, ng-click="submitNewComment()") Submit
+								a(href, ng-click="cancelNewComment()") X
 
 	.ui-layout-east
 		div(ng-if="ui.pdfLayout == 'sideBySide'")
