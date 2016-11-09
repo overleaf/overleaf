@@ -57,37 +57,37 @@ div.full-size(
 							ng-class="'review-entry-callout-' + entry.type"
 							style="top: {{ entry.screenPos.y + 15 }}px; height: {{ top - entry.screenPos.y }}px"
 						)
-					.review-entry(
-						ng-class="'review-entry-' + entry.type"
-						ng-style="{'top': top}"
-					)
-						div(ng-if="entry.type == 'insert' || entry.type == 'delete'")
-							.review-entry-header
-								.review-entry-header-action-icon
+						.review-entry(
+							ng-class="'review-entry-' + entry.type"
+							ng-style="{'top': top}"
+						)
+							div(ng-if="entry.type == 'insert' || entry.type == 'delete'")
+								.review-entry-header
+									.review-entry-header-action-icon
 
-								.review-entry-header-metadata
-									{{ users[entry.metadata.user_id].name }} {{ entry.metadata.ts }}
-								.review-entry-header-avatar(style="background-color: hsl({{ users[entry.metadata.user_id].hue }}, 70%, 50%);") {{ users[entry.metadata.user_id].avatar_text }}
-							.review-entry-body
-								{{ entry.content }}
-							.review-entry-actions
+									.review-entry-header-metadata
+										{{ users[entry.metadata.user_id].name }} {{ entry.metadata.ts }}
+									.review-entry-header-avatar(style="background-color: hsl({{ users[entry.metadata.user_id].hue }}, 70%, 50%);") {{ users[entry.metadata.user_id].avatar_text }}
+								.review-entry-body
+									{{ entry.content }}
+								.review-entry-actions
 
-						div(ng-if="entry.type == 'comment'")
-							div(ng-repeat="comment in entry.thread", class="comment-thread__comment")
-								div.small(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 50%)") {{ users[comment.user_id].name }}
-								div.small {{ comment.ts }}
-								| {{ comment.content }}
-							div(ng-if="entry.replying")
-								textarea(ng-model="entry.replyContent")
-								a.btn.btn-sm.btn-primary(href, ng-click="submitReply(entry)") Submit
-								a(href, ng-click="cancelReply(entry)") X
-							a.btn.btn-sm.btn-primary(href, ng-click="startReply(entry)", ng-if="!entry.replying") Reply
-						div(ng-if="entry.type == 'focus-position'")
-							a.btn.btn-sm(href, ng-if="!commentState.adding", ng-click="startNewComment()") Add comment
-							div(ng-if="commentState.adding")
-								textarea(ng-model="commentState.content")
-								a.btn.btn-sm.btn-primary(href, ng-click="submitNewComment()") Submit
-								a(href, ng-click="cancelNewComment()") X
+							div(ng-if="entry.type == 'comment'")
+								div(ng-repeat="comment in entry.thread", class="comment-thread__comment")
+									div.small(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 50%)") {{ users[comment.user_id].name }}
+									div.small {{ comment.ts }}
+									| {{ comment.content }}
+								div(ng-if="entry.replying")
+									textarea(ng-model="entry.replyContent")
+									a.btn.btn-sm.btn-primary(href, ng-click="submitReply(entry)") Submit
+									a(href, ng-click="cancelReply(entry)") X
+								a.btn.btn-sm.btn-primary(href, ng-click="startReply(entry)", ng-if="!entry.replying") Reply
+							div(ng-if="entry.type == 'focus-position'")
+								a.btn.btn-sm(href, ng-if="!commentState.adding", ng-click="startNewComment()") Add comment
+								div(ng-if="commentState.adding")
+									textarea(ng-model="commentState.content")
+									a.btn.btn-sm.btn-primary(href, ng-click="submitNewComment()") Submit
+									a(href, ng-click="cancelNewComment()") X
 
 	.ui-layout-east
 		div(ng-if="ui.pdfLayout == 'sideBySide'")
