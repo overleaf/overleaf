@@ -60,11 +60,24 @@ define [
 			scroller.scrollTop(scroller.scrollTop() + deltaY * 4)
 			e.preventDefault()
 		
-		$scope.startAddingComment = () ->
+		$scope.startNewComment = () ->
 			$scope.commentState.adding = true
 			$scope.$broadcast "comment:select_line"
 		
-		$scope.submitComment = () ->
+		$scope.submitNewComment = () ->
 			$scope.commentState.adding = false
-			console.log "ADDING COMMENT", $scope.commentState.content
 			$scope.$broadcast "comment:add", $scope.commentState.content
+			$scope.commentState.content = ""
+		
+		$scope.startReply = (entry) ->
+			console.log "Start new reply"
+			entry.replying = true
+		
+		$scope.submitReply = (entry) ->
+			entry.thread.push {
+				content: entry.replyContent
+				ts: new Date()
+				user_id: window.user_id
+			}
+			entry.replyContent = ""
+			entry.replying = false

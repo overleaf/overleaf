@@ -89,18 +89,21 @@ define [
 		turn_off_tracking: () ->
 			@changesTracker.track_changes = false
 
-		addComment: (offset, length, comment) ->
+		addComment: (offset, length, content) ->
 			@changesTracker.addComment offset, length, {
-				comment: comment
-				user_id: window.user_id
+				thread: [{
+					content: content
+					user_id: window.user_id
+					ts: new Date()
+				}]
 			}
 		
-		addCommentToSelection: (comment) ->
+		addCommentToSelection: (content) ->
 			range = @editor.getSelectionRange()
 			offset = @_aceRangeToShareJs(range.start)
 			end = @_aceRangeToShareJs(range.end)
 			length = end - offset
-			@addComment(offset, length, comment)
+			@addComment(offset, length, content)
 		
 		selectLineIfNoSelection: () ->
 			if @editor.selection.isEmpty()
@@ -163,7 +166,7 @@ define [
 			for comment in @changesTracker.comments
 				@$scope.reviewPanel.entries[comment.id] = {
 					type: "comment"
-					content: comment.metadata.comment
+					thread: comment.metadata.thread
 					offset: comment.offset
 				}
 			@updateFocus()
