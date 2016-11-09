@@ -143,6 +143,7 @@ define [
 				@$scope.reviewPanel.entries[change.id] = {
 					content: change.op.i or change.op.d
 					offset: change.op.p
+					metadata: change.metadata
 				}
 			for comment in @changesTracker.comments
 				@$scope.reviewPanel.entries[comment.id] = {

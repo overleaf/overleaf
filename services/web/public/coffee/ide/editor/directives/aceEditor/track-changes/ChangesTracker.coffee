@@ -59,8 +59,10 @@ define [
 				offset, length, metadata
 			}
 			@emit "comment:added", comment
+			return comment
 		
 		applyOp: (op, metadata) ->
+			metadata.ts ?= new Date()
 			# Apply an op that has been applied to the document to our changes to keep them up to date
 			if op.i?
 				@applyInsertToChanges(op, metadata)
@@ -149,6 +151,7 @@ define [
 							is_same_user
 						offset = op_start - change_start
 						change.op.i = change.op.i.slice(0, offset) + op.i + change.op.i.slice(offset)
+						change.metadata.ts = metadata.ts
 						already_merged = true
 						moved_changes.push change
 					else if op_start <= change_start
@@ -241,6 +244,7 @@ define [
 						if insert_remaining.length > 0
 							change.op.i = insert_remaining
 							change.op.p = Math.min(change_start, op_start)
+							change.metadata.ts = metadata.ts
 							moved_changes.push change
 						else
 							remove_changes.push change
