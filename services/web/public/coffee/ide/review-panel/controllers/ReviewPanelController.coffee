@@ -95,16 +95,21 @@ define [
 			entry.replyContent = ""
 			$scope.$broadcast "review-panel:layout"
 		
+		# TODO: Eventually we need to get this from the server, and update it 
+		# when we get an id we don't know. This'll do for client side testing
 		refreshUsers = () ->
 			$scope.users = {}
 			for member in $scope.project.members.concat($scope.project.owner)
+				if member._id == window.user_id
+					name = "You"
+				else
+					name = "#{member.first_name} #{member.last_name}"
 				$scope.users[member._id] = {
 					email: member.email
-					name: "#{member.first_name} #{member.last_name}"
+					name: name
 					hue: ColorManager.getHueForUserId(member._id)
 					avatar_text: [member.first_name, member.last_name].filter((n) -> n?).map((n) -> n[0]).join ""
 				}
-			console.log "REFRESHED USERS", $scope.project.members, $scope.users
 		
 		$scope.$watch "project.members", (members) ->
 			return if !members?
