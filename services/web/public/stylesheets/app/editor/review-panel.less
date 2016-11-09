@@ -1,4 +1,20 @@
-@review-panel-width: 230px;
+@rp-bg-blue			: #dadfed;
+@rp-bg-dim-blue		: #fafafa;
+@rp-highlight-blue	: #8a96b5;
+
+@rp-border-grey		: #d9d9d9;
+
+@rp-green			: #2c8e30;
+@rp-dim-green		: #cae3cb;
+@rp-red				: #c5060b;
+@rp-dim-red			: #f3cdce;
+@rp-yellow			: #f3b111;
+@rp-dim-yellow		: #ffe9b2;
+
+@rp-type-blue		: #6b7797;
+@rp-type-darkgrey	: #3f3f3f;
+
+@review-panel-width	: 230px;
 
 #review-panel {
 	position: absolute;
@@ -6,7 +22,8 @@
 	top: 0px;
 	bottom: 0px;
 	right: 0px;
-	background-color: #eee;
+	background-color: @rp-bg-blue;
+	border-left: solid 1px @rp-border-grey;
 	overflow: hidden;
 	display: none;
 }
@@ -14,8 +31,8 @@
 .review-panel-toolbar {
 	height: 32px;
 	padding: 6px;
-	border-bottom: 1px solid grey;
-	background-color: #eee;
+	border-bottom: 1px solid @rp-border-grey;
+	background-color: @rp-bg-dim-blue;
 	text-align: center;
 	position: absolute;
 	top: 0;
