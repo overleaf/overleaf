@@ -1,20 +1,23 @@
-@rp-bg-blue			: #dadfed;
-@rp-bg-dim-blue		: #fafafa;
-@rp-highlight-blue	: #8a96b5;
+@rp-base-font-size		: 12px;
 
-@rp-border-grey		: #d9d9d9;
+@rp-bg-blue				: #dadfed;
+@rp-bg-dim-blue			: #fafafa;
+@rp-highlight-blue		: #8a96b5;
 
-@rp-green			: #2c8e30;
-@rp-dim-green		: #cae3cb;
-@rp-red				: #c5060b;
-@rp-dim-red			: #f3cdce;
-@rp-yellow			: #f3b111;
-@rp-dim-yellow		: #ffe9b2;
+@rp-border-grey			: #d9d9d9;
 
-@rp-type-blue		: #6b7797;
-@rp-type-darkgrey	: #3f3f3f;
+@rp-green				: #2c8e30;
+@rp-dim-green			: #cae3cb;
+@rp-red					: #c5060b;
+@rp-dim-red				: #f3cdce;
+@rp-yellow				: #f3b111;
+@rp-dim-yellow			: #ffe9b2;
 
-@review-panel-width	: 230px;
+@rp-type-blue			: #6b7797;
+@rp-type-darkgrey		: #3f3f3f;
+
+@rp-entry-ribbon-width	: 4px;
+@review-panel-width		: 230px;
 
 #review-panel {
 	position: absolute;
@@ -26,6 +29,8 @@
 	border-left: solid 1px @rp-border-grey;
 	overflow: hidden;
 	display: none;
+	font-size: @rp-base-font-size;
+	color: @rp-type-blue;
 }
 
 .review-panel-toolbar {
@@ -58,13 +63,12 @@
 
 .review-entry {
 	position: absolute;
-	font-size: 12px;
-	padding: 5px 5px 5px 9px;
-	border-left: solid 4px transparent;
+	padding-left: @rp-entry-ribbon-width;
+	border-left: solid @rp-entry-ribbon-width transparent;
 	border-radius: 3px;
 	margin: 0 6px;
 	background-color: #FFF;
-	max-width: 148px;
+	max-width: 248px;
 	word-wrap: break-word;
 
 	&-insert {
@@ -75,6 +79,32 @@
 		border-left-color: @rp-red;
 	}
 }
+	
+	.review-entry-header {
+		display: flex;
+
+		&-action-icon {
+
+		}
+
+		&-metadata {
+			flex-grow: 1;
+		}
+
+		&-avatar {
+
+		}
+	}
+
+	.review-entry-body {
+
+	}
+
+	.review-entry-actions {
+
+	}
+
+
 
 .review-entry-callout {
 	position: absolute;
