@@ -39,9 +39,8 @@ define [
 				
 		$scope.$watch "ui.reviewPanelOpen", (reviewPanelOpen) ->
 			return if !reviewPanelOpen?
-			setTimeout () ->
-				$scope.$broadcast "reviewPanel:toggle"
 			if reviewPanelOpen
+				$scope.$broadcast "review-panel:layout"
 				scroller.on "scroll", scrollAce
 				$scope.onScroll = scrollPanel # Passed into the editor directive for it to call
 			else
@@ -63,15 +62,18 @@ define [
 		$scope.startNewComment = () ->
 			$scope.commentState.adding = true
 			$scope.$broadcast "comment:select_line"
+			$scope.$broadcast "review-panel:layout"
 		
 		$scope.submitNewComment = () ->
 			$scope.commentState.adding = false
 			$scope.$broadcast "comment:add", $scope.commentState.content
 			$scope.commentState.content = ""
+			$scope.$broadcast "review-panel:layout"
 		
 		$scope.startReply = (entry) ->
 			console.log "Start new reply"
 			entry.replying = true
+			$scope.$broadcast "review-panel:layout"
 		
 		$scope.submitReply = (entry) ->
 			entry.thread.push {
@@ -81,3 +83,4 @@ define [
 			}
 			entry.replyContent = ""
 			entry.replying = false
+			$scope.$broadcast "review-panel:layout"

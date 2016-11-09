@@ -1,11 +1,10 @@
 define [
 	"base"
 ], (App) ->
-	App.directive "reviewPanelSorted", () ->
+	App.directive "reviewPanelSorted", ($timeout) ->
 		return  {
 			link: (scope, element, attrs) ->
-				scope.$watch "reviewPanel.entries", (value) ->
-					return if !value?
+				layout = () ->
 					entries = []
 					for el in element.find(".review-entry")
 						entries.push {
@@ -21,4 +20,12 @@ define [
 						top = Math.max(top, previousBottom + 12)
 						previousBottom = top + height
 						entry.scope.top = top
+				
+				scope.$watch "reviewPanel.entries", (value) ->
+					return if !value?
+					layout()
+				
+				scope.$on "review-panel:layout", () ->
+					$timeout () ->
+						layout()
 		}
