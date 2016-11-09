@@ -50,8 +50,14 @@ div.full-size(
 				input(type="checkbox", ng-model="reviewPanel.trackNewChanges")
 			.review-panel-scroller
 				.review-entry-list(review-panel-sorted)
-					.review-entry(
+					.review-entry-wrapper(
 						ng-repeat="(entry_id, entry) in reviewPanel.entries"
+					)
+						.review-entry-callout(
+							ng-class="'review-entry-callout-' + entry.type"
+							style="top: {{ entry.screenPos.y + 15 }}px; height: {{ top - entry.screenPos.y }}px"
+						)
+					.review-entry(
 						ng-class="'review-entry-' + entry.type"
 						ng-style="{'top': top}"
 					)
