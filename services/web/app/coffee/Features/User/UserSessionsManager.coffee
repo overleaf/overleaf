@@ -5,7 +5,6 @@ Async = require('async')
 _ = require('underscore')
 UserSessionsRedis = require('./UserSessionsRedis')
 
-# rclient = redis.createClient(Settings.redis.web)
 rclient = UserSessionsRedis.client()
 
 module.exports = UserSessionsManager =
@@ -69,7 +68,7 @@ module.exports = UserSessionsManager =
 				logger.log {user_id: user._id}, "no other sessions found, returning"
 				return callback(null, [])
 
-			Async.map sessionKeys, ((k, cb) -> rclient.get(k, cb)), (err, sessions) ->
+			Async.mapSeries sessionKeys, ((k, cb) -> rclient.get(k, cb)), (err, sessions) ->
 				if err?
 					logger.err {user_id: user._id}, "error getting all sessions for user from redis"
 					return callback(err)
