@@ -65,8 +65,8 @@ div.full-size(
 							.review-entry-actions
 						div(ng-if="entry.type == 'comment'")
 							div(ng-repeat="comment in entry.thread", class="comment-thread__comment")
+								div.small(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 50%)") {{ users[comment.user_id].name }}
 								div.small {{ comment.ts }}
-								div.small {{ comment.user_id }}
 								| {{ comment.content }}
 							div(ng-if="entry.replying")
 								textarea(ng-model="entry.replyContent")
