@@ -68,7 +68,8 @@ module.exports = UserSessionsManager =
 			if sessionKeys.length == 0
 				logger.log {user_id: user._id}, "no other sessions found, returning"
 				return callback(null, [])
-			rclient.mget sessionKeys, (err, sessions) ->
+
+			Async.map sessionKeys, ((k, cb) -> rclient.get(k, cb)), (err, sessions) ->
 				if err?
 					logger.err {user_id: user._id}, "error getting all sessions for user from redis"
 					return callback(err)
@@ -104,12 +105,18 @@ module.exports = UserSessionsManager =
 				logger.log {user_id: user._id}, "no sessions in UserSessions set to delete, returning"
 				return callback(null)
 			logger.log {user_id: user._id, count: keysToDelete.length}, "deleting sessions for user"
-			rclient.multi()
-				.del(keysToDelete)
-				.srem(sessionSetKey, keysToDelete)
-				.exec (err, result) ->
+
+			deletions = keysToDelete.map (k) ->
+				(cb) ->
+					rclient.del k, cb
+
+			Async.series deletions, (err, _result) ->
+				if err?
+					logger.err {err, user_id: user._id, sessionSetKey}, "errror revoking all sessions for user"
+					return callback(err)
+				rclient.srem sessionSetKey, keysToDelete, (err) ->
 					if err?
-						logger.err {err, user_id: user._id, sessionSetKey}, "error revoking all sessions for user"
+						logger.err {err, user_id: user._id, sessionSetKey}, "error removing session set for user"
 						return callback(err)
 					callback(null)
 
