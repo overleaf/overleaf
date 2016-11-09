@@ -11,9 +11,9 @@ redisSessionsSettings = Settings.redis.websessions or Settings.redis.web
 
 if redisSessionsSettings?.cluster?
 	logger.log {}, "using redis cluster for web sessions"
-	rclient = new ioredis.Cluster(redisSessionsSettings.cluster)
+	sessionRedisClient = new ioredis.Cluster(redisSessionsSettings.cluster)
 else
-	rclient = redis.createClient(redisSessionsSettings)
+	sessionRedisClient = redis.createClient(redisSessionsSettings)
 
 RedisStore = require('connect-redis')(session)
 SessionSockets = require('session.socket.io')
@@ -30,7 +30,7 @@ server = require('http').createServer(app)
 io = require('socket.io').listen(server)
 
 # Bind to sessions
-sessionStore = new RedisStore(client: rclient)
+sessionStore = new RedisStore(client: sessionRedisClient)
 cookieParser = CookieParser(Settings.security.sessionSecret)
 sessionSockets = new SessionSockets(io, sessionStore, cookieParser, Settings.cookieName)
 
