@@ -1,7 +1,8 @@
 define [
 	"base",
 	"utils/EventEmitter"
-], (App, EventEmitter) ->
+	"ide/colors/ColorManager"
+], (App, EventEmitter, ColorManager) ->
 	App.controller "ReviewPanelController", ($scope, $element, ide) ->
 		$scope.reviewPanel =
 			entries: {}
@@ -93,3 +94,18 @@ define [
 			entry.replying = false
 			entry.replyContent = ""
 			$scope.$broadcast "review-panel:layout"
+		
+		refreshUsers = () ->
+			$scope.users = {}
+			for member in $scope.project.members.concat($scope.project.owner)
+				$scope.users[member._id] = {
+					email: member.email
+					name: "#{member.first_name} #{member.last_name}"
+					hue: ColorManager.getHueForUserId(member._id)
+					avatar_text: [member.first_name, member.last_name].filter((n) -> n?).map((n) -> n[0]).join ""
+				}
+			console.log "REFRESHED USERS", $scope.project.members, $scope.users
+		
+		$scope.$watch "project.members", (members) ->
+			return if !members?
+			refreshUsers()

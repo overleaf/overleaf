@@ -56,13 +56,15 @@ div.full-size(
 						ng-style="{'top': top}"
 					)
 						div(ng-if="entry.type == 'insert' || entry.type == 'delete'")
+							div(style="float: right; background-color: hsl({{ users[entry.metadata.user_id].hue }}, 70%, 50%); width: 40px; height: 40px;") {{ users[entry.metadata.user_id].avatar_text }}
+							div.small(style="color: hsl({{ users[entry.metadata.user_id].hue }}, 70%, 50%)") {{ users[entry.metadata.user_id].name }}
 							div.small {{ entry.metadata.ts }}
-							{{ entry.content }}
+							| {{ entry.content }}
 						div(ng-if="entry.type == 'comment'")
 							div(ng-repeat="comment in entry.thread", class="comment-thread__comment")
 								div.small {{ comment.ts }}
 								div.small {{ comment.user_id }}
-								{{ comment.content }}
+								| {{ comment.content }}
 							div(ng-if="entry.replying")
 								textarea(ng-model="entry.replyContent")
 								a.btn.btn-sm.btn-primary(href, ng-click="submitReply(entry)") Submit
