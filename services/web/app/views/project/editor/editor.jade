@@ -60,6 +60,9 @@ div.full-size(
 							div.small(style="color: hsl({{ users[entry.metadata.user_id].hue }}, 70%, 50%)") {{ users[entry.metadata.user_id].name }}
 							div.small {{ entry.metadata.ts }}
 							| {{ entry.content }}
+							.review-entry-body
+								{{ entry.content }}
+							.review-entry-actions
 						div(ng-if="entry.type == 'comment'")
 							div(ng-repeat="comment in entry.thread", class="comment-thread__comment")
 								div.small {{ comment.ts }}
