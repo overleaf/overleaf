@@ -32,21 +32,27 @@ module.exports = AuthenticationController =
 
 	afterLoginSessionSetup: (req, user, callback=(err)->) ->
 		req.login user, (err) ->
+			if err?
+				logger.err {user_id: user._id, err}, "error from req.login"
+				return callback(err)
 			# Regenerate the session to get a new sessionID (cookie value) to
 			# protect against session fixation attacks
 			oldSession = req.session
-			req.session.destroy()
-			req.sessionStore.generate(req)
-			for key, value of oldSession
-				req.session[key] = value
-			# copy to the old `session.user` location, for backward-comptability
-			req.session.user = req.session.passport.user
-			req.session.save (err) ->
+			req.session.destroy (err) ->
 				if err?
-					logger.err {user_id: user._id}, "error saving regenerated session after login"
+					logger.err {user_id: user._id, err}, "error when trying to destroy old session"
 					return callback(err)
-				UserSessionsManager.trackSession(user, req.sessionID, () ->)
-				callback(null)
+				req.sessionStore.generate(req)
+				for key, value of oldSession
+					req.session[key] = value
+				# copy to the old `session.user` location, for backward-comptability
+				req.session.user = req.session.passport.user
+				req.session.save (err) ->
+					if err?
+						logger.err {user_id: user._id}, "error saving regenerated session after login"
+						return callback(err)
+					UserSessionsManager.trackSession(user, req.sessionID, () ->)
+					callback(null)
 
 	passportLogin: (req, res, next) ->
 		# This function is middleware which wraps the passport.authenticate middleware,

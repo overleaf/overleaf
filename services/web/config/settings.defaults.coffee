@@ -38,6 +38,16 @@ module.exports = settings =
 			port: "6379"
 			password: ""
 
+		# websessions:
+		# 	cluster: [
+		# 		{host: 'localhost', port: 7000}
+		# 		{host: 'localhost', port: 7001}
+		# 		{host: 'localhost', port: 7002}
+		# 		{host: 'localhost', port: 7003}
+		# 		{host: 'localhost', port: 7004}
+		# 		{host: 'localhost', port: 7005}
+		# 	]
+
 		api:
 			host: "localhost"
 			port: "6379"
@@ -107,8 +117,8 @@ module.exports = settings =
 		# references:
 		# 	url: "http://localhost:3040"
 		notifications:
-			url: "http://localhost:3042" 
-			
+			url: "http://localhost:3042"
+
 	templates:
 		user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"
 		showSocialButtons: false
@@ -131,13 +141,13 @@ module.exports = settings =
 
 	# this is only used if cookies are used for clsi backend
 	#clsiCookieKey: "clsiserver"
-	
+
 	# Same, but with http auth credentials.
 	httpAuthSiteUrl: 'http://#{httpAuthUser}:#{httpAuthPass}@localhost:3000'
 
 
 	maxEntitiesPerProject: 2000
-	
+
 	# Security
 	# --------
 	security:
@@ -166,12 +176,12 @@ module.exports = settings =
 		price: 0
 		features: defaultFeatures
 	}]
-	
+
 	enableSubscriptions:false
 
 	# i18n
 	# ------
-	# 
+	#
 	i18n:
 		subdomainLang:
 			www: {lngCode:"en", url: siteUrl}
@@ -180,7 +190,7 @@ module.exports = settings =
 	# Spelling languages
 	# ------------------
 	#
-	# You must have the corresponding aspell package installed to 
+	# You must have the corresponding aspell package installed to
 	# be able to use a language.
 	languages: [
 		{name: "English", code: "en"},
@@ -228,7 +238,7 @@ module.exports = settings =
 	# analytics:
 	# 	ga:
 	# 		token: ""
-	# 
+	#
 	# ShareLaTeX's help desk is provided by tenderapp.com
 	# tenderUrl: ""
 	#
@@ -262,10 +272,10 @@ module.exports = settings =
 	# then set this to true to allow it to correctly detect the forwarded IP
 	# address and http/https protocol information.
 	behindProxy: false
-	
+
 	# Cookie max age (in milliseconds). Set to false for a browser session.
 	cookieSessionLength: 5 * 24 * 60 * 60 * 1000 # 5 days
-	
+
 	# Should we allow access to any page without logging in? This includes
 	# public projects, /learn, /templates, about pages, etc.
 	allowPublicAccess: if process.env["SHARELATEX_ALLOW_PUBLIC_ACCESS"] == 'true' then true else false
@@ -273,10 +283,10 @@ module.exports = settings =
 	# Use a single compile directory for all users in a project
 	# (otherwise each user has their own directory)
 	# disablePerUserCompiles: true
-	
+
 	# Maximum size of text documents in the real-time editing system.
 	max_doc_length: 2 * 1024 * 1024 # 2mb
-	
+
 	# Internal configs
 	# ----------------
 	path:
@@ -285,11 +295,11 @@ module.exports = settings =
 		# them to disk here).
 		dumpFolder: Path.resolve __dirname + "/../data/dumpFolder"
 		uploadFolder: Path.resolve __dirname + "/../data/uploads"
-	
+
 	# Automatic Snapshots
 	# -------------------
 	automaticSnapshots:
-		# How long should we wait after the user last edited to 
+		# How long should we wait after the user last edited to
 		# take a snapshot?
 		waitTimeAfterLastEdit: 5 * minutes
 		# Even if edits are still taking place, this is maximum
@@ -305,13 +315,13 @@ module.exports = settings =
 	# 	user: ""
 	# 	password: ""
 	# 	projectId: ""
-	
+
 	appName: "ShareLaTeX (Community Edition)"
 	adminEmail: "placeholder@example.com"
 
 	nav:
 		title: "ShareLaTeX Community Edition"
-		
+
 		left_footer: [{
 			text: "Powered by <a href='https://www.sharelatex.com'>ShareLaTeX</a> © 2016"
 		}]
@@ -377,11 +387,11 @@ module.exports = settings =
 		"/templates/index": "/templates/"
 
 	proxyUrls: {}
-	
+
 	reloadModuleViewsOnEachRequest: true
 
 	domainLicences: [
-		
+
 	]
 
 	sixpack:
@@ -390,12 +400,12 @@ module.exports = settings =
 	# ----------
 
 
-	
+
 	# LDAP
 	# ----------
 	# Settings below use a working LDAP test server kindly provided by forumsys.com
 	# When testing with forumsys.com use username = einstein and password = password
-	
+
 	# ldap :
 	# 	host: 'ldap://ldap.forumsys.com'
 	# 	dn: 'uid=:userKey,dc=example,dc=com'
@@ -406,13 +416,13 @@ module.exports = settings =
 	# 	placeholder: 'email@example.com'
 	# 	emailAtt: 'mail'
 	# 	anonymous: false
-	#	adminDN: 'cn=read-only-admin,dc=example,dc=com'	
+	#	adminDN: 'cn=read-only-admin,dc=example,dc=com'
 	#	adminPW: 'password'
 	#	starttls: true
 	#	tlsOptions:
 	#		rejectUnauthorized: false
 	#		ca: ['/etc/ldap/ca_certs.pem']
-	
+
 	#templateLinks: [{
 	#	name : "CV projects",
 	#	url : "/templates/cv"
@@ -420,5 +430,3 @@ module.exports = settings =
 	#	name : "all projects",
 	#	url: "/templates/all"
 	#}]
-
-

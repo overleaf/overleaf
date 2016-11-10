@@ -4,6 +4,7 @@ should = chai.should()
 expect = chai.expect
 modulePath = "../../../../app/js/Features/User/UserSessionsManager.js"
 SandboxedModule = require('sandboxed-module')
+Async = require('async')
 
 describe 'UserSessionsManager', ->
 
@@ -32,8 +33,9 @@ describe 'UserSessionsManager', ->
 		@rclient.expire.returns(@rclient)
 		@rclient.exec.callsArgWith(0, null)
 
-		@redis =
-			createClient: () => @rclient
+		@UserSessionsRedis =
+			client: () => @rclient
+			sessionSetKey: (user) => "UserSessions:{#{user._id}}"
 		@logger =
 			err:   sinon.stub()
 			error: sinon.stub()
@@ -42,15 +44,10 @@ describe 'UserSessionsManager', ->
 			redis:
 				web: {}
 		@UserSessionsManager = SandboxedModule.require modulePath, requires:
-			"redis-sharelatex":    @redis
 			"logger-sharelatex":   @logger
 			"settings-sharelatex": @settings
-
-	describe '_sessionSetKey', ->
-
-		it 'should build the correct key', ->
-			result = @UserSessionsManager._sessionSetKey(@user)
-			result.should.equal 'UserSessions:abcd'
+			'./UserSessionsRedis': @UserSessionsRedis
+			'async': Async
 
 	describe '_sessionKey', ->
 
@@ -247,14 +244,14 @@ describe 'UserSessionsManager', ->
 					@_checkSessions.callCount.should.equal 0
 					done()
 
-	##
 	describe 'revokeAllUserSessions', ->
 
 		beforeEach ->
 			@sessionKeys = ['sess:one', 'sess:two']
 			@retain = []
 			@rclient.smembers.callsArgWith(1, null, @sessionKeys)
-			@rclient.exec.callsArgWith(0, null)
+			@rclient.del = sinon.stub().callsArgWith(1, null)
+			@rclient.srem = sinon.stub().callsArgWith(2, null)
 			@call = (callback) =>
 				@UserSessionsManager.revokeAllUserSessions @user, @retain, callback
 
@@ -267,15 +264,14 @@ describe 'UserSessionsManager', ->
 		it 'should call the appropriate redis methods', (done) ->
 			@call (err) =>
 				@rclient.smembers.callCount.should.equal 1
-				@rclient.multi.callCount.should.equal 1
 
-				@rclient.del.callCount.should.equal 1
-				expect(@rclient.del.firstCall.args[0]).to.deep.equal @sessionKeys
+				@rclient.del.callCount.should.equal 2
+				expect(@rclient.del.firstCall.args[0]).to.deep.equal @sessionKeys[0]
+				expect(@rclient.del.secondCall.args[0]).to.deep.equal @sessionKeys[1]
 
 				@rclient.srem.callCount.should.equal 1
 				expect(@rclient.srem.firstCall.args[1]).to.deep.equal @sessionKeys
 
-				@rclient.exec.callCount.should.equal 1
 				done()
 
 		describe 'when a session is retained', ->
@@ -284,7 +280,7 @@ describe 'UserSessionsManager', ->
 				@sessionKeys = ['sess:one', 'sess:two', 'sess:three', 'sess:four']
 				@retain = ['two']
 				@rclient.smembers.callsArgWith(1, null, @sessionKeys)
-				@rclient.exec.callsArgWith(0, null)
+				@rclient.del = sinon.stub().callsArgWith(1, null)
 				@call = (callback) =>
 					@UserSessionsManager.revokeAllUserSessions @user, @retain, callback
 
@@ -297,26 +293,31 @@ describe 'UserSessionsManager', ->
 			it 'should call the appropriate redis methods', (done) ->
 				@call (err) =>
 					@rclient.smembers.callCount.should.equal 1
-					@rclient.multi.callCount.should.equal 1
-					@rclient.del.callCount.should.equal 1
+					@rclient.del.callCount.should.equal @sessionKeys.length - 1
 					@rclient.srem.callCount.should.equal 1
-					@rclient.exec.callCount.should.equal 1
 					done()
 
 			it 'should remove all sessions except for the retained one', (done) ->
 				@call (err) =>
-					expect(@rclient.del.firstCall.args[0]).to.deep.equal(['sess:one', 'sess:three', 'sess:four'])
+					expect(@rclient.del.firstCall.args[0]).to.deep.equal('sess:one')
+					expect(@rclient.del.secondCall.args[0]).to.deep.equal('sess:three')
+					expect(@rclient.del.thirdCall.args[0]).to.deep.equal('sess:four')
 					expect(@rclient.srem.firstCall.args[1]).to.deep.equal(['sess:one', 'sess:three', 'sess:four'])
 					done()
 
 		describe 'when rclient produces an error', ->
 
 			beforeEach ->
-				@rclient.exec.callsArgWith(0, new Error('woops'))
+				@rclient.del = sinon.stub().callsArgWith(1, new Error('woops'))
 
 			it 'should produce an error', (done) ->
 				@call (err) =>
 					expect(err).to.be.instanceof Error
+					done()
+
+			it 'should not call rclient.srem', (done) ->
+				@call (err) =>
+					@rclient.srem.callCount.should.equal 0
 					done()
 
 		describe 'when no user is supplied', ->
@@ -334,10 +335,8 @@ describe 'UserSessionsManager', ->
 			it 'should not call the appropriate redis methods', (done) ->
 				@call (err) =>
 					@rclient.smembers.callCount.should.equal 0
-					@rclient.multi.callCount.should.equal 0
 					@rclient.del.callCount.should.equal 0
 					@rclient.srem.callCount.should.equal 0
-					@rclient.exec.callCount.should.equal 0
 					done()
 
 		describe 'when there are no keys to delete', ->
@@ -354,10 +353,8 @@ describe 'UserSessionsManager', ->
 			it 'should not do the delete operation', (done) ->
 				@call (err) =>
 					@rclient.smembers.callCount.should.equal 1
-					@rclient.multi.callCount.should.equal 0
 					@rclient.del.callCount.should.equal 0
 					@rclient.srem.callCount.should.equal 0
-					@rclient.exec.callCount.should.equal 0
 					done()
 
 	describe 'touch', ->
@@ -415,7 +412,10 @@ describe 'UserSessionsManager', ->
 			]
 			@exclude = ['two']
 			@rclient.smembers.callsArgWith(1, null, @sessionKeys)
-			@rclient.mget.callsArgWith(1, null, @sessions)
+			@rclient.get = sinon.stub()
+			@rclient.get.onCall(0).callsArgWith(1, null, @sessions[0])
+			@rclient.get.onCall(1).callsArgWith(1, null, @sessions[1])
+
 			@call = (callback) =>
 				@UserSessionsManager.getAllUserSessions @user, @exclude, callback
 
@@ -437,9 +437,9 @@ describe 'UserSessionsManager', ->
 				@rclient.smembers.callCount.should.equal 1
 				done()
 
-		it 'should have called rclient.mget', (done) ->
+		it 'should have called rclient.get', (done) ->
 			@call (err, sessions) =>
-				@rclient.mget.callCount.should.equal 1
+				@rclient.get.callCount.should.equal @sessionKeys.length - 1
 				done()
 
 		describe 'when there are no other sessions', ->
@@ -484,10 +484,10 @@ describe 'UserSessionsManager', ->
 					@rclient.mget.callCount.should.equal 0
 					done()
 
-		describe 'when mget produces an error', ->
+		describe 'when get produces an error', ->
 
 			beforeEach ->
-				@rclient.mget.callsArgWith(1, new Error('woops'))
+				@rclient.get = sinon.stub().callsArgWith(1, new Error('woops'))
 
 			it 'should produce an error', (done) ->
 				@call (err, sessions) =>
