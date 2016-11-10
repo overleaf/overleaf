@@ -69,7 +69,7 @@ div.full-size(
 
 									.rp-entry-metadata
 										p.rp-entry-metadata-line(style="color: hsl({{ users[entry.metadata.user_id].hue }}, 70%, 50%);") {{ users[entry.metadata.user_id].name }} 
-										p.rp-entry-metadata-line {{ entry.metadata.ts }}
+										p.rp-entry-metadata-line {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}
 									.rp-entry-avatar(style="background-color: hsl({{ users[entry.metadata.user_id].hue }}, 70%, 50%);") {{ users[entry.metadata.user_id].avatar_text }}
 								.rp-entry-body(ng-switch="entry.type")
 										span(ng-switch-when="insert") Added 
@@ -77,8 +77,12 @@ div.full-size(
 										span(ng-switch-when="delete") Deleted
 											span.rp-content-highlight &nbsp;{{ entry.content }} 
 								.rp-entry-actions
-									a(href, ng-click="acceptChange(entry_id)") Accept
-									a(href, ng-click="rejectChange(entry_id)") Reject
+									a.rp-entry-button(href, ng-click="acceptChange(entry_id)") 
+										i.fa.fa-check
+										| &nbsp;Accept
+									a.rp-entry-button(href, ng-click="rejectChange(entry_id)") 
+										i.fa.fa-times
+										| &nbsp;Reject
 
 							div(ng-if="entry.type == 'comment'")
 								div(ng-repeat="comment in entry.thread", class="comment-thread__comment")

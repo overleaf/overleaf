@@ -89,6 +89,7 @@
 	}
 		.rp-entry-action-icon {
 			font-size: @rp-icon-large-size;
+			padding: 0 5px;
 		}
 
 		.rp-entry-metadata {
@@ -101,11 +102,19 @@
 			}
 
 		.rp-entry-avatar {
-
+			border-radius: 3px;
+			font-weight: @rp-semibold-weight;
+			font-size: @rp-icon-large-size;
+			line-height: 1.2;
+			text-transform: uppercase;
+			color: #FFF;
+			width: 1.3em;
+			height: 1.3em;
+			text-align: center;
 		}
 
 	.rp-entry-body {
-		padding: 0 5px;
+		padding: 10px 5px 5px;
 	}
 		.rp-content-highlight {
 			color: @rp-type-darkgrey;
@@ -113,8 +122,28 @@
 		}
 
 	.rp-entry-actions {
-
+		display: flex;
 	}
+		.rp-entry-button {
+			flex: 1 0 50%;
+			background-color: @rp-highlight-blue;
+			color: #FFF;
+			text-align: center;
+			border-right: solid 1px #FFF;
+			padding: 2px 0;
+
+			&:hover,
+			&:focus {
+				background-color: darken(@rp-highlight-blue, 5%);
+				text-decoration: none;
+				color: #FFF;
+			}
+
+			&:last-child {
+				border-bottom-right-radius: 3px;
+				border-right-width: 0;
+			}
+		}
 
 
 .rp-icon-delete {
@@ -145,23 +174,23 @@
 	}
 	
 	&-insert {
-		border-color: green;
+		border-color: @rp-green;
 		&:after {
-			border-color: green;
+			border-color: @rp-green;
 		}
 	}
 	
 	&-delete {
-		border-color: red;
+		border-color: @rp-red;
 		&:after {
-			border-color: red;
+			border-color: @rp-red;
 		}
 	}
 	
 	&-comment {
-		border-color: orange;
+		border-color: @rp-yellow;
 		&:after {
-			border-color: orange;
+			border-color: @rp-yellow;
 		}
 	}
 }
