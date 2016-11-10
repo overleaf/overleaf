@@ -33,8 +33,9 @@ describe 'UserSessionsManager', ->
 		@rclient.expire.returns(@rclient)
 		@rclient.exec.callsArgWith(0, null)
 
-		@redis =
+		@UserSessionsRedis =
 			client: () => @rclient
+			sessionSetKey: (user) => "UserSessions:{#{user._id}}"
 		@logger =
 			err:   sinon.stub()
 			error: sinon.stub()
@@ -45,14 +46,8 @@ describe 'UserSessionsManager', ->
 		@UserSessionsManager = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex":   @logger
 			"settings-sharelatex": @settings
-			'./UserSessionsRedis': @redis
+			'./UserSessionsRedis': @UserSessionsRedis
 			'async': Async
-
-	describe '_sessionSetKey', ->
-
-		it 'should build the correct key', ->
-			result = @UserSessionsManager._sessionSetKey(@user)
-			result.should.equal 'UserSessions:{abcd}'
 
 	describe '_sessionKey', ->
 
