@@ -70,11 +70,11 @@ div.full-size(
 									.rp-entry-metadata
 										p.rp-entry-metadata-line(style="color: hsl({{ users[entry.metadata.user_id].hue }}, 70%, 50%);") {{ users[entry.metadata.user_id].name }} 
 										p.rp-entry-metadata-line {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}
-									.rp-entry-avatar(style="background-color: hsl({{ users[entry.metadata.user_id].hue }}, 70%, 50%);") {{ users[entry.metadata.user_id].avatar_text }}
+									.rp-avatar(style="background-color: hsl({{ users[entry.metadata.user_id].hue }}, 70%, 50%);") {{ users[entry.metadata.user_id].avatar_text }}
 								.rp-entry-body(ng-switch="entry.type")
 										span(ng-switch-when="insert") Added 
 											span.rp-content-highlight &nbsp;{{ entry.content }} 
-										span(ng-switch-when="delete") Deleted
+										span(ng-switch-when="delete") Delete
 											span.rp-content-highlight &nbsp;{{ entry.content }} 
 								.rp-entry-actions
 									a.rp-entry-button(href, ng-click="acceptChange(entry_id)") 
@@ -84,15 +84,30 @@ div.full-size(
 										i.fa.fa-times
 										| &nbsp;Reject
 							div(ng-if="entry.type == 'comment'")
-								div(ng-repeat="comment in entry.thread", class="comment-thread__comment")
-									div.small(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 50%)") {{ users[comment.user_id].name }}
-									div.small {{ comment.ts }}
-									| {{ comment.content }}
+								.rp-comment(ng-repeat="comment in entry.thread")
+									.rp-comment-body(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 90%);")
+										p.rp-comment-content {{ comment.content }}
+										p.rp-comment-metadata
+											| {{ comment.ts | date : 'MMM d, y h:mm a' }}
+											| &nbsp;&bull;&nbsp;
+											span(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 50%);") {{ users[comment.user_id].name }}
+									.rp-avatar(style="background-color: hsl({{ users[comment.user_id].hue }}, 70%, 50%);") {{ users[comment.user_id].avatar_text }}
+									//- div.small(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 50%)") {{ users[comment.user_id].name }}
+									//- div.small {{ comment.ts }}
+									//- | {{ comment.content }}
+									//- pre {{ comment | json}}
+									//- pre {{ users[comment.user_id] | json }}
 								div(ng-if="entry.replying")
 									textarea(ng-model="entry.replyContent")
 									a.btn.btn-sm.btn-primary(href, ng-click="submitReply(entry)") Submit
 									a(href, ng-click="cancelReply(entry)") X
 								a.btn.btn-sm.btn-primary(href, ng-click="startReply(entry)", ng-if="!entry.replying") Reply
+
+								.rp-entry-actions
+									a.rp-entry-button(href) 
+										i.fa.fa-check
+										| &nbsp;Mark as resolved
+							
 							div(ng-if="entry.type == 'focus-position'")
 								a.btn.btn-sm(href, ng-if="!commentState.adding", ng-click="startNewComment()") Add comment
 								div(ng-if="commentState.adding")

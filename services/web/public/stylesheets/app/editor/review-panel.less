@@ -1,4 +1,5 @@
 @rp-base-font-size		: 12px;
+@rp-small-font-size		: 10px;
 @rp-icon-large-size		: 22px;
 
 @rp-bg-blue				: #dadfed;
@@ -80,16 +81,21 @@
 	&-delete {
 		border-left-color: @rp-red;
 	}
+
+	&-comment {
+		border-left-color: @rp-yellow;
+	}
 }
 	
 	.rp-entry-header {
 		display: flex;
 		align-items: center;
-		padding: 0 5px;
+		padding: 5px;
 	}
 		.rp-entry-action-icon {
 			font-size: @rp-icon-large-size;
 			padding: 0 5px;
+			line-height: 0;
 		}
 
 		.rp-entry-metadata {
@@ -101,20 +107,8 @@
 				margin: 0;
 			}
 
-		.rp-entry-avatar {
-			border-radius: 3px;
-			font-weight: @rp-semibold-weight;
-			font-size: @rp-icon-large-size;
-			line-height: 1.2;
-			text-transform: uppercase;
-			color: #FFF;
-			width: 1.3em;
-			height: 1.3em;
-			text-align: center;
-		}
-
 	.rp-entry-body {
-		padding: 10px 5px 5px;
+		padding: 5px;
 	}
 		.rp-content-highlight {
 			color: @rp-type-darkgrey;
@@ -145,6 +139,66 @@
 			}
 		}
 
+	.rp-comment {
+		display: flex;
+		align-items: flex-start;
+		padding: 5px;
+		
+		&:nth-child(even) {
+			flex-direction: row-reverse;
+
+			.rp-comment-body {
+				margin-right: 0;
+				margin-left: 6px;
+
+				&::after {
+					content: "\25C4";
+					left: -5px;
+					right: auto;
+				}
+			}
+		}
+	}
+		.rp-comment-body {
+			position: relative;
+			background-color: currentColor;
+			flex-grow: 1;
+			padding: 0 3px;
+			margin-right: 6px;
+			border-radius: 3px;
+
+			&::after {
+				content: "\25BA";
+				position: absolute;
+				top: 3px;
+				right: -6px;
+				font-size: 1.2em;
+				line-height: 1;
+			}
+		}
+			.rp-comment-content {
+				margin: 0;
+				color: @rp-type-darkgrey;
+			}
+
+
+			.rp-comment-metadata {
+				color: @rp-type-blue;
+				font-size: @rp-small-font-size;
+				margin: 0;
+			}
+
+.rp-avatar {
+	border-radius: 3px;
+	font-weight: @rp-semibold-weight;
+	font-size: @rp-icon-large-size;
+	line-height: 1.2;
+	text-transform: uppercase;
+	color: #FFF;
+	width: 1.3em;
+	height: 1.3em;
+	text-align: center;
+}
 
 .rp-icon-delete {
 	display: inline-block;
