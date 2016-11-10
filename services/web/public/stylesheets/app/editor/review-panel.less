@@ -1,4 +1,5 @@
 @rp-base-font-size		: 12px;
+@rp-icon-large-size		: 22px;
 
 @rp-bg-blue				: #dadfed;
 @rp-bg-dim-blue			: #fafafa;
@@ -17,7 +18,10 @@
 @rp-type-darkgrey		: #3f3f3f;
 
 @rp-entry-ribbon-width	: 4px;
+@rp-semibold-weight		: 600;
 @review-panel-width		: 230px;
+
+@rp-scroller-offset		: 30px;
 
 #review-panel {
 	position: absolute;
@@ -52,24 +56,22 @@
 	bottom: 0;
 	left: 0;
 	// TODO: Use a more cross-browser method of hiding the scroll bar
-	right: -30px; // Hide scroll bar
+	right: -@rp-scroller-offset; // Hide scroll bar
 	overflow-y: scroll;
 }
 
-.review-entry-list {
+.rp-entry-list {
 	position: relative;
 	width: @review-panel-width;;
 }
 
-.review-entry {
+.rp-entry {
 	position: absolute;
-	padding-left: @rp-entry-ribbon-width;
+	left: 5px;
+	right: 5px;
 	border-left: solid @rp-entry-ribbon-width transparent;
 	border-radius: 3px;
-	margin: 0 6px;
 	background-color: #FFF;
-	max-width: 248px;
-	word-wrap: break-word;
 
 	&-insert {
 		border-left-color: @rp-green;
@@ -80,33 +82,44 @@
 	}
 }
 	
-	.review-entry-header {
+	.rp-entry-header {
 		display: flex;
-
-		&-action-icon {
-
+		padding: 5px;
+	}
+		.rp-entry-action-icon {
+			font-size: @rp-icon-large-size;
 		}
 
-		&-metadata {
+		.rp-entry-metadata {
 			flex-grow: 1;
 		}
 
-		&-avatar {
+		.rp-entry-avatar {
 
 		}
-	}
 
-	.review-entry-body {
-
-	}
-
-	.review-entry-actions {
+	.rp-entry-body {
 
 	}
 
+	.rp-entry-actions {
+
+	}
 
 
-.review-entry-callout {
+.rp-icon-delete {
+	display: inline-block;
+	line-height: 1;
+	font-style: normal;
+	font-size: 0.8em;
+	text-decoration: line-through;
+	font-weight: @rp-semibold-weight;
+	&::before {
+		content: 'Ab';
+	}
+}
+
+.rp-entry-callout {
 	position: absolute;
 	width: 3px;
 	border-top: 1px solid grey;

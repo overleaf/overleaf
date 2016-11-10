@@ -13,7 +13,7 @@ define [
 			content: ""
 			
 		scroller = $element.find(".review-panel-scroller")
-		list = $element.find(".review-entry-list")
+		list = $element.find(".rp-entry-list")
 
 		# Use these to avoid unnecessary updates. Scrolling one
 		# panel causes us to scroll the other panel, but there's no
