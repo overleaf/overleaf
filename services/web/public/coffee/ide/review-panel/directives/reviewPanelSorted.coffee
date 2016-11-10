@@ -6,7 +6,7 @@ define [
 			link: (scope, element, attrs) ->
 				layout = () ->
 					entries = []
-					for el in element.find(".review-entry")
+					for el in element.find(".rp-entry")
 						entries.push {
 							el: el
 							scope: angular.element(el).scope()

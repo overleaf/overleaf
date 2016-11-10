@@ -49,28 +49,30 @@ div.full-size(
 				| Track Changes 
 				input(type="checkbox", ng-model="reviewPanel.trackNewChanges")
 			.review-panel-scroller
-				.review-entry-list(review-panel-sorted)
-					.review-entry-wrapper(
+				.rp-entry-list(review-panel-sorted)
+					.rp-entry-wrapper(
 						ng-repeat="(entry_id, entry) in reviewPanel.entries"
 					)
-						.review-entry-callout(
-							ng-class="'review-entry-callout-' + entry.type"
+						.rp-entry-callout(
+							ng-class="'rp-entry-callout-' + entry.type"
 							style="top: {{ entry.screenPos.y + 15 }}px; height: {{ top - entry.screenPos.y }}px"
 						)
-						.review-entry(
-							ng-class="'review-entry-' + entry.type"
+						.rp-entry(
+							ng-class="'rp-entry-' + entry.type"
 							ng-style="{'top': top}"
 						)
 							div(ng-if="entry.type == 'insert' || entry.type == 'delete'")
-								.review-entry-header
-									.review-entry-header-action-icon
+								.rp-entry-header
+									.rp-entry-action-icon(ng-switch="entry.type")
+										i.fa.fa-pencil(ng-switch-when="insert")
+										i.rp-icon-delete(ng-switch-when="delete")
 
-									.review-entry-header-metadata
+									.rp-entry-metadata
 										{{ users[entry.metadata.user_id].name }} {{ entry.metadata.ts }}
-									.review-entry-header-avatar(style="background-color: hsl({{ users[entry.metadata.user_id].hue }}, 70%, 50%);") {{ users[entry.metadata.user_id].avatar_text }}
-								.review-entry-body
+									.rp-entry-avatar(style="background-color: hsl({{ users[entry.metadata.user_id].hue }}, 70%, 50%);") {{ users[entry.metadata.user_id].avatar_text }}
+								.rp-entry-body
 									{{ entry.content }}
-								.review-entry-actions
+								.rp-entry-actions
 
 							div(ng-if="entry.type == 'comment'")
 								div(ng-repeat="comment in entry.thread", class="comment-thread__comment")
