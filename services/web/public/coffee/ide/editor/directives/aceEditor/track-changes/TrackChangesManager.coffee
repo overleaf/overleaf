@@ -44,6 +44,12 @@ define [
 
 			@$scope.$on "comment:select_line", (e) =>
 				@selectLineIfNoSelection()
+			
+			@$scope.$on "change:accept", (e, change_id) =>
+				@acceptChangeId(change_id)
+			
+			@$scope.$on "change:reject", (e, change_id) =>
+				@rejectChangeId(change_id)
 
 			onChange = (e) =>
 				if !@editor.initing and @enabled
@@ -108,6 +114,33 @@ define [
 		selectLineIfNoSelection: () ->
 			if @editor.selection.isEmpty()
 				@editor.selection.selectLine()
+		
+		acceptChangeId: (change_id) ->
+			@changesTracker.removeChangeId(change_id)
+		
+		rejectChangeId: (change_id) ->
+			change = @changesTracker.getChange(change_id)
+			return if !change?
+			@changesTracker.removeChangeId(change_id)
+			is_tracking = @changesTracker.track_changes
+			@changesTracker.track_changes = false
+			session = @editor.getSession()
+			if change.op.d?
+				content = change.op.d
+				position = @_shareJsOffsetToAcePosition(change.op.p)
+				session.insert(position, content)
+			else if change.op.i?
+				start = @_shareJsOffsetToAcePosition(change.op.p)
+				end = @_shareJsOffsetToAcePosition(change.op.p + change.op.i.length)
+				editor_text = session.getDocument().getTextRange({start, end})
+				if editor_text != change.op.i
+					throw new Error("Op to be removed (#{JSON.stringify(change.op)}), does not match editor text, '#{editor_text}'")
+				session.remove({start, end})
+			else
+				throw new Error("unknown change: #{JSON.stringify(change)}")
+			setTimeout () =>
+				@changesTracker.track_changes = is_tracking
+			, 0
 
 		checkMapping: () ->
 			session = @editor.getSession()
@@ -322,3 +355,4 @@ define [
 			callout_marker = markers[callout_marker_id]
 			callout_marker.range.start = start
 			callout_marker.range.end = start
+

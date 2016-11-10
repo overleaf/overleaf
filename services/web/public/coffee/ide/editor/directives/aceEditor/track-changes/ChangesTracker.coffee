@@ -61,6 +61,19 @@ define [
 			@emit "comment:added", comment
 			return comment
 		
+		getChange: (change_id) ->
+			change = null
+			for c in @changes
+				if c.id == change_id
+					change = c
+					break
+			return change
+
+		removeChangeId: (change_id) ->
+			change = @getChange(change_id)
+			return if !change?
+			@_removeChange(change)
+
 		applyOp: (op, metadata) ->
 			metadata.ts ?= new Date()
 			# Apply an op that has been applied to the document to our changes to keep them up to date
@@ -305,7 +318,7 @@ define [
 				@emit "changes:moved", moved_changes
 
 		_newId: () ->
-			@id++
+			(@id++).toString()
 
 		_addOp: (op, metadata) ->
 			change = {

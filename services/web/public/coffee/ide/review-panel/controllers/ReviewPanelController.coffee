@@ -60,6 +60,12 @@ define [
 			scroller.scrollTop(scroller.scrollTop() + deltaY * 4)
 			e.preventDefault()
 		
+		$scope.acceptChange = (entry_id) ->
+			$scope.$broadcast "change:accept", entry_id
+		
+		$scope.rejectChange = (entry_id) ->
+			$scope.$broadcast "change:reject", entry_id
+		
 		$scope.startNewComment = () ->
 			$scope.commentState.adding = true
 			$scope.$broadcast "comment:select_line"

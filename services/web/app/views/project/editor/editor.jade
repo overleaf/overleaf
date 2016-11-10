@@ -71,6 +71,8 @@ div.full-size(
 								.review-entry-body
 									{{ entry.content }}
 								.review-entry-actions
+									a(href, ng-click="acceptChange(entry_id)") Accept
+									a(href, ng-click="rejectChange(entry_id)") Reject
 
 							div(ng-if="entry.type == 'comment'")
 								div(ng-repeat="comment in entry.thread", class="comment-thread__comment")
