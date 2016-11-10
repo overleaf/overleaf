@@ -84,7 +84,8 @@
 	
 	.rp-entry-header {
 		display: flex;
-		padding: 5px;
+		align-items: center;
+		padding: 0 5px;
 	}
 		.rp-entry-action-icon {
 			font-size: @rp-icon-large-size;
@@ -92,15 +93,24 @@
 
 		.rp-entry-metadata {
 			flex-grow: 1;
+			padding: 0 5px;
+			line-height: 1.2;
 		}
+			.rp-entry-metadata-line {
+				margin: 0;
+			}
 
 		.rp-entry-avatar {
 
 		}
 
 	.rp-entry-body {
-
+		padding: 0 5px;
 	}
+		.rp-content-highlight {
+			color: @rp-type-darkgrey;
+			font-weight: @rp-semibold-weight;
+		}
 
 	.rp-entry-actions {
 
