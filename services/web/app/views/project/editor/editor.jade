@@ -83,7 +83,6 @@ div.full-size(
 									a.rp-entry-button(href, ng-click="rejectChange(entry_id)") 
 										i.fa.fa-times
 										| &nbsp;Reject
-
 							div(ng-if="entry.type == 'comment'")
 								div(ng-repeat="comment in entry.thread", class="comment-thread__comment")
 									div.small(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 50%)") {{ users[comment.user_id].name }}

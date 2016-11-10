@@ -67,8 +67,13 @@ define [
 								@nextUpdateMetaData = null
 						else
 							user_id = window.user.id
-
+						
+						was_tracking = @changesTracker.track_changes
+						if @dont_track_next_update
+							@changesTracker.track_changes = false
+							@dont_track_next_update = false
 						@applyChange(e, { user_id })
+						@changesTracker.track_changes = was_tracking
 						
 						# TODO: Just for debugging, remove before going live.
 						setTimeout () =>
@@ -122,8 +127,7 @@ define [
 			change = @changesTracker.getChange(change_id)
 			return if !change?
 			@changesTracker.removeChangeId(change_id)
-			is_tracking = @changesTracker.track_changes
-			@changesTracker.track_changes = false
+			@dont_track_next_update = true
 			session = @editor.getSession()
 			if change.op.d?
 				content = change.op.d
@@ -138,9 +142,7 @@ define [
 				session.remove({start, end})
 			else
 				throw new Error("unknown change: #{JSON.stringify(change)}")
-			setTimeout () =>
-				@changesTracker.track_changes = is_tracking
-			, 0
+
 
 		checkMapping: () ->
 			session = @editor.getSession()
