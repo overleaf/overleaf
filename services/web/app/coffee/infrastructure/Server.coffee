@@ -90,9 +90,6 @@ webRouter.use session
 		secure: Settings.secureCookie
 	store: sessionStore
 	key: Settings.cookieName
-webRouter.use csrfProtection
-webRouter.use translations.expressMiddlewear
-webRouter.use translations.setLangBasedOnDomainMiddlewear
 
 # passport
 webRouter.use passport.initialize()
@@ -112,6 +109,12 @@ passport.deserializeUser(AuthenticationController.deserializeUser)
 Modules.hooks.fire 'passportSetup', passport, (err) ->
 	if err?
 		logger.err {err}, "error setting up passport in modules"
+
+Modules.applyNonCsrfRouter(webRouter, apiRouter)
+
+webRouter.use csrfProtection
+webRouter.use translations.expressMiddlewear
+webRouter.use translations.setLangBasedOnDomainMiddlewear
 
 # Measure expiry from last request, not last login
 webRouter.use (req, res, next) ->
