@@ -23,10 +23,10 @@ define [
 				
 				scope.$watch "reviewPanel.entries", (value) ->
 					return if !value?
-					$timeout () ->
+					scope.$evalAsync () ->
 						layout()
 				
 				scope.$on "review-panel:layout", () ->
-					$timeout () ->
+					scope.$evalAsync () ->
 						layout()
 		}
