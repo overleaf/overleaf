@@ -82,14 +82,20 @@ div.full-size(
 										i.fa.fa-times
 										| &nbsp;Reject
 							div(ng-if="entry.type == 'comment'")
-								.rp-comment(ng-repeat="comment in entry.thread")
+								.rp-comment(
+									ng-repeat="comment in entry.thread"
+									ng-class="users[comment.user_id].isSelf ? 'rp-comment-self' : '';"
+								)
+									.rp-avatar(
+										ng-if="!users[comment.user_id].isSelf;"
+										style="background-color: hsl({{ users[comment.user_id].hue }}, 70%, 50%);"
+									) {{ users[comment.user_id].avatar_text }}
 									.rp-comment-body(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 90%);")
 										p.rp-comment-content {{ comment.content }}
 										p.rp-comment-metadata
 											| {{ comment.ts | date : 'MMM d, y h:mm a' }}
 											| &nbsp;&bull;&nbsp;
-											span(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 50%);") {{ users[comment.user_id].name }}
-									.rp-avatar(style="background-color: hsl({{ users[comment.user_id].hue }}, 70%, 50%);") {{ users[comment.user_id].avatar_text }}
+											span(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 40%);") {{ users[comment.user_id].name }}
 								//- div.small(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 50%)") {{ users[comment.user_id].name }}
 								//- div.small {{ comment.ts }}
 								//- | {{ comment.content }}

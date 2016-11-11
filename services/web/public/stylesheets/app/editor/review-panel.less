@@ -149,18 +149,14 @@
 		align-items: flex-start;
 		padding: 5px;
 		
-		&:nth-child(even) {
-			flex-direction: row-reverse;
+		&.rp-comment-self .rp-comment-body {
+			margin-left: 0;
+			margin-right: 9px;
 
-			.rp-comment-body {
-				margin-right: 0;
-				margin-left: 6px;
-
-				&::after {
-					content: "\25C4";
-					left: -5px;
-					right: auto;
-				}
+			&::after {
+				content: "\25BA";
+				left: auto;
+				right: -9px;
 			}
 		}
 	}
@@ -168,15 +164,15 @@
 			position: relative;
 			background-color: currentColor;
 			flex-grow: 1;
-			padding: 0 3px;
-			margin-right: 6px;
+			padding: 2px 5px;
+			margin-left: 9px;
 			border-radius: 3px;
 
 			&::after {
-				content: "\25BA";
+				content: "\25C4";
 				position: absolute;
 				top: 3px;
-				right: -6px;
+				left: -9px;
 				font-size: 1.2em;
 				line-height: 1;
 			}
@@ -185,7 +181,6 @@
 				margin: 0;
 				color: @rp-type-darkgrey;
 			}
-
 
 			.rp-comment-metadata {
 				color: @rp-type-blue;
