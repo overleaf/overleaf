@@ -85,7 +85,13 @@ define [
 		$scope.startReply = (entry) ->
 			entry.replying = true
 			$scope.$broadcast "review-panel:layout"
-		
+
+		$scope.handleCommentReplyKeyPress = (ev, entry) ->
+			if ev.keyCode == 13 and !ev.shiftKey and !ev.ctrlKey and !ev.metaKey
+				ev.preventDefault()
+				ev.target.blur()
+				$scope.submitReply(entry)
+
 		$scope.submitReply = (entry) ->
 			entry.thread.push {
 				content: entry.replyContent

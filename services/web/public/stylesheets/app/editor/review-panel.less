@@ -113,6 +113,11 @@
 		.rp-content-highlight {
 			color: @rp-type-darkgrey;
 			font-weight: @rp-semibold-weight;
+			text-decoration: none;
+
+			.rp-entry-delete & {
+				text-decoration: line-through;
+			}
 		}
 
 	.rp-entry-actions {
@@ -186,6 +191,18 @@
 				color: @rp-type-blue;
 				font-size: @rp-small-font-size;
 				margin: 0;
+			}
+
+		.rp-comment-reply {
+			padding: 0 5px;
+		}
+			.rp-comment-reply-input {
+				width: 100%;
+				font-size: @rp-base-font-size;
+				padding: 2px 5px;
+				border-radius: 3px;
+				border: solid 1px @rp-border-grey;
+				resize: vertical;
 			}
 
 .rp-avatar {

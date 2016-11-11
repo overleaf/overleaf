@@ -72,10 +72,10 @@ div.full-size(
 										p.rp-entry-metadata-line {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}
 									.rp-avatar(style="background-color: hsl({{ users[entry.metadata.user_id].hue }}, 70%, 50%);") {{ users[entry.metadata.user_id].avatar_text }}
 								.rp-entry-body(ng-switch="entry.type")
-										span(ng-switch-when="insert") Added 
-											span.rp-content-highlight &nbsp;{{ entry.content }} 
-										span(ng-switch-when="delete") Delete
-											span.rp-content-highlight &nbsp;{{ entry.content }} 
+										span(ng-switch-when="insert") Added&nbsp;
+											ins.rp-content-highlight {{ entry.content }} 
+										span(ng-switch-when="delete") Delete&nbsp;
+											del.rp-content-highlight {{ entry.content }} 
 								.rp-entry-actions
 									a.rp-entry-button(href, ng-click="acceptChange(entry_id)") 
 										i.fa.fa-check
@@ -92,16 +92,22 @@ div.full-size(
 											| &nbsp;&bull;&nbsp;
 											span(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 50%);") {{ users[comment.user_id].name }}
 									.rp-avatar(style="background-color: hsl({{ users[comment.user_id].hue }}, 70%, 50%);") {{ users[comment.user_id].avatar_text }}
-									//- div.small(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 50%)") {{ users[comment.user_id].name }}
-									//- div.small {{ comment.ts }}
-									//- | {{ comment.content }}
-									//- pre {{ comment | json}}
-									//- pre {{ users[comment.user_id] | json }}
-								div(ng-if="entry.replying")
-									textarea(ng-model="entry.replyContent")
-									a.btn.btn-sm.btn-primary(href, ng-click="submitReply(entry)") Submit
-									a(href, ng-click="cancelReply(entry)") X
-								a.btn.btn-sm.btn-primary(href, ng-click="startReply(entry)", ng-if="!entry.replying") Reply
+								//- div.small(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 50%)") {{ users[comment.user_id].name }}
+								//- div.small {{ comment.ts }}
+								//- | {{ comment.content }}
+								//- pre {{ comment | json}}
+								//- pre {{ users[comment.user_id] | json }}
+								//- div(ng-if="entry.replying")
+								//- 	textarea(ng-model="entry.replyContent")
+								//- 	a.btn.btn-sm.btn-primary(href, ng-click="submitReply(entry)") Submit
+								//- 	a(href, ng-click="cancelReply(entry)") X
+								//- a.btn.btn-sm.btn-primary(href, ng-click="startReply(entry)", ng-if="!entry.replying") Reply
+								.rp-comment-reply
+									textarea.rp-comment-reply-input(
+										ng-model="entry.replyContent"
+										ng-keypress="handleCommentReplyKeyPress($event, entry);"
+										placeholder="Hit \"Enter\" to reply"
+									)
 
 								.rp-entry-actions
 									a.rp-entry-button(href) 
