@@ -53,16 +53,6 @@ define [
 					@sendMB key, segmentation
 		}
 
-	# App.directive "countlyTrack", () ->
-	# 	return {
-	# 		restrict: "A"
-	# 		scope: false,
-	# 		link: (scope, el, attrs) ->
-	# 			eventKey  = attrs.countlyTrack
-	# 			if (eventKey?)
-	# 				el.on "click", () ->
-	# 					console.log eventKey
-	# 	}
 
 	#header
 	$('.navbar a').on "click", (e)->

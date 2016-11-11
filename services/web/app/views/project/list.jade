@@ -10,7 +10,7 @@ block content
 		window.data = {
 			projects: !{JSON.stringify(projects).replace(/\//g, '\\/')},
 			tags: !{JSON.stringify(tags).replace(/\//g, '\\/')},
-			notifications: !{JSON.stringify(notifications).replace(/\//g, '\\/')}
+			notifications: !{JSON.stringify(notifications).replace(/\//g, '\\/')},
 		};
 		window.algolia = {
 			institutions: {
@@ -21,7 +21,11 @@ block content
 
 	.content.content-alt(ng-controller="ProjectPageController")
 		.container
-				
+
+			div(ng-controller="AnnouncementsController", ng-cloak)
+				.alert.alert-success(ng-show="dataRecived")
+					a(href, ng-click="openLink()") {{title}} and {{totalAnnouncements}} others
+
 			.row(ng-cloak)
 				span(ng-if="projects.length > 0")
 					aside.col-md-2.col-xs-3

@@ -20,6 +20,8 @@ ProjectGetter = require("./ProjectGetter")
 PrivilegeLevels = require("../Authorization/PrivilegeLevels")
 AuthenticationController = require("../Authentication/AuthenticationController")
 PackageVersions = require("../../infrastructure/PackageVersions")
+BlogHandler = require("../Blog/BlogHandler")
+
 
 module.exports = ProjectController =
 
@@ -153,6 +155,8 @@ module.exports = ProjectController =
 					return next(err)
 				logger.log results:results, user_id:user_id, "rendering project list"
 				tags = results.tags[0]
+				
+
 				notifications = require("underscore").map results.notifications, (notification)->
 					notification.html = req.i18n.translate(notification.templateKey, notification.messageOpts)
 					return notification
