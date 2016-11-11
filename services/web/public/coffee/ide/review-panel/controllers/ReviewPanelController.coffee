@@ -12,6 +12,9 @@ define [
 			adding: false
 			content: ""
 			
+		# TODO Just for prototyping purposes; remove afterwards.
+		mockedUserId = '12345abc'
+
 		scroller = $element.find(".review-panel-scroller")
 		list = $element.find(".rp-entry-list")
 
@@ -101,6 +104,21 @@ define [
 			entry.replyContent = ""
 			entry.replying = false
 			$scope.$broadcast "review-panel:layout"
+			# TODO Just for prototyping purposes; remove afterwards
+			window.setTimeout((() -> 
+				$scope.$applyAsync(() -> submitMockedReply(entry))
+			), 1000 * 2)
+
+		# TODO Just for prototyping purposes; remove afterwards.
+		submitMockedReply = (entry) ->
+			entry.thread.push {
+				content: 'Lorem ipsum dolor sit amet'
+				ts: new Date()
+				user_id: mockedUserId
+			}
+			entry.replyContent = ""
+			entry.replying = false
+			$scope.$broadcast "review-panel:layout"
 		
 		$scope.cancelReply = (entry) ->
 			entry.replying = false
@@ -111,14 +129,27 @@ define [
 		# when we get an id we don't know. This'll do for client side testing
 		refreshUsers = () ->
 			$scope.users = {}
+			# TODO Just for prototyping purposes; remove afterwards.
+			$scope.users[mockedUserId] = {
+				email: "gerald.butler@gmail.com"
+				name: "Gerald Butler"
+				isSelf: false
+				hue: 70
+				avatar_text: "G"
+			}
+
 			for member in $scope.project.members.concat($scope.project.owner)
 				if member._id == window.user_id
 					name = "You"
+					isSelf = true
 				else
 					name = "#{member.first_name} #{member.last_name}"
+					isSelf = false
+
 				$scope.users[member._id] = {
 					email: member.email
 					name: name
+					isSelf: isSelf
 					hue: ColorManager.getHueForUserId(member._id)
 					avatar_text: [member.first_name, member.last_name].filter((n) -> n?).map((n) -> n[0]).join ""
 				}
