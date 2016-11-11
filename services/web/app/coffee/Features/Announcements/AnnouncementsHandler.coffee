@@ -8,9 +8,6 @@ settings = require("settings-sharelatex")
 module.exports =
 
 	getUnreadAnnouncements : (user_id, callback = (err, announcements)->)->
-		if !settings?.apis?.analytics?.url? or !settings.apis.blog.url?
-			return callback null, []
-
 		async.parallel {
 			lastEvent: (cb)->
 				AnalyticsManager.getLastOccurance user_id, "announcement-alert-dismissed", cb
