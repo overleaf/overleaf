@@ -55,11 +55,9 @@ div.full-size(
 					)
 						.rp-entry-callout(
 							ng-class="'rp-entry-callout-' + entry.type"
-							style="top: {{ entry.screenPos.y + 15 }}px; height: {{ top - entry.screenPos.y }}px"
 						)
 						.rp-entry(
 							ng-class="'rp-entry-' + entry.type"
-							ng-style="{'top': top}"
 						)
 							div(ng-if="entry.type == 'insert' || entry.type == 'delete'")
 								.rp-entry-header

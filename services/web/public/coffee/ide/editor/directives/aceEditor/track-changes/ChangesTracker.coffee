@@ -283,7 +283,10 @@ define [
 						moved_changes.push change
 					else if op_start <= change_start <= op_end
 						if @track_changes
-							# If we overlap a delete, add it in our content, and delete the existing change
+							# If we overlap a delete, add it in our content, and delete the existing change.
+							# It's easier to do it this way, rather than modifying the existing delete in case
+							# we overlap many deletes and we'd need to track that. We have a workaround to
+							# update the delete in place if possible below.
 							offset = change_start - op_start
 							op_modifications.push { i: change.op.d, p: offset }
 							remove_changes.push change
@@ -291,14 +294,24 @@ define [
 							change.op.p = op_start
 							moved_changes.push change
 
-			for change in remove_changes
-				@_removeChange change
-			
 			# Copy rather than modify because we still need to apply it to comments
 			op = {
 				p: op.p
 				d: @_applyOpModifications(op.d, op_modifications)
 			}
+
+			for change in remove_changes
+				# This is a bit of hack to avoid removing one delete and replacing it with another.
+				# If we don't do this, it causes the UI to flicker
+				if op.d.length > 0 and change.op.d? and op.p <= change.op.p <= op.p + op.d.length
+					change.op.p = op.p
+					change.op.d = op.d
+					change.metadata = metadata
+					moved_changes.push change
+					op.d = "" # stop it being added
+				else
+					@_removeChange change
+
 			if @track_changes and op.d.length > 0
 				@_addOp op, metadata
 			else
@@ -388,5 +401,11 @@ define [
 						remove_changes.push change
 						previous_change.op.i += change.op.i
 						moved_changes.push previous_change
-				previous_change = change
+				else if previous_change?.op.d? and change.op.d? and previous_change.op.p == change.op.p
+					# Merge adjacent deletes
+					previous_change.op.d += change.op.d
+					remove_changes.push change
+					moved_changes.push previous_change
+				else # Only update to the current change if we haven't removed it.
+					previous_change = change
 			return { moved_changes, remove_changes }

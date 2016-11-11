@@ -35,9 +35,16 @@ define [
 				sl_console.log "[comment:moved]", comment
 				@_onCommentMoved(comment)
 			
-			@editor.on "changeSelection", (e) =>
-				# TODO: Make this only update focus when we get a more optimised updating system
-				@updateReviewEntriesScope()
+			changingSelection = false
+			@editor.on "changeSelection", (args...) =>
+				# Deletes can send about 5 changeSelection events, so
+				# just act on the last one.
+				if !changingSelection
+					changingSelection = true
+					@$scope.$evalAsync () =>
+						changingSelection = false
+						@updateFocus()
+						@recalculateReviewEntriesScreenPositions()
 			
 			@$scope.$on "comment:add", (e, comment) =>
 				@addCommentToSelection(comment)
@@ -189,30 +196,54 @@ define [
 			@changesTracker.applyOp(op, metadata)
 		
 		updateReviewEntriesScope: () ->
-			# TODO: Update in place so Angular doesn't have to redo EVERYTHING
-			@$scope.reviewPanel.entries = {}
+			# Assume we'll delete everything until we see it, then we'll remove it from this object
+			delete_changes = {}
+			delete_changes[change_id] = true for change_id, change of @$scope.reviewPanel.entries
+
 			for change in @changesTracker.changes
-				@$scope.reviewPanel.entries[change.id] = {
+				delete delete_changes[change.id]
+				@$scope.reviewPanel.entries[change.id] ?= {}
+					
+				# Update in place to avoid a full DOM redraw via angular
+				metadata = {}
+				metadata[key] = value for key, value of change.metadata
+				new_entry = {
 					type: if change.op.i then "insert" else "delete"
 					content: change.op.i or change.op.d
 					offset: change.op.p
 					metadata: change.metadata
 				}
+				for key, value of new_entry
+					@$scope.reviewPanel.entries[change.id][key] = value
+
 			for comment in @changesTracker.comments
-				@$scope.reviewPanel.entries[comment.id] = {
+				delete delete_changes[comment.id]
+				@$scope.reviewPanel.entries[comment.id] ?= {}
+				new_entry = {
 					type: "comment"
 					thread: comment.metadata.thread
 					offset: comment.offset
 				}
+				for key, value of new_entry
+					@$scope.reviewPanel.entries[comment.id][key] = value
+
+			for change_id, _ of delete_changes
+				delete @$scope.reviewPanel.entries[change_id]	
+			
 			@updateFocus()
 			@recalculateReviewEntriesScreenPositions()
 		
 		updateFocus: () ->
+			@updateEntryGeneration()
 			@$scope.reviewPanel.entries["focus-position"] = {
 				type: "focus-position"
 				offset: @_aceRangeToShareJs(@editor.getSelectionRange().start)
 			}
-			@recalculateReviewEntriesScreenPositions()
+		
+		updateEntryGeneration: () ->
+			# Rather than making angular deep watch the whole entries array
+			@$scope.reviewPanel.entryGeneration ?= 0
+			@$scope.reviewPanel.entryGeneration++
 		
 		recalculateReviewEntriesScreenPositions: () ->
 			session = @editor.getSession()
@@ -221,7 +252,8 @@ define [
 				doc_position = @_shareJsOffsetToAcePosition(entry.offset)
 				screen_position = session.documentToScreenPosition(doc_position.row, doc_position.column)
 				y = screen_position.row * renderer.lineHeight
-				entry.screenPos = { y }
+				entry.screenPos ?= {}
+				entry.screenPos.y = y
 
 			@$scope.$apply()
 
