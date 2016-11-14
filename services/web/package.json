@@ -25,7 +25,6 @@
     "dateformat": "1.0.4-1.2.3",
     "express": "4.13.0",
     "express-session": "1.11.3",
-    "feedparser": "^1.1.5",
     "grunt": "^0.4.5",
     "heapdump": "^0.3.7",
     "http-proxy": "^1.8.1",
