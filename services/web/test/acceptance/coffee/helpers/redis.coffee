@@ -11,11 +11,11 @@ rclient = UserSessionsRedis.client()
 module.exports =
 
 	getUserSessions: (user, callback=(err, sessionsSet)->) ->
-		rclient.smembers "UserSessions:{#{user._id}}", (err, result) ->
+		rclient.smembers UserSessionsRedis.sessionSetKey(user), (err, result) ->
 			return callback(err, result)
 
 	clearUserSessions: (user, callback=(err)->) ->
-		sessionSetKey = "UserSessions:{#{user._id}}"
+		sessionSetKey = UserSessionsRedis.sessionSetKey(user)
 		rclient.smembers sessionSetKey, (err, sessionKeys) ->
 			if err
 				return callback(err)
