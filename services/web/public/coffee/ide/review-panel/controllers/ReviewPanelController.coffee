@@ -3,7 +3,7 @@ define [
 	"utils/EventEmitter"
 	"ide/colors/ColorManager"
 ], (App, EventEmitter, ColorManager) ->
-	App.controller "ReviewPanelController", ($scope, $element, ide) ->
+	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout) ->
 		$scope.reviewPanel =
 			entries: {}
 			trackNewChanges: false
@@ -103,7 +103,8 @@ define [
 			}
 			entry.replyContent = ""
 			entry.replying = false
-			$scope.$broadcast "review-panel:layout"
+			$timeout () ->
+				$scope.$broadcast "review-panel:layout"
 			# TODO Just for prototyping purposes; remove afterwards
 			window.setTimeout((() -> 
 				$scope.$applyAsync(() -> submitMockedReply(entry))
@@ -118,7 +119,8 @@ define [
 			}
 			entry.replyContent = ""
 			entry.replying = false
-			$scope.$broadcast "review-panel:layout"
+			$timeout () ->
+				$scope.$broadcast "review-panel:layout"
 		
 		$scope.cancelReply = (entry) ->
 			entry.replying = false

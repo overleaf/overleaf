@@ -5,6 +5,7 @@ define [
 		return  {
 			link: (scope, element, attrs) ->
 				layout = () ->
+					sl_console.log "LAYOUT"
 					entries = []
 					for el in element.find(".rp-entry-wrapper")
 						entries.push {
@@ -22,6 +23,7 @@ define [
 						previousBottom = top + height
 						entry.$box_el.css(top: top)
 						entry.$callout_el.css(top: original_top + 15, height: top - original_top)
+						sl_console.log "ENTRY", {entry: entry.scope.entry, top}
 				
 				scope.$watch "reviewPanel.entryGeneration", (value) ->
 					scope.$evalAsync () ->
