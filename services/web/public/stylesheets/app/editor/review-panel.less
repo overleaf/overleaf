@@ -73,6 +73,7 @@
 	border-left: solid @rp-entry-ribbon-width transparent;
 	border-radius: 3px;
 	background-color: #FFF;
+	transition: top 0.3s, left 0.1s, right 0.1s;
 
 	&-insert {
 		border-left-color: @rp-green;
@@ -97,6 +98,12 @@
 			border-left-width: 3px;
 			border-left-color: @rp-yellow;
 		}
+	}
+	
+	&-focused {
+		left: 0px;
+		right: 10px;
+		z-index: 1;
 	}
 }
 	
@@ -270,6 +277,17 @@
 		left: 3px;
 		bottom: 0;
 		border-bottom: 1px solid grey;
+	}
+	
+	&-inverted {
+		border-top: none;
+		border-bottom: 1px solid grey;
+		&:after {
+			top: 0px;
+			bottom: -1px;
+			border-top: 1px solid grey;
+			border-bottom: none;
+		}
 	}
 	
 	&-insert {

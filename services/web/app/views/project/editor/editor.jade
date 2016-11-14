@@ -57,8 +57,7 @@ div.full-size(
 							ng-class="'rp-entry-callout-' + entry.type"
 						)
 						.rp-entry(
-							ng-class="[ 'rp-entry-' + entry.type, (commentState.adding ? 'rp-entry-adding-comment' : '') ]"
-							ng-style="{'top': top}"
+							ng-class="[ 'rp-entry-' + entry.type, (commentState.adding ? 'rp-entry-adding-comment' : ''), (entry.focused ? 'rp-entry-focused' : '')]"
 						)
 							div(ng-if="entry.type == 'insert' || entry.type == 'delete'")
 								.rp-entry-header
@@ -119,7 +118,7 @@ div.full-size(
 										i.fa.fa-check
 										| &nbsp;Mark as resolved
 							
-							div(ng-if="entry.type == 'focus-position'")
+							div(ng-if="entry.type == 'add-comment'")
 								a.rp-add-comment-btn(
 									href
 									ng-if="!commentState.adding"

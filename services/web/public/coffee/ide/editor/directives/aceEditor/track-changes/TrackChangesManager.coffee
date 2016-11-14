@@ -223,6 +223,7 @@ define [
 					type: "comment"
 					thread: comment.metadata.thread
 					offset: comment.offset
+					length: comment.length
 				}
 				for key, value of new_entry
 					@$scope.reviewPanel.entries[comment.id][key] = value
@@ -235,10 +236,25 @@ define [
 		
 		updateFocus: () ->
 			@updateEntryGeneration()
-			@$scope.reviewPanel.entries["focus-position"] = {
-				type: "focus-position"
-				offset: @_aceRangeToShareJs(@editor.getSelectionRange().start)
-			}
+			selection = @editor.getSelectionRange()
+			cursor_offset = @_aceRangeToShareJs(selection.start)
+
+			for id, entry of @$scope.reviewPanel.entries
+				if entry.type == "comment"
+					entry.focused = (entry.offset <= cursor_offset <= entry.offset + entry.length)
+				else if entry.type == "insert"
+					entry.focused = (entry.offset <= cursor_offset <= entry.offset + entry.content.length)
+				else if entry.type == "delete"
+					entry.focused = (entry.offset == cursor_offset)
+
+			if selection.start.column == selection.end.column and selection.start.row == selection.end.row
+				# No selection
+				delete @$scope.reviewPanel.entries["add-comment"]
+			else
+				@$scope.reviewPanel.entries["add-comment"] = {
+					type: "add-comment"
+					offset: cursor_offset
+				}
 		
 		updateEntryGeneration: () ->
 			# Rather than making angular deep watch the whole entries array
