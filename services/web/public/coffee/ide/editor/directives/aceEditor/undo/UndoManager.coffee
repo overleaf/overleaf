@@ -207,16 +207,19 @@ define [
 			return doc.split("\n")
 
 		_aceDeltaSetsToSimpleDeltaSets: (aceDeltaSets, docLines) ->
+			simpleDeltaSets = []
 			for deltaSet in aceDeltaSets
-				simpleDeltas = []
-				for delta in deltaSet.deltas
-					simpleDeltas.push @_aceDeltaToSimpleDelta(delta, docLines)
-					docLines = @_applyAceDeltasToDocLines([delta], docLines)
-				{
-					deltas: simpleDeltas
-					group: deltaSet.group
-				}
-			
+				if deltaSet.group == "doc" # ignore fold changes
+					simpleDeltas = []
+					for delta in deltaSet.deltas
+						simpleDeltas.push @_aceDeltaToSimpleDelta(delta, docLines)
+						docLines = @_applyAceDeltasToDocLines([delta], docLines)
+					simpleDeltaSets.push {
+						deltas: simpleDeltas
+						group: deltaSet.group
+					}
+			return simpleDeltaSets
+
 		_simpleDeltaSetsToAceDeltaSets: (simpleDeltaSets, docLines) ->
 			for deltaSet in simpleDeltaSets
 				aceDeltas = []
