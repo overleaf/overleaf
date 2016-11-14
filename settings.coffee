@@ -425,6 +425,65 @@ if process.env["SHARELATEX_LDAP_HOST"]
 			rejectUnauthorized: process.env["SHARELATEX_LDAP_TLS_OPTS_REJECT_UNAUTH"] == "true"
 			ca:ca_paths  # e.g.'/etc/ldap/ca_certs.pem'
 
+if process.env["SHARELATEX_SAML_ENTRYPOINT"]
+	# NOTE: see https://github.com/bergie/passport-saml/blob/master/README.md for docs of `server` options
+	settings.externalAuth = true
+	settings.saml =
+		server:
+			# strings
+			entryPoint: process.env["SHARELATEX_SAML_ENTRYPOINT"]
+			callbackUrl: process.env["SHARELATEX_SAML_CALLBACK_URL"]
+			issuer: process.env["SHARELATEX_SAML_ISSUER"]
+			cert: process.env["SHARELATEX_SAML_CERT"]
+			privateCert: process.env["SHARELATEX_SAML_PRIVATE_CERT"]
+			decryptionPvk: process.env["SHARELATEX_SAML_DECRYPTION_PVK"]
+			signatureAlgorithm: process.env["SHARELATEX_SAML_SIGNATURE_ALGORITHM"]
+			identifierFormat: process.env["SHARELATEX_SAML_IDENTIFIER_FORMAT"]
+			attributeConsumingServiceIndex: process.env["SHARELATEX_SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX"]
+			authnContext: process.env["SHARELATEX_SAML_AUTHN_CONTEXT"]
+			authnRequestBinding: process.env["SHARELATEX_SAML_AUTHN_REQUEST_BINDING"]
+			validateInResponseTo: process.env["SHARELATEX_SAML_VALIDATE_IN_RESPONSE_TO"]
+			cacheProvider: process.env["SHARELATEX_SAML_CACHE_PROVIDER"]
+			logoutUrl: process.env["SHARELATEX_SAML_LOGOUT_URL"]
+			additionalLogoutParams: process.env["SHARELATEX_SAML_ADDITIONAL_LOGOUT_PARAMS"]
+			logoutCallbackUrl: process.env["SHARELATEX_SAML_LOGOUT_CALLBACK_URL"]
+			disableRequestedAuthnContext: process.env["SHARELATEX_SAML_DISABLE_REQUESTED_AUTHN_CONTEXT"] == 'true'
+			forceAuthn: process.env["SHARELATEX_SAML_FORCE_AUTHN"] == 'true'
+			skipRequestCompression: process.env["SHARELATEX_SAML_SKIP_REQUEST_COMPRESSION"] == 'true'
+			acceptedClockSkewMs: (
+				if _saml_skew = process.env["SHARELATEX_SAML_ACCEPTED_CLOCK_SKEW_MS"]
+					try
+						parseInt(_saml_skew)
+					catch e
+						console.error "Cannot parse SHARELATEX_SAML_ACCEPTED_CLOCK_SKEW_MS"
+				else
+					undefined
+			)
+			requestIdExpirationPeriodMs: (
+				if _saml_exiration = process.env["SHARELATEX_SAML_REQUEST_ID_EXPIRATION_PERIOD_MS"]
+					try
+						parseInt(_saml_expiration)
+					catch e
+						console.error "Cannot parse SHARELATEX_SAML_REQUEST_ID_EXPIRATION_PERIOD_MS"
+				else
+					undefined
+			)
+
+		identityServiceName: process.env["SHARELATEX_SAML_IDENTITY_SERVICE_NAME"]
+
+	if _saml_additionalParams = process.env["SHARELATEX_SAML_ADDITIONAL_PARAMS"]
+		try
+			settings.saml.server.additionalAuthorizeParams = JSON.parse(_saml_additionalParams)
+		catch e
+			console.error "Cannot parse SHARELATEX_SAML_ADDITIONAL_PARAMS"
+
+	if _saml_additionalAuthorizeParams = process.env["SHARELATEX_SAML_ADDITIONAL_AUTHORIZE_PARAMS"]
+		try
+			settings.saml.server.additionalAuthorizeParams = JSON.parse(_saml_additionalAuthorizeParams )
+		catch e
+			console.error "Cannot parse SHARELATEX_SAML_ADDITIONAL_PARAMS"
+
+
 if settings.externalAuth and settings?.nav?.header?
 	results = []
 	for button in settings.nav.header
