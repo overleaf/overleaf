@@ -210,7 +210,7 @@ module.exports = (app, webRouter, apiRouter)->
 
 	webRouter.use (req, res, next)->
 		res.locals.externalAuthenticationSystemUsed = ->
-			Settings.ldap?
+			Settings.ldap? or Settings.saml?
 		next()
 
 	webRouter.use (req, res, next)->
