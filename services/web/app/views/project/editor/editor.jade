@@ -57,7 +57,8 @@ div.full-size(
 							ng-class="'rp-entry-callout-' + entry.type"
 						)
 						.rp-entry(
-							ng-class="'rp-entry-' + entry.type"
+							ng-class="[ 'rp-entry-' + entry.type, (commentState.adding ? 'rp-entry-adding-comment' : '') ]"
+							ng-style="{'top': top}"
 						)
 							div(ng-if="entry.type == 'insert' || entry.type == 'delete'")
 								.rp-entry-header
@@ -107,7 +108,7 @@ div.full-size(
 								//- 	a(href, ng-click="cancelReply(entry)") X
 								//- a.btn.btn-sm.btn-primary(href, ng-click="startReply(entry)", ng-if="!entry.replying") Reply
 								.rp-comment-reply
-									textarea.rp-comment-reply-input(
+									textarea.rp-comment-input(
 										ng-model="entry.replyContent"
 										ng-keypress="handleCommentReplyKeyPress($event, entry);"
 										placeholder="Hit \"Enter\" to reply"
@@ -119,11 +120,26 @@ div.full-size(
 										| &nbsp;Mark as resolved
 							
 							div(ng-if="entry.type == 'focus-position'")
-								a.btn.btn-sm(href, ng-if="!commentState.adding", ng-click="startNewComment()") Add comment
+								a.rp-add-comment-btn(
+									href
+									ng-if="!commentState.adding"
+									ng-click="startNewComment()"
+								) 
+									i.fa.fa-comment
+									| &nbsp;Add comment
 								div(ng-if="commentState.adding")
-									textarea(ng-model="commentState.content")
-									a.btn.btn-sm.btn-primary(href, ng-click="submitNewComment()") Submit
-									a(href, ng-click="cancelNewComment()") X
+									.rp-new-comment
+										textarea.rp-comment-input(
+											ng-model="commentState.content"
+											placeholder="Add your comment here"
+										)
+									.rp-entry-actions
+										a.rp-entry-button(href, ng-click="submitNewComment()") 
+											i.fa.fa-comment
+											| &nbsp;Comment
+										a.rp-entry-button(href, ng-click="cancelNewComment()") 
+											i.fa.fa-times
+											| &nbsp;Cancel
 
 	.ui-layout-east
 		div(ng-if="ui.pdfLayout == 'sideBySide'")

@@ -85,6 +85,19 @@
 	&-comment {
 		border-left-color: @rp-yellow;
 	}
+
+	&-focus-position {
+		background-color: transparent;
+		right: auto;
+		border-left-width: 0;
+
+		&.rp-entry-adding-comment {
+			background-color: #FFF;
+			right: 5px;
+			border-left-width: 3px;
+			border-left-color: @rp-yellow;
+		}
+	}
 }
 	
 	.rp-entry-header {
@@ -191,14 +204,34 @@
 		.rp-comment-reply {
 			padding: 0 5px;
 		}
-			.rp-comment-reply-input {
-				width: 100%;
-				font-size: @rp-base-font-size;
-				padding: 2px 5px;
-				border-radius: 3px;
-				border: solid 1px @rp-border-grey;
-				resize: vertical;
-			}
+
+	.rp-add-comment-btn {
+		display: block;
+		background-color: @rp-highlight-blue;
+		color: #FFF;
+		padding: 5px 10px;
+		border-radius: 3px;
+
+		&:hover,
+		&:focus {
+			background-color: darken(@rp-highlight-blue, 5%);
+			text-decoration: none;
+			color: #FFF;
+		}
+	}
+
+	.rp-new-comment {
+		padding: 5px;
+	}
+
+	.rp-comment-input {
+		width: 100%;
+		font-size: @rp-base-font-size;
+		padding: 2px 5px;
+		border-radius: 3px;
+		border: solid 1px @rp-border-grey;
+		resize: vertical;
+	}
 
 .rp-avatar {
 	border-radius: 3px;
