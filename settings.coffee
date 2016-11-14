@@ -436,6 +436,7 @@ if process.env["SHARELATEX_SAML_ENTRYPOINT"]
 	# NOTE: see https://github.com/bergie/passport-saml/blob/master/README.md for docs of `server` options
 	settings.externalAuth = true
 	settings.saml =
+		identityServiceName: process.env["SHARELATEX_SAML_IDENTITY_SERVICE_NAME"]
 		server:
 			# strings
 			entryPoint: process.env["SHARELATEX_SAML_ENTRYPOINT"]
@@ -452,7 +453,6 @@ if process.env["SHARELATEX_SAML_ENTRYPOINT"]
 			validateInResponseTo: process.env["SHARELATEX_SAML_VALIDATE_IN_RESPONSE_TO"]
 			cacheProvider: process.env["SHARELATEX_SAML_CACHE_PROVIDER"]
 			logoutUrl: process.env["SHARELATEX_SAML_LOGOUT_URL"]
-			additionalLogoutParams: process.env["SHARELATEX_SAML_ADDITIONAL_LOGOUT_PARAMS"]
 			logoutCallbackUrl: process.env["SHARELATEX_SAML_LOGOUT_CALLBACK_URL"]
 			disableRequestedAuthnContext: process.env["SHARELATEX_SAML_DISABLE_REQUESTED_AUTHN_CONTEXT"] == 'true'
 			forceAuthn: process.env["SHARELATEX_SAML_FORCE_AUTHN"] == 'true'
@@ -475,21 +475,33 @@ if process.env["SHARELATEX_SAML_ENTRYPOINT"]
 				else
 					undefined
 			)
-
-		identityServiceName: process.env["SHARELATEX_SAML_IDENTITY_SERVICE_NAME"]
-
-	if _saml_additionalParams = process.env["SHARELATEX_SAML_ADDITIONAL_PARAMS"]
-		try
-			settings.saml.server.additionalAuthorizeParams = JSON.parse(_saml_additionalParams)
-		catch e
-			console.error "Cannot parse SHARELATEX_SAML_ADDITIONAL_PARAMS"
-
-	if _saml_additionalAuthorizeParams = process.env["SHARELATEX_SAML_ADDITIONAL_AUTHORIZE_PARAMS"]
-		try
-			settings.saml.server.additionalAuthorizeParams = JSON.parse(_saml_additionalAuthorizeParams )
-		catch e
-			console.error "Cannot parse SHARELATEX_SAML_ADDITIONAL_PARAMS"
-
+			additionalParams: (
+				if _saml_additionalParams = process.env["SHARELATEX_SAML_ADDITIONAL_PARAMS"]
+					try
+						JSON.parse(_saml_additionalParams)
+					catch e
+						console.error "Cannot parse SHARELATEX_SAML_ADDITIONAL_PARAMS"
+				else
+					undefined
+			)
+			additionalAuthorizeParams: (
+				if _saml_additionalAuthorizeParams = process.env["SHARELATEX_SAML_ADDITIONAL_AUTHORIZE_PARAMS"]
+					try
+						JSON.parse(_saml_additionalAuthorizeParams )
+					catch e
+						console.error "Cannot parse SHARELATEX_SAML_ADDITIONAL_AUTHORIZE_PARAMS"
+				else
+					undefined
+			)
+			additionalLogoutParams: (
+				if _saml_additionalLogoutParams = process.env["SHARELATEX_SAML_ADDITIONAL_LOGOUT_PARAMS"]
+					try
+						JSON.parse(_saml_additionalLogoutParams )
+					catch e
+						console.error "Cannot parse SHARELATEX_SAML_ADDITIONAL_LOGOUT_PARAMS"
+				else
+					undefined
+			)
 
 if settings.externalAuth and settings?.nav?.header?
 	results = []
