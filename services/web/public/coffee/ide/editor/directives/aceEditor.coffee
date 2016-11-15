@@ -277,9 +277,7 @@ define [
 						session.setOption("useWorker", scope.syntaxValidation);
 
 					# now attach session to editor
-					console.log "setting session"
 					editor.setSession(session)
-					console.log "set session"
 
 					doc = session.getDocument()
 					doc.on "change", onChange
