@@ -53,7 +53,6 @@ define [
 		$scope.$watch "ui.reviewPanelOpen", (reviewPanelOpen) ->
 			return if !reviewPanelOpen?
 			if reviewPanelOpen
-				$scope.$broadcast "review-panel:layout"
 				scroller.on "scroll", scrollAce
 				$scope.onScroll = scrollPanel # Passed into the editor directive for it to call
 			else
@@ -61,6 +60,7 @@ define [
 				$scope.onScroll = null
 			$timeout () ->
 				$scope.$broadcast "review-panel:toggle"
+				$scope.$broadcast "review-panel:layout"
 
 		$scope.$watch (() -> Object.keys($scope.reviewPanel.entries).length), (nEntries) ->
 			$scope.reviewPanel.hasEntries = nEntries > 0

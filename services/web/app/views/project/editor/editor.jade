@@ -51,7 +51,7 @@ div.full-size(
 				| Track Changes 
 				input(type="checkbox", ng-model="reviewPanel.trackNewChanges")
 			.review-panel-scroller
-				.rp-entry-list(review-panel-sorted)
+				.rp-entry-list(review-panel-sorted, review-panel-sorted-entry-class="ui.reviewPanelOpen ? 'rp-entry' : 'rp-entry-indicator'")
 					.rp-entry-wrapper(
 						ng-repeat="(entry_id, entry) in reviewPanel.entries"
 					)
@@ -60,11 +60,11 @@ div.full-size(
 						)
 
 						div(ng-switch="entry.type")
-							.rp-entry-indicator(ng-switch-when="insert")
+							.rp-entry-indicator(ng-switch-when="insert", ng-class="{ 'rp-entry-indicator-focused': entry.focused }")
 								i.fa.fa-pencil
-							.rp-entry-indicator(ng-switch-when="delete")
+							.rp-entry-indicator(ng-switch-when="delete", ng-class="{ 'rp-entry-indicator-focused': entry.focused }")
 								i.rp-icon-delete
-							.rp-entry-indicator(ng-switch-when="comment")
+							.rp-entry-indicator(ng-switch-when="comment", ng-class="{ 'rp-entry-indicator-focused': entry.focused }")
 								i.fa.fa-comment
 							.rp-entry-indicator(
 								ng-switch-when="add-comment"
