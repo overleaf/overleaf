@@ -14,6 +14,7 @@ define [
 					entries = []
 					for el in element.find(".rp-entry-wrapper")
 						entries.push {
+							$indicator_el: $(el).find(".rp-entry-indicator")
 							$box_el: $(el).find(".rp-entry")
 							$callout_el: $(el).find(".rp-entry-callout")
 							scope: angular.element(el).scope()
@@ -39,6 +40,7 @@ define [
 					# Put the focused entry exactly where it wants to be
 					focused_entry_top = Math.max(TOOLBAR_HEIGHT, focused_entry.scope.entry.screenPos.y)
 					focused_entry.$box_el.css(top: focused_entry_top)
+					focused_entry.$indicator_el.css(top: focused_entry_top)
 					focused_entry.$callout_el.css(top: focused_entry_top + line_height, height: 0)
 					
 					previousBottom = focused_entry_top + focused_entry.$box_el.height()
@@ -48,6 +50,7 @@ define [
 						top = Math.max(original_top, previousBottom + ENTRY_PADDING)
 						previousBottom = top + height
 						entry.$box_el.css(top: top, bottom: 'auto')
+						entry.$indicator_el.css(top: top, bottom: 'auto')
 						entry.$callout_el.removeClass("rp-entry-callout-inverted")
 						entry.$callout_el.css(top: original_top + line_height, height: top - original_top)
 						sl_console.log "ENTRY", {entry: entry.scope.entry, top}
@@ -62,6 +65,7 @@ define [
 						top = bottom - height
 						previousTop = top
 						entry.$box_el.css(top: top)
+						entry.$indicator_el.css(top: top, bottom: 'auto')
 						entry.$callout_el.addClass("rp-entry-callout-inverted")
 						entry.$callout_el.css(top: top + line_height + 1, height: original_top - top)
 						sl_console.log "ENTRY", {entry: entry.scope.entry, top}

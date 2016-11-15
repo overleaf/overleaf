@@ -21,24 +21,24 @@
 @rp-entry-ribbon-width	: 4px;
 @rp-semibold-weight		: 600;
 @review-panel-width		: 230px;
+@review-off-width		: 20px;
 
 @rp-scroller-offset		: 30px;
 
 #review-panel {
 	position: absolute;
-	width: @review-panel-width;
+	width: @review-off-width; 
 	top: 0px;
 	bottom: 0px;
 	right: 0px;
 	background-color: @rp-bg-blue;
 	border-left: solid 1px @rp-border-grey;
-	overflow: hidden;
-	display: none;
 	font-size: @rp-base-font-size;
 	color: @rp-type-blue;
 }
 
 .review-panel-toolbar {
+	display: none;
 	height: 32px;
 	padding: 6px;
 	border-bottom: 1px solid @rp-border-grey;
@@ -58,18 +58,34 @@
 	left: 0;
 	// TODO: Use a more cross-browser method of hiding the scroll bar
 	right: -@rp-scroller-offset; // Hide scroll bar
-	overflow-y: scroll;
 }
 
 .rp-entry-list {
 	position: relative;
-	width: @review-panel-width;;
+	width: @review-off-width;
+}
+
+.rp-entry-indicator {
+	display: block;
+	position: absolute;
+	left: 1px;
+	right: 1px;
+	text-align: center;
+	background-color: @rp-highlight-blue;
+	border-radius: 3px;
+	color: #FFF;
+	cursor: pointer;
+
+	&:hover + .rp-entry {
+		display: block;
+	}
 }
 
 .rp-entry {
+	display: none;
 	position: absolute;
-	left: 5px;
-	right: 5px;
+	left: @review-off-width; 
+	width: @review-panel-width;
 	border-left: solid @rp-entry-ribbon-width transparent;
 	border-radius: 3px;
 	background-color: #FFF;
@@ -106,7 +122,7 @@
 		z-index: 1;
 	}
 }
-	
+
 	.rp-entry-header {
 		display: flex;
 		align-items: center;
@@ -314,17 +330,41 @@
 
 .has-review-panel {
 	#editor {
-		right: @review-panel-width;;
+		right: @review-panel-width;
 		left: 0px;
 		width: auto;
 		.ace-editor-body {
 			overflow: visible;
 			.ace_scrollbar-v {
-				right: -@review-panel-width;;
+				right: -@review-panel-width;
 			}
 		}
 	}
-	#review-panel {
-		display: block;
+
+	.review-panel-scroller {
+		overflow-y: scroll;
 	}
+
+	#review-panel {
+		width: @review-panel-width;
+		overflow: hidden;
+	}
+
+		.review-panel-toolbar {
+			display: block;
+		}
+
+		.rp-entry-list {
+			width: @review-panel-width;
+		}
+
+			.rp-entry {
+				display: block;
+				left: 5px;
+				right: 5px;
+			}
+
+			.rp-entry-indicator {
+				display: none;
+			}
 }
