@@ -2,7 +2,8 @@ define [
 	"base",
 	"utils/EventEmitter"
 	"ide/colors/ColorManager"
-], (App, EventEmitter, ColorManager) ->
+	"ide/review-panel/ChangesTracker"
+], (App, EventEmitter, ColorManager, ChangesTracker) ->
 	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout) ->
 		$scope.reviewPanel =
 			entries: {}
@@ -11,7 +12,14 @@ define [
 		$scope.commentState =
 			adding: false
 			content: ""
-			
+
+		changesTrackers = {}
+
+		$scope.$watch "editor.open_doc_id", (open_doc_id) ->
+			return if !open_doc_id?
+			changesTrackers[open_doc_id] ?= new ChangesTracker()
+			$scope.reviewPanel.changesTracker = changesTrackers[open_doc_id]
+
 		# TODO Just for prototyping purposes; remove afterwards.
 		mockedUserId = '12345abc'
 

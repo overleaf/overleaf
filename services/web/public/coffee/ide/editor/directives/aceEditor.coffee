@@ -57,6 +57,7 @@ define [
 				scrollEvents: "="
 				trackNewChanges: "="
 				trackChangesEnabled: "="
+				changesTracker: "="
 			}
 			link: (scope, element, attrs) ->
 				# Don't freak out if we're already in an apply callback
@@ -216,13 +217,6 @@ define [
 						session = editor.getSession()
 						session.setOption("useWorker", value);
 
-				scope.$watch "trackNewChanges", (track_new_changes) ->
-					return if !track_new_changes?
-					if track_new_changes
-						trackChangesManager.turn_on_tracking()
-					else
-						trackChangesManager.turn_off_tracking()
-
 				scope.$watch "trackChangesEnabled", (enabled) ->
 					return if !enabled?
 					if enabled
@@ -283,7 +277,9 @@ define [
 						session.setOption("useWorker", scope.syntaxValidation);
 
 					# now attach session to editor
+					console.log "setting session"
 					editor.setSession(session)
+					console.log "set session"
 
 					doc = session.getDocument()
 					doc.on "change", onChange

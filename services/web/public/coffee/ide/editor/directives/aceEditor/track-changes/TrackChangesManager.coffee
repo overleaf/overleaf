@@ -1,39 +1,23 @@
 define [
 	"ace/ace"
 	"utils/EventEmitter"
-	"ide/editor/directives/aceEditor/track-changes/ChangesTracker"
 	"ide/colors/ColorManager"
-], (_, EventEmitter, ChangesTracker, ColorManager) ->
+], (_, EventEmitter, ColorManager) ->
 	class TrackChangesManager
 		Range = ace.require("ace/range").Range
 		
 		constructor: (@$scope, @editor, @element) ->
-			@changesTracker = new ChangesTracker()
-			@changeIdToMarkerIdMap = {}
 			window.trackChangesManager ?= @
+			
+			@$scope.$watch "changesTracker", (changesTracker) =>
+				return if !changesTracker?
+				@disconnectFromChangesTracker()
+				@changesTracker = changesTracker
+				@connectToChangesTracker()
 
-			@changesTracker.on "insert:added", (change) =>
-				sl_console.log "[insert:added]", change
-				@_onInsertAdded(change)
-			@changesTracker.on "insert:removed", (change) =>
-				sl_console.log "[insert:removed]", change
-				@_onInsertRemoved(change)
-			@changesTracker.on "delete:added", (change) =>
-				sl_console.log "[delete:added]", change
-				@_onDeleteAdded(change)
-			@changesTracker.on "delete:removed", (change) =>
-				sl_console.log "[delete:removed]", change
-				@_onDeleteRemoved(change)
-			@changesTracker.on "changes:moved", (changes) =>
-				sl_console.log "[changes:moved]", changes
-				@_onChangesMoved(changes)
-
-			@changesTracker.on "comment:added", (comment) =>
-				sl_console.log "[comment:added]", comment
-				@_onCommentAdded(comment)
-			@changesTracker.on "comment:moved", (comment) =>
-				sl_console.log "[comment:moved]", comment
-				@_onCommentMoved(comment)
+			@$scope.$watch "trackNewChanges", (track_new_changes) =>
+				return if !track_new_changes?
+				@changesTracker?.track_changes = track_new_changes
 			
 			changingSelection = false
 			@editor.on "changeSelection", (args...) =>
@@ -45,6 +29,9 @@ define [
 						changingSelection = false
 						@updateFocus()
 						@recalculateReviewEntriesScreenPositions()
+			
+			@editor.on "changeSession", () =>
+				@redrawAnnotations()
 			
 			@$scope.$on "comment:add", (e, comment) =>
 				@addCommentToSelection(comment)
@@ -95,17 +82,60 @@ define [
 			@editor.renderer.on "resize", () =>
 				@recalculateReviewEntriesScreenPositions()
 		
+		disconnectFromChangesTracker: () ->
+			@changeIdToMarkerIdMap = {}
+			@$scope.reviewPanel.entries = {}
+
+			if @changesTracker?
+				@changesTracker.off "insert:added"
+				@changesTracker.off "insert:removed"
+				@changesTracker.off "delete:added"
+				@changesTracker.off "delete:removed"
+				@changesTracker.off "changes:moved"
+				@changesTracker.off "comment:added"
+				@changesTracker.off "comment:removed"
+		
+		connectToChangesTracker: () ->
+			@changesTracker.track_changes = @$scope.trackNewChanges
+			
+			@changesTracker.on "insert:added", (change) =>
+				sl_console.log "[insert:added]", change
+				@_onInsertAdded(change)
+			@changesTracker.on "insert:removed", (change) =>
+				sl_console.log "[insert:removed]", change
+				@_onInsertRemoved(change)
+			@changesTracker.on "delete:added", (change) =>
+				sl_console.log "[delete:added]", change
+				@_onDeleteAdded(change)
+			@changesTracker.on "delete:removed", (change) =>
+				sl_console.log "[delete:removed]", change
+				@_onDeleteRemoved(change)
+			@changesTracker.on "changes:moved", (changes) =>
+				sl_console.log "[changes:moved]", changes
+				@_onChangesMoved(changes)
+
+			@changesTracker.on "comment:added", (comment) =>
+				sl_console.log "[comment:added]", comment
+				@_onCommentAdded(comment)
+			@changesTracker.on "comment:moved", (comment) =>
+				sl_console.log "[comment:moved]", comment
+				@_onCommentMoved(comment)
+			
+		redrawAnnotations: () ->
+			for change in @changesTracker.changes
+				if change.op.i?
+					@_onInsertAdded(change)
+				else if change.op.d?
+					@_onDeleteAdded(change)
+
+			for comment in @changesTracker.comments
+				@_onCommentAdded(comment)
+
 		enable: () ->
 			@enabled = true
 	
 		disable: () ->
 			@disabled = false
-		
-		turn_on_tracking: () ->
-			@changesTracker.track_changes = true
-		
-		turn_off_tracking: () ->
-			@changesTracker.track_changes = false
 
 		addComment: (offset, length, content) ->
 			@changesTracker.addComment offset, length, {
@@ -196,13 +226,15 @@ define [
 			@changesTracker.applyOp(op, metadata)
 		
 		updateReviewEntriesScope: () ->
+			entries = @_getCurrentDocEntries()
+			
 			# Assume we'll delete everything until we see it, then we'll remove it from this object
 			delete_changes = {}
-			delete_changes[change_id] = true for change_id, change of @$scope.reviewPanel.entries
+			delete_changes[change_id] = true for change_id, change of entries
 
 			for change in @changesTracker.changes
 				delete delete_changes[change.id]
-				@$scope.reviewPanel.entries[change.id] ?= {}
+				entries[change.id] ?= {}
 					
 				# Update in place to avoid a full DOM redraw via angular
 				metadata = {}
@@ -214,11 +246,11 @@ define [
 					metadata: change.metadata
 				}
 				for key, value of new_entry
-					@$scope.reviewPanel.entries[change.id][key] = value
+					entries[change.id][key] = value
 
 			for comment in @changesTracker.comments
 				delete delete_changes[comment.id]
-				@$scope.reviewPanel.entries[comment.id] ?= {}
+				entries[comment.id] ?= {}
 				new_entry = {
 					type: "comment"
 					thread: comment.metadata.thread
@@ -226,10 +258,10 @@ define [
 					length: comment.length
 				}
 				for key, value of new_entry
-					@$scope.reviewPanel.entries[comment.id][key] = value
+					entries[comment.id][key] = value
 
 			for change_id, _ of delete_changes
-				delete @$scope.reviewPanel.entries[change_id]	
+				delete entries[change_id]	
 			
 			@updateFocus()
 			@recalculateReviewEntriesScreenPositions()
@@ -238,8 +270,9 @@ define [
 			@updateEntryGeneration()
 			selection = @editor.getSelectionRange()
 			cursor_offset = @_aceRangeToShareJs(selection.start)
+			entries = @_getCurrentDocEntries()
 
-			for id, entry of @$scope.reviewPanel.entries
+			for id, entry of entries
 				if entry.type == "comment"
 					entry.focused = (entry.offset <= cursor_offset <= entry.offset + entry.length)
 				else if entry.type == "insert"
@@ -249,9 +282,9 @@ define [
 
 			if selection.start.column == selection.end.column and selection.start.row == selection.end.row
 				# No selection
-				delete @$scope.reviewPanel.entries["add-comment"]
+				delete entries["add-comment"]
 			else
-				@$scope.reviewPanel.entries["add-comment"] = {
+				entries["add-comment"] = {
 					type: "add-comment"
 					offset: cursor_offset
 				}
@@ -264,7 +297,8 @@ define [
 		recalculateReviewEntriesScreenPositions: () ->
 			session = @editor.getSession()
 			renderer = @editor.renderer
-			for entry_id, entry of (@$scope.reviewPanel?.entries or {})
+			entries = @_getCurrentDocEntries()
+			for entry_id, entry of entries or {}
 				doc_position = @_shareJsOffsetToAcePosition(entry.offset)
 				screen_position = session.documentToScreenPosition(doc_position.row, doc_position.column)
 				y = screen_position.row * renderer.lineHeight
@@ -272,6 +306,9 @@ define [
 				entry.screenPos.y = y
 
 			@$scope.$apply()
+	
+		_getCurrentDocEntries: () ->
+			return @$scope.reviewPanel.entries
 
 		_makeZeroWidthRange: (position) ->
 			ace_range = new Range(position.row, position.column, position.row, position.column)
