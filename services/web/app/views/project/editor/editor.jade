@@ -58,10 +58,21 @@ div.full-size(
 						.rp-entry-callout(
 							ng-class="'rp-entry-callout-' + entry.type"
 						)
-						.rp-entry-indicator(ng-switch="entry.type") 
-							i.fa.fa-pencil(ng-switch-when="insert")
-							i.rp-icon-delete(ng-switch-when="delete")
-							i.fa.fa-comment(ng-switch-when="comment")
+
+						div(ng-switch="entry.type")
+							.rp-entry-indicator(ng-switch-when="insert")
+								i.fa.fa-pencil
+							.rp-entry-indicator(ng-switch-when="delete")
+								i.rp-icon-delete
+							.rp-entry-indicator(ng-switch-when="comment")
+								i.fa.fa-comment
+							.rp-entry-indicator(
+								ng-switch-when="add-comment"
+								ng-if="!commentState.adding"
+								ng-click="startNewComment(); toggleReviewPanel();"
+							)
+								i.fa.fa-commenting
+
 						.rp-entry(
 							ng-class="[ 'rp-entry-' + entry.type, (commentState.adding ? 'rp-entry-adding-comment' : ''), (entry.focused ? 'rp-entry-focused' : '')]"
 						)

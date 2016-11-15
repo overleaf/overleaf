@@ -113,7 +113,9 @@
 }
 
 .rp-entry-wrapper {
-	&:hover > .rp-entry {
+	&:hover > .rp-entry-insert,
+	&:hover > .rp-entry-delete,
+	&:hover > .rp-entry-comment {
 		display: block;
 	}
 }
@@ -148,7 +150,7 @@
 		border-color: @rp-yellow;
 	}
 
-	&-focus-position {
+	&-add-comment {
 		background-color: transparent;
 		right: auto;
 		border-left-width: 0;
@@ -429,6 +431,17 @@
 					right: 10px;
 					z-index: 1;
 				}
+
+				&-add-comment {
+					right: auto;
+					width: auto;
+
+					&.rp-entry-adding-comment {
+						right: 5px;
+					}
+				}
+
+
 			}
 
 			.rp-entry-indicator {
