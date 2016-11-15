@@ -26,7 +26,7 @@ module.exports =
 			method:"POST"
 			timeout:1000
 			url: "#{settings.apis.analytics.url}/user/#{user_id}/event"
-		request opts, callback
+		makeRequest opts, callback
 
 
 	getLastOccurance: (user_id, event, callback = (error) ->) ->
@@ -37,7 +37,7 @@ module.exports =
 			method:"POST"
 			timeout:1000
 			url: "#{settings.apis.analytics.url}/user/#{user_id}/event/last_occurnace"
-		request opts, (err, response, body)->
+		makeRequest opts, (err, response, body)->
 			if err? 
 				console.log response, opts
 				logger.err {user_id, err}, "error getting last occurance of event"
