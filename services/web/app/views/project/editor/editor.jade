@@ -7,6 +7,7 @@ div.full-size(
 	resize-proportionally="true"
 	initial-size-east="'50%'"
 	minimum-restore-size-east="300"
+	allow-overflow-on="'center'"
 )
 	.ui-layout-center(ng-controller="ReviewPanelController", ng-class="{'has-review-panel': ui.reviewPanelOpen}")
 		.loading-panel(ng-show="!editor.sharejs_doc || editor.opening")
@@ -56,6 +57,10 @@ div.full-size(
 						.rp-entry-callout(
 							ng-class="'rp-entry-callout-' + entry.type"
 						)
+						.rp-entry-indicator(ng-switch="entry.type") 
+							i.fa.fa-pencil(ng-switch-when="insert")
+							i.rp-icon-delete(ng-switch-when="delete")
+							i.fa.fa-comment(ng-switch-when="comment")
 						.rp-entry(
 							ng-class="[ 'rp-entry-' + entry.type, (commentState.adding ? 'rp-entry-adding-comment' : ''), (entry.focused ? 'rp-entry-focused' : '')]"
 						)
@@ -96,23 +101,12 @@ div.full-size(
 											| {{ comment.ts | date : 'MMM d, y h:mm a' }}
 											| &nbsp;&bull;&nbsp;
 											span(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 40%);") {{ users[comment.user_id].name }}
-								//- div.small(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 50%)") {{ users[comment.user_id].name }}
-								//- div.small {{ comment.ts }}
-								//- | {{ comment.content }}
-								//- pre {{ comment | json}}
-								//- pre {{ users[comment.user_id] | json }}
-								//- div(ng-if="entry.replying")
-								//- 	textarea(ng-model="entry.replyContent")
-								//- 	a.btn.btn-sm.btn-primary(href, ng-click="submitReply(entry)") Submit
-								//- 	a(href, ng-click="cancelReply(entry)") X
-								//- a.btn.btn-sm.btn-primary(href, ng-click="startReply(entry)", ng-if="!entry.replying") Reply
 								.rp-comment-reply
 									textarea.rp-comment-input(
 										ng-model="entry.replyContent"
 										ng-keypress="handleCommentReplyKeyPress($event, entry);"
 										placeholder="Hit \"Enter\" to reply"
 									)
-
 								.rp-entry-actions
 									a.rp-entry-button(href) 
 										i.fa.fa-check
