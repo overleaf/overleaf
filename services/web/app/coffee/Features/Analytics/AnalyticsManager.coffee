@@ -4,8 +4,16 @@ _ = require "underscore"
 request = require "request"
 
 
+makeRequest: (opts, callback)->
+	if settings.apis?.analytics?.url?
+		request opts, callback
+	else
+		callback()
+
+
 
 module.exports =
+
 
 	recordEvent: (user_id, event, segmentation = {}, callback = (error) ->) ->
 		opts =
