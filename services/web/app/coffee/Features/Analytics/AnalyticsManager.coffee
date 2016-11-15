@@ -16,6 +16,8 @@ module.exports =
 
 
 	recordEvent: (user_id, event, segmentation = {}, callback = (error) ->) ->
+		if user_id == settings.smokeTest?.userId
+			return callback()
 		opts =
 			body:
 				event:event
