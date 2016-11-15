@@ -20,8 +20,6 @@ ProjectGetter = require("./ProjectGetter")
 PrivilegeLevels = require("../Authorization/PrivilegeLevels")
 AuthenticationController = require("../Authentication/AuthenticationController")
 PackageVersions = require("../../infrastructure/PackageVersions")
-BlogHandler = require("../Blog/BlogHandler")
-
 
 module.exports = ProjectController =
 
