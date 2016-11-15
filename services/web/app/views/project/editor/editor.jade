@@ -9,7 +9,7 @@ div.full-size(
 	minimum-restore-size-east="300"
 	allow-overflow-on="'center'"
 )
-	.ui-layout-center(ng-controller="ReviewPanelController", ng-class="{'has-review-panel': ui.reviewPanelOpen}")
+	.ui-layout-center(ng-controller="ReviewPanelController", ng-class="{'has-review-panel': ui.reviewPanelOpen, 'has-entries': reviewPanel.hasEntries }")
 		.loading-panel(ng-show="!editor.sharejs_doc || editor.opening")
 			span(ng-show="editor.open_doc_id")
 				i.fa.fa-spin.fa-refresh

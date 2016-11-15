@@ -60,6 +60,7 @@
 	}
 
 #review-panel {
+	display: none;
 	position: absolute;
 	width: @review-off-width; 
 	top: 0px;
@@ -366,6 +367,22 @@
 	}
 }
 
+.has-entries {
+	#editor {
+		right: @review-off-width;
+		.ace-editor-body {
+			overflow: visible;
+			.ace_scrollbar-v {
+				right: -@review-off-width;
+			}
+		}
+	}
+
+	#review-panel {
+		display: block;
+	}
+}
+
 .has-review-panel {
 	#editor {
 		right: @review-panel-width;
@@ -384,6 +401,7 @@
 	}
 
 	#review-panel {
+		display: block;
 		width: @review-panel-width;
 		overflow: hidden;
 	}
