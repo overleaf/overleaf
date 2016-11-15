@@ -19,11 +19,45 @@
 @rp-type-darkgrey		: #3f3f3f;
 
 @rp-entry-ribbon-width	: 4px;
+@rp-entry-arrow-width	: 4px;
 @rp-semibold-weight		: 600;
 @review-panel-width		: 230px;
 @review-off-width		: 20px;
 
 @rp-scroller-offset		: 30px;
+
+
+.triangle(@_, @width, @height, @color) {
+	position: absolute;
+	border-color: transparent;
+	border-style: solid;
+	width: 0;
+	height: 0;
+}
+	.triangle(top, @width, @height, @color) {
+		border-width: 0 @width/2 @height @width/2;
+		border-bottom-color: @color;
+		border-left-color: transparent;
+		border-right-color: transparent;
+	}
+	.triangle(bottom, @width, @height, @color) {
+		border-width: @height @width/2 0 @width/2;
+		border-top-color: @color;
+		border-left-color: transparent;
+		border-right-color: transparent;
+	}
+	.triangle(right, @width, @height, @color) {
+		border-width: @height/2 0 @height/2 @width;
+		border-left-color: @color;
+		border-top-color: transparent;
+		border-bottom-color: transparent;
+	}
+	.triangle(left, @width, @height, @color) {
+		border-width: @height/2 @width @height/2 0;
+		border-right-color: @color;
+		border-top-color: transparent;
+		border-bottom-color: transparent;
+	}
 
 #review-panel {
 	position: absolute;
@@ -75,8 +109,10 @@
 	border-radius: 3px;
 	color: #FFF;
 	cursor: pointer;
+}
 
-	&:hover + .rp-entry {
+.rp-entry-wrapper {
+	&:hover > .rp-entry {
 		display: block;
 	}
 }
@@ -84,23 +120,31 @@
 .rp-entry {
 	display: none;
 	position: absolute;
-	left: @review-off-width; 
+	left: @review-off-width + @rp-entry-arrow-width;
 	width: @review-panel-width;
 	border-left: solid @rp-entry-ribbon-width transparent;
 	border-radius: 3px;
 	background-color: #FFF;
 	transition: top 0.3s, left 0.1s, right 0.1s;
+	box-shadow: 0 0 10px 5px rgba(0, 0, 0, .2);
+
+	&::before {
+		.triangle(left, @rp-entry-arrow-width, 6px, inherit);
+		top: (@review-off-width / 2) - @rp-entry-arrow-width;
+		left: -(@rp-entry-ribbon-width  + @rp-entry-arrow-width);
+		content: '';
+	}
 
 	&-insert {
-		border-left-color: @rp-green;
+		border-color: @rp-green;
 	}
 
 	&-delete {
-		border-left-color: @rp-red;
+		border-color: @rp-red;
 	}
 
 	&-comment {
-		border-left-color: @rp-yellow;
+		border-color: @rp-yellow;
 	}
 
 	&-focus-position {
@@ -114,12 +158,6 @@
 			border-left-width: 3px;
 			border-left-color: @rp-yellow;
 		}
-	}
-	
-	&-focused {
-		left: 0px;
-		right: 10px;
-		z-index: 1;
 	}
 }
 
@@ -285,7 +323,7 @@
 	width: 3px;
 	border-top: 1px solid grey;
 	border-right: 1px dashed grey;
-	&:after {
+	&::after {
 		content: "";
 		position: absolute;
 		width: 3px;
@@ -298,7 +336,7 @@
 	&-inverted {
 		border-top: none;
 		border-bottom: 1px solid grey;
-		&:after {
+		&::after {
 			top: 0px;
 			bottom: -1px;
 			border-top: 1px solid grey;
@@ -308,21 +346,21 @@
 	
 	&-insert {
 		border-color: @rp-green;
-		&:after {
+		&::after {
 			border-color: @rp-green;
 		}
 	}
 	
 	&-delete {
 		border-color: @rp-red;
-		&:after {
+		&::after {
 			border-color: @rp-red;
 		}
 	}
 	
 	&-comment {
 		border-color: @rp-yellow;
-		&:after {
+		&::after {
 			border-color: @rp-yellow;
 		}
 	}
@@ -362,6 +400,17 @@
 				display: block;
 				left: 5px;
 				right: 5px;
+				box-shadow: none;
+
+				&::before {
+					content: none;
+				}
+
+				&-focused {
+					left: 0px;
+					right: 10px;
+					z-index: 1;
+				}
 			}
 
 			.rp-entry-indicator {
