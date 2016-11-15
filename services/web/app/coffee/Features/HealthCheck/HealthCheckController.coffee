@@ -64,7 +64,7 @@ Reporter = (res) ->
 			res.contentType("application/json")
 			if failures.length > 0
 				logger.err failures:failures, "health check failed"
-				res.send 500, JSON.stringify(results, null, 2)
+				res.status(500).send(JSON.stringify(results, null, 2))
 			else
-				res.send 200, JSON.stringify(results, null, 2)
+				res.status(200).send(JSON.stringify(results, null, 2))
 
