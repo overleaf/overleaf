@@ -7,7 +7,8 @@ define [
 		$scope.reviewPanel =
 			entries: {}
 			trackNewChanges: false
-		
+			hasEntries: false
+
 		$scope.commentState =
 			adding: false
 			content: ""
@@ -50,6 +51,9 @@ define [
 			else
 				scroller.off "scroll"
 				$scope.onScroll = null
+
+		$scope.$watch (() -> Object.keys($scope.reviewPanel.entries).length), (nEntries) ->
+			$scope.reviewPanel.hasEntries = nEntries > 0
 
 		# If we listen for scroll events in the review panel natively, then with a Mac trackpad
 		# the scroll is very smooth (natively done I'd guess), but we don't get polled regularly
