@@ -59,6 +59,8 @@ define [
 			else
 				scroller.off "scroll"
 				$scope.onScroll = null
+			$timeout () ->
+				$scope.$broadcast "review-panel:toggle"
 
 		$scope.$watch (() -> Object.keys($scope.reviewPanel.entries).length), (nEntries) ->
 			$scope.reviewPanel.hasEntries = nEntries > 0
