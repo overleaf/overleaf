@@ -308,7 +308,9 @@ define [
 			@$scope.$apply()
 	
 		_getCurrentDocEntries: () ->
-			return @$scope.reviewPanel.entries
+			doc_id = @$scope.docId
+			entries = @$scope.reviewPanel.entries[doc_id] ?= {}
+			return entries
 
 		_makeZeroWidthRange: (position) ->
 			ace_range = new Range(position.row, position.column, position.row, position.column)
