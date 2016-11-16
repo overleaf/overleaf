@@ -31,41 +31,23 @@
 				.rp-entry(
 					ng-class="[ 'rp-entry-' + entry.type, (commentState.adding ? 'rp-entry-adding-comment' : ''), (entry.focused ? 'rp-entry-focused' : '')]"
 				)
-					div(ng-if="entry.type == 'insert' || entry.type == 'delete'")
+					div(ng-if="entry.type === 'insert' || entry.type === 'delete'")
 						change-entry(
 							entry="entry"
-							author="users[entry.metadata.user_id]"
+							user="users[entry.metadata.user_id]"
 							on-reject="rejectChange(entry_id);"
 							on-accept="acceptChange(entry_id);"
 						)
 
-					div(ng-if="entry.type == 'comment'")
-						.rp-comment(
-							ng-repeat="comment in entry.thread"
-							ng-class="users[comment.user_id].isSelf ? 'rp-comment-self' : '';"
+					div(ng-if="entry.type === 'comment'")
+						comment-entry(
+							entry="entry"
+							users="users"
+							on-resolve=""
+							on-reply="submitReply(entry);"
 						)
-							.rp-avatar(
-								ng-if="!users[comment.user_id].isSelf;"
-								style="background-color: hsl({{ users[comment.user_id].hue }}, 70%, 50%);"
-							) {{ users[comment.user_id].avatar_text }}
-							.rp-comment-body(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 90%);")
-								p.rp-comment-content {{ comment.content }}
-								p.rp-comment-metadata
-									| {{ comment.ts | date : 'MMM d, y h:mm a' }}
-									| &nbsp;&bull;&nbsp;
-									span(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 40%);") {{ users[comment.user_id].name }}
-						.rp-comment-reply
-							textarea.rp-comment-input(
-								ng-model="entry.replyContent"
-								ng-keypress="handleCommentReplyKeyPress($event, entry);"
-								placeholder="Hit \"Enter\" to reply"
-							)
-						.rp-entry-actions
-							a.rp-entry-button(href) 
-								i.fa.fa-check
-								| &nbsp;Mark as resolved
 					
-					div(ng-if="entry.type == 'add-comment'")
+					div(ng-if="entry.type === 'add-comment'")
 						a.rp-add-comment-btn(
 							href
 							ng-if="!commentState.adding"
@@ -212,9 +194,9 @@ script(type='text/ng-template', id='changeEntryTemplate')
 			i.fa.fa-pencil(ng-switch-when="insert")
 			i.rp-icon-delete(ng-switch-when="delete")
 		.rp-entry-metadata
-			p.rp-entry-metadata-line(style="color: hsl({{ author.hue }}, 70%, 50%);") {{ author.name }} 
+			p.rp-entry-metadata-line(style="color: hsl({{ user.hue }}, 70%, 50%);") {{ user.name }} 
 			p.rp-entry-metadata-line {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}
-		.rp-avatar(style="background-color: hsl({{ author.hue }}, 70%, 50%);") {{ author.avatar_text }}
+		.rp-avatar(style="background-color: hsl({{ user.hue }}, 70%, 50%);") {{ user.avatar_text }}
 	.rp-entry-body(ng-switch="entry.type")
 			span(ng-switch-when="insert") Added&nbsp;
 				ins.rp-content-highlight {{ entry.content }} 
@@ -229,3 +211,27 @@ script(type='text/ng-template', id='changeEntryTemplate')
 			| &nbsp;Accept
 
 script(type='text/ng-template', id='commentEntryTemplate')
+	.rp-comment(
+		ng-repeat="comment in entry.thread"
+		ng-class="users[comment.user_id].isSelf ? 'rp-comment-self' : '';"
+	)
+		.rp-avatar(
+			ng-if="!users[comment.user_id].isSelf;"
+			style="background-color: hsl({{ users[comment.user_id].hue }}, 70%, 50%);"
+		) {{ users[comment.user_id].avatar_text }}
+		.rp-comment-body(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 90%);")
+			p.rp-comment-content {{ comment.content }}
+			p.rp-comment-metadata
+				| {{ comment.ts | date : 'MMM d, y h:mm a' }}
+				| &nbsp;&bull;&nbsp;
+				span(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 40%);") {{ users[comment.user_id].name }}
+	.rp-comment-reply
+		textarea.rp-comment-input(
+			ng-model="entry.replyContent"
+			ng-keypress="handleCommentReplyKeyPress($event);"
+			placeholder="Hit \"Enter\" to reply"
+		)
+	.rp-entry-actions
+		a.rp-entry-button(href, ng-click="onResolve();") 
+			i.fa.fa-check
+			| &nbsp;Mark as resolved

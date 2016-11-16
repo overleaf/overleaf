@@ -6,7 +6,7 @@ define [
 		templateUrl: "changeEntryTemplate"
 		scope: 
 			entry: "="
-			author: "="
+			user: "="
 			onAccept: "&"
 			onReject: "&"
 		
