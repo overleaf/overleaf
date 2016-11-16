@@ -36,6 +36,12 @@ define [
 		#TODO: Doesn't work anymore now entries is first indexed by doc_id
 		$scope.$watch (() -> Object.keys($scope.reviewPanel.entries).length), (nEntries) ->
 			$scope.reviewPanel.hasEntries = nEntries > 0
+
+		$scope.$watch "ui.reviewPanelOpen", (reviewPanelOpen) ->
+			return if !reviewPanelOpen?
+			$timeout () ->
+				$scope.$broadcast "review-panel:toggle"
+				$scope.$broadcast "review-panel:layout"
 		
 		$scope.acceptChange = (entry_id) ->
 			$scope.$broadcast "change:accept", entry_id

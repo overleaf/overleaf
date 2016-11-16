@@ -126,10 +126,4 @@ define [
 
 				scroller.on "scroll", scrollAce
 				scope.scrollBindings.onAceScroll = scrollPanel
-
-				scope.$watch "ui.reviewPanelOpen", (reviewPanelOpen) ->
-					return if !reviewPanelOpen?
-					$timeout () ->
-						scope.$broadcast "review-panel:toggle"
-						scope.$broadcast "review-panel:layout"
 		}
