@@ -33,9 +33,11 @@ define [
 		# TODO Just for prototyping purposes; remove afterwards.
 		mockedUserId = '12345abc'
 
-		#TODO: Doesn't work anymore now entries is first indexed by doc_id
-		$scope.$watch (() -> Object.keys($scope.reviewPanel.entries).length), (nEntries) ->
-			$scope.reviewPanel.hasEntries = nEntries > 0
+		$scope.$watch (() ->
+			entries = $scope.reviewPanel.entries[$scope.editor.open_doc_id] or {}
+			Object.keys(entries).length
+		), (nEntries) ->
+			$scope.reviewPanel.hasEntries = nEntries > 0 and $scope.trackChangesFeatureFlag
 
 		$scope.$watch "ui.reviewPanelOpen", (reviewPanelOpen) ->
 			return if !reviewPanelOpen?
