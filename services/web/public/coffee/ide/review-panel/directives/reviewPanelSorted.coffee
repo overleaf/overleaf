@@ -4,18 +4,16 @@ define [
 	App.directive "reviewPanelSorted", ($timeout) ->
 		return  {
 			link: (scope, element, attrs) ->
-				TOOLBAR_HEIGHT = 28
-				BOX_PADDING = 12
-				INDICATOR_PADDING = 4
-				
 				previous_focused_entry_index = 0
 				
 				layout = () ->
 					sl_console.log "LAYOUT"
 					if scope.ui.reviewPanelOpen
-						PADDING = BOX_PADDING
+						PADDING = 8
+						TOOLBAR_HEIGHT = 38
 					else
-						PADDING = INDICATOR_PADDING
+						PADDING = 4
+						TOOLBAR_HEIGHT = 4
 					
 					entries = []
 					for el in element.find(".rp-entry-wrapper")

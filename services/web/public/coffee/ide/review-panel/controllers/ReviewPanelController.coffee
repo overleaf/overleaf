@@ -46,23 +46,27 @@ define [
 		$scope.startNewComment = () ->
 			# $scope.commentState.adding = true
 			$scope.$broadcast "comment:select_line"
-			$scope.$broadcast "review-panel:layout"
+			$timeout () ->
+				$scope.$broadcast "review-panel:layout"
 		
 		$scope.submitNewComment = (content) ->
 			console.log(content)
 			# $scope.commentState.adding = false
 			$scope.$broadcast "comment:add", content
 			# $scope.commentState.content = ""
-			$scope.$broadcast "review-panel:layout"
+			$timeout () ->
+				$scope.$broadcast "review-panel:layout"
 		
 		$scope.cancelNewComment = (entry) ->
 			# $scope.commentState.adding = false
 			# $scope.commentState.content = ""
-			$scope.$broadcast "review-panel:layout"
+			$timeout () ->
+				$scope.$broadcast "review-panel:layout"
 		
 		$scope.startReply = (entry) ->
 			entry.replying = true
-			$scope.$broadcast "review-panel:layout"
+			$timeout () ->
+				$scope.$broadcast "review-panel:layout"
 
 		# $scope.handleCommentReplyKeyPress = (ev, entry) ->
 		# 	if ev.keyCode == 13 and !ev.shiftKey and !ev.ctrlKey and !ev.metaKey
