@@ -10,10 +10,6 @@
 			.rp-entry-wrapper(
 				ng-repeat="(entry_id, entry) in reviewPanel.entries[editor.open_doc_id]"
 			)
-				.rp-entry-callout(
-					ng-class="'rp-entry-callout-' + entry.type"
-				)
-
 				div(ng-if="entry.type === 'insert' || entry.type === 'delete'")
 					change-entry(
 						entry="entry"
@@ -161,6 +157,9 @@
 
 script(type='text/ng-template', id='changeEntryTemplate')
 	div
+		.rp-entry-callout(
+			ng-class="'rp-entry-callout-' + entry.type"
+		)
 		.rp-entry-indicator(
 			ng-switch="entry.type"
 			ng-class="{ 'rp-entry-indicator-focused': entry.focused }"
@@ -194,6 +193,7 @@ script(type='text/ng-template', id='changeEntryTemplate')
 
 script(type='text/ng-template', id='commentEntryTemplate')
 	div
+		.rp-entry-callout.rp-entry-callout-comment
 		.rp-entry-indicator(
 			ng-class="{ 'rp-entry-indicator-focused': entry.focused }"
 			ng-click="onIndicatorClick();"
@@ -229,6 +229,7 @@ script(type='text/ng-template', id='commentEntryTemplate')
 
 script(type='text/ng-template', id='addCommentEntryTemplate')
 	div
+		.rp-entry-callout.rp-entry-callout-add-comment
 		.rp-entry-indicator(
 			ng-if="!commentState.adding"
 			ng-click="startNewComment(); onIndicatorClick();"
