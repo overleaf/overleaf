@@ -315,15 +315,14 @@ define [
 			ace_range = new Range(position.row, position.column, position.row, position.column)
 			# Our delete marker is zero characters wide, but Ace doesn't draw ranges
 			# that are empty. So we monkey patch the range to tell Ace it's not empty.
+			# We do want to claim to be empty if we're off screen after clipping rows though.
 			# This is the code we need to trick:
 			#   var range = marker.range.clipRows(config.firstRow, config.lastRow);
 			#   if (range.isEmpty()) continue;
-			_clipRows = ace_range.clipRows
-			ace_range.clipRows = (args...) ->
-				range = _clipRows.apply(ace_range, args)
-				range.isEmpty = () ->
-					false
-				return range
+			ace_range.clipRows = (first_row, last_row) ->
+				@isEmpty = () ->
+					first_row > @end.row or last_row < @start.row
+				return @
 			return ace_range
 		
 		_createCalloutMarker: (position, klass) ->
