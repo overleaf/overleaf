@@ -8,6 +8,7 @@ define [
 		
 		constructor: (@$scope, @editor, @element) ->
 			window.trackChangesManager ?= @
+			@$scope.reviewPanel.entries = {}
 			
 			@$scope.$watch "changesTracker", (changesTracker) =>
 				return if !changesTracker?
@@ -84,7 +85,6 @@ define [
 		
 		disconnectFromChangesTracker: () ->
 			@changeIdToMarkerIdMap = {}
-			@$scope.reviewPanel.entries = {}
 
 			if @changesTracker?
 				@changesTracker.off "insert:added"
