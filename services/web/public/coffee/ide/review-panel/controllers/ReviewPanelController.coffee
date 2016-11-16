@@ -44,19 +44,20 @@ define [
 			$scope.$broadcast "change:reject", entry_id
 		
 		$scope.startNewComment = () ->
-			$scope.commentState.adding = true
+			# $scope.commentState.adding = true
 			$scope.$broadcast "comment:select_line"
 			$scope.$broadcast "review-panel:layout"
 		
-		$scope.submitNewComment = () ->
-			$scope.commentState.adding = false
-			$scope.$broadcast "comment:add", $scope.commentState.content
-			$scope.commentState.content = ""
+		$scope.submitNewComment = (content) ->
+			console.log(content)
+			# $scope.commentState.adding = false
+			$scope.$broadcast "comment:add", content
+			# $scope.commentState.content = ""
 			$scope.$broadcast "review-panel:layout"
 		
 		$scope.cancelNewComment = (entry) ->
-			$scope.commentState.adding = false
-			$scope.commentState.content = ""
+			# $scope.commentState.adding = false
+			# $scope.commentState.content = ""
 			$scope.$broadcast "review-panel:layout"
 		
 		$scope.startReply = (entry) ->

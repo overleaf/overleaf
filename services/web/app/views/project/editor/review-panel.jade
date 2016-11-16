@@ -28,46 +28,28 @@
 					)
 						i.fa.fa-commenting
 
-				.rp-entry(
-					ng-class="[ 'rp-entry-' + entry.type, (commentState.adding ? 'rp-entry-adding-comment' : ''), (entry.focused ? 'rp-entry-focused' : '')]"
-				)
-					div(ng-if="entry.type === 'insert' || entry.type === 'delete'")
-						change-entry(
-							entry="entry"
-							user="users[entry.metadata.user_id]"
-							on-reject="rejectChange(entry_id);"
-							on-accept="acceptChange(entry_id);"
-						)
+				div(ng-if="entry.type === 'insert' || entry.type === 'delete'")
+					change-entry(
+						entry="entry"
+						user="users[entry.metadata.user_id]"
+						on-reject="rejectChange(entry_id);"
+						on-accept="acceptChange(entry_id);"
+					)
 
-					div(ng-if="entry.type === 'comment'")
-						comment-entry(
-							entry="entry"
-							users="users"
-							on-resolve=""
-							on-reply="submitReply(entry);"
-						)
-					
-					div(ng-if="entry.type === 'add-comment'")
-						a.rp-add-comment-btn(
-							href
-							ng-if="!commentState.adding"
-							ng-click="startNewComment()"
-						) 
-							i.fa.fa-comment
-							| &nbsp;Add comment
-						div(ng-if="commentState.adding")
-							.rp-new-comment
-								textarea.rp-comment-input(
-									ng-model="commentState.content"
-									placeholder="Add your comment here"
-								)
-							.rp-entry-actions
-								a.rp-entry-button(href, ng-click="cancelNewComment()") 
-									i.fa.fa-times
-									| &nbsp;Cancel
-								a.rp-entry-button(href, ng-click="submitNewComment()") 
-									i.fa.fa-comment
-									| &nbsp;Comment
+				div(ng-if="entry.type === 'comment'")
+					comment-entry(
+						entry="entry"
+						users="users"
+						on-resolve=""
+						on-reply="submitReply(entry);"
+					)
+				
+				div(ng-if="entry.type === 'add-comment'")
+					add-comment-entry(
+						on-start-new="startNewComment();"
+						on-submit="submitNewComment(content);"
+						on-cancel="cancelNewComment();"
+					)
 
 		.rp-overview-entry-list(
 			ng-if="reviewPanel.subView === SubViews.OVERVIEW"
@@ -189,49 +171,81 @@
 
 
 script(type='text/ng-template', id='changeEntryTemplate')
-	.rp-entry-header
-		.rp-entry-action-icon(ng-switch="entry.type")
-			i.fa.fa-pencil(ng-switch-when="insert")
-			i.rp-icon-delete(ng-switch-when="delete")
-		.rp-entry-metadata
-			p.rp-entry-metadata-line(style="color: hsl({{ user.hue }}, 70%, 50%);") {{ user.name }} 
-			p.rp-entry-metadata-line {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}
-		.rp-avatar(style="background-color: hsl({{ user.hue }}, 70%, 50%);") {{ user.avatar_text }}
-	.rp-entry-body(ng-switch="entry.type")
-			span(ng-switch-when="insert") Added&nbsp;
-				ins.rp-content-highlight {{ entry.content }} 
-			span(ng-switch-when="delete") Deleted&nbsp;
-				del.rp-content-highlight {{ entry.content }} 
-	.rp-entry-actions
-		a.rp-entry-button(href, ng-click="onReject();") 
-			i.fa.fa-times
-			| &nbsp;Reject
-		a.rp-entry-button(href, ng-click="onAccept();") 
-			i.fa.fa-check
-			| &nbsp;Accept
+	.rp-entry(
+		ng-class="[ 'rp-entry-' + entry.type, (entry.focused ? 'rp-entry-focused' : '')]"
+	)
+		.rp-entry-header
+			.rp-entry-action-icon(ng-switch="entry.type")
+				i.fa.fa-pencil(ng-switch-when="insert")
+				i.rp-icon-delete(ng-switch-when="delete")
+			.rp-entry-metadata
+				p.rp-entry-metadata-line(style="color: hsl({{ user.hue }}, 70%, 50%);") {{ user.name }} 
+				p.rp-entry-metadata-line {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}
+			.rp-avatar(style="background-color: hsl({{ user.hue }}, 70%, 50%);") {{ user.avatar_text }}
+		.rp-entry-body(ng-switch="entry.type")
+				span(ng-switch-when="insert") Added&nbsp;
+					ins.rp-content-highlight {{ entry.content }} 
+				span(ng-switch-when="delete") Deleted&nbsp;
+					del.rp-content-highlight {{ entry.content }} 
+		.rp-entry-actions
+			a.rp-entry-button(href, ng-click="onReject();") 
+				i.fa.fa-times
+				| &nbsp;Reject
+			a.rp-entry-button(href, ng-click="onAccept();") 
+				i.fa.fa-check
+				| &nbsp;Accept
 
 script(type='text/ng-template', id='commentEntryTemplate')
-	.rp-comment(
-		ng-repeat="comment in entry.thread"
-		ng-class="users[comment.user_id].isSelf ? 'rp-comment-self' : '';"
+	.rp-entry.rp-entry-comment(
+		ng-class="entry.focused ? 'rp-entry-focused' : '';"
 	)
-		.rp-avatar(
-			ng-if="!users[comment.user_id].isSelf;"
-			style="background-color: hsl({{ users[comment.user_id].hue }}, 70%, 50%);"
-		) {{ users[comment.user_id].avatar_text }}
-		.rp-comment-body(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 90%);")
-			p.rp-comment-content {{ comment.content }}
-			p.rp-comment-metadata
-				| {{ comment.ts | date : 'MMM d, y h:mm a' }}
-				| &nbsp;&bull;&nbsp;
-				span(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 40%);") {{ users[comment.user_id].name }}
-	.rp-comment-reply
-		textarea.rp-comment-input(
-			ng-model="entry.replyContent"
-			ng-keypress="handleCommentReplyKeyPress($event);"
-			placeholder="Hit \"Enter\" to reply"
+		.rp-comment(
+			ng-repeat="comment in entry.thread"
+			ng-class="users[comment.user_id].isSelf ? 'rp-comment-self' : '';"
 		)
-	.rp-entry-actions
-		a.rp-entry-button(href, ng-click="onResolve();") 
-			i.fa.fa-check
-			| &nbsp;Mark as resolved
+			.rp-avatar(
+				ng-if="!users[comment.user_id].isSelf;"
+				style="background-color: hsl({{ users[comment.user_id].hue }}, 70%, 50%);"
+			) {{ users[comment.user_id].avatar_text }}
+			.rp-comment-body(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 90%);")
+				p.rp-comment-content {{ comment.content }}
+				p.rp-comment-metadata
+					| {{ comment.ts | date : 'MMM d, y h:mm a' }}
+					| &nbsp;&bull;&nbsp;
+					span(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 40%);") {{ users[comment.user_id].name }}
+		.rp-comment-reply
+			textarea.rp-comment-input(
+				ng-model="entry.replyContent"
+				ng-keypress="handleCommentReplyKeyPress($event);"
+				placeholder="Hit \"Enter\" to reply"
+			)
+		.rp-entry-actions
+			a.rp-entry-button(href, ng-click="onResolve();") 
+				i.fa.fa-check
+				| &nbsp;Mark as resolved
+
+script(type='text/ng-template', id='addCommentEntryTemplate')
+	.rp-entry.rp-entry-add-comment(
+		ng-class="[ (state.isAdding ? 'rp-entry-adding-comment' : ''), (entry.focused ? 'rp-entry-focused' : '')]"
+	)
+		a.rp-add-comment-btn(
+			href
+			ng-if="!state.isAdding"
+			ng-click="startNewComment();"
+		) 
+			i.fa.fa-comment
+			| &nbsp;Add comment
+		div(ng-if="state.isAdding")
+			.rp-new-comment
+				textarea.rp-comment-input(
+					ng-model="state.content"
+					ng-keypress="handleCommentKeyPress($event);"
+					placeholder="Add your comment here"
+				)
+			.rp-entry-actions
+				a.rp-entry-button(href, ng-click="cancelNewComment();") 
+					i.fa.fa-times
+					| &nbsp;Cancel
+				a.rp-entry-button(href, ng-click="submitNewComment()") 
+					i.fa.fa-comment
+					| &nbsp;Comment
