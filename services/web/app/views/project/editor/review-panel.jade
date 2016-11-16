@@ -32,27 +32,13 @@
 					ng-class="[ 'rp-entry-' + entry.type, (commentState.adding ? 'rp-entry-adding-comment' : ''), (entry.focused ? 'rp-entry-focused' : '')]"
 				)
 					div(ng-if="entry.type == 'insert' || entry.type == 'delete'")
-						.rp-entry-header
-							.rp-entry-action-icon(ng-switch="entry.type")
-								i.fa.fa-pencil(ng-switch-when="insert")
-								i.rp-icon-delete(ng-switch-when="delete")
+						change-entry(
+							entry="entry"
+							author="users[entry.metadata.user_id]"
+							on-reject="rejectChange(entry_id);"
+							on-accept="acceptChange(entry_id);"
+						)
 
-							.rp-entry-metadata
-								p.rp-entry-metadata-line(style="color: hsl({{ users[entry.metadata.user_id].hue }}, 70%, 50%);") {{ users[entry.metadata.user_id].name }} 
-								p.rp-entry-metadata-line {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}
-							.rp-avatar(style="background-color: hsl({{ users[entry.metadata.user_id].hue }}, 70%, 50%);") {{ users[entry.metadata.user_id].avatar_text }}
-						.rp-entry-body(ng-switch="entry.type")
-								span(ng-switch-when="insert") Added&nbsp;
-									ins.rp-content-highlight {{ entry.content }} 
-								span(ng-switch-when="delete") Deleted&nbsp;
-									del.rp-content-highlight {{ entry.content }} 
-						.rp-entry-actions
-							a.rp-entry-button(href, ng-click="rejectChange(entry_id)") 
-								i.fa.fa-times
-								| &nbsp;Reject
-							a.rp-entry-button(href, ng-click="acceptChange(entry_id)") 
-								i.fa.fa-check
-								| &nbsp;Accept
 					div(ng-if="entry.type == 'comment'")
 						.rp-comment(
 							ng-repeat="comment in entry.thread"
@@ -221,5 +207,25 @@
 
 
 script(type='text/ng-template', id='changeEntryTemplate')
+	.rp-entry-header
+		.rp-entry-action-icon(ng-switch="entry.type")
+			i.fa.fa-pencil(ng-switch-when="insert")
+			i.rp-icon-delete(ng-switch-when="delete")
+		.rp-entry-metadata
+			p.rp-entry-metadata-line(style="color: hsl({{ author.hue }}, 70%, 50%);") {{ author.name }} 
+			p.rp-entry-metadata-line {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}
+		.rp-avatar(style="background-color: hsl({{ author.hue }}, 70%, 50%);") {{ author.avatar_text }}
+	.rp-entry-body(ng-switch="entry.type")
+			span(ng-switch-when="insert") Added&nbsp;
+				ins.rp-content-highlight {{ entry.content }} 
+			span(ng-switch-when="delete") Deleted&nbsp;
+				del.rp-content-highlight {{ entry.content }} 
+	.rp-entry-actions
+		a.rp-entry-button(href, ng-click="onReject();") 
+			i.fa.fa-times
+			| &nbsp;Reject
+		a.rp-entry-button(href, ng-click="onAccept();") 
+			i.fa.fa-check
+			| &nbsp;Accept
 
 script(type='text/ng-template', id='commentEntryTemplate')
