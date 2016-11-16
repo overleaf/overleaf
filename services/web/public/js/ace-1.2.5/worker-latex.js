@@ -1813,7 +1813,7 @@ var CheckEnvironments = function (Environments, ErrorReporter) {
     var verbatimRanges = [];
     for (var i = 0, len = Environments.length; i < len; i++) {
         var name = Environments[i].name ;
-        if (name && name.match(/^(verbatim|boxedverbatim|lstlisting)$/)) {
+        if (name && name.match(/^(verbatim|boxedverbatim|lstlisting|minted)$/)) {
             Environments[i].verbatim = true;
         }
     }
