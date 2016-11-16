@@ -8,6 +8,7 @@ define [
 			onStartNew: "&"
 			onSubmit: "&"
 			onCancel: "&"
+			onIndicatorClick: "&"
 		link: (scope, element, attrs) ->
 			scope.state =
 				isAdding: false
