@@ -8,8 +8,7 @@ define [
 		
 		constructor: (@$scope, @editor, @element) ->
 			window.trackChangesManager ?= @
-			@$scope.reviewPanel.entries = {}
-			
+
 			@$scope.$watch "changesTracker", (changesTracker) =>
 				return if !changesTracker?
 				@disconnectFromChangesTracker()
