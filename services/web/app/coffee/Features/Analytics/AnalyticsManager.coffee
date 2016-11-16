@@ -4,8 +4,10 @@ _ = require "underscore"
 request = require "request"
 
 
-makeRequest: (opts, callback)->
+makeRequest = (opts, callback)->
 	if settings.apis?.analytics?.url?
+		urlPath = opts.url
+		opts.url = "#{settings.apis.analytics.url}#{urlPath}"
 		request opts, callback
 	else
 		callback()
@@ -25,7 +27,7 @@ module.exports =
 			json:true
 			method:"POST"
 			timeout:1000
-			url: "#{settings.apis.analytics.url}/user/#{user_id}/event"
+			url: "/user/#{user_id}/event"
 		makeRequest opts, callback
 
 
@@ -36,7 +38,7 @@ module.exports =
 			json:true
 			method:"POST"
 			timeout:1000
-			url: "#{settings.apis.analytics.url}/user/#{user_id}/event/last_occurnace"
+			url: "/user/#{user_id}/event/last_occurnace"
 		makeRequest opts, (err, response, body)->
 			if err? 
 				console.log response, opts
