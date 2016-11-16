@@ -10,30 +10,13 @@
 			.rp-entry-wrapper(
 				ng-repeat="(entry_id, entry) in reviewPanel.entries[editor.open_doc_id]"
 			)
-				.rp-entry-callout(
-					ng-class="'rp-entry-callout-' + entry.type"
-				)
-
-				div(ng-switch="entry.type")
-					.rp-entry-indicator(ng-switch-when="insert", ng-class="{ 'rp-entry-indicator-focused': entry.focused }")
-						i.fa.fa-pencil
-					.rp-entry-indicator(ng-switch-when="delete", ng-class="{ 'rp-entry-indicator-focused': entry.focused }")
-						i.rp-icon-delete
-					.rp-entry-indicator(ng-switch-when="comment", ng-class="{ 'rp-entry-indicator-focused': entry.focused }")
-						i.fa.fa-comment
-					.rp-entry-indicator(
-						ng-switch-when="add-comment"
-						ng-if="!commentState.adding"
-						ng-click="startNewComment(); toggleReviewPanel();"
-					)
-						i.fa.fa-commenting
-
 				div(ng-if="entry.type === 'insert' || entry.type === 'delete'")
 					change-entry(
 						entry="entry"
 						user="users[entry.metadata.user_id]"
 						on-reject="rejectChange(entry_id);"
 						on-accept="acceptChange(entry_id);"
+						on-indicator-click="toggleReviewPanel();"
 					)
 
 				div(ng-if="entry.type === 'comment'")
@@ -42,6 +25,7 @@
 						users="users"
 						on-resolve=""
 						on-reply="submitReply(entry);"
+						on-indicator-click="toggleReviewPanel();"
 					)
 				
 				div(ng-if="entry.type === 'add-comment'")
@@ -49,6 +33,7 @@
 						on-start-new="startNewComment();"
 						on-submit="submitNewComment(content);"
 						on-cancel="cancelNewComment();"
+						on-indicator-click="toggleReviewPanel();"
 					)
 
 		.rp-overview-entry-list(
@@ -171,81 +156,106 @@
 
 
 script(type='text/ng-template', id='changeEntryTemplate')
-	.rp-entry(
-		ng-class="[ 'rp-entry-' + entry.type, (entry.focused ? 'rp-entry-focused' : '')]"
-	)
-		.rp-entry-header
-			.rp-entry-action-icon(ng-switch="entry.type")
-				i.fa.fa-pencil(ng-switch-when="insert")
-				i.rp-icon-delete(ng-switch-when="delete")
-			.rp-entry-metadata
-				p.rp-entry-metadata-line(style="color: hsl({{ user.hue }}, 70%, 50%);") {{ user.name }} 
-				p.rp-entry-metadata-line {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}
-			.rp-avatar(style="background-color: hsl({{ user.hue }}, 70%, 50%);") {{ user.avatar_text }}
-		.rp-entry-body(ng-switch="entry.type")
-				span(ng-switch-when="insert") Added&nbsp;
-					ins.rp-content-highlight {{ entry.content }} 
-				span(ng-switch-when="delete") Deleted&nbsp;
-					del.rp-content-highlight {{ entry.content }} 
-		.rp-entry-actions
-			a.rp-entry-button(href, ng-click="onReject();") 
-				i.fa.fa-times
-				| &nbsp;Reject
-			a.rp-entry-button(href, ng-click="onAccept();") 
-				i.fa.fa-check
-				| &nbsp;Accept
+	div
+		.rp-entry-callout(
+			ng-class="'rp-entry-callout-' + entry.type"
+		)
+		.rp-entry-indicator(
+			ng-switch="entry.type"
+			ng-class="{ 'rp-entry-indicator-focused': entry.focused }"
+			ng-click="onIndicatorClick();"
+		)
+			i.fa.fa-pencil(ng-switch-when="insert")
+			i.rp-icon-delete(ng-switch-when="delete")
+		.rp-entry(
+			ng-class="[ 'rp-entry-' + entry.type, (entry.focused ? 'rp-entry-focused' : '')]"
+		)
+			.rp-entry-header
+				.rp-entry-action-icon(ng-switch="entry.type")
+					i.fa.fa-pencil(ng-switch-when="insert")
+					i.rp-icon-delete(ng-switch-when="delete")
+				.rp-entry-metadata
+					p.rp-entry-metadata-line(style="color: hsl({{ user.hue }}, 70%, 50%);") {{ user.name }} 
+					p.rp-entry-metadata-line {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}
+				.rp-avatar(style="background-color: hsl({{ user.hue }}, 70%, 50%);") {{ user.avatar_text }}
+			.rp-entry-body(ng-switch="entry.type")
+					span(ng-switch-when="insert") Added&nbsp;
+						ins.rp-content-highlight {{ entry.content }} 
+					span(ng-switch-when="delete") Deleted&nbsp;
+						del.rp-content-highlight {{ entry.content }} 
+			.rp-entry-actions
+				a.rp-entry-button(href, ng-click="onReject();") 
+					i.fa.fa-times
+					| &nbsp;Reject
+				a.rp-entry-button(href, ng-click="onAccept();") 
+					i.fa.fa-check
+					| &nbsp;Accept
 
 script(type='text/ng-template', id='commentEntryTemplate')
-	.rp-entry.rp-entry-comment(
-		ng-class="entry.focused ? 'rp-entry-focused' : '';"
-	)
-		.rp-comment(
-			ng-repeat="comment in entry.thread"
-			ng-class="users[comment.user_id].isSelf ? 'rp-comment-self' : '';"
+	div
+		.rp-entry-callout.rp-entry-callout-comment
+		.rp-entry-indicator(
+			ng-class="{ 'rp-entry-indicator-focused': entry.focused }"
+			ng-click="onIndicatorClick();"
 		)
-			.rp-avatar(
-				ng-if="!users[comment.user_id].isSelf;"
-				style="background-color: hsl({{ users[comment.user_id].hue }}, 70%, 50%);"
-			) {{ users[comment.user_id].avatar_text }}
-			.rp-comment-body(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 90%);")
-				p.rp-comment-content {{ comment.content }}
-				p.rp-comment-metadata
-					| {{ comment.ts | date : 'MMM d, y h:mm a' }}
-					| &nbsp;&bull;&nbsp;
-					span(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 40%);") {{ users[comment.user_id].name }}
-		.rp-comment-reply
-			textarea.rp-comment-input(
-				ng-model="entry.replyContent"
-				ng-keypress="handleCommentReplyKeyPress($event);"
-				placeholder="Hit \"Enter\" to reply"
-			)
-		.rp-entry-actions
-			a.rp-entry-button(href, ng-click="onResolve();") 
-				i.fa.fa-check
-				| &nbsp;Mark as resolved
-
-script(type='text/ng-template', id='addCommentEntryTemplate')
-	.rp-entry.rp-entry-add-comment(
-		ng-class="[ (state.isAdding ? 'rp-entry-adding-comment' : ''), (entry.focused ? 'rp-entry-focused' : '')]"
-	)
-		a.rp-add-comment-btn(
-			href
-			ng-if="!state.isAdding"
-			ng-click="startNewComment();"
-		) 
 			i.fa.fa-comment
-			| &nbsp;Add comment
-		div(ng-if="state.isAdding")
-			.rp-new-comment
+		.rp-entry.rp-entry-comment(
+			ng-class="entry.focused ? 'rp-entry-focused' : '';"
+		)
+			.rp-comment(
+				ng-repeat="comment in entry.thread"
+				ng-class="users[comment.user_id].isSelf ? 'rp-comment-self' : '';"
+			)
+				.rp-avatar(
+					ng-if="!users[comment.user_id].isSelf;"
+					style="background-color: hsl({{ users[comment.user_id].hue }}, 70%, 50%);"
+				) {{ users[comment.user_id].avatar_text }}
+				.rp-comment-body(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 90%);")
+					p.rp-comment-content {{ comment.content }}
+					p.rp-comment-metadata
+						| {{ comment.ts | date : 'MMM d, y h:mm a' }}
+						| &nbsp;&bull;&nbsp;
+						span(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 40%);") {{ users[comment.user_id].name }}
+			.rp-comment-reply
 				textarea.rp-comment-input(
-					ng-model="state.content"
-					ng-keypress="handleCommentKeyPress($event);"
-					placeholder="Add your comment here"
+					ng-model="entry.replyContent"
+					ng-keypress="handleCommentReplyKeyPress($event);"
+					placeholder="Hit \"Enter\" to reply"
 				)
 			.rp-entry-actions
-				a.rp-entry-button(href, ng-click="cancelNewComment();") 
-					i.fa.fa-times
-					| &nbsp;Cancel
-				a.rp-entry-button(href, ng-click="submitNewComment()") 
-					i.fa.fa-comment
-					| &nbsp;Comment
+				a.rp-entry-button(href, ng-click="onResolve();") 
+					i.fa.fa-check
+					| &nbsp;Mark as resolved
+
+script(type='text/ng-template', id='addCommentEntryTemplate')
+	div
+		.rp-entry-callout.rp-entry-callout-add-comment
+		.rp-entry-indicator(
+			ng-if="!commentState.adding"
+			ng-click="startNewComment(); onIndicatorClick();"
+		)
+			i.fa.fa-commenting
+		.rp-entry.rp-entry-add-comment(
+			ng-class="[ (state.isAdding ? 'rp-entry-adding-comment' : ''), (entry.focused ? 'rp-entry-focused' : '')]"
+		)
+			a.rp-add-comment-btn(
+				href
+				ng-if="!state.isAdding"
+				ng-click="startNewComment();"
+			) 
+				i.fa.fa-comment
+				| &nbsp;Add comment
+			div(ng-if="state.isAdding")
+				.rp-new-comment
+					textarea.rp-comment-input(
+						ng-model="state.content"
+						ng-keypress="handleCommentKeyPress($event);"
+						placeholder="Add your comment here"
+					)
+				.rp-entry-actions
+					a.rp-entry-button(href, ng-click="cancelNewComment();") 
+						i.fa.fa-times
+						| &nbsp;Cancel
+					a.rp-entry-button(href, ng-click="submitNewComment()") 
+						i.fa.fa-comment
+						| &nbsp;Comment

@@ -9,4 +9,5 @@ define [
 			user: "="
 			onAccept: "&"
 			onReject: "&"
+			onIndicatorClick: "&"
 		
