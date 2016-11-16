@@ -70,6 +70,7 @@
 	border-left: solid 1px @rp-border-grey;
 	font-size: @rp-base-font-size;
 	color: @rp-type-blue;
+	overflow: hidden; // Stop inner hidden scroll bar showing
 }
 
 .review-panel-toolbar {
@@ -86,18 +87,18 @@
 	z-index: 2;
 }
 
-.review-panel-scroller {
+.rp-entry-list {
+	// TODO: Use a more cross-browser method of hiding the scroll bar
+	width: @review-off-width + @rp-scroller-offset;
+	padding-right: @rp-scroller-offset;
+	overflow-y: scroll;
 	position: absolute;
 	top: 0;
 	bottom: 0;
-	left: 0;
-	// TODO: Use a more cross-browser method of hiding the scroll bar
-	right: -@rp-scroller-offset; // Hide scroll bar
 }
 
-.rp-entry-list {
+.rp-entry-list-inner {
 	position: relative;
-	width: @review-off-width;
 }
 
 .rp-entry-indicator {
@@ -414,9 +415,6 @@
 		right: @review-off-width;
 		.ace-editor-body {
 			overflow: visible;
-			.ace_scrollbar-v {
-				right: -@review-off-width;
-			}
 		}
 	}
 
@@ -438,10 +436,6 @@
 		}
 	}
 
-	.review-panel-scroller {
-		overflow-y: scroll;
-	}
-
 	#review-panel {
 		display: block;
 		width: @review-panel-width;
@@ -453,7 +447,7 @@
 		}
 
 		.rp-entry-list {
-			width: @review-panel-width;
+			width: @review-panel-width + @rp-scroller-offset;
 		}
 
 			.rp-entry {
