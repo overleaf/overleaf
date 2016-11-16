@@ -2,11 +2,11 @@
 	.review-panel-toolbar
 		| Track Changes 
 		input(type="checkbox", ng-model="reviewPanel.trackNewChanges")
-	.review-panel-scroller
-		.rp-entry-list(
-			review-panel-sorted
-			ng-if="reviewPanel.subView === SubViews.CUR_FILE"
-		)
+	.rp-entry-list(
+		review-panel-sorted
+		ng-if="reviewPanel.subView === SubViews.CUR_FILE"
+	)
+		.rp-entry-list-inner
 			.rp-entry-wrapper(
 				ng-repeat="(entry_id, entry) in reviewPanel.entries[editor.open_doc_id]"
 			)
