@@ -12,14 +12,24 @@ define [
 				
 				layout = () ->
 					sl_console.log "LAYOUT"
+					if scope.ui.reviewPanelOpen
+						PADDING = BOX_PADDING
+					else
+						PADDING = INDICATOR_PADDING
+					
 					entries = []
 					for el in element.find(".rp-entry-wrapper")
-						entries.push {
+						entry = {
 							$indicator_el: $(el).find(".rp-entry-indicator")
 							$box_el: $(el).find(".rp-entry")
 							$callout_el: $(el).find(".rp-entry-callout")
 							scope: angular.element(el).scope()
 						}
+						if scope.ui.reviewPanelOpen
+							entry.$layout_el = entry.$box_el
+						else
+							entry.$layout_el = entry.$indicator_el
+						entries.push entry
 					entries.sort (a,b) -> a.scope.entry.offset - b.scope.entry.offset
 					
 					return if entries.length == 0
@@ -44,55 +54,31 @@ define [
 					focused_entry.$indicator_el.css(top: focused_entry_top)
 					focused_entry.$callout_el.css(top: focused_entry_top + line_height, height: 0)
 					
-					previousBoxBottom = focused_entry_top + focused_entry.$box_el.height()
-					previousIndicatorBottom = focused_entry_top + focused_entry.$indicator_el.height()
+					previousBottom = focused_entry_top + focused_entry.$layout_el.height()
 					for entry in entries_after
 						original_top = entry.scope.entry.screenPos.y
-						box_height = entry.$box_el.height()
-						box_top = Math.max(original_top, previousBoxBottom + BOX_PADDING)
-						indicator_height = entry.$indicator_el.height()
-						indicator_top = Math.max(original_top, previousIndicatorBottom + INDICATOR_PADDING)
-						previousBoxBottom = box_top + box_height
-						previousIndicatorBottom = indicator_top + indicator_height
-						entry.$box_el.css(top: box_top, bottom: 'auto')
-						entry.$indicator_el.css(top: indicator_top, bottom: 'auto')
-
+						height = entry.$layout_el.height()
+						top = Math.max(original_top, previousBottom + PADDING)
+						previousBottom = top + height
+						entry.$box_el.css(top: top)
+						entry.$indicator_el.css(top: top)
 						entry.$callout_el.removeClass("rp-entry-callout-inverted")
-						
-						if scope.ui.reviewPanelOpen
-							callout_height = box_top - original_top
-						else
-							callout_height = indicator_top - original_top
-
-						entry.$callout_el.css(top: original_top + line_height, height: callout_height)
+						entry.$callout_el.css(top: original_top + line_height, height: top - original_top)
 						sl_console.log "ENTRY", {entry: entry.scope.entry, top}
 					
-					previousBoxTop = focused_entry_top
-					previousIndicatorTop = focused_entry_top
+					previousTop = focused_entry_top
 					entries_before.reverse() # Work through backwards, starting with the one just above
 					for entry in entries_before
 						original_top = entry.scope.entry.screenPos.y
-						box_height = entry.$box_el.height()
-						original_box_bottom = original_top + box_height
-						box_bottom = Math.min(original_box_bottom, previousBoxTop - BOX_PADDING)
-						box_top = box_bottom - box_height
-						indicator_height = entry.$indicator_el.height()
-						original_indicator_bottom = original_top + indicator_height
-						indicator_bottom = Math.min(original_indicator_bottom, previousIndicatorTop - INDICATOR_PADDING)
-						indicator_top = indicator_bottom - indicator_height
-						previousBoxTop = box_top
-						previousIndicatorTop = indicator_top
-						entry.$box_el.css(top: box_top, bottom: 'auto')
-						entry.$indicator_el.css(top: indicator_top, bottom: 'auto')
-
+						height = entry.$layout_el.height()
+						original_bottom = original_top + height
+						bottom = Math.min(original_bottom, previousTop - PADDING)
+						top = bottom - height
+						previousTop = top
+						entry.$box_el.css(top: top)
+						entry.$indicator_el.css(top: top)
 						entry.$callout_el.addClass("rp-entry-callout-inverted")
-						
-						if scope.ui.reviewPanelOpen
-							callout_top = box_top + line_height
-						else
-							callout_top = indicator_top + line_height
-
-						entry.$callout_el.css(top: callout_top + 1, height: original_top - callout_top + line_height)
+						entry.$callout_el.css(top: top + line_height + 1, height: original_top - top)
 						sl_console.log "ENTRY", {entry: entry.scope.entry, top}
 				
 				scope.$watch "reviewPanel.entryGeneration", (value) ->
