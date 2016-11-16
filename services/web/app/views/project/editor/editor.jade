@@ -92,12 +92,12 @@ div.full-size(
 										span(ng-switch-when="delete") Delete&nbsp;
 											del.rp-content-highlight {{ entry.content }} 
 								.rp-entry-actions
-									a.rp-entry-button(href, ng-click="acceptChange(entry_id)") 
-										i.fa.fa-check
-										| &nbsp;Accept
 									a.rp-entry-button(href, ng-click="rejectChange(entry_id)") 
 										i.fa.fa-times
 										| &nbsp;Reject
+									a.rp-entry-button(href, ng-click="acceptChange(entry_id)") 
+										i.fa.fa-check
+										| &nbsp;Accept
 							div(ng-if="entry.type == 'comment'")
 								.rp-comment(
 									ng-repeat="comment in entry.thread"
@@ -139,12 +139,28 @@ div.full-size(
 											placeholder="Add your comment here"
 										)
 									.rp-entry-actions
-										a.rp-entry-button(href, ng-click="submitNewComment()") 
-											i.fa.fa-comment
-											| &nbsp;Comment
 										a.rp-entry-button(href, ng-click="cancelNewComment()") 
 											i.fa.fa-times
 											| &nbsp;Cancel
+										a.rp-entry-button(href, ng-click="submitNewComment()") 
+											i.fa.fa-comment
+											| &nbsp;Comment
+
+			.rp-nav
+				a.rp-nav-item(
+					href
+					ng-click="setSubView(SubViews.CUR_FILE);"
+					ng-class="{ 'rp-nav-item-active' : reviewPanel.subView === SubViews.CUR_FILE }"
+				)
+					i.fa.fa-file-text-o
+					span.rp-nav-label Current file
+				a.rp-nav-item(
+					href
+					ng-click="setSubView(SubViews.OVERVIEW);"
+					ng-class="{ 'rp-nav-item-active' : reviewPanel.subView === SubViews.OVERVIEW }"
+				)
+					i.fa.fa-list
+					span.rp-nav-label Overview
 
 	.ui-layout-east
 		div(ng-if="ui.pdfLayout == 'sideBySide'")

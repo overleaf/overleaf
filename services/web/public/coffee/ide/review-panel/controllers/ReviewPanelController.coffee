@@ -5,10 +5,15 @@ define [
 	"ide/review-panel/ChangesTracker"
 ], (App, EventEmitter, ColorManager, ChangesTracker) ->
 	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout) ->
+		$scope.SubViews =
+			CUR_FILE : "cur_file"
+			OVERVIEW : "overview"
+
 		$scope.reviewPanel =
 			entries: {}
 			trackNewChanges: false
 			hasEntries: false
+			subView: $scope.SubViews.CUR_FILE
 
 		$scope.commentState =
 			adding: false
@@ -141,6 +146,9 @@ define [
 			entry.replyContent = ""
 			$scope.$broadcast "review-panel:layout"
 		
+		$scope.setSubView = (subView) -> 
+			$scope.reviewPanel.subView = subView
+			
 		# TODO: Eventually we need to get this from the server, and update it 
 		# when we get an id we don't know. This'll do for client side testing
 		refreshUsers = () ->
