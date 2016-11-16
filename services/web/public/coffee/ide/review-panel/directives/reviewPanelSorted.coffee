@@ -112,7 +112,6 @@ define [
 				ignoreNextAceEvent = false
 			
 				scrollPanel = (scrollTop, height) ->
-					console.log "Scrolling panel", scrollTop, height, list, scroller
 					if ignoreNextAceEvent
 						ignoreNextAceEvent = false
 					else
