@@ -130,7 +130,7 @@
 	display: none;
 	.rp-size-mini & {
 		display: block;
-		z-index: 1;
+		z-index: 12;
 	}
 	position: absolute;
 	left: 2px;
@@ -166,6 +166,8 @@
 		display: none;
 		left: @review-off-width + @rp-entry-arrow-width;
 		box-shadow: 0 0 10px 5px rgba(0, 0, 0, .2);
+		z-index: 11;
+
 		&::before {
 			.triangle(left, @rp-entry-arrow-width, @rp-entry-arrow-width * 1.5, inherit);
 			top: (@review-off-width / 2) - @rp-entry-arrow-width;
