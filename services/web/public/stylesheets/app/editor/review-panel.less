@@ -511,3 +511,38 @@
 		}
 	}
 }
+
+.ace-editor-wrapper {
+	.track-changes-marker-callout {
+		border-radius: 0;
+		position: absolute;
+		.rp-state-overview & {
+			display: none;
+		}
+	}
+	.track-changes-added-marker-callout {
+		border-bottom: 1px dashed @rp-green;
+	}
+	.track-changes-comment-marker-callout {
+		border-bottom: 1px dashed @rp-yellow;
+	}
+	.track-changes-deleted-marker-callout {
+		border-bottom: 1px dashed @rp-red;
+	}
+	
+	.track-changes-marker {
+		border-radius: 0;
+		position: absolute;
+	}
+
+	.track-changes-comment-marker {
+		background-color: @rp-dim-yellow;
+	}
+	.track-changes-added-marker {
+		background-color: @rp-dim-green;
+	}
+	.track-changes-deleted-marker {
+		border-left: 2px dotted @rp-red;
+		margin-left: -1px;
+	}
+}

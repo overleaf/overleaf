@@ -332,7 +332,7 @@ define [
 			callout_range = @_makeZeroWidthRange(position)
 			markerLayer = @editor.renderer.$markerBack
 			callout_marker_id = session.addMarker callout_range, klass, (html, range, left, top, config) ->
-				markerLayer.drawSingleLineMarker(html, range, "#{klass} ace_start", config, 0, "width: auto; right: 0;")
+				markerLayer.drawSingleLineMarker(html, range, "track-changes-marker-callout #{klass} ace_start", config, 0, "width: auto; right: 0;")
 
 		_onInsertAdded: (change) ->
 			start = @_shareJsOffsetToAcePosition(change.op.p)
@@ -340,7 +340,7 @@ define [
 			session = @editor.getSession()
 			doc = session.getDocument()
 			background_range = new Range(start.row, start.column, end.row, end.column)
-			background_marker_id = session.addMarker background_range, "track-changes-added-marker", "text"
+			background_marker_id = session.addMarker background_range, "track-changes-marker track-changes-added-marker", "text"
 			callout_marker_id = @_createCalloutMarker(start, "track-changes-added-marker-callout")
 			@changeIdToMarkerIdMap[change.id] = { background_marker_id, callout_marker_id }
 			@updateReviewEntriesScope()
@@ -351,7 +351,7 @@ define [
 			doc = session.getDocument()
 
 			markerLayer = @editor.renderer.$markerBack
-			klass = "track-changes-deleted-marker"
+			klass = "track-changes-marker track-changes-deleted-marker"
 			background_range = @_makeZeroWidthRange(position)
 			background_marker_id = session.addMarker background_range, klass, (html, range, left, top, config) ->
 				markerLayer.drawSingleLineMarker(html, range, "#{klass} ace_start", config, 0, "")
@@ -380,7 +380,7 @@ define [
 			session = @editor.getSession()
 			doc = session.getDocument()
 			background_range = new Range(start.row, start.column, end.row, end.column)
-			background_marker_id = session.addMarker background_range, "track-changes-comment-marker", "text"
+			background_marker_id = session.addMarker background_range, "track-changes-marker track-changes-comment-marker", "text"
 			callout_marker_id = @_createCalloutMarker(start, "track-changes-comment-marker-callout")
 			@changeIdToMarkerIdMap[comment.id] = { background_marker_id, callout_marker_id }
 			@updateReviewEntriesScope()
