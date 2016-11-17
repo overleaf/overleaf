@@ -41,6 +41,11 @@ define [
 			return if !doc?
 			@openDoc(doc)
 
+		openDocId: (doc_id, options = {}) ->
+			doc = @ide.fileTreeManager.findEntityById(doc_id)
+			return if !doc?
+			@openDoc(doc, options)
+
 		openDoc: (doc, options = {}) ->
 			sl_console.log "[openDoc] Opening #{doc.id}"
 			@$scope.ui.view = "editor"

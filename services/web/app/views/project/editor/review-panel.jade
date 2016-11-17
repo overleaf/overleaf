@@ -54,6 +54,7 @@
 						on-reject="rejectChange(entry_id);"
 						on-accept="acceptChange(entry_id);"
 						on-indicator-click="toggleReviewPanel();"
+						ng-click="gotoEntry(doc_id, entry)"
 					)
 
 				div(ng-if="entry.type === 'comment'")
@@ -63,6 +64,7 @@
 						on-resolve=""
 						on-reply="submitReply(entry);"
 						on-indicator-click="toggleReviewPanel();"
+						ng-click="gotoEntry(doc_id, entry)"
 					)
 
 	.rp-nav

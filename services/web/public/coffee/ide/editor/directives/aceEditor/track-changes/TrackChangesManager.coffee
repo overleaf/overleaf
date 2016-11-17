@@ -305,6 +305,7 @@ define [
 				y = screen_position.row * renderer.lineHeight
 				entry.screenPos ?= {}
 				entry.screenPos.y = y
+				entry.docPos = doc_position
 
 			@$scope.$apply()
 	

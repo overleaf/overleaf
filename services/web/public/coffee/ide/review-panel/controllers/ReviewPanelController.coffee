@@ -146,7 +146,11 @@ define [
 		
 		$scope.setSubView = (subView) -> 
 			$scope.reviewPanel.subView = subView
-			
+		
+		$scope.gotoEntry = (doc_id, entry) ->
+			console.log "Going to entry", entry.docPos
+			ide.editorManager.openDocId(doc_id, { gotoLine: entry.docPos.row + 1, gotoColumn: entry.docPos.column })
+
 		# TODO: Eventually we need to get this from the server, and update it 
 		# when we get an id we don't know. This'll do for client side testing
 		refreshUsers = () ->
