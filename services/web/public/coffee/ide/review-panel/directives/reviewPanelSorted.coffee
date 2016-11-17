@@ -101,7 +101,6 @@ define [
 					deltaY = e.wheelY
 					old_top = parseInt(list.css("top"))
 					top = Math.min(0, old_top - deltaY * 4)
-					console.log {old_top, top}
 					list.css(top: top)
 					scrollAce(-top)
 					e.preventDefault()
