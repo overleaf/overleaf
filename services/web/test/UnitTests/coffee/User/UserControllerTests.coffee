@@ -259,6 +259,24 @@ describe "UserController", ->
 				done()
 			@UserController.updateUserSettings @req, @res
 
+		describe 'when using an external auth source', ->
+
+			beforeEach ->
+				@UserUpdater.changeEmailAddress.callsArgWith(2)
+				@newEmail = 'someone23@example.com'
+				@settings.ldap = {active: true}
+
+			afterEach ->
+				delete @settings.ldap
+
+			it 'should not set a new email', (done) ->
+				@req.body.email = @newEmail
+				@res.sendStatus = (code)=>
+					code.should.equal 200
+					@UserUpdater.changeEmailAddress.calledWith(@user_id, @newEmail).should.equal false
+					done()
+				@UserController.updateUserSettings @req, @res
+
 	describe "logout", ->
 
 		it "should destroy the session", (done)->

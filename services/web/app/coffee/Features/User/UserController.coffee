@@ -44,6 +44,7 @@ module.exports = UserController =
 
 	updateUserSettings : (req, res)->
 		user_id = AuthenticationController.getLoggedInUserId(req)
+		usingExternalAuth = !!(settings.ldap? or settings.saml?)
 		logger.log user_id: user_id, "updating account settings"
 		User.findById user_id, (err, user)->
 			if err? or !user?
@@ -74,12 +75,15 @@ module.exports = UserController =
 				user.ace.syntaxValidation = req.body.syntaxValidation
 			user.save (err)->
 				newEmail = req.body.email?.trim().toLowerCase()
-				if !newEmail? or newEmail == user.email
+				if !newEmail? or newEmail == user.email or usingExternalAuth
+					# end here, don't update email
 					AuthenticationController.setInSessionUser(req, {first_name: user.first_name, last_name: user.last_name})
 					return res.sendStatus 200
 				else if newEmail.indexOf("@") == -1
+					# email invalid
 					return res.sendStatus(400)
 				else
+					# update the user email
 					UserUpdater.changeEmailAddress user_id, newEmail, (err)->
 						if err?
 							logger.err err:err, user_id:user_id, newEmail:newEmail, "problem updaing users email address"
