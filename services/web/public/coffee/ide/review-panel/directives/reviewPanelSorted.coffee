@@ -99,8 +99,11 @@ define [
 				# noticeable, but keeps it perfectly in step with Ace.
 				ace.require("ace/lib/event").addMouseWheelListener scroller[0], (e) ->
 					deltaY = e.wheelY
-					# console.log "mousewheel", deltaY
-					scroller.scrollTop(scroller.scrollTop() + deltaY * 4)
+					old_top = parseInt(list.css("top"))
+					top = Math.min(0, old_top - deltaY * 4)
+					console.log {old_top, top}
+					list.css(top: top)
+					scrollAce(-top)
 					e.preventDefault()
 
 				# Use these to avoid unnecessary updates. Scrolling one
@@ -115,15 +118,15 @@ define [
 					else
 						ignoreNextPanelEvent = true
 						list.height(height)
-						scroller.scrollTop(scrollTop)
+						# console.log({height, scrollTop, top: height - scrollTop})
+						list.css(top: - scrollTop)
 			
-				scrollAce = (e) ->
+				scrollAce = (scrollTop) ->
 					if ignoreNextPanelEvent
 						ignoreNextPanelEvent = false
 					else
 						ignoreNextAceEvent = true
-						scope.scrollBindings.reviewPanelEvents.emit "scroll", e.target.scrollTop
+						scope.scrollBindings.reviewPanelEvents.emit "scroll", scrollTop
 
-				scroller.on "scroll", scrollAce
 				scope.scrollBindings.onAceScroll = scrollPanel
 		}

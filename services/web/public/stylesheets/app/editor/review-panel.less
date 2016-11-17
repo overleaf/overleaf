@@ -24,9 +24,6 @@
 @review-panel-width		: 230px;
 @review-off-width		: 22px;
 
-@rp-scroller-offset		: 30px;
-
-
 .triangle(@_, @width, @height, @color) {
 	position: absolute;
 	border-color: transparent;
@@ -70,7 +67,6 @@
 	border-left: solid 1px @rp-border-grey;
 	font-size: @rp-base-font-size;
 	color: @rp-type-blue;
-	overflow: hidden; // Stop inner hidden scroll bar showing
 }
 
 .review-panel-toolbar {
@@ -88,10 +84,7 @@
 }
 
 .rp-entry-list {
-	// TODO: Use a more cross-browser method of hiding the scroll bar
-	width: @review-off-width + @rp-scroller-offset;
-	padding-right: @rp-scroller-offset;
-	overflow-y: scroll;
+	width: @review-off-width;
 	position: absolute;
 	top: 0;
 	bottom: 0;
@@ -448,7 +441,7 @@
 		}
 
 		.rp-entry-list {
-			width: @review-panel-width + @rp-scroller-offset;
+			width: @review-panel-width;
 		}
 
 			.rp-entry {
