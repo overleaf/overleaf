@@ -1,11 +1,13 @@
-#review-panel
+#review-panel(
+
+	ng-class="{ 'rp-state-current-file': (reviewPanel.subView === SubViews.CUR_FILE), 'rp-state-current-file-expanded': (reviewPanel.subView === SubViews.CUR_FILE && ui.reviewPanelOpen), 'rp-state-current-file-mini': (reviewPanel.subView === SubViews.CUR_FILE && !ui.reviewPanelOpen), 'rp-state-overview': (reviewPanel.subView === SubViews.OVERVIEW) }"
+)
 	.review-panel-toolbar
 		| Track Changes 
 		input(type="checkbox", ng-model="reviewPanel.trackNewChanges")
-	.rp-entry-list.rp-entry-list-current-file(
+	.rp-entry-list(
 		review-panel-sorted
 		ng-if="reviewPanel.subView === SubViews.CUR_FILE"
-		ng-class="{ 'rp-entry-list-current-file-expanded': ui.reviewPanelOpen, 'rp-entry-list-current-file-mini': !ui.reviewPanelOpen }"
 	)
 		.rp-entry-list-inner
 			.rp-entry-wrapper(
@@ -37,7 +39,7 @@
 						on-indicator-click="toggleReviewPanel();"
 					)
 
-	.rp-entry-list.rp-entry-list-overview(
+	.rp-entry-list(
 		ng-if="reviewPanel.subView === SubViews.OVERVIEW"
 	)
 		.rp-overview-file(

@@ -24,6 +24,9 @@
 @review-panel-width		: 230px;
 @review-off-width		: 22px;
 
+@rp-toolbar-height: 32px;
+
+
 .triangle(@_, @width, @height, @color) {
 	position: absolute;
 	border-color: transparent;
@@ -59,7 +62,8 @@
 #review-panel {
 	display: none;
 	.rp-show-expanded & {
-		display: block;
+		display: flex;
+		flex-direction: column;
 		width: @review-panel-width;
 		overflow: hidden;
 	}
@@ -83,15 +87,17 @@
 	.rp-show-expanded & {
 		display: block;
 	}
-	height: 32px;
+	.rp-state-current-file & {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+	}
+	height: @rp-toolbar-height;
 	padding: 6px;
 	border-bottom: 1px solid @rp-border-grey;
 	background-color: @rp-bg-dim-blue;
 	text-align: center;
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
 	z-index: 2;
 }
 
@@ -102,9 +108,18 @@
 	.rp-show-mini & {
 		width: @review-off-width;
 	}
-	position: absolute;
-	top: 0;
-	bottom: 0;
+	
+	.rp-state-current-file & {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+	}
+	
+	
+	.rp-state-overview & {
+		flex-grow: 2;
+		overflow-y: scroll;
+	}
 }
 
 .rp-entry-list-inner {
@@ -142,11 +157,11 @@
 }
 
 .rp-entry {
-	.rp-entry-list-current-file & {
+	.rp-state-current-file & {
 		position: absolute;
 		width: @review-panel-width;
 	}
-	.rp-entry-list-current-file-mini & {
+	.rp-state-current-file-mini & {
 		display: none;
 		left: @review-off-width + @rp-entry-arrow-width;
 		box-shadow: 0 0 10px 5px rgba(0, 0, 0, .2);
@@ -157,7 +172,7 @@
 			content: '';
 		}
 	}
-	.rp-entry-list-current-file-expanded & {
+	.rp-state-current-file-expanded & {
 		left: 5px;
 		right: 5px;
 		width: auto;
@@ -176,7 +191,7 @@
 			}
 		}
 	}
-	.rp-entry-list-overview & {
+	.rp-state-overview & {
 		margin: 5px;
 	}
 
@@ -369,7 +384,7 @@
 }
 
 .rp-entry-callout {
-	.rp-entry-list-current-file & {
+	.rp-state-current-file & {
 		position: absolute;
 		border-top: 1px solid grey;
 		border-right: 1px dashed grey;
@@ -382,24 +397,24 @@
 			border-bottom: 1px solid grey;
 		}
 	}
-	.rp-entry-list-current-file-expanded & {
+	.rp-state-current-file-expanded & {
 		width: 3px;
 		&::after {
 			width: 3px;
 		}
 	}
-	.rp-entry-list-current-file-mini & {
+	.rp-state-current-file-mini & {
 		width: 1px;
 		&::after {
 			width: 1px;
 		}
 	}
 	
-	.rp-entry-list-overview & {
+	.rp-state-overview & {
 		display: none;
 	}
 	
-	.rp-entry-list-current-file &-inverted {
+	.rp-state-current-file &-inverted {
 		border-top: none;
 		border-bottom: 1px solid grey;
 		&::after {
@@ -410,21 +425,21 @@
 		}
 	}
 	
-	.rp-entry-list-current-file &-insert {
+	.rp-state-current-file &-insert {
 		border-color: @rp-green;
 		&::after {
 			border-color: @rp-green;
 		}
 	}
 	
-	.rp-entry-list-current-file &-delete {
+	.rp-state-current-file &-delete {
 		border-color: @rp-red;
 		&::after {
 			border-color: @rp-red;
 		}
 	}
 	
-	.rp-entry-list-current-file &-comment {
+	.rp-state-current-file &-comment {
 		border-color: @rp-yellow;
 		&::after {
 			border-color: @rp-yellow;
@@ -434,11 +449,14 @@
 
 .rp-nav {
 	display: flex;
+	flex-shrink: 0;
 	.rp-show-mini & {
 		display: none;
 	}
-	position: absolute;
-	bottom: 0;
+	.rp-state-current-file & {
+		position: absolute;
+		bottom: 0;
+	}
 	width: 100%;
 	font-size: @rp-icon-large-size;
 	text-align: center;
