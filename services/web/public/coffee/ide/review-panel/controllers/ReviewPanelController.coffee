@@ -5,6 +5,8 @@ define [
 	"ide/review-panel/ChangesTracker"
 ], (App, EventEmitter, ColorManager, ChangesTracker) ->
 	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout) ->
+		$reviewPanelEl = $element.find "#review-panel"
+
 		$scope.SubViews =
 			CUR_FILE : "cur_file"
 			OVERVIEW : "overview"
@@ -20,6 +22,12 @@ define [
 			content: ""
 
 		$scope.reviewPanelEventsBridge = new EventEmitter()
+
+		$scope.reviewPanelEventsBridge.on "aceScrollbarVisibilityChanged", (isVisible, scrollbarWidth) ->
+			if isVisible
+				$reviewPanelEl.css "right", "#{ scrollbarWidth }px"
+			else
+				$reviewPanelEl.css "right", "0"
 
 		changesTrackers = {}
 
