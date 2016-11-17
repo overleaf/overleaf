@@ -244,6 +244,8 @@ define [
 					scope.eventsBridge.emit "aceScrollbarVisibilityChanged", vRenderer.scrollBarV.isVisible, vRenderer.scrollBarV.width
 					
 				if scope.eventsBridge?
+					editor.renderer.on "scrollbarVisibilityChanged", onScrollbarVisibilityChanged
+
 					scope.eventsBridge.on "externalScroll", (position) ->
 						editor.getSession().setScrollTop(position)
 
@@ -297,9 +299,9 @@ define [
 					# need to set annotations after attaching because attaching
 					# deletes and then inserts document content
 					session.setAnnotations scope.annotations
-					
-					session.on "changeScrollTop", onScroll
-					editor.renderer.on "scrollbarVisibilityChanged", onScrollbarVisibilityChanged
+
+					if scope.eventsBridge?
+						session.on "changeScrollTop", onScroll
 
 					setTimeout () ->
 						# Let any listeners init themselves
