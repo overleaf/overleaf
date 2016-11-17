@@ -43,7 +43,7 @@
 			ng-repeat="(doc_id, entries) in reviewPanel.entries"
 		)
 			.rp-overview-file-header
-				| {{ doc_id }}
+				| {{ getFileName(doc_id) }}
 			.rp-entry-wrapper(
 				ng-repeat="(entry_id, entry) in entries"
 			)

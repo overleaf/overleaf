@@ -151,6 +151,15 @@ define [
 			console.log "Going to entry", entry.docPos
 			ide.editorManager.openDocId(doc_id, { gotoLine: entry.docPos.row + 1, gotoColumn: entry.docPos.column })
 
+		DOC_ID_NAMES = {} 
+		$scope.getFileName = (doc_id) ->
+			# This is called a lot and is relatively expensive, so cache the result
+			if !DOC_ID_NAMES[doc_id]?
+				entity = ide.fileTreeManager.findEntityById(doc_id)
+				return if !entity?
+				DOC_ID_NAMES[doc_id] = ide.fileTreeManager.getEntityPath(entity)
+			return DOC_ID_NAMES[doc_id]
+
 		# TODO: Eventually we need to get this from the server, and update it 
 		# when we get an id we don't know. This'll do for client side testing
 		refreshUsers = () ->
