@@ -58,8 +58,17 @@
 
 #review-panel {
 	display: none;
+	.rp-show-expanded & {
+		display: block;
+		width: @review-panel-width;
+		overflow: hidden;
+	}
+	.rp-show-mini & {
+		display: block;
+		width: @review-off-width;
+		overflow: hidden;
+	}
 	position: absolute;
-	width: @review-off-width; 
 	top: 0px;
 	bottom: 0px;
 	right: 0px;
@@ -71,6 +80,9 @@
 
 .review-panel-toolbar {
 	display: none;
+	.rp-show-expanded & {
+		display: block;
+	}
 	height: 32px;
 	padding: 6px;
 	border-bottom: 1px solid @rp-border-grey;
@@ -84,7 +96,12 @@
 }
 
 .rp-entry-list {
-	width: @review-off-width;
+	.rp-show-expanded & {
+		width: @review-panel-width;
+	}
+	.rp-show-mini & {
+		width: @review-off-width;
+	}
 	position: absolute;
 	top: 0;
 	bottom: 0;
@@ -95,7 +112,10 @@
 }
 
 .rp-entry-indicator {
-	display: block;
+	display: none;
+	.rp-show-mini & {
+		display: block;
+	}
 	position: absolute;
 	left: 2px;
 	right: 2px;
@@ -122,22 +142,48 @@
 }
 
 .rp-entry {
-	display: none;
-	position: absolute;
-	left: @review-off-width + @rp-entry-arrow-width;
-	width: @review-panel-width;
+	.rp-entry-list-current-file & {
+		position: absolute;
+		width: @review-panel-width;
+	}
+	.rp-entry-list-current-file-mini & {
+		display: none;
+		left: @review-off-width + @rp-entry-arrow-width;
+		box-shadow: 0 0 10px 5px rgba(0, 0, 0, .2);
+		&::before {
+			.triangle(left, @rp-entry-arrow-width, 6px, inherit);
+			top: (@review-off-width / 2) - @rp-entry-arrow-width;
+			left: -(@rp-entry-ribbon-width  + @rp-entry-arrow-width);
+			content: '';
+		}
+	}
+	.rp-entry-list-current-file-expanded & {
+		left: 5px;
+		right: 5px;
+		width: auto;
+
+		&-focused {
+			left: 0px;
+			right: 10px;
+			z-index: 1;
+		}
+
+		&-add-comment {
+			right: auto;
+
+			&.rp-entry-adding-comment {
+				right: 5px;
+			}
+		}
+	}
+	.rp-entry-list-overview & {
+		margin: 5px;
+	}
+
 	border-left: solid @rp-entry-ribbon-width transparent;
 	border-radius: 3px;
 	background-color: #FFF;
 	transition: top 0.3s, left 0.1s, right 0.1s;
-	box-shadow: 0 0 10px 5px rgba(0, 0, 0, .2);
-
-	&::before {
-		.triangle(left, @rp-entry-arrow-width, 6px, inherit);
-		top: (@review-off-width / 2) - @rp-entry-arrow-width;
-		left: -(@rp-entry-ribbon-width  + @rp-entry-arrow-width);
-		content: '';
-	}
 
 	&-insert {
 		border-color: @rp-green;
@@ -323,21 +369,37 @@
 }
 
 .rp-entry-callout {
-	position: absolute;
-	width: 1px;
-	border-top: 1px solid grey;
-	border-right: 1px dashed grey;
-	&::after {
-		content: "";
+	.rp-entry-list-current-file & {
 		position: absolute;
+		border-top: 1px solid grey;
+		border-right: 1px dashed grey;
+		&::after {
+			content: "";
+			position: absolute;
+			top: -1px;
+			left: 3px;
+			bottom: 0;
+			border-bottom: 1px solid grey;
+		}
+	}
+	.rp-entry-list-current-file-expanded & {
+		width: 3px;
+		&::after {
+			width: 3px;
+		}
+	}
+	.rp-entry-list-current-file-mini & {
 		width: 1px;
-		top: -1px;
-		left: 3px;
-		bottom: 0;
-		border-bottom: 1px solid grey;
+		&::after {
+			width: 1px;
+		}
 	}
 	
-	&-inverted {
+	.rp-entry-list-overview & {
+		display: none;
+	}
+	
+	.rp-entry-list-current-file &-inverted {
 		border-top: none;
 		border-bottom: 1px solid grey;
 		&::after {
@@ -348,21 +410,21 @@
 		}
 	}
 	
-	&-insert {
+	.rp-entry-list-current-file &-insert {
 		border-color: @rp-green;
 		&::after {
 			border-color: @rp-green;
 		}
 	}
 	
-	&-delete {
+	.rp-entry-list-current-file &-delete {
 		border-color: @rp-red;
 		&::after {
 			border-color: @rp-red;
 		}
 	}
 	
-	&-comment {
+	.rp-entry-list-current-file &-comment {
 		border-color: @rp-yellow;
 		&::after {
 			border-color: @rp-yellow;
@@ -371,7 +433,10 @@
 }
 
 .rp-nav {
-	display: none;
+	display: flex;
+	.rp-show-mini & {
+		display: none;
+	}
 	position: absolute;
 	bottom: 0;
 	width: 100%;
@@ -403,22 +468,8 @@
 			font-size: @rp-base-font-size;
 		}
 
-
-.has-entries {
-	#editor {
-		right: @review-off-width;
-		.ace-editor-body {
-			overflow: visible;
-		}
-	}
-
-	#review-panel {
-		display: block;
-	}
-}
-
-.has-review-panel {
-	#editor {
+#editor {
+	.rp-show-expanded & {
 		right: @review-panel-width;
 		left: 0px;
 		width: auto;
@@ -429,59 +480,11 @@
 			}
 		}
 	}
-
-	#review-panel {
-		display: block;
-		width: @review-panel-width;
-		overflow: hidden;
+	
+	.rp-show-mini & {
+		right: @review-off-width;
+		.ace-editor-body {
+			overflow: visible;
+		}
 	}
-
-		.review-panel-toolbar {
-			display: block;
-		}
-
-		.rp-entry-list {
-			width: @review-panel-width;
-		}
-
-			.rp-entry {
-				display: block;
-				left: 5px;
-				right: 5px;
-				width: auto;
-				box-shadow: none;
-
-				&::before {
-					content: none;
-				}
-
-				&-focused {
-					left: 0px;
-					right: 10px;
-					z-index: 1;
-				}
-
-				&-add-comment {
-					right: auto;
-
-					&.rp-entry-adding-comment {
-						right: 5px;
-					}
-				}
-			}
-			
-			.rp-entry-callout {
-				width: 3px;
-				&::after {
-					width: 3px;
-				}
-			}
-
-			.rp-entry-indicator {
-				display: none;
-			}
-
-		.rp-nav {
-			display: flex;
-		}
 }
