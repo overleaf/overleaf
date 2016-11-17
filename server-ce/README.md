@@ -14,7 +14,7 @@ Installation
 
 We have detailed installation instructions in our wiki:
 
-* [Installing ShareLaTeX in Production using docker](https://github.com/sharelatex/sharelatex/wiki/Production-Installation-Instructions)
+* [ShareLaTeX Quick Start Guide](https://github.com/sharelatex/sharelatex/wiki/Quick-Start-Guide)
 
 
 Upgrading
