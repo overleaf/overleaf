@@ -111,9 +111,6 @@ define [
 				# need to trigger the event back to the original panel.
 				ignoreNextPanelEvent = false
 				ignoreNextAceEvent = false
-			
-				handleScrollbarVisibilityChanged = (isVisible, scrollbarWidth) ->
-					console.log isVisible, scrollbarWidth
 
 				scrollPanel = (scrollTop, height) ->
 					if ignoreNextAceEvent
@@ -132,5 +129,4 @@ define [
 						scope.reviewPanelEventsBridge.emit "externalScroll", scrollTop
 				
 				scope.reviewPanelEventsBridge.on "aceScroll", scrollPanel
-				scope.reviewPanelEventsBridge.on "aceScrollbarVisibilityChanged", handleScrollbarVisibilityChanged
 		}	
