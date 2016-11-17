@@ -244,10 +244,12 @@ define [
 					scope.eventsBridge.emit "aceScrollbarVisibilityChanged", vRenderer.scrollBarV.isVisible, vRenderer.scrollBarV.width
 					
 				if scope.eventsBridge?
-					editor.renderer.on "scrollbarVisibilityChanged", onScrollbarVisibilityChanged
-
 					scope.eventsBridge.on "externalScroll", (position) ->
 						editor.getSession().setScrollTop(position)
+					scope.eventsBridge.on "refreshScrollPosition", () ->
+						session = editor.getSession()
+						session.setScrollTop(session.getScrollTop() + 1)
+						session.setScrollTop(session.getScrollTop() - 1)
 
 				attachToAce = (sharejs_doc) ->
 					lines = sharejs_doc.getSnapshot().split("\n")
@@ -299,9 +301,9 @@ define [
 					# need to set annotations after attaching because attaching
 					# deletes and then inserts document content
 					session.setAnnotations scope.annotations
-
-					if scope.eventsBridge?
-						session.on "changeScrollTop", onScroll
+					
+					session.on "changeScrollTop", onScroll
+					editor.renderer.on "scrollbarVisibilityChanged", onScrollbarVisibilityChanged
 
 					setTimeout () ->
 						# Let any listeners init themselves

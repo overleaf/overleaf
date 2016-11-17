@@ -23,11 +23,22 @@ define [
 
 		$scope.reviewPanelEventsBridge = new EventEmitter()
 
+		scrollbar = {}
 		$scope.reviewPanelEventsBridge.on "aceScrollbarVisibilityChanged", (isVisible, scrollbarWidth) ->
-			if isVisible
-				$reviewPanelEl.css "right", "#{ scrollbarWidth }px"
+			scrollbar = {isVisible, scrollbarWidth}
+			updateScrollbar()
+		
+		updateScrollbar = () ->
+			if scrollbar.isVisible and $scope.reviewPanel.subView == $scope.SubViews.CUR_FILE
+				$reviewPanelEl.css "right", "#{ scrollbar.scrollbarWidth }px"
 			else
 				$reviewPanelEl.css "right", "0"
+		
+		$scope.$watch "reviewPanel.subView", (subView) ->
+			return if !subView?
+			updateScrollbar()
+			if subView == $scope.SubViews.CUR_FILE
+				$scope.$broadcast "review-panel:layout"
 
 		changesTrackers = {}
 

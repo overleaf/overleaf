@@ -9,7 +9,17 @@ div.full-size(
 	minimum-restore-size-east="300"
 	allow-overflow-on="'center'"
 )
-	.ui-layout-center(ng-controller="ReviewPanelController", ng-class="{'rp-show-expanded': ui.reviewPanelOpen, 'rp-show-mini': reviewPanel.hasEntries && !ui.reviewPanelOpen }")
+	.ui-layout-center(
+		ng-controller="ReviewPanelController",
+		ng-class="{\
+			'rp-state-current-file': (reviewPanel.subView === SubViews.CUR_FILE),\
+			'rp-state-current-file-expanded': (reviewPanel.subView === SubViews.CUR_FILE && ui.reviewPanelOpen),\
+			'rp-state-current-file-mini': (reviewPanel.subView === SubViews.CUR_FILE && !ui.reviewPanelOpen),\
+			'rp-state-overview': (reviewPanel.subView === SubViews.OVERVIEW),\
+			'rp-size-mini': (!ui.reviewPanelOpen && reviewPanel.hasEntries),\
+			'rp-size-expanded': ui.reviewPanelOpen\
+		}"
+	)
 		.loading-panel(ng-show="!editor.sharejs_doc || editor.opening")
 			span(ng-show="editor.open_doc_id")
 				i.fa.fa-spin.fa-refresh

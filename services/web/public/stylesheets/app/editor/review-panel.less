@@ -61,13 +61,13 @@
 
 #review-panel {
 	display: none;
-	.rp-show-expanded & {
+	.rp-size-expanded & {
 		display: flex;
 		flex-direction: column;
 		width: @review-panel-width;
 		overflow: hidden;
 	}
-	.rp-show-mini & {
+	.rp-size-mini & {
 		display: block;
 		width: @review-off-width;
 		overflow: hidden;
@@ -84,7 +84,7 @@
 
 .review-panel-toolbar {
 	display: none;
-	.rp-show-expanded & {
+	.rp-size-expanded & {
 		display: block;
 	}
 	.rp-state-current-file & {
@@ -102,10 +102,10 @@
 }
 
 .rp-entry-list {
-	.rp-show-expanded & {
+	.rp-size-expanded & {
 		width: @review-panel-width;
 	}
-	.rp-show-mini & {
+	.rp-size-mini & {
 		width: @review-off-width;
 	}
 	
@@ -118,7 +118,7 @@
 	
 	.rp-state-overview & {
 		flex-grow: 2;
-		overflow-y: scroll;
+		overflow-y: auto;
 	}
 }
 
@@ -128,7 +128,7 @@
 
 .rp-entry-indicator {
 	display: none;
-	.rp-show-mini & {
+	.rp-size-mini & {
 		display: block;
 	}
 	position: absolute;
@@ -450,7 +450,7 @@
 .rp-nav {
 	display: flex;
 	flex-shrink: 0;
-	.rp-show-mini & {
+	.rp-size-mini & {
 		display: none;
 	}
 	.rp-state-current-file & {
@@ -487,24 +487,27 @@
 		}
 
 #editor {
-	.rp-show-expanded & {
-		right: @review-panel-width;
-		left: 0px;
-		width: auto;
-		.ace-editor-body {
-			overflow: visible;
-			.ace_scrollbar-v {
-				right: -@review-panel-width;
-			}
-		}
-	}
-	
-	.rp-show-mini & {
+	.rp-size-mini & {
 		right: @review-off-width;
 		.ace-editor-body {
 			overflow: visible;
 			.ace_scrollbar-v {
 				right: -@review-off-width;
+			}
+		}
+	}
+
+	.rp-size-expanded & {
+		right: @review-panel-width;
+		left: 0px;
+		width: auto;
+	}
+	
+	.rp-state-current-file-expanded & {
+		.ace-editor-body {
+			overflow: visible;
+			.ace_scrollbar-v {
+				right: -@review-panel-width;
 			}
 		}
 	}

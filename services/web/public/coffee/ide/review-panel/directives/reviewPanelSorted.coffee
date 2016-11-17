@@ -129,4 +129,8 @@ define [
 						scope.reviewPanelEventsBridge.emit "externalScroll", scrollTop
 				
 				scope.reviewPanelEventsBridge.on "aceScroll", scrollPanel
+				scope.$on "$destroy", () ->
+					scope.reviewPanelEventsBridge.off "aceScroll"
+				
+				scope.reviewPanelEventsBridge.emit "refreshScrollPosition"
 		}	
