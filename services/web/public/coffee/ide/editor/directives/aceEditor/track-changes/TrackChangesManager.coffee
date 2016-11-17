@@ -271,14 +271,6 @@ define [
 			cursor_offset = @_aceRangeToShareJs(selection.start)
 			entries = @_getCurrentDocEntries()
 
-			for id, entry of entries
-				if entry.type == "comment"
-					entry.focused = (entry.offset <= cursor_offset <= entry.offset + entry.length)
-				else if entry.type == "insert"
-					entry.focused = (entry.offset <= cursor_offset <= entry.offset + entry.content.length)
-				else if entry.type == "delete"
-					entry.focused = (entry.offset == cursor_offset)
-
 			if selection.start.column == selection.end.column and selection.start.row == selection.end.row
 				# No selection
 				delete entries["add-comment"]
@@ -287,6 +279,16 @@ define [
 					type: "add-comment"
 					offset: cursor_offset
 				}
+
+			for id, entry of entries
+				if entry.type == "comment"
+					entry.focused = (entry.offset <= cursor_offset <= entry.offset + entry.length)
+				else if entry.type == "insert"
+					entry.focused = (entry.offset <= cursor_offset <= entry.offset + entry.content.length)
+				else if entry.type == "delete"
+					entry.focused = (entry.offset == cursor_offset)
+				else if entry.type == "add-comment" and !selection.isEmpty()
+					entry.focused = true
 		
 		updateEntryGeneration: () ->
 			# Rather than making angular deep watch the whole entries array

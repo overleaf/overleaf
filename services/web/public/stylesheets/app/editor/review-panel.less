@@ -65,7 +65,7 @@
 		display: flex;
 		flex-direction: column;
 		width: @review-panel-width;
-		overflow: hidden;
+		overflow: visible;
 	}
 	.rp-size-mini & {
 		display: block;
@@ -178,8 +178,8 @@
 		width: auto;
 
 		&-focused {
-			left: 0px;
-			right: 10px;
+			left: -2px;
+			right: 12px;
 			z-index: 1;
 		}
 
