@@ -19,7 +19,7 @@
 @rp-type-darkgrey		: #3f3f3f;
 
 @rp-entry-ribbon-width	: 4px;
-@rp-entry-arrow-width	: 4px;
+@rp-entry-arrow-width	: 6px;
 @rp-semibold-weight		: 600;
 @review-panel-width		: 230px;
 @review-off-width		: 22px;
@@ -166,7 +166,7 @@
 		left: @review-off-width + @rp-entry-arrow-width;
 		box-shadow: 0 0 10px 5px rgba(0, 0, 0, .2);
 		&::before {
-			.triangle(left, @rp-entry-arrow-width, 6px, inherit);
+			.triangle(left, @rp-entry-arrow-width, @rp-entry-arrow-width * 1.5, inherit);
 			top: (@review-off-width / 2) - @rp-entry-arrow-width;
 			left: -(@rp-entry-ribbon-width  + @rp-entry-arrow-width);
 			content: '';
@@ -287,33 +287,32 @@
 		display: flex;
 		align-items: flex-start;
 		padding: 5px;
-		
-		&.rp-comment-self .rp-comment-body {
-			margin-left: 0;
-			margin-right: 9px;
-
-			&::after {
-				content: "\25BA";
-				left: auto;
-				right: -9px;
-			}
-		}
 	}
 		.rp-comment-body {
 			position: relative;
 			background-color: currentColor;
 			flex-grow: 1;
 			padding: 2px 5px;
-			margin-left: 9px;
+			margin-left: @rp-entry-arrow-width;
 			border-radius: 3px;
 
+			.rp-comment-self & {
+				margin-left: 0;
+				margin-right: @rp-entry-arrow-width;
+			}
+
 			&::after {
-				content: "\25C4";
-				position: absolute;
-				top: 3px;
-				left: -9px;
-				font-size: 1.2em;
-				line-height: 1;
+				.triangle(left, @rp-entry-arrow-width, @rp-entry-arrow-width * 1.5, inherit);
+				top: (@review-off-width / 2) - @rp-entry-arrow-width;
+				left: -@rp-entry-arrow-width;
+				content: '';
+
+				.rp-comment-self & {
+					.triangle(right, @rp-entry-arrow-width, @rp-entry-arrow-width * 1.5, inherit);
+					right: -@rp-entry-arrow-width;
+					left: auto;
+				}
+
 			}
 		}
 			.rp-comment-content {
