@@ -53,8 +53,7 @@ define [
 				onCtrlEnter: "="
 				syntaxValidation: "="
 				reviewPanel: "="
-				onScroll: "="
-				scrollEvents: "="
+				eventsBridge: "="
 				trackNewChanges: "="
 				trackChangesEnabled: "="
 				changesTracker: "="
@@ -236,12 +235,16 @@ define [
 					scope.$emit "#{scope.name}:change"
 				
 				onScroll = (scrollTop) ->
-					return if !scope.onScroll?
+					return if !scope.eventsBridge?
 					height = editor.renderer.layerConfig.maxHeight
-					scope.onScroll(scrollTop, height)
+					scope.eventsBridge.emit "aceScroll", scrollTop, height
+
+				onScrollbarVisibilityChanged = (event, vRenderer) ->
+					return if !scope.eventsBridge?
+					scope.eventsBridge.emit "aceScrollbarVisibilityChanged", vRenderer.scrollBarV.isVisible, vRenderer.scrollBarV.width
 					
-				if scope.scrollEvents?
-					scope.scrollEvents.on "scroll", (position) ->
+				if scope.eventsBridge?
+					scope.eventsBridge.on "externalScroll", (position) ->
 						editor.getSession().setScrollTop(position)
 
 				attachToAce = (sharejs_doc) ->
@@ -296,6 +299,8 @@ define [
 					session.setAnnotations scope.annotations
 					
 					session.on "changeScrollTop", onScroll
+					editor.renderer.on "scrollbarVisibilityChanged", onScrollbarVisibilityChanged
+
 					setTimeout () ->
 						# Let any listeners init themselves
 						onScroll(editor.renderer.getScrollTop())

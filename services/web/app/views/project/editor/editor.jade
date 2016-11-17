@@ -40,8 +40,7 @@ div.full-size(
 			on-ctrl-enter="recompileViaKey",
 			syntax-validation="settings.syntaxValidation",
 			review-panel="reviewPanel",
-			on-scroll="scrollBindings.onAceScroll",
-			scroll-events="scrollBindings.reviewPanelEvents",
+			events-bridge="reviewPanelEventsBridge"
 			track-changes-enabled="trackChangesFeatureFlag",
 			track-new-changes= "reviewPanel.trackNewChanges",
 			changes-tracker="reviewPanel.changesTracker",
