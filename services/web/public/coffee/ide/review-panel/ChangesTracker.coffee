@@ -61,6 +61,32 @@ define [
 			@emit "comment:added", comment
 			return comment
 		
+		getComment: (comment_id) ->
+			comment = null
+			for c in @comments
+				if c.id == comment_id
+					comment = c
+					break
+			return comment
+		
+		resolveCommentId: (comment_id) ->
+			comment = @getComment(comment_id)
+			return if !comment?
+			comment.metadata.resolved = true
+			@emit "comment:resolved", comment
+		
+		unresolveCommentId: (comment_id) ->
+			comment = @getComment(comment_id)
+			return if !comment?
+			comment.metadata.resolved = false
+			@emit "comment:unresolved", comment
+		
+		removeCommentId: (comment_id) ->
+			comment = @getComment(comment_id)
+			return if !comment?
+			@comments = @comments.filter (c) -> c.id != comment_id
+			@emit "comment:removed", comment
+		
 		getChange: (change_id) ->
 			change = null
 			for c in @changes

@@ -44,6 +44,15 @@ define [
 			
 			@$scope.$on "change:reject", (e, change_id) =>
 				@rejectChangeId(change_id)
+			
+			@$scope.$on "comment:remove", (e, comment_id) =>
+				@removeCommentId(comment_id)
+			
+			@$scope.$on "comment:resolve", (e, comment_id) =>
+				@resolveCommentId(comment_id)
+			
+			@$scope.$on "comment:unresolve", (e, comment_id) =>
+				@unresolveCommentId(comment_id)
 
 			onChange = (e) =>
 				if !@editor.initing and @enabled
@@ -92,7 +101,10 @@ define [
 				@changesTracker.off "delete:removed"
 				@changesTracker.off "changes:moved"
 				@changesTracker.off "comment:added"
+				@changesTracker.off "comment:moved"
 				@changesTracker.off "comment:removed"
+				@changesTracker.off "comment:resolved"
+				@changesTracker.off "comment:unresolved"
 		
 		connectToChangesTracker: () ->
 			@changesTracker.track_changes = @$scope.trackNewChanges
@@ -119,6 +131,15 @@ define [
 			@changesTracker.on "comment:moved", (comment) =>
 				sl_console.log "[comment:moved]", comment
 				@_onCommentMoved(comment)
+			@changesTracker.on "comment:removed", (comment) =>
+				sl_console.log "[comment:removed]", comment
+				@_onCommentRemoved(comment)
+			@changesTracker.on "comment:resolved", (comment) =>
+				sl_console.log "[comment:resolved]", comment
+				@_onCommentRemoved(comment)
+			@changesTracker.on "comment:unresolved", (comment) =>
+				sl_console.log "[comment:unresolved]", comment
+				@_onCommentAdded(comment)
 			
 		redrawAnnotations: () ->
 			for change in @changesTracker.changes
@@ -179,6 +200,14 @@ define [
 			else
 				throw new Error("unknown change: #{JSON.stringify(change)}")
 
+		removeCommentId: (comment_id) ->
+			@changesTracker.removeCommentId(comment_id)
+
+		resolveCommentId: (comment_id) ->
+			@changesTracker.resolveCommentId(comment_id)
+			
+		unresolveCommentId: (comment_id) ->
+			@changesTracker.unresolveCommentId(comment_id)
 
 		checkMapping: () ->
 			session = @editor.getSession()
@@ -190,22 +219,24 @@ define [
 
 			expected_markers = []
 			for change in @changesTracker.changes
-				op = change.op
-				{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[change.id]
-				start = @_shareJsOffsetToAcePosition(op.p)
-				if op.i?
-					end = @_shareJsOffsetToAcePosition(op.p + op.i.length)
-				else if op.d?
-					end = start
-				expected_markers.push { marker_id: background_marker_id, start, end }
-				expected_markers.push { marker_id: callout_marker_id, start, end: start }
+				if @changeIdToMarkerIdMap[change.id]?
+					op = change.op
+					{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[change.id]
+					start = @_shareJsOffsetToAcePosition(op.p)
+					if op.i?
+						end = @_shareJsOffsetToAcePosition(op.p + op.i.length)
+					else if op.d?
+						end = start
+					expected_markers.push { marker_id: background_marker_id, start, end }
+					expected_markers.push { marker_id: callout_marker_id, start, end: start }
 			
 			for comment in @changesTracker.comments
-				{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[comment.id]
-				start = @_shareJsOffsetToAcePosition(comment.offset)
-				end = @_shareJsOffsetToAcePosition(comment.offset + comment.length)
-				expected_markers.push { marker_id: background_marker_id, start, end }
-				expected_markers.push { marker_id: callout_marker_id, start, end: start }
+				if @changeIdToMarkerIdMap[comment.id]?
+					{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[comment.id]
+					start = @_shareJsOffsetToAcePosition(comment.offset)
+					end = @_shareJsOffsetToAcePosition(comment.offset + comment.length)
+					expected_markers.push { marker_id: background_marker_id, start, end }
+					expected_markers.push { marker_id: callout_marker_id, start, end: start }
 			
 			for {marker_id, start, end} in expected_markers
 				marker = markers[marker_id]
@@ -253,6 +284,7 @@ define [
 				new_entry = {
 					type: "comment"
 					thread: comment.metadata.thread
+					resolved: comment.metadata.resolved
 					offset: comment.offset
 					length: comment.length
 				}
@@ -281,7 +313,7 @@ define [
 				}
 
 			for id, entry of entries
-				if entry.type == "comment"
+				if entry.type == "comment" and not entry.resolved
 					entry.focused = (entry.offset <= cursor_offset <= entry.offset + entry.length)
 				else if entry.type == "insert"
 					entry.focused = (entry.offset <= cursor_offset <= entry.offset + entry.content.length)
@@ -363,6 +395,7 @@ define [
 		
 		_onInsertRemoved: (change) ->
 			{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[change.id]
+			delete @changeIdToMarkerIdMap[change.id]
 			session = @editor.getSession()
 			session.removeMarker background_marker_id
 			session.removeMarker callout_marker_id
@@ -370,20 +403,33 @@ define [
 		
 		_onDeleteRemoved: (change) ->
 			{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[change.id]
+			delete @changeIdToMarkerIdMap[change.id]
 			session = @editor.getSession()
 			session.removeMarker background_marker_id
 			session.removeMarker callout_marker_id
 			@updateReviewEntriesScope()
 		
 		_onCommentAdded: (comment) ->
-			start = @_shareJsOffsetToAcePosition(comment.offset)
-			end = @_shareJsOffsetToAcePosition(comment.offset + comment.length)
-			session = @editor.getSession()
-			doc = session.getDocument()
-			background_range = new Range(start.row, start.column, end.row, end.column)
-			background_marker_id = session.addMarker background_range, "track-changes-marker track-changes-comment-marker", "text"
-			callout_marker_id = @_createCalloutMarker(start, "track-changes-comment-marker-callout")
-			@changeIdToMarkerIdMap[comment.id] = { background_marker_id, callout_marker_id }
+			if !@changeIdToMarkerIdMap[comment.id]?
+				# Only create new markers if they don't already exist
+				start = @_shareJsOffsetToAcePosition(comment.offset)
+				end = @_shareJsOffsetToAcePosition(comment.offset + comment.length)
+				session = @editor.getSession()
+				doc = session.getDocument()
+				background_range = new Range(start.row, start.column, end.row, end.column)
+				background_marker_id = session.addMarker background_range, "track-changes-marker track-changes-comment-marker", "text"
+				callout_marker_id = @_createCalloutMarker(start, "track-changes-comment-marker-callout")
+				@changeIdToMarkerIdMap[comment.id] = { background_marker_id, callout_marker_id }
+			@updateReviewEntriesScope()
+		
+		_onCommentRemoved: (comment) ->
+			if @changeIdToMarkerIdMap[comment.id]?
+				# Resolved comments may not have marker ids
+				{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[comment.id]
+				delete @changeIdToMarkerIdMap[comment.id]
+				session = @editor.getSession()
+				session.removeMarker background_marker_id
+				session.removeMarker callout_marker_id
 			@updateReviewEntriesScope()
 
 		_aceRangeToShareJs: (range) ->
@@ -436,13 +482,16 @@ define [
 			@updateReviewEntriesScope()
 	
 		_updateMarker: (change_id, start, end) ->
+			return if !@changeIdToMarkerIdMap[change_id]?
 			session = @editor.getSession()
 			markers = session.getMarkers()
 			{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[change_id]
-			background_marker = markers[background_marker_id]
-			background_marker.range.start = start
-			background_marker.range.end = end
-			callout_marker = markers[callout_marker_id]
-			callout_marker.range.start = start
-			callout_marker.range.end = start
+			if background_marker_id?
+				background_marker = markers[background_marker_id]
+				background_marker.range.start = start
+				background_marker.range.end = end
+			if callout_marker_id?
+				callout_marker = markers[callout_marker_id]
+				callout_marker.range.start = start
+				callout_marker.range.end = start
 

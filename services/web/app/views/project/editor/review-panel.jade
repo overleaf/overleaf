@@ -23,8 +23,10 @@
 					comment-entry(
 						entry="entry"
 						users="users"
-						on-resolve=""
-						on-reply="submitReply(entry);"
+						on-resolve="resolveComment(entry, entry_id)"
+						on-unresolve="unresolveComment(entry_id)"
+						on-delete="deleteComment(entry_id)"
+						on-reply="submitReply(entry, entry_id);"
 						on-indicator-click="toggleReviewPanel();"
 					)
 				
@@ -61,8 +63,10 @@
 					comment-entry(
 						entry="entry"
 						users="users"
-						on-resolve=""
-						on-reply="submitReply(entry);"
+						on-resolve="resolveComment(entry, entry_id)"
+						on-unresolve="unresolveComment(entry_id)"
+						on-delete="deleteComment(entry_id)"
+						on-reply="submitReply(entry, entry_id);"
 						on-indicator-click="toggleReviewPanel();"
 						ng-click="gotoEntry(doc_id, entry)"
 					)
@@ -122,7 +126,7 @@ script(type='text/ng-template', id='changeEntryTemplate')
 
 script(type='text/ng-template', id='commentEntryTemplate')
 	div
-		.rp-entry-callout.rp-entry-callout-comment
+		.rp-entry-callout.rp-entry-callout-comment(ng-if="!entry.resolved")
 		.rp-entry-indicator(
 			ng-class="{ 'rp-entry-indicator-focused': entry.focused }"
 			ng-click="onIndicatorClick();"
@@ -132,6 +136,7 @@ script(type='text/ng-template', id='commentEntryTemplate')
 			ng-class="entry.focused ? 'rp-entry-focused' : '';"
 		)
 			.rp-comment(
+				ng-if="!entry.resolved || entry.showWhenResolved"
 				ng-repeat="comment in entry.thread"
 				ng-class="users[comment.user_id].isSelf ? 'rp-comment-self' : '';"
 			)
@@ -145,16 +150,24 @@ script(type='text/ng-template', id='commentEntryTemplate')
 						| {{ comment.ts | date : 'MMM d, y h:mm a' }}
 						| &nbsp;&bull;&nbsp;
 						span(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 40%);") {{ users[comment.user_id].name }}
-			.rp-comment-reply
+			.rp-comment-reply(ng-if="!entry.resolved || entry.showWhenResolved")
 				textarea.rp-comment-input(
 					ng-model="entry.replyContent"
 					ng-keypress="handleCommentReplyKeyPress($event);"
-					placeholder="Hit \"Enter\" to reply"
+					placeholder="{{ 'Hit \"Enter\" to reply' + (entry.resolved ? ' and re-open' : '') }}"
 				)
+			.rp-comment-resolved-description(ng-if="entry.resolved && !entry.showWhenResolved")
+				| Resolved Comment
+				a(href, ng-click="entry.showWhenResolved = true") Show
 			.rp-entry-actions
-				a.rp-entry-button(href, ng-click="onResolve();") 
+				a.rp-entry-button(href, ng-click="onResolve();", ng-if="!entry.resolved") 
 					i.fa.fa-check
 					| &nbsp;Mark as resolved
+				a.rp-entry-button(href, ng-click="onUnresolve();", ng-if="entry.resolved") 
+					| &nbsp;Re-open
+				a.rp-entry-button(href, ng-click="onDelete();", ng-if="entry.resolved") 
+					| &nbsp;Delete
+				
 
 script(type='text/ng-template', id='addCommentEntryTemplate')
 	div
