@@ -130,6 +130,7 @@
 	display: none;
 	.rp-size-mini & {
 		display: block;
+		z-index: 1;
 	}
 	position: absolute;
 	left: 2px;
@@ -170,6 +171,14 @@
 			top: (@review-off-width / 2) - @rp-entry-arrow-width;
 			left: -(@rp-entry-ribbon-width  + @rp-entry-arrow-width);
 			content: '';
+		}
+		&::after {
+			content: '';
+			position: absolute;
+			top:  -(@review-off-width + @rp-entry-arrow-width);
+			right: -(@review-off-width + @rp-entry-arrow-width);
+			bottom: -(@review-off-width + @rp-entry-arrow-width);
+			left: -(@review-off-width + @rp-entry-arrow-width);
 		}
 	}
 	.rp-state-current-file-expanded & {
