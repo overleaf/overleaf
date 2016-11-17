@@ -44,7 +44,7 @@ module.exports = UserController =
 
 	updateUserSettings : (req, res)->
 		user_id = AuthenticationController.getLoggedInUserId(req)
-		usingExternalAuth = !!(settings.ldap? or settings.saml?)
+		usingExternalAuth = settings.ldap? or settings.saml?
 		logger.log user_id: user_id, "updating account settings"
 		User.findById user_id, (err, user)->
 			if err? or !user?
