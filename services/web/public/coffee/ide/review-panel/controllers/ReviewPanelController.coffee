@@ -16,6 +16,7 @@ define [
 			trackNewChanges: false
 			hasEntries: false
 			subView: $scope.SubViews.CUR_FILE
+			openSubView: $scope.SubViews.CUR_FILE
 
 		$scope.commentState =
 			adding: false
@@ -39,6 +40,18 @@ define [
 			updateScrollbar()
 			if subView == $scope.SubViews.CUR_FILE
 				$scope.$broadcast "review-panel:layout"
+		
+		$scope.$watch "ui.reviewPanelOpen", (open) ->
+			console.log "ui.reviewPanelOpen", open
+			return if !open?
+			if !open
+				# Always show current file when not open, but save current state
+				$scope.reviewPanel.openSubView = $scope.reviewPanel.subView
+				$scope.reviewPanel.subView = $scope.SubViews.CUR_FILE
+			else
+				# Reset back to what we had when previously open
+				$scope.reviewPanel.subView = $scope.reviewPanel.openSubView
+			
 
 		changesTrackers = {}
 
