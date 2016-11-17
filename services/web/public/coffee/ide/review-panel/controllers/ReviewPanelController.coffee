@@ -42,7 +42,6 @@ define [
 				$scope.$broadcast "review-panel:layout"
 		
 		$scope.$watch "ui.reviewPanelOpen", (open) ->
-			console.log "ui.reviewPanelOpen", open
 			return if !open?
 			if !open
 				# Always show current file when not open, but save current state
@@ -88,7 +87,6 @@ define [
 				$scope.$broadcast "review-panel:layout"
 		
 		$scope.submitNewComment = (content) ->
-			console.log(content)
 			# $scope.commentState.adding = false
 			$scope.$broadcast "comment:add", content
 			# $scope.commentState.content = ""
