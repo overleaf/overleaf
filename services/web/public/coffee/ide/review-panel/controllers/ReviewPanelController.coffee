@@ -19,10 +19,6 @@ define [
 			adding: false
 			content: ""
 
-		# DEPRECATED Used to communicate between Ace and reviewPanelSorted directive 
-		$scope.scrollBindings =
-			reviewPanelEvents: new EventEmitter()
-
 		$scope.reviewPanelEventsBridge = new EventEmitter()
 
 		changesTrackers = {}
