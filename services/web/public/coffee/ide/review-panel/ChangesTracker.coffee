@@ -148,15 +148,29 @@ define [
 			already_merged = false
 			previous_change = null
 			moved_changes = []
+			remove_changes = []
 			new_changes = []
 			for change in @changes
 				change_start = change.op.p
 				
 				if change.op.d?
 					# Shift any deletes after this along by the length of this insert
-					if op_start <= change_start
+					if op_start < change_start
 						change.op.p += op_length
 						moved_changes.push change
+					else if op_start == change_start
+						# If the insert matches the start of the delete, just remove it from the delete instead
+						if change.op.d.length >= op.i.length and change.op.d.slice(0, op.i.length) == op.i
+							change.op.d = change.op.d.slice(op.i.length)
+							change.op.p += op.i.length
+							if change.op.d == ""
+								remove_changes.push change
+							else
+								moved_changes.push change
+							already_merged = true
+						else
+							change.op.p += op_length
+							moved_changes.push change
 				else if change.op.i?
 					change_end = change_start + change.op.i.length
 					is_change_overlapping = (op_start >= change_start and op_start <= change_end)
@@ -227,6 +241,9 @@ define [
 				@_addOp op, metadata
 			for {op, metadata} in new_changes
 				@_addOp op, metadata
+		
+			for change in remove_changes
+				@_removeChange change
 			
 			if moved_changes.length > 0
 				@emit "changes:moved", moved_changes
