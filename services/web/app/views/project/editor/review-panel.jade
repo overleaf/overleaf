@@ -176,6 +176,9 @@ script(type='text/ng-template', id='addCommentEntryTemplate')
 		.rp-entry-indicator(
 			ng-if="!commentState.adding"
 			ng-click="startNewComment(); onIndicatorClick();"
+			tooltip="Add a comment"
+			tooltip-placement="right"
+			tooltip-append-to-body="true"
 		)
 			i.fa.fa-commenting
 		.rp-entry.rp-entry-add-comment(
