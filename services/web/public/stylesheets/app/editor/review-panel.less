@@ -203,7 +203,8 @@
 		}
 	}
 	.rp-state-overview & {
-		margin: 5px;
+		padding: 2px 5px;
+		border-bottom: solid 1px @rp-border-grey;
 	}
 
 	border-left: solid @rp-entry-ribbon-width transparent;
@@ -241,24 +242,49 @@
 		display: flex;
 		align-items: center;
 		padding: 5px;
+
+		.rp-state-overview & {
+			padding: 0px;
+		}
 	}
 		.rp-entry-action-icon {
 			font-size: @rp-icon-large-size;
 			padding: 0 5px;
 			line-height: 0;
+
+			.rp-state-overview & {
+				font-size: @rp-base-font-size;
+				padding: 0px;
+				margin-right: 5px;
+			}
 		}
 
 		.rp-entry-metadata {
 			flex-grow: 1;
 			padding: 0 5px;
 			line-height: 1.2;
+
+			.rp-state-overview & {
+				display: flex;
+				line-height: inherit;
+				padding: 0;
+			}
 		}
 			.rp-entry-metadata-line {
 				margin: 0;
+
+				.rp-state-overview &:last-of-type {
+					flex-grow: 1;
+					text-align: right;
+				}
 			}
 
 	.rp-entry-body {
 		padding: 5px;
+
+		.rp-state-overview & {
+			padding: 0;
+		}
 	}
 		.rp-content-highlight {
 			color: @rp-type-darkgrey;
@@ -272,6 +298,10 @@
 
 	.rp-entry-actions {
 		display: flex;
+
+		.rp-state-overview & {
+			display: none;
+		}
 	}
 		.rp-entry-button {
 			flex: 1 0 50%;
@@ -379,6 +409,10 @@
 	width: 1.3em;
 	height: 1.3em;
 	text-align: center;
+
+	.rp-state-overview & {
+		display: none;
+	}
 }
 
 .rp-icon-delete {
@@ -455,6 +489,16 @@
 			border-color: @rp-yellow;
 		}
 	}
+}
+
+.rp-overview-file-header {
+	padding: 2px 5px;
+	border-top: solid 1px @rp-border-grey;
+	border-bottom: solid 1px @rp-border-grey;
+	background-color: #FFF;
+	margin-top: 10px;
+	font-weight: @rp-semibold-weight;
+	border-left: solid @rp-entry-ribbon-width currentColor;
 }
 
 .rp-nav {
