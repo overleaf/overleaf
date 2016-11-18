@@ -38,8 +38,6 @@ define [
 		$scope.$watch "reviewPanel.subView", (subView) ->
 			return if !subView?
 			updateScrollbar()
-			if subView == $scope.SubViews.CUR_FILE
-				$scope.$broadcast "review-panel:layout"
 		
 		$scope.$watch "ui.reviewPanelOpen", (open) ->
 			return if !open?
@@ -155,7 +153,7 @@ define [
 
 		$scope.setSubView = (subView) -> 
 			$scope.reviewPanel.subView = subView
-		
+						
 		$scope.gotoEntry = (doc_id, entry) ->
 			console.log "Going to entry", entry.docPos
 			ide.editorManager.openDocId(doc_id, { gotoLine: entry.docPos.row + 1, gotoColumn: entry.docPos.column })

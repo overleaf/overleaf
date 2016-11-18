@@ -79,12 +79,15 @@ define [
 						entry.$callout_el.css(top: top + line_height + 1, height: original_top - top)
 						sl_console.log "ENTRY", {entry: entry.scope.entry, top}
 				
+				scope.$applyAsync () ->
+					layout()
+
 				scope.$watch "reviewPanel.entryGeneration", (value) ->
-					scope.$evalAsync () ->
+					scope.$applyAsync () ->
 						layout()
 				
 				scope.$on "review-panel:layout", () ->
-					scope.$evalAsync () ->
+					scope.$applyAsync () ->
 						layout()
 
 				## Scroll lock with Ace

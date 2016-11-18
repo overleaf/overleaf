@@ -154,6 +154,7 @@ script(type='text/ng-template', id='commentEntryTemplate')
 				textarea.rp-comment-input(
 					ng-model="entry.replyContent"
 					ng-keypress="handleCommentReplyKeyPress($event);"
+					stop-propagation="click"
 					placeholder="{{ 'Hit \"Enter\" to reply' + (entry.resolved ? ' and re-open' : '') }}"
 				)
 			.rp-comment-resolved-description(ng-if="entry.resolved && !entry.showWhenResolved")
