@@ -10,6 +10,8 @@ define [
 			onResolve: "&"
 			onReply: "&"
 			onIndicatorClick: "&"
+			onDelete: "&"
+			onUnresolve: "&"
 		link: (scope, element, attrs) ->
 			scope.handleCommentReplyKeyPress = (ev) ->
 				if ev.keyCode == 13 and !ev.shiftKey and !ev.ctrlKey and !ev.metaKey

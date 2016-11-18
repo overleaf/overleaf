@@ -110,7 +110,8 @@ define [
 		# 		ev.target.blur()
 		# 		$scope.submitReply(entry)
 
-		$scope.submitReply = (entry) ->
+		$scope.submitReply = (entry, entry_id) ->
+			$scope.unresolveComment(entry_id)
 			entry.thread.push {
 				content: entry.replyContent
 				ts: new Date()
@@ -141,7 +142,17 @@ define [
 			entry.replying = false
 			entry.replyContent = ""
 			$scope.$broadcast "review-panel:layout"
+
+		$scope.resolveComment = (entry, entry_id) ->
+			entry.showWhenResolved = false
+			$scope.$broadcast "comment:resolve", entry_id
 		
+		$scope.unresolveComment = (entry_id) ->
+			$scope.$broadcast "comment:unresolve", entry_id
+		
+		$scope.deleteComment = (entry_id) ->
+			$scope.$broadcast "comment:remove", entry_id
+
 		$scope.setSubView = (subView) -> 
 			$scope.reviewPanel.subView = subView
 		
