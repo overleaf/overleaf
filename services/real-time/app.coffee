@@ -1,20 +1,28 @@
+logger = require "logger-sharelatex"
+logger.initialize("real-time-sharelatex")
+
 express = require("express")
 session = require("express-session")
 redis = require("redis-sharelatex")
+ioredis = require('ioredis')
+Settings = require "settings-sharelatex"
+
+redisSessionsSettings = Settings.redis.websessions or Settings.redis.web
+
+if redisSessionsSettings?.cluster?
+	logger.log {}, "using redis cluster for web sessions"
+	sessionRedisClient = new ioredis.Cluster(redisSessionsSettings.cluster)
+else
+	sessionRedisClient = redis.createClient(redisSessionsSettings)
+
 RedisStore = require('connect-redis')(session)
 SessionSockets = require('session.socket.io')
 CookieParser = require("cookie-parser")
-
-Settings = require "settings-sharelatex"
-
-logger = require "logger-sharelatex"
-logger.initialize("real-time-sharelatex")
 
 Metrics = require("metrics-sharelatex")
 Metrics.initialize(Settings.appName or "real-time")
 Metrics.event_loop.monitor(logger)
 
-rclient = redis.createClient(Settings.redis.web)
 
 # Set up socket.io server
 app = express()
@@ -22,7 +30,7 @@ server = require('http').createServer(app)
 io = require('socket.io').listen(server)
 
 # Bind to sessions
-sessionStore = new RedisStore(client: rclient)
+sessionStore = new RedisStore(client: sessionRedisClient)
 cookieParser = CookieParser(Settings.security.sessionSecret)
 sessionSockets = new SessionSockets(io, sessionStore, cookieParser, Settings.cookieName)
 
@@ -42,14 +50,14 @@ io.configure ->
 
 app.get "/status", (req, res, next) ->
 	res.send "real-time-sharelatex is alive"
-	
+
 redisCheck = redis.activeHealthCheckRedis(Settings.redis.web)
 app.get "/health_check/redis", (req, res, next) ->
 	if redisCheck.isAlive()
 		res.send 200
 	else
 		res.send 500
-	
+
 Router = require "./app/js/Router"
 Router.configure(app, io, sessionSockets)
 
@@ -58,13 +66,13 @@ WebsocketLoadBalancer.listenForEditorEvents(io)
 
 DocumentUpdaterController = require "./app/js/DocumentUpdaterController"
 DocumentUpdaterController.listenForUpdatesFromDocumentUpdater(io)
-	
+
 port = Settings.internal.realTime.port
 host = Settings.internal.realTime.host
 
 server.listen port, host, (error) ->
 	throw error if error?
 	logger.info "realtime starting up, listening on #{host}:#{port}"
-	
+
 # Stop huge stack traces in logs from all the socket.io parsing steps.
 Error.stackTraceLimit = 10
