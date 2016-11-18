@@ -47,14 +47,14 @@
 			.rp-overview-file-header
 				| {{ getFileName(doc_id) }}
 			.rp-entry-wrapper(
-				ng-repeat="(entry_id, entry) in entries"
+				ng-repeat="(entry_id, entry) in entries | orderOverviewEntries"
 			)
 				div(ng-if="entry.type === 'insert' || entry.type === 'delete'")
 					change-entry(
 						entry="entry"
 						user="users[entry.metadata.user_id]"
-						on-reject="rejectChange(entry_id);"
-						on-accept="acceptChange(entry_id);"
+						on-reject="rejectChange(entry.id);"
+						on-accept="acceptChange(entry.id);"
 						on-indicator-click="toggleReviewPanel();"
 						ng-click="gotoEntry(doc_id, entry)"
 					)
@@ -63,9 +63,9 @@
 					comment-entry(
 						entry="entry"
 						users="users"
-						on-resolve="resolveComment(entry, entry_id)"
-						on-unresolve="unresolveComment(entry_id)"
-						on-delete="deleteComment(entry_id)"
+						on-resolve="resolveComment(entry, entry.id)"
+						on-unresolve="unresolveComment(entry.id)"
+						on-delete="deleteComment(entry.id)"
 						on-reply="submitReply(entry, entry_id);"
 						on-indicator-click="toggleReviewPanel();"
 						ng-click="gotoEntry(doc_id, entry)"

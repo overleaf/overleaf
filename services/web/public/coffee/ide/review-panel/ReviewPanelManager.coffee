@@ -4,4 +4,5 @@ define [
 	"ide/review-panel/directives/changeEntry"
 	"ide/review-panel/directives/commentEntry"
 	"ide/review-panel/directives/addCommentEntry"
+	"ide/review-panel/filters/orderOverviewEntries"
 ], () ->
