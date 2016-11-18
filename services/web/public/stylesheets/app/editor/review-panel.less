@@ -203,8 +203,10 @@
 		}
 	}
 	.rp-state-overview & {
+		border-radius: 0;
 		padding: 2px 5px;
 		border-bottom: solid 1px @rp-border-grey;
+		cursor: pointer;
 	}
 
 	border-left: solid @rp-entry-ribbon-width transparent;
@@ -328,6 +330,11 @@
 		display: flex;
 		align-items: flex-start;
 		padding: 5px;
+
+		.rp-state-overview & {
+			padding: 3px 0;
+			line-height: 1.2;
+		}
 	}
 		.rp-comment-body {
 			position: relative;
@@ -369,6 +376,10 @@
 
 		.rp-comment-reply {
 			padding: 0 5px;
+
+			.rp-state-overview & {
+				padding: 3px 0 0;
+			}
 		}
 
 	.rp-add-comment-btn {
