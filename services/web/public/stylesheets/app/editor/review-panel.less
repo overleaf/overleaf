@@ -218,6 +218,7 @@
 		padding: 2px 5px;
 		border-bottom: solid 1px @rp-border-grey;
 		cursor: pointer;
+		position: relative;
 	}
 
 	border-left: solid @rp-entry-ribbon-width transparent;
@@ -315,6 +316,15 @@
 		.rp-state-overview & {
 			display: none;
 		}
+
+		.rp-state-overview .rp-entry:hover & {
+			display: flex;
+			position: absolute;
+			right: 0;
+			top: 0;
+			bottom: 0;
+			opacity: 0.9;
+		}
 	}
 		.rp-entry-button {
 			.rp-button();
@@ -325,6 +335,13 @@
 			&:last-child {
 				border-bottom-right-radius: 3px;
 				border-right-width: 0;
+			}
+
+			.rp-state-overview & {
+				display: flex;
+				flex-direction: column;
+				padding: 5px;
+				border-radius: 0;
 			}
 		}
 
