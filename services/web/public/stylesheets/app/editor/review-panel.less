@@ -26,6 +26,17 @@
 
 @rp-toolbar-height: 32px;
 
+.rp-button() {
+	background-color: @rp-highlight-blue;
+	color: #FFF;
+	text-align: center;
+	&:hover,
+	&:focus {
+		background-color: darken(@rp-highlight-blue, 5%);
+		text-decoration: none;
+		color: #FFF;
+	}
+}
 
 .triangle(@_, @width, @height, @color) {
 	position: absolute;
@@ -306,19 +317,10 @@
 		}
 	}
 		.rp-entry-button {
-			flex: 1 0 50%;
-			background-color: @rp-highlight-blue;
-			color: #FFF;
-			text-align: center;
+			.rp-button();
+			flex: 1 1 50%;
 			border-right: solid 1px #FFF;
 			padding: 2px 0;
-
-			&:hover,
-			&:focus {
-				background-color: darken(@rp-highlight-blue, 5%);
-				text-decoration: none;
-				color: #FFF;
-			}
 
 			&:last-child {
 				border-bottom-right-radius: 3px;
@@ -382,19 +384,15 @@
 			}
 		}
 
+		.rp-comment-resolved-description {
+			padding: 5px;
+		}
+
 	.rp-add-comment-btn {
+		.rp-button();
 		display: block;
-		background-color: @rp-highlight-blue;
-		color: #FFF;
 		padding: 5px 10px;
 		border-radius: 3px;
-
-		&:hover,
-		&:focus {
-			background-color: darken(@rp-highlight-blue, 5%);
-			text-decoration: none;
-			color: #FFF;
-		}
 	}
 
 	.rp-new-comment {
