@@ -26,6 +26,14 @@ define [
 
 		changesTrackers = {}
 
+		getDocEntries = (doc_id) ->
+			$scope.reviewPanel.entries[doc_id] ?= {}
+			return $scope.reviewPanel.entries[doc_id]
+
+		getChangeTracker = (doc_id) ->
+			changesTrackers[doc_id] ?= new ChangesTracker()
+			return changesTrackers[doc_id]
+
 		# TODO Just for prototyping purposes; remove afterwards.
 		mockedUserId = 'mock_user_id_1'
 		mockedUserId2 = 'mock_user_id_2'
@@ -107,11 +115,13 @@ define [
 			ide.$scope.$on "file-tree:initialized", () ->
 				ide.fileTreeManager.forEachEntity (entity) ->
 					if mock_changes[entity.name]?
-						changesTrackers[entity.id] ?= new ChangesTracker()
+						changesTracker = getChangeTracker(entity.id)
 						for change in mock_changes[entity.name].changes
-							changesTrackers[entity.id]._addOp change.op, change.metadata 
+							changesTracker._addOp change.op, change.metadata 
 						for comment in mock_changes[entity.name].comments
-							changesTrackers[entity.id].addComment comment.offset, comment.length, comment.metadata 
+							changesTracker.addComment comment.offset, comment.length, comment.metadata 
+						for doc_id, changesTracker of changesTrackers
+							updateEntries(doc_id)
 
 		scrollbar = {}
 		$scope.reviewPanelEventsBridge.on "aceScrollbarVisibilityChanged", (isVisible, scrollbarWidth) ->
@@ -154,6 +164,77 @@ define [
 			$timeout () ->
 				$scope.$broadcast "review-panel:toggle"
 				$scope.$broadcast "review-panel:layout"
+		
+		updateEntries = (doc_id) ->
+			changesTracker = getChangeTracker(doc_id)
+			entries = getDocEntries(doc_id)
+			
+			# Assume we'll delete everything until we see it, then we'll remove it from this object
+			delete_changes = {}
+			delete_changes[change_id] = true for change_id, change of entries
+
+			for change in changesTracker.changes
+				delete delete_changes[change.id]
+				entries[change.id] ?= {}
+					
+				# Update in place to avoid a full DOM redraw via angular
+				metadata = {}
+				metadata[key] = value for key, value of change.metadata
+				new_entry = {
+					type: if change.op.i then "insert" else "delete"
+					content: change.op.i or change.op.d
+					offset: change.op.p
+					metadata: change.metadata
+				}
+				for key, value of new_entry
+					entries[change.id][key] = value
+
+			for comment in changesTracker.comments
+				delete delete_changes[comment.id]
+				entries[comment.id] ?= {}
+				new_entry = {
+					type: "comment"
+					thread: comment.metadata.thread
+					resolved: comment.metadata.resolved
+					offset: comment.offset
+					length: comment.length
+				}
+				for key, value of new_entry
+					entries[comment.id][key] = value
+
+			for change_id, _ of delete_changes
+				delete entries[change_id]
+
+		$scope.$on "editor:track-changes:changed", () ->
+			doc_id = $scope.editor.open_doc_id
+			updateEntries(doc_id)
+			$scope.$broadcast "review-panel:recalculate-screen-positions"
+			$scope.$broadcast "review-panel:layout"
+		
+		$scope.$on "editor:focus:changed", (e, cursor_offset, selection) ->
+			doc_id = $scope.editor.open_doc_id
+			entries = getDocEntries(doc_id)
+
+			if !selection
+				delete entries["add-comment"]
+			else
+				entries["add-comment"] = {
+					type: "add-comment"
+					offset: cursor_offset
+				}
+			
+			for id, entry of entries
+				if entry.type == "comment" and not entry.resolved
+					entry.focused = (entry.offset <= cursor_offset <= entry.offset + entry.length)
+				else if entry.type == "insert"
+					entry.focused = (entry.offset <= cursor_offset <= entry.offset + entry.content.length)
+				else if entry.type == "delete"
+					entry.focused = (entry.offset == cursor_offset)
+				else if entry.type == "add-comment" and selection
+					entry.focused = true
+			
+			$scope.$broadcast "review-panel:recalculate-screen-positions"
+			$scope.$broadcast "review-panel:layout"
 		
 		$scope.acceptChange = (entry_id) ->
 			$scope.$broadcast "change:accept", entry_id

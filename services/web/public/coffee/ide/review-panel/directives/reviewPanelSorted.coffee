@@ -81,10 +81,6 @@ define [
 				
 				scope.$applyAsync () ->
 					layout()
-
-				scope.$watch "reviewPanel.entryGeneration", (value) ->
-					scope.$applyAsync () ->
-						layout()
 				
 				scope.$on "review-panel:layout", () ->
 					scope.$applyAsync () ->
