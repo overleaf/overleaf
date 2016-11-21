@@ -310,7 +310,7 @@ define [
 
 		_onError: (error, meta = {}) ->
 			meta.doc_id = @doc_id
-			console.error "ShareJS error", error, meta
+			sl_console.log "ShareJS error", error, meta
 			ga?('send', 'event', 'error', "shareJsError", "#{error.message} - #{@ide.socket.socket.transport.name}" )
 			@doc?.clearInflightAndPendingOps()
 			@trigger "error", error, meta
