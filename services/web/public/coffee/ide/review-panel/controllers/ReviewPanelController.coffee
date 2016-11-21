@@ -24,6 +24,95 @@ define [
 
 		$scope.reviewPanelEventsBridge = new EventEmitter()
 
+		changesTrackers = {}
+
+		# TODO Just for prototyping purposes; remove afterwards.
+		mockedUserId = 'mock_user_id_1'
+		mockedUserId2 = 'mock_user_id_2'
+
+		if window.location.search.match /mocktc=true/
+			mock_changes = {
+				"main.tex":
+					changes: [{
+						op: { i: "Habitat loss and conflicts with humans are the greatest causes of concern.", p: 925 - 38 }
+						metadata: { user_id: mockedUserId, ts: new Date(Date.now() - 30 * 60 * 1000) }
+					}, {
+						op: { d: "The lion is now a vulnerable species. ", p: 778 }
+						metadata: { user_id: mockedUserId, ts: new Date(Date.now() - 31 * 60 * 1000) }
+					}]
+					comments: [{
+						offset: 1375 - 38
+						length: 79
+						metadata:
+							thread: [{
+								content: "Do we have a source for this?"
+								user_id: mockedUserId
+								ts: new Date(Date.now() - 45 * 60 * 1000) 
+							}]
+					}]
+				"chapter_1.tex":
+					changes: [{
+						"op":{"p":740,"d":", to take down large animals"},
+						"metadata":{"user_id":mockedUserId, ts: new Date(Date.now() - 15 * 60 * 1000)}
+					}, {
+						"op":{"i":", to keep hold of the prey","p":920},
+						"metadata":{"user_id":mockedUserId, ts: new Date(Date.now() - 130 * 60 * 1000)}
+					}, {
+						"op":{"i":" being","p":1057},
+						"metadata":{"user_id":mockedUserId2, ts: new Date(Date.now() - 72 * 60 * 1000)}
+					}]
+					comments:[{
+						"offset":111,"length":5,
+						"metadata":{
+							"thread": [
+								{"content":"Have we used 'pride' too much here?","user_id":mockedUserId, ts: new Date(Date.now() - 12 * 60 * 1000)},
+								{"content":"No, I think this is OK","user_id":mockedUserId2, ts: new Date(Date.now() - 9 * 60 * 1000)}
+							]
+						}
+					},{
+						"offset":452,"length":21,
+						"metadata":{
+							"thread":[
+								{"content":"TODO: Don't use as many parentheses!","user_id":mockedUserId2, ts: new Date(Date.now() - 99 * 60 * 1000)}
+							]
+						}
+					}]
+				"chapter_2.tex":
+					changes: [{
+						"op":{"p":458,"d":"other"},
+						"metadata":{"user_id":mockedUserId, ts: new Date(Date.now() - 133 * 60 * 1000)}
+					},{
+						"op":{"i":"usually 2-3, ","p":928},
+						"metadata":{"user_id":mockedUserId, ts: new Date(Date.now() - 27 * 60 * 1000)}
+					},{
+						"op":{"i":"If the parents are a male lion and a female tiger, it is called a liger. A tigon comes from a male tiger and a female lion.","p":1126},
+						"metadata":{"user_id":mockedUserId, ts: new Date(Date.now() - 152 * 60 * 1000)}
+					}]
+					comments: [{
+						"offset":299,"length":10,
+						"metadata":{
+							"thread":[{
+								"content":"Should we use a different word here if 'den' needs clarifying?","user_id":mockedUserId,"ts": new Date(Date.now() - 430 * 60 * 1000)
+							}]
+						}
+					},{
+						"offset":843,"length":66,
+						"metadata":{
+							"thread":[{
+								"content":"This sentence is a little ambiguous","user_id":mockedUserId,"ts": new Date(Date.now() - 430 * 60 * 1000)
+							}]
+						}
+					}]
+			}
+			ide.$scope.$on "file-tree:initialized", () ->
+				ide.fileTreeManager.forEachEntity (entity) ->
+					if mock_changes[entity.name]?
+						changesTrackers[entity.id] ?= new ChangesTracker()
+						for change in mock_changes[entity.name].changes
+							changesTrackers[entity.id]._addOp change.op, change.metadata 
+						for comment in mock_changes[entity.name].comments
+							changesTrackers[entity.id].addComment comment.offset, comment.length, comment.metadata 
+
 		scrollbar = {}
 		$scope.reviewPanelEventsBridge.on "aceScrollbarVisibilityChanged", (isVisible, scrollbarWidth) ->
 			scrollbar = {isVisible, scrollbarWidth}
@@ -48,17 +137,11 @@ define [
 			else
 				# Reset back to what we had when previously open
 				$scope.reviewPanel.subView = $scope.reviewPanel.openSubView
-			
-
-		changesTrackers = {}
 
 		$scope.$watch "editor.open_doc_id", (open_doc_id) ->
 			return if !open_doc_id?
 			changesTrackers[open_doc_id] ?= new ChangesTracker()
 			$scope.reviewPanel.changesTracker = changesTrackers[open_doc_id]
-
-		# TODO Just for prototyping purposes; remove afterwards.
-		mockedUserId = '12345abc'
 
 		$scope.$watch (() ->
 			entries = $scope.reviewPanel.entries[$scope.editor.open_doc_id] or {}
@@ -127,7 +210,7 @@ define [
 		# TODO Just for prototyping purposes; remove afterwards.
 		submitMockedReply = (entry) ->
 			entry.thread.push {
-				content: 'Lorem ipsum dolor sit amet'
+				content: 'Sounds good!'
 				ts: new Date()
 				user_id: mockedUserId
 			}
@@ -184,11 +267,18 @@ define [
 			$scope.users = {}
 			# TODO Just for prototyping purposes; remove afterwards.
 			$scope.users[mockedUserId] = {
-				email: "gerald.butler@gmail.com"
-				name: "Gerald Butler"
+				email: "paulo@sharelatex.com"
+				name: "Paulo Reis"
 				isSelf: false
 				hue: 70
-				avatar_text: "G"
+				avatar_text: "PR"
+			}
+			$scope.users[mockedUserId2] = {
+				email: "james@sharelatex.com"
+				name: "James Allen"
+				isSelf: false
+				hue: 320
+				avatar_text: "JA"
 			}
 
 			for member in $scope.project.members.concat($scope.project.owner)
