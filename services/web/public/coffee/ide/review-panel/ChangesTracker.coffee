@@ -69,10 +69,11 @@ define [
 					break
 			return comment
 		
-		resolveCommentId: (comment_id) ->
+		resolveCommentId: (comment_id, resolved_data) ->
 			comment = @getComment(comment_id)
 			return if !comment?
 			comment.metadata.resolved = true
+			comment.metadata.resolved_data = resolved_data
 			@emit "comment:resolved", comment
 		
 		unresolveCommentId: (comment_id) ->

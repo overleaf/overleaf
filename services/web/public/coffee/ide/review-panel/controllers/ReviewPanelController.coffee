@@ -196,6 +196,7 @@ define [
 					type: "comment"
 					thread: comment.metadata.thread
 					resolved: comment.metadata.resolved
+					resolved_data: comment.metadata.resolved_data
 					offset: comment.offset
 					length: comment.length
 				}
@@ -308,7 +309,7 @@ define [
 		$scope.resolveComment = (entry, entry_id) ->
 			entry.showWhenResolved = false
 			entry.focused = false
-			$scope.$broadcast "comment:resolve", entry_id
+			$scope.$broadcast "comment:resolve", entry_id, window.user_id
 		
 		$scope.unresolveComment = (entry_id) ->
 			$scope.$broadcast "comment:unresolve", entry_id

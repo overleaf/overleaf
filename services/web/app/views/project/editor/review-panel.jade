@@ -135,7 +135,7 @@ script(type='text/ng-template', id='commentEntryTemplate')
 		)
 			i.fa.fa-comment
 		.rp-entry.rp-entry-comment(
-			ng-class="entry.focused ? 'rp-entry-focused' : '';"
+			ng-class="{ 'rp-entry-focused': entry.focused, 'rp-entry-comment-resolved': entry.resolved}"
 		)
 			.rp-comment(
 				ng-if="!entry.resolved || entry.showWhenResolved"
@@ -160,7 +160,10 @@ script(type='text/ng-template', id='commentEntryTemplate')
 					placeholder="{{ 'Hit \"Enter\" to reply' + (entry.resolved ? ' and re-open' : '') }}"
 				)
 			.rp-comment-resolved-description(ng-if="entry.resolved && !entry.showWhenResolved")
-				| Resolved comment
+				div
+					| Comment resolved by 
+					span(style="color: hsl({{ users[entry.resolved_data.user_id].hue }}, 70%, 40%);") {{ users[entry.resolved_data.user_id].name }}
+				div {{ entry.resolved_data.ts | date : 'MMM d, y h:mm a' }}
 			.rp-entry-actions
 				a.rp-entry-button(href, ng-click="onResolve();", ng-if="!entry.resolved") 
 					i.fa.fa-check
