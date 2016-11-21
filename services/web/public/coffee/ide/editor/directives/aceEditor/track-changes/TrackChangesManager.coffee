@@ -48,8 +48,8 @@ define [
 			@$scope.$on "comment:remove", (e, comment_id) =>
 				@removeCommentId(comment_id)
 			
-			@$scope.$on "comment:resolve", (e, comment_id) =>
-				@resolveCommentId(comment_id)
+			@$scope.$on "comment:resolve", (e, comment_id, user_id) =>
+				@resolveCommentId(comment_id, user_id)
 			
 			@$scope.$on "comment:unresolve", (e, comment_id) =>
 				@unresolveCommentId(comment_id)
@@ -206,8 +206,10 @@ define [
 		removeCommentId: (comment_id) ->
 			@changesTracker.removeCommentId(comment_id)
 
-		resolveCommentId: (comment_id) ->
-			@changesTracker.resolveCommentId(comment_id)
+		resolveCommentId: (comment_id, user_id) ->
+			@changesTracker.resolveCommentId(comment_id, {
+				user_id, ts: new Date()
+			})
 			
 		unresolveCommentId: (comment_id) ->
 			@changesTracker.unresolveCommentId(comment_id)
