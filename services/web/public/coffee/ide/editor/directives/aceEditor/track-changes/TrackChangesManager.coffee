@@ -53,6 +53,9 @@ define [
 			
 			@$scope.$on "comment:unresolve", (e, comment_id) =>
 				@unresolveCommentId(comment_id)
+			
+			@$scope.$on "review-panel:recalculate-screen-positions", () =>
+				@recalculateReviewEntriesScreenPositions()
 
 			onChange = (e) =>
 				if !@editor.initing and @enabled
@@ -255,77 +258,15 @@ define [
 			op = @_aceChangeToShareJs(delta)
 			@changesTracker.applyOp(op, metadata)
 		
-		updateReviewEntriesScope: () ->
-			entries = @_getCurrentDocEntries()
-			
-			# Assume we'll delete everything until we see it, then we'll remove it from this object
-			delete_changes = {}
-			delete_changes[change_id] = true for change_id, change of entries
-
-			for change in @changesTracker.changes
-				delete delete_changes[change.id]
-				entries[change.id] ?= {}
-					
-				# Update in place to avoid a full DOM redraw via angular
-				metadata = {}
-				metadata[key] = value for key, value of change.metadata
-				new_entry = {
-					type: if change.op.i then "insert" else "delete"
-					content: change.op.i or change.op.d
-					offset: change.op.p
-					metadata: change.metadata
-				}
-				for key, value of new_entry
-					entries[change.id][key] = value
-
-			for comment in @changesTracker.comments
-				delete delete_changes[comment.id]
-				entries[comment.id] ?= {}
-				new_entry = {
-					type: "comment"
-					thread: comment.metadata.thread
-					resolved: comment.metadata.resolved
-					offset: comment.offset
-					length: comment.length
-				}
-				for key, value of new_entry
-					entries[comment.id][key] = value
-
-			for change_id, _ of delete_changes
-				delete entries[change_id]	
-			
-			@updateFocus()
-			@recalculateReviewEntriesScreenPositions()
-		
 		updateFocus: () ->
-			@updateEntryGeneration()
 			selection = @editor.getSelectionRange()
 			cursor_offset = @_aceRangeToShareJs(selection.start)
 			entries = @_getCurrentDocEntries()
-
-			if selection.start.column == selection.end.column and selection.start.row == selection.end.row
-				# No selection
-				delete entries["add-comment"]
-			else
-				entries["add-comment"] = {
-					type: "add-comment"
-					offset: cursor_offset
-				}
-
-			for id, entry of entries
-				if entry.type == "comment" and not entry.resolved
-					entry.focused = (entry.offset <= cursor_offset <= entry.offset + entry.length)
-				else if entry.type == "insert"
-					entry.focused = (entry.offset <= cursor_offset <= entry.offset + entry.content.length)
-				else if entry.type == "delete"
-					entry.focused = (entry.offset == cursor_offset)
-				else if entry.type == "add-comment" and !selection.isEmpty()
-					entry.focused = true
+			selection = !(selection.start.column == selection.end.column and selection.start.row == selection.end.row)
+			@$scope.$emit "editor:focus:changed", cursor_offset, selection
 		
-		updateEntryGeneration: () ->
-			# Rather than making angular deep watch the whole entries array
-			@$scope.reviewPanel.entryGeneration ?= 0
-			@$scope.reviewPanel.entryGeneration++
+		broadcastChange: () ->
+			@$scope.$emit "editor:track-changes:changed", @$scope.docId
 		
 		recalculateReviewEntriesScreenPositions: () ->
 			session = @editor.getSession()
@@ -376,7 +317,7 @@ define [
 			background_marker_id = session.addMarker background_range, "track-changes-marker track-changes-added-marker", "text"
 			callout_marker_id = @_createCalloutMarker(start, "track-changes-added-marker-callout")
 			@changeIdToMarkerIdMap[change.id] = { background_marker_id, callout_marker_id }
-			@updateReviewEntriesScope()
+			@broadcastChange()
 
 		_onDeleteAdded: (change) ->
 			position = @_shareJsOffsetToAcePosition(change.op.p)
@@ -391,7 +332,7 @@ define [
 
 			callout_marker_id = @_createCalloutMarker(position, "track-changes-deleted-marker-callout")
 			@changeIdToMarkerIdMap[change.id] = { background_marker_id, callout_marker_id }
-			@updateReviewEntriesScope()
+			@broadcastChange()
 		
 		_onInsertRemoved: (change) ->
 			{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[change.id]
@@ -399,7 +340,7 @@ define [
 			session = @editor.getSession()
 			session.removeMarker background_marker_id
 			session.removeMarker callout_marker_id
-			@updateReviewEntriesScope()
+			@broadcastChange()
 		
 		_onDeleteRemoved: (change) ->
 			{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[change.id]
@@ -407,7 +348,7 @@ define [
 			session = @editor.getSession()
 			session.removeMarker background_marker_id
 			session.removeMarker callout_marker_id
-			@updateReviewEntriesScope()
+			@broadcastChange()
 		
 		_onCommentAdded: (comment) ->
 			if !@changeIdToMarkerIdMap[comment.id]?
@@ -420,7 +361,7 @@ define [
 				background_marker_id = session.addMarker background_range, "track-changes-marker track-changes-comment-marker", "text"
 				callout_marker_id = @_createCalloutMarker(start, "track-changes-comment-marker-callout")
 				@changeIdToMarkerIdMap[comment.id] = { background_marker_id, callout_marker_id }
-			@updateReviewEntriesScope()
+			@broadcastChange()
 		
 		_onCommentRemoved: (comment) ->
 			if @changeIdToMarkerIdMap[comment.id]?
@@ -430,7 +371,7 @@ define [
 				session = @editor.getSession()
 				session.removeMarker background_marker_id
 				session.removeMarker callout_marker_id
-			@updateReviewEntriesScope()
+			@broadcastChange()
 
 		_aceRangeToShareJs: (range) ->
 			lines = @editor.getSession().getDocument().getLines 0, range.row
@@ -472,14 +413,14 @@ define [
 					end = start
 				@_updateMarker(change.id, start, end)
 			@editor.renderer.updateBackMarkers()
-			@updateReviewEntriesScope()
+			@broadcastChange()
 		
 		_onCommentMoved: (comment) ->
 			start = @_shareJsOffsetToAcePosition(comment.offset)
 			end = @_shareJsOffsetToAcePosition(comment.offset + comment.length)
 			@_updateMarker(comment.id, start, end)
 			@editor.renderer.updateBackMarkers()
-			@updateReviewEntriesScope()
+			@broadcastChange()
 	
 		_updateMarker: (change_id, start, end) ->
 			return if !@changeIdToMarkerIdMap[change_id]?
