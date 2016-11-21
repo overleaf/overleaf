@@ -110,9 +110,9 @@ script(type='text/ng-template', id='changeEntryTemplate')
 					i.fa.fa-pencil(ng-switch-when="insert")
 					i.rp-icon-delete(ng-switch-when="delete")
 				.rp-entry-metadata
-					p.rp-entry-metadata-line(style="color: hsl({{ user.hue }}, 70%, 50%);") {{ user.name }} 
+					p.rp-entry-metadata-line(style="color: hsl({{ user.hue }}, 70%, 40%);") {{ user.name }} 
 					p.rp-entry-metadata-line {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}
-				.rp-avatar(style="background-color: hsl({{ user.hue }}, 70%, 50%);") {{ user.avatar_text }}
+				.rp-avatar(style="background-color: hsl({{ user.hue }}, 70%, 50%);") {{ user.avatar_text | limitTo : 1 }}
 			.rp-entry-body(ng-switch="entry.type")
 					span(ng-switch-when="insert") Added&nbsp;
 						ins.rp-content-highlight {{ entry.content }} 
@@ -145,7 +145,7 @@ script(type='text/ng-template', id='commentEntryTemplate')
 				.rp-avatar(
 					ng-if="!users[comment.user_id].isSelf;"
 					style="background-color: hsl({{ users[comment.user_id].hue }}, 70%, 50%);"
-				) {{ users[comment.user_id].avatar_text }}
+				) {{ users[comment.user_id].avatar_text | limitTo : 1 }}
 				.rp-comment-body(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 90%);")
 					p.rp-comment-content {{ comment.content }}
 					p.rp-comment-metadata
