@@ -25,6 +25,8 @@
 						users="users"
 						on-resolve="resolveComment(entry, entry_id)"
 						on-unresolve="unresolveComment(entry_id)"
+						on-show-thread="showThread(entry)"
+						on-hide-thread="hideThread(entry)"
 						on-delete="deleteComment(entry_id)"
 						on-reply="submitReply(entry, entry_id);"
 						on-indicator-click="toggleReviewPanel();"
@@ -158,12 +160,15 @@ script(type='text/ng-template', id='commentEntryTemplate')
 					placeholder="{{ 'Hit \"Enter\" to reply' + (entry.resolved ? ' and re-open' : '') }}"
 				)
 			.rp-comment-resolved-description(ng-if="entry.resolved && !entry.showWhenResolved")
-				| Resolved Comment
-				a(href, ng-click="entry.showWhenResolved = true") Show
+				| Resolved comment
 			.rp-entry-actions
 				a.rp-entry-button(href, ng-click="onResolve();", ng-if="!entry.resolved") 
 					i.fa.fa-check
 					| &nbsp;Mark as resolved
+				a.rp-entry-button(href, ng-click="onShowThread();", ng-if="entry.resolved && !entry.showWhenResolved")
+					| &nbsp;Show
+				a.rp-entry-button(href, ng-click="onHideThread();", ng-if="entry.resolved && entry.showWhenResolved")
+					| &nbsp;Hide
 				a.rp-entry-button(href, ng-click="onUnresolve();", ng-if="entry.resolved") 
 					| &nbsp;Re-open
 				a.rp-entry-button(href, ng-click="onDelete();", ng-if="entry.resolved") 
