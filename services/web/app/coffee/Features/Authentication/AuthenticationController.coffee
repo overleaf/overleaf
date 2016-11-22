@@ -189,10 +189,11 @@ module.exports = AuthenticationController =
 		Metrics.inc "user.login.failed"
 		callback()
 
-	_setRedirectInSession: (req) ->
-		target = if Object.keys(req.query) then "#{req.path}?#{querystring.stringify(req.query)}" else req.path
+	_setRedirectInSession: (req, value) ->
+		if !value?
+			value = if Object.keys(req.query) > 0 then "#{req.path}?#{querystring.stringify(req.query)}" else req.path
 		if req.session?
-			req.session.postLoginRedirect = target
+			req.session.postLoginRedirect = value
 
 	_getRedirectFromSession: (req) ->
 		return req?.session?.postLoginRedirect || null

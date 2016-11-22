@@ -541,6 +541,10 @@ describe "AuthenticationController", ->
 			@AuthenticationController._setRedirectInSession(@req)
 			expect(@req.session.postLoginRedirect).to.equal "/somewhere?one=1"
 
+		it 'should set the supplied value', ->
+			@AuthenticationController._setRedirectInSession(@req, '/somewhere/specific')
+			expect(@req.session.postLoginRedirect).to.equal "/somewhere/specific"
+
 	describe '_getRedirectFromSession', ->
 		beforeEach ->
 			@req = {session: {postLoginRedirect: "/a?b=c"}}
