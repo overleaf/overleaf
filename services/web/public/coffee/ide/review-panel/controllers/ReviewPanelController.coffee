@@ -331,8 +331,7 @@ define [
 			$scope.reviewPanel.subView = subView
 						
 		$scope.gotoEntry = (doc_id, entry) ->
-			console.log "Going to entry", entry.docPos
-			ide.editorManager.openDocId(doc_id, { gotoLine: entry.docPos.row + 1, gotoColumn: entry.docPos.column })
+			ide.editorManager.openDocId(doc_id, { gotoOffset: entry.offset })
 
 		DOC_ID_NAMES = {} 
 		$scope.getFileName = (doc_id) ->

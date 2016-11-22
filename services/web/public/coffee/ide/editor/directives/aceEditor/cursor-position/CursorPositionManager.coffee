@@ -1,4 +1,6 @@
-define [], () ->
+define [
+	"ide/editor/AceShareJsCodec"
+], (AceShareJsCodec) ->
 	class CursorPositionManager
 		constructor: (@$scope, @editor, @element, @localStorage) ->
 
@@ -23,10 +25,16 @@ define [], () ->
 				@storeCursorPosition(@editor.getSession())
 				@storeScrollTopPosition(@editor.getSession())
 
-			@$scope.$on "#{@$scope.name}:gotoLine", (editor, line, column) =>
+			@$scope.$on "#{@$scope.name}:gotoLine", (e, line, column) =>
 				if line?
 					setTimeout () =>
 						@gotoLine(line, column)
+					, 10 # Hack: Must happen after @gotoStoredPosition
+			
+			@$scope.$on "#{@$scope.name}:gotoOffset", (e, offset) =>
+				if offset?
+					setTimeout () =>
+						@gotoOffset(offset)
 					, 10 # Hack: Must happen after @gotoStoredPosition
 
 		storeScrollTopPosition: (session) ->
@@ -57,3 +65,8 @@ define [], () ->
 			@editor.gotoLine(line, column)
 			@editor.scrollToLine(line,true,true) # centre and animate
 			@editor.focus()
+
+		gotoOffset: (offset) ->
+			lines = @editor.getSession().getDocument().getAllLines()
+			position = AceShareJsCodec.shareJsOffsetToAcePosition(offset, lines)
+			@gotoLine(position.row + 1, position.column)

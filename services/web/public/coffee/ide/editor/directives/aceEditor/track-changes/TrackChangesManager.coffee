@@ -2,7 +2,8 @@ define [
 	"ace/ace"
 	"utils/EventEmitter"
 	"ide/colors/ColorManager"
-], (_, EventEmitter, ColorManager) ->
+	"ide/editor/AceShareJsCodec"
+], (_, EventEmitter, ColorManager, AceShareJsCodec) ->
 	class TrackChangesManager
 		Range = ace.require("ace/range").Range
 		
@@ -377,32 +378,15 @@ define [
 
 		_aceRangeToShareJs: (range) ->
 			lines = @editor.getSession().getDocument().getLines 0, range.row
-			offset = 0
-			for line, i in lines
-				offset += if i < range.row
-					line.length
-				else
-					range.column
-			offset += range.row # Include newlines
+			return AceShareJsCodec.aceRangeToShareJs(range, lines)
 
 		_aceChangeToShareJs: (delta) ->
-			offset = @_aceRangeToShareJs(delta.start)
-
-			text = delta.lines.join('\n')
-			switch delta.action
-				when 'insert'
-					return { i: text, p: offset }
-				when 'remove'
-					return { d: text, p: offset }
-				else throw new Error "unknown action: #{delta.action}"
+			lines = @editor.getSession().getDocument().getLines 0, range.rowf
+			return AceShareJsCodec.aceChangeToShareJs(delta, lines)
 		
 		_shareJsOffsetToAcePosition: (offset) ->
 			lines = @editor.getSession().getDocument().getAllLines()
-			row = 0
-			for line, row in lines
-				break if offset <= line.length
-				offset -= lines[row].length + 1 # + 1 for newline char
-			return {row:row, column:offset}
+			return AceShareJsCodec.shareJsOffsetToAcePosition(offset, lines)
 		
 		_onChangesMoved: (changes) ->
 			# TODO: PERFORMANCE: Only run through the Ace lines once, and calculate all

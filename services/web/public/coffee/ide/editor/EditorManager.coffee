@@ -57,7 +57,12 @@ define [
 					# CursorPositionManager
 					setTimeout () =>
 						@$scope.$broadcast "editor:gotoLine", options.gotoLine, options.gotoColumn
-					,0
+					, 0
+				else if options.gotoOffset?
+					setTimeout () =>
+						@$scope.$broadcast "editor:gotoOffset", options.gotoOffset
+					, 0
+					
 
 			if doc.id == @$scope.editor.open_doc_id and !options.forceReopen
 				@$scope.$apply () =>
