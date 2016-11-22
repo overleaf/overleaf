@@ -56,14 +56,6 @@ describe "UserPagesController", ->
 				done()
 			@UserPagesController.registerPage @req, @res
 
-		it "should set the redirect", (done)->
-			redirect = "/go/here/please"
-			@req.query.redir = redirect
-			@res.render = (page, opts)=>
-				opts.redir.should.equal redirect
-				done()
-			@UserPagesController.registerPage @req, @res
-
 		it "should set sharedProjectData", (done)->
 			@req.query.project_name = "myProject"
 			@req.query.user_first_name = "user_first_name_here"
@@ -95,14 +87,6 @@ describe "UserPagesController", ->
 		it "should render the login page", (done)->
 			@res.render = (page)=>
 				page.should.equal "user/login"
-				done()
-			@UserPagesController.loginPage @req, @res
-
-		it "should set the redirect", (done)->
-			redirect = "/go/here/please"
-			@req.query.redir = redirect
-			@res.render = (page, opts)=>
-				opts.redir.should.equal redirect
 				done()
 			@UserPagesController.loginPage @req, @res
 

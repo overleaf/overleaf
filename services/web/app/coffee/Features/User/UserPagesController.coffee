@@ -20,7 +20,6 @@ module.exports =
 
 		res.render 'user/register',
 			title: 'register'
-			redir: req.query.redir
 			sharedProjectData: sharedProjectData
 			newTemplateData: newTemplateData
 			new_email:req.query.new_email || ""
@@ -51,7 +50,6 @@ module.exports =
 	loginPage : (req, res)->
 		res.render 'user/login',
 			title: 'login',
-			redir: req.query.redir,
 			email: req.query.email
 
 	settingsPage : (req, res, next)->

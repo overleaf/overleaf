@@ -62,17 +62,18 @@ module.exports = AuthenticationController =
 			if err?
 				return next(err)
 			if user # `user` is either a user object or false
+				redir = AuthenticationController._getRedirectFromSession(req) || "/project"
 				AuthenticationController.afterLoginSessionSetup req, user, (err) ->
 					if err?
 						return next(err)
-					res.json {redir: req._redir}
+					AuthenticationController._clearRedirectFromSession(req)
+					res.json {redir: redir}
 			else
 				res.json message: info
 		)(req, res, next)
 
 	doPassportLogin: (req, username, password, done) ->
 		email = username.toLowerCase()
-		redir = Url.parse(req?.body?.redir or "/project").path
 		LoginRateLimiter.processLoginRequest email, (err, isAllowed)->
 			return done(err) if err?
 			if !isAllowed
@@ -90,7 +91,6 @@ module.exports = AuthenticationController =
 					req.session.justLoggedIn = true
 					# capture the request ip for use when creating the session
 					user._login_req_ip = req.ip
-					req._redir = redir
 					return done(null, user)
 				else
 					AuthenticationController._recordFailedLogin()
@@ -127,7 +127,7 @@ module.exports = AuthenticationController =
 	requireLogin: () ->
 		doRequest = (req, res, next = (error) ->) ->
 			if !AuthenticationController.isUserLoggedIn(req)
-				AuthenticationController._redirectToLoginOrRegisterPage(req, res)
+				AuthenticationController._redirectToLoginOrRegisterPage(req, res, next)
 			else
 				req.user = AuthenticationController.getSessionUser(req)
 				next()
@@ -156,22 +156,22 @@ module.exports = AuthenticationController =
 			logger.err user:user, pass:pass, "invalid login details"
 		return isValid
 
-	_redirectToLoginOrRegisterPage: (req, res)->
+	_redirectToLoginOrRegisterPage: (req, res, next)->
 		if req.query.zipUrl? or req.query.project_name?
-			return AuthenticationController._redirectToRegisterPage(req, res)
+			return AuthenticationController._redirectToRegisterPage(req, res, next)
 		else
-			AuthenticationController._redirectToLoginPage(req, res)
+			AuthenticationController._redirectToLoginPage(req, res, next)
 
-	_redirectToLoginPage: (req, res) ->
+	_redirectToLoginPage: (req, res, next) ->
 		logger.log url: req.url, "user not logged in so redirecting to login page"
-		req.query.redir = req.path
+		AuthenticationController._setRedirectInSession(req)
 		url = "/login?#{querystring.stringify(req.query)}"
 		res.redirect url
 		Metrics.inc "security.login-redirect"
 
-	_redirectToRegisterPage: (req, res) ->
+	_redirectToRegisterPage: (req, res, next) ->
 		logger.log url: req.url, "user not logged in so redirecting to register page"
-		req.query.redir = req.path
+		AuthenticationController._setRedirectInSession(req)
 		url = "/register?#{querystring.stringify(req.query)}"
 		res.redirect url
 		Metrics.inc "security.login-redirect"
@@ -188,3 +188,15 @@ module.exports = AuthenticationController =
 	_recordFailedLogin: (callback = (error) ->) ->
 		Metrics.inc "user.login.failed"
 		callback()
+
+	_setRedirectInSession: (req) ->
+		target = if Object.keys(req.query) then "#{req.path}?#{querystring.stringify(req.query)}" else req.path
+		if req.session?
+			req.session.postLoginRedirect = target
+
+	_getRedirectFromSession: (req) ->
+		return req?.session?.postLoginRedirect || null
+
+	_clearRedirectFromSession: (req) ->
+		if req.session?
+			delete req.session.postLoginRedirect
