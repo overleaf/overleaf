@@ -191,7 +191,7 @@ module.exports = AuthenticationController =
 
 	_setRedirectInSession: (req, value) ->
 		if !value?
-			value = if Object.keys(req.query) > 0 then "#{req.path}?#{querystring.stringify(req.query)}" else req.path
+			value = if Object.keys(req.query).length > 0 then "#{req.path}?#{querystring.stringify(req.query)}" else req.path
 		if req.session?
 			req.session.postLoginRedirect = value
 
