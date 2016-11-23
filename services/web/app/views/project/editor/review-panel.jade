@@ -1,6 +1,6 @@
 #review-panel
 	.review-panel-toolbar
-		| Track Changes {{ reviewPanel.trackNewChanges}}
+		span.review-panel-toolbar-span(ng-click="reviewPanel.trackNewChanges = !reviewPanel.trackNewChanges;") Track Changes 
 		review-panel-toggle(ng-model="reviewPanel.trackNewChanges")
 
 	.rp-entry-list(
