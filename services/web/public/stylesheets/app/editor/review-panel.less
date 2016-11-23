@@ -588,6 +588,76 @@
 	}
 }
 
+.rp-toggle {
+	display: inline-block;
+	vertical-align: middle;
+}
+	.rp-toggle-hidden-input {
+		display: none;
+
+		+ .rp-toggle-btn {
+			display: block;
+			width: 3.5em;
+			height: 1.75em;
+			position: relative;
+			outline: 0;
+			margin: 0;
+			font-weight: normal;
+			cursor: pointer;
+			user-select: none;
+			padding: 1px;
+			background-color: @rp-highlight-blue;
+			border: 1px solid #FFF;
+			border-radius: .875em;
+			transition: background .15s ease, border-color 0.15s ease;
+
+			&::before,
+			&::after {
+				display: block;
+				width: 50%;
+				height: 100%;
+			}
+
+			&::before {
+				content: '';
+				display: block;
+				position: relative;
+				left: 0;
+				background-color: #FFF;
+				border-radius: .875em;
+				transition: background-color 0.15s ease, color 0.15s ease, left 0.15s ease;
+			}
+
+			&::after {
+				content: 'OFF';
+				position: absolute;
+				top: 0;
+				left: 50%;
+				font-size: .8em;
+				font-weight: normal;
+				text-align: center;
+				line-height: 215%;
+				color: #FFF;
+			}
+		}
+
+		&:checked + .rp-toggle-btn {
+			background-color: @red;
+			border-color: #FFF;
+
+			&::before {
+				left: 50%;
+				background-color: #FFF;
+			}
+
+			&::after {
+				content: 'ON';
+				left: 0;
+				color: #FFF;
+			}
+		}
+	}
+
 .ace-editor-wrapper {
 	.track-changes-marker-callout {
 		border-radius: 0;
