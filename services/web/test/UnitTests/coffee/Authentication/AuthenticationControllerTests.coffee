@@ -92,7 +92,7 @@ describe "AuthenticationController", ->
 			@req.login = sinon.stub().callsArgWith(1, null)
 			@res.json = sinon.stub()
 			@req.session = @session = {passport: {user: @user}}
-			@req.session.destroy = sinon.stub()
+			@req.session.destroy = sinon.stub().callsArgWith(0, null)
 			@req.session.save = sinon.stub().callsArgWith(0, null)
 			@req.sessionStore = {generate: sinon.stub()}
 			@passport.authenticate.callsArgWith(1, null, @user, @info)
@@ -164,7 +164,7 @@ describe "AuthenticationController", ->
 			@req.session = @session = {passport: {user: @user}}
 			@req.session =
 				passport: {user: {_id: "one"}}
-			@req.session.destroy = sinon.stub()
+			@req.session.destroy = sinon.stub().callsArgWith(0, null)
 			@req.session.save = sinon.stub().callsArgWith(0, null)
 			@req.sessionStore = {generate: sinon.stub()}
 			@UserSessionsManager.trackSession = sinon.stub()

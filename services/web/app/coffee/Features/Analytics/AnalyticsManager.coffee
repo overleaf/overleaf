@@ -1,43 +1,48 @@
-Settings = require "settings-sharelatex"
+settings = require "settings-sharelatex"
 logger = require "logger-sharelatex"
 _ = require "underscore"
+request = require "request"
 
-if !Settings.analytics?.postgres?
-	module.exports =
-		recordEvent: (user_id, event, segmentation, callback = () ->) ->
-			logger.log {user_id, event, segmentation}, "no event tracking configured, logging event"
-			callback()
-else
-	Sequelize = require "sequelize"
-	options = _.extend {logging:false}, Settings.analytics.postgres
 
-	sequelize = new Sequelize(
-		Settings.analytics.postgres.database,
-		Settings.analytics.postgres.username,
-		Settings.analytics.postgres.password,
-		options
-	)
-	
-	Event = sequelize.define("Event", {
-		user_id: Sequelize.STRING,
-		event: Sequelize.STRING,
-		segmentation: Sequelize.JSONB
-	})
+makeRequest = (opts, callback)->
+	if settings.apis?.analytics?.url?
+		urlPath = opts.url
+		opts.url = "#{settings.apis.analytics.url}#{urlPath}"
+		request opts, callback
+	else
+		callback()
 
-	module.exports =
-		recordEvent: (user_id, event, segmentation = {}, callback = (error) ->) ->
-			if user_id? and typeof(user_id) != "string"
-				user_id = user_id.toString()
-			if user_id == Settings.smokeTest?.userId
-				# Don't record smoke tests analytics
-				return callback()
-			Event
-				.create({ user_id, event, segmentation })
-				.then(
-					(result) -> callback(),
-					(error) ->
-						logger.err {err: error, user_id, event, segmentation}, "error recording analytics event"
-						callback(error)
-				)
-			
-		sync: () -> sequelize.sync()
+
+
+module.exports =
+
+
+	recordEvent: (user_id, event, segmentation = {}, callback = (error) ->) ->
+		if user_id == settings.smokeTest?.userId
+			return callback()
+		opts =
+			body:
+				event:event
+				segmentation:segmentation
+			json:true
+			method:"POST"
+			timeout:1000
+			url: "/user/#{user_id}/event"
+		makeRequest opts, callback
+
+
+	getLastOccurance: (user_id, event, callback = (error) ->) ->
+		opts =
+			body:
+				event:event
+			json:true
+			method:"POST"
+			timeout:1000
+			url: "/user/#{user_id}/event/last_occurnace"
+		makeRequest opts, (err, response, body)->
+			if err? 
+				console.log response, opts
+				logger.err {user_id, err}, "error getting last occurance of event"
+				return callback err
+			else
+				return callback null, body

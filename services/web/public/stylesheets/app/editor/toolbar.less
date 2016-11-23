@@ -138,12 +138,16 @@
 }
 
 .toolbar-label {
-	display: inline-block;
+	display: none;
 	margin: 0 4px;
 	font-size: 12px;
 	font-weight: 600;
 	margin-bottom: 2px;
 	vertical-align: middle;
+
+	@media (min-width: @screen-sm-min) {
+		display: inline-block;
+	}
 }
 
 .editor-dark {

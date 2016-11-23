@@ -91,23 +91,6 @@ define [
 			if value?
 				localStorage "ui.reviewPanelOpen.#{window.project_id}", value
 
-		# Only run the header AB test for newly registered users.
-		_abTestStartDate = new Date(Date.UTC(2016, 8, 28))
-		_userSignUpDate = new Date(window.user.signUpDate)
-
-		$scope.shouldABTestHeaderLabels = _userSignUpDate > _abTestStartDate
-		$scope.headerLabelsABVariant = ""
-
-		if ($scope.shouldABTestHeaderLabels)
-			sixpack.participate "editor-header", [ "default", "labels"], (chosenVariation) ->
-				$scope.headerLabelsABVariant = chosenVariation
-
-		$scope.trackABTestConversion = (headerItem) ->
-			event_tracking.sendMB "header-ab-conversion", {
-				headerItem: headerItem,
-				variant: $scope.headerLabelsABVariant
-			}
-
 		# Tracking code.
 		$scope.$watch "ui.view", (newView, oldView) ->
 			if newView? and newView != "editor" and newView != "pdf"

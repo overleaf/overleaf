@@ -39,6 +39,7 @@ ReferencesController = require('./Features/References/ReferencesController')
 AuthorizationMiddlewear = require('./Features/Authorization/AuthorizationMiddlewear')
 BetaProgramController = require('./Features/BetaProgram/BetaProgramController')
 AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
+AnnouncementsController = require("./Features/Announcements/AnnouncementsController")
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -186,6 +187,9 @@ module.exports = class Router
 
 		webRouter.get '/notifications', AuthenticationController.requireLogin(), NotificationsController.getAllUnreadNotifications
 		webRouter.delete '/notifications/:notification_id', AuthenticationController.requireLogin(), NotificationsController.markNotificationAsRead
+
+		webRouter.get '/announcements', AuthenticationController.requireLogin(), AnnouncementsController.getUndreadAnnouncements
+
 
 		# Deprecated in favour of /internal/project/:project_id but still used by versioning
 		apiRouter.get  '/project/:project_id/details', AuthenticationController.httpAuth, ProjectApiController.getProjectDetails

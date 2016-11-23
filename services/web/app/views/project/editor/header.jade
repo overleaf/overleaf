@@ -1,388 +1,125 @@
-div(ng-if="!shouldABTestHeaderLabels")
-	header.toolbar.toolbar-header(
-		ng-cloak,
-		ng-hide="state.loading"
-	)
+header.toolbar.toolbar-header.toolbar-with-labels(
+	ng-cloak,
+	ng-hide="state.loading"
+)
+	.toolbar-left
 		a.btn.btn-full-height(
 			href,
-			ng-click="ui.leftMenuShown = true"
-			tooltip='#{translate("menu")}',
-			tooltip-placement="bottom",
-			tooltip-append-to-body="true",
+			ng-click="ui.leftMenuShown = true;",
 		)
 			i.fa.fa-fw.fa-bars
+			p.toolbar-label #{translate("menu")}
 		a(
 			href="/project"
-			tooltip="#{translate('back_to_projects')}",
-			tooltip-placement="bottom",
-			tooltip-append-to-body="true"
 		)
 			i.fa.fa-fw.fa-level-up
-		
-		span(ng-controller="PdfViewToggleController")
-			a(
-				href,
-				ng-show="ui.pdfLayout == 'flat' && fileTreeClosed",
-				tooltip="PDF",
-				tooltip-placement="bottom",
-				tooltip-append-to-body="true",
-				ng-click="togglePdfView()",
-				ng-class="{ 'active': ui.view == 'pdf' }"
-			)
-				i.fa.fa-file-pdf-o
 
-		.toolbar-center.project-name(ng-controller="ProjectNameController")
-			span.name(
-				ng-dblclick="!permissions.admin || startRenaming()",
-				ng-show="!state.renaming"
-			) {{ project.name }}
-
-			input.form-control(
-				type="text"
-				ng-model="inputs.name",
-				ng-show="state.renaming",
-				on-enter="finishRenaming()",
-				ng-blur="finishRenaming()",
-				select-name-when="state.renaming"
-			)
-
-			a.rename(
-				ng-if="permissions.admin",
-				href='#',
-				tooltip-placement="bottom",
-				tooltip="#{translate('rename')}",
-				tooltip-append-to-body="true",
-				ng-click="startRenaming()",
-				ng-show="!state.renaming"
-			)
-				i.fa.fa-pencil
-
-		.toolbar-right
-			span.online-users(
-				ng-show="onlineUsersArray.length > 0"
-				ng-controller="OnlineUsersController"
-			)
-				span(ng-if="onlineUsersArray.length < 4")
-					span.online-user(
-						ng-repeat="user in onlineUsersArray",
-						ng-style="{ 'background-color': 'hsl({{ getHueForUserId(user.user_id) }}, 70%, 50%)' }",
-						popover="{{ user.name }}"
-						popover-placement="bottom"
-						popover-append-to-body="true"
-						popover-trigger="mouseenter"
-						ng-click="gotoUser(user)"
-					) {{ user.name.slice(0,1) }}
-				
-				span.dropdown(dropdown, ng-if="onlineUsersArray.length >= 4")
-					span.online-user.online-user-multi(
-						dropdown-toggle,
-						tooltip="#{translate('connected_users')}",
-						tooltip-placement="left"
-					)
-						strong {{ onlineUsersArray.length }}
-						i.fa.fa-fw.fa-user
-					ul.dropdown-menu.pull-right
-						li.dropdown-header #{translate('connected_users')}
-						li(ng-repeat="user in onlineUsersArray")
-							a(href, ng-click="gotoUser(user)")
-								span.online-user(
-									ng-style="{ 'background-color': 'hsl({{ getHueForUserId(user.user_id) }}, 70%, 50%)' }"
-								) {{ user.name.slice(0,1) }}
-								| {{ user.name }}
-
-			a.btn.btn-full-height(
-				href,
-				ng-if="trackChangesFeatureFlag",
-				ng-class="{ active: ui.reviewPanelOpen }"
-				tooltip="#{translate('review')}",
-				tooltip-placement="bottom",
-				ng-click="toggleReviewPanel()"
-			)
-				| Review
-			a.btn.btn-full-height(
-				href,
-				ng-if="permissions.admin",
-				tooltip="#{translate('share')}",
-				tooltip-placement="bottom",
-				ng-click="openShareProjectModal()",
-				ng-controller="ShareController",
-			)
-				i.fa.fa-fw.fa-group
-			a.btn.btn-full-height(
-				href,
-				ng-click="toggleHistory()",
-				ng-class="{ active: (ui.view == 'history') }"
-				tooltip="#{translate('recent_changes')}",
-				tooltip-placement="bottom",
-			)
-				i.fa.fa-fw.fa-history
-			a.btn.btn-full-height(
-				href,
-				tooltip="#{translate('chat')}",
-				tooltip-placement="bottom",
-				ng-class="{ active: ui.chatOpen }",
-				ng-click="toggleChat()",
-				ng-controller="ChatButtonController",
-				ng-show="!anonymous",
-			)
-				i.fa.fa-fw.fa-comment(
-					ng-class="{ 'bounce': unreadMessages > 0 }"
-				)
-				span.label.label-info(
-					ng-show="unreadMessages > 0"
-				) {{ unreadMessages }}
-
-div(ng-if="shouldABTestHeaderLabels")
-	div(sixpack-switch="editor-header")
-		header.toolbar.toolbar-header(
-			ng-cloak,
-			ng-hide="state.loading"
-			sixpack-default
+	span(ng-controller="PdfViewToggleController")
+		a(
+			href,
+			ng-show="ui.pdfLayout == 'flat' && fileTreeClosed",
+			tooltip="PDF",
+			tooltip-placement="bottom",
+			tooltip-append-to-body="true",
+			ng-click="togglePdfView()",
+			ng-class="{ 'active': ui.view == 'pdf' }"
 		)
-			a.btn.btn-full-height(
-				href,
-				ng-click="ui.leftMenuShown = true; trackABTestConversion('menu');"
-				tooltip='#{translate("menu")}',
-				tooltip-placement="bottom",
-				tooltip-append-to-body="true",
-				sixpack-convert="editor-header"
-			)
-				i.fa.fa-fw.fa-bars
-			a(
-				href="/project"
-				tooltip="#{translate('back_to_projects')}",
-				tooltip-placement="bottom",
-				tooltip-append-to-body="true"
-			)
-				i.fa.fa-fw.fa-level-up
-			
-			span(ng-controller="PdfViewToggleController")
-				a(
-					href,
-					ng-show="ui.pdfLayout == 'flat' && fileTreeClosed",
-					tooltip="PDF",
-					tooltip-placement="bottom",
-					tooltip-append-to-body="true",
-					ng-click="togglePdfView()",
-					ng-class="{ 'active': ui.view == 'pdf' }"
-				)
-					i.fa.fa-file-pdf-o
+			i.fa.fa-file-pdf-o
 
-			.toolbar-center.project-name(ng-controller="ProjectNameController")
-				span.name(
-					ng-dblclick="!permissions.admin || startRenaming()",
-					ng-show="!state.renaming"
-				) {{ project.name }}
+	.toolbar-center.project-name(ng-controller="ProjectNameController")
+		span.name(
+			ng-dblclick="!permissions.admin || startRenaming()",
+			ng-show="!state.renaming"
+		) {{ project.name }}
 
-				input.form-control(
-					type="text"
-					ng-model="inputs.name",
-					ng-show="state.renaming",
-					on-enter="finishRenaming()",
-					ng-blur="finishRenaming()",
-					select-name-when="state.renaming"
-				)
-
-				a.rename(
-					ng-if="permissions.admin",
-					href='#',
-					tooltip-placement="bottom",
-					tooltip="#{translate('rename')}",
-					tooltip-append-to-body="true",
-					ng-click="startRenaming()",
-					ng-show="!state.renaming"
-				)
-					i.fa.fa-pencil
-
-			.toolbar-right
-				span.online-users(
-					ng-show="onlineUsersArray.length > 0"
-					ng-controller="OnlineUsersController"
-				)
-					span(ng-if="onlineUsersArray.length < 4")
-						span.online-user(
-							ng-repeat="user in onlineUsersArray",
-							ng-style="{ 'background-color': 'hsl({{ getHueForUserId(user.user_id) }}, 70%, 50%)' }",
-							popover="{{ user.name }}"
-							popover-placement="bottom"
-							popover-append-to-body="true"
-							popover-trigger="mouseenter"
-							ng-click="gotoUser(user)"
-						) {{ user.name.slice(0,1) }}
-					
-					span.dropdown(dropdown, ng-if="onlineUsersArray.length >= 4")
-						span.online-user.online-user-multi(
-							dropdown-toggle,
-							tooltip="#{translate('connected_users')}",
-							tooltip-placement="left"
-						)
-							strong {{ onlineUsersArray.length }}
-							i.fa.fa-fw.fa-user
-						ul.dropdown-menu.pull-right
-							li.dropdown-header #{translate('connected_users')}
-							li(ng-repeat="user in onlineUsersArray")
-								a(href, ng-click="gotoUser(user)")
-									span.online-user(
-										ng-style="{ 'background-color': 'hsl({{ getHueForUserId(user.user_id) }}, 70%, 50%)' }"
-									) {{ user.name.slice(0,1) }}
-									| {{ user.name }}
-
-			
-				a.btn.btn-full-height(
-					href,
-					ng-if="permissions.admin",
-					tooltip="#{translate('share')}",
-					tooltip-placement="bottom",
-					ng-click="openShareProjectModal(); trackABTestConversion('share');",
-					ng-controller="ShareController",
-					sixpack-convert="editor-header"
-				)
-					i.fa.fa-fw.fa-group
-				a.btn.btn-full-height(
-					href,
-					ng-click="toggleHistory(); trackABTestConversion('history');",
-					ng-class="{ active: (ui.view == 'history') }"
-					tooltip="#{translate('recent_changes')}",
-					tooltip-placement="bottom",
-					sixpack-convert="editor-header"
-				)
-					i.fa.fa-fw.fa-history
-				a.btn.btn-full-height(
-					href,
-					tooltip="#{translate('chat')}",
-					tooltip-placement="bottom",
-					ng-class="{ active: ui.chatOpen }",
-					ng-click="toggleChat(); trackABTestConversion('chat');",
-					ng-controller="ChatButtonController",
-					ng-show="!anonymous",
-					sixpack-convert="editor-header"
-				)
-					i.fa.fa-fw.fa-comment(
-						ng-class="{ 'bounce': unreadMessages > 0 }"
-					)
-					span.label.label-info(
-						ng-show="unreadMessages > 0"
-					) {{ unreadMessages }}
-
-		header.toolbar.toolbar-header.toolbar-with-labels(
-			ng-cloak,
-			ng-hide="state.loading"
-			sixpack-when="labels"
+		input.form-control(
+			type="text"
+			ng-model="inputs.name",
+			ng-show="state.renaming",
+			on-enter="finishRenaming()",
+			ng-blur="finishRenaming()",
+			select-name-when="state.renaming"
 		)
-			.toolbar-left
-				a.btn.btn-full-height(
-					href,
-					ng-click="ui.leftMenuShown = true; trackABTestConversion('menu');",
-					sixpack-convert="editor-header"
-				)
-					i.fa.fa-fw.fa-bars
-					p.toolbar-label #{translate("menu")}
-				a(
-					href="/project"
-				)
-					i.fa.fa-fw.fa-level-up
 
-			span(ng-controller="PdfViewToggleController")
-				a(
-					href,
-					ng-show="ui.pdfLayout == 'flat' && fileTreeClosed",
-					tooltip="PDF",
-					tooltip-placement="bottom",
-					tooltip-append-to-body="true",
-					ng-click="togglePdfView()",
-					ng-class="{ 'active': ui.view == 'pdf' }"
-				)
-					i.fa.fa-file-pdf-o
+		a.rename(
+			ng-if="permissions.admin",
+			href='#',
+			tooltip-placement="bottom",
+			tooltip="#{translate('rename')}",
+			tooltip-append-to-body="true",
+			ng-click="startRenaming()",
+			ng-show="!state.renaming"
+		)
+			i.fa.fa-pencil
 
-			.toolbar-center.project-name(ng-controller="ProjectNameController")
-				span.name(
-					ng-dblclick="!permissions.admin || startRenaming()",
-					ng-show="!state.renaming"
-				) {{ project.name }}
-
-				input.form-control(
-					type="text"
-					ng-model="inputs.name",
-					ng-show="state.renaming",
-					on-enter="finishRenaming()",
-					ng-blur="finishRenaming()",
-					select-name-when="state.renaming"
-				)
-
-				a.rename(
-					ng-if="permissions.admin",
-					href='#',
-					tooltip-placement="bottom",
-					tooltip="#{translate('rename')}",
-					tooltip-append-to-body="true",
-					ng-click="startRenaming()",
-					ng-show="!state.renaming"
-				)
-					i.fa.fa-pencil
-
-			.toolbar-right
-				span.online-users(
-					ng-show="onlineUsersArray.length > 0"
-					ng-controller="OnlineUsersController"
-				)
-					span(ng-if="onlineUsersArray.length < 4")
-						span.online-user(
-							ng-repeat="user in onlineUsersArray",
-							ng-style="{ 'background-color': 'hsl({{ getHueForUserId(user.user_id) }}, 70%, 50%)' }",
-							popover="{{ user.name }}"
-							popover-placement="bottom"
-							popover-append-to-body="true"
-							popover-trigger="mouseenter"
-							ng-click="gotoUser(user)"
-						) {{ user.name.slice(0,1) }}
-					
-					span.dropdown(dropdown, ng-if="onlineUsersArray.length >= 4")
-						span.online-user.online-user-multi(
-							dropdown-toggle,
-							tooltip="#{translate('connected_users')}",
-							tooltip-placement="left"
-						)
-							strong {{ onlineUsersArray.length }}
-							i.fa.fa-fw.fa-user
-						ul.dropdown-menu.pull-right
-							li.dropdown-header #{translate('connected_users')}
-							li(ng-repeat="user in onlineUsersArray")
-								a(href, ng-click="gotoUser(user)")
-									span.online-user(
-										ng-style="{ 'background-color': 'hsl({{ getHueForUserId(user.user_id) }}, 70%, 50%)' }"
-									) {{ user.name.slice(0,1) }}
-									| {{ user.name }}
-
+	.toolbar-right
+		span.online-users(
+			ng-show="onlineUsersArray.length > 0"
+			ng-controller="OnlineUsersController"
+		)
+			span(ng-if="onlineUsersArray.length < 4")
+				span.online-user(
+					ng-repeat="user in onlineUsersArray",
+					ng-style="{ 'background-color': 'hsl({{ getHueForUserId(user.user_id) }}, 70%, 50%)' }",
+					popover="{{ user.name }}"
+					popover-placement="bottom"
+					popover-append-to-body="true"
+					popover-trigger="mouseenter"
+					ng-click="gotoUser(user)"
+				) {{ user.name.slice(0,1) }}
 			
-				a.btn.btn-full-height(
-					href,
-					ng-if="permissions.admin",
-					ng-click="openShareProjectModal(); trackABTestConversion('share');",
-					ng-controller="ShareController",
-					sixpack-convert="editor-header"
+			span.dropdown(dropdown, ng-if="onlineUsersArray.length >= 4")
+				span.online-user.online-user-multi(
+					dropdown-toggle,
+					tooltip="#{translate('connected_users')}",
+					tooltip-placement="left"
 				)
-					i.fa.fa-fw.fa-group
-					p.toolbar-label #{translate("share")}
-				a.btn.btn-full-height(
-					href,
-					ng-click="toggleHistory(); trackABTestConversion('history');",
-					ng-class="{ active: (ui.view == 'history') }",
-					sixpack-convert="editor-header"
-				)
-					i.fa.fa-fw.fa-history
-					p.toolbar-label #{translate("history")}
-				a.btn.btn-full-height(
-					href,
-					ng-class="{ active: ui.chatOpen }",
-					ng-click="toggleChat(); trackABTestConversion('chat');",
-					ng-controller="ChatButtonController",
-					ng-show="!anonymous",
-					sixpack-convert="editor-header"
-				)
-					i.fa.fa-fw.fa-comment(
-						ng-class="{ 'bounce': unreadMessages > 0 }"
-					)
-					span.label.label-info(
-						ng-show="unreadMessages > 0"
-					) {{ unreadMessages }}
-					p.toolbar-label #{translate("chat")}
+					strong {{ onlineUsersArray.length }}
+					i.fa.fa-fw.fa-user
+				ul.dropdown-menu.pull-right
+					li.dropdown-header #{translate('connected_users')}
+					li(ng-repeat="user in onlineUsersArray")
+						a(href, ng-click="gotoUser(user)")
+							span.online-user(
+								ng-style="{ 'background-color': 'hsl({{ getHueForUserId(user.user_id) }}, 70%, 50%)' }"
+							) {{ user.name.slice(0,1) }}
+							| {{ user.name }}
+
+		a.btn.btn-full-height(
+			href,
+			ng-if="trackChangesFeatureFlag",
+			ng-class="{ active: ui.reviewPanelOpen }"
+			tooltip="#{translate('review')}",
+			tooltip-placement="bottom",
+			ng-click="toggleReviewPanel()"
+		)
+			| Review
+		a.btn.btn-full-height(
+			href,
+			ng-if="permissions.admin",
+			ng-click="openShareProjectModal();",
+			ng-controller="ShareController",
+		)
+			i.fa.fa-fw.fa-group
+			p.toolbar-label #{translate("share")}
+		a.btn.btn-full-height(
+			href,
+			ng-click="toggleHistory();",
+			ng-class="{ active: (ui.view == 'history') }",
+		)
+			i.fa.fa-fw.fa-history
+			p.toolbar-label #{translate("history")}
+		a.btn.btn-full-height(
+			href,
+			ng-class="{ active: ui.chatOpen }",
+			ng-click="toggleChat();",
+			ng-controller="ChatButtonController",
+			ng-show="!anonymous",
+		)
+			i.fa.fa-fw.fa-comment(
+				ng-class="{ 'bounce': unreadMessages > 0 }"
+			)
+			span.label.label-info(
+				ng-show="unreadMessages > 0"
+			) {{ unreadMessages }}
+			p.toolbar-label #{translate("chat")}

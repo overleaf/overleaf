@@ -33,6 +33,12 @@ block content
 													)
 													span.small.text-primary(ng-show="settingsForm.email.$invalid && settingsForm.email.$dirty")
 														|  #{translate("must_be_email_address")}
+											else
+												// show the email, non-editable
+												.form-group
+													label.control-label #{translate("email")}
+													div.form-control(readonly="true") #{user.email}
+
 											.form-group
 												label(for='firstName').control-label #{translate("first_name")}
 												input.form-control(
