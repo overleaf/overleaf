@@ -1,7 +1,8 @@
 #review-panel
 	.review-panel-toolbar
-		| Track Changes 
-		input(type="checkbox", ng-model="reviewPanel.trackNewChanges")
+		| Track Changes {{ reviewPanel.trackNewChanges}}
+		review-panel-toggle(ng-model="reviewPanel.trackNewChanges")
+
 	.rp-entry-list(
 		review-panel-sorted
 		ng-if="reviewPanel.subView === SubViews.CUR_FILE"
