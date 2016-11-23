@@ -97,7 +97,9 @@
 .review-panel-toolbar {
 	display: none;
 	.rp-size-expanded & {
-		display: block;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 	.rp-state-current-file & {
 		position: absolute;
@@ -106,14 +108,14 @@
 		right: 0;
 	}
 	height: @rp-toolbar-height;
-	padding: 6px;
 	border-bottom: 1px solid @rp-border-grey;
 	background-color: @rp-bg-dim-blue;
 	text-align: center;
 	z-index: 2;
 }
-	.review-panel-toolbar-span {
+	.review-panel-toolbar-label {
 		cursor: pointer;
+		margin-right: 5px;
 	}
 
 .rp-entry-list {
@@ -635,10 +637,9 @@
 				content: 'OFF';
 				position: absolute;
 				top: 0;
-				left: 50%;
-				font-size: .8em;
+				right: 1px;
+				font-size: .75em;
 				font-weight: normal;
-				text-align: center;
 				line-height: 215%;
 				color: #FFF;
 			}
@@ -655,7 +656,8 @@
 
 			&::after {
 				content: 'ON';
-				left: 0;
+				left: 1px;
+				right: auto;
 				color: #FFF;
 			}
 		}

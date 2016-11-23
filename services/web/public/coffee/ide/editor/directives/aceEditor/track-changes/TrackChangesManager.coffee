@@ -381,7 +381,7 @@ define [
 			return AceShareJsCodec.aceRangeToShareJs(range, lines)
 
 		_aceChangeToShareJs: (delta) ->
-			lines = @editor.getSession().getDocument().getLines 0, range.rowf
+			lines = @editor.getSession().getDocument().getLines 0, delta.start.row
 			return AceShareJsCodec.aceChangeToShareJs(delta, lines)
 		
 		_shareJsOffsetToAcePosition: (offset) ->
