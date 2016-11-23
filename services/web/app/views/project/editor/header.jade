@@ -89,11 +89,10 @@ header.toolbar.toolbar-header.toolbar-with-labels(
 			href,
 			ng-if="trackChangesFeatureFlag",
 			ng-class="{ active: ui.reviewPanelOpen }"
-			tooltip="#{translate('review')}",
-			tooltip-placement="bottom",
 			ng-click="toggleReviewPanel()"
 		)
-			| Review
+			i.review-icon
+			p.toolbar-label Review
 		a.btn.btn-full-height(
 			href,
 			ng-if="permissions.admin",

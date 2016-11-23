@@ -697,3 +697,24 @@
 		margin-left: -1px;
 	}
 }
+
+.review-icon {
+	position: absolute;
+	background: url('/img/review-icon-sprite.png') top/30px no-repeat;
+	width: 30px;
+	height: 30px;
+
+	.toolbar .btn-full-height:hover & {
+		background-position-y: -30px;
+	}
+
+	.toolbar .btn-full-height.active &,
+	.toolbar .btn-full-height:active & {
+		background-position-y: -60px;
+	}
+
+	& + .toolbar-label {
+		margin-left: 34px;
+	}
+
+}
