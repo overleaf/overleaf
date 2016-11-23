@@ -437,6 +437,7 @@ if process.env["SHARELATEX_SAML_ENTRYPOINT"]
 	settings.externalAuth = true
 	settings.saml =
 		identityServiceName: process.env["SHARELATEX_SAML_IDENTITY_SERVICE_NAME"]
+		emailFieldName: process.env["SHARELATEX_SAML_EMAIL_FIELD_NAME"]
 		server:
 			# strings
 			entryPoint: process.env["SHARELATEX_SAML_ENTRYPOINT"]
