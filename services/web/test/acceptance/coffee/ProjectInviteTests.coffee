@@ -144,10 +144,6 @@ expectInviteRedirectToRegister = (user, link, callback=(err,result)->) ->
 		expect(response.headers.location).to.match new RegExp("^/register.*$")
 		# follow redirect to register page and extract the redirectUrl from form
 		user.request.get response.headers.location, (err, response, body) ->
-			# redirectUrl = body.match(/input name="redir" type="hidden" value="([^"]*)"/m)?[1]
-			# loginUrl = body.match(/href="([^"]*)">\s*Login here/m)?[1]
-			# expect(redirectUrl).to.not.be.oneOf [null, undefined]
-			# expect(loginUrl).to.not.be.oneOf [null, undefined]
 			callback(null)
 
 expectLoginPage = (user, callback=(err, result)->) ->
@@ -161,14 +157,12 @@ expectLoginRedirectToInvite = (user, link, callback=(err, result)->) ->
 	tryLoginUser user, (err, response, body) ->
 		expect(err).to.be.oneOf [null, undefined]
 		expect(response.statusCode).to.equal 200
-		# expect(link).to.match new RegExp("^.*#{body.redir}\?.*$")
 		callback(null, null)
 
 expectRegistrationRedirectToInvite = (user, email, link, callback=(err, result)->) ->
 	tryRegisterUser user, email, (err, response, body) ->
 		expect(err).to.be.oneOf [null, undefined]
 		expect(response.statusCode).to.equal 200
-		# expect(link).to.match new RegExp("^.*#{body.redir}\?.*$")
 		callback(null, null)
 
 expectInviteRedirectToProject = (user, link, invite, callback=(err,result)->) ->
@@ -421,7 +415,6 @@ describe "ProjectInviteTests", ->
 					(cb) => revokeInvite(@sendingUser, @projectId, @invite._id, cb)
 				], done
 
-			# # # #
 			describe 'registration prompt workflow with valid token', ->
 
 				it 'should redirect to the register page', (done) ->
@@ -438,7 +431,6 @@ describe "ProjectInviteTests", ->
 						(cb) => expectProjectAccess @user, @invite.projectId, cb
 					], done
 
-			# # # #
 			describe 'registration prompt workflow with non-valid token', ->
 
 				before (done)->

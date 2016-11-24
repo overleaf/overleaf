@@ -155,10 +155,11 @@ describe "AuthenticationController", ->
 				@AuthenticationController.passportLogin @req, @res, @next
 				@req.login.callCount.should.equal 0
 
-			it 'should send a json response with redirect', () ->
+			it 'should not send a json response with redirect', () ->
 				@AuthenticationController.passportLogin @req, @res, @next
 				@res.json.callCount.should.equal 1
 				@res.json.calledWith({message: @info}).should.equal true
+				expect(@res.json.lastCall.args[0].redir?).to.equal false
 
 	describe 'afterLoginSessionSetup', ->
 
@@ -268,9 +269,6 @@ describe "AuthenticationController", ->
 
 			it "should set res.session.justLoggedIn", ->
 				@req.session.justLoggedIn.should.equal true
-
-			it "should redirect the user to the specified location", ->
-				expect(@req._redir).to.deep.equal @redir
 
 			it "should record the successful login", ->
 				@AuthenticationController._recordSuccessfulLogin
