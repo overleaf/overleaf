@@ -217,14 +217,6 @@ define [
 						session = editor.getSession()
 						session.setOption("useWorker", value);
 
-				scope.$watch "trackChangesEnabled", (enabled) ->
-					return if !enabled?
-					if enabled
-						trackChangesManager.enable()
-					else
-						trackChangesManager.disable()
-
-
 				editor.setOption("scrollPastEnd", true)
 
 				updateCount = 0

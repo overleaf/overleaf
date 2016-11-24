@@ -20,20 +20,6 @@ define [
 				return if !track_new_changes?
 				@changesTracker?.track_changes = track_new_changes
 			
-			changingSelection = false
-			@editor.on "changeSelection", (args...) =>
-				# Deletes can send about 5 changeSelection events, so
-				# just act on the last one.
-				if !changingSelection
-					changingSelection = true
-					@$scope.$evalAsync () =>
-						changingSelection = false
-						@updateFocus()
-						@recalculateReviewEntriesScreenPositions()
-			
-			@editor.on "changeSession", () =>
-				@redrawAnnotations()
-			
 			@$scope.$on "comment:add", (e, comment) =>
 				@addCommentToSelection(comment)
 
@@ -58,8 +44,22 @@ define [
 			@$scope.$on "review-panel:recalculate-screen-positions", () =>
 				@recalculateReviewEntriesScreenPositions()
 
+			changingSelection = false
+			onChangeSelection = (args...) =>
+				# Deletes can send about 5 changeSelection events, so
+				# just act on the last one.
+				if !changingSelection
+					changingSelection = true
+					@$scope.$evalAsync () =>
+						changingSelection = false
+						@updateFocus()
+						@recalculateReviewEntriesScreenPositions()
+			
+			onResize = () =>
+				@recalculateReviewEntriesScreenPositions()
+
 			onChange = (e) =>
-				if !@editor.initing and @enabled
+				if !@editor.initing
 					# This change is trigger by a sharejs 'change' event, which is before the
 					# sharejs 'remoteop' event. So wait until the next event loop when the 'remoteop'
 					# will have fired, before we decide if it was a remote op.
@@ -87,13 +87,29 @@ define [
 							@checkMapping()
 						, 100
 
-			@editor.on "changeSession", (e) =>
+			onChangeSession = (e) =>
 				e.oldSession?.getDocument().off "change", onChange
 				e.session.getDocument().on "change", onChange
-			@editor.getSession().getDocument().on "change", onChange
-			
-			@editor.renderer.on "resize", () =>
-				@recalculateReviewEntriesScreenPositions()
+				@redrawAnnotations()
+
+			bindToAce = () =>
+				@editor.getSession().getDocument().on "change", onChange
+				@editor.on "changeSelection", onChangeSelection
+				@editor.on "changeSession", onChangeSession
+				@editor.renderer.on "resize", onResize
+
+			unbindFromAce = () =>
+				@editor.getSession().getDocument().off "change", onChange
+				@editor.off "changeSelection", onChangeSelection
+				@editor.off "changeSession", onChangeSession
+				@editor.renderer.off "resize", onResize
+
+			@$scope.$watch "trackChangesEnabled", (enabled) =>
+				return if !enabled?
+				if enabled
+					bindToAce()
+				else
+					unbindFromAce()
 		
 		disconnectFromChangesTracker: () ->
 			@changeIdToMarkerIdMap = {}
@@ -154,12 +170,6 @@ define [
 
 			for comment in @changesTracker.comments
 				@_onCommentAdded(comment)
-
-		enable: () ->
-			@enabled = true
-	
-		disable: () ->
-			@disabled = false
 
 		addComment: (offset, length, content) ->
 			@changesTracker.addComment offset, length, {
