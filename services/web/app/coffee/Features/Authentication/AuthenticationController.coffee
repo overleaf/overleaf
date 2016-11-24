@@ -127,7 +127,7 @@ module.exports = AuthenticationController =
 	requireLogin: () ->
 		doRequest = (req, res, next = (error) ->) ->
 			if !AuthenticationController.isUserLoggedIn(req)
-				AuthenticationController._redirectToLoginOrRegisterPage(req, res, next)
+				AuthenticationController._redirectToLoginOrRegisterPage(req, res)
 			else
 				req.user = AuthenticationController.getSessionUser(req)
 				next()
@@ -156,22 +156,22 @@ module.exports = AuthenticationController =
 			logger.err user:user, pass:pass, "invalid login details"
 		return isValid
 
-	_redirectToLoginOrRegisterPage: (req, res, next)->
+	_redirectToLoginOrRegisterPage: (req, res)->
 		if (req.query.zipUrl? or
 			  req.query.project_name? or
 			  req.path == '/user/subscription/new')
-			return AuthenticationController._redirectToRegisterPage(req, res, next)
+			return AuthenticationController._redirectToRegisterPage(req, res)
 		else
-			AuthenticationController._redirectToLoginPage(req, res, next)
+			AuthenticationController._redirectToLoginPage(req, res)
 
-	_redirectToLoginPage: (req, res, next) ->
+	_redirectToLoginPage: (req, res) ->
 		logger.log url: req.url, "user not logged in so redirecting to login page"
 		AuthenticationController._setRedirectInSession(req)
 		url = "/login?#{querystring.stringify(req.query)}"
 		res.redirect url
 		Metrics.inc "security.login-redirect"
 
-	_redirectToRegisterPage: (req, res, next) ->
+	_redirectToRegisterPage: (req, res) ->
 		logger.log url: req.url, "user not logged in so redirecting to register page"
 		AuthenticationController._setRedirectInSession(req)
 		url = "/register?#{querystring.stringify(req.query)}"
