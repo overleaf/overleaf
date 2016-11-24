@@ -1,6 +1,9 @@
 #review-panel
 	.review-panel-toolbar
-		span.review-panel-toolbar-label(ng-click="reviewPanel.trackNewChanges = !reviewPanel.trackNewChanges;") Track Changes 
+		span.review-panel-toolbar-label(ng-click="reviewPanel.trackNewChanges = true;", ng-if="reviewPanel.trackNewChanges === false") Track Changes is 
+			strong off
+		span.review-panel-toolbar-label(ng-click="reviewPanel.trackNewChanges = false;", ng-if="reviewPanel.trackNewChanges === true") Track Changes is 
+			strong on
 		review-panel-toggle(ng-model="reviewPanel.trackNewChanges")
 
 	.rp-entry-list(

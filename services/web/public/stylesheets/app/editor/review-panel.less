@@ -99,7 +99,8 @@
 	.rp-size-expanded & {
 		display: flex;
 		align-items: center;
-		justify-content: center;
+		justify-content: space-between;
+		padding: 0 5px;
 	}
 	.rp-state-current-file & {
 		position: absolute;
@@ -618,32 +619,16 @@
 			border-radius: .875em;
 			transition: background .15s ease, border-color 0.15s ease;
 
-			&::before,
-			&::after {
-				display: block;
-				width: 50%;
-				height: 100%;
-			}
-
 			&::before {
 				content: '';
 				display: block;
+				width: 50%;
+				height: 100%;
 				position: relative;
 				left: 0;
 				background-color: #FFF;
 				border-radius: .875em;
 				transition: background-color 0.15s ease, color 0.15s ease, left 0.15s ease;
-			}
-
-			&::after {
-				content: 'OFF';
-				position: absolute;
-				top: 0;
-				right: 1px;
-				font-size: .75em;
-				font-weight: normal;
-				line-height: 215%;
-				color: #FFF;
 			}
 		}
 
@@ -654,13 +639,6 @@
 			&::before {
 				left: 50%;
 				background-color: #FFF;
-			}
-
-			&::after {
-				content: 'ON';
-				left: 1px;
-				right: auto;
-				color: #FFF;
 			}
 		}
 	}
