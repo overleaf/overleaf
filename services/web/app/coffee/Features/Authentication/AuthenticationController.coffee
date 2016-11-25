@@ -85,7 +85,7 @@ module.exports = AuthenticationController =
 					UserHandler.setupLoginData(user, ()->)
 					LoginRateLimiter.recordSuccessfulLogin(email)
 					AuthenticationController._recordSuccessfulLogin(user._id)
-					Analytics.recordEvent(user._id, "user-logged-in")
+					Analytics.recordEvent(user._id, "user-logged-in", {ip:req.ip})
 					logger.log email: email, user_id: user._id.toString(), "successful log in"
 					req.session.justLoggedIn = true
 					# capture the request ip for use when creating the session
