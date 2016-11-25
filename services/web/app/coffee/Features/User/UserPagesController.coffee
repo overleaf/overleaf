@@ -57,11 +57,13 @@ module.exports =
 	settingsPage : (req, res, next)->
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		logger.log user: user_id, "loading settings page"
+		shouldAllowEditingDetails = !(Settings?.ldap?.updateUserDetailsOnLogin) and !(Settings?.saml?.updateUserDetailsOnLogin)
 		UserLocator.findById user_id, (err, user)->
 			return next(err) if err?
 			res.render 'user/settings',
 				title:'account_settings'
 				user: user,
+				shouldAllowEditingDetails: shouldAllowEditingDetails
 				languages: Settings.languages,
 				accountSettingsTabActive: true
 
