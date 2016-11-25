@@ -1,7 +1,7 @@
 AnnouncementsHandler = require("./AnnouncementsHandler")
 AuthenticationController = require("../Authentication/AuthenticationController")
 logger = require("logger-sharelatex")
-
+settings = require("settings-sharelatex")
 
 module.exports =
 
