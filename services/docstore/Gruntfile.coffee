@@ -6,6 +6,7 @@ module.exports = (grunt) ->
 			app:
 				options:
 					index: "app.js"
+
 		coffee:
 			app_src:
 				expand: true,
@@ -67,6 +68,10 @@ module.exports = (grunt) ->
 					reporter: grunt.option('reporter') or 'spec'
 					timeout: 10000
 				src: ["test/smoke/js/**/*.js"]
+		
+		shell:
+			dockerTests:
+				command: 'docker run -v "$(pwd):/app" -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" -e AWS_BUCKET="$AWS_BUCKET" --rm sl-acceptance-test-runner'
 
 	grunt.loadNpmTasks 'grunt-contrib-coffee'
 	grunt.loadNpmTasks 'grunt-contrib-clean'
@@ -89,6 +94,8 @@ module.exports = (grunt) ->
 	grunt.registerTask 'test:smoke',          ['compile:smoke_tests', 'mochaTest:smoke']
 
 	grunt.registerTask 'install', 'compile:app'
+	
+	grunt.registerTask 'test:acceptance:docker', ['compile:acceptance_tests', 'shell:dockerTests']
 
 	grunt.registerTask 'default', ['run']
 
