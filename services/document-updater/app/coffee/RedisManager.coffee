@@ -13,7 +13,7 @@ minutes = 60 # seconds for Redis expire
 module.exports = RedisManager =
 	rclient: rclient
 
-	putDocInMemory : (project_id, doc_id, docLines, version, _callback)->
+	putDocInMemory : (project_id, doc_id, docLines, version, track_changes, track_changes_entries, _callback)->
 		timer = new metrics.Timer("redis.put-doc")
 		callback = (error) ->
 			timer.done()
@@ -23,6 +23,8 @@ module.exports = RedisManager =
 		multi.set keys.docLines(doc_id:doc_id), JSON.stringify(docLines)
 		multi.set keys.projectKey({doc_id:doc_id}), project_id
 		multi.set keys.docVersion(doc_id:doc_id), version
+		multi.set keys.trackChangesEnabled(doc_id:doc_id), if track_changes then "1" else "0"
+		multi.set keys.trackChangesEntries(doc_id:doc_id), JSON.stringify(track_changes_entries)
 		multi.exec (error) ->
 			return callback(error) if error?
 			rclient.sadd keys.docsInProject(project_id:project_id), doc_id, callback
@@ -41,30 +43,36 @@ module.exports = RedisManager =
 		multi.del keys.docLines(doc_id:doc_id)
 		multi.del keys.projectKey(doc_id:doc_id)
 		multi.del keys.docVersion(doc_id:doc_id)
+		multi.del keys.trackChangesEnabled(doc_id:doc_id)
+		multi.del keys.trackChangesEntries(doc_id:doc_id)
 		multi.exec (error) ->
 			return callback(error) if error?
 			rclient.srem keys.docsInProject(project_id:project_id), doc_id, callback
 
-	getDoc : (project_id, doc_id, callback = (error, lines, version, project_id) ->)->
+	getDoc : (project_id, doc_id, callback = (error, lines, version, track_changes, track_changes_entries) ->)->
 		timer = new metrics.Timer("redis.get-doc")
 		multi = rclient.multi()
 		multi.get keys.docLines(doc_id:doc_id)
 		multi.get keys.docVersion(doc_id:doc_id)
 		multi.get keys.projectKey(doc_id:doc_id)
+		multi.get keys.trackChangesEnabled(doc_id:doc_id)
+		multi.get keys.trackChangesEntries(doc_id:doc_id)
 		multi.exec (error, result)->
 			timer.done()
 			return callback(error) if error?
 			try
 				docLines = JSON.parse result[0]
+				track_changes_entries = JSON.parse result[4]
 			catch e
 				return callback(e)
 			version = parseInt(result[1] or 0, 10)
 			doc_project_id = result[2]
+			track_changes = (result[3] == "1")
 			# check doc is in requested project
 			if doc_project_id? and doc_project_id isnt project_id
 				logger.error project_id: project_id, doc_id: doc_id, doc_project_id: doc_project_id, "doc not in project"
 				return callback(new Errors.NotFoundError("document not found"))
-			callback null, docLines, version, project_id
+			callback null, docLines, version, track_changes, track_changes_entries
 
 	getDocVersion: (doc_id, callback = (error, version) ->) ->
 		rclient.get keys.docVersion(doc_id: doc_id), (error, version) ->
@@ -104,7 +112,7 @@ module.exports = RedisManager =
 
 	DOC_OPS_TTL: 60 * minutes
 	DOC_OPS_MAX_LENGTH: 100
-	updateDocument : (doc_id, docLines, newVersion, appliedOps = [], callback = (error) ->)->
+	updateDocument : (doc_id, docLines, newVersion, appliedOps = [], track_changes_entries, callback = (error) ->)->
 		RedisManager.getDocVersion doc_id, (error, currentVersion) ->
 			return callback(error) if error?
 			if currentVersion + appliedOps.length != newVersion
@@ -119,6 +127,7 @@ module.exports = RedisManager =
 				multi.rpush  keys.docOps(doc_id: doc_id), jsonOps...
 			multi.expire keys.docOps(doc_id: doc_id), RedisManager.DOC_OPS_TTL
 			multi.ltrim  keys.docOps(doc_id: doc_id), -RedisManager.DOC_OPS_MAX_LENGTH, -1
+			multi.set    keys.trackChangesEntries(doc_id:doc_id), JSON.stringify(track_changes_entries)
 			multi.exec (error, replys) ->
 					return callback(error) if error?
 					return callback()
@@ -126,3 +135,6 @@ module.exports = RedisManager =
 	getDocIdsInProject: (project_id, callback = (error, doc_ids) ->) ->
 		rclient.smembers keys.docsInProject(project_id: project_id), callback
 
+	setTrackChanges: (project_id, doc_id, track_changes_on, callback = (error) ->) ->
+		value = (if track_changes_on then "1" else "0")
+		rclient.set keys.trackChangesEnabled({doc_id}), value, callback

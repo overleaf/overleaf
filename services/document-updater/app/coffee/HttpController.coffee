@@ -96,3 +96,15 @@ module.exports = HttpController =
 			return next(error) if error?
 			logger.log project_id: project_id, "deleted project via http"
 			res.send 204 # No Content
+	
+	setTrackChanges: (req, res, next = (error) ->) ->
+		project_id = req.params.project_id
+		track_changes_on = req.body.on
+		if !track_changes_on?
+			return res.send 400
+		track_changes_on = !!track_changes_on # Make boolean
+		logger.log {project_id, track_changes_on}, "turning on track changes via http"
+		ProjectManager.setTrackChangesWithLocks project_id, track_changes_on, (error) ->
+			return next(error) if error?
+			res.send 204
+

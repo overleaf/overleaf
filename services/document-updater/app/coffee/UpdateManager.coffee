@@ -2,11 +2,14 @@ LockManager = require "./LockManager"
 RedisManager = require "./RedisManager"
 WebRedisManager = require "./WebRedisManager"
 ShareJsUpdateManager = require "./ShareJsUpdateManager"
-TrackChangesManager = require "./TrackChangesManager"
+HistoryManager = require "./HistoryManager"
 Settings = require('settings-sharelatex')
 async = require("async")
 logger = require('logger-sharelatex')
 Metrics = require "./Metrics"
+Errors = require "./Errors"
+DocumentManager = require "./DocumentManager"
+TrackChangesManager = require "./TrackChangesManager"
 
 module.exports = UpdateManager =
 	processOutstandingUpdates: (project_id, doc_id, callback = (error) ->) ->
@@ -45,12 +48,18 @@ module.exports = UpdateManager =
 
 	applyUpdate: (project_id, doc_id, update, callback = (error) ->) ->
 		UpdateManager._sanitizeUpdate update
-		ShareJsUpdateManager.applyUpdate project_id, doc_id, update, (error, updatedDocLines, version, appliedOps) ->
+		DocumentManager.getDoc project_id, doc_id, (error, lines, version, track_changes, track_changes_entries) ->
 			return callback(error) if error?
-			logger.log doc_id: doc_id, version: version, "updating doc in redis"
-			RedisManager.updateDocument doc_id, updatedDocLines, version, appliedOps, (error) ->
+			if !lines? or !version?
+				return callback(new Errors.NotFoundError("document not found: #{doc_id}"))
+			ShareJsUpdateManager.applyUpdate project_id, doc_id, update, lines, version, (error, updatedDocLines, version, appliedOps) ->
 				return callback(error) if error?
-				TrackChangesManager.pushUncompressedHistoryOps project_id, doc_id, appliedOps, callback
+				TrackChangesManager.applyUpdate project_id, doc_id, track_changes_entries, appliedOps, track_changes, (error, new_track_changes_entries) ->
+					return callback(error) if error?
+					logger.log doc_id: doc_id, version: version, "updating doc in redis"
+					RedisManager.updateDocument doc_id, updatedDocLines, version, appliedOps, new_track_changes_entries, (error) ->
+						return callback(error) if error?
+						HistoryManager.pushUncompressedHistoryOps project_id, doc_id, appliedOps, callback
 
 	lockUpdatesAndDo: (method, project_id, doc_id, args..., callback) ->
 		LockManager.getLock doc_id, (error, lockValue) ->

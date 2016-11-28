@@ -1,12 +1,11 @@
 Keys = require('./UpdateKeys')
 Settings = require('settings-sharelatex')
-DocumentManager = require "./DocumentManager"
 RedisManager = require "./RedisManager"
 Errors = require "./Errors"
 logger = require "logger-sharelatex"
 
 module.exports = class ShareJsDB
-	constructor: () ->
+	constructor: (@project_id, @doc_id, @lines, @version) ->
 		@appliedOps = {}
 		# ShareJS calls this detacted from the instance, so we need
 		# bind it to keep our context that can access @appliedOps
@@ -31,22 +30,14 @@ module.exports = class ShareJsDB
 		callback()
 
 	getSnapshot: (doc_key, callback) ->
-		[project_id, doc_id] = Keys.splitProjectIdAndDocId(doc_key)
-		DocumentManager.getDoc project_id, doc_id, (error, lines, version) ->
-			return callback(error) if error?
-			if !lines? or !version?
-				return callback(new Errors.NotFoundError("document not found: #{doc_id}"))
-
-			if lines.length > 0 and lines[0].text?
-				type = "json"
-				snapshot = lines: lines
-			else
-				type = "text"
-				snapshot = lines.join("\n")
-			callback null,
-				snapshot: snapshot
-				v: parseInt(version, 10)
-				type: type
+		if doc_key != Keys.combineProjectIdAndDocId(@project_id, @doc_id)
+			return callback(new Errors.NotFoundError("unexpected doc_key #{doc_key}, expected #{Keys.combineProjectIdAndDocId(@project_id, @doc_id)}"))
+		else
+			return callback null, {
+				snapshot: @lines.join("\n")
+				v: parseInt(@version, 10)
+				type: "text"
+			}
 
 	# To be able to remove a doc from the ShareJS memory
 	# we need to called Model::delete, which calls this 

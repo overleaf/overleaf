@@ -12,14 +12,14 @@ MAX_HTTP_REQUEST_LENGTH = 5000 # 5 seconds
 
 module.exports = PersistenceManager =
 	getDoc: (project_id, doc_id, callback = (error, lines, version) ->) ->
-		PersistenceManager.getDocFromWeb project_id, doc_id, (error, lines) ->
+		PersistenceManager.getDocFromWeb project_id, doc_id, (error, lines, track_changes, track_changes_entries) ->
 			return callback(error) if error?
 			PersistenceManager.getDocVersionInMongo doc_id, (error, version) ->
 				return callback(error) if error?
-				callback null, lines, version
+				callback null, lines, version, track_changes, track_changes_entries
 
-	setDoc: (project_id, doc_id, lines, version, callback = (error) ->) ->
-		PersistenceManager.setDocInWeb project_id, doc_id, lines, (error) ->
+	setDoc: (project_id, doc_id, lines, version, track_changes, track_changes_entries, callback = (error) ->) ->
+		PersistenceManager.setDocInWeb project_id, doc_id, lines, track_changes, track_changes_entries, (error) ->
 			return callback(error) if error?
 			PersistenceManager.setDocVersionInMongo doc_id, version, (error) ->
 				return callback(error) if error?
@@ -50,13 +50,13 @@ module.exports = PersistenceManager =
 					body = JSON.parse body
 				catch e
 					return callback(e)
-				return callback null, body.lines
+				return callback null, body.lines, body.track_changes, body.track_changes_entries
 			else if res.statusCode == 404
 				return callback(new Errors.NotFoundError("doc not not found: #{url}"))
 			else
 				return callback(new Error("error accessing web API: #{url} #{res.statusCode}"))
 
-	setDocInWeb: (project_id, doc_id, lines, _callback = (error) ->) ->
+	setDocInWeb: (project_id, doc_id, lines, track_changes, track_changes_entries, _callback = (error) ->) ->
 		timer = new Metrics.Timer("persistenceManager.setDoc")
 		callback = (args...) ->
 			timer.done()
@@ -68,6 +68,8 @@ module.exports = PersistenceManager =
 			method: "POST"
 			body: JSON.stringify
 				lines: lines
+				track_changes: track_changes
+				track_changes_entries: track_changes_entries
 			headers:
 				"content-type": "application/json"
 			auth:

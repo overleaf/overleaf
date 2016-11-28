@@ -34,6 +34,10 @@ module.exports = RedisKeyBuilder =
 		return (key_schema) -> key_schema.uncompressedHistoryOp({doc_id})
 	pendingUpdates: ({doc_id}) ->
 		return (key_schema) -> key_schema.pendingUpdates({doc_id})
+	trackChangesEnabled: ({doc_id}) ->
+		return (key_schema) -> key_schema.trackChangesEnabled({doc_id})
+	trackChangesEntries: ({doc_id}) ->
+		return (key_schema) -> key_schema.trackChangesEntries({doc_id})
 	docsInProject: ({project_id}) ->
 		return (key_schema) -> key_schema.docsInProject({project_id})
 	docsWithHistoryOps: ({project_id}) ->
