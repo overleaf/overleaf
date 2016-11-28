@@ -64,7 +64,11 @@ define [
 						$scope.state.inflight = false
 						$scope.state.error = false
 						$scope.state.invalidCredentials = false
-						window.location = "/"
+						setTimeout(
+							() ->
+								window.location = "/login"
+							, 1000
+						)
 					.error (data, status) ->
 						$scope.state.inflight = false
 						if status == 403
