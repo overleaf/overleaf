@@ -1,7 +1,7 @@
 http = require('http')
 http.globalAgent.maxSockets = 300
 
-module.exports =
+module.exports = Settings =
 	internal:
 		docstore:
 			port: 3016
@@ -12,10 +12,12 @@ module.exports =
 
 	docstore:
 		healthCheck:
-			project_id: "5620bece05509b0a7a3cbc61"
-	#	s3:
-	#		key: ""
-	#		secret: ""
-	#		bucket: "something"
+			project_id: ""
 
 	max_doc_length: 2 * 1024 * 1024 # 2mb
+
+if process.env['AWS_ACCESS_KEY_ID']? and process.env['AWS_SECRET_ACCESS_KEY']? and process.env['AWS_BUCKET']?
+	Settings.docstore.s3 =
+		key: process.env['AWS_ACCESS_KEY_ID']
+		secret: process.env['AWS_SECRET_ACCESS_KEY']
+		bucket: process.env['AWS_BUCKET']

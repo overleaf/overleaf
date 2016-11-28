@@ -7,6 +7,9 @@ module.exports = DocstoreClient =
 
 	createDoc: (project_id, doc_id, lines, callback = (error) ->) ->
 		db.docs.save({_id: doc_id, project_id:project_id, lines: lines, rev:1}, callback)
+	
+	setDocVersion: (doc_id, version, callback = (error) ->) ->
+		db.docOps.save({doc_id: doc_id, version: version}, callback)
 
 	createDeletedDoc: (project_id, doc_id, lines, callback = (error) ->) ->
 		db.docs.insert {
@@ -29,11 +32,12 @@ module.exports = DocstoreClient =
 			json: true
 		}, callback
 
-	updateDoc: (project_id, doc_id, lines, callback = (error, res, body) ->) ->
+	updateDoc: (project_id, doc_id, lines, version, callback = (error, res, body) ->) ->
 		request.post {
 			url: "http://localhost:#{settings.internal.docstore.port}/project/#{project_id}/doc/#{doc_id}"
 			json:
 				lines: lines
+				version: version
 		}, callback
 
 	deleteDoc: (project_id, doc_id, callback = (error, res, body) ->) ->

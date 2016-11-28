@@ -5,7 +5,10 @@ _ = require "underscore"
 DocArchive = require "./DocArchiveManager"
 
 module.exports = DocManager =
-
+	# TODO: For historical reasons, the doc version is currently stored in the docOps
+	# collection (which is all that this collection contains). In future, we should
+	# migrate this version property to be part of the docs collection, to guarantee
+	# consitency between lines and version when writing/reading, and for a simpler schema.
 	getDoc: (project_id, doc_id, callback = (error, doc) ->) ->
 		MongoManager.findDoc project_id, doc_id, (err, doc)->
 			if err?
@@ -19,7 +22,10 @@ module.exports = DocManager =
 						return callback(err)
 					DocManager.getDoc project_id, doc_id, callback
 			else
-				callback err, doc
+				MongoManager.getDocVersion doc_id, (error, version) ->
+					return callback(error) if error?
+					doc.version = version
+					callback err, doc
 
 	getAllDocs: (project_id, callback = (error, docs) ->) ->
 		DocArchive.unArchiveAllDocs project_id, (error) ->
@@ -31,7 +37,7 @@ module.exports = DocManager =
 				else
 					return callback(null, docs)
 
-	updateDoc: (project_id, doc_id, lines, callback = (error, modified, rev) ->) ->
+	updateDoc: (project_id, doc_id, lines, version, callback = (error, modified, rev) ->) ->
 		DocManager.getDoc project_id, doc_id, (err, doc)->
 			if err? and !(err instanceof Errors.NotFoundError)
 				logger.err project_id: project_id, doc_id: doc_id, err:err, "error getting document for update"
@@ -39,8 +45,12 @@ module.exports = DocManager =
 
 			isNewDoc = lines.length == 0
 			linesAreSame =  _.isEqual(doc?.lines, lines)
+			if version?
+				versionsAreSame = (doc?.version == version)
+			else
+				versionsAreSame = true
 
-			if linesAreSame and !isNewDoc
+			if linesAreSame and versionsAreSame and !isNewDoc
 				logger.log project_id: project_id, doc_id: doc_id, rev: doc?.rev, "doc lines have not changed - not updating"
 				return callback null, false, doc?.rev
 			else
@@ -54,7 +64,16 @@ module.exports = DocManager =
 				}, "updating doc lines"
 				MongoManager.upsertIntoDocCollection project_id, doc_id, lines, (error)->
 					return callback(callback) if error?
-					callback null, true,  oldRev + 1 # rev will have been incremented in mongo by MongoManager.updateDoc
+					# TODO: While rolling out this code, setting the version via the docstore is optional,
+					# so if it hasn't been passed, just ignore it. Once the docupdater has totally
+					# handed control of this to the docstore, we can assume it will always be passed
+					# and an error guard on it not being set instead.
+					if version?
+						MongoManager.setDocVersion doc_id, version, (error) ->
+							return callback(error) if error?
+							callback null, true, oldRev + 1 # rev will have been incremented in mongo by MongoManager.updateDoc
+					else
+						callback null, true, oldRev + 1 # rev will have been incremented in mongo by MongoManager.updateDoc
 
 	deleteDoc: (project_id, doc_id, callback = (error) ->) ->
 		DocManager.getDoc project_id, doc_id, (error, doc) ->
