@@ -20,7 +20,6 @@ module.exports =
 
 		res.render 'user/register',
 			title: 'register'
-			redir: req.query.redir
 			sharedProjectData: sharedProjectData
 			newTemplateData: newTemplateData
 			new_email:req.query.new_email || ""
@@ -49,9 +48,13 @@ module.exports =
 					token: req.query.token
 
 	loginPage : (req, res)->
+		# if user is being sent to /login with explicit redirect (redir=/foo),
+		# such as being sent from the editor to /login, then set the redirect explicitly
+		if req.query.redir? and !AuthenticationController._getRedirectFromSession(req)?
+			logger.log {redir: req.query.redir}, "setting explicit redirect from login page"
+			AuthenticationController._setRedirectInSession(req, req.query.redir)
 		res.render 'user/login',
 			title: 'login',
-			redir: req.query.redir,
 			email: req.query.email
 
 	settingsPage : (req, res, next)->
