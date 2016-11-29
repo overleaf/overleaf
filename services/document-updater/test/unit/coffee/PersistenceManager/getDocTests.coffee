@@ -84,5 +84,21 @@ describe "PersistenceManager.getDoc", ->
 
 		it "should time the execution", ->
 			@Metrics.Timer::done.called.should.equal true
-		
+
+	describe "when request returns an doc without lines", ->
+		beforeEach ->
+			@request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify(version: @version))
+			@PersistenceManager.getDoc(@project_id, @doc_id, @callback)
+
+		it "should return and error", ->
+			@callback.calledWith(new Error("web API response had no doc lines")).should.equal true
+
+	describe "when request returns an doc without a version", ->
+		beforeEach ->
+			@request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify(lines: @lines))
+			@PersistenceManager.getDoc(@project_id, @doc_id, @callback)
+
+		it "should return and error", ->
+			@callback.calledWith(new Error("web API response had no valid doc version")).should.equal true
+
 		
