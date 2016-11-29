@@ -94,7 +94,7 @@
 - if (showUserDetailsArea)
 	span(ng-controller="LeftHandMenuPromoController",  ng-cloak)
 
-		.row-spaced#userProfileInformation(ng-if="hasProjects")
+		.row-spaced#userProfileInformation(ng-if="hasProjects && !showCaseStudy")
 			div(ng-controller="UserProfileController")
 				hr(ng-show="percentComplete < 100")
 				.text-centered.user-profile(ng-show="percentComplete < 100")
@@ -108,6 +108,13 @@
 						ng-click="openUserProfileModal()"
 					) #{translate("complete")}
 
+		.row-spaced(ng-if="hasProjects && showCaseStudy", ng-cloak).text-centered
+			hr
+			a(href="{{caseStudy.url}}")
+				p.small read about:
+				p
+					img(src="{{caseStudy.logo}}")
+				a(href="{{caseStudy.url}}") {{caseStudy.title}}
 
 		.row-spaced(ng-if="hasProjects && userHasNoSubscription", ng-cloak).text-centered
 			hr

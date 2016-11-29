@@ -189,6 +189,25 @@ module.exports = (app, webRouter, apiRouter)->
 			return AuthenticationController.isUserLoggedIn(req)
 		res.locals.getSessionUser = ->
 			return AuthenticationController.getSessionUser(req)
+
+		res.locals.caseStudyToShow = ->
+			Settings.caseStudysToShow = [
+				{
+					url:"http://www.sharelatex.com/i/university/indiana",
+					domains: ["sharelatex.com", 'chicargo.edu'],
+					title: "Indiana University Case Study",
+					logo:"/img/crests/logo/iu.png"
+				}
+
+			]
+
+			caseStudy = _.filter Settings.caseStudysToShow, (caseStudy)->
+				matches = _.filter caseStudy.domains, (domain)->
+					email = AuthenticationController.getSessionUser(req)?.email
+					return email.indexOf(domain) != -1
+				return matches.length > 0
+
+			return caseStudy?[0] or {}
 		next()
 
 	webRouter.use (req, res, next) ->

@@ -10,7 +10,8 @@ block content
 		window.data = {
 			projects: !{JSON.stringify(projects).replace(/\//g, '\\/')},
 			tags: !{JSON.stringify(tags).replace(/\//g, '\\/')},
-			notifications: !{JSON.stringify(notifications).replace(/\//g, '\\/')}
+			notifications: !{JSON.stringify(notifications).replace(/\//g, '\\/')},
+			caseStudy: !{JSON.stringify(caseStudyToShow())}
 		};
 		window.algolia = {
 			institutions: {
