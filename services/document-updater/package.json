@@ -11,7 +11,7 @@
     "coffee-script": "1.4.0",
     "express": "3.3.4",
     "ioredis": "^2.2.0",
-    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.0.0",
+    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.1",
     "lynx": "0.0.11",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.5.0",
     "mongojs": "0.9.11",
@@ -33,8 +33,8 @@
     "grunt-contrib-clean": "~0.5.0",
     "grunt-contrib-coffee": "~0.10.0",
     "grunt-execute": "~0.1.5",
-    "grunt-forever": "0.4.1",
+    "grunt-forever": "^0.4.7",
     "grunt-mocha-test": "~0.9.0",
-    "grunt-shell": "^2.1.0"
+    "grunt-shell": "^1.3.0"
   }
 }
