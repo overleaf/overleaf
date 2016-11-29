@@ -3,7 +3,8 @@ chai = require("chai")
 chai.should()
 expect = require("chai").expect
 {db, ObjectId} = require "../../../app/js/mongojs"
-rclient = require("redis").createClient()
+Settings = require('settings-sharelatex')
+rclient = require("redis-sharelatex").createClient(Settings.redis.web)
 
 MockTrackChangesApi = require "./helpers/MockTrackChangesApi"
 MockWebApi = require "./helpers/MockWebApi"

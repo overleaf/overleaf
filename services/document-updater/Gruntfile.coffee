@@ -1,13 +1,4 @@
 module.exports = (grunt) ->
-	grunt.loadNpmTasks 'grunt-contrib-coffee'
-	grunt.loadNpmTasks 'grunt-contrib-clean'
-	grunt.loadNpmTasks 'grunt-mocha-test'
-	grunt.loadNpmTasks 'grunt-available-tasks'
-	grunt.loadNpmTasks 'grunt-execute'
-	grunt.loadNpmTasks 'grunt-bunyan'
-	grunt.loadNpmTasks 'grunt-forever'
-	grunt.loadNpmTasks 'grunt-shell'
-
 	grunt.initConfig
 		forever:
 			app:
@@ -106,6 +97,15 @@ module.exports = (grunt) ->
 		            	"Misc": [
 		            		"help"
 		            	]
+
+	grunt.loadNpmTasks 'grunt-contrib-coffee'
+	grunt.loadNpmTasks 'grunt-contrib-clean'
+	grunt.loadNpmTasks 'grunt-mocha-test'
+	grunt.loadNpmTasks 'grunt-available-tasks'
+	grunt.loadNpmTasks 'grunt-execute'
+	grunt.loadNpmTasks 'grunt-bunyan'
+	grunt.loadNpmTasks 'grunt-forever'
+	grunt.loadNpmTasks 'grunt-shell'
 
 	grunt.registerTask 'help', 'Display this help list', 'availabletasks'
 
