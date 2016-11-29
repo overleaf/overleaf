@@ -4,19 +4,19 @@ npm rebuild
 
 echo ">> Starting server..."
 
-grunt forever:app:start
+grunt --no-color forever:app:start
 
 echo ">> Server started"
 
 sleep 5
 
 echo ">> Running acceptance tests..."
-grunt mochaTest:acceptance
+grunt --no-color mochaTest:acceptance
 _test_exit_code=$?
 
 echo ">> Killing server"
 
-grunt forever:app:stop
+grunt --no-color forever:app:stop
 
 echo ">> Done"
 
