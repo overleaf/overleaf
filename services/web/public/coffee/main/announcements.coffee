@@ -2,19 +2,19 @@ define [
 	"base"
 ], (App) ->
 	App.controller "AnnouncementsController", ($scope, $http, event_tracking, $window) ->
+		$scope.announcements = []
 
-		$scope.dataRecived = false
-		announcement = null
-		$http.get("/announcements").success (announcements) ->
-			if announcements?[0]?
-				announcement = announcements[0]
-				$scope.title = announcement.title
-				$scope.totalAnnouncements =  announcements.length
-				$scope.dataRecived = true
+		refreshAnnouncements = ->
+			$http.get("/announcements").success (announcements) ->
+				$scope.announcements = announcements
+				
+		dismissCurrentAnnouncement = ->
+			event_tracking.sendMB "announcement-alert-dismissed", { blogPostId:announcement.id }
 
-		dismissannouncement = ->
-			event_tracking.sendMB "announcement-alert-dismissed", {blogPostId:announcement.id}
+		refreshAnnouncements()
 
 		$scope.openLink = ->
-			dismissannouncement()
-			$window.location.href = announcement.url
+			dismissCurrentAnnouncement()
+				.then(refreshAnnouncements)
+
+			$window.open = announcement.url

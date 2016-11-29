@@ -1,3 +1,14 @@
+@announcements-shadow: 0 2px 4px 1px rgba(0, 0, 0, 0.2);
+
+@keyframes pulse {
+	0% {
+		opacity: .7;
+	}
+	100% {
+		opacity: .9;
+	}
+}
+
 .project-header {
 	.btn-group > .btn {
 		padding-left: @line-height-base / 2;
@@ -293,3 +304,46 @@ ul.project-list {
 		margin-left:-100px;
 	}
 }
+
+.announcements {
+	position: absolute;
+	bottom: 100px;
+	right: 100px;
+	width: 80px;
+	height: 80px;
+	background: url(/img/lion-128.png) no-repeat center/80% white;
+	border-radius: 50%;
+	box-shadow: @announcements-shadow;
+	z-index: 1;
+}
+
+	.announcements-badge {
+		display: inline-block;
+		position: absolute;
+		font-size: 11px;
+		height: 1.8em;
+		min-width: 1.8em;
+		border-radius: 0.9em;
+		line-height: 1.8;
+		padding: 0 2px;
+		top: 1px;
+		right: 1px;
+		font-weight: bold;
+		color: #FFF;
+		background-color: @red;
+		vertical-align: baseline;
+		white-space: nowrap;
+		text-align: center;
+		animation: pulse 1s alternate infinite;
+	}
+
+	.announcements-body {
+		position: absolute;
+		right: 0;
+		bottom: 80px;
+		width: 500px;
+		min-height: 100px;
+		background: #FFF;
+		box-shadow: @announcements-shadow;
+		border-radius: 10px;
+	}

@@ -22,9 +22,21 @@ block content
 	.content.content-alt(ng-controller="ProjectPageController")
 		.container
 			
-			//- div(ng-controller="AnnouncementsController", ng-cloak)
-			//- 	.alert.alert-success(ng-show="dataRecived")
-			//- 		a(href, ng-click="openLink()") {{title}} and {{totalAnnouncements}} others
+			div(
+				ng-controller="AnnouncementsController"
+				ng-cloak
+			)
+				.announcements(ng-if="announcements.length")
+					span.announcements-badge {{ announcements.length }}
+					.announcements-body
+						.announcement(
+							ng-repeat="announcement in announcements"
+						)
+							a.announcement-title(href, ng-click="openLink()") {{ announcement.title }}
+							p.announcement-description {{ announcement.excerpt }}
+					//- .card.card-thin(ng-show="dataReceived")
+					//- 	a.announcement-title(href, ng-click="openLink()") {{ title }}
+					//- 	p.announcement-description {{ excerpt }}
 
 			.row(ng-cloak)
 				span(ng-if="projects.length > 0")
