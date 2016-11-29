@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-echo $AWS_BUCKET
+npm rebuild
 
 echo ">> Starting server..."
 
