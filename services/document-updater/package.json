@@ -35,6 +35,6 @@
     "grunt-execute": "~0.1.5",
     "grunt-forever": "0.4.1",
     "grunt-mocha-test": "~0.9.0",
-    "grunt-shell": "^1.3.0"
+    "grunt-shell": "^2.1.0"
   }
 }
