@@ -196,6 +196,8 @@ describe "DocManager", ->
 						oldDocLines: @oldDocLines
 						newDocLines: @newDocLines
 						rev: @doc.rev
+						oldVersion: @version
+						newVersion: @version
 						"updating doc lines"
 					)
 					.should.equal true
