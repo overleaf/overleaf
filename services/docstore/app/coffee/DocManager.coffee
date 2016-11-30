@@ -81,7 +81,7 @@ module.exports = DocManager =
 						callback null, true, oldRev + 1 # rev will have been incremented in mongo by MongoManager.updateDoc
 
 	deleteDoc: (project_id, doc_id, callback = (error) ->) ->
-		DocManager.getDoc project_id, doc_id, {}, (error, doc) ->
+		DocManager.getDoc project_id, doc_id, { version: false }, (error, doc) ->
 			return callback(error) if error?
 			return callback new Errors.NotFoundError("No such project/doc to delete: #{project_id}/#{doc_id}") if !doc?
 			MongoManager.upsertIntoDocCollection project_id, doc_id, doc.lines, (error) ->
