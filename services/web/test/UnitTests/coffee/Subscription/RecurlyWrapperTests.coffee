@@ -314,6 +314,19 @@ describe "RecurlyWrapper", ->
 		it "should send a cancel request to the API", ->
 			@apiRequest.called.should.equal true
 
+		describe 'when the subscription is already cancelled', ->
+
+			beforeEach ->
+				@RecurlyWrapper.apiRequest.restore()
+				@recurlySubscriptionId = "subscription-id-123"
+				@apiRequest = sinon.stub @RecurlyWrapper, "apiRequest", (options, callback) =>
+					callback(new Error('woops'), {}, "<error><description>A canceled subscription can't transition to canceled</description></error>")
+
+			it 'should not produce an error', (done) ->
+				@RecurlyWrapper.cancelSubscription @recurlySubscriptionId, (err) =>
+					expect(err).to.equal null
+					done()
+
 	describe "reactivateSubscription", ->
 		beforeEach (done) ->
 			@recurlySubscriptionId = "subscription-id-123"

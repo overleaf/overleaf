@@ -418,6 +418,9 @@ module.exports = RecurlyWrapper =
 			url: "subscriptions/#{subscriptionId}/cancel",
 			method: "put"
 		}, (error, response, body) ->
+			if error? and body?.match(/.*A canceled subscription can't transition to canceled.*/)
+				logger.log {subscriptionId, error, body}, "subscription already cancelled, not really an error, proceeding"
+				error = null
 			callback(error)
 		)
 
