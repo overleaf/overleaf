@@ -138,6 +138,9 @@
 	.spelling-highlight {
 		position: absolute;
 		background-image: url(/img/spellcheck-underline.png);
+		@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+			background-image: url(/img/spellcheck-underline@2x.png);
+		}
 		background-repeat: repeat-x;
 		background-position: bottom left;
 	}
