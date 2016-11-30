@@ -13,6 +13,7 @@ describe "HttpController", ->
 			"./DocManager": @DocManager = {}
 			"./DocArchiveManager": @DocArchiveManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			"./HealthChecker": {}
 		@res = { send: sinon.stub(), json: sinon.stub(), setHeader:sinon.stub() }
 		@req = { query:{}}
 		@next = sinon.stub()
@@ -54,6 +55,7 @@ describe "HttpController", ->
 						lines: @doc.lines
 						rev: @doc.rev
 						deleted: false
+						version: @doc.version
 					})
 					.should.equal true
 
@@ -81,6 +83,7 @@ describe "HttpController", ->
 						lines: @doc.lines
 						rev: @doc.rev
 						deleted: true
+						version: @doc.version
 					})
 					.should.equal true
 
@@ -192,12 +195,12 @@ describe "HttpController", ->
 			beforeEach ->
 				@req.body =
 					lines: @lines = ["hello", "world"]
-				@DocManager.updateDoc = sinon.stub().callsArgWith(3, null, true, @rev = 5)
+				@DocManager.updateDoc = sinon.stub().yields(null, true, @rev = 5)
 				@HttpController.updateDoc @req, @res, @next
 
 			it "should update the document", ->
 				@DocManager.updateDoc
-					.calledWith(@project_id, @doc_id, @lines)
+					.calledWith(@project_id, @doc_id, @lines, undefined)
 					.should.equal true
 
 			it "should return a modified status", ->
@@ -209,7 +212,7 @@ describe "HttpController", ->
 			beforeEach ->
 				@req.body =
 					lines: @lines = ["hello", "world"]
-				@DocManager.updateDoc = sinon.stub().callsArgWith(3, null, false, @rev = 5)
+				@DocManager.updateDoc = sinon.stub().yields(null, false, @rev = 5)
 				@HttpController.updateDoc @req, @res, @next
 
 			it "should return a modified status", ->
@@ -220,7 +223,7 @@ describe "HttpController", ->
 		describe "when the doc lines are not provided", ->
 			beforeEach ->
 				@req.body = {}
-				@DocManager.updateDoc = sinon.stub().callsArgWith(3, null, false)
+				@DocManager.updateDoc = sinon.stub().yields(null, false)
 				@HttpController.updateDoc @req, @res, @next
 
 			it "should not update the document", ->
@@ -229,6 +232,24 @@ describe "HttpController", ->
 			it "should return a 400 (bad request) response", ->
 				@res.send
 					.calledWith(400)
+					.should.equal true
+
+		describe "when the doc version is provided", ->
+			beforeEach ->
+				@req.body =
+					lines: @lines = ["hello", "world"]
+					version: @version = 42
+				@DocManager.updateDoc = sinon.stub().yields(null, true, @rev = 5)
+				@HttpController.updateDoc @req, @res, @next
+
+			it "should update the document with the lines and version", ->
+				@DocManager.updateDoc
+					.calledWith(@project_id, @doc_id, @lines, @version)
+					.should.equal true
+
+			it "should return a modified status", ->
+				@res.json
+					.calledWith(modified: true, rev: @rev)
 					.should.equal true
 
 	describe "deleteDoc", ->

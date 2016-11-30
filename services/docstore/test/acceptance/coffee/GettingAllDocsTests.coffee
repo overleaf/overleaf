@@ -27,7 +27,7 @@ describe "Getting all docs", ->
 				(callback) => 
 					DocstoreClient.createDoc @project_id, doc._id, doc.lines, (err)=>
 						doc.lines[0] = doc.lines[0]+" added"
-						DocstoreClient.updateDoc @project_id, doc._id, doc.lines, callback
+						DocstoreClient.updateDoc @project_id, doc._id, doc.lines, null, callback
 		async.series jobs, done 
 
 	it "should return all the docs", (done) ->

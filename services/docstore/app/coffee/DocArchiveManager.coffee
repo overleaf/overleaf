@@ -25,7 +25,10 @@ module.exports = DocArchive =
 
 	archiveDoc: (project_id, doc, callback)->
 		logger.log project_id: project_id, doc_id: doc._id, "sending doc to s3"
-		options = DocArchive.buildS3Options(doc.lines, project_id+"/"+doc._id)
+		try
+			options = DocArchive.buildS3Options(doc.lines, project_id+"/"+doc._id)
+		catch e
+			return callback e
 		request.put options, (err, res)->
 			if err? || res.statusCode != 200
 				logger.err err:err, res:res, project_id:project_id, doc_id: doc._id, statusCode: res?.statusCode, "something went wrong archiving doc in aws"
@@ -56,7 +59,10 @@ module.exports = DocArchive =
 
 	unarchiveDoc: (project_id, doc_id, callback)->
 		logger.log project_id: project_id, doc_id: doc_id, "getting doc from s3"
-		options = DocArchive.buildS3Options(true, project_id+"/"+doc_id)
+		try
+			options = DocArchive.buildS3Options(true, project_id+"/"+doc_id)
+		catch e
+			return callback e
 		request.get options, (err, res, lines)->
 			if err? || res.statusCode != 200
 				logger.err err:err, res:res, project_id:project_id, doc_id:doc_id, "something went wrong unarchiving doc from aws"
@@ -71,6 +77,8 @@ module.exports = DocArchive =
 					callback()
 
 	buildS3Options: (content, key)->
+		if !settings.docstore.s3?
+			throw new Error("S3 settings are not configured")
 		return {
 				aws:
 					key: settings.docstore.s3.key

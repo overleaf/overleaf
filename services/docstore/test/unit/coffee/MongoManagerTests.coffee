@@ -9,7 +9,7 @@ describe "MongoManager", ->
 	beforeEach ->
 		@MongoManager = SandboxedModule.require modulePath, requires:
 			"./mongojs":
-				db: @db = { docs: {} }
+				db: @db = { docs: {}, docOps: {} }
 				ObjectId: ObjectId
 		@project_id = ObjectId().toString()
 		@doc_id = ObjectId().toString()
@@ -88,4 +88,47 @@ describe "MongoManager", ->
 				err.should.equal @stubbedErr
 				done()
 
-	
+	describe "getDocVersion", ->
+		describe "when the doc exists", ->
+			beforeEach ->
+				@doc =
+					version: @version = 42
+				@db.docOps.find = sinon.stub().callsArgWith(2, null, [@doc])
+				@MongoManager.getDocVersion @doc_id, @callback
+
+			it "should look for the doc in the database", ->
+				@db.docOps.find
+					.calledWith({ doc_id: ObjectId(@doc_id) }, {version: 1})
+					.should.equal true
+
+			it "should call the callback with the version", ->
+				@callback.calledWith(null, @version).should.equal true
+
+		describe "when the doc doesn't exist", ->
+			beforeEach ->
+				@db.docOps.find = sinon.stub().callsArgWith(2, null, [])
+				@MongoManager.getDocVersion @doc_id, @callback
+
+			it "should call the callback with 0", ->
+				@callback.calledWith(null, 0).should.equal true
+
+	describe "setDocVersion", ->
+		beforeEach ->
+			@version = 42
+			@db.docOps.update = sinon.stub().callsArg(3)
+			@MongoManager.setDocVersion @doc_id, @version, @callback
+
+		it "should update the doc version", ->
+			@db.docOps.update
+				.calledWith({
+					doc_id: ObjectId(@doc_id)
+				}, {
+					$set:
+						version: @version
+				}, {
+					upsert: true 
+				})
+				.should.equal true
+
+		it "should call the callback", ->
+			@callback.called.should.equal true

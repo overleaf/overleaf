@@ -49,6 +49,7 @@ module.exports = HttpController =
 		project_id = req.params.project_id
 		doc_id     = req.params.doc_id
 		lines      = req.body?.lines
+		version    = req.body?.version
 
 		if !lines? or lines not instanceof Array
 			logger.error project_id: project_id, doc_id: doc_id, "no doc lines provided"
@@ -56,7 +57,7 @@ module.exports = HttpController =
 			return
 
 		logger.log project_id: project_id, doc_id: doc_id, "got http request to update doc"
-		DocManager.updateDoc project_id, doc_id, lines, (error, modified, rev) ->
+		DocManager.updateDoc project_id, doc_id, lines, version, (error, modified, rev) ->
 			return next(error) if error?
 			res.json {
 				modified: modified
@@ -72,12 +73,15 @@ module.exports = HttpController =
 			res.send 204
 
 	_buildDocView: (doc) -> 
-		return {
+		doc_view = {
 			_id:     doc._id?.toString()
 			lines:   doc.lines
 			rev:     doc.rev
 			deleted: !!doc.deleted
 		}
+		if doc.version?
+			doc_view.version = doc.version
+		return doc_view
 
 	_buildRawDocView: (doc)->
 		return (doc?.lines or []).join("\n")
