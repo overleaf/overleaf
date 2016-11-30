@@ -9,7 +9,7 @@ module.exports = DocManager =
 	# collection (which is all that this collection contains). In future, we should
 	# migrate this version property to be part of the docs collection, to guarantee
 	# consitency between lines and version when writing/reading, and for a simpler schema.
-	getDoc: (project_id, doc_id, callback = (error, doc) ->) ->
+	getDoc: (project_id, doc_id, filter = { version: false }, callback = (error, doc) ->) ->
 		MongoManager.findDoc project_id, doc_id, (err, doc)->
 			if err?
 				return callback(err)
@@ -20,11 +20,14 @@ module.exports = DocManager =
 					if err?
 						logger.err err:err, project_id:project_id, doc_id:doc_id, "error unarchiving doc"
 						return callback(err)
-					DocManager.getDoc project_id, doc_id, callback
+					DocManager.getDoc project_id, doc_id, filter, callback
 			else
-				MongoManager.getDocVersion doc_id, (error, version) ->
-					return callback(error) if error?
-					doc.version = version
+				if filter.version
+					MongoManager.getDocVersion doc_id, (error, version) ->
+						return callback(error) if error?
+						doc.version = version
+						callback err, doc
+				else
 					callback err, doc
 
 	getAllDocs: (project_id, callback = (error, docs) ->) ->
@@ -38,7 +41,7 @@ module.exports = DocManager =
 					return callback(null, docs)
 
 	updateDoc: (project_id, doc_id, lines, version, callback = (error, modified, rev) ->) ->
-		DocManager.getDoc project_id, doc_id, (err, doc)->
+		DocManager.getDoc project_id, doc_id, {version: true}, (err, doc)->
 			if err? and !(err instanceof Errors.NotFoundError)
 				logger.err project_id: project_id, doc_id: doc_id, err:err, "error getting document for update"
 				return callback(err)
@@ -78,7 +81,7 @@ module.exports = DocManager =
 						callback null, true, oldRev + 1 # rev will have been incremented in mongo by MongoManager.updateDoc
 
 	deleteDoc: (project_id, doc_id, callback = (error) ->) ->
-		DocManager.getDoc project_id, doc_id, (error, doc) ->
+		DocManager.getDoc project_id, doc_id, {}, (error, doc) ->
 			return callback(error) if error?
 			return callback new Errors.NotFoundError("No such project/doc to delete: #{project_id}/#{doc_id}") if !doc?
 			MongoManager.upsertIntoDocCollection project_id, doc_id, doc.lines, (error) ->
