@@ -35,6 +35,9 @@ nav.navbar.navbar-default
 									each child in item.dropdown
 										if child.divider
 											li.divider
+										else if child.user_email
+											li
+												div.subdued #{getUserEmail()}
 										else
 											li
 												if child.url

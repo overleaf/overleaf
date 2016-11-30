@@ -58,8 +58,8 @@
     .nav-divider(@dropdown-divider-bg);
   }
 
-  // Links within the dropdown menu
-  > li > a {
+  // Links and other items within the dropdown menu
+  > li > a,div {
     display: block;
     padding: 3px 20px;
     clear: both;
@@ -67,8 +67,11 @@
     line-height: @line-height-base;
     color: @dropdown-link-color;
     white-space: nowrap; // prevent links from randomly breaking onto new lines
+    &.subdued {
+      color: #7a7a7a
+    }
     .subdued {
-        color: #7a7a7a
+      color: #7a7a7a
     }
   }
 }
