@@ -40,12 +40,12 @@ describe "HttpController", ->
 				@req.params =
 					project_id: @project_id
 					doc_id: @doc_id
-				@DocManager.getDoc = sinon.stub().callsArgWith(2, null, @doc)
+				@DocManager.getDoc = sinon.stub().callsArgWith(3, null, @doc)
 				@HttpController.getDoc @req, @res, @next
 
-			it "should get the document (including deleted)", ->
+			it "should get the document with the version (including deleted)", ->
 				@DocManager.getDoc
-					.calledWith(@project_id, @doc_id)
+					.calledWith(@project_id, @doc_id, {version: true})
 					.should.equal true
 
 			it "should return the doc as JSON", ->
@@ -64,11 +64,11 @@ describe "HttpController", ->
 				@req.params =
 					project_id: @project_id
 					doc_id: @doc_id
-				@DocManager.getDoc = sinon.stub().callsArgWith(2, null, @deletedDoc)
+				@DocManager.getDoc = sinon.stub().callsArgWith(3, null, @deletedDoc)
 
 			it "should get the doc from the doc manager", ->
 				@HttpController.getDoc @req, @res, @next
-				@DocManager.getDoc.calledWith(@project_id, @doc_id).should.equal true
+				@DocManager.getDoc.calledWith(@project_id, @doc_id, {version: true}).should.equal true
 
 			it "should return 404 if the query string delete is not set ", ->
 				@HttpController.getDoc @req, @res, @next
@@ -92,12 +92,12 @@ describe "HttpController", ->
 			@req.params =
 				project_id: @project_id
 				doc_id: @doc_id
-			@DocManager.getDoc = sinon.stub().callsArgWith(2, null, @doc)
+			@DocManager.getDoc = sinon.stub().callsArgWith(3, null, @doc)
 			@HttpController.getRawDoc @req, @res, @next
 
-		it "should get the document", ->
+		it "should get the document without the version", ->
 			@DocManager.getDoc
-				.calledWith(@project_id, @doc_id)
+				.calledWith(@project_id, @doc_id, {version: false})
 				.should.equal true
 
 		it "should set the content type header", ->
