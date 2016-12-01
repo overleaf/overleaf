@@ -2,7 +2,6 @@ sinon = require "sinon"
 chai = require("chai")
 chai.should()
 expect = chai.expect
-{db, ObjectId} = require "../../../app/js/mongojs"
 
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
@@ -18,13 +17,9 @@ describe "Getting a document", ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 			sinon.spy MockWebApi, "getDocument"
 
-			MockWebApi.insertDoc @project_id, @doc_id, lines: @lines
-			db.docOps.insert {
-				doc_id: ObjectId(@doc_id)
-				version: @version
-			}, (error) =>
-				throw error if error?
-				DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, @returnedDoc) => done()
+			MockWebApi.insertDoc @project_id, @doc_id, {lines: @lines, version: @version}
+
+			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, @returnedDoc) => done()
 
 		after ->
 			MockWebApi.getDocument.restore()
@@ -44,16 +39,11 @@ describe "Getting a document", ->
 		before (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 			
-			MockWebApi.insertDoc @project_id, @doc_id, lines: @lines
-			db.docOps.insert {
-				doc_id: ObjectId(@doc_id)
-				version: @version
-			}, (error) =>
+			MockWebApi.insertDoc @project_id, @doc_id, {lines: @lines, version: @version}
+			DocUpdaterClient.preloadDoc @project_id, @doc_id, (error) =>
 				throw error if error?
-				DocUpdaterClient.preloadDoc @project_id, @doc_id, (error) =>
-					throw error if error?
-					sinon.spy MockWebApi, "getDocument"
-					DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, @returnedDoc) =>	done()
+				sinon.spy MockWebApi, "getDocument"
+				DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, @returnedDoc) =>	done()
 
 		after ->
 			MockWebApi.getDocument.restore()

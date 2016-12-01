@@ -46,7 +46,7 @@ describe "Deleting a project", ->
 
 	describe "with documents which have been updated", ->
 		before (done) ->
-			sinon.spy MockWebApi, "setDocumentLines"
+			sinon.spy MockWebApi, "setDocument"
 			async.series @docs.map((doc) =>
 				(callback) =>
 					DocUpdaterClient.preloadDoc @project_id, doc.id, (error) =>
@@ -62,14 +62,14 @@ describe "Deleting a project", ->
 				, 200
 
 		after ->
-			MockWebApi.setDocumentLines.restore()
+			MockWebApi.setDocument.restore()
 
 		it "should return a 204 status code", ->
 			@statusCode.should.equal 204
 
 		it "should send each document to the web api", ->
 			for doc in @docs
-				MockWebApi.setDocumentLines
+				MockWebApi.setDocument
 					.calledWith(@project_id, doc.id, doc.updatedLines)
 					.should.equal true
 

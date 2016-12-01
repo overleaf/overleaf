@@ -2,7 +2,6 @@ request = require "request"
 Settings = require "settings-sharelatex"
 Errors = require "./Errors"
 Metrics = require "./Metrics"
-{db, ObjectId} = require("./mongojs")
 logger = require "logger-sharelatex"
 
 # We have to be quick with HTTP calls because we're holding a lock that
@@ -11,21 +10,7 @@ logger = require "logger-sharelatex"
 MAX_HTTP_REQUEST_LENGTH = 5000 # 5 seconds
 
 module.exports = PersistenceManager =
-	getDoc: (project_id, doc_id, callback = (error, lines, version) ->) ->
-		PersistenceManager.getDocFromWeb project_id, doc_id, (error, lines) ->
-			return callback(error) if error?
-			PersistenceManager.getDocVersionInMongo doc_id, (error, version) ->
-				return callback(error) if error?
-				callback null, lines, version
-
-	setDoc: (project_id, doc_id, lines, version, callback = (error) ->) ->
-		PersistenceManager.setDocInWeb project_id, doc_id, lines, (error) ->
-			return callback(error) if error?
-			PersistenceManager.setDocVersionInMongo doc_id, version, (error) ->
-				return callback(error) if error?
-				callback()
-
-	getDocFromWeb: (project_id, doc_id, _callback = (error, lines) ->) ->
+	getDoc: (project_id, doc_id, _callback = (error, lines, version) ->) ->
 		timer = new Metrics.Timer("persistenceManager.getDoc")
 		callback = (args...) ->
 			timer.done()
@@ -50,13 +35,17 @@ module.exports = PersistenceManager =
 					body = JSON.parse body
 				catch e
 					return callback(e)
-				return callback null, body.lines
+				if !body.lines?
+					return callback(new Error("web API response had no doc lines"))
+				if !body.version? or not body.version instanceof Number
+					return callback(new Error("web API response had no valid doc version"))
+				return callback null, body.lines, body.version
 			else if res.statusCode == 404
 				return callback(new Errors.NotFoundError("doc not not found: #{url}"))
 			else
 				return callback(new Error("error accessing web API: #{url} #{res.statusCode}"))
 
-	setDocInWeb: (project_id, doc_id, lines, _callback = (error) ->) ->
+	setDoc: (project_id, doc_id, lines, version, _callback = (error) ->) ->
 		timer = new Metrics.Timer("persistenceManager.setDoc")
 		callback = (args...) ->
 			timer.done()
@@ -68,6 +57,7 @@ module.exports = PersistenceManager =
 			method: "POST"
 			body: JSON.stringify
 				lines: lines
+				version: version
 			headers:
 				"content-type": "application/json"
 			auth:
@@ -84,27 +74,4 @@ module.exports = PersistenceManager =
 				return callback(new Errors.NotFoundError("doc not not found: #{url}"))
 			else
 				return callback(new Error("error accessing web API: #{url} #{res.statusCode}"))
-		
-	getDocVersionInMongo: (doc_id, callback = (error, version) ->) ->
-		db.docOps.find {
-			doc_id: ObjectId(doc_id)
-		}, {
-			version: 1
-		}, (error, docs) ->
-			return callback(error) if error?
-			if docs.length < 1 or !docs[0].version?
-				return callback null, 0
-			else
-				return callback null, docs[0].version
 
-	setDocVersionInMongo: (doc_id, version, callback = (error) ->) ->
-		db.docOps.update {
-			doc_id: ObjectId(doc_id)
-		}, {
-			$set: version: version
-		}, {
-			upsert: true
-		}, callback
-
-
-			

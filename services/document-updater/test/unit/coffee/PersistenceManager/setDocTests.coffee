@@ -3,6 +3,7 @@ chai = require('chai')
 should = chai.should()
 modulePath = "../../../../app/js/PersistenceManager.js"
 SandboxedModule = require('sandboxed-module')
+Errors = require "../../../../app/js/Errors"
 
 describe "PersistenceManager.setDoc", ->
 	beforeEach ->
@@ -12,27 +13,78 @@ describe "PersistenceManager.setDoc", ->
 			"./Metrics": @Metrics =
 				Timer: class Timer
 					done: sinon.stub()
-			"logger-sharelatex": @logger = {warn: sinon.stub()}
-
-		@project_id = "mock-project-id"
-		@doc_id = "mock-doc-id"
+			"logger-sharelatex": @logger = {log: sinon.stub(), err: sinon.stub()}
+		@project_id = "project-id-123"
+		@doc_id = "doc-id-123"
+		@lines = ["one", "two", "three"]
+		@version = 42
 		@callback = sinon.stub()
-		@lines = ["mock", "doc", "lines"]
+		@Settings.apis =
+			web:
+				url: @url = "www.example.com"
+				user: @user = "sharelatex"
+				pass: @pass = "password"
 
-		@PersistenceManager.setDocInWeb = sinon.stub().callsArg(3)
-		@PersistenceManager.setDocVersionInMongo = sinon.stub().callsArg(2)
+	describe "with a successful response from the web api", ->
+		beforeEach ->
+			@request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify(lines: @lines, version: @version))
+			@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @callback)
 
-		@PersistenceManager.setDoc @project_id, @doc_id, @lines, @version, @callback
+		it "should call the web api", ->
+			@request
+				.calledWith({
+					url: "#{@url}/project/#{@project_id}/doc/#{@doc_id}"
+					body: JSON.stringify
+						lines: @lines
+						version: @version
+					method: "POST"
+					headers:
+						"content-type": "application/json"
+					auth:
+						user: @user
+						pass: @pass
+						sendImmediately: true
+					jar: false
+					timeout: 5000
+				})
+				.should.equal true
 
-	it "should set the doc in the web api", ->
-		@PersistenceManager.setDocInWeb
-			.calledWith(@project_id, @doc_id, @lines)
-			.should.equal true
+		it "should call the callback without error", ->
+			@callback.calledWith(null).should.equal true
 
-	it "should set the doc version in mongo", ->
-		@PersistenceManager.setDocVersionInMongo
-			.calledWith(@doc_id, @version)
-			.should.equal true
+		it "should time the execution", ->
+			@Metrics.Timer::done.called.should.equal true
 
-	it "should call the callback", ->
-		@callback.called.should.equal true
+	describe "when request returns an error", ->
+		beforeEach ->
+			@request.callsArgWith(1, @error = new Error("oops"), null, null)
+			@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @callback)
+
+		it "should return the error", ->
+			@callback.calledWith(@error).should.equal true
+
+		it "should time the execution", ->
+			@Metrics.Timer::done.called.should.equal true
+
+	describe "when the request returns 404", ->
+		beforeEach ->
+			@request.callsArgWith(1, null, {statusCode: 404}, "")
+			@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @callback)
+			
+		it "should return a NotFoundError", ->
+			@callback.calledWith(new Errors.NotFoundError("not found")).should.equal true
+
+		it "should time the execution", ->
+			@Metrics.Timer::done.called.should.equal true
+
+	describe "when the request returns an error status code", ->
+		beforeEach ->
+			@request.callsArgWith(1, null, {statusCode: 500}, "")
+			@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @callback)
+			
+		it "should return an error", ->
+			@callback.calledWith(new Error("web api error")).should.equal true
+
+		it "should time the execution", ->
+			@Metrics.Timer::done.called.should.equal true
+
