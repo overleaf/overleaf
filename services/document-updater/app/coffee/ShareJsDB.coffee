@@ -1,8 +1,6 @@
 Keys = require('./UpdateKeys')
-Settings = require('settings-sharelatex')
 RedisManager = require "./RedisManager"
 Errors = require "./Errors"
-logger = require "logger-sharelatex"
 
 module.exports = class ShareJsDB
 	constructor: (@project_id, @doc_id, @lines, @version) ->
