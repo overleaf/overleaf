@@ -90,6 +90,7 @@ webRouter.use session
 		secure: Settings.secureCookie
 	store: sessionStore
 	key: Settings.cookieName
+	rolling: true
 
 # passport
 webRouter.use passport.initialize()

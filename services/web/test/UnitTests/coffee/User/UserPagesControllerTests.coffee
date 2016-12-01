@@ -30,8 +30,10 @@ describe "UserPagesController", ->
 		@AuthenticationController =
 			getLoggedInUserId: sinon.stub().returns(@user._id)
 			getSessionUser: sinon.stub().returns(@user)
+			_getRedirectFromSession: sinon.stub()
+			_setRedirectInSession: sinon.stub()
 		@UserPagesController = SandboxedModule.require modulePath, requires:
-			"settings-sharelatex":@settings
+			"settings-sharelatex": @settings
 			"logger-sharelatex":
 				log:->
 				err:->
@@ -53,14 +55,6 @@ describe "UserPagesController", ->
 		it "should render the register page", (done)->
 			@res.render = (page)=>
 				page.should.equal "user/register"
-				done()
-			@UserPagesController.registerPage @req, @res
-
-		it "should set the redirect", (done)->
-			redirect = "/go/here/please"
-			@req.query.redir = redirect
-			@res.render = (page, opts)=>
-				opts.redir.should.equal redirect
 				done()
 			@UserPagesController.registerPage @req, @res
 
@@ -98,13 +92,19 @@ describe "UserPagesController", ->
 				done()
 			@UserPagesController.loginPage @req, @res
 
-		it "should set the redirect", (done)->
-			redirect = "/go/here/please"
-			@req.query.redir = redirect
-			@res.render = (page, opts)=>
-				opts.redir.should.equal redirect
-				done()
-			@UserPagesController.loginPage @req, @res
+		describe 'when an explicit redirect is set via query string', ->
+
+			beforeEach ->
+				@AuthenticationController._getRedirectFromSession = sinon.stub().returns(null)
+				@AuthenticationController._setRedirectInSession = sinon.stub()
+				@req.query.redir = '/somewhere/in/particular'
+
+			it 'should set a redirect', (done) ->
+				@res.render = (page) =>
+					@AuthenticationController._setRedirectInSession.callCount.should.equal 1
+					expect(@AuthenticationController._setRedirectInSession.lastCall.args[1]).to.equal @req.query.redir
+					done()
+				@UserPagesController.loginPage @req, @res
 
 	describe 'sessionsPage', ->
 
@@ -148,6 +148,40 @@ describe "UserPagesController", ->
 				opts.user.should.equal @user
 				done()
 			@UserPagesController.settingsPage @req, @res
+
+		it "should set 'shouldAllowEditingDetails' to true", (done)->
+			@res.render = (page, opts)=>
+				opts.shouldAllowEditingDetails.should.equal true
+				done()
+			@UserPagesController.settingsPage @req, @res
+
+		describe 'when ldap.updateUserDetailsOnLogin is true', ->
+
+			beforeEach ->
+				@settings.ldap = {updateUserDetailsOnLogin: true}
+
+			afterEach ->
+				delete @settings.ldap
+
+			it 'should set "shouldAllowEditingDetails" to false', (done) ->
+				@res.render = (page, opts)=>
+					opts.shouldAllowEditingDetails.should.equal false
+					done()
+				@UserPagesController.settingsPage @req, @res
+
+		describe 'when saml.updateUserDetailsOnLogin is true', ->
+
+			beforeEach ->
+				@settings.saml = {updateUserDetailsOnLogin: true}
+
+			afterEach ->
+				delete @settings.saml
+
+			it 'should set "shouldAllowEditingDetails" to false', (done) ->
+				@res.render = (page, opts)=>
+					opts.shouldAllowEditingDetails.should.equal false
+					done()
+				@UserPagesController.settingsPage @req, @res
 
 	describe "activateAccountPage", ->
 		beforeEach ->

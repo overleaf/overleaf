@@ -347,6 +347,10 @@ module.exports = settings =
 			text: "Account"
 			only_when_logged_in: true
 			dropdown: [{
+				user_email: true
+			},{
+				divider: true
+			}, {
 				text: "Account Settings"
 				url: "/user/settings"
 			}, {

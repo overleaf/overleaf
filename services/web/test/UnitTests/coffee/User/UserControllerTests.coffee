@@ -89,6 +89,8 @@ describe "UserController", ->
 
 		beforeEach ->
 			@req.body.password = 'wat'
+			@req.logout = sinon.stub()
+			@req.session.destroy = sinon.stub().callsArgWith(0, null)
 			@AuthenticationController.getLoggedInUserId = sinon.stub().returns(@user._id)
 			@AuthenticationManager.authenticate = sinon.stub().callsArgWith(2, null, @user)
 			@UserDeleter.deleteUser = sinon.stub().callsArgWith(1, null)
@@ -159,6 +161,17 @@ describe "UserController", ->
 					done()
 				@UserController.tryDeleteUser @req, @res, @next
 
+		describe 'when session.destroy produces an error', ->
+
+			beforeEach ->
+				@req.session.destroy = sinon.stub().callsArgWith(0, new Error('woops'))
+
+			it 'should call next with an error', (done) ->
+				@next = (err) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					done()
+				@UserController.tryDeleteUser @req, @res, @next
 
 	describe "unsubscribe", ->
 
