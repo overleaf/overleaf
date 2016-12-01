@@ -39,7 +39,7 @@ module.exports = PersistenceManager =
 					return callback(new Error("web API response had no doc lines"))
 				if !body.version? or not body.version instanceof Number
 					return callback(new Error("web API response had no valid doc version"))
-				return callback null, body.lines, body.track_changes, body.track_changes_entries
+				return callback null, body.lines, body.version, body.track_changes, body.track_changes_entries
 			else if res.statusCode == 404
 				return callback(new Errors.NotFoundError("doc not not found: #{url}"))
 			else
@@ -55,13 +55,11 @@ module.exports = PersistenceManager =
 		request {
 			url: url
 			method: "POST"
-			body: JSON.stringify
+			json:
 				lines: lines
 				track_changes: track_changes
 				track_changes_entries: track_changes_entries
 				version: version
-			headers:
-				"content-type": "application/json"
 			auth:
 				user: Settings.apis.web.user
 				pass: Settings.apis.web.pass
