@@ -1,20 +1,22 @@
 #! /usr/bin/env bash
 
+npm rebuild
+
 echo ">> Starting server..."
 
-grunt execute:app >> /dev/null &
-_pid="$!"
+grunt --no-color forever:app:start
 
-echo ">> Server started with pid: $_pid"
+echo ">> Server started"
 
-sleep 20
+sleep 5
 
 echo ">> Running acceptance tests..."
-grunt mochaTest:acceptance
+grunt --no-color test:acceptance
 _test_exit_code=$?
 
-echo ">> Killing server (pid: $_pid)"
-kill -1 "$_pid"
+echo ">> Killing server"
+
+grunt --no-color forever:app:stop
 
 echo ">> Done"
 

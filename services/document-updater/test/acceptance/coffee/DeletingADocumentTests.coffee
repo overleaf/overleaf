@@ -1,7 +1,6 @@
 sinon = require "sinon"
 chai = require("chai")
 chai.should()
-{db, ObjectId} = require "../../../app/js/mongojs"
 
 MockTrackChangesApi = require "./helpers/MockTrackChangesApi"
 MockWebApi = require "./helpers/MockWebApi"
@@ -28,46 +27,31 @@ describe "Deleting a document", ->
 	describe "when the updated doc exists in the doc updater", ->
 		before (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
-			sinon.spy MockWebApi, "setDocumentLines"
+			sinon.spy MockWebApi, "setDocument"
 			sinon.spy MockWebApi, "getDocument"
 
-			MockWebApi.insertDoc @project_id, @doc_id, lines: @lines
-			db.docOps.insert {
-				doc_id: ObjectId(@doc_id)
-				version: @version
-			}, (error) =>
+			MockWebApi.insertDoc @project_id, @doc_id, {lines: @lines, version: @version}
+			DocUpdaterClient.preloadDoc @project_id, @doc_id, (error) =>
 				throw error if error?
-				DocUpdaterClient.preloadDoc @project_id, @doc_id, (error) =>
+				DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) =>
 					throw error if error?
-					DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) =>
-						throw error if error?
-						setTimeout () =>
-							DocUpdaterClient.deleteDoc @project_id, @doc_id, (error, res, body) =>
-								@statusCode = res.statusCode
-								setTimeout done, 200
-						, 200
+					setTimeout () =>
+						DocUpdaterClient.deleteDoc @project_id, @doc_id, (error, res, body) =>
+							@statusCode = res.statusCode
+							setTimeout done, 200
+					, 200
 
 		after ->
-			MockWebApi.setDocumentLines.restore()
+			MockWebApi.setDocument.restore()
 			MockWebApi.getDocument.restore()
 
 		it "should return a 204 status code", ->
 			@statusCode.should.equal 204
 
-		it "should send the updated document to the web api", ->
-			MockWebApi.setDocumentLines
-				.calledWith(@project_id, @doc_id, @result)
+		it "should send the updated document and version to the web api", ->
+			MockWebApi.setDocument
+				.calledWith(@project_id, @doc_id, @result, @version + 1)
 				.should.equal true
-
-		it "should write the version to mongo", (done) ->
-			db.docOps.find {
-				doc_id: ObjectId(@doc_id)
-			}, {
-				version: 1
-			}, (error, docs) =>
-				doc = docs[0]
-				doc.version.should.equal @version + 1
-				done()
 
 		it "should need to reload the doc if read again", (done) ->
 			MockWebApi.getDocument.called.should.equal.false
@@ -86,21 +70,21 @@ describe "Deleting a document", ->
 			MockWebApi.insertDoc @project_id, @doc_id, {
 				lines: @lines
 			}
-			sinon.spy MockWebApi, "setDocumentLines"
+			sinon.spy MockWebApi, "setDocument"
 			sinon.spy MockWebApi, "getDocument"
 			DocUpdaterClient.deleteDoc @project_id, @doc_id, (error, res, body) =>
 				@statusCode = res.statusCode
 				setTimeout done, 200
 
 		after ->
-			MockWebApi.setDocumentLines.restore()
+			MockWebApi.setDocument.restore()
 			MockWebApi.getDocument.restore()
 
 		it "should return a 204 status code", ->
 			@statusCode.should.equal 204
 
 		it "should not need to send the updated document to the web api", ->
-			MockWebApi.setDocumentLines.called.should.equal false
+			MockWebApi.setDocument.called.should.equal false
 
 		it "should need to reload the doc if read again", (done) ->
 			MockWebApi.getDocument.called.should.equal.false
