@@ -157,9 +157,15 @@ describe "UpdateManager", ->
 			@update = {op: [{p: 42, i: "foo"}]}
 			@updatedDocLines = ["updated", "lines"]
 			@version = 34
+			@lines = ["original", "lines"]
+			@track_changes_on = true
+			@track_changes_entries = { entries: "mock", comments: "mock" }
+			@updated_track_changes_entries = { entries: "updated", comments: "updated" }
 			@appliedOps = ["mock-applied-ops"]
-			@ShareJsUpdateManager.applyUpdate = sinon.stub().callsArgWith(3, null, @updatedDocLines, @version, @appliedOps)
-			@RedisManager.updateDocument = sinon.stub().callsArg(4)
+			@DocumentManager.getDoc = sinon.stub().yields(null, @lines, @version, @track_changes_on, @track_changes_entries)
+			@TrackChangesManager.applyUpdate = sinon.stub().yields(null, @updated_track_changes_entries)
+			@ShareJsUpdateManager.applyUpdate = sinon.stub().yields(null, @updatedDocLines, @version, @appliedOps)
+			@RedisManager.updateDocument = sinon.stub().yields()
 			@HistoryManager.pushUncompressedHistoryOps = sinon.stub().callsArg(3)
 		
 		describe "normally", ->
@@ -168,12 +174,17 @@ describe "UpdateManager", ->
 			
 			it "should apply the updates via ShareJS", ->
 				@ShareJsUpdateManager.applyUpdate
-					.calledWith(@project_id, @doc_id, @update)
+					.calledWith(@project_id, @doc_id, @update, @lines, @version)
+					.should.equal true
+			
+			it "should update the track changes entries", ->
+				@TrackChangesManager.applyUpdate
+					.calledWith(@project_id, @doc_id, @track_changes_entries, @appliedOps, @track_changes_on)
 					.should.equal true
 
 			it "should save the document", ->
 				@RedisManager.updateDocument
-					.calledWith(@doc_id, @updatedDocLines, @version, @appliedOps)
+					.calledWith(@doc_id, @updatedDocLines, @version, @appliedOps, @updated_track_changes_entries)
 					.should.equal true
 			
 			it "should push the applied ops into the track changes queue", ->
