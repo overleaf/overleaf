@@ -126,7 +126,7 @@ module.exports = ProjectEntityHandler =
 			doc = new Doc name: docName
 			# Put doc in docstore first, so that if it errors, we don't have a doc_id in the project
 			# which hasn't been created in docstore.
-			DocstoreManager.updateDoc project_id.toString(), doc._id.toString(), docLines, (err, modified, rev) ->
+			DocstoreManager.updateDoc project_id.toString(), doc._id.toString(), docLines, 0, (err, modified, rev) ->
 				return callback(err) if err? 
 
 				ProjectEntityHandler._putElement project, folder_id, doc, "doc", (err, result)=>
@@ -292,7 +292,7 @@ module.exports = ProjectEntityHandler =
 					return callback(err)
 				callback(err, folder, parentFolder_id)
 
-	updateDocLines : (project_id, doc_id, lines, callback = (error) ->)->
+	updateDocLines : (project_id, doc_id, lines, version, callback = (error) ->)->
 		ProjectGetter.getProjectWithoutDocLines project_id, (err, project)->
 			return callback(err) if err?
 			return callback(new Errors.NotFoundError("project not found")) if !project?
@@ -307,7 +307,7 @@ module.exports = ProjectEntityHandler =
 					return callback(error)
 
 				logger.log project_id: project_id, doc_id: doc_id, "telling docstore manager to update doc"
-				DocstoreManager.updateDoc project_id, doc_id, lines, (err, modified, rev) ->
+				DocstoreManager.updateDoc project_id, doc_id, lines, version, (err, modified, rev) ->
 					if err?
 						logger.error err: err, doc_id: doc_id, project_id:project_id, lines: lines, "error sending doc to docstore"
 						return callback(err)
