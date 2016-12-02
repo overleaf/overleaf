@@ -15,17 +15,15 @@ module.exports = MongoManager =
 			inS3: true
 		db.docs.find query, {}, callback
 
-	upsertIntoDocCollection: (project_id, doc_id, lines, callback)->
+	upsertIntoDocCollection: (project_id, doc_id, updates, callback)->
 		update =
-			$set:{}
-			$inc:{}
-			$unset:{}
-		update.$set["lines"] = lines
+			$set: updates
+			$inc:
+				rev: 1
+			$unset:
+				inS3: true
 		update.$set["project_id"] = ObjectId(project_id)
-		update.$inc["rev"] = 1 #on new docs being created this will set the rev to 1
-		update.$unset["inS3"] = true
 		db.docs.update _id: ObjectId(doc_id), update, {upsert: true}, callback
-
 
 	markDocAsDeleted: (project_id, doc_id, callback)->
 		db.docs.update {

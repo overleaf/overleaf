@@ -58,7 +58,7 @@ describe "MongoManager", ->
 			@oldRev = 77
 
 		it "should upsert the document", (done)->	
-			@MongoManager.upsertIntoDocCollection @project_id, @doc_id, @lines, (err)=>
+			@MongoManager.upsertIntoDocCollection @project_id, @doc_id, {@lines}, (err)=>
 				args = @db.docs.update.args[0]
 				assert.deepEqual args[0], {_id: ObjectId(@doc_id)}
 				assert.equal args[1]["$set"]["lines"], @lines
@@ -67,7 +67,7 @@ describe "MongoManager", ->
 				done()
 
 		it "should return the error", (done)->
-			@MongoManager.upsertIntoDocCollection @project_id, @doc_id, @lines, (err)=>
+			@MongoManager.upsertIntoDocCollection @project_id, @doc_id, {@lines}, (err)=>
 				err.should.equal @stubbedErr
 				done()
 

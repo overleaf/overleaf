@@ -179,7 +179,7 @@ describe "DocManager", ->
 
 			it "should upsert the document to the doc collection", ->
 				@MongoManager.upsertIntoDocCollection
-					.calledWith(@project_id, @doc_id, @newDocLines)
+					.calledWith(@project_id, @doc_id, {lines: @newDocLines})
 					.should.equal true
 			
 			it "should update the version", ->
@@ -216,7 +216,7 @@ describe "DocManager", ->
 
 			it "should upsert the document to the doc collection", ->
 				@MongoManager.upsertIntoDocCollection
-					.calledWith(@project_id, @doc_id, @oldDocLines)
+					.calledWith(@project_id, @doc_id, {lines: @oldDocLines})
 					.should.equal true
 			
 			it "should update the version", ->
@@ -272,7 +272,7 @@ describe "DocManager", ->
 
 			it "should upsert the document to the doc collection", ->
 				@MongoManager.upsertIntoDocCollection
-					.calledWith(@project_id, @doc_id,  @doc.lines)
+					.calledWith(@project_id, @doc_id, {lines: @doc.lines})
 					.should.equal true	
 
 		describe "when the doc does not exist", ->
@@ -282,7 +282,7 @@ describe "DocManager", ->
 			
 			it "should upsert the document to the doc collection", ->
 				@MongoManager.upsertIntoDocCollection
-					.calledWith(@project_id, @doc_id, @newDocLines)
+					.calledWith(@project_id, @doc_id, {lines: @newDocLines})
 					.should.equal true
 
 			it "should return the callback with the new rev", ->

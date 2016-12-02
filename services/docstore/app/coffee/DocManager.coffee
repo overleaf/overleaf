@@ -67,7 +67,7 @@ module.exports = DocManager =
 					oldVersion: doc?.version
 					newVersion: version
 				}, "updating doc lines"
-				MongoManager.upsertIntoDocCollection project_id, doc_id, lines, (error)->
+				MongoManager.upsertIntoDocCollection project_id, doc_id, {lines}, (error)->
 					return callback(callback) if error?
 					MongoManager.setDocVersion doc_id, version, (error) ->
 						return callback(error) if error?
