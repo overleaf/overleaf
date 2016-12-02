@@ -22,6 +22,7 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks "grunt-contrib-coffee"
 	grunt.loadNpmTasks "grunt-shell"
 
+	grunt.task.loadTasks "./tasks"
 
 	execute = {}
 	for service in SERVICES
@@ -112,7 +113,7 @@ module.exports = (grunt) ->
 	grunt.registerTask "check:make", "Check that make is installed", () ->
 		Helpers.checkMake @async()
 
-	grunt.registerTask 'migrate', "compile migrations and run them", ['coffee:migrate', 'shell:migrate']
+	grunt.registerTask 'migrate', "compile migrations and run them", ["coffee:migrate", 'shell:migrate']
 
 
 	Helpers =
@@ -233,7 +234,7 @@ module.exports = (grunt) ->
 
 				ShareLaTeX can not talk to the redis instance
 
-				Check the redis instance is running and accessible on env var SHARELATEX_REDIS_URL
+				Check the redis instance is running and accessible on env var SHARELATEX_REDIS_HOST
 
 				!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				"""
@@ -242,5 +243,4 @@ module.exports = (grunt) ->
 			rclient.on 'error', errorHandler
 
 
-	require('load-grunt-config')(grunt)
 
