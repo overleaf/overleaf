@@ -76,15 +76,15 @@ describe "MongoManager", ->
 			@db.docs.update = sinon.stub().callsArgWith(2, @stubbedErr)
 			@oldRev = 77
 
-		it "should process the update", (done)->	
-			@MongoManager.markDocAsDeleted @doc_id, (err)=>
+		it "should process the update", (done) ->
+			@MongoManager.markDocAsDeleted @project_id, @doc_id, (err)=>
 				args = @db.docs.update.args[0]
-				assert.deepEqual args[0], {_id: ObjectId(@doc_id)}
+				assert.deepEqual args[0], {_id: ObjectId(@doc_id), project_id: ObjectId(@project_id)}
 				assert.equal args[1]["$set"]["deleted"], true
 				done()
 
 		it "should return the error", (done)->
-			@MongoManager.markDocAsDeleted @doc_id, (err)=>
+			@MongoManager.markDocAsDeleted @project_id, @doc_id, (err)=>
 				err.should.equal @stubbedErr
 				done()
 

@@ -84,8 +84,4 @@ module.exports = DocManager =
 		DocManager.getDoc project_id, doc_id, { version: false }, (error, doc) ->
 			return callback(error) if error?
 			return callback new Errors.NotFoundError("No such project/doc to delete: #{project_id}/#{doc_id}") if !doc?
-			MongoManager.upsertIntoDocCollection project_id, doc_id, doc.lines, (error) ->
-				return callback(error) if error?
-				MongoManager.markDocAsDeleted doc_id, (error) ->
-					return callback(error) if error?
-					callback()
+			MongoManager.markDocAsDeleted project_id, doc_id, callback

@@ -27,12 +27,13 @@ module.exports = MongoManager =
 		db.docs.update _id: ObjectId(doc_id), update, {upsert: true}, callback
 
 
-	markDocAsDeleted: (doc_id, callback)->
-		update =
-			$set: {}
-		update.$set["deleted"] = true
-		db.docs.update _id: ObjectId(doc_id), update, (err)->
-			callback(err)
+	markDocAsDeleted: (project_id, doc_id, callback)->
+		db.docs.update {
+			_id: ObjectId(doc_id),
+			project_id: ObjectId(project_id) 
+		}, {
+			$set: { deleted: true }
+		}, callback
 
 	markDocAsArchived: (doc_id, rev, callback)->
 		update =

@@ -129,8 +129,7 @@ describe "DocManager", ->
 				@lines = ["mock", "doc", "lines"]
 				@rev = 77
 				@DocManager.getDoc = sinon.stub().callsArgWith(3, null, {lines: @lines, rev:@rev})
-				@MongoManager.upsertIntoDocCollection = sinon.stub().callsArg(3)
-				@MongoManager.markDocAsDeleted = sinon.stub().callsArg(1)
+				@MongoManager.markDocAsDeleted = sinon.stub().callsArg(2)
 				@DocManager.deleteDoc @project_id, @doc_id, @callback
 
 			it "should get the doc", ->
@@ -138,14 +137,9 @@ describe "DocManager", ->
 					.calledWith(@project_id, @doc_id)
 					.should.equal true
 
-			it "should update the doc lines", ->
-				@MongoManager.upsertIntoDocCollection
-					.calledWith(@project_id, @doc_id, @lines)
-					.should.equal true
-
 			it "should mark doc as deleted", ->
 				@MongoManager.markDocAsDeleted
-					.calledWith(@doc_id)
+					.calledWith(@project_id, @doc_id)
 					.should.equal true
 
 			it "should return the callback", ->
@@ -154,11 +148,8 @@ describe "DocManager", ->
 		describe "when the doc does not exist", ->
 			beforeEach -> 
 				@DocManager.getDoc = sinon.stub().callsArgWith(3, null, null)
-				@MongoManager.upsertIntoDocCollection = sinon.stub()
 				@DocManager.deleteDoc @project_id, @doc_id, @callback
 
-			it "should not try to insert a deleted doc", ->
-				@MongoManager.upsertIntoDocCollection.called.should.equal false
 
 			it "should return a NotFoundError", ->
 				@callback
