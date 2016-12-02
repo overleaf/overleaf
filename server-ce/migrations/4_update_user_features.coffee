@@ -6,13 +6,16 @@ db = mongojs(Settings.mongo.url, ['users'])
 _ = require("underscore")
 BSON = db.bson.BSON
 
+
 handleExit = () ->
 	console.log('Got signal.  Shutting down.')
+
 
 process.on 'SIGINT', handleExit
 process.on 'SIGHUP', handleExit
 
-module.exports.migrate = (client, done=()->) ->
+
+exports.migrate = (client, done=()->) ->
 	patch = {
 		$set: {
 			features: {
@@ -30,3 +33,7 @@ module.exports.migrate = (client, done=()->) ->
 	db.users.update {}, patch, {multi: true}, (err) ->
 		console.log "finished updating all user features"
 		return done(err)
+
+
+exports.rollback = (client, done) ->
+	done()
