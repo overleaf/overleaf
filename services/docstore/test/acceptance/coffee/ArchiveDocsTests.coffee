@@ -30,7 +30,7 @@ describe "Archiving all docs", ->
 				(callback) =>
 					DocstoreClient.createDoc @project_id, doc._id, doc.lines, (err)=>
 						doc.lines[0] = doc.lines[0]+" added"
-						DocstoreClient.updateDoc @project_id, doc._id, doc.lines, null, callback
+						DocstoreClient.updateDoc @project_id, doc._id, doc.lines, 42, callback
 		async.series jobs, done 
 
 	afterEach (done) ->
@@ -109,7 +109,7 @@ describe "Archiving all docs", ->
 			quarterMegInBytes = 250000
 			lines = require("crypto").randomBytes(quarterMegInBytes).toString("hex")
 			@docs[1].lines = [lines,lines,lines,lines]
-			DocstoreClient.updateDoc @project_id, @docs[1]._id, @docs[1].lines, null, =>
+			DocstoreClient.updateDoc @project_id, @docs[1]._id, @docs[1].lines, 42, =>
 				DocstoreClient.archiveAllDoc @project_id, (error, @res) =>
 					done()
 		

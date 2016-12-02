@@ -18,9 +18,9 @@ describe "Applying updates to a doc", ->
 				throw error if error?
 				done()
 
-	describe "when the content has changed", ->
+	describe "when the lines have changed", ->
 		beforeEach (done) ->
-			DocstoreClient.updateDoc @project_id, @doc_id, @newLines, null, (error, res, @body) =>
+			DocstoreClient.updateDoc @project_id, @doc_id, @newLines, @version, (error, res, @body) =>
 				done()
 
 		it "should return modified = true", ->
@@ -35,9 +35,9 @@ describe "Applying updates to a doc", ->
 				doc.version.should.equal @version
 				done()
 
-	describe "when the content has not been updated", ->
+	describe "when the lines and version have not been updated", ->
 		beforeEach (done) ->
-			DocstoreClient.updateDoc @project_id, @doc_id, @originalLines, null, (error, res, @body) =>
+			DocstoreClient.updateDoc @project_id, @doc_id, @originalLines, @version, (error, res, @body) =>
 				done()
 
 		it "should return modified = false", ->
@@ -51,7 +51,7 @@ describe "Applying updates to a doc", ->
 	describe "when the doc does not exist", ->
 		beforeEach (done) ->
 			@missing_doc_id = ObjectId()
-			DocstoreClient.updateDoc @project_id, @missing_doc_id, @originalLines, null, (error, @res, @body) =>
+			DocstoreClient.updateDoc @project_id, @missing_doc_id, @originalLines, 0, (error, @res, @body) =>
 				done()
 
 		it "should create the doc", ->
@@ -66,7 +66,7 @@ describe "Applying updates to a doc", ->
 	describe "when malformed doc lines are provided", ->
 		describe "when the lines are not an array", ->
 			beforeEach (done) ->
-				DocstoreClient.updateDoc @project_id, @doc_id, { foo: "bar" }, null, (error, @res, @body) =>
+				DocstoreClient.updateDoc @project_id, @doc_id, { foo: "bar" }, @version, (error, @res, @body) =>
 					done()
 
 			it "should return 400", ->
@@ -79,7 +79,7 @@ describe "Applying updates to a doc", ->
 
 		describe "when the lines are not present", ->
 			beforeEach (done) ->
-				DocstoreClient.updateDoc @project_id, @doc_id, null, null, (error, @res, @body) =>
+				DocstoreClient.updateDoc @project_id, @doc_id, null, @version, (error, @res, @body) =>
 					done()
 
 			it "should return 400", ->
@@ -89,12 +89,26 @@ describe "Applying updates to a doc", ->
 				DocstoreClient.getDoc @project_id, @doc_id, {}, (error, res, doc) =>
 					doc.lines.should.deep.equal @originalLines
 					done()
+	
+	describe "when no version is provided", ->
+		beforeEach (done) ->
+			DocstoreClient.updateDoc @project_id, @doc_id, @originalLines, null, (error, @res, @body) =>
+				done()
+
+		it "should return 400", ->
+			@res.statusCode.should.equal 400
+
+		it "should not update the doc in the API", (done) ->
+			DocstoreClient.getDoc @project_id, @doc_id, {}, (error, res, doc) =>
+				doc.lines.should.deep.equal @originalLines
+				doc.version.should.equal @version
+				done()
 
 	describe "when the content is large", ->
 		beforeEach (done) ->
 			line = new Array(1025).join("x") # 1kb
 			@largeLines = Array.apply(null, Array(1024)).map(() -> line) # 1mb
-			DocstoreClient.updateDoc @project_id, @doc_id, @largeLines, null, (error, res, @body) =>
+			DocstoreClient.updateDoc @project_id, @doc_id, @largeLines, @version, (error, res, @body) =>
 				done()
 
 		it "should return modified = true", ->

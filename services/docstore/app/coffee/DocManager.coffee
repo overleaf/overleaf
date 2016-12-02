@@ -41,6 +41,9 @@ module.exports = DocManager =
 					return callback(null, docs)
 
 	updateDoc: (project_id, doc_id, lines, version, callback = (error, modified, rev) ->) ->
+		if !lines? or !version?
+			return callback(new Error("no lines or version provided"))
+	
 		DocManager.getDoc project_id, doc_id, {version: true}, (err, doc)->
 			if err? and !(err instanceof Errors.NotFoundError)
 				logger.err project_id: project_id, doc_id: doc_id, err:err, "error getting document for update"
@@ -48,10 +51,7 @@ module.exports = DocManager =
 
 			isNewDoc = lines.length == 0
 			linesAreSame =  _.isEqual(doc?.lines, lines)
-			if version?
-				versionsAreSame = (doc?.version == version)
-			else
-				versionsAreSame = true
+			versionsAreSame = (doc?.version == version)
 
 			if linesAreSame and versionsAreSame and !isNewDoc
 				logger.log project_id: project_id, doc_id: doc_id, rev: doc?.rev, "doc lines have not changed - not updating"
@@ -69,15 +69,8 @@ module.exports = DocManager =
 				}, "updating doc lines"
 				MongoManager.upsertIntoDocCollection project_id, doc_id, lines, (error)->
 					return callback(callback) if error?
-					# TODO: While rolling out this code, setting the version via the docstore is optional,
-					# so if it hasn't been passed, just ignore it. Once the docupdater has totally
-					# handed control of this to the docstore, we can assume it will always be passed
-					# and an error guard on it not being set instead.
-					if version?
-						MongoManager.setDocVersion doc_id, version, (error) ->
-							return callback(error) if error?
-							callback null, true, oldRev + 1 # rev will have been incremented in mongo by MongoManager.updateDoc
-					else
+					MongoManager.setDocVersion doc_id, version, (error) ->
+						return callback(error) if error?
 						callback null, true, oldRev + 1 # rev will have been incremented in mongo by MongoManager.updateDoc
 
 	deleteDoc: (project_id, doc_id, callback = (error) ->) ->

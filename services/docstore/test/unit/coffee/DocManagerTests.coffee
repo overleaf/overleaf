@@ -227,42 +227,19 @@ describe "DocManager", ->
 			it "should return the callback with the new rev", ->
 				@callback.calledWith(null, true, @rev + 1).should.equal true
 
-		describe "when the version is null and the lines are different", ->
+		describe "when the version is null", ->
 			beforeEach ->
-				@DocManager.getDoc = sinon.stub().callsArgWith(3, null, @doc)
 				@DocManager.updateDoc @project_id, @doc_id, @newDocLines, null, @callback
 
-			it "should get the existing doc with the version", ->
-				@DocManager.getDoc
-					.calledWith(@project_id, @doc_id, {version: true})
-					.should.equal true
+			it "should return an error", ->
+				@callback.calledWith(new Error("no lines or version provided")).should.equal true
 
-			it "should upsert the document to the doc collection", ->
-				@MongoManager.upsertIntoDocCollection
-					.calledWith(@project_id, @doc_id, @newDocLines)
-					.should.equal true
-			
-			it "should not update the version", ->
-				@MongoManager.setDocVersion
-					.called
-					.should.equal false
-
-			it "should return the callback with the new rev", ->
-				@callback.calledWith(null, true, @rev + 1).should.equal true
-
-		describe "when the version is null and the lines are the same", ->
+		describe "when the lines are null", ->
 			beforeEach ->
-				@DocManager.getDoc = sinon.stub().callsArgWith(3, null, @doc)
-				@DocManager.updateDoc @project_id, @doc_id, @oldDocLines, null, @callback
-			
-			it "should not update the version", ->
-				@MongoManager.setDocVersion.called.should.equal false
+				@DocManager.updateDoc @project_id, @doc_id, null, @version, @callback
 
-			it "should not update the doc", ->
-				@MongoManager.upsertIntoDocCollection.called.should.equal false
-
-			it "should return the callback with the existing rev", ->
-				@callback.calledWith(null, false, @rev).should.equal true
+			it "should return an error", ->
+				@callback.calledWith(new Error("no lines or version provided")).should.equal true
 
 		describe "when there is a generic error getting the doc", ->
 			beforeEach ->

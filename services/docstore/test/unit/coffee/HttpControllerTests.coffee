@@ -195,12 +195,13 @@ describe "HttpController", ->
 			beforeEach ->
 				@req.body =
 					lines: @lines = ["hello", "world"]
+					version: @version = 42
 				@DocManager.updateDoc = sinon.stub().yields(null, true, @rev = 5)
 				@HttpController.updateDoc @req, @res, @next
 
 			it "should update the document", ->
 				@DocManager.updateDoc
-					.calledWith(@project_id, @doc_id, @lines, undefined)
+					.calledWith(@project_id, @doc_id, @lines, @version)
 					.should.equal true
 
 			it "should return a modified status", ->
@@ -212,6 +213,7 @@ describe "HttpController", ->
 			beforeEach ->
 				@req.body =
 					lines: @lines = ["hello", "world"]
+					version: @version = 42
 				@DocManager.updateDoc = sinon.stub().yields(null, false, @rev = 5)
 				@HttpController.updateDoc @req, @res, @next
 
@@ -222,7 +224,7 @@ describe "HttpController", ->
 
 		describe "when the doc lines are not provided", ->
 			beforeEach ->
-				@req.body = {}
+				@req.body = { version: 42 }
 				@DocManager.updateDoc = sinon.stub().yields(null, false)
 				@HttpController.updateDoc @req, @res, @next
 
@@ -234,22 +236,18 @@ describe "HttpController", ->
 					.calledWith(400)
 					.should.equal true
 
-		describe "when the doc version is provided", ->
+		describe "when the doc version is not provided", ->
 			beforeEach ->
-				@req.body =
-					lines: @lines = ["hello", "world"]
-					version: @version = 42
-				@DocManager.updateDoc = sinon.stub().yields(null, true, @rev = 5)
+				@req.body = { lines : [ "foo" ]}
+				@DocManager.updateDoc = sinon.stub().yields(null, false)
 				@HttpController.updateDoc @req, @res, @next
 
-			it "should update the document with the lines and version", ->
-				@DocManager.updateDoc
-					.calledWith(@project_id, @doc_id, @lines, @version)
-					.should.equal true
+			it "should not update the document", ->
+				@DocManager.updateDoc.called.should.equal false
 
-			it "should return a modified status", ->
-				@res.json
-					.calledWith(modified: true, rev: @rev)
+			it "should return a 400 (bad request) response", ->
+				@res.send
+					.calledWith(400)
 					.should.equal true
 
 	describe "deleteDoc", ->

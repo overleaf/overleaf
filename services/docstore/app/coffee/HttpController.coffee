@@ -55,6 +55,11 @@ module.exports = HttpController =
 			logger.error project_id: project_id, doc_id: doc_id, "no doc lines provided"
 			res.send 400 # Bad Request
 			return
+		
+		if !version? or typeof version is not "number"
+			logger.error project_id: project_id, doc_id: doc_id, "no doc version provided"
+			res.send 400 # Bad Request
+			return
 
 		logger.log project_id: project_id, doc_id: doc_id, "got http request to update doc"
 		DocManager.updateDoc project_id, doc_id, lines, version, (error, modified, rev) ->
