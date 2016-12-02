@@ -158,11 +158,10 @@ describe "UpdateManager", ->
 			@updatedDocLines = ["updated", "lines"]
 			@version = 34
 			@lines = ["original", "lines"]
-			@track_changes_on = true
 			@track_changes_entries = { entries: "mock", comments: "mock" }
 			@updated_track_changes_entries = { entries: "updated", comments: "updated" }
 			@appliedOps = ["mock-applied-ops"]
-			@DocumentManager.getDoc = sinon.stub().yields(null, @lines, @version, @track_changes_on, @track_changes_entries)
+			@DocumentManager.getDoc = sinon.stub().yields(null, @lines, @version, @track_changes_entries)
 			@TrackChangesManager.applyUpdate = sinon.stub().yields(null, @updated_track_changes_entries)
 			@ShareJsUpdateManager.applyUpdate = sinon.stub().yields(null, @updatedDocLines, @version, @appliedOps)
 			@RedisManager.updateDocument = sinon.stub().yields()
@@ -179,7 +178,7 @@ describe "UpdateManager", ->
 			
 			it "should update the track changes entries", ->
 				@TrackChangesManager.applyUpdate
-					.calledWith(@project_id, @doc_id, @track_changes_entries, @appliedOps, @track_changes_on)
+					.calledWith(@project_id, @doc_id, @track_changes_entries, @appliedOps)
 					.should.equal true
 
 			it "should save the document", ->

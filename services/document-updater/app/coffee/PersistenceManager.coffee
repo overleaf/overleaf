@@ -10,7 +10,7 @@ logger = require "logger-sharelatex"
 MAX_HTTP_REQUEST_LENGTH = 5000 # 5 seconds
 
 module.exports = PersistenceManager =
-	getDoc: (project_id, doc_id, _callback = (error, lines, version, track_changes, track_changes_entries) ->) ->
+	getDoc: (project_id, doc_id, _callback = (error, lines, version, track_changes_entries) ->) ->
 		timer = new Metrics.Timer("persistenceManager.getDoc")
 		callback = (args...) ->
 			timer.done()
@@ -39,13 +39,13 @@ module.exports = PersistenceManager =
 					return callback(new Error("web API response had no doc lines"))
 				if !body.version? or not body.version instanceof Number
 					return callback(new Error("web API response had no valid doc version"))
-				return callback null, body.lines, body.version, body.track_changes, body.track_changes_entries
+				return callback null, body.lines, body.version, body.track_changes_entries
 			else if res.statusCode == 404
 				return callback(new Errors.NotFoundError("doc not not found: #{url}"))
 			else
 				return callback(new Error("error accessing web API: #{url} #{res.statusCode}"))
 
-	setDoc: (project_id, doc_id, lines, version, track_changes, track_changes_entries, _callback = (error) ->) ->
+	setDoc: (project_id, doc_id, lines, version, track_changes_entries, _callback = (error) ->) ->
 		timer = new Metrics.Timer("persistenceManager.setDoc")
 		callback = (args...) ->
 			timer.done()
@@ -57,7 +57,6 @@ module.exports = PersistenceManager =
 			method: "POST"
 			json:
 				lines: lines
-				track_changes: track_changes
 				track_changes_entries: track_changes_entries
 				version: version
 			auth:

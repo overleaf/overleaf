@@ -24,7 +24,6 @@ describe "DocumentManager", ->
 		@lines = ["one", "two", "three"]
 		@version = 42
 		@track_changes_entries = { comments: "mock", entries: "mock" }
-		@track_changes_on = true
 
 	describe "flushAndDeleteDoc", ->
 		describe "successfully", ->
@@ -58,7 +57,7 @@ describe "DocumentManager", ->
 	describe "flushDocIfLoaded", ->
 		describe "when the doc is in Redis", ->
 			beforeEach ->
-				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @track_changes_on, @track_changes_entries)
+				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @track_changes_entries)
 				@PersistenceManager.setDoc = sinon.stub().yields()
 				@DocumentManager.flushDocIfLoaded @project_id, @doc_id, @callback
 
@@ -69,7 +68,7 @@ describe "DocumentManager", ->
 
 			it "should write the doc lines to the persistence layer", ->
 				@PersistenceManager.setDoc
-					.calledWith(@project_id, @doc_id, @lines, @version, @track_changes_on, @track_changes_entries)
+					.calledWith(@project_id, @doc_id, @lines, @version, @track_changes_entries)
 					.should.equal true
 			
 			it "should call the callback without error", ->
@@ -80,7 +79,7 @@ describe "DocumentManager", ->
 
 		describe "when the document is not in Redis", ->
 			beforeEach ->
-				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, null, null, null, null)
+				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, null, null, null)
 				@PersistenceManager.setDoc = sinon.stub().yields()
 				@DocOpsManager.flushDocOpsToMongo = sinon.stub().callsArgWith(2)
 				@DocumentManager.flushDocIfLoaded @project_id, @doc_id, @callback
@@ -103,7 +102,7 @@ describe "DocumentManager", ->
 	describe "getDocAndRecentOps", ->
 		describe "with a previous version specified", ->
 			beforeEach ->
-				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @track_changes_on, @track_changes_entries)
+				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @track_changes_entries)
 				@RedisManager.getPreviousDocOps = sinon.stub().callsArgWith(3, null, @ops)
 				@DocumentManager.getDocAndRecentOps @project_id, @doc_id, @fromVersion, @callback
 
@@ -125,7 +124,7 @@ describe "DocumentManager", ->
 
 		describe "with no previous version specified", ->
 			beforeEach ->
-				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @track_changes_on, @track_changes_entries)
+				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @track_changes_entries)
 				@RedisManager.getPreviousDocOps = sinon.stub().callsArgWith(3, null, @ops)
 				@DocumentManager.getDocAndRecentOps @project_id, @doc_id, -1, @callback
 
@@ -146,7 +145,7 @@ describe "DocumentManager", ->
 	describe "getDoc", ->
 		describe "when the doc exists in Redis", ->
 			beforeEach ->
-				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @track_changes_on, @track_changes_entries)
+				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @track_changes_entries)
 				@DocumentManager.getDoc @project_id, @doc_id, @callback
 
 			it "should get the doc from Redis", ->
@@ -155,7 +154,7 @@ describe "DocumentManager", ->
 					.should.equal true
 			
 			it "should call the callback with the doc info", ->
-				@callback.calledWith(null, @lines, @version, @track_changes_on, @track_changes_entries, true).should.equal true
+				@callback.calledWith(null, @lines, @version, @track_changes_entries, true).should.equal true
 
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
@@ -163,7 +162,7 @@ describe "DocumentManager", ->
 		describe "when the doc does not exist in Redis", ->
 			beforeEach ->
 				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, null, null, null, null)
-				@PersistenceManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @track_changes_on, @track_changes_entries)
+				@PersistenceManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @track_changes_entries)
 				@RedisManager.putDocInMemory = sinon.stub().yields()
 				@DocumentManager.getDoc @project_id, @doc_id, @callback
 
@@ -179,11 +178,11 @@ describe "DocumentManager", ->
 
 			it "should set the doc in Redis", ->
 				@RedisManager.putDocInMemory
-					.calledWith(@project_id, @doc_id, @lines, @version, @track_changes_on, @track_changes_entries)
+					.calledWith(@project_id, @doc_id, @lines, @version, @track_changes_entries)
 					.should.equal true
 
 			it "should call the callback with the doc info", ->
-				@callback.calledWith(null, @lines, @version, @track_changes_on, @track_changes_entries, false).should.equal true
+				@callback.calledWith(null, @lines, @version, @track_changes_entries, false).should.equal true
 
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
@@ -193,7 +192,7 @@ describe "DocumentManager", ->
 			beforeEach ->
 				@beforeLines = ["before", "lines"]
 				@afterLines = ["after", "lines"]
-				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @beforeLines, @version, @track_changes_on, @track_changes_entries, true)
+				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @beforeLines, @version, @track_changes_entries, true)
 				@DiffCodec.diffAsShareJsOp = sinon.stub().callsArgWith(2, null, @ops)
 				@UpdateManager.applyUpdate = sinon.stub().callsArgWith(3, null)
 				@DocumentManager.flushDocIfLoaded = sinon.stub().callsArg(2)

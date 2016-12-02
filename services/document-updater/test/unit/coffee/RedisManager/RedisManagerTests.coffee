@@ -22,7 +22,6 @@ describe "RedisManager", ->
 				projectKey: ({doc_id}) -> "ProjectId:#{doc_id}"
 				pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
 				docsInProject: ({project_id}) -> "DocsIn:#{project_id}"
-				trackChangesEnabled: ({doc_id}) -> "TrackChangesEnabled:#{doc_id}"
 				trackChangesEntries: ({doc_id}) -> "TrackChangesEntries:#{doc_id}"
 			"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }
 			"./Metrics": @metrics =
@@ -40,11 +39,10 @@ describe "RedisManager", ->
 			@jsonlines = JSON.stringify @lines
 			@version = 42
 			@track_changes_on = true
-			@redis_track_changes_on = "1"
 			@track_changes_entries = { comments: "mock", entries: "mock" }
 			@json_track_changes_entries = JSON.stringify @track_changes_entries
 			@rclient.get = sinon.stub()
-			@rclient.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version, @project_id, @redis_track_changes_on, @json_track_changes_entries])
+			@rclient.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version, @project_id, @json_track_changes_entries])
 
 		describe "successfully", ->
 			beforeEach ->
@@ -60,11 +58,6 @@ describe "RedisManager", ->
 					.calledWith("DocVersion:#{@doc_id}")
 					.should.equal true
 			
-			it "should get the track changes state", ->
-				@rclient.get
-					.calledWith("TrackChangesEnabled:#{@doc_id}")
-					.should.equal true
-			
 			it "should get the track changes entries", ->
 				@rclient.get
 					.calledWith("TrackChangesEntries:#{@doc_id}")
@@ -72,13 +65,13 @@ describe "RedisManager", ->
 
 			it 'should return the document', ->
 				@callback
-					.calledWith(null, @lines, @version, @track_changes_on, @track_changes_entries)
+					.calledWith(null, @lines, @version, @track_changes_entries)
 					.should.equal true
 
 		describe "getDoc with an invalid project id", ->
 			beforeEach ->
 				@another_project_id = "project-id-456"
-				@rclient.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version, @another_project_id, @redis_track_changes_on, @json_track_changes_entries])
+				@rclient.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version, @another_project_id, @json_track_changes_entries])
 				@RedisManager.getDoc @project_id, @doc_id, @callback
 
 			it 'should return an error', ->
@@ -263,9 +256,8 @@ describe "RedisManager", ->
 			@rclient.exec.yields()
 			@lines = ["one", "two", "three"]
 			@version = 42
-			@track_changes_on = true
 			@track_changes_entries = { comments: "mock", entries: "mock" }
-			@RedisManager.putDocInMemory @project_id, @doc_id, @lines, @version, @track_changes_on, @track_changes_entries, done
+			@RedisManager.putDocInMemory @project_id, @doc_id, @lines, @version, @track_changes_entries, done
 		
 		it "should set the lines", ->
 			@rclient.set
@@ -282,11 +274,6 @@ describe "RedisManager", ->
 				.calledWith("TrackChangesEntries:#{@doc_id}", JSON.stringify(@track_changes_entries))
 				.should.equal true
 			
-		it "should set the track changes state", ->
-			@rclient.set
-				.calledWith("TrackChangesEnabled:#{@doc_id}", "1")
-				.should.equal true
-		
 		it "should set the project_id for the doc", ->
 			@rclient.set
 				.calledWith("ProjectId:#{@doc_id}", @project_id)

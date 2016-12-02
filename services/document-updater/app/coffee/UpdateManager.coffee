@@ -48,13 +48,13 @@ module.exports = UpdateManager =
 
 	applyUpdate: (project_id, doc_id, update, callback = (error) ->) ->
 		UpdateManager._sanitizeUpdate update
-		DocumentManager.getDoc project_id, doc_id, (error, lines, version, track_changes, track_changes_entries) ->
+		DocumentManager.getDoc project_id, doc_id, (error, lines, version, track_changes_entries) ->
 			return callback(error) if error?
 			if !lines? or !version?
 				return callback(new Errors.NotFoundError("document not found: #{doc_id}"))
 			ShareJsUpdateManager.applyUpdate project_id, doc_id, update, lines, version, (error, updatedDocLines, version, appliedOps) ->
 				return callback(error) if error?
-				TrackChangesManager.applyUpdate project_id, doc_id, track_changes_entries, appliedOps, track_changes, (error, new_track_changes_entries) ->
+				TrackChangesManager.applyUpdate project_id, doc_id, track_changes_entries, appliedOps, (error, new_track_changes_entries) ->
 					return callback(error) if error?
 					logger.log doc_id: doc_id, version: version, "updating doc in redis"
 					RedisManager.updateDocument doc_id, updatedDocLines, version, appliedOps, new_track_changes_entries, (error) ->
