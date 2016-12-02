@@ -414,6 +414,7 @@ if process.env["SHARELATEX_LDAP_HOST"]
 		starttls:  parse(process.env["SHARELATEX_LDAP_TLS"])
 		nameAtt: process.env["SHARELATEX_LDAP_NAME_ATT"]
 		lastNameAtt: process.env["SHARELATEX_LDAP_LAST_NAME_ATT"]
+		updateUserDetailsOnLogin: process.env["SHARELATEX_LDAP_UPDATE_USER_DETAILS_ON_LOGIN"] == 'true'
 
 	if process.env["SHARELATEX_LDAP_TLS_OPTS_CA_PATH"]
 		try
@@ -436,6 +437,7 @@ if process.env["SHARELATEX_SAML_ENTRYPOINT"]
 	# NOTE: see https://github.com/bergie/passport-saml/blob/master/README.md for docs of `server` options
 	settings.externalAuth = true
 	settings.saml =
+		updateUserDetailsOnLogin: process.env["SHARELATEX_SAML_UPDATE_USER_DETAILS_ON_LOGIN"] == 'true'
 		identityServiceName: process.env["SHARELATEX_SAML_IDENTITY_SERVICE_NAME"]
 		emailField: process.env["SHARELATEX_SAML_EMAIL_FIELD"] || process.env["SHARELATEX_SAML_EMAIL_FIELD_NAME"]
 		firstNameField: process.env["SHARELATEX_SAML_FIRST_NAME_FIELD"]
