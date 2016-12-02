@@ -26,20 +26,20 @@ module.exports = DocumentManager =
 			else
 				callback null, lines, version, track_changes_entries, true
 
-	getDocAndRecentOps: (project_id, doc_id, fromVersion, _callback = (error, lines, version, recentOps) ->) ->
+	getDocAndRecentOps: (project_id, doc_id, fromVersion, _callback = (error, lines, version, recentOps, track_changes_entries) ->) ->
 		timer = new Metrics.Timer("docManager.getDocAndRecentOps")
 		callback = (args...) ->
 			timer.done()
 			_callback(args...)
 		
-		DocumentManager.getDoc project_id, doc_id, (error, lines, version) ->
+		DocumentManager.getDoc project_id, doc_id, (error, lines, version, track_changes_entries) ->
 			return callback(error) if error?
 			if fromVersion == -1
-				callback null, lines, version, []
+				callback null, lines, version, [], track_changes_entries
 			else
 				RedisManager.getPreviousDocOps doc_id, fromVersion, version, (error, ops) ->
 					return callback(error) if error?
-					callback null, lines, version, ops
+					callback null, lines, version, ops, track_changes_entries
 
 	setDoc: (project_id, doc_id, newLines, source, user_id, _callback = (error) ->) ->
 		timer = new Metrics.Timer("docManager.setDoc")

@@ -47,10 +47,9 @@ describe "Track changes", ->
 					setTimeout done, 200
 		
 		it "should set the updated track changes entries in redis", (done) ->
-			console.log "TODO: GET ME FROM HTTP REQUEST"
-			rclient.get "TrackChangesEntries:#{@doc.id}", (error, value) =>
+			DocUpdaterClient.getDoc @project_id, @doc.id, (error, res, data) =>
 				throw error if error?
-				entries = JSON.parse(value)
+				entries = data.track_changes_entries
 				change = entries.changes[0]
 				change.op.should.deep.equal { i: "456", p: 3 }
 				change.metadata.user_id.should.equal @user_id

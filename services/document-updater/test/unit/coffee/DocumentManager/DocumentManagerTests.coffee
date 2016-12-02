@@ -117,7 +117,7 @@ describe "DocumentManager", ->
 					.should.equal true
 
 			it "should call the callback with the doc info", ->
-				@callback.calledWith(null, @lines, @version, @ops).should.equal true
+				@callback.calledWith(null, @lines, @version, @ops, @track_changes_entries).should.equal true
 
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
@@ -137,7 +137,7 @@ describe "DocumentManager", ->
 				@RedisManager.getPreviousDocOps.called.should.equal false
 
 			it "should call the callback with the doc info", ->
-				@callback.calledWith(null, @lines, @version, []).should.equal true
+				@callback.calledWith(null, @lines, @version, [], @track_changes_entries).should.equal true
 
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
