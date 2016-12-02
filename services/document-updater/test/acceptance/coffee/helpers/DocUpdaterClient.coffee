@@ -72,18 +72,3 @@ module.exports = DocUpdaterClient =
 
 	deleteProject: (project_id, callback = () ->) ->
 		request.del "http://localhost:3003/project/#{project_id}", callback
-
-	setTrackChangesOn: (project_id, callback = () ->) ->
-		request.post {
-			url: "http://localhost:3003/project/#{project_id}/track_changes"
-			json:
-				on: true
-		}, callback
-
-	setTrackChangesOff: (project_id, callback = () ->) ->
-		request.post {
-			url: "http://localhost:3003/project/#{project_id}/track_changes"
-			json:
-				on: false
-		}, callback
-

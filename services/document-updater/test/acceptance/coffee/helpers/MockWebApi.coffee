@@ -11,10 +11,11 @@ module.exports = MockWebApi =
 		doc.lines ?= []
 		@docs["#{project_id}:#{doc_id}"] = doc
 
-	setDocument: (project_id, doc_id, lines, version, callback = (error) ->) ->
+	setDocument: (project_id, doc_id, lines, version, track_changes_entries, callback = (error) ->) ->
 		doc = @docs["#{project_id}:#{doc_id}"] ||= {}
 		doc.lines = lines
 		doc.version = version
+		doc.track_changes_entries = track_changes_entries
 		callback null
 
 	getDocument: (project_id, doc_id, callback = (error, doc) ->) ->
@@ -31,7 +32,7 @@ module.exports = MockWebApi =
 					res.send 404
 
 		app.post "/project/:project_id/doc/:doc_id", express.bodyParser(), (req, res, next) =>
-			MockWebApi.setDocument req.params.project_id, req.params.doc_id, req.body.lines, req.body.version, (error) ->
+			MockWebApi.setDocument req.params.project_id, req.params.doc_id, req.body.lines, req.body.version, req.body.track_changes_entries, (error) ->
 				if error?
 					res.send 500
 				else
