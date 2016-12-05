@@ -40,18 +40,35 @@ describe "MongoManager", ->
 			@doc3 = { name: "mock-doc3" }
 			@doc4 = { name: "mock-doc4" }
 			@db.docs.find = sinon.stub().callsArgWith(2, null, [@doc, @doc3, @doc4])
-			@MongoManager.getProjectsDocs @project_id, @callback
+		
+		describe "with included_deleted = false", ->
+			beforeEach -> 
+				@MongoManager.getProjectsDocs @project_id, include_deleted: false, @callback
 
-		it "should find the non-deleted docs via the project_id", ->
-			@db.docs.find
-				.calledWith({
-					project_id: ObjectId(@project_id)
-					deleted: { $ne: true }
-				}, {})
-				.should.equal true
+			it "should find the non-deleted docs via the project_id", ->
+				@db.docs.find
+					.calledWith({
+						project_id: ObjectId(@project_id)
+						deleted: { $ne: true }
+					}, {})
+					.should.equal true
 
-		it "should call the callback with the docs", ->
-			@callback.calledWith(null, [@doc, @doc3, @doc4]).should.equal true
+			it "should call the callback with the docs", ->
+				@callback.calledWith(null, [@doc, @doc3, @doc4]).should.equal true
+				
+		describe "with included_deleted = true", ->
+			beforeEach -> 
+				@MongoManager.getProjectsDocs @project_id, include_deleted: true, @callback
+
+			it "should find all via the project_id", ->
+				@db.docs.find
+					.calledWith({
+						project_id: ObjectId(@project_id)
+					}, {})
+					.should.equal true
+
+			it "should call the callback with the docs", ->
+				@callback.calledWith(null, [@doc, @doc3, @doc4]).should.equal true
 
 	describe "upsertIntoDocCollection", ->
 		beforeEach ->

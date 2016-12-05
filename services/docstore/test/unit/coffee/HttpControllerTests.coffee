@@ -120,11 +120,11 @@ describe "HttpController", ->
 					lines: ["mock", "lines", "two"]
 					rev: 4
 				}]
-				@DocManager.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
+				@DocManager.getAllNonDeletedDocs = sinon.stub().callsArgWith(1, null, @docs)
 				@HttpController.getAllDocs @req, @res, @next
 
-			it "should get all the docs", ->
-				@DocManager.getAllDocs
+			it "should get all the (non-deleted) docs", ->
+				@DocManager.getAllNonDeletedDocs
 					.calledWith(@project_id)
 					.should.equal true
 
@@ -158,7 +158,7 @@ describe "HttpController", ->
 					lines: ["mock", "lines", "two"]
 					rev: 4
 				}]
-				@DocManager.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
+				@DocManager.getAllNonDeletedDocs = sinon.stub().callsArgWith(1, null, @docs)
 				@HttpController.getAllDocs @req, @res, @next
 
 			it "should return the non null docs as JSON", ->
