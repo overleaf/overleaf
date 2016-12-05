@@ -42,10 +42,11 @@ describe "MongoManager", ->
 			@db.docs.find = sinon.stub().callsArgWith(2, null, [@doc, @doc3, @doc4])
 			@MongoManager.getProjectsDocs @project_id, @callback
 
-		it "should find the docs via the project_id", ->
+		it "should find the non-deleted docs via the project_id", ->
 			@db.docs.find
 				.calledWith({
 					project_id: ObjectId(@project_id)
+					deleted: { $ne: true }
 				}, {})
 				.should.equal true
 
