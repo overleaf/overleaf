@@ -196,12 +196,13 @@ describe "HttpController", ->
 				@req.body =
 					lines: @lines = ["hello", "world"]
 					version: @version = 42
+					ranges: @ranges = { changes: "mock" }
 				@DocManager.updateDoc = sinon.stub().yields(null, true, @rev = 5)
 				@HttpController.updateDoc @req, @res, @next
 
 			it "should update the document", ->
 				@DocManager.updateDoc
-					.calledWith(@project_id, @doc_id, @lines, @version)
+					.calledWith(@project_id, @doc_id, @lines, @version, @ranges)
 					.should.equal true
 
 			it "should return a modified status", ->

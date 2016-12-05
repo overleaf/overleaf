@@ -3,6 +3,7 @@ Errors = require "./Errors"
 logger = require "logger-sharelatex"
 _ = require "underscore"
 DocArchive = require "./DocArchiveManager"
+RangeManager = require "./RangeManager"
 
 module.exports = DocManager =
 	# TODO: For historical reasons, the doc version is currently stored in the docOps
@@ -40,7 +41,7 @@ module.exports = DocManager =
 				else
 					return callback(null, docs)
 
-	updateDoc: (project_id, doc_id, lines, version, callback = (error, modified, rev) ->) ->
+	updateDoc: (project_id, doc_id, lines, version, ranges, callback = (error, modified, rev) ->) ->
 		if !lines? or !version?
 			return callback(new Error("no lines or version provided"))
 	
@@ -48,33 +49,56 @@ module.exports = DocManager =
 			if err? and !(err instanceof Errors.NotFoundError)
 				logger.err project_id: project_id, doc_id: doc_id, err:err, "error getting document for update"
 				return callback(err)
+			
+			ranges = RangeManager.jsonRangesToMongo(ranges)
 
-			isNewDoc = lines.length == 0
-			linesAreSame =  _.isEqual(doc?.lines, lines)
-			versionsAreSame = (doc?.version == version)
-
-			if linesAreSame and versionsAreSame and !isNewDoc
-				logger.log project_id: project_id, doc_id: doc_id, rev: doc?.rev, "doc lines have not changed - not updating"
-				return callback null, false, doc?.rev
+			if !doc?
+				# If the document doesn't exist, we'll make sure to create/update all parts of it.
+				updateLines = true
+				updateVersion = true
+				updateRanges = true
 			else
-				oldRev = doc?.rev || 0
-				logger.log {
-					project_id: project_id
-					doc_id: doc_id,
-					oldDocLines: doc?.lines
-					newDocLines: lines
-					rev: oldRev
-					oldVersion: doc?.version
-					newVersion: version
-				}, "updating doc lines"
-				MongoManager.upsertIntoDocCollection project_id, doc_id, {lines}, (error)->
+				updateLines = not _.isEqual(doc.lines, lines)
+				updateVersion = (doc.version != version)
+				updateRanges = RangeManager.shouldUpdateRanges(doc.ranges, ranges)
+			
+			modified = false
+			rev = doc?.rev || 0
+
+			updateLinesAndRangesIfNeeded = (cb) ->
+				if updateLines or updateRanges
+					update = {}
+					if updateLines
+						update.lines = lines
+					if updateRanges
+						update.ranges = ranges
+					logger.log { project_id, doc_id, oldDoc: doc, update: update }, "updating doc lines and ranges"
+					
+					modified = true
+					rev += 1 # rev will be incremented in mongo by MongoManager.upsertIntoDocCollection
+					MongoManager.upsertIntoDocCollection project_id, doc_id, update, cb
+				else
+					logger.log { project_id, doc_id, }, "doc lines have not changed - not updating"
+					cb()
+			
+			updateVersionIfNeeded = (cb) ->
+				if updateVersion
+					logger.log { project_id, doc_id, oldVersion: doc?.version, newVersion: version }, "updating doc version"
+					modified = true
+					MongoManager.setDocVersion doc_id, version, cb
+				else
+					logger.log { project_id, doc_id, version }, "doc version has not changed - not updating"
+					cb()
+			
+			updateLinesAndRangesIfNeeded (error) ->
+				return callback(error) if error?
+				updateVersionIfNeeded (error) ->
 					return callback(callback) if error?
-					MongoManager.setDocVersion doc_id, version, (error) ->
-						return callback(error) if error?
-						callback null, true, oldRev + 1 # rev will have been incremented in mongo by MongoManager.updateDoc
+					callback null, modified, rev
 
 	deleteDoc: (project_id, doc_id, callback = (error) ->) ->
 		DocManager.getDoc project_id, doc_id, { version: false }, (error, doc) ->
 			return callback(error) if error?
 			return callback new Errors.NotFoundError("No such project/doc to delete: #{project_id}/#{doc_id}") if !doc?
 			MongoManager.markDocAsDeleted project_id, doc_id, callback
+

@@ -22,12 +22,14 @@ describe "Getting all docs", ->
 			lines: ["111", "222", "333"]
 			rev: 6
 		}]
+		version = 42
+		ranges = 42
 		jobs = for doc in @docs
 			do (doc) =>
 				(callback) => 
-					DocstoreClient.createDoc @project_id, doc._id, doc.lines, (err)=>
+					DocstoreClient.createDoc @project_id, doc._id, doc.lines, version, ranges, (err)=>
 						doc.lines[0] = doc.lines[0]+" added"
-						DocstoreClient.updateDoc @project_id, doc._id, doc.lines, 42, callback
+						DocstoreClient.updateDoc @project_id, doc._id, doc.lines, version, ranges, callback
 		async.series jobs, done 
 
 	it "should return all the docs", (done) ->
