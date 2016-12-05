@@ -30,9 +30,9 @@ module.exports = DocManager =
 				else
 					callback err, doc
 
-	getAllDocs: (project_id, callback = (error, docs) ->) ->
+	getAllNonDeletedDocs: (project_id, callback = (error, docs) ->) ->
 		DocArchive.unArchiveAllDocs project_id, (error) ->
-			MongoManager.getProjectsDocs project_id, (error, docs) ->
+			MongoManager.getProjectsDocs project_id, false, (error, docs) ->
 				if err?
 					return callback(error)
 				else if !docs?

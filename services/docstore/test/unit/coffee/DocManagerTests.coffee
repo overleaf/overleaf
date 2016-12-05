@@ -96,17 +96,17 @@ describe "DocManager", ->
 					.calledWith(new Errors.NotFoundError("No such doc: #{@doc_id} in project #{@project_id}"))
 					.should.equal true
 
-	describe "getAllDocs", ->
+	describe "getAllNonDeletedDocs", ->
 		describe "when the project exists", ->
 			beforeEach -> 
 				@docs = [{ _id: @doc_id, project_id: @project_id, lines: ["mock-lines"] }]
-				@MongoManager.getProjectsDocs = sinon.stub().callsArgWith(1, null, @docs)
+				@MongoManager.getProjectsDocs = sinon.stub().callsArgWith(2, null, @docs)
 				@DocArchiveManager.unArchiveAllDocs = sinon.stub().callsArgWith(1, null, @docs)
-				@DocManager.getAllDocs @project_id, @callback
+				@DocManager.getAllNonDeletedDocs @project_id, @callback
 
 			it "should get the project from the database", ->
 				@MongoManager.getProjectsDocs
-					.calledWith(@project_id)
+					.calledWith(@project_id, false)
 					.should.equal true
 
 			it "should return the docs", ->
@@ -114,9 +114,9 @@ describe "DocManager", ->
 
 		describe "when there are no docs for the project", ->
 			beforeEach -> 
-				@MongoManager.getProjectsDocs = sinon.stub().callsArgWith(1, null, null)
+				@MongoManager.getProjectsDocs = sinon.stub().callsArgWith(2, null, null)
 				@DocArchiveManager.unArchiveAllDocs = sinon.stub().callsArgWith(1, null, null)
-				@DocManager.getAllDocs @project_id, @callback
+				@DocManager.getAllNonDeletedDocs @project_id, @callback
 
 			it "should return a NotFoundError", ->
 				@callback
