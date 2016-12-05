@@ -8,6 +8,19 @@
 		opacity: .9;
 	}
 }
+@keyframes fade-in {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+.project-list-page {
+	position: relative;
+	overflow: hidden;
+}
 
 .project-header {
 	.btn-group > .btn {
@@ -305,45 +318,86 @@ ul.project-list {
 	}
 }
 
-.announcements {
-	position: absolute;
-	bottom: 100px;
-	right: 100px;
-	width: 80px;
-	height: 80px;
-	background: url(/img/lion-128.png) no-repeat center/80% white;
-	border-radius: 50%;
-	box-shadow: @announcements-shadow;
+.announcements-backdrop {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background-color: rgba(0, 0, 0, 0.35);
+	opacity: 0;
+	animation: fade-in 0.35s forwards;
 	z-index: 1;
 }
 
-	.announcements-badge {
-		display: inline-block;
-		position: absolute;
-		font-size: 11px;
-		height: 1.8em;
-		min-width: 1.8em;
-		border-radius: 0.9em;
-		line-height: 1.8;
-		padding: 0 2px;
-		top: 1px;
-		right: 1px;
-		font-weight: bold;
-		color: #FFF;
-		background-color: @red;
-		vertical-align: baseline;
-		white-space: nowrap;
-		text-align: center;
-		animation: pulse 1s alternate infinite;
+.announcements-btn {
+	position: absolute;
+	bottom: -50px;
+	right: 3%;
+	width: 80px;
+	height: 80px;
+	background: url(/img/lion-128.png) no-repeat center/80% transparent;
+	border-radius: 50%;
+	box-shadow: none;
+	z-index: 1;
+	transition: bottom 0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+				background 0.25s ease,
+				box-shadow 0.25s ease;
+
+	&:hover {
+		bottom: -45px;
 	}
 
-	.announcements-body {
-		position: absolute;
-		right: 0;
-		bottom: 80px;
-		width: 500px;
-		min-height: 100px;
-		background: #FFF;
+	&-open, &-open:hover,
+	&-has-new, &-has-new:hover {
+		background-color: #FFF;
 		box-shadow: @announcements-shadow;
-		border-radius: 10px;
+		bottom: 40px;
 	}
+}
+.announcements-badge {
+	display: inline-block;
+	position: absolute;
+	font-size: 11px;
+	height: 1.8em;
+	min-width: 1.8em;
+	border-radius: 0.9em;
+	line-height: 1.8;
+	padding: 0 2px;
+	top: 1px;
+	right: 1px;
+	font-weight: bold;
+	color: #FFF;
+	background-color: @red;
+	vertical-align: baseline;
+	white-space: nowrap;
+	text-align: center;
+	z-index: 1;
+	animation: pulse 1s alternate infinite;
+}
+
+.announcements-body {
+	position: absolute;
+	right: 3%;
+	bottom: 130px;
+	width: 700px;
+	min-height: 100px;
+	background: #FFF;
+	z-index: 1;
+	box-shadow: @announcements-shadow;
+	padding: 0 @line-height-computed;
+	border-radius: @border-radius-base;
+	animation: fade-in 0.35s forwards;
+}
+	.announcement {
+		margin-bottom: @line-height-computed;
+	}
+		.announcement-header {
+			.page-header;
+			margin-bottom: 0;
+		}
+
+		.announcement-date {
+			.small;
+			margin: (@line-height-computed / 4) 0;
+		}

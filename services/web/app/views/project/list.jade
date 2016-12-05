@@ -19,24 +19,37 @@ block content
 			}
 		};
 
-	.content.content-alt(ng-controller="ProjectPageController")
+	.content.content-alt.project-list-page(ng-controller="ProjectPageController")
 		.container
 			
 			div(
 				ng-controller="AnnouncementsController"
 				ng-cloak
 			)
-				.announcements(ng-if="announcements.length")
-					span.announcements-badge {{ announcements.length }}
-					.announcements-body
-						.announcement(
-							ng-repeat="announcement in announcements"
-						)
-							a.announcement-title(href, ng-click="openLink()") {{ announcement.title }}
-							p.announcement-description {{ announcement.excerpt }}
-					//- .card.card-thin(ng-show="dataReceived")
-					//- 	a.announcement-title(href, ng-click="openLink()") {{ title }}
-					//- 	p.announcement-description {{ excerpt }}
+				.announcements-backdrop(ng-if="ui.isOpen")
+				a.announcements-btn(
+					href
+					ng-if="announcements.length"
+					ng-click="ui.isOpen = !ui.isOpen"
+					ng-class="{ 'announcements-btn-open': ui.isOpen, 'announcements-btn-has-new': ui.hasNew }"
+				)
+					span.announcements-badge(ng-if="ui.hasNew") {{ announcements.length }}
+				.announcements-body(
+					ng-if="ui.isOpen"
+				)
+					.announcement(
+						ng-repeat="announcement in announcements"
+					)
+						h2.announcement-header {{ announcement.title }}
+						p.announcement-date {{ announcement.date | date:"longDate" }}
+						p.announcement-description {{ announcement.excerpt }}
+						a(
+							ng-href="{{ announcement.url }}"
+							target="_blank"
+						) Read more
+				//- .card.card-thin(ng-show="dataReceived")
+				//- 	a.announcement-title(href, ng-click="openLink()") {{ title }}
+				//- 	p.announcement-description {{ excerpt }}
 
 			.row(ng-cloak)
 				span(ng-if="projects.length > 0")
