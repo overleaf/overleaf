@@ -7,7 +7,7 @@ module.exports = MongoManager =
 			callback error, docs[0]
 
 	getProjectsDocs: (project_id, callback)->
-		db.docs.find project_id: ObjectId(project_id.toString()), {}, callback
+		db.docs.find {project_id: ObjectId(project_id.toString()), deleted: { $ne: true }}, {}, callback
 
 	getArchivedProjectDocs: (project_id, callback)->
 		query =
