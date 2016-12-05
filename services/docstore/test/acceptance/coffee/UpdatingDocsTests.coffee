@@ -76,7 +76,7 @@ describe "Applying updates to a doc", ->
 			@body.modified.should.equal true
 
 		it "should return the rev", ->
-			@body.rev.should.equal 2
+			@body.rev.should.equal 1
 
 		it "should update the doc in the API", (done) ->
 			DocstoreClient.getDoc @project_id, @doc_id, {}, (error, res, doc) =>

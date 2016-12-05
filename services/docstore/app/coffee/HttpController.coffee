@@ -10,7 +10,7 @@ module.exports = HttpController =
 		doc_id     = req.params.doc_id
 		include_deleted = req.query?.include_deleted == "true"
 		logger.log project_id: project_id, doc_id: doc_id, "getting doc"
-		DocManager.getDoc project_id, doc_id, {version: true}, (error, doc) ->
+		DocManager.getDoc project_id, doc_id, {lines: true, rev: true, deleted: true, version: true, ranges: true}, (error, doc) ->
 			return next(error) if error?
 			logger.log doc: doc, "got doc"
 			if !doc?
@@ -24,7 +24,7 @@ module.exports = HttpController =
 		project_id = req.params.project_id
 		doc_id     = req.params.doc_id
 		logger.log project_id: project_id, doc_id: doc_id, "getting raw doc"
-		DocManager.getDoc project_id, doc_id, {version: false}, (error, doc) ->
+		DocManager.getDoc project_id, doc_id, {lines: true}, (error, doc) ->
 			return next(error) if error?
 			if !doc?
 				res.send 404
@@ -35,7 +35,7 @@ module.exports = HttpController =
 	getAllDocs: (req, res, next = (error) ->) ->
 		project_id = req.params.project_id
 		logger.log project_id: project_id, "getting all docs"
-		DocManager.getAllNonDeletedDocs project_id, (error, docs = []) ->
+		DocManager.getAllNonDeletedDocs project_id, {lines: true, rev: true}, (error, docs = []) ->
 			return next(error) if error?
 			docViews = []
 			for doc in docs
@@ -83,12 +83,13 @@ module.exports = HttpController =
 			_id:     doc._id?.toString()
 			lines:   doc.lines
 			rev:     doc.rev
-			deleted: !!doc.deleted
 		}
 		if doc.version?
 			doc_view.version = doc.version
 		if doc.ranges?
 			doc_view.ranges = doc.ranges
+		if doc.deleted?
+			doc_view.deleted = doc.deleted
 		return doc_view
 
 	_buildRawDocView: (doc)->

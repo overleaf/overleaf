@@ -11,7 +11,7 @@ thirtySeconds = 30 * 1000
 module.exports = DocArchive =
 
 	archiveAllDocs: (project_id, callback = (err, docs) ->) ->
-		MongoManager.getProjectsDocs project_id, {include_deleted: true}, (err, docs) ->
+		MongoManager.getProjectsDocs project_id, {include_deleted: true}, {lines: true, rev: true, inS3: true}, (err, docs) ->
 			if err?
 				return callback(err)
 			else if !docs?

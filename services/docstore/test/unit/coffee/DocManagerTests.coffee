@@ -92,7 +92,7 @@ describe "DocManager", ->
 
 		describe "when the doc does not exist in the docs collection", ->
 			beforeEach -> 
-				@MongoManager.findDoc = sinon.stub().callsArgWith(2, null, null)
+				@MongoManager.findDoc = sinon.stub().yields(null, null)
 				@DocManager.getDoc @project_id, @doc_id, {version: true}, @callback
 
 			it "should return a NotFoundError", ->
@@ -104,13 +104,14 @@ describe "DocManager", ->
 		describe "when the project exists", ->
 			beforeEach -> 
 				@docs = [{ _id: @doc_id, project_id: @project_id, lines: ["mock-lines"] }]
-				@MongoManager.getProjectsDocs = sinon.stub().callsArgWith(2, null, @docs)
+				@MongoManager.getProjectsDocs = sinon.stub().callsArgWith(3, null, @docs)
 				@DocArchiveManager.unArchiveAllDocs = sinon.stub().callsArgWith(1, null, @docs)
-				@DocManager.getAllNonDeletedDocs @project_id, @callback
+				@filter = { lines: true }
+				@DocManager.getAllNonDeletedDocs @project_id, @filter, @callback
 
 			it "should get the project from the database", ->
 				@MongoManager.getProjectsDocs
-					.calledWith(@project_id, {include_deleted: false})
+					.calledWith(@project_id, {include_deleted: false}, @filter)
 					.should.equal true
 
 			it "should return the docs", ->
@@ -118,13 +119,13 @@ describe "DocManager", ->
 
 		describe "when there are no docs for the project", ->
 			beforeEach -> 
-				@MongoManager.getProjectsDocs = sinon.stub().callsArgWith(2, null, null)
-				@DocArchiveManager.unArchiveAllDocs = sinon.stub().callsArgWith(1, null, null)
-				@DocManager.getAllNonDeletedDocs @project_id, @callback
+				@MongoManager.getProjectsDocs = sinon.stub().callsArgWith(3, null, null)
+				@DocArchiveManager.unArchiveAllDocs = sinon.stub().callsArgWith(1, null)
+				@DocManager.getAllNonDeletedDocs @project_id, @filter, @callback
 
 			it "should return a NotFoundError", ->
 				@callback
-					.calledWith(new Errors.NotFoundError("No such docs for project #{@project_id}"))
+					.calledWith(new Errors.NotFoundError("No docs for project #{@project_id}"))
 					.should.equal true
 
 	describe "deleteDoc", ->
@@ -196,7 +197,7 @@ describe "DocManager", ->
 
 			it "should get the existing doc", ->
 				@DocManager.getDoc
-					.calledWith(@project_id, @doc_id)
+					.calledWith(@project_id, @doc_id, {version: true, rev: true, lines: true, version: true, ranges: true})
 					.should.equal true
 
 			it "should upsert the document to the doc collection", ->
@@ -216,11 +217,6 @@ describe "DocManager", ->
 				@RangeManager.shouldUpdateRanges.returns true
 				@DocManager.updateDoc @project_id, @doc_id, @oldDocLines, @version, @newRanges, @callback
 
-			it "should get the existing doc", ->
-				@DocManager.getDoc
-					.calledWith(@project_id, @doc_id)
-					.should.equal true
-
 			it "should upsert the ranges", ->
 				@MongoManager.upsertIntoDocCollection
 					.calledWith(@project_id, @doc_id, {ranges: @newRanges})
@@ -237,11 +233,6 @@ describe "DocManager", ->
 				@DocManager.getDoc = sinon.stub().callsArgWith(3, null, @doc)
 				@DocManager.updateDoc @project_id, @doc_id, @oldDocLines, @version + 1, @originalRanges, @callback
 
-			it "should get the existing doc with the version", ->
-				@DocManager.getDoc
-					.calledWith(@project_id, @doc_id, {version: true})
-					.should.equal true
-
 			it "should not change the lines or ranges", ->
 				@MongoManager.upsertIntoDocCollection.called.should.equal false
 			
@@ -257,11 +248,6 @@ describe "DocManager", ->
 			beforeEach ->
 				@DocManager.getDoc = sinon.stub().callsArgWith(3, null, @doc)
 				@DocManager.updateDoc @project_id, @doc_id, @oldDocLines, @version, @originalRanges, @callback
-
-			it "should get the existing doc", ->
-				@DocManager.getDoc
-					.calledWith(@project_id, @doc_id)
-					.should.equal true
 
 			it "should not update the ranges or lines", ->
 				@MongoManager.upsertIntoDocCollection.called.should.equal false

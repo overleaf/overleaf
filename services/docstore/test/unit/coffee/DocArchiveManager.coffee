@@ -64,8 +64,8 @@ describe "DocArchiveManager", ->
 		@MongoManager =
 			markDocAsArchived: sinon.stub().callsArgWith(2, null)
 			upsertIntoDocCollection: sinon.stub().callsArgWith(3, null)
-			getProjectsDocs: sinon.stub().callsArgWith(2, null, @mongoDocs)
-			getArchivedProjectDocs: sinon.stub().callsArgWith(1, null, @mongoDocs)
+			getProjectsDocs: sinon.stub().callsArgWith(3, null, @mongoDocs)
+			getArchivedProjectDocs: sinon.stub().callsArgWith(2, null, @mongoDocs)
 
 		@requires = 
 			"settings-sharelatex": @settings
@@ -127,7 +127,7 @@ describe "DocArchiveManager", ->
 	describe "archiveAllDocs", ->
 
 		it "should archive all project docs which are not in s3", (done)->
-			@MongoManager.getProjectsDocs = sinon.stub().callsArgWith(2, null, @mongoDocs)
+			@MongoManager.getProjectsDocs = sinon.stub().callsArgWith(3, null, @mongoDocs)
 			@DocArchiveManager.archiveDoc = sinon.stub().callsArgWith(2, null)
 
 			@DocArchiveManager.archiveAllDocs @project_id, (err)=>
@@ -142,14 +142,14 @@ describe "DocArchiveManager", ->
 				done()
 
 		it "should return error if have no docs", (done)->
-			@MongoManager.getProjectsDocs = sinon.stub().callsArgWith(2, null, null)
+			@MongoManager.getProjectsDocs = sinon.stub().callsArgWith(3, null, null)
 
 			@DocArchiveManager.archiveAllDocs @project_id, (err)=>
 				should.exist err
 				done()
 
 		it "should return the error", (done)->
-			@MongoManager.getProjectsDocs = sinon.stub().callsArgWith(2, @error, null)
+			@MongoManager.getProjectsDocs = sinon.stub().callsArgWith(3, @error, null)
 
 			@DocArchiveManager.archiveAllDocs @project_id, (err)=>
 				err.should.equal @error
@@ -163,7 +163,7 @@ describe "DocArchiveManager", ->
 				while --numberOfDocs != 0
 					@mongoDocs.push({inS3:true, _id: ObjectId()})
 
-				@MongoManager.getProjectsDocs = sinon.stub().callsArgWith(2, null, @mongoDocs)
+				@MongoManager.getProjectsDocs = sinon.stub().callsArgWith(3, null, @mongoDocs)
 				@DocArchiveManager.archiveDoc = sinon.stub().callsArgWith(2, null)	
 
 			it "should not throw and error", (done)->

@@ -45,7 +45,7 @@ describe "HttpController", ->
 
 			it "should get the document with the version (including deleted)", ->
 				@DocManager.getDoc
-					.calledWith(@project_id, @doc_id, {version: true})
+					.calledWith(@project_id, @doc_id, {lines: true, rev: true, deleted: true, version: true, ranges: true})
 					.should.equal true
 
 			it "should return the doc as JSON", ->
@@ -54,7 +54,6 @@ describe "HttpController", ->
 						_id: @doc_id
 						lines: @doc.lines
 						rev: @doc.rev
-						deleted: false
 						version: @doc.version
 					})
 					.should.equal true
@@ -68,7 +67,7 @@ describe "HttpController", ->
 
 			it "should get the doc from the doc manager", ->
 				@HttpController.getDoc @req, @res, @next
-				@DocManager.getDoc.calledWith(@project_id, @doc_id, {version: true}).should.equal true
+				@DocManager.getDoc.calledWith(@project_id, @doc_id, {lines: true, rev: true, deleted: true, version: true, ranges: true}).should.equal true
 
 			it "should return 404 if the query string delete is not set ", ->
 				@HttpController.getDoc @req, @res, @next
@@ -97,7 +96,7 @@ describe "HttpController", ->
 
 		it "should get the document without the version", ->
 			@DocManager.getDoc
-				.calledWith(@project_id, @doc_id, {version: false})
+				.calledWith(@project_id, @doc_id, {lines: true})
 				.should.equal true
 
 		it "should set the content type header", ->
@@ -120,12 +119,12 @@ describe "HttpController", ->
 					lines: ["mock", "lines", "two"]
 					rev: 4
 				}]
-				@DocManager.getAllNonDeletedDocs = sinon.stub().callsArgWith(1, null, @docs)
+				@DocManager.getAllNonDeletedDocs = sinon.stub().callsArgWith(2, null, @docs)
 				@HttpController.getAllDocs @req, @res, @next
 
 			it "should get all the (non-deleted) docs", ->
 				@DocManager.getAllNonDeletedDocs
-					.calledWith(@project_id)
+					.calledWith(@project_id, {lines: true, rev: true})
 					.should.equal true
 
 			it "should return the doc as JSON", ->
@@ -134,12 +133,10 @@ describe "HttpController", ->
 						_id:   @docs[0]._id.toString()
 						lines: @docs[0].lines
 						rev:   @docs[0].rev
-						deleted: false
 					}, {
 						_id:   @docs[1]._id.toString()
 						lines: @docs[1].lines
 						rev:   @docs[1].rev
-						deleted: false
 					}])
 					.should.equal true
 
@@ -158,7 +155,7 @@ describe "HttpController", ->
 					lines: ["mock", "lines", "two"]
 					rev: 4
 				}]
-				@DocManager.getAllNonDeletedDocs = sinon.stub().callsArgWith(1, null, @docs)
+				@DocManager.getAllNonDeletedDocs = sinon.stub().callsArgWith(2, null, @docs)
 				@HttpController.getAllDocs @req, @res, @next
 
 			it "should return the non null docs as JSON", ->
@@ -167,12 +164,10 @@ describe "HttpController", ->
 						_id:   @docs[0]._id.toString()
 						lines: @docs[0].lines
 						rev:   @docs[0].rev
-						deleted: false
 					}, {
 						_id:   @docs[2]._id.toString()
 						lines: @docs[2].lines
 						rev:   @docs[2].rev
-						deleted: false
 					}])
 					.should.equal true
 

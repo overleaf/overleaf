@@ -11,7 +11,7 @@ module.exports = DocManager =
 	# migrate this version property to be part of the docs collection, to guarantee
 	# consitency between lines and version when writing/reading, and for a simpler schema.
 	getDoc: (project_id, doc_id, filter = { version: false }, callback = (error, doc) ->) ->
-		MongoManager.findDoc project_id, doc_id, (err, doc)->
+		MongoManager.findDoc project_id, doc_id, filter, (err, doc)->
 			if err?
 				return callback(err)
 			else if !doc?
@@ -31,9 +31,9 @@ module.exports = DocManager =
 				else
 					callback err, doc
 
-	getAllNonDeletedDocs: (project_id, callback = (error, docs) ->) ->
+	getAllNonDeletedDocs: (project_id, filter, callback = (error, docs) ->) ->
 		DocArchive.unArchiveAllDocs project_id, (error) ->
-			MongoManager.getProjectsDocs project_id, {include_deleted: false}, (error, docs) ->
+			MongoManager.getProjectsDocs project_id, {include_deleted: false}, filter, (error, docs) ->
 				if err?
 					return callback(error)
 				else if !docs?
@@ -45,7 +45,7 @@ module.exports = DocManager =
 		if !lines? or !version?
 			return callback(new Error("no lines or version provided"))
 	
-		DocManager.getDoc project_id, doc_id, {version: true}, (err, doc)->
+		DocManager.getDoc project_id, doc_id, {version: true, rev: true, lines: true, version: true, ranges: true}, (err, doc)->
 			if err? and !(err instanceof Errors.NotFoundError)
 				logger.err project_id: project_id, doc_id: doc_id, err:err, "error getting document for update"
 				return callback(err)
@@ -93,7 +93,7 @@ module.exports = DocManager =
 			updateLinesAndRangesIfNeeded (error) ->
 				return callback(error) if error?
 				updateVersionIfNeeded (error) ->
-					return callback(callback) if error?
+					return callback(error) if error?
 					callback null, modified, rev
 
 	deleteDoc: (project_id, doc_id, callback = (error) ->) ->
