@@ -22,6 +22,8 @@ module.exports = RangeManager =
 			change.id = @_safeObjectId(change.id)
 			if change.metadata?.ts?
 				change.metadata.ts = new Date(change.metadata.ts)
+			if change.metadata?.user_id?
+				change.metadata.user_id = @_safeObjectId(change.metadata.user_id)
 		for comment in ranges.comments or []
 			comment.id = @_safeObjectId(comment.id)
 			if comment.metadata?.ts?
