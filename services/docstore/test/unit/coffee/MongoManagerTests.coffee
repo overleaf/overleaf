@@ -43,7 +43,7 @@ describe "MongoManager", ->
 		
 		describe "with included_deleted = false", ->
 			beforeEach -> 
-				@MongoManager.getProjectsDocs @project_id, false, @callback
+				@MongoManager.getProjectsDocs @project_id, include_deleted: false, @callback
 
 			it "should find the non-deleted docs via the project_id", ->
 				@db.docs.find
@@ -58,7 +58,7 @@ describe "MongoManager", ->
 				
 		describe "with included_deleted = true", ->
 			beforeEach -> 
-				@MongoManager.getProjectsDocs @project_id, true, @callback
+				@MongoManager.getProjectsDocs @project_id, include_deleted: true, @callback
 
 			it "should find all via the project_id", ->
 				@db.docs.find

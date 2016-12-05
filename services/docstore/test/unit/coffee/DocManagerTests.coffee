@@ -106,7 +106,7 @@ describe "DocManager", ->
 
 			it "should get the project from the database", ->
 				@MongoManager.getProjectsDocs
-					.calledWith(@project_id, false)
+					.calledWith(@project_id, {include_deleted: false})
 					.should.equal true
 
 			it "should return the docs", ->
