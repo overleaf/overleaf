@@ -21,12 +21,15 @@ block content
 
 	.content.content-alt.project-list-page(ng-controller="ProjectPageController")
 		.container
-			
-			div(
+			.announcements(
 				ng-controller="AnnouncementsController"
+				ng-class="{ 'announcements-open': ui.isOpen }"
 				ng-cloak
 			)
-				.announcements-backdrop(ng-if="ui.isOpen")
+				.announcements-backdrop(
+					ng-if="ui.isOpen"
+					ng-click="ui.isOpen = false;"
+				)
 				a.announcements-btn(
 					href
 					ng-if="announcements.length"
@@ -41,15 +44,13 @@ block content
 						ng-repeat="announcement in announcements"
 					)
 						h2.announcement-header {{ announcement.title }}
-						p.announcement-date {{ announcement.date | date:"longDate" }}
 						p.announcement-description {{ announcement.excerpt }}
-						a(
-							ng-href="{{ announcement.url }}"
-							target="_blank"
-						) Read more
-				//- .card.card-thin(ng-show="dataReceived")
-				//- 	a.announcement-title(href, ng-click="openLink()") {{ title }}
-				//- 	p.announcement-description {{ excerpt }}
+						.announcement-meta
+							p.announcement-date {{ announcement.date | date:"longDate" }}
+							a.announcement-link(
+								ng-href="{{ announcement.url }}"
+								target="_blank"
+							) Read more
 
 			.row(ng-cloak)
 				span(ng-if="projects.length > 0")
