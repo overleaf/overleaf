@@ -19,7 +19,6 @@
 
 .project-list-page {
 	position: relative;
-	overflow: hidden;
 }
 
 .project-header {
@@ -320,8 +319,12 @@ ul.project-list {
 
 .announcements {
 	position: absolute;
+	top: -100%;
 	bottom: 0;
-	right: 3%;
+	right: 0;
+	height: auto;
+	width: 100%;
+	overflow: hidden;
 }
 
 .announcements-backdrop {
@@ -339,7 +342,7 @@ ul.project-list {
 .announcements-btn {
 	position: absolute;
 	bottom: -50px;
-	right: 0;
+	right: 3%;
 	width: 80px;
 	height: 80px;
 	background: url(/img/lion-128.png) no-repeat center/80% transparent;
@@ -384,7 +387,8 @@ ul.project-list {
 
 .announcements-body {
 	position: absolute;
-	right: 95px;
+	right: 3%;
+	margin-right: 95px;
 	bottom: 30px;
 	width: 700px;
 	min-height: 100px;
