@@ -319,12 +319,18 @@ ul.project-list {
 
 .announcements {
 	position: absolute;
-	top: -100%;
 	bottom: 0;
 	right: 0;
-	height: auto;
+	height: 150px;
 	width: 100%;
+	pointer-events: none;
 	overflow: hidden;
+
+	&-open {
+		top: -100%;
+		height: auto;
+		pointer-events: all;
+	}
 }
 
 .announcements-backdrop {
@@ -349,6 +355,7 @@ ul.project-list {
 	border-radius: 50%;
 	box-shadow: none;
 	z-index: 1;
+	pointer-events: all;
 	transition: bottom 0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55),
 				background 0.25s ease,
 				box-shadow 0.25s ease;
@@ -391,6 +398,7 @@ ul.project-list {
 	margin-right: 95px;
 	bottom: 30px;
 	width: 700px;
+	max-height: 52%;
 	min-height: 100px;
 	background: #FFF;
 	z-index: 1;

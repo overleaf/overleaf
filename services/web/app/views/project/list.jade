@@ -40,17 +40,18 @@ block content
 				.announcements-body(
 					ng-if="ui.isOpen"
 				)
-					.announcement(
-						ng-repeat="announcement in announcements"
-					)
-						h2.announcement-header {{ announcement.title }}
-						p.announcement-description {{ announcement.excerpt }}
-						.announcement-meta
-							p.announcement-date {{ announcement.date | date:"longDate" }}
-							a.announcement-link(
-								ng-href="{{ announcement.url }}"
-								target="_blank"
-							) Read more
+					.announcements-scroller
+						.announcement(
+							ng-repeat="announcement in announcements"
+						)
+							h2.announcement-header {{ announcement.title }}
+							p.announcement-description {{ announcement.excerpt }}
+							.announcement-meta
+								p.announcement-date {{ announcement.date | date:"longDate" }}
+								a.announcement-link(
+									ng-href="{{ announcement.url }}"
+									target="_blank"
+								) Read more
 
 			.row(ng-cloak)
 				span(ng-if="projects.length > 0")
