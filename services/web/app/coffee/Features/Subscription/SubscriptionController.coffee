@@ -14,10 +14,6 @@ module.exports = SubscriptionController =
 
 	plansPage: (req, res, next) ->
 		plans = SubscriptionViewModelBuilder.buildViewModel()
-		if AuthenticationController.isUserLoggedIn(req)
-			baseUrl = ""
-		else
-			baseUrl = "/register?redir="
 		viewName = "subscriptions/plans"
 		if req.query.v?
 			viewName = "#{viewName}_#{req.query.v}"
@@ -29,7 +25,6 @@ module.exports = SubscriptionController =
 				res.render viewName,
 					title: "plans_and_pricing"
 					plans: plans
-					baseUrl: baseUrl
 					gaExperiments: Settings.gaExperiments.plansPage
 					recomendedCurrency:recomendedCurrency
 					shouldABTestPlans: currentUser == null or (currentUser?.signUpDate? and currentUser.signUpDate >= (new Date('2016-10-27')))

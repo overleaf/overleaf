@@ -100,7 +100,7 @@ block content
 												li
 													br
 													a.btn.btn-info(
-														ng-href="#{baseUrl}/user/subscription/new?planCode={{ getCollaboratorPlanCode() }}&currency={{currencyCode}}", ng-click="signUpNowClicked('collaborator')"
+														ng-href="/user/subscription/new?planCode={{ getCollaboratorPlanCode() }}&currency={{currencyCode}}", ng-click="signUpNowClicked('collaborator')"
 													)
 														span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
 														span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
@@ -124,7 +124,7 @@ block content
 												li
 													br
 													a.btn.btn-info(
-														ng-href="#{baseUrl}/user/subscription/new?planCode=professional{{ ui.view == 'annual' && '-annual' || planQueryString}}&currency={{currencyCode}}", ng-click="signUpNowClicked('professional')"
+														ng-href="/user/subscription/new?planCode=professional{{ ui.view == 'annual' && '-annual' || planQueryString}}&currency={{currencyCode}}", ng-click="signUpNowClicked('professional')"
 													)
 														span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
 														span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
@@ -166,7 +166,7 @@ block content
 												li
 													br
 													a.btn.btn-info(
-														ng-href="#{baseUrl}/user/subscription/new?planCode=student{{ plansVariant == 'default' ? planQueryString : '_'+plansVariant }}&currency={{currencyCode}}",
+														ng-href="/user/subscription/new?planCode=student{{ plansVariant == 'default' ? planQueryString : '_'+plansVariant }}&currency={{currencyCode}}",
 														ng-click="signUpNowClicked('student')"
 													) #{translate("start_free_trial")}
 
@@ -189,7 +189,7 @@ block content
 												li
 													br
 													a.btn.btn-info(
-														ng-href="#{baseUrl}/user/subscription/new?planCode=student-annual{{ plansVariant == 'default' ? '' : '_'+plansVariant }}&currency={{currencyCode}}",
+														ng-href="/user/subscription/new?planCode=student-annual{{ plansVariant == 'default' ? '' : '_'+plansVariant }}&currency={{currencyCode}}",
 														ng-click="signUpNowClicked('student')"
 													) #{translate("buy_now")}
 
