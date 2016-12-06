@@ -6,8 +6,11 @@ module.exports = MongoManager =
 		db.docs.find {_id: ObjectId(doc_id.toString()), project_id: ObjectId(project_id.toString())}, {}, (error, docs = []) ->
 			callback error, docs[0]
 
-	getProjectsDocs: (project_id, callback)->
-		db.docs.find {project_id: ObjectId(project_id.toString()), deleted: { $ne: true }}, {}, callback
+	getProjectsDocs: (project_id, options = {include_deleted: true}, callback)->
+		query = {project_id: ObjectId(project_id.toString())}
+		if !options.include_deleted
+			query.deleted = { $ne: true }
+		db.docs.find query, {}, callback
 
 	getArchivedProjectDocs: (project_id, callback)->
 		query =

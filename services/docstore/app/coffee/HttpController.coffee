@@ -35,7 +35,7 @@ module.exports = HttpController =
 	getAllDocs: (req, res, next = (error) ->) ->
 		project_id = req.params.project_id
 		logger.log project_id: project_id, "getting all docs"
-		DocManager.getAllDocs project_id, (error, docs = []) ->
+		DocManager.getAllNonDeletedDocs project_id, (error, docs = []) ->
 			return next(error) if error?
 			docViews = []
 			for doc in docs

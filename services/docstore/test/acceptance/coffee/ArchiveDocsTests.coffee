@@ -31,6 +31,9 @@ describe "Archiving all docs", ->
 					DocstoreClient.createDoc @project_id, doc._id, doc.lines, (err)=>
 						doc.lines[0] = doc.lines[0]+" added"
 						DocstoreClient.updateDoc @project_id, doc._id, doc.lines, null, callback
+		# Make sure archiving works on deleted docs too
+		jobs.push (cb) =>
+			DocstoreClient.deleteDoc @project_id, @docs[2]._id, cb
 		async.series jobs, done 
 
 	afterEach (done) ->
@@ -141,10 +144,11 @@ describe "Archiving all docs", ->
 	describe "Unarchiving all docs", ->
 
 		it "should unarchive all the docs", (done) ->
+			non_deleted_docs = @docs.slice(0,2)
 			DocstoreClient.archiveAllDoc @project_id, (error, res) =>
 				DocstoreClient.getAllDocs @project_id, (error, res, docs) =>
 					throw error if error?
-					docs.length.should.equal @docs.length
-					for doc, i in docs
+					docs.length.should.equal non_deleted_docs.length
+					for doc, i in non_deleted_docs
 						doc.lines.should.deep.equal @docs[i].lines
 					done()
