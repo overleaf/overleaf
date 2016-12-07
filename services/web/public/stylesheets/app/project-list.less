@@ -393,6 +393,8 @@ ul.project-list {
 	}
 
 .announcements-body {
+	display: flex;
+	align-items: stretch;
 	position: absolute;
 	right: 3%;
 	margin-right: 95px;
@@ -403,7 +405,6 @@ ul.project-list {
 	background: #FFF;
 	z-index: 1;
 	box-shadow: @announcements-shadow;
-	padding: @line-height-computed;
 	border-radius: @border-radius-base;
 	animation: fade-in 0.35s forwards;
 
@@ -417,36 +418,43 @@ ul.project-list {
 		text-shadow: @announcements-shadow;
 		font-size: 2em;
 		overflow: hidden;
-		text-indent: -6px;
+		text-indent: -7px;
 	}
 }
-	.announcement {
-		margin-bottom: @line-height-computed * 1.5;
-		&:last-child {
-			margin-bottom: 0;
-		}
-	}	
-		.announcement-header {
-			.page-header;
-			margin: 0;
-		}
 
-		.announcement-description {
-			margin: (@line-height-computed / 4) 0 (@line-height-computed / 2);
-		}
-
-		.announcement-meta {
-			.clearfix;
-			font-size: 0.9em;
-		}
-
-			.announcement-date {
-				float: left;
-				color: @gray;
+	.announcements-scroller {
+		padding: @line-height-computed;
+		flex-grow: 0;
+		overflow-x: hidden;
+		overflow-y: auto;
+	}
+		.announcement {
+			margin-bottom: @line-height-computed * 1.5;
+			&:last-child {
+				margin-bottom: 0;
+			}
+		}	
+			.announcement-header {
+				.page-header;
 				margin: 0;
 			}
 
-			.announcement-link {
-				float: right;
-				margin: 0;
+			.announcement-description {
+				margin: (@line-height-computed / 4) 0 (@line-height-computed / 2);
 			}
+
+			.announcement-meta {
+				.clearfix;
+				font-size: 0.9em;
+			}
+
+				.announcement-date {
+					float: left;
+					color: @gray;
+					margin: 0;
+				}
+
+				.announcement-link {
+					float: right;
+					margin: 0;
+				}
