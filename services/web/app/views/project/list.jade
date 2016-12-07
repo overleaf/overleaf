@@ -45,7 +45,7 @@ block content
 							ng-repeat="announcement in announcements | filter:(ui.newItems ? { read: false } : '') track by announcement.id"
 						)
 							h2.announcement-header {{ announcement.title }}
-							p.announcement-description {{ announcement.excerpt }}
+							p.announcement-description(ng-bind-html="announcement.excerpt")
 							.announcement-meta
 								p.announcement-date {{ announcement.date | date:"longDate" }}
 								a.announcement-link(
