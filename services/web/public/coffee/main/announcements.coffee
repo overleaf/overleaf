@@ -1,23 +1,27 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "AnnouncementsController", ($scope, $http, event_tracking, $window) ->
+	App.controller "AnnouncementsController", ($scope, $http, event_tracking, $window, _) ->
 		$scope.announcements = []
 		$scope.ui =
 			isOpen: false
-			hasNew: false
-			
+			newItems: 0
+		
 		refreshAnnouncements = ->
 			$http.get("/announcements").success (announcements) ->
 				$scope.announcements = announcements
+				$scope.ui.newItems = _.filter(announcements, (announcement) -> !announcement.read).length
 				
-		dismissCurrentAnnouncement = ->
-			event_tracking.sendMB "announcement-alert-dismissed", { blogPostId:announcement.id }
+		markAnnouncementsAsRead = ->
+			event_tracking.sendMB "announcement-alert-dismissed", { blogPostId: $scope.announcements[0].id }
 
 		refreshAnnouncements()
 
-		$scope.openLink = ->
-			dismissCurrentAnnouncement()
-				.then(refreshAnnouncements)
+		$scope.toggleAnnouncementsUI = ->
+			$scope.ui.isOpen = !$scope.ui.isOpen
 
-			$window.open = announcement.url
+			if !$scope.ui.isOpen and $scope.ui.newItems
+				$scope.ui.newItems = 0
+				markAnnouncementsAsRead()
+
+

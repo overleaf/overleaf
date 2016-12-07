@@ -28,21 +28,21 @@ block content
 			)
 				.announcements-backdrop(
 					ng-if="ui.isOpen"
-					ng-click="ui.isOpen = false;"
+					ng-click="toggleAnnouncementsUI();"
 				)
 				a.announcements-btn(
 					href
 					ng-if="announcements.length"
-					ng-click="ui.isOpen = !ui.isOpen"
-					ng-class="{ 'announcements-btn-open': ui.isOpen, 'announcements-btn-has-new': ui.hasNew }"
+					ng-click="toggleAnnouncementsUI();"
+					ng-class="{ 'announcements-btn-open': ui.isOpen, 'announcements-btn-has-new': ui.newItems }"
 				)
-					span.announcements-badge(ng-if="ui.hasNew") {{ announcements.length }}
+					span.announcements-badge(ng-if="ui.newItems") {{ ui.newItems }}
 				.announcements-body(
 					ng-if="ui.isOpen"
 				)
 					.announcements-scroller
 						.announcement(
-							ng-repeat="announcement in announcements"
+							ng-repeat="announcement in announcements | filter:(ui.newItems ? { read: false } : '') track by announcement.id"
 						)
 							h2.announcement-header {{ announcement.title }}
 							p.announcement-description {{ announcement.excerpt }}
