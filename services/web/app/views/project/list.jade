@@ -52,6 +52,13 @@ block content
 									ng-href="{{ announcement.url }}"
 									target="_blank"
 								) Read more
+						div.text-center(
+							ng-if="ui.newItems > 0 && ui.newItems < announcements.length"
+						)
+							a.btn.btn-default.btn-sm(
+								href
+								ng-click="showAll();"
+							) Show all
 
 			.row(ng-cloak)
 				span(ng-if="projects.length > 0")

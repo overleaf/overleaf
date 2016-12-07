@@ -24,4 +24,6 @@ define [
 				$scope.ui.newItems = 0
 				markAnnouncementsAsRead()
 
+		$scope.showAll = -> 
+			$scope.ui.newItems = 0
 
