@@ -1,10 +1,12 @@
 #review-panel
 	.review-panel-toolbar
-		span.review-panel-toolbar-label(ng-click="reviewPanel.trackNewChanges = true;", ng-if="reviewPanel.trackNewChanges === false") Track Changes is 
+		span.review-panel-toolbar-label(ng-click="editor.wantTrackChanges = true;", ng-if="editor.wantTrackChanges === false") Track Changes is 
 			strong off
-		span.review-panel-toolbar-label(ng-click="reviewPanel.trackNewChanges = false;", ng-if="reviewPanel.trackNewChanges === true") Track Changes is 
+		span.review-panel-toolbar-label(ng-click="editor.wantTrackChanges = false;", ng-if="editor.wantTrackChanges === true") Track Changes is 
 			strong on
-		review-panel-toggle(ng-model="reviewPanel.trackNewChanges")
+		review-panel-toggle(ng-if="editor.wantTrackChanges == editor.trackChanges", ng-model="editor.wantTrackChanges")
+		span.review-panel-toolbar-spinner(ng-if="editor.wantTrackChanges != editor.trackChanges")
+			i.fa.fa-spin.fa-spinner
 
 	.rp-entry-list(
 		review-panel-sorted

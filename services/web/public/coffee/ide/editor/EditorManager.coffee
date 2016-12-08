@@ -10,6 +10,8 @@ define [
 				open_doc_id: null
 				open_doc_name: null
 				opening: true
+				trackChanges: false
+				wantTrackChanges: false
 			}
 
 			@$scope.$on "entity:selected", (event, entity) =>
@@ -31,6 +33,10 @@ define [
 
 			@$scope.$on "flush-changes", () =>
 				Document.flushAll()
+			
+			@$scope.$watch "editor.wantTrackChanges", (value) =>
+				return if !value?
+				@_syncTrackChangesState(@$scope.editor.sharejs_doc)
 
 		autoOpenDoc: () ->
 			open_doc_id = 
@@ -83,6 +89,8 @@ define [
 						"Sorry, something went wrong opening this document. Please try again."
 					)
 					return
+				
+				@_syncTrackChangesState(sharejs_doc)
 
 				@$scope.$broadcast "doc:opened"
 
@@ -144,3 +152,28 @@ define [
 			
 		stopIgnoringExternalUpdates: () ->
 			@_ignoreExternalUpdates = false
+		
+		_syncTimeout: null
+		_syncTrackChangesState: (doc) ->
+			return if !doc?
+
+			if @_syncTimeout?
+				clearTimeout @_syncTimeout
+				@_syncTimeout = null
+
+			want = @$scope.editor.wantTrackChanges
+			have = @$scope.editor.trackChanges
+			if want == have
+				return
+
+			console.log "Trying to set track changes to:", want
+			do tryToggle = () =>
+				saved = !doc.getInflightOp()? and !doc.getPendingOp()?
+				if saved
+					console.log "SUCCESS, changing value", want
+					doc.setTrackingChanges(want)
+					@$scope.$apply () =>
+						@$scope.editor.trackChanges = want
+				else
+					console.log "Still in flight, will try soon"
+					@_syncTimeout = setTimeout tryToggle, 100

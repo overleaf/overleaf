@@ -9,21 +9,9 @@ define [
 			# Dencode any binary bits of data
 			# See http://ecmanaut.blogspot.co.uk/2006/07/encoding-decoding-utf8-in-javascript.html
 			@type = "text"
-			docLines = for line in docLines
-				if line.text?
-					@type = "json"
-					line.text = decodeURIComponent(escape(line.text))
-				else
-					@type = "text"
-					line = decodeURIComponent(escape(line))
-				line
-
-			if @type == "text"
-				snapshot = docLines.join("\n")
-			else if @type == "json"
-				snapshot = { lines: docLines }
-			else
-				throw new Error("Unknown type: #{@type}")
+			docLines = (decodeURIComponent(escape(line)) for line in docLines)
+			snapshot = docLines.join("\n")
+			@track_changes = false
 
 			@connection = {
 				send: (update) =>
@@ -34,6 +22,9 @@ define [
 					if window.dropUpdates? and Math.random() < window.dropUpdates
 						sl_console.log "Simulating a lost update", update
 						return
+					if @track_changes
+						update.meta ?= {}
+						update.meta.tc = 1
 					@socket.emit "applyOtUpdate", @doc_id, update, (error) =>
 						return @_handleError(error) if error?
 				state: "ok"

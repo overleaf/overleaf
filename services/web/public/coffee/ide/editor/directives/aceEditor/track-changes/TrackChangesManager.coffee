@@ -10,15 +10,22 @@ define [
 		constructor: (@$scope, @editor, @element) ->
 			window.trackChangesManager ?= @
 
-			@$scope.$watch "changesTracker", (changesTracker) =>
-				return if !changesTracker?
-				@disconnectFromChangesTracker()
-				@changesTracker = changesTracker
-				@connectToChangesTracker()
+			@$scope.$watch "rangesTracker", (rangesTracker) =>
+				return if !rangesTracker?
+				@disconnectFromRangesTracker()
+				@rangesTracker = rangesTracker
+				@connectToRangesTracker()
 
-			@$scope.$watch "trackNewChanges", (track_new_changes) =>
-				return if !track_new_changes?
-				@changesTracker?.track_changes = track_new_changes
+			@$scope.$watch "trackChanges", (track_changes) =>
+				return if !track_changes?
+				@rangesTracker?.track_changes = track_changes
+			
+			@$scope.$watch "sharejsDoc", (doc) =>
+				return if !doc?
+				if doc.opening_ranges?.changes?
+					@rangesTracker.changes = doc.opening_ranges.changes
+				if doc.opening_ranges?.comments?
+					@rangesTracker.comments = doc.opening_ranges.comments
 			
 			@$scope.$on "comment:add", (e, comment) =>
 				@addCommentToSelection(comment)
@@ -75,12 +82,12 @@ define [
 						else
 							user_id = window.user.id
 						
-						was_tracking = @changesTracker.track_changes
+						was_tracking = @rangesTracker.track_changes
 						if @dont_track_next_update
-							@changesTracker.track_changes = false
+							@rangesTracker.track_changes = false
 							@dont_track_next_update = false
 						@applyChange(e, { user_id })
-						@changesTracker.track_changes = was_tracking
+						@rangesTracker.track_changes = was_tracking
 						
 						# TODO: Just for debugging, remove before going live.
 						setTimeout () =>
@@ -111,68 +118,68 @@ define [
 				else
 					unbindFromAce()
 		
-		disconnectFromChangesTracker: () ->
+		disconnectFromRangesTracker: () ->
 			@changeIdToMarkerIdMap = {}
 
-			if @changesTracker?
-				@changesTracker.off "insert:added"
-				@changesTracker.off "insert:removed"
-				@changesTracker.off "delete:added"
-				@changesTracker.off "delete:removed"
-				@changesTracker.off "changes:moved"
-				@changesTracker.off "comment:added"
-				@changesTracker.off "comment:moved"
-				@changesTracker.off "comment:removed"
-				@changesTracker.off "comment:resolved"
-				@changesTracker.off "comment:unresolved"
+			if @rangesTracker?
+				@rangesTracker.off "insert:added"
+				@rangesTracker.off "insert:removed"
+				@rangesTracker.off "delete:added"
+				@rangesTracker.off "delete:removed"
+				@rangesTracker.off "changes:moved"
+				@rangesTracker.off "comment:added"
+				@rangesTracker.off "comment:moved"
+				@rangesTracker.off "comment:removed"
+				@rangesTracker.off "comment:resolved"
+				@rangesTracker.off "comment:unresolved"
 		
-		connectToChangesTracker: () ->
-			@changesTracker.track_changes = @$scope.trackNewChanges
+		connectToRangesTracker: () ->
+			@rangesTracker.track_changes = @$scope.trackChanges
 			
-			@changesTracker.on "insert:added", (change) =>
+			@rangesTracker.on "insert:added", (change) =>
 				sl_console.log "[insert:added]", change
 				@_onInsertAdded(change)
-			@changesTracker.on "insert:removed", (change) =>
+			@rangesTracker.on "insert:removed", (change) =>
 				sl_console.log "[insert:removed]", change
 				@_onInsertRemoved(change)
-			@changesTracker.on "delete:added", (change) =>
+			@rangesTracker.on "delete:added", (change) =>
 				sl_console.log "[delete:added]", change
 				@_onDeleteAdded(change)
-			@changesTracker.on "delete:removed", (change) =>
+			@rangesTracker.on "delete:removed", (change) =>
 				sl_console.log "[delete:removed]", change
 				@_onDeleteRemoved(change)
-			@changesTracker.on "changes:moved", (changes) =>
+			@rangesTracker.on "changes:moved", (changes) =>
 				sl_console.log "[changes:moved]", changes
 				@_onChangesMoved(changes)
 
-			@changesTracker.on "comment:added", (comment) =>
+			@rangesTracker.on "comment:added", (comment) =>
 				sl_console.log "[comment:added]", comment
 				@_onCommentAdded(comment)
-			@changesTracker.on "comment:moved", (comment) =>
+			@rangesTracker.on "comment:moved", (comment) =>
 				sl_console.log "[comment:moved]", comment
 				@_onCommentMoved(comment)
-			@changesTracker.on "comment:removed", (comment) =>
+			@rangesTracker.on "comment:removed", (comment) =>
 				sl_console.log "[comment:removed]", comment
 				@_onCommentRemoved(comment)
-			@changesTracker.on "comment:resolved", (comment) =>
+			@rangesTracker.on "comment:resolved", (comment) =>
 				sl_console.log "[comment:resolved]", comment
 				@_onCommentRemoved(comment)
-			@changesTracker.on "comment:unresolved", (comment) =>
+			@rangesTracker.on "comment:unresolved", (comment) =>
 				sl_console.log "[comment:unresolved]", comment
 				@_onCommentAdded(comment)
 			
 		redrawAnnotations: () ->
-			for change in @changesTracker.changes
+			for change in @rangesTracker.changes
 				if change.op.i?
 					@_onInsertAdded(change)
 				else if change.op.d?
 					@_onDeleteAdded(change)
 
-			for comment in @changesTracker.comments
+			for comment in @rangesTracker.comments
 				@_onCommentAdded(comment)
 
 		addComment: (offset, length, content) ->
-			@changesTracker.addComment offset, length, {
+			@rangesTracker.addComment offset, length, {
 				thread: [{
 					content: content
 					user_id: window.user_id
@@ -192,12 +199,12 @@ define [
 				@editor.selection.selectLine()
 		
 		acceptChangeId: (change_id) ->
-			@changesTracker.removeChangeId(change_id)
+			@rangesTracker.removeChangeId(change_id)
 		
 		rejectChangeId: (change_id) ->
-			change = @changesTracker.getChange(change_id)
+			change = @rangesTracker.getChange(change_id)
 			return if !change?
-			@changesTracker.removeChangeId(change_id)
+			@rangesTracker.removeChangeId(change_id)
 			@dont_track_next_update = true
 			session = @editor.getSession()
 			if change.op.d?
@@ -215,15 +222,15 @@ define [
 				throw new Error("unknown change: #{JSON.stringify(change)}")
 
 		removeCommentId: (comment_id) ->
-			@changesTracker.removeCommentId(comment_id)
+			@rangesTracker.removeCommentId(comment_id)
 
 		resolveCommentId: (comment_id, user_id) ->
-			@changesTracker.resolveCommentId(comment_id, {
+			@rangesTracker.resolveCommentId(comment_id, {
 				user_id, ts: new Date()
 			})
 			
 		unresolveCommentId: (comment_id) ->
-			@changesTracker.unresolveCommentId(comment_id)
+			@rangesTracker.unresolveCommentId(comment_id)
 
 		checkMapping: () ->
 			session = @editor.getSession()
@@ -234,7 +241,7 @@ define [
 				markers[marker_id] = marker
 
 			expected_markers = []
-			for change in @changesTracker.changes
+			for change in @rangesTracker.changes
 				if @changeIdToMarkerIdMap[change.id]?
 					op = change.op
 					{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[change.id]
@@ -246,7 +253,7 @@ define [
 					expected_markers.push { marker_id: background_marker_id, start, end }
 					expected_markers.push { marker_id: callout_marker_id, start, end: start }
 			
-			for comment in @changesTracker.comments
+			for comment in @rangesTracker.comments
 				if @changeIdToMarkerIdMap[comment.id]?
 					{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[comment.id]
 					start = @_shareJsOffsetToAcePosition(comment.offset)
@@ -269,7 +276,7 @@ define [
 		
 		applyChange: (delta, metadata) ->
 			op = @_aceChangeToShareJs(delta)
-			@changesTracker.applyOp(op, metadata)
+			@rangesTracker.applyOp(op, metadata)
 		
 		updateFocus: () ->
 			selection = @editor.getSelectionRange()

@@ -54,9 +54,9 @@ define [
 				syntaxValidation: "="
 				reviewPanel: "="
 				eventsBridge: "="
-				trackNewChanges: "="
+				trackChanges: "="
 				trackChangesEnabled: "="
-				changesTracker: "="
+				rangesTracker: "="
 				docId: "="
 			}
 			link: (scope, element, attrs) ->

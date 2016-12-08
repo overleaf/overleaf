@@ -77,6 +77,9 @@ define [
 
 		hasBufferedOps: () ->
 			@doc?.hasBufferedOps()
+		
+		setTrackingChanges: (track_changes) ->
+			@doc.track_changes = track_changes
 
 		_bindToSocketEvents: () ->
 			@_onUpdateAppliedHandler = (update) => @_onUpdateApplied(update)
@@ -239,16 +242,19 @@ define [
 
 		_joinDoc: (callback = (error) ->) ->
 			if @doc?
-				@ide.socket.emit 'joinDoc', @doc_id, @doc.getVersion(), (error, docLines, version, updates) =>
+				@ide.socket.emit 'joinDoc', @doc_id, @doc.getVersion(), (error, docLines, version, updates, ranges) =>
 					return callback(error) if error?
 					@joined = true
 					@doc.catchUp( updates )
+					# TODO: Worry about whether these ranges are consistent with the doc still
+					@opening_ranges = ranges
 					callback()
 			else
-				@ide.socket.emit 'joinDoc', @doc_id, (error, docLines, version) =>
+				@ide.socket.emit 'joinDoc', @doc_id, (error, docLines, version, updates, ranges) =>
 					return callback(error) if error?
 					@joined = true
 					@doc = new ShareJsDoc @doc_id, docLines, version, @ide.socket
+					@opening_ranges = ranges
 					@_bindToShareJsDocEvents()
 					callback()
 

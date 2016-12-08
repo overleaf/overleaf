@@ -2,8 +2,8 @@ define [
 	"base",
 	"utils/EventEmitter"
 	"ide/colors/ColorManager"
-	"ide/review-panel/ChangesTracker"
-], (App, EventEmitter, ColorManager, ChangesTracker) ->
+	"ide/review-panel/RangesTracker"
+], (App, EventEmitter, ColorManager, RangesTracker) ->
 	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout) ->
 		$reviewPanelEl = $element.find "#review-panel"
 
@@ -13,7 +13,6 @@ define [
 
 		$scope.reviewPanel =
 			entries: {}
-			trackNewChanges: false
 			hasEntries: false
 			subView: $scope.SubViews.CUR_FILE
 			openSubView: $scope.SubViews.CUR_FILE
@@ -24,15 +23,15 @@ define [
 
 		$scope.reviewPanelEventsBridge = new EventEmitter()
 
-		changesTrackers = {}
+		rangesTrackers = {}
 
 		getDocEntries = (doc_id) ->
 			$scope.reviewPanel.entries[doc_id] ?= {}
 			return $scope.reviewPanel.entries[doc_id]
 
 		getChangeTracker = (doc_id) ->
-			changesTrackers[doc_id] ?= new ChangesTracker()
-			return changesTrackers[doc_id]
+			rangesTrackers[doc_id] ?= new RangesTracker()
+			return rangesTrackers[doc_id]
 
 		# TODO Just for prototyping purposes; remove afterwards.
 		mockedUserId = 'mock_user_id_1'
@@ -115,12 +114,12 @@ define [
 			ide.$scope.$on "file-tree:initialized", () ->
 				ide.fileTreeManager.forEachEntity (entity) ->
 					if mock_changes[entity.name]?
-						changesTracker = getChangeTracker(entity.id)
+						rangesTracker = getChangeTracker(entity.id)
 						for change in mock_changes[entity.name].changes
-							changesTracker._addOp change.op, change.metadata 
+							rangesTracker._addOp change.op, change.metadata 
 						for comment in mock_changes[entity.name].comments
-							changesTracker.addComment comment.offset, comment.length, comment.metadata 
-						for doc_id, changesTracker of changesTrackers
+							rangesTracker.addComment comment.offset, comment.length, comment.metadata 
+						for doc_id, rangesTracker of rangesTrackers
 							updateEntries(doc_id)
 
 		scrollbar = {}
@@ -150,8 +149,8 @@ define [
 
 		$scope.$watch "editor.open_doc_id", (open_doc_id) ->
 			return if !open_doc_id?
-			changesTrackers[open_doc_id] ?= new ChangesTracker()
-			$scope.reviewPanel.changesTracker = changesTrackers[open_doc_id]
+			rangesTrackers[open_doc_id] ?= new RangesTracker()
+			$scope.reviewPanel.rangesTracker = rangesTrackers[open_doc_id]
 
 		$scope.$watch (() ->
 			entries = $scope.reviewPanel.entries[$scope.editor.open_doc_id] or {}
@@ -166,14 +165,14 @@ define [
 				$scope.$broadcast "review-panel:layout"
 		
 		updateEntries = (doc_id) ->
-			changesTracker = getChangeTracker(doc_id)
+			rangesTracker = getChangeTracker(doc_id)
 			entries = getDocEntries(doc_id)
 			
 			# Assume we'll delete everything until we see it, then we'll remove it from this object
 			delete_changes = {}
 			delete_changes[change_id] = true for change_id, change of entries
 
-			for change in changesTracker.changes
+			for change in rangesTracker.changes
 				delete delete_changes[change.id]
 				entries[change.id] ?= {}
 					
@@ -189,7 +188,7 @@ define [
 				for key, value of new_entry
 					entries[change.id][key] = value
 
-			for comment in changesTracker.comments
+			for comment in rangesTracker.comments
 				delete delete_changes[comment.id]
 				entries[comment.id] ?= {}
 				new_entry = {
