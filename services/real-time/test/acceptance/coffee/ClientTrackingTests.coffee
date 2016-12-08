@@ -15,22 +15,28 @@ describe "clientTracking", ->
 				(cb) =>
 					FixturesManager.setUpProject {
 						privilegeLevel: "owner"
-						project: { name: "Test Project"	}
+						project: { name: "Test Project" }
 					}, (error, {@user_id, @project_id}) => cb()
 				
 				(cb) =>
+					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops}, (e, {@doc_id}) =>
+						cb(e)
+				
+				(cb) =>
 					@clientA = RealTimeClient.connect()
-					@clientA.on "connect", cb
+					@clientA.on "connectionAccepted", cb
 					
 				(cb) =>
 					@clientB = RealTimeClient.connect()
-						
-					@clientB.on "connect", cb	
+					@clientB.on "connectionAccepted", cb
 					
 				(cb) =>
 					@clientA.emit "joinProject", {
 						project_id: @project_id
 					}, cb
+				
+				(cb) =>
+					@clientA.emit "joinDoc", @doc_id, cb
 					
 				(cb) =>
 					@clientB.emit "joinProject", {
@@ -45,7 +51,7 @@ describe "clientTracking", ->
 					@clientA.emit "clientTracking.updatePosition", {
 						row: @row = 42
 						column: @column = 36
-						doc_id: @doc_id = "mock-doc-id"
+						doc_id: @doc_id
 					}, (error) ->
 						throw error if error?
 						setTimeout cb, 300 # Give the message a chance to reach client B.
@@ -86,8 +92,13 @@ describe "clientTracking", ->
 					}, (error, {@user_id, @project_id}) => cb()
 				
 				(cb) =>
+					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops}, (e, {@doc_id}) =>
+						cb(e)
+				
+				(cb) =>
 					@clientA = RealTimeClient.connect()
-					@clientA.on "connect", cb
+					@clientA.on "connectionAccepted", cb
+
 				(cb) =>
 					@clientA.emit "joinProject", {
 						project_id: @project_id
@@ -98,12 +109,15 @@ describe "clientTracking", ->
 					
 				(cb) =>
 					@anonymous = RealTimeClient.connect()
-					@anonymous.on "connect", cb	
+					@anonymous.on "connectionAccepted", cb	
 					
 				(cb) =>
 					@anonymous.emit "joinProject", {
 						project_id: @project_id
 					}, cb
+				
+				(cb) =>
+					@anonymous.emit "joinDoc", @doc_id, cb
 					
 				(cb) =>
 					@updates = []
@@ -113,7 +127,7 @@ describe "clientTracking", ->
 					@anonymous.emit "clientTracking.updatePosition", {
 						row: @row = 42
 						column: @column = 36
-						doc_id: @doc_id = "mock-doc-id"
+						doc_id: @doc_id
 					}, (error) ->
 						throw error if error?
 						setTimeout cb, 300 # Give the message a chance to reach client B.

@@ -83,8 +83,7 @@ describe "joinProject", ->
 			], done
 		
 		it "should return an error", ->
-			# We don't return specific errors
-			@error.message.should.equal "Something went wrong"
+			@error.message.should.equal "not authorized"
 			
 		it "should not have joined the project room", (done) ->
 			RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
