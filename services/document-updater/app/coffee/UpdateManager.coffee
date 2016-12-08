@@ -9,7 +9,7 @@ logger = require('logger-sharelatex')
 Metrics = require "./Metrics"
 Errors = require "./Errors"
 DocumentManager = require "./DocumentManager"
-TrackChangesManager = require "./TrackChangesManager"
+RangesManager = require "./RangesManager"
 
 module.exports = UpdateManager =
 	processOutstandingUpdates: (project_id, doc_id, callback = (error) ->) ->
@@ -48,16 +48,16 @@ module.exports = UpdateManager =
 
 	applyUpdate: (project_id, doc_id, update, callback = (error) ->) ->
 		UpdateManager._sanitizeUpdate update
-		DocumentManager.getDoc project_id, doc_id, (error, lines, version, track_changes_entries) ->
+		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges) ->
 			return callback(error) if error?
 			if !lines? or !version?
 				return callback(new Errors.NotFoundError("document not found: #{doc_id}"))
 			ShareJsUpdateManager.applyUpdate project_id, doc_id, update, lines, version, (error, updatedDocLines, version, appliedOps) ->
 				return callback(error) if error?
-				TrackChangesManager.applyUpdate project_id, doc_id, track_changes_entries, appliedOps, (error, new_track_changes_entries) ->
+				RangesManager.applyUpdate project_id, doc_id, ranges, appliedOps, (error, new_ranges) ->
 					return callback(error) if error?
 					logger.log doc_id: doc_id, version: version, "updating doc in redis"
-					RedisManager.updateDocument doc_id, updatedDocLines, version, appliedOps, new_track_changes_entries, (error) ->
+					RedisManager.updateDocument doc_id, updatedDocLines, version, appliedOps, new_ranges, (error) ->
 						return callback(error) if error?
 						HistoryManager.pushUncompressedHistoryOps project_id, doc_id, appliedOps, callback
 

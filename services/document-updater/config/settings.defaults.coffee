@@ -32,8 +32,7 @@ module.exports =
 				docVersion: ({doc_id}) -> "DocVersion:#{doc_id}"
 				projectKey: ({doc_id}) -> "ProjectId:#{doc_id}"
 				docsInProject: ({project_id}) -> "DocsIn:#{project_id}"
-				trackChangesEnabled: ({doc_id}) -> "TrackChangesEnabled:#{doc_id}"
-				trackChangesEntries: ({doc_id}) -> "TrackChangesEntries:#{doc_id}"
+				ranges: ({doc_id}) -> "Ranges:#{doc_id}"
 		# }, {
 		# 	cluster: [{
 		# 		port: "7000"
@@ -46,8 +45,7 @@ module.exports =
 		# 		docVersion: ({doc_id}) -> "DocVersion:{#{doc_id}}"
 		# 		projectKey: ({doc_id}) -> "ProjectId:{#{doc_id}}"
 		# 		docsInProject: ({project_id}) -> "DocsIn:{#{project_id}}"
-		# 		trackChangesEnabled: ({doc_id}) -> "TrackChangesEnabled:{#{doc_id}}"
-		# 		trackChangesEntries: ({doc_id}) -> "TrackChangesEntries:{#{doc_id}}"
+		# 		ranges: ({doc_id}) -> "Ranges:{#{doc_id}}"
 		}]
 	
 	max_doc_length: 2 * 1024 * 1024 # 2mb

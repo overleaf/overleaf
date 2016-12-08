@@ -19,7 +19,7 @@ describe "PersistenceManager", ->
 		@lines = ["one", "two", "three"]
 		@version = 42
 		@callback = sinon.stub()
-		@track_changes_entries = { comments: "mock", entries: "mock" }
+		@ranges = { comments: "mock", entries: "mock" }
 		@Settings.apis =
 			web:
 				url: @url = "www.example.com"
@@ -33,7 +33,7 @@ describe "PersistenceManager", ->
 				@request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify({
 					lines: @lines,
 					version: @version,
-					track_changes_entries: @track_changes_entries
+					ranges: @ranges
 				}))
 				@PersistenceManager.getDoc(@project_id, @doc_id, @callback)
 
@@ -53,8 +53,8 @@ describe "PersistenceManager", ->
 					})
 					.should.equal true
 
-			it "should call the callback with the doc lines, version and track changes state", ->
-				@callback.calledWith(null, @lines, @version, @track_changes_entries).should.equal true
+			it "should call the callback with the doc lines, version and ranges", ->
+				@callback.calledWith(null, @lines, @version, @ranges).should.equal true
 
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
@@ -112,7 +112,7 @@ describe "PersistenceManager", ->
 		describe "with a successful response from the web api", ->
 			beforeEach ->
 				@request.callsArgWith(1, null, {statusCode: 200})
-				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @track_changes_entries, @callback)
+				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @ranges, @callback)
 
 			it "should call the web api", ->
 				@request
@@ -121,7 +121,7 @@ describe "PersistenceManager", ->
 						json:
 							lines: @lines
 							version: @version
-							track_changes_entries: @track_changes_entries
+							ranges: @ranges
 						method: "POST"
 						auth:
 							user: @user
@@ -141,7 +141,7 @@ describe "PersistenceManager", ->
 		describe "when request returns an error", ->
 			beforeEach ->
 				@request.callsArgWith(1, @error = new Error("oops"), null, null)
-				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @track_changes_entries, @callback)
+				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @ranges, @callback)
 
 			it "should return the error", ->
 				@callback.calledWith(@error).should.equal true
@@ -152,7 +152,7 @@ describe "PersistenceManager", ->
 		describe "when the request returns 404", ->
 			beforeEach ->
 				@request.callsArgWith(1, null, {statusCode: 404}, "")
-				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @track_changes_entries, @callback)
+				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @ranges, @callback)
 				
 			it "should return a NotFoundError", ->
 				@callback.calledWith(new Errors.NotFoundError("not found")).should.equal true
@@ -163,7 +163,7 @@ describe "PersistenceManager", ->
 		describe "when the request returns an error status code", ->
 			beforeEach ->
 				@request.callsArgWith(1, null, {statusCode: 500}, "")
-				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @track_changes_entries, @callback)
+				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @ranges, @callback)
 				
 			it "should return an error", ->
 				@callback.calledWith(new Error("web api error")).should.equal true

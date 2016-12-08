@@ -13,33 +13,33 @@ module.exports = DocumentManager =
 			timer.done()
 			_callback(args...)
 
-		RedisManager.getDoc project_id, doc_id, (error, lines, version, track_changes_entries) ->
+		RedisManager.getDoc project_id, doc_id, (error, lines, version, ranges) ->
 			return callback(error) if error?
 			if !lines? or !version?
 				logger.log {project_id, doc_id}, "doc not in redis so getting from persistence API"
-				PersistenceManager.getDoc project_id, doc_id, (error, lines, version, track_changes_entries) ->
+				PersistenceManager.getDoc project_id, doc_id, (error, lines, version, ranges) ->
 					return callback(error) if error?
 					logger.log {project_id, doc_id, lines, version}, "got doc from persistence API"
-					RedisManager.putDocInMemory project_id, doc_id, lines, version, track_changes_entries, (error) ->
+					RedisManager.putDocInMemory project_id, doc_id, lines, version, ranges, (error) ->
 						return callback(error) if error?
-						callback null, lines, version, track_changes_entries, false
+						callback null, lines, version, ranges, false
 			else
-				callback null, lines, version, track_changes_entries, true
+				callback null, lines, version, ranges, true
 
-	getDocAndRecentOps: (project_id, doc_id, fromVersion, _callback = (error, lines, version, recentOps, track_changes_entries) ->) ->
+	getDocAndRecentOps: (project_id, doc_id, fromVersion, _callback = (error, lines, version, recentOps, ranges) ->) ->
 		timer = new Metrics.Timer("docManager.getDocAndRecentOps")
 		callback = (args...) ->
 			timer.done()
 			_callback(args...)
 		
-		DocumentManager.getDoc project_id, doc_id, (error, lines, version, track_changes_entries) ->
+		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges) ->
 			return callback(error) if error?
 			if fromVersion == -1
-				callback null, lines, version, [], track_changes_entries
+				callback null, lines, version, [], ranges
 			else
 				RedisManager.getPreviousDocOps doc_id, fromVersion, version, (error, ops) ->
 					return callback(error) if error?
-					callback null, lines, version, ops, track_changes_entries
+					callback null, lines, version, ops, ranges
 
 	setDoc: (project_id, doc_id, newLines, source, user_id, _callback = (error) ->) ->
 		timer = new Metrics.Timer("docManager.setDoc")
@@ -51,7 +51,7 @@ module.exports = DocumentManager =
 			return callback(new Error("No lines were provided to setDoc"))
 
 		UpdateManager = require "./UpdateManager"
-		DocumentManager.getDoc project_id, doc_id, (error, oldLines, version, track_changes, alreadyLoaded) ->
+		DocumentManager.getDoc project_id, doc_id, (error, oldLines, version, ranges, alreadyLoaded) ->
 			return callback(error) if error?
 			
 			if oldLines? and oldLines.length > 0 and oldLines[0].text?
@@ -90,14 +90,14 @@ module.exports = DocumentManager =
 		callback = (args...) ->
 			timer.done()
 			_callback(args...)
-		RedisManager.getDoc project_id, doc_id, (error, lines, version, track_changes_entries) ->
+		RedisManager.getDoc project_id, doc_id, (error, lines, version, ranges) ->
 			return callback(error) if error?
 			if !lines? or !version?
 				logger.log project_id: project_id, doc_id: doc_id, "doc is not loaded so not flushing"
 				callback null  # TODO: return a flag to bail out, as we go on to remove doc from memory?
 			else
 				logger.log project_id: project_id, doc_id: doc_id, version: version, "flushing doc"
-				PersistenceManager.setDoc project_id, doc_id, lines, version, track_changes_entries, (error) ->
+				PersistenceManager.setDoc project_id, doc_id, lines, version, ranges, (error) ->
 					return callback(error) if error?
 					callback null
 

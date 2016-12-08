@@ -1,5 +1,5 @@
 load = (EventEmitter) ->
-	class ChangesTracker extends EventEmitter
+	class RangesTracker extends EventEmitter
 		# The purpose of this class is to track a set of inserts and deletes to a document, like
 		# track changes in Word. We store these as a set of ShareJs style ranges:
 		#   {i: "foo", p: 42} # Insert 'foo' at offset 42
@@ -97,7 +97,7 @@ load = (EventEmitter) ->
 			return if !change?
 			@_removeChange(change)
 
-		applyOp: (op, metadata = {}) ->
+		applyOp: (op, metadata) ->
 			metadata.ts ?= new Date()
 			# Apply an op that has been applied to the document to our changes to keep them up to date
 			if op.i?
@@ -371,7 +371,23 @@ load = (EventEmitter) ->
 				@emit "changes:moved", moved_changes
 
 		_newId: () ->
-			(@id++).toString()
+			# Generate a Mongo ObjectId
+			# Reference: https://github.com/dreampulse/ObjectId.js/blob/master/src/main/javascript/Objectid.js
+			@_pid ?= Math.floor(Math.random() * (32767))
+			@_machine ?= Math.floor(Math.random() * (16777216))
+			timestamp = Math.floor(new Date().valueOf() / 1000)
+			@_increment ?= 0
+			@_increment++
+			
+			timestamp = timestamp.toString(16)
+			machine = @_machine.toString(16)
+			pid = @_pid.toString(16)
+			increment = @_increment.toString(16)
+			
+			return '00000000'.substr(0, 8 - timestamp.length) + timestamp +
+				'000000'.substr(0, 6 - machine.length) + machine +
+				'0000'.substr(0, 4 - pid.length) + pid +
+				'000000'.substr(0, 6 - increment.length) + increment;
 
 		_addOp: (op, metadata) ->
 			change = {

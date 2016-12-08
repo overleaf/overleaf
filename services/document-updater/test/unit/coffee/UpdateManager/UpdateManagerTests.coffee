@@ -21,7 +21,7 @@ describe "UpdateManager", ->
 					done: sinon.stub()
 			"settings-sharelatex": Settings = {}
 			"./DocumentManager": @DocumentManager = {}
-			"./TrackChangesManager": @TrackChangesManager = {}
+			"./RangesManager": @RangesManager = {}
 
 	describe "processOutstandingUpdates", ->
 		beforeEach ->
@@ -158,11 +158,11 @@ describe "UpdateManager", ->
 			@updatedDocLines = ["updated", "lines"]
 			@version = 34
 			@lines = ["original", "lines"]
-			@track_changes_entries = { entries: "mock", comments: "mock" }
-			@updated_track_changes_entries = { entries: "updated", comments: "updated" }
+			@ranges = { entries: "mock", comments: "mock" }
+			@updated_ranges = { entries: "updated", comments: "updated" }
 			@appliedOps = ["mock-applied-ops"]
-			@DocumentManager.getDoc = sinon.stub().yields(null, @lines, @version, @track_changes_entries)
-			@TrackChangesManager.applyUpdate = sinon.stub().yields(null, @updated_track_changes_entries)
+			@DocumentManager.getDoc = sinon.stub().yields(null, @lines, @version, @ranges)
+			@RangesManager.applyUpdate = sinon.stub().yields(null, @updated_ranges)
 			@ShareJsUpdateManager.applyUpdate = sinon.stub().yields(null, @updatedDocLines, @version, @appliedOps)
 			@RedisManager.updateDocument = sinon.stub().yields()
 			@HistoryManager.pushUncompressedHistoryOps = sinon.stub().callsArg(3)
@@ -176,17 +176,17 @@ describe "UpdateManager", ->
 					.calledWith(@project_id, @doc_id, @update, @lines, @version)
 					.should.equal true
 			
-			it "should update the track changes entries", ->
-				@TrackChangesManager.applyUpdate
-					.calledWith(@project_id, @doc_id, @track_changes_entries, @appliedOps)
+			it "should update the ranges", ->
+				@RangesManager.applyUpdate
+					.calledWith(@project_id, @doc_id, @ranges, @appliedOps)
 					.should.equal true
 
 			it "should save the document", ->
 				@RedisManager.updateDocument
-					.calledWith(@doc_id, @updatedDocLines, @version, @appliedOps, @updated_track_changes_entries)
+					.calledWith(@doc_id, @updatedDocLines, @version, @appliedOps, @updated_ranges)
 					.should.equal true
 			
-			it "should push the applied ops into the track changes queue", ->
+			it "should push the applied ops into the history queue", ->
 				@HistoryManager.pushUncompressedHistoryOps
 					.calledWith(@project_id, @doc_id, @appliedOps)
 					.should.equal true

@@ -22,7 +22,7 @@ describe "HttpController.getDoc", ->
 		@ops = ["mock-op-1", "mock-op-2"]
 		@version = 42
 		@fromVersion = 42
-		@track_changes_entries = { changes: "mock", comments: "mock" }
+		@ranges = { changes: "mock", comments: "mock" }
 		@res =
 			send: sinon.stub()
 		@req =
@@ -33,7 +33,7 @@ describe "HttpController.getDoc", ->
 
 	describe "when the document exists and no recent ops are requested", ->
 		beforeEach ->
-			@DocumentManager.getDocAndRecentOpsWithLock = sinon.stub().callsArgWith(3, null, @lines, @version, [], @track_changes_entries)
+			@DocumentManager.getDocAndRecentOpsWithLock = sinon.stub().callsArgWith(3, null, @lines, @version, [], @ranges)
 			@HttpController.getDoc(@req, @res, @next)
 
 		it "should get the doc", ->
@@ -48,7 +48,7 @@ describe "HttpController.getDoc", ->
 					lines: @lines
 					version: @version
 					ops: []
-					track_changes_entries: @track_changes_entries
+					ranges: @ranges
 				}))
 				.should.equal true
 

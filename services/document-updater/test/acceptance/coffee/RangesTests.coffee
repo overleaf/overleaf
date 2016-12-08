@@ -7,8 +7,8 @@ rclient = require("redis").createClient()
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
 
-describe "Track changes", ->
-	describe "tracking changes", ->
+describe "Ranges", ->
+	describe "tracking changes from ops", ->
 		before (done) ->
 			@project_id = DocUpdaterClient.randomId()
 			@user_id = DocUpdaterClient.randomId()
@@ -46,16 +46,16 @@ describe "Track changes", ->
 					throw error if error?
 					setTimeout done, 200
 		
-		it "should update the tracked entries", (done) ->
+		it "should update the ranges", (done) ->
 			DocUpdaterClient.getDoc @project_id, @doc.id, (error, res, data) =>
 				throw error if error?
-				entries = data.track_changes_entries
-				change = entries.changes[0]
+				ranges = data.ranges
+				change = ranges.changes[0]
 				change.op.should.deep.equal { i: "456", p: 3 }
 				change.metadata.user_id.should.equal @user_id
 				done()
 
-	describe "Loading changes from persistence layer", ->
+	describe "Loading ranges from persistence layer", ->
 		before (done) ->
 			@project_id = DocUpdaterClient.randomId()
 			@user_id = DocUpdaterClient.randomId()
@@ -72,7 +72,7 @@ describe "Track changes", ->
 			MockWebApi.insertDoc @project_id, @doc.id, {
 				lines: @doc.lines
 				version: 0
-				track_changes_entries: {
+				ranges: {
 					changes: [{
 						op: { i: "123", p: 1 }
 						metadata:
@@ -87,19 +87,19 @@ describe "Track changes", ->
 					throw error if error?
 					setTimeout done, 200
 		
-		it "should have preloaded the existing changes", (done) ->
+		it "should have preloaded the existing ranges", (done) ->
 			DocUpdaterClient.getDoc @project_id, @doc.id, (error, res, data) =>
 				throw error if error?
-				{changes} = data.track_changes_entries
+				{changes} = data.ranges
 				changes[0].op.should.deep.equal { i: "123", p: 1 }
 				changes[1].op.should.deep.equal { i: "456", p: 5 }
 				done()
 		
-		it "should flush the changes to the persistence layer again", (done) ->
+		it "should flush the ranges to the persistence layer again", (done) ->
 			DocUpdaterClient.flushDoc @project_id, @doc.id, (error) =>
 				throw error if error?
 				MockWebApi.getDocument @project_id, @doc.id, (error, doc) =>
-					{changes} = doc.track_changes_entries
+					{changes} = doc.ranges
 					changes[0].op.should.deep.equal { i: "123", p: 1 }
 					changes[1].op.should.deep.equal { i: "456", p: 5 }
 					done()

@@ -56,31 +56,3 @@ module.exports = ProjectManager =
 					callback new Error("Errors deleting docs. See log for details")
 				else
 					callback(null)
-
-	setTrackChangesWithLocks: (project_id, track_changes_on, _callback = (error) ->) ->
-		timer = new Metrics.Timer("projectManager.toggleTrackChangesWithLocks")
-		callback = (args...) ->
-			timer.done()
-			_callback(args...)
-
-		RedisManager.getDocIdsInProject project_id, (error, doc_ids) ->
-			return callback(error) if error?
-			jobs = []
-			errors = []
-			for doc_id in (doc_ids or [])
-				do (doc_id) ->
-					jobs.push (callback) ->
-						DocumentManager.setTrackChangesWithLock project_id, doc_id, track_changes_on, (error) ->
-							if error?
-								logger.error {err: error, project_id, doc_ids, track_changes_on}, "error toggle track changes for doc"
-								errors.push(error)
-							callback()
-			# TODO: If no docs, turn on track changes in Mongo manually
-
-			logger.log {project_id, doc_ids, track_changes_on}, "toggling track changes for docs"
-			async.series jobs, () ->
-				if errors.length > 0
-					callback new Error("Errors toggling track changes for docs. See log for details")
-				else
-					callback(null)
-		
