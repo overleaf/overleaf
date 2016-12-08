@@ -79,7 +79,7 @@ module.exports = WebsocketController =
 					
 			AuthorizationManager.assertClientCanViewProject client, (error) ->
 				return callback(error) if error?
-				DocumentUpdaterManager.getDocument project_id, doc_id, fromVersion, (error, lines, version, ops) ->
+				DocumentUpdaterManager.getDocument project_id, doc_id, fromVersion, (error, lines, version, ranges, ops) ->
 					return callback(error) if error?
 					# Encode any binary bits of data so it can go via WebSockets
 					# See http://ecmanaut.blogspot.co.uk/2006/07/encoding-decoding-utf8-in-javascript.html
@@ -93,7 +93,7 @@ module.exports = WebsocketController =
 						escapedLines.push line
 					AuthorizationManager.addAccessToDoc client, doc_id
 					client.join(doc_id)
-					callback null, escapedLines, version, ops
+					callback null, escapedLines, version, ops, ranges
 					logger.log {user_id, project_id, doc_id, fromVersion, client_id: client.id}, "client joined doc"
 					
 	leaveDoc: (client, doc_id, callback = (error) ->) ->

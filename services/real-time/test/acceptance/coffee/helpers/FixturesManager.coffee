@@ -32,9 +32,9 @@ module.exports = FixturesManager =
 		options.lines   ||= ["doc", "lines"]
 		options.version ||= 42
 		options.ops     ||= ["mock", "ops"]
-		{doc_id, lines, version, ops} = options
+		{doc_id, lines, version, ops, ranges} = options
 				
-		MockDocUpdaterServer.createMockDoc project_id, doc_id, {lines, version, ops}
+		MockDocUpdaterServer.createMockDoc project_id, doc_id, {lines, version, ops, ranges}
 		MockDocUpdaterServer.run (error) =>
 			throw error if error?
 			callback null, {project_id, doc_id, lines, version, ops}

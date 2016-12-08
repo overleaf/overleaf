@@ -170,11 +170,12 @@ describe 'WebsocketController', ->
 			@doc_lines = ["doc", "lines"]
 			@version = 42
 			@ops = ["mock", "ops"]
+			@ranges = { "mock": "ranges" }
 			
 			@client.params.project_id = @project_id
 			@AuthorizationManager.addAccessToDoc = sinon.stub()
 			@AuthorizationManager.assertClientCanViewProject = sinon.stub().callsArgWith(1, null)
-			@DocumentUpdaterManager.getDocument = sinon.stub().callsArgWith(3, null, @doc_lines, @version, @ops)
+			@DocumentUpdaterManager.getDocument = sinon.stub().callsArgWith(3, null, @doc_lines, @version, @ranges, @ops)
 			
 		describe "with a fromVersion", ->
 			beforeEach ->
@@ -201,9 +202,9 @@ describe 'WebsocketController', ->
 					.calledWith(@doc_id)
 					.should.equal true
 					
-			it "should call the callback with the lines, version and ops", ->
+			it "should call the callback with the lines, version, ranges and ops", ->
 				@callback
-					.calledWith(null, @doc_lines, @version, @ops)
+					.calledWith(null, @doc_lines, @version, @ops, @ranges)
 					.should.equal true
 					
 			it "should increment the join-doc metric", ->
