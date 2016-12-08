@@ -31,11 +31,11 @@ describe "receiveUpdate", ->
 			
 			(cb) =>
 				@clientA = RealTimeClient.connect()
-				@clientA.on "connect", cb
+				@clientA.on "connectionAccepted", cb
 				
 			(cb) =>
 				@clientB = RealTimeClient.connect()
-				@clientB.on "connect", cb
+				@clientB.on "connectionAccepted", cb
 				
 			(cb) =>
 				@clientA.emit "joinProject", {

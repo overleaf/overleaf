@@ -21,11 +21,11 @@ describe "leaveProject", ->
 					
 				(cb) =>
 					@clientA = RealTimeClient.connect()
-					@clientA.on "connect", cb
+					@clientA.on "connectionAccepted", cb
 					
 				(cb) =>
 					@clientB = RealTimeClient.connect()
-					@clientB.on "connect", cb
+					@clientB.on "connectionAccepted", cb
 					
 					@clientBDisconnectMessages = []
 					@clientB.on "clientTracking.clientDisconnected", (data) =>
@@ -46,7 +46,7 @@ describe "leaveProject", ->
 					
 				(cb) =>
 					# The API waits a little while before flushing changes
-					setTimeout done, require("../../../app/js/WebsocketController").FLUSH_IF_EMPTY_DELAY * 2
+					setTimeout done, 1000
 					
 			], done
 
@@ -91,7 +91,7 @@ describe "leaveProject", ->
 					
 				(cb) =>
 					# The API waits a little while before flushing changes
-					setTimeout done, require("../../../app/js/WebsocketController").FLUSH_IF_EMPTY_DELAY * 2
+					setTimeout done, 1000
 			], done
 
 		it "should flush the project to the document updater", ->

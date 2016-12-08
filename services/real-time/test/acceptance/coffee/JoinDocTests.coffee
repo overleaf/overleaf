@@ -26,10 +26,10 @@ describe "joinDoc", ->
 				(cb) =>
 					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops}, (e, {@doc_id}) =>
 						cb(e)
-						
+
 				(cb) =>
 					@client = RealTimeClient.connect()
-					@client.on "connect", cb
+					@client.on "connectionAccepted", cb
 						
 				(cb) =>
 					@client.emit "joinProject", project_id: @project_id, cb
@@ -63,10 +63,10 @@ describe "joinDoc", ->
 				(cb) =>
 					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops}, (e, {@doc_id}) =>
 						cb(e)
-						
+
 				(cb) =>
 					@client = RealTimeClient.connect()
-					@client.on "connect", cb
+					@client.on "connectionAccepted", cb
 						
 				(cb) =>
 					@client.emit "joinProject", project_id: @project_id, cb
@@ -100,10 +100,10 @@ describe "joinDoc", ->
 				(cb) =>
 					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops}, (e, {@doc_id}) =>
 						cb(e)
-						
+
 				(cb) =>
 					@client = RealTimeClient.connect()
-					@client.on "connect", cb
+					@client.on "connectionAccepted", cb
 						
 				(cb) =>
 					@client.emit "joinProject", project_id: @project_id, cb
@@ -142,10 +142,10 @@ describe "joinDoc", ->
 				(cb) =>
 					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops}, (e, {@doc_id}) =>
 						cb(e)
-						
+
 				(cb) =>
 					@client = RealTimeClient.connect()
-					@client.on "connect", cb
+					@client.on "connectionAccepted", cb
 						
 				(cb) =>
 					@client.emit "joinProject", project_id: @project_id, cb

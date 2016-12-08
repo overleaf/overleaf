@@ -20,10 +20,10 @@ describe "joinProject", ->
 						}
 					}, (e, {@project_id, @user_id}) =>
 						cb(e)
-						
+
 				(cb) =>
 					@client = RealTimeClient.connect()
-					@client.on "connect", cb
+					@client.on "connectionAccepted", cb
 						
 				(cb) =>
 					@client.emit "joinProject", project_id: @project_id, (error, @project, @privilegeLevel, @protocolVersion) =>
@@ -72,10 +72,10 @@ describe "joinProject", ->
 						}
 					}, (e, {@project_id, @user_id}) =>
 						cb(e)
-						
+
 				(cb) =>
 					@client = RealTimeClient.connect()
-					@client.on "connect", cb
+					@client.on "connectionAccepted", cb
 						
 				(cb) =>
 					@client.emit "joinProject", project_id: @project_id, (@error, @project, @privilegeLevel, @protocolVersion) =>
