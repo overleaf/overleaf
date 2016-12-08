@@ -267,6 +267,7 @@ describe 'DocumentUpdaterHandler - Flushing documents :', ->
 					lines: @lines
 					version: @version
 					ops: @ops = ["mock-op-1", "mock-op-2"]
+					ranges: @ranges = {"mock":"ranges"}
 				@fromVersion = 2
 				@request.get = sinon.stub().callsArgWith(1, null, {statusCode: 200}, @body)
 				@handler.getDocument @project_id, @doc_id, @fromVersion, @callback
@@ -276,7 +277,7 @@ describe 'DocumentUpdaterHandler - Flushing documents :', ->
 				@request.get.calledWith(url).should.equal true
 
 			it "should call the callback with the lines and version", ->
-				@callback.calledWith(null, @lines, @version, @ops).should.equal true
+				@callback.calledWith(null, @lines, @version, @ranges, @ops).should.equal true
 
 		describe "when the document updater API returns an error", ->
 			beforeEach ->

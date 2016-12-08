@@ -57,12 +57,13 @@ describe "DocstoreManager", ->
 			@lines = ["mock", "doc", "lines"]
 			@rev = 5
 			@version = 42
+			@ranges = { "mock": "ranges" }
 			@modified = true
 
 		describe "with a successful response code", ->
 			beforeEach ->
 				@request.post = sinon.stub().callsArgWith(1, null, statusCode: 204, { modified: @modified, rev: @rev })
-				@DocstoreManager.updateDoc @project_id, @doc_id, @lines, @version, @callback
+				@DocstoreManager.updateDoc @project_id, @doc_id, @lines, @version, @ranges, @callback
 
 			it "should update the doc in the docstore api", ->
 				@request.post
@@ -71,6 +72,7 @@ describe "DocstoreManager", ->
 						json:
 							lines: @lines
 							version: @version
+							ranges: @ranges
 					})
 					.should.equal true
 
@@ -80,7 +82,7 @@ describe "DocstoreManager", ->
 		describe "with a failed response code", ->
 			beforeEach ->
 				@request.post = sinon.stub().callsArgWith(1, null, statusCode: 500, "")
-				@DocstoreManager.updateDoc @project_id, @doc_id, @lines, @version, @callback
+				@DocstoreManager.updateDoc @project_id, @doc_id, @lines, @version, @ranges, @callback
 
 			it "should call the callback with an error", ->
 				@callback.calledWith(new Error("docstore api responded with non-success code: 500")).should.equal true
@@ -100,6 +102,7 @@ describe "DocstoreManager", ->
 				lines:   @lines = ["mock", "doc", "lines"]
 				rev:     @rev = 5
 				version: @version = 42
+				ranges:  @ranges = { "mock": "ranges" }
 
 		describe "with a successful response code", ->
 			beforeEach ->
@@ -115,7 +118,7 @@ describe "DocstoreManager", ->
 					.should.equal true
 
 			it "should call the callback with the lines, version and rev", ->
-				@callback.calledWith(null, @lines, @rev, @version).should.equal true
+				@callback.calledWith(null, @lines, @rev, @version, @ranges).should.equal true
 
 		describe "with a failed response code", ->
 			beforeEach ->
@@ -148,7 +151,7 @@ describe "DocstoreManager", ->
 					.should.equal true
 
 			it "should call the callback with the lines, version and rev", ->
-				@callback.calledWith(null, @lines, @rev, @version).should.equal true
+				@callback.calledWith(null, @lines, @rev, @version, @ranges).should.equal true
 
 	describe "getAllDocs", ->
 		describe "with a successful response code", ->
