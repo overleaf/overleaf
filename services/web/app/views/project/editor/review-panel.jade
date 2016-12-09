@@ -49,8 +49,11 @@
 	.rp-entry-list(
 		ng-if="reviewPanel.subView === SubViews.OVERVIEW"
 	)
+		.rp-overview-loading(ng-if="reviewPanel.overview.loading")
+			i.fa.fa-spinner.fa-spin
 		.rp-overview-file(
 			ng-repeat="(doc_id, entries) in reviewPanel.entries"
+			ng-if="!reviewPanel.overview.loading"
 		)
 			.rp-overview-file-header
 				| {{ getFileName(doc_id) }}

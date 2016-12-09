@@ -2,7 +2,7 @@ settings = require "settings-sharelatex"
 request = require "request"
 logger = require "logger-sharelatex"
 
-module.exports = TrackChangesManager =
+module.exports = HistoryManager =
 	flushProject: (project_id, callback = (error) ->) ->
 		logger.log project_id: project_id, "flushing project in track-changes api"
 		url = "#{settings.apis.trackchanges.url}/project/#{project_id}/flush"

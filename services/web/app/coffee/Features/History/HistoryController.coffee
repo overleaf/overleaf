@@ -3,8 +3,8 @@ request = require "request"
 settings = require "settings-sharelatex"
 AuthenticationController = require "../Authentication/AuthenticationController"
 
-module.exports = TrackChangesController =
-	proxyToTrackChangesApi: (req, res, next = (error) ->) ->
+module.exports = HistoryController =
+	proxyToHistoryApi: (req, res, next = (error) ->) ->
 		user_id = AuthenticationController.getLoggedInUserId req
 		url = settings.apis.trackchanges.url + req.url
 		logger.log url: url, "proxying to track-changes api"

@@ -186,6 +186,38 @@ describe "DocstoreManager", ->
 					}, "error getting all docs from docstore")
 					.should.equal true
 
+	describe "getAllRanges", ->
+		describe "with a successful response code", ->
+			beforeEach ->
+				@request.get = sinon.stub().callsArgWith(1, null, statusCode: 204, @docs = [{ _id: "mock-doc-id", ranges: "mock-ranges" }])
+				@DocstoreManager.getAllRanges @project_id, @callback
+
+			it "should get all the project doc ranges in the docstore api", ->
+				@request.get
+					.calledWith({
+						url: "#{@settings.apis.docstore.url}/project/#{@project_id}/ranges"
+						json: true
+					})
+					.should.equal true
+
+			it "should call the callback with the docs", ->
+				@callback.calledWith(null, @docs).should.equal true
+
+		describe "with a failed response code", ->
+			beforeEach ->
+				@request.get = sinon.stub().callsArgWith(1, null, statusCode: 500, "")
+				@DocstoreManager.getAllRanges @project_id, @callback
+
+			it "should call the callback with an error", ->
+				@callback.calledWith(new Error("docstore api responded with non-success code: 500")).should.equal true
+
+			it "should log the error", ->
+				@logger.error
+					.calledWith({
+						err: new Error("docstore api responded with a non-success code: 500")
+						project_id: @project_id
+					}, "error getting all doc ranges from docstore")
+					.should.equal true
 
 	describe "archiveProject", ->
 		describe "with a successful response code", ->

@@ -4,7 +4,7 @@ define [
 	"ide/colors/ColorManager"
 	"ide/review-panel/RangesTracker"
 ], (App, EventEmitter, ColorManager, RangesTracker) ->
-	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout) ->
+	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout, $http) ->
 		$reviewPanelEl = $element.find "#review-panel"
 
 		$scope.SubViews =
@@ -16,6 +16,8 @@ define [
 			hasEntries: false
 			subView: $scope.SubViews.CUR_FILE
 			openSubView: $scope.SubViews.CUR_FILE
+			overview:
+				loading: false
 
 		$scope.commentState =
 			adding: false
@@ -146,6 +148,11 @@ define [
 			else
 				# Reset back to what we had when previously open
 				$scope.reviewPanel.subView = $scope.reviewPanel.openSubView
+		
+		$scope.$watch "reviewPanel.subView", (view) ->
+			return if !view?
+			if view == $scope.SubViews.OVERVIEW
+				refreshOverviewPanel()
 
 		$scope.$watch "editor.open_doc_id", (open_doc_id) ->
 			return if !open_doc_id?
@@ -163,6 +170,21 @@ define [
 			$timeout () ->
 				$scope.$broadcast "review-panel:toggle"
 				$scope.$broadcast "review-panel:layout"
+		
+		refreshOverviewPanel = () ->
+			$scope.reviewPanel.overview.loading = true
+			$http.get "/project/#{$scope.project_id}/ranges"
+				.success (docs) ->
+					for doc in docs
+						if doc.id != $scope.editor.open_doc_id # this is kept up to date in real-time, don't overwrite
+							rangesTrackers[doc.id] ?= new RangesTracker()
+							rangesTrackers[doc.id].comments = doc.ranges?.comments or []
+							rangesTrackers[doc.id].changes = doc.ranges?.changes or []
+							updateEntries(doc.id)
+					$scope.reviewPanel.overview.loading = false
+				.error (error) ->
+					console.log "loading ranges errored", error
+					$scope.reviewPanel.overview.loading = false
 		
 		updateEntries = (doc_id) ->
 			rangesTracker = getChangeTracker(doc_id)

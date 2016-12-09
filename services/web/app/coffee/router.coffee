@@ -25,7 +25,7 @@ ClsiCookieManager = require("./Features/Compile/ClsiCookieManager")
 HealthCheckController = require("./Features/HealthCheck/HealthCheckController")
 ProjectDownloadsController = require "./Features/Downloads/ProjectDownloadsController"
 FileStoreController = require("./Features/FileStore/FileStoreController")
-TrackChangesController = require("./Features/TrackChanges/TrackChangesController")
+HistoryController = require("./Features/History/HistoryController")
 PasswordResetRouter = require("./Features/PasswordReset/PasswordResetRouter")
 StaticPagesRouter = require("./Features/StaticPages/StaticPagesRouter")
 ChatController = require("./Features/Chat/ChatController")
@@ -40,6 +40,7 @@ AuthorizationMiddlewear = require('./Features/Authorization/AuthorizationMiddlew
 BetaProgramController = require('./Features/BetaProgram/BetaProgramController')
 AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 AnnouncementsController = require("./Features/Announcements/AnnouncementsController")
+RangesController = require("./Features/Ranges/RangesController")
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -171,9 +172,11 @@ module.exports = class Router
 
 		webRouter.post '/project/:Project_id/rename', AuthorizationMiddlewear.ensureUserCanAdminProject, ProjectController.renameProject
 
-		webRouter.get  "/project/:Project_id/updates", AuthorizationMiddlewear.ensureUserCanReadProject, TrackChangesController.proxyToTrackChangesApi
-		webRouter.get  "/project/:Project_id/doc/:doc_id/diff", AuthorizationMiddlewear.ensureUserCanReadProject, TrackChangesController.proxyToTrackChangesApi
-		webRouter.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", AuthorizationMiddlewear.ensureUserCanReadProject, TrackChangesController.proxyToTrackChangesApi
+		webRouter.get  "/project/:Project_id/updates", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.proxyToHistoryApi
+		webRouter.get  "/project/:Project_id/doc/:doc_id/diff", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.proxyToHistoryApi
+		webRouter.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.proxyToHistoryApi
+
+		webRouter.get "/project/:project_id/ranges", AuthorizationMiddlewear.ensureUserCanReadProject, RangesController.getAllRanges
 
 		webRouter.get  '/Project/:Project_id/download/zip', AuthorizationMiddlewear.ensureUserCanReadProject, ProjectDownloadsController.downloadProject
 		webRouter.get  '/project/download/zip', AuthorizationMiddlewear.ensureUserCanReadMultipleProjects, ProjectDownloadsController.downloadMultipleProjects

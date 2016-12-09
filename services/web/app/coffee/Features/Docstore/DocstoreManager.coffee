@@ -29,6 +29,21 @@ module.exports = DocstoreManager =
 				error = new Error("docstore api responded with non-success code: #{res.statusCode}")
 				logger.error err: error, project_id: project_id, "error getting all docs from docstore"
 				callback(error)
+	
+	getAllRanges: (project_id, callback = (error) ->) ->
+		logger.log { project_id }, "getting all doc ranges for project in docstore api"
+		url = "#{settings.apis.docstore.url}/project/#{project_id}/ranges"
+		request.get {
+			url: url
+			json: true
+		}, (error, res, docs) ->
+			return callback(error) if error?
+			if 200 <= res.statusCode < 300
+				callback(null, docs)
+			else
+				error = new Error("docstore api responded with non-success code: #{res.statusCode}")
+				logger.error err: error, project_id: project_id, "error getting all doc ranges from docstore"
+				callback(error)
 
 	getDoc: (project_id, doc_id, options = {}, callback = (error, lines, rev, version) ->) ->
 		if typeof(options) == "function"
