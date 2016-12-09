@@ -452,6 +452,11 @@ if process.env["SHARELATEX_LDAP_HOST"]
 if process.env["SHARELATEX_LDAP_URL"]
 	settings.externalAuth = true
 	settings.ldap =
+		emailAtt: process.env["SHARELATEX_LDAP_EMAIL_ATT"]
+		nameAtt: process.env["SHARELATEX_LDAP_NAME_ATT"]
+		lastNameAtt: process.env["SHARELATEX_LDAP_LAST_NAME_ATT"]
+		updateUserDetailsOnLogin: process.env["SHARELATEX_LDAP_UPDATE_USER_DETAILS_ON_LOGIN"] == 'true'
+		placeholder: process.env["SHARELATEX_LDAP_PLACEHOLDER"]
 		server:
 			url: process.env["SHARELATEX_LDAP_URL"]
 			bindDn: process.env["SHARELATEX_LDAP_BIND_DN"]
@@ -472,7 +477,7 @@ if process.env["SHARELATEX_LDAP_URL"]
 			groupDnProperty: process.env["SHARELATEX_LDAP_GROUP_DN_PROPERTY"]
 			groupSearchBase: process.env["SHARELATEX_LDAP_GROUP_SEARCH_BASE"]
 			groupSearchScope: process.env["SHARELATEX_LDAP_GROUP_SEARCH_SCOPE"]
-			groupSearchFilter: process.env["SHARELATEX_LDAP_GROUP_SEARCH_FILTER"] #
+			groupSearchFilter: process.env["SHARELATEX_LDAP_GROUP_SEARCH_FILTER"]
 			groupSearchAttributes: (
 				if _ldap_group_search_attribs = process.env["SHARELATEX_LDAP_GROUP_SEARCH_ATTRIBUTES"]
 					try
@@ -501,11 +506,6 @@ if process.env["SHARELATEX_LDAP_URL"]
 				else
 					undefined
 			)
-		emailAtt: process.env["SHARELATEX_LDAP_"]
-		nameAtt: process.env["SHARELATEX_LDAP_"]
-		lastNameAtt: process.env["SHARELATEX_LDAP_"]
-		updateUserDetailsOnLogin: process.env["SHARELATEX_LDAP_UPDATE_USER_DETAILS_ON_LOGIN"] == 'true'
-		placeholder: process.env["SHARELATEX_LDAP_"]
 
 	if process.env["SHARELATEX_LDAP_TLS_OPTS_CA_PATH"]
 		try
