@@ -469,7 +469,7 @@ if process.env["SHARELATEX_LDAP_URL"]
 				if _ldap_search_attribs = process.env["SHARELATEX_LDAP_SEARCH_ATTRIBUTES"]
 					try
 						JSON.parse(_ldap_search_attribs)
-					catch
+					catch e
 						console.error "could not parse SHARELATEX_LDAP_SEARCH_ATTRIBUTES"
 				else
 					undefined
@@ -482,7 +482,7 @@ if process.env["SHARELATEX_LDAP_URL"]
 				if _ldap_group_search_attribs = process.env["SHARELATEX_LDAP_GROUP_SEARCH_ATTRIBUTES"]
 					try
 						JSON.parse(_ldap_group_search_attribs)
-					catch
+					catch e
 						console.error "could not parse SHARELATEX_LDAP_GROUP_SEARCH_ATTRIBUTES"
 				else
 					undefined
