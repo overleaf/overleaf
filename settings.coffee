@@ -506,7 +506,6 @@ if process.env["SHARELATEX_LDAP_URL"]
 		lastNameAtt: process.env["SHARELATEX_LDAP_"]
 		updateUserDetailsOnLogin: process.env["SHARELATEX_LDAP_UPDATE_USER_DETAILS_ON_LOGIN"] == 'true'
 		placeholder: process.env["SHARELATEX_LDAP_"]
- 		starttls: process.env["SHARELATEX_LDAP_TLS"] == 'true'
 
 	if process.env["SHARELATEX_LDAP_TLS_OPTS_CA_PATH"]
 		try
