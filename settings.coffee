@@ -462,7 +462,7 @@ if process.env["SHARELATEX_LDAP_URL"]
 			bindDn: process.env["SHARELATEX_LDAP_BIND_DN"]
 			bindCredentials: process.env["SHARELATEX_LDAP_BIND_CREDENTIALS"]
 			bindProperty: process.env["SHARELATEX_LDAP_BIND_PROPERTY"]
-			searchBase: process.env["SHARELATEX_LDAP_SEARCHBASE"]
+			searchBase: process.env["SHARELATEX_LDAP_SEARCH_BASE"]
 			searchScope: process.env["SHARELATEX_LDAP_SEARCH_SCOPE"]
 			searchFilter: process.env["SHARELATEX_LDAP_SEARCH_FILTER"]
 			searchAttributes: (
@@ -502,7 +502,7 @@ if process.env["SHARELATEX_LDAP_URL"]
 					try
 						parseInt(_ldap_connect_timeout)
 					catch e
-						console.error "Cannot parse SHARELATEX_CONNECTLDAP_TIMEOUT"
+						console.error "Cannot parse SHARELATEX_LDAP_CONNECT_TIMEOUT"
 				else
 					undefined
 			)
