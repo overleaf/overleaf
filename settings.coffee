@@ -397,24 +397,116 @@ if parse(process.env["SHARELATEX_IS_SERVER_PRO"]) == true
 # When testing with forumsys.com use username = einstein and password = password
 	
 
+# if process.env["SHARELATEX_LDAP_HOST"]
+# 	settings.externalAuth = true
+# 	settings.ldap =
+# 		host: process.env["SHARELATEX_LDAP_HOST"]
+# 		dn: process.env["SHARELATEX_LDAP_DN"]
+# 		baseSearch: process.env["SHARELATEX_LDAP_BASE_SEARCH"]
+# 		filter:  process.env["SHARELATEX_LDAP_FILTER"]
+# 		failMessage: process.env["SHARELATEX_LDAP_FAIL_MESSAGE"] or 'LDAP User Fail'
+# 		fieldName: process.env["SHARELATEX_LDAP_FIELD_NAME"] or 'LDAP User'
+# 		placeholder: process.env["SHARELATEX_LDAP_PLACEHOLDER"] or 'LDAP User ID'
+# 		emailAtt: process.env["SHARELATEX_LDAP_EMAIL_ATT"] or 'mail'
+# 		anonymous: parse(process.env["SHARELATEX_LDAP_ANONYMOUS"])
+# 		adminDN: process.env["SHARELATEX_LDAP_ADMIN_DN"]
+# 		adminPW: process.env["SHARELATEX_LDAP_ADMIN_PW"]
+# 		starttls:  parse(process.env["SHARELATEX_LDAP_TLS"])
+# 		nameAtt: process.env["SHARELATEX_LDAP_NAME_ATT"]
+# 		lastNameAtt: process.env["SHARELATEX_LDAP_LAST_NAME_ATT"]
+# 		updateUserDetailsOnLogin: process.env["SHARELATEX_LDAP_UPDATE_USER_DETAILS_ON_LOGIN"] == 'true'
+
+# 	if process.env["SHARELATEX_LDAP_TLS_OPTS_CA_PATH"]
+# 		try
+# 			ca = JSON.parse(process.env["SHARELATEX_LDAP_TLS_OPTS_CA_PATH"])
+# 		catch e
+# 			console.error "could not parse SHARELATEX_LDAP_TLS_OPTS_CA_PATH, invalid JSON"
+
+# 		if typeof(ca)  == 'string'
+# 			ca_paths = [ca]
+# 		else if typeof(ca) == 'object' && ca?.length?
+# 			ca_paths = ca
+# 		else
+# 			console.error "problem parsing SHARELATEX_LDAP_TLS_OPTS_CA_PATH"
+
+# 		settings.ldap.tlsOptions =
+# 			rejectUnauthorized: process.env["SHARELATEX_LDAP_TLS_OPTS_REJECT_UNAUTH"] == "true"
+# 			ca:ca_paths  # e.g.'/etc/ldap/ca_certs.pem'
+
+
+
+
+# LDAP - SERVER PRO ONLY
+# ----------
+
 if process.env["SHARELATEX_LDAP_HOST"]
+	console.error """
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+#  WARNING: The LDAP configuration format has changed in version 0.5.1
+#  See https://github.com/sharelatex/sharelatex/wiki/Server-Pro:-LDAP-Config
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+"""
+
+if process.env["SHARELATEX_LDAP_URL"]
 	settings.externalAuth = true
 	settings.ldap =
-		host: process.env["SHARELATEX_LDAP_HOST"]
-		dn: process.env["SHARELATEX_LDAP_DN"]
-		baseSearch: process.env["SHARELATEX_LDAP_BASE_SEARCH"]
-		filter:  process.env["SHARELATEX_LDAP_FILTER"]
-		failMessage: process.env["SHARELATEX_LDAP_FAIL_MESSAGE"] or 'LDAP User Fail'
-		fieldName: process.env["SHARELATEX_LDAP_FIELD_NAME"] or 'LDAP User'
-		placeholder: process.env["SHARELATEX_LDAP_PLACEHOLDER"] or 'LDAP User ID'
-		emailAtt: process.env["SHARELATEX_LDAP_EMAIL_ATT"] or 'mail'
-		anonymous: parse(process.env["SHARELATEX_LDAP_ANONYMOUS"])
-		adminDN: process.env["SHARELATEX_LDAP_ADMIN_DN"]	
-		adminPW: process.env["SHARELATEX_LDAP_ADMIN_PW"]
-		starttls:  parse(process.env["SHARELATEX_LDAP_TLS"])
-		nameAtt: process.env["SHARELATEX_LDAP_NAME_ATT"]
-		lastNameAtt: process.env["SHARELATEX_LDAP_LAST_NAME_ATT"]
+		server:
+			url: process.env["SHARELATEX_LDAP_URL"]
+			bindDn: process.env["SHARELATEX_LDAP_BIND_DN"]
+			bindCredentials: process.env["SHARELATEX_LDAP_BIND_CREDENTIALS"]
+			bindProperty: process.env["SHARELATEX_LDAP_BIND_PROPERTY"]
+			searchBase: process.env["SHARELATEX_LDAP_SEARCHBASE"]
+			searchScope: process.env["SHARELATEX_LDAP_SEARCH_SCOPE"]
+			searchFilter: process.env["SHARELATEX_LDAP_SEARCH_FILTER"]
+			searchAttributes: (
+				if _ldap_search_attribs = process.env["SHARELATEX_LDAP_SEARCH_ATTRIBUTES"]
+					try
+						JSON.parse(_ldap_search_attribs)
+					catch
+						console.error "could not parse SHARELATEX_LDAP_SEARCH_ATTRIBUTES"
+				else
+					undefined
+			)
+			groupDnProperty: process.env["SHARELATEX_LDAP_GROUP_DN_PROPERTY"]
+			groupSearchBase: process.env["SHARELATEX_LDAP_GROUP_SEARCH_BASE"]
+			groupSearchScope: process.env["SHARELATEX_LDAP_GROUP_SEARCH_SCOPE"]
+			groupSearchFilter: process.env["SHARELATEX_LDAP_GROUP_SEARCH_FILTER"] #
+			groupSearchAttributes: (
+				if _ldap_group_search_attribs = process.env["SHARELATEX_LDAP_GROUP_SEARCH_ATTRIBUTES"]
+					try
+						JSON.parse(_ldap_group_search_attribs)
+					catch
+						console.error "could not parse SHARELATEX_LDAP_GROUP_SEARCH_ATTRIBUTES"
+				else
+					undefined
+			)
+			cache: process.env["SHARELATEX_LDAP_CACHE"] == 'true'
+			timeout: (
+				if _ldap_timeout = process.env["SHARELATEX_LDAP_TIMEOUT"]
+					try
+						parseInt(_ldap_timeout)
+					catch e
+						console.error "Cannot parse SHARELATEX_LDAP_TIMEOUT"
+				else
+					undefined
+			)
+			connectTimeout: (
+				if _ldap_connect_timeout = process.env["SHARELATEX_LDAP_CONNECT_TIMEOUT"]
+					try
+						parseInt(_ldap_connect_timeout)
+					catch e
+						console.error "Cannot parse SHARELATEX_CONNECTLDAP_TIMEOUT"
+				else
+					undefined
+			)
+		emailAtt: process.env["SHARELATEX_LDAP_"]
+		nameAtt: process.env["SHARELATEX_LDAP_"]
+		lastNameAtt: process.env["SHARELATEX_LDAP_"]
 		updateUserDetailsOnLogin: process.env["SHARELATEX_LDAP_UPDATE_USER_DETAILS_ON_LOGIN"] == 'true'
+		placeholder: process.env["SHARELATEX_LDAP_"]
+ 		starttls: process.env["SHARELATEX_LDAP_TLS"] == 'true'
 
 	if process.env["SHARELATEX_LDAP_TLS_OPTS_CA_PATH"]
 		try
@@ -429,9 +521,13 @@ if process.env["SHARELATEX_LDAP_HOST"]
 		else
 			console.error "problem parsing SHARELATEX_LDAP_TLS_OPTS_CA_PATH"
 
-		settings.ldap.tlsOptions =
+		settings.ldap.server.tlsOptions =
 			rejectUnauthorized: process.env["SHARELATEX_LDAP_TLS_OPTS_REJECT_UNAUTH"] == "true"
 			ca:ca_paths  # e.g.'/etc/ldap/ca_certs.pem'
+
+
+
+
 
 if process.env["SHARELATEX_SAML_ENTRYPOINT"]
 	# NOTE: see https://github.com/bergie/passport-saml/blob/master/README.md for docs of `server` options
