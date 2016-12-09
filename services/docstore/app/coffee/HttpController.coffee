@@ -37,13 +37,14 @@ module.exports = HttpController =
 		logger.log project_id: project_id, "getting all docs"
 		DocManager.getAllNonDeletedDocs project_id, {lines: true, rev: true}, (error, docs = []) ->
 			return next(error) if error?
-			docViews = []
-			for doc in docs
-				if doc? # There can end up being null docs for some reason :( (probably a race condition)
-					docViews.push HttpController._buildDocView(doc)
-				else
-					logger.error err: new Error("null doc"), project_id: project_id, "encountered null doc"
-			res.json docViews
+			res.json HttpController._buildDocsArrayView(project_id, docs)
+	
+	getAllRanges: (req, res, next = (error) ->) ->
+		project_id = req.params.project_id
+		logger.log {project_id}, "getting all ranges"
+		DocManager.getAllNonDeletedDocs project_id, {ranges: true}, (error, docs = []) ->
+			return next(error) if error?
+			res.json HttpController._buildDocsArrayView(project_id, docs)
 
 	updateDoc: (req, res, next = (error) ->) ->
 		project_id = req.params.project_id
@@ -79,21 +80,23 @@ module.exports = HttpController =
 			res.send 204
 
 	_buildDocView: (doc) -> 
-		doc_view = {
-			_id:     doc._id?.toString()
-			lines:   doc.lines
-			rev:     doc.rev
-		}
-		if doc.version?
-			doc_view.version = doc.version
-		if doc.ranges?
-			doc_view.ranges = doc.ranges
-		if doc.deleted?
-			doc_view.deleted = doc.deleted
+		doc_view = { _id: doc._id?.toString() }
+		for attribute in ["lines", "rev", "version", "ranges", "deleted"]
+			if doc[attribute]?
+				doc_view[attribute] = doc[attribute]
 		return doc_view
 
 	_buildRawDocView: (doc)->
 		return (doc?.lines or []).join("\n")
+	
+	_buildDocsArrayView: (project_id, docs) ->
+		docViews = []
+		for doc in docs
+			if doc? # There can end up being null docs for some reason :( (probably a race condition)
+				docViews.push HttpController._buildDocView(doc)
+			else
+				logger.error err: new Error("null doc"), project_id: project_id, "encountered null doc"
+		return docViews
 
 	archiveAllDocs: (req, res, next = (error) ->) ->
 		project_id = req.params.project_id

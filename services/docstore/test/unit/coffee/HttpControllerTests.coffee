@@ -180,6 +180,37 @@ describe "HttpController", ->
 					)
 					.should.equal true
 
+	describe "getAllRanges", ->
+		describe "normally", ->
+			beforeEach ->
+				@req.params =
+					project_id: @project_id
+				@docs = [{
+					_id: ObjectId()
+					ranges: {"mock_ranges": "one"}
+				}, {
+					_id: ObjectId()
+					ranges: {"mock_ranges": "two"}
+				}]
+				@DocManager.getAllNonDeletedDocs = sinon.stub().callsArgWith(2, null, @docs)
+				@HttpController.getAllRanges @req, @res, @next
+
+			it "should get all the (non-deleted) doc ranges", ->
+				@DocManager.getAllNonDeletedDocs
+					.calledWith(@project_id, {ranges: true})
+					.should.equal true
+
+			it "should return the doc as JSON", ->
+				@res.json
+					.calledWith([{
+						_id:    @docs[0]._id.toString()
+						ranges: @docs[0].ranges
+					}, {
+						_id:    @docs[1]._id.toString()
+						ranges: @docs[1].ranges
+					}])
+					.should.equal true
+
 	describe "updateDoc", ->
 		beforeEach ->
 			@req.params =

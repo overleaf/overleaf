@@ -21,6 +21,12 @@ module.exports = DocstoreClient =
 			json: true
 		}, callback
 
+	getAllRanges: (project_id, callback = (error, res, body) ->) ->
+		request.get {
+			url: "http://localhost:#{settings.internal.docstore.port}/project/#{project_id}/ranges"
+			json: true
+		}, callback
+
 	updateDoc: (project_id, doc_id, lines, version, ranges, callback = (error, res, body) ->) ->
 		request.post {
 			url: "http://localhost:#{settings.internal.docstore.port}/project/#{project_id}/doc/#{doc_id}"
