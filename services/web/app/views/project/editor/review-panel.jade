@@ -52,13 +52,15 @@
 		.rp-overview-loading(ng-if="reviewPanel.overview.loading")
 			i.fa.fa-spinner.fa-spin
 		.rp-overview-file(
-			ng-repeat="(doc_id, entries) in reviewPanel.entries"
+			ng-repeat="doc in docs"
 			ng-if="!reviewPanel.overview.loading"
 		)
-			.rp-overview-file-header
-				| {{ getFileName(doc_id) }}
+			.rp-overview-file-header(
+				ng-if="reviewPanel.entries[doc.doc.id] | notEmpty"
+			)
+				| {{ doc.path }}
 			.rp-entry-wrapper(
-				ng-repeat="(entry_id, entry) in entries | orderOverviewEntries"
+				ng-repeat="(entry_id, entry) in reviewPanel.entries[doc.doc.id] | orderOverviewEntries"
 			)
 				div(ng-if="entry.type === 'insert' || entry.type === 'delete'")
 					change-entry(
