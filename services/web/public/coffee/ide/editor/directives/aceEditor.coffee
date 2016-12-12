@@ -270,6 +270,10 @@ define [
 					catch
 						mode = "ace/mode/plain_text"
 
+					# Give beta users the next release of the syntax checker
+					if mode is "ace/mode/latex" and window.user?.betaProgram
+						mode = "ace/mode/latex_beta"
+
 					# create our new session
 					session = new EditSession(lines, mode)
 
