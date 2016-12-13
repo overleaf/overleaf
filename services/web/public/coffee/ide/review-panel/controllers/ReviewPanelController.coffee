@@ -218,11 +218,11 @@ define [
 				entries[comment.id] ?= {}
 				new_entry = {
 					type: "comment"
-					thread: comment.metadata.thread
-					resolved: comment.metadata.resolved
-					resolved_data: comment.metadata.resolved_data
-					offset: comment.offset
-					length: comment.length
+					thread: comment.metadata.thread or []
+					resolved: comment.metadata?.resolved
+					resolved_data: comment.metadata?.resolved_data
+					content: comment.op.c
+					offset: comment.op.p
 				}
 				for key, value of new_entry
 					entries[comment.id][key] = value

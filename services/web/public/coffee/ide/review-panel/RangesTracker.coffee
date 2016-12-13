@@ -48,15 +48,6 @@ load = (EventEmitter) ->
 			# sync with Ace ranges.
 			@id = 0
 		
-		addComment: (offset, length, metadata) ->
-			# TODO: Don't allow overlapping comments?
-			@comments.push comment = {
-				id: @_newId()
-				offset, length, metadata
-			}
-			@emit "comment:added", comment
-			return comment
-		
 		getComment: (comment_id) ->
 			comment = null
 			for c in @comments
@@ -97,7 +88,7 @@ load = (EventEmitter) ->
 			return if !change?
 			@_removeChange(change)
 
-		applyOp: (op, metadata) ->
+		applyOp: (op, metadata = {}) ->
 			metadata.ts ?= new Date()
 			# Apply an op that has been applied to the document to our changes to keep them up to date
 			if op.i?
@@ -106,14 +97,32 @@ load = (EventEmitter) ->
 			else if op.d?
 				@applyDeleteToChanges(op, metadata)
 				@applyDeleteToComments(op)
+			else if op.c?
+				@addComment(op, metadata)
+			else
+				throw new Error("unknown op type")
+			
+		addComment: (op, metadata) ->
+			# TODO: Don't allow overlapping comments?
+			@comments.push comment = {
+				id: @_newId()
+				op: # Copy because we'll modify in place
+					c: op.c
+					p: op.p
+					t: op.t
+				metadata
+			}
+			@emit "comment:added", comment
+			return comment
 		
 		applyInsertToComments: (op) ->
 			for comment in @comments
-				if op.p <= comment.offset
-					comment.offset += op.i.length
+				if op.p <= comment.op.p
+					comment.op.p += op.i.length
 					@emit "comment:moved", comment
-				else if op.p < comment.offset + comment.length
-					comment.length += op.i.length
+				else if op.p < comment.op.p + comment.op.c.length
+					offset = op.p - comment.op.p
+					comment.op.c = comment.op.c[0..(offset-1)] + op.i + comment.op.c[offset...]
 					@emit "comment:moved", comment
 
 		applyDeleteToComments: (op) ->
@@ -121,20 +130,35 @@ load = (EventEmitter) ->
 			op_length = op.d.length
 			op_end = op.p + op_length
 			for comment in @comments
-				comment_end = comment.offset + comment.length
-				if op_end <= comment.offset
+				comment_start = comment.op.p
+				comment_end = comment.op.p + comment.op.c.length
+				comment_length = comment_end - comment_start
+				if op_end <= comment_start
 					# delete is fully before comment
-					comment.offset -= op_length
+					comment.op.p -= op_length
 					@emit "comment:moved", comment
 				else if op_start >= comment_end
 					# delete is fully after comment, nothing to do
 				else
 					# delete and comment overlap
-					delete_length_before = Math.max(0, comment.offset - op_start)
-					delete_length_after = Math.max(0, op_end - comment_end)
-					delete_length_overlapping = op_length - delete_length_before - delete_length_after
-					comment.offset = Math.min(comment.offset, op_start)
-					comment.length -= delete_length_overlapping
+					if op_start <= comment_start
+						remaining_before = ""
+					else
+						remaining_before = comment.op.c.slice(0, op_start - comment_start)
+					if op_end >= comment_end
+						remaining_after = ""
+					else
+						remaining_after = comment.op.c.slice(op_end - comment_start)
+					
+					# Check deleted content matches delete op
+					deleted_comment = comment.op.c.slice(remaining_before.length, comment_length - remaining_after.length)
+					offset = Math.max(0, comment_start - op_start)
+					deleted_op_content = op.d.slice(offset).slice(0, deleted_comment.length)
+					if deleted_comment != deleted_op_content
+						throw new Error("deleted content does not match comment content")
+					
+					comment.op.p = Math.min(comment_start, op_start)
+					comment.op.c = remaining_before + remaining_after
 					@emit "comment:moved", comment
 
 		applyInsertToChanges: (op, metadata) ->

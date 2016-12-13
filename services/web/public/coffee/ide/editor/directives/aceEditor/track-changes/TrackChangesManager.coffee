@@ -20,8 +20,8 @@ define [
 				@rangesTracker = doc.ranges
 				@connectToRangesTracker()
 			
-			@$scope.$on "comment:add", (e, comment) =>
-				@addCommentToSelection(comment)
+			@$scope.$on "comment:add", (e) =>
+				@addCommentToSelection()
 
 			@$scope.$on "comment:select_line", (e) =>
 				@selectLineIfNoSelection()
@@ -146,21 +146,16 @@ define [
 			for comment in @rangesTracker.comments
 				@_onCommentAdded(comment)
 
-		addComment: (offset, length, content) ->
-			@rangesTracker.addComment offset, length, {
-				thread: [{
-					content: content
-					user_id: window.user_id
-					ts: new Date()
-				}]
-			}
+		addComment: (offset, content) ->
+			op = { c: content, p: offset }
+			# @rangesTracker.applyOp op # Will apply via sharejs
+			@$scope.sharejsDoc.submitOp op
 		
-		addCommentToSelection: (content) ->
+		addCommentToSelection: () ->
 			range = @editor.getSelectionRange()
+			content = @editor.getSelectedText()
 			offset = @_aceRangeToShareJs(range.start)
-			end = @_aceRangeToShareJs(range.end)
-			length = end - offset
-			@addComment(offset, length, content)
+			@addComment(offset, content)
 		
 		selectLineIfNoSelection: () ->
 			if @editor.selection.isEmpty()
@@ -201,6 +196,7 @@ define [
 			@rangesTracker.unresolveCommentId(comment_id)
 
 		checkMapping: () ->
+			# TODO: reintroduce this check
 			session = @editor.getSession()
 
 			# Make a copy of session.getMarkers() so we can modify it
@@ -224,8 +220,8 @@ define [
 			for comment in @rangesTracker.comments
 				if @changeIdToMarkerIdMap[comment.id]?
 					{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[comment.id]
-					start = @_shareJsOffsetToAcePosition(comment.offset)
-					end = @_shareJsOffsetToAcePosition(comment.offset + comment.length)
+					start = @_shareJsOffsetToAcePosition(comment.op.p)
+					end = @_shareJsOffsetToAcePosition(comment.op.p + comment.op.c.length)
 					expected_markers.push { marker_id: background_marker_id, start, end }
 					expected_markers.push { marker_id: callout_marker_id, start, end: start }
 			
@@ -341,8 +337,8 @@ define [
 		_onCommentAdded: (comment) ->
 			if !@changeIdToMarkerIdMap[comment.id]?
 				# Only create new markers if they don't already exist
-				start = @_shareJsOffsetToAcePosition(comment.offset)
-				end = @_shareJsOffsetToAcePosition(comment.offset + comment.length)
+				start = @_shareJsOffsetToAcePosition(comment.op.p)
+				end = @_shareJsOffsetToAcePosition(comment.op.p + comment.op.c.length)
 				session = @editor.getSession()
 				doc = session.getDocument()
 				background_range = new Range(start.row, start.column, end.row, end.column)
@@ -387,8 +383,8 @@ define [
 			@broadcastChange()
 		
 		_onCommentMoved: (comment) ->
-			start = @_shareJsOffsetToAcePosition(comment.offset)
-			end = @_shareJsOffsetToAcePosition(comment.offset + comment.length)
+			start = @_shareJsOffsetToAcePosition(comment.op.p)
+			end = @_shareJsOffsetToAcePosition(comment.op.p + comment.op.c.length)
 			@_updateMarker(comment.id, start, end)
 			@editor.renderer.updateBackMarkers()
 			@broadcastChange()

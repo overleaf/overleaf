@@ -61,6 +61,7 @@ define [
 				@_doc._onMessage message
 			catch error
 				# Version mismatches are thrown as errors
+				console.log error
 				@_handleError(error)
 
 			if message?.meta?.type == "external"
