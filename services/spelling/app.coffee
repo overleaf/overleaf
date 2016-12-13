@@ -1,6 +1,9 @@
 Settings = require 'settings-sharelatex'
 logger = require 'logger-sharelatex'
 logger.initialize("spelling-sharelatex")
+if Settings.sentry?.dsn?
+	logger.initializeErrorReporting(Settings.sentry.dsn)
+
 SpellingAPIController = require './app/js/SpellingAPIController'
 express = require('express')
 Path = require("path")

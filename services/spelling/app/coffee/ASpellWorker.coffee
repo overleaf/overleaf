@@ -41,8 +41,11 @@ class ASpellWorker
 			output = output + chunk
 			# We receive the language code from Aspell as the end of data marker
 			if chunk.toString().match(endMarker)
-				@callback(null, output.slice())
-				@callback = null # only allow one callback in use
+				if @callback?
+					@callback(null, output.slice())
+					@callback = null # only allow one callback in use
+				else
+					logger.err process: @pipe.pid, lang: @language, "end of data marker received when callback already used"
 				@state = 'ready'
 				output = ""
 				error = ""

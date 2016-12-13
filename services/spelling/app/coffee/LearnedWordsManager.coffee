@@ -17,7 +17,6 @@ module.exports = LearnedWordsManager =
 	getLearnedWords: (user_token, callback = (error, words)->) ->
 		mongoCachedWords = mongoCache.get(user_token)
 		if mongoCachedWords?
-			logger.info user_token:user_token, "mongoCache hit"
 			metrics.inc "mongoCache-hit", 0.1
 			return callback(null, mongoCachedWords)
 

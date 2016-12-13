@@ -37,7 +37,6 @@ class ASpellWorkerPool
 		metrics.gauge 'aspellWorkerPool-size', @PROCESS_POOL.length
 
 	check: (language, words, timeout, callback) ->
-		logger.log lang: language, words: words.length, timeout: timeout, "aspell worker running check"
 		# look for an existing process in the pool
 		availableWorker = _.find @PROCESS_POOL, (cached) ->
 			cached.language == language && cached.isReady()
