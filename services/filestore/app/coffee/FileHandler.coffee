@@ -49,7 +49,7 @@ module.exports =
 		convertedFsPath = ""
 		async.series [
 			(cb) =>
-				@_convertFile bucket, key, opts, (err, fileSystemPath) ->
+				@_convertFile bucket, key, opts, (err, fileSystemPath, originalFsPath) ->
 					convertedFsPath = fileSystemPath
 					cb err
 			(cb)->
@@ -58,6 +58,8 @@ module.exports =
 				PersistorManager.sendFile bucket, convertedKey, convertedFsPath, cb
 		], (err)->
 			if err?
+				LocalFileWriter.deleteFile convertedFsPath, ->
+				LocalFileWriter.deleteFile originalFsPath, ->
 				return callback(err)
 			PersistorManager.getFileStream bucket, convertedKey, opts, callback
 
@@ -70,7 +72,7 @@ module.exports =
 					logger.err err:err, bucket:bucket, originalKey:originalKey, opts:opts, "error converting file"
 					return callback(err)
 				LocalFileWriter.deleteFile originalFsPath, ->
-				callback(err, destPath)
+				callback(err, destPath, originalFsPath)
 
 			if opts.format?
 				FileConverter.convert originalFsPath, opts.format, done
