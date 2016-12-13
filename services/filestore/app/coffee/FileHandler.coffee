@@ -47,10 +47,12 @@ module.exports =
 
 	_getConvertedFileAndCache: (bucket, key, convertedKey, opts, callback)->
 		convertedFsPath = ""
+		originalFsPath = ""
 		async.series [
 			(cb) =>
 				@_convertFile bucket, key, opts, (err, fileSystemPath, originalFsPath) ->
 					convertedFsPath = fileSystemPath
+					originalFsPath = originalFsPath
 					cb err
 			(cb)->
 				ImageOptimiser.compressPng convertedFsPath, cb
