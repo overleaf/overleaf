@@ -3,27 +3,32 @@ ASpellWorkerPool = require "./ASpellWorkerPool"
 LRU = require "lru-cache"
 logger = require 'logger-sharelatex'
 fs = require 'fs'
+settings = require("settings-sharelatex")
+Path = require("path")
 
 cache = LRU(10000)
 OneMinute = 60 * 1000
 
+cacheFsPath = Path.resolve(settings.cacheDir, "spell.cache")
+cacheFsPathTmp = cacheFsPath + ".tmp"
+
 # load any existing cache
 try
-	oldCache = fs.readFileSync "spell.cache"
+	oldCache = fs.readFileSync cacheFsPath
 	cache.load JSON.parse(oldCache)
 catch err
-	logger.log {err}, "could not load cache file"
+	logger.log err:err, cacheFsPath:cacheFsPath, "could not load the cache file"
 
 # write the cache every 30 minutes
 setInterval () ->
 	dump = JSON.stringify cache.dump()
-	fs.writeFile "spell.cache.tmp", dump, (err) ->
+	fs.writeFile cacheFsPathTmp, dump, (err) ->
 		if err?
 			logger.log {err}, "error writing cache file"
-			fs.unlink "spell.cache.tmp"
+			fs.unlink cacheFsPathTmp
 		else
-			fs.rename "spell.cache.tmp", "spell.cache"
-			logger.log {len: dump.length}, "wrote cache file"
+			fs.rename cacheFsPathTmp, cacheFsPath
+			logger.log {len: dump.length, cacheFsPath:cacheFsPath}, "wrote cache file"
 , 30 * OneMinute
 
 class ASpellRunner
