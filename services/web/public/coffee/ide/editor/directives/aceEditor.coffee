@@ -56,7 +56,6 @@ define [
 				eventsBridge: "="
 				trackChanges: "="
 				trackChangesEnabled: "="
-				rangesTracker: "="
 				docId: "="
 			}
 			link: (scope, element, attrs) ->

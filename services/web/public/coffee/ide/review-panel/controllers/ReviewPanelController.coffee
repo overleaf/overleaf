@@ -154,10 +154,13 @@ define [
 			if view == $scope.SubViews.OVERVIEW
 				refreshOverviewPanel()
 
-		$scope.$watch "editor.open_doc_id", (open_doc_id) ->
-			return if !open_doc_id?
-			rangesTrackers[open_doc_id] ?= new RangesTracker()
-			$scope.reviewPanel.rangesTracker = rangesTrackers[open_doc_id]
+		$scope.$watch "editor.sharejs_doc", (doc) ->
+			return if !doc?
+			console.log "DOC changed", doc
+			# The open doc range tracker is kept up to date in real-time so
+			# replace any outdated info with this
+			rangesTrackers[doc.doc_id] = doc.ranges
+			$scope.reviewPanel.rangesTracker = rangesTrackers[doc.doc_id]
 
 		$scope.$watch (() ->
 			entries = $scope.reviewPanel.entries[$scope.editor.open_doc_id] or {}

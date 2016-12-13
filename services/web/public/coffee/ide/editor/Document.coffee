@@ -1,7 +1,8 @@
 define [
 	"utils/EventEmitter"
 	"ide/editor/ShareJsDoc"
-], (EventEmitter, ShareJsDoc) ->
+	"ide/review-panel/RangesTracker"
+], (EventEmitter, ShareJsDoc, RangesTracker) ->
 	class Document extends EventEmitter
 		@getDocument: (ide, doc_id) ->
 			@openDocs ||= {}
@@ -247,14 +248,15 @@ define [
 					@joined = true
 					@doc.catchUp( updates )
 					# TODO: Worry about whether these ranges are consistent with the doc still
-					@opening_ranges = ranges
+					@ranges?.changes = ranges?.changes
+					@ranges?.comments = ranges?.comments
 					callback()
 			else
 				@ide.socket.emit 'joinDoc', @doc_id, (error, docLines, version, updates, ranges) =>
 					return callback(error) if error?
 					@joined = true
 					@doc = new ShareJsDoc @doc_id, docLines, version, @ide.socket
-					@opening_ranges = ranges
+					@ranges = new RangesTracker(ranges?.changes, ranges?.comments)
 					@_bindToShareJsDocEvents()
 					callback()
 
@@ -313,6 +315,8 @@ define [
 					inflightOp: inflightOp,
 					pendingOp: pendingOp
 					v: version
+			@doc.on "change", (ops, oldSnapshot, msg) =>
+				@_applyOpsToRanges(ops, oldSnapshot, msg)
 
 		_onError: (error, meta = {}) ->
 			meta.doc_id = @doc_id
@@ -325,3 +329,16 @@ define [
 			# the disconnect event, which means we try to leaveDoc when the connection comes back.
 			# This could intefere with the new connection of a new instance of this document.
 			@_cleanUp()
+
+		_applyOpsToRanges: (ops = [], oldSnapshot, msg) ->
+			track_changes_as = null
+			remote_op = msg?
+			if remote_op and msg.meta?.tc
+				track_changes_as = msg.meta.user_id
+			else if !remote_op and @track_changes_as?
+				track_changes_as = @track_changes_as
+			console.log "CHANGED", oldSnapshot, ops, track_changes_as
+			@ranges.track_changes = track_changes_as?
+			for op in ops
+				console.log "APPLYING OP", op, @ranges.track_changes 
+				@ranges.applyOp op, { user_id: track_changes_as }

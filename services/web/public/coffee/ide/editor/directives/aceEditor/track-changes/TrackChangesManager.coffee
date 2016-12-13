@@ -10,22 +10,15 @@ define [
 		constructor: (@$scope, @editor, @element) ->
 			window.trackChangesManager ?= @
 
-			@$scope.$watch "rangesTracker", (rangesTracker) =>
-				return if !rangesTracker?
-				@disconnectFromRangesTracker()
-				@rangesTracker = rangesTracker
-				@connectToRangesTracker()
-
 			@$scope.$watch "trackChanges", (track_changes) =>
 				return if !track_changes?
-				@rangesTracker?.track_changes = track_changes
+				@setTrackChanges(track_changes)
 			
 			@$scope.$watch "sharejsDoc", (doc) =>
 				return if !doc?
-				if doc.opening_ranges?.changes?
-					@rangesTracker.changes = doc.opening_ranges.changes
-				if doc.opening_ranges?.comments?
-					@rangesTracker.comments = doc.opening_ranges.comments
+				@disconnectFromRangesTracker()
+				@rangesTracker = doc.ranges
+				@connectToRangesTracker()
 			
 			@$scope.$on "comment:add", (e, comment) =>
 				@addCommentToSelection(comment)
@@ -65,48 +58,15 @@ define [
 			onResize = () =>
 				@recalculateReviewEntriesScreenPositions()
 
-			onChange = (e) =>
-				if !@editor.initing
-					# This change is trigger by a sharejs 'change' event, which is before the
-					# sharejs 'remoteop' event. So wait until the next event loop when the 'remoteop'
-					# will have fired, before we decide if it was a remote op.
-					setTimeout () =>
-						if @nextUpdateMetaData?
-							user_id = @nextUpdateMetaData.user_id
-							# The remote op may have contained multiple atomic ops, each of which is an Ace
-							# 'change' event (i.e. bulk commenting out of lines is a single remote op
-							# but gives us one event for each % inserted). These all come in a single event loop
-							# though, so wait until the next one before clearing the metadata.
-							setTimeout () =>
-								@nextUpdateMetaData = null
-						else
-							user_id = window.user.id
-						
-						was_tracking = @rangesTracker.track_changes
-						if @dont_track_next_update
-							@rangesTracker.track_changes = false
-							@dont_track_next_update = false
-						@applyChange(e, { user_id })
-						@rangesTracker.track_changes = was_tracking
-						
-						# TODO: Just for debugging, remove before going live.
-						setTimeout () =>
-							@checkMapping()
-						, 100
-
 			onChangeSession = (e) =>
-				e.oldSession?.getDocument().off "change", onChange
-				e.session.getDocument().on "change", onChange
 				@redrawAnnotations()
 
 			bindToAce = () =>
-				@editor.getSession().getDocument().on "change", onChange
 				@editor.on "changeSelection", onChangeSelection
 				@editor.on "changeSession", onChangeSession
 				@editor.renderer.on "resize", onResize
 
 			unbindFromAce = () =>
-				@editor.getSession().getDocument().off "change", onChange
 				@editor.off "changeSelection", onChangeSelection
 				@editor.off "changeSession", onChangeSession
 				@editor.renderer.off "resize", onResize
@@ -132,41 +92,49 @@ define [
 				@rangesTracker.off "comment:removed"
 				@rangesTracker.off "comment:resolved"
 				@rangesTracker.off "comment:unresolved"
+				
+		setTrackChanges: (value) ->
+			if value
+				@$scope.sharejsDoc?.track_changes_as = window.user.id
+			else
+				@$scope.sharejsDoc?.track_changes_as = null
 		
 		connectToRangesTracker: () ->
-			@rangesTracker.track_changes = @$scope.trackChanges
+			@setTrackChanges(@$scope.trackChanges)
 			
+			# Add a timeout because on remote ops, we get these notifications before
+			# ace has updated
 			@rangesTracker.on "insert:added", (change) =>
 				sl_console.log "[insert:added]", change
-				@_onInsertAdded(change)
+				setTimeout () => @_onInsertAdded(change)
 			@rangesTracker.on "insert:removed", (change) =>
 				sl_console.log "[insert:removed]", change
-				@_onInsertRemoved(change)
+				setTimeout () => @_onInsertRemoved(change)
 			@rangesTracker.on "delete:added", (change) =>
 				sl_console.log "[delete:added]", change
-				@_onDeleteAdded(change)
+				setTimeout () => @_onDeleteAdded(change)
 			@rangesTracker.on "delete:removed", (change) =>
 				sl_console.log "[delete:removed]", change
-				@_onDeleteRemoved(change)
+				setTimeout () => @_onDeleteRemoved(change)
 			@rangesTracker.on "changes:moved", (changes) =>
 				sl_console.log "[changes:moved]", changes
-				@_onChangesMoved(changes)
+				setTimeout () => @_onChangesMoved(changes)
 
 			@rangesTracker.on "comment:added", (comment) =>
 				sl_console.log "[comment:added]", comment
-				@_onCommentAdded(comment)
+				setTimeout () => @_onCommentAdded(comment)
 			@rangesTracker.on "comment:moved", (comment) =>
 				sl_console.log "[comment:moved]", comment
-				@_onCommentMoved(comment)
+				setTimeout () => @_onCommentMoved(comment)
 			@rangesTracker.on "comment:removed", (comment) =>
 				sl_console.log "[comment:removed]", comment
-				@_onCommentRemoved(comment)
+				setTimeout () => @_onCommentRemoved(comment)
 			@rangesTracker.on "comment:resolved", (comment) =>
 				sl_console.log "[comment:resolved]", comment
-				@_onCommentRemoved(comment)
+				setTimeout () => @_onCommentRemoved(comment)
 			@rangesTracker.on "comment:unresolved", (comment) =>
 				sl_console.log "[comment:unresolved]", comment
-				@_onCommentAdded(comment)
+				setTimeout () => @_onCommentAdded(comment)
 			
 		redrawAnnotations: () ->
 			for change in @rangesTracker.changes

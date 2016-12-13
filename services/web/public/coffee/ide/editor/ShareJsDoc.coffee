@@ -34,8 +34,8 @@ define [
 			@_doc = new ShareJs.Doc @connection, @doc_id,
 				type: @type
 			@_doc.setFlushDelay(SINGLE_USER_FLUSH_DELAY)
-			@_doc.on "change", () =>
-				@trigger "change"
+			@_doc.on "change", (args...) =>
+				@trigger "change", args...
 			@_doc.on "acknowledge", () =>
 				@lastAcked = new Date() # note time of last ack from server for an op we sent
 				@trigger "acknowledge"
