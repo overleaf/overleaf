@@ -198,18 +198,18 @@ text._tc = transformComponent = (dest, c, otherC, side) ->
       if c.p < otherC.p < c.p + c.c.length
         offset = otherC.p - c.p
         new_c = (c.c[0..(offset-1)] + otherC.i + c.c[offset...])
-        append dest, {c:new_c, p:c.p}
+        append dest, {c:new_c, p:c.p, t: c.t}
       else
-        append dest, {c:c.c, p:transformPosition(c.p, otherC, true)}
+        append dest, {c:c.c, p:transformPosition(c.p, otherC, true), t: c.t}
     
     else if otherC.d?
       if c.p >= otherC.p + otherC.d.length
-        append dest, {c:c.c, p:c.p - otherC.d.length}
+        append dest, {c:c.c, p:c.p - otherC.d.length, t: c.t}
       else if c.p + c.c.length <= otherC.p
         append dest, c
       else # Delete overlaps comment
         # They overlap somewhere.
-        newC = {c:'', p:c.p}
+        newC = {c:'', p:c.p, t: c.t}
         if c.p < otherC.p
           newC.c = c.c[...(otherC.p - c.p)]
         if c.p + c.c.length > otherC.p + otherC.d.length

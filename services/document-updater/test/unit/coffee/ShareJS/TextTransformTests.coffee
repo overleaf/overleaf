@@ -3,6 +3,9 @@ require("chai").should()
 RangesTracker = require "../../../../app/js/RangesTracker"
 
 describe "ShareJS text type", ->
+	beforeEach ->
+		@t = "mock-thread-id"
+		
 	describe "transform", ->
 		describe "insert / insert", ->
 			it "with an insert before", ->
@@ -113,61 +116,61 @@ describe "ShareJS text type", ->
 		describe "comment / insert", ->
 			it "with an insert before", ->
 				dest = []
-				text._tc(dest, { c: "foo", p: 9 }, { i: "bar", p: 3 })
-				dest.should.deep.equal [{ c: "foo", p: 12 }]
+				text._tc(dest, { c: "foo", p: 9, @t }, { i: "bar", p: 3 })
+				dest.should.deep.equal [{ c: "foo", p: 12, @t }]
 
 			it "with an insert after", ->
 				dest = []
-				text._tc(dest, { c: "foo", p: 3 }, { i: "bar", p: 9 })
-				dest.should.deep.equal [{ c: "foo", p: 3 }]
+				text._tc(dest, { c: "foo", p: 3, @t }, { i: "bar", p: 9 })
+				dest.should.deep.equal [{ c: "foo", p: 3, @t }]
 
 			it "with an insert at the left edge", ->
 				dest = []
-				text._tc(dest, { c: "foo", p: 3 }, { i: "bar", p: 3 })
+				text._tc(dest, { c: "foo", p: 3, @t }, { i: "bar", p: 3 })
 				# RangesTracker doesn't inject inserts into comments on edges, so neither should we
-				dest.should.deep.equal [{ c: "foo", p: 6 }]
+				dest.should.deep.equal [{ c: "foo", p: 6, @t }]
 
 			it "with an insert at the right edge", ->
 				dest = []
-				text._tc(dest, { c: "foo", p: 3 }, { i: "bar", p: 6 })
+				text._tc(dest, { c: "foo", p: 3, @t }, { i: "bar", p: 6 })
 				# RangesTracker doesn't inject inserts into comments on edges, so neither should we
-				dest.should.deep.equal [{ c: "foo", p: 3 }]
+				dest.should.deep.equal [{ c: "foo", p: 3, @t }]
 
 			it "with an insert in the middle", ->
 				dest = []
-				text._tc(dest, { c: "foo", p: 3 }, { i: "bar", p: 5 })
-				dest.should.deep.equal [{ c: "fobaro", p: 3 }]
+				text._tc(dest, { c: "foo", p: 3, @t }, { i: "bar", p: 5 })
+				dest.should.deep.equal [{ c: "fobaro", p: 3, @t }]
 	
 		describe "comment / delete", ->
 			it "with a delete before", ->
 				dest = []
-				text._tc(dest, { c: "foo", p: 9 }, { d: "bar", p: 3 })
-				dest.should.deep.equal [{ c: "foo", p: 6 }]
+				text._tc(dest, { c: "foo", p: 9, @t }, { d: "bar", p: 3 })
+				dest.should.deep.equal [{ c: "foo", p: 6, @t }]
 
 			it "with a delete after", ->
 				dest = []
-				text._tc(dest, { c: "foo", p: 3 }, { i: "bar", p: 9 })
-				dest.should.deep.equal [{ c: "foo", p: 3 }]
+				text._tc(dest, { c: "foo", p: 3, @t }, { i: "bar", p: 9 })
+				dest.should.deep.equal [{ c: "foo", p: 3, @t }]
 
 			it "with a delete overlapping the comment content before", ->
 				dest = []
-				text._tc(dest, { c: "foobar", p: 6 }, { d: "123foo", p: 3 })
-				dest.should.deep.equal [{ c: "bar", p: 3 }]
+				text._tc(dest, { c: "foobar", p: 6, @t }, { d: "123foo", p: 3 })
+				dest.should.deep.equal [{ c: "bar", p: 3, @t }]
 
 			it "with a delete overlapping the comment content after", ->
 				dest = []
-				text._tc(dest, { c: "foobar", p: 6 }, { d: "bar123", p: 9 })
-				dest.should.deep.equal [{ c: "foo", p: 6 }]
+				text._tc(dest, { c: "foobar", p: 6, @t }, { d: "bar123", p: 9 })
+				dest.should.deep.equal [{ c: "foo", p: 6, @t }]
 
 			it "with a delete overlapping the comment content in the middle", ->
 				dest = []
-				text._tc(dest, { c: "foo123bar", p: 6 }, { d: "123", p: 9 })
-				dest.should.deep.equal [{ c: "foobar", p: 6 }]
+				text._tc(dest, { c: "foo123bar", p: 6, @t }, { d: "123", p: 9 })
+				dest.should.deep.equal [{ c: "foobar", p: 6, @t }]
 
 			it "with a delete overlapping the whole comment", ->
 				dest = []
-				text._tc(dest, { c: "foo", p: 6 }, { d: "123foo456", p: 3 })
-				dest.should.deep.equal [{ c: "", p: 3 }]
+				text._tc(dest, { c: "foo", p: 6, @t }, { d: "123foo456", p: 3 })
+				dest.should.deep.equal [{ c: "", p: 3, @t }]
 	
 		describe "comment / insert", ->
 			it "should not do anything", ->
@@ -219,10 +222,7 @@ describe "ShareJS text type", ->
 			
 			applyRanges = (rangesTracker, ops) ->
 				for op in ops
-					if op.c?
-						rangesTracker.addComment(op.p, op.c.length, {})
-					else
-						rangesTracker.applyOp(op, {})
+					rangesTracker.applyOp(op, {})
 				return rangesTracker
 			
 			commentsEqual = (comments1, comments2) ->
@@ -255,8 +255,8 @@ describe "ShareJS text type", ->
 					OPS.push {d: SNAPSHOT.slice(p, p+length), p}
 			for p in [0..(SNAPSHOT.length-1)]
 				for length in [1..(SNAPSHOT.length - p)]
-					OPS.push {c: SNAPSHOT.slice(p, p+length), p}
-			
+					OPS.push {c: SNAPSHOT.slice(p, p+length), p, @t}
+
 			for op1 in OPS
 				for op2 in OPS
 					op1_t = transform(op1, op2, "left")
@@ -281,4 +281,3 @@ describe "ShareJS text type", ->
 						console.log rt21.comments
 						console.error {op1, op2, op1_t, op2_t, rt12_comments: rt12.comments, rt21_comments: rt21.comments}, "Comments are not consistent"
 						throw new Error("OT is inconsistent")
-					
