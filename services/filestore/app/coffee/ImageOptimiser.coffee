@@ -8,7 +8,7 @@ module.exports =
 		logger.log localPath:localPath, "optimising png path"
 		args = "optipng #{localPath}"
 		opts =
-			timeout: 20 * 1000
+			timeout: 30 * 1000
 			killSignal: "SIGKILL"
 		exec args, opts,(err, stdout, stderr)->
 			if err?
