@@ -5,10 +5,10 @@ settings = require("settings-sharelatex")
 request = require("request")
 fileController = require("./app/js/FileController")
 keyBuilder = require("./app/js/KeyBuilder")
+healthCheckController = require("./app/js/HealthCheckController")
 domain = require("domain")
 appIsOk = true
 app = express()
-streamBuffers = require("stream-buffers")
 
 Metrics = require "metrics-sharelatex"
 Metrics.initialize("filestore")
@@ -102,17 +102,11 @@ app.get '/status', (req, res)->
 		logger.log "app is not ok - shutting down"
 		res.send("server is being shut down", 500)
 
-app.get "/health_check", (req, res)->
-	req.params.project_id = settings.health_check.project_id
-	req.params.file_id = settings.health_check.file_id
-	myWritableStreamBuffer = new streamBuffers.WritableStreamBuffer(initialSize: 100)
-	keyBuilder.userFileKey req, res, ->
-		fileController.getFile req, myWritableStreamBuffer
-		myWritableStreamBuffer.on "close", ->
-			if myWritableStreamBuffer.size() > 0
-				res.send(200)
-			else
-				res.send(503)
+
+app.get "/health_check", healthCheckController.check
+	
+
+
 
 app.get '*', (req, res)->
 	res.send 404
