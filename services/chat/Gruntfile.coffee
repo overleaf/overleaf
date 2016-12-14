@@ -2,6 +2,11 @@ module.exports = (grunt) ->
 
 	# Project configuration.
 	grunt.initConfig
+		forever:
+			app:
+				options:
+					index: "app.js"
+
 		execute:
 			app:
 				src: "app.js"
@@ -134,6 +139,7 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-plato'
 	grunt.loadNpmTasks 'grunt-execute'
 	grunt.loadNpmTasks 'grunt-bunyan'
+	grunt.loadNpmTasks 'grunt-forever'
 	
 
 	grunt.registerTask 'compile', ['clean',  'copy', 'coffee', 'less', 'jade', 'requirejs']
