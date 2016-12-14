@@ -16,14 +16,16 @@ module.exports = WebApiManager =
 		options.method = method
 		request options, (error, response, body) ->
 			return callback(error) if error?
-			try
-				result = JSON.parse(body)
-			catch e
-				return callback(e)
-			return callback null, result
-
-	getUserDetailsFromAuthToken: (auth_token, callback = (error, details) ->) ->
-		@apiRequest "/user/personal_info?auth_token=#{auth_token}", "get", callback
+			if 200 <= response.statusCode < 300
+				try
+					result = JSON.parse(body)
+				catch e
+					return callback(e)
+				return callback null, result
+			else
+				error = new Error("web api returned non-success code: #{response.statusCode}")
+				error.statusCode = response.statusCode
+				return callback error
 
 	getUserDetails: (user_id, callback = (error, details) ->) ->
 		@apiRequest "/user/#{user_id}/personal_info", "get", {
@@ -31,7 +33,11 @@ module.exports = WebApiManager =
 				user: Settings.apis.web.user
 				pass: Settings.apis.web.pass
 				sendImmediately: true
-		}, callback
-
-	getProjectCollaborators: (project_id, auth_token, callback = (error, collaborators) ->) ->
-		@apiRequest "/project/#{project_id}/collaborators?auth_token=#{auth_token}", "get", callback
+		}, (error, data) ->
+			if error?
+				if error.statusCode == 404
+					return callback null, null
+				else
+					return callback error
+			else
+				return callback null, data
