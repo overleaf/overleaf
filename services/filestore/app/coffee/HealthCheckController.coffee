@@ -29,9 +29,9 @@ checkFileConvert = (callback)->
 	async.waterfall [
 		(cb)->
 			fs.copy("./tiny.pdf", imgPath, cb)
-		(cb)-> fileConverter.thumbnail "./tiny.pdf", cb
+		(cb)-> fileConverter.thumbnail imgPath, cb
 		(resultPath, cb)-> fs.unlink resultPath, cb
-		(resultPath, cb)-> fs.unlink imgPath, cb
+		(cb)-> fs.unlink imgPath, cb
 	], callback
 
 
