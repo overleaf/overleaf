@@ -2,6 +2,7 @@ crypto = require "crypto"
 
 module.exports = UserFormatter =
 	formatUserForClientSide: (user) ->
+		return null if !user?
 		if user._id?
 			user.id = user._id.toString()
 			delete user._id

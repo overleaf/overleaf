@@ -2,6 +2,11 @@ module.exports = (grunt) ->
 
 	# Project configuration.
 	grunt.initConfig
+		forever:
+			app:
+				options:
+					index: "app.js"
+
 		execute:
 			app:
 				src: "app.js"
@@ -30,7 +35,7 @@ module.exports = (grunt) ->
 				dest: './',
 				ext: '.js'
 
-			server_tests:
+			unit_tests:
 				expand: true,
 				flatten: false,
 				cwd: 'test/unit/coffee',
@@ -38,10 +43,18 @@ module.exports = (grunt) ->
 				dest: 'test/unit/js/',
 				ext: '.js'
 
+			acceptance_tests:
+				expand: true,
+				flatten: false,
+				cwd: 'test/acceptance/coffee',
+				src: ['**/*.coffee'],
+				dest: 'test/acceptance/js/',
+				ext: '.js'
+
 		watch:
 			server_coffee:
 				files: ['app/**/*.coffee', 'test/unit/**/*.coffee']
-				tasks: ['compile:server', 'compile:server_tests', 'mochaTest']
+				tasks: ['compile:server', 'compile:unit_tests', 'mochaTest']
 
 			client_coffee:
 				files: ['public/**/*.coffee']
@@ -101,7 +114,12 @@ module.exports = (grunt) ->
 				options:
 					reporter: process.env.MOCHA_RUNNER || "spec"
 					grep: grunt.option("grep")
-				src: ['test/**/*.js']
+				src: ['test/unit/**/*.js']
+			acceptance:
+				options:
+					reporter: process.env.MOCHA_RUNNER || "spec"
+					grep: grunt.option("grep")
+				src: ['test/acceptance/**/*.js']
 
 		plato:
 			your_task:
@@ -121,6 +139,7 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-plato'
 	grunt.loadNpmTasks 'grunt-execute'
 	grunt.loadNpmTasks 'grunt-bunyan'
+	grunt.loadNpmTasks 'grunt-forever'
 	
 
 	grunt.registerTask 'compile', ['clean',  'copy', 'coffee', 'less', 'jade', 'requirejs']
@@ -128,4 +147,5 @@ module.exports = (grunt) ->
 	grunt.registerTask 'default', ['compile', 'bunyan', 'execute']
 	grunt.registerTask 'compileAndCompress', ['compile', 'uglify']
 	grunt.registerTask 'test:unit', ['compile', 'mochaTest:unit']
+	grunt.registerTask 'test:acceptance', ['compile:acceptance_tests', 'mochaTest:acceptance']
 

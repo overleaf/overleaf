@@ -6,16 +6,13 @@ Path = require("path")
 express = require("express")
 app = express()
 server = require("http").createServer(app)
-io = require("socket.io").listen(server)
-io.set("resource", "/chat/socket.io")
-io.set("log level", 1)
 Router = require "./router"
 
 metrics.mongodb.monitor(Path.resolve(__dirname + "/../../node_modules/mongojs/node_modules/mongodb"), logger)
 
 app.use express.bodyParser()
 app.use metrics.http.monitor(logger)
-Router.route(app, io)
+Router.route(app)
 
 if (app.get 'env') == 'development'
 	console.log "Development Enviroment"
@@ -39,13 +36,9 @@ app.use (req, res, next) ->
 
 app.use(express.static(__dirname + "/../../public/build"))
 
-
-
 module.exports = {
 	server: server
-	io: io
 	app: app
 }
 
-require("./Features/Sockets/RealTimeEventManager").listenForChatEvents()
 
