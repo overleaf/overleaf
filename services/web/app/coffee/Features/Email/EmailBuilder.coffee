@@ -1,6 +1,12 @@
 _ = require('underscore')
+
 PersonalEmailLayout = require("./Layouts/PersonalEmailLayout")
 NotificationEmailLayout = require("./Layouts/NotificationEmailLayout")
+BaseWithHeaderEmailLayout = require("./Layouts/BaseWithHeaderEmailLayout") 
+
+SingleCTAEmailBody = require("./Bodies/SingleCTAEmailBody")
+
+
 settings = require("settings-sharelatex")
 
 
@@ -107,9 +113,9 @@ If you didn't request a password reset, let us know.
 
 templates.projectInvite =
 	subject: _.template "<%= project.name %> - shared by <%= owner.email %>"
-	layout: NotificationEmailLayout
+	layout: BaseWithHeaderEmailLayout
 	type:"notification"
-	plainTextTemplate: _.template """
+	plainTextTemplate: 	plainTextTpl: """
 Hi, <%= owner.email %> wants to share '<%= project.name %>' with you.
 
 Follow this link to view the project: <%= inviteUrl %>
@@ -118,18 +124,14 @@ Thank you
 
 #{settings.appName} - <%= siteUrl %>
 """
-	compiledTemplate: _.template """
-<p>Hi, <%= owner.email %> wants to share <a href="<%= inviteUrl %>">'<%= project.name %>'</a> with you</p>
-<center>
-			<a style="text-decoration: none; width: 200px; background-color: #a93629; border: 1px solid #e24b3b; border-radius: 3px; padding: 15px; margin: 24px; display: block;" href="<%= inviteUrl %>" style="text-decoration:none" target="_blank">
-				<span style= "font-size:16px;font-family:Helvetica,Arial;font-weight:400;color:#fff;white-space:nowrap;display:block; text-align:center">
-					View Project
-				</span>
-			</a>
-</center>
-<p> Thank you</p>
-<p> <a href="<%= siteUrl %>">#{settings.appName}</a></p>
-"""
+	compiledTemplate: (opts) -> 
+		SingleCTAEmailBody({
+			title: "#{ opts.project.name } &ndash; shared by #{ opts.owner.email }"
+			greeting: "Hi,"
+			message: "#{ opts.owner.email } wants to share &ldquo;#{ opts.project.name }&rdquo; with you."
+			ctaURL: opts.inviteUrl
+		})
+
 
 
 templates.completeJoinGroupAccount =
