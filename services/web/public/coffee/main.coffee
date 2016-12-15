@@ -33,4 +33,18 @@ define [
 	"filters/formatDate"
 	"__MAIN_CLIENTSIDE_INCLUDES__"
 ], () ->
-	angular.bootstrap(document.body, ["SharelatexApp"])
+	angular.module('SharelatexApp').config(
+		($locationProvider) ->
+			try
+				$locationProvider.html5Mode({
+					enabled: true,
+					requireBase: false,
+					rewriteLinks: false
+				})
+			catch e
+				console.error "Error while trying to fix '#' links: ", e
+	)
+	angular.bootstrap(
+		document.body,
+		["SharelatexApp"]
+	)
