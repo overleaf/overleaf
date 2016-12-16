@@ -99,7 +99,7 @@ templates.projectInvite =
 	subject: _.template "<%= project.name %> - shared by <%= owner.email %>"
 	layout: BaseWithHeaderEmailLayout
 	type:"notification"
-	plainTextTemplate: """
+	plainTextTemplate: _.template """
 Hi, <%= owner.email %> wants to share '<%= project.name %>' with you.
 
 Follow this link to view the project: <%= inviteUrl %>
