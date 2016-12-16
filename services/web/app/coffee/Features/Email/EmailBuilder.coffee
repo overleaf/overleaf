@@ -92,6 +92,7 @@ Thank you
 			secondaryMessage: "If you ignore this message, your password won't be changed.<br>If you didn't request a password reset, let us know."
 			ctaText: "Reset password"
 			ctaURL: opts.setNewPasswordUrl
+			gmailGoToAction: null
 		})
 
 
@@ -116,6 +117,10 @@ Thank you
 			secondaryMessage: null
 			ctaText: "View project"
 			ctaURL: opts.inviteUrl
+			gmailGoToAction: 
+				target: opts.inviteUrl
+				name: "View project"
+				description: "Join #{ opts.project.name } at ShareLaTeX"
 		})
 
 
@@ -141,6 +146,7 @@ Thank You
 			secondaryMessage: null
 			ctaText: "Verify now"
 			ctaURL: opts.completeJoinUrl
+			gmailGoToAction: null
 		})
 
 module.exports =

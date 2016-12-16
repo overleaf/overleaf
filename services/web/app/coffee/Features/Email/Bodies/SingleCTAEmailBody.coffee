@@ -31,4 +31,19 @@ module.exports = _.template """
 	</th>
 	<th class="expander" style="Margin: 0; color: #0a0a0a; font-family: Helvetica, Arial, sans-serif; font-size: 16px; font-weight: normal; line-height: 1.3; margin: 0; padding: 0 !important; text-align: left; visibility: hidden; width: 0;"></th></tr></table></th>
 </tr></tbody></table>
+<% if (gmailGoToAction) { %>
+	<script type="application/ld+json">
+		{
+			"@context": "http://schema.org",
+			"@type": "EmailMessage",
+			"potentialAction": {
+				"@type": "ViewAction",
+				"target": "<%= gmailGoToAction.target %>",
+				"url": "<%= gmailGoToAction.target %>",
+				"name": "<%= gmailGoToAction.name %>"
+			},
+			"description": "<%= gmailGoToAction.description %>"
+		}
+	</script>
+<% } %>
 """
