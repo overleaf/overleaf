@@ -5,21 +5,28 @@ WebApiManager = require "../WebApi/WebApiManager"
 async = require "async"
 
 module.exports = MessageManager =
-	createMessage: (message, callback = (error, message) ->) ->
-		message = @_ensureIdsAreObjectIds(message)
-		db.messages.save message, callback
+	createMessage: (room_id, user_id, content, timestamp, callback = (error, message) ->) ->
+		newMessageOpts = 
+			content: content
+			room_id: room_id
+			user_id: user_id
+			timestamp: timestamp
+		newMessageOpts = @_ensureIdsAreObjectIds(newMessageOpts)
+		db.messages.save newMessageOpts, callback
 
-	getMessages: (query, options, callback = (error, messages) ->) ->
+	getMessages: (room_id, limit, before, callback = (error, messages) ->) ->
+		query =
+			room_id: room_id
+		if before?
+			query.timestamp = { $lt: before }
 		query = @_ensureIdsAreObjectIds(query)
-		cursor = db.messages.find(query)
-		if options.order_by?
-			options.sort_order ||= 1
-			sortQuery = {}
-			sortQuery[options.order_by] = options.sort_order
-			cursor = cursor.sort(sortQuery)
-		if options.limit?
-			cursor = cursor.limit(options.limit)
+		cursor = db.messages.find(query).sort({ timestamp: -1 }).limit(limit)
 		cursor.toArray callback
+	
+	findAllMessagesInRooms: (room_ids, callback = (error, messages) ->) ->
+		db.messages.find {
+			room_id: { $in: room_ids }
+		}, callback
 
 	populateMessagesWithUsers: (messages, callback = (error, messages) ->) ->
 		jobs = new Array()
