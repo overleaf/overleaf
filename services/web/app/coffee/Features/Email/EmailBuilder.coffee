@@ -115,7 +115,7 @@ templates.projectInvite =
 	subject: _.template "<%= project.name %> - shared by <%= owner.email %>"
 	layout: BaseWithHeaderEmailLayout
 	type:"notification"
-	plainTextTemplate: 	plainTextTpl: """
+	plainTextTemplate: """
 Hi, <%= owner.email %> wants to share '<%= project.name %>' with you.
 
 Follow this link to view the project: <%= inviteUrl %>
@@ -129,6 +129,7 @@ Thank you
 			title: "#{ opts.project.name } &ndash; shared by #{ opts.owner.email }"
 			greeting: "Hi,"
 			message: "#{ opts.owner.email } wants to share &ldquo;#{ opts.project.name }&rdquo; with you."
+			ctaText: "View project"
 			ctaURL: opts.inviteUrl
 		})
 
