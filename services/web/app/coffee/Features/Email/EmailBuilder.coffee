@@ -84,31 +84,15 @@ Thank you
 
 #{settings.appName} - <%= siteUrl %>
 """
-	compiledTemplate: _.template """
-<h2>Password Reset</h2>
-<p>
-We got a request to reset your #{settings.appName} password.
-<p>
-<center>
-	<div style="width:200px;background-color:#a93629;border:1px solid #e24b3b;border-radius:3px;padding:15px; margin:24px;">
-		<div style="padding-right:10px;padding-left:10px">
-			<a href="<%= setNewPasswordUrl %>" style="text-decoration:none" target="_blank">
-				<span style= "font-size:16px;font-family:Arial;font-weight:bold;color:#fff;white-space:nowrap;display:block; text-align:center">
-		  			Reset password
-				</span>
-			</a>
-		</div>
-	</div>
-</center>
-
-If you ignore this message, your password won't be changed.
-<p>
-If you didn't request a password reset, let us know.
-
-</p>
-<p>Thank you</p>
-<p> <a href="<%= siteUrl %>">#{settings.appName}</a></p>
-"""
+	compiledTemplate: (opts) -> 
+		SingleCTAEmailBody({
+			title: "Password Reset"
+			greeting: "Hi,"
+			message: "We got a request to reset your #{settings.appName} password."
+			secondaryMessage: "If you ignore this message, your password won't be changed.<br>If you didn't request a password reset, let us know."
+			ctaText: "Reset password"
+			ctaURL: opts.setNewPasswordUrl
+		})
 
 
 templates.projectInvite =
@@ -129,6 +113,7 @@ Thank you
 			title: "#{ opts.project.name } &ndash; shared by #{ opts.owner.email }"
 			greeting: "Hi,"
 			message: "#{ opts.owner.email } wants to share &ldquo;#{ opts.project.name }&rdquo; with you."
+			secondaryMessage: null
 			ctaText: "View project"
 			ctaURL: opts.inviteUrl
 		})
