@@ -17,6 +17,7 @@ describe "RangeManager", ->
 			change_id = ObjectId().toString()
 			comment_id = ObjectId().toString()
 			user_id = ObjectId().toString()
+			thread_id = ObjectId().toString()
 			ts = new Date().toJSON()
 			@RangeManager.jsonRangesToMongo({
 				changes: [{
@@ -28,10 +29,7 @@ describe "RangeManager", ->
 				}]
 				comments: [{
 					id: comment_id
-					offset: 42
-					length: 5
-					metadata:
-						ts: ts
+					op: { c: "foo", p: 3, t: thread_id }
 				}]
 			}).should.deep.equal {
 				changes: [{
@@ -43,10 +41,7 @@ describe "RangeManager", ->
 				}]
 				comments: [{
 					id: ObjectId(comment_id)
-					offset: 42
-					length: 5
-					metadata:
-						ts: new Date(ts)
+					op: { c: "foo", p: 3, t: ObjectId(thread_id) }
 				}]
 			}
 		
@@ -78,6 +73,7 @@ describe "RangeManager", ->
 			change_id = ObjectId().toString()
 			comment_id = ObjectId().toString()
 			user_id = ObjectId().toString()
+			thread_id = ObjectId().toString()
 			ts = new Date().toJSON()
 			ranges1 = {
 				changes: [{
@@ -89,10 +85,7 @@ describe "RangeManager", ->
 				}]
 				comments: [{
 					id: comment_id
-					offset: 42
-					length: 5
-					metadata:
-						ts: ts
+					op: { c: "foo", p: 3, t: thread_id }
 				}]
 			}
 			ranges1_copy = JSON.parse(JSON.stringify(ranges1)) # jsonRangesToMongo modifies in place
@@ -111,10 +104,7 @@ describe "RangeManager", ->
 				}]
 				comments: [{
 					id: ObjectId()
-					offset: 42
-					length: 5
-					metadata:
-						ts: new Date()
+					op: { c: "foo", p: 3, t: ObjectId() }
 				}]
 			}
 			@ranges_copy = @RangeManager.jsonRangesToMongo(JSON.parse(JSON.stringify(@ranges)))
@@ -153,10 +143,10 @@ describe "RangeManager", ->
 				@ranges_copy.comments[0].id = ObjectId()
 				@RangeManager.shouldUpdateRanges(@ranges, @ranges_copy).should.equal true
 
-			it "should return true when the comment ts changes", ->
-				@ranges_copy.comments[0].metadata.ts = new Date(Date.now() + 1000)
+			it "should return true when the comment offset changes", ->
+				@ranges_copy.comments[0].op.p = 17
 				@RangeManager.shouldUpdateRanges(@ranges, @ranges_copy).should.equal true
 
-			it "should return true when the comment offset changes", ->
-				@ranges_copy.comments[0].offset = 17
+			it "should return true when the comment content changes", ->
+				@ranges_copy.comments[0].op.c = "bar"
 				@RangeManager.shouldUpdateRanges(@ranges, @ranges_copy).should.equal true
