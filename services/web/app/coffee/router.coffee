@@ -41,6 +41,7 @@ BetaProgramController = require('./Features/BetaProgram/BetaProgramController')
 AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 AnnouncementsController = require("./Features/Announcements/AnnouncementsController")
 RangesController = require("./Features/Ranges/RangesController")
+CommentsController = require "./Features/Comments/CommentsController"
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -226,8 +227,11 @@ module.exports = class Router
 		webRouter.post "/spelling/check", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
 		webRouter.post "/spelling/learn", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
 
-		webRouter.get  "/project/:Project_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, ChatController.getMessages
-		webRouter.post "/project/:Project_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, ChatController.sendMessage
+		webRouter.get  "/project/:project_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, ChatController.getMessages
+		webRouter.post "/project/:project_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, ChatController.sendMessage
+		
+		webRouter.post "/project/:project_id/thread/:thread_id/messages", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, CommentsController.sendComment
+		webRouter.get  "/project/:project_id/threads", AuthorizationMiddlewear.ensureUserCanReadProject, CommentsController.getThreads
 
 		webRouter.post "/project/:Project_id/references/index", AuthorizationMiddlewear.ensureUserCanReadProject, ReferencesController.index
 		webRouter.post "/project/:Project_id/references/indexAll", AuthorizationMiddlewear.ensureUserCanReadProject, ReferencesController.indexAll

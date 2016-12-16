@@ -28,7 +28,7 @@
 				div(ng-if="entry.type === 'comment'")
 					comment-entry(
 						entry="entry"
-						users="users"
+						threads="reviewPanel.commentThreads"
 						on-resolve="resolveComment(entry, entry_id)"
 						on-unresolve="unresolveComment(entry_id)"
 						on-show-thread="showThread(entry)"
@@ -150,19 +150,19 @@ script(type='text/ng-template', id='commentEntryTemplate')
 		)
 			.rp-comment(
 				ng-if="!entry.resolved || entry.showWhenResolved"
-				ng-repeat="comment in entry.thread"
-				ng-class="users[comment.user_id].isSelf ? 'rp-comment-self' : '';"
+				ng-repeat="comment in threads[entry.thread_id]"
+				ng-class="comment.user.isSelf ? 'rp-comment-self' : '';"
 			)
 				.rp-avatar(
-					ng-if="!users[comment.user_id].isSelf;"
-					style="background-color: hsl({{ users[comment.user_id].hue }}, 70%, 50%);"
-				) {{ users[comment.user_id].avatar_text | limitTo : 1 }}
-				.rp-comment-body(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 90%);")
+					ng-if="!comment.user.isSelf;"
+					style="background-color: hsl({{ comment.user.hue }}, 70%, 50%);"
+				) {{ comment.user.avatar_text | limitTo : 1 }}
+				.rp-comment-body(style="color: hsl({{ comment.user.hue }}, 70%, 90%);")
 					p.rp-comment-content {{ comment.content }}
 					p.rp-comment-metadata
-						| {{ comment.ts | date : 'MMM d, y h:mm a' }}
+						| {{ comment.timestamp | date : 'MMM d, y h:mm a' }}
 						| &nbsp;&bull;&nbsp;
-						span(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 40%);") {{ users[comment.user_id].name }}
+						span(style="color: hsl({{ comment.user.hue }}, 70%, 40%);") {{ comment.user.name }}
 			.rp-comment-reply(ng-if="!entry.resolved || entry.showWhenResolved")
 				textarea.rp-comment-input(
 					ng-model="entry.replyContent"

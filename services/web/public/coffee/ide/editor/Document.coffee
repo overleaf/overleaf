@@ -339,8 +339,6 @@ define [
 				track_changes_as = msg.meta.user_id
 			else if !remote_op and @track_changes_as?
 				track_changes_as = @track_changes_as
-			console.log "CHANGED", oldSnapshot, ops, track_changes_as
 			@ranges.track_changes = track_changes_as?
 			for op in ops
-				console.log "APPLYING OP", op, @ranges.track_changes 
 				@ranges.applyOp op, { user_id: track_changes_as }

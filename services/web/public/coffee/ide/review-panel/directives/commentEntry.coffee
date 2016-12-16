@@ -6,7 +6,7 @@ define [
 		templateUrl: "commentEntryTemplate"
 		scope: 
 			entry: "="
-			users: "="
+			threads: "="
 			onResolve: "&"
 			onReply: "&"
 			onIndicatorClick: "&"

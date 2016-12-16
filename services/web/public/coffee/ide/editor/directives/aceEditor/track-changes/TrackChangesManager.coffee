@@ -20,8 +20,8 @@ define [
 				@rangesTracker = doc.ranges
 				@connectToRangesTracker()
 			
-			@$scope.$on "comment:add", (e) =>
-				@addCommentToSelection()
+			@$scope.$on "comment:add", (e, thread_id) =>
+				@addCommentToSelection(thread_id)
 
 			@$scope.$on "comment:select_line", (e) =>
 				@selectLineIfNoSelection()
@@ -146,16 +146,16 @@ define [
 			for comment in @rangesTracker.comments
 				@_onCommentAdded(comment)
 
-		addComment: (offset, content) ->
-			op = { c: content, p: offset }
+		addComment: (offset, content, thread_id) ->
+			op = { c: content, p: offset, t: thread_id }
 			# @rangesTracker.applyOp op # Will apply via sharejs
 			@$scope.sharejsDoc.submitOp op
 		
-		addCommentToSelection: () ->
+		addCommentToSelection: (thread_id) ->
 			range = @editor.getSelectionRange()
 			content = @editor.getSelectedText()
 			offset = @_aceRangeToShareJs(range.start)
-			@addComment(offset, content)
+			@addComment(offset, content, thread_id)
 		
 		selectLineIfNoSelection: () ->
 			if @editor.selection.isEmpty()

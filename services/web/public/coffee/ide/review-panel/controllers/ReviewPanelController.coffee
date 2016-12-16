@@ -18,12 +18,27 @@ define [
 			openSubView: $scope.SubViews.CUR_FILE
 			overview:
 				loading: false
+			commentThreads: {}
 
 		$scope.commentState =
 			adding: false
 			content: ""
 
 		$scope.reviewPanelEventsBridge = new EventEmitter()
+		
+		$http.get "/project/#{$scope.project_id}/threads"
+			.success (threads) ->
+				for thread_id, comments of threads
+					for comment in comments
+						formatComment(comment)
+				$scope.reviewPanel.commentThreads = threads
+		
+		ide.socket.on "new-comment", (thread_id, comment) ->
+			$scope.reviewPanel.commentThreads[thread_id] ?= []
+			$scope.reviewPanel.commentThreads[thread_id].push(formatComment(comment))
+			$scope.$apply()
+			$timeout () ->
+				$scope.$broadcast "review-panel:layout"
 
 		rangesTrackers = {}
 
@@ -34,95 +49,6 @@ define [
 		getChangeTracker = (doc_id) ->
 			rangesTrackers[doc_id] ?= new RangesTracker()
 			return rangesTrackers[doc_id]
-
-		# TODO Just for prototyping purposes; remove afterwards.
-		mockedUserId = 'mock_user_id_1'
-		mockedUserId2 = 'mock_user_id_2'
-
-		if window.location.search.match /mocktc=true/
-			mock_changes = {
-				"main.tex":
-					changes: [{
-						op: { i: "Habitat loss and conflicts with humans are the greatest causes of concern.", p: 925 - 38 }
-						metadata: { user_id: mockedUserId, ts: new Date(Date.now() - 30 * 60 * 1000) }
-					}, {
-						op: { d: "The lion is now a vulnerable species. ", p: 778 }
-						metadata: { user_id: mockedUserId, ts: new Date(Date.now() - 31 * 60 * 1000) }
-					}]
-					comments: [{
-						offset: 1375 - 38
-						length: 79
-						metadata:
-							thread: [{
-								content: "Do we have a source for this?"
-								user_id: mockedUserId
-								ts: new Date(Date.now() - 45 * 60 * 1000) 
-							}]
-					}]
-				"chapter_1.tex":
-					changes: [{
-						"op":{"p":740,"d":", to take down large animals"},
-						"metadata":{"user_id":mockedUserId, ts: new Date(Date.now() - 15 * 60 * 1000)}
-					}, {
-						"op":{"i":", to keep hold of the prey","p":920},
-						"metadata":{"user_id":mockedUserId, ts: new Date(Date.now() - 130 * 60 * 1000)}
-					}, {
-						"op":{"i":" being","p":1057},
-						"metadata":{"user_id":mockedUserId2, ts: new Date(Date.now() - 72 * 60 * 1000)}
-					}]
-					comments:[{
-						"offset":111,"length":5,
-						"metadata":{
-							"thread": [
-								{"content":"Have we used 'pride' too much here?","user_id":mockedUserId, ts: new Date(Date.now() - 12 * 60 * 1000)},
-								{"content":"No, I think this is OK","user_id":mockedUserId2, ts: new Date(Date.now() - 9 * 60 * 1000)}
-							]
-						}
-					},{
-						"offset":452,"length":21,
-						"metadata":{
-							"thread":[
-								{"content":"TODO: Don't use as many parentheses!","user_id":mockedUserId2, ts: new Date(Date.now() - 99 * 60 * 1000)}
-							]
-						}
-					}]
-				"chapter_2.tex":
-					changes: [{
-						"op":{"p":458,"d":"other"},
-						"metadata":{"user_id":mockedUserId, ts: new Date(Date.now() - 133 * 60 * 1000)}
-					},{
-						"op":{"i":"usually 2-3, ","p":928},
-						"metadata":{"user_id":mockedUserId, ts: new Date(Date.now() - 27 * 60 * 1000)}
-					},{
-						"op":{"i":"If the parents are a male lion and a female tiger, it is called a liger. A tigon comes from a male tiger and a female lion.","p":1126},
-						"metadata":{"user_id":mockedUserId, ts: new Date(Date.now() - 152 * 60 * 1000)}
-					}]
-					comments: [{
-						"offset":299,"length":10,
-						"metadata":{
-							"thread":[{
-								"content":"Should we use a different word here if 'den' needs clarifying?","user_id":mockedUserId,"ts": new Date(Date.now() - 430 * 60 * 1000)
-							}]
-						}
-					},{
-						"offset":843,"length":66,
-						"metadata":{
-							"thread":[{
-								"content":"This sentence is a little ambiguous","user_id":mockedUserId,"ts": new Date(Date.now() - 430 * 60 * 1000)
-							}]
-						}
-					}]
-			}
-			ide.$scope.$on "file-tree:initialized", () ->
-				ide.fileTreeManager.forEachEntity (entity) ->
-					if mock_changes[entity.name]?
-						rangesTracker = getChangeTracker(entity.id)
-						for change in mock_changes[entity.name].changes
-							rangesTracker._addOp change.op, change.metadata 
-						for comment in mock_changes[entity.name].comments
-							rangesTracker.addComment comment.offset, comment.length, comment.metadata 
-						for doc_id, rangesTracker of rangesTrackers
-							updateEntries(doc_id)
 
 		scrollbar = {}
 		$scope.reviewPanelEventsBridge.on "aceScrollbarVisibilityChanged", (isVisible, scrollbarWidth) ->
@@ -156,7 +82,6 @@ define [
 
 		$scope.$watch "editor.sharejs_doc", (doc) ->
 			return if !doc?
-			console.log "DOC changed", doc
 			# The open doc range tracker is kept up to date in real-time so
 			# replace any outdated info with this
 			rangesTrackers[doc.doc_id] = doc.ranges
@@ -218,7 +143,7 @@ define [
 				entries[comment.id] ?= {}
 				new_entry = {
 					type: "comment"
-					thread: comment.metadata.thread or []
+					thread_id: comment.op.t
 					resolved: comment.metadata?.resolved
 					resolved_data: comment.metadata?.resolved_data
 					content: comment.op.c
@@ -250,7 +175,7 @@ define [
 			
 			for id, entry of entries
 				if entry.type == "comment" and not entry.resolved
-					entry.focused = (entry.offset <= cursor_offset <= entry.offset + entry.length)
+					entry.focused = (entry.offset <= cursor_offset <= entry.offset + entry.content.length)
 				else if entry.type == "insert"
 					entry.focused = (entry.offset <= cursor_offset <= entry.offset + entry.content.length)
 				else if entry.type == "delete"
@@ -268,21 +193,20 @@ define [
 			$scope.$broadcast "change:reject", entry_id
 		
 		$scope.startNewComment = () ->
-			# $scope.commentState.adding = true
 			$scope.$broadcast "comment:select_line"
 			$timeout () ->
 				$scope.$broadcast "review-panel:layout"
 		
 		$scope.submitNewComment = (content) ->
-			# $scope.commentState.adding = false
-			$scope.$broadcast "comment:add", content
-			# $scope.commentState.content = ""
+			thread_id = RangesTracker.newId()
+			$scope.$broadcast "comment:add", thread_id
+			$http.post("/project/#{$scope.project_id}/thread/#{thread_id}/messages", {content, _csrf: window.csrfToken})
+				.error (error) ->
+					ide.showGenericMessageModal("Error submitting comment", "Sorry, there was a problem submitting your comment")
 			$timeout () ->
 				$scope.$broadcast "review-panel:layout"
 		
 		$scope.cancelNewComment = (entry) ->
-			# $scope.commentState.adding = false
-			# $scope.commentState.content = ""
 			$timeout () ->
 				$scope.$broadcast "review-panel:layout"
 		
@@ -291,40 +215,19 @@ define [
 			$timeout () ->
 				$scope.$broadcast "review-panel:layout"
 
-		# $scope.handleCommentReplyKeyPress = (ev, entry) ->
-		# 	if ev.keyCode == 13 and !ev.shiftKey and !ev.ctrlKey and !ev.metaKey
-		# 		ev.preventDefault()
-		# 		ev.target.blur()
-		# 		$scope.submitReply(entry)
-
 		$scope.submitReply = (entry, entry_id) ->
 			$scope.unresolveComment(entry_id)
-			entry.thread.push {
-				content: entry.replyContent
-				ts: new Date()
-				user_id: window.user_id
-			}
-			entry.replyContent = ""
-			entry.replying = false
-			$timeout () ->
-				$scope.$broadcast "review-panel:layout"
-			# TODO Just for prototyping purposes; remove afterwards
-			window.setTimeout((() -> 
-				$scope.$applyAsync(() -> submitMockedReply(entry))
-			), 1000 * 2)
+			thread_id = entry.thread_id
+			content   = entry.replyContent
+			$http.post("/project/#{$scope.project_id}/thread/#{thread_id}/messages", {content, _csrf: window.csrfToken})
+				.error (error) ->
+					ide.showGenericMessageModal("Error submitting comment", "Sorry, there was a problem submitting your comment")
 
-		# TODO Just for prototyping purposes; remove afterwards.
-		submitMockedReply = (entry) ->
-			entry.thread.push {
-				content: 'Sounds good!'
-				ts: new Date()
-				user_id: mockedUserId
-			}
 			entry.replyContent = ""
 			entry.replying = false
 			$timeout () ->
 				$scope.$broadcast "review-panel:layout"
-		
+
 		$scope.cancelReply = (entry) ->
 			entry.replying = false
 			entry.replyContent = ""
@@ -361,37 +264,39 @@ define [
 		# when we get an id we don't know. This'll do for client side testing
 		refreshUsers = () ->
 			$scope.users = {}
-			# TODO Just for prototyping purposes; remove afterwards.
-			$scope.users[mockedUserId] = {
-				email: "paulo@sharelatex.com"
-				name: "Paulo Reis"
-				isSelf: false
-				hue: 70
-				avatar_text: "PR"
-			}
-			$scope.users[mockedUserId2] = {
-				email: "james@sharelatex.com"
-				name: "James Allen"
-				isSelf: false
-				hue: 320
-				avatar_text: "JA"
-			}
-
 			for member in $scope.project.members.concat($scope.project.owner)
-				if member._id == window.user_id
-					name = "You"
-					isSelf = true
-				else
-					name = "#{member.first_name} #{member.last_name}"
-					isSelf = false
+				$scope.users[member._id] = formatUser(member)
 
-				$scope.users[member._id] = {
-					email: member.email
-					name: name
-					isSelf: isSelf
-					hue: ColorManager.getHueForUserId(member._id)
-					avatar_text: [member.first_name, member.last_name].filter((n) -> n?).map((n) -> n[0]).join ""
+		formatComment = (comment) ->
+			comment.user = formatUser(user)
+			comment.timestamp = new Date(comment.timestamp)
+			return comment
+
+		formatUser = (user) ->
+			if !user?
+				return {
+					email: null
+					name: "Anonymous"
+					isSelf: false
+					hue: ColorManager.ANONYMOUS_HUE
+					avatar_text: "A"
 				}
+
+			id = user._id or user.id
+			if id == window.user_id
+				name = "You"
+				isSelf = true
+			else
+				name = "#{user.first_name} #{user.last_name}"
+				isSelf = false
+			return {
+				id: id
+				email: user.email
+				name: name
+				isSelf: isSelf
+				hue: ColorManager.getHueForUserId(id)
+				avatar_text: [user.first_name, user.last_name].filter((n) -> n?).map((n) -> n[0]).join ""
+			}
 		
 		$scope.$watch "project.members", (members) ->
 			return if !members?
