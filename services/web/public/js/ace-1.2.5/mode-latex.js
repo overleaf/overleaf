@@ -242,10 +242,6 @@ var createLatexWorker = function (session) {
         var annotations = [];
         var newRange = {};
         var cursor = selection.getCursor();
-        var maxRow = session.getLength() - 1;
-        var maxCol = (maxRow > 0) ? session.getLine(maxRow).length : 0;
-        var cursorAtEndOfDocument = (cursor.row == maxRow) && (cursor.column === maxCol);
-
         suppressions = [];
 
         for (var i = 0, len = hints.length; i<len; i++) {
@@ -254,8 +250,8 @@ var createLatexWorker = function (session) {
             var suppressedChanges = 0;
             var hintRange = new Range(hint.start_row, hint.start_col, hint.end_row, hint.end_col);
 
-            var cursorInRange = hintRange.insideEnd(cursor.row, cursor.column);
-            var cursorAtStart = hintRange.isStart(cursor.row, cursor.column - 1); // cursor after start not before
+            var cursorInRange = hintRange.insideStart(cursor.row, cursor.column);
+            var cursorAtStart = hintRange.isStart(cursor.row, cursor.column);
             var cursorAtEnd = hintRange.isEnd(cursor.row, cursor.column);
             if (hint.suppressIfEditing && (cursorAtStart || cursorAtEnd)) {
                 suppressions.push(hintRange);
@@ -293,10 +289,8 @@ var createLatexWorker = function (session) {
                 cursorInRange = newRange[key].cursorInRange;
                 hint = newRange[key].hint;
                 var errorAtStart = (hint.row === hint.start_row && hint.column === hint.start_col);
-                var movableStart = (cursorInRange && !errorAtStart) && !cursorAtEndOfDocument;
-                var movableEnd = (cursorInRange && errorAtStart) && !cursorAtEndOfDocument;
-                var a = movableStart ? cursorAnchor : doc.createAnchor(new_range.start);
-                var b = movableEnd ? cursorAnchor : doc.createAnchor(new_range.end);
+                var a = (cursorInRange && !errorAtStart) ? cursorAnchor : doc.createAnchor(new_range.start);
+                var b = (cursorInRange && errorAtStart) ? cursorAnchor : doc.createAnchor(new_range.end);
                 var range = new Range();
                 range.start = a;
                 range.end = b;

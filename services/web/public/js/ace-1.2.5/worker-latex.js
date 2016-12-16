@@ -1490,7 +1490,7 @@ var Tokenise = function (text) {
             var controlSequence = NEXTCS.exec(text);
             var nextSpecialPos = controlSequence === null ? idx : controlSequence.index;
             if (nextSpecialPos === idx) {
-                Tokens.push([lineNumber, code, pos, idx + 1, text[idx], "control-symbol"]);
+                Tokens.push([lineNumber, code, pos, idx + 1, text[idx]]);
                 idx = SPECIAL.lastIndex = idx + 1;
                 char = text[nextSpecialPos];
                 if (char === '\n') { lineNumber++; linePosition[lineNumber] = nextSpecialPos;};
@@ -1508,7 +1508,12 @@ var Tokenise = function (text) {
         } else if (code === "}") {  // close group
             Tokens.push([lineNumber, code, pos]);
         } else if (code === "$") {  // math mode
-            Tokens.push([lineNumber, code, pos]);
+            if (text[idx] === "$") {
+                idx = SPECIAL.lastIndex = idx + 1;
+                Tokens.push([lineNumber, "$$", pos]);
+            } else {
+                Tokens.push([lineNumber, code, pos]);
+            }
         } else if (code === "&") {  // tabalign
             Tokens.push([lineNumber, code, pos]);
         } else if (code === "#") {  // macro parameter
@@ -1584,29 +1589,6 @@ var read1name = function (TokeniseResult, k) {
         } else {
             return null;
         }
-    } else {
-        return null;
-    }
-};
-
-var read1filename = function (TokeniseResult, k) {
-    var Tokens = TokeniseResult.tokens;
-    var text = TokeniseResult.text;
-
-    var fileName = "";
-    for (var j = k + 1, tok; (tok = Tokens[j]); j++) {
-        if (tok[1] === "Text") {
-            var str = text.substring(tok[2], tok[3]);
-            if (!str.match(/^\S*$/)) { break; }
-            fileName = fileName + str;
-        } else if (tok[1] === "_") {
-            fileName = fileName + "_";
-        } else {
-            break;
-        }
-    }
-    if (fileName.length > 0) {
-        return  j; // advance past these tokens
     } else {
         return null;
     }
@@ -1715,6 +1697,7 @@ var readUrl = function(TokeniseResult, k) {
     return null;
 };
 
+
 var InterpretTokens = function (TokeniseResult, ErrorReporter) {
     var Tokens = TokeniseResult.tokens;
     var linePosition = TokeniseResult.linePosition;
@@ -1723,9 +1706,7 @@ var InterpretTokens = function (TokeniseResult, ErrorReporter) {
 
     var TokenErrorFromTo = ErrorReporter.TokenErrorFromTo;
     var TokenError = ErrorReporter.TokenError;
-    var Environments = new EnvHandler(ErrorReporter);
-
-    var nextGroupMathMode = null; // if the next group should have math mode on or off (for \hbox)
+    var Environments = [];
 
     for (var i = 0, len = Tokens.length; i < len; i++) {
         var token = Tokens[i];
@@ -1810,407 +1791,128 @@ var InterpretTokens = function (TokeniseResult, ErrorReporter) {
             } else if (seq === "url") {
                 newPos = readUrl(TokeniseResult, i);
                 if (newPos === null) { TokenError(token, "invalid url command"); } else {i = newPos;};
-            } else if (seq === "left" || seq === "right") {
-                var nextToken = Tokens[i+1];
-                char = "";
-                if (nextToken && nextToken[1] === "Text") {
-                    char = text.substring(nextToken[2], nextToken[2] + 1);
-                } else if (nextToken && nextToken[1] === "\\" && nextToken[5] == "control-symbol") {
-                    char = nextToken[4];
-                } else if (nextToken && nextToken[1] === "\\") {
-                    char = "unknown";
-                }
-                if (char === "" || (char !== "unknown" && "(){}[]<>|.".indexOf(char) === -1)) {
-                    TokenError(token, "invalid bracket command");
-                } else {
-                    i = i + 1;
-                    Environments.push({command:seq, token:token});
-                };
-            } else if (seq === "(" || seq === ")" || seq === "[" || seq === "]") {
-                Environments.push({command:seq, token:token});
-            } else if (seq === "input") {
-                newPos = read1filename(TokeniseResult, i);
-                if (newPos === null) { continue; } else {i = newPos;};
-            } else if (seq === "hbox" || seq === "text" || seq === "mbox") {
-                nextGroupMathMode = false;
-            } else if (typeof seq === "string" && seq.match(/^(alpha|beta|gamma|delta|epsilon|varepsilon|zeta|eta|theta|vartheta|iota|kappa|lambda|mu|nu|xi|pi|varpi|rho|varrho|sigma|varsigma|tau|upsilon|phi|varphi|chi|psi|omega|Gamma|Delta|Theta|Lambda|Xi|Pi|Sigma|Upsilon|Phi|Psi|Omega)$/)) {
-                var currentMathMode = Environments.getMathMode() ; // returns null / $(inline) / $$(display)
-                if (currentMathMode === null && !insideGroup) {
-                    TokenError(token, type + seq + " must be inside math mode");
-                };
-            } else if (typeof seq === "string" && seq.match(/^(chapter|section|subsection|subsubsection|cite|ref)/)) {
-                currentMathMode = Environments.getMathMode() ; // returns null / $(inline) / $$(display)
-                if (currentMathMode && !insideGroup) {
-                    TokenError(token, type + seq + " used inside math mode");
-                    Environments.resetMathMode();
-                };
-            };
+            }
         } else if (type === "{") {
-            Environments.push({command:"{", token:token, mathMode: nextGroupMathMode});
-            nextGroupMathMode = null;
+            Environments.push({command:"{", token:token});
         } else if (type === "}") {
             Environments.push({command:"}", token:token});
-        } else if (type === "$") {
-            var lookAhead = Tokens[i+1];
-            var nextIsDollar = lookAhead && lookAhead[1] === "$";
-            currentMathMode = Environments.getMathMode() ; // returns null / $(inline) / $$(display)
-            if (nextIsDollar && (!currentMathMode || currentMathMode.command == "$$")) {
-                Environments.push({command:"$$", token:token});
-                i = i + 1;
-            } else {
-                Environments.push({command:"$", token:token});
-            }
-        } else if (type === "^" || type === "_") {
-            currentMathMode = Environments.getMathMode() ; // returns null / $(inline) / $$(display)
-            var insideGroup = Environments.insideGroup();  // true if inside {....}
-            if (currentMathMode === null && !insideGroup) {
-                TokenError(token, type + " must be inside math mode");
-            };
-        } else {
-            nextGroupMathMode = null;
-        }
+        };
     };
     return Environments;
 };
 
-var EnvHandler = function (ErrorReporter) {
+
+var CheckEnvironments = function (Environments, ErrorReporter) {
     var ErrorTo = ErrorReporter.EnvErrorTo;
     var ErrorFromTo = ErrorReporter.EnvErrorFromTo;
     var ErrorFrom = ErrorReporter.EnvErrorFrom;
-
-    var envs = [];
 
     var state = [];
     var documentClosed = null;
     var inVerbatim = false;
     var verbatimRanges = [];
-
-    this.Environments = envs;
-
-    this.push = function (newEnv) {
-        this.setEnvProps(newEnv);
-        this.checkAndUpdateState(newEnv);
-        envs.push(newEnv);
-    };
-
-    this._endVerbatim = function (thisEnv) {
-        var lastEnv = state.pop();
-        if (lastEnv && lastEnv.name === thisEnv.name) {
-            inVerbatim = false;
-            verbatimRanges.push({start: lastEnv.token[2], end: thisEnv.token[2]});
-        } else {
-            if(lastEnv) { state.push(lastEnv); } ;
+    for (var i = 0, len = Environments.length; i < len; i++) {
+        var name = Environments[i].name ;
+        if (name && name.match(/^(verbatim|boxedverbatim|lstlisting|minted)$/)) {
+            Environments[i].verbatim = true;
         }
-    };
-
-    var invalidEnvs = [];
-
-    this._end = function (thisEnv) {
-        do {
+    }
+    for (i = 0, len = Environments.length; i < len; i++) {
+        var thisEnv = Environments[i];
+        if(thisEnv.command === "begin" || thisEnv.command === "{") {
+            if (inVerbatim) { continue; } // ignore anything in verbatim environments
+            if (thisEnv.verbatim) {inVerbatim = true;};
+            state.push(thisEnv);
+        } else if (thisEnv.command === "end" || thisEnv.command === "}") {
             var lastEnv = state.pop();
-            var retry = false;
-            var i;
 
-            if (closedBy(lastEnv, thisEnv)) {
-                if (thisEnv.command === "end" && thisEnv.name === "document" && !documentClosed) {
+            if (inVerbatim) {
+                if (lastEnv && lastEnv.name === thisEnv.name) {
+                    inVerbatim = false;
+                    verbatimRanges.push({start: lastEnv.token[2], end: thisEnv.token[2]});
+                    continue;
+                } else {
+                    if(lastEnv) { state.push(lastEnv); } ;
+                    continue;  // ignore all other commands
+                }
+            };
+
+            if (lastEnv && lastEnv.command === "{" && thisEnv.command === "}") {
+                continue;
+            } else if (lastEnv && lastEnv.name === thisEnv.name) {
+                if (thisEnv.name === "document" && !documentClosed) {
                     documentClosed = thisEnv;
                 };
-                return;
+                continue;
             } else if (!lastEnv) {
-                if (documentClosed) {
-                    ErrorFromTo(documentClosed, thisEnv, "\\end{" + documentClosed.name + "} is followed by unexpected content",{errorAtStart: true, type: "info"});
-                } else {
-                    ErrorTo(thisEnv, "unexpected \\end{" + thisEnv.name + "}");
-                }
-            } else if (invalidEnvs.length > 0 && (i = indexOfClosingEnvInArray(invalidEnvs, thisEnv) > -1)) {
-                invalidEnvs.splice(i, 1);
-                if (lastEnv) { state.push(lastEnv); } ;
-                return;
-            } else {
-                var status = reportError(lastEnv, thisEnv);
-                if (envPrecedence(lastEnv) < envPrecedence(thisEnv)) {
-                    invalidEnvs.push(lastEnv);
-                    retry = true;
-                } else {
-                    var prevLastEnv = state.pop();
-                    if(prevLastEnv) {
-                        if (thisEnv.name === prevLastEnv.name) {
-                            return;
-                        } else {
-                            state.push(prevLastEnv);
-                        }
+                if (thisEnv.command === "}") {
+                    if (documentClosed) {
+                        ErrorFromTo(documentClosed, thisEnv, "\\end{" + documentClosed.name + "} is followed by unexpected end group }",{errorAtStart: true, type: "info"});
+                    } else {
+                        ErrorTo(thisEnv, "unexpected end group }");
+                    };
+                } else if (thisEnv.command === "end") {
+                    if (documentClosed) {
+                        ErrorFromTo(documentClosed, thisEnv, "\\end{" + documentClosed.name + "} is followed by unexpected content",{errorAtStart: true, type: "info"});
+                    } else {
+                        ErrorTo(thisEnv, "unexpected \\end{" + thisEnv.name + "}");
                     }
-                    invalidEnvs.push(lastEnv);
+                }
+            } else if (lastEnv.command === "begin" && thisEnv.command === "}") {
+                ErrorFromTo(lastEnv, thisEnv, "unexpected end group } after \\begin{" + lastEnv.name +"}");
+                state.push(lastEnv);
+            } else if (lastEnv.command === "{" && thisEnv.command === "end") {
+                ErrorFromTo(lastEnv, thisEnv,
+                            "unclosed group { found at \\end{" + thisEnv.name + "}",
+                            {suppressIfEditing:true, errorAtStart: true, type:"warning"});
+                i--;
+            } else if (lastEnv.command === "begin" && thisEnv.command === "end") {
+                ErrorFromTo(lastEnv, thisEnv,
+                            "unclosed \\begin{" + lastEnv.name + "} found at \\end{" + thisEnv.name + "} " ,
+                            {errorAtStart: true});
+                for (var j = i + 1; j < len; j++) {
+                    var futureEnv = Environments[j];
+                    if (futureEnv.command === "end" && futureEnv.name === lastEnv.name) {
+                        state.push(lastEnv);
+                        continue;
+                    }
+                }
+                lastEnv = state.pop();
+                if(lastEnv) {
+                    if (thisEnv.name === lastEnv.name) {
+                        continue;
+                    } else {
+                        state.push(lastEnv);
+                    }
                 }
 
             }
-        } while (retry === true);
-    };
-
-    var CLOSING_DELIMITER = {
-        "{" : "}",
-        "left" : "right",
-        "[" : "]",
-        "(" : ")",
-        "$" : "$",
-        "$$": "$$"
-    };
-
-    var closedBy = function (lastEnv, thisEnv) {
-        if (!lastEnv) {
-            return false ;
-        } else if (thisEnv.command === "end") {
-            return lastEnv.command === "begin" && lastEnv.name === thisEnv.name;
-        } else if (thisEnv.command === CLOSING_DELIMITER[lastEnv.command]) {
-            return true;
-        } else {
-            return false;
         }
-    };
-
-    var indexOfClosingEnvInArray = function (envs, thisEnv) {
-        for (var i = 0, n = envs.length; i < n ; i++) {
-            if (closedBy(envs[i], thisEnv)) {
-                return i;
-            }
-        }
-        return -1;
-    };
-
-    var envPrecedence = function (env) {
-        var openScore = {
-            "{" : 1,
-            "left" : 2,
-            "$" : 3,
-            "$$" : 4,
-            "begin": 4
-        };
-        var closeScore = {
-            "}" : 1,
-            "right" : 2,
-            "$" : 3,
-            "$$" : 5,
-            "end": 4
-        };
-        if (env.command) {
-            return openScore[env.command] || closeScore[env.command];
-        } else {
-            return 0;
-        }
-    };
-
-    var getName = function(env) {
-        var description = {
-            "{" : "open group {",
-            "}" : "close group }",
-            "[" : "open display math \\[",
-            "]" : "close display math \\]",
-            "(" : "open inline math \\(",
-            ")" : "close inline math \\)",
-            "$" : "$",
-            "$$" : "$$",
-            "left" : "\\left",
-            "right" : "\\right"
-        };
-        if (env.command === "begin" || env.command === "end") {
-            return "\\" + env.command + "{" + env.name + "}";
-        } else if (env.command in description) {
-            return description[env.command];
-        } else {
-            return env.command;
-        }
-    };
-
-    var EXTRA_CLOSE = 1;
-    var UNCLOSED_GROUP = 2;
-    var UNCLOSED_ENV = 3;
-
-    var reportError = function(lastEnv, thisEnv) {
-        if (!lastEnv) { // unexpected close, nothing was open!
-            if (documentClosed) {
-                ErrorFromTo(documentClosed, thisEnv, "\\end{" + documentClosed.name + "} is followed by unexpected end group }",{errorAtStart: true, type: "info"});
-            } else {
-                ErrorTo(thisEnv, "unexpected " + getName(thisEnv));
-            };
-            return EXTRA_CLOSE;
-        } else if (lastEnv.command === "{" && thisEnv.command === "end") {
-            ErrorFromTo(lastEnv, thisEnv, "unclosed " + getName(lastEnv) + " found at " + getName(thisEnv),
-                        {suppressIfEditing:true, errorAtStart: true, type:"warning"});
-            return UNCLOSED_GROUP;
-        } else {
-            var pLast = envPrecedence(lastEnv);
-            var pThis = envPrecedence(thisEnv);
-            if (pThis > pLast) {
-                ErrorFromTo(lastEnv, thisEnv, "unclosed " + getName(lastEnv) + " found at " + getName(thisEnv),
-                           {suppressIfEditing:true, errorAtStart: true});
-            } else {
-                ErrorFromTo(lastEnv, thisEnv, "unexpected " + getName(thisEnv) + " after " + getName(lastEnv));
-            }
-            return UNCLOSED_ENV;
-        };
-    };
-
-    this._beginMathMode = function (thisEnv) {
-        var currentMathMode = this.getMathMode(); // undefined, null, $, $$, name of mathmode env
-        if (currentMathMode) {
-            ErrorFrom(thisEnv, thisEnv.name + " used inside existing math mode " + getName(currentMathMode),
-                      {suppressIfEditing:true, errorAtStart: true});
-        };
-        thisEnv.mathMode = thisEnv;
-        state.push(thisEnv);
-    };
-
-    this._toggleMathMode = function (thisEnv) {
-        var lastEnv = state.pop();
-        if (closedBy(lastEnv, thisEnv)) {
-            return;
-        } else {
-            if (lastEnv) {state.push(lastEnv);}
-            if (lastEnv && lastEnv.mathMode) {
-                this._end(thisEnv);
-            } else {
-                thisEnv.mathMode = thisEnv;
-                state.push(thisEnv);
-            }
-        };
-    };
-
-    this.getMathMode = function () {
-        var n = state.length;
-        if (n > 0) {
-            return state[n-1].mathMode;
-        } else {
-            return null;
-        }
-    };
-
-    this.insideGroup = function () {
-        var n = state.length;
-        if (n > 0) {
-            return (state[n-1].command === "{");
-        } else {
-            return null;
-        }
-    };
-
-    var resetMathMode = function () {
-        var n = state.length;
-        if (n > 0) {
-            var lastMathMode = state[n-1].mathMode;
-            do {
-                var lastEnv = state.pop();
-            } while (lastEnv && lastEnv !== lastMathMode);
-        } else {
-            return;
-        }
-    };
-
-    this.resetMathMode = resetMathMode;
-
-    var getNewMathMode = function (currentMathMode, thisEnv) {
-        var newMathMode = null;
-
+    }
+    while (state.length > 0) {
+        thisEnv = state.pop();
         if (thisEnv.command === "{") {
-            if (thisEnv.mathMode !== null) {
-                newMathMode = thisEnv.mathMode;
-            } else {
-                newMathMode = currentMathMode;
-            }
-        } else if (thisEnv.command === "left") {
-            if (currentMathMode === null) {
-                ErrorFrom(thisEnv, "\\left can only be used in math mode");
-            };
-            newMathMode = currentMathMode;
+            ErrorFrom(thisEnv, "unclosed group {", {type:"warning"});
         } else if (thisEnv.command === "begin") {
-            var name = thisEnv.name;
-            if (name) {
-                if (name.match(/^(document|figure|center|tabular|enumerate|itemize|table|abstract|proof|lemma|theorem|definition|proposition|corollary|remark|notation|thebibliography)$/)) {
-                    if (currentMathMode) {
-                        ErrorFromTo(currentMathMode, thisEnv, thisEnv.name + " used inside " + getName(currentMathMode),
-                                    {suppressIfEditing:true, errorAtStart: true});
-                        resetMathMode();
-                    };
-                    newMathMode = null;
-                } else if (name.match(/^(array|gathered|split|aligned|alignedat)/)) {
-                    if (!currentMathMode) {
-                        ErrorFrom(thisEnv, thisEnv.name + " not inside math mode");
-                    };
-                    newMathMode = currentMathMode;
-                } else if (name.match(/^(math|displaymath|equation|eqnarray|multline|align|gather|flalign|alignat)\*?$/)) {
-                    if (currentMathMode) {
-                        ErrorFromTo(currentMathMode, thisEnv, thisEnv.name + " used inside " + getName(currentMathMode),
-                                    {suppressIfEditing:true, errorAtStart: true});
-                        resetMathMode();
-                    };
-                    newMathMode = thisEnv;
-                } else {
-                    newMathMode = undefined;  // undefined means we don't know if we are in math mode or not
-                }
-            }
+            ErrorFrom(thisEnv, "unclosed environment \\begin{" + thisEnv.name + "}");
         };
-        return newMathMode;
-    };
-
-    this.checkAndUpdateState = function (thisEnv) {
-        if (inVerbatim) {
-            if (thisEnv.command === "end") {
-                this._endVerbatim(thisEnv);
-            } else {
-                return; // ignore anything in verbatim environments
-            }
-        } else if(thisEnv.command === "begin" || thisEnv.command === "{" || thisEnv.command === "left") {
-            if (thisEnv.verbatim) {inVerbatim = true;};
-            var currentMathMode = this.getMathMode(); // undefined, null, $, $$, name of mathmode env
-            var newMathMode = getNewMathMode(currentMathMode, thisEnv);
-            thisEnv.mathMode = newMathMode;
-            state.push(thisEnv);
-        } else if (thisEnv.command === "end") {
-            this._end(thisEnv);
-        } else if (thisEnv.command === "(" || thisEnv.command === "[") {
-            this._beginMathMode(thisEnv);
-        } else if (thisEnv.command === ")" || thisEnv.command === "]") {
-            this._end(thisEnv);
-        } else if (thisEnv.command === "}") {
-            this._end(thisEnv);
-        } else if (thisEnv.command === "right") {
-            this._end(thisEnv);
-        } else if (thisEnv.command === "$" || thisEnv.command === "$$") {
-            this._toggleMathMode(thisEnv);
-        }
-    };
-
-    this.close = function () {
-        while (state.length > 0) {
-            var thisEnv = state.pop();
-            if (thisEnv.command === "{") {
-                ErrorFrom(thisEnv, "unclosed group {", {type:"warning"});
-            } else {
-                ErrorFrom(thisEnv, "unclosed " + getName(thisEnv));
-            }
-        }
-        var vlen = verbatimRanges.length;
-        var len = ErrorReporter.tokenErrors.length;
-        if (vlen >0 && len > 0) {
-            for (var i = 0; i < len; i++) {
-                var tokenError = ErrorReporter.tokenErrors[i];
-                var startPos = tokenError.startPos;
-                var endPos = tokenError.endPos;
-                for (var j = 0; j < vlen; j++) {
-                    if (startPos > verbatimRanges[j].start && startPos < verbatimRanges[j].end) {
-                        tokenError.ignore = true;
-                        break;
-                    }
+    }
+    var vlen = verbatimRanges.length;
+    len = ErrorReporter.tokenErrors.length;
+    if (vlen >0 && len > 0) {
+        for (i = 0; i < len; i++) {
+            var tokenError = ErrorReporter.tokenErrors[i];
+            var startPos = tokenError.startPos;
+            var endPos = tokenError.endPos;
+            for (j = 0; j < vlen; j++) {
+                if (startPos > verbatimRanges[j].start && startPos < verbatimRanges[j].end) {
+                    tokenError.ignore = true;
+                    break;
                 }
             }
         }
-    };
+    }
 
-    this.setEnvProps = function (env) {
-        var name = env.name ;
-        if (name && name.match(/^(verbatim|boxedverbatim|lstlisting|minted|Verbatim)$/)) {
-            env.verbatim = true;
-        }
-    };
 };
 var ErrorReporter = function (TokeniseResult) {
     var text = TokeniseResult.text;
@@ -2229,11 +1931,9 @@ var ErrorReporter = function (TokeniseResult) {
         return returnedErrors.concat(errors);
     };
 
-    this.TokenError = function (token, message, options) {
-        if(!options) { options = { suppressIfEditing:true } ; };
+    this.TokenError = function (token, message) {
         var line = token[0], type = token[1], start = token[2], end = token[3];
         var start_col = start - linePosition[line];
-        if (!end) { end = start + 1; } ;
         var end_col = end - linePosition[line];
         tokenErrors.push({row: line,
                           column: start_col,
@@ -2245,11 +1945,10 @@ var ErrorReporter = function (TokeniseResult) {
                           text:message,
                           startPos: start,
                           endPos: end,
-                          suppressIfEditing:options.suppressIfEditing});
+                          suppressIfEditing:true});
     };
 
-    this.TokenErrorFromTo = function (fromToken, toToken, message, options) {
-        if(!options) { options = {suppressIfEditing:true } ; };
+    this.TokenErrorFromTo = function (fromToken, toToken, message) {
         var fromLine = fromToken[0], fromStart = fromToken[2], fromEnd = fromToken[3];
         var toLine = toToken[0], toStart = toToken[2], toEnd = toToken[3];
         if (!toEnd) { toEnd = toStart + 1;};
@@ -2266,7 +1965,7 @@ var ErrorReporter = function (TokeniseResult) {
                           text:message,
                           startPos: fromStart,
                           endPos: toEnd,
-                          suppressIfEditing:options.suppressIfEditing});
+                          suppressIfEditing:true});
     };
 
 
@@ -2328,7 +2027,7 @@ var Parse = function (text) {
     var TokeniseResult = Tokenise(text);
     var Reporter = new ErrorReporter(TokeniseResult);
     var Environments = InterpretTokens(TokeniseResult, Reporter);
-    Environments.close();
+    CheckEnvironments(Environments, Reporter);
     return Reporter.getErrors();
 };
 
