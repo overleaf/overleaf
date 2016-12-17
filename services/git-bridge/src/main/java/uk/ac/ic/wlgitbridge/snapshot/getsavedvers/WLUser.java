@@ -34,4 +34,8 @@ public class WLUser {
         return email;
     }
 
+    @Override
+    public String toString() {
+        return "(" + name + ", " + email + ")";
+    }
 }

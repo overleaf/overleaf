@@ -10,6 +10,7 @@ import uk.ac.ic.wlgitbridge.snapshot.base.Result;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.exception.InvalidProjectException;
 import uk.ac.ic.wlgitbridge.snapshot.getsavedvers.WLUser;
+import uk.ac.ic.wlgitbridge.util.Log;
 
 /**
  * Created by Winston on 06/11/14.
@@ -73,6 +74,7 @@ public class GetDocResult extends Result {
 
     @Override
     public void fromJSON(JsonElement json) {
+        Log.info("GetDocResult: " + json);
         JsonObject jsonObject = json.getAsJsonObject();
         if (jsonObject.has("status")) {
             switch (jsonObject.get("status").getAsInt()) {

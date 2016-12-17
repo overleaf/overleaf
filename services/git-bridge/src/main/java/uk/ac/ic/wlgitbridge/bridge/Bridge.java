@@ -306,6 +306,7 @@ public class Bridge {
             String projectName
     ) throws ServiceMayNotContinueException,
              GitUserException {
+        Log.info("[{}] Checking that project exists", projectName);
         try (LockGuard __ = lock.lockGuard(projectName)) {
             GetDocRequest getDocRequest = new GetDocRequest(
                     oauth2,
@@ -335,7 +336,7 @@ public class Bridge {
     ) throws IOException, GitUserException {
         String projectName = repo.getProjectName();
         try (LockGuard __ = lock.lockGuard(projectName)) {
-            Log.info("[{}] Updating", projectName);
+            Log.info("[{}] Updating repository", projectName);
             updateRepositoryCritical(oauth2, repo);
         }
     }

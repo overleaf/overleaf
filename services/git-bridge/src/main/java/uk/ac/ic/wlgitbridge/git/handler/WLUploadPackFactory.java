@@ -4,6 +4,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.UploadPack;
 import org.eclipse.jgit.transport.resolver.UploadPackFactory;
 import uk.ac.ic.wlgitbridge.git.servlet.WLGitServlet;
+import uk.ac.ic.wlgitbridge.util.Log;
 import uk.ac.ic.wlgitbridge.util.Util;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,11 +35,11 @@ public class WLUploadPackFactory
             HttpServletRequest __,
             Repository repository
     ) {
-        UploadPack uploadPack = new UploadPack(repository);
-        uploadPack.sendMessage(
-                "Downloading files from " + Util.getServiceName()
+        Log.info(
+                "[{}] Creating upload-pack",
+                repository.getWorkTree().getName()
         );
-        return uploadPack;
+       return new UploadPack(repository);
     }
 
 }

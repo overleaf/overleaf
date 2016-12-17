@@ -9,6 +9,7 @@ import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotAPI;
 import uk.ac.ic.wlgitbridge.git.handler.hook.WriteLatexPutHook;
 import uk.ac.ic.wlgitbridge.git.servlet.WLGitServlet;
 import uk.ac.ic.wlgitbridge.server.Oauth2Filter;
+import uk.ac.ic.wlgitbridge.util.Log;
 import uk.ac.ic.wlgitbridge.util.Util;
 
 import javax.servlet.http.HttpServletRequest;
@@ -54,6 +55,10 @@ public class WLReceivePackFactory
             HttpServletRequest httpServletRequest,
             Repository repository
     ) {
+        Log.info(
+                "[{}] Creating receive-pack",
+                repository.getWorkTree().getName()
+        );
         Credential oauth2 = (Credential) httpServletRequest.getAttribute(
                 Oauth2Filter.ATTRIBUTE_KEY
         );

@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import uk.ac.ic.wlgitbridge.snapshot.base.HTTPMethod;
 import uk.ac.ic.wlgitbridge.snapshot.base.SnapshotAPIRequest;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
+import uk.ac.ic.wlgitbridge.util.Log;
 
 /**
  * Created by Winston on 06/11/14.
@@ -23,6 +24,12 @@ public class GetForVersionRequest
     ) {
         super(projectName, API_CALL + "/" + versionID, oauth2);
         this.versionID = versionID;
+        Log.info(
+                "GetForVersionRequest({}, {}, {})",
+                "oauth2: <oauth2>",
+                "projectName: " + projectName,
+                "versionID: " + versionID
+        );
     }
 
     @Override

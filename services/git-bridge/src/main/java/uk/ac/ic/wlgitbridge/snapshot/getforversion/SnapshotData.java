@@ -33,6 +33,11 @@ public class SnapshotData implements JSONSource {
         this.atts = atts;
     }
 
+    @Override
+    public String toString() {
+        return "SnapshotData(srcs: " + srcs + ", atts: " + atts + ")";
+    }
+
     public JsonElement toJson() {
         JsonObject jsonThis = new JsonObject();
         JsonArray jsonSrcs = new JsonArray();

@@ -32,7 +32,11 @@ public class PostbackHandler extends AbstractHandler {
             HttpServletRequest request,
             HttpServletResponse response
     ) throws IOException, ServletException {
-
+        Log.info(
+                "PostbackHandler: " + baseRequest.getMethod()
+                        + " <- "
+                        + baseRequest.getHttpURI()
+        );
         try {
             if (
                     request.getMethod().equals("POST")
@@ -46,11 +50,6 @@ public class PostbackHandler extends AbstractHandler {
                 }
                 String projectName = parts[1];
                 String postbackKey = parts[2];
-                Log.info(
-                        baseRequest.getMethod()
-                                + " <- "
-                                + baseRequest.getHttpURI()
-                );
                 PostbackContents postbackContents = new PostbackContents(
                         bridge,
                         projectName,

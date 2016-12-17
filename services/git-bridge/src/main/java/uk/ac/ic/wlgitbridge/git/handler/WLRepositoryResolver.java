@@ -81,6 +81,7 @@ public class WLRepositoryResolver
     ) throws RepositoryNotFoundException,
              ServiceNotAuthorizedException,
              ServiceMayNotContinueException {
+        Log.info("[{}] Request to open git repo", name);
         Credential oauth2 = (Credential) httpServletRequest.getAttribute(
                 Oauth2Filter.ATTRIBUTE_KEY
         );

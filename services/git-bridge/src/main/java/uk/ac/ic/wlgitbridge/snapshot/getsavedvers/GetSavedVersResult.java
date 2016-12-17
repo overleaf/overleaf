@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 import uk.ac.ic.wlgitbridge.snapshot.base.Request;
 import uk.ac.ic.wlgitbridge.snapshot.base.Result;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
+import uk.ac.ic.wlgitbridge.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +50,7 @@ public class GetSavedVersResult extends Result {
 
     @Override
     public void fromJSON(JsonElement json) {
+        Log.info("GetSavedVersResult({})", json);
         savedVers = new ArrayList<>();
         for (JsonElement elem : json.getAsJsonArray()) {
             savedVers.add(

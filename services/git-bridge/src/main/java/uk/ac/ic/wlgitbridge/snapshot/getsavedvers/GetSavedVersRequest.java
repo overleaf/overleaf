@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import uk.ac.ic.wlgitbridge.snapshot.base.SnapshotAPIRequest;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.snapshot.base.HTTPMethod;
+import uk.ac.ic.wlgitbridge.util.Log;
 
 /**
  * Created by Winston on 06/11/14.
@@ -16,6 +17,11 @@ public class GetSavedVersRequest
 
     public GetSavedVersRequest(Credential oauth2, String projectName) {
         super(projectName, API_CALL, oauth2);
+        Log.info(
+                "GetSavedVersRequest({}, {})",
+                "oauth2: <oauth2>",
+                "projectName: " + projectName
+        );
     }
 
     @Override
