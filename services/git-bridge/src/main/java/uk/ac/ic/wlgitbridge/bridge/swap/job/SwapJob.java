@@ -32,12 +32,53 @@ public interface SwapJob {
         return new NoopSwapJob();
     }
 
+    /**
+     * Starts the swap job, which should schedule an attempted swap at the given
+     * configured interval (config["swapJob"]["intervalMillis"]
+     */
     void start();
 
+    /**
+     * Stops the stop job.
+     */
     void stop();
 
+    /**
+     * Called by the swap job when a project should be evicted.
+     *
+     * Pre:
+     * 1. projName must be in repoStore
+     * 2. projName should not be in swapStore
+     * 3. projName should be PRESENT in dbStore (last_accessed is not null)
+     *
+     * Acquires the project lock and performs an eviction of projName.
+     *
+     * Post:
+     * 1. projName should not in repoStore
+     * 2. projName must be in swapStore
+     * 3. projName must be SWAPPED in dbStore (last_accessed is null)
+     * @param projName
+     * @throws IOException
+     */
     void evict(String projName) throws IOException;
 
+    /**
+     * Called on a project when it must be restored.
+     *
+     * Pre:
+     * 1. projName should not be in repoStore
+     * 2. projName must be in swapStore
+     * 3. projName must be SWAPPED in dbStore (last_accessed is null)
+     *
+     * Acquires the project lock and restores projName.
+     *
+     * Post:
+     * 1. projName must be in repoStore
+     * 2. projName should not in swapStore
+     * 3. projName should be PRESENT in dbStore (last_accessed is not null)
+     * @param projName
+     * @throws IOException
+     */
     void restore(String projName) throws IOException;
 
 }

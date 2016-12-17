@@ -53,9 +53,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * Created by Winston on 16/11/14.
- */
-/**
  * This is the heart of the Git Bridge. You plug in all the parts (project
  * lock, repo store, db store, swap store, snapshot api, resource cache and
  * postback manager) is called by Git user requests and Overleaf postback
@@ -272,7 +269,10 @@ public class Bridge {
                 if (state != ProjectState.NOT_PRESENT) {
                     continue;
                 }
-                Log.warn("Project: {} not in swap_store, adding", projName);
+                Log.warn(
+                        "Project: {} not in swap_store, adding",
+                        projName
+                );
                 dbStore.setLastAccessedTime(
                         projName,
                         new Timestamp(dotGit.lastModified())
@@ -288,6 +288,13 @@ public class Bridge {
      * ourselves whether a project exists. If a user creates a project on the
      * app, and clones, the project is not on the git bridge disk and must ask
      * the snapshot API whether it exists.
+     *
+     * 1. Acquires the project lock.
+     * 2. Makes a docs request and tries to get the version ID.
+     * 3. If the version ID is valid, returns true.
+     * 4. Otherwise, the version ID is invalid, and throws
+     *    InvalidProjectException, returning false.
+     *
      * @param oauth2 The oauth2 to use for the snapshot API
      * @param projectName The project name
      * @return true iff the project exists
@@ -334,8 +341,14 @@ public class Bridge {
     }
 
     /**
-     * Synchronises the given repository with Overleaf. The project lock must
-     * be acquired.
+     * Synchronises the given repository with Overleaf.
+     *
+     * Pre: the project lock must be acquired for the given repo.
+     *
+     * 1. Queries the project state for the given project name.
+     *    a. NOT_PRESENT = We've never seen it before, and the row for the
+     *                     project doesn't even exist.
+     *    b. PRESENT = The
      *
      * If the project has never been cloned, it is git init'd. If the project
      * is in swap, it is restored to disk. Otherwise, the project was already
@@ -407,7 +420,10 @@ public class Bridge {
                     oldDirectoryContents
             );
         } catch (SevereSnapshotPostException e) {
-            Log.warn("[" + projectName + "] Failed to put to Overleaf", e);
+            Log.warn(
+                    "[" + projectName + "] Failed to put to Overleaf",
+                    e
+            );
             throw e;
         } catch (SnapshotPostException e) {
             /* Stack trace should be printed further up */

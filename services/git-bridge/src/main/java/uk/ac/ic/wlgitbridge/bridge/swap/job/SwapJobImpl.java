@@ -143,6 +143,18 @@ public class SwapJobImpl implements SwapJob {
         swaps.incrementAndGet();
     }
 
+    /**
+     * @see SwapJob#evict(String) for high-level description.
+     *
+     * 1. Acquires the project lock.
+     * 2. Gets a bz2 stream and size of a project from the repo store, or throws
+     * 3. Uploads the bz2 stream and size to the projName in the swapStore.
+     * 4. Sets the last accessed time in the dbStore to null, which makes our
+     *    state SWAPPED
+     * 5. Removes the project from the repo store.
+     * @param projName
+     * @throws IOException
+     */
     @Override
     public void evict(String projName) throws IOException {
         Preconditions.checkNotNull(projName);
@@ -157,6 +169,17 @@ public class SwapJobImpl implements SwapJob {
         Log.info("Evicted project: {}", projName);
     }
 
+    /**
+     * @see SwapJob#restore(String) for high-level description.
+     *
+     * 1. Acquires the project lock.
+     * 2. Gets a bz2 stream for the project from the swapStore.
+     * 3. Fully downloads and places the bz2 stream back in the repo store.
+     * 4. Sets the last accessed time in the dbStore to now, which makes our
+     *    state PRESENT and the last project to be evicted.
+     * @param projName
+     * @throws IOException
+     */
     @Override
     public void restore(String projName) throws IOException {
         try (LockGuard __ = lock.lockGuard(projName)) {

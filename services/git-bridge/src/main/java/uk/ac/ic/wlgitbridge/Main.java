@@ -32,7 +32,10 @@ public class Main {
             new GitBridgeApp(args).run();
         } catch (Throwable t) {
             /* So that we get a timestamp */
-            Log.error("Fatal exception thrown to top level, exiting: ", t);
+            Log.error(
+                    "Fatal exception thrown to top level, exiting: ",
+                    t
+            );
             System.exit(1);
         }
     }

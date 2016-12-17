@@ -39,11 +39,18 @@ public interface RepoStore {
         return bzip2Project(projectName, null);
     }
 
+    /**
+     * Called after {@link #bzip2Project(String, long[])}'s has been safely
+     * uploaded to the swap store. Removes all traces of the project from disk,
+     * i.e. not just its .git, but the whole project's git directory.
+     * @param projectName
+     * @throws IOException
+     */
     void remove(String projectName) throws IOException;
 
     /**
      * Unbzip2s the given data stream into a .git directory for projectName.
-     * Creates the project directory.
+     * Creates the project's git directory.
      * If projectName already exists, throws an IOException.
      * @param projectName the name of the project, e.g. abc123
      * @param dataStream the data stream containing the bzipped contents.

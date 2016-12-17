@@ -1,7 +1,10 @@
 package uk.ac.ic.wlgitbridge.bridge.lock;
 
 /**
- * Created by winston on 20/08/2016.
+ * Project Lock class.
+ *
+ * The locks should be re-entrant. For example, we are usually holding the lock
+ * when a project must be restored, which tries to acquire the lock again.
  */
 public interface ProjectLock {
 
