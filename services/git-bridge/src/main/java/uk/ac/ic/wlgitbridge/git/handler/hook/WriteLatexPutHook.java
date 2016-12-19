@@ -74,7 +74,7 @@ public class WriteLatexPutHook implements PreReceiveHook {
                 );
             } catch (OutOfDateException e) {
                 receiveCommand.setResult(Result.REJECTED_NONFASTFORWARD);
-            } catch (SnapshotPostException e) {
+            } catch (GitUserException e) {
                 handleSnapshotPostException(receivePack, receiveCommand, e);
             } catch (Throwable t) {
                 Log.warn("Throwable on pre receive: ", t);
@@ -90,7 +90,7 @@ public class WriteLatexPutHook implements PreReceiveHook {
     private void handleSnapshotPostException(
             ReceivePack receivePack,
             ReceiveCommand receiveCommand,
-            SnapshotPostException e
+            GitUserException e
     ) {
         String message = e.getMessage();
         receivePack.sendError(message);

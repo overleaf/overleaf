@@ -678,7 +678,7 @@ public class Bridge {
     private void makeCommitsFromSnapshots(
             ProjectRepo repo,
             Collection<Snapshot> snapshots
-    ) throws IOException, SizeLimitExceededException {
+    ) throws IOException, GitUserException {
         String name = repo.getProjectName();
         for (Snapshot snapshot : snapshots) {
             Map<String, RawFile> fileTable = repo.getFiles();

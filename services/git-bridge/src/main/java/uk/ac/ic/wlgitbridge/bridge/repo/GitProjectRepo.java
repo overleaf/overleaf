@@ -9,6 +9,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import uk.ac.ic.wlgitbridge.data.filestore.GitDirectoryContents;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
+import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
 import uk.ac.ic.wlgitbridge.git.exception.SizeLimitExceededException;
 import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
 import uk.ac.ic.wlgitbridge.util.Log;
@@ -62,7 +63,7 @@ public class GitProjectRepo implements ProjectRepo {
 
     @Override
     public Map<String, RawFile> getFiles()
-            throws IOException, SizeLimitExceededException {
+            throws IOException, GitUserException {
         Preconditions.checkState(repository.isPresent());
         return new RepositoryObjectTreeWalker(
                 repository.get()

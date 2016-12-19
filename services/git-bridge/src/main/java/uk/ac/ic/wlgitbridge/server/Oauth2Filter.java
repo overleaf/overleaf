@@ -8,6 +8,7 @@ import uk.ac.ic.wlgitbridge.application.config.Oauth2;
 import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocRequest;
 import uk.ac.ic.wlgitbridge.util.Instance;
+import uk.ac.ic.wlgitbridge.util.Log;
 import uk.ac.ic.wlgitbridge.util.Util;
 
 import javax.servlet.*;
@@ -34,6 +35,17 @@ public class Oauth2Filter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) {}
 
+    /**
+     * The original request from git will not contain the Authorization header.
+     *
+     * So, for projects that need auth, we return 401. Git will swallow this
+     * and prompt the user for user/pass, and then make a brand new request.
+     * @param servletRequest
+     * @param servletResponse
+     * @param filterChain
+     * @throws IOException
+     * @throws ServletException
+     */
     @Override
     public void doFilter(
             ServletRequest servletRequest,
@@ -44,24 +56,29 @@ public class Oauth2Filter implements Filter {
                 ((Request) servletRequest).getRequestURI().split("/")[1],
                 ".git"
         );
+        Log.info("[{}] Checking if auth needed", project);
         GetDocRequest doc = new GetDocRequest(project);
         doc.request();
         try {
             doc.getResult();
         } catch (ForbiddenException e) {
+            Log.info("[{}] Auth needed", project);
             getAndInjectCredentials(
+                    project,
                     servletRequest,
                     servletResponse,
                     filterChain
             );
             return;
         }
+        Log.info("[{}] Auth not needed");
         filterChain.doFilter(servletRequest, servletResponse);
     }
 
     // TODO: this is ridiculous. Check for error cases first, then return/throw
     // TODO: also, use an Optional credential, since we treat it as optional
     private void getAndInjectCredentials(
+            String projectName,
             ServletRequest servletRequest,
             ServletResponse servletResponse,
             FilterChain filterChain
@@ -71,6 +88,7 @@ public class Oauth2Filter implements Filter {
 
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null) {
+            Log.info("[{}] Authorization header present");
             StringTokenizer st = new StringTokenizer(authHeader);
             if (st.hasMoreTokens()) {
                 String basic = st.nextToken();
@@ -100,10 +118,9 @@ public class Oauth2Filter implements Filter {
                                                 oauth2.getOauth2ClientID(),
                                                 oauth2.getOauth2ClientSecret()
                                         )
-                                )
-                                        .execute().getAccessToken();
+                                ).execute().getAccessToken();
                             } catch (TokenResponseException e) {
-                                unauthorized(response);
+                                unauthorized(projectName, response);
                                 return;
                             }
                             final Credential cred = new Credential.Builder(
@@ -118,7 +135,7 @@ public class Oauth2Filter implements Filter {
                                     servletResponse
                             );
                         } else {
-                            unauthorized(response);
+                            unauthorized(projectName, response);
                         }
                     } catch (UnsupportedEncodingException e) {
                         throw new Error("Couldn't retrieve authentication", e);
@@ -126,7 +143,7 @@ public class Oauth2Filter implements Filter {
                 }
             }
         } else {
-            unauthorized(response);
+            unauthorized(projectName, response);
         }
     }
 
@@ -134,8 +151,10 @@ public class Oauth2Filter implements Filter {
     public void destroy() {}
 
     private void unauthorized(
+            String projectName,
             ServletResponse servletResponse
     ) throws IOException {
+        Log.info("[{}] Unauthorized", projectName);
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         response.setContentType("text/plain");
         response.setHeader("WWW-Authenticate", "Basic realm=\"Git Bridge\"");

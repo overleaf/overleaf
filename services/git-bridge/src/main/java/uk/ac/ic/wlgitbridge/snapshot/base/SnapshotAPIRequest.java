@@ -39,6 +39,13 @@ public abstract class SnapshotAPIRequest<T extends Result> extends Request<T> {
                 ).intercept(request1);
                 oauth2.intercept(request1);
             });
+        } else {
+            request.setInterceptor(request1 -> {
+                new BasicAuthentication(
+                        USERNAME,
+                        PASSWORD
+                ).intercept(request1);
+            });
         }
     }
 

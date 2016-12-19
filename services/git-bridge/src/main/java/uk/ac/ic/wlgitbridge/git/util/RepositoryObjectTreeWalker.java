@@ -8,6 +8,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.data.filestore.RepositoryFile;
+import uk.ac.ic.wlgitbridge.git.exception.InvalidGitRepository;
 import uk.ac.ic.wlgitbridge.git.exception.SizeLimitExceededException;
 
 import java.io.IOException;
@@ -44,7 +45,7 @@ public class RepositoryObjectTreeWalker {
     }
 
     public RawDirectory getDirectoryContents(
-    ) throws IOException, SizeLimitExceededException {
+    ) throws IOException, SizeLimitExceededException, InvalidGitRepository {
         return new RawDirectory(walkGitObjectTree());
     }
 
@@ -63,7 +64,7 @@ public class RepositoryObjectTreeWalker {
     }
 
     private Map<String, RawFile> walkGitObjectTree(
-    ) throws IOException, SizeLimitExceededException {
+    ) throws IOException, SizeLimitExceededException, InvalidGitRepository {
         Map<String, RawFile> fileContentsTable = new HashMap<>();
         if (treeWalk == null) {
             return fileContentsTable;
@@ -71,9 +72,13 @@ public class RepositoryObjectTreeWalker {
         while (treeWalk.next()) {
             String path = treeWalk.getPathString();
 
+            ObjectId objectId = treeWalk.getObjectId(0);
+            if (!repository.hasObject(objectId)) {
+                throw new InvalidGitRepository();
+            }
             try {
                 byte[] content = repository.open(
-                        treeWalk.getObjectId(0)
+                        objectId
                 ).getBytes();
                 fileContentsTable.put(path, new RepositoryFile(path, content));
             } catch (LargeObjectException e) {
