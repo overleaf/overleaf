@@ -1,5 +1,4 @@
 Settings = require('settings-sharelatex')
-redis = require('redis-sharelatex')
 logger = require("logger-sharelatex")
 Async = require('async')
 _ = require('underscore')
