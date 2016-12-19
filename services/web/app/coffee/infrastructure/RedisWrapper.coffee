@@ -21,7 +21,7 @@ module.exports = Redis =
 		if redisFeatureSettings?.cluster?
 			logger.log {feature}, "creating redis-cluster client"
 			rclient = new ioredis.Cluster(redisFeatureSettings.cluster)
-			rclient._is_redis_cluster = true
+			rclient.__is_redis_cluster = true
 		else
 			logger.log {feature}, "creating redis client"
 			rclient = redis.createClient(redisFeatureSettings)
