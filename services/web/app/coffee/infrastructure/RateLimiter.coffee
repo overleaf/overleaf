@@ -8,14 +8,13 @@ module.exports = RateLimiter =
 	_buildKey: (endpoint, subject) ->
 		return "RateLimiter:#{endpoint}:{#{subject}}"
 
-	addCount: (opts, callback = (opts, shouldProcess)->)->
+	addCount: (opts, callback = (err, shouldProcess)->)->
 		k = RateLimiter._buildKey(opts.endpointName, opts.subjectName)
 		multi = rclient.multi()
 		multi.incr(k)
 		multi.get(k)
 		multi.expire(k, opts.timeInterval)
 		multi.exec (err, results)->
-			console.log ">> results", results
 			count = results[1]
 			# account for the different results from `multi` when using cluster
 			if count instanceof Object
