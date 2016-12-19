@@ -50,7 +50,6 @@
     "passport": "^0.3.2",
     "passport-ldapauth": "^0.6.0",
     "passport-local": "^1.0.0",
-    "redback": "0.4.0",
     "redis": "0.10.1",
     "redis-sharelatex": "0.0.9",
     "request": "^2.69.0",
