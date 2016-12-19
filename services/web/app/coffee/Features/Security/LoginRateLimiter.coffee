@@ -1,23 +1,21 @@
-Settings = require('settings-sharelatex')
-redis = require("redis-sharelatex")
-rclient = redis.createClient(Settings.redis.web)
+RateLimiter = require('../../infrastructure/RateLimiter')
 
-buildKey = (k)->
-	return "LoginRateLimit:#{k}"
 
 ONE_MIN = 60
 ATTEMPT_LIMIT = 10
 
+
 module.exports =
-	processLoginRequest: (email, callback)->
-		multi = rclient.multi()
-		multi.incr(buildKey(email))
-		multi.get(buildKey(email))
-		multi.expire(buildKey(email), ONE_MIN * 2)
-		multi.exec (err, results)->
-			loginCount = results[1]
-			allow = loginCount <= ATTEMPT_LIMIT
-			callback err, allow
+
+	processLoginRequest: (email, callback) ->
+		opts =
+			endpointName: 'login'
+			throttle: ATTEMPT_LIMIT
+			timeInterval: ONE_MIN * 2
+			subjectName: email
+		RateLimiter.addCount opts, (err, shouldAllow) ->
+			callback(err, shouldAllow)
 
 	recordSuccessfulLogin: (email, callback = ->)->
-		rclient.del buildKey(email), callback
+		RateLimiter.clearRateLimit 'login', email, callback
+
