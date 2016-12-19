@@ -25,7 +25,6 @@ checkCanStoreFiles = (callback)->
 
 checkFileConvert = (callback)->
 	imgPath = path.join(settings.path.uploadFolder, "/tiny.pdf")
-	console.log imgPath, settings.path.uploadFolder
 	async.waterfall [
 		(cb)->
 			fs.copy("./tiny.pdf", imgPath, cb)
@@ -37,14 +36,18 @@ checkFileConvert = (callback)->
 
 isOk = true
 
+q = async.queue (task, callback)->
+	task(callback)
 
-runCheckInBackground = ->
+
+runChecks = (callback)->
 	async.parallel [checkFileConvert, checkCanStoreFiles], (err)->
 		if err? 
 			logger.err err:err, "Health check: error running"
 			isOk = false
 		else
 			isOk = true
+		callback()
 
 module.exports =
 
@@ -53,4 +56,4 @@ module.exports =
 			res.send 200
 		else
 			res.send 500
-		runCheckInBackground()
+		q.push runChecks # run in background 1 at a time
