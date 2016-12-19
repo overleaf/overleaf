@@ -39,7 +39,6 @@ app.use (req, res, next) ->
 	requestDomain.add res
 	requestDomain.on "error", (err)->
 		try
-			appIsOk = false
 			# request a shutdown to prevent memory leaks
 			beginShutdown()
 			if !res.headerSent
