@@ -27,6 +27,8 @@ module.exports =
 		stream.pipe writeStream
 
 	deleteFile: (fsPath, callback)->
+		if !fsPath? or fsPath == ""
+			return callback()
 		logger.log fsPath:fsPath, "removing local temp file"
 		fs.unlink fsPath, callback
 
