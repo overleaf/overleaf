@@ -26,6 +26,8 @@ chown www-data:www-data /var/lib/sharelatex/tmp/uploads
 mkdir -p /var/lib/sharelatex/tmp/dumpFolder
 chown www-data:www-data /var/lib/sharelatex/tmp/dumpFolder
 
+chown www-data:www-data /var/www/
+
 if [ ! -e "/var/lib/sharelatex/data/db.sqlite" ]; then
        touch /var/lib/sharelatex/data/db.sqlite
 fi
