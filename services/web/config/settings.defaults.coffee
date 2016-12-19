@@ -48,6 +48,16 @@ module.exports = settings =
 		# 		{host: 'localhost', port: 7005}
 		# 	]
 
+		# ratelimiter:
+		# 	cluster: [
+		# 		{host: 'localhost', port: 7000}
+		# 		{host: 'localhost', port: 7001}
+		# 		{host: 'localhost', port: 7002}
+		# 		{host: 'localhost', port: 7003}
+		# 		{host: 'localhost', port: 7004}
+		# 		{host: 'localhost', port: 7005}
+		# 	]
+
 		api:
 			host: "localhost"
 			port: "6379"
