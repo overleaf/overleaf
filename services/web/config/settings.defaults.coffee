@@ -276,6 +276,10 @@ module.exports = settings =
 	# Cookie max age (in milliseconds). Set to false for a browser session.
 	cookieSessionLength: 5 * 24 * 60 * 60 * 1000 # 5 days
 
+	# When true, only allow invites to be sent to email addresses that
+	# already have user accounts
+	restrictInvitesToExistingAccounts: false
+
 	# Should we allow access to any page without logging in? This includes
 	# public projects, /learn, /templates, about pages, etc.
 	allowPublicAccess: if process.env["SHARELATEX_ALLOW_PUBLIC_ACCESS"] == 'true' then true else false
