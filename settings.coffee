@@ -393,51 +393,6 @@ if parse(process.env["SHARELATEX_IS_SERVER_PRO"]) == true
 
 # LDAP - SERVER PRO ONLY
 # ----------
-# Settings below use a working LDAP test server kindly provided by forumsys.com
-# When testing with forumsys.com use username = einstein and password = password
-	
-
-# if process.env["SHARELATEX_LDAP_HOST"]
-# 	settings.externalAuth = true
-# 	settings.ldap =
-# 		host: process.env["SHARELATEX_LDAP_HOST"]
-# 		dn: process.env["SHARELATEX_LDAP_DN"]
-# 		baseSearch: process.env["SHARELATEX_LDAP_BASE_SEARCH"]
-# 		filter:  process.env["SHARELATEX_LDAP_FILTER"]
-# 		failMessage: process.env["SHARELATEX_LDAP_FAIL_MESSAGE"] or 'LDAP User Fail'
-# 		fieldName: process.env["SHARELATEX_LDAP_FIELD_NAME"] or 'LDAP User'
-# 		placeholder: process.env["SHARELATEX_LDAP_PLACEHOLDER"] or 'LDAP User ID'
-# 		emailAtt: process.env["SHARELATEX_LDAP_EMAIL_ATT"] or 'mail'
-# 		anonymous: parse(process.env["SHARELATEX_LDAP_ANONYMOUS"])
-# 		adminDN: process.env["SHARELATEX_LDAP_ADMIN_DN"]
-# 		adminPW: process.env["SHARELATEX_LDAP_ADMIN_PW"]
-# 		starttls:  parse(process.env["SHARELATEX_LDAP_TLS"])
-# 		nameAtt: process.env["SHARELATEX_LDAP_NAME_ATT"]
-# 		lastNameAtt: process.env["SHARELATEX_LDAP_LAST_NAME_ATT"]
-# 		updateUserDetailsOnLogin: process.env["SHARELATEX_LDAP_UPDATE_USER_DETAILS_ON_LOGIN"] == 'true'
-
-# 	if process.env["SHARELATEX_LDAP_TLS_OPTS_CA_PATH"]
-# 		try
-# 			ca = JSON.parse(process.env["SHARELATEX_LDAP_TLS_OPTS_CA_PATH"])
-# 		catch e
-# 			console.error "could not parse SHARELATEX_LDAP_TLS_OPTS_CA_PATH, invalid JSON"
-
-# 		if typeof(ca)  == 'string'
-# 			ca_paths = [ca]
-# 		else if typeof(ca) == 'object' && ca?.length?
-# 			ca_paths = ca
-# 		else
-# 			console.error "problem parsing SHARELATEX_LDAP_TLS_OPTS_CA_PATH"
-
-# 		settings.ldap.tlsOptions =
-# 			rejectUnauthorized: process.env["SHARELATEX_LDAP_TLS_OPTS_REJECT_UNAUTH"] == "true"
-# 			ca:ca_paths  # e.g.'/etc/ldap/ca_certs.pem'
-
-
-
-
-# LDAP - SERVER PRO ONLY
-# ----------
 
 if process.env["SHARELATEX_LDAP_HOST"]
 	console.error """
