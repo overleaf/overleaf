@@ -109,6 +109,7 @@ settings =
 	# The name this is used to describe your ShareLaTeX Installation
 	appName: process.env["SHARELATEX_APP_NAME"] or "ShareLaTeX (Community Edition)"
 
+	restrictInvitesToExistingAccounts: process.env["SHARELATEX_RESTRICT_INVITES_TO_EXISTING_ACCOUNTS"] == 'true'
 
 	nav:
 		title: process.env["SHARELATEX_NAV_TITLE"] or  process.env["SHARELATEX_APP_NAME"] or "ShareLaTeX Community Edition"
