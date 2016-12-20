@@ -1,5 +1,7 @@
 module.exports =
 	user: (user) ->
+		if !user?
+			return null
 		if !user._id?
 			user = {_id : user}
 		return {
@@ -10,6 +12,8 @@ module.exports =
 		}
 	
 	project: (project) ->
+		if !project?
+			return null
 		if !project._id?
 			project = {_id: project}
 		return {

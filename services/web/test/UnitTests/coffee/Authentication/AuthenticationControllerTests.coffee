@@ -91,8 +91,11 @@ describe "AuthenticationController", ->
 			@info = null
 			@req.login = sinon.stub().callsArgWith(1, null)
 			@res.json = sinon.stub()
-			@req.session = @session = {passport: {user: @user}}
-			@req.session.destroy = sinon.stub()
+			@req.session = @session = {
+				passport: {user: @user},
+				postLoginRedirect: "/path/to/redir/to"
+			}
+			@req.session.destroy = sinon.stub().callsArgWith(0, null)
 			@req.session.save = sinon.stub().callsArgWith(0, null)
 			@req.sessionStore = {generate: sinon.stub()}
 			@passport.authenticate.callsArgWith(1, null, @user, @info)
@@ -114,11 +117,11 @@ describe "AuthenticationController", ->
 		describe 'when authenticate produces a user', ->
 
 			beforeEach ->
-				@req._redir = 'some_redirect'
+				@req.session.postLoginRedirect = 'some_redirect'
 				@passport.authenticate.callsArgWith(1, null, @user, @info)
 
 			afterEach ->
-				delete @req._redir
+				delete @req.session.postLoginRedirect
 
 			it 'should call req.login', () ->
 				@AuthenticationController.passportLogin @req, @res, @next
@@ -128,7 +131,7 @@ describe "AuthenticationController", ->
 			it 'should send a json response with redirect', () ->
 				@AuthenticationController.passportLogin @req, @res, @next
 				@res.json.callCount.should.equal 1
-				@res.json.calledWith({redir: @req._redir}).should.equal true
+				@res.json.calledWith({redir: 'some_redirect'}).should.equal true
 
 			describe 'when session.save produces an error', () ->
 				beforeEach ->
@@ -152,10 +155,61 @@ describe "AuthenticationController", ->
 				@AuthenticationController.passportLogin @req, @res, @next
 				@req.login.callCount.should.equal 0
 
-			it 'should send a json response with redirect', () ->
+			it 'should not send a json response with redirect', () ->
 				@AuthenticationController.passportLogin @req, @res, @next
 				@res.json.callCount.should.equal 1
 				@res.json.calledWith({message: @info}).should.equal true
+				expect(@res.json.lastCall.args[0].redir?).to.equal false
+
+	describe 'afterLoginSessionSetup', ->
+
+		beforeEach ->
+			@req.login = sinon.stub().callsArgWith(1, null)
+			@req.session = @session = {passport: {user: @user}}
+			@req.session =
+				passport: {user: {_id: "one"}}
+			@req.session.destroy = sinon.stub().callsArgWith(0, null)
+			@req.session.save = sinon.stub().callsArgWith(0, null)
+			@req.sessionStore = {generate: sinon.stub()}
+			@UserSessionsManager.trackSession = sinon.stub()
+			@call = (callback) =>
+				@AuthenticationController.afterLoginSessionSetup @req, @user, callback
+
+		it 'should not produce an error', (done) ->
+			@call (err) =>
+				expect(err).to.equal null
+				done()
+
+		it 'should call req.login', (done) ->
+			@call (err) =>
+				@req.login.callCount.should.equal 1
+				done()
+
+		it 'should call req.session.save', (done) ->
+			@call (err) =>
+				@req.session.save.callCount.should.equal 1
+				done()
+
+		it 'should call UserSessionsManager.trackSession', (done) ->
+			@call (err) =>
+				@UserSessionsManager.trackSession.callCount.should.equal 1
+				done()
+
+		describe 'when req.session.save produces an error', ->
+
+			beforeEach ->
+				@req.session.save = sinon.stub().callsArgWith(0, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.not.be.oneOf [null, undefined]
+					expect(err).to.be.instanceof Error
+					done()
+
+			it 'should not call UserSessionsManager.trackSession', (done) ->
+				@call (err) =>
+					@UserSessionsManager.trackSession.callCount.should.equal 0
+					done()
 
 	describe 'getSessionUser', ->
 
@@ -180,7 +234,8 @@ describe "AuthenticationController", ->
 			@req.body =
 				email: @email
 				password: @password
-				redir: @redir = "/path/to/redir/to"
+				session:
+					postLoginRedirect: "/path/to/redir/to"
 			@cb = sinon.stub()
 
 		describe "when the users rate limit", ->
@@ -214,9 +269,6 @@ describe "AuthenticationController", ->
 
 			it "should set res.session.justLoggedIn", ->
 				@req.session.justLoggedIn.should.equal true
-
-			it "should redirect the user to the specified location", ->
-				expect(@req._redir).to.deep.equal @redir
 
 			it "should record the successful login", ->
 				@AuthenticationController._recordSuccessfulLogin
@@ -262,17 +314,6 @@ describe "AuthenticationController", ->
 				@logger.log
 					.calledWith(email: @email.toLowerCase(), "failed log in")
 					.should.equal true
-
-		describe "with a URL to a different domain", ->
-			beforeEach ->
-				@LoginRateLimiter.processLoginRequest.callsArgWith(1, null, true)
-				@req.body.redir = "http://www.facebook.com/test"
-				@AuthenticationManager.authenticate = sinon.stub().callsArgWith(2, null, @user)
-				@cb = sinon.stub()
-				@AuthenticationController.doPassportLogin(@req, @req.body.email, @req.body.password, @cb)
-
-			it "should only redirect to the local path", ->
-				expect(@req._redir).to.equal "/test"
 
 	describe "getLoggedInUserId", ->
 
@@ -438,8 +479,8 @@ describe "AuthenticationController", ->
 			@AuthenticationController._redirectToRegisterPage(@req, @res)
 
 		it "should redirect to the register page with a query string attached", ->
-			@res.redirectedTo
-				.should.equal "/register?extra_query=foo&redir=%2Ftarget%2Furl"
+			@req.session.postLoginRedirect.should.equal '/target/url?extra_query=foo'
+			@res.redirectedTo.should.equal "/register?extra_query=foo"
 
 		it "should log out a message", ->
 			@logger.log
@@ -454,7 +495,8 @@ describe "AuthenticationController", ->
 			@AuthenticationController._redirectToLoginPage(@req, @res)
 
 		it "should redirect to the register page with a query string attached", ->
-			@res.redirectedTo.should.equal "/login?extra_query=foo&redir=%2Ftarget%2Furl"
+			@req.session.postLoginRedirect.should.equal '/target/url?extra_query=foo'
+			@res.redirectedTo.should.equal "/login?extra_query=foo"
 
 
 	describe "_recordSuccessfulLogin", ->
@@ -485,3 +527,34 @@ describe "AuthenticationController", ->
 
 		it "should call the callback", ->
 			@callback.called.should.equal true
+
+
+	describe '_setRedirectInSession', ->
+		beforeEach ->
+			@req = {session: {}}
+			@req.path = "/somewhere"
+			@req.query = {one: "1"}
+
+		it 'should set redirect property on session', ->
+			@AuthenticationController._setRedirectInSession(@req)
+			expect(@req.session.postLoginRedirect).to.equal "/somewhere?one=1"
+
+		it 'should set the supplied value', ->
+			@AuthenticationController._setRedirectInSession(@req, '/somewhere/specific')
+			expect(@req.session.postLoginRedirect).to.equal "/somewhere/specific"
+
+	describe '_getRedirectFromSession', ->
+		beforeEach ->
+			@req = {session: {postLoginRedirect: "/a?b=c"}}
+
+		it 'should get redirect property from session', ->
+			expect(@AuthenticationController._getRedirectFromSession(@req)).to.equal "/a?b=c"
+
+	describe '_clearRedirectFromSession', ->
+		beforeEach ->
+			@req = {session: {postLoginRedirect: "/a?b=c"}}
+
+		it 'should remove the redirect property from session', ->
+			@AuthenticationController._clearRedirectFromSession(@req)
+			expect(@req.session.postLoginRedirect).to.equal undefined
+

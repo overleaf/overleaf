@@ -15,12 +15,32 @@ settings = require "settings-sharelatex"
 
 module.exports = UserController =
 
-	deleteUser: (req, res)->
+	tryDeleteUser: (req, res, next) ->
 		user_id = AuthenticationController.getLoggedInUserId(req)
-		UserDeleter.deleteUser user_id, (err)->
-			if !err?
-				req.session?.destroy()
-			res.sendStatus(200)
+		password = req.body.password
+		logger.log {user_id}, "trying to delete user account"
+		if !password? or password == ''
+			logger.err {user_id}, 'no password supplied for attempt to delete account'
+			return res.sendStatus(403)
+		AuthenticationManager.authenticate {_id: user_id}, password, (err, user) ->
+			if err?
+				logger.err {user_id}, 'error authenticating during attempt to delete account'
+				return next(err)
+			if !user
+				logger.err {user_id}, 'auth failed during attempt to delete account'
+				return res.sendStatus(403)
+			UserDeleter.deleteUser user_id, (err) ->
+				if err?
+					logger.err {user_id}, "error while deleting user account"
+					return next(err)
+				sessionId = req.sessionID
+				req.logout?()
+				req.session.destroy (err) ->
+					if err?
+						logger.err err: err, 'error destorying session'
+						return next(err)
+					UserSessionsManager.untrackSession(user, sessionId)
+					res.sendStatus(200)
 
 	unsubscribe: (req, res)->
 		user_id = AuthenticationController.getLoggedInUserId(req)
@@ -30,6 +50,7 @@ module.exports = UserController =
 
 	updateUserSettings : (req, res)->
 		user_id = AuthenticationController.getLoggedInUserId(req)
+		usingExternalAuth = settings.ldap? or settings.saml?
 		logger.log user_id: user_id, "updating account settings"
 		User.findById user_id, (err, user)->
 			if err? or !user?
@@ -60,12 +81,15 @@ module.exports = UserController =
 				user.ace.syntaxValidation = req.body.syntaxValidation
 			user.save (err)->
 				newEmail = req.body.email?.trim().toLowerCase()
-				if !newEmail? or newEmail == user.email
+				if !newEmail? or newEmail == user.email or usingExternalAuth
+					# end here, don't update email
 					AuthenticationController.setInSessionUser(req, {first_name: user.first_name, last_name: user.last_name})
 					return res.sendStatus 200
 				else if newEmail.indexOf("@") == -1
+					# email invalid
 					return res.sendStatus(400)
 				else
+					# update the user email
 					UserUpdater.changeEmailAddress user_id, newEmail, (err)->
 						if err?
 							logger.err err:err, user_id:user_id, newEmail:newEmail, "problem updaing users email address"
@@ -143,7 +167,7 @@ module.exports = UserController =
 									type:'success'
 									text:'Your password has been changed'
 			else
-				logger.log user: user, "current password wrong"
+				logger.log user_id: user_id, "current password wrong"
 				res.send
 					message:
 					  type:'error'

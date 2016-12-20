@@ -7,8 +7,19 @@ div.full-size(
 	resize-proportionally="true"
 	initial-size-east="'50%'"
 	minimum-restore-size-east="300"
+	allow-overflow-on="'center'"
 )
-	.ui-layout-center
+	.ui-layout-center(
+		ng-controller="ReviewPanelController",
+		ng-class="{\
+			'rp-state-current-file': (reviewPanel.subView === SubViews.CUR_FILE),\
+			'rp-state-current-file-expanded': (reviewPanel.subView === SubViews.CUR_FILE && ui.reviewPanelOpen),\
+			'rp-state-current-file-mini': (reviewPanel.subView === SubViews.CUR_FILE && !ui.reviewPanelOpen),\
+			'rp-state-overview': (reviewPanel.subView === SubViews.OVERVIEW),\
+			'rp-size-mini': (!ui.reviewPanelOpen && reviewPanel.hasEntries),\
+			'rp-size-expanded': ui.reviewPanelOpen\
+		}"
+	)
 		.loading-panel(ng-show="!editor.sharejs_doc || editor.opening")
 			span(ng-show="editor.open_doc_id")
 				i.fa.fa-spin.fa-refresh
@@ -24,7 +35,7 @@ div.full-size(
 			keybindings="settings.mode",
 			font-size="settings.fontSize",
 			auto-complete="settings.autoComplete",
-			spell-check="true",
+			spell-check="!anonymous",
 			spell-check-language="project.spellCheckLanguage",
 			highlights="onlineUserCursorHighlights[editor.open_doc_id]"
 			show-print-margin="false",
@@ -32,12 +43,21 @@ div.full-size(
 			last-updated="editor.last_updated",
 			cursor-position="editor.cursorPosition",
 			goto-line="editor.gotoLine",
-			resize-on="layout:main:resize,layout:pdf:resize",
+			resize-on="layout:main:resize,layout:pdf:resize,layout:review:resize,review-panel:toggle",
 			annotations="pdf.logEntryAnnotations[editor.open_doc_id]",
 			read-only="!permissions.write",
-			on-ctrl-enter="recompileViaKey"
-			syntax-validation="settings.syntaxValidation"
+			file-name="editor.open_doc_name",
+			on-ctrl-enter="recompileViaKey",
+			syntax-validation="settings.syntaxValidation",
+			review-panel="reviewPanel",
+			events-bridge="reviewPanelEventsBridge"
+			track-changes-enabled="trackChangesFeatureFlag",
+			track-new-changes= "reviewPanel.trackNewChanges",
+			changes-tracker="reviewPanel.changesTracker",
+			doc-id="editor.open_doc_id"
 		)
+		
+		include ./review-panel
 
 	.ui-layout-east
 		div(ng-if="ui.pdfLayout == 'sideBySide'")

@@ -9,7 +9,9 @@ define [
 	"ide/pdf/PdfManager"
 	"ide/binary-files/BinaryFilesManager"
 	"ide/references/ReferencesManager"
+	"ide/review-panel/ReviewPanelManager"
 	"ide/SafariScrollPatcher"
+	"ide/FeatureOnboardingController"
 	"ide/settings/index"
 	"ide/share/index"
 	"ide/chat/index"
@@ -41,6 +43,7 @@ define [
 	PdfManager
 	BinaryFilesManager
 	ReferencesManager
+	ReviewPanelManager
 	SafariScrollPatcher
 ) ->
 
@@ -54,6 +57,9 @@ define [
 			else
 				this.$originalApply(fn);
 
+		if window.location.search.match /tcon=true/ # track changes on
+			$scope.trackChangesFeatureFlag = true
+	
 		$scope.state = {
 			loading: true
 			load_progress: 40
@@ -64,35 +70,31 @@ define [
 			view: "editor"
 			chatOpen: false
 			pdfLayout: 'sideBySide'
+			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}") and $scope.trackChangesFeatureFlag
+			showCodeCheckerOnboarding: !window.userSettings.syntaxValidation?
 		}
 		$scope.user = window.user
+
+		$scope.shouldABTestPlans = false
+		if $scope.user.signUpDate >= '2016-10-27'
+			$scope.shouldABTestPlans = true
+
 		$scope.settings = window.userSettings
 		$scope.anonymous = window.anonymous
 
 		$scope.chat = {}
 
+		ide.toggleReviewPanel = $scope.toggleReviewPanel = () ->
+			$scope.ui.reviewPanelOpen = !$scope.ui.reviewPanelOpen
 
-		# Only run the header AB test for newly registered users.
-		_abTestStartDate = new Date(Date.UTC(2016, 8, 28))
-		_userSignUpDate = new Date(window.user.signUpDate)
-		
-		$scope.shouldABTestHeaderLabels = _userSignUpDate > _abTestStartDate
-		$scope.headerLabelsABVariant = ""
-
-		if ($scope.shouldABTestHeaderLabels)
-			sixpack.participate "editor-header", [ "default", "labels"], (chosenVariation) ->
-				$scope.headerLabelsABVariant = chosenVariation
-
-		$scope.trackABTestConversion = (headerItem) ->
-			event_tracking.sendMB "header-ab-conversion", {
-				headerItem: headerItem,
-				variant: $scope.headerLabelsABVariant
-			}
+		$scope.$watch "ui.reviewPanelOpen", (value) ->
+			if value?
+				localStorage "ui.reviewPanelOpen.#{window.project_id}", value
 
 		# Tracking code.
 		$scope.$watch "ui.view", (newView, oldView) ->
 			if newView? and newView != "editor" and newView != "pdf"
-				event_tracking.sendMBOnce "ide-open-view-#{ newView }-once" 
+				event_tracking.sendMBOnce "ide-open-view-#{ newView }-once"
 
 		$scope.$watch "ui.chatOpen", (isOpen) ->
 			event_tracking.sendMBOnce "ide-open-chat-once" if isOpen
@@ -105,7 +107,7 @@ define [
 		# End of tracking code.
 
 		window._ide = ide
-		
+
 		ide.validFileRegex = '^[^\*\/]*$' # Don't allow * and /
 
 		ide.project_id = $scope.project_id = window.project_id

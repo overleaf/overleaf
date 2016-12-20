@@ -33,25 +33,40 @@ block content
 													)
 													span.small.text-primary(ng-show="settingsForm.email.$invalid && settingsForm.email.$dirty")
 														|  #{translate("must_be_email_address")}
-											.form-group
-												label(for='firstName').control-label #{translate("first_name")}
-												input.form-control(
-													type='text',
-													name='first_name',
-													value=user.first_name
-												)
-											.form-group
-												label(for='lastName').control-label #{translate("last_name")}
-												input.form-control(
-													type='text',
-													name='last_name',
-													value=user.last_name
-												)
-											.actions
-												button.btn.btn-primary(
-													type='submit',
-													ng-disabled="settingsForm.$invalid"
-												)  #{translate("update")}
+											else
+												// show the email, non-editable
+												.form-group
+													label.control-label #{translate("email")}
+													div.form-control(readonly="true") #{user.email}
+
+											if shouldAllowEditingDetails
+												.form-group
+													label(for='firstName').control-label #{translate("first_name")}
+													input.form-control(
+														type='text',
+														name='first_name',
+														value=user.first_name
+													)
+												.form-group
+													label(for='lastName').control-label #{translate("last_name")}
+													input.form-control(
+														type='text',
+														name='last_name',
+														value=user.last_name
+													)
+												.actions
+													button.btn.btn-primary(
+														type='submit',
+														ng-disabled="settingsForm.$invalid"
+													)  #{translate("update")}
+											else
+												.form-group
+													label.control-label #{translate("first_name")}
+													div.form-control(readonly="true") #{user.first_name}
+												.form-group
+													label.control-label #{translate("last_name")}
+													div.form-control(readonly="true") #{user.last_name}
+
 									if !externalAuthenticationSystemUsed()
 										.col-md-5.col-md-offset-1
 											h3  #{translate("change_password")}
@@ -150,16 +165,32 @@ block content
 	script(type='text/ng-template', id='deleteAccountModalTemplate')
 		.modal-header
 			h3 #{translate("delete_account")}
-		.modal-body
-			p !{translate("delete_account_warning_message_2")}
+		div.modal-body#delete-account-modal
+			p !{translate("delete_account_warning_message_3")}
 			form(novalidate, name="deleteAccountForm")
+				label #{translate('email')}
 				input.form-control(
 					type="text",
+					autocomplete="off",
 					placeholder="",
 					ng-model="state.deleteText",
 					focus-on="open",
 					ng-keyup="checkValidation()"
 				)
+				label #{translate('password')}
+				input.form-control(
+					type="password",
+					autocomplete="off",
+					placeholder="",
+					ng-model="state.password",
+					ng-keyup="checkValidation()"
+				)
+			div(ng-if="state.error")
+				div.alert.alert-danger
+					| #{translate('generic_something_went_wrong')}
+			div(ng-if="state.invalidCredentials")
+				div.alert.alert-danger
+					| #{translate('email_or_password_wrong_try_again')}
 		.modal-footer
 			button.btn.btn-default(
 				ng-click="cancel()"

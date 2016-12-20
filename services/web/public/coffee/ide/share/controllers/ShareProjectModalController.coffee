@@ -8,6 +8,7 @@ define [
 		}
 		$scope.state = {
 			error: null
+			errorReason: null
 			inflight: false
 			startedFreeTrial: false
 			invites: []
@@ -19,11 +20,16 @@ define [
 			, 200
 
 		INFINITE_COLLABORATORS = -1
-		$scope.$watch "(project.members.length + project.invites.length)", (noOfMembers) ->
-			allowedNoOfMembers = $scope.project.features.collaborators
-			$scope.canAddCollaborators = noOfMembers < allowedNoOfMembers or allowedNoOfMembers == INFINITE_COLLABORATORS
 
-		window._m = projectMembers
+		$scope.refreshCanAddCollaborators = () ->
+			allowedNoOfMembers = $scope.project.features.collaborators
+			$scope.canAddCollaborators = (
+				($scope.project.members.length + $scope.project.invites.length) < allowedNoOfMembers or allowedNoOfMembers == INFINITE_COLLABORATORS
+			)
+		$scope.refreshCanAddCollaborators()
+
+		$scope.$watch "(project.members.length + project.invites.length)", (_noOfMembers) ->
+			$scope.refreshCanAddCollaborators()
 
 		$scope.autocompleteContacts = []
 		do loadAutocompleteUsers = () ->
@@ -64,7 +70,8 @@ define [
 
 				members = $scope.inputs.contacts
 				$scope.inputs.contacts = []
-				$scope.state.error = null
+				$scope.state.error = false
+				$scope.state.errorReason = null
 				$scope.state.inflight = true
 
 				if !$scope.project.invites?
@@ -96,17 +103,22 @@ define [
 
 					request
 						.success (data) ->
-							if data.invite
-								invite = data.invite
-								$scope.project.invites.push invite
+							if data.error
+								$scope.state.error = true
+								$scope.state.errorReason = "#{data.error}"
+								$scope.state.inflight = false
 							else
-								if data.users?
-									users = data.users
-								else if data.user?
-									users = [data.user]
+								if data.invite
+									invite = data.invite
+									$scope.project.invites.push invite
 								else
-									users = []
-								$scope.project.members.push users...
+									if data.users?
+										users = data.users
+									else if data.user?
+										users = [data.user]
+									else
+										users = []
+									$scope.project.members.push users...
 
 							setTimeout () ->
 								# Give $scope a chance to update $scope.canAddCollaborators
@@ -116,6 +128,7 @@ define [
 						.error () ->
 							$scope.state.inflight = false
 							$scope.state.error = true
+							$scope.state.errorReason = null
 
 			$timeout addMembers, 50 # Give email list a chance to update
 

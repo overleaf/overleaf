@@ -8,11 +8,12 @@ define [
 			@$scope.editor = {
 				sharejs_doc: null
 				open_doc_id: null
+				open_doc_name: null
 				opening: true
 			}
 
 			@$scope.$on "entity:selected", (event, entity) =>
-				if (@$scope.ui.view != "track-changes" and entity.type == "doc")
+				if (@$scope.ui.view != "history" and entity.type == "doc")
 					@openDoc(entity)
 
 			@$scope.$on "entity:deleted", (event, entity) =>
@@ -40,6 +41,11 @@ define [
 			return if !doc?
 			@openDoc(doc)
 
+		openDocId: (doc_id, options = {}) ->
+			doc = @ide.fileTreeManager.findEntityById(doc_id)
+			return if !doc?
+			@openDoc(doc, options)
+
 		openDoc: (doc, options = {}) ->
 			sl_console.log "[openDoc] Opening #{doc.id}"
 			@$scope.ui.view = "editor"
@@ -51,7 +57,12 @@ define [
 					# CursorPositionManager
 					setTimeout () =>
 						@$scope.$broadcast "editor:gotoLine", options.gotoLine, options.gotoColumn
-					,0
+					, 0
+				else if options.gotoOffset?
+					setTimeout () =>
+						@$scope.$broadcast "editor:gotoOffset", options.gotoOffset
+					, 0
+					
 
 			if doc.id == @$scope.editor.open_doc_id and !options.forceReopen
 				@$scope.$apply () =>
@@ -59,6 +70,7 @@ define [
 				return
 
 			@$scope.editor.open_doc_id = doc.id
+			@$scope.editor.open_doc_name = doc.name
 
 			@ide.localStorage "doc.open_id.#{@$scope.project_id}", doc.id
 			@ide.fileTreeManager.selectEntity(doc)
@@ -107,7 +119,7 @@ define [
 					@ide.reportError(error, meta)
 					@ide.showGenericMessageModal(
 						"Out of sync"
-						"Sorry, this file has gone out of sync and we need to do a full refresh. <br> <a href='http://sharelatex.tenderapp.com/help/kb/browsers/editor-out-of-sync-problems'>Please see this help guide for more information</a>"
+						"Sorry, this file has gone out of sync and we need to do a full refresh. <br> <a href='/learn/Kb/Editor_out_of_sync_problems'>Please see this help guide for more information</a>"
 					)
 				@openDoc(doc, forceReopen: true)
 

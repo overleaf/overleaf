@@ -94,8 +94,6 @@ define [
 					$(window).unload () ->
 						ide.localStorage("layout.#{name}", element.layout().readState())
 
-
-
 					if attrs.openEast?
 						scope.$watch attrs.openEast, (value, oldValue) ->
 							if value? and value != oldValue
@@ -106,6 +104,9 @@ define [
 							setTimeout () ->
 								scope.$digest()
 							, 0
+
+					if attrs.allowOverflowOn?
+						element.layout().allowOverflow(scope.$eval(attrs.allowOverflowOn))
 
 					resetOpenStates()
 					onInternalResize()

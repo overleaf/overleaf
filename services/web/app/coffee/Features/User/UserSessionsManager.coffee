@@ -3,14 +3,11 @@ redis = require('redis-sharelatex')
 logger = require("logger-sharelatex")
 Async = require('async')
 _ = require('underscore')
+UserSessionsRedis = require('./UserSessionsRedis')
 
-rclient = redis.createClient(Settings.redis.web)
+rclient = UserSessionsRedis.client()
 
 module.exports = UserSessionsManager =
-
-	_sessionSetKey: (user) ->
-		return "UserSessions:#{user._id}"
-
 	# mimic the key used by the express sessions
 	_sessionKey: (sessionId) ->
 		return "sess:#{sessionId}"
@@ -23,7 +20,7 @@ module.exports = UserSessionsManager =
 			logger.log {user_id: user._id}, "no sessionId to track, returning"
 			return callback(null)
 		logger.log {user_id: user._id, sessionId}, "onLogin handler"
-		sessionSetKey = UserSessionsManager._sessionSetKey(user)
+		sessionSetKey = UserSessionsRedis.sessionSetKey(user)
 		value = UserSessionsManager._sessionKey sessionId
 		rclient.multi()
 			.sadd(sessionSetKey, value)
@@ -43,7 +40,7 @@ module.exports = UserSessionsManager =
 			logger.log {user_id: user._id}, "no sessionId to untrack, returning"
 			return callback(null)
 		logger.log {user_id: user._id, sessionId}, "onLogout handler"
-		sessionSetKey = UserSessionsManager._sessionSetKey(user)
+		sessionSetKey = UserSessionsRedis.sessionSetKey(user)
 		value = UserSessionsManager._sessionKey sessionId
 		rclient.multi()
 			.srem(sessionSetKey, value)
@@ -57,7 +54,7 @@ module.exports = UserSessionsManager =
 
 	getAllUserSessions: (user, exclude, callback=(err, sessionKeys)->) ->
 		exclude = _.map(exclude, UserSessionsManager._sessionKey)
-		sessionSetKey = UserSessionsManager._sessionSetKey(user)
+		sessionSetKey = UserSessionsRedis.sessionSetKey(user)
 		rclient.smembers sessionSetKey, (err, sessionKeys) ->
 			if err?
 				logger.err user_id: user._id, "error getting all session keys for user from redis"
@@ -66,7 +63,8 @@ module.exports = UserSessionsManager =
 			if sessionKeys.length == 0
 				logger.log {user_id: user._id}, "no other sessions found, returning"
 				return callback(null, [])
-			rclient.mget sessionKeys, (err, sessions) ->
+
+			Async.mapSeries sessionKeys, ((k, cb) -> rclient.get(k, cb)), (err, sessions) ->
 				if err?
 					logger.err {user_id: user._id}, "error getting all sessions for user from redis"
 					return callback(err)
@@ -92,7 +90,7 @@ module.exports = UserSessionsManager =
 			logger.log {}, "no user to revoke sessions for, returning"
 			return callback(null)
 		logger.log {user_id: user._id}, "revoking all existing sessions for user"
-		sessionSetKey = UserSessionsManager._sessionSetKey(user)
+		sessionSetKey = UserSessionsRedis.sessionSetKey(user)
 		rclient.smembers sessionSetKey, (err, sessionKeys) ->
 			if err?
 				logger.err {err, user_id: user._id, sessionSetKey}, "error getting contents of UserSessions set"
@@ -102,12 +100,18 @@ module.exports = UserSessionsManager =
 				logger.log {user_id: user._id}, "no sessions in UserSessions set to delete, returning"
 				return callback(null)
 			logger.log {user_id: user._id, count: keysToDelete.length}, "deleting sessions for user"
-			rclient.multi()
-				.del(keysToDelete)
-				.srem(sessionSetKey, keysToDelete)
-				.exec (err, result) ->
+
+			deletions = keysToDelete.map (k) ->
+				(cb) ->
+					rclient.del k, cb
+
+			Async.series deletions, (err, _result) ->
+				if err?
+					logger.err {err, user_id: user._id, sessionSetKey}, "errror revoking all sessions for user"
+					return callback(err)
+				rclient.srem sessionSetKey, keysToDelete, (err) ->
 					if err?
-						logger.err {err, user_id: user._id, sessionSetKey}, "error revoking all sessions for user"
+						logger.err {err, user_id: user._id, sessionSetKey}, "error removing session set for user"
 						return callback(err)
 					callback(null)
 
@@ -115,7 +119,7 @@ module.exports = UserSessionsManager =
 		if !user
 			logger.log {}, "no user to touch sessions for, returning"
 			return callback(null)
-		sessionSetKey = UserSessionsManager._sessionSetKey(user)
+		sessionSetKey = UserSessionsRedis.sessionSetKey(user)
 		rclient.expire sessionSetKey, "#{Settings.cookieSessionLength}", (err, response) ->
 			if err?
 				logger.err {err, user_id: user._id}, "error while updating ttl on UserSessions set"
@@ -127,7 +131,7 @@ module.exports = UserSessionsManager =
 			logger.log {}, "no user, returning"
 			return callback(null)
 		logger.log {user_id: user._id}, "checking sessions for user"
-		sessionSetKey = UserSessionsManager._sessionSetKey(user)
+		sessionSetKey = UserSessionsRedis.sessionSetKey(user)
 		rclient.smembers sessionSetKey, (err, sessionKeys) ->
 			if err?
 				logger.err {err, user_id: user._id, sessionSetKey}, "error getting contents of UserSessions set"

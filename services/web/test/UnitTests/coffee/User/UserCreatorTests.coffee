@@ -9,7 +9,7 @@ describe "UserCreator", ->
 
 	beforeEach ->
 		self = @
-		@user = {_id:"12390i"}
+		@user = {_id:"12390i", ace: {}}
 		@user.save = sinon.stub().callsArgWith(0)
 		@UserModel = class Project
 			constructor: ->

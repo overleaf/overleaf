@@ -69,6 +69,12 @@ define [
 		getPendingOp: () ->
 			@doc?.getPendingOp()
 
+		getRecentAck: () ->
+			@doc?.getRecentAck()
+
+		getOpSize: (op) ->
+			@doc?.getOpSize(op)
+
 		hasBufferedOps: () ->
 			@doc?.hasBufferedOps()
 
@@ -143,24 +149,34 @@ define [
 		clearChaosMonkey: () ->
 			clearTimeout @_cm
 
+		MAX_PENDING_OP_SIZE: 30 # pending ops bigger than this are always considered unsaved
+
 		pollSavedStatus: () ->
 			# returns false if doc has ops waiting to be acknowledged or
 			# sent that haven't changed since the last time we checked.
 			# Otherwise returns true.
 			inflightOp = @getInflightOp()
 			pendingOp = @getPendingOp()
+			recentAck = @getRecentAck()
+			pendingOpSize = pendingOp? && @getOpSize(pendingOp)
 			if !inflightOp? and !pendingOp?
-				# there's nothing going on
+				# there's nothing going on, this is ok.
 				saved = true
 				sl_console.log "[pollSavedStatus] no inflight or pending ops"
 			else if inflightOp? and inflightOp == @oldInflightOp
 				# The same inflight op has been sitting unacked since we
-				# last checked.
+				# last checked, this is bad.
 				saved = false
 				sl_console.log "[pollSavedStatus] inflight op is same as before"
-			else
+			else if pendingOp? and recentAck && pendingOpSize < @MAX_PENDING_OP_SIZE
+				# There is an op waiting to go to server but it is small and
+				# within the flushDelay, this is ok for now.
 				saved = true
-				sl_console.log "[pollSavedStatus] assuming saved (inflightOp?: #{inflightOp?}, pendingOp?: #{pendingOp?})"
+				sl_console.log "[pollSavedStatus] pending op (small with recent ack) assume ok", pendingOp, pendingOpSize
+			else
+				# In any other situation, assume the document is unsaved.
+				saved = false
+				sl_console.log "[pollSavedStatus] assuming not saved (inflightOp?: #{inflightOp?}, pendingOp?: #{pendingOp?})"
 
 			@oldInflightOp = inflightOp
 			return saved
@@ -265,10 +281,10 @@ define [
 				@ide.pushEvent "externalUpdate",
 					doc_id: @doc_id
 				@trigger "externalUpdate", update
-			@doc.on "remoteop", () => 
+			@doc.on "remoteop", (args...) => 
 				@ide.pushEvent "remoteop",
 					doc_id: @doc_id
-				@trigger "remoteop"
+				@trigger "remoteop", args...
 			@doc.on "op:sent", (op) =>
 				@ide.pushEvent "op:sent",
 					doc_id: @doc_id
@@ -294,7 +310,7 @@ define [
 
 		_onError: (error, meta = {}) ->
 			meta.doc_id = @doc_id
-			console.error "ShareJS error", error, meta
+			sl_console.log "ShareJS error", error, meta
 			ga?('send', 'event', 'error', "shareJsError", "#{error.message} - #{@ide.socket.socket.transport.name}" )
 			@doc?.clearInflightAndPendingOps()
 			@trigger "error", error, meta

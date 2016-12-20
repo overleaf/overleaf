@@ -29,12 +29,12 @@ define [
 
 		$scope.$watch "shouldShowLogs", (shouldShow) ->
 			if shouldShow
-				$scope.$applyAsync () -> 
+				$scope.$applyAsync () ->
 					$scope.shouldDropUp = getFilesDropdownTopCoordAsRatio() > 0.65
 
 		# log hints tracking
 		$scope.logHintsNegFeedbackValues = logHintsFeedback.feedbackOpts
-		
+
 		$scope.trackLogHintsLearnMore = () ->
 			event_tracking.sendMB "logs-hints-learn-more"
 
@@ -108,7 +108,7 @@ define [
 				_csrf: window.csrfToken
 			}, {params: params}
 
-		parseCompileResponse = (response) ->		
+		parseCompileResponse = (response) ->
 
 			# keep last url
 			last_pdf_url = $scope.pdf.url
@@ -469,7 +469,7 @@ define [
 
 			event_tracking.sendMB "subscription-start-trial", { source }
 
-			window.open("/user/subscription/new?planCode=student_free_trial_7_days")
+			window.open("/user/subscription/new?planCode=#{$scope.startTrialPlanCode}")
 			$scope.startedFreeTrial = true
 
 	App.factory "synctex", ["ide", "$http", "$q", (ide, $http, $q) ->

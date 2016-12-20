@@ -99,7 +99,7 @@ define [
 				visible = true
 				# Only show if it matches any search text
 				if $scope.searchText.value? and $scope.searchText.value != ""
-					if !project.name.toLowerCase().match($scope.searchText.value.toLowerCase())
+					if project.name.toLowerCase().indexOf($scope.searchText.value.toLowerCase()) == -1
 						visible = false
 				# Only show if it matches the selected tag
 				if $scope.filter == "tag" and selectedTag? and project.id not in selectedTag.project_ids

@@ -109,51 +109,16 @@
 					) #{translate("complete")}
 
 
-		.row-spaced(ng-if="hasProjects && userHasNoSubscription", ng-cloak, sixpack-switch="left-menu-upgraed-rotation").text-centered
-			span(sixpack-default).text-centered
-				hr
-				p.small #{translate("on_free_sl")}
-				p
-					a(href="/user/subscription/plans", sixpack-convert="left-menu-upgraed-rotation").btn.btn-primary #{translate("upgrade")}
-				p.small.text-centered
-					| #{translate("or_unlock_features_bonus")} 
-					a(href="/user/bonus") #{translate("sharing_sl")} .
+		.row-spaced(ng-if="hasProjects && userHasNoSubscription", ng-cloak).text-centered
+			hr
+			p.small #{translate("on_free_sl")}
+			p
+				a(href="/user/subscription/plans", sixpack-convert="left-menu-upgraed-rotation").btn.btn-primary #{translate("upgrade")}
+			p.small.text-centered
+				| #{translate("or_unlock_features_bonus")} 
+				a(href="/user/bonus") #{translate("sharing_sl")} .
 
-			span(sixpack-when="random").text-centered
-				span(ng-if="randomView == 'default'")
-					hr
-					p.small #{translate("on_free_sl")}
-					p
-						a(href="/user/subscription/plans", sixpack-convert="left-menu-upgraed-rotation").btn.btn-primary #{translate("upgrade")}
-					p.small.text-centered
-						| #{translate("or_unlock_features_bonus")} 
-						a(href="/user/bonus") #{translate("sharing_sl")} .
-
-				span(ng-if="randomView == 'dropbox'")
-					hr
-					.card.card-thin
-						p
-							span Get Dropbox Sync
-						p
-							img(src=buildImgPath("dropbox/simple_logo.png"))
-						p
-							a(href="/user/subscription/plans", sixpack-convert="left-menu-upgraed-rotation").btn.btn-primary #{translate("upgrade")}
-						p.small.text-centered
-							| #{translate("or_unlock_features_bonus")} 
-							a(href="/user/bonus") #{translate("sharing_sl")} .
-
-				span(ng-if="randomView == 'github'")
-					hr
-					.card.card-thin
-						p
-							span Get Github Sync
-						p
-							img(src=buildImgPath("github/octocat.jpg"))
-						p
-							a(href="/user/subscription/plans", sixpack-convert="left-menu-upgraed-rotation").btn.btn-primary #{translate("upgrade")}
-						p.small.text-centered
-							| #{translate("or_unlock_features_bonus")} 
-							a(href="/user/bonus") #{translate("sharing_sl")} .
+			
 script.
 	window.userHasNoSubscription = #{!!(settings.enableSubscriptions && !hasSubscription)}
 

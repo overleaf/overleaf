@@ -51,8 +51,6 @@ html(itemscope, itemtype='http://schema.org/Product')
 		script(type="text/javascript").
 			window.csrfToken = "#{csrfToken}";
 			
-		block scripts
-
 		script(src=buildJsPath("libs/jquery-1.11.1.min.js", {fingerprint:false}))
 		script(type="text/javascript").
 			var noCdnKey = "nocdn=true"
@@ -61,6 +59,9 @@ html(itemscope, itemtype='http://schema.org/Product')
 			if (cdnBlocked && !noCdnAlreadyInUrl && navigator.userAgent.indexOf("Googlebot") == -1) {
 				window.location.search += '&'+noCdnKey;
 			}
+
+		block scripts
+
 		script(src=buildJsPath("libs/angular-1.3.15.min.js", {fingerprint:false}))
 
 		script.

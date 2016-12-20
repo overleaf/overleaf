@@ -39,7 +39,7 @@ pathList = [
 	["#{jsPath}ide.js"]
 	["#{jsPath}main.js"]
 	["#{jsPath}libs.js"]
-	["#{jsPath}#{ace}/ace.js","#{jsPath}#{ace}/mode-latex.js", "#{jsPath}#{ace}/snippets/latex.js"]
+	["#{jsPath}#{ace}/ace.js","#{jsPath}#{ace}/mode-latex.js","#{jsPath}#{ace}/worker-latex.js","#{jsPath}#{ace}/snippets/latex.js"]
 	["#{jsPath}libs/#{pdfjs}/pdf.js"]
 	["#{jsPath}libs/#{pdfjs}/pdf.worker.js"]
 	["#{jsPath}libs/#{pdfjs}/compatibility.js"]
@@ -210,7 +210,7 @@ module.exports = (app, webRouter, apiRouter)->
 
 	webRouter.use (req, res, next)->
 		res.locals.externalAuthenticationSystemUsed = ->
-			Settings.ldap?
+			Settings.ldap? or Settings.saml?
 		next()
 
 	webRouter.use (req, res, next)->

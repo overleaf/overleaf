@@ -30,7 +30,7 @@ define [
 
 		$scope.$watch "settings.syntaxValidation", (syntaxValidation, oldSyntaxValidation) =>
 			if syntaxValidation != oldSyntaxValidation
-				settings.saveProjectSettings({syntaxValidation: syntaxValidation})
+				settings.saveSettings({syntaxValidation: syntaxValidation})
 
 		$scope.$watch "project.spellCheckLanguage", (language, oldLanguage) =>
 			return if @ignoreUpdates

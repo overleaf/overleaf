@@ -3,7 +3,8 @@ html(itemscope, itemtype='http://schema.org/Product')
 	head
 		title Something went wrong
 		link(rel="icon", href="/favicon.ico")
-		link(rel='stylesheet', href=buildCssPath('/style.css'))
+		if buildCssPath
+			link(rel='stylesheet', href=buildCssPath('/style.css'))
 		link(href="//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css",rel="stylesheet")
 	body
 		.content
@@ -12,7 +13,9 @@ html(itemscope, itemtype='http://schema.org/Product')
 					.col-md-8.col-md-offset-2.text-center
 						.page-header
 							h2 Oh dear, something went wrong.
-						p: img(src=buildImgPath("lion-sad-128.png"), alt="Sad Lion")
+						if buildImgPath
+							p
+								img(src=buildImgPath("lion-sad-128.png"), alt="Sad Lion")
 						p
 							| Something went wrong with your request, sorry. Our staff are probably looking into this, but if it continues, please contact us at #{settings.adminEmail}
 						p

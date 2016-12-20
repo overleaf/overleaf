@@ -8,7 +8,9 @@ expressLocals = require('./ExpressLocals')
 Router = require('../router')
 metrics.inc("startup")
 redis = require("redis-sharelatex")
-rclient = redis.createClient(Settings.redis.web)
+UserSessionsRedis = require('../Features/User/UserSessionsRedis')
+
+sessionsRedisClient = UserSessionsRedis.client()
 
 session = require("express-session")
 RedisStore = require('connect-redis')(session)
@@ -19,7 +21,8 @@ csrf = require('csurf')
 csrfProtection = csrf()
 cookieParser = require('cookie-parser')
 
-sessionStore = new RedisStore(client:rclient)
+# Init the session store
+sessionStore = new RedisStore(client:sessionsRedisClient)
 
 passport = require('passport')
 LocalStrategy = require('passport-local').Strategy
@@ -87,9 +90,7 @@ webRouter.use session
 		secure: Settings.secureCookie
 	store: sessionStore
 	key: Settings.cookieName
-webRouter.use csrfProtection
-webRouter.use translations.expressMiddlewear
-webRouter.use translations.setLangBasedOnDomainMiddlewear
+	rolling: true
 
 # passport
 webRouter.use passport.initialize()
@@ -105,6 +106,16 @@ passport.use(new LocalStrategy(
 ))
 passport.serializeUser(AuthenticationController.serializeUser)
 passport.deserializeUser(AuthenticationController.deserializeUser)
+
+Modules.hooks.fire 'passportSetup', passport, (err) ->
+	if err?
+		logger.err {err}, "error setting up passport in modules"
+
+Modules.applyNonCsrfRouter(webRouter, apiRouter)
+
+webRouter.use csrfProtection
+webRouter.use translations.expressMiddlewear
+webRouter.use translations.setLangBasedOnDomainMiddlewear
 
 # Measure expiry from last request, not last login
 webRouter.use (req, res, next) ->

@@ -70,7 +70,7 @@
 			// whitelistUrls: ['example.com/scripts/']
 			}).install();
 		}
-	- if (typeof(user) != "undefined" && typeof (user.email) != "undefined")
+	- if (user && typeof(user) != "undefined" && typeof (user.email) != "undefined")
 		script(type="text/javascript").
 			if (typeof(Raven) != "undefined" && Raven.setUserContext) {
 				Raven.setUserContext({email: '#{user.email}'});

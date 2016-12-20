@@ -96,6 +96,7 @@ describe "UserRegistrationHandler", ->
 			it "should return email registered in the error if there is a non holdingAccount there", (done)->
 				@User.findOne.callsArgWith(1, null, @user = {holdingAccount:false})
 				@handler.registerNewUser @passingRequest, (err, user)=>
+					console.log err, user
 					err.should.deep.equal new Error("EmailAlreadyRegistered")
 					user.should.deep.equal @user
 					done()

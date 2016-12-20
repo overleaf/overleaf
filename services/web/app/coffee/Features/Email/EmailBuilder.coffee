@@ -7,10 +7,18 @@ settings = require("settings-sharelatex")
 
 templates = {}
 
+
 templates.registered =
 	subject:  _.template "Activate your #{settings.appName} Account"
 	layout: PersonalEmailLayout
 	type: "notification"
+	plainTextTemplate: _.template """
+Congratulations, you've just had an account created for you on #{settings.appName} with the email address "<%= to %>".
+
+Click here to set your password and log in: <%= setNewPasswordUrl %>
+
+If you have any questions or problems, please contact #{settings.adminEmail}
+"""
 	compiledTemplate: _.template """
 <p>Congratulations, you've just had an account created for you on #{settings.appName} with the email address "<%= to %>".</p>
 
@@ -19,10 +27,24 @@ templates.registered =
 <p>If you have any questions or problems, please contact <a href="mailto:#{settings.adminEmail}">#{settings.adminEmail}</a>.</p>
 """
 
+
 templates.canceledSubscription =
 	subject:  _.template "ShareLaTeX thoughts"
 	layout: PersonalEmailLayout
 	type:"lifecycle"
+	plainTextTemplate: _.template """
+Hi <%= first_name %>,
+
+I'm sorry to see you cancelled your ShareLaTeX premium account. Would you mind giving me some advice on what the site is lacking at the moment via this survey?:
+
+https://sharelatex.typeform.com/to/f5lBiZ
+
+Thank you in advance.
+
+Henry
+
+ShareLaTeX Co-founder
+"""
 	compiledTemplate: _.template '''
 <p>Hi <%= first_name %>,</p>
 
@@ -36,10 +58,26 @@ ShareLaTeX Co-founder
 </p>
 '''
 
+
 templates.passwordResetRequested =
 	subject:  _.template "Password Reset - #{settings.appName}"
 	layout: NotificationEmailLayout
 	type:"notification"
+	plainTextTemplate: _.template """
+Password Reset
+
+We got a request to reset your #{settings.appName} password.
+
+Click this link to reset your password: <%= setNewPasswordUrl %>
+
+If you ignore this message, your password won't be changed.
+
+If you didn't request a password reset, let us know.
+
+Thank you
+
+#{settings.appName} - <%= siteUrl %>
+"""
 	compiledTemplate: _.template """
 <h2>Password Reset</h2>
 <p>
@@ -66,26 +104,6 @@ If you didn't request a password reset, let us know.
 <p> <a href="<%= siteUrl %>">#{settings.appName}</a></p>
 """
 
-templates.projectSharedWithYou =
-	subject: _.template "<%= owner.email %> wants to share <%= project.name %> with you"
-	layout: NotificationEmailLayout
-	type:"notification"
-	compiledTemplate: _.template """
-<p>Hi, <%= owner.email %> wants to share <a href="<%= project.url %>">'<%= project.name %>'</a> with you</p>
-<center>
-	<div style="width:200px;background-color:#a93629;border:1px solid #e24b3b;border-radius:3px;padding:15px; margin:24px;">
-		<div style="padding-right:10px;padding-left:10px">
-			<a href="<%= project.url %>" style="text-decoration:none" target="_blank">
-				<span style= "font-size:16px;font-family:Helvetica,Arial;font-weight:400;color:#fff;white-space:nowrap;display:block; text-align:center">
-		  			View Project
-				</span>
-			</a>
-		</div>
-	</div>
-</center>
-<p> Thank you</p>
-<p> <a href="<%= siteUrl %>">#{settings.appName}</a></p>
-"""
 
 templates.projectInvite =
 	subject: _.template "<%= project.name %> - shared by <%= owner.email %>"
@@ -113,10 +131,20 @@ Thank you
 <p> <a href="<%= siteUrl %>">#{settings.appName}</a></p>
 """
 
+
 templates.completeJoinGroupAccount =
 	subject: _.template "Verify Email to join <%= group_name %> group"
 	layout: NotificationEmailLayout
 	type:"notification"
+	plainTextTemplate: _.template """
+Hi, please verify your email to join the <%= group_name %> and get your free premium account
+
+Click this link to verify now: <%= completeJoinUrl %>
+
+Thank You
+
+#{settings.appName} - <%= siteUrl %>
+"""
 	compiledTemplate: _.template """
 <p>Hi, please verify your email to join the <%= group_name %> and get your free premium account</p>
 <center>
@@ -133,6 +161,7 @@ templates.completeJoinGroupAccount =
 <p> Thank you</p>
 <p> <a href="<%= siteUrl %>">#{settings.appName}</a></p>
 """
+
 
 module.exports =
 	templates: templates

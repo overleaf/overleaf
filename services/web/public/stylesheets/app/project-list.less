@@ -1,3 +1,26 @@
+@announcements-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+
+@keyframes pulse {
+	0% {
+		opacity: .7;
+	}
+	100% {
+		opacity: .9;
+	}
+}
+@keyframes fade-in {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+.project-list-page {
+	position: relative;
+}
+
 .project-header {
 	.btn-group > .btn {
 		padding-left: @line-height-base / 2;
@@ -200,6 +223,10 @@ ul.structured-list {
 		.select-item + span, .select-all + span {
 			display: inline-block;
 			padding-left: @line-height-computed * 1.5;
+			max-width: 100%;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			vertical-align: top;
 		}
 	}
 }
@@ -289,3 +316,146 @@ ul.project-list {
 		margin-left:-100px;
 	}
 }
+
+.announcements {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	height: 150px;
+	width: 100%;
+	pointer-events: none;
+	overflow: hidden;
+
+	&-open {
+		top: -100%;
+		height: auto;
+		pointer-events: all;
+	}
+}
+
+.announcements-backdrop {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background-color: rgba(0, 0, 0, 0.35);
+	opacity: 0;
+	animation: fade-in 0.35s forwards;
+	z-index: 1;
+}
+
+.announcements-btn {
+	position: absolute;
+	bottom: -50px;
+	right: 3%;
+	width: 80px;
+	height: 80px;
+	background: url(/img/lion-128.png) no-repeat center/80% transparent;
+	border-radius: 50%;
+	box-shadow: none;
+	z-index: 1;
+	pointer-events: all;
+	transition: bottom 0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+				background 0.25s ease,
+				box-shadow 0.25s ease;
+
+	&:hover {
+		bottom: -45px;
+	}
+
+	&-open, &-open:hover,
+	&-has-new, &-has-new:hover {
+		background-color: #FFF;
+		box-shadow: @announcements-shadow;
+		bottom: 30px;
+	}
+}
+	.announcements-badge {
+		display: inline-block;
+		position: absolute;
+		font-size: 11px;
+		height: 1.8em;
+		min-width: 1.8em;
+		border-radius: 0.9em;
+		line-height: 1.8;
+		padding: 0 2px;
+		top: 1px;
+		right: 1px;
+		font-weight: bold;
+		color: #FFF;
+		background-color: @red;
+		vertical-align: baseline;
+		white-space: nowrap;
+		text-align: center;
+		z-index: 1;
+		animation: pulse 1s alternate infinite;
+	}
+
+.announcements-body {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	position: absolute;
+	right: 3%;
+	margin-right: 95px;
+	bottom: 30px;
+	width: 700px;
+	max-height: 52%;
+	min-height: 100px;
+	background: #FFF;
+	z-index: 1;
+	box-shadow: @announcements-shadow;
+	border-radius: @border-radius-base;
+	animation: fade-in 0.35s forwards;
+
+	&::after {
+		content: "\25b8";
+		position: absolute;
+		left: 100%;
+		bottom: 17px;
+		width: 30px;
+		color: #FFF;
+		text-shadow: @announcements-shadow;
+		font-size: 2em;
+		overflow: hidden;
+		text-indent: -7px;
+	}
+}
+
+	.announcements-scroller {
+		padding: @line-height-computed;
+		flex-grow: 0;
+		overflow-x: hidden;
+		overflow-y: auto;
+	}
+		.announcement {
+			margin-bottom: @line-height-computed * 1.5;
+			&:last-child {
+				margin-bottom: 0;
+			}
+		}	
+			.announcement-header {
+				.page-header;
+				margin: 0;
+			}
+
+			.announcement-description {
+				margin: (@line-height-computed / 4) 0 (@line-height-computed / 2);
+			}
+
+			.announcement-meta {
+				.clearfix;
+				font-size: 0.9em;
+			}
+
+				.announcement-date {
+					float: left;
+					color: @gray;
+					margin: 0;
+				}
+
+				.announcement-link {
+					float: right;
+					margin: 0;
+				}

@@ -84,15 +84,94 @@ describe "UserController", ->
 			sendStatus: sinon.stub()
 			json: sinon.stub()
 		@next = sinon.stub()
-	describe "deleteUser", ->
 
-		it "should delete the user", (done)->
+	describe 'tryDeleteUser', ->
 
-			@res.sendStatus = (code)=>
-				@UserDeleter.deleteUser.calledWith(@user_id)
+		beforeEach ->
+			@req.body.password = 'wat'
+			@req.logout = sinon.stub()
+			@req.session.destroy = sinon.stub().callsArgWith(0, null)
+			@AuthenticationController.getLoggedInUserId = sinon.stub().returns(@user._id)
+			@AuthenticationManager.authenticate = sinon.stub().callsArgWith(2, null, @user)
+			@UserDeleter.deleteUser = sinon.stub().callsArgWith(1, null)
+
+		it 'should send 200', (done) ->
+			@res.sendStatus = (code) =>
 				code.should.equal 200
 				done()
-			@UserController.deleteUser @req, @res
+			@UserController.tryDeleteUser @req, @res, @next
+
+		it 'should try to authenticate user', (done) ->
+			@res.sendStatus = (code) =>
+				@AuthenticationManager.authenticate.callCount.should.equal 1
+				@AuthenticationManager.authenticate.calledWith({_id: @user._id}, @req.body.password).should.equal true
+				done()
+			@UserController.tryDeleteUser @req, @res, @next
+
+		it 'should delete the user', (done) ->
+			@res.sendStatus = (code) =>
+				@UserDeleter.deleteUser.callCount.should.equal 1
+				@UserDeleter.deleteUser.calledWith(@user._id).should.equal true
+				done()
+			@UserController.tryDeleteUser @req, @res, @next
+
+		describe 'when no password is supplied', ->
+
+			beforeEach ->
+				@req.body.password = ''
+
+			it 'should return 403', (done) ->
+				@res.sendStatus = (code) =>
+					code.should.equal 403
+					done()
+				@UserController.tryDeleteUser @req, @res, @next
+
+		describe 'when authenticate produces an error', ->
+
+			beforeEach ->
+				@AuthenticationManager.authenticate = sinon.stub().callsArgWith(2, new Error('woops'))
+
+			it 'should call next with an error', (done) ->
+				@next = (err) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					done()
+				@UserController.tryDeleteUser @req, @res, @next
+
+		describe 'when authenticate does not produce a user', ->
+
+			beforeEach ->
+				@AuthenticationManager.authenticate = sinon.stub().callsArgWith(2, null, null)
+
+			it 'should return 403', (done) ->
+				@res.sendStatus = (code) =>
+					code.should.equal 403
+					done()
+				@UserController.tryDeleteUser @req, @res, @next
+
+		describe 'when deleteUser produces an error', ->
+
+			beforeEach ->
+				@UserDeleter.deleteUser = sinon.stub().callsArgWith(1, new Error('woops'))
+
+			it 'should call next with an error', (done) ->
+				@next = (err) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					done()
+				@UserController.tryDeleteUser @req, @res, @next
+
+		describe 'when session.destroy produces an error', ->
+
+			beforeEach ->
+				@req.session.destroy = sinon.stub().callsArgWith(0, new Error('woops'))
+
+			it 'should call next with an error', (done) ->
+				@next = (err) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					done()
+				@UserController.tryDeleteUser @req, @res, @next
 
 	describe "unsubscribe", ->
 
@@ -192,6 +271,24 @@ describe "UserController", ->
 				@UserHandler.populateGroupLicenceInvite.calledWith(@user).should.equal true
 				done()
 			@UserController.updateUserSettings @req, @res
+
+		describe 'when using an external auth source', ->
+
+			beforeEach ->
+				@UserUpdater.changeEmailAddress.callsArgWith(2)
+				@newEmail = 'someone23@example.com'
+				@settings.ldap = {active: true}
+
+			afterEach ->
+				delete @settings.ldap
+
+			it 'should not set a new email', (done) ->
+				@req.body.email = @newEmail
+				@res.sendStatus = (code)=>
+					code.should.equal 200
+					@UserUpdater.changeEmailAddress.calledWith(@user_id, @newEmail).should.equal false
+					done()
+				@UserController.updateUserSettings @req, @res
 
 	describe "logout", ->
 

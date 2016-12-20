@@ -30,6 +30,30 @@ module.exports = AuthenticationController =
 	deserializeUser: (user, cb) ->
 		cb(null, user)
 
+	afterLoginSessionSetup: (req, user, callback=(err)->) ->
+		req.login user, (err) ->
+			if err?
+				logger.err {user_id: user._id, err}, "error from req.login"
+				return callback(err)
+			# Regenerate the session to get a new sessionID (cookie value) to
+			# protect against session fixation attacks
+			oldSession = req.session
+			req.session.destroy (err) ->
+				if err?
+					logger.err {user_id: user._id, err}, "error when trying to destroy old session"
+					return callback(err)
+				req.sessionStore.generate(req)
+				for key, value of oldSession
+					req.session[key] = value
+				# copy to the old `session.user` location, for backward-comptability
+				req.session.user = req.session.passport.user
+				req.session.save (err) ->
+					if err?
+						logger.err {user_id: user._id}, "error saving regenerated session after login"
+						return callback(err)
+					UserSessionsManager.trackSession(user, req.sessionID, () ->)
+					callback(null)
+
 	passportLogin: (req, res, next) ->
 		# This function is middleware which wraps the passport.authenticate middleware,
 		# so we can send back our custom `{message: {text: "", type: ""}}` responses on failure,
@@ -38,29 +62,18 @@ module.exports = AuthenticationController =
 			if err?
 				return next(err)
 			if user # `user` is either a user object or false
-				req.login user, (err) ->
-					# Regenerate the session to get a new sessionID (cookie value) to
-					# protect against session fixation attacks
-					oldSession = req.session
-					req.session.destroy()
-					req.sessionStore.generate(req)
-					for key, value of oldSession
-						req.session[key] = value
-					# copy to the old `session.user` location, for backward-comptability
-					req.session.user = req.session.passport.user
-					req.session.save (err) ->
-						if err?
-							logger.err {user_id: user._id}, "error saving regenerated session after login"
-							return next(err)
-						UserSessionsManager.trackSession(user, req.sessionID, () ->)
-						res.json {redir: req._redir}
+				redir = AuthenticationController._getRedirectFromSession(req) || "/project"
+				AuthenticationController.afterLoginSessionSetup req, user, (err) ->
+					if err?
+						return next(err)
+					AuthenticationController._clearRedirectFromSession(req)
+					res.json {redir: redir}
 			else
 				res.json message: info
 		)(req, res, next)
 
 	doPassportLogin: (req, username, password, done) ->
 		email = username.toLowerCase()
-		redir = Url.parse(req?.body?.redir or "/project").path
 		LoginRateLimiter.processLoginRequest email, (err, isAllowed)->
 			return done(err) if err?
 			if !isAllowed
@@ -73,12 +86,11 @@ module.exports = AuthenticationController =
 					UserHandler.setupLoginData(user, ()->)
 					LoginRateLimiter.recordSuccessfulLogin(email)
 					AuthenticationController._recordSuccessfulLogin(user._id)
-					Analytics.recordEvent(user._id, "user-logged-in")
+					Analytics.recordEvent(user._id, "user-logged-in", {ip:req.ip})
 					logger.log email: email, user_id: user._id.toString(), "successful log in"
 					req.session.justLoggedIn = true
 					# capture the request ip for use when creating the session
 					user._login_req_ip = req.ip
-					req._redir = redir
 					return done(null, user)
 				else
 					AuthenticationController._recordFailedLogin()
@@ -145,21 +157,23 @@ module.exports = AuthenticationController =
 		return isValid
 
 	_redirectToLoginOrRegisterPage: (req, res)->
-		if req.query.zipUrl? or req.query.project_name?
+		if (req.query.zipUrl? or
+			  req.query.project_name? or
+			  req.path == '/user/subscription/new')
 			return AuthenticationController._redirectToRegisterPage(req, res)
 		else
 			AuthenticationController._redirectToLoginPage(req, res)
 
 	_redirectToLoginPage: (req, res) ->
 		logger.log url: req.url, "user not logged in so redirecting to login page"
-		req.query.redir = req.path
+		AuthenticationController._setRedirectInSession(req)
 		url = "/login?#{querystring.stringify(req.query)}"
 		res.redirect url
 		Metrics.inc "security.login-redirect"
 
 	_redirectToRegisterPage: (req, res) ->
 		logger.log url: req.url, "user not logged in so redirecting to register page"
-		req.query.redir = req.path
+		AuthenticationController._setRedirectInSession(req)
 		url = "/register?#{querystring.stringify(req.query)}"
 		res.redirect url
 		Metrics.inc "security.login-redirect"
@@ -176,3 +190,16 @@ module.exports = AuthenticationController =
 	_recordFailedLogin: (callback = (error) ->) ->
 		Metrics.inc "user.login.failed"
 		callback()
+
+	_setRedirectInSession: (req, value) ->
+		if !value?
+			value = if Object.keys(req.query).length > 0 then "#{req.path}?#{querystring.stringify(req.query)}" else req.path
+		if req.session?
+			req.session.postLoginRedirect = value
+
+	_getRedirectFromSession: (req) ->
+		return req?.session?.postLoginRedirect || null
+
+	_clearRedirectFromSession: (req) ->
+		if req.session?
+			delete req.session.postLoginRedirect

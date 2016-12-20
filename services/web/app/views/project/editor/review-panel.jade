@@ -1,0 +1,219 @@
+#review-panel
+	.review-panel-toolbar
+		span.review-panel-toolbar-label(ng-click="reviewPanel.trackNewChanges = true;", ng-if="reviewPanel.trackNewChanges === false") Track Changes is 
+			strong off
+		span.review-panel-toolbar-label(ng-click="reviewPanel.trackNewChanges = false;", ng-if="reviewPanel.trackNewChanges === true") Track Changes is 
+			strong on
+		review-panel-toggle(ng-model="reviewPanel.trackNewChanges")
+
+	.rp-entry-list(
+		review-panel-sorted
+		ng-if="reviewPanel.subView === SubViews.CUR_FILE"
+	)
+		.rp-entry-list-inner
+			.rp-entry-wrapper(
+				ng-repeat="(entry_id, entry) in reviewPanel.entries[editor.open_doc_id]"
+			)
+				div(ng-if="entry.type === 'insert' || entry.type === 'delete'")
+					change-entry(
+						entry="entry"
+						user="users[entry.metadata.user_id]"
+						on-reject="rejectChange(entry_id);"
+						on-accept="acceptChange(entry_id);"
+						on-indicator-click="toggleReviewPanel();"
+					)
+
+				div(ng-if="entry.type === 'comment'")
+					comment-entry(
+						entry="entry"
+						users="users"
+						on-resolve="resolveComment(entry, entry_id)"
+						on-unresolve="unresolveComment(entry_id)"
+						on-show-thread="showThread(entry)"
+						on-hide-thread="hideThread(entry)"
+						on-delete="deleteComment(entry_id)"
+						on-reply="submitReply(entry, entry_id);"
+						on-indicator-click="toggleReviewPanel();"
+					)
+				
+				div(ng-if="entry.type === 'add-comment'")
+					add-comment-entry(
+						on-start-new="startNewComment();"
+						on-submit="submitNewComment(content);"
+						on-cancel="cancelNewComment();"
+						on-indicator-click="toggleReviewPanel();"
+					)
+
+	.rp-entry-list(
+		ng-if="reviewPanel.subView === SubViews.OVERVIEW"
+	)
+		.rp-overview-file(
+			ng-repeat="(doc_id, entries) in reviewPanel.entries"
+		)
+			.rp-overview-file-header
+				| {{ getFileName(doc_id) }}
+			.rp-entry-wrapper(
+				ng-repeat="(entry_id, entry) in entries | orderOverviewEntries"
+			)
+				div(ng-if="entry.type === 'insert' || entry.type === 'delete'")
+					change-entry(
+						entry="entry"
+						user="users[entry.metadata.user_id]"
+						on-reject="rejectChange(entry.id);"
+						on-accept="acceptChange(entry.id);"
+						on-indicator-click="toggleReviewPanel();"
+						ng-click="gotoEntry(doc_id, entry)"
+					)
+
+				div(ng-if="entry.type === 'comment'")
+					comment-entry(
+						entry="entry"
+						users="users"
+						on-resolve="resolveComment(entry, entry.id)"
+						on-unresolve="unresolveComment(entry.id)"
+						on-delete="deleteComment(entry.id)"
+						on-reply="submitReply(entry, entry_id);"
+						on-indicator-click="toggleReviewPanel();"
+						ng-click="gotoEntry(doc_id, entry)"
+					)
+
+	.rp-nav
+		a.rp-nav-item(
+			href
+			ng-click="setSubView(SubViews.CUR_FILE);"
+			ng-class="{ 'rp-nav-item-active' : reviewPanel.subView === SubViews.CUR_FILE }"
+		)
+			i.fa.fa-file-text-o
+			span.rp-nav-label Current file
+		a.rp-nav-item(
+			href
+			ng-click="setSubView(SubViews.OVERVIEW);"
+			ng-class="{ 'rp-nav-item-active' : reviewPanel.subView === SubViews.OVERVIEW }"
+		)
+			i.fa.fa-list
+			span.rp-nav-label Overview
+
+
+script(type='text/ng-template', id='changeEntryTemplate')
+	div
+		.rp-entry-callout(
+			ng-class="'rp-entry-callout-' + entry.type"
+		)
+		.rp-entry-indicator(
+			ng-switch="entry.type"
+			ng-class="{ 'rp-entry-indicator-focused': entry.focused }"
+			ng-click="onIndicatorClick();"
+		)
+			i.fa.fa-pencil(ng-switch-when="insert")
+			i.rp-icon-delete(ng-switch-when="delete")
+		.rp-entry(
+			ng-class="[ 'rp-entry-' + entry.type, (entry.focused ? 'rp-entry-focused' : '')]"
+		)
+			.rp-entry-header
+				.rp-entry-action-icon(ng-switch="entry.type")
+					i.fa.fa-pencil(ng-switch-when="insert")
+					i.rp-icon-delete(ng-switch-when="delete")
+				.rp-entry-metadata
+					p.rp-entry-metadata-line(style="color: hsl({{ user.hue }}, 70%, 40%);") {{ user.name }} 
+					p.rp-entry-metadata-line {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}
+				.rp-avatar(style="background-color: hsl({{ user.hue }}, 70%, 50%);") {{ user.avatar_text | limitTo : 1 }}
+			.rp-entry-body(ng-switch="entry.type")
+					span(ng-switch-when="insert") Added&nbsp;
+						ins.rp-content-highlight {{ entry.content }} 
+					span(ng-switch-when="delete") Deleted&nbsp;
+						del.rp-content-highlight {{ entry.content }} 
+			.rp-entry-actions
+				a.rp-entry-button(href, ng-click="onReject();") 
+					i.fa.fa-times
+					| &nbsp;Reject
+				a.rp-entry-button(href, ng-click="onAccept();") 
+					i.fa.fa-check
+					| &nbsp;Accept
+
+script(type='text/ng-template', id='commentEntryTemplate')
+	div
+		.rp-entry-callout.rp-entry-callout-comment(ng-if="!entry.resolved")
+		.rp-entry-indicator(
+			ng-class="{ 'rp-entry-indicator-focused': entry.focused }"
+			ng-click="onIndicatorClick();"
+		)
+			i.fa.fa-comment
+		.rp-entry.rp-entry-comment(
+			ng-class="{ 'rp-entry-focused': entry.focused, 'rp-entry-comment-resolved': entry.resolved}"
+		)
+			.rp-comment(
+				ng-if="!entry.resolved || entry.showWhenResolved"
+				ng-repeat="comment in entry.thread"
+				ng-class="users[comment.user_id].isSelf ? 'rp-comment-self' : '';"
+			)
+				.rp-avatar(
+					ng-if="!users[comment.user_id].isSelf;"
+					style="background-color: hsl({{ users[comment.user_id].hue }}, 70%, 50%);"
+				) {{ users[comment.user_id].avatar_text | limitTo : 1 }}
+				.rp-comment-body(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 90%);")
+					p.rp-comment-content {{ comment.content }}
+					p.rp-comment-metadata
+						| {{ comment.ts | date : 'MMM d, y h:mm a' }}
+						| &nbsp;&bull;&nbsp;
+						span(style="color: hsl({{ users[comment.user_id].hue }}, 70%, 40%);") {{ users[comment.user_id].name }}
+			.rp-comment-reply(ng-if="!entry.resolved || entry.showWhenResolved")
+				textarea.rp-comment-input(
+					ng-model="entry.replyContent"
+					ng-keypress="handleCommentReplyKeyPress($event);"
+					stop-propagation="click"
+					placeholder="{{ 'Hit \"Enter\" to reply' + (entry.resolved ? ' and re-open' : '') }}"
+				)
+			.rp-comment-resolved-description(ng-if="entry.resolved && !entry.showWhenResolved")
+				div
+					| Comment resolved by 
+					span(style="color: hsl({{ users[entry.resolved_data.user_id].hue }}, 70%, 40%);") {{ users[entry.resolved_data.user_id].name }}
+				div {{ entry.resolved_data.ts | date : 'MMM d, y h:mm a' }}
+			.rp-entry-actions
+				a.rp-entry-button(href, ng-click="onResolve();", ng-if="!entry.resolved") 
+					i.fa.fa-check
+					| &nbsp;Mark as resolved
+				a.rp-entry-button(href, ng-click="onShowThread();", ng-if="entry.resolved && !entry.showWhenResolved")
+					| &nbsp;Show
+				a.rp-entry-button(href, ng-click="onHideThread();", ng-if="entry.resolved && entry.showWhenResolved")
+					| &nbsp;Hide
+				a.rp-entry-button(href, ng-click="onUnresolve();", ng-if="entry.resolved") 
+					| &nbsp;Re-open
+				a.rp-entry-button(href, ng-click="onDelete();", ng-if="entry.resolved") 
+					| &nbsp;Delete
+				
+
+script(type='text/ng-template', id='addCommentEntryTemplate')
+	div
+		.rp-entry-callout.rp-entry-callout-add-comment
+		.rp-entry-indicator(
+			ng-if="!commentState.adding"
+			ng-click="startNewComment(); onIndicatorClick();"
+			tooltip="Add a comment"
+			tooltip-placement="right"
+			tooltip-append-to-body="true"
+		)
+			i.fa.fa-commenting
+		.rp-entry.rp-entry-add-comment(
+			ng-class="[ (state.isAdding ? 'rp-entry-adding-comment' : ''), (entry.focused ? 'rp-entry-focused' : '')]"
+		)
+			a.rp-add-comment-btn(
+				href
+				ng-if="!state.isAdding"
+				ng-click="startNewComment();"
+			) 
+				i.fa.fa-comment
+				| &nbsp;Add comment
+			div(ng-if="state.isAdding")
+				.rp-new-comment
+					textarea.rp-comment-input(
+						ng-model="state.content"
+						ng-keypress="handleCommentKeyPress($event);"
+						placeholder="Add your comment here"
+					)
+				.rp-entry-actions
+					a.rp-entry-button(href, ng-click="cancelNewComment();") 
+						i.fa.fa-times
+						| &nbsp;Cancel
+					a.rp-entry-button(href, ng-click="submitNewComment()") 
+						i.fa.fa-comment
+						| &nbsp;Comment

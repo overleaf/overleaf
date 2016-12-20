@@ -11,6 +11,8 @@
 @import "./editor/publish-template.less";
 @import "./editor/online-users.less";
 @import "./editor/hotkeys.less";
+@import "./editor/review-panel.less";
+@import "./editor/feature-onboarding.less";
 
 .full-size {
 	position: absolute;
@@ -31,13 +33,6 @@
 		padding: (@line-height-computed / 4);
 		font-size: 14px;
 		margin-bottom: (@line-height-computed / 4);
-	}
-}
-
-#chat-wrapper {
-	.full-size;
-	> .ui-layout-resizer > .ui-layout-toggler {
-		display: none !important;
 	}
 }
 
@@ -143,19 +138,12 @@
 	.spelling-highlight {
 		position: absolute;
 		background-image: url(/img/spellcheck-underline.png);
+		@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+			background-image: url(/img/spellcheck-underline@2x.png);
+			background-size: 5px 4px;
+		}
 		background-repeat: repeat-x;
 		background-position: bottom left;
-	}
-	.track-changes-added-marker {
-		border-radius: 0;
-		position: absolute;
-		background-color: hsl(100, 70%, 70%);
-	}
-	.track-changes-deleted-marker {
-		border-radius: 0;
-		position: absolute;
-		border-left: 2px dotted red;
-		margin-left: -1px;
 	}
 	.remote-cursor {
 		position: absolute;
@@ -261,6 +249,16 @@
 .modal-alert {
 	margin-top:10px;
 	margin-bottom:0px;
+}
+
+// vertically centre the "connection down" modal so it does not hide
+// the reconnecting indicator
+
+.modal.lock-editor-modal {
+	display: flex !important;
+	.modal-dialog {
+		margin: auto;
+	}
 }
 
 .sl_references_search_hint-varDefault {
@@ -413,16 +411,19 @@
 	}
 }
 
+.teaser-title,
 .dropbox-teaser-title {
 	margin-top: 0;
 	text-align: center;
 }
 
+.teaser-img,
 .dropbox-teaser-img {
 	.img-responsive;
 	margin-bottom: 5px;
 }
 
+.teaser-video-container,
 .dropbox-teaser-video-container {
 	margin-top: -@modal-inner-padding;
 	margin-left: -@modal-inner-padding;
@@ -430,7 +431,10 @@
 	margin-bottom: 5px;
 	overflow: hidden;
 }
+
+.teaser-video,
 .dropbox-teaser-video {
 	width: 100%;
 	height: auto;
+	border-bottom: 1px solid @modal-header-border-color;
 }
