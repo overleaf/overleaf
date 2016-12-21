@@ -559,13 +559,6 @@ if process.env["SHARELATEX_SAML_ENTRYPOINT"]
 					undefined
 			)
 
-if settings.externalAuth and settings?.nav?.header?
-	results = []
-	for button in settings.nav.header
-		if button.url != "/register"
-			results.push(button)
-	settings.nav.header = results
-
 
 # Compiler
 # --------
