@@ -305,7 +305,7 @@ settings =
 		references: true
 		templates: true
 
-#### OPTIONAL CONFIGERABLE SETTINGS
+## OPTIONAL CONFIGERABLE SETTINGS
 
 if process.env["SHARELATEX_LEFT_FOOTER"]?
 	try
@@ -322,9 +322,12 @@ if process.env["SHARELATEX_RIGHT_FOOTER"]?
 
 if process.env["SHARELATEX_HEADER_IMAGE_URL"]?
 	settings.nav.custom_logo = process.env["SHARELATEX_HEADER_IMAGE_URL"]
-	
-if process.env["SHARELATEX_HEADER"]?
-	settings.nav.header = process.env["SHARELATEX_HEADER_NAV_LINKS"]
+
+if process.env["SHARELATEX_HEADER_NAV_LINKS"]?
+	try
+		settings.nav.header = JSON.parse(process.env["SHARELATEX_HEADER_NAV_LINKS"])
+	catch e
+		console.error("could not parse SHARELATEX_HEADER_NAV_LINKS, not valid JSON")
 
 # if process.env["SHARELATEX_PROXY_LEARN"]?
 # 	settings.nav.header.push({text: "help", class: "subdued", dropdown: [{text: "documentation", url: "/learn"}] })
