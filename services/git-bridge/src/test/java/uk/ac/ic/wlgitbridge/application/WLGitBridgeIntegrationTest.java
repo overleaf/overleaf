@@ -628,7 +628,7 @@ public class WLGitBridgeIntegrationTest {
     }
 
     private static final List<String> EXPECTED_OUT_PUSH_SUBMODULE = Arrays.asList(
-            "remote: hint: Your Git repository is invalid.",
+            "remote: hint: Your Git repository contains a reference we cannot resolve.",
             "remote: hint: If your project contains a Git submodule,",
             "remote: hint: please remove it and try again.",
             "To http://127.0.0.1:33875/testproj.git",

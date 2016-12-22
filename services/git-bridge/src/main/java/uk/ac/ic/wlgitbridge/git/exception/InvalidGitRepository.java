@@ -13,7 +13,7 @@ public class InvalidGitRepository extends GitUserException {
     @Override
     public List<String> getDescriptionLines() {
         return Arrays.asList(
-                "Your Git repository is invalid.",
+                "Your Git repository contains a reference we cannot resolve.",
                 "If your project contains a Git submodule,",
                 "please remove it and try again."
         );
