@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import uk.ac.ic.wlgitbridge.snapshot.base.Result;
 import uk.ac.ic.wlgitbridge.snapshot.base.Request;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
+import uk.ac.ic.wlgitbridge.util.Log;
 import uk.ac.ic.wlgitbridge.util.Util;
 
 /**
@@ -14,7 +15,10 @@ public class PushResult extends Result {
 
     private boolean success;
 
-    public PushResult(Request request, JsonElement json) throws FailedConnectionException {
+    public PushResult(
+            Request request,
+            JsonElement json
+    ) throws FailedConnectionException {
         super(request, json);
     }
 
@@ -29,6 +33,7 @@ public class PushResult extends Result {
 
     @Override
     public void fromJSON(JsonElement json) {
+        Log.info("PushResult({})", json);
         JsonObject responseObject = json.getAsJsonObject();
         String code = Util.getCodeFromResponse(responseObject);
 

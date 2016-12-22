@@ -25,12 +25,13 @@ public class SnapshotAPIState {
     private Map<String, SnapshotPushResult> push;
     private Map<String, SnapshotPostbackRequest> postback;
 
-    public SnapshotAPIState(Map<String, GetDocResult> getDoc,
-                            Map<String, GetSavedVersResult> getSavedVers,
-                            Map<String, Map<Integer, GetForVersionResult>> getForVers,
-                            Map<String, SnapshotPushResult> push,
-                            Map<String, SnapshotPostbackRequest> postback) {
-
+    public SnapshotAPIState(
+            Map<String, GetDocResult> getDoc,
+            Map<String, GetSavedVersResult> getSavedVers,
+            Map<String, Map<Integer, GetForVersionResult>> getForVers,
+            Map<String, SnapshotPushResult> push,
+            Map<String, SnapshotPostbackRequest> postback
+    ) {
         this.getDoc = getDoc;
         this.getSavedVers = getSavedVers;
         this.getForVers = getForVers;
@@ -39,19 +40,45 @@ public class SnapshotAPIState {
     }
 
     public SnapshotAPIState() {
-
-        getDoc = new HashMap<String, GetDocResult>();
-        getDoc.put("1826rqgsdb", new GetDocResult(null, 243, "2014-11-30T18:40:58Z", "jdleesmiller+1@gmail.com", "John+1"));
+        getDoc = new HashMap<>();
+        getDoc.put(
+                "1826rqgsdb",
+                new GetDocResult(
+                        null,
+                        243,
+                        "2014-11-30T18:40:58Z",
+                        "jdleesmiller+1@gmail.com",
+                        "John+1"
+                )
+        );
 
         getSavedVers = new HashMap<String, GetSavedVersResult>();
         List<SnapshotInfo> savedVers = new LinkedList<SnapshotInfo>();
-        savedVers.add(new SnapshotInfo(243, "added more info on doc GET and error details", "jdleesmiller+1@gmail.com", "John+1", "2014-11-30T18:47:01Z"));
-        savedVers.add(new SnapshotInfo(185, "with more details on POST request", "jdleesmiller+1@gmail.com", "John+1", "2014-11-11T17:18:40Z"));
-        savedVers.add(new SnapshotInfo(175, "with updated PUT/POST request", "jdleesmiller+1@gmail.com", "John+1", "2014-11-09T23:09:13Z"));
-        savedVers.add(new SnapshotInfo(146, "added PUT format", "jdleesmiller@gmail.com", "John Lees-Miller", "2014-11-07T15:11:35Z"));
-        savedVers.add(new SnapshotInfo(74, "with example output", "jdleesmiller@gmail.com", "John Lees-Miller", "2014-11-05T18:09:41Z"));
-        savedVers.add(new SnapshotInfo(39, "with more files", "jdleesmiller@gmail.com", "John Lees-Miller", "2014-11-05T18:02:19Z"));
-        savedVers.add(new SnapshotInfo(24, "first draft", "jdleesmiller@gmail.com", "John Lees-Miller", "2014-11-05T17:56:58Z"));
+        savedVers.add(new SnapshotInfo(
+                243,
+                "added more info on doc GET and error details",
+                "jdleesmiller+1@gmail.com",
+                "John+1",
+                "2014-11-30T18:47:01Z"
+        ));
+        savedVers.add(new SnapshotInfo(
+                185, "with more details on POST request", "jdleesmiller+1@gmail.com", "John+1", "2014-11-11T17:18:40Z"
+        ));
+        savedVers.add(new SnapshotInfo(
+                175, "with updated PUT/POST request", "jdleesmiller+1@gmail.com", "John+1", "2014-11-09T23:09:13Z"
+        ));
+        savedVers.add(new SnapshotInfo(
+                146, "added PUT format", "jdleesmiller@gmail.com", "John Lees-Miller", "2014-11-07T15:11:35Z"
+        ));
+        savedVers.add(new SnapshotInfo(
+                74, "with example output", "jdleesmiller@gmail.com", "John Lees-Miller", "2014-11-05T18:09:41Z"
+        ));
+        savedVers.add(new SnapshotInfo(
+                39, "with more files", "jdleesmiller@gmail.com", "John Lees-Miller", "2014-11-05T18:02:19Z"
+        ));
+        savedVers.add(new SnapshotInfo(
+                24, "first draft", "jdleesmiller@gmail.com", "John Lees-Miller", "2014-11-05T17:56:58Z"
+        ));
         getSavedVers.put("1826rqgsdb", new GetSavedVersResult(savedVers));
 
         getForVers = new HashMap<String, Map<Integer, GetForVersionResult>>() {{
@@ -105,9 +132,33 @@ public class SnapshotAPIState {
         }};
 
         postback = new HashMap<String, SnapshotPostbackRequest>() {{
-//            put("1826rqgsdb", new SnapshotPostbackRequestInvalidFiles(Arrays.<InvalidFileError>asList(new InvalidFileErrorDefault("file1.invalid"), new InvalidFileErrorDisallowed("file2.exe"), new InvalidFileErrorUnclean("hello world.png", "hello_world.png"))));
+//            put(
+//                    "1826rqgsdb",
+//                    new SnapshotPostbackRequestInvalidFiles(
+//                            Arrays.<InvalidFileError>asList(
+//                                    new InvalidFileErrorDefault(
+//                                            "file1.invalid"
+//                                    ),
+//                                    new InvalidFileErrorDisallowed(
+//                                            "file2.exe"
+//                                    ),
+//                                    new InvalidFileErrorUnclean(
+//                                            "hello world.png",
+//                                            "hello_world.png"
+//                                    )
+//                            )
+//                    )
+//            );
 //            put("1826rqgsdb", new SnapshotPostbackRequestOutOfDate());
-            put("1826rqgsdb", new SnapshotPostbackRequestInvalidProject(Arrays.asList("Your project is missing main.tex.", "Please name your main latex file main.tex.")));
+            put(
+                    "1826rqgsdb",
+                    new SnapshotPostbackRequestInvalidProject(
+                            Arrays.asList(
+                                    "Your project is missing main.tex.",
+                                    "Please name your main latex file main.tex."
+                            )
+                    )
+            );
 //            put("1826rqgsdb", new SnapshotPostbackRequestError());
         }};
     }
@@ -120,7 +171,10 @@ public class SnapshotAPIState {
         return getSavedVers.get(projectName);
     }
 
-    public GetForVersionResult getStateForGetForVers(String projectName, int versionID) {
+    public GetForVersionResult getStateForGetForVers(
+            String projectName,
+            int versionID
+    ) {
         return getForVers.get(projectName).get(versionID);
     }
 

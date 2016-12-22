@@ -4,7 +4,7 @@ import uk.ac.ic.wlgitbridge.bridge.db.sqlite.SQLQuery;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,8 +16,10 @@ public class GetProjectNamesSQLQuery implements SQLQuery<List<String>> {
             "SELECT `name` FROM `projects`";
 
     @Override
-    public List<String> processResultSet(ResultSet resultSet) throws SQLException {
-        List<String> projectNames = new LinkedList<String>();
+    public List<String> processResultSet(
+            ResultSet resultSet
+    ) throws SQLException {
+        List<String> projectNames = new ArrayList<>();
         while (resultSet.next()) {
             projectNames.add(resultSet.getString("name"));
         }

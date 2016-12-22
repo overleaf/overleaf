@@ -3,7 +3,6 @@ package uk.ac.ic.wlgitbridge.application;
 import uk.ac.ic.wlgitbridge.application.config.Config;
 import uk.ac.ic.wlgitbridge.application.exception.ArgsException;
 import uk.ac.ic.wlgitbridge.application.exception.ConfigFileException;
-import uk.ac.ic.wlgitbridge.git.exception.InvalidRootDirectoryPathException;
 import uk.ac.ic.wlgitbridge.server.GitBridgeServer;
 import uk.ac.ic.wlgitbridge.util.Log;
 
@@ -58,11 +57,6 @@ public class GitBridgeApp implements Runnable {
                     "Servlet exception when instantiating GitBridgeServer",
                     e
             );
-        } catch (InvalidRootDirectoryPathException e) {
-            Log.error(
-                    "Invalid root git directory path. Check your config file."
-            );
-            System.exit(EXIT_CODE_FAILED);
         }
     }
 
@@ -97,6 +91,7 @@ public class GitBridgeApp implements Runnable {
     }
 
     private void loadConfigFile() throws ConfigFileException, IOException {
+        Log.info("Loading config file at path: " + configFilePath);
         config = new Config(configFilePath);
     }
 

@@ -13,8 +13,17 @@ import java.io.FileNotFoundException;
 public class Main {
 
     public static void main(String[] args) throws FileNotFoundException {
-        MockSnapshotServer server = new MockSnapshotServer(60000, new File("/Users/Roxy/Code/java/writelatex-git-bridge"));
-        server.setState(new SnapshotAPIStateBuilder(new FileInputStream(new File("/Users/Roxy/Desktop/state.json"))).build());
+        MockSnapshotServer server = new MockSnapshotServer(
+                60000,
+                new File("/Users/Roxy/Code/java/writelatex-git-bridge")
+        );
+        server.setState(
+                new SnapshotAPIStateBuilder(
+                        new FileInputStream(
+                                new File("/Users/Roxy/Desktop/state.json")
+                        )
+                ).build()
+        );
         server.start();
     }
 

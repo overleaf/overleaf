@@ -9,7 +9,11 @@ public class Oauth2 {
     private final String oauth2ClientSecret;
     private final String oauth2Server;
 
-    public Oauth2(String oauth2ClientID, String oauth2ClientSecret, String oauth2Server) {
+    public Oauth2(
+            String oauth2ClientID,
+            String oauth2ClientSecret,
+            String oauth2Server
+    ) {
         this.oauth2ClientID = oauth2ClientID;
         this.oauth2ClientSecret = oauth2ClientSecret;
         this.oauth2Server = oauth2Server;

@@ -10,6 +10,7 @@ import uk.ac.ic.wlgitbridge.snapshot.base.Result;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.exception.InvalidProjectException;
 import uk.ac.ic.wlgitbridge.snapshot.getsavedvers.WLUser;
+import uk.ac.ic.wlgitbridge.util.Log;
 
 /**
  * Created by Winston on 06/11/14.
@@ -24,11 +25,20 @@ public class GetDocResult extends Result {
     private SnapshotAPIException exception;
     private ForbiddenException forbidden;
 
-    public GetDocResult(Request request, JsonElement json) throws FailedConnectionException {
+    public GetDocResult(
+            Request request,
+            JsonElement json
+    ) throws FailedConnectionException {
         super(request, json);
     }
 
-    public GetDocResult(JsonElement error, int versionID, String createdAt, String email, String name) {
+    public GetDocResult(
+            JsonElement error,
+            int versionID,
+            String createdAt,
+            String email,
+            String name
+    ) {
         if (error == null) {
             this.error = -1;
         } else {
@@ -64,6 +74,7 @@ public class GetDocResult extends Result {
 
     @Override
     public void fromJSON(JsonElement json) {
+        Log.info("GetDocResult: " + json);
         JsonObject jsonObject = json.getAsJsonObject();
         if (jsonObject.has("status")) {
             switch (jsonObject.get("status").getAsInt()) {
@@ -75,7 +86,9 @@ public class GetDocResult extends Result {
                 exception = new InvalidProjectException();
                 break;
             default:
-                throw new IllegalArgumentException("unknown get doc error code");
+                throw new IllegalArgumentException(
+                        "unknown get doc error code"
+                );
             }
         } else {
             versionID = jsonObject.get("latestVerId").getAsInt();

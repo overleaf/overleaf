@@ -9,5 +9,13 @@ import java.util.Map;
  * Created by winston on 20/08/2016.
  */
 public interface ResourceCache {
-    RawFile get(String projectName, String url, String newPath, Map<String, RawFile> fileTable, Map<String, byte[]> fetchedUrls) throws IOException;
+
+    RawFile get(
+            String projectName,
+            String url,
+            String newPath,
+            Map<String, RawFile> fileTable,
+            Map<String, byte[]> fetchedUrls
+    ) throws IOException;
+
 }

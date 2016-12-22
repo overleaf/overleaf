@@ -1,9 +1,9 @@
 package uk.ac.ic.wlgitbridge.bridge.repo;
 
-import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
 import uk.ac.ic.wlgitbridge.data.filestore.GitDirectoryContents;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
+import uk.ac.ic.wlgitbridge.git.exception.SizeLimitExceededException;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -24,7 +24,8 @@ public interface ProjectRepo {
             RepoStore repoStore
     ) throws IOException;
 
-    Map<String, RawFile> getFiles() throws IOException, GitUserException;
+    Map<String, RawFile> getFiles(
+    ) throws IOException, GitUserException;
 
     Collection<String> commitAndGetMissing(
             GitDirectoryContents gitDirectoryContents

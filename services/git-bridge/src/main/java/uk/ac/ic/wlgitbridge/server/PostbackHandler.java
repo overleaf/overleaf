@@ -26,10 +26,22 @@ public class PostbackHandler extends AbstractHandler {
     }
 
     @Override
-    public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-
+    public void handle(
+            String target,
+            Request baseRequest,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws IOException, ServletException {
+        Log.info(
+                "PostbackHandler: " + baseRequest.getMethod()
+                        + " <- "
+                        + baseRequest.getHttpURI()
+        );
         try {
-            if (request.getMethod().equals("POST") && target.endsWith("postback")) {
+            if (
+                    request.getMethod().equals("POST")
+                            && target.endsWith("postback")
+            ) {
                 response.setContentType("application/json");
                 String contents = Util.getContentsOfReader(request.getReader());
                 String[] parts = target.split("/");
@@ -38,8 +50,12 @@ public class PostbackHandler extends AbstractHandler {
                 }
                 String projectName = parts[1];
                 String postbackKey = parts[2];
-                Log.info(baseRequest.getMethod() + " <- " + baseRequest.getHttpURI());
-                PostbackContents postbackContents = new PostbackContents(bridge, projectName, postbackKey, contents);
+                PostbackContents postbackContents = new PostbackContents(
+                        bridge,
+                        projectName,
+                        postbackKey,
+                        contents
+                );
                 JsonObject body = new JsonObject();
 
                 try {

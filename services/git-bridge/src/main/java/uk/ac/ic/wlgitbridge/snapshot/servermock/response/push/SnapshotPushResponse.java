@@ -12,7 +12,10 @@ public class SnapshotPushResponse extends SnapshotResponse {
     private final SnapshotPushResult stateForPush;
     private final SnapshotPostbackRequest stateForPostback;
 
-    public SnapshotPushResponse(SnapshotPushResult stateForPush, SnapshotPostbackRequest stateForPostback) {
+    public SnapshotPushResponse(
+            SnapshotPushResult stateForPush,
+            SnapshotPostbackRequest stateForPostback
+    ) {
         this.stateForPush = stateForPush;
         this.stateForPostback = stateForPostback;
     }

@@ -18,12 +18,15 @@ public class PostbackTimeoutException extends SevereSnapshotPostException {
 
     @Override
     public List<String> getDescriptionLines() {
-        return Arrays.asList("The " + Util.getServiceName() + " server is currently unavailable.", "Please try again later.");
+        return Arrays.asList(
+                "The "
+                        + Util.getServiceName()
+                        + " server is currently unavailable.",
+                "Please try again later."
+        );
     }
 
     @Override
-    public void fromJSON(JsonElement json) {
-
-    }
+    public void fromJSON(JsonElement json) {}
 
 }

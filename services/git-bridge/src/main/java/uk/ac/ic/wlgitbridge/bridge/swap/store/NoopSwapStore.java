@@ -1,7 +1,6 @@
 package uk.ac.ic.wlgitbridge.bridge.swap.store;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -9,18 +8,14 @@ import java.io.InputStream;
  */
 public class NoopSwapStore implements SwapStore {
 
-    public NoopSwapStore(SwapStoreConfig config) {
-
-    }
+    public NoopSwapStore(SwapStoreConfig __) {}
 
     @Override
     public void upload(
             String projectName,
             InputStream uploadStream,
             long contentLength
-    ) throws IOException {
-
-    }
+    ) {}
 
     @Override
     public InputStream openDownloadStream(String projectName) {
@@ -28,8 +23,6 @@ public class NoopSwapStore implements SwapStore {
     }
 
     @Override
-    public void remove(String projectName) {
-
-    }
+    public void remove(String projectName) {}
 
 }

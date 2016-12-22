@@ -5,16 +5,23 @@ import com.google.gson.JsonElement;
 import uk.ac.ic.wlgitbridge.snapshot.base.SnapshotAPIRequest;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.snapshot.base.HTTPMethod;
+import uk.ac.ic.wlgitbridge.util.Log;
 
 /**
  * Created by Winston on 06/11/14.
  */
-public class GetSavedVersRequest extends SnapshotAPIRequest<GetSavedVersResult> {
+public class GetSavedVersRequest
+        extends SnapshotAPIRequest<GetSavedVersResult> {
 
     public static final String API_CALL = "/saved_vers";
 
     public GetSavedVersRequest(Credential oauth2, String projectName) {
         super(projectName, API_CALL, oauth2);
+        Log.info(
+                "GetSavedVersRequest({}, {})",
+                "oauth2: <oauth2>",
+                "projectName: " + projectName
+        );
     }
 
     @Override
@@ -23,7 +30,9 @@ public class GetSavedVersRequest extends SnapshotAPIRequest<GetSavedVersResult> 
     }
 
     @Override
-    protected GetSavedVersResult parseResponse(JsonElement json) throws FailedConnectionException {
+    protected GetSavedVersResult parseResponse(
+            JsonElement json
+    ) throws FailedConnectionException {
         return new GetSavedVersResult(this, json);
     }
 

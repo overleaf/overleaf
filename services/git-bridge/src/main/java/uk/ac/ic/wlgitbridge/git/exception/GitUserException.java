@@ -8,6 +8,7 @@ import java.util.List;
 public abstract class GitUserException extends Exception {
 
     public abstract String getMessage();
+
     public abstract List<String> getDescriptionLines();
 
 }

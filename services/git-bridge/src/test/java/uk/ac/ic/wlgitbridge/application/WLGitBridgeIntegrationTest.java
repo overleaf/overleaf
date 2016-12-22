@@ -107,6 +107,9 @@ public class WLGitBridgeIntegrationTest {
         put("wlgbCanSwapProjects", new HashMap<String, SnapshotAPIState>() {{
             put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/wlgbCanSwapProjects/state/state.json")).build());
         }});
+        put("pushSubmoduleFailsWithInvalidGitRepo", new HashMap<String, SnapshotAPIState>() {{
+            put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/pushSubmoduleFailsWithInvalidGitRepo/state/state.json")).build());
+        }});
     }};
 
     @Rule
@@ -323,11 +326,11 @@ public class WLGitBridgeIntegrationTest {
     public void canPushFilesSuccessfully() throws IOException, GitAPIException, InterruptedException {
         MockSnapshotServer server = new MockSnapshotServer(3866, getResource("/canPushFilesSuccessfully").toFile());
         server.start();
-        server.setState(states.get("canPushFilesSuccessfully").get("state"));
         GitBridgeApp wlgb = new GitBridgeApp(new String[] {
             makeConfigFile(33866, 3866)
         });
         wlgb.run();
+        server.setState(states.get("canPushFilesSuccessfully").get("state"));
         File dir = folder.newFolder();
         File testprojDir = cloneRepository("testproj", 33866, dir);
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canPushFilesSuccessfully/state/testproj"), testprojDir.toPath()));
@@ -621,6 +624,43 @@ public class WLGitBridgeIntegrationTest {
         while (testProj2ServerDir.exists());
         assertTrue(testProj1ServerDir.exists());
         assertFalse(testProj2ServerDir.exists());
+        wlgb.stop();
+    }
+
+    private static final List<String> EXPECTED_OUT_PUSH_SUBMODULE = Arrays.asList(
+            "remote: hint: Your Git repository contains a reference we cannot resolve.",
+            "remote: hint: If your project contains a Git submodule,",
+            "remote: hint: please remove it and try again.",
+            "To http://127.0.0.1:33875/testproj.git",
+            "! [remote rejected] master -> master (invalid git repo)",
+            "error: failed to push some refs to 'http://127.0.0.1:33875/testproj.git'"
+    );
+
+    @Test
+    public void pushSubmoduleFailsWithInvalidGitRepo() throws IOException, GitAPIException, InterruptedException {
+        MockSnapshotServer server = new MockSnapshotServer(3875, getResource("/pushSubmoduleFailsWithInvalidGitRepo").toFile());
+        server.start();
+        server.setState(states.get("pushSubmoduleFailsWithInvalidGitRepo").get("state"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+                makeConfigFile(33875, 3875)
+        });
+        wlgb.run();
+        File dir = folder.newFolder();
+        File testprojDir = cloneRepository("testproj", 33875, dir);
+        runtime.exec("mkdir sub", null, testprojDir).waitFor();
+        File sub = new File(testprojDir, "sub");
+        runtime.exec("touch sub.txt", null, sub).waitFor();
+        runtime.exec("git init", null, sub).waitFor();
+        runtime.exec("git add -A", null, sub).waitFor();
+        runtime.exec("git commit -m \"sub\"", null, sub).waitFor();
+        runtime.exec("git add -A", null, testprojDir).waitFor();
+        runtime.exec("git commit -m \"push\"", null, testprojDir).waitFor();
+        Process gitPush = runtime.exec("git push", null, testprojDir);
+        int pushExitCode = gitPush.waitFor();
+        wlgb.stop();
+        assertEquals(1, pushExitCode);
+        List<String> actual = Util.linesFromStream(gitPush.getErrorStream(), 2, "[K");
+        assertEquals(EXPECTED_OUT_PUSH_SUBMODULE, actual);
         wlgb.stop();
     }
 

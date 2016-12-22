@@ -21,10 +21,12 @@ public class SizeLimitExceededException extends GitUserException {
 
     @Override
     public List<String> getDescriptionLines() {
-        String filename = path != null ? "File '" + path + "' is" : "There's a file";
+        String filename =
+                path != null ? "File '" + path + "' is" : "There's a file";
         return Arrays.asList(
-            filename + " too large to push to " + Util.getServiceName() + " via git",
-            "the recommended maximum file size is 50 MiB"
+                filename + " too large to push to "
+                        + Util.getServiceName() + " via git",
+                        "the recommended maximum file size is 50 MiB"
         );
     }
 

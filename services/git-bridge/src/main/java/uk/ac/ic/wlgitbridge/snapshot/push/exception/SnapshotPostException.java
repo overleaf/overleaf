@@ -8,9 +8,7 @@ import uk.ac.ic.wlgitbridge.git.exception.SnapshotAPIException;
  */
 public abstract class SnapshotPostException extends SnapshotAPIException {
 
-    public SnapshotPostException() {
-
-    }
+    public SnapshotPostException() {}
 
     public SnapshotPostException(JsonElement jsonElement) {
         fromJSON(jsonElement);

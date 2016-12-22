@@ -19,6 +19,15 @@ public class SnapshotFile extends RawFile implements JSONSource {
     }
 
     @Override
+    public String toString() {
+        return "SnapshotFile(path: "
+                + path
+                + ", contents: byte["
+                + contents.length
+                + "])";
+    }
+
+    @Override
     public void fromJSON(JsonElement json) {
         JsonArray jsonArray = json.getAsJsonArray();
         contents = jsonArray.get(0).getAsString().getBytes();

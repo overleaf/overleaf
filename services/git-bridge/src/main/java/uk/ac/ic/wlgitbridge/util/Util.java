@@ -17,7 +17,8 @@ public class Util {
     private static String HOSTNAME;
     private static int PORT;
     private static String POSTBACK_URL;
-    private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
+    private static final DateFormat dateFormat
+            = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
 
     public static String entries(int entries) {
         if (entries == 1) {
@@ -57,9 +58,11 @@ public class Util {
         return result;
     }
 
-    public static String getContentsOfReader(BufferedReader reader) throws IOException {
+    public static String getContentsOfReader(
+            BufferedReader reader
+    ) throws IOException {
         StringBuilder sb = new StringBuilder();
-        for (String line; (line = reader.readLine()) != null; ) {
+        for (String line; (line = reader.readLine()) != null;) {
             sb.append(line);
         }
         return sb.toString();
@@ -102,9 +105,12 @@ public class Util {
         }
     }
 
-    public static void deleteInDirectoryApartFrom(File directory, String... apartFrom) {
+    public static void deleteInDirectoryApartFrom(
+            File directory,
+            String... apartFrom
+    ) {
         if (directory != null) {
-            Set<String> excluded = new HashSet<String>(Arrays.asList(apartFrom));
+            Set<String> excluded = new HashSet<>(Arrays.asList(apartFrom));
             File [] files = directory.listFiles();
             if (files != null) {
                 for (File file : files) {
@@ -120,9 +126,15 @@ public class Util {
         }
     }
 
-    public static List<String> linesFromStream(InputStream stream, int skip, String trimSuffix) throws IOException {
-        List<String> lines = new ArrayList<String>();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+    public static List<String> linesFromStream(
+            InputStream stream,
+            int skip,
+            String trimSuffix
+    ) throws IOException {
+        List<String> lines = new ArrayList<>();
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(stream)
+        );
         String line;
         for (int i = 0; i < skip; i++) {
             reader.readLine();
@@ -139,8 +151,13 @@ public class Util {
         return lines;
     }
 
-    public static String fromStream(InputStream stream, int skip) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+    public static String fromStream(
+            InputStream stream,
+            int skip
+    ) throws IOException {
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(stream)
+        );
         StringBuilder out = new StringBuilder();
         String newLine = System.getProperty("line.separator");
         String line;
@@ -182,7 +199,6 @@ public class Util {
         } else {
             code = codeElement.getAsString();
         }
-
         return code;
     }
 

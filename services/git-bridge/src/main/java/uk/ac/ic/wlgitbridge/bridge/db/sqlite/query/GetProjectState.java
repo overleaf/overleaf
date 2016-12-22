@@ -29,7 +29,9 @@ public class GetProjectState implements SQLQuery<ProjectState> {
     }
 
     @Override
-    public ProjectState processResultSet(ResultSet resultSet) throws SQLException {
+    public ProjectState processResultSet(
+            ResultSet resultSet
+    ) throws SQLException {
         while (resultSet.next()) {
             if (resultSet.getTimestamp("last_accessed") == null) {
                 return ProjectState.SWAPPED;
@@ -40,7 +42,9 @@ public class GetProjectState implements SQLQuery<ProjectState> {
     }
 
     @Override
-    public void addParametersToStatement(PreparedStatement statement) throws SQLException {
+    public void addParametersToStatement(
+            PreparedStatement statement
+    ) throws SQLException {
         statement.setString(1, projectName);
     }
 

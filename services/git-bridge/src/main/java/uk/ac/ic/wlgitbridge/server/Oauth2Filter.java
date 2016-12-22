@@ -2,17 +2,13 @@ package uk.ac.ic.wlgitbridge.server;
 
 import com.google.api.client.auth.oauth2.*;
 import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.gson.GsonFactory;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jetty.server.Request;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.ac.ic.wlgitbridge.application.config.Oauth2;
 import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocRequest;
 import uk.ac.ic.wlgitbridge.util.Instance;
+import uk.ac.ic.wlgitbridge.util.Log;
 import uk.ac.ic.wlgitbridge.util.Util;
 
 import javax.servlet.*;
@@ -37,58 +33,109 @@ public class Oauth2Filter implements Filter {
     }
 
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {}
 
-    }
-
+    /**
+     * The original request from git will not contain the Authorization header.
+     *
+     * So, for projects that need auth, we return 401. Git will swallow this
+     * and prompt the user for user/pass, and then make a brand new request.
+     * @param servletRequest
+     * @param servletResponse
+     * @param filterChain
+     * @throws IOException
+     * @throws ServletException
+     */
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
-            throws IOException, ServletException {
-        String project = Util.removeAllSuffixes(((Request) servletRequest).getRequestURI().split("/")[1], ".git");
+    public void doFilter(
+            ServletRequest servletRequest,
+            ServletResponse servletResponse,
+            FilterChain filterChain
+    ) throws IOException, ServletException {
+        String project = Util.removeAllSuffixes(
+                ((Request) servletRequest).getRequestURI().split("/")[1],
+                ".git"
+        );
+        Log.info("[{}] Checking if auth needed", project);
         GetDocRequest doc = new GetDocRequest(project);
         doc.request();
         try {
             doc.getResult();
         } catch (ForbiddenException e) {
-            getAndInjectCredentials(servletRequest, servletResponse, filterChain);
+            Log.info("[{}] Auth needed", project);
+            getAndInjectCredentials(
+                    project,
+                    servletRequest,
+                    servletResponse,
+                    filterChain
+            );
             return;
         }
+        Log.info("[{}] Auth not needed");
         filterChain.doFilter(servletRequest, servletResponse);
     }
 
-    private void getAndInjectCredentials(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+    // TODO: this is ridiculous. Check for error cases first, then return/throw
+    // TODO: also, use an Optional credential, since we treat it as optional
+    private void getAndInjectCredentials(
+            String projectName,
+            ServletRequest servletRequest,
+            ServletResponse servletResponse,
+            FilterChain filterChain
+    ) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null) {
+            Log.info("[{}] Authorization header present");
             StringTokenizer st = new StringTokenizer(authHeader);
             if (st.hasMoreTokens()) {
                 String basic = st.nextToken();
                 if (basic.equalsIgnoreCase("Basic")) {
                     try {
-                        String credentials = new String(Base64.decodeBase64(st.nextToken()), "UTF-8");
+                        String credentials = new String(
+                                Base64.decodeBase64(st.nextToken()),
+                                "UTF-8"
+                        );
                         String[] split = credentials.split(":");
                         if (split.length == 2) {
                             String username = split[0];
                             String password = split[1];
                             String accessToken = null;
                             try {
-                                accessToken = new PasswordTokenRequest(Instance.httpTransport, Instance.jsonFactory, new GenericUrl(oauth2.getOauth2Server() + "/oauth/token"), username, password)
-                                        .setClientAuthentication(new ClientParametersAuthentication(oauth2.getOauth2ClientID(), oauth2.getOauth2ClientSecret()))
-                                        .execute().getAccessToken();
+                                accessToken = new PasswordTokenRequest(
+                                        Instance.httpTransport,
+                                        Instance.jsonFactory,
+                                        new GenericUrl(
+                                                oauth2.getOauth2Server()
+                                                        + "/oauth/token"
+                                        ),
+                                        username,
+                                        password
+                                ).setClientAuthentication(
+                                        new ClientParametersAuthentication(
+                                                oauth2.getOauth2ClientID(),
+                                                oauth2.getOauth2ClientSecret()
+                                        )
+                                ).execute().getAccessToken();
                             } catch (TokenResponseException e) {
-                                unauthorized(response);
+                                unauthorized(projectName, response);
                                 return;
                             }
-                            final Credential cred = new Credential.Builder(BearerToken.authorizationHeaderAccessMethod())
-                                    .build();
+                            final Credential cred = new Credential.Builder(
+                                    BearerToken.authorizationHeaderAccessMethod(
+                                    )
+                            ).build();
                             cred.setAccessToken(accessToken);
                             servletRequest.setAttribute(ATTRIBUTE_KEY, cred);
 
-                            filterChain.doFilter(servletRequest, servletResponse);
+                            filterChain.doFilter(
+                                    servletRequest,
+                                    servletResponse
+                            );
                         } else {
-                            unauthorized(response);
+                            unauthorized(projectName, response);
                         }
                     } catch (UnsupportedEncodingException e) {
                         throw new Error("Couldn't retrieve authentication", e);
@@ -96,27 +143,42 @@ public class Oauth2Filter implements Filter {
                 }
             }
         } else {
-            unauthorized(response);
+            unauthorized(projectName, response);
         }
     }
 
     @Override
-    public void destroy() {
-    }
+    public void destroy() {}
 
-    private void unauthorized(ServletResponse servletResponse) throws IOException {
+    private void unauthorized(
+            String projectName,
+            ServletResponse servletResponse
+    ) throws IOException {
+        Log.info("[{}] Unauthorized", projectName);
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         response.setContentType("text/plain");
         response.setHeader("WWW-Authenticate", "Basic realm=\"Git Bridge\"");
         response.setStatus(401);
 
         PrintWriter w = response.getWriter();
-        w.println("Please sign in using your email address and Overleaf password.");
+        w.println(
+                "Please sign in using your email address and Overleaf password."
+        );
         w.println();
-        w.println("*Note*: if you sign in to Overleaf using another provider, such ");
-        w.println("as Google or Twitter, you need to set a password on your Overleaf ");
-        w.println("account first. Please see https://www.overleaf.com/blog/195 for ");
+        w.println(
+                "*Note*: if you sign in to Overleaf using another provider, "
+                        + "such "
+        );
+        w.println(
+                "as Google or Twitter, you need to set a password "
+                        + "on your Overleaf "
+        );
+        w.println(
+                "account first. "
+                        + "Please see https://www.overleaf.com/blog/195 for "
+        );
         w.println("more information.");
         w.close();
     }
+
 }

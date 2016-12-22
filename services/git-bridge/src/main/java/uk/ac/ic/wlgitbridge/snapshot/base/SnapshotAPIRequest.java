@@ -2,9 +2,7 @@ package uk.ac.ic.wlgitbridge.snapshot.base;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.http.BasicAuthentication;
-import com.google.api.client.http.HttpExecuteInterceptor;
 import com.google.api.client.http.HttpRequest;
-import com.ning.http.client.Realm;
 
 import java.io.IOException;
 
@@ -20,22 +18,33 @@ public abstract class SnapshotAPIRequest<T extends Result> extends Request<T> {
 
     private final Credential oauth2;
 
-    public SnapshotAPIRequest(String projectName, String apiCall, Credential oauth2) {
+    public SnapshotAPIRequest(
+            String projectName,
+            String apiCall,
+            Credential oauth2
+    ) {
         super(BASE_URL + projectName + apiCall);
         this.oauth2 = oauth2;
     }
 
     @Override
-    protected void onBeforeRequest(HttpRequest request) throws IOException {
+    protected void onBeforeRequest(
+            HttpRequest request
+    ) throws IOException {
         if (oauth2 != null) {
-            request.setInterceptor(new HttpExecuteInterceptor() {
-
-                @Override
-                public void intercept(HttpRequest request) throws IOException {
-                    new BasicAuthentication(USERNAME, PASSWORD).intercept(request);
-                    oauth2.intercept(request);
-                }
-
+            request.setInterceptor(request1 -> {
+                new BasicAuthentication(
+                        USERNAME,
+                        PASSWORD
+                ).intercept(request1);
+                oauth2.intercept(request1);
+            });
+        } else {
+            request.setInterceptor(request1 -> {
+                new BasicAuthentication(
+                        USERNAME,
+                        PASSWORD
+                ).intercept(request1);
             });
         }
     }

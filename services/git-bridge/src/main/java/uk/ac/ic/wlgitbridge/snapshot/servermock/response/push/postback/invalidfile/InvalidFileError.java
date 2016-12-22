@@ -30,9 +30,13 @@ public abstract class InvalidFileError {
         } else if (state.equals("disallowed")) {
             return new InvalidFileErrorDisallowed(file);
         } else if (state.equals("unclean_name")) {
-            return new InvalidFileErrorUnclean(file, error.get("cleanFile").getAsString());
+            return new InvalidFileErrorUnclean(
+                    file, error.get("cleanFile").getAsString()
+            );
         } else {
-            throw new IllegalArgumentException("bad invalid file state: " + state);
+            throw new IllegalArgumentException(
+                    "bad invalid file state: " + state
+            );
         }
     }
 

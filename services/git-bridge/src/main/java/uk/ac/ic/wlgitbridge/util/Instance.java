@@ -22,7 +22,8 @@ public class Instance {
     public static final JsonFactory jsonFactory = new GsonFactory();
 
     public static final Gson prettyGson =
-            new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+            new GsonBuilder(
+            ).setPrettyPrinting().disableHtmlEscaping().create();
 
     public static final Gson gson = new Gson();
 

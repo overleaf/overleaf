@@ -12,7 +12,10 @@ public class SnapshotPostExceptionBuilder {
     private static final String CODE_ERROR_INVALID_PROJECT = "invalidProject";
     private static final String CODE_ERROR_UNKNOWN = "error";
 
-    public SnapshotPostException build(String errorCode, JsonObject json) throws UnexpectedPostbackException {
+    public SnapshotPostException build(
+            String errorCode,
+            JsonObject json
+    ) throws UnexpectedPostbackException {
         if (errorCode.equals(CODE_ERROR_OUT_OF_DATE)) {
             return new OutOfDateException(json);
         } else if (errorCode.equals(CODE_ERROR_INVALID_FILES)) {

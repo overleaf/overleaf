@@ -30,8 +30,9 @@ public class PostbackManager {
         this(new SecureRandom());
     }
 
-    public int waitForVersionIdOrThrow(String projectName)
-            throws SnapshotPostException {
+    public int waitForVersionIdOrThrow(
+            String projectName
+    ) throws SnapshotPostException {
         try {
             PostbackPromise postbackPromise =
                     postbackContentsTable.get(projectName);
@@ -42,19 +43,21 @@ public class PostbackManager {
         }
     }
 
-    public void postVersionIDForProject(String projectName,
-                                        int versionID,
-                                        String postbackKey)
-            throws UnexpectedPostbackException {
+    public void postVersionIDForProject(
+            String projectName,
+            int versionID,
+            String postbackKey
+    ) throws UnexpectedPostbackException {
         getPostbackForProject(
                 projectName
         ).receivedVersionID(versionID, postbackKey);
     }
 
-    public void postExceptionForProject(String projectName,
-                                        SnapshotPostException exception,
-                                        String postbackKey)
-            throws UnexpectedPostbackException {
+    public void postExceptionForProject(
+            String projectName,
+            SnapshotPostException exception,
+            String postbackKey
+    ) throws UnexpectedPostbackException {
         getPostbackForProject(
                 projectName
         ).receivedException(exception, postbackKey);
@@ -80,7 +83,8 @@ public class PostbackManager {
             throws InvalidPostbackKeyException {
         PostbackPromise postbackPromise = postbackContentsTable.get(projectName);
         if (postbackPromise == null) {
-            throw new InvalidPostbackKeyException(); // project not found; can't check key
+            // project not found; can't check key
+            throw new InvalidPostbackKeyException();
         } else {
             postbackPromise.checkPostbackKey(postbackKey);
         }

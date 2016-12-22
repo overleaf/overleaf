@@ -14,6 +14,7 @@ import java.util.Arrays;
 public abstract class RawFile {
 
     public abstract String getPath();
+
     public abstract byte[] getContents();
 
     public final void writeToDisk(File directory) throws IOException {

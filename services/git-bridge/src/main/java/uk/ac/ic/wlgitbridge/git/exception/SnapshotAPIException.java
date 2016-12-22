@@ -7,5 +7,4 @@ import uk.ac.ic.wlgitbridge.snapshot.base.JSONSource;
  */
 public abstract class SnapshotAPIException
         extends GitUserException
-        implements JSONSource {
-}
+        implements JSONSource {}

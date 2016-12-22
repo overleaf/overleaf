@@ -64,7 +64,10 @@ public class PostbackPromise {
         }
     }
 
-    public void receivedException(SnapshotPostException exception, String postbackKey) {
+    public void receivedException(
+            SnapshotPostException exception,
+            String postbackKey
+    ) {
         lock.lock();
         try {
             if (postbackKey.equals(this.postbackKey)) {
@@ -77,7 +80,9 @@ public class PostbackPromise {
         }
     }
 
-    public void checkPostbackKey(String postbackKey) throws InvalidPostbackKeyException {
+    public void checkPostbackKey(
+            String postbackKey
+    ) throws InvalidPostbackKeyException {
         if (!postbackKey.equals(this.postbackKey)) {
             throw new InvalidPostbackKeyException();
         }

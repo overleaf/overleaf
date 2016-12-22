@@ -15,9 +15,7 @@ public class OutOfDateException extends SnapshotPostException {
         super(json);
     }
 
-    public OutOfDateException() {
-
-    }
+    public OutOfDateException() {}
 
     @Override
     public String getMessage() {
@@ -30,8 +28,6 @@ public class OutOfDateException extends SnapshotPostException {
     }
 
     @Override
-    public void fromJSON(JsonElement json) {
-
-    }
+    public void fromJSON(JsonElement json) {}
 
 }

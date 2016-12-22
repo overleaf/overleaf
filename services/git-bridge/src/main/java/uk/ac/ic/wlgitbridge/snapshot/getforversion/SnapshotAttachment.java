@@ -18,6 +18,11 @@ public class SnapshotAttachment implements JSONSource {
     }
 
     @Override
+    public String toString() {
+        return "SnapshotAttachment(url: " + url + ", path: " + path + ")";
+    }
+
+    @Override
     public void fromJSON(JsonElement json) {
         JsonArray jsonArray = json.getAsJsonArray();
         url = jsonArray.get(0).getAsString();

@@ -59,7 +59,10 @@ public class Files {
         return renamed;
     }
 
-    private static boolean uncheckedContentsAreEqual(File f0, File f1) throws IOException {
+    private static boolean uncheckedContentsAreEqual(
+            File f0,
+            File f1
+    ) throws IOException {
         if (f0.equals(f1)) {
             return true;
         }

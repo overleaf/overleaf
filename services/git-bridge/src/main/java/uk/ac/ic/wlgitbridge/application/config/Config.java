@@ -49,8 +49,10 @@ public class Config implements JSONSource {
     @Nullable
     private SwapJobConfig swapJob;
 
-    public Config(String configFilePath) throws ConfigFileException,
-                                                IOException {
+    public Config(
+            String configFilePath
+    ) throws ConfigFileException,
+             IOException {
         this(new FileReader(configFilePath));
     }
 

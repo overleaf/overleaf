@@ -2,9 +2,9 @@ package uk.ac.ic.wlgitbridge.snapshot.servermock.server;
 
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
-import uk.ac.ic.wlgitbridge.snapshot.servermock.exception.InvalidAPICallException;
-import uk.ac.ic.wlgitbridge.snapshot.servermock.response.SnapshotResponse;
-import uk.ac.ic.wlgitbridge.snapshot.servermock.response.SnapshotResponseBuilder;
+import uk.ac.ic.wlgitbridge.snapshot.servermock.exception.
+        InvalidAPICallException;
+import uk.ac.ic.wlgitbridge.snapshot.servermock.response.*;
 import uk.ac.ic.wlgitbridge.util.Log;
 
 import javax.servlet.ServletException;
@@ -19,17 +19,30 @@ public class MockSnapshotRequestHandler extends AbstractHandler {
 
     private final SnapshotResponseBuilder responseBuilder;
 
-    public MockSnapshotRequestHandler(SnapshotResponseBuilder responseBuilder) {
+    public MockSnapshotRequestHandler(
+            SnapshotResponseBuilder responseBuilder
+    ) {
         this.responseBuilder = responseBuilder;
     }
 
     @Override
-    public void handle(String target, final Request baseRequest, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    public void handle(
+            String target,
+            final Request baseRequest,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws IOException, ServletException {
         boolean handled;
         try {
-            final SnapshotResponse snapshotResponse = responseBuilder.buildWithTarget(target, baseRequest.getMethod());
+            final SnapshotResponse snapshotResponse
+                    = responseBuilder.buildWithTarget(
+                            target, baseRequest.getMethod()
+                    );
             response.getWriter().println(snapshotResponse.respond());
-            new PostbackThread(baseRequest.getReader(), snapshotResponse.postback()).startIfNotNull();
+            new PostbackThread(
+                    baseRequest.getReader(),
+                    snapshotResponse.postback()
+            ).startIfNotNull();
             handled = true;
         } catch (InvalidAPICallException e) {
             handled = false;

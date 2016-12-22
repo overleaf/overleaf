@@ -26,7 +26,12 @@ public class PostbackContents implements JSONSource {
     private int versionID;
     private SnapshotPostException exception;
 
-    public PostbackContents(Bridge bridge, String projectName, String postbackKey, String contents) {
+    public PostbackContents(
+            Bridge bridge,
+            String projectName,
+            String postbackKey,
+            String contents
+    ) {
         this.bridge = bridge;
         this.projectName = projectName;
         this.postbackKey = postbackKey;
@@ -43,9 +48,17 @@ public class PostbackContents implements JSONSource {
 
     public void processPostback() throws UnexpectedPostbackException {
         if (exception == null) {
-            bridge.postbackReceivedSuccessfully(projectName, postbackKey, versionID);
+            bridge.postbackReceivedSuccessfully(
+                    projectName,
+                    postbackKey,
+                    versionID
+            );
         } else {
-            bridge.postbackReceivedWithException(projectName, postbackKey, exception);
+            bridge.postbackReceivedWithException(
+                    projectName,
+                    postbackKey,
+                    exception
+            );
         }
     }
 
@@ -63,7 +76,10 @@ public class PostbackContents implements JSONSource {
 
     private void setException(JsonObject responseObject, String code) {
         try {
-            exception = snapshotPostExceptionBuilder.build(code, responseObject);
+            exception = snapshotPostExceptionBuilder.build(
+                    code,
+                    responseObject
+            );
         } catch (UnexpectedPostbackException e) {
             throw new RuntimeException(e);
         }
