@@ -1,6 +1,6 @@
 @rp-base-font-size      : 12px;
 @rp-small-font-size     : 10px;
-@rp-icon-large-size     : 22px;
+@rp-icon-large-size     : 18px;
 
 @rp-bg-blue             : #dadfed;
 @rp-bg-dim-blue         : #fafafa;
@@ -31,6 +31,7 @@
 	background-color: @rp-highlight-blue;
 	color: #FFF;
 	text-align: center;
+	line-height: 1.3;
 	&:hover,
 	&:focus {
 		background-color: darken(@rp-highlight-blue, 5%);
@@ -267,7 +268,7 @@
 	.rp-entry-body {
 		display: flex;
 		align-items: center;
-		padding: 3px 5px;
+		padding: 4px 5px;
 
 		.rp-state-overview & {
 			padding: 0;
@@ -275,7 +276,7 @@
 	}
 		.rp-entry-action-icon {
 			font-size: @rp-icon-large-size;
-			padding: 0 5px;
+			padding: 0 3px;
 			line-height: 0;
 
 			.rp-state-overview & {
