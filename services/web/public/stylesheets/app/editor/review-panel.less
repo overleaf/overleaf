@@ -1,31 +1,31 @@
-@rp-base-font-size		: 12px;
-@rp-small-font-size		: 10px;
-@rp-icon-large-size		: 22px;
+@rp-base-font-size      : 12px;
+@rp-small-font-size     : 10px;
+@rp-icon-large-size     : 22px;
 
-@rp-bg-blue				: #dadfed;
-@rp-bg-dim-blue			: #fafafa;
-@rp-highlight-blue		: #8a96b5;
+@rp-bg-blue             : #dadfed;
+@rp-bg-dim-blue         : #fafafa;
+@rp-highlight-blue      : #8a96b5;
 
-@rp-border-grey			: #d9d9d9;
+@rp-border-grey         : #d9d9d9;
 
-@rp-green				: #2c8e30;
-@rp-dim-green			: #cae3cb;
-@rp-red					: #c5060b;
-@rp-dim-red				: #f3cdce;
-@rp-yellow				: #f3b111;
-@rp-dim-yellow			: #ffe9b2;
-@rp-grey				: #aaaaaa;
+@rp-green               : #2c8e30;
+@rp-dim-green           : #cae3cb;
+@rp-red                 : #c5060b;
+@rp-dim-red             : #f3cdce;
+@rp-yellow              : #f3b111;
+@rp-dim-yellow          : #ffe9b2;
+@rp-grey                : #aaaaaa;
 
-@rp-type-blue			: #6b7797;
-@rp-type-darkgrey		: #3f3f3f;
+@rp-type-blue           : #6b7797;
+@rp-type-darkgrey       : #3f3f3f;
 
-@rp-entry-ribbon-width	: 4px;
-@rp-entry-arrow-width	: 6px;
-@rp-semibold-weight		: 600;
-@review-panel-width		: 230px;
-@review-off-width		: 22px;
+@rp-entry-ribbon-width  : 4px;
+@rp-entry-arrow-width   : 6px;
+@rp-semibold-weight     : 600;
+@review-panel-width     : 230px;
+@review-off-width       : 22px;
 
-@rp-toolbar-height: 32px;
+@rp-toolbar-height      : 32px;
 
 .rp-button() {
 	background-color: @rp-highlight-blue;
@@ -264,14 +264,13 @@
 		}
 	}
 }
-
-	.rp-entry-header {
+	.rp-entry-body {
 		display: flex;
 		align-items: center;
-		padding: 5px;
+		padding: 3px 5px;
 
 		.rp-state-overview & {
-			padding: 0px;
+			padding: 0;
 		}
 	}
 		.rp-entry-action-icon {
@@ -280,48 +279,33 @@
 			line-height: 0;
 
 			.rp-state-overview & {
-				font-size: @rp-base-font-size;
-				padding: 0px;
-				margin-right: 5px;
+				display: none;
 			}
 		}
 
-		.rp-entry-metadata {
-			flex-grow: 1;
-			padding: 0 5px;
-			line-height: 1.2;
-
-			.rp-state-overview & {
-				display: flex;
-				line-height: inherit;
-				padding: 0;
-			}
+		.rp-entry-details {
+			line-height: 1.4;
+			margin-left: 5px;
 		}
-			.rp-entry-metadata-line {
-				margin: 0;
 
-				.rp-state-overview &:last-of-type {
-					flex-grow: 1;
-					text-align: right;
+			.rp-entry-metadata {
+				font-size: @rp-small-font-size;
+				.rp-state-overview & {
 				}
 			}
+				.rp-entry-user {
+					font-weight: @rp-semibold-weight;
+				}
 
-	.rp-entry-body {
-		padding: 5px;
+			.rp-content-highlight {
+				color: @rp-type-darkgrey;
+				font-weight: @rp-semibold-weight;
+				text-decoration: none;
 
-		.rp-state-overview & {
-			padding: 0;
-		}
-	}
-		.rp-content-highlight {
-			color: @rp-type-darkgrey;
-			font-weight: @rp-semibold-weight;
-			text-decoration: none;
-
-			.rp-entry-delete & {
-				text-decoration: line-through;
+				.rp-entry-delete & {
+					text-decoration: line-through;
+				}
 			}
-		}
 
 	.rp-entry-actions {
 		display: flex;
@@ -426,24 +410,6 @@
 		resize: vertical;
 	}
 
-.rp-avatar {
-	border-radius: 3px;
-	font-weight: @rp-semibold-weight;
-	font-size: @rp-icon-large-size;
-	line-height: 1.2;
-	text-transform: uppercase;
-	color: #FFF;
-	width: 1.3em;
-	height: 1.3em;
-	text-align: center;
-	flex-grow: 0;
-	flex-shrink: 0;
-
-	.rp-state-overview & {
-		display: none;
-	}
-}
-
 .rp-icon-delete {
 	display: inline-block;
 	line-height: 1;
@@ -524,10 +490,10 @@
 	padding: 2px 5px;
 	border-top: solid 1px @rp-border-grey;
 	border-bottom: solid 1px @rp-border-grey;
-	background-color: #FFF;
+	background-color: @rp-bg-dim-blue;
 	margin-top: 10px;
 	font-weight: @rp-semibold-weight;
-	border-left: solid @rp-entry-ribbon-width currentColor;
+	text-align: center;
 }
 
 .rp-nav {

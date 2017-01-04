@@ -116,19 +116,19 @@ script(type='text/ng-template', id='changeEntryTemplate')
 		.rp-entry(
 			ng-class="[ 'rp-entry-' + entry.type, (entry.focused ? 'rp-entry-focused' : '')]"
 		)
-			.rp-entry-header
+			.rp-entry-body
 				.rp-entry-action-icon(ng-switch="entry.type")
 					i.fa.fa-pencil(ng-switch-when="insert")
 					i.rp-icon-delete(ng-switch-when="delete")
-				.rp-entry-metadata
-					p.rp-entry-metadata-line(style="color: hsl({{ user.hue }}, 70%, 40%);") {{ user.name }} 
-					p.rp-entry-metadata-line {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}
-				.rp-avatar(style="background-color: hsl({{ user.hue }}, 70%, 50%);") {{ user.avatar_text | limitTo : 1 }}
-			.rp-entry-body(ng-switch="entry.type")
-					span(ng-switch-when="insert") Added&nbsp;
-						ins.rp-content-highlight {{ entry.content }} 
-					span(ng-switch-when="delete") Deleted&nbsp;
-						del.rp-content-highlight {{ entry.content }} 
+				.rp-entry-details
+					.rp-entry-description(ng-switch="entry.type")
+						span(ng-switch-when="insert") Added&nbsp;
+							ins.rp-content-highlight {{ entry.content }} 
+						span(ng-switch-when="delete") Deleted&nbsp;
+							del.rp-content-highlight {{ entry.content }} 
+					.rp-entry-metadata
+						span {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }} &bull;&nbsp;
+						span.rp-entry-user(style="color: hsl({{ user.hue }}, 70%, 40%);") {{ user.name }} 
 			.rp-entry-actions
 				a.rp-entry-button(href, ng-click="onReject();") 
 					i.fa.fa-times
