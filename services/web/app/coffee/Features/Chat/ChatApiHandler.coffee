@@ -46,3 +46,16 @@ module.exports = ChatApiHandler =
 			method: "GET"
 			json:   true
 		}, callback
+	
+	resolveThread: (project_id, thread_id, user_id, callback = (error) ->) ->
+		ChatApiHandler._apiRequest {
+			url:    "#{settings.apis.chat.internal_url}/project/#{project_id}/thread/#{thread_id}/resolve"
+			method: "POST"
+			json:   {user_id}
+		}, callback
+	
+	reopenThread: (project_id, thread_id, callback = (error) ->) ->
+		ChatApiHandler._apiRequest {
+			url:    "#{settings.apis.chat.internal_url}/project/#{project_id}/thread/#{thread_id}/reopen"
+			method: "POST"
+		}, callback

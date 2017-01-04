@@ -28,14 +28,16 @@ define [
 		
 		$http.get "/project/#{$scope.project_id}/threads"
 			.success (threads) ->
-				for thread_id, comments of threads
-					for comment in comments
+				for thread_id, thread of threads
+					for comment in thread.messages
 						formatComment(comment)
+					if thread.resolved_by_user?
+						formatUser(thread.resolved_by_user)
 				$scope.reviewPanel.commentThreads = threads
 		
 		ide.socket.on "new-comment", (thread_id, comment) ->
-			$scope.reviewPanel.commentThreads[thread_id] ?= []
-			$scope.reviewPanel.commentThreads[thread_id].push(formatComment(comment))
+			$scope.reviewPanel.commentThreads[thread_id] ?= { messages: [] }
+			$scope.reviewPanel.commentThreads[thread_id].messages.push(formatComment(comment))
 			$scope.$apply()
 			$timeout () ->
 				$scope.$broadcast "review-panel:layout"
@@ -236,9 +238,19 @@ define [
 		$scope.resolveComment = (entry, entry_id) ->
 			entry.showWhenResolved = false
 			entry.focused = false
+			thread = $scope.reviewPanel.commentThreads[entry.thread_id]
+			thread.resolved = true
+			thread.resolved_by_user = $scope.users[window.user_id]
+			thread.resolved_at = new Date()
+			$http.post "/project/#{$scope.project_id}/thread/#{entry.thread_id}/resolve", {_csrf: window.csrfToken}
 			$scope.$broadcast "comment:resolve", entry_id, window.user_id
 		
-		$scope.unresolveComment = (entry_id) ->
+		$scope.unresolveComment = (entry, entry_id) ->
+			thread = $scope.reviewPanel.commentThreads[entry.thread_id]
+			delete thread.resolved
+			delete thread.resolved_by_user
+			delete thread.resolved_at
+			$http.post "/project/#{$scope.project_id}/thread/#{entry.thread_id}/reopen", {_csrf: window.csrfToken}
 			$scope.$broadcast "comment:unresolve", entry_id
 		
 		$scope.deleteComment = (entry_id) ->
