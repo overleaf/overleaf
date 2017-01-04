@@ -148,6 +148,12 @@ settings =
 
 	behindProxy: process.env["SHARELATEX_BEHIND_PROXY"] or false
 
+	# Site Languages
+	i18n:
+		subdomainLang:
+			www: {lngCode:process.env["SHARELATEX_SITE_LANGUAGE"] or "en", url: siteUrl}
+		defaultLng: process.env["SHARELATEX_SITE_LANGUAGE"] or "en"
+
 	# Spell Check Languages
 	# ---------------------
 	#
@@ -329,9 +335,6 @@ if process.env["SHARELATEX_HEADER_NAV_LINKS"]?
 	catch e
 		console.error("could not parse SHARELATEX_HEADER_NAV_LINKS, not valid JSON")
 
-# if process.env["SHARELATEX_PROXY_LEARN"]?
-# 	settings.nav.header.push({text: "help", class: "subdued", dropdown: [{text: "documentation", url: "/learn"}] })
-
 
 # Sending Email
 # -------------
@@ -381,7 +384,7 @@ if process.env["SHARELATEX_PASSWORD_VALIDATION_PATTERN"] or process.env["SHARELA
 
 	settings.passwordStrengthOptions =
 		pattern: process.env["SHARELATEX_PASSWORD_VALIDATION_PATTERN"] or "aA$3"
-		length: {min:process.env["SHARELATEX_PASSWORD_VALIDATION_MIN_LENGTH"] or 8, max: process.env["SHARELATEX_PASSWORD_VALIDATION_MAX_LENGTH"] or 50}
+		length: {min:process.env["SHARELATEX_PASSWORD_VALIDATION_MIN_LENGTH"] or 8, max: process.env["SHARELATEX_PASSWORD_VALIDATION_MAX_LENGTH"] or 150}
 
 
 
