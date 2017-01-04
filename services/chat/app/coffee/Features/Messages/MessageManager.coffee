@@ -28,7 +28,7 @@ module.exports = MessageManager =
 			room_id: { $in: room_ids }
 		}, callback
 
-	populateMessagesWithUsers: (messages, callback = (error, messages) ->) ->
+	populateMessagesAndRoomsWithUsers: (messages, rooms, callback = (error) ->) ->
 		jobs = new Array()
 
 		userCache = {}
@@ -48,7 +48,18 @@ module.exports = MessageManager =
 						return callback(error) if error?
 						delete message.user_id
 						message.user = user
-						callback(null, message)
+						callback()
+		
+		for room in rooms
+			do (room) ->
+				if !room?.resolved?.user_id?
+					return
+				jobs.push (callback) ->
+					getUserDetails room.resolved.user_id.toString(), (error, user) ->
+						return callback(error) if error?
+						delete room.resolved.user_id
+						room.resolved.user = user
+						callback()
 
 		async.series jobs, callback
 	

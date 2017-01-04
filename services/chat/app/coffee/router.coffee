@@ -24,15 +24,14 @@ module.exports = Router =
 
 		app.post "/project/:project_id/thread/:thread_id/messages", MessageHttpController.sendThreadMessage
 		app.get  "/project/:project_id/threads", MessageHttpController.getAllThreads
-		# app.get  "/project/:project_id/thread", MessageHttpController.getAllThreadMessages
-		# 
+
 		# app.post "/project/:project_id/thread/:thread_id/messages/:message_id/edit", MessageHttpController.editMessage
 		# app.del  "/project/:project_id/thread/:thread_id/messages/:message_id", MessageHttpController.deleteMessage
-		# 
-		# app.post "/project/:project_id/thread/:thread_id/resolve", MessageHttpController.resolveThread
-		# app.post "/project/:project_id/thread/:thread_id/reopen", MessageHttpController.reopenThread
+
+		app.post "/project/:project_id/thread/:thread_id/resolve", MessageHttpController.resolveThread
+		app.post "/project/:project_id/thread/:thread_id/reopen", MessageHttpController.reopenThread
 		# app.del  "/project/:project_id/thread/:thread_id", MessageHttpController.deleteThread
-		# 
+
 		app.get "/status", (req, res, next) ->
 			res.send("chat is alive")
 

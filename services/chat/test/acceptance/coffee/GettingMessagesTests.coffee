@@ -71,20 +71,20 @@ describe "Getting messages", ->
 			ChatClient.getThreads @project_id, (error, response, threads) =>
 				expect(Object.keys(threads).length).to.equal 2
 				thread1 = threads[@thread_id1]
-				expect(thread1.length).to.equal 2
+				expect(thread1.messages.length).to.equal 2
 				thread2 = threads[@thread_id2]
-				expect(thread2.length).to.equal 2
+				expect(thread2.messages.length).to.equal 2
 				
-				expect(thread1[0].content).to.equal "one"
-				expect(thread1[0].user).to.deep.equal {
+				expect(thread1.messages[0].content).to.equal "one"
+				expect(thread1.messages[0].user).to.deep.equal {
 					id: @user_id1
 					first_name: "Jane"
 					last_name: "Smith"
 					email: "jane@example.com"
 					gravatar_url: "//www.gravatar.com/avatar/#{crypto.createHash("md5").update("jane@example.com").digest("hex")}"
 				}
-				expect(thread1[1].content).to.equal "three"
-				expect(thread1[1].user).to.deep.equal {
+				expect(thread1.messages[1].content).to.equal "three"
+				expect(thread1.messages[1].user).to.deep.equal {
 					id: @user_id1
 					first_name: "Jane"
 					last_name: "Smith"
@@ -92,16 +92,16 @@ describe "Getting messages", ->
 					gravatar_url: "//www.gravatar.com/avatar/#{crypto.createHash("md5").update("jane@example.com").digest("hex")}"
 				}
 
-				expect(thread2[0].content).to.equal "two"
-				expect(thread2[0].user).to.deep.equal {
+				expect(thread2.messages[0].content).to.equal "two"
+				expect(thread2.messages[0].user).to.deep.equal {
 					id: @user_id2
 					first_name: "John"
 					last_name: "Doe"
 					email: "john@example.com"
 					gravatar_url: "//www.gravatar.com/avatar/#{crypto.createHash("md5").update("john@example.com").digest("hex")}"
 				}
-				expect(thread2[1].content).to.equal "four"
-				expect(thread2[1].user).to.deep.equal {
+				expect(thread2.messages[1].content).to.equal "four"
+				expect(thread2.messages[1].user).to.deep.equal {
 					id: @user_id2
 					first_name: "John"
 					last_name: "Doe"

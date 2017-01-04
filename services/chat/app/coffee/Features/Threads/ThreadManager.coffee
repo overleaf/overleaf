@@ -27,8 +27,29 @@ module.exports = ThreadManager =
 			project_id: ObjectId(project_id.toString())
 			thread_id: { $exists: true }
 		}, {
-			thread_id: 1
+			thread_id: 1,
+			resolved: 1
 		}, callback
 	
+	resolveThread: (project_id, thread_id, user_id, callback = (error) ->) ->
+		db.rooms.update {
+			project_id: ObjectId(project_id.toString())
+			thread_id: ObjectId(thread_id.toString())
+		}, {
+			$set: {
+				resolved: {
+					user_id: user_id
+					ts: new Date()
+				}
+			}
+		}, callback
 	
-		
+	reopenThread: (project_id, thread_id, callback = (error) ->) ->
+		db.rooms.update {
+			project_id: ObjectId(project_id.toString())
+			thread_id: ObjectId(thread_id.toString())
+		}, {
+			$unset: {
+				resolved: true
+			}
+		}, callback

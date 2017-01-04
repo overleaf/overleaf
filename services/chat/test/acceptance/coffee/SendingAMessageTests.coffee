@@ -50,8 +50,8 @@ describe "Sending a message", ->
 			ChatClient.getThreads @project_id, (error, response, threads) =>
 				expect(error).to.be.null
 				expect(response.statusCode).to.equal 200
-				expect(threads[@thread_id].length).to.equal 1
-				expect(threads[@thread_id][0].content).to.equal @content
+				expect(threads[@thread_id].messages.length).to.equal 1
+				expect(threads[@thread_id].messages[0].content).to.equal @content
 				done()
 	
 	describe "with a malformed user_id", ->

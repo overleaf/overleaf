@@ -16,17 +16,31 @@ module.exports = MessageFormatter =
 		(@formatMessageForClientSide(message) for message in messages)
 	
 	groupMessagesByThreads: (rooms, messages) ->
-		room_id_to_thread_id = {}
+		rooms_by_id = {}
 		for room in rooms
-			room_id_to_thread_id[room._id.toString()] = room.thread_id.toString()
-		
+			rooms_by_id[room._id.toString()] = room
+
 		threads = {}
+		getThread = (room) ->
+			thread_id = room.thread_id.toString()
+			if threads[thread_id]?
+				return threads[thread_id]
+			else
+				thread = { messages: [] }
+				if room.resolved?
+					thread.resolved = true
+					thread.resolved_at = room.resolved.ts
+					thread.resolved_by_user = UserFormatter.formatUserForClientSide(room.resolved.user)
+				threads[thread_id] = thread
+				return thread
+			
 		for message in messages
-			thread_id = room_id_to_thread_id[message.room_id.toString()]
-			threads[thread_id] ?= []
-			threads[thread_id].push MessageFormatter.formatMessageForClientSide(message)
+			room = rooms_by_id[message.room_id.toString()]
+			if room?
+				thread = getThread(room)
+				thread.messages.push MessageFormatter.formatMessageForClientSide(message)
 		
-		for thread_id, messages of threads
-			messages.sort (a,b) -> a.timestamp - b.timestamp
+		for thread_id, thread of threads
+			thread.messages.sort (a,b) -> a.timestamp - b.timestamp
 		
 		return threads

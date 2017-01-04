@@ -28,3 +28,16 @@ module.exports =
 			url: "/project/#{project_id}/threads",
 			json: true
 		}, callback
+	
+	resolveThread: (project_id, thread_id, user_id, callback) ->
+		request.post {
+			url: "/project/#{project_id}/thread/#{thread_id}/resolve",
+			json: {
+				user_id: user_id
+			}
+		}, callback
+
+	reopenThread: (project_id, thread_id, callback) ->
+		request.post {
+			url: "/project/#{project_id}/thread/#{thread_id}/reopen",
+		}, callback

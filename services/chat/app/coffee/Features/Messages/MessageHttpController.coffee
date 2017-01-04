@@ -25,10 +25,25 @@ module.exports = MessageHttpController =
 			room_ids = rooms.map (r) -> r._id
 			MessageManager.findAllMessagesInRooms room_ids, (error, messages) ->
 				return next(error) if error?
-				MessageManager.populateMessagesWithUsers messages, (error, messages) ->
+				MessageManager.populateMessagesAndRoomsWithUsers messages, rooms, (error) ->
 					return next(error) if error?
 					threads = MessageFormatter.groupMessagesByThreads rooms, messages
 					res.json threads
+	
+	resolveThread: (req, res, next) ->
+		{project_id, thread_id} = req.params
+		{user_id} = req.body
+		logger.log {user_id, project_id, thread_id}, "marking thread as resolved"
+		ThreadManager.resolveThread project_id, thread_id, user_id, (error) ->
+			return next(error) if error?
+			res.send 204 # No content
+
+	reopenThread: (req, res, next) ->
+		{project_id, thread_id} = req.params
+		logger.log {project_id, thread_id}, "reopening thread"
+		ThreadManager.reopenThread project_id, thread_id, (error) ->
+			return next(error) if error?
+			res.send 204 # No content
 
 	_sendMessage: (client_thread_id, req, res, next) ->
 		{user_id, content} = req?.body
@@ -40,9 +55,9 @@ module.exports = MessageHttpController =
 			return next(error) if error?
 			MessageManager.createMessage thread._id, user_id, content, Date.now(), (error, message) ->
 				return next(error) if error?
-				MessageManager.populateMessagesWithUsers [message], (error, messages) ->
+				MessageManager.populateMessagesAndRoomsWithUsers [message], [], (error) ->
 					return next(error) if error?
-					message = MessageFormatter.formatMessageForClientSide(messages[0])
+					message = MessageFormatter.formatMessageForClientSide(message)
 					message.room =
 						id: project_id
 					res.send(201, message)
@@ -64,7 +79,7 @@ module.exports = MessageHttpController =
 			logger.log {limit, before, project_id, client_thread_id, thread_object_id}, "found or created thread"
 			MessageManager.getMessages thread_object_id, limit, before, (error, messages) ->
 				return next(error) if error?
-				MessageManager.populateMessagesWithUsers messages, (error, messages) ->
+				MessageManager.populateMessagesAndRoomsWithUsers messages, [], (error) ->
 					return next(error) if error? 
 					messages = MessageFormatter.formatMessagesForClientSide messages
 					logger.log {project_id, messages}, "got messages"
