@@ -100,7 +100,6 @@
 	.rp-size-expanded & {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
 		padding: 0 5px;
 	}
 	.rp-state-current-file & {
@@ -120,6 +119,8 @@
 	.review-panel-toolbar-label {
 		cursor: pointer;
 		margin-right: 5px;
+		text-align: right;
+		flex-grow: 1;
 	}
 
 .rp-entry-list {
@@ -632,4 +633,26 @@
 		margin-left: 34px;
 	}
 
+}
+
+.resolved-comments-toggle {
+	font-size: @rp-icon-large-size;		
+	color: lighten(@rp-type-blue, 25%);
+	border: solid 1px @rp-border-grey;
+	border-radius: 3px;
+	padding: 0 4px;
+
+	&:hover,
+	&:focus {
+		text-decoration: none;
+		color: @rp-type-blue;
+	}
+}
+
+.resolved-comments-dropdown {
+	display: none;
+	
+	&-open {
+		display: block;
+	}
 }

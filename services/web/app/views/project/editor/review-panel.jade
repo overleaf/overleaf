@@ -1,5 +1,9 @@
 #review-panel
 	.review-panel-toolbar
+		resolved-comments-dropdown(
+			entries="reviewPanel.entries"
+			threads="reviewPanel.commentThreads"
+		)
 		span.review-panel-toolbar-label(ng-click="editor.wantTrackChanges = true;", ng-if="editor.wantTrackChanges === false") Track Changes is 
 			strong off
 		span.review-panel-toolbar-label(ng-click="editor.wantTrackChanges = false;", ng-if="editor.wantTrackChanges === true") Track Changes is 
@@ -118,8 +122,7 @@ script(type='text/ng-template', id='changeEntryTemplate')
 						span(ng-switch-when="delete") Deleted&nbsp;
 							del.rp-content-highlight {{ entry.content }} 
 					.rp-entry-metadata
-						| {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}
-						| &nbsp;&bull;&nbsp;
+						| {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}&nbsp;&bull;&nbsp;
 						span.rp-entry-user(style="color: hsl({{ user.hue }}, 70%, 40%);") {{ user.name }} 
 			.rp-entry-actions
 				a.rp-entry-button(href, ng-click="onReject();") 
@@ -142,13 +145,16 @@ script(type='text/ng-template', id='commentEntryTemplate')
 		)
 			div
 				.rp-comment(
-					ng-repeat="comment in threads[entry.thread_id].messages"
+					ng-repeat="comment in threads[entry.thread_id].messages track by comment.id"
 				)
-					p.rp-comment-content {{ comment.content }}
+					p.rp-comment-content 
+						span.rp-entry-user(
+							style="color: hsl({{ comment.user.hue }}, 70%, 40%);"
+							ng-if="$first || comment.user.id !== threads[entry.thread_id].messages[$index - 1].user.id"
+						) {{ comment.user.name }}:&nbsp;
+						| {{ comment.content }}
 					.rp-entry-metadata
 						| {{ comment.timestamp | date : 'MMM d, y h:mm a' }}
-						| &nbsp;&bull;&nbsp;
-						span.rp-entry-user(style="color: hsl({{ comment.user.hue }}, 70%, 40%);") {{ comment.user.name }} 
 			.rp-comment-reply
 				textarea.rp-comment-input(
 					ng-model="entry.replyContent"
@@ -163,7 +169,7 @@ script(type='text/ng-template', id='commentEntryTemplate')
 			//- 	div {{ threads[entry.thread_id].resolved_at | date : 'MMM d, y h:mm a' }}
 			.rp-entry-actions
 				a.rp-entry-button(href, ng-click="onResolve();") 
-					i.fa.fa-check
+					i.fa.fa-inbox
 					| &nbsp;Resolve
 				a.rp-entry-button(href, ng-click="onReply();") 
 					i.fa.fa-reply
@@ -213,3 +219,15 @@ script(type='text/ng-template', id='addCommentEntryTemplate')
 					a.rp-entry-button(href, ng-click="submitNewComment()") 
 						i.fa.fa-comment
 						| &nbsp;Comment
+
+script(type='text/ng-template', id='resolvedCommentsDropdownTemplate')
+	.resolved-comments
+		a.resolved-comments-toggle(
+			href
+			ng-click="state.isOpen = !state.isOpen"
+		) 
+			i.fa.fa-inbox
+		.resolved-comments-dropdown(
+			ng-class="{ 'resolved-comments-dropdown-open' : state.isOpen }"
+		)
+			div wut
