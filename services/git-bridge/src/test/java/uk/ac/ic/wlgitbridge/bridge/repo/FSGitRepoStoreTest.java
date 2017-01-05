@@ -77,18 +77,14 @@ public class FSGitRepoStoreTest {
 
     @Test
     public void zipAndUnzipShouldBeTheSame() throws IOException {
-        long beforeSize = repoStore.totalSize();
+        File expected = new File(original, "proj1");
+        File actual = new File(repoStore.getRootDirectory(), "proj1");
+        assertTrue(Files.contentsAreEqual(expected, actual));
         InputStream zipped = repoStore.bzip2Project("proj1");
         repoStore.remove("proj1");
-        assertTrue(beforeSize > repoStore.totalSize());
+        assertFalse(actual.exists());
         repoStore.unbzip2Project("proj1", zipped);
-        assertEquals(beforeSize, repoStore.totalSize());
-        assertTrue(
-                Files.contentsAreEqual(
-                        original,
-                        repoStore.getRootDirectory()
-                )
-        );
+        assertTrue(Files.contentsAreEqual(expected, actual));
     }
 
 }
