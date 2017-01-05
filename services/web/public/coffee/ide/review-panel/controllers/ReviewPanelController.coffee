@@ -32,6 +32,7 @@ define [
 					for comment in thread.messages
 						formatComment(comment)
 					if thread.resolved_by_user?
+						$scope.$broadcast "comment:resolve_thread", thread_id
 						formatUser(thread.resolved_by_user)
 				$scope.reviewPanel.commentThreads = threads
 		
@@ -146,8 +147,6 @@ define [
 				new_entry = {
 					type: "comment"
 					thread_id: comment.op.t
-					resolved: comment.metadata?.resolved
-					resolved_data: comment.metadata?.resolved_data
 					content: comment.op.c
 					offset: comment.op.p
 				}
@@ -243,7 +242,7 @@ define [
 			thread.resolved_by_user = $scope.users[window.user_id]
 			thread.resolved_at = new Date()
 			$http.post "/project/#{$scope.project_id}/thread/#{entry.thread_id}/resolve", {_csrf: window.csrfToken}
-			$scope.$broadcast "comment:resolve", entry_id, window.user_id
+			$scope.$broadcast "comment:resolve_thread", entry.thread_id
 		
 		$scope.unresolveComment = (entry, entry_id) ->
 			thread = $scope.reviewPanel.commentThreads[entry.thread_id]
@@ -251,7 +250,7 @@ define [
 			delete thread.resolved_by_user
 			delete thread.resolved_at
 			$http.post "/project/#{$scope.project_id}/thread/#{entry.thread_id}/reopen", {_csrf: window.csrfToken}
-			$scope.$broadcast "comment:unresolve", entry_id
+			$scope.$broadcast "comment:unresolve_thread", entry.thread_id
 		
 		$scope.deleteComment = (entry_id) ->
 			$scope.$broadcast "comment:remove", entry_id

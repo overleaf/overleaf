@@ -35,11 +35,11 @@ define [
 			@$scope.$on "comment:remove", (e, comment_id) =>
 				@removeCommentId(comment_id)
 			
-			@$scope.$on "comment:resolve", (e, comment_id, user_id) =>
-				@resolveCommentId(comment_id, user_id)
+			@$scope.$on "comment:resolve_thread", (e, thread_id) =>
+				@resolveCommentByThreadId(thread_id)
 			
-			@$scope.$on "comment:unresolve", (e, comment_id) =>
-				@unresolveCommentId(comment_id)
+			@$scope.$on "comment:unresolve_thread", (e, thread_id) =>
+				@unresolveCommentByThreadId(thread_id)
 			
 			@$scope.$on "review-panel:recalculate-screen-positions", () =>
 				@recalculateReviewEntriesScreenPositions()
@@ -90,9 +90,7 @@ define [
 				@rangesTracker.off "comment:added"
 				@rangesTracker.off "comment:moved"
 				@rangesTracker.off "comment:removed"
-				@rangesTracker.off "comment:resolved"
-				@rangesTracker.off "comment:unresolved"
-				
+
 		setTrackChanges: (value) ->
 			if value
 				@$scope.sharejsDoc?.track_changes_as = window.user.id
@@ -129,12 +127,6 @@ define [
 			@rangesTracker.on "comment:removed", (comment) =>
 				sl_console.log "[comment:removed]", comment
 				setTimeout () => @_onCommentRemoved(comment)
-			@rangesTracker.on "comment:resolved", (comment) =>
-				sl_console.log "[comment:resolved]", comment
-				setTimeout () => @_onCommentRemoved(comment)
-			@rangesTracker.on "comment:unresolved", (comment) =>
-				sl_console.log "[comment:unresolved]", comment
-				setTimeout () => @_onCommentAdded(comment)
 			
 		redrawAnnotations: () ->
 			for change in @rangesTracker.changes
@@ -187,13 +179,18 @@ define [
 		removeCommentId: (comment_id) ->
 			@rangesTracker.removeCommentId(comment_id)
 
-		resolveCommentId: (comment_id, user_id) ->
-			@rangesTracker.resolveCommentId(comment_id, {
-				user_id, ts: new Date()
-			})
+		RESOLVED_THREADS: {}
+		resolveCommentByThreadId: (thread_id) ->
+			@RESOLVED_THREADS[thread_id] = true
+			for comment in @rangesTracker?.comments or []
+				if comment.op.t == thread_id
+					@_onCommentRemoved(comment)
 			
-		unresolveCommentId: (comment_id) ->
-			@rangesTracker.unresolveCommentId(comment_id)
+		unresolveCommentByThreadId: (thread_id) ->
+			@RESOLVED_THREADS[thread_id] = false
+			for comment in @rangesTracker?.comments or []
+				if comment.op.t == thread_id
+					@_onCommentAdded(comment)
 
 		checkMapping: () ->
 			# TODO: reintroduce this check
@@ -335,6 +332,9 @@ define [
 			@broadcastChange()
 		
 		_onCommentAdded: (comment) ->
+			if @RESOLVED_THREADS[comment.op.t]
+				# Comment is resolved so shouldn't be displayed.
+				return
 			if !@changeIdToMarkerIdMap[comment.id]?
 				# Only create new markers if they don't already exist
 				start = @_shareJsOffsetToAcePosition(comment.op.p)

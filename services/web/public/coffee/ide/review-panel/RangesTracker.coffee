@@ -63,19 +63,6 @@ load = (EventEmitter) ->
 					break
 			return comment
 		
-		resolveCommentId: (comment_id, resolved_data) ->
-			comment = @getComment(comment_id)
-			return if !comment?
-			comment.metadata.resolved = true
-			comment.metadata.resolved_data = resolved_data
-			@emit "comment:resolved", comment
-		
-		unresolveCommentId: (comment_id) ->
-			comment = @getComment(comment_id)
-			return if !comment?
-			comment.metadata.resolved = false
-			@emit "comment:unresolved", comment
-		
 		removeCommentId: (comment_id) ->
 			comment = @getComment(comment_id)
 			return if !comment?
