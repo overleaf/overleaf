@@ -5,22 +5,27 @@ define [
 		restrict: "E"
 		templateUrl: "resolvedCommentsDropdownTemplate"
 		scope: 
-			entries: "="
-			threads: "="
+			entries : "="
+			threads : "="
+			docs	: "="
 		link: (scope, element, attrs) ->
 			scope.state = 
 				isOpen: false
 
-			scope.resolvedComments = {}
+			scope.resolvedCommentsPerFile = {}
 
 			filterResolvedComments = () ->
-				scope.resolvedComments = {}
+				scope.resolvedCommentsPerFile = {}
 
 				for fileId, fileEntries of scope.entries
-					scope.resolvedComments[fileId] = {}
+					scope.resolvedCommentsPerFile[fileId] = {}
 					for entryId, entry of fileEntries
 						if entry.type == "comment" and scope.threads[entry.thread_id].resolved?
-							scope.resolvedComments[fileId][entryId] = scope.threads[entry.thread_id]
+							scope.resolvedCommentsPerFile[fileId][entryId] = angular.copy scope.threads[entry.thread_id]
+							scope.resolvedCommentsPerFile[fileId][entryId].content = entry.content
+
+				console.log scope.resolvedCommentsPerFile
+
 
 			scope.$watchCollection "entries", filterResolvedComments
 			scope.$watchCollection "threads", filterResolvedComments

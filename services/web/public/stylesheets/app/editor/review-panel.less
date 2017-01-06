@@ -230,6 +230,10 @@
 		border-bottom: solid 1px @rp-border-grey;
 		cursor: pointer;
 	}
+	.resolved-comments-dropdown & {
+		position: static;
+		margin-bottom: 5px;
+	}
 
 	border-left: solid @rp-entry-ribbon-width transparent;
 	border-radius: 3px;
@@ -649,9 +653,29 @@
 	}
 }
 
+.resolved-comments-backdrop {
+	display: none;
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background-color: rgba(0, 0, 0, .5);
+
+	&-visible {
+		display: block;
+	}
+}
+
 .resolved-comments-dropdown {
 	display: none;
-	
+	position: absolute;
+	width: 300px;
+	background-color: @rp-bg-blue;
+	text-align: left;
+	padding: 5px;
+	border-radius: 3px;
+
 	&-open {
 		display: block;
 	}
