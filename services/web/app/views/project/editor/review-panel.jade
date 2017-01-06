@@ -74,7 +74,7 @@
 				div(ng-if="entry.type === 'comment'")
 					comment-entry(
 						entry="entry"
-						users="users"
+						threads="reviewPanel.commentThreads"
 						on-reply="submitReply(entry, entry_id);"
 						on-indicator-click="toggleReviewPanel();"
 						ng-click="gotoEntry(doc_id, entry)"
