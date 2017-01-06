@@ -25,10 +25,8 @@ module.exports = MessageHttpController =
 			room_ids = rooms.map (r) -> r._id
 			MessageManager.findAllMessagesInRooms room_ids, (error, messages) ->
 				return next(error) if error?
-				MessageManager.populateMessagesAndRoomsWithUsers messages, rooms, (error) ->
-					return next(error) if error?
-					threads = MessageFormatter.groupMessagesByThreads rooms, messages
-					res.json threads
+				threads = MessageFormatter.groupMessagesByThreads rooms, messages
+				res.json threads
 	
 	resolveThread: (req, res, next) ->
 		{project_id, thread_id} = req.params
@@ -55,12 +53,9 @@ module.exports = MessageHttpController =
 			return next(error) if error?
 			MessageManager.createMessage thread._id, user_id, content, Date.now(), (error, message) ->
 				return next(error) if error?
-				MessageManager.populateMessagesAndRoomsWithUsers [message], [], (error) ->
-					return next(error) if error?
-					message = MessageFormatter.formatMessageForClientSide(message)
-					message.room =
-						id: project_id
-					res.send(201, message)
+				message = MessageFormatter.formatMessageForClientSide(message)
+				message.room_id = project_id
+				res.send(201, message)
 
 	_getMessages: (client_thread_id, req, res, next) ->
 		{project_id} = req.params
@@ -79,8 +74,6 @@ module.exports = MessageHttpController =
 			logger.log {limit, before, project_id, client_thread_id, thread_object_id}, "found or created thread"
 			MessageManager.getMessages thread_object_id, limit, before, (error, messages) ->
 				return next(error) if error?
-				MessageManager.populateMessagesAndRoomsWithUsers messages, [], (error) ->
-					return next(error) if error? 
-					messages = MessageFormatter.formatMessagesForClientSide messages
-					logger.log {project_id, messages}, "got messages"
-					res.send 200, messages
+				messages = MessageFormatter.formatMessagesForClientSide messages
+				logger.log {project_id, messages}, "got messages"
+				res.send 200, messages

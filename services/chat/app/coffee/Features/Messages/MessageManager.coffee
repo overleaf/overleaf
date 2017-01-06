@@ -1,7 +1,6 @@
 mongojs = require "../../mongojs"
 db = mongojs.db
 ObjectId = mongojs.ObjectId
-WebApiManager = require "../WebApi/WebApiManager"
 async = require "async"
 
 module.exports = MessageManager =
@@ -28,41 +27,6 @@ module.exports = MessageManager =
 			room_id: { $in: room_ids }
 		}, callback
 
-	populateMessagesAndRoomsWithUsers: (messages, rooms, callback = (error) ->) ->
-		jobs = new Array()
-
-		userCache = {}
-		getUserDetails = (user_id, callback = (error, user) ->) ->
-			return callback(null, userCache[user_id]) if userCache[user_id]?
-			WebApiManager.getUserDetails user_id, (error, user) ->
-				return callback(error) if error?
-				userCache[user_id] = user
-				callback null, user
-
-		for message in messages
-			do (message) ->
-				if !message?
-					return
-				jobs.push (callback) ->
-					getUserDetails message.user_id.toString(), (error, user) ->
-						return callback(error) if error?
-						delete message.user_id
-						message.user = user
-						callback()
-		
-		for room in rooms
-			do (room) ->
-				if !room?.resolved?.user_id?
-					return
-				jobs.push (callback) ->
-					getUserDetails room.resolved.user_id.toString(), (error, user) ->
-						return callback(error) if error?
-						delete room.resolved.user_id
-						room.resolved.user = user
-						callback()
-
-		async.series jobs, callback
-	
 	_ensureIdsAreObjectIds: (query) ->
 		if query.user_id? and query.user_id not instanceof ObjectId
 			query.user_id = ObjectId(query.user_id)

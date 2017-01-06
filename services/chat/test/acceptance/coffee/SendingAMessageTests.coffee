@@ -1,7 +1,6 @@
 {ObjectId} = require "../../../app/js/mongojs"
 expect = require("chai").expect
 
-MockWebApi = require "./helpers/MockWebApi"
 ChatClient = require "./helpers/ChatClient"
 
 describe "Sending a message", ->
@@ -9,12 +8,6 @@ describe "Sending a message", ->
 		@project_id = ObjectId().toString()
 		@user_id = ObjectId().toString()
 		@thread_id = ObjectId().toString()
-		MockWebApi.addUser @user_id, @user = {
-			id: @user_id
-			first_name: "Jane"
-			last_name: "Smith"
-			email: "jane@example.com"
-		}
 
 	describe "globally", ->
 		before (done) ->
@@ -23,8 +16,8 @@ describe "Sending a message", ->
 				expect(error).to.be.null
 				expect(response.statusCode).to.equal 201
 				expect(body.content).to.equal @content
-				expect(body.user.id).to.equal @user_id
-				expect(body.room.id).to.equal @project_id
+				expect(body.user_id).to.equal @user_id
+				expect(body.room_id).to.equal @project_id
 				done()
 		
 		it "should then list the message in the project messages", (done) ->
@@ -42,8 +35,8 @@ describe "Sending a message", ->
 				expect(error).to.be.null
 				expect(response.statusCode).to.equal 201
 				expect(body.content).to.equal @content
-				expect(body.user.id).to.equal @user_id
-				expect(body.room.id).to.equal @project_id
+				expect(body.user_id).to.equal @user_id
+				expect(body.room_id).to.equal @project_id
 				done()
 		
 		it "should then list the message in the threads", (done) ->

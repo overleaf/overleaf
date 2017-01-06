@@ -1,5 +1,3 @@
-UserFormatter = require "../Users/UserFormatter"
-
 module.exports = MessageFormatter =
 	formatMessageForClientSide: (message) ->
 		if message._id?
@@ -9,7 +7,7 @@ module.exports = MessageFormatter =
 			id: message.id
 			content: message.content
 			timestamp: message.timestamp
-			user: UserFormatter.formatUserForClientSide(message.user)
+			user_id: message.user_id
 		return formattedMessage
 
 	formatMessagesForClientSide: (messages) ->
@@ -30,7 +28,7 @@ module.exports = MessageFormatter =
 				if room.resolved?
 					thread.resolved = true
 					thread.resolved_at = room.resolved.ts
-					thread.resolved_by_user = UserFormatter.formatUserForClientSide(room.resolved.user)
+					thread.resolved_by_user_id = room.resolved.user_id
 				threads[thread_id] = thread
 				return thread
 			
