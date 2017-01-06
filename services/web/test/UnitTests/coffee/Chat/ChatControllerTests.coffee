@@ -21,6 +21,9 @@ describe "ChatController", ->
 			"./ChatApiHandler": @ChatApiHandler
 			"../Editor/EditorRealTimeController": @EditorRealTimeController
 			'../Authentication/AuthenticationController': @AuthenticationController
+			'../User/UserInfoManager': @UserInfoManager = {}
+			'../User/UserInfoController': @UserInfoController = {}
+			'../Comments/CommentsController': @CommentsController = {}
 		@req =
 			params:
 				project_id: @project_id
@@ -32,8 +35,21 @@ describe "ChatController", ->
 		beforeEach ->
 			@req.body =
 				content: @content = "message-content"
-			@ChatApiHandler.sendGlobalMessage = sinon.stub().yields(null, @message = {"mock": "message"})
+			@UserInfoManager.getPersonalInfo = sinon.stub().yields(null, @user = {"unformatted": "user"})
+			@UserInfoController.formatPersonalInfo = sinon.stub().returns(@formatted_user = {"formatted": "user"})
+			@ChatApiHandler.sendGlobalMessage = sinon.stub().yields(null, @message = {"mock": "message", user_id: @user_id})
 			@ChatController.sendMessage @req, @res
+
+		it "should look up the user", ->
+			@UserInfoManager.getPersonalInfo
+				.calledWith(@user_id)
+				.should.equal true
+
+		it "should format and inject the user into the message", ->
+			@UserInfoController.formatPersonalInfo
+				.calledWith(@user)
+				.should.equal true
+			@message.user.should.deep.equal @formatted_user
 
 		it "should tell the chat handler about the message", ->
 			@ChatApiHandler.sendGlobalMessage
@@ -53,6 +69,7 @@ describe "ChatController", ->
 			@req.query =
 				limit: @limit = "30"
 				before: @before = "12345"
+			@CommentsController._injectUserInfoIntoThreads = sinon.stub().yields()
 			@ChatApiHandler.getGlobalMessages = sinon.stub().yields(null, @messages = ["mock", "messages"])
 			@ChatController.getMessages @req, @res
 

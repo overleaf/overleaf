@@ -26,17 +26,12 @@ module.exports = UserController =
 			UserController.sendFormattedPersonalInfo(user, res, next)
 
 	sendFormattedPersonalInfo: (user, res, next = (error) ->) ->
-		UserController._formatPersonalInfo user, (error, info) ->
-			return next(error) if error?
-			res.send JSON.stringify(info)
+		info = UserController.formatPersonalInfo(user)
+		res.send JSON.stringify(info)
 
-	_formatPersonalInfo: (user, callback = (error, info) ->) ->
-		callback null, {
-			id: user._id.toString()
-			first_name: user.first_name
-			last_name: user.last_name
-			email: user.email
-			signUpDate: user.signUpDate
-			role: user.role
-			institution: user.institution
-		}
+	formatPersonalInfo: (user, callback = (error, info) ->) ->
+		formatted_user = { id: user._id.toString() }
+		for key in ["first_name", "last_name", "email", "signUpDate", "role", "institution"]
+			if user[key]?
+				formatted_user[key] = user[key]
+		return formatted_user

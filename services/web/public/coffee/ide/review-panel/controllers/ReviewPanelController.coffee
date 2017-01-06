@@ -24,17 +24,9 @@ define [
 			adding: false
 			content: ""
 
+		$scope.users = {}
+
 		$scope.reviewPanelEventsBridge = new EventEmitter()
-		
-		$http.get "/project/#{$scope.project_id}/threads"
-			.success (threads) ->
-				for thread_id, thread of threads
-					for comment in thread.messages
-						formatComment(comment)
-					if thread.resolved_by_user?
-						$scope.$broadcast "comment:resolve_thread", thread_id
-						formatUser(thread.resolved_by_user)
-				$scope.reviewPanel.commentThreads = threads
 		
 		ide.socket.on "new-comment", (thread_id, comment) ->
 			$scope.reviewPanel.commentThreads[thread_id] ?= { messages: [] }
@@ -141,6 +133,9 @@ define [
 				for key, value of new_entry
 					entries[change.id][key] = value
 
+				if !$scope.users[change.metadata.user_id]?
+					refreshChangeUsers(change.metadata.user_id)
+
 			for comment in rangesTracker.comments
 				delete delete_changes[comment.id]
 				entries[comment.id] ?= {}
@@ -239,7 +234,7 @@ define [
 			entry.focused = false
 			thread = $scope.reviewPanel.commentThreads[entry.thread_id]
 			thread.resolved = true
-			thread.resolved_by_user = $scope.users[window.user_id]
+			thread.resolved_by_user = formatUser(ide.$scope.user)
 			thread.resolved_at = new Date()
 			$http.post "/project/#{$scope.project_id}/thread/#{entry.thread_id}/resolve", {_csrf: window.csrfToken}
 			$scope.$broadcast "comment:resolve_thread", entry.thread_id
@@ -271,12 +266,41 @@ define [
 		$scope.gotoEntry = (doc_id, entry) ->
 			ide.editorManager.openDocId(doc_id, { gotoOffset: entry.offset })
 
-		# TODO: Eventually we need to get this from the server, and update it 
-		# when we get an id we don't know. This'll do for client side testing
-		refreshUsers = () ->
-			$scope.users = {}
-			for member in $scope.project.members.concat($scope.project.owner)
-				$scope.users[member._id] = formatUser(member)
+		_refreshingRangeUsers = false
+		_refreshedForUserIds = {}
+		refreshChangeUsers = (refresh_for_user_id) ->
+			if refresh_for_user_id?
+				if _refreshedForUserIds[refresh_for_user_id]?
+					# We've already tried to refresh to get this user id, so stop it looping
+					return
+				_refreshedForUserIds[refresh_for_user_id] = true
+
+			# Only do one refresh at once
+			if _refreshingRangeUsers
+				return
+			_refreshingRangeUsers = true
+
+			$http.get "/project/#{$scope.project_id}/ranges/users"
+				.success (users) ->
+					_refreshingRangeUsers = false
+					$scope.users = {}
+					for user in users
+						$scope.users[user.id] = formatUser(user)
+				.error () ->
+					_refreshingRangeUsers = false
+
+		refreshThreads = () ->
+			$http.get "/project/#{$scope.project_id}/threads"
+				.success (threads) ->
+					for thread_id, thread of threads
+						for comment in thread.messages
+							formatComment(comment)
+						if thread.resolved_by_user?
+							$scope.$broadcast "comment:resolve_thread", thread_id
+							formatUser(thread.resolved_by_user)
+					$scope.reviewPanel.commentThreads = threads
+
+		refreshThreads()
 
 		formatComment = (comment) ->
 			comment.user = formatUser(user)
@@ -308,7 +332,3 @@ define [
 				hue: ColorManager.getHueForUserId(id)
 				avatar_text: [user.first_name, user.last_name].filter((n) -> n?).map((n) -> n[0]).join ""
 			}
-		
-		$scope.$watch "project.members", (members) ->
-			return if !members?
-			refreshUsers()
