@@ -226,7 +226,6 @@
 	}
 	.rp-state-overview & {
 		border-radius: 0;
-		padding: 2px 5px;
 		border-bottom: solid 1px @rp-border-grey;
 		cursor: pointer;
 	}
@@ -274,10 +273,6 @@
 		display: flex;
 		align-items: center;
 		padding: 4px 5px;
-
-		.rp-state-overview & {
-			padding: 0;
-		}
 	}
 		.rp-entry-action-icon {
 			font-size: @rp-icon-large-size;
@@ -292,6 +287,10 @@
 		.rp-entry-details {
 			line-height: 1.4;
 			margin-left: 5px;
+
+			.rp-state-overview & {
+				margin-left: 0;
+			}
 		}
 
 			.rp-entry-metadata {
@@ -299,6 +298,7 @@
 			}
 				.rp-entry-user {
 					font-weight: @rp-semibold-weight;
+					font-style: normal;
 				}
 
 			.rp-content-highlight {
@@ -336,13 +336,20 @@
 		line-height: 1.4;
 		border-bottom: solid 1px @rp-border-grey;
 
+
+
 		&:last-child {
 			margin-bottom: 2px;
 			border-bottom-width: 0;
 		}
 
 		.rp-state-overview & {
-			padding: 0;
+			margin: 4px 5px;
+
+			&:first-child {
+				margin-top: 0;
+				padding-top: 4px;
+			}
 		}
 	}
 		.rp-comment-content {
@@ -355,13 +362,17 @@
 			font-size: @rp-small-font-size;
 			margin: 0;
 		}
+	
+	.rp-comment-resolver {
+		color: @rp-type-blue;
+		font-style: italic;
+	}
+		.rp-comment-resolver-content {
+			margin: 0;
+		}
 
 	.rp-comment-reply {
 		padding: 0 5px;
-
-		.rp-state-overview & {
-			padding: 3px 0 0;
-		}
 	}
 
 	.rp-add-comment-btn {
@@ -395,6 +406,26 @@
 		content: 'Ab';
 	}
 }
+
+.rp-resolved-comment {
+	border-left: solid @rp-entry-ribbon-width @rp-yellow;
+	border-radius: 3px;
+	background-color: #FFF;
+	margin-bottom: 5px;
+}
+	.rp-resolved-comment-context {
+		background-color: lighten(@rp-yellow, 35%);
+		padding: 4px 5px;
+	}
+		.rp-resolved-comment-context-file {
+			font-weight: @rp-semibold-weight;
+		}
+
+		.rp-resolved-comment-context-quote {
+			color: #000;
+			font-family: @font-family-monospace;
+			margin: 0;
+		}
 
 .rp-entry-callout {
 	.rp-state-current-file & {
@@ -653,19 +684,19 @@
 	}
 }
 
-.resolved-comments-backdrop {
-	display: none;
-	position: fixed;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	left: 0;
-	background-color: rgba(0, 0, 0, .5);
+// .resolved-comments-backdrop {
+// 	display: none;
+// 	position: fixed;
+// 	top: 0;
+// 	right: 0;
+// 	bottom: 0;
+// 	left: 0;
+// 	background-color: rgba(0, 0, 0, .5);
 
-	&-visible {
-		display: block;
-	}
-}
+// 	&-visible {
+// 		display: block;
+// 	}
+// }
 
 .resolved-comments-dropdown {
 	display: none;
@@ -673,7 +704,7 @@
 	width: 300px;
 	background-color: @rp-bg-blue;
 	text-align: left;
-	padding: 5px;
+	padding: 5px 5px 0;
 	border-radius: 3px;
 
 	&-open {

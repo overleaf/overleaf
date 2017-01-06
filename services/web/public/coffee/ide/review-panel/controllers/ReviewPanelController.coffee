@@ -297,7 +297,7 @@ define [
 							formatComment(comment)
 						if thread.resolved_by_user?
 							$scope.$broadcast "comment:resolve_thread", thread_id
-							formatUser(thread.resolved_by_user)
+							thread.resolved_by_user = formatUser(thread.resolved_by_user)
 					$scope.reviewPanel.commentThreads = threads
 
 		refreshThreads()

@@ -20,12 +20,9 @@ define [
 				for fileId, fileEntries of scope.entries
 					scope.resolvedCommentsPerFile[fileId] = {}
 					for entryId, entry of fileEntries
-						if entry.type == "comment" and scope.threads[entry.thread_id].resolved?
+						if entry.type == "comment" and scope.threads[entry.thread_id]?.resolved?
 							scope.resolvedCommentsPerFile[fileId][entryId] = angular.copy scope.threads[entry.thread_id]
 							scope.resolvedCommentsPerFile[fileId][entryId].content = entry.content
-
-				console.log scope.resolvedCommentsPerFile
-
 
 			scope.$watchCollection "entries", filterResolvedComments
 			scope.$watchCollection "threads", filterResolvedComments
