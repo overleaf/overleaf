@@ -365,9 +365,9 @@
 	
 	.rp-comment-resolver {
 		color: @rp-type-blue;
-		font-style: italic;
 	}
 		.rp-comment-resolver-content {
+			font-style: italic;
 			margin: 0;
 		}
 
@@ -702,10 +702,22 @@
 	display: none;
 	position: absolute;
 	width: 300px;
+	left: -150px;
+	margin-top: @rp-entry-arrow-width * 1.5;
+	margin-left: 1em;
 	background-color: @rp-bg-blue;
 	text-align: left;
 	padding: 5px 5px 0;
 	border-radius: 3px;
+	box-shadow: 0 0 20px 10px rgba(0, 0, 0, .3);
+
+	&::before {
+		content: '';
+		.triangle(top, @rp-entry-arrow-width * 3, @rp-entry-arrow-width * 1.5, @rp-bg-blue);
+		top: -@rp-entry-ribbon-width * 2;
+		left: 50%;
+		margin-left: -@rp-entry-arrow-width * .75;
+	}
 
 	&-open {
 		display: block;
