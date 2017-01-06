@@ -336,11 +336,11 @@ module.exports = settings =
 		}]
 
 		header: [{
-			text: "Register"
+			text: "register"
 			url: "/register"
 			only_when_logged_out: true
 		}, {
-			text: "Log In"
+			text: "log_in"
 			url: "/login"
 			only_when_logged_out: true
 		}, {
