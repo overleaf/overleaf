@@ -148,7 +148,6 @@ settings =
 
 	behindProxy: process.env["SHARELATEX_BEHIND_PROXY"] or false
 
-	# Site Languages
 	i18n:
 		subdomainLang:
 			www: {lngCode:process.env["SHARELATEX_SITE_LANGUAGE"] or "en", url: siteUrl}
@@ -374,7 +373,12 @@ if process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]?
 	if process.env["SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH"]?
 		settings.email.parameters.tls =
 			rejectUnauthorized: parse(process.env["SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH"])
-		
+
+
+# i18n
+if process.env["SHARELATEX_LANG_DOMAIN_MAPPING"]?		
+
+	settings.i18n.subdomainLang = parse(process.env["SHARELATEX_LANG_DOMAIN_MAPPING"])
 
 # Password Settings
 # -----------
