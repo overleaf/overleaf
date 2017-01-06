@@ -1,5 +1,10 @@
 #review-panel
 	.review-panel-toolbar
+		resolved-comments-dropdown(
+			entries="reviewPanel.entries"
+			threads="reviewPanel.commentThreads"
+			docs="docs"
+		)
 		span.review-panel-toolbar-label(ng-click="editor.wantTrackChanges = true;", ng-if="editor.wantTrackChanges === false") Track Changes is 
 			strong off
 		span.review-panel-toolbar-label(ng-click="editor.wantTrackChanges = false;", ng-if="editor.wantTrackChanges === true") Track Changes is 
@@ -30,10 +35,6 @@
 						entry="entry"
 						threads="reviewPanel.commentThreads"
 						on-resolve="resolveComment(entry, entry_id)"
-						on-unresolve="unresolveComment(entry, entry_id)"
-						on-show-thread="showThread(entry)"
-						on-hide-thread="hideThread(entry)"
-						on-delete="deleteComment(entry_id)"
 						on-reply="submitReply(entry, entry_id);"
 						on-indicator-click="toggleReviewPanel();"
 					)
@@ -66,8 +67,6 @@
 					change-entry(
 						entry="entry"
 						user="users[entry.metadata.user_id]"
-						on-reject="rejectChange(entry.id);"
-						on-accept="acceptChange(entry.id);"
 						on-indicator-click="toggleReviewPanel();"
 						ng-click="gotoEntry(doc_id, entry)"
 					)
@@ -76,9 +75,6 @@
 					comment-entry(
 						entry="entry"
 						users="users"
-						on-resolve="resolveComment(entry, entry.id)"
-						on-unresolve="unresolveComment(entry, entry.id)"
-						on-delete="deleteComment(entry.id)"
 						on-reply="submitReply(entry, entry_id);"
 						on-indicator-click="toggleReviewPanel();"
 						ng-click="gotoEntry(doc_id, entry)"
@@ -127,7 +123,7 @@ script(type='text/ng-template', id='changeEntryTemplate')
 						span(ng-switch-when="delete") Deleted&nbsp;
 							del.rp-content-highlight {{ entry.content }} 
 					.rp-entry-metadata
-						span {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }} &bull;&nbsp;
+						| {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}&nbsp;&bull;&nbsp;
 						span.rp-entry-user(style="color: hsl({{ user.hue }}, 70%, 40%);") {{ user.name }} 
 			.rp-entry-actions
 				a.rp-entry-button(href, ng-click="onReject();") 
@@ -139,55 +135,66 @@ script(type='text/ng-template', id='changeEntryTemplate')
 
 script(type='text/ng-template', id='commentEntryTemplate')
 	div
-		.rp-entry-callout.rp-entry-callout-comment(ng-if="!threads[entry.thread_id].resolved")
+		.rp-entry-callout.rp-entry-callout-comment
 		.rp-entry-indicator(
 			ng-class="{ 'rp-entry-indicator-focused': entry.focused }"
 			ng-click="onIndicatorClick();"
 		)
 			i.fa.fa-comment
 		.rp-entry.rp-entry-comment(
-			ng-class="{ 'rp-entry-focused': entry.focused, 'rp-entry-comment-resolved': threads[entry.thread_id].resolved}"
+			ng-class="{ 'rp-entry-focused': entry.focused }"
 		)
-			.rp-comment(
-				ng-if="!threads[entry.thread_id].resolved || entry.showWhenResolved"
-				ng-repeat="comment in threads[entry.thread_id].messages"
-				ng-class="comment.user.isSelf ? 'rp-comment-self' : '';"
-			)
-				.rp-avatar(
-					ng-if="!comment.user.isSelf;"
-					style="background-color: hsl({{ comment.user.hue }}, 70%, 50%);"
-				) {{ comment.user.avatar_text | limitTo : 1 }}
-				.rp-comment-body(style="color: hsl({{ comment.user.hue }}, 70%, 90%);")
-					p.rp-comment-content {{ comment.content }}
-					p.rp-comment-metadata
+			div
+				.rp-comment(
+					ng-repeat="comment in threads[entry.thread_id].messages track by comment.id"
+				)
+					p.rp-comment-content 
+						span.rp-entry-user(
+							style="color: hsl({{ comment.user.hue }}, 70%, 40%);"
+							ng-if="$first || comment.user.id !== threads[entry.thread_id].messages[$index - 1].user.id"
+						) {{ comment.user.name }}:&nbsp;
+						| {{ comment.content }}
+					.rp-entry-metadata
 						| {{ comment.timestamp | date : 'MMM d, y h:mm a' }}
-						| &nbsp;&bull;&nbsp;
-						span(style="color: hsl({{ comment.user.hue }}, 70%, 40%);") {{ comment.user.name }}
-			.rp-comment-reply(ng-if="!threads[entry.thread_id].resolved || entry.showWhenResolved")
+			.rp-comment-reply
 				textarea.rp-comment-input(
 					ng-model="entry.replyContent"
 					ng-keypress="handleCommentReplyKeyPress($event);"
 					stop-propagation="click"
 					placeholder="{{ 'Hit \"Enter\" to reply' + (entry.resolved ? ' and re-open' : '') }}"
 				)
-			.rp-comment-resolved-description(ng-if="threads[entry.thread_id].resolved && !entry.showWhenResolved")
-				div
-					| Comment resolved by 
-					span(style="color: hsl({{ threads[entry.thread_id].resolved_by_user.hue }}, 70%, 40%);") {{ threads[entry.thread_id].resolved_by_user.name }}
-				div {{ threads[entry.thread_id].resolved_at | date : 'MMM d, y h:mm a' }}
 			.rp-entry-actions
-				a.rp-entry-button(href, ng-click="onResolve();", ng-if="!threads[entry.thread_id].resolved") 
-					i.fa.fa-check
-					| &nbsp;Mark as resolved
-				a.rp-entry-button(href, ng-click="onShowThread();", ng-if="threads[entry.thread_id].resolved && !entry.showWhenResolved")
-					| &nbsp;Show
-				a.rp-entry-button(href, ng-click="onHideThread();", ng-if="threads[entry.thread_id].resolved && entry.showWhenResolved")
-					| &nbsp;Hide
-				a.rp-entry-button(href, ng-click="onUnresolve();", ng-if="threads[entry.thread_id].resolved") 
-					| &nbsp;Re-open
-				a.rp-entry-button(href, ng-click="onDelete();", ng-if="threads[entry.thread_id].resolved") 
-					| &nbsp;Delete
-				
+				a.rp-entry-button(href, ng-click="onResolve();") 
+					i.fa.fa-inbox
+					| &nbsp;Resolve
+				a.rp-entry-button(href, ng-click="onReply();") 
+					i.fa.fa-reply
+					| &nbsp;Reply
+	
+script(type='text/ng-template', id='resolvedCommentEntryTemplate')
+	.rp-entry.rp-entry-comment
+		div
+			.rp-comment-context
+				| Quoted text on&nbsp;
+				.rp-comment-context-file {{ doc.doc.name }}
+				.rp-comment-context-quote {{ thread.content }}
+			.rp-comment(
+				ng-repeat="comment in thread.messages track by comment.id"
+			)
+				p.rp-comment-content 
+					span.rp-entry-user(
+						style="color: hsl({{ comment.user.hue }}, 70%, 40%);"
+						ng-if="$first || comment.user.id !== thread.messages[$index - 1].user.id"
+					) {{ comment.user.name }}:&nbsp;
+					| {{ comment.content }}
+				.rp-entry-metadata
+					| {{ comment.timestamp | date : 'MMM d, y h:mm a' }}
+		.rp-entry-actions
+			a.rp-entry-button(href, ng-click="onUnresolve();") 
+				| &nbsp;Re-open
+			a.rp-entry-button(href, ng-click="onDelete();") 
+				| &nbsp;Delete
+
 
 script(type='text/ng-template', id='addCommentEntryTemplate')
 	div
@@ -224,3 +231,27 @@ script(type='text/ng-template', id='addCommentEntryTemplate')
 					a.rp-entry-button(href, ng-click="submitNewComment()") 
 						i.fa.fa-comment
 						| &nbsp;Comment
+
+script(type='text/ng-template', id='resolvedCommentsDropdownTemplate')
+	.resolved-comments
+		.resolved-comments-backdrop(
+			ng-class="{ 'resolved-comments-backdrop-visible' : state.isOpen }"
+			ng-click="state.isOpen = !state.isOpen"
+		)
+		a.resolved-comments-toggle(
+			href
+			ng-click="state.isOpen = !state.isOpen"
+		) 
+			i.fa.fa-inbox
+		.resolved-comments-dropdown(
+			ng-class="{ 'resolved-comments-dropdown-open' : state.isOpen }"
+		)
+			div(
+				ng-repeat="doc in docs"
+			)
+				resolved-comment-entry(
+					ng-repeat="thread in resolvedCommentsPerFile[doc.doc.id]"
+					thread="thread"
+					doc="doc"
+				)
+			
