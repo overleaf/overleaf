@@ -96,17 +96,22 @@ define [
 				$scope.$broadcast "review-panel:toggle"
 				$scope.$broadcast "review-panel:layout"
 		
-		regenerateTrackChangesId = (doc) ->
-			old_id = getChangeTracker(doc.doc_id).getIdSeed()
+		generatePartialMongoId = () ->
 			# Generate a the first 18 characters of Mongo ObjectId, leaving 6 for the increment part
 			# Reference: https://github.com/dreampulse/ObjectId.js/blob/master/src/main/javascript/Objectid.js
 			pid = Math.floor(Math.random() * (32767)).toString(16)
 			machine = Math.floor(Math.random() * (16777216)).toString(16)
 			timestamp = Math.floor(new Date().valueOf() / 1000).toString(16)
-			new_id = '00000000'.substr(0, 8 - timestamp.length) + timestamp +
+			return '00000000'.substr(0, 8 - timestamp.length) + timestamp +
 				'000000'.substr(0, 6 - machine.length) + machine +
 				'0000'.substr(0, 4 - pid.length) + pid
-			
+		
+		generateFullMongoId = () ->
+			return generatePartialMongoId() + "000000"
+		
+		regenerateTrackChangesId = (doc) ->
+			old_id = getChangeTracker(doc.doc_id).getIdSeed()
+			new_id = generatePartialMongoId()
 			getChangeTracker(doc.doc_id).setIdSeed(new_id)
 			doc.setTrackChangesIdSeeds({pending: new_id, inflight: old_id})
 		
@@ -211,7 +216,7 @@ define [
 				$scope.$broadcast "review-panel:layout"
 		
 		$scope.submitNewComment = (content) ->
-			thread_id = RangesTracker.newId()
+			thread_id = generateFullMongoId()
 			$scope.$broadcast "comment:add", thread_id
 			$http.post("/project/#{$scope.project_id}/thread/#{thread_id}/messages", {content, _csrf: window.csrfToken})
 				.error (error) ->
