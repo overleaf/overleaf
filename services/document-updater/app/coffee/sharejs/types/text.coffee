@@ -32,34 +32,13 @@ checkValidComponent = (c) ->
   i_type = typeof c.i
   d_type = typeof c.d
   c_type = typeof c.c
-  dr_type = typeof c.dr
-  throw new Error 'component needs an i, d, c or dr field' unless (i_type == 'string') ^ (d_type == 'string') ^ (c_type == 'string') ^ (dr_type == 'string')
+  throw new Error 'component needs an i, d or c field' unless (i_type == 'string') ^ (d_type == 'string') ^ (c_type == 'string')
 
   throw new Error 'position cannot be negative' unless c.p >= 0
 
 checkValidOp = (op) ->
   checkValidComponent(c) for c in op
   true
-
-componentText = (c) ->
-  if c.c?
-    text = c.c
-  if c.dr?
-    text = c.dr
-  throw new Error("invalid component") if !text?
-  return text
-
-duplicateComponent = (c) ->
-  newC = {}
-  for key, value of c
-    newC[key] = value
-  return newC
-
-setComponentText = (c, text) ->
-  if c.c?
-    c.c = text
-  if c.dr?
-    c.dr = text
 
 text.apply = (snapshot, op) ->
   checkValidOp op
@@ -70,10 +49,9 @@ text.apply = (snapshot, op) ->
       deleted = snapshot[component.p...(component.p + component.d.length)]
       throw new Error "Delete component '#{component.d}' does not match deleted text '#{deleted}'" unless component.d == deleted
       snapshot = snapshot[...component.p] + snapshot[(component.p + component.d.length)..]
-    else if component.c? or component.dr?
-      c_text = componentText(component)
-      range = snapshot[component.p...(component.p + c_text.length)]
-      throw new Error "Range component '#{c_text}' does not match range text '#{range}'" unless c_text == range
+    else if component.c?
+      comment = snapshot[component.p...(component.p + component.c.length)]
+      throw new Error "Comment component '#{component.c}' does not match commented text '#{comment}'" unless component.c == comment
     else
       throw new Error "Unknown op type"
   snapshot
@@ -149,7 +127,7 @@ transformPosition = (pos, c, insertAfter) ->
       c.p
     else
       pos - c.d.length
-  else if c.c? or c.dr?
+  else if c.c?
     pos
   else
     throw new Error("unknown op type")
@@ -209,54 +187,46 @@ text._tc = transformComponent = (dest, c, otherC, side) ->
           newC.p = transformPosition newC.p, otherC
           append dest, newC
     
-    else if otherC.c? or otherC.dr?
+    else if otherC.c?
       append dest, c
     
     else
       throw new Error("unknown op type")
 
-  else if c.c? or c.dr? # Comment or delete range
-    c_text = componentText(c)
+  else if c.c? # Comment
     if otherC.i?
-      if c.p < otherC.p < c.p + c_text.length
+      if c.p < otherC.p < c.p + c.c.length
         offset = otherC.p - c.p
-        newText = (c_text[0..(offset-1)] + otherC.i + c_text[offset...])
-        newC = duplicateComponent(c)
-        setComponentText(newC, newText)
-        append dest, newC
+        new_c = (c.c[0..(offset-1)] + otherC.i + c.c[offset...])
+        append dest, {c:new_c, p:c.p, t: c.t}
       else
-        newC = duplicateComponent(c)
-        newC.p = transformPosition(c.p, otherC, true)
-        append dest, newC
+        append dest, {c:c.c, p:transformPosition(c.p, otherC, true), t: c.t}
     
     else if otherC.d?
       if c.p >= otherC.p + otherC.d.length
-        newC = duplicateComponent(c)
-        newC.p = c.p - otherC.d.length
-        append dest, newC
-      else if c.p + c_text.length <= otherC.p
+        append dest, {c:c.c, p:c.p - otherC.d.length, t: c.t}
+      else if c.p + c.c.length <= otherC.p
         append dest, c
       else # Delete overlaps comment
         # They overlap somewhere.
-        newC = duplicateComponent(c)
-        setComponentText(newC, '')
+        newC = {c:'', p:c.p, t: c.t}
         if c.p < otherC.p
-          setComponentText(newC, c_text[...(otherC.p - c.p)])
-        if c.p + c_text.length > otherC.p + otherC.d.length
-          setComponentText(newC, componentText(newC) + c_text[(otherC.p + otherC.d.length - c.p)..])
+          newC.c = c.c[...(otherC.p - c.p)]
+        if c.p + c.c.length > otherC.p + otherC.d.length
+          newC.c += c.c[(otherC.p + otherC.d.length - c.p)..]
 
         # This is entirely optional - just for a check that the deleted
         # text in the two ops matches
         intersectStart = Math.max c.p, otherC.p
-        intersectEnd = Math.min c.p + c_text.length, otherC.p + otherC.d.length
-        cIntersect = c_text[intersectStart - c.p...intersectEnd - c.p]
+        intersectEnd = Math.min c.p + c.c.length, otherC.p + otherC.d.length
+        cIntersect = c.c[intersectStart - c.p...intersectEnd - c.p]
         otherIntersect = otherC.d[intersectStart - otherC.p...intersectEnd - otherC.p]
-        throw new Error 'Delete op text does not match range being modified' unless cIntersect == otherIntersect
+        throw new Error 'Delete ops delete different text in the same region of the document' unless cIntersect == otherIntersect
 
         newC.p = transformPosition newC.p, otherC
         append dest, newC
     
-    else if otherC.c? or otherC.dr?
+    else if otherC.c?
       append dest, c
     
     else

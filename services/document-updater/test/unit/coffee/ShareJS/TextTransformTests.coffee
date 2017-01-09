@@ -189,95 +189,6 @@ describe "ShareJS text type", ->
 				dest = []
 				text._tc(dest, { c: "foo", p: 6 }, { c: "bar", p: 3 })
 				dest.should.deep.equal [{ c: "foo", p: 6 }]
-	
-		describe "comment / delete_range", ->
-			it "should not do anything", ->
-				dest = []
-				text._tc(dest, { c: "foo", p: 6 }, { dr: "bar", p: 3 })
-				dest.should.deep.equal [{ c: "foo", p: 6 }]
-		
-		describe "delete_range / insert", ->
-			it "with an insert before", ->
-				dest = []
-				text._tc(dest, { dr: "foo", p: 9 }, { i: "bar", p: 3 })
-				dest.should.deep.equal [{ dr: "foo", p: 12 }]
-
-			it "with an insert after", ->
-				dest = []
-				text._tc(dest, { dr: "foo", p: 3 }, { i: "bar", p: 9 })
-				dest.should.deep.equal [{ dr: "foo", p: 3 }]
-
-			it "with an insert at the left edge", ->
-				dest = []
-				text._tc(dest, { dr: "foo", p: 3 }, { i: "bar", p: 3 })
-				# RangesTracker doesn't inject inserts into comments on edges, so neither should we
-				dest.should.deep.equal [{ dr: "foo", p: 6 }]
-
-			it "with an insert at the right edge", ->
-				dest = []
-				text._tc(dest, { dr: "foo", p: 3 }, { i: "bar", p: 6 })
-				# RangesTracker doesn't inject inserts into comments on edges, so neither should we
-				dest.should.deep.equal [{ dr: "foo", p: 3 }]
-
-			it "with an insert in the middle", ->
-				dest = []
-				text._tc(dest, { dr: "foo", p: 3 }, { i: "bar", p: 5 })
-				dest.should.deep.equal [{ dr: "fobaro", p: 3 }]
-	
-		describe "delete_range / delete", ->
-			it "with a delete before", ->
-				dest = []
-				text._tc(dest, { dr: "foo", p: 9 }, { d: "bar", p: 3 })
-				dest.should.deep.equal [{ dr: "foo", p: 6 }]
-
-			it "with a delete after", ->
-				dest = []
-				text._tc(dest, { dr: "foo", p: 3 }, { i: "bar", p: 9 })
-				dest.should.deep.equal [{ dr: "foo", p: 3 }]
-
-			it "with a delete overlapping the comment content before", ->
-				dest = []
-				text._tc(dest, { dr: "foobar", p: 6 }, { d: "123foo", p: 3 })
-				dest.should.deep.equal [{ dr: "bar", p: 3 }]
-
-			it "with a delete overlapping the comment content after", ->
-				dest = []
-				text._tc(dest, { dr: "foobar", p: 6 }, { d: "bar123", p: 9 })
-				dest.should.deep.equal [{ dr: "foo", p: 6 }]
-
-			it "with a delete overlapping the comment content in the middle", ->
-				dest = []
-				text._tc(dest, { dr: "foo123bar", p: 6 }, { d: "123", p: 9 })
-				dest.should.deep.equal [{ dr: "foobar", p: 6 }]
-
-			it "with a delete overlapping the whole comment", ->
-				dest = []
-				text._tc(dest, { dr: "foo", p: 6 }, { d: "123foo456", p: 3 })
-				dest.should.deep.equal [{ dr: "", p: 3 }]
-	
-		describe "delete_range / insert", ->
-			it "should not do anything", ->
-				dest = []
-				text._tc(dest, { i: "foo", p: 6 }, { dr: "bar", p: 3 })
-				dest.should.deep.equal [{ i: "foo", p: 6 }]
-	
-		describe "delete_range / delete", ->
-			it "should not do anything", ->
-				dest = []
-				text._tc(dest, { d: "foo", p: 6 }, { dr: "bar", p: 3 })
-				dest.should.deep.equal [{ d: "foo", p: 6 }]
-	
-		describe "delete_range / comment", ->
-			it "should not do anything", ->
-				dest = []
-				text._tc(dest, { c: "foo", p: 6 }, { dr: "bar", p: 3 })
-				dest.should.deep.equal [{ c: "foo", p: 6 }]
-	
-		describe "delete_range / delete_range", ->
-			it "should not do anything", ->
-				dest = []
-				text._tc(dest, { dr: "foo", p: 6 }, { dr: "bar", p: 3 })
-				dest.should.deep.equal [{ dr: "foo", p: 6 }]
 
 	describe "apply", ->
 		it "should apply an insert", ->
@@ -288,9 +199,6 @@ describe "ShareJS text type", ->
 
 		it "should do nothing with a comment", ->
 			text.apply("foo123bar", [{ c: "123", p: 3 }]).should.equal "foo123bar"
-
-		it "should do nothing with a delete_range", ->
-			text.apply("foo123bar", [{ dr: "123", p: 3 }]).should.equal "foo123bar"
 		
 		it "should throw an error when deleted content does not match", ->
 			(() ->
