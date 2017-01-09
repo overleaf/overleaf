@@ -43,6 +43,12 @@ define [
 				$scope.$broadcast "change:accept", change_id
 			updateEntries(doc_id)
 			$scope.$apply () ->
+		
+		ide.socket.on "resolve-thread", (thread_id, user) ->
+			_onCommentResolved(thread_id, user)
+			
+		ide.socket.on "reopen-thread", (thread_id) ->
+			_onCommentReopened(thread_id)
 
 		rangesTrackers = {}
 
@@ -265,20 +271,26 @@ define [
 		$scope.resolveComment = (entry, entry_id) ->
 			entry.showWhenResolved = false
 			entry.focused = false
-			thread = $scope.reviewPanel.commentThreads[entry.thread_id]
-			thread.resolved = true
-			thread.resolved_by_user = formatUser(ide.$scope.user)
-			thread.resolved_at = new Date()
 			$http.post "/project/#{$scope.project_id}/thread/#{entry.thread_id}/resolve", {_csrf: window.csrfToken}
-			$scope.$broadcast "comment:resolve_thread", entry.thread_id
-		
+			_onCommentResolved(entry.thread_id, ide.$scope.user)
+
 		$scope.unresolveComment = (entry, entry_id) ->
-			thread = $scope.reviewPanel.commentThreads[entry.thread_id]
+			_onCommentReopened(entry.thread_id)
+			$http.post "/project/#{$scope.project_id}/thread/#{entry.thread_id}/reopen", {_csrf: window.csrfToken}
+		
+		_onCommentResolved = (thread_id, user) ->
+			thread = $scope.reviewPanel.commentThreads[thread_id]
+			thread.resolved = true
+			thread.resolved_by_user = formatUser(user)
+			thread.resolved_at = new Date()
+			$scope.$broadcast "comment:resolve_thread", thread_id
+		
+		_onCommentReopened = (thread_id) ->
+			thread = $scope.reviewPanel.commentThreads[thread_id]
 			delete thread.resolved
 			delete thread.resolved_by_user
 			delete thread.resolved_at
-			$http.post "/project/#{$scope.project_id}/thread/#{entry.thread_id}/reopen", {_csrf: window.csrfToken}
-			$scope.$broadcast "comment:unresolve_thread", entry.thread_id
+			$scope.$broadcast "comment:unresolve_thread", thread_id
 		
 		$scope.deleteComment = (entry_id) ->
 			$scope.$broadcast "comment:remove", entry_id
