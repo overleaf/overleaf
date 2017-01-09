@@ -340,7 +340,7 @@ define [
 		_applyOpsToRanges: (ops = [], oldSnapshot, msg) ->
 			track_changes_as = null
 			remote_op = msg?
-			if msg.meta?.tc?
+			if msg?.meta?.tc?
 				@ranges.setIdSeed(msg.meta.tc)
 			if remote_op and msg.meta?.tc
 				track_changes_as = msg.meta.user_id

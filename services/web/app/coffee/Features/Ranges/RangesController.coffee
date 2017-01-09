@@ -1,6 +1,7 @@
 RangesManager = require "./RangesManager"
 logger = require "logger-sharelatex"
 UserInfoController = require "../User/UserInfoController"
+DocumentUpdaterHandler = require "../DocumentUpdater/DocumentUpdaterHandler"
 
 module.exports = RangesController =
 	getAllRanges: (req, res, next) ->
@@ -18,3 +19,10 @@ module.exports = RangesController =
 			return next(error) if error?
 			users = (UserInfoController.formatPersonalInfo(user) for user in users)
 			res.json users
+	
+	acceptChange: (req, res, next) ->
+		{project_id, doc_id, change_id} = req.params
+		logger.log {project_id, doc_id, change_id}, "request to accept change"
+		DocumentUpdaterHandler.acceptChange project_id, doc_id, change_id, (error) ->
+			return next(error) if error?
+			res.send 204

@@ -8,8 +8,7 @@ path = require 'path'
 _ = require 'underscore'
 modulePath = path.join __dirname, '../../../../app/js/Features/DocumentUpdater/DocumentUpdaterHandler'
 
-describe 'DocumentUpdaterHandler - Flushing documents :', ->
-
+describe 'DocumentUpdaterHandler', ->
 	beforeEach ->
 		@project_id = "project-id-923"
 		@doc_id = "doc-id-394"
@@ -291,6 +290,41 @@ describe 'DocumentUpdaterHandler - Flushing documents :', ->
 			beforeEach ->
 				@request.get = sinon.stub().callsArgWith(1, null, { statusCode: 500 }, "")
 				@handler.getDocument @project_id, @doc_id, @fromVersion, @callback
+
+			it "should return the callback with an error", ->
+				@callback
+					.calledWith(new Error("doc updater returned failure status code: 500"))
+					.should.equal true
+
+	describe "acceptChange", ->
+		beforeEach ->
+			@change_id = "mock-change-id-1"
+			@callback = sinon.stub()
+
+		describe "successfully", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 200}, @body)
+				@handler.acceptChange @project_id, @doc_id, @change_id, @callback
+
+			it 'should accept the change in the document updater', ->
+				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}/doc/#{@doc_id}/change/#{@change_id}/accept"
+				@request.post.calledWith(url).should.equal true
+
+			it "should call the callback", ->
+				@callback.calledWith(null).should.equal true
+
+		describe "when the document updater API returns an error", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, @error = new Error("something went wrong"), null, null)
+				@handler.acceptChange @project_id, @doc_id, @change_id, @callback
+
+			it "should return an error to the callback", ->
+				@callback.calledWith(@error).should.equal true
+
+		describe "when the document updater returns a failure error code", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, { statusCode: 500 }, "")
+				@handler.acceptChange @project_id, @doc_id, @change_id, @callback
 
 			it "should return the callback with an error", ->
 				@callback

@@ -179,6 +179,7 @@ module.exports = class Router
 
 		webRouter.get "/project/:project_id/ranges", AuthorizationMiddlewear.ensureUserCanReadProject, RangesController.getAllRanges
 		webRouter.get "/project/:project_id/ranges/users", AuthorizationMiddlewear.ensureUserCanReadProject, RangesController.getAllRangesUsers
+		webRouter.post "/project/:project_id/doc/:doc_id/changes/:change_id/accept", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, RangesController.acceptChange
 
 		webRouter.get  '/Project/:Project_id/download/zip', AuthorizationMiddlewear.ensureUserCanReadProject, ProjectDownloadsController.downloadProject
 		webRouter.get  '/project/download/zip', AuthorizationMiddlewear.ensureUserCanReadMultipleProjects, ProjectDownloadsController.downloadMultipleProjects
