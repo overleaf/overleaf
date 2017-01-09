@@ -172,12 +172,12 @@ script(type='text/ng-template', id='commentEntryTemplate')
 					| &nbsp;Reply
 	
 script(type='text/ng-template', id='resolvedCommentEntryTemplate')
-	.rp-entry.rp-entry-comment
+	.rp-resolved-comment
 		div
-			.rp-comment-context
+			.rp-resolved-comment-context
 				| Quoted text on&nbsp;
-				.rp-comment-context-file {{ doc.doc.name }}
-				.rp-comment-context-quote {{ thread.content }}
+				span.rp-resolved-comment-context-file {{ doc.doc.name }}
+				p.rp-resolved-comment-context-quote {{ thread.content }}
 			.rp-comment(
 				ng-repeat="comment in thread.messages track by comment.id"
 			)
@@ -189,6 +189,15 @@ script(type='text/ng-template', id='resolvedCommentEntryTemplate')
 					| {{ comment.content }}
 				.rp-entry-metadata
 					| {{ comment.timestamp | date : 'MMM d, y h:mm a' }}
+			.rp-comment.rp-comment-resolver
+				p.rp-comment-resolver-content 
+					span.rp-entry-user(
+						style="color: hsl({{ thread.resolved_by_user.hue }}, 70%, 40%);"
+					) {{ thread.resolved_by_user.name }}:&nbsp;
+					| Marked as resolved.
+				.rp-entry-metadata
+					| {{ thread.resolved_at | date : 'MMM d, y h:mm a' }}
+				
 		.rp-entry-actions
 			a.rp-entry-button(href, ng-click="onUnresolve();") 
 				| &nbsp;Re-open
@@ -234,10 +243,10 @@ script(type='text/ng-template', id='addCommentEntryTemplate')
 
 script(type='text/ng-template', id='resolvedCommentsDropdownTemplate')
 	.resolved-comments
-		.resolved-comments-backdrop(
-			ng-class="{ 'resolved-comments-backdrop-visible' : state.isOpen }"
-			ng-click="state.isOpen = !state.isOpen"
-		)
+		//- .resolved-comments-backdrop(
+		//- 	ng-class="{ 'resolved-comments-backdrop-visible' : state.isOpen }"
+		//- 	ng-click="state.isOpen = !state.isOpen"
+		//- )
 		a.resolved-comments-toggle(
 			href
 			ng-click="state.isOpen = !state.isOpen"
