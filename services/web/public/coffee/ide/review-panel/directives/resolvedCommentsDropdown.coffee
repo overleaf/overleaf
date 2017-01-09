@@ -9,6 +9,7 @@ define [
 			threads 	: "="
 			docs		: "="
 			onOpen		: "&"
+			onUnresolve	: "&"
 			isLoading	: "="
 
 		link: (scope, element, attrs) ->
@@ -22,6 +23,10 @@ define [
 
 			scope.resolvedCommentsPerFile = {}
 
+			scope.handleUnresolve = (threadId) ->
+				scope.onUnresolve({ threadId })
+				filterResolvedComments()
+
 			filterResolvedComments = () ->
 				scope.resolvedCommentsPerFile = {}
 
@@ -31,6 +36,7 @@ define [
 						if entry.type == "comment" and scope.threads[entry.thread_id]?.resolved?
 							scope.resolvedCommentsPerFile[fileId][entryId] = angular.copy scope.threads[entry.thread_id]
 							scope.resolvedCommentsPerFile[fileId][entryId].content = entry.content
+							scope.resolvedCommentsPerFile[fileId][entryId].threadId = entry.thread_id
 
 			scope.$watchCollection "entries", filterResolvedComments
 			scope.$watchCollection "threads", filterResolvedComments

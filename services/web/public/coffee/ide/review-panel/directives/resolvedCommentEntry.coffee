@@ -5,7 +5,7 @@ define [
 		restrict: "E"
 		templateUrl: "resolvedCommentEntryTemplate"
 		scope: 
+			threadId: "="
 			thread: "="
 			doc: "="
-			onReopen: "&"
-			onDelete: "&"
+			onUnresolve: "&"

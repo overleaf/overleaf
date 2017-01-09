@@ -285,9 +285,9 @@ define [
 			$http.post "/project/#{$scope.project_id}/thread/#{entry.thread_id}/resolve", {_csrf: window.csrfToken}
 			_onCommentResolved(entry.thread_id, ide.$scope.user)
 
-		$scope.unresolveComment = (entry, entry_id) ->
-			_onCommentReopened(entry.thread_id)
-			$http.post "/project/#{$scope.project_id}/thread/#{entry.thread_id}/reopen", {_csrf: window.csrfToken}
+		$scope.unresolveComment = (thread_id) ->
+			_onCommentReopened(thread_id)
+			$http.post "/project/#{$scope.project_id}/thread/#{thread_id}/reopen", {_csrf: window.csrfToken}
 		
 		_onCommentResolved = (thread_id, user) ->
 			thread = $scope.reviewPanel.commentThreads[thread_id]
