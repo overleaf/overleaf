@@ -18,6 +18,8 @@ define [
 			openSubView: $scope.SubViews.CUR_FILE
 			overview:
 				loading: false
+			dropdown:
+				loading: false
 			commentThreads: {}
 
 		$scope.commentState =
@@ -70,11 +72,7 @@ define [
 				$reviewPanelEl.css "right", "#{ scrollbar.scrollbarWidth }px"
 			else
 				$reviewPanelEl.css "right", "0"
-		
-		$scope.$watch "reviewPanel.subView", (subView) ->
-			return if !subView?
-			updateScrollbar()
-		
+
 		$scope.$watch "ui.reviewPanelOpen", (open) ->
 			return if !open?
 			if !open
@@ -87,6 +85,7 @@ define [
 		
 		$scope.$watch "reviewPanel.subView", (view) ->
 			return if !view?
+			updateScrollbar()
 			if view == $scope.SubViews.OVERVIEW
 				refreshOverviewPanel()
 
@@ -133,8 +132,7 @@ define [
 			getChangeTracker(doc.doc_id).setIdSeed(new_id)
 			doc.setTrackChangesIdSeeds({pending: new_id, inflight: old_id})
 		
-		refreshOverviewPanel = () ->
-			$scope.reviewPanel.overview.loading = true
+		refreshRanges = () ->
 			$http.get "/project/#{$scope.project_id}/ranges"
 				.success (docs) ->
 					for doc in docs
@@ -143,10 +141,23 @@ define [
 							rangesTracker.comments = doc.ranges?.comments or []
 							rangesTracker.changes = doc.ranges?.changes or []
 							updateEntries(doc.id)
+
+		refreshOverviewPanel = () ->
+			$scope.reviewPanel.overview.loading = true
+			refreshRanges()
+				.then () ->
 					$scope.reviewPanel.overview.loading = false
-				.error (error) ->
+				.catch () ->
 					$scope.reviewPanel.overview.loading = false
-		
+
+		$scope.refreshResolvedCommentsDropdown = () ->
+			$scope.reviewPanel.dropdown.loading = true
+			refreshRanges()
+				.then () ->
+					$scope.reviewPanel.dropdown.loading = false
+				.catch () ->
+					$scope.reviewPanel.dropdown.loading = false
+
 		updateEntries = (doc_id) ->
 			rangesTracker = getChangeTracker(doc_id)
 			entries = getDocEntries(doc_id)

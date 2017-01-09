@@ -137,7 +137,6 @@
 		bottom: 0;
 	}
 	
-	
 	.rp-state-overview & {
 		flex-grow: 2;
 		overflow-y: auto;
@@ -314,7 +313,7 @@
 	.rp-entry-actions {
 		display: flex;
 
-		.rp-state-overview & {
+		.rp-state-overview .rp-entry-list & {
 			display: none;
 		}
 	}
@@ -336,14 +335,12 @@
 		line-height: 1.4;
 		border-bottom: solid 1px @rp-border-grey;
 
-
-
 		&:last-child {
 			margin-bottom: 2px;
 			border-bottom-width: 0;
 		}
 
-		.rp-state-overview & {
+		.rp-state-overview .rp-entry-list & {
 			margin: 4px 5px;
 
 			&:first-child {
@@ -499,6 +496,11 @@
 	margin-top: 10px;
 	font-weight: @rp-semibold-weight;
 	text-align: center;
+}
+
+.rp-loading {
+	text-align: center;
+	padding: 5px;
 }
 
 .rp-nav {

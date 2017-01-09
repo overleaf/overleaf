@@ -5,12 +5,21 @@ define [
 		restrict: "E"
 		templateUrl: "resolvedCommentsDropdownTemplate"
 		scope: 
-			entries : "="
-			threads : "="
-			docs	: "="
+			entries 	: "="
+			threads 	: "="
+			docs		: "="
+			onOpen		: "&"
+			isLoading	: "="
+
 		link: (scope, element, attrs) ->
 			scope.state = 
 				isOpen: false
+
+			scope.toggleOpenState = () ->
+				scope.state.isOpen = !scope.state.isOpen
+				if (scope.state.isOpen)
+					console.log('will call stuff')
+					scope.onOpen()
 
 			scope.resolvedCommentsPerFile = {}
 
