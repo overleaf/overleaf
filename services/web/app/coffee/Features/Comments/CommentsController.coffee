@@ -62,7 +62,7 @@ module.exports = CommentsController =
 				callback null, user
 		
 		jobs = []
-		for thread in threads
+		for thread_id, thread of threads
 			do (thread) ->
 				if thread.resolved
 					jobs.push (cb) ->

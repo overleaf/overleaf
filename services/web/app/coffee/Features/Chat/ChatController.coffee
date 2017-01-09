@@ -28,7 +28,7 @@ module.exports =
 		logger.log project_id:project_id, query:query, "getting messages"
 		ChatApiHandler.getGlobalMessages project_id, query.limit, query.before, (err, messages) ->
 			return next(err) if err?
-			CommentsController._injectUserInfoIntoThreads [{ messages: messages }], (err) ->
+			CommentsController._injectUserInfoIntoThreads {global: { messages: messages }}, (err) ->
 				return next(err) if err?
 				logger.log length: messages?.length, "sending messages to client"
 				res.json messages

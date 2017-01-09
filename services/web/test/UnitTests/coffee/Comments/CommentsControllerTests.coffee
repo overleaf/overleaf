@@ -151,8 +151,8 @@ describe "CommentsController", ->
 				return { "formatted": user["mock"] }
 			
 		it "should inject a user object into messaged and resolved data", (done) ->
-			@CommentsController._injectUserInfoIntoThreads [
-				{
+			@CommentsController._injectUserInfoIntoThreads {
+				thread1: {
 					resolved: true
 					resolved_by_user_id: "user_id_1"
 					messages: [{
@@ -163,15 +163,15 @@ describe "CommentsController", ->
 						content: "bar"
 					}]
 				},
-				{
+				thread2: {
 					messages: [{
 						user_id: "user_id_1"
 						content: "baz"
 					}]
 				}
-			], (error, threads) ->
-				expect(threads).to.deep.equal [
-					{
+			}, (error, threads) ->
+				expect(threads).to.deep.equal {
+					thread1: {
 						resolved: true
 						resolved_by_user_id: "user_id_1"
 						resolved_by_user: { "formatted": "user_1" }
@@ -185,14 +185,14 @@ describe "CommentsController", ->
 							content: "bar"
 						}]
 					},
-					{
+					thread2: {
 						messages: [{
 							user_id: "user_id_1"
 							user: { "formatted": "user_1" }
 							content: "baz"
 						}]
 					}
-				]
+				}
 				done()
 
 		it "should only need to look up each user once", (done) ->
