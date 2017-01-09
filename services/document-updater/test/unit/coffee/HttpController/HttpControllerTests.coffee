@@ -333,3 +333,44 @@ describe "HttpController", ->
 				@next
 					.calledWith(new Error("oops"))
 					.should.equal true
+	
+	describe "acceptChange", ->
+		beforeEach ->
+			@req =
+				params:
+					project_id: @project_id
+					doc_id: @doc_id
+					change_id: @change_id = "mock-change-od-1"
+
+		describe "successfully", ->
+			beforeEach ->
+				@DocumentManager.acceptChangeWithLock = sinon.stub().callsArgWith(3)
+				@HttpController.acceptChange(@req, @res, @next)
+
+			it "should accept the change", ->
+				@DocumentManager.acceptChangeWithLock
+					.calledWith(@project_id, @doc_id, @change_id)
+					.should.equal true
+
+			it "should return a successful No Content response", ->
+				@res.send
+					.calledWith(204)
+					.should.equal true
+
+			it "should log the request", ->
+				@logger.log
+					.calledWith({@project_id, @doc_id, @change_id}, "accepting change via http")
+					.should.equal true
+
+			it "should time the request", ->
+				@Metrics.Timer::done.called.should.equal true
+
+		describe "when an errors occurs", ->
+			beforeEach ->
+				@DocumentManager.acceptChangeWithLock = sinon.stub().callsArgWith(3, new Error("oops"))
+				@HttpController.acceptChange(@req, @res, @next)
+
+			it "should call next with the error", ->
+				@next
+					.calledWith(new Error("oops"))
+					.should.equal true

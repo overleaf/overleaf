@@ -1,6 +1,7 @@
 sinon = require "sinon"
 chai = require("chai")
 chai.should()
+expect = chai.expect
 async = require "async"
 rclient = require("redis").createClient()
 
@@ -181,4 +182,46 @@ describe "Ranges", ->
 					{changes} = doc.ranges
 					changes[0].op.should.deep.equal { i: "123", p: 1 }
 					changes[1].op.should.deep.equal { i: "456", p: 5 }
+					done()
+
+	describe "accepting a change", ->
+		before (done) ->
+			@project_id = DocUpdaterClient.randomId()
+			@user_id = DocUpdaterClient.randomId()
+			@id_seed = "587357bd35e64f6157"
+			@doc = {
+				id: DocUpdaterClient.randomId()
+				lines: ["aaa"]
+			}
+			@update = {
+				doc: @doc.id
+				op: [{ i: "456", p: 1 }]
+				v: 0
+				meta: { user_id: @user_id, tc: @id_seed }
+			}
+			MockWebApi.insertDoc @project_id, @doc.id, {
+				lines: @doc.lines
+				version: 0
+			}
+			DocUpdaterClient.preloadDoc @project_id, @doc.id, (error) =>
+				throw error if error?
+				DocUpdaterClient.sendUpdate @project_id, @doc.id, @update, (error) =>
+					throw error if error?
+					setTimeout () =>
+						DocUpdaterClient.getDoc @project_id, @doc.id, (error, res, data) =>
+							throw error if error?
+							ranges = data.ranges
+							change = ranges.changes[0]
+							change.op.should.deep.equal { i: "456", p: 1 }
+							change.id.should.equal @id_seed + "000001"
+							change.metadata.user_id.should.equal @user_id
+							done()
+					, 200
+		
+		it "should remove the change after accepting", (done) ->
+			DocUpdaterClient.acceptChange @project_id, @doc.id, @id_seed + "000001", (error) =>
+				throw error if error?
+				DocUpdaterClient.getDoc @project_id, @doc.id, (error, res, data) =>
+					throw error if error?
+					expect(data.ranges.changes).to.be.undefined
 					done()

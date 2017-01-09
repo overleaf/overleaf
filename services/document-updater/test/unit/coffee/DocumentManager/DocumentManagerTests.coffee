@@ -3,6 +3,7 @@ chai = require('chai')
 should = chai.should()
 modulePath = "../../../../app/js/DocumentManager.js"
 SandboxedModule = require('sandboxed-module')
+Errors = require "../../../../app/js/Errors"
 
 describe "DocumentManager", ->
 	beforeEach ->
@@ -18,6 +19,7 @@ describe "DocumentManager", ->
 			"./WebRedisManager": @WebRedisManager = {}
 			"./DiffCodec": @DiffCodec = {}
 			"./UpdateManager": @UpdateManager = {}
+			"./RangesManager": @RangesManager = {}
 		@project_id = "project-id-123"
 		@doc_id = "doc-id-123"
 		@callback = sinon.stub()
@@ -260,3 +262,49 @@ describe "DocumentManager", ->
 					
 				it "should not try to get the doc lines", ->
 					@DocumentManager.getDoc.called.should.equal false
+	
+	describe "acceptChanges", ->
+		beforeEach ->
+			@change_id = "mock-change-id"
+			@version = 34
+			@lines = ["original", "lines"]
+			@ranges = { entries: "mock", comments: "mock" }
+			@updated_ranges = { entries: "updated", comments: "updated" }
+			@DocumentManager.getDoc = sinon.stub().yields(null, @lines, @version, @ranges)
+			@RangesManager.acceptChange = sinon.stub().yields(null, @updated_ranges)
+			@RedisManager.updateDocument = sinon.stub().yields()
+		
+		describe "successfully", ->
+			beforeEach ->
+				@DocumentManager.acceptChange @project_id, @doc_id, @change_id, @callback
+			
+			it "should get the document's current ranges", ->
+				@DocumentManager.getDoc
+					.calledWith(@project_id, @doc_id)
+					.should.equal true
+			
+			it "should apply the accept change to the ranges", ->
+				@RangesManager.acceptChange
+					.calledWith(@change_id, @ranges)
+					.should.equal true
+					
+			it "should save the updated ranges", ->
+				@RedisManager.updateDocument
+					.calledWith(@doc_id, @lines, @version, [], @updated_ranges)
+					.should.equal true
+			
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+		describe "when the doc is not found", ->
+			beforeEach ->
+				@DocumentManager.getDoc = sinon.stub().yields(null, null, null, null)
+				@DocumentManager.acceptChange @project_id, @doc_id, @change_id, @callback
+
+			it "should not save anything", ->
+				@RedisManager.updateDocument.called.should.equal false
+			
+			it "should call the callback with a not found error", ->
+				error = new Errors.NotFoundError("document not found: #{@doc_id}")
+				@callback.calledWith(error).should.equal true
+			
