@@ -35,6 +35,7 @@ load = (EventEmitter) ->
 		#   * Inserts by another user will not combine with inserts by the first user. If they are in the
 		#     middle of a previous insert by the first user, the original insert will be split into two.
 		constructor: (@changes = [], @comments = []) ->
+			@setIdSeed("")
 
 		getIdSeed: () ->
 			return @id_seed
