@@ -8,6 +8,8 @@ module.exports = RangesManager =
 		rangesTracker = new RangesTracker(changes, comments)
 		for update in updates
 			rangesTracker.track_changes = !!update.meta.tc
+			if !!update.meta.tc
+				rangesTracker.setIdSeed(update.meta.tc)
 			for op in update.op
 				rangesTracker.applyOp(op, { user_id: update.meta?.user_id })
 		

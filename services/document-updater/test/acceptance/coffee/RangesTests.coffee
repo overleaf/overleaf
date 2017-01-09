@@ -12,6 +12,7 @@ describe "Ranges", ->
 		before (done) ->
 			@project_id = DocUpdaterClient.randomId()
 			@user_id = DocUpdaterClient.randomId()
+			@id_seed = "587357bd35e64f6157"
 			@doc = {
 				id: DocUpdaterClient.randomId()
 				lines: ["aaa"]
@@ -25,7 +26,7 @@ describe "Ranges", ->
 				doc: @doc.id
 				op: [{ i: "456", p: 5 }]
 				v: 1
-				meta: { user_id: @user_id, tc: 1 }
+				meta: { user_id: @user_id, tc: @id_seed }
 			}, {
 				doc: @doc.id
 				op: [{ d: "12", p: 1 }]
@@ -52,6 +53,7 @@ describe "Ranges", ->
 				ranges = data.ranges
 				change = ranges.changes[0]
 				change.op.should.deep.equal { i: "456", p: 3 }
+				change.id.should.equal @id_seed + "000001"
 				change.metadata.user_id.should.equal @user_id
 				done()
 	
@@ -135,6 +137,7 @@ describe "Ranges", ->
 		before (done) ->
 			@project_id = DocUpdaterClient.randomId()
 			@user_id = DocUpdaterClient.randomId()
+			@id_seed = "587357bd35e64f6157"
 			@doc = {
 				id: DocUpdaterClient.randomId()
 				lines: ["a123aa"]
@@ -143,7 +146,7 @@ describe "Ranges", ->
 				doc: @doc.id
 				op: [{ i: "456", p: 5 }]
 				v: 0
-				meta: { user_id: @user_id, tc: 1 }
+				meta: { user_id: @user_id, tc: @id_seed }
 			}
 			MockWebApi.insertDoc @project_id, @doc.id, {
 				lines: @doc.lines
