@@ -32,7 +32,7 @@
 						on-indicator-click="toggleReviewPanel();"
 					)
 
-				div(ng-if="entry.type === 'comment'")
+				div(ng-if="entry.type === 'comment' && !(reviewPanel.commentThreads[entry.thread_id].resolved === true)")
 					comment-entry(
 						entry="entry"
 						threads="reviewPanel.commentThreads"
@@ -73,7 +73,7 @@
 						ng-click="gotoEntry(doc_id, entry)"
 					)
 
-				div(ng-if="entry.type === 'comment'")
+				div(ng-if="entry.type === 'comment' && !(reviewPanel.commentThreads[entry.thread_id].resolved === true)")
 					comment-entry(
 						entry="entry"
 						threads="reviewPanel.commentThreads"

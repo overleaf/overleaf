@@ -18,7 +18,6 @@ define [
 			scope.toggleOpenState = () ->
 				scope.state.isOpen = !scope.state.isOpen
 				if (scope.state.isOpen)
-					console.log('will call stuff')
 					scope.onOpen()
 
 			scope.resolvedCommentsPerFile = {}
