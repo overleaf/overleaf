@@ -34,6 +34,15 @@ define [
 			$scope.$apply()
 			$timeout () ->
 				$scope.$broadcast "review-panel:layout"
+		
+		ide.socket.on "accept-change", (doc_id, change_id) ->
+			console.log "Got remote accept change", doc_id, change_id
+			if doc_id != $scope.editor.open_doc_id
+				getChangeTracker(doc_id).removeChangeId(change_id)
+			else
+				$scope.$broadcast "change:accept", change_id
+			updateEntries(doc_id)
+			$scope.$apply () ->
 
 		rangesTrackers = {}
 
@@ -124,13 +133,12 @@ define [
 				.success (docs) ->
 					for doc in docs
 						if doc.id != $scope.editor.open_doc_id # this is kept up to date in real-time, don't overwrite
-							rangesTrackers[doc.id] ?= new RangesTracker()
-							rangesTrackers[doc.id].comments = doc.ranges?.comments or []
-							rangesTrackers[doc.id].changes = doc.ranges?.changes or []
+							rangesTracker = getChangeTracker(doc.id)
+							rangesTracker.comments = doc.ranges?.comments or []
+							rangesTracker.changes = doc.ranges?.changes or []
 							updateEntries(doc.id)
 					$scope.reviewPanel.overview.loading = false
 				.error (error) ->
-					console.log "loading ranges errored", error
 					$scope.reviewPanel.overview.loading = false
 		
 		updateEntries = (doc_id) ->

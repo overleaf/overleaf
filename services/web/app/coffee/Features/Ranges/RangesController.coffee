@@ -2,6 +2,7 @@ RangesManager = require "./RangesManager"
 logger = require "logger-sharelatex"
 UserInfoController = require "../User/UserInfoController"
 DocumentUpdaterHandler = require "../DocumentUpdater/DocumentUpdaterHandler"
+EditorRealTimeController = require("../Editor/EditorRealTimeController")
 
 module.exports = RangesController =
 	getAllRanges: (req, res, next) ->
@@ -25,4 +26,5 @@ module.exports = RangesController =
 		logger.log {project_id, doc_id, change_id}, "request to accept change"
 		DocumentUpdaterHandler.acceptChange project_id, doc_id, change_id, (error) ->
 			return next(error) if error?
+			EditorRealTimeController.emitToRoom project_id, "accept-change", doc_id, change_id, (err)->
 			res.send 204
