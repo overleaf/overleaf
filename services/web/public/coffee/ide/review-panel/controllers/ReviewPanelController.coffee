@@ -18,6 +18,8 @@ define [
 			openSubView: $scope.SubViews.CUR_FILE
 			overview:
 				loading: false
+			dropdown:
+				loading: false
 			commentThreads: {}
 
 		$scope.commentState =
@@ -115,8 +117,7 @@ define [
 			getChangeTracker(doc.doc_id).setIdSeed(new_id)
 			doc.setTrackChangesIdSeeds({pending: new_id, inflight: old_id})
 		
-		refreshOverviewPanel = () ->
-			$scope.reviewPanel.overview.loading = true
+		refreshRanges = () ->
 			$http.get "/project/#{$scope.project_id}/ranges"
 				.success (docs) ->
 					for doc in docs
@@ -125,11 +126,27 @@ define [
 							rangesTrackers[doc.id].comments = doc.ranges?.comments or []
 							rangesTrackers[doc.id].changes = doc.ranges?.changes or []
 							updateEntries(doc.id)
-					$scope.reviewPanel.overview.loading = false
+					# $scope.reviewPanel.overview.loading = false
 				.error (error) ->
 					console.log "loading ranges errored", error
+					# $scope.reviewPanel.overview.loading = false
+
+		refreshOverviewPanel = () ->
+			$scope.reviewPanel.overview.loading = true
+			refreshRanges()
+				.then () ->
 					$scope.reviewPanel.overview.loading = false
-		
+				.catch () ->
+					$scope.reviewPanel.overview.loading = false
+
+		$scope.refreshResolvedCommentsDropdown = () ->
+			$scope.reviewPanel.dropdown.loading = true
+			refreshRanges()
+				.then () ->
+					$scope.reviewPanel.dropdown.loading = false
+				.catch () ->
+					$scope.reviewPanel.dropdown.loading = false
+
 		updateEntries = (doc_id) ->
 			rangesTracker = getChangeTracker(doc_id)
 			entries = getDocEntries(doc_id)

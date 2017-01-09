@@ -4,6 +4,8 @@
 			entries="reviewPanel.entries"
 			threads="reviewPanel.commentThreads"
 			docs="docs"
+			on-open="refreshResolvedCommentsDropdown();"
+			is-loading="reviewPanel.dropdown.loading"
 		)
 		span.review-panel-toolbar-label(ng-click="editor.wantTrackChanges = true;", ng-if="editor.wantTrackChanges === false") Track Changes is 
 			strong off
@@ -50,7 +52,7 @@
 	.rp-entry-list(
 		ng-if="reviewPanel.subView === SubViews.OVERVIEW"
 	)
-		.rp-overview-loading(ng-if="reviewPanel.overview.loading")
+		.rp-loading(ng-if="reviewPanel.overview.loading")
 			i.fa.fa-spinner.fa-spin
 		.rp-overview-file(
 			ng-repeat="doc in docs"
@@ -249,13 +251,16 @@ script(type='text/ng-template', id='resolvedCommentsDropdownTemplate')
 		//- )
 		a.resolved-comments-toggle(
 			href
-			ng-click="state.isOpen = !state.isOpen"
+			ng-click="toggleOpenState();"
 		) 
 			i.fa.fa-inbox
 		.resolved-comments-dropdown(
 			ng-class="{ 'resolved-comments-dropdown-open' : state.isOpen }"
 		)
+			.rp-loading(ng-if="isLoading")
+				i.fa.fa-spinner.fa-spin
 			div(
+				ng-if="!isLoading"
 				ng-repeat="doc in docs"
 			)
 				resolved-comment-entry(

@@ -313,7 +313,7 @@
 	.rp-entry-actions {
 		display: flex;
 
-		.rp-entry-list .rp-state-overview & {
+		.rp-state-overview .rp-entry-list & {
 			display: none;
 		}
 	}
@@ -340,7 +340,7 @@
 			border-bottom-width: 0;
 		}
 
-		.rp-entry-list .rp-state-overview & {
+		.rp-state-overview .rp-entry-list & {
 			margin: 4px 5px;
 
 			&:first-child {
@@ -496,6 +496,11 @@
 	margin-top: 10px;
 	font-weight: @rp-semibold-weight;
 	text-align: center;
+}
+
+.rp-loading {
+	text-align: center;
+	padding: 5px;
 }
 
 .rp-nav {
