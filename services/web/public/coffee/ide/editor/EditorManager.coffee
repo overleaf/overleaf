@@ -166,14 +166,11 @@ define [
 			if want == have
 				return
 
-			console.log "Trying to set track changes to:", want
 			do tryToggle = () =>
 				saved = !doc.getInflightOp()? and !doc.getPendingOp()?
 				if saved
-					console.log "SUCCESS, changing value", want
 					doc.setTrackingChanges(want)
 					@$scope.$apply () =>
 						@$scope.editor.trackChanges = want
 				else
-					console.log "Still in flight, will try soon"
 					@_syncTimeout = setTimeout tryToggle, 100

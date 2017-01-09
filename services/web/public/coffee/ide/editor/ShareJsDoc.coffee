@@ -24,7 +24,7 @@ define [
 						return
 					if @track_changes
 						update.meta ?= {}
-						update.meta.tc = 1
+						update.meta.tc = @track_changes_id_seeds.inflight
 					@socket.emit "applyOtUpdate", @doc_id, update, (error) =>
 						return @_handleError(error) if error?
 				state: "ok"
@@ -44,6 +44,8 @@ define [
 				# ops as quickly as possible for low latency.
 				@_doc.setFlushDelay(0)
 				@trigger "remoteop", args...
+			@_doc.on "flipped_pending_to_inflight", () =>
+				@trigger "flipped_pending_to_inflight"
 			@_doc.on "error", (e) =>
 				@_handleError(e)
 
@@ -117,7 +119,7 @@ define [
 
 		attachToAce: (ace) -> @_doc.attach_ace(ace, false, window.maxDocLength)
 		detachFromAce: () -> @_doc.detach_ace?()
-	
+
 		INFLIGHT_OP_TIMEOUT: 5000 # Retry sending ops after 5 seconds without an ack
 		WAIT_FOR_CONNECTION_TIMEOUT: 500 # If we're waiting for the project to join, try again in 0.5 seconds
 		_startInflightOpTimeout: (update) ->

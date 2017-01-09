@@ -83,6 +83,9 @@ define [
 		
 		setTrackingChanges: (track_changes) ->
 			@doc.track_changes = track_changes
+		
+		setTrackChangesIdSeeds: (id_seeds) ->
+			@doc.track_changes_id_seeds = id_seeds
 
 		_bindToSocketEvents: () ->
 			@_onUpdateAppliedHandler = (update) => @_onUpdateApplied(update)
@@ -319,6 +322,8 @@ define [
 					v: version
 			@doc.on "change", (ops, oldSnapshot, msg) =>
 				@_applyOpsToRanges(ops, oldSnapshot, msg)
+			@doc.on "flipped_pending_to_inflight", () =>
+				@trigger "flipped_pending_to_inflight"
 
 		_onError: (error, meta = {}) ->
 			meta.doc_id = @doc_id
@@ -335,6 +340,8 @@ define [
 		_applyOpsToRanges: (ops = [], oldSnapshot, msg) ->
 			track_changes_as = null
 			remote_op = msg?
+			if msg.meta?.tc?
+				@ranges.setIdSeed(msg.meta.tc)
 			if remote_op and msg.meta?.tc
 				track_changes_as = msg.meta.user_id
 			else if !remote_op and @track_changes_as?

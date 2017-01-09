@@ -36,24 +36,18 @@ load = (EventEmitter) ->
 		#     middle of a previous insert by the first user, the original insert will be split into two.
 		constructor: (@changes = [], @comments = []) ->
 
-		@_increment: 0
-		@newId: () ->
-			# Generate a Mongo ObjectId
-			# Reference: https://github.com/dreampulse/ObjectId.js/blob/master/src/main/javascript/Objectid.js
-			@_pid ?= Math.floor(Math.random() * (32767))
-			@_machine ?= Math.floor(Math.random() * (16777216))
-			timestamp = Math.floor(new Date().valueOf() / 1000)
-			@_increment++
-			
-			timestamp = timestamp.toString(16)
-			machine = @_machine.toString(16)
-			pid = @_pid.toString(16)
-			increment = @_increment.toString(16)
-			
-			return '00000000'.substr(0, 8 - timestamp.length) + timestamp +
-				'000000'.substr(0, 6 - machine.length) + machine +
-				'0000'.substr(0, 4 - pid.length) + pid +
-				'000000'.substr(0, 6 - increment.length) + increment;
+		getIdSeed: () ->
+			return @id_seed
+
+		setIdSeed: (seed) ->
+			@id_seed = seed
+			@id_increment = 0
+
+		newId: () ->
+			@id_increment++
+			increment = @id_increment.toString(16)
+			id = @id_seed + '000000'.substr(0, 6 - increment.length) + increment;
+			return id
 		
 		getComment: (comment_id) ->
 			comment = null
@@ -99,7 +93,7 @@ load = (EventEmitter) ->
 		addComment: (op, metadata) ->
 			# TODO: Don't allow overlapping comments?
 			@comments.push comment = {
-				id: RangesTracker.newId()
+				id: @newId()
 				op: # Copy because we'll modify in place
 					c: op.c
 					p: op.p
@@ -390,7 +384,7 @@ load = (EventEmitter) ->
 
 		_addOp: (op, metadata) ->
 			change = {
-				id: RangesTracker.newId()
+				id: @newId()
 				op: op
 				metadata: metadata
 			}

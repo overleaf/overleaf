@@ -75,12 +75,17 @@ define [
 			if view == $scope.SubViews.OVERVIEW
 				refreshOverviewPanel()
 
-		$scope.$watch "editor.sharejs_doc", (doc) ->
+		$scope.$watch "editor.sharejs_doc", (doc, old_doc) ->
 			return if !doc?
 			# The open doc range tracker is kept up to date in real-time so
 			# replace any outdated info with this
 			rangesTrackers[doc.doc_id] = doc.ranges
 			$scope.reviewPanel.rangesTracker = rangesTrackers[doc.doc_id]
+			if old_doc?
+				old_doc.off "flipped_pending_to_inflight"
+			doc.on "flipped_pending_to_inflight", () ->
+				regenerateTrackChangesId(doc)
+			regenerateTrackChangesId(doc)
 
 		$scope.$watch (() ->
 			entries = $scope.reviewPanel.entries[$scope.editor.open_doc_id] or {}
@@ -93,6 +98,20 @@ define [
 			$timeout () ->
 				$scope.$broadcast "review-panel:toggle"
 				$scope.$broadcast "review-panel:layout"
+		
+		regenerateTrackChangesId = (doc) ->
+			old_id = getChangeTracker(doc.doc_id).getIdSeed()
+			# Generate a the first 18 characters of Mongo ObjectId, leaving 6 for the increment part
+			# Reference: https://github.com/dreampulse/ObjectId.js/blob/master/src/main/javascript/Objectid.js
+			pid = Math.floor(Math.random() * (32767)).toString(16)
+			machine = Math.floor(Math.random() * (16777216)).toString(16)
+			timestamp = Math.floor(new Date().valueOf() / 1000).toString(16)
+			new_id = '00000000'.substr(0, 8 - timestamp.length) + timestamp +
+				'000000'.substr(0, 6 - machine.length) + machine +
+				'0000'.substr(0, 4 - pid.length) + pid
+			
+			getChangeTracker(doc.doc_id).setIdSeed(new_id)
+			doc.setTrackChangesIdSeeds({pending: new_id, inflight: old_id})
 		
 		refreshOverviewPanel = () ->
 			$scope.reviewPanel.overview.loading = true

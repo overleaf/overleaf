@@ -266,6 +266,8 @@ class Doc
     @pendingOp = null
     @pendingCallbacks = []
 
+    @emit "flipped_pending_to_inflight"
+
     #console.log "SENDING OP TO SERVER", @inflightOp, @version
     @connection.send {doc:@name, op:@inflightOp, v:@version}
 
