@@ -137,15 +137,21 @@ module.exports = DocumentUpdaterHandler =
 				logger.error project_id:project_id, doc_id:doc_id, url: url, "doc updater returned a non-success status code: #{res.statusCode}"
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
-	getNumberOfDocsInMemory : (callback)->
-		request.get "#{settings.apis.documentupdater.url}/total", (err, req, body)->
-			try
-				body = JSON.parse body
-			catch err
-				logger.err err:err, "error parsing response from doc updater about the total number of docs"
-			callback(err, body?.total)
-
-
+	acceptChange: (project_id, doc_id, change_id, callback = (error) ->) ->
+		timer = new metrics.Timer("accept-change")
+		url = "#{settings.apis.documentupdater.url}/project/#{project_id}/doc/#{doc_id}/change/#{change_id}/accept"
+		logger.log {project_id, doc_id, change_id}, "accepting change in document updater"
+		request.post url, (error, res, body)->
+			timer.done()
+			if error?
+				logger.error {err:error, project_id, doc_id, change_id}, "error accepting change in doc updater"
+				return callback(error)
+			if res.statusCode >= 200 and res.statusCode < 300
+				logger.log {project_id, doc_id, change_id}, "accepted change in document updater"
+				return callback(null)
+			else
+				logger.error {project_id, doc_id, change_id}, "doc updater returned a non-success status code: #{res.statusCode}"
+				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
 PENDINGUPDATESKEY = "PendingUpdates"
 DOCLINESKEY = "doclines"
