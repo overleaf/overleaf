@@ -5,9 +5,6 @@ define [
 		restrict: "E"
 		templateUrl: "resolvedCommentEntryTemplate"
 		scope:
-			entryId: "="
-			threadId: "="
 			thread: "="
-			doc: "="
 			onUnresolve: "&"
 			onDelete: "&"
