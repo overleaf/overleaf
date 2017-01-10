@@ -3,7 +3,7 @@ SandboxedModule = require('sandboxed-module')
 assert = require('assert')
 sinon = require('sinon')
 path = require "path"
-modulePath = path.join __dirname, "../../../../app/js/Features/Ranges/RangesManager"
+modulePath = path.join __dirname, "../../../../app/js/Features/TrackChanges/RangesManager"
 expect = require("chai").expect
 
 describe "RangesManager", ->
@@ -13,7 +13,7 @@ describe "RangesManager", ->
 			"../Docstore/DocstoreManager": @DocstoreManager = {}
 			"../User/UserInfoManager": @UserInfoManager = {}
 
-	describe "getAllRangesUsers", ->
+	describe "getAllChangesUsers", ->
 		beforeEach ->
 			@project_id = "mock-project-id"
 			@user_id1 = "mock-user-id-1"
@@ -45,11 +45,11 @@ describe "RangesManager", ->
 			@RangesManager.getAllRanges = sinon.stub().yields(null, @docs)
 
 		it "should return an array of unique users", (done) ->
-			@RangesManager.getAllRangesUsers @project_id, (error, users) =>
+			@RangesManager.getAllChangesUsers @project_id, (error, users) =>
 				users.should.deep.equal [{"mock": "user-1"}, {"mock": "user-2"}]
 				done()
 
 		it "should only call getPersonalInfo once for each user", (done) ->
-			@RangesManager.getAllRangesUsers @project_id, (error, users) =>
+			@RangesManager.getAllChangesUsers @project_id, (error, users) =>
 				@UserInfoManager.getPersonalInfo.calledTwice.should.equal true
 				done()

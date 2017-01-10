@@ -40,7 +40,7 @@ AuthorizationMiddlewear = require('./Features/Authorization/AuthorizationMiddlew
 BetaProgramController = require('./Features/BetaProgram/BetaProgramController')
 AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 AnnouncementsController = require("./Features/Announcements/AnnouncementsController")
-RangesController = require("./Features/Ranges/RangesController")
+TrackChangesController = require("./Features/TrackChanges/TrackChangesController")
 CommentsController = require "./Features/Comments/CommentsController"
 
 logger = require("logger-sharelatex")
@@ -177,9 +177,9 @@ module.exports = class Router
 		webRouter.get  "/project/:Project_id/doc/:doc_id/diff", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.proxyToHistoryApi
 		webRouter.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.proxyToHistoryApi
 
-		webRouter.get "/project/:project_id/ranges", AuthorizationMiddlewear.ensureUserCanReadProject, RangesController.getAllRanges
-		webRouter.get "/project/:project_id/ranges/users", AuthorizationMiddlewear.ensureUserCanReadProject, RangesController.getAllRangesUsers
-		webRouter.post "/project/:project_id/doc/:doc_id/changes/:change_id/accept", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, RangesController.acceptChange
+		webRouter.get "/project/:project_id/ranges", AuthorizationMiddlewear.ensureUserCanReadProject, TrackChangesController.getAllRanges
+		webRouter.get "/project/:project_id/changes/users", AuthorizationMiddlewear.ensureUserCanReadProject, TrackChangesController.getAllChangesUsers
+		webRouter.post "/project/:project_id/doc/:doc_id/changes/:change_id/accept", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, TrackChangesController.acceptChange
 
 		webRouter.get  '/Project/:Project_id/download/zip', AuthorizationMiddlewear.ensureUserCanReadProject, ProjectDownloadsController.downloadProject
 		webRouter.get  '/project/download/zip', AuthorizationMiddlewear.ensureUserCanReadMultipleProjects, ProjectDownloadsController.downloadMultipleProjects

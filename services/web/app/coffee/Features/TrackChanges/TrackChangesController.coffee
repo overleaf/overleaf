@@ -4,7 +4,7 @@ UserInfoController = require "../User/UserInfoController"
 DocumentUpdaterHandler = require "../DocumentUpdater/DocumentUpdaterHandler"
 EditorRealTimeController = require("../Editor/EditorRealTimeController")
 
-module.exports = RangesController =
+module.exports = TrackChangesController =
 	getAllRanges: (req, res, next) ->
 		project_id = req.params.project_id
 		logger.log {project_id}, "request for project ranges"
@@ -13,10 +13,10 @@ module.exports = RangesController =
 			docs = ({id: d._id, ranges: d.ranges} for d in docs)
 			res.json docs
 	
-	getAllRangesUsers: (req, res, next) ->
+	getAllChangesUsers: (req, res, next) ->
 		project_id = req.params.project_id
 		logger.log {project_id}, "request for project range users"
-		RangesManager.getAllRangesUsers project_id, (error, users) ->
+		RangesManager.getAllChangesUsers project_id, (error, users) ->
 			return next(error) if error?
 			users = (UserInfoController.formatPersonalInfo(user) for user in users)
 			res.json users
@@ -28,3 +28,4 @@ module.exports = RangesController =
 			return next(error) if error?
 			EditorRealTimeController.emitToRoom project_id, "accept-change", doc_id, change_id, (err)->
 			res.send 204
+

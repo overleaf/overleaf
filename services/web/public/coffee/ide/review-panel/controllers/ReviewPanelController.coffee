@@ -332,7 +332,7 @@ define [
 				return
 			_refreshingRangeUsers = true
 
-			$http.get "/project/#{$scope.project_id}/ranges/users"
+			$http.get "/project/#{$scope.project_id}/changes/users"
 				.success (users) ->
 					_refreshingRangeUsers = false
 					$scope.users = {}

@@ -9,7 +9,7 @@ module.exports = RangesManager =
 			return callback(error) if error?
 			DocstoreManager.getAllRanges project_id, callback
 	
-	getAllRangesUsers: (project_id, callback = (error, users) ->) ->
+	getAllChangesUsers: (project_id, callback = (error, users) ->) ->
 		user_ids = {}
 		RangesManager.getAllRanges project_id, (error, docs) ->
 			return callback(error) if error?
