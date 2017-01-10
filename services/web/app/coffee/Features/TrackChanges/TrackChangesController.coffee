@@ -3,6 +3,7 @@ logger = require "logger-sharelatex"
 UserInfoController = require "../User/UserInfoController"
 DocumentUpdaterHandler = require "../DocumentUpdater/DocumentUpdaterHandler"
 EditorRealTimeController = require("../Editor/EditorRealTimeController")
+TrackChangesManager = require "./TrackChangesManager"
 
 module.exports = TrackChangesController =
 	getAllRanges: (req, res, next) ->
@@ -29,3 +30,11 @@ module.exports = TrackChangesController =
 			EditorRealTimeController.emitToRoom project_id, "accept-change", doc_id, change_id, (err)->
 			res.send 204
 
+	toggleTrackChanges: (req, res, next) ->
+		{project_id} = req.params
+		track_changes_on = !!req.body.on
+		logger.log {project_id, track_changes_on}, "request to toggle track changes"
+		TrackChangesManager.toggleTrackChanges project_id, track_changes_on, (error) ->
+			return next(error) if error?
+			EditorRealTimeController.emitToRoom project_id, "toggle-track-changes", track_changes_on, (err)->
+			res.send 204

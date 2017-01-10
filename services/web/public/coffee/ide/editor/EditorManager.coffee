@@ -11,7 +11,7 @@ define [
 				open_doc_name: null
 				opening: true
 				trackChanges: false
-				wantTrackChanges: false
+				wantTrackChanges: window.trackChangesEnabled
 			}
 
 			@$scope.$on "entity:selected", (event, entity) =>

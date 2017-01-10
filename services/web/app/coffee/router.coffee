@@ -180,6 +180,7 @@ module.exports = class Router
 		webRouter.get "/project/:project_id/ranges", AuthorizationMiddlewear.ensureUserCanReadProject, TrackChangesController.getAllRanges
 		webRouter.get "/project/:project_id/changes/users", AuthorizationMiddlewear.ensureUserCanReadProject, TrackChangesController.getAllChangesUsers
 		webRouter.post "/project/:project_id/doc/:doc_id/changes/:change_id/accept", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, TrackChangesController.acceptChange
+		webRouter.post "/project/:project_id/track_changes", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, TrackChangesController.toggleTrackChanges
 
 		webRouter.get  '/Project/:Project_id/download/zip', AuthorizationMiddlewear.ensureUserCanReadProject, ProjectDownloadsController.downloadProject
 		webRouter.get  '/project/download/zip', AuthorizationMiddlewear.ensureUserCanReadMultipleProjects, ProjectDownloadsController.downloadMultipleProjects

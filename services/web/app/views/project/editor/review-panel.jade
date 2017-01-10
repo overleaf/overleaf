@@ -9,11 +9,11 @@
 			on-delete="deleteComment(entryId, threadId);"
 			is-loading="reviewPanel.dropdown.loading"
 		)
-		span.review-panel-toolbar-label(ng-click="editor.wantTrackChanges = true;", ng-if="editor.wantTrackChanges === false") Track Changes is 
+		span.review-panel-toolbar-label(ng-click="toggleTrackChanges(true)", ng-if="editor.wantTrackChanges === false") Track Changes is 
 			strong off
-		span.review-panel-toolbar-label(ng-click="editor.wantTrackChanges = false;", ng-if="editor.wantTrackChanges === true") Track Changes is 
+		span.review-panel-toolbar-label(ng-click="toggleTrackChanges(false)", ng-if="editor.wantTrackChanges === true") Track Changes is 
 			strong on
-		review-panel-toggle(ng-if="editor.wantTrackChanges == editor.trackChanges", ng-model="editor.wantTrackChanges")
+		review-panel-toggle(ng-if="editor.wantTrackChanges == editor.trackChanges", ng-model="editor.wantTrackChanges", on-toggle="toggleTrackChanges")
 		span.review-panel-toolbar-spinner(ng-if="editor.wantTrackChanges != editor.trackChanges")
 			i.fa.fa-spin.fa-spinner
 
