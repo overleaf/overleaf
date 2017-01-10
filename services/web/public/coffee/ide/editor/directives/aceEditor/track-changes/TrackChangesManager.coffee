@@ -179,15 +179,12 @@ define [
 		removeCommentId: (comment_id) ->
 			@rangesTracker.removeCommentId(comment_id)
 
-		RESOLVED_THREADS: {}
 		resolveCommentByThreadId: (thread_id) ->
-			@RESOLVED_THREADS[thread_id] = true
 			for comment in @rangesTracker?.comments or []
 				if comment.op.t == thread_id
 					@_onCommentRemoved(comment)
 			
 		unresolveCommentByThreadId: (thread_id) ->
-			@RESOLVED_THREADS[thread_id] = false
 			for comment in @rangesTracker?.comments or []
 				if comment.op.t == thread_id
 					@_onCommentAdded(comment)
@@ -332,7 +329,7 @@ define [
 			@broadcastChange()
 		
 		_onCommentAdded: (comment) ->
-			if @RESOLVED_THREADS[comment.op.t]
+			if @rangesTracker.resolvedThreadIds[comment.op.t]
 				# Comment is resolved so shouldn't be displayed.
 				return
 			if !@changeIdToMarkerIdMap[comment.id]?

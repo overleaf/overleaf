@@ -35,7 +35,7 @@ load = (EventEmitter) ->
 		#   * Inserts by another user will not combine with inserts by the first user. If they are in the
 		#     middle of a previous insert by the first user, the original insert will be split into two.
 		constructor: (@changes = [], @comments = []) ->
-			@setIdSeed("")
+			@setIdSeed(RangesTracker.generateIdSeed())
 
 		getIdSeed: () ->
 			return @id_seed
@@ -43,6 +43,19 @@ load = (EventEmitter) ->
 		setIdSeed: (seed) ->
 			@id_seed = seed
 			@id_increment = 0
+		
+		@generateIdSeed: () ->
+			# Generate a the first 18 characters of Mongo ObjectId, leaving 6 for the increment part
+			# Reference: https://github.com/dreampulse/ObjectId.js/blob/master/src/main/javascript/Objectid.js
+			pid = Math.floor(Math.random() * (32767)).toString(16)
+			machine = Math.floor(Math.random() * (16777216)).toString(16)
+			timestamp = Math.floor(new Date().valueOf() / 1000).toString(16)
+			return '00000000'.substr(0, 8 - timestamp.length) + timestamp +
+				'000000'.substr(0, 6 - machine.length) + machine +
+				'0000'.substr(0, 4 - pid.length) + pid
+		
+		@generateId: () ->
+			@generateIdSeed() + "000001"
 
 		newId: () ->
 			@id_increment++
