@@ -69,7 +69,7 @@ define [
 		$scope.reviewPanelEventsBridge.on "aceScrollbarVisibilityChanged", (isVisible, scrollbarWidth) ->
 			scrollbar = {isVisible, scrollbarWidth}
 			updateScrollbar()
-		
+
 		updateScrollbar = () ->
 			if scrollbar.isVisible and $scope.reviewPanel.subView == $scope.SubViews.CUR_FILE
 				$reviewPanelEl.css "right", "#{ scrollbar.scrollbarWidth }px"
@@ -222,9 +222,6 @@ define [
 			$scope.$broadcast "review-panel:recalculate-screen-positions"
 			$scope.$broadcast "review-panel:layout"
 
-		$scope.$on "comment:removed", (comment) ->
-			console.log comment
-
 		$scope.acceptChange = (entry_id) ->
 			$http.post "/project/#{$scope.project_id}/doc/#{$scope.editor.open_doc_id}/changes/#{entry_id}/accept", {_csrf: window.csrfToken}
 			$scope.$broadcast "change:accept", entry_id
@@ -274,7 +271,6 @@ define [
 			$scope.$broadcast "review-panel:layout"
 
 		$scope.resolveComment = (entry, entry_id) ->
-			entry.showWhenResolved = false
 			entry.focused = false
 			$http.post "/project/#{$scope.project_id}/thread/#{entry.thread_id}/resolve", {_csrf: window.csrfToken}
 			_onCommentResolved(entry.thread_id, ide.$scope.user)
@@ -298,19 +294,14 @@ define [
 			delete thread.resolved_at
 			delete resolvedThreadIds[thread_id]
 			$scope.$broadcast "comment:unresolve_thread", thread_id
+
+		_onCommentDeleted = (thread_id) ->
+			delete $scope.reviewPanel.commentThreads[thread_id]
 		
-		$scope.deleteComment = (entry_id) ->
+		$scope.deleteComment = (entry_id, thread_id) ->
+			console.log thread_id
+			_onCommentDeleted(thread_id)
 			$scope.$broadcast "comment:remove", entry_id
-
-		$scope.showThread = (entry) ->
-			entry.showWhenResolved = true
-			$timeout () ->
-				$scope.$broadcast "review-panel:layout"
-
-		$scope.hideThread = (entry) ->
-			entry.showWhenResolved = false
-			$timeout () ->
-				$scope.$broadcast "review-panel:layout"
 
 		$scope.setSubView = (subView) -> 
 			$scope.reviewPanel.subView = subView

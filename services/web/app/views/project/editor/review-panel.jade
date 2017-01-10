@@ -6,7 +6,7 @@
 			docs="docs"
 			on-open="refreshResolvedCommentsDropdown();"
 			on-unresolve="unresolveComment(threadId);"
-			on-delete="deleteComment(entryId);"
+			on-delete="deleteComment(entryId, threadId);"
 			is-loading="reviewPanel.dropdown.loading"
 		)
 		span.review-panel-toolbar-label(ng-click="editor.wantTrackChanges = true;", ng-if="editor.wantTrackChanges === false") Track Changes is 
@@ -180,7 +180,7 @@ script(type='text/ng-template', id='resolvedCommentEntryTemplate')
 		div
 			.rp-resolved-comment-context
 				| Quoted text on&nbsp;
-				span.rp-resolved-comment-context-file {{ doc.doc.name }}
+				span.rp-resolved-comment-context-file {{ thread.docName }}
 				p.rp-resolved-comment-context-quote {{ thread.content }}
 			.rp-comment(
 				ng-repeat="comment in thread.messages track by comment.id"
@@ -205,12 +205,12 @@ script(type='text/ng-template', id='resolvedCommentEntryTemplate')
 		.rp-entry-actions
 			a.rp-entry-button(
 				href
-				ng-click="onUnresolve({ 'threadId': threadId });"
+				ng-click="onUnresolve({ 'threadId': thread.threadId });"
 			) 
 				| &nbsp;Re-open
 			a.rp-entry-button(
 				href
-				ng-click="onDelete({ 'entryId': entryId });"
+				ng-click="onDelete({ 'entryId': thread.entryId, 'threadId': thread.threadId });"
 			)
 				| &nbsp;Delete
 
@@ -269,15 +269,13 @@ script(type='text/ng-template', id='resolvedCommentsDropdownTemplate')
 				i.fa.fa-spinner.fa-spin
 			div(
 				ng-if="!isLoading"
-				ng-repeat="doc in docs"
 			)
 				resolved-comment-entry(
-					ng-repeat="thread in resolvedCommentsPerFile[doc.doc.id]"
-					entry-id="thread.entryId"
-					thread-id="thread.threadId"
+					ng-repeat="thread in resolvedComments"
 					thread="thread"
-					doc="doc"
 					on-unresolve="handleUnresolve(threadId);"
-					on-delete="handleDelete(entryId);"
+					on-delete="handleDelete(entryId, threadId);"
 				)
+				.rp-loading(ng-if="!resolvedComments.length")
+					| No resolved threads.
 			

@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.directive "resolvedCommentsDropdown", () ->
+	App.directive "resolvedCommentsDropdown", (_) ->
 		restrict: "E"
 		templateUrl: "resolvedCommentsDropdownTemplate"
 		scope: 
@@ -23,28 +23,38 @@ define [
 					filterResolvedComments()
 					scope.onOpen()
 
-			scope.resolvedCommentsPerFile = {}
+			scope.resolvedComments = []
 
 			scope.handleUnresolve = (threadId) ->
 				scope.onUnresolve({ threadId })
 				filterResolvedComments()
 
-			scope.handleDelete = (entryId) ->
-				scope.onDelete({ entryId })
+			scope.handleDelete = (entryId, threadId) ->
+				scope.onDelete({ entryId, threadId })
 				filterResolvedComments()
 
+			getDocNameById = (docId) ->
+				doc = _.find(scope.docs, (doc) -> doc.doc.id = docId)
+				if doc?
+					return doc.path
+				else 
+					return null
 
 			filterResolvedComments = () ->
-				scope.resolvedCommentsPerFile = {}
+				scope.resolvedComments = []
 
-				for fileId, fileEntries of scope.entries
-					scope.resolvedCommentsPerFile[fileId] = {}
-					for entryId, entry of fileEntries
+				for docId, docEntries of scope.entries
+					for entryId, entry of docEntries
 						if entry.type == "comment" and scope.threads[entry.thread_id]?.resolved?
-							scope.resolvedCommentsPerFile[fileId][entryId] = angular.copy scope.threads[entry.thread_id]
-							scope.resolvedCommentsPerFile[fileId][entryId].content = entry.content
-							scope.resolvedCommentsPerFile[fileId][entryId].threadId = entry.thread_id
-							scope.resolvedCommentsPerFile[fileId][entryId].entryId = entryId
+							resolvedComment = angular.copy scope.threads[entry.thread_id]
+
+							resolvedComment.content = entry.content
+							resolvedComment.threadId = entry.thread_id
+							resolvedComment.entryId = entryId
+							resolvedComment.docId = docId
+							resolvedComment.docName = getDocNameById(docId)
+
+							scope.resolvedComments.push(resolvedComment)
 
 			scope.$watchCollection "entries", filterResolvedComments
 			scope.$watchCollection "threads", filterResolvedComments
