@@ -39,7 +39,6 @@ define [
 				$scope.$broadcast "review-panel:layout"
 		
 		ide.socket.on "accept-change", (doc_id, change_id) ->
-			console.log "Got remote accept change", doc_id, change_id
 			if doc_id != $scope.editor.open_doc_id
 				getChangeTracker(doc_id).removeChangeId(change_id)
 			else
