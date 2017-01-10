@@ -231,6 +231,9 @@ define [
 			$scope.$broadcast "review-panel:recalculate-screen-positions"
 			$scope.$broadcast "review-panel:layout"
 
+		$scope.$on "comment:removed", (comment) ->
+			console.log comment
+
 		$scope.acceptChange = (entry_id) ->
 			$http.post "/project/#{$scope.project_id}/doc/#{$scope.editor.open_doc_id}/changes/#{entry_id}/accept", {_csrf: window.csrfToken}
 			$scope.$broadcast "change:accept", entry_id

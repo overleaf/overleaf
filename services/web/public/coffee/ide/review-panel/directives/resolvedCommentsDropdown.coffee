@@ -10,6 +10,7 @@ define [
 			docs		: "="
 			onOpen		: "&"
 			onUnresolve	: "&"
+			onDelete	: "&"
 			isLoading	: "="
 
 		link: (scope, element, attrs) ->
@@ -19,6 +20,7 @@ define [
 			scope.toggleOpenState = () ->
 				scope.state.isOpen = !scope.state.isOpen
 				if (scope.state.isOpen)
+					filterResolvedComments()
 					scope.onOpen()
 
 			scope.resolvedCommentsPerFile = {}
@@ -26,6 +28,11 @@ define [
 			scope.handleUnresolve = (threadId) ->
 				scope.onUnresolve({ threadId })
 				filterResolvedComments()
+
+			scope.handleDelete = (entryId) ->
+				scope.onDelete({ entryId })
+				filterResolvedComments()
+
 
 			filterResolvedComments = () ->
 				scope.resolvedCommentsPerFile = {}
@@ -37,6 +44,7 @@ define [
 							scope.resolvedCommentsPerFile[fileId][entryId] = angular.copy scope.threads[entry.thread_id]
 							scope.resolvedCommentsPerFile[fileId][entryId].content = entry.content
 							scope.resolvedCommentsPerFile[fileId][entryId].threadId = entry.thread_id
+							scope.resolvedCommentsPerFile[fileId][entryId].entryId = entryId
 
 			scope.$watchCollection "entries", filterResolvedComments
 			scope.$watchCollection "threads", filterResolvedComments
