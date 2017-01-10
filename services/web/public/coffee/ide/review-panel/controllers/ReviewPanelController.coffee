@@ -11,7 +11,7 @@ define [
 			CUR_FILE : "cur_file"
 			OVERVIEW : "overview"
 
-		window.reviewPanel = $scope.reviewPanel =
+		$scope.reviewPanel =
 			entries: {}
 			hasEntries: false
 			subView: $scope.SubViews.CUR_FILE
