@@ -6,7 +6,7 @@
 			docs="docs"
 			on-open="refreshResolvedCommentsDropdown();"
 			on-unresolve="unresolveComment(threadId);"
-			on-delete="deleteComment(entryId);"
+			on-delete="deleteComment(entryId, threadId);"
 			is-loading="reviewPanel.dropdown.loading"
 		)
 		span.review-panel-toolbar-label(ng-click="editor.wantTrackChanges = true;", ng-if="editor.wantTrackChanges === false") Track Changes is 
@@ -210,7 +210,7 @@ script(type='text/ng-template', id='resolvedCommentEntryTemplate')
 				| &nbsp;Re-open
 			a.rp-entry-button(
 				href
-				ng-click="onDelete({ 'entryId': entryId });"
+				ng-click="onDelete({ 'entryId': entryId, 'threadId': threadId });"
 			)
 				| &nbsp;Delete
 
@@ -278,6 +278,6 @@ script(type='text/ng-template', id='resolvedCommentsDropdownTemplate')
 					thread="thread"
 					doc="doc"
 					on-unresolve="handleUnresolve(threadId);"
-					on-delete="handleDelete(entryId);"
+					on-delete="handleDelete(entryId, threadId);"
 				)
 			

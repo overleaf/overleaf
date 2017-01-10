@@ -29,8 +29,8 @@ define [
 				scope.onUnresolve({ threadId })
 				filterResolvedComments()
 
-			scope.handleDelete = (entryId) ->
-				scope.onDelete({ entryId })
+			scope.handleDelete = (entryId, threadId) ->
+				scope.onDelete({ entryId, threadId })
 				filterResolvedComments()
 
 
