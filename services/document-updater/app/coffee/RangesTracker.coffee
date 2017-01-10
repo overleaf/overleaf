@@ -55,7 +55,7 @@ load = (EventEmitter) ->
 				'0000'.substr(0, 4 - pid.length) + pid
 		
 		@generateId: () ->
-			@generateId() + "000001"
+			@generateIdSeed() + "000001"
 
 		newId: () ->
 			@id_increment++
