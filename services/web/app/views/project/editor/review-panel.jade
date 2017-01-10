@@ -24,6 +24,7 @@
 		.rp-entry-list-inner
 			.rp-entry-wrapper(
 				ng-repeat="(entry_id, entry) in reviewPanel.entries[editor.open_doc_id]"
+				ng-if="!(entry.type === 'comment' && reviewPanel.commentThreads[entry.thread_id].resolved === true)"
 			)
 				div(ng-if="entry.type === 'insert' || entry.type === 'delete'")
 					change-entry(
@@ -34,7 +35,7 @@
 						on-indicator-click="toggleReviewPanel();"
 					)
 
-				div(ng-if="entry.type === 'comment' && !(reviewPanel.commentThreads[entry.thread_id].resolved === true)")
+				div(ng-if="entry.type === 'comment'")
 					comment-entry(
 						entry="entry"
 						threads="reviewPanel.commentThreads"
@@ -66,6 +67,7 @@
 				| {{ doc.path }}
 			.rp-entry-wrapper(
 				ng-repeat="(entry_id, entry) in reviewPanel.entries[doc.doc.id] | orderOverviewEntries"
+				ng-if="!(entry.type === 'comment' && reviewPanel.commentThreads[entry.thread_id].resolved === true)"
 			)
 				div(ng-if="entry.type === 'insert' || entry.type === 'delete'")
 					change-entry(
@@ -75,7 +77,7 @@
 						ng-click="gotoEntry(doc_id, entry)"
 					)
 
-				div(ng-if="entry.type === 'comment' && !(reviewPanel.commentThreads[entry.thread_id].resolved === true)")
+				div(ng-if="entry.type === 'comment'")
 					comment-entry(
 						entry="entry"
 						threads="reviewPanel.commentThreads"
