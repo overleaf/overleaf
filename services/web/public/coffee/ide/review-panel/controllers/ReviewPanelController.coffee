@@ -11,7 +11,7 @@ define [
 			CUR_FILE : "cur_file"
 			OVERVIEW : "overview"
 
-		$scope.reviewPanel =
+		window.reviewPanel = $scope.reviewPanel =
 			entries: {}
 			hasEntries: false
 			subView: $scope.SubViews.CUR_FILE
@@ -53,13 +53,16 @@ define [
 			_onCommentReopened(thread_id)
 
 		rangesTrackers = {}
+		resolvedThreadIds = {}
 
 		getDocEntries = (doc_id) ->
 			$scope.reviewPanel.entries[doc_id] ?= {}
 			return $scope.reviewPanel.entries[doc_id]
 
 		getChangeTracker = (doc_id) ->
-			rangesTrackers[doc_id] ?= new RangesTracker()
+			if !rangesTrackers[doc_id]?
+				rangesTrackers[doc_id] = new RangesTracker()
+				rangesTrackers[doc_id].resolvedThreadIds = resolvedThreadIds
 			return rangesTrackers[doc_id]
 
 		scrollbar = {}
@@ -94,6 +97,7 @@ define [
 			# The open doc range tracker is kept up to date in real-time so
 			# replace any outdated info with this
 			rangesTrackers[doc.doc_id] = doc.ranges
+			rangesTrackers[doc.doc_id].resolvedThreadIds = resolvedThreadIds
 			$scope.reviewPanel.rangesTracker = rangesTrackers[doc.doc_id]
 			if old_doc?
 				old_doc.off "flipped_pending_to_inflight"
@@ -112,23 +116,10 @@ define [
 			$timeout () ->
 				$scope.$broadcast "review-panel:toggle"
 				$scope.$broadcast "review-panel:layout"
-		
-		generatePartialMongoId = () ->
-			# Generate a the first 18 characters of Mongo ObjectId, leaving 6 for the increment part
-			# Reference: https://github.com/dreampulse/ObjectId.js/blob/master/src/main/javascript/Objectid.js
-			pid = Math.floor(Math.random() * (32767)).toString(16)
-			machine = Math.floor(Math.random() * (16777216)).toString(16)
-			timestamp = Math.floor(new Date().valueOf() / 1000).toString(16)
-			return '00000000'.substr(0, 8 - timestamp.length) + timestamp +
-				'000000'.substr(0, 6 - machine.length) + machine +
-				'0000'.substr(0, 4 - pid.length) + pid
-		
-		generateFullMongoId = () ->
-			return generatePartialMongoId() + "000000"
-		
+
 		regenerateTrackChangesId = (doc) ->
 			old_id = getChangeTracker(doc.doc_id).getIdSeed()
-			new_id = generatePartialMongoId()
+			new_id = RangesTracker.generateIdSeed()
 			getChangeTracker(doc.doc_id).setIdSeed(new_id)
 			doc.setTrackChangesIdSeeds({pending: new_id, inflight: old_id})
 		
@@ -247,7 +238,7 @@ define [
 				$scope.$broadcast "review-panel:layout"
 		
 		$scope.submitNewComment = (content) ->
-			thread_id = generateFullMongoId()
+			thread_id = RangesTracker.generateId()
 			$scope.$broadcast "comment:add", thread_id
 			$http.post("/project/#{$scope.project_id}/thread/#{thread_id}/messages", {content, _csrf: window.csrfToken})
 				.error (error) ->
@@ -297,6 +288,7 @@ define [
 			thread.resolved = true
 			thread.resolved_by_user = formatUser(user)
 			thread.resolved_at = new Date()
+			resolvedThreadIds[thread_id] = true
 			$scope.$broadcast "comment:resolve_thread", thread_id
 		
 		_onCommentReopened = (thread_id) ->
@@ -304,6 +296,7 @@ define [
 			delete thread.resolved
 			delete thread.resolved_by_user
 			delete thread.resolved_at
+			delete resolvedThreadIds[thread_id]
 			$scope.$broadcast "comment:unresolve_thread", thread_id
 		
 		$scope.deleteComment = (entry_id) ->
@@ -351,12 +344,15 @@ define [
 		refreshThreads = () ->
 			$http.get "/project/#{$scope.project_id}/threads"
 				.success (threads) ->
+					for thread_id, _ of resolvedThreadIds
+						delete resolvedThreadIds[thread_id]
 					for thread_id, thread of threads
 						for comment in thread.messages
 							formatComment(comment)
 						if thread.resolved_by_user?
 							$scope.$broadcast "comment:resolve_thread", thread_id
 							thread.resolved_by_user = formatUser(thread.resolved_by_user)
+							resolvedThreadIds[thread_id] = true
 					$scope.reviewPanel.commentThreads = threads
 
 		refreshThreads()
