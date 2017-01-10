@@ -2,6 +2,9 @@ RangesTracker = require "./RangesTracker"
 logger = require "logger-sharelatex"
 
 module.exports = RangesManager =
+	MAX_COMMENTS: 500
+	MAX_CHANGES: 500
+
 	applyUpdate: (project_id, doc_id, entries = {}, updates = [], callback = (error, new_entries) ->) ->
 		{changes, comments} = entries
 		logger.log {changes, comments, updates}, "applying updates to ranges"
@@ -12,6 +15,9 @@ module.exports = RangesManager =
 				rangesTracker.setIdSeed(update.meta.tc)
 			for op in update.op
 				rangesTracker.applyOp(op, { user_id: update.meta?.user_id })
+		
+		if rangesTracker.changes?.length > RangesManager.MAX_CHANGES or rangesTracker.comments?.length > RangesManager.MAX_COMMENTS
+			return callback new Error("too many comments or tracked changes")
 
 		response = RangesManager._getRanges rangesTracker
 		logger.log {response}, "applied updates to ranges"

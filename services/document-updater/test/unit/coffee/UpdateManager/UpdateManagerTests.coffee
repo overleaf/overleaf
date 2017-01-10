@@ -165,6 +165,7 @@ describe "UpdateManager", ->
 			@RangesManager.applyUpdate = sinon.stub().yields(null, @updated_ranges)
 			@ShareJsUpdateManager.applyUpdate = sinon.stub().yields(null, @updatedDocLines, @version, @appliedOps)
 			@RedisManager.updateDocument = sinon.stub().yields()
+			@WebRedisManager.sendData = sinon.stub()
 			@HistoryManager.pushUncompressedHistoryOps = sinon.stub().callsArg(3)
 		
 		describe "normally", ->
@@ -206,6 +207,25 @@ describe "UpdateManager", ->
 				
 				# \uFFFD is 'replacement character'
 				@update.op[0].i.should.equal "\uFFFD\uFFFD"
+		
+		describe "with an error", ->
+			beforeEach ->
+				@error = new Error("something went wrong")
+				@ShareJsUpdateManager.applyUpdate = sinon.stub().yields(@error)
+				@UpdateManager.applyUpdate @project_id, @doc_id, @update, @callback
+			
+			it "should call WebRedisManager.sendData with the error", ->
+				@WebRedisManager.sendData
+					.calledWith({
+						project_id: @project_id,
+						doc_id: @doc_id,
+						error: @error.message
+					})
+					.should.equal true
+
+			it "should call the callback with the error", ->
+				@callback.calledWith(@error).should.equal true
+			
 
 	describe "lockUpdatesAndDo", ->
 		beforeEach ->

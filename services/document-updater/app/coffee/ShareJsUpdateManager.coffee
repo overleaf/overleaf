@@ -37,13 +37,10 @@ module.exports = ShareJsUpdateManager =
 					update.dup = true
 					ShareJsUpdateManager._sendOp(project_id, doc_id, update)
 				else
-					ShareJsUpdateManager._sendError(project_id, doc_id, error)
 					return callback(error)
 			logger.log project_id: project_id, doc_id: doc_id, error: error, "applied update"
 			model.getSnapshot doc_key, (error, data) =>
-				if error?
-					ShareJsUpdateManager._sendError(project_id, doc_id, error)
-					return callback(error)
+				return callback(error) if error?
 				docLines = data.snapshot.split(/\r\n|\n|\r/)
 				callback(null, docLines, data.v, model.db.appliedOps[doc_key] or [])
 
@@ -55,6 +52,3 @@ module.exports = ShareJsUpdateManager =
 	_sendOp: (project_id, doc_id, op) ->
 		WebRedisManager.sendData {project_id, doc_id, op}
 
-	_sendError: (project_id, doc_id, error) ->
-		WebRedisManager.sendData {project_id, doc_id, error: error.message || error}
-		

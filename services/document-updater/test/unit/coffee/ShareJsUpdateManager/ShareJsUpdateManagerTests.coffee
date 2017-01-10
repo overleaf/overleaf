@@ -70,16 +70,10 @@ describe "ShareJsUpdateManager", ->
 		describe "when applyOp fails", ->
 			beforeEach (done) ->
 				@error = new Error("Something went wrong")
-				@ShareJsUpdateManager._sendError = sinon.stub()
 				@model.applyOp = sinon.stub().callsArgWith(2, @error)
 				@ShareJsUpdateManager.applyUpdate @project_id, @doc_id, @update, @lines, @version, (err, docLines, version) =>
 					@callback(err, docLines, version)
 					done()
-
-			it "should call sendError with the error", ->
-				@ShareJsUpdateManager._sendError
-					.calledWith(@project_id, @doc_id, @error)
-					.should.equal true
 
 			it "should call the callback with the error", ->
 				@callback.calledWith(@error).should.equal true
@@ -87,16 +81,10 @@ describe "ShareJsUpdateManager", ->
 		describe "when getSnapshot fails", ->
 			beforeEach (done) ->
 				@error = new Error("Something went wrong")
-				@ShareJsUpdateManager._sendError = sinon.stub()
 				@model.getSnapshot.callsArgWith(1, @error)
 				@ShareJsUpdateManager.applyUpdate @project_id, @doc_id, @update, @lines, @version, (err, docLines, version) =>
 					@callback(err, docLines, version)
 					done()
-
-			it "should call sendError with the error", ->
-				@ShareJsUpdateManager._sendError
-					.calledWith(@project_id, @doc_id, @error)
-					.should.equal true
 
 			it "should call the callback with the error", ->
 				@callback.calledWith(@error).should.equal true
@@ -124,15 +112,4 @@ describe "ShareJsUpdateManager", ->
 				@WebRedisManager.sendData
 					.calledWith({project_id: @project_id, doc_id: @doc_id, op: @opData})
 					.should.equal true
-
-	describe "_sendError", ->
-		beforeEach ->
-			@error_text = "Something went wrong"
-			@WebRedisManager.sendData = sinon.stub()
-			@ShareJsUpdateManager._sendError(@project_id, @doc_id, new Error(@error_text))
-
-		it "should publish the error to the redis stream", ->
-			@WebRedisManager.sendData
-				.calledWith({project_id: @project_id, doc_id: @doc_id, error: @error_text})
-				.should.equal true
 

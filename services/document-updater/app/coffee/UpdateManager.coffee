@@ -46,7 +46,12 @@ module.exports = UpdateManager =
 				(update, cb) -> UpdateManager.applyUpdate project_id, doc_id, update, cb
 				callback
 
-	applyUpdate: (project_id, doc_id, update, callback = (error) ->) ->
+	applyUpdate: (project_id, doc_id, update, _callback = (error) ->) ->
+		callback = (error) ->
+			if error?
+				WebRedisManager.sendData {project_id, doc_id, error: error.message || error}
+			_callback(error)
+		
 		UpdateManager._sanitizeUpdate update
 		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges) ->
 			return callback(error) if error?

@@ -176,8 +176,12 @@ describe "Applying updates to a doc", ->
 	describe "with a broken update", ->
 		before (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
+			@broken_update = { doc_id: @doc_id, v: @version, op: [d: "not the correct content", p: 0 ] }
 			MockWebApi.insertDoc @project_id, @doc_id, {lines: @lines, version: @version}
-			DocUpdaterClient.sendUpdate @project_id, @doc_id, @undefined, (error) ->
+	
+			DocUpdaterClient.subscribeToAppliedOps @messageCallback = sinon.stub()
+
+			DocUpdaterClient.sendUpdate @project_id, @doc_id, @broken_update, (error) ->
 				throw error if error?
 				setTimeout done, 200
 
@@ -185,6 +189,16 @@ describe "Applying updates to a doc", ->
 			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
 				doc.lines.should.deep.equal @lines
 				done()
+		
+		it "should send a message with an error", ->
+			@messageCallback.called.should.equal true
+			[channel, message] = @messageCallback.args[0]
+			channel.should.equal "applied-ops"
+			JSON.parse(message).should.deep.equal {
+				project_id: @project_id,
+				doc_id: @doc_id, 
+				error:'Delete component \'not the correct content\' does not match deleted text \'one\ntwo\nthree\''
+			}
 
 	describe "with enough updates to flush to the track changes api", ->
 		before (done) ->
