@@ -21,6 +21,7 @@ define [
 			dropdown:
 				loading: false
 			commentThreads: {}
+			resolvedThreadIds: {}
 
 		$scope.commentState =
 			adding: false
@@ -52,7 +53,6 @@ define [
 			_onCommentReopened(thread_id)
 
 		rangesTrackers = {}
-		resolvedThreadIds = {}
 
 		getDocEntries = (doc_id) ->
 			$scope.reviewPanel.entries[doc_id] ?= {}
@@ -61,7 +61,7 @@ define [
 		getChangeTracker = (doc_id) ->
 			if !rangesTrackers[doc_id]?
 				rangesTrackers[doc_id] = new RangesTracker()
-				rangesTrackers[doc_id].resolvedThreadIds = resolvedThreadIds
+				rangesTrackers[doc_id].resolvedThreadIds = $scope.reviewPanel.resolvedThreadIds
 			return rangesTrackers[doc_id]
 
 		scrollbar = {}
@@ -96,7 +96,7 @@ define [
 			# The open doc range tracker is kept up to date in real-time so
 			# replace any outdated info with this
 			rangesTrackers[doc.doc_id] = doc.ranges
-			rangesTrackers[doc.doc_id].resolvedThreadIds = resolvedThreadIds
+			rangesTrackers[doc.doc_id].resolvedThreadIds = $scope.reviewPanel.resolvedThreadIds
 			$scope.reviewPanel.rangesTracker = rangesTrackers[doc.doc_id]
 			if old_doc?
 				old_doc.off "flipped_pending_to_inflight"
@@ -253,8 +253,7 @@ define [
 			$timeout () ->
 				$scope.$broadcast "review-panel:layout"
 
-		$scope.submitReply = (entry, entry_id) ->
-			$scope.unresolveComment(entry, entry_id)
+		$scope.submitReply = (entry, entry_id) ->			
 			thread_id = entry.thread_id
 			content   = entry.replyContent
 			$http.post("/project/#{$scope.project_id}/thread/#{thread_id}/messages", {content, _csrf: window.csrfToken})
@@ -285,7 +284,7 @@ define [
 			thread.resolved = true
 			thread.resolved_by_user = formatUser(user)
 			thread.resolved_at = new Date()
-			resolvedThreadIds[thread_id] = true
+			$scope.reviewPanel.resolvedThreadIds[thread_id] = true
 			$scope.$broadcast "comment:resolve_thread", thread_id
 		
 		_onCommentReopened = (thread_id) ->
@@ -293,14 +292,16 @@ define [
 			delete thread.resolved
 			delete thread.resolved_by_user
 			delete thread.resolved_at
-			delete resolvedThreadIds[thread_id]
+			delete $scope.reviewPanel.resolvedThreadIds[thread_id]
 			$scope.$broadcast "comment:unresolve_thread", thread_id
 
 		_onCommentDeleted = (thread_id) ->
+			if $scope.reviewPanel.resolvedThreadIds[thread_id]?
+				delete $scope.reviewPanel.resolvedThreadIds[thread_id]
+				
 			delete $scope.reviewPanel.commentThreads[thread_id]
 		
 		$scope.deleteComment = (entry_id, thread_id) ->
-			console.log thread_id
 			_onCommentDeleted(thread_id)
 			$scope.$broadcast "comment:remove", entry_id
 
@@ -345,15 +346,15 @@ define [
 		refreshThreads = () ->
 			$http.get "/project/#{$scope.project_id}/threads"
 				.success (threads) ->
-					for thread_id, _ of resolvedThreadIds
-						delete resolvedThreadIds[thread_id]
+					for thread_id, _ of $scope.reviewPanel.resolvedThreadIds
+						delete $scope.reviewPanel.resolvedThreadIds[thread_id]
 					for thread_id, thread of threads
 						for comment in thread.messages
 							formatComment(comment)
 						if thread.resolved_by_user?
 							$scope.$broadcast "comment:resolve_thread", thread_id
 							thread.resolved_by_user = formatUser(thread.resolved_by_user)
-							resolvedThreadIds[thread_id] = true
+							$scope.reviewPanel.resolvedThreadIds[thread_id] = true
 					$scope.reviewPanel.commentThreads = threads
 
 		refreshThreads()

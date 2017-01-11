@@ -7,6 +7,7 @@ define [
 		scope: 
 			entries 	: "="
 			threads 	: "="
+			resolvedIds	: "="
 			docs		: "="
 			onOpen		: "&"
 			onUnresolve	: "&"
@@ -27,11 +28,9 @@ define [
 
 			scope.handleUnresolve = (threadId) ->
 				scope.onUnresolve({ threadId })
-				filterResolvedComments()
 
 			scope.handleDelete = (entryId, threadId) ->
 				scope.onDelete({ entryId, threadId })
-				filterResolvedComments()
 
 			getDocNameById = (docId) ->
 				doc = _.find(scope.docs, (doc) -> doc.doc.id = docId)
@@ -56,7 +55,4 @@ define [
 
 							scope.resolvedComments.push(resolvedComment)
 
-			scope.$watchCollection "entries", filterResolvedComments
-			scope.$watchCollection "threads", filterResolvedComments
-
-						
+			scope.$watchCollection "resolvedIds", filterResolvedComments

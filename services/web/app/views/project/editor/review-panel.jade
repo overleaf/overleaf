@@ -3,6 +3,7 @@
 		resolved-comments-dropdown(
 			entries="reviewPanel.entries"
 			threads="reviewPanel.commentThreads"
+			resolved-ids="reviewPanel.resolvedThreadIds"
 			docs="docs"
 			on-open="refreshResolvedCommentsDropdown();"
 			on-unresolve="unresolveComment(threadId);"
@@ -255,10 +256,10 @@ script(type='text/ng-template', id='addCommentEntryTemplate')
 
 script(type='text/ng-template', id='resolvedCommentsDropdownTemplate')
 	.resolved-comments
-		//- .resolved-comments-backdrop(
-		//- 	ng-class="{ 'resolved-comments-backdrop-visible' : state.isOpen }"
-		//- 	ng-click="state.isOpen = !state.isOpen"
-		//- )
+		.resolved-comments-backdrop(
+			ng-class="{ 'resolved-comments-backdrop-visible' : state.isOpen }"
+			ng-click="state.isOpen = false"
+		)
 		a.resolved-comments-toggle(
 			href
 			ng-click="toggleOpenState();"
@@ -269,11 +270,11 @@ script(type='text/ng-template', id='resolvedCommentsDropdownTemplate')
 		)
 			.rp-loading(ng-if="isLoading")
 				i.fa.fa-spinner.fa-spin
-			div(
+			.resolved-comments-scroller(
 				ng-if="!isLoading"
 			)
 				resolved-comment-entry(
-					ng-repeat="thread in resolvedComments"
+					ng-repeat="thread in resolvedComments | orderBy:'-resolved_at'"
 					thread="thread"
 					on-unresolve="handleUnresolve(threadId);"
 					on-delete="handleDelete(entryId, threadId);"
