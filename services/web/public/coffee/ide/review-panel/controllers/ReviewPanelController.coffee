@@ -154,7 +154,9 @@ define [
 			
 			# Assume we'll delete everything until we see it, then we'll remove it from this object
 			delete_changes = {}
-			delete_changes[change_id] = true for change_id, change of entries
+			for change_id, change of entries
+				if change_id != "add-comment"
+					delete_changes[change_id] = true 
 
 			for change in rangesTracker.changes
 				delete delete_changes[change.id]

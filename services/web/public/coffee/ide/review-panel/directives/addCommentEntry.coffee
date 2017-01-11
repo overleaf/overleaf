@@ -29,7 +29,6 @@ define [
 					scope.submitNewComment()
 
 			scope.submitNewComment = () ->
-				console.log scope.state.content
 				scope.onSubmit { content: scope.state.content }
 				scope.state.isAdding = false
 				scope.state.content = ""
