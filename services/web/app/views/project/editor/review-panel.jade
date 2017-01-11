@@ -270,7 +270,7 @@ script(type='text/ng-template', id='resolvedCommentsDropdownTemplate')
 		)
 			.rp-loading(ng-if="isLoading")
 				i.fa.fa-spinner.fa-spin
-			div(
+			.resolved-comments-scroller(
 				ng-if="!isLoading"
 			)
 				resolved-comment-entry(

@@ -103,12 +103,12 @@
 		align-items: center;
 		padding: 0 5px;
 	}
-	.rp-state-current-file & {
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-	}
+	// .rp-state-current-file & {
+	// 	position: absolute;
+	// 	top: 0;
+	// 	left: 0;
+	// 	right: 0;
+	// }
 	height: @rp-toolbar-height;
 	border-bottom: 1px solid @rp-border-grey;
 	background-color: @rp-bg-dim-blue;
@@ -706,11 +706,13 @@
 	position: absolute;
 	width: 300px;
 	left: -150px;
+	max-height: 90%;
 	margin-top: @rp-entry-arrow-width * 1.5;
 	margin-left: 1em;
 	background-color: @rp-bg-blue;
 	text-align: left;
-	padding: 5px;
+	align-items: stretch;
+	justify-content: center;
 	border-radius: 3px;
 	box-shadow: 0 0 20px 10px rgba(0, 0, 0, .3);
 
@@ -723,6 +725,11 @@
 	}
 
 	&-open {
-		display: block;
+		display: flex;
 	}
 }
+	.resolved-comments-scroller {
+		flex: 0 0 100%;
+		padding: 5px;
+		overflow-y: auto;
+	}
