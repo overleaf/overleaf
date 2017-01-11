@@ -130,7 +130,7 @@ define [
 							rangesTracker = getChangeTracker(doc.id)
 							rangesTracker.comments = doc.ranges?.comments or []
 							rangesTracker.changes = doc.ranges?.changes or []
-							updateEntries(doc.id)
+						updateEntries(doc.id)
 
 		refreshOverviewPanel = () ->
 			$scope.reviewPanel.overview.loading = true
@@ -152,6 +152,8 @@ define [
 			rangesTracker = getChangeTracker(doc_id)
 			entries = getDocEntries(doc_id)
 			
+			changed = false
+
 			# Assume we'll delete everything until we see it, then we'll remove it from this object
 			delete_changes = {}
 			for change_id, change of entries
@@ -159,6 +161,7 @@ define [
 					delete_changes[change_id] = true 
 
 			for change in rangesTracker.changes
+				changed = true
 				delete delete_changes[change.id]
 				entries[change.id] ?= {}
 					
@@ -178,6 +181,7 @@ define [
 					refreshChangeUsers(change.metadata.user_id)
 
 			for comment in rangesTracker.comments
+				changed = true
 				delete delete_changes[comment.id]
 				entries[comment.id] ?= {}
 				new_entry = {
@@ -190,7 +194,11 @@ define [
 					entries[comment.id][key] = value
 
 			for change_id, _ of delete_changes
+				changed = true
 				delete entries[change_id]
+			
+			if changed
+				$scope.$broadcast "entries:changed"
 
 		$scope.$on "editor:track-changes:changed", () ->
 			doc_id = $scope.editor.open_doc_id

@@ -21,7 +21,6 @@ define [
 			scope.toggleOpenState = () ->
 				scope.state.isOpen = !scope.state.isOpen
 				if (scope.state.isOpen)
-					filterResolvedComments()
 					scope.onOpen()
 
 			scope.resolvedComments = []
@@ -55,4 +54,4 @@ define [
 
 							scope.resolvedComments.push(resolvedComment)
 
-			scope.$watchCollection "resolvedIds", filterResolvedComments
+			scope.$on "entries:changed", filterResolvedComments
