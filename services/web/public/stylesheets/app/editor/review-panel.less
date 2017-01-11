@@ -93,6 +93,7 @@
 	border-left: solid 1px @rp-border-grey;
 	font-size: @rp-base-font-size;
 	color: @rp-type-blue;
+	z-index: 4; // 3 is Ace's gutter z-index value.
 }
 
 .review-panel-toolbar {
@@ -112,7 +113,7 @@
 	border-bottom: 1px solid @rp-border-grey;
 	background-color: @rp-bg-dim-blue;
 	text-align: center;
-	z-index: 2;
+	z-index: 3;
 	flex-basis: 32px;
 	flex-shrink: 0;
 }
@@ -687,19 +688,18 @@
 	}
 }
 
-// .resolved-comments-backdrop {
-// 	display: none;
-// 	position: fixed;
-// 	top: 0;
-// 	right: 0;
-// 	bottom: 0;
-// 	left: 0;
-// 	background-color: rgba(0, 0, 0, .5);
+.resolved-comments-backdrop {
+	display: none;
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
 
-// 	&-visible {
-// 		display: block;
-// 	}
-// }
+	&-visible {
+		display: block;
+	}
+}
 
 .resolved-comments-dropdown {
 	display: none;

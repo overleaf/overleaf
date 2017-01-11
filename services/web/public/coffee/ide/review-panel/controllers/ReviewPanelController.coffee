@@ -251,8 +251,7 @@ define [
 			$timeout () ->
 				$scope.$broadcast "review-panel:layout"
 
-		$scope.submitReply = (entry, entry_id) ->
-			$scope.unresolveComment(entry, entry_id)
+		$scope.submitReply = (entry, entry_id) ->			
 			thread_id = entry.thread_id
 			content   = entry.replyContent
 			$http.post("/project/#{$scope.project_id}/thread/#{thread_id}/messages", {content, _csrf: window.csrfToken})

@@ -256,10 +256,10 @@ script(type='text/ng-template', id='addCommentEntryTemplate')
 
 script(type='text/ng-template', id='resolvedCommentsDropdownTemplate')
 	.resolved-comments
-		//- .resolved-comments-backdrop(
-		//- 	ng-class="{ 'resolved-comments-backdrop-visible' : state.isOpen }"
-		//- 	ng-click="state.isOpen = !state.isOpen"
-		//- )
+		.resolved-comments-backdrop(
+			ng-class="{ 'resolved-comments-backdrop-visible' : state.isOpen }"
+			ng-click="state.isOpen = false"
+		)
 		a.resolved-comments-toggle(
 			href
 			ng-click="toggleOpenState();"
