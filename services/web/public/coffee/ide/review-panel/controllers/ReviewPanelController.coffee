@@ -346,8 +346,13 @@ define [
 				.success (users) ->
 					_refreshingRangeUsers = false
 					$scope.users = {}
+					# Always include ourself, since if we submit an op, we might need to display info
+					# about it locally before it has been flushed through the server
+					if ide.$scope.user?.id?
+						$scope.users[ide.$scope.user.id] = formatUser(ide.$scope.user)
 					for user in users
-						$scope.users[user.id] = formatUser(user)
+						if user.id?
+							$scope.users[user.id] = formatUser(user)
 				.error () ->
 					_refreshingRangeUsers = false
 

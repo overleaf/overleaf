@@ -93,7 +93,7 @@ define [
 
 		setTrackChanges: (value) ->
 			if value
-				@$scope.sharejsDoc?.track_changes_as = window.user.id
+				@$scope.sharejsDoc?.track_changes_as = window.user.id or "anonymous"
 			else
 				@$scope.sharejsDoc?.track_changes_as = null
 		
@@ -229,10 +229,6 @@ define [
 			for marker_id, marker of markers
 				if marker.clazz.match("track-changes")
 					console.error "Orphaned ace marker", marker
-		
-		applyChange: (delta, metadata) ->
-			op = @_aceChangeToShareJs(delta)
-			@rangesTracker.applyOp(op, metadata)
 		
 		updateFocus: () ->
 			selection = @editor.getSelectionRange()

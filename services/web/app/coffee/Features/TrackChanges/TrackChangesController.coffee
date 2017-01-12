@@ -20,6 +20,8 @@ module.exports = TrackChangesController =
 		RangesManager.getAllChangesUsers project_id, (error, users) ->
 			return next(error) if error?
 			users = (UserInfoController.formatPersonalInfo(user) for user in users)
+			# Get rid of any anonymous/deleted user objects
+			users = users.filter (u) -> u?.id?
 			res.json users
 	
 	acceptChange: (req, res, next) ->
