@@ -233,6 +233,28 @@ describe "Appending doc ops to the history", ->
 			expect(@updates[0].pack[0].v).to.equal 3
 			expect(@updates[0].pack[1].v).to.equal 4
 
+	describe "when there is a comment update", ->
+		before (done) ->
+			@project_id = ObjectId().toString()
+			@doc_id = ObjectId().toString()
+			@user_id = ObjectId().toString()
+			MockWebApi.projects[@project_id] = features: versioning: false
+			TrackChangesClient.pushRawUpdates @project_id, @doc_id, [{
+				op: [{ c: "foo", p: 3 }, {d: "bar", p: 6}]
+				meta: { ts: Date.now(), user_id: @user_id }
+				v: 3
+			}], (error) =>
+				throw error if error?
+				TrackChangesClient.flushAndGetCompressedUpdates @project_id, @doc_id, (error, @updates) =>
+					throw error if error?
+					done()
+
+		it "should ignore the comment op", ->
+			expect(@updates[0].pack[0].op).to.deep.equal [{d: "bar", p: 6}]
+
+		it "should insert the correct version numbers into mongo", ->
+			expect(@updates[0].pack[0].v).to.equal 3
+
 	describe "when the project has versioning enabled", ->
 		before (done) ->
 			@project_id = ObjectId().toString()

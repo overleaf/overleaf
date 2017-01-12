@@ -24,7 +24,9 @@ module.exports = UpdateCompressor =
 	convertToSingleOpUpdates: (updates) ->
 		splitUpdates = []
 		for update in updates
-			if update.op.length == 0
+			# Reject any non-insert or delete ops, i.e. comments
+			ops = update.op.filter (o) -> o.i? or o.d?
+			if ops.length == 0
 				splitUpdates.push
 					op: UpdateCompressor.NOOP
 					meta:
@@ -33,7 +35,7 @@ module.exports = UpdateCompressor =
 						user_id:  update.meta.user_id
 					v: update.v
 			else
-				for op in update.op
+				for op in ops
 					splitUpdates.push
 						op: op
 						meta:
