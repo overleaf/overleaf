@@ -244,17 +244,8 @@ module.exports = (app, webRouter, apiRouter)->
 		for key, value of Settings.nav
 			res.locals.nav[key] = _.clone(Settings.nav[key])
 		res.locals.templates = Settings.templateLinks
-		try
-			externalAuth = res.locals.externalAuthenticationSystemUsed()
-			if externalAuth and res.locals.nav.header?
-				# filter out '/register' link
-				res.locals.nav.header = _.filter(
-					res.locals.nav.header,
-					(h) ->
-						h.url != '/register'
-				)
-		catch error
-			logger.error {error}, "error while trying to filter out '/register' links from header"
+		if res.locals.nav.header
+			console.error {}, "The `nav.header` setting is no longer supported, use `nav.header_extras` instead"
 		next()
 
 	webRouter.use (req, res, next) ->
