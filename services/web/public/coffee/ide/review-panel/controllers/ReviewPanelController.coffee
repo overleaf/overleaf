@@ -368,7 +368,7 @@ define [
 		refreshThreads()
 
 		formatComment = (comment) ->
-			comment.user = formatUser(user)
+			comment.user = formatUser(comment.user)
 			comment.timestamp = new Date(comment.timestamp)
 			return comment
 
