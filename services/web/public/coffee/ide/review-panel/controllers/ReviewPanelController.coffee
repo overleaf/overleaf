@@ -320,7 +320,6 @@ define [
 			ide.editorManager.openDocId(doc_id, { gotoOffset: entry.offset })
 		
 		$scope.toggleTrackChanges = (value) ->
-			console.log "Toggling track changes", value
 			$scope.editor.wantTrackChanges = value
 			$http.post "/project/#{$scope.project_id}/track_changes", {_csrf: window.csrfToken, on: value}
 		
