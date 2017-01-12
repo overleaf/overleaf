@@ -373,7 +373,9 @@ define [
 			return comment
 
 		formatUser = (user) ->
-			if !user?
+			id = user?._id or user?.id
+
+			if !id?
 				return {
 					email: null
 					name: "Anonymous"
@@ -381,13 +383,13 @@ define [
 					hue: ColorManager.ANONYMOUS_HUE
 					avatar_text: "A"
 				}
-
-			id = user._id or user.id
 			if id == window.user_id
 				name = "You"
 				isSelf = true
 			else
-				name = "#{user.first_name} #{user.last_name}"
+				name = [user.first_name, user.last_name].filter((n) -> n?).join(" ")
+				if name == ""
+					name = "Unknown"
 				isSelf = false
 			return {
 				id: id

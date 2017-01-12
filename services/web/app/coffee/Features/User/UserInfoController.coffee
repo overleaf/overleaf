@@ -30,6 +30,8 @@ module.exports = UserController =
 		res.send JSON.stringify(info)
 
 	formatPersonalInfo: (user, callback = (error, info) ->) ->
+		if !user?
+			return {}
 		formatted_user = { id: user._id.toString() }
 		for key in ["first_name", "last_name", "email", "signUpDate", "role", "institution"]
 			if user[key]?
