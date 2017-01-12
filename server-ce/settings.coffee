@@ -148,6 +148,11 @@ settings =
 
 	behindProxy: process.env["SHARELATEX_BEHIND_PROXY"] or false
 
+	i18n:
+		subdomainLang:
+			www: {lngCode:process.env["SHARELATEX_SITE_LANGUAGE"] or "en", url: siteUrl}
+		defaultLng: process.env["SHARELATEX_SITE_LANGUAGE"] or "en"
+
 	# Spell Check Languages
 	# ---------------------
 	#
@@ -340,9 +345,6 @@ if process.env["SHARELATEX_HEADER_EXTRAS"]?
 		console.error("could not parse SHARELATEX_HEADER_EXTRAS, not valid JSON")
 
 
-# if process.env["SHARELATEX_PROXY_LEARN"]?
-# 	settings.nav.header.push({text: "help", class: "subdued", dropdown: [{text: "documentation", url: "/learn"}] })
-
 
 # Sending Email
 # -------------
@@ -382,7 +384,12 @@ if process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]?
 	if process.env["SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH"]?
 		settings.email.parameters.tls =
 			rejectUnauthorized: parse(process.env["SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH"])
-		
+
+
+# i18n
+if process.env["SHARELATEX_LANG_DOMAIN_MAPPING"]?		
+
+	settings.i18n.subdomainLang = parse(process.env["SHARELATEX_LANG_DOMAIN_MAPPING"])
 
 # Password Settings
 # -----------
@@ -392,7 +399,7 @@ if process.env["SHARELATEX_PASSWORD_VALIDATION_PATTERN"] or process.env["SHARELA
 
 	settings.passwordStrengthOptions =
 		pattern: process.env["SHARELATEX_PASSWORD_VALIDATION_PATTERN"] or "aA$3"
-		length: {min:process.env["SHARELATEX_PASSWORD_VALIDATION_MIN_LENGTH"] or 8, max: process.env["SHARELATEX_PASSWORD_VALIDATION_MAX_LENGTH"] or 50}
+		length: {min:process.env["SHARELATEX_PASSWORD_VALIDATION_MIN_LENGTH"] or 8, max: process.env["SHARELATEX_PASSWORD_VALIDATION_MAX_LENGTH"] or 150}
 
 
 
