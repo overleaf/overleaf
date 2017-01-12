@@ -24,5 +24,5 @@ define [
 			scope.animateAndCallOnResolve = () ->
 				scope.state.animating = true
 				element.find(".rp-entry").css("top", 0)
-				$timeout((() -> scope.onResolve()), 200)
+				$timeout((() -> scope.onResolve()), 350)
 				return true

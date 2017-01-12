@@ -183,11 +183,7 @@ script(type='text/ng-template', id='commentEntryTemplate')
 					placeholder="{{ 'Hit \"Enter\" to reply' + (entry.resolved ? ' and re-open' : '') }}"
 				)
 			.rp-entry-actions
-<<<<<<< Updated upstream
-				a.rp-entry-button(href, ng-click="onResolve();", ng-if="permissions.comment && permissions.write") 
-=======
-				a.rp-entry-button(href, ng-click="animateAndCallOnResolve();") 
->>>>>>> Stashed changes
+				a.rp-entry-button(href, ng-click="animateAndCallOnResolve();", ng-if="permissions.comment && permissions.write") 
 					i.fa.fa-inbox
 					| &nbsp;Resolve
 				a.rp-entry-button(href, ng-click="onReply();", ng-if="permissions.comment")
