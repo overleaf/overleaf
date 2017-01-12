@@ -275,7 +275,10 @@ script(type='text/ng-template', id='resolvedCommentsDropdownTemplate')
 		a.resolved-comments-toggle(
 			href
 			ng-click="toggleOpenState();"
-		) 
+			tooltip="Resolved Comments"
+			tooltip-placement="bottom"
+			tooltip-append-to-body="true"
+		)
 			i.fa.fa-inbox
 		.resolved-comments-dropdown(
 			ng-class="{ 'resolved-comments-dropdown-open' : state.isOpen }"
