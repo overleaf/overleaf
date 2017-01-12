@@ -33,7 +33,7 @@ define [
 				scope.onDelete({ entryId, threadId })
 
 			getDocNameById = (docId) ->
-				doc = _.find(scope.docs, (doc) -> doc.doc.id = docId)
+				doc = _.find(scope.docs, (doc) -> doc.doc.id == docId)
 				if doc?
 					return doc.path
 				else 

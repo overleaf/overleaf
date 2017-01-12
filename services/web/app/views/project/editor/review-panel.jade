@@ -289,7 +289,7 @@ script(type='text/ng-template', id='resolvedCommentsDropdownTemplate')
 				ng-if="!isLoading"
 			)
 				resolved-comment-entry(
-					ng-repeat="thread in resolvedComments | orderBy:'-resolved_at'"
+					ng-repeat="thread in resolvedComments | orderBy:'resolved_at':true"
 					thread="thread"
 					on-unresolve="handleUnresolve(threadId);"
 					on-delete="handleDelete(entryId, threadId);"
