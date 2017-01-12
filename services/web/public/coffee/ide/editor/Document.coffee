@@ -252,9 +252,7 @@ define [
 					return callback(error) if error?
 					@joined = true
 					@doc.catchUp( updates )
-					# TODO: Worry about whether these ranges are consistent with the doc still
-					@ranges?.changes = ranges?.changes
-					@ranges?.comments = ranges?.comments
+					@_catchUpRanges( ranges?.changes, ranges?.comments )
 					callback()
 			else
 				@ide.socket.emit 'joinDoc', @doc_id, (error, docLines, version, updates, ranges) =>
@@ -341,6 +339,7 @@ define [
 			track_changes_as = null
 			remote_op = msg?
 			if msg?.meta?.tc?
+				old_id_seed = @ranges.getIdSeed()
 				@ranges.setIdSeed(msg.meta.tc)
 			if remote_op and msg.meta?.tc
 				track_changes_as = msg.meta.user_id
@@ -349,3 +348,20 @@ define [
 			@ranges.track_changes = track_changes_as?
 			for op in ops
 				@ranges.applyOp op, { user_id: track_changes_as }
+			if old_id_seed?
+				@ranges.setIdSeed(old_id_seed)
+		
+		_catchUpRanges: (changes = [], comments = []) ->
+			# We've just been given the current server's ranges, but need to apply any local ops we have.
+			# Reset to the server state then apply our local ops again.
+			@ranges.emit "clear"
+			@ranges.changes = changes
+			@ranges.comments = comments
+			@ranges.track_changes = @doc.track_changes
+			for op in @doc.getInflightOp() or []
+				@ranges.setIdSeed(@doc.track_changes_id_seeds.inflight)
+				@ranges.applyOp(op)
+			for op in @doc.getPendingOp() or []
+				@ranges.setIdSeed(@doc.track_changes_id_seeds.pending)
+				@ranges.applyOp(op)
+			@ranges.emit "redraw"

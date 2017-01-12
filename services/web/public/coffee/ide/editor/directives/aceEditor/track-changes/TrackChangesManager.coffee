@@ -59,6 +59,7 @@ define [
 				@recalculateReviewEntriesScreenPositions()
 
 			onChangeSession = (e) =>
+				@clearAnnotations()
 				@redrawAnnotations()
 
 			bindToAce = () =>
@@ -128,6 +129,18 @@ define [
 				sl_console.log "[comment:removed]", comment
 				setTimeout () => @_onCommentRemoved(comment)
 			
+			@rangesTracker.on "clear", () =>
+				@clearAnnotations()
+			@rangesTracker.on "redraw", () =>
+				@redrawAnnotations()
+		
+		clearAnnotations: () ->
+			session = @editor.getSession()
+			for change_id, markers of @changeIdToMarkerIdMap
+				for marker_name, marker_id of markers
+					session.removeMarker marker_id
+			@changeIdToMarkerIdMap = {}
+
 		redrawAnnotations: () ->
 			for change in @rangesTracker.changes
 				if change.op.i?
