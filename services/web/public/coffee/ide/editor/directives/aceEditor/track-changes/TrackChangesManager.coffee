@@ -159,8 +159,6 @@ define [
 		rejectChangeId: (change_id) ->
 			change = @rangesTracker.getChange(change_id)
 			return if !change?
-			@rangesTracker.removeChangeId(change_id)
-			@dont_track_next_update = true
 			session = @editor.getSession()
 			if change.op.d?
 				content = change.op.d
