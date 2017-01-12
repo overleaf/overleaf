@@ -27,6 +27,8 @@
 
 @rp-toolbar-height      : 32px;
 
+
+
 .rp-button() {
 	background-color: @rp-highlight-blue;
 	color: #FFF;
@@ -252,6 +254,16 @@
 
 	&-comment {
 		border-color: @rp-yellow;
+	}
+	
+	&-comment-resolving {
+		top: 4px;
+		left: 6px;
+		opacity: 0;
+		z-index: 3;
+		transform: scale(.1);
+		transform-origin: 0 0;
+		transition: top .2s ease-out, left .2s ease-out, transform .2s ease-out, opacity .2s ease-out .1s;
 	}
 	
 	&-comment-resolved {
@@ -501,6 +513,14 @@
 	margin-top: 10px;
 	font-weight: @rp-semibold-weight;
 	text-align: center;
+}
+
+.rp-comment-wrapper {
+	transition: .2s opacity ease-out;
+
+	&-resolving {
+		opacity: 0;
+	}
 }
 
 .rp-loading,
