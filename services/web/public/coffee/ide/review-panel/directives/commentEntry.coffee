@@ -7,6 +7,7 @@ define [
 		scope: 
 			entry: "="
 			threads: "="
+			permissions: "="
 			onResolve: "&"
 			onReply: "&"
 			onIndicatorClick: "&"

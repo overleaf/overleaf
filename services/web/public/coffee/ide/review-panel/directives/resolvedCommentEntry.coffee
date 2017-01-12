@@ -6,5 +6,6 @@ define [
 		templateUrl: "resolvedCommentEntryTemplate"
 		scope:
 			thread: "="
+			permissions: "="
 			onUnresolve: "&"
 			onDelete: "&"

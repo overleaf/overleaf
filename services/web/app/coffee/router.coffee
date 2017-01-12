@@ -233,7 +233,8 @@ module.exports = class Router
 		webRouter.get  "/project/:project_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, ChatController.getMessages
 		webRouter.post "/project/:project_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, ChatController.sendMessage
 		
-		webRouter.post "/project/:project_id/thread/:thread_id/messages", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, CommentsController.sendComment
+		# Note: Read only users can still comment
+		webRouter.post "/project/:project_id/thread/:thread_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, CommentsController.sendComment
 		webRouter.get  "/project/:project_id/threads", AuthorizationMiddlewear.ensureUserCanReadProject, CommentsController.getThreads
 		webRouter.post "/project/:project_id/thread/:thread_id/resolve", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, CommentsController.resolveThread
 		webRouter.post "/project/:project_id/thread/:thread_id/reopen", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, CommentsController.reopenThread

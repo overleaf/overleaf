@@ -9,6 +9,7 @@ define [
 			threads 	: "="
 			resolvedIds	: "="
 			docs		: "="
+			permissions: "="
 			onOpen		: "&"
 			onUnresolve	: "&"
 			onDelete	: "&"

@@ -7,6 +7,7 @@ define [
 		scope: 
 			entry: "="
 			user: "="
+			permissions: "="
 			onAccept: "&"
 			onReject: "&"
 			onIndicatorClick: "&"

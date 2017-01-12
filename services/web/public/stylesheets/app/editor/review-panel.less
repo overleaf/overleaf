@@ -119,10 +119,13 @@
 }
 	.review-panel-toolbar-label {
 		cursor: pointer;
-		margin-right: 5px;
 		text-align: right;
 		flex-grow: 1;
 	}
+		.review-panel-toolbar-label-disabled {
+			cursor: auto;
+			margin-right: 5px;
+		}
 
 .rp-entry-list {
 	.rp-size-expanded & {
@@ -574,6 +577,7 @@
 .rp-toggle {
 	display: inline-block;
 	vertical-align: middle;
+	margin-left: 5px;
 }
 	.rp-toggle-hidden-input {
 		display: none;
