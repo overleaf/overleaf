@@ -324,10 +324,21 @@ if process.env["SHARELATEX_HEADER_IMAGE_URL"]?
 	settings.nav.custom_logo = process.env["SHARELATEX_HEADER_IMAGE_URL"]
 
 if process.env["SHARELATEX_HEADER_NAV_LINKS"]?
+	console.error """
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+#  WARNING: SHARELATEX_HEADER_NAV_LINKS is no longer supported
+#  See https://github.com/sharelatex/sharelatex/wiki/Configuring-Headers,-Footers-&-Logo
+#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+"""
+
+if process.env["SHARELATEX_HEADER_EXTRAS"]?
 	try
-		settings.nav.header = JSON.parse(process.env["SHARELATEX_HEADER_NAV_LINKS"])
+		settings.nav.header_extras = JSON.parse(process.env["SHARELATEX_HEADER_EXTRAS"])
 	catch e
-		console.error("could not parse SHARELATEX_HEADER_NAV_LINKS, not valid JSON")
+		console.error("could not parse SHARELATEX_HEADER_EXTRAS, not valid JSON")
+
 
 # if process.env["SHARELATEX_PROXY_LEARN"]?
 # 	settings.nav.header.push({text: "help", class: "subdued", dropdown: [{text: "documentation", url: "/learn"}] })
