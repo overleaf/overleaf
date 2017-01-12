@@ -22,6 +22,16 @@ define [
 				loading: false
 			commentThreads: {}
 			resolvedThreadIds: {}
+			layoutToLeft: false
+
+		$scope.$on "layout:pdf:linked", (event, state) ->
+			$scope.reviewPanel.layoutToLeft = (state.east?.size < 220 || state.east?.initClosed)
+
+		$scope.$on "layout:pdf:resize", (event, state) ->
+			$scope.reviewPanel.layoutToLeft = (state.east?.size < 220 || state.east?.initClosed)
+
+		$scope.$watch "ui.pdfLayout", (layout) ->
+			$scope.reviewPanel.layoutToLeft = (layout == "flat")
 
 		$scope.commentState =
 			adding: false
