@@ -169,7 +169,6 @@ script(type='text/ng-template', id='commentEntryTemplate')
 					p.rp-comment-content 
 						span.rp-entry-user(
 							style="color: hsl({{ comment.user.hue }}, 70%, 40%);"
-							ng-if="$first || comment.user.id !== threads[entry.thread_id].messages[$index - 1].user.id"
 						) {{ comment.user.name }}:&nbsp;
 						| {{ comment.content }}
 					.rp-entry-metadata
