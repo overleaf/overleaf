@@ -17,8 +17,8 @@ div.full-size(
 			'rp-state-current-file-mini': (reviewPanel.subView === SubViews.CUR_FILE && !ui.reviewPanelOpen),\
 			'rp-state-overview': (reviewPanel.subView === SubViews.OVERVIEW),\
 			'rp-size-mini': (!ui.reviewPanelOpen && reviewPanel.hasEntries),\
-			'rp-size-expanded': ui.reviewPanelOpen\
-			'rp-layout-left': reviewPanel.layoutToLeft
+			'rp-size-expanded': ui.reviewPanelOpen,\
+			'rp-layout-left': reviewPanel.layoutToLeft\
 		}"
 	)
 		.loading-panel(ng-show="!editor.sharejs_doc || editor.opening")
