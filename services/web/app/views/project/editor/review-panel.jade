@@ -152,7 +152,9 @@ script(type='text/ng-template', id='changeEntryTemplate')
 					| &nbsp;Accept
 
 script(type='text/ng-template', id='commentEntryTemplate')
-	div
+	.rp-comment-wrapper(
+		ng-class="{ 'rp-comment-wrapper-resolving': state.animating }"
+	)
 		.rp-entry-callout.rp-entry-callout-comment
 		.rp-entry-indicator(
 			ng-class="{ 'rp-entry-indicator-focused': entry.focused }"
@@ -160,7 +162,7 @@ script(type='text/ng-template', id='commentEntryTemplate')
 		)
 			i.fa.fa-comment
 		.rp-entry.rp-entry-comment(
-			ng-class="{ 'rp-entry-focused': entry.focused }"
+			ng-class="{ 'rp-entry-focused': entry.focused, 'rp-entry-comment-resolving': state.animating }"
 		)
 			div
 				.rp-comment(
@@ -181,7 +183,7 @@ script(type='text/ng-template', id='commentEntryTemplate')
 					placeholder="{{ 'Hit \"Enter\" to reply' + (entry.resolved ? ' and re-open' : '') }}"
 				)
 			.rp-entry-actions
-				a.rp-entry-button(href, ng-click="onResolve();", ng-if="permissions.comment && permissions.write") 
+				a.rp-entry-button(href, ng-click="animateAndCallOnResolve();", ng-if="permissions.comment && permissions.write") 
 					i.fa.fa-inbox
 					| &nbsp;Resolve
 				a.rp-entry-button(href, ng-click="onReply();", ng-if="permissions.comment")
