@@ -7,7 +7,6 @@ RollingRateLimiter = require('rolling-rate-limiter')
 module.exports = RateLimiter =
 
 	addCount: (opts, callback = (err, shouldProcess)->)->
-		console.log ">> opts", opts
 		namespace = "RateLimit:#{opts.endpointName}:"
 		k = "{#{opts.subjectName}}"
 		limiter = RollingRateLimiter({

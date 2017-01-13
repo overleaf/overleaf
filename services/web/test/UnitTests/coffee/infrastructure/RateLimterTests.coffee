@@ -24,7 +24,12 @@ describe "RateLimiter", ->
 		@RedisWrapper =
 			client: sinon.stub().returns(@rclient)
 
+		@limiterFn = sinon.stub()
+		@RollingRateLimiter = (opts) =>
+			return @limiterFn
+
 		@limiter = SandboxedModule.require modulePath, requires:
+			"rolling-rate-limiter": @RollingRateLimiter
 			"settings-sharelatex":@settings
 			"logger-sharelatex" : @logger = {log:sinon.stub(), err:sinon.stub()}
 			"./RedisWrapper": @RedisWrapper
@@ -41,45 +46,46 @@ describe "RateLimiter", ->
 			timeInterval: @timeInterval
 		@key = "RateLimiter:#{@endpointName}:{#{@subject}}"
 
-	for redisType, resultSet of {
-		normal:[10, '10', 10],
-		cluster:[[null,10], [null,'10'], [null,10]]
-	}
-		do (redisType, resultSet) ->
 
-			describe "addCount with #{redisType} redis", ->
 
-				beforeEach ->
-					@results = resultSet
-					@rclient.incr = sinon.stub()
-					@rclient.get = sinon.stub()
-					@rclient.expire = sinon.stub()
-					@rclient.exec = sinon.stub().callsArgWith(0, null, @results)
 
-				it "should use correct key", (done)->
-					@limiter.addCount @details, =>
-						@rclient.incr.calledWith(@key).should.equal true
-						done()
+	describe 'when action is permitted', ->
 
-				it "should only call it once", (done)->
-					@limiter.addCount @details, =>
-						@rclient.exec.callCount.should.equal 1
-						done()
+		beforeEach ->
+			@limiterFn = sinon.stub().callsArgWith(1, null, 0, 22)
 
-				it "should return true if the count is less than throttle", (done)->
-					@details.throttle = 100
-					@limiter.addCount @details, (err, canProcess)=>
-						canProcess.should.equal true
-						done()
+		it 'should not produce and error', (done) ->
+			@limiter.addCount {}, (err, should) ->
+				expect(err).to.equal null
+				done()
 
-				it "should return true if the count is less than throttle", (done)->
-					@details.throttle = 1
-					@limiter.addCount @details, (err, canProcess)=>
-						canProcess.should.equal false
-						done()
+		it 'should callback with true', (done) ->
+			@limiter.addCount {}, (err, should) ->
+				expect(should).to.equal true
+				done()
 
-				it "should return false if the limit is matched", (done)->
-					@details.throttle = 10
-					@limiter.addCount @details, (err, canProcess)=>
-						canProcess.should.equal false
-						done()
+	describe 'when action is not permitted', ->
+
+		beforeEach ->
+			@limiterFn = sinon.stub().callsArgWith(1, null, 4000, 0)
+
+		it 'should not produce and error', (done) ->
+			@limiter.addCount {}, (err, should) ->
+				expect(err).to.equal null
+				done()
+
+		it 'should callback with false', (done) ->
+			@limiter.addCount {}, (err, should) ->
+				expect(should).to.equal false
+				done()
+
+	describe 'when limiter produces an error', ->
+
+		beforeEach ->
+			@limiterFn = sinon.stub().callsArgWith(1, new Error('woops'))
+
+		it 'should produce and error', (done) ->
+			@limiter.addCount {}, (err, should) ->
+				expect(err).to.not.equal null
+				expect(err).to.be.instanceof Error
+				done()
