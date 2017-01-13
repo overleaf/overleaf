@@ -245,10 +245,11 @@ define [
 		
 		updateFocus: () ->
 			selection = @editor.getSelectionRange()
-			cursor_offset = @_aceRangeToShareJs(selection.start)
+			selection_start = @_aceRangeToShareJs(selection.start)
+			selection_end = @_aceRangeToShareJs(selection.end)
 			entries = @_getCurrentDocEntries()
-			selection = !(selection.start.column == selection.end.column and selection.start.row == selection.end.row)
-			@$scope.$emit "editor:focus:changed", cursor_offset, selection
+			is_selection = (selection_start != selection_end)
+			@$scope.$emit "editor:focus:changed", selection_start, selection_end, is_selection
 		
 		broadcastChange: () ->
 			@$scope.$emit "editor:track-changes:changed", @$scope.docId
