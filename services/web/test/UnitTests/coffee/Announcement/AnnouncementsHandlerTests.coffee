@@ -42,10 +42,13 @@ describe 'AnnouncementsHandler', ->
 			@BlogHandler.getLatestAnnouncements.callsArgWith(0, null, @stubbedAnnouncements)
 
 
-		it "should return all announcements if there are no getLastOccurance", (done)->
+		it "should mark all announcements as read is false", (done)->
 			@AnalyticsManager.getLastOccurance.callsArgWith(2, null, [])
 			@handler.getUnreadAnnouncements @user_id, (err, announcements)=>
-				announcements.length.should.equal 4
+				announcements[0].read.should.equal false
+				announcements[1].read.should.equal false
+				announcements[2].read.should.equal false
+				announcements[3].read.should.equal false
 				done()
 
 		it "should should be sorted again to ensure correct order", (done)->
@@ -57,16 +60,30 @@ describe 'AnnouncementsHandler', ->
 				announcements[0].should.equal @stubbedAnnouncements[0]
 				done()
 
-		it "should return ones older than the last blog id", (done)->
+		it "should return older ones marked as read as well", (done)->
 			@AnalyticsManager.getLastOccurance.callsArgWith(2, null, {segmentation:{blogPostId:"/2014/04/12/title-date-irrelivant"}})
 			@handler.getUnreadAnnouncements @user_id, (err, announcements)=>
-				announcements.length.should.equal 2
 				announcements[0].id.should.equal @stubbedAnnouncements[0].id
+				announcements[0].read.should.equal false
+
 				announcements[1].id.should.equal @stubbedAnnouncements[1].id
+				announcements[1].read.should.equal false
+
+				announcements[2].id.should.equal @stubbedAnnouncements[3].id
+				announcements[2].read.should.equal true
+
+				announcements[3].id.should.equal @stubbedAnnouncements[2].id
+				announcements[3].read.should.equal true
+
 				done()
 
-		it "should return none when the latest id is the first element", (done)->
+		it "should return all of them marked as read", (done)->
 			@AnalyticsManager.getLastOccurance.callsArgWith(2, null, {segmentation:{blogPostId:"/2016/11/01/introducting-latex-code-checker"}})
 			@handler.getUnreadAnnouncements @user_id, (err, announcements)=>
-				announcements.length.should.equal 0
+				announcements[0].read.should.equal true
+				announcements[1].read.should.equal true
+				announcements[2].read.should.equal true
+				announcements[3].read.should.equal true
 				done()
+
+

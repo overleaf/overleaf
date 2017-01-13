@@ -197,7 +197,7 @@ module.exports = ProjectController =
 			user_id = null
 
 		project_id = req.params.Project_id
-		logger.log project_id:project_id, "loading editor"
+		logger.log project_id:project_id, anonymous:anonymous, user_id:user_id, "loading editor"
 
 		async.parallel {
 			project: (cb)->

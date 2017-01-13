@@ -276,6 +276,10 @@ module.exports = settings =
 	# Cookie max age (in milliseconds). Set to false for a browser session.
 	cookieSessionLength: 5 * 24 * 60 * 60 * 1000 # 5 days
 
+	# When true, only allow invites to be sent to email addresses that
+	# already have user accounts
+	restrictInvitesToExistingAccounts: false
+
 	# Should we allow access to any page without logging in? This includes
 	# public projects, /learn, /templates, about pages, etc.
 	allowPublicAccess: if process.env["SHARELATEX_ALLOW_PUBLIC_ACCESS"] == 'true' then true else false
@@ -331,35 +335,11 @@ module.exports = settings =
 			url: "https://github.com/sharelatex/sharelatex"
 		}]
 
-		header: [{
-			text: "Register"
-			url: "/register"
-			only_when_logged_out: true
-		}, {
-			text: "Log In"
-			url: "/login"
-			only_when_logged_out: true
-		}, {
-			text: "Projects"
-			url: "/project"
-			only_when_logged_in: true
-		}, {
-			text: "Account"
-			only_when_logged_in: true
-			dropdown: [{
-				user_email: true
-			},{
-				divider: true
-			}, {
-				text: "Account Settings"
-				url: "/user/settings"
-			}, {
-				divider: true
-			}, {
-				text: "Log out"
-				url: "/logout"
-			}]
-		}]
+		showSubscriptionLink: false
+
+		header_extras: []
+		# Example:
+		#   header_extras: [{text: "Some Page", url: "http://example.com/some/page", class: "subdued"}]
 
 	customisation: {}
 

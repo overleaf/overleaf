@@ -148,6 +148,7 @@ module.exports = AuthenticationController =
 			return next()
 		else
 			logger.log url:req.url, "user trying to access endpoint not in global whitelist"
+			AuthenticationController._setRedirectInSession(req)
 			return res.redirect "/login"
 
 	httpAuth: basicAuth (user, pass)->
