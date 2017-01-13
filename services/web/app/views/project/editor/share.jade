@@ -137,10 +137,15 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 					p.small(ng-show="startedFreeTrial")
 						| #{translate("refresh_page_after_starting_free_trial")}.
 
-	.modal-footer
+	.modal-footer.modal-footer-share
 		.modal-footer-left
 			i.fa.fa-refresh.fa-spin(ng-show="state.inflight")
-			span.text-danger.error(ng-show="state.error") #{translate("generic_something_went_wrong")}
+			span.text-danger.error(ng-show="state.error")
+				span(ng-switch="state.errorReason")
+					span(ng-switch-when="cannot_invite_non_user")
+						| #{translate("cannot_invite_non_user")}
+					span(ng-switch-default)
+						| #{translate("generic_something_went_wrong")}
 		button.btn.btn-default(
 			ng-click="done()"
 		) #{translate("close")}

@@ -244,6 +244,8 @@ module.exports = (app, webRouter, apiRouter)->
 		for key, value of Settings.nav
 			res.locals.nav[key] = _.clone(Settings.nav[key])
 		res.locals.templates = Settings.templateLinks
+		if res.locals.nav.header
+			console.error {}, "The `nav.header` setting is no longer supported, use `nav.header_extras` instead"
 		next()
 
 	webRouter.use (req, res, next) ->

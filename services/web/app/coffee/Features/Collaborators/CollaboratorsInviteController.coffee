@@ -4,6 +4,7 @@ UserGetter = require "../User/UserGetter"
 CollaboratorsHandler = require('./CollaboratorsHandler')
 CollaboratorsInviteHandler = require('./CollaboratorsInviteHandler')
 logger = require('logger-sharelatex')
+Settings = require('settings-sharelatex')
 EmailHelper = require "../Helpers/EmailHelper"
 EditorRealTimeController = require("../Editor/EditorRealTimeController")
 NotificationsBuilder = require("../Notifications/NotificationsBuilder")
@@ -21,6 +22,16 @@ module.exports = CollaboratorsInviteController =
 				return next(err)
 			res.json({invites: invites})
 
+	_checkShouldInviteEmail: (email, callback=(err, shouldAllowInvite)->) ->
+		if Settings.restrictInvitesToExistingAccounts == true
+			logger.log {email}, "checking if user exists with this email"
+			UserGetter.getUser {email: email}, {_id: 1}, (err, user) ->
+				return callback(err) if err?
+				userExists = user? and user?._id?
+				callback(null, userExists)
+		else
+			callback(null, true)
+
 	inviteToProject: (req, res, next) ->
 		projectId = req.params.Project_id
 		email = req.body.email
@@ -37,13 +48,20 @@ module.exports = CollaboratorsInviteController =
 			if !email? or email == ""
 				logger.log {projectId, email, sendingUserId}, "invalid email address"
 				return res.sendStatus(400)
-			CollaboratorsInviteHandler.inviteToProject projectId, sendingUser, email, privileges, (err, invite) ->
+			CollaboratorsInviteController._checkShouldInviteEmail email, (err, shouldAllowInvite)->
 				if err?
-					logger.err {projectId, email, sendingUserId}, "error creating project invite"
+					logger.err {err, email, projectId, sendingUserId}, "error checking if we can invite this email address"
 					return next(err)
-				logger.log {projectId, email, sendingUserId}, "invite created"
-				EditorRealTimeController.emitToRoom(projectId, 'project:membership:changed', {invites: true})
-				return res.json {invite: invite}
+				if !shouldAllowInvite
+					logger.log {email, projectId, sendingUserId}, "not allowed to send an invite to this email address"
+					return res.json {invite: null, error: 'cannot_invite_non_user'}
+				CollaboratorsInviteHandler.inviteToProject projectId, sendingUser, email, privileges, (err, invite) ->
+					if err?
+						logger.err {projectId, email, sendingUserId}, "error creating project invite"
+						return next(err)
+					logger.log {projectId, email, sendingUserId}, "invite created"
+					EditorRealTimeController.emitToRoom(projectId, 'project:membership:changed', {invites: true})
+					return res.json {invite: invite}
 
 	revokeInvite: (req, res, next) ->
 		projectId = req.params.Project_id
