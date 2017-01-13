@@ -206,7 +206,13 @@ script(type='text/ng-template', id='resolvedCommentEntryTemplate')
 			.rp-resolved-comment-context
 				| Quoted text on&nbsp;
 				span.rp-resolved-comment-context-file {{ thread.docName }}
-				p.rp-resolved-comment-context-quote {{ thread.content }}
+				p.rp-resolved-comment-context-quote
+					span {{ thread.content | limitTo:(isCollapsed ? contentLimit : thread.content.length)}}
+					a.rp-collapse-toggle(
+						href
+						ng-if="needsCollapsing"
+						ng-click="toggleCollapse();"
+					) &nbsp;{{ isCollapsed ? '(more)' : '(less)' }}
 			.rp-comment(
 				ng-repeat="comment in thread.messages track by comment.id"
 			)
