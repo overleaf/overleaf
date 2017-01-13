@@ -13,6 +13,7 @@ define [
 
 		$scope.reviewPanel =
 			entries: {}
+			resolvedComments: {}
 			hasEntries: false
 			subView: $scope.SubViews.CUR_FILE
 			openSubView: $scope.SubViews.CUR_FILE
@@ -68,6 +69,10 @@ define [
 		getDocEntries = (doc_id) ->
 			$scope.reviewPanel.entries[doc_id] ?= {}
 			return $scope.reviewPanel.entries[doc_id]
+
+		getDocResolvedComments = (doc_id) ->
+			$scope.reviewPanel.resolvedComments[doc_id] ?= {}
+			return $scope.reviewPanel.resolvedComments[doc_id]
 
 		getChangeTracker = (doc_id) ->
 			if !rangesTrackers[doc_id]?
@@ -162,6 +167,7 @@ define [
 		updateEntries = (doc_id) ->
 			rangesTracker = getChangeTracker(doc_id)
 			entries = getDocEntries(doc_id)
+			resolvedComments = getDocResolvedComments(doc_id)
 			
 			changed = false
 
@@ -170,6 +176,8 @@ define [
 			for change_id, change of entries
 				if change_id != "add-comment"
 					delete_changes[change_id] = true 
+			for change_id, change of resolvedComments
+				delete_changes[change_id] = true 
 
 			for change in rangesTracker.changes
 				changed = true
@@ -194,7 +202,10 @@ define [
 			for comment in rangesTracker.comments
 				changed = true
 				delete delete_changes[comment.id]
-				entries[comment.id] ?= {}
+				if $scope.reviewPanel.resolvedThreadIds[comment.op.t]
+					new_comment = resolvedComments[comment.id] ?= {}
+				else
+					new_comment = entries[comment.id] ?= {}
 				new_entry = {
 					type: "comment"
 					thread_id: comment.op.t
@@ -202,11 +213,12 @@ define [
 					offset: comment.op.p
 				}
 				for key, value of new_entry
-					entries[comment.id][key] = value
+					new_comment[key] = value
 
 			for change_id, _ of delete_changes
 				changed = true
 				delete entries[change_id]
+				delete resolvedComments[change_id]
 			
 			if changed
 				$scope.$broadcast "entries:changed"
