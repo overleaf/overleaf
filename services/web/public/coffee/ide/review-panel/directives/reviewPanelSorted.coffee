@@ -59,19 +59,19 @@ define [
 
 					line_height = 15
 					
+					positionLayoutEl = ($callout_el, original_top, top) ->
+						if original_top <= top
+							$callout_el.removeClass("rp-entry-callout-inverted")
+							$callout_el.css(top: original_top + line_height, height: top - original_top)
+						else
+							$callout_el.addClass("rp-entry-callout-inverted")
+							$callout_el.css(top: top + line_height + 1, height: original_top - top)
+
 					# Put the focused entry as close to where it wants to be as possible
 					focused_entry_top = Math.max(previousMinTop, focused_entry.scope.entry.screenPos.y)
 					focused_entry.$box_el.css(top: focused_entry_top)
 					focused_entry.$indicator_el.css(top: focused_entry_top)
-					focused_entry.$callout_el.css(top: focused_entry_top + line_height, height: 0)
-					
-					positionLayoutEl = ($callout_el, original_top, top) ->
-						if original_top <= top
-							entry.$callout_el.removeClass("rp-entry-callout-inverted")
-							entry.$callout_el.css(top: original_top + line_height, height: top - original_top)
-						else
-							entry.$callout_el.addClass("rp-entry-callout-inverted")
-							entry.$callout_el.css(top: top + line_height + 1, height: original_top - top)
+					positionLayoutEl(focused_entry.$callout_el, focused_entry.scope.entry.screenPos.y, focused_entry_top)
 
 					previousBottom = focused_entry_top + focused_entry.$layout_el.height()
 					for entry in entries_after
