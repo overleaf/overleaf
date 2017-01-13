@@ -23,6 +23,7 @@ define [
 			commentThreads: {}
 			resolvedThreadIds: {}
 			layoutToLeft: false
+			rendererData: {}
 
 		$scope.$on "layout:pdf:linked", (event, state) ->
 			$scope.reviewPanel.layoutToLeft = (state.east?.size < 220 || state.east?.initClosed)

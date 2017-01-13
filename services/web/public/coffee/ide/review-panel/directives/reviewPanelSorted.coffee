@@ -32,6 +32,8 @@ define [
 					
 					return if entries.length == 0
 					
+					line_height = scope.reviewPanel.rendererData.lineHeight
+
 					focused_entry_index = Math.min(previous_focused_entry_index, entries.length - 1)
 					for entry, i in entries
 						if entry.scope.entry.focused
@@ -57,15 +59,13 @@ define [
 						previousMinTop += PADDING + height
 					min_tops.reverse()
 
-					line_height = 15
-					
 					positionLayoutEl = ($callout_el, original_top, top) ->
 						if original_top <= top
 							$callout_el.removeClass("rp-entry-callout-inverted")
-							$callout_el.css(top: original_top + line_height, height: top - original_top)
+							$callout_el.css(top: original_top + line_height - 1, height: top - original_top)
 						else
 							$callout_el.addClass("rp-entry-callout-inverted")
-							$callout_el.css(top: top + line_height + 1, height: original_top - top)
+							$callout_el.css(top: top + line_height, height: original_top - top)
 
 					# Put the focused entry as close to where it wants to be as possible
 					focused_entry_top = Math.max(previousMinTop, focused_entry.scope.entry.screenPos.y)
@@ -104,6 +104,9 @@ define [
 				scope.$on "review-panel:layout", () ->
 					scope.$applyAsync () ->
 						layout()
+				
+				scope.$watch "reviewPanel.rendererData.lineHeight", () ->
+					layout()
 
 				## Scroll lock with Ace
 				scroller = element
