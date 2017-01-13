@@ -201,7 +201,7 @@
 			top:  -(@review-off-width + @rp-entry-arrow-width);
 			right: -(@review-off-width + @rp-entry-arrow-width);
 			bottom: -(@review-off-width + @rp-entry-arrow-width);
-			left: -(@review-off-width + @rp-entry-arrow-width);
+			left: -(2 * @rp-entry-arrow-width + 2);
 			z-index: -1;
 		}
 		&::after {
@@ -218,6 +218,10 @@
 		border-right-width: @rp-entry-ribbon-width;
 		border-right-style: solid;
 
+		&::before {
+			left: -(@review-off-width + @rp-entry-arrow-width);
+			right: -(2 * @rp-entry-arrow-width + 2);
+		}
 		&::after {
 			.triangle(right, @rp-entry-arrow-width, @rp-entry-arrow-width * 1.5, inherit);
 			right: -(@rp-entry-ribbon-width  + @rp-entry-arrow-width);
@@ -789,7 +793,7 @@
 .rp-collapse-toggle {
 	color: @rp-type-blue;
 	font-weight: @rp-semibold-weight;
-	
+
 	&:hover,
 	&:focus {
 		color: darken(@rp-type-blue, 5%);
