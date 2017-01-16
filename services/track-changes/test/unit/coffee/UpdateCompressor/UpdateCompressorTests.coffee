@@ -54,6 +54,22 @@ describe "UpdateCompressor", ->
 				v: 42
 			}]
 
+		it "should ignore comment ops", ->
+			expect(@UpdateCompressor.convertToSingleOpUpdates [{
+				op:   [ @op1 = { p: 0, i: "Foo" }, @op2 = { p: 9, c: "baz"}, @op3 = { p: 6, i: "bar"} ]
+				meta: { ts: @ts1, user_id: @user_id }
+				v: 42
+			}])
+			.to.deep.equal [{
+				op: @op1,
+				meta: { start_ts: @ts1, end_ts: @ts1, user_id: @user_id },
+				v: 42
+			}, {
+				op: @op3,
+				meta: { start_ts: @ts1, end_ts: @ts1, user_id: @user_id },
+				v: 42
+			}]
+
 	describe "concatUpdatesWithSameVersion", ->
 		it "should concat updates with the same version", ->
 			expect(@UpdateCompressor.concatUpdatesWithSameVersion [{

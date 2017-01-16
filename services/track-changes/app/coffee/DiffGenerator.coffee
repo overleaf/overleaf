@@ -47,6 +47,9 @@ module.exports = DiffGenerator =
 
 		else if op.d?
 			return content.slice(0, op.p) + op.d + content.slice(op.p)
+		
+		else
+			return content
 
 	rewindUpdates: (content, updates) ->
 		for update in updates.reverse()
