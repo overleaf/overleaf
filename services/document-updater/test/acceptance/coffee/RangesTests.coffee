@@ -3,7 +3,6 @@ chai = require("chai")
 chai.should()
 expect = chai.expect
 async = require "async"
-rclient = require("redis").createClient()
 
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
