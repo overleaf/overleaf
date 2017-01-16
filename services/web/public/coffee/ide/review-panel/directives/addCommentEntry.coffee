@@ -17,6 +17,8 @@ define [
 			scope.startNewComment = () ->
 				scope.state.isAdding = true
 				scope.onStartNew()
+				setTimeout () ->
+					scope.$broadcast "comment:new:open"
 
 			scope.cancelNewComment = () ->
 				scope.state.isAdding = false
