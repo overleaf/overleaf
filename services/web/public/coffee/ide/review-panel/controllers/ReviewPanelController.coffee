@@ -163,11 +163,12 @@ define [
 
 		$scope.refreshResolvedCommentsDropdown = () ->
 			$scope.reviewPanel.dropdown.loading = true
-			refreshRanges()
-				.then () ->
-					$scope.reviewPanel.dropdown.loading = false
-				.catch () ->
-					$scope.reviewPanel.dropdown.loading = false
+			q = refreshRanges()
+			q.then () ->
+				$scope.reviewPanel.dropdown.loading = false
+			q.catch () ->
+				$scope.reviewPanel.dropdown.loading = false
+			return q
 
 		updateEntries = (doc_id) ->
 			rangesTracker = getChangeTracker(doc_id)

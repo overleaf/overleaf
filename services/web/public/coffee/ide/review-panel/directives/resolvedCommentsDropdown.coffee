@@ -23,6 +23,7 @@ define [
 				scope.state.isOpen = !scope.state.isOpen
 				if (scope.state.isOpen)
 					scope.onOpen()
+						.then () -> filterResolvedComments()
 
 			scope.resolvedComments = []
 
@@ -54,5 +55,3 @@ define [
 							resolvedComment.docName = getDocNameById(docId)
 
 							scope.resolvedComments.push(resolvedComment)
-
-			scope.$on "entries:changed", filterResolvedComments
