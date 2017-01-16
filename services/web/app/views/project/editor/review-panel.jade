@@ -84,7 +84,7 @@
 						entry="entry"
 						user="users[entry.metadata.user_id]"
 						on-indicator-click="toggleReviewPanel();"
-						ng-click="gotoEntry(doc_id, entry)"
+						ng-click="gotoEntry(doc.doc.id, entry)"
 						permissions="permissions"
 					)
 
@@ -94,7 +94,7 @@
 						threads="reviewPanel.commentThreads"
 						on-reply="submitReply(entry, entry_id);"
 						on-indicator-click="toggleReviewPanel();"
-						ng-click="gotoEntry(doc_id, entry)"
+						ng-click="gotoEntry(doc.doc.id, entry)"
 						permissions="permissions"
 					)
 
