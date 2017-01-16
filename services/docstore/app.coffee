@@ -29,6 +29,7 @@ app.param 'doc_id', (req, res, next, doc_id) ->
 		next new Error("invalid doc id")
 
 app.get  '/project/:project_id/doc', HttpController.getAllDocs
+app.get  '/project/:project_id/ranges', HttpController.getAllRanges
 app.get  '/project/:project_id/doc/:doc_id', HttpController.getDoc
 app.get  '/project/:project_id/doc/:doc_id/raw', HttpController.getRawDoc
 # Add 16kb overhead for the JSON encoding

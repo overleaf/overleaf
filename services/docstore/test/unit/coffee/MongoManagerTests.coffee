@@ -20,14 +20,15 @@ describe "MongoManager", ->
 		beforeEach ->
 			@doc = { name: "mock-doc"}
 			@db.docs.find = sinon.stub().callsArgWith(2, null, [@doc])
-			@MongoManager.findDoc @project_id, @doc_id, @callback
+			@filter = { lines: true }
+			@MongoManager.findDoc @project_id, @doc_id, @filter, @callback
 
 		it "should find the doc", ->
 			@db.docs.find
 				.calledWith({
 					_id: ObjectId(@doc_id)
 					project_id: ObjectId(@project_id)
-				}, {})
+				}, @filter)
 				.should.equal true
 
 		it "should call the callback with the doc", ->
@@ -35,6 +36,7 @@ describe "MongoManager", ->
 
 	describe "getProjectsDocs", ->
 		beforeEach ->
+			@filter = {lines: true}
 			@doc1 = { name: "mock-doc1" }
 			@doc2 = { name: "mock-doc2" }
 			@doc3 = { name: "mock-doc3" }
@@ -43,28 +45,28 @@ describe "MongoManager", ->
 		
 		describe "with included_deleted = false", ->
 			beforeEach -> 
-				@MongoManager.getProjectsDocs @project_id, include_deleted: false, @callback
+				@MongoManager.getProjectsDocs @project_id, include_deleted: false, @filter, @callback
 
 			it "should find the non-deleted docs via the project_id", ->
 				@db.docs.find
 					.calledWith({
 						project_id: ObjectId(@project_id)
 						deleted: { $ne: true }
-					}, {})
+					}, @filter)
 					.should.equal true
 
 			it "should call the callback with the docs", ->
 				@callback.calledWith(null, [@doc, @doc3, @doc4]).should.equal true
 				
 		describe "with included_deleted = true", ->
-			beforeEach -> 
-				@MongoManager.getProjectsDocs @project_id, include_deleted: true, @callback
+			beforeEach ->
+				@MongoManager.getProjectsDocs @project_id, include_deleted: true, @filter, @callback
 
 			it "should find all via the project_id", ->
 				@db.docs.find
 					.calledWith({
 						project_id: ObjectId(@project_id)
-					}, {})
+					}, @filter)
 					.should.equal true
 
 			it "should call the callback with the docs", ->
@@ -76,7 +78,7 @@ describe "MongoManager", ->
 			@oldRev = 77
 
 		it "should upsert the document", (done)->	
-			@MongoManager.upsertIntoDocCollection @project_id, @doc_id, @lines, (err)=>
+			@MongoManager.upsertIntoDocCollection @project_id, @doc_id, {@lines}, (err)=>
 				args = @db.docs.update.args[0]
 				assert.deepEqual args[0], {_id: ObjectId(@doc_id)}
 				assert.equal args[1]["$set"]["lines"], @lines
@@ -85,7 +87,7 @@ describe "MongoManager", ->
 				done()
 
 		it "should return the error", (done)->
-			@MongoManager.upsertIntoDocCollection @project_id, @doc_id, @lines, (err)=>
+			@MongoManager.upsertIntoDocCollection @project_id, @doc_id, {@lines}, (err)=>
 				err.should.equal @stubbedErr
 				done()
 
@@ -94,15 +96,15 @@ describe "MongoManager", ->
 			@db.docs.update = sinon.stub().callsArgWith(2, @stubbedErr)
 			@oldRev = 77
 
-		it "should process the update", (done)->	
-			@MongoManager.markDocAsDeleted @doc_id, (err)=>
+		it "should process the update", (done) ->
+			@MongoManager.markDocAsDeleted @project_id, @doc_id, (err)=>
 				args = @db.docs.update.args[0]
-				assert.deepEqual args[0], {_id: ObjectId(@doc_id)}
+				assert.deepEqual args[0], {_id: ObjectId(@doc_id), project_id: ObjectId(@project_id)}
 				assert.equal args[1]["$set"]["deleted"], true
 				done()
 
 		it "should return the error", (done)->
-			@MongoManager.markDocAsDeleted @doc_id, (err)=>
+			@MongoManager.markDocAsDeleted @project_id, @doc_id, (err)=>
 				err.should.equal @stubbedErr
 				done()
 

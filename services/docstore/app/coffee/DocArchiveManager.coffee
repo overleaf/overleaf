@@ -11,7 +11,7 @@ thirtySeconds = 30 * 1000
 module.exports = DocArchive =
 
 	archiveAllDocs: (project_id, callback = (err, docs) ->) ->
-		MongoManager.getProjectsDocs project_id, {include_deleted: true}, (err, docs) ->
+		MongoManager.getProjectsDocs project_id, {include_deleted: true}, {lines: true, rev: true, inS3: true}, (err, docs) ->
 			if err?
 				return callback(err)
 			else if !docs?
@@ -67,7 +67,7 @@ module.exports = DocArchive =
 			if err? || res.statusCode != 200
 				logger.err err:err, res:res, project_id:project_id, doc_id:doc_id, "something went wrong unarchiving doc from aws"
 				return callback new Errors.NotFoundError("Error in S3 request")
-			MongoManager.upsertIntoDocCollection project_id, doc_id.toString(), lines, (err) ->
+			MongoManager.upsertIntoDocCollection project_id, doc_id.toString(), {lines}, (err) ->
 				return callback(err) if err?
 				logger.log project_id: project_id, doc_id: doc_id, "deleting doc from s3"
 				request.del options, (err, res, body)->

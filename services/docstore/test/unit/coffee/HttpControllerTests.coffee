@@ -45,7 +45,7 @@ describe "HttpController", ->
 
 			it "should get the document with the version (including deleted)", ->
 				@DocManager.getDoc
-					.calledWith(@project_id, @doc_id, {version: true})
+					.calledWith(@project_id, @doc_id, {lines: true, rev: true, deleted: true, version: true, ranges: true})
 					.should.equal true
 
 			it "should return the doc as JSON", ->
@@ -54,7 +54,6 @@ describe "HttpController", ->
 						_id: @doc_id
 						lines: @doc.lines
 						rev: @doc.rev
-						deleted: false
 						version: @doc.version
 					})
 					.should.equal true
@@ -68,7 +67,7 @@ describe "HttpController", ->
 
 			it "should get the doc from the doc manager", ->
 				@HttpController.getDoc @req, @res, @next
-				@DocManager.getDoc.calledWith(@project_id, @doc_id, {version: true}).should.equal true
+				@DocManager.getDoc.calledWith(@project_id, @doc_id, {lines: true, rev: true, deleted: true, version: true, ranges: true}).should.equal true
 
 			it "should return 404 if the query string delete is not set ", ->
 				@HttpController.getDoc @req, @res, @next
@@ -97,7 +96,7 @@ describe "HttpController", ->
 
 		it "should get the document without the version", ->
 			@DocManager.getDoc
-				.calledWith(@project_id, @doc_id, {version: false})
+				.calledWith(@project_id, @doc_id, {lines: true})
 				.should.equal true
 
 		it "should set the content type header", ->
@@ -120,12 +119,12 @@ describe "HttpController", ->
 					lines: ["mock", "lines", "two"]
 					rev: 4
 				}]
-				@DocManager.getAllNonDeletedDocs = sinon.stub().callsArgWith(1, null, @docs)
+				@DocManager.getAllNonDeletedDocs = sinon.stub().callsArgWith(2, null, @docs)
 				@HttpController.getAllDocs @req, @res, @next
 
 			it "should get all the (non-deleted) docs", ->
 				@DocManager.getAllNonDeletedDocs
-					.calledWith(@project_id)
+					.calledWith(@project_id, {lines: true, rev: true})
 					.should.equal true
 
 			it "should return the doc as JSON", ->
@@ -134,12 +133,10 @@ describe "HttpController", ->
 						_id:   @docs[0]._id.toString()
 						lines: @docs[0].lines
 						rev:   @docs[0].rev
-						deleted: false
 					}, {
 						_id:   @docs[1]._id.toString()
 						lines: @docs[1].lines
 						rev:   @docs[1].rev
-						deleted: false
 					}])
 					.should.equal true
 
@@ -158,7 +155,7 @@ describe "HttpController", ->
 					lines: ["mock", "lines", "two"]
 					rev: 4
 				}]
-				@DocManager.getAllNonDeletedDocs = sinon.stub().callsArgWith(1, null, @docs)
+				@DocManager.getAllNonDeletedDocs = sinon.stub().callsArgWith(2, null, @docs)
 				@HttpController.getAllDocs @req, @res, @next
 
 			it "should return the non null docs as JSON", ->
@@ -167,12 +164,10 @@ describe "HttpController", ->
 						_id:   @docs[0]._id.toString()
 						lines: @docs[0].lines
 						rev:   @docs[0].rev
-						deleted: false
 					}, {
 						_id:   @docs[2]._id.toString()
 						lines: @docs[2].lines
 						rev:   @docs[2].rev
-						deleted: false
 					}])
 					.should.equal true
 
@@ -185,6 +180,37 @@ describe "HttpController", ->
 					)
 					.should.equal true
 
+	describe "getAllRanges", ->
+		describe "normally", ->
+			beforeEach ->
+				@req.params =
+					project_id: @project_id
+				@docs = [{
+					_id: ObjectId()
+					ranges: {"mock_ranges": "one"}
+				}, {
+					_id: ObjectId()
+					ranges: {"mock_ranges": "two"}
+				}]
+				@DocManager.getAllNonDeletedDocs = sinon.stub().callsArgWith(2, null, @docs)
+				@HttpController.getAllRanges @req, @res, @next
+
+			it "should get all the (non-deleted) doc ranges", ->
+				@DocManager.getAllNonDeletedDocs
+					.calledWith(@project_id, {ranges: true})
+					.should.equal true
+
+			it "should return the doc as JSON", ->
+				@res.json
+					.calledWith([{
+						_id:    @docs[0]._id.toString()
+						ranges: @docs[0].ranges
+					}, {
+						_id:    @docs[1]._id.toString()
+						ranges: @docs[1].ranges
+					}])
+					.should.equal true
+
 	describe "updateDoc", ->
 		beforeEach ->
 			@req.params =
@@ -195,12 +221,14 @@ describe "HttpController", ->
 			beforeEach ->
 				@req.body =
 					lines: @lines = ["hello", "world"]
+					version: @version = 42
+					ranges: @ranges = { changes: "mock" }
 				@DocManager.updateDoc = sinon.stub().yields(null, true, @rev = 5)
 				@HttpController.updateDoc @req, @res, @next
 
 			it "should update the document", ->
 				@DocManager.updateDoc
-					.calledWith(@project_id, @doc_id, @lines, undefined)
+					.calledWith(@project_id, @doc_id, @lines, @version, @ranges)
 					.should.equal true
 
 			it "should return a modified status", ->
@@ -212,6 +240,7 @@ describe "HttpController", ->
 			beforeEach ->
 				@req.body =
 					lines: @lines = ["hello", "world"]
+					version: @version = 42
 				@DocManager.updateDoc = sinon.stub().yields(null, false, @rev = 5)
 				@HttpController.updateDoc @req, @res, @next
 
@@ -222,7 +251,7 @@ describe "HttpController", ->
 
 		describe "when the doc lines are not provided", ->
 			beforeEach ->
-				@req.body = {}
+				@req.body = { version: 42 }
 				@DocManager.updateDoc = sinon.stub().yields(null, false)
 				@HttpController.updateDoc @req, @res, @next
 
@@ -234,22 +263,18 @@ describe "HttpController", ->
 					.calledWith(400)
 					.should.equal true
 
-		describe "when the doc version is provided", ->
+		describe "when the doc version is not provided", ->
 			beforeEach ->
-				@req.body =
-					lines: @lines = ["hello", "world"]
-					version: @version = 42
-				@DocManager.updateDoc = sinon.stub().yields(null, true, @rev = 5)
+				@req.body = { lines : [ "foo" ]}
+				@DocManager.updateDoc = sinon.stub().yields(null, false)
 				@HttpController.updateDoc @req, @res, @next
 
-			it "should update the document with the lines and version", ->
-				@DocManager.updateDoc
-					.calledWith(@project_id, @doc_id, @lines, @version)
-					.should.equal true
+			it "should not update the document", ->
+				@DocManager.updateDoc.called.should.equal false
 
-			it "should return a modified status", ->
-				@res.json
-					.calledWith(modified: true, rev: @rev)
+			it "should return a 400 (bad request) response", ->
+				@res.send
+					.calledWith(400)
 					.should.equal true
 
 	describe "deleteDoc", ->
