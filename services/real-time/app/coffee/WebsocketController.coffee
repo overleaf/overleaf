@@ -70,7 +70,7 @@ module.exports = WebsocketController =
 				callback()
 			, WebsocketController.FLUSH_IF_EMPTY_DELAY
 			
-	joinDoc: (client, doc_id, fromVersion = -1, callback = (error, doclines, version, ops) ->) ->
+	joinDoc: (client, doc_id, fromVersion = -1, callback = (error, doclines, version, ops, ranges) ->) ->
 		metrics.inc "editor.join-doc"
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
 			return callback(error) if error?
