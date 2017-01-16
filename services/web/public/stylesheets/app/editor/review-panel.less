@@ -10,9 +10,11 @@
 
 @rp-green               : #2c8e30;
 @rp-dim-green           : #cae3cb;
+@rp-green-on-dark		: rgba(37, 107, 41, 0.5);
 @rp-red                 : #c5060b;
 @rp-dim-red             : #f3cdce;
 @rp-yellow              : #f3b111;
+@rp-yellow-on-dark		: rgba(194, 93, 11, 0.5);
 @rp-dim-yellow          : #ffe9b2;
 @rp-grey                : #aaaaaa;
 
@@ -702,6 +704,15 @@
 	.track-changes-deleted-marker {
 		border-left: 2px dotted @rp-red;
 		margin-left: -1px;
+	}
+
+	.ace_dark {
+		.track-changes-comment-marker {
+			background-color: @rp-yellow-on-dark
+		}
+		.track-changes-added-marker {
+			background-color: @rp-green-on-dark;
+		}	
 	}
 }
 
