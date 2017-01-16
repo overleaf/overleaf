@@ -195,10 +195,16 @@ script(type='text/ng-template', id='commentEntryTemplate')
 					placeholder="{{ 'Hit \"Enter\" to reply' + (entry.resolved ? ' and re-open' : '') }}"
 				)
 			.rp-entry-actions
-				a.rp-entry-button(href, ng-click="animateAndCallOnResolve();", ng-if="permissions.comment && permissions.write") 
+				button.rp-entry-button(
+					ng-click="animateAndCallOnResolve();"
+					ng-if="permissions.comment && permissions.write"
+				) 
 					i.fa.fa-inbox
 					| &nbsp;Resolve
-				a.rp-entry-button(href, ng-click="onReply();", ng-if="permissions.comment")
+				button.rp-entry-button(
+					ng-click="onReply();"
+					ng-if="permissions.comment"
+					ng-disabled="!entry.replyContent.length")
 					i.fa.fa-reply
 					| &nbsp;Reply
 	
@@ -214,7 +220,7 @@ script(type='text/ng-template', id='resolvedCommentEntryTemplate')
 						href
 						ng-if="needsCollapsing"
 						ng-click="toggleCollapse();"
-					) &nbsp;{{ isCollapsed ? '(more)' : '(less)' }}
+					) &nbsp;{{ isCollapsed ? '... (show all)' : ' (show less)' }}
 			.rp-comment(
 				ng-repeat="comment in thread.messages track by comment.id"
 			)
