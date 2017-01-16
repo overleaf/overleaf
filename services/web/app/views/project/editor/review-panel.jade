@@ -142,14 +142,14 @@ script(type='text/ng-template', id='changeEntryTemplate')
 								href
 								ng-if="needsCollapsing"
 								ng-click="toggleCollapse();"
-							) &nbsp;{{ isCollapsed ? '(more)' : '(less)' }}
+							) {{ isCollapsed ? '... (show all)' : ' (show less)' }}
 						span(ng-switch-when="delete") Deleted&nbsp;
 							del.rp-content-highlight {{ entry.content | limitTo:(isCollapsed ? contentLimit : entry.content.length) }}
 							a.rp-collapse-toggle(
 								href
 								ng-if="needsCollapsing"
 								ng-click="toggleCollapse();"
-							) &nbsp;{{ isCollapsed ? '(more)' : '(less)' }}
+							) {{ isCollapsed ? '... (show all)' : ' (show less)' }}
 					.rp-entry-metadata
 						| {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}&nbsp;&bull;&nbsp;
 						span.rp-entry-user(style="color: hsl({{ user.hue }}, 70%, 40%);") {{ user.name }} 
