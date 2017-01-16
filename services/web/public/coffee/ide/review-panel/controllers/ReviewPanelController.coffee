@@ -44,8 +44,9 @@ define [
 		$scope.reviewPanelEventsBridge = new EventEmitter()
 		
 		ide.socket.on "new-comment", (thread_id, comment) ->
-			$scope.reviewPanel.commentThreads[thread_id] ?= { messages: [] }
-			$scope.reviewPanel.commentThreads[thread_id].messages.push(formatComment(comment))
+			thread = getThread(thread_id)
+			delete thread.submitting
+			thread.messages.push(formatComment(comment))
 			$scope.$apply()
 			$timeout () ->
 				$scope.$broadcast "review-panel:layout"
@@ -73,6 +74,10 @@ define [
 		getDocResolvedComments = (doc_id) ->
 			$scope.reviewPanel.resolvedComments[doc_id] ?= {}
 			return $scope.reviewPanel.resolvedComments[doc_id]
+		
+		getThread = (thread_id) ->
+			$scope.reviewPanel.commentThreads[thread_id] ?= { messages: [] }
+			return $scope.reviewPanel.commentThreads[thread_id]
 
 		getChangeTracker = (doc_id) ->
 			if !rangesTrackers[doc_id]?
@@ -274,6 +279,8 @@ define [
 		
 		$scope.submitNewComment = (content) ->
 			thread_id = RangesTracker.generateId()
+			thread = getThread(thread_id)
+			thread.submitting = true
 			$scope.$broadcast "comment:add", thread_id
 			$http.post("/project/#{$scope.project_id}/thread/#{thread_id}/messages", {content, _csrf: window.csrfToken})
 				.error (error) ->
@@ -297,6 +304,8 @@ define [
 				.error (error) ->
 					ide.showGenericMessageModal("Error submitting comment", "Sorry, there was a problem submitting your comment")
 
+			thread = getThread(thread_id)
+			thread.submitting = true
 			entry.replyContent = ""
 			entry.replying = false
 			$timeout () ->

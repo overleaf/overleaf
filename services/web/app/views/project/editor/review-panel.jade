@@ -185,6 +185,8 @@ script(type='text/ng-template', id='commentEntryTemplate')
 						| {{ comment.content }}
 					.rp-entry-metadata
 						| {{ comment.timestamp | date : 'MMM d, y h:mm a' }}
+			.rp-loading(ng-if="threads[entry.thread_id].submitting")
+				i.fa.fa-spinner.fa-spin
 			.rp-comment-reply(ng-if="permissions.comment")
 				textarea.rp-comment-input(
 					ng-model="entry.replyContent"
