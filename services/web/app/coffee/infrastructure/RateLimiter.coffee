@@ -19,7 +19,6 @@ module.exports = RateLimiter =
 			if err?
 				return callback(err)
 			allowed = timeLeft == 0
-			console.log ">> limit", namespace, k, timeLeft, actionsLeft, ", allowed", allowed
 			callback(null, allowed)
 
 	clearRateLimit: (endpointName, subject, callback) ->

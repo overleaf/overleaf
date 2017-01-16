@@ -1,9 +1,11 @@
 expect = require("chai").expect
+assert = require("chai").assert
 async = require("async")
 User = require "./helpers/User"
 request = require "./helpers/request"
 settings = require "settings-sharelatex"
 redis = require "./helpers/redis"
+_ = require 'lodash'
 
 
 
@@ -30,6 +32,41 @@ tryLoginThroughRegistrationForm = (user, email, password, callback=(err, respons
 				email: email
 				password: password
 		}, callback
+
+
+describe "LoginRateLimit", ->
+
+	before ->
+		@user = new User()
+		@badEmail = 'bademail@example.com'
+		@badPassword = 'badpassword'
+
+	it 'should rate limit login attempts after 10 within two minutes', (done) ->
+		@user.request.get '/login', (err, res, body) =>
+			async.timesSeries(
+				15
+				, (n, cb) =>
+					@user.getCsrfToken (error) =>
+						return cb(error) if error?
+						@user.request.post {
+							url: "/login"
+							json:
+								email: @badEmail
+								password: @badPassword
+						}, (err, response, body) =>
+							cb(null, body?.message?.text)
+				, (err, results) =>
+					# ten incorrect-credentials messages, then five rate-limit messages
+					expect(results.length).to.equal 15
+					assert.deepEqual(
+						results,
+						_.concat(
+							_.fill([1..10], 'Your email or password is incorrect. Please try again'),
+							_.fill([1..5], 'This account has had too many login requests. Please wait 2 minutes before trying to log in again')
+						)
+					)
+					done()
+			)
 
 
 describe "LoginViaRegistration", ->
