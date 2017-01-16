@@ -37,6 +37,9 @@ module.exports = CollaboratorsInviteController =
 		email = req.body.email
 		sendingUser = AuthenticationController.getSessionUser(req)
 		sendingUserId = sendingUser._id
+		if email == sendingUser.email
+			logger.log {projectId, email, sendingUserId}, "cannot invite yourself to project"
+			return res.json {invite: null, error: 'cannot_invite_self'}
 		logger.log {projectId, email, sendingUserId}, "inviting to project"
 		LimitationsManager.canAddXCollaborators projectId, 1, (error, allowed) =>
 			return next(error) if error?
