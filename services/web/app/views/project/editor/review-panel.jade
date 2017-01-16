@@ -204,7 +204,8 @@ script(type='text/ng-template', id='commentEntryTemplate')
 				button.rp-entry-button(
 					ng-click="onReply();"
 					ng-if="permissions.comment"
-					ng-disabled="!entry.replyContent.length")
+					ng-disabled="!entry.replyContent.length"
+				)
 					i.fa.fa-reply
 					| &nbsp;Reply
 	
@@ -284,10 +285,15 @@ script(type='text/ng-template', id='addCommentEntryTemplate')
 						focus-on="comment:new:open"
 					)
 				.rp-entry-actions
-					a.rp-entry-button(href, ng-click="cancelNewComment();") 
+					button.rp-entry-button(
+						ng-click="cancelNewComment();"
+					) 
 						i.fa.fa-times
 						| &nbsp;Cancel
-					a.rp-entry-button(href, ng-click="submitNewComment()") 
+					button.rp-entry-button(
+						ng-click="submitNewComment()"
+						ng-disabled="!state.content.length"
+					) 
 						i.fa.fa-comment
 						| &nbsp;Comment
 
