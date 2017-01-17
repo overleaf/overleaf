@@ -123,8 +123,6 @@ Thank you
 				description: "Join #{ opts.project.name } at ShareLaTeX"
 		})
 
-
-
 templates.completeJoinGroupAccount =
 	subject: _.template "Verify Email to join <%= group_name %> group"
 	layout: BaseWithHeaderEmailLayout
@@ -148,6 +146,21 @@ Thank You
 			ctaURL: opts.completeJoinUrl
 			gmailGoToAction: null
 		})
+
+templates.testEmail =
+	subject: _.template "Test Email from ShareLaTeX"
+	layout: PersonalEmailLayout
+	type: 'notification'
+	plainTextTemplate: _.template """
+Hi,
+
+This is a test email, from ShareLaTeX.
+
+#{settings.appName} - <%= siteUrl %>
+"""
+	compiledTemplate: _.template """
+	<p>This is a test email, from ShareLaTeX.</p>
+	"""
 
 module.exports =
 	templates: templates
