@@ -4,7 +4,7 @@ logger = require "logger-sharelatex"
 async = require "async"
 WebRedisManager = require "./WebRedisManager"
 
-module.exports = TrackChangesManager =
+module.exports = HistoryManager =
 	flushDocChanges: (project_id, doc_id, callback = (error) ->) ->
 		if !settings.apis?.trackchanges?
 			logger.warn doc_id: doc_id, "track changes API is not configured, so not flushing"
@@ -32,13 +32,13 @@ module.exports = TrackChangesManager =
 			# ops. If we've changed, then we've gone over a multiple of 50 and should flush.
 			# (Most of the time, we will only hit 50 and then flushing will put us back to 0)
 			previousLength = length - ops.length
-			prevBlock = Math.floor(previousLength / TrackChangesManager.FLUSH_EVERY_N_OPS)
-			newBlock  = Math.floor(length / TrackChangesManager.FLUSH_EVERY_N_OPS)
+			prevBlock = Math.floor(previousLength / HistoryManager.FLUSH_EVERY_N_OPS)
+			newBlock  = Math.floor(length / HistoryManager.FLUSH_EVERY_N_OPS)
 			if newBlock != prevBlock
 				# Do this in the background since it uses HTTP and so may be too
 				# slow to wait for when processing a doc update.
 				logger.log length: length, doc_id: doc_id, project_id: project_id, "flushing track changes api"
-				TrackChangesManager.flushDocChanges project_id, doc_id,  (error) ->
+				HistoryManager.flushDocChanges project_id, doc_id,  (error) ->
 					if error?
 						logger.error err: error, doc_id: doc_id, project_id: project_id, "error flushing doc to track changes api"
 			callback()

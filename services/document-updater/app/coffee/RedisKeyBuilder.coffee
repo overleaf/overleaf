@@ -34,6 +34,8 @@ module.exports = RedisKeyBuilder =
 		return (key_schema) -> key_schema.uncompressedHistoryOp({doc_id})
 	pendingUpdates: ({doc_id}) ->
 		return (key_schema) -> key_schema.pendingUpdates({doc_id})
+	ranges: ({doc_id}) ->
+		return (key_schema) -> key_schema.ranges({doc_id})
 	docsInProject: ({project_id}) ->
 		return (key_schema) -> key_schema.docsInProject({project_id})
 	docsWithHistoryOps: ({project_id}) ->

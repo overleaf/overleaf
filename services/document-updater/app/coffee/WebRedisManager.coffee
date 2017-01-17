@@ -33,3 +33,6 @@ module.exports = WebRedisManager =
 			return callback(error) if error?
 			[length, _] = results
 			callback(error, length)
+	
+	sendData: (data) ->
+		rclient.publish "applied-ops", JSON.stringify(data)

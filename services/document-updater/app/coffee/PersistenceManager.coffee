@@ -10,7 +10,7 @@ logger = require "logger-sharelatex"
 MAX_HTTP_REQUEST_LENGTH = 5000 # 5 seconds
 
 module.exports = PersistenceManager =
-	getDoc: (project_id, doc_id, _callback = (error, lines, version) ->) ->
+	getDoc: (project_id, doc_id, _callback = (error, lines, version, ranges) ->) ->
 		timer = new Metrics.Timer("persistenceManager.getDoc")
 		callback = (args...) ->
 			timer.done()
@@ -39,13 +39,13 @@ module.exports = PersistenceManager =
 					return callback(new Error("web API response had no doc lines"))
 				if !body.version? or not body.version instanceof Number
 					return callback(new Error("web API response had no valid doc version"))
-				return callback null, body.lines, body.version
+				return callback null, body.lines, body.version, body.ranges
 			else if res.statusCode == 404
 				return callback(new Errors.NotFoundError("doc not not found: #{url}"))
 			else
 				return callback(new Error("error accessing web API: #{url} #{res.statusCode}"))
 
-	setDoc: (project_id, doc_id, lines, version, _callback = (error) ->) ->
+	setDoc: (project_id, doc_id, lines, version, ranges, _callback = (error) ->) ->
 		timer = new Metrics.Timer("persistenceManager.setDoc")
 		callback = (args...) ->
 			timer.done()
@@ -55,11 +55,10 @@ module.exports = PersistenceManager =
 		request {
 			url: url
 			method: "POST"
-			body: JSON.stringify
+			json:
 				lines: lines
+				ranges: ranges
 				version: version
-			headers:
-				"content-type": "application/json"
 			auth:
 				user: Settings.apis.web.user
 				pass: Settings.apis.web.pass

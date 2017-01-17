@@ -18,7 +18,7 @@ module.exports = HttpController =
 		else
 			fromVersion = -1
 
-		DocumentManager.getDocAndRecentOpsWithLock project_id, doc_id, fromVersion, (error, lines, version, ops) ->
+		DocumentManager.getDocAndRecentOpsWithLock project_id, doc_id, fromVersion, (error, lines, version, ops, ranges) ->
 			timer.done()
 			return next(error) if error?
 			logger.log project_id: project_id, doc_id: doc_id, "got doc via http"
@@ -29,6 +29,7 @@ module.exports = HttpController =
 				lines: lines
 				version: version
 				ops: ops
+				ranges: ranges
 
 	_getTotalSizeOfLines: (lines) ->
 		size = 0
@@ -96,3 +97,15 @@ module.exports = HttpController =
 			return next(error) if error?
 			logger.log project_id: project_id, "deleted project via http"
 			res.send 204 # No Content
+	
+	acceptChange: (req, res, next = (error) ->) ->
+		{project_id, doc_id, change_id} = req.params
+		logger.log {project_id, doc_id, change_id}, "accepting change via http"
+		timer = new Metrics.Timer("http.acceptChange")
+		DocumentManager.acceptChangeWithLock project_id, doc_id, change_id, (error) ->
+			timer.done()
+			return next(error) if error?
+			logger.log {project_id, doc_id, change_id}, "accepted change via http"
+			res.send 204 # No Content
+		
+

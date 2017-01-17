@@ -3,7 +3,10 @@ PersistenceManager = require "./PersistenceManager"
 DiffCodec = require "./DiffCodec"
 logger = require "logger-sharelatex"
 Metrics = require "./Metrics"
-TrackChangesManager = require "./TrackChangesManager"
+HistoryManager = require "./HistoryManager"
+WebRedisManager = require "./WebRedisManager"
+Errors = require "./Errors"
+RangesManager = require "./RangesManager"
 
 module.exports = DocumentManager =
 	getDoc: (project_id, doc_id, _callback = (error, lines, version, alreadyLoaded) ->) ->
@@ -12,33 +15,33 @@ module.exports = DocumentManager =
 			timer.done()
 			_callback(args...)
 
-		RedisManager.getDoc project_id, doc_id, (error, lines, version) ->
+		RedisManager.getDoc project_id, doc_id, (error, lines, version, ranges) ->
 			return callback(error) if error?
 			if !lines? or !version?
-				logger.log project_id: project_id, doc_id: doc_id, "doc not in redis so getting from persistence API"
-				PersistenceManager.getDoc project_id, doc_id, (error, lines, version) ->
+				logger.log {project_id, doc_id}, "doc not in redis so getting from persistence API"
+				PersistenceManager.getDoc project_id, doc_id, (error, lines, version, ranges) ->
 					return callback(error) if error?
-					logger.log project_id: project_id, doc_id: doc_id, lines: lines, version: version, "got doc from persistence API"
-					RedisManager.putDocInMemory project_id, doc_id, lines, version, (error) ->
+					logger.log {project_id, doc_id, lines, version}, "got doc from persistence API"
+					RedisManager.putDocInMemory project_id, doc_id, lines, version, ranges, (error) ->
 						return callback(error) if error?
-						callback null, lines, version, false
+						callback null, lines, version, ranges, false
 			else
-				callback null, lines, version, true
+				callback null, lines, version, ranges, true
 
-	getDocAndRecentOps: (project_id, doc_id, fromVersion, _callback = (error, lines, version, recentOps) ->) ->
+	getDocAndRecentOps: (project_id, doc_id, fromVersion, _callback = (error, lines, version, recentOps, ranges) ->) ->
 		timer = new Metrics.Timer("docManager.getDocAndRecentOps")
 		callback = (args...) ->
 			timer.done()
 			_callback(args...)
 		
-		DocumentManager.getDoc project_id, doc_id, (error, lines, version) ->
+		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges) ->
 			return callback(error) if error?
 			if fromVersion == -1
-				callback null, lines, version, []
+				callback null, lines, version, [], ranges
 			else
 				RedisManager.getPreviousDocOps doc_id, fromVersion, version, (error, ops) ->
 					return callback(error) if error?
-					callback null, lines, version, ops
+					callback null, lines, version, ops, ranges
 
 	setDoc: (project_id, doc_id, newLines, source, user_id, _callback = (error) ->) ->
 		timer = new Metrics.Timer("docManager.setDoc")
@@ -50,7 +53,7 @@ module.exports = DocumentManager =
 			return callback(new Error("No lines were provided to setDoc"))
 
 		UpdateManager = require "./UpdateManager"
-		DocumentManager.getDoc project_id, doc_id, (error, oldLines, version, alreadyLoaded) ->
+		DocumentManager.getDoc project_id, doc_id, (error, oldLines, version, ranges, alreadyLoaded) ->
 			return callback(error) if error?
 			
 			if oldLines? and oldLines.length > 0 and oldLines[0].text?
@@ -82,21 +85,20 @@ module.exports = DocumentManager =
 						DocumentManager.flushAndDeleteDoc project_id, doc_id, (error) ->
 							return callback(error) if error?
 							callback null
-		
 
 	flushDocIfLoaded: (project_id, doc_id, _callback = (error) ->) ->
 		timer = new Metrics.Timer("docManager.flushDocIfLoaded")
 		callback = (args...) ->
 			timer.done()
 			_callback(args...)
-		RedisManager.getDoc project_id, doc_id, (error, lines, version) ->
+		RedisManager.getDoc project_id, doc_id, (error, lines, version, ranges) ->
 			return callback(error) if error?
 			if !lines? or !version?
 				logger.log project_id: project_id, doc_id: doc_id, "doc is not loaded so not flushing"
 				callback null  # TODO: return a flag to bail out, as we go on to remove doc from memory?
 			else
 				logger.log project_id: project_id, doc_id: doc_id, version: version, "flushing doc"
-				PersistenceManager.setDoc project_id, doc_id, lines, version, (error) ->
+				PersistenceManager.setDoc project_id, doc_id, lines, version, ranges, (error) ->
 					return callback(error) if error?
 					callback null
 
@@ -111,13 +113,29 @@ module.exports = DocumentManager =
 			
 			# Flush in the background since it requires and http request
 			# to track changes
-			TrackChangesManager.flushDocChanges project_id, doc_id, (err) ->
+			HistoryManager.flushDocChanges project_id, doc_id, (err) ->
 				if err?
 					logger.err {err, project_id, doc_id}, "error flushing to track changes"
 
 			RedisManager.removeDocFromMemory project_id, doc_id, (error) ->
 				return callback(error) if error?
 				callback null
+	
+	acceptChange: (project_id, doc_id, change_id, _callback = (error) ->) ->
+		timer = new Metrics.Timer("docManager.acceptChange")
+		callback = (args...) ->
+			timer.done()
+			_callback(args...)
+
+		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges) ->
+			return callback(error) if error?
+			if !lines? or !version?
+				return callback(new Errors.NotFoundError("document not found: #{doc_id}"))
+			RangesManager.acceptChange change_id, ranges, (error, new_ranges) ->
+				return callback(error) if error?
+				RedisManager.updateDocument doc_id, lines, version, [], new_ranges, (error) ->
+					return callback(error) if error?
+					callback()
 
 	getDocWithLock: (project_id, doc_id, callback = (error, lines, version) ->) ->
 		UpdateManager = require "./UpdateManager"
@@ -138,3 +156,7 @@ module.exports = DocumentManager =
 	flushAndDeleteDocWithLock: (project_id, doc_id, callback = (error) ->) ->
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.flushAndDeleteDoc, project_id, doc_id, callback
+
+	acceptChangeWithLock: (project_id, doc_id, change_id, callback = (error) ->) ->
+		UpdateManager = require "./UpdateManager"
+		UpdateManager.lockUpdatesAndDo DocumentManager.acceptChange, project_id, doc_id, change_id, callback

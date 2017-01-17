@@ -72,7 +72,6 @@ module.exports = DocUpdaterClient =
 
 	deleteProject: (project_id, callback = () ->) ->
 		request.del "http://localhost:3003/project/#{project_id}", callback
-		
-		
-		
-	
+
+	acceptChange: (project_id, doc_id, change_id, callback = () ->) ->
+		request.post "http://localhost:3003/project/#{project_id}/doc/#{doc_id}/change/#{change_id}/accept", callback

@@ -14,12 +14,14 @@ describe "UpdateManager", ->
 			"./RedisManager" : @RedisManager = {}
 			"./WebRedisManager" : @WebRedisManager = {}
 			"./ShareJsUpdateManager" : @ShareJsUpdateManager = {}
-			"./TrackChangesManager" : @TrackChangesManager = {}
+			"./HistoryManager" : @HistoryManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub() }
 			"./Metrics": @Metrics =
 				Timer: class Timer
 					done: sinon.stub()
 			"settings-sharelatex": Settings = {}
+			"./DocumentManager": @DocumentManager = {}
+			"./RangesManager": @RangesManager = {}
 
 	describe "processOutstandingUpdates", ->
 		beforeEach ->
@@ -155,10 +157,16 @@ describe "UpdateManager", ->
 			@update = {op: [{p: 42, i: "foo"}]}
 			@updatedDocLines = ["updated", "lines"]
 			@version = 34
+			@lines = ["original", "lines"]
+			@ranges = { entries: "mock", comments: "mock" }
+			@updated_ranges = { entries: "updated", comments: "updated" }
 			@appliedOps = ["mock-applied-ops"]
-			@ShareJsUpdateManager.applyUpdate = sinon.stub().callsArgWith(3, null, @updatedDocLines, @version, @appliedOps)
-			@RedisManager.updateDocument = sinon.stub().callsArg(4)
-			@TrackChangesManager.pushUncompressedHistoryOps = sinon.stub().callsArg(3)
+			@DocumentManager.getDoc = sinon.stub().yields(null, @lines, @version, @ranges)
+			@RangesManager.applyUpdate = sinon.stub().yields(null, @updated_ranges)
+			@ShareJsUpdateManager.applyUpdate = sinon.stub().yields(null, @updatedDocLines, @version, @appliedOps)
+			@RedisManager.updateDocument = sinon.stub().yields()
+			@WebRedisManager.sendData = sinon.stub()
+			@HistoryManager.pushUncompressedHistoryOps = sinon.stub().callsArg(3)
 		
 		describe "normally", ->
 			beforeEach ->
@@ -166,16 +174,21 @@ describe "UpdateManager", ->
 			
 			it "should apply the updates via ShareJS", ->
 				@ShareJsUpdateManager.applyUpdate
-					.calledWith(@project_id, @doc_id, @update)
+					.calledWith(@project_id, @doc_id, @update, @lines, @version)
+					.should.equal true
+			
+			it "should update the ranges", ->
+				@RangesManager.applyUpdate
+					.calledWith(@project_id, @doc_id, @ranges, @appliedOps)
 					.should.equal true
 
 			it "should save the document", ->
 				@RedisManager.updateDocument
-					.calledWith(@doc_id, @updatedDocLines, @version, @appliedOps)
+					.calledWith(@doc_id, @updatedDocLines, @version, @appliedOps, @updated_ranges)
 					.should.equal true
 			
-			it "should push the applied ops into the track changes queue", ->
-				@TrackChangesManager.pushUncompressedHistoryOps
+			it "should push the applied ops into the history queue", ->
+				@HistoryManager.pushUncompressedHistoryOps
 					.calledWith(@project_id, @doc_id, @appliedOps)
 					.should.equal true
 
@@ -194,4 +207,94 @@ describe "UpdateManager", ->
 				
 				# \uFFFD is 'replacement character'
 				@update.op[0].i.should.equal "\uFFFD\uFFFD"
+		
+		describe "with an error", ->
+			beforeEach ->
+				@error = new Error("something went wrong")
+				@ShareJsUpdateManager.applyUpdate = sinon.stub().yields(@error)
+				@UpdateManager.applyUpdate @project_id, @doc_id, @update, @callback
+			
+			it "should call WebRedisManager.sendData with the error", ->
+				@WebRedisManager.sendData
+					.calledWith({
+						project_id: @project_id,
+						doc_id: @doc_id,
+						error: @error.message
+					})
+					.should.equal true
+
+			it "should call the callback with the error", ->
+				@callback.calledWith(@error).should.equal true
+			
+
+	describe "lockUpdatesAndDo", ->
+		beforeEach ->
+			@method = sinon.stub().callsArgWith(3, null, @response_arg1)
+			@callback = sinon.stub()
+			@arg1 = "argument 1"
+			@response_arg1 = "response argument 1"
+			@lockValue = "mock-lock-value"
+			@LockManager.getLock = sinon.stub().callsArgWith(1, null, @lockValue)
+			@LockManager.releaseLock = sinon.stub().callsArg(2)
+
+		describe "successfully", ->
+			beforeEach ->
+				@UpdateManager.continueProcessingUpdatesWithLock = sinon.stub()
+				@UpdateManager.processOutstandingUpdates = sinon.stub().callsArg(2)
+				@UpdateManager.lockUpdatesAndDo @method, @project_id, @doc_id, @arg1, @callback
+
+			it "should lock the doc", ->
+				@LockManager.getLock
+					.calledWith(@doc_id)
+					.should.equal true
+
+			it "should process any outstanding updates", ->
+				@UpdateManager.processOutstandingUpdates
+					.calledWith(@project_id, @doc_id)
+					.should.equal true
+
+			it "should call the method", ->
+				@method
+					.calledWith(@project_id, @doc_id, @arg1)
+					.should.equal true
+
+			it "should return the method response to the callback", ->
+				@callback
+					.calledWith(null, @response_arg1)
+					.should.equal true
+
+			it "should release the lock", ->
+				@LockManager.releaseLock
+					.calledWith(@doc_id, @lockValue)
+					.should.equal true
+
+			it "should continue processing updates", ->
+				@UpdateManager.continueProcessingUpdatesWithLock
+					.calledWith(@project_id, @doc_id)
+					.should.equal true
+
+		describe "when processOutstandingUpdates returns an error", ->
+			beforeEach ->
+				@UpdateManager.processOutstandingUpdates = sinon.stub().callsArgWith(2, @error = new Error("Something went wrong"))
+				@UpdateManager.lockUpdatesAndDo @method, @project_id, @doc_id, @arg1, @callback
+
+			it "should free the lock", ->
+				@LockManager.releaseLock.calledWith(@doc_id, @lockValue).should.equal true
+				
+			it "should return the error in the callback", ->
+				@callback.calledWith(@error).should.equal true
+
+		describe "when the method returns an error", ->
+			beforeEach ->
+				@UpdateManager.processOutstandingUpdates = sinon.stub().callsArg(2)
+				@method = sinon.stub().callsArgWith(3, @error = new Error("something went wrong"), @response_arg1)
+				@UpdateManager.lockUpdatesAndDo @method, @project_id, @doc_id, @arg1, @callback
+
+			it "should free the lock", ->
+				@LockManager.releaseLock.calledWith(@doc_id, @lockValue).should.equal true
+				
+			it "should return the error in the callback", ->
+				@callback.calledWith(@error).should.equal true
+
+
 

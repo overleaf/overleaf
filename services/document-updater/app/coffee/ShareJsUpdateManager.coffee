@@ -6,22 +6,19 @@ Settings = require('settings-sharelatex')
 Keys = require "./UpdateKeys"
 {EventEmitter} = require "events"
 util = require "util"
-
-redis = require("redis-sharelatex")
-rclient = redis.createClient(Settings.redis.web)
-
+WebRedisManager = require "./WebRedisManager"
 
 ShareJsModel:: = {}
 util.inherits ShareJsModel, EventEmitter
 
 module.exports = ShareJsUpdateManager =
-	getNewShareJsModel: () ->
-		db = new ShareJsDB()
+	getNewShareJsModel: (project_id, doc_id, lines, version) ->
+		db = new ShareJsDB(project_id, doc_id, lines, version)
 		model = new ShareJsModel(db, maxDocLength: Settings.max_doc_length)
 		model.db = db
 		return model
 
-	applyUpdate: (project_id, doc_id, update, callback = (error, updatedDocLines) ->) ->
+	applyUpdate: (project_id, doc_id, update, lines, version, callback = (error, updatedDocLines) ->) ->
 		logger.log project_id: project_id, doc_id: doc_id, update: update, "applying sharejs updates"
 		jobs = []
 
@@ -30,7 +27,7 @@ module.exports = ShareJsUpdateManager =
 		# getting stuck due to queued callbacks (line 260 of sharejs/server/model.coffee)
 		# This adds a small but hopefully acceptable overhead (~12ms per 1000 updates on
 		# my 2009 MBP).
-		model = @getNewShareJsModel()
+		model = @getNewShareJsModel(project_id, doc_id, lines, version)
 		@_listenForOps(model)
 		doc_key = Keys.combineProjectIdAndDocId(project_id, doc_id)
 		model.applyOp doc_key, update, (error) ->
@@ -40,13 +37,10 @@ module.exports = ShareJsUpdateManager =
 					update.dup = true
 					ShareJsUpdateManager._sendOp(project_id, doc_id, update)
 				else
-					ShareJsUpdateManager._sendError(project_id, doc_id, error)
 					return callback(error)
 			logger.log project_id: project_id, doc_id: doc_id, error: error, "applied update"
 			model.getSnapshot doc_key, (error, data) =>
-				if error?
-					ShareJsUpdateManager._sendError(project_id, doc_id, error)
-					return callback(error)
+				return callback(error) if error?
 				docLines = data.snapshot.split(/\r\n|\n|\r/)
 				callback(null, docLines, data.v, model.db.appliedOps[doc_key] or [])
 
@@ -55,18 +49,6 @@ module.exports = ShareJsUpdateManager =
 			[project_id, doc_id] = Keys.splitProjectIdAndDocId(doc_key)
 			ShareJsUpdateManager._sendOp(project_id, doc_id, opData)
 	
-	_sendOp: (project_id, doc_id, opData) ->
-		data =
-			project_id: project_id
-			doc_id: doc_id
-			op: opData
-		data = JSON.stringify data
-		rclient.publish "applied-ops", data
+	_sendOp: (project_id, doc_id, op) ->
+		WebRedisManager.sendData {project_id, doc_id, op}
 
-	_sendError: (project_id, doc_id, error) ->
-		data = JSON.stringify
-			project_id: project_id
-			doc_id: doc_id
-			error: error.message || error
-		rclient.publish "applied-ops", data
-		

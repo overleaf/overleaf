@@ -56,5 +56,3 @@ module.exports = ProjectManager =
 					callback new Error("Errors deleting docs. See log for details")
 				else
 					callback(null)
-
-		

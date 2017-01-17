@@ -2,11 +2,14 @@ LockManager = require "./LockManager"
 RedisManager = require "./RedisManager"
 WebRedisManager = require "./WebRedisManager"
 ShareJsUpdateManager = require "./ShareJsUpdateManager"
-TrackChangesManager = require "./TrackChangesManager"
+HistoryManager = require "./HistoryManager"
 Settings = require('settings-sharelatex')
 async = require("async")
 logger = require('logger-sharelatex')
 Metrics = require "./Metrics"
+Errors = require "./Errors"
+DocumentManager = require "./DocumentManager"
+RangesManager = require "./RangesManager"
 
 module.exports = UpdateManager =
 	processOutstandingUpdates: (project_id, doc_id, callback = (error) ->) ->
@@ -43,14 +46,25 @@ module.exports = UpdateManager =
 				(update, cb) -> UpdateManager.applyUpdate project_id, doc_id, update, cb
 				callback
 
-	applyUpdate: (project_id, doc_id, update, callback = (error) ->) ->
+	applyUpdate: (project_id, doc_id, update, _callback = (error) ->) ->
+		callback = (error) ->
+			if error?
+				WebRedisManager.sendData {project_id, doc_id, error: error.message || error}
+			_callback(error)
+		
 		UpdateManager._sanitizeUpdate update
-		ShareJsUpdateManager.applyUpdate project_id, doc_id, update, (error, updatedDocLines, version, appliedOps) ->
+		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges) ->
 			return callback(error) if error?
-			logger.log doc_id: doc_id, version: version, "updating doc in redis"
-			RedisManager.updateDocument doc_id, updatedDocLines, version, appliedOps, (error) ->
+			if !lines? or !version?
+				return callback(new Errors.NotFoundError("document not found: #{doc_id}"))
+			ShareJsUpdateManager.applyUpdate project_id, doc_id, update, lines, version, (error, updatedDocLines, version, appliedOps) ->
 				return callback(error) if error?
-				TrackChangesManager.pushUncompressedHistoryOps project_id, doc_id, appliedOps, callback
+				RangesManager.applyUpdate project_id, doc_id, ranges, appliedOps, (error, new_ranges) ->
+					return callback(error) if error?
+					logger.log doc_id: doc_id, version: version, "updating doc in redis"
+					RedisManager.updateDocument doc_id, updatedDocLines, version, appliedOps, new_ranges, (error) ->
+						return callback(error) if error?
+						HistoryManager.pushUncompressedHistoryOps project_id, doc_id, appliedOps, callback
 
 	lockUpdatesAndDo: (method, project_id, doc_id, args..., callback) ->
 		LockManager.getLock doc_id, (error, lockValue) ->
