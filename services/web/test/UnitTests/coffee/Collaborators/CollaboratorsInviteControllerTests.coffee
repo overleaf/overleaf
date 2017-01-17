@@ -255,6 +255,37 @@ describe "CollaboratorsInviteController", ->
 			it 'should not have called inviteToProject', ->
 				@CollaboratorsInviteHandler.inviteToProject.callCount.should.equal 0
 
+		describe 'when the user invites themselves to the project', ->
+
+			beforeEach ->
+				@req.session.user = {_id: 'abc', email: 'me@example.com'}
+				@req.body.email = 'me@example.com'
+				@_checkShouldInviteEmail = sinon.stub(
+					@CollaboratorsInviteController, '_checkShouldInviteEmail'
+				).callsArgWith(1, null, true)
+				@LimitationsManager.canAddXCollaborators = sinon.stub().callsArgWith(2, null, true)
+				@CollaboratorsInviteController.inviteToProject @req, @res, @next
+
+			afterEach ->
+				@_checkShouldInviteEmail.restore()
+
+			it 'should reject action, return json response with error code', ->
+				@res.json.callCount.should.equal 1
+				({invite: null, error: 'cannot_invite_self'}).should.deep.equal(@res.json.firstCall.args[0])
+
+			it 'should not have called canAddXCollaborators', ->
+				@LimitationsManager.canAddXCollaborators.callCount.should.equal 0
+
+			it 'should not have called _checkShouldInviteEmail', ->
+				@_checkShouldInviteEmail.callCount.should.equal 0
+
+			it 'should not have called inviteToProject', ->
+				@CollaboratorsInviteHandler.inviteToProject.callCount.should.equal 0
+
+			it 'should not have called emitToRoom', ->
+				@EditorRealTimeController.emitToRoom.callCount.should.equal 0
+
+
 	describe "viewInvite", ->
 
 		beforeEach ->
