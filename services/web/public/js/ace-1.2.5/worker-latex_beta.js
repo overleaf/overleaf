@@ -1554,6 +1554,25 @@ var read1arg = function (TokeniseResult, k, options) {
     }
 };
 
+var readLetDefinition = function (TokeniseResult, k) {
+
+    var Tokens = TokeniseResult.tokens;
+    var text = TokeniseResult.text;
+
+    var first = Tokens[k+1];
+    var second = Tokens[k+2];
+    var third = Tokens[k+3];
+
+    if(first && first[1] === "\\" && second && second[1] === "\\") {
+        return k + 2;
+    } else if(first && first[1] === "\\" &&
+              second && second[1] === "Text" && text.substring(second[2], second[3]) === "=" &&
+              third && third[1] === "\\") {
+        return k + 3;
+    } else {
+        return null;
+    }
+};
 
 var read1name = function (TokeniseResult, k) {
     var Tokens = TokeniseResult.tokens;
@@ -1624,7 +1643,54 @@ var readOptionalParams = function(TokeniseResult, k) {
             return k + 1; // got it
         };
     };
+    var count = 0;
+    var nextToken = Tokens[k+1];
+    var pos = nextToken[2];
+
+    for (var i = pos, end = text.length; i < end; i++) {
+        var char = text[i];
+        if (nextToken && i >= nextToken[2]) { k++; nextToken = Tokens[k+1];};
+        if (char === "[") { count++; }
+        if (char === "]") { count--; }
+        if (count === 0 && char === "{") { return k - 1; }
+        if (count > 0 && (char  === '\r' || char === '\n')) { return null; }
+    };
     return null;
+};
+
+var readOptionalGeneric = function(TokeniseResult, k) {
+    var Tokens = TokeniseResult.tokens;
+    var text = TokeniseResult.text;
+
+    var params = Tokens[k+1];
+
+    if(params && params[1] === "Text") {
+        var paramNum = text.substring(params[2], params[3]);
+        if (paramNum.match(/^(\[[^\]]*\])+\s*$/)) {
+            return k + 1; // got it
+        };
+    };
+    return null;
+};
+
+var readOptionalDef = function (TokeniseResult, k) {
+    var Tokens = TokeniseResult.tokens;
+    var text = TokeniseResult.text;
+
+    var defToken = Tokens[k];
+    var pos = defToken[3];
+
+    var openBrace = "{";
+    var nextToken = Tokens[k+1];
+    for (var i = pos, end = text.length; i < end; i++) {
+        var char = text[i];
+        if (nextToken && i >= nextToken[2]) { k++; nextToken = Tokens[k+1];};
+        if (char === openBrace) { return k - 1; }; // move back to the last token of the optional arguments
+        if (char  === '\r' || char === '\n') { return null; }
+    };
+
+    return null;
+
 };
 
 var readDefinition = function(TokeniseResult, k) {
@@ -1726,10 +1792,27 @@ var InterpretTokens = function (TokeniseResult, ErrorReporter) {
     var Environments = new EnvHandler(ErrorReporter);
 
     var nextGroupMathMode = null; // if the next group should have math mode on or off (for \hbox)
+    var nextGroupMathModeStack = [] ; // tracking all nextGroupMathModes
+    var seenUserDefinedBeginEquation = false; // if we have seen macros like \beq
+    var seenUserDefinedEndEquation = false; // if we have seen macros like \eeq
 
     for (var i = 0, len = Tokens.length; i < len; i++) {
         var token = Tokens[i];
         var line = token[0], type = token[1], start = token[2], end = token[3], seq = token[4];
+
+        if (type === "{") {
+            Environments.push({command:"{", token:token, mathMode: nextGroupMathMode});
+            nextGroupMathModeStack.push(nextGroupMathMode);
+            nextGroupMathMode = null;
+            continue;
+        } else if (type === "}") {
+            Environments.push({command:"}", token:token});
+            nextGroupMathMode = nextGroupMathModeStack.pop();
+            continue;
+        } else {
+            nextGroupMathMode = null;
+        };
+
         if (type === "\\") {
             if (seq === "begin" || seq === "end") {
                 var open = Tokens[i+1];
@@ -1778,14 +1861,30 @@ var InterpretTokens = function (TokeniseResult, ErrorReporter) {
                     } else {
                         TokenError(token, "invalid environment command");
                     };
-                    }
-            } else if (seq === "newcommand" || seq === "renewcommand" || seq === "def" || seq === "DeclareRobustCommand") {
-                var newPos = read1arg(TokeniseResult, i, {allowStar: (seq != "def")});
+                }
+            } else if (typeof seq === "string" && seq.match(/^(be|beq|beqa|bea)$/i)) {
+                seenUserDefinedBeginEquation = true;
+            } else if (typeof seq === "string" && seq.match(/^(ee|eeq|eeqn|eeqa|eeqan|eea)$/i)) {
+                seenUserDefinedEndEquation = true;
+            } else if (seq === "newcommand" || seq === "renewcommand" || seq === "DeclareRobustCommand") {
+                var newPos = read1arg(TokeniseResult, i, {allowStar: true});
                 if (newPos === null) { continue; } else {i = newPos;};
                 newPos = readOptionalParams(TokeniseResult, i);
                 if (newPos === null) { /* do nothing */ } else {i = newPos;};
                 newPos = readDefinition(TokeniseResult, i);
                 if (newPos === null) { /* do nothing */ } else {i = newPos;};
+
+            } else if (seq === "def") {
+                newPos = read1arg(TokeniseResult, i);
+                if (newPos === null) { continue; } else {i = newPos;};
+                newPos = readOptionalDef(TokeniseResult, i);
+                if (newPos === null) { /* do nothing */ } else {i = newPos;};
+                newPos = readDefinition(TokeniseResult, i);
+                if (newPos === null) { /* do nothing */ } else {i = newPos;};
+
+            } else if (seq === "let") {
+                newPos = readLetDefinition(TokeniseResult, i);
+                if (newPos === null) { continue; } else {i = newPos;};
 
             } else if (seq === "newcolumntype") {
                 newPos = read1name(TokeniseResult, i);
@@ -1820,7 +1919,7 @@ var InterpretTokens = function (TokeniseResult, ErrorReporter) {
                 } else if (nextToken && nextToken[1] === "\\") {
                     char = "unknown";
                 }
-                if (char === "" || (char !== "unknown" && "(){}[]<>|.".indexOf(char) === -1)) {
+                if (char === "" || (char !== "unknown" && "(){}[]<>/|\\.".indexOf(char) === -1)) {
                     TokenError(token, "invalid bracket command");
                 } else {
                     i = i + 1;
@@ -1831,25 +1930,50 @@ var InterpretTokens = function (TokeniseResult, ErrorReporter) {
             } else if (seq === "input") {
                 newPos = read1filename(TokeniseResult, i);
                 if (newPos === null) { continue; } else {i = newPos;};
-            } else if (seq === "hbox" || seq === "text" || seq === "mbox") {
+            } else if (seq === "hbox" || seq === "text" || seq === "mbox" || seq === "footnote" || seq === "intertext" || seq === "shortintertext" || seq === "textnormal" || seq === "tag" || seq === "reflectbox" || seq === "textrm") {
                 nextGroupMathMode = false;
+            } else if (seq === "rotatebox" || seq === "scalebox") {
+                newPos = readOptionalGeneric(TokeniseResult, i);
+                if (newPos === null) { /* do nothing */ } else {i = newPos;};
+                newPos = readDefinition(TokeniseResult, i);
+                if (newPos === null) { /* do nothing */ } else {i = newPos;};
+                nextGroupMathMode = false;
+            } else if (seq === "resizebox") {
+                newPos = readOptionalGeneric(TokeniseResult, i);
+                if (newPos === null) { /* do nothing */ } else {i = newPos;};
+                newPos = readDefinition(TokeniseResult, i);
+                if (newPos === null) { /* do nothing */ } else {i = newPos;};
+                newPos = readDefinition(TokeniseResult, i);
+                if (newPos === null) { /* do nothing */ } else {i = newPos;};
+
+                nextGroupMathMode = false;
+            } else if (seq === "DeclareMathOperator") {
+                newPos = readDefinition(TokeniseResult, i);
+                if (newPos === null) { /* do nothing */ } else {i = newPos;};
+                newPos = readDefinition(TokeniseResult, i);
+                if (newPos === null) { /* do nothing */ } else {i = newPos;};
+            } else if (seq === "DeclarePairedDelimiter") {
+                newPos = readDefinition(TokeniseResult, i);
+                if (newPos === null) { /* do nothing */ } else {i = newPos;};
+                newPos = readDefinition(TokeniseResult, i);
+                if (newPos === null) { /* do nothing */ } else {i = newPos;};
+                newPos = readDefinition(TokeniseResult, i);
+                if (newPos === null) { /* do nothing */ } else {i = newPos;};
             } else if (typeof seq === "string" && seq.match(/^(alpha|beta|gamma|delta|epsilon|varepsilon|zeta|eta|theta|vartheta|iota|kappa|lambda|mu|nu|xi|pi|varpi|rho|varrho|sigma|varsigma|tau|upsilon|phi|varphi|chi|psi|omega|Gamma|Delta|Theta|Lambda|Xi|Pi|Sigma|Upsilon|Phi|Psi|Omega)$/)) {
                 var currentMathMode = Environments.getMathMode() ; // returns null / $(inline) / $$(display)
-                if (currentMathMode === null && !insideGroup) {
-                    TokenError(token, type + seq + " must be inside math mode");
+                if (currentMathMode === null) {
+                    TokenError(token, type + seq + " must be inside math mode", {mathMode:true});
                 };
-            } else if (typeof seq === "string" && seq.match(/^(chapter|section|subsection|subsubsection|cite|ref)/)) {
+            } else if (typeof seq === "string" && seq.match(/^(chapter|section|subsection|subsubsection)$/)) {
                 currentMathMode = Environments.getMathMode() ; // returns null / $(inline) / $$(display)
-                if (currentMathMode && !insideGroup) {
-                    TokenError(token, type + seq + " used inside math mode");
+                if (currentMathMode) {
+                    TokenError(token, type + seq + " used inside math mode", {mathMode:true});
                     Environments.resetMathMode();
                 };
+            } else if (typeof seq === "string" && seq.match(/^[a-z]+$/)) {
+                nextGroupMathMode = undefined;
             };
-        } else if (type === "{") {
-            Environments.push({command:"{", token:token, mathMode: nextGroupMathMode});
-            nextGroupMathMode = null;
-        } else if (type === "}") {
-            Environments.push({command:"}", token:token});
+
         } else if (type === "$") {
             var lookAhead = Tokens[i+1];
             var nextIsDollar = lookAhead && lookAhead[1] === "$";
@@ -1864,12 +1988,15 @@ var InterpretTokens = function (TokeniseResult, ErrorReporter) {
             currentMathMode = Environments.getMathMode() ; // returns null / $(inline) / $$(display)
             var insideGroup = Environments.insideGroup();  // true if inside {....}
             if (currentMathMode === null && !insideGroup) {
-                TokenError(token, type + " must be inside math mode");
+                TokenError(token, type + " must be inside math mode", {mathMode:true});
             };
-        } else {
-            nextGroupMathMode = null;
         }
     };
+
+    if (seenUserDefinedBeginEquation && seenUserDefinedEndEquation) {
+        ErrorReporter.filterMath = true;
+    };
+
     return Environments;
 };
 
@@ -1920,7 +2047,7 @@ var EnvHandler = function (ErrorReporter) {
                 if (documentClosed) {
                     ErrorFromTo(documentClosed, thisEnv, "\\end{" + documentClosed.name + "} is followed by unexpected content",{errorAtStart: true, type: "info"});
                 } else {
-                    ErrorTo(thisEnv, "unexpected \\end{" + thisEnv.name + "}");
+                    ErrorTo(thisEnv, "unexpected " + getName(thisEnv));
                 }
             } else if (invalidEnvs.length > 0 && (i = indexOfClosingEnvInArray(invalidEnvs, thisEnv) > -1)) {
                 invalidEnvs.splice(i, 1);
@@ -2054,7 +2181,7 @@ var EnvHandler = function (ErrorReporter) {
         var currentMathMode = this.getMathMode(); // undefined, null, $, $$, name of mathmode env
         if (currentMathMode) {
             ErrorFrom(thisEnv, thisEnv.name + " used inside existing math mode " + getName(currentMathMode),
-                      {suppressIfEditing:true, errorAtStart: true});
+                      {suppressIfEditing:true, errorAtStart: true, mathMode:true});
         };
         thisEnv.mathMode = thisEnv;
         state.push(thisEnv);
@@ -2118,28 +2245,28 @@ var EnvHandler = function (ErrorReporter) {
             }
         } else if (thisEnv.command === "left") {
             if (currentMathMode === null) {
-                ErrorFrom(thisEnv, "\\left can only be used in math mode");
+                ErrorFrom(thisEnv, "\\left can only be used in math mode", {mathMode: true});
             };
             newMathMode = currentMathMode;
         } else if (thisEnv.command === "begin") {
             var name = thisEnv.name;
             if (name) {
-                if (name.match(/^(document|figure|center|tabular|enumerate|itemize|table|abstract|proof|lemma|theorem|definition|proposition|corollary|remark|notation|thebibliography)$/)) {
+                if (name.match(/^(document|figure|center|enumerate|itemize|table|abstract|proof|lemma|theorem|definition|proposition|corollary|remark|notation|thebibliography)$/)) {
                     if (currentMathMode) {
                         ErrorFromTo(currentMathMode, thisEnv, thisEnv.name + " used inside " + getName(currentMathMode),
-                                    {suppressIfEditing:true, errorAtStart: true});
+                                    {suppressIfEditing:true, errorAtStart: true, mathMode: true});
                         resetMathMode();
                     };
                     newMathMode = null;
-                } else if (name.match(/^(array|gathered|split|aligned|alignedat)/)) {
-                    if (!currentMathMode) {
-                        ErrorFrom(thisEnv, thisEnv.name + " not inside math mode");
+                } else if (name.match(/^(array|gathered|split|aligned|alignedat)\*?$/)) {
+                    if (currentMathMode === null) {
+                        ErrorFrom(thisEnv, thisEnv.name + " not inside math mode", {mathMode: true});
                     };
                     newMathMode = currentMathMode;
                 } else if (name.match(/^(math|displaymath|equation|eqnarray|multline|align|gather|flalign|alignat)\*?$/)) {
                     if (currentMathMode) {
                         ErrorFromTo(currentMathMode, thisEnv, thisEnv.name + " used inside " + getName(currentMathMode),
-                                    {suppressIfEditing:true, errorAtStart: true});
+                                    {suppressIfEditing:true, errorAtStart: true, mathMode: true});
                         resetMathMode();
                     };
                     newMathMode = thisEnv;
@@ -2220,13 +2347,36 @@ var ErrorReporter = function (TokeniseResult) {
     var errors = [], tokenErrors = [];
     this.errors = errors;
     this.tokenErrors = tokenErrors;
+    this.filterMath = false;
 
     this.getErrors = function () {
         var returnedErrors = [];
         for (var i = 0, len = tokenErrors.length; i < len; i++) {
             if (!tokenErrors[i].ignore) { returnedErrors.push(tokenErrors[i]); }
         }
-        return returnedErrors.concat(errors);
+        var allErrors = returnedErrors.concat(errors);
+        var result = [];
+
+        var mathErrorCount = 0;
+        for (i = 0, len = allErrors.length; i < len; i++) {
+            if (allErrors[i].mathMode) {
+                mathErrorCount++;
+            }
+            if (mathErrorCount > 10) {
+                return [];
+            }
+        }
+
+        if (this.filterMath && mathErrorCount > 0) {
+            for (i = 0, len = allErrors.length; i < len; i++) {
+                if (!allErrors[i].mathMode) {
+                    result.push(allErrors[i]);
+                }
+            }
+            return result;
+        } else {
+            return allErrors;
+        }
     };
 
     this.TokenError = function (token, message, options) {
@@ -2245,7 +2395,8 @@ var ErrorReporter = function (TokeniseResult) {
                           text:message,
                           startPos: start,
                           endPos: end,
-                          suppressIfEditing:options.suppressIfEditing});
+                          suppressIfEditing:options.suppressIfEditing,
+                          mathMode: options.mathMode});
     };
 
     this.TokenErrorFromTo = function (fromToken, toToken, message, options) {
@@ -2266,7 +2417,8 @@ var ErrorReporter = function (TokeniseResult) {
                           text:message,
                           startPos: fromStart,
                           endPos: toEnd,
-                          suppressIfEditing:options.suppressIfEditing});
+                          suppressIfEditing:options.suppressIfEditing,
+                          mathMode: options.mathMode});
     };
 
 
@@ -2287,7 +2439,8 @@ var ErrorReporter = function (TokeniseResult) {
                      end_col: end_col,
                      type: options.type ? options.type : "error",
                      text:message,
-                     suppressIfEditing:options.suppressIfEditing});
+                     suppressIfEditing:options.suppressIfEditing,
+                     mathMode: options.mathMode});
     };
 
     this.EnvErrorTo = function (toEnv, message, options) {
@@ -2303,7 +2456,8 @@ var ErrorReporter = function (TokeniseResult) {
                    end_row: line,
                    end_col: end_col,
                    type: options.type ? options.type : "error",
-                   text:message};
+                   text:message,
+                   mathMode: options.mathMode};
         errors.push(err);
     };
 
@@ -2320,7 +2474,8 @@ var ErrorReporter = function (TokeniseResult) {
                      end_row: lineNumber,
                      end_col: end_col,
                      type: options.type ? options.type : "error",
-                     text:message});
+                     text:message,
+                     mathMode: options.mathMode});
     };
 };
 

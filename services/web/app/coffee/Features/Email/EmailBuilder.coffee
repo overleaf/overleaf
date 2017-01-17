@@ -1,6 +1,12 @@
 _ = require('underscore')
+
 PersonalEmailLayout = require("./Layouts/PersonalEmailLayout")
 NotificationEmailLayout = require("./Layouts/NotificationEmailLayout")
+BaseWithHeaderEmailLayout = require("./Layouts/BaseWithHeaderEmailLayout") 
+
+SingleCTAEmailBody = require("./Bodies/SingleCTAEmailBody")
+
+
 settings = require("settings-sharelatex")
 
 
@@ -61,7 +67,7 @@ ShareLaTeX Co-founder
 
 templates.passwordResetRequested =
 	subject:  _.template "Password Reset - #{settings.appName}"
-	layout: NotificationEmailLayout
+	layout: BaseWithHeaderEmailLayout
 	type:"notification"
 	plainTextTemplate: _.template """
 Password Reset
@@ -78,36 +84,21 @@ Thank you
 
 #{settings.appName} - <%= siteUrl %>
 """
-	compiledTemplate: _.template """
-<h2>Password Reset</h2>
-<p>
-We got a request to reset your #{settings.appName} password.
-<p>
-<center>
-	<div style="width:200px;background-color:#a93629;border:1px solid #e24b3b;border-radius:3px;padding:15px; margin:24px;">
-		<div style="padding-right:10px;padding-left:10px">
-			<a href="<%= setNewPasswordUrl %>" style="text-decoration:none" target="_blank">
-				<span style= "font-size:16px;font-family:Arial;font-weight:bold;color:#fff;white-space:nowrap;display:block; text-align:center">
-		  			Reset password
-				</span>
-			</a>
-		</div>
-	</div>
-</center>
-
-If you ignore this message, your password won't be changed.
-<p>
-If you didn't request a password reset, let us know.
-
-</p>
-<p>Thank you</p>
-<p> <a href="<%= siteUrl %>">#{settings.appName}</a></p>
-"""
+	compiledTemplate: (opts) -> 
+		SingleCTAEmailBody({
+			title: "Password Reset"
+			greeting: "Hi,"
+			message: "We got a request to reset your #{settings.appName} password."
+			secondaryMessage: "If you ignore this message, your password won't be changed.<br>If you didn't request a password reset, let us know."
+			ctaText: "Reset password"
+			ctaURL: opts.setNewPasswordUrl
+			gmailGoToAction: null
+		})
 
 
 templates.projectInvite =
 	subject: _.template "<%= project.name %> - shared by <%= owner.email %>"
-	layout: NotificationEmailLayout
+	layout: BaseWithHeaderEmailLayout
 	type:"notification"
 	plainTextTemplate: _.template """
 Hi, <%= owner.email %> wants to share '<%= project.name %>' with you.
@@ -118,23 +109,25 @@ Thank you
 
 #{settings.appName} - <%= siteUrl %>
 """
-	compiledTemplate: _.template """
-<p>Hi, <%= owner.email %> wants to share <a href="<%= inviteUrl %>">'<%= project.name %>'</a> with you</p>
-<center>
-			<a style="text-decoration: none; width: 200px; background-color: #a93629; border: 1px solid #e24b3b; border-radius: 3px; padding: 15px; margin: 24px; display: block;" href="<%= inviteUrl %>" style="text-decoration:none" target="_blank">
-				<span style= "font-size:16px;font-family:Helvetica,Arial;font-weight:400;color:#fff;white-space:nowrap;display:block; text-align:center">
-					View Project
-				</span>
-			</a>
-</center>
-<p> Thank you</p>
-<p> <a href="<%= siteUrl %>">#{settings.appName}</a></p>
-"""
+	compiledTemplate: (opts) -> 
+		SingleCTAEmailBody({
+			title: "#{ opts.project.name } &ndash; shared by #{ opts.owner.email }"
+			greeting: "Hi,"
+			message: "#{ opts.owner.email } wants to share &ldquo;#{ opts.project.name }&rdquo; with you."
+			secondaryMessage: null
+			ctaText: "View project"
+			ctaURL: opts.inviteUrl
+			gmailGoToAction: 
+				target: opts.inviteUrl
+				name: "View project"
+				description: "Join #{ opts.project.name } at ShareLaTeX"
+		})
+
 
 
 templates.completeJoinGroupAccount =
 	subject: _.template "Verify Email to join <%= group_name %> group"
-	layout: NotificationEmailLayout
+	layout: BaseWithHeaderEmailLayout
 	type:"notification"
 	plainTextTemplate: _.template """
 Hi, please verify your email to join the <%= group_name %> and get your free premium account
@@ -145,23 +138,16 @@ Thank You
 
 #{settings.appName} - <%= siteUrl %>
 """
-	compiledTemplate: _.template """
-<p>Hi, please verify your email to join the <%= group_name %> and get your free premium account</p>
-<center>
-	<div style="width:200px;background-color:#a93629;border:1px solid #e24b3b;border-radius:3px;padding:15px; margin:24px;">
-		<div style="padding-right:10px;padding-left:10px">
-			<a href="<%= completeJoinUrl %>" style="text-decoration:none" target="_blank">
-				<span style= "font-size:16px;font-family:Helvetica,Arial;font-weight:400;color:#fff;white-space:nowrap;display:block; text-align:center">
-		  			Verify now
-				</span>
-			</a>
-		</div>
-	</div>
-</center>
-<p> Thank you</p>
-<p> <a href="<%= siteUrl %>">#{settings.appName}</a></p>
-"""
-
+	compiledTemplate: (opts) -> 
+		SingleCTAEmailBody({
+			title: "Verify Email to join #{ opts.group_name } group"
+			greeting: "Hi,"
+			message: "please verify your email to join the #{ opts.group_name } group and get your free premium account."
+			secondaryMessage: null
+			ctaText: "Verify now"
+			ctaURL: opts.completeJoinUrl
+			gmailGoToAction: null
+		})
 
 module.exports =
 	templates: templates
