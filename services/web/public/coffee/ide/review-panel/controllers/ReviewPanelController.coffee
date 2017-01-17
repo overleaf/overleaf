@@ -205,6 +205,9 @@ define [
 				if !$scope.users[change.metadata.user_id]?
 					refreshChangeUsers(change.metadata.user_id)
 
+			if rangesTracker.comments.length > 0
+				ensureThreadsAreLoaded()
+
 			for comment in rangesTracker.comments
 				changed = true
 				delete delete_changes[comment.id]
@@ -394,7 +397,12 @@ define [
 				.error () ->
 					_refreshingRangeUsers = false
 
-		refreshThreads = () ->
+		_threadsLoaded = false
+		ensureThreadsAreLoaded = () ->
+			if _threadsLoaded
+				# We get any updates in real time so only need to load them once.
+				return
+			_threadsLoaded = true
 			$http.get "/project/#{$scope.project_id}/threads"
 				.success (threads) ->
 					for thread_id, _ of $scope.reviewPanel.resolvedThreadIds
@@ -407,8 +415,6 @@ define [
 							thread.resolved_by_user = formatUser(thread.resolved_by_user)
 							$scope.reviewPanel.resolvedThreadIds[thread_id] = true
 					$scope.reviewPanel.commentThreads = threads
-
-		refreshThreads()
 
 		formatComment = (comment) ->
 			comment.user = formatUser(comment.user)
