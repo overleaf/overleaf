@@ -67,7 +67,7 @@ define [
 			view: "editor"
 			chatOpen: false
 			pdfLayout: 'sideBySide'
-			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}") and $scope.project.features.trackChanges
+			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}")
 			showCodeCheckerOnboarding: !window.userSettings.syntaxValidation?
 		}
 		$scope.user = window.user

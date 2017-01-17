@@ -25,6 +25,7 @@ define [
 			resolvedThreadIds: {}
 			layoutToLeft: false
 			rendererData: {}
+			loadingThreads: false
 
 		$scope.$on "layout:pdf:linked", (event, state) ->
 			$scope.reviewPanel.layoutToLeft = (state.east?.size < 220 || state.east?.initClosed)
@@ -403,8 +404,10 @@ define [
 				# We get any updates in real time so only need to load them once.
 				return
 			_threadsLoaded = true
+			$scope.reviewPanel.loadingThreads = true
 			$http.get "/project/#{$scope.project_id}/threads"
 				.success (threads) ->
+					$scope.reviewPanel.loadingThreads = false
 					for thread_id, _ of $scope.reviewPanel.resolvedThreadIds
 						delete $scope.reviewPanel.resolvedThreadIds[thread_id]
 					for thread_id, thread of threads

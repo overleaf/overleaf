@@ -692,7 +692,7 @@
 	.track-changes-marker-callout {
 		border-radius: 0;
 		position: absolute;
-		.rp-state-overview & {
+		.rp-state-overview &, .rp-loading-threads & {
 			display: none;
 		}
 	}
@@ -709,6 +709,9 @@
 	.track-changes-marker {
 		border-radius: 0;
 		position: absolute;
+		.rp-loading-threads & {
+			display: none;
+		}
 	}
 
 	.track-changes-comment-marker {

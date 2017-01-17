@@ -52,6 +52,7 @@
 						on-reply="submitReply(entry, entry_id);"
 						on-indicator-click="toggleReviewPanel();"
 						permissions="permissions"
+						ng-if="!reviewPanel.loadingThreads"
 					)
 				
 				div(ng-if="entry.type === 'add-comment' && permissions.comment")
