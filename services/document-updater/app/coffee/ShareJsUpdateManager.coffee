@@ -11,10 +11,12 @@ WebRedisManager = require "./WebRedisManager"
 ShareJsModel:: = {}
 util.inherits ShareJsModel, EventEmitter
 
+MAX_AGE_OF_OP = 80
+
 module.exports = ShareJsUpdateManager =
 	getNewShareJsModel: (project_id, doc_id, lines, version) ->
 		db = new ShareJsDB(project_id, doc_id, lines, version)
-		model = new ShareJsModel(db, maxDocLength: Settings.max_doc_length)
+		model = new ShareJsModel(db, maxDocLength: Settings.max_doc_length, maximumAge: MAX_AGE_OF_OP)
 		model.db = db
 		return model
 
