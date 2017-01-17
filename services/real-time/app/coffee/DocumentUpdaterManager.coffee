@@ -22,7 +22,7 @@ module.exports = DocumentUpdaterManager =
 					body = JSON.parse(body)
 				catch error
 					return callback(error)
-				callback null, body?.lines, body?.version, body?.ops
+				callback null, body?.lines, body?.version, body?.ranges, body?.ops
 			else if res.statusCode == 422 # Unprocessable Entity
 				err = new Error("doc updater could not load requested ops")
 				err.statusCode = res.statusCode

@@ -20,6 +20,9 @@ describe 'DocumentUpdaterManager', ->
 			'logger-sharelatex': @logger = {log: sinon.stub(), error: sinon.stub(), warn: sinon.stub()}
 			'request': @request = {}
 			'redis-sharelatex' : createClient: () => @rclient
+			'metrics-sharelatex': @Metrics =
+				Timer: class Timer
+					done: () ->
 
 	describe "getDocument", ->
 		beforeEach ->
@@ -31,6 +34,7 @@ describe 'DocumentUpdaterManager', ->
 					lines: @lines
 					version: @version
 					ops: @ops = ["mock-op-1", "mock-op-2"]
+					ranges: @ranges = {"mock": "ranges"}
 				@fromVersion = 2
 				@request.get = sinon.stub().callsArgWith(1, null, {statusCode: 200}, @body)
 				@DocumentUpdaterManager.getDocument @project_id, @doc_id, @fromVersion, @callback
@@ -39,8 +43,8 @@ describe 'DocumentUpdaterManager', ->
 				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}/doc/#{@doc_id}?fromVersion=#{@fromVersion}"
 				@request.get.calledWith(url).should.equal true
 
-			it "should call the callback with the lines and version", ->
-				@callback.calledWith(null, @lines, @version, @ops).should.equal true
+			it "should call the callback with the lines, version, ranges and ops", ->
+				@callback.calledWith(null, @lines, @version, @ranges, @ops).should.equal true
 
 		describe "when the document updater API returns an error", ->
 			beforeEach ->

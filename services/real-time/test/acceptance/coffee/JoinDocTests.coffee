@@ -13,6 +13,7 @@ describe "joinDoc", ->
 		@lines = ["test", "doc", "lines"]
 		@version = 42
 		@ops = ["mock", "doc", "ops"]
+		@ranges = {"mock": "ranges"}
 			
 	describe "when authorised readAndWrite", ->
 		before (done) ->
@@ -24,7 +25,7 @@ describe "joinDoc", ->
 						cb(e)
 					
 				(cb) =>
-					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops}, (e, {@doc_id}) =>
+					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops, @ranges}, (e, {@doc_id}) =>
 						cb(e)
 
 				(cb) =>
@@ -43,8 +44,8 @@ describe "joinDoc", ->
 				.calledWith(@project_id, @doc_id, -1)
 				.should.equal true
 		
-		it "should return the doc lines, version and ops", ->
-			@returnedArgs.should.deep.equal [@lines, @version, @ops]
+		it "should return the doc lines, version, ranges and ops", ->
+			@returnedArgs.should.deep.equal [@lines, @version, @ops, @ranges]
 			
 		it "should have joined the doc room", (done) ->
 			RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
@@ -61,7 +62,7 @@ describe "joinDoc", ->
 						cb(e)
 					
 				(cb) =>
-					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops}, (e, {@doc_id}) =>
+					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops, @ranges}, (e, {@doc_id}) =>
 						cb(e)
 
 				(cb) =>
@@ -80,8 +81,8 @@ describe "joinDoc", ->
 				.calledWith(@project_id, @doc_id, -1)
 				.should.equal true
 		
-		it "should return the doc lines, version and ops", ->
-			@returnedArgs.should.deep.equal [@lines, @version, @ops]
+		it "should return the doc lines, version, ranges and ops", ->
+			@returnedArgs.should.deep.equal [@lines, @version, @ops, @ranges]
 			
 		it "should have joined the doc room", (done) ->
 			RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
@@ -98,7 +99,7 @@ describe "joinDoc", ->
 						cb(e)
 					
 				(cb) =>
-					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops}, (e, {@doc_id}) =>
+					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops, @ranges}, (e, {@doc_id}) =>
 						cb(e)
 
 				(cb) =>
@@ -117,8 +118,8 @@ describe "joinDoc", ->
 				.calledWith(@project_id, @doc_id, -1)
 				.should.equal true
 		
-		it "should return the doc lines, version and ops", ->
-			@returnedArgs.should.deep.equal [@lines, @version, @ops]
+		it "should return the doc lines, version, ranges and ops", ->
+			@returnedArgs.should.deep.equal [@lines, @version, @ops, @ranges]
 			
 		it "should have joined the doc room", (done) ->
 			RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
@@ -140,7 +141,7 @@ describe "joinDoc", ->
 						cb(e)
 					
 				(cb) =>
-					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops}, (e, {@doc_id}) =>
+					FixturesManager.setUpDoc @project_id, {@lines, @version, @ops, @ranges}, (e, {@doc_id}) =>
 						cb(e)
 
 				(cb) =>
@@ -159,8 +160,8 @@ describe "joinDoc", ->
 				.calledWith(@project_id, @doc_id, @fromVersion)
 				.should.equal true
 		
-		it "should return the doc lines, version and ops", ->
-			@returnedArgs.should.deep.equal [@lines, @version, @ops]
+		it "should return the doc lines, version, ranges and ops", ->
+			@returnedArgs.should.deep.equal [@lines, @version, @ops, @ranges]
 			
 		it "should have joined the doc room", (done) ->
 			RealTimeClient.getConnectedClient @client.socket.sessionid, (error, client) =>
