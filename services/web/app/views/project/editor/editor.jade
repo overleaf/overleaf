@@ -58,6 +58,15 @@ div.full-size(
 			doc-id="editor.open_doc_id"
 			renderer-data="reviewPanel.rendererData"
 		)
+
+		a.rp-track-changes-indicator(
+			href
+			ng-if="editor.wantTrackChanges"
+			ng-click="toggleReviewPanel();"
+			ng-class="{ 'rp-track-changes-indicator-on-dark' : darkTheme }"
+		) Track changes is 
+			strong on
+
 		
 		include ./review-panel
 

@@ -828,3 +828,40 @@
 		text-decoration: none;
 	}
 }
+
+.rp-track-changes-indicator {
+	display: none;
+	position: absolute;
+	top: 0;
+	right: @review-off-width;
+	padding: 5px 10px;
+	background-color: rgba(240, 240, 240, 0.9);
+	color: @rp-type-blue;
+	text-align: center;
+	border-bottom-left-radius: 3px;
+	font-size: 10px;
+	z-index: 2;
+
+	&.rp-track-changes-indicator-on-dark {
+		background-color: rgba(88, 88, 88, .8);
+		color: #FFF;
+		
+		&:hover,
+		&:focus {
+			background-color: rgba(88, 88, 88, 1);
+			color: #FFF;
+		}
+	}
+
+	&:hover,
+	&:focus {
+		outline: 0;
+		text-decoration: none;
+		background-color: rgba(240, 240, 240, 1);
+		color: @rp-type-blue;
+	}
+
+	.rp-size-mini & {
+		display: block;
+	}
+}
