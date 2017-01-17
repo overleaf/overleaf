@@ -29,6 +29,7 @@ define [
 
 			scope.handleUnresolve = (threadId) ->
 				scope.onUnresolve({ threadId })
+				scope.resolvedComments = scope.resolvedComments.filter (c) -> c.threadId != threadId
 
 			scope.handleDelete = (entryId, threadId) ->
 				scope.onDelete({ entryId, threadId })
