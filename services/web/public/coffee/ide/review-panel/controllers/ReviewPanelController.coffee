@@ -4,7 +4,7 @@ define [
 	"ide/colors/ColorManager"
 	"ide/review-panel/RangesTracker"
 ], (App, EventEmitter, ColorManager, RangesTracker) ->
-	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout, $http) ->
+	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout, $http, event_tracking) ->
 		$reviewPanelEl = $element.find "#review-panel"
 
 		$scope.SubViews =
@@ -272,9 +272,11 @@ define [
 		$scope.acceptChange = (entry_id) ->
 			$http.post "/project/#{$scope.project_id}/doc/#{$scope.editor.open_doc_id}/changes/#{entry_id}/accept", {_csrf: window.csrfToken}
 			$scope.$broadcast "change:accept", entry_id
+			event_tracking.sendMB "rp-change-accepted", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
 		
 		$scope.rejectChange = (entry_id) ->
 			$scope.$broadcast "change:reject", entry_id
+			event_tracking.sendMB "rp-change-rejected", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
 		
 		$scope.startNewComment = () ->
 			$scope.$broadcast "comment:select_line"
@@ -291,7 +293,8 @@ define [
 					ide.showGenericMessageModal("Error submitting comment", "Sorry, there was a problem submitting your comment")
 			$timeout () ->
 				$scope.$broadcast "review-panel:layout"
-		
+			event_tracking.sendMB "rp-new-comment", { size: content.length }
+
 		$scope.cancelNewComment = (entry) ->
 			$timeout () ->
 				$scope.$broadcast "review-panel:layout"
@@ -307,6 +310,11 @@ define [
 			$http.post("/project/#{$scope.project_id}/thread/#{thread_id}/messages", {content, _csrf: window.csrfToken})
 				.error (error) ->
 					ide.showGenericMessageModal("Error submitting comment", "Sorry, there was a problem submitting your comment")
+			
+			trackingMetadata =
+				view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini'
+				size: entry.replyContent.length
+				thread: thread_id
 
 			thread = getThread(thread_id)
 			thread.submitting = true
@@ -314,6 +322,7 @@ define [
 			entry.replying = false
 			$timeout () ->
 				$scope.$broadcast "review-panel:layout"
+			event_tracking.sendMB "rp-comment-reply", trackingMetadata
 
 		$scope.cancelReply = (entry) ->
 			entry.replying = false
@@ -324,10 +333,12 @@ define [
 			entry.focused = false
 			$http.post "/project/#{$scope.project_id}/thread/#{entry.thread_id}/resolve", {_csrf: window.csrfToken}
 			_onCommentResolved(entry.thread_id, ide.$scope.user)
+			event_tracking.sendMB "rp-comment-resolve", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
 
 		$scope.unresolveComment = (thread_id) ->
 			_onCommentReopened(thread_id)
 			$http.post "/project/#{$scope.project_id}/thread/#{thread_id}/reopen", {_csrf: window.csrfToken}
+			event_tracking.sendMB "rp-comment-reopen"
 		
 		_onCommentResolved = (thread_id, user) ->
 			thread = $scope.reviewPanel.commentThreads[thread_id]
@@ -354,9 +365,11 @@ define [
 		$scope.deleteComment = (entry_id, thread_id) ->
 			_onCommentDeleted(thread_id)
 			$scope.$broadcast "comment:remove", entry_id
+			event_tracking.sendMB "rp-comment-delete"
 
 		$scope.setSubView = (subView) -> 
 			$scope.reviewPanel.subView = subView
+			event_tracking.sendMB "rp-subview-change", { subView }
 						
 		$scope.gotoEntry = (doc_id, entry) ->
 			ide.editorManager.openDocId(doc_id, { gotoOffset: entry.offset })
@@ -364,6 +377,7 @@ define [
 		$scope.toggleTrackChanges = (value) ->
 			$scope.editor.wantTrackChanges = value
 			$http.post "/project/#{$scope.project_id}/track_changes", {_csrf: window.csrfToken, on: value}
+			event_tracking.sendMB "rp-trackchanges-toggle", { value }
 		
 		ide.socket.on "toggle-track-changes", (value) ->
 			$scope.$apply () ->

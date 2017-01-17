@@ -86,6 +86,7 @@ define [
 
 		ide.toggleReviewPanel = $scope.toggleReviewPanel = () ->
 			$scope.ui.reviewPanelOpen = !$scope.ui.reviewPanelOpen
+			event_tracking.sendMB "rp-toggle-panel", { value : $scope.ui.reviewPanelOpen }
 
 		$scope.$watch "ui.reviewPanelOpen", (value) ->
 			if value?
