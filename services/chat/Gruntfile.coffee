@@ -12,14 +12,6 @@ module.exports = (grunt) ->
 				src: "app.js"
 
 		coffee:
-			client: 
-				expand: true,
-				flatten: false,
-				cwd: 'public/coffee',
-				src: ['**/*.coffee'],
-				dest: 'public/build/',
-				ext: '.js'
-
 			server: 
 				expand: true,
 				flatten: false,
@@ -56,47 +48,7 @@ module.exports = (grunt) ->
 				files: ['app/**/*.coffee', 'test/unit/**/*.coffee']
 				tasks: ['compile:server', 'compile:unit_tests', 'mochaTest']
 
-			client_coffee:
-				files: ['public/**/*.coffee']
-				tasks: ['compile']
-
-			less:
-				files: ['public/less/*.less']
-				tasks: ['compile']
-
-			jade:
-				files: ['public/jade/*.jade']
-				tasks: ['compile']
-
-
-		less:
-			production:
-				files:
-					"public/build/css/chat.css": "public/less/chat.less"
-
-		jade:
-			compile:
-				files:
-					"public/build/html/templates.html": ["public/jade/templates.jade"]
-
-		requirejs:
-			compile:
-				options:
-					mainConfigFile: 'public/app.build.js',
-
-		uglify:
-			my_target:
-				files:
-					'public/build/chat.js': ['public/build/chat.js']
-
-		copy:
-			main:
-				expand: true
-				cwd: 'public/js'
-				src: '**'
-				dest: 'public/build/'
-
-		clean: ["public/build", "app/js", "test/unit/js"]
+		clean: ["app/js", "test/unit/js"]
 
 		nodemon:
 			dev:
@@ -127,11 +79,6 @@ module.exports = (grunt) ->
 
 	grunt.loadNpmTasks 'grunt-contrib-coffee'
 	grunt.loadNpmTasks 'grunt-contrib-watch'
-	grunt.loadNpmTasks 'grunt-contrib-copy'
-	grunt.loadNpmTasks 'grunt-contrib-less'
-	grunt.loadNpmTasks 'grunt-contrib-jade'
-	grunt.loadNpmTasks 'grunt-contrib-requirejs'
-	grunt.loadNpmTasks 'grunt-contrib-uglify'
 	grunt.loadNpmTasks 'grunt-nodemon'
 	grunt.loadNpmTasks 'grunt-contrib-clean'
 	grunt.loadNpmTasks 'grunt-concurrent'
@@ -142,10 +89,9 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-forever'
 	
 
-	grunt.registerTask 'compile', ['clean',  'copy', 'coffee', 'less', 'jade', 'requirejs']
+	grunt.registerTask 'compile', ['clean', 'coffee']
 	grunt.registerTask 'install', ['compile']
 	grunt.registerTask 'default', ['compile', 'bunyan', 'execute']
-	grunt.registerTask 'compileAndCompress', ['compile', 'uglify']
 	grunt.registerTask 'test:unit', ['compile', 'mochaTest:unit']
 	grunt.registerTask 'test:acceptance', ['compile:acceptance_tests', 'mochaTest:acceptance']
 
