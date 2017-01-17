@@ -399,11 +399,11 @@ define [
 			session = @editor.getSession()
 			markers = session.getMarkers()
 			{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[change_id]
-			if background_marker_id?
+			if background_marker_id? and markers[background_marker_id]?
 				background_marker = markers[background_marker_id]
 				background_marker.range.start = start
 				background_marker.range.end = end
-			if callout_marker_id?
+			if callout_marker_id? and markers[callout_marker_id]?
 				callout_marker = markers[callout_marker_id]
 				callout_marker.range.start = start
 				callout_marker.range.end = start
