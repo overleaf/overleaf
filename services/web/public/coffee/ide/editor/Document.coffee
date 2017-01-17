@@ -360,8 +360,8 @@ define [
 			@ranges.track_changes = @doc.track_changes
 			for op in @doc.getInflightOp() or []
 				@ranges.setIdSeed(@doc.track_changes_id_seeds.inflight)
-				@ranges.applyOp(op)
+				@ranges.applyOp(op, { user_id: @track_changes_as })
 			for op in @doc.getPendingOp() or []
 				@ranges.setIdSeed(@doc.track_changes_id_seeds.pending)
-				@ranges.applyOp(op)
+				@ranges.applyOp(op, { user_id: @track_changes_as })
 			@ranges.emit "redraw"
