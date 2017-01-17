@@ -19,6 +19,11 @@ module.exports = ProjectEditorHandler =
 
 		if !result.invites?
 			result.invites = []
+			
+		hasTrackChanges = false
+		for member in members
+			if member.privilegeLevel == "owner" and member.user?.featureSwitches?.track_changes
+				hasTrackChanges = true
 
 		{owner, ownerFeatures, members} = @buildOwnerAndMembersViews(members)
 		result.owner = owner
@@ -32,6 +37,7 @@ module.exports = ProjectEditorHandler =
 			compileGroup:"standard"
 			templates: false
 			references: false
+			trackChanges: hasTrackChanges
 		})
 
 		return result

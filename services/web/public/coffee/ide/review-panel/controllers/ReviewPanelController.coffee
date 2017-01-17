@@ -129,7 +129,7 @@ define [
 			entries = $scope.reviewPanel.entries[$scope.editor.open_doc_id] or {}
 			Object.keys(entries).length
 		), (nEntries) ->
-			$scope.reviewPanel.hasEntries = nEntries > 0 and $scope.trackChangesFeatureFlag
+			$scope.reviewPanel.hasEntries = nEntries > 0 and $scope.project.features.trackChanges
 
 		$scope.$watch "ui.reviewPanelOpen", (reviewPanelOpen) ->
 			return if !reviewPanelOpen?
