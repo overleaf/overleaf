@@ -249,11 +249,11 @@ script(type='text/ng-template', id='resolvedCommentEntryTemplate')
 				ng-click="onUnresolve({ 'threadId': thread.threadId });"
 			) 
 				| &nbsp;Re-open
-			a.rp-entry-button(
-				href
-				ng-click="onDelete({ 'entryId': thread.entryId, 'threadId': thread.threadId });"
-			)
-				| &nbsp;Delete
+			//- a.rp-entry-button(
+			//- 	href
+			//- 	ng-click="onDelete({ 'entryId': thread.entryId, 'threadId': thread.threadId });"
+			//- )
+			//- 	| &nbsp;Delete
 
 
 script(type='text/ng-template', id='addCommentEntryTemplate')
