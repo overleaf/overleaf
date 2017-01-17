@@ -415,6 +415,8 @@ define [
 							thread.resolved_by_user = formatUser(thread.resolved_by_user)
 							$scope.reviewPanel.resolvedThreadIds[thread_id] = true
 					$scope.reviewPanel.commentThreads = threads
+					$timeout () ->
+						$scope.$broadcast "review-panel:layout"
 
 		formatComment = (comment) ->
 			comment.user = formatUser(comment.user)
@@ -436,9 +438,9 @@ define [
 				name = "You"
 				isSelf = true
 			else
-				name = [user.first_name, user.last_name].filter((n) -> n?).join(" ")
+				name = [user.first_name, user.last_name].filter((n) -> n? and n != "").join(" ")
 				if name == ""
-					name = "Unknown"
+					name = user.email?.split("@")[0] or "Unknown"
 				isSelf = false
 			return {
 				id: id
