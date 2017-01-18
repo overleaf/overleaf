@@ -16,8 +16,6 @@ define [
 
 			scope.toggleCollapse = () ->
 				scope.isCollapsed = !scope.isCollapsed
-				$timeout () ->
-					scope.$emit "review-panel:layout"
 
 			scope.$watch "thread.content.length", (contentLength) ->
 				scope.needsCollapsing = contentLength > scope.contentLimit
