@@ -15,7 +15,8 @@
     "mongojs": "^2.4.0",
     "redis": "~0.10.1",
     "request": "^2.79.0",
-    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0"
+    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
+    "v8-profiler": "^5.6.5"
   },
   "devDependencies": {
     "bunyan": "^1.0.0",

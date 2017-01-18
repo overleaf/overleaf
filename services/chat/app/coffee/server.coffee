@@ -12,7 +12,6 @@ metrics.mongodb.monitor(Path.resolve(__dirname + "/../../node_modules/mongojs/no
 
 app.use express.bodyParser()
 app.use metrics.http.monitor(logger)
-Router.route(app)
 
 if (app.get 'env') == 'development'
 	console.log "Development Enviroment"
@@ -22,19 +21,17 @@ if (app.get 'env') == 'production'
 	console.log "Production Enviroment"
 	app.use express.logger()
 	app.use express.errorHandler()
+	
+profiler = require "v8-profiler"
+app.get "/profile", (req, res) ->
+	time = parseInt(req.query.time || "1000")
+	profiler.startProfiling("test")
+	setTimeout () ->
+		profile = profiler.stopProfiling("test")
+		res.json(profile)
+	, time
 
-
-
-mountPoint = "/chat"
-app.use (req, res, next) ->
-
-	if req.url.slice(0, mountPoint.length) == mountPoint
-		req.url = req.url.slice(mountPoint.length)
-		next()
-	else
-		res.send(404)
-
-app.use(express.static(__dirname + "/../../public/build"))
+Router.route(app)
 
 module.exports = {
 	server: server
