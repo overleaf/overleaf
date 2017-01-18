@@ -17,7 +17,9 @@ div.full-size(
 			'rp-state-current-file-mini': (reviewPanel.subView === SubViews.CUR_FILE && !ui.reviewPanelOpen),\
 			'rp-state-overview': (reviewPanel.subView === SubViews.OVERVIEW),\
 			'rp-size-mini': (!ui.reviewPanelOpen && reviewPanel.hasEntries),\
-			'rp-size-expanded': ui.reviewPanelOpen\
+			'rp-size-expanded': ui.reviewPanelOpen,\
+			'rp-layout-left': reviewPanel.layoutToLeft,\
+			'rp-loading-threads': reviewPanel.loadingThreads\
 		}"
 	)
 		.loading-panel(ng-show="!editor.sharejs_doc || editor.opening")
@@ -51,11 +53,20 @@ div.full-size(
 			syntax-validation="settings.syntaxValidation",
 			review-panel="reviewPanel",
 			events-bridge="reviewPanelEventsBridge"
-			track-changes-enabled="trackChangesFeatureFlag",
-			track-new-changes= "reviewPanel.trackNewChanges",
-			changes-tracker="reviewPanel.changesTracker",
+			track-changes-enabled="project.features.trackChanges",
+			track-changes= "editor.trackChanges",
 			doc-id="editor.open_doc_id"
+			renderer-data="reviewPanel.rendererData"
 		)
+
+		a.rp-track-changes-indicator(
+			href
+			ng-if="editor.wantTrackChanges"
+			ng-click="toggleReviewPanel();"
+			ng-class="{ 'rp-track-changes-indicator-on-dark' : darkTheme }"
+		) Track changes is 
+			strong on
+
 		
 		include ./review-panel
 

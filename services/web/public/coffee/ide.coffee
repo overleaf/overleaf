@@ -57,9 +57,6 @@ define [
 			else
 				this.$originalApply(fn);
 
-		if window.location.search.match /tcon=true/ # track changes on
-			$scope.trackChangesFeatureFlag = true
-	
 		$scope.state = {
 			loading: true
 			load_progress: 40
@@ -70,7 +67,7 @@ define [
 			view: "editor"
 			chatOpen: false
 			pdfLayout: 'sideBySide'
-			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}") and $scope.trackChangesFeatureFlag
+			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}")
 			showCodeCheckerOnboarding: !window.userSettings.syntaxValidation?
 		}
 		$scope.user = window.user
@@ -86,6 +83,7 @@ define [
 
 		ide.toggleReviewPanel = $scope.toggleReviewPanel = () ->
 			$scope.ui.reviewPanelOpen = !$scope.ui.reviewPanelOpen
+			event_tracking.sendMB "rp-toggle-panel", { value : $scope.ui.reviewPanelOpen }
 
 		$scope.$watch "ui.reviewPanelOpen", (value) ->
 			if value?
