@@ -147,20 +147,29 @@ Thank You
 			gmailGoToAction: null
 		})
 
+
 templates.testEmail =
-	subject: _.template "Test Email from ShareLaTeX"
-	layout: PersonalEmailLayout
-	type: 'notification'
+	subject: _.template "A Test Email from ShareLaTeX"
+	layout: BaseWithHeaderEmailLayout
+	type:"notification"
 	plainTextTemplate: _.template """
 Hi,
 
-This is a test email, from ShareLaTeX.
+This is a test email sent from ShareLaTeX.
 
 #{settings.appName} - <%= siteUrl %>
 """
-	compiledTemplate: _.template """
-	<p>This is a test email, from ShareLaTeX.</p>
-	"""
+	compiledTemplate: (opts) -> 
+		SingleCTAEmailBody({
+			title: "A Test Email from ShareLaTeX"
+			greeting: "Hi,"
+			message: "This is a test email sent from ShareLaTeX"
+			secondaryMessage: null
+			ctaText: "Open ShareLaTeX"
+			ctaURL: "/"
+			gmailGoToAction: null
+		})
+
 
 module.exports =
 	templates: templates
