@@ -241,6 +241,7 @@ describe "HttpController", ->
 				@req.body =
 					lines: @lines = ["hello", "world"]
 					version: @version = 42
+					ranges: {}
 				@DocManager.updateDoc = sinon.stub().yields(null, false, @rev = 5)
 				@HttpController.updateDoc @req, @res, @next
 
@@ -251,7 +252,7 @@ describe "HttpController", ->
 
 		describe "when the doc lines are not provided", ->
 			beforeEach ->
-				@req.body = { version: 42 }
+				@req.body = { version: 42, ranges: {} }
 				@DocManager.updateDoc = sinon.stub().yields(null, false)
 				@HttpController.updateDoc @req, @res, @next
 
@@ -263,9 +264,23 @@ describe "HttpController", ->
 					.calledWith(400)
 					.should.equal true
 
-		describe "when the doc version is not provided", ->
+		describe "when the doc version are not provided", ->
 			beforeEach ->
-				@req.body = { lines : [ "foo" ]}
+				@req.body = { version: 42, lines: ["hello world"] }
+				@DocManager.updateDoc = sinon.stub().yields(null, false)
+				@HttpController.updateDoc @req, @res, @next
+
+			it "should not update the document", ->
+				@DocManager.updateDoc.called.should.equal false
+
+			it "should return a 400 (bad request) response", ->
+				@res.send
+					.calledWith(400)
+					.should.equal true
+
+		describe "when the doc ranges is not provided", ->
+			beforeEach ->
+				@req.body = { lines : [ "foo" ], version: 42 }
 				@DocManager.updateDoc = sinon.stub().yields(null, false)
 				@HttpController.updateDoc @req, @res, @next
 

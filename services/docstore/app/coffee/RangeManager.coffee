@@ -3,10 +3,8 @@ _ = require "underscore"
 
 module.exports = RangeManager =
 	shouldUpdateRanges: (doc_ranges, incoming_ranges) ->
-		# TODO: If we have no incoming_ranges, just ignore for now while
-		# we're rolling this out, but eventually this should be a mandatory
-		# field and this will become an error condition
-		return false if !incoming_ranges?
+		if !incoming_ranges?
+			throw new Error("expected incoming_ranges")
 
 		# If the ranges are empty, we don't store them in the DB, so set
 		# doc_ranges to an empty object as default, since this is was the 

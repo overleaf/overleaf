@@ -1,6 +1,7 @@
 SandboxedModule = require('sandboxed-module')
 sinon = require('sinon')
 require('chai').should()
+expect = require('chai').expect
 modulePath = require('path').join __dirname, '../../../app/js/RangeManager'
 ObjectId = require("mongojs").ObjectId
 assert = require("chai").assert
@@ -110,8 +111,10 @@ describe "RangeManager", ->
 			@ranges_copy = @RangeManager.jsonRangesToMongo(JSON.parse(JSON.stringify(@ranges)))
 
 		describe "with a blank new range", ->
-			it "should return false", ->
-				@RangeManager.shouldUpdateRanges(@ranges, null).should.equal false
+			it "should throw an error", ->
+				expect(() =>
+					@RangeManager.shouldUpdateRanges(@ranges, null)
+				).to.throw(Error)
 		
 		describe "with a blank old range", ->
 			it "should treat it like {}", ->

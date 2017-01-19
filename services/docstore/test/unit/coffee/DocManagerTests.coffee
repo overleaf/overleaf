@@ -263,14 +263,21 @@ describe "DocManager", ->
 				@DocManager.updateDoc @project_id, @doc_id, @newDocLines, null, @originalRanges, @callback
 
 			it "should return an error", ->
-				@callback.calledWith(new Error("no lines or version provided")).should.equal true
+				@callback.calledWith(new Error("no lines, version or ranges provided")).should.equal true
 
 		describe "when the lines are null", ->
 			beforeEach ->
 				@DocManager.updateDoc @project_id, @doc_id, null, @version, @originalRanges, @callback
 
 			it "should return an error", ->
-				@callback.calledWith(new Error("no lines or version provided")).should.equal true
+				@callback.calledWith(new Error("no lines, version or ranges provided")).should.equal true
+
+		describe "when the ranges are null", ->
+			beforeEach ->
+				@DocManager.updateDoc @project_id, @doc_id, @newDocLines, @version, null, @callback
+
+			it "should return an error", ->
+				@callback.calledWith(new Error("no lines, version or ranges provided")).should.equal true
 
 		describe "when there is a generic error getting the doc", ->
 			beforeEach ->
