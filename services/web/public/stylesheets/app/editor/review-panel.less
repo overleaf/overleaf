@@ -123,12 +123,8 @@
 		justify-content: space-around;
 		padding: 0 5px;
 	}
-	// .rp-state-current-file & {
-	// 	position: absolute;
-	// 	top: 0;
-	// 	left: 0;
-	// 	right: 0;
-	// }
+
+	position: relative;
 	height: @rp-toolbar-height;
 	border-bottom: 1px solid @rp-border-grey;
 	background-color: @rp-bg-dim-blue;
@@ -793,7 +789,7 @@
 	position: absolute;
 	width: 300px;
 	left: -150px;
-	max-height: 90%;
+	max-height: ~"calc(100vh - 100px)";
 	margin-top: @rp-entry-arrow-width * 1.5;
 	margin-left: 1em;
 	background-color: @rp-bg-blue;
