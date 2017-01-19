@@ -814,6 +814,7 @@
 	.resolved-comments-scroller {
 		flex: 0 0 auto; // Can't use 100% in the flex-basis key here, IE won't account for padding.
 		width: 100%; // We need to set the width explicitly, as flex-basis won't work.
+		max-height: ~"calc(100vh - 100px)"; // We also need to explicitly set the max-height, IE won't compute the flex-determined height.
 		padding: 5px;
 		overflow-y: auto;
 	}
