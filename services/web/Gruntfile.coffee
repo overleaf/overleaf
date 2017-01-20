@@ -222,11 +222,11 @@ module.exports = (grunt) ->
 
 		sed:
 			version:
-				path: "app/views/sentry.jade"
+				path: "app/views/sentry.pug"
 				pattern: '@@COMMIT@@',
 				replacement: '<%= commit %>',
 			release:
-				path: "app/views/sentry.jade"
+				path: "app/views/sentry.pug"
 				pattern: "@@RELEASE@@"
 				replacement: process.env.BUILD_NUMBER || "(unknown build)"
 
@@ -389,5 +389,5 @@ module.exports = (grunt) ->
 
 	grunt.registerTask 'default', 'run'
 
-	grunt.registerTask 'version', "Write the version number into sentry.jade", ['git-rev-parse', 'sed']
+	grunt.registerTask 'version', "Write the version number into sentry.pug", ['git-rev-parse', 'sed']
 

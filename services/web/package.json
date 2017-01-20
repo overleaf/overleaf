@@ -64,7 +64,8 @@
     "underscore": "1.6.0",
     "v8-profiler": "^5.2.3",
     "xml2js": "0.2.0",
-    "passport-saml": "^0.15.0"
+    "passport-saml": "^0.15.0",
+    "pug": "^2.0.0-beta6"
   },
   "devDependencies": {
     "bunyan": "0.22.1",
