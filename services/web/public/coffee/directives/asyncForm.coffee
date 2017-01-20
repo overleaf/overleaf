@@ -33,6 +33,11 @@ define [
 							response.success = true
 							response.error = false
 
+							onSuccessHandler = scope[attrs.onSuccess]
+							if onSuccessHandler
+								onSuccessHandler(data, status, headers, config)
+								return
+
 							if data.redir?
 								ga('send', 'event', formName, 'success')
 								window.location = data.redir
@@ -50,6 +55,12 @@ define [
 							scope[attrs.name].inflight = false
 							response.success = false
 							response.error = true
+
+							onErrorHandler = scope[attrs.onError]
+							if onErrorHandler
+								onErrorHandler(data, status, headers, config)
+								return
+
 							if status == 403 # Forbidden
 								response.message =
 									text: "Session error. Please check you have cookies enabled. If the problem persists, try clearing your cache and cookies."
