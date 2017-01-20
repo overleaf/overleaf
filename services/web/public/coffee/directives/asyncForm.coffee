@@ -33,7 +33,8 @@ define [
 							response.success = true
 							response.error = false
 
-							if onSuccessHandler = scope[attrs.onSuccess]
+							onSuccessHandler = scope[attrs.onSuccess]
+							if onSuccessHandler
 								onSuccessHandler(data, status, headers, config)
 								return
 
@@ -55,7 +56,8 @@ define [
 							response.success = false
 							response.error = true
 
-							if onErrorHandler = scope[attrs.onError]
+							onErrorHandler = scope[attrs.onError]
+							if onErrorHandler
 								onErrorHandler(data, status, headers, config)
 								return
 
