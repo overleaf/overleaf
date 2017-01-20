@@ -54,10 +54,10 @@ define [
 				syntaxValidation: "="
 				reviewPanel: "="
 				eventsBridge: "="
-				trackNewChanges: "="
+				trackChanges: "="
 				trackChangesEnabled: "="
-				changesTracker: "="
 				docId: "="
+				rendererData: "="
 			}
 			link: (scope, element, attrs) ->
 				# Don't freak out if we're already in an apply callback
@@ -318,6 +318,14 @@ define [
 					
 					doc = session.getDocument()
 					doc.off "change", onChange
+				
+				editor.renderer.on "changeCharacterSize", () ->
+					scope.$apply () ->
+						scope.rendererData.lineHeight = editor.renderer.lineHeight
+				
+				scope.$watch "rendererData", (rendererData) ->
+					if rendererData?
+						rendererData.lineHeight = editor.renderer.lineHeight
 
 			template: """
 				<div class="ace-editor-wrapper">

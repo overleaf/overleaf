@@ -1,5 +1,6 @@
 define [
 	"base"
+	"libs/md5"
 ], (App) ->
 	App.factory "chatMessages", ($http, ide) ->
 		MESSAGES_URL = "/project/#{ide.project_id}/messages"
@@ -72,7 +73,7 @@ define [
 				firstMessage.contents.unshift message.content
 			else
 				chat.state.messages.unshift({
-					user: message.user
+					user: formatUser(message.user)
 					timestamp: message.timestamp
 					contents: [message.content]
 				})
@@ -93,9 +94,14 @@ define [
 				lastMessage.contents.push message.content
 			else
 				chat.state.messages.push({
-					user: message.user
+					user: formatUser(message.user)
 					timestamp: message.timestamp
 					contents: [message.content]
 				})
+				
+		formatUser = (user) ->
+			hash = CryptoJS.MD5(user.email.toLowerCase())
+			user.gravatar_url = "//www.gravatar.com/avatar/#{hash}"
+			return user
 
 		return chat

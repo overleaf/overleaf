@@ -41,7 +41,7 @@ else
 
 checkCanSendEmail = (options, callback)->
 	if !options.sendingUser_id? #email not sent from user, not rate limited
-		callback(null, true)
+		return callback(null, true)
 	opts = 
 		endpointName: "send_email"
 		timeInterval: 60 * 60 * 3

@@ -201,7 +201,7 @@ module.exports = ProjectController =
 
 		async.parallel {
 			project: (cb)->
-				ProjectGetter.getProject project_id, { name: 1, lastUpdated: 1}, cb
+				ProjectGetter.getProject project_id, { name: 1, lastUpdated: 1, track_changes: 1 }, cb
 			user: (cb)->
 				if !user_id?
 					cb null, defaultSettingsForAnonymousUser(user_id)
@@ -267,6 +267,7 @@ module.exports = ProjectController =
 						pdfViewer : user.ace.pdfViewer
 						syntaxValidation: user.ace.syntaxValidation
 					}
+					trackChangesEnabled: !!project.track_changes
 					privilegeLevel: privilegeLevel
 					chatUrl: Settings.apis.chat.url
 					anonymous: anonymous

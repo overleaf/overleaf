@@ -117,5 +117,10 @@ define [
 								element.layout().hide("east")
 							else
 								element.layout().show("east")
+
+				post: (scope, element, attrs) ->
+					name = attrs.layout
+					state = element.layout().readState()
+					scope.$broadcast "layout:#{name}:linked", state
 		}
 	]
