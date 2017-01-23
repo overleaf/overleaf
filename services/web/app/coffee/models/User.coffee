@@ -2,7 +2,7 @@ Project = require('./Project').Project
 Settings = require 'settings-sharelatex'
 _ = require('underscore')
 mongoose = require('mongoose')
-uuid = require('node-uuid')
+uuid = require('uuid')
 Schema = mongoose.Schema
 ObjectId = Schema.ObjectId
 
