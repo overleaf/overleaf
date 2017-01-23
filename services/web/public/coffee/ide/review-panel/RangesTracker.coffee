@@ -107,7 +107,7 @@ load = (EventEmitter) ->
 		addComment: (op, metadata) ->
 			# TODO: Don't allow overlapping comments?
 			@comments.push comment = {
-				id: @newId()
+				id: op.t or @newId()
 				op: # Copy because we'll modify in place
 					c: op.c
 					p: op.p
