@@ -1,21 +1,21 @@
 chai = require('chai')
 chai.should()
 sinon = require("sinon")
-modulePath = "../../../../app/js/Features/TrackChanges/TrackChangesController"
+modulePath = "../../../../app/js/Features/History/HistoryController"
 SandboxedModule = require('sandboxed-module')
 
-describe "TrackChangesController", ->
+describe "HistoryController", ->
 	beforeEach ->
 		@user_id = "user-id-123"
 		@AuthenticationController =
 			getLoggedInUserId: sinon.stub().returns(@user_id)
-		@TrackChangesController = SandboxedModule.require modulePath, requires:
+		@HistoryController = SandboxedModule.require modulePath, requires:
 			"request" : @request = sinon.stub()
 			"settings-sharelatex": @settings = {}
 			"logger-sharelatex": @logger = {log: sinon.stub(), error: sinon.stub()}
 			"../Authentication/AuthenticationController": @AuthenticationController
 
-	describe "proxyToTrackChangesApi", ->
+	describe "proxyToHistoryApi", ->
 		beforeEach ->
 			@req = { url: "/mock/url", method: "POST" }
 			@res = "mock-res"
@@ -28,7 +28,7 @@ describe "TrackChangesController", ->
 				pipe: sinon.stub()
 				on: (event, handler) -> @events[event] = handler
 			@request.returns @proxy
-			@TrackChangesController.proxyToTrackChangesApi @req, @res, @next
+			@HistoryController.proxyToHistoryApi @req, @res, @next
 
 		describe "successfully", ->
 			it "should get the user id", ->

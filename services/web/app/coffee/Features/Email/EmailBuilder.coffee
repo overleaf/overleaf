@@ -97,7 +97,7 @@ Thank you
 
 
 templates.projectInvite =
-	subject: _.template "<%= project.name %> - shared by <%= owner.email %>"
+	subject: _.template "<%= project.name.slice(0, 40) %> - shared by <%= owner.email %>"
 	layout: BaseWithHeaderEmailLayout
 	type:"notification"
 	plainTextTemplate: _.template """
@@ -111,19 +111,17 @@ Thank you
 """
 	compiledTemplate: (opts) -> 
 		SingleCTAEmailBody({
-			title: "#{ opts.project.name } &ndash; shared by #{ opts.owner.email }"
+			title: "#{ opts.project.name.slice(0, 40) } &ndash; shared by #{ opts.owner.email }"
 			greeting: "Hi,"
-			message: "#{ opts.owner.email } wants to share &ldquo;#{ opts.project.name }&rdquo; with you."
+			message: "#{ opts.owner.email } wants to share &ldquo;#{ opts.project.name.slice(0, 40) }&rdquo; with you."
 			secondaryMessage: null
 			ctaText: "View project"
 			ctaURL: opts.inviteUrl
 			gmailGoToAction: 
 				target: opts.inviteUrl
 				name: "View project"
-				description: "Join #{ opts.project.name } at ShareLaTeX"
+				description: "Join #{ opts.project.name.slice(0, 40) } at ShareLaTeX"
 		})
-
-
 
 templates.completeJoinGroupAccount =
 	subject: _.template "Verify Email to join <%= group_name %> group"
@@ -148,6 +146,30 @@ Thank You
 			ctaURL: opts.completeJoinUrl
 			gmailGoToAction: null
 		})
+
+
+templates.testEmail =
+	subject: _.template "A Test Email from ShareLaTeX"
+	layout: BaseWithHeaderEmailLayout
+	type:"notification"
+	plainTextTemplate: _.template """
+Hi,
+
+This is a test email sent from ShareLaTeX.
+
+#{settings.appName} - <%= siteUrl %>
+"""
+	compiledTemplate: (opts) -> 
+		SingleCTAEmailBody({
+			title: "A Test Email from ShareLaTeX"
+			greeting: "Hi,"
+			message: "This is a test email sent from ShareLaTeX"
+			secondaryMessage: null
+			ctaText: "Open ShareLaTeX"
+			ctaURL: "/"
+			gmailGoToAction: null
+		})
+
 
 module.exports =
 	templates: templates

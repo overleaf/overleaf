@@ -9,21 +9,9 @@ define [
 			# Dencode any binary bits of data
 			# See http://ecmanaut.blogspot.co.uk/2006/07/encoding-decoding-utf8-in-javascript.html
 			@type = "text"
-			docLines = for line in docLines
-				if line.text?
-					@type = "json"
-					line.text = decodeURIComponent(escape(line.text))
-				else
-					@type = "text"
-					line = decodeURIComponent(escape(line))
-				line
-
-			if @type == "text"
-				snapshot = docLines.join("\n")
-			else if @type == "json"
-				snapshot = { lines: docLines }
-			else
-				throw new Error("Unknown type: #{@type}")
+			docLines = (decodeURIComponent(escape(line)) for line in docLines)
+			snapshot = docLines.join("\n")
+			@track_changes = false
 
 			@connection = {
 				send: (update) =>
@@ -34,6 +22,9 @@ define [
 					if window.dropUpdates? and Math.random() < window.dropUpdates
 						sl_console.log "Simulating a lost update", update
 						return
+					if @track_changes
+						update.meta ?= {}
+						update.meta.tc = @track_changes_id_seeds.inflight
 					@socket.emit "applyOtUpdate", @doc_id, update, (error) =>
 						return @_handleError(error) if error?
 				state: "ok"
@@ -43,8 +34,8 @@ define [
 			@_doc = new ShareJs.Doc @connection, @doc_id,
 				type: @type
 			@_doc.setFlushDelay(SINGLE_USER_FLUSH_DELAY)
-			@_doc.on "change", () =>
-				@trigger "change"
+			@_doc.on "change", (args...) =>
+				@trigger "change", args...
 			@_doc.on "acknowledge", () =>
 				@lastAcked = new Date() # note time of last ack from server for an op we sent
 				@trigger "acknowledge"
@@ -53,6 +44,8 @@ define [
 				# ops as quickly as possible for low latency.
 				@_doc.setFlushDelay(0)
 				@trigger "remoteop", args...
+			@_doc.on "flipped_pending_to_inflight", () =>
+				@trigger "flipped_pending_to_inflight"
 			@_doc.on "error", (e) =>
 				@_handleError(e)
 
@@ -70,6 +63,7 @@ define [
 				@_doc._onMessage message
 			catch error
 				# Version mismatches are thrown as errors
+				console.log error
 				@_handleError(error)
 
 			if message?.meta?.type == "external"
@@ -125,7 +119,7 @@ define [
 
 		attachToAce: (ace) -> @_doc.attach_ace(ace, false, window.maxDocLength)
 		detachFromAce: () -> @_doc.detach_ace?()
-	
+
 		INFLIGHT_OP_TIMEOUT: 5000 # Retry sending ops after 5 seconds without an ack
 		WAIT_FOR_CONNECTION_TIMEOUT: 500 # If we're waiting for the project to join, try again in 0.5 seconds
 		_startInflightOpTimeout: (update) ->

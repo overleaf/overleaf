@@ -107,6 +107,7 @@ block requirejs
 		window.csrfToken = "!{csrfToken}";
 		window.anonymous = #{anonymous};
 		window.maxDocLength = #{maxDocLength};
+		window.trackChangesEnabled = #{trackChangesEnabled};
 		window.wikiEnabled = #{!!(settings.apis.wiki && settings.apis.wiki.url)};
 		window.requirejs = {
 			"paths" : {

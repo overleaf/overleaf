@@ -71,7 +71,7 @@ class Doc
     # Its important that these event handlers are called with oldSnapshot.
     # The reason is that the OT type APIs might need to access the snapshots to
     # determine information about the received op.
-    @emit 'change', docOp, oldSnapshot
+    @emit 'change', docOp, oldSnapshot, msg
     @emit 'remoteop', docOp, oldSnapshot, msg if isRemote
   
   _connectionStateChanged: (state, data) ->
@@ -266,6 +266,8 @@ class Doc
     @pendingOp = null
     @pendingCallbacks = []
 
+    @emit "flipped_pending_to_inflight"
+
     #console.log "SENDING OP TO SERVER", @inflightOp, @version
     @connection.send {doc:@name, op:@inflightOp, v:@version}
 
@@ -274,6 +276,7 @@ class Doc
   submitOp: (op, callback) ->
     op = @type.normalize(op) if @type.normalize?
 
+    oldSnapshot = @snapshot
     # If this throws an exception, no changes should have been made to the doc
     @snapshot = @type.apply @snapshot, op
 
@@ -284,7 +287,7 @@ class Doc
 
     @pendingCallbacks.push callback if callback
 
-    @emit 'change', op
+    @emit 'change', op, oldSnapshot
 
     @delayedFlush()
 
