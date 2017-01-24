@@ -307,4 +307,48 @@ describe "DocumentManager", ->
 			it "should call the callback with a not found error", ->
 				error = new Errors.NotFoundError("document not found: #{@doc_id}")
 				@callback.calledWith(error).should.equal true
+	
+	describe "deleteComment", ->
+		beforeEach ->
+			@comment_id = "mock-comment-id"
+			@version = 34
+			@lines = ["original", "lines"]
+			@ranges = { comments: ["one", "two", "three"] }
+			@updated_ranges = { comments: ["one", "three"] }
+			@DocumentManager.getDoc = sinon.stub().yields(null, @lines, @version, @ranges)
+			@RangesManager.deleteComment = sinon.stub().yields(null, @updated_ranges)
+			@RedisManager.updateDocument = sinon.stub().yields()
+		
+		describe "successfully", ->
+			beforeEach ->
+				@DocumentManager.deleteComment @project_id, @doc_id, @comment_id, @callback
 			
+			it "should get the document's current ranges", ->
+				@DocumentManager.getDoc
+					.calledWith(@project_id, @doc_id)
+					.should.equal true
+			
+			it "should delete the comment from the ranges", ->
+				@RangesManager.deleteComment
+					.calledWith(@comment_id, @ranges)
+					.should.equal true
+					
+			it "should save the updated ranges", ->
+				@RedisManager.updateDocument
+					.calledWith(@doc_id, @lines, @version, [], @updated_ranges)
+					.should.equal true
+			
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+		describe "when the doc is not found", ->
+			beforeEach ->
+				@DocumentManager.getDoc = sinon.stub().yields(null, null, null, null)
+				@DocumentManager.acceptChange @project_id, @doc_id, @comment_id, @callback
+
+			it "should not save anything", ->
+				@RedisManager.updateDocument.called.should.equal false
+			
+			it "should call the callback with a not found error", ->
+				error = new Errors.NotFoundError("document not found: #{@doc_id}")
+				@callback.calledWith(error).should.equal true

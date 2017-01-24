@@ -91,6 +91,7 @@ describe "Ranges", ->
 						ranges = data.ranges
 						comment = ranges.comments[0]
 						comment.op.should.deep.equal { c: "bar", p: 4, t: @tid }
+						comment.id.should.equal @tid
 						done()
 
 			describe "with conflicting ops needing OT", ->
@@ -223,4 +224,44 @@ describe "Ranges", ->
 				DocUpdaterClient.getDoc @project_id, @doc.id, (error, res, data) =>
 					throw error if error?
 					expect(data.ranges.changes).to.be.undefined
+					done()
+
+	describe "deleting a comment range", ->
+		before (done) ->
+			@project_id = DocUpdaterClient.randomId()
+			@user_id = DocUpdaterClient.randomId()
+			@doc = {
+				id: DocUpdaterClient.randomId()
+				lines: ["foo bar"]
+			}
+			@update = {
+				doc: @doc.id
+				op: [{ c: "bar", p: 4, t: @tid = DocUpdaterClient.randomId() }]
+				v: 0
+			}
+			MockWebApi.insertDoc @project_id, @doc.id, {
+				lines: @doc.lines
+				version: 0
+			}
+			DocUpdaterClient.preloadDoc @project_id, @doc.id, (error) =>
+				throw error if error?
+				DocUpdaterClient.sendUpdate @project_id, @doc.id, @update, (error) =>
+					throw error if error?
+					setTimeout () =>
+						DocUpdaterClient.getDoc @project_id, @doc.id, (error, res, data) =>
+							throw error if error?
+							ranges = data.ranges
+							change = ranges.comments[0]
+							change.op.should.deep.equal { c: "bar", p: 4, t: @tid }
+							change.id.should.equal @tid
+							done()
+					, 200
+		
+		it "should remove the comment range", (done) ->
+			DocUpdaterClient.removeComment @project_id, @doc.id, @tid, (error, res) =>
+				throw error if error?
+				expect(res.statusCode).to.equal 204
+				DocUpdaterClient.getDoc @project_id, @doc.id, (error, res, data) =>
+					throw error if error?
+					expect(data.ranges.comments).to.be.undefined
 					done()
