@@ -40,6 +40,19 @@ define [
 					message: -> message
 			}
 
+		ide.showLockEditorMessageModal = (title, message) ->
+			# modal to block the editor when connection is down
+			$modal.open {
+				templateUrl: "lockEditorModalTemplate"
+				controller:  "GenericMessageModalController"
+				backdrop:    "static" # prevent dismiss by click on background
+				keyboard:    false    # prevent dismiss via keyboard
+				resolve:
+					title:   -> title
+					message: -> message
+				windowClass: "lock-editor-modal"
+			}
+
 		return ide
 	]
 

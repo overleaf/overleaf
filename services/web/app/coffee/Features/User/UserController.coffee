@@ -8,27 +8,50 @@ logger = require("logger-sharelatex")
 metrics = require("../../infrastructure/Metrics")
 Url = require("url")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
+AuthenticationController = require('../Authentication/AuthenticationController')
 UserSessionsManager = require("./UserSessionsManager")
 UserUpdater = require("./UserUpdater")
 settings = require "settings-sharelatex"
 
 module.exports = UserController =
 
-	deleteUser: (req, res)->
-		user_id = req.session.user._id
-		UserDeleter.deleteUser user_id, (err)->
-			if !err?
-				req.session?.destroy()
-			res.sendStatus(200)
+	tryDeleteUser: (req, res, next) ->
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		password = req.body.password
+		logger.log {user_id}, "trying to delete user account"
+		if !password? or password == ''
+			logger.err {user_id}, 'no password supplied for attempt to delete account'
+			return res.sendStatus(403)
+		AuthenticationManager.authenticate {_id: user_id}, password, (err, user) ->
+			if err?
+				logger.err {user_id}, 'error authenticating during attempt to delete account'
+				return next(err)
+			if !user
+				logger.err {user_id}, 'auth failed during attempt to delete account'
+				return res.sendStatus(403)
+			UserDeleter.deleteUser user_id, (err) ->
+				if err?
+					logger.err {user_id}, "error while deleting user account"
+					return next(err)
+				sessionId = req.sessionID
+				req.logout?()
+				req.session.destroy (err) ->
+					if err?
+						logger.err err: err, 'error destorying session'
+						return next(err)
+					UserSessionsManager.untrackSession(user, sessionId)
+					res.sendStatus(200)
 
 	unsubscribe: (req, res)->
-		UserLocator.findById req.session.user._id, (err, user)->
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		UserLocator.findById user_id, (err, user)->
 			newsLetterManager.unsubscribe user, ->
 				res.send()
 
 	updateUserSettings : (req, res)->
-		logger.log user: req.session.user, "updating account settings"
-		user_id = req.session.user._id
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		usingExternalAuth = settings.ldap? or settings.saml?
+		logger.log user_id: user_id, "updating account settings"
 		User.findById user_id, (err, user)->
 			if err? or !user?
 				logger.err err:err, user_id:user_id, "problem updaing user settings"
@@ -54,13 +77,19 @@ module.exports = UserController =
 				user.ace.spellCheckLanguage = req.body.spellCheckLanguage
 			if req.body.pdfViewer?
 				user.ace.pdfViewer = req.body.pdfViewer
+			if req.body.syntaxValidation?
+				user.ace.syntaxValidation = req.body.syntaxValidation
 			user.save (err)->
 				newEmail = req.body.email?.trim().toLowerCase()
-				if !newEmail? or newEmail == user.email
+				if !newEmail? or newEmail == user.email or usingExternalAuth
+					# end here, don't update email
+					AuthenticationController.setInSessionUser(req, {first_name: user.first_name, last_name: user.last_name})
 					return res.sendStatus 200
 				else if newEmail.indexOf("@") == -1
+					# email invalid
 					return res.sendStatus(400)
 				else
+					# update the user email
 					UserUpdater.changeEmailAddress user_id, newEmail, (err)->
 						if err?
 							logger.err err:err, user_id:user_id, newEmail:newEmail, "problem updaing users email address"
@@ -73,7 +102,7 @@ module.exports = UserController =
 							if err?
 								logger.err err:err, user_id:user_id, "error getting user for email update"
 								return res.send 500
-							req.session.user.email = user.email
+							AuthenticationController.setInSessionUser(req, {email: user.email, first_name: user.first_name, last_name: user.last_name})
 							UserHandler.populateGroupLicenceInvite user, (err)-> #need to refresh this in the background
 								if err?
 									logger.err err:err, "error populateGroupLicenceInvite"
@@ -81,9 +110,10 @@ module.exports = UserController =
 
 	logout : (req, res)->
 		metrics.inc "user.logout"
-		logger.log user: req?.session?.user, "logging out"
+		user = AuthenticationController.getSessionUser(req)
+		logger.log user: user, "logging out"
 		sessionId = req.sessionID
-		user = req?.session?.user
+		req.logout?()  # passport logout
 		req.session.destroy (err)->
 			if err
 				logger.err err: err, 'error destorying session'
@@ -102,13 +132,22 @@ module.exports = UserController =
 				setNewPasswordUrl: setNewPasswordUrl
 			}
 
+	clearSessions: (req, res, next = (error) ->) ->
+		metrics.inc "user.clear-sessions"
+		user = AuthenticationController.getSessionUser(req)
+		logger.log {user_id: user._id}, "clearing sessions for user"
+		UserSessionsManager.revokeAllUserSessions user, [req.sessionID], (err) ->
+			return next(err) if err?
+			res.sendStatus 201
+
 	changePassword : (req, res, next = (error) ->)->
 		metrics.inc "user.password-change"
 		oldPass = req.body.currentPassword
-		AuthenticationManager.authenticate {_id:req.session.user._id}, oldPass, (err, user)->
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		AuthenticationManager.authenticate {_id:user_id}, oldPass, (err, user)->
 			return next(err) if err?
 			if(user)
-				logger.log user: req.session.user, "changing password"
+				logger.log user: user._id, "changing password"
 				newPassword1 = req.body.newPassword1
 				newPassword2 = req.body.newPassword2
 				if newPassword1 != newPassword2
@@ -128,7 +167,7 @@ module.exports = UserController =
 									type:'success'
 									text:'Your password has been changed'
 			else
-				logger.log user: user, "current password wrong"
+				logger.log user_id: user_id, "current password wrong"
 				res.send
 					message:
 					  type:'error'

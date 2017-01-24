@@ -18,6 +18,10 @@ module.exports = Modules =
 	applyRouter: (webRouter, apiRouter) ->
 		for module in @modules
 			module.router?.apply(webRouter, apiRouter)
+
+	applyNonCsrfRouter: (webRouter, apiRouter) ->
+		for module in @modules
+			module.nonCsrfRouter?.apply(webRouter, apiRouter)
 			
 	viewIncludes: {}
 	loadViewIncludes: (app) ->
@@ -25,14 +29,14 @@ module.exports = Modules =
 		for module in @modules
 			for view, partial of module.viewIncludes or {}
 				@viewIncludes[view] ||= []
-				@viewIncludes[view].push fs.readFileSync(Path.join(MODULE_BASE_PATH, module.name, "app/views", partial + ".jade"))
+				@viewIncludes[view].push jade.compile(fs.readFileSync(Path.join(MODULE_BASE_PATH, module.name, "app/views", partial + ".jade")), doctype: "html")
 			
 	moduleIncludes: (view, locals) ->
-		partials = Modules.viewIncludes[view] or []
+		compiledPartials = Modules.viewIncludes[view] or []
 		html = ""
-		for partial in partials
-			compiler = jade.compile(partial, doctype: "html")
-			html += compiler(locals)
+		for compiledPartial in compiledPartials
+			d = new Date()
+			html += compiledPartial(locals)
 		return html
 
 	moduleIncludesAvailable: (view) ->

@@ -1,4 +1,5 @@
 fs = require "fs"
+PackageVersions = require "./app/coffee/infrastructure/PackageVersions"
 
 module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-contrib-coffee'
@@ -157,12 +158,13 @@ module.exports = (grunt) ->
 					inlineText: false
 					preserveLicenseComments: false
 					paths:
-						"moment": "libs/moment-2.9.0"
+						"moment": "libs/#{PackageVersions.lib('moment')}"
 						"mathjax": "/js/libs/mathjax/MathJax.js?config=TeX-AMS_HTML"
-						"libs/pdf": "libs/pdfjs-1.3.91/pdf"
+						"pdfjs-dist/build/pdf": "libs/#{PackageVersions.lib('pdfjs')}/pdf"
+						"ace": "#{PackageVersions.lib('ace')}"
 					shim:
-						"libs/pdf":
-							deps: ["libs/pdfjs-1.3.91/compatibility"]
+						"pdfjs-dist/build/pdf":
+							deps: ["libs/#{PackageVersions.lib('pdfjs')}/compatibility"]
 
 					skipDirOptimize: true
 					modules: [
@@ -171,11 +173,13 @@ module.exports = (grunt) ->
 							exclude: ["libs"]
 						}, {
 							name: "ide",
-							exclude: ["libs", "libs/pdf"]
+							exclude: ["libs", "pdfjs-dist/build/pdf"]
 						}, {
 							name: "libs"
 						},{
 							name: "ace/mode-latex"
+						},{
+							name: "ace/worker-latex"
 						}
 
 					]
@@ -380,8 +384,8 @@ module.exports = (grunt) ->
 	
 	grunt.registerTask 'test:modules:unit', 'Run the unit tests for the modules', ['compile:modules:server', 'compile:modules:unit_tests'].concat(moduleUnitTestTasks)
 
-	grunt.registerTask 'run', "Compile and run the web-sharelatex server", ['compile', 'env:run', 'parallel']
-	grunt.registerTask 'runq', "Compile and run the web-sharelatex server", ['compile', 'env:run', 'exec']
+	grunt.registerTask 'run:watch', "Compile and run the web-sharelatex server", ['compile', 'env:run', 'parallel']
+	grunt.registerTask 'run', "Compile and run the web-sharelatex server", ['compile', 'env:run', 'exec']
 
 	grunt.registerTask 'default', 'run'
 

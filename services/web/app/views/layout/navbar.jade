@@ -13,7 +13,7 @@ nav.navbar.navbar-default
 		.navbar-collapse.collapse(collapse="navCollapsed")
 
 			ul.nav.navbar-nav.navbar-right
-				if (session && session.user && session.user.isAdmin)
+				if (getSessionUser() && getSessionUser().isAdmin)
 					li.dropdown(class="subdued", dropdown)
 						a.dropdown-toggle(href, dropdown-toggle)
 							| Admin
@@ -24,8 +24,11 @@ nav.navbar.navbar-default
 							li
 								a(href="/admin/user") Manage Users
 
-				each item in nav.header
-					if ((item.only_when_logged_in && session && session.user) || (item.only_when_logged_out && (!session || !session.user)) || (!item.only_when_logged_out && !item.only_when_logged_in))
+
+				// loop over header_extras
+				each item in nav.header_extras
+
+					if ((item.only_when_logged_in && getSessionUser()) || (item.only_when_logged_out && (!getSessionUser())) || (!item.only_when_logged_out && !item.only_when_logged_in))
 						if item.dropdown
 							li.dropdown(class=item.class, dropdown)
 								a.dropdown-toggle(href, dropdown-toggle)
@@ -47,7 +50,35 @@ nav.navbar.navbar-default
 									a(href=item.url, class=item.class) !{translate(item.text)}
 								else
 									| !{translate(item.text)}
-				
-				
-				
 
+				// logged out
+				if !getSessionUser()
+					// register link
+					if !externalAuthenticationSystemUsed()
+						li
+							a(href="/register") #{translate('register')}
+
+					// login link
+					li
+						a(href="/login") #{translate('log_in')}
+
+				// projects link and account menu
+				if getSessionUser()
+					li
+						a(href="/project") #{translate('Projects')}
+					li.dropdown(dropdown)
+						a.dropbodw-toggle(href, dropdown-toggle)
+							| #{translate('Account')}
+							b.caret
+						ul.dropdown-menu
+							li
+								div.subdued #{getUserEmail()}
+							li.divider
+							li
+								a(href="/user/settings") #{translate('Account Settings')}
+							if nav.showSubscriptionLink
+								li
+									a(href="/user/subscription") #{translate('subscription')}
+							li.divider
+							li
+								a(href="/logout") #{translate('log_out')}

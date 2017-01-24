@@ -9,6 +9,7 @@ ObjectId = require("mongojs").ObjectId
 
 describe "AuthenticationManager", ->
 	beforeEach ->
+		@settings = { security: { bcryptRounds: 12 } }
 		@AuthenticationManager = SandboxedModule.require modulePath, requires:
 			"../../models/User": User: @User = {}
 			"../../infrastructure/mongojs":
@@ -16,7 +17,7 @@ describe "AuthenticationManager", ->
 					users: {}
 				ObjectId: ObjectId
 			"bcrypt": @bcrypt = {}
-			"settings-sharelatex": { security: { bcryptRounds: 12 } }
+			"settings-sharelatex": @settings
 		@callback = sinon.stub()
 
 	describe "authenticate", ->
@@ -102,27 +103,52 @@ describe "AuthenticationManager", ->
 			@bcrypt.genSalt = sinon.stub().callsArgWith(1, null, @salt)
 			@bcrypt.hash = sinon.stub().callsArgWith(2, null, @hashedPassword)
 			@db.users.update = sinon.stub().callsArg(2)
-			@AuthenticationManager.setUserPassword(@user_id, @password, @callback)
 
-		it "should update the user's password in the database", ->
-			@db.users.update
-				.calledWith({
-					_id: ObjectId(@user_id.toString())
-				}, {
-					$set: {
-						"hashedPassword": @hashedPassword
-					}
-					$unset: password: true
-				})
-				.should.equal true
+		describe "too long", ->
+			beforeEach ->
+				@settings.passwordStrengthOptions =
+					length: 
+						max:10
+				@password = "dsdsadsadsadsadsadkjsadjsadjsadljs"
 
-		it "should hash the password", ->
-			@bcrypt.genSalt
-				.calledWith(12)
-				.should.equal true
-			@bcrypt.hash
-				.calledWith(@password, @salt)
-				.should.equal true
+			it "should return and error", (done)->
+				@AuthenticationManager.setUserPassword @user_id, @password, (err)->
+					expect(err).to.exist
+					done()
 
-		it "should call the callback", ->
-			@callback.called.should.equal true
+
+			it "should not start the bcrypt process", (done)->
+				@AuthenticationManager.setUserPassword @user_id, @password, (err)=>
+					@bcrypt.genSalt.called.should.equal false
+					@bcrypt.hash.called.should.equal false
+					done()
+
+		describe "successful set", ->
+			beforeEach -> 
+				@AuthenticationManager.setUserPassword(@user_id, @password, @callback)
+
+			it "should update the user's password in the database", ->
+				@db.users.update
+					.calledWith({
+						_id: ObjectId(@user_id.toString())
+					}, {
+						$set: {
+							"hashedPassword": @hashedPassword
+						}
+						$unset: password: true
+					})
+					.should.equal true
+
+			it "should hash the password", ->
+				@bcrypt.genSalt
+					.calledWith(12)
+					.should.equal true
+				@bcrypt.hash
+					.calledWith(@password, @salt)
+					.should.equal true
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+
+

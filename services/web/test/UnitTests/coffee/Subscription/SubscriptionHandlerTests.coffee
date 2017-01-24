@@ -57,6 +57,10 @@ describe "Subscription Handler sanboxed", ->
 
 		@EmailHandler =
 			sendEmail:sinon.stub()
+
+		@AnalyticsManager = 
+			recordEvent:sinon.stub()
+			
 		@SubscriptionHandler = SandboxedModule.require modulePath, requires:
 			"./RecurlyWrapper": @RecurlyWrapper
 			"settings-sharelatex": @Settings
@@ -67,6 +71,7 @@ describe "Subscription Handler sanboxed", ->
 			"../Email/EmailHandler":@EmailHandler
 			"../Dropbox/DropboxHandler":@DropboxHandler
 			"../../infrastructure/Events": @Events = {emit: sinon.stub()}
+			"../Analytics/AnalyticsManager": @AnalyticsManager
 
 		@SubscriptionHandler.syncSubscriptionToUser = sinon.stub().callsArgWith(2)
 

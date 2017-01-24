@@ -185,7 +185,7 @@ describe "CollaboratorsInviteHandler", ->
 	describe '_sendMessages', ->
 
 		beforeEach ->
-			@CollaboratorsEmailHandler.notifyUserOfProjectInvite = sinon.stub().callsArgWith(3, null)
+			@CollaboratorsEmailHandler.notifyUserOfProjectInvite = sinon.stub().callsArgWith(4, null)
 			@CollaboratorsInviteHandler._trySendInviteNotification = sinon.stub().callsArgWith(3, null)
 			@call = (callback) =>
 				@CollaboratorsInviteHandler._sendMessages @projectId, @sendingUser, @fakeInvite, callback
@@ -213,7 +213,7 @@ describe "CollaboratorsInviteHandler", ->
 		describe 'when CollaboratorsEmailHandler.notifyUserOfProjectInvite produces an error', ->
 
 			beforeEach ->
-				@CollaboratorsEmailHandler.notifyUserOfProjectInvite = sinon.stub().callsArgWith(3, new Error('woops'))
+				@CollaboratorsEmailHandler.notifyUserOfProjectInvite = sinon.stub().callsArgWith(4, new Error('woops'))
 
 			it 'should produce an error', (done) ->
 				@call (err, invite) =>
@@ -404,7 +404,7 @@ describe "CollaboratorsInviteHandler", ->
 			@CollaboratorsInviteHandler._tryCancelInviteNotification = sinon.stub().callsArgWith(1, null)
 			@ProjectInvite.remove.callsArgWith(1, null)
 			@call = (callback) =>
-				@CollaboratorsInviteHandler.acceptInvite @projectId, @inviteId, @token, @user, callback
+				@CollaboratorsInviteHandler.acceptInvite @projectId, @token, @user, callback
 
 		afterEach ->
 			@_getInviteByToken.restore()

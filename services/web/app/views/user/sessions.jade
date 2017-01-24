@@ -1,0 +1,49 @@
+extends ../layout
+
+
+block scripts
+	script(type='text/javascript').
+		window.otherSessions = !{JSON.stringify(sessions)}
+
+
+block content
+	.content.content-alt
+		.container
+			.row
+				.col-md-10.col-md-offset-1.col-lg-8.col-lg-offset-2
+					.card.clear-user-sessions(ng-controller="ClearSessionsController", ng-cloak)
+						.page-header
+							h1  #{translate("your_sessions")}
+
+						div
+							p.small
+								| #{translate("clear_sessions_description")}
+
+						div
+							div(ng-if="state.otherSessions.length == 0")
+								p.text-center
+									| #{translate("no_other_sessions")}
+
+								div(ng-if="state.success == true")
+									p.text-success.text-center
+										| #{translate('clear_sessions_success')}
+
+							div(ng-if="state.otherSessions.length != 0")
+								table.table.table-striped
+									thead
+										tr
+											th #{translate("ip_address")}
+											th #{translate("session_created_at")}
+									tr(ng-repeat="session in state.otherSessions")
+										td {{session.ip_address}}
+										td {{session.session_created | formatDate}}
+
+								p.actions
+									.text-center
+										button.btn.btn-lg.btn-primary(
+											ng-click="clearSessions()"
+										) #{translate('clear_sessions')}
+
+										div(ng-if="state.error == true")
+											p.text-danger.error
+												| #{translate('generic_something_went_wrong')}

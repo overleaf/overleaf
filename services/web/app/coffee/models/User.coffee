@@ -26,6 +26,7 @@ UserSchema = new Schema
 							autoComplete:   {type : Boolean, default: true}
 							spellCheckLanguage :   {type : String, default: "en"}
 							pdfViewer   :   {type : String, default: "pdfjs"}
+							syntaxValidation   :   {type : Boolean}
 						}
 	features		  : {
 							collaborators: { type:Number,  default: Settings.defaultFeatures.collaborators }
@@ -38,7 +39,7 @@ UserSchema = new Schema
 							references:    { type:Boolean, default: Settings.defaultFeatures.references }
 						}
 	featureSwitches	  : {
-		pdfng: { type: Boolean }
+		track_changes: { type: Boolean }
 	}
 	referal_id : {type:String, default:() -> uuid.v4().split("-")[0]}
 	refered_users: [ type:ObjectId, ref:'User' ]

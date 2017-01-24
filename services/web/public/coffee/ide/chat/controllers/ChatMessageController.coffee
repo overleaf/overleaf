@@ -1,7 +1,11 @@
 define [
 	"base"
-], (App) ->
+	"ide/colors/ColorManager"
+], (App, ColorManager) ->
 	App.controller "ChatMessageController", ["$scope", "ide", ($scope, ide) ->
 		$scope.hue = (user) ->
-			ide.onlineUsersManager.getHueForUserId(user.id)
+			if !user?
+				return 0
+			else
+				return ColorManager.getHueForUserId(user.id)
 	]

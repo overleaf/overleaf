@@ -1,0 +1,78 @@
+@feat-onboard-wrapper-width: 820px;
+@feat-onboard-max-text-width: 750px;
+
+.feat-onboard {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	display: flex;
+ 	justify-content: center;
+ 	align-items: center;
+	background-image: linear-gradient(rgba(0, 0, 0, .85), rgba(0, 0, 0, .85));
+	background-repeat: no-repeat;
+	background-position-x: 0;
+	color: #FFF;
+	text-align: center;
+	z-index: 102;
+	transition: background-position ease-in-out @left-menu-animation-duration;
+	overflow: auto;
+}
+
+.feat-onboard-step2 {
+	background-position-x: @left-menu-width;
+
+	~ #left-menu {
+		pointer-events: none;
+
+		.code-check-setting {
+			box-shadow: 0 0 300px 0 #000;
+		}
+	}
+}
+	.feat-onboard-wrapper {
+		width: @feat-onboard-wrapper-width;
+	}
+		.feat-onboard-title {
+			color: @brand-primary;
+			margin-bottom: 40px;
+
+		}
+			.feat-onboard-title-name {
+				color: #FFF;
+				font-weight: bold;
+			}
+
+		.feat-onboard-description {
+			max-width: @feat-onboard-max-text-width;
+			margin: 0 auto 30px;
+			padding: 0 80px;
+		}
+			.feat-onboard-description-name {
+				font-weight: bold;
+			}
+
+	.feat-onboard-video {
+		box-shadow: 0 0 70px 0 rgba(255, 255, 255, 0.3);
+	}
+
+	.feat-onboard-adv-wrapper {
+		text-align: left;
+		margin-bottom: 30px;
+	}
+		.feat-onboard-adv-title {
+			color: #FFF;
+			font-size: 23px;
+		}
+			.feat-onboard-adv-title-highlight {
+				font-weight: bold;
+			}
+
+	.feat-onboard-btn-wrapper {
+		margin-bottom: 10px;
+
+		> .btn {
+			box-shadow: 0 0 70px 0 rgba(255, 255, 255, 0.3);
+		}
+	}

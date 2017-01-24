@@ -24,12 +24,19 @@ define [
 
 					scope[attrs.name].inflight = true
 
+					# for asyncForm prevent automatic redirect to /login if
+					# authentication fails, we will handle it ourselves
 					$http
-						.post(element.attr('action'), formData)
+						.post(element.attr('action'), formData, {disableAutoLoginRedirect: true})
 						.success (data, status, headers, config) ->
 							scope[attrs.name].inflight = false
 							response.success = true
 							response.error = false
+
+							onSuccessHandler = scope[attrs.onSuccess]
+							if onSuccessHandler
+								onSuccessHandler(data, status, headers, config)
+								return
 
 							if data.redir?
 								ga('send', 'event', formName, 'success')
@@ -48,6 +55,12 @@ define [
 							scope[attrs.name].inflight = false
 							response.success = false
 							response.error = true
+
+							onErrorHandler = scope[attrs.onError]
+							if onErrorHandler
+								onErrorHandler(data, status, headers, config)
+								return
+
 							if status == 403 # Forbidden
 								response.message =
 									text: "Session error. Please check you have cookies enabled. If the problem persists, try clearing your cache and cookies."
@@ -112,6 +125,8 @@ define [
 			[asyncFormCtrl, ngModelCtrl] = ctrl
 
 			ngModelCtrl.$parsers.unshift (modelValue) ->
+				
+			
 				isValid = passField.validatePass()
 				email = asyncFormCtrl.getEmail() || window.usersEmail
 				if !isValid
@@ -121,5 +136,8 @@ define [
 					if modelValue.indexOf(email) != -1 or modelValue.indexOf(startOfEmail) != -1
 						isValid = false
 						scope.complexPasswordErrorMessage = "Password can not contain email address"
+				if opts.length.max? and modelValue.length == opts.length.max
+					isValid = false
+					scope.complexPasswordErrorMessage = "Maximum password length #{opts.length.max} reached"
 				ngModelCtrl.$setValidity('complexPassword', isValid)
 				return modelValue

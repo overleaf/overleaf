@@ -4,12 +4,14 @@ define [
 	"ide/connection/ConnectionManager"
 	"ide/editor/EditorManager"
 	"ide/online-users/OnlineUsersManager"
-	"ide/track-changes/TrackChangesManager"
+	"ide/history/HistoryManager"
 	"ide/permissions/PermissionsManager"
 	"ide/pdf/PdfManager"
 	"ide/binary-files/BinaryFilesManager"
 	"ide/references/ReferencesManager"
+	"ide/review-panel/ReviewPanelManager"
 	"ide/SafariScrollPatcher"
+	"ide/FeatureOnboardingController"
 	"ide/settings/index"
 	"ide/share/index"
 	"ide/chat/index"
@@ -36,15 +38,16 @@ define [
 	ConnectionManager
 	EditorManager
 	OnlineUsersManager
-	TrackChangesManager
+	HistoryManager
 	PermissionsManager
 	PdfManager
 	BinaryFilesManager
 	ReferencesManager
+	ReviewPanelManager
 	SafariScrollPatcher
 ) ->
 
-	App.controller "IdeController", ($scope, $timeout, ide, localStorage, event_tracking) ->
+	App.controller "IdeController", ($scope, $timeout, ide, localStorage, sixpack, event_tracking) ->
 		# Don't freak out if we're already in an apply callback
 		$scope.$originalApply = $scope.$apply
 		$scope.$apply = (fn = () ->) ->
@@ -64,17 +67,32 @@ define [
 			view: "editor"
 			chatOpen: false
 			pdfLayout: 'sideBySide'
+			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}")
+			showCodeCheckerOnboarding: !window.userSettings.syntaxValidation?
 		}
 		$scope.user = window.user
+
+		$scope.shouldABTestPlans = false
+		if $scope.user.signUpDate >= '2016-10-27'
+			$scope.shouldABTestPlans = true
+
 		$scope.settings = window.userSettings
 		$scope.anonymous = window.anonymous
 
 		$scope.chat = {}
 
+		ide.toggleReviewPanel = $scope.toggleReviewPanel = () ->
+			$scope.ui.reviewPanelOpen = !$scope.ui.reviewPanelOpen
+			event_tracking.sendMB "rp-toggle-panel", { value : $scope.ui.reviewPanelOpen }
+
+		$scope.$watch "ui.reviewPanelOpen", (value) ->
+			if value?
+				localStorage "ui.reviewPanelOpen.#{window.project_id}", value
+
 		# Tracking code.
 		$scope.$watch "ui.view", (newView, oldView) ->
 			if newView? and newView != "editor" and newView != "pdf"
-				event_tracking.sendMBOnce "ide-open-view-#{ newView }-once" 
+				event_tracking.sendMBOnce "ide-open-view-#{ newView }-once"
 
 		$scope.$watch "ui.chatOpen", (isOpen) ->
 			event_tracking.sendMBOnce "ide-open-chat-once" if isOpen
@@ -88,6 +106,8 @@ define [
 
 		window._ide = ide
 
+		ide.validFileRegex = '^[^\*\/]*$' # Don't allow * and /
+
 		ide.project_id = $scope.project_id = window.project_id
 		ide.$scope = $scope
 
@@ -96,7 +116,7 @@ define [
 		ide.fileTreeManager = new FileTreeManager(ide, $scope)
 		ide.editorManager = new EditorManager(ide, $scope)
 		ide.onlineUsersManager = new OnlineUsersManager(ide, $scope)
-		ide.trackChangesManager = new TrackChangesManager(ide, $scope)
+		ide.historyManager = new HistoryManager(ide, $scope)
 		ide.pdfManager = new PdfManager(ide, $scope)
 		ide.permissionsManager = new PermissionsManager(ide, $scope)
 		ide.binaryFilesManager = new BinaryFilesManager(ide, $scope)

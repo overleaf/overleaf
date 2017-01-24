@@ -10,10 +10,17 @@ MockResponse = require "../helpers/MockResponse"
 
 describe "CompileController", ->
 	beforeEach ->
-		@CompileManager = 
+		@user_id = 'wat'
+		@user =
+			_id: @user_id
+			email: 'user@example.com'
+			features:
+				compileGroup: "premium"
+				compileTimeout: 100
+		@CompileManager =
 			compile: sinon.stub()
 		@ClsiManager = {}
-		@UserGetter = 
+		@UserGetter =
 			getUser:sinon.stub()
 		@RateLimiter = {addCount:sinon.stub()}
 		@settings =
@@ -23,8 +30,13 @@ describe "CompileController", ->
 				clsi_priority:
 					url: "clsi-priority.example.com"
 		@jar = {cookie:"stuff"}
-		@ClsiCookieManager = 
+		@ClsiCookieManager =
 			getCookieJar:sinon.stub().callsArgWith(1, null, @jar)
+		@AuthenticationController =
+			getLoggedInUser: sinon.stub().callsArgWith(1, null, @user)
+			getLoggedInUserId: sinon.stub().returns(@user_id)
+			getSessionUser: sinon.stub().returns(@user)
+			isUserLoggedIn: sinon.stub().returns(true)
 		@CompileController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings
 			"request": @request = sinon.stub()
@@ -34,18 +46,13 @@ describe "CompileController", ->
 			"./CompileManager":@CompileManager
 			"../User/UserGetter":@UserGetter
 			"./ClsiManager": @ClsiManager
-			"../Authentication/AuthenticationController": @AuthenticationController = {}
+			"../Authentication/AuthenticationController": @AuthenticationController
 			"../../infrastructure/RateLimiter":@RateLimiter
 			"./ClsiCookieManager":@ClsiCookieManager
 		@project_id = "project-id"
-		@user = 
-			features:
-				compileGroup: "premium"
-				compileTimeout: 100
 		@next = sinon.stub()
 		@req = new MockRequest()
 		@res = new MockResponse()
-		@AuthenticationController.getLoggedInUserId = sinon.stub().callsArgWith(1, null, @user_id = "mock-user-id")
 
 	describe "compile", ->
 		beforeEach ->
@@ -90,7 +97,7 @@ describe "CompileController", ->
 				@CompileManager.compile
 					.calledWith(@project_id, @user_id, { isAutoCompile: true })
 					.should.equal true
-		
+
 		describe "with the draft attribute", ->
 			beforeEach ->
 				@req.body =
@@ -108,7 +115,7 @@ describe "CompileController", ->
 				Project_id: @project_id
 			@project =
 				getSafeProjectName: () => @safe_name = "safe-name"
-				
+
 			@req.query = {pdfng:true}
 			@Project.findById = sinon.stub().callsArgWith(2, null, @project)
 
@@ -340,9 +347,9 @@ describe "CompileController", ->
 					project_id:@project_id
 			@CompileManager.compile.callsArgWith(3)
 			@CompileController.proxyToClsi = sinon.stub()
-			@res = 
+			@res =
 				send:=>
-									
+
 		it "should call compile in the compile manager", (done)->
 			@CompileController.compileAndDownloadPdf @req, @res
 			@CompileManager.compile.calledWith(@project_id).should.equal true

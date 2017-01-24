@@ -2,7 +2,7 @@ extends ../layout
 
 block content
 	.content.content-alt
-		.container
+		.container(ng-controller="SuccessfulSubscriptionController")
 			.row
 				.col-md-8.col-md-offset-2
 					.card(ng-cloak)
@@ -10,13 +10,8 @@ block content
 							h2 #{translate("thanks_for_subscribing")}
 						.alert.alert-success
 							p !{translate("next_payment_of_x_collectected_on_y", {paymentAmmount:"<strong>"+subscription.price+"</strong>", collectionDate:"<strong>"+subscription.nextPaymentDueAt+"</strong>"})}
-							span(sixpack-switch="upgrade-success-message")
-								span(sixpack-default)
-									p #{translate("if_you_dont_want_to_be_charged")}
-										a(href="/user/subscription") #{translate("click_here_to_cancel")}.
-								span(sixpack-when="manage-subscription")
-									p #{translate("to_modify_your_subscription_go_to")} 
-										a(href="/user/subscription")  #{translate("manage_subscription")}.
+							p #{translate("to_modify_your_subscription_go_to")} 
+								a(href="/user/subscription")  #{translate("manage_subscription")}.
 						p
 							- if (subscription.groupPlan == true)
 								a.btn.btn-success.btn-large(href="/subscription/group") #{translate("add_your_first_group_member_now")}

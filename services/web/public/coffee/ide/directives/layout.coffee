@@ -94,8 +94,6 @@ define [
 					$(window).unload () ->
 						ide.localStorage("layout.#{name}", element.layout().readState())
 
-
-
 					if attrs.openEast?
 						scope.$watch attrs.openEast, (value, oldValue) ->
 							if value? and value != oldValue
@@ -107,6 +105,9 @@ define [
 								scope.$digest()
 							, 0
 
+					if attrs.allowOverflowOn?
+						element.layout().allowOverflow(scope.$eval(attrs.allowOverflowOn))
+
 					resetOpenStates()
 					onInternalResize()
 
@@ -116,5 +117,10 @@ define [
 								element.layout().hide("east")
 							else
 								element.layout().show("east")
+
+				post: (scope, element, attrs) ->
+					name = attrs.layout
+					state = element.layout().readState()
+					scope.$broadcast "layout:#{name}:linked", state
 		}
 	]

@@ -418,7 +418,15 @@ module.exports = RecurlyWrapper =
 			url: "subscriptions/#{subscriptionId}/cancel",
 			method: "put"
 		}, (error, response, body) ->
-			callback(error)
+			if error?
+				RecurlyWrapper._parseXml body, (_err, parsed) ->
+					if parsed?.error?.description == "A canceled subscription can't transition to canceled"
+						logger.log {subscriptionId, error, body}, "subscription already cancelled, not really an error, proceeding"
+						callback(null)
+					else
+						callback(error)
+			else
+				callback(null)
 		)
 
 	reactivateSubscription: (subscriptionId, callback) ->

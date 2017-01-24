@@ -28,5 +28,5 @@ text.api =
       for component in op
         if component.i != undefined
           @emit 'insert', component.p, component.i
-        else
+        else if component.d != undefined
           @emit 'delete', component.p, component.d

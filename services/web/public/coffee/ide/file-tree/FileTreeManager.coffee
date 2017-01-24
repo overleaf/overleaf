@@ -275,6 +275,16 @@ define [
 						doc:  entity
 						path: path
 					}
+			# Keep list ordered by folders, then name
+			@$scope.docs.sort (a,b) ->
+				aDepth = (a.path.match(/\//g) || []).length
+				bDepth = (b.path.match(/\//g) || []).length
+				if aDepth - bDepth != 0
+					return -(aDepth - bDepth) # Deeper path == folder first
+				else if a.path < b.path
+					return -1
+				else
+					return 1
 			
 		getEntityPath: (entity) ->
 			@_getEntityPathInFolder @$scope.rootFolder, entity

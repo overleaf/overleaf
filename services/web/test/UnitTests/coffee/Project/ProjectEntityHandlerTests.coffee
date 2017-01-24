@@ -382,7 +382,9 @@ describe 'ProjectEntityHandler', ->
 		beforeEach ->
 			@lines = ["mock", "doc", "lines"]
 			@rev = 5
-			@DocstoreManager.getDoc = sinon.stub().callsArgWith(3, null, @lines, @rev)
+			@version = 42
+			@ranges = {"mock": "ranges"}
+			@DocstoreManager.getDoc = sinon.stub().callsArgWith(3, null, @lines, @rev, @version, @ranges)
 			@ProjectEntityHandler.getDoc project_id, doc_id, @callback
 
 		it "should call the docstore", ->
@@ -391,7 +393,7 @@ describe 'ProjectEntityHandler', ->
 				.should.equal true
 
 		it "should call the callback with the lines, version and rev", ->
-			@callback.calledWith(null, @lines, @rev).should.equal true
+			@callback.calledWith(null, @lines, @rev, @version, @ranges).should.equal true
 
 	describe 'addDoc', ->
 		beforeEach ->
@@ -402,7 +404,7 @@ describe 'ProjectEntityHandler', ->
 			@ProjectEntityHandler._putElement = sinon.stub().callsArgWith(4, null, {path:{fileSystem:@path}})
 			@callback = sinon.stub()
 			@tpdsUpdateSender.addDoc = sinon.stub().callsArg(1)
-			@DocstoreManager.updateDoc = sinon.stub().callsArgWith(3, null, true, 0)
+			@DocstoreManager.updateDoc = sinon.stub().yields(null, true, 0)
 
 			@ProjectEntityHandler.addDoc project_id, folder_id, @name, @lines, @callback
 
@@ -589,6 +591,8 @@ describe 'ProjectEntityHandler', ->
 			@doc = {
 				_id: doc_id
 			}
+			@version = 42
+			@ranges = {"mock":"ranges"}
 			@ProjectGetter.getProjectWithoutDocLines = sinon.stub().callsArgWith(1, null, @project)
 			@projectLocator.findElement = sinon.stub().callsArgWith(1, null, @doc, {fileSystem: @path})
 			@tpdsUpdateSender.addDoc = sinon.stub().callsArg(1)
@@ -597,8 +601,8 @@ describe 'ProjectEntityHandler', ->
 
 		describe "when the doc has been modified", ->
 			beforeEach ->
-				@DocstoreManager.updateDoc = sinon.stub().callsArgWith(3, null, true, @rev = 5)
-				@ProjectEntityHandler.updateDocLines project_id, doc_id, @lines, @callback
+				@DocstoreManager.updateDoc = sinon.stub().yields(null, true, @rev = 5)
+				@ProjectEntityHandler.updateDocLines project_id, doc_id, @lines, @version, @ranges, @callback
 
 			it "should get the project without doc lines", ->
 				@ProjectGetter.getProjectWithoutDocLines
@@ -616,7 +620,7 @@ describe 'ProjectEntityHandler', ->
 
 			it "should update the doc in the docstore", ->
 				@DocstoreManager.updateDoc
-					.calledWith(project_id, doc_id, @lines)
+					.calledWith(project_id, doc_id, @lines, @version, @ranges)
 					.should.equal true
 
 			it "should mark the project as updated", ->
@@ -640,8 +644,8 @@ describe 'ProjectEntityHandler', ->
 
 		describe "when the doc has not been modified", ->
 			beforeEach ->
-				@DocstoreManager.updateDoc = sinon.stub().callsArgWith(3, null, false, @rev = 5)
-				@ProjectEntityHandler.updateDocLines project_id, doc_id, @lines, @callback
+				@DocstoreManager.updateDoc = sinon.stub().yields(null, false, @rev = 5)
+				@ProjectEntityHandler.updateDocLines project_id, doc_id, @lines, @version, @ranges, @callback
 
 			it "should not mark the project as updated", ->
 				@projectUpdater.markAsUpdated.called.should.equal false
@@ -655,7 +659,7 @@ describe 'ProjectEntityHandler', ->
 		describe "when the project is not found", ->
 			beforeEach ->
 				@ProjectGetter.getProjectWithoutDocLines = sinon.stub().callsArgWith(1, null, null)
-				@ProjectEntityHandler.updateDocLines project_id, doc_id, @lines, @callback
+				@ProjectEntityHandler.updateDocLines project_id, doc_id, @lines, @ranges, @version, @callback
 
 			it "should return a not found error", ->
 				@callback.calledWith(new Errors.NotFoundError()).should.equal true
@@ -663,7 +667,7 @@ describe 'ProjectEntityHandler', ->
 		describe "when the doc is not found", ->
 			beforeEach ->
 				@projectLocator.findElement = sinon.stub().callsArgWith(1, null, null, null)
-				@ProjectEntityHandler.updateDocLines project_id, doc_id, @lines, @callback
+				@ProjectEntityHandler.updateDocLines project_id, doc_id, @lines, @ranges, @version, @callback
 
 			it "should log out the error", ->
 				@logger.error

@@ -27,6 +27,7 @@ describe "UserInfoController", ->
 			"./UserDeleter": @UserDeleter
 			"logger-sharelatex": log:->
 			"sanitizer":@sanitizer
+			'../Authentication/AuthenticationController': @AuthenticationController = {getLoggedInUserId: sinon.stub()}
 
 		@req = new MockRequest()
 		@res = new MockResponse()
@@ -40,6 +41,7 @@ describe "UserInfoController", ->
 			@req.session.user = @user
 			@UserInfoController.sendFormattedPersonalInfo = sinon.stub()
 			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user)
+			@AuthenticationController.getLoggedInUserId = sinon.stub().returns(@user._id)
 			@UserInfoController.getLoggedInUsersPersonalInfo(@req, @res, @next)
 
 		it "should call sendFormattedPersonalInfo", ->
@@ -91,18 +93,18 @@ describe "UserInfoController", ->
 				first_name: @user.first_name
 				last_name: @user.last_name
 				email: @user.email
-			@UserInfoController._formatPersonalInfo = sinon.stub().callsArgWith(1, null, @formattedInfo)
+			@UserInfoController.formatPersonalInfo = sinon.stub().returns(@formattedInfo)
 			@UserInfoController.sendFormattedPersonalInfo @user, @res
 
 		it "should format the user details for the response", ->
-			@UserInfoController._formatPersonalInfo
+			@UserInfoController.formatPersonalInfo
 				.calledWith(@user)
 				.should.equal true
 
 		it "should send the formatted details back to the client", ->
 			@res.body.should.equal JSON.stringify(@formattedInfo)
 
-	describe "_formatPersonalInfo", ->
+	describe "formatPersonalInfo", ->
 		it "should return the correctly formatted data", ->
 			@user =
 				_id: ObjectId()
@@ -113,14 +115,13 @@ describe "UserInfoController", ->
 				signUpDate: new Date()
 				role:"student"
 				institution:"sheffield"
-			@UserInfoController._formatPersonalInfo @user, (error, info) =>
-				expect(info).to.deep.equal {
-					id: @user._id.toString()
-					first_name: @user.first_name
-					last_name: @user.last_name
-					email: @user.email
-					signUpDate: @user.signUpDate
-					role: @user.role
-					institution: @user.institution
-				}
+			expect(@UserInfoController.formatPersonalInfo(@user)).to.deep.equal {
+				id: @user._id.toString()
+				first_name: @user.first_name
+				last_name: @user.last_name
+				email: @user.email
+				signUpDate: @user.signUpDate
+				role: @user.role
+				institution: @user.institution
+			}
 

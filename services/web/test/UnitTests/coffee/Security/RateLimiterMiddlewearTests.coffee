@@ -5,9 +5,13 @@ modulePath = require('path').join __dirname, '../../../../app/js/Features/Securi
 
 describe "RateLimiterMiddlewear", ->
 	beforeEach ->
+		@AuthenticationController =
+			getLoggedInUserId: () =>
+				@req?.session?.user?._id
 		@RateLimiterMiddlewear = SandboxedModule.require modulePath, requires:
 			'../../infrastructure/RateLimiter' : @RateLimiter = {}
 			"logger-sharelatex": @logger = {warn: sinon.stub()}
+			'../Authentication/AuthenticationController': @AuthenticationController
 		@req =
 			params: {}
 		@res =
@@ -15,7 +19,7 @@ describe "RateLimiterMiddlewear", ->
 			write: sinon.stub()
 			end: sinon.stub()
 		@next = sinon.stub()
-	
+
 	describe "rateLimit", ->
 		beforeEach ->
 			@rateLimiter = @RateLimiterMiddlewear.rateLimit({
@@ -28,7 +32,7 @@ describe "RateLimiterMiddlewear", ->
 				project_id: @project_id = "project-id"
 				doc_id: @doc_id = "doc-id"
 			}
-			
+
 		describe "when there is no session", ->
 			beforeEach ->
 				@RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
@@ -44,18 +48,18 @@ describe "RateLimiterMiddlewear", ->
 						subjectName: "#{@project_id}:#{@doc_id}:#{@ip}"
 					})
 					.should.equal true
-					
+
 			it "should pass on to next()", ->
 
 
 		describe "when under the rate limit with logged in user", ->
 			beforeEach ->
 				@req.session =
-					user : 
+					user :
 						_id: @user_id = "user-id"
 				@RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
 				@rateLimiter(@req, @res, @next)
-				
+
 			it "should call the rate limiter backend with the user_id", ->
 				@RateLimiter.addCount
 					.calledWith({
@@ -65,16 +69,16 @@ describe "RateLimiterMiddlewear", ->
 						subjectName: "#{@project_id}:#{@doc_id}:#{@user_id}"
 					})
 					.should.equal true
-					
+
 			it "should pass on to next()", ->
 				@next.called.should.equal true
-				
+
 		describe "when under the rate limit with anonymous user", ->
 			beforeEach ->
 				@req.ip = @ip = "1.2.3.4"
 				@RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
 				@rateLimiter(@req, @res, @next)
-				
+
 			it "should call the rate limiter backend with the ip address", ->
 				@RateLimiter.addCount
 					.calledWith({
@@ -84,25 +88,25 @@ describe "RateLimiterMiddlewear", ->
 						subjectName: "#{@project_id}:#{@doc_id}:#{@ip}"
 					})
 					.should.equal true
-					
+
 			it "should pass on to next()", ->
 				@next.called.should.equal true
-				
+
 		describe "when over the rate limit", ->
 			beforeEach ->
-				@req.session  = 
-					user : 
+				@req.session  =
+					user :
 						_id: @user_id = "user-id"
 				@RateLimiter.addCount = sinon.stub().callsArgWith(1, null, false)
 				@rateLimiter(@req, @res, @next)
-				
+
 			it "should return a 429", ->
 				@res.status.calledWith(429).should.equal true
 				@res.end.called.should.equal true
-				
+
 			it "should not continue", ->
 				@next.called.should.equal false
-				
+
 			it "should log a warning", ->
 				@logger.warn
 					.calledWith({
@@ -112,4 +116,3 @@ describe "RateLimiterMiddlewear", ->
 						subjectName: "#{@project_id}:#{@doc_id}:#{@user_id}"
 					}, "rate limit exceeded")
 					.should.equal true
-			

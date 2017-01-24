@@ -20,7 +20,7 @@ define -> [
 		regexToMatch: /Missing [{$] inserted./
 		extraInfoURL: "https://www.sharelatex.com/learn/Errors/Missing_$_inserted"
 		humanReadableHint: """
-			Check that your $'s match around math expressions. If they do, then you've probably used a symbol in normal text that needs to be in math mode. Symbols such as subscripts ( _ ), integrals ( \\int ), Greek letters ( \\alpha, \\beta, \\delta ), and modifiers (\\vec{x}, \\tilde{x} ) must be written in math mode. See the full list <a target=\"_blank\" href=\"https://www.sharelatex.com/learn/Errors/Missing_$_inserted \">here</a>.If you intended to use mathematics mode, then use $ \u2026 $ for 'inline math mode', $$ \u2026 $$ for 'display math mode' or alternatively \begin{math} \u2026 \end{math}.
+			Check that your $'s match around math expressions. If they do, then you've probably used a symbol in normal text that needs to be in math mode. Symbols such as subscripts ( _ ), integrals ( \\int ), Greek letters ( \\alpha, \\beta, \\delta ), and modifiers (\\vec{x}, \\tilde{x} ) must be written in math mode. See the full list <a target=\"_blank\" href=\"https://www.sharelatex.com/learn/Errors/Missing_$_inserted \">here</a>.If you intended to use mathematics mode, then use $ \u2026 $ for 'inline math mode', $$ \u2026 $$ for 'display math mode' or alternatively \\begin{math} \u2026 \\end{math}.
 		"""
 	,
 		regexToMatch: /(undefined )?[rR]eference(s)?.+(undefined)?/
@@ -50,7 +50,7 @@ define -> [
 		regexToMatch: /No positions in optional float specifier/
 		extraInfoURL: "https://www.sharelatex.com/learn/Errors/No_positions_in_optional_float_specifier"
 		humanReadableHint: """
-			You have forgotten to include a float specifier, which tells LaTeX where to position your figure. To fix this, either insert a float specifier inside the square brackets (e.g. \begin{figure}[h]), or remove the square brackets (e.g. \begin{figure}). Find out more about float specifiers <a target=\"_blank\" href=\"https://www.sharelatex.com/learn/Positioning_of_Figures\">here</a>.
+			You have forgotten to include a float specifier, which tells LaTeX where to position your figure. To fix this, either insert a float specifier inside the square brackets (e.g. \\begin{figure}[h]), or remove the square brackets (e.g. \\begin{figure}). Find out more about float specifiers <a target=\"_blank\" href=\"https://www.sharelatex.com/learn/Positioning_of_Figures\">here</a>.
 		"""
 	,
 		regexToMatch: /Undefined control sequence/
@@ -151,6 +151,36 @@ define -> [
 		extraInfoURL: "https://www.sharelatex.com/learn/Errors/Misplaced_%5Cnoalign"
 		humanReadableHint: """
 			You have used a \\hline command in the wrong place, probably outside a table. If the \\hline command is written inside a table, try including \\\ before it.
+		"""
+	,
+		regexToMatch: /LaTeX Error: There's no line here to end/
+		extraInfoURL: "https://www.sharelatex.com/learn/Errors/LaTeX_Error:_There%27s_no_line_here_to_end"
+		humanReadableHint: """
+			You have used a \\\\ or \\newline command where LaTeX was not expecting one. Make sure that you only use line breaks after blocks of text, and be careful using linebreaks inside lists and other environments.
+		"""
+	,
+		regexToMatch: /LaTeX Error: \\verb ended by end of line/
+		extraInfoURL: "https://www.sharelatex.com/learn/Errors/LaTeX_Error:_%5Cverb_ended_by_end_of_line"
+		humanReadableHint: """
+			You have used a \\verb command incorrectly. Try replacling the \\verb command with \\begin{verbatim}\u2026\\end{verbatim}.
+		"""
+	,
+		regexToMatch: /Illegal unit of measure (pt inserted)/
+		extraInfoURL: "https://www.sharelatex.com/learn/Errors%2FIllegal%20unit%20of%20measure%20(pt%20inserted)"
+		humanReadableHint: """
+			You have written a length, but have not specified the appropriate units (pt, mm, cm etc.). If you have not written a length, check that you have not witten a linebreak \\\\ followed by square brackets [\u2026] anywhere.
+		"""
+	,
+		regexToMatch: /Extra \\right/
+		extraInfoURL: "https://www.sharelatex.com/learn/Errors/Extra_%5Cright"
+		humanReadableHint: """
+			You have written a \\right command without a corresponding \\left command. Check that all \\left and \\right commands balance everywhere. 
+		"""
+	,
+		regexToMatch: /Missing \\begin{document}/
+		extraInfoURL: "https://www.sharelatex.com/learn/Errors%2FLaTeX%20Error%3A%20Missing%20%5Cbegin%20document"
+		humanReadableHint: """
+			No \\begin{document} command was found. Make sure you have included \\begin{document} in your preamble, and that your main document is set correctly.
 		"""
 	,
 		ruleId: "hint_mismatched_environment2"

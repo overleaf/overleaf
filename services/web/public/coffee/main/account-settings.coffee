@@ -21,17 +21,21 @@ define [
 		$scope.deleteAccount = () ->
 			modalInstance = $modal.open(
 				templateUrl: "deleteAccountModalTemplate"
-				controller: "DeleteAccountModalController"
+				controller: "DeleteAccountModalController",
+				scope: $scope
 			)
 	]
 
 	App.controller "DeleteAccountModalController", [
 		"$scope", "$modalInstance", "$timeout", "$http",
 		($scope,   $modalInstance,   $timeout,   $http) ->
-			$scope.state = 
+			$scope.state =
 				isValid : false
 				deleteText: ""
+				password: ""
 				inflight: false
+				error: false
+				invalidCredentials: false
 
 			$modalInstance.opened.then () ->
 				$timeout () ->
@@ -39,20 +43,38 @@ define [
 				, 700
 
 			$scope.checkValidation = ->
-				$scope.state.isValid = $scope.state.deleteText == "DELETE"
+				$scope.state.isValid = $scope.state.deleteText == $scope.email and $scope.state.password.length > 0
 
 			$scope.delete = () ->
 				$scope.state.inflight = true
-
+				$scope.state.error = false
+				$scope.state.invalidCredentials = false
 				$http({
-						method: "DELETE"
-						url: "/user"
+						method: "POST"
+						url: "/user/delete"
 						headers:
 							"X-CSRF-Token": window.csrfToken
+							"Content-Type": 'application/json'
+						data:
+							password: $scope.state.password
+						disableAutoLoginRedirect: true # we want to handle errors ourselves
 					})
 					.success () ->
 						$modalInstance.close()
-						window.location = "/"
+						$scope.state.inflight = false
+						$scope.state.error = false
+						$scope.state.invalidCredentials = false
+						setTimeout(
+							() ->
+								window.location = "/login"
+							, 1000
+						)
+					.error (data, status) ->
+						$scope.state.inflight = false
+						if status == 403
+							$scope.state.invalidCredentials = true
+						else
+							$scope.state.error = true
 
 			$scope.cancel = () ->
 				$modalInstance.dismiss('cancel')

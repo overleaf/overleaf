@@ -5,12 +5,13 @@ Path = require "path"
 fs = require "fs"
 
 ErrorController = require "../Errors/ErrorController"
+AuthenticationController = require('../Authentication/AuthenticationController')
 
 homepageExists = fs.existsSync Path.resolve(__dirname + "/../../../views/external/home.jade")
 
 module.exports = HomeController =
 	index : (req,res)->
-		if req.session.user
+		if AuthenticationController.isUserLoggedIn(req)
 			if req.query.scribtex_path?
 				res.redirect "/project?scribtex_path=#{req.query.scribtex_path}"
 			else

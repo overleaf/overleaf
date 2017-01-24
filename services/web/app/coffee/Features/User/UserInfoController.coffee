@@ -3,12 +3,14 @@ logger = require("logger-sharelatex")
 UserDeleter = require("./UserDeleter")
 UserUpdater = require("./UserUpdater")
 sanitize = require('sanitizer')
+AuthenticationController = require('../Authentication/AuthenticationController')
 
 module.exports = UserController =
 	getLoggedInUsersPersonalInfo: (req, res, next = (error) ->) ->
-		logger.log user: req.user, "reciving request for getting logged in users personal info"
-		return next(new Error("User is not logged in")) if !req.user?
-		UserGetter.getUser req.user._id, {
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		logger.log user_id: user_id, "reciving request for getting logged in users personal info"
+		return next(new Error("User is not logged in")) if !user_id?
+		UserGetter.getUser user_id, {
 			first_name: true, last_name: true,
 			role:true, institution:true,
 			email: true, signUpDate: true
@@ -24,20 +26,14 @@ module.exports = UserController =
 			UserController.sendFormattedPersonalInfo(user, res, next)
 
 	sendFormattedPersonalInfo: (user, res, next = (error) ->) ->
-		UserController._formatPersonalInfo user, (error, info) ->
-			return next(error) if error?
-			res.send JSON.stringify(info)
+		info = UserController.formatPersonalInfo(user)
+		res.send JSON.stringify(info)
 
-	_formatPersonalInfo: (user, callback = (error, info) ->) ->
-		callback null, {
-			id: user._id.toString()
-			first_name: user.first_name
-			last_name: user.last_name
-			email: user.email
-			signUpDate: user.signUpDate
-			role: user.role
-			institution: user.institution
-		}
-		
-
-	
+	formatPersonalInfo: (user, callback = (error, info) ->) ->
+		if !user?
+			return {}
+		formatted_user = { id: user._id.toString() }
+		for key in ["first_name", "last_name", "email", "signUpDate", "role", "institution"]
+			if user[key]?
+				formatted_user[key] = user[key]
+		return formatted_user

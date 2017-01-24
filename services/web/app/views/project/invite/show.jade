@@ -20,7 +20,7 @@ block content
 								form.form(
 									name="acceptForm",
 									method="POST",
-									action="/project/#{invite.projectId}/invite/#{invite._id}/accept"
+									action="/project/#{invite.projectId}/invite/token/#{invite.token}/accept"
 								)
 									input(name='_csrf', type='hidden', value=csrfToken)
 									input(name='token', type='hidden', value="#{invite.token}")

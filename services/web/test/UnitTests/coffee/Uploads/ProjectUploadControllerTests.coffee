@@ -15,13 +15,16 @@ describe "ProjectUploadController", ->
 		@metrics =
 			Timer: class Timer
 				done: sinon.stub()
+		@AuthenticationController =
+			getLoggedInUserId: sinon.stub().returns(@user_id)
 		@ProjectUploadController = SandboxedModule.require modulePath, requires:
 			"./ProjectUploadManager" : @ProjectUploadManager = {}
 			"./FileSystemImportManager" : @FileSystemImportManager = {}
 			"logger-sharelatex" : @logger = {log: sinon.stub(), error: sinon.stub(), err:->}
 			"../../infrastructure/Metrics": @metrics
+			'../Authentication/AuthenticationController': @AuthenticationController
 			"fs" : @fs = {}
-		
+
 	describe "uploadProject", ->
 		beforeEach ->
 			@path = "/path/to/file/on/disk.zip"
@@ -55,13 +58,13 @@ describe "ProjectUploadController", ->
 					.createProjectFromZipArchive
 					.calledWith(sinon.match.any, "filename", sinon.match.any)
 					.should.equal true
-				
+
 			it "should create a project from the zip archive", ->
 				@ProjectUploadManager
 					.createProjectFromZipArchive
 					.calledWith(sinon.match.any, sinon.match.any, @path)
 					.should.equal true
-				
+
 			it "should return a successful response to the FileUploader client", ->
 				expect(@res.body).to.deep.equal
 					success: true

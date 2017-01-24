@@ -31,7 +31,8 @@ checkValidComponent = (c) ->
 
   i_type = typeof c.i
   d_type = typeof c.d
-  throw new Error 'component needs an i or d field' unless (i_type == 'string') ^ (d_type == 'string')
+  c_type = typeof c.c
+  throw new Error 'component needs an i, d or c field' unless (i_type == 'string') ^ (d_type == 'string') ^ (c_type == 'string')
 
   throw new Error 'position cannot be negative' unless c.p >= 0
 
@@ -44,11 +45,15 @@ text.apply = (snapshot, op) ->
   for component in op
     if component.i?
       snapshot = strInject snapshot, component.p, component.i
-    else
+    else if component.d?
       deleted = snapshot[component.p...(component.p + component.d.length)]
       throw new Error "Delete component '#{component.d}' does not match deleted text '#{deleted}'" unless component.d == deleted
       snapshot = snapshot[...component.p] + snapshot[(component.p + component.d.length)..]
-  
+    else if component.c?
+      comment = snapshot[component.p...(component.p + component.c.length)]
+      throw new Error "Comment component '#{component.c}' does not match commented text '#{comment}'" unless component.c == comment
+    else
+      throw new Error "Unknown op type"
   snapshot
 
 
@@ -112,7 +117,7 @@ transformPosition = (pos, c, insertAfter) ->
       pos + c.i.length
     else
       pos
-  else
+  else if c.d?
     # I think this could also be written as: Math.min(c.p, Math.min(c.p - otherC.p, otherC.d.length))
     # but I think its harder to read that way, and it compiles using ternary operators anyway
     # so its no slower written like this.
@@ -122,6 +127,10 @@ transformPosition = (pos, c, insertAfter) ->
       c.p
     else
       pos - c.d.length
+  else if c.c?
+    pos
+  else
+    throw new Error("unknown op type")
 
 # Helper method to transform a cursor position as a result of an op.
 #
@@ -143,7 +152,7 @@ text._tc = transformComponent = (dest, c, otherC, side) ->
   if c.i?
     append dest, {i:c.i, p:transformPosition(c.p, otherC, side == 'right')}
 
-  else # Delete
+  else if c.d? # Delete
     if otherC.i? # delete vs insert
       s = c.d
       if c.p < otherC.p
@@ -152,7 +161,7 @@ text._tc = transformComponent = (dest, c, otherC, side) ->
       if s != ''
         append dest, {d:s, p:c.p + otherC.i.length}
 
-    else # Delete vs delete
+    else if otherC.d? # Delete vs delete
       if c.p >= otherC.p + otherC.d.length
         append dest, {d:c.d, p:c.p - otherC.d.length}
       else if c.p + c.d.length <= otherC.p
@@ -177,6 +186,51 @@ text._tc = transformComponent = (dest, c, otherC, side) ->
           # This could be rewritten similarly to insert v delete, above.
           newC.p = transformPosition newC.p, otherC
           append dest, newC
+    
+    else if otherC.c?
+      append dest, c
+    
+    else
+      throw new Error("unknown op type")
+
+  else if c.c? # Comment
+    if otherC.i?
+      if c.p < otherC.p < c.p + c.c.length
+        offset = otherC.p - c.p
+        new_c = (c.c[0..(offset-1)] + otherC.i + c.c[offset...])
+        append dest, {c:new_c, p:c.p, t: c.t}
+      else
+        append dest, {c:c.c, p:transformPosition(c.p, otherC, true), t: c.t}
+    
+    else if otherC.d?
+      if c.p >= otherC.p + otherC.d.length
+        append dest, {c:c.c, p:c.p - otherC.d.length, t: c.t}
+      else if c.p + c.c.length <= otherC.p
+        append dest, c
+      else # Delete overlaps comment
+        # They overlap somewhere.
+        newC = {c:'', p:c.p, t: c.t}
+        if c.p < otherC.p
+          newC.c = c.c[...(otherC.p - c.p)]
+        if c.p + c.c.length > otherC.p + otherC.d.length
+          newC.c += c.c[(otherC.p + otherC.d.length - c.p)..]
+
+        # This is entirely optional - just for a check that the deleted
+        # text in the two ops matches
+        intersectStart = Math.max c.p, otherC.p
+        intersectEnd = Math.min c.p + c.c.length, otherC.p + otherC.d.length
+        cIntersect = c.c[intersectStart - c.p...intersectEnd - c.p]
+        otherIntersect = otherC.d[intersectStart - otherC.p...intersectEnd - otherC.p]
+        throw new Error 'Delete ops delete different text in the same region of the document' unless cIntersect == otherIntersect
+
+        newC.p = transformPosition newC.p, otherC
+        append dest, newC
+    
+    else if otherC.c?
+      append dest, c
+    
+    else
+      throw new Error("unknown op type")
   
   dest
 

@@ -31,3 +31,5 @@ define [], () ->
 			@events ||= {}
 			for callback in @events[event] or []
 				callback.callback(args...)
+
+		emit: (args...) -> @trigger(args...)

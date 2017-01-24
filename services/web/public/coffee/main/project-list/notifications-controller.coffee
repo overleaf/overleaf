@@ -15,3 +15,24 @@ define [
 			})
 				.success (data) ->
 					notification.hide = true
+					
+	App.controller "ProjectInviteNotificationController", ($scope, $http) ->
+		# Shortcuts for translation keys
+		$scope.projectName = $scope.notification.messageOpts.projectName
+		$scope.userName = $scope.notification.messageOpts.userName
+
+		$scope.accept = () ->
+			$scope.notification.inflight = true
+			$http({
+				url: "/project/#{$scope.notification.messageOpts.projectId}/invite/token/#{$scope.notification.messageOpts.token}/accept"
+				method: "POST"
+				headers:
+					"X-Csrf-Token": window.csrfToken
+					"X-Requested-With": "XMLHttpRequest"
+			})
+				.success () ->
+					$scope.notification.inflight = false
+					$scope.notification.accepted = true
+				.error () ->
+					$scope.notification.inflight = false
+					$scope.notification.error = true

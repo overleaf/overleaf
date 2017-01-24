@@ -9,8 +9,19 @@ describe "SubscriptionGroupController", ->
 
 	beforeEach ->
 		@user = {_id:"!@312431",email:"user@email.com"}
+		@adminUserId = "123jlkj"
+		@subscription_id = "123434325412"
+		@user_email = "bob@gmail.com"
+		@req =
+			session:
+				user:
+					_id: @adminUserId
+					email:@user_email
+			params:
+				subscription_id:@subscription_id
+			query:{}
 		@subscription = {}
-		@GroupHandler = 
+		@GroupHandler =
 			addUserToGroup: sinon.stub().callsArgWith(2, null, @user)
 			removeUserFromGroup: sinon.stub().callsArgWith(2)
 			isUserPartOfGroup: sinon.stub()
@@ -18,15 +29,18 @@ describe "SubscriptionGroupController", ->
 			processGroupVerification:sinon.stub()
 			getPopulatedListOfMembers: sinon.stub().callsArgWith(1, null, [@user])
 		@SubscriptionLocator = getUsersSubscription: sinon.stub().callsArgWith(1, null, @subscription)
+		@AuthenticationController =
+			getLoggedInUserId: (req) -> req.session.user._id
+			getSessionUser: (req) -> req.session.user
 
-		@SubscriptionDomainHandler = 
+		@SubscriptionDomainHandler =
 			findDomainLicenceBySubscriptionId:sinon.stub()
 
 		@OneTimeTokenHandler =
 			getValueFromTokenAndExpire:sinon.stub()
 
 
-		@ErrorsController = 
+		@ErrorsController =
 			notFound:sinon.stub()
 
 		@Controller = SandboxedModule.require modulePath, requires:
@@ -35,18 +49,8 @@ describe "SubscriptionGroupController", ->
 			"./SubscriptionLocator": @SubscriptionLocator
 			"./SubscriptionDomainHandler":@SubscriptionDomainHandler
 			"../Errors/ErrorController":@ErrorsController
+			'../Authentication/AuthenticationController': @AuthenticationController
 
-		@adminUserId = "123jlkj"
-		@subscription_id = "123434325412"
-		@user_email = "bob@gmail.com"
-		@req =
-			session:
-				user: 
-					_id: @adminUserId
-					email:@user_email
-			params:
-				subscription_id:@subscription_id
-			query:{}
 
 		@token = "super-secret-token"
 
@@ -76,7 +80,7 @@ describe "SubscriptionGroupController", ->
 			@Controller.removeUserFromGroup @req, res
 
 
-	describe "renderSubscriptionGroupAdminPage", ->	
+	describe "renderSubscriptionGroupAdminPage", ->
 		it "should redirect you if you don't have a group account", (done)->
 			@subscription.groupPlan = false
 
@@ -177,7 +181,7 @@ describe "SubscriptionGroupController", ->
 				@Controller.completeJoin @req, res
 
 
-	describe "exportGroupCsv", ->	
+	describe "exportGroupCsv", ->
 
 		beforeEach ->
 			@subscription.groupPlan = true

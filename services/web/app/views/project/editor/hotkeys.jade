@@ -66,6 +66,31 @@ script(type="text/ng-template", id="hotkeysModalTemplate")
 				.hotkey
 					span.combination {{ctrl}} + I
 					span.description Italic Text
+	
+		h3 #{translate("autocomplete")}
+		.row
+			.col-xs-6
+				.hotkey
+					span.combination Ctrl + Space
+					span.description Autocomplete Menu
+
+			.col-xs-6
+				.hotkey
+					span.combination Tab / Up / Down
+					span.description Select Candidate
+
+				.hotkey
+					span.combination Enter
+					span.description Insert Candidate
+	
+		h3 !{translate("autocomplete_references")}
+		.row
+			.col-xs-6
+				.hotkey
+					span.combination Ctrl + Space 
+					span.description Search References
+		
+					
 	.modal-footer
 		button.btn.btn-default(
 			ng-click="cancel()"

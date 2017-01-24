@@ -10,16 +10,9 @@ describe 'NotificationsController', ->
 	notification_id = "123njdskj9jlk"
 
 	beforeEach ->
-		@handler = 
+		@handler =
 			getUserNotifications: sinon.stub().callsArgWith(1)
 			markAsRead: sinon.stub().callsArgWith(2)
-		@controller = SandboxedModule.require modulePath, requires:
-			"./NotificationsHandler":@handler
-			"underscore":@underscore =
-				map:(arr)-> return arr
-			'logger-sharelatex':
-				log:->
-				err:->
 		@req =
 			params:
 				notification_id:notification_id
@@ -28,6 +21,16 @@ describe 'NotificationsController', ->
 					_id:user_id
 			i18n:
 				translate:->
+		@AuthenticationController =
+			getLoggedInUserId: sinon.stub().returns(@req.session.user._id)
+		@controller = SandboxedModule.require modulePath, requires:
+			"./NotificationsHandler":@handler
+			"underscore":@underscore =
+				map:(arr)-> return arr
+			'logger-sharelatex':
+				log:->
+				err:->
+			'../Authentication/AuthenticationController': @AuthenticationController
 
 	it 'should ask the handler for all unread notifications', (done)->
 		allNotifications = [{_id: notification_id, user_id: user_id}]

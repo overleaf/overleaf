@@ -2,6 +2,7 @@ define [
 	"main/project-list/index"
 	"main/user-details"
 	"main/account-settings"
+	"main/clear-sessions"
 	"main/account-upgrade"
 	"main/plans"
 	"main/group-members"
@@ -13,6 +14,7 @@ define [
 	"main/subscription-dashboard"
 	"main/new-subscription"
 	"main/annual-upgrade"
+	"main/announcements"
 	"main/register-users"
 	"main/subscription/group-subscription-invite-controller"
 	"main/contact-us"
@@ -31,7 +33,18 @@ define [
 	"filters/formatDate"
 	"__MAIN_CLIENTSIDE_INCLUDES__"
 ], () ->
-	angular.bootstrap(document.body, ["SharelatexApp"])
-
-	
-
+	angular.module('SharelatexApp').config(
+		($locationProvider) ->
+			try
+				$locationProvider.html5Mode({
+					enabled: false,
+					requireBase: false,
+					rewriteLinks: false
+				})
+			catch e
+				console.error "Error while trying to fix '#' links: ", e
+	)
+	angular.bootstrap(
+		document.body,
+		["SharelatexApp"]
+	)

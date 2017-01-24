@@ -3,25 +3,32 @@ redis = require('redis-sharelatex')
 logger = require("logger-sharelatex")
 Async = require('async')
 
-rclient = redis.createClient(Settings.redis.web)
+UserSessionsRedis = require('../../../../app/js/Features/User/UserSessionsRedis')
+
+# rclient = redis.createClient(Settings.redis.web)
+rclient = UserSessionsRedis.client()
 
 module.exports =
 
 	getUserSessions: (user, callback=(err, sessionsSet)->) ->
-		rclient.smembers "UserSessions:#{user._id}", (err, result) ->
+		rclient.smembers UserSessionsRedis.sessionSetKey(user), (err, result) ->
 			return callback(err, result)
 
 	clearUserSessions: (user, callback=(err)->) ->
-		sessionSetKey = "UserSessions:#{user._id}"
+		sessionSetKey = UserSessionsRedis.sessionSetKey(user)
 		rclient.smembers sessionSetKey, (err, sessionKeys) ->
 			if err
 				return callback(err)
 			if sessionKeys.length == 0
 				return callback(null)
-			rclient.multi()
-				.del(sessionKeys)
-				.srem(sessionSetKey, sessionKeys)
-				.exec (err, result) ->
-					if err
-						return callback(err)
-					callback(null)
+			actions = sessionKeys.map (k) ->
+				(cb) ->
+					rclient.del k, (err) ->
+						cb(err)
+			Async.series(
+				actions, (err, results) ->
+					rclient.srem sessionSetKey, sessionKeys, (err) ->
+						if err
+							return callback(err)
+						callback(null)
+			)

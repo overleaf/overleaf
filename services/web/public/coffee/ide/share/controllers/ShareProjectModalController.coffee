@@ -8,6 +8,7 @@ define [
 		}
 		$scope.state = {
 			error: null
+			errorReason: null
 			inflight: false
 			startedFreeTrial: false
 			invites: []
@@ -19,11 +20,16 @@ define [
 			, 200
 
 		INFINITE_COLLABORATORS = -1
-		$scope.$watch "project.members.length", (noOfMembers) ->
-			allowedNoOfMembers = $scope.project.features.collaborators
-			$scope.canAddCollaborators = noOfMembers < allowedNoOfMembers or allowedNoOfMembers == INFINITE_COLLABORATORS
 
-		window._m = projectMembers
+		$scope.refreshCanAddCollaborators = () ->
+			allowedNoOfMembers = $scope.project.features.collaborators
+			$scope.canAddCollaborators = (
+				($scope.project.members.length + $scope.project.invites.length) < allowedNoOfMembers or allowedNoOfMembers == INFINITE_COLLABORATORS
+			)
+		$scope.refreshCanAddCollaborators()
+
+		$scope.$watch "(project.members.length + project.invites.length)", (_noOfMembers) ->
+			$scope.refreshCanAddCollaborators()
 
 		$scope.autocompleteContacts = []
 		do loadAutocompleteUsers = () ->
@@ -64,7 +70,8 @@ define [
 
 				members = $scope.inputs.contacts
 				$scope.inputs.contacts = []
-				$scope.state.error = null
+				$scope.state.error = false
+				$scope.state.errorReason = null
 				$scope.state.inflight = true
 
 				if !$scope.project.invites?
@@ -79,33 +86,39 @@ define [
 						return
 
 					member = members.shift()
-					if !member.type? and member.display in currentMemberEmails
+					if member.type == "user"
+						email = member.email
+					else # Not an auto-complete object, so email == display
+						email = member.display
+					email = email.toLowerCase()
+
+					if email in currentMemberEmails
 						# Skip this existing member
 						return addNextMember()
 
-					# NOTE: groups aren't really a thing in ShareLaTeX, partially inherited from DJ
-					if member.display in currentInviteEmails and inviteId = _.find(($scope.project.invites || []), (invite) -> invite.email == member.display)?._id
+					if email in currentInviteEmails and inviteId = _.find(($scope.project.invites || []), (invite) -> invite.email == email)?._id
 						request = projectInvites.resendInvite(inviteId)
-					else if member.type == "user"
-						request = projectInvites.sendInvite(member.email, $scope.inputs.privileges)
-					else if member.type == "group"
-						request = projectMembers.addGroup(member.id, $scope.inputs.privileges)
-					else # Not an auto-complete object, so email == display
-						request = projectInvites.sendInvite(member.display, $scope.inputs.privileges)
+					else
+						request = projectInvites.sendInvite(email, $scope.inputs.privileges)
 
 					request
 						.success (data) ->
-							if data.invite
-								invite = data.invite
-								$scope.project.invites.push invite
+							if data.error
+								$scope.state.error = true
+								$scope.state.errorReason = "#{data.error}"
+								$scope.state.inflight = false
 							else
-								if data.users?
-									users = data.users
-								else if data.user?
-									users = [data.user]
+								if data.invite
+									invite = data.invite
+									$scope.project.invites.push invite
 								else
-									users = []
-								$scope.project.members.push users...
+									if data.users?
+										users = data.users
+									else if data.user?
+										users = [data.user]
+									else
+										users = []
+									$scope.project.members.push users...
 
 							setTimeout () ->
 								# Give $scope a chance to update $scope.canAddCollaborators
@@ -115,6 +128,7 @@ define [
 						.error () ->
 							$scope.state.inflight = false
 							$scope.state.error = true
+							$scope.state.errorReason = null
 
 			$timeout addMembers, 50 # Give email list a chance to update
 

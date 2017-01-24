@@ -8,7 +8,9 @@ expressLocals = require('./ExpressLocals')
 Router = require('../router')
 metrics.inc("startup")
 redis = require("redis-sharelatex")
-rclient = redis.createClient(Settings.redis.web)
+UserSessionsRedis = require('../Features/User/UserSessionsRedis')
+
+sessionsRedisClient = UserSessionsRedis.client()
 
 session = require("express-session")
 RedisStore = require('connect-redis')(session)
@@ -19,7 +21,11 @@ csrf = require('csurf')
 csrfProtection = csrf()
 cookieParser = require('cookie-parser')
 
-sessionStore = new RedisStore(client:rclient)
+# Init the session store
+sessionStore = new RedisStore(client:sessionsRedisClient)
+
+passport = require('passport')
+LocalStrategy = require('passport-local').Strategy
 
 Mongoose = require("./Mongoose")
 
@@ -32,6 +38,7 @@ Modules = require "./Modules"
 
 ErrorController = require "../Features/Errors/ErrorController"
 UserSessionsManager = require "../Features/User/UserSessionsManager"
+AuthenticationController = require "../Features/Authentication/AuthenticationController"
 
 metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongojs/node_modules/mongodb"), logger)
 metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongoose/node_modules/mongodb"), logger)
@@ -83,6 +90,29 @@ webRouter.use session
 		secure: Settings.secureCookie
 	store: sessionStore
 	key: Settings.cookieName
+	rolling: true
+
+# passport
+webRouter.use passport.initialize()
+webRouter.use passport.session()
+
+passport.use(new LocalStrategy(
+	{
+		passReqToCallback: true,
+		usernameField: 'email',
+		passwordField: 'password'
+	},
+	AuthenticationController.doPassportLogin
+))
+passport.serializeUser(AuthenticationController.serializeUser)
+passport.deserializeUser(AuthenticationController.deserializeUser)
+
+Modules.hooks.fire 'passportSetup', passport, (err) ->
+	if err?
+		logger.err {err}, "error setting up passport in modules"
+
+Modules.applyNonCsrfRouter(webRouter, apiRouter)
+
 webRouter.use csrfProtection
 webRouter.use translations.expressMiddlewear
 webRouter.use translations.setLangBasedOnDomainMiddlewear
@@ -90,8 +120,8 @@ webRouter.use translations.setLangBasedOnDomainMiddlewear
 # Measure expiry from last request, not last login
 webRouter.use (req, res, next) ->
 	req.session.touch()
-	if req?.session?.user?
-		UserSessionsManager.touch(req.session.user, (err)->)
+	if AuthenticationController.isUserLoggedIn(req)
+		UserSessionsManager.touch(AuthenticationController.getSessionUser(req), (err)->)
 	next()
 
 webRouter.use ReferalConnect.use

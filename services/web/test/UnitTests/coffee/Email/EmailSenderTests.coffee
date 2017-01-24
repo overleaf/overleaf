@@ -10,6 +10,9 @@ describe "EmailSender", ->
 
 	beforeEach ->
 
+		@RateLimiter =
+			addCount:sinon.stub()
+
 		@settings =
 			email:
 				transport: "ses"
@@ -21,17 +24,21 @@ describe "EmailSender", ->
 
 		@sesClient =
 			sendMail: sinon.stub()
+
 		@ses =
 			createTransport: => @sesClient
+
+
 		@sender = SandboxedModule.require modulePath, requires:
 			'nodemailer': @ses
 			"settings-sharelatex":@settings
+			'../../infrastructure/RateLimiter':@RateLimiter
 			"logger-sharelatex":
 				log:->
 				warn:->
 				err:->
 			"../../infrastructure/Metrics": inc:->
-				
+
 
 
 		@opts =
@@ -83,3 +90,42 @@ describe "EmailSender", ->
 				args = @sesClient.sendMail.args[0][0]
 				args.replyTo.should.equal @opts.replyTo
 				done()
+
+
+		it "should not send an email when the rate limiter says no", (done)->
+			@opts.sendingUser_id = "12321312321"
+			@RateLimiter.addCount.callsArgWith(1, null, false)
+			@sender.sendEmail @opts, =>
+				@sesClient.sendMail.called.should.equal false
+				done()
+
+		it "should send the email when the rate limtier says continue",  (done)->
+			@sesClient.sendMail.callsArgWith(1)
+			@opts.sendingUser_id = "12321312321"
+			@RateLimiter.addCount.callsArgWith(1, null, true)
+			@sender.sendEmail @opts, =>
+				@sesClient.sendMail.called.should.equal true
+				done()
+
+		it "should not check the rate limiter when there is no sendingUser_id", (done)->
+			@sesClient.sendMail.callsArgWith(1)
+			@sender.sendEmail @opts, =>
+				@sesClient.sendMail.called.should.equal true
+				@RateLimiter.addCount.called.should.equal false
+				done()
+
+		describe 'with plain-text email content', () ->
+
+			beforeEach ->
+				@opts.text = "hello there"
+
+			it "should set the text property on the email to send", (done)->
+				@sesClient.sendMail.callsArgWith(1)
+
+				@sender.sendEmail @opts, =>
+					args = @sesClient.sendMail.args[0][0]
+					args.html.should.equal @opts.html
+					args.text.should.equal @opts.text
+					args.to.should.equal @opts.to
+					args.subject.should.equal @opts.subject
+					done()

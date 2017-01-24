@@ -51,15 +51,17 @@ html(itemscope, itemtype='http://schema.org/Product')
 		script(type="text/javascript").
 			window.csrfToken = "#{csrfToken}";
 			
-		block scripts
 		script(src=buildJsPath("libs/jquery-1.11.1.min.js", {fingerprint:false}))
 		script(type="text/javascript").
 			var noCdnKey = "nocdn=true"
 			var cdnBlocked = typeof jQuery === 'undefined'
 			var noCdnAlreadyInUrl = window.location.href.indexOf(noCdnKey) != -1 //prevent loops
-			if (cdnBlocked && !noCdnAlreadyInUrl) {
+			if (cdnBlocked && !noCdnAlreadyInUrl && navigator.userAgent.indexOf("Googlebot") == -1) {
 				window.location.search += '&'+noCdnKey;
 			}
+
+		block scripts
+
 		script(src=buildJsPath("libs/angular-1.3.15.min.js", {fingerprint:false}))
 
 		script.
@@ -110,23 +112,27 @@ html(itemscope, itemtype='http://schema.org/Product')
 			include layout/navbar
 
 		block content
+
 		div(ng-controller="AbTestController")
 		- if(typeof(suppressFooter) == "undefined")
 			include layout/footer
-
-
 
 		- if (typeof(lookingForScribtex) != "undefined" && lookingForScribtex)
 			span(ng-controller="ScribtexPopupController")
 			include scribtex-modal
 
-
-		- if(typeof(suppressFooter) == "undefined")
+		block requirejs
 			script(type='text/javascript').
+				// minimal requirejs configuration (can be extended/overridden)
 				window.requirejs = {
-					"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'main.js')}-#{fingerprint(jsPath + 'libs.js')}",
 					"paths" : {
-						"moment": "libs/moment-2.7.0"
+						"moment": "libs/#{lib('moment')}"
+					},
+					"urlArgs": "fingerprint=#{fingerprint(jsPath + 'main.js')}-#{fingerprint(jsPath + 'libs.js')}",
+					"config":{
+						"moment":{
+							"noGlobal": true
+						}
 					}
 				};
 			script(
@@ -134,7 +140,6 @@ html(itemscope, itemtype='http://schema.org/Product')
 				baseurl=fullJsPath,
 				src=buildJsPath('libs/require.js')
 			)
-
 
 		include contact-us-modal
 		include sentry

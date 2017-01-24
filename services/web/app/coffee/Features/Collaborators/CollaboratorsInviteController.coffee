@@ -4,10 +4,13 @@ UserGetter = require "../User/UserGetter"
 CollaboratorsHandler = require('./CollaboratorsHandler')
 CollaboratorsInviteHandler = require('./CollaboratorsInviteHandler')
 logger = require('logger-sharelatex')
+Settings = require('settings-sharelatex')
 EmailHelper = require "../Helpers/EmailHelper"
 EditorRealTimeController = require("../Editor/EditorRealTimeController")
 NotificationsBuilder = require("../Notifications/NotificationsBuilder")
 AnalyticsManger = require("../Analytics/AnalyticsManager")
+AuthenticationController = require("../Authentication/AuthenticationController")
+rateLimiter = require("../../infrastructure/RateLimiter")
 
 module.exports = CollaboratorsInviteController =
 
@@ -20,11 +23,36 @@ module.exports = CollaboratorsInviteController =
 				return next(err)
 			res.json({invites: invites})
 
+	_checkShouldInviteEmail: (sendingUser, email, callback=(err, shouldAllowInvite)->) ->
+		if Settings.restrictInvitesToExistingAccounts == true
+			logger.log {email}, "checking if user exists with this email"
+			UserGetter.getUser {email: email}, {_id: 1}, (err, user) ->
+				return callback(err) if err?
+				userExists = user? and user?._id?
+				callback(null, userExists)
+		else
+			UserGetter.getUser sendingUser._id, {features:1, _id:1}, (err, user)->
+				if err?
+					return callback(err)
+				collabLimit = user?.features?.collaborators || 1
+				if collabLimit == -1 
+					collabLimit = 20
+				collabLimit = collabLimit * 10
+				opts = 
+					endpointName: "invite_to_project"
+					timeInterval: 60 * 30
+					subjectName: sendingUser._id
+					throttle: collabLimit
+				rateLimiter.addCount opts, callback
+
 	inviteToProject: (req, res, next) ->
 		projectId = req.params.Project_id
 		email = req.body.email
-		sendingUser = req.session.user
+		sendingUser = AuthenticationController.getSessionUser(req)
 		sendingUserId = sendingUser._id
+		if email == sendingUser.email
+			logger.log {projectId, email, sendingUserId}, "cannot invite yourself to project"
+			return res.json {invite: null, error: 'cannot_invite_self'}
 		logger.log {projectId, email, sendingUserId}, "inviting to project"
 		LimitationsManager.canAddXCollaborators projectId, 1, (error, allowed) =>
 			return next(error) if error?
@@ -36,13 +64,20 @@ module.exports = CollaboratorsInviteController =
 			if !email? or email == ""
 				logger.log {projectId, email, sendingUserId}, "invalid email address"
 				return res.sendStatus(400)
-			CollaboratorsInviteHandler.inviteToProject projectId, sendingUser, email, privileges, (err, invite) ->
+			CollaboratorsInviteController._checkShouldInviteEmail sendingUser, email, (err, shouldAllowInvite)->
 				if err?
-					logger.err {projectId, email, sendingUserId}, "error creating project invite"
+					logger.err {err, email, projectId, sendingUserId}, "error checking if we can invite this email address"
 					return next(err)
-				logger.log {projectId, email, sendingUserId}, "invite created"
-				EditorRealTimeController.emitToRoom(projectId, 'project:membership:changed', {invites: true})
-				return res.json {invite: invite}
+				if !shouldAllowInvite
+					logger.log {email, projectId, sendingUserId}, "not allowed to send an invite to this email address"
+					return res.json {invite: null, error: 'cannot_invite_non_user'}
+				CollaboratorsInviteHandler.inviteToProject projectId, sendingUser, email, privileges, (err, invite) ->
+					if err?
+						logger.err {projectId, email, sendingUserId}, "error creating project invite"
+						return next(err)
+					logger.log {projectId, email, sendingUserId}, "invite created"
+					EditorRealTimeController.emitToRoom(projectId, 'project:membership:changed', {invites: true})
+					return res.json {invite: invite}
 
 	revokeInvite: (req, res, next) ->
 		projectId = req.params.Project_id
@@ -58,8 +93,8 @@ module.exports = CollaboratorsInviteController =
 	resendInvite: (req, res, next) ->
 		projectId = req.params.Project_id
 		inviteId = req.params.invite_id
-		sendingUser = req.session.user
 		logger.log {projectId, inviteId}, "resending invite"
+		sendingUser = AuthenticationController.getSessionUser(req)
 		CollaboratorsInviteHandler.resendInvite projectId, sendingUser, inviteId, (err) ->
 			if err?
 				logger.err {projectId, inviteId}, "error resending invite"
@@ -69,11 +104,11 @@ module.exports = CollaboratorsInviteController =
 	viewInvite: (req, res, next) ->
 		projectId = req.params.Project_id
 		token = req.params.token
-		currentUser = req.session.user
 		_renderInvalidPage = () ->
 			logger.log {projectId, token}, "invite not valid, rendering not-valid page"
 			res.render "project/invite/not-valid", {title: "Invalid Invite"}
 		# check if the user is already a member of the project
+		currentUser = AuthenticationController.getSessionUser(req)
 		CollaboratorsHandler.isUserMemberOfProject currentUser._id, projectId, (err, isMember, _privilegeLevel) ->
 			if err?
 				logger.err {err, projectId}, "error checking if user is member of project"
@@ -111,14 +146,16 @@ module.exports = CollaboratorsInviteController =
 
 	acceptInvite: (req, res, next) ->
 		projectId = req.params.Project_id
-		inviteId = req.params.invite_id
-		{token} = req.body
-		currentUser = req.session.user
-		logger.log {projectId, inviteId, userId: currentUser._id}, "accepting invite"
-		CollaboratorsInviteHandler.acceptInvite projectId, inviteId, token, currentUser, (err) ->
+		token = req.params.token
+		currentUser = AuthenticationController.getSessionUser(req)
+		logger.log {projectId, userId: currentUser._id, token}, "got request to accept invite"
+		CollaboratorsInviteHandler.acceptInvite projectId, token, currentUser, (err) ->
 			if err?
-				logger.err {projectId, inviteId}, "error accepting invite by token"
+				logger.err {projectId, token}, "error accepting invite by token"
 				return next(err)
 			EditorRealTimeController.emitToRoom projectId, 'project:membership:changed', {invites: true, members: true}
-			AnalyticsManger.recordEvent(currentUser._id, "project-invite-accept", {inviteId:inviteId, projectId:projectId})
-			res.redirect "/project/#{projectId}"
+			AnalyticsManger.recordEvent(currentUser._id, "project-invite-accept", {projectId:projectId, userId:currentUser._id})
+			if req.xhr
+				res.sendStatus 204 #  Done async via project page notification
+			else
+				res.redirect "/project/#{projectId}"
