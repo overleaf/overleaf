@@ -10,18 +10,18 @@ define [
 		constructor: (@$scope, @editor, @element) ->
 			window.trackChangesManager ?= @
 
-			@$scope.$watch "changesTracker", (changesTracker) =>
-				return if !changesTracker?
-				@disconnectFromChangesTracker()
-				@changesTracker = changesTracker
-				@connectToChangesTracker()
-
-			@$scope.$watch "trackNewChanges", (track_new_changes) =>
-				return if !track_new_changes?
-				@changesTracker?.track_changes = track_new_changes
+			@$scope.$watch "trackChanges", (track_changes) =>
+				return if !track_changes?
+				@setTrackChanges(track_changes)
 			
-			@$scope.$on "comment:add", (e, comment) =>
-				@addCommentToSelection(comment)
+			@$scope.$watch "sharejsDoc", (doc) =>
+				return if !doc?
+				@disconnectFromRangesTracker()
+				@rangesTracker = doc.ranges
+				@connectToRangesTracker()
+			
+			@$scope.$on "comment:add", (e, thread_id) =>
+				@addCommentToSelection(thread_id)
 
 			@$scope.$on "comment:select_line", (e) =>
 				@selectLineIfNoSelection()
@@ -35,11 +35,11 @@ define [
 			@$scope.$on "comment:remove", (e, comment_id) =>
 				@removeCommentId(comment_id)
 			
-			@$scope.$on "comment:resolve", (e, comment_id, user_id) =>
-				@resolveCommentId(comment_id, user_id)
+			@$scope.$on "comment:resolve_thread", (e, thread_id) =>
+				@resolveCommentByThreadId(thread_id)
 			
-			@$scope.$on "comment:unresolve", (e, comment_id) =>
-				@unresolveCommentId(comment_id)
+			@$scope.$on "comment:unresolve_thread", (e, thread_id) =>
+				@unresolveCommentByThreadId(thread_id)
 			
 			@$scope.$on "review-panel:recalculate-screen-positions", () =>
 				@recalculateReviewEntriesScreenPositions()
@@ -58,48 +58,16 @@ define [
 			onResize = () =>
 				@recalculateReviewEntriesScreenPositions()
 
-			onChange = (e) =>
-				if !@editor.initing
-					# This change is trigger by a sharejs 'change' event, which is before the
-					# sharejs 'remoteop' event. So wait until the next event loop when the 'remoteop'
-					# will have fired, before we decide if it was a remote op.
-					setTimeout () =>
-						if @nextUpdateMetaData?
-							user_id = @nextUpdateMetaData.user_id
-							# The remote op may have contained multiple atomic ops, each of which is an Ace
-							# 'change' event (i.e. bulk commenting out of lines is a single remote op
-							# but gives us one event for each % inserted). These all come in a single event loop
-							# though, so wait until the next one before clearing the metadata.
-							setTimeout () =>
-								@nextUpdateMetaData = null
-						else
-							user_id = window.user.id
-						
-						was_tracking = @changesTracker.track_changes
-						if @dont_track_next_update
-							@changesTracker.track_changes = false
-							@dont_track_next_update = false
-						@applyChange(e, { user_id })
-						@changesTracker.track_changes = was_tracking
-						
-						# TODO: Just for debugging, remove before going live.
-						setTimeout () =>
-							@checkMapping()
-						, 100
-
 			onChangeSession = (e) =>
-				e.oldSession?.getDocument().off "change", onChange
-				e.session.getDocument().on "change", onChange
+				@clearAnnotations()
 				@redrawAnnotations()
 
 			bindToAce = () =>
-				@editor.getSession().getDocument().on "change", onChange
 				@editor.on "changeSelection", onChangeSelection
 				@editor.on "changeSession", onChangeSession
 				@editor.renderer.on "resize", onResize
 
 			unbindFromAce = () =>
-				@editor.getSession().getDocument().off "change", onChange
 				@editor.off "changeSelection", onChangeSelection
 				@editor.off "changeSession", onChangeSession
 				@editor.renderer.off "resize", onResize
@@ -111,94 +79,99 @@ define [
 				else
 					unbindFromAce()
 		
-		disconnectFromChangesTracker: () ->
+		disconnectFromRangesTracker: () ->
 			@changeIdToMarkerIdMap = {}
 
-			if @changesTracker?
-				@changesTracker.off "insert:added"
-				@changesTracker.off "insert:removed"
-				@changesTracker.off "delete:added"
-				@changesTracker.off "delete:removed"
-				@changesTracker.off "changes:moved"
-				@changesTracker.off "comment:added"
-				@changesTracker.off "comment:moved"
-				@changesTracker.off "comment:removed"
-				@changesTracker.off "comment:resolved"
-				@changesTracker.off "comment:unresolved"
-		
-		connectToChangesTracker: () ->
-			@changesTracker.track_changes = @$scope.trackNewChanges
-			
-			@changesTracker.on "insert:added", (change) =>
-				sl_console.log "[insert:added]", change
-				@_onInsertAdded(change)
-			@changesTracker.on "insert:removed", (change) =>
-				sl_console.log "[insert:removed]", change
-				@_onInsertRemoved(change)
-			@changesTracker.on "delete:added", (change) =>
-				sl_console.log "[delete:added]", change
-				@_onDeleteAdded(change)
-			@changesTracker.on "delete:removed", (change) =>
-				sl_console.log "[delete:removed]", change
-				@_onDeleteRemoved(change)
-			@changesTracker.on "changes:moved", (changes) =>
-				sl_console.log "[changes:moved]", changes
-				@_onChangesMoved(changes)
+			if @rangesTracker?
+				@rangesTracker.off "insert:added"
+				@rangesTracker.off "insert:removed"
+				@rangesTracker.off "delete:added"
+				@rangesTracker.off "delete:removed"
+				@rangesTracker.off "changes:moved"
+				@rangesTracker.off "comment:added"
+				@rangesTracker.off "comment:moved"
+				@rangesTracker.off "comment:removed"
 
-			@changesTracker.on "comment:added", (comment) =>
-				sl_console.log "[comment:added]", comment
-				@_onCommentAdded(comment)
-			@changesTracker.on "comment:moved", (comment) =>
-				sl_console.log "[comment:moved]", comment
-				@_onCommentMoved(comment)
-			@changesTracker.on "comment:removed", (comment) =>
-				sl_console.log "[comment:removed]", comment
-				@_onCommentRemoved(comment)
-			@changesTracker.on "comment:resolved", (comment) =>
-				sl_console.log "[comment:resolved]", comment
-				@_onCommentRemoved(comment)
-			@changesTracker.on "comment:unresolved", (comment) =>
-				sl_console.log "[comment:unresolved]", comment
-				@_onCommentAdded(comment)
+		setTrackChanges: (value) ->
+			if value
+				@$scope.sharejsDoc?.track_changes_as = window.user.id or "anonymous"
+			else
+				@$scope.sharejsDoc?.track_changes_as = null
+		
+		connectToRangesTracker: () ->
+			@setTrackChanges(@$scope.trackChanges)
 			
+			# Add a timeout because on remote ops, we get these notifications before
+			# ace has updated
+			@rangesTracker.on "insert:added", (change) =>
+				sl_console.log "[insert:added]", change
+				setTimeout () => @_onInsertAdded(change)
+			@rangesTracker.on "insert:removed", (change) =>
+				sl_console.log "[insert:removed]", change
+				setTimeout () => @_onInsertRemoved(change)
+			@rangesTracker.on "delete:added", (change) =>
+				sl_console.log "[delete:added]", change
+				setTimeout () => @_onDeleteAdded(change)
+			@rangesTracker.on "delete:removed", (change) =>
+				sl_console.log "[delete:removed]", change
+				setTimeout () => @_onDeleteRemoved(change)
+			@rangesTracker.on "changes:moved", (changes) =>
+				sl_console.log "[changes:moved]", changes
+				setTimeout () => @_onChangesMoved(changes)
+
+			@rangesTracker.on "comment:added", (comment) =>
+				sl_console.log "[comment:added]", comment
+				setTimeout () => @_onCommentAdded(comment)
+			@rangesTracker.on "comment:moved", (comment) =>
+				sl_console.log "[comment:moved]", comment
+				setTimeout () => @_onCommentMoved(comment)
+			@rangesTracker.on "comment:removed", (comment) =>
+				sl_console.log "[comment:removed]", comment
+				setTimeout () => @_onCommentRemoved(comment)
+			
+			@rangesTracker.on "clear", () =>
+				@clearAnnotations()
+			@rangesTracker.on "redraw", () =>
+				@redrawAnnotations()
+		
+		clearAnnotations: () ->
+			session = @editor.getSession()
+			for change_id, markers of @changeIdToMarkerIdMap
+				for marker_name, marker_id of markers
+					session.removeMarker marker_id
+			@changeIdToMarkerIdMap = {}
+
 		redrawAnnotations: () ->
-			for change in @changesTracker.changes
+			for change in @rangesTracker.changes
 				if change.op.i?
 					@_onInsertAdded(change)
 				else if change.op.d?
 					@_onDeleteAdded(change)
 
-			for comment in @changesTracker.comments
+			for comment in @rangesTracker.comments
 				@_onCommentAdded(comment)
 
-		addComment: (offset, length, content) ->
-			@changesTracker.addComment offset, length, {
-				thread: [{
-					content: content
-					user_id: window.user_id
-					ts: new Date()
-				}]
-			}
+		addComment: (offset, content, thread_id) ->
+			op = { c: content, p: offset, t: thread_id }
+			# @rangesTracker.applyOp op # Will apply via sharejs
+			@$scope.sharejsDoc.submitOp op
 		
-		addCommentToSelection: (content) ->
+		addCommentToSelection: (thread_id) ->
 			range = @editor.getSelectionRange()
+			content = @editor.getSelectedText()
 			offset = @_aceRangeToShareJs(range.start)
-			end = @_aceRangeToShareJs(range.end)
-			length = end - offset
-			@addComment(offset, length, content)
+			@addComment(offset, content, thread_id)
 		
 		selectLineIfNoSelection: () ->
 			if @editor.selection.isEmpty()
 				@editor.selection.selectLine()
 		
 		acceptChangeId: (change_id) ->
-			@changesTracker.removeChangeId(change_id)
+			@rangesTracker.removeChangeId(change_id)
 		
 		rejectChangeId: (change_id) ->
-			change = @changesTracker.getChange(change_id)
+			change = @rangesTracker.getChange(change_id)
 			return if !change?
-			@changesTracker.removeChangeId(change_id)
-			@dont_track_next_update = true
 			session = @editor.getSession()
 			if change.op.d?
 				content = change.op.d
@@ -215,17 +188,20 @@ define [
 				throw new Error("unknown change: #{JSON.stringify(change)}")
 
 		removeCommentId: (comment_id) ->
-			@changesTracker.removeCommentId(comment_id)
+			@rangesTracker.removeCommentId(comment_id)
 
-		resolveCommentId: (comment_id, user_id) ->
-			@changesTracker.resolveCommentId(comment_id, {
-				user_id, ts: new Date()
-			})
+		resolveCommentByThreadId: (thread_id) ->
+			for comment in @rangesTracker?.comments or []
+				if comment.op.t == thread_id
+					@_onCommentRemoved(comment)
 			
-		unresolveCommentId: (comment_id) ->
-			@changesTracker.unresolveCommentId(comment_id)
+		unresolveCommentByThreadId: (thread_id) ->
+			for comment in @rangesTracker?.comments or []
+				if comment.op.t == thread_id
+					@_onCommentAdded(comment)
 
 		checkMapping: () ->
+			# TODO: reintroduce this check
 			session = @editor.getSession()
 
 			# Make a copy of session.getMarkers() so we can modify it
@@ -234,7 +210,7 @@ define [
 				markers[marker_id] = marker
 
 			expected_markers = []
-			for change in @changesTracker.changes
+			for change in @rangesTracker.changes
 				if @changeIdToMarkerIdMap[change.id]?
 					op = change.op
 					{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[change.id]
@@ -246,11 +222,11 @@ define [
 					expected_markers.push { marker_id: background_marker_id, start, end }
 					expected_markers.push { marker_id: callout_marker_id, start, end: start }
 			
-			for comment in @changesTracker.comments
+			for comment in @rangesTracker.comments
 				if @changeIdToMarkerIdMap[comment.id]?
 					{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[comment.id]
-					start = @_shareJsOffsetToAcePosition(comment.offset)
-					end = @_shareJsOffsetToAcePosition(comment.offset + comment.length)
+					start = @_shareJsOffsetToAcePosition(comment.op.p)
+					end = @_shareJsOffsetToAcePosition(comment.op.p + comment.op.c.length)
 					expected_markers.push { marker_id: background_marker_id, start, end }
 					expected_markers.push { marker_id: callout_marker_id, start, end: start }
 			
@@ -267,16 +243,13 @@ define [
 				if marker.clazz.match("track-changes")
 					console.error "Orphaned ace marker", marker
 		
-		applyChange: (delta, metadata) ->
-			op = @_aceChangeToShareJs(delta)
-			@changesTracker.applyOp(op, metadata)
-		
 		updateFocus: () ->
 			selection = @editor.getSelectionRange()
-			cursor_offset = @_aceRangeToShareJs(selection.start)
+			selection_start = @_aceRangeToShareJs(selection.start)
+			selection_end = @_aceRangeToShareJs(selection.end)
 			entries = @_getCurrentDocEntries()
-			selection = !(selection.start.column == selection.end.column and selection.start.row == selection.end.row)
-			@$scope.$emit "editor:focus:changed", cursor_offset, selection
+			is_selection = (selection_start != selection_end)
+			@$scope.$emit "editor:focus:changed", selection_start, selection_end, is_selection
 		
 		broadcastChange: () ->
 			@$scope.$emit "editor:track-changes:changed", @$scope.docId
@@ -364,10 +337,13 @@ define [
 			@broadcastChange()
 		
 		_onCommentAdded: (comment) ->
+			if @rangesTracker.resolvedThreadIds[comment.op.t]
+				# Comment is resolved so shouldn't be displayed.
+				return
 			if !@changeIdToMarkerIdMap[comment.id]?
 				# Only create new markers if they don't already exist
-				start = @_shareJsOffsetToAcePosition(comment.offset)
-				end = @_shareJsOffsetToAcePosition(comment.offset + comment.length)
+				start = @_shareJsOffsetToAcePosition(comment.op.p)
+				end = @_shareJsOffsetToAcePosition(comment.op.p + comment.op.c.length)
 				session = @editor.getSession()
 				doc = session.getDocument()
 				background_range = new Range(start.row, start.column, end.row, end.column)
@@ -412,8 +388,8 @@ define [
 			@broadcastChange()
 		
 		_onCommentMoved: (comment) ->
-			start = @_shareJsOffsetToAcePosition(comment.offset)
-			end = @_shareJsOffsetToAcePosition(comment.offset + comment.length)
+			start = @_shareJsOffsetToAcePosition(comment.op.p)
+			end = @_shareJsOffsetToAcePosition(comment.op.p + comment.op.c.length)
 			@_updateMarker(comment.id, start, end)
 			@editor.renderer.updateBackMarkers()
 			@broadcastChange()
@@ -423,11 +399,11 @@ define [
 			session = @editor.getSession()
 			markers = session.getMarkers()
 			{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[change_id]
-			if background_marker_id?
+			if background_marker_id? and markers[background_marker_id]?
 				background_marker = markers[background_marker_id]
 				background_marker.range.start = start
 				background_marker.range.end = end
-			if callout_marker_id?
+			if callout_marker_id? and markers[callout_marker_id]?
 				callout_marker = markers[callout_marker_id]
 				callout_marker.range.start = start
 				callout_marker.range.end = start

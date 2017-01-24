@@ -25,8 +25,15 @@ module.exports =
 			announcementIndex = _.findIndex announcements, (announcement)-> 
 				announcement.id == lastSeenBlogId
 
-			if announcementIndex != -1
-				announcements = announcements.slice(0, announcementIndex)
+			announcements = _.map announcements, (announcement, index)->
+				if announcementIndex == -1
+					read = false
+				else if index >= announcementIndex
+					read = true
+				else
+					read = false
+				announcement.read = read
+				return announcement
 
 			logger.log announcementsLength:announcements?.length, user_id:user_id, "returning announcements"
 

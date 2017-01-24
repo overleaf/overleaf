@@ -23,6 +23,7 @@ describe "DocumentController", ->
 		@doc_id = "doc-id-123"
 		@doc_lines = ["one", "two", "three"]
 		@version = 42
+		@ranges = {"mock": "ranges"}
 		@rev = 5
 
 	describe "getDocument", ->
@@ -33,7 +34,7 @@ describe "DocumentController", ->
 
 		describe "when the document exists", ->
 			beforeEach ->
-				@ProjectEntityHandler.getDoc = sinon.stub().callsArgWith(2, null, @doc_lines, @rev)
+				@ProjectEntityHandler.getDoc = sinon.stub().callsArgWith(2, null, @doc_lines, @rev, @version, @ranges)
 				@DocumentController.getDocument(@req, @res, @next)
 
 			it "should get the document from Mongo", ->
@@ -45,6 +46,8 @@ describe "DocumentController", ->
 				@res.type.should.equal "json"
 				@res.body.should.equal JSON.stringify
 					lines: @doc_lines
+					version: @version
+					ranges: @ranges
 
 		describe "when the document doesn't exist", ->
 			beforeEach ->
@@ -63,14 +66,16 @@ describe "DocumentController", ->
 
 		describe "when the document exists", ->
 			beforeEach ->
-				@ProjectEntityHandler.updateDocLines = sinon.stub().callsArg(3)
+				@ProjectEntityHandler.updateDocLines = sinon.stub().yields()
 				@req.body =
 					lines: @doc_lines
+					version: @version
+					ranges: @ranges
 				@DocumentController.setDocument(@req, @res, @next)
 
 			it "should update the document in Mongo", ->
 				@ProjectEntityHandler.updateDocLines
-					.calledWith(@project_id, @doc_id, @doc_lines)
+					.calledWith(@project_id, @doc_id, @doc_lines, @version, @ranges)
 					.should.equal true
 
 			it "should return a successful response", ->
@@ -78,7 +83,7 @@ describe "DocumentController", ->
 
 		describe "when the document doesn't exist", ->
 			beforeEach ->
-				@ProjectEntityHandler.updateDocLines = sinon.stub().callsArgWith(3, new Errors.NotFoundError("document does not exist"))
+				@ProjectEntityHandler.updateDocLines = sinon.stub().yields(new Errors.NotFoundError("document does not exist"))
 				@req.body =
 					lines: @doc_lines
 				@DocumentController.setDocument(@req, @res, @next)

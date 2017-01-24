@@ -33,8 +33,14 @@ module.exports = UserController =
 				if err?
 					logger.err {user_id}, "error while deleting user account"
 					return next(err)
-				req.session?.destroy()
-				res.sendStatus(200)
+				sessionId = req.sessionID
+				req.logout?()
+				req.session.destroy (err) ->
+					if err?
+						logger.err err: err, 'error destorying session'
+						return next(err)
+					UserSessionsManager.untrackSession(user, sessionId)
+					res.sendStatus(200)
 
 	unsubscribe: (req, res)->
 		user_id = AuthenticationController.getLoggedInUserId(req)

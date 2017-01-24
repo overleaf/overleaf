@@ -1,23 +1,29 @@
 define [
 	"base"
 ], (App) ->
-	App.directive "commentEntry", () ->
+	App.directive "commentEntry", ($timeout) ->
 		restrict: "E"
 		templateUrl: "commentEntryTemplate"
 		scope: 
 			entry: "="
-			users: "="
+			threads: "="
+			permissions: "="
 			onResolve: "&"
 			onReply: "&"
 			onIndicatorClick: "&"
-			onDelete: "&"
-			onUnresolve: "&"
-			onShowThread: "&"
-			onHideThread: "&"
 		link: (scope, element, attrs) ->
+			scope.state =
+				animating: false
+
 			scope.handleCommentReplyKeyPress = (ev) ->
 				if ev.keyCode == 13 and !ev.shiftKey and !ev.ctrlKey and !ev.metaKey
 					ev.preventDefault()
-					ev.target.blur()
-					scope.onReply()
-		
+					if scope.entry.replyContent.length > 0 
+						ev.target.blur()
+						scope.onReply()
+			
+			scope.animateAndCallOnResolve = () ->
+				scope.state.animating = true
+				element.find(".rp-entry").css("top", 0)
+				$timeout((() -> scope.onResolve()), 350)
+				return true

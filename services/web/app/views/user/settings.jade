@@ -39,25 +39,34 @@ block content
 													label.control-label #{translate("email")}
 													div.form-control(readonly="true") #{user.email}
 
-											.form-group
-												label(for='firstName').control-label #{translate("first_name")}
-												input.form-control(
-													type='text',
-													name='first_name',
-													value=user.first_name
-												)
-											.form-group
-												label(for='lastName').control-label #{translate("last_name")}
-												input.form-control(
-													type='text',
-													name='last_name',
-													value=user.last_name
-												)
-											.actions
-												button.btn.btn-primary(
-													type='submit',
-													ng-disabled="settingsForm.$invalid"
-												)  #{translate("update")}
+											if shouldAllowEditingDetails
+												.form-group
+													label(for='firstName').control-label #{translate("first_name")}
+													input.form-control(
+														type='text',
+														name='first_name',
+														value=user.first_name
+													)
+												.form-group
+													label(for='lastName').control-label #{translate("last_name")}
+													input.form-control(
+														type='text',
+														name='last_name',
+														value=user.last_name
+													)
+												.actions
+													button.btn.btn-primary(
+														type='submit',
+														ng-disabled="settingsForm.$invalid"
+													)  #{translate("update")}
+											else
+												.form-group
+													label.control-label #{translate("first_name")}
+													div.form-control(readonly="true") #{user.first_name}
+												.form-group
+													label.control-label #{translate("last_name")}
+													div.form-control(readonly="true") #{user.last_name}
+
 									if !externalAuthenticationSystemUsed()
 										.col-md-5.col-md-offset-1
 											h3  #{translate("change_password")}

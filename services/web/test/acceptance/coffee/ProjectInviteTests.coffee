@@ -60,7 +60,7 @@ tryAcceptInvite = (user, invite, callback=(err, response, body)->) ->
 			token: invite.token
 	}, callback
 
-tryRegisterUser = (user, email, redir, callback=(err, response, body)->) ->
+tryRegisterUser = (user, email, callback=(err, response, body)->) ->
 	user.getCsrfToken (error) =>
 		return callback(error) if error?
 		user.request.post {
@@ -68,7 +68,6 @@ tryRegisterUser = (user, email, redir, callback=(err, response, body)->) ->
 			json:
 				email: email
 				password: "some_weird_password"
-				redir: redir
 		}, callback
 
 tryFollowLoginLink = (user, loginLink, callback=(err, response, body)->) ->
@@ -76,7 +75,7 @@ tryFollowLoginLink = (user, loginLink, callback=(err, response, body)->) ->
 		return callback(error) if error?
 		user.request.get loginLink, callback
 
-tryLoginUser = (user, redir, callback=(err, response, body)->) ->
+tryLoginUser = (user, callback=(err, response, body)->) ->
 	user.getCsrfToken (error) =>
 		return callback(error) if error?
 		user.request.post {
@@ -84,7 +83,6 @@ tryLoginUser = (user, redir, callback=(err, response, body)->) ->
 			json:
 				email: user.email
 				password: user.password
-				redir: redir
 		}, callback
 
 tryGetInviteList = (user, projectId, callback=(err, response, body)->) ->
@@ -143,35 +141,28 @@ expectInviteRedirectToRegister = (user, link, callback=(err,result)->) ->
 	tryFollowInviteLink user, link, (err, response, body) ->
 		expect(err).to.be.oneOf [null, undefined]
 		expect(response.statusCode).to.equal 302
-		expect(response.headers.location).to.match new RegExp("^/register\?.*redir=.*$")
+		expect(response.headers.location).to.match new RegExp("^/register.*$")
 		# follow redirect to register page and extract the redirectUrl from form
 		user.request.get response.headers.location, (err, response, body) ->
-			redirectUrl = body.match(/input name="redir" type="hidden" value="([^"]*)"/m)?[1]
-			loginUrl = body.match(/href="([^"]*)">\s*Login here/m)?[1]
-			expect(redirectUrl).to.not.be.oneOf [null, undefined]
-			expect(loginUrl).to.not.be.oneOf [null, undefined]
-			callback(null, redirectUrl, loginUrl)
+			callback(null)
 
-expectLoginPage = (user, loginLink, callback=(err, result)->) ->
-	tryFollowLoginLink user, loginLink, (err, response, body) ->
+expectLoginPage = (user, callback=(err, result)->) ->
+	tryFollowLoginLink user, "/login", (err, response, body) ->
 		expect(err).to.be.oneOf [null, undefined]
 		expect(response.statusCode).to.equal 200
 		expect(body).to.match new RegExp("<title>Login - .*</title>")
-		redirectUrl = body.match(/input name="redir" type="hidden" value="([^"]*)"/m)?[1]
-		callback(null, redirectUrl)
+		callback(null)
 
-expectLoginRedirectToInvite = (user, redir, link, callback=(err, result)->) ->
-	tryLoginUser user, redir, (err, response, body) ->
+expectLoginRedirectToInvite = (user, link, callback=(err, result)->) ->
+	tryLoginUser user, (err, response, body) ->
 		expect(err).to.be.oneOf [null, undefined]
 		expect(response.statusCode).to.equal 200
-		expect(link).to.match new RegExp("^.*#{body.redir}\?.*$")
 		callback(null, null)
 
-expectRegistrationRedirectToInvite = (user, email, redir, link, callback=(err, result)->) ->
-	tryRegisterUser user, email, redir, (err, response, body) ->
+expectRegistrationRedirectToInvite = (user, email, link, callback=(err, result)->) ->
+	tryRegisterUser user, email, (err, response, body) ->
 		expect(err).to.be.oneOf [null, undefined]
 		expect(response.statusCode).to.equal 200
-		expect(link).to.match new RegExp("^.*#{body.redir}\?.*$")
 		callback(null, null)
 
 expectInviteRedirectToProject = (user, link, invite, callback=(err,result)->) ->
@@ -433,11 +424,8 @@ describe "ProjectInviteTests", ->
 
 				it 'should allow user to accept the invite if the user registers a new account', (done) ->
 					Async.series [
-						(cb) =>
-							expectInviteRedirectToRegister @user, @link, (err, redirectUrl) =>
-								@_redir = redirectUrl
-								cb()
-						(cb) => expectRegistrationRedirectToInvite @user, "some_email@example.com", @_redir, @link, cb
+						(cb) => expectInviteRedirectToRegister @user, @link, cb
+						(cb) => expectRegistrationRedirectToInvite @user, "some_email@example.com", @link, cb
 						(cb) => expectInvitePage @user, @link, cb
 						(cb) => expectAcceptInviteAndRedirect @user, @invite, cb
 						(cb) => expectProjectAccess @user, @invite.projectId, cb
@@ -457,11 +445,8 @@ describe "ProjectInviteTests", ->
 				it 'should display invalid-invite if the user registers a new account', (done) ->
 					badLink = @link.replace(@invite.token, 'not_a_real_token')
 					Async.series [
-						(cb) =>
-							expectInviteRedirectToRegister @user, badLink, (err, redirectUrl) =>
-								@_redir = redirectUrl
-								cb()
-						(cb) => expectRegistrationRedirectToInvite @user, "some_email@example.com", @_redir, badLink, cb
+						(cb) => expectInviteRedirectToRegister @user, badLink, cb
+						(cb) => expectRegistrationRedirectToInvite @user, "some_email@example.com", badLink, cb
 						(cb) => expectInvalidInvitePage @user, badLink, cb
 						(cb) => expectNoProjectAccess @user, @invite.projectId, cb
 					], done
@@ -479,16 +464,9 @@ describe "ProjectInviteTests", ->
 
 				it 'should allow the user to login to view the invite', (done) ->
 					Async.series [
-						(cb) =>
-							expectInviteRedirectToRegister @user, @link, (err, redirectUrl, loginUrl) =>
-								@_redir = redirectUrl
-								@_loginLink = loginUrl
-								cb()
-						(cb) =>
-							expectLoginPage @user, @_loginLink, (err, redirectUrl) =>
-								expect(@_redir).to.equal redirectUrl
-								cb()
-						(cb) => expectLoginRedirectToInvite @user, @_redir, @link, cb
+						(cb) => expectInviteRedirectToRegister @user, @link, cb
+						(cb) => expectLoginPage @user, cb
+						(cb) => expectLoginRedirectToInvite @user, @link, cb
 						(cb) => expectInvitePage @user, @link, cb
 						(cb) => expectNoProjectAccess @user, @invite.projectId, cb
 					], done
@@ -515,15 +493,10 @@ describe "ProjectInviteTests", ->
 					badLink = @link.replace(@invite.token, 'not_a_real_token')
 					Async.series [
 						(cb) =>
-							expectInviteRedirectToRegister @user, badLink, (err, redirectUrl, loginUrl) =>
-								@_redir = redirectUrl
-								@_loginLink = loginUrl
-								cb()
+							expectInviteRedirectToRegister @user, badLink, cb
 						(cb) =>
-							expectLoginPage @user, @_loginLink, (err, redirectUrl) =>
-								expect(@_redir).to.equal redirectUrl
-								cb()
-						(cb) => expectLoginRedirectToInvite @user, @_redir, badLink, cb
+							expectLoginPage @user, cb
+						(cb) => expectLoginRedirectToInvite @user, badLink, cb
 						(cb) => expectInvalidInvitePage @user, badLink, cb
 						(cb) => expectNoProjectAccess @user, @invite.projectId, cb
 					], done
