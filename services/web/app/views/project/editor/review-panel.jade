@@ -180,7 +180,7 @@ script(type='text/ng-template', id='commentEntryTemplate')
 			ng-class="{ 'rp-entry-focused': entry.focused, 'rp-entry-comment-resolving': state.animating }"
 		)
 
-			.rp-loading(ng-if="!threads[entry.thread_id] || threads[entry.thread_id].messages.length == 0")
+			.rp-loading(ng-if="!threads[entry.thread_id].submitting && (!threads[entry.thread_id] || threads[entry.thread_id].messages.length == 0)")
 				| No comments
 			div
 				.rp-comment(
