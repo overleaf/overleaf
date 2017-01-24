@@ -29,6 +29,8 @@ describe "Syncing", ->
 						elements: 0
 						mathInline: 6
 						mathDisplay: 0
+						errors: 0
+						messages: ""
 					}
 				)
 				done()

@@ -6,13 +6,14 @@ describe "Timed out compile", ->
 	before (done) ->
 		@request =
 			options:
-				timeout: 0.01 #seconds 
+				timeout: 1 #seconds
 			resources: [
 				path: "main.tex"
 				content: '''
 					\\documentclass{article}
 					\\begin{document}
 					Hello world
+					\\input{|"sleep 10"}
 					\\end{document}
 				'''
 			]
