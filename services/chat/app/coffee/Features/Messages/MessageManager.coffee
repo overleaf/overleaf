@@ -27,10 +27,41 @@ module.exports = MessageManager =
 			room_id: { $in: room_ids }
 		}, callback
 
+	deleteAllMessagesInRoom: (room_id, callback = (error) ->) ->
+		db.messages.remove {
+			room_id: room_id
+		}, callback
+	
+	updateMessage: (room_id, message_id, content, timestamp, callback = (error, message) ->) ->
+		query = @_ensureIdsAreObjectIds(
+			_id: message_id
+			room_id: room_id
+		)
+		db.messages.update query, {
+			$set:
+				content: content
+				edited_at: timestamp
+		}, (error) ->
+			return callback(error) if error?
+			db.messages.find query, (error, messages) ->
+				return callback(error) if error?
+				return callback null, messages[0]
+
+	deleteMessage: (room_id, message_id, callback = (error) ->) ->
+		query = @_ensureIdsAreObjectIds(
+			_id: message_id
+			room_id: room_id
+		)
+		db.messages.remove query, (error) ->
+			return callback(error) if error?
+			return callback()
+
 	_ensureIdsAreObjectIds: (query) ->
 		if query.user_id? and query.user_id not instanceof ObjectId
 			query.user_id = ObjectId(query.user_id)
 		if query.room_id? and query.room_id not instanceof ObjectId
 			query.room_id = ObjectId(query.room_id)
+		if query._id? and query._id not instanceof ObjectId
+			query._id = ObjectId(query._id)
 		return query
 		

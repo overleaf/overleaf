@@ -41,3 +41,20 @@ module.exports =
 		request.post {
 			url: "/project/#{project_id}/thread/#{thread_id}/reopen",
 		}, callback
+
+	deleteThread: (project_id, thread_id, callback) ->
+		request.del {
+			url: "/project/#{project_id}/thread/#{thread_id}",
+		}, callback
+
+	editMessage: (project_id, thread_id, message_id, content, callback) ->
+		request.post {
+			url: "/project/#{project_id}/thread/#{thread_id}/messages/#{message_id}/edit"
+			json:
+				content: content
+		}, callback
+
+	deleteMessage: (project_id, thread_id, message_id, callback) ->
+		request.del {
+			url: "/project/#{project_id}/thread/#{thread_id}/messages/#{message_id}",
+		}, callback
