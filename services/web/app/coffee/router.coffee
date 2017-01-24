@@ -238,6 +238,9 @@ module.exports = class Router
 		webRouter.get  "/project/:project_id/threads", AuthorizationMiddlewear.ensureUserCanReadProject, CommentsController.getThreads
 		webRouter.post "/project/:project_id/thread/:thread_id/resolve", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, CommentsController.resolveThread
 		webRouter.post "/project/:project_id/thread/:thread_id/reopen", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, CommentsController.reopenThread
+		webRouter.delete "/project/:project_id/doc/:doc_id/thread/:thread_id", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, CommentsController.deleteThread
+		webRouter.post "/project/:project_id/thread/:thread_id/messages/:message_id/edit", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, CommentsController.editMessage
+		webRouter.delete  "/project/:project_id/thread/:thread_id/messages/:message_id", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, CommentsController.deleteMessage
 
 		webRouter.post "/project/:Project_id/references/index", AuthorizationMiddlewear.ensureUserCanReadProject, ReferencesController.index
 		webRouter.post "/project/:Project_id/references/indexAll", AuthorizationMiddlewear.ensureUserCanReadProject, ReferencesController.indexAll
