@@ -205,8 +205,9 @@ script(type='text/ng-template', id='commentEntryTemplate')
 						span.rp-comment-actions(ng-if="comment.user.isSelf && !comment.deleting")
 							| &nbsp;&bull;&nbsp;
 							a(href, ng-click="startEditing(comment)") Edit
-							| &nbsp;&bull;&nbsp;
-							a(href, ng-click="confirmDelete(comment)") Delete
+							span(ng-if="threads[entry.thread_id].messages.length > 1")
+								| &nbsp;&bull;&nbsp;
+								a(href, ng-click="confirmDelete(comment)") Delete
 						span.rp-confim-delete(ng-if="comment.user.isSelf && comment.deleting")
 							| Are you sure?
 							| &bull;&nbsp;
