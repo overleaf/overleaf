@@ -46,6 +46,7 @@ app.delete '/project/:project_id/doc/:doc_id',       HttpController.flushAndDele
 app.delete '/project/:project_id',                   HttpController.deleteProject
 app.post   '/project/:project_id/flush',             HttpController.flushProject
 app.post   '/project/:project_id/doc/:doc_id/change/:change_id/accept', HttpController.acceptChange
+app.del    '/project/:project_id/doc/:doc_id/comment/:comment_id', HttpController.deleteComment
 
 app.get '/total', (req, res)->
 	timer = new Metrics.Timer("http.allDocList")	

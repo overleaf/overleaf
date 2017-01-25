@@ -105,7 +105,6 @@ load = (EventEmitter) ->
 				throw new Error("unknown op type")
 			
 		addComment: (op, metadata) ->
-			# TODO: Don't allow overlapping comments?
 			@comments.push comment = {
 				id: op.t or @newId()
 				op: # Copy because we'll modify in place

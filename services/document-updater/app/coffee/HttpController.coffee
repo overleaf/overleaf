@@ -107,5 +107,15 @@ module.exports = HttpController =
 			return next(error) if error?
 			logger.log {project_id, doc_id, change_id}, "accepted change via http"
 			res.send 204 # No Content
+	
+	deleteComment: (req, res, next = (error) ->) ->
+		{project_id, doc_id, comment_id} = req.params
+		logger.log {project_id, doc_id, comment_id}, "deleting comment via http"
+		timer = new Metrics.Timer("http.deleteComment")
+		DocumentManager.deleteCommentWithLock project_id, doc_id, comment_id, (error) ->
+			timer.done()
+			return next(error) if error?
+			logger.log {project_id, doc_id, comment_id}, "deleted comment via http"
+			res.send 204 # No Content
 		
 

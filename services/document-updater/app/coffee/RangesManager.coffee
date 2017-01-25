@@ -30,6 +30,14 @@ module.exports = RangesManager =
 		rangesTracker.removeChangeId(change_id)
 		response = RangesManager._getRanges(rangesTracker)
 		callback null, response
+
+	deleteComment: (comment_id, ranges, callback = (error, ranges) ->) ->
+		{changes, comments} = ranges
+		logger.log {changes, comments, comment_id}, "deleting comment in ranges"
+		rangesTracker = new RangesTracker(changes, comments)
+		rangesTracker.removeCommentId(comment_id)
+		response = RangesManager._getRanges(rangesTracker)
+		callback null, response
 	
 	_getRanges: (rangesTracker) ->
 		# Return the minimal data structure needed, since most documents won't have any
