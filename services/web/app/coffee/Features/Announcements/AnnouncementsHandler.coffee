@@ -1,9 +1,9 @@
 AnalyticsManager = require("../Analytics/AnalyticsManager")
 BlogHandler = require("../Blog/BlogHandler")
-async = require("async")
-_ = require("lodash")
 logger = require("logger-sharelatex")
 settings = require("settings-sharelatex")
+async = require("async")
+_ = require("lodash")
 
 
 
@@ -13,22 +13,25 @@ module.exports = AnnouncementsHandler =
 
 
 	_domainSpecificAnnouncements : (email)->
-		domainSpecific = _.filter settings?.domainAnnouncmentsToShow, (domainAnnouncment)->
+		domainSpecific = _.filter settings?.domainAnnouncementsToShow, (domainAnnouncment)->
 			matches = _.filter domainAnnouncment.domains, (domain)->
 				return email.indexOf(domain) != -1
-			return matches.length > 0
+			return matches.length > 0 and domainAnnouncment.id?
 		return domainSpecific or []
 
 
 	getUnreadAnnouncements : (user, callback = (err, announcements)->)->
+		if !user? and !user._id?
+			return callback("user not supplied")
+
 		async.parallel {
 			lastEvent: (cb)->
-				AnalyticsManager.getLastOccurance user?._id, "announcement-alert-dismissed", cb
+				AnalyticsManager.getLastOccurance user._id, "announcement-alert-dismissed", cb
 			announcements: (cb)->
 				BlogHandler.getLatestAnnouncements cb
 		}, (err, results)->
 			if err?
-				logger.err err:err, user_id:user?._id, "error getting unread announcements"
+				logger.err err:err, user_id:user._id, "error getting unread announcements"
 				return callback(err)
 			
 			domainSpecific = AnnouncementsHandler._domainSpecificAnnouncements(user?.email)

@@ -17,12 +17,13 @@ describe 'AnnouncementsHandler', ->
 			getLastOccurance: sinon.stub()
 		@BlogHandler =
 			getLatestAnnouncements:sinon.stub()
+		@settings = {}
 		@handler = SandboxedModule.require modulePath, requires:
 			"../Analytics/AnalyticsManager":@AnalyticsManager
 			"../Blog/BlogHandler":@BlogHandler
+			"settings-sharelatex":@settings
 			"logger-sharelatex":
 				log:->
-
 
 	describe "getUnreadAnnouncements", ->
 		beforeEach ->
@@ -113,3 +114,46 @@ describe 'AnnouncementsHandler', ->
 					announcements[1].should.equal @stubbedDomainSpecificAnn[0]
 					announcements[0].should.equal @stubbedAnnouncements[0]
 					done()
+
+		describe "_domainSpecificAnnouncements", ->
+			beforeEach ->
+				@settings.domainAnnouncementsToShow = [
+					{
+						domains: ["gmail.com", 'yahoo.edu']
+						title: "some message"
+						excerpt: "read this"
+						url:"http://www.sharelatex.com/i/somewhere"
+						id:"id1"
+						date: new Date(1308369600000).toString()
+					},	{
+						domains: ["gmail.com", 'yahoo.edu']
+						title: "some message"
+						excerpt: "read this"
+						url:"http://www.sharelatex.com/i/somewhere"
+						date: new Date(1308369600000).toString()
+					},	{
+						domains: ["gmail.com", 'yahoo.edu']
+						title: "some message"
+						excerpt: "read this"
+						url:"http://www.sharelatex.com/i/somewhere"
+						id:"id3"
+						date: new Date(1308369600000).toString()
+					}
+				]
+
+			it "should filter announcments which don't have an id", (done) ->
+				result = @handler._domainSpecificAnnouncements "someone@gmail.com"
+				result.length.should.equal 2
+				result[0].id.should.equal "id1"
+				result[1].id.should.equal "id3"
+				done()
+
+
+			it "should match on domain", (done) ->
+				@settings.domainAnnouncementsToShow[2].domains = ["yahoo.com"]
+				result = @handler._domainSpecificAnnouncements "someone@gmail.com"
+				result.length.should.equal 1
+				result[0].id.should.equal "id1"
+				done()
+
+
