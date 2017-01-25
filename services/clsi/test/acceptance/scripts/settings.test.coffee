@@ -22,9 +22,9 @@ module.exports =
 		#archive_logs: true
 		commandRunner: "docker-runner-sharelatex"
 		docker:
-			image: "quay.io/sharelatex/texlive-full:2015.1"
+			image: "texlive-full:2016.1"
 			env:
-				PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/texlive/2015/bin/x86_64-linux/"
+				PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/texlive/2016/bin/x86_64-linux/"
 				HOME: "/tmp"
 			modem:
 				socketPath: false
