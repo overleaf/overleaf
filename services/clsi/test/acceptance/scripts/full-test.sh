@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-npm rebuild
+export SHARELATEX_CONFIG=`pwd`/test/acceptance/scripts/settings.test.coffee
 
 echo ">> Starting server..."
 
