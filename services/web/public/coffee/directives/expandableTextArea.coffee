@@ -5,7 +5,6 @@ define [
 		restrict: "A"
 		link: (scope, el) ->
 			resetHeight = () ->
-				console.log el.val()
 				el.css("height", "auto")
 				el.css("height", el.prop("scrollHeight"))
 
