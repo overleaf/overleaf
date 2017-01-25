@@ -60,7 +60,7 @@ module.exports = MessageHttpController =
 			return next(error) if error?
 			MessageManager.updateMessage room._id, message_id, content, Date.now(), (error) ->
 				return next(error) if error?
-				res.send(200)
+				res.send(204)
 
 	deleteMessage: (req, res, next) ->
 		{project_id, thread_id, message_id} = req.params

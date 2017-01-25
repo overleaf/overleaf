@@ -20,9 +20,7 @@ describe "Editing a message", ->
 				expect(@message.content).to.equal @content
 				ChatClient.editMessage @project_id, @thread_id, @message.id, @new_content, (error, response, @new_message) =>
 					expect(error).to.be.null
-					expect(response.statusCode).to.equal 201
-					expect(@new_message.edited_at).to.exist
-					expect(@new_message.content).to.equal @new_content
+					expect(response.statusCode).to.equal 204
 					done()
 		
 		it "should then list the updated message in the threads", (done) ->

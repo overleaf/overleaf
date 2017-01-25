@@ -43,9 +43,7 @@ module.exports = MessageManager =
 				edited_at: timestamp
 		}, (error) ->
 			return callback(error) if error?
-			db.messages.find query, (error, messages) ->
-				return callback(error) if error?
-				return callback null, messages[0]
+			return callback()
 
 	deleteMessage: (room_id, message_id, callback = (error) ->) ->
 		query = @_ensureIdsAreObjectIds(
