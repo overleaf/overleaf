@@ -42,6 +42,34 @@ module.exports = MessageHttpController =
 		ThreadManager.reopenThread project_id, thread_id, (error) ->
 			return next(error) if error?
 			res.send 204 # No content
+	
+	deleteThread: (req, res, next) ->
+		{project_id, thread_id} = req.params
+		logger.log {project_id, thread_id}, "deleting thread"
+		ThreadManager.deleteThread project_id, thread_id, (error, room_id) ->
+			return next(error) if error?
+			MessageManager.deleteAllMessagesInRoom room_id, (error) ->
+				return next(error) if error?
+				res.send 204 # No content
+	
+	editMessage: (req, res, next) ->
+		{content} = req?.body
+		{project_id, thread_id, message_id} = req.params
+		logger.log {project_id, thread_id, message_id, content}, "editing message"
+		ThreadManager.findOrCreateThread project_id, thread_id, (error, room) ->
+			return next(error) if error?
+			MessageManager.updateMessage room._id, message_id, content, Date.now(), (error) ->
+				return next(error) if error?
+				res.send(204)
+
+	deleteMessage: (req, res, next) ->
+		{project_id, thread_id, message_id} = req.params
+		logger.log {project_id, thread_id, message_id}, "deleting message"
+		ThreadManager.findOrCreateThread project_id, thread_id, (error, room) ->
+			return next(error) if error?
+			MessageManager.deleteMessage room._id, message_id, (error, message) ->
+				return next(error) if error?
+				res.send(204)
 
 	_sendMessage: (client_thread_id, req, res, next) ->
 		{user_id, content} = req?.body

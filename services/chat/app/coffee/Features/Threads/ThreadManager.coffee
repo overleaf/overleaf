@@ -53,3 +53,12 @@ module.exports = ThreadManager =
 				resolved: true
 			}
 		}, callback
+
+	deleteThread: (project_id, thread_id, callback = (error, room_id) ->) ->
+		@findOrCreateThread project_id, thread_id, (error, room) ->
+			return callback(error) if error?
+			db.rooms.remove {
+				_id: room._id
+			}, (error) ->
+				return callback(error) if error?
+				return callback null, room._id

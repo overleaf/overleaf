@@ -8,6 +8,8 @@ module.exports = MessageFormatter =
 			content: message.content
 			timestamp: message.timestamp
 			user_id: message.user_id
+		if message.edited_at?
+			formattedMessage.edited_at = message.edited_at
 		return formattedMessage
 
 	formatMessagesForClientSide: (messages) ->
