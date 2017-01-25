@@ -65,6 +65,14 @@ define [
 			
 		ide.socket.on "reopen-thread", (thread_id) ->
 			_onCommentReopened(thread_id)
+		
+		ide.socket.on "edit-message", (thread_id, message_id, content) ->
+			_onCommentEdited(thread_id, message_id, content)
+			$scope.$apply () ->
+		
+		ide.socket.on "delete-message", (thread_id, message_id) ->
+			_onCommentDeleted(thread_id, message_id)
+			$scope.$apply () ->
 
 		rangesTrackers = {}
 
@@ -342,7 +350,8 @@ define [
 			event_tracking.sendMB "rp-comment-reopen"
 		
 		_onCommentResolved = (thread_id, user) ->
-			thread = $scope.reviewPanel.commentThreads[thread_id]
+			thread = getThread(thread_id)
+			return if !thread?
 			thread.resolved = true
 			thread.resolved_by_user = formatUser(user)
 			thread.resolved_at = new Date()
@@ -350,23 +359,63 @@ define [
 			$scope.$broadcast "comment:resolve_thread", thread_id
 		
 		_onCommentReopened = (thread_id) ->
-			thread = $scope.reviewPanel.commentThreads[thread_id]
+			thread = getThread(thread_id)
+			return if !thread?
 			delete thread.resolved
 			delete thread.resolved_by_user
 			delete thread.resolved_at
 			delete $scope.reviewPanel.resolvedThreadIds[thread_id]
 			$scope.$broadcast "comment:unresolve_thread", thread_id
 
-		_onCommentDeleted = (thread_id) ->
-			if $scope.reviewPanel.resolvedThreadIds[thread_id]?
-				delete $scope.reviewPanel.resolvedThreadIds[thread_id]
-				
+		_onThreadDeleted = (thread_id) ->
+			delete $scope.reviewPanel.resolvedThreadIds[thread_id]
 			delete $scope.reviewPanel.commentThreads[thread_id]
 		
-		$scope.deleteComment = (entry_id, thread_id) ->
-			_onCommentDeleted(thread_id)
+		_onCommentEdited = (thread_id, comment_id, content) ->
+			thread = getThread(thread_id)
+			return if !thread?
+			for message in thread.messages
+				if message.id == comment_id
+					message.content = content
+			updateEntries()
+		
+		_onCommentDeleted = (thread_id, comment_id) ->
+			thread = getThread(thread_id)
+			return if !thread?
+			thread.messages = thread.messages.filter (m) -> m.id != comment_id
+			updateEntries()
+		
+		$scope.deleteThread = (entry_id, doc_id, thread_id) ->
+			_onThreadDeleted(thread_id)
+			$http({
+				method: "DELETE"
+				url: "/project/#{$scope.project_id}/doc/#{doc_id}/thread/#{thread_id}",
+				headers: {
+					'X-CSRF-Token': window.csrfToken
+				}
+			})
 			$scope.$broadcast "comment:remove", entry_id
 			event_tracking.sendMB "rp-comment-delete"
+		
+		$scope.saveEdit = (thread_id, comment) ->
+			$http.post("/project/#{$scope.project_id}/thread/#{thread_id}/messages/#{comment.id}/edit", {
+				content: comment.content
+				_csrf: window.csrfToken
+			})
+			$timeout () ->
+				$scope.$broadcast "review-panel:layout"
+
+		$scope.deleteComment = (thread_id, comment) ->
+			_onCommentDeleted(thread_id, comment.id)
+			$http({
+				method: "DELETE"
+				url: "/project/#{$scope.project_id}/thread/#{thread_id}/messages/#{comment.id}",
+				headers: {
+					'X-CSRF-Token': window.csrfToken
+				}
+			})
+			$timeout () ->
+				$scope.$broadcast "review-panel:layout"
 
 		$scope.setSubView = (subView) -> 
 			$scope.reviewPanel.subView = subView

@@ -7,7 +7,7 @@
 			docs="docs"
 			on-open="refreshResolvedCommentsDropdown();"
 			on-unresolve="unresolveComment(threadId);"
-			on-delete="deleteComment(entryId, threadId);"
+			on-delete="deleteThread(entryId, docId, threadId);"
 			is-loading="reviewPanel.dropdown.loading"
 			permissions="permissions"
 		)
@@ -51,6 +51,8 @@
 						on-resolve="resolveComment(entry, entry_id)"
 						on-reply="submitReply(entry, entry_id);"
 						on-indicator-click="toggleReviewPanel();"
+						on-save-edit="saveEdit(entry.thread_id, comment)"
+						on-delete="deleteComment(entry.thread_id, comment)"
 						permissions="permissions"
 						ng-if="!reviewPanel.loadingThreads"
 					)
@@ -94,6 +96,8 @@
 						entry="entry"
 						threads="reviewPanel.commentThreads"
 						on-reply="submitReply(entry, entry_id);"
+						on-save-edit="saveEdit(entry.thread_id, comment)"
+						on-delete="deleteComment(entry.thread_id, comment)"
 						on-indicator-click="toggleReviewPanel();"
 						ng-click="gotoEntry(doc.doc.id, entry)"
 						permissions="permissions"
@@ -175,21 +179,48 @@ script(type='text/ng-template', id='commentEntryTemplate')
 		.rp-entry.rp-entry-comment(
 			ng-class="{ 'rp-entry-focused': entry.focused, 'rp-entry-comment-resolving': state.animating }"
 		)
+
+			.rp-loading(ng-if="!threads[entry.thread_id].submitting && (!threads[entry.thread_id] || threads[entry.thread_id].messages.length == 0)")
+				| No comments
 			div
 				.rp-comment(
 					ng-repeat="comment in threads[entry.thread_id].messages track by comment.id"
 				)
-					p.rp-comment-content 
-						span.rp-entry-user(
-							style="color: hsl({{ comment.user.hue }}, 70%, 40%);"
-						) {{ comment.user.name }}:&nbsp;
-						| {{ comment.content }}
-					.rp-entry-metadata
-						| {{ comment.timestamp | date : 'MMM d, y h:mm a' }}
-			.rp-loading(ng-if="!threads[entry.thread_id] || threads[entry.thread_id].submitting")
+					p.rp-comment-content
+						span(ng-if="!comment.editing")
+							span.rp-entry-user(
+								style="color: hsl({{ comment.user.hue }}, 70%, 40%);",
+							) {{ comment.user.name }}:&nbsp;
+							| {{ comment.content }}
+						textarea.rp-comment-input(
+							expandable-text-area
+							ng-if="comment.editing"
+							ng-model="comment.content"
+							ng-keypress="saveEditOnEnter($event, comment);"
+							ng-blur="saveEdit(comment)"
+							autofocus
+							stop-propagation="click"
+						)
+					.rp-entry-metadata(ng-if="!comment.editing")
+						span(ng-if="!comment.deleting") {{ comment.timestamp | date : 'MMM d, y h:mm a' }}
+						span.rp-comment-actions(ng-if="comment.user.isSelf && !comment.deleting")
+							| &nbsp;&bull;&nbsp;
+							a(href, ng-click="startEditing(comment)") Edit
+							span(ng-if="threads[entry.thread_id].messages.length > 1")
+								| &nbsp;&bull;&nbsp;
+								a(href, ng-click="confirmDelete(comment)") Delete
+						span.rp-confim-delete(ng-if="comment.user.isSelf && comment.deleting")
+							| Are you sure?
+							| &bull;&nbsp;
+							a(href, ng-click="doDelete(comment)") Delete
+							| &nbsp;&bull;&nbsp;
+							a(href, ng-click="cancelDelete(comment)") Cancel
+
+			.rp-loading(ng-if="threads[entry.thread_id].submitting")
 				i.fa.fa-spinner.fa-spin
 			.rp-comment-reply(ng-if="permissions.comment")
 				textarea.rp-comment-input(
+					expandable-text-area
 					ng-model="entry.replyContent"
 					ng-keypress="handleCommentReplyKeyPress($event);"
 					stop-propagation="click"
@@ -249,11 +280,11 @@ script(type='text/ng-template', id='resolvedCommentEntryTemplate')
 				ng-click="onUnresolve({ 'threadId': thread.threadId });"
 			) 
 				| &nbsp;Re-open
-			//- a.rp-entry-button(
-			//- 	href
-			//- 	ng-click="onDelete({ 'entryId': thread.entryId, 'threadId': thread.threadId });"
-			//- )
-			//- 	| &nbsp;Delete
+			a.rp-entry-button(
+				href
+				ng-click="onDelete({ 'entryId': thread.entryId, 'docId': thread.docId, 'threadId': thread.threadId });"
+			)
+				| &nbsp;Delete
 
 
 script(type='text/ng-template', id='addCommentEntryTemplate')
@@ -280,6 +311,7 @@ script(type='text/ng-template', id='addCommentEntryTemplate')
 			div(ng-if="state.isAdding")
 				.rp-new-comment
 					textarea.rp-comment-input(
+						expandable-text-area
 						ng-model="state.content"
 						ng-keypress="handleCommentKeyPress($event);"
 						placeholder="Add your comment here"
@@ -324,7 +356,7 @@ script(type='text/ng-template', id='resolvedCommentsDropdownTemplate')
 					ng-repeat="thread in resolvedComments | orderBy:'resolved_at':true"
 					thread="thread"
 					on-unresolve="handleUnresolve(threadId);"
-					on-delete="handleDelete(entryId, threadId);"
+					on-delete="handleDelete(entryId, docId, threadId);"
 					permissions="permissions"
 				)
 				.rp-loading(ng-if="!resolvedComments.length")
