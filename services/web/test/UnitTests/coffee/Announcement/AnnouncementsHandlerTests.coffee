@@ -117,7 +117,7 @@ describe 'AnnouncementsHandler', ->
 
 		describe "_domainSpecificAnnouncements", ->
 			beforeEach ->
-				@settings.domainAnnouncementsToShow = [
+				@settings.domainAnnouncements = [
 					{
 						domains: ["gmail.com", 'yahoo.edu']
 						title: "some message"
@@ -150,7 +150,7 @@ describe 'AnnouncementsHandler', ->
 
 
 			it "should match on domain", (done) ->
-				@settings.domainAnnouncementsToShow[2].domains = ["yahoo.com"]
+				@settings.domainAnnouncements[2].domains = ["yahoo.com"]
 				result = @handler._domainSpecificAnnouncements "someone@gmail.com"
 				result.length.should.equal 1
 				result[0].id.should.equal "id1"

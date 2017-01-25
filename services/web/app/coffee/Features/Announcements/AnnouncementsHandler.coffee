@@ -5,15 +5,10 @@ settings = require("settings-sharelatex")
 async = require("async")
 _ = require("lodash")
 
-
-
-
 module.exports = AnnouncementsHandler = 
 
-
-
 	_domainSpecificAnnouncements : (email)->
-		domainSpecific = _.filter settings?.domainAnnouncementsToShow, (domainAnnouncment)->
+		domainSpecific = _.filter settings?.domainAnnouncements, (domainAnnouncment)->
 			matches = _.filter domainAnnouncment.domains, (domain)->
 				return email.indexOf(domain) != -1
 			return matches.length > 0 and domainAnnouncment.id?
