@@ -22,7 +22,7 @@ module.exports =
 		#archive_logs: true
 		commandRunner: "docker-runner-sharelatex"
 		docker:
-			image: "texlive-full:2016.1"
+			image: "texlive-full:2016.1-opt"
 			env:
 				PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/texlive/2016/bin/x86_64-linux/"
 				HOME: "/tmp"
