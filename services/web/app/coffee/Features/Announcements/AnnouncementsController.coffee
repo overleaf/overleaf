@@ -13,7 +13,7 @@ module.exports =
 		logger.log {user_id:user?._id}, "getting unread announcements"
 		AnnouncementsHandler.getUnreadAnnouncements user, (err, announcements)->
 			if err?
-				logger.err {err, user_id}, "unable to get unread announcements"
+				logger.err {err:err, user_id:user._id}, "unable to get unread announcements"
 				next(err)
 			else
 				res.json announcements
