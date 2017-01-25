@@ -28,6 +28,7 @@ define [
 	"directives/onEnter"
 	"directives/stopPropagation"
 	"directives/rightClick"
+	"directives/expandableTextArea"
 	"services/queued-http"
 	"filters/formatDate"
 	"main/event"

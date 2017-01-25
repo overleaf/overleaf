@@ -193,6 +193,7 @@ script(type='text/ng-template', id='commentEntryTemplate')
 							) {{ comment.user.name }}:&nbsp;
 							| {{ comment.content }}
 						textarea.rp-comment-input(
+							expandable-text-area
 							ng-if="comment.editing"
 							ng-model="comment.content"
 							ng-keypress="saveEditOnEnter($event, comment);"
@@ -219,6 +220,7 @@ script(type='text/ng-template', id='commentEntryTemplate')
 				i.fa.fa-spinner.fa-spin
 			.rp-comment-reply(ng-if="permissions.comment")
 				textarea.rp-comment-input(
+					expandable-text-area
 					ng-model="entry.replyContent"
 					ng-keypress="handleCommentReplyKeyPress($event);"
 					stop-propagation="click"
@@ -309,6 +311,7 @@ script(type='text/ng-template', id='addCommentEntryTemplate')
 			div(ng-if="state.isAdding")
 				.rp-new-comment
 					textarea.rp-comment-input(
+						expandable-text-area
 						ng-model="state.content"
 						ng-keypress="handleCommentKeyPress($event);"
 						placeholder="Add your comment here"
