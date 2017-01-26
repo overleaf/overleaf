@@ -44,6 +44,19 @@ settings =
 			port: process.env["SHARELATEX_REDIS_PORT"] or "6379"
 			password: process.env["SHARELATEX_REDIS_PASS"] or ""
 		fairy: redisConfig
+		documentupdater:
+			port: process.env["SHARELATEX_REDIS_PORT"] or "6379"
+			host: process.env["SHARELATEX_REDIS_HOST"] or "dockerhost"
+			password: process.env["SHARELATEX_REDIS_PASS"] or ""
+			key_schema:
+				blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
+				docLines: ({doc_id}) -> "doclines:#{doc_id}"
+				docOps: ({doc_id}) -> "DocOps:#{doc_id}"
+				docVersion: ({doc_id}) -> "DocVersion:#{doc_id}"
+				projectKey: ({doc_id}) -> "ProjectId:#{doc_id}"
+				docsInProject: ({project_id}) -> "DocsIn:#{project_id}"
+				ranges: ({doc_id}) -> "Ranges:#{doc_id}"
+
 
 	# The compile server (the clsi) uses a SQL database to cache files and
 	# meta-data. sqllite is the default, and the load is low enough that this will
