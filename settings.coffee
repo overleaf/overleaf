@@ -44,7 +44,7 @@ settings =
 			port: process.env["SHARELATEX_REDIS_PORT"] or "6379"
 			password: process.env["SHARELATEX_REDIS_PASS"] or ""
 		fairy: redisConfig
-		documentupdater:
+		documentupdater: [{
 			port: process.env["SHARELATEX_REDIS_PORT"] or "6379"
 			host: process.env["SHARELATEX_REDIS_HOST"] or "dockerhost"
 			password: process.env["SHARELATEX_REDIS_PASS"] or ""
@@ -56,6 +56,7 @@ settings =
 				projectKey: ({doc_id}) -> "ProjectId:#{doc_id}"
 				docsInProject: ({project_id}) -> "DocsIn:#{project_id}"
 				ranges: ({doc_id}) -> "Ranges:#{doc_id}"
+    }]
 
 
 	# The compile server (the clsi) uses a SQL database to cache files and
