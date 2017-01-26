@@ -1,0 +1,2 @@
+#!/bin/bash
+tail -F /var/log/sharelatex/*.log | grep '"level":50' >> /var/log/sharlatex-errors.log
