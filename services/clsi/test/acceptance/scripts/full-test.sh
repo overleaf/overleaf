@@ -4,7 +4,7 @@ export SHARELATEX_CONFIG=`pwd`/test/acceptance/scripts/settings.test.coffee
 
 echo ">> Starting server..."
 
-grunt --no-color &
+grunt --no-color >server.log 2>&1 &
 
 echo ">> Server started"
 
