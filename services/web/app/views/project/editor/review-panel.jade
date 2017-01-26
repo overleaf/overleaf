@@ -50,7 +50,7 @@
 						on-reject="rejectChange(entry_id);"
 						on-accept="acceptChange(entry_id);"
 						on-indicator-click="toggleReviewPanel();"
-						ng-click="gotoEntry(editor.open_doc_id, entry)"
+						on-body-click="gotoEntry(editor.open_doc_id, entry)"
 						permissions="permissions"
 					)
 
@@ -63,7 +63,7 @@
 						on-indicator-click="toggleReviewPanel();"
 						on-save-edit="saveEdit(entry.thread_id, comment)"
 						on-delete="deleteComment(entry.thread_id, comment)"
-						ng-click="gotoEntry(editor.open_doc_id, entry)"
+						on-body-click="gotoEntry(editor.open_doc_id, entry)"
 						permissions="permissions"
 						ng-if="!reviewPanel.loadingThreads"
 					)
@@ -152,28 +152,28 @@ script(type='text/ng-template', id='changeEntryTemplate')
 					i.rp-icon-delete(ng-switch-when="delete")
 				.rp-entry-details
 					.rp-entry-description(ng-switch="entry.type")
-						span(ng-switch-when="insert", stop-propagation="click") Added&nbsp;
+						span(ng-switch-when="insert") Added&nbsp;
 							ins.rp-content-highlight {{ entry.content | limitTo:(isCollapsed ? contentLimit : entry.content.length) }}
 							a.rp-collapse-toggle(
 								href
 								ng-if="needsCollapsing"
 								ng-click="toggleCollapse();"
 							) {{ isCollapsed ? '... (show all)' : ' (show less)' }}
-						span(ng-switch-when="delete", stop-propagation="click") Deleted&nbsp;
+						span(ng-switch-when="delete") Deleted&nbsp;
 							del.rp-content-highlight {{ entry.content | limitTo:(isCollapsed ? contentLimit : entry.content.length) }}
 							a.rp-collapse-toggle(
 								href
 								ng-if="needsCollapsing"
 								ng-click="toggleCollapse();"
 							) {{ isCollapsed ? '... (show all)' : ' (show less)' }}
-					.rp-entry-metadata(stop-propagation="click")
+					.rp-entry-metadata
 						| {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}&nbsp;&bull;&nbsp;
 						span.rp-entry-user(style="color: hsl({{ user.hue }}, 70%, 40%);") {{ user.name }} 
 			.rp-entry-actions(ng-if="permissions.write")
-				a.rp-entry-button(href, ng-click="onReject();", stop-propagation="click") 
+				a.rp-entry-button(href, ng-click="onReject();") 
 					i.fa.fa-times
 					| &nbsp;Reject
-				a.rp-entry-button(href, ng-click="onAccept();", stop-propagation="click") 
+				a.rp-entry-button(href, ng-click="onAccept();") 
 					i.fa.fa-check
 					| &nbsp;Accept
 
@@ -193,12 +193,12 @@ script(type='text/ng-template', id='commentEntryTemplate')
 
 			.rp-loading(ng-if="!threads[entry.thread_id].submitting && (!threads[entry.thread_id] || threads[entry.thread_id].messages.length == 0)")
 				| No comments
-			div
+			.rp-comment-loaded
 				.rp-comment(
 					ng-repeat="comment in threads[entry.thread_id].messages track by comment.id"
 				)
 					p.rp-comment-content
-						span(ng-if="!comment.editing", stop-propagation="click")
+						span(ng-if="!comment.editing")
 							span.rp-entry-user(
 								style="color: hsl({{ comment.user.hue }}, 70%, 40%);",
 							) {{ comment.user.name }}:&nbsp;
@@ -216,16 +216,16 @@ script(type='text/ng-template', id='commentEntryTemplate')
 						span(ng-if="!comment.deleting") {{ comment.timestamp | date : 'MMM d, y h:mm a' }}
 						span.rp-comment-actions(ng-if="comment.user.isSelf && !comment.deleting")
 							| &nbsp;&bull;&nbsp;
-							a(href, ng-click="startEditing(comment)", stop-propagation="click") Edit
+							a(href, ng-click="startEditing(comment)") Edit
 							span(ng-if="threads[entry.thread_id].messages.length > 1")
 								| &nbsp;&bull;&nbsp;
-								a(href, ng-click="confirmDelete(comment)", stop-propagation="click") Delete
+								a(href, ng-click="confirmDelete(comment)") Delete
 						span.rp-confim-delete(ng-if="comment.user.isSelf && comment.deleting")
 							| Are you sure?
 							| &bull;&nbsp;
-							a(href, ng-click="doDelete(comment)", stop-propagation="click") Delete
+							a(href, ng-click="doDelete(comment)") Delete
 							| &nbsp;&bull;&nbsp;
-							a(href, ng-click="cancelDelete(comment)", stop-propagation="click") Cancel
+							a(href, ng-click="cancelDelete(comment)") Cancel
 
 			.rp-loading(ng-if="threads[entry.thread_id].submitting")
 				i.fa.fa-spinner.fa-spin
@@ -241,7 +241,6 @@ script(type='text/ng-template', id='commentEntryTemplate')
 				button.rp-entry-button(
 					ng-click="animateAndCallOnResolve();"
 					ng-if="permissions.comment && permissions.write"
-					stop-propagation="click"
 				) 
 					i.fa.fa-inbox
 					| &nbsp;Resolve
@@ -249,7 +248,6 @@ script(type='text/ng-template', id='commentEntryTemplate')
 					ng-click="onReply();"
 					ng-if="permissions.comment"
 					ng-disabled="!entry.replyContent.length"
-					stop-propagation="click"
 				)
 					i.fa.fa-reply
 					| &nbsp;Reply
