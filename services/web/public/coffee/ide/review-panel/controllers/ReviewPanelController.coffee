@@ -66,6 +66,10 @@ define [
 		ide.socket.on "reopen-thread", (thread_id) ->
 			_onCommentReopened(thread_id)
 		
+		ide.socket.on "delete-thread", (thread_id) ->
+			_onThreadDeleted(thread_id)
+			$scope.$apply () ->
+		
 		ide.socket.on "edit-message", (thread_id, message_id, content) ->
 			_onCommentEdited(thread_id, message_id, content)
 			$scope.$apply () ->
@@ -372,6 +376,7 @@ define [
 		_onThreadDeleted = (thread_id) ->
 			delete $scope.reviewPanel.resolvedThreadIds[thread_id]
 			delete $scope.reviewPanel.commentThreads[thread_id]
+			$scope.$broadcast "comment:remove", thread_id
 		
 		_onCommentEdited = (thread_id, comment_id, content) ->
 			thread = getThread(thread_id)
@@ -396,7 +401,6 @@ define [
 					'X-CSRF-Token': window.csrfToken
 				}
 			})
-			$scope.$broadcast "comment:remove", entry_id
 			event_tracking.sendMB "rp-comment-delete"
 		
 		$scope.saveEdit = (thread_id, comment) ->
