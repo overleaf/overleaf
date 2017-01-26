@@ -28,7 +28,7 @@ module.exports =
 				HOME: "/tmp"
 			modem:
 				socketPath: false
-			user: "tex"
+			user: "111"
 			latexmkCommandPrefix: ["/usr/bin/time", "-v"]         # on Linux
 
 	internal:
