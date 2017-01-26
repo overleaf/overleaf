@@ -9,6 +9,7 @@ define [
 				fitHeight = el.prop("scrollHeight")
 				
 				if fitHeight > curHeight and el.val() != ""
+					scope.$emit "expandable-text-area:resize"
 					el.css("height", fitHeight) 
 
 			scope.$watch (() -> el.val()), resetHeight
