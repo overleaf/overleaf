@@ -534,5 +534,5 @@ module.exports = PackManager =
 
 	_getOneDayInFutureWithRandomDelay: ->
 		thirtyMins = 1000 * 60 * 30
-		randomThirtyMinMax = Math.round(Math.random() * thirtyMins)
+		randomThirtyMinMax = Math.ceil(Math.random() * thirtyMins)
 		return new Date(Date.now() + randomThirtyMinMax + 1*DAYS)
