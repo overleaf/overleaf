@@ -526,7 +526,13 @@ module.exports = PackManager =
 	setTTLOnArchivedPack: (project_id, doc_id, pack_id, callback) ->
 		db.docHistory.findAndModify {
 			query: {_id: pack_id}
-			update: {$set: {expiresAt: new Date(Date.now() + 1*DAYS)}}
+			update: {$set: {expiresAt: PackManager._getOneDayInFutureWithRandomDelay()}}
 		}, (err) ->
 			logger.log {project_id, doc_id, pack_id}, "set expiry on pack"
 			callback()
+
+
+	_getOneDayInFutureWithRandomDelay: ->
+		thirtyMins = 1000 * 60 * 30
+		randomThirtyMinMax = Math.round(Math.random() * thirtyMins)
+		return new Date(Date.now() + randomThirtyMinMax + 1*DAYS)
