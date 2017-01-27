@@ -164,6 +164,7 @@ define [
 			want = @$scope.editor.wantTrackChanges
 			have = doc.getTrackingChanges()
 			if want == have
+				@$scope.editor.trackChanges = want
 				return
 
 			do tryToggle = () =>
