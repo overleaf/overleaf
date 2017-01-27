@@ -45,6 +45,7 @@ settings =
 			password: process.env["SHARELATEX_REDIS_PASS"] or ""
 		fairy: redisConfig
 		documentupdater: [{
+			primary: true
 			port: process.env["SHARELATEX_REDIS_PORT"] or "6379"
 			host: process.env["SHARELATEX_REDIS_HOST"] or "dockerhost"
 			password: process.env["SHARELATEX_REDIS_PASS"] or ""
