@@ -23,7 +23,7 @@ module.exports = CollaboratorsInviteController =
 				return next(err)
 			res.json({invites: invites})
 
-	_checkShouldInviteEmail: (sendingUser, email, callback=(err, shouldAllowInvite)->) ->
+	_checkShouldInviteEmail: (email, callback=(err, shouldAllowInvite)->) ->
 		if Settings.restrictInvitesToExistingAccounts == true
 			logger.log {email}, "checking if user exists with this email"
 			UserGetter.getUser {email: email}, {_id: 1}, (err, user) ->
@@ -31,19 +31,20 @@ module.exports = CollaboratorsInviteController =
 				userExists = user? and user?._id?
 				callback(null, userExists)
 		else
-			UserGetter.getUser sendingUser._id, {features:1, _id:1}, (err, user)->
-				if err?
-					return callback(err)
-				collabLimit = user?.features?.collaborators || 1
-				if collabLimit == -1 
-					collabLimit = 20
-				collabLimit = collabLimit * 10
-				opts = 
-					endpointName: "invite_to_project"
-					timeInterval: 60 * 30
-					subjectName: sendingUser._id
-					throttle: collabLimit
-				rateLimiter.addCount opts, callback
+			callback(null, true)
+	
+	_checkRateLimit: (user_id, callback = (error) ->) ->
+		LimitationsManager.allowedNumberOfCollaboratorsForUser user_id, (err, collabLimit = 1)->
+			return callback(err) if err?
+			if collabLimit == -1 
+				collabLimit = 20
+			collabLimit = collabLimit * 10
+			opts = 
+				endpointName: "invite-to-project-by-user-id"
+				timeInterval: 60 * 30
+				subjectName: user_id
+				throttle: collabLimit
+			rateLimiter.addCount opts, callback
 
 	inviteToProject: (req, res, next) ->
 		projectId = req.params.Project_id
@@ -64,20 +65,24 @@ module.exports = CollaboratorsInviteController =
 			if !email? or email == ""
 				logger.log {projectId, email, sendingUserId}, "invalid email address"
 				return res.sendStatus(400)
-			CollaboratorsInviteController._checkShouldInviteEmail sendingUser, email, (err, shouldAllowInvite)->
-				if err?
-					logger.err {err, email, projectId, sendingUserId}, "error checking if we can invite this email address"
-					return next(err)
-				if !shouldAllowInvite
-					logger.log {email, projectId, sendingUserId}, "not allowed to send an invite to this email address"
-					return res.json {invite: null, error: 'cannot_invite_non_user'}
-				CollaboratorsInviteHandler.inviteToProject projectId, sendingUser, email, privileges, (err, invite) ->
+			CollaboratorsInviteController._checkRateLimit sendingUserId, (error, underRateLimit) ->
+				return next(error) if error?
+				if !underRateLimit
+					return res.sendStatus(429)
+				CollaboratorsInviteController._checkShouldInviteEmail email, (err, shouldAllowInvite)->
 					if err?
-						logger.err {projectId, email, sendingUserId}, "error creating project invite"
+						logger.err {err, email, projectId, sendingUserId}, "error checking if we can invite this email address"
 						return next(err)
-					logger.log {projectId, email, sendingUserId}, "invite created"
-					EditorRealTimeController.emitToRoom(projectId, 'project:membership:changed', {invites: true})
-					return res.json {invite: invite}
+					if !shouldAllowInvite
+						logger.log {email, projectId, sendingUserId}, "not allowed to send an invite to this email address"
+						return res.json {invite: null, error: 'cannot_invite_non_user'}
+					CollaboratorsInviteHandler.inviteToProject projectId, sendingUser, email, privileges, (err, invite) ->
+						if err?
+							logger.err {projectId, email, sendingUserId}, "error creating project invite"
+							return next(err)
+						logger.log {projectId, email, sendingUserId}, "invite created"
+						EditorRealTimeController.emitToRoom(projectId, 'project:membership:changed', {invites: true})
+						return res.json {invite: invite}
 
 	revokeInvite: (req, res, next) ->
 		projectId = req.params.Project_id

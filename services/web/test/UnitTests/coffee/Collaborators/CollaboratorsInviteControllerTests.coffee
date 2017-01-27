@@ -114,7 +114,8 @@ describe "CollaboratorsInviteController", ->
 		describe 'when all goes well', ->
 
 			beforeEach ->
-				@CollaboratorsInviteController._checkShouldInviteEmail = sinon.stub().callsArgWith(2, null, true)
+				@CollaboratorsInviteController._checkShouldInviteEmail = sinon.stub().callsArgWith(1, null, true)
+				@CollaboratorsInviteController._checkRateLimit = sinon.stub().yields(null, true)
 				@LimitationsManager.canAddXCollaborators = sinon.stub().callsArgWith(2, null, true)
 				@CollaboratorsInviteController.inviteToProject @req, @res, @next
 
@@ -128,7 +129,7 @@ describe "CollaboratorsInviteController", ->
 
 			it 'should have called _checkShouldInviteEmail', ->
 				@CollaboratorsInviteController._checkShouldInviteEmail.callCount.should.equal 1
-				@CollaboratorsInviteController._checkShouldInviteEmail.calledWith(@sendingUser, @targetEmail).should.equal true
+				@CollaboratorsInviteController._checkShouldInviteEmail.calledWith(@targetEmail).should.equal true
 
 			it 'should have called inviteToProject', ->
 				@CollaboratorsInviteHandler.inviteToProject.callCount.should.equal 1
@@ -141,7 +142,8 @@ describe "CollaboratorsInviteController", ->
 		describe 'when the user is not allowed to add more collaborators', ->
 
 			beforeEach ->
-				@CollaboratorsInviteController._checkShouldInviteEmail = sinon.stub().callsArgWith(2, null, true)
+				@CollaboratorsInviteController._checkShouldInviteEmail = sinon.stub().callsArgWith(1, null, true)
+				@CollaboratorsInviteController._checkRateLimit = sinon.stub().yields(null, true)
 				@LimitationsManager.canAddXCollaborators = sinon.stub().callsArgWith(2, null, false)
 				@CollaboratorsInviteController.inviteToProject @req, @res, @next
 
@@ -159,7 +161,8 @@ describe "CollaboratorsInviteController", ->
 		describe 'when canAddXCollaborators produces an error', ->
 
 			beforeEach ->
-				@CollaboratorsInviteController._checkShouldInviteEmail = sinon.stub().callsArgWith(2, null, true)
+				@CollaboratorsInviteController._checkShouldInviteEmail = sinon.stub().callsArgWith(1, null, true)
+				@CollaboratorsInviteController._checkRateLimit = sinon.stub().yields(null, true)
 				@err = new Error('woops')
 				@LimitationsManager.canAddXCollaborators = sinon.stub().callsArgWith(2, @err)
 				@CollaboratorsInviteController.inviteToProject @req, @res, @next
@@ -178,7 +181,8 @@ describe "CollaboratorsInviteController", ->
 		describe 'when inviteToProject produces an error', ->
 
 			beforeEach ->
-				@CollaboratorsInviteController._checkShouldInviteEmail = sinon.stub().callsArgWith(2, null, true)
+				@CollaboratorsInviteController._checkShouldInviteEmail = sinon.stub().callsArgWith(1, null, true)
+				@CollaboratorsInviteController._checkRateLimit = sinon.stub().yields(null, true)
 				@err = new Error('woops')
 				@CollaboratorsInviteHandler.inviteToProject = sinon.stub().callsArgWith(4, @err)
 				@CollaboratorsInviteController.inviteToProject @req, @res, @next
@@ -193,7 +197,7 @@ describe "CollaboratorsInviteController", ->
 
 			it 'should have called _checkShouldInviteEmail', ->
 				@CollaboratorsInviteController._checkShouldInviteEmail.callCount.should.equal 1
-				@CollaboratorsInviteController._checkShouldInviteEmail.calledWith(@sendingUser, @targetEmail).should.equal true
+				@CollaboratorsInviteController._checkShouldInviteEmail.calledWith(@targetEmail).should.equal true
 
 			it 'should have called inviteToProject', ->
 				@CollaboratorsInviteHandler.inviteToProject.callCount.should.equal 1
@@ -202,7 +206,8 @@ describe "CollaboratorsInviteController", ->
 		describe 'when _checkShouldInviteEmail disallows the invite', ->
 
 			beforeEach ->
-				@CollaboratorsInviteController._checkShouldInviteEmail = sinon.stub().callsArgWith(2, null, false)
+				@CollaboratorsInviteController._checkShouldInviteEmail = sinon.stub().callsArgWith(1, null, false)
+				@CollaboratorsInviteController._checkRateLimit = sinon.stub().yields(null, true)
 				@LimitationsManager.canAddXCollaborators = sinon.stub().callsArgWith(2, null, true)
 				@CollaboratorsInviteController.inviteToProject @req, @res, @next
 
@@ -212,7 +217,7 @@ describe "CollaboratorsInviteController", ->
 
 			it 'should have called _checkShouldInviteEmail', ->
 				@CollaboratorsInviteController._checkShouldInviteEmail.callCount.should.equal 1
-				@CollaboratorsInviteController._checkShouldInviteEmail.calledWith(@sendingUser, @targetEmail).should.equal true
+				@CollaboratorsInviteController._checkShouldInviteEmail.calledWith(@targetEmail).should.equal true
 
 			it 'should not have called inviteToProject', ->
 				@CollaboratorsInviteHandler.inviteToProject.callCount.should.equal 0
@@ -220,7 +225,8 @@ describe "CollaboratorsInviteController", ->
 		describe 'when _checkShouldInviteEmail produces an error', ->
 
 			beforeEach ->
-				@CollaboratorsInviteController._checkShouldInviteEmail = sinon.stub().callsArgWith(2, new Error('woops'))
+				@CollaboratorsInviteController._checkShouldInviteEmail = sinon.stub().callsArgWith(1, new Error('woops'))
+				@CollaboratorsInviteController._checkRateLimit = sinon.stub().yields(null, true)
 				@LimitationsManager.canAddXCollaborators = sinon.stub().callsArgWith(2, null, true)
 				@CollaboratorsInviteController.inviteToProject @req, @res, @next
 
@@ -230,7 +236,7 @@ describe "CollaboratorsInviteController", ->
 
 			it 'should have called _checkShouldInviteEmail', ->
 				@CollaboratorsInviteController._checkShouldInviteEmail.callCount.should.equal 1
-				@CollaboratorsInviteController._checkShouldInviteEmail.calledWith(@sendingUser, @targetEmail).should.equal true
+				@CollaboratorsInviteController._checkShouldInviteEmail.calledWith(@targetEmail).should.equal true
 
 			it 'should not have called inviteToProject', ->
 				@CollaboratorsInviteHandler.inviteToProject.callCount.should.equal 0
@@ -240,7 +246,8 @@ describe "CollaboratorsInviteController", ->
 			beforeEach ->
 				@req.session.user = {_id: 'abc', email: 'me@example.com'}
 				@req.body.email = 'me@example.com'
-				@CollaboratorsInviteController._checkShouldInviteEmail = sinon.stub().callsArgWith(2, null, true)
+				@CollaboratorsInviteController._checkShouldInviteEmail = sinon.stub().callsArgWith(1, null, true)
+				@CollaboratorsInviteController._checkRateLimit = sinon.stub().yields(null, true)
 				@LimitationsManager.canAddXCollaborators = sinon.stub().callsArgWith(2, null, true)
 				@CollaboratorsInviteController.inviteToProject @req, @res, @next
 
@@ -261,6 +268,22 @@ describe "CollaboratorsInviteController", ->
 			it 'should not have called emitToRoom', ->
 				@EditorRealTimeController.emitToRoom.callCount.should.equal 0
 
+		describe 'when _checkRateLimit returns false', ->
+
+			beforeEach ->
+				@CollaboratorsInviteController._checkShouldInviteEmail = sinon.stub().callsArgWith(1, null, true)
+				@CollaboratorsInviteController._checkRateLimit = sinon.stub().yields(null, false)
+				@LimitationsManager.canAddXCollaborators = sinon.stub().callsArgWith(2, null, true)
+				@CollaboratorsInviteController.inviteToProject @req, @res, @next
+
+			it 'should send a 429 response', ->
+				@res.sendStatus.calledWith(429).should.equal true
+
+			it 'should not call inviteToProject', ->
+				@CollaboratorsInviteHandler.inviteToProject.called.should.equal false
+
+			it 'should not call emitToRoom', ->
+				@EditorRealTimeController.emitToRoom.called.should.equal false
 
 	describe "viewInvite", ->
 
@@ -679,13 +702,12 @@ describe "CollaboratorsInviteController", ->
 		beforeEach ->
 			@email = 'user@example.com'
 
-
 		describe 'when we should be restricting to existing accounts', ->
 
 			beforeEach ->
 				@settings.restrictInvitesToExistingAccounts = true
 				@call = (callback) =>
-					@CollaboratorsInviteController._checkShouldInviteEmail {}, @email, callback
+					@CollaboratorsInviteController._checkShouldInviteEmail @email, callback
 
 			describe 'when user account is present', ->
 
@@ -730,46 +752,43 @@ describe "CollaboratorsInviteController", ->
 						expect(shouldAllow).to.equal undefined
 						done()
 
-		describe 'when we should not be restricting on only registered users but do rate limit', ->
+	describe '_checkRateLimit', ->
+		beforeEach ->
+			@settings.restrictInvitesToExistingAccounts = false
+			@sendingUserId = "32312313"
+			@LimitationsManager.allowedNumberOfCollaboratorsForUser = sinon.stub()
+			@LimitationsManager.allowedNumberOfCollaboratorsForUser.withArgs(@sendingUserId).yields(null, 17)
 
-			beforeEach ->
-				@settings.restrictInvitesToExistingAccounts = false
-				@sendingUser = 
-					_id:"32312313"
-					features:
-						collaborators:17.8
-				@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @sendingUser)
+		it 'should callback with `true` when rate limit under', (done) ->
+			@RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
+			@CollaboratorsInviteController._checkRateLimit @sendingUserId, (err, result)=>
+				@RateLimiter.addCount.called.should.equal true
+				result.should.equal true
+				done()
 
-			it 'should callback with `true` when rate limit under', (done) ->
-				@RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
-				@CollaboratorsInviteController._checkShouldInviteEmail @sendingUser, @email, (err, result)=>
-					@RateLimiter.addCount.called.should.equal true
-					result.should.equal true
-					done()
+		it 'should callback with `false` when rate limit hit', (done) ->
+			@RateLimiter.addCount = sinon.stub().callsArgWith(1, null, false)
+			@CollaboratorsInviteController._checkRateLimit @sendingUserId, (err, result)=>
+				@RateLimiter.addCount.called.should.equal true
+				result.should.equal false
+				done()
+	
+		it 'should call rate limiter with 10x the collaborators', (done) ->
+			@RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
+			@CollaboratorsInviteController._checkRateLimit @sendingUserId, (err, result)=>
+				@RateLimiter.addCount.args[0][0].throttle.should.equal(170)
+				done()
 
-			it 'should callback with `false` when rate limit hit', (done) ->
-				@RateLimiter.addCount = sinon.stub().callsArgWith(1, null, false)
-				@CollaboratorsInviteController._checkShouldInviteEmail @sendingUser, @email, (err, result)=>
-					@RateLimiter.addCount.called.should.equal true
-					result.should.equal false
-					done()
-		
-			it 'should call rate limiter with 10x the collaborators', (done) ->
-				@RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
-				@CollaboratorsInviteController._checkShouldInviteEmail @sendingUser, @email, (err, result)=>
-					@RateLimiter.addCount.args[0][0].throttle.should.equal(178)
-					done()
+		it 'should call rate limiter with 200 when collaborators is -1', (done) ->
+			@LimitationsManager.allowedNumberOfCollaboratorsForUser.withArgs(@sendingUserId).yields(null, -1)
+			@RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
+			@CollaboratorsInviteController._checkRateLimit @sendingUserId, (err, result)=>
+				@RateLimiter.addCount.args[0][0].throttle.should.equal(200)
+				done()
 
-			it 'should call rate limiter with 200 when collaborators is -1', (done) ->
-				@sendingUser.features.collaborators = -1
-				@RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
-				@CollaboratorsInviteController._checkShouldInviteEmail @sendingUser, @email, (err, result)=>
-					@RateLimiter.addCount.args[0][0].throttle.should.equal(200)
-					done()
-
-			it 'should call rate limiter with 10 when user has no collaborators set', (done) ->
-				delete @sendingUser.features
-				@RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
-				@CollaboratorsInviteController._checkShouldInviteEmail @sendingUser, @email, (err, result)=>
-					@RateLimiter.addCount.args[0][0].throttle.should.equal(10)
-					done()
+		it 'should call rate limiter with 10 when user has no collaborators set', (done) ->
+			@LimitationsManager.allowedNumberOfCollaboratorsForUser.withArgs(@sendingUserId).yields(null)
+			@RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
+			@CollaboratorsInviteController._checkRateLimit @sendingUserId, (err, result)=>
+				@RateLimiter.addCount.args[0][0].throttle.should.equal(10)
+				done()

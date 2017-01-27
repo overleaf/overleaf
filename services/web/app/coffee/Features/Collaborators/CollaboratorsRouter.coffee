@@ -22,13 +22,13 @@ module.exports =
 		webRouter.post(
 			'/project/:Project_id/invite',
 			RateLimiterMiddlewear.rateLimit({
-				endpointName: "invite-to-project"
+				endpointName: "invite-to-project-by-project-id"
 				params: ["Project_id"]
 				maxRequests: 100
 				timeInterval: 60 * 10
 			}),
 			RateLimiterMiddlewear.rateLimit({
-				endpointName: "invite-to-project-ip"
+				endpointName: "invite-to-project-by-ip"
 				ipOnly:true
 				maxRequests: 100
 				timeInterval: 60 * 10
