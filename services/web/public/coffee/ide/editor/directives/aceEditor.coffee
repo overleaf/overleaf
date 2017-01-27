@@ -279,7 +279,7 @@ define [
 
 					session.setUseWrapMode(true)
 					# use syntax validation only when explicitly set
-					if scope.syntaxValidation? and syntaxValidationEnabled
+					if scope.syntaxValidation? and syntaxValidationEnabled and !scope.fileName.match(/\.bib$/)
 						session.setOption("useWorker", scope.syntaxValidation);
 
 					# now attach session to editor
