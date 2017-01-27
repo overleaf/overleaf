@@ -56,7 +56,7 @@ settings =
 				projectKey: ({doc_id}) -> "ProjectId:#{doc_id}"
 				docsInProject: ({project_id}) -> "DocsIn:#{project_id}"
 				ranges: ({doc_id}) -> "Ranges:#{doc_id}"
-    }]
+		}]
 
 
 	# The compile server (the clsi) uses a SQL database to cache files and
