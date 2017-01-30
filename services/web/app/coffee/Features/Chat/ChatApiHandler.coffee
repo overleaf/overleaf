@@ -59,3 +59,24 @@ module.exports = ChatApiHandler =
 			url:    "#{settings.apis.chat.internal_url}/project/#{project_id}/thread/#{thread_id}/reopen"
 			method: "POST"
 		}, callback
+	
+	deleteThread: (project_id, thread_id, callback = (error) ->) ->
+		ChatApiHandler._apiRequest {
+			url:    "#{settings.apis.chat.internal_url}/project/#{project_id}/thread/#{thread_id}"
+			method: "DELETE"
+		}, callback
+	
+	editMessage: (project_id, thread_id, message_id, content, callback = (error) ->) ->
+		ChatApiHandler._apiRequest {
+			url:    "#{settings.apis.chat.internal_url}/project/#{project_id}/thread/#{thread_id}/messages/#{message_id}/edit"
+			method: "POST"
+			json:
+				content: content
+		}, callback
+	
+	deleteMessage: (project_id, thread_id, message_id, callback = (error) ->) ->
+		ChatApiHandler._apiRequest {
+			url:    "#{settings.apis.chat.internal_url}/project/#{project_id}/thread/#{thread_id}/messages/#{message_id}"
+			method: "DELETE"
+		}, callback
+		

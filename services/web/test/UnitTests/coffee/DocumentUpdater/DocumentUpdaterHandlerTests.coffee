@@ -330,3 +330,38 @@ describe 'DocumentUpdaterHandler', ->
 				@callback
 					.calledWith(new Error("doc updater returned failure status code: 500"))
 					.should.equal true
+
+	describe "deleteThread", ->
+		beforeEach ->
+			@thread_id = "mock-thread-id-1"
+			@callback = sinon.stub()
+
+		describe "successfully", ->
+			beforeEach ->
+				@request.del = sinon.stub().callsArgWith(1, null, {statusCode: 200}, @body)
+				@handler.deleteThread @project_id, @doc_id, @thread_id, @callback
+
+			it 'should delete the thread in the document updater', ->
+				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}/doc/#{@doc_id}/comment/#{@thread_id}"
+				@request.del.calledWith(url).should.equal true
+
+			it "should call the callback", ->
+				@callback.calledWith(null).should.equal true
+
+		describe "when the document updater API returns an error", ->
+			beforeEach ->
+				@request.del = sinon.stub().callsArgWith(1, @error = new Error("something went wrong"), null, null)
+				@handler.deleteThread @project_id, @doc_id, @thread_id, @callback
+
+			it "should return an error to the callback", ->
+				@callback.calledWith(@error).should.equal true
+
+		describe "when the document updater returns a failure error code", ->
+			beforeEach ->
+				@request.del = sinon.stub().callsArgWith(1, null, { statusCode: 500 }, "")
+				@handler.deleteThread @project_id, @doc_id, @thread_id, @callback
+
+			it "should return the callback with an error", ->
+				@callback
+					.calledWith(new Error("doc updater returned failure status code: 500"))
+					.should.equal true

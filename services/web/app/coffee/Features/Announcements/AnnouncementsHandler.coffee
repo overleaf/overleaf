@@ -1,24 +1,46 @@
 AnalyticsManager = require("../Analytics/AnalyticsManager")
 BlogHandler = require("../Blog/BlogHandler")
-async = require("async")
-_ = require("lodash")
 logger = require("logger-sharelatex")
 settings = require("settings-sharelatex")
+async = require("async")
+_ = require("lodash")
 
-module.exports =
+module.exports = AnnouncementsHandler = 
 
-	getUnreadAnnouncements : (user_id, callback = (err, announcements)->)->
+	_domainSpecificAnnouncements : (email)->
+		domainSpecific = _.filter settings?.domainAnnouncements, (domainAnnouncment)->
+			matches = _.filter domainAnnouncment.domains, (domain)->
+				return email.indexOf(domain) != -1
+			return matches.length > 0 and domainAnnouncment.id?
+		return domainSpecific or []
+
+
+	getUnreadAnnouncements : (user, callback = (err, announcements)->)->
+		if !user? and !user._id?
+			return callback("user not supplied")
+
 		async.parallel {
 			lastEvent: (cb)->
-				AnalyticsManager.getLastOccurance user_id, "announcement-alert-dismissed", cb
+				AnalyticsManager.getLastOccurance user._id, "announcement-alert-dismissed", cb
 			announcements: (cb)->
 				BlogHandler.getLatestAnnouncements cb
 		}, (err, results)->
 			if err?
-				logger.err err:err, user_id:user_id, "error getting unread announcements"
+				logger.err err:err, user_id:user._id, "error getting unread announcements"
 				return callback(err)
 			
-			announcements = _.sortBy(results.announcements, "date").reverse()
+			domainSpecific = AnnouncementsHandler._domainSpecificAnnouncements(user?.email)
+
+			domainSpecific = _.map domainSpecific, (domainAnnouncment)->
+				try
+					domainAnnouncment.date = new Date(domainAnnouncment.date)
+					return domainAnnouncment
+				catch e
+					return callback(e)
+
+			announcements = results.announcements
+			announcements = _.union announcements, domainSpecific
+			announcements = _.sortBy(announcements, "date").reverse()
 
 			lastSeenBlogId = results?.lastEvent?.segmentation?.blogPostId
 
@@ -35,6 +57,6 @@ module.exports =
 				announcement.read = read
 				return announcement
 
-			logger.log announcementsLength:announcements?.length, user_id:user_id, "returning announcements"
+			logger.log announcementsLength:announcements?.length, user_id:user?._id, "returning announcements"
 
 			callback null, announcements

@@ -32,6 +32,7 @@
 
 
 .rp-button() {
+	display: block; // IE doesn't do flex with inline items.
 	background-color: @rp-highlight-blue;
 	color: #FFF;
 	text-align: center;
@@ -119,14 +120,11 @@
 	.rp-size-expanded & {
 		display: flex;
 		align-items: center;
+		justify-content: space-between;
 		padding: 0 5px;
 	}
-	// .rp-state-current-file & {
-	// 	position: absolute;
-	// 	top: 0;
-	// 	left: 0;
-	// 	right: 0;
-	// }
+
+	position: relative;
 	height: @rp-toolbar-height;
 	border-bottom: 1px solid @rp-border-grey;
 	background-color: @rp-bg-dim-blue;
@@ -338,6 +336,9 @@
 		.rp-entry-details {
 			line-height: 1.4;
 			margin-left: 5px;
+			// We need to set any low-enough flex base size (0px), making it growable (1) and non-shrinkable (0).
+			// This is needed to ensure that IE makes the element fill the available space. 
+			flex: 1 0 1px; 
 
 			.rp-state-overview & {
 				margin-left: 0;
@@ -350,6 +351,9 @@
 				.rp-entry-user {
 					font-weight: @rp-semibold-weight;
 					font-style: normal;
+				}
+				.rp-comment-actions {
+					a { color: @rp-type-blue; }
 				}
 
 			.rp-content-highlight {
@@ -414,12 +418,6 @@
 			margin: 0;
 			color: @rp-type-darkgrey;
 		}
-
-		.rp-comment-metadata {
-			color: @rp-type-blue;
-			font-size: @rp-small-font-size;
-			margin: 0;
-		}
 	
 	.rp-comment-resolver {
 		color: @rp-type-blue;
@@ -452,6 +450,7 @@
 		border: solid 1px @rp-border-grey;
 		resize: vertical;
 		color: @rp-type-darkgrey;
+		margin-top: 3px;
 	}
 
 .rp-icon-delete {
@@ -592,6 +591,7 @@
 	z-index: 2;
 }
 	.rp-nav-item {
+		display: block;
 		color: lighten(@rp-type-blue, 25%);
 		flex: 0 0 50%;
 		border-top: solid 3px transparent;
@@ -790,7 +790,7 @@
 	position: absolute;
 	width: 300px;
 	left: -150px;
-	max-height: 90%;
+	max-height: ~"calc(100vh - 100px)";
 	margin-top: @rp-entry-arrow-width * 1.5;
 	margin-left: 1em;
 	background-color: @rp-bg-blue;
@@ -813,7 +813,9 @@
 	}
 }
 	.resolved-comments-scroller {
-		flex: 0 0 100%;
+		flex: 0 0 auto; // Can't use 100% in the flex-basis key here, IE won't account for padding.
+		width: 100%; // We need to set the width explicitly, as flex-basis won't work.
+		max-height: ~"calc(100vh - 100px)"; // We also need to explicitly set the max-height, IE won't compute the flex-determined height.
 		padding: 5px;
 		overflow-y: auto;
 	}
@@ -841,6 +843,7 @@
 	border-bottom-left-radius: 3px;
 	font-size: 10px;
 	z-index: 2;
+	white-space: nowrap;
 
 	&.rp-track-changes-indicator-on-dark {
 		background-color: rgba(88, 88, 88, .8);
@@ -864,4 +867,11 @@
 	.rp-size-mini & {
 		display: block;
 	}
+}
+
+// Helper class for elements which aren't treated as flex-items by IE10, e.g:
+// * inline items;
+// * unknown elements (elements which aren't standard DOM elements, such as custom element directives)
+.rp-flex-block {
+	display: block;
 }

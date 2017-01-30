@@ -23,6 +23,7 @@ describe "CommentsController", ->
 			'../Authentication/AuthenticationController': @AuthenticationController
 			'../User/UserInfoManager': @UserInfoManager = {}
 			'../User/UserInfoController': @UserInfoController = {}
+			"../DocumentUpdater/DocumentUpdaterHandler": @DocumentUpdaterHandler = {}
 		@req = {}
 		@res =
 			json: sinon.stub()
@@ -129,6 +130,80 @@ describe "CommentsController", ->
 		it "should tell the client the comment was resolved", ->
 			@EditorRealTimeController.emitToRoom
 				.calledWith(@project_id, "reopen-thread", @thread_id)
+				.should.equal true
+
+		it "should return a success code", ->
+			@res.send.calledWith(204).should.equal
+
+	describe "deleteThread", ->
+		beforeEach ->
+			@req.params =
+				project_id: @project_id = "mock-project-id"
+				doc_id: @doc_id = "mock-doc-id"
+				thread_id: @thread_id = "mock-thread-id"
+			@DocumentUpdaterHandler.deleteThread = sinon.stub().yields()
+			@ChatApiHandler.deleteThread = sinon.stub().yields()
+			@CommentsController.deleteThread @req, @res
+		
+		it "should ask the doc udpater to delete the thread", ->
+			@DocumentUpdaterHandler.deleteThread
+				.calledWith(@project_id, @doc_id, @thread_id)
+				.should.equal true
+
+		it "should ask the chat handler to delete the thread", ->
+			@ChatApiHandler.deleteThread
+				.calledWith(@project_id, @thread_id)
+				.should.equal true
+
+		it "should tell the client the thread was deleted", ->
+			@EditorRealTimeController.emitToRoom
+				.calledWith(@project_id, "delete-thread", @thread_id)
+				.should.equal true
+
+		it "should return a success code", ->
+			@res.send.calledWith(204).should.equal
+
+	describe "editMessage", ->
+		beforeEach ->
+			@req.params =
+				project_id: @project_id = "mock-project-id"
+				thread_id: @thread_id = "mock-thread-id"
+				message_id: @message_id = "mock-thread-id"
+			@req.body =
+				content: @content = "mock-content"
+			@ChatApiHandler.editMessage = sinon.stub().yields()
+			@CommentsController.editMessage @req, @res
+
+		it "should ask the chat handler to edit the comment", ->
+			@ChatApiHandler.editMessage
+				.calledWith(@project_id, @thread_id, @message_id, @content)
+				.should.equal true
+
+		it "should tell the client the comment was edited", ->
+			@EditorRealTimeController.emitToRoom
+				.calledWith(@project_id, "edit-message", @thread_id, @message_id, @content)
+				.should.equal true
+
+		it "should return a success code", ->
+			@res.send.calledWith(204).should.equal
+
+	describe "deleteMessage", ->
+		beforeEach ->
+			@req.params =
+				project_id: @project_id = "mock-project-id"
+				thread_id: @thread_id = "mock-thread-id"
+				message_id: @message_id = "mock-thread-id"
+			@ChatApiHandler.deleteMessage = sinon.stub().yields()
+			@CommentsController.deleteMessage @req, @res
+
+		it "should ask the chat handler to deleted the message", ->
+			@ChatApiHandler.deleteMessage
+				.calledWith(@project_id, @thread_id, @message_id)
+				.should.equal true
+
+		it "should tell the client the message was deleted", ->
+			@EditorRealTimeController.emitToRoom
+				.calledWith(@project_id, "delete-message", @thread_id, @message_id)
 				.should.equal true
 
 		it "should return a success code", ->
