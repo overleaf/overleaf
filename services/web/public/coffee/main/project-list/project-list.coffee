@@ -14,10 +14,9 @@ define [
 		$scope.searchText = 
 			value : ""
 
-		if $scope.projects.length == 0
-			$timeout () ->
-				recalculateProjectListHeight()
-			, 10
+		$timeout () ->
+			recalculateProjectListHeight()
+		, 10
 
 		recalculateProjectListHeight = () ->
 			topOffset = $(".project-list-card")?.offset()?.top

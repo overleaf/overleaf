@@ -24,7 +24,13 @@ module.exports =
 			RateLimiterMiddlewear.rateLimit({
 				endpointName: "invite-to-project"
 				params: ["Project_id"]
-				maxRequests: 200
+				maxRequests: 100
+				timeInterval: 60 * 10
+			}),
+			RateLimiterMiddlewear.rateLimit({
+				endpointName: "invite-to-project-ip"
+				ipOnly:true
+				maxRequests: 100
 				timeInterval: 60 * 10
 			}),
 			AuthenticationController.requireLogin(),

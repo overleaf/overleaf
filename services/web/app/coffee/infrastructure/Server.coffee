@@ -7,7 +7,6 @@ crawlerLogger = require('./CrawlerLogger')
 expressLocals = require('./ExpressLocals')
 Router = require('../router')
 metrics.inc("startup")
-redis = require("redis-sharelatex")
 UserSessionsRedis = require('../Features/User/UserSessionsRedis')
 
 sessionsRedisClient = UserSessionsRedis.client()

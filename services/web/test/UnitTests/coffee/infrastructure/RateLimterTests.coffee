@@ -6,7 +6,7 @@ expect = chai.expect
 modulePath = "../../../../app/js/infrastructure/RateLimiter.js"
 SandboxedModule = require('sandboxed-module')
 
-describe "FileStoreHandler", ->
+describe "RateLimiter", ->
 
 	beforeEach ->
 		@settings = 
@@ -15,23 +15,27 @@ describe "FileStoreHandler", ->
 					port:"1234"
 					host:"somewhere"
 					password: "password"
-		@redbackInstance = 
-			addCount: sinon.stub()
+		@rclient =
+			incr: sinon.stub()
+			get: sinon.stub()
+			expire: sinon.stub()
+			exec: sinon.stub()
+		@rclient.multi = sinon.stub().returns(@rclient)
+		@RedisWrapper =
+			client: sinon.stub().returns(@rclient)
 
-		@redback = 
-			createRateLimit: sinon.stub().returns(@redbackInstance)
-		@redis = 
-			createClient: ->
-				return auth:->
+		@limiterFn = sinon.stub()
+		@RollingRateLimiter = (opts) =>
+			return @limiterFn
 
 		@limiter = SandboxedModule.require modulePath, requires:
+			"rolling-rate-limiter": @RollingRateLimiter
 			"settings-sharelatex":@settings
 			"logger-sharelatex" : @logger = {log:sinon.stub(), err:sinon.stub()}
-			"redis-sharelatex": @redis
-			"redback": use: => @redback
+			"./RedisWrapper": @RedisWrapper
 
 		@endpointName = "compiles"
-		@subject = "some project id"
+		@subject = "some-project-id"
 		@timeInterval = 20
 		@throttleLimit = 5
 
@@ -40,43 +44,48 @@ describe "FileStoreHandler", ->
 			subjectName: @subject
 			throttle: @throttleLimit
 			timeInterval: @timeInterval
+		@key = "RateLimiter:#{@endpointName}:{#{@subject}}"
 
 
-	describe "addCount", ->
+
+
+	describe 'when action is permitted', ->
 
 		beforeEach ->
-			@redbackInstance.addCount.callsArgWith(2, null, 10)
+			@limiterFn = sinon.stub().callsArgWith(1, null, 0, 22)
 
-		it "should use correct namespace", (done)->
-			@limiter.addCount @details, =>
-				@redback.createRateLimit.calledWith(@endpointName).should.equal true
+		it 'should not produce and error', (done) ->
+			@limiter.addCount {}, (err, should) ->
+				expect(err).to.equal null
 				done()
 
-		it "should only call it once", (done)->
-			@limiter.addCount @details, =>
-				@redbackInstance.addCount.callCount.should.equal 1
+		it 'should callback with true', (done) ->
+			@limiter.addCount {}, (err, should) ->
+				expect(should).to.equal true
 				done()
 
-		it  "should use the subjectName", (done)->
-			@limiter.addCount @details, =>
-				@redbackInstance.addCount.calledWith(@details.subjectName, @details.timeInterval).should.equal true
+	describe 'when action is not permitted', ->
+
+		beforeEach ->
+			@limiterFn = sinon.stub().callsArgWith(1, null, 4000, 0)
+
+		it 'should not produce and error', (done) ->
+			@limiter.addCount {}, (err, should) ->
+				expect(err).to.equal null
 				done()
 
-		it "should return true if the count is less than throttle", (done)-> 
-			@details.throttle = 100
-			@limiter.addCount @details, (err, canProcess)=>
-				canProcess.should.equal true
+		it 'should callback with false', (done) ->
+			@limiter.addCount {}, (err, should) ->
+				expect(should).to.equal false
 				done()
 
-		it "should return true if the count is less than throttle", (done)-> 
-			@details.throttle = 1
-			@limiter.addCount @details, (err, canProcess)=>
-				canProcess.should.equal false
-				done()
+	describe 'when limiter produces an error', ->
 
-		it "should return false if the limit is matched", (done)-> 
-			@details.throttle = 10
-			@limiter.addCount @details, (err, canProcess)=>
-				canProcess.should.equal false
-				done()
+		beforeEach ->
+			@limiterFn = sinon.stub().callsArgWith(1, new Error('woops'))
 
+		it 'should produce and error', (done) ->
+			@limiter.addCount {}, (err, should) ->
+				expect(err).to.not.equal null
+				expect(err).to.be.instanceof Error
+				done()

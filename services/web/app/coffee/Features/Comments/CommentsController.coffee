@@ -4,6 +4,7 @@ logger = require("logger-sharelatex")
 AuthenticationController = require('../Authentication/AuthenticationController')
 UserInfoManager = require('../User/UserInfoManager')
 UserInfoController = require('../User/UserInfoController')
+DocumentUpdaterHandler = require "../DocumentUpdater/DocumentUpdaterHandler"
 async = require "async"
 
 module.exports = CommentsController =
@@ -49,6 +50,33 @@ module.exports = CommentsController =
 		ChatApiHandler.reopenThread project_id, thread_id, (err, threads) ->
 			return next(err) if err?
 			EditorRealTimeController.emitToRoom project_id, "reopen-thread", thread_id, (err)->
+			res.send 204
+	
+	deleteThread: (req, res, next) ->
+		{project_id, doc_id, thread_id} = req.params
+		logger.log {project_id, doc_id, thread_id}, "deleting comment thread"
+		DocumentUpdaterHandler.deleteThread project_id, doc_id, thread_id, (err) ->
+			return next(err) if err?
+			ChatApiHandler.deleteThread project_id, thread_id, (err, threads) ->
+				return next(err) if err?
+				EditorRealTimeController.emitToRoom project_id, "delete-thread", thread_id, (err)->
+				res.send 204
+	
+	editMessage: (req, res, next) ->
+		{project_id, thread_id, message_id} = req.params
+		{content} = req.body
+		logger.log {project_id, thread_id, message_id}, "editing message thread"
+		ChatApiHandler.editMessage project_id, thread_id, message_id, content, (err) ->
+			return next(err) if err?
+			EditorRealTimeController.emitToRoom project_id, "edit-message", thread_id, message_id, content, (err)->
+			res.send 204
+	
+	deleteMessage: (req, res, next) ->
+		{project_id, thread_id, message_id} = req.params
+		logger.log {project_id, thread_id, message_id}, "deleting message"
+		ChatApiHandler.deleteMessage project_id, thread_id, message_id, (err, threads) ->
+			return next(err) if err?
+			EditorRealTimeController.emitToRoom project_id, "delete-message", thread_id, message_id, (err)->
 			res.send 204
 
 	_injectUserInfoIntoThreads: (threads, callback = (error, threads) ->) ->

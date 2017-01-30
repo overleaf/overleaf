@@ -1,78 +1,74 @@
 SandboxedModule = require('sandboxed-module')
 sinon = require('sinon')
 require('chai').should()
+expect = require('chai').expect
 modulePath = require('path').join __dirname, '../../../../app/js/Features/Security/LoginRateLimiter'
 
-buildKey = (k)->
-	return "LoginRateLimit:#{k}"
 
 describe "LoginRateLimiter", ->
+
 	beforeEach ->
 		@email = "bob@bob.com"
-		@incrStub = sinon.stub()
-		@getStub = sinon.stub()
-		@execStub = sinon.stub()
-		@expireStub = sinon.stub()
-		@delStub = sinon.stub().callsArgWith(1)
-
-		@rclient = 
-			auth:->
-			del: @delStub
-			multi: =>
-				incr: @incrStub
-				expire: @expireStub
-				get: @getStub
-				exec: @execStub
+		@RateLimiter =
+			clearRateLimit: sinon.stub()
+			addCount: sinon.stub()
 
 		@LoginRateLimiter = SandboxedModule.require modulePath, requires:
-			'redis-sharelatex' : createClient: () => @rclient
-			"settings-sharelatex":{redis:{}}
-	
+			'../../infrastructure/RateLimiter': @RateLimiter
+
 	describe "processLoginRequest", ->
 
-		it "should inc the counter for login requests in redis", (done)->
-			@execStub.callsArgWith(0, "null", ["",""])
-			@LoginRateLimiter.processLoginRequest @email, =>
-				@incrStub.calledWith(buildKey(@email)).should.equal true
+		beforeEach ->
+			@RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
+
+		it 'should call RateLimiter.addCount', (done) ->
+			@LoginRateLimiter.processLoginRequest @email, (err, allow) =>
+				@RateLimiter.addCount.callCount.should.equal 1
+				expect(@RateLimiter.addCount.lastCall.args[0].endpointName).to.equal 'login'
+				expect(@RateLimiter.addCount.lastCall.args[0].subjectName).to.equal @email
 				done()
 
-		it "should set a expire", (done)->
-			@execStub.callsArgWith(0, "null", ["",""])
-			@LoginRateLimiter.processLoginRequest @email, =>
-				@expireStub.calledWith(buildKey(@email), 60 * 2).should.equal true
-				done()
+		describe 'when login is allowed', ->
 
-		it "should return true if the count is below 10", (done)->
-			@execStub.callsArgWith(0, "null", ["", 9])
-			@LoginRateLimiter.processLoginRequest @email, (err, isAllowed)=>
-				isAllowed.should.equal true
-				done()
+			beforeEach ->
+				@RateLimiter.addCount = sinon.stub().callsArgWith(1, null, true)
 
-		it "should return true if the count is 10", (done)->
-			@execStub.callsArgWith(0, "null", ["", 10])
-			@LoginRateLimiter.processLoginRequest @email, (err, isAllowed)=>
-				isAllowed.should.equal true
-				done()
+			it 'should call pass allow=true', (done) ->
+				@LoginRateLimiter.processLoginRequest @email, (err, allow) =>
+					expect(err).to.equal null
+					expect(allow).to.equal true
+					done()
 
-		it "should return false if the count is above 10", (done)->
-			@execStub.callsArgWith(0, "null", ["", 11])
-			@LoginRateLimiter.processLoginRequest @email, (err, isAllowed)=>
-				isAllowed.should.equal false
-				done()
+		describe 'when login is blocked', ->
 
+			beforeEach ->
+				@RateLimiter.addCount = sinon.stub().callsArgWith(1, null, false)
 
-	describe "smoke test user", ->
+			it 'should call pass allow=false', (done) ->
+				@LoginRateLimiter.processLoginRequest @email, (err, allow) =>
+					expect(err).to.equal null
+					expect(allow).to.equal false
+					done()
 
-		it "should have a higher limit", (done)->
-			done()
+		describe 'when addCount produces an error', ->
 
+			beforeEach ->
+				@RateLimiter.addCount = sinon.stub().callsArgWith(1, new Error('woops'))
 
-
+			it 'should produce an error', (done) ->
+				@LoginRateLimiter.processLoginRequest @email, (err, allow) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					done()
 
 
 	describe "recordSuccessfulLogin", ->
 
-		it "should delete the user key", (done)->
+		beforeEach ->
+			@RateLimiter.clearRateLimit = sinon.stub().callsArgWith 2, null
+
+		it "should call clearRateLimit", (done)->
 			@LoginRateLimiter.recordSuccessfulLogin @email, =>
-				@delStub.calledWith(buildKey(@email)).should.equal true
+				@RateLimiter.clearRateLimit.callCount.should.equal 1
+				@RateLimiter.clearRateLimit.calledWith('login', @email).should.equal true
 				done()

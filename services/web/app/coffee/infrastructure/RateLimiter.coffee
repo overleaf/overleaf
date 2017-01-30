@@ -1,15 +1,27 @@
 settings = require("settings-sharelatex")
-redis = require("redis-sharelatex")
-rclient = redis.createClient(settings.redis.web)
-redback = require("redback").use(rclient)
+RedisWrapper = require('./RedisWrapper')
+rclient = RedisWrapper.client('ratelimiter')
+RollingRateLimiter = require('rolling-rate-limiter')
 
-module.exports =
 
-	addCount: (opts, callback = (opts, shouldProcess)->)->
-		ratelimit = redback.createRateLimit(opts.endpointName)
-		ratelimit.addCount opts.subjectName, opts.timeInterval, (err, callCount)->
-			shouldProcess = callCount < opts.throttle
-			callback(err, shouldProcess)
-			
+module.exports = RateLimiter =
+
+	addCount: (opts, callback = (err, shouldProcess)->)->
+		namespace = "RateLimit:#{opts.endpointName}:"
+		k = "{#{opts.subjectName}}"
+		limiter = RollingRateLimiter({
+			redis: rclient,
+			namespace: namespace,
+			interval: opts.timeInterval * 1000,
+			maxInInterval: opts.throttle
+		})
+		limiter k, (err, timeLeft, actionsLeft) ->
+			if err?
+				return callback(err)
+			allowed = timeLeft == 0
+			callback(null, allowed)
+
 	clearRateLimit: (endpointName, subject, callback) ->
-		rclient.del "#{endpointName}:#{subject}", callback
+		# same as the key which will be built by RollingRateLimiter (namespace+k)
+		keyName = "RateLimit:#{endpointName}:{#{subject}}"
+		rclient.del keyName, callback

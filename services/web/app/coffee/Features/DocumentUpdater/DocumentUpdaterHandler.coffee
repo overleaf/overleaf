@@ -153,6 +153,22 @@ module.exports = DocumentUpdaterHandler =
 				logger.error {project_id, doc_id, change_id}, "doc updater returned a non-success status code: #{res.statusCode}"
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
+	deleteThread: (project_id, doc_id, thread_id, callback = (error) ->) ->
+		timer = new metrics.Timer("delete-thread")
+		url = "#{settings.apis.documentupdater.url}/project/#{project_id}/doc/#{doc_id}/comment/#{thread_id}"
+		logger.log {project_id, doc_id, thread_id}, "deleting comment range in document updater"
+		request.del url, (error, res, body)->
+			timer.done()
+			if error?
+				logger.error {err:error, project_id, doc_id, thread_id}, "error deleting comment range in doc updater"
+				return callback(error)
+			if res.statusCode >= 200 and res.statusCode < 300
+				logger.log {project_id, doc_id, thread_id}, "deleted comment rangee in document updater"
+				return callback(null)
+			else
+				logger.error {project_id, doc_id, thread_id}, "doc updater returned a non-success status code: #{res.statusCode}"
+				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
+
 PENDINGUPDATESKEY = "PendingUpdates"
 DOCLINESKEY = "doclines"
 DOCIDSWITHPENDINGUPDATES = "DocsWithPendingUpdates"

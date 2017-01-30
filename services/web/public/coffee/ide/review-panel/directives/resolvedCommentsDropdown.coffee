@@ -31,8 +31,9 @@ define [
 				scope.onUnresolve({ threadId })
 				scope.resolvedComments = scope.resolvedComments.filter (c) -> c.threadId != threadId
 
-			scope.handleDelete = (entryId, threadId) ->
-				scope.onDelete({ entryId, threadId })
+			scope.handleDelete = (entryId, docId, threadId) ->
+				scope.onDelete({ entryId, docId, threadId })
+				scope.resolvedComments = scope.resolvedComments.filter (c) -> c.threadId != threadId
 
 			getDocNameById = (docId) ->
 				doc = _.find(scope.docs, (doc) -> doc.doc.id == docId)
