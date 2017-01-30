@@ -18,7 +18,7 @@ define [
 			scope.needsCollapsing = false
 
 			element.on "click", (e) ->
-				if $(e.target).is('.rp-entry, .rp-entry-description, .rp-entry-body')
+				if $(e.target).is('.rp-entry, .rp-entry-description, .rp-entry-body, .rp-entry-action-icon i')
 					scope.onBodyClick()
 
 			scope.toggleCollapse = () ->
