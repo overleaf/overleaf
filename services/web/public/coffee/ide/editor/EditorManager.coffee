@@ -162,8 +162,9 @@ define [
 				@_syncTimeout = null
 
 			want = @$scope.editor.wantTrackChanges
-			have = @$scope.editor.trackChanges
+			have = doc.getTrackingChanges()
 			if want == have
+				@$scope.editor.trackChanges = want
 				return
 
 			do tryToggle = () =>

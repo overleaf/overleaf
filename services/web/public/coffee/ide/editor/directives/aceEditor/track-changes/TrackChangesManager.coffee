@@ -35,8 +35,8 @@ define [
 			@$scope.$on "comment:remove", (e, comment_id) =>
 				@removeCommentId(comment_id)
 			
-			@$scope.$on "comment:resolve_thread", (e, thread_id) =>
-				@resolveCommentByThreadId(thread_id)
+			@$scope.$on "comment:resolve_threads", (e, thread_ids) =>
+				@resolveCommentByThreadIds(thread_ids)
 			
 			@$scope.$on "comment:unresolve_thread", (e, thread_id) =>
 				@unresolveCommentByThreadId(thread_id)
@@ -105,29 +105,45 @@ define [
 			# ace has updated
 			@rangesTracker.on "insert:added", (change) =>
 				sl_console.log "[insert:added]", change
-				setTimeout () => @_onInsertAdded(change)
+				setTimeout () =>
+					@_onInsertAdded(change)
+					@broadcastChange()
 			@rangesTracker.on "insert:removed", (change) =>
 				sl_console.log "[insert:removed]", change
-				setTimeout () => @_onInsertRemoved(change)
+				setTimeout () =>
+					@_onInsertRemoved(change)
+					@broadcastChange()
 			@rangesTracker.on "delete:added", (change) =>
 				sl_console.log "[delete:added]", change
-				setTimeout () => @_onDeleteAdded(change)
+				setTimeout () =>
+					@_onDeleteAdded(change)
+					@broadcastChange()
 			@rangesTracker.on "delete:removed", (change) =>
 				sl_console.log "[delete:removed]", change
-				setTimeout () => @_onDeleteRemoved(change)
+				setTimeout () =>
+					@_onDeleteRemoved(change)
+					@broadcastChange()
 			@rangesTracker.on "changes:moved", (changes) =>
 				sl_console.log "[changes:moved]", changes
-				setTimeout () => @_onChangesMoved(changes)
+				setTimeout () =>
+					@_onChangesMoved(changes)
+					@broadcastChange()
 
 			@rangesTracker.on "comment:added", (comment) =>
 				sl_console.log "[comment:added]", comment
-				setTimeout () => @_onCommentAdded(comment)
+				setTimeout () =>
+					@_onCommentAdded(comment)
+					@broadcastChange()
 			@rangesTracker.on "comment:moved", (comment) =>
 				sl_console.log "[comment:moved]", comment
-				setTimeout () => @_onCommentMoved(comment)
+				setTimeout () =>
+					@_onCommentMoved(comment)
+					@broadcastChange()
 			@rangesTracker.on "comment:removed", (comment) =>
 				sl_console.log "[comment:removed]", comment
-				setTimeout () => @_onCommentRemoved(comment)
+				setTimeout () =>
+					@_onCommentRemoved(comment)
+					@broadcastChange()
 			
 			@rangesTracker.on "clear", () =>
 				@clearAnnotations()
@@ -150,6 +166,8 @@ define [
 
 			for comment in @rangesTracker.comments
 				@_onCommentAdded(comment)
+			
+			@broadcastChange()
 
 		addComment: (offset, content, thread_id) ->
 			op = { c: content, p: offset, t: thread_id }
@@ -190,15 +208,20 @@ define [
 		removeCommentId: (comment_id) ->
 			@rangesTracker.removeCommentId(comment_id)
 
-		resolveCommentByThreadId: (thread_id) ->
+		resolveCommentByThreadIds: (thread_ids) ->
+			resolve_ids = {}
+			for id in thread_ids
+				resolve_ids[id] = true
 			for comment in @rangesTracker?.comments or []
-				if comment.op.t == thread_id
+				if resolve_ids[comment.op.t]
 					@_onCommentRemoved(comment)
+			@broadcastChange()
 			
 		unresolveCommentByThreadId: (thread_id) ->
 			for comment in @rangesTracker?.comments or []
 				if comment.op.t == thread_id
 					@_onCommentAdded(comment)
+			@broadcastChange()
 
 		checkMapping: () ->
 			# TODO: reintroduce this check
@@ -303,7 +326,6 @@ define [
 			background_marker_id = session.addMarker background_range, "track-changes-marker track-changes-added-marker", "text"
 			callout_marker_id = @_createCalloutMarker(start, "track-changes-added-marker-callout")
 			@changeIdToMarkerIdMap[change.id] = { background_marker_id, callout_marker_id }
-			@broadcastChange()
 
 		_onDeleteAdded: (change) ->
 			position = @_shareJsOffsetToAcePosition(change.op.p)
@@ -318,7 +340,6 @@ define [
 
 			callout_marker_id = @_createCalloutMarker(position, "track-changes-deleted-marker-callout")
 			@changeIdToMarkerIdMap[change.id] = { background_marker_id, callout_marker_id }
-			@broadcastChange()
 		
 		_onInsertRemoved: (change) ->
 			{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[change.id]
@@ -326,7 +347,6 @@ define [
 			session = @editor.getSession()
 			session.removeMarker background_marker_id
 			session.removeMarker callout_marker_id
-			@broadcastChange()
 		
 		_onDeleteRemoved: (change) ->
 			{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[change.id]
@@ -334,7 +354,6 @@ define [
 			session = @editor.getSession()
 			session.removeMarker background_marker_id
 			session.removeMarker callout_marker_id
-			@broadcastChange()
 		
 		_onCommentAdded: (comment) ->
 			if @rangesTracker.resolvedThreadIds[comment.op.t]
@@ -350,7 +369,6 @@ define [
 				background_marker_id = session.addMarker background_range, "track-changes-marker track-changes-comment-marker", "text"
 				callout_marker_id = @_createCalloutMarker(start, "track-changes-comment-marker-callout")
 				@changeIdToMarkerIdMap[comment.id] = { background_marker_id, callout_marker_id }
-			@broadcastChange()
 		
 		_onCommentRemoved: (comment) ->
 			if @changeIdToMarkerIdMap[comment.id]?
@@ -360,7 +378,6 @@ define [
 				session = @editor.getSession()
 				session.removeMarker background_marker_id
 				session.removeMarker callout_marker_id
-			@broadcastChange()
 
 		_aceRangeToShareJs: (range) ->
 			lines = @editor.getSession().getDocument().getLines 0, range.row
@@ -385,14 +402,12 @@ define [
 					end = start
 				@_updateMarker(change.id, start, end)
 			@editor.renderer.updateBackMarkers()
-			@broadcastChange()
 		
 		_onCommentMoved: (comment) ->
 			start = @_shareJsOffsetToAcePosition(comment.op.p)
 			end = @_shareJsOffsetToAcePosition(comment.op.p + comment.op.c.length)
 			@_updateMarker(comment.id, start, end)
 			@editor.renderer.updateBackMarkers()
-			@broadcastChange()
 	
 		_updateMarker: (change_id, start, end) ->
 			return if !@changeIdToMarkerIdMap[change_id]?
