@@ -72,13 +72,15 @@ describe "Example Documents", ->
 
 				it "should generate the correct pdf", (done) ->
 					Client.compileDirectory @project_id, fixturePath("examples"), example_dir, 4242, (error, res, body) =>
-						console.log "DEBUG: error", error, "body", body
+						if body?.compile?.status is "failure"
+							console.log "DEBUG: error", error, "body", JSON.stringify(body)
 						pdf = Client.getOutputFile body, "pdf"
 						downloadAndComparePdf(@project_id, example_dir, pdf.url, done)
 
 				it "should generate the correct pdf on the second run as well", (done) ->
 					Client.compileDirectory @project_id, fixturePath("examples"), example_dir, 4242, (error, res, body) =>
-						console.log "DEBUG: error", error, "body", body
+						if body?.compile?.status is "failure"
+							console.log "DEBUG: error", error, "body", JSON.stringify(body)
 						pdf = Client.getOutputFile body, "pdf"
 						downloadAndComparePdf(@project_id, example_dir, pdf.url, done)
 
