@@ -2,7 +2,7 @@ div.full-size.pdf(ng-controller="PdfController")
 	.toolbar.toolbar-tall
 		.btn-group(
 			dropdown,
-			tooltip-html="'#{translate('recompile_pdf')} <span class=\"keyboard-shortcut\">({{modifierKey}} + Enter)</span>'"
+			tooltip-html="'"+translate('recompile_pdf')+" <span class=\"keyboard-shortcut\">({{modifierKey}} + Enter)</span>'"
 			tooltip-class="keyboard-tooltip"
 			tooltip-popup-delay="500"
 			tooltip-append-to-body="true"
@@ -53,7 +53,7 @@ div.full-size.pdf(ng-controller="PdfController")
 			href
 			ng-click="stop()"
 			ng-show="pdf.compiling",
-			tooltip="#{translate('stop_compile')}"
+			tooltip=translate('stop_compile')
 			tooltip-placement="bottom"
 		)
 			i.fa.fa-stop()
@@ -61,7 +61,7 @@ div.full-size.pdf(ng-controller="PdfController")
 			href
 			ng-click="toggleLogs()"
 			ng-class="{ 'active': shouldShowLogs == true }"
-			tooltip="#{translate('logs_and_output_files')}"
+			tooltip=translate('logs_and_output_files')
 			tooltip-placement="bottom"
 		)
 			i.fa.fa-file-text-o
@@ -77,7 +77,7 @@ div.full-size.pdf(ng-controller="PdfController")
 			ng-href="{{pdf.downloadUrl || pdf.url}}"
 			target="_blank"
 			ng-if="pdf.url"
-			tooltip="#{translate('download_pdf')}"
+			tooltip=translate('download_pdf')
 			tooltip-placement="bottom"
 		)
 			i.fa.fa-download
@@ -87,7 +87,7 @@ div.full-size.pdf(ng-controller="PdfController")
 				href,
 				ng-click="switchToFlatLayout()"
 				ng-show="ui.pdfLayout == 'sideBySide'"
-				tooltip="#{translate('full_screen')}"
+				tooltip=translate('full_screen')
 				tooltip-placement="bottom"
 				tooltip-append-to-body="true"
 			)
@@ -96,7 +96,7 @@ div.full-size.pdf(ng-controller="PdfController")
 				href,
 				ng-click="switchToSideBySideLayout()"
 				ng-show="ui.pdfLayout == 'flat'"
-				tooltip="#{translate('split_screen')}"
+				tooltip=translate('split_screen')
 				tooltip-placement="bottom"
 				tooltip-append-to-body="true"
 			)
@@ -233,7 +233,7 @@ div.full-size.pdf(ng-controller="PdfController")
 			.files-dropdown-container
 				a.btn.btn-default.btn-sm(
 					href,
-					tooltip="#{translate('clear_cached_files')}",
+					tooltip=translate('clear_cached_files'),
 					tooltip-placement="top",
 					tooltip-append-to-body="true",
 					ng-click="openClearCacheModal()"

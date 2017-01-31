@@ -36,7 +36,7 @@ block content
 									placeholder="email@example.com"
 									required,
 									ng-model="email",
-									ng-init="email = #{JSON.stringify(email)}",
+									ng-init="email = "+JSON.stringify(email),
 									ng-model-options="{ updateOn: 'blur' }",
 									disabled
 								)

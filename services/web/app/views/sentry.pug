@@ -1,12 +1,12 @@
 - if (typeof(sentrySrc) != "undefined")
 	- if (sentrySrc.match(/^([a-z]+:)?\/\//i))
-		script(src="#{sentrySrc}")
+		script(src=sentrySrc)
 	- else
-		script(src=buildJsPath("libs/#{sentrySrc}", {fingerprint:false}))
+		script(src=buildJsPath("libs/"+sentrySrc, {fingerprint:false}))
 - if (typeof(sentrySrc) != "undefined")
 	script(type="text/javascript").
 		if (typeof(Raven) != "undefined" && Raven.config) {
-			Raven.config("#{sentryPublicDSN}", {
+			Raven.config(sentryPublicDSN, {
 			tags: { 'commit': '@@COMMIT@@', 'build': '@@RELEASE@@' },
 			release: '@@RELEASE@@',
 			// Ignore list based off: https://gist.github.com/1878283

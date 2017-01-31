@@ -4,7 +4,7 @@ nav.navbar.navbar-default
 			button.navbar-toggle(ng-init="navCollapsed = true", ng-click="navCollapsed = !navCollapsed", ng-class="{active: !navCollapsed}")
 				i.fa.fa-bars
 			if settings.nav.custom_logo
-				a(href='/', style='background-image:url("#{settings.nav.custom_logo}")').navbar-brand
+				a(href='/', style='background-image:url("'+settings.nav.custom_logo+'")').navbar-brand
 			else if (nav.title)
 				a(href='/').navbar-title #{nav.title}
 			else

@@ -30,7 +30,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 		meta(itemprop="name", content="ShareLaTeX, the Online LaTeX Editor")
 		
 		-if (typeof(meta) == "undefined")
-			meta(itemprop="description", name="description", content='#{translate("site_description")}')
+			meta(itemprop="description", name="description", content=translate("site_description"))
 		-else
 			meta(itemprop="description", name="description" , content=meta)
 		
