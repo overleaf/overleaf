@@ -334,32 +334,32 @@ describe "PackManager", ->
 			it "should return with no error", ->
 				@callback.calledWith(undefined).should.equal true
 
-	describe "setTTLOnArchivedPack", ->
-		beforeEach ->
-			@pack_id = "somepackid"
-			@onedayinms = 86400000
-			@db.docHistory =
-				findAndModify : sinon.stub().callsArgWith(1)
+	# describe "setTTLOnArchivedPack", ->
+	# 	beforeEach ->
+	# 		@pack_id = "somepackid"
+	# 		@onedayinms = 86400000
+	# 		@db.docHistory =
+	# 			findAndModify : sinon.stub().callsArgWith(1)
 
-		it "should set expires to 1 day", (done)->
-			@PackManager._getOneDayInFutureWithRandomDelay = sinon.stub().returns(@onedayinms)
-			@PackManager.setTTLOnArchivedPack @project_id, @doc_id, @pack_id, =>
-				args = @db.docHistory.findAndModify.args[0][0]
-				args.query._id.should.equal @pack_id
-				args.update['$set'].expiresAt.should.equal @onedayinms
-				done()
+	# 	it "should set expires to 1 day", (done)->
+	# 		#@PackManager._getOneDayInFutureWithRandomDelay = sinon.stub().returns(@onedayinms)
+	# 		@PackManager.setTTLOnArchivedPack @project_id, @doc_id, @pack_id, =>
+	# 			args = @db.docHistory.findAndModify.args[0][0]
+	# 			args.query._id.should.equal @pack_id
+	# 			args.update['$set'].expiresAt.should.equal @onedayinms
+	# 			done()
 
 
-	describe "_getOneDayInFutureWithRandomDelay", ->
-		beforeEach ->
-			@onedayinms = 86400000
-			@thirtyMins = 1000 * 60 * 30
+	# describe "_getOneDayInFutureWithRandomDelay", ->
+	# 	beforeEach ->
+	# 		@onedayinms = 86400000
+	# 		@thirtyMins = 1000 * 60 * 30
 
-		it "should give 1 day + 30 mins random time", (done)->
-			loops = 10000
-			while --loops > 0
-				randomDelay = @PackManager._getOneDayInFutureWithRandomDelay() - new Date(Date.now() + @onedayinms)
-				randomDelay.should.be.above(0)
-				randomDelay.should.be.below(@thirtyMins + 1)
-			done()
+	# 	it "should give 1 day + 30 mins random time", (done)->
+	# 		loops = 10000
+	# 		while --loops > 0
+	# 			randomDelay = @PackManager._getOneDayInFutureWithRandomDelay() - new Date(Date.now() + @onedayinms)
+	# 			randomDelay.should.be.above(0)
+	# 			randomDelay.should.be.below(@thirtyMins + 1)
+	# 		done()
 
