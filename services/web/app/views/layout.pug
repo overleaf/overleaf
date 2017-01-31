@@ -21,6 +21,8 @@ html(itemscope, itemtype='http://schema.org/Product')
 		link(rel="icon", href="/favicon.ico")
 		link(rel='stylesheet', href=buildCssPath('/style.css'))
 
+		block _headLinks
+
 		if settings.i18n.subdomainLang
 			each subdomainDetails in settings.i18n.subdomainLang
 				if !subdomainDetails.hide
