@@ -19,7 +19,7 @@ module.exports =
 		jobs = [
 			(cb)->
 				opts = getOpts()
-				opts.json = {lines: lines, version: 42}
+				opts.json = {lines: lines, version: 42, ranges: {}}
 				request.post(opts, cb)
 			(cb)->
 				opts = getOpts()
