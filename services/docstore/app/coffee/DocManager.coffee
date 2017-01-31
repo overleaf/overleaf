@@ -42,8 +42,8 @@ module.exports = DocManager =
 					return callback(null, docs)
 
 	updateDoc: (project_id, doc_id, lines, version, ranges, callback = (error, modified, rev) ->) ->
-		if !lines? or !version?
-			return callback(new Error("no lines or version provided"))
+		if !lines? or !version? or !ranges?
+			return callback(new Error("no lines, version or ranges provided"))
 	
 		DocManager.getDoc project_id, doc_id, {version: true, rev: true, lines: true, version: true, ranges: true}, (err, doc)->
 			if err? and !(err instanceof Errors.NotFoundError)
