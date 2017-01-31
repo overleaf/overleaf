@@ -23,7 +23,7 @@ compare = (originalPath, generatedPath, callback = (error, same) ->) ->
 		if stderr.trim() == "0 (0)"
 			callback null, true
 		else
-			console.log stderr
+			console.log "compare result", stderr
 			callback null, false
 
 compareMultiplePages = (project_id, callback = (error) ->) ->
@@ -72,11 +72,13 @@ describe "Example Documents", ->
 
 				it "should generate the correct pdf", (done) ->
 					Client.compileDirectory @project_id, fixturePath("examples"), example_dir, 4242, (error, res, body) =>
+						console.log "DEBUG: error", error, "body", body
 						pdf = Client.getOutputFile body, "pdf"
 						downloadAndComparePdf(@project_id, example_dir, pdf.url, done)
 
 				it "should generate the correct pdf on the second run as well", (done) ->
 					Client.compileDirectory @project_id, fixturePath("examples"), example_dir, 4242, (error, res, body) =>
+						console.log "DEBUG: error", error, "body", body
 						pdf = Client.getOutputFile body, "pdf"
 						downloadAndComparePdf(@project_id, example_dir, pdf.url, done)
 
