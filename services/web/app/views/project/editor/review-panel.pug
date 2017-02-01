@@ -20,7 +20,7 @@
 			is-loading="reviewPanel.dropdown.loading"
 			permissions="permissions"
 		)
-		span.review-panel-toolbar-label(ng-if="permissions.write")
+		span.review-panel-toolbar-label(ng-if="permissions.write", ng-click="fooBarBaz($event);")
 			span(ng-click="toggleTrackChanges(true)", ng-if="editor.wantTrackChanges === false") Track Changes is 
 				strong off
 			span(ng-click="toggleTrackChanges(false)", ng-if="editor.wantTrackChanges === true") Track Changes is 
@@ -372,3 +372,49 @@ script(type='text/ng-template', id='resolvedCommentsDropdownTemplate')
 				.rp-loading(ng-if="!resolvedComments.length")
 					| No resolved threads.
 			
+script(type="text/ng-template", id="trackChangesUpgradeModalTemplate")
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
+		h3 Track Changes
+	.modal-body
+		.teaser-video-container
+			video.teaser-video(autoplay, loop)
+				source(src="/img/teasers/track-changes/teaser-track-changes.mp4", type="video/mp4")
+				img(src="/img/teasers/track-changes/teaser-track-changes.gif")
+		
+		h4.teaser-title See changes in your documents, live
+	
+		p.small(ng-show="startedFreeTrial")
+			| #{translate("refresh_page_after_starting_free_trial")}
+
+		.row
+			.col-md-10.col-md-offset-1
+				ul.list-unstyled
+					li
+						i.fa.fa-check &nbsp;
+						| Track any change, in real-time
+					
+					li
+						i.fa.fa-check &nbsp;
+						| Review your peers' work
+
+					li
+						i.fa.fa-check &nbsp;
+						| Accept or reject each change individually
+					
+
+		.row.text-center(ng-controller="FreeTrialModalController")
+			a.btn.btn-success(
+				href
+				ng-click="startFreeTrial('track-changes')"
+			) Try it for free
+
+	.modal-footer()
+		button.btn.btn-default(
+			ng-click="cancel()"
+		)
+			span #{translate("close")}

@@ -4,7 +4,7 @@ define [
 	"ide/colors/ColorManager"
 	"ide/review-panel/RangesTracker"
 ], (App, EventEmitter, ColorManager, RangesTracker) ->
-	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout, $http, event_tracking) ->
+	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout, $http, $modal, event_tracking) ->
 		$reviewPanelEl = $element.find "#review-panel"
 
 		$scope.SubViews =
@@ -431,6 +431,10 @@ define [
 			ide.editorManager.openDocId(doc_id, { gotoOffset: entry.offset })
 		
 		$scope.toggleTrackChanges = (value) ->
+			if true # TODO check feature/permission
+				$scope.openTrackChangesUpgradeModal()
+				return
+
 			$scope.editor.wantTrackChanges = value
 			$http.post "/project/#{$scope.project_id}/track_changes", {_csrf: window.csrfToken, on: value}
 			event_tracking.sendMB "rp-trackchanges-toggle", { value }
@@ -521,4 +525,11 @@ define [
 				isSelf: isSelf
 				hue: ColorManager.getHueForUserId(id)
 				avatar_text: [user.first_name, user.last_name].filter((n) -> n?).map((n) -> n[0]).join ""
+			}
+
+		$scope.openTrackChangesUpgradeModal = () ->
+			$modal.open {
+				templateUrl: "trackChangesUpgradeModalTemplate"
+				controller: "TrackChangesUpgradeModalController"
+				scope: $scope.$new()
 			}
