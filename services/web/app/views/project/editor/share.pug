@@ -38,7 +38,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 				.col-xs-1
 					a(
 						href
-						tooltip="#{translate('remove_collaborator')}"
+						tooltip=translate('remove_collaborator')
 						tooltip-placement="bottom"
 						ng-click="removeMember(member)"
 					)
@@ -55,7 +55,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 				.col-xs-1
 					a(
 						href
-						tooltip="#{translate('revoke_invite')}"
+						tooltip=translate('revoke_invite')
 						tooltip-placement="bottom"
 						ng-click="revokeInvite(invite)"
 					)
@@ -66,7 +66,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 					.form-group
 						tags-input(
 							template="shareTagTemplate"
-							placeholder="#{settings.customisation.shareProjectPlaceholder || 'joe@example.com, sue@example.com, ...'}"
+							placeholder=settings.customisation.shareProjectPlaceholder || 'joe@example.com, sue@example.com, ...'
 							ng-model="inputs.contacts"
 							focus-on="open"
 							display-property="display"

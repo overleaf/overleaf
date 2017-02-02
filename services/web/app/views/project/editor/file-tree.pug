@@ -3,21 +3,21 @@ aside#file-tree(ng-controller="FileTreeController", ng-class="{ 'multi-selected'
 		a(
 			href,
 			ng-click="openNewDocModal()",
-			tooltip-html="'#{translate('new_file').replace(' ', '<br>')}'",
+			tooltip-html="'"+translate('new_file').replace(' ', '<br>')+"'",
 			tooltip-placement="bottom"
 		)
 			i.fa.fa-file
 		a(
 			href,
 			ng-click="openNewFolderModal()",
-			tooltip-html="'#{translate('new_folder').replace(' ', '<br>')}'",
+			tooltip-html="'"+translate('new_folder').replace(' ', '<br>')+"'",
 			tooltip-placement="bottom"
 		)
 			i.fa.fa-folder
 		a(
 			href,
 			ng-click="openUploadFileModal()",
-			tooltip="#{translate('upload')}",
+			tooltip=translate('upload'),
 			tooltip-placement="bottom"
 		)
 			i.fa.fa-upload
@@ -26,7 +26,7 @@ aside#file-tree(ng-controller="FileTreeController", ng-class="{ 'multi-selected'
 			a(
 				href,
 				ng-click="startRenamingSelected()",
-				tooltip="#{translate('rename')}",
+				tooltip=translate('rename'),
 				tooltip-placement="bottom",
 				ng-show="multiSelectedCount == 0"
 			)
@@ -34,7 +34,7 @@ aside#file-tree(ng-controller="FileTreeController", ng-class="{ 'multi-selected'
 			a(
 				href,
 				ng-click="openDeleteModalForSelected()",
-				tooltip="#{translate('delete')}",
+				tooltip=translate('delete'),
 				tooltip-placement="bottom",
 				tooltip-append-to-body="true"
 			)

@@ -80,7 +80,7 @@ module.exports = CollaboratorsInviteHandler =
 				# Send email and notification in background
 				CollaboratorsInviteHandler._sendMessages projectId, sendingUser, invite, (err) ->
 					if err?
-						logger.err {projectId, email}, "error sending messages for invite"
+						logger.err {err, projectId, email}, "error sending messages for invite"
 				callback(null, invite)
 
 

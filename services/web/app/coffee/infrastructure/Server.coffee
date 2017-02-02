@@ -61,7 +61,7 @@ if Settings.behindProxy
 
 webRouter.use express.static(__dirname + '/../../../public', {maxAge: staticCacheAge })
 app.set 'views', __dirname + '/../../views'
-app.set 'view engine', 'jade'
+app.set 'view engine', 'pug'
 Modules.loadViewIncludes app
 
 

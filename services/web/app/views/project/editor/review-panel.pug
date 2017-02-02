@@ -41,7 +41,6 @@
 		.rp-entry-list-inner
 			.rp-entry-wrapper(
 				ng-repeat="(entry_id, entry) in reviewPanel.entries[editor.open_doc_id]"
-				ng-if="!(entry.type === 'comment' && reviewPanel.commentThreads[entry.thread_id].resolved === true)"
 			)
 				div(ng-if="entry.type === 'insert' || entry.type === 'delete'")
 					change-entry(
@@ -50,6 +49,7 @@
 						on-reject="rejectChange(entry_id);"
 						on-accept="acceptChange(entry_id);"
 						on-indicator-click="toggleReviewPanel();"
+						on-body-click="gotoEntry(editor.open_doc_id, entry)"
 						permissions="permissions"
 					)
 
@@ -62,6 +62,7 @@
 						on-indicator-click="toggleReviewPanel();"
 						on-save-edit="saveEdit(entry.thread_id, comment)"
 						on-delete="deleteComment(entry.thread_id, comment)"
+						on-body-click="gotoEntry(editor.open_doc_id, entry)"
 						permissions="permissions"
 						ng-if="!reviewPanel.loadingThreads"
 					)
@@ -191,7 +192,7 @@ script(type='text/ng-template', id='commentEntryTemplate')
 
 			.rp-loading(ng-if="!threads[entry.thread_id].submitting && (!threads[entry.thread_id] || threads[entry.thread_id].messages.length == 0)")
 				| No comments
-			div
+			.rp-comment-loaded
 				.rp-comment(
 					ng-repeat="comment in threads[entry.thread_id].messages track by comment.id"
 				)

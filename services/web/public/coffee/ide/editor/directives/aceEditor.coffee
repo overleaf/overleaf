@@ -13,7 +13,7 @@ define [
 	EditSession = ace.require('ace/edit_session').EditSession
 	ModeList = ace.require('ace/ext/modelist')
 
-	# set the path for ace workers if using a CDN (from editor.jade)
+	# set the path for ace workers if using a CDN (from editor.pug)
 	if window.aceWorkerPath != ""
 		syntaxValidationEnabled = true
 		ace.config.set('workerPath', "#{window.aceWorkerPath}")
@@ -279,7 +279,7 @@ define [
 
 					session.setUseWrapMode(true)
 					# use syntax validation only when explicitly set
-					if scope.syntaxValidation? and syntaxValidationEnabled
+					if scope.syntaxValidation? and syntaxValidationEnabled and !scope.fileName.match(/\.bib$/)
 						session.setOption("useWorker", scope.syntaxValidation);
 
 					# now attach session to editor

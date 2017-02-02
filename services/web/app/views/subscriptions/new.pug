@@ -164,7 +164,7 @@ block content
 													ng-change="updateCountry()"
 													required
 												)
-													mixin countries_options()
+													+countries_options()
 												span.input-feedback-message {{ simpleCCForm.country.$error.required ? 'This field is required' : '' }}
 
 											if (showVatField)

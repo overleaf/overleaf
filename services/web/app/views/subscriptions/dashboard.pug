@@ -12,7 +12,7 @@ block scripts
 
 mixin printPlan(plan)
 	-if (!plan.hideFromUsers)
-		tr(ng-controller="ChangePlanFormController", ng-init="plan=#{JSON.stringify(plan)}", ng-show="shouldShowPlan(plan.planCode)")
+		tr(ng-controller="ChangePlanFormController", ng-init="plan="+JSON.stringify(plan), ng-show="shouldShowPlan(plan.planCode)")
 			td
 				strong #{plan.name}
 			td {{refreshPrice(plan.planCode)}}
@@ -22,18 +22,18 @@ mixin printPlan(plan)
 					| {{prices[plan.planCode]}} / #{translate("month")}
 			td
 				-if (subscription.state == "free-trial")
-					a(href="/user/subscription/new?planCode=#{plan.planCode}").btn.btn-success #{translate("subscribe_to_this_plan")}
+					a(href="/user/subscription/new?planCode="+plan.planCode).btn.btn-success #{translate("subscribe_to_this_plan")}
 				-else if (typeof(subscription.planCode) != "undefined" && plan.planCode == subscription.planCode.split("_")[0])
 					button.btn.disabled #{translate("your_plan")}
 				-else
 					form
-						input(type="hidden", ng-model="plan_code", name="plan_code", value="#{plan.planCode}")
+						input(type="hidden", ng-model="plan_code", name="plan_code", value=plan.planCode)
 						input(type="submit", ng-click="changePlan()", value=translate("change_to_this_plan")).btn.btn-success
 
 
 mixin printPlans(plans)
-	-each plan in plans
-		mixin printPlan(plan)
+	each plan in plans
+		+printPlan(plan)
 
 block content
 	.content.content-alt(ng-cloak)
@@ -46,7 +46,7 @@ block content
 							| &nbsp;
 							| #{translate("your_billing_details_were_saved")}
 					.card(ng-if="view == 'overview'")
-						.page-header(x-current-plan="#{subscription.planCode}")
+						.page-header(x-current-plan=subscription.planCode)
 							h1 #{translate("your_subscription")} 
 
 						- if (subscription && user._id+'' == subscription.admin_id+'')
@@ -97,9 +97,9 @@ block content
 										th !{translate("name")}
 										th !{translate("price")}
 										th
-									mixin printPlans(plans.studentAccounts)
-									mixin printPlans(plans.individualMonthlyPlans)
-									mixin printPlans(plans.individualAnnualPlans)
+									+printPlans(plans.studentAccounts)
+									+printPlans(plans.individualMonthlyPlans)
+									+printPlans(plans.individualAnnualPlans)
 							
 
 						each groupSubscription in groupSubscriptions
@@ -107,7 +107,7 @@ block content
 								div 
 									p !{translate("member_of_group_subscription", {admin_email: "<strong>" + groupSubscription.admin_id.email + "</strong>"})}
 									span 
-										button.btn.btn-danger(ng-click="removeSelfFromGroup('#{groupSubscription.admin_id._id}')") #{translate("leave_group")}
+										button.btn.btn-danger(ng-click="removeSelfFromGroup('"+groupSubscription.admin_id._id+"')") #{translate("leave_group")}
 
 						-if(subscription.groupPlan && user._id+'' == subscription.admin_id+'')
 							div

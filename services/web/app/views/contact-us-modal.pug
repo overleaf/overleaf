@@ -24,10 +24,10 @@ script(type='text/ng-template', id='supportModalTemplate')
 						a.contact-suggestion-list-item(ng-href="{{ suggestion.url }}", ng-click="clickSuggestionLink(suggestion.url);" target="_blank")
 							span(ng-bind-html="suggestion.name")
 							i.fa.fa-angle-right
-			label.desc(ng-show="'#{getUserEmail()}'.length < 1")
+			label.desc(ng-show="'"+getUserEmail()+"'.length < 1")
 				| #{translate("email")}
-			.form-group(ng-show="'#{getUserEmail()}'.length < 1")
-				input.field.text.medium.span8.form-control(ng-model="form.email",  ng-init="form.email = '#{getUserEmail()}'", type='email', spellcheck='false', value='', maxlength='255', tabindex='2')
+			.form-group(ng-show="'"+getUserEmail()+"'.length < 1")
+				input.field.text.medium.span8.form-control(ng-model="form.email",  ng-init="form.email = '"+getUserEmail()+"'", type='email', spellcheck='false', value='', maxlength='255', tabindex='2')
 			label#title12.desc
 				| #{translate("project_url")} (#{translate("optional")})
 			.form-group
@@ -37,6 +37,6 @@ script(type='text/ng-template', id='supportModalTemplate')
 			.form-group
 				textarea.field.text.medium.span8.form-control(ng-model="form.message",type='text', value='', tabindex='4', onkeyup='')
 			.form-group.text-center
-				input.btn-success.btn.btn-lg(type='submit', ng-disabled="sending", ng-click="contactUs()" value='#{translate("contact_us")}')
+				input.btn-success.btn.btn-lg(type='submit', ng-disabled="sending", ng-click="contactUs()" value=translate("contact_us"))
 		span(ng-show="sent")
 			p #{translate("request_sent_thank_you")}

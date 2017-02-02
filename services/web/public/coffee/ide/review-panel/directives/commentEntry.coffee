@@ -13,9 +13,14 @@ define [
 			onIndicatorClick: "&"
 			onSaveEdit: "&"
 			onDelete: "&"
+			onBodyClick: "&"
 		link: (scope, element, attrs) ->
 			scope.state =
 				animating: false
+
+			element.on "click", (e) ->
+				if $(e.target).is('.rp-entry, .rp-comment-loaded, .rp-comment-content, .rp-comment-reply, .rp-entry-metadata')
+					scope.onBodyClick()
 
 			scope.handleCommentReplyKeyPress = (ev) ->
 				if ev.keyCode == 13 and !ev.shiftKey and !ev.ctrlKey and !ev.metaKey

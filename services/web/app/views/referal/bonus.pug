@@ -24,7 +24,7 @@ block content
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
-										a(href='https://twitter.com/share?text=is%20trying%20out%20the%20online%20LaTeX%20Editor%20ShareLaTeX&url=#{encodeURIComponent(buildReferalUrl("t"))}&counturl=https://www.sharelatex.com', target="_blank").twitter Tweet
+										a(href='https://twitter.com/share?text=is%20trying%20out%20the%20online%20LaTeX%20Editor%20ShareLaTeX&url='+encodeURIComponent(buildReferalUrl("t"))+'&counturl=https://www.sharelatex.com', target="_blank").twitter Tweet
 									
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
@@ -34,12 +34,12 @@ block content
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
-										a(href="https://plus.google.com/share?url=#{encodeURIComponent(buildReferalUrl('gp'))}", onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');return false;").google-plus #{translate("share_us_on_googleplus")}
+										a(href="https://plus.google.com/share?url="+encodeURIComponent(buildReferalUrl('gp')), onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');return false;").google-plus #{translate("share_us_on_googleplus")}
 									
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
-										a(href='mailto:?subject=Online LaTeX editor you may like &body=Hey, I have been using the online LaTeX editor ShareLaTeX recently and thought you might like to check it out. #{encodeURIComponent(buildReferalUrl("e"))}', title='Share by Email').email #{translate("email_us_to_your_friends")}
+										a(href='mailto:?subject=Online LaTeX editor you may like &body=Hey, I have been using the online LaTeX editor ShareLaTeX recently and thought you might like to check it out. '+encodeURIComponent(buildReferalUrl("e")), title='Share by Email').email #{translate("email_us_to_your_friends")}
 
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
@@ -58,9 +58,9 @@ block content
 								.col-md-10.col-md-offset-1.bonus-banner(style="position: relative; height: 30px; margin-top: 20px;")
 									- for (var i = 0; i <= 10; i++) {
 										- if (refered_user_count == i)
-											.number(style="left: #{i}0%").active #{i}
+											.number(style="left: "+i+"0%").active #{i}
 										- else
-											.number(style="left: #{i}0%") #{i}
+											.number(style="left: "+i+"0%") #{i}
 									- }
 
 							.row.ab-bonus
@@ -68,7 +68,7 @@ block content
 									.progress
 										- if (refered_user_count == 0)
 											div(style="text-align: center; padding: 4px;") #{translate("spread_the_word_and_fill_bar")}
-										.progress-bar.progress-bar-info(style="width: #{refered_user_count}0%")
+										.progress-bar.progress-bar-info(style="width: "+refered_user_count+"0%")
 
 							.row.ab-bonus
 								.col-md-10.col-md-offset-1.bonus-banner(style="position: relative; height: 70px;")

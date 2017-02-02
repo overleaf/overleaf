@@ -70,6 +70,10 @@ define [
 		ide.socket.on "reopen-thread", (thread_id) ->
 			_onCommentReopened(thread_id)
 		
+		ide.socket.on "delete-thread", (thread_id) ->
+			_onThreadDeleted(thread_id)
+			$scope.$apply () ->
+		
 		ide.socket.on "edit-message", (thread_id, message_id, content) ->
 			_onCommentEdited(thread_id, message_id, content)
 			$scope.$apply () ->
@@ -226,8 +230,10 @@ define [
 				delete delete_changes[comment.id]
 				if $scope.reviewPanel.resolvedThreadIds[comment.op.t]
 					new_comment = resolvedComments[comment.id] ?= {}
+					delete entries[comment.id]
 				else
 					new_comment = entries[comment.id] ?= {}
+					delete resolvedComments[comment.id]
 				new_entry = {
 					type: "comment"
 					thread_id: comment.op.t
@@ -360,7 +366,7 @@ define [
 			thread.resolved_by_user = formatUser(user)
 			thread.resolved_at = new Date()
 			$scope.reviewPanel.resolvedThreadIds[thread_id] = true
-			$scope.$broadcast "comment:resolve_thread", thread_id
+			$scope.$broadcast "comment:resolve_threads", [thread_id]
 		
 		_onCommentReopened = (thread_id) ->
 			thread = getThread(thread_id)
@@ -374,6 +380,7 @@ define [
 		_onThreadDeleted = (thread_id) ->
 			delete $scope.reviewPanel.resolvedThreadIds[thread_id]
 			delete $scope.reviewPanel.commentThreads[thread_id]
+			$scope.$broadcast "comment:remove", thread_id
 		
 		_onCommentEdited = (thread_id, comment_id, content) ->
 			thread = getThread(thread_id)
@@ -398,7 +405,6 @@ define [
 					'X-CSRF-Token': window.csrfToken
 				}
 			})
-			$scope.$broadcast "comment:remove", entry_id
 			event_tracking.sendMB "rp-comment-delete"
 		
 		$scope.saveEdit = (thread_id, comment) ->
@@ -481,9 +487,9 @@ define [
 						for comment in thread.messages
 							formatComment(comment)
 						if thread.resolved_by_user?
-							$scope.$broadcast "comment:resolve_thread", thread_id
 							thread.resolved_by_user = formatUser(thread.resolved_by_user)
 							$scope.reviewPanel.resolvedThreadIds[thread_id] = true
+							$scope.$broadcast "comment:resolve_threads", [thread_id]
 					$scope.reviewPanel.commentThreads = threads
 					$timeout () ->
 						$scope.$broadcast "review-panel:layout"

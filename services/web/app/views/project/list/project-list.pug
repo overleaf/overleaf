@@ -6,7 +6,7 @@
 		form.project-search.form-horizontal(role="form")
 			.form-group.has-feedback.has-feedback-left.col-md-7.col-xs-12
 				input.form-control.col-md-7.col-xs-12(
-					placeholder="#{translate('search_projects')}…",
+					placeholder=translate('search_projects')+"…",
 					autofocus='autofocus',
 					ng-model="searchText.value",
 					focus-on='search:clear',
@@ -25,7 +25,7 @@
 				.btn-group(ng-hide="selectedProjects.length < 1")
 					a.btn.btn-default(
 						href,
-						tooltip="#{translate('download')}",
+						tooltip=translate('download'),
 						tooltip-placement="bottom",
 						tooltip-append-to-body="true",
 						ng-click="downloadSelectedProjects()"
@@ -33,7 +33,7 @@
 						i.fa.fa-cloud-download
 					a.btn.btn-default(
 						href,
-						tooltip="#{translate('delete')}",
+						tooltip=translate('delete'),
 						tooltip-placement="bottom",
 						tooltip-append-to-body="true",
 						ng-click="openArchiveProjectsModal()"
@@ -45,7 +45,7 @@
 						href,
 						data-toggle="dropdown",
 						dropdown-toggle,
-						tooltip="#{translate('add_to_folders')}",
+						tooltip=translate('add_to_folders'),
 						tooltip-append-to-body="true",
 						tooltip-placement="bottom"
 					)

@@ -6,7 +6,7 @@ block content
 		.container(ng-controller="AnnualUpgradeController")
 			.row(ng-cloak)
 				.col-md-6.col-md-offset-3
-					.card(ng-init="planName = #{JSON.stringify(planName)}")
+					.card(ng-init="planName = "+JSON.stringify(planName))
 						.page-header
 							h1.text-centered #{translate("move_to_annual_billing")}
 						div(ng-hide="upgradeComplete")

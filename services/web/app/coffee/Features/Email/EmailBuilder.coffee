@@ -97,7 +97,7 @@ Thank you
 
 
 templates.projectInvite =
-	subject: _.template "<%= project.name.slice(0, 40) %> - shared by <%= owner.email %>"
+	subject: _.template "<%= project.name %> - shared by <%= owner.email %>"
 	layout: BaseWithHeaderEmailLayout
 	type:"notification"
 	plainTextTemplate: _.template """
@@ -111,16 +111,16 @@ Thank you
 """
 	compiledTemplate: (opts) -> 
 		SingleCTAEmailBody({
-			title: "#{ opts.project.name.slice(0, 40) } &ndash; shared by #{ opts.owner.email }"
+			title: "#{ opts.project.name } &ndash; shared by #{ opts.owner.email }"
 			greeting: "Hi,"
-			message: "#{ opts.owner.email } wants to share &ldquo;#{ opts.project.name.slice(0, 40) }&rdquo; with you."
+			message: "#{ opts.owner.email } wants to share &ldquo;#{ opts.project.name }&rdquo; with you."
 			secondaryMessage: null
 			ctaText: "View project"
 			ctaURL: opts.inviteUrl
 			gmailGoToAction: 
 				target: opts.inviteUrl
 				name: "View project"
-				description: "Join #{ opts.project.name.slice(0, 40) } at ShareLaTeX"
+				description: "Join #{ opts.project.name } at ShareLaTeX"
 		})
 
 templates.completeJoinGroupAccount =

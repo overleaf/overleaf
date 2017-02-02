@@ -24,7 +24,7 @@ aside#left-menu.full-size(
 				| PDF
 			div.link-disabled(
 				ng-if="!pdf.url"
-				tooltip="#{translate('please_compile_pdf_before_download')}"
+				tooltip=translate('please_compile_pdf_before_download')
 				tooltip-placement="bottom"
 			)
 				i.fa.fa-file-pdf-o.fa-2x
@@ -47,7 +47,7 @@ aside#left-menu.full-size(
 				a(href, ng-if="pdf.url" ,ng-click="openWordCountModal()")
 					i.fa.fa-fw.fa-eye
 					span &nbsp;&nbsp; #{translate("word_count")}
-				a.link-disabled(href, ng-if="!pdf.url" , tooltip="#{translate('please_compile_pdf_before_word_count')}")
+				a.link-disabled(href, ng-if="!pdf.url" , tooltip=translate('please_compile_pdf_before_word_count'))
 					i.fa.fa-fw.fa-eye
 					span.link-disabled &nbsp;&nbsp; #{translate("word_count")}	
 
@@ -200,7 +200,7 @@ script(type='text/ng-template', id='wordCountModalTemplate')
 				span &nbsp; #{translate("loading")}...  
 			div.pdf-disabled(
 				ng-if="!pdf.url"
-				tooltip="#{translate('please_compile_pdf_before_word_count')}"
+				tooltip=translate('please_compile_pdf_before_word_count')
 				tooltip-placement="bottom"
 			)
 		div(ng-if="!status.loading")

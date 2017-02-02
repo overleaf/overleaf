@@ -84,6 +84,9 @@ define [
 		setTrackingChanges: (track_changes) ->
 			@doc.track_changes = track_changes
 		
+		getTrackingChanges: () ->
+			!!@doc.track_changes
+		
 		setTrackChangesIdSeeds: (id_seeds) ->
 			@doc.track_changes_id_seeds = id_seeds
 

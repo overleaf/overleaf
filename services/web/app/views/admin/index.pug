@@ -28,10 +28,10 @@ block content
 							tab(heading="Open Sockets")
 								.row-spaced
 									ul
-										-each agents, url in openSockets
+										each agents, url in openSockets
 											li #{url} - total : #{agents.length}
 												ul
-													-each agent in agents
+													each agent in agents
 														li #{agent}
 
 							tab(heading="Close Editor")
