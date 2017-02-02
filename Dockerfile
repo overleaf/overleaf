@@ -63,7 +63,10 @@ RUN cd /var/www && npm install
 
 RUN cd /var/www/sharelatex; \
 	npm install; \
-	grunt install;
+	grunt install; \
+	cd web/modules; \
+	git clone https://bitbucket.org/sharelatex/launchpad-webmodule.git launchpad; \
+	grunt compile;
 
 RUN cd /var/www && node git-revision > revisions.txt
 	
