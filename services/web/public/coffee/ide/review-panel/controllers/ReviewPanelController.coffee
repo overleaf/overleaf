@@ -9,7 +9,7 @@ define [
 
 		# TODO Mocked feature flag, remove.
 		$scope.$on "project:joined", () ->
-			$scope.project.features.hasTrackChanges = false
+			$scope.project.features.hasTrackChanges = true
 
 		$scope.SubViews =
 			CUR_FILE : "cur_file"
