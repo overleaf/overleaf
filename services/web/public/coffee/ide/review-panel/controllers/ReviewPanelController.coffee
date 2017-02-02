@@ -7,6 +7,10 @@ define [
 	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout, $http, $modal, event_tracking) ->
 		$reviewPanelEl = $element.find "#review-panel"
 
+		# TODO Mocked feature flag, remove.
+		$scope.$on "project:joined", () ->
+			$scope.project.features.hasTrackChanges = false
+
 		$scope.SubViews =
 			CUR_FILE : "cur_file"
 			OVERVIEW : "overview"
@@ -431,13 +435,12 @@ define [
 			ide.editorManager.openDocId(doc_id, { gotoOffset: entry.offset })
 		
 		$scope.toggleTrackChanges = (value) ->
-			if true # TODO check feature/permission
+			if $scope.project.features.hasTrackChanges
+				$scope.editor.wantTrackChanges = value
+				$http.post "/project/#{$scope.project_id}/track_changes", {_csrf: window.csrfToken, on: value}
+				event_tracking.sendMB "rp-trackchanges-toggle", { value }
+			else
 				$scope.openTrackChangesUpgradeModal()
-				return
-
-			$scope.editor.wantTrackChanges = value
-			$http.post "/project/#{$scope.project_id}/track_changes", {_csrf: window.csrfToken, on: value}
-			event_tracking.sendMB "rp-trackchanges-toggle", { value }
 		
 		ide.socket.on "toggle-track-changes", (value) ->
 			$scope.$apply () ->

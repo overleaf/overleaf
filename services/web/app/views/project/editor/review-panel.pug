@@ -20,12 +20,18 @@
 			is-loading="reviewPanel.dropdown.loading"
 			permissions="permissions"
 		)
-		span.review-panel-toolbar-label(ng-if="permissions.write", ng-click="fooBarBaz($event);")
+		span.review-panel-toolbar-label(ng-if="permissions.write")
 			span(ng-click="toggleTrackChanges(true)", ng-if="editor.wantTrackChanges === false") Track Changes is 
 				strong off
 			span(ng-click="toggleTrackChanges(false)", ng-if="editor.wantTrackChanges === true") Track Changes is 
 				strong on
-			review-panel-toggle(ng-if="editor.wantTrackChanges == editor.trackChanges", ng-model="editor.wantTrackChanges", on-toggle="toggleTrackChanges")
+			review-panel-toggle(
+				ng-if="editor.wantTrackChanges == editor.trackChanges"
+				ng-model="editor.wantTrackChanges"
+				on-toggle="toggleTrackChanges"
+				disabled="!project.features.hasTrackChanges"
+				on-disabled-click="openTrackChangesUpgradeModal"
+			)
 		span.review-panel-toolbar-label.review-panel-toolbar-label-disabled(ng-if="!permissions.write")
 			span(ng-if="editor.wantTrackChanges === false") Track Changes is 
 				strong off
