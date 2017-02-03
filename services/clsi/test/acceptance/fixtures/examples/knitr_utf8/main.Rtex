@@ -1,0 +1,35 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+ 
+\begin{document}
+ 
+\tableofcontents
+ 
+\vspace{2cm} %Add a 2cm space
+ 
+\begin{abstract}
+Este es un breve resumen del contenido del 
+documento escrito en español.
+\end{abstract}
+ 
+\section{Sección Introductoria}
+Esta es la primera sección, podemos agregar 
+algunos elementos adicionales y todo será 
+escrito correctamente. Más aún, si una palabra 
+es demaciado larga y tiene que ser truncada, 
+babel tratará de truncarla correctamente 
+dependiendo del idioma.
+ 
+\section{Sección con teoremas}
+Esta sección es para ver que pasa con los comandos 
+que definen texto
+ 
+%% chunk options: cache this chunk
+%% begin.rcode my-cache, cache=TRUE
+% set.seed(123)
+% x = runif(10)
+% sd(x)  # standard deviation
+%% end.rcode
+ 
+\end{document}
