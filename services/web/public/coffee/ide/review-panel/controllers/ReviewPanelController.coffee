@@ -306,6 +306,7 @@ define [
 			$http.post("/project/#{$scope.project_id}/thread/#{thread_id}/messages", {content, _csrf: window.csrfToken})
 				.error (error) ->
 					ide.showGenericMessageModal("Error submitting comment", "Sorry, there was a problem submitting your comment")
+			$scope.$broadcast "editor:clearSelection"
 			$timeout () ->
 				$scope.$broadcast "review-panel:layout"
 			event_tracking.sendMB "rp-new-comment", { size: content.length }

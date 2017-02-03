@@ -37,6 +37,9 @@ define [
 						@gotoOffset(offset)
 					, 10 # Hack: Must happen after @gotoStoredPosition
 
+			@$scope.$on "#{@$scope.name}:clearSelection", (e) =>
+				@editor.selection.clearSelection()
+
 		storeScrollTopPosition: (session) ->
 			if @doc_id?
 				docPosition = @localStorage("doc.position.#{@doc_id}") || {}
