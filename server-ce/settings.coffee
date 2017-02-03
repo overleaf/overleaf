@@ -611,6 +611,12 @@ if process.env["SANDBOXED_COMPILES"] == "true"
 	if !settings.path?
 		settings.path = {}
 	settings.path.synctexBaseDir = () -> "/compile"
+	if process.env['SANDBOXED_COMPILES_SIBLING_CONTAINERS']  == 'true'
+		console.log("Using sibling containers for sandoxed compiles")
+		if process.env['SANDBOXED_COMPILES_HOST_DIR']
+			settings.path.sandboxedCompilesHostDir = process.env['SANDBOXED_COMPILES_HOST_DIR']
+		else
+			console.error('Sibling containers, but SANDBOXED_COMPILES_HOST_DIR not set')
 
 
 # Templates
