@@ -29,7 +29,7 @@
 				ng-if="editor.wantTrackChanges == editor.trackChanges"
 				ng-model="editor.wantTrackChanges"
 				on-toggle="toggleTrackChanges"
-				disabled="!project.features.hasTrackChanges"
+				disabled="!project.features.trackChanges"
 				on-disabled-click="openTrackChangesUpgradeModal"
 			)
 		span.review-panel-toolbar-label.review-panel-toolbar-label-disabled(ng-if="!permissions.write")

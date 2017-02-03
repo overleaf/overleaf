@@ -20,10 +20,10 @@ module.exports = ProjectEditorHandler =
 		if !result.invites?
 			result.invites = []
 			
-		hasTrackChanges = false
+		trackChangesVisible = false
 		for member in members
 			if member.privilegeLevel == "owner" and member.user?.featureSwitches?.track_changes
-				hasTrackChanges = true
+				trackChangesVisible = true
 
 		{owner, ownerFeatures, members} = @buildOwnerAndMembersViews(members)
 		result.owner = owner
@@ -37,7 +37,8 @@ module.exports = ProjectEditorHandler =
 			compileGroup:"standard"
 			templates: false
 			references: false
-			trackChanges: hasTrackChanges
+			trackChanges: true # TODO: Set this to false to make track changes a paid feature
+			trackChangesVisible: trackChangesVisible # TODO: Get this from the beta flag when going to public beta
 		})
 
 		return result

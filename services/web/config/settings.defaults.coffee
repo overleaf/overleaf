@@ -179,6 +179,7 @@ module.exports = settings =
 		compileGroup: "standard"
 		references: true
 		templates: true
+		trackChanges: true
 
 	plans: plans = [{
 		planCode: "personal"
