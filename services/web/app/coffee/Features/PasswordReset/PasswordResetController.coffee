@@ -53,7 +53,6 @@ module.exports =
 					if req.body.login_after
 						UserGetter.getUser user_id, {email: 1}, (err, user) ->
 							return next(err) if err?
-							# AuthenticationController.doLogin {email:user.email, password: password}, req, res, next
 							AuthenticationController.afterLoginSessionSetup req, user, (err) ->
 								if err?
 									logger.err {err, email: user.email}, "Error setting up session after setting password"
