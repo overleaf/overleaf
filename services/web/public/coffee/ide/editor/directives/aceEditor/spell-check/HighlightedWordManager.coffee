@@ -21,7 +21,7 @@ define [
 				highlight.row, highlight.column,
 				highlight.row, highlight.column + highlight.word.length
 			)
-			highlight.markerId = @editor.getSession().addMarker range, "spelling-highlight", null, true
+			highlight.markerId = @editor.getSession().addMarker range, "spelling-highlight", 'text', false
 			@highlights.rows[highlight.row] ||= []
 			@highlights.rows[highlight.row].push highlight
 
