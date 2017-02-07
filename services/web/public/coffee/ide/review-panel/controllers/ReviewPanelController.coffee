@@ -29,9 +29,11 @@ define [
 
 		$scope.$on "layout:pdf:linked", (event, state) ->
 			$scope.reviewPanel.layoutToLeft = (state.east?.size < 220 || state.east?.initClosed)
+			$scope.$broadcast "review-panel:layout"
 
 		$scope.$on "layout:pdf:resize", (event, state) ->
 			$scope.reviewPanel.layoutToLeft = (state.east?.size < 220 || state.east?.initClosed)
+			$scope.$broadcast "review-panel:layout"
 
 		$scope.$on "expandable-text-area:resize", (event) ->
 			$timeout () ->
