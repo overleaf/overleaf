@@ -33,6 +33,10 @@ define [
 		$scope.$on "layout:pdf:resize", (event, state) ->
 			$scope.reviewPanel.layoutToLeft = (state.east?.size < 220 || state.east?.initClosed)
 
+		$scope.$on "expandable-text-area:resize", (event) ->
+			$timeout () ->
+				$scope.$broadcast "review-panel:layout"
+
 		$scope.$watch "ui.pdfLayout", (layout) ->
 			$scope.reviewPanel.layoutToLeft = (layout == "flat")
 
@@ -306,6 +310,7 @@ define [
 			$http.post("/project/#{$scope.project_id}/thread/#{thread_id}/messages", {content, _csrf: window.csrfToken})
 				.error (error) ->
 					ide.showGenericMessageModal("Error submitting comment", "Sorry, there was a problem submitting your comment")
+			$scope.$broadcast "editor:clearSelection"
 			$timeout () ->
 				$scope.$broadcast "review-panel:layout"
 			event_tracking.sendMB "rp-new-comment", { size: content.length }

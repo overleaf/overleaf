@@ -5,12 +5,13 @@ define [
 		restrict: "A"
 		link: (scope, el) ->
 			resetHeight = () ->
-				el.css("height", "auto")
-				el.css("height", el.prop("scrollHeight"))
+				curHeight = el.outerHeight()
+				fitHeight = el.prop("scrollHeight")
+				
+				if fitHeight > curHeight and el.val() != ""
+					scope.$emit "expandable-text-area:resize"
+					el.css("height", fitHeight) 
 
 			scope.$watch (() -> el.val()), resetHeight
-
-			resetHeight()
-
 
 	
