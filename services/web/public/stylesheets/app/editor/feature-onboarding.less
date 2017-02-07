@@ -1,5 +1,5 @@
-@feat-onboard-wrapper-width: 820px;
-@feat-onboard-max-text-width: 750px;
+@feat-onboard-wrapper-width: 750px;
+@feat-onboard-max-text-width: 700px;
 
 .feat-onboard {
 	position: fixed;
@@ -10,56 +10,44 @@
 	display: flex;
  	justify-content: center;
  	align-items: center;
-	background-image: linear-gradient(rgba(0, 0, 0, .85), rgba(0, 0, 0, .85));
+	background-color: rgba(0, 0, 0, .85);
 	background-repeat: no-repeat;
 	background-position-x: 0;
 	color: #FFF;
 	text-align: center;
 	z-index: 102;
-	transition: background-position ease-in-out @left-menu-animation-duration;
 	overflow: auto;
 }
 
-.feat-onboard-step2 {
-	background-position-x: @left-menu-width;
-
-	~ #left-menu {
-		pointer-events: none;
-
-		.code-check-setting {
-			box-shadow: 0 0 300px 0 #000;
-		}
-	}
-}
 	.feat-onboard-wrapper {
 		width: @feat-onboard-wrapper-width;
 	}
 		.feat-onboard-title {
-			color: @brand-primary;
+			color: #FFF;
 			margin-bottom: 40px;
 
 		}
 			.feat-onboard-title-name {
-				color: #FFF;
 				font-weight: bold;
 			}
 
 		.feat-onboard-description {
 			max-width: @feat-onboard-max-text-width;
-			margin: 0 auto 30px;
+			margin: 0 auto 5px;
 			padding: 0 80px;
 		}
 			.feat-onboard-description-name {
 				font-weight: bold;
+				white-space: nowrap;
 			}
 
 	.feat-onboard-video {
+		margin-top: 30px;
 		box-shadow: 0 0 70px 0 rgba(255, 255, 255, 0.3);
 	}
 
 	.feat-onboard-adv-wrapper {
 		text-align: left;
-		margin-bottom: 30px;
 	}
 		.feat-onboard-adv-title {
 			color: #FFF;
@@ -70,6 +58,7 @@
 			}
 
 	.feat-onboard-btn-wrapper {
+		margin-top: 30px;
 		margin-bottom: 10px;
 
 		> .btn {

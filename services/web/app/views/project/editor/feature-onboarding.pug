@@ -1,54 +1,85 @@
 .feat-onboard(
 	ng-controller="FeatureOnboardingController"
-	ng-class="('feat-onboard-step' + innerStep)"
-	ng-if="!state.loading && ui.showCodeCheckerOnboarding"
+	ng-class="('feat-onboard-step' + onboarding.innerStep)"
 	ng-cloak
 )
 	.feat-onboard-wrapper
-		h1.feat-onboard-title
-			| Introducing&nbsp;
-			span.feat-onboard-title-name Code check
-		div(ng-if="innerStep === 1;")
+		div(ng-if="onboarding.innerStep === 1;")
+			h1.feat-onboard-title
+				span.feat-onboard-title-name Commenting
+				| &nbsp;&amp;&nbsp;
+				span.feat-onboard-title-name Track Changes
 			p.feat-onboard-description
-				span.feat-onboard-description-name Code check&nbsp;
-				| will highlight potential problems in your LaTeX code, allowing you to handle errors earlier and become more productive.
+				| Collaboration features are finally here!&nbsp;
+			p.feat-onboard-description
+				span.feat-onboard-description-name Commenting&nbsp;
+				| and&nbsp;
+				span.feat-onboard-description-name Track Changes&nbsp;
+				| will make it easier for you to work with peers in your documents. 
 			.row
 				video.feat-onboard-video(autoplay, loop)
-					source(src="/img/teasers/code-checker/code-checker.mp4", type="video/mp4")
-					img(src="/img/teasers/code-checker/code-checker.gif")
+					source(src="/img/onboarding/review-panel/open-review.mp4", type="video/mp4")
+					img(src="/img/onboarding/review-panel/open-review.gif")
 			.row.feat-onboard-adv-wrapper
-				.col-xs-4
+				.col-xs-6
 					h2.feat-onboard-adv-title 
-						| Missing&nbsp;
-						span.feat-onboard-adv-title-highlight brackets
-					p Forgot to place a closing bracket? We'll warn you.
-				.col-xs-4
+						span.feat-onboard-adv-title-highlight Commenting
+					p Want to discuss specific parts of the text?
+					p Use our brand-new commenting system.
+				.col-xs-6
 					h2.feat-onboard-adv-title 
-						| Unclosed&nbsp;
-						span.feat-onboard-adv-title-highlight environments
-					p 
-						| Know when you are missing an&nbsp;
-						code \end{...}
-						| &nbsp;command.
-				.col-xs-4
-					h2.feat-onboard-adv-title 
-						| Incorrect&nbsp;
-						span.feat-onboard-adv-title-highlight nesting
-					p 
-						| Order matters. Get notified when you use an&nbsp;
-						code \end{...}
-						| &nbsp; too soon.
+						span.feat-onboard-adv-title-highlight Track Changes
+					p See changes in your documents, live.
+					p Track, accept and reject changes individually.
 			.feat-onboard-btn-wrapper
-				button.btn.btn-primary(ng-click="turnCodeCheckOn();") Yes, turn Code check on
-			.feat-onboard-btn-wrapper
-				button.btn.btn-default(ng-click="turnCodeCheckOff();") No, disable it for now
-		div(ng-if="innerStep === 2;")
+				button.btn.btn-primary(ng-click="onboarding.innerStep = 2;") Next
+			//- .feat-onboard-btn-wrapper
+			//- 	button.btn.btn-default(ng-click="turnCodeCheckOff();") No, disable it for now
+		
+		div(ng-if="onboarding.innerStep === 2;")
+			h1.feat-onboard-title
+				span.feat-onboard-title-name Commenting
 			p.feat-onboard-description
-				| Remember: you can always turn&nbsp;
-				span.feat-onboard-description-name Code check&nbsp;
-				em on&nbsp;
-				| or&nbsp;
-				em off&nbsp;
-				|, in the settings menu.
+				span.feat-onboard-description-name Commenting&nbsp;
+				| is very easy.
+			p.feat-onboard-description Just select a span of text and click on&nbsp;
+				span.feat-onboard-description-name &ldquo;Add comment&rdquo;
+				| .
+			.row
+				video.feat-onboard-video(autoplay, loop)
+					source(src="/img/onboarding/review-panel/commenting.mp4", type="video/mp4")
+					img(src="/img/onboarding/review-panel/commenting.gif")
 			.feat-onboard-btn-wrapper
-				button.btn.btn-primary(ng-click="dismiss();") OK, got it
+				button.btn.btn-primary(ng-click="onboarding.innerStep = 3;") Next
+
+		div(ng-if="onboarding.innerStep === 3;")
+			h1.feat-onboard-title
+				span.feat-onboard-title-name Track Changes
+			p.feat-onboard-description
+				| Let your peers know what you've been up to.
+			p.feat-onboard-description
+				| Click on the 
+				span.feat-onboard-description-name &ldquo;Track Changes&rdquo;&nbsp;
+				| toggle to start marking your insertions, as well as your deletions.
+			.row
+				video.feat-onboard-video(autoplay, loop)
+					source(src="/img/onboarding/review-panel/add-changes.mp4", type="video/mp4")
+					img(src="/img/onboarding/review-panel/add-changes.gif")
+			.feat-onboard-btn-wrapper
+				button.btn.btn-primary(ng-click="onboarding.innerStep = 4;") Next
+
+		div(ng-if="onboarding.innerStep === 4;")
+			h1.feat-onboard-title
+				span.feat-onboard-title-name Track Changes
+			p.feat-onboard-description
+				| Click&nbsp;
+				span.feat-onboard-description-name &ldquo;Accept&rdquo;&nbsp;
+				| or&nbsp;
+				span.feat-onboard-description-name &ldquo;Reject&rdquo;&nbsp;
+				| to keep or discard an individual change.
+			.row
+				video.feat-onboard-video(autoplay, loop)
+					source(src="/img/onboarding/review-panel/accept-changes.mp4", type="video/mp4")
+					img(src="/img/onboarding/review-panel/accept-changes.gif")
+			.feat-onboard-btn-wrapper
+				button.btn.btn-primary(ng-click="onboarding.innerStep = 4;") Next
