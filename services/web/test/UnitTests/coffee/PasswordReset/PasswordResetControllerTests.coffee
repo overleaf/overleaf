@@ -145,18 +145,27 @@ describe "PasswordResetController", ->
 				done()
 			@PasswordResetController.setNewUserPassword @req, @res
 
-		it "should login user if login_after is set", (done) ->
-			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, { email: "joe@example.com" })
-			@PasswordResetHandler.setNewUserPassword.callsArgWith(2, null, true, @user_id = "user-id-123")
-			@req.body.login_after = "true"
-			@AuthenticationController.doLogin = (options, req, res, next)=>
-				@UserGetter.getUser.calledWith(@user_id).should.equal true
-				expect(options).to.deep.equal {
-					email: "joe@example.com",
-					password: @password
-				}
+		describe 'when login_after is set', ->
+
+			beforeEach ->
+				@UserGetter.getUser = sinon.stub().callsArgWith(2, null, { email: "joe@example.com" })
+				@PasswordResetHandler.setNewUserPassword.callsArgWith(2, null, true, @user_id = "user-id-123")
+				@req.body.login_after = "true"
+				@res.json = sinon.stub()
+				@AuthenticationController.afterLoginSessionSetup = sinon.stub().callsArgWith(2, null)
+				@AuthenticationController._getRedirectFromSession = sinon.stub().returns('/some/path')
+
+			it "should login user if login_after is set", (done) ->
+				@PasswordResetController.setNewUserPassword @req, @res
+				@AuthenticationController.afterLoginSessionSetup.callCount.should.equal 1
+				@AuthenticationController.afterLoginSessionSetup.calledWith(
+					@req,
+					{email: 'joe@example.com'}
+				).should.equal true
+				@AuthenticationController._getRedirectFromSession.callCount.should.equal 1
+				@res.json.callCount.should.equal 1
+				@res.json.calledWith({redir: '/some/path'}).should.equal true
 				done()
-			@PasswordResetController.setNewUserPassword @req, @res
 
 	describe "renderSetPasswordForm", ->
 
