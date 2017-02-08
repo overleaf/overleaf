@@ -20,7 +20,6 @@
 }
 
 	.feat-onboard-wrapper {
-		width: @feat-onboard-wrapper-width;
 	}
 		.feat-onboard-title {
 			color: #FFF;
@@ -36,26 +35,22 @@
 			margin: 0 auto 5px;
 			padding: 0 80px;
 		}
-			.feat-onboard-description-name {
-				font-weight: bold;
-				white-space: nowrap;
-			}
-
-	.feat-onboard-video {
-		margin-top: 30px;
-		box-shadow: 0 0 70px 0 rgba(255, 255, 255, 0.3);
+	
+	.feat-onboard-highlight {
+		font-weight: bold;
+		white-space: nowrap;
 	}
 
 	.feat-onboard-adv-wrapper {
 		text-align: left;
 	}
 		.feat-onboard-adv-title {
+			font-weight: bold;
+			white-space: nowrap;
 			color: #FFF;
 			font-size: 23px;
+			margin-top: 0;
 		}
-			.feat-onboard-adv-title-highlight {
-				font-weight: bold;
-			}
 
 	.feat-onboard-btn-wrapper {
 		margin-top: 30px;
@@ -65,3 +60,30 @@
 			box-shadow: 0 0 70px 0 rgba(255, 255, 255, 0.3);
 		}
 	}
+
+	.feat-onboard-tutorial-wrapper {
+		display: flex;
+		align-items: center;
+		padding: 30px 0;
+	}
+		.feat-onboard-video-container {
+			width: 618px;
+			margin: 0 30px;
+		}
+		.feat-onboard-video {
+			box-shadow: 0 0 70px 0 rgba(255, 255, 255, 0.3);
+		}
+
+		.feat-onboard-nav-btn {
+			border-radius: 1em;
+			width: 2em;
+			height: 2em;
+			text-align: center;
+			padding: 0;
+			font-size: 1.3em;
+			line-height: 1em;
+
+			&[disabled] {
+				opacity: 0.2;
+			}
+		}

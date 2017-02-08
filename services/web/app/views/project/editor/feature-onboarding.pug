@@ -1,85 +1,96 @@
 .feat-onboard(
 	ng-controller="FeatureOnboardingController"
 	ng-class="('feat-onboard-step' + onboarding.innerStep)"
+	ng-if="!state.loading && ui.showCollabFeaturesOnboarding"
 	ng-cloak
 )
 	.feat-onboard-wrapper
-		div(ng-if="onboarding.innerStep === 1;")
-			h1.feat-onboard-title
-				span.feat-onboard-title-name Commenting
-				| &nbsp;&amp;&nbsp;
-				span.feat-onboard-title-name Track Changes
-			p.feat-onboard-description
-				| Collaboration features are finally here!&nbsp;
-			p.feat-onboard-description
-				span.feat-onboard-description-name Commenting&nbsp;
-				| and&nbsp;
-				span.feat-onboard-description-name Track Changes&nbsp;
-				| will make it easier for you to work with peers in your documents. 
-			.row
-				video.feat-onboard-video(autoplay, loop)
-					source(src="/img/onboarding/review-panel/open-review.mp4", type="video/mp4")
-					img(src="/img/onboarding/review-panel/open-review.gif")
-			.row.feat-onboard-adv-wrapper
+		h1.feat-onboard-title
+			span.feat-onboard-title-name Commenting
+			| &nbsp;&amp;&nbsp;
+			span.feat-onboard-title-name Track Changes
+		p.feat-onboard-description
+			| Collaboration features are finally here!&nbsp;
+		p.feat-onboard-description
+			span.feat-onboard-highlight Commenting&nbsp;
+			| and&nbsp;
+			span.feat-onboard-highlight Track Changes&nbsp;
+			| will make it easier for you to work with peers in your documents. 
+
+		.feat-onboard-tutorial-wrapper
+			button.btn.btn-primary.feat-onboard-nav-btn(
+				ng-click="gotoPrevStep();"
+				ng-disabled="onboarding.innerStep === 1;")
+				i.fa.fa-arrow-left
+			.feat-onboard-video-container(ng-switch="onboarding.innerStep")
+				div(ng-switch-when="1")
+					video.feat-onboard-video(
+						autoplay
+						loop
+					)
+						source(src="/img/onboarding/review-panel/open-review.mp4", type="video/mp4")
+						img(src="/img/onboarding/review-panel/open-review.gif")
+				div(ng-switch-when="2")
+					video.feat-onboard-video(
+						autoplay
+						loop
+					)
+						source(src="/img/onboarding/review-panel/commenting.mp4", type="video/mp4")
+						img(src="/img/onboarding/review-panel/commenting.gif")
+				div(ng-switch-when="3")
+					video.feat-onboard-video(
+						autoplay
+						loop
+					)
+						source(src="/img/onboarding/review-panel/add-changes.mp4", type="video/mp4")
+						img(src="/img/onboarding/review-panel/add-changes.gif")
+				div(ng-switch-when="4")
+					video.feat-onboard-video(
+						autoplay
+						loop
+					)
+						source(src="/img/onboarding/review-panel/accept-changes.mp4", type="video/mp4")
+						img(src="/img/onboarding/review-panel/accept-changes.gif")
+			button.btn.btn-primary.feat-onboard-nav-btn(
+				ng-click="gotoNextStep();"
+				ng-disabled="onboarding.innerStep === onboarding.nSteps;")
+				i.fa.fa-arrow-right
+
+		div(ng-switch="onboarding.innerStep")
+			.row.feat-onboard-adv-wrapper(ng-switch-when="1")
 				.col-xs-6
-					h2.feat-onboard-adv-title 
-						span.feat-onboard-adv-title-highlight Commenting
+					h2.feat-onboard-adv-title Commenting
 					p Want to discuss specific parts of the text?
 					p Use our brand-new commenting system.
 				.col-xs-6
-					h2.feat-onboard-adv-title 
-						span.feat-onboard-adv-title-highlight Track Changes
+					h2.feat-onboard-adv-title Track Changes
 					p See changes in your documents, live.
 					p Track, accept and reject changes individually.
-			.feat-onboard-btn-wrapper
-				button.btn.btn-primary(ng-click="onboarding.innerStep = 2;") Next
-			//- .feat-onboard-btn-wrapper
-			//- 	button.btn.btn-default(ng-click="turnCodeCheckOff();") No, disable it for now
-		
-		div(ng-if="onboarding.innerStep === 2;")
-			h1.feat-onboard-title
-				span.feat-onboard-title-name Commenting
-			p.feat-onboard-description
-				span.feat-onboard-description-name Commenting&nbsp;
-				| is very easy.
-			p.feat-onboard-description Just select a span of text and click on&nbsp;
-				span.feat-onboard-description-name &ldquo;Add comment&rdquo;
-				| .
-			.row
-				video.feat-onboard-video(autoplay, loop)
-					source(src="/img/onboarding/review-panel/commenting.mp4", type="video/mp4")
-					img(src="/img/onboarding/review-panel/commenting.gif")
-			.feat-onboard-btn-wrapper
-				button.btn.btn-primary(ng-click="onboarding.innerStep = 3;") Next
+			.row.feat-onboard-adv-wrapper(ng-switch-when="2")
+				.col-xs-12
+					h2.feat-onboard-adv-title Commenting
+					p
+						span.feat-onboard-highlight Commenting&nbsp;
+						| is very easy.
+					p Just select a span of text and click on&nbsp;
+						span.feat-onboard-highlight &ldquo;Add comment&rdquo;
+						| .		
+			.row.feat-onboard-adv-wrapper(ng-switch-when="3")
+				.col-xs-12
+					h2.feat-onboard-adv-title Track Changes
+					p
+						| Let your peers know what you've been up to.
+					p
+						| Click on the 
+						span.feat-onboard-highlight &ldquo;Track Changes&rdquo;&nbsp;
+						| toggle to start marking your insertions, as well as your deletions.
 
-		div(ng-if="onboarding.innerStep === 3;")
-			h1.feat-onboard-title
-				span.feat-onboard-title-name Track Changes
-			p.feat-onboard-description
-				| Let your peers know what you've been up to.
-			p.feat-onboard-description
-				| Click on the 
-				span.feat-onboard-description-name &ldquo;Track Changes&rdquo;&nbsp;
-				| toggle to start marking your insertions, as well as your deletions.
-			.row
-				video.feat-onboard-video(autoplay, loop)
-					source(src="/img/onboarding/review-panel/add-changes.mp4", type="video/mp4")
-					img(src="/img/onboarding/review-panel/add-changes.gif")
-			.feat-onboard-btn-wrapper
-				button.btn.btn-primary(ng-click="onboarding.innerStep = 4;") Next
-
-		div(ng-if="onboarding.innerStep === 4;")
-			h1.feat-onboard-title
-				span.feat-onboard-title-name Track Changes
-			p.feat-onboard-description
-				| Click&nbsp;
-				span.feat-onboard-description-name &ldquo;Accept&rdquo;&nbsp;
-				| or&nbsp;
-				span.feat-onboard-description-name &ldquo;Reject&rdquo;&nbsp;
-				| to keep or discard an individual change.
-			.row
-				video.feat-onboard-video(autoplay, loop)
-					source(src="/img/onboarding/review-panel/accept-changes.mp4", type="video/mp4")
-					img(src="/img/onboarding/review-panel/accept-changes.gif")
-			.feat-onboard-btn-wrapper
-				button.btn.btn-primary(ng-click="onboarding.innerStep = 4;") Next
+			.row.feat-onboard-adv-wrapper(ng-switch-when="4") 
+				.col-xs-12
+					h2.feat-onboard-adv-title Track Changes
+					p
+						| Click&nbsp;
+						span.feat-onboard-highlight &ldquo;Accept&rdquo;&nbsp;
+						| or&nbsp;
+						span.feat-onboard-highlight &ldquo;Reject&rdquo;&nbsp;
+						| to keep or discard an individual change.
