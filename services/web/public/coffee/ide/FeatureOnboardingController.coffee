@@ -4,10 +4,18 @@ define [
 	App.controller "FeatureOnboardingController", ($scope, settings) ->
 		$scope.onboarding = 
 			innerStep: 1
+			nSteps: 4
 
 		$scope.dismiss = () ->
-			$scope.ui.leftMenuShown = false
-			$scope.ui.showCodeCheckerOnboarding = false
+			$scope.ui.showCollabFeaturesOnboarding = false
+
+		$scope.gotoPrevStep = () ->
+			if $scope.onboarding.innerStep > 1 
+				$scope.onboarding.innerStep--;
+
+		$scope.gotoNextStep = () ->
+			if $scope.onboarding.innerStep < 4
+				$scope.onboarding.innerStep++;
 
 		# handleKeypress = (e) ->
 		# 	if e.keyCode == 13
