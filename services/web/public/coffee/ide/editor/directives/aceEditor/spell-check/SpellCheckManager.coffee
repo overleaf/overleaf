@@ -23,6 +23,8 @@ define [
 
 			@editor.on "changeSession", (e) =>
 				@highlightedWordManager.reset()
+				if @inProgressRequest?
+					@inProgressRequest.abort()
 
 				if @$scope.spellCheckEnabled and @$scope.spellCheckLanguage and @$scope.spellCheckLanguage != ""
 					@runSpellCheckSoon(200)
@@ -185,7 +187,8 @@ define [
 			if not words.length
 				displayResult highlights
 			else
-				@apiRequest "/check", {language: language, words: words}, (error, result) =>
+				@inProgressRequest = @apiRequest "/check", {language: language, words: words}, (error, result) =>
+					delete @inProgressRequest
 					if error? or !result? or !result.misspellings?
 						return null
 					mispelled = []
@@ -242,4 +245,4 @@ define [
 					callback null, data
 				error: (xhr, status, error) ->
 					callback error
-			$.ajax options
+			return $.ajax options
