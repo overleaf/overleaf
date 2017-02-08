@@ -12,6 +12,9 @@ define [
 
 	class HighlightedWordManager
 		constructor: (@editor) ->
+			@reset()
+		
+		reset: () ->
 			@highlights = rows: []
 
 		addHighlight: (highlight) ->

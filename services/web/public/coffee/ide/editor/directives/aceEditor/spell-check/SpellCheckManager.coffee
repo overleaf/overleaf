@@ -22,6 +22,8 @@ define [
 				@closeContextMenu()
 
 			@editor.on "changeSession", (e) =>
+				@highlightedWordManager.reset()
+
 				if @$scope.spellCheckEnabled and @$scope.spellCheckLanguage and @$scope.spellCheckLanguage != ""
 					@runSpellCheckSoon(200)
 
