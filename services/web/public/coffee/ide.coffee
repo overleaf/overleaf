@@ -29,6 +29,7 @@ define [
 	"directives/stopPropagation"
 	"directives/rightClick"
 	"directives/expandableTextArea"
+	"directives/videoPlayState"
 	"services/queued-http"
 	"filters/formatDate"
 	"main/event"
