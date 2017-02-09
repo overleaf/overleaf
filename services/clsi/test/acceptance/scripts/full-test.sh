@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#! /usr/bin/env bash -x
 
 export SHARELATEX_CONFIG=`pwd`/test/acceptance/scripts/settings.test.coffee
 
