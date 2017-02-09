@@ -22,35 +22,38 @@
 				ng-click="gotoPrevStep();"
 				ng-disabled="onboarding.innerStep === 1;")
 				i.fa.fa-arrow-left
-			.feat-onboard-video-container(ng-switch="onboarding.innerStep")
-				div(ng-switch-when="1")
-					video.feat-onboard-video(
-						autoplay
-						loop
-					)
-						source(src="/img/onboarding/review-panel/open-review.mp4", type="video/mp4")
-						img(src="/img/onboarding/review-panel/open-review.gif")
-				div(ng-switch-when="2")
-					video.feat-onboard-video(
-						autoplay
-						loop
-					)
-						source(src="/img/onboarding/review-panel/commenting.mp4", type="video/mp4")
-						img(src="/img/onboarding/review-panel/commenting.gif")
-				div(ng-switch-when="3")
-					video.feat-onboard-video(
-						autoplay
-						loop
-					)
-						source(src="/img/onboarding/review-panel/add-changes.mp4", type="video/mp4")
-						img(src="/img/onboarding/review-panel/add-changes.gif")
-				div(ng-switch-when="4")
-					video.feat-onboard-video(
-						autoplay
-						loop
-					)
-						source(src="/img/onboarding/review-panel/accept-changes.mp4", type="video/mp4")
-						img(src="/img/onboarding/review-panel/accept-changes.gif")
+			div(ng-show="onboarding.innerStep === 1;")
+				video.feat-onboard-video(
+					video-play-state="onboarding.innerStep === 1;"
+					autoplay
+					loop
+				)
+					source(src="/img/onboarding/review-panel/open-review.mp4", type="video/mp4")
+					img(src="/img/onboarding/review-panel/open-review.gif")
+			div(ng-show="onboarding.innerStep === 2;")
+				video.feat-onboard-video(
+					video-play-state="onboarding.innerStep === 2;"
+					autoplay
+					loop
+				)
+					source(src="/img/onboarding/review-panel/commenting.mp4", type="video/mp4")
+					img(src="/img/onboarding/review-panel/commenting.gif")
+			div(ng-show="onboarding.innerStep === 3;")
+				video.feat-onboard-video(
+					video-play-state="onboarding.innerStep === 3;"
+					autoplay
+					loop
+				)
+					source(src="/img/onboarding/review-panel/add-changes.mp4", type="video/mp4")
+					img(src="/img/onboarding/review-panel/add-changes.gif")
+			div(ng-show="onboarding.innerStep === 4;")
+				video.feat-onboard-video(
+					video-play-state="onboarding.innerStep === 4;"
+					autoplay
+					loop
+				)
+					source(src="/img/onboarding/review-panel/accept-changes.mp4", type="video/mp4")
+					img(src="/img/onboarding/review-panel/accept-changes.gif")
 			button.btn.btn-primary.feat-onboard-nav-btn(
 				ng-click="gotoNextStep();"
 				ng-disabled="onboarding.innerStep === onboarding.nSteps;")
