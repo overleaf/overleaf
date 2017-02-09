@@ -1,6 +1,3 @@
-@feat-onboard-wrapper-width: 750px;
-@feat-onboard-max-text-width: 700px;
-
 .feat-onboard {
 	position: fixed;
 	top: 0;
@@ -9,7 +6,7 @@
 	left: 0;
 	display: flex;
  	justify-content: center;
- 	align-items: center;
+ 	align-items: baseline;
 	background-color: rgba(0, 0, 0, .85);
 	background-repeat: no-repeat;
 	background-position-x: 0;
@@ -18,53 +15,37 @@
 	z-index: 102;
 	overflow: auto;
 }
-
 	.feat-onboard-wrapper {
+		padding-top: 30px;
 	}
+
 		.feat-onboard-title {
 			color: #FFF;
-			margin-bottom: 40px;
-
+			margin-bottom: 30px;
 		}
-			.feat-onboard-title-name {
-				font-weight: bold;
-			}
 
 		.feat-onboard-description {
-			max-width: @feat-onboard-max-text-width;
+			max-width: 30em;
 			margin: 0 auto 5px;
-			padding: 0 80px;
 		}
-	
-	.feat-onboard-highlight {
-		font-weight: bold;
-		white-space: nowrap;
-	}
-
-	.feat-onboard-adv-wrapper {
-		text-align: left;
-	}
-		.feat-onboard-adv-title {
+		
+		.feat-onboard-highlight {
 			font-weight: bold;
 			white-space: nowrap;
-			color: #FFF;
-			font-size: 23px;
-			margin-top: 0;
 		}
 
-	.feat-onboard-btn-wrapper {
-		margin-top: 30px;
-		margin-bottom: 10px;
-
-		> .btn {
-			box-shadow: 0 0 70px 0 rgba(255, 255, 255, 0.3);
-		}
-	}
+			.feat-onboard-adv-title {
+				font-weight: bold;
+				white-space: nowrap;
+				color: #FFF;
+				font-size: 23px;
+				margin-top: 0;
+			}
 
 	.feat-onboard-tutorial-wrapper {
 		display: flex;
 		align-items: center;
-		padding: 30px 0;
+		padding: 30px 0 15px;
 	}
 		.feat-onboard-video {
 			width: 616px;
@@ -80,6 +61,7 @@
 			padding: 0;
 			font-size: 1.3em;
 			line-height: 1em;
+			box-shadow: 0 0 70px 0 rgba(255, 255, 255, 0.3);
 
 			&[disabled] {
 				opacity: 0.2;
