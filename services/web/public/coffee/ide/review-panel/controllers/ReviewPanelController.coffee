@@ -4,7 +4,7 @@ define [
 	"ide/colors/ColorManager"
 	"ide/review-panel/RangesTracker"
 ], (App, EventEmitter, ColorManager, RangesTracker) ->
-	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout, $http, event_tracking) ->
+	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout, $http, $modal, event_tracking) ->
 		$reviewPanelEl = $element.find "#review-panel"
 
 		$scope.SubViews =
@@ -29,9 +29,15 @@ define [
 
 		$scope.$on "layout:pdf:linked", (event, state) ->
 			$scope.reviewPanel.layoutToLeft = (state.east?.size < 220 || state.east?.initClosed)
+			$scope.$broadcast "review-panel:layout"
 
 		$scope.$on "layout:pdf:resize", (event, state) ->
 			$scope.reviewPanel.layoutToLeft = (state.east?.size < 220 || state.east?.initClosed)
+			$scope.$broadcast "review-panel:layout", false
+
+		$scope.$on "expandable-text-area:resize", (event) ->
+			$timeout () ->
+				$scope.$broadcast "review-panel:layout"
 
 		$scope.$watch "ui.pdfLayout", (layout) ->
 			$scope.reviewPanel.layoutToLeft = (layout == "flat")
@@ -142,13 +148,13 @@ define [
 			entries = $scope.reviewPanel.entries[$scope.editor.open_doc_id] or {}
 			Object.keys(entries).length
 		), (nEntries) ->
-			$scope.reviewPanel.hasEntries = nEntries > 0 and $scope.project.features.trackChanges
+			$scope.reviewPanel.hasEntries = nEntries > 0 and $scope.project.features.trackChangesVisible
 
 		$scope.$watch "ui.reviewPanelOpen", (reviewPanelOpen) ->
 			return if !reviewPanelOpen?
 			$timeout () ->
 				$scope.$broadcast "review-panel:toggle"
-				$scope.$broadcast "review-panel:layout"
+				$scope.$broadcast "review-panel:layout", false
 
 		regenerateTrackChangesId = (doc) ->
 			old_id = getChangeTracker(doc.doc_id).getIdSeed()
@@ -432,9 +438,12 @@ define [
 			ide.editorManager.openDocId(doc_id, { gotoOffset: entry.offset })
 		
 		$scope.toggleTrackChanges = (value) ->
-			$scope.editor.wantTrackChanges = value
-			$http.post "/project/#{$scope.project_id}/track_changes", {_csrf: window.csrfToken, on: value}
-			event_tracking.sendMB "rp-trackchanges-toggle", { value }
+			if $scope.project.features.trackChanges
+				$scope.editor.wantTrackChanges = value
+				$http.post "/project/#{$scope.project_id}/track_changes", {_csrf: window.csrfToken, on: value}
+				event_tracking.sendMB "rp-trackchanges-toggle", { value }
+			else
+				$scope.openTrackChangesUpgradeModal()
 		
 		ide.socket.on "toggle-track-changes", (value) ->
 			$scope.$apply () ->
@@ -522,4 +531,11 @@ define [
 				isSelf: isSelf
 				hue: ColorManager.getHueForUserId(id)
 				avatar_text: [user.first_name, user.last_name].filter((n) -> n?).map((n) -> n[0]).join ""
+			}
+
+		$scope.openTrackChangesUpgradeModal = () ->
+			$modal.open {
+				templateUrl: "trackChangesUpgradeModalTemplate"
+				controller: "TrackChangesUpgradeModalController"
+				scope: $scope.$new()
 			}

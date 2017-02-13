@@ -167,10 +167,22 @@ define [
 					if arg == "/"
 						ace.require("ace/ext/searchbox").Search(editor, true)
 
+				getCursorScreenPosition = () ->
+					session = editor.getSession()
+					cursorPosition = session.selection.getCursor()
+					sessionPos = session.documentToScreenPosition(cursorPosition.row, cursorPosition.column)
+					screenPos = editor.renderer.textToScreenCoordinates(sessionPos.row, sessionPos.column)
+					return sessionPos.row * editor.renderer.lineHeight - session.getScrollTop()
+
 				if attrs.resizeOn?
 					for event in attrs.resizeOn.split(",")
 						scope.$on event, () ->
+							previousScreenPosition = getCursorScreenPosition()
 							editor.resize()
+							# Put cursor back to same vertical position on screen
+							newScreenPosition = getCursorScreenPosition()
+							session = editor.getSession()
+							session.setScrollTop(session.getScrollTop() + newScreenPosition - previousScreenPosition)
 
 				scope.$watch "theme", (value) ->
 					editor.setTheme("ace/theme/#{value}")

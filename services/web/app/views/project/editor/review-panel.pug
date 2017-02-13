@@ -25,7 +25,13 @@
 				strong off
 			span(ng-click="toggleTrackChanges(false)", ng-if="editor.wantTrackChanges === true") Track Changes is 
 				strong on
-			review-panel-toggle(ng-if="editor.wantTrackChanges == editor.trackChanges", ng-model="editor.wantTrackChanges", on-toggle="toggleTrackChanges")
+			review-panel-toggle(
+				ng-if="editor.wantTrackChanges == editor.trackChanges"
+				ng-model="editor.wantTrackChanges"
+				on-toggle="toggleTrackChanges"
+				disabled="!project.features.trackChanges"
+				on-disabled-click="openTrackChangesUpgradeModal"
+			)
 		span.review-panel-toolbar-label.review-panel-toolbar-label-disabled(ng-if="!permissions.write")
 			span(ng-if="editor.wantTrackChanges === false") Track Changes is 
 				strong off
@@ -201,7 +207,7 @@ script(type='text/ng-template', id='commentEntryTemplate')
 							span.rp-entry-user(
 								style="color: hsl({{ comment.user.hue }}, 70%, 40%);",
 							) {{ comment.user.name }}:&nbsp;
-							| {{ comment.content }}
+							span(ng-bind-html="comment.content | linky:'_blank'")
 						textarea.rp-comment-input(
 							expandable-text-area
 							ng-if="comment.editing"
@@ -272,7 +278,7 @@ script(type='text/ng-template', id='resolvedCommentEntryTemplate')
 						style="color: hsl({{ comment.user.hue }}, 70%, 40%);"
 						ng-if="$first || comment.user.id !== thread.messages[$index - 1].user.id"
 					) {{ comment.user.name }}:&nbsp;
-					| {{ comment.content }}
+					span(ng-bind-html="comment.content | linky:'_blank'")
 				.rp-entry-metadata
 					| {{ comment.timestamp | date : 'MMM d, y h:mm a' }}
 			.rp-comment.rp-comment-resolver
@@ -372,3 +378,49 @@ script(type='text/ng-template', id='resolvedCommentsDropdownTemplate')
 				.rp-loading(ng-if="!resolvedComments.length")
 					| No resolved threads.
 			
+script(type="text/ng-template", id="trackChangesUpgradeModalTemplate")
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
+		h3 Upgrade to Track Changes
+	.modal-body
+		.teaser-video-container
+			video.teaser-video(autoplay, loop)
+				source(src="/img/teasers/track-changes/teaser-track-changes.mp4", type="video/mp4")
+				img(src="/img/teasers/track-changes/teaser-track-changes.gif")
+		
+		h4.teaser-title See changes in your documents, live
+	
+		p.small(ng-show="startedFreeTrial")
+			| #{translate("refresh_page_after_starting_free_trial")}
+
+		.row
+			.col-md-10.col-md-offset-1
+				ul.list-unstyled
+					li
+						i.fa.fa-check &nbsp;
+						| Track any change, in real-time
+					
+					li
+						i.fa.fa-check &nbsp;
+						| Review your peers' work
+
+					li
+						i.fa.fa-check &nbsp;
+						| Accept or reject each change individually
+					
+
+		.row.text-center(ng-controller="FreeTrialModalController")
+			a.btn.btn-success(
+				href
+				ng-click="startFreeTrial('track-changes')"
+			) Try it for free
+
+	.modal-footer()
+		button.btn.btn-default(
+			ng-click="cancel()"
+		)
+			span #{translate("close")}

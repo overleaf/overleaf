@@ -6,7 +6,11 @@ define [
 			link: (scope, element, attrs) ->
 				previous_focused_entry_index = 0
 				
-				layout = () ->
+				layout = (animate = true) ->
+					if animate
+						element.removeClass("no-animate")
+					else
+						element.addClass("no-animate")
 					sl_console.log "LAYOUT"
 					if scope.ui.reviewPanelOpen
 						PADDING = 8
@@ -101,9 +105,9 @@ define [
 				scope.$applyAsync () ->
 					layout()
 				
-				scope.$on "review-panel:layout", () ->
+				scope.$on "review-panel:layout", (e, animate = true) ->
 					scope.$applyAsync () ->
-						layout()
+						layout(animate)
 				
 				scope.$watch "reviewPanel.rendererData.lineHeight", () ->
 					layout()
