@@ -37,6 +37,7 @@ UserSchema = new Schema
 							compileGroup:  { type:String,  default: Settings.defaultFeatures.compileGroup }
 							templates:     { type:Boolean, default: Settings.defaultFeatures.templates }
 							references:    { type:Boolean, default: Settings.defaultFeatures.references }
+							trackChanges:  { type:Boolean, default: Settings.defaultFeatures.trackChanges }
 						}
 	featureSwitches	  : {
 		track_changes: { type: Boolean }
