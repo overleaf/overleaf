@@ -22,7 +22,7 @@ module.exports = ProjectEditorHandler =
 			
 		trackChangesVisible = false
 		for member in members
-			if member.privilegeLevel == "owner" and (member.user?.featureSwitches?.track_changes or member.user?.betaProgram)
+			if member.privilegeLevel == "owner" and member.user?.featureSwitches?.track_changes
 				trackChangesVisible = true
 
 		{owner, ownerFeatures, members} = @buildOwnerAndMembersViews(members)
