@@ -184,6 +184,9 @@
 	color: #FFF;
 	cursor: pointer;
 	transition: top 0.3s, left 0.1s, right 0.1s;
+	.no-animate & {
+		transition: none;
+	}
 	
 	&-focused {
 		left: 0px;
@@ -277,6 +280,9 @@
 	border-radius: 3px;
 	background-color: #FFF;
 	transition: top 0.3s, left 0.1s, right 0.1s;
+	.no-animate & {
+		transition: none;
+	}
 
 	&-insert {
 		border-color: @rp-green;

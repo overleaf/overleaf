@@ -33,7 +33,7 @@ define [
 
 		$scope.$on "layout:pdf:resize", (event, state) ->
 			$scope.reviewPanel.layoutToLeft = (state.east?.size < 220 || state.east?.initClosed)
-			$scope.$broadcast "review-panel:layout"
+			$scope.$broadcast "review-panel:layout", false
 
 		$scope.$on "expandable-text-area:resize", (event) ->
 			$timeout () ->
@@ -154,7 +154,7 @@ define [
 			return if !reviewPanelOpen?
 			$timeout () ->
 				$scope.$broadcast "review-panel:toggle"
-				$scope.$broadcast "review-panel:layout"
+				$scope.$broadcast "review-panel:layout", false
 
 		regenerateTrackChangesId = (doc) ->
 			old_id = getChangeTracker(doc.doc_id).getIdSeed()
