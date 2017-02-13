@@ -184,6 +184,9 @@
 	color: #FFF;
 	cursor: pointer;
 	transition: top 0.3s, left 0.1s, right 0.1s;
+	.no-animate & {
+		transition: none;
+	}
 	
 	&-focused {
 		left: 0px;
@@ -277,6 +280,9 @@
 	border-radius: 3px;
 	background-color: #FFF;
 	transition: top 0.3s, left 0.1s, right 0.1s;
+	.no-animate & {
+		transition: none;
+	}
 
 	&-insert {
 		border-color: @rp-green;
@@ -339,6 +345,7 @@
 			// We need to set any low-enough flex base size (0px), making it growable (1) and non-shrinkable (0).
 			// This is needed to ensure that IE makes the element fill the available space. 
 			flex: 1 0 1px; 
+			overflow-x: auto;
 
 			.rp-state-overview & {
 				margin-left: 0;
@@ -417,6 +424,7 @@
 		.rp-comment-content {
 			margin: 0;
 			color: @rp-type-darkgrey;
+			overflow-x: auto; // Long words, like links can overflow without this.
 		}
 	
 	.rp-comment-resolver {

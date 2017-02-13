@@ -201,7 +201,7 @@ script(type='text/ng-template', id='commentEntryTemplate')
 							span.rp-entry-user(
 								style="color: hsl({{ comment.user.hue }}, 70%, 40%);",
 							) {{ comment.user.name }}:&nbsp;
-							| {{ comment.content }}
+							span(ng-bind-html="comment.content | linky:'_blank'")
 						textarea.rp-comment-input(
 							expandable-text-area
 							ng-if="comment.editing"
@@ -272,7 +272,7 @@ script(type='text/ng-template', id='resolvedCommentEntryTemplate')
 						style="color: hsl({{ comment.user.hue }}, 70%, 40%);"
 						ng-if="$first || comment.user.id !== thread.messages[$index - 1].user.id"
 					) {{ comment.user.name }}:&nbsp;
-					| {{ comment.content }}
+					span(ng-bind-html="comment.content | linky:'_blank'")
 				.rp-entry-metadata
 					| {{ comment.timestamp | date : 'MMM d, y h:mm a' }}
 			.rp-comment.rp-comment-resolver
