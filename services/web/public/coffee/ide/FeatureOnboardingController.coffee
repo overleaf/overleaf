@@ -2,6 +2,8 @@ define [
 	"base"
 ], (App) ->
 	App.controller "FeatureOnboardingController", ($scope, settings) ->
+		# TODO Send event to Analytics API; handle keyboard input. 
+
 		$scope.onboarding = 
 			innerStep: 1
 			nSteps: 4

@@ -4,6 +4,10 @@
 	ng-if="!state.loading && ui.showCollabFeaturesOnboarding"
 	ng-cloak
 )
+	a.feat-onboard-dismiss(
+		href
+		ng-click="dismiss();"
+	) &times;
 	.feat-onboard-wrapper
 		h1.feat-onboard-title
 			span.feat-onboard-highlight Commenting
