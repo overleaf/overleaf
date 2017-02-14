@@ -18,11 +18,9 @@ block content
 											| #{translate("beta_program_badge_description")}
 											span.beta-feature-badge
 										p.text-centered
-											| #{translate("beta_program_current_beta_features_description")}
-											ul.list-unstyled.text-center
-												li 
-													i.fa.fa-fw.fa-book
-													| &nbsp;#{translate("syntax_checking")}
+											strong We're currently testing track changes and commenting:
+										p.text-centered
+											img(src="/img/teasers/track-changes/track-changes-beta.png", style="max-width: 100%; border-bottom: 1px solid #ddd")
 								.row.text-centered
 									.col-md-12
 										if user.betaProgram

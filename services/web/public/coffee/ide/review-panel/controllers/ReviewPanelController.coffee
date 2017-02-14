@@ -280,6 +280,7 @@ define [
 					entries["add-comment"] = {
 						type: "add-comment"
 						offset: selection_offset_start
+						length: selection_offset_end - selection_offset_start
 					}
 			
 			for id, entry of entries
@@ -310,10 +311,15 @@ define [
 				$scope.$broadcast "review-panel:layout"
 		
 		$scope.submitNewComment = (content) ->
+			return if !content? or content == ""
+			doc_id = $scope.editor.open_doc_id
+			entries = getDocEntries(doc_id)
+			return if !entries["add-comment"]?
+			{offset, length} = entries["add-comment"]
 			thread_id = RangesTracker.generateId()
 			thread = getThread(thread_id)
 			thread.submitting = true
-			$scope.$broadcast "comment:add", thread_id
+			$scope.$broadcast "comment:add", thread_id, offset, length
 			$http.post("/project/#{$scope.project_id}/thread/#{thread_id}/messages", {content, _csrf: window.csrfToken})
 				.error (error) ->
 					ide.showGenericMessageModal("Error submitting comment", "Sorry, there was a problem submitting your comment")
