@@ -84,7 +84,7 @@ app.use (error, req, res, next) ->
 	else if error instanceof Errors.OpRangeNotAvailableError
 		res.send 422 # Unprocessable Entity
 	else
-		logger.error err: error, "request errored"
+		logger.error err: error, req: req, "request errored"
 		res.send(500, "Oops, something went wrong")
 
 shutdownCleanly = (signal) ->
