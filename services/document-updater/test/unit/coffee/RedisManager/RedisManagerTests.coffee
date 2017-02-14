@@ -4,6 +4,7 @@ should = chai.should()
 modulePath = "../../../../app/js/RedisManager.js"
 SandboxedModule = require('sandboxed-module')
 Errors = require "../../../../app/js/Errors"
+crypto = require "crypto"
 
 describe "RedisManager", ->
 	beforeEach ->
@@ -19,6 +20,7 @@ describe "RedisManager", ->
 				docLines: ({doc_id}) -> "doclines:#{doc_id}"
 				docOps: ({doc_id}) -> "DocOps:#{doc_id}"
 				docVersion: ({doc_id}) -> "DocVersion:#{doc_id}"
+				docHash: ({doc_id}) -> "DocHash:#{doc_id}"
 				projectKey: ({doc_id}) -> "ProjectId:#{doc_id}"
 				pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
 				docsInProject: ({project_id}) -> "DocsIn:#{project_id}"
@@ -38,10 +40,11 @@ describe "RedisManager", ->
 			@lines = ["one", "two", "three"]
 			@jsonlines = JSON.stringify @lines
 			@version = 42
+			@hash = crypto.createHash('sha1').update(@jsonlines).digest('hex')
 			@ranges = { comments: "mock", entries: "mock" }
 			@json_ranges = JSON.stringify @ranges
 			@rclient.get = sinon.stub()
-			@rclient.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version, @project_id, @json_ranges])
+			@rclient.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version, @hash, @project_id, @json_ranges])
 
 		describe "successfully", ->
 			beforeEach ->

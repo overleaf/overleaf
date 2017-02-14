@@ -6,6 +6,7 @@ keys = require('./RedisKeyBuilder')
 logger = require('logger-sharelatex')
 metrics = require('./Metrics')
 Errors = require "./Errors"
+crypto = require "crypto"
 
 # Make times easy to read
 minutes = 60 # seconds for Redis expire
@@ -18,12 +19,15 @@ module.exports = RedisManager =
 		callback = (error) ->
 			timer.done()
 			_callback(error)
-		logger.log project_id:project_id, doc_id:doc_id, version: version, "putting doc in redis"
+		docLines = JSON.stringify(docLines)
+		docHash = RedisManager._computeHash(docLines)
+		logger.log project_id:project_id, doc_id:doc_id, version: version, hash:docHash, "putting doc in redis"
 		ranges = RedisManager._serializeRanges(ranges)
 		multi = rclient.multi()
-		multi.set keys.docLines(doc_id:doc_id), JSON.stringify(docLines)
+		multi.set keys.docLines(doc_id:doc_id), docLines
 		multi.set keys.projectKey({doc_id:doc_id}), project_id
 		multi.set keys.docVersion(doc_id:doc_id), version
+		multi.set keys.docHash(doc_id:doc_id), docHash
 		if ranges?
 			multi.set keys.ranges(doc_id:doc_id), ranges
 		else
@@ -46,6 +50,7 @@ module.exports = RedisManager =
 		multi.del keys.docLines(doc_id:doc_id)
 		multi.del keys.projectKey(doc_id:doc_id)
 		multi.del keys.docVersion(doc_id:doc_id)
+		multi.del keys.docHash(doc_id:doc_id)
 		multi.del keys.ranges(doc_id:doc_id)
 		multi.exec (error) ->
 			return callback(error) if error?
@@ -56,11 +61,17 @@ module.exports = RedisManager =
 		multi = rclient.multi()
 		multi.get keys.docLines(doc_id:doc_id)
 		multi.get keys.docVersion(doc_id:doc_id)
+		multi.get keys.docHash(doc_id:doc_id)
 		multi.get keys.projectKey(doc_id:doc_id)
 		multi.get keys.ranges(doc_id:doc_id)
-		multi.exec (error, [docLines, version, doc_project_id, ranges])->
+		multi.exec (error, [docLines, version, storedHash, doc_project_id, ranges])->
 			timer.done()
 			return callback(error) if error?
+			if docLines?
+				computedHash = RedisManager._computeHash(docLines)
+				if computedHash isnt storedHash
+					logger.error project_id: project_id, doc_id: doc_id, doc_project_id: doc_project_id, computedHash: computedHash, storedHash: storedHash, "hash mismatch on retrieved document"
+
 			try
 				docLines = JSON.parse docLines
 				ranges = RedisManager._deserializeRanges(ranges)
@@ -121,8 +132,11 @@ module.exports = RedisManager =
 				return callback(error)
 			jsonOps = appliedOps.map (op) -> JSON.stringify op
 			multi = rclient.multi()
-			multi.set    keys.docLines(doc_id:doc_id), JSON.stringify(docLines)
+			newDocLines = JSON.stringify(docLines)
+			newHash = RedisManager._computeHash(newDocLines)
+			multi.set    keys.docLines(doc_id:doc_id), newDocLines
 			multi.set    keys.docVersion(doc_id:doc_id), newVersion
+			multi.set    keys.docHash(doc_id:doc_id), newHash
 			if jsonOps.length > 0
 				multi.rpush  keys.docOps(doc_id: doc_id), jsonOps...
 			multi.expire keys.docOps(doc_id: doc_id), RedisManager.DOC_OPS_TTL
@@ -151,3 +165,7 @@ module.exports = RedisManager =
 			return {}
 		else
 			return JSON.parse(ranges)
+
+	_computeHash: (docLines) ->
+		# use sha1 checksum of doclines to detect data corruption
+		return crypto.createHash('sha1').update(docLines).digest('hex')
