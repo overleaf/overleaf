@@ -13,6 +13,8 @@ define [
 		$scope.dismiss = () ->
 			event_tracking.sendMB "shown-track-changes-onboarding"
 			$scope.$applyAsync(() -> $scope.showCollabFeaturesOnboarding = false)
+			$(document).off "keydown", handleKeydown
+			$(document).off "click", $scope.dismiss
 
 		$scope.gotoPrevStep = () ->
 			if $scope.onboarding.innerStep > 1 
