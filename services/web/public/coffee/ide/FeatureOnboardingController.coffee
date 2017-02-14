@@ -12,24 +12,23 @@ define [
 
 		$scope.dismiss = () ->
 			event_tracking.sendMB "shown-track-changes-onboarding"
-			$scope.showCollabFeaturesOnboarding = false
+			$scope.$applyAsync(() -> $scope.showCollabFeaturesOnboarding = false)
 
 		$scope.gotoPrevStep = () ->
 			if $scope.onboarding.innerStep > 1 
-				$scope.onboarding.innerStep--;
+				$scope.$applyAsync(() -> $scope.onboarding.innerStep--)
 
 		$scope.gotoNextStep = () ->
 			if $scope.onboarding.innerStep < 4
-				$scope.onboarding.innerStep++;
+				$scope.$applyAsync(() -> $scope.onboarding.innerStep++)
 
-		# handleKeypress = (e) ->
-		# 	if e.keyCode == 13
-		# 		if $scope.innerStep == 1
-		# 			$scope.turnCodeCheckOn()
-		# 		else
-		# 			$scope.dismiss()
+		handleKeydown = (e) ->
+			switch e.keyCode
+				when 37 then $scope.gotoPrevStep()		# left directional key
+				when 39, 13 then $scope.gotoNextStep()	# right directional key, enter
+				when 27 then $scope.dismiss()			# escape
 
-		# $(document).on "keypress", handleKeypress
+		$(document).on "keydown", handleKeydown
 
-		# $scope.$on "$destroy", () -> 
-		# 	$(document).off "keypress", handleKeypress
+		$scope.$on "$destroy", () -> 
+			$(document).off "keydown", handleKeydown
