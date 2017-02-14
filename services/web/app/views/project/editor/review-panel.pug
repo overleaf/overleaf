@@ -332,6 +332,7 @@ script(type='text/ng-template', id='addCommentEntryTemplate')
 						ng-keypress="handleCommentKeyPress($event);"
 						placeholder="Add your comment here"
 						focus-on="comment:new:open"
+						ng-blur="submitNewComment()"
 					)
 				.rp-entry-actions
 					button.rp-entry-button(

@@ -20,8 +20,8 @@ define [
 				@rangesTracker = doc.ranges
 				@connectToRangesTracker()
 			
-			@$scope.$on "comment:add", (e, thread_id) =>
-				@addCommentToSelection(thread_id)
+			@$scope.$on "comment:add", (e, thread_id, offset, length) =>
+				@addCommentToSelection(thread_id, offset, length)
 
 			@$scope.$on "comment:select_line", (e) =>
 				@selectLineIfNoSelection()
@@ -45,7 +45,7 @@ define [
 				@recalculateReviewEntriesScreenPositions()
 
 			changingSelection = false
-			onChangeSelection = (args...) =>
+			onChangeSelection = () =>
 				# Deletes can send about 5 changeSelection events, so
 				# just act on the last one.
 				if !changingSelection
@@ -53,7 +53,6 @@ define [
 					@$scope.$evalAsync () =>
 						changingSelection = false
 						@updateFocus()
-						@recalculateReviewEntriesScreenPositions()
 			
 			onResize = () =>
 				@recalculateReviewEntriesScreenPositions()
@@ -64,11 +63,13 @@ define [
 
 			bindToAce = () =>
 				@editor.on "changeSelection", onChangeSelection
+				@editor.on "change", onChangeSelection # Selection also moves with updates elsewhere in the document
 				@editor.on "changeSession", onChangeSession
 				@editor.renderer.on "resize", onResize
 
 			unbindFromAce = () =>
 				@editor.off "changeSelection", onChangeSelection
+				@editor.off "change", onChangeSelection
 				@editor.off "changeSession", onChangeSession
 				@editor.renderer.off "resize", onResize
 
@@ -174,10 +175,11 @@ define [
 			# @rangesTracker.applyOp op # Will apply via sharejs
 			@$scope.sharejsDoc.submitOp op
 		
-		addCommentToSelection: (thread_id) ->
-			range = @editor.getSelectionRange()
-			content = @editor.getSelectedText()
-			offset = @_aceRangeToShareJs(range.start)
+		addCommentToSelection: (thread_id, offset, length) ->
+			start = @_shareJsOffsetToAcePosition(offset)
+			end = @_shareJsOffsetToAcePosition(offset + length)
+			range = new Range(start.row, start.column, end.row, end.column)
+			content = @editor.session.getTextRange(range)
 			@addComment(offset, content, thread_id)
 		
 		selectLineIfNoSelection: () ->
