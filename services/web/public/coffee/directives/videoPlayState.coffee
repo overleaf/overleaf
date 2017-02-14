@@ -6,7 +6,6 @@ define [
 			restrict: "A",
 			link: (scope, element, attrs) ->
 				videoDOMEl = element[0]
-				console.dir videoDOMEl
 				scope.$watch (() -> $parse(attrs.videoPlayState)(scope)), (shouldPlay) ->
 					if shouldPlay
 						videoDOMEl.currentTime = 0
