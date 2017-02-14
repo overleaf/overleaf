@@ -1,78 +1,101 @@
-@feat-onboard-wrapper-width: 820px;
-@feat-onboard-max-text-width: 750px;
+@feat-onboard-width: 900px;
 
 .feat-onboard {
 	position: fixed;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	left: 0;
+	top: 50px;
+	bottom: 50px;
+	left: 50%;
+	width: @feat-onboard-width;
+	margin-left: -(@feat-onboard-width / 2);
 	display: flex;
  	justify-content: center;
- 	align-items: center;
-	background-image: linear-gradient(rgba(0, 0, 0, .85), rgba(0, 0, 0, .85));
+ 	align-items: baseline;
+	background-color: rgba(0, 0, 0, .85);
 	background-repeat: no-repeat;
 	background-position-x: 0;
 	color: #FFF;
 	text-align: center;
+	border-radius: 1em;
 	z-index: 102;
-	transition: background-position ease-in-out @left-menu-animation-duration;
 	overflow: auto;
 }
-
-.feat-onboard-step2 {
-	background-position-x: @left-menu-width;
-
-	~ #left-menu {
-		pointer-events: none;
-
-		.code-check-setting {
-			box-shadow: 0 0 300px 0 #000;
-		}
-	}
-}
 	.feat-onboard-wrapper {
-		width: @feat-onboard-wrapper-width;
+		padding: 30px 0;
 	}
-		.feat-onboard-title {
-			color: @brand-primary;
-			margin-bottom: 40px;
 
+		.feat-onboard-title {
+			color: #FFF;
+			margin-bottom: 30px;
 		}
-			.feat-onboard-title-name {
-				color: #FFF;
-				font-weight: bold;
-			}
 
 		.feat-onboard-description {
-			max-width: @feat-onboard-max-text-width;
-			margin: 0 auto 30px;
-			padding: 0 80px;
+			max-width: 35em;
+			margin: 0 auto 5px;
 		}
-			.feat-onboard-description-name {
+		
+		.feat-onboard-highlight {
+			font-weight: bold;
+			white-space: nowrap;
+		}
+
+			.feat-onboard-adv-title {
 				font-weight: bold;
+				white-space: nowrap;
+				color: #FFF;
+				font-size: 23px;
+				margin-top: 0;
 			}
 
-	.feat-onboard-video {
-		box-shadow: 0 0 70px 0 rgba(255, 255, 255, 0.3);
+	.feat-onboard-tutorial-wrapper {
+		display: flex;
+		align-items: center;
+		padding: 30px 0 15px;
 	}
-
-	.feat-onboard-adv-wrapper {
-		text-align: left;
-		margin-bottom: 30px;
-	}
-		.feat-onboard-adv-title {
-			color: #FFF;
-			font-size: 23px;
-		}
-			.feat-onboard-adv-title-highlight {
-				font-weight: bold;
-			}
-
-	.feat-onboard-btn-wrapper {
-		margin-bottom: 10px;
-
-		> .btn {
+		.feat-onboard-video {
+			width: 616px;
+			margin: 0 30px;
 			box-shadow: 0 0 70px 0 rgba(255, 255, 255, 0.3);
 		}
+
+		.feat-onboard-nav-btn {
+			border-radius: 1em;
+			width: 2em;
+			height: 2em;
+			text-align: center;
+			padding: 0;
+			font-size: 1.3em;
+			line-height: 1em;
+			box-shadow: 0 0 70px 0 rgba(255, 255, 255, 0.3);
+
+			&[disabled] {
+				opacity: 0.2;
+			}
+
+			&:focus,
+			&:active:focus {
+				outline: 0;
+				box-shadow: 0 0 70px 0 rgba(255, 255, 255, 0.3);
+			}
+		}
+
+a.feat-onboard-dismiss {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	width: 1em;
+	height: 1em;
+	line-height: 1em;
+	font-size: 2.5em;
+	color: #FFF;
+	background-color: rgba(0,0,0, .25);
+	opacity: 0.7;
+	border-radius: 0.5em;
+	transition: opacity .15s ease-in-out;
+	
+	&:hover,
+	&:focus {
+		text-decoration: none;
+		color: #FFF;
+		opacity: 1;
 	}
+}

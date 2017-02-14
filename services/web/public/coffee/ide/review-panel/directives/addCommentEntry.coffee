@@ -28,7 +28,6 @@ define [
 				if ev.keyCode == 13 and !ev.shiftKey and !ev.ctrlKey and !ev.metaKey
 					ev.preventDefault()
 					if scope.state.content.length > 0 
-						ev.target.blur()
 						scope.submitNewComment()
 
 			scope.submitNewComment = () ->

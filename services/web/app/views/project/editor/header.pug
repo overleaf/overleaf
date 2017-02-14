@@ -92,7 +92,9 @@ header.toolbar.toolbar-header.toolbar-with-labels(
 			ng-click="toggleReviewPanel()"
 		)
 			i.review-icon
-			p.toolbar-label Review
+			p.toolbar-label
+				| Review
+				span(style="vertical-align: 20%; margin-left: 4px; padding: 2px 4px;").beta-feature-badge
 		a.btn.btn-full-height(
 			href,
 			ng-if="permissions.admin",

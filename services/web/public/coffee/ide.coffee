@@ -29,6 +29,7 @@ define [
 	"directives/stopPropagation"
 	"directives/rightClick"
 	"directives/expandableTextArea"
+	"directives/videoPlayState"
 	"services/queued-http"
 	"filters/formatDate"
 	"main/event"
@@ -69,7 +70,6 @@ define [
 			chatOpen: false
 			pdfLayout: 'sideBySide'
 			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}")
-			showCodeCheckerOnboarding: !window.userSettings.syntaxValidation?
 		}
 		$scope.user = window.user
 

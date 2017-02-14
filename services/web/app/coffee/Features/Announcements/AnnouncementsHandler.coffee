@@ -19,6 +19,9 @@ module.exports = AnnouncementsHandler =
 		if !user? and !user._id?
 			return callback("user not supplied")
 
+		timestamp = user._id.toString().substring(0,8)
+		userSignupDate = new Date( parseInt( timestamp, 16 ) * 1000 )
+
 		async.parallel {
 			lastEvent: (cb)->
 				AnalyticsManager.getLastOccurance user._id, "announcement-alert-dismissed", cb
@@ -48,7 +51,9 @@ module.exports = AnnouncementsHandler =
 				announcement.id == lastSeenBlogId
 
 			announcements = _.map announcements, (announcement, index)->
-				if announcementIndex == -1
+				if announcement.date < userSignupDate
+					read = true
+				else if announcementIndex == -1
 					read = false
 				else if index >= announcementIndex
 					read = true
