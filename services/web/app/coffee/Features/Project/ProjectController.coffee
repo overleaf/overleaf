@@ -10,7 +10,7 @@ TagsHandler = require("../Tags/TagsHandler")
 SubscriptionLocator = require("../Subscription/SubscriptionLocator")
 NotificationsHandler = require("../Notifications/NotificationsHandler")
 LimitationsManager = require("../Subscription/LimitationsManager")
-_ = require("underscore")
+underscore = require("underscore")
 Settings = require("settings-sharelatex")
 AuthorizationManager = require("../Authorization/AuthorizationManager")
 fs = require "fs"
@@ -221,7 +221,7 @@ module.exports = ProjectController =
 				ProjectUpdateHandler.markAsOpened project_id, ->
 				cb()
 			showTrackChangesOnboarding: (cb) ->
-				cb = _.once(cb)
+				cb = underscore.once(cb)
 				if !user_id?
 					return cb()
 				timeout = setTimeout cb, 500
