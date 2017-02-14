@@ -41,6 +41,11 @@ define [
 
 		$scope.$watch "ui.pdfLayout", (layout) ->
 			$scope.reviewPanel.layoutToLeft = (layout == "flat")
+		
+		$scope.$watch "project.features.trackChangesVisible", (visible) ->
+			return if !visible?
+			if !visible
+				$scope.ui.reviewPanelOpen = false
 
 		$scope.commentState =
 			adding: false
