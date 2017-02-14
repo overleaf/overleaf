@@ -7,6 +7,7 @@ ThreadManager = require "../Threads/ThreadManager"
 
 module.exports = MessageHttpController =
 	DEFAULT_MESSAGE_LIMIT: 50
+	MAX_MESSAGE_LENGTH: 10 * 1024 # 10kb, about 1,500 words
 	
 	getGlobalMessages: (req, res, next) ->
 		MessageHttpController._getMessages(ThreadManager.GLOBAL_THREAD, req, res, next)
@@ -76,6 +77,10 @@ module.exports = MessageHttpController =
 		{project_id} = req.params
 		if !ObjectId.isValid(user_id)
 			return res.send(400, "Invalid user_id")
+		if !content?
+			return res.send(400, "No content provided")
+		if content.length > @MAX_MESSAGE_LENGTH
+			return res.send(400, "Content too long (> #{@MAX_MESSAGE_LENGTH} bytes)")
 		logger.log {client_thread_id, project_id, user_id, content}, "new message received"
 		ThreadManager.findOrCreateThread project_id, client_thread_id, (error, thread) ->
 			return next(error) if error?

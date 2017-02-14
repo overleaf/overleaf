@@ -67,3 +67,18 @@ describe "Sending a message", ->
 				expect(response.statusCode).to.equal 400
 				expect(body).to.equal "Invalid thread_id"
 				done()
+	
+	describe "with no content", ->
+		it "should return a graceful error", (done) ->
+			ChatClient.sendMessage @project_id, @thread_id, @user_id, null, (error, response, body) =>
+				expect(response.statusCode).to.equal 400
+				expect(body).to.equal "No content provided"
+				done()
+	
+	describe "with very long content", ->
+		it "should return a graceful error", (done) ->
+			content = new Buffer(10240).toString("hex")
+			ChatClient.sendMessage @project_id, @thread_id, @user_id, content, (error, response, body) =>
+				expect(response.statusCode).to.equal 400
+				expect(body).to.equal "Content too long (> 10240 bytes)"
+				done()
