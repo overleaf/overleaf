@@ -58,6 +58,8 @@ describe "ProjectController", ->
 			getLoggedInUserId: sinon.stub().returns(@user._id)
 			getSessionUser: sinon.stub().returns(@user)
 			isUserLoggedIn: sinon.stub().returns(true)
+		@AnalyticsManager =
+			getLastOccurance: sinon.stub()
 		@ProjectController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex":
@@ -82,6 +84,7 @@ describe "ProjectController", ->
 			"../ReferencesSearch/ReferencesSearchHandler": @ReferencesSearchHandler
 			"./ProjectGetter": @ProjectGetter
 			'../Authentication/AuthenticationController': @AuthenticationController
+			"../Analytics/AnalyticsManager": @AnalyticsManager
 
 		@projectName = "£12321jkj9ujkljds"
 		@req =
@@ -310,8 +313,8 @@ describe "ProjectController", ->
 			@AuthorizationManager.getPrivilegeLevelForProject.callsArgWith 2, null, "owner"
 			@ProjectDeleter.unmarkAsDeletedByExternalSource = sinon.stub()
 			@InactiveProjectManager.reactivateProjectIfRequired.callsArgWith(1)
+			@AnalyticsManager.getLastOccurance.yields(null, {"mock": "event"})
 			@ProjectUpdateHandler.markAsOpened.callsArgWith(1)
-
 
 		it "should render the project/editor page", (done)->
 			@res.render = (pageName, opts)=>
@@ -355,5 +358,26 @@ describe "ProjectController", ->
 		it "should mark project as opened", (done)->
 			@res.render = (pageName, opts)=>
 				@ProjectUpdateHandler.markAsOpened.calledWith(@project_id).should.equal true
+				done()
+			@ProjectController.loadEditor @req, @res
+		
+		it "should set showTrackChangesOnboarding = false if there is an event", (done) ->
+			@AnalyticsManager.getLastOccurance.yields(null, {"mock": "event"})
+			@res.render = (pageName, opts)=>
+				opts.showTrackChangesOnboarding.should.equal false
+				done()
+			@ProjectController.loadEditor @req, @res
+		
+		it "should set showTrackChangesOnboarding = true if there is no event", (done) ->
+			@AnalyticsManager.getLastOccurance.yields(null, null)
+			@res.render = (pageName, opts)=>
+				opts.showTrackChangesOnboarding.should.equal true
+				done()
+			@ProjectController.loadEditor @req, @res
+		
+		it "should set showTrackChangesOnboarding = false if there is an error", (done) ->
+			@AnalyticsManager.getLastOccurance.yields(new Error("oops"), null)
+			@res.render = (pageName, opts)=>
+				opts.showTrackChangesOnboarding.should.equal false
 				done()
 			@ProjectController.loadEditor @req, @res

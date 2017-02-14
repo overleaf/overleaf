@@ -1,35 +1,36 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "FeatureOnboardingController", ($scope, settings) ->
-		$scope.innerStep = 1
-
-		$scope.turnCodeCheckOn = () ->
-			settings.saveSettings({ syntaxValidation: true })
-			$scope.settings.syntaxValidation = true
-			navToInnerStep2()
-			
-		$scope.turnCodeCheckOff = () ->
-			settings.saveSettings({ syntaxValidation: false })
-			$scope.settings.syntaxValidation = false
-			navToInnerStep2()
+	App.controller "FeatureOnboardingController", ($scope, settings, event_tracking) ->
+		$scope.onboarding = 
+			innerStep: 1
+			nSteps: 4
+		
+		$scope.$watch "project.features.trackChangesVisible", (visible) ->
+			return if !visible?
+			$scope.showCollabFeaturesOnboarding = window.showTrackChangesOnboarding and visible
 
 		$scope.dismiss = () ->
-			$scope.ui.leftMenuShown = false
-			$scope.ui.showCodeCheckerOnboarding = false
+			event_tracking.sendMB "shown-track-changes-onboarding"
+			$scope.$applyAsync(() -> $scope.showCollabFeaturesOnboarding = false)
 
-		navToInnerStep2 = () ->
-			$scope.innerStep = 2
-			$scope.ui.leftMenuShown = true
+		$scope.gotoPrevStep = () ->
+			if $scope.onboarding.innerStep > 1 
+				$scope.$applyAsync(() -> $scope.onboarding.innerStep--)
 
-		handleKeypress = (e) ->
-			if e.keyCode == 13
-				if $scope.innerStep == 1
-					$scope.turnCodeCheckOn()
-				else
-					$scope.dismiss()
+		$scope.gotoNextStep = () ->
+			if $scope.onboarding.innerStep < 4
+				$scope.$applyAsync(() -> $scope.onboarding.innerStep++)
 
-		$(document).on "keypress", handleKeypress
+		handleKeydown = (e) ->
+			switch e.keyCode
+				when 37 then $scope.gotoPrevStep()     # left directional key
+				when 39, 13 then $scope.gotoNextStep() # right directional key, enter
+				when 27 then $scope.dismiss()          # escape
+
+		$(document).on "keydown", handleKeydown
+		$(document).on "click", $scope.dismiss
 
 		$scope.$on "$destroy", () -> 
-			$(document).off "keypress", handleKeypress
+			$(document).off "keydown", handleKeydown
+			$(document).off "click", $scope.dismiss
