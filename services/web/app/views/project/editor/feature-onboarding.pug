@@ -3,6 +3,7 @@ div(ng-controller="FeatureOnboardingController")
 		ng-class="('feat-onboard-step' + onboarding.innerStep)"
 		ng-if="!state.loading && showCollabFeaturesOnboarding"
 		ng-cloak
+		stop-propagation="click"
 	)
 		a.feat-onboard-dismiss(
 			href

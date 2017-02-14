@@ -24,11 +24,13 @@ define [
 
 		handleKeydown = (e) ->
 			switch e.keyCode
-				when 37 then $scope.gotoPrevStep()		# left directional key
-				when 39, 13 then $scope.gotoNextStep()	# right directional key, enter
-				when 27 then $scope.dismiss()			# escape
+				when 37 then $scope.gotoPrevStep()     # left directional key
+				when 39, 13 then $scope.gotoNextStep() # right directional key, enter
+				when 27 then $scope.dismiss()          # escape
 
 		$(document).on "keydown", handleKeydown
+		$(document).on "click", $scope.dismiss
 
 		$scope.$on "$destroy", () -> 
 			$(document).off "keydown", handleKeydown
+			$(document).off "click", $scope.dismiss
