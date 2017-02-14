@@ -70,7 +70,7 @@ define [
 			chatOpen: false
 			pdfLayout: 'sideBySide'
 			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}")
-			showCollabFeaturesOnboarding: true #!window.userSettings.syntaxValidation?
+			showCollabFeaturesOnboarding: window.showTrackChangesOnboarding
 		}
 		$scope.user = window.user
 

@@ -20,6 +20,7 @@ ProjectGetter = require("./ProjectGetter")
 PrivilegeLevels = require("../Authorization/PrivilegeLevels")
 AuthenticationController = require("../Authentication/AuthenticationController")
 PackageVersions = require("../../infrastructure/PackageVersions")
+AnalyticsManager = require "../Analytics/AnalyticsManager"
 
 module.exports = ProjectController =
 
@@ -219,6 +220,19 @@ module.exports = ProjectController =
 				#don't need to wait for this to complete
 				ProjectUpdateHandler.markAsOpened project_id, ->
 				cb()
+			showTrackChangesOnboarding: (cb) ->
+				cb = _.once(cb)
+				if !user_id?
+					return cb()
+				timeout = setTimeout cb, 500
+				AnalyticsManager.getLastOccurance user_id, "shown-track-changes-onboarding", (error, event) ->
+					clearTimeout timeout
+					if error?
+						return cb(null, false)
+					else if event?
+						return cb(null, false)
+					else
+						return cb(null, true)
 		}, (err, results)->
 			if err?
 				logger.err err:err, "error getting details for project page"
@@ -226,7 +240,7 @@ module.exports = ProjectController =
 			project = results.project
 			user = results.user
 			subscription = results.subscription
-
+			showTrackChangesOnboarding = results.showTrackChangesOnboarding
 
 			daysSinceLastUpdated =  (new Date() - project.lastUpdated) /86400000
 			logger.log project_id:project_id, daysSinceLastUpdated:daysSinceLastUpdated, "got db results for loading editor"
@@ -268,6 +282,7 @@ module.exports = ProjectController =
 						syntaxValidation: user.ace.syntaxValidation
 					}
 					trackChangesEnabled: !!project.track_changes
+					showTrackChangesOnboarding: !!showTrackChangesOnboarding
 					privilegeLevel: privilegeLevel
 					chatUrl: Settings.apis.chat.url
 					anonymous: anonymous

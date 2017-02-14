@@ -1,14 +1,13 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "FeatureOnboardingController", ($scope, settings) ->
-		# TODO Send event to Analytics API; handle keyboard input. 
-
+	App.controller "FeatureOnboardingController", ($scope, settings, event_tracking) ->
 		$scope.onboarding = 
 			innerStep: 1
 			nSteps: 4
 
 		$scope.dismiss = () ->
+			event_tracking.sendMB "shown-track-changes-onboarding"
 			$scope.ui.showCollabFeaturesOnboarding = false
 
 		$scope.gotoPrevStep = () ->
