@@ -3,6 +3,9 @@ http = require("http")
 Settings = require('settings-sharelatex')
 logger = require('logger-sharelatex')
 logger.initialize("documentupdater")
+if Settings.sentry?.dsn?
+	logger.initializeErrorReporting(Settings.sentry.dsn)
+
 RedisManager = require('./app/js/RedisManager')
 DispatchManager = require('./app/js/DispatchManager')
 Keys = require('./app/js/RedisKeyBuilder')
