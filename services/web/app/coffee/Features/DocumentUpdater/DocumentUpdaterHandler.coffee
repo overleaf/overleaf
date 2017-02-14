@@ -95,7 +95,7 @@ module.exports = DocumentUpdaterHandler =
 				logger.error err: error, project_id: project_id, doc_id: doc_id, "document updater returned failure status code: #{res.statusCode}"
 				return callback(error)
 
-	getDocument: (project_id, doc_id, fromVersion, callback = (error, exists, doclines, version) ->) ->
+	getDocument: (project_id, doc_id, fromVersion, callback = (error, doclines, version, ranges, ops) ->) ->
 		timer = new metrics.Timer("get-document")
 		url = "#{settings.apis.documentupdater.url}/project/#{project_id}/doc/#{doc_id}?fromVersion=#{fromVersion}"
 		logger.log project_id:project_id, doc_id: doc_id, "getting doc from document updater"
@@ -110,7 +110,7 @@ module.exports = DocumentUpdaterHandler =
 					body = JSON.parse(body)
 				catch error
 					return callback(error)
-				callback null, body.lines, body.version, body.ops
+				callback null, body.lines, body.version, body.ranges, body.ops
 			else
 				logger.error project_id:project_id, doc_id:doc_id, url: url, "doc updater returned a non-success status code: #{res.statusCode}"
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
@@ -137,15 +137,37 @@ module.exports = DocumentUpdaterHandler =
 				logger.error project_id:project_id, doc_id:doc_id, url: url, "doc updater returned a non-success status code: #{res.statusCode}"
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
-	getNumberOfDocsInMemory : (callback)->
-		request.get "#{settings.apis.documentupdater.url}/total", (err, req, body)->
-			try
-				body = JSON.parse body
-			catch err
-				logger.err err:err, "error parsing response from doc updater about the total number of docs"
-			callback(err, body?.total)
+	acceptChange: (project_id, doc_id, change_id, callback = (error) ->) ->
+		timer = new metrics.Timer("accept-change")
+		url = "#{settings.apis.documentupdater.url}/project/#{project_id}/doc/#{doc_id}/change/#{change_id}/accept"
+		logger.log {project_id, doc_id, change_id}, "accepting change in document updater"
+		request.post url, (error, res, body)->
+			timer.done()
+			if error?
+				logger.error {err:error, project_id, doc_id, change_id}, "error accepting change in doc updater"
+				return callback(error)
+			if res.statusCode >= 200 and res.statusCode < 300
+				logger.log {project_id, doc_id, change_id}, "accepted change in document updater"
+				return callback(null)
+			else
+				logger.error {project_id, doc_id, change_id}, "doc updater returned a non-success status code: #{res.statusCode}"
+				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
-
+	deleteThread: (project_id, doc_id, thread_id, callback = (error) ->) ->
+		timer = new metrics.Timer("delete-thread")
+		url = "#{settings.apis.documentupdater.url}/project/#{project_id}/doc/#{doc_id}/comment/#{thread_id}"
+		logger.log {project_id, doc_id, thread_id}, "deleting comment range in document updater"
+		request.del url, (error, res, body)->
+			timer.done()
+			if error?
+				logger.error {err:error, project_id, doc_id, thread_id}, "error deleting comment range in doc updater"
+				return callback(error)
+			if res.statusCode >= 200 and res.statusCode < 300
+				logger.log {project_id, doc_id, thread_id}, "deleted comment rangee in document updater"
+				return callback(null)
+			else
+				logger.error {project_id, doc_id, thread_id}, "doc updater returned a non-success status code: #{res.statusCode}"
+				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
 PENDINGUPDATESKEY = "PendingUpdates"
 DOCLINESKEY = "doclines"

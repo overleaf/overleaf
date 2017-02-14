@@ -25,7 +25,7 @@ ClsiCookieManager = require("./Features/Compile/ClsiCookieManager")
 HealthCheckController = require("./Features/HealthCheck/HealthCheckController")
 ProjectDownloadsController = require "./Features/Downloads/ProjectDownloadsController"
 FileStoreController = require("./Features/FileStore/FileStoreController")
-TrackChangesController = require("./Features/TrackChanges/TrackChangesController")
+HistoryController = require("./Features/History/HistoryController")
 PasswordResetRouter = require("./Features/PasswordReset/PasswordResetRouter")
 StaticPagesRouter = require("./Features/StaticPages/StaticPagesRouter")
 ChatController = require("./Features/Chat/ChatController")
@@ -40,6 +40,8 @@ AuthorizationMiddlewear = require('./Features/Authorization/AuthorizationMiddlew
 BetaProgramController = require('./Features/BetaProgram/BetaProgramController')
 AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 AnnouncementsController = require("./Features/Announcements/AnnouncementsController")
+TrackChangesController = require("./Features/TrackChanges/TrackChangesController")
+CommentsController = require "./Features/Comments/CommentsController"
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -171,9 +173,14 @@ module.exports = class Router
 
 		webRouter.post '/project/:Project_id/rename', AuthorizationMiddlewear.ensureUserCanAdminProject, ProjectController.renameProject
 
-		webRouter.get  "/project/:Project_id/updates", AuthorizationMiddlewear.ensureUserCanReadProject, TrackChangesController.proxyToTrackChangesApi
-		webRouter.get  "/project/:Project_id/doc/:doc_id/diff", AuthorizationMiddlewear.ensureUserCanReadProject, TrackChangesController.proxyToTrackChangesApi
-		webRouter.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", AuthorizationMiddlewear.ensureUserCanReadProject, TrackChangesController.proxyToTrackChangesApi
+		webRouter.get  "/project/:Project_id/updates", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.proxyToHistoryApi
+		webRouter.get  "/project/:Project_id/doc/:doc_id/diff", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.proxyToHistoryApi
+		webRouter.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.proxyToHistoryApi
+
+		webRouter.get "/project/:project_id/ranges", AuthorizationMiddlewear.ensureUserCanReadProject, TrackChangesController.getAllRanges
+		webRouter.get "/project/:project_id/changes/users", AuthorizationMiddlewear.ensureUserCanReadProject, TrackChangesController.getAllChangesUsers
+		webRouter.post "/project/:project_id/doc/:doc_id/changes/:change_id/accept", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, TrackChangesController.acceptChange
+		webRouter.post "/project/:project_id/track_changes", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, TrackChangesController.toggleTrackChanges
 
 		webRouter.get  '/Project/:Project_id/download/zip', AuthorizationMiddlewear.ensureUserCanReadProject, ProjectDownloadsController.downloadProject
 		webRouter.get  '/project/download/zip', AuthorizationMiddlewear.ensureUserCanReadMultipleProjects, ProjectDownloadsController.downloadMultipleProjects
@@ -223,8 +230,17 @@ module.exports = class Router
 		webRouter.post "/spelling/check", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
 		webRouter.post "/spelling/learn", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
 
-		webRouter.get  "/project/:Project_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, ChatController.getMessages
-		webRouter.post "/project/:Project_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, ChatController.sendMessage
+		webRouter.get  "/project/:project_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, ChatController.getMessages
+		webRouter.post "/project/:project_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, ChatController.sendMessage
+		
+		# Note: Read only users can still comment
+		webRouter.post "/project/:project_id/thread/:thread_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, CommentsController.sendComment
+		webRouter.get  "/project/:project_id/threads", AuthorizationMiddlewear.ensureUserCanReadProject, CommentsController.getThreads
+		webRouter.post "/project/:project_id/thread/:thread_id/resolve", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, CommentsController.resolveThread
+		webRouter.post "/project/:project_id/thread/:thread_id/reopen", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, CommentsController.reopenThread
+		webRouter.delete "/project/:project_id/doc/:doc_id/thread/:thread_id", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, CommentsController.deleteThread
+		webRouter.post "/project/:project_id/thread/:thread_id/messages/:message_id/edit", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, CommentsController.editMessage
+		webRouter.delete  "/project/:project_id/thread/:thread_id/messages/:message_id", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, CommentsController.deleteMessage
 
 		webRouter.post "/project/:Project_id/references/index", AuthorizationMiddlewear.ensureUserCanReadProject, ReferencesController.index
 		webRouter.post "/project/:Project_id/references/indexAll", AuthorizationMiddlewear.ensureUserCanReadProject, ReferencesController.indexAll

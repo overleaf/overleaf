@@ -22,9 +22,15 @@ module.exports =
 		webRouter.post(
 			'/project/:Project_id/invite',
 			RateLimiterMiddlewear.rateLimit({
-				endpointName: "invite-to-project"
+				endpointName: "invite-to-project-by-project-id"
 				params: ["Project_id"]
-				maxRequests: 200
+				maxRequests: 100
+				timeInterval: 60 * 10
+			}),
+			RateLimiterMiddlewear.rateLimit({
+				endpointName: "invite-to-project-by-ip"
+				ipOnly:true
+				maxRequests: 100
 				timeInterval: 60 * 10
 			}),
 			AuthenticationController.requireLogin(),

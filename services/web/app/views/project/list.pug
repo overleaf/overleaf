@@ -1,0 +1,76 @@
+extends ../layout
+
+block content
+	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
+	//- and doesn't prematurely end the script tag.
+
+
+
+	script(type="text/javascript").
+		window.data = {
+			projects: !{JSON.stringify(projects).replace(/\//g, '\\/')},
+			tags: !{JSON.stringify(tags).replace(/\//g, '\\/')},
+			notifications: !{JSON.stringify(notifications).replace(/\//g, '\\/')}
+		};
+		window.algolia = {
+			institutions: {
+				app_id:  '#{algolia_app_id}',
+				api_key: '#{algolia_api_key}'
+			}
+		};
+
+	.content.content-alt.project-list-page(ng-controller="ProjectPageController")
+		.container
+			.announcements(
+				ng-controller="AnnouncementsController"
+				ng-class="{ 'announcements-open': ui.isOpen }"
+				ng-cloak
+			)
+				.announcements-backdrop(
+					ng-if="ui.isOpen"
+					ng-click="toggleAnnouncementsUI();"
+				)
+				a.announcements-btn(
+					href
+					ng-if="announcements.length"
+					ng-click="toggleAnnouncementsUI();"
+					ng-class="{ 'announcements-btn-open': ui.isOpen, 'announcements-btn-has-new': ui.newItems }"
+				)
+					span.announcements-badge(ng-if="ui.newItems") {{ ui.newItems }}
+				.announcements-body(
+					ng-if="ui.isOpen"
+				)
+					.announcements-scroller
+						.announcement(
+							ng-repeat="announcement in announcements | filter:(ui.newItems ? { read: false } : '') track by announcement.id"
+						)
+							h2.announcement-header {{ announcement.title }}
+							p.announcement-description(ng-bind-html="announcement.excerpt")
+							.announcement-meta
+								p.announcement-date {{ announcement.date | date:"longDate" }}
+								a.announcement-link(
+									ng-href="{{ announcement.url }}"
+									target="_blank"
+								) Read more
+						div.text-center(
+							ng-if="ui.newItems > 0 && ui.newItems < announcements.length"
+						)
+							a.btn.btn-default.btn-sm(
+								href
+								ng-click="showAll();"
+							) Show all
+
+			.row(ng-cloak)
+				span(ng-if="projects.length > 0")
+					aside.col-md-2.col-xs-3
+						include ./list/side-bar
+
+					.col-md-10.col-xs-9
+						include ./list/notifications
+						include ./list/project-list
+				
+				span(ng-if="projects.length === 0")
+					.col-md-offset-2.col-md-8.col-md-offset-2.col-xs-8
+						include ./list/empty-project-list
+
+		include ./list/modals

@@ -1,0 +1,59 @@
+aside.chat(
+	ng-controller="ChatController",
+	ng-if="!anonymous"
+)
+	.messages(
+		infinite-scroll="loadMoreMessages()"
+		infinite-scroll-disabled="chat.loading || chat.atEnd || chat.errored"
+		infinite-scroll-initialize="ui.chatOpen"
+		infinite-scroll-upwards="true"
+		update-scroll-bottom-on="updateScrollPosition"
+	)
+		.infinite-scroll-inner
+			.loading(ng-show="chat.loading")
+				i.fa.fa-fw.fa-spin.fa-refresh
+				| &nbsp;&nbsp;#{translate("loading")}...
+			.no-messages.text-center.small(ng-show='!chat.loading && chat.messages.length == 0')
+				| #{translate("no_messages")}
+			.first-message.text-center(ng-show='!chat.loading && chat.messages.length == 0')
+				| #{translate("send_first_message")}
+				br
+				i.fa.fa-arrow-down
+			ul.list-unstyled(
+				ng-click="resetUnreadMessages()"
+			)
+				li.message(
+					ng-repeat="message in chat.messages"
+					ng-controller="ChatMessageController"
+					ng-class="{'self': message.user.id == user.id }"
+				)
+					div.date(ng-if="$index == 0 || (message.timestamp - chat.messages[$index - 1].timestamp) > 5 * 60 * 1000") {{ message.timestamp | formatDate:'h:mm a' }} {{ message.timestamp | relativeDate }}
+					span.avatar
+						img(ng-src="{{message.user.gravatar_url}}?d=mm&s=50")
+					div.message-wrapper
+						.name(ng-if="message.user.id != user.id")
+							span(ng-if="message.user.first_name") {{ message.user.first_name }}
+							span(ng-if="!message.user.first_name") {{ message.user.email }}
+						.message(
+							ng-style="{\
+								'border-color': 'hsl({{ hue(message.user) }}, 70%, 70%)',\
+								'background-color': 'hsl({{ hue(message.user) }}, 60%, 97%)'\
+							}"
+						)
+							.arrow(ng-style="{'border-color': 'hsl({{ hue(message.user) }}, 70%, 70%)'}")
+							.message-content
+								p(
+									mathjax,
+									ng-repeat="content in message.contents track by $index"
+								)
+									span(ng-bind-html="content | linky:'_blank'")
+
+	.new-message
+		textarea(
+			placeholder=translate('your_message')+"...",
+			on-enter="sendMessage()",
+			ng-model="newMessageContent",
+			ng-click="resetUnreadMessages()"
+		)
+
+

@@ -7,7 +7,6 @@ crawlerLogger = require('./CrawlerLogger')
 expressLocals = require('./ExpressLocals')
 Router = require('../router')
 metrics.inc("startup")
-redis = require("redis-sharelatex")
 UserSessionsRedis = require('../Features/User/UserSessionsRedis')
 
 sessionsRedisClient = UserSessionsRedis.client()
@@ -62,7 +61,7 @@ if Settings.behindProxy
 
 webRouter.use express.static(__dirname + '/../../../public', {maxAge: staticCacheAge })
 app.set 'views', __dirname + '/../../views'
-app.set 'view engine', 'jade'
+app.set 'view engine', 'pug'
 Modules.loadViewIncludes app
 
 

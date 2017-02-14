@@ -6,7 +6,11 @@ define [
 			link: (scope, element, attrs) ->
 				previous_focused_entry_index = 0
 				
-				layout = () ->
+				layout = (animate = true) ->
+					if animate
+						element.removeClass("no-animate")
+					else
+						element.addClass("no-animate")
 					sl_console.log "LAYOUT"
 					if scope.ui.reviewPanelOpen
 						PADDING = 8
@@ -32,6 +36,8 @@ define [
 					
 					return if entries.length == 0
 					
+					line_height = scope.reviewPanel.rendererData.lineHeight
+
 					focused_entry_index = Math.min(previous_focused_entry_index, entries.length - 1)
 					for entry, i in entries
 						if entry.scope.entry.focused
@@ -43,15 +49,34 @@ define [
 					previous_focused_entry_index = focused_entry_index
 					
 					sl_console.log "focused_entry_index", focused_entry_index
-					
-					line_height = 15
-					
-					# Put the focused entry exactly where it wants to be
-					focused_entry_top = Math.max(TOOLBAR_HEIGHT, focused_entry.scope.entry.screenPos.y)
+
+					# As we go backwards, we run the risk of pushing things off the top of the editor.
+					# If we go through the entries before and assume they are as pushed together as they
+					# could be, we can work out the 'ceiling' that each one can't go through. I.e. the first
+					# on can't go beyond the toolbar height, the next one can't go beyond the bottom of the first
+					# one at this minimum height, etc.
+					heights = (entry.$layout_el.height() for entry in entries_before)
+					previousMinTop = TOOLBAR_HEIGHT
+					min_tops = []
+					for height in heights
+						min_tops.push previousMinTop
+						previousMinTop += PADDING + height
+					min_tops.reverse()
+
+					positionLayoutEl = ($callout_el, original_top, top) ->
+						if original_top <= top
+							$callout_el.removeClass("rp-entry-callout-inverted")
+							$callout_el.css(top: original_top + line_height - 1, height: top - original_top)
+						else
+							$callout_el.addClass("rp-entry-callout-inverted")
+							$callout_el.css(top: top + line_height, height: original_top - top)
+
+					# Put the focused entry as close to where it wants to be as possible
+					focused_entry_top = Math.max(previousMinTop, focused_entry.scope.entry.screenPos.y)
 					focused_entry.$box_el.css(top: focused_entry_top)
 					focused_entry.$indicator_el.css(top: focused_entry_top)
-					focused_entry.$callout_el.css(top: focused_entry_top + line_height, height: 0)
-					
+					positionLayoutEl(focused_entry.$callout_el, focused_entry.scope.entry.screenPos.y, focused_entry_top)
+
 					previousBottom = focused_entry_top + focused_entry.$layout_el.height()
 					for entry in entries_after
 						original_top = entry.scope.entry.screenPos.y
@@ -60,31 +85,32 @@ define [
 						previousBottom = top + height
 						entry.$box_el.css(top: top)
 						entry.$indicator_el.css(top: top)
-						entry.$callout_el.removeClass("rp-entry-callout-inverted")
-						entry.$callout_el.css(top: original_top + line_height, height: top - original_top)
+						positionLayoutEl(entry.$callout_el, original_top, top)
 						sl_console.log "ENTRY", {entry: entry.scope.entry, top}
-					
+
 					previousTop = focused_entry_top
 					entries_before.reverse() # Work through backwards, starting with the one just above
-					for entry in entries_before
+					for entry, i in entries_before
 						original_top = entry.scope.entry.screenPos.y
 						height = entry.$layout_el.height()
 						original_bottom = original_top + height
 						bottom = Math.min(original_bottom, previousTop - PADDING)
-						top = bottom - height
+						top = Math.max(bottom - height, min_tops[i])
 						previousTop = top
 						entry.$box_el.css(top: top)
 						entry.$indicator_el.css(top: top)
-						entry.$callout_el.addClass("rp-entry-callout-inverted")
-						entry.$callout_el.css(top: top + line_height + 1, height: original_top - top)
+						positionLayoutEl(entry.$callout_el, original_top, top)
 						sl_console.log "ENTRY", {entry: entry.scope.entry, top}
 				
 				scope.$applyAsync () ->
 					layout()
 				
-				scope.$on "review-panel:layout", () ->
+				scope.$on "review-panel:layout", (e, animate = true) ->
 					scope.$applyAsync () ->
-						layout()
+						layout(animate)
+				
+				scope.$watch "reviewPanel.rendererData.lineHeight", () ->
+					layout()
 
 				## Scroll lock with Ace
 				scroller = element

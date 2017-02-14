@@ -1,6 +1,6 @@
 fs   = require "fs"
 Path = require "path"
-jade = require "jade"
+pug = require "pug"
 async = require "async"
 
 MODULE_BASE_PATH = Path.resolve(__dirname + "/../../../modules")
@@ -29,7 +29,7 @@ module.exports = Modules =
 		for module in @modules
 			for view, partial of module.viewIncludes or {}
 				@viewIncludes[view] ||= []
-				@viewIncludes[view].push jade.compile(fs.readFileSync(Path.join(MODULE_BASE_PATH, module.name, "app/views", partial + ".jade")), doctype: "html")
+				@viewIncludes[view].push pug.compile(fs.readFileSync(Path.join(MODULE_BASE_PATH, module.name, "app/views", partial + ".pug")), doctype: "html")
 			
 	moduleIncludes: (view, locals) ->
 		compiledPartials = Modules.viewIncludes[view] or []

@@ -1,5 +1,6 @@
 fs = require "fs"
 PackageVersions = require "./app/coffee/infrastructure/PackageVersions"
+require('es6-promise').polyfill()
 
 module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-contrib-coffee'
@@ -18,6 +19,7 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-contrib-watch'
 	grunt.loadNpmTasks 'grunt-parallel'
 	grunt.loadNpmTasks 'grunt-exec'
+	grunt.loadNpmTasks 'grunt-postcss'
 	# grunt.loadNpmTasks 'grunt-contrib-imagemin'
 	# grunt.loadNpmTasks 'grunt-sprity'
 
@@ -136,8 +138,14 @@ module.exports = (grunt) ->
 				files:
 					"public/stylesheets/style.css": "public/stylesheets/style.less"
 
-
-
+		postcss:
+			options:
+				map: true,
+				processors: [
+					require('autoprefixer')({browsers: [ 'last 2 versions', 'ie >= 10' ]})
+				]
+			dist:
+				src: 'public/stylesheets/style.css'
 
 		env:
 			run:
@@ -222,11 +230,11 @@ module.exports = (grunt) ->
 
 		sed:
 			version:
-				path: "app/views/sentry.jade"
+				path: "app/views/sentry.pug"
 				pattern: '@@COMMIT@@',
 				replacement: '<%= commit %>',
 			release:
-				path: "app/views/sentry.jade"
+				path: "app/views/sentry.pug"
 				pattern: "@@RELEASE@@"
 				replacement: process.env.BUILD_NUMBER || "(unknown build)"
 
@@ -366,7 +374,7 @@ module.exports = (grunt) ->
 	
 	grunt.registerTask 'compile:server', 'Compile the server side coffee script', ['clean:app', 'coffee:app', 'coffee:app_dir', 'compile:modules:server']
 	grunt.registerTask 'compile:client', 'Compile the client side coffee script', ['coffee:client', 'coffee:sharejs', 'wrap_sharejs', "compile:modules:client", 'compile:modules:inject_clientside_includes']
-	grunt.registerTask 'compile:css', 'Compile the less files to css', ['less']
+	grunt.registerTask 'compile:css', 'Compile the less files to css', ['less', 'postcss:dist']
 	grunt.registerTask 'compile:minify', 'Concat and minify the client side js', ['requirejs', "file_append", "exec:cssmin",]
 	grunt.registerTask 'compile:unit_tests', 'Compile the unit tests', ['clean:unit_tests', 'coffee:unit_tests']
 	grunt.registerTask 'compile:acceptance_tests', 'Compile the acceptance tests', ['clean:acceptance_tests', 'coffee:acceptance_tests']
@@ -389,5 +397,5 @@ module.exports = (grunt) ->
 
 	grunt.registerTask 'default', 'run'
 
-	grunt.registerTask 'version', "Write the version number into sentry.jade", ['git-rev-parse', 'sed']
+	grunt.registerTask 'version', "Write the version number into sentry.pug", ['git-rev-parse', 'sed']
 

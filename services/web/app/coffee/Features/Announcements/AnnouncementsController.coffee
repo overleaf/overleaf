@@ -9,11 +9,11 @@ module.exports =
 		if !settings?.apis?.analytics?.url? or !settings.apis.blog.url?
 			return res.json []
 
-		user_id = AuthenticationController.getLoggedInUserId(req)
-		logger.log {user_id}, "getting unread announcements"
-		AnnouncementsHandler.getUnreadAnnouncements user_id, (err, announcements)->
+		user = AuthenticationController.getSessionUser(req)
+		logger.log {user_id:user?._id}, "getting unread announcements"
+		AnnouncementsHandler.getUnreadAnnouncements user, (err, announcements)->
 			if err?
-				logger.err {err, user_id}, "unable to get unread announcements"
+				logger.err {err:err, user_id:user._id}, "unable to get unread announcements"
 				next(err)
 			else
 				res.json announcements

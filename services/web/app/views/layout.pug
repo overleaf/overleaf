@@ -1,0 +1,150 @@
+doctype html
+html(itemscope, itemtype='http://schema.org/Product')
+	block vars
+
+	head
+		script(type="text/javascript").
+			// Stop superfish from loading
+			window.similarproducts = true
+		style [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak  {display: none !important; display: none; }
+
+
+		-if (typeof(gaExperiments) != "undefined")
+			|!{gaExperiments}
+		
+
+		-if (typeof(title) == "undefined")
+			title= 'ShareLaTeX, '+ translate("online_latex_editor") 
+		-else
+			title= translate(title) + ' - ShareLaTeX, ' + translate("online_latex_editor") 
+
+		link(rel="icon", href="/favicon.ico")
+		link(rel='stylesheet', href=buildCssPath('/style.css'))
+
+		block _headLinks
+
+		if settings.i18n.subdomainLang
+			each subdomainDetails in settings.i18n.subdomainLang
+				if !subdomainDetails.hide
+					link(rel="alternate", href=subdomainDetails.url+currentUrl, hreflang=subdomainDetails.lngCode)
+
+
+		meta(itemprop="name", content="ShareLaTeX, the Online LaTeX Editor")
+		
+		-if (typeof(meta) == "undefined")
+			meta(itemprop="description", name="description", content=translate("site_description"))
+		-else
+			meta(itemprop="description", name="description" , content=meta)
+		
+		meta(itemprop="image", name="image", content="https://www.sharelatex.com/favicon.ico")
+
+		- if (typeof(gaToken) != "undefined")
+			script(type='text/javascript').
+				(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+				(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+				m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+				})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+				ga('create', '#{gaToken}', 'sharelatex.com');
+				ga('send', 'pageview');
+		- else
+			script(type='text/javascript').
+				window.ga = function() { console.log("would send to GA", arguments) };
+				
+		script(type="text/javascript").
+			window.csrfToken = "#{csrfToken}";
+			
+		script(src=buildJsPath("libs/jquery-1.11.1.min.js", {fingerprint:false}))
+		script(type="text/javascript").
+			var noCdnKey = "nocdn=true"
+			var cdnBlocked = typeof jQuery === 'undefined'
+			var noCdnAlreadyInUrl = window.location.href.indexOf(noCdnKey) != -1 //prevent loops
+			if (cdnBlocked && !noCdnAlreadyInUrl && navigator.userAgent.indexOf("Googlebot") == -1) {
+				window.location.search += '&'+noCdnKey;
+			}
+
+		block scripts
+
+		script(src=buildJsPath("libs/angular-1.3.15.min.js", {fingerprint:false}))
+
+		script.
+			window.sharelatex = {
+				siteUrl: '#{settings.siteUrl}',
+				jsPath:  '#{jsPath}',
+				sixpackDomain: '#{settings.sixpack.domain}'
+			};
+			window.systemMessages = !{JSON.stringify(systemMessages).replace(/\//g, '\\/')};
+			window.ab = {};
+			window.user_id = '#{getLoggedInUserId()}';
+
+		- if (typeof(settings.algolia) != "undefined")
+			script.
+				window.sharelatex.algolia = {
+					app_id:'#{settings.algolia.app_id}',
+					api_key:'#{settings.algolia.read_only_api_key}',
+					indexes:!{JSON.stringify(settings.algolia.indexes)}
+				}
+
+		- if (typeof(settings.templates) != "undefined")
+			script.
+				window.sharelatex.templates = {
+					user_id : '!{settings.templates.user_id}',
+					cdnDomain : '!{settings.templates.cdnDomain}',
+					indexName : '!{settings.templates.indexName}'
+				}
+				
+	body
+
+		- if(typeof(suppressSystemMessages) == "undefined")
+			.system-messages(
+				ng-cloak
+				ng-controller="SystemMessagesController"
+			)
+				.system-message(
+					ng-repeat="message in messages"
+					ng-controller="SystemMessageController"
+					ng-hide="hidden"
+				)
+					a(href, ng-click="hide()").pull-right &times;
+					.system-message-content(ng-bind-html="htmlContent")
+	
+			include translations/translation_message
+
+
+		- if(typeof(suppressNavbar) == "undefined")
+			include layout/navbar
+
+		block content
+
+		div(ng-controller="AbTestController")
+		- if(typeof(suppressFooter) == "undefined")
+			include layout/footer
+
+		- if (typeof(lookingForScribtex) != "undefined" && lookingForScribtex)
+			span(ng-controller="ScribtexPopupController")
+			include scribtex-modal
+
+		block requirejs
+			script(type='text/javascript').
+				// minimal requirejs configuration (can be extended/overridden)
+				window.requirejs = {
+					"paths" : {
+						"moment": "libs/#{lib('moment')}"
+					},
+					"urlArgs": "fingerprint=#{fingerprint(jsPath + 'main.js')}-#{fingerprint(jsPath + 'libs.js')}",
+					"config":{
+						"moment":{
+							"noGlobal": true
+						}
+					}
+				};
+			script(
+				data-main=buildJsPath('main.js', {fingerprint:false}),
+				baseurl=fullJsPath,
+				src=buildJsPath('libs/require.js')
+			)
+
+		include contact-us-modal
+		include sentry
+		
+
+

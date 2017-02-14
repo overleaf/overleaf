@@ -1,7 +1,8 @@
 define [
 	"utils/EventEmitter"
 	"ide/editor/ShareJsDoc"
-], (EventEmitter, ShareJsDoc) ->
+	"ide/review-panel/RangesTracker"
+], (EventEmitter, ShareJsDoc, RangesTracker) ->
 	class Document extends EventEmitter
 		@getDocument: (ide, doc_id) ->
 			@openDocs ||= {}
@@ -40,6 +41,8 @@ define [
 			editorDoc = @ace?.getSession().getDocument()
 			editorDoc?.off "change", @_checkConsistency
 			@ide.$scope.$emit 'document:closed', @doc
+		
+		submitOp: (args...) -> @doc?.submitOp(args...)
 
 		_checkConsistency: () ->
 			# We've been seeing a lot of errors when I think there shouldn't be
@@ -77,6 +80,15 @@ define [
 
 		hasBufferedOps: () ->
 			@doc?.hasBufferedOps()
+		
+		setTrackingChanges: (track_changes) ->
+			@doc.track_changes = track_changes
+		
+		getTrackingChanges: () ->
+			!!@doc.track_changes
+		
+		setTrackChangesIdSeeds: (id_seeds) ->
+			@doc.track_changes_id_seeds = id_seeds
 
 		_bindToSocketEvents: () ->
 			@_onUpdateAppliedHandler = (update) => @_onUpdateApplied(update)
@@ -239,16 +251,18 @@ define [
 
 		_joinDoc: (callback = (error) ->) ->
 			if @doc?
-				@ide.socket.emit 'joinDoc', @doc_id, @doc.getVersion(), (error, docLines, version, updates) =>
+				@ide.socket.emit 'joinDoc', @doc_id, @doc.getVersion(), (error, docLines, version, updates, ranges) =>
 					return callback(error) if error?
 					@joined = true
 					@doc.catchUp( updates )
+					@_catchUpRanges( ranges?.changes, ranges?.comments )
 					callback()
 			else
-				@ide.socket.emit 'joinDoc', @doc_id, (error, docLines, version) =>
+				@ide.socket.emit 'joinDoc', @doc_id, (error, docLines, version, updates, ranges) =>
 					return callback(error) if error?
 					@joined = true
 					@doc = new ShareJsDoc @doc_id, docLines, version, @ide.socket
+					@ranges = new RangesTracker(ranges?.changes, ranges?.comments)
 					@_bindToShareJsDocEvents()
 					callback()
 
@@ -307,6 +321,10 @@ define [
 					inflightOp: inflightOp,
 					pendingOp: pendingOp
 					v: version
+			@doc.on "change", (ops, oldSnapshot, msg) =>
+				@_applyOpsToRanges(ops, oldSnapshot, msg)
+			@doc.on "flipped_pending_to_inflight", () =>
+				@trigger "flipped_pending_to_inflight"
 
 		_onError: (error, meta = {}) ->
 			meta.doc_id = @doc_id
@@ -319,3 +337,34 @@ define [
 			# the disconnect event, which means we try to leaveDoc when the connection comes back.
 			# This could intefere with the new connection of a new instance of this document.
 			@_cleanUp()
+
+		_applyOpsToRanges: (ops = [], oldSnapshot, msg) ->
+			track_changes_as = null
+			remote_op = msg?
+			if msg?.meta?.tc?
+				old_id_seed = @ranges.getIdSeed()
+				@ranges.setIdSeed(msg.meta.tc)
+			if remote_op and msg.meta?.tc
+				track_changes_as = msg.meta.user_id
+			else if !remote_op and @track_changes_as?
+				track_changes_as = @track_changes_as
+			@ranges.track_changes = track_changes_as?
+			for op in ops
+				@ranges.applyOp op, { user_id: track_changes_as }
+			if old_id_seed?
+				@ranges.setIdSeed(old_id_seed)
+		
+		_catchUpRanges: (changes = [], comments = []) ->
+			# We've just been given the current server's ranges, but need to apply any local ops we have.
+			# Reset to the server state then apply our local ops again.
+			@ranges.emit "clear"
+			@ranges.changes = changes
+			@ranges.comments = comments
+			@ranges.track_changes = @doc.track_changes
+			for op in @doc.getInflightOp() or []
+				@ranges.setIdSeed(@doc.track_changes_id_seeds.inflight)
+				@ranges.applyOp(op, { user_id: @track_changes_as })
+			for op in @doc.getPendingOp() or []
+				@ranges.setIdSeed(@doc.track_changes_id_seeds.pending)
+				@ranges.applyOp(op, { user_id: @track_changes_as })
+			@ranges.emit "redraw"

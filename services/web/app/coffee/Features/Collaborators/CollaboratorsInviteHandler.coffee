@@ -53,7 +53,7 @@ module.exports = CollaboratorsInviteHandler =
 
 	_sendMessages: (projectId, sendingUser, invite, callback=(err)->) ->
 		logger.log {projectId, inviteId: invite._id}, "sending notification and email for invite"
-		CollaboratorsEmailHandler.notifyUserOfProjectInvite projectId, invite.email, invite, (err)->
+		CollaboratorsEmailHandler.notifyUserOfProjectInvite projectId, invite.email, invite, sendingUser, (err)->
 			return callback(err) if err?
 			CollaboratorsInviteHandler._trySendInviteNotification projectId, sendingUser, invite, (err)->
 				return callback(err) if err?
@@ -80,7 +80,7 @@ module.exports = CollaboratorsInviteHandler =
 				# Send email and notification in background
 				CollaboratorsInviteHandler._sendMessages projectId, sendingUser, invite, (err) ->
 					if err?
-						logger.err {projectId, email}, "error sending messages for invite"
+						logger.err {err, projectId, email}, "error sending messages for invite"
 				callback(null, invite)
 
 

@@ -6,17 +6,17 @@ Settings = require("settings-sharelatex")
 
 describe "LimitationsManager", ->
 	beforeEach ->
-		@project = { _id: "project-id" }
-		@user = { _id: "user-id", features:{} }
+		@project = { _id: @project_id = "project-id" }
+		@user = { _id: @user_id = "user-id", features:{} }
 		@Project =
 			findById: (project_id, fields, callback) =>
 				if project_id == @project_id
 					callback null, @project
 				else
 					callback null, null
-		@User =
-			findById: (user_id, callback) =>
-				if user_id == @user.id
+		@UserGetter =
+			getUser: (user_id, filter, callback) =>
+				if user_id == @user_id
 					callback null, @user
 				else
 					callback null, null
@@ -26,7 +26,7 @@ describe "LimitationsManager", ->
 
 		@LimitationsManager = SandboxedModule.require modulePath, requires:
 			'../../models/Project' : Project: @Project
-			'../../models/User' : User: @User
+			'../User/UserGetter' : @UserGetter
 			'./SubscriptionLocator':@SubscriptionLocator
 			'settings-sharelatex' : @Settings = {}
 			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler = {}
@@ -37,6 +37,7 @@ describe "LimitationsManager", ->
 		describe "when the project is owned by a user without a subscription", ->
 			beforeEach ->
 				@Settings.defaultPlanCode = collaborators: 23
+				@project.owner_ref = @user_id
 				delete @user.features
 				@callback = sinon.stub()
 				@LimitationsManager.allowedNumberOfCollaboratorsInProject(@project_id, @callback)
@@ -46,10 +47,32 @@ describe "LimitationsManager", ->
 
 		describe "when the project is owned by a user with a subscription", ->
 			beforeEach ->
+				@project.owner_ref = @user_id
 				@user.features =
 					collaborators: 21
 				@callback = sinon.stub()
 				@LimitationsManager.allowedNumberOfCollaboratorsInProject(@project_id, @callback)
+
+			it "should return the number of collaborators the user is allowed", ->
+				@callback.calledWith(null, @user.features.collaborators).should.equal true
+	
+	describe "allowedNumberOfCollaboratorsForUser", ->
+		describe "when the user has no features", ->
+			beforeEach ->
+				@Settings.defaultPlanCode = collaborators: 23
+				delete @user.features
+				@callback = sinon.stub()
+				@LimitationsManager.allowedNumberOfCollaboratorsForUser(@user_id, @callback)
+
+			it "should return the default number", ->
+				@callback.calledWith(null, @Settings.defaultPlanCode.collaborators).should.equal true
+
+		describe "when the user has features", ->
+			beforeEach ->
+				@user.features =
+					collaborators: 21
+				@callback = sinon.stub()
+				@LimitationsManager.allowedNumberOfCollaboratorsForUser(@user_id, @callback)
 
 			it "should return the number of collaborators the user is allowed", ->
 				@callback.calledWith(null, @user.features.collaborators).should.equal true

@@ -148,6 +148,7 @@ module.exports = AuthenticationController =
 			return next()
 		else
 			logger.log url:req.url, "user trying to access endpoint not in global whitelist"
+			AuthenticationController._setRedirectInSession(req)
 			return res.redirect "/login"
 
 	httpAuth: basicAuth (user, pass)->
@@ -193,8 +194,8 @@ module.exports = AuthenticationController =
 
 	_setRedirectInSession: (req, value) ->
 		if !value?
-			value = if Object.keys(req.query).length > 0 then "#{req.path}?#{querystring.stringify(req.query)}" else req.path
-		if req.session?
+			value = if Object.keys(req.query).length > 0 then "#{req.path}?#{querystring.stringify(req.query)}" else "#{req.path}"
+		if req.session? && !value.match(new RegExp('^\/(socket.io|js|stylesheets|img)\/.*$'))
 			req.session.postLoginRedirect = value
 
 	_getRedirectFromSession: (req) ->

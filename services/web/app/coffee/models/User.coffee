@@ -2,7 +2,7 @@ Project = require('./Project').Project
 Settings = require 'settings-sharelatex'
 _ = require('underscore')
 mongoose = require('mongoose')
-uuid = require('node-uuid')
+uuid = require('uuid')
 Schema = mongoose.Schema
 ObjectId = Schema.ObjectId
 
@@ -37,9 +37,10 @@ UserSchema = new Schema
 							compileGroup:  { type:String,  default: Settings.defaultFeatures.compileGroup }
 							templates:     { type:Boolean, default: Settings.defaultFeatures.templates }
 							references:    { type:Boolean, default: Settings.defaultFeatures.references }
+							trackChanges:  { type:Boolean, default: Settings.defaultFeatures.trackChanges }
 						}
 	featureSwitches	  : {
-		pdfng: { type: Boolean }
+		track_changes: { type: Boolean }
 	}
 	referal_id : {type:String, default:() -> uuid.v4().split("-")[0]}
 	refered_users: [ type:ObjectId, ref:'User' ]

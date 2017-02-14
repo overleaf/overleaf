@@ -48,6 +48,16 @@ module.exports = settings =
 		# 		{host: 'localhost', port: 7005}
 		# 	]
 
+		# ratelimiter:
+		# 	cluster: [
+		# 		{host: 'localhost', port: 7000}
+		# 		{host: 'localhost', port: 7001}
+		# 		{host: 'localhost', port: 7002}
+		# 		{host: 'localhost', port: 7003}
+		# 		{host: 'localhost', port: 7004}
+		# 		{host: 'localhost', port: 7005}
+		# 	]
+
 		api:
 			host: "localhost"
 			port: "6379"
@@ -169,6 +179,7 @@ module.exports = settings =
 		compileGroup: "standard"
 		references: true
 		templates: true
+		trackChanges: true
 
 	plans: plans = [{
 		planCode: "personal"
@@ -335,35 +346,11 @@ module.exports = settings =
 			url: "https://github.com/sharelatex/sharelatex"
 		}]
 
-		header: [{
-			text: "Register"
-			url: "/register"
-			only_when_logged_out: true
-		}, {
-			text: "Log In"
-			url: "/login"
-			only_when_logged_out: true
-		}, {
-			text: "Projects"
-			url: "/project"
-			only_when_logged_in: true
-		}, {
-			text: "Account"
-			only_when_logged_in: true
-			dropdown: [{
-				user_email: true
-			},{
-				divider: true
-			}, {
-				text: "Account Settings"
-				url: "/user/settings"
-			}, {
-				divider: true
-			}, {
-				text: "Log out"
-				url: "/logout"
-			}]
-		}]
+		showSubscriptionLink: false
+
+		header_extras: []
+		# Example:
+		#   header_extras: [{text: "Some Page", url: "http://example.com/some/page", class: "subdued"}]
 
 	customisation: {}
 

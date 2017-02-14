@@ -5,8 +5,6 @@ DocstoreManager = require("../Docstore/DocstoreManager")
 ProjectGetter = require("../Project/ProjectGetter")
 ProjectUpdateHandler = require("../Project/ProjectUpdateHandler")
 Project = require("../../models/Project").Project
-TrackChangesManager = require("../TrackChanges/TrackChangesManager")
-
 
 MILISECONDS_IN_DAY = 86400000
 module.exports = InactiveProjectManager =
@@ -52,7 +50,6 @@ module.exports = InactiveProjectManager =
 		logger.log project_id:project_id, "deactivating inactive project"
 		jobs = [
 			(cb)-> DocstoreManager.archiveProject project_id, cb
-			# (cb)-> TrackChangesManager.archiveProject project_id, cb
 			(cb)-> ProjectUpdateHandler.markAsInactive project_id, cb
 		]
 		async.series jobs, (err)->

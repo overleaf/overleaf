@@ -1,20 +1,25 @@
 logger = require("logger-sharelatex")
 Project = require("../../models/Project").Project
-User = require("../../models/User").User
+UserGetter = require("../User/UserGetter")
 SubscriptionLocator = require("./SubscriptionLocator")
 Settings = require("settings-sharelatex")
 CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
 CollaboratorsInvitesHandler = require("../Collaborators/CollaboratorsInviteHandler")
 
 module.exports =
-
 	allowedNumberOfCollaboratorsInProject: (project_id, callback) ->
-		getOwnerOfProject project_id, (error, owner)->
+		Project.findById project_id, 'owner_ref', (error, project) =>
 			return callback(error) if error?
-			if owner.features? and owner.features.collaborators?
-				callback null, owner.features.collaborators
+			@allowedNumberOfCollaboratorsForUser project.owner_ref, callback
+	
+	allowedNumberOfCollaboratorsForUser: (user_id, callback) ->
+		UserGetter.getUser user_id, {features: 1}, (error, user) ->
+			return callback(error) if error?
+			if user.features? and user.features.collaborators?
+				callback null, user.features.collaborators
 			else
 				callback null, Settings.defaultPlanCode.collaborators
+		
 
 	canAddXCollaborators: (project_id, x_collaborators, callback = (error, allowed)->) ->
 		@allowedNumberOfCollaboratorsInProject project_id, (error, allowed_number) =>
@@ -63,8 +68,4 @@ module.exports =
 			logger.log user_id:user_id, limitReached:limitReached, currentTotal: subscription.member_ids.length, membersLimit: subscription.membersLimit, "checking if subscription members limit has been reached"
 			callback(err, limitReached, subscription)
 
-getOwnerOfProject = (project_id, callback)->
-	Project.findById project_id, 'owner_ref', (error, project) ->
-		return callback(error) if error?
-		User.findById project.owner_ref, (error, owner) ->
-			callback(error, owner)
+getOwnerIdOfProject = (project_id, callback)->

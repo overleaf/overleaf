@@ -19,12 +19,15 @@ module.exports = RateLimiterMiddlewear =
 			user_id = AuthenticationController.getLoggedInUserId(req) || req.ip
 			params = (opts.params or []).map (p) -> req.params[p]
 			params.push user_id
+			subjectName = params.join(":")
+			if opts.ipOnly
+				subjectName = req.ip
 			if !opts.endpointName?
 				throw new Error("no endpointName provided")
 			options = {
 				endpointName: opts.endpointName
 				timeInterval: opts.timeInterval or 60
-				subjectName:  params.join(":")
+				subjectName:  subjectName
 				throttle:     opts.maxRequests or 6
 			}
 			RateLimiter.addCount options, (error, canContinue)->

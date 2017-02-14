@@ -13,7 +13,7 @@ define [
 	EditSession = ace.require('ace/edit_session').EditSession
 	ModeList = ace.require('ace/ext/modelist')
 
-	# set the path for ace workers if using a CDN (from editor.jade)
+	# set the path for ace workers if using a CDN (from editor.pug)
 	if window.aceWorkerPath != ""
 		syntaxValidationEnabled = true
 		ace.config.set('workerPath', "#{window.aceWorkerPath}")
@@ -54,10 +54,10 @@ define [
 				syntaxValidation: "="
 				reviewPanel: "="
 				eventsBridge: "="
-				trackNewChanges: "="
+				trackChanges: "="
 				trackChangesEnabled: "="
-				changesTracker: "="
 				docId: "="
+				rendererData: "="
 			}
 			link: (scope, element, attrs) ->
 				# Don't freak out if we're already in an apply callback
@@ -167,10 +167,22 @@ define [
 					if arg == "/"
 						ace.require("ace/ext/searchbox").Search(editor, true)
 
+				getCursorScreenPosition = () ->
+					session = editor.getSession()
+					cursorPosition = session.selection.getCursor()
+					sessionPos = session.documentToScreenPosition(cursorPosition.row, cursorPosition.column)
+					screenPos = editor.renderer.textToScreenCoordinates(sessionPos.row, sessionPos.column)
+					return sessionPos.row * editor.renderer.lineHeight - session.getScrollTop()
+
 				if attrs.resizeOn?
 					for event in attrs.resizeOn.split(",")
 						scope.$on event, () ->
+							previousScreenPosition = getCursorScreenPosition()
 							editor.resize()
+							# Put cursor back to same vertical position on screen
+							newScreenPosition = getCursorScreenPosition()
+							session = editor.getSession()
+							session.setScrollTop(session.getScrollTop() + newScreenPosition - previousScreenPosition)
 
 				scope.$watch "theme", (value) ->
 					editor.setTheme("ace/theme/#{value}")
@@ -279,7 +291,7 @@ define [
 
 					session.setUseWrapMode(true)
 					# use syntax validation only when explicitly set
-					if scope.syntaxValidation? and syntaxValidationEnabled
+					if scope.syntaxValidation? and syntaxValidationEnabled and !scope.fileName.match(/\.bib$/)
 						session.setOption("useWorker", scope.syntaxValidation);
 
 					# now attach session to editor
@@ -318,6 +330,14 @@ define [
 					
 					doc = session.getDocument()
 					doc.off "change", onChange
+				
+				editor.renderer.on "changeCharacterSize", () ->
+					scope.$apply () ->
+						scope.rendererData.lineHeight = editor.renderer.lineHeight
+				
+				scope.$watch "rendererData", (rendererData) ->
+					if rendererData?
+						rendererData.lineHeight = editor.renderer.lineHeight
 
 			template: """
 				<div class="ace-editor-wrapper">

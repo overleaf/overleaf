@@ -387,6 +387,10 @@ describe "AuthenticationController", ->
 		beforeEach ->
 			@req.headers = {}
 			@AuthenticationController.httpAuth = sinon.stub()
+			@_setRedirect = sinon.spy(@AuthenticationController, '_setRedirectInSession')
+
+		afterEach ->
+			@_setRedirect.restore()
 
 		describe "with white listed url", ->
 			beforeEach ->
@@ -430,6 +434,9 @@ describe "AuthenticationController", ->
 			beforeEach ->
 				@req.session = {}
 				@AuthenticationController.requireGlobalLogin @req, @res, @next
+
+			it 'should have called setRedirectInSession', ->
+				@_setRedirect.callCount.should.equal 1
 
 			it "should redirect to the /login page", ->
 				@res.redirectedTo.should.equal "/login"
@@ -542,6 +549,15 @@ describe "AuthenticationController", ->
 		it 'should set the supplied value', ->
 			@AuthenticationController._setRedirectInSession(@req, '/somewhere/specific')
 			expect(@req.session.postLoginRedirect).to.equal "/somewhere/specific"
+
+		describe 'with a js path', ->
+
+			beforeEach ->
+				@req = {session: {}}
+
+			it 'should not set the redirect', ->
+				@AuthenticationController._setRedirectInSession(@req, '/js/something.js')
+				expect(@req.session.postLoginRedirect).to.equal undefined
 
 	describe '_getRedirectFromSession', ->
 		beforeEach ->

@@ -1,0 +1,152 @@
+extends ../layout
+
+block vars
+	- var suppressNavbar = true
+	- var suppressFooter = true
+	- var suppressSystemMessages = true
+
+block content
+	.editor(ng-controller="IdeController").full-size
+		.loading-screen(ng-show="state.loading")
+			.container
+				h3 #{translate("loading")}...
+				.progress
+					.progress-bar(style="width: 20%", ng-style="{'width': state.load_progress + '%'}")
+				p.text-center.text-danger(ng-if="state.error").ng-cloak 
+					span(ng-bind-html="state.error")
+
+		include ./editor/feature-onboarding
+		
+		.global-alerts(ng-cloak)
+			.alert.alert-danger.small(ng-if="connection.forced_disconnect")
+				strong #{translate("disconnected")}
+				|  #{translate("please_refresh")}
+
+			.alert.alert-warning.small(ng-if="connection.reconnection_countdown")
+				strong #{translate("lost_connection")}.
+				| #{translate("reconnecting_in_x_secs", {seconds:"{{ connection.reconnection_countdown }}"})}.
+				a#try-reconnect-now-button.pull-right(href, ng-click="tryReconnectNow()") #{translate("try_now")}
+
+			.alert.alert-warning.small(ng-if="connection.reconnecting")
+				strong #{translate("reconnecting")}...
+
+			.alert.alert-warning.small(ng-if="connection.inactive_disconnect")
+				strong #{translate("editor_disconected_click_to_reconnect")}
+
+			.div(ng-controller="SavingNotificationController")
+				.alert.alert-warning.small(ng-repeat="(doc_id, state) in docSavingStatus" ng-if="state.unsavedSeconds > 8") #{translate("saving_notification_with_seconds", {docname:"{{ state.doc.name }}", seconds:"{{ state.unsavedSeconds }}"})}
+
+		include ./editor/left-menu
+
+		#chat-wrapper.full-size(
+			layout="chat",
+			spacing-open="12",
+			spacing-closed="0",
+			initial-size-east="250",
+			init-closed-east="true",
+			open-east="ui.chatOpen",
+			ng-hide="state.loading",
+			ng-cloak
+		)
+			.ui-layout-center
+				include ./editor/header
+
+				include ./editor/share
+
+				#ide-body(
+					ng-cloak,
+					layout="main",
+					ng-hide="state.loading",
+					resize-on="layout:chat:resize",
+					minimum-restore-size-west="130"
+				)
+					.ui-layout-west
+						include ./editor/file-tree
+
+					.ui-layout-center
+						include ./editor/editor
+						include ./editor/binary-file
+						include ./editor/history
+						include ./editor/publish-template
+
+			.ui-layout-east
+				include ./editor/chat
+				
+	include ./editor/hotkeys
+
+	script(type="text/ng-template", id="genericMessageModalTemplate")
+		.modal-header
+			button.close(
+				type="button"
+				data-dismiss="modal"
+				ng-click="done()"
+			) &times;
+			h3 {{ title }}
+		.modal-body(ng-bind-html="message")
+		.modal-footer
+			button.btn.btn-info(ng-click="done()") #{translate("ok")}
+
+	script(type="text/ng-template", id="lockEditorModalTemplate")
+		.modal-header
+			h3 {{ title }}
+		.modal-body(ng-bind-html="message")
+
+block requirejs
+	script(type="text/javascript" src='/socket.io/socket.io.js')
+
+	//- don't use cdn for workers
+	- var aceWorkerPath = buildJsPath(lib('ace'), {cdn:false,fingerprint:false})
+	- var pdfWorkerPath = buildJsPath('/libs/' + lib('pdfjs') + '/pdf.worker', {cdn:false,fingerprint:false})
+
+	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
+	//- and doesn't prematurely end the script tag.
+	script(type='text/javascript').
+		window.project_id = "!{project_id}";
+		window.userSettings = !{JSON.stringify(userSettings).replace(/\//g, '\\/')};
+		window.user = !{JSON.stringify(user).replace(/\//g, '\\/')};
+		window.csrfToken = "!{csrfToken}";
+		window.anonymous = #{anonymous};
+		window.maxDocLength = #{maxDocLength};
+		window.trackChangesEnabled = #{trackChangesEnabled};
+		window.wikiEnabled = #{!!(settings.apis.wiki && settings.apis.wiki.url)};
+		window.requirejs = {
+			"paths" : {
+				"mathjax": "#{buildJsPath('/libs/mathjax/MathJax.js', {cdn:false, fingerprint:false, qs:{config:'TeX-AMS_HTML'}})}",
+				"moment": "libs/#{lib('moment')}",
+				"pdfjs-dist/build/pdf": "libs/#{lib('pdfjs')}/pdf",
+				"pdfjs-dist/build/pdf.worker": "#{pdfWorkerPath}",
+				"ace": "#{lib('ace')}"
+			},
+			"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'ide.js')}-#{fingerprint(jsPath + 'libs.js')}",
+			"waitSeconds": 0,
+			"shim": {
+				"pdfjs-dist/build/pdf": {
+					"deps": ["libs/#{lib('pdfjs')}/compatibility"]
+				},
+				"ace/ext-searchbox": {
+					"deps": ["ace/ace"]
+				},
+				"ace/ext-modelist": {
+					"deps": ["ace/ace"]
+				},
+				"ace/ext-language_tools": {
+					"deps": ["ace/ace"]
+				}
+			},
+			"config":{
+				"moment":{
+					"noGlobal": true
+				}
+			}
+		};
+		window.aceFingerprint = "#{fingerprint(jsPath + lib('ace') + '/ace.js')}"
+		window.aceWorkerPath = "#{aceWorkerPath}";
+
+	script(
+		data-main=buildJsPath("ide.js", {fingerprint:false}),
+		baseurl=fullJsPath,
+		data-ace-base=buildJsPath(lib('ace'), {fingerprint:false}),
+		src=buildJsPath('libs/require.js')
+	)
+
+	
