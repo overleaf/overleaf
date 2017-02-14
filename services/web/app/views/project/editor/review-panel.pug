@@ -417,7 +417,9 @@ script(type="text/ng-template", id="trackChangesUpgradeModalTemplate")
 			a.btn.btn-success(
 				href
 				ng-click="startFreeTrial('track-changes')"
+				ng-show="project.owner._id == user.id"
 			) Try it for free
+			p(ng-show="project.owner._id != user.id"): strong Please ask the project owner to upgrade to use track changes
 
 	.modal-footer()
 		button.btn.btn-default(
