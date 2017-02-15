@@ -67,7 +67,9 @@ module.exports = RedisManager =
 		multi.exec (error, [docLines, version, storedHash, doc_project_id, ranges])->
 			timer.done()
 			return callback(error) if error?
-			if docLines?
+
+			# check sha1 hash value if present
+			if docLines? and storedHash?
 				computedHash = RedisManager._computeHash(docLines)
 				if computedHash isnt storedHash
 					logger.error project_id: project_id, doc_id: doc_id, doc_project_id: doc_project_id, computedHash: computedHash, storedHash: storedHash, "hash mismatch on retrieved document"
