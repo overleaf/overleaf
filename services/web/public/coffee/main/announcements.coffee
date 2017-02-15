@@ -15,7 +15,7 @@ define [
 		markAnnouncementsAsRead = ->
 			event_tracking.sendMB "announcement-alert-dismissed", { blogPostId: $scope.announcements[0].id }
 
-		$scope.announcementClicked = ->
+		$scope.logAnnouncementClick = ->
 			event_tracking.sendMB "announcement-read-more-clicked", { blogPostId: $scope.announcements[0].id }
 
 		refreshAnnouncements()
