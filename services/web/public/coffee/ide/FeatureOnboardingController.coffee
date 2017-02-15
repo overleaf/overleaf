@@ -5,16 +5,10 @@ define [
 		$scope.onboarding = 
 			innerStep: 1
 			nSteps: 4
-		
-		$scope.$watch "project.features.trackChangesVisible", (visible) ->
-			return if !visible?
-			$scope.showCollabFeaturesOnboarding = window.showTrackChangesOnboarding and visible
 
 		$scope.dismiss = () ->
-			event_tracking.sendMB "shown-track-changes-onboarding"
-			$scope.$applyAsync(() -> $scope.showCollabFeaturesOnboarding = false)
-			$(document).off "keydown", handleKeydown
-			$(document).off "click", $scope.dismiss
+			event_tracking.sendMB "shown-track-changes-onboarding-2"
+			$scope.$applyAsync(() -> $scope.ui.showCollabFeaturesOnboarding = false)
 
 		$scope.gotoPrevStep = () ->
 			if $scope.onboarding.innerStep > 1 

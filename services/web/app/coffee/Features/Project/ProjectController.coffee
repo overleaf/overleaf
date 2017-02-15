@@ -225,7 +225,7 @@ module.exports = ProjectController =
 				if !user_id?
 					return cb()
 				timeout = setTimeout cb, 500
-				AnalyticsManager.getLastOccurance user_id, "shown-track-changes-onboarding", (error, event) ->
+				AnalyticsManager.getLastOccurance user_id, "shown-track-changes-onboarding-2", (error, event) ->
 					clearTimeout timeout
 					if error?
 						return cb(null, false)

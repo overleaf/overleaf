@@ -72,6 +72,10 @@ define [
 			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}")
 		}
 		$scope.user = window.user
+		
+		$scope.$watch "project.features.trackChangesVisible", (visible) ->
+			return if !visible?
+			$scope.ui.showCollabFeaturesOnboarding = window.showTrackChangesOnboarding and visible
 
 		$scope.shouldABTestPlans = false
 		if $scope.user.signUpDate >= '2016-10-27'
