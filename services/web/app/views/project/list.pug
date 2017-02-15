@@ -50,6 +50,7 @@ block content
 								p.announcement-date {{ announcement.date | date:"longDate" }}
 								a.announcement-link(
 									ng-href="{{ announcement.url }}"
+									ng-click="logAnnouncementClick()",
 									target="_blank"
 								) Read more
 						div.text-center(
