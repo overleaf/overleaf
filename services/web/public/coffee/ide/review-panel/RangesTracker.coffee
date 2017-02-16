@@ -105,6 +105,7 @@ load = (EventEmitter) ->
 				throw new Error("unknown op type")
 			
 		addComment: (op, metadata) ->
+			# TODO: Don't allow overlapping comments?
 			@comments.push comment = {
 				id: op.t or @newId()
 				op: # Copy because we'll modify in place
@@ -167,12 +168,14 @@ load = (EventEmitter) ->
 			op_length = op.i.length
 			op_end = op.p + op_length
 
+
 			already_merged = false
 			previous_change = null
 			moved_changes = []
 			remove_changes = []
 			new_changes = []
-			for change in @changes
+
+			for change, i in @changes
 				change_start = change.op.p
 				
 				if change.op.d?
@@ -200,6 +203,16 @@ load = (EventEmitter) ->
 					# Only merge inserts if they are from the same user
 					is_same_user = metadata.user_id == change.metadata.user_id
 					
+					# If this is an insert op at the end of an existing insert with a delete following, and it cancels out the following
+					# delete then we shouldn't append it to this insert, but instead only cancel the following delete.
+					# E.g.
+					#                   foo|<--- about to insert 'b' here
+					#  inserted 'foo'  --^ ^-- deleted 'bar'
+					# should become just 'foo' not 'foob' (with the delete marker becoming just 'ar'), .
+					next_change = @changes[i+1]
+					is_op_adjacent_to_next_delete = next_change? and next_change.op.d? and op.p == change_end and next_change.op.p == op.p
+					will_op_cancel_next_delete = is_op_adjacent_to_next_delete and next_change.op.d.slice(0, op.i.length) == op.i
+					
 					# If there is a delete at the start of the insert, and we're inserting
 					# at the start, we SHOULDN'T merge since the delete acts as a partition.
 					# The previous op will be the delete, but it's already been shifted by this insert
@@ -222,7 +235,8 @@ load = (EventEmitter) ->
 					if @track_changes and
 							is_change_overlapping and
 							!is_insert_blocked_by_delete and
-							!already_merged and 
+							!already_merged and
+							!will_op_cancel_next_delete and
 							is_same_user
 						offset = op_start - change_start
 						change.op.i = change.op.i.slice(0, offset) + op.i + change.op.i.slice(offset)
@@ -396,9 +410,13 @@ load = (EventEmitter) ->
 				@emit "changes:moved", moved_changes
 
 		_addOp: (op, metadata) ->
+			# Don't take a reference to the existing op since we'll modify this in place with future changes
+			clone_op = {}
+			for k,v of op
+				clone_op[k] = v
 			change = {
 				id: @newId()
-				op: op
+				op: clone_op
 				metadata: metadata
 			}
 			@changes.push change
