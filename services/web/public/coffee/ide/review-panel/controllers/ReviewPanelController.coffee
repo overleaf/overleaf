@@ -19,6 +19,7 @@ define [
 			openSubView: $scope.SubViews.CUR_FILE
 			overview:
 				loading: false
+				docsCollapsedState: {}
 			dropdown:
 				loading: false
 			commentThreads: {}
@@ -171,6 +172,8 @@ define [
 			$http.get "/project/#{$scope.project_id}/ranges"
 				.success (docs) ->
 					for doc in docs
+						if !$scope.reviewPanel.overview.docsCollapsedState[doc.id]?
+							$scope.reviewPanel.overview.docsCollapsedState[doc.id] = false
 						if doc.id != $scope.editor.open_doc_id # this is kept up to date in real-time, don't overwrite
 							rangesTracker = getChangeTracker(doc.id)
 							rangesTracker.comments = doc.ranges?.comments or []
