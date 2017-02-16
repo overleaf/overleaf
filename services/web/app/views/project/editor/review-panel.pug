@@ -6,7 +6,7 @@
 		ng-class="{ 'rp-track-changes-indicator-on-dark' : darkTheme }"
 	) Track changes is 
 		strong on
-		
+			
 	.review-panel-toolbar
 		resolved-comments-dropdown(
 			class="rp-flex-block"
@@ -418,8 +418,10 @@ script(type="text/ng-template", id="trackChangesUpgradeModalTemplate")
 		.row.text-center(ng-controller="FreeTrialModalController")
 			a.btn.btn-success(
 				href
-				ng-click="startFreeTrial('track-changes')"
+				ng-click="startFreeTrial('real-time-track-changes')"
+				ng-show="project.owner._id == user.id"
 			) Try it for free
+			p(ng-show="project.owner._id != user.id"): strong Please ask the project owner to upgrade to use track changes
 
 	.modal-footer()
 		button.btn.btn-default(

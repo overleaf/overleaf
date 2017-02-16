@@ -11,7 +11,7 @@ describe 'AnnouncementsHandler', ->
 
 	beforeEach ->
 		@user = 
-			_id:"some_id"
+			_id:"3c6afe000000000000000000" #2002-02-14T00:00:00.000Z
 			email: "someone@gmail.com"
 		@AnalyticsManager =
 			getLastOccurance: sinon.stub()
@@ -36,10 +36,10 @@ describe 'AnnouncementsHandler', ->
 					id: '/2013/08/02/thesis-series-pt1' 
 				}, {
 					date: new Date(1108369600000),
-					id: '/2011/08/04/somethingelse'
+					id: '/2005/08/04/somethingelse'
 				}, {
 					date: new Date(1208369600000),
-					id: '/2014/04/12/title-date-irrelivant'
+					id: '/2008/04/12/title-date-irrelivant'
 				}
 			]
 			@BlogHandler.getLatestAnnouncements.callsArgWith(0, null, @stubbedAnnouncements)
@@ -64,7 +64,7 @@ describe 'AnnouncementsHandler', ->
 				done()
 
 		it "should return older ones marked as read as well", (done)->
-			@AnalyticsManager.getLastOccurance.callsArgWith(2, null, {segmentation:{blogPostId:"/2014/04/12/title-date-irrelivant"}})
+			@AnalyticsManager.getLastOccurance.callsArgWith(2, null, {segmentation:{blogPostId:"/2008/04/12/title-date-irrelivant"}})
 			@handler.getUnreadAnnouncements @user, (err, announcements)=>
 				announcements[0].id.should.equal @stubbedAnnouncements[0].id
 				announcements[0].read.should.equal false
@@ -87,6 +87,21 @@ describe 'AnnouncementsHandler', ->
 				announcements[1].read.should.equal true
 				announcements[2].read.should.equal true
 				announcements[3].read.should.equal true
+				done()
+
+		it "should return posts older than signup date as read", (done)->
+			@stubbedAnnouncements.push({
+					date: new Date(978836800000),
+					id: '/2001/04/12/title-date-irrelivant'
+			})
+			@AnalyticsManager.getLastOccurance.callsArgWith(2, null, [])
+			@handler.getUnreadAnnouncements @user, (err, announcements)=>
+				announcements[0].read.should.equal false
+				announcements[1].read.should.equal false
+				announcements[2].read.should.equal false
+				announcements[3].read.should.equal false
+				announcements[4].read.should.equal true
+				announcements[4].id.should.equal '/2001/04/12/title-date-irrelivant'
 				done()
 
 
