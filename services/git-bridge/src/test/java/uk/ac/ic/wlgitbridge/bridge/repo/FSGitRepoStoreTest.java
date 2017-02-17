@@ -47,7 +47,9 @@ public class FSGitRepoStoreTest {
 
     @Test
     public void testPurgeNonexistentProjects() {
-        File toDelete = new File(repoStore.getRootDirectory(), "idontexist");
+        File toDelete = new File(
+                repoStore.getRootDirectory(), "idontexist"
+        );
         File wlgb = new File(repoStore.getRootDirectory(), ".wlgb");
         assertTrue(toDelete.exists());
         assertTrue(wlgb.exists());

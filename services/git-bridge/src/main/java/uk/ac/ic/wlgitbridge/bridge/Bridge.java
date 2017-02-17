@@ -5,6 +5,8 @@ import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
 import uk.ac.ic.wlgitbridge.bridge.db.ProjectState;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.SqliteDBStore;
+import uk.ac.ic.wlgitbridge.bridge.gc.GcJob;
+import uk.ac.ic.wlgitbridge.bridge.gc.GcJobImpl;
 import uk.ac.ic.wlgitbridge.bridge.lock.LockGuard;
 import uk.ac.ic.wlgitbridge.bridge.lock.ProjectLock;
 import uk.ac.ic.wlgitbridge.bridge.repo.FSGitRepoStore;
@@ -145,6 +147,7 @@ public class Bridge {
     private final DBStore dbStore;
     private final SwapStore swapStore;
     private final SwapJob swapJob;
+    private final GcJob gcJob;
 
     private final SnapshotAPI snapshotAPI;
     private final ResourceCache resourceCache;
@@ -183,6 +186,7 @@ public class Bridge {
                         dbStore,
                         swapStore
                 ),
+                new GcJobImpl(repoStore, lock),
                 new NetSnapshotAPI(),
                 new UrlResourceCache(dbStore)
         );
@@ -197,6 +201,7 @@ public class Bridge {
      * @param dbStore the {@link DBStore} to use
      * @param swapStore the {@link SwapStore} to use
      * @param swapJob the {@link SwapJob} to use
+     * @param gcJob
      * @param snapshotAPI the {@link SnapshotAPI} to use
      * @param resourceCache the {@link ResourceCache} to use
      */
@@ -206,6 +211,7 @@ public class Bridge {
             DBStore dbStore,
             SwapStore swapStore,
             SwapJob swapJob,
+            GcJob gcJob,
             SnapshotAPI snapshotAPI,
             ResourceCache resourceCache
     ) {
@@ -216,6 +222,7 @@ public class Bridge {
         this.snapshotAPI = snapshotAPI;
         this.resourceCache = resourceCache;
         this.swapJob = swapJob;
+        this.gcJob = gcJob;
         postbackManager = new PostbackManager();
         Runtime.getRuntime().addShutdownHook(new Thread(this::doShutdown));
         repoStore.purgeNonexistentProjects(dbStore.getProjectNames());
@@ -234,6 +241,8 @@ public class Bridge {
         Log.info("Shutdown received.");
         Log.info("Stopping SwapJob");
         swapJob.stop();
+        Log.info("Stopping GcJob");
+        gcJob.stop();
         Log.info("Waiting for projects");
         lock.lockAll();
         Log.info("Bye");
@@ -243,8 +252,9 @@ public class Bridge {
      * Starts the swap job, which will begin checking whether projects should be
      * swapped with a configurable frequency.
      */
-    public void startSwapJob() {
+    public void startBackgroundJobs() {
         swapJob.start();
+        gcJob.start();
     }
 
     /**
@@ -348,8 +358,12 @@ public class Bridge {
      *
      * 1. Queries the project state for the given project name.
      *    a. NOT_PRESENT = We've never seen it before, and the row for the
-     *                     project doesn't even exist.
-     *    b. PRESENT = The
+     *                     project doesn't even exist. The project definitely
+     *                     exists because
+     *                     {@link #projectExists(Credential, String)} would
+     *                     have had to return true to get here.
+     *    b. PRESENT = The project is on disk.
+     *    c. SWAPPED = The project is in the {@link SwapStore}
      *
      * If the project has never been cloned, it is git init'd. If the project
      * is in swap, it is restored to disk. Otherwise, the project was already

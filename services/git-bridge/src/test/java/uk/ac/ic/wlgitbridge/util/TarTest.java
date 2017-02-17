@@ -35,18 +35,20 @@ public class TarTest {
 
     @Test
     public void tarAndUntarProducesTheSameResult() throws IOException {
-        InputStream tar = Tar.tar(testDir);
-        Tar.untar(tar, tmpDir);
-        File untarred = new File(tmpDir, "testdir");
-        assertTrue(Files.contentsAreEqual(testDir, untarred));
+        try (InputStream tar = Tar.tar(testDir)) {
+            Tar.untar(tar, tmpDir);
+            File untarred = new File(tmpDir, "testdir");
+            assertTrue(Files.contentsAreEqual(testDir, untarred));
+        }
     }
 
     @Test
     public void tarbz2AndUntarbz2ProducesTheSameResult() throws IOException {
-        InputStream tarbz2 = Tar.bz2.zip(testDir);
-        Tar.bz2.unzip(tarbz2, tmpDir);
-        File unzipped = new File(tmpDir, "testdir");
-        assertTrue(Files.contentsAreEqual(testDir, unzipped));
+        try (InputStream tarbz2 = Tar.bz2.zip(testDir)) {
+            Tar.bz2.unzip(tarbz2, tmpDir);
+            File unzipped = new File(tmpDir, "testdir");
+            assertTrue(Files.contentsAreEqual(testDir, unzipped));
+        }
     }
 
 }
