@@ -197,6 +197,7 @@ describe "RedisManager", ->
 			@rclient.expire = sinon.stub()
 			@rclient.ltrim = sinon.stub()
 			@rclient.del = sinon.stub()
+			@rclient.eval = sinon.stub()
 			@RedisManager.getDocVersion = sinon.stub()
 			
 			@lines = ["one", "two", "three"]
@@ -218,8 +219,8 @@ describe "RedisManager", ->
 					.should.equal true
 		
 			it "should set the doclines", ->
-				@rclient.set
-					.calledWith("doclines:#{@doc_id}", JSON.stringify(@lines))
+				@rclient.eval
+					.calledWith(sinon.match(/redis.call/), 1, "doclines:#{@doc_id}", JSON.stringify(@lines))
 					.should.equal true
 				
 			it "should set the version", ->
@@ -279,8 +280,8 @@ describe "RedisManager", ->
 					.should.equal false
 		
 			it "should still set the doclines", ->
-				@rclient.set
-					.calledWith("doclines:#{@doc_id}", JSON.stringify(@lines))
+				@rclient.eval
+					.calledWith(sinon.match(/redis.call/), 1, "doclines:#{@doc_id}", JSON.stringify(@lines))
 					.should.equal true
 		
 		describe "with empty ranges", ->
@@ -303,6 +304,7 @@ describe "RedisManager", ->
 			@rclient.set = sinon.stub()
 			@rclient.sadd = sinon.stub().yields()
 			@rclient.del = sinon.stub()
+			@rclient.eval = sinon.stub()
 			@rclient.exec.yields()
 			@lines = ["one", "two", "three"]
 			@version = 42
@@ -314,8 +316,8 @@ describe "RedisManager", ->
 				@RedisManager.putDocInMemory @project_id, @doc_id, @lines, @version, @ranges, done
 			
 			it "should set the lines", ->
-				@rclient.set
-					.calledWith("doclines:#{@doc_id}", JSON.stringify @lines)
+				@rclient.eval
+					.calledWith(sinon.match(/redis.call/), 1, "doclines:#{@doc_id}", JSON.stringify(@lines))
 					.should.equal true
 			
 			it "should set the version", ->
