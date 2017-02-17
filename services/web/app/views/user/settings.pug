@@ -107,7 +107,7 @@ block content
 													span.small.text-primary(ng-show="changePasswordForm.newPassword2.$error.areEqual && changePasswordForm.newPassword2.$dirty")
 														| #{translate("doesnt_match")} 
 													span.small.text-primary(ng-show="!changePasswordForm.newPassword2.$error.areEqual && changePasswordForm.newPassword2.$invalid && changePasswordForm.newPassword2.$dirty")
-														| #{translate("Invalid Password")} 
+														| #{translate("invalid_password")} 
 												.actions
 													button.btn.btn-primary(
 														type='submit',
