@@ -100,7 +100,9 @@
 				)
 					i.fa.fa-angle-down
 
-			.rp-overview-file-entries(ng-class="{ 'rp-overview-file-entries-collapsed' : reviewPanel.overview.docsCollapsedState[doc.doc.id] }")
+			.rp-overview-file-entries(
+				review-panel-collapse-height="reviewPanel.overview.docsCollapsedState[doc.doc.id]"
+			)
 				.rp-entry-wrapper(
 					ng-repeat="(entry_id, entry) in reviewPanel.entries[doc.doc.id] | orderOverviewEntries"
 					ng-if="!(entry.type === 'comment' && reviewPanel.commentThreads[entry.thread_id].resolved === true)"
