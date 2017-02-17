@@ -302,7 +302,7 @@ div.full-size.pdf(ng-controller="PdfController")
 			.alert.alert-danger(ng-show="pdf.validation.conflictedPaths")
 				div
 					strong #{translate("conflicting_paths_found")}
-				div #{translate("following_paths_conflict")}
+				div !{translate("following_paths_conflict")}
 				div
 					li(ng-repeat="entry in pdf.validation.conflictedPaths") {{ '/'+entry['path'] }}
 
