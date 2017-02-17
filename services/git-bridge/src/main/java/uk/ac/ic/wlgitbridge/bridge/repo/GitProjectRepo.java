@@ -125,11 +125,6 @@ public class GitProjectRepo implements ProjectRepo {
                     proc.getErrorStream(),
                     StandardCharsets.UTF_8
             ));
-            try {
-                Thread.sleep(1000000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             throw new IOException("git gc error");
         }
         Log.info("[{}] git gc successful", projectName);
