@@ -281,7 +281,7 @@ script(type='text/ng-template', id='resolvedCommentEntryTemplate')
 					span.rp-entry-user(
 						style="color: hsl({{ thread.resolved_by_user.hue }}, 70%, 40%);"
 					) {{ thread.resolved_by_user.name }}:&nbsp;
-					| #{translate("mark_as_resolveded")}.
+					| #{translate("mark_as_resolved")}.
 				.rp-entry-metadata
 					| {{ thread.resolved_at | date : 'MMM d, y h:mm a' }}
 				
