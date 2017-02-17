@@ -410,14 +410,10 @@ load = (EventEmitter) ->
 				@emit "changes:moved", moved_changes
 
 		_addOp: (op, metadata) ->
-			# Don't take a reference to the existing op since we'll modify this in place with future changes
-			clone_op = {}
-			for k,v of op
-				clone_op[k] = v
 			change = {
 				id: @newId()
-				op: clone_op
-				metadata: metadata
+				op: @_clone(op) # Don't take a reference to the existing op since we'll modify this in place with future changes
+				metadata: @_clone(metadata)
 			}
 			@changes.push change
 
@@ -489,6 +485,11 @@ load = (EventEmitter) ->
 				else # Only update to the current change if we haven't removed it.
 					previous_change = change
 			return { moved_changes, remove_changes }
+		
+		_clone: (object) ->
+			clone = {}
+			(clone[k] = v for k,v of object)
+			return clone
 
 if define?
 	define ["utils/EventEmitter"], load
