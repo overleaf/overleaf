@@ -181,6 +181,19 @@
 	}
 }
 
+// Hack to solve an issue where scrollbars aren't visible in Safari.
+// Safari seems to clip part of the scrollbar element. By giving the 
+// element a background, we're telling Safari that it *really* needs to 
+// paint the whole area. See https://github.com/ajaxorg/ace/issues/2872
+.ace_scrollbar-inner {
+	background-color: #FFF;
+	opacity: 0.01;
+
+	.ace_dark & {
+		background-color: #000;
+	}
+}
+
 .ui-layout-resizer {
 	width: 6px;
 	background-color: #f4f4f4;
