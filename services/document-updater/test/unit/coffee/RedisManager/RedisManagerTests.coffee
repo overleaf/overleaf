@@ -197,6 +197,7 @@ describe "RedisManager", ->
 			@rclient.expire = sinon.stub()
 			@rclient.ltrim = sinon.stub()
 			@rclient.del = sinon.stub()
+			@rclient.eval = sinon.stub()
 			@RedisManager.getDocVersion = sinon.stub()
 			
 			@lines = ["one", "two", "three"]
@@ -205,7 +206,7 @@ describe "RedisManager", ->
 			@hash = crypto.createHash('sha1').update(JSON.stringify(@lines)).digest('hex')
 			@ranges = { comments: "mock", entries: "mock" }
 
-			@rclient.exec = sinon.stub().callsArg(0)
+			@rclient.exec = sinon.stub().callsArg(0, null, [@hash])
 
 		describe "with a consistent version", ->
 			beforeEach ->
@@ -218,8 +219,8 @@ describe "RedisManager", ->
 					.should.equal true
 		
 			it "should set the doclines", ->
-				@rclient.set
-					.calledWith("doclines:#{@doc_id}", JSON.stringify(@lines))
+				@rclient.eval
+					.calledWith(sinon.match(/redis.call/), 1, "doclines:#{@doc_id}", JSON.stringify(@lines))
 					.should.equal true
 				
 			it "should set the version", ->
@@ -254,6 +255,10 @@ describe "RedisManager", ->
 
 			it "should call the callback", ->
 				@callback.called.should.equal true
+
+			it 'should not log any errors', ->
+				@logger.error.calledWith()
+					.should.equal false
 		
 		describe "with an inconsistent version", ->
 			beforeEach ->
@@ -279,8 +284,8 @@ describe "RedisManager", ->
 					.should.equal false
 		
 			it "should still set the doclines", ->
-				@rclient.set
-					.calledWith("doclines:#{@doc_id}", JSON.stringify(@lines))
+				@rclient.eval
+					.calledWith(sinon.match(/redis.call/), 1, "doclines:#{@doc_id}", JSON.stringify(@lines))
 					.should.equal true
 		
 		describe "with empty ranges", ->
@@ -298,15 +303,30 @@ describe "RedisManager", ->
 					.calledWith("Ranges:#{@doc_id}")
 					.should.equal true
 
+		describe "with a corrupted write", ->
+			beforeEach ->
+				@badHash = "INVALID-HASH-VALUE"
+				@rclient.exec = sinon.stub().callsArgWith(0, null, [@badHash])
+				@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version - @ops.length)
+				@RedisManager.updateDocument @doc_id, @lines, @version, @ops, @ranges, @callback
+
+			it 'should log a hash error', ->
+				@logger.error.calledWith()
+					.should.equal true
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
 	describe "putDocInMemory", ->
 		beforeEach ->
 			@rclient.set = sinon.stub()
 			@rclient.sadd = sinon.stub().yields()
 			@rclient.del = sinon.stub()
-			@rclient.exec.yields()
+			@rclient.eval = sinon.stub()
 			@lines = ["one", "two", "three"]
 			@version = 42
 			@hash = crypto.createHash('sha1').update(JSON.stringify(@lines)).digest('hex')
+			@rclient.exec = sinon.stub().callsArgWith(0, null, [@hash])
 			@ranges = { comments: "mock", entries: "mock" }
 		
 		describe "with non-empty ranges", ->
@@ -314,8 +334,8 @@ describe "RedisManager", ->
 				@RedisManager.putDocInMemory @project_id, @doc_id, @lines, @version, @ranges, done
 			
 			it "should set the lines", ->
-				@rclient.set
-					.calledWith("doclines:#{@doc_id}", JSON.stringify @lines)
+				@rclient.eval
+					.calledWith(sinon.match(/redis.call/), 1, "doclines:#{@doc_id}", JSON.stringify(@lines))
 					.should.equal true
 			
 			it "should set the version", ->
@@ -342,6 +362,10 @@ describe "RedisManager", ->
 				@rclient.sadd
 					.calledWith("DocsIn:#{@project_id}", @doc_id)
 					.should.equal true
+
+			it 'should not log any errors', ->
+				@logger.error.calledWith()
+					.should.equal false
 	
 		describe "with empty ranges", ->
 			beforeEach (done) ->
@@ -356,6 +380,15 @@ describe "RedisManager", ->
 				@rclient.set
 					.calledWith("Ranges:#{@doc_id}", JSON.stringify(@ranges))
 					.should.equal false
+
+		describe "with a corrupted write", ->
+			beforeEach (done) ->
+				@rclient.exec = sinon.stub().callsArgWith(0, null, ["INVALID-HASH-VALUE"])
+				@RedisManager.putDocInMemory @project_id, @doc_id, @lines, @version, @ranges, done
+
+			it 'should log a hash error', ->
+				@logger.error.calledWith()
+					.should.equal true
 
 	describe "removeDocFromMemory", ->
 		beforeEach (done) ->
