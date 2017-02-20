@@ -49,11 +49,11 @@
 	}
 
 	&[disabled] {
-		opacity: 0.5;
+		background-color: tint(@rp-highlight-blue, 50%);
 
 		&:hover,
 		&:focus {
-			background-color: @rp-highlight-blue;
+			background-color: tint(@rp-highlight-blue, 50%);
 		}
 	}
 }
