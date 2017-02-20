@@ -2,6 +2,8 @@
 
 # npm rebuild
 
+sleep 60
+
 echo ">> Starting server..."
 
 grunt --no-color forever:app:start
