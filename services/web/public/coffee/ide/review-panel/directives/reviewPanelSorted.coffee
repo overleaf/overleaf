@@ -33,6 +33,7 @@ define [
 							entry.$layout_el = entry.$box_el
 						else
 							entry.$layout_el = entry.$indicator_el
+						entry.height = entry.$layout_el.height() # Do all of our DOM reads first for perfomance, see http://wilsonpage.co.uk/preventing-layout-thrashing/
 						entries.push entry
 					entries.sort (a,b) -> a.scope.entry.offset - b.scope.entry.offset
 					
@@ -69,7 +70,7 @@ define [
 					previousBottom = focused_entry_top + focused_entry.$layout_el.height()
 					for entry in entries_after
 						original_top = entry.scope.entry.screenPos.y
-						height = entry.$layout_el.height()
+						height = entry.height
 						top = Math.max(original_top, previousBottom + PADDING)
 						previousBottom = top + height
 						entry.$box_el.css(top: top)
@@ -83,7 +84,7 @@ define [
 					entries_before.reverse() # Work through backwards, starting with the one just above
 					for entry, i in entries_before
 						original_top = entry.scope.entry.screenPos.y
-						height = entry.$layout_el.height()
+						height = entry.height
 						original_bottom = original_top + height
 						bottom = Math.min(original_bottom, previousTop - PADDING)
 						top = bottom - height
