@@ -11,6 +11,13 @@ crypto = require "crypto"
 # Make times easy to read
 minutes = 60 # seconds for Redis expire
 
+# LUA script to write document and return hash
+# arguments: docLinesKey docLines
+setScript = """
+	redis.call('set', KEYS[1], ARGV[1])
+	return redis.sha1hex(ARGV[1])
+"""
+
 module.exports = RedisManager =
 	rclient: rclient
 
@@ -24,7 +31,7 @@ module.exports = RedisManager =
 		logger.log project_id:project_id, doc_id:doc_id, version: version, hash:docHash, "putting doc in redis"
 		ranges = RedisManager._serializeRanges(ranges)
 		multi = rclient.multi()
-		multi.set keys.docLines(doc_id:doc_id), docLines
+		multi.eval setScript, 1, keys.docLines(doc_id:doc_id), docLines
 		multi.set keys.projectKey({doc_id:doc_id}), project_id
 		multi.set keys.docVersion(doc_id:doc_id), version
 		multi.set keys.docHash(doc_id:doc_id), docHash
@@ -32,8 +39,13 @@ module.exports = RedisManager =
 			multi.set keys.ranges(doc_id:doc_id), ranges
 		else
 			multi.del keys.ranges(doc_id:doc_id)
-		multi.exec (error) ->
+		multi.exec (error, result) ->
 			return callback(error) if error?
+			# check the hash computed on the redis server
+			writeHash = result?[0]
+			if writeHash? and writeHash isnt docHash
+				logger.error project_id: project_id, doc_id: doc_id, writeHash: writeHash, origHash: docHash, "hash mismatch on putDocInMemory"
+			# update docsInProject set
 			rclient.sadd keys.docsInProject(project_id:project_id), doc_id, callback
 
 	removeDocFromMemory : (project_id, doc_id, _callback)->
@@ -136,7 +148,7 @@ module.exports = RedisManager =
 			multi = rclient.multi()
 			newDocLines = JSON.stringify(docLines)
 			newHash = RedisManager._computeHash(newDocLines)
-			multi.set    keys.docLines(doc_id:doc_id), newDocLines
+			multi.eval setScript, 1, keys.docLines(doc_id:doc_id), newDocLines
 			multi.set    keys.docVersion(doc_id:doc_id), newVersion
 			multi.set    keys.docHash(doc_id:doc_id), newHash
 			if jsonOps.length > 0
@@ -148,8 +160,12 @@ module.exports = RedisManager =
 				multi.set keys.ranges(doc_id:doc_id), ranges
 			else
 				multi.del keys.ranges(doc_id:doc_id)
-			multi.exec (error, replys) ->
+			multi.exec (error, result) ->
 					return callback(error) if error?
+					# check the hash computed on the redis server
+					writeHash = result?[0]
+					if writeHash? and writeHash isnt newHash
+						logger.error doc_id: doc_id, writeHash: writeHash, origHash: newHash, "hash mismatch on updateDocument"
 					return callback()
 
 	getDocIdsInProject: (project_id, callback = (error, doc_ids) ->) ->
