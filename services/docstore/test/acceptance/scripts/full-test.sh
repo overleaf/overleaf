@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-npm rebuild
+# npm rebuild
 
 echo ">> Starting server..."
 
