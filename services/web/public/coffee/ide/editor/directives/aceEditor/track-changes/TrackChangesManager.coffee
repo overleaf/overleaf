@@ -307,7 +307,7 @@ define [
 			@$scope.$apply()
 
 		recalculateVisibleEntries: () ->
-			OFFSCREEN_ROWS = 5
+			OFFSCREEN_ROWS = 20
 			CULL_AFTER = 100 # With less than this number of entries, don't bother culling to avoid little UI jumps when scrolling.
 			{firstRow, lastRow} = @editor.renderer.layerConfig
 			entries = @_getCurrentDocEntries() or {}
