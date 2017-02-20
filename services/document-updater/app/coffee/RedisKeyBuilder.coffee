@@ -28,6 +28,8 @@ module.exports = RedisKeyBuilder =
 		return (key_schema) -> key_schema.docOps({doc_id})
 	docVersion: ({doc_id}) ->
 		return (key_schema) -> key_schema.docVersion({doc_id})
+	docHash: ({doc_id}) ->
+		return (key_schema) -> key_schema.docHash({doc_id})
 	projectKey: ({doc_id}) ->
 		return (key_schema) -> key_schema.projectKey({doc_id})
 	uncompressedHistoryOp: ({doc_id}) ->
