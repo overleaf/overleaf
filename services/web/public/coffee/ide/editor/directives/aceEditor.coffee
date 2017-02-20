@@ -184,6 +184,23 @@ define [
 							session = editor.getSession()
 							session.setScrollTop(session.getScrollTop() + newScreenPosition - previousScreenPosition)
 
+				scope.$on "#{scope.name}:set-scroll-size", (e, size) ->
+					# Make sure that the editor has enough scroll margin above and below
+					# to scroll the review panel with the given size
+					marginChanged = false
+					if editor.renderer.scrollMargin.top != size.overflowTop
+						window.editors[0].renderer.scrollMargin.top = size.overflowTop
+						marginChanged = true
+
+					maxHeight = editor.renderer.layerConfig.maxHeight
+					marginBottom = Math.max(size.height - maxHeight, 0)
+					if editor.renderer.scrollMargin.bottom != marginBottom
+						editor.renderer.scrollMargin.bottom = marginBottom
+						marginChanged = true
+
+					if marginChanged
+						editor.renderer.updateFull()
+
 				scope.$watch "theme", (value) ->
 					editor.setTheme("ace/theme/#{value}")
 

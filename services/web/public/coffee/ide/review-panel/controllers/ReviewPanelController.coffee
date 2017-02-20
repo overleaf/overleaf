@@ -39,6 +39,9 @@ define [
 			$timeout () ->
 				$scope.$broadcast "review-panel:layout"
 
+		$scope.$on "review-panel:sizes", (e, sizes) ->
+			$scope.$broadcast "editor:set-scroll-size", sizes
+
 		$scope.$watch "ui.pdfLayout", (layout) ->
 			$scope.reviewPanel.layoutToLeft = (layout == "flat")
 		
