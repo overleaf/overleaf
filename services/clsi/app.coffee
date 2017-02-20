@@ -176,7 +176,12 @@ server = net.createServer (socket) ->
 		socket.destroy()
 
 	currentLoad = os.loadavg()[0]
-	availableWorkingCpus = os.cpus().length - 1
+
+	if os.cpus().length == 1
+		availableWorkingCpus = 1
+	else
+		availableWorkingCpus = os.cpus().length - 1
+		
 	freeLoad = availableWorkingCpus - currentLoad
 	freeLoadPercentage = Math.round((freeLoad / availableWorkingCpus) * 100)
 	if freeLoadPercentage <= 0
