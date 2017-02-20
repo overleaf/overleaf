@@ -304,7 +304,7 @@ script(type='text/ng-template', id='addCommentEntryTemplate')
 		.rp-entry-indicator(
 			ng-if="!commentState.adding"
 			ng-click="startNewComment(); onIndicatorClick();"
-			tooltip="Add a comment"
+			tooltip=translate("add_comment")
 			tooltip-placement="{{ layoutToLeft ? 'left' : 'right' }}"
 			tooltip-append-to-body="true"
 		)
@@ -351,7 +351,7 @@ script(type='text/ng-template', id='resolvedCommentsDropdownTemplate')
 		a.resolved-comments-toggle(
 			href
 			ng-click="toggleOpenState();"
-			tooltip="Resolved Comments"
+			tooltip=translate("resolved_comments")
 			tooltip-placement="bottom"
 			tooltip-append-to-body="true"
 		)
