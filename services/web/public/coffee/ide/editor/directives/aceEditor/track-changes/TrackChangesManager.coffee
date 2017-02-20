@@ -60,6 +60,18 @@ define [
 			onChangeSession = (e) =>
 				@clearAnnotations()
 				@redrawAnnotations()
+				@editor.session.on "changeScrollTop", onChangeScroll
+
+			_scrollTimeout = null
+			onChangeScroll = () =>
+				if _scrollTimeout?
+					return
+				else
+					_scrollTimeout = setTimeout () =>
+						@recalculateVisibleEntries()
+						@$scope.$apply()
+						_scrollTimeout = null
+					, 200
 
 			bindToAce = () =>
 				@editor.on "changeSelection", onChangeSelection
@@ -282,6 +294,7 @@ define [
 		recalculateReviewEntriesScreenPositions: () ->
 			session = @editor.getSession()
 			renderer = @editor.renderer
+			{firstRow, lastRow} = renderer.layerConfig
 			entries = @_getCurrentDocEntries()
 			for entry_id, entry of entries or {}
 				doc_position = @_shareJsOffsetToAcePosition(entry.offset)
@@ -290,9 +303,24 @@ define [
 				entry.screenPos ?= {}
 				entry.screenPos.y = y
 				entry.docPos = doc_position
-
+			@recalculateVisibleEntries()
 			@$scope.$apply()
-	
+
+		recalculateVisibleEntries: () ->
+			OFFSCREEN_ROWS = 5
+			CULL_AFTER = 100 # With less than this number of entries, don't bother culling to avoid little UI jumps when scrolling.
+			{firstRow, lastRow} = @editor.renderer.layerConfig
+			entries = @_getCurrentDocEntries() or {}
+			entriesLength = Object.keys(entries).length
+			changed = false
+			for entry_id, entry of entries
+				old = entry.visible
+				entry.visible = (entriesLength < CULL_AFTER) or (firstRow - OFFSCREEN_ROWS <= entry.docPos.row <= lastRow + OFFSCREEN_ROWS)
+				if (entry.visible != old)
+					changed = true
+			if changed
+				@$scope.$emit "editor:track-changes:visibility_changed"
+
 		_getCurrentDocEntries: () ->
 			doc_id = @$scope.docId
 			entries = @$scope.reviewPanel.entries[doc_id] ?= {}
