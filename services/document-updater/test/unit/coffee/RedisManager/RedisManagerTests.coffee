@@ -59,7 +59,12 @@ describe "RedisManager", ->
 				@rclient.get
 					.calledWith("DocVersion:#{@doc_id}")
 					.should.equal true
-			
+
+			it 'should get the hash', ->
+				@rclient.get
+					.calledWith("DocHash:#{@doc_id}")
+					.should.equal true
+
 			it "should get the ranges", ->
 				@rclient.get
 					.calledWith("Ranges:#{@doc_id}")
@@ -69,6 +74,26 @@ describe "RedisManager", ->
 				@callback
 					.calledWith(null, @lines, @version, @ranges)
 					.should.equal true
+
+			it 'should not log any errors', ->
+				@logger.error.calledWith()
+					.should.equal false
+
+		describe "with a corrupted document", ->
+			beforeEach ->
+				@badHash = "INVALID-HASH-VALUE"
+				@rclient.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version, @badHash, @project_id, @json_ranges])
+				@RedisManager.getDoc @project_id, @doc_id, @callback
+
+			it 'should log a hash error', ->
+				@logger.error.calledWith()
+					.should.equal true
+
+			it 'should return the document', ->
+				@callback
+					.calledWith(null, @lines, @version, @ranges)
+					.should.equal true
+
 
 		describe "getDoc with an invalid project id", ->
 			beforeEach ->
@@ -177,6 +202,7 @@ describe "RedisManager", ->
 			@lines = ["one", "two", "three"]
 			@ops = [{ op: [{ i: "foo", p: 4 }] },{ op: [{ i: "bar", p: 8 }] }]
 			@version = 42
+			@hash = crypto.createHash('sha1').update(JSON.stringify(@lines)).digest('hex')
 			@ranges = { comments: "mock", entries: "mock" }
 
 			@rclient.exec = sinon.stub().callsArg(0)
@@ -199,6 +225,11 @@ describe "RedisManager", ->
 			it "should set the version", ->
 				@rclient.set
 					.calledWith("DocVersion:#{@doc_id}", @version)
+					.should.equal true
+
+			it "should set the hash", ->
+				@rclient.set
+					.calledWith("DocHash:#{@doc_id}", @hash)
 					.should.equal true
 				
 			it "should set the ranges", ->
@@ -275,6 +306,7 @@ describe "RedisManager", ->
 			@rclient.exec.yields()
 			@lines = ["one", "two", "three"]
 			@version = 42
+			@hash = crypto.createHash('sha1').update(JSON.stringify(@lines)).digest('hex')
 			@ranges = { comments: "mock", entries: "mock" }
 		
 		describe "with non-empty ranges", ->
@@ -289,6 +321,11 @@ describe "RedisManager", ->
 			it "should set the version", ->
 				@rclient.set
 					.calledWith("DocVersion:#{@doc_id}", @version)
+					.should.equal true
+
+			it "should set the hash", ->
+				@rclient.set
+					.calledWith("DocHash:#{@doc_id}", @hash)
 					.should.equal true
 				
 			it "should set the ranges", ->
@@ -335,6 +372,11 @@ describe "RedisManager", ->
 		it "should delete the version", ->
 			@rclient.del
 				.calledWith("DocVersion:#{@doc_id}")
+				.should.equal true
+
+		it "should delete the hash", ->
+			@rclient.del
+				.calledWith("DocHash:#{@doc_id}")
 				.should.equal true
 		
 		it "should delete the project_id for the doc", ->
