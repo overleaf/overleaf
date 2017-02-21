@@ -4,7 +4,7 @@ define [
 	"ide/colors/ColorManager"
 	"ide/review-panel/RangesTracker"
 ], (App, EventEmitter, ColorManager, RangesTracker) ->
-	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout, $http, $modal, event_tracking) ->
+	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout, $http, $modal, event_tracking, localStorage) ->
 		$reviewPanelEl = $element.find "#review-panel"
 
 		$scope.SubViews =
@@ -27,6 +27,16 @@ define [
 			layoutToLeft: false
 			rendererData: {}
 			loadingThreads: false
+
+		$scope.$on "project:joined", () ->
+			$scope.reviewPanel.overview.docsCollapsedState = JSON.parse(localStorage("docs_collapsed_state:#{$scope.project_id}")) or {}
+
+		window.addEventListener "beforeunload", () ->
+			collapsedStates = {}
+			for doc, state of $scope.reviewPanel.overview.docsCollapsedState
+				collapsedStates[doc] = state if state is true
+			valToStore = if Object.keys(collapsedStates).length > 0 then JSON.stringify(collapsedStates) else null
+			localStorage("docs_collapsed_state:#{$scope.project_id}", valToStore)
 
 		$scope.$on "layout:pdf:linked", (event, state) ->
 			$scope.reviewPanel.layoutToLeft = (state.east?.size < 220 || state.east?.initClosed)
