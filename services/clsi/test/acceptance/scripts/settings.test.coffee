@@ -21,6 +21,7 @@ module.exports =
 		#strace: true
 		#archive_logs: true
 		commandRunner: "docker-runner-sharelatex"
+		latexmkCommandPrefix: ["/usr/bin/time", "-v"]         # on Linux
 		docker:
 			image: "texlive-full:2016.1-opt"
 			env:
@@ -29,7 +30,6 @@ module.exports =
 			modem:
 				socketPath: false
 			user: "111"
-			latexmkCommandPrefix: ["/usr/bin/time", "-v"]         # on Linux
 
 	internal:
 		clsi:
