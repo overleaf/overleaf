@@ -62,7 +62,7 @@ define [
 							$callout_el.css(top: top + line_height, height: original_top - top)
 
 					# Put the focused entry as close to where it wants to be as possible
-					focused_entry_top = focused_entry.scope.entry.screenPos.y
+					focused_entry_top = Math.max(focused_entry.scope.entry.screenPos.y, TOOLBAR_HEIGHT)
 					focused_entry.$box_el.css(top: focused_entry_top)
 					focused_entry.$indicator_el.css(top: focused_entry_top)
 					positionLayoutEl(focused_entry.$callout_el, focused_entry.scope.entry.screenPos.y, focused_entry_top)
