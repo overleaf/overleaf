@@ -2,4 +2,8 @@ define [
 	"base"
 ], (App) ->
 	app.filter "numKeys", () ->
-		(object) -> Object.keys(object).length
+		(object) -> 
+			if object?
+				return Object.keys(object).length
+			else
+				return 0
