@@ -47,6 +47,7 @@
 		.rp-entry-list-inner
 			.rp-entry-wrapper(
 				ng-repeat="(entry_id, entry) in reviewPanel.entries[editor.open_doc_id]"
+				ng-if="entry.visible"
 			)
 				div(ng-if="entry.type === 'insert' || entry.type === 'delete'")
 					change-entry(
