@@ -19,7 +19,7 @@ define [
 			openSubView: $scope.SubViews.CUR_FILE
 			overview:
 				loading: false
-				docsCollapsedState: {}
+				docsCollapsedState: JSON.parse(localStorage("docs_collapsed_state:#{$scope.project_id}")) or {}
 			dropdown:
 				loading: false
 			commentThreads: {}
@@ -28,13 +28,11 @@ define [
 			rendererData: {}
 			loadingThreads: false
 
-		$scope.$on "project:joined", () ->
-			$scope.reviewPanel.overview.docsCollapsedState = JSON.parse(localStorage("docs_collapsed_state:#{$scope.project_id}")) or {}
-
 		window.addEventListener "beforeunload", () ->
 			collapsedStates = {}
 			for doc, state of $scope.reviewPanel.overview.docsCollapsedState
-				collapsedStates[doc] = state if state is true
+				if state
+					collapsedStates[doc] = state 
 			valToStore = if Object.keys(collapsedStates).length > 0 then JSON.stringify(collapsedStates) else null
 			localStorage("docs_collapsed_state:#{$scope.project_id}", valToStore)
 
