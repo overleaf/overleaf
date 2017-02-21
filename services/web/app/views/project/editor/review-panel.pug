@@ -94,14 +94,14 @@
 				ng-if="reviewPanel.entries[doc.doc.id] | notEmpty"
 				ng-click="reviewPanel.overview.docsCollapsedState[doc.doc.id] = ! reviewPanel.overview.docsCollapsedState[doc.doc.id]"
 			)
+				span.rp-overview-file-header-collapse(
+					ng-class="{ 'rp-overview-file-header-collapse-on': reviewPanel.overview.docsCollapsedState[doc.doc.id] }"
+				)
+					i.fa.fa-angle-right
 				| {{ doc.path }}
 				span.rp-overview-file-num-entries(
 					ng-show="reviewPanel.overview.docsCollapsedState[doc.doc.id]"
 				) &nbsp;({{ reviewPanel.entries[doc.doc.id] | numKeys }})
-				span.rp-overview-file-header-collapse(
-					ng-class="{ 'rp-overview-file-header-collapse-on': reviewPanel.overview.docsCollapsedState[doc.doc.id] }"
-				)
-					i.fa.fa-angle-up
 
 			.rp-overview-file-entries(
 				review-panel-collapse-height="reviewPanel.overview.docsCollapsedState[doc.doc.id]"
