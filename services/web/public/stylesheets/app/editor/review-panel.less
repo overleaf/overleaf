@@ -29,6 +29,8 @@
 
 @rp-toolbar-height      : 32px;
 
+@rp-entry-animation-speed: 0.3s;
+
 
 
 .rp-button() {
@@ -185,7 +187,7 @@
 	border-radius: 3px;
 	color: #FFF;
 	cursor: pointer;
-	transition: top 0.3s, left 0.1s, right 0.1s;
+	transition: top @rp-entry-animation-speed, left 0.1s, right 0.1s;
 	.no-animate & {
 		transition: none;
 	}
@@ -281,7 +283,7 @@
 	border-left: solid @rp-entry-ribbon-width transparent;
 	border-radius: 3px;
 	background-color: #FFF;
-	transition: top 0.3s, left 0.1s, right 0.1s;
+	transition: top @rp-entry-animation-speed, left 0.1s, right 0.1s;
 	.no-animate & {
 		transition: none;
 	}
@@ -499,6 +501,7 @@
 		}
 
 .rp-entry-callout {
+	transition: top @rp-entry-animation-speed, height @rp-entry-animation-speed;
 	.rp-state-current-file & {
 		position: absolute;
 		border-top: 1px solid grey;
