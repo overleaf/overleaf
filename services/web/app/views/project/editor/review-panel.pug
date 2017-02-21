@@ -235,7 +235,7 @@ script(type='text/ng-template', id='commentEntryTemplate')
 					ng-model="entry.replyContent"
 					ng-keypress="handleCommentReplyKeyPress($event);"
 					stop-propagation="click"
-					placeholder="{{ 'Hit \"Enter\" to reply' + (entry.resolved ? ' and re-open' : '') }}"
+					placeholder=translate("hit_enter_to_reply")
 				)
 			.rp-entry-actions
 				button.rp-entry-button(
@@ -325,7 +325,7 @@ script(type='text/ng-template', id='addCommentEntryTemplate')
 						expandable-text-area
 						ng-model="state.content"
 						ng-keypress="handleCommentKeyPress($event);"
-						placeholder="Add your comment here"
+						placeholder=translate("add_your_comment_here")
 						focus-on="comment:new:open"
 						ng-blur="submitNewComment()"
 					)
