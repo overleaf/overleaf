@@ -185,5 +185,8 @@ module.exports = RedisManager =
 			return JSON.parse(ranges)
 
 	_computeHash: (docLines) ->
-		# use sha1 checksum of doclines to detect data corruption
-		return crypto.createHash('sha1').update(docLines).digest('hex')
+		# use sha1 checksum of doclines to detect data corruption.
+		#
+		# note: must specify 'utf8' encoding explicitly, as the default is
+		# binary in node < v5
+		return crypto.createHash('sha1').update(docLines, 'utf8').digest('hex')

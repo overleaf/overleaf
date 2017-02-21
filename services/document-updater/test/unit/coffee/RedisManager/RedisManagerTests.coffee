@@ -37,10 +37,10 @@ describe "RedisManager", ->
 
 	describe "getDoc", ->
 		beforeEach ->
-			@lines = ["one", "two", "three"]
+			@lines = ["one", "two", "three", "これは"] # include some utf8
 			@jsonlines = JSON.stringify @lines
 			@version = 42
-			@hash = crypto.createHash('sha1').update(@jsonlines).digest('hex')
+			@hash = crypto.createHash('sha1').update(@jsonlines,'utf8').digest('hex')
 			@ranges = { comments: "mock", entries: "mock" }
 			@json_ranges = JSON.stringify @ranges
 			@rclient.get = sinon.stub()
@@ -200,10 +200,10 @@ describe "RedisManager", ->
 			@rclient.eval = sinon.stub()
 			@RedisManager.getDocVersion = sinon.stub()
 			
-			@lines = ["one", "two", "three"]
+			@lines = ["one", "two", "three", "これは"]
 			@ops = [{ op: [{ i: "foo", p: 4 }] },{ op: [{ i: "bar", p: 8 }] }]
 			@version = 42
-			@hash = crypto.createHash('sha1').update(JSON.stringify(@lines)).digest('hex')
+			@hash = crypto.createHash('sha1').update(JSON.stringify(@lines),'utf8').digest('hex')
 			@ranges = { comments: "mock", entries: "mock" }
 
 			@rclient.exec = sinon.stub().callsArg(0, null, [@hash])
@@ -323,9 +323,9 @@ describe "RedisManager", ->
 			@rclient.sadd = sinon.stub().yields()
 			@rclient.del = sinon.stub()
 			@rclient.eval = sinon.stub()
-			@lines = ["one", "two", "three"]
+			@lines = ["one", "two", "three", "これは"]
 			@version = 42
-			@hash = crypto.createHash('sha1').update(JSON.stringify(@lines)).digest('hex')
+			@hash = crypto.createHash('sha1').update(JSON.stringify(@lines),'utf8').digest('hex')
 			@rclient.exec = sinon.stub().callsArgWith(0, null, [@hash])
 			@ranges = { comments: "mock", entries: "mock" }
 		
