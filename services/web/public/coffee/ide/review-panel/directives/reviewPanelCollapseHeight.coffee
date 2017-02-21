@@ -12,4 +12,7 @@ define [
 							element.animate { height: 0 }, 150
 						else
 							element.animate { height: neededHeight }, 150
+					else
+						if shouldCollapse
+							element.height 0
 		}
