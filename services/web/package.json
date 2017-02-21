@@ -59,6 +59,7 @@
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
     "sixpack-client": "^1.0.0",
     "temp": "^0.8.3",
+    "translations-sharelatex": "git+https://github.com/sharelatex/translations-sharelatex.git#master",
     "underscore": "1.6.0",
     "v8-profiler": "^5.2.3",
     "xml2js": "0.2.0",
@@ -93,7 +94,6 @@
     "grunt-sed": "^0.1.1",
     "sandboxed-module": "0.2.0",
     "sinon": "",
-    "timekeeper": "",
-    "translations-sharelatex": "git+https://github.com/sharelatex/translations-sharelatex.git#master"
+    "timekeeper": ""
   }
 }
