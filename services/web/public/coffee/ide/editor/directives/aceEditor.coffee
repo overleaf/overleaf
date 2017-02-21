@@ -184,6 +184,28 @@ define [
 							session = editor.getSession()
 							session.setScrollTop(session.getScrollTop() + newScreenPosition - previousScreenPosition)
 
+				scope.$on "#{scope.name}:set-scroll-size", (e, size) ->
+					# Make sure that the editor has enough scroll margin above and below
+					# to scroll the review panel with the given size
+					marginTop = size.overflowTop
+					maxHeight = editor.renderer.layerConfig.maxHeight
+					marginBottom = Math.max(size.height - maxHeight, 0)
+					setScrollMargins(marginTop, marginBottom)
+
+				setScrollMargins = (marginTop, marginBottom) ->
+					marginChanged = false
+					if editor.renderer.scrollMargin.top != marginTop
+						editor.renderer.scrollMargin.top = marginTop
+						marginChanged = true
+					if editor.renderer.scrollMargin.bottom != marginBottom
+						editor.renderer.scrollMargin.bottom = marginBottom
+						marginChanged = true
+					if marginChanged
+						editor.renderer.updateFull()
+
+				resetScrollMargins = () ->
+					setScrollMargins(0,0)
+
 				scope.$watch "theme", (value) ->
 					editor.setTheme("ace/theme/#{value}")
 
@@ -307,6 +329,8 @@ define [
 					editor.initing = true
 					sharejs_doc.attachToAce(editor)
 					editor.initing = false
+
+					resetScrollMargins()
 
 					# need to set annotations after attaching because attaching
 					# deletes and then inserts document content

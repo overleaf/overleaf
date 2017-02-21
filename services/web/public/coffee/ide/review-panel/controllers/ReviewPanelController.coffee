@@ -40,6 +40,9 @@ define [
 			$timeout () ->
 				$scope.$broadcast "review-panel:layout"
 
+		$scope.$on "review-panel:sizes", (e, sizes) ->
+			$scope.$broadcast "editor:set-scroll-size", sizes
+
 		$scope.$watch "ui.pdfLayout", (layout) ->
 			$scope.reviewPanel.layoutToLeft = (layout == "flat")
 		
@@ -266,7 +269,11 @@ define [
 			updateEntries(doc_id)
 			$scope.$broadcast "review-panel:recalculate-screen-positions"
 			$scope.$broadcast "review-panel:layout"
-		
+
+		$scope.$on "editor:track-changes:visibility_changed", () ->
+			$timeout () ->
+				$scope.$broadcast "review-panel:layout", false
+
 		$scope.$on "editor:focus:changed", (e, selection_offset_start, selection_offset_end, selection) ->
 			doc_id = $scope.editor.open_doc_id
 			entries = getDocEntries(doc_id)

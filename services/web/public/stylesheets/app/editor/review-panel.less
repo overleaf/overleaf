@@ -49,11 +49,11 @@
 	}
 
 	&[disabled] {
-		opacity: 0.5;
+		background-color: tint(@rp-highlight-blue, 50%);
 
 		&:hover,
 		&:focus {
-			background-color: @rp-highlight-blue;
+			background-color: tint(@rp-highlight-blue, 50%);
 		}
 	}
 }
@@ -463,6 +463,7 @@
 		margin-top: 3px;
 		overflow-x: hidden;
 		min-height: 3em;
+		max-height: 400px;
 	}
 
 .rp-icon-delete {
@@ -783,6 +784,10 @@
 	.toolbar .btn-full-height.active &,
 	.toolbar .btn-full-height:active & {
 		background-position-y: -60px;
+	}
+	
+	@media (min-device-pixel-ratio: 1.5), (min-resolution: 144dpi) {
+		background-image: url('/img/review-icon-sprite@2x.png');
 	}
 }
 

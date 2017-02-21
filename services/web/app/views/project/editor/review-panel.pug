@@ -47,6 +47,7 @@
 		.rp-entry-list-inner
 			.rp-entry-wrapper(
 				ng-repeat="(entry_id, entry) in reviewPanel.entries[editor.open_doc_id]"
+				ng-if="entry.visible"
 			)
 				div(ng-if="entry.type === 'insert' || entry.type === 'delete'")
 					change-entry(
@@ -79,6 +80,7 @@
 						on-submit="submitNewComment(content);"
 						on-cancel="cancelNewComment();"
 						on-indicator-click="toggleReviewPanel();"
+						layout-to-left="reviewPanel.layoutToLeft"
 					)
 
 	.rp-entry-list(
@@ -322,7 +324,7 @@ script(type='text/ng-template', id='addCommentEntryTemplate')
 			ng-if="!commentState.adding"
 			ng-click="startNewComment(); onIndicatorClick();"
 			tooltip="Add a comment"
-			tooltip-placement="right"
+			tooltip-placement="{{ layoutToLeft ? 'left' : 'right' }}"
 			tooltip-append-to-body="true"
 		)
 			i.fa.fa-commenting
