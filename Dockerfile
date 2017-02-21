@@ -23,7 +23,8 @@ RUN wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz; \
 	tar -xvf install-tl-unx.tar.gz -C /install-tl-unx --strip-components=1
 
 RUN echo "selected_scheme scheme-basic" >> /install-tl-unx/texlive.profile; \
-	/install-tl-unx/install-tl -profile /install-tl-unx/texlive.profile
+	/install-tl-unx/install-tl -profile /install-tl-unx/texlive.profile; \
+	rm -rf /usr/local/texlive/2016/texmf-dist/doc/
 
 RUN rm -r /install-tl-unx; \
 	rm install-tl-unx.tar.gz
