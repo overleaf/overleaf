@@ -93,7 +93,7 @@
 			ng-if="!reviewPanel.overview.loading"
 		)
 			.rp-overview-file-header(
-				ng-if="reviewPanel.entries[doc.doc.id] | notEmpty"
+				ng-if="(reviewPanel.entries[doc.doc.id] != null) && (reviewPanel.entries[doc.doc.id] | notEmpty)"
 				ng-click="reviewPanel.overview.docsCollapsedState[doc.doc.id] = ! reviewPanel.overview.docsCollapsedState[doc.doc.id]"
 			)
 				span.rp-overview-file-header-collapse(
