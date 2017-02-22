@@ -2,6 +2,8 @@
 
 FROM sharelatex/sharelatex-base 
 
+ENV baseDir .
+
 # Install sharelatex settings file
 ADD ${baseDir}/settings.coffee /etc/sharelatex/settings.coffee
 ENV SHARELATEX_CONFIG /etc/sharelatex/settings.coffee
@@ -17,7 +19,7 @@ ADD ${baseDir}/logrotate/sharelatex /etc/logrotate.d/sharelatex
 COPY ${baseDir}/init_scripts/  /etc/my_init.d/
 
 # Install ShareLaTeX
-RUN git clone https://github.com/sharelatex/sharelatex.git /var/www/sharelatex #random_change
+RUN git clone https://github.com/sharelatex/sharelatex.git /var/www/sharelatex
 
 ADD ${baseDir}/services.js /var/www/sharelatex/config/services.js
 ADD ${baseDir}/package.json /var/www/package.json
