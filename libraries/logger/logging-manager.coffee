@@ -54,7 +54,13 @@ module.exports = Logger =
 		@logger.info.apply(@logger, arguments)
 	error: (attributes, message, args...)->
 		@logger.error(attributes, message, args...)
-		@captureException(attributes, message, "error") if @raven?
+		if @raven?
+			now = new Date()
+			rateLimited = (now - @lastErrorTimeStamp) < 30 * 1000
+			# only report one error every thirty seconds to avoid overload
+			if not rateLimited
+				@captureException(attributes, message, "error")
+				@lastErrorTimeStamp = now
 	err: () ->
 		@error.apply(this, arguments)
 	warn: ()->
