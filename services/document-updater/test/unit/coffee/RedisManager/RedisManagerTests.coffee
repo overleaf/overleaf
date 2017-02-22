@@ -26,6 +26,7 @@ describe "RedisManager", ->
 				docsInProject: ({project_id}) -> "DocsIn:#{project_id}"
 				ranges: ({doc_id}) -> "Ranges:#{doc_id}"
 			"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }
+			"settings-sharelatex": {documentupdater: {logHashErrors: true}}
 			"./Metrics": @metrics =
 				inc: sinon.stub()
 				Timer: class Timer

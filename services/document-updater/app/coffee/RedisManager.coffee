@@ -18,6 +18,8 @@ setScript = """
 	return redis.sha1hex(ARGV[1])
 """
 
+logHashErrors = Settings.documentupdater?.logHashErrors
+
 module.exports = RedisManager =
 	rclient: rclient
 
@@ -43,7 +45,7 @@ module.exports = RedisManager =
 			return callback(error) if error?
 			# check the hash computed on the redis server
 			writeHash = result?[0]
-			if writeHash? and writeHash isnt docHash
+			if logHashErrors and writeHash? and writeHash isnt docHash
 				logger.error project_id: project_id, doc_id: doc_id, writeHash: writeHash, origHash: docHash, "hash mismatch on putDocInMemory"
 			# update docsInProject set
 			rclient.sadd keys.docsInProject(project_id:project_id), doc_id, callback
@@ -83,7 +85,7 @@ module.exports = RedisManager =
 			# check sha1 hash value if present
 			if docLines? and storedHash?
 				computedHash = RedisManager._computeHash(docLines)
-				if computedHash isnt storedHash
+				if logHashErrors and computedHash isnt storedHash
 					logger.error project_id: project_id, doc_id: doc_id, doc_project_id: doc_project_id, computedHash: computedHash, storedHash: storedHash, "hash mismatch on retrieved document"
 
 			try
@@ -164,7 +166,7 @@ module.exports = RedisManager =
 					return callback(error) if error?
 					# check the hash computed on the redis server
 					writeHash = result?[0]
-					if writeHash? and writeHash isnt newHash
+					if logHashErrors and writeHash? and writeHash isnt newHash
 						logger.error doc_id: doc_id, writeHash: writeHash, origHash: newHash, "hash mismatch on updateDocument"
 					return callback()
 
