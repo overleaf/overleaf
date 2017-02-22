@@ -1,4 +1,6 @@
-FROM sharelatex-base-image
+# Sharelatex Community Edition (sharelatex/sharelatex)
+
+FROM sharelatex/sharelatex-base 
 
 # Install sharelatex settings file
 ADD ${baseDir}/settings.coffee /etc/sharelatex/settings.coffee
