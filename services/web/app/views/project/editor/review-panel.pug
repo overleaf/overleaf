@@ -87,33 +87,45 @@
 			ng-if="!reviewPanel.overview.loading"
 		)
 			.rp-overview-file-header(
-				ng-if="reviewPanel.entries[doc.doc.id] | notEmpty"
+				ng-if="(reviewPanel.entries[doc.doc.id] != null) && (reviewPanel.entries[doc.doc.id] | notEmpty)"
+				ng-click="reviewPanel.overview.docsCollapsedState[doc.doc.id] = ! reviewPanel.overview.docsCollapsedState[doc.doc.id]"
 			)
+				span.rp-overview-file-header-collapse(
+					ng-class="{ 'rp-overview-file-header-collapse-on': reviewPanel.overview.docsCollapsedState[doc.doc.id] }"
+				)
+					i.fa.fa-angle-down
 				| {{ doc.path }}
-			.rp-entry-wrapper(
-				ng-repeat="(entry_id, entry) in reviewPanel.entries[doc.doc.id] | orderOverviewEntries"
-				ng-if="!(entry.type === 'comment' && reviewPanel.commentThreads[entry.thread_id].resolved === true)"
-			)
-				div(ng-if="entry.type === 'insert' || entry.type === 'delete'")
-					change-entry(
-						entry="entry"
-						user="users[entry.metadata.user_id]"
-						on-indicator-click="toggleReviewPanel();"
-						ng-click="gotoEntry(doc.doc.id, entry)"
-						permissions="permissions"
-					)
+				span.rp-overview-file-num-entries(
+					ng-show="reviewPanel.overview.docsCollapsedState[doc.doc.id]"
+				) &nbsp;({{ reviewPanel.entries[doc.doc.id] | numKeys }})
 
-				div(ng-if="entry.type === 'comment'")
-					comment-entry(
-						entry="entry"
-						threads="reviewPanel.commentThreads"
-						on-reply="submitReply(entry, entry_id);"
-						on-save-edit="saveEdit(entry.thread_id, comment)"
-						on-delete="deleteComment(entry.thread_id, comment)"
-						on-indicator-click="toggleReviewPanel();"
-						ng-click="gotoEntry(doc.doc.id, entry)"
-						permissions="permissions"
-					)
+			.rp-overview-file-entries(
+				review-panel-collapse-height="reviewPanel.overview.docsCollapsedState[doc.doc.id]"
+			)
+				.rp-entry-wrapper(
+					ng-repeat="(entry_id, entry) in reviewPanel.entries[doc.doc.id] | orderOverviewEntries"
+					ng-if="!(entry.type === 'comment' && reviewPanel.commentThreads[entry.thread_id].resolved === true)"
+				)
+					div(ng-if="entry.type === 'insert' || entry.type === 'delete'")
+						change-entry(
+							entry="entry"
+							user="users[entry.metadata.user_id]"
+							on-indicator-click="toggleReviewPanel();"
+							ng-click="gotoEntry(doc.doc.id, entry)"
+							permissions="permissions"
+						)
+
+					div(ng-if="entry.type === 'comment'")
+						comment-entry(
+							entry="entry"
+							threads="reviewPanel.commentThreads"
+							on-reply="submitReply(entry, entry_id);"
+							on-save-edit="saveEdit(entry.thread_id, comment)"
+							on-delete="deleteComment(entry.thread_id, comment)"
+							on-indicator-click="toggleReviewPanel();"
+							ng-click="gotoEntry(doc.doc.id, entry)"
+							permissions="permissions"
+						)
 
 	.rp-nav
 		a.rp-nav-item(
