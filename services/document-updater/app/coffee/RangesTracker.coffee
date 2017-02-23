@@ -206,12 +206,12 @@ load = (EventEmitter) ->
 					# If this is an insert op at the end of an existing insert with a delete following, and it cancels out the following
 					# delete then we shouldn't append it to this insert, but instead only cancel the following delete.
 					# E.g.
-					#                   foo|<--- about to insert 'b' here
+					#                   foo|<--- about to insert 'bar' here
 					#  inserted 'foo'  --^ ^-- deleted 'bar'
-					# should become just 'foo' not 'foob' (with the delete marker becoming just 'ar'), .
+					# should become just 'foo' not 'foobar' (with the delete marker disappearing), .
 					next_change = @changes[i+1]
 					is_op_adjacent_to_next_delete = next_change? and next_change.op.d? and op.p == change_end and next_change.op.p == op.p
-					will_op_cancel_next_delete = is_op_adjacent_to_next_delete and next_change.op.d.slice(0, op.i.length) == op.i
+					will_op_cancel_next_delete = is_op_adjacent_to_next_delete and next_change.op.d == op.i
 					
 					# If there is a delete at the start of the insert, and we're inserting
 					# at the start, we SHOULDN'T merge since the delete acts as a partition.
