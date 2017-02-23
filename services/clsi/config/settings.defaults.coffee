@@ -35,7 +35,6 @@ module.exports =
 	internal:
 		clsi:
 			port: 3013
-			load_port: 3044
 			host: "localhost"
 
 	

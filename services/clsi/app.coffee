@@ -162,36 +162,3 @@ setInterval () ->
 	ProjectPersistenceManager.clearExpiredProjects()
 , tenMinutes = 10 * 60 * 1000
 
-
-
-net = require('net')
-os = require('os')
-
-server = net.createServer (socket) ->
-	socket.on "error", (err)->
-		if err.code == "ECONNRESET"
-			# this always comes up, we don't know why
-			return
-		logger.err err:err, "error with socket on load check"
-		socket.destroy()
-
-	currentLoad = os.loadavg()[0]
-	
-	# On staging there may be 1 cpu on host, don't want to set availableWorkingCpus to 0 in that instance
-	if os.cpus().length == 1
-		availableWorkingCpus = 1
-	else
-		availableWorkingCpus = os.cpus().length - 1
-		
-	freeLoad = availableWorkingCpus - currentLoad
-	freeLoadPercentage = Math.round((freeLoad / availableWorkingCpus) * 100)
-	if freeLoadPercentage <= 0
-		freeLoadPercentage = 1 # when its 0 the server is set to drain and will move projects to different servers
-	socket.write("up, #{freeLoadPercentage}%\n", "ASCII")
-	socket.end()
-
-server.listen load_port = (Settings.internal?.clsi?.load_port or 3044),  ->
-  logger.info "tcp load endpoint listening on port #{load_port}"
-  # telnet 127.0.0.1 3044
-
-
