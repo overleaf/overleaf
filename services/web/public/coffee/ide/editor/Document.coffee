@@ -353,7 +353,12 @@ define [
 				@ranges.applyOp op, { user_id: track_changes_as }
 			if old_id_seed?
 				@ranges.setIdSeed(old_id_seed)
-			@emit "ranges:dirty"
+			if remote_op
+				# With remote ops, Ace hasn't been updated when we receive this op,
+				# so defer updating track changes until it has
+				setTimeout () => @emit "ranges:dirty"
+			else
+				@emit "ranges:dirty"
 		
 		_catchUpRanges: (changes = [], comments = []) ->
 			# We've just been given the current server's ranges, but need to apply any local ops we have.
