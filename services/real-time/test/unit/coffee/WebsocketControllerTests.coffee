@@ -129,6 +129,7 @@ describe 'WebsocketController', ->
 							throw "expected room_id to be project_id"
 						return @clientsInRoom
 			@client.params.project_id = @project_id
+			@client.params.user_id = @user_id
 			@WebsocketController.FLUSH_IF_EMPTY_DELAY = 0
 			tk.reset() # Allow setTimeout to work.
 			
@@ -163,7 +164,55 @@ describe 'WebsocketController', ->
 			it "should not flush the project in the document updater", ->
 				@DocumentUpdaterManager.flushProjectToMongoAndDelete
 					.called.should.equal false
-						
+
+		describe "when client has not authenticated", ->
+			beforeEach (done) ->
+				@client.params.user_id = null
+				@client.params.project_id = null
+				@WebsocketController.leaveProject @io, @client, done
+
+			it "should not end clientTracking.clientDisconnected to the project room", ->
+				@WebsocketLoadBalancer.emitToRoom
+					.calledWith(@project_id, "clientTracking.clientDisconnected", @client.id)
+					.should.equal false
+
+			it "should not mark the user as disconnected", ->
+				@ConnectedUsersManager.markUserAsDisconnected
+					.calledWith(@project_id, @client.id)
+					.should.equal false
+
+			it "should not flush the project in the document updater", ->
+				@DocumentUpdaterManager.flushProjectToMongoAndDelete
+					.calledWith(@project_id)
+					.should.equal false
+
+			it "should increment the leave-project metric", ->
+				@metrics.inc.calledWith("editor.leave-project").should.equal true
+
+		describe "when client has not joined a project", ->
+			beforeEach (done) ->
+				@client.params.user_id = @user_id
+				@client.params.project_id = null
+				@WebsocketController.leaveProject @io, @client, done
+
+			it "should not end clientTracking.clientDisconnected to the project room", ->
+				@WebsocketLoadBalancer.emitToRoom
+					.calledWith(@project_id, "clientTracking.clientDisconnected", @client.id)
+					.should.equal false
+
+			it "should not mark the user as disconnected", ->
+				@ConnectedUsersManager.markUserAsDisconnected
+					.calledWith(@project_id, @client.id)
+					.should.equal false
+
+			it "should not flush the project in the document updater", ->
+				@DocumentUpdaterManager.flushProjectToMongoAndDelete
+					.calledWith(@project_id)
+					.should.equal false
+
+			it "should increment the leave-project metric", ->
+				@metrics.inc.calledWith("editor.leave-project").should.equal true
+
 	describe "joinDoc", ->
 		beforeEach ->
 			@doc_id = "doc-id-123"
