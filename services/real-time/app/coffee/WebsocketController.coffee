@@ -52,6 +52,16 @@ module.exports = WebsocketController =
 		metrics.inc "editor.leave-project"
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
 			return callback(error) if error?
+			# bail out if the client had not managed to authenticate or join
+			# the project.  Prevents downstream errors in docupdater from
+			# flushProjectToMongoAndDelete with null project_id.
+			if not user_id?
+				logger.log {client_id: client.id}, "client leaving, unknown user"
+				return callback()
+			if not project_id?
+				logger.log {user_id: user_id, client_id: client.id}, "client leaving, not in project"
+				return callback()
+
 			logger.log {project_id, user_id, client_id: client.id}, "client leaving project"
 			WebsocketLoadBalancer.emitToRoom project_id, "clientTracking.clientDisconnected", client.id
 		
