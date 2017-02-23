@@ -7,13 +7,18 @@ block vars
 
 block content
 	.editor(ng-controller="IdeController").full-size
-		.loading-screen(ng-show="state.loading")
-			.container
-				h3 #{translate("loading")}...
-				.progress
-					.progress-bar(style="width: 20%", ng-style="{'width': state.load_progress + '%'}")
-				p.text-center.text-danger(ng-if="state.error").ng-cloak 
-					span(ng-bind-html="state.error")
+		.loading-screen(ng-if="state.loading")
+			.loading-screen-lion-container
+				.loading-screen-lion(
+					style="height: 20%;"
+					ng-style="{ 'height': state.load_progress + '%' }"
+				)
+			h3.loading-screen-label(ng-if="!state.error") #{translate("loading")}
+				span.loading-screen-ellip .
+				span.loading-screen-ellip .
+				span.loading-screen-ellip .
+			p.loading-screen-error(ng-if="state.error").ng-cloak 
+				span(ng-bind-html="state.error")
 
 		include ./editor/feature-onboarding
 		
