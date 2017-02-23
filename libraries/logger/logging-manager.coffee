@@ -10,6 +10,7 @@ module.exports = Logger =
 	initializeErrorReporting: (sentry_dsn, options) ->
 		raven = require "raven"
 		@raven = new raven.Client(sentry_dsn, options)
+		@lastErrorTimeStamp = 0 # for rate limiting on sentry reporting
 
 	captureException: (attributes, message, level) ->
 		# handle case of logger.error "message"
