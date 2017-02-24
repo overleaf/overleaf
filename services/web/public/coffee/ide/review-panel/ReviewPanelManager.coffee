@@ -8,6 +8,8 @@ define [
 	"ide/review-panel/directives/addCommentEntry"
 	"ide/review-panel/directives/resolvedCommentEntry"
 	"ide/review-panel/directives/resolvedCommentsDropdown"
+	"ide/review-panel/directives/reviewPanelCollapseHeight"
 	"ide/review-panel/filters/notEmpty"
+	"ide/review-panel/filters/numKeys"
 	"ide/review-panel/filters/orderOverviewEntries"
 ], () ->

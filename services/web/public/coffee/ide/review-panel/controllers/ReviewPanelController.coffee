@@ -4,7 +4,7 @@ define [
 	"ide/colors/ColorManager"
 	"ide/review-panel/RangesTracker"
 ], (App, EventEmitter, ColorManager, RangesTracker) ->
-	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout, $http, $modal, event_tracking) ->
+	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout, $http, $modal, event_tracking, localStorage) ->
 		$reviewPanelEl = $element.find "#review-panel"
 
 		$scope.SubViews =
@@ -19,6 +19,7 @@ define [
 			openSubView: $scope.SubViews.CUR_FILE
 			overview:
 				loading: false
+				docsCollapsedState: JSON.parse(localStorage("docs_collapsed_state:#{$scope.project_id}")) or {}
 			dropdown:
 				loading: false
 			commentThreads: {}
@@ -26,6 +27,14 @@ define [
 			layoutToLeft: false
 			rendererData: {}
 			loadingThreads: false
+
+		window.addEventListener "beforeunload", () ->
+			collapsedStates = {}
+			for doc, state of $scope.reviewPanel.overview.docsCollapsedState
+				if state
+					collapsedStates[doc] = state 
+			valToStore = if Object.keys(collapsedStates).length > 0 then JSON.stringify(collapsedStates) else null
+			localStorage("docs_collapsed_state:#{$scope.project_id}", valToStore)
 
 		$scope.$on "layout:pdf:linked", (event, state) ->
 			$scope.reviewPanel.layoutToLeft = (state.east?.size < 220 || state.east?.initClosed)
@@ -38,6 +47,9 @@ define [
 		$scope.$on "expandable-text-area:resize", (event) ->
 			$timeout () ->
 				$scope.$broadcast "review-panel:layout"
+
+		$scope.$on "review-panel:sizes", (e, sizes) ->
+			$scope.$broadcast "editor:set-scroll-size", sizes
 
 		$scope.$watch "ui.pdfLayout", (layout) ->
 			$scope.reviewPanel.layoutToLeft = (layout == "flat")
@@ -171,6 +183,8 @@ define [
 			$http.get "/project/#{$scope.project_id}/ranges"
 				.success (docs) ->
 					for doc in docs
+						if !$scope.reviewPanel.overview.docsCollapsedState[doc.id]?
+							$scope.reviewPanel.overview.docsCollapsedState[doc.id] = false
 						if doc.id != $scope.editor.open_doc_id # this is kept up to date in real-time, don't overwrite
 							rangesTracker = getChangeTracker(doc.id)
 							rangesTracker.comments = doc.ranges?.comments or []
@@ -263,7 +277,11 @@ define [
 			updateEntries(doc_id)
 			$scope.$broadcast "review-panel:recalculate-screen-positions"
 			$scope.$broadcast "review-panel:layout"
-		
+
+		$scope.$on "editor:track-changes:visibility_changed", () ->
+			$timeout () ->
+				$scope.$broadcast "review-panel:layout", false
+
 		$scope.$on "editor:focus:changed", (e, selection_offset_start, selection_offset_end, selection) ->
 			doc_id = $scope.editor.open_doc_id
 			entries = getDocEntries(doc_id)

@@ -29,6 +29,8 @@
 
 @rp-toolbar-height      : 32px;
 
+@rp-entry-animation-speed: 0.3s;
+
 
 
 .rp-button() {
@@ -49,11 +51,11 @@
 	}
 
 	&[disabled] {
-		opacity: 0.5;
+		background-color: tint(@rp-highlight-blue, 50%);
 
 		&:hover,
 		&:focus {
-			background-color: @rp-highlight-blue;
+			background-color: tint(@rp-highlight-blue, 50%);
 		}
 	}
 }
@@ -158,6 +160,7 @@
 		position: absolute;
 		top: 0;
 		bottom: 0;
+		padding-bottom: 52px;
 	}
 	
 	.rp-state-overview & {
@@ -183,7 +186,7 @@
 	border-radius: 3px;
 	color: #FFF;
 	cursor: pointer;
-	transition: top 0.3s, left 0.1s, right 0.1s;
+	transition: top @rp-entry-animation-speed, left 0.1s, right 0.1s;
 	.no-animate & {
 		transition: none;
 	}
@@ -279,7 +282,7 @@
 	border-left: solid @rp-entry-ribbon-width transparent;
 	border-radius: 3px;
 	background-color: #FFF;
-	transition: top 0.3s, left 0.1s, right 0.1s;
+	transition: top @rp-entry-animation-speed, left 0.1s, right 0.1s;
 	.no-animate & {
 		transition: none;
 	}
@@ -461,6 +464,7 @@
 		margin-top: 3px;
 		overflow-x: hidden;
 		min-height: 3em;
+		max-height: 400px;
 	}
 
 .rp-icon-delete {
@@ -496,6 +500,7 @@
 		}
 
 .rp-entry-callout {
+	transition: top @rp-entry-animation-speed, height @rp-entry-animation-speed;
 	.rp-state-current-file & {
 		position: absolute;
 		border-top: 1px solid grey;
@@ -567,7 +572,27 @@
 	margin-top: 10px;
 	font-weight: @rp-semibold-weight;
 	text-align: center;
+	cursor: pointer;
 }
+
+	.rp-overview-file-num-entries {
+		font-weight: normal;
+		font-size: 0.9em;
+	}
+	.rp-overview-file-header-collapse {
+		display: inline-block;
+		float: left;
+		transform: rotateZ(0deg);
+		transition: transform 0.15s ease
+	}
+	
+	.rp-overview-file-header-collapse-on {
+		transform: rotateZ(-90deg);
+	}
+
+	.rp-overview-file-entries {
+		overflow: hidden;
+	}
 
 .rp-comment-wrapper {
 	transition: .35s opacity ease-out .2s;
@@ -761,6 +786,10 @@
 	.toolbar .btn-full-height.active &,
 	.toolbar .btn-full-height:active & {
 		background-position-y: -60px;
+	}
+	
+	@media (min-device-pixel-ratio: 1.5), (min-resolution: 144dpi) {
+		background-image: url('/img/review-icon-sprite@2x.png');
 	}
 }
 
