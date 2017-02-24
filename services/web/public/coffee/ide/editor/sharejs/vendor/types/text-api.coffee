@@ -11,14 +11,20 @@ text.api =
   # Get the text contents of a document
   getText: -> @snapshot
 
-  insert: (pos, text, callback) ->
-    op = [{p:pos, i:text}]
+  insert: (pos, text, fromUndo, callback) ->
+    op = {p:pos, i:text}
+    if fromUndo
+      op.u = true
+    op = [op]
     
     @submitOp op, callback
     op
   
-  del: (pos, length, callback) ->
-    op = [{p:pos, d:@snapshot[pos...(pos + length)]}]
+  del: (pos, length, fromUndo, callback) ->
+    op = {p:pos, d:@snapshot[pos...(pos + length)]}
+    if fromUndo
+      op.u = true
+    op = [op]
 
     @submitOp op, callback
     op

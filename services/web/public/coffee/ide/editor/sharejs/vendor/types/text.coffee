@@ -56,6 +56,13 @@ text.apply = (snapshot, op) ->
       throw new Error "Unknown op type"
   snapshot
 
+cloneAndModify = (op, modifications) ->
+  newOp = {}
+  for k,v of op
+    newOp[k] = v
+  for k,v of modifications
+    newOp[k] = v
+  return newOp
 
 # Exported for use by the random op generator.
 #
@@ -69,10 +76,10 @@ text._append = append = (newOp, c) ->
     last = newOp[newOp.length - 1]
 
     # Compose the insert into the previous insert if possible
-    if last.i? && c.i? and last.p <= c.p <= (last.p + last.i.length)
-      newOp[newOp.length - 1] = {i:strInject(last.i, c.p - last.p, c.i), p:last.p}
-    else if last.d? && c.d? and c.p <= last.p <= (c.p + c.d.length)
-      newOp[newOp.length - 1] = {d:strInject(c.d, last.p - c.p, last.d), p:c.p}
+    if last.i? && c.i? and last.p <= c.p <= (last.p + last.i.length) and last.u == c.u
+      newOp[newOp.length - 1] = cloneAndModify(last, {i:strInject(last.i, c.p - last.p, c.i)})
+    else if last.d? && c.d? and c.p <= last.p <= (c.p + c.d.length) and last.u == c.u
+      newOp[newOp.length - 1] = cloneAndModify(last, {d:strInject(c.d, last.p - c.p, last.d), p: c.p})
     else
       newOp.push c
 
@@ -150,25 +157,25 @@ text._tc = transformComponent = (dest, c, otherC, side) ->
   checkValidOp [otherC]
 
   if c.i?
-    append dest, {i:c.i, p:transformPosition(c.p, otherC, side == 'right')}
+    append dest, cloneAndModify(c, {p:transformPosition(c.p, otherC, side == 'right')})
 
   else if c.d? # Delete
     if otherC.i? # delete vs insert
       s = c.d
       if c.p < otherC.p
-        append dest, {d:s[...otherC.p - c.p], p:c.p}
+        append dest, cloneAndModify(c, {d:s[...otherC.p - c.p]})
         s = s[(otherC.p - c.p)..]
       if s != ''
-        append dest, {d:s, p:c.p + otherC.i.length}
+        append dest, cloneAndModify(c, {d:s, p:c.p + otherC.i.length})
 
     else if otherC.d? # Delete vs delete
       if c.p >= otherC.p + otherC.d.length
-        append dest, {d:c.d, p:c.p - otherC.d.length}
+        append dest, cloneAndModify(c, {p:c.p - otherC.d.length})
       else if c.p + c.d.length <= otherC.p
         append dest, c
       else
         # They overlap somewhere.
-        newC = {d:'', p:c.p}
+        newC = cloneAndModify(c, {d:''})
         if c.p < otherC.p
           newC.d = c.d[...(otherC.p - c.p)]
         if c.p + c.d.length > otherC.p + otherC.d.length
@@ -198,18 +205,18 @@ text._tc = transformComponent = (dest, c, otherC, side) ->
       if c.p < otherC.p < c.p + c.c.length
         offset = otherC.p - c.p
         new_c = (c.c[0..(offset-1)] + otherC.i + c.c[offset...])
-        append dest, {c:new_c, p:c.p, t: c.t}
+        append dest, cloneAndModify(c, {c:new_c})
       else
-        append dest, {c:c.c, p:transformPosition(c.p, otherC, true), t: c.t}
+        append dest, cloneAndModify(c, {p:transformPosition(c.p, otherC, true)})
     
     else if otherC.d?
       if c.p >= otherC.p + otherC.d.length
-        append dest, {c:c.c, p:c.p - otherC.d.length, t: c.t}
+        append dest, cloneAndModify(c, {p:c.p - otherC.d.length})
       else if c.p + c.c.length <= otherC.p
         append dest, c
       else # Delete overlaps comment
         # They overlap somewhere.
-        newC = {c:'', p:c.p, t: c.t}
+        newC = cloneAndModify(c, {c:''})
         if c.p < otherC.p
           newC.c = c.c[...(otherC.p - c.p)]
         if c.p + c.c.length > otherC.p + otherC.d.length

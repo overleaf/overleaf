@@ -210,14 +210,18 @@ define [
 			if change.op.d?
 				content = change.op.d
 				position = @_shareJsOffsetToAcePosition(change.op.p)
+				session.$fromReject = true # Tell track changes to cancel out delete
 				session.insert(position, content)
+				session.$fromReject = false
 			else if change.op.i?
 				start = @_shareJsOffsetToAcePosition(change.op.p)
 				end = @_shareJsOffsetToAcePosition(change.op.p + change.op.i.length)
 				editor_text = session.getDocument().getTextRange({start, end})
 				if editor_text != change.op.i
 					throw new Error("Op to be removed (#{JSON.stringify(change.op)}), does not match editor text, '#{editor_text}'")
+				session.$fromReject = true
 				session.remove({start, end})
+				session.$fromReject = false
 			else
 				throw new Error("unknown change: #{JSON.stringify(change)}")
 

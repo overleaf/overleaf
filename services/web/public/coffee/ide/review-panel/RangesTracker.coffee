@@ -172,6 +172,7 @@ load = () ->
 			op_start = op.p
 			op_length = op.i.length
 			op_end = op.p + op_length
+			undoing = !!op.u
 
 
 			already_merged = false
@@ -189,8 +190,9 @@ load = () ->
 						change.op.p += op_length
 						moved_changes.push change
 					else if op_start == change_start
-						# If the insert matches the start of the delete, just remove it from the delete instead
-						if change.op.d.length >= op.i.length and change.op.d.slice(0, op.i.length) == op.i
+						# If we are undoing, then we want to cancel any existing delete ranges if we can.
+						# Check if the insert matches the start of the delete, and just remove it from the delete instead if so.
+						if undoing and change.op.d.length >= op.i.length and change.op.d.slice(0, op.i.length) == op.i
 							change.op.d = change.op.d.slice(op.i.length)
 							change.op.p += op.i.length
 							if change.op.d == ""
@@ -208,15 +210,15 @@ load = () ->
 					# Only merge inserts if they are from the same user
 					is_same_user = metadata.user_id == change.metadata.user_id
 					
-					# If this is an insert op at the end of an existing insert with a delete following, and it cancels out the following
-					# delete then we shouldn't append it to this insert, but instead only cancel the following delete.
+					# If we are undoing, then our changes will be removed from any delete ops just after. In that case, if there is also
+					# an insert op just before, then we shouldn't append it to this insert, but instead only cancel the following delete.
 					# E.g.
-					#                   foo|<--- about to insert 'bar' here
+					#                   foo|<--- about to insert 'b' here
 					#  inserted 'foo'  --^ ^-- deleted 'bar'
-					# should become just 'foo' not 'foobar' (with the delete marker disappearing), .
+					# should become just 'foo' not 'foob' (with the delete marker becoming just 'ar'), .
 					next_change = @changes[i+1]
 					is_op_adjacent_to_next_delete = next_change? and next_change.op.d? and op.p == change_end and next_change.op.p == op.p
-					will_op_cancel_next_delete = is_op_adjacent_to_next_delete and next_change.op.d == op.i
+					will_op_cancel_next_delete = undoing and is_op_adjacent_to_next_delete and next_change.op.d.slice(0, op.i.length) == op.i
 					
 					# If there is a delete at the start of the insert, and we're inserting
 					# at the start, we SHOULDN'T merge since the delete acts as a partition.

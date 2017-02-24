@@ -3,7 +3,7 @@
 Range = ace.require("ace/range").Range
 
 # Convert an ace delta into an op understood by share.js
-applyToShareJS = (editorDoc, delta, doc) ->
+applyToShareJS = (editorDoc, delta, doc, fromUndo) ->
   # Get the start position of the range, in no. of characters
   getStartOffsetPosition = (start) ->
     # This is quite inefficient - getLines makes a copy of the entire
@@ -27,11 +27,11 @@ applyToShareJS = (editorDoc, delta, doc) ->
   switch delta.action
     when 'insert'
       text = delta.lines.join('\n')
-      doc.insert pos, text
+      doc.insert pos, text, fromUndo
       
     when 'remove'
       text = delta.lines.join('\n')
-      doc.del pos, text.length
+      doc.del pos, text.length, fromUndo
 
     else throw new Error "unknown action: #{delta.action}"
   
@@ -78,8 +78,10 @@ window.sharejs.extendDoc 'attach_ace', (editor, keepEditorContents, maxDocLength
     if maxDocLength? and editorDoc.getValue().length > maxDocLength
         doc.emit "error", new Error("document length is greater than maxDocLength")
         return
+
+    fromUndo = !!(editor.getSession().$fromUndo or editor.getSession().$fromReject)
     
-    applyToShareJS editorDoc, change, doc
+    applyToShareJS editorDoc, change, doc, fromUndo
 
     check()
 
