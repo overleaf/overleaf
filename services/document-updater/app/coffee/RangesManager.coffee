@@ -3,7 +3,7 @@ logger = require "logger-sharelatex"
 
 module.exports = RangesManager =
 	MAX_COMMENTS: 500
-	MAX_CHANGES: 1200
+	MAX_CHANGES: 2000
 
 	applyUpdate: (project_id, doc_id, entries = {}, updates = [], callback = (error, new_entries) ->) ->
 		{changes, comments} = entries
