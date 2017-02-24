@@ -6,21 +6,33 @@ module.exports = ThreadManager =
 	GLOBAL_THREAD: "GLOBAL"
 
 	findOrCreateThread: (project_id, thread_id, callback = (error, thread) ->) ->
-		query =
-			project_id: ObjectId(project_id.toString())
+		project_id = ObjectId(project_id.toString())
+		if thread_id != ThreadManager.GLOBAL_THREAD
+			thread_id = ObjectId(thread_id.toString())
 
-		if thread_id? and thread_id != ThreadManager.GLOBAL_THREAD
-			query.thread_id = ObjectId(thread_id.toString())
-
-		# Threads used to be called rooms, and still are in the DB
-		db.rooms.findOne query, (error, thread) ->
+		if thread_id == ThreadManager.GLOBAL_THREAD
+			query = {
+				project_id: project_id
+				thread_id: { $exists: false }
+			}
+			update = {
+				project_id: project_id
+			}
+		else
+			query = {
+				project_id: project_id
+				thread_id: thread_id
+			}
+			update = {
+				project_id: project_id
+				thread_id: thread_id
+			}
+		
+		db.rooms.update query, update, { upsert: true }, (error) ->
 			return callback(error) if error?
-			if thread?
-				callback null, thread
-			else
-				db.rooms.save query, (error, thread) ->
-					return callback(error) if error?
-					callback null, thread
+			db.rooms.find query, (error, rooms = []) ->
+				return callback(error) if error?
+				return callback null, rooms[0]
 	
 	findAllThreadRooms: (project_id, callback = (error, rooms) ->) ->
 		db.rooms.find {
