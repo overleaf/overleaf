@@ -7,7 +7,6 @@ module.exports = RangesManager =
 
 	applyUpdate: (project_id, doc_id, entries = {}, updates = [], callback = (error, new_entries) ->) ->
 		{changes, comments} = entries
-		logger.log {changes, comments, updates}, "applying updates to ranges"
 		rangesTracker = new RangesTracker(changes, comments)
 		for update in updates
 			rangesTracker.track_changes = !!update.meta.tc
@@ -20,12 +19,12 @@ module.exports = RangesManager =
 			return callback new Error("too many comments or tracked changes")
 
 		response = RangesManager._getRanges rangesTracker
-		logger.log {response}, "applied updates to ranges"
+		logger.log {project_id, doc_id, changesCount: response.changes?.length, commentsCount: response.comments?.length}, "applied updates to ranges"
 		callback null, response
 
 	acceptChange: (change_id, ranges, callback = (error, ranges) ->) ->
 		{changes, comments} = ranges
-		logger.log {changes, comments, change_id}, "accepting change in ranges"
+		logger.log {change_id}, "accepting change in ranges"
 		rangesTracker = new RangesTracker(changes, comments)
 		rangesTracker.removeChangeId(change_id)
 		response = RangesManager._getRanges(rangesTracker)
@@ -33,7 +32,7 @@ module.exports = RangesManager =
 
 	deleteComment: (comment_id, ranges, callback = (error, ranges) ->) ->
 		{changes, comments} = ranges
-		logger.log {changes, comments, comment_id}, "deleting comment in ranges"
+		logger.log {comment_id}, "deleting comment in ranges"
 		rangesTracker = new RangesTracker(changes, comments)
 		rangesTracker.removeCommentId(comment_id)
 		response = RangesManager._getRanges(rangesTracker)
