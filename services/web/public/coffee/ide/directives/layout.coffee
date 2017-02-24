@@ -55,7 +55,7 @@ define [
 								controls.css({
 									position: "absolute"
 									right: state.east.size
-									"z-index": 10
+									"z-index": 3
 								})
 
 					resetOpenStates = () ->
