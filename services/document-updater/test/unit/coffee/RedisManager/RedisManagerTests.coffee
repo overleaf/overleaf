@@ -331,6 +331,9 @@ describe "RedisManager", ->
 
 			afterEach ->
 				@JSON.stringify = @_stringify
+			
+			it "should log an error", ->
+				@logger.error.called.should.equal true
 
 			it "should call the callback with an error", ->
 				@callback.calledWith(new Error("null bytes found in doc lines")).should.equal true
@@ -416,6 +419,9 @@ describe "RedisManager", ->
 
 			afterEach ->
 				@JSON.stringify = @_stringify
+			
+			it "should log an error", ->
+				@logger.error.called.should.equal true
 
 			it "should call the callback with an error", ->
 				@callback.calledWith(new Error("null bytes found in doc lines")).should.equal true
