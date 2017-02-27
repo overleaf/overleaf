@@ -12,26 +12,30 @@ describe "RedisManager", ->
 			auth: () ->
 			exec: sinon.stub()
 		@rclient.multi = () => @rclient
-		@RedisManager = SandboxedModule.require modulePath, requires:
-			"./RedisBackend":
-				createClient: () => @rclient
-			"./RedisKeyBuilder":
-				blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
-				docLines: ({doc_id}) -> "doclines:#{doc_id}"
-				docOps: ({doc_id}) -> "DocOps:#{doc_id}"
-				docVersion: ({doc_id}) -> "DocVersion:#{doc_id}"
-				docHash: ({doc_id}) -> "DocHash:#{doc_id}"
-				projectKey: ({doc_id}) -> "ProjectId:#{doc_id}"
-				pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
-				docsInProject: ({project_id}) -> "DocsIn:#{project_id}"
-				ranges: ({doc_id}) -> "Ranges:#{doc_id}"
-			"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }
-			"settings-sharelatex": {documentupdater: {logHashErrors: {write:true, read:true}}}
-			"./Metrics": @metrics =
-				inc: sinon.stub()
-				Timer: class Timer
-					done: () ->
-			"./Errors": Errors
+		@RedisManager = SandboxedModule.require modulePath,
+			requires:
+				"./RedisBackend":
+					createClient: () => @rclient
+				"./RedisKeyBuilder":
+					blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
+					docLines: ({doc_id}) -> "doclines:#{doc_id}"
+					docOps: ({doc_id}) -> "DocOps:#{doc_id}"
+					docVersion: ({doc_id}) -> "DocVersion:#{doc_id}"
+					docHash: ({doc_id}) -> "DocHash:#{doc_id}"
+					projectKey: ({doc_id}) -> "ProjectId:#{doc_id}"
+					pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
+					docsInProject: ({project_id}) -> "DocsIn:#{project_id}"
+					ranges: ({doc_id}) -> "Ranges:#{doc_id}"
+				"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }
+				"settings-sharelatex": {documentupdater: {logHashErrors: {write:true, read:true}}}
+				"./Metrics": @metrics =
+					inc: sinon.stub()
+					Timer: class Timer
+						done: () ->
+				"./Errors": Errors
+			globals:
+				JSON: @JSON = JSON
+		
 		@doc_id = "doc-id-123"
 		@project_id = "project-id-123"
 		@callback = sinon.stub()
@@ -318,6 +322,22 @@ describe "RedisManager", ->
 			it "should call the callback", ->
 				@callback.called.should.equal true
 
+		describe "with null bytes in the serialized doc lines", ->
+			beforeEach ->
+				@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version - @ops.length)
+				@_stringify = JSON.stringify
+				@JSON.stringify = () -> return '["bad bytes! \u0000 <- here"]'
+				@RedisManager.updateDocument @doc_id, @lines, @version, @ops, @ranges, @callback
+
+			afterEach ->
+				@JSON.stringify = @_stringify
+			
+			it "should log an error", ->
+				@logger.error.called.should.equal true
+
+			it "should call the callback with an error", ->
+				@callback.calledWith(new Error("null bytes found in doc lines")).should.equal true
+
 	describe "putDocInMemory", ->
 		beforeEach ->
 			@rclient.set = sinon.stub()
@@ -390,6 +410,21 @@ describe "RedisManager", ->
 			it 'should log a hash error', ->
 				@logger.error.calledWith()
 					.should.equal true
+
+		describe "with null bytes in the serialized doc lines", ->
+			beforeEach ->
+				@_stringify = JSON.stringify
+				@JSON.stringify = () -> return '["bad bytes! \u0000 <- here"]'
+				@RedisManager.putDocInMemory @project_id, @doc_id, @lines, @version, @ranges, @callback
+
+			afterEach ->
+				@JSON.stringify = @_stringify
+			
+			it "should log an error", ->
+				@logger.error.called.should.equal true
+
+			it "should call the callback with an error", ->
+				@callback.calledWith(new Error("null bytes found in doc lines")).should.equal true
 
 	describe "removeDocFromMemory", ->
 		beforeEach (done) ->
