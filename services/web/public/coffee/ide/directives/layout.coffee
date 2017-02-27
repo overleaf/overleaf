@@ -55,7 +55,7 @@ define [
 								controls.css({
 									position: "absolute"
 									right: state.east.size
-									"z-index": 10
+									"z-index": 3
 								})
 
 					resetOpenStates = () ->
@@ -106,7 +106,14 @@ define [
 							, 0
 
 					if attrs.allowOverflowOn?
-						element.layout().allowOverflow(scope.$eval(attrs.allowOverflowOn))
+						layoutObj = element.layout()
+						overflowPane = scope.$eval(attrs.allowOverflowOn)
+						overflowPaneEl = layoutObj.panes[overflowPane]
+						# Set the panel as overflowing (gives it higher z-index and sets overflow rules)
+						layoutObj.allowOverflow overflowPane
+						# Read the given z-index value and increment it, so that it's higher than synctex controls.
+						overflowPaneZVal = overflowPaneEl.css "z-index"
+						overflowPaneEl.css "z-index", overflowPaneZVal + 1
 
 					resetOpenStates()
 					onInternalResize()
