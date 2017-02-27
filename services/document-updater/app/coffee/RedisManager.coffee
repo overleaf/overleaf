@@ -22,6 +22,9 @@ logHashErrors = Settings.documentupdater?.logHashErrors
 logHashReadErrors = logHashErrors?.read
 logHashWriteErrors = logHashErrors?.write
 
+MEGABYTES = 1024 * 1024
+MAX_RANGES_SIZE = 3 * MEGABYTES
+
 module.exports = RedisManager =
 	rclient: rclient
 
@@ -37,24 +40,28 @@ module.exports = RedisManager =
 			return callback(error)
 		docHash = RedisManager._computeHash(docLines)
 		logger.log project_id:project_id, doc_id:doc_id, version: version, hash:docHash, "putting doc in redis"
-		ranges = RedisManager._serializeRanges(ranges)
-		multi = rclient.multi()
-		multi.eval setScript, 1, keys.docLines(doc_id:doc_id), docLines
-		multi.set keys.projectKey({doc_id:doc_id}), project_id
-		multi.set keys.docVersion(doc_id:doc_id), version
-		multi.set keys.docHash(doc_id:doc_id), docHash
-		if ranges?
-			multi.set keys.ranges(doc_id:doc_id), ranges
-		else
-			multi.del keys.ranges(doc_id:doc_id)
-		multi.exec (error, result) ->
-			return callback(error) if error?
-			# check the hash computed on the redis server
-			writeHash = result?[0]
-			if logHashWriteErrors and writeHash? and writeHash isnt docHash
-				logger.error project_id: project_id, doc_id: doc_id, writeHash: writeHash, origHash: docHash, "hash mismatch on putDocInMemory"
-			# update docsInProject set
-			rclient.sadd keys.docsInProject(project_id:project_id), doc_id, callback
+
+		RedisManager._serializeRanges ranges, (error, ranges) ->
+			if error?
+				logger.error {err: error, doc_id, project_id}, error.message
+				return callback(error)
+			multi = rclient.multi()
+			multi.eval setScript, 1, keys.docLines(doc_id:doc_id), docLines
+			multi.set keys.projectKey({doc_id:doc_id}), project_id
+			multi.set keys.docVersion(doc_id:doc_id), version
+			multi.set keys.docHash(doc_id:doc_id), docHash
+			if ranges?
+				multi.set keys.ranges(doc_id:doc_id), ranges
+			else
+				multi.del keys.ranges(doc_id:doc_id)
+			multi.exec (error, result) ->
+				return callback(error) if error?
+				# check the hash computed on the redis server
+				writeHash = result?[0]
+				if logHashWriteErrors and writeHash? and writeHash isnt docHash
+					logger.error project_id: project_id, doc_id: doc_id, writeHash: writeHash, origHash: docHash, "hash mismatch on putDocInMemory"
+				# update docsInProject set
+				rclient.sadd keys.docsInProject(project_id:project_id), doc_id, callback
 
 	removeDocFromMemory : (project_id, doc_id, _callback)->
 		logger.log project_id:project_id, doc_id:doc_id, "removing doc from redis"
@@ -163,36 +170,41 @@ module.exports = RedisManager =
 			
 			logger.log doc_id: doc_id, version: newVersion, hash: newHash, "updating doc in redis"
 			
-			multi = rclient.multi()
-			multi.eval setScript, 1, keys.docLines(doc_id:doc_id), newDocLines
-			multi.set    keys.docVersion(doc_id:doc_id), newVersion
-			multi.set    keys.docHash(doc_id:doc_id), newHash
-			if jsonOps.length > 0
-				multi.rpush  keys.docOps(doc_id: doc_id), jsonOps...
-			multi.expire keys.docOps(doc_id: doc_id), RedisManager.DOC_OPS_TTL
-			multi.ltrim  keys.docOps(doc_id: doc_id), -RedisManager.DOC_OPS_MAX_LENGTH, -1
-			ranges = RedisManager._serializeRanges(ranges)
-			if ranges?
-				multi.set keys.ranges(doc_id:doc_id), ranges
-			else
-				multi.del keys.ranges(doc_id:doc_id)
-			multi.exec (error, result) ->
-					return callback(error) if error?
-					# check the hash computed on the redis server
-					writeHash = result?[0]
-					if logHashWriteErrors and writeHash? and writeHash isnt newHash
-						logger.error doc_id: doc_id, writeHash: writeHash, origHash: newHash, "hash mismatch on updateDocument"
-					return callback()
+			RedisManager._serializeRanges ranges, (error, ranges) ->
+				if error?
+					logger.error {err: error, doc_id}, error.message
+					return callback(error)
+				multi = rclient.multi()
+				multi.eval setScript, 1, keys.docLines(doc_id:doc_id), newDocLines
+				multi.set    keys.docVersion(doc_id:doc_id), newVersion
+				multi.set    keys.docHash(doc_id:doc_id), newHash
+				if jsonOps.length > 0
+					multi.rpush  keys.docOps(doc_id: doc_id), jsonOps...
+				multi.expire keys.docOps(doc_id: doc_id), RedisManager.DOC_OPS_TTL
+				multi.ltrim  keys.docOps(doc_id: doc_id), -RedisManager.DOC_OPS_MAX_LENGTH, -1
+				if ranges?
+					multi.set keys.ranges(doc_id:doc_id), ranges
+				else
+					multi.del keys.ranges(doc_id:doc_id)
+				multi.exec (error, result) ->
+						return callback(error) if error?
+						# check the hash computed on the redis server
+						writeHash = result?[0]
+						if logHashWriteErrors and writeHash? and writeHash isnt newHash
+							logger.error doc_id: doc_id, writeHash: writeHash, origHash: newHash, "hash mismatch on updateDocument"
+						return callback()
 
 	getDocIdsInProject: (project_id, callback = (error, doc_ids) ->) ->
 		rclient.smembers keys.docsInProject(project_id: project_id), callback
 	
-	_serializeRanges: (ranges) ->
+	_serializeRanges: (ranges, callback = (error, serializedRanges) ->) ->
 		jsonRanges = JSON.stringify(ranges)
+		if jsonRanges? and jsonRanges.length > MAX_RANGES_SIZE
+			return callback new Error("ranges are too large")
 		if jsonRanges == '{}'
 			# Most doc will have empty ranges so don't fill redis with lots of '{}' keys
 			jsonRanges = null
-		return jsonRanges
+		return callback null, jsonRanges
 	
 	_deserializeRanges: (ranges) ->
 		if !ranges? or ranges == ""
