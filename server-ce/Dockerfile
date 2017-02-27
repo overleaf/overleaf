@@ -1,6 +1,6 @@
 # Sharelatex Community Edition (sharelatex/sharelatex)
 
-FROM sharelatex/sharelatex-base 
+FROM sharelatex/sharelatex-base:v1.0.0
 
 ENV baseDir .
 
