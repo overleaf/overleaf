@@ -61,7 +61,6 @@ module.exports = UpdateManager =
 				return callback(error) if error?
 				RangesManager.applyUpdate project_id, doc_id, ranges, appliedOps, (error, new_ranges) ->
 					return callback(error) if error?
-					logger.log doc_id: doc_id, version: version, "updating doc in redis"
 					RedisManager.updateDocument doc_id, updatedDocLines, version, appliedOps, new_ranges, (error) ->
 						return callback(error) if error?
 						HistoryManager.pushUncompressedHistoryOps project_id, doc_id, appliedOps, callback
