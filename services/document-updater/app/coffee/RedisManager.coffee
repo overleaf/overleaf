@@ -31,6 +31,8 @@ module.exports = RedisManager =
 			timer.done()
 			_callback(error)
 		docLines = JSON.stringify(docLines)
+		if docLines.indexOf("\u0000") != -1
+			return callback(new Error("null bytes found in doc lines"))
 		docHash = RedisManager._computeHash(docLines)
 		logger.log project_id:project_id, doc_id:doc_id, version: version, hash:docHash, "putting doc in redis"
 		ranges = RedisManager._serializeRanges(ranges)
@@ -151,6 +153,8 @@ module.exports = RedisManager =
 			jsonOps = appliedOps.map (op) -> JSON.stringify op
 			multi = rclient.multi()
 			newDocLines = JSON.stringify(docLines)
+			if newDocLines.indexOf("\u0000") != -1
+				return callback(new Error("null bytes found in doc lines"))
 			newHash = RedisManager._computeHash(newDocLines)
 			multi.eval setScript, 1, keys.docLines(doc_id:doc_id), newDocLines
 			multi.set    keys.docVersion(doc_id:doc_id), newVersion
