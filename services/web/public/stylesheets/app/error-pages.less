@@ -1,0 +1,50 @@
+.error-container {
+	display: flex;
+	align-items: center;
+}
+	.error-figure {
+		flex: 0 0 50%;
+		align-self: stretch;
+		padding: 50px;
+	}
+
+	.error-details {
+		flex: 0 0 50%;
+		padding: 50px;
+	}
+		.error-code {
+			font-family: @font-family-sans-serif;
+			font-size: @font-size-h1 * 4;
+			font-weight: 800;
+			color: @red;
+			margin-bottom: @line-height-computed;
+		}
+		.error-status,
+		.error-description {
+			font-family: @font-family-serif;
+			margin-bottom: (@line-height-computed / 4);
+			line-height: 1;
+			color: @gray-dark;
+			font-size: @font-size-h1;
+		}
+		.error-description {
+			font-size: @font-size-h3;
+			color: @gray-light;
+			margin-bottom: @line-height-computed * 2;
+		}
+		.error-btn {
+			color: @navbar-default-link-color;
+			border: 2px solid @navbar-default-link-color;
+			border-radius: @border-radius-base;
+			font-weight: 700;
+			line-height: 1;
+			padding: @padding-base-vertical @padding-base-horizontal;
+
+			&:hover,
+			&:focus {
+				text-decoration: none;
+				color: #fff;
+				background-color: @navbar-default-link-hover-bg;
+				border: 2px solid @navbar-default-link-hover-color;
+			}
+		}
