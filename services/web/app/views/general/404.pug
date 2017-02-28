@@ -3,11 +3,21 @@ extends ../layout
 block content
 	.content
 		.container
-			.row
-				.col-md-8.col-md-offset-2.text-center
-					.page-header
-						h2 #{translate("cant_find_page")}
-					p
-						a(href="/")
-							i.fa.fa-arrow-circle-o-left
-							|  #{translate("take_me_home")}
+			.error-container
+				.error-figure.error-figure-404
+					img.img-responsive(
+						src="/img/brand/404-visual.svg"
+						alt="Not found"
+					)
+				.error-details
+					h1.error-code 404
+					p.error-status Not found
+					p.error-description #{translate("cant_find_page")}
+					a.error-btn(href="/") Home
+				//- .col-md-8.col-md-offset-2.text-center
+				//- 	.page-header
+				//- 		h2 
+				//- 	p
+				//- 		a(href="/")
+				//- 			i.fa.fa-arrow-circle-o-left
+				//- 			|  
