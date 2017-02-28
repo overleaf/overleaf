@@ -3,14 +3,18 @@
 	align-items: center;
 }
 	.error-figure {
+		display: none;
 		flex: 0 0 50%;
 		align-self: stretch;
-		padding: 50px;
+		padding: @line-height-computed * 2;
+		@media (min-width: @screen-sm-min) {
+			display: block;
+		}
 	}
 
 	.error-details {
-		flex: 0 0 50%;
-		padding: 50px;
+		flex: 0 1 50%;
+		padding: @line-height-computed * 2;
 	}
 		.error-code {
 			font-family: @font-family-sans-serif;
