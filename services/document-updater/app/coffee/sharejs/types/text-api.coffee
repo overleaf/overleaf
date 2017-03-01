@@ -11,20 +11,14 @@ text.api =
   # Get the text contents of a document
   getText: -> @snapshot
 
-  insert: (pos, text, fromUndo, callback) ->
-    op = {p:pos, i:text}
-    if fromUndo
-      op.u = true
-    op = [op]
+  insert: (pos, text, callback) ->
+    op = [{p:pos, i:text}]
     
     @submitOp op, callback
     op
   
-  del: (pos, length, fromUndo, callback) ->
-    op = {p:pos, d:@snapshot[pos...(pos + length)]}
-    if fromUndo
-      op.u = true
-    op = [op]
+  del: (pos, length, callback) ->
+    op = [{p:pos, d:@snapshot[pos...(pos + length)]}]
 
     @submitOp op, callback
     op
@@ -34,5 +28,5 @@ text.api =
       for component in op
         if component.i != undefined
           @emit 'insert', component.p, component.i
-        else if component.d != undefined
+        else
           @emit 'delete', component.p, component.d

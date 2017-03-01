@@ -27,11 +27,6 @@ describe "ShareJS text type", ->
 				dest = []
 				text._tc(dest, { i: "foo", p: 3 }, { i: "bar", p: 3 }, 'left')
 				dest.should.deep.equal [{ i: "foo", p: 3 }]
-			
-			it "should preserve the undo flag", ->
-				dest = []
-				text._tc(dest, { i: "foo", p: 9, u: true }, { i: "bar", p: 3 })
-				dest.should.deep.equal [{ i: "foo", p: 12, u: true }]
 
 		describe "insert / delete", ->
 			it "with a delete before", ->
@@ -51,13 +46,9 @@ describe "ShareJS text type", ->
 
 			it "with a delete at the same place with side == 'left'", ->
 				dest = []
+				
 				text._tc(dest, { i: "foo", p: 3 }, { d: "bar", p: 3 }, 'left')
 				dest.should.deep.equal [{ i: "foo", p: 3 }]
-			
-			it "should preserve the undo flag", ->
-				dest = []
-				text._tc(dest, { i: "foo", p: 9, u: true }, { d: "bar", p: 3 })
-				dest.should.deep.equal [{ i: "foo", p: 6, u: true }]
 
 		describe "delete / insert", ->
 			it "with an insert before", ->
@@ -84,11 +75,7 @@ describe "ShareJS text type", ->
 				dest = []
 				text._tc(dest, { d: "foo", p: 3 }, { i: "bar", p: 4 })
 				dest.should.deep.equal [{ d: "f", p: 3 }, { d: "oo", p: 6 }]
-			
-			it "should preserve the undo flag", ->
-				dest = []
-				text._tc(dest, { d: "foo", p: 9, u: true }, { i: "bar", p: 3 })
-				dest.should.deep.equal [{ d: "foo", p: 12, u: true }]
+				
 
 		describe "delete / delete", ->
 			it "with a delete before", ->
@@ -125,11 +112,6 @@ describe "ShareJS text type", ->
 				dest = []
 				text._tc(dest, { d: "foo", p: 6 }, { d: "abcfoo123", p: 3 })
 				dest.should.deep.equal []
-			
-			it "should preserve the undo flag", ->
-				dest = []
-				text._tc(dest, { d: "foo", p: 9, u: true }, { d: "bar", p: 3 })
-				dest.should.deep.equal [{ d: "foo", p: 6, u: true }]
 	
 		describe "comment / insert", ->
 			it "with an insert before", ->
@@ -227,37 +209,6 @@ describe "ShareJS text type", ->
 			(() ->
 				text.apply("foo123bar", [{ c: "456", p: 3 }])
 			).should.throw(Error)
-	
-	describe "_append", ->
-		it "should combine adjacent inserts", ->
-			dest = [{ i: "foo", p: 3 }]
-			text._append dest, { i: "bar", p: 6 }
-			dest.should.deep.equal [{ i: "foobar", p: 3 }]
-
-		it "should combine adjacent undo inserts", ->
-			dest = [{ i: "foo", p: 3, u: true }]
-			text._append dest, { i: "bar", p: 6, u: true }
-			dest.should.deep.equal [{ i: "foobar", p: 3, u: true }]
-
-		it "should not combine an undo and a normal insert", ->
-			dest = [{ i: "foo", p: 3, u: true }]
-			text._append dest, { i: "bar", p: 6 }
-			dest.should.deep.equal [{ i: "foo", p: 3, u: true }, { i: "bar", p: 6 }]
-	
-		it "should combine adjacent deletes", ->
-			dest = [{ d: "bar", p: 6 }]
-			text._append dest, { d: "foobaz", p: 3 }
-			dest.should.deep.equal [{ d: "foobarbaz", p: 3 }]
-
-		it "should combine adjacent undo deletes", ->
-			dest = [{ d: "foo", p: 3, u: true }]
-			text._append dest, { d: "bar", p: 3, u: true }
-			dest.should.deep.equal [{ d: "foobar", p: 3, u: true }]
-
-		it "should not combine an undo and a normal insert", ->
-			dest = [{ d: "foo", p: 3, u: true }]
-			text._append dest, { d: "bar", p: 3 }
-			dest.should.deep.equal [{ d: "foo", p: 3, u: true }, { d: "bar", p: 3 }]
 	
 	describe "applying ops and comments in different orders", ->
 		it "should not matter which op or comment is applied first", ->
