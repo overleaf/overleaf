@@ -26,15 +26,22 @@
 	position: absolute;
 	z-index: 20;
 	top: 2px;
-	width: 400px;
-	left: 50%;
-	margin-left: -200px;
+	left: 0;
+	right: 0;
+	text-align: center;
+
 	.alert {
+		display: inline-block;
+		text-align: left;
+		min-width: 400px;
 		padding: (@line-height-computed / 4);
 		font-size: 14px;
 		margin-bottom: (@line-height-computed / 4);
 	}
 }
+	#try-reconnect-now-button {
+		margin-left: 20px;
+	}
 
 #ide-body {
 	.full-size;
