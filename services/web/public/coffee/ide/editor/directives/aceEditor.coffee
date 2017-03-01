@@ -322,10 +322,6 @@ define [
 					doc = session.getDocument()
 					doc.on "change", onChange
 
-					sharejs_doc.on "remoteop.recordRemote", (op, oldSnapshot, msg) ->
-						undoManager.nextUpdateIsRemote = true
-						trackChangesManager.nextUpdateMetaData = msg?.meta
-
 					editor.initing = true
 					sharejs_doc.attachToAce(editor)
 					editor.initing = false

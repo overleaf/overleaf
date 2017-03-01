@@ -110,16 +110,46 @@ window.sharejs.extendDoc 'attach_ace', (editor, keepEditorContents, maxDocLength
 
     row:row, column:offset
 
+  # We want to insert a remote:true into the delta if the op comes from the
+  # underlying sharejs doc (which means it is from a remote op), so we have to do
+  # the work of editorDoc.insert and editorDoc.remove manually. These methods are
+  # copied from ace.js doc#insert and #remove, and then inject the remote:true
+  # flag into the delta.
   doc.on 'insert', (pos, text) ->
+    if (editorDoc.getLength() <= 1)
+        editorDoc.$detectNewLine(text)
+
+    lines = editorDoc.$split(text)
+    position = offsetToPos(pos)
+    start = editorDoc.clippedPos(position.row, position.column)
+    end = {
+        row: start.row + lines.length - 1,
+        column: (if lines.length == 1 then start.column else 0) + lines[lines.length - 1].length
+    }
+
     suppress = true
-    editorDoc.insert offsetToPos(pos), text
+    editorDoc.applyDelta({
+        start: start,
+        end: end,
+        action: "insert",
+        lines: lines,
+        remote: true
+    });
     suppress = false
     check()
 
   doc.on 'delete', (pos, text) ->
-    suppress = true
     range = Range.fromPoints offsetToPos(pos), offsetToPos(pos + text.length)
-    editorDoc.remove range
+    start = editorDoc.clippedPos(range.start.row, range.start.column)
+    end = editorDoc.clippedPos(range.end.row, range.end.column)
+    suppress = true
+    editorDoc.applyDelta({
+        start: start,
+        end: end,
+        action: "remove",
+        lines: editorDoc.getLinesForRange({start: start, end: end})
+        remote: true
+    });
     suppress = false
     check()
 
