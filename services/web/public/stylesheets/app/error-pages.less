@@ -1,3 +1,8 @@
+.full-height {
+	height: 100%;
+	padding: 0;
+}
+
 .error-container {
 	display: flex;
 	align-items: center;
@@ -7,8 +12,17 @@
 		flex: 0 0 50%;
 		align-self: stretch;
 		padding: @line-height-computed * 2;
-		@media (min-width: @screen-sm-min) {
-			display: block;
+		&-404 {
+			@media (min-width: @screen-sm-min) {
+				display: block;
+			}
+		}
+		&-500 {
+			padding-bottom: 0;
+			@media (min-width: @screen-sm-min) {
+				display: flex;	
+				align-items: flex-end;
+			}
 		}
 	}
 
