@@ -10,21 +10,45 @@
 	.error-figure {
 		display: none;
 		flex: 0 0 50%;
-		align-self: stretch;
 		padding: @line-height-computed * 2;
-		&-404 {
-			@media (min-width: @screen-sm-min) {
-				display: block;
-			}
-		}
-		&-500 {
-			padding-bottom: 0;
-			@media (min-width: @screen-sm-min) {
-				display: flex;	
-				align-items: flex-end;
-			}
+		@media (min-width: @screen-sm-min) {
+			display: block;
 		}
 	}
+	.error-figure-500 {
+		&::before {
+			content: '';
+			display: block;
+			position: fixed;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			right: 80%;
+			background-image: url(/img/brand/500-visual-plug.svg);
+			background-size: 400px;
+			background-repeat: no-repeat;
+			background-position: right 70%;
+		}
+		&::after {
+			content: '';
+			display: block;
+			position: fixed;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			background-image: url(/img/brand/500-visual-tail.svg);
+			background-size: 100px;
+			background-repeat: no-repeat;
+			background-position: 35% bottom;
+		}
+	}
+		.error-img {
+			display: block;
+			max-width: 380px;
+			height: auto;
+			margin: 0 auto;
+		}
 
 	.error-details {
 		flex: 0 1 50%;
