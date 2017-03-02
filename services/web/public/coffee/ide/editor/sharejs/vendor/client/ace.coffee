@@ -3,7 +3,7 @@
 Range = ace.require("ace/range").Range
 
 # Convert an ace delta into an op understood by share.js
-applyToShareJS = (editorDoc, delta, doc) ->
+applyToShareJS = (editorDoc, delta, doc, fromUndo) ->
   # Get the start position of the range, in no. of characters
   getStartOffsetPosition = (start) ->
     # This is quite inefficient - getLines makes a copy of the entire
@@ -27,11 +27,11 @@ applyToShareJS = (editorDoc, delta, doc) ->
   switch delta.action
     when 'insert'
       text = delta.lines.join('\n')
-      doc.insert pos, text
+      doc.insert pos, text, fromUndo
       
     when 'remove'
       text = delta.lines.join('\n')
-      doc.del pos, text.length
+      doc.del pos, text.length, fromUndo
 
     else throw new Error "unknown action: #{delta.action}"
   
@@ -78,8 +78,10 @@ window.sharejs.extendDoc 'attach_ace', (editor, keepEditorContents, maxDocLength
     if maxDocLength? and editorDoc.getValue().length > maxDocLength
         doc.emit "error", new Error("document length is greater than maxDocLength")
         return
+
+    fromUndo = !!(editor.getSession().$fromUndo or editor.getSession().$fromReject)
     
-    applyToShareJS editorDoc, change, doc
+    applyToShareJS editorDoc, change, doc, fromUndo
 
     check()
 
@@ -108,16 +110,46 @@ window.sharejs.extendDoc 'attach_ace', (editor, keepEditorContents, maxDocLength
 
     row:row, column:offset
 
+  # We want to insert a remote:true into the delta if the op comes from the
+  # underlying sharejs doc (which means it is from a remote op), so we have to do
+  # the work of editorDoc.insert and editorDoc.remove manually. These methods are
+  # copied from ace.js doc#insert and #remove, and then inject the remote:true
+  # flag into the delta.
   doc.on 'insert', (pos, text) ->
+    if (editorDoc.getLength() <= 1)
+        editorDoc.$detectNewLine(text)
+
+    lines = editorDoc.$split(text)
+    position = offsetToPos(pos)
+    start = editorDoc.clippedPos(position.row, position.column)
+    end = {
+        row: start.row + lines.length - 1,
+        column: (if lines.length == 1 then start.column else 0) + lines[lines.length - 1].length
+    }
+
     suppress = true
-    editorDoc.insert offsetToPos(pos), text
+    editorDoc.applyDelta({
+        start: start,
+        end: end,
+        action: "insert",
+        lines: lines,
+        remote: true
+    });
     suppress = false
     check()
 
   doc.on 'delete', (pos, text) ->
-    suppress = true
     range = Range.fromPoints offsetToPos(pos), offsetToPos(pos + text.length)
-    editorDoc.remove range
+    start = editorDoc.clippedPos(range.start.row, range.start.column)
+    end = editorDoc.clippedPos(range.end.row, range.end.column)
+    suppress = true
+    editorDoc.applyDelta({
+        start: start,
+        end: end,
+        action: "remove",
+        lines: editorDoc.getLinesForRange({start: start, end: end})
+        remote: true
+    });
     suppress = false
     check()
 

@@ -11,10 +11,10 @@ define [
 				show_remote_warning: false
 				
 			@reset()
-			@nextUpdateIsRemote = false
 
 			@editor.on "changeSession", (e) =>
 				@reset()
+				@session = e.session
 				e.session.setUndoManager(@)
 
 		showUndoConflictWarning: () ->
@@ -38,20 +38,44 @@ define [
 				@firstUpdate = false
 				return
 			aceDeltaSets = options.args[0]
-			@session = options.args[1]
 			return if !aceDeltaSets?
+			@session = options.args[1]
 
-			lines = @session.getDocument().getAllLines()
-			linesBeforeChange = @_revertAceDeltaSetsOnDocLines(aceDeltaSets, lines)
-			simpleDeltaSets = @_aceDeltaSetsToSimpleDeltaSets(aceDeltaSets, linesBeforeChange)
-			@undoStack.push(
-				deltaSets: simpleDeltaSets
-				remote: @nextUpdateIsRemote
-			)
+			# We need to split the delta sets into local or remote groups before pushing onto
+			# the undo stack, since these are treated differently.
+			splitDeltaSets = []
+			currentDeltaSet = null # Make global to this function
+			do newDeltaSet = () ->
+				currentDeltaSet = {group: "doc", deltas: []}
+				splitDeltaSets.push currentDeltaSet
+			currentRemoteState = null
+
+			for deltaSet in aceDeltaSets or []
+				if deltaSet.group == "doc" # ignore code folding etc.
+					for delta in deltaSet.deltas
+						if currentDeltaSet.remote? and currentDeltaSet.remote != !!delta.remote
+							newDeltaSet()
+						currentDeltaSet.deltas.push delta
+						currentDeltaSet.remote = !!delta.remote
+
+			# The lines are currently as they are after applying all these deltas, but to turn into simple deltas,
+			# we need the lines before each delta group.
+			docLines = @session.getDocument().getAllLines()
+			docLines = @_revertAceDeltaSetsOnDocLines(aceDeltaSets, docLines)
+			for deltaSet in splitDeltaSets
+				{simpleDeltaSet, docLines}  = @_aceDeltaSetToSimpleDeltaSet(deltaSet, docLines)
+				frame = {
+					deltaSets: [simpleDeltaSet]
+					remote: deltaSet.remote
+				}
+				@undoStack.push frame
 			@redoStack = []
-			@nextUpdateIsRemote = false
 
 		undo: (dontSelect) ->
+			# We rely on the doclines being in sync with the undo stack, so make sure
+			# any pending undo deltas are processed.
+			@session.$syncInformUndoManager()
+
 			localUpdatesMade = @_shiftLocalChangeToTopOfUndoStack()
 			return if !localUpdatesMade
 
@@ -206,19 +230,16 @@ define [
 						throw "Unknown delta type"
 			return doc.split("\n")
 
-		_aceDeltaSetsToSimpleDeltaSets: (aceDeltaSets, docLines) ->
-			simpleDeltaSets = []
-			for deltaSet in aceDeltaSets
-				if deltaSet.group == "doc" # ignore fold changes
-					simpleDeltas = []
-					for delta in deltaSet.deltas
-						simpleDeltas.push @_aceDeltaToSimpleDelta(delta, docLines)
-						docLines = @_applyAceDeltasToDocLines([delta], docLines)
-					simpleDeltaSets.push {
-						deltas: simpleDeltas
-						group: deltaSet.group
-					}
-			return simpleDeltaSets
+		_aceDeltaSetToSimpleDeltaSet: (deltaSet, docLines) ->
+			simpleDeltas = []
+			for delta in deltaSet.deltas
+				simpleDeltas.push @_aceDeltaToSimpleDelta(delta, docLines)
+				docLines = @_applyAceDeltasToDocLines([delta], docLines)
+			simpleDeltaSet = {
+				deltas: simpleDeltas
+				group: deltaSet.group
+			}
+			return {simpleDeltaSet, docLines} 
 
 		_simpleDeltaSetsToAceDeltaSets: (simpleDeltaSets, docLines) ->
 			for deltaSet in simpleDeltaSets

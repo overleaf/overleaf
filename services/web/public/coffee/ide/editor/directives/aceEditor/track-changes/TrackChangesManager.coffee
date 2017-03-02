@@ -14,11 +14,11 @@ define [
 				return if !track_changes?
 				@setTrackChanges(track_changes)
 			
-			@$scope.$watch "sharejsDoc", (doc) =>
+			@$scope.$watch "sharejsDoc", (doc, oldDoc) =>
 				return if !doc?
-				@disconnectFromRangesTracker()
-				@rangesTracker = doc.ranges
-				@connectToRangesTracker()
+				if oldDoc?
+					@disconnectFromDoc(oldDoc)
+				@connectToDoc(doc)
 			
 			@$scope.$on "comment:add", (e, thread_id, offset, length) =>
 				@addCommentToSelection(thread_id, offset, length)
@@ -36,10 +36,10 @@ define [
 				@removeCommentId(comment_id)
 			
 			@$scope.$on "comment:resolve_threads", (e, thread_ids) =>
-				@resolveCommentByThreadIds(thread_ids)
+				@hideCommentsByThreadIds(thread_ids)
 			
 			@$scope.$on "comment:unresolve_thread", (e, thread_id) =>
-				@unresolveCommentByThreadId(thread_id)
+				@showCommentByThreadId(thread_id)
 			
 			@$scope.$on "review-panel:recalculate-screen-positions", () =>
 				@recalculateReviewEntriesScreenPositions()
@@ -92,18 +92,11 @@ define [
 				else
 					unbindFromAce()
 		
-		disconnectFromRangesTracker: () ->
+		disconnectFromDoc: (doc) ->
 			@changeIdToMarkerIdMap = {}
-
-			if @rangesTracker?
-				@rangesTracker.off "insert:added"
-				@rangesTracker.off "insert:removed"
-				@rangesTracker.off "delete:added"
-				@rangesTracker.off "delete:removed"
-				@rangesTracker.off "changes:moved"
-				@rangesTracker.off "comment:added"
-				@rangesTracker.off "comment:moved"
-				@rangesTracker.off "comment:removed"
+			doc.off "ranges:clear"
+			doc.off "ranges:redraw"
+			doc.off "ranges:dirty"
 
 		setTrackChanges: (value) ->
 			if value
@@ -111,56 +104,15 @@ define [
 			else
 				@$scope.sharejsDoc?.track_changes_as = null
 		
-		connectToRangesTracker: () ->
+		connectToDoc: (doc) ->
+			@rangesTracker = doc.ranges
 			@setTrackChanges(@$scope.trackChanges)
 			
-			# Add a timeout because on remote ops, we get these notifications before
-			# ace has updated
-			@rangesTracker.on "insert:added", (change) =>
-				sl_console.log "[insert:added]", change
-				setTimeout () =>
-					@_onInsertAdded(change)
-					@broadcastChange()
-			@rangesTracker.on "insert:removed", (change) =>
-				sl_console.log "[insert:removed]", change
-				setTimeout () =>
-					@_onInsertRemoved(change)
-					@broadcastChange()
-			@rangesTracker.on "delete:added", (change) =>
-				sl_console.log "[delete:added]", change
-				setTimeout () =>
-					@_onDeleteAdded(change)
-					@broadcastChange()
-			@rangesTracker.on "delete:removed", (change) =>
-				sl_console.log "[delete:removed]", change
-				setTimeout () =>
-					@_onDeleteRemoved(change)
-					@broadcastChange()
-			@rangesTracker.on "changes:moved", (changes) =>
-				sl_console.log "[changes:moved]", changes
-				setTimeout () =>
-					@_onChangesMoved(changes)
-					@broadcastChange()
-
-			@rangesTracker.on "comment:added", (comment) =>
-				sl_console.log "[comment:added]", comment
-				setTimeout () =>
-					@_onCommentAdded(comment)
-					@broadcastChange()
-			@rangesTracker.on "comment:moved", (comment) =>
-				sl_console.log "[comment:moved]", comment
-				setTimeout () =>
-					@_onCommentMoved(comment)
-					@broadcastChange()
-			@rangesTracker.on "comment:removed", (comment) =>
-				sl_console.log "[comment:removed]", comment
-				setTimeout () =>
-					@_onCommentRemoved(comment)
-					@broadcastChange()
-			
-			@rangesTracker.on "clear", () =>
+			doc.on "ranges:dirty", () =>
+				@updateAnnotations()
+			doc.on "ranges:clear", () =>
 				@clearAnnotations()
-			@rangesTracker.on "redraw", () =>
+			doc.on "ranges:redraw", () =>
 				@redrawAnnotations()
 		
 		clearAnnotations: () ->
@@ -181,6 +133,55 @@ define [
 				@_onCommentAdded(comment)
 			
 			@broadcastChange()
+		
+		_doneUpdateThisLoop: false
+		_pendingUpdates: false
+		updateAnnotations: () ->
+			# Doc updates with multiple ops, like search/replace or block comments
+			# will call this with every individual op in a single event loop. So only
+			# do the first this loop, then schedule an update for the next loop for the rest.
+			if !@_doneUpdateThisLoop
+				@_doUpdateAnnotations()
+				@_doneUpdateThisLoop = true
+				setTimeout () =>
+					if @_pendingUpdates
+						@_doUpdateAnnotations()
+					@_doneUpdateThisLoop = false
+					@_pendingUpdates = false
+			else
+				@_pendingUpdates = true
+
+		_doUpdateAnnotations: () ->
+			dirty = @rangesTracker.getDirtyState()
+			
+			updateMarkers = false
+			
+			for id, change of dirty.change.added
+				if change.op.i?
+					@_onInsertAdded(change)
+				else if change.op.d?
+					@_onDeleteAdded(change)
+			for id, change of dirty.change.removed
+				if change.op.i?
+					@_onInsertRemoved(change)
+				else if change.op.d?
+					@_onDeleteRemoved(change)
+			for id, change of dirty.change.moved
+				updateMarkers = true
+				@_onChangeMoved(change)
+				
+			for id, comment of dirty.comment.added
+				@_onCommentAdded(comment)
+			for id, comment of dirty.comment.removed
+				@_onCommentRemoved(comment)
+			for id, comment of dirty.comment.moved
+				updateMarkers = true
+				@_onCommentMoved(comment)
+			
+			@rangesTracker.resetDirtyState()
+			if updateMarkers
+				@editor.renderer.updateBackMarkers()
+			@broadcastChange()
 
 		addComment: (offset, content, thread_id) ->
 			op = { c: content, p: offset, t: thread_id }
@@ -200,6 +201,7 @@ define [
 		
 		acceptChangeId: (change_id) ->
 			@rangesTracker.removeChangeId(change_id)
+			@updateAnnotations()
 		
 		rejectChangeId: (change_id) ->
 			change = @rangesTracker.getChange(change_id)
@@ -208,21 +210,26 @@ define [
 			if change.op.d?
 				content = change.op.d
 				position = @_shareJsOffsetToAcePosition(change.op.p)
+				session.$fromReject = true # Tell track changes to cancel out delete
 				session.insert(position, content)
+				session.$fromReject = false
 			else if change.op.i?
 				start = @_shareJsOffsetToAcePosition(change.op.p)
 				end = @_shareJsOffsetToAcePosition(change.op.p + change.op.i.length)
 				editor_text = session.getDocument().getTextRange({start, end})
 				if editor_text != change.op.i
 					throw new Error("Op to be removed (#{JSON.stringify(change.op)}), does not match editor text, '#{editor_text}'")
+				session.$fromReject = true
 				session.remove({start, end})
+				session.$fromReject = false
 			else
 				throw new Error("unknown change: #{JSON.stringify(change)}")
 
 		removeCommentId: (comment_id) ->
 			@rangesTracker.removeCommentId(comment_id)
+			@updateAnnotations()
 
-		resolveCommentByThreadIds: (thread_ids) ->
+		hideCommentsByThreadIds: (thread_ids) ->
 			resolve_ids = {}
 			for id in thread_ids
 				resolve_ids[id] = true
@@ -231,7 +238,7 @@ define [
 					@_onCommentRemoved(comment)
 			@broadcastChange()
 			
-		unresolveCommentByThreadId: (thread_id) ->
+		showCommentByThreadId: (thread_id) ->
 			for comment in @rangesTracker?.comments or []
 				if comment.op.t == thread_id
 					@_onCommentAdded(comment)
@@ -421,23 +428,18 @@ define [
 			lines = @editor.getSession().getDocument().getAllLines()
 			return AceShareJsCodec.shareJsOffsetToAcePosition(offset, lines)
 		
-		_onChangesMoved: (changes) ->
-			# TODO: PERFORMANCE: Only run through the Ace lines once, and calculate all
-			# change positions as we go.
-			for change in changes
-				start = @_shareJsOffsetToAcePosition(change.op.p)
-				if change.op.i?
-					end = @_shareJsOffsetToAcePosition(change.op.p + change.op.i.length)
-				else
-					end = start
-				@_updateMarker(change.id, start, end)
-			@editor.renderer.updateBackMarkers()
+		_onChangeMoved: (change) ->
+			start = @_shareJsOffsetToAcePosition(change.op.p)
+			if change.op.i?
+				end = @_shareJsOffsetToAcePosition(change.op.p + change.op.i.length)
+			else
+				end = start
+			@_updateMarker(change.id, start, end)
 		
 		_onCommentMoved: (comment) ->
 			start = @_shareJsOffsetToAcePosition(comment.op.p)
 			end = @_shareJsOffsetToAcePosition(comment.op.p + comment.op.c.length)
 			@_updateMarker(comment.id, start, end)
-			@editor.renderer.updateBackMarkers()
 	
 		_updateMarker: (change_id, start, end) ->
 			return if !@changeIdToMarkerIdMap[change_id]?
