@@ -4,9 +4,9 @@ logger = require("logger-sharelatex")
 AuthenticationController = require('../Authentication/AuthenticationController')
 UserInfoManager = require('../User/UserInfoManager')
 UserInfoController = require('../User/UserInfoController')
-CommentsController = require('../Comments/CommentsController')
+async = require "async"
 
-module.exports =
+module.exports = ChatController =
 	sendMessage: (req, res, next)->
 		project_id = req.params.project_id
 		content = req.body.content
@@ -28,7 +28,38 @@ module.exports =
 		logger.log project_id:project_id, query:query, "getting messages"
 		ChatApiHandler.getGlobalMessages project_id, query.limit, query.before, (err, messages) ->
 			return next(err) if err?
-			CommentsController._injectUserInfoIntoThreads {global: { messages: messages }}, (err) ->
+			ChatController._injectUserInfoIntoThreads {global: { messages: messages }}, (err) ->
 				return next(err) if err?
 				logger.log length: messages?.length, "sending messages to client"
 				res.json messages
+
+	_injectUserInfoIntoThreads: (threads, callback = (error, threads) ->) ->
+		userCache = {}
+		getUserDetails = (user_id, callback = (error, user) ->) ->
+			return callback(null, userCache[user_id]) if userCache[user_id]?
+			UserInfoManager.getPersonalInfo user_id, (err, user) ->
+				return callback(error) if error?
+				user = UserInfoController.formatPersonalInfo user
+				userCache[user_id] = user
+				callback null, user
+		
+		jobs = []
+		for thread_id, thread of threads
+			do (thread) ->
+				if thread.resolved
+					jobs.push (cb) ->
+						getUserDetails thread.resolved_by_user_id, (error, user) ->
+							cb(error) if error?
+							thread.resolved_by_user = user
+							cb()
+				for message in thread.messages
+					do (message) ->
+						jobs.push (cb) ->
+							getUserDetails message.user_id, (error, user) ->
+								cb(error) if error?
+								message.user = user
+								cb()
+		
+		async.series jobs, (error) ->
+			return callback(error) if error?
+			return callback null, threads

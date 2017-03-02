@@ -1,6 +1,8 @@
 _ = require("underscore")
 
 module.exports = ProjectEditorHandler =
+	trackChangesAvailable: false
+
 	buildProjectModelView: (project, members, invites) ->
 		result =
 			_id        : project._id
@@ -38,7 +40,7 @@ module.exports = ProjectEditorHandler =
 			templates: false
 			references: false
 			trackChanges: false
-			trackChangesVisible: trackChangesVisible
+			trackChangesVisible: ProjectEditorHandler.trackChangesAvailable and trackChangesVisible
 		})
 
 		return result
