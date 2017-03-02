@@ -23,7 +23,7 @@ module.exports = SystemMessageManager =
 	clearCache: () ->
 		delete @_cachedMessages
 				
-CACHE_TIMEOUT = 5 * 60 * 1000 # 5 minutes		
+CACHE_TIMEOUT = 20 * 1000 # 20 seconds		
 setInterval () ->
 	SystemMessageManager.clearCache()
 , CACHE_TIMEOUT
