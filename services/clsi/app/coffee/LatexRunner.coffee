@@ -62,31 +62,32 @@ module.exports = LatexRunner =
 		else
 			CommandRunner.kill ProcessTable[id], callback
 
-	_latexmkBaseCommand: (Settings?.clsi?.latexmkCommandPrefix || []).concat(
-			["latexmk", "-cd", "-f", "-jobname=output", "-auxdir=$COMPILE_DIR", "-outdir=$COMPILE_DIR"]
-		)
+	_latexmkBaseCommand: (Settings?.clsi?.latexmkCommandPrefix || []).concat([
+		"latexmk", "-cd", "-f", "-jobname=output", "-auxdir=$COMPILE_DIR", "-outdir=$COMPILE_DIR",
+		"-synctex=1","-interaction=batchmode"
+		])
 
 	_pdflatexCommand: (mainFile) ->
 		LatexRunner._latexmkBaseCommand.concat [
-			"-pdf", "-e", "$pdflatex='pdflatex -synctex=1 -interaction=batchmode %O %S'",
+			"-pdf",
 			Path.join("$COMPILE_DIR", mainFile)
 		]
 		
 	_latexCommand: (mainFile) ->
 		LatexRunner._latexmkBaseCommand.concat [
-			"-pdfdvi", "-e", "$latex='latex -synctex=1 -interaction=batchmode %O %S'",
+			"-pdfdvi",
 			Path.join("$COMPILE_DIR", mainFile)
 		]
 
 	_xelatexCommand: (mainFile) ->
 		LatexRunner._latexmkBaseCommand.concat [
-			"-xelatex", "-e", "$pdflatex='xelatex -synctex=1 -interaction=batchmode %O %S'",
+			"-xelatex",
 			Path.join("$COMPILE_DIR", mainFile)
 		]
 
 	_lualatexCommand: (mainFile) ->
 		LatexRunner._latexmkBaseCommand.concat [
-			"-pdf", "-e", "$pdflatex='lualatex -synctex=1 -interaction=batchmode %O %S'",
+			"-lualatex",
 			Path.join("$COMPILE_DIR", mainFile)
 		]
 
