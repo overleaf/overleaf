@@ -47,7 +47,10 @@ module.exports = Logger =
 					newError[key] = value
 				error = newError
 			# send the error to sentry
-			@raven.captureException(error, {tags: tags, extra: extra, level: level})
+			try
+				@raven.captureException(error, {tags: tags, extra: extra, level: level})
+			catch
+				return # ignore any errors
 
 	info : ()->
 		@logger.info.apply(@logger, arguments)
