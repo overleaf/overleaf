@@ -265,3 +265,40 @@ describe "Ranges", ->
 					throw error if error?
 					expect(data.ranges.comments).to.be.undefined
 					done()
+					
+	describe "tripping range size limit", ->
+		before (done) ->
+			@project_id = DocUpdaterClient.randomId()
+			@user_id = DocUpdaterClient.randomId()
+			@id_seed = DocUpdaterClient.randomId()
+			@doc = {
+				id: DocUpdaterClient.randomId()
+				lines: ["aaa"]
+			}
+			@i = new Array(3 * 1024 * 1024).join("a")
+			@updates = [{
+				doc: @doc.id
+				op: [{ i: @i, p: 1 }]
+				v: 0
+				meta: { user_id: @user_id, tc: @id_seed }
+			}]
+			MockWebApi.insertDoc @project_id, @doc.id, {
+				lines: @doc.lines
+				version: 0
+			}
+			jobs = []
+			for update in @updates
+				do (update) =>
+					jobs.push (callback) => DocUpdaterClient.sendUpdate @project_id, @doc.id, update, callback
+			DocUpdaterClient.preloadDoc @project_id, @doc.id, (error) =>
+				throw error if error?
+				async.series jobs, (error) ->
+					throw error if error?
+					setTimeout done, 200
+		
+		it "should not update the ranges", (done) ->
+			DocUpdaterClient.getDoc @project_id, @doc.id, (error, res, data) =>
+				throw error if error?
+				ranges = data.ranges
+				expect(ranges.changes).to.be.undefined
+				done()

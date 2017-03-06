@@ -337,6 +337,18 @@ describe "RedisManager", ->
 
 			it "should call the callback with an error", ->
 				@callback.calledWith(new Error("null bytes found in doc lines")).should.equal true
+	
+		describe "with ranges that are too big", ->
+			beforeEach ->
+				@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version - @ops.length)
+				@RedisManager._serializeRanges = sinon.stub().yields(new Error("ranges are too large"))
+				@RedisManager.updateDocument @doc_id, @lines, @version, @ops, @ranges, @callback
+
+			it 'should log an error', ->
+				@logger.error.called.should.equal true
+
+			it "should call the callback with the error", ->
+				@callback.calledWith(new Error("ranges are too large")).should.equal true
 
 	describe "putDocInMemory", ->
 		beforeEach ->
@@ -425,6 +437,17 @@ describe "RedisManager", ->
 
 			it "should call the callback with an error", ->
 				@callback.calledWith(new Error("null bytes found in doc lines")).should.equal true
+	
+		describe "with ranges that are too big", ->
+			beforeEach ->
+				@RedisManager._serializeRanges = sinon.stub().yields(new Error("ranges are too large"))
+				@RedisManager.putDocInMemory @project_id, @doc_id, @lines, @version, @ranges, @callback
+
+			it 'should log an error', ->
+				@logger.error.called.should.equal true
+
+			it "should call the callback with the error", ->
+				@callback.calledWith(new Error("ranges are too large")).should.equal true
 
 	describe "removeDocFromMemory", ->
 		beforeEach (done) ->
