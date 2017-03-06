@@ -11,7 +11,7 @@ echo ">> Server started"
 sleep 5
 
 echo ">> Running acceptance tests..."
-grunt --no-color test:acceptance
+grunt --no-color mochaTest:acceptance
 _test_exit_code=$?
 
 echo ">> Killing server"
