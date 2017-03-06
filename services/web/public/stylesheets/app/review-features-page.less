@@ -11,6 +11,9 @@
 @rfp-rp-blue-darker: shade(@rfp-rp-blue, 65%);
 @rfp-rp-blue-darkest: shade(@rfp-rp-blue, 75%);
 
+@rfp-card-shadow: 0 0 30px 5px rgba(0, 0, 0, .3);
+@rfp-border-radius: 5px;
+
 .rfp-main {
 	background-color: @rfp-rp-blue-dark;
 	color: #FFF;
@@ -22,22 +25,24 @@
 		margin-bottom: 2em;
 		color: inherit;
 	}
-		.rfp-h1-main {
-			color: #505050;
+		.rfp-h1-masthead {
+			color: #FFF;
+			margin-bottom: 1em;
 		}
 	.rfp-h2 {
 		font-size: @rfp-h2-size;
 		margin-bottom: 2em;
 		color: inherit;
-		.rfp-section-feature-alt & {
-			color: @rfp-rp-blue-dark;
-		}
 	}
 	.rfp-h3 {
 		font-size: @rfp-h3-size;
 		margin-bottom: 2em;
 		color: inherit;
 	}
+		.rfp-h3-cta {
+			margin-top: 0;
+			margin-bottom: 40px;
+		}
 	.rfp-lead {
 		font-size: @rfp-lead-size;
 		margin-bottom: 2em;
@@ -46,8 +51,15 @@
 		margin-right: auto;
 		font-weight: 300;
 	}
+		.rfp-lead-cta {
+			margin-top: 0;
+			margin-bottom: 40px;
+		}
 	.rfp-lead-strong {
 		font-weight: 700;
+		.rfp-section-masthead & {
+			margin-bottom: 0;
+		}
 	}
 	.rfp-p {
 		margin-bottom: 2em;
@@ -72,29 +84,33 @@
 	}
 	// Sections
 	.rfp-section {
-		padding: 60px;
+		padding: 30px;
 		text-align: center;
+		@media (min-width: @screen-sm-min) {
+			padding: 60px;
+		}
 	}
 	.rfp-section-masthead {
-	    background-image: linear-gradient(to right, fade(#FFF, 90%), fade(#FFF, 90%)), url(/img/feature-page/full-editor.png);
-	    //color: @rfp-sl-red;
+	    color: #FFF;
 		background-size: cover;
 		background-position: center;
-		color: #505050;
 	}
 	.rfp-section-blockquote {
+		position: relative;
 		padding-top: 30px;
 		padding-bottom: 30px;
 		background-color: @rfp-sl-red;
+		box-shadow: @rfp-card-shadow;
 	}
 	.rfp-section-feature {
-		color: #FFF;
+		color: @rfp-rp-blue-dark;
+		background-color: @rfp-rp-blue-light;
 		text-align: left;
 	}
 	.rfp-section-feature-alt {
+		color: #FFF;
+		background-color: transparent;
 		text-align: right;
-		color: @rfp-rp-blue-dark;
-		background-color: @rfp-rp-blue-light;
 	}
 	.rfp-section-testimonials {
 		background-color: @rfp-rp-blue-darkest;
@@ -103,24 +119,39 @@
 		background-color: @rfp-rp-blue-darker;
 	}
 	// Elements
+	.rfp-screenshot-masthead {
+		max-width: 100%;
+		box-shadow: @rfp-card-shadow;
+		margin-bottom: 2em;
+	}
 	.rfp-quote-section {
-		display: flex;
+
+		@media (min-width: @screen-sm-min) {
+			display: flex;
+		}
 	}
 	.rfp-quote {
-		display: flex;
-		flex-direction: column;
-		justify-content: space-between;
-		flex: 0 0 50%;
-		font-size: @rfp-lead-size;
-		background-color: #FFF;
-		color: @rfp-rp-blue-dark;
-		margin-right: 20px;
+		display: block;
+		width: 100%;
 		padding: 20px 40px;
 		border-left: 0;
 		max-width: 30em;
 		font-size: @rfp-lead-size;
 		quotes: "\201C" "\201D";
-		// Override weird Boostrap default.
+		box-shadow: @rfp-card-shadow;
+		border-radius: @rfp-border-radius;
+		font-size: @rfp-lead-size;
+		background-color: #FFF;
+		color: @rfp-rp-blue-dark;
+		
+		@media (min-width: @screen-sm-min) {
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+			flex: 0 1 50%;
+			margin-right: 20px;
+			// Override weird Boostrap default.
+		}
 		p {
 			display: block;
 		}
@@ -178,7 +209,26 @@
 				flex: 0 0 30%;
 			}
 		}
-			.rfp-quote-person-photo {
+			.rfp-quoted-person-name {
+				margin: 0;
+			}
+			.rfp-quoted-person-link {
+				margin: 0;
+				font-size: .8em;
+				&:hover,
+				&:focus {
+					text-decoration: none;
+					cursor: pointer;
+				}
+				.rfp-quote-main & {
+					color: #FFF;
+					&:hover,
+					&:focus {
+						color: #FFF;
+					}
+				}
+			}
+			.rfp-quoted-person-photo {
 				border-radius: 3em;
 				width: 6em;
 				margin-bottom: 20px;
@@ -193,12 +243,15 @@
 			padding: 40px;
 			background-color: #FFF;
 			color: @rfp-rp-blue-dark;
+			box-shadow: @rfp-card-shadow;
+ 			border-radius: @rfp-border-radius;
 		}
 			.rfp-cta {
 				display: inline-block;
 				background-color: @rfp-sl-red;
 				color: #FFF;
 				font-size: @rfp-h3-size;
+				border-radius: @rfp-border-radius;
 				padding: .75em 1.5em;
 				&:hover,
 				&:focus {
@@ -217,7 +270,7 @@
 				.rfp-cta-main {
 					display: block;
 					transition: transform 0.25s;
-					transform: translate(0, 0, 0);
+					transform: translate(0, 0);
 				}
 				.rfp-cta-extra {
 					display: block;
