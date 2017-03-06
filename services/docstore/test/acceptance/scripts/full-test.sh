@@ -8,7 +8,7 @@ grunt --no-color forever:app:start
 
 echo ">> Server started"
 
-sleep 5
+sleep 20
 
 echo ">> Running acceptance tests..."
 grunt --no-color mochaTest:acceptance
