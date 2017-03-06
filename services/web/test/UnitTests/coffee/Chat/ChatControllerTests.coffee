@@ -69,7 +69,7 @@ describe "ChatController", ->
 			@req.query =
 				limit: @limit = "30"
 				before: @before = "12345"
-			@CommentsController._injectUserInfoIntoThreads = sinon.stub().yields()
+			@ChatController._injectUserInfoIntoThreads = sinon.stub().yields()
 			@ChatApiHandler.getGlobalMessages = sinon.stub().yields(null, @messages = ["mock", "messages"])
 			@ChatController.getMessages @req, @res
 
@@ -80,3 +80,77 @@ describe "ChatController", ->
 
 		it "should return the messages", ->
 			@res.json.calledWith(@messages).should.equal true
+
+	describe "_injectUserInfoIntoThreads", ->
+		beforeEach ->
+			@users = {
+				"user_id_1": {
+					"mock": "user_1"
+				}
+				"user_id_2": {
+					"mock": "user_2"
+				}
+			}
+			@UserInfoManager.getPersonalInfo = (user_id, callback) =>
+				return callback(null, @users[user_id])
+			sinon.spy @UserInfoManager, "getPersonalInfo"
+			@UserInfoController.formatPersonalInfo = (user) ->
+				return { "formatted": user["mock"] }
+			
+		it "should inject a user object into messaged and resolved data", (done) ->
+			@ChatController._injectUserInfoIntoThreads {
+				thread1: {
+					resolved: true
+					resolved_by_user_id: "user_id_1"
+					messages: [{
+						user_id: "user_id_1"
+						content: "foo"
+					}, {
+						user_id: "user_id_2"
+						content: "bar"
+					}]
+				},
+				thread2: {
+					messages: [{
+						user_id: "user_id_1"
+						content: "baz"
+					}]
+				}
+			}, (error, threads) ->
+				expect(threads).to.deep.equal {
+					thread1: {
+						resolved: true
+						resolved_by_user_id: "user_id_1"
+						resolved_by_user: { "formatted": "user_1" }
+						messages: [{
+							user_id: "user_id_1"
+							user: { "formatted": "user_1" }
+							content: "foo"
+						}, {
+							user_id: "user_id_2"
+							user: { "formatted": "user_2" }
+							content: "bar"
+						}]
+					},
+					thread2: {
+						messages: [{
+							user_id: "user_id_1"
+							user: { "formatted": "user_1" }
+							content: "baz"
+						}]
+					}
+				}
+				done()
+
+		it "should only need to look up each user once", (done) ->
+			@ChatController._injectUserInfoIntoThreads [{
+				messages: [{
+					user_id: "user_id_1"
+					content: "foo"
+				}, {
+					user_id: "user_id_1"
+					content: "bar"
+				}]
+			}], (error, threads) =>
+				@UserInfoManager.getPersonalInfo.calledOnce.should.equal true
+				done()
