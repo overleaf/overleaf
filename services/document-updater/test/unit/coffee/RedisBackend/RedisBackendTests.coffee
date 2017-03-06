@@ -368,15 +368,8 @@ describe "RedisBackend", ->
 			
 			it "should return the primary result", ->
 				@result.should.deep.equal [@doclines, @version]
-			
-			it "should log out the secondary error", ->
-				@logger.error
-					.calledWith({
-						err: @error
-					}, "error in redis backend")
-					.should.equal true
 
-		describe "when the secondary errors", ->
+		describe "when the primary errors", ->
 			beforeEach (done) ->
 				@rclient_redis.get = sinon.stub()
 				@rclient_redis.exec = sinon.stub().yields(@error = new Error("oops"))
@@ -391,13 +384,6 @@ describe "RedisBackend", ->
 			
 			it "should return the error", ->
 				@returned_error.should.equal @error
-			
-			it "should log out the error", ->
-				@logger.error
-					.calledWith({
-						err: @error
-					}, "error in redis backend")
-					.should.equal true
 
 		describe "when the secondary takes longer than SECONDARY_TIMEOUT", ->
 			beforeEach (done) ->
