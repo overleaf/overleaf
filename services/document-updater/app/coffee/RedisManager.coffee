@@ -40,7 +40,6 @@ module.exports = RedisManager =
 			return callback(error)
 		docHash = RedisManager._computeHash(docLines)
 		logger.log project_id:project_id, doc_id:doc_id, version: version, hash:docHash, "putting doc in redis"
-
 		RedisManager._serializeRanges ranges, (error, ranges) ->
 			if error?
 				logger.error {err: error, doc_id, project_id}, error.message
@@ -59,7 +58,7 @@ module.exports = RedisManager =
 				# check the hash computed on the redis server
 				writeHash = result?[0]
 				if logHashWriteErrors and writeHash? and writeHash isnt docHash
-					logger.error project_id: project_id, doc_id: doc_id, writeHash: writeHash, origHash: docHash, "hash mismatch on putDocInMemory"
+					logger.error project_id: project_id, doc_id: doc_id, writeHash: writeHash, origHash: docHash, docLines:docLines, "hash mismatch on putDocInMemory"
 				# update docsInProject set
 				rclient.sadd keys.docsInProject(project_id:project_id), doc_id, callback
 
@@ -99,7 +98,7 @@ module.exports = RedisManager =
 			if docLines? and storedHash?
 				computedHash = RedisManager._computeHash(docLines)
 				if logHashReadErrors and computedHash isnt storedHash
-					logger.error project_id: project_id, doc_id: doc_id, doc_project_id: doc_project_id, computedHash: computedHash, storedHash: storedHash, "hash mismatch on retrieved document"
+					logger.error project_id: project_id, doc_id: doc_id, doc_project_id: doc_project_id, computedHash: computedHash, storedHash: storedHash, docLines:docLines, "hash mismatch on retrieved document"
 
 			try
 				docLines = JSON.parse docLines
@@ -191,7 +190,7 @@ module.exports = RedisManager =
 						# check the hash computed on the redis server
 						writeHash = result?[0]
 						if logHashWriteErrors and writeHash? and writeHash isnt newHash
-							logger.error doc_id: doc_id, writeHash: writeHash, origHash: newHash, "hash mismatch on updateDocument"
+							logger.error doc_id: doc_id, writeHash: writeHash, origHash: newHash, docLines:newDocLines, "hash mismatch on updateDocument"
 						return callback()
 
 	getDocIdsInProject: (project_id, callback = (error, doc_ids) ->) ->
