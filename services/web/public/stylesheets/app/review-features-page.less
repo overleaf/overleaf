@@ -94,6 +94,7 @@
 	    color: #FFF;
 		background-size: cover;
 		background-position: center;
+		background-color: @rfp-rp-blue-darker;
 	}
 	.rfp-section-blockquote {
 		position: relative;
@@ -123,6 +124,7 @@
 		max-width: 100%;
 		box-shadow: @rfp-card-shadow;
 		margin-bottom: 2em;
+		border-radius: @rfp-border-radius;
 	}
 	.rfp-quote-section {
 
@@ -143,7 +145,7 @@
 		font-size: @rfp-lead-size;
 		background-color: #FFF;
 		color: @rfp-rp-blue-dark;
-		
+
 		@media (min-width: @screen-sm-min) {
 			display: flex;
 			flex-direction: column;
@@ -163,13 +165,16 @@
 		}
 	}
 	.rfp-quote-main {
-		display: flex;
+		display: block;
 		max-width: none;
 		border-left: 0;
 		margin: 0 auto;
 		padding: 0;
 		quotes: "\201C" "\201D";
 		font-size: @rfp-lead-size;
+		@media (min-width: @screen-sm-min) {
+			display: flex;
+		}
 		// Override weird Boostrap default.
 		p {
 			display: block;
@@ -196,8 +201,10 @@
 				left: -0.75em;
 			}
 			.rfp-quote-main & {
-				flex: 1 1 70%;
-				margin: auto 40px auto auto;
+				@media (min-width: @screen-sm-min) {
+					flex: 1 1 70%;
+					margin: auto 40px auto auto;
+				}
 			}
 		}
 		.rfp-quoted-person {
@@ -206,6 +213,7 @@
 			.rfp-quote-main & {
 				display: flex;
 				align-items: center;
+				justify-content: center;
 				flex: 0 0 30%;
 			}
 		}
