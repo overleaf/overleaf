@@ -100,7 +100,8 @@ class MultiClient
 					cb(error, result)
 		async.parallel jobs, (error, results) ->
 			if error?
-				logger.error {err: error}, "error in redis backend"
+				# suppress logging of errors
+				# logger.error {err: error}, "error in redis backend"
 			else
 				compareResults(results, "exec")
 			callback(primaryError, primaryResult)
