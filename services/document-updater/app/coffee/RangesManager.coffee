@@ -13,7 +13,10 @@ module.exports = RangesManager =
 			if !!update.meta.tc
 				rangesTracker.setIdSeed(update.meta.tc)
 			for op in update.op
-				rangesTracker.applyOp(op, { user_id: update.meta?.user_id })
+				try
+					rangesTracker.applyOp(op, { user_id: update.meta?.user_id })
+				catch error
+					return callback(error)
 		
 		if rangesTracker.changes?.length > RangesManager.MAX_CHANGES or rangesTracker.comments?.length > RangesManager.MAX_COMMENTS
 			return callback new Error("too many comments or tracked changes")
