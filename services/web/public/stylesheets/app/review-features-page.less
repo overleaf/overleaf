@@ -104,10 +104,20 @@
 		box-shadow: @rfp-card-shadow;
 	}
 	.rfp-section-feature {
+		display: flex;
 		color: @rfp-rp-blue-dark;
 		background-color: @rfp-rp-blue-light;
 		text-align: left;
 	}
+		.rfp-feature-description-container,
+		.rfp-feature-video-container {
+			flex: 0 0 50%;
+		}
+		.rfp-feature-video-container {
+			.rfp-section-feature-alt & {
+				order: -1;
+			}	
+		}
 	.rfp-section-feature-alt {
 		color: #FFF;
 		background-color: transparent;
@@ -120,14 +130,27 @@
 		background-color: @rfp-rp-blue-darker;
 	}
 	// Elements
-	.rfp-screenshot-masthead {
+	.rfp-video {
 		max-width: 100%;
 		box-shadow: @rfp-card-shadow;
-		margin-bottom: 2em;
 		border-radius: @rfp-border-radius;
 	}
+		.rfp-video-masthead {
+			margin-bottom: 2em;
+		}
+		.rfp-video-anim {
+			transition: transform 0.8s ease, opacity 0.8s ease;
+			transform:	translate(100%, 0);
+			opacity: 0;
+		}
+			.rfp-video-anim-alt {
+				transform: translate(-100%, 0);
+			}
+			.rfp-video-anim-in {
+				transform: translate(0, 0);
+				opacity: 1;
+			}
 	.rfp-quote-section {
-
 		@media (min-width: @screen-sm-min) {
 			display: flex;
 		}
