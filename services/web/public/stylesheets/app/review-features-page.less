@@ -147,6 +147,29 @@
 		background-color: @rfp-rp-blue-darker;
 	}
 	// Elements
+	.rfp-h1-masthead-portion {
+		display: inline-block;
+		transform: translate(150px, 0);
+		opacity: 0;
+		transition: transform 0.8s ease 0s, opacity 0.8s ease 0s;
+		&:nth-child(2) {
+			transition-delay: 0.5s, 0.5s;
+		}		
+		&:nth-child(3) {
+			transition-delay: 0.5s, 0.5s;
+		}
+		&:nth-child(4) {
+			transition-delay: 1s, 1s;
+		}
+		&:nth-child(5) {
+			transition-delay: 1s, 1s;
+		}
+
+		.rfp-section-masthead-in & {
+			transform: translate(0, 0);
+			opacity: 1;
+		}
+	}
 	.rfp-video {
 		max-width: 100%;
 		box-shadow: @rfp-card-shadow;
@@ -154,6 +177,13 @@
 	}
 		.rfp-video-masthead {
 			margin-bottom: 2em;
+			transform: translate(0, 100px);
+			opacity: 0;
+			transition: transform 0.8s ease 1s, opacity 0.8s ease 1s;
+			.rfp-section-masthead-in & {
+				transform: translate(0, 0);
+				opacity: 1;
+			}
 		}
 		.rfp-video-anim {
 			transition: transform 0.8s ease, opacity 0.8s ease;
