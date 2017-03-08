@@ -92,6 +92,17 @@
 		background-size: cover;
 		background-position: center;
 		background-color: @rfp-rp-blue-darker;
+		min-height: 100vh;
+		.rfp-lead {
+			opacity: 0;
+			transition: opacity 0.8s ease;
+		}
+		&.rfp-section-masthead-in {
+			min-height: none;
+			.rfp-lead {
+				opacity: 1;
+			}
+		}
 	}
 	.rfp-section-blockquote {
 		position: relative;
@@ -180,6 +191,7 @@
 			transform: translate(0, 100px);
 			opacity: 0;
 			transition: transform 0.8s ease 1s, opacity 0.8s ease 1s;
+		
 			.rfp-section-masthead-in & {
 				transform: translate(0, 0);
 				opacity: 1;
