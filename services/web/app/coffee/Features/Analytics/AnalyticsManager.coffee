@@ -16,6 +16,14 @@ makeRequest = (opts, callback)->
 
 module.exports =
 
+	idendifyUser: (user_id, old_user_id, callback)->
+		opts =
+			body:
+				old_user_id:old_user_id
+			json:true
+			method:"POST"
+			timeout:1000
+			url: "/user/#{user_id}/idendify"	
 
 	recordEvent: (user_id, event, segmentation = {}, callback = (error) ->) ->
 		if user_id+"" == settings.smokeTest?.userId+""
