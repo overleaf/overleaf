@@ -101,35 +101,44 @@
 		box-shadow: @rfp-card-shadow;
 	}
 	.rfp-section-feature {
-		display: flex;
-		align-items: center;
+		display: block;
 		color: @rfp-rp-blue-dark;
 		background-color: @rfp-rp-blue-light;
 		text-align: left;
+		@media (min-width: @screen-sm-min) {
+			display: flex;
+			align-items: center;
+		}
 	}
 		.rfp-feature-description-container,
 		.rfp-feature-video-container {
 			flex: 0 0 50%;
 		}
 		.rfp-feature-description-container {
-			padding-right: 1em;
-			.rfp-section-feature-alt & {
-				padding-right: 0;
-				padding-left: 1em;
+			@media (min-width: @screen-sm-min) {
+				padding-right: 1em;
+				.rfp-section-feature-alt & {
+					padding-right: 0;
+					padding-left: 1em;
+				}
 			}
 		}
 		.rfp-feature-video-container {
-			padding-left: 1em;
-			.rfp-section-feature-alt & {
-				padding-left: 0;
-				padding-right: 1em;
-				order: -1;
+			@media (min-width: @screen-sm-min) {
+				padding-left: 1em;
+				.rfp-section-feature-alt & {
+					padding-left: 0;
+					padding-right: 1em;
+					order: -1;
+				}
 			}
 		}
 	.rfp-section-feature-alt {
 		color: #FFF;
 		background-color: transparent;
-		text-align: right;
+		@media (min-width: @screen-sm-min) {
+			text-align: right;
+		}
 	}
 	.rfp-section-testimonials {
 		background-color: @rfp-rp-blue-darkest;
