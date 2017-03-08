@@ -32,7 +32,7 @@ module.exports = FileController =
 				logger.err err:err, key:key, bucket:bucket, format:format, style:style, "problem getting file"
 				if err instanceof Errors.NotFoundError
 					return res.send 404
-				if !res.finished and res?.send?
+				else
 					return res.send 500
 			else if req.query.cacheWarm
 				logger.log key:key, bucket:bucket, format:format, style:style, "request is only for cache warm so not sending stream"
