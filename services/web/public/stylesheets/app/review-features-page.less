@@ -14,12 +14,16 @@
 @rfp-card-shadow: 0 0 30px 5px rgba(0, 0, 0, .3);
 @rfp-border-radius: 5px;
 
+@rfp-header-height: 80px;
+@rfp-header-height-collapsed: 50px;
+
 .rfp-main {
 	background-color: @rfp-rp-blue-dark;
 	color: #FFF;
 	font-size: 18px;
 	min-width: @screen-xs-min;
 }
+
 	// Typographical scale and basics.
 	.rfp-h1 {
 		font-size: @rfp-h1-size;
@@ -80,6 +84,35 @@
 		font-weight: 700;
 	}
 	// Sections
+	.rfp-header {
+		position: fixed;
+		top: 0;
+		width: 100%;
+		z-index: 2;
+		height: @rfp-header-height;
+		transition: height .2s;
+		background-color: fade(@rfp-rp-blue-darkest, 90%);
+		padding: 10px 30px;
+		min-width: @screen-xs-min;
+		@media (min-width: @screen-sm-min) {
+			padding-left: 60px;
+			padding-right: 60px;
+		}
+		.rfp-main-header-collapsed & {
+			height: @rfp-header-height-collapsed;
+		}
+	}
+		.rfp-header-wrapper {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			max-width: @container-large-desktop;
+			height: 100%;
+			margin: auto;
+		}
+			.rfp-header-logo {
+				height: 21px;
+			}
 	.rfp-section {
 		padding: 30px;
 		text-align: center;
@@ -94,6 +127,7 @@
 		background-position: center;
 		background-color: @rfp-rp-blue-darker;
 		min-height: 100vh;
+		padding-top: @rfp-header-height;
 		.rfp-lead {
 			opacity: 0;
 			transition: opacity 0.8s ease;
@@ -162,7 +196,7 @@
 	}
 		.rfp-section-wrapper {
 			max-width: @container-large-desktop;
-			margin: auto;
+			margin: 0 auto;
 		}
 	// Elements
 	.rfp-h1-masthead-portion {
@@ -403,6 +437,11 @@
 						transform: translate(-50%, -40%);
 					}
 				}
+			}
+
+			.rfp-cta-header {
+				font-size: 1em;
+				padding: .2em 1em;
 			}
 				.rfp-cta-main {
 					display: block;
