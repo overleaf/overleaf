@@ -31,7 +31,10 @@ define [
 					if scope.state.content.length > 0 
 						scope.submitNewComment()
 
-			scope.submitNewComment = () ->
+			scope.submitNewComment = (event) ->
+				# If this is from a blur event from clicking on cancel, ignore it.
+				if event? and event.type == "blur" and $(event.relatedTarget).hasClass("rp-entry-button-cancel")
+					return true
 				scope.onSubmit { content: scope.state.content }
 				scope.state.isAdding = false
 				scope.state.content = ""

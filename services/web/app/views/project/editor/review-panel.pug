@@ -340,10 +340,10 @@ script(type='text/ng-template', id='addCommentEntryTemplate')
 						ng-keypress="handleCommentKeyPress($event);"
 						placeholder=translate("add_your_comment_here")
 						focus-on="comment:new:open"
-						ng-blur="submitNewComment()"
+						ng-blur="submitNewComment($event)"
 					)
 				.rp-entry-actions
-					button.rp-entry-button(
+					button.rp-entry-button.rp-entry-button-cancel(
 						ng-click="cancelNewComment();"
 					) 
 						i.fa.fa-times
