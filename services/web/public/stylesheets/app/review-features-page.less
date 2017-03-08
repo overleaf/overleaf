@@ -285,7 +285,7 @@
 				opacity: 1;
 			}
 	.rfp-quote-section {
-		@media (min-width: @screen-sm-min) {
+		@media (min-width: @screen-md-min) {
 			display: flex;
 		}
 	}
@@ -302,24 +302,27 @@
 		background-color: #FFF;
 		color: @rfp-rp-blue-dark;
 		font-size: 1em;
+		margin: 0 auto 20px;
 
 		@media (min-width: @screen-xs-min) {
 			font-size: @rfp-lead-size;
 		}
 
-		@media (min-width: @screen-sm-min) {
+		@media (min-width: @screen-md-min) {
 			display: flex;
 			flex-direction: column;
 			justify-content: space-between;
 			flex: 0 1 50%;
 			margin-right: 20px;
-			// Override weird Boostrap default.
 		}
+		// Override weird Boostrap default.
 		p {
 			display: block;
 		}
 		&:last-of-type {
-			margin-right: 0;
+			@media (min-width: @screen-md-min) {
+				margin-right: 0;
+			}
 		}
 		&::before {
 			content: none;
@@ -333,7 +336,7 @@
 		padding: 0;
 		quotes: "\201C" "\201D";
 		font-size: @rfp-lead-size;
-		@media (min-width: @screen-sm-min) {
+		@media (min-width: @screen-md-min) {
 			display: flex;
 		}
 		// Override weird Boostrap default.
@@ -362,7 +365,7 @@
 				left: -0.75em;
 			}
 			.rfp-quote-main & {
-				@media (min-width: @screen-sm-min) {
+				@media (min-width: @screen-md-min) {
 					flex: 1 1 70%;
 					margin: auto 40px auto auto;
 				}
@@ -381,7 +384,7 @@
 			.rfp-quoted-person-name {
 				margin: 0;
 			}
-			.rfp-quoted-person-link {
+			.rfp-quoted-person-affil {
 				margin: 0;
 				font-size: .8em;
 				&:hover,
