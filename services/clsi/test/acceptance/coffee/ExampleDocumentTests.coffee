@@ -16,11 +16,13 @@ convertToPng = (pdfPath, pngPath, callback = (error) ->) ->
 		callback()
 
 compare = (originalPath, generatedPath, callback = (error, same) ->) ->
-	proc = ChildProcess.exec "compare -metric mae #{fixturePath(originalPath)} #{fixturePath(generatedPath)} #{fixturePath("tmp/diff.png")}"
+	diff_file = "#{fixturePath(generatedPath)}-diff.png"
+	proc = ChildProcess.exec "compare -metric mae #{fixturePath(originalPath)} #{fixturePath(generatedPath)} #{diff_file}"
 	stderr = ""
 	proc.stderr.on "data", (chunk) -> stderr += chunk
 	proc.on "exit", () ->
 		if stderr.trim() == "0 (0)"
+			fs.unlink diff_file # remove output diff if test matches expected image
 			callback null, true
 		else
 			console.log "compare result", stderr
@@ -68,7 +70,7 @@ describe "Example Documents", ->
 		do (example_dir) ->
 			describe example_dir, ->
 				before ->
-					@project_id = Client.randomId()
+					@project_id = Client.randomId() + "_" + example_dir
 
 				it "should generate the correct pdf", (done) ->
 					Client.compileDirectory @project_id, fixturePath("examples"), example_dir, 4242, (error, res, body) =>
