@@ -18,6 +18,7 @@
 	background-color: @rfp-rp-blue-dark;
 	color: #FFF;
 	font-size: 18px;
+	min-width: @screen-xs-min;
 }
 	// Typographical scale and basics.
 	.rfp-h1 {
@@ -117,8 +118,10 @@
 		background-color: @rfp-rp-blue-light;
 		text-align: left;
 		@media (min-width: @screen-sm-min) {
-			display: flex;
-			align-items: center;
+			.rfp-section-wrapper {
+				display: flex;
+				align-items: center;
+			}
 		}
 	}
 		.rfp-feature-description-container,
@@ -157,6 +160,10 @@
 	.rfp-section-final {
 		background-color: @rfp-rp-blue-darker;
 	}
+		.rfp-section-wrapper {
+			max-width: @container-large-desktop;
+			margin: auto;
+		}
 	// Elements
 	.rfp-h1-masthead-portion {
 		display: inline-block;
@@ -187,14 +194,31 @@
 		border-radius: @rfp-border-radius;
 	}
 		.rfp-video-masthead {
+			width: 400px;
+			height: 241px;
 			margin-bottom: 2em;
 			transform: translate(0, 100px);
 			opacity: 0;
 			transition: transform 0.8s ease 1s, opacity 0.8s ease 1s;
-		
+			box-shadow: none;
+			max-width: none;
+
+			@media (min-width: 600px) {
+				width: 525px;
+				height: 316px;
+			}
+			@media (min-width: @screen-sm-min) {
+				width: 633px;
+				height: 381px;
+			}
+			@media (min-width: @screen-sm-min) {
+				width: 697px;
+				height: 420px;
+			}
 			.rfp-section-masthead-in & {
 				transform: translate(0, 0);
 				opacity: 1;
+				box-shadow: @rfp-card-shadow;
 			}
 		}
 		.rfp-video-anim {
