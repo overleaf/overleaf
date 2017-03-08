@@ -21,14 +21,17 @@
 	background-color: @rfp-rp-blue-dark;
 	color: #FFF;
 	font-size: 18px;
-	min-width: @screen-xs-min;
+	min-width: 240px;
 }
 
 	// Typographical scale and basics.
 	.rfp-h1 {
-		font-size: @rfp-h1-size;
+		font-size: @rfp-h2-size;
 		margin-bottom: 1.6em;
 		color: inherit;
+		@media (min-width: @screen-xs-min) {
+			font-size: @rfp-h1-size;
+		}
 	}
 		.rfp-h1-masthead {
 			color: #FFF;
@@ -49,12 +52,14 @@
 			margin-bottom: 40px;
 		}
 	.rfp-lead {
-		font-size: @rfp-lead-size;
 		margin-bottom: 1.6em;
 		max-width: 30em;
 		margin-left: auto;
 		margin-right: auto;
 		font-weight: 300;
+		@media (min-width: @screen-xs-min) {
+			font-size: @rfp-lead-size;
+		}			
 	}
 		.rfp-lead-cta {
 			margin-top: 0;
@@ -92,8 +97,12 @@
 		height: @rfp-header-height;
 		transition: height .2s;
 		background-color: fade(@rfp-rp-blue-darkest, 90%);
-		padding: 10px 30px;
-		min-width: @screen-xs-min;
+		padding: 10px 20px;
+		min-width: 320px;
+		@media (min-width: @screen-xs-min) {
+			padding-left: 30px;
+			padding-right: 30px;
+		}
 		@media (min-width: @screen-sm-min) {
 			padding-left: 60px;
 			padding-right: 60px;
@@ -111,12 +120,18 @@
 			margin: auto;
 		}
 			.rfp-header-logo {
-				height: 21px;
+				height: 15px;
+				@media (min-width: @screen-xs-min) {
+					height: 21px;
+				}
 			}
 	.rfp-section {
-		padding: 30px;
+		padding: 30px 20px;
 		text-align: center;
 		overflow: hidden;
+		@media (min-width: @screen-xs-min) {
+			padding: 30px;
+		}
 		@media (min-width: @screen-sm-min) {
 			padding: 60px;
 		}
@@ -226,8 +241,8 @@
 		border-radius: @rfp-border-radius;
 	}
 		.rfp-video-masthead {
-			width: 400px;
-			height: 241px;
+			width: 270px;
+			height: 163px;
 			margin-bottom: 2em;
 			transform: translate(0, 100px);
 			opacity: 0;
@@ -235,6 +250,10 @@
 			box-shadow: none;
 			max-width: none;
 
+			@media (min-width: @screen-xs-min) {
+				width: 400px;
+				height: 241px;
+			}
 			@media (min-width: 600px) {
 				width: 525px;
 				height: 316px;
@@ -280,9 +299,13 @@
 		quotes: "\201C" "\201D";
 		box-shadow: @rfp-card-shadow;
 		border-radius: @rfp-border-radius;
-		font-size: @rfp-lead-size;
 		background-color: #FFF;
 		color: @rfp-rp-blue-dark;
+		font-size: 1em;
+
+		@media (min-width: @screen-xs-min) {
+			font-size: @rfp-lead-size;
+		}
 
 		@media (min-width: @screen-sm-min) {
 			display: flex;
@@ -421,7 +444,10 @@
 				color: #FFF;
 				font-size: @rfp-h3-size;
 				border-radius: @rfp-border-radius;
-				padding: .75em 1.5em;
+				padding: .75em;
+				@media (min-width: @screen-xs-min) {
+					padding: .75em 1.5em;
+				}
 				&:hover,
 				&:focus {
 					color: #FFF;
