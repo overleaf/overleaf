@@ -39,9 +39,6 @@ UserSchema = new Schema
 							references:    { type:Boolean, default: Settings.defaultFeatures.references }
 							trackChanges:  { type:Boolean, default: Settings.defaultFeatures.trackChanges }
 						}
-	featureSwitches	  : {
-		track_changes: { type: Boolean }
-	}
 	referal_id : {type:String, default:() -> uuid.v4().split("-")[0]}
 	refered_users: [ type:ObjectId, ref:'User' ]
 	refered_user_count: { type:Number, default: 0 }
