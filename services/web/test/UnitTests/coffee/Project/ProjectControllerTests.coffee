@@ -13,7 +13,7 @@ describe "ProjectController", ->
 		@project_id = "123213jlkj9kdlsaj"
 
 		@user =
-			_id:"!£123213kjljkl"
+			_id:"588f3ddae8ebc1bac07c9fa4"
 			first_name: "bjkdsjfk"
 		@settings =
 			apis:
@@ -302,7 +302,7 @@ describe "ProjectController", ->
 				name:"my proj"
 				_id:"213123kjlkj"
 			@user =
-				_id:"123kj21k3lj"
+				_id: "588f3ddae8ebc1bac07c9fa4"
 				ace:
 					fontSize:"massive"
 					theme:"sexy"
@@ -377,6 +377,14 @@ describe "ProjectController", ->
 		
 		it "should set showTrackChangesOnboarding = false if there is an error", (done) ->
 			@AnalyticsManager.getLastOccurance.yields(new Error("oops"), null)
+			@res.render = (pageName, opts)=>
+				opts.showTrackChangesOnboarding.should.equal false
+				done()
+			@ProjectController.loadEditor @req, @res
+		
+		it "should set showTrackChangesOnboarding = false if the user signed up after release", (done) ->
+			@AuthenticationController.getLoggedInUserId.returns("58c11a608ba0d6e49e8ce5d5")
+			@AnalyticsManager.getLastOccurance.yields(null, null)
 			@res.render = (pageName, opts)=>
 				opts.showTrackChangesOnboarding.should.equal false
 				done()
