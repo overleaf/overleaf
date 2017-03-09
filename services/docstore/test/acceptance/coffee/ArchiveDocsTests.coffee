@@ -150,3 +150,15 @@ describe "Archiving", ->
 					for doc, i in non_deleted_docs
 						doc.lines.should.deep.equal @docs[i].lines
 					done()
+
+	describe "Unarchiving automatically", ->
+		it "should unarchive the docs ", (done) ->
+			DocstoreClient.archiveAllDoc @project_id, (error, res) =>
+				DocstoreClient.getDoc @project_id, @docs[0]._id, {}, (error, res, doc) =>
+					doc.lines.should.deep.equal @docs[0].lines
+					doc.version.should.equal @docs[0].version
+					doc.ranges.should.deep.equal @docs[0].ranges
+					done()
+
+
+
