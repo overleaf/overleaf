@@ -15,6 +15,8 @@ module.exports =
 		webRouter.get '/style', HomeController.externalPage("style_guide", "Style Guide")
 		webRouter.get '/jobs', HomeController.externalPage("jobs", "Jobs")
 
+		webRouter.get '/track-changes-and-comments-in-latex', HomeController.externalPage("review-features-page", "Review features")
+
 		webRouter.get '/dropbox', HomeController.externalPage("dropbox", "Dropbox and ShareLaTeX")
 
 		webRouter.get '/university', UniversityController.getIndexPage
