@@ -68,7 +68,7 @@ module.exports = DocArchive =
 				logger.err err:err, res:res, project_id:project_id, doc_id:doc_id, "something went wrong unarchiving doc from aws"
 				return callback new Errors.NotFoundError("Error in S3 request")
 			if !(lines instanceof Array)
-				logger.err err:err, res:res, project_id:project_id, doc_id:doc_id, "doc lines from aws are not in array format, likely not JSON parsable"
+				logger.err err:err, res:res, project_id:project_id, doc_id:doc_id, lines:lines, "doc lines from aws are not in array format, likely not JSON parsable"
 				return callback(new Error("Error unpacking doc"))
 			MongoManager.upsertIntoDocCollection project_id, doc_id.toString(), {lines}, (err) ->
 				return callback(err) if err?
