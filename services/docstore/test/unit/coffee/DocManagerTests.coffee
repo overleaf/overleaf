@@ -34,6 +34,20 @@ describe "DocManager", ->
 			@MongoManager.findDoc = sinon.stub()
 			@MongoManager.getDocVersion = sinon.stub().yields(null, @version)
 
+		describe "when using a filter", ->
+			beforeEach ->
+				@MongoManager.findDoc.yields(null, @doc)
+
+			it "should always get inS3 even when filter is passed", (done)->
+				@DocManager.getDoc @project_id, @doc_id, {version: true}, =>
+					@MongoManager.findDoc.args[0][2].inS3.should.equal true
+					done()
+
+			it "should always get inS3 even when no filter is passed", (done)->
+				@DocManager.getDoc @project_id, @doc_id, undefined, =>
+					@MongoManager.findDoc.args[0][2].inS3.should.equal true
+					done()
+
 		describe "when the doc is in the doc collection", ->
 			beforeEach ->
 				@MongoManager.findDoc.yields(null, @doc)
