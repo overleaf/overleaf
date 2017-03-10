@@ -35,6 +35,8 @@ module.exports = DocManager =
 
 	getAllNonDeletedDocs: (project_id, filter, callback = (error, docs) ->) ->
 		DocArchive.unArchiveAllDocs project_id, (error) ->
+			if error?
+				return callback(error)
 			MongoManager.getProjectsDocs project_id, {include_deleted: false}, filter, (error, docs) ->
 				if err?
 					return callback(error)
