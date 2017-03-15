@@ -157,7 +157,7 @@ module.exports = WebsocketController =
 		Utils.getClientAttributes client, ["user_id", "project_id"], (error, {user_id, project_id}) ->
 			return callback(error) if error?
 			return callback(new Error("no project_id found on client")) if !project_id?
-			AuthorizationManager.assertClientCanEditProjectAndDoc client, doc_id, (error) ->
+			WebsocketController._assertClientCanApplyUpdate client, doc_id, update, (error) ->
 				if error?
 					logger.error {err: error, doc_id, client_id: client.id, version: update.v}, "client is not authorized to make update"
 					setTimeout () ->
@@ -179,3 +179,20 @@ module.exports = WebsocketController =
 						logger.error {err: error, project_id, doc_id, client_id: client.id, version: update.v}, "document was not available for update"
 						client.disconnect()
 					callback(error)
+
+	_assertClientCanApplyUpdate: (client, doc_id, update, callback) ->
+		AuthorizationManager.assertClientCanEditProjectAndDoc client, doc_id, (error) ->
+			if error?
+				if error.message == "not authorized" and WebsocketController._isCommentUpdate(update)
+					# This might be a comment op, which we only need read-only priveleges for
+					AuthorizationManager.assertClientCanViewProjectAndDoc client, doc_id, callback
+				else
+					return callback(error)
+			else
+				return callback(null)
+	
+	_isCommentUpdate: (update) ->
+		for op in update.op
+			if !op.c?
+				return false
+		return true
