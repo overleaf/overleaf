@@ -16,15 +16,12 @@ module.exports = (obj, methodName, key, logger) ->
 				"[Metrics] expected wrapped method '#{methodName}' to be invoked with a callback"
 			)
 
-		timer = new Metrics.Timer(key)
+		timer = new metrics.Timer(key)
 		start = new Date()
 
-		realMethod.call this, firstArgs, (callbackArgs...) ->
+		realMethod.call this, firstArgs..., (callbackArgs...) ->
 			timer.done()
 			elapsedTime = new Date() - start
 			if logger?
-				logger.log
-					key: key
-					time: elapsedTime
-					"[Metrics] timed async method call"
+				logger.log {key, elapsedTime}, "[Metrics] timed async method call"
 			callback.apply this, callbackArgs
