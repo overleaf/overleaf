@@ -10,7 +10,7 @@ destructors = []
 
 require "./uv_threadpool_size"
 
-module.exports =
+module.exports = Metrics =
 	initialize: (_name) ->
 		name = _name
 
@@ -47,6 +47,8 @@ module.exports =
 	open_sockets: require "./open_sockets"
 	event_loop: require "./event_loop"
 	memory: require "./memory"
+
+	timeAsyncMethod: require('./timeAsyncMethod')
 
 	close: () ->
 		for func in destructors
