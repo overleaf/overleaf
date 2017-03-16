@@ -5,13 +5,15 @@ expect = chai.expect
 modulePath = "../../../../app/js/UpdateCompressor.js"
 SandboxedModule = require('sandboxed-module')
 
+bigstring = ("a" for [0 .. 2*1024*1024]).join("")
+mediumstring = ("a" for [0 .. 1024*1024]).join("")
+
 describe "UpdateCompressor", ->
 	beforeEach ->
-		@UpdateCompressor = SandboxedModule.require modulePath
+		@UpdateCompressor = SandboxedModule.require modulePath, requires:
+			"../lib/diff_match_patch": require("../../../../app/lib/diff_match_patch")
 		@user_id = "user-id-1"
 		@other_user_id = "user-id-2"
-		@bigstring = ("a" for [0 .. 2*1024*1024]).join("")
-		@mediumstring = ("a" for [0 .. 1024*1024]).join("")
 		@ts1 = Date.now()
 		@ts2 = Date.now() + 1000
 
@@ -48,6 +50,22 @@ describe "UpdateCompressor", ->
 			}])
 			.to.deep.equal [{
 				op: @UpdateCompressor.NOOP
+				meta: { start_ts: @ts1, end_ts: @ts1, user_id: @user_id },
+				v: 42
+			}]
+
+		it "should ignore comment ops", ->
+			expect(@UpdateCompressor.convertToSingleOpUpdates [{
+				op:   [ @op1 = { p: 0, i: "Foo" }, @op2 = { p: 9, c: "baz"}, @op3 = { p: 6, i: "bar"} ]
+				meta: { ts: @ts1, user_id: @user_id }
+				v: 42
+			}])
+			.to.deep.equal [{
+				op: @op1,
+				meta: { start_ts: @ts1, end_ts: @ts1, user_id: @user_id },
+				v: 42
+			}, {
+				op: @op3,
 				meta: { start_ts: @ts1, end_ts: @ts1, user_id: @user_id },
 				v: 42
 			}]
@@ -149,7 +167,7 @@ describe "UpdateCompressor", ->
 					meta: ts: @ts1, user_id: @user_id
 					v: 42
 				}, {
-					op: { p: 6, i: @bigstring }
+					op: { p: 6, i: bigstring }
 					meta: ts: @ts2, user_id: @user_id
 					v: 43
 				}])
@@ -158,47 +176,47 @@ describe "UpdateCompressor", ->
 					meta: start_ts: @ts1, end_ts: @ts1, user_id: @user_id
 					v: 42
 				}, {
-					op: { p: 6, i: @bigstring }
+					op: { p: 6, i: bigstring }
 					meta: start_ts: @ts2, end_ts: @ts2, user_id: @user_id
 					v: 43
 				}]
 
 			it "should not append inserts that are too big (first op)", ->
 				expect(@UpdateCompressor.compressUpdates [{
-					op: { p: 3, i: @bigstring }
+					op: { p: 3, i: bigstring }
 					meta: ts: @ts1, user_id: @user_id
 					v: 42
 				}, {
-					op: { p: 3 + @bigstring.length, i: "bar" }
+					op: { p: 3 + bigstring.length, i: "bar" }
 					meta: ts: @ts2, user_id: @user_id
 					v: 43
 				}])
 				.to.deep.equal [{
-					op: { p: 3, i: @bigstring }
+					op: { p: 3, i: bigstring }
 					meta: start_ts: @ts1, end_ts: @ts1, user_id: @user_id
 					v: 42
 				}, {
-					op: { p: 3 + @bigstring.length, i: "bar" }
+					op: { p: 3 + bigstring.length, i: "bar" }
 					meta: start_ts: @ts2, end_ts: @ts2, user_id: @user_id
 					v: 43
 				}]
 
 			it "should not append inserts that are too big (first and second op)", ->
 				expect(@UpdateCompressor.compressUpdates [{
-					op: { p: 3, i: @mediumstring }
+					op: { p: 3, i: mediumstring }
 					meta: ts: @ts1, user_id: @user_id
 					v: 42
 				}, {
-					op: { p: 3 + @mediumstring.length, i: @mediumstring }
+					op: { p: 3 + mediumstring.length, i: mediumstring }
 					meta: ts: @ts2, user_id: @user_id
 					v: 43
 				}])
 				.to.deep.equal [{
-					op: { p: 3, i: @mediumstring }
+					op: { p: 3, i: mediumstring }
 					meta: start_ts: @ts1, end_ts: @ts1, user_id: @user_id
 					v: 42
 				}, {
-					op: { p: 3 + @mediumstring.length, i: @mediumstring }
+					op: { p: 3 + mediumstring.length, i: mediumstring }
 					meta: start_ts: @ts2, end_ts: @ts2, user_id: @user_id
 					v: 43
 				}]
@@ -343,6 +361,43 @@ describe "UpdateCompressor", ->
 				}, {
 					op: { p: 6, d: "bardle" }
 					meta: start_ts: @ts2, end_ts: @ts2, user_id: @user_id
+					v: 43
+				}]
+		
+		describe "delete - insert", ->
+			it "should do a diff of the content", ->
+				expect(@UpdateCompressor.compressUpdates [{
+					op: { p: 3, d: "one two three four five six seven eight" }
+					meta: ts: @ts1, user_id: @user_id
+					v: 42
+				}, {
+					op: { p: 3, i: "one 2 three four five six seven eight" }
+					meta: ts: @ts2, user_id: @user_id
+					v: 43
+				}])
+				.to.deep.equal [{
+					op: { p: 7, d: "two" }
+					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
+					v: 43
+				}, {
+					op: { p: 7, i: "2" }
+					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
+					v: 43
+				}]
+			
+			it "should return a no-op if the delete and insert are the same", ->
+				expect(@UpdateCompressor.compressUpdates [{
+					op: { p: 3, d: "one two three four five six seven eight" }
+					meta: ts: @ts1, user_id: @user_id
+					v: 42
+				}, {
+					op: { p: 3, i: "one two three four five six seven eight" }
+					meta: ts: @ts2, user_id: @user_id
+					v: 43
+				}])
+				.to.deep.equal [{
+					op: { p: 3, i: "" }
+					meta: start_ts: @ts1, end_ts: @ts2, user_id: @user_id
 					v: 43
 				}]
 

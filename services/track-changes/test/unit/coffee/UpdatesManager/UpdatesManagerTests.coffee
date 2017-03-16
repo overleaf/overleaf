@@ -761,3 +761,41 @@ describe "UpdatesManager", ->
 					start_ts: @now
 					end_ts:   @now + 30
 			}]
+
+		it "should split updates before a big delete", ->
+			result = @UpdatesManager._summarizeUpdates [{
+				doc_id: "doc-id-1"
+				op: [{ d: "this is a long long long long long delete", p: 34 }]
+				meta:
+					user_id: @user_1.id
+					start_ts: @now + 20
+					end_ts:   @now + 30
+				v: 5
+			}, {
+				doc_id: "doc-id-1"
+				meta:
+					user_id: @user_2.id
+					start_ts: @now
+					end_ts:   @now + 10
+				v: 4
+			}]
+
+			expect(result).to.deep.equal [{
+				docs:
+					"doc-id-1":
+						fromV: 5
+						toV: 5
+				meta:
+					user_ids: [@user_1.id]
+					start_ts: @now + 20
+					end_ts:   @now + 30
+			}, {
+				docs:
+					"doc-id-1":
+						fromV: 4
+						toV: 4
+				meta:
+					user_ids: [@user_2.id]
+					start_ts: @now
+					end_ts:   @now + 10
+			}]

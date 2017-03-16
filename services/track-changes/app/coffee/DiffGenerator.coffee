@@ -18,7 +18,7 @@ module.exports = DiffGenerator =
 				if e instanceof ConsistencyError and i = update.op.length - 1
 					# catch known case where the last op in an array has been
 					# merged into a later op
-					logger.error {update, op: JSON.stringify(op)}, "marking op as broken"
+					logger.error {err: e, update, op: JSON.stringify(op)}, "marking op as broken"
 					op.broken = true
 				else
 					throw e # rethrow the execption
@@ -47,6 +47,9 @@ module.exports = DiffGenerator =
 
 		else if op.d?
 			return content.slice(0, op.p) + op.d + content.slice(op.p)
+		
+		else
+			return content
 
 	rewindUpdates: (content, updates) ->
 		for update in updates.reverse()

@@ -219,11 +219,35 @@ module.exports = UpdatesManager =
 			return !!user_id.match(/^[a-f0-9]{24}$/)
 
 	TIME_BETWEEN_DISTINCT_UPDATES: fiveMinutes = 5 * 60 * 1000
+	SPLIT_ON_DELETE_SIZE: 16 # characters
 	_summarizeUpdates: (updates, existingSummarizedUpdates = []) ->
 		summarizedUpdates = existingSummarizedUpdates.slice()
+		previousUpdateWasBigDelete = false
 		for update in updates
 			earliestUpdate = summarizedUpdates[summarizedUpdates.length - 1]
-			if earliestUpdate and earliestUpdate.meta.start_ts - update.meta.end_ts < @TIME_BETWEEN_DISTINCT_UPDATES
+			shouldConcat = false
+
+			# If a user inserts some text, then deletes a big chunk including that text,
+			# the update we show might concat the insert and delete, and there will be no sign
+			# of that insert having happened, or be able to restore to it (restoring after a big delete is common).
+			# So, we split the summary on 'big' deletes. However, we've stepping backwards in time with
+			# most recent changes considered first, so if this update is a big delete, we want to start
+			# a new summarized update next timge, hence we monitor the previous update.
+			if previousUpdateWasBigDelete
+				shouldConcat = false
+			else if earliestUpdate and earliestUpdate.meta.end_ts - update.meta.start_ts < @TIME_BETWEEN_DISTINCT_UPDATES
+				# We're going backwards in time through the updates, so only combine if this update starts less than 5 minutes before
+				# the end of current summarized block, so no block spans more than 5 minutes.
+				shouldConcat = true
+
+			isBigDelete = false
+			for op in update.op or []
+				if op.d? and op.d.length > @SPLIT_ON_DELETE_SIZE
+					isBigDelete = true
+
+			previousUpdateWasBigDelete = isBigDelete
+
+			if shouldConcat
 				# check if the user in this update is already present in the earliest update,
 				# if not, add them to the users list of the earliest update
 				earliestUpdate.meta.user_ids = _.union earliestUpdate.meta.user_ids, [update.meta.user_id]

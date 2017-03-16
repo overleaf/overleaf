@@ -530,3 +530,9 @@ module.exports = PackManager =
 		}, (err) ->
 			logger.log {project_id, doc_id, pack_id}, "set expiry on pack"
 			callback()
+
+
+#	_getOneDayInFutureWithRandomDelay: ->
+#		thirtyMins = 1000 * 60 * 30
+#		randomThirtyMinMax = Math.ceil(Math.random() * thirtyMins)
+#		return new Date(Date.now() + randomThirtyMinMax + 1*DAYS)
