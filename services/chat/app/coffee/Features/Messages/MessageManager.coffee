@@ -2,6 +2,8 @@ mongojs = require "../../mongojs"
 db = mongojs.db
 ObjectId = mongojs.ObjectId
 async = require "async"
+metrics = require 'metrics-sharelatex'
+logger = require 'logger-sharelatex'
 
 module.exports = MessageManager =
 	createMessage: (room_id, user_id, content, timestamp, callback = (error, message) ->) ->
@@ -63,3 +65,29 @@ module.exports = MessageManager =
 			query._id = ObjectId(query._id)
 		return query
 		
+
+metrics.timeAsyncMethod(
+	MessageManager, 'createMessage',
+	'MessageManager.createMessage',
+	logger
+)
+metrics.timeAsyncMethod(
+	MessageManager, 'getMessages',
+	'MessageManager.getMessages',
+	logger
+)
+metrics.timeAsyncMethod(
+	MessageManager, 'findAllMessagesInRooms',
+	'MessageManager.findAllMessagesInRooms',
+	logger
+)
+metrics.timeAsyncMethod(
+	MessageManager, 'updateMessage',
+	'MessageManager.updateMessage',
+	logger
+)
+metrics.timeAsyncMethod(
+	MessageManager, 'deleteMessage',
+	'MessageManager.deleteMessage',
+	logger
+)

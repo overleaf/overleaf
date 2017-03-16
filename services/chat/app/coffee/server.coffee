@@ -8,8 +8,6 @@ app = express()
 server = require("http").createServer(app)
 Router = require "./router"
 
-metrics.mongodb.monitor(Path.resolve(__dirname + "/../../node_modules/mongojs/node_modules/mongodb"), logger)
-
 app.use express.bodyParser()
 app.use metrics.http.monitor(logger)
 

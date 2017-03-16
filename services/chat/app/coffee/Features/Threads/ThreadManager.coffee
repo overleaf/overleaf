@@ -1,6 +1,8 @@
 mongojs = require("../../mongojs")
 db = mongojs.db
 ObjectId = mongojs.ObjectId
+logger = require('logger-sharelatex')
+metrics = require('metrics-sharelatex')
 
 module.exports = ThreadManager =
 	GLOBAL_THREAD: "GLOBAL"
@@ -74,3 +76,30 @@ module.exports = ThreadManager =
 			}, (error) ->
 				return callback(error) if error?
 				return callback null, room._id
+
+
+metrics.timeAsyncMethod(
+	ThreadManager, 'findOrCreateThread',
+	'ThreadManager.findOrCreateThread',
+	logger
+)
+metrics.timeAsyncMethod(
+	ThreadManager, 'findAllThreadRooms',
+	'ThreadManager.findAllThreadRooms',
+	logger
+)
+metrics.timeAsyncMethod(
+	ThreadManager, 'resolveThread',
+	'ThreadManager.resolveThread',
+	logger
+)
+metrics.timeAsyncMethod(
+	ThreadManager, 'reopenThread',
+	'ThreadManager.reopenThread',
+	logger
+)
+metrics.timeAsyncMethod(
+	ThreadManager, 'deleteThread',
+	'ThreadManager.deleteThread',
+	logger
+)
