@@ -39,8 +39,6 @@ ErrorController = require "../Features/Errors/ErrorController"
 UserSessionsManager = require "../Features/User/UserSessionsManager"
 AuthenticationController = require "../Features/Authentication/AuthenticationController"
 
-metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongojs/node_modules/mongodb"), logger)
-metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongoose/node_modules/mongodb"), logger)
 
 metrics.event_loop?.monitor(logger)
 

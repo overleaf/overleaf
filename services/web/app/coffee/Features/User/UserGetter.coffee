@@ -1,4 +1,6 @@
 mongojs = require("../../infrastructure/mongojs")
+metrics = require('../../infrastructure/Metrics')
+logger = require('logger-sharelatex')
 db = mongojs.db
 ObjectId = mongojs.ObjectId
 
@@ -24,3 +26,6 @@ module.exports = UserGetter =
 			return callback error
 		
 		db.users.find { _id: { $in: user_ids} }, projection, callback
+
+metrics.timeAsyncMethod UserGetter, 'getUser', 'UserGetter.getUser', logger
+metrics.timeAsyncMethod UserGetter, 'getUsers', 'UserGetter.getUsers', logger

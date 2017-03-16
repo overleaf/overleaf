@@ -1,4 +1,5 @@
 mongojs = require("../../infrastructure/mongojs")
+metrics = require("../../infrastructure/Metrics")
 db = mongojs.db
 ObjectId = mongojs.ObjectId
 async = require "async"
@@ -57,3 +58,6 @@ module.exports = ProjectGetter =
 			CollaboratorsHandler.getProjectsUserIsCollaboratorOf user_id, fields, (error, readAndWriteProjects, readOnlyProjects) ->
 				return callback(error) if error?
 				callback null, projects, readAndWriteProjects, readOnlyProjects
+
+
+metrics.timeAsyncMethod ProjectGetter, 'getProject', 'ProjectGetter.getProject', logger
