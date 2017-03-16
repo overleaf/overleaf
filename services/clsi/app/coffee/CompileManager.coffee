@@ -8,6 +8,7 @@ logger = require "logger-sharelatex"
 Metrics = require "./Metrics"
 child_process = require "child_process"
 DraftModeManager = require "./DraftModeManager"
+TikzManager = require "./TikzManager"
 fs = require("fs")
 fse = require "fs-extra"
 os = require("os")
@@ -42,6 +43,12 @@ module.exports = CompileManager =
 				else
 					callback()
 
+			createTikzFileIfRequired = (callback) ->
+				if TikzManager.needsOutputFile(request.rootResourcePath, request.resources)
+					TikzManager.injectOutputFile compileDir, request.rootResourcePath, callback
+				else
+					callback()
+
 			# set up environment variables for chktex
 			env = {}
 			# only run chktex on LaTeX files (not knitr .Rtex files or any others)
@@ -54,7 +61,8 @@ module.exports = CompileManager =
 				if request.check is 'validate'
 					env['CHKTEX_VALIDATE'] =  1
 
-			injectDraftModeIfRequired (error) ->
+			# apply a series of file modifications/creations for draft mode and tikz
+			async.series [injectDraftModeIfRequired, createTikzFileIfRequired], (error) ->
 				return callback(error) if error?
 				timer = new Metrics.Timer("run-compile")
 				# find the image tag to log it as a metric, e.g. 2015.1 (convert . to - for graphite)

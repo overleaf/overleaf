@@ -50,6 +50,8 @@ module.exports = ResourceWriter =
 						should_delete = false
 					if path == "output.pdf" or path == "output.dvi" or path == "output.log"
 						should_delete = true
+					if path == "output.tex" # created by TikzManager if present in output files
+						should_delete = true
 					if should_delete
 						jobs.push (callback) -> ResourceWriter._deleteFileIfNotDirectory Path.join(basePath, path), callback
 
