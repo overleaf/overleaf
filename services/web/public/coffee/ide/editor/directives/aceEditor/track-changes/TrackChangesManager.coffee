@@ -73,16 +73,24 @@ define [
 						_scrollTimeout = null
 					, 200
 
+			@_resetCutState()
+			onCut = () => @onCut()
+			onPaste = () => @onPaste()
+
 			bindToAce = () =>
 				@editor.on "changeSelection", onChangeSelection
 				@editor.on "change", onChangeSelection # Selection also moves with updates elsewhere in the document
 				@editor.on "changeSession", onChangeSession
+				@editor.on "cut", onCut
+				@editor.on "paste", onPaste
 				@editor.renderer.on "resize", onResize
 
 			unbindFromAce = () =>
 				@editor.off "changeSelection", onChangeSelection
 				@editor.off "change", onChangeSelection
 				@editor.off "changeSession", onChangeSession
+				@editor.off "cut", onCut
+				@editor.off "paste", onPaste
 				@editor.renderer.off "resize", onResize
 
 			@$scope.$watch "trackChangesEnabled", (enabled) =>
@@ -243,6 +251,50 @@ define [
 				if comment.op.t == thread_id
 					@_onCommentAdded(comment)
 			@broadcastChange()
+
+		_resetCutState: () ->
+			@_cutState = {
+				text: null
+				comments: []
+				docId: null
+			}
+
+		onCut: () ->
+			@_resetCutState()
+			selection = @editor.getSelectionRange()
+			selection_start = @_aceRangeToShareJs(selection.start)
+			selection_end = @_aceRangeToShareJs(selection.end)
+			@_cutState.text = @editor.getSelectedText()
+			@_cutState.docId = @$scope.docId
+			for comment in @rangesTracker.comments
+				comment_start = comment.op.p
+				comment_end = comment_start + comment.op.c.length
+				if selection_start <= comment_start and comment_end <= selection_end
+					@_cutState.comments.push {
+						offset: comment.op.p - selection_start
+						text: comment.op.c
+						comment: comment
+					}
+
+		onPaste: () =>
+			@editor.once "change", (change) =>
+				return if change.action != "insert"
+				pasted_text = change.lines.join("\n")
+				paste_offset = @_aceRangeToShareJs(change.start)
+				console.log "PASTE", pasted_text, paste_offset
+				# We have to wait until the change has been processed by the range tracker, 
+				# since if we move the ops into place beforehand, they will be moved again
+				# when the changes are processed by the range tracker. This ranges:dirty
+				# event is fired after the doc has applied the changes to the range tracker.
+				@$scope.sharejsDoc.on "ranges:dirty.paste", () =>
+					@$scope.sharejsDoc.off "ranges:dirty.paste" # Doc event emitter uses namespaced events
+					if pasted_text == @_cutState.text and @$scope.docId == @_cutState.docId
+						for {comment, offset, text} in @_cutState.comments
+							op = { c: text, p: paste_offset + offset, t: comment.id }
+							@$scope.sharejsDoc.submitOp op # Resubmitting an existing comment op (by thread id) will move it
+					@_resetCutState()
+					# Check that comments still match text. Will throw error if not.
+					@rangesTracker.validate(@editor.getValue())
 
 		checkMapping: () ->
 			# TODO: reintroduce this check

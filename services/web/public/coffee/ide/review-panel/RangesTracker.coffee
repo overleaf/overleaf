@@ -1,3 +1,6 @@
+# This file is shared between document-updater and web, so that the server and client share
+# an identical track changes implementation. Do not edit it directly in web or document-updater,
+# instead edit it at https://github.com/sharelatex/ranges-tracker, where it has a suite of tests
 load = () ->
 	class RangesTracker
 		# The purpose of this class is to track a set of inserts and deletes to a document, like
@@ -78,6 +81,13 @@ load = () ->
 			@comments = @comments.filter (c) -> c.id != comment_id
 			@_markAsDirty comment, "comment", "removed"
 		
+		moveCommentId: (comment_id, position, text) ->
+			for comment in @comments
+				if comment.id == comment_id
+					comment.op.p = position
+					comment.op.c = text
+					@_markAsDirty comment, "comment", "moved"
+
 		getChange: (change_id) ->
 			change = null
 			for c in @changes
@@ -90,6 +100,18 @@ load = () ->
 			change = @getChange(change_id)
 			return if !change?
 			@_removeChange(change)
+		
+		validate: (text) ->
+			for change in @changes
+				if change.op.i?
+					content = text.slice(change.op.p, change.op.p + change.op.i.length)
+					if content != change.op.i
+						throw new Error("Change (#{JSON.stringify(change)}) doesn't match text (#{JSON.stringify(content)})")
+			for comment in @comments
+				content = text.slice(comment.op.p, comment.op.p + comment.op.c.length)
+				if content != comment.op.c
+					throw new Error("Comment (#{JSON.stringify(comment)}) doesn't match text (#{JSON.stringify(content)})")
+			return true
 
 		applyOp: (op, metadata = {}) ->
 			metadata.ts ?= new Date()
@@ -110,17 +132,21 @@ load = () ->
 				@applyOp(op, metadata)
 
 		addComment: (op, metadata) ->
-			# TODO: Don't allow overlapping comments?
-			@comments.push comment = {
-				id: op.t or @newId()
-				op: # Copy because we'll modify in place
-					c: op.c
-					p: op.p
-					t: op.t
-				metadata
-			}
-			@_markAsDirty comment, "comment", "added"
-			return comment
+			existing = @getComment(op.t)
+			if existing?
+				@moveCommentId(op.t, op.p, op.c)
+				return existing
+			else
+				@comments.push comment = {
+					id: op.t or @newId()
+					op: # Copy because we'll modify in place
+						c: op.c
+						p: op.p
+						t: op.t
+					metadata
+				}
+				@_markAsDirty comment, "comment", "added"
+				return comment
 		
 		applyInsertToComments: (op) ->
 			for comment in @comments
