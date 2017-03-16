@@ -21,6 +21,7 @@ describe "UserUpdater", ->
 			"logger-sharelatex": log:->
 			"./UserLocator":@UserLocator
 			"../../infrastructure/mongojs":@mongojs
+			"../../infrastructure/Metrics": timeAsyncMethod: sinon.stub()
 
 		@stubbedUser = 
 			name:"bob"

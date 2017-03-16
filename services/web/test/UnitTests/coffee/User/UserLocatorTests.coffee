@@ -10,6 +10,7 @@ describe "UserLocator", ->
 		@user = {_id:"12390i"}
 		@UserLocator = SandboxedModule.require modulePath, requires:
 			"../../infrastructure/mongojs": db: @db =  { users: {} }
+			"../../infrastructure/Metrics": timeAsyncMethod: sinon.stub()
 		@db.users =
 			findOne : sinon.stub().callsArgWith(1, null, @user)
 
