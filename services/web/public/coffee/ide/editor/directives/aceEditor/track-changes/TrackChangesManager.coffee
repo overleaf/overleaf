@@ -281,7 +281,6 @@ define [
 				return if change.action != "insert"
 				pasted_text = change.lines.join("\n")
 				paste_offset = @_aceRangeToShareJs(change.start)
-				console.log "PASTE", pasted_text, paste_offset
 				# We have to wait until the change has been processed by the range tracker, 
 				# since if we move the ops into place beforehand, they will be moved again
 				# when the changes are processed by the range tracker. This ranges:dirty
