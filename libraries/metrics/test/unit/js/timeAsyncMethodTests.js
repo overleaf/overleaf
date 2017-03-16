@@ -53,7 +53,7 @@
       this.timeAsyncMethod(this.testObject, 'nextNumber', 'test.nextNumber');
       return done();
     });
-    return it('should work', function(done) {
+    it('should transparently wrap method invocation in timer', function(done) {
       this.timeAsyncMethod(this.testObject, 'nextNumber', 'test.nextNumber');
       return this.testObject.nextNumber(2, (function(_this) {
         return function(err, result) {
@@ -64,6 +64,49 @@
           return done();
         };
       })(this));
+    });
+    describe('when base method produces an error', function() {
+      beforeEach(function() {
+        return this.testObject.nextNumber = function(n, callback) {
+          if (callback == null) {
+            callback = function(err, result) {};
+          }
+          return setTimeout(function() {
+            return callback(new Error('woops'));
+          }, 100);
+        };
+      });
+      return it('should propagate the error transparently', function(done) {
+        this.timeAsyncMethod(this.testObject, 'nextNumber', 'test.nextNumber');
+        return this.testObject.nextNumber(2, (function(_this) {
+          return function(err, result) {
+            expect(err).to.exist;
+            expect(err).to.be["instanceof"](Error);
+            expect(result).to.not.exist;
+            return done();
+          };
+        })(this));
+      });
+    });
+    return describe('when a logger is supplied', function() {
+      beforeEach(function() {
+        return this.logger = {
+          log: sinon.stub()
+        };
+      });
+      return it('should also call logger.log', function(done) {
+        this.timeAsyncMethod(this.testObject, 'nextNumber', 'test.nextNumber', this.logger);
+        return this.testObject.nextNumber(2, (function(_this) {
+          return function(err, result) {
+            expect(err).to.not.exist;
+            expect(result).to.equal(3);
+            expect(_this.TimerConstructor.callCount).to.equal(1);
+            expect(_this.Timer.done.callCount).to.equal(1);
+            expect(_this.logger.log.callCount).to.equal(1);
+            return done();
+          };
+        })(this));
+      });
     });
   });
 

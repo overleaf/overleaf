@@ -47,3 +47,33 @@ describe 'timeAsyncMethod', ->
 			expect(@Timer.done.callCount).to.equal 1
 			done()
 
+	describe 'when base method produces an error', ->
+		beforeEach ->
+			@testObject.nextNumber = (n, callback=(err, result)->) ->
+				setTimeout(
+					() ->
+						callback(new Error('woops'))
+					, 100
+				)
+
+		it 'should propagate the error transparently', (done) ->
+			@timeAsyncMethod @testObject, 'nextNumber', 'test.nextNumber'
+			@testObject.nextNumber 2, (err, result) =>
+				expect(err).to.exist
+				expect(err).to.be.instanceof Error
+				expect(result).to.not.exist
+				done()
+
+	describe 'when a logger is supplied', ->
+		beforeEach ->
+			@logger = {log: sinon.stub()}
+
+		it 'should also call logger.log', (done) ->
+			@timeAsyncMethod @testObject, 'nextNumber', 'test.nextNumber', @logger
+			@testObject.nextNumber 2, (err, result) =>
+				expect(err).to.not.exist
+				expect(result).to.equal 3
+				expect(@TimerConstructor.callCount).to.equal 1
+				expect(@Timer.done.callCount).to.equal 1
+				expect(@logger.log.callCount).to.equal 1
+				done()
