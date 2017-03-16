@@ -87,3 +87,18 @@ describe 'timeAsyncMethod', ->
 			expect(badWrap).to.throw(
 				/^.*expected object property 'DEFINITELY_NOT_A_REAL_METHOD' to be a function.*$/
 			)
+
+	describe 'when the wrapped function is not using a callback', ->
+		beforeEach ->
+			@testObject.nextNumber = (n) ->
+				return n+1
+
+		it 'should throw an error', ->
+			@timeAsyncMethod @testObject, 'nextNumber', 'test.nextNumber'
+			badCall = () =>
+				@testObject.nextNumber 2
+			expect(badCall).to.throw(
+				/^.*expected wrapped method 'nextNumber' to be invoked with a callback.*$/
+			)
+
+

@@ -108,7 +108,7 @@
         })(this));
       });
     });
-    return describe('when the wrapper cannot be applied', function() {
+    describe('when the wrapper cannot be applied', function() {
       beforeEach(function() {});
       return it('should raise an error', function() {
         var badWrap;
@@ -118,6 +118,23 @@
           };
         })(this);
         return expect(badWrap).to["throw"](/^.*expected object property 'DEFINITELY_NOT_A_REAL_METHOD' to be a function.*$/);
+      });
+    });
+    return describe('when the wrapped function is not using a callback', function() {
+      beforeEach(function() {
+        return this.testObject.nextNumber = function(n) {
+          return n + 1;
+        };
+      });
+      return it('should throw an error', function() {
+        var badCall;
+        this.timeAsyncMethod(this.testObject, 'nextNumber', 'test.nextNumber');
+        badCall = (function(_this) {
+          return function() {
+            return _this.testObject.nextNumber(2);
+          };
+        })(this);
+        return expect(badCall).to["throw"](/^.*expected wrapped method 'nextNumber' to be invoked with a callback.*$/);
       });
     });
   });
