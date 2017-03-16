@@ -23,6 +23,7 @@ describe "LearnedWordsManager", ->
 				log:->
 				err:->
 				info:->
+			'metrics-sharelatex': {timeAsyncMethod: sinon.stub(), inc: sinon.stub()}
 
 	describe "learnWord", ->
 		beforeEach ->

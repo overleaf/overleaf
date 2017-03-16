@@ -29,4 +29,14 @@ module.exports = LearnedWordsManager =
 			mongoCache.set(user_token, words)
 			callback null, words
 
-		
+
+metrics.timeAsyncMethod(
+	LearnedWordsManager, 'learnWord',
+	'LearnedWordsManager.learnWord',
+	logger
+)
+metrics.timeAsyncMethod(
+	LearnedWordsManager, 'getLearnedWords',
+	'LearnedWordsManager.getLearnedWords',
+	logger
+)
