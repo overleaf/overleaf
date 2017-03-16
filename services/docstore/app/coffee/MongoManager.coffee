@@ -1,4 +1,6 @@
 {db, ObjectId} = require "./mongojs"
+logger = require 'logger-sharelatex'
+metrics = require 'metrics-sharelatex'
 
 module.exports = MongoManager =
 
@@ -68,3 +70,40 @@ module.exports = MongoManager =
 		}, {
 			upsert: true
 		}, callback
+
+
+metrics.timeAsyncMethod(
+	MongoManager, 'findDoc',
+	'MongoManager.findDoc',
+	logger
+)
+metrics.timeAsyncMethod(
+	MongoManager, 'getProjectsDocs',
+	'MongoManager.getProjectsDocs',
+	logger
+)
+metrics.timeAsyncMethod(
+	MongoManager, 'getArchivedProjectDocs',
+	'MongoManager.getArchivedProjectDocs',
+	logger
+)
+metrics.timeAsyncMethod(
+	MongoManager, 'upsertIntoDocCollection',
+	'MongoManager.upsertIntoDocCollection',
+	logger
+)
+metrics.timeAsyncMethod(
+	MongoManager, 'markDocAsArchived',
+	'MongoManager.markDocAsArchived',
+	logger
+)
+metrics.timeAsyncMethod(
+	MongoManager, 'getDocVersion',
+	'MongoManager.getDocVersion',
+	logger
+)
+metrics.timeAsyncMethod(
+	MongoManager, 'setDocVersion',
+	'MongoManager.setDocVersion',
+	logger
+)

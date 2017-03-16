@@ -11,6 +11,7 @@ describe "MongoManager", ->
 			"./mongojs":
 				db: @db = { docs: {}, docOps: {} }
 				ObjectId: ObjectId
+			'metrics-sharelatex': {timeAsyncMethod: sinon.stub()}
 		@project_id = ObjectId().toString()
 		@doc_id = ObjectId().toString()
 		@callback = sinon.stub()
