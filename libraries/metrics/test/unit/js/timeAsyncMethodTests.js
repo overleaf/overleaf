@@ -88,7 +88,7 @@
         })(this));
       });
     });
-    return describe('when a logger is supplied', function() {
+    describe('when a logger is supplied', function() {
       beforeEach(function() {
         return this.logger = {
           log: sinon.stub()
@@ -106,6 +106,18 @@
             return done();
           };
         })(this));
+      });
+    });
+    return describe('when the wrapper cannot be applied', function() {
+      beforeEach(function() {});
+      return it('should raise an error', function() {
+        var badWrap;
+        badWrap = (function(_this) {
+          return function() {
+            return _this.timeAsyncMethod(_this.testObject, 'DEFINITELY_NOT_A_REAL_METHOD', 'test.nextNumber');
+          };
+        })(this);
+        return expect(badWrap).to["throw"](/^.*expected object property 'DEFINITELY_NOT_A_REAL_METHOD' to be a function.*$/);
       });
     });
   });

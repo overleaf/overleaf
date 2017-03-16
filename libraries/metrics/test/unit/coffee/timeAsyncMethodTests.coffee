@@ -77,3 +77,13 @@ describe 'timeAsyncMethod', ->
 				expect(@Timer.done.callCount).to.equal 1
 				expect(@logger.log.callCount).to.equal 1
 				done()
+
+	describe 'when the wrapper cannot be applied', ->
+		beforeEach ->
+
+		it 'should raise an error', ->
+			badWrap = () =>
+				@timeAsyncMethod @testObject, 'DEFINITELY_NOT_A_REAL_METHOD', 'test.nextNumber'
+			expect(badWrap).to.throw(
+				/^.*expected object property 'DEFINITELY_NOT_A_REAL_METHOD' to be a function.*$/
+			)
