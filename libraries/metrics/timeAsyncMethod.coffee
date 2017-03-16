@@ -17,11 +17,9 @@ module.exports = (obj, methodName, key, logger) ->
 			)
 
 		timer = new metrics.Timer(key)
-		start = new Date()
 
 		realMethod.call this, firstArgs..., (callbackArgs...) ->
-			timer.done()
-			elapsedTime = new Date() - start
+			elapsedTime = timer.done()
 			if logger?
 				logger.log {key, elapsedTime}, "[Metrics] timed async method call"
 			callback.apply this, callbackArgs
