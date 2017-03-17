@@ -1,5 +1,5 @@
-load = (EventEmitter) ->
-	class RangesTracker extends EventEmitter
+load = () ->
+	class RangesTracker
 		# The purpose of this class is to track a set of inserts and deletes to a document, like
 		# track changes in Word. We store these as a set of ShareJs style ranges:
 		#   {i: "foo", p: 42} # Insert 'foo' at offset 42
@@ -36,6 +36,7 @@ load = (EventEmitter) ->
 		#     middle of a previous insert by the first user, the original insert will be split into two.
 		constructor: (@changes = [], @comments = []) ->
 			@setIdSeed(RangesTracker.generateIdSeed())
+			@resetDirtyState()
 
 		getIdSeed: () ->
 			return @id_seed
@@ -75,7 +76,7 @@ load = (EventEmitter) ->
 			comment = @getComment(comment_id)
 			return if !comment?
 			@comments = @comments.filter (c) -> c.id != comment_id
-			@emit "comment:removed", comment
+			@_markAsDirty comment, "comment", "removed"
 		
 		getChange: (change_id) ->
 			change = null
@@ -103,7 +104,11 @@ load = (EventEmitter) ->
 				@addComment(op, metadata)
 			else
 				throw new Error("unknown op type")
-			
+
+		applyOps: (ops, metadata = {}) ->
+			for op in ops
+				@applyOp(op, metadata)
+
 		addComment: (op, metadata) ->
 			# TODO: Don't allow overlapping comments?
 			@comments.push comment = {
@@ -114,18 +119,18 @@ load = (EventEmitter) ->
 					t: op.t
 				metadata
 			}
-			@emit "comment:added", comment
+			@_markAsDirty comment, "comment", "added"
 			return comment
 		
 		applyInsertToComments: (op) ->
 			for comment in @comments
 				if op.p <= comment.op.p
 					comment.op.p += op.i.length
-					@emit "comment:moved", comment
+					@_markAsDirty comment, "comment", "moved"
 				else if op.p < comment.op.p + comment.op.c.length
 					offset = op.p - comment.op.p
 					comment.op.c = comment.op.c[0..(offset-1)] + op.i + comment.op.c[offset...]
-					@emit "comment:moved", comment
+					@_markAsDirty comment, "comment", "moved"
 
 		applyDeleteToComments: (op) ->
 			op_start = op.p
@@ -138,7 +143,7 @@ load = (EventEmitter) ->
 				if op_end <= comment_start
 					# delete is fully before comment
 					comment.op.p -= op_length
-					@emit "comment:moved", comment
+					@_markAsDirty comment, "comment", "moved"
 				else if op_start >= comment_end
 					# delete is fully after comment, nothing to do
 				else
@@ -161,12 +166,13 @@ load = (EventEmitter) ->
 					
 					comment.op.p = Math.min(comment_start, op_start)
 					comment.op.c = remaining_before + remaining_after
-					@emit "comment:moved", comment
+					@_markAsDirty comment, "comment", "moved"
 
 		applyInsertToChanges: (op, metadata) ->
 			op_start = op.p
 			op_length = op.i.length
 			op_end = op.p + op_length
+			undoing = !!op.u
 
 
 			already_merged = false
@@ -184,8 +190,9 @@ load = (EventEmitter) ->
 						change.op.p += op_length
 						moved_changes.push change
 					else if op_start == change_start
-						# If the insert matches the start of the delete, just remove it from the delete instead
-						if change.op.d.length >= op.i.length and change.op.d.slice(0, op.i.length) == op.i
+						# If we are undoing, then we want to cancel any existing delete ranges if we can.
+						# Check if the insert matches the start of the delete, and just remove it from the delete instead if so.
+						if undoing and change.op.d.length >= op.i.length and change.op.d.slice(0, op.i.length) == op.i
 							change.op.d = change.op.d.slice(op.i.length)
 							change.op.p += op.i.length
 							if change.op.d == ""
@@ -203,15 +210,15 @@ load = (EventEmitter) ->
 					# Only merge inserts if they are from the same user
 					is_same_user = metadata.user_id == change.metadata.user_id
 					
-					# If this is an insert op at the end of an existing insert with a delete following, and it cancels out the following
-					# delete then we shouldn't append it to this insert, but instead only cancel the following delete.
+					# If we are undoing, then our changes will be removed from any delete ops just after. In that case, if there is also
+					# an insert op just before, then we shouldn't append it to this insert, but instead only cancel the following delete.
 					# E.g.
 					#                   foo|<--- about to insert 'b' here
 					#  inserted 'foo'  --^ ^-- deleted 'bar'
 					# should become just 'foo' not 'foob' (with the delete marker becoming just 'ar'), .
 					next_change = @changes[i+1]
 					is_op_adjacent_to_next_delete = next_change? and next_change.op.d? and op.p == change_end and next_change.op.p == op.p
-					will_op_cancel_next_delete = is_op_adjacent_to_next_delete and next_change.op.d.slice(0, op.i.length) == op.i
+					will_op_cancel_next_delete = undoing and is_op_adjacent_to_next_delete and next_change.op.d.slice(0, op.i.length) == op.i
 					
 					# If there is a delete at the start of the insert, and we're inserting
 					# at the start, we SHOULDN'T merge since the delete acts as a partition.
@@ -281,8 +288,8 @@ load = (EventEmitter) ->
 			for change in remove_changes
 				@_removeChange change
 			
-			if moved_changes.length > 0
-				@emit "changes:moved", moved_changes
+			for change in moved_changes
+				@_markAsDirty change, "change", "moved"
 		
 		applyDeleteToChanges: (op, metadata) ->
 			op_start = op.p
@@ -406,8 +413,8 @@ load = (EventEmitter) ->
 					@_removeChange change
 					moved_changes = moved_changes.filter (c) -> c != change
 			
-			if moved_changes.length > 0
-				@emit "changes:moved", moved_changes
+			for change in moved_changes
+				@_markAsDirty change, "change", "moved"
 
 		_addOp: (op, metadata) ->
 			change = {
@@ -427,17 +434,11 @@ load = (EventEmitter) ->
 				else
 					return -1
 
-			if op.d?
-				@emit "delete:added", change
-			else if op.i?
-				@emit "insert:added", change
+			@_markAsDirty(change, "change", "added")
 		
 		_removeChange: (change) ->
 			@changes = @changes.filter (c) -> c.id != change.id
-			if change.op.d?
-				@emit "delete:removed", change
-			else if change.op.i?
-				@emit "insert:removed", change
+			@_markAsDirty change, "change", "removed"
 			
 		_applyOpModifications: (content, op_modifications) ->
 			# Put in descending position order, with deleting first if at the same offset 
@@ -486,13 +487,32 @@ load = (EventEmitter) ->
 					previous_change = change
 			return { moved_changes, remove_changes }
 		
+		resetDirtyState: () ->
+			@_dirtyState = {
+				comment: {
+					moved: {}
+					removed: {}
+					added: {}
+				}
+				change: {
+					moved: {}
+					removed: {}
+					added: {}
+				}
+			}
+		
+		getDirtyState: () ->
+			return @_dirtyState
+		
+		_markAsDirty: (object, type, action) ->
+			@_dirtyState[type][action][object.id] = object
+		
 		_clone: (object) ->
 			clone = {}
 			(clone[k] = v for k,v of object)
 			return clone
 
 if define?
-	define ["utils/EventEmitter"], load
+	define [], load
 else
-	EventEmitter = require("events").EventEmitter
-	module.exports = load(EventEmitter)
+	module.exports = load()
