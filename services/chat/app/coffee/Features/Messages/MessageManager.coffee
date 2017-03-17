@@ -64,30 +64,13 @@ module.exports = MessageManager =
 		if query._id? and query._id not instanceof ObjectId
 			query._id = ObjectId(query._id)
 		return query
-		
 
-metrics.timeAsyncMethod(
-	MessageManager, 'createMessage',
-	'MessageManager.createMessage',
-	logger
-)
-metrics.timeAsyncMethod(
-	MessageManager, 'getMessages',
-	'MessageManager.getMessages',
-	logger
-)
-metrics.timeAsyncMethod(
-	MessageManager, 'findAllMessagesInRooms',
-	'MessageManager.findAllMessagesInRooms',
-	logger
-)
-metrics.timeAsyncMethod(
-	MessageManager, 'updateMessage',
-	'MessageManager.updateMessage',
-	logger
-)
-metrics.timeAsyncMethod(
-	MessageManager, 'deleteMessage',
-	'MessageManager.deleteMessage',
-	logger
-)
+
+[
+	'createMessage',
+	'getMessages',
+	'findAllMessagesInRooms',
+	'updateMessage',
+	'deleteMessage'
+].map (method) ->
+	metrics.timeAsyncMethod(MessageManager, method, 'mongo.MessageManager', logger)

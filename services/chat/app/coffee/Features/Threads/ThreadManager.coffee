@@ -78,28 +78,11 @@ module.exports = ThreadManager =
 				return callback null, room._id
 
 
-metrics.timeAsyncMethod(
-	ThreadManager, 'findOrCreateThread',
-	'ThreadManager.findOrCreateThread',
-	logger
-)
-metrics.timeAsyncMethod(
-	ThreadManager, 'findAllThreadRooms',
-	'ThreadManager.findAllThreadRooms',
-	logger
-)
-metrics.timeAsyncMethod(
-	ThreadManager, 'resolveThread',
-	'ThreadManager.resolveThread',
-	logger
-)
-metrics.timeAsyncMethod(
-	ThreadManager, 'reopenThread',
-	'ThreadManager.reopenThread',
-	logger
-)
-metrics.timeAsyncMethod(
-	ThreadManager, 'deleteThread',
-	'ThreadManager.deleteThread',
-	logger
-)
+[
+	 'findOrCreateThread',
+	 'findAllThreadRooms',
+	 'resolveThread',
+	 'reopenThread',
+	 'deleteThread',
+].map (method) ->
+	metrics.timeAsyncMethod(ThreadManager, method, 'mongo.ThreadManager', logger)
