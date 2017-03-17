@@ -96,6 +96,13 @@ describe "FileStoreHandler", ->
 					@fs.createReadStream.called.should.equal false
 					done()
 
+		describe "symlink", ->
+			it "should not read file stat returns nothing", (done)->
+				@fs.lstat = sinon.stub().callsArgWith(1, null, null)
+				@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, =>
+					@fs.createReadStream.called.should.equal false
+					done()
+
 		describe "when upload fails", ->
 			beforeEach ->
 				@writeStream.on = (type, cb) ->

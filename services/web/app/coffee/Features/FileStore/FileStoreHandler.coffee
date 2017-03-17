@@ -13,6 +13,9 @@ module.exports = FileStoreHandler =
 			if err?
 				logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "error stating file"
 				callback(err)
+			if !stat?
+				logger.err project_id:project_id, file_id:file_id, fsPath:fsPath, "stat is not available, can not check file from disk"
+				return callback(new Error("error getting stat, not available"))
 			if !stat.isFile()
 				logger.log project_id:project_id, file_id:file_id, fsPath:fsPath, "tried to upload symlink, not contining"
 				return callback(new Error("can not upload symlink"))
