@@ -21,5 +21,10 @@ module.exports = (obj, methodName, prefix, logger) ->
 		realMethod.call this, firstArgs..., (callbackArgs...) ->
 			elapsedTime = timer.done()
 			if logger?
-				logger.log {key, elapsedTime}, "[Metrics] timed async method call"
+				loggableArgs = {}
+				try
+					for arg, idx in firstArgs
+						if arg.toString().match(/^[0-9a-f]{24}$/)
+							loggableArgs["#{idx}"] = arg
+				logger.log {key, args: loggableArgs, elapsedTime}, "[Metrics] timed async method call"
 			callback.apply this, callbackArgs
