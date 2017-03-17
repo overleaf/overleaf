@@ -31,14 +31,8 @@ module.exports = ContactManager =
 			return callback(error) if error?
 			callback null, user?.contacts
 
-metrics.timeAsyncMethod(
-	ContactManager, 'touchContact',
-	'ContactManager.touchContact',
-	logger
-)
-
-metrics.timeAsyncMethod(
-	ContactManager, 'getContacts',
-	'ContactManager.getContacts',
-	logger
-)
+[
+	'touchContact',
+	'getContacts',
+].map (method) ->
+	metrics.timeAsyncMethod(ContactManager, method, 'mongo.ContactManager', logger)
