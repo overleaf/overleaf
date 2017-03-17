@@ -14,7 +14,9 @@ describe "ContactManager", ->
 			"./mongojs": {
 				db: @db = contacts: {}
 				ObjectId: ObjectId
-			}
+			},
+			'logger-sharelatex': {log: sinon.stub()},
+			'metrics-sharelatex': {timeAsyncMethod: sinon.stub()}
 		@user_id = ObjectId().toString()
 		@contact_id = ObjectId().toString()
 		@callback = sinon.stub()

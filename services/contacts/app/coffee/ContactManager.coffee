@@ -1,4 +1,6 @@
 {db, ObjectId} = require "./mongojs"
+logger = require('logger-sharelatex')
+metrics = require('metrics-sharelatex')
 
 module.exports = ContactManager =
 	touchContact: (user_id, contact_id, callback = (error) ->) ->
@@ -28,3 +30,15 @@ module.exports = ContactManager =
 		}, (error, user) ->
 			return callback(error) if error?
 			callback null, user?.contacts
+
+metrics.timeAsyncMethod(
+	ContactManager, 'touchContact',
+	'ContactManager.touchContact',
+	logger
+)
+
+metrics.timeAsyncMethod(
+	ContactManager, 'getContacts',
+	'ContactManager.getContacts',
+	logger
+)
