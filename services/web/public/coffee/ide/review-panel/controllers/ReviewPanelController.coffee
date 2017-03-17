@@ -163,7 +163,10 @@ define [
 
 		$scope.$watch (() ->
 			entries = $scope.reviewPanel.entries[$scope.editor.open_doc_id] or {}
-			Object.keys(entries).length
+			permEntries = {}
+			for entry, entryData of entries
+				permEntries[entry] = entryData if entry != "add-comment"
+			Object.keys(permEntries).length
 		), (nEntries) ->
 			$scope.reviewPanel.hasEntries = nEntries > 0 and $scope.project.features.trackChangesVisible
 
