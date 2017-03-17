@@ -82,13 +82,8 @@ module.exports = Notifications =
 		db.notifications.remove searchOps, {justOne: true}, callback
 
 
-metrics.timeAsyncMethod(
-	Notifications, 'getUserNotifications',
-	'Notifications.getUserNotifications',
-	logger
-)
-metrics.timeAsyncMethod(
-	Notifications, 'addNotification',
-	'Notifications.addNotification',
-	logger
-)
+[
+	'getUserNotifications',
+	'addNotification'
+].map (method) ->
+	metrics.timeAsyncMethod(Notifications, method, 'mongo.Notifications', logger)
