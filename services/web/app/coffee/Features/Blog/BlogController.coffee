@@ -10,7 +10,7 @@ module.exports = BlogController =
 		url = req.url?.toLowerCase()
 		blogUrl = "#{settings.apis.blog.url}#{url}"
 
-		extensionsToProxy = [".png", ".xml", ".jpeg", ".json", ".zip", ".eps", ".gif"]
+		extensionsToProxy = [".png", ".xml", ".jpeg", ".jpeg", ".jpg", ".zip", ".eps", ".gif"]
 
 		shouldProxy = _.find extensionsToProxy, (extension)->
 			url.indexOf(extension) != -1
