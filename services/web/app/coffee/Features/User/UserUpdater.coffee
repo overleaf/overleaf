@@ -30,4 +30,4 @@ module.exports = UserUpdater =
 				callback()
 
 
-metrics.timeAsyncMethod UserUpdater, 'updateUser', 'UserUpdater.updateUser', logger
+metrics.timeAsyncMethod UserUpdater, 'updateUser', 'mongo.UserUpdater', logger

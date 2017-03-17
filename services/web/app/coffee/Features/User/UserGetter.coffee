@@ -27,5 +27,9 @@ module.exports = UserGetter =
 		
 		db.users.find { _id: { $in: user_ids} }, projection, callback
 
-metrics.timeAsyncMethod UserGetter, 'getUser', 'UserGetter.getUser', logger
-metrics.timeAsyncMethod UserGetter, 'getUsers', 'UserGetter.getUsers', logger
+
+[
+	'getUser',
+	'getUsers'
+].map (method) ->
+	metrics.timeAsyncMethod UserGetter, method, 'mongo.UserGetter', logger

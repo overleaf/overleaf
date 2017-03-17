@@ -60,4 +60,8 @@ module.exports = ProjectGetter =
 				callback null, projects, readAndWriteProjects, readOnlyProjects
 
 
-metrics.timeAsyncMethod ProjectGetter, 'getProject', 'ProjectGetter.getProject', logger
+[
+	'getProject',
+	'getProjectWithoutDocLines'
+].map (method) ->
+	metrics.timeAsyncMethod(ProjectGetter, method, 'mongo.ProjectGetter', logger)

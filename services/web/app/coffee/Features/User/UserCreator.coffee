@@ -1,8 +1,10 @@
 User = require("../../models/User").User
 UserLocator = require("./UserLocator")
 logger = require("logger-sharelatex")
+metrics = require('../../infrastructure/Metrics')
 
-module.exports =
+
+module.exports = UserCreator =
 
 	getUserOrCreateHoldingAccount: (email, callback = (err, user)->)->
 		self = @
@@ -36,3 +38,9 @@ module.exports =
 
 		user.save (err)->
 			callback(err, user)
+
+metrics.timeAsyncMethod(
+	UserCreator, 'createNewUser',
+	'mongo.UserCreator',
+	logger
+)

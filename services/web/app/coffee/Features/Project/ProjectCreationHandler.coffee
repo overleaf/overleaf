@@ -11,7 +11,8 @@ fs = require('fs')
 Path = require "path"
 _ = require "underscore"
 
-module.exports =
+module.exports = ProjectCreationHandler =
+
 	createBlankProject : (owner_id, projectName, callback = (error, project) ->)->
 		metrics.inc("project-creation")
 		logger.log owner_id:owner_id, projectName:projectName, "creating blank project"
@@ -79,5 +80,10 @@ module.exports =
 				output = _.template(template.toString(), data)
 				callback null, output.split("\n")
 
+metrics.timeAsyncMethod(
+	ProjectCreationHandler, 'createBlankProject',
+	'mongo.ProjectCreationHandler',
+	logger
+)
 
 

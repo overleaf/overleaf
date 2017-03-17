@@ -14,5 +14,8 @@ module.exports = UserLocator =
 	findById: (_id, callback)->
 		db.users.findOne _id:ObjectId(_id+""), callback
 
-metrics.timeAsyncMethod UserLocator, 'findById', 'UserLocator.findById', logger
-metrics.timeAsyncMethod UserLocator, 'findByEmail', 'UserLocator.findByEmail', logger
+[
+	'findById',
+	'findByEmail'
+].map (method) ->
+	metrics.timeAsyncMethod UserLocator, method, 'mongo.UserLocator', logger
