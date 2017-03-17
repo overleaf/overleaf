@@ -30,13 +30,8 @@ module.exports = LearnedWordsManager =
 			callback null, words
 
 
-metrics.timeAsyncMethod(
-	LearnedWordsManager, 'learnWord',
-	'LearnedWordsManager.learnWord',
-	logger
-)
-metrics.timeAsyncMethod(
-	LearnedWordsManager, 'getLearnedWords',
-	'LearnedWordsManager.getLearnedWords',
-	logger
-)
+[
+	'learnWord',
+	'getLearnedWords'
+].map (method) ->
+	metrics.timeAsyncMethod(LearnedWordsManager, method, 'mongo.LearnedWordsManager', logger)
