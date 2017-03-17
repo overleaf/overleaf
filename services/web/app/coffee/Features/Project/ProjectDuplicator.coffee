@@ -15,9 +15,11 @@ module.exports = ProjectDuplicator =
 	_copyDocs: (newProject, originalRootDoc, originalFolder, desFolder, docContents, callback)->
 		setRootDoc = _.once (doc_id)->
 			projectEntityHandler.setRootDoc newProject._id, doc_id
-
-		jobs = originalFolder.docs.map (doc)->
+		docs = originalFolder.docs or []
+		jobs = docs.map (doc)->
 			return (cb)->
+				if !doc?._id?
+					return callback()
 				content = docContents[doc._id.toString()]
 				projectEntityHandler.addDocWithProject newProject, desFolder._id, doc.name, content.lines, (err, newDoc)->
 					if err?
@@ -30,7 +32,8 @@ module.exports = ProjectDuplicator =
 		async.series jobs, callback
 
 	_copyFiles: (newProject, originalProject_id, originalFolder, desFolder, callback)->
-		jobs = originalFolder.fileRefs.map (file)->
+		fileRefs = originalFolder.fileRefs or []
+		jobs = fileRefs.map (file)->
 			return (cb)->
 				projectEntityHandler.copyFileFromExistingProjectWithProject newProject, desFolder._id, originalProject_id, file, cb
 		async.parallelLimit jobs, 5, callback
@@ -40,10 +43,14 @@ module.exports = ProjectDuplicator =
 		ProjectGetter.getProject newProject_id, {rootFolder:true, name:true}, (err, newProject)->
 			if err?
 				logger.err project_id:newProject_id, "could not get project"
-				return cb(err)
+				return callback(err)
 
-			jobs = originalFolder.folders.map (childFolder)->
+			folders = originalFolder.folders or []
+
+			jobs = folders.map (childFolder)->
 				return (cb)->
+					if !childFolder?._id?
+						return cb()
 					projectEntityHandler.addFolderWithProject newProject, desFolder?._id, childFolder.name, (err, newFolder)->
 						return cb(err) if err?
 						ProjectDuplicator._copyFolderRecursivly newProject_id, originalProject_id, originalRootDoc, childFolder, newFolder, docContents, cb
