@@ -136,7 +136,20 @@ describe "AuthorizationManager", ->
 			it "should return a NotFoundError", ->
 				@AuthorizationManager.getPrivilegeLevelForProject @user_id, @project_id, (error) ->
 					error.should.be.instanceof Errors.NotFoundError
-	
+
+		describe "when the project id is not validssssssss", ->
+			beforeEach ->
+				@AuthorizationManager.isUserSiteAdmin.withArgs(@user_id).yields(null, false)
+				@CollaboratorsHandler.getMemberIdPrivilegeLevel
+					.withArgs(@user_id, @project_id)
+					.yields(null, "readOnly")
+
+			it "should return a error", (done)->
+				@AuthorizationManager.getPrivilegeLevelForProject undefined, "not project id", (err) =>
+					@Project.findOne.called.should.equal false
+					expect(err).to.exist
+					done()
+
 	describe "canUserReadProject", ->
 		beforeEach ->
 			@AuthorizationManager.getPrivilegeLevelForProject = sinon.stub()
