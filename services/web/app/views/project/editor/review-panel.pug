@@ -1,10 +1,18 @@
-#review-panel
+.rp-in-editor-widgets
 	a.rp-track-changes-indicator(
 		href
 		ng-if="editor.wantTrackChanges"
 		ng-click="toggleReviewPanel();"
 		ng-class="{ 'rp-track-changes-indicator-on-dark' : darkTheme }"
 	) !{translate("track_changes_is_on")}
+	a.rp-add-comment-btn(
+		href
+		ng-if="reviewPanel.entries[editor.open_doc_id]['add-comment'] != null"
+		ng-click="startNewComment();"
+	) 
+		i.fa.fa-comment
+		| &nbsp;#{translate("add_comment")}
+#review-panel
 	.review-panel-toolbar
 		resolved-comments-dropdown(
 			class="rp-flex-block"

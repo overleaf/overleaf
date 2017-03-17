@@ -448,6 +448,11 @@
 		display: block;
 		padding: 5px 10px;
 		border-radius: 3px;
+
+		.rp-in-editor-widgets & {
+			border-radius: 0;
+			border-bottom-left-radius: 3px;
+		}
 	}
 
 	.rp-new-comment {
@@ -871,43 +876,49 @@
 	}
 }
 
-.rp-track-changes-indicator {
-	display: none;
+.rp-in-editor-widgets {
 	position: absolute;
 	top: 0;
-	right: @review-off-width;
-	padding: 5px 10px;
-	background-color: rgba(240, 240, 240, 0.9);
-	color: @rp-type-blue;
-	text-align: center;
-	border-bottom-left-radius: 3px;
+	right: 0;
 	font-size: 10px;
-	z-index: 2;
-	white-space: nowrap;
-
-	&.rp-track-changes-indicator-on-dark {
-		background-color: rgba(88, 88, 88, .8);
-		color: #FFF;
-		
-		&:hover,
-		&:focus {
-			background-color: rgba(88, 88, 88, 1);
-			color: #FFF;
-		}
-	}
-
-	&:hover,
-	&:focus {
-		outline: 0;
-		text-decoration: none;
-		background-color: rgba(240, 240, 240, 1);
-		color: @rp-type-blue;
-	}
-
+	
 	.rp-size-mini & {
-		display: block;
+		right: @review-off-width;
 	}
 }
+	.rp-track-changes-indicator {
+		display: block;
+		padding: 5px 10px;
+		background-color: rgba(240, 240, 240, 0.9);
+		color: @rp-type-blue;
+		text-align: center;
+		border-bottom-left-radius: 3px;
+		z-index: 2;
+		white-space: nowrap;
+
+		&.rp-track-changes-indicator-on-dark {
+			background-color: rgba(88, 88, 88, .8);
+			color: #FFF;
+			
+			&:hover,
+			&:focus {
+				background-color: rgba(88, 88, 88, 1);
+				color: #FFF;
+			}
+		}
+
+		&:hover,
+		&:focus {
+			outline: 0;
+			text-decoration: none;
+			background-color: rgba(240, 240, 240, 1);
+			color: @rp-type-blue;
+		}
+
+		.rp-size-expanded & {
+			display: none;
+		}
+	}
 
 // Helper class for elements which aren't treated as flex-items by IE10, e.g:
 // * inline items;
