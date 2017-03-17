@@ -1,12 +1,12 @@
 
-module.exports = (obj, methodName, key, logger) ->
+module.exports = (obj, methodName, prefix, logger) ->
 	metrics = require('./metrics')
 
 	if typeof obj[methodName] != 'function'
 		throw new Error("[Metrics] expected object property '#{methodName}' to be a function")
 
 	realMethod = obj[methodName]
-	key = "methods.#{key}"
+	key = "#{prefix}.#{methodName}"
 
 	obj[methodName] = (originalArgs...) ->
 
