@@ -36,6 +36,7 @@ describe 'Notifications Tests', ->
 			}
 			'settings-sharelatex': {}
 			'mongojs':@mongojs
+			'metrics-sharelatex': {timeAsyncMethod: sinon.stub()}
 
 		@stubbedNotification = {user_id: ObjectId(user_id), key:"notification-key", messageOpts:"some info", templateKey:"template-key"}
 		@stubbedNotificationArray = [@stubbedNotification]

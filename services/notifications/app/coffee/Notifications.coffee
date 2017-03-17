@@ -3,8 +3,9 @@ logger = require('logger-sharelatex')
 mongojs = require('mongojs')
 db = mongojs(Settings.mongo?.url, ['notifications'])
 ObjectId = require("mongojs").ObjectId
+metrics = require('metrics-sharelatex')
 
-module.exports =
+module.exports = Notifications =
 
 	getUserNotifications: (user_id, callback = (err, notifications)->)->
 		query =
@@ -79,3 +80,15 @@ module.exports =
 		searchOps =
 			key: notification_key
 		db.notifications.remove searchOps, {justOne: true}, callback
+
+
+metrics.timeAsyncMethod(
+	Notifications, 'getUserNotifications',
+	'Notifications.getUserNotifications',
+	logger
+)
+metrics.timeAsyncMethod(
+	Notifications, 'addNotification',
+	'Notifications.addNotification',
+	logger
+)

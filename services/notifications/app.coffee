@@ -9,7 +9,6 @@ db = mongojs(Settings.mongo.url, ['notifications'])
 Path = require("path")
 metrics = require("metrics-sharelatex")
 metrics.initialize("notifications")
-metrics.mongodb.monitor(Path.resolve(__dirname + "/node_modules/mongojs/node_modules/mongodb"), logger)
 metrics.memory.monitor(logger)
 
 HealthCheckController = require("./app/js/HealthCheckController")
