@@ -121,10 +121,21 @@ define [
 
 		_bindToDocumentEvents: (doc, sharejs_doc) ->
 			sharejs_doc.on "error", (error, meta) =>
-				if error?.message?.match "maxDocLength"
+				if error?.message?
+					message = error.message
+				else if typeof error == "string"
+					message = error
+				else
+					message = ""
+				if message.match "maxDocLength"
 					@ide.showGenericMessageModal(
 						"Document Too Long"
 						"Sorry, this file is too long to be edited manually. Please upload it directly."
+					)
+				else if message.match "too many comments or tracked changes"
+					@ide.showGenericMessageModal(
+						"Too many comments or tracked changes"
+						"Sorry, this file has too many comments or tracked changes. Please try accepting or rejecting some existing changes, or resolving and deleting some comments."
 					)
 				else
 					@ide.socket.disconnect()
