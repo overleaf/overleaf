@@ -7,7 +7,7 @@
 	) !{translate("track_changes_is_on")}
 	a.rp-add-comment-btn(
 		href
-		ng-if="reviewPanel.entries[editor.open_doc_id]['add-comment'] != null"
+		ng-if="reviewPanel.newAddCommentUI && reviewPanel.entries[editor.open_doc_id]['add-comment'] != null"
 		ng-click="addNewComment();"
 	) 
 		i.fa.fa-comment
@@ -81,6 +81,7 @@
 						on-start-new="startNewComment();"
 						on-submit="submitNewComment(content);"
 						on-cancel="cancelNewComment();"
+						on-indicator-click="toggleReviewPanel();"
 						layout-to-left="reviewPanel.layoutToLeft"
 					)
 
@@ -321,6 +322,14 @@ script(type='text/ng-template', id='resolvedCommentEntryTemplate')
 script(type='text/ng-template', id='addCommentEntryTemplate')
 	div
 		.rp-entry-callout.rp-entry-callout-add-comment
+		.rp-entry-indicator.rp-entry-indicator-add-comment(
+			ng-if="!commentState.adding"
+			ng-click="startNewComment(); onIndicatorClick();"
+			tooltip=translate("add_comment")
+			tooltip-placement="{{ layoutToLeft ? 'left' : 'right' }}"
+			tooltip-append-to-body="true"
+		)
+			i.fa.fa-commenting
 		.rp-entry.rp-entry-add-comment(
 			ng-class="[ (state.isAdding ? 'rp-entry-adding-comment' : ''), (entry.focused ? 'rp-entry-focused' : '')]"
 		)

@@ -197,6 +197,10 @@
 		right: 4px;
 		z-index: 1;
 	}
+
+	.rp-new-comment-ui &-add-comment {
+		display: none;
+	}
 }
 
 .rp-entry-wrapper {
@@ -569,7 +573,7 @@
 		}
 	}
 
-	.rp-state-current-file &-add-comment {
+	.rp-size-mini.rp-new-comment-ui &-add-comment {
 		display: none;
 	}
 }
@@ -884,7 +888,7 @@
 	position: absolute;
 	top: 0;
 	right: 0;
-	font-size: 10px;
+	font-size: 11px;
 	
 	.rp-size-mini & {
 		right: @review-off-width;
