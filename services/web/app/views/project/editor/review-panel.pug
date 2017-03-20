@@ -8,7 +8,7 @@
 	a.rp-add-comment-btn(
 		href
 		ng-if="reviewPanel.entries[editor.open_doc_id]['add-comment'] != null"
-		ng-click="startNewComment();"
+		ng-click="addNewComment();"
 	) 
 		i.fa.fa-comment
 		| &nbsp;#{translate("add_comment")}

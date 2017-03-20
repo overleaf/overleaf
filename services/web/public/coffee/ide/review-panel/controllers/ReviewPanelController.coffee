@@ -327,6 +327,10 @@ define [
 			$scope.$broadcast "change:reject", entry_id
 			event_tracking.sendMB "rp-change-rejected", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
 		
+		$scope.addNewComment = () ->
+			$scope.$broadcast "comment:start_adding"
+			$scope.toggleReviewPanel()
+
 		$scope.startNewComment = () ->
 			$scope.$broadcast "comment:select_line"
 			$timeout () ->
