@@ -5,7 +5,7 @@ module.exports = RangesManager =
 	MAX_COMMENTS: 500
 	MAX_CHANGES: 2000
 
-	applyUpdate: (project_id, doc_id, entries = {}, updates = [], callback = (error, new_entries) ->) ->
+	applyUpdate: (project_id, doc_id, entries = {}, updates = [], newDocLines, callback = (error, new_entries) ->) ->
 		{changes, comments} = entries
 		rangesTracker = new RangesTracker(changes, comments)
 		for update in updates
@@ -20,6 +20,14 @@ module.exports = RangesManager =
 		
 		if rangesTracker.changes?.length > RangesManager.MAX_CHANGES or rangesTracker.comments?.length > RangesManager.MAX_COMMENTS
 			return callback new Error("too many comments or tracked changes")
+
+		try
+			# This is a consistency check that all of our ranges and
+			# comments still match the corresponding text
+			rangesTracker.validate(newDocLines.join("\n"))
+		catch error
+			logger.error {err: error, project_id, doc_id, newDocLines, updates}, "error validating ranges"
+			return callback(error)
 
 		response = RangesManager._getRanges rangesTracker
 		logger.log {project_id, doc_id, changesCount: response.changes?.length, commentsCount: response.comments?.length}, "applied updates to ranges"
