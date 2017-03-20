@@ -7,8 +7,7 @@ define [
 		scope: 
 			onStartNew: "&"
 			onSubmit: "&"
-			onCancel: "&"
-			onIndicatorClick: "&"
+			onCancel: "&"	
 			layoutToLeft: "="
 		link: (scope, element, attrs) ->
 			scope.state =
