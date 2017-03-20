@@ -15,7 +15,6 @@ define [
 			entries: {}
 			resolvedComments: {}
 			hasEntries: false
-			showAddComment: false
 			subView: $scope.SubViews.CUR_FILE
 			openSubView: $scope.SubViews.CUR_FILE
 			overview:
