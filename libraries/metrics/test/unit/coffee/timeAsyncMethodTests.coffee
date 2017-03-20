@@ -93,12 +93,10 @@ describe 'timeAsyncMethod', ->
 			@testObject.nextNumber = (n) ->
 				return n+1
 
-		it 'should throw an error', ->
+		it 'should not throw an error', ->
 			@timeAsyncMethod @testObject, 'nextNumber', 'test.nextNumber'
 			badCall = () =>
 				@testObject.nextNumber 2
-			expect(badCall).to.throw(
-				/^.*expected wrapped method 'nextNumber' to be invoked with a callback.*$/
-			)
+			expect(badCall).to.not.throw(Error)
 
 
