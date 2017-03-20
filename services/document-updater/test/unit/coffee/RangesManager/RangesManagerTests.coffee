@@ -94,6 +94,7 @@ describe "RangesManager", ->
 					op: [{
 						c: "one"
 						p: 0
+						t: "thread-id-1"
 					}]
 				}]
 				@entries = {
@@ -101,12 +102,14 @@ describe "RangesManager", ->
 						op:
 							c: "three "
 							p: 4
+							t: "thread-id-2"
 						metadata:
 							user_id: @user_id
 					}, {
 						op:
 							c: "four "
 							p: 10
+							t: "thread-id-3"
 						metadata:
 							user_id: @user_id
 					}]
@@ -115,7 +118,6 @@ describe "RangesManager", ->
 				@RangesManager.applyUpdate @project_id, @doc_id, @entries, @updates, @newDocLines, @callback
 			
 			it "should return an error", ->
-				# Save space in redis and don't store just {}
 				@callback.called.should.equal true
 				[error, entries] = @callback.args[0]
 				expect(error).to.not.be.null
