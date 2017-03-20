@@ -164,16 +164,10 @@ module.exports = WebsocketController =
 					
 
 	applyOtUpdate: (client, doc_id, update, callback = (error) ->) ->
-		cbc_0 = 0 # Callback counter
-		cbc_1 = 0
 		Utils.getClientAttributes client, ["user_id", "project_id"], (error, {user_id, project_id}) ->
-			cbc_0++
 			return callback(error) if error?
 			return callback(new Error("no project_id found on client")) if !project_id?
-			# Omit this logging for now since it's likely too noisey
-			#logger.log {user_id, project_id, doc_id, client_id: client.id, update: update}, "applying update"
-			AuthorizationManager.assertClientCanEditProjectAndDoc client, doc_id, (error) ->
-				cbc_1++
+			WebsocketController._assertClientCanApplyUpdate client, doc_id, update, (error) ->
 				if error?
 					logger.error {err: error, doc_id, client_id: client.id, version: update.v}, "client is not authorized to make update"
 					setTimeout () ->
@@ -188,11 +182,27 @@ module.exports = WebsocketController =
 				metrics.set "editor.active-projects", project_id, 0.3
 				metrics.set "editor.active-users", user_id, 0.3
 
-				logger.log {user_id, doc_id, project_id, client_id: client.id, version: update.v, cbc_0, cbc_1}, "sending update to doc updater"
+				logger.log {user_id, doc_id, project_id, client_id: client.id, version: update.v}, "sending update to doc updater"
 
 				DocumentUpdaterManager.queueChange project_id, doc_id, update, (error) ->
 					if error?
 						logger.error {err: error, project_id, doc_id, client_id: client.id, version: update.v}, "document was not available for update"
 						client.disconnect()
 					callback(error)
-					#logger.log {user_id, project_id, doc_id, client_id: client.id}, "applied update"
+
+	_assertClientCanApplyUpdate: (client, doc_id, update, callback) ->
+		AuthorizationManager.assertClientCanEditProjectAndDoc client, doc_id, (error) ->
+			if error?
+				if error.message == "not authorized" and WebsocketController._isCommentUpdate(update)
+					# This might be a comment op, which we only need read-only priveleges for
+					AuthorizationManager.assertClientCanViewProjectAndDoc client, doc_id, callback
+				else
+					return callback(error)
+			else
+				return callback(null)
+	
+	_isCommentUpdate: (update) ->
+		for op in update.op
+			if !op.c?
+				return false
+		return true

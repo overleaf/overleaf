@@ -1,6 +1,7 @@
 chai = require('chai')
 should = chai.should()
 sinon = require("sinon")
+expect = chai.expect
 modulePath = "../../../app/js/WebsocketController.js"
 SandboxedModule = require('sandboxed-module')
 tk = require "timekeeper"
@@ -417,7 +418,7 @@ describe 'WebsocketController', ->
 			@update = {op: {p: 12, t: "foo"}}
 			@client.params.user_id = @user_id
 			@client.params.project_id = @project_id
-			@AuthorizationManager.assertClientCanEditProjectAndDoc = sinon.stub().callsArg(2)
+			@WebsocketController._assertClientCanApplyUpdate = sinon.stub().yields()
 			@DocumentUpdaterManager.queueChange = sinon.stub().callsArg(3)
 
 		describe "succesfully", ->
@@ -465,7 +466,7 @@ describe 'WebsocketController', ->
 		describe "when not authorized", ->
 			beforeEach ->
 				@client.disconnect = sinon.stub()
-				@AuthorizationManager.assertClientCanEditProjectAndDoc = sinon.stub().callsArgWith(2, @error = new Error("not authorized"))
+				@WebsocketController._assertClientCanApplyUpdate = sinon.stub().yields(@error = new Error("not authorized"))
 				@WebsocketController.applyOtUpdate @client, @doc_id, @update, @callback
 
 			# This happens in a setTimeout to allow the client a chance to receive the error first.
@@ -478,3 +479,41 @@ describe 'WebsocketController', ->
 
 			it "should call the callback with the error", ->
 				@callback.calledWith(@error).should.equal true
+
+	describe "_assertClientCanApplyUpdate", ->
+		beforeEach ->
+			@edit_update = { op: [{i: "foo", p: 42}, {c: "bar", p: 132}] } # comments may still be in an edit op
+			@comment_update = { op: [{c: "bar", p: 132}] }
+			@AuthorizationManager.assertClientCanEditProjectAndDoc = sinon.stub()
+			@AuthorizationManager.assertClientCanViewProjectAndDoc = sinon.stub()
+			
+		describe "with a read-write client", ->
+			it "should return successfully", (done) ->
+				@AuthorizationManager.assertClientCanEditProjectAndDoc.yields(null)
+				@WebsocketController._assertClientCanApplyUpdate @client, @doc_id, @edit_update, (error) ->
+					expect(error).to.be.null
+					done()
+
+		describe "with a read-only client and an edit op", ->
+			it "should return an error", (done) ->
+				@AuthorizationManager.assertClientCanEditProjectAndDoc.yields(new Error("not authorized"))
+				@AuthorizationManager.assertClientCanViewProjectAndDoc.yields(null)
+				@WebsocketController._assertClientCanApplyUpdate @client, @doc_id, @edit_update, (error) ->
+					expect(error.message).to.equal "not authorized"
+					done()
+		
+		describe "with a read-only client and a comment op", ->
+			it "should return successfully", (done) ->
+				@AuthorizationManager.assertClientCanEditProjectAndDoc.yields(new Error("not authorized"))
+				@AuthorizationManager.assertClientCanViewProjectAndDoc.yields(null)
+				@WebsocketController._assertClientCanApplyUpdate @client, @doc_id, @comment_update, (error) ->
+					expect(error).to.be.null
+					done()
+		
+		describe "with a totally unauthorized client", ->
+			it "should return an error", (done) ->
+				@AuthorizationManager.assertClientCanEditProjectAndDoc.yields(new Error("not authorized"))
+				@AuthorizationManager.assertClientCanViewProjectAndDoc.yields(new Error("not authorized"))
+				@WebsocketController._assertClientCanApplyUpdate @client, @doc_id, @comment_update, (error) ->
+					expect(error.message).to.equal "not authorized"
+					done()
