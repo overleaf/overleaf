@@ -1,3 +1,6 @@
+# This file is shared between document-updater and web, so that the server and client share
+# an identical track changes implementation. Do not edit it directly in web or document-updater,
+# instead edit it at https://github.com/sharelatex/ranges-tracker, where it has a suite of tests
 load = () ->
 	class RangesTracker
 		# The purpose of this class is to track a set of inserts and deletes to a document, like
@@ -90,6 +93,18 @@ load = () ->
 			change = @getChange(change_id)
 			return if !change?
 			@_removeChange(change)
+		
+		validate: (text) ->
+			for change in @changes
+				if change.op.i?
+					content = text.slice(change.op.p, change.op.p + change.op.i.length)
+					if content != change.op.i
+						throw new Error("Change (#{JSON.stringify(change)}) doesn't match text (#{JSON.stringify(content)})")
+			for comment in @comments
+				content = text.slice(comment.op.p, comment.op.p + comment.op.c.length)
+				if content != comment.op.c
+					throw new Error("Comment (#{JSON.stringify(comment)}) doesn't match text (#{JSON.stringify(content)})")
+			return true
 
 		applyOp: (op, metadata = {}) ->
 			metadata.ts ?= new Date()

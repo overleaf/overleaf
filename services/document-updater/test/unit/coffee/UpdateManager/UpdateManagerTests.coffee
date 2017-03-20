@@ -179,7 +179,7 @@ describe "UpdateManager", ->
 			
 			it "should update the ranges", ->
 				@RangesManager.applyUpdate
-					.calledWith(@project_id, @doc_id, @ranges, @appliedOps)
+					.calledWith(@project_id, @doc_id, @ranges, @appliedOps, @updatedDocLines)
 					.should.equal true
 
 			it "should save the document", ->

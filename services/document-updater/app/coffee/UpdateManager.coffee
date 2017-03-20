@@ -59,7 +59,7 @@ module.exports = UpdateManager =
 				return callback(new Errors.NotFoundError("document not found: #{doc_id}"))
 			ShareJsUpdateManager.applyUpdate project_id, doc_id, update, lines, version, (error, updatedDocLines, version, appliedOps) ->
 				return callback(error) if error?
-				RangesManager.applyUpdate project_id, doc_id, ranges, appliedOps, (error, new_ranges) ->
+				RangesManager.applyUpdate project_id, doc_id, ranges, appliedOps, updatedDocLines, (error, new_ranges) ->
 					return callback(error) if error?
 					RedisManager.updateDocument doc_id, updatedDocLines, version, appliedOps, new_ranges, (error) ->
 						return callback(error) if error?
