@@ -223,4 +223,22 @@ describe "RequestParser", ->
 		it "should also escape the resource path", ->
 			@data.resources[0].path.should.equal @goodPath
 		
+	describe "with a root resource path that has a relative path", ->
+		beforeEach ->
+			@validRequest.compile.rootResourcePath = "foo/../../bar.tex"
+			@RequestParser.parse @validRequest, @callback
+			@data = @callback.args[0][1]
 
+		it "should return an error", ->
+			@callback.calledWith("relative path in root resource")
+				.should.equal true
+
+	describe "with a root resource path that has unescaped + relative path", ->
+		beforeEach ->
+			@validRequest.compile.rootResourcePath = "foo/#../bar.tex"
+			@RequestParser.parse @validRequest, @callback
+			@data = @callback.args[0][1]
+
+		it "should return an error", ->
+			@callback.calledWith("relative path in root resource")
+				.should.equal true

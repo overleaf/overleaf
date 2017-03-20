@@ -44,7 +44,7 @@ module.exports = RequestParser =
 				type: "string"
 			originalRootResourcePath = rootResourcePath
 			sanitizedRootResourcePath = RequestParser._sanitizePath(rootResourcePath)
-			response.rootResourcePath = sanitizedRootResourcePath
+			response.rootResourcePath = RequestParser._checkPath(sanitizedRootResourcePath)
 			
 			for resource in response.resources
 				if resource.path == originalRootResourcePath
@@ -92,3 +92,10 @@ module.exports = RequestParser =
 	_sanitizePath: (path) ->
 		# See http://php.net/manual/en/function.escapeshellcmd.php
 		path.replace(/[\#\&\;\`\|\*\?\~\<\>\^\(\)\[\]\{\}\$\\\x0A\xFF\x00]/g, "")
+
+	_checkPath: (path) ->
+		# check that the request does not use a relative path
+		for dir in path.split('/')
+			if dir == '..'
+				throw "relative path in root resource"
+		return path
