@@ -25,7 +25,6 @@ TrackChangesLogger.addSerializers {
 Path = require "path"
 Metrics = require "metrics-sharelatex"
 Metrics.initialize("track-changes")
-# Metrics.mongodb.monitor(Path.resolve(__dirname + "/node_modules/mongojs/node_modules/mongodb"), logger)
 Metrics.memory.monitor(logger)
 
 child_process = require "child_process"
