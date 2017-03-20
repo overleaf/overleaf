@@ -81,6 +81,13 @@ load = () ->
 			@comments = @comments.filter (c) -> c.id != comment_id
 			@_markAsDirty comment, "comment", "removed"
 		
+		moveCommentId: (comment_id, position, text) ->
+			for comment in @comments
+				if comment.id == comment_id
+					comment.op.p = position
+					comment.op.c = text
+					@_markAsDirty comment, "comment", "moved"
+
 		getChange: (change_id) ->
 			change = null
 			for c in @changes
@@ -125,17 +132,21 @@ load = () ->
 				@applyOp(op, metadata)
 
 		addComment: (op, metadata) ->
-			# TODO: Don't allow overlapping comments?
-			@comments.push comment = {
-				id: op.t or @newId()
-				op: # Copy because we'll modify in place
-					c: op.c
-					p: op.p
-					t: op.t
-				metadata
-			}
-			@_markAsDirty comment, "comment", "added"
-			return comment
+			existing = @getComment(op.t)
+			if existing?
+				@moveCommentId(op.t, op.p, op.c)
+				return existing
+			else
+				@comments.push comment = {
+					id: op.t or @newId()
+					op: # Copy because we'll modify in place
+						c: op.c
+						p: op.p
+						t: op.t
+					metadata
+				}
+				@_markAsDirty comment, "comment", "added"
+				return comment
 		
 		applyInsertToComments: (op) ->
 			for comment in @comments
