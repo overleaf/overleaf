@@ -14,7 +14,6 @@ module.exports = (obj, methodName, prefix, logger) ->
 
 		if !callback? || typeof callback != 'function'
 			logger.log "[Metrics] expected wrapped method '#{methodName}' to be invoked with a callback"
-			return
 
 		timer = new metrics.Timer(key)
 
