@@ -90,13 +90,20 @@ describe 'timeAsyncMethod', ->
 
 	describe 'when the wrapped function is not using a callback', ->
 		beforeEach ->
-			@testObject.nextNumber = (n) ->
-				return n+1
+			@realMethod =  sinon.stub().returns(42)
+			@testObject.nextNumber = @realMethod
 
 		it 'should not throw an error', ->
 			@timeAsyncMethod @testObject, 'nextNumber', 'test.nextNumber'
 			badCall = () =>
 				@testObject.nextNumber 2
 			expect(badCall).to.not.throw(Error)
+
+		it 'should call the underlying method', ->
+			@timeAsyncMethod @testObject, 'nextNumber', 'test.nextNumber'
+			result = @testObject.nextNumber(12)
+			expect(@realMethod.callCount).to.equal 1
+			expect(@realMethod.calledWith(12)).to.equal true
+			expect(result).to.equal 42
 
 

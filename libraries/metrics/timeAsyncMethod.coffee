@@ -13,7 +13,9 @@ module.exports = (obj, methodName, prefix, logger) ->
 		[firstArgs..., callback] = originalArgs
 
 		if !callback? || typeof callback != 'function'
-			logger.log "[Metrics] expected wrapped method '#{methodName}' to be invoked with a callback"
+			if logger?
+				logger.log "[Metrics] expected wrapped method '#{methodName}' to be invoked with a callback"
+			return realMethod.apply this, originalArgs
 
 		timer = new metrics.Timer(key)
 
