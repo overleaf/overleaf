@@ -65,5 +65,5 @@ describe "Restoring a version", ->
 
 	it "should set the doc in the doc updater", ->
 		MockDocUpdaterApi.setDoc
-			.calledWith(@project_id, @doc_id, @restored_lines, @user_id)
+			.calledWith(@project_id, @doc_id, @restored_lines, @user_id, true)
 			.should.equal true

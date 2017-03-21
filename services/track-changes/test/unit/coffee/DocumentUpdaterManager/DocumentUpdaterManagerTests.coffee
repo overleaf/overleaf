@@ -70,6 +70,7 @@ describe "DocumentUpdaterManager", ->
 							lines: @content.split("\n")
 							source: "restore"
 							user_id: @user_id
+							undoing: true
 					}).should.equal true
 
 			it "should call the callback", ->

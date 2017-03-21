@@ -7,7 +7,7 @@ module.exports = MockDocUpdaterApi =
 	getDoc: (project_id, doc_id, callback = (error) ->) ->
 		callback null, @docs[doc_id]
 
-	setDoc: (project_id, doc_id, lines, user_id, callback = (error) ->) ->
+	setDoc: (project_id, doc_id, lines, user_id, undoing, callback = (error) ->) ->
 		@docs[doc_id] ||= {}
 		@docs[doc_id].lines = lines
 		callback()
@@ -23,7 +23,7 @@ module.exports = MockDocUpdaterApi =
 					res.send JSON.stringify doc
 
 		app.post "/project/:project_id/doc/:doc_id", express.bodyParser(), (req, res, next) =>
-			@setDoc req.params.project_id, req.params.doc_id, req.body.lines, req.body.user_id, (errr, doc) ->
+			@setDoc req.params.project_id, req.params.doc_id, req.body.lines, req.body.user_id, req.body.undoing, (errr, doc) ->
 				if error?
 					res.send 500
 				else
