@@ -11,28 +11,22 @@ describe 'TikzManager', ->
 			"logger-sharelatex": @logger = {log: () ->}
 
 	describe "needsOutputFile", ->
-		it "should return true if there is a usepackage{tikz}", ->
+		it "should return true if there is a \\tikzexternalize", ->
+			@TikzManager.needsOutputFile("main.tex", [
+				{ path: 'foo.tex' },
+				{ path: 'main.tex', content:'foo \\usepackage{tikz} \\tikzexternalize' }
+			]).should.equal true
+
+		it "should return false if there is no \\tikzexternalize", ->
 			@TikzManager.needsOutputFile("main.tex", [
 				{ path: 'foo.tex' },
 				{ path: 'main.tex', content:'foo \\usepackage{tikz}' }
-			]).should.equal true
-
-		it "should return true if there is a usepackage{pgf}", ->
-			@TikzManager.needsOutputFile("main.tex", [
-				{ path: 'foo.tex'},
-				{ path: 'main.tex', content:'foo \\usepackage{pgf}' }
-			]).should.equal true
-
-		it "should return false if there is no usepackage{tikz} or {pgf}", ->
-			@TikzManager.needsOutputFile("main.tex", [
-				{ path: 'foo.tex' },
-				{ path: 'main.tex', content:'foo \\usepackage{bar}' }
 			]).should.equal false
 
 		it "should return false if there is already an output.tex file", ->
 			@TikzManager.needsOutputFile("main.tex", [
 				{ path: 'foo.tex' },
-				{ path: 'main.tex' },
+				{ path: 'main.tex', content:'foo \\usepackage{tikz} \\tikzexternalize' },
 				{ path: 'output.tex' }
 			]).should.equal false
 
@@ -44,6 +38,7 @@ describe 'TikzManager', ->
 			@content = '''
 				\\documentclass{article}
 				\\usepackage{tikz}
+				\\tikzexternalize
 				\\begin{document}
 				Hello world
 				\\end{document}

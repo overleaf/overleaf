@@ -21,11 +21,9 @@ module.exports = TikzManager =
 		return false
 
 	_includesTikz: (resource) ->
-		# check if we are loading tikz or pgf
-		content = resource.content.slice(0,4096)
-		if content.indexOf("\\usepackage{tikz") >= 0
-			return true
-		else if content.indexOf("\\usepackage{pgf") >= 0
+		# check if we are using tikz externalize
+		content = resource.content.slice(0,65536)
+		if content.indexOf("\\tikzexternalize") >= 0
 			return true
 		else
 			return false
