@@ -173,3 +173,11 @@ describe "ResourceWriter", ->
 			it "should return an error", ->
 				@callback.calledWith(new Error("resource path is outside root directory"))
 				.should.equal true
+
+		describe "with another invalid path matching on a prefix", ->
+			beforeEach ->
+				@ResourceWriter.checkPath("foo", "../foobar/baz", @callback)
+
+			it "should return an error", ->
+				@callback.calledWith(new Error("resource path is outside root directory"))
+				.should.equal true

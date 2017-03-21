@@ -90,7 +90,7 @@ module.exports = ResourceWriter =
 
 	checkPath: (basePath, resourcePath, callback) ->
 		path = Path.normalize(Path.join(basePath, resourcePath))
-		if (path.slice(0, basePath.length) != basePath)
+		if (path.slice(0, basePath.length + 1) != basePath + "/")
 			return callback new Error("resource path is outside root directory")
 		else
 			return callback(null, path)
