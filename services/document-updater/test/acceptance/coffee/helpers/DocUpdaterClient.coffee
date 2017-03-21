@@ -53,13 +53,14 @@ module.exports = DocUpdaterClient =
 		request.post "http://localhost:3003/project/#{project_id}/doc/#{doc_id}/flush", (error, res, body) ->
 			callback error, res, body
 
-	setDocLines: (project_id, doc_id, lines, source, user_id, callback = (error) ->) ->
+	setDocLines: (project_id, doc_id, lines, source, user_id, undoing, callback = (error) ->) ->
 		request.post {
 			url: "http://localhost:3003/project/#{project_id}/doc/#{doc_id}"
 			json:
 				lines: lines
 				source: source
 				user_id: user_id
+				undoing: undoing
 		}, (error, res, body) ->
 			callback error, res, body
 

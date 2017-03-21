@@ -125,15 +125,16 @@ describe "HttpController", ->
 					lines: @lines
 					source: @source
 					user_id: @user_id
+					undoing: @undoing = true
 
 		describe "successfully", ->
 			beforeEach ->
-				@DocumentManager.setDocWithLock = sinon.stub().callsArgWith(5)
+				@DocumentManager.setDocWithLock = sinon.stub().callsArgWith(6)
 				@HttpController.setDoc(@req, @res, @next)
 
 			it "should set the doc", ->
 				@DocumentManager.setDocWithLock
-					.calledWith(@project_id, @doc_id, @lines, @source, @user_id)
+					.calledWith(@project_id, @doc_id, @lines, @source, @user_id, @undoing)
 					.should.equal true
 
 			it "should return a successful No Content response", ->
@@ -143,7 +144,7 @@ describe "HttpController", ->
 
 			it "should log the request", ->
 				@logger.log
-					.calledWith(doc_id: @doc_id, project_id: @project_id, lines: @lines, source: @source, user_id: @user_id, "setting doc via http")
+					.calledWith(doc_id: @doc_id, project_id: @project_id, lines: @lines, source: @source, user_id: @user_id, undoing: @undoing, "setting doc via http")
 					.should.equal true
 
 			it "should time the request", ->
@@ -151,7 +152,7 @@ describe "HttpController", ->
 
 		describe "when an errors occurs", ->
 			beforeEach ->
-				@DocumentManager.setDocWithLock = sinon.stub().callsArgWith(5, new Error("oops"))
+				@DocumentManager.setDocWithLock = sinon.stub().callsArgWith(6, new Error("oops"))
 				@HttpController.setDoc(@req, @res, @next)
 
 			it "should call next with the error", ->
@@ -165,7 +166,7 @@ describe "HttpController", ->
 				for _ in [0..200000]
 					lines.push "test test test"
 				@req.body.lines = lines
-				@DocumentManager.setDocWithLock = sinon.stub().callsArgWith(5)
+				@DocumentManager.setDocWithLock = sinon.stub().callsArgWith(6)
 				@HttpController.setDoc(@req, @res, @next)
 
 			it 'should send back a 406 response', ->
