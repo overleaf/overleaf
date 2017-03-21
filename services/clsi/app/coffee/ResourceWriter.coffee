@@ -75,19 +75,22 @@ module.exports = ResourceWriter =
 				callback()
 
 	_writeResourceToDisk: (project_id, resource, basePath, callback = (error) ->) ->
-		path = Path.normalize(Path.join(basePath, resource.path))
+		ResourceWriter.checkPath basePath, resource.path, (error, path) ->
+			return callback(error) if error?
+			mkdirp Path.dirname(path), (error) ->
+				return callback(error) if error?
+				# TODO: Don't overwrite file if it hasn't been modified
+				if resource.url?
+					UrlCache.downloadUrlToFile project_id, resource.url, path, resource.modified, (err)->
+						if err?
+							logger.err err:err, project_id:project_id, path:path, resource_url:resource.url, modified:resource.modified, "error downloading file for resources"
+						callback() #try and continue compiling even if http resource can not be downloaded at this time
+				else
+					fs.writeFile path, resource.content, callback
+
+	checkPath: (basePath, resourcePath, callback) ->
+		path = Path.normalize(Path.join(basePath, resourcePath))
 		if (path.slice(0, basePath.length) != basePath)
 			return callback new Error("resource path is outside root directory")
-
-		mkdirp Path.dirname(path), (error) ->
-			return callback(error) if error?
-			# TODO: Don't overwrite file if it hasn't been modified
-			if resource.url?
-				UrlCache.downloadUrlToFile project_id, resource.url, path, resource.modified, (err)->
-					if err?
-						logger.err err:err, project_id:project_id, path:path, resource_url:resource.url, modified:resource.modified, "error downloading file for resources"
-					callback() #try and continue compiling even if http resource can not be downloaded at this time
-			else
-				fs.writeFile path, resource.content, callback
-
-		
+		else
+			return callback(null, path)

@@ -6,6 +6,7 @@ modulePath = require('path').join __dirname, '../../../app/js/TikzManager'
 describe 'TikzManager', ->
 	beforeEach ->
 		@TikzManager = SandboxedModule.require modulePath, requires:
+			"./ResourceWriter": @ResourceWriter = {}
 			"fs": @fs = {}
 			"logger-sharelatex": @logger = {log: () ->}
 
@@ -49,7 +50,12 @@ describe 'TikzManager', ->
 			'''
 			@fs.readFile = sinon.stub().callsArgWith(2, null, @content)
 			@fs.writeFile = sinon.stub().callsArg(3)
+			@ResourceWriter.checkPath = sinon.stub().callsArgWith(2, null, "#{@rootDir}/#{@filename}")
 			@TikzManager.injectOutputFile @rootDir, @filename, @callback
+
+		it "sould check the path", ->
+			@ResourceWriter.checkPath.calledWith(@rootDir, @filename)
+			.should.equal true
 
 		it "should read the file", ->
 			@fs.readFile

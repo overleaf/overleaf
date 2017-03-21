@@ -157,6 +157,19 @@ describe "ResourceWriter", ->
 					.calledWith(new Error("resource path is outside root directory"))
 					.should.equal true
 			
-			
+	describe "checkPath", ->
+		describe "with a valid path", ->
+			beforeEach ->
+				@ResourceWriter.checkPath("foo", "bar", @callback)
 
-			
+			it "should return the joined path", ->
+				@callback.calledWith(null, "foo/bar")
+				.should.equal true
+
+		describe "with an invalid path", ->
+			beforeEach ->
+				@ResourceWriter.checkPath("foo", "baz/../../bar", @callback)
+
+			it "should return an error", ->
+				@callback.calledWith(new Error("resource path is outside root directory"))
+				.should.equal true

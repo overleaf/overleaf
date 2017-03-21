@@ -1,5 +1,6 @@
 fs = require "fs"
 Path = require "path"
+ResourceWriter = require "./ResourceWriter"
 logger = require "logger-sharelatex"
 
 # for \tikzexternalize to work the main file needs to match the
@@ -30,8 +31,10 @@ module.exports = TikzManager =
 			return false
 
 	injectOutputFile: (compileDir, mainFile, callback = (error) ->) ->
-		fs.readFile Path.join(compileDir, mainFile), "utf8", (error, content) ->
+		ResourceWriter.checkPath compileDir, mainFile, (error, path) ->
 			return callback(error) if error?
-			logger.log compileDir: compileDir, mainFile: mainFile, "copied file to ouput.tex for tikz"
-			# use wx flag to ensure that output file does not already exist
-			fs.writeFile Path.join(compileDir, "output.tex"), content, {flag:'wx'}, callback
+			fs.readFile path, "utf8", (error, content) ->
+				return callback(error) if error?
+				logger.log compileDir: compileDir, mainFile: mainFile, "copied file to ouput.tex for tikz"
+				# use wx flag to ensure that output file does not already exist
+				fs.writeFile Path.join(compileDir, "output.tex"), content, {flag:'wx'}, callback
