@@ -27,6 +27,10 @@ define [
 			layoutToLeft: false
 			rendererData: {}
 			loadingThreads: false
+			newAddCommentUI: false # Test new UI for adding comments; remove afterwards.
+
+		if window.location.search.match /new-comments=true/
+			$scope.reviewPanel.newAddCommentUI = true
 
 		window.addEventListener "beforeunload", () ->
 			collapsedStates = {}
@@ -163,7 +167,11 @@ define [
 
 		$scope.$watch (() ->
 			entries = $scope.reviewPanel.entries[$scope.editor.open_doc_id] or {}
-			Object.keys(entries).length
+			permEntries = {}
+			for entry, entryData of entries
+				if entry != "add-comment" or !$scope.reviewPanel.newAddCommentUI
+					permEntries[entry] = entryData 
+			Object.keys(permEntries).length
 		), (nEntries) ->
 			$scope.reviewPanel.hasEntries = nEntries > 0 and $scope.project.features.trackChangesVisible
 
@@ -323,6 +331,10 @@ define [
 			$scope.$broadcast "change:reject", entry_id
 			event_tracking.sendMB "rp-change-rejected", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
 		
+		$scope.addNewComment = () ->
+			$scope.$broadcast "comment:start_adding"
+			$scope.toggleReviewPanel()
+
 		$scope.startNewComment = () ->
 			$scope.$broadcast "comment:select_line"
 			$timeout () ->
