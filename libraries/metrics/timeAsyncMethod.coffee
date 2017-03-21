@@ -22,7 +22,7 @@ module.exports = (obj, methodName, prefix, logger) ->
 		realMethod.call this, firstArgs..., (callbackArgs...) ->
 			elapsedTime = timer.done()
 			possibleError = callbackArgs[0]
-			if possibleError? && possibleError.message? && possibleError.stack?
+			if possibleError? 
 				metrics.inc "#{key}.failure"
 			else
 				metrics.inc "#{key}.success"
