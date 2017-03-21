@@ -15,6 +15,7 @@ describe "MongoManager", ->
 			"./mongojs" : { db: @db = {}, ObjectId: ObjectId }
 			"./PackManager" : @PackManager = {}
 			'metrics-sharelatex': {timeAsyncMethod: ()->}
+			'logger-sharelatex': {log: ()->}
 		@callback = sinon.stub()
 		@doc_id = ObjectId().toString()
 		@project_id = ObjectId().toString()
