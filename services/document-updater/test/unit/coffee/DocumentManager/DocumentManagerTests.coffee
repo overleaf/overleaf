@@ -194,6 +194,7 @@ describe "DocumentManager", ->
 			beforeEach ->
 				@beforeLines = ["before", "lines"]
 				@afterLines = ["after", "lines"]
+				@ops = [{ i: "foo", p: 4 }, { d: "bar", p: 42 }]
 				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @beforeLines, @version, @ranges, true)
 				@DiffCodec.diffAsShareJsOp = sinon.stub().callsArgWith(2, null, @ops)
 				@UpdateManager.applyUpdate = sinon.stub().callsArgWith(3, null)
@@ -202,7 +203,7 @@ describe "DocumentManager", ->
 
 			describe "when already loaded", ->
 				beforeEach ->
-					@DocumentManager.setDoc @project_id, @doc_id, @afterLines, @source, @user_id, @callback
+					@DocumentManager.setDoc @project_id, @doc_id, @afterLines, @source, @user_id, false, @callback
 
 				it "should get the current doc lines", ->
 					@DocumentManager.getDoc
@@ -246,7 +247,7 @@ describe "DocumentManager", ->
 			describe "when not already loaded", ->
 				beforeEach ->
 					@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @beforeLines, @version, false)
-					@DocumentManager.setDoc @project_id, @doc_id, @afterLines, @source, @user_id, @callback
+					@DocumentManager.setDoc @project_id, @doc_id, @afterLines, @source, @user_id, false, @callback
 
 				it "should flush and delete the doc from the doc updater", ->
 					@DocumentManager.flushAndDeleteDoc
@@ -255,13 +256,24 @@ describe "DocumentManager", ->
 
 			describe "without new lines", ->
 				beforeEach ->
-					@DocumentManager.setDoc @project_id, @doc_id, null, @source, @user_id, @callback
+					@DocumentManager.setDoc @project_id, @doc_id, null, @source, @user_id, false, @callback
 
 				it "should return the callback with an error", ->
 					@callback.calledWith(new Error("No lines were passed to setDoc"))
 					
 				it "should not try to get the doc lines", ->
 					@DocumentManager.getDoc.called.should.equal false
+			
+			describe "with the undoing flag", ->
+				beforeEach ->
+					# Copy ops so we don't interfere with other tests
+					@ops = [{ i: "foo", p: 4 }, { d: "bar", p: 42 }]
+					@DiffCodec.diffAsShareJsOp = sinon.stub().callsArgWith(2, null, @ops)
+					@DocumentManager.setDoc @project_id, @doc_id, @afterLines, @source, @user_id, true, @callback
+				
+				it "should set the undo flag on each op", ->
+					for op in @ops
+						op.u.should.equal true
 	
 	describe "acceptChanges", ->
 		beforeEach ->

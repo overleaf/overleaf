@@ -43,7 +43,7 @@ module.exports = DocumentManager =
 					return callback(error) if error?
 					callback null, lines, version, ops, ranges
 
-	setDoc: (project_id, doc_id, newLines, source, user_id, _callback = (error) ->) ->
+	setDoc: (project_id, doc_id, newLines, source, user_id, undoing, _callback = (error) ->) ->
 		timer = new Metrics.Timer("docManager.setDoc")
 		callback = (args...) ->
 			timer.done()
@@ -63,6 +63,9 @@ module.exports = DocumentManager =
 			logger.log doc_id: doc_id, project_id: project_id, oldLines: oldLines, newLines: newLines, "setting a document via http"
 			DiffCodec.diffAsShareJsOp oldLines, newLines, (error, op) ->
 				return callback(error) if error?
+				if undoing
+					for o in op or []
+						o.u = true # Turn on undo flag for each op for track changes
 				update =
 					doc: doc_id
 					op: op
@@ -161,9 +164,9 @@ module.exports = DocumentManager =
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.getDocAndRecentOps, project_id, doc_id, fromVersion, callback
 		
-	setDocWithLock: (project_id, doc_id, lines, source, user_id, callback = (error) ->) ->
+	setDocWithLock: (project_id, doc_id, lines, source, user_id, undoing, callback = (error) ->) ->
 		UpdateManager = require "./UpdateManager"
-		UpdateManager.lockUpdatesAndDo DocumentManager.setDoc, project_id, doc_id, lines, source, user_id, callback
+		UpdateManager.lockUpdatesAndDo DocumentManager.setDoc, project_id, doc_id, lines, source, user_id, undoing, callback
 		
 	flushDocIfLoadedWithLock: (project_id, doc_id, callback = (error) ->) ->
 		UpdateManager = require "./UpdateManager"

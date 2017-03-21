@@ -41,7 +41,7 @@ describe "Setting a document", ->
 				DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) =>
 					throw error if error?
 					setTimeout () =>
-						DocUpdaterClient.setDocLines @project_id, @doc_id, @newLines, @source, @user_id, (error, res, body) =>
+						DocUpdaterClient.setDocLines @project_id, @doc_id, @newLines, @source, @user_id, false, (error, res, body) =>
 							@statusCode = res.statusCode
 							done()
 					, 200
@@ -74,7 +74,7 @@ describe "Setting a document", ->
 		before (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 			MockWebApi.insertDoc @project_id, @doc_id, {lines: @lines, version: @version}
-			DocUpdaterClient.setDocLines @project_id, @doc_id, @newLines, @source, @user_id, (error, res, body) =>
+			DocUpdaterClient.setDocLines @project_id, @doc_id, @newLines, @source, @user_id, false, (error, res, body) =>
 				@statusCode = res.statusCode
 				setTimeout done, 200
 		
@@ -94,3 +94,60 @@ describe "Setting a document", ->
 				throw error if error?
 				expect(lines).to.not.exist
 				done()
+	
+	describe "with track changes", ->
+		before ->
+			@lines = ["one", "one and a half", "two", "three"]
+			@id_seed = "587357bd35e64f6157"
+			@update =
+				doc: @doc_id
+				op: [{
+					d: "one and a half\n"
+					p: 4
+				}]
+				meta:
+					tc: @id_seed
+					user_id: @user_id
+				v: @version
+
+		describe "with the undo flag", ->
+			before (done) ->
+				[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
+				MockWebApi.insertDoc @project_id, @doc_id, {lines: @lines, version: @version}
+				DocUpdaterClient.preloadDoc @project_id, @doc_id, (error) =>
+					throw error if error?
+					DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) =>
+						throw error if error?
+						# Go back to old lines, with undo flag
+						DocUpdaterClient.setDocLines @project_id, @doc_id, @lines, @source, @user_id, true, (error, res, body) =>
+							@statusCode = res.statusCode
+							setTimeout done, 200
+			
+			it "should undo the tracked changes", (done) ->
+				DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, data) =>
+					throw error if error?
+					ranges = data.ranges
+					expect(ranges.changes).to.be.undefined
+					done()
+			
+		describe "without the undo flag", ->
+			before (done) ->
+				[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
+				MockWebApi.insertDoc @project_id, @doc_id, {lines: @lines, version: @version}
+				DocUpdaterClient.preloadDoc @project_id, @doc_id, (error) =>
+					throw error if error?
+					DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) =>
+						throw error if error?
+						# Go back to old lines, without undo flag
+						DocUpdaterClient.setDocLines @project_id, @doc_id, @lines, @source, @user_id, false, (error, res, body) =>
+							@statusCode = res.statusCode
+							setTimeout done, 200
+			
+			it "should not undo the tracked changes", (done) ->
+				DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, data) =>
+					throw error if error?
+					ranges = data.ranges
+					expect(ranges.changes.length).to.equal 1
+					done()
+
+				
