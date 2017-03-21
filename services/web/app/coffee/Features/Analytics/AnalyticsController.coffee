@@ -8,7 +8,7 @@ module.exports = AnalyticsController =
 			if error?
 				if error instanceof Errors.ServiceNotConfiguredError
 					# ignore, no-op
-					return next(204)
+					return res.send(204)
 				else
 					return next(error)
 			res.send 204
