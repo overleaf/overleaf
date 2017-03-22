@@ -2,6 +2,7 @@ settings = require "settings-sharelatex"
 logger = require "logger-sharelatex"
 _ = require "underscore"
 request = require "request"
+Errors = require '../Errors/Errors'
 
 
 makeRequest = (opts, callback)->
@@ -10,8 +11,7 @@ makeRequest = (opts, callback)->
 		opts.url = "#{settings.apis.analytics.url}#{urlPath}"
 		request opts, callback
 	else
-		callback()
-
+		callback(new Errors.ServiceNotConfiguredError('Analytics service not configured'))
 
 
 module.exports =
