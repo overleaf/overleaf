@@ -68,14 +68,6 @@ module.exports = UpdatesManager =
 				logger.log {project_id, doc_id, orig_v: lastCompressedUpdate?.v, new_v: result.v}, "inserted updates into pack"	if result?
 				callback()
 
-	REDIS_READ_BATCH_SIZE: 100
-	processUncompressedUpdates: (project_id, doc_id, callback = (error) ->) ->
-		UpdatesManager._prepareProjectForUpdates project_id, (error, temporary) ->
-			return callback(error) if error?
-			UpdatesManager._prepareDocForUpdates project_id, doc_id, (error) ->
-				return callback(error) if error?
-				UpdatesManager._processUncompressedUpdates project_id, doc_id, temporary, callback
-
 	# Check whether the updates are temporary (per-project property)
 	_prepareProjectForUpdates: (project_id, callback = (error, temporary) ->) ->
 		UpdateTrimmer.shouldTrimUpdates project_id, (error, temporary) ->
@@ -89,7 +81,8 @@ module.exports = UpdatesManager =
 			callback(null)
 
 	# Apply updates for specific project/doc after preparing at project and doc level
-	_processUncompressedUpdates: (project_id, doc_id, temporary, callback = (error) ->) ->
+	REDIS_READ_BATCH_SIZE: 100
+	processUncompressedUpdates: (project_id, doc_id, temporary, callback = (error) ->) ->
 		# get the updates as strings from redis (so we can delete them after they are applied)
 		RedisManager.getOldestDocUpdates doc_id, UpdatesManager.REDIS_READ_BATCH_SIZE, (error, docUpdates) ->
 			return callback(error) if error?
@@ -108,7 +101,7 @@ module.exports = UpdatesManager =
 							# There might be more updates
 							logger.log project_id: project_id, doc_id: doc_id, "continuing processing updates"
 							setTimeout () ->
-								UpdatesManager._processUncompressedUpdates project_id, doc_id, temporary, callback
+								UpdatesManager.processUncompressedUpdates project_id, doc_id, temporary, callback
 							, 0
 						else
 							logger.log project_id: project_id, doc_id: doc_id, "all raw updates processed"
@@ -128,7 +121,7 @@ module.exports = UpdatesManager =
 			LockManager.runWithLock(
 				"HistoryLock:#{doc_id}",
 				(releaseLock) ->
-					UpdatesManager._processUncompressedUpdates project_id, doc_id, temporary, releaseLock
+					UpdatesManager.processUncompressedUpdates project_id, doc_id, temporary, releaseLock
 				callback
 			)
 

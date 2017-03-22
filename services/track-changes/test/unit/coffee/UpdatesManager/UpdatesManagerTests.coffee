@@ -182,17 +182,7 @@ describe "UpdatesManager", ->
 				@updates = ["mock-update"]
 				@RedisManager.getOldestDocUpdates = sinon.stub().callsArgWith(2, null, @updates)
 				@RedisManager.expandDocUpdates = sinon.stub().callsArgWith(1, null, @updates)
-				@UpdatesManager.processUncompressedUpdates @project_id, @doc_id, @callback
-
-			it "should check if the updates are temporary", ->
-				@UpdateTrimmer.shouldTrimUpdates
-					.calledWith(@project_id)
-					.should.equal true
-
-			it "should backport the project id", ->
-				@MongoManager.backportProjectId
-					.calledWith(@project_id, @doc_id)
-					.should.equal true
+				@UpdatesManager.processUncompressedUpdates @project_id, @doc_id, @temporary, @callback
 
 			it "should get the oldest updates", ->
 				@RedisManager.getOldestDocUpdates
@@ -225,7 +215,7 @@ describe "UpdatesManager", ->
 				@RedisManager.expandDocUpdates = (jsonUpdates, callback) =>
 					callback null, jsonUpdates
 				sinon.spy @RedisManager, "expandDocUpdates"
-				@UpdatesManager.processUncompressedUpdates @project_id, @doc_id, (args...) =>
+				@UpdatesManager.processUncompressedUpdates @project_id, @doc_id, @temporary, (args...) =>
 					@callback(args...)
 					done()
 
@@ -256,6 +246,16 @@ describe "UpdatesManager", ->
 			@UpdatesManager._processUncompressedUpdates = sinon.stub().callsArg(3)
 			@LockManager.runWithLock = sinon.stub().callsArg(2)
 			@UpdatesManager.processUncompressedUpdatesWithLock @project_id, @doc_id, @callback
+
+		it "should check if the updates are temporary", ->
+			@UpdateTrimmer.shouldTrimUpdates
+				.calledWith(@project_id)
+				.should.equal true
+
+		it "should backport the project id", ->
+			@MongoManager.backportProjectId
+				.calledWith(@project_id, @doc_id)
+				.should.equal true
 
 		it "should run processUncompressedUpdates with the lock", ->
 			@LockManager.runWithLock
