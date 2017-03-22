@@ -3,7 +3,7 @@ logger = require "logger-sharelatex"
 Settings = require "settings-sharelatex"
 
 # Don't let HTTP calls hang for a long time
-MAX_HTTP_REQUEST_LENGTH = 15000 # 15 seconds
+MAX_HTTP_REQUEST_LENGTH = 30000 # 30 seconds
 
 # DEPRECATED! This method of getting user details via track-changes is deprecated
 # in the way we lay out our services.
