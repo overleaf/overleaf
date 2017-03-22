@@ -255,7 +255,7 @@ describe "AuthenticationController", ->
 				@LoginRateLimiter.processLoginRequest.callsArgWith(1, null, true)
 				@AuthenticationManager.authenticate = sinon.stub().callsArgWith(2, null, @user)
 				@req.sessionID = Math.random()
-				@AnalyticsManager.idendifyUser = sinon.stub()
+				@AnalyticsManager.identifyUser = sinon.stub()
 				@AuthenticationController.doPassportLogin(@req, @req.body.email, @req.body.password, @cb)
 
 			it "should attempt to authorise the user", ->
@@ -263,8 +263,8 @@ describe "AuthenticationController", ->
 					.calledWith(email: @email.toLowerCase(), @password)
 					.should.equal true
 
-			it "should call idendifyUser", ->
-				@AnalyticsManager.idendifyUser.calledWith(@user._id, @req.sessionID).should.equal true
+			it "should call identifyUser", ->
+				@AnalyticsManager.identifyUser.calledWith(@user._id, @req.sessionID).should.equal true
 
 			it "should setup the user data in the background", ->
 				@UserHandler.setupLoginData.calledWith(@user).should.equal true

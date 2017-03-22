@@ -16,7 +16,7 @@ makeRequest = (opts, callback)->
 
 module.exports =
 
-	idendifyUser: (user_id, old_user_id, callback = (error)->)->
+	identifyUser: (user_id, old_user_id, callback = (error)->)->
 		opts =
 			body:
 				old_user_id:old_user_id
