@@ -118,11 +118,11 @@ module.exports = UpdatesManager =
 	processUncompressedUpdatesWithLock: (project_id, doc_id, callback = (error) ->) ->
 		UpdatesManager._prepareProjectForUpdates project_id, (error, temporary) ->
 			return callback(error) if error?
-			UpdatesManager._processUncompressedUpdatesForDoc project_id, doc_id, temporary, callback
+			UpdatesManager._processUncompressedUpdatesForDocWithLock project_id, doc_id, temporary, callback
 
 
 	# Process updates for a doc when the whole project is flushed (internal method)
-	_processUncompressedUpdatesForDoc: (project_id, doc_id, temporary, callback = (error) ->) ->
+	_processUncompressedUpdatesForDocWithLock: (project_id, doc_id, temporary, callback = (error) ->) ->
 		UpdatesManager._prepareDocForUpdates project_id, doc_id, (error) ->
 			return callback(error) if error?
 			LockManager.runWithLock(
@@ -141,7 +141,7 @@ module.exports = UpdatesManager =
 				for doc_id in doc_ids
 					do (doc_id) ->
 						jobs.push (cb) ->
-							UpdatesManager._processUncompressedUpdatesForDoc project_id, doc_id, temporary, cb
+							UpdatesManager._processUncompressedUpdatesForDocWithLock project_id, doc_id, temporary, cb
 				async.parallelLimit jobs, 5, callback
 
 	getDocUpdates: (project_id, doc_id, options = {}, callback = (error, updates) ->) ->

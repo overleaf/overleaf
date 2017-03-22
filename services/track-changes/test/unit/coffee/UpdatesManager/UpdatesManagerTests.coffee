@@ -317,7 +317,7 @@ describe "UpdatesManager", ->
 			@doc_ids = ["mock-id-1", "mock-id-2"]
 			@UpdateTrimmer.shouldTrimUpdates = sinon.stub().callsArgWith(1, null, @temporary = "temp mock")
 			@MongoManager.backportProjectId = sinon.stub().callsArg(2)
-			@UpdatesManager._processUncompressedUpdatesForDoc = sinon.stub().callsArg(3)
+			@UpdatesManager._processUncompressedUpdatesForDocWithLock = sinon.stub().callsArg(3)
 			@RedisManager.getDocIdsWithHistoryOps = sinon.stub().callsArgWith(1, null, @doc_ids)
 			@UpdatesManager.processUncompressedUpdatesForProject @project_id, () =>
 				@callback()
@@ -330,7 +330,7 @@ describe "UpdatesManager", ->
 
 		it "should process the doc ops for the each doc_id", ->
 			for doc_id in @doc_ids
-				@UpdatesManager._processUncompressedUpdatesForDoc
+				@UpdatesManager._processUncompressedUpdatesForDocWithLock
 					.calledWith(@project_id, doc_id, @temporary)
 					.should.equal true
 
