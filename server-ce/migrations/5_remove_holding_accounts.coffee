@@ -60,16 +60,17 @@ module.exports = HoldingAccountMigration =
 			callback()
 
 	run: (done = () ->) ->
+		console.log "[Getting list of holding accounts]"
 		HoldingAccountMigration.findHoldingAccounts (error, users) ->
 			throw error if error?
-			console.log "[Got list of holding accounts]", users.map (u) -> u._id
+			console.log "[Got #{users.length} holding accounts]"
 			jobs = users.map (u) ->
 				(cb) ->
 					HoldingAccountMigration.deleteUser u._id, (error) ->
 						return cb(error) if error?
 						HoldingAccountMigration.deleteUserProjects u._id, (error) ->
 							return cb(error) if error?
-							setTimeout cb, 200 # Small delay to not hammer DB
+							setTimeout cb, 50 # Small delay to not hammer DB
 			async.series jobs, (error) ->
 				throw error if error?
 				console.log "[FINISHED]"
