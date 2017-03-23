@@ -24,7 +24,7 @@ module.exports = HoldingAccountMigration =
 			jobs = projects.map (project) ->
 				(cb) ->
 					console.log "[Removing user from project]", user_id, JSON.stringify(project)
-					if !project._id?
+					if !project?._id?
 						throw new Error("no project id")
 				
 					if !HoldingAccountMigration.DRY_RUN
@@ -48,31 +48,31 @@ module.exports = HoldingAccountMigration =
 	deleteUser: (user_id, callback = (error) ->) ->
 		if !user_id?
 			throw new Error("must have user_id")
-		db.users.find {_id: user_id}, (error, user) ->
-			return callback(error) if error?
-			if !user?
-				throw new Error("expected user")
-			console.log "[Removing user]", user_id, JSON.stringify(user)
-			if !HoldingAccountMigration.DRY_RUN
-				db.users.remove {_id: user_id}, (error, result) ->
-					console.log "[Removed user]", user_id, result
-					callback(error)
-			else
-				console.log "[Would have removed user]", user_id
+		if !HoldingAccountMigration.DRY_RUN
+			db.users.remove {_id: user_id, holdingAccount: true}, (error, result) ->
+				return callback(error) if error?
+				console.log "[Removed user]", user_id, result
+				if result.n != 1
+					return callback(new Error("failed to remove user as expected"))
 				callback()
+		else
+			console.log "[Would have removed user]", user_id
+			callback()
 
-	run: (done) ->
+	run: (done = () ->) ->
 		HoldingAccountMigration.findHoldingAccounts (error, users) ->
 			throw error if error?
 			console.log "[Got list of holding accounts]", users.map (u) -> u._id
 			jobs = users.map (u) ->
 				(cb) ->
-					HoldingAccountMigration.deleteUserProjects u._id, (error) ->
+					HoldingAccountMigration.deleteUser u._id, (error) ->
 						return cb(error) if error?
-						HoldingAccountMigration.deleteUser u._id, cb
+						HoldingAccountMigration.deleteUserProjects u._id, (error) ->
+							return cb(error) if error?
+							setTimeout cb, 200 # Small delay to not hammer DB
 			async.series jobs, (error) ->
 				throw error if error?
-				console.log "[Removed holding accounts]"
+				console.log "[FINISHED]"
 				done()
 
 	migrate: (client, done=()->) ->
