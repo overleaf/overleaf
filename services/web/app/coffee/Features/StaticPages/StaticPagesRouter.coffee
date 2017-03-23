@@ -9,7 +9,6 @@ module.exports =
 
 		webRouter.get '/tos', HomeController.externalPage("tos", "Terms of Service")
 		webRouter.get '/about', HomeController.externalPage("about", "About Us")
-		webRouter.get '/review', HomeController.externalPage("review", "About Us")
 
 		webRouter.get '/security', HomeController.externalPage("security", "Security")
 		webRouter.get '/privacy_policy', HomeController.externalPage("privacy", "Privacy Policy")
