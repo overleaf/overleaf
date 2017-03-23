@@ -11,6 +11,7 @@ module.exports = Logger =
 		raven = require "raven"
 		@raven = new raven.Client(sentry_dsn, options)
 		@lastErrorTimeStamp = 0 # for rate limiting on sentry reporting
+		@lastErrorCount = 0
 
 	captureException: (attributes, message, level) ->
 		# handle case of logger.error "message"
@@ -59,12 +60,22 @@ module.exports = Logger =
 	error: (attributes, message, args...)->
 		@logger.error(attributes, message, args...)
 		if @raven?
+			MAX_ERRORS = 5 # maximum number of errors in 1 minute
 			now = new Date()
-			rateLimited = (now - @lastErrorTimeStamp) < 30 * 1000
-			# only report one error every thirty seconds to avoid overload
-			if not rateLimited
-				@captureException(attributes, message, "error")
+			# have we recently reported an error?
+			recentSentryReport = (now - @lastErrorTimeStamp) < 60 * 1000
+			# if so, increment the error count
+			if recentSentryReport
+				@lastErrorCount++
+			else
+				@lastErrorCount = 0
 				@lastErrorTimeStamp = now
+			# only report 5 errors every minute to avoid overload
+			if @lastErrorCount <= MAX_ERRORS
+				# add a note if the rate limit has been hit
+				note = if @lastErrorCount is MAX_ERRORS then "(rate limited)" else ""
+				# report the exception
+				@captureException(attributes, message, "error#{note}")
 	err: () ->
 		@error.apply(this, arguments)
 	warn: ()->
