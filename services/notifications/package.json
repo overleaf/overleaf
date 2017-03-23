@@ -12,7 +12,7 @@
     "async": "^0.1.22",
     "express": "3.1.0",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.1.0",
-    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.7.0",
+    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.7.1",
     "mongojs": "^2.4.0",
     "node-statsd": "0.0.3",
     "request": "^2.65.0",

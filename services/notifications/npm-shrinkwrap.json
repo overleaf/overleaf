@@ -253,9 +253,9 @@
       }
     },
     "metrics-sharelatex": {
-      "version": "1.7.0",
-      "from": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.7.0",
-      "resolved": "git+https://github.com/sharelatex/metrics-sharelatex.git#d2bfafab3b90ec1f2d27353fd22c46f8a6858278",
+      "version": "1.7.1",
+      "from": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.7.1",
+      "resolved": "git+https://github.com/sharelatex/metrics-sharelatex.git#166961924c599b1f9468f2e17846fa2a9d12372d",
       "dependencies": {
         "lynx": {
           "version": "0.1.1",
@@ -698,7 +698,8 @@
           "dependencies": {
             "punycode": {
               "version": "1.4.1",
-              "from": "punycode@>=1.4.1 <2.0.0"
+              "from": "punycode@>=1.4.1 <2.0.0",
+              "resolved": "https://registry.npmjs.org/punycode/-/punycode-1.4.1.tgz"
             }
           }
         },
