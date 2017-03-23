@@ -182,17 +182,7 @@ describe "UpdatesManager", ->
 				@updates = ["mock-update"]
 				@RedisManager.getOldestDocUpdates = sinon.stub().callsArgWith(2, null, @updates)
 				@RedisManager.expandDocUpdates = sinon.stub().callsArgWith(1, null, @updates)
-				@UpdatesManager.processUncompressedUpdates @project_id, @doc_id, @callback
-
-			it "should check if the updates are temporary", ->
-				@UpdateTrimmer.shouldTrimUpdates
-					.calledWith(@project_id)
-					.should.equal true
-
-			it "should backport the project id", ->
-				@MongoManager.backportProjectId
-					.calledWith(@project_id, @doc_id)
-					.should.equal true
+				@UpdatesManager.processUncompressedUpdates @project_id, @doc_id, @temporary, @callback
 
 			it "should get the oldest updates", ->
 				@RedisManager.getOldestDocUpdates
@@ -225,7 +215,7 @@ describe "UpdatesManager", ->
 				@RedisManager.expandDocUpdates = (jsonUpdates, callback) =>
 					callback null, jsonUpdates
 				sinon.spy @RedisManager, "expandDocUpdates"
-				@UpdatesManager.processUncompressedUpdates @project_id, @doc_id, (args...) =>
+				@UpdatesManager.processUncompressedUpdates @project_id, @doc_id, @temporary, (args...) =>
 					@callback(args...)
 					done()
 
@@ -251,9 +241,21 @@ describe "UpdatesManager", ->
 
 	describe "processCompressedUpdatesWithLock", ->
 		beforeEach ->
-			@UpdatesManager.processUncompressedUpdates = sinon.stub().callsArg(2)
+			@UpdateTrimmer.shouldTrimUpdates = sinon.stub().callsArgWith(1, null, @temporary = "temp mock")
+			@MongoManager.backportProjectId = sinon.stub().callsArg(2)
+			@UpdatesManager._processUncompressedUpdates = sinon.stub().callsArg(3)
 			@LockManager.runWithLock = sinon.stub().callsArg(2)
 			@UpdatesManager.processUncompressedUpdatesWithLock @project_id, @doc_id, @callback
+
+		it "should check if the updates are temporary", ->
+			@UpdateTrimmer.shouldTrimUpdates
+				.calledWith(@project_id)
+				.should.equal true
+
+		it "should backport the project id", ->
+			@MongoManager.backportProjectId
+				.calledWith(@project_id, @doc_id)
+				.should.equal true
 
 		it "should run processUncompressedUpdates with the lock", ->
 			@LockManager.runWithLock
@@ -313,7 +315,9 @@ describe "UpdatesManager", ->
 	describe "processUncompressedUpdatesForProject", ->
 		beforeEach (done) ->
 			@doc_ids = ["mock-id-1", "mock-id-2"]
-			@UpdatesManager.processUncompressedUpdatesWithLock = sinon.stub().callsArg(2)
+			@UpdateTrimmer.shouldTrimUpdates = sinon.stub().callsArgWith(1, null, @temporary = "temp mock")
+			@MongoManager.backportProjectId = sinon.stub().callsArg(2)
+			@UpdatesManager._processUncompressedUpdatesForDocWithLock = sinon.stub().callsArg(3)
 			@RedisManager.getDocIdsWithHistoryOps = sinon.stub().callsArgWith(1, null, @doc_ids)
 			@UpdatesManager.processUncompressedUpdatesForProject @project_id, () =>
 				@callback()
@@ -326,8 +330,8 @@ describe "UpdatesManager", ->
 
 		it "should process the doc ops for the each doc_id", ->
 			for doc_id in @doc_ids
-				@UpdatesManager.processUncompressedUpdatesWithLock
-					.calledWith(@project_id, doc_id)
+				@UpdatesManager._processUncompressedUpdatesForDocWithLock
+					.calledWith(@project_id, doc_id, @temporary)
 					.should.equal true
 
 		it "should call the callback", ->
