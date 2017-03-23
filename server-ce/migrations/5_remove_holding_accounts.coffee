@@ -64,8 +64,10 @@ module.exports = HoldingAccountMigration =
 		HoldingAccountMigration.findHoldingAccounts (error, users) ->
 			throw error if error?
 			console.log "[Got #{users.length} holding accounts]"
+			i = 0
 			jobs = users.map (u) ->
 				(cb) ->
+					console.log "[Removing user #{i++}/#{users.length}]"
 					HoldingAccountMigration.deleteUser u._id, (error) ->
 						return cb(error) if error?
 						HoldingAccountMigration.deleteUserProjects u._id, (error) ->
