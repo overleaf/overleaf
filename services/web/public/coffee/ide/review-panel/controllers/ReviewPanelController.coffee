@@ -29,8 +29,13 @@ define [
 			loadingThreads: false
 			newAddCommentUI: false # Test new UI for adding comments; remove afterwards.
 
-		if window.location.search.match /new-comments=true/
+		if $scope.shouldABAddCommentBtn and $scope.variationABAddCommentBtn? == "editor-corner"
 			$scope.reviewPanel.newAddCommentUI = true
+			console.log "editor corner"
+		else
+			console.log "default"
+
+		console.log $scope.shouldABAddCommentBtn
 
 		window.addEventListener "beforeunload", () ->
 			collapsedStates = {}

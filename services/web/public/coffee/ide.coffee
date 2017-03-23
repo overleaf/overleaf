@@ -81,6 +81,12 @@ define [
 		if $scope.user.signUpDate >= '2016-10-27'
 			$scope.shouldABTestPlans = true
 
+		$scope.shouldABAddCommentBtn = false
+		if $scope.user.signUpDate >= '2016-03-22'
+			$scope.shouldABAddCommentBtn = true
+			sixpack.participate "add-comment-btn", [ "default", "editor-corner" ], (variation) ->
+				$scope.variationABAddCommentBtn = variation
+
 		$scope.settings = window.userSettings
 		$scope.anonymous = window.anonymous
 
