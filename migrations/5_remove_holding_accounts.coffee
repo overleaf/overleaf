@@ -8,7 +8,7 @@ module.exports = HoldingAccountMigration =
 	DRY_RUN: true
 
 	findHoldingAccounts: (callback = (error, users) ->) ->
-		db.users.find({holdingAccount: true}, {holdingAccount: 1, email: 1}, callback)
+		db.users.find({holdingAccount: true, hashedPassword: { $exists: false }}, {holdingAccount: 1, email: 1}, callback)
 
 	deleteUserProjects: (user_id, callback = (error) ->) ->
 		# Holding accounts can't own projects, so only remove from 
