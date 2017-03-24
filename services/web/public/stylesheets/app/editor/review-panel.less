@@ -90,7 +90,7 @@
 	}
 
 #review-panel {
-	display: none;
+	display: block;
 	.rp-size-expanded & {
 		display: flex;
 		flex-direction: column;
@@ -98,7 +98,6 @@
 		overflow: visible;
 	}
 	.rp-size-mini & {
-		display: block;
 		width: @review-off-width;
 		z-index: 6;
 	}
@@ -152,7 +151,13 @@
 	}
 
 .rp-entry-list {
+	display: none;
 	width: 100%;
+
+	.rp-size-expanded &,
+	.rp-size-mini & {
+		display: block;
+	}
 	
 	.rp-state-current-file & {
 		position: absolute;
@@ -620,11 +625,12 @@
 }
 
 .rp-nav {
-	display: flex;
+	display: none;
 	flex-shrink: 0;
-	.rp-size-mini & {
-		display: none;
+	.rp-size-expanded & {
+		display: flex;
 	}
+
 	.rp-state-current-file & {
 		position: absolute;
 		bottom: 0;
