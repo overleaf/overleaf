@@ -72,6 +72,7 @@ module.exports =
 			client.sendMail options, (err, res)->
 				if err?
 					logger.err err:err, "error sending message"
+					err = new Error('Cannot send email')
 				else
 					logger.log "Message sent to #{options.to}"
-				callback(new Error('Cannot send email'))
+				callback(err)
