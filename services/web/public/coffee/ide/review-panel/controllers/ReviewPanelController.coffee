@@ -4,7 +4,7 @@ define [
 	"ide/colors/ColorManager"
 	"ide/review-panel/RangesTracker"
 ], (App, EventEmitter, ColorManager, RangesTracker) ->
-	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout, $http, $modal, event_tracking, localStorage) ->
+	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout, $http, $modal, event_tracking, sixpack, localStorage) ->
 		$reviewPanelEl = $element.find "#review-panel"
 
 		$scope.SubViews =
@@ -29,8 +29,12 @@ define [
 			loadingThreads: false
 			newAddCommentUI: false # Test new UI for adding comments; remove afterwards.
 
-		if window.location.search.match /new-comments=true/
-			$scope.reviewPanel.newAddCommentUI = true
+		$scope.shouldABAddCommentBtn = false
+		if $scope.user.signUpDate >= '2017-03-27'
+			sixpack.participate "add-comment-btn", [ "default", "editor-corner" ], (variation) ->
+				$scope.shouldABAddCommentBtn = true
+				$scope.variationABAddCommentBtn = variation
+				$scope.reviewPanel.newAddCommentUI = (variation == "editor-corner")
 
 		window.addEventListener "beforeunload", () ->
 			collapsedStates = {}
@@ -339,7 +343,9 @@ define [
 			$scope.$broadcast "comment:select_line"
 			$timeout () ->
 				$scope.$broadcast "review-panel:layout"
-		
+			if $scope.shouldABAddCommentBtn and !$scope.ui.reviewPanelOpen
+				sixpack.convert "add-comment-btn"
+
 		$scope.submitNewComment = (content) ->
 			return if !content? or content == ""
 			doc_id = $scope.editor.open_doc_id
