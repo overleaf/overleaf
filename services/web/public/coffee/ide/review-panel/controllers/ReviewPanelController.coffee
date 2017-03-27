@@ -30,7 +30,7 @@ define [
 			newAddCommentUI: false # Test new UI for adding comments; remove afterwards.
 
 		$scope.shouldABAddCommentBtn = false
-		if $scope.user.signUpDate >= '2016-03-22'
+		if $scope.user.signUpDate >= '2017-03-27'
 			sixpack.participate "add-comment-btn", [ "default", "editor-corner" ], (variation) ->
 				$scope.shouldABAddCommentBtn = true
 				$scope.variationABAddCommentBtn = variation
