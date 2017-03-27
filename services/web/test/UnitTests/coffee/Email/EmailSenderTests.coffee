@@ -58,10 +58,11 @@ describe "EmailSender", ->
 				args.subject.should.equal @opts.subject
 				done()
 
-		it "should return the error", (done)->
+		it "should return a non-specific error", (done)->
 			@sesClient.sendMail.callsArgWith(1, "error")
 			@sender.sendEmail {}, (err)=>
-				err.should.equal "error"
+				err.should.exist
+				err.toString().should.equal 'Error: Cannot send email'
 				done()
 
 

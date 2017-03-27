@@ -74,4 +74,4 @@ module.exports =
 					logger.err err:err, "error sending message"
 				else
 					logger.log "Message sent to #{options.to}"
-				callback(err)
+				callback(new Error('Cannot send email'))
