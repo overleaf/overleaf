@@ -137,7 +137,7 @@ describe "AuthorizationManager", ->
 				@AuthorizationManager.getPrivilegeLevelForProject @user_id, @project_id, (error) ->
 					error.should.be.instanceof Errors.NotFoundError
 
-		describe "when the project id is not validssssssss", ->
+		describe "when the project id is not valid", ->
 			beforeEach ->
 				@AuthorizationManager.isUserSiteAdmin.withArgs(@user_id).yields(null, false)
 				@CollaboratorsHandler.getMemberIdPrivilegeLevel
