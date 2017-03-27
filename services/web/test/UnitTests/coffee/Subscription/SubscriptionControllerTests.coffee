@@ -17,8 +17,7 @@ mockSubscriptions =
 		account:
 			account_code: "user-123"
 
-describe "SubscriptionController sanboxed", ->
-
+describe "SubscriptionController", ->
 	beforeEach ->
 		@user = {email:"tom@yahoo.com", _id: 'one', signUpDate: new Date('2000-10-01')}
 		@activeRecurlySubscription = mockSubscriptions["subscription-123-active"]
@@ -150,6 +149,7 @@ describe "SubscriptionController sanboxed", ->
 	describe "paymentPage", ->
 		beforeEach ->
 			@req.headers = {}
+			@SubscriptionHandler.validateNoSubscriptionInRecurly = sinon.stub().yields(null, true)
 			@GeoIpLookup.getCurrencyCode.callsArgWith(1, null, @stubbedCurrencyCode)
 
 		describe "with a user without a subscription", ->
@@ -209,6 +209,16 @@ describe "SubscriptionController sanboxed", ->
 					opts.currency.should.equal @stubbedCurrencyCode
 					done()
 				@SubscriptionController.paymentPage @req, @res
+		
+		describe "with a recurly subscription already", ->
+			it "should redirect to the subscription dashboard", (done)->
+				@LimitationsManager.userHasSubscription.callsArgWith(1, null, false)
+				@SubscriptionHandler.validateNoSubscriptionInRecurly = sinon.stub().yields(null, false)
+				@res.redirect = (url)=>
+					url.should.equal "/user/subscription"
+					done()
+				@SubscriptionController.paymentPage(@req, @res)
+			
 
 	describe "successful_subscription", ->
 		beforeEach (done) ->
