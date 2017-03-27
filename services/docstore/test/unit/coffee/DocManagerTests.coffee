@@ -1,6 +1,7 @@
 SandboxedModule = require('sandboxed-module')
 sinon = require('sinon')
 chai = require('chai')
+assert = require("chai").assert
 chai.should()
 expect = chai.expect
 modulePath = require('path').join __dirname, '../../../app/js/DocManager'
@@ -26,6 +27,72 @@ describe "DocManager", ->
 		@callback = sinon.stub()
 		@stubbedError = new Error("blew up")
 
+
+	describe "checkDocExists", ->
+		beforeEach ->
+			@DocManager._getDoc = sinon.stub()
+
+		it "should call get doc with a quick filter", (done)->
+			@DocManager._getDoc.callsArgWith(3, null, {_id:@doc_id})
+			@DocManager.checkDocExists @project_id, @doc_id, (err, exist)=>
+				exist.should.equal true
+				@DocManager._getDoc.calledWith(@project_id, @doc_id, {_id:1, inS3:true}).should.equal true
+				done()
+
+		it "should return false when doc is not there", (done)->
+			@DocManager._getDoc.callsArgWith(3, null)
+			@DocManager.checkDocExists @project_id, @doc_id, (err, exist)=>
+				exist.should.equal false
+				done()
+
+		it "should return error when get doc errors", (done)->
+			@DocManager._getDoc.callsArgWith(3, "error")
+			@DocManager.checkDocExists @project_id, @doc_id, (err, exist)=>
+				err.should.equal "error"
+				done()
+
+	describe "getFullDoc", ->
+		beforeEach ->
+			@DocManager._getDoc = sinon.stub()
+			@doc = 
+				_id: @doc_id
+				lines:["2134"]
+
+		it "should call get doc with a quick filter", (done)->
+			@DocManager._getDoc.callsArgWith(3, null, @doc)
+			@DocManager.getFullDoc @project_id, @doc_id, (err, doc)=>
+				doc.should.equal @doc
+				@DocManager._getDoc.calledWith(@project_id, @doc_id, {lines: true, rev: true, deleted: true, version: true, ranges: true, inS3:true}).should.equal true
+				done()
+	
+		it "should return error when get doc errors", (done)->
+			@DocManager._getDoc.callsArgWith(3, "error")
+			@DocManager.getFullDoc @project_id, @doc_id, (err, exist)=>
+				err.should.equal "error"
+				done()
+
+	describe "getRawDoc", ->
+
+		beforeEach ->
+			@DocManager._getDoc = sinon.stub()
+			@doc = 
+				lines:["2134"]
+
+		it "should call get doc with a quick filter", (done)->
+			@DocManager._getDoc.callsArgWith(3, null, @doc)
+			@DocManager.getDocLines @project_id, @doc_id, (err, doc)=>
+				doc.should.equal @doc
+				@DocManager._getDoc.calledWith(@project_id, @doc_id, {lines: true, inS3:true}).should.equal true
+				done()
+	
+		it "should return error when get doc errors", (done)->
+			@DocManager._getDoc.callsArgWith(3, "error")
+			@DocManager.getDocLines @project_id, @doc_id, (err, exist)=>
+				err.should.equal "error"
+				done()
+
+
+
 	describe "getDoc", ->
 		beforeEach ->
 			@project = { name: "mock-project" }
@@ -34,10 +101,30 @@ describe "DocManager", ->
 			@MongoManager.findDoc = sinon.stub()
 			@MongoManager.getDocVersion = sinon.stub().yields(null, @version)
 
+		describe "when using a filter", ->
+			beforeEach ->
+				@MongoManager.findDoc.yields(null, @doc)
+
+			it "should error if inS3 is not set to true", (done)->
+				@DocManager._getDoc @project_id, @doc_id, {inS3: false}, (err)->
+					expect(err).to.exist
+					done()
+
+			it "should always get inS3 even when no filter is passed", (done)->
+				@DocManager._getDoc @project_id, @doc_id, undefined, (err)=>
+					@MongoManager.findDoc.called.should.equal false
+					expect(err).to.exist
+					done()
+
+			it "should not error if inS3 is set to true", (done)->
+				@DocManager._getDoc @project_id, @doc_id, {inS3: true}, (err)->
+					expect(err).to.not.exist
+					done()
+
 		describe "when the doc is in the doc collection", ->
 			beforeEach ->
 				@MongoManager.findDoc.yields(null, @doc)
-				@DocManager.getDoc @project_id, @doc_id, {version: true}, @callback
+				@DocManager._getDoc @project_id, @doc_id, {version: true, inS3:true}, @callback
 
 			it "should get the doc from the doc collection", ->
 				@MongoManager.findDoc
@@ -58,7 +145,7 @@ describe "DocManager", ->
 		describe "without the version filter", ->
 			beforeEach ->
 				@MongoManager.findDoc.yields(null, @doc)
-				@DocManager.getDoc @project_id, @doc_id, {version: false}, @callback
+				@DocManager._getDoc @project_id, @doc_id, {version: false, inS3:true}, @callback
 
 			it "should not get the doc version from the docOps collection", ->
 				@MongoManager.getDocVersion.called.should.equal false
@@ -66,7 +153,7 @@ describe "DocManager", ->
 		describe "when MongoManager.findDoc errors", ->
 			beforeEach ->
 				@MongoManager.findDoc.yields(@stubbedError)
-				@DocManager.getDoc @project_id, @doc_id, {version: true}, @callback
+				@DocManager._getDoc @project_id, @doc_id, {version: true, inS3:true}, @callback
 
 			it "should return the error", ->
 				@callback.calledWith(@stubbedError).should.equal true
@@ -79,7 +166,7 @@ describe "DocManager", ->
 					@doc.inS3 = false
 					callback()
 				sinon.spy @DocArchiveManager, "unarchiveDoc"
-				@DocManager.getDoc @project_id, @doc_id, {version: true}, @callback
+				@DocManager._getDoc @project_id, @doc_id, {version: true, inS3:true}, @callback
 
 			it "should call the DocArchive to unarchive the doc", ->
 				@DocArchiveManager.unarchiveDoc.calledWith(@project_id, @doc_id).should.equal true
@@ -93,7 +180,7 @@ describe "DocManager", ->
 		describe "when the doc does not exist in the docs collection", ->
 			beforeEach -> 
 				@MongoManager.findDoc = sinon.stub().yields(null, null)
-				@DocManager.getDoc @project_id, @doc_id, {version: true}, @callback
+				@DocManager._getDoc @project_id, @doc_id, {version: true, inS3:true}, @callback
 
 			it "should return a NotFoundError", ->
 				@callback
@@ -133,12 +220,12 @@ describe "DocManager", ->
 			beforeEach ->
 				@lines = ["mock", "doc", "lines"]
 				@rev = 77
-				@DocManager.getDoc = sinon.stub().callsArgWith(3, null, {lines: @lines, rev:@rev})
+				@DocManager.checkDocExists = sinon.stub().callsArgWith(2, null, true)
 				@MongoManager.markDocAsDeleted = sinon.stub().callsArg(2)
 				@DocManager.deleteDoc @project_id, @doc_id, @callback
 
 			it "should get the doc", ->
-				@DocManager.getDoc
+				@DocManager.checkDocExists
 					.calledWith(@project_id, @doc_id)
 					.should.equal true
 
@@ -152,9 +239,8 @@ describe "DocManager", ->
 
 		describe "when the doc does not exist", ->
 			beforeEach -> 
-				@DocManager.getDoc = sinon.stub().callsArgWith(3, null, null)
+				@DocManager.checkDocExists = sinon.stub().callsArgWith(2, null, false)
 				@DocManager.deleteDoc @project_id, @doc_id, @callback
-
 
 			it "should return a NotFoundError", ->
 				@callback
@@ -188,16 +274,16 @@ describe "DocManager", ->
 
 			@MongoManager.upsertIntoDocCollection = sinon.stub().callsArg(3)
 			@MongoManager.setDocVersion = sinon.stub().yields()
-			@DocManager.getDoc = sinon.stub()
+			@DocManager._getDoc = sinon.stub()
 
 		describe "when only the doc lines have changed", ->
 			beforeEach ->
-				@DocManager.getDoc = sinon.stub().callsArgWith(3, null, @doc)
+				@DocManager._getDoc = sinon.stub().callsArgWith(3, null, @doc)
 				@DocManager.updateDoc @project_id, @doc_id, @newDocLines, @version, @originalRanges, @callback
 
 			it "should get the existing doc", ->
-				@DocManager.getDoc
-					.calledWith(@project_id, @doc_id, {version: true, rev: true, lines: true, version: true, ranges: true})
+				@DocManager._getDoc
+					.calledWith(@project_id, @doc_id, {version: true, rev: true, lines: true, version: true, ranges: true, inS3:true})
 					.should.equal true
 
 			it "should upsert the document to the doc collection", ->
@@ -213,7 +299,7 @@ describe "DocManager", ->
 
 		describe "when the doc ranges have changed", ->
 			beforeEach ->
-				@DocManager.getDoc = sinon.stub().callsArgWith(3, null, @doc)
+				@DocManager._getDoc = sinon.stub().callsArgWith(3, null, @doc)
 				@RangeManager.shouldUpdateRanges.returns true
 				@DocManager.updateDoc @project_id, @doc_id, @oldDocLines, @version, @newRanges, @callback
 
@@ -230,7 +316,7 @@ describe "DocManager", ->
 
 		describe "when only the version has changed", ->
 			beforeEach ->
-				@DocManager.getDoc = sinon.stub().callsArgWith(3, null, @doc)
+				@DocManager._getDoc = sinon.stub().callsArgWith(3, null, @doc)
 				@DocManager.updateDoc @project_id, @doc_id, @oldDocLines, @version + 1, @originalRanges, @callback
 
 			it "should not change the lines or ranges", ->
@@ -246,7 +332,7 @@ describe "DocManager", ->
 
 		describe "when the doc has not changed at all", ->
 			beforeEach ->
-				@DocManager.getDoc = sinon.stub().callsArgWith(3, null, @doc)
+				@DocManager._getDoc = sinon.stub().callsArgWith(3, null, @doc)
 				@DocManager.updateDoc @project_id, @doc_id, @oldDocLines, @version, @originalRanges, @callback
 
 			it "should not update the ranges or lines", ->
@@ -282,7 +368,7 @@ describe "DocManager", ->
 		describe "when there is a generic error getting the doc", ->
 			beforeEach ->
 				@error =  new Error("doc could not be found")
-				@DocManager.getDoc = sinon.stub().callsArgWith(3, @error, null, null)
+				@DocManager._getDoc = sinon.stub().callsArgWith(3, @error, null, null)
 				@DocManager.updateDoc @project_id, @doc_id, @newDocLines, @version, @originalRanges, @callback
 			
 			it "should not upsert the document to the doc collection", ->
@@ -293,7 +379,7 @@ describe "DocManager", ->
 
 		describe "when the doc lines have not changed", ->
 			beforeEach ->
-				@DocManager.getDoc = sinon.stub().callsArgWith(3, null, @doc)
+				@DocManager._getDoc = sinon.stub().callsArgWith(3, null, @doc)
 				@DocManager.updateDoc @project_id, @doc_id, @oldDocLines.slice(), @version, @originalRanges, @callback
 
 			it "should not update the doc", ->
@@ -304,7 +390,7 @@ describe "DocManager", ->
 
 		describe "when the doc does not exist", ->
 			beforeEach ->
-				@DocManager.getDoc = sinon.stub().callsArgWith(3, null, null, null)
+				@DocManager._getDoc = sinon.stub().callsArgWith(3, null, null, null)
 				@DocManager.updateDoc @project_id, @doc_id, @newDocLines, @version, @originalRanges, @callback
 			
 			it "should upsert the document to the doc collection", ->

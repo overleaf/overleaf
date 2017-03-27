@@ -10,7 +10,7 @@ module.exports = HttpController =
 		doc_id     = req.params.doc_id
 		include_deleted = req.query?.include_deleted == "true"
 		logger.log project_id: project_id, doc_id: doc_id, "getting doc"
-		DocManager.getDoc project_id, doc_id, {lines: true, rev: true, deleted: true, version: true, ranges: true}, (error, doc) ->
+		DocManager.getFullDoc project_id, doc_id, (error, doc) ->
 			return next(error) if error?
 			logger.log doc: doc, "got doc"
 			if !doc?
@@ -24,7 +24,7 @@ module.exports = HttpController =
 		project_id = req.params.project_id
 		doc_id     = req.params.doc_id
 		logger.log project_id: project_id, doc_id: doc_id, "getting raw doc"
-		DocManager.getDoc project_id, doc_id, {lines: true}, (error, doc) ->
+		DocManager.getDocLines project_id, doc_id, (error, doc) ->
 			return next(error) if error?
 			if !doc?
 				res.send 404

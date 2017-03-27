@@ -6,11 +6,16 @@ DocArchive = require "./DocArchiveManager"
 RangeManager = require "./RangeManager"
 
 module.exports = DocManager =
+	
+
 	# TODO: For historical reasons, the doc version is currently stored in the docOps
 	# collection (which is all that this collection contains). In future, we should
 	# migrate this version property to be part of the docs collection, to guarantee
 	# consitency between lines and version when writing/reading, and for a simpler schema.
-	getDoc: (project_id, doc_id, filter = { version: false }, callback = (error, doc) ->) ->
+	_getDoc: (project_id, doc_id, filter = {}, callback = (error, doc) ->) ->
+		if filter.inS3 != true
+			return callback("must include inS3 when getting doc")
+
 		MongoManager.findDoc project_id, doc_id, filter, (err, doc)->
 			if err?
 				return callback(err)
@@ -21,7 +26,7 @@ module.exports = DocManager =
 					if err?
 						logger.err err:err, project_id:project_id, doc_id:doc_id, "error unarchiving doc"
 						return callback(err)
-					DocManager.getDoc project_id, doc_id, filter, callback
+					DocManager._getDoc project_id, doc_id, filter, callback
 			else
 				if filter.version
 					MongoManager.getDocVersion doc_id, (error, version) ->
@@ -30,6 +35,25 @@ module.exports = DocManager =
 						callback err, doc
 				else
 					callback err, doc
+
+	checkDocExists: (project_id, doc_id, callback = (err, exists)->)->
+		DocManager._getDoc project_id, doc_id, {_id:1, inS3:true}, (err, doc)->
+			if err?
+				return callback(err)
+			callback(err, doc?)
+
+	getFullDoc: (project_id, doc_id, callback = (err, doc)->)->
+		DocManager._getDoc project_id, doc_id, {lines: true, rev: true, deleted: true, version: true, ranges: true, inS3:true}, (err, doc)->
+			if err? 
+				return callback(err)
+			callback(err, doc)
+
+
+	getDocLines: (project_id, doc_id, callback = (err, doc)->)->
+		DocManager._getDoc project_id, doc_id, {lines:true, inS3:true}, (err, doc)->
+			if err?
+				return callback(err)
+			callback(err, doc)
 
 	getAllNonDeletedDocs: (project_id, filter, callback = (error, docs) ->) ->
 		DocArchive.unArchiveAllDocs project_id, (error) ->
@@ -47,7 +71,7 @@ module.exports = DocManager =
 		if !lines? or !version? or !ranges?
 			return callback(new Error("no lines, version or ranges provided"))
 	
-		DocManager.getDoc project_id, doc_id, {version: true, rev: true, lines: true, version: true, ranges: true}, (err, doc)->
+		DocManager._getDoc project_id, doc_id, {version: true, rev: true, lines: true, version: true, ranges: true, inS3:true}, (err, doc)->
 			if err? and !(err instanceof Errors.NotFoundError)
 				logger.err project_id: project_id, doc_id: doc_id, err:err, "error getting document for update"
 				return callback(err)
@@ -99,8 +123,8 @@ module.exports = DocManager =
 					callback null, modified, rev
 
 	deleteDoc: (project_id, doc_id, callback = (error) ->) ->
-		DocManager.getDoc project_id, doc_id, { version: false }, (error, doc) ->
+		DocManager.checkDocExists project_id, doc_id, (error, exists) ->
 			return callback(error) if error?
-			return callback new Errors.NotFoundError("No such project/doc to delete: #{project_id}/#{doc_id}") if !doc?
+			return callback new Errors.NotFoundError("No such project/doc to delete: #{project_id}/#{doc_id}") if !exists
 			MongoManager.markDocAsDeleted project_id, doc_id, callback
 
