@@ -30,6 +30,7 @@ module.exports = DocumentUpdaterManager =
 				lines: content.split("\n")
 				source: "restore"
 				user_id: user_id
+				undoing: true
 		}, (error, res, body)->
 			if error?
 				return callback(error)
