@@ -16,6 +16,15 @@ makeRequest = (opts, callback)->
 
 module.exports =
 
+	identifyUser: (user_id, old_user_id, callback = (error)->)->
+		opts =
+			body:
+				old_user_id:old_user_id
+			json:true
+			method:"POST"
+			timeout:1000
+			url: "/user/#{user_id}/identify"
+		makeRequest opts, callback
 
 	recordEvent: (user_id, event, segmentation = {}, callback = (error) ->) ->
 		if user_id+"" == settings.smokeTest?.userId+""
