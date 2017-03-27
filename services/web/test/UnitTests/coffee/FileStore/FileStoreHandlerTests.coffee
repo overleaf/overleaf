@@ -17,8 +17,8 @@ describe "FileStoreHandler", ->
 		@writeStream =
 			my:"writeStream"
 			on: (type, cb)-> 
-				if type == "end"
-					cb()
+				if type == "response"
+					cb({statusCode: 200})
 		@readStream = {my:"readStream", on: sinon.stub()}
 		@request = sinon.stub()
 		@settings = apis:{filestore:{url:"http//filestore.sharelatex.test"}}
@@ -79,11 +79,38 @@ describe "FileStoreHandler", ->
 				@handler._buildUrl.calledWith(@project_id, @file_id).should.equal true
 				done()
 
+		it 'should callback with null', (done) ->
+			@fs.createReadStream.returns
+				pipe:->
+				on: (type, cb)->
+					if type == "end"
+						cb()
+			@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, (err) =>
+				expect(err).to.not.exist
+				done()
+
 		describe "symlink", ->
 			it "should not read file if it is symlink", (done)->
 				@isSafeOnFileSystem = false
 				@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, =>
 					@fs.createReadStream.called.should.equal false
+					done()
+
+		describe "when upload fails", ->
+			beforeEach ->
+				@writeStream.on = (type, cb) ->
+					if type == "response"
+						cb({statusCode: 500})
+
+			it 'should callback with an error', (done) ->
+				@fs.createReadStream.returns
+					pipe:->
+					on: (type, cb)->
+						if type == "end"
+							cb()
+				@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, (err) =>
+					expect(err).to.exist
+					expect(err).to.be.instanceof Error
 					done()
 
 	describe "deleteFile", ->

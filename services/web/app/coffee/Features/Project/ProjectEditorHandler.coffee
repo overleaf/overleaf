@@ -1,6 +1,8 @@
 _ = require("underscore")
 
 module.exports = ProjectEditorHandler =
+	trackChangesAvailable: false
+
 	buildProjectModelView: (project, members, invites) ->
 		result =
 			_id        : project._id
@@ -20,11 +22,6 @@ module.exports = ProjectEditorHandler =
 		if !result.invites?
 			result.invites = []
 			
-		trackChangesVisible = false
-		for member in members
-			if member.privilegeLevel == "owner" and (member.user?.featureSwitches?.track_changes or member.user?.betaProgram)
-				trackChangesVisible = true
-
 		{owner, ownerFeatures, members} = @buildOwnerAndMembersViews(members)
 		result.owner = owner
 		result.members = members
@@ -38,7 +35,7 @@ module.exports = ProjectEditorHandler =
 			templates: false
 			references: false
 			trackChanges: false
-			trackChangesVisible: trackChangesVisible
+			trackChangesVisible: ProjectEditorHandler.trackChangesAvailable
 		})
 
 		return result

@@ -353,11 +353,17 @@ define [
 				@ranges.applyOp op, { user_id: track_changes_as }
 			if old_id_seed?
 				@ranges.setIdSeed(old_id_seed)
+			if remote_op
+				# With remote ops, Ace hasn't been updated when we receive this op,
+				# so defer updating track changes until it has
+				setTimeout () => @emit "ranges:dirty"
+			else
+				@emit "ranges:dirty"
 		
 		_catchUpRanges: (changes = [], comments = []) ->
 			# We've just been given the current server's ranges, but need to apply any local ops we have.
 			# Reset to the server state then apply our local ops again.
-			@ranges.emit "clear"
+			@emit "ranges:clear"
 			@ranges.changes = changes
 			@ranges.comments = comments
 			@ranges.track_changes = @doc.track_changes
@@ -367,4 +373,4 @@ define [
 			for op in @doc.getPendingOp() or []
 				@ranges.setIdSeed(@doc.track_changes_id_seeds.pending)
 				@ranges.applyOp(op, { user_id: @track_changes_as })
-			@ranges.emit "redraw"
+			@emit "ranges:redraw"

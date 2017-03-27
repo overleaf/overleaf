@@ -1,10 +1,18 @@
-#review-panel
+.rp-in-editor-widgets
 	a.rp-track-changes-indicator(
 		href
 		ng-if="editor.wantTrackChanges"
 		ng-click="toggleReviewPanel();"
 		ng-class="{ 'rp-track-changes-indicator-on-dark' : darkTheme }"
 	) !{translate("track_changes_is_on")}
+	a.rp-add-comment-btn(
+		href
+		ng-if="reviewPanel.newAddCommentUI && reviewPanel.entries[editor.open_doc_id]['add-comment'] != null"
+		ng-click="addNewComment();"
+	) 
+		i.fa.fa-comment
+		| &nbsp;#{translate("add_comment")}
+#review-panel
 	.review-panel-toolbar
 		resolved-comments-dropdown(
 			class="rp-flex-block"
@@ -314,7 +322,7 @@ script(type='text/ng-template', id='resolvedCommentEntryTemplate')
 script(type='text/ng-template', id='addCommentEntryTemplate')
 	div
 		.rp-entry-callout.rp-entry-callout-add-comment
-		.rp-entry-indicator(
+		.rp-entry-indicator.rp-entry-indicator-add-comment(
 			ng-if="!commentState.adding"
 			ng-click="startNewComment(); onIndicatorClick();"
 			tooltip=translate("add_comment")
@@ -340,10 +348,10 @@ script(type='text/ng-template', id='addCommentEntryTemplate')
 						ng-keypress="handleCommentKeyPress($event);"
 						placeholder=translate("add_your_comment_here")
 						focus-on="comment:new:open"
-						ng-blur="submitNewComment()"
+						ng-blur="submitNewComment($event)"
 					)
 				.rp-entry-actions
-					button.rp-entry-button(
+					button.rp-entry-button.rp-entry-button-cancel(
 						ng-click="cancelNewComment();"
 					) 
 						i.fa.fa-times
