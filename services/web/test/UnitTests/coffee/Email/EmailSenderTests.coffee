@@ -51,17 +51,19 @@ describe "EmailSender", ->
 		it "should set the properties on the email to send", (done)->
 			@sesClient.sendMail.callsArgWith(1)
 
-			@sender.sendEmail @opts, =>
+			@sender.sendEmail @opts, (err) =>
+				expect(err).to.not.exist
 				args = @sesClient.sendMail.args[0][0]
 				args.html.should.equal @opts.html
 				args.to.should.equal @opts.to
 				args.subject.should.equal @opts.subject
 				done()
 
-		it "should return the error", (done)->
+		it "should return a non-specific error", (done)->
 			@sesClient.sendMail.callsArgWith(1, "error")
 			@sender.sendEmail {}, (err)=>
-				err.should.equal "error"
+				err.should.exist
+				err.toString().should.equal 'Error: Cannot send email'
 				done()
 
 
