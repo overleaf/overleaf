@@ -469,33 +469,35 @@ module.exports = RecurlyWrapper =
 				logger.err err:error,  subscriptionId:subscriptionId, daysUntilExpire:daysUntilExpire,  "error exending trial"
 			callback(error)
 		)
+	
+	listAccountActiveSubscriptions: (account_id, callback = (error, subscriptions) ->) ->
+		RecurlyWrapper.apiRequest {
+			url: "accounts/#{account_id}/subscriptions"
+			qs:
+				state: "active"
+		}, (error, response, body) ->
+			return callback(error) if error?
+			RecurlyWrapper._parseSubscriptionsXml body, callback
+
+	_parseSubscriptionsXml: (xml, callback) ->
+		RecurlyWrapper._parseXmlAndGetAttribute xml, "subscriptions", callback
 
 	_parseSubscriptionXml: (xml, callback) ->
-		RecurlyWrapper._parseXml xml, (error, data) ->
-			return callback(error) if error?
-			if data? and data.subscription?
-				recurlySubscription = data.subscription
-			else
-				return callback "I don't understand the response from Recurly"
-			callback null, recurlySubscription
+		RecurlyWrapper._parseXmlAndGetAttribute xml, "subscription", callback
 
 	_parseAccountXml: (xml, callback) ->
-		RecurlyWrapper._parseXml xml, (error, data) ->
-			return callback(error) if error?
-			if data? and data.account?
-				account = data.account
-			else
-				return callback "I don't understand the response from Recurly"
-			callback null, account
+		RecurlyWrapper._parseXmlAndGetAttribute xml, "account", callback
 
 	_parseBillingInfoXml: (xml, callback) ->
+		RecurlyWrapper._parseXmlAndGetAttribute xml, "billing_info", callback
+
+	_parseXmlAndGetAttribute: (xml, attribute, callback) ->
 		RecurlyWrapper._parseXml xml, (error, data) ->
 			return callback(error) if error?
-			if data? and data.billing_info?
-				billingInfo = data.billing_info
+			if data? and data[attribute]?
+				return callback null, data[attribute]
 			else
-				return callback "I don't understand the response from Recurly"
-			callback null, billingInfo
+				return callback(new Error("I don't understand the response from Recurly"))
 
 	_parseXml: (xml, callback) ->
 		convertDataTypes = (data) ->

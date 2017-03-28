@@ -11,15 +11,28 @@ Analytics = require("../Analytics/AnalyticsManager")
 
 
 module.exports =
+	validateNoSubscriptionInRecurly: (user_id, callback = (error, valid) ->) ->
+		RecurlyWrapper.listAccountActiveSubscriptions user_id, (error, subscriptions = []) ->
+			return callback(error) if error?
+			if subscriptions.length > 0
+				SubscriptionUpdater.syncSubscription subscriptions[0], user_id, (error) ->
+					return callback(error) if error?
+					return callback(null, false)
+			else
+				return callback(null, true)
 
 	createSubscription: (user, subscriptionDetails, recurly_token_id, callback)->
 		self = @
 		clientTokenId = ""
-		RecurlyWrapper.createSubscription user, subscriptionDetails, recurly_token_id, (error, recurlySubscription)->
+		@validateNoSubscriptionInRecurly user._id, (error, valid) ->
 			return callback(error) if error?
-			SubscriptionUpdater.syncSubscription recurlySubscription, user._id, (error) ->
+			if !valid
+				return callback(new Error("user already has subscription in recurly"))
+			RecurlyWrapper.createSubscription user, subscriptionDetails, recurly_token_id, (error, recurlySubscription)->
 				return callback(error) if error?
-				callback()
+				SubscriptionUpdater.syncSubscription recurlySubscription, user._id, (error) ->
+					return callback(error) if error?
+					callback()
 
 	updateSubscription: (user, plan_code, coupon_code, callback)->
 		logger.log user:user, plan_code:plan_code, coupon_code:coupon_code, "updating subscription"
