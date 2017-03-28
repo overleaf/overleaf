@@ -5,14 +5,16 @@ logger = require("logger-sharelatex")
 tpdsUpdateSender = require '../ThirdPartyDataStore/TpdsUpdateSender'
 _ = require("underscore")
 PublicAccessLevels = require("../Authorization/PublicAccessLevels")
+Errors = require("../Errors/Errors")
 
 module.exports = 
 
 	getDetails: (project_id, callback)->
 		ProjectGetter.getProject project_id, {name:true, description:true, compiler:true, features:true, owner_ref:true}, (err, project)->
-			if err? or !project?
+			if err?
 				logger.err err:err, project_id:project_id, "error getting project"
 				return callback(err)
+			return callback(new Errors.NotFoundError("project not found")) if !project?
 			UserGetter.getUser project.owner_ref, (err, user) ->
 				return callback(err) if err?
 				details =
