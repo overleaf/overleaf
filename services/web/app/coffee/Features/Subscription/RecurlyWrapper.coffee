@@ -475,9 +475,13 @@ module.exports = RecurlyWrapper =
 			url: "accounts/#{account_id}/subscriptions"
 			qs:
 				state: "active"
+			expect404: true
 		}, (error, response, body) ->
 			return callback(error) if error?
-			RecurlyWrapper._parseSubscriptionsXml body, callback
+			if response.statusCode == 404
+				return callback null, []
+			else
+				RecurlyWrapper._parseSubscriptionsXml body, callback
 
 	_parseSubscriptionsXml: (xml, callback) ->
 		RecurlyWrapper._parseXmlAndGetAttribute xml, "subscriptions", callback
