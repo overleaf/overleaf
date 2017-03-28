@@ -288,18 +288,11 @@ define [
 
 			delete entries["add-comment"]
 			if selection
-				# Only show add comment if we're not already overlapping one
-				overlapping_comment = false
-				for id, entry of entries
-					if entry.type == "comment" and not $scope.reviewPanel.resolvedThreadIds[entry.thread_id]
-						unless entry.offset >= selection_offset_end or entry.offset + entry.content.length <= selection_offset_start
-							overlapping_comment = true
-				if !overlapping_comment
-					entries["add-comment"] = {
-						type: "add-comment"
-						offset: selection_offset_start
-						length: selection_offset_end - selection_offset_start
-					}
+				entries["add-comment"] = {
+					type: "add-comment"
+					offset: selection_offset_start
+					length: selection_offset_end - selection_offset_start
+				}
 			
 			for id, entry of entries
 				if entry.type == "comment" and not $scope.reviewPanel.resolvedThreadIds[entry.thread_id]
