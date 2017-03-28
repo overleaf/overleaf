@@ -10,7 +10,7 @@ module.exports =
 
 	getDetails: (project_id, callback)->
 		ProjectGetter.getProject project_id, {name:true, description:true, compiler:true, features:true, owner_ref:true}, (err, project)->
-			if err?
+			if err? or !project?
 				logger.err err:err, project_id:project_id, "error getting project"
 				return callback(err)
 			UserGetter.getUser project.owner_ref, (err, user) ->

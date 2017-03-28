@@ -48,6 +48,13 @@ describe 'ProjectDetailsHandler', ->
 				assert.equal(details.something, undefined)
 				done()
 
+		it "should return an error for a non-existent project", (done)->
+			@ProjectGetter.getProject.callsArg(2, null, null)
+			@handler.getDetails "0123456789012345678901234", (err, details)=>
+				assert.equal(err, undefined)
+				assert.equal(details, undefined)
+				done()
+
 		it "should return the error", (done)->
 			error = "some error"
 			@ProjectGetter.getProject.callsArgWith(2, error)
