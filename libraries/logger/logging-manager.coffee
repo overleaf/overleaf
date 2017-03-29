@@ -71,9 +71,9 @@ module.exports = Logger =
 				@lastErrorCount = 0
 				@lastErrorTimeStamp = now
 			# only report 5 errors every minute to avoid overload
-			if @lastErrorCount <= MAX_ERRORS
+			if @lastErrorCount < MAX_ERRORS
 				# add a note if the rate limit has been hit
-				note = if @lastErrorCount is MAX_ERRORS then "(rate limited)" else ""
+				note = if @lastErrorCount+1 is MAX_ERRORS then "(rate limited)" else ""
 				# report the exception
 				@captureException(attributes, message, "error#{note}")
 	err: () ->
