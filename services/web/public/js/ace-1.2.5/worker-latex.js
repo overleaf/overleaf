@@ -1931,7 +1931,7 @@ var InterpretTokens = function (TokeniseResult, ErrorReporter) {
                 if (newPos === null) { continue; } else {i = newPos;};
             } else if (seq === "hbox" || seq === "text" || seq === "mbox" || seq === "footnote" || seq === "intertext" || seq === "shortintertext" || seq === "textnormal" || seq === "tag" || seq === "reflectbox" || seq === "textrm") {
                 nextGroupMathMode = false;
-            } else if (seq === "rotatebox" || seq === "scalebox") {
+            } else if (seq === "rotatebox" || seq === "scalebox"  || seq == "feynmandiagram") {
                 newPos = readOptionalGeneric(TokeniseResult, i);
                 if (newPos === null) { /* do nothing */ } else {i = newPos;};
                 newPos = readDefinition(TokeniseResult, i);
@@ -2179,7 +2179,7 @@ var EnvHandler = function (ErrorReporter) {
     this._beginMathMode = function (thisEnv) {
         var currentMathMode = this.getMathMode(); // undefined, null, $, $$, name of mathmode env
         if (currentMathMode) {
-            ErrorFrom(thisEnv, thisEnv.name + " used inside existing math mode " + getName(currentMathMode),
+            ErrorFrom(thisEnv, getName(thisEnv) + " used inside existing math mode " + getName(currentMathMode),
                       {suppressIfEditing:true, errorAtStart: true, mathMode:true});
         };
         thisEnv.mathMode = thisEnv;
