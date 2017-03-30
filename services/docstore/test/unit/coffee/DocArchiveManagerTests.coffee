@@ -134,6 +134,14 @@ describe "DocArchiveManager", ->
 				should.exist err
 				done()
 
+		it "should error if the doc lines are a string not an array", (done)->
+			@request.get = sinon.stub().callsArgWith(1, null, statusCode:200, "this is a string")
+			@request.del = sinon.stub()
+			@DocArchiveManager.unarchiveDoc @project_id, @mongoDocs[0], (err)=>
+				should.exist err
+				@request.del.called.should.equal false
+				done()
+
 	describe "archiveAllDocs", ->
 
 		it "should archive all project docs which are not in s3", (done)->

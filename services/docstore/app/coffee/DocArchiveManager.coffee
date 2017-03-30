@@ -84,7 +84,7 @@ module.exports = DocArchive =
 							logger.err err:err, res:res, project_id:project_id, doc_id:doc_id, "something went wrong deleting doc from aws"
 							return callback new Errors.NotFoundError("Error in S3 request")
 						callback()
-	
+
 	_s3DocToMongoDoc: (doc, callback = (error, mongo_doc) ->) ->
 		mongo_doc = {}
 		if doc.schema_v == 1 and doc.lines?

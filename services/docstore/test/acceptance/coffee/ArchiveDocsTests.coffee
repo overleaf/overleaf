@@ -33,7 +33,7 @@ describe "Archiving", ->
 				throw error if error?
 				DocstoreClient.archiveAllDoc @project_id, (error, @res) =>
 					done()
-		
+
 		it "should archive all the docs", (done) ->
 			@res.statusCode.should.equal 204
 			done()
@@ -384,3 +384,4 @@ describe "Archiving", ->
 		it "should return the doc", (done) ->
 			@fetched_docs[0].lines.should.deep.equal @doc.lines
 			done()
+
