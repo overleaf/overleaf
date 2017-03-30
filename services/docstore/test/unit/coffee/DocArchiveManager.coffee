@@ -71,6 +71,7 @@ describe "DocArchiveManager", ->
 			"settings-sharelatex": @settings
 			"./MongoManager": @MongoManager
 			"request": @request
+			"./RangeManager": @RangeManager = {}
 			"logger-sharelatex":
 				log:->
 				err:->
@@ -87,13 +88,22 @@ describe "DocArchiveManager", ->
 			@DocArchiveManager.archiveDoc @project_id, @mongoDocs[0], (err)=>
 				opts = @request.put.args[0][0]
 				assert.deepEqual(opts.aws, {key:@settings.docstore.s3.key, secret:@settings.docstore.s3.secret, bucket:@settings.docstore.s3.bucket})
-				opts.json.should.equal @mongoDocs[0].lines
+				opts.body.should.equal JSON.stringify(
+					lines: @mongoDocs[0].lines
+					ranges: @mongoDocs[0].ranges
+					schema_v: 1
+				)
 				opts.timeout.should.equal (30*1000)
 				opts.uri.should.equal "https://#{@settings.docstore.s3.bucket}.s3.amazonaws.com/#{@project_id}/#{@mongoDocs[0]._id}"
 				done()
 
 		it "should return no md5 error", (done)->
-			@md5 = crypto.createHash("md5").update(JSON.stringify(@mongoDocs[0].lines)).digest("hex")
+			data = JSON.stringify(
+				lines: @mongoDocs[0].lines
+				ranges: @mongoDocs[0].ranges
+				schema_v: 1
+			)
+			@md5 = crypto.createHash("md5").update(data).digest("hex")
 			@request.put = sinon.stub().callsArgWith(1,  null, {statusCode:200,headers:{etag:@md5}})
 			@DocArchiveManager.archiveDoc @project_id, @mongoDocs[0], (err)=>
 				should.not.exist err

@@ -16,16 +16,21 @@ module.exports = RangeManager =
 	
 	jsonRangesToMongo: (ranges) ->
 		return null if !ranges?
+		
+		updateMetadata = (metadata) ->
+			if metadata?.ts?
+				metadata.ts = new Date(metadata.ts)
+			if metadata?.user_id?
+				metadata.user_id = RangeManager._safeObjectId(metadata.user_id)
+		
 		for change in ranges.changes or []
-			change.id = @_safeObjectId(change.id)
-			if change.metadata?.ts?
-				change.metadata.ts = new Date(change.metadata.ts)
-			if change.metadata?.user_id?
-				change.metadata.user_id = @_safeObjectId(change.metadata.user_id)
+			change.id = RangeManager._safeObjectId(change.id)
+			updateMetadata(change.metadata)
 		for comment in ranges.comments or []
-			comment.id = @_safeObjectId(comment.id)
+			comment.id = RangeManager._safeObjectId(comment.id)
 			if comment.op?.t?
-				comment.op.t = @_safeObjectId(comment.op.t)
+				comment.op.t = RangeManager._safeObjectId(comment.op.t)
+			updateMetadata(comment.metadata)
 		return ranges
 	
 	_safeObjectId: (data) ->

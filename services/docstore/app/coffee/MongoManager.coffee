@@ -42,6 +42,7 @@ module.exports = MongoManager =
 			$unset: {}
 		update.$set["inS3"] = true
 		update.$unset["lines"] = true
+		update.$unset["ranges"] = true
 		query =
 			_id: doc_id
 			rev: rev
