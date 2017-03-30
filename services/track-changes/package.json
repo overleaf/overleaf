@@ -15,7 +15,7 @@
     "line-reader": "^0.2.4",
     "mongojs": "^1.4.1",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
-    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.0",
+    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.6",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.5.0",
     "request": "~2.33.0",
     "redis-sharelatex": "~0.0.9",
