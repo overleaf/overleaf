@@ -11,7 +11,7 @@
     "coffee-script": "1.4.0",
     "express": "3.3.4",
     "ioredis": "^2.2.0",
-    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.4",
+    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.6",
     "lynx": "0.0.11",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.5.0",
     "redis-sharelatex": "0.0.9",
