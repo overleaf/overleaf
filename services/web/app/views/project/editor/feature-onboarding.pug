@@ -32,7 +32,7 @@
 					autoplay
 					loop
 				)
-					source(src="/img/onboarding/review-panel/open-review.mp4", type="video/mp4")
+					source(ng-src="{{ '/img/onboarding/review-panel/open-review.mp4' }}", type="video/mp4")
 					img(src="/img/onboarding/review-panel/open-review.gif")
 			div(ng-show="onboarding.innerStep === 2;")
 				video.feat-onboard-video(
@@ -40,7 +40,7 @@
 					autoplay
 					loop
 				)
-					source(src="/img/onboarding/review-panel/commenting.mp4", type="video/mp4")
+					source(ng-src="{{ '/img/onboarding/review-panel/commenting.mp4' }}", type="video/mp4")
 					img(src="/img/onboarding/review-panel/commenting.gif")
 			div(ng-show="onboarding.innerStep === 3;")
 				video.feat-onboard-video(
@@ -48,7 +48,7 @@
 					autoplay
 					loop
 				)
-					source(src="/img/onboarding/review-panel/add-changes.mp4", type="video/mp4")
+					source(ng-src="{{ '/img/onboarding/review-panel/add-changes.mp4' }}", type="video/mp4")
 					img(src="/img/onboarding/review-panel/add-changes.gif")
 			div(ng-show="onboarding.innerStep === 4;")
 				video.feat-onboard-video(
@@ -56,7 +56,7 @@
 					autoplay
 					loop
 				)
-					source(src="/img/onboarding/review-panel/accept-changes.mp4", type="video/mp4")
+					source(ng-src="{{ '/img/onboarding/review-panel/accept-changes.mp4' }}", type="video/mp4")
 					img(src="/img/onboarding/review-panel/accept-changes.gif")
 			button.btn.btn-primary.feat-onboard-nav-btn(
 				ng-click="gotoNextStep();"
