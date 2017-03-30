@@ -16,6 +16,13 @@ module.exports = UpdatesManager =
 		if length == 0
 			return callback()
 
+		# check that ops are in the correct order
+		for op, i in rawUpdates when i > 0
+			thisVersion = op?.v
+			prevVersion = rawUpdates[i-1]?.v
+			if not (prevVersion < thisVersion)
+				logger.error project_id: project_id, doc_id: doc_id, rawUpdates:rawUpdates, temporary: temporary, thisVersion:thisVersion, prevVersion:prevVersion, "op versions out of order"
+
 		# FIXME: we no longer need the lastCompressedUpdate, so change functions not to need it
 		# CORRECTION:  we do use it to log the time in case of error
 		MongoManager.peekLastCompressedUpdate doc_id, (error, lastCompressedUpdate, lastVersion) ->
