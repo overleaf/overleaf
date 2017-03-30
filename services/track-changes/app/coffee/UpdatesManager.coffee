@@ -22,8 +22,6 @@ module.exports = UpdatesManager =
 			prevVersion = rawUpdates[i-1]?.v
 			if not (prevVersion < thisVersion)
 				logger.error project_id: project_id, doc_id: doc_id, rawUpdates:rawUpdates, temporary: temporary, thisVersion:thisVersion, prevVersion:prevVersion, "op versions out of order"
-				# TODO try to recover by sorting the ops
-				return callback(new Error("incoming op versions out of order"))
 
 		# FIXME: we no longer need the lastCompressedUpdate, so change functions not to need it
 		# CORRECTION:  we do use it to log the time in case of error

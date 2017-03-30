@@ -144,7 +144,7 @@ describe "UpdatesManager", ->
 
 				it "should call the callback with an error", ->
 					@callback
-						.calledWith(new Error("incoming op versions out of order"))
+						.calledWith(new Error)
 						.should.equal true
 
 				it "should not insert any update into mongo", ->
