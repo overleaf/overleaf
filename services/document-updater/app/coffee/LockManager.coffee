@@ -41,7 +41,7 @@ module.exports = LockManager =
 				logger.log {doc_id}, "doc is locked"
 				callback err, false
 
-	getLock: (doc_id, callback = (error) ->) ->
+	getLock: (doc_id, callback = (error, lockValue) ->) ->
 		startTime = Date.now()
 		do attempt = () ->
 			if Date.now() - startTime > LockManager.MAX_LOCK_WAIT_TIME
