@@ -137,6 +137,20 @@ describe "UpdatesManager", ->
 				it "should not insert any update into mongo", ->
 					@PackManager.insertCompressedUpdates.called.should.equal false
 
+			describe "when the raw ops are out of order", ->
+				beforeEach ->
+					@rawUpdates = [{ v: 13, op: "mock-op-13" }, { v: 12, op: "mock-op-12" }]
+					@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, @rawUpdates, @temporary, @callback
+
+				it "should call the callback with an error", ->
+					@callback
+						.calledWith(new Error("incoming op versions out of order"))
+						.should.equal true
+
+				it "should not insert any update into mongo", ->
+					@PackManager.insertCompressedUpdates.called.should.equal false
+
+
 		describe "when the raw ops need appending to existing history which is in S3", ->
 			beforeEach ->
 				@lastCompressedUpdate = null
