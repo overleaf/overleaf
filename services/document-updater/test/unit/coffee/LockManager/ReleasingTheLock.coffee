@@ -8,21 +8,36 @@ doc_id     = 5678
 SandboxedModule = require('sandboxed-module')
 
 describe 'LockManager - releasing the lock', ()->
+	beforeEach ->
+		@client = {
+			auth: ->
+			eval: sinon.stub()
+		}
+		mocks =
+			"logger-sharelatex":
+				log:->
+				error:->
+			"redis-sharelatex":
+				createClient : () => @client
+			"./Metrics": {inc: () ->}
+		@LockManager = SandboxedModule.require(modulePath, requires: mocks)
+		@lockValue = "lock-value-stub"
 
-	evalStub = sinon.stub().yields(1)
-	mocks =
-		"logger-sharelatex": log:->
-		"redis-sharelatex":
-			createClient : ()->
-				auth:->
-				eval: evalStub
-		"./Metrics": {inc: () ->}
-	
-	LockManager = SandboxedModule.require(modulePath, requires: mocks)
+	describe "when the lock is current", ->
+		beforeEach ->
+			@client.eval = sinon.stub().yields(null, 1)
+			@LockManager.releaseLock doc_id, @lockValue, @callback
 
-	it 'should put a all data into memory', (done)->
-		lockValue = "lock-value-stub"
-		LockManager.releaseLock doc_id, lockValue, ->
-			evalStub.calledWith(LockManager.unlockScript, 1, "Blocking:#{doc_id}", lockValue).should.equal true
-			done()
+		it 'should clear the data from redis', ->
+			@client.eval.calledWith(@LockManager.unlockScript, 1, "Blocking:#{doc_id}", @lockValue).should.equal true
 
+		it 'should call the callback', ->
+			@callback.called.should.equal true
+
+	describe "when the lock has expired", ->
+		beforeEach ->
+			@client.eval = sinon.stub().yields(null, 0)
+			@LockManager.releaseLock doc_id, @lockValue, @callback
+
+		it 'should return an error if the lock has expired', ->
+			@callback.calledWith(new Error("tried to release timed out lock")).should.equal true

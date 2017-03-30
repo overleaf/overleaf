@@ -70,6 +70,10 @@ module.exports = LockManager =
 
 	releaseLock: (doc_id, lockValue, callback)->
 		key = keys.blockingKey(doc_id:doc_id)
-		rclient.eval LockManager.unlockScript, 1, key, lockValue, callback
-
-	
+		rclient.eval LockManager.unlockScript, 1, key, lockValue, (err, result) ->
+			if err?
+				return callback(err)
+			if result? and result isnt 1 # successful unlock should release exactly one key
+				logger.error {doc_id:doc_id, lockValue:lockValue, redis_err:err, redis_result:result}, "unlocking error"
+				return callback(new Error("tried to release timed out lock"))
+			callback(err,result)
