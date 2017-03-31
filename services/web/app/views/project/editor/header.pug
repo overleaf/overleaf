@@ -30,6 +30,10 @@ header.toolbar.toolbar-header.toolbar-with-labels(
 		span.name(
 			ng-dblclick="!permissions.admin || startRenaming()",
 			ng-show="!state.renaming"
+			tooltip="{{ project.name }}",
+			tooltip-class="project-name-tooltip"
+			tooltip-placement="bottom",
+			tooltip-append-to-body="true",
 		) {{ project.name }}
 
 		input.form-control(
