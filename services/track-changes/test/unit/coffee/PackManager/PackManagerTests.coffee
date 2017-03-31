@@ -20,6 +20,7 @@ describe "PackManager", ->
 			"./LockManager" : {}
 			"./MongoAWS": {}
 			"logger-sharelatex": { log: sinon.stub(), error: sinon.stub() }
+			'./Metrics': {inc: ()->}
 		@callback = sinon.stub()
 		@doc_id = ObjectId().toString()
 		@project_id = ObjectId().toString()
