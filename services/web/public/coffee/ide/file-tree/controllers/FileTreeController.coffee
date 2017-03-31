@@ -93,7 +93,6 @@ define [
 				if !name? or name.length == 0
 					return
 				$scope.state.inflight = true
-				$scope.state.inflight = true
 				ide.fileTreeManager
 					.createFolder(name, parent_folder)
 					.error (e)->
