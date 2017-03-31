@@ -21,6 +21,7 @@ describe "UserCreator", ->
 			"../../models/User": User:@UserModel
 			"./UserLocator":@UserLocator
 			"logger-sharelatex":{log:->}
+			'../../infrastructure/Metrics': {timeAsyncMethod: ()->}
 
 		@email = "bob.oswald@gmail.com"
 
