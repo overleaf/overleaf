@@ -4,7 +4,7 @@ define [
 	"ide/colors/ColorManager"
 	"ide/review-panel/RangesTracker"
 ], (App, EventEmitter, ColorManager, RangesTracker) ->
-	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout, $http, $modal, event_tracking, localStorage) ->
+	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout, $http, $modal, event_tracking, sixpack, localStorage) ->
 		$reviewPanelEl = $element.find "#review-panel"
 
 		$scope.SubViews =
@@ -27,6 +27,14 @@ define [
 			layoutToLeft: false
 			rendererData: {}
 			loadingThreads: false
+			newAddCommentUI: false # Test new UI for adding comments; remove afterwards.
+
+		$scope.shouldABAddCommentBtn = false
+		if $scope.user.signUpDate >= '2017-03-27'
+			sixpack.participate "add-comment-btn", [ "default", "editor-corner" ], (variation) ->
+				$scope.shouldABAddCommentBtn = true
+				$scope.variationABAddCommentBtn = variation
+				$scope.reviewPanel.newAddCommentUI = (variation == "editor-corner")
 
 		window.addEventListener "beforeunload", () ->
 			collapsedStates = {}
@@ -163,7 +171,11 @@ define [
 
 		$scope.$watch (() ->
 			entries = $scope.reviewPanel.entries[$scope.editor.open_doc_id] or {}
-			Object.keys(entries).length
+			permEntries = {}
+			for entry, entryData of entries
+				if entry != "add-comment" or !$scope.reviewPanel.newAddCommentUI
+					permEntries[entry] = entryData 
+			Object.keys(permEntries).length
 		), (nEntries) ->
 			$scope.reviewPanel.hasEntries = nEntries > 0 and $scope.project.features.trackChangesVisible
 
@@ -323,11 +335,17 @@ define [
 			$scope.$broadcast "change:reject", entry_id
 			event_tracking.sendMB "rp-change-rejected", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
 		
+		$scope.addNewComment = () ->
+			$scope.$broadcast "comment:start_adding"
+			$scope.toggleReviewPanel()
+
 		$scope.startNewComment = () ->
 			$scope.$broadcast "comment:select_line"
 			$timeout () ->
 				$scope.$broadcast "review-panel:layout"
-		
+			if $scope.shouldABAddCommentBtn and !$scope.ui.reviewPanelOpen
+				sixpack.convert "add-comment-btn"
+
 		$scope.submitNewComment = (content) ->
 			return if !content? or content == ""
 			doc_id = $scope.editor.open_doc_id

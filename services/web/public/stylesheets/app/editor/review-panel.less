@@ -9,13 +9,10 @@
 @rp-border-grey         : #d9d9d9;
 
 @rp-green               : #2c8e30;
-@rp-dim-green           : #cae3cb;
 @rp-green-on-dark		: rgba(37, 107, 41, 0.5);
 @rp-red                 : #c5060b;
-@rp-dim-red             : #f3cdce;
 @rp-yellow              : #f3b111;
 @rp-yellow-on-dark		: rgba(194, 93, 11, 0.5);
-@rp-dim-yellow          : #ffe9b2;
 @rp-grey                : #aaaaaa;
 
 @rp-type-blue           : #6b7797;
@@ -93,7 +90,7 @@
 	}
 
 #review-panel {
-	display: none;
+	display: block;
 	.rp-size-expanded & {
 		display: flex;
 		flex-direction: column;
@@ -101,7 +98,6 @@
 		overflow: visible;
 	}
 	.rp-size-mini & {
-		display: block;
 		width: @review-off-width;
 		z-index: 6;
 	}
@@ -155,7 +151,13 @@
 	}
 
 .rp-entry-list {
+	display: none;
 	width: 100%;
+
+	.rp-size-expanded &,
+	.rp-size-mini & {
+		display: block;
+	}
 	
 	.rp-state-current-file & {
 		position: absolute;
@@ -196,6 +198,10 @@
 		left: 0px;
 		right: 4px;
 		z-index: 1;
+	}
+
+	.rp-new-comment-ui &-add-comment {
+		display: none;
 	}
 }
 
@@ -448,6 +454,12 @@
 		display: block;
 		padding: 5px 10px;
 		border-radius: 3px;
+
+		.rp-in-editor-widgets & {
+			white-space: nowrap;
+			border-radius: 0;
+			border-bottom-left-radius: 3px;
+		}
 	}
 
 	.rp-new-comment {
@@ -563,6 +575,10 @@
 			border-color: @rp-yellow;
 		}
 	}
+
+	.rp-size-mini.rp-new-comment-ui &-add-comment {
+		display: none;
+	}
 }
 
 .rp-overview-file-header {
@@ -610,11 +626,12 @@
 }
 
 .rp-nav {
-	display: flex;
+	display: none;
 	flex-shrink: 0;
-	.rp-size-mini & {
-		display: none;
+	.rp-size-expanded & {
+		display: flex;
 	}
+
 	.rp-state-current-file & {
 		position: absolute;
 		bottom: 0;
@@ -748,13 +765,16 @@
 		.rp-loading-threads & {
 			display: none;
 		}
+		z-index: 6 // Appear above text selection
 	}
 
 	.track-changes-comment-marker {
-		background-color: @rp-dim-yellow;
+		background-color: @rp-yellow;
+		opacity: 0.3;
 	}
 	.track-changes-added-marker {
-		background-color: @rp-dim-green;
+		background-color: @rp-green;
+		opacity: 0.3;
 	}
 	.track-changes-deleted-marker {
 		border-left: 2px dotted @rp-red;
@@ -871,43 +891,49 @@
 	}
 }
 
-.rp-track-changes-indicator {
-	display: none;
+.rp-in-editor-widgets {
 	position: absolute;
 	top: 0;
-	right: @review-off-width;
-	padding: 5px 10px;
-	background-color: rgba(240, 240, 240, 0.9);
-	color: @rp-type-blue;
-	text-align: center;
-	border-bottom-left-radius: 3px;
-	font-size: 10px;
+	right: 0;
+	font-size: 11px;
 	z-index: 2;
-	white-space: nowrap;
-
-	&.rp-track-changes-indicator-on-dark {
-		background-color: rgba(88, 88, 88, .8);
-		color: #FFF;
-		
-		&:hover,
-		&:focus {
-			background-color: rgba(88, 88, 88, 1);
-			color: #FFF;
-		}
-	}
-
-	&:hover,
-	&:focus {
-		outline: 0;
-		text-decoration: none;
-		background-color: rgba(240, 240, 240, 1);
-		color: @rp-type-blue;
-	}
-
+	
 	.rp-size-mini & {
-		display: block;
+		right: @review-off-width;
 	}
 }
+	.rp-track-changes-indicator {
+		display: block;
+		padding: 5px 10px;
+		background-color: rgba(240, 240, 240, 0.9);
+		color: @rp-type-blue;
+		text-align: center;
+		border-bottom-left-radius: 3px;
+		white-space: nowrap;
+
+		&.rp-track-changes-indicator-on-dark {
+			background-color: rgba(88, 88, 88, .8);
+			color: #FFF;
+			
+			&:hover,
+			&:focus {
+				background-color: rgba(88, 88, 88, 1);
+				color: #FFF;
+			}
+		}
+
+		&:hover,
+		&:focus {
+			outline: 0;
+			text-decoration: none;
+			background-color: rgba(240, 240, 240, 1);
+			color: @rp-type-blue;
+		}
+
+		.rp-size-expanded & {
+			display: none;
+		}
+	}
 
 // Helper class for elements which aren't treated as flex-items by IE10, e.g:
 // * inline items;

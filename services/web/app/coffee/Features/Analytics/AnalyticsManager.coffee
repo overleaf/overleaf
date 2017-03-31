@@ -2,6 +2,7 @@ settings = require "settings-sharelatex"
 logger = require "logger-sharelatex"
 _ = require "underscore"
 request = require "request"
+Errors = require '../Errors/Errors'
 
 
 makeRequest = (opts, callback)->
@@ -10,12 +11,20 @@ makeRequest = (opts, callback)->
 		opts.url = "#{settings.apis.analytics.url}#{urlPath}"
 		request opts, callback
 	else
-		callback()
-
+		callback(new Errors.ServiceNotConfiguredError('Analytics service not configured'))
 
 
 module.exports =
 
+	identifyUser: (user_id, old_user_id, callback = (error)->)->
+		opts =
+			body:
+				old_user_id:old_user_id
+			json:true
+			method:"POST"
+			timeout:1000
+			url: "/user/#{user_id}/identify"
+		makeRequest opts, callback
 
 	recordEvent: (user_id, event, segmentation = {}, callback = (error) ->) ->
 		if user_id+"" == settings.smokeTest?.userId+""

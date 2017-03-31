@@ -173,6 +173,8 @@ define [
 			@_findEntityByPathInFolder @$scope.rootFolder, path
 
 		_findEntityByPathInFolder: (folder, path) ->
+			if !path? or !folder?
+				return null
 			parts = path.split("/")
 			name = parts.shift()
 			rest = parts.join("/")

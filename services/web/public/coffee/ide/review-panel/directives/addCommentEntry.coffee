@@ -8,12 +8,15 @@ define [
 			onStartNew: "&"
 			onSubmit: "&"
 			onCancel: "&"
-			onIndicatorClick: "&"
+			onIndicatorClick: "&"	
 			layoutToLeft: "="
 		link: (scope, element, attrs) ->
 			scope.state =
 				isAdding: false
 				content: ""
+
+			scope.$on "comment:start_adding", () ->
+				scope.startNewComment()
 
 			scope.startNewComment = () ->
 				scope.state.isAdding = true

@@ -26,6 +26,8 @@ module.exports = ProjectLocator =
 			element = _.find searchFolder[elementType], (el)-> el?._id+'' == element_id+'' #need to ToString both id's for robustness
 			if !element? && searchFolder.folders? && searchFolder.folders.length != 0
 				_.each searchFolder.folders, (folder, index)->
+					if !folder?
+						return
 					newPath = {}
 					newPath[key] = value for own key,value of path #make a value copy of the string
 					newPath.fileSystem += "/#{folder.name}"

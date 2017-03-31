@@ -1,5 +1,6 @@
 should = require('chai').should()
 modulePath = "../../../../app/js/Features/Project/ProjectDetailsHandler"
+Errors = require "../../../../app/js/Features/Errors/Errors"
 SandboxedModule = require('sandboxed-module')
 sinon = require('sinon')
 assert = require("chai").assert
@@ -46,6 +47,13 @@ describe 'ProjectDetailsHandler', ->
 				details.compiler.should.equal @project.compiler
 				details.features.should.equal @user.features
 				assert.equal(details.something, undefined)
+				done()
+
+		it "should return an error for a non-existent project", (done)->
+			@ProjectGetter.getProject.callsArg(2, null, null)
+			err = new Errors.NotFoundError("project not found")
+			@handler.getDetails "0123456789012345678901234", (error, details) =>
+				err.should.eql error
 				done()
 
 		it "should return the error", (done)->
