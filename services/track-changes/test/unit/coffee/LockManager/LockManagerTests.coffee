@@ -15,6 +15,7 @@ describe "LockManager", ->
 				createClient: () => @rclient =
 					auth: sinon.stub()
 			"settings-sharelatex": @Settings
+			"logger-sharelatex": {error: ->}
 
 		@key = "lock-key"
 		@callback = sinon.stub()
@@ -174,3 +175,24 @@ describe "LockManager", ->
 
 			it "should call the callback with the error", ->
 				@callback.calledWith(@error).should.equal true
+
+		describe "releaseLock", ->
+			describe "when the lock is current", ->
+				beforeEach ->
+					@rclient.eval = sinon.stub().yields(null, 1)
+					@LockManager.releaseLock @key, @lockValue, @callback
+
+				it 'should clear the data from redis', ->
+					@rclient.eval.calledWith(@LockManager.unlockScript, 1, @key, @lockValue).should.equal true
+
+				it 'should call the callback', ->
+					@callback.called.should.equal true
+
+			describe "when the lock has expired", ->
+				beforeEach ->
+					@rclient.eval = sinon.stub().yields(null, 0)
+					@LockManager.releaseLock @key, @lockValue, @callback
+
+				it 'should return an error if the lock has expired', ->
+					@callback.calledWith(new Error("tried to release timed out lock")).should.equal true
+
