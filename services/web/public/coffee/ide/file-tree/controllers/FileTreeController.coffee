@@ -97,6 +97,7 @@ define [
 					.createFolder(name, parent_folder)
 					.error (e)->
 						$scope.error = e
+						$scope.state.inflight = false
 					.success () ->
 						$scope.state.inflight = false
 						$modalInstance.close()
