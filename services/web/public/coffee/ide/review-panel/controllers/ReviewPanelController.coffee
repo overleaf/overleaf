@@ -414,7 +414,7 @@ define [
 			return if !thread?
 			thread.resolved = true
 			thread.resolved_by_user = formatUser(user)
-			thread.resolved_at = new Date()
+			thread.resolved_at = new Date().toISOString()
 			$scope.reviewPanel.resolvedThreadIds[thread_id] = true
 			$scope.$broadcast "comment:resolve_threads", [thread_id]
 		
