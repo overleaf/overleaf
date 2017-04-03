@@ -212,3 +212,45 @@ describe "DocArchiveManager", ->
 			@DocArchiveManager.unArchiveAllDocs @project_id, (err)=>
 				err.should.equal @error
 				done()
+	
+	describe "_s3DocToMongoDoc", ->
+		describe "with the old schema", ->
+			it "should return the docs lines", (done) ->
+				@DocArchiveManager._s3DocToMongoDoc ["doc", "lines"], (error, doc) ->
+					expect(doc).to.deep.equal {
+						lines: ["doc", "lines"]
+					}
+					done()
+		
+		describe "with the new schema", ->
+			it "should return the doc lines and ranges", (done) ->
+				@RangeManager.jsonRangesToMongo = sinon.stub().returns {"mongo": "ranges"}
+				@DocArchiveManager._s3DocToMongoDoc {
+					lines: ["doc", "lines"]
+					ranges: {"json": "ranges"}
+					schema_v: 1
+				}, (error, doc) ->
+					expect(doc).to.deep.equal {
+						lines: ["doc", "lines"]
+						ranges: {"mongo": "ranges"}
+					}
+					done()
+					
+			it "should return just the doc lines when there are no ranges", (done) ->
+				@DocArchiveManager._s3DocToMongoDoc {
+					lines: ["doc", "lines"]
+					schema_v: 1
+				}, (error, doc) ->
+					expect(doc).to.deep.equal {
+						lines: ["doc", "lines"]
+					}
+					done()
+		
+		describe "with an unrecognised schema", ->
+			it "should return an error", (done) ->
+				@DocArchiveManager._s3DocToMongoDoc {
+					schema_v: 2
+				}, (error, doc) ->
+					expect(error).to.exist
+					done()
+			
