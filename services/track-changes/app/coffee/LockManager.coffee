@@ -3,6 +3,7 @@ redis = require("redis-sharelatex")
 rclient = redis.createClient(Settings.redis.web)
 os = require "os"
 crypto = require "crypto"
+logger = require "logger-sharelatex"
 
 HOST = os.hostname()
 PID = process.pid
@@ -57,7 +58,13 @@ module.exports = LockManager =
 				callback err, true
 
 	releaseLock: (key, lockValue, callback) ->
-		rclient.eval LockManager.unlockScript, 1, key, lockValue, callback
+		rclient.eval LockManager.unlockScript, 1, key, lockValue, (err, result) ->
+			if err?
+				return callback(err)
+			if result? and result isnt 1 # successful unlock should release exactly one key
+				logger.error {key:key, lockValue:lockValue, redis_err:err, redis_result:result}, "unlocking error"
+				return callback(new Error("tried to release timed out lock"))
+			callback(err,result)
 
 	runWithLock: (key, runner = ( (releaseLock = (error) ->) -> ), callback = ( (error) -> )) ->
 		LockManager.getLock key, (error, lockValue) ->
