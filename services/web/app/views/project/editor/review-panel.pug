@@ -8,7 +8,7 @@
 		) !{translate("track_changes_is_on")}
 		a.rp-add-comment-btn(
 			href
-			ng-if="reviewPanel.newAddCommentUI && reviewPanel.entries[editor.open_doc_id]['add-comment'] != null"
+			ng-if="reviewPanel.entries[editor.open_doc_id]['add-comment'] != null"
 			ng-click="addNewComment();"
 		) 
 			i.fa.fa-comment
