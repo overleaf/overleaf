@@ -6,7 +6,7 @@ S3S = require 's3-streams'
 JSONStream = require "JSONStream"
 ReadlineStream = require "byline"
 zlib = require "zlib"
-Metrics = require "./Metrics"
+Metrics = require "metrics-sharelatex"
 
 DAYS = 24 * 3600 * 1000 # one day in milliseconds
 

@@ -26,7 +26,7 @@ describe "MongoAWS", ->
 			"./mongojs" : { db: @db = {}, ObjectId: ObjectId }
 			"JSONStream": @JSONStream = {}
 			"readline-stream": @readline = sinon.stub()
-			'./Metrics': {inc: ()->}
+			'metrics-sharelatex': {inc: ()->}
 
 		@project_id = ObjectId().toString()
 		@doc_id = ObjectId().toString()
