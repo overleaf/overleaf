@@ -1350,6 +1350,11 @@ if (typeof navigator != "object")
 
 var os = (navigator.platform.match(/mac|win|linux/i) || ["other"])[0].toLowerCase();
 var ua = navigator.userAgent;
+
+var safariRegex = /version\/([\w\.]+).+?(mobile\s?safari|safari)/i;
+var safariResult = ua.match(safariRegex);
+var safariVersion = safariResult ? parseFloat(safariResult[1]) : 0;
+
 exports.isWin = (os == "win");
 exports.isMac = (os == "mac");
 exports.isLinux = (os == "linux");
@@ -1365,6 +1370,8 @@ exports.isOpera = window.opera && Object.prototype.toString.call(window.opera) =
 exports.isWebKit = parseFloat(ua.split("WebKit/")[1]) || undefined;
 
 exports.isChrome = parseFloat(ua.split(" Chrome/")[1]) || undefined;
+
+exports.isSafari = safariVersion || undefined;
 
 exports.isAIR = ua.indexOf("AdobeAIR") >= 0;
 
