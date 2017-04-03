@@ -1,4 +1,4 @@
-request = require "request"
+request = require "requestretry"  # allow retry on error https://github.com/FGRibreau/node-request-retry
 logger = require "logger-sharelatex"
 Settings = require "settings-sharelatex"
 
@@ -15,6 +15,7 @@ module.exports = WebApiManager =
 		request.get {
 			url: "#{Settings.apis.web.url}#{url}"
 			timeout: MAX_HTTP_REQUEST_LENGTH
+			maxAttempts: 2 # for node-request-retry
 			auth:
 				user: Settings.apis.web.user
 				pass: Settings.apis.web.pass
@@ -28,7 +29,7 @@ module.exports = WebApiManager =
 			if res.statusCode >= 200 and res.statusCode < 300
 				return callback null, body
 			else
-				error = new Error("web returned a non-success status code: #{res.statusCode}")
+				error = new Error("web returned a non-success status code: #{res.statusCode} (attempts: #{res.attempts})")
 				callback error
 
 	getUserInfo: (user_id, callback = (error, userInfo) ->) ->

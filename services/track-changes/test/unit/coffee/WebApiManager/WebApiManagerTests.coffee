@@ -8,7 +8,7 @@ SandboxedModule = require('sandboxed-module')
 describe "WebApiManager", ->
 	beforeEach ->
 		@WebApiManager = SandboxedModule.require modulePath, requires:
-			"request": @request = {}
+			"requestretry": @request = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			'settings-sharelatex': @settings =
 				apis:
