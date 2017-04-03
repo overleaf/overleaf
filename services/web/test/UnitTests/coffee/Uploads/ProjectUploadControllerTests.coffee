@@ -21,7 +21,7 @@ describe "ProjectUploadController", ->
 			"./ProjectUploadManager" : @ProjectUploadManager = {}
 			"./FileSystemImportManager" : @FileSystemImportManager = {}
 			"logger-sharelatex" : @logger = {log: sinon.stub(), error: sinon.stub(), err:->}
-			"../../infrastructure/Metrics": @metrics
+			"metrics-sharelatex": @metrics
 			'../Authentication/AuthenticationController': @AuthenticationController
 			"fs" : @fs = {}
 

@@ -26,7 +26,7 @@ describe "ArchiveManager", ->
 		@ArchiveManager = SandboxedModule.require modulePath, requires:
 			"child_process": @child
 			"logger-sharelatex": @logger
-			"../../infrastructure/Metrics": @metrics
+			"metrics-sharelatex": @metrics
 			"fs": @fs = {}
 	
 	describe "extractZipArchive", ->

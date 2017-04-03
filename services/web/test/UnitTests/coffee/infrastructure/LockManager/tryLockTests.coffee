@@ -14,7 +14,7 @@ describe 'LockManager - trying the lock', ->
 					auth:->
 					set: @set = sinon.stub()
 			"settings-sharelatex":{redis:{}}
-			"./Metrics": inc:->			
+			"metrics-sharelatex": inc:->			
 		@callback = sinon.stub()
 		@doc_id = "doc-id-123"
 	

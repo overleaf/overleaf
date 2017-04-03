@@ -1,5 +1,5 @@
 logger  = require "logger-sharelatex"
-metrics = require "../../infrastructure/Metrics"
+metrics = require "metrics-sharelatex"
 fs      = require "fs"
 Path    = require "path"
 FileSystemImportManager = require "./FileSystemImportManager"

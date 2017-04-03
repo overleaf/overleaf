@@ -1,5 +1,5 @@
 mongojs = require("../../infrastructure/mongojs")
-metrics = require('../../infrastructure/Metrics')
+metrics = require('metrics-sharelatex')
 logger = require('logger-sharelatex')
 db = mongojs.db
 ObjectId = mongojs.ObjectId

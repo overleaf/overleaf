@@ -1,4 +1,4 @@
-metrics = require('./Metrics')
+metrics = require('metrics-sharelatex')
 module.exports =
 	log: (req)->
 		if req.headers["user-agent"]?

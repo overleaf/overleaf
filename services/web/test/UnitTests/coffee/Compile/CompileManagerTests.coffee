@@ -23,7 +23,7 @@ describe "CompileManager", ->
 			"../User/UserGetter": @UserGetter = {}
 			"./ClsiManager": @ClsiManager = {}
 			"../../infrastructure/RateLimiter": @ratelimiter
-			"../../infrastructure/Metrics": @Metrics =
+			"metrics-sharelatex": @Metrics =
 				Timer: class Timer
 					done: sinon.stub()
 				inc: sinon.stub()

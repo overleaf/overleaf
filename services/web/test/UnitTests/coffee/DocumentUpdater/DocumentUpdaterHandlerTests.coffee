@@ -32,7 +32,7 @@ describe 'DocumentUpdaterHandler', ->
 			"../../models/Project": Project: @Project={}
 			'../../Features/Project/ProjectLocator':{}
 			'redis-sharelatex' : createClient: () => @rclient
-			"../../infrastructure/Metrics": 
+			"metrics-sharelatex": 
 				Timer:->
 					done:->
 

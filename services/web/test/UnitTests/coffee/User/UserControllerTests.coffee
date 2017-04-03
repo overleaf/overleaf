@@ -77,7 +77,7 @@ describe "UserController", ->
 			"logger-sharelatex":
 				log:->
 				err:->
-			"../../infrastructure/Metrics": inc:->
+			"metrics-sharelatex": inc:->
 
 		@res =
 			send: sinon.stub()

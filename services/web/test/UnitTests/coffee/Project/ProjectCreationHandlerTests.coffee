@@ -50,7 +50,7 @@ describe 'ProjectCreationHandler', ->
 			'./ProjectEntityHandler':@ProjectEntityHandler
 			"settings-sharelatex": @Settings = {}
 			'logger-sharelatex': {log:->}
-			"../../infrastructure/Metrics": {
+			"metrics-sharelatex": {
 				inc: ()->,
 				timeAsyncMethod: ()->
 			}

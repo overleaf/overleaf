@@ -1,6 +1,6 @@
 logger = require('logger-sharelatex')
 async = require("async")
-metrics = require('../../infrastructure/Metrics')
+metrics = require('metrics-sharelatex')
 Settings = require('settings-sharelatex')
 ObjectId = require('mongoose').Types.ObjectId	
 Project = require('../../models/Project').Project

@@ -1,7 +1,7 @@
 User = require("../../models/User").User
 UserLocator = require("./UserLocator")
 logger = require("logger-sharelatex")
-metrics = require('../../infrastructure/Metrics')
+metrics = require('metrics-sharelatex')
 
 
 module.exports = UserCreator =

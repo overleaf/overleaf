@@ -6,7 +6,7 @@ Project = require("../../models/Project").Project
 ProjectRootDocManager = require "../Project/ProjectRootDocManager"
 UserGetter = require "../User/UserGetter"
 ClsiManager = require "./ClsiManager"
-Metrics = require('../../infrastructure/Metrics')
+Metrics = require('metrics-sharelatex')
 logger = require("logger-sharelatex")
 rateLimiter = require("../../infrastructure/RateLimiter")
 

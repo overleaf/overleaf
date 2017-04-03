@@ -42,7 +42,7 @@ describe 'TpdsUpdateSender', ->
 			'../../models/Project': Project:@Project
 			'request':@request
 			'../Collaborators/CollaboratorsHandler': @CollaboratorsHandler
-			"../../infrastructure/Metrics":
+			"metrics-sharelatex":
 				inc:-> 
 
 	describe "_enqueue", ->

@@ -16,7 +16,7 @@ describe "AuthenticationController", ->
 			"./AuthenticationManager": @AuthenticationManager = {}
 			"../User/UserGetter" : @UserGetter = {}
 			"../User/UserUpdater" : @UserUpdater = {}
-			"../../infrastructure/Metrics": @Metrics = { inc: sinon.stub() }
+			"metrics-sharelatex": @Metrics = { inc: sinon.stub() }
 			"../Security/LoginRateLimiter": @LoginRateLimiter = { processLoginRequest:sinon.stub(), recordSuccessfulLogin:sinon.stub() }
 			"../User/UserHandler": @UserHandler = {setupLoginData:sinon.stub()}
 			"../Analytics/AnalyticsManager": @AnalyticsManager = { recordEvent: sinon.stub() }

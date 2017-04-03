@@ -1,6 +1,6 @@
 logger = require("logger-sharelatex")
 mongojs = require("../../infrastructure/mongojs")
-metrics = require("../../infrastructure/Metrics")
+metrics = require("metrics-sharelatex")
 db = mongojs.db
 ObjectId = mongojs.ObjectId
 UserLocator = require("./UserLocator")

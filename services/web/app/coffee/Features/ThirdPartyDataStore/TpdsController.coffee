@@ -2,7 +2,7 @@ tpdsUpdateHandler = require('./TpdsUpdateHandler')
 UpdateMerger = require "./UpdateMerger"
 logger = require('logger-sharelatex')
 Path = require('path')
-metrics = require("../../infrastructure/Metrics")
+metrics = require("metrics-sharelatex")
 
 module.exports =
 	# mergeUpdate and deleteUpdate are used by Dropbox, where the project is only passed as the name, as the

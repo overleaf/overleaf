@@ -1,5 +1,5 @@
 logger                  = require "logger-sharelatex"
-Metrics                 = require "../../infrastructure/Metrics"
+Metrics                 = require "metrics-sharelatex"
 Project                 = require("../../models/Project").Project
 ProjectZipStreamManager = require "./ProjectZipStreamManager"
 DocumentUpdaterHandler  = require "../DocumentUpdater/DocumentUpdaterHandler"
