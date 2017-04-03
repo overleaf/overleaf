@@ -75,11 +75,13 @@ describe "DocArchiveManager", ->
 			"logger-sharelatex":
 				log:->
 				err:->
+		@globals =
+			JSON: JSON
 
 		@error = "my errror"
 		@project_id = ObjectId().toString()
 		@stubbedError = new Errors.NotFoundError("Error in S3 request")
-		@DocArchiveManager = SandboxedModule.require modulePath, requires: @requires
+		@DocArchiveManager = SandboxedModule.require modulePath, requires: @requires, globals: @globals
 
 	describe "archiveDoc", ->
 
@@ -253,4 +255,41 @@ describe "DocArchiveManager", ->
 				}, (error, doc) ->
 					expect(error).to.exist
 					done()
+	
+	describe "_mongoDocToS3Doc", ->
+		describe "with a valid doc", ->
+			it "should return the json version", (done) ->
+				@DocArchiveManager._mongoDocToS3Doc doc = {
+					lines: ["doc", "lines"]
+					ranges: { "mock": "ranges" }
+				}, (err, s3_doc) ->
+					expect(s3_doc).to.equal JSON.stringify({
+						lines: ["doc", "lines"]
+						ranges: { "mock": "ranges" }
+						schema_v: 1
+					})
+					done()
+			
+		describe "with null bytes in the result", ->
+			beforeEach ->
+				@_stringify = JSON.stringify
+				JSON.stringify = sinon.stub().returns '{"bad": "\u0000"}'
+			
+			afterEach ->
+				JSON.stringify = @_stringify
+				
+			it "should return an error", (done) ->
+				@DocArchiveManager._mongoDocToS3Doc {
+					lines: ["doc", "lines"]
+					ranges: { "mock": "ranges" }
+				}, (err, s3_doc) ->
+					expect(err).to.exist
+					done()
+		
+		describe "without doc lines", ->
+			it "should return an error", (done) ->
+				@DocArchiveManager._mongoDocToS3Doc {}, (err, s3_doc) ->
+					expect(err).to.exist
+					done()
+			
 			

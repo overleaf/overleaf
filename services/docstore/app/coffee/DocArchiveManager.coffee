@@ -98,6 +98,8 @@ module.exports = DocArchive =
 		return callback null, mongo_doc
 
 	_mongoDocToS3Doc: (doc, callback = (error, s3_doc) ->) ->
+		if !doc.lines?
+			return callback(new Error("doc has no lines"))
 		json = JSON.stringify({
 			lines: doc.lines
 			ranges: doc.ranges
@@ -105,7 +107,7 @@ module.exports = DocArchive =
 		})
 		if json.indexOf("\u0000") != -1
 			error = new Error("null bytes detected")
-			logger.error {err: error, project_id, doc_id}, error.message
+			logger.err {err: error, doc, json}, error.message
 			return callback(error)
 		return callback null, json
 
