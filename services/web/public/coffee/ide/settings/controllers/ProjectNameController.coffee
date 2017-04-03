@@ -2,9 +2,13 @@ define [
 	"base"
 ], (App) ->
 	MAX_PROJECT_NAME_LENGTH = 150
-	App.controller "ProjectNameController", ["$scope", "settings", "ide", ($scope, settings, ide) ->
+	App.controller "ProjectNameController", ["$scope", "$element", "settings", "ide", ($scope, $element, settings, ide) ->
+		projectNameReadOnlyEl = $element.find(".name")[0]
+
 		$scope.state =
 			renaming: false
+			overflowed: false
+
 		$scope.inputs = {}
 
 		$scope.startRenaming = () ->
@@ -29,4 +33,7 @@ define [
 		$scope.$watch "project.name", (name) ->
 			if name?
 				window.document.title = name + " - Online LaTeX Editor ShareLaTeX"
+				$scope.$applyAsync () ->
+					# This ensures that the element is measured *after* the binding is done (i.e. project name is rendered).
+					$scope.state.overflowed = (projectNameReadOnlyEl.scrollWidth > projectNameReadOnlyEl.clientWidth)
 	]
