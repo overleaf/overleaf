@@ -20,6 +20,7 @@ describe 'Project api controller', ->
 			session:
 				destroy:sinon.stub()
 		@res = {}
+		@next = sinon.stub()
 		@projDetails = {name:"something"}
 
 
@@ -34,9 +35,7 @@ describe 'Project api controller', ->
 			@controller.getProjectDetails @req, @res
 
 
-		it "should send a 500 if there is an error", (done)->
+		it "should send a 500 if there is an error", ()->
 			@ProjectDetailsHandler.getDetails.callsArgWith(1, "error")
-			@res.sendStatus = (resCode)=>
-				resCode.should.equal 500
-				done()
-			@controller.getProjectDetails @req, @res
+			@controller.getProjectDetails @req, @res, @next
+			@next.calledWith("error").should.equal true

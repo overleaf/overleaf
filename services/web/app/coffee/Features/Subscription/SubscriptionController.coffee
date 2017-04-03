@@ -46,31 +46,39 @@ module.exports = SubscriptionController =
 			if hasSubscription or !plan?
 				res.redirect "/user/subscription"
 			else
-				currency = req.query.currency?.toUpperCase()
-				GeoIpLookup.getCurrencyCode req.query?.ip || req.ip, (err, recomendedCurrency, countryCode)->
-					return next(err) if err?
-					if recomendedCurrency? and !currency?
-						currency = recomendedCurrency
-					RecurlyWrapper.sign {
-						subscription:
-							plan_code : req.query.planCode
-							currency: currency
-						account_code: user._id
-					}, (error, signature) ->
-						return next(error) if error?
-						res.render "subscriptions/new",
-							title      : "subscribe"
-							plan_code: req.query.planCode
-							currency: currency
-							countryCode:countryCode
-							plan:plan
-							showStudentPlan: req.query.ssp
-							recurlyConfig: JSON.stringify
-								currency: currency
-								subdomain: Settings.apis.recurly.subdomain
-							showCouponField: req.query.scf
-							showVatField: req.query.svf
-							couponCode:      req.query.cc or ""
+				# LimitationsManager.userHasSubscription only checks Mongo. Double check with
+				# Recurly as well at this point (we don't do this most places for speed).
+				SubscriptionHandler.validateNoSubscriptionInRecurly user._id, (error, valid) ->
+					return next(error) if error?
+					if !valid
+						res.redirect "/user/subscription"
+						return
+					else
+						currency = req.query.currency?.toUpperCase()
+						GeoIpLookup.getCurrencyCode req.query?.ip || req.ip, (err, recomendedCurrency, countryCode)->
+							return next(err) if err?
+							if recomendedCurrency? and !currency?
+								currency = recomendedCurrency
+							RecurlyWrapper.sign {
+								subscription:
+									plan_code : req.query.planCode
+									currency: currency
+								account_code: user._id
+							}, (error, signature) ->
+								return next(error) if error?
+								res.render "subscriptions/new",
+									title      : "subscribe"
+									plan_code: req.query.planCode
+									currency: currency
+									countryCode:countryCode
+									plan:plan
+									showStudentPlan: req.query.ssp
+									recurlyConfig: JSON.stringify
+										currency: currency
+										subdomain: Settings.apis.recurly.subdomain
+									showCouponField: req.query.scf
+									showVatField: req.query.svf
+									couponCode:      req.query.cc or ""
 
 
 

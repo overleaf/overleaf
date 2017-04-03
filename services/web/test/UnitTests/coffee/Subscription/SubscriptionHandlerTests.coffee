@@ -16,7 +16,7 @@ mockRecurlySubscriptions =
 		account:
 			account_code: "user-123"
 			
-describe "Subscription Handler sanboxed", ->
+describe "SubscriptionHandler", ->
 
 	beforeEach ->
 		@Settings = 
@@ -33,7 +33,7 @@ describe "Subscription Handler sanboxed", ->
 		@activeRecurlySubscription = mockRecurlySubscriptions["subscription-123-active"]
 		@User = {}
 		@user =
-			_id: "user_id_here_"
+			_id: @user_id = "user_id_here_"
 		@subscription = 
 			recurlySubscription_id: @activeRecurlySubscription.uuid
 		@RecurlyWrapper = 
@@ -77,23 +77,33 @@ describe "Subscription Handler sanboxed", ->
 
 
 	describe "createSubscription", ->
-		beforeEach (done) ->
+		beforeEach ->
+			@callback = sinon.stub()
 			@subscriptionDetails = 
 				cvv:"123"
 				number:"12345"
 			@recurly_token_id = "45555666"
-			@SubscriptionHandler.createSubscription(@user, @subscriptionDetails, @recurly_token_id, done)
+			@SubscriptionHandler.validateNoSubscriptionInRecurly = sinon.stub().yields(null, true)
 
-		it "should create the subscription with the wrapper", (done)->
-			@RecurlyWrapper.createSubscription.calledWith(@user, @subscriptionDetails, @recurly_token_id).should.equal true
-			done()
+		describe "successfully", ->
+			beforeEach ->
+				@SubscriptionHandler.createSubscription(@user, @subscriptionDetails, @recurly_token_id, @callback)
 
-		it "should sync the subscription to the user", (done)->
-			@SubscriptionUpdater.syncSubscription.calledOnce.should.equal true
-			@SubscriptionUpdater.syncSubscription.args[0][0].should.deep.equal @activeRecurlySubscription
-			@SubscriptionUpdater.syncSubscription.args[0][1].should.deep.equal @user._id
-			done()
+			it "should create the subscription with the wrapper", ->
+				@RecurlyWrapper.createSubscription.calledWith(@user, @subscriptionDetails, @recurly_token_id).should.equal true
 
+			it "should sync the subscription to the user", ->
+				@SubscriptionUpdater.syncSubscription.calledOnce.should.equal true
+				@SubscriptionUpdater.syncSubscription.args[0][0].should.deep.equal @activeRecurlySubscription
+				@SubscriptionUpdater.syncSubscription.args[0][1].should.deep.equal @user._id
+
+		describe "when there is already a subscription in Recurly", ->
+			beforeEach ->
+				@SubscriptionHandler.validateNoSubscriptionInRecurly = sinon.stub().yields(null, false)
+				@SubscriptionHandler.createSubscription(@user, @subscriptionDetails, @recurly_token_id, @callback)
+			
+			it "should return an error", ->
+				@callback.calledWith(new Error("user already has subscription in recurly"))
 
 	describe "updateSubscription", ->
 		describe "with a user with a subscription", ->
@@ -144,8 +154,6 @@ describe "Subscription Handler sanboxed", ->
 				@RecurlyWrapper.updateSubscription.calledWith(@subscription.recurlySubscription_id).should.equal true
 				updateOptions = @RecurlyWrapper.updateSubscription.args[0][1]
 				updateOptions.plan_code.should.equal @plan_code
-
-
 
 	describe "cancelSubscription", ->
 		describe "with a user without a subscription", ->
@@ -210,5 +218,39 @@ describe "Subscription Handler sanboxed", ->
 				@SubscriptionUpdater.syncSubscription.args[0][0].should.deep.equal @activeRecurlySubscription
 				@SubscriptionUpdater.syncSubscription.args[0][1].should.deep.equal @user._id
 
+	describe "validateNoSubscriptionInRecurly", ->
+		beforeEach ->
+			@subscriptions = []
+			@RecurlyWrapper.listAccountActiveSubscriptions = sinon.stub().yields(null, @subscriptions)
+			@SubscriptionUpdater.syncSubscription = sinon.stub().yields()
+			@callback = sinon.stub()
 
+		describe "with no subscription in recurly", ->
+			beforeEach ->
+				@subscriptions.push @subscription = { "mock": "subscription" }
+				@SubscriptionHandler.validateNoSubscriptionInRecurly @user_id, @callback
 
+			it "should call RecurlyWrapper.listAccountActiveSubscriptions with the user id", ->
+				@RecurlyWrapper.listAccountActiveSubscriptions
+					.calledWith(@user_id)
+					.should.equal true
+
+			it "should sync the subscription", ->
+				@SubscriptionUpdater.syncSubscription
+					.calledWith(@subscription, @user_id)
+					.should.equal true
+
+			it "should call the callback with valid == false", ->
+				@callback.calledWith(null, false).should.equal true
+
+		describe "with a subscription in recurly", ->
+			beforeEach ->
+				@SubscriptionHandler.validateNoSubscriptionInRecurly @user_id, @callback
+
+			it "should not sync the subscription", ->
+				@SubscriptionUpdater.syncSubscription
+					.called
+					.should.equal false
+
+			it "should call the callback with valid == true", ->
+				@callback.calledWith(null, true).should.equal true
