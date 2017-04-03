@@ -18,6 +18,7 @@
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.6",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.5.0",
     "request": "~2.33.0",
+    "requestretry": "^1.12.0",
     "redis-sharelatex": "~0.0.9",
     "redis": "~0.10.1",
     "underscore": "~1.7.0",
