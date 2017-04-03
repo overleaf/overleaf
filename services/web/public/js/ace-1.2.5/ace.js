@@ -2292,7 +2292,7 @@ var TextInput = function(parentNode, host) {
         }
         // WORKAROUND: Accent keys and Korean keys don't work in Chrome >53.
         // https://github.com/ajaxorg/ace/issues/3045
-        if (useragent.isChrome >= 53) onInput();
+        if (useragent.isChrome >= 53 || useragent.isSafari >= 10.1) onInput();
     };
     
     
