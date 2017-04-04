@@ -3,15 +3,11 @@ extends ../layout
 block content
 	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
 	//- and doesn't prematurely end the script tag.
-
-
+	script#data(type="application/json").
+		!{JSON.stringify({ projects: projects, tags: tags, notifications: notifications }).replace(/\//g, '\\/')}
 
 	script(type="text/javascript").
-		window.data = {
-			projects: !{JSON.stringify(projects).replace(/\//g, '\\/')},
-			tags: !{JSON.stringify(tags).replace(/\//g, '\\/')},
-			notifications: !{JSON.stringify(notifications).replace(/\//g, '\\/')}
-		};
+		window.data = JSON.parse($("#data").text());
 		window.algolia = {
 			institutions: {
 				app_id:  '#{algolia_app_id}',
