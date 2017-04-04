@@ -96,8 +96,10 @@ module.exports = EditorHttpController =
 		EditorController.addFolder project_id, parent_folder_id, name, "editor", (error, doc) ->
 			if error == "project_has_to_many_files"
 				res.status(400).json(req.i18n.translate("project_has_to_many_files"))
+			else if error?.message == 'invalid element name'
+				res.status(400).json(req.i18n.translate('invalid_file_name'))
 			else if error?
-				next(error)
+				res.status(500).json(req.i18n.translate('generic_something_went_wrong'))
 			else
 				res.json doc
 
