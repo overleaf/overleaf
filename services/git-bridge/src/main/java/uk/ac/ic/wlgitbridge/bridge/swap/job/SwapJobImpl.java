@@ -185,10 +185,10 @@ public class SwapJobImpl implements SwapJob {
     @Override
     public void restore(String projName) throws IOException {
         try (LockGuard __ = lock.lockGuard(projName)) {
-            try (InputStream s3File = swapStore.openDownloadStream(projName)) {
+            try (InputStream zipped = swapStore.openDownloadStream(projName)) {
                 repoStore.unbzip2Project(
                         projName,
-                        s3File
+                        zipped
                 );
                 swapStore.remove(projName);
                 dbStore.setLastAccessedTime(
