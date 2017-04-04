@@ -11,9 +11,24 @@ module.exports = OutputFileOptimiser =
 		# check output file (src) and see if we can optimise it, storing
 		# the result in the build directory (dst)
 		if src.match(/\/output\.pdf$/)
-			OutputFileOptimiser.optimisePDF src, dst, callback
+			OutputFileOptimiser.checkIfPDFIsOptimised src, (err, isOptimised) ->
+				return callback(null) if err? or isOptimised
+				OutputFileOptimiser.optimisePDF src, dst, callback
 		else
 			callback (null)
+
+	checkIfPDFIsOptimised: (file, callback) ->
+		SIZE = 16*1024 # check the header of the pdf
+		result = new Buffer(SIZE)
+		result.fill(0) # prevent leakage of uninitialised buffer
+		fs.open file, "r", (err, fd) ->
+			return callback(err) if err?
+			fs.read fd, result, 0, SIZE, 0, (errRead, bytesRead, buffer) ->
+				fs.close fd, (errClose) ->
+					return callback(errRead) if errRead?
+					return callback(errClose) if errReadClose?
+					isOptimised = buffer.toString('ascii').indexOf("/Linearized 1") >= 0
+					callback(null, isOptimised)
 
 	optimisePDF: (src, dst, callback = (error) ->) ->
 		tmpOutput = dst + '.opt'
