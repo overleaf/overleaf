@@ -3,11 +3,13 @@ package uk.ac.ic.wlgitbridge.bridge.repo;
 import com.google.api.client.repackaged.com.google.common.base.Preconditions;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import uk.ac.ic.wlgitbridge.data.filestore.GitDirectoryContents;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.data.filestore.RepositoryFile;
+import uk.ac.ic.wlgitbridge.snapshot.servermock.util.FileUtil;
 import uk.ac.ic.wlgitbridge.util.Files;
 
 import java.io.File;
@@ -16,8 +18,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Supplier;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.Assert.*;
 
 /**
  * Created by winston on 08/10/2016.
@@ -42,17 +47,26 @@ public class GitProjectRepoTest {
     FSGitRepoStore repoStore;
     GitProjectRepo repo;
     GitProjectRepo badGitignore;
+    GitProjectRepo incoming;
+    GitProjectRepo withoutIncoming;
+
+    @Rule
+    public TemporaryFolder tmpFolder = new TemporaryFolder();
 
     @Before
     public void setup() throws IOException {
-        TemporaryFolder tmpFolder = new TemporaryFolder();
-        tmpFolder.create();
         rootdir = makeTempRepoDir(tmpFolder, "rootdir");
         repoStore = new FSGitRepoStore(rootdir.getAbsolutePath());
-        repo = new GitProjectRepo("repo");
-        repo.useExistingRepository(repoStore);
-        badGitignore = new GitProjectRepo("badgitignore");
-        badGitignore.useExistingRepository(repoStore);
+        repo = fromExistingDir("repo");
+        badGitignore = fromExistingDir("badgitignore");
+        incoming = fromExistingDir("incoming");
+        withoutIncoming = fromExistingDir("without_incoming");
+    }
+
+    private GitProjectRepo fromExistingDir(String dir) throws IOException {
+        GitProjectRepo ret = new GitProjectRepo(dir);
+        ret.useExistingRepository(repoStore);
+        return ret;
     }
 
     private GitDirectoryContents makeDirContents(
@@ -88,7 +102,7 @@ public class GitProjectRepoTest {
         );
         repo.commitAndGetMissing(contents);
         repo.resetHard();
-        File dir = repo.getDirectory();
+        File dir = repo.getDotGitDir();
         assertEquals(
                 new HashSet<String>(Arrays.asList(".git", ".gitignore")),
                 new HashSet<String>(Arrays.asList(dir.list()))
@@ -120,7 +134,7 @@ public class GitProjectRepoTest {
                         "file2.txt",
                         "added.ignored"
                 )),
-                new HashSet<String>(Arrays.asList(repo.getDirectory().list()))
+                new HashSet<String>(Arrays.asList(repo.getDotGitDir().list()))
         );
     }
 
@@ -139,6 +153,48 @@ public class GitProjectRepoTest {
                 ""
         );
         badGitignore.commitAndGetMissing(contents);
+    }
+
+    private static long repoSize(ProjectRepo repo) {
+        return FileUtils.sizeOfDirectory(repo.getProjectDir());
+    }
+
+    @Test
+    public void runGCReducesTheSizeOfARepoWithGarbage() throws IOException {
+        long beforeSize = repoSize(repo);
+        repo.runGC();
+        long afterSize = repoSize(repo);
+        assertThat(beforeSize, lessThan(afterSize));
+
+    }
+
+    @Test
+    public void runGCDoesNothingOnARepoWithoutGarbage() throws IOException {
+        repo.runGC();
+        long beforeSize = repoSize(repo);
+        repo.runGC();
+        long afterSize = repoSize(repo);
+        assertThat(beforeSize, equalTo(afterSize));
+    }
+
+    @Test
+    public void deleteIncomingPacksDeletesIncomingPacks() throws IOException {
+        Supplier<Boolean> dirsAreEq = () -> FileUtil.directoryDeepEquals(
+                incoming.getProjectDir(), withoutIncoming.getProjectDir()
+        );
+        assertFalse(dirsAreEq.get());
+        incoming.deleteIncomingPacks();
+        assertTrue(dirsAreEq.get());
+    }
+
+    @Test
+    public void deleteIncomingPacksOnDirWithoutIncomingPacksDoesNothing()
+            throws IOException {
+        File actual = withoutIncoming.getProjectDir();
+        File expected = tmpFolder.newFolder();
+        FileUtils.copyDirectory(actual, expected);
+        withoutIncoming.deleteIncomingPacks();
+        assertTrue(FileUtil.directoryDeepEquals(actual, expected));
     }
 
 }

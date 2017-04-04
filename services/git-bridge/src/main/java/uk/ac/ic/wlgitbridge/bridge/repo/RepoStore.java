@@ -17,6 +17,8 @@ public interface RepoStore {
 
     File getRootDirectory();
 
+    ProjectRepo getExistingRepo(String project) throws IOException;
+
     void purgeNonexistentProjects(
             Collection<String> existingProjectNames
     );

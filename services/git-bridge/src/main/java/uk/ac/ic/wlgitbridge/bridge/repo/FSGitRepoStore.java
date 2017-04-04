@@ -45,6 +45,13 @@ public class FSGitRepoStore implements RepoStore {
         return rootDirectory;
     }
 
+    @Override
+    public ProjectRepo getExistingRepo(String project) throws IOException {
+        GitProjectRepo ret = new GitProjectRepo(project);
+        ret.useExistingRepository(this);
+        return ret;
+    }
+
     /* TODO: Perhaps we should just delete bad directories on the fly. */
     @Override
     public void purgeNonexistentProjects(

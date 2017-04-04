@@ -686,26 +686,10 @@ public class WLGitBridgeIntegrationTest {
         gitCommit(sub, "sub");
         gitAdd(testprojDir);
         gitCommit(testprojDir, "push");
-        Process gitPush = runtime.exec("git push -v --progress", null, testprojDir);
-        int pushExitCode = gitPush.waitFor();
+        Process push = gitPush(testprojDir, 1);
         wlgb.stop();
-        /* TODO: remove this entire conditional, remove -v and --progress flags (:658), remove subList call (:676) */
-        if (pushExitCode != 1) {
-            String stdout = IOUtils.toString(gitPush.getInputStream(), StandardCharsets.UTF_8);
-            String stderr = IOUtils.toString(gitPush.getErrorStream(), StandardCharsets.UTF_8);
-            /* Print to stderr to avoid log config */
-            System.err.println("===== Git exit code was not 1, it was: " + pushExitCode + " =====");
-            System.err.println("===== Failing test =====");
-            System.err.println("===== stdout (" + stdout.length() + " chars) =====");
-            System.err.println(stdout);
-            System.err.println("===== stderr: (" + stderr.length() + " chars) =====");
-            System.err.println(stderr);
-            fail();
-            return;
-        }
-        assertEquals(1, pushExitCode);
-        List<String> actual = Util.linesFromStream(gitPush.getErrorStream(), 2, "[K");
-        assertEquals(EXPECTED_OUT_PUSH_SUBMODULE, actual.subList(actual.size() - 6, actual.size()));
+        List<String> actual = Util.linesFromStream(push.getErrorStream(), 2, "[K");
+        assertEquals(EXPECTED_OUT_PUSH_SUBMODULE, actual);
         wlgb.stop();
     }
 

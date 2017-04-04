@@ -7,6 +7,7 @@ import uk.ac.ic.wlgitbridge.bridge.lock.ProjectLock;
 import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
 import uk.ac.ic.wlgitbridge.bridge.swap.store.SwapStore;
 import uk.ac.ic.wlgitbridge.util.Log;
+import uk.ac.ic.wlgitbridge.util.TimerUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -81,7 +82,7 @@ public class SwapJobImpl implements SwapJob {
     @Override
     public void start() {
         timer.schedule(
-                uk.ac.ic.wlgitbridge.util.Timer.makeTimerTask(this::doSwap),
+                TimerUtils.makeTimerTask(this::doSwap),
                 0
         );
     }
@@ -98,7 +99,7 @@ public class SwapJobImpl implements SwapJob {
             Log.warn("Exception thrown during swap job", t);
         }
         timer.schedule(
-                uk.ac.ic.wlgitbridge.util.Timer.makeTimerTask(this::doSwap),
+                TimerUtils.makeTimerTask(this::doSwap),
                 interval.toMillis()
         );
     }
@@ -161,10 +162,11 @@ public class SwapJobImpl implements SwapJob {
         Log.info("Evicting project: {}", projName);
         try (LockGuard __ = lock.lockGuard(projName)) {
             long[] sizePtr = new long[1];
-            InputStream bzipped = repoStore.bzip2Project(projName, sizePtr);
-            swapStore.upload(projName, bzipped, sizePtr[0]);
-            dbStore.setLastAccessedTime(projName, null);
-            repoStore.remove(projName);
+            try (InputStream blob = repoStore.bzip2Project(projName, sizePtr)) {
+                swapStore.upload(projName, blob, sizePtr[0]);
+                dbStore.setLastAccessedTime(projName, null);
+                repoStore.remove(projName);
+            }
         }
         Log.info("Evicted project: {}", projName);
     }
@@ -183,15 +185,17 @@ public class SwapJobImpl implements SwapJob {
     @Override
     public void restore(String projName) throws IOException {
         try (LockGuard __ = lock.lockGuard(projName)) {
-            repoStore.unbzip2Project(
-                    projName,
-                    swapStore.openDownloadStream(projName)
-            );
-            swapStore.remove(projName);
-            dbStore.setLastAccessedTime(
-                    projName,
-                    Timestamp.valueOf(LocalDateTime.now())
-            );
+            try (InputStream zipped = swapStore.openDownloadStream(projName)) {
+                repoStore.unbzip2Project(
+                        projName,
+                        zipped
+                );
+                swapStore.remove(projName);
+                dbStore.setLastAccessedTime(
+                        projName,
+                        Timestamp.valueOf(LocalDateTime.now())
+                );
+            }
         }
     }
 

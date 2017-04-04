@@ -3,8 +3,8 @@ package uk.ac.ic.wlgitbridge.bridge.repo;
 import uk.ac.ic.wlgitbridge.data.filestore.GitDirectoryContents;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
-import uk.ac.ic.wlgitbridge.git.exception.SizeLimitExceededException;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
@@ -30,5 +30,11 @@ public interface ProjectRepo {
     Collection<String> commitAndGetMissing(
             GitDirectoryContents gitDirectoryContents
     ) throws IOException;
+
+    void runGC() throws IOException;
+
+    void deleteIncomingPacks() throws IOException;
+
+    File getProjectDir();
 
 }

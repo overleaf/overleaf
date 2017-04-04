@@ -83,7 +83,7 @@ public class GitBridgeServer {
         try {
             bridge.checkDB();
             jettyServer.start();
-            bridge.startSwapJob();
+            bridge.startBackgroundJobs();
             Log.info(Util.getServiceName() + "-Git Bridge server started");
             Log.info("Listening on port: " + port);
             Log.info("Bridged to: " + apiBaseURL);

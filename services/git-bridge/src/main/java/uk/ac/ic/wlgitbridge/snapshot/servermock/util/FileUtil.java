@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.snapshot.servermock.util;
 
+import com.google.common.collect.ImmutableSet;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoHeadException;
@@ -10,9 +11,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by Winston on 11/01/15.
@@ -50,6 +51,26 @@ public class FileUtil {
                 dir2,
                 dir2.resolve(".git")
         );
+        return filesAreEqual(dir1, dir2, dir1Contents, dir2Contents);
+    }
+
+    public static boolean directoryDeepEquals(File dir, File dir_) {
+        return directoryDeepEquals(dir.toPath(), dir_.toPath());
+    }
+
+    public static boolean directoryDeepEquals(Path path, Path path_) {
+        List<Set<String>> contents = Stream.of(path, path_).map(p ->
+                getAllFilesRecursively(
+                        p, p, Collections.emptySet(), true
+                )
+        ).collect(Collectors.toList());
+        return filesAreEqual(path, path_, contents.get(0), contents.get(1));
+    }
+
+    private static boolean filesAreEqual(
+            Path dir1, Path dir2,
+            Set<String> dir1Contents, Set<String> dir2Contents
+    ) {
         boolean filesEqual = dir1Contents.equals(dir2Contents);
         if (!filesEqual) {
             System.out.println(
@@ -106,14 +127,18 @@ public class FileUtil {
             Path dir,
             Path excluded
     ) {
-        return getAllRecursivelyInDirectoryApartFrom(dir, excluded, true);
+        return getAllRecursivelyInDirectoryApartFrom(
+                dir, excluded, true
+        );
     }
 
     public static Set<String> getOnlyFilesRecursivelyInDirectoryApartFrom(
             Path dir,
             Path excluded
     ) {
-        return getAllRecursivelyInDirectoryApartFrom(dir, excluded, false);
+        return getAllRecursivelyInDirectoryApartFrom(
+                dir, excluded, false
+        );
     }
 
     private static Set<String> getAllRecursivelyInDirectoryApartFrom(
@@ -124,30 +149,40 @@ public class FileUtil {
         if (!dir.toFile().isDirectory()) {
             throw new IllegalArgumentException("need a directory");
         }
-        return getAllFilesRecursively(dir, dir, excluded, directories);
+        return getAllFilesRecursively(
+                dir, dir, ImmutableSet.of(excluded.toFile()), directories
+        );
     }
+
+    private static final Set<String> ExcludedNames = ImmutableSet.of(
+            ".DS_Store"
+    );
 
     static Set<String> getAllFilesRecursively(
             Path baseDir,
             Path dir,
-            Path excluded,
+            Set<File> excluded,
             boolean directories
     ) {
         Set<String> files = new HashSet<String>();
         for (File file : dir.toFile().listFiles()) {
-            if (!file.equals(excluded.toFile())) {
-                boolean isDirectory = file.isDirectory();
-                if (directories || !isDirectory) {
-                    files.add(baseDir.relativize(file.toPath()).toString());
-                }
-                if (isDirectory) {
-                    files.addAll(getAllFilesRecursively(
-                            baseDir,
-                            file.toPath(),
-                            excluded,
-                            directories
-                    ));
-                }
+            if (excluded.contains(file)) {
+                continue;
+            }
+            if (ExcludedNames.contains(file.getName())) {
+                continue;
+            }
+            boolean isDirectory = file.isDirectory();
+            if (directories || !isDirectory) {
+                files.add(baseDir.relativize(file.toPath()).toString());
+            }
+            if (isDirectory) {
+                files.addAll(getAllFilesRecursively(
+                        baseDir,
+                        file.toPath(),
+                        excluded,
+                        directories
+                ));
             }
         }
         return files;

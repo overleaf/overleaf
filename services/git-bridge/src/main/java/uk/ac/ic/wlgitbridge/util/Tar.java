@@ -8,14 +8,19 @@ import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Created by winston on 23/08/2016.
+ * Tar utilities.
+ *
+ * The resource returned by zip and tar are treated as unowned.
+ *
+ * The resource given to unzip is treated as unowned.
+ *
+ * Caller is responsible for all resources.
  */
 public class Tar {
 
@@ -31,23 +36,27 @@ public class Tar {
                 File fileOrDir,
                 long[] sizePtr
         ) throws IOException {
-            ByteArrayOutputStream target = new ByteArrayOutputStream();
+            File tmp = File.createTempFile(fileOrDir.getName(), ".tar.bz2");
+            tmp.deleteOnExit();
+            OutputStream target = new FileOutputStream(tmp);
+            /* Closes target */
             try (OutputStream bzip2 = new BZip2CompressorOutputStream(target)) {
                 tarTo(fileOrDir, bzip2);
             }
             if (sizePtr != null) {
-                sizePtr[0] = target.size();
+                sizePtr[0] = tmp.length();
             }
-            return target.toInputStream();
+            return new FileInputStream(tmp);
         }
 
         public static void unzip(
                 InputStream tarbz2,
                 File parentDir
         ) throws IOException {
-            try (InputStream tar = new BZip2CompressorInputStream(tarbz2)) {
-                untar(tar, parentDir);
-            }
+            /* BZip2CompressorInputStream does not need closing
+               Closing it would close tarbz2 which we should not do */
+            InputStream tar = new BZip2CompressorInputStream(tarbz2);
+            untar(tar, parentDir);
         }
 
     }
@@ -55,9 +64,12 @@ public class Tar {
     private Tar() {}
 
     public static InputStream tar(File fileOrDir) throws IOException {
-        ByteArrayOutputStream target = new ByteArrayOutputStream();
-        tarTo(fileOrDir, target);
-        return target.toInputStream();
+        File tmp = File.createTempFile(fileOrDir.getName(), ".tar");
+        tmp.deleteOnExit();
+        try (FileOutputStream target = new FileOutputStream(tmp)) {
+            tarTo(fileOrDir, target);
+            return new FileInputStream(tmp);
+        }
     }
 
     public static void tarTo(
