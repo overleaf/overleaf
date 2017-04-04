@@ -4,7 +4,7 @@ _ = require "underscore"
 logger = require "logger-sharelatex"
 LockManager = require "./LockManager"
 MongoAWS = require "./MongoAWS"
-Metrics = require "./Metrics"
+Metrics = require "metrics-sharelatex"
 ProjectIterator = require "./ProjectIterator"
 
 # Sharejs operations are stored in a 'pack' object

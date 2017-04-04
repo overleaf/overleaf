@@ -2,6 +2,8 @@
 PackManager = require "./PackManager"
 async = require "async"
 _ = require "underscore"
+metrics = require 'metrics-sharelatex'
+logger = require 'logger-sharelatex'
 
 module.exports = MongoManager =
 	getLastCompressedUpdate: (doc_id, callback = (error, update) ->) ->
@@ -92,3 +94,11 @@ module.exports = MongoManager =
 		db.docHistory.ensureIndex { last_checked: 1 }, { background: true }
 		# For finding archived packs
 		db.docHistoryIndex.ensureIndex { project_id: 1 }, { background: true }
+
+
+[
+	'getLastCompressedUpdate',
+	'getProjectMetaData',
+	'setProjectMetaData'
+].map (method) ->
+	metrics.timeAsyncMethod(MongoManager, method, 'mongo.MongoManager', logger)
