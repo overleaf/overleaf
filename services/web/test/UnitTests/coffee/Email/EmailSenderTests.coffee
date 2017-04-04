@@ -37,7 +37,7 @@ describe "EmailSender", ->
 				log:->
 				warn:->
 				err:->
-			"../../infrastructure/Metrics": inc:->
+			"metrics-sharelatex": inc:->
 
 
 

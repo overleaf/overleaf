@@ -1,6 +1,6 @@
 child   = require "child_process"
 logger  = require "logger-sharelatex"
-metrics = require "../../infrastructure/Metrics"
+metrics = require "metrics-sharelatex"
 fs      = require "fs"
 Path    = require "path"
 _ = require("underscore")

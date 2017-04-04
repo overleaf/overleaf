@@ -42,7 +42,7 @@ describe "CompileController", ->
 			"request": @request = sinon.stub()
 			"../../models/Project": Project: @Project = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
-			"../../infrastructure/Metrics": @Metrics =  { inc: sinon.stub() }
+			"metrics-sharelatex": @Metrics =  { inc: sinon.stub() }
 			"./CompileManager":@CompileManager
 			"../User/UserGetter":@UserGetter
 			"./ClsiManager": @ClsiManager

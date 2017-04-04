@@ -1,8 +1,10 @@
 mongojs = require("../../infrastructure/mongojs")
+metrics = require("metrics-sharelatex")
 db = mongojs.db
 ObjectId = mongojs.ObjectId
+logger = require('logger-sharelatex')
 
-module.exports =
+module.exports = UserLocator =
 
 	findByEmail: (email, callback)->
 		email = email.trim()
@@ -11,3 +13,9 @@ module.exports =
 
 	findById: (_id, callback)->
 		db.users.findOne _id:ObjectId(_id+""), callback
+
+[
+	'findById',
+	'findByEmail'
+].map (method) ->
+	metrics.timeAsyncMethod UserLocator, method, 'mongo.UserLocator', logger

@@ -2,7 +2,7 @@ Path = require "path"
 express = require('express')
 Settings = require('settings-sharelatex')
 logger = require 'logger-sharelatex'
-metrics = require('./Metrics')
+metrics = require('metrics-sharelatex')
 crawlerLogger = require('./CrawlerLogger')
 expressLocals = require('./ExpressLocals')
 Router = require('../router')
@@ -39,8 +39,6 @@ ErrorController = require "../Features/Errors/ErrorController"
 UserSessionsManager = require "../Features/User/UserSessionsManager"
 AuthenticationController = require "../Features/Authentication/AuthenticationController"
 
-metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongojs/node_modules/mongodb"), logger)
-metrics.mongodb.monitor(Path.resolve(__dirname + "/../../../node_modules/mongoose/node_modules/mongodb"), logger)
 
 metrics.event_loop?.monitor(logger)
 

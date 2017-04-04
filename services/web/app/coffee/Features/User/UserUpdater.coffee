@@ -1,5 +1,6 @@
 logger = require("logger-sharelatex")
 mongojs = require("../../infrastructure/mongojs")
+metrics = require("metrics-sharelatex")
 db = mongojs.db
 ObjectId = mongojs.ObjectId
 UserLocator = require("./UserLocator")
@@ -28,3 +29,5 @@ module.exports = UserUpdater =
 					return callback(err)
 				callback()
 
+
+metrics.timeAsyncMethod UserUpdater, 'updateUser', 'mongo.UserUpdater', logger

@@ -24,7 +24,7 @@ describe 'UpdateMerger :', ->
 			'logger-sharelatex':
 				log: ->
 				err: ->
-			"../../infrastructure/Metrics": 
+			"metrics-sharelatex": 
 				Timer:->
 					done:->
 		@project_id = "project_id_here"

@@ -1,4 +1,5 @@
 mongojs = require("../../infrastructure/mongojs")
+metrics = require("metrics-sharelatex")
 db = mongojs.db
 ObjectId = mongojs.ObjectId
 async = require "async"
@@ -57,3 +58,10 @@ module.exports = ProjectGetter =
 			CollaboratorsHandler.getProjectsUserIsCollaboratorOf user_id, fields, (error, readAndWriteProjects, readOnlyProjects) ->
 				return callback(error) if error?
 				callback null, projects, readAndWriteProjects, readOnlyProjects
+
+
+[
+	'getProject',
+	'getProjectWithoutDocLines'
+].map (method) ->
+	metrics.timeAsyncMethod(ProjectGetter, method, 'mongo.ProjectGetter', logger)

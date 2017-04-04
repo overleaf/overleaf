@@ -65,7 +65,7 @@ describe "ProjectController", ->
 			"logger-sharelatex":
 				log:->
 				err:->
-			"../../infrastructure/Metrics":
+			"metrics-sharelatex":
 				Timer:->
 					done:->
 				inc:->

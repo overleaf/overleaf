@@ -16,6 +16,7 @@ describe "ProjectGetter", ->
 					projects: {}
 					users: {}
 				ObjectId: ObjectId
+			"metrics-sharelatex": timeAsyncMethod: sinon.stub()
 			"../../models/Project": Project: @Project = {}
 			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler = {}
 			"logger-sharelatex":
