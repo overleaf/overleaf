@@ -9,7 +9,6 @@ Path       = require "path"
 
 Metrics.initialize("docstore")
 logger.initialize("docstore")
-Metrics.mongodb.monitor(Path.resolve(__dirname + "/node_modules/mongojs/node_modules/mongodb"), logger)
 Metrics.event_loop?.monitor(logger)
 
 app = express()
