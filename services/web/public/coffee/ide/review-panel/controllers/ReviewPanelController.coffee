@@ -24,7 +24,6 @@ define [
 				loading: false
 			commentThreads: {}
 			resolvedThreadIds: {}
-			layoutToLeft: false
 			rendererData: {}
 			loadingThreads: false
 
@@ -37,11 +36,9 @@ define [
 			localStorage("docs_collapsed_state:#{$scope.project_id}", valToStore)
 
 		$scope.$on "layout:pdf:linked", (event, state) ->
-			$scope.reviewPanel.layoutToLeft = (state.east?.size < 220 || state.east?.initClosed)
 			$scope.$broadcast "review-panel:layout"
 
 		$scope.$on "layout:pdf:resize", (event, state) ->
-			$scope.reviewPanel.layoutToLeft = (state.east?.size < 220 || state.east?.initClosed)
 			$scope.$broadcast "review-panel:layout", false
 
 		$scope.$on "expandable-text-area:resize", (event) ->
@@ -50,9 +47,6 @@ define [
 
 		$scope.$on "review-panel:sizes", (e, sizes) ->
 			$scope.$broadcast "editor:set-scroll-size", sizes
-
-		$scope.$watch "ui.pdfLayout", (layout) ->
-			$scope.reviewPanel.layoutToLeft = (layout == "flat")
 		
 		$scope.$watch "project.features.trackChangesVisible", (visible) ->
 			return if !visible?

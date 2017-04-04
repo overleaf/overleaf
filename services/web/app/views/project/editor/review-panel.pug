@@ -81,8 +81,6 @@
 						on-start-new="startNewComment();"
 						on-submit="submitNewComment(content);"
 						on-cancel="cancelNewComment();"
-						on-indicator-click="toggleReviewPanel();"
-						layout-to-left="reviewPanel.layoutToLeft"
 					)
 
 	.rp-entry-list(
@@ -322,14 +320,6 @@ script(type='text/ng-template', id='resolvedCommentEntryTemplate')
 script(type='text/ng-template', id='addCommentEntryTemplate')
 	div
 		.rp-entry-callout.rp-entry-callout-add-comment
-		.rp-entry-indicator.rp-entry-indicator-add-comment(
-			ng-if="!commentState.adding"
-			ng-click="startNewComment(); onIndicatorClick();"
-			tooltip=translate("add_comment")
-			tooltip-placement="{{ layoutToLeft ? 'left' : 'right' }}"
-			tooltip-append-to-body="true"
-		)
-			i.fa.fa-commenting
 		.rp-entry.rp-entry-add-comment(
 			ng-class="[ (state.isAdding ? 'rp-entry-adding-comment' : ''), (entry.focused ? 'rp-entry-focused' : '')]"
 		)
