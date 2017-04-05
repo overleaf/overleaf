@@ -8,8 +8,6 @@ define [
 			onStartNew: "&"
 			onSubmit: "&"
 			onCancel: "&"
-			onIndicatorClick: "&"	
-			layoutToLeft: "="
 		link: (scope, element, attrs) ->
 			scope.state =
 				isAdding: false

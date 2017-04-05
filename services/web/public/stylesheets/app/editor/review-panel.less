@@ -96,10 +96,12 @@
 		flex-direction: column;
 		width: @review-panel-width;
 		overflow: visible;
+		border-left-width: 1px;
 	}
 	.rp-size-mini & {
 		width: @review-off-width;
 		z-index: 6;
+		border-left-width: 1px;
 	}
 	
 	position: absolute;
@@ -107,7 +109,7 @@
 	bottom: 0px;
 	right: 0px;
 	background-color: @rp-bg-blue;
-	border-left: solid 1px @rp-border-grey;
+	border-left: solid 0px @rp-border-grey;
 	font-size: @rp-base-font-size;
 	color: @rp-type-blue;
 	z-index: 6;
@@ -181,6 +183,9 @@
 	.rp-size-mini & {
 		display: block;
 	}
+	.rp-size-mini &-add-comment {
+		display: none;
+	}
 	position: absolute;
 	left: 2px;
 	right: 2px;
@@ -200,9 +205,6 @@
 		z-index: 1;
 	}
 
-	.rp-new-comment-ui &-add-comment {
-		display: none;
-	}
 }
 
 .rp-entry-wrapper {
@@ -576,7 +578,7 @@
 		}
 	}
 
-	.rp-size-mini.rp-new-comment-ui &-add-comment {
+	.rp-size-mini &-add-comment {
 		display: none;
 	}
 }
