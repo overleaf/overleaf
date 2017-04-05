@@ -127,15 +127,13 @@ define [
 				ace.require("ace/lib/event").addMouseWheelListener scroller[0], (e) ->
 					deltaY = e.wheelY
 					old_top = parseInt(list.css("top"))
-					top = Math.min(0, old_top - deltaY * 4)
-					list.css(top: top)
+					top = old_top - deltaY * 4
 					scrollAce(-top)
 					e.preventDefault()
 
-				# Use these to avoid unnecessary updates. Scrolling one
-				# panel causes us to scroll the other panel, but there's no
-				# need to trigger the event back to the original panel.
-				ignoreNextPanelEvent = false
+				# We always scroll by telling Ace to scroll and then updating the 
+				# review panel. This lets Ace manage the size of the scroller and
+				# when it overflows.
 				ignoreNextAceEvent = false
 
 				scrollPanel = (scrollTop, height) ->
@@ -148,11 +146,7 @@ define [
 						list.css(top: - scrollTop)
 			
 				scrollAce = (scrollTop) ->
-					if ignoreNextPanelEvent
-						ignoreNextPanelEvent = false
-					else
-						ignoreNextAceEvent = true
-						scope.reviewPanelEventsBridge.emit "externalScroll", scrollTop
+					scope.reviewPanelEventsBridge.emit "externalScroll", scrollTop
 				
 				scope.reviewPanelEventsBridge.on "aceScroll", scrollPanel
 				scope.$on "$destroy", () ->
