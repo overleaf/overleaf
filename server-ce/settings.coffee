@@ -101,6 +101,9 @@ settings =
 	# 		secret: "AWS_SECRET"
 	# 		
 
+	trackchanges:
+		continueOnError: true
+
 	# Local disk caching
 	# ------------------
 	path:
