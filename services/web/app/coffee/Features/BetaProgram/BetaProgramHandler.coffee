@@ -1,6 +1,6 @@
 User = require("../../models/User").User
 logger = require 'logger-sharelatex'
-metrics = require("../../infrastructure/Metrics")
+metrics = require("metrics-sharelatex")
 
 module.exports = BetaProgramHandler =
 

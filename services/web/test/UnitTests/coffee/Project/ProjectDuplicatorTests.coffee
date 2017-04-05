@@ -9,7 +9,7 @@ describe 'ProjectDuplicator', ->
 		@level2folder =
 			name: "level2folderName"
 			_id:"level2folderId"
-			docs:[@doc2 = {_id: "doc2_id", name:"level2folderDocName"}]
+			docs:[@doc2 = {_id: "doc2_id", name:"level2folderDocName"}, undefined]
 			folders:[]
 			fileRefs:[{name:"file2", _id:"file2"}]
 		@level1folder =
@@ -17,12 +17,12 @@ describe 'ProjectDuplicator', ->
 			_id:"level1folderId"
 			docs:[@doc1 = {_id: "doc1_id", name:"level1folderDocName"}]
 			folders:[@level2folder]
-			fileRefs:[{name:"file1", _id:"file1"}]
+			fileRefs:[{name:"file1", _id:"file1"}, null]
 		@rootFolder = 
 			name:"rootFolder"
 			_id:"rootFolderId"
 			docs:[@doc0 = {_id: "doc0_id", name:"rootDocHere"}]
-			folders:[@level1folder]
+			folders:[@level1folder, {}]
 			fileRefs:[{name:"file0", _id:"file0"}]
 		@project = 
 			_id: @old_project_id = "this_is_the_old_project_id"
@@ -117,7 +117,7 @@ describe 'ProjectDuplicator', ->
 			@projectOptionsHandler.setCompiler.calledWith(@stubbedNewProject._id, @project.compiler).should.equal true
 			done()
 	
-	it 'should use the same root docccccccc', (done)->
+	it 'should use the same root doc', (done)->
 		@entityHandler.addDocWithProject.callsArgWith(4, null, @rootFolder.docs[0])
 		@duplicator.duplicate @owner, @old_project_id, "", (err, newProject)=>
 			@entityHandler.setRootDoc.calledWith(@stubbedNewProject._id, @rootFolder.docs[0]._id).should.equal true

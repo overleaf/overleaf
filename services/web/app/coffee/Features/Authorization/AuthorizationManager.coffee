@@ -4,6 +4,8 @@ User = require("../../models/User").User
 PrivilegeLevels = require("./PrivilegeLevels")
 PublicAccessLevels = require("./PublicAccessLevels")
 Errors = require("../Errors/Errors")
+ObjectId = require("mongojs").ObjectId
+
 
 module.exports = AuthorizationManager =
 	# Get the privilege level that the user has for the project
@@ -13,6 +15,8 @@ module.exports = AuthorizationManager =
 	#   * becausePublic: true if the access level is only because the project is public.
 	getPrivilegeLevelForProject: (user_id, project_id, callback = (error, privilegeLevel, becausePublic) ->) ->
 		getPublicAccessLevel = () ->
+			if !ObjectId.isValid(project_id)
+				return callback(new Error("invalid project id"))
 			Project.findOne { _id: project_id }, { publicAccesLevel: 1 }, (error, project) ->
 				return callback(error) if error?
 				if !project?

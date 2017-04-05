@@ -19,7 +19,8 @@ div.full-size(
 			'rp-size-mini': (!ui.reviewPanelOpen && reviewPanel.hasEntries),\
 			'rp-size-expanded': ui.reviewPanelOpen,\
 			'rp-layout-left': reviewPanel.layoutToLeft,\
-			'rp-loading-threads': reviewPanel.loadingThreads\
+			'rp-loading-threads': reviewPanel.loadingThreads,\
+			'rp-new-comment-ui': reviewPanel.newAddCommentUI\
 		}"
 	)
 		.loading-panel(ng-show="!editor.sharejs_doc || editor.opening")

@@ -30,6 +30,11 @@ header.toolbar.toolbar-header.toolbar-with-labels(
 		span.name(
 			ng-dblclick="!permissions.admin || startRenaming()",
 			ng-show="!state.renaming"
+			tooltip="{{ project.name }}",
+			tooltip-class="project-name-tooltip"
+			tooltip-placement="bottom",
+			tooltip-append-to-body="true",
+			tooltip-enable="state.overflowed"
 		) {{ project.name }}
 
 		input.form-control(
@@ -94,7 +99,6 @@ header.toolbar.toolbar-header.toolbar-with-labels(
 			i.review-icon
 			p.toolbar-label
 				| #{translate("review")}
-				span(style="vertical-align: 20%; margin-left: 4px; padding: 2px 4px;").beta-feature-badge
 		a.btn.btn-full-height(
 			href,
 			ng-if="permissions.admin",

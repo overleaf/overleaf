@@ -4,7 +4,7 @@ projectDeleter = require("./ProjectDeleter")
 projectDuplicator = require("./ProjectDuplicator")
 projectCreationHandler = require("./ProjectCreationHandler")
 editorController = require("../Editor/EditorController")
-metrics = require('../../infrastructure/Metrics')
+metrics = require('metrics-sharelatex')
 User = require('../../models/User').User
 TagsHandler = require("../Tags/TagsHandler")
 SubscriptionLocator = require("../Subscription/SubscriptionLocator")
@@ -224,6 +224,11 @@ module.exports = ProjectController =
 				cb = underscore.once(cb)
 				if !user_id?
 					return cb()
+				timestamp = user_id.toString().substring(0,8)
+				userSignupDate = new Date( parseInt( timestamp, 16 ) * 1000 )
+				if userSignupDate > new Date("2017-03-09") # 8th March
+					# Don't show for users who registered after it was released
+					return cb(null, false)
 				timeout = setTimeout cb, 500
 				AnalyticsManager.getLastOccurance user_id, "shown-track-changes-onboarding-2", (error, event) ->
 					clearTimeout timeout

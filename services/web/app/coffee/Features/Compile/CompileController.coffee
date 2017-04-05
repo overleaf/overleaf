@@ -1,4 +1,4 @@
-Metrics = require "../../infrastructure/Metrics"
+Metrics = require "metrics-sharelatex"
 Project = require("../../models/Project").Project
 CompileManager = require("./CompileManager")
 ClsiManager = require("./ClsiManager")

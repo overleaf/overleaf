@@ -14,6 +14,18 @@
 @import "./editor/review-panel.less";
 @import "./editor/feature-onboarding.less";
 
+@keyframes blink {
+	0% { 
+		opacity: 0.2;
+	}
+	20% { 
+		opacity: 1;
+	}
+	100% { 
+		opacity: 0.2;
+	}
+}
+
 .full-size {
 	position: absolute;
 	top: 0;
@@ -26,15 +38,22 @@
 	position: absolute;
 	z-index: 20;
 	top: 2px;
-	width: 400px;
-	left: 50%;
-	margin-left: -200px;
+	left: 0;
+	right: 0;
+	text-align: center;
+
 	.alert {
+		display: inline-block;
+		text-align: left;
+		min-width: 400px;
 		padding: (@line-height-computed / 4);
 		font-size: 14px;
 		margin-bottom: (@line-height-computed / 4);
 	}
 }
+	#try-reconnect-now-button {
+		margin-left: 20px;
+	}
 
 #ide-body {
 	.full-size;
@@ -46,24 +65,59 @@
 }
 
 .loading-screen {
-	h3 {
-		padding-top: 136px;
-		background-image: url(/img/lion-128.png);
-		background-repeat: no-repeat;
-		background-position: top center;
-	}
-	.full-size;
-	background-color: #fafafa;
-	.container {
-		text-align: center;
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		width: 400px;
-		margin-left: -200px;
-		margin-top: -200px;
-	}
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	height: 100%;
+	background-color: #FFF;
 }
+	.loading-screen-lion-container {
+		width: 15%;
+		min-width: 200px;
+		text-align: center;
+	}
+		.loading-screen-lion {
+			position: relative;
+			width: 100%;
+			padding-top: 86.2%;
+			height: 0;
+			background: url(/img/brand/lion-grey.svg) no-repeat bottom / 100%;
+
+    		&::after {
+				content: '';
+				position: absolute;
+				height: inherit;
+				right: 0;
+				bottom: 0;
+				left: 0;
+				background: url(/img/brand/lion.svg) no-repeat bottom / 100%;
+				transition: height .5s;
+    		}
+		}
+		.loading-screen-label {
+			margin: 0;
+			padding-top: 1em;
+			font-size: 2em;
+			color: @gray-dark;
+		}
+			.loading-screen-ellip {
+				animation: blink 1.4s both infinite;
+				&:nth-child(2) {
+					animation-delay: 0.2s;
+				}
+				&:nth-child(3) {
+					animation-delay: 0.4s;
+				}
+			}
+
+		.loading-screen-error {
+			margin: 0;
+			padding-top: 1em;
+			color: @state-danger-text;
+		}
+
 
 .loading-panel {
 	.full-size;

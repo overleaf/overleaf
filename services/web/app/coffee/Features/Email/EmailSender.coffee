@@ -1,5 +1,5 @@
 logger = require('logger-sharelatex')
-metrics = require('../../infrastructure/Metrics')
+metrics = require('metrics-sharelatex')
 Settings = require('settings-sharelatex')
 nodemailer = require("nodemailer")
 sesTransport = require('nodemailer-ses-transport')
@@ -72,6 +72,7 @@ module.exports =
 			client.sendMail options, (err, res)->
 				if err?
 					logger.err err:err, "error sending message"
+					err = new Error('Cannot send email')
 				else
 					logger.log "Message sent to #{options.to}"
 				callback(err)

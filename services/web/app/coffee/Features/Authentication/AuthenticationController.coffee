@@ -2,7 +2,7 @@ AuthenticationManager = require ("./AuthenticationManager")
 LoginRateLimiter = require("../Security/LoginRateLimiter")
 UserGetter = require "../User/UserGetter"
 UserUpdater = require "../User/UserUpdater"
-Metrics = require('../../infrastructure/Metrics')
+Metrics = require('metrics-sharelatex')
 logger = require("logger-sharelatex")
 querystring = require('querystring')
 Url = require("url")
@@ -87,6 +87,7 @@ module.exports = AuthenticationController =
 					LoginRateLimiter.recordSuccessfulLogin(email)
 					AuthenticationController._recordSuccessfulLogin(user._id)
 					Analytics.recordEvent(user._id, "user-logged-in", {ip:req.ip})
+					Analytics.identifyUser(user._id, req.sessionID)
 					logger.log email: email, user_id: user._id.toString(), "successful log in"
 					req.session.justLoggedIn = true
 					# capture the request ip for use when creating the session

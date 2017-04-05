@@ -17,7 +17,7 @@ describe "ProjectDownloadsController", ->
 		@ProjectDownloadsController = SandboxedModule.require modulePath, requires:
 			"./ProjectZipStreamManager"   : @ProjectZipStreamManager = {}
 			"../../models/Project"        : Project: @Project = {}
-			"../../infrastructure/Metrics": @metrics = {}
+			"metrics-sharelatex": @metrics = {}
 			"logger-sharelatex"           : @logger = {log: sinon.stub()}
 			"../DocumentUpdater/DocumentUpdaterHandler": @DocumentUpdaterHandler
 

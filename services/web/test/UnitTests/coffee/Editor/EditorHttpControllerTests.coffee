@@ -15,7 +15,7 @@ describe "EditorHttpController", ->
 			"./EditorRealTimeController": @EditorRealTimeController = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"./EditorController": @EditorController = {}
-			'../../infrastructure/Metrics': @Metrics = {inc: sinon.stub()}
+			'metrics-sharelatex': @Metrics = {inc: sinon.stub()}
 			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler = {}
 			"../Collaborators/CollaboratorsInviteHandler": @CollaboratorsInviteHandler = {}
 

@@ -16,7 +16,7 @@ describe "AuthenticationController", ->
 			"./AuthenticationManager": @AuthenticationManager = {}
 			"../User/UserGetter" : @UserGetter = {}
 			"../User/UserUpdater" : @UserUpdater = {}
-			"../../infrastructure/Metrics": @Metrics = { inc: sinon.stub() }
+			"metrics-sharelatex": @Metrics = { inc: sinon.stub() }
 			"../Security/LoginRateLimiter": @LoginRateLimiter = { processLoginRequest:sinon.stub(), recordSuccessfulLogin:sinon.stub() }
 			"../User/UserHandler": @UserHandler = {setupLoginData:sinon.stub()}
 			"../Analytics/AnalyticsManager": @AnalyticsManager = { recordEvent: sinon.stub() }
@@ -254,12 +254,17 @@ describe "AuthenticationController", ->
 				@cb = sinon.stub()
 				@LoginRateLimiter.processLoginRequest.callsArgWith(1, null, true)
 				@AuthenticationManager.authenticate = sinon.stub().callsArgWith(2, null, @user)
+				@req.sessionID = Math.random()
+				@AnalyticsManager.identifyUser = sinon.stub()
 				@AuthenticationController.doPassportLogin(@req, @req.body.email, @req.body.password, @cb)
 
 			it "should attempt to authorise the user", ->
 				@AuthenticationManager.authenticate
 					.calledWith(email: @email.toLowerCase(), @password)
 					.should.equal true
+
+			it "should call identifyUser", ->
+				@AnalyticsManager.identifyUser.calledWith(@user._id, @req.sessionID).should.equal true
 
 			it "should setup the user data in the background", ->
 				@UserHandler.setupLoginData.calledWith(@user).should.equal true

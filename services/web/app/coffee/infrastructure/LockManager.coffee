@@ -1,4 +1,4 @@
-metrics = require('./Metrics')
+metrics = require('metrics-sharelatex')
 Settings = require('settings-sharelatex')
 redis = require("redis-sharelatex")
 rclient = redis.createClient(Settings.redis.web)

@@ -17,7 +17,7 @@ file1 = name:"file1", _id:"dsa9lkdsad"
 subSubFile = name:"subSubFile", _id:"d1d2dk"
 subSubDoc = name:"subdoc.txt", _id:"321dmdwi"
 secondSubFolder = name:"secondSubFolder", _id:"dsa3e23", docs:[subSubDoc], fileRefs:[subSubFile], folders:[]
-subFolder = name:"subFolder", _id:"dsadsa93", folders:[secondSubFolder], docs:[], fileRefs:[]
+subFolder = name:"subFolder", _id:"dsadsa93", folders:[secondSubFolder, null], docs:[], fileRefs:[]
 subFolder1 = name:"subFolder1", _id:"123asdjoij"
 
 rootFolder =

@@ -13,6 +13,9 @@ module.exports = FileStoreHandler =
 			if err?
 				logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "error stating file"
 				callback(err)
+			if !stat?
+				logger.err project_id:project_id, file_id:file_id, fsPath:fsPath, "stat is not available, can not check file from disk"
+				return callback(new Error("error getting stat, not available"))
 			if !stat.isFile()
 				logger.log project_id:project_id, file_id:file_id, fsPath:fsPath, "tried to upload symlink, not contining"
 				return callback(new Error("can not upload symlink"))
@@ -25,10 +28,19 @@ module.exports = FileStoreHandler =
 				timeout:fiveMinsInMs
 			writeStream = request(opts)
 			readStream.pipe writeStream
-			writeStream.on "end", callback
+
+			writeStream.on 'response', (response) ->
+				if response.statusCode not in [200, 201]
+					err = new Error("non-ok response from filestore for upload: #{response.statusCode}")
+					logger.err {err, statusCode: response.statusCode}, "error uploading to filestore"
+					callback(err)
+				else
+					callback(null)
+
 			readStream.on "error", (err)->
 				logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "something went wrong on the read stream of uploadFileFromDisk"
 				callback err
+
 			writeStream.on "error", (err)->
 				logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "something went wrong on the write stream of uploadFileFromDisk"
 				callback err

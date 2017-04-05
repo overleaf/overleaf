@@ -64,7 +64,7 @@ describe "EditorController", ->
 			"settings-sharelatex":@settings
 			'../Dropbox/DropboxProjectLinker':@dropboxProjectLinker
 			'./EditorRealTimeController':@EditorRealTimeController = {}
-			"../../infrastructure/Metrics": @Metrics = { inc: sinon.stub() }
+			"metrics-sharelatex": @Metrics = { inc: sinon.stub() }
 			"../TrackChanges/TrackChangesManager": @TrackChangesManager = {}
 			"../../infrastructure/LockManager":@LockManager
 			'redis-sharelatex':createClient:-> auth:->

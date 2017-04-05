@@ -1,5 +1,5 @@
 logger = require('logger-sharelatex')
-Metrics = require('../../infrastructure/Metrics')
+Metrics = require('metrics-sharelatex')
 sanitize = require('sanitizer')
 ProjectEntityHandler = require('../Project/ProjectEntityHandler')
 ProjectOptionsHandler = require('../Project/ProjectOptionsHandler')

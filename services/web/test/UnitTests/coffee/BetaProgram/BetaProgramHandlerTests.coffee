@@ -26,7 +26,7 @@ describe 'BetaProgramHandler', ->
 				log: sinon.stub()
 				err: sinon.stub()
 			},
-			"../../infrastructure/Metrics": @logger = {
+			"metrics-sharelatex": @logger = {
 				inc: sinon.stub()
 			}
 

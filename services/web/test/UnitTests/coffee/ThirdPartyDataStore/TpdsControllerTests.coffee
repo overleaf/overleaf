@@ -14,7 +14,7 @@ describe 'TpdsController', ->
 			'logger-sharelatex':
 				log:->
 				err:->
-			"../../infrastructure/Metrics": inc:->
+			"metrics-sharelatex": inc:->
 				
 		@user_id = "dsad29jlkjas"
 

@@ -3,7 +3,7 @@ logger = require('logger-sharelatex')
 path = require('path')
 Project = require('../../models/Project').Project
 keys = require('../../infrastructure/Keys')
-metrics = require("../../infrastructure/Metrics")
+metrics = require("metrics-sharelatex")
 request = require("request")
 CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
 

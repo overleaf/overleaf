@@ -1030,3 +1030,35 @@ describe "RecurlyWrapper", ->
 					@call (err, result) =>
 						expect(err).to.be.instanceof Error
 						done()
+
+	describe "listAccountActiveSubscriptions", ->
+		beforeEach ->
+			@user_id = "mock-user-id"
+			@callback = sinon.stub()
+			@RecurlyWrapper.apiRequest = sinon.stub().yields(null, @response = {"mock": "response"}, @body = "<mock body/>")
+			@RecurlyWrapper._parseSubscriptionsXml = sinon.stub().yields(null, @subscriptions = ["mock", "subscriptions"])
+			
+		describe "with an account", ->
+			beforeEach ->
+				@RecurlyWrapper.listAccountActiveSubscriptions @user_id, @callback
+			
+			it "should send a request to Recurly", ->
+				@RecurlyWrapper.apiRequest
+					.calledWith({
+						url: "accounts/#{@user_id}/subscriptions"
+						qs:
+							state: "active"
+						expect404: true
+					})
+					.should.equal true
+
+			it "should return the subscriptions", ->
+				@callback.calledWith(null, @subscriptions).should.equal true
+			
+		describe "without an account", ->
+			beforeEach ->
+				@response.statusCode = 404
+				@RecurlyWrapper.listAccountActiveSubscriptions @user_id, @callback
+
+			it "should return an empty array of subscriptions", ->
+				@callback.calledWith(null, []).should.equal true
