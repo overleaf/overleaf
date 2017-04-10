@@ -146,7 +146,7 @@ define [], () ->
 			else
 				@ide.socket.disconnect()
 				@ide.showGenericMessageModal("Something went wrong connecting", """
-					Something went wrong connecting to your project. Please refresh is this continues to happen.
+					Something went wrong connecting to your project. Please refresh if this continues to happen.
 				""")
 
 		joinProject: () ->
@@ -157,7 +157,7 @@ define [], () ->
 			@ide.socket.emit 'joinProject', {
 				project_id: @ide.project_id
 			}, (err, project, permissionsLevel, protocolVersion) =>
-				if err?
+				if err? or !project?
 					return @reportConnectionError(err)
 
 				if @$scope.protocolVersion? and @$scope.protocolVersion != protocolVersion
