@@ -315,7 +315,10 @@ module.exports = ProjectEntityHandler =
 					if modified
 						# Don't need to block for marking as updated
 						projectUpdateHandler.markAsUpdated project_id
-						tpdsUpdateSender.addDoc {project_id:project_id, path:path.fileSystem, doc_id:doc_id, project_name:project.name, rev:rev}, callback
+						tpdsUpdateSender.addDoc {project_id:project_id, path:path.fileSystem, doc_id:doc_id, project_name:project.name, rev:rev}, (error) ->
+							if error?
+								logger.err {err: error, project_id, doc_id, version}, "error sending doc to tpds, but continuing"
+							callback()
 					else
 						callback()
 
