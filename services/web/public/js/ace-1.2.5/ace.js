@@ -2283,9 +2283,13 @@ var TextInput = function(parentNode, host) {
         if (e.type == "compositionend" && c.range) {
             host.selection.setRange(c.range);
         }
-        // WORKAROUND: Accent keys and Korean keys don't work in Chrome >53.
-        // https://github.com/ajaxorg/ace/issues/3045
-        if (useragent.isChrome >= 53) onInput();
+        var needsOnInput =
+            (!!useragent.isChrome && useragent.isChrome >= 53) ||
+            (!!useragent.isWebKit && useragent.isWebKit >= 603);
+
+        if (needsOnInput) {
+          onInput();
+        }
     };
     
     

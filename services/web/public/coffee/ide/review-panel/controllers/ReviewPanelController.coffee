@@ -4,7 +4,7 @@ define [
 	"ide/colors/ColorManager"
 	"ide/review-panel/RangesTracker"
 ], (App, EventEmitter, ColorManager, RangesTracker) ->
-	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout, $http, $modal, event_tracking, sixpack, localStorage) ->
+	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout, $http, $modal, event_tracking, localStorage) ->
 		$reviewPanelEl = $element.find "#review-panel"
 
 		$scope.SubViews =
@@ -24,17 +24,8 @@ define [
 				loading: false
 			commentThreads: {}
 			resolvedThreadIds: {}
-			layoutToLeft: false
 			rendererData: {}
 			loadingThreads: false
-			newAddCommentUI: false # Test new UI for adding comments; remove afterwards.
-
-		$scope.shouldABAddCommentBtn = false
-		if $scope.user.signUpDate >= '2017-03-27'
-			sixpack.participate "add-comment-btn", [ "default", "editor-corner" ], (variation) ->
-				$scope.shouldABAddCommentBtn = true
-				$scope.variationABAddCommentBtn = variation
-				$scope.reviewPanel.newAddCommentUI = (variation == "editor-corner")
 
 		window.addEventListener "beforeunload", () ->
 			collapsedStates = {}
@@ -45,11 +36,9 @@ define [
 			localStorage("docs_collapsed_state:#{$scope.project_id}", valToStore)
 
 		$scope.$on "layout:pdf:linked", (event, state) ->
-			$scope.reviewPanel.layoutToLeft = (state.east?.size < 220 || state.east?.initClosed)
 			$scope.$broadcast "review-panel:layout"
 
 		$scope.$on "layout:pdf:resize", (event, state) ->
-			$scope.reviewPanel.layoutToLeft = (state.east?.size < 220 || state.east?.initClosed)
 			$scope.$broadcast "review-panel:layout", false
 
 		$scope.$on "expandable-text-area:resize", (event) ->
@@ -58,9 +47,6 @@ define [
 
 		$scope.$on "review-panel:sizes", (e, sizes) ->
 			$scope.$broadcast "editor:set-scroll-size", sizes
-
-		$scope.$watch "ui.pdfLayout", (layout) ->
-			$scope.reviewPanel.layoutToLeft = (layout == "flat")
 		
 		$scope.$watch "project.features.trackChangesVisible", (visible) ->
 			return if !visible?
@@ -173,7 +159,7 @@ define [
 			entries = $scope.reviewPanel.entries[$scope.editor.open_doc_id] or {}
 			permEntries = {}
 			for entry, entryData of entries
-				if entry != "add-comment" or !$scope.reviewPanel.newAddCommentUI
+				if entry != "add-comment"
 					permEntries[entry] = entryData 
 			Object.keys(permEntries).length
 		), (nEntries) ->
@@ -336,8 +322,6 @@ define [
 			$scope.$broadcast "comment:select_line"
 			$timeout () ->
 				$scope.$broadcast "review-panel:layout"
-			if $scope.shouldABAddCommentBtn and !$scope.ui.reviewPanelOpen
-				sixpack.convert "add-comment-btn"
 
 		$scope.submitNewComment = (content) ->
 			return if !content? or content == ""
