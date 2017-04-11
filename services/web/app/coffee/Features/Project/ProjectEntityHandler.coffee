@@ -138,8 +138,7 @@ module.exports = ProjectEntityHandler =
 						project_name: project.name,
 						rev:          0
 					}, (err) ->
-						if err?
-							logger.err err:err, "error adding doc to tpdsworker, contining anyway"
+						return callback(err) if err?
 						callback(null, doc, folder_id)
 
 	restoreDoc: (project_id, doc_id, name, callback = (error, doc, folder_id) ->) ->
@@ -170,9 +169,8 @@ module.exports = ProjectEntityHandler =
 					if err?
 						logger.err err:err, project_id: project._id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error adding file with project"
 						return callback(err)
-					tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:result?.path?.fileSystem, project_name:project.name, rev:fileRef.rev}, (err)->
-						if err?
-							logger.err err:err, project_id: project._id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error sending file to tpdsworker"
+					tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:result?.path?.fileSystem, project_name:project.name, rev:fileRef.rev}, (err) ->
+						return callback(err) if err?
 						callback(null, fileRef, folder_id)
 
 	replaceFile: (project_id, file_id, fsPath, callback)->
@@ -315,10 +313,7 @@ module.exports = ProjectEntityHandler =
 					if modified
 						# Don't need to block for marking as updated
 						projectUpdateHandler.markAsUpdated project_id
-						tpdsUpdateSender.addDoc {project_id:project_id, path:path.fileSystem, doc_id:doc_id, project_name:project.name, rev:rev}, (error) ->
-							if error?
-								logger.err {err: error, project_id, doc_id, version}, "error sending doc to tpds, but continuing"
-							callback()
+						tpdsUpdateSender.addDoc {project_id:project_id, path:path.fileSystem, doc_id:doc_id, project_name:project.name, rev:rev}, callback
 					else
 						callback()
 
