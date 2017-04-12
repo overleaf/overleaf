@@ -71,6 +71,19 @@ module.exports = (app, webRouter, apiRouter)->
 		res.locals.session = req.session
 		next()
 
+	addSetContentDisposition = (req, res, next) ->
+		res.setContentDisposition = (type, opts) ->
+			directives = for k, v of opts
+				"#{k}=\"#{encodeURIComponent(v)}\""
+			contentDispositionValue = "#{type}; #{directives.join('; ')}"
+			res.setHeader(
+				'Content-Disposition',
+				contentDispositionValue
+			)
+		next()
+	webRouter.use addSetContentDisposition
+	apiRouter.use addSetContentDisposition
+
 	webRouter.use (req, res, next)->
 
 		cdnBlocked = req.query.nocdn == 'true' or req.session.cdnBlocked

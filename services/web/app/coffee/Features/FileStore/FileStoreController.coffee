@@ -35,5 +35,5 @@ module.exports =
 				if (is_mobile_safari(user_agent) and is_html(file))
 					logger.log filename: file.name, user_agent: user_agent, "sending html file to mobile-safari as plain text"
 					res.setHeader('Content-Type', 'text/plain')
-				res.setHeader("Content-Disposition", "attachment; filename=#{encodeURIComponent(file.name)}")
+				res.setContentDisposition('attachment', {filename: file.name})
 				stream.pipe res

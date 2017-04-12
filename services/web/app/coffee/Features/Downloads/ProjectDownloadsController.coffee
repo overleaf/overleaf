@@ -15,9 +15,9 @@ module.exports = ProjectDownloadsController =
 				return next(error) if error?
 				ProjectZipStreamManager.createZipStreamForProject project_id, (error, stream) ->
 					return next(error) if error?
-					res.header(
-						"Content-Disposition",
-						"attachment; filename=#{encodeURIComponent(project.name)}.zip"
+					res.setContentDisposition(
+						'attachment',
+						{filename: "#{project.name}.zip"}
 					)
 					res.contentType('application/zip')
 					stream.pipe(res)
@@ -30,9 +30,9 @@ module.exports = ProjectDownloadsController =
 			return next(error) if error?
 			ProjectZipStreamManager.createZipStreamForMultipleProjects project_ids, (error, stream) ->
 				return next(error) if error?
-				res.header(
-					"Content-Disposition",
-					"attachment; filename=ShareLaTeX Projects (#{project_ids.length} items).zip"
+				res.setContentDisposition(
+					'attachment',
+					{filename: "ShareLaTeX Projects (#{project_ids.length} items).zip"}
 				)
 				res.contentType('application/zip')
 				stream.pipe(res)
