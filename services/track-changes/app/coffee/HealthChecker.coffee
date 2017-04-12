@@ -22,7 +22,7 @@ module.exports =
 					else
 						cb()
 			(cb)->
-				request.post {url:"#{url}/flush", timeout:3000}, (err, res, body) ->
+				request.post {url:"#{url}/flush", timeout:10000}, (err, res, body) ->
 					if err?
 						logger.err err:err, project_id:project_id, "error flushing for health check"
 						cb(err)
@@ -31,7 +31,7 @@ module.exports =
 					else
 						cb()
 			(cb)->
-				request.get {url:"#{url}/updates", timeout:3000}, (err, res, body)->
+				request.get {url:"#{url}/updates", timeout:10000}, (err, res, body)->
 					if err?
 						logger.err err:err, project_id:project_id, "error getting updates for health check"
 						cb(err)
