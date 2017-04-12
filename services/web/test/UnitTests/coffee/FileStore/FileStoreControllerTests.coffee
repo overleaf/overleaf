@@ -62,7 +62,9 @@ describe "FileStoreController", ->
 
 		it "should set the Content-Disposition header", (done)->
 			@stream.pipe = (des)=>
-				@res.setHeader.calledWith("Content-Disposition", "attachment; filename=#{@file.name}").should.equal true
+				@res.setHeader.calledWith(
+					"Content-Disposition", "attachment; filename=#{encodeURIComponent(@file.name)}"
+				).should.equal true
 				done()
 			@controller.getFile @req, @res
 

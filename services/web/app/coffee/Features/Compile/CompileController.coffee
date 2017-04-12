@@ -85,7 +85,9 @@ module.exports = CompileController =
 			res.contentType("application/pdf")
 			if !!req.query.popupDownload
 				logger.log project_id: project_id, "download pdf as popup download"
-				res.header('Content-Disposition', "attachment; filename=#{project.getSafeProjectName()}.pdf")
+				res.header(
+					'Content-Disposition', "attachment; filename=#{encodeURIComponent(project.getSafeProjectName())}.pdf"
+				)
 			else
 				logger.log project_id: project_id, "download pdf to embed in browser"
 				res.header('Content-Disposition', "filename=#{project.getSafeProjectName()}.pdf")
