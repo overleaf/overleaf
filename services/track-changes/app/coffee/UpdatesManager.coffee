@@ -144,6 +144,23 @@ module.exports = UpdatesManager =
 							UpdatesManager._processUncompressedUpdatesForDocWithLock project_id, doc_id, temporary, cb
 				async.parallelLimit jobs, 5, callback
 
+	# flush all outstanding changes
+	flushAll: (callback = (error, result) ->) ->
+		RedisManager.getProjectIdsWithHistoryOps (error, project_ids) ->
+			return callback(error) if error?
+			logger.log {count: project_ids?.length, project_ids: project_ids}, "found projects"
+			jobs = []
+			for project_id in project_ids
+				do (project_id) ->
+					jobs.push (cb) ->
+						UpdatesManager.processUncompressedUpdatesForProject project_id, (err) ->
+							return cb(null, {failed: err?, project_id: project_id})
+			async.series jobs, (error, result) ->
+				return callback(error) if error?
+				failedProjects = (x.project_id for x in result when x.failed)
+				succeededProjects = (x.project_id for x in result when not x.failed)
+				callback(null, {failed: failedProjects, succeeded: succeededProjects})
+
 	getDocUpdates: (project_id, doc_id, options = {}, callback = (error, updates) ->) ->
 		UpdatesManager.processUncompressedUpdatesWithLock project_id, doc_id, (error) ->
 			return callback(error) if error?

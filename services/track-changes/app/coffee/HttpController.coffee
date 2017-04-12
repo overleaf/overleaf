@@ -22,6 +22,18 @@ module.exports = HttpController =
 			return next(error) if error?
 			res.send 204
 
+	flushAll: (req, res, next = (error) ->) ->
+		logger.log "flushing all projects"
+		UpdatesManager.flushAll (error, result) ->
+			return next(error) if error?
+			{failed, succeeded} = result
+			status = "#{succeeded.length} succeeded, #{failed.length} failed"
+			if failed.length > 0
+				logger.log {failed: failed, succeeded: succeeded}, "error flushing projects"
+				res.status(500).send "#{status}\nfailed to flush:\n#{failed.join('\n')}\n"
+			else
+				res.status(200).send "#{status}\nflushed all #{succeeded.length} projects\n"
+
 	checkDoc: (req, res, next = (error) ->) ->
 		doc_id = req.params.doc_id
 		project_id = req.params.project_id

@@ -32,3 +32,12 @@ module.exports = RedisManager =
 
 	getDocIdsWithHistoryOps: (project_id, callback = (error, doc_ids) ->) ->
 		rclient.smembers docsWithHistoryOpsKey(project_id), callback
+
+	# this will only work on single node redis, not redis cluster
+	getProjectIdsWithHistoryOps: (callback = (error, project_ids) ->) ->
+		rclient.keys docsWithHistoryOpsKey("*"), (error, project_keys) ->
+			return callback(error) if error?
+			project_ids = for key in project_keys
+				[prefix, project_id] = key.split(":")
+				project_id
+			callback(error, project_ids)
