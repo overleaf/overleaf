@@ -14,6 +14,7 @@ describe "WebRedisManager", ->
 		@WebRedisManager = SandboxedModule.require modulePath, requires:
 			"redis-sharelatex": createClient: () => @rclient
 			"settings-sharelatex": redis: web: @settings = {"mock": "settings"}
+			"logger-sharelatex": { log: () -> }
 		@doc_id = "doc-id-123"
 		@project_id = "project-id-123"
 		@callback = sinon.stub()

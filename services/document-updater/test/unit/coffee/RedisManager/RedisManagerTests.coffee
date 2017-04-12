@@ -14,20 +14,24 @@ describe "RedisManager", ->
 		@rclient.multi = () => @rclient
 		@RedisManager = SandboxedModule.require modulePath,
 			requires:
-				"./RedisBackend":
-					createClient: () => @rclient
-				"./RedisKeyBuilder":
-					blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
-					docLines: ({doc_id}) -> "doclines:#{doc_id}"
-					docOps: ({doc_id}) -> "DocOps:#{doc_id}"
-					docVersion: ({doc_id}) -> "DocVersion:#{doc_id}"
-					docHash: ({doc_id}) -> "DocHash:#{doc_id}"
-					projectKey: ({doc_id}) -> "ProjectId:#{doc_id}"
-					pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
-					docsInProject: ({project_id}) -> "DocsIn:#{project_id}"
-					ranges: ({doc_id}) -> "Ranges:#{doc_id}"
 				"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }
-				"settings-sharelatex": {documentupdater: {logHashErrors: {write:true, read:true}}}
+				"settings-sharelatex": {
+					documentupdater: {logHashErrors: {write:true, read:true}}
+					redis:
+						documentupdater:
+							key_schema: 
+								blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
+								docLines: ({doc_id}) -> "doclines:#{doc_id}"
+								docOps: ({doc_id}) -> "DocOps:#{doc_id}"
+								docVersion: ({doc_id}) -> "DocVersion:#{doc_id}"
+								docHash: ({doc_id}) -> "DocHash:#{doc_id}"
+								projectKey: ({doc_id}) -> "ProjectId:#{doc_id}"
+								pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
+								docsInProject: ({project_id}) -> "DocsIn:#{project_id}"
+								ranges: ({doc_id}) -> "Ranges:#{doc_id}"
+				}
+				"redis-sharelatex":
+					createClient: () => @rclient
 				"./Metrics": @metrics =
 					inc: sinon.stub()
 					Timer: class Timer

@@ -1,8 +1,7 @@
 Settings = require('settings-sharelatex')
 async = require('async')
-rclient = require("./RedisBackend").createClient()
+rclient = require("redis-sharelatex").createClient(Settings.redis.documentupdater)
 _ = require('underscore')
-keys = require('./RedisKeyBuilder')
 logger = require('logger-sharelatex')
 metrics = require('./Metrics')
 Errors = require "./Errors"
@@ -24,6 +23,8 @@ logHashWriteErrors = logHashErrors?.write
 
 MEGABYTES = 1024 * 1024
 MAX_RANGES_SIZE = 3 * MEGABYTES
+
+keys = Settings.redis.documentupdater.key_schema
 
 module.exports = RedisManager =
 	rclient: rclient
