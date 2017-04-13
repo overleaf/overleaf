@@ -34,7 +34,9 @@ describe "ProjectGetter", ->
 				@ProjectGetter.getProjectWithoutDocLines @project_id, @callback
 
 			it "should call find with the project id", ->
-				@db.projects.find.calledWith(_id: ObjectId(@project_id)).should.equal true
+				expect(@db.projects.find.lastCall.args[0]).to.deep.equal {
+					_id: ObjectId(@project_id)
+				}
 
 			it "should exclude the doc lines", ->
 				excludes =
@@ -65,7 +67,9 @@ describe "ProjectGetter", ->
 				@ProjectGetter.getProjectWithOnlyFolders @project_id, @callback
 
 			it "should call find with the project id", ->
-				@db.projects.find.calledWith(_id: ObjectId(@project_id)).should.equal true
+				expect(@db.projects.find.lastCall.args[0]).to.deep.equal {
+					_id: ObjectId(@project_id)
+				}
 
 			it "should exclude the docs and files linesaaaa", ->
 				excludes =
@@ -103,7 +107,9 @@ describe "ProjectGetter", ->
 				@ProjectGetter.getProjectWithOnlyFolders @project_id, @callback
 
 			it "should call find with the project id", ->
-				@db.projects.find.calledWith(_id: ObjectId(@project_id)).should.equal true
+				expect(@db.projects.find.lastCall.args[0]).to.deep.equal {
+					_id: ObjectId(@project_id)
+				}
 
 			it "should exclude the docs and files linesaaaa", ->
 				excludes =

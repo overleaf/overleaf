@@ -136,8 +136,8 @@ describe "CompileController", ->
 					.should.equal true
 
 			it "should set the content-disposition header with the project name", ->
-				@res.header
-					.calledWith("Content-Disposition", "filename=#{@safe_name}.pdf")
+				@res.setContentDisposition
+					.calledWith('', {filename: "#{@safe_name}.pdf"})
 					.should.equal true
 
 			it "should increment the pdf-downloads metric", ->

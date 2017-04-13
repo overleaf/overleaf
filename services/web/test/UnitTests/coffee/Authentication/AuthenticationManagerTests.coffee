@@ -128,16 +128,14 @@ describe "AuthenticationManager", ->
 				@AuthenticationManager.setUserPassword(@user_id, @password, @callback)
 
 			it "should update the user's password in the database", ->
-				@db.users.update
-					.calledWith({
-						_id: ObjectId(@user_id.toString())
-					}, {
-						$set: {
-							"hashedPassword": @hashedPassword
-						}
-						$unset: password: true
-					})
-					.should.equal true
+				args = @db.users.update.lastCall.args
+				expect(args[0]).to.deep.equal {_id: ObjectId(@user_id.toString())}
+				expect(args[1]).to.deep.equal {
+					$set: {
+						"hashedPassword": @hashedPassword
+					}
+					$unset: password: true
+				}
 
 			it "should hash the password", ->
 				@bcrypt.genSalt

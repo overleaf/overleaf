@@ -59,10 +59,10 @@ describe "ProjectDownloadsController", ->
 			@Project.findById.calledWith(@project_id, "name").should.equal(true)
 
 		it "should name the downloaded file after the project", ->
-			@res.header
+			@res.setContentDisposition
 				.calledWith(
-					"Content-Disposition",
-					"attachment; filename=#{encodeURIComponent(@project_name)}.zip")
+					'attachment',
+					{filename: "#{@project_name}.zip"})
 				.should.equal true
 
 		it "should record the action via Metrics", ->
@@ -107,10 +107,10 @@ describe "ProjectDownloadsController", ->
 				.should.equal true
 
 		it "should name the downloaded file after the project", ->
-			@res.header
+			@res.setContentDisposition
 				.calledWith(
-					"Content-Disposition",
-					"attachment; filename=ShareLaTeX Projects (2 items).zip")
+					'attachment',
+					{filename: "ShareLaTeX Projects (2 items).zip"})
 				.should.equal true
 
 		it "should record the action via Metrics", ->

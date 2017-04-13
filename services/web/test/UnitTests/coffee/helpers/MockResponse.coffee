@@ -70,6 +70,8 @@ class MockResponse
 	setHeader: (header, value) ->
 		@headers[header] = value
 
+	setContentDisposition: sinon.stub()
+
 	setTimeout: (@timout)->
 
 	header: sinon.stub()

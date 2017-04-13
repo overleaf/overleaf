@@ -29,6 +29,7 @@ describe "FileStoreController", ->
 			get: (key) -> undefined
 		@res =
 			setHeader: sinon.stub()
+			setContentDisposition: sinon.stub()
 		@file =
 			name: "myfile.png"
 
@@ -62,7 +63,9 @@ describe "FileStoreController", ->
 
 		it "should set the Content-Disposition header", (done)->
 			@stream.pipe = (des)=>
-				@res.setHeader.calledWith("Content-Disposition", "attachment; filename=#{@file.name}").should.equal true
+				@res.setContentDisposition.calledWith(
+					"attachment", {filename: @file.name}
+				).should.equal true
 				done()
 			@controller.getFile @req, @res
 
