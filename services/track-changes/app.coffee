@@ -51,6 +51,7 @@ app.post  '/project/:project_id/doc/:doc_id/push', HttpController.pushDocHistory
 app.post  '/project/:project_id/doc/:doc_id/pull', HttpController.pullDocHistory
 
 app.post '/flush/all', HttpController.flushAll
+app.post '/check/dangling', HttpController.checkDanglingUpdates
 
 packWorker = null # use a single packing worker
 

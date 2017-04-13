@@ -33,11 +33,23 @@ module.exports = RedisManager =
 	getDocIdsWithHistoryOps: (project_id, callback = (error, doc_ids) ->) ->
 		rclient.smembers docsWithHistoryOpsKey(project_id), callback
 
+	# extract ids from keys like DocsWithHistoryOps:57fd0b1f53a8396d22b2c24b
+	_extractIds: (keyList) ->
+		ids = (key.split(":")[1] for key in keyList)
+		return ids
+
 	# this will only work on single node redis, not redis cluster
 	getProjectIdsWithHistoryOps: (callback = (error, project_ids) ->) ->
 		rclient.keys docsWithHistoryOpsKey("*"), (error, project_keys) ->
 			return callback(error) if error?
-			project_ids = for key in project_keys
-				[prefix, project_id] = key.split(":")
-				project_id
+			project_ids = RedisManager._extractIds project_keys
 			callback(error, project_ids)
+
+	# this will only work on single node redis, not redis cluster
+	getAllDocIdsWithHistoryOps: (callback = (error, doc_ids) ->) ->
+		# return all the docids, to find dangling history entries after
+		# everything is flushed.
+		rclient.keys rawUpdatesKey("*"), (error, doc_keys) ->
+			return callback(error) if error?
+			doc_ids = RedisManager._extractIds doc_keys
+			callback(error, doc_ids)
