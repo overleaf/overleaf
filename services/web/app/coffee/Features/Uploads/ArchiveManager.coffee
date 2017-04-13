@@ -33,7 +33,7 @@ module.exports = ArchiveManager =
 		unzip.on "close", (exitCode) ->
 			if error?
 				error = new Error(error)
-				logger.error err:error, source: source, "error checking zip size"
+				logger.warn err:error, source: source, "error checking zip size"
 
 			lines = output.split("\n")
 			lastLine = lines[lines.length - 2]?.trim()
