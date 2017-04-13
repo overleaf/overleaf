@@ -20,6 +20,8 @@ module.exports =
 			port:"6379"
 			host:"localhost"
 			password:""
+			key_schema:
+				pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
 		documentupdater:
 			port: "6379"
 			host: "localhost"
@@ -33,6 +35,15 @@ module.exports =
 				projectKey: ({doc_id}) -> "ProjectId:#{doc_id}"
 				docsInProject: ({project_id}) -> "DocsIn:#{project_id}"
 				ranges: ({doc_id}) -> "Ranges:#{doc_id}"
+		history:
+			port:"6379"
+			host:"localhost"
+			password:""
+			key_schema:
+				uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
+				docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:#{project_id}"
+			
+			
 			# cluster: [{
 			# 	port: "7000"
 			# 	host: "localhost"

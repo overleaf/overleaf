@@ -9,7 +9,7 @@ describe "HistoryManager", ->
 			"request": @request = {}
 			"settings-sharelatex": @Settings = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
-			"./WebRedisManager": @WebRedisManager = {}
+			"./HistoryRedisManager": @HistoryRedisManager = {}
 		@project_id = "mock-project-id"
 		@doc_id = "mock-doc-id"
 		@callback = sinon.stub()
@@ -47,11 +47,11 @@ describe "HistoryManager", ->
 
 		describe "pushing the op", ->
 			beforeEach ->
-				@WebRedisManager.pushUncompressedHistoryOps = sinon.stub().callsArgWith(3, null, 1)
+				@HistoryRedisManager.pushUncompressedHistoryOps = sinon.stub().callsArgWith(3, null, 1)
 				@HistoryManager.pushUncompressedHistoryOps @project_id, @doc_id, @ops, @callback
 
 			it "should push the ops into redis", ->
-				@WebRedisManager.pushUncompressedHistoryOps
+				@HistoryRedisManager.pushUncompressedHistoryOps
 					.calledWith(@project_id, @doc_id, @ops)
 					.should.equal true
 
@@ -63,7 +63,7 @@ describe "HistoryManager", ->
 
 		describe "when we hit a multiple of FLUSH_EVERY_N_OPS ops", ->
 			beforeEach ->
-				@WebRedisManager.pushUncompressedHistoryOps =
+				@HistoryRedisManager.pushUncompressedHistoryOps =
 					sinon.stub().callsArgWith(3, null, 2 * @HistoryManager.FLUSH_EVERY_N_OPS)
 				@HistoryManager.pushUncompressedHistoryOps @project_id, @doc_id, @ops, @callback
 
@@ -75,7 +75,7 @@ describe "HistoryManager", ->
 		describe "when we go over a multiple of FLUSH_EVERY_N_OPS ops", ->
 			beforeEach ->
 				@ops = ["op1", "op2", "op3"]
-				@WebRedisManager.pushUncompressedHistoryOps =
+				@HistoryRedisManager.pushUncompressedHistoryOps =
 					sinon.stub().callsArgWith(3, null, 2 * @HistoryManager.FLUSH_EVERY_N_OPS + 1)
 				@HistoryManager.pushUncompressedHistoryOps @project_id, @doc_id, @ops, @callback
 
@@ -86,7 +86,7 @@ describe "HistoryManager", ->
 
 		describe "when HistoryManager errors", ->
 			beforeEach ->
-				@WebRedisManager.pushUncompressedHistoryOps =
+				@HistoryRedisManager.pushUncompressedHistoryOps =
 					sinon.stub().callsArgWith(3, null, 2 * @HistoryManager.FLUSH_EVERY_N_OPS)
 				@HistoryManager.flushDocChanges = sinon.stub().callsArgWith(2, @error = new Error("oops"))
 				@HistoryManager.pushUncompressedHistoryOps @project_id, @doc_id, @ops, @callback
@@ -103,10 +103,10 @@ describe "HistoryManager", ->
 		
 		describe "with no ops", ->
 			beforeEach ->
-				@WebRedisManager.pushUncompressedHistoryOps = sinon.stub().callsArgWith(3, null, 1)
+				@HistoryRedisManager.pushUncompressedHistoryOps = sinon.stub().callsArgWith(3, null, 1)
 				@HistoryManager.pushUncompressedHistoryOps @project_id, @doc_id, [], @callback
 			
-			it "should not call WebRedisManager.pushUncompressedHistoryOps", ->
-				@WebRedisManager.pushUncompressedHistoryOps.called.should.equal false
+			it "should not call HistoryRedisManager.pushUncompressedHistoryOps", ->
+				@HistoryRedisManager.pushUncompressedHistoryOps.called.should.equal false
 			
 
