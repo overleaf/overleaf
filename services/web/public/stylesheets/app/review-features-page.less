@@ -97,7 +97,7 @@
 		height: @rfp-header-height;
 		transition: height .2s;
 		background-color: fade(@rfp-rp-blue-darkest, 90%);
-		padding: 10px 20px;
+		padding: 15px 20px;
 		min-width: 320px;
 		@media (min-width: @screen-xs-min) {
 			padding-left: 30px;
@@ -109,6 +109,8 @@
 		}
 		.rfp-main-header-collapsed & {
 			height: @rfp-header-height-collapsed;
+			padding-top: 10px;
+			padding-bottom: 10px;
 		}
 	}
 		.rfp-header-wrapper {
@@ -119,11 +121,9 @@
 			height: 100%;
 			margin: auto;
 		}
+			.rfp-header-logo-container,
 			.rfp-header-logo {
-				height: 15px;
-				@media (min-width: @screen-xs-min) {
-					height: 21px;
-				}
+				height: 100%;
 			}
 	.rfp-section {
 		padding: 30px 20px;
