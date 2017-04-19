@@ -50,6 +50,9 @@ app.post "/project/:project_id/doc/:doc_id/version/:version/restore", HttpContro
 app.post  '/project/:project_id/doc/:doc_id/push', HttpController.pushDocHistory
 app.post  '/project/:project_id/doc/:doc_id/pull', HttpController.pullDocHistory
 
+app.post '/flush/all', HttpController.flushAll
+app.post '/check/dangling', HttpController.checkDanglingUpdates
+
 packWorker = null # use a single packing worker
 
 app.post "/pack", (req, res, next) ->

@@ -144,6 +144,37 @@ module.exports = UpdatesManager =
 							UpdatesManager._processUncompressedUpdatesForDocWithLock project_id, doc_id, temporary, cb
 				async.parallelLimit jobs, 5, callback
 
+	# flush all outstanding changes
+	flushAll: (callback = (error, result) ->) ->
+		RedisManager.getProjectIdsWithHistoryOps (error, project_ids) ->
+			return callback(error) if error?
+			logger.log {count: project_ids?.length, project_ids: project_ids}, "found projects"
+			jobs = []
+			for project_id in project_ids
+				do (project_id) ->
+					jobs.push (cb) ->
+						UpdatesManager.processUncompressedUpdatesForProject project_id, (err) ->
+							return cb(null, {failed: err?, project_id: project_id})
+			async.series jobs, (error, result) ->
+				return callback(error) if error?
+				failedProjects = (x.project_id for x in result when x.failed)
+				succeededProjects = (x.project_id for x in result when not x.failed)
+				RedisManager.getAllDocIdsWithHistoryOps (error, doc_ids) ->
+				callback(null, {failed: failedProjects, succeeded: succeededProjects})
+
+	getDanglingUpdates: (callback = (error, doc_ids) ->) ->
+		RedisManager.getAllDocIdsWithHistoryOps (error, all_doc_ids) ->
+			return callback(error) if error?
+			RedisManager.getProjectIdsWithHistoryOps (error, all_project_ids) ->
+				return callback(error) if error?
+				# function to get doc_ids for each project
+				task = (cb) -> async.concatSeries all_project_ids, RedisManager.getDocIdsWithHistoryOps, cb
+				# find the dangling doc ids
+				task (error, project_doc_ids) ->
+					dangling_doc_ids = _.difference(all_doc_ids, project_doc_ids)
+					logger.log {all_doc_ids: all_doc_ids, all_project_ids: all_project_ids, project_doc_ids: project_doc_ids, dangling_doc_ids: dangling_doc_ids}, "checking for dangling doc ids"
+					callback(null, dangling_doc_ids)
+
 	getDocUpdates: (project_id, doc_id, options = {}, callback = (error, updates) ->) ->
 		UpdatesManager.processUncompressedUpdatesWithLock project_id, doc_id, (error) ->
 			return callback(error) if error?
