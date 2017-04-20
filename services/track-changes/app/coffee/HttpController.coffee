@@ -23,12 +23,16 @@ module.exports = HttpController =
 			res.send 204
 
 	flushAll: (req, res, next = (error) ->) ->
-		logger.log "flushing all projects"
-		UpdatesManager.flushAll (error, result) ->
+		# limit on projects to flush or -1 for all (default)
+		limit = if req.query.limit? then parseInt(req.query.limit, 10) else -1
+		logger.log {limit: limit}, "flushing all projects"
+		UpdatesManager.flushAll limit, (error, result) ->
 			return next(error) if error?
-			{failed, succeeded} = result
+			{failed, succeeded, all} = result
 			status = "#{succeeded.length} succeeded, #{failed.length} failed"
-			if failed.length > 0
+			if limit == 0
+				res.status(200).send "#{status}\nwould flush:\n#{all.join('\n')}\n"
+			else if failed.length > 0
 				logger.log {failed: failed, succeeded: succeeded}, "error flushing projects"
 				res.status(500).send "#{status}\nfailed to flush:\n#{failed.join('\n')}\n"
 			else
