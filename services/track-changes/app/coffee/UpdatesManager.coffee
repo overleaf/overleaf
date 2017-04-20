@@ -145,12 +145,13 @@ module.exports = UpdatesManager =
 				async.parallelLimit jobs, 5, callback
 
 	# flush all outstanding changes
-	flushAll: (callback = (error, result) ->) ->
+	flushAll: (limit, callback = (error, result) ->) ->
 		RedisManager.getProjectIdsWithHistoryOps (error, project_ids) ->
 			return callback(error) if error?
 			logger.log {count: project_ids?.length, project_ids: project_ids}, "found projects"
 			jobs = []
-			for project_id in project_ids
+			selectedProjects = if limit < 0 then project_ids else project_ids[0...limit]
+			for project_id in selectedProjects
 				do (project_id) ->
 					jobs.push (cb) ->
 						UpdatesManager.processUncompressedUpdatesForProject project_id, (err) ->
@@ -159,8 +160,7 @@ module.exports = UpdatesManager =
 				return callback(error) if error?
 				failedProjects = (x.project_id for x in result when x.failed)
 				succeededProjects = (x.project_id for x in result when not x.failed)
-				RedisManager.getAllDocIdsWithHistoryOps (error, doc_ids) ->
-				callback(null, {failed: failedProjects, succeeded: succeededProjects})
+				callback(null, {failed: failedProjects, succeeded: succeededProjects, all: project_ids})
 
 	getDanglingUpdates: (callback = (error, doc_ids) ->) ->
 		RedisManager.getAllDocIdsWithHistoryOps (error, all_doc_ids) ->
