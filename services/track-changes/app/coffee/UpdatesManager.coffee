@@ -150,6 +150,7 @@ module.exports = UpdatesManager =
 			return callback(error) if error?
 			logger.log {count: project_ids?.length, project_ids: project_ids}, "found projects"
 			jobs = []
+			project_ids = _.shuffle project_ids # randomise to avoid hitting same projects each time
 			selectedProjects = if limit < 0 then project_ids else project_ids[0...limit]
 			for project_id in selectedProjects
 				do (project_id) ->
