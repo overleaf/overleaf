@@ -36,7 +36,7 @@ module.exports = HttpController =
 				logger.log {failed: failed, succeeded: succeeded}, "error flushing projects"
 				res.status(500).send "#{status}\nfailed to flush:\n#{failed.join('\n')}\n"
 			else
-				res.status(200).send "#{status}\nflushed all #{succeeded.length} projects\n"
+				res.status(200).send "#{status}\nflushed #{succeeded.length} projects of #{all.length}\n"
 
 	checkDanglingUpdates: (req, res, next = (error) ->) ->
 		logger.log "checking dangling updates"
