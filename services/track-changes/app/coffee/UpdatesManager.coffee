@@ -159,7 +159,6 @@ module.exports = UpdatesManager =
 				return callback(error) if error?
 				failedProjects = (x.project_id for x in result when x.failed)
 				succeededProjects = (x.project_id for x in result when not x.failed)
-				RedisManager.getAllDocIdsWithHistoryOps (error, doc_ids) ->
 				callback(null, {failed: failedProjects, succeeded: succeededProjects})
 
 	getDanglingUpdates: (callback = (error, doc_ids) ->) ->
