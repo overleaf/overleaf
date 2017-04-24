@@ -389,7 +389,7 @@ define [
 					$scope.pdf.compiling = false
 					parseCompileResponse(data)
 				.error (err, status) ->
-					if status = 429
+					if status == 429
 						$scope.pdf.rateLimited = true
 					$scope.pdf.compiling = false
 					$scope.pdf.renderingError = false
