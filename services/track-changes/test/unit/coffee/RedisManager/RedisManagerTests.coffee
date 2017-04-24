@@ -14,7 +14,10 @@ describe "RedisManager", ->
 					multi: () => @rclient
 			"settings-sharelatex":
 				redis:
-					web:{}
+					history:
+						key_schema:
+							uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
+							docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:#{project_id}"
 		@doc_id = "doc-id-123"
 		@project_id = "project-id-123"
 		@batchSize = 100

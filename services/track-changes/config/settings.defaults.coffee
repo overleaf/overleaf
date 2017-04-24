@@ -22,6 +22,13 @@ module.exports =
 			host: "localhost"
 			port: 6379
 			pass: ""
+		history:
+			port:"6379"
+			host:"localhost"
+			password:""
+			key_schema:
+				uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
+				docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:#{project_id}"
 
 	trackchanges:
 		s3:
