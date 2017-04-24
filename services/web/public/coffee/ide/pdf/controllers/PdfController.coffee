@@ -388,7 +388,9 @@ define [
 					$scope.pdf.view = "pdf"
 					$scope.pdf.compiling = false
 					parseCompileResponse(data)
-				.error () ->
+				.error (err, status) ->
+					if status = 429
+						$scope.pdf.rateLimited = true
 					$scope.pdf.compiling = false
 					$scope.pdf.renderingError = false
 					$scope.pdf.error = true
