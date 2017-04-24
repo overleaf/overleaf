@@ -30,14 +30,14 @@ success = 0
 fixDangling = (doc_id, callback) ->
 	# look up project id from doc id
 	db.docs.find {_id:ObjectId(doc_id)}, {project_id:1}, (err, result) ->
-		console.log "doc_id", doc_id, "err", err, "result", result
+		#console.log "doc_id", doc_id, "err", err, "result", result
 		if err?
 			errored++
 			return callback()
 		if !result? or result.length == 0
 			missing++
 			return callback()
-		project_id = result[0]
+		project_id = result[0].project_id
 		console.log "found project_id", project_id, "for doc_id", doc_id
 		url = "http://localhost:#{options.port}/project/#{project_id}/doc/#{doc_id}/flush"
 		if options.force
