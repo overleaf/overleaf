@@ -111,7 +111,13 @@ module.exports = class Router
 		webRouter.post '/project/:Project_id/settings', AuthorizationMiddlewear.ensureUserCanWriteProjectSettings, ProjectController.updateProjectSettings
 		webRouter.post '/project/:Project_id/settings/admin', AuthorizationMiddlewear.ensureUserCanAdminProject, ProjectController.updateProjectAdminSettings
 
-		webRouter.post '/project/:Project_id/compile', AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.compile
+		webRouter.post '/project/:Project_id/compile', RateLimiterMiddlewear.rateLimit({
+			endpointName: "compile-project-http"
+			params: ["Project_id"]
+			maxRequests: 800
+			timeInterval: 60 * 60
+		}), AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.compile
+
 		webRouter.post '/project/:Project_id/compile/stop', AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.stopCompile
 
 		# Used by the web download buttons, adds filename header
