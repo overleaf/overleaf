@@ -35,8 +35,8 @@ module.exports = TpdsUpdateSender =
 			timeout: (5 * 1000)
 		request opts, (err)->
 			if err?
-				logger.err err:err, "error queuing something in the tpdsworker"
-				callback(err)
+				logger.err err:err, "error queuing something in the tpdsworker, continuing anyway"
+				callback()
 			else
 				logger.log group:group, "successfully queued up job for tpdsworker"
 				callback()
