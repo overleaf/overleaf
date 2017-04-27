@@ -2,7 +2,7 @@ define [
 	"base"
 ], (App) ->
 
-	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp, event_tracking, $timeout) ->
+	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp, event_tracking, $timeout, localStorage) ->
 		$scope.projects = window.data.projects
 		$scope.tags = window.data.tags
 		$scope.notifications = window.data.notifications
@@ -17,6 +17,8 @@ define [
 		$timeout () ->
 			recalculateProjectListHeight()
 		, 10
+
+		storedUIOpts = JSON.parse(localStorage("project_list"))
 
 		recalculateProjectListHeight = () ->
 			topOffset = $(".project-list-card")?.offset()?.top
@@ -52,6 +54,13 @@ define [
 					project.tags ||= []
 					project.tags.push tag
 
+		markTagAsSelected = (id) ->
+			for tag in $scope.tags
+				if tag._id == id
+					tag.selected = true
+				else
+					tag.selected = false
+		
 		$scope.changePredicate = (newPredicate)->
 			if $scope.predicate == newPredicate
 				$scope.reverse = !$scope.reverse
@@ -126,6 +135,11 @@ define [
 				else
 					# We don't want hidden selections
 					project.selected = false
+
+			localStorage("project_list", JSON.stringify({ 
+				filter: $scope.filter,
+				selectedTagId: selectedTag?._id
+			}))
 			$scope.updateSelectedProjects()
 
 		$scope.getSelectedTag = () ->
@@ -424,8 +438,6 @@ define [
 				path = "/project/#{selected_project_ids[0]}/download/zip"
 
 			window.location = path
-			
-		$scope.updateVisibleProjects()
 
 	App.controller "ProjectListItemController", ($scope) ->
 		$scope.ownerName = () ->
