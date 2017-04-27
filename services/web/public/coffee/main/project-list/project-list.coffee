@@ -438,6 +438,13 @@ define [
 				path = "/project/#{selected_project_ids[0]}/download/zip"
 
 			window.location = path
+			
+		if storedUIOpts?.filter?
+			if storedUIOpts.filter == "tag" and storedUIOpts.selectedTagId?
+				markTagAsSelected(storedUIOpts.selectedTagId)
+			$scope.setFilter(storedUIOpts.filter)
+		else
+			$scope.updateVisibleProjects()
 
 	App.controller "ProjectListItemController", ($scope) ->
 		$scope.ownerName = () ->
