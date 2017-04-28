@@ -79,13 +79,13 @@
 					li
 						a(href, ng-click="deleteTag(tag)", stop-propagation="click")
 							| #{translate("delete")}
-		li.tag(
+		li.tag.untagged(
 			ng-if="tags.length",
 			ng-cloak,
 			ng-click="selectUntagged()"
 			ng-class="{active: filter === 'untagged'}",
 		) 	
-			a.tag-untagged(href)
+			a.tag-name(href)
 				| #{translate("uncategorized")}
 				span.subdued  ({{ nUntagged }})
 		li(ng-cloak)

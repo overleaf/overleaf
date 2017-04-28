@@ -124,6 +124,20 @@ ul.folders-menu {
 				}
 			}
 		}
+		&.untagged {
+			font-style: italic;
+			margin-bottom: @line-height-computed / 4;
+			a {
+				line-height: 1.7;
+				&:hover,
+				&:focus {
+					text-decoration: none;
+				}
+			}
+			span.subdued {
+				font-style: normal;
+			}
+		}
 		&:hover {
 			&:not(.active) {
 				background-color: darken(@gray-lightest, 2%);
@@ -151,13 +165,6 @@ ul.folders-menu {
 				display: inline-block;
 				padding-left: 22px;
 				line-height: 1.4;
-			}
-		}
-		.tag-untagged {
-			font-style: italic;
-			&:hover,
-			&:focus {
-				text-decoration: none;
 			}
 		}
 		.tag-menu {
