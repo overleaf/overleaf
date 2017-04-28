@@ -10,6 +10,7 @@ define [
 		$scope.selectedProjects = []
 		$scope.filter = "all"
 		$scope.predicate = "lastUpdated"
+		$scope.nUntagged = 0
 		$scope.reverse = true
 		$scope.searchText = 
 			value : ""
@@ -17,6 +18,10 @@ define [
 		$timeout () ->
 			recalculateProjectListHeight()
 		, 10
+
+		$scope.$watch((
+			() -> $scope.projects.filter((project) -> !project.tags? or project.tags.length == 0).length
+		), (newVal) -> $scope.nUntagged = newVal)
 
 		storedUIOpts = JSON.parse(localStorage("project_list"))
 
@@ -114,7 +119,7 @@ define [
 					visible = false
 
 				# Hide tagged projects if we only want to see the uncategorized ones
-				if $scope.filter == "untagged" and project.tags?
+				if $scope.filter == "untagged" and project.tags?.length > 0
 					visible = false
 
 				# Hide projects we own if we only want to see shared projects

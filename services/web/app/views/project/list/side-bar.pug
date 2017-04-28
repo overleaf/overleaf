@@ -83,7 +83,11 @@
 			ng-if="tags.length",
 			ng-cloak,
 			ng-click="selectUntagged()"
-		) uncategorized
+			ng-class="{active: filter === 'untagged'}",
+		) 	
+			a.tag-untagged(href)
+				| #{translate("uncategorized")}
+				span.subdued  ({{ nUntagged }})
 		li(ng-cloak)
 			a.tag(href, ng-click="openNewTagModal()")
 				i.fa.fa-fw.fa-plus
