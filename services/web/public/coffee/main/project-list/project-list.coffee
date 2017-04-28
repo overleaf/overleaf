@@ -113,6 +113,10 @@ define [
 				if $scope.filter == "tag" and selectedTag? and project.id not in selectedTag.project_ids
 					visible = false
 
+				# Hide tagged projects if we only want to see the uncategorized ones
+				if $scope.filter == "untagged" and project.tags?
+					visible = false
+
 				# Hide projects we own if we only want to see shared projects
 				if $scope.filter == "shared" and project.accessLevel == "owner"
 					visible = false

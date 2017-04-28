@@ -15,7 +15,11 @@ define [
 			$scope._clearTags()
 			tag.selected = true
 			$scope.setFilter("tag")
-		
+
+		$scope.selectUntagged = () ->
+			$scope._clearTags()
+			$scope.setFilter("untagged")
+
 		$scope.deleteTag = (tag) ->
 			modalInstance = $modal.open(
 				templateUrl: "deleteTagModalTemplate"
