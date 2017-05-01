@@ -140,20 +140,25 @@
 					ng-repeat="project in visibleProjects | orderBy:predicate:reverse",
 					ng-controller="ProjectListItemController"
 				)
-					.row
+					.row(select-row)
 						.col-xs-6
 							input.select-item(
 								select-individual,
 								type="checkbox",
 								ng-model="project.selected"
+								stop-propagation="click"
 							)
 							span
-								a.projectName(href="/project/{{project.id}}") {{project.name}}
+								a.projectName(
+									href="/project/{{project.id}}"
+									stop-propagation="click"
+								) {{project.name}}
 								span(
 									ng-controller="TagListController"
 								)
 									.tag-label(
 										ng-repeat='tag in project.tags'
+										stop-propagation="click"
 									)
 										a.label.label-default.tag-label-name(
 											href,
