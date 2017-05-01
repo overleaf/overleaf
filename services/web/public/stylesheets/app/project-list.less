@@ -260,10 +260,24 @@ ul.project-list {
 			margin-left: @line-height-computed / 4;
 			position: relative;
 			top: -2px;
-			padding-top: 0.25em;
 			display: inline-block;
-			color: white;
 		}
+			.tag-label-name,
+			.tag-label-remove {
+				display: inline-block;
+				padding-top: 0.25em;
+				color: #FFF;
+			}
+			.tag-label-name {
+				padding-right: 0.3em;
+				border-top-right-radius: 0;
+				border-bottom-right-radius: 0;	
+			}
+			.tag-label-remove {
+				padding-left: 0.3em;
+				border-top-left-radius: 0;
+				border-bottom-left-radius: 0;
+			}
 	}
 	i.tablesort {
 		padding-left: 8px;
