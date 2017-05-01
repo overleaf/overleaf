@@ -201,6 +201,23 @@ define [
 			# the projects from view
 			$scope.updateVisibleProjects()
 
+		$scope.removeProjectFromTag = (project, tag) ->
+			tag.showWhenEmpty = true
+
+			project.tags ||= []
+			index = project.tags.indexOf tag
+
+			if index > -1
+				$scope._removeProjectIdsFromTagArray(tag, [ project.id ])
+				project.tags.splice(index, 1)
+				queuedHttp({
+					method: "DELETE"
+					url: "/tag/#{tag._id}/project/#{project.id}"
+					headers:
+						"X-CSRF-Token": window.csrfToken
+				})
+				$scope.updateVisibleProjects()
+
 		$scope.addSelectedProjectsToTag = (tag) ->
 			selected_projects = $scope.getSelectedProjects()
 			event_tracking.send 'project-list-page-interaction', 'project action', 'addSelectedProjectsToTag'
