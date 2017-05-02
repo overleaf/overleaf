@@ -7,6 +7,7 @@ define [
 		scope: 
 			onBulkAccept: "&"
 			onBulkReject: "&"
+			nEntries: "="
 		link: (scope, element, attrs) ->
 			scope.bulkAccept = () ->
 				scope.onBulkAccept()

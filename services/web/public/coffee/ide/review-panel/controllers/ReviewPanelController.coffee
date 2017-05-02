@@ -26,6 +26,7 @@ define [
 			resolvedThreadIds: {}
 			rendererData: {}
 			loadingThreads: false
+			nSelectedEntries: 0
 
 		window.addEventListener "beforeunload", () ->
 			collapsedStates = {}
@@ -283,6 +284,7 @@ define [
 		$scope.$on "editor:focus:changed", (e, selection_offset_start, selection_offset_end, selection) ->
 			doc_id = $scope.editor.open_doc_id
 			entries = getDocEntries(doc_id)
+			$scope.reviewPanel.nSelectedEntries = 0
 
 			delete entries["add-comment"]
 			delete entries["bulk-actions"]
@@ -303,9 +305,13 @@ define [
 				if entry.type == "comment" and not $scope.reviewPanel.resolvedThreadIds[entry.thread_id]
 					entry.focused = (entry.offset <= selection_offset_start <= entry.offset + entry.content.length)
 				else if entry.type == "insert"
+					isEntryWithinSelection = entry.offset >= selection_offset_start and entry.offset + entry.content.length <= selection_offset_end
 					entry.focused = (entry.offset <= selection_offset_start <= entry.offset + entry.content.length)
+					$scope.reviewPanel.nSelectedEntries++ if isEntryWithinSelection
 				else if entry.type == "delete"
+					isEntryWithinSelection = selection_offset_start <= entry.offset >= selection_offset_start
 					entry.focused = (entry.offset == selection_offset_start)
+					$scope.reviewPanel.nSelectedEntries++ if isEntryWithinSelection
 				else if entry.type in [ "add-comment", "bulk-actions" ] and selection
 					entry.focused = true
 			

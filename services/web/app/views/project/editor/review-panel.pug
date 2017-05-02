@@ -86,6 +86,7 @@
 					bulk-actions-entry(
 						on-bulk-accept="bulkAccept();"
 						on-bulk-reject="bulkAccept();"
+						n-entries="reviewPanel.nSelectedEntries"
 					)
 
 	.rp-entry-list(
@@ -359,7 +360,7 @@ script(type='text/ng-template', id='addCommentEntryTemplate')
 						| &nbsp;#{translate("comment")}
 
 script(type='text/ng-template', id='bulkActionsEntryTemplate')
-	div
+	div(ng-if="nEntries > 0")
 		.rp-entry-callout.rp-entry-callout-bulk-actions
 		.rp-entry.rp-entry-bulk-actions
 			a.rp-bulk-actions-btn(
@@ -368,12 +369,14 @@ script(type='text/ng-template', id='bulkActionsEntryTemplate')
 			) 
 				i.fa.fa-times
 				| &nbsp;#{translate("reject_all")}
+				| ({{ nEntries }})
 			a.rp-bulk-actions-btn(
 				href
 				ng-click="bulkAccept();"
 			) 
 				i.fa.fa-check
 				| &nbsp;#{translate("accept_all")}
+				| ({{ nEntries }})
 			
 script(type='text/ng-template', id='resolvedCommentsDropdownTemplate')
 	.resolved-comments
