@@ -1,21 +1,21 @@
 sinon = require('sinon')
 chai = require('chai')
 should = chai.should()
-modulePath = "../../../../app/js/WebRedisManager.js"
+modulePath = "../../../../app/js/RealTimeRedisManager.js"
 SandboxedModule = require('sandboxed-module')
 Errors = require "../../../../app/js/Errors"
 
-describe "WebRedisManager", ->
+describe "RealTimeRedisManager", ->
 	beforeEach ->
 		@rclient =
 			auth: () ->
 			exec: sinon.stub()
 		@rclient.multi = () => @rclient
-		@WebRedisManager = SandboxedModule.require modulePath, requires:
+		@RealTimeRedisManager = SandboxedModule.require modulePath, requires:
 			"redis-sharelatex": createClient: () => @rclient
 			"settings-sharelatex":
 				redis:
-					web: @settings =
+					realtime: @settings =
 						key_schema:
 							pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
 			"logger-sharelatex": { log: () -> }
@@ -36,7 +36,7 @@ describe "WebRedisManager", ->
 				]
 				@jsonUpdates = @updates.map (update) -> JSON.stringify update
 				@rclient.exec = sinon.stub().callsArgWith(0, null, [@jsonUpdates])
-				@WebRedisManager.getPendingUpdatesForDoc @doc_id, @callback
+				@RealTimeRedisManager.getPendingUpdatesForDoc @doc_id, @callback
 			
 			it "should get the pending updates", ->
 				@rclient.lrange
@@ -58,7 +58,7 @@ describe "WebRedisManager", ->
 					"broken json"
 				]
 				@rclient.exec = sinon.stub().callsArgWith(0, null, [@jsonUpdates])
-				@WebRedisManager.getPendingUpdatesForDoc @doc_id, @callback
+				@RealTimeRedisManager.getPendingUpdatesForDoc @doc_id, @callback
 
 			it "should return an error to the callback", ->
 				@callback.calledWith(new Error("JSON parse error")).should.equal true
@@ -67,7 +67,7 @@ describe "WebRedisManager", ->
 	describe "getUpdatesLength", ->
 		beforeEach ->
 			@rclient.llen = sinon.stub().yields(null, @length = 3)
-			@WebRedisManager.getUpdatesLength @doc_id, @callback
+			@RealTimeRedisManager.getUpdatesLength @doc_id, @callback
 		
 		it "should look up the length", ->
 			@rclient.llen.calledWith("PendingUpdates:#{@doc_id}").should.equal true

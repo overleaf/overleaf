@@ -1,6 +1,6 @@
 LockManager = require "./LockManager"
 RedisManager = require "./RedisManager"
-WebRedisManager = require "./WebRedisManager"
+RealTimeRedisManager = require "./RealTimeRedisManager"
 ShareJsUpdateManager = require "./ShareJsUpdateManager"
 HistoryManager = require "./HistoryManager"
 Settings = require('settings-sharelatex')
@@ -30,7 +30,7 @@ module.exports = UpdateManager =
 					UpdateManager.continueProcessingUpdatesWithLock project_id, doc_id, callback
 
 	continueProcessingUpdatesWithLock: (project_id, doc_id, callback = (error) ->) ->
-		WebRedisManager.getUpdatesLength doc_id, (error, length) =>
+		RealTimeRedisManager.getUpdatesLength doc_id, (error, length) =>
 			return callback(error) if error?
 			if length > 0
 				UpdateManager.processOutstandingUpdatesWithLock project_id, doc_id, callback
@@ -38,7 +38,7 @@ module.exports = UpdateManager =
 				callback()
 
 	fetchAndApplyUpdates: (project_id, doc_id, callback = (error) ->) ->
-		WebRedisManager.getPendingUpdatesForDoc doc_id, (error, updates) =>
+		RealTimeRedisManager.getPendingUpdatesForDoc doc_id, (error, updates) =>
 			return callback(error) if error?
 			if updates.length == 0
 				return callback()
@@ -49,7 +49,7 @@ module.exports = UpdateManager =
 	applyUpdate: (project_id, doc_id, update, _callback = (error) ->) ->
 		callback = (error) ->
 			if error?
-				WebRedisManager.sendData {project_id, doc_id, error: error.message || error}
+				RealTimeRedisManager.sendData {project_id, doc_id, error: error.message || error}
 			_callback(error)
 		
 		UpdateManager._sanitizeUpdate update

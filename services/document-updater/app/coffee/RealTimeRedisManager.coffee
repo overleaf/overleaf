@@ -1,9 +1,9 @@
 Settings = require('settings-sharelatex')
-rclient = require("redis-sharelatex").createClient(Settings.redis.web)
-Keys = Settings.redis.web.key_schema
+rclient = require("redis-sharelatex").createClient(Settings.redis.realtime)
+Keys = Settings.redis.realtime.key_schema
 logger = require('logger-sharelatex')
 
-module.exports = WebRedisManager =
+module.exports = RealTimeRedisManager =
 	getPendingUpdatesForDoc : (doc_id, callback)->
 		multi = rclient.multi()
 		multi.lrange Keys.pendingUpdates({doc_id}), 0 , -1

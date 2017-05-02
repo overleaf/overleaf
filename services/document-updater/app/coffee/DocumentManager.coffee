@@ -4,7 +4,7 @@ DiffCodec = require "./DiffCodec"
 logger = require "logger-sharelatex"
 Metrics = require "./Metrics"
 HistoryManager = require "./HistoryManager"
-WebRedisManager = require "./WebRedisManager"
+RealTimeRedisManager = require "./RealTimeRedisManager"
 Errors = require "./Errors"
 RangesManager = require "./RangesManager"
 

@@ -16,7 +16,7 @@ module.exports =
 			url: "http://localhost:3015"
 
 	redis:
-		web:
+		realtime:
 			port:"6379"
 			host:"localhost"
 			password:""
