@@ -83,7 +83,10 @@
 						on-cancel="cancelNewComment();"
 					)
 				div(ng-if="entry.type === 'bulk-actions'")
-					| Bulk actions.
+					bulk-actions-entry(
+						on-bulk-accept="bulkAccept();"
+						on-bulk-reject="bulkAccept();"
+					)
 
 	.rp-entry-list(
 		ng-if="reviewPanel.subView === SubViews.OVERVIEW"
@@ -355,6 +358,23 @@ script(type='text/ng-template', id='addCommentEntryTemplate')
 						i.fa.fa-comment
 						| &nbsp;#{translate("comment")}
 
+script(type='text/ng-template', id='bulkActionsEntryTemplate')
+	div
+		.rp-entry-callout.rp-entry-callout-bulk-actions
+		.rp-entry.rp-entry-bulk-actions
+			a.rp-bulk-actions-btn(
+				href
+				ng-click="bulkReject();"
+			) 
+				i.fa.fa-times
+				| &nbsp;#{translate("reject_all")}
+			a.rp-bulk-actions-btn(
+				href
+				ng-click="bulkAccept();"
+			) 
+				i.fa.fa-check
+				| &nbsp;#{translate("accept_all")}
+			
 script(type='text/ng-template', id='resolvedCommentsDropdownTemplate')
 	.resolved-comments
 		.resolved-comments-backdrop(
