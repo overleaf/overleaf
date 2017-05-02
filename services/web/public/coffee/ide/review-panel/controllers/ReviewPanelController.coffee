@@ -309,7 +309,7 @@ define [
 					entry.focused = (entry.offset <= selection_offset_start <= entry.offset + entry.content.length)
 					$scope.reviewPanel.nSelectedEntries++ if isEntryWithinSelection
 				else if entry.type == "delete"
-					isEntryWithinSelection = selection_offset_start <= entry.offset >= selection_offset_start
+					isEntryWithinSelection = selection_offset_start <= entry.offset <= selection_offset_end
 					entry.focused = (entry.offset == selection_offset_start)
 					$scope.reviewPanel.nSelectedEntries++ if isEntryWithinSelection
 				else if entry.type in [ "add-comment", "bulk-actions" ] and selection
