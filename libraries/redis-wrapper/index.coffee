@@ -13,53 +13,71 @@ module.exports = RedisSharelatex =
 			delete standardOpts.endpoints
 			delete standardOpts.masterName
 			client = require("redis-sentinel").createClient opts.endpoints, opts.masterName, standardOpts
+			client.healthCheck = RedisSharelatex.singleInstanceHealthCheckBuilder(client)
+		else if opts.cluster?
+			Redis = require("ioredis")
+			client = new Redis.Cluster(opts.cluster)
+			client.healthCheck = RedisSharelatex.clusterHealthCheckBuilder(client)
+			RedisSharelatex._monkeyPatchIoredisExec(client)
 		else
 			standardOpts = _.clone(opts)
 			delete standardOpts.port
 			delete standardOpts.host
 			client = require("redis").createClient opts.port, opts.host, standardOpts
+			client.healthCheck = RedisSharelatex.singleInstanceHealthCheckBuilder(client)
 		return client
-
-
-	activeHealthCheckRedis: (connectionInfo)->
-		sub = RedisSharelatex.createClient(connectionInfo)
-		pub = RedisSharelatex.createClient(connectionInfo)
+	
+	HEARTBEAT_TIMEOUT: 2000
+	singleInstanceHealthCheckBuilder: (client) ->
+		healthCheck = (callback) ->
+			RedisSharelatex._checkClient(client, callback)
+		return healthCheck
+	
+	clusterHealthCheckBuilder: (client) ->
+		healthCheck = (callback) ->
+			jobs = client.rclient.nodes("all").map (node) =>
+				(cb) => RedisSharelatex._checkClient(node, cb)
+			async.parallel jobs, callback
 		
-		redisIsOk = true
-		lastPingMessage = ""
-		heartbeatInterval = 2000 #ms
-		isAliveTimeout = 10000 #ms
+		return healthCheck
+	
+	_checkClient: (client, callback) ->
+		callback = _.once(callback)
+		timer = setTimeout () ->
+			error = new Error("redis client ping check timed out")
+			console.error {
+				err: error,
+				key: client.options?.key # only present for cluster
+			}, "client timed out"
+			callback(error)
+		, RedisSharelatex.HEARTBEAT_TIMEOUT
+		client.ping (err) ->
+			clearTimeout timer
+			callback(err)
 		
-		id = require("crypto").pseudoRandomBytes(16).toString("hex")
-		heartbeatChannel = "heartbeat-#{id}"
-		lastHeartbeat = Date.now()
+	_monkeyPatchIoredisExec: (client) ->
+		_multi = client.multi
+		client.multi = (args...) ->
+			multi = _multi.call(client, args...)
+			_exec = multi.exec
+			multi.exec = (args..., callback) ->
+				_exec.call multi, args..., (error, result) ->
+					# ioredis exec returns an results like:
+					# [ [null, 42], [null, "foo"] ]
+					# where the first entries in each 2-tuple are
+					# presumably errors for each individual command,
+					# and the second entry is the result. We need to transform
+					# this into the same result as the old redis driver:
+					# [ 42, "foo" ]
+					filtered_result = []
+					for entry in result or []
+						if entry[0]?
+							return callback(entry[0])
+						else
+							filtered_result.push entry[1]
+					callback error, filtered_result
+			return multi
+	
 		
-		sub.subscribe heartbeatChannel, (error) ->
-			if error?
-				console.error "ERROR: failed to subscribe to #{heartbeatChannel} channel", error
-		sub.on "message", (channel, message) ->
-			if lastPingMessage == message #we got the same message twice
-				redisIsOk = false
-			lastPingMessage = message
-			if channel == heartbeatChannel
-				lastHeartbeat = Date.now()
-		
-		setInterval ->
-			message = "ping:#{Date.now()}"
-			pub.publish heartbeatChannel, message
-		, heartbeatInterval
+	
 
-		isAlive = ->
-			timeSinceLastHeartbeat = Date.now() - lastHeartbeat
-			if !redisIsOk
-				return false
-			else if timeSinceLastHeartbeat > isAliveTimeout
-				console.error "heartbeat from redis timed out"
-				redisIsOk = false
-				return false
-			else
-				return true
-
-		return {
-			isAlive:isAlive
-		}
