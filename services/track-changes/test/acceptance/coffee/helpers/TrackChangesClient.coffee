@@ -1,9 +1,10 @@
 async = require 'async'
 zlib = require 'zlib'
 request = require "request"
-rclient = require("redis").createClient() # Only works locally for now
-{db, ObjectId} = require "../../../../app/js/mongojs"
 Settings = require "settings-sharelatex"
+rclient = require("redis-sharelatex").createClient(Settings.redis.history) # Only works locally for now
+Keys = Settings.redis.history.key_schema
+{db, ObjectId} = require "../../../../app/js/mongojs"
 
 module.exports = TrackChangesClient =
 	flushAndGetCompressedUpdates: (project_id, doc_id, callback = (error, updates) ->) ->
@@ -49,9 +50,9 @@ module.exports = TrackChangesClient =
 			}, callback
 
 	pushRawUpdates: (project_id, doc_id, updates, callback = (error) ->) ->
-		rclient.sadd "DocsWithHistoryOps:#{project_id}", doc_id, (error) ->
+		rclient.sadd Keys.docsWithHistoryOps({project_id}), doc_id, (error) ->
 			return callback(error) if error?
-			rclient.rpush "UncompressedHistoryOps:#{doc_id}", (JSON.stringify(u) for u in updates)..., callback
+			rclient.rpush Keys.uncompressedHistoryOps({doc_id}), (JSON.stringify(u) for u in updates)..., callback
 
 	getDiff: (project_id, doc_id, from, to, callback = (error, diff) ->) ->
 		request.get {
