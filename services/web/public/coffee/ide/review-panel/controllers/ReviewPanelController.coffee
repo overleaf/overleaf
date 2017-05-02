@@ -159,7 +159,7 @@ define [
 			entries = $scope.reviewPanel.entries[$scope.editor.open_doc_id] or {}
 			permEntries = {}
 			for entry, entryData of entries
-				if entry not in [ "add-comment", "bulk-accept", "bulk-reject" ]
+				if entry not in [ "add-comment", "bulk-actions" ]
 					permEntries[entry] = entryData 
 			Object.keys(permEntries).length
 		), (nEntries) ->
@@ -285,8 +285,7 @@ define [
 			entries = getDocEntries(doc_id)
 
 			delete entries["add-comment"]
-			delete entries["bulk-accept"]
-			delete entries["bulk-reject"]
+			delete entries["bulk-actions"]
 
 			if selection
 				entries["add-comment"] = {
@@ -294,13 +293,8 @@ define [
 					offset: selection_offset_start
 					length: selection_offset_end - selection_offset_start
 				}
-				entries["bulk-accept"] = {
-					type: "bulk-accept"
-					offset: selection_offset_start
-					length: selection_offset_end - selection_offset_start
-				}
-				entries["bulk-reject"] = {
-					type: "bulk-reject"
+				entries["bulk-actions"] = {
+					type: "bulk-actions"
 					offset: selection_offset_start
 					length: selection_offset_end - selection_offset_start
 				}
@@ -312,7 +306,7 @@ define [
 					entry.focused = (entry.offset <= selection_offset_start <= entry.offset + entry.content.length)
 				else if entry.type == "delete"
 					entry.focused = (entry.offset == selection_offset_start)
-				else if entry.type in [ "add-comment", "bulk-accept", "bulk-reject" ] and selection
+				else if entry.type in [ "add-comment", "bulk-actions" ] and selection
 					entry.focused = true
 			
 			$scope.$broadcast "review-panel:recalculate-screen-positions"

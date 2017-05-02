@@ -82,10 +82,8 @@
 						on-submit="submitNewComment(content);"
 						on-cancel="cancelNewComment();"
 					)
-				div(ng-if="entry.type === 'bulk-accept'")
-					| Bulk accept
-				div(ng-if="entry.type === 'bulk-reject'")
-					| Bulk reject
+				div(ng-if="entry.type === 'bulk-actions'")
+					| Bulk actions.
 
 	.rp-entry-list(
 		ng-if="reviewPanel.subView === SubViews.OVERVIEW"
