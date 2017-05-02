@@ -75,6 +75,27 @@ describe "index", ->
 			assert(client instanceof @ioredis.Cluster)
 			client.config.should.deep.equal @cluster
 
+	describe "monkey patch ioredis exec", ->
+		beforeEach ->
+			@callback = sinon.stub()
+			@results = []
+			@multiOrig = { exec: sinon.stub().yields(null, @results)}
+			@client = { multi: sinon.stub().returns(@multiOrig) }
+			@redis._monkeyPatchIoredisExec(@client)
+			@multi = @client.multi()
+
+		it "should return the old redis format for an array", ->
+			@results[0] = [null, 42]
+			@results[1] = [null, "foo"]
+			@multi.exec @callback
+			@callback.calledWith(null, [42, "foo"]).should.equal true
+
+		it "should return the old redis format when there is an error", ->
+			@results[0] = [null, 42]
+			@results[1] = ["error", "foo"]
+			@multi.exec @callback
+			@callback.calledWith("error").should.equal true
+
 	describe "setting the password", ->
 		beforeEach ->
 			@standardOpts =
