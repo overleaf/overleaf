@@ -1,7 +1,7 @@
 logger = require "logger-sharelatex"
 settings = require 'settings-sharelatex'
 redis = require("redis-sharelatex")
-rclient = redis.createClient(settings.redis.web)
+rclient = redis.createClient(settings.redis.documentupdater)
 SafeJsonParse = require "./SafeJsonParse"
 
 MESSAGE_SIZE_LOG_LIMIT = 1024 * 1024 # 1Mb

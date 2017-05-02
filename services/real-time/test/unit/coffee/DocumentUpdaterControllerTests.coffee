@@ -13,10 +13,13 @@ describe "DocumentUpdaterController", ->
 		@EditorUpdatesController = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub() }
 			"settings-sharelatex": @settings =
-				redis: web: {}
+				redis:
+					documentupdater:
+						key_schema:
+							pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
 			"redis-sharelatex" : 
-				createClient: ()=> 
-					@rclient = {auth:->}
+				createClient: () => 
+					@rclient = {}
 			"./SafeJsonParse": @SafeJsonParse =
 				parse: (data, cb) => cb null, JSON.parse(data)
 

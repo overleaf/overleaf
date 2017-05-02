@@ -5,10 +5,10 @@ modulePath = require('path').join __dirname, '../../../app/js/WebsocketLoadBalan
 
 describe "WebsocketLoadBalancer", ->
 	beforeEach ->
+		@rclient = {}
 		@WebsocketLoadBalancer = SandboxedModule.require modulePath, requires:
 			"redis-sharelatex": 
-				createClient: () ->
-					auth:->
+				createClient: () => @rclient
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"./SafeJsonParse": @SafeJsonParse =
 				parse: (data, cb) => cb null, JSON.parse(data)
