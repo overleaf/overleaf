@@ -3,6 +3,7 @@ chai.should()
 sinon = require("sinon")
 modulePath = "../../../../app/js/Features/Docstore/DocstoreManager"
 SandboxedModule = require('sandboxed-module')
+Errors = require "../../../../app/js/Features/Errors/Errors.js"
 
 describe "DocstoreManager", ->
 	beforeEach ->
@@ -50,6 +51,23 @@ describe "DocstoreManager", ->
 						project_id: @project_id
 						doc_id: @doc_id
 					}, "error deleting doc in docstore")
+					.should.equal true
+
+		describe "with a missing (404) response code", ->
+			beforeEach ->
+				@request.del = sinon.stub().callsArgWith(1, null, statusCode: 404, "")
+				@DocstoreManager.deleteDoc @project_id, @doc_id, @callback
+
+			it "should call the callback with an error", ->
+				@callback.calledWith(new Errors.NotFoundError("tried to delete doc not in docstore")).should.equal true
+
+			it "should log the error", ->
+				@logger.error
+					.calledWith({
+						err: new Errors.NotFoundError("tried to delete doc not in docstore")
+						project_id: @project_id
+						doc_id: @doc_id
+					}, "tried to delete doc not in docstore")
 					.should.equal true
 
 	describe "updateDoc", ->
@@ -152,6 +170,23 @@ describe "DocstoreManager", ->
 
 			it "should call the callback with the lines, version and rev", ->
 				@callback.calledWith(null, @lines, @rev, @version, @ranges).should.equal true
+
+		describe "with a missing (404) response code", ->
+			beforeEach ->
+				@request.get = sinon.stub().callsArgWith(1, null, statusCode: 404, "")
+				@DocstoreManager.getDoc @project_id, @doc_id, @callback
+
+			it "should call the callback with an error", ->
+				@callback.calledWith(new Errors.NotFoundError("doc not found in docstore")).should.equal true
+
+			it "should log the error", ->
+				@logger.error
+					.calledWith({
+						err: new Errors.NotFoundError("doc not found in docstore")
+						project_id: @project_id
+						doc_id: @doc_id
+					}, "doc not found in docstore")
+					.should.equal true
 
 	describe "getAllDocs", ->
 		describe "with a successful response code", ->
