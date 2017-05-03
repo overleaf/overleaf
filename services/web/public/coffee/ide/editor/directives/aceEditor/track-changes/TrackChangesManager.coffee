@@ -31,6 +31,12 @@ define [
 			
 			@$scope.$on "change:reject", (e, change_id) =>
 				@rejectChangeId(change_id)
+
+			@$scope.$on "change:bulk-accept", (e, change_ids) =>
+				@bulkAcceptChangeIds(change_ids)
+			
+			@$scope.$on "change:bulk-reject", (e, change_ids) =>
+				@bulkRejectChangeIds(change_ids)
 			
 			@$scope.$on "comment:remove", (e, comment_id) =>
 				@removeCommentId(comment_id)
@@ -232,6 +238,13 @@ define [
 				session.$fromReject = false
 			else
 				throw new Error("unknown change: #{JSON.stringify(change)}")
+
+		bulkAcceptChangeIds: (change_ids) ->
+			console.log change_id for change_id in change_ids
+
+		bulkRejectChangeIds: (change_ids) ->
+			for change_id in change_ids
+				@rejectChangeId change_id 
 
 		removeCommentId: (comment_id) ->
 			@rangesTracker.removeCommentId(comment_id)
