@@ -328,10 +328,20 @@ define [
 			event_tracking.sendMB "rp-change-rejected", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
 		
 		$scope.bulkAccept = () ->
-			console.log $scope.reviewPanel.selectedEntryIds
+			$scope.$broadcast "change:bulk-accept", $scope.reviewPanel.selectedEntryIds.slice()
+			$scope.reviewPanel.selectedEntryIds = []
+			event_tracking.sendMB "rp-bulk-accept", { 
+				view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini',  
+				nEntries: $scope.reviewPanel.selectedEntryIds.length
+			}
 
 		$scope.bulkReject = () ->
-			console.log $scope.reviewPanel.selectedEntryIds
+			$scope.$broadcast "change:bulk-reject", $scope.reviewPanel.selectedEntryIds.slice()
+			$scope.reviewPanel.selectedEntryIds = []
+			event_tracking.sendMB "rp-bulk-reject", { 
+				view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini',  
+				nEntries: $scope.reviewPanel.selectedEntryIds.length
+			}
 
 		$scope.addNewComment = () ->
 			$scope.$broadcast "comment:start_adding"
