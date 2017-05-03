@@ -930,6 +930,9 @@
 	.rp-size-mini & {
 		right: @review-off-width;
 	}
+	.rp-size-expanded & {
+		display: none;
+	}
 }
 	.rp-track-changes-indicator {
 		display: block;
@@ -957,10 +960,6 @@
 			text-decoration: none;
 			background-color: rgba(240, 240, 240, 1);
 			color: @rp-type-blue;
-		}
-
-		.rp-size-expanded & {
-			display: none;
 		}
 	}
 
