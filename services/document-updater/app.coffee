@@ -11,10 +11,6 @@ DispatchManager = require('./app/js/DispatchManager')
 Errors = require "./app/js/Errors"
 HttpController = require "./app/js/HttpController"
 
-redis = require("redis-sharelatex")
-rclient = redis.createClient(Settings.redis.web)
-
-
 Path = require "path"
 Metrics = require "metrics-sharelatex"
 Metrics.initialize("doc-updater")

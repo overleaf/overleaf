@@ -22,6 +22,12 @@ module.exports =
 			password:""
 			key_schema:
 				pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
+			# cluster: [{
+			# 	port: "7000"
+			# 	host: "localhost"
+			# }]
+			# key_schema:
+			# 	pendingUpdates: ({doc_id}) -> "PendingUpdates:{#{doc_id}}"
 		documentupdater:
 			port: "6379"
 			host: "localhost"
@@ -35,15 +41,6 @@ module.exports =
 				projectKey: ({doc_id}) -> "ProjectId:#{doc_id}"
 				docsInProject: ({project_id}) -> "DocsIn:#{project_id}"
 				ranges: ({doc_id}) -> "Ranges:#{doc_id}"
-		history:
-			port:"6379"
-			host:"localhost"
-			password:""
-			key_schema:
-				uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
-				docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:#{project_id}"
-			
-			
 			# cluster: [{
 			# 	port: "7000"
 			# 	host: "localhost"
@@ -57,6 +54,32 @@ module.exports =
 			# 	projectKey: ({doc_id}) -> "ProjectId:{#{doc_id}}"
 			# 	docsInProject: ({project_id}) -> "DocsIn:{#{project_id}}"
 			# 	ranges: ({doc_id}) -> "Ranges:{#{doc_id}}"
+		history:
+			port:"6379"
+			host:"localhost"
+			password:""
+			key_schema:
+				uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
+				docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:#{project_id}"
+			# cluster: [{
+			# 	port: "7000"
+			# 	host: "localhost"
+			# }]
+			# key_schema:
+			# 	uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:{#{doc_id}}"
+			# 	docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:{#{project_id}}"
+		lock:
+			port:"6379"
+			host:"localhost"
+			password:""
+			key_schema:
+				blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
+			# cluster: [{
+			# 	port: "7000"
+			# 	host: "localhost"
+			# }]
+			# key_schema:
+			# 	blockingKey: ({doc_id}) -> "Blocking:{#{doc_id}}"
 	
 	max_doc_length: 2 * 1024 * 1024 # 2mb
 
