@@ -49,7 +49,7 @@
     "passport-ldapauth": "^0.6.0",
     "passport-local": "^1.0.0",
     "redis": "0.10.1",
-    "redis-sharelatex": "0.0.9",
+    "redis-sharelatex": "git+https://github.com/sharelatex/redis-sharelatex.git#v1.0.0",
     "request": "^2.69.0",
     "requests": "^0.1.7",
     "rimraf": "2.2.6",
