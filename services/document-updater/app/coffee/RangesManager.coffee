@@ -41,6 +41,15 @@ module.exports = RangesManager =
 		response = RangesManager._getRanges(rangesTracker)
 		callback null, response
 
+	bulkAcceptChanges: (change_ids, ranges, callback = (error, ranges) ->) ->
+		{changes, comments} = ranges
+		logger.log {change_id}, "accepting #{ change_ids.length } changes in ranges"
+		rangesTracker = new RangesTracker(changes, comments)
+		for change_id in change_ids
+			rangesTracker.removeChangeId(change_id)
+		response = RangesManager._getRanges(rangesTracker)
+		callback null, response
+
 	deleteComment: (comment_id, ranges, callback = (error, ranges) ->) ->
 		{changes, comments} = ranges
 		logger.log {comment_id}, "deleting comment in ranges"
