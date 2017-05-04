@@ -79,6 +79,15 @@
 					li
 						a(href, ng-click="deleteTag(tag)", stop-propagation="click")
 							| #{translate("delete")}
+		li.tag.untagged(
+			ng-if="tags.length",
+			ng-cloak,
+			ng-click="selectUntagged()"
+			ng-class="{active: filter === 'untagged'}",
+		) 	
+			a.tag-name(href)
+				| #{translate("uncategorized")}
+				span.subdued  ({{ nUntagged }})
 		li(ng-cloak)
 			a.tag(href, ng-click="openNewTagModal()")
 				i.fa.fa-fw.fa-plus

@@ -58,4 +58,18 @@ define [
 					scope.$apply () ->
 						scope.ngModel = false
 					ignoreChanges = false
+
+				scope.$on "select-all:row-clicked", () ->
+					ignoreChanges = true
+					scope.$apply () ->
+						scope.ngModel = !scope.ngModel
+					ignoreChanges = false
+		}
+
+	App.directive "selectRow", () ->
+		return {
+			scope: true
+			link: (scope, element, attrs) ->
+				element.on "click", (e) ->
+					scope.$broadcast "select-all:row-clicked"
 		}
