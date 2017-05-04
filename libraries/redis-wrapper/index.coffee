@@ -1,4 +1,5 @@
 _ = require("underscore")
+async = require "async"
 
 module.exports = RedisSharelatex =
 	createClient: (opts = {port: 6379, host: "localhost"})->
@@ -35,7 +36,7 @@ module.exports = RedisSharelatex =
 	
 	clusterHealthCheckBuilder: (client) ->
 		healthCheck = (callback) ->
-			jobs = client.rclient.nodes("all").map (node) =>
+			jobs = client.nodes("all").map (node) =>
 				(cb) => RedisSharelatex._checkClient(node, cb)
 			async.parallel jobs, callback
 		

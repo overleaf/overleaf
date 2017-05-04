@@ -6,6 +6,7 @@
   "author": "ShareLaTeX",
   "license": "ISC",
   "dependencies": {
+    "async": "^2.4.0",
     "chai": "1.9.1",
     "coffee-script": "1.8.0",
     "grunt": "0.4.5",
