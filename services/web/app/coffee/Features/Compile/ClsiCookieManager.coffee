@@ -1,7 +1,7 @@
 Settings = require "settings-sharelatex"
 request = require('request')
-redis = require("redis-sharelatex")
-rclient = redis.createClient(Settings.redis.web)
+RedisWrapper = require("../../infrastructure/RedisWrapper")
+rclient = RedisWrapper.client("clsi_cookie")
 Cookie = require('cookie')
 logger = require "logger-sharelatex"
 

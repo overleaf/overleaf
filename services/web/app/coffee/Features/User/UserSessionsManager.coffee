@@ -3,7 +3,6 @@ logger = require("logger-sharelatex")
 Async = require('async')
 _ = require('underscore')
 UserSessionsRedis = require('./UserSessionsRedis')
-
 rclient = UserSessionsRedis.client()
 
 module.exports = UserSessionsManager =

@@ -23,8 +23,8 @@ describe "OneTimeTokenHandler", ->
 			exec:sinon.stub()
 		self = @
 		@OneTimeTokenHandler = SandboxedModule.require modulePath, requires:
-			"redis-sharelatex" :
-				createClient: =>
+			"../../infrastructure/RedisWrapper" :
+				client: =>
 					auth:->
 					multi: -> return self.redisMulti
 

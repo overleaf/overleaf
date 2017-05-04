@@ -20,10 +20,8 @@ describe 'DocumentUpdaterHandler', ->
 
 		@request = {}
 		@projectEntityHandler = {}
-		@rclient = {auth:->}
 		@settings = 
 			apis : documentupdater: url : "http://something.com"
-			redis:{web:{}}
 		@handler = SandboxedModule.require modulePath, requires:
 			'request': defaults:=> return @request
 			'settings-sharelatex':@settings
@@ -31,51 +29,9 @@ describe 'DocumentUpdaterHandler', ->
 			'../Project/ProjectEntityHandler':@projectEntityHandler
 			"../../models/Project": Project: @Project={}
 			'../../Features/Project/ProjectLocator':{}
-			'redis-sharelatex' : createClient: () => @rclient
 			"metrics-sharelatex": 
 				Timer:->
 					done:->
-
-	describe 'queueChange', ->
-		beforeEach ->
-			@change = {
-				"action":"removeText",
-				"range":{"start":{"row":2,"column":2},"end":{"row":2,"column":3}},
-				"text":"e"
-			}
-			@rclient.multi = sinon.stub().returns @rclient
-			@rclient.exec = sinon.stub().callsArg(0)
-			@rclient.rpush = sinon.stub()
-			@rclient.sadd = sinon.stub()
-			@callback = sinon.stub()
-
-		describe "successfully", ->
-			beforeEach ->
-				@handler.queueChange(@project_id, @doc_id, @change, @callback)
-
-			it "should push the change", ->
-				@rclient.rpush
-					.calledWith("PendingUpdates:#{@doc_id}", JSON.stringify(@change))
-					.should.equal true
-
-			it "should notify the doc updater of the change via the pending-updates-list queue", ->
-				@rclient.rpush
-					.calledWith("pending-updates-list", "#{@project_id}:#{@doc_id}")
-					.should.equal true
-
-			it "should push the doc id into the pending updates set", ->
-				@rclient.sadd
-					.calledWith("DocsWithPendingUpdates", "#{@project_id}:#{@doc_id}")
-					.should.equal true
-
-		describe "with error connecting to redis during exec", ->
-			beforeEach ->
-				@rclient.exec = sinon.stub().callsArgWith(0, new Error("something went wrong"))
-				@handler.queueChange(@project_id, @doc_id, @change, @callback)
-
-			it "should return an error", ->
-				@callback.calledWithExactly(sinon.match(Error)).should.equal true
-
 
 	describe 'flushProjectToMongo', ->
 		beforeEach ->
