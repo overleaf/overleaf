@@ -8,7 +8,7 @@
 		) !{translate("track_changes_is_on")}
 		a.rp-bulk-actions-btn(
 			href
-			ng-if="reviewPanel.selectedEntryIds.length > 0"
+			ng-if="reviewPanel.selectedEntryIds.length > 1"
 			ng-click="bulkAccept();"
 		) 
 			i.fa.fa-check
@@ -16,7 +16,7 @@
 			| ({{ reviewPanel.selectedEntryIds.length }})
 		a.rp-bulk-actions-btn(
 			href
-			ng-if="reviewPanel.selectedEntryIds.length > 0"
+			ng-if="reviewPanel.selectedEntryIds.length > 1"
 			ng-click="bulkReject();"
 		) 
 			i.fa.fa-times
@@ -377,7 +377,7 @@ script(type='text/ng-template', id='addCommentEntryTemplate')
 						| &nbsp;#{translate("comment")}
 
 script(type='text/ng-template', id='bulkActionsEntryTemplate')
-	div(ng-if="nEntries > 0")
+	div(ng-if="nEntries > 1")
 		.rp-entry-callout.rp-entry-callout-bulk-actions
 		.rp-entry.rp-entry-bulk-actions
 			a.rp-bulk-actions-btn(
