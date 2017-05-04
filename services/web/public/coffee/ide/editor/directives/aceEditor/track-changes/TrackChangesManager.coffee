@@ -32,9 +32,6 @@ define [
 			@$scope.$on "change:reject", (e, change_id) =>
 				@rejectChangeId(change_id)
 
-			@$scope.$on "change:bulk-accept", (e, change_ids) =>
-				@bulkAcceptChangeIds(change_ids)
-			
 			@$scope.$on "change:bulk-reject", (e, change_ids) =>
 				@bulkRejectChangeIds(change_ids)
 			

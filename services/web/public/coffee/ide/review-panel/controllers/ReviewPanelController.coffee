@@ -328,7 +328,9 @@ define [
 			event_tracking.sendMB "rp-change-rejected", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
 		
 		$scope.bulkAccept = () ->
-			$scope.$broadcast "change:bulk-accept", $scope.reviewPanel.selectedEntryIds.slice()
+			entry_ids = $scope.reviewPanel.selectedEntryIds.slice()
+			$http.post "/project/#{$scope.project_id}/doc/#{$scope.editor.open_doc_id}/changes/accept", { change_ids: entry_ids, _csrf: window.csrfToken}
+			$scope.$broadcast "change:bulk-accept", entry_ids
 			$scope.reviewPanel.selectedEntryIds = []
 			event_tracking.sendMB "rp-bulk-accept", { 
 				view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini',  
