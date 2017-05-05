@@ -61,8 +61,8 @@ module.exports = RedisSharelatex =
 		client.multi = (args...) ->
 			multi = _multi.call(client, args...)
 			_exec = multi.exec
-			multi.exec = (args..., callback) ->
-				_exec.call multi, args..., (error, result) ->
+			multi.exec = (callback = () ->) ->
+				_exec.call multi, (error, result) ->
 					# ioredis exec returns an results like:
 					# [ [null, 42], [null, "foo"] ]
 					# where the first entries in each 2-tuple are
