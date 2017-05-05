@@ -1025,10 +1025,22 @@
       }
     },
     "redis-sharelatex": {
-      "version": "1.0.0",
-      "from": "git+https://github.com/sharelatex/redis-sharelatex.git#v1.0.0",
-      "resolved": "git+https://github.com/sharelatex/redis-sharelatex.git#0cd669a9ed73c0330e3b912fc9d9a42dae3c4fbd",
+      "version": "1.0.1",
+      "from": "git+https://github.com/sharelatex/redis-sharelatex.git#v1.0.1",
+      "resolved": "git+https://github.com/sharelatex/redis-sharelatex.git#0c581688a2077346ab79b67f1f6086a002e4dc17",
       "dependencies": {
+        "async": {
+          "version": "2.4.0",
+          "from": "async@>=2.4.0 <3.0.0",
+          "resolved": "https://registry.npmjs.org/async/-/async-2.4.0.tgz",
+          "dependencies": {
+            "lodash": {
+              "version": "4.17.4",
+              "from": "lodash@>=4.14.0 <5.0.0",
+              "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz"
+            }
+          }
+        },
         "chai": {
           "version": "1.9.1",
           "from": "chai@1.9.1",
