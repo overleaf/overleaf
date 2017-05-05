@@ -16,7 +16,7 @@ describe "DocumentManager", ->
 			"./Metrics": @Metrics =
 				Timer: class Timer
 					done: sinon.stub()
-			"./WebRedisManager": @WebRedisManager = {}
+			"./RealTimeRedisManager": @RealTimeRedisManager = {}
 			"./DiffCodec": @DiffCodec = {}
 			"./UpdateManager": @UpdateManager = {}
 			"./RangesManager": @RangesManager = {}

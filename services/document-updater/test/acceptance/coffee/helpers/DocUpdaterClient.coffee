@@ -1,9 +1,10 @@
 Settings = require('settings-sharelatex')
-rclient = require("redis-sharelatex").createClient(Settings.redis.web)
+rclient = require("redis-sharelatex").createClient(Settings.redis.realtime)
+keys = Settings.redis.realtime.key_schema
 request = require("request").defaults(jar: false)
 async = require "async"
 
-rclient_sub = require("redis-sharelatex").createClient(Settings.redis.web)
+rclient_sub = require("redis-sharelatex").createClient(Settings.redis.realtime)
 rclient_sub.subscribe "applied-ops"
 rclient_sub.setMaxListeners(0)
 	
@@ -17,7 +18,7 @@ module.exports = DocUpdaterClient =
 		rclient_sub.on "message", callback
 
 	sendUpdate: (project_id, doc_id, update, callback = (error) ->) ->
-		rclient.rpush "PendingUpdates:#{doc_id}", JSON.stringify(update), (error)->
+		rclient.rpush keys.pendingUpdates({doc_id}), JSON.stringify(update), (error)->
 			return callback(error) if error?
 			doc_key = "#{project_id}:#{doc_id}"
 			rclient.sadd "DocsWithPendingUpdates", doc_key, (error) ->

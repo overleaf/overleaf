@@ -8,7 +8,7 @@ Metrics = require('./Metrics')
 
 module.exports = DispatchManager =
 	createDispatcher: () ->
-		client = redis.createClient(Settings.redis.web)
+		client = redis.createClient(Settings.redis.realtime)
 		worker = {
 			client: client
 			_waitForUpdateThenDispatchWorker: (callback = (error) ->) ->

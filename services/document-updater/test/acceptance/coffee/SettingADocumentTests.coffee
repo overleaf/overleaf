@@ -3,7 +3,8 @@ chai = require("chai")
 chai.should()
 expect = require("chai").expect
 Settings = require('settings-sharelatex')
-rclient = require("redis-sharelatex").createClient(Settings.redis.web)
+rclient_du = require("redis-sharelatex").createClient(Settings.redis.documentupdater)
+Keys = Settings.redis.documentupdater.key_schema
 
 MockTrackChangesApi = require "./helpers/MockTrackChangesApi"
 MockWebApi = require "./helpers/MockWebApi"
@@ -65,7 +66,7 @@ describe "Setting a document", ->
 				done()
 		
 		it "should leave the document in redis", (done) ->
-			rclient.get "doclines:#{@doc_id}", (error, lines) =>
+			rclient_du.get Keys.docLines({doc_id: @doc_id}), (error, lines) =>
 				throw error if error?
 				expect(JSON.parse(lines)).to.deep.equal @newLines
 				done()
@@ -90,7 +91,7 @@ describe "Setting a document", ->
 			MockTrackChangesApi.flushDoc.calledWith(@doc_id).should.equal true
 		
 		it "should remove the document from redis", (done) ->
-			rclient.get "doclines:#{@doc_id}", (error, lines) =>
+			rclient_du.get Keys.docLines({doc_id: @doc_id}), (error, lines) =>
 				throw error if error?
 				expect(lines).to.not.exist
 				done()

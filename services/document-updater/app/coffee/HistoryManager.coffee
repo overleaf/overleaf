@@ -2,7 +2,7 @@ settings = require "settings-sharelatex"
 request  = require "request"
 logger = require "logger-sharelatex"
 async = require "async"
-WebRedisManager = require "./WebRedisManager"
+HistoryRedisManager = require "./HistoryRedisManager"
 
 module.exports = HistoryManager =
 	flushDocChanges: (project_id, doc_id, callback = (error) ->) ->
@@ -25,7 +25,7 @@ module.exports = HistoryManager =
 	pushUncompressedHistoryOps: (project_id, doc_id, ops = [], callback = (error) ->) ->
 		if ops.length == 0
 			return callback()
-		WebRedisManager.pushUncompressedHistoryOps project_id, doc_id, ops, (error, length) ->
+		HistoryRedisManager.pushUncompressedHistoryOps project_id, doc_id, ops, (error, length) ->
 			return callback(error) if error?
 			# We want to flush every 50 ops, i.e. 50, 100, 150, etc
 			# Find out which 'block' (i.e. 0-49, 50-99) we were in before and after pushing these

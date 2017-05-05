@@ -8,13 +8,8 @@ if Settings.sentry?.dsn?
 
 RedisManager = require('./app/js/RedisManager')
 DispatchManager = require('./app/js/DispatchManager')
-Keys = require('./app/js/RedisKeyBuilder')
 Errors = require "./app/js/Errors"
 HttpController = require "./app/js/HttpController"
-
-redis = require("redis-sharelatex")
-rclient = redis.createClient(Settings.redis.web)
-
 
 Path = require "path"
 Metrics = require "metrics-sharelatex"
@@ -63,15 +58,18 @@ app.get '/status', (req, res)->
 	else
 		res.send('document updater is alive')
 
-redisCheck = require("redis-sharelatex").activeHealthCheckRedis(Settings.redis.web)
-app.get "/health_check/redis", (req, res, next)->
-	if redisCheck.isAlive()
-		res.send 200
-	else
-		res.send 500
+webRedisClient = require("redis-sharelatex").createClient(Settings.redis.realtime)
+app.get "/health_check/redis", (req, res, next) ->
+	webRedisClient.healthCheck (error) ->
+		if error?
+			logger.err {err: error}, "failed redis health check"
+			res.send 500
+		else
+			res.send 200
 
+docUpdaterRedisClient = require("redis-sharelatex").createClient(Settings.redis.documentupdater)
 app.get "/health_check/redis_cluster", (req, res, next) ->
-	RedisManager.rclient.healthCheck (error, alive) ->
+	docUpdaterRedisClient.healthCheck (error) ->
 		if error?
 			logger.err {err: error}, "failed redis cluster health check"
 			res.send 500

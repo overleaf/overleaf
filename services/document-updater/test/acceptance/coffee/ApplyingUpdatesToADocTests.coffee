@@ -4,7 +4,10 @@ chai.should()
 expect = chai.expect
 async = require "async"
 Settings = require('settings-sharelatex')
-rclient = require("redis-sharelatex").createClient(Settings.redis.web)
+rclient_history = require("redis-sharelatex").createClient(Settings.redis.history)
+rclient_du = require("redis-sharelatex").createClient(Settings.redis.documentupdater)
+Keys = Settings.redis.documentupdater.key_schema
+HistoryKeys = Settings.redis.history.key_schema
 
 MockTrackChangesApi = require "./helpers/MockTrackChangesApi"
 MockWebApi = require "./helpers/MockWebApi"
@@ -47,10 +50,10 @@ describe "Applying updates to a doc", ->
 				done()
 
 		it "should push the applied updates to the track changes api", (done) ->
-			rclient.lrange "UncompressedHistoryOps:#{@doc_id}", 0, -1, (error, updates) =>
+			rclient_history.lrange HistoryKeys.uncompressedHistoryOps({@doc_id}), 0, -1, (error, updates) =>
 				throw error if error?
 				JSON.parse(updates[0]).op.should.deep.equal @update.op
-				rclient.sismember "DocsWithHistoryOps:#{@project_id}", @doc_id, (error, result) =>
+				rclient_history.sismember HistoryKeys.docsWithHistoryOps({@project_id}), @doc_id, (error, result) =>
 					throw error if error?
 					result.should.equal 1
 					done()
@@ -80,9 +83,9 @@ describe "Applying updates to a doc", ->
 				done()
 
 		it "should push the applied updates to the track changes api", (done) ->
-			rclient.lrange "UncompressedHistoryOps:#{@doc_id}", 0, -1, (error, updates) =>
+			rclient_history.lrange HistoryKeys.uncompressedHistoryOps({@doc_id}), 0, -1, (error, updates) =>
 				JSON.parse(updates[0]).op.should.deep.equal @update.op
-				rclient.sismember "DocsWithHistoryOps:#{@project_id}", @doc_id, (error, result) =>
+				rclient_history.sismember HistoryKeys.docsWithHistoryOps({@project_id}), @doc_id, (error, result) =>
 					result.should.equal 1
 					done()
 
@@ -125,17 +128,17 @@ describe "Applying updates to a doc", ->
 						done()
 
 			it "should push the applied updates to the track changes api", (done) ->
-				rclient.lrange "UncompressedHistoryOps:#{@doc_id}", 0, -1, (error, updates) =>
+				rclient_history.lrange HistoryKeys.uncompressedHistoryOps({@doc_id}), 0, -1, (error, updates) =>
 					updates = (JSON.parse(u) for u in updates)
 					for appliedUpdate, i in @updates
 						appliedUpdate.op.should.deep.equal updates[i].op
 
-					rclient.sismember "DocsWithHistoryOps:#{@project_id}", @doc_id, (error, result) =>
+					rclient_history.sismember HistoryKeys.docsWithHistoryOps({@project_id}), @doc_id, (error, result) =>
 						result.should.equal 1
 						done()
 			
 			it "should store the doc ops in the correct order", (done) ->
-				rclient.lrange "DocOps:#{@doc_id}", 0, -1, (error, updates) =>
+				rclient_du.lrange Keys.docOps({doc_id: @doc_id}), 0, -1, (error, updates) =>
 					updates = (JSON.parse(u) for u in updates)
 					for appliedUpdate, i in @updates
 						appliedUpdate.op.should.deep.equal updates[i].op
