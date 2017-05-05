@@ -48,8 +48,8 @@ app.post   '/project/:project_id/doc/:doc_id/flush',                    HttpCont
 app.delete '/project/:project_id/doc/:doc_id',                          HttpController.flushAndDeleteDoc
 app.delete '/project/:project_id',                                      HttpController.deleteProject
 app.post   '/project/:project_id/flush',                                HttpController.flushProject
-app.post   '/project/:project_id/doc/:doc_id/change/:change_id/accept', HttpController.acceptChange
-app.post   '/project/:project_id/doc/:doc_id/change/accept',            HttpController.bulkAcceptChanges
+app.post   '/project/:project_id/doc/:doc_id/change/:change_id/accept', HttpController.acceptChanges
+app.post   '/project/:project_id/doc/:doc_id/change/accept',            HttpController.acceptChanges
 app.del    '/project/:project_id/doc/:doc_id/comment/:comment_id',      HttpController.deleteComment
 
 app.get '/total', (req, res)->

@@ -33,15 +33,7 @@ module.exports = RangesManager =
 		logger.log {project_id, doc_id, changesCount: response.changes?.length, commentsCount: response.comments?.length}, "applied updates to ranges"
 		callback null, response
 
-	acceptChange: (change_id, ranges, callback = (error, ranges) ->) ->
-		{changes, comments} = ranges
-		logger.log {change_id}, "accepting change in ranges"
-		rangesTracker = new RangesTracker(changes, comments)
-		rangesTracker.removeChangeId(change_id)
-		response = RangesManager._getRanges(rangesTracker)
-		callback null, response
-
-	bulkAcceptChanges: (change_ids, ranges, callback = (error, ranges) ->) ->
+	acceptChanges: (change_ids, ranges, callback = (error, ranges) ->) ->
 		{changes, comments} = ranges
 		logger.log {change_id}, "accepting #{ change_ids.length } changes in ranges"
 		rangesTracker = new RangesTracker(changes, comments)

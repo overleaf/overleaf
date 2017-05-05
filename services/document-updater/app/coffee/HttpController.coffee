@@ -100,19 +100,20 @@ module.exports = HttpController =
 		{project_id, doc_id, change_id} = req.params
 		logger.log {project_id, doc_id, change_id}, "accepting change via http"
 		timer = new Metrics.Timer("http.acceptChange")
-		DocumentManager.acceptChangeWithLock project_id, doc_id, change_id, (error) ->
+		DocumentManager.acceptChangesWithLock project_id, doc_id, [ change_id ], (error) ->
 			timer.done()
 			return next(error) if error?
 			logger.log {project_id, doc_id, change_id}, "accepted change via http"
 			res.send 204 # No Content
 
-	bulkAcceptChanges: (req, res, next = (error) ->) ->
+	acceptChanges: (req, res, next = (error) ->) ->
 		{project_id, doc_id} = req.params
 		{change_ids} = req.body
-		change_ids ?= []
+		if !change_ids?
+			change_ids = [ req.params.change_id ]
 		logger.log {project_id, doc_id}, "accepting #{ change_ids.length } changes via http"
-		timer = new Metrics.Timer("http.bulkAcceptChanges")
-		DocumentManager.bulkAcceptChangesWithLock project_id, doc_id, change_ids, (error) ->
+		timer = new Metrics.Timer("http.acceptChanges")
+		DocumentManager.acceptChangesWithLock project_id, doc_id, change_ids, (error) ->
 			timer.done()
 			return next(error) if error?
 			logger.log {project_id, doc_id}, "accepted #{ change_ids.length } changes via http"
