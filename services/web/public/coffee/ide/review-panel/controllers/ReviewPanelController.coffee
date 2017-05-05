@@ -78,7 +78,7 @@ define [
 			updateEntries(doc_id)
 			$scope.$apply () ->
 
-		ide.socket.on "bulk-accept-changes", (doc_id, change_ids) ->
+		ide.socket.on "accept-changes", (doc_id, change_ids) ->
 			if doc_id != $scope.editor.open_doc_id
 				for change_id in change_ids
 					getChangeTracker(doc_id).removeChangeId(change_id)
