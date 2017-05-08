@@ -19,6 +19,12 @@ describe 'LockManager - releasing the lock', ()->
 				error:->
 			"redis-sharelatex":
 				createClient : () => @client
+			"settings-sharelatex": {
+				redis:
+					lock:
+						key_schema:
+							blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
+			}
 			"./Metrics": {inc: () ->}
 		@LockManager = SandboxedModule.require(modulePath, requires: mocks)
 		@lockValue = "lock-value-stub"
