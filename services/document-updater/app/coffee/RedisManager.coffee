@@ -25,6 +25,7 @@ MEGABYTES = 1024 * 1024
 MAX_RANGES_SIZE = 3 * MEGABYTES
 
 keys = Settings.redis.documentupdater.key_schema
+historyKeys = Settings.redis.history.key_schema
 
 module.exports = RedisManager =
 	rclient: rclient
@@ -167,9 +168,10 @@ module.exports = RedisManager =
 				logger.error err: error, doc_id: doc_id, newDocLines: newDocLines, error.message
 				return callback(error)
 			newHash = RedisManager._computeHash(newDocLines)
-			
-			logger.log doc_id: doc_id, version: newVersion, hash: newHash, "updating doc in redis"
-			
+
+			opVersions = appliedOps.map (op) -> op?.v
+			logger.log doc_id: doc_id, version: newVersion, hash: newHash, op_versions: opVersions, "updating doc in redis"
+
 			RedisManager._serializeRanges ranges, (error, ranges) ->
 				if error?
 					logger.error {err: error, doc_id}, error.message
@@ -180,6 +182,7 @@ module.exports = RedisManager =
 				multi.set    keys.docHash(doc_id:doc_id), newHash
 				if jsonOps.length > 0
 					multi.rpush  keys.docOps(doc_id: doc_id), jsonOps...
+					multi.rpush  historyKeys.uncompressedHistoryOps(doc_id: doc_id), jsonOps...
 				multi.expire keys.docOps(doc_id: doc_id), RedisManager.DOC_OPS_TTL
 				multi.ltrim  keys.docOps(doc_id: doc_id), -RedisManager.DOC_OPS_MAX_LENGTH, -1
 				if ranges?
