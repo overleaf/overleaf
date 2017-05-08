@@ -2,6 +2,8 @@ mongoose = require('mongoose')
 Settings = require 'settings-sharelatex'
 logger = require('logger-sharelatex')
 
+mongoose.Promise = global.Promise
+
 mongoose.connect(Settings.mongo.url, server: poolSize: 10)
 
 mongoose.connection.on 'connected', () ->

@@ -1,6 +1,6 @@
 Subscription = require('../../models/Subscription').Subscription
 logger = require("logger-sharelatex")
-ObjectId = require('mongoose').Types.ObjectId
+ObjectId = require('../../infrastructure/Mongoose').Types.ObjectId
 
 module.exports =
 

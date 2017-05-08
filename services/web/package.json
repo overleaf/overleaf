@@ -39,7 +39,7 @@
     "mimelib": "0.2.14",
     "mocha": "1.17.1",
     "mongojs": "2.4.0",
-    "mongoose": "4.1.0",
+    "mongoose": "4.9.8",
     "multer": "^0.1.8",
     "nodemailer": "2.1.0",
     "nodemailer-sendgrid-transport": "^0.2.0",

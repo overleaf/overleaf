@@ -1,4 +1,4 @@
-mongoose = require('mongoose')
+mongoose = require('../infrastructure/Mongoose')
 Settings = require 'settings-sharelatex'
 _ = require('underscore')
 FolderSchema = require('./Folder.js').FolderSchema

@@ -1,4 +1,4 @@
-mongoose = require 'mongoose'
+mongoose = require '../infrastructure/Mongoose'
 Settings = require 'settings-sharelatex'
 
 Schema = mongoose.Schema
