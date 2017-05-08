@@ -240,8 +240,7 @@ define [
 				throw new Error("unknown change: #{JSON.stringify(change)}")
 
 		bulkAcceptChangeIds: (change_ids) ->
-			for change_id in change_ids
-				@rangesTracker.removeChangeId(change_id)
+			@rangesTracker.removeChangeIds(change_ids)
 			@updateAnnotations()
 
 		bulkRejectChangeIds: (change_ids) ->

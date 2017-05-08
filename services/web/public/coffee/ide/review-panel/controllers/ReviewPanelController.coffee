@@ -80,8 +80,7 @@ define [
 
 		ide.socket.on "accept-changes", (doc_id, change_ids) ->
 			if doc_id != $scope.editor.open_doc_id
-				for change_id in change_ids
-					getChangeTracker(doc_id).removeChangeId(change_id)
+				getChangeTracker(doc_id).removeChangeIds(change_ids)
 			else
 				$scope.$broadcast "change:bulk-accept", change_ids
 			updateEntries(doc_id)
