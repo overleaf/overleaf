@@ -335,7 +335,7 @@ describe "HttpController", ->
 					.calledWith(new Error("oops"))
 					.should.equal true
 	
-	describe "acceptChange", ->
+	describe "acceptChanges", ->
 		beforeEach ->
 			@req =
 				params:
@@ -345,12 +345,12 @@ describe "HttpController", ->
 
 		describe "successfully", ->
 			beforeEach ->
-				@DocumentManager.acceptChangeWithLock = sinon.stub().callsArgWith(3)
-				@HttpController.acceptChange(@req, @res, @next)
+				@DocumentManager.acceptChangesWithLock = sinon.stub().callsArgWith(3)
+				@HttpController.acceptChanges(@req, @res, @next)
 
 			it "should accept the change", ->
-				@DocumentManager.acceptChangeWithLock
-					.calledWith(@project_id, @doc_id, @change_id)
+				@DocumentManager.acceptChangesWithLock
+					.calledWith(@project_id, @doc_id, [ @change_id ])
 					.should.equal true
 
 			it "should return a successful No Content response", ->
@@ -360,7 +360,7 @@ describe "HttpController", ->
 
 			it "should log the request", ->
 				@logger.log
-					.calledWith({@project_id, @doc_id, @change_id}, "accepting change via http")
+					.calledWith({@project_id, @doc_id}, "accepting 1 changes via http")
 					.should.equal true
 
 			it "should time the request", ->
@@ -368,8 +368,8 @@ describe "HttpController", ->
 
 		describe "when an errors occurs", ->
 			beforeEach ->
-				@DocumentManager.acceptChangeWithLock = sinon.stub().callsArgWith(3, new Error("oops"))
-				@HttpController.acceptChange(@req, @res, @next)
+				@DocumentManager.acceptChangesWithLock = sinon.stub().callsArgWith(3, new Error("oops"))
+				@HttpController.acceptChanges(@req, @res, @next)
 
 			it "should call next with the error", ->
 				@next

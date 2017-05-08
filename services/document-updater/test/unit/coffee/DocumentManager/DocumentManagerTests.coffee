@@ -283,12 +283,12 @@ describe "DocumentManager", ->
 			@ranges = { entries: "mock", comments: "mock" }
 			@updated_ranges = { entries: "updated", comments: "updated" }
 			@DocumentManager.getDoc = sinon.stub().yields(null, @lines, @version, @ranges)
-			@RangesManager.acceptChange = sinon.stub().yields(null, @updated_ranges)
+			@RangesManager.acceptChanges = sinon.stub().yields(null, @updated_ranges)
 			@RedisManager.updateDocument = sinon.stub().yields()
 		
 		describe "successfully", ->
 			beforeEach ->
-				@DocumentManager.acceptChange @project_id, @doc_id, @change_id, @callback
+				@DocumentManager.acceptChanges @project_id, @doc_id, [ @change_id ], @callback
 			
 			it "should get the document's current ranges", ->
 				@DocumentManager.getDoc
@@ -296,8 +296,8 @@ describe "DocumentManager", ->
 					.should.equal true
 			
 			it "should apply the accept change to the ranges", ->
-				@RangesManager.acceptChange
-					.calledWith(@change_id, @ranges)
+				@RangesManager.acceptChanges
+					.calledWith([ @change_id ], @ranges)
 					.should.equal true
 					
 			it "should save the updated ranges", ->
@@ -311,7 +311,7 @@ describe "DocumentManager", ->
 		describe "when the doc is not found", ->
 			beforeEach ->
 				@DocumentManager.getDoc = sinon.stub().yields(null, null, null, null)
-				@DocumentManager.acceptChange @project_id, @doc_id, @change_id, @callback
+				@DocumentManager.acceptChanges @project_id, @doc_id, [ @change_id ], @callback
 
 			it "should not save anything", ->
 				@RedisManager.updateDocument.called.should.equal false
@@ -356,7 +356,7 @@ describe "DocumentManager", ->
 		describe "when the doc is not found", ->
 			beforeEach ->
 				@DocumentManager.getDoc = sinon.stub().yields(null, null, null, null)
-				@DocumentManager.acceptChange @project_id, @doc_id, @comment_id, @callback
+				@DocumentManager.acceptChanges @project_id, @doc_id, [ @comment_id ], @callback
 
 			it "should not save anything", ->
 				@RedisManager.updateDocument.called.should.equal false

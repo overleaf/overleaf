@@ -35,7 +35,7 @@ module.exports = RangesManager =
 
 	acceptChanges: (change_ids, ranges, callback = (error, ranges) ->) ->
 		{changes, comments} = ranges
-		logger.log {change_id}, "accepting #{ change_ids.length } changes in ranges"
+		logger.log "accepting #{ change_ids.length } changes in ranges"
 		rangesTracker = new RangesTracker(changes, comments)
 		rangesTracker.removeChangeIds(change_ids)
 		response = RangesManager._getRanges(rangesTracker)

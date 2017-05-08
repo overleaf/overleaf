@@ -98,7 +98,7 @@ module.exports = HttpController =
 
 	acceptChanges: (req, res, next = (error) ->) ->
 		{project_id, doc_id} = req.params
-		{change_ids} = req.body
+		change_ids = req.body?.change_ids
 		if !change_ids?
 			change_ids = [ req.params.change_id ]
 		logger.log {project_id, doc_id}, "accepting #{ change_ids.length } changes via http"
