@@ -100,6 +100,21 @@ load = () ->
 			change = @getChange(change_id)
 			return if !change?
 			@_removeChange(change)
+
+		removeChangeIds: (change_to_remove_ids) ->
+			return if !change_to_remove_ids?.length > 0
+			i = @changes.length
+			remove_change_id = {} 
+			for change_id in change_to_remove_ids
+				remove_change_id[change_id] = true
+
+			while (i--)
+				if remove_change_id[@changes[i].id]
+					delete remove_change_id[@changes[i].id]
+					removed_change = @changes.splice(i, 1)[0]
+					@_markAsDirty removed_change, "change", "removed"
+					if Object.keys(remove_change_id).length == 0
+						break
 		
 		validate: (text) ->
 			for change in @changes
