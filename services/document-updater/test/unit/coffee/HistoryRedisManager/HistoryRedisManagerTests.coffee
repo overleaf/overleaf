@@ -24,7 +24,7 @@ describe "HistoryRedisManager", ->
 		@project_id = "project-id-123"
 		@callback = sinon.stub()
 
-	describe "pushUncompressedHistoryOps", ->
+	describe "recordDocHasHistoryOps", ->
 		beforeEach ->
 			@ops = [{ op: [{ i: "foo", p: 4 }] },{ op: [{ i: "bar", p: 56 }] }]
 			@rclient.llen = sinon.stub().yields(null, @length = 42)
@@ -32,7 +32,7 @@ describe "HistoryRedisManager", ->
 		
 		describe "with ops", ->
 			beforeEach (done) ->
-				@HistoryRedisManager.pushUncompressedHistoryOps @project_id, @doc_id, @ops, (args...) =>
+				@HistoryRedisManager.recordDocHasHistoryOps @project_id, @doc_id, @ops, (args...) =>
 					@callback(args...)
 					done()
 			
@@ -46,7 +46,7 @@ describe "HistoryRedisManager", ->
 		
 		describe "with no ops", ->
 			beforeEach (done) ->
-				@HistoryRedisManager.pushUncompressedHistoryOps @project_id, @doc_id, [], (args...) =>
+				@HistoryRedisManager.recordDocHasHistoryOps @project_id, @doc_id, [], (args...) =>
 					@callback(args...)
 					done()
 			
