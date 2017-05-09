@@ -14,6 +14,7 @@ COUNT = 0
 
 module.exports = LockManager =
 	LOCK_TEST_INTERVAL: 50 # 50ms between each test of the lock
+	MAX_TEST_INTERVAL: 1000 # back off to 1s between each test of the lock
 	MAX_LOCK_WAIT_TIME: 10000 # 10s maximum time to spend trying to get the lock
 	LOCK_TTL: 30 # seconds. Time until lock auto expires in redis.
 
@@ -41,6 +42,7 @@ module.exports = LockManager =
 
 	getLock: (doc_id, callback = (error, lockValue) ->) ->
 		startTime = Date.now()
+		testInterval = LockManager.LOCK_TEST_INTERVAL
 		do attempt = () ->
 			if Date.now() - startTime > LockManager.MAX_LOCK_WAIT_TIME
 				e = new Error("Timeout")
@@ -52,7 +54,9 @@ module.exports = LockManager =
 				if gotLock
 					callback(null, lockValue)
 				else
-					setTimeout attempt, LockManager.LOCK_TEST_INTERVAL
+					setTimeout attempt, testInterval
+					# back off when the lock is taken to avoid overloading
+					testInterval = Math.max(testInterval * 2, LockManager.MAX_TEST_INTERVAL)
 
 	checkLock: (doc_id, callback = (err, isFree)->)->
 		key = keys.blockingKey(doc_id:doc_id)
