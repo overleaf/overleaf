@@ -335,7 +335,7 @@ define [
 			$scope.$broadcast "change:reject", entry_id
 			event_tracking.sendMB "rp-change-rejected", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
 		
-		$scope.bulkAccept = () ->
+		bulkAccept = () ->
 			entry_ids = $scope.reviewPanel.selectedEntryIds.slice()
 			$http.post "/project/#{$scope.project_id}/doc/#{$scope.editor.open_doc_id}/changes/accept", { change_ids: entry_ids, _csrf: window.csrfToken}
 			$scope.$broadcast "change:bulk-accept", entry_ids
@@ -345,13 +345,33 @@ define [
 				nEntries: $scope.reviewPanel.selectedEntryIds.length
 			}
 
-		$scope.bulkReject = () ->
+		bulkReject = () ->
 			$scope.$broadcast "change:bulk-reject", $scope.reviewPanel.selectedEntryIds.slice()
 			$scope.reviewPanel.selectedEntryIds = []
 			event_tracking.sendMB "rp-bulk-reject", { 
 				view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini',  
 				nEntries: $scope.reviewPanel.selectedEntryIds.length
 			}
+
+		$scope.showBulkAcceptDialog = () ->
+			console.log "showBulkAcceptDialog"
+			showBulkActionsDialog true
+
+		$scope.showBulkRejectDialog = () -> showBulkActionsDialog false
+
+		showBulkActionsDialog = (isAccept) ->
+			$modal.open({
+				templateUrl: "bulkActionsModalTemplate"
+				controller: "BulkActionsModalController"
+				resolve:
+					isAccept: () -> isAccept
+					nChanges: () -> $scope.reviewPanel.selectedEntryIds.length
+				scope: $scope.$new()
+			}).result.then (isAccept) ->
+				if isAccept
+					bulkAccept()
+				else
+					bulkReject()
 
 		$scope.addNewComment = () ->
 			$scope.$broadcast "comment:start_adding"

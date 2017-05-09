@@ -1,6 +1,7 @@
 define [
 	"ide/review-panel/controllers/ReviewPanelController"
 	"ide/review-panel/controllers/TrackChangesUpgradeModalController"
+	"ide/review-panel/controllers/BulkActionsModalController"
 	"ide/review-panel/directives/reviewPanelSorted"
 	"ide/review-panel/directives/reviewPanelToggle"
 	"ide/review-panel/directives/changeEntry"
