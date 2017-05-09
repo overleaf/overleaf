@@ -221,10 +221,10 @@ module.exports = class Router
 		apiRouter.get  '/project/:Project_id/doc/:doc_id', AuthenticationController.httpAuth, DocumentController.getDocument
 		apiRouter.post '/project/:Project_id/doc/:doc_id', AuthenticationController.httpAuth, DocumentController.setDocument
 
-		apiRouter.post '/user/:user_id/update/*', AuthenticationController.httpAuth, TpdsController.mergeUpdate
+		apiRouter.post '/user/:user_id/update/*', AuthenticationController.httpAuth, CooldownMiddlewear.freezeProject, TpdsController.mergeUpdate
 		apiRouter.delete '/user/:user_id/update/*', AuthenticationController.httpAuth, TpdsController.deleteUpdate
 
-		apiRouter.post '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.updateProjectContents
+		apiRouter.post '/project/:project_id/contents/*', AuthenticationController.httpAuth, CooldownMiddlewear.freezeProject, TpdsController.updateProjectContents
 		apiRouter.delete '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.deleteProjectContents
 
 		webRouter.post "/spelling/check", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
