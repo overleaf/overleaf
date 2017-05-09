@@ -343,7 +343,7 @@ describe "HttpController", ->
 					doc_id: @doc_id
 					change_id: @change_id = "mock-change-od-1"
 
-		describe "successfully", ->
+		describe "successfully with a single change", ->
 			beforeEach ->
 				@DocumentManager.acceptChangesWithLock = sinon.stub().callsArgWith(3)
 				@HttpController.acceptChanges(@req, @res, @next)
@@ -365,6 +365,24 @@ describe "HttpController", ->
 
 			it "should time the request", ->
 				@Metrics.Timer::done.called.should.equal true
+
+		describe "succesfully with with multiple changes", ->
+			beforeEach ->
+				@change_ids = [ "mock-change-od-1", "mock-change-od-2", "mock-change-od-3", "mock-change-od-4" ]
+				@req.body =
+					change_ids: @change_ids
+				@DocumentManager.acceptChangesWithLock = sinon.stub().callsArgWith(3)
+				@HttpController.acceptChanges(@req, @res, @next)
+
+			it "should accept the changes in the body payload", ->
+				@DocumentManager.acceptChangesWithLock
+					.calledWith(@project_id, @doc_id, @change_ids)
+					.should.equal true
+
+			it "should log the request with the correct number of changes", ->
+				@logger.log
+					.calledWith({@project_id, @doc_id}, "accepting #{ @change_ids.length } changes via http")
+					.should.equal true
 
 		describe "when an errors occurs", ->
 			beforeEach ->

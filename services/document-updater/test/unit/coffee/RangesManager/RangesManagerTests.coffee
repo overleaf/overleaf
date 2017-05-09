@@ -10,7 +10,6 @@ describe "RangesManager", ->
 		@RangesManager = SandboxedModule.require modulePath,
 			requires:
 				"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }
-		
 		@doc_id = "doc-id-123"
 		@project_id = "project-id-123"
 		@user_id = "user-id-123"
@@ -179,3 +178,27 @@ describe "RangesManager", ->
 				[error, entries] = @callback.args[0]
 				expect(error).to.not.be.null
 				expect(error.message).to.equal("Change ({\"op\":{\"i\":\"five\",\"p\":15},\"metadata\":{\"user_id\":\"user-id-123\"}}) doesn't match text (\"our \")")
+
+	describe "acceptChanges", ->
+		beforeEach ->
+			@ranges = { entries: "mock", comments: "mock" }
+
+		describe "successfully with a single change", ->
+			beforeEach ->
+				@change_id = "mock-change-id"
+				@RangesManager.acceptChanges [ @change_id ], @ranges 
+
+			it "should log the call with the correct number of changes", ->
+				@logger.log
+					.calledWith("accepting 1 changes in ranges")
+					.should.equal true
+
+		describe "successfully with multiple changes", ->
+			beforeEach ->
+				@change_ids = [ "mock-change-id-1", "mock-change-id-2", "mock-change-id-3", "mock-change-id-4" ]
+				@RangesManager.acceptChanges @change_ids, @ranges
+
+			it "should log the call with the correct number of changes", ->
+				@logger.log
+					.calledWith("accepting #{ @change_ids.length } changes in ranges")
+					.should.equal true

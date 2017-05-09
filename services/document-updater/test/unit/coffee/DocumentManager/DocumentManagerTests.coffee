@@ -278,6 +278,7 @@ describe "DocumentManager", ->
 	describe "acceptChanges", ->
 		beforeEach ->
 			@change_id = "mock-change-id"
+			@change_ids = [ "mock-change-id-1", "mock-change-id-2", "mock-change-id-3", "mock-change-id-4" ]
 			@version = 34
 			@lines = ["original", "lines"]
 			@ranges = { entries: "mock", comments: "mock" }
@@ -286,7 +287,7 @@ describe "DocumentManager", ->
 			@RangesManager.acceptChanges = sinon.stub().yields(null, @updated_ranges)
 			@RedisManager.updateDocument = sinon.stub().yields()
 		
-		describe "successfully", ->
+		describe "successfully with a single change", ->
 			beforeEach ->
 				@DocumentManager.acceptChanges @project_id, @doc_id, [ @change_id ], @callback
 			
@@ -307,6 +308,15 @@ describe "DocumentManager", ->
 			
 			it "should call the callback", ->
 				@callback.called.should.equal true
+
+		describe "successfully with multiple changes", ->
+			beforeEach ->
+				@DocumentManager.acceptChanges @project_id, @doc_id, @change_ids, @callback
+			
+			it "should apply the accept change to the ranges", ->
+				@RangesManager.acceptChanges
+					.calledWith(@change_ids, @ranges)
+					.should.equal true
 
 		describe "when the doc is not found", ->
 			beforeEach ->
