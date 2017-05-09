@@ -9,7 +9,7 @@
 		a.rp-bulk-actions-btn(
 			href
 			ng-if="reviewPanel.selectedEntryIds.length > 1"
-			ng-click="bulkAccept();"
+			ng-click="showBulkAcceptDialog();"
 		) 
 			i.fa.fa-check
 			| &nbsp;#{translate("accept_all")}
@@ -17,7 +17,7 @@
 		a.rp-bulk-actions-btn(
 			href
 			ng-if="reviewPanel.selectedEntryIds.length > 1"
-			ng-click="bulkReject();"
+			ng-click="showBulkRejectDialog();"
 		) 
 			i.fa.fa-times
 			| &nbsp;#{translate("reject_all")}
@@ -101,8 +101,8 @@
 					)
 				div(ng-if="entry.type === 'bulk-actions'")
 					bulk-actions-entry(
-						on-bulk-accept="bulkAccept();"
-						on-bulk-reject="bulkReject();"
+						on-bulk-accept="showBulkAcceptDialog();"
+						on-bulk-reject="showBulkRejectDialog();"
 						n-entries="reviewPanel.selectedEntryIds.length"
 					)
 
@@ -475,3 +475,24 @@ script(type="text/ng-template", id="trackChangesUpgradeModalTemplate")
 			ng-click="cancel()"
 		)
 			span #{translate("close")}
+
+script(type="text/ng-template", id="bulkActionsModalTemplate")
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
+		h3 {{ isAccept ? '#{translate("accept_all")}' : '#{translate("reject_all")}' }}
+	.modal-body 
+		p(ng-if="isAccept") #{translate("bulk_accept_confirm", { nChanges: "{{ nChanges }}"})}
+		p(ng-if="!isAccept") #{translate("bulk_reject_confirm", { nChanges: "{{ nChanges }}"})}
+	.modal-footer()
+		button.btn.btn-default(
+			ng-click="cancel()"
+		)
+			span #{translate("cancel")}
+		button.btn.btn-primary(
+			ng-click="confirm()"
+		)
+			span #{translate("ok")}
