@@ -19,7 +19,7 @@ describe "RedisManager", ->
 					documentupdater: {logHashErrors: {write:true, read:true}}
 					redis:
 						documentupdater:
-							key_schema: 
+							key_schema:
 								blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
 								docLines: ({doc_id}) -> "doclines:#{doc_id}"
 								docOps: ({doc_id}) -> "DocOps:#{doc_id}"
@@ -29,6 +29,10 @@ describe "RedisManager", ->
 								pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
 								docsInProject: ({project_id}) -> "DocsIn:#{project_id}"
 								ranges: ({doc_id}) -> "Ranges:#{doc_id}"
+						history:
+							key_schema:
+								uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
+								docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:#{project_id}"
 				}
 				"redis-sharelatex":
 					createClient: () => @rclient
