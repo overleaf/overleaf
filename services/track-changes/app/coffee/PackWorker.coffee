@@ -22,7 +22,7 @@ source = process.argv[2]
 DOCUMENT_PACK_DELAY = Number(process.argv[3]) || 1000
 TIMEOUT = Number(process.argv[4]) || 30*60*1000
 
-if source.match(/[^0-9]/)
+if !source.match(/^[0-9]+$/)
 	file = fs.readFileSync source
 	result = for line in file.toString().split('\n')
 		[project_id, doc_id] = line.split(' ')
