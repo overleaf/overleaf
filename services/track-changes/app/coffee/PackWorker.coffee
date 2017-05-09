@@ -21,6 +21,8 @@ PackManager = require "./PackManager"
 source = process.argv[2]
 DOCUMENT_PACK_DELAY = Number(process.argv[3]) || 1000
 TIMEOUT = Number(process.argv[4]) || 30*60*1000
+COUNT = 0  # number processed
+TOTAL = 0  # total number to process
 
 if !source.match(/^[0-9]+$/)
 	file = fs.readFileSync source
@@ -62,7 +64,7 @@ finish = () ->
 	db.close () ->
 		logger.log 'closing LockManager Redis Connection'
 		LockManager.close () ->
-			logger.log 'ready to exit from pack archive worker'
+			logger.log {processedCount: COUNT, allCount: TOTAL}, 'ready to exit from pack archive worker'
 			hardTimeout = setTimeout () ->
 				logger.error 'hard exit from pack archive worker'
 				process.exit(1)
@@ -75,7 +77,8 @@ process.on 'exit', (code) ->
 processUpdates = (pending) ->
 	async.eachSeries pending,	(result, callback) ->
 		{_id, project_id, doc_id} = result
-		logger.log {project_id, doc_id}, "processing"
+		COUNT++
+		logger.log {project_id, doc_id}, "processing #{COUNT}/#{TOTAL}"
 		if not project_id? or not doc_id?
 			logger.log {project_id, doc_id}, "skipping pack, missing project/doc id"
 			return callback()
@@ -131,5 +134,6 @@ else
 			finish()
 			return
 		pending = _.uniq results, false, (result) -> result.doc_id.toString()
-		logger.log "found #{pending.length} documents to archive"
+		TOTAL = pending.length
+		logger.log "found #{TOTAL} documents to archive"
 		processUpdates pending
