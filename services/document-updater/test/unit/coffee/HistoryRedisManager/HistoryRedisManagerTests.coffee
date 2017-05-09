@@ -27,7 +27,6 @@ describe "HistoryRedisManager", ->
 	describe "recordDocHasHistoryOps", ->
 		beforeEach ->
 			@ops = [{ op: [{ i: "foo", p: 4 }] },{ op: [{ i: "bar", p: 56 }] }]
-			@rclient.llen = sinon.stub().yields(null, @length = 42)
 			@rclient.sadd = sinon.stub().yields()
 		
 		describe "with ops", ->
@@ -41,9 +40,6 @@ describe "HistoryRedisManager", ->
 					.calledWith("DocsWithHistoryOps:#{@project_id}", @doc_id)
 					.should.equal true
 
-			it "should call the callback with the length", ->
-				@callback.calledWith(null, @length).should.equal true
-		
 		describe "with no ops", ->
 			beforeEach (done) ->
 				@HistoryRedisManager.recordDocHasHistoryOps @project_id, @doc_id, [], (args...) =>

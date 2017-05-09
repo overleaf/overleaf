@@ -166,7 +166,7 @@ describe "UpdateManager", ->
 			@ShareJsUpdateManager.applyUpdate = sinon.stub().yields(null, @updatedDocLines, @version, @appliedOps)
 			@RedisManager.updateDocument = sinon.stub().yields()
 			@RealTimeRedisManager.sendData = sinon.stub()
-			@HistoryManager.pushUncompressedHistoryOps = sinon.stub().callsArg(3)
+			@HistoryManager.pushUncompressedHistoryOps = sinon.stub().callsArg(4)
 		
 		describe "normally", ->
 			beforeEach ->

@@ -22,11 +22,12 @@ module.exports = HistoryManager =
 				return callback(error)
 
 	FLUSH_EVERY_N_OPS: 50
-	pushUncompressedHistoryOps: (project_id, doc_id, ops = [], callback = (error) ->) ->
+	pushUncompressedHistoryOps: (project_id, doc_id, ops = [], length, callback = (error) ->) ->
 		if ops.length == 0
 			return callback()
-		HistoryRedisManager.recordDocHasHistoryOps project_id, doc_id, ops, (error, length) ->
+		HistoryRedisManager.recordDocHasHistoryOps project_id, doc_id, ops, (error) ->
 			return callback(error) if error?
+			return callback() if not length? # don't flush unless we know the length
 			# We want to flush every 50 ops, i.e. 50, 100, 150, etc
 			# Find out which 'block' (i.e. 0-49, 50-99) we were in before and after pushing these
 			# ops. If we've changed, then we've gone over a multiple of 50 and should flush.

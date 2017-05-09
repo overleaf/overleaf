@@ -177,25 +177,28 @@ module.exports = RedisManager =
 					logger.error {err: error, doc_id}, error.message
 					return callback(error)
 				multi = rclient.multi()
-				multi.eval setScript, 1, keys.docLines(doc_id:doc_id), newDocLines
-				multi.set    keys.docVersion(doc_id:doc_id), newVersion
-				multi.set    keys.docHash(doc_id:doc_id), newHash
-				if jsonOps.length > 0
-					multi.rpush  keys.docOps(doc_id: doc_id), jsonOps...
-					multi.rpush  historyKeys.uncompressedHistoryOps(doc_id: doc_id), jsonOps...
-				multi.expire keys.docOps(doc_id: doc_id), RedisManager.DOC_OPS_TTL
-				multi.ltrim  keys.docOps(doc_id: doc_id), -RedisManager.DOC_OPS_MAX_LENGTH, -1
+				multi.eval setScript, 1, keys.docLines(doc_id:doc_id), newDocLines  # index 0
+				multi.set    keys.docVersion(doc_id:doc_id), newVersion             # index 1
+				multi.set    keys.docHash(doc_id:doc_id), newHash                   # index 2
+				multi.expire keys.docOps(doc_id: doc_id), RedisManager.DOC_OPS_TTL  # index 3
+				multi.ltrim  keys.docOps(doc_id: doc_id), -RedisManager.DOC_OPS_MAX_LENGTH, -1 # index 4
 				if ranges?
-					multi.set keys.ranges(doc_id:doc_id), ranges
+					multi.set keys.ranges(doc_id:doc_id), ranges  # index 5
 				else
-					multi.del keys.ranges(doc_id:doc_id)
+					multi.del keys.ranges(doc_id:doc_id)          # also index 5
+				# push the ops last so we can get the lengths at fixed index positions 6 and 7
+				if jsonOps.length > 0
+					multi.rpush  keys.docOps(doc_id: doc_id), jsonOps...                         # index 6
+					multi.rpush  historyKeys.uncompressedHistoryOps(doc_id: doc_id), jsonOps...  # index 7
 				multi.exec (error, result) ->
 						return callback(error) if error?
 						# check the hash computed on the redis server
 						writeHash = result?[0]
 						if logHashWriteErrors and writeHash? and writeHash isnt newHash
 							logger.error doc_id: doc_id, writeHash: writeHash, origHash: newHash, docLines:newDocLines, "hash mismatch on updateDocument"
-						return callback()
+						# return length of uncompressedHistoryOps queue (index 7)
+						uncompressedHistoryOpsLength = result?[7]
+						return callback(null, uncompressedHistoryOpsLength)
 
 	getDocIdsInProject: (project_id, callback = (error, doc_ids) ->) ->
 		rclient.smembers keys.docsInProject(project_id: project_id), callback
