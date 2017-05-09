@@ -37,10 +37,11 @@ shutDownTimer = setTimeout () ->
 	# start the shutdown on the next pack
 	shutDownRequested = true
 	# do a hard shutdown after a further 5 minutes
-	setTimeout () ->
+	hardTimeout = setTimeout () ->
 		logger.error "HARD TIMEOUT in pack archive worker"
 		process.exit()
 	, 5*60*1000
+	hardTimeout.unref()
 , TIMEOUT
 
 logger.log "checking for updates, limit=#{LIMIT}, delay=#{DOCUMENT_PACK_DELAY}, timeout=#{TIMEOUT}"
