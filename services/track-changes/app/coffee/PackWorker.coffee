@@ -116,11 +116,13 @@ if pending?
 	logger.log "got #{pending.length} entries from #{source}"
 	processUpdates pending
 else
+	oneWeekAgo = new Date(Date.now() - 7 * DAYS)
 	db.docHistory.find({
 		expiresAt: {$exists: false}
 		project_id: {$exists: true}
 		v_end: {$exists: true}
-		_id: {$lt: ObjectIdFromDate(new Date(Date.now() - 7 * DAYS))}
+		_id: {$lt: ObjectIdFromDate(oneWeekAgo)}
+		last_checked: {$lt: oneWeekAgo}
 	}, {_id:1, doc_id:1, project_id:1}).sort({
 		last_checked:1
 	}).limit LIMIT, (err, results) ->
