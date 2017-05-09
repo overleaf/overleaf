@@ -87,7 +87,7 @@ processUpdates = (pending) ->
 				logger.error {err, result}, "error in pack archive worker"
 				return callback(err)
 			if shutDownRequested
-				logger.error "shutting down pack archive worker"
+				logger.warn "shutting down pack archive worker"
 				return callback(new Error("shutdown"))
 			setTimeout () ->
 				callback(err, result)
