@@ -166,7 +166,7 @@ describe "UpdateManager", ->
 			@ShareJsUpdateManager.applyUpdate = sinon.stub().yields(null, @updatedDocLines, @version, @appliedOps)
 			@RedisManager.updateDocument = sinon.stub().yields()
 			@RealTimeRedisManager.sendData = sinon.stub()
-			@HistoryManager.pushUncompressedHistoryOps = sinon.stub().callsArg(4)
+			@HistoryManager.recordAndFlushHistoryOps = sinon.stub().callsArg(4)
 		
 		describe "normally", ->
 			beforeEach ->
@@ -188,7 +188,7 @@ describe "UpdateManager", ->
 					.should.equal true
 			
 			it "should push the applied ops into the history queue", ->
-				@HistoryManager.pushUncompressedHistoryOps
+				@HistoryManager.recordAndFlushHistoryOps
 					.calledWith(@project_id, @doc_id, @appliedOps)
 					.should.equal true
 

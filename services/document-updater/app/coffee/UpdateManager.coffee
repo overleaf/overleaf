@@ -63,7 +63,7 @@ module.exports = UpdateManager =
 					return callback(error) if error?
 					RedisManager.updateDocument doc_id, updatedDocLines, version, appliedOps, new_ranges, (error, historyOpsLength) ->
 						return callback(error) if error?
-						HistoryManager.pushUncompressedHistoryOps project_id, doc_id, appliedOps, historyOpsLength, callback
+						HistoryManager.recordAndFlushHistoryOps project_id, doc_id, appliedOps, historyOpsLength, callback
 
 	lockUpdatesAndDo: (method, project_id, doc_id, args..., callback) ->
 		LockManager.getLock doc_id, (error, lockValue) ->

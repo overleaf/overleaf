@@ -22,7 +22,7 @@ module.exports = HistoryManager =
 				return callback(error)
 
 	FLUSH_EVERY_N_OPS: 100
-	pushUncompressedHistoryOps: (project_id, doc_id, ops = [], length, callback = (error) ->) ->
+	recordAndFlushHistoryOps: (project_id, doc_id, ops = [], length, callback = (error) ->) ->
 		if ops.length == 0
 			return callback()
 		HistoryRedisManager.recordDocHasHistoryOps project_id, doc_id, ops, (error) ->
