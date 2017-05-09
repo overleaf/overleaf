@@ -207,7 +207,7 @@ describe "Applying updates to a doc", ->
 		before (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 			updates = []
-			for v in [0..99] # Should flush after 50 ops
+			for v in [0..199] # Should flush after 100 ops
 				updates.push
 					doc_id: @doc_id,
 					op: [i: v.toString(), p: 0]
@@ -219,7 +219,7 @@ describe "Applying updates to a doc", ->
 
 			# Send updates in chunks to causes multiple flushes
 			actions = []
-			for i in [0..9]
+			for i in [0..19]
 				do (i) =>
 					actions.push (cb) =>
 						DocUpdaterClient.sendUpdates @project_id, @doc_id, updates.slice(i*10, (i+1)*10), cb
