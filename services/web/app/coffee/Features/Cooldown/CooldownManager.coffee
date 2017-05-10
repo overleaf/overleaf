@@ -12,8 +12,7 @@ module.exports = CooldownManager =
 		"Cooldown:{#{projectId}}"
 
 	putProjectOnCooldown: (projectId, callback=(err)->) ->
-		logger.log {projectId},
-			"[Cooldown] putting project on cooldown for #{COOLDOWN_IN_SECONDS} seconds"
+		logger.log {projectId}, "[Cooldown] putting project on cooldown for #{COOLDOWN_IN_SECONDS} seconds"
 		rclient.set(CooldownManager._buildKey(projectId), '1', 'EX', COOLDOWN_IN_SECONDS, callback)
 
 	isProjectOnCooldown: (projectId, callback=(err, isOnCooldown)->) ->
