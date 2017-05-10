@@ -1,0 +1,110 @@
+SandboxedModule = require('sandboxed-module')
+assert = require('assert')
+require('chai').should()
+expect = require('chai').expect
+sinon = require('sinon')
+modulePath = require('path').join __dirname, '../../../../app/js/Features/SudoMode/SudoModeHandler'
+
+
+describe 'SudoModeHandler', ->
+	beforeEach ->
+		@userId = 'some_user_id'
+		@rclient = {get: sinon.stub(), set: sinon.stub(), del: sinon.stub()}
+		@RedisWrapper =
+			client: () => @rclient
+		@SudoModeHandler = SandboxedModule.require modulePath, requires:
+			'../../infrastructure/RedisWrapper': @RedisWrapper
+			'logger-sharelatex': @logger = {log: sinon.stub(), err: sinon.stub()}
+
+	describe '_buildKey', ->
+
+		it 'should build a properly formed key', ->
+			expect(@SudoModeHandler._buildKey('123')).to.equal 'SudoMode:{123}'
+
+	describe 'activateSudoMode', ->
+		beforeEach ->
+			@call = (cb) =>
+				@SudoModeHandler.activateSudoMode @userId, cb
+
+		describe 'when all goes well', ->
+			beforeEach ->
+				@rclient.set = sinon.stub().callsArgWith(4, null)
+
+			it 'should not produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.equal null
+					done()
+
+			it 'should set a value in redis', (done) ->
+				@call (err) =>
+					expect(@rclient.set.callCount).to.equal 1
+					expect(@rclient.set.calledWith(
+						'SudoMode:{some_user_id}', '1', 'EX', 60*60
+					)).to.equal true
+					done()
+
+		describe 'when rclient.set produces an error', ->
+			beforeEach ->
+				@rclient.set = sinon.stub().callsArgWith(4, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					done()
+
+	describe 'isSudoModeActive', ->
+		beforeEach ->
+			@call = (cb) =>
+				@SudoModeHandler.isSudoModeActive @userId, cb
+
+		describe 'when sudo-mode is active for that user', ->
+			beforeEach ->
+				@rclient.get = sinon.stub().callsArgWith(1, null, '1')
+
+			it 'should not produce an error', (done) ->
+				@call (err, isActive) =>
+					expect(err).to.equal null
+					done()
+
+			it 'should get the value from redis', (done) ->
+				@call (err, isActive) =>
+					expect(@rclient.get.callCount).to.equal 1
+					expect(@rclient.get.calledWith('SudoMode:{some_user_id}')).to.equal true
+					done()
+
+			it 'should produce a true result', (done) ->
+				@call (err, isActive) =>
+					expect(isActive).to.equal true
+					done()
+
+		describe 'when sudo-mode is not active for that user', ->
+			beforeEach ->
+				@rclient.get = sinon.stub().callsArgWith(1, null, null)
+
+			it 'should not produce an error', (done) ->
+				@call (err, isActive) =>
+					expect(err).to.equal null
+					done()
+
+			it 'should get the value from redis', (done) ->
+				@call (err, isActive) =>
+					expect(@rclient.get.callCount).to.equal 1
+					expect(@rclient.get.calledWith('SudoMode:{some_user_id}')).to.equal true
+					done()
+
+			it 'should produce a false result', (done) ->
+				@call (err, isActive) =>
+					expect(isActive).to.equal false
+					done()
+
+		describe 'when rclient.get produces an error', ->
+			beforeEach ->
+				@rclient.get = sinon.stub().callsArgWith(1, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err, isActive) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					expect(isActive).to.be.oneOf [null, undefined]
+					done()
