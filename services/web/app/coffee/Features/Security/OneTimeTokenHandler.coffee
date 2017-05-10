@@ -1,6 +1,6 @@
 Settings = require('settings-sharelatex')
-redis = require("redis-sharelatex")
-rclient = redis.createClient(Settings.redis.web)
+RedisWrapper = require("../../infrastructure/RedisWrapper")
+rclient = RedisWrapper.client("one_time_token")
 crypto = require("crypto")
 logger = require("logger-sharelatex")
 

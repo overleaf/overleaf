@@ -5,16 +5,13 @@ modulePath = require('path').join __dirname, '../../../../app/js/Features/Editor
 
 describe "EditorRealTimeController", ->
 	beforeEach ->
+		@rclient =
+			publish: sinon.stub()
 		@EditorRealTimeController = SandboxedModule.require modulePath, requires:
-			"redis-sharelatex": 
-				createClient: () ->
-					auth:->
+			"../../infrastructure/RedisWrapper": 
+				client: () => @rclient
 			"../../infrastructure/Server" : io: @io = {}
 			"settings-sharelatex":{redis:{}}
-		@EditorRealTimeController.rclientPub = publish: sinon.stub()
-		@EditorRealTimeController.rclientSub =
-			subscribe: sinon.stub()
-			on: sinon.stub()
 		
 		@room_id = "room-id"
 		@message = "message-to-editor"
@@ -25,7 +22,7 @@ describe "EditorRealTimeController", ->
 			@EditorRealTimeController.emitToRoom(@room_id, @message, @payload...)
 
 		it "should publish the message to redis", ->
-			@EditorRealTimeController.rclientPub.publish
+			@rclient.publish
 				.calledWith("editor-events", JSON.stringify(
 					room_id: @room_id,
 					message: @message

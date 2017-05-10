@@ -7,7 +7,7 @@ doc_id     = 5678
 blockingKey = "Blocking:#{doc_id}"
 SandboxedModule = require('sandboxed-module')
 
-describe 'Lock Manager - checking the lock', ()->
+describe 'LockManager - checking the lock', ()->
 
 	existsStub = sinon.stub()
 	setStub = sinon.stub()
@@ -17,8 +17,8 @@ describe 'Lock Manager - checking the lock', ()->
 	mocks =
 		"logger-sharelatex": log:->
 
-		"redis-sharelatex":
-			createClient : ()->
+		"./RedisWrapper":
+			client: ()->
 				auth:->
 				multi: ->
 					exists: existsStub
