@@ -39,6 +39,7 @@ ReferencesController = require('./Features/References/ReferencesController')
 AuthorizationMiddlewear = require('./Features/Authorization/AuthorizationMiddlewear')
 BetaProgramController = require('./Features/BetaProgram/BetaProgramController')
 SudoModeController = require('./Features/SudoMode/SudoModeController')
+SudoModeMiddlewear = require('./Features/SudoMode/SudoModeMiddlewear')
 AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 AnnouncementsController = require("./Features/Announcements/AnnouncementsController")
 
@@ -86,7 +87,10 @@ module.exports = class Router
 		webRouter.get '/user/activate', UserPagesController.activateAccountPage
 		AuthenticationController.addEndpointToLoginWhitelist '/user/activate'
 
-		webRouter.get  '/user/settings', AuthenticationController.requireLogin(), UserPagesController.settingsPage
+		webRouter.get  '/user/settings',
+			AuthenticationController.requireLogin(),
+			SudoModeMiddlewear.protectPage,
+			UserPagesController.settingsPage
 		webRouter.post '/user/settings', AuthenticationController.requireLogin(), UserController.updateUserSettings
 		webRouter.post '/user/password/update', AuthenticationController.requireLogin(), UserController.changePassword
 
