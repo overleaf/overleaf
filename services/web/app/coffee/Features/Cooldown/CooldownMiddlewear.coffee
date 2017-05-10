@@ -6,6 +6,8 @@ module.exports = CooldownMiddlewear =
 
 	freezeProject: (req, res, next) ->
 			projectId = req.params.Project_id
+			if !projectId?
+				return next(new Error('[Cooldown] No projectId parameter on route'))
 			CooldownManager.isProjectOnCooldown projectId, (err, projectIsOnCooldown) ->
 				if err?
 					return next(err)

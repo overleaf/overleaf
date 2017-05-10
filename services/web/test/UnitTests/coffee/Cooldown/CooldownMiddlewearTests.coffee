@@ -70,3 +70,19 @@ describe "CooldownMiddlewear", ->
 				@CooldownMiddlewear.freezeProject @req, @res, @next
 				@next.callCount.should.equal 1
 				expect(@next.lastCall.args[0]).to.be.instanceof Error
+
+		describe 'when projectId is not part of route', ->
+			beforeEach ->
+				@CooldownManager.isProjectOnCooldown = sinon.stub().callsArgWith(1, null, true)
+				@req = {params: {lol: 'abc'}}
+				@res = {sendStatus: sinon.stub()}
+				@next = sinon.stub()
+
+			it 'call next with an error', ->
+				@CooldownMiddlewear.freezeProject @req, @res, @next
+				@next.callCount.should.equal 1
+				expect(@next.lastCall.args[0]).to.be.instanceof Error
+
+			it 'should not call CooldownManager.isProjectOnCooldown', ->
+				@CooldownMiddlewear.freezeProject @req, @res, @next
+				@CooldownManager.isProjectOnCooldown.callCount.should.equal 0
