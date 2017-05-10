@@ -61,7 +61,7 @@ app.post "/pack", (req, res, next) ->
 	else
 		logger.log "running pack"
 		packWorker = child_process.fork(__dirname + '/app/js/PackWorker.js',
-			[req.query.limit, req.query.delay, req.query.timeout])
+			[req.query.limit || 1000, req.query.delay || 1000, req.query.timeout || 30*60*1000])
 		packWorker.on 'exit', (code, signal) ->
 			logger.log {code, signal}, "history auto pack exited"
 			packWorker = null
