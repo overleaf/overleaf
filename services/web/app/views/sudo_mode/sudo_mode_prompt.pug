@@ -1,0 +1,39 @@
+extends ../layout
+
+block content
+	.content.content-alt
+		.container
+			.row
+				.col-md-10.col-md-offset-1.col-lg-8.col-lg-offset-2
+					.card
+						.page-header.text-centered
+							h1 Confirm your password to continue
+						div
+							.container-fluid
+								.row
+									.col-md-8.col-md-offset-2
+										form(async-form="confirmPassword", name="confirmPassword",
+												action='/confirm-password/submit', method="POST", ng-cloak)
+											input(name='_csrf', type='hidden', value=csrfToken)
+											form-messages(for="confirmPassword")
+											.form-group
+												label
+													| #{translate('password')}
+												input.form-control(
+													type='password',
+													name='password',
+													required,
+													placeholder='********',
+													ng-model="password"
+												)
+												span.small.text-primary(
+													ng-show="confirmPassword.password.$invalid && confirmPassword.password.$dirty"
+												)
+													| #{translate("required")}
+											.actions
+												button.btn-primary.btn(
+													style="width: 100%",
+													type='submit',
+													ng-disabled="confirmPassword.inflight"
+												)
+													span #{translate("confirm")}

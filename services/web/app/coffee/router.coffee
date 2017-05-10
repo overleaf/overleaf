@@ -38,6 +38,7 @@ ContactRouter = require("./Features/Contacts/ContactRouter")
 ReferencesController = require('./Features/References/ReferencesController')
 AuthorizationMiddlewear = require('./Features/Authorization/AuthorizationMiddlewear')
 BetaProgramController = require('./Features/BetaProgram/BetaProgramController')
+SudoModeController = require('./Features/SudoMode/SudoModeController')
 AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 AnnouncementsController = require("./Features/Announcements/AnnouncementsController")
 
@@ -238,6 +239,9 @@ module.exports = class Router
 		webRouter.get "/beta/participate",  AuthenticationController.requireLogin(), BetaProgramController.optInPage
 		webRouter.post "/beta/opt-in", AuthenticationController.requireLogin(), BetaProgramController.optIn
 		webRouter.post "/beta/opt-out", AuthenticationController.requireLogin(), BetaProgramController.optOut
+		webRouter.get "/confirm-password", AuthenticationController.requireLogin(), SudoModeController.sudoModePrompt
+		webRouter.post "/confirm-password/submit", AuthenticationController.requireLogin(), SudoModeController.submitPassword
+
 
 		#Admin Stuff
 		webRouter.get  '/admin', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.index
