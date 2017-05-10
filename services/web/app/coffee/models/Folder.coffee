@@ -1,4 +1,4 @@
-mongoose = require('../infrastructure/Mongoose')
+mongoose = require('mongoose')
 Settings = require 'settings-sharelatex'
 DocSchema = require('./Doc').DocSchema
 FileSchema = require('./File').FileSchema

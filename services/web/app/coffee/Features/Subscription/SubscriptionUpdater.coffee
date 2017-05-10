@@ -6,7 +6,7 @@ UserFeaturesUpdater = require("./UserFeaturesUpdater")
 PlansLocator = require("./PlansLocator")
 Settings = require("settings-sharelatex")
 logger = require("logger-sharelatex")
-ObjectId = require('../../infrastructure/Mongoose').Types.ObjectId
+ObjectId = require('mongoose').Types.ObjectId	
 ReferalAllocator = require("../Referal/ReferalAllocator")
 
 oneMonthInSeconds = 60 * 60 * 24 * 30

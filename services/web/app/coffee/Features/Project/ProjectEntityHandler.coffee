@@ -534,7 +534,7 @@ module.exports = ProjectEntityHandler =
 					fileSystem: "#{path.fileSystem}/#{element.name}"
 					mongo: path.mongo
 				id = element._id+''
-				element._id = require('../../infrastructure/Mongoose').Types.ObjectId(id)
+				element._id = require('mongoose').Types.ObjectId(id)
 				conditions = _id:project._id
 				mongopath = "#{path.mongo}.#{type}"
 				update = "$push":{}
