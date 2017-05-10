@@ -4,16 +4,9 @@ logger.initialize("real-time-sharelatex")
 express = require("express")
 session = require("express-session")
 redis = require("redis-sharelatex")
-ioredis = require('ioredis')
 Settings = require "settings-sharelatex"
 
-redisSessionsSettings = Settings.redis.websessions or Settings.redis.web
-
-if redisSessionsSettings?.cluster?
-	logger.log {}, "using redis cluster for web sessions"
-	sessionRedisClient = new ioredis.Cluster(redisSessionsSettings.cluster)
-else
-	sessionRedisClient = redis.createClient(redisSessionsSettings)
+sessionRedisClient = redis.createClient(Settings.redis.websessions)
 
 RedisStore = require('connect-redis')(session)
 SessionSockets = require('session.socket.io')

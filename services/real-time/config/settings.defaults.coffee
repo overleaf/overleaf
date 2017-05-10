@@ -14,7 +14,12 @@ module.exports =
 			password: ""
 			key_schema:
 				pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
-			
+
+		websessions:
+			host: "localhost"
+			port: "6379"
+			password: ""
+
 	internal:
 		realTime:
 			port: 3026
