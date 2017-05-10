@@ -3,7 +3,7 @@ rclient = RedisWrapper.client('sudomode')
 logger = require('logger-sharelatex')
 
 
-TIMEOUT_IN_SECONDS = 60 * 10
+TIMEOUT_IN_SECONDS = 60 * 60
 
 
 module.exports = SudoModeHandler =
