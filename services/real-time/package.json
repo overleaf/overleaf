@@ -18,7 +18,7 @@
     "ioredis": "^2.4.0",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.1.0",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.4.0",
-    "redis-sharelatex": "0.0.9",
+    "redis-sharelatex": "git+https://github.com/sharelatex/redis-sharelatex.git#v1.0.2",
     "request": "~2.34.0",
     "session.socket.io": "^0.1.6",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",

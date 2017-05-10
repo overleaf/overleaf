@@ -15,7 +15,10 @@ describe "ConnectedUsersManager", ->
 
 		@settings =
 			redis:
-				web:{}
+				realtime:
+					key_schema:
+						clientsInProject: ({project_id}) -> "clients_in_project:#{project_id}"
+						connectedUser: ({project_id, client_id})-> "connected_user:#{project_id}:#{client_id}"
 		@rClient =
 			auth:->
 			setex:sinon.stub()

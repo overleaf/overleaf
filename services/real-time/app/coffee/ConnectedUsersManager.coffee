@@ -2,18 +2,14 @@ async = require("async")
 Settings = require('settings-sharelatex')
 logger = require("logger-sharelatex")
 redis = require("redis-sharelatex")
-rclient = redis.createClient(Settings.redis.web)
-
+rclient = redis.createClient(Settings.redis.realtime)
+Keys = Settings.redis.realtime.key_schema
 
 ONE_HOUR_IN_S = 60 * 60
 ONE_DAY_IN_S = ONE_HOUR_IN_S * 24
 FOUR_DAYS_IN_S = ONE_DAY_IN_S * 4
 
 USER_TIMEOUT_IN_S = ONE_HOUR_IN_S / 4
-
-buildProjectSetKey = (project_id)-> return "clients_in_project:#{project_id}"
-buildUserKey = (project_id, client_id)-> return "connected_user:#{project_id}:#{client_id}"
-
 
 module.exports =
 
@@ -25,18 +21,18 @@ module.exports =
 
 		multi = rclient.multi()
 		
-		multi.sadd   buildProjectSetKey(project_id), client_id
-		multi.expire buildProjectSetKey(project_id), FOUR_DAYS_IN_S
+		multi.sadd   Keys.clientsInProject({project_id}), client_id
+		multi.expire Keys.clientsInProject({project_id}), FOUR_DAYS_IN_S
 		
-		multi.hset buildUserKey(project_id, client_id), "last_updated_at", Date.now()
-		multi.hset buildUserKey(project_id, client_id), "user_id", user._id
-		multi.hset buildUserKey(project_id, client_id), "first_name", user.first_name or ""
-		multi.hset buildUserKey(project_id, client_id), "last_name", user.last_name or ""
-		multi.hset buildUserKey(project_id, client_id), "email", user.email or ""
+		multi.hset Keys.connectedUser({project_id, client_id}), "last_updated_at", Date.now()
+		multi.hset Keys.connectedUser({project_id, client_id}), "user_id", user._id
+		multi.hset Keys.connectedUser({project_id, client_id}), "first_name", user.first_name or ""
+		multi.hset Keys.connectedUser({project_id, client_id}), "last_name", user.last_name or ""
+		multi.hset Keys.connectedUser({project_id, client_id}), "email", user.email or ""
 		
 		if cursorData?
-			multi.hset buildUserKey(project_id, client_id), "cursorData", JSON.stringify(cursorData)
-		multi.expire buildUserKey(project_id, client_id), USER_TIMEOUT_IN_S
+			multi.hset Keys.connectedUser({project_id, client_id}), "cursorData", JSON.stringify(cursorData)
+		multi.expire Keys.connectedUser({project_id, client_id}), USER_TIMEOUT_IN_S
 		
 		multi.exec (err)->
 			if err?
@@ -46,14 +42,14 @@ module.exports =
 	markUserAsDisconnected: (project_id, client_id, callback)->
 		logger.log project_id:project_id, client_id:client_id, "marking user as disconnected"
 		multi = rclient.multi()
-		multi.srem buildProjectSetKey(project_id), client_id
-		multi.expire buildProjectSetKey(project_id), FOUR_DAYS_IN_S
-		multi.del buildUserKey(project_id, client_id)
+		multi.srem Keys.clientsInProject({project_id}), client_id
+		multi.expire Keys.clientsInProject({project_id}), FOUR_DAYS_IN_S
+		multi.del Keys.connectedUser({project_id, client_id})
 		multi.exec callback
 
 
 	_getConnectedUser: (project_id, client_id, callback)->
-		rclient.hgetall buildUserKey(project_id, client_id), (err, result)->
+		rclient.hgetall Keys.connectedUser({project_id, client_id}), (err, result)->
 			if !result?
 				result =
 					connected : false
@@ -71,7 +67,7 @@ module.exports =
 
 	getConnectedUsers: (project_id, callback)->
 		self = @
-		rclient.smembers buildProjectSetKey(project_id), (err, results)->
+		rclient.smembers Keys.clientsInProject({project_id}), (err, results)->
 			return callback(err) if err?
 			jobs = results.map (client_id)->
 				(cb)->

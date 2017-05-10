@@ -51,12 +51,14 @@ io.configure ->
 app.get "/status", (req, res, next) ->
 	res.send "real-time-sharelatex is alive"
 
-redisCheck = redis.activeHealthCheckRedis(Settings.redis.web)
+rclient = require("redis-sharelatex").createClient(Settings.redis.realtime)
 app.get "/health_check/redis", (req, res, next) ->
-	if redisCheck.isAlive()
-		res.send 200
-	else
-		res.send 500
+	rclient.healthCheck (error) ->
+		if error?
+			logger.err {err: error}, "failed redis health check"
+			res.sendStatus 500
+		else
+			res.sendStatus 200
 
 Router = require "./app/js/Router"
 Router.configure(app, io, sessionSockets)

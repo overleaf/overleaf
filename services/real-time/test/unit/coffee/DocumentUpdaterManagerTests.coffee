@@ -12,7 +12,9 @@ describe 'DocumentUpdaterManager', ->
 		@version = 42
 		@settings = 
 			apis: documentupdater: url: "http://doc-updater.example.com"
-			redis: web: {}
+			redis: documentupdater:
+				key_schema:
+					pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
 		@rclient = {auth:->}
 			
 		@DocumentUpdaterManager = SandboxedModule.require modulePath, requires:

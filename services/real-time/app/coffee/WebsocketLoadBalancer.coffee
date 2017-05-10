@@ -2,8 +2,8 @@ Settings = require 'settings-sharelatex'
 logger = require 'logger-sharelatex'
 redis = require("redis-sharelatex")
 SafeJsonParse = require "./SafeJsonParse"
-rclientPub = redis.createClient(Settings.redis.web)
-rclientSub = redis.createClient(Settings.redis.web)
+rclientPub = redis.createClient(Settings.redis.realtime)
+rclientSub = redis.createClient(Settings.redis.realtime)
 
 module.exports = WebsocketLoadBalancer =
 	rclientPub: rclientPub

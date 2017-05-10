@@ -1,9 +1,19 @@
 module.exports =
 	redis:
-		web:
+		realtime:
 			host: "localhost"
 			port: "6379"
 			password: ""
+			key_schema:
+				clientsInProject: ({project_id}) -> "clients_in_project:#{project_id}"
+				connectedUser: ({project_id, client_id})-> "connected_user:#{project_id}:#{client_id}"
+
+		documentupdater:
+			host: "localhost"
+			port: "6379"
+			password: ""
+			key_schema:
+				pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
 			
 	internal:
 		realTime:

@@ -3,8 +3,8 @@ logger = require "logger-sharelatex"
 settings = require "settings-sharelatex"
 metrics = require("metrics-sharelatex")
 
-redis = require("redis-sharelatex")
-rclient = redis.createClient(settings.redis.web)
+rclient = require("redis-sharelatex").createClient(settings.redis.documentupdater)
+Keys = settings.redis.documentupdater.key_schema
 
 module.exports = DocumentUpdaterManager =
 	getDocument: (project_id, doc_id, fromVersion, callback = (error, exists, doclines, version) ->) ->
@@ -56,7 +56,7 @@ module.exports = DocumentUpdaterManager =
 		jsonChange = JSON.stringify change
 		doc_key = "#{project_id}:#{doc_id}"
 		multi = rclient.multi()
-		multi.rpush "PendingUpdates:#{doc_id}", jsonChange
+		multi.rpush Keys.pendingUpdates({doc_id}), jsonChange
 		multi.sadd  "DocsWithPendingUpdates", doc_key
 		multi.rpush "pending-updates-list", doc_key
 		multi.exec (error) ->
