@@ -13,14 +13,14 @@ module.exports = SudoModeHandler =
 
 	activateSudoMode: (userId, callback=(err)->) ->
 		if !userId?
-			return callback(new Error('[SudoMode] user must not be supplied'))
+			return callback(new Error('[SudoMode] user must be supplied'))
 		duration = TIMEOUT_IN_SECONDS
 		logger.log {userId, duration}, "[SudoMode] activating sudo mode for user"
 		rclient.set SudoModeHandler._buildKey(userId), '1', 'EX', duration, callback
 
 	isSudoModeActive: (userId, callback=(err, isActive)->) ->
 		if !userId?
-			return callback(new Error('[SudoMode] user must not be supplied'))
+			return callback(new Error('[SudoMode] user must be supplied'))
 		rclient.get SudoModeHandler._buildKey(userId), (err, result) ->
 			if err?
 				return callback(err)
