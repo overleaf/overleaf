@@ -141,7 +141,10 @@ define [
 			else
 				# Reset back to what we had when previously open
 				$scope.reviewPanel.subView = $scope.reviewPanel.openSubView
-		
+			$timeout () ->
+				$scope.$broadcast "review-panel:toggle"
+				$scope.$broadcast "review-panel:layout", false
+
 		$scope.$watch "reviewPanel.subView", (view) ->
 			return if !view?
 			updateScrollbar()
@@ -170,12 +173,6 @@ define [
 			Object.keys(permEntries).length
 		), (nEntries) ->
 			$scope.reviewPanel.hasEntries = nEntries > 0 and $scope.project.features.trackChangesVisible
-
-		$scope.$watch "ui.reviewPanelOpen", (reviewPanelOpen) ->
-			return if !reviewPanelOpen?
-			$timeout () ->
-				$scope.$broadcast "review-panel:toggle"
-				$scope.$broadcast "review-panel:layout", false
 
 		regenerateTrackChangesId = (doc) ->
 			old_id = getChangeTracker(doc.doc_id).getIdSeed()
