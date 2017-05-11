@@ -123,10 +123,7 @@ describe 'DocumentUpdaterManager', ->
 				"range":{"start":{"row":2,"column":2},"end":{"row":2,"column":3}},
 				"text":"e"
 			}
-			@rclient.multi = sinon.stub().returns @rclient
-			@rclient.exec = sinon.stub().callsArg(0)
-			@rclient.rpush = sinon.stub()
-			@rclient.sadd = sinon.stub()
+			@rclient.rpush = sinon.stub().yields()
 			@callback = sinon.stub()
 
 		describe "successfully", ->
@@ -143,14 +140,9 @@ describe 'DocumentUpdaterManager', ->
 					.calledWith("pending-updates-list", "#{@project_id}:#{@doc_id}")
 					.should.equal true
 
-			it "should push the doc id into the pending updates set", ->
-				@rclient.sadd
-					.calledWith("DocsWithPendingUpdates", "#{@project_id}:#{@doc_id}")
-					.should.equal true
-
-		describe "with error connecting to redis during exec", ->
+		describe "with error talking to redis during rpush", ->
 			beforeEach ->
-				@rclient.exec = sinon.stub().callsArgWith(0, new Error("something went wrong"))
+				@rclient.rpush = sinon.stub().yields(new Error("something went wrong"))
 				@DocumentUpdaterManager.queueChange(@project_id, @doc_id, @change, @callback)
 
 			it "should return an error", ->

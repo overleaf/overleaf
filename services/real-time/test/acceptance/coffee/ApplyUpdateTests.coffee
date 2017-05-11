@@ -46,11 +46,6 @@ describe "applyOtUpdate", ->
 			rclient.lrange "pending-updates-list", 0, -1, (error, [doc_id]) =>
 				doc_id.should.equal "#{@project_id}:#{@doc_id}"
 				done()
-		
-		it "should add the doc to the pending updates set in redis", (done) ->
-			rclient.sismember "DocsWithPendingUpdates", "#{@project_id}:#{@doc_id}", (error, isMember) =>
-				isMember.should.equal 1
-				done()
 
 		it "should push the update into redis", (done) ->
 			rclient.lrange "PendingUpdates:#{@doc_id}", 0, -1, (error, [update]) =>
@@ -144,11 +139,6 @@ describe "applyOtUpdate", ->
 		it "should push the doc into the pending updates list", (done) ->
 			rclient.lrange "pending-updates-list", 0, -1, (error, [doc_id]) =>
 				doc_id.should.equal "#{@project_id}:#{@doc_id}"
-				done()
-		
-		it "should add the doc to the pending updates set in redis", (done) ->
-			rclient.sismember "DocsWithPendingUpdates", "#{@project_id}:#{@doc_id}", (error, isMember) =>
-				isMember.should.equal 1
 				done()
 
 		it "should push the update into redis", (done) ->

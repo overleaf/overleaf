@@ -55,10 +55,8 @@ module.exports = DocumentUpdaterManager =
 	queueChange: (project_id, doc_id, change, callback = ()->)->
 		jsonChange = JSON.stringify change
 		doc_key = "#{project_id}:#{doc_id}"
-		multi = rclient.multi()
-		multi.rpush Keys.pendingUpdates({doc_id}), jsonChange
-		multi.sadd  "DocsWithPendingUpdates", doc_key
-		multi.rpush "pending-updates-list", doc_key
-		multi.exec (error) ->
+		# Push onto pendingUpdates for doc_id first, because once the doc updater
+		# gets an entry on pending-updates-list, it starts processing.
+		rclient.rpush Keys.pendingUpdates({doc_id}), jsonChange, (error) ->
 			return callback(error) if error?
-			callback()
+			rclient.rpush "pending-updates-list", doc_key, callback
