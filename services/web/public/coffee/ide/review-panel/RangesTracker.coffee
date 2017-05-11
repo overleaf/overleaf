@@ -108,13 +108,16 @@ load = () ->
 			for change_id in change_to_remove_ids
 				remove_change_id[change_id] = true
 
-			while (i--)
-				if remove_change_id[@changes[i].id]
-					delete remove_change_id[@changes[i].id]
-					removed_change = @changes.splice(i, 1)[0]
-					@_markAsDirty removed_change, "change", "removed"
-					if Object.keys(remove_change_id).length == 0
-						break
+			remaining_changes = []
+
+			for change in @changes
+				if remove_change_id[change.id]
+					delete remove_change_id[change.id]
+					@_markAsDirty change, "change", "removed"
+				else
+					remaining_changes.push change
+
+			@changes = remaining_changes
 		
 		validate: (text) ->
 			for change in @changes
