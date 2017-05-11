@@ -1,7 +1,7 @@
 metrics = require('metrics-sharelatex')
 Settings = require('settings-sharelatex')
-redis = require("redis-sharelatex")
-rclient = redis.createClient(Settings.redis.web)
+RedisWrapper = require("./RedisWrapper")
+rclient = RedisWrapper.client("lock")
 logger = require "logger-sharelatex"
 
 module.exports = LockManager =

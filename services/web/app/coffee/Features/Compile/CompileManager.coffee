@@ -1,6 +1,6 @@
 Settings = require('settings-sharelatex')
-redis = require("redis-sharelatex")
-rclient = redis.createClient(Settings.redis.web)
+RedisWrapper = require("../../infrastructure/RedisWrapper")
+rclient = RedisWrapper.client("clsi_recently_compiled")
 DocumentUpdaterHandler = require "../DocumentUpdater/DocumentUpdaterHandler"
 Project = require("../../models/Project").Project
 ProjectRootDocManager = require "../Project/ProjectRootDocManager"
