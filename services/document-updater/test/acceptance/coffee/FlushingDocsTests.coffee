@@ -63,7 +63,7 @@ describe "Flushing a doc to Mongo", ->
 				lines: @lines
 				version: @version
 			}
-			sinon.stub MockWebApi, "setDocument", (project_id, doc_id, lines, version, callback = (error) ->) ->
+			sinon.stub MockWebApi, "setDocument", (project_id, doc_id, lines, version, ranges, callback = (error) ->) ->
 				setTimeout callback, 30000
 			DocUpdaterClient.preloadDoc @project_id, @doc_id, done
 
