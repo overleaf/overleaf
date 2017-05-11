@@ -4,7 +4,7 @@ path = require('path')
 modulePath = path.join __dirname, '../../../../../app/js/infrastructure/LockManager.js'
 project_id = 1234
 doc_id     = 5678
-blockingKey = "Blocking:#{doc_id}"
+blockingKey = "lock:web:{#{doc_id}}"
 SandboxedModule = require('sandboxed-module')
 
 describe 'LockManager - checking the lock', ()->

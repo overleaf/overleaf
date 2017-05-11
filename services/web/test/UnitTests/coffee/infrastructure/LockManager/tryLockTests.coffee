@@ -24,7 +24,7 @@ describe 'LockManager - trying the lock', ->
 			@LockManager.tryLock @doc_id, @callback
 
 		it "should set the lock key with an expiry if it is not set", ->
-			@set.calledWith("Blocking:#{@doc_id}", "locked", "EX", 30, "NX")
+			@set.calledWith("lock:web:{#{@doc_id}}", "locked", "EX", 30, "NX")
 				.should.equal true
 
 		it "should return the callback with true", ->

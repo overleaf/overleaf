@@ -9,17 +9,17 @@ module.exports = LockManager =
 	MAX_LOCK_WAIT_TIME: 10000 # 10s maximum time to spend trying to get the lock
 	REDIS_LOCK_EXPIRY: 30 # seconds. Time until lock auto expires in redis.
 
-	_blockingKey : (key)-> "Blocking:"+key
+	_blockingKey : (key)-> "lock:web:{#{key}}"
 
 	tryLock : (key, callback = (err, isFree)->)->
 		rclient.set LockManager._blockingKey(key), "locked", "EX", LockManager.REDIS_LOCK_EXPIRY, "NX", (err, gotLock)->
 			return callback(err) if err?
 			if gotLock == "OK"
-				metrics.inc "doc-not-blocking"
+				metrics.inc "lock-not-blocking"
 				callback err, true
 			else
-				metrics.inc "doc-blocking"
-				logger.log key: key, redis_response: gotLock, "doc is locked"
+				metrics.inc "lock-blocking"
+				logger.log key: key, redis_response: gotLock, "lock is locked"
 				callback err, false
 
 	getLock: (key, callback = (error) ->) ->
@@ -42,10 +42,10 @@ module.exports = LockManager =
 			return callback(err) if err?
 			exists = parseInt replys[0]
 			if exists == 1
-				metrics.inc "doc-blocking"
+				metrics.inc "lock-blocking"
 				callback err, false
 			else
-				metrics.inc "doc-not-blocking"
+				metrics.inc "lock-not-blocking"
 				callback err, true
 
 	releaseLock: (key, callback)->
