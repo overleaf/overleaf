@@ -126,6 +126,12 @@ define [
 			else
 				$reviewPanelEl.css "right", "0"
 
+		$scope.$watch "!ui.reviewPanelOpen && reviewPanel.hasEntries", (open, prevVal) ->
+			return if !open?
+			$scope.ui.miniReviewPanelVisible = open
+			if open != prevVal
+				$timeout () -> $scope.$broadcast "review-panel:toggle"
+
 		$scope.$watch "ui.reviewPanelOpen", (open) ->
 			return if !open?
 			if !open
