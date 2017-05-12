@@ -40,6 +40,7 @@ module.exports = UpdateManager =
 	fetchAndApplyUpdates: (project_id, doc_id, callback = (error) ->) ->
 		RealTimeRedisManager.getPendingUpdatesForDoc doc_id, (error, updates) =>
 			return callback(error) if error?
+			logger.log {project_id: project_id, doc_id: doc_id, count: updates.length}, "processing updates"
 			if updates.length == 0
 				return callback()
 			async.eachSeries updates,
