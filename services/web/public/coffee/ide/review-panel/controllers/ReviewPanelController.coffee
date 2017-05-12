@@ -354,7 +354,6 @@ define [
 			}
 
 		$scope.showBulkAcceptDialog = () ->
-			console.log "showBulkAcceptDialog"
 			showBulkActionsDialog true
 
 		$scope.showBulkRejectDialog = () -> showBulkActionsDialog false
