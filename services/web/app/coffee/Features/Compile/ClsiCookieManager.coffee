@@ -2,6 +2,8 @@ Settings = require "settings-sharelatex"
 request = require('request')
 RedisWrapper = require("../../infrastructure/RedisWrapper")
 rclient = RedisWrapper.client("clsi_cookie")
+if Settings.redis.clsi_cookie_secondary?
+	rclient_secondary = RedisWrapper.client("clsi_cookie_secondary")
 Cookie = require('cookie')
 logger = require "logger-sharelatex"
 
@@ -42,11 +44,16 @@ module.exports = ClsiCookieManager =
 		if !clsiCookiesEnabled
 			return callback()
 		serverId = ClsiCookieManager._parseServerIdFromResponse(response)
+		if rclient_secondary?
+			@_setServerIdInRedis rclient_secondary, project_id, serverId
+		@_setServerIdInRedis rclient, project_id, serverId, (err) ->
+			callback(err, serverId)
+
+	_setServerIdInRedis: (rclient, project_id, serverId, callback = (err) ->) ->
 		multi = rclient.multi()
 		multi.set buildKey(project_id), serverId
 		multi.expire buildKey(project_id), Settings.clsiCookie.ttl
-		multi.exec (err)->
-			callback(err, serverId)
+		multi.exec callback
 
 	clearServerId: (project_id, callback = (err)->)->
 		if !clsiCookiesEnabled
