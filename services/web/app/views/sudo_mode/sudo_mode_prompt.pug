@@ -4,14 +4,14 @@ block content
 	.content.content-alt
 		.container
 			.row
-				.col-md-10.col-md-offset-1.col-lg-8.col-lg-offset-2
+				.col-md-8.col-md-offset-2.col-lg-6.col-lg-offset-3
 					.card
 						.page-header.text-centered
-							h1 Confirm your password to continue
+							h2 Confirm password to continue
 						div
 							.container-fluid
 								.row
-									.col-md-8.col-md-offset-2
+									.col-md-12
 										form(async-form="confirmPassword", name="confirmPassword",
 												action='/confirm-password/submit', method="POST", ng-cloak)
 											input(name='_csrf', type='hidden', value=csrfToken)
@@ -38,8 +38,8 @@ block content
 												)
 													span #{translate("confirm")}
 
-								.row
-									.col-md-8.col-md-offset-2
+								.row.row-spaced-small
+									.col-md-12
 										p.text-centered
 											small
-												| Tip: You are entering "sudo mode", we won't ask for your password again for a while.
+												| We won't ask for your password again for a while.
