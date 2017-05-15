@@ -130,9 +130,9 @@ module.exports = DocumentManager =
 			RedisManager.removeDocFromMemory project_id, doc_id, (error) ->
 				return callback(error) if error?
 				callback null
-	
-	acceptChange: (project_id, doc_id, change_id, _callback = (error) ->) ->
-		timer = new Metrics.Timer("docManager.acceptChange")
+
+	acceptChanges: (project_id, doc_id, change_ids = [], _callback = (error) ->) ->
+		timer = new Metrics.Timer("docManager.acceptChanges")
 		callback = (args...) ->
 			timer.done()
 			_callback(args...)
@@ -141,7 +141,7 @@ module.exports = DocumentManager =
 			return callback(error) if error?
 			if !lines? or !version?
 				return callback(new Errors.NotFoundError("document not found: #{doc_id}"))
-			RangesManager.acceptChange change_id, ranges, (error, new_ranges) ->
+			RangesManager.acceptChanges change_ids, ranges, (error, new_ranges) ->
 				return callback(error) if error?
 				RedisManager.updateDocument doc_id, lines, version, [], new_ranges, (error) ->
 					return callback(error) if error?
@@ -183,9 +183,9 @@ module.exports = DocumentManager =
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.flushAndDeleteDoc, project_id, doc_id, callback
 
-	acceptChangeWithLock: (project_id, doc_id, change_id, callback = (error) ->) ->
+	acceptChangesWithLock: (project_id, doc_id, change_ids, callback = (error) ->) ->
 		UpdateManager = require "./UpdateManager"
-		UpdateManager.lockUpdatesAndDo DocumentManager.acceptChange, project_id, doc_id, change_id, callback
+		UpdateManager.lockUpdatesAndDo DocumentManager.acceptChanges, project_id, doc_id, change_ids, callback
 
 	deleteCommentWithLock: (project_id, doc_id, thread_id, callback = (error) ->) ->
 		UpdateManager = require "./UpdateManager"

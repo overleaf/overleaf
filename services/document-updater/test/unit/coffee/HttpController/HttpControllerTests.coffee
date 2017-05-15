@@ -335,7 +335,7 @@ describe "HttpController", ->
 					.calledWith(new Error("oops"))
 					.should.equal true
 	
-	describe "acceptChange", ->
+	describe "acceptChanges", ->
 		beforeEach ->
 			@req =
 				params:
@@ -343,14 +343,14 @@ describe "HttpController", ->
 					doc_id: @doc_id
 					change_id: @change_id = "mock-change-od-1"
 
-		describe "successfully", ->
+		describe "successfully with a single change", ->
 			beforeEach ->
-				@DocumentManager.acceptChangeWithLock = sinon.stub().callsArgWith(3)
-				@HttpController.acceptChange(@req, @res, @next)
+				@DocumentManager.acceptChangesWithLock = sinon.stub().callsArgWith(3)
+				@HttpController.acceptChanges(@req, @res, @next)
 
 			it "should accept the change", ->
-				@DocumentManager.acceptChangeWithLock
-					.calledWith(@project_id, @doc_id, @change_id)
+				@DocumentManager.acceptChangesWithLock
+					.calledWith(@project_id, @doc_id, [ @change_id ])
 					.should.equal true
 
 			it "should return a successful No Content response", ->
@@ -360,16 +360,34 @@ describe "HttpController", ->
 
 			it "should log the request", ->
 				@logger.log
-					.calledWith({@project_id, @doc_id, @change_id}, "accepting change via http")
+					.calledWith({@project_id, @doc_id}, "accepting 1 changes via http")
 					.should.equal true
 
 			it "should time the request", ->
 				@Metrics.Timer::done.called.should.equal true
 
+		describe "succesfully with with multiple changes", ->
+			beforeEach ->
+				@change_ids = [ "mock-change-od-1", "mock-change-od-2", "mock-change-od-3", "mock-change-od-4" ]
+				@req.body =
+					change_ids: @change_ids
+				@DocumentManager.acceptChangesWithLock = sinon.stub().callsArgWith(3)
+				@HttpController.acceptChanges(@req, @res, @next)
+
+			it "should accept the changes in the body payload", ->
+				@DocumentManager.acceptChangesWithLock
+					.calledWith(@project_id, @doc_id, @change_ids)
+					.should.equal true
+
+			it "should log the request with the correct number of changes", ->
+				@logger.log
+					.calledWith({@project_id, @doc_id}, "accepting #{ @change_ids.length } changes via http")
+					.should.equal true
+
 		describe "when an errors occurs", ->
 			beforeEach ->
-				@DocumentManager.acceptChangeWithLock = sinon.stub().callsArgWith(3, new Error("oops"))
-				@HttpController.acceptChange(@req, @res, @next)
+				@DocumentManager.acceptChangesWithLock = sinon.stub().callsArgWith(3, new Error("oops"))
+				@HttpController.acceptChanges(@req, @res, @next)
 
 			it "should call next with the error", ->
 				@next

@@ -95,15 +95,18 @@ module.exports = HttpController =
 			return next(error) if error?
 			logger.log project_id: project_id, "deleted project via http"
 			res.send 204 # No Content
-	
-	acceptChange: (req, res, next = (error) ->) ->
-		{project_id, doc_id, change_id} = req.params
-		logger.log {project_id, doc_id, change_id}, "accepting change via http"
-		timer = new Metrics.Timer("http.acceptChange")
-		DocumentManager.acceptChangeWithLock project_id, doc_id, change_id, (error) ->
+
+	acceptChanges: (req, res, next = (error) ->) ->
+		{project_id, doc_id} = req.params
+		change_ids = req.body?.change_ids
+		if !change_ids?
+			change_ids = [ req.params.change_id ]
+		logger.log {project_id, doc_id}, "accepting #{ change_ids.length } changes via http"
+		timer = new Metrics.Timer("http.acceptChanges")
+		DocumentManager.acceptChangesWithLock project_id, doc_id, change_ids, (error) ->
 			timer.done()
 			return next(error) if error?
-			logger.log {project_id, doc_id, change_id}, "accepted change via http"
+			logger.log {project_id, doc_id}, "accepted #{ change_ids.length } changes via http"
 			res.send 204 # No Content
 	
 	deleteComment: (req, res, next = (error) ->) ->

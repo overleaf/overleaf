@@ -10,7 +10,7 @@ describe "RangesManager", ->
 		@RangesManager = SandboxedModule.require modulePath,
 			requires:
 				"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }
-		
+
 		@doc_id = "doc-id-123"
 		@project_id = "project-id-123"
 		@user_id = "user-id-123"
@@ -179,3 +179,107 @@ describe "RangesManager", ->
 				[error, entries] = @callback.args[0]
 				expect(error).to.not.be.null
 				expect(error.message).to.equal("Change ({\"op\":{\"i\":\"five\",\"p\":15},\"metadata\":{\"user_id\":\"user-id-123\"}}) doesn't match text (\"our \")")
+
+	describe "acceptChanges", ->
+		beforeEach ->
+			@RangesManager = SandboxedModule.require modulePath,
+				requires:
+					"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }
+					"./RangesTracker":@RangesTracker = SandboxedModule.require "../../../../app/js/RangesTracker.js"
+
+			@ranges = {
+				comments: []
+				changes: [{
+					id: "a1"
+					op:
+						i: "lorem"
+						p: 0
+				}, {
+					id: "a2"
+					op:
+						i: "ipsum"
+						p: 10
+				}, {
+					id: "a3"
+					op:
+						i: "dolor"
+						p: 20
+				}, {
+					id: "a4"
+					op:
+						i: "sit"
+						p: 30
+				}, {
+					id: "a5"
+					op:
+						i: "amet"
+						p: 40
+				}]
+			}
+			@removeChangeIdsSpy = sinon.spy @RangesTracker.prototype, "removeChangeIds"
+
+		describe "successfully with a single change", ->
+			beforeEach (done) ->
+				@change_ids = [ @ranges.changes[1].id ]
+				@RangesManager.acceptChanges @change_ids, @ranges, (err, ranges) => 
+					@rangesResponse = ranges
+					done()
+
+			it "should log the call with the correct number of changes", ->
+				@logger.log
+					.calledWith("accepting 1 changes in ranges")
+					.should.equal true
+
+			it "should delegate the change removal to the ranges tracker", ->
+				@removeChangeIdsSpy
+					.calledWith(@change_ids)
+					.should.equal true
+
+			it "should remove the change", ->
+				expect(@rangesResponse.changes
+					.find((change) => change.id ==  @ranges.changes[1].id))
+					.to.be.undefined
+
+			it "should return the original number of changes minus 1", ->
+				@rangesResponse.changes.length
+					.should.equal @ranges.changes.length - 1
+					
+			it "should not touch other changes", ->
+				for i in [ 0, 2, 3, 4]
+					expect(@rangesResponse.changes
+						.find((change) => change.id ==  @ranges.changes[i].id))
+						.to.deep.equal @ranges.changes[i]
+
+		describe "successfully with multiple changes", ->
+			beforeEach (done) ->
+				@change_ids = [ @ranges.changes[1].id, @ranges.changes[3].id, @ranges.changes[4].id ]
+				@RangesManager.acceptChanges @change_ids, @ranges, (err, ranges) => 
+					@rangesResponse = ranges
+					done()
+
+			it "should log the call with the correct number of changes", ->
+				@logger.log
+					.calledWith("accepting #{ @change_ids.length } changes in ranges")
+					.should.equal true
+
+			it "should delegate the change removal to the ranges tracker", ->
+				@removeChangeIdsSpy
+					.calledWith(@change_ids)
+					.should.equal true
+
+			it "should remove the changes", ->
+				for i in [ 1, 3, 4]
+					expect(@rangesResponse.changes
+						.find((change) => change.id ==  @ranges.changes[1].id))
+						.to.be.undefined
+			
+			it "should return the original number of changes minus the number of accepted changes", ->
+				@rangesResponse.changes.length
+					.should.equal @ranges.changes.length - 3
+
+			it "should not touch other changes", ->
+				for i in [ 0, 2 ]
+					expect(@rangesResponse.changes
+						.find((change) => change.id ==  @ranges.changes[i].id))
+						.to.deep.equal @ranges.changes[i]
+					
