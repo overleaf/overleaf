@@ -6,7 +6,7 @@ Settings = require('settings-sharelatex')
 Keys = require "./UpdateKeys"
 {EventEmitter} = require "events"
 util = require "util"
-WebRedisManager = require "./WebRedisManager"
+RealTimeRedisManager = require "./RealTimeRedisManager"
 
 ShareJsModel:: = {}
 util.inherits ShareJsModel, EventEmitter
@@ -52,5 +52,5 @@ module.exports = ShareJsUpdateManager =
 			ShareJsUpdateManager._sendOp(project_id, doc_id, opData)
 	
 	_sendOp: (project_id, doc_id, op) ->
-		WebRedisManager.sendData {project_id, doc_id, op}
+		RealTimeRedisManager.sendData {project_id, doc_id, op}
 

@@ -1,8 +1,7 @@
 Settings = require('settings-sharelatex')
 async = require('async')
-rclient = require("./RedisBackend").createClient()
+rclient = require("redis-sharelatex").createClient(Settings.redis.documentupdater)
 _ = require('underscore')
-keys = require('./RedisKeyBuilder')
 logger = require('logger-sharelatex')
 metrics = require('./Metrics')
 Errors = require "./Errors"
@@ -24,6 +23,9 @@ logHashWriteErrors = logHashErrors?.write
 
 MEGABYTES = 1024 * 1024
 MAX_RANGES_SIZE = 3 * MEGABYTES
+
+keys = Settings.redis.documentupdater.key_schema
+historyKeys = Settings.redis.history.key_schema
 
 module.exports = RedisManager =
 	rclient: rclient
@@ -166,32 +168,37 @@ module.exports = RedisManager =
 				logger.error err: error, doc_id: doc_id, newDocLines: newDocLines, error.message
 				return callback(error)
 			newHash = RedisManager._computeHash(newDocLines)
-			
-			logger.log doc_id: doc_id, version: newVersion, hash: newHash, "updating doc in redis"
-			
+
+			opVersions = appliedOps.map (op) -> op?.v
+			logger.log doc_id: doc_id, version: newVersion, hash: newHash, op_versions: opVersions, "updating doc in redis"
+
 			RedisManager._serializeRanges ranges, (error, ranges) ->
 				if error?
 					logger.error {err: error, doc_id}, error.message
 					return callback(error)
 				multi = rclient.multi()
-				multi.eval setScript, 1, keys.docLines(doc_id:doc_id), newDocLines
-				multi.set    keys.docVersion(doc_id:doc_id), newVersion
-				multi.set    keys.docHash(doc_id:doc_id), newHash
-				if jsonOps.length > 0
-					multi.rpush  keys.docOps(doc_id: doc_id), jsonOps...
-				multi.expire keys.docOps(doc_id: doc_id), RedisManager.DOC_OPS_TTL
-				multi.ltrim  keys.docOps(doc_id: doc_id), -RedisManager.DOC_OPS_MAX_LENGTH, -1
+				multi.eval setScript, 1, keys.docLines(doc_id:doc_id), newDocLines  # index 0
+				multi.set    keys.docVersion(doc_id:doc_id), newVersion             # index 1
+				multi.set    keys.docHash(doc_id:doc_id), newHash                   # index 2
+				multi.expire keys.docOps(doc_id: doc_id), RedisManager.DOC_OPS_TTL  # index 3
+				multi.ltrim  keys.docOps(doc_id: doc_id), -RedisManager.DOC_OPS_MAX_LENGTH, -1 # index 4
 				if ranges?
-					multi.set keys.ranges(doc_id:doc_id), ranges
+					multi.set keys.ranges(doc_id:doc_id), ranges  # index 5
 				else
-					multi.del keys.ranges(doc_id:doc_id)
+					multi.del keys.ranges(doc_id:doc_id)          # also index 5
+				# push the ops last so we can get the lengths at fixed index positions 6 and 7
+				if jsonOps.length > 0
+					multi.rpush  keys.docOps(doc_id: doc_id), jsonOps...                         # index 6
+					multi.rpush  historyKeys.uncompressedHistoryOps(doc_id: doc_id), jsonOps...  # index 7
 				multi.exec (error, result) ->
 						return callback(error) if error?
 						# check the hash computed on the redis server
 						writeHash = result?[0]
 						if logHashWriteErrors and writeHash? and writeHash isnt newHash
 							logger.error doc_id: doc_id, writeHash: writeHash, origHash: newHash, docLines:newDocLines, "hash mismatch on updateDocument"
-						return callback()
+						# return length of uncompressedHistoryOps queue (index 7)
+						uncompressedHistoryOpsLength = result?[7]
+						return callback(null, uncompressedHistoryOpsLength)
 
 	getDocIdsInProject: (project_id, callback = (error, doc_ids) ->) ->
 		rclient.smembers keys.docsInProject(project_id: project_id), callback

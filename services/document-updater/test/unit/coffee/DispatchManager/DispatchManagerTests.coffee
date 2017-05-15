@@ -11,7 +11,7 @@ describe "DispatchManager", ->
 			"logger-sharelatex": @logger = { log: sinon.stub() }
 			"settings-sharelatex": @settings =
 				redis:
-					web: {}
+					realtime: {}
 			"redis-sharelatex": @redis = {}
 		@callback = sinon.stub()
 

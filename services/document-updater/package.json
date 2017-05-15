@@ -14,7 +14,7 @@
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.6",
     "lynx": "0.0.11",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.5.0",
-    "redis-sharelatex": "0.0.9",
+    "redis-sharelatex": "git+https://github.com/sharelatex/redis-sharelatex.git#v1.0.2",
     "request": "2.25.0",
     "sandboxed-module": "~0.2.0",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",

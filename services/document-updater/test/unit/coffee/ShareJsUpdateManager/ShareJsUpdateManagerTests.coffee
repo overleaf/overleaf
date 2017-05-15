@@ -17,7 +17,7 @@ describe "ShareJsUpdateManager", ->
 				"./ShareJsDB" : @ShareJsDB = { mockDB: true }
 				"redis-sharelatex" : createClient: () => @rclient = auth:->
 				"logger-sharelatex": @logger = { log: sinon.stub() }
-				"./WebRedisManager": @WebRedisManager = {}
+				"./RealTimeRedisManager": @RealTimeRedisManager = {}
 			globals:
 				clearTimeout: @clearTimeout = sinon.stub()
 
@@ -105,11 +105,11 @@ describe "ShareJsUpdateManager", ->
 				@opData =
 					op: {t: "foo", p: 1}
 					meta: source: "bar"
-				@WebRedisManager.sendData = sinon.stub()
+				@RealTimeRedisManager.sendData = sinon.stub()
 				@callback("#{@project_id}:#{@doc_id}", @opData)
 
 			it "should publish the op to redis", ->
-				@WebRedisManager.sendData
+				@RealTimeRedisManager.sendData
 					.calledWith({project_id: @project_id, doc_id: @doc_id, op: @opData})
 					.should.equal true
 

@@ -1,7 +1,8 @@
 metrics = require('./Metrics')
 Settings = require('settings-sharelatex')
 redis = require("redis-sharelatex")
-rclient = redis.createClient(Settings.redis.web)
+rclient = redis.createClient(Settings.redis.lock)
+keys = Settings.redis.lock.key_schema
 logger = require "logger-sharelatex"
 os = require "os"
 crypto = require "crypto"
@@ -10,9 +11,6 @@ HOST = os.hostname()
 PID = process.pid
 RND = crypto.randomBytes(4).toString('hex')
 COUNT = 0
-
-keys =
-	blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
 
 module.exports = LockManager =
 	LOCK_TEST_INTERVAL: 50 # 50ms between each test of the lock

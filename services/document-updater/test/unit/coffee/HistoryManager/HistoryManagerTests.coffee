@@ -9,7 +9,7 @@ describe "HistoryManager", ->
 			"request": @request = {}
 			"settings-sharelatex": @Settings = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
-			"./WebRedisManager": @WebRedisManager = {}
+			"./HistoryRedisManager": @HistoryRedisManager = {}
 		@project_id = "mock-project-id"
 		@doc_id = "mock-doc-id"
 		@callback = sinon.stub()
@@ -40,18 +40,18 @@ describe "HistoryManager", ->
 			it "should return the callback with an error", ->
 				@callback.calledWith(new Error("track changes api return non-success code: 500")).should.equal true
 
-	describe "pushUncompressedHistoryOps", ->
+	describe "recordAndFlushHistoryOps", ->
 		beforeEach ->
 			@ops = ["mock-ops"]
 			@HistoryManager.flushDocChanges = sinon.stub().callsArg(2)
 
 		describe "pushing the op", ->
 			beforeEach ->
-				@WebRedisManager.pushUncompressedHistoryOps = sinon.stub().callsArgWith(3, null, 1)
-				@HistoryManager.pushUncompressedHistoryOps @project_id, @doc_id, @ops, @callback
+				@HistoryRedisManager.recordDocHasHistoryOps = sinon.stub().callsArgWith(3, null)
+				@HistoryManager.recordAndFlushHistoryOps @project_id, @doc_id, @ops, 1, @callback
 
 			it "should push the ops into redis", ->
-				@WebRedisManager.pushUncompressedHistoryOps
+				@HistoryRedisManager.recordDocHasHistoryOps
 					.calledWith(@project_id, @doc_id, @ops)
 					.should.equal true
 
@@ -63,9 +63,9 @@ describe "HistoryManager", ->
 
 		describe "when we hit a multiple of FLUSH_EVERY_N_OPS ops", ->
 			beforeEach ->
-				@WebRedisManager.pushUncompressedHistoryOps =
-					sinon.stub().callsArgWith(3, null, 2 * @HistoryManager.FLUSH_EVERY_N_OPS)
-				@HistoryManager.pushUncompressedHistoryOps @project_id, @doc_id, @ops, @callback
+				@HistoryRedisManager.recordDocHasHistoryOps =
+					sinon.stub().callsArgWith(3, null)
+				@HistoryManager.recordAndFlushHistoryOps @project_id, @doc_id, @ops, 2 * @HistoryManager.FLUSH_EVERY_N_OPS,@callback
 
 			it "should tell the track changes api to flush", ->
 				@HistoryManager.flushDocChanges
@@ -75,9 +75,9 @@ describe "HistoryManager", ->
 		describe "when we go over a multiple of FLUSH_EVERY_N_OPS ops", ->
 			beforeEach ->
 				@ops = ["op1", "op2", "op3"]
-				@WebRedisManager.pushUncompressedHistoryOps =
-					sinon.stub().callsArgWith(3, null, 2 * @HistoryManager.FLUSH_EVERY_N_OPS + 1)
-				@HistoryManager.pushUncompressedHistoryOps @project_id, @doc_id, @ops, @callback
+				@HistoryRedisManager.recordDocHasHistoryOps =
+					sinon.stub().callsArgWith(3, null)
+				@HistoryManager.recordAndFlushHistoryOps @project_id, @doc_id, @ops, 2 * @HistoryManager.FLUSH_EVERY_N_OPS + 1, @callback
 
 			it "should tell the track changes api to flush", ->
 				@HistoryManager.flushDocChanges
@@ -86,10 +86,10 @@ describe "HistoryManager", ->
 
 		describe "when HistoryManager errors", ->
 			beforeEach ->
-				@WebRedisManager.pushUncompressedHistoryOps =
-					sinon.stub().callsArgWith(3, null, 2 * @HistoryManager.FLUSH_EVERY_N_OPS)
+				@HistoryRedisManager.recordDocHasHistoryOps =
+					sinon.stub().callsArgWith(3, null)
 				@HistoryManager.flushDocChanges = sinon.stub().callsArgWith(2, @error = new Error("oops"))
-				@HistoryManager.pushUncompressedHistoryOps @project_id, @doc_id, @ops, @callback
+				@HistoryManager.recordAndFlushHistoryOps @project_id, @doc_id, @ops, 2 * @HistoryManager.FLUSH_EVERY_N_OPS, @callback
 
 			it "should log out the error", ->
 				@logger.error
@@ -103,10 +103,10 @@ describe "HistoryManager", ->
 		
 		describe "with no ops", ->
 			beforeEach ->
-				@WebRedisManager.pushUncompressedHistoryOps = sinon.stub().callsArgWith(3, null, 1)
-				@HistoryManager.pushUncompressedHistoryOps @project_id, @doc_id, [], @callback
+				@HistoryRedisManager.recordDocHasHistoryOps = sinon.stub().callsArgWith(3, null)
+				@HistoryManager.recordAndFlushHistoryOps @project_id, @doc_id, [], 1, @callback
 			
-			it "should not call WebRedisManager.pushUncompressedHistoryOps", ->
-				@WebRedisManager.pushUncompressedHistoryOps.called.should.equal false
+			it "should not call HistoryRedisManager.recordDocHasHistoryOps", ->
+				@HistoryRedisManager.recordDocHasHistoryOps.called.should.equal false
 			
 
