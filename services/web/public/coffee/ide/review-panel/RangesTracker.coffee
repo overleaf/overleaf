@@ -96,6 +96,20 @@ load = () ->
 					break
 			return change
 
+		getChanges: (change_ids) ->
+			changes_response = []
+			ids_map = {}
+
+			for change_id in change_ids
+				ids_map[change_id] = true
+
+			for change in @changes
+				if ids_map[change.id]
+					delete ids_map[change.id]
+					changes_response.push change
+
+			return changes_response
+
 		removeChangeId: (change_id) ->
 			change = @getChange(change_id)
 			return if !change?
