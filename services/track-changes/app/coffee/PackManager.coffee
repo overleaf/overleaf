@@ -6,6 +6,8 @@ LockManager = require "./LockManager"
 MongoAWS = require "./MongoAWS"
 Metrics = require "metrics-sharelatex"
 ProjectIterator = require "./ProjectIterator"
+Settings = require "settings-sharelatex"
+keys = Settings.redis.lock.key_schema
 
 # Sharejs operations are stored in a 'pack' object
 #
@@ -319,7 +321,7 @@ module.exports = PackManager =
 
 	insertPacksIntoIndexWithLock: (project_id, doc_id, newPacks, callback) ->
 		LockManager.runWithLock(
-			"HistoryIndexLock:#{doc_id}",
+			keys.historyIndexLock({doc_id}),
 			(releaseLock) ->
 				PackManager._insertPacksIntoIndex project_id, doc_id, newPacks, releaseLock
 			callback
@@ -438,7 +440,7 @@ module.exports = PackManager =
 
 	markPackAsFinalisedWithLock: (project_id, doc_id, pack_id, callback) ->
 		LockManager.runWithLock(
-			"HistoryLock:#{doc_id}",
+			keys.historyLock({doc_id}),
 			(releaseLock) ->
 				PackManager._markPackAsFinalised project_id, doc_id, pack_id, releaseLock
 			callback

@@ -9,6 +9,7 @@ logger = require "logger-sharelatex"
 async = require "async"
 _ = require "underscore"
 Settings = require "settings-sharelatex"
+keys = Settings.redis.lock.key_schema
 
 module.exports = UpdatesManager =
 	compressAndSaveRawUpdates: (project_id, doc_id, rawUpdates, temporary, callback = (error) ->) ->
@@ -126,7 +127,7 @@ module.exports = UpdatesManager =
 		UpdatesManager._prepareDocForUpdates project_id, doc_id, (error) ->
 			return callback(error) if error?
 			LockManager.runWithLock(
-				"HistoryLock:#{doc_id}",
+				keys.historyLock({doc_id}),
 				(releaseLock) ->
 					UpdatesManager.processUncompressedUpdates project_id, doc_id, temporary, releaseLock
 				callback

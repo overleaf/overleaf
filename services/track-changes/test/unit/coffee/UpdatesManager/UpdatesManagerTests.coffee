@@ -17,6 +17,9 @@ describe "UpdatesManager", ->
 			"./UpdateTrimmer": @UpdateTrimmer = {}
 			"./DocArchiveManager": @DocArchiveManager = {}
 			"logger-sharelatex": { log: sinon.stub(), error: sinon.stub() }
+			"settings-sharelatex":
+				redis: lock: key_schema:
+					historyLock: ({doc_id}) -> "HistoryLock:#{doc_id}"
 		@doc_id = "doc-id-123"
 		@project_id = "project-id-123"
 		@callback = sinon.stub()
