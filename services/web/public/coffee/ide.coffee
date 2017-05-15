@@ -70,6 +70,7 @@ define [
 			chatOpen: false
 			pdfLayout: 'sideBySide'
 			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}")
+			miniReviewPanelVisible: false
 		}
 		$scope.user = window.user
 		

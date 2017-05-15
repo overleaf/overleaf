@@ -15,6 +15,8 @@ docComparitor = require('./DocLinesComparitor')
 projectUpdateHandler = require('./ProjectUpdateHandler')
 DocstoreManager = require "../Docstore/DocstoreManager"
 ProjectGetter = require "./ProjectGetter"
+CooldownManager = require '../Cooldown/CooldownManager'
+
 
 module.exports = ProjectEntityHandler =
 	getAllFolders: (project_id,  callback) ->
@@ -522,6 +524,7 @@ module.exports = ProjectEntityHandler =
 		ProjectEntityHandler._countElements project, (err, count)->
 			if count > settings.maxEntitiesPerProject
 				logger.warn project_id:project._id, "project too big, stopping insertions"
+				CooldownManager.putProjectOnCooldown(project._id)
 				return callback("project_has_to_many_files")
 			projectLocator.findElement {project:project, element_id:folder_id, type:"folders"}, (err, folder, path)=>
 				if err?

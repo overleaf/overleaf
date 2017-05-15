@@ -740,12 +740,6 @@
       "from": "double-ended-queue@>=2.1.0-0 <3.0.0",
       "resolved": "https://registry.npmjs.org/double-ended-queue/-/double-ended-queue-2.1.0-0.tgz"
     },
-    "dtrace-provider": {
-      "version": "0.2.8",
-      "from": "dtrace-provider@0.2.8",
-      "resolved": "https://registry.npmjs.org/dtrace-provider/-/dtrace-provider-0.2.8.tgz",
-      "optional": true
-    },
     "each-series": {
       "version": "1.0.0",
       "from": "each-series@>=1.0.0 <2.0.0",
@@ -2742,24 +2736,29 @@
       }
     },
     "redis-sharelatex": {
-      "version": "0.0.9",
-      "from": "redis-sharelatex@0.0.9",
-      "resolved": "https://registry.npmjs.org/redis-sharelatex/-/redis-sharelatex-0.0.9.tgz",
+      "version": "1.0.2",
+      "from": "git+https://github.com/sharelatex/redis-sharelatex.git#v1.0.2",
+      "resolved": "git+https://github.com/sharelatex/redis-sharelatex.git#143b7eb192675f36d835080e534a4ac4899f918a",
       "dependencies": {
         "ansi-regex": {
           "version": "0.2.1",
-          "from": "ansi-regex@^0.2.0",
+          "from": "ansi-regex@>=0.2.0 <0.3.0",
           "resolved": "https://registry.npmjs.org/ansi-regex/-/ansi-regex-0.2.1.tgz"
         },
         "ansi-styles": {
           "version": "1.1.0",
-          "from": "ansi-styles@^1.1.0",
+          "from": "ansi-styles@>=1.1.0 <2.0.0",
           "resolved": "https://registry.npmjs.org/ansi-styles/-/ansi-styles-1.1.0.tgz"
         },
         "assertion-error": {
           "version": "1.0.0",
           "from": "assertion-error@1.0.0",
           "resolved": "https://registry.npmjs.org/assertion-error/-/assertion-error-1.0.0.tgz"
+        },
+        "async": {
+          "version": "2.4.0",
+          "from": "async@>=2.4.0 <3.0.0",
+          "resolved": "https://registry.npmjs.org/async/-/async-2.4.0.tgz"
         },
         "chai": {
           "version": "1.9.1",
@@ -2768,7 +2767,7 @@
         },
         "chalk": {
           "version": "0.5.1",
-          "from": "chalk@~0.5.0",
+          "from": "chalk@>=0.5.0 <0.6.0",
           "resolved": "https://registry.npmjs.org/chalk/-/chalk-0.5.1.tgz"
         },
         "coffee-script": {
@@ -2793,7 +2792,7 @@
           "dependencies": {
             "mkdirp": {
               "version": "0.5.1",
-              "from": "mkdirp@^0.5.0",
+              "from": "mkdirp@>=0.5.0 <0.6.0",
               "resolved": "https://registry.npmjs.org/mkdirp/-/mkdirp-0.5.1.tgz"
             }
           }
@@ -2815,8 +2814,13 @@
           "dependencies": {
             "coffee-script": {
               "version": "1.7.1",
-              "from": "coffee-script@~1.7.0",
+              "from": "coffee-script@>=1.7.0 <1.8.0",
               "resolved": "https://registry.npmjs.org/coffee-script/-/coffee-script-1.7.1.tgz"
+            },
+            "lodash": {
+              "version": "2.4.2",
+              "from": "lodash@>=2.4.1 <2.5.0",
+              "resolved": "https://registry.npmjs.org/lodash/-/lodash-2.4.2.tgz"
             }
           }
         },
@@ -2827,7 +2831,7 @@
         },
         "has-ansi": {
           "version": "0.1.0",
-          "from": "has-ansi@^0.1.0",
+          "from": "has-ansi@>=0.1.0 <0.2.0",
           "resolved": "https://registry.npmjs.org/has-ansi/-/has-ansi-0.1.0.tgz"
         },
         "jade": {
@@ -2852,15 +2856,10 @@
           "from": "jsonfile@>=2.0.0 <3.0.0",
           "resolved": "https://registry.npmjs.org/jsonfile/-/jsonfile-2.4.0.tgz"
         },
-        "lodash": {
-          "version": "2.4.2",
-          "from": "lodash@~2.4.1",
-          "resolved": "https://registry.npmjs.org/lodash/-/lodash-2.4.2.tgz"
-        },
         "minimatch": {
-          "version": "3.0.3",
+          "version": "3.0.4",
           "from": "minimatch@>=3.0.2 <4.0.0",
-          "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-3.0.3.tgz"
+          "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-3.0.4.tgz"
         },
         "mkdirp": {
           "version": "0.3.5",
@@ -2884,7 +2883,7 @@
             },
             "minimatch": {
               "version": "0.2.14",
-              "from": "minimatch@~0.2.11",
+              "from": "minimatch@>=0.2.11 <0.3.0",
               "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-0.2.14.tgz"
             }
           }
@@ -2904,11 +2903,6 @@
           "from": "rimraf@>=2.2.8 <3.0.0",
           "resolved": "https://registry.npmjs.org/rimraf/-/rimraf-2.6.1.tgz"
         },
-        "samsam": {
-          "version": "1.1.3",
-          "from": "samsam@>=1.1.0 <1.2.0",
-          "resolved": "https://registry.npmjs.org/samsam/-/samsam-1.1.3.tgz"
-        },
         "sandboxed-module": {
           "version": "1.0.1",
           "from": "sandboxed-module@1.0.1",
@@ -2921,12 +2915,12 @@
         },
         "strip-ansi": {
           "version": "0.3.0",
-          "from": "strip-ansi@^0.3.0",
+          "from": "strip-ansi@>=0.3.0 <0.4.0",
           "resolved": "https://registry.npmjs.org/strip-ansi/-/strip-ansi-0.3.0.tgz"
         },
         "supports-color": {
           "version": "0.2.0",
-          "from": "supports-color@^0.2.0",
+          "from": "supports-color@>=0.2.0 <0.3.0",
           "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-0.2.0.tgz"
         },
         "underscore": {
@@ -3035,6 +3029,11 @@
       "from": "safe-json-stringify@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/safe-json-stringify/-/safe-json-stringify-1.0.4.tgz",
       "optional": true
+    },
+    "samsam": {
+      "version": "1.1.2",
+      "from": "samsam@1.1.2",
+      "resolved": "https://registry.npmjs.org/samsam/-/samsam-1.1.2.tgz"
     },
     "sanitizer": {
       "version": "0.1.1",

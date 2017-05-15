@@ -34,8 +34,8 @@ describe "ClsiCookieManager", ->
 				ttl:Math.random()
 				key: "coooookie"
 		@requires = 
-			"redis-sharelatex" :
-				createClient: =>
+			"../../infrastructure/RedisWrapper":
+				client: =>
 					@redis
 			"settings-sharelatex": @settings
 			"request": @request

@@ -2,7 +2,7 @@ define [
 	"base"
 ], (App) ->
 
-	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp, event_tracking, $timeout) ->
+	App.controller "ProjectPageController", ($scope, $modal, $q, $window, queuedHttp, event_tracking, $timeout, localStorage) ->
 		$scope.projects = window.data.projects
 		$scope.tags = window.data.tags
 		$scope.notifications = window.data.notifications
@@ -10,6 +10,7 @@ define [
 		$scope.selectedProjects = []
 		$scope.filter = "all"
 		$scope.predicate = "lastUpdated"
+		$scope.nUntagged = 0
 		$scope.reverse = true
 		$scope.searchText = 
 			value : ""
@@ -17,6 +18,12 @@ define [
 		$timeout () ->
 			recalculateProjectListHeight()
 		, 10
+
+		$scope.$watch((
+			() -> $scope.projects.filter((project) -> !project.tags? or project.tags.length == 0).length
+		), (newVal) -> $scope.nUntagged = newVal)
+
+		storedUIOpts = JSON.parse(localStorage("project_list"))
 
 		recalculateProjectListHeight = () ->
 			topOffset = $(".project-list-card")?.offset()?.top
@@ -52,6 +59,13 @@ define [
 					project.tags ||= []
 					project.tags.push tag
 
+		markTagAsSelected = (id) ->
+			for tag in $scope.tags
+				if tag._id == id
+					tag.selected = true
+				else
+					tag.selected = false
+		
 		$scope.changePredicate = (newPredicate)->
 			if $scope.predicate == newPredicate
 				$scope.reverse = !$scope.reverse
@@ -104,6 +118,10 @@ define [
 				if $scope.filter == "tag" and selectedTag? and project.id not in selectedTag.project_ids
 					visible = false
 
+				# Hide tagged projects if we only want to see the uncategorized ones
+				if $scope.filter == "untagged" and project.tags?.length > 0
+					visible = false
+
 				# Hide projects we own if we only want to see shared projects
 				if $scope.filter == "shared" and project.accessLevel == "owner"
 					visible = false
@@ -126,6 +144,11 @@ define [
 				else
 					# We don't want hidden selections
 					project.selected = false
+
+			localStorage("project_list", JSON.stringify({ 
+				filter: $scope.filter,
+				selectedTagId: selectedTag?._id
+			}))
 			$scope.updateSelectedProjects()
 
 		$scope.getSelectedTag = () ->
@@ -177,6 +200,23 @@ define [
 			# If we're filtering by this tag then we need to remove
 			# the projects from view
 			$scope.updateVisibleProjects()
+
+		$scope.removeProjectFromTag = (project, tag) ->
+			tag.showWhenEmpty = true
+
+			project.tags ||= []
+			index = project.tags.indexOf tag
+
+			if index > -1
+				$scope._removeProjectIdsFromTagArray(tag, [ project.id ])
+				project.tags.splice(index, 1)
+				queuedHttp({
+					method: "DELETE"
+					url: "/tag/#{tag._id}/project/#{project.id}"
+					headers:
+						"X-CSRF-Token": window.csrfToken
+				})
+				$scope.updateVisibleProjects()
 
 		$scope.addSelectedProjectsToTag = (tag) ->
 			selected_projects = $scope.getSelectedProjects()
@@ -425,7 +465,12 @@ define [
 
 			window.location = path
 			
-		$scope.updateVisibleProjects()
+		if storedUIOpts?.filter?
+			if storedUIOpts.filter == "tag" and storedUIOpts.selectedTagId?
+				markTagAsSelected(storedUIOpts.selectedTagId)
+			$scope.setFilter(storedUIOpts.filter)
+		else
+			$scope.updateVisibleProjects()
 
 	App.controller "ProjectListItemController", ($scope) ->
 		$scope.ownerName = () ->
