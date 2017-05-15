@@ -30,12 +30,6 @@ historyKeys = Settings.redis.history.key_schema
 module.exports = RedisManager =
 	rclient: rclient
 
-	checkDocInMemory: (project_id, doc_id, callback) ->
-		rclient.exists keys.docLines(doc_id:doc_id), (error, result) ->
-			return callback(error) if error?
-			return callback new Error("doc not in memory") if result isnt 1
-			callback()
-
 	putDocInMemory : (project_id, doc_id, docLines, version, ranges, _callback)->
 		timer = new metrics.Timer("redis.put-doc")
 		callback = (error) ->
