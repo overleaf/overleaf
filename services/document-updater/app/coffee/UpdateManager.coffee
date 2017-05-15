@@ -14,14 +14,10 @@ RangesManager = require "./RangesManager"
 module.exports = UpdateManager =
 	processOutstandingUpdates: (project_id, doc_id, callback = (error) ->) ->
 		timer = new Metrics.Timer("updateManager.processOutstandingUpdates")
-		DocumentManager.ensureDocIsLoaded project_id, doc_id, (error) ->
-			# an error at this point is safe, because we haven't consumed any ops yet
+		UpdateManager.fetchAndApplyUpdates project_id, doc_id, (error) ->
+			timer.done()
 			return callback(error) if error?
-			UpdateManager.fetchAndApplyUpdates project_id, doc_id, (error) ->
-				timer.done()
-				# now we have taken ops off the queue so errors here will cause data loss
-				return callback(error) if error?
-				callback()
+			callback()
 
 	processOutstandingUpdatesWithLock: (project_id, doc_id, callback = (error) ->) ->
 		LockManager.tryLock doc_id, (error, gotLock, lockValue) =>

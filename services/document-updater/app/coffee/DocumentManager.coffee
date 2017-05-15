@@ -28,13 +28,6 @@ module.exports = DocumentManager =
 			else
 				callback null, lines, version, ranges, true
 
-	ensureDocIsLoaded: (project_id, doc_id, callback = (error) ->) ->
-		RedisManager.checkDocInMemory project_id, doc_id, (error) ->
-			if error?
-				DocumentManager.getDoc project_id, doc_id, callback
-			else
-				callback()
-
 	getDocAndRecentOps: (project_id, doc_id, fromVersion, _callback = (error, lines, version, recentOps, ranges) ->) ->
 		timer = new Metrics.Timer("docManager.getDocAndRecentOps")
 		callback = (args...) ->

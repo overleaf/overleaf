@@ -25,7 +25,6 @@ describe "UpdateManager", ->
 
 	describe "processOutstandingUpdates", ->
 		beforeEach ->
-			@DocumentManager.ensureDocIsLoaded = sinon.stub().callsArg(2)
 			@UpdateManager.fetchAndApplyUpdates = sinon.stub().callsArg(2)
 			@UpdateManager.processOutstandingUpdates @project_id, @doc_id, @callback
 
@@ -43,7 +42,6 @@ describe "UpdateManager", ->
 			beforeEach ->
 				@LockManager.tryLock = sinon.stub().callsArgWith(1, null, true, @lockValue = "mock-lock-value")
 				@LockManager.releaseLock = sinon.stub().callsArg(2)
-				@RedisManager.checkDocInMemory = sinon.stub().callsArg(2)
 				@UpdateManager.continueProcessingUpdatesWithLock = sinon.stub().callsArg(2)
 				@UpdateManager.processOutstandingUpdates = sinon.stub().callsArg(2)
 
@@ -92,8 +90,7 @@ describe "UpdateManager", ->
 
 			it "should not process the updates", ->
 				@UpdateManager.processOutstandingUpdates.called.should.equal false
-
-
+				
 	describe "continueProcessingUpdatesWithLock", ->
 		describe "when there are outstanding updates", ->
 			beforeEach ->
