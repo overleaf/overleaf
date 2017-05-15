@@ -40,8 +40,8 @@ describe "FileStoreHandler", ->
 		it "should create read stream", (done)->
 			@fs.createReadStream.returns 
 				pipe:->
-				on: (type, cb)-> 
-					if type == "end"
+				on: (type, cb)->
+					if type == "open"
 						cb()
 			@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, =>
 				@fs.createReadStream.calledWith(@fsPath).should.equal true
@@ -51,7 +51,7 @@ describe "FileStoreHandler", ->
 			@request.returns(@writeStream)
 			@fs.createReadStream.returns 
 				on: (type, cb)-> 
-					if type == "end"
+					if type == "open"
 						cb()
 				pipe:(o)=>
 					@writeStream.should.equal o
@@ -62,7 +62,7 @@ describe "FileStoreHandler", ->
 			@fs.createReadStream.returns 
 				pipe:->
 				on: (type, cb)-> 
-					if type == "end"
+					if type == "open"
 						cb()
 			@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, =>
 				@request.args[0][0].method.should.equal "post"
@@ -73,7 +73,7 @@ describe "FileStoreHandler", ->
 			@fs.createReadStream.returns 
 				pipe:->
 				on: (type, cb)-> 
-					if type == "end"
+					if type == "open"
 						cb()
 			@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, =>
 				@handler._buildUrl.calledWith(@project_id, @file_id).should.equal true
@@ -83,7 +83,7 @@ describe "FileStoreHandler", ->
 			@fs.createReadStream.returns
 				pipe:->
 				on: (type, cb)->
-					if type == "end"
+					if type == "open"
 						cb()
 			@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, (err) =>
 				expect(err).to.not.exist
@@ -113,7 +113,7 @@ describe "FileStoreHandler", ->
 				@fs.createReadStream.returns
 					pipe:->
 					on: (type, cb)->
-						if type == "end"
+						if type == "open"
 							cb()
 				@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, (err) =>
 					expect(err).to.exist
