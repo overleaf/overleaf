@@ -9,6 +9,9 @@ UserGetter = require '../User/UserGetter'
 module.exports = SudoModeController =
 
 	sudoModePrompt: (req, res, next) ->
+		if req.externalAuthenticationSystemUsed()
+			logger.log {userId}, "[SudoMode] using external auth, redirecting"
+			return res.redirect('/project')
 		userId = AuthenticationController.getLoggedInUserId(req)
 		logger.log {userId}, "[SudoMode] rendering sudo mode password page"
 		SudoModeHandler.isSudoModeActive userId, (err, isActive) ->

@@ -6,6 +6,9 @@ AuthenticationController = require '../Authentication/AuthenticationController'
 module.exports = SudoModeMiddlewear =
 
 	protectPage: (req, res, next) ->
+		if req.externalAuthenticationSystemUsed()
+			logger.log {userId}, "[SudoMode] using external auth, skipping sudo-mode check"
+			return next()
 		userId = AuthenticationController.getLoggedInUserId(req)
 		logger.log {userId}, "[SudoMode] protecting endpoint, checking if sudo mode is active"
 		SudoModeHandler.isSudoModeActive userId, (err, isActive) ->

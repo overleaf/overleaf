@@ -34,7 +34,7 @@ describe 'SudoModeController', ->
 	describe 'sudoModePrompt', ->
 		beforeEach ->
 			@SudoModeHandler.isSudoModeActive = sinon.stub().callsArgWith(1, null, false)
-			@req = {}
+			@req = {externalAuthenticationSystemUsed: sinon.stub().returns(false)}
 			@res = {redirect: sinon.stub(), render: sinon.stub()}
 			@next = sinon.stub()
 
@@ -69,6 +69,27 @@ describe 'SudoModeController', ->
 				@SudoModeController.sudoModePrompt(@req, @res, @next)
 				@next.callCount.should.equal 1
 				expect(@next.lastCall.args[0]).to.be.instanceof Error
+
+			it 'should not render page', ->
+				@SudoModeController.sudoModePrompt(@req, @res, @next)
+				@res.render.callCount.should.equal 0
+
+		describe 'when external auth system is used', ->
+			beforeEach ->
+				@req.externalAuthenticationSystemUsed = sinon.stub().returns(true)
+
+			it 'should redirect', ->
+				@SudoModeController.sudoModePrompt(@req, @res, @next)
+				@res.redirect.callCount.should.equal 1
+				@res.redirect.calledWith('/project').should.equal true
+
+			it 'should not check if sudo mode is active', ->
+				@SudoModeController.sudoModePrompt(@req, @res, @next)
+				@SudoModeHandler.isSudoModeActive.callCount.should.equal 0
+
+			it 'should not render page', ->
+				@SudoModeController.sudoModePrompt(@req, @res, @next)
+				@res.render.callCount.should.equal 0
 
 	describe 'submitPassword', ->
 		beforeEach ->

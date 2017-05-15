@@ -21,8 +21,9 @@ describe 'SudoModeMiddlewear', ->
 
 	describe 'protectPage', ->
 		beforeEach ->
+			@externalAuth = false
 			@call = (cb) =>
-				@req = {}
+				@req = {externalAuthenticationSystemUsed: sinon.stub().returns(@externalAuth)}
 				@res = {redirect: sinon.stub()}
 				@next = sinon.stub()
 				@SudoModeMiddlewear.protectPage @req, @res, @next
@@ -99,4 +100,24 @@ describe 'SudoModeMiddlewear', ->
 				@call () =>
 					@next.callCount.should.equal 1
 					expect(@next.lastCall.args[0]).to.be.instanceof Error
+					done()
+
+		describe 'when external auth is being used', ->
+			beforeEach ->
+				@externalAuth = true
+
+			it 'should immediately return next with no args', (done) ->
+				@call () =>
+					@next.callCount.should.equal 1
+					expect(@next.lastCall.args[0]).to.not.exist
+					done()
+
+			it 'should not get the current user id', (done) ->
+				@call () =>
+					@AuthenticationController.getLoggedInUserId.callCount.should.equal 0
+					done()
+
+			it 'should not check if sudo-mode is active', (done) ->
+				@call () =>
+					@SudoModeHandler.isSudoModeActive.callCount.should.equal 0
 					done()
