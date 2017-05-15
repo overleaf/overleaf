@@ -27,16 +27,16 @@ define [
 				@selectLineIfNoSelection()
 			
 			@$scope.$on "change:accept", (e, change_id) =>
-				@acceptChangeId(change_id)
+				@acceptChangeIds([ change_id ])
 			
 			@$scope.$on "change:reject", (e, change_id) =>
-				@rejectChangeId(change_id)
+				@rejectChangeIds([ change_id ])
 
 			@$scope.$on "change:bulk-accept", (e, change_ids) =>
-				@bulkAcceptChangeIds(change_ids)			
+				@acceptChangeIds(change_ids)			
 
 			@$scope.$on "change:bulk-reject", (e, change_ids) =>
-				@bulkRejectChangeIds(change_ids)
+				@rejectChangeIds(change_ids)
 			
 			@$scope.$on "comment:remove", (e, comment_id) =>
 				@removeCommentId(comment_id)
@@ -213,39 +213,32 @@ define [
 			if @editor.selection.isEmpty()
 				@editor.selection.selectLine()
 		
-		acceptChangeId: (change_id) ->
-			@rangesTracker.removeChangeId(change_id)
-			@updateAnnotations()
-		
-		rejectChangeId: (change_id) ->
-			change = @rangesTracker.getChange(change_id)
-			return if !change?
-			session = @editor.getSession()
-			if change.op.d?
-				content = change.op.d
-				position = @_shareJsOffsetToAcePosition(change.op.p)
-				session.$fromReject = true # Tell track changes to cancel out delete
-				session.insert(position, content)
-				session.$fromReject = false
-			else if change.op.i?
-				start = @_shareJsOffsetToAcePosition(change.op.p)
-				end = @_shareJsOffsetToAcePosition(change.op.p + change.op.i.length)
-				editor_text = session.getDocument().getTextRange({start, end})
-				if editor_text != change.op.i
-					throw new Error("Op to be removed (#{JSON.stringify(change.op)}), does not match editor text, '#{editor_text}'")
-				session.$fromReject = true
-				session.remove({start, end})
-				session.$fromReject = false
-			else
-				throw new Error("unknown change: #{JSON.stringify(change)}")
-
-		bulkAcceptChangeIds: (change_ids) ->
+		acceptChangeIds: (change_ids) ->
 			@rangesTracker.removeChangeIds(change_ids)
 			@updateAnnotations()
 
-		bulkRejectChangeIds: (change_ids) ->
-			for change_id in change_ids
-				@rejectChangeId change_id 
+		rejectChangeIds: (change_ids) ->
+			changes = @rangesTracker.getChanges(change_ids)
+			return if changes.length == 0
+			session = @editor.getSession()
+			for change in changes
+				if change.op.d?
+					content = change.op.d
+					position = @_shareJsOffsetToAcePosition(change.op.p)
+					session.$fromReject = true # Tell track changes to cancel out delete
+					session.insert(position, content)
+					session.$fromReject = false
+				else if change.op.i?
+					start = @_shareJsOffsetToAcePosition(change.op.p)
+					end = @_shareJsOffsetToAcePosition(change.op.p + change.op.i.length)
+					editor_text = session.getDocument().getTextRange({start, end})
+					if editor_text != change.op.i
+						throw new Error("Op to be removed (#{JSON.stringify(change.op)}), does not match editor text, '#{editor_text}'")
+					session.$fromReject = true
+					session.remove({start, end})
+					session.$fromReject = false
+				else
+					throw new Error("unknown change: #{JSON.stringify(change)}")
 
 		removeCommentId: (comment_id) ->
 			@rangesTracker.removeCommentId(comment_id)
