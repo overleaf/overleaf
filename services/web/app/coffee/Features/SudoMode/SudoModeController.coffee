@@ -1,4 +1,3 @@
-Settings = require "settings-sharelatex"
 logger = require 'logger-sharelatex'
 SudoModeHandler = require './SudoModeHandler'
 AuthenticationController = require '../Authentication/AuthenticationController'
