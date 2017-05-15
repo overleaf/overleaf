@@ -30,6 +30,7 @@ describe 'SudoModeHandler', ->
 			beforeEach ->
 				@rclient.set = sinon.stub().callsArgWith(4, null)
 
+
 			it 'should not produce an error', (done) ->
 				@call (err) =>
 					expect(err).to.equal null
@@ -43,6 +44,22 @@ describe 'SudoModeHandler', ->
 					)).to.equal true
 					done()
 
+		describe 'when user id is not supplied', ->
+			beforeEach ->
+				@call = (cb) =>
+					@SudoModeHandler.activateSudoMode null, cb
+
+			it 'should produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					done()
+
+			it 'should not set value in redis', (done) ->
+				@call (err) =>
+					expect(@rclient.set.callCount).to.equal 0
+					done()
+
 		describe 'when rclient.set produces an error', ->
 			beforeEach ->
 				@rclient.set = sinon.stub().callsArgWith(4, new Error('woops'))
@@ -51,6 +68,51 @@ describe 'SudoModeHandler', ->
 				@call (err) =>
 					expect(err).to.not.equal null
 					expect(err).to.be.instanceof Error
+					done()
+
+	describe 'clearSudoMode', ->
+		beforeEach ->
+			@rclient.del = sinon.stub().callsArgWith(1, null)
+			@call = (cb) =>
+				@SudoModeHandler.clearSudoMode @userId, cb
+
+		it 'should not produce an error', (done) ->
+			@call (err) =>
+				expect(err).to.equal null
+				done()
+
+		it 'should delete key from redis', (done) ->
+			@call (err) =>
+				expect(@rclient.del.callCount).to.equal 1
+				expect(@rclient.del.calledWith(
+					'SudoMode:{some_user_id}'
+				)).to.equal true
+				done()
+
+		describe 'when rclient.del produces an error', ->
+			beforeEach ->
+				@rclient.del = sinon.stub().callsArgWith(1, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					done()
+
+		describe 'when user id is not supplied', ->
+			beforeEach ->
+				@call = (cb) =>
+					@SudoModeHandler.clearSudoMode null, cb
+
+			it 'should produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					done()
+
+			it 'should not delete value in redis', (done) ->
+				@call (err) =>
+					expect(@rclient.del.callCount).to.equal 0
 					done()
 
 	describe 'isSudoModeActive', ->
@@ -107,4 +169,20 @@ describe 'SudoModeHandler', ->
 					expect(err).to.not.equal null
 					expect(err).to.be.instanceof Error
 					expect(isActive).to.be.oneOf [null, undefined]
+					done()
+
+		describe 'when user id is not supplied', ->
+			beforeEach ->
+				@call = (cb) =>
+					@SudoModeHandler.isSudoModeActive null, cb
+
+			it 'should produce an error', (done) ->
+				@call (err) =>
+					expect(err).to.not.equal null
+					expect(err).to.be.instanceof Error
+					done()
+
+			it 'should not get value in redis', (done) ->
+				@call (err) =>
+					expect(@rclient.get.callCount).to.equal 0
 					done()

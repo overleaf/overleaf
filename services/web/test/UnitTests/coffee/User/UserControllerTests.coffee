@@ -60,6 +60,8 @@ describe "UserController", ->
 			trackSession: sinon.stub()
 			untrackSession: sinon.stub()
 			revokeAllUserSessions: sinon.stub().callsArgWith(2, null)
+		@SudoModeHandler =
+			clearSudoMode: sinon.stub()
 		@UserController = SandboxedModule.require modulePath, requires:
 			"./UserLocator": @UserLocator
 			"./UserDeleter": @UserDeleter
@@ -73,6 +75,7 @@ describe "UserController", ->
 			"../Subscription/SubscriptionDomainHandler":@SubscriptionDomainHandler
 			"./UserHandler":@UserHandler
 			"./UserSessionsManager": @UserSessionsManager
+			"../SudoMode/SudoModeHandler": @SudoModeHandler
 			"settings-sharelatex": @settings
 			"logger-sharelatex":
 				log:->
@@ -298,6 +301,17 @@ describe "UserController", ->
 			@res.redirect = (url)=>
 				url.should.equal "/login"
 				@req.session.destroy.called.should.equal true
+				done()
+
+			@UserController.logout @req, @res
+
+		it 'should clear sudo-mode', (done) ->
+			@req.session.destroy = sinon.stub().callsArgWith(0)
+			@SudoModeHandler.clearSudoMode = sinon.stub()
+			@res.redirect = (url)=>
+				url.should.equal "/login"
+				@SudoModeHandler.clearSudoMode.callCount.should.equal 1
+				@SudoModeHandler.clearSudoMode.calledWith(@user._id).should.equal true
 				done()
 
 			@UserController.logout @req, @res
