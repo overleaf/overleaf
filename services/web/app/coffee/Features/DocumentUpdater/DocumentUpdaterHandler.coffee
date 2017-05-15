@@ -5,24 +5,10 @@ _ = require 'underscore'
 async = require 'async'
 logger = require('logger-sharelatex')
 metrics = require('metrics-sharelatex')
-redis = require("redis-sharelatex")
-rclient = redis.createClient(settings.redis.web)
 Project = require("../../models/Project").Project
 ProjectLocator = require('../../Features/Project/ProjectLocator')
 
 module.exports = DocumentUpdaterHandler =
-	
-	queueChange : (project_id, doc_id, change, callback = ()->)->
-		jsonChange = JSON.stringify change
-		doc_key = keys.combineProjectIdAndDocId(project_id, doc_id)
-		multi = rclient.multi()
-		multi.rpush keys.pendingUpdates(doc_id:doc_id), jsonChange
-		multi.sadd  keys.docsWithPendingUpdates, doc_key
-		multi.rpush "pending-updates-list", doc_key
-		multi.exec (error) ->
-			return callback(error) if error?
-			callback()
-
 	flushProjectToMongo: (project_id, callback = (error) ->)->
 		logger.log project_id:project_id, "flushing project from document updater"
 		timer = new metrics.Timer("flushing.mongo.project")

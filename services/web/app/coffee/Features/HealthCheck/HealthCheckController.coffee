@@ -1,8 +1,8 @@
 Mocha = require "mocha"
 Base = require("mocha/lib/reporters/base")
-redis = require("redis-sharelatex")
+RedisWrapper = require("../../infrastructure/RedisWrapper")
+rclient = RedisWrapper.client("health_check")
 settings = require("settings-sharelatex")
-redisCheck = redis.activeHealthCheckRedis(settings.redis.web)
 logger = require "logger-sharelatex"
 domain = require "domain"
 
@@ -31,10 +31,12 @@ module.exports = HealthCheckController =
 				delete require.cache[path]
 
 	checkRedis: (req, res, next)->
-		if redisCheck.isAlive()
-			res.sendStatus 200
-		else
-			res.sendStatus 500
+		rclient.healthCheck (error) ->
+			if error?
+				logger.err {err: error}, "failed redis health check"
+				res.sendStatus 500
+			else
+				res.sendStatus 200
 		
 Reporter = (res) ->
 	(runner) ->

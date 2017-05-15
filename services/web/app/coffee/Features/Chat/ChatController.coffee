@@ -34,32 +34,32 @@ module.exports = ChatController =
 				res.json messages
 
 	_injectUserInfoIntoThreads: (threads, callback = (error, threads) ->) ->
-		userCache = {}
-		getUserDetails = (user_id, callback = (error, user) ->) ->
-			return callback(null, userCache[user_id]) if userCache[user_id]?
-			UserInfoManager.getPersonalInfo user_id, (err, user) ->
-				return callback(error) if error?
-				user = UserInfoController.formatPersonalInfo user
-				userCache[user_id] = user
-				callback null, user
+		# There will be a lot of repitition of user_ids, so first build a list
+		# of unique ones to perform db look ups on, then use these to populate the
+		# user fields
+		user_ids = {}
+		for thread_id, thread of threads
+			if thread.resolved
+				user_ids[thread.resolved_by_user_id] = true
+			for message in thread.messages
+				user_ids[message.user_id] = true
 		
 		jobs = []
-		for thread_id, thread of threads
-			do (thread) ->
-				if thread.resolved
-					jobs.push (cb) ->
-						getUserDetails thread.resolved_by_user_id, (error, user) ->
-							cb(error) if error?
-							thread.resolved_by_user = user
-							cb()
-				for message in thread.messages
-					do (message) ->
-						jobs.push (cb) ->
-							getUserDetails message.user_id, (error, user) ->
-								cb(error) if error?
-								message.user = user
-								cb()
-		
+		users = {}
+		for user_id, _ of user_ids
+			do (user_id) ->
+				jobs.push (cb) ->
+					UserInfoManager.getPersonalInfo user_id, (err, user) ->
+						return cb(error) if error?
+						user = UserInfoController.formatPersonalInfo user
+						users[user_id] = user
+						cb()
+
 		async.series jobs, (error) ->
 			return callback(error) if error?
+			for thread_id, thread of threads
+				if thread.resolved
+					thread.resolved_by_user = users[thread.resolved_by_user_id]
+				for message in thread.messages
+					message.user = users[message.user_id]
 			return callback null, threads

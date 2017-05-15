@@ -1,6 +1,7 @@
 request = require("request").defaults(jar: false)
 logger = require "logger-sharelatex"
 settings = require "settings-sharelatex"
+Errors  = require "../Errors/Errors"
 
 module.exports = DocstoreManager =
 	deleteDoc: (project_id, doc_id, callback = (error) ->) ->
@@ -10,6 +11,10 @@ module.exports = DocstoreManager =
 			return callback(error) if error?
 			if 200 <= res.statusCode < 300
 				callback(null)
+			else if res.statusCode is 404
+				error = new Errors.NotFoundError("tried to delete doc not in docstore")
+				logger.error err: error, project_id: project_id, doc_id: doc_id, "tried to delete doc not in docstore"
+				callback(error) # maybe suppress the error when delete doc which is not present?
 			else
 				error = new Error("docstore api responded with non-success code: #{res.statusCode}")
 				logger.error err: error, project_id: project_id, doc_id: doc_id, "error deleting doc in docstore"
@@ -61,6 +66,10 @@ module.exports = DocstoreManager =
 			if 200 <= res.statusCode < 300
 				logger.log doc_id: doc_id, project_id: project_id, version: doc.version, rev: doc.rev, "got doc from docstore api"
 				callback(null, doc.lines, doc.rev, doc.version, doc.ranges)
+			else if res.statusCode is 404
+				error = new Errors.NotFoundError("doc not found in docstore")
+				logger.error err: error, project_id: project_id, doc_id: doc_id, "doc not found in docstore"
+				callback(error)
 			else
 				error = new Error("docstore api responded with non-success code: #{res.statusCode}")
 				logger.error err: error, project_id: project_id, doc_id: doc_id, "error getting doc from docstore"

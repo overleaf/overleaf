@@ -22,6 +22,9 @@ module.exports = ErrorController =
 		if error instanceof Errors.NotFoundError
 			logger.warn {err: error, url: req.url}, "not found error"
 			ErrorController.notFound req, res
+		else if error instanceof Errors.TooManyRequestsError
+			logger.warn {err: error, url: req.url}, "too many requests error"
+			res.sendStatus(429)
 		else
 			logger.error err: error, url:req.url, method:req.method, user:user, "error passed to top level next middlewear"
 			ErrorController.serverError req, res
