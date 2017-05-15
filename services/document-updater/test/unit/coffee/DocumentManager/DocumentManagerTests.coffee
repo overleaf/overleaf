@@ -188,7 +188,48 @@ describe "DocumentManager", ->
 
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
-	
+
+
+	describe "ensureDocIsLoaded", ->
+		describe "when the doc exists in Redis", ->
+			beforeEach ->
+				@RedisManager.checkDocInMemory = sinon.stub().callsArgWith(2)
+				@DocumentManager.ensureDocIsLoaded @project_id, @doc_id, @callback
+
+			it "should check the doc in Redis", ->
+				@RedisManager.checkDocInMemory
+					.calledWith(@project_id, @doc_id)
+					.should.equal true
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+		describe "when the doc does not exist in Redis", ->
+			beforeEach ->
+				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, null, null, null, null)
+				@PersistenceManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges)
+				@RedisManager.putDocInMemory = sinon.stub().yields()
+				@RedisManager.checkDocInMemory = sinon.stub().callsArgWith(2, new Error("doc is not loaded"))
+				@DocumentManager.ensureDocIsLoaded @project_id, @doc_id, @callback
+
+			it "should try to get the doc from Redis", ->
+				@RedisManager.getDoc
+					.calledWith(@project_id, @doc_id)
+					.should.equal true
+
+			it "should get the doc from the PersistenceManager", ->
+				@PersistenceManager.getDoc
+					.calledWith(@project_id, @doc_id)
+					.should.equal true
+
+			it "should set the doc in Redis", ->
+				@RedisManager.putDocInMemory
+					.calledWith(@project_id, @doc_id, @lines, @version, @ranges)
+					.should.equal true
+
+			it "should call the callback", ->
+				@callback.calledWith(null).should.equal true
+
 	describe "setDoc", ->
 		describe "with plain tex lines", ->
 			beforeEach ->
