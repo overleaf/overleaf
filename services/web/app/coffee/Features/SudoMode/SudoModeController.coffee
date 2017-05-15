@@ -18,7 +18,7 @@ module.exports = SudoModeController =
 			if isActive
 				logger.log {userId}, "[SudoMode] sudo mode already active, redirecting"
 				return res.redirect('/project')
-			res.render 'sudo_mode/sudo_mode_prompt', title: 'confirm_your_password'
+			res.render 'sudo_mode/sudo_mode_prompt', title: 'confirm_password_to_continue'
 
 	submitPassword: (req, res, next) ->
 		userId = AuthenticationController.getLoggedInUserId(req)
