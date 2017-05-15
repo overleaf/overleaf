@@ -9,8 +9,8 @@ describe 'LockManager - getting the lock', ->
 	beforeEach ->
 		@LockManager = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": log:->
-			"redis-sharelatex":
-				createClient : () =>
+			"./RedisWrapper":
+				client: ()->
 					auth:->
 			"settings-sharelatex":{redis:{}}
 			"metrics-sharelatex": inc:->

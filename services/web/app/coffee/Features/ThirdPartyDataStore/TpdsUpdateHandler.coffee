@@ -5,6 +5,8 @@ projectCreationHandler = require('../Project/ProjectCreationHandler')
 projectDeleter = require('../Project/ProjectDeleter')
 ProjectRootDocManager   = require "../Project/ProjectRootDocManager"
 FileTypeManager = require('../Uploads/FileTypeManager')
+CooldownManager = require('../Cooldown/CooldownManager')
+Errors = require('../Errors/Errors')
 
 commitMessage = "Before update from Dropbox"
 
@@ -24,10 +26,15 @@ module.exports =
 					cb err, project
 		getOrCreateProject (err, project)->
 			return callback(err) if err?
-			FileTypeManager.shouldIgnore path, (err, shouldIgnore)->
-				if shouldIgnore
-					return callback()
-				updateMerger.mergeUpdate user_id, project._id, path, updateRequest, source, callback
+			CooldownManager.isProjectOnCooldown project._id, (err, projectIsOnCooldown) ->
+				return callback(err) if err?
+				if projectIsOnCooldown
+					logger.log {projectId: project._id}, "project is on cooldown, denying request"
+					return callback(new Errors.TooManyRequestsError('project on cooldown'))
+				FileTypeManager.shouldIgnore path, (err, shouldIgnore)->
+					if shouldIgnore
+						return callback()
+					updateMerger.mergeUpdate user_id, project._id, path, updateRequest, source, callback
 
 
 	deleteUpdate: (user_id, projectName, path, source, callback)->	

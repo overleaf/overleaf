@@ -32,6 +32,7 @@ ChatController = require("./Features/Chat/ChatController")
 BlogController = require("./Features/Blog/BlogController")
 Modules = require "./infrastructure/Modules"
 RateLimiterMiddlewear = require('./Features/Security/RateLimiterMiddlewear')
+CooldownMiddlewear = require('./Features/Cooldown/CooldownMiddlewear')
 RealTimeProxyRouter = require('./Features/RealTimeProxy/RealTimeProxyRouter')
 InactiveProjectController = require("./Features/InactiveData/InactiveProjectController")
 ContactRouter = require("./Features/Contacts/ContactRouter")

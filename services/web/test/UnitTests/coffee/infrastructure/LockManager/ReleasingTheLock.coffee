@@ -12,8 +12,8 @@ describe 'LockManager - releasing the lock', ()->
 	mocks =
 		"logger-sharelatex": log:->
 
-		"redis-sharelatex":
-			createClient : ()->
+		"./RedisWrapper":
+			client: ()->
 				auth:->
 				del:deleteStub
 	
@@ -21,6 +21,6 @@ describe 'LockManager - releasing the lock', ()->
 
 	it 'should put a all data into memory', (done)->
 		LockManager.releaseLock doc_id, ->
-			deleteStub.calledWith("Blocking:#{doc_id}").should.equal true
+			deleteStub.calledWith("lock:web:{#{doc_id}}").should.equal true
 			done()
 
