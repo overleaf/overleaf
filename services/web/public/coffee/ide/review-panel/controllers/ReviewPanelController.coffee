@@ -76,6 +76,14 @@ define [
 				$scope.$broadcast "change:accept", change_id
 			updateEntries(doc_id)
 			$scope.$apply () ->
+
+		ide.socket.on "accept-changes", (doc_id, change_ids) ->
+			if doc_id != $scope.editor.open_doc_id
+				getChangeTracker(doc_id).removeChangeIds(change_ids)
+			else
+				$scope.$broadcast "change:bulk-accept", change_ids
+			updateEntries(doc_id)
+			$scope.$apply () ->
 		
 		ide.socket.on "resolve-thread", (thread_id, user) ->
 			_onCommentResolved(thread_id, user)
