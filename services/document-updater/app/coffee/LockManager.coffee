@@ -56,7 +56,7 @@ module.exports = LockManager =
 				else
 					setTimeout attempt, testInterval
 					# back off when the lock is taken to avoid overloading
-					testInterval = Math.max(testInterval * 2, LockManager.MAX_TEST_INTERVAL)
+					testInterval = Math.min(testInterval * 2, LockManager.MAX_TEST_INTERVAL)
 
 	checkLock: (doc_id, callback = (err, isFree)->)->
 		key = keys.blockingKey(doc_id:doc_id)
