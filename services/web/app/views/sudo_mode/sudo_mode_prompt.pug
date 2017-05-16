@@ -13,7 +13,7 @@ block content
 								.row
 									.col-md-12
 										form(async-form="confirmPassword", name="confirmPassword",
-												action='/confirm-password/submit', method="POST", ng-cloak)
+												action='/confirm-password', method="POST", ng-cloak)
 											input(name='_csrf', type='hidden', value=csrfToken)
 											form-messages(for="confirmPassword")
 											.form-group

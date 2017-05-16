@@ -310,7 +310,7 @@ describe "Sessions", ->
 						@user2.getCsrfToken (err) =>
 							expect(err).to.be.oneOf [null, undefined]
 							@user2.request.post {
-								uri: '/confirm-password/submit',
+								uri: '/confirm-password',
 								json:
 									password: @user2.password
 							}, (err, response, body) =>

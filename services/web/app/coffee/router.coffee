@@ -248,7 +248,7 @@ module.exports = class Router
 		webRouter.post "/beta/opt-in", AuthenticationController.requireLogin(), BetaProgramController.optIn
 		webRouter.post "/beta/opt-out", AuthenticationController.requireLogin(), BetaProgramController.optOut
 		webRouter.get "/confirm-password", AuthenticationController.requireLogin(), SudoModeController.sudoModePrompt
-		webRouter.post "/confirm-password/submit", AuthenticationController.requireLogin(), SudoModeController.submitPassword
+		webRouter.post "/confirm-password", AuthenticationController.requireLogin(), SudoModeController.submitPassword
 
 
 		#Admin Stuff
