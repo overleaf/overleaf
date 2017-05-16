@@ -96,10 +96,42 @@ load = () ->
 					break
 			return change
 
+		getChanges: (change_ids) ->
+			changes_response = []
+			ids_map = {}
+
+			for change_id in change_ids
+				ids_map[change_id] = true
+
+			for change in @changes
+				if ids_map[change.id]
+					delete ids_map[change.id]
+					changes_response.push change
+
+			return changes_response
+
 		removeChangeId: (change_id) ->
 			change = @getChange(change_id)
 			return if !change?
 			@_removeChange(change)
+
+		removeChangeIds: (change_to_remove_ids) ->
+			return if !change_to_remove_ids?.length > 0
+			i = @changes.length
+			remove_change_id = {} 
+			for change_id in change_to_remove_ids
+				remove_change_id[change_id] = true
+
+			remaining_changes = []
+
+			for change in @changes
+				if remove_change_id[change.id]
+					delete remove_change_id[change.id]
+					@_markAsDirty change, "change", "removed"
+				else
+					remaining_changes.push change
+
+			@changes = remaining_changes
 		
 		validate: (text) ->
 			for change in @changes
