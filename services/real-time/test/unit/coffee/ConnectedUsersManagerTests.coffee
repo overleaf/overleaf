@@ -122,7 +122,7 @@ describe "ConnectedUsersManager", ->
 
 	describe "_getConnectedUser", ->
 
-		it "should get the user returning connected if there is a value", (done)->
+		it "should return a connected user if there is a user object", (done)->
 			cursorData = JSON.stringify(cursorData:{row:1})
 			@rClient.hgetall.callsArgWith(1, null, {connected_at:new Date(), cursorData})
 			@ConnectedUsersManager._getConnectedUser @project_id, @client_id, (err, result)=>
@@ -130,8 +130,15 @@ describe "ConnectedUsersManager", ->
 				result.client_id.should.equal @client_id
 				done()
 
-		it "should get the user returning connected if there is a value", (done)->
-			@rClient.hgetall.callsArgWith(1)
+		it "should return a not connected user if there is no object", (done)->
+			@rClient.hgetall.callsArgWith(1, null, null)
+			@ConnectedUsersManager._getConnectedUser @project_id, @client_id, (err, result)=>
+				result.connected.should.equal false
+				result.client_id.should.equal @client_id
+				done()
+
+		it "should return a not connected user if there is an empty object", (done)->
+			@rClient.hgetall.callsArgWith(1, null, {})
 			@ConnectedUsersManager._getConnectedUser @project_id, @client_id, (err, result)=>
 				result.connected.should.equal false
 				result.client_id.should.equal @client_id
