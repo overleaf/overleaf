@@ -21,6 +21,8 @@ describe "PackManager", ->
 			"./MongoAWS": {}
 			"logger-sharelatex": { log: sinon.stub(), error: sinon.stub() }
 			'metrics-sharelatex': {inc: ()->}
+			"settings-sharelatex":
+				redis: lock: key_schema: {}
 		@callback = sinon.stub()
 		@doc_id = ObjectId().toString()
 		@project_id = ObjectId().toString()

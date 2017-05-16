@@ -1,6 +1,6 @@
 Settings = require "settings-sharelatex"
 redis = require("redis-sharelatex")
-rclient = redis.createClient(Settings.redis.web)
+rclient = redis.createClient(Settings.redis.lock)
 os = require "os"
 crypto = require "crypto"
 logger = require "logger-sharelatex"
