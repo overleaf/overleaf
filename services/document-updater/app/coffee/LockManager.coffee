@@ -30,14 +30,16 @@ module.exports = LockManager =
 	tryLock : (doc_id, callback = (err, isFree)->)->
 		lockValue = LockManager.randomLock()
 		key = keys.blockingKey(doc_id:doc_id)
+		logger.log {doc_id: doc_id, key: key}, "tryLock"
 		rclient.set key, lockValue, "EX", @LOCK_TTL, "NX", (err, gotLock)->
 			return callback(err) if err?
 			if gotLock == "OK"
 				metrics.inc "doc-not-blocking"
+				logger.log {doc_id: doc_id, key: key, lockValue: lockValue}, "got lock"
 				callback err, true, lockValue
 			else
 				metrics.inc "doc-blocking"
-				logger.log {doc_id}, "doc is locked"
+				logger.log {doc_id: doc_id, key: key}, "doc is locked"
 				callback err, false
 
 	getLock: (doc_id, callback = (error, lockValue) ->) ->
@@ -54,6 +56,7 @@ module.exports = LockManager =
 				if gotLock
 					callback(null, lockValue)
 				else
+					logger.log {doc_id: doc_id, delay: testInterval}, "will retry lock"
 					setTimeout attempt, testInterval
 					# back off when the lock is taken to avoid overloading
 					testInterval = Math.min(testInterval * 2, LockManager.MAX_TEST_INTERVAL)
@@ -75,7 +78,9 @@ module.exports = LockManager =
 		rclient.eval LockManager.unlockScript, 1, key, lockValue, (err, result) ->
 			if err?
 				return callback(err)
-			if result? and result isnt 1 # successful unlock should release exactly one key
-				logger.error {doc_id:doc_id, lockValue:lockValue, redis_err:err, redis_result:result}, "unlocking error"
+			else if result? and result isnt 1 # successful unlock should release exactly one key
+				logger.error {doc_id:doc_id, key:key, lockValue:lockValue, redis_err:err, redis_result:result}, "unlocking error"
 				return callback(new Error("tried to release timed out lock"))
-			callback(err,result)
+			else
+				logger.log {doc_id:doc_id, key:key, lockValue:lockValue}, "released lock"
+				callback(err,result)
