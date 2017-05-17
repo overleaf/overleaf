@@ -1,0 +1,16 @@
+[Unit]
+Description=ShareLatex document-updater service
+After=syslog.target network.target auditd.service redis.service
+
+[Service]
+User=sharelatex
+Group=sharelatex
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=sharelatex-document-updater
+SyslogFacility=daemon
+EnvironmentFile=/etc/sharelatex/sharelatex
+ExecStart=/usr/bin/node /var/www/sharelatex/document-updater/app.js
+
+[Install]
+WantedBy=multi-user.target

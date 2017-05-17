@@ -1,0 +1,16 @@
+[Unit]
+Description=ShareLatex tags service
+After=syslog.target network.target auditd.service redis.service
+
+[Service]
+User=sharelatex
+Group=sharelatex
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=sharelatex-tags
+SyslogFacility=daemon
+EnvironmentFile=/etc/sharelatex/sharelatex
+ExecStart=/usr/bin/node /var/www/sharelatex/tags/app.js
+
+[Install]
+WantedBy=multi-user.target

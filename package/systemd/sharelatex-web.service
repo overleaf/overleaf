@@ -1,0 +1,16 @@
+[Unit]
+Description=ShareLatex web service
+After=syslog.target network.target auditd.service redis.service mongod.service
+
+[Service]
+User=sharelatex
+Group=sharelatex
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=sharelatex-web
+SyslogFacility=daemon
+EnvironmentFile=/etc/sharelatex/sharelatex
+ExecStart=/usr/bin/node /var/www/sharelatex/web/app.js
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,16 @@
+[Unit]
+Description=ShareLatex docstore service
+After=syslog.target network.target auditd.service redis.service
+
+[Service]
+User=sharelatex
+Group=sharelatex
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=sharelatex-docstore
+SyslogFacility=daemon
+EnvironmentFile=/etc/sharelatex/sharelatex
+ExecStart=/usr/bin/node /var/www/sharelatex/docstore/app.js
+
+[Install]
+WantedBy=multi-user.target

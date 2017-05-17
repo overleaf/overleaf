@@ -1,0 +1,4 @@
+SHARELATEX_CONFIG="/etc/sharelatex/settings.coffee" 
+NODE_ENV="production" 
+LATEX_PATH="/usr/local/texlive/2014/bin/x86_64-linux"
+PATH="/usr/local/texlive/2014/bin/x86_64-linux:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
