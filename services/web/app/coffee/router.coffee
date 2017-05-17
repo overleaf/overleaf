@@ -39,6 +39,8 @@ ContactRouter = require("./Features/Contacts/ContactRouter")
 ReferencesController = require('./Features/References/ReferencesController')
 AuthorizationMiddlewear = require('./Features/Authorization/AuthorizationMiddlewear')
 BetaProgramController = require('./Features/BetaProgram/BetaProgramController')
+SudoModeController = require('./Features/SudoMode/SudoModeController')
+SudoModeMiddlewear = require('./Features/SudoMode/SudoModeMiddlewear')
 AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 AnnouncementsController = require("./Features/Announcements/AnnouncementsController")
 
@@ -86,11 +88,17 @@ module.exports = class Router
 		webRouter.get '/user/activate', UserPagesController.activateAccountPage
 		AuthenticationController.addEndpointToLoginWhitelist '/user/activate'
 
-		webRouter.get  '/user/settings', AuthenticationController.requireLogin(), UserPagesController.settingsPage
+		webRouter.get  '/user/settings',
+			AuthenticationController.requireLogin(),
+			SudoModeMiddlewear.protectPage,
+			UserPagesController.settingsPage
 		webRouter.post '/user/settings', AuthenticationController.requireLogin(), UserController.updateUserSettings
 		webRouter.post '/user/password/update', AuthenticationController.requireLogin(), UserController.changePassword
 
-		webRouter.get  '/user/sessions', AuthenticationController.requireLogin(), UserPagesController.sessionsPage
+		webRouter.get  '/user/sessions',
+			AuthenticationController.requireLogin(),
+			SudoModeMiddlewear.protectPage,
+			UserPagesController.sessionsPage
 		webRouter.post '/user/sessions/clear', AuthenticationController.requireLogin(), UserController.clearSessions
 
 		webRouter.delete '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController.unsubscribe
@@ -239,6 +247,9 @@ module.exports = class Router
 		webRouter.get "/beta/participate",  AuthenticationController.requireLogin(), BetaProgramController.optInPage
 		webRouter.post "/beta/opt-in", AuthenticationController.requireLogin(), BetaProgramController.optIn
 		webRouter.post "/beta/opt-out", AuthenticationController.requireLogin(), BetaProgramController.optOut
+		webRouter.get "/confirm-password", AuthenticationController.requireLogin(), SudoModeController.sudoModePrompt
+		webRouter.post "/confirm-password", AuthenticationController.requireLogin(), SudoModeController.submitPassword
+
 
 		#Admin Stuff
 		webRouter.get  '/admin', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.index

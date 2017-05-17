@@ -134,6 +134,15 @@ class User
 				return callback(error) if error?
 				callback(null, response.statusCode)
 
+	getProjectListPage: (callback=(error, statusCode)->) ->
+		@getCsrfToken (error) =>
+			return callback(error) if error?
+			@request.get {
+				url: "/project"
+			}, (error, response, body) =>
+				return callback(error) if error?
+				callback(null, response.statusCode)
+
 
 
 module.exports = User

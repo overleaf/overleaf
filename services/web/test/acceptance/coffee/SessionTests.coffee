@@ -34,9 +34,9 @@ describe "Sessions", ->
 							expect(sessions[0].slice(0, 5)).to.equal 'sess:'
 							next()
 
-					# should be able to access settings page
+					# should be able to access project list page
 					, (next) =>
-						@user1.getUserSettingsPage (err, statusCode) =>
+						@user1.getProjectListPage (err, statusCode) =>
 							expect(err).to.equal null
 							expect(statusCode).to.equal 200
 							next()
@@ -94,15 +94,15 @@ describe "Sessions", ->
 							expect(sessions[1].slice(0, 5)).to.equal 'sess:'
 							next()
 
-					# both should be able to access settings page
+					# both should be able to access project list page
 					, (next) =>
-						@user1.getUserSettingsPage (err, statusCode) =>
+						@user1.getProjectListPage (err, statusCode) =>
 							expect(err).to.equal null
 							expect(statusCode).to.equal 200
 							next()
 
 					, (next) =>
-						@user2.getUserSettingsPage (err, statusCode) =>
+						@user2.getProjectListPage (err, statusCode) =>
 							expect(err).to.equal null
 							expect(statusCode).to.equal 200
 							next()
@@ -117,16 +117,16 @@ describe "Sessions", ->
 							expect(sessions.length).to.equal 1
 							next()
 
-					# first session should not have access to settings page
+					# first session should not have access to project list page
 					, (next) =>
-						@user1.getUserSettingsPage (err, statusCode) =>
+						@user1.getProjectListPage (err, statusCode) =>
 							expect(err).to.equal null
 							expect(statusCode).to.equal 302
 							next()
 
 					# second session should still have access to settings
 					, (next) =>
-						@user2.getUserSettingsPage (err, statusCode) =>
+						@user2.getProjectListPage (err, statusCode) =>
 							expect(err).to.equal null
 							expect(statusCode).to.equal 200
 							next()
@@ -141,9 +141,9 @@ describe "Sessions", ->
 							expect(sessions.length).to.equal 0
 							next()
 
-					# second session should not have access to settings page
+					# second session should not have access to project list page
 					, (next) =>
-						@user2.getUserSettingsPage (err, statusCode) =>
+						@user2.getProjectListPage (err, statusCode) =>
 							expect(err).to.equal null
 							expect(statusCode).to.equal 302
 							next()
@@ -216,22 +216,22 @@ describe "Sessions", ->
 							expect(sessions.length).to.equal 1
 							next()
 
-					# users one and three should not be able to access settings page
+					# users one and three should not be able to access project list page
 					, (next) =>
-						@user1.getUserSettingsPage (err, statusCode) =>
+						@user1.getProjectListPage (err, statusCode) =>
 							expect(err).to.equal null
 							expect(statusCode).to.equal 302
 							next()
 
 					, (next) =>
-						@user3.getUserSettingsPage (err, statusCode) =>
+						@user3.getProjectListPage (err, statusCode) =>
 							expect(err).to.equal null
 							expect(statusCode).to.equal 302
 							next()
 
-					# user two should still be logged in, and able to access settings page
+					# user two should still be logged in, and able to access project list page
 					, (next) =>
-						@user2.getUserSettingsPage (err, statusCode) =>
+						@user2.getProjectListPage (err, statusCode) =>
 							expect(err).to.equal null
 							expect(statusCode).to.equal 200
 							next()
@@ -305,6 +305,19 @@ describe "Sessions", ->
 							expect(sessions[1].slice(0, 5)).to.equal 'sess:'
 							next()
 
+					# enter sudo-mode
+					, (next) =>
+						@user2.getCsrfToken (err) =>
+							expect(err).to.be.oneOf [null, undefined]
+							@user2.request.post {
+								uri: '/confirm-password',
+								json:
+									password: @user2.password
+							}, (err, response, body) =>
+								expect(err).to.be.oneOf [null, undefined]
+								expect(response.statusCode).to.equal 200
+								next()
+
 					# check the sessions page
 					, (next) =>
 						@user2.request.get {
@@ -328,22 +341,22 @@ describe "Sessions", ->
 							expect(sessions.length).to.equal 1
 							next()
 
-					# users one and three should not be able to access settings page
+					# users one and three should not be able to access project list page
 					, (next) =>
-						@user1.getUserSettingsPage (err, statusCode) =>
+						@user1.getProjectListPage (err, statusCode) =>
 							expect(err).to.equal null
 							expect(statusCode).to.equal 302
 							next()
 
 					, (next) =>
-						@user3.getUserSettingsPage (err, statusCode) =>
+						@user3.getProjectListPage (err, statusCode) =>
 							expect(err).to.equal null
 							expect(statusCode).to.equal 302
 							next()
 
-					# user two should still be logged in, and able to access settings page
+					# user two should still be logged in, and able to access project list page
 					, (next) =>
-						@user2.getUserSettingsPage (err, statusCode) =>
+						@user2.getProjectListPage (err, statusCode) =>
 							expect(err).to.equal null
 							expect(statusCode).to.equal 200
 							next()

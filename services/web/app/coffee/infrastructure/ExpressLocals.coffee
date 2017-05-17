@@ -85,6 +85,11 @@ module.exports = (app, webRouter, apiRouter)->
 	apiRouter.use addSetContentDisposition
 
 	webRouter.use (req, res, next)->
+		req.externalAuthenticationSystemUsed = res.locals.externalAuthenticationSystemUsed = ->
+			Settings.ldap? or Settings.saml?
+		next()
+
+	webRouter.use (req, res, next)->
 
 		cdnBlocked = req.query.nocdn == 'true' or req.session.cdnBlocked
 		user_id = AuthenticationController.getLoggedInUserId(req)
@@ -220,11 +225,6 @@ module.exports = (app, webRouter, apiRouter)->
 
 	webRouter.use (req, res, next)->
 		res.locals.formatPrice = SubscriptionFormatters.formatPrice
-		next()
-
-	webRouter.use (req, res, next)->
-		res.locals.externalAuthenticationSystemUsed = ->
-			Settings.ldap? or Settings.saml?
 		next()
 
 	webRouter.use (req, res, next)->
