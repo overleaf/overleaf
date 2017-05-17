@@ -43,13 +43,8 @@ settings =
 			host: process.env["SHARELATEX_REDIS_HOST"] or "dockerhost"
 			port: process.env["SHARELATEX_REDIS_PORT"] or "6379"
 			password: process.env["SHARELATEX_REDIS_PASS"] or ""
-		fairy: redisConfig
-		documentupdater: [{
-			primary: true
-			port: process.env["SHARELATEX_REDIS_PORT"] or "6379"
-			host: process.env["SHARELATEX_REDIS_HOST"] or "dockerhost"
-			password: process.env["SHARELATEX_REDIS_PASS"] or ""
 			key_schema:
+				# document-updater
 				blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
 				docLines: ({doc_id}) -> "doclines:#{doc_id}"
 				docOps: ({doc_id}) -> "DocOps:#{doc_id}"
@@ -58,8 +53,25 @@ settings =
 				projectKey: ({doc_id}) -> "ProjectId:#{doc_id}"
 				docsInProject: ({project_id}) -> "DocsIn:#{project_id}"
 				ranges: ({doc_id}) -> "Ranges:#{doc_id}"
-		}]
-
+				# document-updater:realtime
+				pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
+				# document-updater:history
+				uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
+				docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:#{project_id}"
+				# document-updater:lock
+				blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
+				# track-changes:lock
+				historyLock: ({doc_id}) -> "HistoryLock:#{doc_id}"
+				historyIndexLock: ({project_id}) -> "HistoryIndexLock:#{project_id}"
+				# track-chanegs:history
+				uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
+				docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:#{project_id}"
+		fairy: redisConfig
+		# track-changes and document-updater
+		realtime: redisConfig
+		documentupdater: redisConfig
+		lock: redisConfig
+		history: redisConfig
 
 	# The compile server (the clsi) uses a SQL database to cache files and
 	# meta-data. sqllite is the default, and the load is low enough that this will
