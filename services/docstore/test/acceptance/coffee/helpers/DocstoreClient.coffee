@@ -48,5 +48,6 @@ module.exports = DocstoreClient =
 
 
 	getS3Doc: (project_id, doc_id, callback = (error, res, body) ->) ->
-		options = DocArchiveManager.buildS3Options(true, project_id+"/"+doc_id)
-		request.get options, callback	
+		options = DocArchiveManager.buildS3Options(project_id+"/"+doc_id)
+		options.json = true
+		request.get options, callback

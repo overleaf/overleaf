@@ -71,14 +71,17 @@ describe "DocArchiveManager", ->
 			"settings-sharelatex": @settings
 			"./MongoManager": @MongoManager
 			"request": @request
+			"./RangeManager": @RangeManager = {}
 			"logger-sharelatex":
 				log:->
 				err:->
+		@globals =
+			JSON: JSON
 
 		@error = "my errror"
 		@project_id = ObjectId().toString()
 		@stubbedError = new Errors.NotFoundError("Error in S3 request")
-		@DocArchiveManager = SandboxedModule.require modulePath, requires: @requires
+		@DocArchiveManager = SandboxedModule.require modulePath, requires: @requires, globals: @globals
 
 	describe "archiveDoc", ->
 
@@ -87,13 +90,22 @@ describe "DocArchiveManager", ->
 			@DocArchiveManager.archiveDoc @project_id, @mongoDocs[0], (err)=>
 				opts = @request.put.args[0][0]
 				assert.deepEqual(opts.aws, {key:@settings.docstore.s3.key, secret:@settings.docstore.s3.secret, bucket:@settings.docstore.s3.bucket})
-				opts.json.should.equal @mongoDocs[0].lines
+				opts.body.should.equal JSON.stringify(
+					lines: @mongoDocs[0].lines
+					ranges: @mongoDocs[0].ranges
+					schema_v: 1
+				)
 				opts.timeout.should.equal (30*1000)
 				opts.uri.should.equal "https://#{@settings.docstore.s3.bucket}.s3.amazonaws.com/#{@project_id}/#{@mongoDocs[0]._id}"
 				done()
 
 		it "should return no md5 error", (done)->
-			@md5 = crypto.createHash("md5").update(JSON.stringify(@mongoDocs[0].lines)).digest("hex")
+			data = JSON.stringify(
+				lines: @mongoDocs[0].lines
+				ranges: @mongoDocs[0].ranges
+				schema_v: 1
+			)
+			@md5 = crypto.createHash("md5").update(data).digest("hex")
 			@request.put = sinon.stub().callsArgWith(1,  null, {statusCode:200,headers:{etag:@md5}})
 			@DocArchiveManager.archiveDoc @project_id, @mongoDocs[0], (err)=>
 				should.not.exist err
@@ -202,3 +214,82 @@ describe "DocArchiveManager", ->
 			@DocArchiveManager.unArchiveAllDocs @project_id, (err)=>
 				err.should.equal @error
 				done()
+	
+	describe "_s3DocToMongoDoc", ->
+		describe "with the old schema", ->
+			it "should return the docs lines", (done) ->
+				@DocArchiveManager._s3DocToMongoDoc ["doc", "lines"], (error, doc) ->
+					expect(doc).to.deep.equal {
+						lines: ["doc", "lines"]
+					}
+					done()
+		
+		describe "with the new schema", ->
+			it "should return the doc lines and ranges", (done) ->
+				@RangeManager.jsonRangesToMongo = sinon.stub().returns {"mongo": "ranges"}
+				@DocArchiveManager._s3DocToMongoDoc {
+					lines: ["doc", "lines"]
+					ranges: {"json": "ranges"}
+					schema_v: 1
+				}, (error, doc) ->
+					expect(doc).to.deep.equal {
+						lines: ["doc", "lines"]
+						ranges: {"mongo": "ranges"}
+					}
+					done()
+					
+			it "should return just the doc lines when there are no ranges", (done) ->
+				@DocArchiveManager._s3DocToMongoDoc {
+					lines: ["doc", "lines"]
+					schema_v: 1
+				}, (error, doc) ->
+					expect(doc).to.deep.equal {
+						lines: ["doc", "lines"]
+					}
+					done()
+		
+		describe "with an unrecognised schema", ->
+			it "should return an error", (done) ->
+				@DocArchiveManager._s3DocToMongoDoc {
+					schema_v: 2
+				}, (error, doc) ->
+					expect(error).to.exist
+					done()
+	
+	describe "_mongoDocToS3Doc", ->
+		describe "with a valid doc", ->
+			it "should return the json version", (done) ->
+				@DocArchiveManager._mongoDocToS3Doc doc = {
+					lines: ["doc", "lines"]
+					ranges: { "mock": "ranges" }
+				}, (err, s3_doc) ->
+					expect(s3_doc).to.equal JSON.stringify({
+						lines: ["doc", "lines"]
+						ranges: { "mock": "ranges" }
+						schema_v: 1
+					})
+					done()
+			
+		describe "with null bytes in the result", ->
+			beforeEach ->
+				@_stringify = JSON.stringify
+				JSON.stringify = sinon.stub().returns '{"bad": "\u0000"}'
+			
+			afterEach ->
+				JSON.stringify = @_stringify
+				
+			it "should return an error", (done) ->
+				@DocArchiveManager._mongoDocToS3Doc {
+					lines: ["doc", "lines"]
+					ranges: { "mock": "ranges" }
+				}, (err, s3_doc) ->
+					expect(err).to.exist
+					done()
+		
+		describe "without doc lines", ->
+			it "should return an error", (done) ->
+				@DocArchiveManager._mongoDocToS3Doc {}, (err, s3_doc) ->
+					expect(err).to.exist
+					done()
+			
+			
