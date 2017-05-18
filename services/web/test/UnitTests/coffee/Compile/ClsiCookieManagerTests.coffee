@@ -60,6 +60,13 @@ describe "ClsiCookieManager", ->
 				@ClsiCookieManager._populateServerIdViaRequest.calledWith(@project_id).should.equal true
 				done()
 
+		it "should _populateServerIdViaRequest if no key is blank", (done)->
+			@ClsiCookieManager._populateServerIdViaRequest = sinon.stub().callsArgWith(1)
+			@redis.get.callsArgWith(1, null, "")
+			@ClsiCookieManager._getServerId @project_id, (err, serverId)=>
+				@ClsiCookieManager._populateServerIdViaRequest.calledWith(@project_id).should.equal true
+				done()
+
 
 	describe "_populateServerIdViaRequest", ->
 
