@@ -9,6 +9,7 @@ module.exports = class Profiler
 
 	constructor: (@name, @args) ->
 		@t0 = @t = process.hrtime()
+		@start = new Date()
 		@updateTimes = []
 
 	log: (label) ->
@@ -25,4 +26,6 @@ module.exports = class Profiler
 		for k,v of @args
 			args[k] = v
 		args.updateTimes = @updateTimes
+		args.start = @start
+		args.end = new Date()
 		logger.log args, @name
