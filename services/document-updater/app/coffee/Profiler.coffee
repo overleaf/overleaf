@@ -2,7 +2,9 @@ Settings = require('settings-sharelatex')
 logger = require('logger-sharelatex')
 
 deltaMs = (ta, tb) ->
-	return Math.floor(((ta[0]-tb[0])*1e9 + (ta[1]-tb[1]))*1e-6)
+	nanoSeconds = (ta[0]-tb[0])*1e9 + (ta[1]-tb[1])
+	milliSeconds = Math.floor(nanoSeconds*1e-6)
+	return milliSeconds
 
 module.exports = class Profiler
 	LOG_CUTOFF_TIME: 1000
