@@ -5,7 +5,7 @@ deltaMs = (ta, tb) ->
 	return Math.floor(((ta[0]-tb[0])*1e9 + (ta[1]-tb[1]))*1e-6)
 
 module.exports = class Profiler
-	LOG_CUTOFF_TIME: 100
+	LOG_CUTOFF_TIME: 1000
 
 	constructor: (@name, @args) ->
 		@t0 = @t = process.hrtime()
