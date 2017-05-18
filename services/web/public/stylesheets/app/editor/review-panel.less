@@ -277,6 +277,9 @@
 				right: 5px;
 			}
 		}
+		&-bulk-actions {
+			right: auto;
+		}
 	}
 	.rp-state-overview & {
 		border-radius: 0;
@@ -334,6 +337,12 @@
 			border-left-width: 3px;
 			border-left-color: @rp-yellow;
 		}
+	}
+
+	&-bulk-actions {
+		background-color: transparent;
+		right: auto;
+		border-left-width: 0;
 	}
 }
 	.rp-entry-body {
@@ -451,16 +460,34 @@
 		padding: 0 5px;
 	}
 
-	.rp-add-comment-btn {
+	.rp-add-comment-btn,
+	.rp-bulk-actions-btn {
 		.rp-button();
-		display: block;
+		display: inline-block;
 		padding: 5px 10px;
 		border-radius: 3px;
 
 		.rp-in-editor-widgets & {
+			display: block;
 			white-space: nowrap;
 			border-radius: 0;
+
+			&:last-child {
+				border-bottom-left-radius: 3px;
+			}
+		}
+	}
+
+	.rp-bulk-actions-btn {
+		border-radius: 0;
+		&:first-child {
+			border-top-left-radius: 3px;
 			border-bottom-left-radius: 3px;
+		}
+		&:last-child {
+			border-top-right-radius: 3px;
+			border-bottom-right-radius: 3px;
+			margin-left: 1px;
 		}
 	}
 
@@ -903,6 +930,9 @@
 	.rp-size-mini & {
 		right: @review-off-width;
 	}
+	.rp-size-expanded & {
+		display: none;
+	}
 }
 	.rp-track-changes-indicator {
 		display: block;
@@ -930,10 +960,6 @@
 			text-decoration: none;
 			background-color: rgba(240, 240, 240, 1);
 			color: @rp-type-blue;
-		}
-
-		.rp-size-expanded & {
-			display: none;
 		}
 	}
 

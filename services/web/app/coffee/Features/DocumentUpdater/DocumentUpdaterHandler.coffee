@@ -123,20 +123,23 @@ module.exports = DocumentUpdaterHandler =
 				logger.error project_id:project_id, doc_id:doc_id, url: url, "doc updater returned a non-success status code: #{res.statusCode}"
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
-	acceptChange: (project_id, doc_id, change_id, callback = (error) ->) ->
-		timer = new metrics.Timer("accept-change")
-		url = "#{settings.apis.documentupdater.url}/project/#{project_id}/doc/#{doc_id}/change/#{change_id}/accept"
-		logger.log {project_id, doc_id, change_id}, "accepting change in document updater"
-		request.post url, (error, res, body)->
+	acceptChanges: (project_id, doc_id, change_ids = [], callback = (error) ->) ->
+		timer = new metrics.Timer("accept-changes")
+		reqSettings =
+			url: "#{settings.apis.documentupdater.url}/project/#{project_id}/doc/#{doc_id}/change/accept"
+			json:
+				change_ids: change_ids
+		logger.log {project_id, doc_id }, "accepting #{ change_ids.length } changes"
+		request.post reqSettings, (error, res, body)->
 			timer.done()
 			if error?
-				logger.error {err:error, project_id, doc_id, change_id}, "error accepting change in doc updater"
+				logger.error {err:error, project_id, doc_id }, "error accepting #{ change_ids.length } changes in doc updater"
 				return callback(error)
 			if res.statusCode >= 200 and res.statusCode < 300
-				logger.log {project_id, doc_id, change_id}, "accepted change in document updater"
+				logger.log {project_id, doc_id }, "accepted #{ change_ids.length } changes in document updater"
 				return callback(null)
 			else
-				logger.error {project_id, doc_id, change_id}, "doc updater returned a non-success status code: #{res.statusCode}"
+				logger.error {project_id, doc_id }, "doc updater returned a non-success status code: #{res.statusCode}"
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
 	deleteThread: (project_id, doc_id, thread_id, callback = (error) ->) ->
