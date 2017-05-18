@@ -66,12 +66,16 @@ settings =
 				# track-chanegs:history
 				uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
 				docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:#{project_id}"
+				# realtime
+				clientsInProject: ({project_id}) -> "clients_in_project:#{project_id}"
+				connectedUser: ({project_id, client_id})-> "connected_user:#{project_id}:#{client_id}"
 		fairy: redisConfig
 		# track-changes and document-updater
 		realtime: redisConfig
 		documentupdater: redisConfig
 		lock: redisConfig
 		history: redisConfig
+		websessions: redisConfig
 
 	# The compile server (the clsi) uses a SQL database to cache files and
 	# meta-data. sqllite is the default, and the load is low enough that this will
