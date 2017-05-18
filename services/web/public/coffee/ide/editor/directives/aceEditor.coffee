@@ -51,6 +51,7 @@ define [
 				navigateHighlights: "="
 				fileName: "="
 				onCtrlEnter: "="
+				onCtrlJ: "="
 				syntaxValidation: "="
 				reviewPanel: "="
 				eventsBridge: "="
@@ -158,6 +159,15 @@ define [
 						editor.commands.addCommand 
 							name: "compile",
 							bindKey: win: "Ctrl-Enter", mac: "Command-Enter"
+							exec: (editor) =>
+								callback()
+							readOnly: true
+
+				scope.$watch "onCtrlJ", (callback) ->
+					if callback?
+						editor.commands.addCommand 
+							name: "toggle-review-panel",
+							bindKey: win: "Ctrl-J", mac: "Command-J"
 							exec: (editor) =>
 								callback()
 							readOnly: true
