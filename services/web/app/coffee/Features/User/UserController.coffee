@@ -11,6 +11,7 @@ AuthenticationManager = require("../Authentication/AuthenticationManager")
 AuthenticationController = require('../Authentication/AuthenticationController')
 UserSessionsManager = require("./UserSessionsManager")
 UserUpdater = require("./UserUpdater")
+SudoModeHandler = require('../SudoMode/SudoModeHandler')
 settings = require "settings-sharelatex"
 
 module.exports = UserController =
@@ -118,6 +119,7 @@ module.exports = UserController =
 			if err
 				logger.err err: err, 'error destorying session'
 			UserSessionsManager.untrackSession(user, sessionId)
+			SudoModeHandler.clearSudoMode(user._id)
 			res.redirect '/login'
 
 	register : (req, res, next = (error) ->)->

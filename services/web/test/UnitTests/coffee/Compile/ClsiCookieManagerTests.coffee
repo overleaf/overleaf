@@ -34,9 +34,8 @@ describe "ClsiCookieManager", ->
 				ttl:Math.random()
 				key: "coooookie"
 		@requires = 
-			"../../infrastructure/RedisWrapper":
-				client: =>
-					@redis
+			"../../infrastructure/RedisWrapper": @RedisWrapper =
+				client: => @redis
 			"settings-sharelatex": @settings
 			"request": @request
 
@@ -57,6 +56,13 @@ describe "ClsiCookieManager", ->
 		it "should _populateServerIdViaRequest if no key is found", (done)->
 			@ClsiCookieManager._populateServerIdViaRequest = sinon.stub().callsArgWith(1)
 			@redis.get.callsArgWith(1, null)
+			@ClsiCookieManager._getServerId @project_id, (err, serverId)=>
+				@ClsiCookieManager._populateServerIdViaRequest.calledWith(@project_id).should.equal true
+				done()
+
+		it "should _populateServerIdViaRequest if no key is blank", (done)->
+			@ClsiCookieManager._populateServerIdViaRequest = sinon.stub().callsArgWith(1)
+			@redis.get.callsArgWith(1, null, "")
 			@ClsiCookieManager._getServerId @project_id, (err, serverId)=>
 				@ClsiCookieManager._populateServerIdViaRequest.calledWith(@project_id).should.equal true
 				done()
@@ -105,6 +111,24 @@ describe "ClsiCookieManager", ->
 			@ClsiCookieManager = SandboxedModule.require modulePath, requires:@requires
 			@ClsiCookieManager.setServerId @project_id, @response, (err, serverId)=>
 				@redisMulti.exec.called.should.equal false
+				done()
+		
+		it "should also set in the secondary if secondary redis is enabled", (done) ->
+			@redisSecondaryMulti =
+				set:sinon.stub()
+				expire:sinon.stub()
+				exec:sinon.stub()
+			@redis_secondary =
+				multi: => @redisSecondaryMulti
+			@settings.redis.clsi_cookie_secondary = {}
+			@RedisWrapper.client = sinon.stub()
+			@RedisWrapper.client.withArgs("clsi_cookie").returns(@redis)
+			@RedisWrapper.client.withArgs("clsi_cookie_secondary").returns(@redis_secondary)
+			@ClsiCookieManager = SandboxedModule.require modulePath, requires:@requires
+			@ClsiCookieManager._parseServerIdFromResponse = sinon.stub().returns("clsi-8")
+			@ClsiCookieManager.setServerId @project_id, @response, (err, serverId)=>
+				@redisSecondaryMulti.set.calledWith("clsiserver:#{@project_id}", "clsi-8").should.equal true
+				@redisSecondaryMulti.expire.calledWith("clsiserver:#{@project_id}", @settings.clsiCookie.ttl).should.equal true
 				done()
 
 	describe "getCookieJar", ->

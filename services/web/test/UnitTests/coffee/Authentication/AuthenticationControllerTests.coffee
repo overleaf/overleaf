@@ -555,6 +555,14 @@ describe "AuthenticationController", ->
 			@AuthenticationController._setRedirectInSession(@req, '/somewhere/specific')
 			expect(@req.session.postLoginRedirect).to.equal "/somewhere/specific"
 
+		describe 'with a png', ->
+			beforeEach ->
+				@req = {session: {}}
+
+			it 'should not set the redirect', ->
+				@AuthenticationController._setRedirectInSession(@req, '/something.png')
+				expect(@req.session.postLoginRedirect).to.equal undefined
+
 		describe 'with a js path', ->
 
 			beforeEach ->
