@@ -19,10 +19,10 @@ module.exports = ClsiCookieManager =
 		rclient.get buildKey(project_id), (err, serverId)->
 			if err?
 				return callback(err)
-			if serverId?
-				return callback(null, serverId)
-			else
+			if !serverId? or serverId == ""
 				return ClsiCookieManager._populateServerIdViaRequest project_id, callback
+			else
+				return callback(null, serverId)
 
 
 	_populateServerIdViaRequest :(project_id, callback = (err, serverId)->)->
