@@ -60,6 +60,13 @@ describe "ClsiCookieManager", ->
 				@ClsiCookieManager._populateServerIdViaRequest.calledWith(@project_id).should.equal true
 				done()
 
+		it "should _populateServerIdViaRequest if no key is blank", (done)->
+			@ClsiCookieManager._populateServerIdViaRequest = sinon.stub().callsArgWith(1)
+			@redis.get.callsArgWith(1, null, "")
+			@ClsiCookieManager._getServerId @project_id, (err, serverId)=>
+				@ClsiCookieManager._populateServerIdViaRequest.calledWith(@project_id).should.equal true
+				done()
+
 
 	describe "_populateServerIdViaRequest", ->
 
@@ -98,10 +105,15 @@ describe "ClsiCookieManager", ->
 				serverId.should.equal "clsi-8"
 				done()
 
-
 		it "should not set the server id if clsiCookies are not enabled", (done)->
 			delete @settings.clsiCookie.key 
 			@ClsiCookieManager = SandboxedModule.require modulePath, requires:@requires
+			@ClsiCookieManager.setServerId @project_id, @response, (err, serverId)=>
+				@redisMulti.exec.called.should.equal false
+				done()
+
+		it "should not set the server id there is no server id in the response", (done)->
+			@ClsiCookieManager._parseServerIdFromResponse = sinon.stub().returns(null)
 			@ClsiCookieManager.setServerId @project_id, @response, (err, serverId)=>
 				@redisMulti.exec.called.should.equal false
 				done()

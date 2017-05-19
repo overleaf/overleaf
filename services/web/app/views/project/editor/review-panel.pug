@@ -6,6 +6,22 @@
 			ng-click="toggleReviewPanel();"
 			ng-class="{ 'rp-track-changes-indicator-on-dark' : darkTheme }"
 		) !{translate("track_changes_is_on")}
+		a.rp-bulk-actions-btn(
+			href
+			ng-if="reviewPanel.selectedEntryIds.length > 1"
+			ng-click="showBulkAcceptDialog();"
+		) 
+			i.fa.fa-check
+			| &nbsp;#{translate("accept_all")}
+			| ({{ reviewPanel.selectedEntryIds.length }})
+		a.rp-bulk-actions-btn(
+			href
+			ng-if="reviewPanel.selectedEntryIds.length > 1"
+			ng-click="showBulkRejectDialog();"
+		) 
+			i.fa.fa-times
+			| &nbsp;#{translate("reject_all")}
+			| ({{ reviewPanel.selectedEntryIds.length }})
 		a.rp-add-comment-btn(
 			href
 			ng-if="reviewPanel.entries[editor.open_doc_id]['add-comment'] != null"
@@ -85,6 +101,12 @@
 						on-start-new="startNewComment();"
 						on-submit="submitNewComment(content);"
 						on-cancel="cancelNewComment();"
+					)
+				div(ng-if="entry.type === 'bulk-actions'")
+					bulk-actions-entry(
+						on-bulk-accept="showBulkAcceptDialog();"
+						on-bulk-reject="showBulkRejectDialog();"
+						n-entries="reviewPanel.selectedEntryIds.length"
 					)
 
 	.rp-entry-list(
@@ -357,6 +379,25 @@ script(type='text/ng-template', id='addCommentEntryTemplate')
 						i.fa.fa-comment
 						| &nbsp;#{translate("comment")}
 
+script(type='text/ng-template', id='bulkActionsEntryTemplate')
+	div(ng-if="nEntries > 1")
+		.rp-entry-callout.rp-entry-callout-bulk-actions
+		.rp-entry.rp-entry-bulk-actions
+			a.rp-bulk-actions-btn(
+				href
+				ng-click="bulkReject();"
+			) 
+				i.fa.fa-times
+				| &nbsp;#{translate("reject_all")}
+				| ({{ nEntries }})
+			a.rp-bulk-actions-btn(
+				href
+				ng-click="bulkAccept();"
+			) 
+				i.fa.fa-check
+				| &nbsp;#{translate("accept_all")}
+				| ({{ nEntries }})
+			
 script(type='text/ng-template', id='resolvedCommentsDropdownTemplate')
 	.resolved-comments
 		.resolved-comments-backdrop(
@@ -437,3 +478,24 @@ script(type="text/ng-template", id="trackChangesUpgradeModalTemplate")
 			ng-click="cancel()"
 		)
 			span #{translate("close")}
+
+script(type="text/ng-template", id="bulkActionsModalTemplate")
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
+		h3 {{ isAccept ? '#{translate("accept_all")}' : '#{translate("reject_all")}' }}
+	.modal-body 
+		p(ng-if="isAccept") #{translate("bulk_accept_confirm", { nChanges: "{{ nChanges }}"})}
+		p(ng-if="!isAccept") #{translate("bulk_reject_confirm", { nChanges: "{{ nChanges }}"})}
+	.modal-footer()
+		button.btn.btn-default(
+			ng-click="cancel()"
+		)
+			span #{translate("cancel")}
+		button.btn.btn-primary(
+			ng-click="confirm()"
+		)
+			span #{translate("ok")}

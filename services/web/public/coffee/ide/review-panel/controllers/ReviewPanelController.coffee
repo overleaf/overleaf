@@ -26,6 +26,7 @@ define [
 			resolvedThreadIds: {}
 			rendererData: {}
 			loadingThreads: false
+			selectedEntryIds: []
 
 		window.addEventListener "beforeunload", () ->
 			collapsedStates = {}
@@ -176,7 +177,7 @@ define [
 			entries = $scope.reviewPanel.entries[$scope.editor.open_doc_id] or {}
 			permEntries = {}
 			for entry, entryData of entries
-				if entry != "add-comment"
+				if entry not in [ "add-comment", "bulk-actions" ]
 					permEntries[entry] = entryData 
 			Object.keys(permEntries).length
 		), (nEntries) ->
@@ -294,11 +295,19 @@ define [
 		$scope.$on "editor:focus:changed", (e, selection_offset_start, selection_offset_end, selection) ->
 			doc_id = $scope.editor.open_doc_id
 			entries = getDocEntries(doc_id)
+			$scope.reviewPanel.selectedEntryIds = []
 
 			delete entries["add-comment"]
+			delete entries["bulk-actions"]
+
 			if selection
 				entries["add-comment"] = {
 					type: "add-comment"
+					offset: selection_offset_start
+					length: selection_offset_end - selection_offset_start
+				}
+				entries["bulk-actions"] = {
+					type: "bulk-actions"
 					offset: selection_offset_start
 					length: selection_offset_end - selection_offset_start
 				}
@@ -307,10 +316,14 @@ define [
 				if entry.type == "comment" and not $scope.reviewPanel.resolvedThreadIds[entry.thread_id]
 					entry.focused = (entry.offset <= selection_offset_start <= entry.offset + entry.content.length)
 				else if entry.type == "insert"
+					isEntryWithinSelection = entry.offset >= selection_offset_start and entry.offset + entry.content.length <= selection_offset_end
 					entry.focused = (entry.offset <= selection_offset_start <= entry.offset + entry.content.length)
+					$scope.reviewPanel.selectedEntryIds.push id if isEntryWithinSelection
 				else if entry.type == "delete"
+					isEntryWithinSelection = selection_offset_start <= entry.offset <= selection_offset_end
 					entry.focused = (entry.offset == selection_offset_start)
-				else if entry.type == "add-comment" and selection
+					$scope.reviewPanel.selectedEntryIds.push id if isEntryWithinSelection
+				else if entry.type in [ "add-comment", "bulk-actions" ] and selection
 					entry.focused = true
 			
 			$scope.$broadcast "review-panel:recalculate-screen-positions"
@@ -325,6 +338,43 @@ define [
 			$scope.$broadcast "change:reject", entry_id
 			event_tracking.sendMB "rp-change-rejected", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
 		
+		bulkAccept = () ->
+			entry_ids = $scope.reviewPanel.selectedEntryIds.slice()
+			$http.post "/project/#{$scope.project_id}/doc/#{$scope.editor.open_doc_id}/changes/accept", { change_ids: entry_ids, _csrf: window.csrfToken}
+			$scope.$broadcast "change:bulk-accept", entry_ids
+			$scope.reviewPanel.selectedEntryIds = []
+			event_tracking.sendMB "rp-bulk-accept", { 
+				view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini',  
+				nEntries: $scope.reviewPanel.selectedEntryIds.length
+			}
+
+		bulkReject = () ->
+			$scope.$broadcast "change:bulk-reject", $scope.reviewPanel.selectedEntryIds.slice()
+			$scope.reviewPanel.selectedEntryIds = []
+			event_tracking.sendMB "rp-bulk-reject", { 
+				view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini',  
+				nEntries: $scope.reviewPanel.selectedEntryIds.length
+			}
+
+		$scope.showBulkAcceptDialog = () ->
+			showBulkActionsDialog true
+
+		$scope.showBulkRejectDialog = () -> showBulkActionsDialog false
+
+		showBulkActionsDialog = (isAccept) ->
+			$modal.open({
+				templateUrl: "bulkActionsModalTemplate"
+				controller: "BulkActionsModalController"
+				resolve:
+					isAccept: () -> isAccept
+					nChanges: () -> $scope.reviewPanel.selectedEntryIds.length
+				scope: $scope.$new()
+			}).result.then (isAccept) ->
+				if isAccept
+					bulkAccept()
+				else
+					bulkReject()
+
 		$scope.addNewComment = () ->
 			$scope.$broadcast "comment:start_adding"
 			$scope.toggleReviewPanel()

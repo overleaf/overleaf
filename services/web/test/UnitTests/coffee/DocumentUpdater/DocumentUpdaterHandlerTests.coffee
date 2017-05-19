@@ -252,7 +252,7 @@ describe 'DocumentUpdaterHandler', ->
 					.calledWith(new Error("doc updater returned failure status code: 500"))
 					.should.equal true
 
-	describe "acceptChange", ->
+	describe "acceptChanges", ->
 		beforeEach ->
 			@change_id = "mock-change-id-1"
 			@callback = sinon.stub()
@@ -260,11 +260,14 @@ describe 'DocumentUpdaterHandler', ->
 		describe "successfully", ->
 			beforeEach ->
 				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 200}, @body)
-				@handler.acceptChange @project_id, @doc_id, @change_id, @callback
+				@handler.acceptChanges @project_id, @doc_id, [ @change_id ], @callback
 
 			it 'should accept the change in the document updater', ->
-				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}/doc/#{@doc_id}/change/#{@change_id}/accept"
-				@request.post.calledWith(url).should.equal true
+				req =
+					url: "#{@settings.apis.documentupdater.url}/project/#{@project_id}/doc/#{@doc_id}/change/accept"
+					json:
+						change_ids: [ @change_id ]
+				@request.post.calledWith(req).should.equal true
 
 			it "should call the callback", ->
 				@callback.calledWith(null).should.equal true
@@ -272,7 +275,7 @@ describe 'DocumentUpdaterHandler', ->
 		describe "when the document updater API returns an error", ->
 			beforeEach ->
 				@request.post = sinon.stub().callsArgWith(1, @error = new Error("something went wrong"), null, null)
-				@handler.acceptChange @project_id, @doc_id, @change_id, @callback
+				@handler.acceptChanges @project_id, @doc_id, [ @change_id ], @callback
 
 			it "should return an error to the callback", ->
 				@callback.calledWith(@error).should.equal true
@@ -280,7 +283,7 @@ describe 'DocumentUpdaterHandler', ->
 		describe "when the document updater returns a failure error code", ->
 			beforeEach ->
 				@request.post = sinon.stub().callsArgWith(1, null, { statusCode: 500 }, "")
-				@handler.acceptChange @project_id, @doc_id, @change_id, @callback
+				@handler.acceptChanges @project_id, @doc_id, [ @change_id ], @callback
 
 			it "should return the callback with an error", ->
 				@callback
