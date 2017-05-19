@@ -62,20 +62,31 @@ module.exports = UpdateManager =
 		callback = (error) ->
 			if error?
 				RealTimeRedisManager.sendData {project_id, doc_id, error: error.message || error}
+				profile.log("sendData")
+			profile.end()
 			_callback(error)
-		
+
+		profile = new Profiler("applyUpdate", {project_id, doc_id})
 		UpdateManager._sanitizeUpdate update
+		profile.log("sanitizeUpdate")
 		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges) ->
+			profile.log("getDoc")
 			return callback(error) if error?
 			if !lines? or !version?
 				return callback(new Errors.NotFoundError("document not found: #{doc_id}"))
 			ShareJsUpdateManager.applyUpdate project_id, doc_id, update, lines, version, (error, updatedDocLines, version, appliedOps) ->
+				profile.log("sharejs.applyUpdate")
 				return callback(error) if error?
 				RangesManager.applyUpdate project_id, doc_id, ranges, appliedOps, updatedDocLines, (error, new_ranges) ->
+					profile.log("RangesManager.applyUpdate")
 					return callback(error) if error?
 					RedisManager.updateDocument doc_id, updatedDocLines, version, appliedOps, new_ranges, (error, historyOpsLength) ->
+						profile.log("RedisManager.updateDocument")
 						return callback(error) if error?
-						HistoryManager.recordAndFlushHistoryOps project_id, doc_id, appliedOps, historyOpsLength, callback
+						HistoryManager.recordAndFlushHistoryOps project_id, doc_id, appliedOps, historyOpsLength, (error) ->
+							profile.log("recordAndFlushHistoryOps")
+							return callback(error) if error?
+							callback()
 
 	lockUpdatesAndDo: (method, project_id, doc_id, args..., callback) ->
 		profile = new Profiler("lockUpdatesAndDo", {project_id, doc_id})
@@ -84,7 +95,7 @@ module.exports = UpdateManager =
 			return callback(error) if error?
 			UpdateManager.processOutstandingUpdates project_id, doc_id, (error) ->
 				return UpdateManager._handleErrorInsideLock(doc_id, lockValue, error, callback) if error?
-				profile.log("processOutStandingUpdates")
+				profile.log("processOutstandingUpdates")
 				method project_id, doc_id, args..., (error, response_args...) ->
 					return UpdateManager._handleErrorInsideLock(doc_id, lockValue, error, callback) if error?
 					profile.log("method")
