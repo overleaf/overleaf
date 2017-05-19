@@ -9,38 +9,38 @@ script(type="text/ng-template", id="hotkeysModalTemplate")
 	.modal-body.modal-hotkeys
 		h3 #{translate("common")}
 		.row
-			.col-xs-6
+			.col-xs-4
 				.hotkey
 					span.combination {{ctrl}} + F
 					span.description Find (and replace)
 				.hotkey
 					span.combination {{ctrl}} + Enter
 					span.description Compile
-			.col-xs-6
+			.col-xs-4
 				.hotkey
 					span.combination {{ctrl}} + Z
 					span.description Undo
+			.col-xs-4
 				.hotkey
 					span.combination {{ctrl}} + Y
 					span.description Redo
-
 		h3 #{translate("navigation")}
 		.row
-			.col-xs-6
+			.col-xs-4
 				.hotkey
 					span.combination {{ctrl}} + Home
 					span.description  Beginning of document
+			.col-xs-4
 				.hotkey
 					span.combination {{ctrl}} + End
 					span.description End of document
-			.col-xs-6
+			.col-xs-4
 				.hotkey
 					span.combination {{ctrl}} + L
 					span.description Go To Line
-
 		h3 #{translate("editing")}
 		.row
-			.col-xs-6
+			.col-xs-4
 				.hotkey
 					span.combination {{ctrl}} + /
 					span.description Toggle Comment
@@ -50,16 +50,17 @@ script(type="text/ng-template", id="hotkeysModalTemplate")
 				.hotkey
 					span.combination {{ctrl}} + A
 					span.description Select All
-				.hotkey
-					span.combination Tab
-					span.description Indent Selection
-			.col-xs-6
+			.col-xs-4
 				.hotkey
 					span.combination Ctrl + U
 					span.description To Uppercase
 				.hotkey
 					span.combination Ctrl + Shift + U
 					span.description To Lowercase
+				.hotkey
+					span.combination Tab
+					span.description Indent Selection
+			.col-xs-4
 				.hotkey
 					span.combination {{ctrl}} + B
 					span.description Bold text
@@ -69,27 +70,40 @@ script(type="text/ng-template", id="hotkeysModalTemplate")
 	
 		h3 #{translate("autocomplete")}
 		.row
-			.col-xs-6
+			.col-xs-4
 				.hotkey
 					span.combination Ctrl + Space
 					span.description Autocomplete Menu
-
-			.col-xs-6
+			.col-xs-4
 				.hotkey
 					span.combination Tab / Up / Down
 					span.description Select Candidate
-
+			.col-xs-4
 				.hotkey
 					span.combination Enter
 					span.description Insert Candidate
 	
 		h3 !{translate("autocomplete_references")}
 		.row
-			.col-xs-6
+			.col-xs-4
 				.hotkey
 					span.combination Ctrl + Space 
 					span.description Search References
 		
+		h3 #{translate("review")}
+		.row
+			.col-xs-4
+				.hotkey
+					span.combination {{ctrl}} + J
+					span.description Toggle review panel
+			.col-xs-4
+				.hotkey
+					span.combination {{ctrl}} + Shift + A
+					span.description Toggle track changes
+			.col-xs-4
+				.hotkey
+					span.combination {{ctrl}} + Shift + C
+					span.description Add a comment
 					
 	.modal-footer
 		button.btn.btn-default(
