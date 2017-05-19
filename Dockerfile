@@ -30,7 +30,8 @@ RUN cd /var/www/sharelatex; \
 	npm install; \
 	grunt install; \
 	cd web; \
-	npm install && npm install bcrypt; \
+	npm install; \
+	npm install bcrypt; \
 	cd modules; \
 	git clone https://bitbucket.org/sharelatex/launchpad-webmodule.git launchpad; \
 	grunt compile;
