@@ -380,9 +380,12 @@ define [
 			$scope.toggleReviewPanel()
 
 		$scope.addNewCommentFromKbdShortcut = () ->
-			$scope.$broadcast "comment:start_adding"
+			$scope.$broadcast "comment:select_line"
 			if !$scope.ui.reviewPanelOpen
 				$scope.toggleReviewPanel()
+			$timeout () ->
+				$scope.$broadcast "review-panel:layout"	
+				$scope.$broadcast "comment:start_adding"
 
 		$scope.startNewComment = () ->
 			$scope.$broadcast "comment:select_line"

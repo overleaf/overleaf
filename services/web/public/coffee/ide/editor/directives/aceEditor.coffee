@@ -180,9 +180,7 @@ define [
 							name: "add-new-comment",
 							bindKey: win: "Ctrl-Shift-C", mac: "Command-Shift-C"
 							exec: (editor) =>
-								selection = editor.getSelection()
-								if !selection.isEmpty()
-									callback()
+								callback()
 							readOnly: true
 
 				scope.$watch "onCtrlShiftA", (callback) ->
