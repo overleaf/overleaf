@@ -972,7 +972,8 @@
 	opacity: 0.5;
 	color: @rp-highlight-blue;
 	z-index: 1;
-	cursor: e-resize;
+	background-color: transparent;
+	transition: background 0.1s;
 
 	.rp-size-expanded & {
 		display: block;
@@ -980,8 +981,8 @@
 
 	&:hover,
 	&:focus {
-		opacity: 1;
 		color: @rp-highlight-blue;
+		background-color: #FFF;
 	}
 
 	&::after {
