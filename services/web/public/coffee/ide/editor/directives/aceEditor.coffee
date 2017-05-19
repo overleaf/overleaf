@@ -50,8 +50,10 @@ define [
 				annotations: "="
 				navigateHighlights: "="
 				fileName: "="
-				onCtrlEnter: "="
-				onCtrlJ: "="
+				onCtrlEnter: "="   # Compile
+				onCtrlJ: "="       # Toggle the review panel
+				onCtrlShiftC: "="  # Add a new comment
+				onCtrlShiftA: "="  # Toggle track-changes on/off
 				syntaxValidation: "="
 				reviewPanel: "="
 				eventsBridge: "="
@@ -168,6 +170,26 @@ define [
 						editor.commands.addCommand 
 							name: "toggle-review-panel",
 							bindKey: win: "Ctrl-J", mac: "Command-J"
+							exec: (editor) =>
+								callback()
+							readOnly: true
+
+				scope.$watch "onCtrlShiftC", (callback) ->
+					if callback?
+						editor.commands.addCommand 
+							name: "add-new-comment",
+							bindKey: win: "Ctrl-Shift-C", mac: "Command-Shift-C"
+							exec: (editor) =>
+								selection = editor.getSelection()
+								if !selection.isEmpty()
+									callback()
+							readOnly: true
+
+				scope.$watch "onCtrlShiftA", (callback) ->
+					if callback?
+						editor.commands.addCommand 
+							name: "toggle-track-changes",
+							bindKey: win: "Ctrl-Shift-A", mac: "Command-Shift-A"
 							exec: (editor) =>
 								callback()
 							readOnly: true

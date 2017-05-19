@@ -329,6 +329,11 @@ define [
 			$scope.$broadcast "comment:start_adding"
 			$scope.toggleReviewPanel()
 
+		$scope.addNewCommentFromKbdShortcut = () ->
+			$scope.$broadcast "comment:start_adding"
+			if !$scope.ui.reviewPanelOpen
+				$scope.toggleReviewPanel()
+
 		$scope.startNewComment = () ->
 			$scope.$broadcast "comment:select_line"
 			$timeout () ->
@@ -479,6 +484,12 @@ define [
 				event_tracking.sendMB "rp-trackchanges-toggle", { value }
 			else
 				$scope.openTrackChangesUpgradeModal()
+
+		$scope.toggleTrackChangesFromKbdShortcut = () ->
+			if $scope.editor.wantTrackChanges
+				$scope.toggleTrackChanges false
+			else 
+				$scope.toggleTrackChanges true
 		
 		ide.socket.on "toggle-track-changes", (value) ->
 			$scope.$apply () ->
