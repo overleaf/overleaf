@@ -98,6 +98,8 @@ script(type='text/ng-template', id='renameProjectModalTemplate')
 		) &times;
 		h3 #{translate("rename_project")}
 	.modal-body
+		.alert.alert-danger(ng-show="state.error.message") {{ state.error.message}} 
+		.alert.alert-danger(ng-show="state.error && !state.error.message") #{translate("generic_something_went_wrong")}
 		form(name="renameProjectForm", novalidate)
 			input.form-control(
 				type="text",
@@ -111,8 +113,10 @@ script(type='text/ng-template', id='renameProjectModalTemplate')
 		button.btn.btn-default(ng-click="cancel()") #{translate("cancel")}
 		button.btn.btn-primary(
 			ng-click="rename()",
-			ng-disabled="renameProjectForm.$invalid"
-		) #{translate("rename")}
+			ng-disabled="renameProjectForm.$invalid || state.inflight"
+		)
+			span(ng-show="!state.inflight") #{translate("rename")}
+			span(ng-show="state.inflight") #{translate("renaming")}...
 
 script(type='text/ng-template', id='cloneProjectModalTemplate')
 	.modal-header
@@ -123,6 +127,8 @@ script(type='text/ng-template', id='cloneProjectModalTemplate')
 		) &times;
 		h3 #{translate("copy_project")}
 	.modal-body
+		.alert.alert-danger(ng-show="state.error.message") {{ state.error.message}} 
+		.alert.alert-danger(ng-show="state.error && !state.error.message") #{translate("generic_something_went_wrong")}
 		form(name="cloneProjectForm", novalidate)
 			.form-group
 				label #{translate("new_name")}
@@ -155,6 +161,8 @@ script(type='text/ng-template', id='newProjectModalTemplate')
 		) &times;
 		h3 #{translate("new_project")}
 	.modal-body
+		.alert.alert-danger(ng-show="state.error.message") {{ state.error.message}} 
+		.alert.alert-danger(ng-show="state.error && !state.error.message") #{translate("generic_something_went_wrong")}
 		form(novalidate, name="newProjectForm")
 			input.form-control(
 				type="text",

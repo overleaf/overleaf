@@ -101,7 +101,7 @@ module.exports = ProjectController =
 			res.send(project_id:project._id)
 
 
-	newProject: (req, res)->
+	newProject: (req, res, next)->
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		projectName = req.body.projectName?.trim()
 		template = req.body.template
@@ -113,25 +113,17 @@ module.exports = ProjectController =
 				else
 					projectCreationHandler.createBasicProject user_id, projectName, cb
 		], (err, project)->
-			if err?
-				logger.error err: err, project: project, user: user_id, name: projectName, templateType: template, "error creating project"
-				res.sendStatus 500
-			else
-				logger.log project: project, user: user_id, name: projectName, templateType: template, "created project"
-				res.send {project_id:project._id}
+			return next(err) if err?
+			logger.log project: project, user: user_id, name: projectName, templateType: template, "created project"
+			res.send {project_id:project._id}
 
 
-	renameProject: (req, res)->
+	renameProject: (req, res, next)->
 		project_id = req.params.Project_id
 		newName = req.body.newProjectName
-		if newName.length > 150
-			return res.sendStatus 400
 		editorController.renameProject project_id, newName, (err)->
-			if err?
-				logger.err err:err, project_id:project_id, newName:newName, "problem renaming project"
-				res.sendStatus 500
-			else
-				res.sendStatus 200
+			return next(err) if err?
+			res.sendStatus 200
 
 	projectListPage: (req, res, next)->
 		timer = new metrics.Timer("project-list")

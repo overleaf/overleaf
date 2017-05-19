@@ -7,8 +7,7 @@ _ = require("underscore")
 PublicAccessLevels = require("../Authorization/PublicAccessLevels")
 Errors = require("../Errors/Errors")
 
-module.exports = 
-
+module.exports = ProjectDetailsHandler =
 	getDetails: (project_id, callback)->
 		ProjectGetter.getProject project_id, {name:true, description:true, compiler:true, features:true, owner_ref:true}, (err, project)->
 			if err?
@@ -39,16 +38,29 @@ module.exports =
 			callback(err)
 
 	renameProject: (project_id, newName, callback = ->)->
-		logger.log project_id: project_id, newName:newName, "renaming project"
-		ProjectGetter.getProject project_id, {name:true}, (err, project)->
-			if err? or !project?
-				logger.err err:err,  project_id:project_id, "error getting project or could not find it todo project rename"
-				return callback(err)
-			oldProjectName = project.name
-			Project.update _id:project_id, {name: newName}, (err, project)=>
-				if err?
+		ProjectDetailsHandler.validateProjectName newName, (error) ->
+			return callback(error) if error?
+			logger.log project_id: project_id, newName:newName, "renaming project"
+			ProjectGetter.getProject project_id, {name:true}, (err, project)->
+				if err? or !project?
+					logger.err err:err,  project_id:project_id, "error getting project or could not find it todo project rename"
 					return callback(err)
-				tpdsUpdateSender.moveEntity {project_id:project_id, project_name:oldProjectName, newProjectName:newName}, callback
+				oldProjectName = project.name
+				Project.update _id:project_id, {name: newName}, (err, project)=>
+					if err?
+						return callback(err)
+					tpdsUpdateSender.moveEntity {project_id:project_id, project_name:oldProjectName, newProjectName:newName}, callback
+
+	MAX_PROJECT_NAME_LENGTH: 150
+	validateProjectName: (name, callback = (error) ->) ->
+		if name.length == 0
+			return callback(new Errors.InvalidNameError("Project name cannot be blank"))
+		else if name.length > @MAX_PROJECT_NAME_LENGTH
+			return callback(new Errors.InvalidNameError("Project name is too long"))
+		else if name.indexOf("/") > -1
+			return callback(new Errors.InvalidNameError("Project name cannot not contain / characters"))
+		else
+			return callback()
 
 	setPublicAccessLevel : (project_id, newAccessLevel, callback = ->)->
 		logger.log project_id: project_id, level: newAccessLevel, "set public access level"

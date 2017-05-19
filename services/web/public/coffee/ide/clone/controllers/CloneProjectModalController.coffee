@@ -6,6 +6,7 @@ define [
 			projectName: ide.$scope.project.name + " (Copy)"
 		$scope.state =
 			inflight: false
+			error: false
 
 		$modalInstance.opened.then () ->
 			$timeout () ->
@@ -20,9 +21,16 @@ define [
 
 		$scope.clone = () ->
 			$scope.state.inflight = true
+			$scope.state.error = false
 			cloneProject($scope.inputs.projectName)
-				.then (data) ->
+				.success (data) ->
 					window.location = "/project/#{data.data.project_id}"
+				.error (body, statusCode) ->
+					$scope.state.inflight = false
+					if statusCode == 400
+						$scope.state.error = { message: body }
+					else
+						$scope.state.error = true
 
 		$scope.cancel = () ->
 			$modalInstance.dismiss('cancel')

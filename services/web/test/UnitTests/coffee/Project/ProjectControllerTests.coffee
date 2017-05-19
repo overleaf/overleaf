@@ -280,20 +280,12 @@ describe "ProjectController", ->
 				done()
 			@ProjectController.renameProject @req, @res
 
-		it "should send a 500 if there is a problem", (done)->
-			@EditorController.renameProject.callsArgWith(2, "problem")
-			@res.sendStatus = (code)=>
-				code.should.equal 500
-				@EditorController.renameProject.calledWith(@project_id, @newProjectName).should.equal true
+		it "should send an error to next() if there is a problem", (done)->
+			@EditorController.renameProject.callsArgWith(2, error = new Error("problem"))
+			next = (e)=>
+				e.should.equal error
 				done()
-			@ProjectController.renameProject @req, @res
-
-		it "should return an error if the name is over 150 chars", (done)->
-			@req.body.newProjectName = "EDMUBEEBKBXUUUZERMNSXFFWIBHGSDAWGMRIQWJBXGWSBVWSIKLFPRBYSJEKMFHTRZBHVKJSRGKTBHMJRXPHORFHAKRNPZGGYIOTEDMUBEEBKBXUUUZERMNSXFFWIBHGSDAWGMRIQWJBXGWSBVWSIKLFPRBYSJEKMFHTRZBHVKJSRGKTBHMJRXPHORFHAKRNPZGGYIOT"
-			@res.sendStatus = (code)=>
-				code.should.equal 400
-				done()
-			@ProjectController.renameProject @req, @res
+			@ProjectController.renameProject @req, @res, next
 
 	describe "loadEditor", ->
 		beforeEach ->
