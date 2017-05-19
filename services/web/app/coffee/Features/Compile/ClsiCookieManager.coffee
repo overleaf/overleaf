@@ -44,6 +44,8 @@ module.exports = ClsiCookieManager =
 		if !clsiCookiesEnabled
 			return callback()
 		serverId = ClsiCookieManager._parseServerIdFromResponse(response)
+		if !serverId? # We don't get a cookie back if it hasn't changed
+			return callback()
 		if rclient_secondary?
 			@_setServerIdInRedis rclient_secondary, project_id, serverId
 		@_setServerIdInRedis rclient, project_id, serverId, (err) ->
