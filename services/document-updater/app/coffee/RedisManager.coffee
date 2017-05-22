@@ -181,6 +181,10 @@ module.exports = RedisManager =
 				if error?
 					logger.error {err: error, doc_id}, error.message
 					return callback(error)
+				if ranges? and ranges.indexOf("\u0000") != -1
+					error = new Error("null bytes found in ranges")
+					logger.error err: error, doc_id: doc_id, ranges: ranges, error.message
+					return callback(error)
 				multi = rclient.multi()
 				multi.eval setScript, 1, keys.docLines(doc_id:doc_id), newDocLines  # index 0
 				multi.set    keys.docVersion(doc_id:doc_id), newVersion             # index 1
