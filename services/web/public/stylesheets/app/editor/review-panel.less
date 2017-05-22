@@ -964,7 +964,7 @@
 	}
 
 .review-panel-toggler {
-	display: none;
+	// display: none;
 	position: absolute;
 	top: 0;
 	bottom: 0;
@@ -976,7 +976,9 @@
 	transition: background 0.1s;
 
 	.rp-size-expanded & {
-		display: block;
+		&::after {
+			content: "\f105";
+		}
 	}
 
 	&:hover,
@@ -986,7 +988,7 @@
 	}
 
 	&::after {
-		content: "\f105";
+		content: "\f104";
 		font-family: FontAwesome;
 		line-height: 1;
 		-webkit-font-smoothing: antialiased;
