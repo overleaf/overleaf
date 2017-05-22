@@ -375,6 +375,10 @@ define [
 				else
 					bulkReject()
 
+		$scope.handleTogglerClick = (e) ->
+			e.target.blur()
+			$scope.toggleReviewPanel()
+
 		$scope.addNewComment = () ->
 			$scope.$broadcast "comment:start_adding"
 			$scope.toggleReviewPanel()

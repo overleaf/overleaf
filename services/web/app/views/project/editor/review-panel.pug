@@ -31,7 +31,7 @@
 			| &nbsp;#{translate("add_comment")}
 	a.review-panel-toggler(
 		href
-		ng-click="toggleReviewPanel();"
+		ng-click="handleTogglerClick($event);"
 	)
 	.review-panel-toolbar
 		resolved-comments-dropdown(
