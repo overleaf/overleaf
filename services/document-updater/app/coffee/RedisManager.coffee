@@ -162,6 +162,11 @@ module.exports = RedisManager =
 				return callback(error)
 
 			jsonOps = appliedOps.map (op) -> JSON.stringify op
+			if jsonOps.indexOf("\u0000") != -1
+				error = new Error("null bytes found in jsonOps")
+				logger.error err: error, doc_id: doc_id, jsonOps: jsonOps, error.message
+				return callback(error)
+
 			newDocLines = JSON.stringify(docLines)
 			if newDocLines.indexOf("\u0000") != -1
 				error = new Error("null bytes found in doc lines")
