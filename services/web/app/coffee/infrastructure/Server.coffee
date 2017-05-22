@@ -161,15 +161,27 @@ app.get "/heapdump", (req, res)->
 logger.info ("creating HTTP server").yellow
 server = require('http').createServer(app)
 
-# process api routes first, if nothing matched fall though and use
-# web middlewear + routes
-app.use(apiRouter)
-app.use(ErrorController.handleApiError)
-app.use(webRouter)
-app.use(ErrorController.handleError)
+# can set WEB_TYPE=api-only or WEB_TYPE=web-only for separate web and
+# api processes
+switch process.env.WEB_TYPE
+	when "api-only"
+		logger.info("providing api router");
+		app.use(apiRouter)
+		app.use(ErrorController.handleApiError)
+	when "web-only"
+		logger.info("providing web router");
+		app.use(webRouter)
+		app.use(ErrorController.handleError)
+	else
+		logger.info("providing web and api router");
+		# process api routes first, if nothing matched fall though and use
+		# web middleware + routes
+		app.use(apiRouter)
+		app.use(ErrorController.handleApiError)
+		app.use(webRouter)
+		app.use(ErrorController.handleError)
 
 router = new Router(webRouter, apiRouter)
-
 
 module.exports =
 	app: app
