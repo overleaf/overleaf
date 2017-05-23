@@ -97,7 +97,9 @@ module.exports = UpdatesManager =
 			length = docUpdates.length
 			# parse the redis strings into ShareJs updates
 			RedisManager.expandDocUpdates docUpdates, (error, rawUpdates) ->
-				return callback(error) if error?
+				if error?
+					logger.err project_id: project_id, doc_id: doc_id, docUpdates: docUpdates, "failed to parse docUpdates"
+					return callback(error)
 				logger.log project_id: project_id, doc_id: doc_id, rawUpdates: rawUpdates, "retrieved raw updates from redis"
 				UpdatesManager.compressAndSaveRawUpdates project_id, doc_id, rawUpdates, temporary, (error) ->
 					return callback(error) if error?
