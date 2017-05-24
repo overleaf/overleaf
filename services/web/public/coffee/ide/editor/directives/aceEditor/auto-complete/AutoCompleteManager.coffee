@@ -125,6 +125,7 @@ define [
 			end = change.end
 			# Check that this change was made by us, not a collaborator
 			# (Cursor is still one place behind)
+			# NOTE: this is also the case when a user backspaces over a highlighted region
 			if end.row == cursorPosition.row and end.column == cursorPosition.column + 1
 				if change.action == "insert"
 					range = new Range(end.row, 0, end.row, end.column)
@@ -134,16 +135,16 @@ define [
 					if commandFragment? and commandFragment.length > 2
 						if commandFragment.startsWith('\\label{')
 							# console.log ">> LABEL IS HERE"
-							# TODO: trigger re-scan of document
 							@labelsManager.scheduleLoadLabelsFromOpenDoc()
 						setTimeout () =>
 							@editor.execCommand("startAutocomplete")
 						, 0
 			else
+				# Check if user has backspaced/deleted a highlighted region of text
+				# and see if that contains a `\label{}`
 				if change.action == 'remove'
 					if _.any(change.lines, (line) -> line.match(/\\label{.*}/))
 						# console.log ">> a label has been removed"
-						# TODO: trigger removal of label
 						@labelsManager.scheduleLoadLabelsFromOpenDoc()
 
 		monkeyPatchAutocomplete: () ->
