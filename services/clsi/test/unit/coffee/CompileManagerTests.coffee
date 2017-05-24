@@ -192,6 +192,7 @@ describe "CompileManager", ->
 
 		describe "syncFromCode", ->
 			beforeEach ->
+				@fs.stat = sinon.stub().callsArgWith(1, null,{isFile: ()->true})
 				@child_process.execFile.callsArgWith(3, null, @stdout = "NODE\t#{@page}\t#{@h}\t#{@v}\t#{@width}\t#{@height}\n", "")
 				@CompileManager.syncFromCode @project_id, @user_id, @file_name, @line, @column, @callback
 
@@ -216,6 +217,7 @@ describe "CompileManager", ->
 
 		describe "syncFromPdf", ->
 			beforeEach ->
+				@fs.stat = sinon.stub().callsArgWith(1, null,{isFile: ()->true})
 				@child_process.execFile.callsArgWith(3, null, @stdout = "NODE\t#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}/#{@file_name}\t#{@line}\t#{@column}\n", "")
 				@CompileManager.syncFromPdf @project_id, @user_id, @page, @h, @v, @callback
 
