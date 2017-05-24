@@ -40,6 +40,37 @@ define [
 
 			SnippetCompleter = new SnippetManager()
 
+			labelsState = @$scope.$root._labels
+			LabelsCompleter =
+				getCompletions: (editor, session, pos, prefxi, callback) ->
+					console.log ">> [LabelsCompleter] getting completions"
+					upToCursorRange = new Range(pos.row, 0, pos.row, pos.column)
+					lineUpToCursor = editor.getSession().getTextRange(upToCursorRange)
+					commandFragment = getLastCommandFragment(lineUpToCursor)
+					if commandFragment
+						refMatch = commandFragment.match(/^~?\\ref{([^}]*, *)?(\w*)/)
+						if refMatch
+							beyondCursorRange = new Range(pos.row, pos.column, pos.row, 99999)
+							lineBeyondCursor = editor.getSession().getTextRange(beyondCursorRange)
+							needsClosingBrace = !lineBeyondCursor.match(/^[^{]*}/)
+							currentArg = refMatch[1]
+							result = []
+							result.push {
+								caption: "\\ref{}",
+								snippet: "\\ref{}",
+								meta: "cross-reference",
+								score: 11000
+							}
+							labels = _.flatten(labels for docId, labels of labelsState.documents)
+							for label in labels
+								result.push {
+									caption: "\\ref{#{label}#{if needsClosingBrace then '}' else ''}",
+									value: "\\ref{#{label}#{if needsClosingBrace then '}' else ''}",
+									meta: "cross-reference",
+									score: 10000
+								}
+							callback null, result
+
 			references = @$scope.$root._references
 			ReferencesCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
@@ -78,7 +109,7 @@ define [
 							else
 								callback null, result
 
-			@editor.completers = [@suggestionManager, SnippetCompleter, ReferencesCompleter]
+			@editor.completers = [@suggestionManager, SnippetCompleter, ReferencesCompleter, LabelsCompleter]
 
 		disable: () ->
 			@editor.setOptions({
