@@ -31,6 +31,8 @@ define [
 				e.oldSession.off "change", onChange
 				e.session.on "change", onChange
 
+			@labelsManager = @$scope.$root._labels
+
 		enable: () ->
 			@editor.setOptions({
 				enableBasicAutocompletion: true,
@@ -40,10 +42,10 @@ define [
 
 			SnippetCompleter = new SnippetManager()
 
-			labelsState = @$scope.$root._labels
+			labelsManager = @labelsManager
 			LabelsCompleter =
 				getCompletions: (editor, session, pos, prefxi, callback) ->
-					console.log ">> [LabelsCompleter] getting completions"
+					# console.log ">> [LabelsCompleter] getting completions"
 					upToCursorRange = new Range(pos.row, 0, pos.row, pos.column)
 					lineUpToCursor = editor.getSession().getTextRange(upToCursorRange)
 					commandFragment = getLastCommandFragment(lineUpToCursor)
@@ -61,7 +63,7 @@ define [
 								meta: "cross-reference",
 								score: 11000
 							}
-							labels = _.flatten(labels for docId, labels of labelsState.documents)
+							labels = labelsManager.getAllLabels()
 							for label in labels
 								result.push {
 									caption: "\\ref{#{label}#{if needsClosingBrace then '}' else ''}",
@@ -118,6 +120,7 @@ define [
 			})
 
 		onChange: (change) ->
+			window.EDITOR = @editor
 			cursorPosition = @editor.getCursorPosition()
 			end = change.end
 			# Check that this change was made by us, not a collaborator
@@ -129,9 +132,19 @@ define [
 					commandFragment = getLastCommandFragment(lineUpToCursor)
 
 					if commandFragment? and commandFragment.length > 2
+						if commandFragment.startsWith('\\label{')
+							# console.log ">> LABEL IS HERE"
+							# TODO: trigger re-scan of document
+							@labelsManager.scheduleLoadLabelsFromOpenDoc()
 						setTimeout () =>
 							@editor.execCommand("startAutocomplete")
 						, 0
+			else
+				if change.action == 'remove'
+					if _.any(change.lines, (line) -> line.match(/\\label{.*}/))
+						# console.log ">> a label has been removed"
+						# TODO: trigger removal of label
+						@labelsManager.scheduleLoadLabelsFromOpenDoc()
 
 		monkeyPatchAutocomplete: () ->
 			Autocomplete = ace.require("ace/autocomplete").Autocomplete
