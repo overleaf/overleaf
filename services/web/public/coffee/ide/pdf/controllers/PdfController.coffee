@@ -341,7 +341,8 @@ define [
 					response = getChkTex()
 
 			# display the combined result
-			response.finally annotateFiles
+			if response?
+				response.finally annotateFiles
 
 		getRootDocOverride_id = () ->
 			doc = ide.editorManager.getCurrentDocValue()
