@@ -20,7 +20,9 @@ module.exports = DispatchManager =
 					[list_name, doc_key] = result
 					[project_id, doc_id] = Keys.splitProjectIdAndDocId(doc_key)
 					# Dispatch this in the background
+					Metrics.gauge "processingUpdates", "+1"  # increments/decrements gauge with +/- sign
 					UpdateManager.processOutstandingUpdatesWithLock project_id, doc_id, (error) ->
+						Metrics.gauge "processingUpdates", "-1"
 						logger.error err: error, project_id: project_id, doc_id: doc_id, "error processing update" if error?
 					callback()
 						
