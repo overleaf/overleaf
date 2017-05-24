@@ -20,12 +20,13 @@ module.exports = CompileController =
 					else if error?.validate
 						status = "validation-#{error.validate}"
 					else if error?
-						logger.error err: error, project_id: request.project_id, "error running compile"
 						if error.timedout
 							status = "timedout"
+							logger.log err: error, project_id: request.project_id, "timeout running compile"
 						else
 							status = "error"
 							code = 500
+							logger.error err: error, project_id: request.project_id, "error running compile"
 					else
 						status = "failure"
 						for file in outputFiles
