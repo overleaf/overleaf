@@ -45,7 +45,6 @@ define [
 			labelsManager = @labelsManager
 			LabelsCompleter =
 				getCompletions: (editor, session, pos, prefxi, callback) ->
-					# console.log ">> [LabelsCompleter] getting completions"
 					upToCursorRange = new Range(pos.row, 0, pos.row, pos.column)
 					lineUpToCursor = editor.getSession().getTextRange(upToCursorRange)
 					commandFragment = getLastCommandFragment(lineUpToCursor)
@@ -120,7 +119,6 @@ define [
 			})
 
 		onChange: (change) ->
-			window.EDITOR = @editor
 			cursorPosition = @editor.getCursorPosition()
 			end = change.end
 			# Check that this change was made by us, not a collaborator
@@ -134,7 +132,6 @@ define [
 
 					if commandFragment? and commandFragment.length > 2
 						if commandFragment.startsWith('\\label{')
-							# console.log ">> LABEL IS HERE"
 							@labelsManager.scheduleLoadLabelsFromOpenDoc()
 						setTimeout () =>
 							@editor.execCommand("startAutocomplete")
@@ -144,7 +141,6 @@ define [
 				# and see if that contains a `\label{}`
 				if change.action == 'remove'
 					if _.any(change.lines, (line) -> line.match(/\\label{.*}/))
-						# console.log ">> a label has been removed"
 						@labelsManager.scheduleLoadLabelsFromOpenDoc()
 
 		monkeyPatchAutocomplete: () ->

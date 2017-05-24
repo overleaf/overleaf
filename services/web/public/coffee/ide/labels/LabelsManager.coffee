@@ -25,7 +25,6 @@ define [
 
 		loadLabelsFromOpenDoc: () ->
 			docId = @ide.editorManager.getCurrentDocId()
-			# console.log ">> [LabelsMangager] loading labels", docId
 			docText = @ide.editorManager.getCurrentDocValue()
 			labels = []
 			re = /\\label{(.*)}/g
@@ -33,16 +32,14 @@ define [
 				if labelMatch[1]
 					labels.push(labelMatch[1])
 			@state.documents[docId] = labels
-			# console.log ">> [LabelsMangager] success, loaded labels", docId, labels
 
 		scheduleLoadLabelsFromOpenDoc: () ->
 			if @loadLabelsTimeout
 				clearTimeout(@loadLabelsTimeout)
 			@loadLabelsTimeout = setTimeout(
 				(self) ->
-					# console.log ">> trigger timeout"
 					self.loadLabelsFromOpenDoc()
-				, 500
+				, 1000
 				, this
 			)
 
