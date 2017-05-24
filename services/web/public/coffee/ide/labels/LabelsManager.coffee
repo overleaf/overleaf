@@ -1,21 +1,37 @@
 define [
 ], () ->
+
+	AUTOMATIC_REFRESH_PERIOD = 1000 * 60 * 10
+
 	class LabelsManager
 		constructor: (@ide, @$scope) ->
 			@$scope.$root._labels = this
 
 			@state =
-				documents: {}
+				documents: {} # map of DocId => List[Label]
 
 			@loadLabelsTimeout = null
+			@periodicLoadInterval = null
 
 			setTimeout(
 				(self) ->
+					# set up a regular re-load
+					setTimeout(
+						(self) ->
+							self.periodicLoadInterval = setInterval(
+								(self) ->
+									self.loadLabelsFromOpenDoc()
+								, AUTOMATIC_REFRESH_PERIOD
+								, self
+							)
+						, AUTOMATIC_REFRESH_PERIOD
+						, self
+					)
+					# listen for document open
 					self.$scope.$on 'document:opened', (e, doc) ->
-						# console.log ">> [LabelsManager] document opened"
 						setTimeout(
 							(self) ->
-								self.loadLabelsFromOpenDoc()
+								self.scheduleLoadLabelsFromOpenDoc()
 							, 1000
 							, self
 						)
