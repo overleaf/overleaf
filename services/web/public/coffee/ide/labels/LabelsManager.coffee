@@ -14,29 +14,25 @@ define [
 			@periodicLoadInterval = null
 
 			setTimeout(
-				(self) ->
+				() =>
 					# set up a regular re-load
 					setTimeout(
-						(self) ->
-							self.periodicLoadInterval = setInterval(
-								(self) ->
-									self.loadLabelsFromOpenDoc()
+						() =>
+							@periodicLoadInterval = setInterval(
+								() =>
+									@loadLabelsFromOpenDoc()
 								, AUTOMATIC_REFRESH_PERIOD
-								, self
 							)
 						, AUTOMATIC_REFRESH_PERIOD
-						, self
 					)
 					# listen for document open
-					self.$scope.$on 'document:opened', (e, doc) ->
+					@$scope.$on 'document:opened', (e, doc) =>
 						setTimeout(
-							(self) ->
-								self.scheduleLoadLabelsFromOpenDoc()
+							() =>
+								@scheduleLoadLabelsFromOpenDoc()
 							, 1000
-							, self
 						)
 				, 0
-				this
 			)
 
 		loadLabelsFromOpenDoc: () ->
@@ -53,8 +49,8 @@ define [
 			if @loadLabelsTimeout
 				clearTimeout(@loadLabelsTimeout)
 			@loadLabelsTimeout = setTimeout(
-				(self) ->
-					self.loadLabelsFromOpenDoc()
+				() =>
+					@loadLabelsFromOpenDoc()
 				, 1000
 				, this
 			)
