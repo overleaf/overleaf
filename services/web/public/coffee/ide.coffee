@@ -9,7 +9,7 @@ define [
 	"ide/pdf/PdfManager"
 	"ide/binary-files/BinaryFilesManager"
 	"ide/references/ReferencesManager"
-	"ide/labels/LabelsManager"
+	"ide/editor/directives/aceEditor/labels/LabelsManager"
 	"ide/review-panel/ReviewPanelManager"
 	"ide/SafariScrollPatcher"
 	"ide/FeatureOnboardingController"
