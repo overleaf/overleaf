@@ -33,6 +33,7 @@ define [
 			@state.documents[docId] = labels
 
 		scheduleLoadLabelsFromOpenDoc: () ->
+			# De-bounce loading labels with a timeout
 			if @loadLabelsTimeout
 				clearTimeout(@loadLabelsTimeout)
 			@loadLabelsTimeout = setTimeout(
