@@ -964,7 +964,7 @@
 	}
 
 .review-panel-toggler {
-	// display: none;
+	display: none;
 	position: absolute;
 	top: 0;
 	bottom: 0;
@@ -974,6 +974,11 @@
 	z-index: 1;
 	background-color: transparent;
 	transition: background 0.1s;
+
+	.rp-size-mini &,
+	.rp-size-expanded & {
+		display: block;
+	}
 
 	.rp-size-expanded & {
 		&::after {
