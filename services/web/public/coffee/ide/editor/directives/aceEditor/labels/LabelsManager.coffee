@@ -23,20 +23,12 @@ define [
 				range = new Range(end.row, 0, end.row, end.column)
 				lineUpToCursor = @editor.getSession().getTextRange(range)
 				commandFragment = getLastCommandFragment(lineUpToCursor)
-				if change.action == 'remove'
-					if _.any(change.lines, (line) -> line.match(/\\label\{[^\}\n\\]{0,80}\}/))
-						@scheduleLoadLabelsFromOpenDoc()
-					if commandFragment? and commandFragment.length > 2
-						if commandFragment.startsWith('\\label{')
-							@scheduleLoadLabelsFromOpenDoc()
 				if (
-					change.action == "insert" and
-					end.row == cursorPosition.row and
-					end.column == cursorPosition.column + 1
+					change.action in ['remove', 'insert'] and
+					((_.any(change.lines, (line) -> line.match(/\\label\{[^\}\n\\]{0,80}\}/))) or
+					 (commandFragment?.length > 2 and commandFragment.startsWith('\\label{')))
 				)
-					if commandFragment? and commandFragment.length > 2
-						if commandFragment.startsWith('\\label{')
-							@scheduleLoadLabelsFromOpenDoc()
+					@scheduleLoadLabelsFromOpenDoc()
 
 			@editor.on "changeSession", (e) =>
 				e.oldSession.off "change", onChange
