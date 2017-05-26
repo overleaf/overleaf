@@ -9,7 +9,6 @@ define [
 	"ide/pdf/PdfManager"
 	"ide/binary-files/BinaryFilesManager"
 	"ide/references/ReferencesManager"
-	"ide/editor/directives/aceEditor/labels/LabelsManager"
 	"ide/review-panel/ReviewPanelManager"
 	"ide/SafariScrollPatcher"
 	"ide/FeatureOnboardingController"
@@ -46,7 +45,6 @@ define [
 	PdfManager
 	BinaryFilesManager
 	ReferencesManager
-	LabelsManager
 	ReviewPanelManager
 	SafariScrollPatcher
 ) ->
@@ -120,7 +118,6 @@ define [
 		ide.$scope = $scope
 
 		ide.referencesSearchManager = new ReferencesManager(ide, $scope)
-		ide.labelsSearchManager = new LabelsManager(ide, $scope)
 		ide.connectionManager = new ConnectionManager(ide, $scope)
 		ide.fileTreeManager = new FileTreeManager(ide, $scope)
 		ide.editorManager = new EditorManager(ide, $scope)

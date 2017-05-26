@@ -13,7 +13,7 @@ define [
 			return null
 
 	class AutoCompleteManager
-		constructor: (@$scope, @editor) ->
+		constructor: (@$scope, @editor, @element, @labelsManager) ->
 			@suggestionManager = new SuggestionManager()
 
 			@monkeyPatchAutocomplete()
@@ -30,8 +30,6 @@ define [
 			@editor.on "changeSession", (e) =>
 				e.oldSession.off "change", onChange
 				e.session.on "change", onChange
-
-			@labelsManager = @$scope.$root._labels
 
 		enable: () ->
 			@editor.setOptions({
@@ -62,8 +60,7 @@ define [
 								meta: "cross-reference",
 								score: 11000
 							}
-							labels = labelsManager.getAllLabels()
-							for label in labels
+							for label in labelsManager.getAllLabels()
 								result.push {
 									caption: "\\ref{#{label}#{if needsClosingBrace then '}' else ''}",
 									value: "\\ref{#{label}#{if needsClosingBrace then '}' else ''}",
@@ -124,16 +121,6 @@ define [
 			range = new Range(end.row, 0, end.row, end.column)
 			lineUpToCursor = @editor.getSession().getTextRange(range)
 			commandFragment = getLastCommandFragment(lineUpToCursor)
-
-			# Check if user has backspaced/deleted a highlighted region of text
-			# and see if that contains a `\label{}`
-			if change.action == 'remove'
-				if _.any(change.lines, (line) -> line.match(/\\label\{[^\}\n\\]{0,80}\}/))
-					@labelsManager.scheduleLoadLabelsFromOpenDoc()
-				if commandFragment? and commandFragment.length > 2
-					if commandFragment.startsWith('\\label{')
-						@labelsManager.scheduleLoadLabelsFromOpenDoc()
-
 			# Check that this change was made by us, not a collaborator
 			# (Cursor is still one place behind)
 			# NOTE: this is also the case when a user backspaces over a highlighted region
@@ -143,8 +130,6 @@ define [
 				end.column == cursorPosition.column + 1
 			)
 				if commandFragment? and commandFragment.length > 2
-					if commandFragment.startsWith('\\label{')
-						@labelsManager.scheduleLoadLabelsFromOpenDoc()
 					setTimeout () =>
 						@editor.execCommand("startAutocomplete")
 					, 0
