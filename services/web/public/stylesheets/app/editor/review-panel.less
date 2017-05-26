@@ -963,6 +963,45 @@
 		}
 	}
 
+.review-panel-toggler {
+	// display: none;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	width: 10px;
+	opacity: 0.5;
+	color: @rp-highlight-blue;
+	z-index: 1;
+	background-color: transparent;
+	transition: background 0.1s;
+
+	.rp-size-expanded & {
+		&::after {
+			content: "\f105";
+		}
+	}
+
+	&:hover,
+	&:focus {
+		color: @rp-highlight-blue;
+		background-color: #FFF;
+	}
+
+	&::after {
+		content: "\f104";
+		font-family: FontAwesome;
+		line-height: 1;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		font-size: 16px;
+		display: block;
+		position: absolute;
+		top: 50%;
+		width: 100%;
+		text-align: center;
+		margin-top: -0.5em;
+	}
+}
 // Helper class for elements which aren't treated as flex-items by IE10, e.g:
 // * inline items;
 // * unknown elements (elements which aren't standard DOM elements, such as custom element directives)
