@@ -5,9 +5,10 @@ redis = require("redis-sharelatex")
 
 UpdateManager = require('./UpdateManager')
 Metrics = require('./Metrics')
+RateLimitManager = require('./RateLimitManager')
 
 module.exports = DispatchManager =
-	createDispatcher: () ->
+	createDispatcher: (RateLimiter) ->
 		client = redis.createClient(Settings.redis.realtime)
 		worker = {
 			client: client
@@ -20,11 +21,11 @@ module.exports = DispatchManager =
 					[list_name, doc_key] = result
 					[project_id, doc_id] = Keys.splitProjectIdAndDocId(doc_key)
 					# Dispatch this in the background
-					Metrics.gauge "processingUpdates", "+1"  # increments/decrements gauge with +/- sign
-					UpdateManager.processOutstandingUpdatesWithLock project_id, doc_id, (error) ->
-						Metrics.gauge "processingUpdates", "-1"
-						logger.error err: error, project_id: project_id, doc_id: doc_id, "error processing update" if error?
-					callback()
+					backgroundTask = (cb) ->
+						UpdateManager.processOutstandingUpdatesWithLock project_id, doc_id, (error) ->
+							logger.error err: error, project_id: project_id, doc_id: doc_id, "error processing update" if error?
+							cb()
+					RateLimiter.run backgroundTask, callback
 						
 			run: () ->
 				return if Settings.shuttingDown
@@ -39,6 +40,7 @@ module.exports = DispatchManager =
 		return worker
 		
 	createAndStartDispatchers: (number) ->
+		RateLimiter = new RateLimitManager(number)
 		for i in [1..number]
-			worker = DispatchManager.createDispatcher()
+			worker = DispatchManager.createDispatcher(RateLimiter)
 			worker.run()

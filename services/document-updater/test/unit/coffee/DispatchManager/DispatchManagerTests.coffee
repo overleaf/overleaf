@@ -14,6 +14,7 @@ describe "DispatchManager", ->
 					realtime: {}
 			"redis-sharelatex": @redis = {}
 		@callback = sinon.stub()
+		@RateLimiter = { run: (task,cb) -> task(cb) } # run task without rate limit
 
 	describe "each worker", ->
 		beforeEach ->
@@ -21,7 +22,7 @@ describe "DispatchManager", ->
 				auth: sinon.stub()
 			@redis.createClient = sinon.stub().returns @client
 			
-			@worker = @DispatchManager.createDispatcher()
+			@worker = @DispatchManager.createDispatcher(@RateLimiter)
 			
 		it "should create a new redis client", ->
 			@redis.createClient.called.should.equal true
