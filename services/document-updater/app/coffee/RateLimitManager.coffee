@@ -11,17 +11,19 @@ module.exports = class RateLimiter
 
 	_adjustLimitUp: () ->
 		@CurrentWorkerLimit += 0.1 # allow target worker limit to increase gradually
+		Metrics.gauge "currentLimit", Math.ceil(@CurrentWorkerLimit)
 
 	_adjustLimitDown: () ->
 		@CurrentWorkerLimit = Math.max @BaseWorkerCount, (@CurrentWorkerLimit * 0.9)
 		logger.log {currentLimit: Math.ceil(@CurrentWorkerLimit)}, "reducing rate limit"
+		Metrics.gauge "currentLimit", Math.ceil(@CurrentWorkerLimit)
 
 	_trackAndRun: (task, callback = () ->) ->
 		@ActiveWorkerCount++
-		Metrics.gauge "processingUpdates", "+1"  # increments/decrements gauge with +/- sign
+		Metrics.gauge "processingUpdates", @ActiveWorkerCount
 		task (err) =>
 			@ActiveWorkerCount--
-			Metrics.gauge "processingUpdates", "-1"
+			Metrics.gauge "processingUpdates", @ActiveWorkerCount
 			callback(err)
 
 	run: (task, callback) ->
