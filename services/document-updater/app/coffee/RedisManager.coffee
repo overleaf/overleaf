@@ -115,7 +115,7 @@ module.exports = RedisManager =
 				return callback(new Errors.NotFoundError("document not found"))
 
 			# doc is not in redis, bail out
-			if !lines?
+			if !docLines?
 				return callback null, docLines, version, ranges
 
 			# doc should be in project set, check if missing (workaround for missing docs from putDoc)
