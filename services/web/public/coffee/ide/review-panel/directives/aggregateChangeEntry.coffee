@@ -13,7 +13,7 @@ define [
 			onIndicatorClick: "&"
 			onBodyClick: "&"
 		link: (scope, element, attrs) ->
-			scope.contentLimit = 40
+			scope.contentLimit = 35
 			scope.isCollapsed = true
 			scope.needsCollapsing = false
 
@@ -26,5 +26,5 @@ define [
 				$timeout () ->
 					scope.$emit "review-panel:layout"
 
-			# scope.$watch "entry.content.length", (contentLength) ->
-			# 	scope.needsCollapsing = contentLength > scope.contentLimit
+			scope.$watch "entry.content.length + entry.metadata.agg_op.content.length", (contentLength) ->
+					scope.needsCollapsing = contentLength > scope.contentLimit

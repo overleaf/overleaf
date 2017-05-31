@@ -225,6 +225,7 @@ define [
 			
 			changed = false
 
+
 			# Assume we'll delete everything until we see it, then we'll remove it from this object
 			delete_changes = {}
 			for change_id, change of entries
@@ -233,22 +234,39 @@ define [
 			for change_id, change of resolvedComments
 				delete_changes[change_id] = true 
 
+			potential_aggregate = false
+			prev_insertion = null
+
 			for change in rangesTracker.changes
 				changed = true
+				aggregate_entry = false
 				delete delete_changes[change.id]
 				entries[change.id] ?= {}
-					
-				# Update in place to avoid a full DOM redraw via angular
-				metadata = {}
-				metadata[key] = value for key, value of change.metadata
+				
+				if potential_aggregate and change.op.d and change.op.p == prev_insertion.op.p + prev_insertion.op.i.length
+					aggregate_entry = true
+
 				new_entry = {
 					type: if change.op.i then "insert" else "delete"
 					content: change.op.i or change.op.d
 					offset: change.op.p
 					metadata: change.metadata
 				}
+
+				if aggregate_entry
+					new_entry.type = "agg-change"
+					new_entry.metadata.agg_op = entries[prev_insertion.id]
+					delete entries[prev_insertion.id]
+
 				for key, value of new_entry
 					entries[change.id][key] = value
+
+				if change.op.i
+					potential_aggregate = true
+					prev_insertion = change
+				else
+					potential_aggregate = false
+					prev_insertion = null
 
 				if !$scope.users[change.metadata.user_id]?
 					refreshChangeUsers(change.metadata.user_id)
