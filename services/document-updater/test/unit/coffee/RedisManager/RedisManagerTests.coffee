@@ -58,7 +58,7 @@ describe "RedisManager", ->
 			@json_ranges = JSON.stringify @ranges
 			@rclient.get = sinon.stub()
 			@rclient.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version, @hash, @project_id, @json_ranges])
-			@rclient.sadd = sinon.stub().yields()
+			@rclient.sadd = sinon.stub().yields(null, 0)
 
 		describe "successfully", ->
 			beforeEach ->
@@ -84,6 +84,11 @@ describe "RedisManager", ->
 					.calledWith("Ranges:#{@doc_id}")
 					.should.equal true
 
+			it "should check if the document is in the DocsIn set", ->
+				@rclient.sadd
+					.calledWith("DocsIn:#{@project_id}")
+					.should.equal true
+
 			it 'should return the document', ->
 				@callback
 					.calledWith(null, @lines, @version, @ranges)
@@ -92,6 +97,40 @@ describe "RedisManager", ->
 			it 'should not log any errors', ->
 				@logger.error.calledWith()
 					.should.equal false
+
+		describe "when the document is not present", ->
+			beforeEach ->
+				@rclient.exec = sinon.stub().callsArgWith(0, null, [null, null, null, null, null])
+				@rclient.sadd = sinon.stub().yields()
+				@RedisManager.getDoc @project_id, @doc_id, @callback
+
+			it "should not check if the document is in the DocsIn set", ->
+				@rclient.sadd
+					.calledWith("DocsIn:#{@project_id}")
+					.should.equal false
+
+			it 'should return an empty result', ->
+				@callback
+					.calledWith(null, null, 0, {})
+					.should.equal true
+
+			it 'should not log any errors', ->
+				@logger.error.calledWith()
+					.should.equal false
+
+		describe "when the document is missing from the DocsIn set", ->
+			beforeEach ->
+				@rclient.sadd = sinon.stub().yields(null, 1)
+				@RedisManager.getDoc @project_id, @doc_id, @callback
+
+			it 'should log an error', ->
+				@logger.error.calledWith()
+					.should.equal true
+
+			it 'should return the document', ->
+				@callback
+					.calledWith(null, @lines, @version, @ranges)
+					.should.equal true
 
 		describe "with a corrupted document", ->
 			beforeEach ->
