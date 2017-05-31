@@ -201,16 +201,33 @@ module.exports = CompileManager =
 			logger.log project_id: project_id, user_id:user_id, page: page, h: h, v:v, stdout: stdout, "synctex pdf output"
 			callback null, CompileManager._parseSynctexFromPdfOutput(stdout, base_dir)
 
+	_checkFileExists: (path, callback = (error) ->) ->
+		synctexDir = Path.dirname(path)
+		synctexFile = Path.join(synctexDir, "output.synctex.gz")
+		fs.stat synctexDir, (error, stats) ->
+			if error?.code is 'ENOENT'
+				return callback(new Error("called synctex with no output directory"))
+			return callback(error) if error?
+			fs.stat synctexFile, (error, stats) ->
+				if error?.code is 'ENOENT'
+					return callback(new Error("called synctex with no output file"))
+				return callback(error) if error?
+				return callback(new Error("not a file")) if not stats?.isFile()
+				callback()
+
 	_runSynctex: (args, callback = (error, stdout) ->) ->
 		bin_path = Path.resolve(__dirname + "/../../bin/synctex")
 		seconds = 1000
-		if Settings.clsi?.synctexCommandWrapper?
-			[bin_path, args] = Settings.clsi?.synctexCommandWrapper bin_path, args
-		child_process.execFile bin_path, args, timeout: 10 * seconds, (error, stdout, stderr) ->
-			if error?
-				logger.err err:error, args:args, "error running synctex"
-				return callback(error)
-			callback(null, stdout)
+		outputFilePath = args[1]
+		CompileManager._checkFileExists outputFilePath, (error) ->
+			return callback(error) if error?
+			if Settings.clsi?.synctexCommandWrapper?
+				[bin_path, args] = Settings.clsi?.synctexCommandWrapper bin_path, args
+			child_process.execFile bin_path, args, timeout: 10 * seconds, (error, stdout, stderr) ->
+				if error?
+					logger.err err:error, args:args, "error running synctex"
+					return callback(error)
+				callback(null, stdout)
 
 	_parseSynctexFromCodeOutput: (output) ->
 		results = []
