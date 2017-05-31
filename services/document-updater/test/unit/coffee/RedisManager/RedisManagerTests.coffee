@@ -58,6 +58,7 @@ describe "RedisManager", ->
 			@json_ranges = JSON.stringify @ranges
 			@rclient.get = sinon.stub()
 			@rclient.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version, @hash, @project_id, @json_ranges])
+			@rclient.sadd = sinon.stub().yields()
 
 		describe "successfully", ->
 			beforeEach ->

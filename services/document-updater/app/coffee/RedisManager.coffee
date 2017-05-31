@@ -113,7 +113,17 @@ module.exports = RedisManager =
 			if doc_project_id? and doc_project_id isnt project_id
 				logger.error project_id: project_id, doc_id: doc_id, doc_project_id: doc_project_id, "doc not in project"
 				return callback(new Errors.NotFoundError("document not found"))
-			callback null, docLines, version, ranges
+
+			# doc is not in redis, bail out
+			if !lines?
+				return callback null, docLines, version, ranges
+
+			# doc should be in project set, check if missing (workaround for missing docs from putDoc)
+			rclient.sadd keys.docsInProject(project_id:project_id), doc_id, (error, result) ->
+				return callback(error) if error?
+				if result isnt 0 # doc should already be in set
+					logger.error project_id: project_id, doc_id: doc_id, doc_project_id: doc_project_id, "doc missing from docsInProject set"
+				callback null, docLines, version, ranges
 
 	getDocVersion: (doc_id, callback = (error, version) ->) ->
 		rclient.get keys.docVersion(doc_id: doc_id), (error, version) ->
