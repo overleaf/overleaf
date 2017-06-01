@@ -247,7 +247,12 @@ define [
 				delete delete_changes[change.id]
 				entries[change.id] ?= {}
 				
-				if potential_aggregate and change.op.d and change.op.p == prev_insertion.op.p + prev_insertion.op.i.length
+				if (
+					potential_aggregate and 
+					change.op.d and 
+					change.op.p == prev_insertion.op.p + prev_insertion.op.i.length and
+					change.metadata.user_id == prev_insertion.metadata.user_id
+				)
 					aggregate_entry = true
 
 				new_entry = {
