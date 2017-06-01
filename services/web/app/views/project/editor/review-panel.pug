@@ -8,20 +8,20 @@
 		) !{translate("track_changes_is_on")}
 		a.rp-bulk-actions-btn(
 			href
-			ng-if="reviewPanel.selectedEntryIds.length > 1"
+			ng-if="reviewPanel.nVisibleSelectedChanges > 1"
 			ng-click="showBulkAcceptDialog();"
 		) 
 			i.fa.fa-check
 			| &nbsp;#{translate("accept_all")}
-			| ({{ reviewPanel.selectedEntryIds.length }})
+			| ({{ reviewPanel.nVisibleSelectedChanges }})
 		a.rp-bulk-actions-btn(
 			href
-			ng-if="reviewPanel.selectedEntryIds.length > 1"
+			ng-if="reviewPanel.nVisibleSelectedChanges > 1"
 			ng-click="showBulkRejectDialog();"
 		) 
 			i.fa.fa-times
 			| &nbsp;#{translate("reject_all")}
-			| ({{ reviewPanel.selectedEntryIds.length }})
+			| ({{ reviewPanel.nVisibleSelectedChanges }})
 		a.rp-add-comment-btn(
 			href
 			ng-if="reviewPanel.entries[editor.open_doc_id]['add-comment'] != null"
@@ -117,7 +117,7 @@
 					bulk-actions-entry(
 						on-bulk-accept="showBulkAcceptDialog();"
 						on-bulk-reject="showBulkRejectDialog();"
-						n-entries="reviewPanel.selectedEntryIds.length"
+						n-entries="reviewPanel.nVisibleSelectedChanges"
 					)
 
 	.rp-entry-list(

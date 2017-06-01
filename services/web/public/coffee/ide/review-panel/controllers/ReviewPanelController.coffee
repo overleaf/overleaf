@@ -230,7 +230,6 @@ define [
 			
 			changed = false
 
-
 			# Assume we'll delete everything until we see it, then we'll remove it from this object
 			delete_changes = {}
 			for change_id, change of entries
@@ -321,8 +320,7 @@ define [
 			# All selected changes will be added to this array.
 			$scope.reviewPanel.selectedEntryIds = []
 			# Count of user-visible changes, i.e. an aggregated change will count as one.
-			$scope.nVisibleSelectedChanges = 0
-			console.log selection_offset_start, selection_offset_end
+			$scope.reviewPanel.nVisibleSelectedChanges = 0
 			delete entries["add-comment"]
 			delete entries["bulk-actions"]
 
@@ -344,11 +342,22 @@ define [
 				else if entry.type == "insert"
 					isEntryWithinSelection = entry.offset >= selection_offset_start and entry.offset + entry.content.length <= selection_offset_end
 					entry.focused = (entry.offset <= selection_offset_start <= entry.offset + entry.content.length)
-					$scope.reviewPanel.selectedEntryIds.push id if isEntryWithinSelection
+					if isEntryWithinSelection
+						$scope.reviewPanel.selectedEntryIds.push id 
+						$scope.reviewPanel.nVisibleSelectedChanges++
 				else if entry.type == "delete"
 					isEntryWithinSelection = selection_offset_start <= entry.offset <= selection_offset_end
 					entry.focused = (entry.offset == selection_offset_start)
-					$scope.reviewPanel.selectedEntryIds.push id if isEntryWithinSelection
+					if isEntryWithinSelection
+						$scope.reviewPanel.selectedEntryIds.push id 
+						$scope.reviewPanel.nVisibleSelectedChanges++
+				else if entry.type == "agg-change"
+					isEntryWithinSelection = entry.offset >= selection_offset_start and entry.offset + entry.content.length <= selection_offset_end
+					entry.focused = (entry.offset <= selection_offset_start <= entry.offset + entry.content.length)
+					if isEntryWithinSelection
+						$scope.reviewPanel.selectedEntryIds.push id, entry.metadata.agg_op_id
+						$scope.reviewPanel.nVisibleSelectedChanges++
+
 				else if entry.type in [ "add-comment", "bulk-actions" ] and selection
 					entry.focused = true
 			
@@ -406,7 +415,7 @@ define [
 				controller: "BulkActionsModalController"
 				resolve:
 					isAccept: () -> isAccept
-					nChanges: () -> $scope.reviewPanel.selectedEntryIds.length
+					nChanges: () -> $scope.reviewPanel.nVisibleSelectedChanges
 				scope: $scope.$new()
 			}).result.then (isAccept) ->
 				if isAccept
