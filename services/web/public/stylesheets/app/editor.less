@@ -35,11 +35,8 @@
 }
 
 .global-alerts {
-	position: absolute;
-	z-index: 20;
-	top: 2px;
-	left: 0;
-	right: 0;
+	height: 0;
+	margin-top: 2px;
 	text-align: center;
 
 	.alert {
@@ -49,6 +46,8 @@
 		padding: (@line-height-computed / 4);
 		font-size: 14px;
 		margin-bottom: (@line-height-computed / 4);
+		position: relative;
+		z-index: 20;
 	}
 }
 	#try-reconnect-now-button {
