@@ -256,6 +256,7 @@ define [
 				if aggregate_entry
 					new_entry.type = "agg-change"
 					new_entry.metadata.agg_op = entries[prev_insertion.id]
+					new_entry.metadata.agg_op_id = prev_insertion.id
 					delete entries[prev_insertion.id]
 
 				for key, value of new_entry
@@ -356,10 +357,23 @@ define [
 			$scope.$broadcast "change:reject", entry_id
 			event_tracking.sendMB "rp-change-rejected", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
 		
+		$scope.acceptAggChange = (entry_id1, entry_id2) ->
+			_doAcceptMultipleChanges [ entry_id1, entry_id2 ]
+			event_tracking.sendMB "rp-agg-change-accepted", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
+
+		$scope.rejectAggChange = (entry_id1, entry_id2) ->
+			_doRejectMultipleChanges [ entry_id1, entry_id2 ]
+			event_tracking.sendMB "rp-agg-change-rejected", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
+
+		_doAcceptMultipleChanges = (change_ids) ->
+			$http.post "/project/#{$scope.project_id}/doc/#{$scope.editor.open_doc_id}/changes/accept", { change_ids, _csrf: window.csrfToken}
+			$scope.$broadcast "change:bulk-accept", change_ids
+
+		_doRejectMultipleChanges = (change_ids) ->
+			$scope.$broadcast "change:bulk-reject", change_ids
+
 		bulkAccept = () ->
-			entry_ids = $scope.reviewPanel.selectedEntryIds.slice()
-			$http.post "/project/#{$scope.project_id}/doc/#{$scope.editor.open_doc_id}/changes/accept", { change_ids: entry_ids, _csrf: window.csrfToken}
-			$scope.$broadcast "change:bulk-accept", entry_ids
+			_doAcceptMultipleChanges $scope.reviewPanel.selectedEntryIds.slice()
 			$scope.reviewPanel.selectedEntryIds = []
 			event_tracking.sendMB "rp-bulk-accept", { 
 				view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini',  
@@ -367,7 +381,7 @@ define [
 			}
 
 		bulkReject = () ->
-			$scope.$broadcast "change:bulk-reject", $scope.reviewPanel.selectedEntryIds.slice()
+			_doRejectMultipleChanges $scope.reviewPanel.selectedEntryIds.slice()
 			$scope.reviewPanel.selectedEntryIds = []
 			event_tracking.sendMB "rp-bulk-reject", { 
 				view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini',  

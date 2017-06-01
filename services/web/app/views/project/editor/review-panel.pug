@@ -86,8 +86,8 @@
 					aggregate-change-entry(
 						entry="entry"
 						user="users[entry.metadata.user_id]"
-						on-reject="rejectChange(entry_id);"
-						on-accept="acceptChange(entry_id);"
+						on-reject="rejectAggChange(entry_id, entry.metadata.agg_op_id);"
+						on-accept="acceptAggChange(entry_id, entry.metadata.agg_op_id);"
 						on-indicator-click="toggleReviewPanel();"
 						on-body-click="gotoEntry(editor.open_doc_id, entry)"
 						permissions="permissions"
@@ -264,13 +264,11 @@ script(type='text/ng-template', id='aggregateChangeEntryTemplate')
 						del.rp-content-highlight {{ entry.content }}
 						|  for 
 						ins.rp-content-highlight {{ entry.metadata.agg_op.content }}
-						//- span(ng-switch-when="insert") #{translate("tracked_change_added")}&nbsp;
-						//- 	ins.rp-content-highlight {{ entry.content | limitTo:(isCollapsed ? contentLimit : entry.content.length) }}
-						//- 	a.rp-collapse-toggle(
-						//- 		href
-						//- 		ng-if="needsCollapsing"
-						//- 		ng-click="toggleCollapse();"
-						//- 	) {{ isCollapsed ? '... (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
+						a.rp-collapse-toggle(
+							href
+							ng-if="needsCollapsing"
+							ng-click="toggleCollapse();"
+						) {{ isCollapsed ? '... (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
 					.rp-entry-metadata
 						| {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}&nbsp;&bull;&nbsp;
 						span.rp-entry-user(style="color: hsl({{ user.hue }}, 70%, 40%);") {{ user.name }} 
