@@ -9,6 +9,7 @@ define [
 			$modal.open {
 				templateUrl: "hotkeysModalTemplate"
 				controller:  "HotkeysModalController"
+				size: "lg"
 			}
 		
 	App.controller "HotkeysModalController", ($scope, $modalInstance)->

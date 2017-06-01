@@ -29,7 +29,10 @@
 		) 
 			i.fa.fa-comment
 			| &nbsp;#{translate("add_comment")}
-
+	a.review-panel-toggler(
+		href
+		ng-click="handleTogglerClick($event);"
+	)
 	.review-panel-toolbar
 		resolved-comments-dropdown(
 			class="rp-flex-block"
