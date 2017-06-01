@@ -337,29 +337,25 @@ define [
 				}
 			
 			for id, entry of entries
+				isChangeEntryAndWithinSelection = false
 				if entry.type == "comment" and not $scope.reviewPanel.resolvedThreadIds[entry.thread_id]
 					entry.focused = (entry.offset <= selection_offset_start <= entry.offset + entry.content.length)
 				else if entry.type == "insert"
-					isEntryWithinSelection = entry.offset >= selection_offset_start and entry.offset + entry.content.length <= selection_offset_end
+					isChangeEntryAndWithinSelection = entry.offset >= selection_offset_start and entry.offset + entry.content.length <= selection_offset_end
 					entry.focused = (entry.offset <= selection_offset_start <= entry.offset + entry.content.length)
-					if isEntryWithinSelection
-						$scope.reviewPanel.selectedEntryIds.push id 
-						$scope.reviewPanel.nVisibleSelectedChanges++
 				else if entry.type == "delete"
-					isEntryWithinSelection = selection_offset_start <= entry.offset <= selection_offset_end
+					isChangeEntryAndWithinSelection = selection_offset_start <= entry.offset <= selection_offset_end
 					entry.focused = (entry.offset == selection_offset_start)
-					if isEntryWithinSelection
-						$scope.reviewPanel.selectedEntryIds.push id 
-						$scope.reviewPanel.nVisibleSelectedChanges++
 				else if entry.type == "agg-change"
-					isEntryWithinSelection = entry.offset >= selection_offset_start and entry.offset + entry.content.length <= selection_offset_end
+					isChangeEntryAndWithinSelection = entry.offset >= selection_offset_start and entry.offset + entry.content.length <= selection_offset_end
 					entry.focused = (entry.offset <= selection_offset_start <= entry.offset + entry.content.length)
-					if isEntryWithinSelection
-						$scope.reviewPanel.selectedEntryIds.push id, entry.metadata.agg_op_id
-						$scope.reviewPanel.nVisibleSelectedChanges++
-
 				else if entry.type in [ "add-comment", "bulk-actions" ] and selection
 					entry.focused = true
+
+				if isChangeEntryAndWithinSelection
+					$scope.reviewPanel.selectedEntryIds.push id
+					$scope.reviewPanel.selectedEntryIds.push entry.metadata.agg_op_id if entry.type == "agg-change"
+					$scope.reviewPanel.nVisibleSelectedChanges++
 			
 			$scope.$broadcast "review-panel:recalculate-screen-positions"
 			$scope.$broadcast "review-panel:layout"
@@ -391,17 +387,19 @@ define [
 		bulkAccept = () ->
 			_doAcceptMultipleChanges $scope.reviewPanel.selectedEntryIds.slice()
 			$scope.reviewPanel.selectedEntryIds = []
+			$scope.reviewPanel.nVisibleSelectedChanges = 0
 			event_tracking.sendMB "rp-bulk-accept", { 
 				view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini',  
-				nEntries: $scope.reviewPanel.selectedEntryIds.length
+				nEntries: $scope.reviewPanel.nVisibleSelectedChanges
 			}
 
 		bulkReject = () ->
 			_doRejectMultipleChanges $scope.reviewPanel.selectedEntryIds.slice()
 			$scope.reviewPanel.selectedEntryIds = []
+			$scope.reviewPanel.nVisibleSelectedChanges = 0
 			event_tracking.sendMB "rp-bulk-reject", { 
 				view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini',  
-				nEntries: $scope.reviewPanel.selectedEntryIds.length
+				nEntries: $scope.reviewPanel.nVisibleSelectedChanges
 			}
 
 		$scope.showBulkAcceptDialog = () ->
