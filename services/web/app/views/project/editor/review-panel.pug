@@ -261,9 +261,9 @@ script(type='text/ng-template', id='aggregateChangeEntryTemplate')
 				.rp-entry-details
 					.rp-entry-description
 						| Changed 
-						del.rp-content-highlight {{ entry.content }}
+						del.rp-content-highlight {{ entry.metadata.agg_op.content }}
 						|  for 
-						ins.rp-content-highlight {{ entry.metadata.agg_op.content }}
+						ins.rp-content-highlight {{ entry.content }}
 						a.rp-collapse-toggle(
 							href
 							ng-if="needsCollapsing"

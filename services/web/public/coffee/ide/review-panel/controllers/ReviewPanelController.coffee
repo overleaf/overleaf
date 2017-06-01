@@ -26,7 +26,12 @@ define [
 			resolvedThreadIds: {}
 			rendererData: {}
 			loadingThreads: false
-			selectedEntryIds: []
+			# All selected changes. If a aggregated change (insertion + deletion) is selection, the two ids
+			# will be present. The length of this array will differ from the count below (see explanation).
+			selectedEntryIds: [] 
+			# A count of user-facing selected changes. An aggregated change (insertion + deletion) will count
+			# as only one.
+			nVisibleSelectedChanges: 0
 
 		window.addEventListener "beforeunload", () ->
 			collapsedStates = {}
@@ -254,13 +259,12 @@ define [
 				}
 
 				if aggregate_entry
-					new_entry.type = "agg-change"
-					new_entry.metadata.agg_op = entries[prev_insertion.id]
-					new_entry.metadata.agg_op_id = prev_insertion.id
-					delete entries[prev_insertion.id]
-
-				for key, value of new_entry
-					entries[change.id][key] = value
+					entries[prev_insertion.id].type = "agg-change"
+					entries[prev_insertion.id].metadata.agg_op = new_entry
+					entries[prev_insertion.id].metadata.agg_op_id = change.id
+				else
+					for key, value of new_entry
+						entries[change.id][key] = value
 
 				if change.op.i
 					potential_aggregate = true
@@ -314,8 +318,11 @@ define [
 		$scope.$on "editor:focus:changed", (e, selection_offset_start, selection_offset_end, selection) ->
 			doc_id = $scope.editor.open_doc_id
 			entries = getDocEntries(doc_id)
+			# All selected changes will be added to this array.
 			$scope.reviewPanel.selectedEntryIds = []
-
+			# Count of user-visible changes, i.e. an aggregated change will count as one.
+			$scope.nVisibleSelectedChanges = 0
+			console.log selection_offset_start, selection_offset_end
 			delete entries["add-comment"]
 			delete entries["bulk-actions"]
 
