@@ -12,6 +12,9 @@ define [
 	class LabelsManager
 		constructor: (@$scope, @editor, @element) ->
 
+			window.GET_LABELS = () =>
+				@loadProjectLabelsFromServer()
+
 			@state =
 				documents: {} # map of DocId => List[Label]
 
@@ -35,9 +38,21 @@ define [
 				e.session.on "change", onChange
 				setTimeout(
 					() =>
-						@scheduleLoadLabelsFromOpenDoc()
+						# @scheduleLoadLabelsFromOpenDoc()
+						@loadProjectLabelsFromServer()
 					, 0
 				)
+
+		loadProjectLabelsFromServer: () ->
+			$.get(
+				"/project/#{window.project_id}/labels"
+				, (data) =>
+					console.log ">>", data
+					if data.labels
+						for docId, docLabels of data.labels
+							@state.documents[docId] = docLabels
+					console.log @state.documents
+			)
 
 		loadLabelsFromOpenDoc: () ->
 			docId = @$scope.docId
