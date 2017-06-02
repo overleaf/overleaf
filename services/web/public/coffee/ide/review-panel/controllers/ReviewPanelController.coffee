@@ -263,7 +263,7 @@ define [
 				}
 
 				if aggregate_entry
-					entries[prev_insertion.id].type = "agg-change"
+					entries[prev_insertion.id].type = "aggregate-change"
 					entries[prev_insertion.id].metadata.agg_op = new_entry
 					entries[prev_insertion.id].metadata.agg_op_id = change.id
 				else
@@ -351,7 +351,7 @@ define [
 				else if entry.type == "delete"
 					isChangeEntryAndWithinSelection = selection_offset_start <= entry.offset <= selection_offset_end
 					entry.focused = (entry.offset == selection_offset_start)
-				else if entry.type == "agg-change"
+				else if entry.type == "aggregate-change"
 					isChangeEntryAndWithinSelection = entry.offset >= selection_offset_start and entry.offset + entry.content.length <= selection_offset_end
 					entry.focused = (entry.offset <= selection_offset_start <= entry.offset + entry.content.length)
 				else if entry.type in [ "add-comment", "bulk-actions" ] and selection
@@ -359,7 +359,7 @@ define [
 
 				if isChangeEntryAndWithinSelection
 					$scope.reviewPanel.selectedEntryIds.push id
-					$scope.reviewPanel.selectedEntryIds.push entry.metadata.agg_op_id if entry.type == "agg-change"
+					$scope.reviewPanel.selectedEntryIds.push entry.metadata.agg_op_id if entry.type == "aggregate-change"
 					$scope.reviewPanel.nVisibleSelectedChanges++
 			
 			$scope.$broadcast "review-panel:recalculate-screen-positions"

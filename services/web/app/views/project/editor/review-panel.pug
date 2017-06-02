@@ -82,7 +82,7 @@
 						permissions="permissions"
 					)
 
-				div(ng-if="entry.type === 'agg-change'")
+				div(ng-if="entry.type === 'aggregate-change'")
 					aggregate-change-entry(
 						entry="entry"
 						user="users[entry.metadata.user_id]"
@@ -158,7 +158,7 @@
 							permissions="permissions"
 						)
 
-					div(ng-if="entry.type === 'agg-change'")
+					div(ng-if="entry.type === 'aggregate-change'")
 						aggregate-change-entry(
 							entry="entry"
 							user="users[entry.metadata.user_id]"
