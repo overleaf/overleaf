@@ -49,6 +49,7 @@ module.exports = MongoAWS =
 			if uncompressedData.indexOf("\u0000") != -1
 				error = new Error("null bytes found in upload")
 				logger.error err: error, project_id: project_id, doc_id: doc_id, pack_id: pack_id, error.message
+				return callback(error)
 			zlib.gzip uncompressedData, (err, buf) ->
 				logger.log {project_id, doc_id, pack_id, origSize: uncompressedData.length, newSize: buf.length}, "compressed pack"
 				return callback(err) if err?
