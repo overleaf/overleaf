@@ -92,8 +92,9 @@ define [
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
 				trackChangesManager   = new TrackChangesManager(scope, editor, element)
-				labelsManager         = new LabelsManager(scope, editor, element)
-				autoCompleteManager   = new AutoCompleteManager(scope, editor, element, labelsManager)
+				if scope.name == 'editor'
+					labelsManager         = new LabelsManager(scope, editor, element)
+					autoCompleteManager   = new AutoCompleteManager(scope, editor, element, labelsManager)
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				editor.commands.addCommand

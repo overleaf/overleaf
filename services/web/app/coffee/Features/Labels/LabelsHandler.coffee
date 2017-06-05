@@ -1,4 +1,5 @@
 ProjectEntityHandler = require "../Project/ProjectEntityHandler"
+DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 
 
 module.exports = LabelsHandler =
@@ -16,13 +17,16 @@ module.exports = LabelsHandler =
 				callback(null, projectLabels)
 
 	getLabelsForDoc: (projectId, docId, callback=(err, docLabels)->) ->
-		ProjectEntityHandler.getDoc projectId, docId, (err, lines, rev) ->
+		DocumentUpdaterHandler.flushDocToMongo projectId, docId, (err) ->
 			if err?
 				return callback(err)
-			LabelsHandler.extractLabelsFromDoc lines, (err, docLabels) ->
+			ProjectEntityHandler.getDoc projectId, docId, (err, lines, rev) ->
 				if err?
 					return callback(err)
-				callback(null, docLabels)
+				LabelsHandler.extractLabelsFromDoc lines, (err, docLabels) ->
+					if err?
+						return callback(err)
+					callback(null, docLabels)
 
 	extractLabelsFromDoc: (lines, callback=(err, docLabels)->) ->
 		docLabels = []

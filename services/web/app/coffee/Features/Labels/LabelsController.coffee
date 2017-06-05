@@ -11,7 +11,7 @@ module.exports = LabelsController =
 			if err?
 				logger.err {project_id, err}, "[LabelsController] error getting all labels from project"
 				return next(err)
-			res.json {projectId: project_id, labels: projectLabels}
+			res.json {projectId: project_id, projectLabels: projectLabels}
 
 	getLabelsForDoc: (req, res, next) ->
 		project_id = req.params.Project_id
@@ -20,4 +20,7 @@ module.exports = LabelsController =
 			if err?
 				logger.err {project_id, doc_id, err}, "[LabelsController] error getting labels from doc"
 				return next(err)
+			EditorRealTimeController.emitToRoom project_id, 'doc:labels:updated', {
+				docId: doc_id, labels: docLabels
+			}
 			res.json {projectId: project_id, docId: doc_id, labels: docLabels}
