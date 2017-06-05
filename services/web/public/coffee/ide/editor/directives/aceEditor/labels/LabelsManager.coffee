@@ -27,6 +27,7 @@ define [
 				lineUpToCursor = @editor.getSession().getTextRange(range)
 				commandFragment = getLastCommandFragment(lineUpToCursor)
 				if (
+					!change.remote and
 					change.action in ['remove', 'insert'] and
 					((_.any(change.lines, (line) -> line.match(/\\label\{[^\}\n\\]{0,80}\}/))) or
 					 (commandFragment?.length > 2 and commandFragment.slice(0,7) == '\\label{'))
