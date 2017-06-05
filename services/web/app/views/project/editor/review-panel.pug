@@ -75,8 +75,8 @@
 					change-entry(
 						entry="entry"
 						user="users[entry.metadata.user_id]"
-						on-reject="rejectChanges([ entry_id ]);"
-						on-accept="acceptChanges([ entry_id ]);"
+						on-reject="rejectChanges(entry.entry_ids);"
+						on-accept="acceptChanges(entry.entry_ids);"
 						on-indicator-click="toggleReviewPanel();"
 						on-body-click="gotoEntry(editor.open_doc_id, entry)"
 						permissions="permissions"
@@ -86,8 +86,8 @@
 					aggregate-change-entry(
 						entry="entry"
 						user="users[entry.metadata.user_id]"
-						on-reject="rejectChanges([ entry_id, entry.metadata.agg_op_id ]);"
-						on-accept="acceptChanges([ entry_id, entry.metadata.agg_op_id ]);"
+						on-reject="rejectChanges(entry.entry_ids);"
+						on-accept="acceptChanges(entry.entry_ids);"
 						on-indicator-click="toggleReviewPanel();"
 						on-body-click="gotoEntry(editor.open_doc_id, entry)"
 						permissions="permissions"
@@ -256,7 +256,7 @@ script(type='text/ng-template', id='aggregateChangeEntryTemplate')
 				.rp-entry-details
 					.rp-entry-description
 						| Changed 
-						del.rp-content-highlight {{ entry.metadata.agg_op.content }}
+						del.rp-content-highlight {{ entry.metadata.replaced_content }}
 						|  for 
 						ins.rp-content-highlight {{ entry.content }}
 						a.rp-collapse-toggle(

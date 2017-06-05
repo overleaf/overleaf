@@ -224,20 +224,19 @@ define [
 
 			# Assume we'll delete everything until we see it, then we'll remove it from this object
 			delete_changes = {}
-			for change_id, change of entries
-				if change_id != "add-comment"
-					delete_changes[change_id] = true 
-			for change_id, change of resolvedComments
-				delete_changes[change_id] = true 
+			for id, change of entries
+				if id not in [ "add-comment", "bulk-actions" ]
+					for entry_id in change.entry_ids
+						delete_changes[entry_id] = true 
+			for id, change of resolvedComments
+				for entry_id in change.entry_ids
+					delete_changes[entry_id] = true 
 
 			potential_aggregate = false
 			prev_insertion = null
 
 			for change in rangesTracker.changes
 				changed = true
-				aggregate_entry = false
-				delete delete_changes[change.id]
-				entries[change.id] ?= {}
 				
 				if (
 					potential_aggregate and 
@@ -245,20 +244,20 @@ define [
 					change.op.p == prev_insertion.op.p + prev_insertion.op.i.length and
 					change.metadata.user_id == prev_insertion.metadata.user_id
 				)
-					aggregate_entry = true
-
-				new_entry = {
-					type: if change.op.i then "insert" else "delete"
-					content: change.op.i or change.op.d
-					offset: change.op.p
-					metadata: change.metadata
-				}
-
-				if aggregate_entry
+					# An actual aggregate op.
 					entries[prev_insertion.id].type = "aggregate-change"
-					entries[prev_insertion.id].metadata.agg_op = new_entry
-					entries[prev_insertion.id].metadata.agg_op_id = change.id
+					entries[prev_insertion.id].metadata.replaced_content = change.op.d
+					entries[prev_insertion.id].entry_ids.push change.id
 				else
+					entries[change.id] ?= {}
+					delete delete_changes[change.id]
+					new_entry = {
+						type: if change.op.i then "insert" else "delete"
+						entry_ids: [ change.id ]
+						content: change.op.i or change.op.d
+						offset: change.op.p
+						metadata: change.metadata
+					}
 					for key, value of new_entry
 						entries[change.id][key] = value
 
@@ -287,6 +286,7 @@ define [
 				new_entry = {
 					type: "comment"
 					thread_id: comment.op.t
+					entry_ids: [ comment.id ]
 					content: comment.op.c
 					offset: comment.op.p
 				}
@@ -350,30 +350,30 @@ define [
 					entry.focused = true
 
 				if isChangeEntryAndWithinSelection
-					$scope.reviewPanel.selectedEntryIds.push id
-					$scope.reviewPanel.selectedEntryIds.push entry.metadata.agg_op_id if entry.type == "aggregate-change"
+					for entry_id in entry.entry_ids
+						$scope.reviewPanel.selectedEntryIds.push entry_id
 					$scope.reviewPanel.nVisibleSelectedChanges++
 			
 			$scope.$broadcast "review-panel:recalculate-screen-positions"
 			$scope.$broadcast "review-panel:layout"
 
 		$scope.acceptChanges = (change_ids) ->
-			_doAcceptMultipleChanges change_ids
+			_doAcceptChanges change_ids
 			event_tracking.sendMB "rp-changes-accepted", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
 
 		$scope.rejectChanges = (change_ids) ->
-			_doRejectMultipleChanges change_ids
+			_doRejectChanges change_ids
 			event_tracking.sendMB "rp-changes-rejected", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
 
-		_doAcceptMultipleChanges = (change_ids) ->
+		_doAcceptChanges = (change_ids) ->
 			$http.post "/project/#{$scope.project_id}/doc/#{$scope.editor.open_doc_id}/changes/accept", { change_ids, _csrf: window.csrfToken}
 			$scope.$broadcast "changes:accept", change_ids
 
-		_doRejectMultipleChanges = (change_ids) ->
+		_doRejectChanges = (change_ids) ->
 			$scope.$broadcast "changes:reject", change_ids
 
 		bulkAccept = () ->
-			_doAcceptMultipleChanges $scope.reviewPanel.selectedEntryIds.slice()
+			_doAcceptChanges $scope.reviewPanel.selectedEntryIds.slice()
 			$scope.reviewPanel.selectedEntryIds = []
 			$scope.reviewPanel.nVisibleSelectedChanges = 0
 			event_tracking.sendMB "rp-bulk-accept", { 
@@ -382,7 +382,7 @@ define [
 			}
 
 		bulkReject = () ->
-			_doRejectMultipleChanges $scope.reviewPanel.selectedEntryIds.slice()
+			_doRejectChanges $scope.reviewPanel.selectedEntryIds.slice()
 			$scope.reviewPanel.selectedEntryIds = []
 			$scope.reviewPanel.nVisibleSelectedChanges = 0
 			event_tracking.sendMB "rp-bulk-reject", { 
