@@ -12,8 +12,7 @@ define [
 				# End of tracking code.
 				
 				data._csrf = window.csrfToken
-				ide.$http.post "/user/settings", data
-
+				return ide.$http.post "/user/settings", data
 
 			saveProjectSettings: (data) ->
 				# Tracking code.
@@ -24,9 +23,8 @@ define [
 				# End of tracking code.
 				
 				data._csrf = window.csrfToken
-				ide.$http.post "/project/#{ide.project_id}/settings", data
+				return ide.$http.post "/project/#{ide.project_id}/settings", data
 
-				
 			saveProjectAdminSettings: (data) ->
 				# Tracking code.
 				for key in Object.keys(data)
@@ -36,8 +34,6 @@ define [
 				# End of tracking code.
 				
 				data._csrf = window.csrfToken
-				ide.$http.post "/project/#{ide.project_id}/settings/admin", data
-
-				
+				return ide.$http.post "/project/#{ide.project_id}/settings/admin", data
 		}
 	]

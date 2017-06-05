@@ -80,6 +80,7 @@ describe 'ProjectEntityHandler', ->
 			'./ProjectUpdateHandler': @projectUpdater
 			"./ProjectGetter": @ProjectGetter
 			"settings-sharelatex":@settings
+			"../Cooldown/CooldownManager": @CooldownManager = {}
 
 
 	describe 'mkdirp', ->

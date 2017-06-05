@@ -176,7 +176,7 @@ module.exports = EditorController =
 					callback?()
 
 	renameProject: (project_id, newName, callback = (err) ->) ->
-		ProjectDetailsHandler.renameProject project_id, newName, ->
+		ProjectDetailsHandler.renameProject project_id, newName, (err) ->
 			if err?
 				logger.err err:err, project_id:project_id, newName:newName, "error renaming project"
 				return callback(err)

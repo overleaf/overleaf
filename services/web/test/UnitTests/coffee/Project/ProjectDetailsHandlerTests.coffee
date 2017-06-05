@@ -4,6 +4,7 @@ Errors = require "../../../../app/js/Features/Errors/Errors"
 SandboxedModule = require('sandboxed-module')
 sinon = require('sinon')
 assert = require("chai").assert
+expect = require("chai").expect
 require('chai').should()
 
 describe 'ProjectDetailsHandler', ->
@@ -95,6 +96,7 @@ describe 'ProjectDetailsHandler', ->
 
 	describe "renameProject", ->
 		beforeEach ->
+			@handler.validateProjectName = sinon.stub().yields()
 			@ProjectModel.update.callsArgWith(2)
 			@newName = "new name here"
 
@@ -108,7 +110,34 @@ describe 'ProjectDetailsHandler', ->
 			@handler.renameProject @project_id, @newName, =>
 				@tpdsUpdateSender.moveEntity.calledWith({project_id:@project_id, project_name:@project.name, newProjectName:@newName}).should.equal true
 				done()
+		
+		it "should not do anything with an invalid name", (done) ->
+			@handler.validateProjectName = sinon.stub().yields(new Error("invalid name"))
+			@handler.renameProject @project_id, @newName, =>
+				@tpdsUpdateSender.moveEntity.called.should.equal false
+				@ProjectModel.update.called.should.equal false
+				done()
 
+	describe "validateProjectName", ->
+		it "should reject empty names", (done) ->
+			@handler.validateProjectName "", (error) ->
+				expect(error).to.exist
+				done()
+
+		it "should reject empty names with /s", (done) ->
+			@handler.validateProjectName "foo/bar", (error) ->
+				expect(error).to.exist
+				done()
+
+		it "should reject long names", (done) ->
+			@handler.validateProjectName new Array(1000).join("a"), (error) ->
+				expect(error).to.exist
+				done()
+
+		it "should accept normal names", (done) ->
+			@handler.validateProjectName "foobar", (error) ->
+				expect(error).to.not.exist
+				done()
 
 	describe "setPublicAccessLevel", ->
 		beforeEach ->
