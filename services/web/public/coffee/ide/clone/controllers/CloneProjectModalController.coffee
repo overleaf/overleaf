@@ -24,7 +24,7 @@ define [
 			$scope.state.error = false
 			cloneProject($scope.inputs.projectName)
 				.success (data) ->
-					window.location = "/project/#{data.data.project_id}"
+					window.location = "/project/#{data.project_id}"
 				.error (body, statusCode) ->
 					$scope.state.inflight = false
 					if statusCode == 400
