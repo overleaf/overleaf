@@ -214,6 +214,8 @@ define [
 		rejectChangeIds: (change_ids) ->
 			changes = @rangesTracker.getChanges(change_ids)
 			return if changes.length == 0
+			changes.sort((a, b) -> b.op.p - a.op.p)
+
 			session = @editor.getSession()
 			for change in changes
 				if change.op.d?
