@@ -75,8 +75,8 @@
 					change-entry(
 						entry="entry"
 						user="users[entry.metadata.user_id]"
-						on-reject="rejectChange(entry_id);"
-						on-accept="acceptChange(entry_id);"
+						on-reject="rejectChanges([ entry_id ]);"
+						on-accept="acceptChanges([ entry_id ]);"
 						on-indicator-click="toggleReviewPanel();"
 						on-body-click="gotoEntry(editor.open_doc_id, entry)"
 						permissions="permissions"
@@ -86,8 +86,8 @@
 					aggregate-change-entry(
 						entry="entry"
 						user="users[entry.metadata.user_id]"
-						on-reject="rejectAggChange(entry_id, entry.metadata.agg_op_id);"
-						on-accept="acceptAggChange(entry_id, entry.metadata.agg_op_id);"
+						on-reject="rejectChanges([ entry_id, entry.metadata.agg_op_id ]);"
+						on-accept="acceptChanges([ entry_id, entry.metadata.agg_op_id ]);"
 						on-indicator-click="toggleReviewPanel();"
 						on-body-click="gotoEntry(editor.open_doc_id, entry)"
 						permissions="permissions"
@@ -153,7 +153,6 @@
 						change-entry(
 							entry="entry"
 							user="users[entry.metadata.user_id]"
-							on-indicator-click="toggleReviewPanel();"
 							ng-click="gotoEntry(doc.doc.id, entry)"
 							permissions="permissions"
 						)
@@ -162,10 +161,7 @@
 						aggregate-change-entry(
 							entry="entry"
 							user="users[entry.metadata.user_id]"
-							on-reject="rejectChange(entry_id);"
-							on-accept="acceptChange(entry_id);"
-							on-indicator-click="toggleReviewPanel();"
-							on-body-click="gotoEntry(editor.open_doc_id, entry)"
+							ng-click="gotoEntry(editor.open_doc_id, entry)"
 							permissions="permissions"
 						)
 
@@ -176,7 +172,6 @@
 							on-reply="submitReply(entry, entry_id);"
 							on-save-edit="saveEdit(entry.thread_id, comment)"
 							on-delete="deleteComment(entry.thread_id, comment)"
-							on-indicator-click="toggleReviewPanel();"
 							ng-click="gotoEntry(doc.doc.id, entry)"
 							permissions="permissions"
 						)
