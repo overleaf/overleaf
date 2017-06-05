@@ -79,7 +79,7 @@ define [
 			if doc_id != $scope.editor.open_doc_id
 				getChangeTracker(doc_id).removeChangeId(change_id)
 			else
-				$scope.$broadcast "change:accept", change_id
+				$scope.$broadcast "changes:accept", [ change_id ]
 			updateEntries(doc_id)
 			$scope.$apply () ->
 
@@ -87,7 +87,7 @@ define [
 			if doc_id != $scope.editor.open_doc_id
 				getChangeTracker(doc_id).removeChangeIds(change_ids)
 			else
-				$scope.$broadcast "change:bulk-accept", change_ids
+				$scope.$broadcast "changes:accept", change_ids
 			updateEntries(doc_id)
 			$scope.$apply () ->
 		
@@ -365,29 +365,20 @@ define [
 			$scope.$broadcast "review-panel:recalculate-screen-positions"
 			$scope.$broadcast "review-panel:layout"
 
-		$scope.acceptChange = (entry_id) ->
-			$http.post "/project/#{$scope.project_id}/doc/#{$scope.editor.open_doc_id}/changes/#{entry_id}/accept", {_csrf: window.csrfToken}
-			$scope.$broadcast "change:accept", entry_id
-			event_tracking.sendMB "rp-change-accepted", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
-		
-		$scope.rejectChange = (entry_id) ->
-			$scope.$broadcast "change:reject", entry_id
-			event_tracking.sendMB "rp-change-rejected", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
-		
-		$scope.acceptAggChange = (entry_id1, entry_id2) ->
-			_doAcceptMultipleChanges [ entry_id1, entry_id2 ]
-			event_tracking.sendMB "rp-agg-change-accepted", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
+		$scope.acceptChanges = (change_ids) ->
+			_doAcceptMultipleChanges change_ids
+			event_tracking.sendMB "rp-changes-accepted", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
 
-		$scope.rejectAggChange = (entry_id1, entry_id2) ->
-			_doRejectMultipleChanges [ entry_id1, entry_id2 ]
-			event_tracking.sendMB "rp-agg-change-rejected", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
+		$scope.rejectChanges = (change_ids) ->
+			_doRejectMultipleChanges change_ids
+			event_tracking.sendMB "rp-changes-rejected", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
 
 		_doAcceptMultipleChanges = (change_ids) ->
 			$http.post "/project/#{$scope.project_id}/doc/#{$scope.editor.open_doc_id}/changes/accept", { change_ids, _csrf: window.csrfToken}
-			$scope.$broadcast "change:bulk-accept", change_ids
+			$scope.$broadcast "changes:accept", change_ids
 
 		_doRejectMultipleChanges = (change_ids) ->
-			$scope.$broadcast "change:bulk-reject", change_ids
+			$scope.$broadcast "changes:reject", change_ids
 
 		bulkAccept = () ->
 			_doAcceptMultipleChanges $scope.reviewPanel.selectedEntryIds.slice()
@@ -410,7 +401,8 @@ define [
 		$scope.showBulkAcceptDialog = () ->
 			showBulkActionsDialog true
 
-		$scope.showBulkRejectDialog = () -> showBulkActionsDialog false
+		$scope.showBulkRejectDialog = () -> 
+			showBulkActionsDialog false
 
 		showBulkActionsDialog = (isAccept) ->
 			$modal.open({

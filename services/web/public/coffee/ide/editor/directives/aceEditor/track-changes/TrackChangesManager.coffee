@@ -26,16 +26,10 @@ define [
 			@$scope.$on "comment:select_line", (e) =>
 				@selectLineIfNoSelection()
 			
-			@$scope.$on "change:accept", (e, change_id) =>
-				@acceptChangeIds([ change_id ])
-			
-			@$scope.$on "change:reject", (e, change_id) =>
-				@rejectChangeIds([ change_id ])
-
-			@$scope.$on "change:bulk-accept", (e, change_ids) =>
+			@$scope.$on "changes:accept", (e, change_ids) =>
 				@acceptChangeIds(change_ids)
 
-			@$scope.$on "change:bulk-reject", (e, change_ids) =>
+			@$scope.$on "changes:reject", (e, change_ids) =>
 				@rejectChangeIds(change_ids)
 			
 			@$scope.$on "comment:remove", (e, comment_id) =>
