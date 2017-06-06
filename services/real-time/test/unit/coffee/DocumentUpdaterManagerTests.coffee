@@ -17,14 +17,17 @@ describe 'DocumentUpdaterManager', ->
 					pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
 		@rclient = {auth:->}
 			
-		@DocumentUpdaterManager = SandboxedModule.require modulePath, requires:
-			'settings-sharelatex':@settings
-			'logger-sharelatex': @logger = {log: sinon.stub(), error: sinon.stub(), warn: sinon.stub()}
-			'request': @request = {}
-			'redis-sharelatex' : createClient: () => @rclient
-			'metrics-sharelatex': @Metrics =
-				Timer: class Timer
-					done: () ->
+		@DocumentUpdaterManager = SandboxedModule.require modulePath,
+			requires:
+				'settings-sharelatex':@settings
+				'logger-sharelatex': @logger = {log: sinon.stub(), error: sinon.stub(), warn: sinon.stub()}
+				'request': @request = {}
+				'redis-sharelatex' : createClient: () => @rclient
+				'metrics-sharelatex': @Metrics =
+					Timer: class Timer
+						done: () ->
+			globals:
+				JSON: @JSON = Object.create(JSON) # avoid modifying JSON object directly
 
 	describe "getDocument", ->
 		beforeEach ->
@@ -147,3 +150,14 @@ describe 'DocumentUpdaterManager', ->
 
 			it "should return an error", ->
 				@callback.calledWithExactly(sinon.match(Error)).should.equal true
+
+		describe "with null byte corruption", ->
+			beforeEach ->
+				@JSON.stringify = () -> return '["bad bytes! \u0000 <- here"]'
+				@DocumentUpdaterManager.queueChange(@project_id, @doc_id, @change, @callback)
+
+			it "should return an error", ->
+				@callback.calledWithExactly(sinon.match(Error)).should.equal true
+
+			it "should not push the change onto the pending-updates-list queue", ->
+				@rclient.rpush.called.should.equal false

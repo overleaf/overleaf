@@ -54,6 +54,10 @@ module.exports = DocumentUpdaterManager =
 				
 	queueChange: (project_id, doc_id, change, callback = ()->)->
 		jsonChange = JSON.stringify change
+		if jsonChange.indexOf("\u0000") != -1
+			error = new Error("null bytes found in op")
+			logger.error err: error, project_id: project_id, doc_id: doc_id, jsonChange: jsonChange, error.message
+			return callback(error)
 		doc_key = "#{project_id}:#{doc_id}"
 		# Push onto pendingUpdates for doc_id first, because once the doc updater
 		# gets an entry on pending-updates-list, it starts processing.
