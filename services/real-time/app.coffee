@@ -1,12 +1,12 @@
 logger = require "logger-sharelatex"
 logger.initialize("real-time-sharelatex")
-if Settings.sentry?.dsn?
-	logger.initializeErrorReporting(Settings.sentry.dsn)
 
 express = require("express")
 session = require("express-session")
 redis = require("redis-sharelatex")
 Settings = require "settings-sharelatex"
+if Settings.sentry?.dsn?
+	logger.initializeErrorReporting(Settings.sentry.dsn)
 
 sessionRedisClient = redis.createClient(Settings.redis.websessions)
 
