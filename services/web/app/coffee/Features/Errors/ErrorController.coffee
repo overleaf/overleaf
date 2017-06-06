@@ -32,3 +32,11 @@ module.exports = ErrorController =
 		else
 			logger.error err: error, url:req.url, method:req.method, user:user, "error passed to top level next middlewear"
 			ErrorController.serverError req, res
+
+	handleApiError: (error, req, res, next) ->
+		if error instanceof Errors.NotFoundError
+			logger.warn {err: error, url: req.url}, "not found error"
+			res.sendStatus(404)
+		else
+			logger.error err: error, url:req.url, method:req.method, user:user, "error passed to top level next middlewear"
+			res.sendStatus(500)

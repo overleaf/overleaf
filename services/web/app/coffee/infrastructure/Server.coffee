@@ -164,11 +164,12 @@ server = require('http').createServer(app)
 # process api routes first, if nothing matched fall though and use
 # web middlewear + routes
 app.use(apiRouter)
+app.use(ErrorController.handleApiError)
 app.use(webRouter)
+app.use(ErrorController.handleError)
 
 router = new Router(webRouter, apiRouter)
 
-app.use ErrorController.handleError
 
 module.exports =
 	app: app
