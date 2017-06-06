@@ -65,6 +65,8 @@ define [
 					focused_entry_top = Math.max(focused_entry.scope.entry.screenPos.y, TOOLBAR_HEIGHT)
 					focused_entry.$box_el.css(
 						top: focused_entry_top
+						# The entry element is invisible by default, to avoid flickering when positioning for 
+						# the first time. Here we make sure it becomes visible after having a "top" value.
 						visibility: "visible"
 					)
 					focused_entry.$indicator_el.css(top: focused_entry_top)
@@ -78,6 +80,8 @@ define [
 						previousBottom = top + height
 						entry.$box_el.css(
 							top: top
+							# The entry element is invisible by default, to avoid flickering when positioning for 
+							# the first time. Here we make sure it becomes visible after having a "top" value.
 							visibility: "visible"
 						)
 						entry.$indicator_el.css(top: top)
@@ -97,6 +101,8 @@ define [
 						previousTop = top
 						entry.$box_el.css(
 							top: top
+							# The entry element is invisible by default, to avoid flickering when positioning for 
+							# the first time. Here we make sure it becomes visible after having a "top" value.
 							visibility: "visible"
 						)
 						entry.$indicator_el.css(top: top)

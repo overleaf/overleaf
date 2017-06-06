@@ -255,9 +255,9 @@ script(type='text/ng-template', id='aggregateChangeEntryTemplate')
 					i.fa.fa-pencil
 				.rp-entry-details
 					.rp-entry-description
-						| Changed 
+						| #{translate("aggregate_changed")} 
 						del.rp-content-highlight {{ entry.metadata.replaced_content }}
-						|  for 
+						|  #{translate("aggregate_to")} 
 						ins.rp-content-highlight {{ entry.content }}
 						a.rp-collapse-toggle(
 							href
