@@ -374,8 +374,9 @@ define [
 
 		bulkAccept = () ->
 			_doAcceptChanges $scope.reviewPanel.selectedEntryIds.slice()
-			$scope.reviewPanel.selectedEntryIds = []
-			$scope.reviewPanel.nVisibleSelectedChanges = 0
+			$timeout () ->
+				$scope.reviewPanel.selectedEntryIds = []
+				$scope.reviewPanel.nVisibleSelectedChanges = 0
 			event_tracking.sendMB "rp-bulk-accept", { 
 				view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini',  
 				nEntries: $scope.reviewPanel.nVisibleSelectedChanges
@@ -383,8 +384,9 @@ define [
 
 		bulkReject = () ->
 			_doRejectChanges $scope.reviewPanel.selectedEntryIds.slice()
-			$scope.reviewPanel.selectedEntryIds = []
-			$scope.reviewPanel.nVisibleSelectedChanges = 0
+			$timeout () ->
+				$scope.reviewPanel.selectedEntryIds = []
+				$scope.reviewPanel.nVisibleSelectedChanges = 0
 			event_tracking.sendMB "rp-bulk-reject", { 
 				view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini',  
 				nEntries: $scope.reviewPanel.nVisibleSelectedChanges
