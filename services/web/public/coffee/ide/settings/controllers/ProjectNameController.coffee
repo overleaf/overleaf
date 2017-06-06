@@ -19,12 +19,18 @@ define [
 		$scope.finishRenaming = () ->
 			$scope.state.renaming = false
 			newName = $scope.inputs.name
-			if !newName? or newName.length == 0 or newName.length > MAX_PROJECT_NAME_LENGTH
-				return
 			if $scope.project.name == newName
 				return
+			oldName = $scope.project.name
 			$scope.project.name = newName
 			settings.saveProjectSettings({name: $scope.project.name})
+				.error (response, statusCode) ->
+					$scope.project.name = oldName
+					if statusCode == 400
+						ide.showGenericMessageModal("Error renaming project", response)
+					else
+						ide.showGenericMessageModal("Error renaming project", "Please try again in a moment")
+					console.log arguments
 
 		ide.socket.on "projectNameUpdated", (name) ->
 			$scope.$apply () ->

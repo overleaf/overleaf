@@ -19,24 +19,29 @@ define [
 						processPendingRequests()
 
 		queuedHttp = (args...) ->
-			deferred = $q.defer()
-			promise = deferred.promise
+			# We can't use Angular's $q.defer promises, because it only passes
+			# a single argument on error, and $http passes multiple.
+			promise = {}
+			successCallbacks = []
+			errorCallbacks = []
 
 			# Adhere to the $http promise conventions
 			promise.success = (callback) ->
-				promise.then(callback)
+				successCallbacks.push callback
 				return promise
 
 			promise.error = (callback) ->
-				promise.catch(callback)
+				errorCallbacks.push callback
 				return promise
 
 			doRequest = () ->
 				$http(args...)
-					.success (successArgs...) ->
-						deferred.resolve(successArgs...)
-					.error (errorArgs...) ->
-						deferred.reject(errorArgs...)
+					.success (args...) ->
+						for cb in successCallbacks
+							cb(args...)
+					.error (args...) ->
+						for cb in errorCallbacks
+							cb(args...)
 
 			pendingRequests.push doRequest
 			processPendingRequests()

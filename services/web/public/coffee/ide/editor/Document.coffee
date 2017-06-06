@@ -35,6 +35,7 @@ define [
 			@doc?.attachToAce(@ace)
 			editorDoc = @ace.getSession().getDocument()
 			editorDoc.on "change", @_checkConsistency
+			@ide.$scope.$emit 'document:opened', @doc
 
 		detachFromAce: () ->
 			@doc?.detachFromAce()

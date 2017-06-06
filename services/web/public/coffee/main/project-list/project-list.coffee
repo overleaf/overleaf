@@ -256,9 +256,7 @@ define [
 			)
 
 		$scope.createProject = (name, template = "none") ->
-			deferred = $q.defer()
-
-			queuedHttp
+			return queuedHttp
 				.post("/project/new", {
 					_csrf: window.csrfToken
 					projectName: name
@@ -273,13 +271,7 @@ define [
 						# to the rest of the app
 					}
 					$scope.updateVisibleProjects()
-					deferred.resolve(data.project_id)
 				)
-				.error((data, status, headers, config) ->
-					deferred.reject()
-				)
-
-			return deferred.promise
 
 		$scope.openCreateProjectModal = (template = "none") ->
 			event_tracking.send 'project-list-page-interaction', 'new-project', template
@@ -294,15 +286,13 @@ define [
 			modalInstance.result.then (project_id) ->
 				window.location = "/project/#{project_id}"
 
-		MAX_PROJECT_NAME_LENGTH = 150
 		$scope.renameProject = (project, newName) ->
-			if !newName? or newName.length == 0 or newName.length > MAX_PROJECT_NAME_LENGTH
-				return
-			project.name = newName
-			queuedHttp.post "/project/#{project.id}/rename", {
-				newProjectName: project.name
+			return queuedHttp.post "/project/#{project.id}/rename", {
+				newProjectName: newName,
 				_csrf: window.csrfToken
 			}
+				.success () ->
+					project.name = newName
 
 		$scope.openRenameProjectModal = () ->
 			project = $scope.getFirstSelectedProject()
@@ -312,16 +302,11 @@ define [
 				templateUrl: "renameProjectModalTemplate"
 				controller: "RenameProjectModalController"
 				resolve:
-					projectName: () -> project.name
-			)
-
-			modalInstance.result.then(
-				(newName) ->
-					$scope.renameProject(project, newName)
+					project: () -> project
+				scope: $scope
 			)
 
 		$scope.cloneProject = (project, cloneName) ->
-			deferred = $q.defer()
 			event_tracking.send 'project-list-page-interaction', 'project action', 'Clone'
 			queuedHttp
 				.post("/project/#{project.id}/clone", {
@@ -337,13 +322,7 @@ define [
 						# to the rest of the app
 					}
 					$scope.updateVisibleProjects()
-					deferred.resolve(data.project_id)
 				)
-				.error((data, status, headers, config) ->
-					deferred.reject()
-				)
-
-			return deferred.promise
 
 		$scope.openCloneProjectModal = () ->
 			project = $scope.getFirstSelectedProject()

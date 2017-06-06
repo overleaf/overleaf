@@ -13,7 +13,7 @@ define [
 			return null
 
 	class AutoCompleteManager
-		constructor: (@$scope, @editor) ->
+		constructor: (@$scope, @editor, @element, @labelsManager) ->
 			@suggestionManager = new SuggestionManager()
 
 			@monkeyPatchAutocomplete()
@@ -39,6 +39,35 @@ define [
 			})
 
 			SnippetCompleter = new SnippetManager()
+
+			labelsManager = @labelsManager
+			LabelsCompleter =
+				getCompletions: (editor, session, pos, prefxi, callback) ->
+					upToCursorRange = new Range(pos.row, 0, pos.row, pos.column)
+					lineUpToCursor = editor.getSession().getTextRange(upToCursorRange)
+					commandFragment = getLastCommandFragment(lineUpToCursor)
+					if commandFragment
+						refMatch = commandFragment.match(/^~?\\ref{([^}]*, *)?(\w*)/)
+						if refMatch
+							beyondCursorRange = new Range(pos.row, pos.column, pos.row, 99999)
+							lineBeyondCursor = editor.getSession().getTextRange(beyondCursorRange)
+							needsClosingBrace = !lineBeyondCursor.match(/^[^{]*}/)
+							currentArg = refMatch[1]
+							result = []
+							result.push {
+								caption: "\\ref{}",
+								snippet: "\\ref{}",
+								meta: "cross-reference",
+								score: 11000
+							}
+							for label in labelsManager.getAllLabels()
+								result.push {
+									caption: "\\ref{#{label}#{if needsClosingBrace then '}' else ''}",
+									value: "\\ref{#{label}#{if needsClosingBrace then '}' else ''}",
+									meta: "cross-reference",
+									score: 10000
+								}
+							callback null, result
 
 			references = @$scope.$root._references
 			ReferencesCompleter =
@@ -78,7 +107,7 @@ define [
 							else
 								callback null, result
 
-			@editor.completers = [@suggestionManager, SnippetCompleter, ReferencesCompleter]
+			@editor.completers = [@suggestionManager, SnippetCompleter, ReferencesCompleter, LabelsCompleter]
 
 		disable: () ->
 			@editor.setOptions({
@@ -89,18 +118,21 @@ define [
 		onChange: (change) ->
 			cursorPosition = @editor.getCursorPosition()
 			end = change.end
+			range = new Range(end.row, 0, end.row, end.column)
+			lineUpToCursor = @editor.getSession().getTextRange(range)
+			commandFragment = getLastCommandFragment(lineUpToCursor)
 			# Check that this change was made by us, not a collaborator
 			# (Cursor is still one place behind)
-			if end.row == cursorPosition.row and end.column == cursorPosition.column + 1
-				if change.action == "insert"
-					range = new Range(end.row, 0, end.row, end.column)
-					lineUpToCursor = @editor.getSession().getTextRange(range)
-					commandFragment = getLastCommandFragment(lineUpToCursor)
-
-					if commandFragment? and commandFragment.length > 2
-						setTimeout () =>
-							@editor.execCommand("startAutocomplete")
-						, 0
+			# NOTE: this is also the case when a user backspaces over a highlighted region
+			if (
+				change.action == "insert" and
+				end.row == cursorPosition.row and
+				end.column == cursorPosition.column + 1
+			)
+				if commandFragment? and commandFragment.length > 2
+					setTimeout () =>
+						@editor.execCommand("startAutocomplete")
+					, 0
 
 		monkeyPatchAutocomplete: () ->
 			Autocomplete = ace.require("ace/autocomplete").Autocomplete

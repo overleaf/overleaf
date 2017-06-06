@@ -9,7 +9,8 @@ define [
 	"ide/editor/directives/aceEditor/highlights/HighlightsManager"
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
 	"ide/editor/directives/aceEditor/track-changes/TrackChangesManager"
-], (App, Ace, SearchBox, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager) ->
+	"ide/editor/directives/aceEditor/labels/LabelsManager"
+], (App, Ace, SearchBox, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager, LabelsManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
 	ModeList = ace.require('ace/ext/modelist')
 
@@ -84,7 +85,6 @@ define [
 
 				scope.name = attrs.aceEditor
 
-				autoCompleteManager   = new AutoCompleteManager(scope, editor, element)
 				if scope.spellCheck # only enable spellcheck when explicitly required
 					spellCheckCache =  $cacheFactory("spellCheck-#{scope.name}", {capacity: 1000})
 					spellCheckManager = new SpellCheckManager(scope, editor, element, spellCheckCache)
@@ -92,6 +92,8 @@ define [
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
 				trackChangesManager   = new TrackChangesManager(scope, editor, element)
+				labelsManager         = new LabelsManager(scope, editor, element)
+				autoCompleteManager   = new AutoCompleteManager(scope, editor, element, labelsManager)
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				editor.commands.addCommand
