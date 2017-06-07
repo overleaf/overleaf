@@ -34,5 +34,6 @@ module.exports = class RateLimiter
 				@_adjustLimitDown()
 		else
 			logger.log {active: @ActiveWorkerCount, currentLimit: Math.ceil(@CurrentWorkerLimit)}, "hit rate limit"
-			@_trackAndRun task, callback # only return after task completes
-			@_adjustLimitUp()
+			@_trackAndRun task, (err) =>
+				@_adjustLimitUp() if !err? # don't increment rate limit if there was an error
+				callback(err) # only return after task completes
