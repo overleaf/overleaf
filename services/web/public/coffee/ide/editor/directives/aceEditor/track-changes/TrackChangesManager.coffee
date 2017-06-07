@@ -210,6 +210,7 @@ define [
 		acceptChangeIds: (change_ids) ->
 			@rangesTracker.removeChangeIds(change_ids)
 			@updateAnnotations()
+			@updateFocus()
 
 		rejectChangeIds: (change_ids) ->
 			changes = @rangesTracker.getChanges(change_ids)
@@ -288,7 +289,8 @@ define [
 					session.$fromReject = false
 				else
 					throw new Error("unknown change: #{JSON.stringify(change)}")
-
+			@updateFocus()
+			
 		removeCommentId: (comment_id) ->
 			@rangesTracker.removeCommentId(comment_id)
 			@updateAnnotations()
