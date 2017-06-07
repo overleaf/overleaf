@@ -289,8 +289,8 @@ define [
 					session.$fromReject = false
 				else
 					throw new Error("unknown change: #{JSON.stringify(change)}")
-			@updateFocus()
-			
+			setTimeout () => @updateFocus()
+
 		removeCommentId: (comment_id) ->
 			@rangesTracker.removeCommentId(comment_id)
 			@updateAnnotations()
