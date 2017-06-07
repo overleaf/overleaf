@@ -8,20 +8,20 @@
 		) !{translate("track_changes_is_on")}
 		a.rp-bulk-actions-btn(
 			href
-			ng-if="reviewPanel.selectedEntryIds.length > 1"
+			ng-if="reviewPanel.nVisibleSelectedChanges > 1"
 			ng-click="showBulkAcceptDialog();"
 		) 
 			i.fa.fa-check
 			| &nbsp;#{translate("accept_all")}
-			| ({{ reviewPanel.selectedEntryIds.length }})
+			| ({{ reviewPanel.nVisibleSelectedChanges }})
 		a.rp-bulk-actions-btn(
 			href
-			ng-if="reviewPanel.selectedEntryIds.length > 1"
+			ng-if="reviewPanel.nVisibleSelectedChanges > 1"
 			ng-click="showBulkRejectDialog();"
 		) 
 			i.fa.fa-times
 			| &nbsp;#{translate("reject_all")}
-			| ({{ reviewPanel.selectedEntryIds.length }})
+			| ({{ reviewPanel.nVisibleSelectedChanges }})
 		a.rp-add-comment-btn(
 			href
 			ng-if="reviewPanel.entries[editor.open_doc_id]['add-comment'] != null"
@@ -75,8 +75,19 @@
 					change-entry(
 						entry="entry"
 						user="users[entry.metadata.user_id]"
-						on-reject="rejectChange(entry_id);"
-						on-accept="acceptChange(entry_id);"
+						on-reject="rejectChanges(entry.entry_ids);"
+						on-accept="acceptChanges(entry.entry_ids);"
+						on-indicator-click="toggleReviewPanel();"
+						on-body-click="gotoEntry(editor.open_doc_id, entry)"
+						permissions="permissions"
+					)
+
+				div(ng-if="entry.type === 'aggregate-change'")
+					aggregate-change-entry(
+						entry="entry"
+						user="users[entry.metadata.user_id]"
+						on-reject="rejectChanges(entry.entry_ids);"
+						on-accept="acceptChanges(entry.entry_ids);"
 						on-indicator-click="toggleReviewPanel();"
 						on-body-click="gotoEntry(editor.open_doc_id, entry)"
 						permissions="permissions"
@@ -106,7 +117,7 @@
 					bulk-actions-entry(
 						on-bulk-accept="showBulkAcceptDialog();"
 						on-bulk-reject="showBulkRejectDialog();"
-						n-entries="reviewPanel.selectedEntryIds.length"
+						n-entries="reviewPanel.nVisibleSelectedChanges"
 					)
 
 	.rp-entry-list(
@@ -142,8 +153,15 @@
 						change-entry(
 							entry="entry"
 							user="users[entry.metadata.user_id]"
-							on-indicator-click="toggleReviewPanel();"
 							ng-click="gotoEntry(doc.doc.id, entry)"
+							permissions="permissions"
+						)
+
+					div(ng-if="entry.type === 'aggregate-change'")
+						aggregate-change-entry(
+							entry="entry"
+							user="users[entry.metadata.user_id]"
+							ng-click="gotoEntry(editor.open_doc_id, entry)"
 							permissions="permissions"
 						)
 
@@ -154,7 +172,6 @@
 							on-reply="submitReply(entry, entry_id);"
 							on-save-edit="saveEdit(entry.thread_id, comment)"
 							on-delete="deleteComment(entry.thread_id, comment)"
-							on-indicator-click="toggleReviewPanel();"
 							ng-click="gotoEntry(doc.doc.id, entry)"
 							permissions="permissions"
 						)
@@ -211,6 +228,42 @@ script(type='text/ng-template', id='changeEntryTemplate')
 								ng-if="needsCollapsing"
 								ng-click="toggleCollapse();"
 							) {{ isCollapsed ? '... (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
+					.rp-entry-metadata
+						| {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}&nbsp;&bull;&nbsp;
+						span.rp-entry-user(style="color: hsl({{ user.hue }}, 70%, 40%);") {{ user.name }} 
+			.rp-entry-actions(ng-if="permissions.write")
+				a.rp-entry-button(href, ng-click="onReject();") 
+					i.fa.fa-times
+					| &nbsp;#{translate("reject")}
+				a.rp-entry-button(href, ng-click="onAccept();") 
+					i.fa.fa-check
+					| &nbsp;#{translate("accept")}
+
+script(type='text/ng-template', id='aggregateChangeEntryTemplate')
+	div
+		.rp-entry-callout.rp-entry-callout-aggregate
+		.rp-entry-indicator(
+			ng-class="{ 'rp-entry-indicator-focused': entry.focused }"
+			ng-click="onIndicatorClick();"
+		)
+			i.fa.fa-pencil
+		.rp-entry.rp-entry-aggregate(
+			ng-class="{ 'rp-entry-focused': entry.focused }"
+		)
+			.rp-entry-body
+				.rp-entry-action-icon
+					i.fa.fa-pencil
+				.rp-entry-details
+					.rp-entry-description
+						| #{translate("aggregate_changed")} 
+						del.rp-content-highlight {{ entry.metadata.replaced_content }}
+						|  #{translate("aggregate_to")} 
+						ins.rp-content-highlight {{ entry.content }}
+						a.rp-collapse-toggle(
+							href
+							ng-if="needsCollapsing"
+							ng-click="toggleCollapse();"
+						) {{ isCollapsed ? '... (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
 					.rp-entry-metadata
 						| {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}&nbsp;&bull;&nbsp;
 						span.rp-entry-user(style="color: hsl({{ user.hue }}, 70%, 40%);") {{ user.name }} 

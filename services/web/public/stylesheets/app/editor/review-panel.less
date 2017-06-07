@@ -210,6 +210,7 @@
 .rp-entry-wrapper {
 	&:hover .rp-entry-insert,
 	&:hover .rp-entry-delete,
+	&:hover .rp-entry-aggregate,
 	&:hover .rp-entry-comment {
 		display: block;
 	}
@@ -260,6 +261,7 @@
 		}
 	}
 	.rp-state-current-file-expanded & {
+		visibility: hidden;
 		left: 5px;
 		right: 5px;
 		width: auto;
@@ -299,7 +301,8 @@
 		transition: none;
 	}
 
-	&-insert {
+	&-insert,
+	&-aggregate {
 		border-color: @rp-green;
 	}
 
@@ -389,7 +392,7 @@
 				font-weight: @rp-semibold-weight;
 				text-decoration: none;
 
-				.rp-entry-delete & {
+				del& {
 					text-decoration: line-through;
 				}
 			}
@@ -780,6 +783,7 @@
 	}
 	.track-changes-added-marker-callout {
 		border-bottom: 1px dashed @rp-green;
+		z-index: 1;
 	}
 	.track-changes-comment-marker-callout {
 		border-bottom: 1px dashed @rp-yellow;
