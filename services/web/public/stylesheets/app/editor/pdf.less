@@ -37,6 +37,20 @@
 			margin: 10px auto;
 			padding: 0 10px;
 			box-sizing: content-box;
+			// don't display the text layer by default,
+			// it slows down scrolling
+			div.plv-text-layer {
+				display: none;
+			}
+			// display it if we are hovering over the page
+			// so it's selectable
+			// FIXME: need to work out a solution to
+			// select text across multiple pages
+			&:hover {
+				div.plv-text-layer {
+					display: block;
+				}
+			}
 		}
 	}
 	.progress-thin {
