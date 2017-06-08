@@ -92,7 +92,7 @@ define [
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
 				trackChangesManager   = new TrackChangesManager(scope, editor, element)
-				if scope.name == 'editor'
+				if attrs.enableAutoCompleteFeatures
 					labelsManager         = new LabelsManager(scope, editor, element)
 					autoCompleteManager   = new AutoCompleteManager(scope, editor, element, labelsManager)
 
