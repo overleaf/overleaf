@@ -20,7 +20,7 @@ module.exports = LabelsHandler =
 		DocumentUpdaterHandler.flushDocToMongo projectId, docId, (err) ->
 			if err?
 				return callback(err)
-			ProjectEntityHandler.getDoc projectId, docId, (err, lines, rev) ->
+			ProjectEntityHandler.getDoc projectId, docId, (err, lines) ->
 				if err?
 					return callback(err)
 				LabelsHandler.extractLabelsFromDoc lines, (err, docLabels) ->
