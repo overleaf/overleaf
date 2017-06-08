@@ -46,6 +46,7 @@ block content
 														type='text',
 														name='first_name',
 														value=user.first_name
+														ng-non-bindable
 													)
 												.form-group
 													label(for='lastName').control-label #{translate("last_name")}
@@ -53,6 +54,7 @@ block content
 														type='text',
 														name='last_name',
 														value=user.last_name
+														ng-non-bindable
 													)
 												.actions
 													button.btn.btn-primary(
