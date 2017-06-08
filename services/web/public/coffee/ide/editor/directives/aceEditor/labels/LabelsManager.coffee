@@ -31,8 +31,9 @@ define [
 				if entity.type == 'doc'
 					delete @state.documents[entity.id]
 
-			@$scope.$on 'file:upload:complete', (e, entityId) =>
-				@loadDocLabelsFromServer(entityId)
+			@$scope.$on 'file:upload:complete', (e, upload) =>
+				if upload.entity_type == 'doc'
+					@loadDocLabelsFromServer(upload.entity_id)
 
 			onChange = (change) =>
 				if change.remote

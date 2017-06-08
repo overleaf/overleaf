@@ -96,9 +96,13 @@ module.exports = FileSystemImportManager =
 					FileTypeManager.isBinary name, path, (error, isBinary) =>
 						return callback(error) if error?
 						if isBinary
-							FileSystemImportManager.addFile user_id, project_id, folder_id, name, path, replace, callback
+							FileSystemImportManager.addFile user_id, project_id, folder_id, name, path, replace, (err, entity) ->
+								entity?.type = 'file'
+								callback(err, entity)
 						else
-							FileSystemImportManager.addDoc user_id, project_id, folder_id, name, path, replace, callback
+							FileSystemImportManager.addDoc user_id, project_id, folder_id, name, path, replace, (err, entity) ->
+								entity?.type = 'doc'
+								callback(err, entity)
 
 
 	_isSafeOnFileSystem: (path, callback = (err, isSafe)->)->

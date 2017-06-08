@@ -135,7 +135,7 @@ define [
 				$timeout (() ->
 					uploadCount--
 					if response.success
-						$rootScope.$broadcast 'file:upload:complete', response.entity_id
+						$rootScope.$broadcast 'file:upload:complete', response
 					if uploadCount == 0 and response? and response.success
 						$modalInstance.close("done")
 				), 250

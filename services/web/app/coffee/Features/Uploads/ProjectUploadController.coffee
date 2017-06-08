@@ -50,5 +50,5 @@ module.exports = ProjectUploadController =
 				logger.log
 					project_id: project_id, file_path: path, file_name: name, folder_id: folder_id
 					"uploaded file"
-				res.send success: true, entity_id: entity?._id
+				res.send success: true, entity_id: entity?._id, entity_type: entity?.type
 
