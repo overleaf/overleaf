@@ -20,7 +20,7 @@ module.exports = LabelsController =
 			if err?
 				logger.err {project_id, doc_id, err}, "[LabelsController] error getting labels from doc"
 				return next(err)
-			EditorRealTimeController.emitToRoom project_id, 'doc:labels:updated', {
+			EditorRealTimeController.emitToRoom project_id, 'docLabelsUpdated', {
 				docId: doc_id, labels: docLabels
 			}
 			res.json {projectId: project_id, docId: doc_id, labels: docLabels}

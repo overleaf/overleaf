@@ -71,7 +71,7 @@ define [
 				@$scope.$apply () =>
 					@_deleteEntityFromScope entity
 					@recalculateDocList()
-				@$scope.$emit "entity:deleted", entity
+				@$scope.$broadcast "entity:deleted", entity
 
 			@ide.socket.on "reciveEntityMove", (entity_id, folder_id) =>
 				entity = @findEntityById(entity_id)

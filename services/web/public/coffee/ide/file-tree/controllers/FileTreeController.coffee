@@ -107,8 +107,8 @@ define [
 	]
 
 	App.controller "UploadFileModalController", [
-		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder", "$window"
-		($scope,   ide,   $modalInstance,   $timeout,   parent_folder, $window) ->
+		"$scope", "$rootScope", "ide", "$modalInstance", "$timeout", "parent_folder", "$window"
+		($scope,   $rootScope,   ide,   $modalInstance,   $timeout,   parent_folder, $window) ->
 			$scope.parent_folder_id = parent_folder?.id
 			$scope.tooManyFiles = false
 			$scope.rateLimitHit = false
@@ -134,6 +134,8 @@ define [
 			$scope.onComplete = (error, name, response) ->
 				$timeout (() ->
 					uploadCount--
+					if response.success
+						$rootScope.$broadcast 'file:upload:complete', response.entity_id
 					if uploadCount == 0 and response? and response.success
 						$modalInstance.close("done")
 				), 250

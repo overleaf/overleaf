@@ -172,7 +172,7 @@ define [
 		# User can append ?ft=somefeature to url to activate a feature toggle
 		ide.featureToggle = location?.search?.match(/^\?ft=(\w+)$/)?[1]
 
-		ide.socket.on 'doc:labels:updated', (data) ->
+		ide.socket.on 'docLabelsUpdated', (data) ->
 			$scope.$broadcast 'doc:labels:updated', data
 
 	angular.bootstrap(document.body, ["SharelatexApp"])

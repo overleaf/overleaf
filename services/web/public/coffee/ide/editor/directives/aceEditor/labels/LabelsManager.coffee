@@ -27,6 +27,13 @@ define [
 				if data.docId and data.labels
 					@state.documents[data.docId] = data.labels
 
+			@$scope.$on 'entity:deleted', (e, entity) =>
+				if entity.type == 'doc'
+					delete @state.documents[entity.id]
+
+			@$scope.$on 'file:upload:complete', (e, entityId) =>
+				@loadDocLabelsFromServer(entityId)
+
 			onChange = (change) =>
 				if change.remote
 					return
@@ -66,33 +73,16 @@ define [
 			)
 
 		loadCurrentDocLabelsFromServer: () ->
+			currentDocId = @$scope.docId
+			@loadDocLabelsFromServer(currentDocId)
+
+		loadDocLabelsFromServer: (docId) ->
 			$.get(
-				"/project/#{window.project_id}/#{@$scope.docId}/labels"
+				"/project/#{window.project_id}/#{docId}/labels"
 				, (data) =>
 					if data.docId and data.labels
 						@state.documents[data.docId] = data.labels
 			)
-
-		# loadLabelsFromOpenDoc: () ->
-		# 	docId = @$scope.docId
-		# 	docText = @editor.getValue()
-		# 	labels = []
-		# 	re = /\\label\{([^\}\n\\]{0,80})\}/g
-		# 	while (labelMatch = re.exec(docText)) and labels.length < 1000
-		# 		if labelMatch[1]
-		# 			labels.push(labelMatch[1])
-		# 	@state.documents[docId] = labels
-
-		# scheduleLoadLabelsFromOpenDoc: () ->
-		# 	# De-bounce loading labels with a timeout
-		# 	if @loadLabelsTimeout
-		# 		clearTimeout(@loadLabelsTimeout)
-		# 	@loadLabelsTimeout = setTimeout(
-		# 		() =>
-		# 			@loadLabelsFromOpenDoc()
-		# 		, 1000
-		# 		, this
-		# 	)
 
 		scheduleLoadCurrentDocLabelsFromServer: () ->
 			# De-bounce loading labels with a timeout
