@@ -19,6 +19,9 @@ describe 'LockManager - trying the lock', ->
 						key_schema:
 							blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
 			}
+			"./Profiler": class Profiler
+				log: sinon.stub().returns { end: sinon.stub() }
+				end: sinon.stub()
 
 		@callback = sinon.stub()
 		@doc_id = "doc-id-123"

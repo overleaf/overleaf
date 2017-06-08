@@ -26,6 +26,9 @@ describe 'LockManager - releasing the lock', ()->
 							blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
 			}
 			"./Metrics": {inc: () ->}
+			"./Profiler": class Profiler
+				log: sinon.stub().returns { end: sinon.stub() }
+				end: sinon.stub()
 		@LockManager = SandboxedModule.require(modulePath, requires: mocks)
 		@lockValue = "lock-value-stub"
 

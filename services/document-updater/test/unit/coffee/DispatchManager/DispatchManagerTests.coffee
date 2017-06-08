@@ -13,6 +13,7 @@ describe "DispatchManager", ->
 				redis:
 					realtime: {}
 			"redis-sharelatex": @redis = {}
+			"./RateLimitManager": {}
 		@callback = sinon.stub()
 		@RateLimiter = { run: (task,cb) -> task(cb) } # run task without rate limit
 

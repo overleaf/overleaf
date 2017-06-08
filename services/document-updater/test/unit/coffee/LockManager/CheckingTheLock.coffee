@@ -19,6 +19,9 @@ describe 'LockManager - checking the lock', ()->
 				auth:->
 				exists: existsStub
 		"./Metrics": {inc: () ->}
+		"./Profiler": class Profiler
+			log: sinon.stub().returns { end: sinon.stub() }
+			end: sinon.stub()
 	LockManager = SandboxedModule.require(modulePath, requires: mocks)
 
 	it 'should return true if the key does not exists', (done)->

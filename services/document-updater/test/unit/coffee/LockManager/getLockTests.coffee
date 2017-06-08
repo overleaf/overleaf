@@ -12,6 +12,9 @@ describe 'LockManager - getting the lock', ->
 				createClient : () =>
 					auth:->
 			"./Metrics": {inc: () ->}
+			"./Profiler": class Profiler
+				log: sinon.stub().returns { end: sinon.stub() }
+				end: sinon.stub()
 		@callback = sinon.stub()
 		@doc_id = "doc-id-123"
 	

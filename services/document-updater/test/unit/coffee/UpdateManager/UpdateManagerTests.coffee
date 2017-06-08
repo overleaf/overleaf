@@ -22,6 +22,9 @@ describe "UpdateManager", ->
 			"settings-sharelatex": Settings = {}
 			"./DocumentManager": @DocumentManager = {}
 			"./RangesManager": @RangesManager = {}
+			"./Profiler": class Profiler
+				log: sinon.stub().returns { end: sinon.stub() }
+				end: sinon.stub()
 
 	describe "processOutstandingUpdates", ->
 		beforeEach ->
