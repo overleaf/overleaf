@@ -33,7 +33,7 @@ define [
 		$scope.removeMembers = () ->
 			for user in $scope.selectedUsers
 				do (user) ->
-					if user.holdingAccount
+					if user.holdingAccount and !user._id?
 						url = "/subscription/group/email/#{user.email}"
 					else
 						url = "/subscription/group/user/#{user._id}"
