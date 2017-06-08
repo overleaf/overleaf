@@ -35,6 +35,14 @@ module.exports = SubscriptionUpdater =
 				logger.err err:err, searchOps:searchOps, insertOperation:insertOperation, "error findy and modify add user to group"
 				return callback(err)
 			UserFeaturesUpdater.updateFeatures user_id, subscription.planCode, callback
+	
+	addEmailInviteToGroup: (adminUser_id, email, callback) ->
+		logger.log {adminUser_id, email}, "adding email into mongo subscription"
+		searchOps = 
+			admin_id: adminUser_id
+		insertOperation =
+			"$addToSet": {invited_emails: email}
+		Subscription.findAndModify searchOps, insertOperation, callback
 
 	removeUserFromGroup: (adminUser_id, user_id, callback)->
 		searchOps = 
@@ -47,6 +55,12 @@ module.exports = SubscriptionUpdater =
 				return callback(err)
 			SubscriptionUpdater._setUsersMinimumFeatures user_id, callback
 
+	removeEmailInviteFromGroup: (adminUser_id, email, callback)->
+		Subscription.update {
+			admin_id: adminUser_id
+		}, "$pull": {
+			invited_emails: email
+		}, callback
 
 	_createNewSubscription: (adminUser_id, callback)->
 		logger.log adminUser_id:adminUser_id, "creating new subscription"

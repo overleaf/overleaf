@@ -19,6 +19,7 @@ describe "UserHandler", ->
 
 		@SubscriptionGroupHandler =
 			isUserPartOfGroup:sinon.stub()
+			convertEmailInvitesToMemberships: sinon.stub().callsArgWith(2)
 		@createStub = sinon.stub().callsArgWith(0)
 		@NotificationsBuilder = 
 			groupPlan:sinon.stub().returns({create:@createStub})
@@ -30,11 +31,15 @@ describe "UserHandler", ->
 			"../Subscription/SubscriptionGroupHandler":@SubscriptionGroupHandler
 
 	describe "populateGroupLicenceInvite", ->
-
 		describe "no licence", ->
 			beforeEach (done)->
 				@SubscriptionDomainHandler.getLicenceUserCanJoin.returns()
 				@UserHandler.populateGroupLicenceInvite @user, done
+			
+			it "should call convertEmailInvitesToMemberships", ->
+				@SubscriptionGroupHandler.convertEmailInvitesToMemberships
+					.calledWith(@user.email, @user._id)
+					.should.equal true
 
 			it "should not call NotificationsBuilder", (done)->
 				@NotificationsBuilder.groupPlan.called.should.equal false
@@ -45,7 +50,6 @@ describe "UserHandler", ->
 				done()
 
 		describe "with matching licence user is not in", ->
-
 			beforeEach (done)->
 				@SubscriptionDomainHandler.getLicenceUserCanJoin.returns(@licence)
 				@SubscriptionGroupHandler.isUserPartOfGroup.callsArgWith(2, null, false)
@@ -54,11 +58,13 @@ describe "UserHandler", ->
 			it "should create notifcation", (done)->
 				@NotificationsBuilder.groupPlan.calledWith(@user, @licence).should.equal true
 				done()
-
-
+			
+			it "should call convertEmailInvitesToMemberships", ->
+				@SubscriptionGroupHandler.convertEmailInvitesToMemberships
+					.calledWith(@user.email, @user._id)
+					.should.equal true
 
 		describe "with matching licence user is already in", ->
-
 			beforeEach (done)->
 				@SubscriptionDomainHandler.getLicenceUserCanJoin.returns(@licence)
 				@SubscriptionGroupHandler.isUserPartOfGroup.callsArgWith(2, null, true)
@@ -67,3 +73,8 @@ describe "UserHandler", ->
 			it "should create notifcation", (done)->
 				@NotificationsBuilder.groupPlan.called.should.equal false
 				done()
+			
+			it "should call convertEmailInvitesToMemberships", ->
+				@SubscriptionGroupHandler.convertEmailInvitesToMemberships
+					.calledWith(@user.email, @user._id)
+					.should.equal true

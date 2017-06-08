@@ -33,9 +33,13 @@ define [
 		$scope.removeMembers = () ->
 			for user in $scope.selectedUsers
 				do (user) ->
+					if user.holdingAccount
+						url = "/subscription/group/email/#{user.email}"
+					else
+						url = "/subscription/group/user/#{user._id}"
 					queuedHttp({
 						method: "DELETE",
-						url: "/subscription/group/user/#{user._id}"
+						url: url
 						headers:
 							"X-Csrf-Token": window.csrfToken
 					})

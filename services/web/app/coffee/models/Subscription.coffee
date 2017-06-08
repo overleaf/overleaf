@@ -6,7 +6,8 @@ ObjectId = Schema.ObjectId
 
 SubscriptionSchema = new Schema
 	admin_id     :   {type:ObjectId, ref:'User', index: {unique: true, dropDups: true}}
-	member_ids 	 :   [ type:ObjectId, ref:'User' ]
+	member_ids   :   [ type:ObjectId, ref:'User' ]
+	invited_emails:  [ String ]
 	recurlySubscription_id : String
 	planCode 	 : {type: String}
 	groupPlan	 : {type: Boolean, default: false}
