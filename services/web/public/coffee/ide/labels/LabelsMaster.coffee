@@ -27,18 +27,16 @@ define [
 
 		## Loaders
 		loadProjectLabelsFromServer: () ->
-			$.get(
-				"/project/#{window.project_id}/labels"
-				, (data) =>
+			@ide.$http
+				.get("/project/#{window.project_id}/labels")
+				.success (data) =>
 					if data.projectLabels
 						for docId, docLabels of data.projectLabels
 							@_state.documents[docId] = docLabels
-			)
 
 		loadDocLabelsFromServer: (docId) ->
-			$.get(
-				"/project/#{window.project_id}/#{docId}/labels"
-				, (data) =>
+			@ide.$http
+				.get("/project/#{window.project_id}/#{docId}/labels")
+				.success (data) =>
 					if data.docId and data.labels
 						@_state.documents[data.docId] = data.labels
-			)
