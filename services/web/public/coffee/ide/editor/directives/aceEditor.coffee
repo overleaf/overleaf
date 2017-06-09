@@ -37,6 +37,7 @@ define [
 
 		return  {
 			scope: {
+				labelsMaster: '='
 				theme: "="
 				showPrintMargin: "="
 				keybindings: "="

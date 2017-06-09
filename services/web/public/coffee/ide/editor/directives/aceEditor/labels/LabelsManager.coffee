@@ -11,29 +11,8 @@ define [
 
 	class LabelsManager
 		constructor: (@$scope, @editor, @element) ->
-
-			window.GET_LABELS = () =>
-				@loadProjectLabelsFromServer()
-
-			window.GET_DOC_LABELS = () =>
-				@loadCurrentDocLabelsFromServer()
-
-			@state =
-				documents: {} # map of DocId => List[Label]
-
+			@labelsMaster = @$scope.labelsMaster
 			@loadLabelsTimeout = null
-
-			@$scope.$on 'doc:labels:updated', (e, data) =>
-				if data.docId and data.labels
-					@state.documents[data.docId] = data.labels
-
-			@$scope.$on 'entity:deleted', (e, entity) =>
-				if entity.type == 'doc'
-					delete @state.documents[entity.id]
-
-			@$scope.$on 'file:upload:complete', (e, upload) =>
-				if upload.entity_type == 'doc'
-					@loadDocLabelsFromServer(upload.entity_id)
 
 			onChange = (change) =>
 				if change.remote
@@ -49,41 +28,14 @@ define [
 					 (commandFragment?.length > 2 and commandFragment.slice(0,7) == '\\label{'))
 				)
 					@scheduleLoadCurrentDocLabelsFromServer()
-					# @scheduleLoadLabelsFromOpenDoc()
 
 			@editor.on "changeSession", (e) =>
 				e.oldSession.off "change", onChange
 				e.session.on "change", onChange
-				# setTimeout(
-				# 	() =>
-				# 		# @scheduleLoadLabelsFromOpenDoc()
-				# 		@loadProjectLabelsFromServer()
-				# 	, 0
-				# )
-
-			# Load now
-			@loadProjectLabelsFromServer()
-
-		loadProjectLabelsFromServer: () ->
-			$.get(
-				"/project/#{window.project_id}/labels"
-				, (data) =>
-					if data.projectLabels
-						for docId, docLabels of data.projectLabels
-							@state.documents[docId] = docLabels
-			)
 
 		loadCurrentDocLabelsFromServer: () ->
 			currentDocId = @$scope.docId
-			@loadDocLabelsFromServer(currentDocId)
-
-		loadDocLabelsFromServer: (docId) ->
-			$.get(
-				"/project/#{window.project_id}/#{docId}/labels"
-				, (data) =>
-					if data.docId and data.labels
-						@state.documents[data.docId] = data.labels
-			)
+			@labelsMaster.loadDocLabelsFromServer(currentDocId)
 
 		scheduleLoadCurrentDocLabelsFromServer: () ->
 			# De-bounce loading labels with a timeout
@@ -97,4 +49,4 @@ define [
 			)
 
 		getAllLabels: () ->
-			_.flatten(labels for docId, labels of @state.documents)
+			@labelsMaster.getAllLabels()
