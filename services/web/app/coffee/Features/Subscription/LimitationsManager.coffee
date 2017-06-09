@@ -64,8 +64,9 @@ module.exports =
 			if !subscription?
 				logger.err user_id:user_id, "no subscription found for user"
 				return callback("no subscription found")
-			limitReached = subscription.member_ids.length >= subscription.membersLimit
-			logger.log user_id:user_id, limitReached:limitReached, currentTotal: subscription.member_ids.length, membersLimit: subscription.membersLimit, "checking if subscription members limit has been reached"
+			currentTotal = (subscription.member_ids or []).length + (subscription.invited_emails or []).length
+			limitReached = currentTotal >= subscription.membersLimit
+			logger.log user_id:user_id, limitReached:limitReached, currentTotal: currentTotal, membersLimit: subscription.membersLimit, "checking if subscription members limit has been reached"
 			callback(err, limitReached, subscription)
 
 getOwnerIdOfProject = (project_id, callback)->
