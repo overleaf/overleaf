@@ -34,7 +34,7 @@ define [
 			for user in $scope.selectedUsers
 				do (user) ->
 					if user.holdingAccount and !user._id?
-						url = "/subscription/group/email/#{user.email}"
+						url = "/subscription/group/email/#{encodeURIComponent(user.email)}"
 					else
 						url = "/subscription/group/user/#{user._id}"
 					queuedHttp({
