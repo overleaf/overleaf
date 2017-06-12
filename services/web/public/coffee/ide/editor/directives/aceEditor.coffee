@@ -10,6 +10,7 @@ define [
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
 	"ide/editor/directives/aceEditor/track-changes/TrackChangesManager"
 	"ide/editor/directives/aceEditor/labels/LabelsManager"
+	"services/labels"
 ], (App, Ace, SearchBox, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager, LabelsManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
 	ModeList = ace.require('ace/ext/modelist')
@@ -32,8 +33,9 @@ define [
 			url = ace.config._moduleUrl(args...) + "?fingerprint=#{window.aceFingerprint}"
 			return url
 
-	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory) ->
+	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory, labels) ->
 		monkeyPatchSearch($rootScope, $compile)
+		
 
 		return  {
 			scope: {
@@ -94,7 +96,7 @@ define [
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
 				trackChangesManager   = new TrackChangesManager(scope, editor, element)
 				if attrs.enableAutoCompleteFeatures
-					labelsManager         = new LabelsManager(scope, editor, element)
+					labelsManager         = new LabelsManager(scope, editor, element, labels)
 					autoCompleteManager   = new AutoCompleteManager(scope, editor, element, labelsManager)
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog

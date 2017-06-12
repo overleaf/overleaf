@@ -10,8 +10,7 @@ define [
 			return null
 
 	class LabelsManager
-		constructor: (@$scope, @editor, @element) ->
-			@labelsMaster = @$scope.labelsMaster
+		constructor: (@$scope, @editor, @element, @Labels) ->
 			@loadLabelsTimeout = null
 
 			onChange = (change) =>
@@ -35,7 +34,7 @@ define [
 
 		loadCurrentDocLabelsFromServer: () ->
 			currentDocId = @$scope.docId
-			@labelsMaster.loadDocLabelsFromServer(currentDocId)
+			@Labels.loadDocLabelsFromServer(currentDocId)
 
 		scheduleLoadCurrentDocLabelsFromServer: () ->
 			# De-bounce loading labels with a timeout
@@ -49,4 +48,4 @@ define [
 			)
 
 		getAllLabels: () ->
-			@labelsMaster.getAllLabels()
+			@Labels.getAllLabels()

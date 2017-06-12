@@ -9,7 +9,6 @@ define [
 	"ide/pdf/PdfManager"
 	"ide/binary-files/BinaryFilesManager"
 	"ide/references/ReferencesManager"
-	"ide/labels/LabelsMaster"
 	"ide/review-panel/ReviewPanelManager"
 	"ide/SafariScrollPatcher"
 	"ide/FeatureOnboardingController"
@@ -46,12 +45,11 @@ define [
 	PdfManager
 	BinaryFilesManager
 	ReferencesManager
-	LabelsMaster
 	ReviewPanelManager
 	SafariScrollPatcher
 ) ->
 
-	App.controller "IdeController", ($scope, $timeout, ide, localStorage, sixpack, event_tracking) ->
+	App.controller "IdeController", ($scope, $timeout, ide, localStorage, sixpack, event_tracking, labels) ->
 		# Don't freak out if we're already in an apply callback
 		$scope.$originalApply = $scope.$apply
 		$scope.$apply = (fn = () ->) ->
@@ -119,8 +117,6 @@ define [
 		ide.project_id = $scope.project_id = window.project_id
 		ide.$scope = $scope
 
-		$scope.labelsMaster = ide.labelsMaster = new LabelsMaster(ide, $scope)
-
 		ide.referencesSearchManager = new ReferencesManager(ide, $scope)
 		ide.connectionManager = new ConnectionManager(ide, $scope)
 		ide.fileTreeManager = new FileTreeManager(ide, $scope)
@@ -130,6 +126,13 @@ define [
 		ide.pdfManager = new PdfManager(ide, $scope)
 		ide.permissionsManager = new PermissionsManager(ide, $scope)
 		ide.binaryFilesManager = new BinaryFilesManager(ide, $scope)
+
+		# Set up labels
+		$scope.$on 'doc:labels:updated', labels.onDocLabelsUpdated
+		$scope.$on 'entity:deleted', labels.onEntityDeleted
+		$scope.$on 'file:upload:complete', labels.fileUploadComplete
+		$timeout () ->
+			labels.loadProjectLabelsFromServer()
 
 		inited = false
 		$scope.$on "project:joined", () ->
