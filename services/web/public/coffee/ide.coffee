@@ -128,7 +128,8 @@ define [
 		ide.binaryFilesManager = new BinaryFilesManager(ide, $scope)
 
 		# Set up labels
-		$scope.$on 'doc:labels:updated', labels.onDocLabelsUpdated
+		ide.socket.on 'broadcastDocLabels', (data) ->
+			labels.onBroadcastDocLabels(data)
 		$scope.$on 'entity:deleted', labels.onEntityDeleted
 		$scope.$on 'file:upload:complete', labels.fileUploadComplete
 		$timeout () ->
@@ -178,8 +179,5 @@ define [
 
 		# User can append ?ft=somefeature to url to activate a feature toggle
 		ide.featureToggle = location?.search?.match(/^\?ft=(\w+)$/)?[1]
-
-		ide.socket.on 'docLabelsUpdated', (data) ->
-			$scope.$broadcast 'doc:labels:updated', data
 
 	angular.bootstrap(document.body, ["SharelatexApp"])

@@ -10,7 +10,7 @@ define [
 			state: state
 		}
 
-		labels.onDocLabelsUpdated = (e, data) ->
+		labels.onBroadcastDocLabels = (data) ->
 			if data.docId and data.labels
 				state.documents[data.docId] = data.labels
 
