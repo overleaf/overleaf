@@ -16,16 +16,16 @@ define [
 			onChange = (change) =>
 				if change.remote
 					return
+				if change.action not in ['remove', 'insert']
+					return
 				cursorPosition = @editor.getCursorPosition()
 				end = change.end
 				range = new Range(end.row, 0, end.row, end.column)
 				lineUpToCursor = @editor.getSession().getTextRange(range)
 				commandFragment = getLastCommandFragment(lineUpToCursor)
-				if (
-					change.action in ['remove', 'insert'] and
-					((_.any(change.lines, (line) -> line.match(/\\label\{[^\}\n\\]{0,80}\}/))) or
-					 (commandFragment?.length > 2 and commandFragment.slice(0,7) == '\\label{'))
-				)
+				linesContainLabel = _.any(change.lines, (line) -> line.match(/\\label\{[^\}\n\\]{0,80}\}/))
+				lastCommandFragmentIsLabel = commandFragment?.slice(0,7) == '\\label{'
+				if linesContainLabel or lastCommandFragmentIsLabel
 					@scheduleLoadCurrentDocLabelsFromServer()
 
 			@editor.on "changeSession", (e) =>
