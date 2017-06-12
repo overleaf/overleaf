@@ -25,7 +25,7 @@ describe 'LabelsController', ->
 		beforeEach ->
 			@fakeLabels = {'somedoc': ['a_label']}
 			@LabelsHandler.getAllLabelsForProject = sinon.stub().callsArgWith(1, null, @fakeLabels)
-			@req = {params: {Project_id: @projectId}}
+			@req = {params: {project_id: @projectId}}
 			@res = {json: sinon.stub()}
 			@next = sinon.stub()
 
@@ -46,7 +46,7 @@ describe 'LabelsController', ->
 		describe 'when LabelsHandler.getAllLabelsForProject produces an error', ->
 			beforeEach ->
 				@LabelsHandler.getAllLabelsForProject = sinon.stub().callsArgWith(1, new Error('woops'))
-				@req = {params: {Project_id: @projectId}}
+				@req = {params: {project_id: @projectId}}
 				@res = {json: sinon.stub()}
 				@next = sinon.stub()
 
@@ -69,7 +69,7 @@ describe 'LabelsController', ->
 			@LabelsHandler.getLabelsForDoc = sinon.stub().callsArgWith(2, null, @fakeLabels)
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 			@docId = 'somedoc'
-			@req = {params: {Project_id: @projectId, doc_id: @docId}}
+			@req = {params: {project_id: @projectId, doc_id: @docId}}
 			@res = {json: sinon.stub()}
 			@next = sinon.stub()
 
@@ -100,7 +100,7 @@ describe 'LabelsController', ->
 				@LabelsHandler.getLabelsForDoc = sinon.stub().callsArgWith(2, new Error('woops'))
 				@EditorRealTimeController.emitToRoom = sinon.stub()
 				@docId = 'somedoc'
-				@req = {params: {Project_id: @projectId, doc_id: @docId}}
+				@req = {params: {project_id: @projectId, doc_id: @docId}}
 				@res = {json: sinon.stub()}
 				@next = sinon.stub()
 
