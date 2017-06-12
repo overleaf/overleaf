@@ -17,6 +17,9 @@ module.exports = LabelsHandler =
 				callback(null, projectLabels)
 
 	getLabelsForDoc: (projectId, docId, callback=(err, docLabels)->) ->
+		# Flush doc first, because this action is often performed while
+		# a document is being edited by the client. By contrast,
+		# `getAllLabelsForProject` is called only when a project/editor is loaded
 		DocumentUpdaterHandler.flushDocToMongo projectId, docId, (err) ->
 			if err?
 				return callback(err)
