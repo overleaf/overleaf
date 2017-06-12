@@ -128,6 +128,8 @@ define [
 		ide.binaryFilesManager = new BinaryFilesManager(ide, $scope)
 
 		# Set up labels
+		# TODO: figure out angular init order and move this
+		# code somewhere more appropriate
 		ide.socket.on 'broadcastDocLabels', (data) ->
 			labels.onBroadcastDocLabels(data)
 		$scope.$on 'entity:deleted', labels.onEntityDeleted
