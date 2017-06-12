@@ -1,5 +1,6 @@
 ProjectEntityHandler = require "../Project/ProjectEntityHandler"
 DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
+Async = require('async')
 
 
 module.exports = LabelsHandler =
@@ -40,14 +41,16 @@ module.exports = LabelsHandler =
 					docLabels.push(labelMatch[1])
 		callback(null, docLabels)
 
-	extractLabelsFromProjectDocs: (docs, callback=(err, projectLabels)->) ->
+	extractLabelsFromProjectDocs: (projectDocs, callback=(err, projectLabels)->) ->
 		projectLabels = {}  # docId => List[Label]
-		for _docPath, doc of docs
-			docLabels = []
-			for line in doc.lines
-				re = LabelsHandler.labelCaptureRegex()
-				while (labelMatch = re.exec(line))
-					if labelMatch[1]
-						docLabels.push(labelMatch[1])
-			projectLabels[doc._id] = docLabels
-		callback(null, projectLabels)
+		docs = for _path, doc of projectDocs
+			doc
+		Async.eachSeries(
+			docs
+			, (doc, cb) ->
+				LabelsHandler.extractLabelsFromDoc doc.lines, (err, docLabels) ->
+					projectLabels[doc._id] = docLabels
+					cb(err)
+			, (err, x) ->
+				callback(err, projectLabels)
+		)

@@ -61,7 +61,7 @@ describe 'LabelsHandler', ->
 
 		it 'should not produce an error', (done) ->
 			@LabelsHandler.extractLabelsFromProjectDocs @docs, (err, projectLabels) ->
-				expect(err).to.equal null
+				expect(err).to.be.oneOf [null, undefined]
 				done()
 
 		it 'should extract all the labels', (done) ->
