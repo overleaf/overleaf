@@ -255,7 +255,7 @@ describe "FileSystemImportManager", ->
 				@FileSystemImportManager.addEntity @user_id, @project_id, @folder_id, @name, @path_on_disk, @replace, @callback
 
 			it "should call addFile", ->
-				@FileSystemImportManager.addFile.calledWith(@user_id, @project_id, @folder_id, @name, @path_on_disk, @replace, @callback)
+				@FileSystemImportManager.addFile.calledWith(@user_id, @project_id, @folder_id, @name, @path_on_disk, @replace)
 					.should.equal true
 
 		describe "with text file", ->
@@ -267,7 +267,7 @@ describe "FileSystemImportManager", ->
 				@FileSystemImportManager.addEntity @user_id, @project_id, @folder_id, @name, @path_on_disk, @replace, @callback
 
 			it "should call addFile", ->
-				@FileSystemImportManager.addDoc.calledWith(@user_id, @project_id, @folder_id, @name, @path_on_disk, @replace, @callback)
+				@FileSystemImportManager.addDoc.calledWith(@user_id, @project_id, @folder_id, @name, @path_on_disk, @replace)
 					.should.equal true
 
 

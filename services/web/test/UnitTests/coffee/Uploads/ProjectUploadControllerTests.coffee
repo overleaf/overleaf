@@ -121,6 +121,7 @@ describe "ProjectUploadController", ->
 			beforeEach ->
 				@entity =
 					_id : "1234"
+					type: 'file'
 				@FileSystemImportManager.addEntity = sinon.stub().callsArgWith(6, null, @entity)
 				@ProjectUploadController.uploadFile @req, @res
 
@@ -133,6 +134,7 @@ describe "ProjectUploadController", ->
 				expect(@res.body).to.deep.equal
 					success: true
 					entity_id: @entity._id
+					entity_type: 'file'
 
 			it "should output a log line", ->
 				@logger.log

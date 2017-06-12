@@ -92,7 +92,7 @@ describe 'LabelsController', ->
 			@EditorRealTimeController.emitToRoom.callCount.should.equal 1
 			lastCall = @EditorRealTimeController.emitToRoom.lastCall
 			expect(lastCall.args[0]).to.equal @projectId
-			expect(lastCall.args[1]).to.equal 'doc:labels:updated'
+			expect(lastCall.args[1]).to.equal 'docLabelsUpdated'
 			expect(lastCall.args[2]).to.have.all.keys ['docId', 'labels']
 
 		describe 'when LabelsHandler.getLabelsForDoc produces an error', ->
