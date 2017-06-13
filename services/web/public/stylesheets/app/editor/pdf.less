@@ -23,6 +23,7 @@
 		.full-size;
 		background-color: @gray-lighter;
 		overflow: scroll;
+		user-select: none;
 		canvas, div.pdf-canvas {
 			background: white;
 			box-shadow: black 0px 0px 10px;
@@ -341,10 +342,14 @@
 
 .plv-text-layer {
 	display: none;
+	user-select: text;
+	
+	.pdf-page-container:hover &,
+	.pdfjs-viewer-show-text & {
+		display: block;
+	}
+
 	& > div {
 		color: red;
-	}
-	&.plv-text-layer-visible {
-		display: block;
 	}
 }

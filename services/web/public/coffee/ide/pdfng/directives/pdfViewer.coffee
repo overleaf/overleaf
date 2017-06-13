@@ -405,15 +405,37 @@ define [
 						scope.adjustingScroll = true
 						element.scrollTop(currentScrollTop + delta)
 
-				element.on 'mouseover', '.pdf-page-container', (e) ->
-					pdfPageEl = $(e.currentTarget)
+				element.on 'mousedown', (e) ->
+					if !_hasSelection()
+						console.log 'adding class'
+						element.addClass 'pdfjs-viewer-show-text'
+						$(document.body).one 'mouseup', _handleSelectionMouseUp
 
-					pdfPageEl.find('.plv-text-layer').addClass('plv-text-layer-visible')
-					pdfPageEl.prev().find('.plv-text-layer').addClass('plv-text-layer-visible')
-					pdfPageEl.next().find('.plv-text-layer').addClass('plv-text-layer-visible')
+				_handleSelectionMouseUp = () ->
+					window.setTimeout _removeClassIfNoSelection, 10
 
-				element.on 'mouseout', '.pdf-page-container', (e) ->
-					$('.plv-text-layer-visible').removeClass('plv-text-layer-visible')
+				_removeClassIfNoSelection = () ->
+					if _hasSelection()
+						console.log 'has selection, keeping class'
+						$(document.body).one 'mouseup', _handleSelectionMouseUp
+					else
+						console.log 'no selection, removing class'
+						element.removeClass 'pdfjs-viewer-show-text'
+
+				_hasSelection = () ->
+					selection = window.getSelection()
+					if _isSelectionWithinPDF(selection) and selection.toString() != ''
+						console.log 'selection within and not empty' + selection.toString()
+						return true
+					else 
+						console.log 'selection outside or empty'
+						return false
+
+				_isSelectionWithinPDF = (selection) ->
+					if selection.rangeCount == 0
+						return false
+					selectionAncestorNode = selection.getRangeAt(0).commonAncestorContainer
+					return element.find(selectionAncestorNode).length > 0 or element.is(selectionAncestorNode)
 
 				element.on 'scroll', () ->
 					#console.log 'scroll event', element.scrollTop(), 'adjusting?', scope.adjustingScroll
