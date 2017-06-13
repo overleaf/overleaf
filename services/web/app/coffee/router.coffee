@@ -195,7 +195,7 @@ module.exports = class Router
 		webRouter.get  '/project/download/zip', AuthorizationMiddlewear.ensureUserCanReadMultipleProjects, ProjectDownloadsController.downloadMultipleProjects
 
 		webRouter.get '/project/:project_id/labels', AuthorizationMiddlewear.ensureUserCanReadProject, AuthenticationController.requireLogin(), LabelsController.getAllLabels
-		webRouter.get '/project/:project_id/:doc_id/labels', AuthorizationMiddlewear.ensureUserCanReadProject, AuthenticationController.requireLogin(), LabelsController.getLabelsForDoc
+		webRouter.get '/project/:project_id/doc/:doc_id/labels', AuthorizationMiddlewear.ensureUserCanReadProject, AuthenticationController.requireLogin(), LabelsController.getLabelsForDoc
 
 		webRouter.get    '/tag', AuthenticationController.requireLogin(), TagsController.getAllTags
 		webRouter.post   '/tag', AuthenticationController.requireLogin(), TagsController.createTag

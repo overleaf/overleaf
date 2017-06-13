@@ -35,7 +35,7 @@ define [
 
 		labels.loadDocLabelsFromServer = (docId) ->
 			$http
-				.get("/project/#{window.project_id}/#{docId}/labels")
+				.get("/project/#{window.project_id}/doc/#{docId}/labels")
 				.success (data) ->
 					if data.docId and data.labels
 						state.documents[data.docId] = data.labels
