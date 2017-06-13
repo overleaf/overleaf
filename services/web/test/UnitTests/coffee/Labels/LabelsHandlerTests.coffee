@@ -32,15 +32,9 @@ describe 'LabelsHandler', ->
 				'six seven'
 			]
 
-		it 'should not produce an error', (done) ->
-			@LabelsHandler.extractLabelsFromDoc @lines, (err, docLabels) ->
-				expect(err).to.equal null
-				done()
-
-		it 'should extract all the labels', (done) ->
-			@LabelsHandler.extractLabelsFromDoc @lines, (err, docLabels) ->
-				expect(docLabels).to.deep.equal ['aaa', 'bbb']
-				done()
+		it 'should extract all the labels', ->
+			docLabels = @LabelsHandler.extractLabelsFromDoc @lines
+			expect(docLabels).to.deep.equal ['aaa', 'bbb']
 
 	describe 'extractLabelsFromProjectDocs', ->
 		beforeEach ->
@@ -59,19 +53,13 @@ describe 'LabelsHandler', ->
 				}
 			}
 
-		it 'should not produce an error', (done) ->
-			@LabelsHandler.extractLabelsFromProjectDocs @docs, (err, projectLabels) ->
-				expect(err).to.be.oneOf [null, undefined]
-				done()
-
-		it 'should extract all the labels', (done) ->
-			@LabelsHandler.extractLabelsFromProjectDocs @docs, (err, projectLabels) ->
-				expect(projectLabels).to.deep.equal {
-					'id_one': ['aaa'],
-					'id_two': [],
-					'id_three': ['bbb', 'ccc']
-				}
-				done()
+		it 'should extract all the labels', ->
+			projectLabels = @LabelsHandler.extractLabelsFromProjectDocs @docs
+			expect(projectLabels).to.deep.equal {
+				'id_one': ['aaa'],
+				'id_two': [],
+				'id_three': ['bbb', 'ccc']
+			}
 
 	describe 'getLabelsForDoc', ->
 		beforeEach ->
@@ -79,7 +67,7 @@ describe 'LabelsHandler', ->
 			@fakeLabels = ['aaa']
 			@DocumentUpdaterHandler.flushDocToMongo = sinon.stub().callsArgWith(2, null)
 			@ProjectEntityHandler.getDoc = sinon.stub().callsArgWith(2, null, @fakeLines)
-			@LabelsHandler.extractLabelsFromDoc = sinon.stub().callsArgWith(1, null, @fakeLabels)
+			@LabelsHandler.extractLabelsFromDoc = sinon.stub().returns(@fakeLabels)
 			@call = (callback) =>
 				@LabelsHandler.getLabelsForDoc @projectId, @docId, callback
 
@@ -118,7 +106,7 @@ describe 'LabelsHandler', ->
 			}
 			@fakeLabels = ['aaa']
 			@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @fakeDocs)
-			@LabelsHandler.extractLabelsFromProjectDocs = sinon.stub().callsArgWith(1, null, @fakeLabels)
+			@LabelsHandler.extractLabelsFromProjectDocs = sinon.stub().returns(@fakeLabels)
 			@call = (callback) =>
 				@LabelsHandler.getAllLabelsForProject @projectId, callback
 

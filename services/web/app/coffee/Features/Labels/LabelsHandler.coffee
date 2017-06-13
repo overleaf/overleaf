@@ -1,6 +1,5 @@
 ProjectEntityHandler = require "../Project/ProjectEntityHandler"
 DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
-Async = require('async')
 
 
 module.exports = LabelsHandler =
@@ -12,10 +11,8 @@ module.exports = LabelsHandler =
 		ProjectEntityHandler.getAllDocs projectId, (err, docs) ->
 			if err?
 				return callback(err)
-			LabelsHandler.extractLabelsFromProjectDocs docs, (err, projectLabels) ->
-				if err?
-					return callback(err)
-				callback(null, projectLabels)
+			projectLabels = LabelsHandler.extractLabelsFromProjectDocs docs
+			callback(null, projectLabels)
 
 	getLabelsForDoc: (projectId, docId, callback=(err, docLabels)->) ->
 		# Flush doc first, because this action is often performed while
@@ -27,30 +24,20 @@ module.exports = LabelsHandler =
 			ProjectEntityHandler.getDoc projectId, docId, (err, lines) ->
 				if err?
 					return callback(err)
-				LabelsHandler.extractLabelsFromDoc lines, (err, docLabels) ->
-					if err?
-						return callback(err)
-					callback(null, docLabels)
+				docLabels = LabelsHandler.extractLabelsFromDoc lines
+				callback(null, docLabels)
 
-	extractLabelsFromDoc: (lines, callback=(err, docLabels)->) ->
+	extractLabelsFromDoc: (lines) ->
 		docLabels = []
 		for line in lines
 			re = LabelsHandler.labelCaptureRegex()
 			while (labelMatch = re.exec(line))
 				if labelMatch[1]
 					docLabels.push(labelMatch[1])
-		callback(null, docLabels)
+		return docLabels
 
-	extractLabelsFromProjectDocs: (projectDocs, callback=(err, projectLabels)->) ->
+	extractLabelsFromProjectDocs: (projectDocs) ->
 		projectLabels = {}  # docId => List[Label]
-		docs = for _path, doc of projectDocs
-			doc
-		Async.eachSeries(
-			docs
-			, (doc, cb) ->
-				LabelsHandler.extractLabelsFromDoc doc.lines, (err, docLabels) ->
-					projectLabels[doc._id] = docLabels
-					cb(err)
-			, (err, x) ->
-				callback(err, projectLabels)
-		)
+		for _path, doc of projectDocs
+			projectLabels[doc._id] = LabelsHandler.extractLabelsFromDoc(doc.lines)
+		return projectLabels
