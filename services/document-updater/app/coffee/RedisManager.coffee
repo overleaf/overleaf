@@ -200,15 +200,16 @@ module.exports = RedisManager =
 				multi.eval setScript, 1, keys.docLines(doc_id:doc_id), newDocLines  # index 0
 				multi.set    keys.docVersion(doc_id:doc_id), newVersion             # index 1
 				multi.set    keys.docHash(doc_id:doc_id), newHash                   # index 2
-				multi.expire keys.docOps(doc_id: doc_id), RedisManager.DOC_OPS_TTL  # index 3
-				multi.ltrim  keys.docOps(doc_id: doc_id), -RedisManager.DOC_OPS_MAX_LENGTH, -1 # index 4
+				multi.ltrim  keys.docOps(doc_id: doc_id), -RedisManager.DOC_OPS_MAX_LENGTH, -1 # index 3
 				if ranges?
-					multi.set keys.ranges(doc_id:doc_id), ranges  # index 5
+					multi.set keys.ranges(doc_id:doc_id), ranges  # index 4
 				else
-					multi.del keys.ranges(doc_id:doc_id)          # also index 5
-				# push the ops last so we can get the lengths at fixed index positions 6 and 7
+					multi.del keys.ranges(doc_id:doc_id)          # also index 4
+				# push the ops last so we can get the lengths at fixed index position 7
 				if jsonOps.length > 0
-					multi.rpush  keys.docOps(doc_id: doc_id), jsonOps...                         # index 6
+					multi.rpush  keys.docOps(doc_id: doc_id), jsonOps...                         # index 5
+					# expire must come after rpush since before it will be a no-op if the list is empty
+					multi.expire keys.docOps(doc_id: doc_id), RedisManager.DOC_OPS_TTL           # index 6
 					multi.rpush  historyKeys.uncompressedHistoryOps(doc_id: doc_id), jsonOps...  # index 7
 				multi.exec (error, result) ->
 						return callback(error) if error?
