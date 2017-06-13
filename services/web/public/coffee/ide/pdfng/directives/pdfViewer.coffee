@@ -405,6 +405,16 @@ define [
 						scope.adjustingScroll = true
 						element.scrollTop(currentScrollTop + delta)
 
+				element.on 'mouseover', '.pdf-page-container', (e) ->
+					pdfPageEl = $(e.currentTarget)
+
+					pdfPageEl.find('.plv-text-layer').addClass('plv-text-layer-visible')
+					pdfPageEl.prev().find('.plv-text-layer').addClass('plv-text-layer-visible')
+					pdfPageEl.next().find('.plv-text-layer').addClass('plv-text-layer-visible')
+
+				element.on 'mouseout', '.pdf-page-container', (e) ->
+					$('.plv-text-layer-visible').removeClass('plv-text-layer-visible')
+
 				element.on 'scroll', () ->
 					#console.log 'scroll event', element.scrollTop(), 'adjusting?', scope.adjustingScroll
 					#scope.scrollPosition = element.scrollTop()
