@@ -105,6 +105,7 @@ describe 'LabelsHandler', ->
 				'doc_one': {lines: ['\\label{aaa}']}
 			}
 			@fakeLabels = ['aaa']
+			@DocumentUpdaterHandler.flushProjectToMongo = sinon.stub().callsArgWith(1, null)
 			@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @fakeDocs)
 			@LabelsHandler.extractLabelsFromProjectDocs = sinon.stub().returns(@fakeLabels)
 			@call = (callback) =>
