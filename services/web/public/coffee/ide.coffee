@@ -9,6 +9,7 @@ define [
 	"ide/pdf/PdfManager"
 	"ide/binary-files/BinaryFilesManager"
 	"ide/references/ReferencesManager"
+	"ide/labels/LabelsManager"
 	"ide/review-panel/ReviewPanelManager"
 	"ide/SafariScrollPatcher"
 	"ide/FeatureOnboardingController"
@@ -45,6 +46,7 @@ define [
 	PdfManager
 	BinaryFilesManager
 	ReferencesManager
+	LabelsManager
 	ReviewPanelManager
 	SafariScrollPatcher
 ) ->
@@ -126,16 +128,10 @@ define [
 		ide.pdfManager = new PdfManager(ide, $scope)
 		ide.permissionsManager = new PermissionsManager(ide, $scope)
 		ide.binaryFilesManager = new BinaryFilesManager(ide, $scope)
+		ide.labelsManager = new LabelsManager(ide, $scope, labels)
 
-		# Set up labels
-		# TODO: figure out angular init order and move this
-		# code somewhere more appropriate
-		ide.socket.on 'broadcastDocLabels', (data) ->
-			labels.onBroadcastDocLabels(data)
-		$scope.$on 'entity:deleted', labels.onEntityDeleted
-		$scope.$on 'file:upload:complete', labels.fileUploadComplete
 		$timeout () ->
-			labels.loadProjectLabelsFromServer()
+			ide.labelsManager.loadProjectLabelsFromServer()
 
 		inited = false
 		$scope.$on "project:joined", () ->
