@@ -39,7 +39,11 @@ describe "RedisManager", ->
 				"./Metrics": @metrics =
 					inc: sinon.stub()
 					Timer: class Timer
+						constructor: () ->
+							this.start = new Date()
 						done: () ->
+							timeSpan = new Date - this.start
+							return timeSpan
 				"./Errors": Errors
 			globals:
 				JSON: @JSON = JSON
@@ -147,6 +151,24 @@ describe "RedisManager", ->
 					.calledWith(null, @lines, @version, @ranges)
 					.should.equal true
 
+
+		describe "with a slow request to redis", ->
+			beforeEach ->
+				@rclient.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version, @badHash, @project_id, @json_ranges])
+				@clock = sinon.useFakeTimers();
+				@rclient.exec = (cb) =>
+					@clock.tick(6000);
+					cb(null, [@jsonlines, @version, @another_project_id, @json_ranges])
+
+				@RedisManager.getDoc @project_id, @doc_id, @callback
+
+			afterEach ->
+				@clock.restore()
+
+			it 'should return an error', ->
+				@callback
+					.calledWith(new Error("redis getDoc exceeded timeout"))
+					.should.equal true
 
 		describe "getDoc with an invalid project id", ->
 			beforeEach ->

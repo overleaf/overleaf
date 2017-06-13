@@ -7,6 +7,12 @@ metrics = require('./Metrics')
 Errors = require "./Errors"
 crypto = require "crypto"
 
+# Sometimes Redis calls take an unexpectedly long time.  We have to be
+# quick with Redis calls because we're holding a lock that expires
+# after 30 seconds. We can't let any errors in the rest of the stack
+# hold us up, and need to bail out quickly if there is a problem.
+MAX_REDIS_REQUEST_LENGTH = 5000 # 5 seconds
+
 # Make times easy to read
 minutes = 60 # seconds for Redis expire
 
@@ -93,9 +99,12 @@ module.exports = RedisManager =
 		multi.get keys.projectKey(doc_id:doc_id)
 		multi.get keys.ranges(doc_id:doc_id)
 		multi.exec (error, [docLines, version, storedHash, doc_project_id, ranges])->
-			timer.done()
+			timeSpan = timer.done()
 			return callback(error) if error?
-
+			# check if request took too long and bail out.  only do this for
+			# get, because it is the first call in each update, so if this
+			# passes we'll assume others have a reasonable chance to succeed.
+			return callback(new Error("redis getDoc exceeded timeout")) if timeSpan > MAX_REDIS_REQUEST_LENGTH
 			# check sha1 hash value if present
 			if docLines? and storedHash?
 				computedHash = RedisManager._computeHash(docLines)
