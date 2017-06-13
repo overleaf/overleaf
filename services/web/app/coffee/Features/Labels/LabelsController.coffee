@@ -13,7 +13,7 @@ module.exports = LabelsController =
 				return next(err)
 			res.json {projectId: project_id, projectLabels: projectLabels}
 
-	getLabelsForDoc: (req, res, next) ->
+	broadcastLabelsForDoc: (req, res, next) ->
 		project_id = req.params.project_id
 		doc_id = req.params.doc_id
 		LabelsHandler.getLabelsForDoc project_id, doc_id, (err, docLabels) ->
@@ -23,4 +23,4 @@ module.exports = LabelsController =
 			EditorRealTimeController.emitToRoom project_id, 'broadcastDocLabels', {
 				docId: doc_id, labels: docLabels
 			}
-			res.json {projectId: project_id, docId: doc_id, labels: docLabels}
+			res.sendStatus(200)

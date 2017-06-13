@@ -35,9 +35,10 @@ define [
 
 		labels.loadDocLabelsFromServer = (docId) ->
 			$http
-				.get("/project/#{window.project_id}/doc/#{docId}/labels")
+				.post(
+					"/project/#{window.project_id}/doc/#{docId}/labels",
+					{_csrf: window.csrfToken}
+				)
 				.success (data) ->
-					if data.docId and data.labels
-						state.documents[data.docId] = data.labels
 
 		return labels

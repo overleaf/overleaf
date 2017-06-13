@@ -64,31 +64,31 @@ describe 'LabelsController', ->
 				@LabelsController.getAllLabels(@req, @res, @next)
 				@res.json.callCount.should.equal 0
 
-	describe 'getLabelsForDoc', ->
+	describe 'broadcastLabelsForDoc', ->
 		beforeEach ->
 			@LabelsHandler.getLabelsForDoc = sinon.stub().callsArgWith(2, null, @fakeLabels)
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 			@docId = 'somedoc'
 			@req = {params: {project_id: @projectId, doc_id: @docId}}
-			@res = {json: sinon.stub()}
+			@res = {sendStatus: sinon.stub()}
 			@next = sinon.stub()
 
 		it 'should call LabelsHandler.getLabelsForDoc', () ->
-			@LabelsController.getLabelsForDoc(@req, @res, @next)
+			@LabelsController.broadcastLabelsForDoc(@req, @res, @next)
 			@LabelsHandler.getLabelsForDoc.callCount.should.equal 1
 			@LabelsHandler.getLabelsForDoc.calledWith(@projectId).should.equal true
 
 		it 'should call not call next with an error', () ->
-			@LabelsController.getLabelsForDoc(@req, @res, @next)
+			@LabelsController.broadcastLabelsForDoc(@req, @res, @next)
 			@next.callCount.should.equal 0
 
-		it 'should send a json response', () ->
-			@LabelsController.getLabelsForDoc(@req, @res, @next)
-			@res.json.callCount.should.equal 1
-			expect(@res.json.lastCall.args[0]).to.have.all.keys ['projectId', 'docId', 'labels']
+		it 'should send a success response', () ->
+			@LabelsController.broadcastLabelsForDoc(@req, @res, @next)
+			@res.sendStatus.callCount.should.equal 1
+			@res.sendStatus.calledWith(200).should.equal true
 
 		it 'should emit a message to room', () ->
-			@LabelsController.getLabelsForDoc(@req, @res, @next)
+			@LabelsController.broadcastLabelsForDoc(@req, @res, @next)
 			@EditorRealTimeController.emitToRoom.callCount.should.equal 1
 			lastCall = @EditorRealTimeController.emitToRoom.lastCall
 			expect(lastCall.args[0]).to.equal @projectId
@@ -105,15 +105,15 @@ describe 'LabelsController', ->
 				@next = sinon.stub()
 
 			it 'should call LabelsHandler.getLabelsForDoc', () ->
-				@LabelsController.getLabelsForDoc(@req, @res, @next)
+				@LabelsController.broadcastLabelsForDoc(@req, @res, @next)
 				@LabelsHandler.getLabelsForDoc.callCount.should.equal 1
 				@LabelsHandler.getLabelsForDoc.calledWith(@projectId).should.equal true
 
 			it 'should call next with an error', ->
-				@LabelsController.getLabelsForDoc(@req, @res, @next)
+				@LabelsController.broadcastLabelsForDoc(@req, @res, @next)
 				@next.callCount.should.equal 1
 				expect(@next.lastCall.args[0]).to.be.instanceof Error
 
 			it 'should not send a json response', ->
-				@LabelsController.getLabelsForDoc(@req, @res, @next)
+				@LabelsController.broadcastLabelsForDoc(@req, @res, @next)
 				@res.json.callCount.should.equal 0
