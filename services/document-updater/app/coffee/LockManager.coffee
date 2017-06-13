@@ -87,6 +87,7 @@ module.exports = LockManager =
 			else if result? and result isnt 1 # successful unlock should release exactly one key
 				profile.log("unlockScript:expired-lock").end()
 				logger.error {doc_id:doc_id, key:key, lockValue:lockValue, redis_err:err, redis_result:result}, "unlocking error"
+				metrics.inc "unlock-error"
 				return callback(new Error("tried to release timed out lock"))
 			else
 				profile.log("unlockScript:ok").end()
