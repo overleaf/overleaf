@@ -130,9 +130,6 @@ define [
 		ide.binaryFilesManager = new BinaryFilesManager(ide, $scope)
 		ide.labelsManager = new LabelsManager(ide, $scope, labels)
 
-		$timeout () ->
-			ide.labelsManager.loadProjectLabelsFromServer()
-
 		inited = false
 		$scope.$on "project:joined", () ->
 			return if inited
@@ -143,6 +140,13 @@ define [
 					We don't want to delete your data on ShareLaTeX, so this project still contains your history and collaborators.
 					If the project has been renamed please look in your project list for a new project under the new name.
 				""")
+			$timeout(
+				() ->
+					if $scope.permissions.write
+						ide.labelsManager.loadProjectLabelsFromServer()
+						_labelsInitialLoadDone = true
+				, 200
+			)
 
 		DARK_THEMES = [
 			"ambiance", "chaos", "clouds_midnight", "cobalt", "idle_fingers",

@@ -44,7 +44,6 @@ define [
 				keybindings: "="
 				fontSize: "="
 				autoComplete: "="
-				enableAutoCompleteFeatures: "="
 				sharejsDoc: "="
 				spellCheck: "="
 				spellCheckLanguage: "="
@@ -95,9 +94,9 @@ define [
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
 				trackChangesManager   = new TrackChangesManager(scope, editor, element)
-				if scope.enableAutoCompleteFeatures
-					labelsManager         = new LabelsManager(scope, editor, element, labels)
-					autoCompleteManager   = new AutoCompleteManager(scope, editor, element, labelsManager)
+				labelsManager = new LabelsManager(scope, editor, element, labels)
+				autoCompleteManager = new AutoCompleteManager(scope, editor, element, labelsManager)
+
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				editor.commands.addCommand
