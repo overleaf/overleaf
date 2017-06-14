@@ -42,7 +42,7 @@ define [
 
 			labelsManager = @labelsManager
 			LabelsCompleter =
-				getCompletions: (editor, session, pos, prefxi, callback) ->
+				getCompletions: (editor, session, pos, prefix, callback) ->
 					upToCursorRange = new Range(pos.row, 0, pos.row, pos.column)
 					lineUpToCursor = editor.getSession().getTextRange(upToCursorRange)
 					commandFragment = getLastCommandFragment(lineUpToCursor)
