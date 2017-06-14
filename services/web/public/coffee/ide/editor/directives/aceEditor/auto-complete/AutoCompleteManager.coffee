@@ -47,23 +47,24 @@ define [
 					lineUpToCursor = editor.getSession().getTextRange(upToCursorRange)
 					commandFragment = getLastCommandFragment(lineUpToCursor)
 					if commandFragment
-						refMatch = commandFragment.match(/^~?\\ref{([^}]*, *)?(\w*)/)
+						refMatch = commandFragment.match(/^~?\\([a-z]*ref){([^}]*, *)?(\w*)/)
 						if refMatch
 							beyondCursorRange = new Range(pos.row, pos.column, pos.row, 99999)
 							lineBeyondCursor = editor.getSession().getTextRange(beyondCursorRange)
 							needsClosingBrace = !lineBeyondCursor.match(/^[^{]*}/)
-							currentArg = refMatch[1]
+							commandName = refMatch[1]
+							currentArg = refMatch[2]
 							result = []
 							result.push {
-								caption: "\\ref{}",
-								snippet: "\\ref{}",
+								caption: "\\#{commandName}{}",
+								snippet: "\\#{commandName}{}",
 								meta: "cross-reference",
 								score: 11000
 							}
 							for label in labelsManager.getAllLabels()
 								result.push {
-									caption: "\\ref{#{label}#{if needsClosingBrace then '}' else ''}",
-									value: "\\ref{#{label}#{if needsClosingBrace then '}' else ''}",
+									caption: "\\#{commandName}{#{label}#{if needsClosingBrace then '}' else ''}",
+									value: "\\#{commandName}{#{label}#{if needsClosingBrace then '}' else ''}",
 									meta: "cross-reference",
 									score: 10000
 								}
