@@ -7,6 +7,7 @@ module.exports = LabelsController =
 
 	getAllLabels: (req, res, next) ->
 		project_id = req.params.project_id
+		logger.log {project_id}, "getting all labels for project"
 		LabelsHandler.getAllLabelsForProject project_id, (err, projectLabels) ->
 			if err?
 				logger.err {project_id, err}, "[LabelsController] error getting all labels from project"
@@ -16,6 +17,7 @@ module.exports = LabelsController =
 	broadcastLabelsForDoc: (req, res, next) ->
 		project_id = req.params.project_id
 		doc_id = req.params.doc_id
+		logger.log {project_id, doc_id}, "getting labels for doc"
 		LabelsHandler.getLabelsForDoc project_id, doc_id, (err, docLabels) ->
 			if err?
 				logger.err {project_id, doc_id, err}, "[LabelsController] error getting labels from doc"
