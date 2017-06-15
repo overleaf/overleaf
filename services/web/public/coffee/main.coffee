@@ -30,7 +30,6 @@ define [
 	"directives/maxHeight"
 	"directives/creditCards"
 	"services/queued-http"
-	"services/labels"
 	"filters/formatDate"
 	"__MAIN_CLIENTSIDE_INCLUDES__"
 ], () ->
