@@ -417,16 +417,28 @@ define [
 					# grey background area or the scrollbars.
 					if e.target != element[0] and !_hasSelection()
 						element.addClass 'pdfjs-viewer-show-text'
-						$(document.body).one 'mouseup', _handleSelectionMouseUp
+						_setMouseUpHandler()
+
+				mouseUpHandler = null # keep track of the handler to avoid adding multiple times
+
+				_setMouseUpHandler = () ->
+					if not mouseUpHandler?
+						mouseUpHandler = $(document.body).one 'mouseup', _handleSelectionMouseUp
 
 				_handleSelectionMouseUp = () ->
-					window.setTimeout _removeClassIfNoSelection, 10
+					mouseUpHandler = null # reset handler, has now fired
+					window.setTimeout () ->
+						removedClass = _removeClassIfNoSelection()
+						# if we still have a selection we need to keep the handler going
+						if not removedClass then _setMouseUpHandler()
+					, 10
 
 				_removeClassIfNoSelection = () ->
 					if _hasSelection()
-						$(document.body).one 'mouseup', _handleSelectionMouseUp
+						return false # didn't remove the text layer
 					else
 						element.removeClass 'pdfjs-viewer-show-text'
+						return true
 
 				_hasSelection = () ->
 					selection = window.getSelection()
