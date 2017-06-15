@@ -442,10 +442,10 @@ define [
 
 				_hasSelection = () ->
 					selection = window.getSelection?()
-					# check the selection type in preference to using
-					# selection.toString() as the latter is "" when the
-					# selection is hidden (e.g. while viewing logs)
-					return selection? and _isSelectionWithinPDF(selection) and selection.type is 'Range'
+					# check the selection collapsed state in preference to
+					# using selection.toString() as the latter is "" when 
+					# the selection is hidden (e.g. while viewing logs)
+					return selection? and _isSelectionWithinPDF(selection) and !selection.isCollapsed
 
 				_isSelectionWithinPDF = (selection) ->
 					if selection.rangeCount == 0
