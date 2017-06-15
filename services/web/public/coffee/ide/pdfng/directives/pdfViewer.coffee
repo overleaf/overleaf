@@ -406,8 +406,14 @@ define [
 						element.scrollTop(currentScrollTop + delta)
 
 				element.on 'mousedown', (e) ->
-					if !_hasSelection()
-						console.log 'adding class'
+					# We're checking that the event target isn't the directive root element 
+					# to make sure that the click was within a PDF page - no point in showing
+					# the text layer when the click is outside.
+					# If the user clicks a PDF page, the mousedown target will be the canvas
+					# element (or the text layer one). Alternatively, if the event target is
+					# the root element, we can assume that the user has clicked either the 
+					# grey background area or the scrollbars.
+					if e.target != element[0] and !_hasSelection()
 						element.addClass 'pdfjs-viewer-show-text'
 						$(document.body).one 'mouseup', _handleSelectionMouseUp
 
@@ -416,20 +422,13 @@ define [
 
 				_removeClassIfNoSelection = () ->
 					if _hasSelection()
-						console.log 'has selection, keeping class'
 						$(document.body).one 'mouseup', _handleSelectionMouseUp
 					else
-						console.log 'no selection, removing class'
 						element.removeClass 'pdfjs-viewer-show-text'
 
 				_hasSelection = () ->
 					selection = window.getSelection()
-					if _isSelectionWithinPDF(selection) and selection.toString() != ''
-						console.log 'selection within and not empty' + selection.toString()
-						return true
-					else 
-						console.log 'selection outside or empty'
-						return false
+					return _isSelectionWithinPDF(selection) and selection.toString() != ''
 
 				_isSelectionWithinPDF = (selection) ->
 					if selection.rangeCount == 0
