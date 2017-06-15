@@ -323,6 +323,8 @@ define [
 									clearTimeout spinnerTimer
 								else
 									spinner.remove(element)
+								# stop displaying the text layer
+								element.removeClass 'pdfjs-viewer-show-text'
 								ctrl.redraw(origposition)
 								$timeout renderVisiblePages
 								scope.loadSuccess = true
