@@ -432,6 +432,7 @@ define [
 						# if we still have a selection we need to keep the handler going
 						if not removedClass then _setMouseUpHandler()
 					, 10
+					return true
 
 				_removeClassIfNoSelection = () ->
 					if _hasSelection()
