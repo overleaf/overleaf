@@ -11,6 +11,7 @@ describe 'ProjectUpdateHandler', ->
 		@ProjectModel.update = sinon.stub().callsArg(3)
 		@handler = SandboxedModule.require modulePath, requires:
 			'../../models/Project':{Project:@ProjectModel}
+			'logger-sharelatex' : { log: sinon.stub() }
 
 	describe 'marking a project as recently updated', ->
 		it 'should send an update to mongo', (done)->

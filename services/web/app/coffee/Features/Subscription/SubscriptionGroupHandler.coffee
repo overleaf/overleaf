@@ -1,6 +1,5 @@
 async = require("async")
 _ = require("underscore")
-UserCreator = require("../User/UserCreator")
 SubscriptionUpdater = require("./SubscriptionUpdater")
 SubscriptionLocator = require("./SubscriptionLocator")
 UserLocator = require("../User/UserLocator")
@@ -15,36 +14,40 @@ module.exports = SubscriptionGroupHandler =
 
 	addUserToGroup: (adminUserId, newEmail, callback)->
 		logger.log adminUserId:adminUserId, newEmail:newEmail, "adding user to group"
-		UserCreator.getUserOrCreateHoldingAccount newEmail, (err, user)->
+		LimitationsManager.hasGroupMembersLimitReached adminUserId, (err, limitReached, subscription)->
 			if err?
-				logger.err err:err,  adminUserId:adminUserId, newEmail:newEmail, "error creating user for holding account"
+				logger.err err:err, adminUserId:adminUserId, newEmail:newEmail, "error checking if limit reached for group plan"
 				return callback(err)
-			if !user?
-				msg = "no user returned whenc reating holidng account or getting user"
-				logger.err adminUserId:adminUserId, newEmail:newEmail, msg
-				return callback(msg)
-			LimitationsManager.hasGroupMembersLimitReached adminUserId, (err, limitReached, subscription)->
-				if err?
-					logger.err err:err, adminUserId:adminUserId, newEmail:newEmail, "error checking if limit reached for group plan"
-					return callback(err)
-				if limitReached
-					logger.err adminUserId:adminUserId, newEmail:newEmail, "group subscription limit reached not adding user to group"
-					return callback(limitReached:limitReached)
-				SubscriptionUpdater.addUserToGroup adminUserId, user._id, (err)->
-					if err?
-						logger.err err:err, "error adding user to group"
-						return callback(err)
-					NotificationsBuilder.groupPlan(user, {subscription_id:subscription._id}).read()
-					userViewModel = buildUserViewModel(user)
-					callback(err, userViewModel)
+			if limitReached
+				logger.err adminUserId:adminUserId, newEmail:newEmail, "group subscription limit reached not adding user to group"
+				return callback(limitReached:limitReached)
+			UserLocator.findByEmail newEmail, (err, user)->
+				return callback(err) if err?
+				if user?
+					SubscriptionUpdater.addUserToGroup adminUserId, user._id, (err)->
+						if err?
+							logger.err err:err, "error adding user to group"
+							return callback(err)
+						NotificationsBuilder.groupPlan(user, {subscription_id:subscription._id}).read()
+						userViewModel = buildUserViewModel(user)
+						callback(err, userViewModel)
+				else
+					SubscriptionUpdater.addEmailInviteToGroup adminUserId, newEmail, (err) ->
+						return callback(err) if err?
+						userViewModel = buildEmailInviteViewModel(newEmail)
+						callback(err, userViewModel)
 
 	removeUserFromGroup: (adminUser_id, userToRemove_id, callback)->
 		SubscriptionUpdater.removeUserFromGroup adminUser_id, userToRemove_id, callback
-
+	
+	removeEmailInviteFromGroup: (adminUser_id, email, callback) ->
+		SubscriptionUpdater.removeEmailInviteFromGroup adminUser_id, email, callback
 
 	getPopulatedListOfMembers: (adminUser_id, callback)->
 		SubscriptionLocator.getUsersSubscription adminUser_id, (err, subscription)-> 
 			users = []
+			for email in subscription.invited_emails or []
+				users.push buildEmailInviteViewModel(email)
 			jobs = _.map subscription.member_ids, (user_id)->
 				return (cb)->
 					UserLocator.findById user_id, (err, user)->
@@ -91,7 +94,21 @@ module.exports = SubscriptionGroupHandler =
 					return callback()
 				SubscriptionGroupHandler.addUserToGroup subscription?.admin_id, userEmail, callback
 
-
+	convertEmailInvitesToMemberships: (email, user_id, callback = (err) ->) ->
+		SubscriptionLocator.getGroupsWithEmailInvite email, (err, groups = []) ->
+			return callback(err) if err?
+			logger.log {email, user_id, groups}, "found groups to convert from email invite to member"
+			jobs = []
+			for group in groups
+				do (group) ->
+					jobs.push (cb) ->
+						SubscriptionUpdater.removeEmailInviteFromGroup group.admin_id, email, (err) ->
+							return cb(err) if err?
+							SubscriptionUpdater.addUserToGroup group.admin_id, user_id, (err) ->
+								return cb(err) if err?
+								logger.log {group_id: group._id, user_id, email}, "converted email invite to group membership"
+								return cb()
+			async.series jobs, callback
 
 buildUserViewModel = (user)->
 	u = 
@@ -101,3 +118,9 @@ buildUserViewModel = (user)->
 		holdingAccount: user.holdingAccount
 		_id: user._id
 	return u
+
+buildEmailInviteViewModel = (email) ->
+	return {
+		email: email
+		holdingAccount: true
+	}

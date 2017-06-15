@@ -34,6 +34,8 @@ describe 'ProjectCreationHandler', ->
 			addDoc: sinon.stub().callsArgWith(4, null, {_id: docId})
 			addFile: sinon.stub().callsArg(4)
 			setRootDoc: sinon.stub().callsArg(2)
+		@ProjectDetailsHandler =
+			validateProjectName: sinon.stub().yields()
 
 		@user = 
 			first_name:"first name here"
@@ -48,6 +50,7 @@ describe 'ProjectCreationHandler', ->
 			'../../models/Project':{Project:@ProjectModel}
 			'../../models/Folder':{Folder:@FolderModel}
 			'./ProjectEntityHandler':@ProjectEntityHandler
+			"./ProjectDetailsHandler":@ProjectDetailsHandler
 			"settings-sharelatex": @Settings = {}
 			'logger-sharelatex': {log:->}
 			"metrics-sharelatex": {
@@ -96,6 +99,18 @@ describe 'ProjectCreationHandler', ->
 			
 			it 'should return the error to the callback', ->
 				should.exist @callback.args[0][0]
+		
+		describe "with an invalid name", ->
+			beforeEach ->
+				@ProjectDetailsHandler.validateProjectName = sinon.stub().yields(new Error("bad name"))
+				@handler.createBlankProject ownerId, projectName, @callback
+			
+			it 'should return the error to the callback', ->
+				should.exist @callback.args[0][0]
+			
+			it 'should not try to create the project', ->
+				@ProjectModel::save.called.should.equal false
+				
 
 	describe 'Creating a basic project', ->
 		beforeEach ->

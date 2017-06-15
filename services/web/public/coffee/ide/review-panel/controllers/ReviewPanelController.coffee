@@ -26,7 +26,12 @@ define [
 			resolvedThreadIds: {}
 			rendererData: {}
 			loadingThreads: false
-			selectedEntryIds: []
+			# All selected changes. If a aggregated change (insertion + deletion) is selection, the two ids
+			# will be present. The length of this array will differ from the count below (see explanation).
+			selectedEntryIds: [] 
+			# A count of user-facing selected changes. An aggregated change (insertion + deletion) will count
+			# as only one.
+			nVisibleSelectedChanges: 0
 
 		window.addEventListener "beforeunload", () ->
 			collapsedStates = {}
@@ -69,20 +74,12 @@ define [
 			$scope.$apply()
 			$timeout () ->
 				$scope.$broadcast "review-panel:layout"
-		
-		ide.socket.on "accept-change", (doc_id, change_id) ->
-			if doc_id != $scope.editor.open_doc_id
-				getChangeTracker(doc_id).removeChangeId(change_id)
-			else
-				$scope.$broadcast "change:accept", change_id
-			updateEntries(doc_id)
-			$scope.$apply () ->
 
 		ide.socket.on "accept-changes", (doc_id, change_ids) ->
 			if doc_id != $scope.editor.open_doc_id
 				getChangeTracker(doc_id).removeChangeIds(change_ids)
 			else
-				$scope.$broadcast "change:bulk-accept", change_ids
+				$scope.$broadcast "changes:accept", change_ids
 			updateEntries(doc_id)
 			$scope.$apply () ->
 		
@@ -227,28 +224,49 @@ define [
 
 			# Assume we'll delete everything until we see it, then we'll remove it from this object
 			delete_changes = {}
-			for change_id, change of entries
-				if change_id != "add-comment"
-					delete_changes[change_id] = true 
-			for change_id, change of resolvedComments
-				delete_changes[change_id] = true 
+			for id, change of entries
+				if id not in [ "add-comment", "bulk-actions" ]
+					for entry_id in change.entry_ids
+						delete_changes[entry_id] = true 
+			for id, change of resolvedComments
+				for entry_id in change.entry_ids
+					delete_changes[entry_id] = true 
+
+			potential_aggregate = false
+			prev_insertion = null
 
 			for change in rangesTracker.changes
 				changed = true
-				delete delete_changes[change.id]
-				entries[change.id] ?= {}
-					
-				# Update in place to avoid a full DOM redraw via angular
-				metadata = {}
-				metadata[key] = value for key, value of change.metadata
-				new_entry = {
-					type: if change.op.i then "insert" else "delete"
-					content: change.op.i or change.op.d
-					offset: change.op.p
-					metadata: change.metadata
-				}
-				for key, value of new_entry
-					entries[change.id][key] = value
+				
+				if (
+					potential_aggregate and 
+					change.op.d and 
+					change.op.p == prev_insertion.op.p + prev_insertion.op.i.length and
+					change.metadata.user_id == prev_insertion.metadata.user_id
+				)
+					# An actual aggregate op.
+					entries[prev_insertion.id].type = "aggregate-change"
+					entries[prev_insertion.id].metadata.replaced_content = change.op.d
+					entries[prev_insertion.id].entry_ids.push change.id
+				else
+					entries[change.id] ?= {}
+					delete delete_changes[change.id]
+					new_entry = {
+						type: if change.op.i then "insert" else "delete"
+						entry_ids: [ change.id ]
+						content: change.op.i or change.op.d
+						offset: change.op.p
+						metadata: change.metadata
+					}
+					for key, value of new_entry
+						entries[change.id][key] = value
+
+				if change.op.i
+					potential_aggregate = true
+					prev_insertion = change
+				else
+					potential_aggregate = false
+					prev_insertion = null
 
 				if !$scope.users[change.metadata.user_id]?
 					refreshChangeUsers(change.metadata.user_id)
@@ -268,6 +286,7 @@ define [
 				new_entry = {
 					type: "comment"
 					thread_id: comment.op.t
+					entry_ids: [ comment.id ]
 					content: comment.op.c
 					offset: comment.op.p
 				}
@@ -295,8 +314,10 @@ define [
 		$scope.$on "editor:focus:changed", (e, selection_offset_start, selection_offset_end, selection) ->
 			doc_id = $scope.editor.open_doc_id
 			entries = getDocEntries(doc_id)
+			# All selected changes will be added to this array.
 			$scope.reviewPanel.selectedEntryIds = []
-
+			# Count of user-visible changes, i.e. an aggregated change will count as one.
+			$scope.reviewPanel.nVisibleSelectedChanges = 0
 			delete entries["add-comment"]
 			delete entries["bulk-actions"]
 
@@ -313,53 +334,63 @@ define [
 				}
 			
 			for id, entry of entries
+				isChangeEntryAndWithinSelection = false
 				if entry.type == "comment" and not $scope.reviewPanel.resolvedThreadIds[entry.thread_id]
 					entry.focused = (entry.offset <= selection_offset_start <= entry.offset + entry.content.length)
 				else if entry.type == "insert"
-					isEntryWithinSelection = entry.offset >= selection_offset_start and entry.offset + entry.content.length <= selection_offset_end
+					isChangeEntryAndWithinSelection = entry.offset >= selection_offset_start and entry.offset + entry.content.length <= selection_offset_end
 					entry.focused = (entry.offset <= selection_offset_start <= entry.offset + entry.content.length)
-					$scope.reviewPanel.selectedEntryIds.push id if isEntryWithinSelection
 				else if entry.type == "delete"
-					isEntryWithinSelection = selection_offset_start <= entry.offset <= selection_offset_end
+					isChangeEntryAndWithinSelection = selection_offset_start <= entry.offset <= selection_offset_end
 					entry.focused = (entry.offset == selection_offset_start)
-					$scope.reviewPanel.selectedEntryIds.push id if isEntryWithinSelection
+				else if entry.type == "aggregate-change"
+					isChangeEntryAndWithinSelection = entry.offset >= selection_offset_start and entry.offset + entry.content.length <= selection_offset_end
+					entry.focused = (entry.offset <= selection_offset_start <= entry.offset + entry.content.length)
 				else if entry.type in [ "add-comment", "bulk-actions" ] and selection
 					entry.focused = true
+
+				if isChangeEntryAndWithinSelection
+					for entry_id in entry.entry_ids
+						$scope.reviewPanel.selectedEntryIds.push entry_id
+					$scope.reviewPanel.nVisibleSelectedChanges++
 			
 			$scope.$broadcast "review-panel:recalculate-screen-positions"
 			$scope.$broadcast "review-panel:layout"
 
-		$scope.acceptChange = (entry_id) ->
-			$http.post "/project/#{$scope.project_id}/doc/#{$scope.editor.open_doc_id}/changes/#{entry_id}/accept", {_csrf: window.csrfToken}
-			$scope.$broadcast "change:accept", entry_id
-			event_tracking.sendMB "rp-change-accepted", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
-		
-		$scope.rejectChange = (entry_id) ->
-			$scope.$broadcast "change:reject", entry_id
-			event_tracking.sendMB "rp-change-rejected", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
-		
+		$scope.acceptChanges = (change_ids) ->
+			_doAcceptChanges change_ids
+			event_tracking.sendMB "rp-changes-accepted", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
+
+		$scope.rejectChanges = (change_ids) ->
+			_doRejectChanges change_ids
+			event_tracking.sendMB "rp-changes-rejected", { view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini' }
+
+		_doAcceptChanges = (change_ids) ->
+			$http.post "/project/#{$scope.project_id}/doc/#{$scope.editor.open_doc_id}/changes/accept", { change_ids, _csrf: window.csrfToken}
+			$scope.$broadcast "changes:accept", change_ids
+
+		_doRejectChanges = (change_ids) ->
+			$scope.$broadcast "changes:reject", change_ids
+
 		bulkAccept = () ->
-			entry_ids = $scope.reviewPanel.selectedEntryIds.slice()
-			$http.post "/project/#{$scope.project_id}/doc/#{$scope.editor.open_doc_id}/changes/accept", { change_ids: entry_ids, _csrf: window.csrfToken}
-			$scope.$broadcast "change:bulk-accept", entry_ids
-			$scope.reviewPanel.selectedEntryIds = []
+			_doAcceptChanges $scope.reviewPanel.selectedEntryIds.slice()
 			event_tracking.sendMB "rp-bulk-accept", { 
 				view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini',  
-				nEntries: $scope.reviewPanel.selectedEntryIds.length
+				nEntries: $scope.reviewPanel.nVisibleSelectedChanges
 			}
 
 		bulkReject = () ->
-			$scope.$broadcast "change:bulk-reject", $scope.reviewPanel.selectedEntryIds.slice()
-			$scope.reviewPanel.selectedEntryIds = []
+			_doRejectChanges $scope.reviewPanel.selectedEntryIds.slice()
 			event_tracking.sendMB "rp-bulk-reject", { 
 				view: if $scope.ui.reviewPanelOpen then $scope.reviewPanel.subView else 'mini',  
-				nEntries: $scope.reviewPanel.selectedEntryIds.length
+				nEntries: $scope.reviewPanel.nVisibleSelectedChanges
 			}
 
 		$scope.showBulkAcceptDialog = () ->
 			showBulkActionsDialog true
 
-		$scope.showBulkRejectDialog = () -> showBulkActionsDialog false
+		$scope.showBulkRejectDialog = () -> 
+			showBulkActionsDialog false
 
 		showBulkActionsDialog = (isAccept) ->
 			$modal.open({
@@ -367,7 +398,7 @@ define [
 				controller: "BulkActionsModalController"
 				resolve:
 					isAccept: () -> isAccept
-					nChanges: () -> $scope.reviewPanel.selectedEntryIds.length
+					nChanges: () -> $scope.reviewPanel.nVisibleSelectedChanges
 				scope: $scope.$new()
 			}).result.then (isAccept) ->
 				if isAccept

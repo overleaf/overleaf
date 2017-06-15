@@ -63,7 +63,12 @@ define [
 
 					# Put the focused entry as close to where it wants to be as possible
 					focused_entry_top = Math.max(focused_entry.scope.entry.screenPos.y, TOOLBAR_HEIGHT)
-					focused_entry.$box_el.css(top: focused_entry_top)
+					focused_entry.$box_el.css(
+						top: focused_entry_top
+						# The entry element is invisible by default, to avoid flickering when positioning for 
+						# the first time. Here we make sure it becomes visible after having a "top" value.
+						visibility: "visible"
+					)
 					focused_entry.$indicator_el.css(top: focused_entry_top)
 					positionLayoutEl(focused_entry.$callout_el, focused_entry.scope.entry.screenPos.y, focused_entry_top)
 
@@ -73,7 +78,12 @@ define [
 						height = entry.height
 						top = Math.max(original_top, previousBottom + PADDING)
 						previousBottom = top + height
-						entry.$box_el.css(top: top)
+						entry.$box_el.css(
+							top: top
+							# The entry element is invisible by default, to avoid flickering when positioning for 
+							# the first time. Here we make sure it becomes visible after having a "top" value.
+							visibility: "visible"
+						)
 						entry.$indicator_el.css(top: top)
 						positionLayoutEl(entry.$callout_el, original_top, top)
 						sl_console.log "ENTRY", {entry: entry.scope.entry, top}
@@ -89,7 +99,12 @@ define [
 						bottom = Math.min(original_bottom, previousTop - PADDING)
 						top = bottom - height
 						previousTop = top
-						entry.$box_el.css(top: top)
+						entry.$box_el.css(
+							top: top
+							# The entry element is invisible by default, to avoid flickering when positioning for 
+							# the first time. Here we make sure it becomes visible after having a "top" value.
+							visibility: "visible"
+						)
 						entry.$indicator_el.css(top: top)
 						positionLayoutEl(entry.$callout_el, original_top, top)
 						sl_console.log "ENTRY", {entry: entry.scope.entry, top}

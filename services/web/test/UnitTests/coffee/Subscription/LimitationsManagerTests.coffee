@@ -257,24 +257,25 @@ describe "LimitationsManager", ->
 		beforeEach ->
 			@user_id = "12312"
 			@subscription =
-				membersLimit: 2
+				membersLimit: 3
 				member_ids: ["", ""]
+				invited_emails: ["bob@example.com"]
 
-		it "should return true if the limit is hit", (done)->
+		it "should return true if the limit is hit (including members and invites)", (done)->
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @subscription)
 			@LimitationsManager.hasGroupMembersLimitReached @user_id, (err, limitReached)->
 				limitReached.should.equal true
 				done()
 
-		it "should return false if the limit is not hit", (done)->
-			@subscription.membersLimit = 3
+		it "should return false if the limit is not hit (including members and invites)", (done)->
+			@subscription.membersLimit = 4
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @subscription)
 			@LimitationsManager.hasGroupMembersLimitReached @user_id, (err, limitReached)->
 				limitReached.should.equal false
 				done()
 
-		it "should return true if the limit has been exceded", (done)->
-			@subscription.membersLimit = 0
+		it "should return true if the limit has been exceded (including members and invites)", (done)->
+			@subscription.membersLimit = 2
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @subscription)
 			@LimitationsManager.hasGroupMembersLimitReached @user_id, (err, limitReached)->
 				limitReached.should.equal true

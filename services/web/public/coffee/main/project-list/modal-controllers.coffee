@@ -1,9 +1,13 @@
 define [
 	"base"
 ], (App) ->
-	App.controller 'RenameProjectModalController', ($scope, $modalInstance, $timeout, projectName) ->
+	App.controller 'RenameProjectModalController', ($scope, $modalInstance, $timeout, project, queuedHttp) ->
 		$scope.inputs = 
-			projectName: projectName
+			projectName: project.name
+		
+		$scope.state =
+			inflight: false
+			error: false
 
 		$modalInstance.opened.then () ->
 			$timeout () ->
@@ -11,7 +15,20 @@ define [
 			, 200
 
 		$scope.rename = () ->
-			$modalInstance.close($scope.inputs.projectName)
+			$scope.state.inflight = true
+			$scope.state.error = false
+			$scope
+				.renameProject(project, $scope.inputs.projectName)
+				.success () ->
+					$scope.state.inflight = false
+					$scope.state.error = false
+					$modalInstance.close()
+				.error (body, statusCode) ->
+					$scope.state.inflight = false
+					if statusCode == 400
+						$scope.state.error = { message: body }
+					else
+						$scope.state.error = true
 
 		$scope.cancel = () ->
 			$modalInstance.dismiss('cancel')
@@ -21,6 +38,7 @@ define [
 			projectName: project.name + " (Copy)"
 		$scope.state =
 			inflight: false
+			error: false
 
 		$modalInstance.opened.then () ->
 			$timeout () ->
@@ -31,9 +49,16 @@ define [
 			$scope.state.inflight = true
 			$scope
 				.cloneProject(project, $scope.inputs.projectName)
-				.then (project_id) ->
+				.success () ->
 					$scope.state.inflight = false
-					$modalInstance.close(project_id)
+					$scope.state.error = false
+					$modalInstance.close()
+				.error (body, statusCode) ->
+					$scope.state.inflight = false
+					if statusCode == 400
+						$scope.state.error = { message: body }
+					else
+						$scope.state.error = true
 
 		$scope.cancel = () ->
 			$modalInstance.dismiss('cancel')
@@ -43,6 +68,7 @@ define [
 			projectName: ""
 		$scope.state =
 			inflight: false
+			error: false
 
 		$modalInstance.opened.then () ->
 			$timeout () ->
@@ -51,11 +77,19 @@ define [
 
 		$scope.create = () ->
 			$scope.state.inflight = true
+			$scope.state.error = false
 			$scope
 				.createProject($scope.inputs.projectName, template)
-				.then (project_id) ->
+				.success (data) ->
 					$scope.state.inflight = false
-					$modalInstance.close(project_id)
+					$scope.state.error = false
+					$modalInstance.close(data.project_id)
+				.error (body, statusCode) ->
+					$scope.state.inflight = false
+					if statusCode == 400
+						$scope.state.error = { message: body }
+					else
+						$scope.state.error = true
 
 		$scope.cancel = () ->
 			$modalInstance.dismiss('cancel')

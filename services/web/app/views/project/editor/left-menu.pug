@@ -167,6 +167,8 @@ script(type='text/ng-template', id='cloneProjectModalTemplate')
 	.modal-header
 		h3 #{translate("copy_project")}
 	.modal-body
+		.alert.alert-danger(ng-show="state.error.message") {{ state.error.message}} 
+		.alert.alert-danger(ng-show="state.error && !state.error.message") #{translate("generic_something_went_wrong")}
 		form(name="cloneProjectForm", novalidate)
 			.form-group
 				label #{translate("new_name")}

@@ -24,6 +24,7 @@ describe "SubscriptionGroupController", ->
 		@GroupHandler =
 			addUserToGroup: sinon.stub().callsArgWith(2, null, @user)
 			removeUserFromGroup: sinon.stub().callsArgWith(2)
+			removeEmailInviteFromGroup: sinon.stub().callsArgWith(2)
 			isUserPartOfGroup: sinon.stub()
 			sendVerificationEmail:sinon.stub()
 			processGroupVerification:sinon.stub()
@@ -69,7 +70,7 @@ describe "SubscriptionGroupController", ->
 
 
 	describe "removeUserFromGroup", ->
-		it "should use the admin id for the logged in user and take the email address from the body", (done)->
+		it "should use the admin id for the logged in user and take the user id from the params", (done)->
 			userIdToRemove = "31231"
 			@req.params = user_id: userIdToRemove
 
@@ -79,6 +80,15 @@ describe "SubscriptionGroupController", ->
 					done()
 			@Controller.removeUserFromGroup @req, res
 
+	describe "removeEmailInviteFromGroup", ->
+		it "should use the admin id for the logged in user and take the email from the params", (done)->
+			email = "jo@example.com"
+			@req.params = email: email
+			res =
+				send : =>
+					@GroupHandler.removeEmailInviteFromGroup.calledWith(@adminUserId, email).should.equal true
+					done()
+			@Controller.removeEmailInviteFromGroup @req, res
 
 	describe "renderSubscriptionGroupAdminPage", ->
 		it "should redirect you if you don't have a group account", (done)->

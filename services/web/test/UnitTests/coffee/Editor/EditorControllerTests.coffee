@@ -547,7 +547,7 @@ describe "EditorController", ->
 			@err = "errro"
 			@window_id = "kdsjklj290jlk"
 			@newName = "new name here"
-			@ProjectDetailsHandler.renameProject = sinon.stub().callsArgWith(2, @err)
+			@ProjectDetailsHandler.renameProject = sinon.stub().callsArg(2)
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 
 		it "should call the EditorController", (done)->
