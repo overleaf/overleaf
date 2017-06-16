@@ -23,7 +23,7 @@ describe "index", ->
 			"redis":@normalRedis
 			"ioredis": @ioredis =
 				Cluster: class Cluster
-					constructor: (@config) ->
+					constructor: (@config, @options) ->
 		@auth_pass = "1234 pass"
 		@endpoints = [
 				{host: '127.0.0.1', port: 26379},
@@ -69,11 +69,22 @@ describe "index", ->
 	describe "cluster", ->
 		beforeEach ->
 			@cluster = [{"mock": "cluster"}, { "mock": "cluster2"}]
+			@extraOptions = {keepAlive:100}
+			@settings =
+				cluster: @cluster
+				redisOptions: @extraOptions
 
-		it "should pass the options correctly though", ->
+		it "should pass the options correctly though with no options", ->
 			client = @redis.createClient cluster: @cluster
 			assert(client instanceof @ioredis.Cluster)
 			client.config.should.deep.equal @cluster
+
+		it "should pass the options correctly though with additional options", ->
+			client = @redis.createClient @settings
+			assert(client instanceof @ioredis.Cluster)
+			client.config.should.deep.equal @cluster
+			# need to use expect here because of _.clone in sandbox
+			expect(client.options).to.deep.equal {redisOptions: @extraOptions, retry_max_delay: 5000}
 
 	describe "monkey patch ioredis exec", ->
 		beforeEach ->
