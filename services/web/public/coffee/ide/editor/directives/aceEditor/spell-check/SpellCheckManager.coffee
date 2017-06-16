@@ -53,6 +53,9 @@ define [
 			@$scope.learnWord = (highlight) =>
 				@learnWord(highlight)
 
+			# DEBUG
+			window.BLANK = @blankOutBlacklistedCommands
+
 		runFullCheck: () ->
 			@highlightedWordManager.clearRows()
 			if @$scope.spellCheckLanguage and @$scope.spellCheckLanguage != ""
@@ -217,6 +220,7 @@ define [
 			words = []
 			positions = []
 			for line, row in lines
+				line = @blankOutBlacklistedCommands(line)
 				if !linesToProcess? or linesToProcess[row]
 					# Regex generated from /\\?['\p{L}]+/g via https://mothereff.in/regexpu.
 					# \p{L} matches unicode characters in the 'letter' category, but is not supported until ES6.
@@ -246,3 +250,10 @@ define [
 				error: (xhr, status, error) ->
 					callback error
 			return $.ajax options
+
+		blankOutBlacklistedCommands: (line) ->
+			line.replace /\\label(\[[^\]]*\])?{[^}]*}/g, (command) ->
+				command = command.replace /{.*}/, (args) ->
+					'{' + args.slice(1, args.length-1).split('').map((_char)-> '.').join('') + '}'
+				command.replace /\[.*\]/, (args) ->
+					'[' + args.slice(1, args.length-1).split('').map((_char)-> '.').join('') + ']'
