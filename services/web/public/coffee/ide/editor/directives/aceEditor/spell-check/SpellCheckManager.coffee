@@ -252,7 +252,7 @@ define [
 			return $.ajax options
 
 		blankOutBlacklistedCommands: (line) ->
-			line.replace /\\label(\[[^\]]*\])?{[^}]*}/g, (command) ->
+			line.replace /\\(label|ref|usepackage|begin|end)(\[[^\]]*\])?{[^}]*}/g, (command) ->
 				command = command.replace /{.*}/, (args) ->
 					'{' + args.slice(1, args.length-1).split('').map((_char)-> '.').join('') + '}'
 				command.replace /\[.*\]/, (args) ->
