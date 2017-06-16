@@ -251,22 +251,23 @@ define [
 					callback error
 			return $.ajax options
 
+		blacklistedCommandRegex: ///
+			\\                    # initial backslash
+			(label                # any of these commands
+			|[a-z]{0,2}ref
+			|usepackage
+			|begin
+			|end
+			|[a-z]{0,2}cite
+			|input
+			|include
+			|includegraphics)
+			( \[ [^\]]* \] )?     # optional [...] args
+				\{ [^}]*  \}        # the {...} args
+		///g
+
 		blankOutBlacklistedCommands: (line) ->
-			commandRegex = ///
-				\\                    # initial backslash
-				(label                # any of these commands
-				|[a-z]{0,2}ref
-				|usepackage
-				|begin
-				|end
-				|[a-z]{0,2}cite
-				|input
-				|include
-				|includegraphics)
-				( \[ [^\]]* \] )?     # optional [...] args
-				  \{ [^}]*  \}        # the {...} args
-			///g
-			line.replace commandRegex, (command) ->
+			line.replace @blacklistedCommandRegex, (command) ->
 				command.replace(
 					/{.*}/, (args) ->
 						'{' + args.slice(1, args.length-1).split('').map((_char)-> '.').join('') + '}'
