@@ -276,7 +276,7 @@ module.exports = class Router
 		apiRouter.get '/health_check', HealthCheckController.check
 		apiRouter.get '/health_check/redis', HealthCheckController.checkRedis
 
-		apiRouter.get "/status/compiler/:Project_id", AuthorizationMiddlewear.ensureUserCanReadProject, (req, res) ->
+		webRouter.get "/status/compiler/:Project_id", AuthorizationMiddlewear.ensureUserCanReadProject, (req, res) ->
 			project_id = req.params.Project_id
 			sendRes = _.once (statusCode, message)->
 				res.status statusCode
