@@ -73,11 +73,18 @@ describe "index", ->
 			@settings =
 				cluster: @cluster
 				redisOptions: @extraOptions
+				key_schema: {foo: (x) -> "#{x}"}
 
 		it "should pass the options correctly though with no options", ->
 			client = @redis.createClient cluster: @cluster
 			assert(client instanceof @ioredis.Cluster)
 			client.config.should.deep.equal @cluster
+
+		it "should not pass the key_schema through to the driver", ->
+			client = @redis.createClient cluster: @cluster, key_schema: "foobar"
+			assert(client instanceof @ioredis.Cluster)
+			client.config.should.deep.equal @cluster
+			expect(client.options).to.deep.equal {retry_max_delay: 5000}
 
 		it "should pass the options correctly though with additional options", ->
 			client = @redis.createClient @settings
