@@ -267,13 +267,18 @@ module.exports = class Router
 		apiRouter.get '/perfTest', (req,res)->
 			res.send("hello")
 
-		apiRouter.get '/status', (req,res)->
+		webRouter.get '/status', (req,res)->
 			res.send("websharelatex is up")
+		apiRouter.get '/status', (req,res)->
+			res.send("websharelatex api is up")
 
 		webRouter.get '/dev/csrf', (req, res) ->
 			res.send res.locals.csrfToken
 
+		webRouter.get '/health_check', HealthCheckController.check
 		apiRouter.get '/health_check', HealthCheckController.check
+
+		webRouter.get '/health_check/redis', HealthCheckController.checkRedis
 		apiRouter.get '/health_check/redis', HealthCheckController.checkRedis
 
 		webRouter.get "/status/compiler/:Project_id", AuthorizationMiddlewear.ensureUserCanReadProject, (req, res) ->
