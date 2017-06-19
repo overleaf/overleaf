@@ -304,7 +304,7 @@ module.exports = class Router
 				else
 					sendRes 500, "Compiler returned failure #{status}"
 
-		apiRouter.get "/ip", (req, res, next) ->
+		webRouter.get "/ip", (req, res, next) ->
 			res.send({
 				ip: req.ip
 				ips: req.ips
