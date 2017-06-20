@@ -251,11 +251,11 @@ define [
 		blacklistedCommandRegex: ///
 			\\                    # initial backslash
 			(label                # any of these commands
-			|[a-z]{0,2}ref
+			|[a-z]{0,16}ref
 			|usepackage
 			|begin
 			|end
-			|[a-z]{0,2}cite
+			|[a-z]{0,16}cite
 			|input
 			|include
 			|includegraphics)
