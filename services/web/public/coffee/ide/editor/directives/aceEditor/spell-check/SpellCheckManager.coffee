@@ -265,10 +265,4 @@ define [
 
 		blankOutBlacklistedCommands: (line) ->
 			line.replace @blacklistedCommandRegex, (command) ->
-				command.replace(
-					/{.*}/, (args) ->
-						'{' + args.slice(1, args.length-1).split('').map((_char)-> '.').join('') + '}'
-				).replace(
-					/\[.*\]/, (args) ->
-						'[' + args.slice(1, args.length-1).split('').map((_char)-> '.').join('') + ']'
-				)
+				Array(command.length+1).join('.')
