@@ -136,7 +136,8 @@ aside#left-menu.full-size(
 				label(for="fontSize") #{translate("font_size")}
 				select(
 					name="fontSize"
-					ng-model="settings.fontSize"
+					ng-model="fontSizeAsStr"
+					ng-model-options="{ getterSetter: true }"
 				)
 					each size in ['10','11','12','13','14','16','20','24']
 						option(value=size) #{size}px

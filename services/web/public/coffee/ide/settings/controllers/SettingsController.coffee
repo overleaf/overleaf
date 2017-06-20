@@ -8,6 +8,11 @@ define [
 		if $scope.settings.pdfViewer not in ["pdfjs", "native"]
 			$scope.settings.pdfViewer = "pdfjs"
 
+		$scope.fontSizeAsStr = (newVal) ->
+			if newVal?
+				$scope.settings.fontSize = newVal
+			return $scope.settings.fontSize.toString()
+
 		$scope.$watch "settings.theme", (theme, oldTheme) =>
 			if theme != oldTheme
 				settings.saveSettings({theme: theme})
