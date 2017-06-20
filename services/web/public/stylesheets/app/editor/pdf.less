@@ -37,6 +37,7 @@
 			margin: 10px auto;
 			padding: 0 10px;
 			box-sizing: content-box;
+			user-select: none;
 		}
 	}
 	.progress-thin {
@@ -338,3 +339,13 @@
 	.files-dropdown {
 		display: inline-block;
 	}
+
+.plv-text-layer {
+	display: none;
+	user-select: text;
+	
+	.pdf-page-container:hover &,
+	.pdfjs-viewer-show-text & {
+		display: block;
+	}
+}

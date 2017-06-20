@@ -323,6 +323,8 @@ define [
 									clearTimeout spinnerTimer
 								else
 									spinner.remove(element)
+								# stop displaying the text layer
+								element.removeClass 'pdfjs-viewer-show-text'
 								ctrl.redraw(origposition)
 								$timeout renderVisiblePages
 								scope.loadSuccess = true
@@ -404,6 +406,53 @@ define [
 						#console.log 'adjusting scroll from', currentScrollTop, 'by', delta
 						scope.adjustingScroll = true
 						element.scrollTop(currentScrollTop + delta)
+
+				element.on 'mousedown', (e) ->
+					# We're checking that the event target isn't the directive root element 
+					# to make sure that the click was within a PDF page - no point in showing
+					# the text layer when the click is outside.
+					# If the user clicks a PDF page, the mousedown target will be the canvas
+					# element (or the text layer one). Alternatively, if the event target is
+					# the root element, we can assume that the user has clicked either the 
+					# grey background area or the scrollbars.
+					if e.target != element[0] and !_hasSelection()
+						element.addClass 'pdfjs-viewer-show-text'
+						_setMouseUpHandler()
+
+				mouseUpHandler = null # keep track of the handler to avoid adding multiple times
+
+				_setMouseUpHandler = () ->
+					if not mouseUpHandler?
+						mouseUpHandler = $(document.body).one 'mouseup', _handleSelectionMouseUp
+
+				_handleSelectionMouseUp = () ->
+					mouseUpHandler = null # reset handler, has now fired
+					window.setTimeout () ->
+						removedClass = _removeClassIfNoSelection()
+						# if we still have a selection we need to keep the handler going
+						if not removedClass then _setMouseUpHandler()
+					, 10
+					return true
+
+				_removeClassIfNoSelection = () ->
+					if _hasSelection()
+						return false # didn't remove the text layer
+					else
+						element.removeClass 'pdfjs-viewer-show-text'
+						return true
+
+				_hasSelection = () ->
+					selection = window.getSelection?()
+					# check the selection collapsed state in preference to
+					# using selection.toString() as the latter is "" when 
+					# the selection is hidden (e.g. while viewing logs)
+					return selection? and _isSelectionWithinPDF(selection) and !selection.isCollapsed
+
+				_isSelectionWithinPDF = (selection) ->
+					if selection.rangeCount == 0
+						return false
+					selectionAncestorNode = selection.getRangeAt(0).commonAncestorContainer
+					return element.find(selectionAncestorNode).length > 0 or element.is(selectionAncestorNode)
 
 				element.on 'scroll', () ->
 					#console.log 'scroll event', element.scrollTop(), 'adjusting?', scope.adjustingScroll
