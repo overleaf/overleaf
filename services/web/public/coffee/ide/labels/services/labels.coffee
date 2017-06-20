@@ -28,7 +28,7 @@ define [
 		labels.loadProjectLabelsFromServer = () ->
 			$http
 				.get("/project/#{window.project_id}/labels")
-				.success (data) ->
+				.then (data) ->
 					if data.projectLabels
 						for docId, docLabels of data.projectLabels
 							state.documents[docId] = docLabels
@@ -39,6 +39,6 @@ define [
 					"/project/#{window.project_id}/doc/#{docId}/labels",
 					{_csrf: window.csrfToken}
 				)
-				.success (data) ->
+				.then (data) ->
 
 		return labels

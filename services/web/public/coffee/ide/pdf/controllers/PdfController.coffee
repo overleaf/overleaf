@@ -385,11 +385,11 @@ define [
 			options.rootDocOverride_id = getRootDocOverride_id()
 
 			sendCompileRequest(options)
-				.success (data) ->
+				.then (data) ->
 					$scope.pdf.view = "pdf"
 					$scope.pdf.compiling = false
 					parseCompileResponse(data)
-				.error (err, status) ->
+				.catch (err, status) ->
 					if status == 429
 						$scope.pdf.rateLimited = true
 					$scope.pdf.compiling = false
@@ -514,9 +514,9 @@ define [
 							clsiserverid:ide.clsiServerId
 						}
 					})
-					.success (data) ->
+					.then (data) ->
 						deferred.resolve(data.pdf or [])
-					.error (error) ->
+					.catch (error) ->
 						deferred.reject(error)
 
 				return deferred.promise
@@ -559,12 +559,12 @@ define [
 							clsiserverid:ide.clsiServerId
 						}
 					})
-					.success (data) ->
+					.then (data) ->
 						if data.code? and data.code.length > 0
 							doc = ide.fileTreeManager.findEntityByPath(data.code[0].file)
 							return if !doc?
 							deferred.resolve({doc: doc, line: data.code[0].line})
-					.error (error) ->
+					.catch (error) ->
 						deferred.reject(error)
 
 				return deferred.promise

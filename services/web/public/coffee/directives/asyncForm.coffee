@@ -28,7 +28,7 @@ define [
 					# authentication fails, we will handle it ourselves
 					$http
 						.post(element.attr('action'), formData, {disableAutoLoginRedirect: true})
-						.success (data, status, headers, config) ->
+						.then (data, status, headers, config) ->
 							scope[attrs.name].inflight = false
 							response.success = true
 							response.error = false
@@ -51,7 +51,7 @@ define [
 								else
 									ga('send', 'event', formName, 'success')
 
-						.error (data, status, headers, config) ->
+						.catch (data, status, headers, config) ->
 							scope[attrs.name].inflight = false
 							response.success = false
 							response.error = true

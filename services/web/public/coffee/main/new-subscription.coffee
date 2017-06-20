@@ -162,10 +162,10 @@ define [
 
 
 				$http.post("/user/subscription/create", postData)
-					.success (data, status, headers)->
+					.then (data, status, headers)->
 						event_tracking.sendMB "subscription-submission-success"
 						window.location.href = "/user/subscription/thank-you"
-					.error (data, status, headers)->
+					.catch (data, status, headers)->
 						$scope.processing = false
 						$scope.genericError = "Something went wrong processing the request"
 

@@ -13,7 +13,7 @@ define [
 				headers:
 					"X-Csrf-Token": window.csrfToken
 			})
-				.success (data) ->
+				.then (data) ->
 					notification.hide = true
 					
 	App.controller "ProjectInviteNotificationController", ($scope, $http) ->
@@ -30,9 +30,9 @@ define [
 					"X-Csrf-Token": window.csrfToken
 					"X-Requested-With": "XMLHttpRequest"
 			})
-				.success () ->
+				.then () ->
 					$scope.notification.inflight = false
 					$scope.notification.accepted = true
-				.error () ->
+				.catch () ->
 					$scope.notification.inflight = false
 					$scope.notification.error = true

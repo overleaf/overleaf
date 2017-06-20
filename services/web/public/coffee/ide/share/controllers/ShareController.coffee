@@ -15,16 +15,16 @@ define [
 			ide.socket.on 'project:membership:changed', (data) =>
 				if data.members
 					projectMembers.getMembers()
-						.success (responseData) =>
+						.then (responseData) =>
 							if responseData.members
 								$scope.project.members = responseData.members
-						.error (responseDate) =>
+						.catch (responseDate) =>
 							console.error "Error fetching members for project"
 				if data.invites
 					projectInvites.getInvites()
-						.success (responseData) =>
+						.then (responseData) =>
 							if responseData.invites
 								$scope.project.invites = responseData.invites
-						.error (responseDate) =>
+						.catch (responseDate) =>
 							console.error "Error fetching invites for project"
 	]

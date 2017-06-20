@@ -8,7 +8,7 @@ define [
 			newItems: 0
 		
 		refreshAnnouncements = ->
-			$http.get("/announcements").success (announcements) ->
+			$http.get("/announcements").then (announcements) ->
 				$scope.announcements = announcements
 				$scope.ui.newItems = _.filter(announcements, (announcement) -> !announcement.read).length
 				

@@ -19,11 +19,11 @@ define [
 			$scope.state.error = false
 			$scope
 				.renameProject(project, $scope.inputs.projectName)
-				.success () ->
+				.then () ->
 					$scope.state.inflight = false
 					$scope.state.error = false
 					$modalInstance.close()
-				.error (body, statusCode) ->
+				.catch (body, statusCode) ->
 					$scope.state.inflight = false
 					if statusCode == 400
 						$scope.state.error = { message: body }
@@ -49,11 +49,11 @@ define [
 			$scope.state.inflight = true
 			$scope
 				.cloneProject(project, $scope.inputs.projectName)
-				.success () ->
+				.then () ->
 					$scope.state.inflight = false
 					$scope.state.error = false
 					$modalInstance.close()
-				.error (body, statusCode) ->
+				.catch (body, statusCode) ->
 					$scope.state.inflight = false
 					if statusCode == 400
 						$scope.state.error = { message: body }
@@ -80,11 +80,11 @@ define [
 			$scope.state.error = false
 			$scope
 				.createProject($scope.inputs.projectName, template)
-				.success (data) ->
+				.then (data) ->
 					$scope.state.inflight = false
 					$scope.state.error = false
 					$modalInstance.close(data.project_id)
-				.error (body, statusCode) ->
+				.catch (body, statusCode) ->
 					$scope.state.inflight = false
 					if statusCode == 400
 						$scope.state.error = { message: body }

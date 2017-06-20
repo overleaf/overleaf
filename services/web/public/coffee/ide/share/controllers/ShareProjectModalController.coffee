@@ -34,7 +34,7 @@ define [
 		$scope.autocompleteContacts = []
 		do loadAutocompleteUsers = () ->
 			$http.get "/user/contacts"
-				.success (data) ->
+				.then (data) ->
 					$scope.autocompleteContacts = data.contacts or []
 					for contact in $scope.autocompleteContacts
 						if contact.type == "user"
@@ -102,7 +102,7 @@ define [
 						request = projectInvites.sendInvite(email, $scope.inputs.privileges)
 
 					request
-						.success (data) ->
+						.then (data) ->
 							if data.error
 								$scope.state.error = true
 								$scope.state.errorReason = "#{data.error}"
@@ -125,7 +125,7 @@ define [
 								# with new collaborator information.
 								addNextMember()
 							, 0
-						.error () ->
+						.catch () ->
 							$scope.state.inflight = false
 							$scope.state.error = true
 							$scope.state.errorReason = null
@@ -137,12 +137,12 @@ define [
 			$scope.state.inflight = true
 			projectMembers
 				.removeMember(member)
-				.success () ->
+				.then () ->
 					$scope.state.inflight = false
 					index = $scope.project.members.indexOf(member)
 					return if index == -1
 					$scope.project.members.splice(index, 1)
-				.error () ->
+				.catch () ->
 					$scope.state.inflight = false
 					$scope.state.error = "Sorry, something went wrong :("
 
@@ -151,12 +151,12 @@ define [
 			$scope.state.inflight = true
 			projectInvites
 				.revokeInvite(invite._id)
-				.success () ->
+				.then () ->
 					$scope.state.inflight = false
 					index = $scope.project.invites.indexOf(invite)
 					return if index == -1
 					$scope.project.invites.splice(index, 1)
-				.error () ->
+				.catch () ->
 					$scope.state.inflight = false
 					$scope.state.error = "Sorry, something went wrong :("
 
@@ -165,10 +165,10 @@ define [
 			$scope.state.inflight = true
 			projectInvites
 				.resendInvite(invite._id)
-				.success () ->
+				.then () ->
 					$scope.state.inflight = false
 					event.target.blur()
-				.error () ->
+				.catch () ->
 					$scope.state.inflight = false
 					$scope.state.error = "Sorry, something went wrong resending the invite :("
 					event.target.blur()

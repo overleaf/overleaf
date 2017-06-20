@@ -26,7 +26,7 @@ define [
 						email: email,
 						_csrf: window.csrfToken
 					})
-					.success (data) ->
+					.then (data) ->
 						$scope.users.push data.user if data.user?
 						$scope.inputs.emails = ""
 
@@ -43,7 +43,7 @@ define [
 						headers:
 							"X-Csrf-Token": window.csrfToken
 					})
-						.success () ->
+						.then () ->
 							index = $scope.users.indexOf(user)
 							return if index == -1
 							$scope.users.splice(index, 1)

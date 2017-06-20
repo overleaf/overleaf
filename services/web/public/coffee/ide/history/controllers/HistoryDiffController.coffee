@@ -9,7 +9,7 @@ define [
 				.restoreDeletedDoc(
 					$scope.history.diff.doc
 				)
-				.success (response) ->
+				.then (response) ->
 					$scope.history.diff.restoredDocNewId = response.doc_id
 					$scope.history.diff.restoreInProgress = false
 					$scope.history.diff.restoreDeletedSuccess = true
@@ -37,7 +37,7 @@ define [
 			$scope.state.inflight = true
 			ide.historyManager
 				.restoreDiff(diff)
-				.success () ->
+				.then () ->
 					$scope.state.inflight = false
 					$modalInstance.close()
 					ide.editorManager.openDoc(diff.doc)
