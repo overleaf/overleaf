@@ -12,6 +12,7 @@ describe "ResourceWriter", ->
 			"./UrlCache" : @UrlCache = {}
 			"mkdirp" : @mkdirp = sinon.stub().callsArg(1)
 			"./OutputFileFinder": @OutputFileFinder = {}
+			"logger-sharelatex": {log: sinon.stub(), err: sinon.stub()}
 			"./Metrics": @Metrics =
 				Timer: class Timer
 					done: sinon.stub()
