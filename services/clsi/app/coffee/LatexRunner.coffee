@@ -58,7 +58,8 @@ module.exports = LatexRunner =
 		id = "#{project_id}"
 		logger.log {id:id}, "killing running compile"
 		if not ProcessTable[id]?
-			return callback new Error("no such project to kill")
+			logger.warn {id}, "no such project to kill"
+			return callback(null)
 		else
 			CommandRunner.kill ProcessTable[id], callback
 
