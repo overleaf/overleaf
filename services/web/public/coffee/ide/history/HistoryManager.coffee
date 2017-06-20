@@ -73,7 +73,8 @@ define [
 			@$scope.history.loading = true
 			@ide.$http
 				.get(url)
-				.then (data) =>
+				.then (response) =>
+					{ data } = response
 					@_loadUpdates(data.updates)
 					@$scope.history.nextBeforeTimestamp = data.nextBeforeTimestamp
 					if !data.nextBeforeTimestamp?
@@ -109,7 +110,8 @@ define [
 
 				@ide.$http
 					.get(url)
-					.then (data) =>
+					.then (response) =>
+						{ data } = response
 						diff.loading = false
 						{text, highlights} = @_parseDiff(data)
 						diff.text = text

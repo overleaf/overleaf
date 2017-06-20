@@ -34,7 +34,8 @@ define [
 		$scope.autocompleteContacts = []
 		do loadAutocompleteUsers = () ->
 			$http.get "/user/contacts"
-				.then (data) ->
+				.then (response) ->
+					{ data } = response
 					$scope.autocompleteContacts = data.contacts or []
 					for contact in $scope.autocompleteContacts
 						if contact.type == "user"
@@ -102,7 +103,8 @@ define [
 						request = projectInvites.sendInvite(email, $scope.inputs.privileges)
 
 					request
-						.then (data) ->
+						.then (response) ->
+							{ data } = response
 							if data.error
 								$scope.state.error = true
 								$scope.state.errorReason = "#{data.error}"

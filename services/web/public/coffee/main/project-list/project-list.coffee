@@ -263,6 +263,7 @@ define [
 					template: template
 				})
 				.then((data, status, headers, config) ->
+					console.log data, status, headers, config
 					$scope.projects.push {
 						name: name
 						_id: data.project_id

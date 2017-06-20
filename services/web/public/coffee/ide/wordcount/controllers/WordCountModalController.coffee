@@ -11,7 +11,8 @@ define [
 			params:
 				clsiserverid:ide.clsiServerId
 		$http opts
-			.then (data) ->
+			.then (response) ->
+				{ data } = response
 				$scope.status.loading = false
 				$scope.data = data.texcount
 			.catch () ->

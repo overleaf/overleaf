@@ -8,8 +8,8 @@ define [
 			newItems: 0
 		
 		refreshAnnouncements = ->
-			$http.get("/announcements").then (announcements) ->
-				$scope.announcements = announcements
+			$http.get("/announcements").then (response) ->
+				$scope.announcements = response.data
 				$scope.ui.newItems = _.filter(announcements, (announcement) -> !announcement.read).length
 				
 		markAnnouncementsAsRead = ->

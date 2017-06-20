@@ -47,7 +47,8 @@ define [
 			chat.state.loading = true
 			return $http
 				.get(url)
-				.then (messages = [])->
+				.then (response) ->
+					messages = response.data ? []
 					chat.state.loading = false
 					if messages.length < MESSAGE_LIMIT
 						chat.state.atEnd = true

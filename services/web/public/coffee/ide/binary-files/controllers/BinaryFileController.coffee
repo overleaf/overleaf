@@ -34,7 +34,8 @@ define [
 			$scope.bibtexPreview.shouldShowDots = false
 			$scope.$apply()
 			$http.get(url)
-				.then (data) ->
+				.then (response) ->
+					{ data } = response
 					$scope.bibtexPreview.loading = false
 					$scope.bibtexPreview.error = false
 					# show dots when payload is closs to cutoff
@@ -46,7 +47,7 @@ define [
 					finally
 						$scope.bibtexPreview.data = data
 					$timeout($scope.setHeight, 0)
-				.catch (err) ->
+				.catch () ->
 					$scope.bibtexPreview.error = true
 					$scope.bibtexPreview.loading = false
 

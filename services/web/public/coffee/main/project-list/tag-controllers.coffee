@@ -94,7 +94,8 @@ define [
 					_csrf: window.csrfToken,
 					name: name
 				}
-				.then (data, status, headers, config) ->
+				.then (response) ->
+					{ data } = response
 					$scope.state.inflight = false
 					$modalInstance.close(data)
 				.catch () ->

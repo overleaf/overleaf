@@ -69,7 +69,8 @@ define [
 								window.location = "/login"
 							, 1000
 						)
-					.catch (data, status) ->
+					.catch (response) ->
+						{ data, status } = response
 						$scope.state.inflight = false
 						if status == 403
 							$scope.state.invalidCredentials = true

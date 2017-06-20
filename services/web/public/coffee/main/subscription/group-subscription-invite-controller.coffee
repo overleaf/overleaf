@@ -16,19 +16,20 @@ define [
 		$scope.cancelSubscription = ->
 			$scope.inflight = true
 			request = $http.post "/user/subscription/cancel", {_csrf:window.csrfToken}
-			request.then (data, status)->
+			request.then ()->
 				$scope.inflight = false
 				$scope.view = "groupSubscriptionInvite"
-			request.catch (data, status)->
+			request.catch ()->
 				console.log "the request failed"					
 
 		$scope.joinGroup = ->
 			$scope.view = "requestSent"
 			$scope.inflight = true
 			request = $http.post "/user/subscription/#{group_subscription_id}/group/begin-join", {_csrf:window.csrfToken}
-			request.then (data, status)->
+			request.then (response)->
+				{ status } = response
 				$scope.inflight = false
 				if status != 200 # assume request worked
 					$scope.requestSent = false
-			request.catch (data, status)->
+			request.catch ()->
 				console.log "the request failed"

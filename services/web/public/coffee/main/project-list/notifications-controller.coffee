@@ -13,7 +13,7 @@ define [
 				headers:
 					"X-Csrf-Token": window.csrfToken
 			})
-				.then (data) ->
+				.then () ->
 					notification.hide = true
 					
 	App.controller "ProjectInviteNotificationController", ($scope, $http) ->
