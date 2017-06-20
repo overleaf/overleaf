@@ -53,9 +53,6 @@ define [
 			@$scope.learnWord = (highlight) =>
 				@learnWord(highlight)
 
-			# DEBUG
-			window.BLANK = @blankOutBlacklistedCommands
-
 		runFullCheck: () ->
 			@highlightedWordManager.clearRows()
 			if @$scope.spellCheckLanguage and @$scope.spellCheckLanguage != ""
