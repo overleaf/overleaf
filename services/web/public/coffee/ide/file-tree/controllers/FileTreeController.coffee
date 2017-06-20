@@ -66,8 +66,9 @@ define [
 					.then () ->
 						$scope.state.inflight = false
 						$modalInstance.close()
-					.catch (e)->
-						$scope.error = e
+					.catch (response)->
+						{ data } = response
+						$scope.error = data
 
 			$scope.cancel = () ->
 				$modalInstance.dismiss('cancel')
@@ -98,8 +99,9 @@ define [
 					.then () ->
 						$scope.state.inflight = false
 						$modalInstance.close()
-					.catch (e)->
-						$scope.error = e
+					.catch (response)->
+						{ data } = response
+						$scope.error = data
 						$scope.state.inflight = false
 
 			$scope.cancel = () ->

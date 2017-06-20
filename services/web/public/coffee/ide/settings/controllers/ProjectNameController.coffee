@@ -24,13 +24,13 @@ define [
 			oldName = $scope.project.name
 			$scope.project.name = newName
 			settings.saveProjectSettings({name: $scope.project.name})
-				.catch (response, statusCode) ->
+				.catch (response) ->
+					{ data, status } = response
 					$scope.project.name = oldName
-					if statusCode == 400
-						ide.showGenericMessageModal("Error renaming project", response)
+					if status == 400
+						ide.showGenericMessageModal("Error renaming project", data)
 					else
 						ide.showGenericMessageModal("Error renaming project", "Please try again in a moment")
-					console.log arguments
 
 		ide.socket.on "projectNameUpdated", (name) ->
 			$scope.$apply () ->

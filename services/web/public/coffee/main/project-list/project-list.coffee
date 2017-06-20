@@ -262,8 +262,8 @@ define [
 					projectName: name
 					template: template
 				})
-				.then((data, status, headers, config) ->
-					console.log data, status, headers, config
+				.then((response) ->
+					{ data } = response
 					$scope.projects.push {
 						name: name
 						_id: data.project_id
@@ -314,7 +314,8 @@ define [
 					_csrf: window.csrfToken
 					projectName: cloneName
 				})
-				.then((data, status, headers, config) ->
+				.then((response) ->
+					{ data } = response
 					$scope.projects.push {
 						name: cloneName
 						id: data.project_id

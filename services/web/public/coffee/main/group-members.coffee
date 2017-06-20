@@ -26,7 +26,8 @@ define [
 						email: email,
 						_csrf: window.csrfToken
 					})
-					.then (data) ->
+					.then (response) ->
+						{ data } = response
 						$scope.users.push data.user if data.user?
 						$scope.inputs.emails = ""
 
