@@ -13,6 +13,7 @@ define [
 
 				@clearSelectAllState = () ->
 					$scope.$broadcast "select-all:clear"
+				return
 			]
 			link: (scope, element, attrs) ->
 
@@ -63,6 +64,8 @@ define [
 					ignoreChanges = true
 					scope.$apply () ->
 						scope.ngModel = !scope.ngModel
+						if !scope.ngModel
+							selectAllListController.clearSelectAllState()
 					ignoreChanges = false
 		}
 
