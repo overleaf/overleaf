@@ -278,7 +278,7 @@ module.exports = ProjectController =
 						pdfViewer : user.ace.pdfViewer
 						syntaxValidation: user.ace.syntaxValidation
 					}
-					trackChangesEnabled: !!project.track_changes
+					trackChangesState: project.track_changes
 					showTrackChangesOnboarding: !!showTrackChangesOnboarding
 					privilegeLevel: privilegeLevel
 					chatUrl: Settings.apis.chat.url
