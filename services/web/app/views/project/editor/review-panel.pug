@@ -46,21 +46,46 @@
 			is-loading="reviewPanel.dropdown.loading"
 			permissions="permissions"
 		)
-		span.review-panel-toolbar-label(ng-if="permissions.write")
-			span(ng-click="toggleTrackChanges(true)", ng-if="editor.wantTrackChanges === false") !{translate("track_changes_is_off")}
-			span(ng-click="toggleTrackChanges(false)", ng-if="editor.wantTrackChanges === true") !{translate("track_changes_is_on")}
+		div
+			span On for everyone
 			review-panel-toggle(
-				ng-if="editor.wantTrackChanges == editor.trackChanges"
-				ng-model="editor.wantTrackChanges"
-				on-toggle="toggleTrackChanges"
+				ng-model="reviewPanel.trackChangesOnForEveryone"
+				on-toggle="toggleTrackChangesForEveryone"
 				disabled="!project.features.trackChanges"
 				on-disabled-click="openTrackChangesUpgradeModal"
 			)
-		span.review-panel-toolbar-label.review-panel-toolbar-label-disabled(ng-if="!permissions.write")
-			span(ng-if="editor.wantTrackChanges === false") !{translate("track_changes_is_off")}
-			span(ng-if="editor.wantTrackChanges === true") !{translate("track_changes_is_on")}
-		span.review-panel-toolbar-spinner(ng-if="editor.wantTrackChanges != editor.trackChanges")
-			i.fa.fa-spin.fa-spinner
+		div
+			span You {{user.id}}
+			//- Missing on-toggle attribute because we also need to pass user_id to the toggleTrackChangesForUser
+			//- method, and it's not clear how.
+			review-panel-toggle(
+				ng-model="reviewPanel.trackChangesState[user.id]"
+				disabled="!project.features.trackChanges"
+				on-disabled-click="openTrackChangesUpgradeModal"
+			)
+		div(ng-repeat="member in project.members")
+			span {{member.email}} {{member._id}}
+			review-panel-toggle(
+				ng-model="reviewPanel.trackChangesState[member._id]"
+				disabled="!project.features.trackChanges"
+				on-disabled-click="openTrackChangesUpgradeModal"
+			)
+		
+		//- span.review-panel-toolbar-label(ng-if="permissions.write")
+		//- 	span(ng-click="toggleTrackChanges(true)", ng-if="editor.wantTrackChanges === false") !{translate("track_changes_is_off")}
+		//- 	span(ng-click="toggleTrackChanges(false)", ng-if="editor.wantTrackChanges === true") !{translate("track_changes_is_on")}
+		//- 	review-panel-toggle(
+		//- 		ng-if="editor.wantTrackChanges == editor.trackChanges"
+		//- 		ng-model="editor.wantTrackChanges"
+		//- 		on-toggle="toggleTrackChanges"
+		//- 		disabled="!project.features.trackChanges"
+		//- 		on-disabled-click="openTrackChangesUpgradeModal"
+		//- 	)
+		//- span.review-panel-toolbar-label.review-panel-toolbar-label-disabled(ng-if="!permissions.write")
+		//- 	span(ng-if="editor.wantTrackChanges === false") !{translate("track_changes_is_off")}
+		//- 	span(ng-if="editor.wantTrackChanges === true") !{translate("track_changes_is_on")}
+		//- span.review-panel-toolbar-spinner(ng-if="editor.wantTrackChanges != editor.trackChanges")
+		//- 	i.fa.fa-spin.fa-spinner
 
 	.rp-entry-list(
 		review-panel-sorted

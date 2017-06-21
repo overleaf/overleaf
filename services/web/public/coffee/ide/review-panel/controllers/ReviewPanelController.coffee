@@ -11,7 +11,10 @@ define [
 			CUR_FILE : "cur_file"
 			OVERVIEW : "overview"
 
+		window.reviewPanel = # DEBUG LINE
 		$scope.reviewPanel =
+			trackChangesState: {}
+			trackChangesOnForEveryone: false
 			entries: {}
 			resolvedComments: {}
 			hasEntries: false
@@ -564,24 +567,90 @@ define [
 						
 		$scope.gotoEntry = (doc_id, entry) ->
 			ide.editorManager.openDocId(doc_id, { gotoOffset: entry.offset })
+			
+		applyTrackChangesStateToClient = (state) ->
+			console.log "[applyTrackChangesStateToClient]", state
+			if typeof state is "boolean"
+				console.log "[applyTrackChangesStateToClient]", "BOOLEAN"
+				$scope.reviewPanel.trackChangesOnForEveryone = state
+				$scope.reviewPanel.trackChangesState = {}
+				$scope.editor.wantTrackChanges = state
+			else
+				$scope.reviewPanel.trackChangesOnForEveryone = false
+				$scope.reviewPanel.trackChangesState = state
+				# State is an object with user_ids as keys
+				if state[ide.$scope.user.id]
+					$scope.editor.wantTrackChanges = true
+				else
+					$scope.editor.wantTrackChanges = false
 		
-		$scope.toggleTrackChanges = (value) ->
+		applyClientTrackChangesStateToServer = () ->
+			if $scope.reviewPanel.trackChangesOnForEveryone
+				data = {on : true}
+			else
+				data = {on_for: $scope.reviewPanel.trackChangesState}
+			console.log "[applyClientTrackChangesStateToServer]", data
+			data._csrf = window.csrfToken
+			$http.post "/project/#{$scope.project_id}/track_changes", data
+		
+		setTrackChangesState = (state) ->
+			console.log "[setTrackChangesState]", state
 			if $scope.project.features.trackChanges
-				$scope.editor.wantTrackChanges = value
-				$http.post "/project/#{$scope.project_id}/track_changes", {_csrf: window.csrfToken, on: value}
-				event_tracking.sendMB "rp-trackchanges-toggle", { value }
+				applyTrackChangesStateToClient(state)
+				applyClientTrackChangesStateToServer()
+				event_tracking.sendMB "rp-trackchanges-toggle", { state }
 			else
 				$scope.openTrackChangesUpgradeModal()
-
-		$scope.toggleTrackChangesFromKbdShortcut = () ->
-			if $scope.editor.wantTrackChanges
-				$scope.toggleTrackChanges false
-			else 
-				$scope.toggleTrackChanges true
 		
-		ide.socket.on "toggle-track-changes", (value) ->
+		$scope.toggleTrackChangesForEveryone = (onForEveryone) ->
+			console.log "[toggleTrackChangesForEveryone]", onForEveryone
+			setTrackChangesState(onForEveryone)
+		
+		window.toggleTrackChangesForUser = # DEBUG LINE
+		$scope.toggleTrackChangesForUser = (user_id) ->
+			state = $scope.reviewPanel.trackChangesState
+			if state[user_id]?
+				delete state[user_id]
+			else
+				state[user_id] = true
+			setTrackChangesState(state)				
+
+		ide.socket.on "toggle-track-changes", (state) ->
+			console.log "[ide toggle-track-changes]", state
 			$scope.$apply () ->
-				$scope.editor.wantTrackChanges = value
+				applyTrackChangesStateToClient(state)
+
+		# window.toggleTrackChangesForUser = # DEBUG LINE, remove after dev
+		# $scope.toggleTrackChangesForUser = (user_id) ->
+		# 	state = $scope.reviewPanel.trackChangesState
+		# 	if state == true
+		# 		return # On for everyone, nothing to do
+		# 	else if state == false or !state?
+		# 		state = {}
+		# 
+		# 	if state[user_id]
+		# 		delete state[user_id]
+		# 	else
+		# 		state[user_id] = true
+		# 	setTrackChangesState(state)
+
+		# Not sure what the kbd shortcut should do now?
+		# $scope.toggleTrackChangesFromKbdShortcut = () ->
+		# 	if $scope.editor.wantTrackChanges
+		# 		$scope.toggleTrackChanges false
+		# 	else 
+		# 		$scope.toggleTrackChanges true
+
+		_inited = false
+		ide.$scope.$on "project:joined", () ->
+			console.log "project joined, setting track changes state from window"
+			return if _inited
+			project = ide.$scope.project
+			if project.features.trackChanges
+				applyTrackChangesStateToClient(window.trackChangesState)
+			else
+				applyTrackChangesStateToClient(false)
+			_inited = true
 
 		_refreshingRangeUsers = false
 		_refreshedForUserIds = {}

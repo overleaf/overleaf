@@ -37,10 +37,6 @@ define [
 			@$scope.$watch "editor.wantTrackChanges", (value) =>
 				return if !value?
 				@_syncTrackChangesState(@$scope.editor.sharejs_doc)
-			
-			@$scope.$watch "project.features.trackChanges", (trackChangesFeature) =>
-				return if !trackChangesFeature?
-				@$scope.editor.wantTrackChanges = window.trackChangesEnabled and trackChangesFeature
 
 		autoOpenDoc: () ->
 			open_doc_id = 
