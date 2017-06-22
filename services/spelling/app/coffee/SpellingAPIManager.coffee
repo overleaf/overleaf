@@ -3,20 +3,33 @@ LearnedWordsManager = require './LearnedWordsManager'
 async = require 'async'
 
 module.exports = SpellingAPIManager =
+
+	wordWhitelist: [
+		'ShareLaTeX',
+		'sharelatex',
+		'LaTeX',
+		'http',
+		'https',
+		'www'
+	]
+
 	runRequest: (token, request, callback = (error, result) ->) ->
 		if !request.words?
 			return callback(new Error("malformed JSON"))
-	
+
 		lang = request.language || "en"
 
 		check = (words, callback) ->
 			ASpell.checkWords lang, words, (error, misspellings) ->
 				callback error, misspellings: misspellings
-		
+
+		wordsToCheck = (request.words || []).filter (word) ->
+			SpellingAPIManager.wordWhitelist.indexOf(word) == -1
+
 		if token?
 			LearnedWordsManager.getLearnedWords token, (error, learnedWords) ->
 				return callback(error) if error?
-				words = (request.words || []).slice(0,10000)
+				words = (wordsToCheck).slice(0,10000)
 				check words, (error, result) ->
 					return callback error if error?
 					result.misspellings = result.misspellings.filter (m) ->
@@ -24,7 +37,7 @@ module.exports = SpellingAPIManager =
 						learnedWords.indexOf(word) == -1
 					callback error, result
 		else
-			check(request.words, callback)
+			check(wordsToCheck, callback)
 
 	learnWord: (token, request, callback = (error) ->) ->
 		if !request.word?

@@ -80,6 +80,15 @@ describe "SpellingAPIManager", ->
 			it "should truncate to 10,000 words", ->
 				@ASpell.checkWords.calledWith(sinon.match.any, @manyWords.slice(0, 10000)).should.equal true
 
+		describe 'with words from the whitelist', ->
+			beforeEach (done) ->
+				@whitelistWord = @SpellingAPIManager.wordWhitelist[0]
+				@words = ["One", @whitelistWord, "Two"]
+				@SpellingAPIManager.runRequest @token, words: @words, (error, @result) => done()
+
+			it 'should ignore the white-listed word', ->
+				expect(@ASpell.checkWords.lastCall.args[1]).to.deep.equal ["One", "Two"]
+
 	describe "learnWord", ->
 		describe "without a token", ->
 			beforeEach (done) -> @SpellingAPIManager.learnWord null, word: "banana", (@error) => done()
