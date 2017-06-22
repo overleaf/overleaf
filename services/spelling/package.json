@@ -33,6 +33,6 @@
     "grunt-execute": "^0.2.2",
     "grunt-mocha-test": "^0.11.0",
     "sandboxed-module": "",
-    "sinon": ""
+    "sinon": "^1.17.0"
   }
 }
