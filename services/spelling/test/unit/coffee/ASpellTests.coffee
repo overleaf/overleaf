@@ -10,6 +10,9 @@ describe "ASpell", ->
 			"logger-sharelatex":
 				log:->
 				err:->
+			'metrics-sharelatex':
+				gauge:->
+				inc: ->
 
 	describe "a correctly spelled word", ->
 		beforeEach (done) ->
