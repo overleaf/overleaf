@@ -46,7 +46,9 @@ describe "SpellingAPIManager", ->
 				@SpellingAPIManager.runRequest @token, {}, (@error, @result) => done()
 
 			it "should return an error", ->
-				expect(@error).to.deep.equal new Error("malformed JSON")
+				expect(@error).to.exist
+				expect(@error).to.be.instanceof Error
+				expect(@error.message).to.equal "malformed JSON"
 
 		describe "with a missing token", ->
 			beforeEach (done) ->
@@ -94,13 +96,17 @@ describe "SpellingAPIManager", ->
 			beforeEach (done) -> @SpellingAPIManager.learnWord null, word: "banana", (@error) => done()
 
 			it "should return an error", ->
-				expect(@error).to.deep.equal new Error("malformed JSON")
+				expect(@error).to.exist
+				expect(@error).to.be.instanceof Error
+				expect(@error.message).to.equal "no token provided"
 
 		describe "without a word", ->
 			beforeEach (done) -> @SpellingAPIManager.learnWord @token, {}, (@error) => done()
 
 			it "should return an error", ->
-				expect(@error).to.deep.equal new Error("no token provided")
+				expect(@error).to.exist
+				expect(@error).to.be.instanceof Error
+				expect(@error.message).to.equal "malformed JSON"
 
 		describe "with a word and a token", ->
 			beforeEach (done) ->
