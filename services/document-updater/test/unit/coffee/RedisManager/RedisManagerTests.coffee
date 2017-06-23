@@ -265,6 +265,35 @@ describe "RedisManager", ->
 			it "should log out the problem", ->
 				@logger.warn.called.should.equal true
 
+		describe "with a slow request to redis", ->
+			beforeEach ->
+				@first_version_in_redis = 30
+				@version = 70
+				@length = @version - @first_version_in_redis
+				@start  = 50
+				@end    = 60
+				@ops = [
+					{ "mock": "op-1" },
+					{ "mock": "op-2" }
+				]
+				@jsonOps = @ops.map (op) -> JSON.stringify op
+				@rclient.llen = sinon.stub().callsArgWith(1, null, @length)
+				@rclient.get = sinon.stub().callsArgWith(1, null, @version.toString())
+				@clock = sinon.useFakeTimers();
+				@rclient.lrange = (key, start, end, cb) =>
+					@clock.tick(6000);
+					cb(null, @jsonOps)
+				@RedisManager.getPreviousDocOps(@doc_id, @start, @end, @callback)
+
+			afterEach ->
+				@clock.restore()
+
+			it 'should return an error', ->
+				@callback
+					.calledWith(new Error("redis getPreviousDocOps exceeded timeout"))
+					.should.equal true
+
+
 	describe "updateDocument", ->
 		beforeEach ->
 			@rclient.set = sinon.stub()

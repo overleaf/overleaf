@@ -141,6 +141,7 @@ module.exports = RedisManager =
 			callback null, version
 
 	getPreviousDocOps: (doc_id, start, end, callback = (error, jsonOps) ->) ->
+		timer = new metrics.Timer("redis.get-prev-docops")
 		rclient.llen keys.docOps(doc_id: doc_id), (error, length) ->
 			return callback(error) if error?
 			rclient.get keys.docVersion(doc_id: doc_id), (error, version) ->
@@ -168,6 +169,8 @@ module.exports = RedisManager =
 						ops = jsonOps.map (jsonOp) -> JSON.parse jsonOp
 					catch e
 						return callback(e)
+					timeSpan = timer.done()
+					return callback(new Error("redis getPreviousDocOps exceeded timeout")) if timeSpan > MAX_REDIS_REQUEST_LENGTH
 					callback null, ops
 
 	DOC_OPS_TTL: 60 * minutes
