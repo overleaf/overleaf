@@ -7,6 +7,7 @@ if Settings.sentry?.dsn?
 
 smokeTest = require "smoke-test-sharelatex"
 ContentTypeMapper = require "./app/js/ContentTypeMapper"
+Errors = require './app/js/Errors'
 
 Path = require "path"
 fs = require "fs"
@@ -152,8 +153,12 @@ app.get "/heapdump", (req, res)->
 		res.send filename
 
 app.use (error, req, res, next) ->
-	logger.error err: error, "server error"
-	res.sendStatus(error?.statusCode || 500)
+	if error instanceof Errors.NotFoundError
+		logger.warn {err: error, url: req.url}, "not found error"
+		return res.sendStatus(404)
+	else
+		logger.error {err: error, url: req.url}, "server error"
+		res.sendStatus(error?.statusCode || 500)
 
 app.listen port = (Settings.internal?.clsi?.port or 3013), host = (Settings.internal?.clsi?.host or "localhost"), (error) ->
 	logger.info "CLSI starting up, listening on #{host}:#{port}"

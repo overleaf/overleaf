@@ -13,6 +13,7 @@ fs = require("fs")
 fse = require "fs-extra"
 os = require("os")
 async = require "async"
+Errors = require './Errors'
 
 commandRunner = Settings.clsi?.commandRunner or "./CommandRunner"
 logger.info commandRunner:commandRunner, "selecting command runner for clsi"
@@ -206,11 +207,11 @@ module.exports = CompileManager =
 		synctexFile = Path.join(synctexDir, "output.synctex.gz")
 		fs.stat synctexDir, (error, stats) ->
 			if error?.code is 'ENOENT'
-				return callback(new Error("called synctex with no output directory"))
+				return callback(new Errors.NotFoundError("called synctex with no output directory"))
 			return callback(error) if error?
 			fs.stat synctexFile, (error, stats) ->
 				if error?.code is 'ENOENT'
-					return callback(new Error("called synctex with no output file"))
+					return callback(new Errors.NotFoundError("called synctex with no output file"))
 				return callback(error) if error?
 				return callback(new Error("not a file")) if not stats?.isFile()
 				callback()
