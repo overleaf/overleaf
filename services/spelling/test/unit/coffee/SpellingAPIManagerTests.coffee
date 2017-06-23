@@ -84,12 +84,12 @@ describe "SpellingAPIManager", ->
 
 		describe 'with words from the whitelist', ->
 			beforeEach (done) ->
-				@whitelistWord = @SpellingAPIManager.wordWhitelist[0]
-				@words = ["One", @whitelistWord, "Two"]
+				@whitelistWord = @SpellingAPIManager.whitelist[0]
+				@words = ["One",  "Two", @whitelistWord]
 				@SpellingAPIManager.runRequest @token, words: @words, (error, @result) => done()
 
 			it 'should ignore the white-listed word', ->
-				expect(@ASpell.checkWords.lastCall.args[1]).to.deep.equal ["One", "...", "Two"]
+				expect(@result.misspellings.length).to.equal @misspellings.length-1
 
 	describe "learnWord", ->
 		describe "without a token", ->

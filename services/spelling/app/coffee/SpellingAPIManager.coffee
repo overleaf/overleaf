@@ -4,7 +4,7 @@ async = require 'async'
 
 module.exports = SpellingAPIManager =
 
-	wordWhitelist: [
+	whitelist: [
 		'ShareLaTeX',
 		'sharelatex',
 		'LaTeX',
@@ -23,12 +23,7 @@ module.exports = SpellingAPIManager =
 			ASpell.checkWords lang, words, (error, misspellings) ->
 				callback error, misspellings: misspellings
 
-		wordsToCheck = (request.words || []).map (word) ->
-			# blank out whitelisted words
-			if SpellingAPIManager.wordWhitelist.indexOf(word) == -1
-				word
-			else
-				'...'
+		wordsToCheck = request.words || []
 
 		if token?
 			LearnedWordsManager.getLearnedWords token, (error, learnedWords) ->
@@ -38,7 +33,7 @@ module.exports = SpellingAPIManager =
 					return callback error if error?
 					result.misspellings = result.misspellings.filter (m) ->
 						word = words[m.index]
-						learnedWords.indexOf(word) == -1
+						learnedWords.indexOf(word) == -1 and SpellingAPIManager.whitelist.indexOf(word) == -1
 					callback error, result
 		else
 			check(wordsToCheck, callback)
