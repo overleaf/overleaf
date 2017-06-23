@@ -89,7 +89,7 @@ describe "SpellingAPIManager", ->
 				@SpellingAPIManager.runRequest @token, words: @words, (error, @result) => done()
 
 			it 'should ignore the white-listed word', ->
-				expect(@ASpell.checkWords.lastCall.args[1]).to.deep.equal ["One", "Two"]
+				expect(@ASpell.checkWords.lastCall.args[1]).to.deep.equal ["One", "...", "Two"]
 
 	describe "learnWord", ->
 		describe "without a token", ->

@@ -23,8 +23,12 @@ module.exports = SpellingAPIManager =
 			ASpell.checkWords lang, words, (error, misspellings) ->
 				callback error, misspellings: misspellings
 
-		wordsToCheck = (request.words || []).filter (word) ->
-			SpellingAPIManager.wordWhitelist.indexOf(word) == -1
+		wordsToCheck = (request.words || []).map (word) ->
+			# blank out whitelisted words
+			if SpellingAPIManager.wordWhitelist.indexOf(word) == -1
+				word
+			else
+				'...'
 
 		if token?
 			LearnedWordsManager.getLearnedWords token, (error, learnedWords) ->
