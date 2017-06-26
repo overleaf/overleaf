@@ -104,7 +104,9 @@ module.exports = RedisManager =
 			# check if request took too long and bail out.  only do this for
 			# get, because it is the first call in each update, so if this
 			# passes we'll assume others have a reasonable chance to succeed.
-			return callback(new Error("redis getDoc exceeded timeout")) if timeSpan > MAX_REDIS_REQUEST_LENGTH
+			if timeSpan > MAX_REDIS_REQUEST_LENGTH
+				error = new Error("redis getDoc exceeded timeout")
+				return callback(error)
 			# check sha1 hash value if present
 			if docLines? and storedHash?
 				computedHash = RedisManager._computeHash(docLines)
@@ -170,7 +172,9 @@ module.exports = RedisManager =
 					catch e
 						return callback(e)
 					timeSpan = timer.done()
-					return callback(new Error("redis getPreviousDocOps exceeded timeout")) if timeSpan > MAX_REDIS_REQUEST_LENGTH
+					if timeSpan > MAX_REDIS_REQUEST_LENGTH
+						error = new Error("redis getPreviousDocOps exceeded timeout")
+						return callback(error)
 					callback null, ops
 
 	DOC_OPS_TTL: 60 * minutes
