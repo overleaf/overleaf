@@ -17,7 +17,10 @@ module.exports = RedisSharelatex =
 			client.healthCheck = RedisSharelatex.singleInstanceHealthCheckBuilder(client)
 		else if opts.cluster?
 			Redis = require("ioredis")
-			client = new Redis.Cluster(opts.cluster)
+			standardOpts = _.clone(opts)
+			delete standardOpts.cluster
+			delete standardOpts.key_schema
+			client = new Redis.Cluster(opts.cluster, standardOpts)
 			client.healthCheck = RedisSharelatex.clusterHealthCheckBuilder(client)
 			RedisSharelatex._monkeyPatchIoredisExec(client)
 		else
