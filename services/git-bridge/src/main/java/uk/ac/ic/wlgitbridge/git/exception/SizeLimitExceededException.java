@@ -7,7 +7,7 @@ import java.util.List;
 
 public class SizeLimitExceededException extends GitUserException {
 
-    private static String path = null;
+    private final String path;
 
     public SizeLimitExceededException(String path) {
         super();
