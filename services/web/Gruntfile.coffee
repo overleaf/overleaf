@@ -107,9 +107,9 @@ module.exports = (grunt) ->
 				cwd: 'public/coffee',
 				src: ['**/*.coffee'],
 				dest: 'public/js/',
-				ext: '.js'
+				ext: '.js',
 				options:
-					sourceMap: true,
+					sourceMap: true
 
 			smoke_tests:
 				expand: true,
