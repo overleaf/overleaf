@@ -10,7 +10,8 @@ define [
 					$scope.history.diff.doc
 				)
 				.then (response) ->
-					$scope.history.diff.restoredDocNewId = response.doc_id
+					{ data } = response
+					$scope.history.diff.restoredDocNewId = data.doc_id
 					$scope.history.diff.restoreInProgress = false
 					$scope.history.diff.restoreDeletedSuccess = true
 
