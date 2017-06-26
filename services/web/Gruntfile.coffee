@@ -108,6 +108,8 @@ module.exports = (grunt) ->
 				src: ['**/*.coffee'],
 				dest: 'public/js/',
 				ext: '.js'
+				options:
+					sourceMap: true,
 
 			smoke_tests:
 				expand: true,
@@ -164,6 +166,7 @@ module.exports = (grunt) ->
 					baseUrl: "./"
 					dir: "public/minjs"
 					inlineText: false
+					generateSourceMaps: true
 					preserveLicenseComments: false
 					paths:
 						"moment": "libs/#{PackageVersions.lib('moment')}"
