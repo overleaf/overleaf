@@ -81,7 +81,7 @@ describe "FSPersistorManagerTests", ->
     it "should use correct file location", (done) ->
       @Fs.createReadStream.returns({on: ->})
       @FSPersistorManager.getFileStream @location, @name1, @opts, (err,res) =>
-      @Fs.createReadStream.calledWith("#{@location}/#{@name1Filtered}").should.equal.true
+      @Fs.createReadStream.calledWith("#{@location}/#{@name1Filtered}").should.equal true
       done()
 
     describe "with start and end options", ->
@@ -144,17 +144,17 @@ describe "FSPersistorManagerTests", ->
 
     it "Should open the source for reading", (done) ->
       @FSPersistorManager.copyFile @location, @name1, @name2, ->
-      @Fs.createReadStream.calledWith("#{@location}/#{@name1}").should.equal.true
+      @Fs.createReadStream.calledWith("#{@location}/#{@name1Filtered}").should.equal true
       done()
 
     it "Should open the target for writing", (done) ->
       @FSPersistorManager.copyFile @location, @name1, @name2, ->
-      @Fs.createWriteStream.calledWith("#{@location}/#{@name2}").should.equal.true
+      @Fs.createWriteStream.calledWith("#{@location}/#{@name2}").should.equal true
       done()
 
     it "Should pipe the source to the target", (done) ->
       @FSPersistorManager.copyFile @location, @name1, @name2, ->
-      @ReadStream.pipe.calledWith(@WriteStream).should.equal.true
+      @ReadStream.pipe.calledWith(@WriteStream).should.equal true
       done()
 
   describe "deleteFile", ->
@@ -163,7 +163,7 @@ describe "FSPersistorManagerTests", ->
 
     it "Should call unlink with correct options", (done) ->
       @FSPersistorManager.deleteFile @location, @name1, (err) =>
-        @Fs.unlink.calledWith("#{@location}/#{@name1}").should.equal.true
+        @Fs.unlink.calledWith("#{@location}/#{@name1Filtered}").should.equal true
         done()
 
     it "Should propogate the error", (done) ->
@@ -178,7 +178,7 @@ describe "FSPersistorManagerTests", ->
 
     it "Should call rmdir(rimraf) with correct options", (done) ->
       @FSPersistorManager.deleteDirectory @location, @name1, (err) =>
-        @Rimraf.calledWith("#{@location}/#{@name1}").should.equal.true
+        @Rimraf.calledWith("#{@location}/#{@name1Filtered}").should.equal true
         done()
 
     it "Should propogate the error", (done) ->
@@ -192,7 +192,7 @@ describe "FSPersistorManagerTests", ->
 
     it "Should call exists with correct options", (done) ->
       @FSPersistorManager.checkIfFileExists @location, @name1, (exists) =>
-        @Fs.exists.calledWith("#{@location}/#{@name1}").should.equal.true
+        @Fs.exists.calledWith("#{@location}/#{@name1Filtered}").should.equal true
         done()
 
     # fs.exists simply returns false on any error, so...
