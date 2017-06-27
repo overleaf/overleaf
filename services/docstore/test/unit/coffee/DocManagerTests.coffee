@@ -215,6 +215,29 @@ describe "DocManager", ->
 					.calledWith(new Errors.NotFoundError("No docs for project #{@project_id}"))
 					.should.equal true
 
+		describe "when there are some archived docs for the project", ->
+			beforeEach ->
+				@stubs = [{ _id: @doc_id, project_id: @project_id, inS3:true }]
+				@docs = [{ _id: @doc_id, project_id: @project_id, lines: ["mock-lines"] }]
+				@MongoManager.getProjectsDocs = sinon.stub()
+					.callsArgWith(3, null, @stubs) # first call
+					.callsArgWith(3, null, @docs)  # second call (after unarchiving)
+				@DocArchiveManager.unArchiveAllDocs = sinon.stub().callsArgWith(1, null)
+				@DocManager.getAllNonDeletedDocs @project_id, @filter, @callback
+
+			it "should get the project from the database", ->
+				@MongoManager.getProjectsDocs
+					.calledWith(@project_id, {include_deleted: false}, @filter)
+					.should.equal true
+
+			it "should unarchive the documents", ->
+				@DocArchiveManager.unArchiveAllDocs
+					.calledWith(@project_id)
+					.should.equal true
+
+			it "should return the docs", ->
+				@callback.calledWith(null, @docs).should.equal true
+
 	describe "deleteDoc", ->
 		describe "when the doc exists", ->
 			beforeEach ->
