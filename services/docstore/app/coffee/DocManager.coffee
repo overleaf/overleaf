@@ -65,6 +65,7 @@ module.exports = DocManager =
 				callback(null, docs)
 
 	getAllNonDeletedDocs: (project_id, filter, callback = (error, docs) ->) ->
+		# load docs optimistically, only unarchive if results are incomplete
 		DocManager._getAllDocs project_id, filter, (error, docs) ->
 			return callback(error) if error?
 			# check if any docs have been archived
@@ -74,8 +75,10 @@ module.exports = DocManager =
 					if error?
 						logger.err err:error, project_id:project_id, "error unarchiving docs"
 						return callback(error)
+					# now reload the docs after unarchiving
 					DocManager._getAllDocs project_id, filter, callback
 			else
+				# return docs immediately, nothing in s3
 				return callback(null, docs)
 
 	updateDoc: (project_id, doc_id, lines, version, ranges, callback = (error, modified, rev) ->) ->
