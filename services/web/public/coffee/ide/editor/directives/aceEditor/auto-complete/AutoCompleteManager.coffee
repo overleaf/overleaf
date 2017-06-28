@@ -169,7 +169,7 @@ define [
 						$(editor.completer.popup?.container).css({'font-size': @$scope.fontSize + 'px'})
 						if editor.completer?.completions?.filtered?.length == 0
 							editor.completer.detach()
-					bindKey: "Ctrl-Space|Ctrl-Shift-Space|Alt-Space"
+					bindKey: "Ctrl-Space|Ctrl-Shift-Space|Alt-Space|Shift-Space"
 				}
 
 			Util.retrievePrecedingIdentifier = (text, pos, regex) ->
