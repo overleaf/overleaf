@@ -182,6 +182,9 @@
 			.rp-tc-state-item-name-everyone {
 				color: @red;
 			}
+			.rp-tc-state-item-name-disabled {
+				opacity: .35;
+			}
 
 .rp-entry-list {
 	display: none;
@@ -801,6 +804,11 @@
 				left: 50%;
 				background-color: #FFF;
 			}
+		}
+
+		&:disabled + .rp-toggle-btn {
+			cursor: default;
+			opacity: .35;
 		}
 	}
 
