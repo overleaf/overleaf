@@ -21,6 +21,7 @@ describe "PackManager", ->
 			"./MongoAWS": {}
 			"logger-sharelatex": { log: sinon.stub(), error: sinon.stub() }
 			'metrics-sharelatex': {inc: ()->}
+			"./ProjectIterator": require("../../../../app/js/ProjectIterator.js") # Cache for speed
 		@callback = sinon.stub()
 		@doc_id = ObjectId().toString()
 		@project_id = ObjectId().toString()

@@ -26,20 +26,40 @@ describe "DiffManager", ->
 
 			@DocumentUpdaterManager.getDocument = sinon.stub().callsArgWith(2, null, @content, @version)
 			@UpdatesManager.getDocUpdatesWithUserInfo = sinon.stub().callsArgWith(3, null, @updates)
-			@DiffManager.getLatestDocAndUpdates @project_id, @doc_id, @from, @to, @callback
 
-		it "should get the latest version of the doc", ->
-			@DocumentUpdaterManager.getDocument
-				.calledWith(@project_id, @doc_id)
-				.should.equal true
+		describe "with a fromVersion", ->
+			beforeEach ->
+				@DiffManager.getLatestDocAndUpdates @project_id, @doc_id, @from, @callback
 
-		it "should get the latest updates", ->
-			@UpdatesManager.getDocUpdatesWithUserInfo
-				.calledWith(@project_id, @doc_id, from: @from, to: @to)
-				.should.equal true
+			it "should get the latest version of the doc", ->
+				@DocumentUpdaterManager.getDocument
+					.calledWith(@project_id, @doc_id)
+					.should.equal true
 
-		it "should call the callback with the content, version and updates", ->
-			@callback.calledWith(null, @content, @version, @updates).should.equal true
+			it "should get the latest updates", ->
+				@UpdatesManager.getDocUpdatesWithUserInfo
+					.calledWith(@project_id, @doc_id, from: @from)
+					.should.equal true
+
+			it "should call the callback with the content, version and updates", ->
+				@callback.calledWith(null, @content, @version, @updates).should.equal true
+
+		describe "with no fromVersion", ->
+			beforeEach ->
+				@DiffManager.getLatestDocAndUpdates @project_id, @doc_id, null, @callback
+
+			it "should get the latest version of the doc", ->
+				@DocumentUpdaterManager.getDocument
+					.calledWith(@project_id, @doc_id)
+					.should.equal true
+
+			it "should not get the latest updates", ->
+				@UpdatesManager.getDocUpdatesWithUserInfo
+					.called.should.equal false
+
+			it "should call the callback with the content, version and blank updates", ->
+				@callback.calledWith(null, @content, @version, []).should.equal true
+			
 
 	describe "getDiff", ->
 		beforeEach ->
@@ -80,7 +100,7 @@ describe "DiffManager", ->
 
 		describe "when the updates are inconsistent", ->
 			beforeEach ->
-				@DiffManager.getLatestDocAndUpdates = sinon.stub().callsArgWith(4, null, @content, @version, @updates)
+				@DiffManager.getLatestDocAndUpdates = sinon.stub().callsArgWith(3, null, @content, @version, @updates)
 				@DiffGenerator.buildDiff = sinon.stub().throws(@error = new Error("inconsistent!"))
 				@DiffManager.getDiff @project_id, @doc_id, @fromVersion, @toVersion, @callback
 
@@ -177,7 +197,7 @@ describe "DiffManager", ->
 			
 		describe "with matching versions", ->
 			beforeEach ->
-				@DiffManager.getLatestDocAndUpdates = sinon.stub().callsArgWith(4, null, @content, @version, @updates)
+				@DiffManager.getLatestDocAndUpdates = sinon.stub().callsArgWith(3, null, @content, @version, @updates)
 				@DiffGenerator.rewindUpdates = sinon.spy (content, updates) =>
 					# the rewindUpdates method reverses the 'updates' array
 					updates.reverse()
@@ -187,7 +207,7 @@ describe "DiffManager", ->
 
 			it "should get the latest doc and version with all recent updates", ->
 				@DiffManager.getLatestDocAndUpdates
-					.calledWith(@project_id, @doc_id, @fromVersion, null)
+					.calledWith(@project_id, @doc_id, @fromVersion)
 					.should.equal true
 
 			it "should rewind the diff", ->
@@ -200,7 +220,7 @@ describe "DiffManager", ->
 			beforeEach ->
 				@version = 50
 				@updates = [ { op: "mock-1", v: 40 }, { op: "mock-1", v: 39 } ]
-				@DiffManager.getLatestDocAndUpdates = sinon.stub().callsArgWith(4, null, @content, @version, @updates)
+				@DiffManager.getLatestDocAndUpdates = sinon.stub().callsArgWith(3, null, @content, @version, @updates)
 				@DiffManager._tryGetDocumentBeforeVersion @project_id, @doc_id, @fromVersion, @callback
 
 			it "should call the callback with an error with retry = true set", ->
@@ -210,7 +230,7 @@ describe "DiffManager", ->
 
 		describe "when the updates are inconsistent", ->
 			beforeEach ->
-				@DiffManager.getLatestDocAndUpdates = sinon.stub().callsArgWith(4, null, @content, @version, @updates)
+				@DiffManager.getLatestDocAndUpdates = sinon.stub().callsArgWith(3, null, @content, @version, @updates)
 				@DiffGenerator.rewindUpdates = sinon.stub().throws(@error = new Error("inconsistent!"))
 				@DiffManager.getDocumentBeforeVersion @project_id, @doc_id, @fromVersion, @callback
 

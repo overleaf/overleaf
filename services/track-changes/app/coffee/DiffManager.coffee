@@ -4,12 +4,14 @@ DiffGenerator = require "./DiffGenerator"
 logger = require "logger-sharelatex"
 
 module.exports = DiffManager =
-	getLatestDocAndUpdates: (project_id, doc_id, fromVersion, toVersion, callback = (error, content, version, updates) ->) ->
+	getLatestDocAndUpdates: (project_id, doc_id, fromVersion, callback = (error, content, version, updates) ->) ->
 		# Get updates last, since then they must be ahead and it
 		# might be possible to rewind to the same version as the doc.
 		DocumentUpdaterManager.getDocument project_id, doc_id, (error, content, version) ->
 			return callback(error) if error?
-			UpdatesManager.getDocUpdatesWithUserInfo project_id, doc_id, from: fromVersion, to: toVersion, (error, updates) ->
+			if !fromVersion? # If we haven't been given a version, just return lastest doc and no updates
+				return callback(null, content, version, [])
+			UpdatesManager.getDocUpdatesWithUserInfo project_id, doc_id, from: fromVersion, (error, updates) ->
 				return callback(error) if error?
 				callback(null, content, version, updates)
 	
@@ -56,7 +58,7 @@ module.exports = DiffManager =
 
 	_tryGetDocumentBeforeVersion: (project_id, doc_id, version, callback = (error, document, rewoundUpdates) ->) ->
 		logger.log project_id: project_id, doc_id: doc_id, version: version, "getting document before version"
-		DiffManager.getLatestDocAndUpdates project_id, doc_id, version, null, (error, content, version, updates) ->
+		DiffManager.getLatestDocAndUpdates project_id, doc_id, version, (error, content, version, updates) ->
 			return callback(error) if error?
 
 			# bail out if we hit a broken update
