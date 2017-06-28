@@ -28,6 +28,7 @@ define [
 			commentThreads: {}
 			resolvedThreadIds: {}
 			rendererData: {}
+			fullTCStateCollapsed: true
 			loadingThreads: false
 			# All selected changes. If a aggregated change (insertion + deletion) is selection, the two ids
 			# will be present. The length of this array will differ from the count below (see explanation).
@@ -602,6 +603,9 @@ define [
 				event_tracking.sendMB "rp-trackchanges-toggle", { state }
 			else
 				$scope.openTrackChangesUpgradeModal()
+
+		$scope.toggleFullTCStateCollapse = () ->
+			reviewPanel.fullTCStateCollapsed = !reviewPanel.fullTCStateCollapsed
 		
 		$scope.toggleTrackChangesForEveryone = (onForEveryone) ->
 			console.log "[toggleTrackChangesForEveryone]", onForEveryone

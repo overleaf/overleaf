@@ -46,31 +46,43 @@
 			is-loading="reviewPanel.dropdown.loading"
 			permissions="permissions"
 		)
-		div
-			span On for everyone
-			review-panel-toggle(
-				ng-model="reviewPanel.trackChangesOnForEveryone"
-				on-toggle="toggleTrackChangesForEveryone"
-				disabled="!project.features.trackChanges"
-				on-disabled-click="openTrackChangesUpgradeModal"
-			)
-		div
-			span You {{user.id}}
-			//- Missing on-toggle attribute because we also need to pass user_id to the toggleTrackChangesForUser
-			//- method, and it's not clear how.
-			review-panel-toggle(
-				ng-model="reviewPanel.trackChangesState[user.id]"
-				disabled="!project.features.trackChanges"
-				on-disabled-click="openTrackChangesUpgradeModal"
-			)
-		div(ng-repeat="member in project.members")
-			span {{member.email}} {{member._id}}
-			review-panel-toggle(
-				ng-model="reviewPanel.trackChangesState[member._id]"
-				disabled="!project.features.trackChanges"
-				on-disabled-click="openTrackChangesUpgradeModal"
-			)
-		
+		span.review-panel-toolbar-label(ng-if="permissions.write")
+			span(ng-click="toggleFullTCStateCollapse();", ng-if="editor.wantTrackChanges === false") !{translate("track_changes_is_off")}
+			span(ng-click="toggleFullTCStateCollapse();", ng-if="editor.wantTrackChanges === true") !{translate("track_changes_is_on")}
+		ul.rp-tc-state(
+			review-panel-collapse-height="reviewPanel.fullTCStateCollapsed"
+		)
+			li.rp-tc-state-item
+				span.rp-tc-state-item-name.rp-tc-state-item-name-everyone Everyone
+				review-panel-toggle(
+					ng-model="reviewPanel.trackChangesOnForEveryone"
+					on-toggle="toggleTrackChangesForEveryone"
+					disabled="!project.features.trackChanges"
+					on-disabled-click="openTrackChangesUpgradeModal"
+				)
+			li.rp-tc-state-item
+				span.rp-tc-state-item-name.rp-tc-state-item-self(
+					style="color: hsl({{ users[user.id].hue }}, 70%, 40%);"
+				) {{ users[user.id].name }}
+				//- {{user.id}}
+				//- Missing on-toggle attribute because we also need to pass user_id to the toggleTrackChangesForUser
+				//- method, and it's not clear how.
+				review-panel-toggle(
+					ng-model="reviewPanel.trackChangesState[user.id]"
+					disabled="!project.features.trackChanges"
+					on-disabled-click="openTrackChangesUpgradeModal"
+				)
+			li.rp-tc-state-item(ng-repeat="member in project.members")
+				span.rp-tc-state-item-name(
+					style="color: hsl({{ users[member._id].hue }}, 70%, 40%);"
+				) {{ users[member._id].name }}
+				//- {{member._id}}
+				review-panel-toggle(
+					ng-model="reviewPanel.trackChangesState[member._id]"
+					disabled="!project.features.trackChanges"
+					on-disabled-click="openTrackChangesUpgradeModal"
+				)
+			
 		//- span.review-panel-toolbar-label(ng-if="permissions.write")
 		//- 	span(ng-click="toggleTrackChanges(true)", ng-if="editor.wantTrackChanges === false") !{translate("track_changes_is_off")}
 		//- 	span(ng-click="toggleTrackChanges(false)", ng-if="editor.wantTrackChanges === true") !{translate("track_changes_is_on")}
