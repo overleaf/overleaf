@@ -121,6 +121,7 @@ define [
 			end = change.end
 			range = new Range(end.row, 0, end.row, end.column)
 			lineUpToCursor = @editor.getSession().getTextRange(range)
+			lastCharIsBackslash = lineUpToCursor.slice(-1) == "\\"
 			commandFragment = getLastCommandFragment(lineUpToCursor)
 			# Check that this change was made by us, not a collaborator
 			# (Cursor is still one place behind)
@@ -130,7 +131,7 @@ define [
 				end.row == cursorPosition.row and
 				end.column == cursorPosition.column + 1
 			)
-				if commandFragment? and commandFragment.length > 2
+				if (commandFragment? and commandFragment.length > 2) or lastCharIsBackslash
 					setTimeout () =>
 						@editor.execCommand("startAutocomplete")
 					, 0
