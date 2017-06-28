@@ -4,7 +4,7 @@ define [
 	App.directive "reviewPanelToggle", () ->
 		restrict: "E"
 		scope: 
-			onToggle: '='
+			onToggle: '&'
 			ngModel: '='
 			disabled: '=?'
 			onDisabledClick: '=?'
@@ -12,7 +12,7 @@ define [
 			if !scope.disabled?
 				scope.disabled = false
 			scope.onChange = (args...) ->
-				scope.onToggle(scope.localModel)
+				scope.onToggle({ isOn: scope.localModel })
 			scope.handleClick = () ->
 				if scope.disabled
 					scope.onDisabledClick()

@@ -610,14 +610,15 @@ define [
 		$scope.toggleTrackChangesForEveryone = (onForEveryone) ->
 			console.log "[toggleTrackChangesForEveryone]", onForEveryone
 			setTrackChangesState(onForEveryone)
-		
+	
+
 		window.toggleTrackChangesForUser = # DEBUG LINE
-		$scope.toggleTrackChangesForUser = (user_id) ->
+		$scope.toggleTrackChangesForUser = (onForUser, userId) ->
+			console.log "[toggleTrackChangesForUser]", onForUser, userId
 			state = $scope.reviewPanel.trackChangesState
-			if state[user_id]?
-				delete state[user_id]
-			else
-				state[user_id] = true
+			state[userId] = onForUser
+			if state[user_id] == false
+				delete state[userId]
 			setTrackChangesState(state)				
 
 		ide.socket.on "toggle-track-changes", (state) ->
