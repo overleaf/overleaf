@@ -56,7 +56,7 @@
 				span.rp-tc-state-item-name.rp-tc-state-item-name-everyone Everyone
 				review-panel-toggle(
 					ng-model="reviewPanel.trackChangesOnForEveryone"
-					on-toggle="toggleTrackChangesForEveryone"
+					on-toggle="toggleTrackChangesForEveryone(isOn);"
 					disabled="!project.features.trackChanges"
 					on-disabled-click="openTrackChangesUpgradeModal"
 				)
@@ -69,8 +69,7 @@
 				//- method, and it's not clear how.
 				review-panel-toggle(
 					ng-model="reviewPanel.trackChangesState[user.id]"
-					disabled="!project.features.trackChanges"
-					on-disabled-click="openTrackChangesUpgradeModal"
+					on-toggle="toggleTrackChangesForUser(isOn, user.id);"
 				)
 			li.rp-tc-state-item(ng-repeat="member in project.members")
 				span.rp-tc-state-item-name(
@@ -79,8 +78,7 @@
 				//- {{member._id}}
 				review-panel-toggle(
 					ng-model="reviewPanel.trackChangesState[member._id]"
-					disabled="!project.features.trackChanges"
-					on-disabled-click="openTrackChangesUpgradeModal"
+					on-toggle="toggleTrackChangesForUser(isOn, member._id);"
 				)
 			
 		//- span.review-panel-toolbar-label(ng-if="permissions.write")
