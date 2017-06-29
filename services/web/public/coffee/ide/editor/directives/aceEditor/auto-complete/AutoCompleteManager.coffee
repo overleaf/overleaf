@@ -59,14 +59,14 @@ define [
 								caption: "\\#{commandName}{}",
 								snippet: "\\#{commandName}{}",
 								meta: "cross-reference",
-								score: 11000
+								score: 60
 							}
 							for label in labelsManager.getAllLabels()
 								result.push {
 									caption: "\\#{commandName}{#{label}#{if needsClosingBrace then '}' else ''}",
 									value: "\\#{commandName}{#{label}#{if needsClosingBrace then '}' else ''}",
 									meta: "cross-reference",
-									score: 10000
+									score: 50
 								}
 							callback null, result
 
