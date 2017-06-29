@@ -39,7 +39,7 @@ define [], () ->
 			return commands
 
 		# Ignore single letter commands since auto complete is moot then.
-		commandRegex: /\\([a-zA-Z][a-zA-Z]+)/
+		commandRegex: /^[^%]*?\\([a-zA-Z][a-zA-Z]+).*$/m
 
 		nextCommand: () ->
 			i = @doc.search(@commandRegex)
