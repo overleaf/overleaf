@@ -61,16 +61,16 @@
 					//- disabled="!project.features.trackChanges"
 					//- on-disabled-click="openTrackChangesUpgradeModal"
 			li.rp-tc-state-item
-				span.rp-tc-state-item-name.rp-tc-state-item-self(
+				span.rp-tc-state-item-name.rp-tc-state-item-owner(
 					ng-class="{ 'rp-tc-state-item-name-disabled' : reviewPanel.trackChangesOnForEveryone}"
-					style="color: hsl({{ users[user.id].hue }}, 70%, 40%);"
-				) {{ users[user.id].name }}
+					style="color: hsl({{ users[project.owner._id].hue }}, 70%, 40%);"
+				) {{ users[project.owner._id].name }}
 				//- {{user.id}}
 				//- Missing on-toggle attribute because we also need to pass user_id to the toggleTrackChangesForUser
 				//- method, and it's not clear how.
 				review-panel-toggle(
-					ng-model="reviewPanel.trackChangesState[user.id].value"
-					on-toggle="toggleTrackChangesForUser(isOn, user.id);"
+					ng-model="reviewPanel.trackChangesState[project.owner._id].value"
+					on-toggle="toggleTrackChangesForUser(isOn, project.owner._id);"
 					disabled="reviewPanel.trackChangesOnForEveryone"
 				)
 			li.rp-tc-state-item(ng-repeat="member in project.members")
