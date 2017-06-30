@@ -11,6 +11,11 @@ define [
 			CUR_FILE : "cur_file"
 			OVERVIEW : "overview"
 
+		$scope.UserTCSyncState = UserTCSyncState =
+			SYNCED  : "synced"
+			PENDING : "pending"
+
+
 		window.reviewPanel = # DEBUG LINE
 		$scope.reviewPanel =
 			trackChangesState: {}
@@ -571,34 +576,45 @@ define [
 			ide.editorManager.openDocId(doc_id, { gotoOffset: entry.offset })
 			
 		applyTrackChangesStateToClient = (state) ->
-			console.log "[applyTrackChangesStateToClient]", state
 			if typeof state is "boolean"
-				console.log "[applyTrackChangesStateToClient]", "BOOLEAN"
 				$scope.reviewPanel.trackChangesOnForEveryone = state
 				$scope.reviewPanel.trackChangesState = {}
 				$scope.editor.wantTrackChanges = state
 			else
 				$scope.reviewPanel.trackChangesOnForEveryone = false
-				$scope.reviewPanel.trackChangesState = state
+				for member in $scope.project.members
+					_setUserState(member._id, state[member._id] ? false)
+				_setUserState(ide.$scope.user.id, state[ide.$scope.user.id] ? false)
+				
+				for id, state of $scope.reviewPanel.trackChangesState
+					console.log id, state.value, state.syncState
 				# State is an object with user_ids as keys
 				if state[ide.$scope.user.id]
 					$scope.editor.wantTrackChanges = true
 				else
 					$scope.editor.wantTrackChanges = false
-		
+
+		_setUserState = (userId, newValue) ->
+			$scope.reviewPanel.trackChangesState[userId] ?= {}
+			state = $scope.reviewPanel.trackChangesState[userId]
+			if !state.syncState? or state.syncState == UserTCSyncState.SYNCED
+				state.value = newValue
+				state.syncState = UserTCSyncState.SYNCED
+			if state.syncState == UserTCSyncState.PENDING and state.value == newValue
+				state.syncState = UserTCSyncState.SYNCED
+
 		applyClientTrackChangesStateToServer = () ->
 			if $scope.reviewPanel.trackChangesOnForEveryone
 				data = {on : true}
 			else
-				data = {on_for: $scope.reviewPanel.trackChangesState}
-			console.log "[applyClientTrackChangesStateToServer]", data
+				data = {on_for: {}}
+				for userId, userState of $scope.reviewPanel.trackChangesState
+					data.on_for[userId] = true if userState.value
 			data._csrf = window.csrfToken
 			$http.post "/project/#{$scope.project_id}/track_changes", data
 		
 		setTrackChangesState = (state) ->
-			console.log "[setTrackChangesState]", state
 			if $scope.project.features.trackChanges
-				applyTrackChangesStateToClient(state)
 				applyClientTrackChangesStateToServer()
 				event_tracking.sendMB "rp-trackchanges-toggle", { state }
 			else
@@ -608,21 +624,17 @@ define [
 			reviewPanel.fullTCStateCollapsed = !reviewPanel.fullTCStateCollapsed
 		
 		$scope.toggleTrackChangesForEveryone = (onForEveryone) ->
-			console.log "[toggleTrackChangesForEveryone]", onForEveryone
 			setTrackChangesState(onForEveryone)
 	
-
 		window.toggleTrackChangesForUser = # DEBUG LINE
 		$scope.toggleTrackChangesForUser = (onForUser, userId) ->
-			console.log "[toggleTrackChangesForUser]", onForUser, userId
 			state = $scope.reviewPanel.trackChangesState
-			state[userId] = onForUser
-			if state[user_id] == false
-				delete state[userId]
+			state[userId] = 
+				value     : onForUser
+				syncState : UserTCSyncState.PENDING
 			setTrackChangesState(state)				
 
 		ide.socket.on "toggle-track-changes", (state) ->
-			console.log "[ide toggle-track-changes]", state
 			$scope.$apply () ->
 				applyTrackChangesStateToClient(state)
 
@@ -649,7 +661,6 @@ define [
 
 		_inited = false
 		ide.$scope.$on "project:joined", () ->
-			console.log "project joined, setting track changes state from window"
 			return if _inited
 			project = ide.$scope.project
 			if project.features.trackChanges

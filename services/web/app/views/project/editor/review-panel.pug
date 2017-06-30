@@ -69,7 +69,7 @@
 				//- Missing on-toggle attribute because we also need to pass user_id to the toggleTrackChangesForUser
 				//- method, and it's not clear how.
 				review-panel-toggle(
-					ng-model="reviewPanel.trackChangesOnForEveryone || reviewPanel.trackChangesState[user.id]"
+					ng-model="reviewPanel.trackChangesState[user.id].value"
 					on-toggle="toggleTrackChangesForUser(isOn, user.id);"
 					disabled="reviewPanel.trackChangesOnForEveryone"
 				)
@@ -80,7 +80,7 @@
 				) {{ users[member._id].name }}
 				//- {{member._id}}
 				review-panel-toggle(
-					ng-model="reviewPanel.trackChangesOnForEveryone || reviewPanel.trackChangesState[member._id]"
+					ng-model="reviewPanel.trackChangesState[member._id].value"
 					on-toggle="toggleTrackChangesForUser(isOn, member._id);"
 					disabled="reviewPanel.trackChangesOnForEveryone"
 				)
