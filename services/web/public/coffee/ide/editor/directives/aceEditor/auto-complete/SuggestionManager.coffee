@@ -40,15 +40,17 @@ define [], () ->
 
 		# Ignore single letter commands since auto complete is moot then.
 		# Ignore commands which occur after a comment character '%'
-		commandRegex: /^[^%]*?\\([a-zA-Z][a-zA-Z]+).*$/m
+		commandRegex: /^([^%]*?)\\([a-zA-Z][a-zA-Z]+)/m
 
 		nextCommand: () ->
 			i = @doc.search(@commandRegex)
 			if i == -1
 				return false
 			else
-				match = @doc.match(@commandRegex)[1]
-				@doc = @doc.substr(i + match.length + 1)
+				matchObject = @doc.match(@commandRegex)
+				preMatch = matchObject[1]
+				match = matchObject[2]
+				@doc = @doc.substr(i + preMatch.length + match.length + 1)
 				return match
 
 		consumeWhitespace: () ->
