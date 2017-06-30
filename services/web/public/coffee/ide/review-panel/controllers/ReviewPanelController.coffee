@@ -584,7 +584,7 @@ define [
 				$scope.reviewPanel.trackChangesOnForEveryone = false
 				for member in $scope.project.members
 					_setUserState(member._id, state[member._id] ? false)
-				_setUserState(ide.$scope.user.id, state[ide.$scope.user.id] ? false)
+				_setUserState($scope.project.owner._id, state[$scope.project.owner._id] ? false)
 				
 				for id, state of $scope.reviewPanel.trackChangesState
 					console.log id, state.value, state.syncState
@@ -609,7 +609,7 @@ define [
 			else
 				data = {on_for: {}}
 				for userId, userState of $scope.reviewPanel.trackChangesState
-					data.on_for[userId] = true if userState.value
+					data.on_for[userId] = userState.value
 			data._csrf = window.csrfToken
 			$http.post "/project/#{$scope.project_id}/track_changes", data
 		
