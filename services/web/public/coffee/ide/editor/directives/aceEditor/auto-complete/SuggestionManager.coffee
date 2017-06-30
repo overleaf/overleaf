@@ -39,6 +39,7 @@ define [], () ->
 			return commands
 
 		# Ignore single letter commands since auto complete is moot then.
+		# Ignore commands which occur after a comment character '%'
 		commandRegex: /^[^%]*?\\([a-zA-Z][a-zA-Z]+).*$/m
 
 		nextCommand: () ->
