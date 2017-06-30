@@ -55,17 +55,31 @@ module.exports = DocManager =
 				return callback(err)
 			callback(err, doc)
 
-	getAllNonDeletedDocs: (project_id, filter, callback = (error, docs) ->) ->
-		DocArchive.unArchiveAllDocs project_id, (error) ->
-			if error?
+	_getAllDocs: (project_id, filter, callback = (error, docs) ->) ->
+		MongoManager.getProjectsDocs project_id, {include_deleted: false}, filter, (error, docs) ->
+			if err?
 				return callback(error)
-			MongoManager.getProjectsDocs project_id, {include_deleted: false}, filter, (error, docs) ->
-				if err?
-					return callback(error)
-				else if !docs?
-					return callback new Errors.NotFoundError("No docs for project #{project_id}")
-				else
-					return callback(null, docs)
+			else if !docs?
+				return callback new Errors.NotFoundError("No docs for project #{project_id}")
+			else
+				callback(null, docs)
+
+	getAllNonDeletedDocs: (project_id, filter, callback = (error, docs) ->) ->
+		# load docs optimistically, only unarchive if results are incomplete
+		DocManager._getAllDocs project_id, filter, (error, docs) ->
+			return callback(error) if error?
+			# check if any docs have been archived
+			docsInS3 = (doc for doc in docs when doc?.inS3)
+			if docsInS3.length > 0
+				DocArchive.unArchiveAllDocs project_id, (error) ->
+					if error?
+						logger.err err:error, project_id:project_id, "error unarchiving docs"
+						return callback(error)
+					# now reload the docs after unarchiving
+					DocManager._getAllDocs project_id, filter, callback
+			else
+				# return docs immediately, nothing in s3
+				return callback(null, docs)
 
 	updateDoc: (project_id, doc_id, lines, version, ranges, callback = (error, modified, rev) ->) ->
 		if !lines? or !version? or !ranges?
