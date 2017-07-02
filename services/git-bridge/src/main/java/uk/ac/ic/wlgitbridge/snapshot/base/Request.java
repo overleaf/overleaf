@@ -9,8 +9,7 @@ import uk.ac.ic.wlgitbridge.util.Log;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 /**
  * Created by Winston on 06/11/14.
@@ -18,6 +17,8 @@ import java.util.concurrent.Future;
 public abstract class Request<T extends Result> {
 
     public static final AsyncHttpClient httpClient = new AsyncHttpClient();
+
+    private static final Executor executor = Executors.newCachedThreadPool();
 
     private final String url;
 
@@ -27,7 +28,7 @@ public abstract class Request<T extends Result> {
         this.url = url;
     }
 
-    public void request() {
+    public CompletableFuture<T> request() {
         switch (httpMethod()) {
             case GET:
                 performGetRequest();
@@ -38,9 +39,18 @@ public abstract class Request<T extends Result> {
             default:
                 break;
         }
+        CompletableFuture<T> ret = new CompletableFuture<>();
+        executor.execute(() -> {
+            try {
+                ret.complete(getResult());
+            } catch (Throwable t) {
+                ret.completeExceptionally(t);
+            }
+        });
+        return ret;
     }
 
-    public T getResult() throws FailedConnectionException, ForbiddenException {
+    private T getResult() throws FailedConnectionException, ForbiddenException {
         try {
             HttpResponse response = future.get();
             Log.info(

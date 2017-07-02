@@ -46,6 +46,13 @@ public class FSGitRepoStore implements RepoStore {
     }
 
     @Override
+    public ProjectRepo initRepo(String project) throws IOException {
+        GitProjectRepo ret = new GitProjectRepo(project);
+        ret.initRepo(this);
+        return ret;
+    }
+
+    @Override
     public ProjectRepo getExistingRepo(String project) throws IOException {
         GitProjectRepo ret = new GitProjectRepo(project);
         ret.useExistingRepository(this);

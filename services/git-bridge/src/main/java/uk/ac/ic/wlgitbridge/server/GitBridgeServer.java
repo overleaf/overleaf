@@ -13,6 +13,8 @@ import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.SqliteDBStore;
 import uk.ac.ic.wlgitbridge.bridge.repo.FSGitRepoStore;
 import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
+import uk.ac.ic.wlgitbridge.bridge.snapshot.NetSnapshotApi;
+import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotApi;
 import uk.ac.ic.wlgitbridge.bridge.swap.store.SwapStore;
 import uk.ac.ic.wlgitbridge.git.servlet.WLGitServlet;
 import uk.ac.ic.wlgitbridge.snapshot.base.SnapshotAPIRequest;
@@ -57,14 +59,16 @@ public class GitBridgeServer {
                 ).resolve(".wlgb").resolve("wlgb.db").toFile()
         );
         SwapStore swapStore = SwapStore.fromConfig(config.getSwapStore());
+        SnapshotApi snapshotApi = new NetSnapshotApi();
         bridge = Bridge.make(
                 repoStore,
                 dbStore,
                 swapStore,
-                config.getSwapJob()
+                config.getSwapJob(),
+                snapshotApi
         );
         jettyServer = new Server(port);
-        configureJettyServer(config);
+        configureJettyServer(config, snapshotApi);
         SnapshotAPIRequest.setBasicAuth(
                 config.getUsername(),
                 config.getPassword()
@@ -105,11 +109,12 @@ public class GitBridgeServer {
     }
 
     private void configureJettyServer(
-            Config config
+            Config config,
+            SnapshotApi snapshotApi
     ) throws ServletException {
         HandlerCollection handlers = new HandlerList();
         handlers.addHandler(initApiHandler());
-        handlers.addHandler(initGitHandler(config));
+        handlers.addHandler(initGitHandler(config, snapshotApi));
         jettyServer.setHandler(handlers);
     }
 
@@ -130,12 +135,13 @@ public class GitBridgeServer {
     }
 
     private Handler initGitHandler(
-            Config config
+            Config config,
+            SnapshotApi snapshotApi
     ) throws ServletException {
         final ServletContextHandler servletContextHandler =
                 new ServletContextHandler(ServletContextHandler.SESSIONS);
         if (config.isUsingOauth2()) {
-            Filter filter = new Oauth2Filter(config.getOauth2());
+            Filter filter = new Oauth2Filter(snapshotApi, config.getOauth2());
             servletContextHandler.addFilter(
                     new FilterHolder(filter),
                     "/*",

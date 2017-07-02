@@ -21,6 +21,7 @@ import uk.ac.ic.wlgitbridge.util.Log;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Optional;
 
 /**
  * Created by Winston on 03/11/14.
@@ -34,7 +35,7 @@ public class WriteLatexPutHook implements PreReceiveHook {
 
     private final Bridge bridge;
     private final String hostname;
-    private final Credential oauth2;
+    private final Optional<Credential> oauth2;
 
     /**
      * The constructor to use, which provides the hook with the {@link Bridge},
@@ -47,7 +48,7 @@ public class WriteLatexPutHook implements PreReceiveHook {
     public WriteLatexPutHook(
             Bridge bridge,
             String hostname,
-            Credential oauth2
+            Optional<Credential> oauth2
     ) {
         this.bridge = bridge;
         this.hostname = hostname;
@@ -112,7 +113,7 @@ public class WriteLatexPutHook implements PreReceiveHook {
     }
 
     private void handleReceiveCommand(
-            Credential oauth2,
+            Optional<Credential> oauth2,
             Repository repository,
             ReceiveCommand receiveCommand
     ) throws IOException, GitUserException {

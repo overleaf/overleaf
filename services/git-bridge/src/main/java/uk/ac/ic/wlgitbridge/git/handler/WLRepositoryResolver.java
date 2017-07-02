@@ -7,7 +7,6 @@ import org.eclipse.jgit.transport.ServiceMayNotContinueException;
 import org.eclipse.jgit.transport.resolver.RepositoryResolver;
 import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import uk.ac.ic.wlgitbridge.bridge.Bridge;
-import uk.ac.ic.wlgitbridge.bridge.repo.GitProjectRepo;
 import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
 import uk.ac.ic.wlgitbridge.git.handler.hook.WriteLatexPutHook;
 import uk.ac.ic.wlgitbridge.git.servlet.WLGitServlet;
@@ -19,6 +18,7 @@ import uk.ac.ic.wlgitbridge.util.Util;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * Created by Winston on 02/11/14.
@@ -82,17 +82,12 @@ public class WLRepositoryResolver
              ServiceNotAuthorizedException,
              ServiceMayNotContinueException {
         Log.info("[{}] Request to open git repo", name);
-        Credential oauth2 = (Credential) httpServletRequest.getAttribute(
-                Oauth2Filter.ATTRIBUTE_KEY
-        );
+        Optional<Credential> oauth2 = Optional.ofNullable(
+                (Credential) httpServletRequest.getAttribute(
+                        Oauth2Filter.ATTRIBUTE_KEY));
         String projName = Util.removeAllSuffixes(name, "/", ".git");
         try {
-            if (!bridge.projectExists(oauth2, projName)) {
-                throw new RepositoryNotFoundException(projName);
-            }
-            GitProjectRepo repo = new GitProjectRepo(projName);
-            bridge.updateRepository(oauth2, repo);
-            return repo.getJGitRepository();
+            return bridge.getUpdatedRepo(oauth2, projName).getJGitRepository();
         } catch (RepositoryNotFoundException e) {
             Log.info("Repository not found: " + name);
             throw e;

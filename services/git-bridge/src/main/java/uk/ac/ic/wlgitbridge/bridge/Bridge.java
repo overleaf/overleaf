@@ -1,7 +1,7 @@
 package uk.ac.ic.wlgitbridge.bridge;
 
 import com.google.api.client.auth.oauth2.Credential;
-import org.eclipse.jgit.transport.ServiceMayNotContinueException;
+import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
 import uk.ac.ic.wlgitbridge.bridge.db.ProjectState;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.SqliteDBStore;
@@ -15,13 +15,14 @@ import uk.ac.ic.wlgitbridge.bridge.repo.ProjectRepo;
 import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
 import uk.ac.ic.wlgitbridge.bridge.resource.ResourceCache;
 import uk.ac.ic.wlgitbridge.bridge.resource.UrlResourceCache;
-import uk.ac.ic.wlgitbridge.bridge.snapshot.NetSnapshotAPI;
-import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotAPI;
+import uk.ac.ic.wlgitbridge.bridge.snapshot.NetSnapshotApi;
+import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotApi;
 import uk.ac.ic.wlgitbridge.bridge.swap.job.SwapJob;
 import uk.ac.ic.wlgitbridge.bridge.swap.job.SwapJobConfig;
 import uk.ac.ic.wlgitbridge.bridge.swap.job.SwapJobImpl;
 import uk.ac.ic.wlgitbridge.bridge.swap.store.S3SwapStore;
 import uk.ac.ic.wlgitbridge.bridge.swap.store.SwapStore;
+import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotApiFacade;
 import uk.ac.ic.wlgitbridge.data.CandidateSnapshot;
 import uk.ac.ic.wlgitbridge.data.ProjectLockImpl;
 import uk.ac.ic.wlgitbridge.data.filestore.GitDirectoryContents;
@@ -38,12 +39,9 @@ import uk.ac.ic.wlgitbridge.server.FileHandler;
 import uk.ac.ic.wlgitbridge.server.PostbackContents;
 import uk.ac.ic.wlgitbridge.server.PostbackHandler;
 import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
-import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocRequest;
-import uk.ac.ic.wlgitbridge.snapshot.getdoc.exception.InvalidProjectException;
 import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotAttachment;
 import uk.ac.ic.wlgitbridge.snapshot.push.PostbackManager;
 import uk.ac.ic.wlgitbridge.snapshot.push.PostbackPromise;
-import uk.ac.ic.wlgitbridge.snapshot.push.PushRequest;
 import uk.ac.ic.wlgitbridge.snapshot.push.PushResult;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.*;
 import uk.ac.ic.wlgitbridge.util.Log;
@@ -120,8 +118,8 @@ import java.util.*;
  *
  * 6. The Snapshot API, which provides data from the Overleaf app.
  *
- *    @see SnapshotAPI - the interface for the Snapshot API.
- *    @see NetSnapshotAPI - the default concrete implementation
+ *    @see SnapshotApi - the interface for the Snapshot API.
+ *    @see NetSnapshotApi - the default concrete implementation
  *
  * 7. The Resource Cache, which provides the data for attachment resources from
  *    URLs. It will generally fetch from the source on a cache miss.
@@ -149,7 +147,7 @@ public class Bridge {
     private final SwapJob swapJob;
     private final GcJob gcJob;
 
-    private final SnapshotAPI snapshotAPI;
+    private final SnapshotApiFacade snapshotAPI;
     private final ResourceCache resourceCache;
 
     private final PostbackManager postbackManager;
@@ -169,7 +167,8 @@ public class Bridge {
             RepoStore repoStore,
             DBStore dbStore,
             SwapStore swapStore,
-            Optional<SwapJobConfig> swapJobConfig
+            Optional<SwapJobConfig> swapJobConfig,
+            SnapshotApi snapshotApi
     ) {
         ProjectLock lock = new ProjectLockImpl((int threads) ->
                 Log.info("Waiting for " + threads + " projects...")
@@ -187,7 +186,7 @@ public class Bridge {
                         swapStore
                 ),
                 new GcJobImpl(repoStore, lock),
-                new NetSnapshotAPI(),
+                new SnapshotApiFacade(snapshotApi),
                 new UrlResourceCache(dbStore)
         );
     }
@@ -202,7 +201,7 @@ public class Bridge {
      * @param swapStore the {@link SwapStore} to use
      * @param swapJob the {@link SwapJob} to use
      * @param gcJob
-     * @param snapshotAPI the {@link SnapshotAPI} to use
+     * @param snapshotAPI the {@link SnapshotApi} to use
      * @param resourceCache the {@link ResourceCache} to use
      */
     Bridge(
@@ -212,7 +211,7 @@ public class Bridge {
             SwapStore swapStore,
             SwapJob swapJob,
             GcJob gcJob,
-            SnapshotAPI snapshotAPI,
+            SnapshotApiFacade snapshotAPI,
             ResourceCache resourceCache
     ) {
         this.lock = lock;
@@ -292,62 +291,25 @@ public class Bridge {
     }
 
     /**
-     * Checks if a project exists by asking the snapshot API.
-     *
-     * The snapshot API is the source of truth because we can't know by
-     * ourselves whether a project exists. If a user creates a project on the
-     * app, and clones, the project is not on the git bridge disk and must ask
-     * the snapshot API whether it exists.
-     *
-     * 1. Acquires the project lock.
-     * 2. Makes a docs request and tries to get the version ID.
-     * 3. If the version ID is valid, returns true.
-     * 4. Otherwise, the version ID is invalid, and throws
-     *    InvalidProjectException, returning false.
-     *
-     * @param oauth2 The oauth2 to use for the snapshot API
-     * @param projectName The project name
-     * @return true iff the project exists
-     * @throws ServiceMayNotContinueException if the connection fails
-     * @throws GitUserException if the user is not allowed access
-     */
-    public boolean projectExists(
-            Credential oauth2,
-            String projectName
-    ) throws ServiceMayNotContinueException,
-             GitUserException {
-        Log.info("[{}] Checking that project exists", projectName);
-        try (LockGuard __ = lock.lockGuard(projectName)) {
-            GetDocRequest getDocRequest = new GetDocRequest(
-                    oauth2,
-                    projectName
-            );
-            getDocRequest.request();
-            getDocRequest.getResult().getVersionID();
-            return true;
-        } catch (InvalidProjectException e) {
-            return false;
-        }
-    }
-
-    /**
      * Synchronises the given repository with Overleaf.
      *
      * It acquires the project lock and calls
-     * {@link #updateRepositoryCritical(Credential, ProjectRepo)}
+     * {@link #getUpdatedRepoCritical(Optional, String)}.
      * @param oauth2 The oauth2 to use
-     * @param repo the repository to use
+     * @param projectName The name of the project
      * @throws IOException
      * @throws GitUserException
      */
-    public void updateRepository(
-            Credential oauth2,
-            ProjectRepo repo
+    public ProjectRepo getUpdatedRepo(
+            Optional<Credential> oauth2,
+            String projectName
     ) throws IOException, GitUserException {
-        String projectName = repo.getProjectName();
         try (LockGuard __ = lock.lockGuard(projectName)) {
+            if (!snapshotAPI.projectExists(oauth2, projectName)) {
+                throw new RepositoryNotFoundException(projectName);
+            }
             Log.info("[{}] Updating repository", projectName);
-            updateRepositoryCritical(oauth2, repo);
+            return getUpdatedRepoCritical(oauth2, projectName);
         }
     }
 
@@ -359,9 +321,7 @@ public class Bridge {
      * 1. Queries the project state for the given project name.
      *    a. NOT_PRESENT = We've never seen it before, and the row for the
      *                     project doesn't even exist. The project definitely
-     *                     exists because
-     *                     {@link #projectExists(Credential, String)} would
-     *                     have had to return true to get here.
+     *                     exists because we would have aborted otherwise.
      *    b. PRESENT = The project is on disk.
      *    c. SWAPPED = The project is in the {@link SwapStore}
      *
@@ -370,43 +330,44 @@ public class Bridge {
      * present.
      *
      * With the project present, snapshots are downloaded from the snapshot
-     * API with {@link #updateProject(Credential, ProjectRepo)}.
+     * API with {@link #updateProject(Optional, ProjectRepo)}.
      *
      * Then, the last accessed time of the project is set to the current time.
      * This is to support the LRU of the swap store.
      * @param oauth2
-     * @param repo
+     * @param projectName The name of the project
      * @throws IOException
      * @throws GitUserException
      */
-    private void updateRepositoryCritical(
-            Credential oauth2,
-            ProjectRepo repo
+    private ProjectRepo getUpdatedRepoCritical(
+            Optional<Credential> oauth2,
+            String projectName
     ) throws IOException, GitUserException {
-        String projectName = repo.getProjectName();
+        ProjectRepo repo;
         ProjectState state = dbStore.getProjectState(projectName);
         switch (state) {
         case NOT_PRESENT:
-            repo.initRepo(repoStore);
+            repo = repoStore.initRepo(projectName);
             break;
         case SWAPPED:
             swapJob.restore(projectName);
             /* Fallthrough */
         default:
-            repo.useExistingRepository(repoStore);
+            repo = repoStore.getExistingRepo(projectName);
         }
         updateProject(oauth2, repo);
         dbStore.setLastAccessedTime(
                 projectName,
                 Timestamp.valueOf(LocalDateTime.now())
         );
+        return repo;
     }
 
     /**
      * The public call to push a project.
      *
      * It acquires the lock and calls {@link #pushCritical(
-     *      Credential,
+     *      Optional,
      *      String,
      *      RawDirectory,
      *      RawDirectory
@@ -421,7 +382,7 @@ public class Bridge {
      * @throws ForbiddenException
      */
     public void push(
-            Credential oauth2,
+            Optional<Credential> oauth2,
             String projectName,
             RawDirectory directoryContents,
             RawDirectory oldDirectoryContents,
@@ -499,7 +460,7 @@ public class Bridge {
      * @throws SnapshotPostException
      */
     private void pushCritical(
-            Credential oauth2,
+            Optional<Credential> oauth2,
             String projectName,
             RawDirectory directoryContents,
             RawDirectory oldDirectoryContents
@@ -523,13 +484,8 @@ public class Bridge {
                     projectName,
                     candidate
             );
-            PushRequest pushRequest = new PushRequest(
-                    oauth2,
-                    candidate,
-                    postbackKey
-            );
-            pushRequest.request();
-            PushResult result = pushRequest.getResult();
+            PushResult result
+                    = snapshotAPI.push(oauth2, candidate, postbackKey);
             if (result.wasSuccessful()) {
                 Log.info(
                         "[{}] Push to Overleaf successful",
@@ -587,7 +543,7 @@ public class Bridge {
      * {@link PostbackContents#processPostback()}, i.e. once the Overleaf app
      * has fetched all the atts and has committed the push and is happy, it
      * calls back here, fulfilling the promise that the push
-     * {@link #push(Credential, String, RawDirectory, RawDirectory, String)}
+     * {@link #push(Optional, String, RawDirectory, RawDirectory, String)}
      * is waiting on.
      *
      * The Overleaf app will have invented a new version for the push, which is
@@ -642,7 +598,7 @@ public class Bridge {
     /* PRIVATE */
 
     /**
-     * Called by {@link #updateRepositoryCritical(Credential, ProjectRepo)}.
+     * Called by {@link #getUpdatedRepoCritical(Optional, String)}
      *
      * Does the actual work of getting the snapshots for a project from the
      * snapshot API and committing them to a repo.
@@ -655,16 +611,13 @@ public class Bridge {
      * @throws GitUserException
      */
     private void updateProject(
-            Credential oauth2,
+            Optional<Credential> oauth2,
             ProjectRepo repo
     ) throws IOException, GitUserException {
         String projectName = repo.getProjectName();
-        Deque<Snapshot> snapshots =
-                snapshotAPI.getSnapshotsForProjectAfterVersion(
-                        oauth2,
-                        projectName,
-                        dbStore.getLatestVersionForProject(projectName)
-                );
+        int latestVersionId = dbStore.getLatestVersionForProject(projectName);
+        Deque<Snapshot> snapshots = snapshotAPI.getSnapshots(
+                oauth2, projectName, latestVersionId);
 
         makeCommitsFromSnapshots(repo, snapshots);
 
@@ -677,7 +630,7 @@ public class Bridge {
     }
 
     /**
-     * Called by {@link #updateProject(Credential, ProjectRepo)}.
+     * Called by {@link #updateProject(Optional, ProjectRepo)}.
      *
      * Performs the actual Git commits on the disk.
      *
@@ -732,7 +685,7 @@ public class Bridge {
 
     /**
      * Called by
-     * {@link #pushCritical(Credential, String, RawDirectory, RawDirectory)}.
+     * {@link #pushCritical(Optional, String, RawDirectory, RawDirectory)}.
      *
      * This call consists of 2 things: Creating the candidate snapshot,
      * and writing the atts to the atts directory.
@@ -761,7 +714,7 @@ public class Bridge {
 
     /**
      * Called by
-     * {@link #pushCritical(Credential, String, RawDirectory, RawDirectory)}.
+     * {@link #pushCritical(Optional, String, RawDirectory, RawDirectory)}.
      *
      * This method approves a push by setting the latest version and removing
      * any deleted files from the db store (files were already added by the

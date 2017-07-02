@@ -1,5 +1,6 @@
 package uk.ac.ic.wlgitbridge.bridge.repo;
 
+import org.eclipse.jgit.lib.Repository;
 import uk.ac.ic.wlgitbridge.data.filestore.GitDirectoryContents;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
@@ -37,4 +38,5 @@ public interface ProjectRepo {
 
     File getProjectDir();
 
+    Repository getJGitRepository();
 }
