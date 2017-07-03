@@ -17,7 +17,8 @@ define [
 		"ErrorCatcher"
 		"localStorage"
 		"ngTagsInput"
-	]).config (sixpackProvider)->
+	]).config ($qProvider, sixpackProvider)->
+		$qProvider.errorOnUnhandledRejections(false)
 		sixpackProvider.setOptions({
 			debug: false
 			baseUrl: window.sharelatex.sixpackDomain

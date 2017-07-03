@@ -34,14 +34,13 @@ define [
 	"__MAIN_CLIENTSIDE_INCLUDES__"
 ], () ->
 	angular.module('SharelatexApp').config(
-		($locationProvider, $qProvider) ->
+		($locationProvider) ->
 			try
 				$locationProvider.html5Mode({
 					enabled: false,
 					requireBase: false,
 					rewriteLinks: false
 				})
-				$qProvider.errorOnUnhandledRejections(false)
 			catch e
 				console.error "Error while trying to fix '#' links: ", e
 	)
