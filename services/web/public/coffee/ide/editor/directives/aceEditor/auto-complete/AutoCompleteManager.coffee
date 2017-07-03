@@ -5,6 +5,7 @@ define [
 	"ace/ext-language_tools"
 ], (SuggestionManager, SnippetManager) ->
 	Range = ace.require("ace/range").Range
+	aceSnippetManager = ace.require('ace/snippets').snippetManager
 
 	getLastCommandFragment = (lineUpToCursor) ->
 		if m = lineUpToCursor.match(/(\\[^\\]+)$/)
@@ -153,6 +154,25 @@ define [
 					# since it will be adding in with the autocomplete of \begin{item}...
 					if this.completions.filterText.match(/^\\begin\{/) and nextChar == "}"
 						editor.session.remove(range)
+
+					if !data?
+						completions = this.completions
+						popup = editor.completer.popup
+						data = popup.getData(popup.getRow())
+						data.completer =
+							insertMatch: (editor, matchData) ->
+								console.log ">> custom insertMatch"
+								console.log ">> data", data
+								ranges = editor.selection.getAllRanges()
+								for range in ranges
+									range.start.column -= completions.filterText.length;
+									editor.session.remove(range);
+								if matchData.snippet
+									console.log ">> snippet"
+									aceSnippetManager.insertSnippet(editor, matchData.snippet);
+								else
+									console.log ">> string", matchData
+									editor.execCommand("insertstring", matchData.value || matchData);
 
 					Autocomplete::_insertMatch.call this, data
 
