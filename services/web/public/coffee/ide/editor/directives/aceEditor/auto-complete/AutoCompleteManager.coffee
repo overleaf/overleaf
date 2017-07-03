@@ -155,6 +155,15 @@ define [
 					if this.completions.filterText.match(/^\\begin\{/) and nextChar == "}"
 						editor.session.remove(range)
 
+					# Provide our own `insertMatch` implementation.
+					# See the `insertMatch` method of Autocomplete in `ext-language_tools.js`.
+					# We need this to account for editing existing commands, particularly when
+					# adding a prefix.
+					# We fix this by detecting when the cursor is in the middle of an existing
+					# command, and adjusting the insertions/deletions accordingly.
+					# Example:
+					#   when changing `\ref{}` to `\href{}`, ace default behaviour
+					#   is likely to end up with `\href{}ref{}`
 					if !data?
 						completions = this.completions
 						popup = editor.completer.popup
