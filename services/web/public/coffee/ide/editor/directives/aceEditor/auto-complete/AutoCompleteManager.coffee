@@ -183,11 +183,11 @@ define [
 											editor.session.remove(right);
 											# trim the completion text to just the command, without braces
 											# example: '\cite{}' -> '\cite'
-											if matchData.snippet
+											if matchData.snippet?
 												matchData.snippet = matchData.snippet.replace(/[{\[].*[}\]]/, '')
-											if matchData.caption
+											if matchData.caption?
 												matchData.caption = matchData.caption.replace(/[{\[].*[}\]]/, '')
-											if matchData.value
+											if matchData.value?
 												matchData.value = matchData.value.replace(/[{\[].*[}\]]/, '')
 								# finally, insert the match
 								if matchData.snippet
