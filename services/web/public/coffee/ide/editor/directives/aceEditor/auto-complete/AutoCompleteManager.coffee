@@ -162,7 +162,6 @@ define [
 						data.completer =
 							insertMatch: (editor, matchData) ->
 								console.log ">> custom insertMatch"
-								console.log ">> data", data
 								ranges = editor.selection.getAllRanges()
 								for range in ranges
 									range.start.column -= completions.filterText.length;
