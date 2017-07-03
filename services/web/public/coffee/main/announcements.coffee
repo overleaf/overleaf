@@ -8,9 +8,9 @@ define [
 			newItems: 0
 		
 		refreshAnnouncements = ->
-			$http.get("/announcements").success (announcements) ->
-				$scope.announcements = announcements
-				$scope.ui.newItems = _.filter(announcements, (announcement) -> !announcement.read).length
+			$http.get("/announcements").then (response) ->
+				$scope.announcements = response.data
+				$scope.ui.newItems = _.filter($scope.announcements, (announcement) -> !announcement.read).length
 				
 		markAnnouncementsAsRead = ->
 			event_tracking.sendMB "announcement-alert-dismissed", { blogPostId: $scope.announcements[0].id }

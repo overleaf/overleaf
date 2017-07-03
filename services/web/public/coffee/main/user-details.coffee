@@ -7,7 +7,8 @@ define [
 
 	App.controller "UserProfileController", ($scope, $modal, $http)->
 		$scope.institutions = []
-		$http.get("/user/personal_info").success (data)->
+		$http.get("/user/personal_info").then (response)->
+			{ data } = response
 			$scope.userInfoForm =
 				first_name: data.first_name || ""
 				last_name: data.last_name || ""
@@ -43,8 +44,8 @@ define [
 
 		sendUpdate = ->
 			request = $http.post "/user/settings", $scope.userInfoForm
-			request.success (data, status)->
-			request.error (data, status)->
+			request.then ()->
+			request.catch ()->
 				console.log "the request failed"
 
 		$scope.updateInstitutionsList = (inputVal)->

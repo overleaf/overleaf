@@ -11,10 +11,10 @@ define [
 		$scope.clearSessions = () ->
 			console.log ">> clearing all sessions"
 			$http({method: 'POST', url: "/user/sessions/clear", headers: {'X-CSRF-Token': window.csrfToken}})
-			.success () ->
+			.then () ->
 				$scope.state.otherSessions = []
 				$scope.state.error = false
 				$scope.state.success = true
-			.error () ->
+			.catch () ->
 				$scope.state.error = true
 	]

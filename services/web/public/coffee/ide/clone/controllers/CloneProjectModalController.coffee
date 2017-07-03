@@ -23,12 +23,14 @@ define [
 			$scope.state.inflight = true
 			$scope.state.error = false
 			cloneProject($scope.inputs.projectName)
-				.success (data) ->
+				.then (response) ->
+					{ data } = response
 					window.location = "/project/#{data.project_id}"
-				.error (body, statusCode) ->
+				.catch (response) ->
+					{ data, status } = response
 					$scope.state.inflight = false
-					if statusCode == 400
-						$scope.state.error = { message: body }
+					if status == 400
+						$scope.state.error = { message: data }
 					else
 						$scope.state.error = true
 

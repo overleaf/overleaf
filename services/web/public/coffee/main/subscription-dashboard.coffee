@@ -68,9 +68,9 @@ define [
 			$scope.inflight = true
 
 			$http.post("#{SUBSCRIPTION_URL}?origin=confirmChangePlan", body)
-				.success ->
+				.then ->
 					location.reload()
-				.error ->
+				.catch ->
 					console.log "something went wrong changing plan"
 
 		$scope.cancel = () ->
@@ -83,9 +83,9 @@ define [
 				url: "/subscription/group/user",
 				method: "DELETE",
 				params: {admin_user_id: $scope.admin_id, _csrf: window.csrfToken}
-			}).success ->
+			}).then ->
 				location.reload()
-			.error ->
+			.catch ->
 				console.log "something went wrong changing plan"
 
 		$scope.cancel = () ->
@@ -141,9 +141,9 @@ define [
 				_csrf : window.csrfToken
 			$scope.inflight = true
 			$http.post("#{SUBSCRIPTION_URL}?origin=downgradeToStudent", body)
-				.success ->
+				.then ->
 					location.reload()
-				.error ->
+				.catch ->
 					console.log "something went wrong changing plan"
 
 		$scope.cancelSubscription = ->
@@ -152,9 +152,9 @@ define [
 
 			$scope.inflight = true
 			$http.post("/user/subscription/cancel", body)
-				.success ->
+				.then ->
 					location.reload()
-				.error ->
+				.catch ->
 					console.log "something went wrong changing plan"
 
 
@@ -176,7 +176,7 @@ define [
 				_csrf : window.csrfToken
 			$scope.inflight = true
 			$http.put("/user/subscription/extend", body)
-				.success ->
+				.then ->
 					location.reload()
-				.error ->
+				.catch ->
 					console.log "something went wrong changing plan"

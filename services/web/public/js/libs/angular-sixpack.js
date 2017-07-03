@@ -30,7 +30,7 @@
 			return -1;
 		};
 	}
-	angular.module('mvdSixpack', ['ngCookies'])
+	angular.module('mvdSixpack', [ 'ipCookie' ])
 		.provider('sixpack', function() {
 			var $body
 				, _tests = []
@@ -45,18 +45,19 @@
 				angular.extend(_opts, options || {});
 			}
 
-			this.$get = ['$cookies','$timeout', '$log', function($cookies, $timeout, $log) {
+			this.$get = ['ipCookie','$timeout', '$log', function(ipCookie, $timeout, $log) {
 				var _cookiePrefix = 'sixpack-'
 					, _session
 					, _clientId;
 
 				var _getOrInitSession = function () {
 					if (!_session) {
-						if (_clientId = $cookies[_cookiePrefix + 'clientId']) {
+						if (_clientId = ipCookie(_cookiePrefix + 'clientId')) {
 							_session = new sp.Session({client_id:_clientId, base_url:_opts.baseUrl});
 						} else {
 							_session = new sp.Session({client_id:_opts.client_id, base_url:_opts.baseUrl});
-							$cookies[_cookiePrefix + 'clientId'] = _clientId = _session.client_id;
+							_clientId = _session.client_id;
+							ipCookie(_cookiePrefix + 'clientId', _clientId);
 						}
 						if (_opts.debug) {
 							$log.debug('[sixpack] Initialized session with clientId', _clientId, 'and base url', _opts.baseUrl);

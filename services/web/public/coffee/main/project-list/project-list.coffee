@@ -262,7 +262,8 @@ define [
 					projectName: name
 					template: template
 				})
-				.success((data, status, headers, config) ->
+				.then((response) ->
+					{ data } = response
 					$scope.projects.push {
 						name: name
 						_id: data.project_id
@@ -291,7 +292,7 @@ define [
 				newProjectName: newName,
 				_csrf: window.csrfToken
 			}
-				.success () ->
+				.then () ->
 					project.name = newName
 
 		$scope.openRenameProjectModal = () ->
@@ -313,7 +314,8 @@ define [
 					_csrf: window.csrfToken
 					projectName: cloneName
 				})
-				.success((data, status, headers, config) ->
+				.then((response) ->
+					{ data } = response
 					$scope.projects.push {
 						name: cloneName
 						id: data.project_id

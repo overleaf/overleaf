@@ -12,10 +12,10 @@ define [
 					headers:
 						"X-CSRF-Token": window.csrfToken
 				})
-				.success () ->
+				.then () ->
 					$scope.unsubscribing = false
 					$scope.subscribed = false
-				.error () ->
+				.catch () ->
 					$scope.unsubscribing = true
 
 		$scope.deleteAccount = () ->
@@ -59,7 +59,7 @@ define [
 							password: $scope.state.password
 						disableAutoLoginRedirect: true # we want to handle errors ourselves
 					})
-					.success () ->
+					.then () ->
 						$modalInstance.close()
 						$scope.state.inflight = false
 						$scope.state.error = false
@@ -69,7 +69,8 @@ define [
 								window.location = "/login"
 							, 1000
 						)
-					.error (data, status) ->
+					.catch (response) ->
+						{ data, status } = response
 						$scope.state.inflight = false
 						if status == 403
 							$scope.state.invalidCredentials = true

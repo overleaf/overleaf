@@ -28,16 +28,17 @@ define [
 					# authentication fails, we will handle it ourselves
 					$http
 						.post(element.attr('action'), formData, {disableAutoLoginRedirect: true})
-						.success (data, status, headers, config) ->
+						.then (httpResponse) ->
+							{ data, status, headers, config } = httpResponse
 							scope[attrs.name].inflight = false
 							response.success = true
 							response.error = false
 
 							onSuccessHandler = scope[attrs.onSuccess]
 							if onSuccessHandler
-								onSuccessHandler(data, status, headers, config)
+								onSuccessHandler(httpResponse)
 								return
-
+							
 							if data.redir?
 								ga('send', 'event', formName, 'success')
 								window.location = data.redir
@@ -51,14 +52,15 @@ define [
 								else
 									ga('send', 'event', formName, 'success')
 
-						.error (data, status, headers, config) ->
+						.catch (httpResponse) ->
+							{ data, status, headers, config } = httpResponse
 							scope[attrs.name].inflight = false
 							response.success = false
 							response.error = true
 
 							onErrorHandler = scope[attrs.onError]
 							if onErrorHandler
-								onErrorHandler(data, status, headers, config)
+								onErrorHandler(httpResponse)
 								return
 
 							if status == 403 # Forbidden

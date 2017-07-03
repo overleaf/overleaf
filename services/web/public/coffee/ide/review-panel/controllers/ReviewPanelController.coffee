@@ -188,7 +188,8 @@ define [
 		
 		refreshRanges = () ->
 			$http.get "/project/#{$scope.project_id}/ranges"
-				.success (docs) ->
+				.then (response) ->
+					docs = response.data
 					for doc in docs
 						if !$scope.reviewPanel.overview.docsCollapsedState[doc.id]?
 							$scope.reviewPanel.overview.docsCollapsedState[doc.id] = false
@@ -438,7 +439,7 @@ define [
 			thread.submitting = true
 			$scope.$broadcast "comment:add", thread_id, offset, length
 			$http.post("/project/#{$scope.project_id}/thread/#{thread_id}/messages", {content, _csrf: window.csrfToken})
-				.error (error) ->
+				.catch () ->
 					ide.showGenericMessageModal("Error submitting comment", "Sorry, there was a problem submitting your comment")
 			$scope.$broadcast "editor:clearSelection"
 			$timeout () ->
@@ -458,7 +459,7 @@ define [
 			thread_id = entry.thread_id
 			content   = entry.replyContent
 			$http.post("/project/#{$scope.project_id}/thread/#{thread_id}/messages", {content, _csrf: window.csrfToken})
-				.error (error) ->
+				.catch () ->
 					ide.showGenericMessageModal("Error submitting comment", "Sorry, there was a problem submitting your comment")
 			
 			trackingMetadata =
@@ -598,7 +599,8 @@ define [
 			_refreshingRangeUsers = true
 
 			$http.get "/project/#{$scope.project_id}/changes/users"
-				.success (users) ->
+				.then (response) ->
+					users = response.data
 					_refreshingRangeUsers = false
 					$scope.users = {}
 					# Always include ourself, since if we submit an op, we might need to display info
@@ -608,7 +610,7 @@ define [
 					for user in users
 						if user.id?
 							$scope.users[user.id] = formatUser(user)
-				.error () ->
+				.catch () ->
 					_refreshingRangeUsers = false
 
 		_threadsLoaded = false
@@ -619,7 +621,8 @@ define [
 			_threadsLoaded = true
 			$scope.reviewPanel.loadingThreads = true
 			$http.get "/project/#{$scope.project_id}/threads"
-				.success (threads) ->
+				.then (response) ->
+					threads = response.data
 					$scope.reviewPanel.loadingThreads = false
 					for thread_id, _ of $scope.reviewPanel.resolvedThreadIds
 						delete $scope.reviewPanel.resolvedThreadIds[thread_id]
