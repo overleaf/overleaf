@@ -54,8 +54,8 @@ module.exports =
 	renderSubscriptionGroupAdminPage: (req, res)->
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		SubscriptionLocator.getUsersSubscription user_id, (err, subscription)->
-			if !subscription.groupPlan
-				return res.redirect("/")
+			if !subscription?.groupPlan
+				return res.redirect("/user/subscription")
 			SubscriptionGroupHandler.getPopulatedListOfMembers user_id, (err, users)->
 				res.render "subscriptions/group_admin",
 					title: 'group_admin'

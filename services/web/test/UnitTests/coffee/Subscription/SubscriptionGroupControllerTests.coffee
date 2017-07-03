@@ -96,7 +96,16 @@ describe "SubscriptionGroupController", ->
 
 			res =
 				redirect : (path)=>
-					path.should.equal("/")
+					path.should.equal("/user/subscription")
+					done()
+			@Controller.renderSubscriptionGroupAdminPage @req, res
+
+		it "should redirect you don't have a subscription", (done)->
+			@SubscriptionLocator.getUsersSubscription = sinon.stub().callsArgWith(1)
+
+			res =
+				redirect : (path)=>
+					path.should.equal("/user/subscription")
 					done()
 			@Controller.renderSubscriptionGroupAdminPage @req, res
 

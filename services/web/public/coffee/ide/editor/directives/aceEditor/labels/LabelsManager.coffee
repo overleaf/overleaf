@@ -11,7 +11,7 @@ define [
 
 	class LabelsManager
 		constructor: (@$scope, @editor, @element, @Labels) ->
-			@loadLabelsTimeout = null
+			@debouncer = {}  # DocId => Timeout
 
 			onChange = (change) =>
 				if change.remote
@@ -36,13 +36,20 @@ define [
 			currentDocId = @$scope.docId
 			@Labels.loadDocLabelsFromServer(currentDocId)
 
+		loadDocLabelsFromServer: (docId) ->
+			@Labels.loadDocLabelsFromServer(docId)
+
 		scheduleLoadCurrentDocLabelsFromServer: () ->
 			# De-bounce loading labels with a timeout
-			if @loadLabelsTimeout
-				clearTimeout(@loadLabelsTimeout)
-			@loadLabelsTimeout = setTimeout(
+			currentDocId = @$scope.docId
+			existingTimeout = @debouncer[currentDocId]
+			if existingTimeout?
+				clearTimeout(existingTimeout)
+				delete @debouncer[currentDocId]
+			@debouncer[currentDocId] = setTimeout(
 				() =>
-					@loadCurrentDocLabelsFromServer()
+					@loadDocLabelsFromServer(currentDocId)
+					delete @debouncer[currentDocId]
 				, 1000
 				, this
 			)

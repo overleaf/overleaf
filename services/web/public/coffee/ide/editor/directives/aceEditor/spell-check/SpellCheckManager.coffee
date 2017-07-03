@@ -217,6 +217,7 @@ define [
 			words = []
 			positions = []
 			for line, row in lines
+				line = @blankOutBlacklistedCommands(line)
 				if !linesToProcess? or linesToProcess[row]
 					# Regex generated from /\\?['\p{L}]+/g via https://mothereff.in/regexpu.
 					# \p{L} matches unicode characters in the 'letter' category, but is not supported until ES6.
@@ -246,3 +247,22 @@ define [
 				error: (xhr, status, error) ->
 					callback error
 			return $.ajax options
+
+		blacklistedCommandRegex: ///
+			\\                    # initial backslash
+			(label                # any of these commands
+			|[a-z]{0,16}ref
+			|usepackage
+			|begin
+			|end
+			|[a-z]{0,16}cite
+			|input
+			|include
+			|includegraphics)
+			( \[ [^\]]* \] )?     # optional [...] args
+				\{ [^}]*  \}        # the {...} args
+		///g
+
+		blankOutBlacklistedCommands: (line) ->
+			line.replace @blacklistedCommandRegex, (command) ->
+				Array(command.length+1).join('.')
