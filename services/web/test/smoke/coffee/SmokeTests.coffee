@@ -5,8 +5,9 @@ chai = require("chai")
 chai.should() unless Object.prototype.should?
 expect = chai.expect
 Settings = require "settings-sharelatex"
-port = Settings.internal?.web?.port or Settings.port or 3000
-cookeFilePath = "/tmp/smoke-test-cookie-#{port}.txt"
+ownPort = Settings.internal?.web?.port or Settings.port or 3000
+port = Settings.web?.web_router_port or ownPort # send requests to web router if this is the api process
+cookeFilePath = "/tmp/smoke-test-cookie-#{ownPort}-to-#{port}.txt"
 buildUrl = (path) -> " -b #{cookeFilePath} --resolve 'smoke#{Settings.cookieDomain}:#{port}:127.0.0.1' http://smoke#{Settings.cookieDomain}:#{port}/#{path}?setLng=en"
 logger = require "logger-sharelatex"
 
