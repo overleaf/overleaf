@@ -142,9 +142,6 @@ webRouter.use (req, res, next) ->
 		res.status(503)
 		res.render("general/closed", {title:"maintenance"})
 
-apiRouter.get "/status", (req, res)->
-	res.send("web sharelatex is alive")
-
 profiler = require "v8-profiler"
 apiRouter.get "/profile", (req, res) ->
 	time = parseInt(req.query.time || "1000")

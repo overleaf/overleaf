@@ -272,9 +272,9 @@ module.exports = class Router
 			res.send("hello")
 
 		webRouter.get '/status', (req,res)->
-			res.send("websharelatex is up")
+			res.send("websharelatex is alive (web)")
 		apiRouter.get '/status', (req,res)->
-			res.send("websharelatex api is up")
+			res.send("websharelatex is alive (api)")
 
 		webRouter.get '/dev/csrf', (req, res) ->
 			res.send res.locals.csrfToken
