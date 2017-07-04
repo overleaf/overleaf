@@ -593,9 +593,11 @@ define [
 			if userId == ide.$scope.user.id
 				$scope.editor.wantTrackChanges = newValue		
 
-		_setEveryoneTCState = (newValue) ->
+		_setEveryoneTCState = (newValue, isLocal = false) ->
 			$scope.reviewPanel.trackChangesOnForEveryone = newValue
-			$scope.reviewPanel.trackChangesState = {}
+			for userId, userState of $scope.reviewPanel.trackChangesState
+				userState.value = newValue
+				userState.syncState = if isLocal then UserTCSyncState.PENDING else UserTCSyncState.SYNCED
 			$scope.editor.wantTrackChanges = newValue
 
 		applyClientTrackChangesStateToServer = () ->
@@ -625,8 +627,7 @@ define [
 				_setUserTCState($scope.project.owner._id, state[$scope.project.owner._id] ? false)
 		
 		$scope.toggleTrackChangesForEveryone = (onForEveryone) ->
-			console.log onForEveryone
-			_setEveryoneTCState onForEveryone
+			_setEveryoneTCState onForEveryone, true
 			applyClientTrackChangesStateToServer()
 	
 		window.toggleTrackChangesForUser = # DEBUG LINE
