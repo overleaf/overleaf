@@ -57,6 +57,15 @@
 	}
 }
 
+.rp-collapse-arrow() {
+	display: inline-block;
+	transform: rotateZ(0deg);
+	transition: transform 0.15s ease;
+	&-on {
+		transform: rotateZ(-90deg);
+	}
+}
+
 .triangle(@_, @width, @height, @color) {
 	position: absolute;
 	border-color: transparent;
@@ -163,6 +172,10 @@
 		background-color: @rp-bg-dim-blue;
 		text-align: left;
 	}
+		.rp-tc-state-collapse {
+			.rp-collapse-arrow;
+			margin-left: 5px;
+		}
 		.rp-tc-state-item {
 			display: flex;
 			align-items: center;
@@ -663,16 +676,9 @@
 		font-size: 0.9em;
 	}
 	.rp-overview-file-header-collapse {
-		display: inline-block;
+		.rp-collapse-arrow;
 		float: left;
-		transform: rotateZ(0deg);
-		transition: transform 0.15s ease
 	}
-	
-	.rp-overview-file-header-collapse-on {
-		transform: rotateZ(-90deg);
-	}
-
 	.rp-overview-file-entries {
 		overflow: hidden;
 	}

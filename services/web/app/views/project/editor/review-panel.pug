@@ -49,6 +49,10 @@
 		span.review-panel-toolbar-label(ng-if="permissions.write")
 			span(ng-click="toggleFullTCStateCollapse();", ng-if="editor.wantTrackChanges === false") !{translate("track_changes_is_off")}
 			span(ng-click="toggleFullTCStateCollapse();", ng-if="editor.wantTrackChanges === true") !{translate("track_changes_is_on")}
+			span.rp-tc-state-collapse(
+				ng-class="{ 'rp-tc-state-collapse-on': reviewPanel.fullTCStateCollapsed }"
+			)
+				i.fa.fa-angle-down
 		ul.rp-tc-state(
 			review-panel-collapse-height="reviewPanel.fullTCStateCollapsed"
 		)
