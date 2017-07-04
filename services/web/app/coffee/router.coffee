@@ -271,16 +271,21 @@ module.exports = class Router
 		apiRouter.get '/perfTest', (req,res)->
 			res.send("hello")
 
-		apiRouter.get '/status', (req,res)->
+		webRouter.get '/status', (req,res)->
 			res.send("websharelatex is up")
+		apiRouter.get '/status', (req,res)->
+			res.send("websharelatex api is up")
 
 		webRouter.get '/dev/csrf', (req, res) ->
 			res.send res.locals.csrfToken
 
+		webRouter.get '/health_check', HealthCheckController.check
 		apiRouter.get '/health_check', HealthCheckController.check
+
+		webRouter.get '/health_check/redis', HealthCheckController.checkRedis
 		apiRouter.get '/health_check/redis', HealthCheckController.checkRedis
 
-		apiRouter.get "/status/compiler/:Project_id", AuthorizationMiddlewear.ensureUserCanReadProject, (req, res) ->
+		webRouter.get "/status/compiler/:Project_id", AuthorizationMiddlewear.ensureUserCanReadProject, (req, res) ->
 			project_id = req.params.Project_id
 			sendRes = _.once (statusCode, message)->
 				res.status statusCode
@@ -303,7 +308,7 @@ module.exports = class Router
 				else
 					sendRes 500, "Compiler returned failure #{status}"
 
-		apiRouter.get "/ip", (req, res, next) ->
+		webRouter.get "/ip", (req, res, next) ->
 			res.send({
 				ip: req.ip
 				ips: req.ips
