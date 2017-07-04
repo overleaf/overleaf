@@ -65,9 +65,6 @@
 					ng-class="{ 'rp-tc-state-item-name-disabled' : reviewPanel.trackChangesOnForEveryone}"
 					style="color: hsl({{ users[project.owner._id].hue }}, 70%, 40%);"
 				) {{ users[project.owner._id].name }}
-				//- {{user.id}}
-				//- Missing on-toggle attribute because we also need to pass user_id to the toggleTrackChangesForUser
-				//- method, and it's not clear how.
 				review-panel-toggle(
 					ng-model="reviewPanel.trackChangesState[project.owner._id].value"
 					on-toggle="toggleTrackChangesForUser(isOn, project.owner._id);"
@@ -78,7 +75,6 @@
 					ng-class="{ 'rp-tc-state-item-name-disabled' : reviewPanel.trackChangesOnForEveryone}"
 					style="color: hsl({{ users[member._id].hue }}, 70%, 40%);"
 				) {{ users[member._id].name }}
-				//- {{member._id}}
 				review-panel-toggle(
 					ng-model="reviewPanel.trackChangesState[member._id].value"
 					on-toggle="toggleTrackChangesForUser(isOn, member._id);"
