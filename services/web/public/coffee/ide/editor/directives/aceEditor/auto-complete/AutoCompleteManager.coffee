@@ -170,27 +170,28 @@ define [
 						data = popup.getData(popup.getRow())
 						data.completer =
 							insertMatch: (editor, matchData) ->
-								ranges = editor.selection.getAllRanges()
-								for range in ranges
-									left = _.clone(range)
-									right = _.clone(range)
-									left.start.column -= completions.filterText.length;
-									editor.session.remove(left);
-									beyondCursorRange = new Range(
-										right.start.row,
-										right.start.column,
-										right.end.row,
-										99999
+								for range in editor.selection.getAllRanges()
+									leftRange = _.clone(range)
+									rightRange = _.clone(range)
+									# trim to left of cursor
+									leftRange.start.column -= completions.filterText.length;
+									editor.session.remove(leftRange);
+									lineBeyondCursor = editor.getSession().getTextRange(
+										new Range(
+											rightRange.start.row,
+											rightRange.start.column,
+											rightRange.end.row,
+											99999
+										)
 									)
-									lineBeyondCursor = editor.getSession().getTextRange(beyondCursorRange)
 									if lineBeyondCursor
 										if partialCommandMatch = lineBeyondCursor.match(/^([a-z0-9]+)\{/)
 											# We've got a partial command after the cursor
 											commandTail = partialCommandMatch[1]
-											# remove rest of the partial command
-											right.end.column += commandTail.length - completions.filterText.length
-											editor.session.remove(right);
-											# trim the completion text to just the command, without braces
+											# remove rest of the partial command, right of cursor
+											rightRange.end.column += commandTail.length - completions.filterText.length
+											editor.session.remove(rightRange);
+											# trim the completion text to just the command, without braces or brackets
 											# example: '\cite{}' -> '\cite'
 											if matchData.snippet?
 												matchData.snippet = matchData.snippet.replace(/[{\[].*[}\]]/, '')
