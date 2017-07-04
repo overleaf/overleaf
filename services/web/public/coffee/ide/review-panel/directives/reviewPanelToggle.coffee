@@ -6,6 +6,7 @@ define [
 		scope: 
 			onToggle: '&'
 			ngModel: '='
+			valWhenUndefined: '=?'
 			disabled: '=?'
 			onDisabledClick: '=?'
 		link: (scope) ->
@@ -18,6 +19,8 @@ define [
 					scope.onDisabledClick()
 			scope.localModel = scope.ngModel
 			scope.$watch "ngModel", (value) ->
+				if scope.valWhenUndefined? and !value?
+					value = scope.valWhenUndefined
 				scope.localModel = value
 
 		template: """
