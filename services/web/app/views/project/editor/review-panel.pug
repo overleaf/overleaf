@@ -47,6 +47,10 @@
 			permissions="permissions"
 		)
 		span.review-panel-toolbar-label(ng-if="permissions.write")
+			span.review-panel-toolbar-icon-on(
+				ng-if="editor.wantTrackChanges === true"
+			)
+				i.fa.fa-circle
 			span(ng-click="toggleFullTCStateCollapse();", ng-if="editor.wantTrackChanges === false") !{translate("track_changes_is_off")}
 			span(ng-click="toggleFullTCStateCollapse();", ng-if="editor.wantTrackChanges === true") !{translate("track_changes_is_on")}
 			span.rp-tc-state-collapse(
@@ -56,8 +60,8 @@
 		ul.rp-tc-state(
 			review-panel-collapse-height="reviewPanel.fullTCStateCollapsed"
 		)
-			li.rp-tc-state-item
-				span.rp-tc-state-item-name.rp-tc-state-item-name-everyone Everyone
+			li.rp-tc-state-item.rp-tc-state-item-everyone
+				span.rp-tc-state-item-name Everyone
 				review-panel-toggle(
 					ng-model="reviewPanel.trackChangesOnForEveryone"
 					on-toggle="toggleTrackChangesForEveryone(isOn);"

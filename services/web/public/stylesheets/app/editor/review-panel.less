@@ -152,6 +152,10 @@
 		text-align: right;
 		flex-grow: 1;
 	}
+		.review-panel-toolbar-icon-on {
+			margin-right: 5px;
+			color: @red;
+		}
 		.review-panel-toolbar-label-disabled {
 			cursor: auto;
 			margin-right: 5px;
@@ -179,11 +183,14 @@
 		.rp-tc-state-item {
 			display: flex;
 			align-items: center;
-			border-bottom: 1px solid @rp-border-grey;
 			padding: 3px 0;	
 			&:last-of-type {
 				padding-bottom: 5px;
 			}
+		}
+		.rp-tc-state-item-everyone {
+			border-bottom: 1px solid @rp-border-grey;
+			color: @red;
 		}
 			.rp-tc-state-item-name {
 				flex-grow: 1;
@@ -191,9 +198,6 @@
 				text-overflow: ellipsis;
 				white-space: nowrap;
 				font-weight: @rp-semibold-weight;
-			}
-			.rp-tc-state-item-name-everyone {
-				color: @red;
 			}
 			.rp-tc-state-item-name-disabled {
 				opacity: .35;
