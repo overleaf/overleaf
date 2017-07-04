@@ -574,34 +574,30 @@ define [
 						
 		$scope.gotoEntry = (doc_id, entry) ->
 			ide.editorManager.openDocId(doc_id, { gotoOffset: entry.offset })
-			
-		applyTrackChangesStateToClient = (state) ->
-			if typeof state is "boolean"
-				$scope.reviewPanel.trackChangesOnForEveryone = state
-				$scope.reviewPanel.trackChangesState = {}
-				$scope.editor.wantTrackChanges = state
-			else
-				$scope.reviewPanel.trackChangesOnForEveryone = false
-				for member in $scope.project.members
-					_setUserState(member._id, state[member._id] ? false)
-				_setUserState($scope.project.owner._id, state[$scope.project.owner._id] ? false)
-				
-				for id, state of $scope.reviewPanel.trackChangesState
-					console.log id, state.value, state.syncState
-				# State is an object with user_ids as keys
-				if state[ide.$scope.user.id]
-					$scope.editor.wantTrackChanges = true
-				else
-					$scope.editor.wantTrackChanges = false
 
-		_setUserState = (userId, newValue) ->
+		$scope.toggleFullTCStateCollapse = () ->
+			reviewPanel.fullTCStateCollapsed = !reviewPanel.fullTCStateCollapsed
+
+		_setUserTCState = (userId, newValue, isLocal = false) ->
 			$scope.reviewPanel.trackChangesState[userId] ?= {}
 			state = $scope.reviewPanel.trackChangesState[userId]
+
 			if !state.syncState? or state.syncState == UserTCSyncState.SYNCED
 				state.value = newValue
 				state.syncState = UserTCSyncState.SYNCED
-			if state.syncState == UserTCSyncState.PENDING and state.value == newValue
+			else if state.syncState == UserTCSyncState.PENDING and state.value == newValue
 				state.syncState = UserTCSyncState.SYNCED
+			else if isLocal
+				state.value = newValue
+				state.syncState = UserTCSyncState.PENDING
+			
+			if userId == ide.$scope.user.id
+				$scope.editor.wantTrackChanges = newValue		
+
+		_setEveryoneTCState = (newValue) ->
+			$scope.reviewPanel.trackChangesOnForEveryone = newValue
+			$scope.reviewPanel.trackChangesState = {}
+			$scope.editor.wantTrackChanges = newValue
 
 		applyClientTrackChangesStateToServer = () ->
 			if $scope.reviewPanel.trackChangesOnForEveryone
@@ -613,44 +609,35 @@ define [
 			data._csrf = window.csrfToken
 			$http.post "/project/#{$scope.project_id}/track_changes", data
 		
-		setTrackChangesState = (state) ->
-			if $scope.project.features.trackChanges
-				applyClientTrackChangesStateToServer()
-				event_tracking.sendMB "rp-trackchanges-toggle", { state }
-			else
-				$scope.openTrackChangesUpgradeModal()
+		# setTrackChangesState = (state) ->
+		# 	if $scope.project.features.trackChanges
+		# 		applyClientTrackChangesStateToServer()
+		# 		event_tracking.sendMB "rp-trackchanges-toggle", { state }
+		# 	else
+		# 		$scope.openTrackChangesUpgradeModal()
 
-		$scope.toggleFullTCStateCollapse = () ->
-			reviewPanel.fullTCStateCollapsed = !reviewPanel.fullTCStateCollapsed
+		applyTrackChangesStateToClient = (state) ->
+			if typeof state is "boolean"
+				_setEveryoneTCState state
+			else
+				$scope.reviewPanel.trackChangesOnForEveryone = false
+				for member in $scope.project.members
+					_setUserTCState(member._id, state[member._id] ? false)
+				_setUserTCState($scope.project.owner._id, state[$scope.project.owner._id] ? false)
 		
 		$scope.toggleTrackChangesForEveryone = (onForEveryone) ->
-			setTrackChangesState(onForEveryone)
+			console.log onForEveryone
+			_setEveryoneTCState onForEveryone
+			applyClientTrackChangesStateToServer()
 	
 		window.toggleTrackChangesForUser = # DEBUG LINE
 		$scope.toggleTrackChangesForUser = (onForUser, userId) ->
-			state = $scope.reviewPanel.trackChangesState
-			state[userId] = 
-				value     : onForUser
-				syncState : UserTCSyncState.PENDING
-			setTrackChangesState(state)				
+			_setUserTCState userId, onForUser, true
+			applyClientTrackChangesStateToServer()				
 
 		ide.socket.on "toggle-track-changes", (state) ->
 			$scope.$apply () ->
 				applyTrackChangesStateToClient(state)
-
-		# window.toggleTrackChangesForUser = # DEBUG LINE, remove after dev
-		# $scope.toggleTrackChangesForUser = (user_id) ->
-		# 	state = $scope.reviewPanel.trackChangesState
-		# 	if state == true
-		# 		return # On for everyone, nothing to do
-		# 	else if state == false or !state?
-		# 		state = {}
-		# 
-		# 	if state[user_id]
-		# 		delete state[user_id]
-		# 	else
-		# 		state[user_id] = true
-		# 	setTrackChangesState(state)
 
 		# Not sure what the kbd shortcut should do now?
 		# $scope.toggleTrackChangesFromKbdShortcut = () ->
