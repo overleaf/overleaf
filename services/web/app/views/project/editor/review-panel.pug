@@ -65,6 +65,7 @@
 				review-panel-toggle(
 					ng-model="reviewPanel.trackChangesOnForEveryone"
 					on-toggle="toggleTrackChangesForEveryone(isOn);"
+					disabled="!project.features.trackChanges"
 				)
 					//- disabled="!project.features.trackChanges"
 					//- on-disabled-click="openTrackChangesUpgradeModal"
@@ -76,7 +77,7 @@
 				review-panel-toggle(
 					ng-model="reviewPanel.trackChangesState[project.owner._id].value"
 					on-toggle="toggleTrackChangesForUser(isOn, project.owner._id);"
-					disabled="reviewPanel.trackChangesOnForEveryone"
+					disabled="reviewPanel.trackChangesOnForEveryone || !project.features.trackChanges"
 				)
 			li.rp-tc-state-item(ng-repeat="member in project.members")
 				span.rp-tc-state-item-name(
@@ -86,7 +87,7 @@
 				review-panel-toggle(
 					ng-model="reviewPanel.trackChangesState[member._id].value"
 					on-toggle="toggleTrackChangesForUser(isOn, member._id);"
-					disabled="reviewPanel.trackChangesOnForEveryone"
+					disabled="reviewPanel.trackChangesOnForEveryone || !project.features.trackChanges"
 				)
 			
 		//- span.review-panel-toolbar-label(ng-if="permissions.write")
