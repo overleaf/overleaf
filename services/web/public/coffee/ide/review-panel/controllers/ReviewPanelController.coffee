@@ -33,6 +33,7 @@ define [
 			commentThreads: {}
 			resolvedThreadIds: {}
 			rendererData: {}
+			formattedProjectMembers: {}
 			fullTCStateCollapsed: true
 			loadingThreads: false
 			# All selected changes. If a aggregated change (insertion + deletion) is selection, the two ids
@@ -67,6 +68,15 @@ define [
 			return if !visible?
 			if !visible
 				$scope.ui.reviewPanelOpen = false
+
+		$scope.$watch "project.members", (members) ->
+			$scope.reviewPanel.formattedProjectMembers = {}
+			if $scope.project?.owner?
+				$scope.reviewPanel.formattedProjectMembers[$scope.project.owner._id] = formatUser($scope.project.owner)
+			if $scope.project?.members?
+				for member in members
+					if member.privileges == "readAndWrite"
+						$scope.reviewPanel.formattedProjectMembers[member._id] = formatUser(member)
 
 		$scope.commentState =
 			adding: false
@@ -648,6 +658,7 @@ define [
 			return if _inited
 			project = ide.$scope.project
 			if project.features.trackChanges
+				window.trackChangesState ?= false
 				applyTrackChangesStateToClient(window.trackChangesState)
 			else
 				applyTrackChangesStateToClient(false)

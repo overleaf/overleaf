@@ -67,24 +67,30 @@
 					on-toggle="toggleTrackChangesForEveryone(isOn);"
 					disabled="!project.features.trackChanges || !permissions.write"
 				)
-			li.rp-tc-state-item
-				span.rp-tc-state-item-name.rp-tc-state-item-owner(
-					ng-class="{ 'rp-tc-state-item-name-disabled' : reviewPanel.trackChangesOnForEveryone}"
-					style="color: hsl({{ users[project.owner._id].hue }}, 70%, 40%);"
-				) {{ users[project.owner._id].name }}
-				review-panel-toggle(
-					ng-model="reviewPanel.trackChangesState[project.owner._id].value"
-					on-toggle="toggleTrackChangesForUser(isOn, project.owner._id);"
-					disabled="reviewPanel.trackChangesOnForEveryone || !project.features.trackChanges || !permissions.write"
-				)
-			li.rp-tc-state-item(ng-repeat="member in project.members | filter:{ privileges: 'readAndWrite' }")
+			//- li.rp-tc-state-item(
+			//- 	ng-init="formattedOwner = formatUser(project.owner);"
+			//- )
+			//- 	pre {{ project.owner | json }}
+			//- 	pre {{ formattedOwner | json }}
+			//- 	span.rp-tc-state-item-name.rp-tc-state-item-owner(
+			//- 		ng-class="{ 'rp-tc-state-item-name-disabled' : reviewPanel.trackChangesOnForEveryone}"
+			//- 		style="color: hsl({{ formattedOwner.hue }}, 70%, 40%);"
+			//- 	) {{ formattedOwner.name }}
+			//- 	review-panel-toggle(
+			//- 		ng-model="reviewPanel.trackChangesState[formattedOwner.id].value"
+			//- 		on-toggle="toggleTrackChangesForUser(isOn, formattedOwner.id);"
+			//- 		disabled="reviewPanel.trackChangesOnForEveryone || !project.features.trackChanges || !permissions.write"
+			//- 	)
+			li.rp-tc-state-item(
+				ng-repeat="member in reviewPanel.formattedProjectMembers"
+			)
 				span.rp-tc-state-item-name(
 					ng-class="{ 'rp-tc-state-item-name-disabled' : reviewPanel.trackChangesOnForEveryone}"
-					style="color: hsl({{ users[member._id].hue }}, 70%, 40%);"
-				) {{ users[member._id].name }}
+					style="color: hsl({{ member.hue }}, 70%, 40%);"
+				) {{ member.name }}
 				review-panel-toggle(
-					ng-model="reviewPanel.trackChangesState[member._id].value"
-					on-toggle="toggleTrackChangesForUser(isOn, member._id);"
+					ng-model="reviewPanel.trackChangesState[member.id].value"
+					on-toggle="toggleTrackChangesForUser(isOn, member.id);"
 					disabled="reviewPanel.trackChangesOnForEveryone || !project.features.trackChanges || !permissions.write"
 				)
 
