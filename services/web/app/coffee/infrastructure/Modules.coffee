@@ -15,14 +15,14 @@ module.exports = Modules =
 				@modules.push loadedModule
 		Modules.attachHooks()
 
-	applyRouter: (webRouter, apiRouter) ->
+	applyRouter: (webRouter, privateApiRouter, publicApiRouter) ->
 		for module in @modules
-			module.router?.apply?(webRouter, apiRouter)
+			module.router?.apply?(webRouter, privateApiRouter, publicApiRouter)
 
-	applyNonCsrfRouter: (webRouter, apiRouter) ->
+	applyNonCsrfRouter: (webRouter, privateApiRouter, publicApiRouter) ->
 		for module in @modules
-			module.nonCsrfRouter?.apply(webRouter, apiRouter)
-			module.router?.applyNonCsrfRouter?(webRouter, apiRouter)
+			module.nonCsrfRouter?.apply(webRouter, privateApiRouter, publicApiRouter)
+			module.router?.applyNonCsrfRouter?(webRouter, privateApiRouter, publicApiRouter)
 			
 	viewIncludes: {}
 	loadViewIncludes: (app) ->

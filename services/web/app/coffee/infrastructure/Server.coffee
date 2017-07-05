@@ -52,7 +52,8 @@ else
 app = express()
 
 webRouter = express.Router()
-apiRouter = express.Router()
+privateApiRouter = express.Router()
+publicApiRouter = express.Router()
 
 if Settings.behindProxy
 	app.enable('trust proxy')
@@ -108,7 +109,7 @@ Modules.hooks.fire 'passportSetup', passport, (err) ->
 	if err?
 		logger.err {err}, "error setting up passport in modules"
 
-Modules.applyNonCsrfRouter(webRouter, apiRouter)
+Modules.applyNonCsrfRouter(webRouter, privateApiRouter, publicApiRouter)
 
 webRouter.use csrfProtection
 webRouter.use translations.expressMiddlewear
@@ -122,7 +123,7 @@ webRouter.use (req, res, next) ->
 	next()
 
 webRouter.use ReferalConnect.use
-expressLocals(app, webRouter, apiRouter)
+expressLocals(app, webRouter, privateApiRouter, publicApiRouter)
 
 if app.get('env') == 'production'
 	logger.info "Production Enviroment"
@@ -143,7 +144,7 @@ webRouter.use (req, res, next) ->
 		res.render("general/closed", {title:"maintenance"})
 
 profiler = require "v8-profiler"
-apiRouter.get "/profile", (req, res) ->
+privateApiRouter.get "/profile", (req, res) ->
 	time = parseInt(req.query.time || "1000")
 	profiler.startProfiling("test")
 	setTimeout () ->
@@ -165,16 +166,18 @@ notDefined = (x) -> !x?
 enableApiRouter = Settings.web?.enableApiRouter
 if enableApiRouter or notDefined(enableApiRouter)
 	logger.info("providing api router");
-	app.use(apiRouter)
+	app.use(privateApiRouter)
 	app.use(ErrorController.handleApiError)
 
 enableWebRouter = Settings.web?.enableWebRouter
 if enableWebRouter or notDefined(enableWebRouter)
 	logger.info("providing web router");
+	app.use(publicApiRouter) # public API goes with web router for public access
+	app.use(ErrorController.handleApiError)
 	app.use(webRouter)
 	app.use(ErrorController.handleError)
 
-router = new Router(webRouter, apiRouter)
+router = new Router(webRouter, privateApiRouter, publicApiRouter)
 
 module.exports =
 	app: app

@@ -66,7 +66,7 @@ logger.log "Finished generating file fingerprints"
 cdnAvailable = Settings.cdn?.web?.host?
 darkCdnAvailable = Settings.cdn?.web?.darkHost?
 
-module.exports = (app, webRouter, apiRouter)->
+module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 	webRouter.use (req, res, next)->
 		res.locals.session = req.session
 		next()
@@ -82,7 +82,8 @@ module.exports = (app, webRouter, apiRouter)->
 			)
 		next()
 	webRouter.use addSetContentDisposition
-	apiRouter.use addSetContentDisposition
+	privateApiRouter.use addSetContentDisposition
+	publicApiRouter.use addSetContentDisposition
 
 	webRouter.use (req, res, next)->
 		req.externalAuthenticationSystemUsed = res.locals.externalAuthenticationSystemUsed = ->
