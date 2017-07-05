@@ -271,7 +271,7 @@ module.exports = class Router
 		privateApiRouter.get '/perfTest', (req,res)->
 			res.send("hello")
 
-		webRouter.get '/status', (req,res)->
+		publicApiRouter.get '/status', (req,res)->
 			res.send("web sharelatex is alive (web)")
 		privateApiRouter.get '/status', (req,res)->
 			res.send("web sharelatex is alive (api)")
@@ -279,10 +279,10 @@ module.exports = class Router
 		webRouter.get '/dev/csrf', (req, res) ->
 			res.send res.locals.csrfToken
 
-		webRouter.get '/health_check', HealthCheckController.check
+		publicApiRouter.get '/health_check', HealthCheckController.check
 		privateApiRouter.get '/health_check', HealthCheckController.check
 
-		webRouter.get '/health_check/redis', HealthCheckController.checkRedis
+		publicApiRouter.get '/health_check/redis', HealthCheckController.checkRedis
 		privateApiRouter.get '/health_check/redis', HealthCheckController.checkRedis
 
 		webRouter.get "/status/compiler/:Project_id", AuthorizationMiddlewear.ensureUserCanReadProject, (req, res) ->
