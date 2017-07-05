@@ -34,6 +34,7 @@ define [
 			resolvedThreadIds: {}
 			rendererData: {}
 			formattedProjectMembers: {}
+			isMultiUser: false
 			fullTCStateCollapsed: true
 			loadingThreads: false
 			# All selected changes. If a aggregated change (insertion + deletion) is selection, the two ids
@@ -71,11 +72,13 @@ define [
 
 		$scope.$watch "project.members", (members) ->
 			$scope.reviewPanel.formattedProjectMembers = {}
+			$scope.reviewPanel.isMultiUser = false
 			if $scope.project?.owner?
 				$scope.reviewPanel.formattedProjectMembers[$scope.project.owner._id] = formatUser($scope.project.owner)
 			if $scope.project?.members?
 				for member in members
 					if member.privileges == "readAndWrite"
+						$scope.reviewPanel.isMultiUser = true
 						$scope.reviewPanel.formattedProjectMembers[member._id] = formatUser(member)
 
 		$scope.commentState =
@@ -585,6 +588,12 @@ define [
 		$scope.gotoEntry = (doc_id, entry) ->
 			ide.editorManager.openDocId(doc_id, { gotoOffset: entry.offset })
 
+		$scope.handleTrackChangesStateClick = () ->
+			if $scope.reviewPanel.isMultiUser
+				$scope.toggleFullTCStateCollapse()
+			else
+				$scope.toggleTrackChangesForEveryone()
+
 		$scope.toggleFullTCStateCollapse = () ->
 			if $scope.project.features.trackChanges
 				reviewPanel.fullTCStateCollapsed = !reviewPanel.fullTCStateCollapsed
@@ -633,7 +642,7 @@ define [
 					_setUserTCState(member._id, state[member._id] ? false)
 				_setUserTCState($scope.project.owner._id, state[$scope.project.owner._id] ? false)
 		
-		$scope.toggleTrackChangesForEveryone = (onForEveryone) ->
+		$scope.toggleTrackChangesForEveryone = (onForEveryone = !reviewPanel.trackChangesOnForEveryone) ->
 			_setEveryoneTCState onForEveryone, true
 			applyClientTrackChangesStateToServer()
 	
