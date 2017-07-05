@@ -17,11 +17,12 @@ module.exports = Modules =
 
 	applyRouter: (webRouter, apiRouter) ->
 		for module in @modules
-			module.router?.apply(webRouter, apiRouter)
+			module.router?.apply?(webRouter, apiRouter)
 
 	applyNonCsrfRouter: (webRouter, apiRouter) ->
 		for module in @modules
 			module.nonCsrfRouter?.apply(webRouter, apiRouter)
+			module.router?.applyNonCsrfRouter?(webRouter, apiRouter)
 			
 	viewIncludes: {}
 	loadViewIncludes: (app) ->
