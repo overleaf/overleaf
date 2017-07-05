@@ -49,7 +49,7 @@ logger = require("logger-sharelatex")
 _ = require("underscore")
 
 module.exports = class Router
-	constructor: (webRouter, apiRouter)->
+	constructor: (webRouter, apiRouter, publicApiRouter)->
 		if !Settings.allowPublicAccess
 			webRouter.all '*', AuthenticationController.requireGlobalLogin
 
@@ -77,7 +77,7 @@ module.exports = class Router
 		ContactRouter.apply(webRouter, apiRouter)
 		AnalyticsRouter.apply(webRouter, apiRouter)
 
-		Modules.applyRouter(webRouter, apiRouter)
+		Modules.applyRouter(webRouter, apiRouter, publicApiRouter)
 
 
 		if Settings.enableSubscriptions
