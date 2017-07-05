@@ -173,6 +173,7 @@ enableWebRouter = Settings.web?.enableWebRouter
 if enableWebRouter or notDefined(enableWebRouter)
 	logger.info("providing web router");
 	app.use(publicApiRouter) # public API goes with web router for public access
+	app.use(ErrorController.handleApiError)
 	app.use(webRouter)
 	app.use(ErrorController.handleError)
 
