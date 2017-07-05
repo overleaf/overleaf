@@ -613,13 +613,6 @@ define [
 					data.on_for[userId] = userState.value
 			data._csrf = window.csrfToken
 			$http.post "/project/#{$scope.project_id}/track_changes", data
-		
-		# setTrackChangesState = (state) ->
-		# 	if $scope.project.features.trackChanges
-		# 		applyClientTrackChangesStateToServer()
-		# 		event_tracking.sendMB "rp-trackchanges-toggle", { state }
-		# 	else
-		# 		$scope.openTrackChangesUpgradeModal()
 
 		applyTrackChangesStateToClient = (state) ->
 			if typeof state is "boolean"
