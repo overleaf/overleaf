@@ -46,7 +46,7 @@
 			is-loading="reviewPanel.dropdown.loading"
 			permissions="permissions"
 		)
-		span.review-panel-toolbar-label(ng-if="permissions.write")
+		span.review-panel-toolbar-label
 			span.review-panel-toolbar-icon-on(
 				ng-if="editor.wantTrackChanges === true"
 			)
@@ -65,10 +65,8 @@
 				review-panel-toggle(
 					ng-model="reviewPanel.trackChangesOnForEveryone"
 					on-toggle="toggleTrackChangesForEveryone(isOn);"
-					disabled="!project.features.trackChanges"
+					disabled="!project.features.trackChanges || !permissions.write"
 				)
-					//- disabled="!project.features.trackChanges"
-					//- on-disabled-click="openTrackChangesUpgradeModal"
 			li.rp-tc-state-item
 				span.rp-tc-state-item-name.rp-tc-state-item-owner(
 					ng-class="{ 'rp-tc-state-item-name-disabled' : reviewPanel.trackChangesOnForEveryone}"
@@ -77,7 +75,7 @@
 				review-panel-toggle(
 					ng-model="reviewPanel.trackChangesState[project.owner._id].value"
 					on-toggle="toggleTrackChangesForUser(isOn, project.owner._id);"
-					disabled="reviewPanel.trackChangesOnForEveryone || !project.features.trackChanges"
+					disabled="reviewPanel.trackChangesOnForEveryone || !project.features.trackChanges || !permissions.write"
 				)
 			li.rp-tc-state-item(ng-repeat="member in project.members")
 				span.rp-tc-state-item-name(
@@ -87,24 +85,8 @@
 				review-panel-toggle(
 					ng-model="reviewPanel.trackChangesState[member._id].value"
 					on-toggle="toggleTrackChangesForUser(isOn, member._id);"
-					disabled="reviewPanel.trackChangesOnForEveryone || !project.features.trackChanges"
+					disabled="reviewPanel.trackChangesOnForEveryone || !project.features.trackChanges || !permissions.write"
 				)
-			
-		//- span.review-panel-toolbar-label(ng-if="permissions.write")
-		//- 	span(ng-click="toggleTrackChanges(true)", ng-if="editor.wantTrackChanges === false") !{translate("track_changes_is_off")}
-		//- 	span(ng-click="toggleTrackChanges(false)", ng-if="editor.wantTrackChanges === true") !{translate("track_changes_is_on")}
-		//- 	review-panel-toggle(
-		//- 		ng-if="editor.wantTrackChanges == editor.trackChanges"
-		//- 		ng-model="editor.wantTrackChanges"
-		//- 		on-toggle="toggleTrackChanges"
-		//- 		disabled="!project.features.trackChanges"
-		//- 		on-disabled-click="openTrackChangesUpgradeModal"
-		//- 	)
-		//- span.review-panel-toolbar-label.review-panel-toolbar-label-disabled(ng-if="!permissions.write")
-		//- 	span(ng-if="editor.wantTrackChanges === false") !{translate("track_changes_is_off")}
-		//- 	span(ng-if="editor.wantTrackChanges === true") !{translate("track_changes_is_on")}
-		//- span.review-panel-toolbar-spinner(ng-if="editor.wantTrackChanges != editor.trackChanges")
-		//- 	i.fa.fa-spin.fa-spinner
 
 	.rp-entry-list(
 		review-panel-sorted
