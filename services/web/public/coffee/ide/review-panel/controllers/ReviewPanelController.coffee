@@ -576,7 +576,10 @@ define [
 			ide.editorManager.openDocId(doc_id, { gotoOffset: entry.offset })
 
 		$scope.toggleFullTCStateCollapse = () ->
-			reviewPanel.fullTCStateCollapsed = !reviewPanel.fullTCStateCollapsed
+			if $scope.project.features.trackChanges
+				reviewPanel.fullTCStateCollapsed = !reviewPanel.fullTCStateCollapsed
+			else
+				$scope.openTrackChangesUpgradeModal()
 
 		_setUserTCState = (userId, newValue, isLocal = false) ->
 			$scope.reviewPanel.trackChangesState[userId] ?= {}
