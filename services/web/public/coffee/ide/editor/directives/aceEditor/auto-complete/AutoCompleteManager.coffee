@@ -63,14 +63,14 @@ define [
 								caption: "\\#{commandName}{}",
 								snippet: "\\#{commandName}{}",
 								meta: "cross-reference",
-								score: 11000
+								score: 60
 							}
 							for label in labelsManager.getAllLabels()
 								result.push {
 									caption: "\\#{commandName}{#{label}#{if needsClosingBrace then '}' else ''}",
 									value: "\\#{commandName}{#{label}#{if needsClosingBrace then '}' else ''}",
 									meta: "cross-reference",
-									score: 10000
+									score: 50
 								}
 							callback null, result
 
@@ -97,7 +97,7 @@ define [
 								caption: "\\#{commandName}{}",
 								snippet: "\\#{commandName}{}",
 								meta: "reference",
-								score: 11000
+								score: 60
 							}
 							if references.keys and references.keys.length > 0
 								references.keys.forEach (key) ->
@@ -106,7 +106,7 @@ define [
 											caption: "\\#{commandName}{#{previousArgsCaption}#{key}#{if needsClosingBrace then '}' else ''}",
 											value: "\\#{commandName}{#{previousArgs}#{key}#{if needsClosingBrace then '}' else ''}",
 											meta: "reference",
-											score: 10000
+											score: 50
 										})
 								callback null, result
 							else

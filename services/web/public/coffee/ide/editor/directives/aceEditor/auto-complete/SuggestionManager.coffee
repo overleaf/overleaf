@@ -80,10 +80,10 @@ define [], () ->
 			doc = session.getValue()
 			parser = new Parser(doc)
 			commands = parser.parse()
-
 			completions = []
 			for command in commands
 				caption = "\\#{command[0]}"
+				score = if prefix == caption then 99 else 50
 				snippet = caption
 				i = 1
 				_.times command[1], () ->
@@ -94,12 +94,12 @@ define [], () ->
 					snippet += "{${#{i}}}"
 					caption += "{}"
 					i++
-				unless caption == prefix
-					completions.push {
-						caption: caption
-						snippet: snippet
-						meta: "cmd"
-					}
+				completions.push {
+					caption: caption
+					snippet: snippet
+					meta: "cmd"
+					score: score
+				}
 
 			callback null, completions
 
