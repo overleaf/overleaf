@@ -12,6 +12,9 @@ define [
 		else
 			return null
 
+	getCommandNameFromFragment = (commandFragment) ->
+		commandFragment?.match(/\\(\w+)\{/)?[1]
+
 	class AutoCompleteManager
 		constructor: (@$scope, @editor, @element, @labelsManager) ->
 			@suggestionManager = new SuggestionManager()
@@ -124,6 +127,9 @@ define [
 			if lineUpToCursor.match(/.*%.*/)
 				return
 			commandFragment = getLastCommandFragment(lineUpToCursor)
+			commandName = getCommandNameFromFragment(commandFragment)
+			if commandName in ['begin', 'end']
+				return
 			# Check that this change was made by us, not a collaborator
 			# (Cursor is still one place behind)
 			# NOTE: this is also the case when a user backspaces over a highlighted region
