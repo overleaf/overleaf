@@ -452,17 +452,6 @@ LatexBehaviour.recordAutoInsert = function(editor, session, bracket) {
     context.autoInsertedBrackets++;
 };
 
-LatexBehaviour.recordMaybeInsert = function(editor, session, bracket) {
-    var cursor = editor.getCursorPosition();
-    var line = session.doc.getLine(cursor.row);
-    if (!this.isMaybeInsertedClosing(cursor, line))
-        context.maybeInsertedBrackets = 0;
-    context.maybeInsertedRow = cursor.row;
-    context.maybeInsertedLineStart = line.substr(0, cursor.column) + bracket;
-    context.maybeInsertedLineEnd = line.substr(cursor.column);
-    context.maybeInsertedBrackets++;
-};
-
 LatexBehaviour.isAutoInsertedClosing = function(cursor, line, bracket) {
     return context.autoInsertedBrackets > 0 &&
         cursor.row === context.autoInsertedRow &&
@@ -470,25 +459,10 @@ LatexBehaviour.isAutoInsertedClosing = function(cursor, line, bracket) {
         line.substr(cursor.column) === context.autoInsertedLineEnd;
 };
 
-LatexBehaviour.isMaybeInsertedClosing = function(cursor, line) {
-    return context.maybeInsertedBrackets > 0 &&
-        cursor.row === context.maybeInsertedRow &&
-        line.substr(cursor.column) === context.maybeInsertedLineEnd &&
-        line.substr(0, cursor.column) == context.maybeInsertedLineStart;
-};
-
 LatexBehaviour.popAutoInsertedClosing = function() {
     context.autoInsertedLineEnd = context.autoInsertedLineEnd.substr(1);
     context.autoInsertedBrackets--;
 };
-
-LatexBehaviour.clearMaybeInsertedClosing = function() {
-    if (context) {
-        context.maybeInsertedBrackets = 0;
-        context.maybeInsertedRow = -1;
-    }
-};
-
 
 
 oop.inherits(LatexBehaviour, Behaviour);
