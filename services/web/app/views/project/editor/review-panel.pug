@@ -51,22 +51,14 @@
 				ng-if="editor.wantTrackChanges === true"
 			)
 				i.fa.fa-circle
-			span(ng-click="handleTrackChangesStateClick();", ng-if="editor.wantTrackChanges === false") !{translate("track_changes_is_off")}
-			span(ng-click="handleTrackChangesStateClick();", ng-if="editor.wantTrackChanges === true") !{translate("track_changes_is_on")}
+			span(ng-click="toggleFullTCStateCollapse();", ng-if="editor.wantTrackChanges === false") !{translate("track_changes_is_off")}
+			span(ng-click="toggleFullTCStateCollapse();", ng-if="editor.wantTrackChanges === true") !{translate("track_changes_is_on")}
 			span.rp-tc-state-collapse(
-				ng-if="reviewPanel.isMultiUser"
 				ng-class="{ 'rp-tc-state-collapse-on': reviewPanel.fullTCStateCollapsed }"
 			)
 				i.fa.fa-angle-down
-			review-panel-toggle(
-				ng-if="!reviewPanel.isMultiUser"
-				ng-model="reviewPanel.trackChangesOnForEveryone"
-				on-toggle="toggleTrackChangesForEveryone(isOn);"
-				disabled="!project.features.trackChanges || !permissions.write"
-			)
 		ul.rp-tc-state(
 			review-panel-collapse-height="reviewPanel.fullTCStateCollapsed"
-			ng-if="reviewPanel.isMultiUser"
 		)
 			li.rp-tc-state-item.rp-tc-state-item-everyone
 				span.rp-tc-state-item-name Everyone
