@@ -5,6 +5,7 @@ define [
 	"ace/ext-language_tools"
 ], (SuggestionManager, SnippetManager) ->
 	Range = ace.require("ace/range").Range
+	aceSnippetManager = ace.require('ace/snippets').snippetManager
 
 	getLastCommandFragment = (lineUpToCursor) ->
 		if m = lineUpToCursor.match(/(\\[^\\]+)$/)
@@ -162,6 +163,56 @@ define [
 					# since it will be adding in with the autocomplete of \begin{item}...
 					if this.completions.filterText.match(/^\\begin\{/) and nextChar == "}"
 						editor.session.remove(range)
+
+					# Provide our own `insertMatch` implementation.
+					# See the `insertMatch` method of Autocomplete in `ext-language_tools.js`.
+					# We need this to account for editing existing commands, particularly when
+					# adding a prefix.
+					# We fix this by detecting when the cursor is in the middle of an existing
+					# command, and adjusting the insertions/deletions accordingly.
+					# Example:
+					#   when changing `\ref{}` to `\href{}`, ace default behaviour
+					#   is likely to end up with `\href{}ref{}`
+					if !data?
+						completions = this.completions
+						popup = editor.completer.popup
+						data = popup.getData(popup.getRow())
+						data.completer =
+							insertMatch: (editor, matchData) ->
+								for range in editor.selection.getAllRanges()
+									leftRange = _.clone(range)
+									rightRange = _.clone(range)
+									# trim to left of cursor
+									leftRange.start.column -= completions.filterText.length;
+									editor.session.remove(leftRange);
+									lineBeyondCursor = editor.getSession().getTextRange(
+										new Range(
+											rightRange.start.row,
+											rightRange.start.column,
+											rightRange.end.row,
+											99999
+										)
+									)
+									if lineBeyondCursor
+										if partialCommandMatch = lineBeyondCursor.match(/^([a-z0-9]+)\{/)
+											# We've got a partial command after the cursor
+											commandTail = partialCommandMatch[1]
+											# remove rest of the partial command, right of cursor
+											rightRange.end.column += commandTail.length - completions.filterText.length
+											editor.session.remove(rightRange);
+											# trim the completion text to just the command, without braces or brackets
+											# example: '\cite{}' -> '\cite'
+											if matchData.snippet?
+												matchData.snippet = matchData.snippet.replace(/[{\[].*[}\]]/, '')
+											if matchData.caption?
+												matchData.caption = matchData.caption.replace(/[{\[].*[}\]]/, '')
+											if matchData.value?
+												matchData.value = matchData.value.replace(/[{\[].*[}\]]/, '')
+								# finally, insert the match
+								if matchData.snippet
+									aceSnippetManager.insertSnippet(editor, matchData.snippet);
+								else
+									editor.execCommand("insertstring", matchData.value || matchData);
 
 					Autocomplete::_insertMatch.call this, data
 
