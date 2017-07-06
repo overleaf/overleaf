@@ -120,6 +120,7 @@ block requirejs
 		window.maxDocLength = #{maxDocLength};
 		window.trackChangesState = data.trackChangesState;
 		window.showTrackChangesOnboarding = #{!!showTrackChangesOnboarding};
+		window.showPerUserTCNotice = #{!!showPerUserTCNotice};
 		window.wikiEnabled = #{!!(settings.apis.wiki && settings.apis.wiki.url)};
 		window.requirejs = {
 			"paths" : {
