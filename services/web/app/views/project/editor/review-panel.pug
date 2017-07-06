@@ -51,12 +51,13 @@
 				ng-if="editor.wantTrackChanges === true"
 			)
 				i.fa.fa-circle
-			span(ng-click="toggleFullTCStateCollapse();", ng-if="editor.wantTrackChanges === false") !{translate("track_changes_is_off")}
-			span(ng-click="toggleFullTCStateCollapse();", ng-if="editor.wantTrackChanges === true") !{translate("track_changes_is_on")}
-			span.rp-tc-state-collapse(
-				ng-class="{ 'rp-tc-state-collapse-on': reviewPanel.fullTCStateCollapsed }"
-			)
-				i.fa.fa-angle-down
+			span(ng-click="toggleFullTCStateCollapse();")
+				span(ng-if="editor.wantTrackChanges === false") !{translate("track_changes_is_off")}
+				span(ng-if="editor.wantTrackChanges === true") !{translate("track_changes_is_on")}
+				span.rp-tc-state-collapse(
+					ng-class="{ 'rp-tc-state-collapse-on': reviewPanel.fullTCStateCollapsed }"
+				)
+					i.fa.fa-angle-down
 		ul.rp-tc-state(
 			review-panel-collapse-height="reviewPanel.fullTCStateCollapsed"
 		)
@@ -67,20 +68,6 @@
 					on-toggle="toggleTrackChangesForEveryone(isOn);"
 					disabled="!project.features.trackChanges || !permissions.write"
 				)
-			//- li.rp-tc-state-item(
-			//- 	ng-init="formattedOwner = formatUser(project.owner);"
-			//- )
-			//- 	pre {{ project.owner | json }}
-			//- 	pre {{ formattedOwner | json }}
-			//- 	span.rp-tc-state-item-name.rp-tc-state-item-owner(
-			//- 		ng-class="{ 'rp-tc-state-item-name-disabled' : reviewPanel.trackChangesOnForEveryone}"
-			//- 		style="color: hsl({{ formattedOwner.hue }}, 70%, 40%);"
-			//- 	) {{ formattedOwner.name }}
-			//- 	review-panel-toggle(
-			//- 		ng-model="reviewPanel.trackChangesState[formattedOwner.id].value"
-			//- 		on-toggle="toggleTrackChangesForUser(isOn, formattedOwner.id);"
-			//- 		disabled="reviewPanel.trackChangesOnForEveryone || !project.features.trackChanges || !permissions.write"
-			//- 	)
 			li.rp-tc-state-item(
 				ng-repeat="member in reviewPanel.formattedProjectMembers"
 			)
@@ -526,7 +513,7 @@ script(type="text/ng-template", id="trackChangesUpgradeModalTemplate")
 	.modal-body
 		.teaser-video-container
 			video.teaser-video(autoplay, loop)
-				source(src="/img/teasers/track-changes/teaser-track-changes.mp4", type="video/mp4")
+				source(ng-src="{{ '/img/teasers/track-changes/teaser-track-changes.mp4' }}", type="video/mp4")
 				img(src="/img/teasers/track-changes/teaser-track-changes.gif")
 		
 		h4.teaser-title #{translate("see_changes_in_your_documents_live")}
@@ -561,6 +548,37 @@ script(type="text/ng-template", id="trackChangesUpgradeModalTemplate")
 	.modal-footer()
 		button.btn.btn-default(
 			ng-click="cancel()"
+		)
+			span #{translate("close")}
+
+script(type="text/ng-template", id="perUserTCNoticeModalTemplate")
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="$close()"
+		) &times;
+		h3 Per-user Track Changes
+	.modal-body
+		.teaser-video-container
+			video.teaser-video(autoplay, loop)
+				source(ng-src="{{ '/img/teasers/track-changes/per-user-track-changes.mp4' }}", type="video/mp4")
+				img(src="/img/teasers/track-changes/per-user-track-changes.gif")
+		h4.teaser-title Now you can use Track Changes on a per-user basis
+		.row
+			.col-md-8.col-md-offset-2
+				ul.list-unstyled
+					li
+						i.fa.fa-check &nbsp;
+						| Turn Track Changes on for individuals users
+					
+					li
+						i.fa.fa-check &nbsp;
+						| Or keep it on for everyone, like before
+
+	.modal-footer()
+		button.btn.btn-default(
+			ng-click="$close()"
 		)
 			span #{translate("close")}
 
