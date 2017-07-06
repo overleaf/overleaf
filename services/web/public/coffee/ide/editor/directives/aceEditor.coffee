@@ -44,6 +44,7 @@ define [
 				keybindings: "="
 				fontSize: "="
 				autoComplete: "="
+				autoPairDelimiters: "="
 				sharejsDoc: "="
 				spellCheck: "="
 				spellCheckLanguage: "="
@@ -78,9 +79,15 @@ define [
 				editor = ace.edit(element.find(".ace-editor-body")[0])
 				editor.$blockScrolling = Infinity
 
-				# disable auto insertion of brackets and quotes
-				editor.setOption('behavioursEnabled', false)
+				# auto-insertion of braces, brackets, dollars
+				editor.setOption('behavioursEnabled', scope.autoPairDelimiters || false)
 				editor.setOption('wrapBehavioursEnabled', false)
+
+				scope.$watch "autoPairDelimiters", (autoPairDelimiters) =>
+					if autoPairDelimiters
+						editor.setOption('behavioursEnabled', true)
+					else
+						editor.setOption('behavioursEnabled', false)
 
 				window.editors ||= []
 				window.editors.push editor
