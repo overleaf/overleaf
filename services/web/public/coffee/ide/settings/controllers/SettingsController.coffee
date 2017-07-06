@@ -24,6 +24,10 @@ define [
 			if autoComplete != oldAutoComplete
 				settings.saveSettings({autoComplete: autoComplete})
 
+		$scope.$watch "settings.autoPairDelimiters", (autoPairDelimiters, oldAutoPairDelimiters) =>
+			if autoPairDelimiters != oldAutoPairDelimiters
+				settings.saveSettings({autoPairDelimiters: autoPairDelimiters})
+
 		$scope.$watch "settings.pdfViewer", (pdfViewer, oldPdfViewer) =>
 			if pdfViewer != oldPdfViewer
 				settings.saveSettings({pdfViewer: pdfViewer})
