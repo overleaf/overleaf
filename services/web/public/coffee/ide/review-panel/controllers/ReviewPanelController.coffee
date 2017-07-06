@@ -585,7 +585,7 @@ define [
 
 		$scope.toggleFullTCStateCollapse = () ->
 			if $scope.project.features.trackChanges
-				if true or $scope.reviewPanel.showPerUserTCNotice
+				if $scope.reviewPanel.showPerUserTCNotice
 					$scope.openPerUserTCNoticeModal()
 				$scope.reviewPanel.fullTCStateCollapsed = !$scope.reviewPanel.fullTCStateCollapsed
 			else
