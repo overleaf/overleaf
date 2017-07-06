@@ -15,8 +15,6 @@ define [
 			SYNCED  : "synced"
 			PENDING : "pending"
 
-
-		window.reviewPanel = # DEBUG LINE
 		$scope.reviewPanel =
 			trackChangesState: {}
 			trackChangesOnForEveryone: false
@@ -42,6 +40,7 @@ define [
 			# A count of user-facing selected changes. An aggregated change (insertion + deletion) will count
 			# as only one.
 			nVisibleSelectedChanges: 0
+			showPerUserTCNotice: window.showPerUserTCNotice
 
 		window.addEventListener "beforeunload", () ->
 			collapsedStates = {}
@@ -586,7 +585,9 @@ define [
 
 		$scope.toggleFullTCStateCollapse = () ->
 			if $scope.project.features.trackChanges
-				reviewPanel.fullTCStateCollapsed = !reviewPanel.fullTCStateCollapsed
+				if true or $scope.reviewPanel.showPerUserTCNotice
+					$scope.openPerUserTCNoticeModal()
+				$scope.reviewPanel.fullTCStateCollapsed = !$scope.reviewPanel.fullTCStateCollapsed
 			else
 				$scope.openTrackChangesUpgradeModal()
 
@@ -636,7 +637,6 @@ define [
 			_setEveryoneTCState onForEveryone, true
 			applyClientTrackChangesStateToServer()
 	
-		window.toggleTrackChangesForUser = # DEBUG LINE
 		$scope.toggleTrackChangesForUser = (onForUser, userId) ->
 			_setUserTCState userId, onForUser, true
 			applyClientTrackChangesStateToServer()				
@@ -753,3 +753,11 @@ define [
 				controller: "TrackChangesUpgradeModalController"
 				scope: $scope.$new()
 			}
+
+		$scope.openPerUserTCNoticeModal = () ->
+			$scope.reviewPanel.showPerUserTCNotice = false
+			$modal.open({
+				templateUrl: "perUserTCNoticeModalTemplate"
+			}).result.finally () ->
+				event_tracking.sendMB "shown-per-user-tc-notice"
+
