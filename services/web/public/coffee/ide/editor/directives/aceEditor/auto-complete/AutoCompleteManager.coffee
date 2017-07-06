@@ -121,6 +121,8 @@ define [
 			end = change.end
 			range = new Range(end.row, 0, end.row, end.column)
 			lineUpToCursor = @editor.getSession().getTextRange(range)
+			if lineUpToCursor.match(/.*%.*/)
+				return
 			commandFragment = getLastCommandFragment(lineUpToCursor)
 			# Check that this change was made by us, not a collaborator
 			# (Cursor is still one place behind)
