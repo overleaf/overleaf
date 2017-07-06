@@ -62,7 +62,7 @@
 			review-panel-collapse-height="reviewPanel.fullTCStateCollapsed"
 		)
 			li.rp-tc-state-item.rp-tc-state-item-everyone
-				span.rp-tc-state-item-name Everyone
+				span.rp-tc-state-item-name !{translate("tc_everyone")}
 				review-panel-toggle(
 					ng-model="reviewPanel.trackChangesOnForEveryone"
 					on-toggle="toggleTrackChangesForEveryone(isOn);"
@@ -558,23 +558,23 @@ script(type="text/ng-template", id="perUserTCNoticeModalTemplate")
 			data-dismiss="modal"
 			ng-click="$close()"
 		) &times;
-		h3 Per-user Track Changes
+		h3 #{translate("per_user_tc_title")}
 	.modal-body
 		.teaser-video-container
 			video.teaser-video(autoplay, loop)
 				source(ng-src="{{ '/img/teasers/track-changes/per-user-track-changes.mp4' }}", type="video/mp4")
 				img(src="/img/teasers/track-changes/per-user-track-changes.gif")
-		h4.teaser-title Now you can use Track Changes on a per-user basis
+		h4.teaser-title #{translate("you_can_use_per_user_tc")}
 		.row
 			.col-md-8.col-md-offset-2
 				ul.list-unstyled
 					li
 						i.fa.fa-check &nbsp;
-						| Turn Track Changes on for individuals users
+						| #{translate("turn_tc_on_individuals")}
 					
 					li
 						i.fa.fa-check &nbsp;
-						| Or keep it on for everyone, like before
+						| #{translate("keep_tc_on_like_before")}
 
 	.modal-footer()
 		button.btn.btn-default(
