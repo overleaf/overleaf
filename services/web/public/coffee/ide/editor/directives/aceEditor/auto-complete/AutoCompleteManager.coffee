@@ -126,6 +126,7 @@ define [
 			lineUpToCursor = @editor.getSession().getTextRange(range)
 			if lineUpToCursor.match(/.*%.*/)
 				return
+			lastCharIsBackslash = lineUpToCursor.slice(-1) == "\\"
 			commandFragment = getLastCommandFragment(lineUpToCursor)
 			commandName = getCommandNameFromFragment(commandFragment)
 			if commandName in ['begin', 'end']
@@ -138,7 +139,7 @@ define [
 				end.row == cursorPosition.row and
 				end.column == cursorPosition.column + 1
 			)
-				if commandFragment? and commandFragment.length > 2
+				if (commandFragment? and commandFragment.length > 2) or lastCharIsBackslash
 					setTimeout () =>
 						@editor.execCommand("startAutocomplete")
 					, 0
