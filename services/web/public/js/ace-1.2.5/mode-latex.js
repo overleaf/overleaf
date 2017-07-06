@@ -330,7 +330,7 @@ var createLatexWorker = function (session) {
     };
     worker.on("lint", function(results) {
         if(docChangePending) { docChangePending = false; };
-        hints = results.data;
+        hints = results.data.errors;
         if (hints.length > 100) {
             hints = hints.slice(0, 100); // limit to 100 errors
         };
