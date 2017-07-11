@@ -83,7 +83,7 @@ define [], () ->
 			completions = []
 			for command in commands
 				caption = "\\#{command[0]}"
-				score = if prefix == caption then 99 else 50
+				score = 50
 				snippet = caption
 				i = 1
 				_.times command[1], () ->
@@ -94,12 +94,13 @@ define [], () ->
 					snippet += "{${#{i}}}"
 					caption += "{}"
 					i++
-				completions.push {
-					caption: caption
-					snippet: snippet
-					meta: "cmd"
-					score: score
-				}
+				unless caption == prefix
+					completions.push {
+						caption: caption
+						snippet: snippet
+						meta: "cmd"
+						score: score
+					}
 
 			callback null, completions
 
