@@ -23,11 +23,12 @@ module.exports = class Profiler
 
 	end: (message) ->
 		totalTime = deltaMs(@t, @t0)
-		return if totalTime < @LOG_CUTOFF_TIME # skip anything less than cutoff
-		args = {}
-		for k,v of @args
-			args[k] = v
-		args.updateTimes = @updateTimes
-		args.start = @start
-		args.end = new Date()
-		logger.log args, @name
+		if totalTime > @LOG_CUTOFF_TIME # log anything greater than cutoff
+			args = {}
+			for k,v of @args
+				args[k] = v
+			args.updateTimes = @updateTimes
+			args.start = @start
+			args.end = new Date()
+			logger.log args, @name
+		return totalTime

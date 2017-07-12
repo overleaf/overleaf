@@ -14,6 +14,8 @@ PID = process.pid
 RND = crypto.randomBytes(4).toString('hex')
 COUNT = 0
 
+MAX_REDIS_REQUEST_LENGTH = 5000 # 5 seconds
+
 module.exports = LockManager =
 	LOCK_TEST_INTERVAL: 50 # 50ms between each test of the lock
 	MAX_TEST_INTERVAL: 1000 # back off to 1s between each test of the lock
@@ -37,12 +39,18 @@ module.exports = LockManager =
 			return callback(err) if err?
 			if gotLock == "OK"
 				metrics.inc "doc-not-blocking"
-				profile.log("got lock").end()
-				callback err, true, lockValue
+				timeTaken = profile.log("got lock").end()
+				if timeTaken > MAX_REDIS_REQUEST_LENGTH
+					# took too long, so try to free the lock
+					LockManager.releaseLock doc_id, lockValue, (err, result) ->
+						return callback(err) if err? # error freeing lock
+						callback null, false # tell caller they didn't get the lock
+				else
+					callback null, true, lockValue
 			else
 				metrics.inc "doc-blocking"
 				profile.log("doc is locked").end()
-				callback err, false
+				callback null, false
 
 	getLock: (doc_id, callback = (error, lockValue) ->) ->
 		startTime = Date.now()
@@ -73,10 +81,10 @@ module.exports = LockManager =
 			exists = parseInt exists
 			if exists == 1
 				metrics.inc "doc-blocking"
-				callback err, false
+				callback null, false
 			else
 				metrics.inc "doc-not-blocking"
-				callback err, true
+				callback null, true
 
 	releaseLock: (doc_id, lockValue, callback)->
 		key = keys.blockingKey(doc_id:doc_id)
@@ -91,4 +99,4 @@ module.exports = LockManager =
 				return callback(new Error("tried to release timed out lock"))
 			else
 				profile.log("unlockScript:ok").end()
-				callback(err,result)
+				callback(null,result)
