@@ -41,7 +41,10 @@ module.exports = LockManager =
 				metrics.inc "doc-not-blocking"
 				timeTaken = profile.log("got lock").end()
 				if timeTaken > MAX_REDIS_REQUEST_LENGTH
-					callback err, false # took too long to get the lock, bail out
+					# took too long, so try to free the lock
+					LockManager.releaseLock doc_id, lockValue, (err, result) ->
+						return callback(err) if err? # error freeing lock
+						callback null, false # tell caller they didn't get the lock
 				else
 					callback err, true, lockValue
 			else
