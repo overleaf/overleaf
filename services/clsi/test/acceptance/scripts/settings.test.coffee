@@ -23,9 +23,9 @@ module.exports =
 		commandRunner: "docker-runner-sharelatex"
 		latexmkCommandPrefix: ["/usr/bin/time", "-v"]         # on Linux
 		docker:
-			image: "texlive-full:2016.1-opt"
+			image: "texlive-full:2017.1-opt"
 			env:
-				PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/texlive/2016/bin/x86_64-linux/"
+				PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/texlive/2017/bin/x86_64-linux/"
 				HOME: "/tmp"
 			modem:
 				socketPath: false
