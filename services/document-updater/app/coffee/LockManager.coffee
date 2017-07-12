@@ -46,11 +46,11 @@ module.exports = LockManager =
 						return callback(err) if err? # error freeing lock
 						callback null, false # tell caller they didn't get the lock
 				else
-					callback err, true, lockValue
+					callback null, true, lockValue
 			else
 				metrics.inc "doc-blocking"
 				profile.log("doc is locked").end()
-				callback err, false
+				callback null, false
 
 	getLock: (doc_id, callback = (error, lockValue) ->) ->
 		startTime = Date.now()
@@ -81,10 +81,10 @@ module.exports = LockManager =
 			exists = parseInt exists
 			if exists == 1
 				metrics.inc "doc-blocking"
-				callback err, false
+				callback null, false
 			else
 				metrics.inc "doc-not-blocking"
-				callback err, true
+				callback null, true
 
 	releaseLock: (doc_id, lockValue, callback)->
 		key = keys.blockingKey(doc_id:doc_id)
@@ -99,4 +99,4 @@ module.exports = LockManager =
 				return callback(new Error("tried to release timed out lock"))
 			else
 				profile.log("unlockScript:ok").end()
-				callback(err,result)
+				callback(null,result)
