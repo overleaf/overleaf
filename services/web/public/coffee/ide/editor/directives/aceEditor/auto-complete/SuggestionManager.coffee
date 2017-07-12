@@ -10,7 +10,10 @@ define [], () ->
 			if window?._ide?.browserIsSafari
 				limit = 100
 
+			# fully formed commands
 			realCommands = []
+			# commands which match the prefix exactly,
+			# and could be partially typed or malformed
 			incidentalCommands = []
 			seen = {}
 			iterations = 0
@@ -30,24 +33,22 @@ define [], () ->
 					args++
 
 				commandHash = "#{command}\\#{optionalArgs}\\#{args}"
-				if !seen[commandHash]?
-					seen[commandHash] = true
 
-					# skip the first occurence of the current command at the cursor
-					if @prefix? && "\\#{command}" == @prefix
-						incidentalCommands.push [command, optionalArgs, args]
-					else
+				if @prefix? && "\\#{command}" == @prefix
+					incidentalCommands.push [command, optionalArgs, args]
+				else
+					if !seen[commandHash]?
+						seen[commandHash] = true
 						realCommands.push [command, optionalArgs, args]
 
 				# Reset to before argument to handle nested commands
 				@doc = docState
 
-			# check incidentals
+			# check incidentals, see if we should pluck out a match
 			if incidentalCommands.length > 1
 				bestMatch = incidentalCommands.sort((a, b) =>  a[1]+a[2] < b[1]+b[2])[0]
 				realCommands.push bestMatch
 
-			window.I = incidentalCommands
 			return realCommands
 
 		# Ignore single letter commands since auto complete is moot then.
@@ -58,8 +59,7 @@ define [], () ->
 			if i == -1
 				return false
 			else
-				M = @doc.match(@commandRegex)
-				match = M[1]
+				match = @doc.match(@commandRegex)[1]
 				@doc = @doc.substr(i + match.length + 1)
 				return match
 
