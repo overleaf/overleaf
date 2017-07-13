@@ -128,6 +128,11 @@ define [
 			if lineUpToCursor.match(/.*%.*/)
 				return
 			lastCharIsBackslash = lineUpToCursor.slice(-1) == "\\"
+			lastTwoCharsAreBackslash = lineUpToCursor.slice(-2) == "\\\\"
+			# Don't offer autocomplete on double-backslash
+			if lastTwoCharsAreBackslash
+				@editor?.completer?.detach?()
+				return
 			commandFragment = getLastCommandFragment(lineUpToCursor)
 			commandName = getCommandNameFromFragment(commandFragment)
 			if commandName in ['begin', 'end']
