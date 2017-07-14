@@ -128,9 +128,9 @@ define [
 			if lineUpToCursor.match(/.*%.*/)
 				return
 			lastCharIsBackslash = lineUpToCursor.slice(-1) == "\\"
-			lastTwoCharsAreBackslash = lineUpToCursor.slice(-2) == "\\\\"
-			# Don't offer autocomplete on double-backslash
-			if lastTwoCharsAreBackslash
+			lastTwoChars = lineUpToCursor.slice(-2)
+			# Don't offer autocomplete on double-backslash, backslash-colon, etc
+			if lastTwoChars.match(/^\\[^a-z]$/)
 				@editor?.completer?.detach?()
 				return
 			commandFragment = getLastCommandFragment(lineUpToCursor)
