@@ -46,7 +46,7 @@ public class Tar {
             if (sizePtr != null) {
                 sizePtr[0] = tmp.length();
             }
-            return new FileInputStream(tmp);
+            return new DeletingFileInputStream(tmp);
         }
 
         public static void unzip(
