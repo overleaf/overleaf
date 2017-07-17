@@ -1,4 +1,4 @@
-request = require "request"
+request = require "requestretry"
 Settings = require "settings-sharelatex"
 Errors = require "./Errors"
 Metrics = require "./Metrics"
@@ -28,6 +28,7 @@ module.exports = PersistenceManager =
 				sendImmediately: true
 			jar: false
 			timeout: MAX_HTTP_REQUEST_LENGTH
+			maxAttempts: 2  # for requestretry
 		}, (error, res, body) ->
 			return callback(error) if error?
 			if res.statusCode >= 200 and res.statusCode < 300
@@ -65,6 +66,7 @@ module.exports = PersistenceManager =
 				sendImmediately: true
 			jar: false
 			timeout: MAX_HTTP_REQUEST_LENGTH
+			maxAttempts: 2  # for requestretry
 		}, (error, res, body) ->
 			return callback(error) if error?
 			if res.statusCode >= 200 and res.statusCode < 300
