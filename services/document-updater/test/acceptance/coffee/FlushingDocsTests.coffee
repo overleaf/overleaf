@@ -55,25 +55,26 @@ describe "Flushing a doc to Mongo", ->
 		it "should not flush the doc to the web api", ->
 			MockWebApi.setDocument.called.should.equal false
 
-	describe "when the web api http request takes a long time", ->
+	describe "when the web api http request takes a long time on first request", ->
 		before (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
-			@timeout = 10000
 			MockWebApi.insertDoc @project_id, @doc_id, {
 				lines: @lines
 				version: @version
 			}
+			t = 30000
 			sinon.stub MockWebApi, "setDocument", (project_id, doc_id, lines, version, ranges, callback = (error) ->) ->
-				setTimeout callback, 30000
+				setTimeout callback, t
+				t = 0
 			DocUpdaterClient.preloadDoc @project_id, @doc_id, done
 
 		after ->
 			MockWebApi.setDocument.restore()
 		
-		it "should return quickly(ish)", (done) ->
+		it "should still work", (done) ->
 			start = Date.now()
 			DocUpdaterClient.flushDoc @project_id, @doc_id, (error, res, doc) =>
-				res.statusCode.should.equal 500
+				res.statusCode.should.equal 204
 				delta = Date.now() - start
 				expect(delta).to.be.below 20000
 				done()

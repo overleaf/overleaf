@@ -57,7 +57,7 @@ module.exports = (grunt) ->
 				options:
 					reporter: grunt.option('reporter') or 'spec'
 					grep: grunt.option("grep")
-					timeout: 10000
+					timeout: 50000
 
 		shell:
 			fullAcceptanceTests:
