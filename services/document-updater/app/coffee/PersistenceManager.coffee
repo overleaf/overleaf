@@ -1,8 +1,11 @@
-request = require "requestretry"
 Settings = require "settings-sharelatex"
 Errors = require "./Errors"
 Metrics = require "./Metrics"
 logger = require "logger-sharelatex"
+request = (require("requestretry")).defaults({
+	maxAttempts: 2
+	retryDelay: 10
+})
 
 # We have to be quick with HTTP calls because we're holding a lock that
 # expires after 30 seconds. We can't let any errors in the rest of the stack
@@ -28,7 +31,6 @@ module.exports = PersistenceManager =
 				sendImmediately: true
 			jar: false
 			timeout: MAX_HTTP_REQUEST_LENGTH
-			maxAttempts: 2  # for requestretry
 		}, (error, res, body) ->
 			return callback(error) if error?
 			if res.statusCode >= 200 and res.statusCode < 300
@@ -66,7 +68,6 @@ module.exports = PersistenceManager =
 				sendImmediately: true
 			jar: false
 			timeout: MAX_HTTP_REQUEST_LENGTH
-			maxAttempts: 2  # for requestretry
 		}, (error, res, body) ->
 			return callback(error) if error?
 			if res.statusCode >= 200 and res.statusCode < 300

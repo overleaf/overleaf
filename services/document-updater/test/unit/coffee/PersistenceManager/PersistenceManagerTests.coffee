@@ -7,8 +7,10 @@ Errors = require "../../../../app/js/Errors"
 
 describe "PersistenceManager", ->
 	beforeEach ->
+		@request = sinon.stub()
+		@request.defaults = () => @request
 		@PersistenceManager = SandboxedModule.require modulePath, requires:
-			"requestretry": @request = sinon.stub()
+			"requestretry": @request
 			"settings-sharelatex": @Settings = {}
 			"./Metrics": @Metrics =
 				Timer: class Timer
@@ -50,7 +52,6 @@ describe "PersistenceManager", ->
 							sendImmediately: true
 						jar: false
 						timeout: 5000
-						maxAttempts: 2
 					})
 					.should.equal true
 
@@ -130,7 +131,6 @@ describe "PersistenceManager", ->
 							sendImmediately: true
 						jar: false
 						timeout: 5000
-						maxAttempts: 2
 					})
 					.should.equal true
 
