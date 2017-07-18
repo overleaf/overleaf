@@ -72,6 +72,8 @@
 				// whitelistUrls: ['example.com/scripts/']
 				}).install();
 			}
+		}, function(err) {
+			console.log(">> error loading raven", err);
 		})
 	- if (user && typeof(user) != "undefined" && typeof (user.email) != "undefined")
 		script(type="text/javascript").
