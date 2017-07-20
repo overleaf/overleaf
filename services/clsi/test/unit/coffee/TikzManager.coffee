@@ -30,6 +30,12 @@ describe 'TikzManager', ->
 				{ path: 'output.tex' }
 			]).should.equal false
 
+		it "should return false if the file has no content", ->
+			@TikzManager.needsOutputFile("main.tex", [
+				{ path: 'foo.tex' },
+				{ path: 'main.tex' }
+			]).should.equal false
+
 	describe "injectOutputFile", ->
 		beforeEach ->
 			@rootDir = "/mock"

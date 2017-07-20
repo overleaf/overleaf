@@ -22,8 +22,8 @@ module.exports = TikzManager =
 
 	_includesTikz: (resource) ->
 		# check if we are using tikz externalize
-		content = resource.content.slice(0,65536)
-		if content.indexOf("\\tikzexternalize") >= 0
+		content = resource.content?.slice(0,65536)
+		if content?.indexOf("\\tikzexternalize") >= 0
 			return true
 		else
 			return false
