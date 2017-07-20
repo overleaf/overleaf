@@ -4,7 +4,7 @@ SubscriptionGroupController = require './SubscriptionGroupController'
 Settings = require "settings-sharelatex"
 
 module.exports =
-	apply: (webRouter, apiRouter) ->
+	apply: (webRouter, privateApiRouter, publicApiRouter) ->
 		return unless Settings.enableSubscriptions
 
 		webRouter.get  '/user/subscription/plans',      SubscriptionController.plansPage
@@ -35,7 +35,7 @@ module.exports =
 		webRouter.get '/user/subscription/:subscription_id/group/successful-join', AuthenticationController.requireLogin(), SubscriptionGroupController.renderSuccessfulJoinPage
 
 		#recurly callback
-		apiRouter.post '/user/subscription/callback',   SubscriptionController.recurlyNotificationParser, SubscriptionController.recurlyCallback
+		publicApiRouter.post '/user/subscription/callback',   SubscriptionController.recurlyNotificationParser, SubscriptionController.recurlyCallback
 
 		#user changes their account state
 		webRouter.post '/user/subscription/create',     AuthenticationController.requireLogin(), SubscriptionController.createSubscription

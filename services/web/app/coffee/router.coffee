@@ -69,7 +69,7 @@ module.exports = class Router
 
 		EditorRouter.apply(webRouter, privateApiRouter)
 		CollaboratorsRouter.apply(webRouter, privateApiRouter)
-		SubscriptionRouter.apply(webRouter, privateApiRouter)
+		SubscriptionRouter.apply(webRouter, privateApiRouter, publicApiRouter)
 		UploadsRouter.apply(webRouter, privateApiRouter)
 		PasswordResetRouter.apply(webRouter, privateApiRouter)
 		StaticPagesRouter.apply(webRouter, privateApiRouter)
