@@ -128,6 +128,11 @@ define [
 			if lineUpToCursor.match(/.*%.*/)
 				return
 			lastCharIsBackslash = lineUpToCursor.slice(-1) == "\\"
+			lastTwoChars = lineUpToCursor.slice(-2)
+			# Don't offer autocomplete on double-backslash, backslash-colon, etc
+			if lastTwoChars.match(/^\\[^a-z]$/)
+				@editor?.completer?.detach?()
+				return
 			commandFragment = getLastCommandFragment(lineUpToCursor)
 			commandName = getCommandNameFromFragment(commandFragment)
 			if commandName in ['begin', 'end']
@@ -183,8 +188,22 @@ define [
 									leftRange = _.clone(range)
 									rightRange = _.clone(range)
 									# trim to left of cursor
-									leftRange.start.column -= completions.filterText.length;
-									editor.session.remove(leftRange);
+									lineUpToCursor = editor.getSession().getTextRange(
+										new Range(
+											range.start.row,
+											0,
+											range.start.row,
+											range.start.column,
+										)
+									)
+									# Delete back to last backslash, as appropriate
+									lastBackslashIndex = lineUpToCursor.lastIndexOf('\\')
+									if lastBackslashIndex != -1
+										leftRange.start.column = lastBackslashIndex
+									else
+										leftRange.start.column -= completions.filterText.length
+									editor.session.remove(leftRange)
+									# look at text after cursor
 									lineBeyondCursor = editor.getSession().getTextRange(
 										new Range(
 											rightRange.start.row,

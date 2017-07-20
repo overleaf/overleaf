@@ -1,7 +1,7 @@
 define [], () ->
 
 	class Parser
-		constructor: (@doc) ->
+		constructor: (@doc, @prefix) ->
 
 		parse: () ->
 			# Safari regex is super slow, freezes browser for minutes on end,
@@ -10,13 +10,17 @@ define [], () ->
 			if window?._ide?.browserIsSafari
 				limit = 100
 
-			commands = []
+			# fully formed commands
+			realCommands = []
+			# commands which match the prefix exactly,
+			# and could be partially typed or malformed
+			incidentalCommands = []
 			seen = {}
 			iterations = 0
 			while command = @nextCommand()
 				iterations += 1
 				if limit && iterations > limit
-					return commands
+					return realCommands
 
 				docState = @doc
 
@@ -29,14 +33,23 @@ define [], () ->
 					args++
 
 				commandHash = "#{command}\\#{optionalArgs}\\#{args}"
-				if !seen[commandHash]?
-					seen[commandHash] = true
-					commands.push [command, optionalArgs, args]
+
+				if @prefix? && "\\#{command}" == @prefix
+					incidentalCommands.push [command, optionalArgs, args]
+				else
+					if !seen[commandHash]?
+						seen[commandHash] = true
+						realCommands.push [command, optionalArgs, args]
 
 				# Reset to before argument to handle nested commands
 				@doc = docState
 
-			return commands
+			# check incidentals, see if we should pluck out a match
+			if incidentalCommands.length > 1
+				bestMatch = incidentalCommands.sort((a, b) =>  a[1]+a[2] < b[1]+b[2])[0]
+				realCommands.push bestMatch
+
+			return realCommands
 
 		# Ignore single letter commands since auto complete is moot then.
 		commandRegex: /\\([a-zA-Z][a-zA-Z]+)/
@@ -78,12 +91,12 @@ define [], () ->
 	class SuggestionManager
 		getCompletions: (editor, session, pos, prefix, callback) ->
 			doc = session.getValue()
-			parser = new Parser(doc)
+			parser = new Parser(doc, prefix)
 			commands = parser.parse()
 			completions = []
 			for command in commands
 				caption = "\\#{command[0]}"
-				score = 50
+				score = if caption == prefix then 99 else 50
 				snippet = caption
 				i = 1
 				_.times command[1], () ->
@@ -94,13 +107,12 @@ define [], () ->
 					snippet += "{${#{i}}}"
 					caption += "{}"
 					i++
-				unless caption == prefix
-					completions.push {
-						caption: caption
-						snippet: snippet
-						meta: "cmd"
-						score: score
-					}
+				completions.push {
+					caption: caption
+					snippet: snippet
+					meta: "cmd"
+					score: score
+				}
 
 			callback null, completions
 
