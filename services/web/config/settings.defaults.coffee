@@ -226,8 +226,8 @@ module.exports = settings =
 	# passwordStrengthOptions:
 	# 	pattern: "aA$3"
 	# 	length:
-	# 		min: 1
-	# 		max: 10
+	# 		min: 6
+	# 		max: 128
 
 	# Email support
 	# -------------
