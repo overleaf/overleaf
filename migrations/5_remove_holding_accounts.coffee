@@ -1,7 +1,7 @@
 Settings = require "settings-sharelatex"
 mongojs = require("mongojs")
 ObjectId = mongojs.ObjectId
-db = mongojs(Settings.mongo.url, ['users', 'projects'])
+db = mongojs(Settings.mongo.url, ['users', 'projects', 'subscriptions'])
 async = require "async"
 
 module.exports = HoldingAccountMigration = 
@@ -58,6 +58,21 @@ module.exports = HoldingAccountMigration =
 		else
 			console.log "[Would have removed user]", user_id
 			callback()
+	
+	migrateGroupInvites: (user_id, email, callback = (error) ->) ->
+		if !user_id?
+			throw new Error("must have user_id")
+		if !HoldingAccountMigration.DRY_RUN
+			db.subscriptions.update {member_ids: user_id}, {
+				$pull: { member_ids: user_id },
+				$addToSet : { invited_emails: email }
+			}, { multi : true }, (error, result) ->
+				return callback(error) if error?
+				console.log "[Migrated user in group accounts]", user_id, email, result
+				callback()
+		else
+			console.log "[Would have migrated user in group accounts]", user_id, email
+			callback()
 
 	run: (done = () ->) ->
 		console.log "[Getting list of holding accounts]"
@@ -68,11 +83,13 @@ module.exports = HoldingAccountMigration =
 			jobs = users.map (u) ->
 				(cb) ->
 					console.log "[Removing user #{i++}/#{users.length}]"
-					HoldingAccountMigration.deleteUser u._id, (error) ->
+					HoldingAccountMigration.migrateGroupInvites u._id, u.email, (error) ->
 						return cb(error) if error?
-						HoldingAccountMigration.deleteUserProjects u._id, (error) ->
+						HoldingAccountMigration.deleteUser u._id, (error) ->
 							return cb(error) if error?
-							setTimeout cb, 50 # Small delay to not hammer DB
+							HoldingAccountMigration.deleteUserProjects u._id, (error) ->
+								return cb(error) if error?
+								setTimeout cb, 50 # Small delay to not hammer DB
 			async.series jobs, (error) ->
 				throw error if error?
 				console.log "[FINISHED]"
