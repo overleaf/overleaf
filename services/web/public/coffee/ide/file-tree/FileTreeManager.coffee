@@ -202,6 +202,8 @@ define [
 					childPath = path + "/" + entity.name
 				else
 					childPath = entity.name
+				# FIXME: this is a hack
+				entity.path = childPath
 				callback(entity, folder, childPath)
 				if entity.children?
 					@_forEachEntityInFolder(entity, childPath, callback)

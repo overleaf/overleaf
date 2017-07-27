@@ -17,7 +17,7 @@ define [
 		commandFragment?.match(/\\(\w+)\{/)?[1]
 
 	class AutoCompleteManager
-		constructor: (@$scope, @editor, @element, @labelsManager) ->
+		constructor: (@$scope, @editor, @element, @labelsManager, @graphics) ->
 			@suggestionManager = new SuggestionManager()
 
 			@monkeyPatchAutocomplete()
@@ -43,6 +43,36 @@ define [
 			})
 
 			SnippetCompleter = new SnippetManager()
+
+			Graphics = @graphics
+			GraphicsCompleter =
+				getCompletions: (editor, session, pos, prefix, callback) ->
+					upToCursorRange = new Range(pos.row, 0, pos.row, pos.column)
+					lineUpToCursor = editor.getSession().getTextRange(upToCursorRange)
+					commandFragment = getLastCommandFragment(lineUpToCursor)
+					if commandFragment
+						match = commandFragment.match(/^~?\\(includegraphics(?:\[.*])?){([^}]*, *)?(\w*)/)
+						if match
+							beyondCursorRange = new Range(pos.row, pos.column, pos.row, 99999)
+							lineBeyondCursor = editor.getSession().getTextRange(beyondCursorRange)
+							needsClosingBrace = !lineBeyondCursor.match(/^[^{]*}/)
+							commandName = match[1]
+							currentArg = match[3]
+							result = []
+							# result.push {
+							# 	caption: "\\#{commandName}{}",
+							# 	snippet: "\\#{commandName}{}",
+							# 	meta: "graphic",
+							# 	score: 60
+							# }
+							for graphic in Graphics.getGraphicsFiles()
+								result.push {
+									caption: "\\#{commandName}{#{graphic.path}#{if needsClosingBrace then '}' else ''}",
+									value: "\\#{commandName}{#{graphic.path}#{if needsClosingBrace then '}' else ''}",
+									meta: "graphic",
+									score: 50
+								}
+							callback null, result
 
 			labelsManager = @labelsManager
 			LabelsCompleter =
@@ -112,7 +142,13 @@ define [
 							else
 								callback null, result
 
-			@editor.completers = [@suggestionManager, SnippetCompleter, ReferencesCompleter, LabelsCompleter]
+			@editor.completers = [
+				@suggestionManager,
+				SnippetCompleter,
+				ReferencesCompleter,
+				LabelsCompleter,
+				GraphicsCompleter
+			]
 
 		disable: () ->
 			@editor.setOptions({
