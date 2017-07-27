@@ -1,0 +1,12 @@
+#! env bash
+
+grep 'name:' config/services.js | \
+	sed 's/.*name: "\(.*\)",/\1/' | \
+	while read service
+	do
+		pushd $service &&
+		nvm install &&
+		nvm use &&
+		npm install
+		popd
+	done
