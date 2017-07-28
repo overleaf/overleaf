@@ -56,3 +56,30 @@ module.exports = ProjectManager =
 					callback new Error("Errors deleting docs. See log for details")
 				else
 					callback(null)
+
+	getProjectDocs: (project_id, excludeVersions = {}, _callback = (error) ->) ->
+		timer = new Metrics.Timer("projectManager.getProjectDocs")
+		callback = (args...) ->
+			timer.done()
+			_callback(args...)
+
+		RedisManager.getDocIdsInProject project_id, (error, doc_ids) ->
+			return callback(error) if error?
+			jobs = []
+			docs = []
+			for doc_id in doc_ids or []
+				do (doc_id) ->
+					jobs.push (cb) ->
+						# check the doc version first
+						RedisManager.getDocVersion doc_id, (error, version) ->
+							return cb(error) if error?
+							# skip getting the doc if we already have that version
+							return cb() if version is excludeVersions[doc_id]
+							# otherwise get the doc lines from redis
+							RedisManager.getDocLines doc_id, (error, lines) ->
+								return cb(error) if error?
+								docs.push {_id: doc_id, lines: lines, rev: version}
+								cb()
+			async.series jobs, (error) ->
+				return callback(error) if error?
+				callback(null, docs)
