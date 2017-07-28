@@ -26,6 +26,7 @@ describe "ClsiManager", ->
 						url: "https://clsipremium.example.com"
 			"../../models/Project": Project: @Project = {}
 			"../Project/ProjectEntityHandler": @ProjectEntityHandler = {}
+			"../DocumentUpdater/DocumentUpdaterHandler": @DocumentUpdaterHandler = {}
 			"./ClsiCookieManager": @ClsiCookieManager
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), warn: sinon.stub() }
 			"request": @request = sinon.stub()
@@ -144,6 +145,7 @@ describe "ClsiManager", ->
 			@Project.findById = sinon.stub().callsArgWith(2, null, @project)
 			@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
 			@ProjectEntityHandler.getAllFiles = sinon.stub().callsArgWith(1, null, @files)
+			@DocumentUpdaterHandler.flushProjectToMongo = sinon.stub().callsArgWith(1, null)
 
 		describe "with a valid project", ->
 			beforeEach (done) ->
@@ -154,6 +156,11 @@ describe "ClsiManager", ->
 			it "should get the project with the required fields", ->
 				@Project.findById
 					.calledWith(@project_id, {compiler:1, rootDoc_id: 1, imageName: 1})
+					.should.equal true
+
+			it "should flush the project to the database", ->
+				@DocumentUpdaterHandler.flushProjectToMongo
+					.calledWith(@project_id)
 					.should.equal true
 
 			it "should get all the docs", ->

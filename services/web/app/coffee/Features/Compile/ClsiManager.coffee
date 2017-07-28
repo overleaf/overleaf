@@ -10,6 +10,7 @@ ClsiCookieManager = require("./ClsiCookieManager")
 _ = require("underscore")
 async = require("async")
 ClsiFormatChecker = require("./ClsiFormatChecker")
+DocumentUpdaterHandler = require "../DocumentUpdater/DocumentUpdaterHandler"
 
 module.exports = ClsiManager =
 
@@ -109,48 +110,50 @@ module.exports = ClsiManager =
 			if project.compiler not in ClsiManager.VALID_COMPILERS
 				project.compiler = "pdflatex"
 
-			ProjectEntityHandler.getAllDocs project_id, (error, docs = {}) ->
+			DocumentUpdaterHandler.flushProjectToMongo project_id, (error) ->
 				return callback(error) if error?
-				ProjectEntityHandler.getAllFiles project_id, (error, files = {}) ->
+				ProjectEntityHandler.getAllDocs project_id, (error, docs = {}) ->
 					return callback(error) if error?
+					ProjectEntityHandler.getAllFiles project_id, (error, files = {}) ->
+						return callback(error) if error?
 
-					resources = []
-					rootResourcePath = null
-					rootResourcePathOverride = null
+						resources = []
+						rootResourcePath = null
+						rootResourcePathOverride = null
 
-					for path, doc of docs
-						path = path.replace(/^\//, "") # Remove leading /
-						resources.push
-							path:    path
-							content: doc.lines.join("\n")
-						if project.rootDoc_id? and doc._id.toString() == project.rootDoc_id.toString()
-							rootResourcePath = path
-						if options.rootDoc_id? and doc._id.toString() == options.rootDoc_id.toString()
-							rootResourcePathOverride = path
+						for path, doc of docs
+							path = path.replace(/^\//, "") # Remove leading /
+							resources.push
+								path:    path
+								content: doc.lines.join("\n")
+							if project.rootDoc_id? and doc._id.toString() == project.rootDoc_id.toString()
+								rootResourcePath = path
+							if options.rootDoc_id? and doc._id.toString() == options.rootDoc_id.toString()
+								rootResourcePathOverride = path
 
-					rootResourcePath = rootResourcePathOverride if rootResourcePathOverride?
-					if !rootResourcePath?
-						logger.warn {project_id}, "no root document found, setting to main.tex"
-						rootResourcePath = "main.tex"
+						rootResourcePath = rootResourcePathOverride if rootResourcePathOverride?
+						if !rootResourcePath?
+							logger.warn {project_id}, "no root document found, setting to main.tex"
+							rootResourcePath = "main.tex"
 
-					for path, file of files
-						path = path.replace(/^\//, "") # Remove leading /
-						resources.push
-							path:     path
-							url:      "#{Settings.apis.filestore.url}/project/#{project._id}/file/#{file._id}"
-							modified: file.created?.getTime()
+						for path, file of files
+							path = path.replace(/^\//, "") # Remove leading /
+							resources.push
+								path:     path
+								url:      "#{Settings.apis.filestore.url}/project/#{project._id}/file/#{file._id}"
+								modified: file.created?.getTime()
 
-					callback null, {
-						compile:
-							options:
-								compiler: project.compiler
-								timeout: options.timeout
-								imageName: project.imageName
-								draft: !!options.draft
-								check: options.check
-							rootResourcePath: rootResourcePath
-							resources: resources
-					}
+						callback null, {
+							compile:
+								options:
+									compiler: project.compiler
+									timeout: options.timeout
+									imageName: project.imageName
+									draft: !!options.draft
+									check: options.check
+								rootResourcePath: rootResourcePath
+								resources: resources
+						}
 
 	wordCount: (project_id, user_id, file, options, callback = (error, response) ->) ->
 		ClsiManager._buildRequest project_id, options, (error, req) ->
