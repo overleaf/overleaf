@@ -5,8 +5,11 @@ grep 'name:' config/services.js | \
 	while read service
 	do
 		pushd $service &&
+		echo "Installing Service $service" &&
+		echo '  installing Node' &&
 		nvm install &&
 		nvm use &&
+		echo '  installing Dependencies' &&
 		npm install
 		popd
 	done
