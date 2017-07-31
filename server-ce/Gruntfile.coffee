@@ -87,9 +87,11 @@ module.exports = (grunt) ->
 	grunt.registerTask 'install:all', "Download and set up all ShareLaTeX services",
 		[].concat(
 			("install:#{service.name}" for service in SERVICES)
-		)
+		).concat(['postinstall'])
 
 	grunt.registerTask 'install', 'install:all'
+	grunt.registerTask 'postinstall', 'Explain postinstall steps', () ->
+		Helpers.postinstallMessage @async()
 
 	grunt.registerTask 'update:all', "Checkout and update all ShareLaTeX services",
 		["check:make"].concat(
@@ -146,6 +148,17 @@ module.exports = (grunt) ->
 			proc = spawn "git", ["checkout", service.version], stdio: "inherit", cwd: dir
 			proc.on "close", () ->
 				callback()
+
+		postinstallMessage: (callback = (error) ->) ->
+			grunt.log.write """
+			Services cloned:
+				#{service.name for service in SERVICES}
+			To install services run:
+				$ source bin/install-services
+			This will install the required node versions and run `npm install` for each service.
+			See https://github.com/sharelatex/sharelatex/pull/549 for more info.
+			"""
+			callback()
 
 		checkMake: (callback = (error) ->) ->
 			grunt.log.write "Checking make is installed... "
