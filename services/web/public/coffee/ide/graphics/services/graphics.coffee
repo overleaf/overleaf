@@ -4,13 +4,12 @@ define [
 
 	App.factory 'graphics', (ide) ->
 
-		graphics = {
+		Graphics =
 			getGraphicsFiles: () ->
 				graphicsFiles = []
 				ide.fileTreeManager.forEachEntity (f) ->
 					if f?.name?.match?(/.*\.(png|jpg|jpeg)/)
 						graphicsFiles.push f
 				return graphicsFiles
-		}
 
-		return graphics
+		return Graphics

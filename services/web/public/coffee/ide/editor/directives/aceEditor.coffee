@@ -12,6 +12,7 @@ define [
 	"ide/editor/directives/aceEditor/labels/LabelsManager"
 	"ide/labels/services/labels"
 	"ide/graphics/services/graphics"
+	"ide/preamble/services/preamble"
 ], (App, Ace, SearchBox, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager, LabelsManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
 	ModeList = ace.require('ace/ext/modelist')
@@ -34,7 +35,7 @@ define [
 			url = ace.config._moduleUrl(args...) + "?fingerprint=#{window.aceFingerprint}"
 			return url
 
-	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory, labels, graphics) ->
+	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory, labels, graphics, preamble) ->
 		monkeyPatchSearch($rootScope, $compile)
 
 		return  {
