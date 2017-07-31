@@ -19,6 +19,4 @@ define [
 					paths.push(match[1])
 				return paths
 
-		window.Preamble = Preamble
-
 		return Preamble

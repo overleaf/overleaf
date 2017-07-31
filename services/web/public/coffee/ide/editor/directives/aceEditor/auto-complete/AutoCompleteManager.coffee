@@ -17,7 +17,7 @@ define [
 		commandFragment?.match(/\\(\w+)\{/)?[1]
 
 	class AutoCompleteManager
-		constructor: (@$scope, @editor, @element, @labelsManager, @graphics) ->
+		constructor: (@$scope, @editor, @element, @labelsManager, @graphics, @preamble) ->
 			@suggestionManager = new SuggestionManager()
 
 			@monkeyPatchAutocomplete()
@@ -45,6 +45,7 @@ define [
 			SnippetCompleter = new SnippetManager()
 
 			Graphics = @graphics
+			Preamble = @preamble
 			GraphicsCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
 					upToCursorRange = new Range(pos.row, 0, pos.row, pos.column)
@@ -58,17 +59,17 @@ define [
 							needsClosingBrace = !lineBeyondCursor.match(/^[^{]*}/)
 							commandName = match[1]
 							currentArg = match[3]
+							graphicsPaths = Preamble.getGraphicsPaths()
 							result = []
-							# result.push {
-							# 	caption: "\\#{commandName}{}",
-							# 	snippet: "\\#{commandName}{}",
-							# 	meta: "graphic",
-							# 	score: 60
-							# }
 							for graphic in Graphics.getGraphicsFiles()
+								path = graphic.path
+								for graphicsPath in graphicsPaths
+									if path.indexOf(graphicsPath) == 0
+										path = path.slice(graphicsPath.length)
+										break
 								result.push {
-									caption: "\\#{commandName}{#{graphic.path}#{if needsClosingBrace then '}' else ''}",
-									value: "\\#{commandName}{#{graphic.path}#{if needsClosingBrace then '}' else ''}",
+									caption: "\\#{commandName}{#{path}#{if needsClosingBrace then '}' else ''}",
+									value: "\\#{commandName}{#{path}#{if needsClosingBrace then '}' else ''}",
 									meta: "graphic",
 									score: 50
 								}

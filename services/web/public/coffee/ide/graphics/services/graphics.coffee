@@ -7,9 +7,11 @@ define [
 		Graphics =
 			getGraphicsFiles: () ->
 				graphicsFiles = []
-				ide.fileTreeManager.forEachEntity (f) ->
-					if f?.name?.match?(/.*\.(png|jpg|jpeg)/)
-						graphicsFiles.push f
+				ide.fileTreeManager.forEachEntity (entity, folder, path) ->
+					if entity.type == 'file' && entity?.name?.match?(/.*\.(png|jpg|jpeg|pdf|eps)/)
+						cloned = _.clone(entity)
+						cloned.path = path
+						graphicsFiles.push cloned
 				return graphicsFiles
 
 		return Graphics

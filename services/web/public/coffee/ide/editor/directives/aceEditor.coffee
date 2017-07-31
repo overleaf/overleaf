@@ -103,7 +103,7 @@ define [
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
 				trackChangesManager   = new TrackChangesManager(scope, editor, element)
 				labelsManager = new LabelsManager(scope, editor, element, labels)
-				autoCompleteManager = new AutoCompleteManager(scope, editor, element, labelsManager, graphics)
+				autoCompleteManager = new AutoCompleteManager(scope, editor, element, labelsManager, graphics, preamble)
 
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
