@@ -69,7 +69,7 @@ module.exports = class Router
 
 		EditorRouter.apply(webRouter, privateApiRouter)
 		CollaboratorsRouter.apply(webRouter, privateApiRouter)
-		SubscriptionRouter.apply(webRouter, privateApiRouter)
+		SubscriptionRouter.apply(webRouter, privateApiRouter, publicApiRouter)
 		UploadsRouter.apply(webRouter, privateApiRouter)
 		PasswordResetRouter.apply(webRouter, privateApiRouter)
 		StaticPagesRouter.apply(webRouter, privateApiRouter)
@@ -94,7 +94,14 @@ module.exports = class Router
 			SudoModeMiddlewear.protectPage,
 			UserPagesController.settingsPage
 		webRouter.post '/user/settings', AuthenticationController.requireLogin(), UserController.updateUserSettings
-		webRouter.post '/user/password/update', AuthenticationController.requireLogin(), UserController.changePassword
+		webRouter.post '/user/password/update',
+			AuthenticationController.requireLogin(),
+			RateLimiterMiddlewear.rateLimit({
+				endpointName: "change-password"
+				maxRequests: 10
+				timeInterval: 60
+			}),
+			UserController.changePassword
 
 		webRouter.get  '/user/sessions',
 			AuthenticationController.requireLogin(),
