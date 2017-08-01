@@ -610,10 +610,9 @@ define [
 
 		_setEveryoneTCState = (newValue, isLocal = false) ->
 			$scope.reviewPanel.trackChangesOnForEveryone = newValue
-			for userId, userState of $scope.reviewPanel.trackChangesState
-				userState.value = newValue
-				userState.syncState = if isLocal then UserTCSyncState.PENDING else UserTCSyncState.SYNCED
-			$scope.editor.wantTrackChanges = newValue
+			for member in $scope.project.members
+				_setUserTCState(member._id, newValue, isLocal)
+			_setUserTCState($scope.project.owner._id, newValue, isLocal)
 
 		applyClientTrackChangesStateToServer = () ->
 			if $scope.reviewPanel.trackChangesOnForEveryone
