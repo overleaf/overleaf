@@ -123,6 +123,29 @@ module.exports = DocumentUpdaterHandler =
 				logger.error project_id:project_id, doc_id:doc_id, url: url, "doc updater returned a non-success status code: #{res.statusCode}"
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
+	getProjectDocs: (project_id, callback = (error, docs) ->) ->
+		timer = new metrics.Timer("get-project-docs")
+		url = "#{settings.apis.documentupdater.url}/project/#{project_id}"
+		logger.log project_id:project_id, "getting project docs from document updater"
+		request.get url, (error, res, body)->
+			timer.done()
+			if error?
+				logger.error err:error, url:url, project_id:project_id, "error getting project docs from doc updater"
+				return callback(error)
+			if res.statusCode >= 200 and res.statusCode < 300
+				logger.log project_id:project_id, "got project docs from document document updater"
+				try
+					docs = JSON.parse(body)
+					for doc in docs or []
+						doc.lines = JSON.parse(doc.lines)
+				catch error
+					return callback(error)
+				logger.log project_id: project_id, docs: docs, "RESULT"
+				callback null, docs
+			else
+				logger.error project_id:project_id, url: url, "doc updater returned a non-success status code: #{res.statusCode}"
+				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
+
 	acceptChanges: (project_id, doc_id, change_ids = [], callback = (error) ->) ->
 		timer = new metrics.Timer("accept-changes")
 		reqSettings =
