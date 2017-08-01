@@ -282,7 +282,18 @@ define [
 						editor.completer.autoSelect = true
 						editor.completer.showPopup(editor)
 						editor.completer.cancelContextMenu()
-						$(editor.completer.popup?.container).css({'font-size': @$scope.fontSize + 'px'})
+						container = $(editor.completer.popup?.container)
+						container.css({'font-size': @$scope.fontSize + 'px'})
+						# Dynamically set width of autocomplete popup
+						if filtered = editor?.completer?.completions?.filtered
+							longestCaption = _.max(filtered.map( (c) -> c.caption.length ))
+							longestMeta = _.max(filtered.map( (c) -> c.meta.length ))
+							charScale = @$scope.fontSize * 0.7
+							width = Math.min(
+								Math.round(longestCaption*charScale + longestMeta*charScale + 25),
+								700
+							)
+							container.css({width: "#{width}px"})
 						if editor.completer?.completions?.filtered?.length == 0
 							editor.completer.detach()
 					bindKey: "Ctrl-Space|Ctrl-Shift-Space|Alt-Space"
