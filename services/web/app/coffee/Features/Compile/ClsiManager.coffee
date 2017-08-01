@@ -7,6 +7,7 @@ ProjectEntityHandler = require("../Project/ProjectEntityHandler")
 logger = require "logger-sharelatex"
 Url = require("url")
 ClsiCookieManager = require("./ClsiCookieManager")
+ClsiStateManager = require("./ClsiStateManager")
 _ = require("underscore")
 async = require("async")
 ClsiFormatChecker = require("./ClsiFormatChecker")
@@ -14,10 +15,20 @@ DocumentUpdaterHandler = require "../DocumentUpdater/DocumentUpdaterHandler"
 
 module.exports = ClsiManager =
 
-	sendRequest: (project_id, user_id, options = {}, callback = (error, status, outputFiles, clsiServerId, validationProblems) ->) ->
-		ClsiManager._buildRequest project_id, options, (error, req) ->
+	sendRequest: (project_id, user_id, options = {}, callback) ->
+		ClsiManager.sendRequestOnce project_id, user_id, _.clone(options), (error, status, result...) ->
+			return callback(error) if error?
+			if status is 'conflict'
+				options.state = "conflict" # will force full compile
+				ClsiManager.sendRequestOnce project_id, user_id, options, callback # try again
+			else
+				callback(error, status, result...)
+
+	sendRequestOnce: (project_id, user_id, options = {}, callback = (error, status, outputFiles, clsiServerId, validationProblems) ->) ->
+		ClsiManager._buildRequest project_id, user_id, options, (error, req) ->
 			return callback(error) if error?
 			logger.log project_id: project_id, "sending compile to CLSI"
+			console.log "REQUEST", JSON.stringify(req, null, 2)
 			ClsiFormatChecker.checkRecoursesForProblems req.compile?.resources, (err, validationProblems)->
 				if err?
 					logger.err err, project_id, "could not check resources for potential problems before sending to clsi"
@@ -29,6 +40,9 @@ module.exports = ClsiManager =
 				if error?
 					logger.err err:error, project_id:project_id, "error sending request to clsi"
 					return callback(error)
+				if response?.compile?.status is "conflict"
+					# FIXME try again without incremental option
+					console.log "CONFLICT TRY AGAIN"
 				logger.log project_id: project_id, outputFilesLength: response?.outputFiles?.length, status: response?.status, "received compile response from CLSI"
 				ClsiCookieManager._getServerId project_id, (err, clsiServerId)->
 					if err?
@@ -86,6 +100,8 @@ module.exports = ClsiManager =
 				callback null, body
 			else if response.statusCode == 413
 				callback null, compile:status:"project-too-large"
+			else if response.statusCode == 409
+				callback null, compile:status:"conflict"
 			else
 				error = new Error("CLSI returned non-success code: #{response.statusCode}")
 				logger.error err: error, project_id: project_id, "CLSI returned failure code"
@@ -102,17 +118,50 @@ module.exports = ClsiManager =
 		return outputFiles
 
 	VALID_COMPILERS: ["pdflatex", "latex", "xelatex", "lualatex"]
-	_buildRequest: (project_id, options={}, callback = (error, request) ->) ->
-		Project.findById project_id, {compiler: 1, rootDoc_id: 1, imageName: 1}, (error, project) ->
+
+	_buildRequest: (project_id, user_id, options={}, callback = (error, request) ->) ->
+		Project.findById project_id, {}, (error, project) ->
 			return callback(error) if error?
 			return callback(new Errors.NotFoundError("project does not exist: #{project_id}")) if !project?
-
+			console.log "PROJECT", project, JSON.stringify(project.rootFolder,null,2)
 			if project.compiler not in ClsiManager.VALID_COMPILERS
 				project.compiler = "pdflatex"
 
-			ClsiManager._getContentFromMongo project_id, (error, docs, files) ->
+			ClsiStateManager.checkState project_id, user_id, project, (error, stateOk, state) ->
 				return callback(error) if error?
-				ClsiManager._finaliseRequest project_id, options, project, docs, files, callback
+				logger.log project_id: project_id, checkState: stateOk, "checked project state"
+				console.log "OPTIONS ARE", options
+				if stateOk and not options.state? # incremental
+					ClsiManager._getContentFromDocUpdater project_id, (error, docUpdaterDocs) ->
+						return callback(error) if error?
+						# make this incremental
+						ProjectEntityHandler.getAllDocPathsFromProject project, (error, docPath) ->
+							return callback(error) if error?
+							console.log "PATHS", docPath
+							console.log "DOCS", docUpdaterDocs
+							docs = {}
+							for doc in docUpdaterDocs or []
+								path = docPath[doc._id]
+								docs[path] = doc
+							console.log "MAPPED DOCS", docs
+							options.incremental = state
+							ClsiManager._finaliseRequest project_id, options, project, docs, [], callback
+				else
+					ClsiManager._getContentFromMongo project_id, (error, docs, files) ->
+						return callback(error) if error?
+						console.log "DOCS", docs
+						# FIXME want to store state after project has been sent to clsi
+						ClsiStateManager.setState project_id, user_id, project, (error, state) ->
+							if error?
+								logger.err err:error, project_id:project_id, "error storing state in redis"
+								#return callback(error)
+							options.state = state
+							ClsiManager._finaliseRequest project_id, options, project, docs, files, callback
+
+	_getContentFromDocUpdater: (project_id, callback = (error, docs) ->) ->
+		DocumentUpdaterHandler.getProjectDocs project_id, (error, docs) ->
+			return callback(error) if error?
+			callback(null, docs)
 
 	_getContentFromMongo: (project_id, callback = (error, docs, files) ->) ->
 		DocumentUpdaterHandler.flushProjectToMongo project_id, (error) ->
@@ -120,6 +169,7 @@ module.exports = ClsiManager =
 			ProjectEntityHandler.getAllDocs project_id, (error, docs = {}) ->
 				return callback(error) if error?
 				ProjectEntityHandler.getAllFiles project_id, (error, files = {}) ->
+					return callback(error) if error?
 					callback(null, docs, files)
 
 	_finaliseRequest: (project_id, options, project, docs, files, callback = (error, params) -> ) ->
@@ -132,6 +182,7 @@ module.exports = ClsiManager =
 			resources.push
 				path:    path
 				content: doc.lines.join("\n")
+				rev: doc.rev
 			if project.rootDoc_id? and doc._id.toString() == project.rootDoc_id.toString()
 				rootResourcePath = path
 			if options.rootDoc_id? and doc._id.toString() == options.rootDoc_id.toString()
@@ -157,6 +208,8 @@ module.exports = ClsiManager =
 					imageName: project.imageName
 					draft: !!options.draft
 					check: options.check
+					incremental: options.incremental
+					state: options.state
 				rootResourcePath: rootResourcePath
 				resources: resources
 		}
