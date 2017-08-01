@@ -288,10 +288,14 @@ define [
 						if filtered = editor?.completer?.completions?.filtered
 							longestCaption = _.max(filtered.map( (c) -> c.caption.length ))
 							longestMeta = _.max(filtered.map( (c) -> c.meta.length ))
-							charScale = @$scope.fontSize * 0.7
-							width = Math.min(
-								Math.round(longestCaption*charScale + longestMeta*charScale + 25),
-								700
+							charWidth = editor.renderer.characterWidth
+							# between 280 and 700 px
+							width = Math.max(
+								Math.min(
+									Math.round(longestCaption*charWidth + longestMeta*charWidth + 5*charWidth),
+									700
+								),
+								280
 							)
 							container.css({width: "#{width}px"})
 						if editor.completer?.completions?.filtered?.length == 0
