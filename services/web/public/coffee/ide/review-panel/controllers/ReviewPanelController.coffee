@@ -645,12 +645,8 @@ define [
 			$scope.$apply () ->
 				applyTrackChangesStateToClient(state)
 
-		# Not sure what the kbd shortcut should do now?
-		# $scope.toggleTrackChangesFromKbdShortcut = () ->
-		# 	if $scope.editor.wantTrackChanges
-		# 		$scope.toggleTrackChanges false
-		# 	else 
-		# 		$scope.toggleTrackChanges true
+		$scope.toggleTrackChangesFromKbdShortcut = () ->
+				$scope.toggleTrackChangesForUser !$scope.reviewPanel.trackChangesState[ide.$scope.user.id].value, ide.$scope.user.id
 
 		_inited = false
 		ide.$scope.$on "project:joined", () ->
