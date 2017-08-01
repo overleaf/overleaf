@@ -11,7 +11,39 @@ settings = require("settings-sharelatex")
 parallelFileDownloads = settings.parallelFileDownloads or 1
 
 module.exports = ResourceWriter =
-	syncResourcesToDisk: (project_id, resources, basePath, callback = (error) ->) ->
+
+	syncResourcesToDisk: (request, basePath, callback = (error) ->) ->
+		if request.incremental?
+			ResourceWriter.checkState request.incremental, basePath, (error, ok) ->
+				logger.log state: request.state, result:ok, "checked state on incremental request"
+				return callback new Error("invalid state") if not ok
+				ResourceWriter.saveIncrementalResourcesToDisk request.project_id, request.resources, basePath, callback
+		else
+			@saveAllResourcesToDisk request.project_id, request.resources, basePath, (error) ->
+				return callback(error) if error?
+				ResourceWriter.storeState request.state, basePath, callback
+
+	storeState: (state, basePath, callback) ->
+		logger.log state:state, basePath:basePath, "writing state"
+		fs.writeFile Path.join(basePath, ".resource-state"), state, {encoding: 'ascii'}, callback
+
+	checkState: (state, basePath, callback) ->
+		fs.readFile Path.join(basePath, ".resource-state"), {encoding:'ascii'}, (err, oldState) ->
+			logger.log state:state, oldState: oldState, basePath:basePath, err:err, "checking state"
+			if state is oldState
+				return callback(null, true)
+			else
+				return callback(null, false)
+
+	saveIncrementalResourcesToDisk: (project_id, resources, basePath, callback = (error) ->) ->
+		@_createDirectory basePath, (error) =>
+			return callback(error) if error?
+			jobs = for resource in resources
+				do (resource) =>
+					(callback) => @_writeResourceToDisk(project_id, resource, basePath, callback)
+			async.parallelLimit jobs, parallelFileDownloads, callback
+
+	saveAllResourcesToDisk: (project_id, resources, basePath, callback = (error) ->) ->
 		@_createDirectory basePath, (error) =>
 			return callback(error) if error?
 			@_removeExtraneousFiles resources, basePath, (error) =>

@@ -31,7 +31,7 @@ module.exports = CompileManager =
 
 		timer = new Metrics.Timer("write-to-disk")
 		logger.log project_id: request.project_id, user_id: request.user_id, "syncing resources to disk"
-		ResourceWriter.syncResourcesToDisk request.project_id, request.resources, compileDir, (error) ->
+		ResourceWriter.syncResourcesToDisk request, compileDir, (error) ->
 			if error?
 				logger.err err:error, project_id: request.project_id, user_id: request.user_id, "error writing resources to disk"
 				return callback(error) 

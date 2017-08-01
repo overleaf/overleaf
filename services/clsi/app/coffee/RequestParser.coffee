@@ -31,6 +31,12 @@ module.exports = RequestParser =
 			response.check = @_parseAttribute "check",
 				compile.options.check,
 				type: "string"
+			response.incremental = @_parseAttribute "incremental",
+				compile.options.incremental,
+				type: "string"
+			response.state = @_parseAttribute "state",
+				compile.options.state,
+				type: "string"
 
 			if response.timeout > RequestParser.MAX_TIMEOUT
 				response.timeout = RequestParser.MAX_TIMEOUT

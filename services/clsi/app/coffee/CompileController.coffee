@@ -15,7 +15,10 @@ module.exports = CompileController =
 			ProjectPersistenceManager.markProjectAsJustAccessed request.project_id, (error) ->
 				return next(error) if error?
 				CompileManager.doCompile request, (error, outputFiles = []) ->
-					if error?.terminated
+					if error?.message is "invalid state"
+						code = 409 # Http 409 Conflict
+						status = "retry"
+					else if error?.terminated
 						status = "terminated"
 					else if error?.validate
 						status = "validation-#{error.validate}"
