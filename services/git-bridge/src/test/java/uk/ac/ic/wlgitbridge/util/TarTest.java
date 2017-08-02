@@ -1,6 +1,5 @@
 package uk.ac.ic.wlgitbridge.util;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -8,8 +7,6 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static org.junit.Assert.assertTrue;
 
@@ -18,37 +15,62 @@ import static org.junit.Assert.assertTrue;
  */
 public class TarTest {
 
+    private static final String RESOURCE_DIR
+            = "/uk/ac/ic/wlgitbridge/util/TarTest";
+
     private File testDir;
+    private File dirWithEmptyFile;
     private File tmpDir;
 
     @Before
     public void setup() throws IOException {
         TemporaryFolder tmpFolder = new TemporaryFolder();
         tmpFolder.create();
-        testDir = tmpFolder.newFolder("testdir");
-        Path resdir = Paths.get(
-                "src/test/resources/uk/ac/ic/wlgitbridge/util/TarTest/testdir"
-        );
-        FileUtils.copyDirectory(resdir.toFile(), testDir);
+        testDir = ResourceUtil.copyOfFolderResource(
+                RESOURCE_DIR + "/testdir",
+                tmpFolder::newFolder);
+        dirWithEmptyFile = ResourceUtil.copyOfFolderResource(
+                RESOURCE_DIR + "/dir_with_empty_file",
+                tmpFolder::newFolder);
         tmpDir = tmpFolder.newFolder();
+    }
+
+    /**
+     * Compresses inputDir and decompresses to outputDir. Checks equality
+     * between outputDir and inputDir.
+     * @param inputDir the directory to compress
+     * @param outputDir the output directory. Must be empty.
+     * @param compressFunction compression function
+     * @param decompressFunction decompression function
+     * @throws IOException
+     */
+    private static void assertCompDecompEqual(
+            File inputDir,
+            File outputDir,
+            FunctionT<File, InputStream, IOException> compressFunction,
+            BiConsumerT<InputStream, File, IOException> decompressFunction
+    ) throws IOException {
+        try (InputStream tarbz2 = compressFunction.apply(inputDir)) {
+            decompressFunction.accept(tarbz2, outputDir);
+            File unzipped = new File(outputDir, inputDir.getName());
+            assertTrue(Files.contentsAreEqual(inputDir, unzipped));
+        }
     }
 
     @Test
     public void tarAndUntarProducesTheSameResult() throws IOException {
-        try (InputStream tar = Tar.tar(testDir)) {
-            Tar.untar(tar, tmpDir);
-            File untarred = new File(tmpDir, "testdir");
-            assertTrue(Files.contentsAreEqual(testDir, untarred));
-        }
+        assertCompDecompEqual(testDir, tmpDir, Tar::tar, Tar::untar);
     }
 
     @Test
     public void tarbz2AndUntarbz2ProducesTheSameResult() throws IOException {
-        try (InputStream tarbz2 = Tar.bz2.zip(testDir)) {
-            Tar.bz2.unzip(tarbz2, tmpDir);
-            File unzipped = new File(tmpDir, "testdir");
-            assertTrue(Files.contentsAreEqual(testDir, unzipped));
-        }
+        assertCompDecompEqual(testDir, tmpDir, Tar.bz2::zip, Tar.bz2::unzip);
+    }
+
+    @Test
+    public void tarbz2WorksOnDirectoriesWithAnEmptyFile() throws IOException {
+        assertCompDecompEqual(
+                dirWithEmptyFile, tmpDir, Tar.bz2::zip, Tar.bz2::unzip);
     }
 
 }
