@@ -101,8 +101,9 @@ public class Tar {
             }
             long size = e.getSize();
             Preconditions.checkArgument(
-                    size > 0 && size < Integer.MAX_VALUE,
-                    "file too big: tarTo should have thrown an IOException"
+                    size >= 0 && size <= Integer.MAX_VALUE,
+                    "file too big (" + size + " B): " +
+                            "tarTo should have thrown an IOException"
             );
             try (OutputStream out = new FileOutputStream(f)) {
                 /* TarInputStream pretends each
