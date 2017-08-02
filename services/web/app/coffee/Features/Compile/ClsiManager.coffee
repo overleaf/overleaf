@@ -25,7 +25,7 @@ module.exports = ClsiManager =
 				callback(error, status, result...)
 
 	sendRequestOnce: (project_id, user_id, options = {}, callback = (error, status, outputFiles, clsiServerId, validationProblems) ->) ->
-		ClsiManager._buildRequest project_id, user_id, options, (error, req) ->
+		ClsiManager._buildRequest project_id, options, (error, req) ->
 			return callback(error) if error?
 			logger.log project_id: project_id, "sending compile to CLSI"
 			console.log "REQUEST", JSON.stringify(req, null, 2)
@@ -119,7 +119,7 @@ module.exports = ClsiManager =
 
 	VALID_COMPILERS: ["pdflatex", "latex", "xelatex", "lualatex"]
 
-	_buildRequest: (project_id, user_id, options={}, callback = (error, request) ->) ->
+	_buildRequest: (project_id, options={}, callback = (error, request) ->) ->
 		Project.findById project_id, {}, (error, project) ->
 			return callback(error) if error?
 			return callback(new Errors.NotFoundError("project does not exist: #{project_id}")) if !project?
@@ -127,7 +127,7 @@ module.exports = ClsiManager =
 			if project.compiler not in ClsiManager.VALID_COMPILERS
 				project.compiler = "pdflatex"
 
-			ClsiStateManager.checkState project_id, user_id, project, (error, stateOk, state) ->
+			ClsiStateManager.checkState project_id, project, (error, stateOk, state) ->
 				return callback(error) if error?
 				logger.log project_id: project_id, checkState: stateOk, "checked project state"
 				console.log "OPTIONS ARE", options
@@ -151,7 +151,7 @@ module.exports = ClsiManager =
 						return callback(error) if error?
 						console.log "DOCS", docs
 						# FIXME want to store state after project has been sent to clsi
-						ClsiStateManager.setState project_id, user_id, project, (error, state) ->
+						ClsiStateManager.setState project_id, project, (error, state) ->
 							if error?
 								logger.err err:error, project_id:project_id, "error storing state in redis"
 								#return callback(error)
