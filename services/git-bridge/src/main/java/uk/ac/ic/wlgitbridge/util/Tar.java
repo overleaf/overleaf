@@ -100,17 +100,21 @@ public class Tar {
                 continue;
             }
             long size = e.getSize();
-            Preconditions.checkArgument(
-                    size >= 0 && size <= Integer.MAX_VALUE,
-                    "file too big (" + size + " B): " +
-                            "tarTo should have thrown an IOException"
-            );
+            checkFileSize(size);
             try (OutputStream out = new FileOutputStream(f)) {
                 /* TarInputStream pretends each
                    entry's EOF is the stream's EOF */
                 IOUtils.copy(tin, out);
             }
         }
+    }
+
+    private static void checkFileSize(long size) {
+        Preconditions.checkArgument(
+                size >= 0 && size <= Integer.MAX_VALUE,
+                "file too big (" + size + " B): " +
+                        "tarTo should have thrown an IOException"
+        );
     }
 
     private static void addTarEntry(
@@ -151,13 +155,19 @@ public class Tar {
             Path base,
             File file
     ) throws IOException {
-        Preconditions.checkArgument(file.isFile());
+        Preconditions.checkArgument(
+                file.isFile(),
+                "given file" +
+                " is not file: %s", file);
+        checkFileSize(file.length());
         String name = base.relativize(
                 Paths.get(file.getAbsolutePath())
         ).toString();
         ArchiveEntry entry = tout.createArchiveEntry(file, name);
         tout.putArchiveEntry(entry);
-        tout.write(FileUtils.readFileToByteArray(file));
+        try (InputStream in = new FileInputStream(file)) {
+            IOUtils.copy(in, tout);
+        }
         tout.closeArchiveEntry();
     }
 
