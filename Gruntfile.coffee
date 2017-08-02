@@ -87,9 +87,11 @@ module.exports = (grunt) ->
 	grunt.registerTask 'install:all', "Download and set up all ShareLaTeX services",
 		[].concat(
 			("install:#{service.name}" for service in SERVICES)
-		)
+		).concat(['postinstall'])
 
 	grunt.registerTask 'install', 'install:all'
+	grunt.registerTask 'postinstall', 'Explain postinstall steps', () ->
+		Helpers.postinstallMessage @async()
 
 	grunt.registerTask 'update:all', "Checkout and update all ShareLaTeX services",
 		["check:make"].concat(
@@ -120,16 +122,10 @@ module.exports = (grunt) ->
 		installService: (service, callback = (error) ->) ->
 			console.log "Installing #{service.name}"
 			Helpers.cloneGitRepo service, (error) ->
-				return callback(error) if error?
-				Helpers.installNpmModules service, (error) ->
-					return callback(error) if error?
-					Helpers.rebuildNpmModules service, (error) ->
-						return callback(error) if error?
-						Helpers.runGruntInstall service, (error) ->
-							return callback(error) if error?
-							console.log "Finished installing #{service.name}"
-							callback()
-
+				if error?
+					callback(error)
+				else
+					callback()
 
 		cloneGitRepo: (service, callback = (error) ->) ->
 			repo_src = service.repo
@@ -153,26 +149,16 @@ module.exports = (grunt) ->
 			proc.on "close", () ->
 				callback()
 
-
-		installNpmModules: (service, callback = (error) ->) ->
-			dir = service.name
-			proc = spawn "npm", ["install"], stdio: "inherit", cwd: dir
-			proc.on "close", () ->
-				callback()
-
-		# work around for https://github.com/npm/npm/issues/5400
-		# where binary modules are not built due to bug in npm
-		rebuildNpmModules: (service, callback = (error) ->) ->
-			dir = service.name
-			proc = spawn "npm", ["rebuild"], stdio: "inherit", cwd: dir
-			proc.on "close", () ->
-				callback()
-
-		runGruntInstall: (service, callback = (error) ->) ->
-			dir = service.name
-			proc = spawn "grunt", ["install"], stdio: "inherit", cwd: dir
-			proc.on "close", () ->
-				callback()
+		postinstallMessage: (callback = (error) ->) ->
+			grunt.log.write """
+			Services cloned:
+				#{service.name for service in SERVICES}
+			To install services run:
+				$ source bin/install-services
+			This will install the required node versions and run `npm install` for each service.
+			See https://github.com/sharelatex/sharelatex/pull/549 for more info.
+			"""
+			callback()
 
 		checkMake: (callback = (error) ->) ->
 			grunt.log.write "Checking make is installed... "
