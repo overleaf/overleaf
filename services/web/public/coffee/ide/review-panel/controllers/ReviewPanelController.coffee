@@ -416,6 +416,8 @@ define [
 			$scope.toggleReviewPanel()
 
 		$scope.addNewCommentFromKbdShortcut = () ->
+			if !$scope.project.features.trackChangesVisible
+				return
 			$scope.$broadcast "comment:select_line"
 			if !$scope.ui.reviewPanelOpen
 				$scope.toggleReviewPanel()
@@ -575,6 +577,8 @@ define [
 				$scope.openTrackChangesUpgradeModal()
 
 		$scope.toggleTrackChangesFromKbdShortcut = () ->
+			if !$scope.project.features.trackChangesVisible
+				return
 			if $scope.editor.wantTrackChanges
 				$scope.toggleTrackChanges false
 			else 
