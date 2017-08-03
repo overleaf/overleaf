@@ -125,7 +125,7 @@ module.exports = DocumentUpdaterHandler =
 
 	getProjectDocs: (project_id, callback = (error, docs) ->) ->
 		timer = new metrics.Timer("get-project-docs")
-		url = "#{settings.apis.documentupdater.url}/project/#{project_id}"
+		url = "#{settings.apis.documentupdater.url}/project/#{project_id}/doc"
 		logger.log project_id:project_id, "getting project docs from document updater"
 		request.get url, (error, res, body)->
 			timer.done()
