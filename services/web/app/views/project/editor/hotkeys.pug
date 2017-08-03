@@ -90,8 +90,8 @@ script(type="text/ng-template", id="hotkeysModalTemplate")
 					span.combination Ctrl + Space 
 					span.description Search References
 		
-		h3 #{translate("review")}
-		.row
+		h3(ng-if="trackChangesVisible") #{translate("review")}
+		.row(ng-if="trackChangesVisible")
 			.col-xs-4
 				.hotkey
 					span.combination {{ctrl}} + J
