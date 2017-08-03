@@ -7,12 +7,16 @@ crypto = require "crypto"
 buildKey = (project_id)->
 	return "clsistate:#{project_id}"  # FIXME: should we cluster these on project??
 
-# the "state" of a project is a hash of the relevant attributes in the
+# The "state" of a project is a hash of the relevant attributes in the
 # project object in this case we only need the rootFolder.
 #
-# When it changes the full set of files on the CLSI will need to be
-# updated.  If it doesn't change then we can overwrite changed docs in
-# place on the clsi, getting them from the docupdater.
+# The idea is that it will change if any doc or file is
+# created/renamed/deleted, and also if the content of any file (not
+# doc) changes.
+#
+# When the hash changes the full set of files on the CLSI will need to
+# be updated.  If it doesn't change then we can overwrite changed docs
+# in place on the clsi, getting them from the docupdater.
 #
 # The docupdater is also responsible for unsetting the key in redis if
 # it removes any documents from the doc updater.
