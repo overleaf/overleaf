@@ -158,7 +158,7 @@ public class SwapJobImpl implements SwapJob {
      */
     @Override
     public void evict(String projName) throws IOException {
-        Preconditions.checkNotNull(projName);
+        Preconditions.checkNotNull(projName, "projName was null");
         Log.info("Evicting project: {}", projName);
         try (LockGuard __ = lock.lockGuard(projName)) {
             long[] sizePtr = new long[1];

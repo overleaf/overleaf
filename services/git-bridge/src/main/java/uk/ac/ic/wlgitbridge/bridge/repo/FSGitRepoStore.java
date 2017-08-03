@@ -76,13 +76,13 @@ public class FSGitRepoStore implements RepoStore {
             String projectName,
             long[] sizePtr
     ) throws IOException {
-        Preconditions.checkArgument(Project.isValidProjectName(projectName));
+        Project.checkValidProjectName(projectName);
         return Tar.bz2.zip(getDotGitForProject(projectName), sizePtr);
     }
 
     @Override
     public void remove(String projectName) throws IOException {
-        Preconditions.checkArgument(Project.isValidProjectName(projectName));
+        Project.checkValidProjectName(projectName);
         FileUtils.deleteDirectory(new File(rootDirectory, projectName));
     }
 
@@ -91,13 +91,22 @@ public class FSGitRepoStore implements RepoStore {
             String projectName,
             InputStream dataStream
     ) throws IOException {
-        Preconditions.checkArgument(Project.isValidProjectName(projectName));
-        Preconditions.checkState(getDirForProject(projectName).mkdirs());
+        Preconditions.checkArgument(
+                Project.isValidProjectName(projectName),
+                "[%s] invalid project name: ",
+                projectName
+        );
+        Preconditions.checkState(
+                getDirForProject(projectName).mkdirs(),
+                "[%s] directories for " +
+                        "evicted project already exist",
+                projectName
+        );
         Tar.bz2.unzip(dataStream, getDirForProject(projectName));
     }
 
     private File getDirForProject(String projectName) {
-        Preconditions.checkArgument(Project.isValidProjectName(projectName));
+        Project.checkValidProjectName(projectName);
         return Paths.get(
                 rootDirectory.getAbsolutePath()
         ).resolve(
@@ -106,7 +115,7 @@ public class FSGitRepoStore implements RepoStore {
     }
 
     private File getDotGitForProject(String projectName) {
-        Preconditions.checkArgument(Project.isValidProjectName(projectName));
+        Project.checkValidProjectName(projectName);
         return Paths.get(
                 rootDirectory.getAbsolutePath()
         ).resolve(
@@ -119,7 +128,12 @@ public class FSGitRepoStore implements RepoStore {
     private File initRootGitDirectory(String rootGitDirectoryPath) {
         File rootGitDirectory = new File(rootGitDirectoryPath);
         rootGitDirectory.mkdirs();
-        Preconditions.checkArgument(rootGitDirectory.isDirectory());
+        Preconditions.checkArgument(
+                rootGitDirectory.isDirectory(),
+                "given root git directory " +
+                        "is not a directory: %s",
+                rootGitDirectory.getAbsolutePath()
+        );
         return rootGitDirectory;
     }
 
