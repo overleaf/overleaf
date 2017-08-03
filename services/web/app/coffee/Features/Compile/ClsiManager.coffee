@@ -29,7 +29,6 @@ module.exports = ClsiManager =
 		ClsiManager._buildRequest project_id, options, (error, req) ->
 			return callback(error) if error?
 			logger.log project_id: project_id, "sending compile to CLSI"
-			console.log "REQUEST", JSON.stringify(req, null, 2)
 			ClsiFormatChecker.checkRecoursesForProblems req.compile?.resources, (err, validationProblems)->
 				if err?
 					logger.err err, project_id, "could not check resources for potential problems before sending to clsi"
@@ -41,10 +40,7 @@ module.exports = ClsiManager =
 				if error?
 					logger.err err:error, project_id:project_id, "error sending request to clsi"
 					return callback(error)
-				if response?.compile?.status is "conflict"
-					# FIXME try again without incremental option
-					console.log "CONFLICT TRY AGAIN"
-				logger.log project_id: project_id, outputFilesLength: response?.outputFiles?.length, status: response?.status, "received compile response from CLSI"
+				logger.log project_id: project_id, outputFilesLength: response?.outputFiles?.length, status: response?.status, compile_status: response?.compile?.status, "received compile response from CLSI"
 				ClsiCookieManager._getServerId project_id, (err, clsiServerId)->
 					if err?
 						logger.err err:err, project_id:project_id, "error getting server id"
@@ -124,7 +120,6 @@ module.exports = ClsiManager =
 		ProjectGetter.getProject project_id, {compiler: 1, rootDoc_id: 1, imageName: 1, rootFolder:1}, (error, project) ->
 			return callback(error) if error?
 			return callback(new Errors.NotFoundError("project does not exist: #{project_id}")) if !project?
-			console.log "PROJECT", project, JSON.stringify(project.rootFolder,null,2)
 			if project.compiler not in ClsiManager.VALID_COMPILERS
 				project.compiler = "pdflatex"
 
@@ -137,20 +132,17 @@ module.exports = ClsiManager =
 						# make this incremental
 						ProjectEntityHandler.getAllDocPathsFromProject project, (error, docPath) ->
 							return callback(error) if error?
-							console.log "PATHS", docPath
-							console.log "DOCS", docUpdaterDocs
 							docs = {}
 							for doc in docUpdaterDocs or []
 								path = docPath[doc._id]
 								docs[path] = doc
-							console.log "MAPPED DOCS", docs
 							options.incremental = projectState
 							ClsiManager._finaliseRequest project_id, options, project, docs, [], callback
 				else
 					ClsiManager._getContentFromMongo project_id, (error, docs, files) ->
 						return callback(error) if error?
-						console.log "DOCS", docs
-						# FIXME want to store state after project has been sent to clsi
+						# FIXME want to store state after project has been sent to
+						# clsi, but need to do it here.
 						ClsiStateManager.setProjectState project_id, project, (error, projectState) ->
 							if error?
 								logger.err err:error, project_id:project_id, "error storing state in redis"
