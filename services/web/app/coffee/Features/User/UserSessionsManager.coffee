@@ -114,7 +114,7 @@ module.exports = UserSessionsManager =
 					callback(null)
 
 	touch: (user, callback=(err)->) ->
-		if !user
+		if !user?
 			logger.log {}, "no user to touch sessions for, returning"
 			return callback(null)
 		sessionSetKey = UserSessionsRedis.sessionSetKey(user)
@@ -125,7 +125,7 @@ module.exports = UserSessionsManager =
 			callback(null)
 
 	_checkSessions: (user, callback=(err)->) ->
-		if !user
+		if !user?
 			logger.log {}, "no user, returning"
 			return callback(null)
 		logger.log {user_id: user._id}, "checking sessions for user"
