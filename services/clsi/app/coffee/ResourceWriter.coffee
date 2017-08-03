@@ -5,6 +5,7 @@ async = require "async"
 mkdirp = require "mkdirp"
 OutputFileFinder = require "./OutputFileFinder"
 Metrics = require "./Metrics"
+Errors = require "./Errors"
 logger = require "logger-sharelatex"
 settings = require("settings-sharelatex")
 
@@ -16,7 +17,7 @@ module.exports = ResourceWriter =
 		if request.syncType? is "incremental"
 			ResourceWriter.checkSyncState request.syncState, basePath, (error, ok) ->
 				logger.log syncState: request.syncState, result:ok, "checked state on incremental request"
-				return callback new Error("invalid state") if not ok
+				return callback new Errors.FilesOutOfSyncError("invalid state for incremental update") if not ok
 				ResourceWriter.saveIncrementalResourcesToDisk request.project_id, request.resources, basePath, callback
 		else
 			@saveAllResourcesToDisk request.project_id, request.resources, basePath, (error) ->
