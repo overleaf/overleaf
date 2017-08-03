@@ -2728,6 +2728,11 @@
       "from": "node-forge@0.2.24",
       "resolved": "https://registry.npmjs.org/node-forge/-/node-forge-0.2.24.tgz"
     },
+    "node-html-encoder": {
+      "version": "0.0.2",
+      "from": "node-html-encoder@0.0.2",
+      "resolved": "https://registry.npmjs.org/node-html-encoder/-/node-html-encoder-0.0.2.tgz"
+    },
     "node-pre-gyp": {
       "version": "0.6.30",
       "from": "node-pre-gyp@0.6.30",

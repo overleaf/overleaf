@@ -11,6 +11,7 @@ async = require("async")
 Modules = require "./Modules"
 Url = require "url"
 PackageVersions = require "./PackageVersions"
+htmlEncoder = new require("node-html-encoder").Encoder("numerical")
 fingerprints = {}
 Path = require 'path'
 
@@ -151,9 +152,10 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 		next()
 
 	webRouter.use (req, res, next)->
-		res.locals.translate = (key, vars = {}) ->
+		res.locals.translate = (key, vars = {}, htmlEncode = false) ->
 			vars.appName = Settings.appName
-			req.i18n.translate(key, vars)
+			str = req.i18n.translate(key, vars)
+			if htmlEncode then htmlEncoder.htmlEncode(str) else str
 		# Don't include the query string parameters, otherwise Google
 		# treats ?nocdn=true as the canonical version
 		res.locals.currentUrl = Url.parse(req.originalUrl).pathname
