@@ -62,6 +62,15 @@ module.exports = SubscriptionUpdater =
 			invited_emails: email
 		}, callback
 
+	deleteSubscription: (subscription_id, callback = (error) ->) ->
+		SubscriptionLocator.getSubscription subscription_id, (err, subscription) ->
+			return callback(err) if err?
+			affected_user_ids = [subscription.admin_id].concat(subscription.member_ids or [])
+			logger.log {subscription_id, affected_user_ids}, "deleting subscription and downgrading users"
+			Subscription.remove {_id: ObjectId(subscription_id)}, (err) ->
+				return callback(err) if err?
+				async.mapSeries affected_user_ids, SubscriptionUpdater._setUsersMinimumFeatures, callback
+
 	_createNewSubscription: (adminUser_id, callback)->
 		logger.log adminUser_id:adminUser_id, "creating new subscription"
 		subscription = new Subscription(admin_id:adminUser_id)
