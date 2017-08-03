@@ -1,9 +1,10 @@
 define [
 	"ide/editor/directives/aceEditor/auto-complete/SuggestionManager"
 	"ide/editor/directives/aceEditor/auto-complete/SnippetManager"
+	"ide/editor/directives/aceEditor/auto-complete/StaticSuggestionManager"
 	"ace/ace"
 	"ace/ext-language_tools"
-], (SuggestionManager, SnippetManager) ->
+], (SuggestionManager, SnippetManager, StaticSuggestionManager) ->
 	Range = ace.require("ace/range").Range
 	aceSnippetManager = ace.require('ace/snippets').snippetManager
 
@@ -43,6 +44,8 @@ define [
 			})
 
 			SnippetCompleter = new SnippetManager()
+
+			StaticCommandCompleter = new StaticSuggestionManager()
 
 			labelsManager = @labelsManager
 			LabelsCompleter =
@@ -112,7 +115,11 @@ define [
 							else
 								callback null, result
 
-			@editor.completers = [@suggestionManager, SnippetCompleter, ReferencesCompleter, LabelsCompleter]
+			@editor.completers = [@suggestionManager,
+								  SnippetCompleter,
+								  StaticCommandCompleter,
+								  ReferencesCompleter,
+								  LabelsCompleter]
 
 		disable: () ->
 			@editor.setOptions({
