@@ -90,6 +90,8 @@ define [
 		$scope.chat = {}
 
 		ide.toggleReviewPanel = $scope.toggleReviewPanel = () ->
+			if !$scope.project.features.trackChangesVisible
+				return
 			$scope.ui.reviewPanelOpen = !$scope.ui.reviewPanelOpen
 			event_tracking.sendMB "rp-toggle-panel", { value : $scope.ui.reviewPanelOpen }
 
