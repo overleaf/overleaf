@@ -123,13 +123,13 @@ module.exports = ClsiManager =
 			if project.compiler not in ClsiManager.VALID_COMPILERS
 				project.compiler = "pdflatex"
 
-			ClsiStateManager.checkProjectStateMatch project_id, project, (error, stateOk, projectState) ->
+			ClsiStateManager.checkProjectStateMatch project_id, project, (error, stateOk, projectStateHash) ->
 				return callback(error) if error?
 				logger.log project_id: project_id, checkState: stateOk, "checked project state"
-				if stateOk and options.syncType isnt "full" # incremental
+				# see if we can send an incremental update to the CLSI
+				if stateOk and options.syncType isnt "full"
 					ClsiManager._getContentFromDocUpdater project_id, (error, docUpdaterDocs) ->
 						return callback(error) if error?
-						# make this incremental
 						ProjectEntityHandler.getAllDocPathsFromProject project, (error, docPath) ->
 							return callback(error) if error?
 							docs = {}
@@ -137,19 +137,20 @@ module.exports = ClsiManager =
 								path = docPath[doc._id]
 								docs[path] = doc
 							options.syncType = "incremental"
-							options.syncState = projectState
+							options.syncState = projectStateHash
+							# send new docs but not files as those are already on the clsi
 							ClsiManager._finaliseRequest project_id, options, project, docs, [], callback
 				else
 					ClsiManager._getContentFromMongo project_id, (error, docs, files) ->
 						return callback(error) if error?
 						# FIXME want to store state after project has been sent to
 						# clsi, but need to do it here.
-						ClsiStateManager.setProjectState project_id, project, (error, projectState) ->
+						ClsiStateManager.setProjectState project_id, project, (error, projectStateHash) ->
 							if error?
 								logger.err err:error, project_id:project_id, "error storing state in redis"
 								#return callback(error)
 							options.syncType = "full"
-							options.syncState = projectState
+							options.syncState = projectStateHash
 							ClsiManager._finaliseRequest project_id, options, project, docs, files, callback
 
 	_getContentFromDocUpdater: (project_id, callback = (error, docs) ->) ->
