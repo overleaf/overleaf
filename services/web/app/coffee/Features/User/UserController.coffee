@@ -120,8 +120,9 @@ module.exports = UserController =
 		req.session.destroy (err)->
 			if err
 				logger.err err: err, 'error destorying session'
-			UserSessionsManager.untrackSession(user, sessionId)
-			SudoModeHandler.clearSudoMode(user._id)
+			if user?
+				UserSessionsManager.untrackSession(user, sessionId)
+				SudoModeHandler.clearSudoMode(user._id)
 			res.redirect '/login'
 
 	register : (req, res, next = (error) ->)->
