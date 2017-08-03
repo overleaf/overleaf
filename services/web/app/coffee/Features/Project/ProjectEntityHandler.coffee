@@ -20,14 +20,7 @@ CooldownManager = require '../Cooldown/CooldownManager'
 
 module.exports = ProjectEntityHandler =
 	getAllFolders: (project_id,  callback) ->
-		logger.log project_id:project_id, "getting all folders for project" 
-		folders = {}
-		processFolder = (basePath, folder) ->
-			folders[basePath] = folder
-			for childFolder in (folder.folders or [])
-				if childFolder.name?
-					processFolder path.join(basePath, childFolder.name), childFolder
-
+		logger.log project_id:project_id, "getting all folders for project"
 		ProjectGetter.getProjectWithoutDocLines project_id, (err, project) ->
 			return callback(err) if err?
 			return callback("no project") if !project?
