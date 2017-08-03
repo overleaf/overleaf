@@ -103,8 +103,8 @@ define [
 			defaultPasswordOpts =
 				pattern: ""
 				length:
-					min: 1
-					max: 50
+					min: 6
+					max: 128
 				allowEmpty: false
 				allowAnyChars: false
 				isMasked: true
@@ -127,8 +127,6 @@ define [
 			[asyncFormCtrl, ngModelCtrl] = ctrl
 
 			ngModelCtrl.$parsers.unshift (modelValue) ->
-				
-			
 				isValid = passField.validatePass()
 				email = asyncFormCtrl.getEmail() || window.usersEmail
 				if !isValid
@@ -141,5 +139,8 @@ define [
 				if opts.length.max? and modelValue.length == opts.length.max
 					isValid = false
 					scope.complexPasswordErrorMessage = "Maximum password length #{opts.length.max} reached"
+				if opts.length.min? and modelValue.length < opts.length.min
+					isValid = false
+					scope.complexPasswordErrorMessage = "Password too short, minimum #{opts.length.min}"
 				ngModelCtrl.$setValidity('complexPassword', isValid)
 				return modelValue

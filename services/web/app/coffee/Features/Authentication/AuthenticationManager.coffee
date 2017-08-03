@@ -29,8 +29,12 @@ module.exports = AuthenticationManager =
 				callback null, null
 
 	setUserPassword: (user_id, password, callback = (error) ->) ->
-		if Settings.passwordStrengthOptions?.length?.max? and Settings.passwordStrengthOptions?.length?.max < password.length
+		if (Settings.passwordStrengthOptions?.length?.max? and
+				Settings.passwordStrengthOptions?.length?.max < password.length)
 			return callback("password is too long")
+		if (Settings.passwordStrengthOptions?.length?.min? and
+				Settings.passwordStrengthOptions?.length?.min > password.length)
+			return callback("password is too short")
 
 		bcrypt.genSalt BCRYPT_ROUNDS, (error, salt) ->
 			return callback(error) if error?
