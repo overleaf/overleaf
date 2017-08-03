@@ -31,11 +31,11 @@ module.exports = RequestParser =
 			response.check = @_parseAttribute "check",
 				compile.options.check,
 				type: "string"
-			response.incremental = @_parseAttribute "incremental",
-				compile.options.incremental,
+			response.syncType = @_parseAttribute "syncType",
+				compile.options.syncType,
 				type: "string"
-			response.state = @_parseAttribute "state",
-				compile.options.state,
+			response.syncState = @_parseAttribute "syncState",
+				compile.options.syncState,
 				type: "string"
 
 			if response.timeout > RequestParser.MAX_TIMEOUT
