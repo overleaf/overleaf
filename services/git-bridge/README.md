@@ -61,6 +61,9 @@ The configuration file is in `.json` format.
                                      with protocol and
                                      without trailing slash
         },
+        "repoStore" (object, optional): { configure the repo store
+            "maxFileSize" (long, optional): maximum size of a file, inclusive
+        },
         "swapStore" (object, optional): { the place to swap projects to.
                                           if null, type defaults to
                                           "noop"
