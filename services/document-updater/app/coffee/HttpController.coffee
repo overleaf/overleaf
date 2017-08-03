@@ -39,12 +39,12 @@ module.exports = HttpController =
 
 	getProjectDocs: (req, res, next = (error) ->) ->
 		project_id = req.params.project_id
-		# filter is string of existing docs "id:version,id:version,..."
-		filterItems = req.query?.filter?.split(',') or []
-		logger.log project_id: project_id, filter: filterItems, "getting docs via http"
+		# exclude is string of existing docs "id:version,id:version,..."
+		excludeItems = req.query?.exclude?.split(',') or []
+		logger.log project_id: project_id, exclude: excludeItems, "getting docs via http"
 		timer = new Metrics.Timer("http.getAllDocs")
 		excludeVersions = {}
-		for item in filterItems
+		for item in excludeItems
 			[id,version] = item?.split(':')
 			excludeVersions[id] = version
 		logger.log {project_id: project_id, excludeVersions: excludeVersions}, "excluding versions"
