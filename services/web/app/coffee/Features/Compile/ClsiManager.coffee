@@ -20,7 +20,7 @@ module.exports = ClsiManager =
 		ClsiManager.sendRequestOnce project_id, user_id, _.clone(options), (error, status, result...) ->
 			return callback(error) if error?
 			if status is 'conflict'
-				options.state = "conflict" # will force full compile
+				options.syncType = "full" #  force full compile
 				ClsiManager.sendRequestOnce project_id, user_id, options, callback # try again
 			else
 				callback(error, status, result...)
@@ -126,7 +126,7 @@ module.exports = ClsiManager =
 			ClsiStateManager.checkProjectStateMatch project_id, project, (error, stateOk, projectState) ->
 				return callback(error) if error?
 				logger.log project_id: project_id, checkState: stateOk, "checked project state"
-				if stateOk and not options.state? # incremental
+				if stateOk and options.syncType isnt "full" # incremental
 					ClsiManager._getContentFromDocUpdater project_id, (error, docUpdaterDocs) ->
 						return callback(error) if error?
 						# make this incremental
@@ -136,7 +136,8 @@ module.exports = ClsiManager =
 							for doc in docUpdaterDocs or []
 								path = docPath[doc._id]
 								docs[path] = doc
-							options.incremental = projectState
+							options.syncType = "incremental"
+							options.syncState = projectState
 							ClsiManager._finaliseRequest project_id, options, project, docs, [], callback
 				else
 					ClsiManager._getContentFromMongo project_id, (error, docs, files) ->
@@ -147,7 +148,8 @@ module.exports = ClsiManager =
 							if error?
 								logger.err err:error, project_id:project_id, "error storing state in redis"
 								#return callback(error)
-							options.state = projectState
+							options.syncType = "full"
+							options.syncState = projectState
 							ClsiManager._finaliseRequest project_id, options, project, docs, files, callback
 
 	_getContentFromDocUpdater: (project_id, callback = (error, docs) ->) ->
@@ -200,8 +202,8 @@ module.exports = ClsiManager =
 					imageName: project.imageName
 					draft: !!options.draft
 					check: options.check
-					incremental: options.incremental
-					state: options.state
+					syncType: options.syncType
+					syncState: options.syncState
 				rootResourcePath: rootResourcePath
 				resources: resources
 		}
