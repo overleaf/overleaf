@@ -128,10 +128,9 @@ module.exports = ClsiManager =
 			if project.compiler not in ClsiManager.VALID_COMPILERS
 				project.compiler = "pdflatex"
 
-			ClsiStateManager.checkState project_id, project, (error, stateOk, state) ->
+			ClsiStateManager.checkProjectStateMatch project_id, project, (error, stateOk, projectState) ->
 				return callback(error) if error?
 				logger.log project_id: project_id, checkState: stateOk, "checked project state"
-				console.log "OPTIONS ARE", options
 				if stateOk and not options.state? # incremental
 					ClsiManager._getContentFromDocUpdater project_id, (error, docUpdaterDocs) ->
 						return callback(error) if error?
@@ -145,18 +144,18 @@ module.exports = ClsiManager =
 								path = docPath[doc._id]
 								docs[path] = doc
 							console.log "MAPPED DOCS", docs
-							options.incremental = state
+							options.incremental = projectState
 							ClsiManager._finaliseRequest project_id, options, project, docs, [], callback
 				else
 					ClsiManager._getContentFromMongo project_id, (error, docs, files) ->
 						return callback(error) if error?
 						console.log "DOCS", docs
 						# FIXME want to store state after project has been sent to clsi
-						ClsiStateManager.setState project_id, project, (error, state) ->
+						ClsiStateManager.setProjectState project_id, project, (error, projectState) ->
 							if error?
 								logger.err err:error, project_id:project_id, "error storing state in redis"
 								#return callback(error)
-							options.state = state
+							options.state = projectState
 							ClsiManager._finaliseRequest project_id, options, project, docs, files, callback
 
 	_getContentFromDocUpdater: (project_id, callback = (error, docs) ->) ->
