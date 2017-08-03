@@ -123,11 +123,11 @@ module.exports = ClsiManager =
 			if project.compiler not in ClsiManager.VALID_COMPILERS
 				project.compiler = "pdflatex"
 
-			ClsiStateManager.checkProjectStateMatch project_id, project, (error, stateOk, projectStateHash) ->
+			ClsiStateManager.checkProjectStateMatch project_id, project, (error, projectStateUnchanged, projectStateHash) ->
 				return callback(error) if error?
-				logger.log project_id: project_id, checkState: stateOk, "checked project state"
+				logger.log project_id: project_id, projectStateUnchanged: projectStateUnchanged, "checked project state"
 				# see if we can send an incremental update to the CLSI
-				if stateOk and options.syncType isnt "full"
+				if projectStateUnchanged and options.syncType isnt "full"
 					ClsiManager._getContentFromDocUpdater project_id, (error, docUpdaterDocs) ->
 						return callback(error) if error?
 						ProjectEntityHandler.getAllDocPathsFromProject project, (error, docPath) ->
