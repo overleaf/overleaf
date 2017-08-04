@@ -1436,6 +1436,7 @@ oop.inherits(LatexWorker, Mirror);
         } catch (e) {
             console.log(e);
             disabled = true;
+            this.sender.emit("fatal-error", e);
             errors = [];
         }
         this.sender.emit("lint", {
@@ -1657,6 +1658,7 @@ var readOptionalParams = function(TokeniseResult, k) {
     };
     var count = 0;
     var nextToken = Tokens[k+1];
+    if (!nextToken) { return null };
     var pos = nextToken[2];
 
     for (var i = pos, end = text.length; i < end; i++) {
