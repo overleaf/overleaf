@@ -9,6 +9,7 @@ logger = require "logger-sharelatex"
 async = require "async"
 _ = require "underscore"
 Settings = require "settings-sharelatex"
+keys = Settings.redis.lock.key_schema
 
 module.exports = UpdatesManager =
 	compressAndSaveRawUpdates: (project_id, doc_id, rawUpdates, temporary, callback = (error) ->) ->
@@ -96,7 +97,9 @@ module.exports = UpdatesManager =
 			length = docUpdates.length
 			# parse the redis strings into ShareJs updates
 			RedisManager.expandDocUpdates docUpdates, (error, rawUpdates) ->
-				return callback(error) if error?
+				if error?
+					logger.err project_id: project_id, doc_id: doc_id, docUpdates: docUpdates, "failed to parse docUpdates"
+					return callback(error)
 				logger.log project_id: project_id, doc_id: doc_id, rawUpdates: rawUpdates, "retrieved raw updates from redis"
 				UpdatesManager.compressAndSaveRawUpdates project_id, doc_id, rawUpdates, temporary, (error) ->
 					return callback(error) if error?
@@ -126,7 +129,7 @@ module.exports = UpdatesManager =
 		UpdatesManager._prepareDocForUpdates project_id, doc_id, (error) ->
 			return callback(error) if error?
 			LockManager.runWithLock(
-				"HistoryLock:#{doc_id}",
+				keys.historyLock({doc_id}),
 				(releaseLock) ->
 					UpdatesManager.processUncompressedUpdates project_id, doc_id, temporary, releaseLock
 				callback

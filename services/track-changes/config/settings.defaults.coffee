@@ -18,10 +18,13 @@ module.exports =
 			user: "sharelatex"
 			pass: "password"
 	redis:
-		web:
+		lock:
 			host: "localhost"
 			port: 6379
 			pass: ""
+			key_schema:
+				historyLock: ({doc_id}) -> "HistoryLock:#{doc_id}"
+				historyIndexLock: ({project_id}) -> "HistoryIndexLock:#{project_id}"
 		history:
 			port:"6379"
 			host:"localhost"

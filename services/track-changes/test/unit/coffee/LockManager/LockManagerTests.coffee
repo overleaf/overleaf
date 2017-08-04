@@ -9,7 +9,7 @@ describe "LockManager", ->
 	beforeEach ->
 		@Settings = 		
 			redis:
-				web:{}
+				lock:{}
 		@LockManager = SandboxedModule.require modulePath, requires:
 			"redis-sharelatex":
 				createClient: () => @rclient =

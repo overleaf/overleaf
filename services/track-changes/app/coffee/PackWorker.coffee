@@ -21,8 +21,10 @@ PackManager = require "./PackManager"
 source = process.argv[2]
 DOCUMENT_PACK_DELAY = Number(process.argv[3]) || 1000
 TIMEOUT = Number(process.argv[4]) || 30*60*1000
+COUNT = 0  # number processed
+TOTAL = 0  # total number to process
 
-if source.match(/[^0-9]/)
+if !source.match(/^[0-9]+$/)
 	file = fs.readFileSync source
 	result = for line in file.toString().split('\n')
 		[project_id, doc_id] = line.split(' ')
@@ -37,10 +39,11 @@ shutDownTimer = setTimeout () ->
 	# start the shutdown on the next pack
 	shutDownRequested = true
 	# do a hard shutdown after a further 5 minutes
-	setTimeout () ->
+	hardTimeout = setTimeout () ->
 		logger.error "HARD TIMEOUT in pack archive worker"
 		process.exit()
 	, 5*60*1000
+	hardTimeout.unref()
 , TIMEOUT
 
 logger.log "checking for updates, limit=#{LIMIT}, delay=#{DOCUMENT_PACK_DELAY}, timeout=#{TIMEOUT}"
@@ -61,7 +64,7 @@ finish = () ->
 	db.close () ->
 		logger.log 'closing LockManager Redis Connection'
 		LockManager.close () ->
-			logger.log 'ready to exit from pack archive worker'
+			logger.log {processedCount: COUNT, allCount: TOTAL}, 'ready to exit from pack archive worker'
 			hardTimeout = setTimeout () ->
 				logger.error 'hard exit from pack archive worker'
 				process.exit(1)
@@ -74,7 +77,8 @@ process.on 'exit', (code) ->
 processUpdates = (pending) ->
 	async.eachSeries pending,	(result, callback) ->
 		{_id, project_id, doc_id} = result
-		logger.log {project_id, doc_id}, "processing"
+		COUNT++
+		logger.log {project_id, doc_id}, "processing #{COUNT}/#{TOTAL}"
 		if not project_id? or not doc_id?
 			logger.log {project_id, doc_id}, "skipping pack, missing project/doc id"
 			return callback()
@@ -87,7 +91,7 @@ processUpdates = (pending) ->
 				logger.error {err, result}, "error in pack archive worker"
 				return callback(err)
 			if shutDownRequested
-				logger.error "shutting down pack archive worker"
+				logger.warn "shutting down pack archive worker"
 				return callback(new Error("shutdown"))
 			setTimeout () ->
 				callback(err, result)
@@ -115,11 +119,13 @@ if pending?
 	logger.log "got #{pending.length} entries from #{source}"
 	processUpdates pending
 else
+	oneWeekAgo = new Date(Date.now() - 7 * DAYS)
 	db.docHistory.find({
 		expiresAt: {$exists: false}
 		project_id: {$exists: true}
 		v_end: {$exists: true}
-		_id: {$lt: ObjectIdFromDate(new Date(Date.now() - 7 * DAYS))}
+		_id: {$lt: ObjectIdFromDate(oneWeekAgo)}
+		last_checked: {$lt: oneWeekAgo}
 	}, {_id:1, doc_id:1, project_id:1}).sort({
 		last_checked:1
 	}).limit LIMIT, (err, results) ->
@@ -128,5 +134,6 @@ else
 			finish()
 			return
 		pending = _.uniq results, false, (result) -> result.doc_id.toString()
-		logger.log "found #{pending.length} documents to archive"
+		TOTAL = pending.length
+		logger.log "found #{TOTAL} documents to archive"
 		processUpdates pending
