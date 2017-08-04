@@ -1419,6 +1419,34 @@ var LatexWorker = exports.LatexWorker = function(sender) {
 
 oop.inherits(LatexWorker, Mirror);
 
+(function() {
+    var disabled = false;
+    this.onUpdate = function() {
+        if (disabled) { return ; };
+
+        var value = this.doc.getValue();
+        var errors = [];
+        var contexts = [];
+        try {
+            if (value) {
+                var result = Parse(value);
+                errors = result.errors;
+                contexts = result.contexts;
+            }
+        } catch (e) {
+            console.log(e);
+            disabled = true;
+            this.sender.emit("fatal-error", e);
+            errors = [];
+        }
+        this.sender.emit("lint", {
+          errors: errors,
+          contexts: contexts
+        });
+    };
+
+}).call(LatexWorker.prototype);
+
 var Tokenise = function (text) {
     var Tokens = [];
     var Comments = [];
@@ -1503,22 +1531,8 @@ var Tokenise = function (text) {
                 }
                 idx = SPECIAL.lastIndex = nextSpecialPos;
             }
-        } else if (code === "{") {  // open group
-            Tokens.push([lineNumber, code, pos]);
-        } else if (code === "}") {  // close group
-            Tokens.push([lineNumber, code, pos]);
-        } else if (code === "$") {  // math mode
-            Tokens.push([lineNumber, code, pos]);
-        } else if (code === "&") {  // tabalign
-            Tokens.push([lineNumber, code, pos]);
-        } else if (code === "#") {  // macro parameter
-            Tokens.push([lineNumber, code, pos]);
-        } else if (code === "^") {  // superscript
-            Tokens.push([lineNumber, code, pos]);
-        } else if (code === "_") {  // subscript
-            Tokens.push([lineNumber, code, pos]);
-        } else if (code === "~") {  // active character (space)
-            Tokens.push([lineNumber, code, pos]);
+        } else if (["{", "}", "$", "&", "#", "^", "_", "~"].indexOf(code) > -1) {  // special characters
+            Tokens.push([lineNumber, code, pos, pos+1]);
         } else {
             throw "unrecognised character " + code;
         }
@@ -1539,15 +1553,15 @@ var read1arg = function (TokeniseResult, k, options) {
     };
 
     var open = Tokens[k+1];
-    var env = Tokens[k+2];
+    var delimiter = Tokens[k+2];
     var close = Tokens[k+3];
-    var envName;
+    var delimiterName;
 
     if(open && open[1] === "\\") {
-        envName = open[4]; // array element 4 is command sequence
+        delimiterName = open[4]; // array element 4 is command sequence
         return k + 1;
-    } else if(open && open[1] === "{" && env && env[1] === "\\" && close && close[1] === "}") {
-        envName = env[4]; // NOTE: if we were actually using this, keep track of * above
+    } else if(open && open[1] === "{" && delimiter && delimiter[1] === "\\" && close && close[1] === "}") {
+        delimiterName = delimiter[4]; // NOTE: if we were actually using this, keep track of * above
         return k + 3; // array element 4 is command sequence
     } else {
         return null;
@@ -1579,21 +1593,21 @@ var read1name = function (TokeniseResult, k) {
     var text = TokeniseResult.text;
 
     var open = Tokens[k+1];
-    var env = Tokens[k+2];
+    var delimiter = Tokens[k+2];
     var close = Tokens[k+3];
 
-    if(open && open[1] === "{" && env && env[1] === "Text" && close && close[1] === "}") {
-        var envName = text.substring(env[2], env[3]);
+    if(open && open[1] === "{" && delimiter && delimiter[1] === "Text" && close && close[1] === "}") {
+        var delimiterName = text.substring(delimiter[2], delimiter[3]);
         return k + 3;
-    } else if (open && open[1] === "{" && env && env[1] === "Text") {
-        envName = "";
+    } else if (open && open[1] === "{" && delimiter && delimiter[1] === "Text") {
+        delimiterName = "";
         for (var j = k + 2, tok; (tok = Tokens[j]); j++) {
             if (tok[1] === "Text") {
                 var str = text.substring(tok[2], tok[3]);
                 if (!str.match(/^\S*$/)) { break; }
-                envName = envName + str;
+                delimiterName = delimiterName + str;
             } else if (tok[1] === "_") {
-                envName = envName + "_";
+                delimiterName = delimiterName + "_";
             } else {
                 break;
             }
@@ -1644,6 +1658,7 @@ var readOptionalParams = function(TokeniseResult, k) {
     };
     var count = 0;
     var nextToken = Tokens[k+1];
+    if (!nextToken) { return null };
     var pos = nextToken[2];
 
     for (var i = pos, end = text.length; i < end; i++) {
@@ -1788,7 +1803,7 @@ var InterpretTokens = function (TokeniseResult, ErrorReporter) {
 
     var TokenErrorFromTo = ErrorReporter.TokenErrorFromTo;
     var TokenError = ErrorReporter.TokenError;
-    var Environments = new EnvHandler(ErrorReporter);
+    var Environments = new EnvHandler(TokeniseResult, ErrorReporter);
 
     var nextGroupMathMode = null; // if the next group should have
     var nextGroupMathModeStack = [] ; // tracking all nextGroupMathModes
@@ -1815,28 +1830,28 @@ var InterpretTokens = function (TokeniseResult, ErrorReporter) {
         if (type === "\\") {
             if (seq === "begin" || seq === "end") {
                 var open = Tokens[i+1];
-                var env = Tokens[i+2];
+                var delimiter = Tokens[i+2];
                 var close = Tokens[i+3];
-                if(open && open[1] === "{" && env && env[1] === "Text" && close && close[1] === "}") {
-                    var envName = text.substring(env[2], env[3]);
-                    Environments.push({command: seq, name: envName, token: token, closeToken: close});
+                if(open && open[1] === "{" && delimiter && delimiter[1] === "Text" && close && close[1] === "}") {
+                    var delimiterName = text.substring(delimiter[2], delimiter[3]);
+                    Environments.push({command: seq, name: delimiterName, token: token, closeToken: close});
                     i = i + 3; // advance past these tokens
                 } else {
-                    if (open && open[1] === "{" && env && env[1] === "Text") {
-                        envName = "";
+                    if (open && open[1] === "{" && delimiter && delimiter[1] === "Text") {
+                        delimiterName = "";
                         for (var j = i + 2, tok; (tok = Tokens[j]); j++) {
                             if (tok[1] === "Text") {
                                 var str = text.substring(tok[2], tok[3]);
                                 if (!str.match(/^\S*$/)) { break; }
-                                envName = envName + str;
+                                delimiterName = delimiterName + str;
                             } else if (tok[1] === "_") {
-                                envName = envName + "_";
+                                delimiterName = delimiterName + "_";
                             } else {
                                 break;
                             }
                         }
                         if (tok && tok[1] === "}") {
-                            Environments.push({command: seq, name: envName, token: token, closeToken: close});
+                            Environments.push({command: seq, name: delimiterName, token: token, closeToken: close});
                             i = j; // advance past these tokens
                             continue;
                         }
@@ -1844,8 +1859,8 @@ var InterpretTokens = function (TokeniseResult, ErrorReporter) {
                     var endToken = null;
                     if (open && open[1] === "{") {
                         endToken = open; // we've got a {
-                        if (env && env[1] === "Text") {
-                            endToken = env.slice(); // we've got some text following the {
+                        if (delimiter && delimiter[1] === "Text") {
+                            endToken = delimiter.slice(); // we've got some text following the {
                             start = endToken[2]; end = endToken[3];
                             for (j = start; j < end; j++) {
                                 var char = text[j];
@@ -1978,7 +1993,12 @@ var InterpretTokens = function (TokeniseResult, ErrorReporter) {
             var nextIsDollar = lookAhead && lookAhead[1] === "$";
             currentMathMode = Environments.getMathMode() ; // returns null / $(inline) / $$(display)
             if (nextIsDollar && (!currentMathMode || currentMathMode.command == "$$")) {
-                Environments.push({command:"$$", token:token});
+                if (currentMathMode && currentMathMode.command == "$$") {
+                    var delimiterToken = lookAhead;
+                } else {
+                    var delimiterToken = token;
+                }
+                Environments.push({command:"$$", token:delimiterToken});
                 i = i + 1;
             } else {
                 Environments.push({command:"$", token:token});
@@ -1999,74 +2019,174 @@ var InterpretTokens = function (TokeniseResult, ErrorReporter) {
     return Environments;
 };
 
-var EnvHandler = function (ErrorReporter) {
+var DocumentTree = function(TokeniseResult) {
+    var tree = {
+      children: []
+    };
+    var stack = [tree];
+    
+    this.openEnv = function(startDelimiter) {
+        var currentNode = this.getCurrentNode();
+        var newNode = {
+            startDelimiter: startDelimiter,
+            children: []
+        };
+        currentNode.children.push(newNode);
+        stack.push(newNode);
+    };
+    
+    this.closeEnv = function(endDelimiter) {
+        if (stack.length == 1) {
+            return null
+        }
+        var currentNode = stack.pop();
+        currentNode.endDelimiter = endDelimiter;
+        return currentNode.startDelimiter;
+    };
+    
+    this.getNthPreviousNode = function(n) {
+        var offset = stack.length - n - 1;
+        if (offset < 0)
+            return null;
+        return stack[offset];
+    }
+    
+    this.getCurrentNode = function() {
+        return this.getNthPreviousNode(0);
+    }
+    
+    this.getCurrentDelimiter = function() {
+        return this.getCurrentNode().startDelimiter;
+    };
+
+    this.getPreviousDelimiter = function() {
+        var node = this.getNthPreviousNode(1);
+        if (!node)
+            return null
+        return node.startDelimiter;
+    }
+    
+    this.getDepth = function() {
+        return (stack.length - 1) // Root node doesn't count
+    }
+    
+    this.getContexts = function() {
+        var linePosition = TokeniseResult.linePosition;
+
+        function tokenToRange(token) {
+            var line = token[0], start = token[2], end = token[3];
+            var start_col = start - linePosition[line];
+            if (!end) { end = start + 1; } ;
+            var end_col = end - linePosition[line];
+            return {
+                start: {
+                    row: line,
+                    column: start_col
+                },
+                end: {
+                    row: line,
+                    column: end_col
+                }
+            }
+        };
+        
+        function getContextsFromNode(node) {
+            if (node.startDelimiter && node.startDelimiter.mathMode) {
+                var context = {
+                    type: "math",
+                    range: {
+                        start: tokenToRange(node.startDelimiter.token).start
+                    }
+                };
+                if (node.endDelimiter) {
+                    var closeToken = node.endDelimiter.closeToken || node.endDelimiter.token;
+                    context.range.end = tokenToRange(closeToken).end;
+                };
+                return [context];
+            } else {
+                var contexts = [];
+                for (var i = 0; i < node.children.length; i++) {
+                    var child = node.children[i];
+                    contexts = contexts.concat(getContextsFromNode(child));
+                }
+                return contexts;
+            }
+        };
+        
+        return getContextsFromNode(tree);
+    }
+}
+
+var EnvHandler = function (TokeniseResult, ErrorReporter) {
     var ErrorTo = ErrorReporter.EnvErrorTo;
     var ErrorFromTo = ErrorReporter.EnvErrorFromTo;
     var ErrorFrom = ErrorReporter.EnvErrorFrom;
 
-    var envs = [];
+    var delimiters = [];
 
-    var state = [];
+    var document = new DocumentTree(TokeniseResult);
     var documentClosed = null;
     var inVerbatim = false;
     var verbatimRanges = [];
-
-    this.Environments = envs;
-
-    this.push = function (newEnv) {
-        this.setEnvProps(newEnv);
-        this.checkAndUpdateState(newEnv);
-        envs.push(newEnv);
+    
+    this.getDocument = function() {
+        return document;
     };
 
-    this._endVerbatim = function (thisEnv) {
-        var lastEnv = state.pop();
-        if (lastEnv && lastEnv.name === thisEnv.name) {
+    this.push = function (newDelimiter) {
+        this.setDelimiterProps(newDelimiter);
+        this.checkAndUpdateState(newDelimiter);
+        delimiters.push(newDelimiter);
+    };
+
+    this._endVerbatim = function (thisDelimiter) {
+        var lastDelimiter = document.getCurrentDelimiter();
+        if (lastDelimiter && lastDelimiter.name === thisDelimiter.name) {
             inVerbatim = false;
-            verbatimRanges.push({start: lastEnv.token[2], end: thisEnv.token[2]});
-        } else {
-            if(lastEnv) { state.push(lastEnv); } ;
+            document.closeEnv(thisDelimiter);
+            verbatimRanges.push({start: lastDelimiter.token[2], end: thisDelimiter.token[2]});
         }
     };
 
     var invalidEnvs = [];
 
-    this._end = function (thisEnv) {
+    this._end = function (thisDelimiter) {
         do {
-            var lastEnv = state.pop();
+            var lastDelimiter = document.getCurrentDelimiter();
             var retry = false;
             var i;
 
-            if (closedBy(lastEnv, thisEnv)) {
-                if (thisEnv.command === "end" && thisEnv.name === "document" && !documentClosed) {
-                    documentClosed = thisEnv;
+            if (closedBy(lastDelimiter, thisDelimiter)) {
+                document.closeEnv(thisDelimiter);
+                if (thisDelimiter.command === "end" && thisDelimiter.name === "document" && !documentClosed) {
+                    documentClosed = thisDelimiter;
                 };
                 return;
-            } else if (!lastEnv) {
+            } else if (!lastDelimiter) {
                 if (documentClosed) {
-                    ErrorFromTo(documentClosed, thisEnv, "\\end{" + documentClosed.name + "} is followed by unexpected content",{errorAtStart: true, type: "info"});
+                    ErrorFromTo(documentClosed, thisDelimiter, "\\end{" + documentClosed.name + "} is followed by unexpected content",{errorAtStart: true, type: "info"});
                 } else {
-                    ErrorTo(thisEnv, "unexpected " + getName(thisEnv));
+                    ErrorTo(thisDelimiter, "unexpected " + getName(thisDelimiter));
                 }
-            } else if (invalidEnvs.length > 0 && (i = indexOfClosingEnvInArray(invalidEnvs, thisEnv) > -1)) {
+            } else if (invalidEnvs.length > 0 && (i = indexOfClosingEnvInArray(invalidEnvs, thisDelimiter) > -1)) {
                 invalidEnvs.splice(i, 1);
-                if (lastEnv) { state.push(lastEnv); } ;
                 return;
             } else {
-                var status = reportError(lastEnv, thisEnv);
-                if (envPrecedence(lastEnv) < envPrecedence(thisEnv)) {
-                    invalidEnvs.push(lastEnv);
+                var status = reportError(lastDelimiter, thisDelimiter);
+                if (delimiterPrecedence(lastDelimiter) < delimiterPrecedence(thisDelimiter)) {
+                    document.closeEnv();
+                    invalidEnvs.push(lastDelimiter);
                     retry = true;
                 } else {
-                    var prevLastEnv = state.pop();
-                    if(prevLastEnv) {
-                        if (thisEnv.name === prevLastEnv.name) {
+                    var prevDelimiter = document.getPreviousDelimiter();
+                    if(prevDelimiter) {
+                        if (thisDelimiter.name === prevDelimiter.name) {
+                            document.closeEnv() // Close current env
+                            document.closeEnv(thisDelimiter) // Close previous env
                             return;
-                        } else {
-                            state.push(prevLastEnv);
                         }
                     }
-                    invalidEnvs.push(lastEnv);
+                    invalidEnvs.push(lastDelimiter);
                 }
 
             }
@@ -2082,28 +2202,28 @@ var EnvHandler = function (ErrorReporter) {
         "$$": "$$"
     };
 
-    var closedBy = function (lastEnv, thisEnv) {
-        if (!lastEnv) {
+    var closedBy = function (lastDelimiter, thisDelimiter) {
+        if (!lastDelimiter) {
             return false ;
-        } else if (thisEnv.command === "end") {
-            return lastEnv.command === "begin" && lastEnv.name === thisEnv.name;
-        } else if (thisEnv.command === CLOSING_DELIMITER[lastEnv.command]) {
+        } else if (thisDelimiter.command === "end") {
+            return lastDelimiter.command === "begin" && lastDelimiter.name === thisDelimiter.name;
+        } else if (thisDelimiter.command === CLOSING_DELIMITER[lastDelimiter.command]) {
             return true;
         } else {
             return false;
         }
     };
 
-    var indexOfClosingEnvInArray = function (envs, thisEnv) {
-        for (var i = 0, n = envs.length; i < n ; i++) {
-            if (closedBy(envs[i], thisEnv)) {
+    var indexOfClosingEnvInArray = function (delimiters, thisDelimiter) {
+        for (var i = 0, n = delimiters.length; i < n ; i++) {
+            if (closedBy(delimiters[i], thisDelimiter)) {
                 return i;
             }
         }
         return -1;
     };
 
-    var envPrecedence = function (env) {
+    var delimiterPrecedence = function (delimiter) {
         var openScore = {
             "{" : 1,
             "left" : 2,
@@ -2118,14 +2238,14 @@ var EnvHandler = function (ErrorReporter) {
             "$$" : 5,
             "end": 4
         };
-        if (env.command) {
-            return openScore[env.command] || closeScore[env.command];
+        if (delimiter.command) {
+            return openScore[delimiter.command] || closeScore[delimiter.command];
         } else {
             return 0;
         }
     };
 
-    var getName = function(env) {
+    var getName = function(delimiter) {
         var description = {
             "{" : "open group {",
             "}" : "close group }",
@@ -2138,12 +2258,12 @@ var EnvHandler = function (ErrorReporter) {
             "left" : "\\left",
             "right" : "\\right"
         };
-        if (env.command === "begin" || env.command === "end") {
-            return "\\" + env.command + "{" + env.name + "}";
-        } else if (env.command in description) {
-            return description[env.command];
+        if (delimiter.command === "begin" || delimiter.command === "end") {
+            return "\\" + delimiter.command + "{" + delimiter.name + "}";
+        } else if (delimiter.command in description) {
+            return description[delimiter.command];
         } else {
-            return env.command;
+            return delimiter.command;
         }
     };
 
@@ -2151,81 +2271,81 @@ var EnvHandler = function (ErrorReporter) {
     var UNCLOSED_GROUP = 2;
     var UNCLOSED_ENV = 3;
 
-    var reportError = function(lastEnv, thisEnv) {
-        if (!lastEnv) { // unexpected close, nothing was open!
+    var reportError = function(lastDelimiter, thisDelimiter) {
+        if (!lastDelimiter) { // unexpected close, nothing was open!
             if (documentClosed) {
-                ErrorFromTo(documentClosed, thisEnv, "\\end{" + documentClosed.name + "} is followed by unexpected end group }",{errorAtStart: true, type: "info"});
+                ErrorFromTo(documentClosed, thisDelimiter, "\\end{" + documentClosed.name + "} is followed by unexpected end group }",{errorAtStart: true, type: "info"});
             } else {
-                ErrorTo(thisEnv, "unexpected " + getName(thisEnv));
+                ErrorTo(thisDelimiter, "unexpected " + getName(thisDelimiter));
             };
             return EXTRA_CLOSE;
-        } else if (lastEnv.command === "{" && thisEnv.command === "end") {
-            ErrorFromTo(lastEnv, thisEnv, "unclosed " + getName(lastEnv) + " found at " + getName(thisEnv),
+        } else if (lastDelimiter.command === "{" && thisDelimiter.command === "end") {
+            ErrorFromTo(lastDelimiter, thisDelimiter, "unclosed " + getName(lastDelimiter) + " found at " + getName(thisDelimiter),
                         {suppressIfEditing:true, errorAtStart: true, type:"warning"});
             return UNCLOSED_GROUP;
         } else {
-            var pLast = envPrecedence(lastEnv);
-            var pThis = envPrecedence(thisEnv);
+            var pLast = delimiterPrecedence(lastDelimiter);
+            var pThis = delimiterPrecedence(thisDelimiter);
             if (pThis > pLast) {
-                ErrorFromTo(lastEnv, thisEnv, "unclosed " + getName(lastEnv) + " found at " + getName(thisEnv),
+                ErrorFromTo(lastDelimiter, thisDelimiter, "unclosed " + getName(lastDelimiter) + " found at " + getName(thisDelimiter),
                            {suppressIfEditing:true, errorAtStart: true});
             } else {
-                ErrorFromTo(lastEnv, thisEnv, "unexpected " + getName(thisEnv) + " after " + getName(lastEnv));
+                ErrorFromTo(lastDelimiter, thisDelimiter, "unexpected " + getName(thisDelimiter) + " after " + getName(lastDelimiter));
             }
             return UNCLOSED_ENV;
         };
     };
 
-    this._beginMathMode = function (thisEnv) {
+    this._beginMathMode = function (thisDelimiter) {
         var currentMathMode = this.getMathMode(); // undefined, null, $, $$, name of mathmode env
         if (currentMathMode) {
-            ErrorFrom(thisEnv, getName(thisEnv) + " used inside existing math mode " + getName(currentMathMode),
+            ErrorFrom(thisDelimiter, getName(thisDelimiter) + " used inside existing math mode " + getName(currentMathMode),
                       {suppressIfEditing:true, errorAtStart: true, mathMode:true});
         };
-        thisEnv.mathMode = thisEnv;
-        state.push(thisEnv);
+        thisDelimiter.mathMode = thisDelimiter;
+        document.openEnv(thisDelimiter);
     };
 
-    this._toggleMathMode = function (thisEnv) {
-        var lastEnv = state.pop();
-        if (closedBy(lastEnv, thisEnv)) {
+    this._toggleMathMode = function (thisDelimiter) {
+        var lastDelimiter = document.getCurrentDelimiter();
+        if (closedBy(lastDelimiter, thisDelimiter)) {
+            document.closeEnv(thisDelimiter)
             return;
         } else {
-            if (lastEnv) {state.push(lastEnv);}
-            if (lastEnv && lastEnv.mathMode) {
-                this._end(thisEnv);
+            if (lastDelimiter && lastDelimiter.mathMode) {
+                this._end(thisDelimiter);
             } else {
-                thisEnv.mathMode = thisEnv;
-                state.push(thisEnv);
+                thisDelimiter.mathMode = thisDelimiter;
+                document.openEnv(thisDelimiter);
             }
         };
     };
 
     this.getMathMode = function () {
-        var n = state.length;
-        if (n > 0) {
-            return state[n-1].mathMode;
+        var currentDelimiter = document.getCurrentDelimiter();
+        if (currentDelimiter) {
+            return currentDelimiter.mathMode;
         } else {
             return null;
         }
     };
 
     this.insideGroup = function () {
-        var n = state.length;
-        if (n > 0) {
-            return (state[n-1].command === "{");
+        var currentDelimiter = document.getCurrentDelimiter();
+        if (currentDelimiter) {
+            return (currentDelimiter.command === "{");
         } else {
             return null;
         }
     };
 
     var resetMathMode = function () {
-        var n = state.length;
-        if (n > 0) {
-            var lastMathMode = state[n-1].mathMode;
+        var currentDelimiter = document.getCurrentDelimiter();
+        if (currentDelimiter) {
+            var lastMathMode = currentDelimiter.mathMode;
             do {
-                var lastEnv = state.pop();
-            } while (lastEnv && lastEnv !== lastMathMode);
+                var lastDelimiter = document.closeEnv();
+            } while (lastDelimiter && lastDelimiter !== lastMathMode);
         } else {
             return;
         }
@@ -2233,42 +2353,42 @@ var EnvHandler = function (ErrorReporter) {
 
     this.resetMathMode = resetMathMode;
 
-    var getNewMathMode = function (currentMathMode, thisEnv) {
+    var getNewMathMode = function (currentMathMode, thisDelimiter) {
         var newMathMode = null;
 
-        if (thisEnv.command === "{") {
-            if (thisEnv.mathMode !== null) {
-                newMathMode = thisEnv.mathMode;
+        if (thisDelimiter.command === "{") {
+            if (thisDelimiter.mathMode !== null) {
+                newMathMode = thisDelimiter.mathMode;
             } else {
                 newMathMode = currentMathMode;
             }
-        } else if (thisEnv.command === "left") {
+        } else if (thisDelimiter.command === "left") {
             if (currentMathMode === null) {
-                ErrorFrom(thisEnv, "\\left can only be used in math mode", {mathMode: true});
+                ErrorFrom(thisDelimiter, "\\left can only be used in math mode", {mathMode: true});
             };
             newMathMode = currentMathMode;
-        } else if (thisEnv.command === "begin") {
-            var name = thisEnv.name;
+        } else if (thisDelimiter.command === "begin") {
+            var name = thisDelimiter.name;
             if (name) {
                 if (name.match(/^(document|figure|center|enumerate|itemize|table|abstract|proof|lemma|theorem|definition|proposition|corollary|remark|notation|thebibliography)$/)) {
                     if (currentMathMode) {
-                        ErrorFromTo(currentMathMode, thisEnv, thisEnv.name + " used inside " + getName(currentMathMode),
+                        ErrorFromTo(currentMathMode, thisDelimiter, thisDelimiter.name + " used inside " + getName(currentMathMode),
                                     {suppressIfEditing:true, errorAtStart: true, mathMode: true});
                         resetMathMode();
                     };
                     newMathMode = null;
                 } else if (name.match(/^(array|gathered|split|aligned|alignedat)\*?$/)) {
                     if (currentMathMode === null) {
-                        ErrorFrom(thisEnv, thisEnv.name + " not inside math mode", {mathMode: true});
+                        ErrorFrom(thisDelimiter, thisDelimiter.name + " not inside math mode", {mathMode: true});
                     };
                     newMathMode = currentMathMode;
                 } else if (name.match(/^(math|displaymath|equation|eqnarray|multline|align|gather|flalign|alignat)\*?$/)) {
                     if (currentMathMode) {
-                        ErrorFromTo(currentMathMode, thisEnv, thisEnv.name + " used inside " + getName(currentMathMode),
+                        ErrorFromTo(currentMathMode, thisDelimiter, thisDelimiter.name + " used inside " + getName(currentMathMode),
                                     {suppressIfEditing:true, errorAtStart: true, mathMode: true});
                         resetMathMode();
                     };
-                    newMathMode = thisEnv;
+                    newMathMode = thisDelimiter;
                 } else {
                     newMathMode = undefined;  // undefined means we don't know if we are in math mode or not
                 }
@@ -2277,41 +2397,41 @@ var EnvHandler = function (ErrorReporter) {
         return newMathMode;
     };
 
-    this.checkAndUpdateState = function (thisEnv) {
+    this.checkAndUpdateState = function (thisDelimiter) {
         if (inVerbatim) {
-            if (thisEnv.command === "end") {
-                this._endVerbatim(thisEnv);
+            if (thisDelimiter.command === "end") {
+                this._endVerbatim(thisDelimiter);
             } else {
                 return; // ignore anything in verbatim environments
             }
-        } else if(thisEnv.command === "begin" || thisEnv.command === "{" || thisEnv.command === "left") {
-            if (thisEnv.verbatim) {inVerbatim = true;};
+        } else if(thisDelimiter.command === "begin" || thisDelimiter.command === "{" || thisDelimiter.command === "left") {
+            if (thisDelimiter.verbatim) {inVerbatim = true;};
             var currentMathMode = this.getMathMode(); // undefined, null, $, $$, name of mathmode env
-            var newMathMode = getNewMathMode(currentMathMode, thisEnv);
-            thisEnv.mathMode = newMathMode;
-            state.push(thisEnv);
-        } else if (thisEnv.command === "end") {
-            this._end(thisEnv);
-        } else if (thisEnv.command === "(" || thisEnv.command === "[") {
-            this._beginMathMode(thisEnv);
-        } else if (thisEnv.command === ")" || thisEnv.command === "]") {
-            this._end(thisEnv);
-        } else if (thisEnv.command === "}") {
-            this._end(thisEnv);
-        } else if (thisEnv.command === "right") {
-            this._end(thisEnv);
-        } else if (thisEnv.command === "$" || thisEnv.command === "$$") {
-            this._toggleMathMode(thisEnv);
+            var newMathMode = getNewMathMode(currentMathMode, thisDelimiter);
+            thisDelimiter.mathMode = newMathMode;
+            document.openEnv(thisDelimiter);
+        } else if (thisDelimiter.command === "end") {
+            this._end(thisDelimiter);
+        } else if (thisDelimiter.command === "(" || thisDelimiter.command === "[") {
+            this._beginMathMode(thisDelimiter);
+        } else if (thisDelimiter.command === ")" || thisDelimiter.command === "]") {
+            this._end(thisDelimiter);
+        } else if (thisDelimiter.command === "}") {
+            this._end(thisDelimiter);
+        } else if (thisDelimiter.command === "right") {
+            this._end(thisDelimiter);
+        } else if (thisDelimiter.command === "$" || thisDelimiter.command === "$$") {
+            this._toggleMathMode(thisDelimiter);
         }
     };
 
     this.close = function () {
-        while (state.length > 0) {
-            var thisEnv = state.pop();
-            if (thisEnv.command === "{") {
-                ErrorFrom(thisEnv, "unclosed group {", {type:"warning"});
+        while (document.getDepth() > 0) {
+            var thisDelimiter = document.closeEnv();
+            if (thisDelimiter.command === "{") {
+                ErrorFrom(thisDelimiter, "unclosed group {", {type:"warning"});
             } else {
-                ErrorFrom(thisEnv, "unclosed " + getName(thisEnv));
+                ErrorFrom(thisDelimiter, "unclosed " + getName(thisDelimiter));
             }
         }
         var vlen = verbatimRanges.length;
@@ -2331,10 +2451,10 @@ var EnvHandler = function (ErrorReporter) {
         }
     };
 
-    this.setEnvProps = function (env) {
-        var name = env.name ;
+    this.setDelimiterProps = function (delimiter) {
+        var name = delimiter.name ;
         if (name && name.match(/^(verbatim|boxedverbatim|lstlisting|minted|Verbatim)$/)) {
-            env.verbatim = true;
+            delimiter.verbatim = true;
         }
     };
 };
@@ -2458,9 +2578,9 @@ var ErrorReporter = function (TokeniseResult) {
         errors.push(err);
     };
 
-    this.EnvErrorFrom = function (env, message, options) {
+    this.EnvErrorFrom = function (delimiter, message, options) {
         if(!options) { options = {} ; };
-        var token = env.token;
+        var token = delimiter.token;
         var line = token[0], type = token[1], start = token[2], end = token[3];
         var start_col = start - linePosition[line];
         var end_col = Infinity;
@@ -2481,29 +2601,11 @@ var Parse = function (text) {
     var Reporter = new ErrorReporter(TokeniseResult);
     var Environments = InterpretTokens(TokeniseResult, Reporter);
     Environments.close();
-    return Reporter.getErrors();
+    return {
+      errors: Reporter.getErrors(),
+      contexts: Environments.getDocument().getContexts()
+    }
 };
-
-(function() {
-    var disabled = false;
-
-    this.onUpdate = function() {
-        if (disabled) { return ; };
-
-        var value = this.doc.getValue();
-        var errors = [];
-        try {
-            if (value)
-                errors = Parse(value);
-        } catch (e) {
-            disabled = true;
-            errors = [];
-        }
-        this.sender.emit("lint", errors);
-    };
-
-}).call(LatexWorker.prototype);
-
 });
 
 ace.define("ace/lib/es5-shim",["require","exports","module"], function(require, exports, module) {
