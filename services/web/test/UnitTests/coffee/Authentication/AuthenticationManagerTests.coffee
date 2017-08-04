@@ -116,6 +116,24 @@ describe "AuthenticationManager", ->
 					expect(err).to.exist
 					done()
 
+			it "should not start the bcrypt process", (done)->
+				@AuthenticationManager.setUserPassword @user_id, @password, (err)=>
+					@bcrypt.genSalt.called.should.equal false
+					@bcrypt.hash.called.should.equal false
+					done()
+
+		describe "too short", ->
+			beforeEach ->
+				@settings.passwordStrengthOptions =
+					length:
+						max:10
+						min:6
+				@password = "dsd"
+
+			it "should return and error", (done)->
+				@AuthenticationManager.setUserPassword @user_id, @password, (err)->
+					expect(err).to.exist
+					done()
 
 			it "should not start the bcrypt process", (done)->
 				@AuthenticationManager.setUserPassword @user_id, @password, (err)=>

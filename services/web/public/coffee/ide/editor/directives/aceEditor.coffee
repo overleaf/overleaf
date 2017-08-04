@@ -11,6 +11,8 @@ define [
 	"ide/editor/directives/aceEditor/track-changes/TrackChangesManager"
 	"ide/editor/directives/aceEditor/labels/LabelsManager"
 	"ide/labels/services/labels"
+	"ide/graphics/services/graphics"
+	"ide/preamble/services/preamble"
 ], (App, Ace, SearchBox, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager, LabelsManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
 	ModeList = ace.require('ace/ext/modelist')
@@ -33,9 +35,8 @@ define [
 			url = ace.config._moduleUrl(args...) + "?fingerprint=#{window.aceFingerprint}"
 			return url
 
-	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory, labels) ->
+	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory, labels, graphics, preamble) ->
 		monkeyPatchSearch($rootScope, $compile)
-		
 
 		return  {
 			scope: {
@@ -44,6 +45,7 @@ define [
 				keybindings: "="
 				fontSize: "="
 				autoComplete: "="
+				autoPairDelimiters: "="
 				sharejsDoc: "="
 				spellCheck: "="
 				spellCheckLanguage: "="
@@ -78,9 +80,15 @@ define [
 				editor = ace.edit(element.find(".ace-editor-body")[0])
 				editor.$blockScrolling = Infinity
 
-				# disable auto insertion of brackets and quotes
-				editor.setOption('behavioursEnabled', false)
+				# auto-insertion of braces, brackets, dollars
+				editor.setOption('behavioursEnabled', scope.autoPairDelimiters || false)
 				editor.setOption('wrapBehavioursEnabled', false)
+
+				scope.$watch "autoPairDelimiters", (autoPairDelimiters) =>
+					if autoPairDelimiters
+						editor.setOption('behavioursEnabled', true)
+					else
+						editor.setOption('behavioursEnabled', false)
 
 				window.editors ||= []
 				window.editors.push editor
@@ -95,7 +103,7 @@ define [
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
 				trackChangesManager   = new TrackChangesManager(scope, editor, element)
 				labelsManager = new LabelsManager(scope, editor, element, labels)
-				autoCompleteManager = new AutoCompleteManager(scope, editor, element, labelsManager)
+				autoCompleteManager = new AutoCompleteManager(scope, editor, element, labelsManager, graphics, preamble)
 
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog

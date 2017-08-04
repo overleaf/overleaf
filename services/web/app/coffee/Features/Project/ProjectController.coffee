@@ -275,6 +275,7 @@ module.exports = ProjectController =
 						theme : user.ace.theme
 						fontSize : user.ace.fontSize
 						autoComplete: user.ace.autoComplete
+						autoPairDelimiters: user.ace.autoPairDelimiters
 						pdfViewer : user.ace.pdfViewer
 						syntaxValidation: user.ace.syntaxValidation
 					}

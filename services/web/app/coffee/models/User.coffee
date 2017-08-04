@@ -24,6 +24,7 @@ UserSchema = new Schema
 							theme       :   {type : String, default: 'textmate'}
 							fontSize    :   {type : Number, default:'12'}
 							autoComplete:   {type : Boolean, default: true}
+							autoPairDelimiters: {type : Boolean, default: true}
 							spellCheckLanguage :   {type : String, default: "en"}
 							pdfViewer   :   {type : String, default: "pdfjs"}
 							syntaxValidation   :   {type : Boolean}

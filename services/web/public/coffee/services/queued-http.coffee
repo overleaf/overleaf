@@ -11,10 +11,10 @@ define [
 			if doRequest?
 				inflight = true
 				doRequest()
-					.success () ->
+					.then () ->
 						inflight = false
 						processPendingRequests()
-					.error () ->
+					.catch () ->
 						inflight = false
 						processPendingRequests()
 
@@ -26,20 +26,21 @@ define [
 			errorCallbacks = []
 
 			# Adhere to the $http promise conventions
-			promise.success = (callback) ->
+			promise.then = (callback, errCallback) ->
 				successCallbacks.push callback
+				errorCallbacks.push errCallback if errCallback?
 				return promise
 
-			promise.error = (callback) ->
+			promise.catch = (callback) ->
 				errorCallbacks.push callback
 				return promise
 
 			doRequest = () ->
 				$http(args...)
-					.success (args...) ->
+					.then (args...) ->
 						for cb in successCallbacks
 							cb(args...)
-					.error (args...) ->
+					.catch (args...) ->
 						for cb in errorCallbacks
 							cb(args...)
 

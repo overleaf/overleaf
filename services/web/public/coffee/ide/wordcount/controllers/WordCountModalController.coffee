@@ -11,10 +11,11 @@ define [
 			params:
 				clsiserverid:ide.clsiServerId
 		$http opts
-			.success (data) ->
+			.then (response) ->
+				{ data } = response
 				$scope.status.loading = false
 				$scope.data = data.texcount
-			.error () ->
+			.catch () ->
 				$scope.status.error = true
 
 		$scope.cancel = () ->

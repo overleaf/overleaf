@@ -25,8 +25,10 @@ define [
 						email: email,
 						_csrf: window.csrfToken
 					})
-					.success (user) ->
+					.then (response) ->
+						{ data } = response
+						user = data
 						$scope.users.push user
 						$scope.inputs.emails = ""
-					.error () ->
+					.catch () ->
 						$scope.error = true

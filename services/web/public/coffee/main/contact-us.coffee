@@ -30,7 +30,7 @@ define [
 				$scope.suggestions = suggestions
 
 		$scope.contactUs = ->
-			if !$scope.form.email?
+			if !$scope.form.email? or $scope.form.email == ""
 				console.log "email not set"
 				return
 			$scope.sending = true
@@ -46,8 +46,16 @@ define [
 				about: "<div>browser: #{platform?.name} #{platform?.version}</div>
 						<div>os: #{platform?.os?.family} #{platform?.os?.version}</div>"
 
-			Groove.createTicket params, (err, json)->
-				$scope.sent = true
+			Groove.createTicket params, (response)->
+				$scope.sending = false
+				if response.responseText == "" # Blocked request or similar
+					$scope.error = true
+				else
+					data = JSON.parse(response.responseText)
+					if data.errors?
+						$scope.error = true
+					else
+						$scope.sent = true
 				$scope.$apply()
 
 		$scope.$watch "form.subject", (newVal, oldVal) ->

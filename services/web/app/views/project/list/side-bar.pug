@@ -48,7 +48,7 @@
 		li
 			h2 #{translate("folders")}
 		li.tag(
-			ng-repeat="tag in tags | orderBy:name",
+			ng-repeat="tag in tags | orderBy:'name'",
 			ng-class="{active: tag.selected}",
 			ng-cloak,
 			ng-click="selectTag(tag)"

@@ -11,6 +11,7 @@ async = require("async")
 Modules = require "./Modules"
 Url = require "url"
 PackageVersions = require "./PackageVersions"
+htmlEncoder = new require("node-html-encoder").Encoder("numerical")
 fingerprints = {}
 Path = require 'path'
 
@@ -66,7 +67,7 @@ logger.log "Finished generating file fingerprints"
 cdnAvailable = Settings.cdn?.web?.host?
 darkCdnAvailable = Settings.cdn?.web?.darkHost?
 
-module.exports = (app, webRouter, apiRouter)->
+module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 	webRouter.use (req, res, next)->
 		res.locals.session = req.session
 		next()
@@ -82,7 +83,8 @@ module.exports = (app, webRouter, apiRouter)->
 			)
 		next()
 	webRouter.use addSetContentDisposition
-	apiRouter.use addSetContentDisposition
+	privateApiRouter.use addSetContentDisposition
+	publicApiRouter.use addSetContentDisposition
 
 	webRouter.use (req, res, next)->
 		req.externalAuthenticationSystemUsed = res.locals.externalAuthenticationSystemUsed = ->
@@ -150,9 +152,10 @@ module.exports = (app, webRouter, apiRouter)->
 		next()
 
 	webRouter.use (req, res, next)->
-		res.locals.translate = (key, vars = {}) ->
+		res.locals.translate = (key, vars = {}, htmlEncode = false) ->
 			vars.appName = Settings.appName
-			req.i18n.translate(key, vars)
+			str = req.i18n.translate(key, vars)
+			if htmlEncode then htmlEncoder.htmlEncode(str) else str
 		# Don't include the query string parameters, otherwise Google
 		# treats ?nocdn=true as the canonical version
 		res.locals.currentUrl = Url.parse(req.originalUrl).pathname

@@ -52,7 +52,8 @@ else
 app = express()
 
 webRouter = express.Router()
-apiRouter = express.Router()
+privateApiRouter = express.Router()
+publicApiRouter = express.Router()
 
 if Settings.behindProxy
 	app.enable('trust proxy')
@@ -108,7 +109,7 @@ Modules.hooks.fire 'passportSetup', passport, (err) ->
 	if err?
 		logger.err {err}, "error setting up passport in modules"
 
-Modules.applyNonCsrfRouter(webRouter, apiRouter)
+Modules.applyNonCsrfRouter(webRouter, privateApiRouter, publicApiRouter)
 
 webRouter.use csrfProtection
 webRouter.use translations.expressMiddlewear
@@ -122,7 +123,7 @@ webRouter.use (req, res, next) ->
 	next()
 
 webRouter.use ReferalConnect.use
-expressLocals(app, webRouter, apiRouter)
+expressLocals(app, webRouter, privateApiRouter, publicApiRouter)
 
 if app.get('env') == 'production'
 	logger.info "Production Enviroment"
@@ -142,11 +143,8 @@ webRouter.use (req, res, next) ->
 		res.status(503)
 		res.render("general/closed", {title:"maintenance"})
 
-apiRouter.get "/status", (req, res)->
-	res.send("web sharelatex is alive")
-
 profiler = require "v8-profiler"
-apiRouter.get "/profile", (req, res) ->
+privateApiRouter.get "/profile", (req, res) ->
 	time = parseInt(req.query.time || "1000")
 	profiler.startProfiling("test")
 	setTimeout () ->
@@ -161,15 +159,25 @@ app.get "/heapdump", (req, res)->
 logger.info ("creating HTTP server").yellow
 server = require('http').createServer(app)
 
-# process api routes first, if nothing matched fall though and use
-# web middlewear + routes
-app.use(apiRouter)
-app.use(ErrorController.handleApiError)
-app.use(webRouter)
-app.use(ErrorController.handleError)
+# provide settings for separate web and api processes
+# if enableApiRouter and enableWebRouter are not defined they default
+# to true.
+notDefined = (x) -> !x?
+enableApiRouter = Settings.web?.enableApiRouter
+if enableApiRouter or notDefined(enableApiRouter)
+	logger.info("providing api router");
+	app.use(privateApiRouter)
+	app.use(ErrorController.handleApiError)
 
-router = new Router(webRouter, apiRouter)
+enableWebRouter = Settings.web?.enableWebRouter
+if enableWebRouter or notDefined(enableWebRouter)
+	logger.info("providing web router");
+	app.use(publicApiRouter) # public API goes with web router for public access
+	app.use(ErrorController.handleApiError)
+	app.use(webRouter)
+	app.use(ErrorController.handleError)
 
+router = new Router(webRouter, privateApiRouter, publicApiRouter)
 
 module.exports =
 	app: app

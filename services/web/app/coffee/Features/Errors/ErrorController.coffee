@@ -38,5 +38,5 @@ module.exports = ErrorController =
 			logger.warn {err: error, url: req.url}, "not found error"
 			res.sendStatus(404)
 		else
-			logger.error err: error, url:req.url, method:req.method, user:user, "error passed to top level next middlewear"
+			logger.error err: error, url:req.url, method:req.method, "error passed to top level next middlewear"
 			res.sendStatus(500)

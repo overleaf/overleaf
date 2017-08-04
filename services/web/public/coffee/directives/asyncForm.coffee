@@ -28,16 +28,17 @@ define [
 					# authentication fails, we will handle it ourselves
 					$http
 						.post(element.attr('action'), formData, {disableAutoLoginRedirect: true})
-						.success (data, status, headers, config) ->
+						.then (httpResponse) ->
+							{ data, status, headers, config } = httpResponse
 							scope[attrs.name].inflight = false
 							response.success = true
 							response.error = false
 
 							onSuccessHandler = scope[attrs.onSuccess]
 							if onSuccessHandler
-								onSuccessHandler(data, status, headers, config)
+								onSuccessHandler(httpResponse)
 								return
-
+							
 							if data.redir?
 								ga('send', 'event', formName, 'success')
 								window.location = data.redir
@@ -51,14 +52,15 @@ define [
 								else
 									ga('send', 'event', formName, 'success')
 
-						.error (data, status, headers, config) ->
+						.catch (httpResponse) ->
+							{ data, status, headers, config } = httpResponse
 							scope[attrs.name].inflight = false
 							response.success = false
 							response.error = true
 
 							onErrorHandler = scope[attrs.onError]
 							if onErrorHandler
-								onErrorHandler(data, status, headers, config)
+								onErrorHandler(httpResponse)
 								return
 
 							if status == 403 # Forbidden
@@ -101,8 +103,8 @@ define [
 			defaultPasswordOpts =
 				pattern: ""
 				length:
-					min: 1
-					max: 50
+					min: 6
+					max: 128
 				allowEmpty: false
 				allowAnyChars: false
 				isMasked: true
@@ -125,8 +127,6 @@ define [
 			[asyncFormCtrl, ngModelCtrl] = ctrl
 
 			ngModelCtrl.$parsers.unshift (modelValue) ->
-				
-			
 				isValid = passField.validatePass()
 				email = asyncFormCtrl.getEmail() || window.usersEmail
 				if !isValid
@@ -139,5 +139,8 @@ define [
 				if opts.length.max? and modelValue.length == opts.length.max
 					isValid = false
 					scope.complexPasswordErrorMessage = "Maximum password length #{opts.length.max} reached"
+				if opts.length.min? and modelValue.length < opts.length.min
+					isValid = false
+					scope.complexPasswordErrorMessage = "Password too short, minimum #{opts.length.min}"
 				ngModelCtrl.$setValidity('complexPassword', isValid)
 				return modelValue

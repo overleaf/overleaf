@@ -49,7 +49,7 @@ logger = require("logger-sharelatex")
 _ = require("underscore")
 
 module.exports = class Router
-	constructor: (webRouter, apiRouter)->
+	constructor: (webRouter, privateApiRouter, publicApiRouter)->
 		if !Settings.allowPublicAccess
 			webRouter.all '*', AuthenticationController.requireGlobalLogin
 
@@ -67,17 +67,17 @@ module.exports = class Router
 		AuthenticationController.addEndpointToLoginWhitelist '/register'
 
 
-		EditorRouter.apply(webRouter, apiRouter)
-		CollaboratorsRouter.apply(webRouter, apiRouter)
-		SubscriptionRouter.apply(webRouter, apiRouter)
-		UploadsRouter.apply(webRouter, apiRouter)
-		PasswordResetRouter.apply(webRouter, apiRouter)
-		StaticPagesRouter.apply(webRouter, apiRouter)
-		RealTimeProxyRouter.apply(webRouter, apiRouter)
-		ContactRouter.apply(webRouter, apiRouter)
-		AnalyticsRouter.apply(webRouter, apiRouter)
+		EditorRouter.apply(webRouter, privateApiRouter)
+		CollaboratorsRouter.apply(webRouter, privateApiRouter)
+		SubscriptionRouter.apply(webRouter, privateApiRouter, publicApiRouter)
+		UploadsRouter.apply(webRouter, privateApiRouter)
+		PasswordResetRouter.apply(webRouter, privateApiRouter)
+		StaticPagesRouter.apply(webRouter, privateApiRouter)
+		RealTimeProxyRouter.apply(webRouter, privateApiRouter)
+		ContactRouter.apply(webRouter, privateApiRouter)
+		AnalyticsRouter.apply(webRouter, privateApiRouter)
 
-		Modules.applyRouter(webRouter, apiRouter)
+		Modules.applyRouter(webRouter, privateApiRouter, publicApiRouter)
 
 
 		if Settings.enableSubscriptions
@@ -94,7 +94,14 @@ module.exports = class Router
 			SudoModeMiddlewear.protectPage,
 			UserPagesController.settingsPage
 		webRouter.post '/user/settings', AuthenticationController.requireLogin(), UserController.updateUserSettings
-		webRouter.post '/user/password/update', AuthenticationController.requireLogin(), UserController.changePassword
+		webRouter.post '/user/password/update',
+			AuthenticationController.requireLogin(),
+			RateLimiterMiddlewear.rateLimit({
+				endpointName: "change-password"
+				maxRequests: 10
+				timeInterval: 60
+			}),
+			UserController.changePassword
 
 		webRouter.get  '/user/sessions',
 			AuthenticationController.requireLogin(),
@@ -106,7 +113,7 @@ module.exports = class Router
 		webRouter.post '/user/delete', AuthenticationController.requireLogin(), UserController.tryDeleteUser
 
 		webRouter.get  '/user/personal_info', AuthenticationController.requireLogin(), UserInfoController.getLoggedInUsersPersonalInfo
-		apiRouter.get  '/user/:user_id/personal_info', AuthenticationController.httpAuth, UserInfoController.getPersonalInfo
+		privateApiRouter.get  '/user/:user_id/personal_info', AuthenticationController.httpAuth, UserInfoController.getPersonalInfo
 
 		webRouter.get  '/project', AuthenticationController.requireLogin(), ProjectController.projectListPage
 		webRouter.post '/project/new', AuthenticationController.requireLogin(), ProjectController.newProject
@@ -211,15 +218,15 @@ module.exports = class Router
 
 
 		# Deprecated in favour of /internal/project/:project_id but still used by versioning
-		apiRouter.get  '/project/:project_id/details', AuthenticationController.httpAuth, ProjectApiController.getProjectDetails
+		privateApiRouter.get  '/project/:project_id/details', AuthenticationController.httpAuth, ProjectApiController.getProjectDetails
 
 		# New 'stable' /internal API end points
-		apiRouter.get  '/internal/project/:project_id',     AuthenticationController.httpAuth, ProjectApiController.getProjectDetails
-		apiRouter.get  '/internal/project/:Project_id/zip', AuthenticationController.httpAuth, ProjectDownloadsController.downloadProject
-		apiRouter.get  '/internal/project/:project_id/compile/pdf', AuthenticationController.httpAuth, CompileController.compileAndDownloadPdf
+		privateApiRouter.get  '/internal/project/:project_id',     AuthenticationController.httpAuth, ProjectApiController.getProjectDetails
+		privateApiRouter.get  '/internal/project/:Project_id/zip', AuthenticationController.httpAuth, ProjectDownloadsController.downloadProject
+		privateApiRouter.get  '/internal/project/:project_id/compile/pdf', AuthenticationController.httpAuth, CompileController.compileAndDownloadPdf
 
-		apiRouter.post '/internal/deactivateOldProjects', AuthenticationController.httpAuth, InactiveProjectController.deactivateOldProjects
-		apiRouter.post '/internal/project/:project_id/deactivate', AuthenticationController.httpAuth, InactiveProjectController.deactivateProject
+		privateApiRouter.post '/internal/deactivateOldProjects', AuthenticationController.httpAuth, InactiveProjectController.deactivateOldProjects
+		privateApiRouter.post '/internal/project/:project_id/deactivate', AuthenticationController.httpAuth, InactiveProjectController.deactivateProject
 
 		webRouter.get  /^\/internal\/project\/([^\/]*)\/output\/(.*)$/,
 			((req, res, next) ->
@@ -230,14 +237,14 @@ module.exports = class Router
 				next()
 			), AuthenticationController.httpAuth, CompileController.getFileFromClsi
 
-		apiRouter.get  '/project/:Project_id/doc/:doc_id', AuthenticationController.httpAuth, DocumentController.getDocument
-		apiRouter.post '/project/:Project_id/doc/:doc_id', AuthenticationController.httpAuth, DocumentController.setDocument
+		privateApiRouter.get  '/project/:Project_id/doc/:doc_id', AuthenticationController.httpAuth, DocumentController.getDocument
+		privateApiRouter.post '/project/:Project_id/doc/:doc_id', AuthenticationController.httpAuth, DocumentController.setDocument
 
-		apiRouter.post '/user/:user_id/update/*', AuthenticationController.httpAuth, TpdsController.mergeUpdate
-		apiRouter.delete '/user/:user_id/update/*', AuthenticationController.httpAuth, TpdsController.deleteUpdate
+		privateApiRouter.post '/user/:user_id/update/*', AuthenticationController.httpAuth, TpdsController.mergeUpdate
+		privateApiRouter.delete '/user/:user_id/update/*', AuthenticationController.httpAuth, TpdsController.deleteUpdate
 
-		apiRouter.post '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.updateProjectContents
-		apiRouter.delete '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.deleteProjectContents
+		privateApiRouter.post '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.updateProjectContents
+		privateApiRouter.delete '/project/:project_id/contents/*', AuthenticationController.httpAuth, TpdsController.deleteProjectContents
 
 		webRouter.post "/spelling/check", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
 		webRouter.post "/spelling/learn", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
@@ -268,19 +275,24 @@ module.exports = class Router
 		webRouter.post '/admin/messages', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.createMessage
 		webRouter.post '/admin/messages/clear', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.clearMessages
 
-		apiRouter.get '/perfTest', (req,res)->
+		privateApiRouter.get '/perfTest', (req,res)->
 			res.send("hello")
 
-		apiRouter.get '/status', (req,res)->
-			res.send("websharelatex is up")
+		publicApiRouter.get '/status', (req,res)->
+			res.send("web sharelatex is alive (web)")
+		privateApiRouter.get '/status', (req,res)->
+			res.send("web sharelatex is alive (api)")
 
 		webRouter.get '/dev/csrf', (req, res) ->
 			res.send res.locals.csrfToken
 
-		apiRouter.get '/health_check', HealthCheckController.check
-		apiRouter.get '/health_check/redis', HealthCheckController.checkRedis
+		publicApiRouter.get '/health_check', HealthCheckController.check
+		privateApiRouter.get '/health_check', HealthCheckController.check
 
-		apiRouter.get "/status/compiler/:Project_id", AuthorizationMiddlewear.ensureUserCanReadProject, (req, res) ->
+		publicApiRouter.get '/health_check/redis', HealthCheckController.checkRedis
+		privateApiRouter.get '/health_check/redis', HealthCheckController.checkRedis
+
+		webRouter.get "/status/compiler/:Project_id", AuthorizationMiddlewear.ensureUserCanReadProject, (req, res) ->
 			project_id = req.params.Project_id
 			sendRes = _.once (statusCode, message)->
 				res.status statusCode
@@ -303,7 +315,7 @@ module.exports = class Router
 				else
 					sendRes 500, "Compiler returned failure #{status}"
 
-		apiRouter.get "/ip", (req, res, next) ->
+		webRouter.get "/ip", (req, res, next) ->
 			res.send({
 				ip: req.ip
 				ips: req.ips
@@ -316,7 +328,7 @@ module.exports = class Router
 			require("./models/Project").Project.findOne {}, () ->
 				throw new Error("Test error")
 
-		apiRouter.get '/opps-small', (req, res, next)->
+		privateApiRouter.get '/opps-small', (req, res, next)->
 			logger.err "test error occured"
 			res.send()
 

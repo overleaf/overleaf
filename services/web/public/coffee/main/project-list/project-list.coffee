@@ -20,7 +20,7 @@ define [
 		, 10
 
 		$scope.$watch((
-			() -> $scope.projects.filter((project) -> !project.tags? or project.tags.length == 0).length
+			() -> $scope.projects.filter((project) -> (!project.tags? or project.tags.length == 0) and !project.archived).length
 		), (newVal) -> $scope.nUntagged = newVal)
 
 		storedUIOpts = JSON.parse(localStorage("project_list"))
@@ -262,7 +262,8 @@ define [
 					projectName: name
 					template: template
 				})
-				.success((data, status, headers, config) ->
+				.then((response) ->
+					{ data } = response
 					$scope.projects.push {
 						name: name
 						_id: data.project_id
@@ -291,7 +292,7 @@ define [
 				newProjectName: newName,
 				_csrf: window.csrfToken
 			}
-				.success () ->
+				.then () ->
 					project.name = newName
 
 		$scope.openRenameProjectModal = () ->
@@ -313,7 +314,8 @@ define [
 					_csrf: window.csrfToken
 					projectName: cloneName
 				})
-				.success((data, status, headers, config) ->
+				.then((response) ->
+					{ data } = response
 					$scope.projects.push {
 						name: cloneName
 						id: data.project_id

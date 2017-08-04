@@ -22,7 +22,7 @@ define [
 
 
 			$http.post(MESSAGES_URL, body)
-				.success ->
+				.then ->
 					$scope.upgradeComplete = true
-				.error ->
+				.catch ->
 					console.log "something went wrong changing plan"

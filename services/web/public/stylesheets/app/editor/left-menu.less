@@ -68,27 +68,33 @@
 
 	form.settings {
 		label {
-			float: left;
 			font-weight: normal;
 			color: @gray-dark;
+			flex: 1 0 50%;
 			margin-bottom: 0;
+			margin-top: 9px;
+			padding-right: 5px;
+			white-space: nowrap;
 		}
 		select {
-			float: right;
 			width: 50%;
-			// height: 30px;
-			// margin: 2px 0;
-			// background: none;
-			// border: none;
-			// box-shadow: none;
-			// color: @link-color;
-			// cursor: pointer;
-			// font-size: 14px;
-			// font-weight: 700;
+			flex: 0 0 50%;
+			margin: 9px 0;
 		}
 		.form-controls {
 			clear: both;
-			padding: (@line-height-computed / 4);
+			padding: 0 9px;
+			display: flex;
+			flex-wrap: wrap;
+			align-items: baseline;
+			justify-content: flex-end;
+			border-bottom: solid 1px rgba(0, 0, 0, 0.07);
+			&:first-child {
+				margin-top: -9px;
+			}
+			&:last-child {
+				border-bottom: 0;
+			}
 			&:hover {
 				background-color: @link-color;
 				// select.form-control {

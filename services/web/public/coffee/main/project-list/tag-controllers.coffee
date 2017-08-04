@@ -94,10 +94,11 @@ define [
 					_csrf: window.csrfToken,
 					name: name
 				}
-				.success (data, status, headers, config) ->
+				.then (response) ->
+					{ data } = response
 					$scope.state.inflight = false
 					$modalInstance.close(data)
-				.error () ->
+				.catch () ->
 					$scope.state.inflight = false
 					$scope.state.error = true
 
@@ -126,10 +127,10 @@ define [
 					_csrf: window.csrfToken,
 					name: name
 				}
-				.success () ->
+				.then () ->
 					$scope.state.inflight = false
 					$modalInstance.close(name)
-				.error () ->
+				.catch () ->
 					$scope.state.inflight = false
 					$scope.state.error = true
 
@@ -151,10 +152,10 @@ define [
 				headers:
 					"X-CSRF-Token": window.csrfToken
 			})
-				.success () ->
+				.then () ->
 					$scope.state.inflight = false
 					$modalInstance.close()
-				.error () ->
+				.catch () ->
 					$scope.state.inflight = false
 					$scope.state.error = true
 		
