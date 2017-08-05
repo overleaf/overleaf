@@ -10,7 +10,7 @@ of ShareLaTeX, then here are some notes on how to do that.
 Reporting bugs and opening issues
 ---------------------------------
 
-If you'd like a report a bug or open an issue then please:
+If you'd like to report a bug or open an issue then please:
 
 1. **Find the correct repository.** ShareLaTeX is split across multiple different repositories, each containing a different service (you can find a list of [all repositories here](https://github.com/sharelatex/sharelatex/blob/master/README.md#other-repositories)). If you know the bug only applies to one service, then please open an issue in that repository. For general bugs and issues that span more than one service, please open an issue in the [sharelatex/sharelatex](https://github.com/sharelatex/sharelatex) repository.
 2. **Check if there is an existing issue.** If there is then please add
