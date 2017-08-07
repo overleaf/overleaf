@@ -59,6 +59,9 @@ UserSchema = new Schema
 		zotero: Boolean
 	}
 	betaProgram:   { type:Boolean, default: false}
+	overleaf:
+		id: { type: Number }
+		accessToken: { type: String }
 
 conn = mongoose.createConnection(Settings.mongo.url, server: poolSize: 10)
 

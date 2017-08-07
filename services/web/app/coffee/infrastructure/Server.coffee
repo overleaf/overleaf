@@ -25,6 +25,7 @@ sessionStore = new RedisStore(client:sessionsRedisClient)
 
 passport = require('passport')
 LocalStrategy = require('passport-local').Strategy
+OAuth2Strategy = require('passport-oauth2').Strategy
 
 Mongoose = require("./Mongoose")
 
@@ -38,7 +39,7 @@ Modules = require "./Modules"
 ErrorController = require "../Features/Errors/ErrorController"
 UserSessionsManager = require "../Features/User/UserSessionsManager"
 AuthenticationController = require "../Features/Authentication/AuthenticationController"
-
+OverleafAuthenticationController = require "../Features/Authentication/OverleafAuthenticationController"
 
 metrics.event_loop?.monitor(logger)
 
@@ -104,6 +105,29 @@ passport.use(new LocalStrategy(
 ))
 passport.serializeUser(AuthenticationController.serializeUser)
 passport.deserializeUser(AuthenticationController.deserializeUser)
+
+overleafOAuth2Strategy = new OAuth2Strategy(
+	{
+		authorizationURL: 'http://localhost:5000/oauth/authorize',
+		tokenURL: 'http://localhost:5000/oauth/token',
+		clientID: "0479498de20727971b5f40f86dc558264fe7a5021ae74c3e0e03f7dccfeaf0ab",
+		clientSecret: "ecb446d53bb9a1555fecd74b5e3faabefe1345ca6a9228da0c1fbdac2338c502",
+		callbackURL: "http://www.sharelatex.dev:3000/overleaf/callback"
+	},
+	OverleafAuthenticationController.doPassportLogin
+)
+overleafOAuth2Strategy.userProfile = (accessToken, cb) ->
+	require("request").get {
+		url: "http://localhost:5000/api/v1/sharelatex/profile"
+		json: true
+		headers:
+			Authorization: "Bearer #{accessToken}"
+	}, (err, response, body) ->
+		console.log {err, response, body}
+		return cb(err) if err?
+		cb(null, body)
+passport.use(overleafOAuth2Strategy)
+
 
 Modules.hooks.fire 'passportSetup', passport, (err) ->
 	if err?
