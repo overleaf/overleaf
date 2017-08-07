@@ -29,7 +29,9 @@ describe "ResourceWriter", ->
 			]
 			@ResourceWriter._writeResourceToDisk = sinon.stub().callsArg(3)
 			@ResourceWriter._removeExtraneousFiles = sinon.stub().callsArg(2)
-			@ResourceWriter.syncResourcesToDisk(@project_id, @resources, @basePath, @callback)
+			@ResourceWriter.checkSyncState = sinon.stub().callsArg(2)
+			@ResourceWriter.storeSyncState = sinon.stub().callsArg(2)
+			@ResourceWriter.syncResourcesToDisk({project_id: @project_id, resources: @resources}, @basePath, @callback)
 
 		it "should remove old files", ->
 			@ResourceWriter._removeExtraneousFiles
