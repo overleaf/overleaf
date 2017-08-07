@@ -84,7 +84,6 @@ module.exports = ProjectEntityHandler =
 			docPath = {}
 			for folderPath, folder of folders
 				for doc in (folder.docs or [])
-					console.log "PATH", path.join(folderPath, doc.name), doc._id, doc.name
 					docPath[doc._id] = path.join(folderPath, doc.name)
 			logger.log count:_.keys(docPath).length, project_id:project._id, "returning docPaths for project"
 			callback null, docPath

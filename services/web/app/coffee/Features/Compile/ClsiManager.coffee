@@ -123,35 +123,40 @@ module.exports = ClsiManager =
 			if project.compiler not in ClsiManager.VALID_COMPILERS
 				project.compiler = "pdflatex"
 
-			ClsiStateManager.checkProjectStateMatch project_id, project, (error, projectStateUnchanged, projectStateHash) ->
+			ClsiManager.getContentFromDocUpdaterIfMatch project_id, project, (error, projectStateHash, docUpdaterDocs) ->
 				return callback(error) if error?
-				logger.log project_id: project_id, projectStateUnchanged: projectStateUnchanged, "checked project state"
+				logger.log project_id: project_id, projectStateHash: projectStateHash, docs: docUpdaterDocs?, "checked project state"
 				# see if we can send an incremental update to the CLSI
-				if projectStateUnchanged and options.syncType isnt "full"
-					ClsiManager._getContentFromDocUpdater project_id, (error, docUpdaterDocs) ->
-						return callback(error) if error?
-						ProjectEntityHandler.getAllDocPathsFromProject project, (error, docPath) ->
-							return callback(error) if error?
-							docs = {}
-							for doc in docUpdaterDocs or []
-								path = docPath[doc._id]
-								docs[path] = doc
-							options.syncType = "incremental"
-							options.syncState = projectStateHash
-							# send new docs but not files as those are already on the clsi
-							ClsiManager._finaliseRequest project_id, options, project, docs, [], callback
+				if docUpdaterDocs? and options.syncType isnt "full"
+					ClsiManager._buildRequestFromDocupdater project_id, options, project, projectStateHash, docUpdaterDocs, callback
 				else
-					ClsiManager._getContentFromMongo project_id, (error, docs, files) ->
-						return callback(error) if error?
-						# FIXME want to store state after project has been sent to
-						# clsi, but need to do it here.
-						ClsiStateManager.setProjectState project_id, project, (error, projectStateHash) ->
-							if error?
-								logger.err err:error, project_id:project_id, "error storing state in redis"
-								#return callback(error)
-							options.syncType = "full"
-							options.syncState = projectStateHash
-							ClsiManager._finaliseRequest project_id, options, project, docs, files, callback
+					ClsiManager._buildRequestFromMongo project_id, options, project, projectStateHash, callback
+
+	getContentFromDocUpdaterIfMatch: (project_id, project, callback = (error, projectStateHash, docs) ->) ->
+		ClsiStateManager.computeHash project, (error, projectStateHash) ->
+			return callback(error) if error?
+			DocumentUpdaterHandler.getProjectDocsIfMatch project_id, projectStateHash, (error, docs) ->
+				return callback(error) if error?
+				callback(null, projectStateHash, docs)
+
+	_buildRequestFromDocupdater: (project_id, options, project, projectStateHash, docUpdaterDocs, callback = (error, request) ->) ->
+		ProjectEntityHandler.getAllDocPathsFromProject project, (error, docPath) ->
+				return callback(error) if error?
+				docs = {}
+				for doc in docUpdaterDocs or []
+					path = docPath[doc._id]
+					docs[path] = doc
+				# send new docs but not files as those are already on the clsi
+				options.syncType = "incremental"
+				options.syncState = projectStateHash
+				ClsiManager._finaliseRequest project_id, options, project, docs, [], callback
+
+	_buildRequestFromMongo: (project_id, options, project, projectStateHash, callback = (error, request) ->) ->
+		ClsiManager._getContentFromMongo project_id, (error, docs, files) ->
+			return callback(error) if error?
+			options.syncType = "full"
+			options.syncState = projectStateHash
+			ClsiManager._finaliseRequest project_id, options, project, docs, files, callback
 
 	_getContentFromDocUpdater: (project_id, callback = (error, docs) ->) ->
 		DocumentUpdaterHandler.getProjectDocs project_id, (error, docs) ->
