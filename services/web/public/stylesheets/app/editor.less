@@ -80,9 +80,9 @@
 		.loading-screen-brand {
 			position: relative;
 			width: 100%;
-			padding-top: 115.44%;
+			padding-top: @editor-loading-logo-padding-top;
 			height: 0;
-			background: url(/img/ol-brand/overleaf-o-grey.svg) no-repeat bottom / 100%;
+			background: @editor-loading-logo-background-url no-repeat bottom / 100%;
 
     		&::after {
 				content: '';
@@ -91,7 +91,7 @@
 				right: 0;
 				bottom: 0;
 				left: 0;
-				background: url(/img/ol-brand/overleaf-o.svg) no-repeat bottom / 100%;
+				background: @editor-loading-logo-background-url no-repeat bottom / 100%;
 				transition: height .5s;
     		}
 		}
