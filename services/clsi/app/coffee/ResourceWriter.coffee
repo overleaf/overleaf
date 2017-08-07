@@ -14,10 +14,10 @@ parallelFileDownloads = settings.parallelFileDownloads or 1
 module.exports = ResourceWriter =
 
 	syncResourcesToDisk: (request, basePath, callback = (error) ->) ->
-		if request.syncType? is "incremental"
-			ResourceWriter.checkSyncState request.syncState, basePath, (error, ok) ->
-				logger.log syncState: request.syncState, result:ok, "checked state on incremental request"
-				return callback new Errors.FilesOutOfSyncError("invalid state for incremental update") if not ok
+		if request.syncType is "incremental"
+			ResourceWriter.checkSyncState request.syncState, basePath, (error, syncStateOk) ->
+				logger.log syncState: request.syncState, result:syncStateOk, "checked state on incremental request"
+				return callback new Errors.FilesOutOfSyncError("invalid state for incremental update") if not syncStateOk
 				ResourceWriter.saveIncrementalResourcesToDisk request.project_id, request.resources, basePath, callback
 		else
 			@saveAllResourcesToDisk request.project_id, request.resources, basePath, (error) ->
@@ -30,11 +30,8 @@ module.exports = ResourceWriter =
 
 	checkSyncState: (state, basePath, callback) ->
 		fs.readFile Path.join(basePath, ".resource-sync-state"), {encoding:'ascii'}, (err, oldState) ->
-			logger.log state:state, oldState: oldState, basePath:basePath, err:err, "checking sync state"
-			if state is oldState
-				return callback(null, true)
-			else
-				return callback(null, false)
+			# ignore errors, return true if state matches, false otherwise (including errors)
+			return callback(null, if state is oldState then true else false)
 
 	saveIncrementalResourcesToDisk: (project_id, resources, basePath, callback = (error) ->) ->
 		@_createDirectory basePath, (error) =>

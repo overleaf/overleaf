@@ -16,7 +16,7 @@ module.exports = CompileController =
 			ProjectPersistenceManager.markProjectAsJustAccessed request.project_id, (error) ->
 				return next(error) if error?
 				CompileManager.doCompile request, (error, outputFiles = []) ->
-					if error instanceOf Errors.FilesOutOfSyncError
+					if error instanceof Errors.FilesOutOfSyncError
 						code = 409 # Http 409 Conflict
 						status = "retry"
 					else if error?.terminated
