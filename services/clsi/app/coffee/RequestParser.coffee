@@ -33,6 +33,7 @@ module.exports = RequestParser =
 				type: "string"
 			response.syncType = @_parseAttribute "syncType",
 				compile.options.syncType,
+				validValues: ["full", "incremental"]
 				type: "string"
 			response.syncState = @_parseAttribute "syncState",
 				compile.options.syncState,
