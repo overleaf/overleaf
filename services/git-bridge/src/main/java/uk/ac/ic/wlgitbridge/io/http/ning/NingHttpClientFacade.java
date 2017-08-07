@@ -4,7 +4,6 @@ import com.ning.http.client.HttpResponseHeaders;
 import uk.ac.ic.wlgitbridge.util.FunctionT;
 
 import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
 
 public interface NingHttpClientFacade {
 
@@ -18,6 +17,6 @@ public interface NingHttpClientFacade {
     <E extends Exception> byte[] get(
             String url,
             FunctionT<HttpResponseHeaders, Boolean, E> handler
-    ) throws E;
+    ) throws ExecutionException;
 
 }

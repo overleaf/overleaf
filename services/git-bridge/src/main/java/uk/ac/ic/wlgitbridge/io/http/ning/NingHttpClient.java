@@ -8,7 +8,6 @@ import uk.ac.ic.wlgitbridge.util.FunctionT;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
 
 public class NingHttpClient implements NingHttpClientFacade {
 
@@ -25,7 +24,7 @@ public class NingHttpClient implements NingHttpClientFacade {
     public <E extends Exception> byte[] get(
             String url,
             FunctionT<HttpResponseHeaders, Boolean, E> handler
-    ) throws E {
+    ) throws ExecutionException {
         try {
             return http
                     .prepareGet(url)
@@ -70,14 +69,6 @@ public class NingHttpClient implements NingHttpClientFacade {
             }).get();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
-        } catch (ExecutionException e) {
-            try {
-                /* No clean way to do this */
-                //noinspection unchecked
-                throw (E) e.getCause();
-            } catch (ClassCastException cce) {
-                throw new RuntimeException(cce);
-            }
         }
     }
 
