@@ -39,6 +39,7 @@ module.exports = HttpController =
 
 	getProjectDocs: (req, res, next = (error) ->) ->
 		project_id = req.params.project_id
+		projectStateHash = req.query?.state
 		# exclude is string of existing docs "id:version,id:version,..."
 		excludeItems = req.query?.exclude?.split(',') or []
 		logger.log project_id: project_id, exclude: excludeItems, "getting docs via http"
@@ -47,12 +48,16 @@ module.exports = HttpController =
 		for item in excludeItems
 			[id,version] = item?.split(':')
 			excludeVersions[id] = version
-		logger.log {project_id: project_id, excludeVersions: excludeVersions}, "excluding versions"
-		ProjectManager.getProjectDocs project_id, excludeVersions, (error, result) ->
+		logger.log {project_id: project_id, projectStateHash: projectStateHash, excludeVersions: excludeVersions}, "excluding versions"
+		ProjectManager.getProjectDocs project_id, projectStateHash, excludeVersions, (error, result) ->
 			timer.done()
-			return next(error) if error?
-			logger.log project_id: project_id, result: ("#{doc._id}:#{doc.rev}" for doc in result), "got docs via http"
-			res.send result
+			if error instanceof Errors.ProjectStateChangedError
+				res.send 409 # conflict
+			else if error?
+				return next(error)
+			else
+				logger.log project_id: project_id, result: ("#{doc._id}:#{doc.rev}" for doc in result), "got docs via http"
+				res.send result
 
 	setDoc: (req, res, next = (error) ->) ->
 		doc_id = req.params.doc_id
