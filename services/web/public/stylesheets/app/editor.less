@@ -72,17 +72,17 @@
 	height: 100%;
 	background-color: #FFF;
 }
-	.loading-screen-lion-container {
+	.loading-screen-brand-container {
 		width: 15%;
 		min-width: 200px;
 		text-align: center;
 	}
-		.loading-screen-lion {
+		.loading-screen-brand {
 			position: relative;
 			width: 100%;
-			padding-top: 86.2%;
+			padding-top: @editor-loading-logo-padding-top;
 			height: 0;
-			background: url(/img/brand/lion-grey.svg) no-repeat bottom / 100%;
+			background: @editor-loading-logo-background-url no-repeat bottom / 100%;
 
     		&::after {
 				content: '';
@@ -91,7 +91,7 @@
 				right: 0;
 				bottom: 0;
 				left: 0;
-				background: url(/img/brand/lion.svg) no-repeat bottom / 100%;
+				background: @editor-loading-logo-foreground-url no-repeat bottom / 100%;
 				transition: height .5s;
     		}
 		}
