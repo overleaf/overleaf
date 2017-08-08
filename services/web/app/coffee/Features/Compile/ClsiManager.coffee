@@ -17,9 +17,10 @@ DocumentUpdaterHandler = require "../DocumentUpdater/DocumentUpdaterHandler"
 module.exports = ClsiManager =
 
 	sendRequest: (project_id, user_id, options = {}, callback) ->
-		ClsiManager.sendRequestOnce project_id, user_id, _.clone(options), (error, status, result...) ->
+		ClsiManager.sendRequestOnce project_id, user_id, options, (error, status, result...) ->
 			return callback(error) if error?
 			if status is 'conflict'
+				options = _.clone(options)
 				options.syncType = "full" #  force full compile
 				ClsiManager.sendRequestOnce project_id, user_id, options, callback # try again
 			else
@@ -147,6 +148,7 @@ module.exports = ClsiManager =
 					path = docPath[doc._id]
 					docs[path] = doc
 				# send new docs but not files as those are already on the clsi
+				options = _.clone(options)
 				options.syncType = "incremental"
 				options.syncState = projectStateHash
 				ClsiManager._finaliseRequest project_id, options, project, docs, [], callback
@@ -154,6 +156,7 @@ module.exports = ClsiManager =
 	_buildRequestFromMongo: (project_id, options, project, projectStateHash, callback = (error, request) ->) ->
 		ClsiManager._getContentFromMongo project_id, (error, docs, files) ->
 			return callback(error) if error?
+			options = _.clone(options)
 			options.syncType = "full"
 			options.syncState = projectStateHash
 			ClsiManager._finaliseRequest project_id, options, project, docs, files, callback
