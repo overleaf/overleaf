@@ -25,11 +25,21 @@ module.exports = ResourceWriter =
 				ResourceWriter.storeSyncState request.syncState, basePath, callback
 
 	storeSyncState: (state, basePath, callback) ->
-		logger.log state:state, basePath:basePath, "writing sync state"
-		fs.writeFile Path.join(basePath, ".resource-sync-state"), state, {encoding: 'ascii'}, callback
+		stateFile = Path.join(basePath, ".resource-sync-state")
+		if not state? # remove the  file if no state passed in
+			logger.log state:state, basePath:basePath, "clearing sync state"
+			fs.unlink stateFile, (err) ->
+				if err? and err.code isnt 'ENOENT'
+					return callback(err)
+				else
+					return callback()
+		else
+			logger.log state:state, basePath:basePath, "writing sync state"
+			fs.writeFile stateFile, state, {encoding: 'ascii'}, callback
 
 	checkSyncState: (state, basePath, callback) ->
-		fs.readFile Path.join(basePath, ".resource-sync-state"), {encoding:'ascii'}, (err, oldState) ->
+		stateFile = Path.join(basePath, ".resource-sync-state")
+		fs.readFile stateFile, {encoding:'ascii'}, (err, oldState) ->
 			# ignore errors, return true if state matches, false otherwise (including errors)
 			return callback(null, if state is oldState then true else false)
 
