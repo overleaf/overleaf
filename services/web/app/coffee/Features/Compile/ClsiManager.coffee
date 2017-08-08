@@ -124,14 +124,19 @@ module.exports = ClsiManager =
 			if project.compiler not in ClsiManager.VALID_COMPILERS
 				project.compiler = "pdflatex"
 
-			ClsiManager.getContentFromDocUpdaterIfMatch project_id, project, (error, projectStateHash, docUpdaterDocs) ->
-				return callback(error) if error?
-				logger.log project_id: project_id, projectStateHash: projectStateHash, docs: docUpdaterDocs?, "checked project state"
-				# see if we can send an incremental update to the CLSI
-				if docUpdaterDocs? and options.syncType isnt "full"
-					ClsiManager._buildRequestFromDocupdater project_id, options, project, projectStateHash, docUpdaterDocs, callback
-				else
-					ClsiManager._buildRequestFromMongo project_id, options, project, projectStateHash, callback
+			if options.syncType? # new way, either incremental or full
+				ClsiManager.getContentFromDocUpdaterIfMatch project_id, project, (error, projectStateHash, docUpdaterDocs) ->
+					return callback(error) if error?
+					logger.log project_id: project_id, projectStateHash: projectStateHash, docs: docUpdaterDocs?, "checked project state"
+					# see if we can send an incremental update to the CLSI
+					if docUpdaterDocs? and options.syncType isnt "full"
+						ClsiManager._buildRequestFromDocupdater project_id, options, project, projectStateHash, docUpdaterDocs, callback
+					else
+						ClsiManager._buildRequestFromMongo project_id, options, project, projectStateHash, callback
+			else # old way, always from mongo
+				ClsiManager._getContentFromMongo project_id, (error, docs, files) ->
+					return callback(error) if error?
+					ClsiManager._finaliseRequest project_id, options, project, docs, files, callback
 
 	getContentFromDocUpdaterIfMatch: (project_id, project, callback = (error, projectStateHash, docs) ->) ->
 		ClsiStateManager.computeHash project, (error, projectStateHash) ->
