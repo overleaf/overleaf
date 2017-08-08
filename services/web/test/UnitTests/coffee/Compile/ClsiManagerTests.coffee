@@ -12,6 +12,8 @@ describe "ClsiManager", ->
 			getCookieJar: sinon.stub().callsArgWith(1, null, @jar)
 			setServerId: sinon.stub().callsArgWith(2)
 			_getServerId:sinon.stub()
+		@ClsiStateManager =
+			computeHash: sinon.stub().callsArgWith(1, null, "01234567890abcdef")
 		@ClsiFormatChecker =
 			checkRecoursesForProblems:sinon.stub().callsArgWith(1)
 		@ClsiManager = SandboxedModule.require modulePath, requires:
@@ -26,8 +28,11 @@ describe "ClsiManager", ->
 						url: "https://clsipremium.example.com"
 			"../../models/Project": Project: @Project = {}
 			"../Project/ProjectEntityHandler": @ProjectEntityHandler = {}
-			"../DocumentUpdater/DocumentUpdaterHandler": @DocumentUpdaterHandler = {}
+			"../Project/ProjectGetter": @ProjectGetter = {}
+			"../DocumentUpdater/DocumentUpdaterHandler": @DocumentUpdaterHandler =
+				getProjectDocsIfMatch: sinon.stub().callsArgWith(2,null,null)
 			"./ClsiCookieManager": @ClsiCookieManager
+			"./ClsiStateManager": @ClsiStateManager
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), warn: sinon.stub() }
 			"request": @request = sinon.stub()
 			"./ClsiFormatChecker": @ClsiFormatChecker
@@ -145,6 +150,7 @@ describe "ClsiManager", ->
 			@Project.findById = sinon.stub().callsArgWith(2, null, @project)
 			@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
 			@ProjectEntityHandler.getAllFiles = sinon.stub().callsArgWith(1, null, @files)
+			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, @project)
 			@DocumentUpdaterHandler.flushProjectToMongo = sinon.stub().callsArgWith(1, null)
 
 		describe "with a valid project", ->
@@ -154,8 +160,8 @@ describe "ClsiManager", ->
 					done()
 
 			it "should get the project with the required fields", ->
-				@Project.findById
-					.calledWith(@project_id, {compiler:1, rootDoc_id: 1, imageName: 1})
+				@ProjectGetter.getProject
+					.calledWith(@project_id, {compiler:1, rootDoc_id: 1, imageName: 1, rootFolder: 1})
 					.should.equal true
 
 			it "should flush the project to the database", ->
@@ -182,6 +188,8 @@ describe "ClsiManager", ->
 							imageName: @image
 							draft: false
 							check: undefined
+							syncType: "full"
+							syncState: "01234567890abcdef"
 						rootResourcePath: "main.tex"
 						resources: [{
 							path:    "main.tex"

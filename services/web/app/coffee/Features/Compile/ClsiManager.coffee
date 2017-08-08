@@ -182,7 +182,6 @@ module.exports = ClsiManager =
 			resources.push
 				path:    path
 				content: doc.lines.join("\n")
-				rev: doc.rev
 			if project.rootDoc_id? and doc._id.toString() == project.rootDoc_id.toString()
 				rootResourcePath = path
 			if options.rootDoc_id? and doc._id.toString() == options.rootDoc_id.toString()
