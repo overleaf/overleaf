@@ -46,6 +46,11 @@ module.exports = (grunt) ->
 			app:
 				src: "app.js"
 
+		mkdir:
+			all:
+				options:
+					create: ["cache", "compiles"]
+
 		mochaTest:
 			unit:
 				options:
@@ -70,6 +75,7 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-shell'
 	grunt.loadNpmTasks 'grunt-execute'
 	grunt.loadNpmTasks 'grunt-bunyan'
+	grunt.loadNpmTasks 'grunt-mkdir'
 
 	grunt.registerTask 'compile:bin', () ->	
 		callback = @async()
@@ -93,6 +99,6 @@ module.exports = (grunt) ->
 
 	grunt.registerTask 'install', 'compile:app'
 
-	grunt.registerTask 'default', ['run']
+	grunt.registerTask 'default', ['mkdir', 'run']
 
 
