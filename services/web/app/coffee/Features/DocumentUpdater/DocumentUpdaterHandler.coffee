@@ -124,6 +124,9 @@ module.exports = DocumentUpdaterHandler =
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
 	getProjectDocsIfMatch: (project_id, projectStateHash, callback = (error, docs) ->) ->
+		# If the project state hasn't changed, we can get all the latest
+		# docs from redis via the docupdater. Otherwise we will need to
+		# fall back to getting them from mongo.
 		timer = new metrics.Timer("get-project-docs")
 		url = "#{settings.apis.documentupdater.url}/project/#{project_id}/doc?state=#{projectStateHash}"
 		logger.log project_id:project_id, "getting project docs from document updater"
@@ -132,7 +135,12 @@ module.exports = DocumentUpdaterHandler =
 			if error?
 				logger.error err:error, url:url, project_id:project_id, "error getting project docs from doc updater"
 				return callback(error)
-			if res.statusCode is 409
+			if res.statusCode is 409 # HTTP response code "409 Conflict"
+				# Docupdater has checked the projectStateHash and found that
+				# it has changed. This means that the docs currently in redis
+				# aren't the only change to the project and the full set of
+				# docs/files should be retreived from docstore/filestore
+				# instead.
 				return callback()
 			else if res.statusCode >= 200 and res.statusCode < 300
 				logger.log project_id:project_id, "got project docs from document document updater"
