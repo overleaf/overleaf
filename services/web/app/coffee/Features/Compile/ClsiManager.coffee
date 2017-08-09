@@ -124,7 +124,7 @@ module.exports = ClsiManager =
 			if project.compiler not in ClsiManager.VALID_COMPILERS
 				project.compiler = "pdflatex"
 
-			if options.syncType? # new way, either incremental or full
+			if options.incremental or options.syncType? # new way, either incremental or full
 				ClsiManager.getContentFromDocUpdaterIfMatch project_id, project, (error, projectStateHash, docUpdaterDocs) ->
 					return callback(error) if error?
 					logger.log project_id: project_id, projectStateHash: projectStateHash, docs: docUpdaterDocs?, "checked project state"
