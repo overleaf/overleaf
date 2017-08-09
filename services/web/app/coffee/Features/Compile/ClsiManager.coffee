@@ -13,6 +13,7 @@ _ = require("underscore")
 async = require("async")
 ClsiFormatChecker = require("./ClsiFormatChecker")
 DocumentUpdaterHandler = require "../DocumentUpdater/DocumentUpdaterHandler"
+Metrics = require('metrics-sharelatex')
 
 module.exports = ClsiManager =
 
@@ -125,16 +126,22 @@ module.exports = ClsiManager =
 				project.compiler = "pdflatex"
 
 			if options.incremental or options.syncType? # new way, either incremental or full
+				timer = new Metrics.Timer("editor.compile-getdocs-redis")
 				ClsiManager.getContentFromDocUpdaterIfMatch project_id, project, (error, projectStateHash, docUpdaterDocs) ->
+					timer.done()
 					return callback(error) if error?
 					logger.log project_id: project_id, projectStateHash: projectStateHash, docs: docUpdaterDocs?, "checked project state"
 					# see if we can send an incremental update to the CLSI
 					if docUpdaterDocs? and options.syncType isnt "full"
+						Metrics.inc "compile-from-redis"
 						ClsiManager._buildRequestFromDocupdater project_id, options, project, projectStateHash, docUpdaterDocs, callback
 					else
+						Metrics.inc "compile-from-mongo"
 						ClsiManager._buildRequestFromMongo project_id, options, project, projectStateHash, callback
 			else # old way, always from mongo
+				timer = new Metrics.Timer("editor.compile-getdocs-mongo")
 				ClsiManager._getContentFromMongo project_id, (error, docs, files) ->
+					timer.done()
 					return callback(error) if error?
 					ClsiManager._finaliseRequest project_id, options, project, docs, files, callback
 

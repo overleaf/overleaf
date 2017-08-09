@@ -36,6 +36,10 @@ describe "ClsiManager", ->
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), warn: sinon.stub() }
 			"request": @request = sinon.stub()
 			"./ClsiFormatChecker": @ClsiFormatChecker
+			"metrics-sharelatex": @Metrics =
+				Timer: class Timer
+					done: sinon.stub()
+				inc: sinon.stub()
 		@project_id = "project-id"
 		@user_id = "user-id"
 		@callback = sinon.stub()
