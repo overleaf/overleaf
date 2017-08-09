@@ -188,8 +188,8 @@ describe "ClsiManager", ->
 							imageName: @image
 							draft: false
 							check: undefined
-							syncType: "full"
-							syncState: "01234567890abcdef"
+							syncType: undefined # "full"
+							syncState: undefined # "01234567890abcdef"
 						rootResourcePath: "main.tex"
 						resources: [{
 							path:    "main.tex"
