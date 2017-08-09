@@ -39,6 +39,7 @@ ErrorController = require "../Features/Errors/ErrorController"
 UserSessionsManager = require "../Features/User/UserSessionsManager"
 AuthenticationController = require "../Features/Authentication/AuthenticationController"
 
+
 metrics.event_loop?.monitor(logger)
 
 Settings.editorIsOpen ||= true
