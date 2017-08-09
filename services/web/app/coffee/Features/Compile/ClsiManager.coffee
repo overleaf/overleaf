@@ -174,9 +174,14 @@ module.exports = ClsiManager =
 			ClsiManager._finaliseRequest project_id, options, project, docs, files, callback
 
 	_getContentFromDocUpdater: (project_id, callback = (error, docs) ->) ->
-		DocumentUpdaterHandler.getProjectDocs project_id, (error, docs) ->
+		# Workaround: for now, always flush project to mongo on compile
+		# until we have automatic periodic flushing on the docupdater
+		# side, to prevent documents staying in redis too long.
+		DocumentUpdaterHandler.flushProjectToMongo project_id, (error) ->
 			return callback(error) if error?
-			callback(null, docs)
+			DocumentUpdaterHandler.getProjectDocs project_id, (error, docs) ->
+				return callback(error) if error?
+				callback(null, docs)
 
 	_getContentFromMongo: (project_id, callback = (error, docs, files) ->) ->
 		DocumentUpdaterHandler.flushProjectToMongo project_id, (error) ->
