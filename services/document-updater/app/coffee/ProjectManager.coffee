@@ -84,7 +84,7 @@ module.exports = ProjectManager =
 								# otherwise get the doc lines from redis
 								RedisManager.getDocLines doc_id, (error, lines) ->
 									return cb(error) if error?
-									docs.push {_id: doc_id, lines: lines, rev: version}
+									docs.push {_id: doc_id, lines: lines, v: version}
 									cb()
 				async.series jobs, (error) ->
 					return callback(error) if error?
