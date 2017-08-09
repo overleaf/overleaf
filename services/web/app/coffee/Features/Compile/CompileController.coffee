@@ -30,8 +30,8 @@ module.exports = CompileController =
 			options.draft = req.body.draft
 		if req.body?.check in ['validate', 'error', 'silent']
 			options.check = req.body.check
-		if req.body?.incremental
-			options.incremental = true
+		if req.body?.incrementalCompilesEnabled
+			options.incrementalCompilesEnabled = true
 		logger.log {options:options, project_id:project_id, user_id:user_id}, "got compile request"
 		CompileManager.compile project_id, user_id, options, (error, status, outputFiles, clsiServerId, limits, validationProblems) ->
 			return next(error) if error?
