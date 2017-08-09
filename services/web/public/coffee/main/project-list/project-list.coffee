@@ -20,7 +20,7 @@ define [
 		, 10
 
 		$scope.$watch((
-			() -> $scope.projects.filter((project) -> !project.tags? or project.tags.length == 0).length
+			() -> $scope.projects.filter((project) -> (!project.tags? or project.tags.length == 0) and !project.archived).length
 		), (newVal) -> $scope.nUntagged = newVal)
 
 		storedUIOpts = JSON.parse(localStorage("project_list"))

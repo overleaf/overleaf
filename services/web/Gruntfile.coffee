@@ -139,6 +139,9 @@ module.exports = (grunt) ->
 			app:
 				files:
 					"public/stylesheets/style.css": "public/stylesheets/style.less"
+			ol:
+				files:
+					"public/stylesheets/ol-style.css": "public/stylesheets/ol-style.less"
 
 		postcss:
 			options:

@@ -94,7 +94,7 @@ describe "Opening", ->
 		
 			expect(error, "smoke test: error returned in getting project list").to.not.exist
 			expect(!!stderr.match("200 OK"), "smoke test: response code is not 200 getting project list").to.equal true
-			expect(!!stdout.match("<title>Your Projects - ShareLaTeX, Online LaTeX Editor</title>"), "smoke test: body does not have correct title").to.equal true
+			expect(!!stdout.match("<title>Your Projects - .*, Online LaTeX Editor</title>"), "smoke test: body does not have correct title").to.equal true
 			expect(!!stdout.match("ProjectPageController"), "smoke test: body does not have correct angular controller").to.equal true
 			done()
 	

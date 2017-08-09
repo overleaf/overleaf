@@ -226,8 +226,8 @@ module.exports = settings =
 	# passwordStrengthOptions:
 	# 	pattern: "aA$3"
 	# 	length:
-	# 		min: 1
-	# 		max: 10
+	# 		min: 6
+	# 		max: 128
 
 	# Email support
 	# -------------
@@ -343,6 +343,8 @@ module.exports = settings =
 
 	appName: "ShareLaTeX (Community Edition)"
 	adminEmail: "placeholder@example.com"
+	
+	brandPrefix: "" # Set to 'ol-' for overleaf styles
 
 	nav:
 		title: "ShareLaTeX Community Edition"

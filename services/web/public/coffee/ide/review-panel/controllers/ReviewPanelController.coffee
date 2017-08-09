@@ -434,6 +434,8 @@ define [
 			$scope.toggleReviewPanel()
 
 		$scope.addNewCommentFromKbdShortcut = () ->
+			if !$scope.project.features.trackChangesVisible
+				return
 			$scope.$broadcast "comment:select_line"
 			if !$scope.ui.reviewPanelOpen
 				$scope.toggleReviewPanel()
@@ -646,7 +648,9 @@ define [
 				applyTrackChangesStateToClient(state)
 
 		$scope.toggleTrackChangesFromKbdShortcut = () ->
-				$scope.toggleTrackChangesForUser !$scope.reviewPanel.trackChangesState[ide.$scope.user.id].value, ide.$scope.user.id
+			if !$scope.project.features.trackChangesVisible
+				return
+			$scope.toggleTrackChangesForUser !$scope.reviewPanel.trackChangesState[ide.$scope.user.id].value, ide.$scope.user.id
 
 		_inited = false
 		ide.$scope.$on "project:joined", () ->
