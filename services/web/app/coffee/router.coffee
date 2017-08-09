@@ -12,7 +12,6 @@ UploadsRouter = require './Features/Uploads/UploadsRouter'
 metrics = require('metrics-sharelatex')
 ReferalController = require('./Features/Referal/ReferalController')
 AuthenticationController = require('./Features/Authentication/AuthenticationController')
-OverleafAuthenticationController = require('./Features/Authentication/OverleafAuthenticationController')
 TagsController = require("./Features/Tags/TagsController")
 NotificationsController = require("./Features/Notifications/NotificationsController")
 CollaboratorsRouter = require('./Features/Collaborators/CollaboratorsRouter')
@@ -59,9 +58,6 @@ module.exports = class Router
 		AuthenticationController.addEndpointToLoginWhitelist '/login'
 
 		webRouter.post '/login', AuthenticationController.passportLogin
-		
-		webRouter.get  '/overleaf/login', OverleafAuthenticationController.passportLogin
-		webRouter.get  '/overleaf/callback', OverleafAuthenticationController.passportCallback, OverleafAuthenticationController.afterPassportLogin
 
 		webRouter.get  '/logout', UserController.logout
 		webRouter.get  '/restricted', AuthorizationMiddlewear.restricted

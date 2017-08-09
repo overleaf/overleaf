@@ -62,6 +62,7 @@ UserSchema = new Schema
 	overleaf:
 		id: { type: Number }
 		accessToken: { type: String }
+		refreshToken: { type: String }
 
 conn = mongoose.createConnection(Settings.mongo.url, server: poolSize: 10)
 
