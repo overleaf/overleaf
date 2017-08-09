@@ -230,6 +230,24 @@ module.exports = ProjectController =
 						return cb(null, false)
 					else
 						return cb(null, true)
+			showPerUserTCNotice: (cb) ->
+				cb = underscore.once(cb)
+				if !user_id?
+					return cb()
+				timestamp = user_id.toString().substring(0,8)
+				userSignupDate = new Date( parseInt( timestamp, 16 ) * 1000 )
+				if userSignupDate > new Date("2017-08-09")
+					# Don't show for users who registered after it was released
+					return cb(null, false)
+				timeout = setTimeout cb, 500
+				AnalyticsManager.getLastOccurance user_id, "shown-per-user-tc-notice", (error, event) ->
+					clearTimeout timeout
+					if error?
+						return cb(null, false)
+					else if event?
+						return cb(null, false)
+					else
+						return cb(null, true)
 		}, (err, results)->
 			if err?
 				logger.err err:err, "error getting details for project page"
@@ -237,7 +255,7 @@ module.exports = ProjectController =
 			project = results.project
 			user = results.user
 			subscription = results.subscription
-			showTrackChangesOnboarding = results.showTrackChangesOnboarding
+			{ showTrackChangesOnboarding, showPerUserTCNotice } = results
 
 			daysSinceLastUpdated =  (new Date() - project.lastUpdated) /86400000
 			logger.log project_id:project_id, daysSinceLastUpdated:daysSinceLastUpdated, "got db results for loading editor"
@@ -279,8 +297,9 @@ module.exports = ProjectController =
 						pdfViewer : user.ace.pdfViewer
 						syntaxValidation: user.ace.syntaxValidation
 					}
-					trackChangesEnabled: !!project.track_changes
+					trackChangesState: project.track_changes
 					showTrackChangesOnboarding: !!showTrackChangesOnboarding
+					showPerUserTCNotice: !!showPerUserTCNotice
 					privilegeLevel: privilegeLevel
 					chatUrl: Settings.apis.chat.url
 					anonymous: anonymous

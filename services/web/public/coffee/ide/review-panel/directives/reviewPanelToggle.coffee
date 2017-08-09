@@ -4,20 +4,23 @@ define [
 	App.directive "reviewPanelToggle", () ->
 		restrict: "E"
 		scope: 
-			onToggle: '='
+			onToggle: '&'
 			ngModel: '='
+			valWhenUndefined: '=?'
 			disabled: '=?'
-			onDisabledClick: '=?'
+			onDisabledClick: '&?'
 		link: (scope) ->
 			if !scope.disabled?
 				scope.disabled = false
 			scope.onChange = (args...) ->
-				scope.onToggle(scope.localModel)
+				scope.onToggle({ isOn: scope.localModel })
 			scope.handleClick = () ->
-				if scope.disabled
+				if scope.disabled and scope.onDisabledClick?
 					scope.onDisabledClick()
 			scope.localModel = scope.ngModel
 			scope.$watch "ngModel", (value) ->
+				if scope.valWhenUndefined? and !value?
+					value = scope.valWhenUndefined
 				scope.localModel = value
 
 		template: """
