@@ -12,7 +12,7 @@ describe "HttpController", ->
 			"./ProjectManager": @ProjectManager = {}
 			"logger-sharelatex" : @logger = { log: sinon.stub() }
 			"./Metrics": @Metrics = {}
-
+			"./Errors" : Errors
 		@Metrics.Timer = class Timer
 			done: sinon.stub()
 		@project_id = "project-id-123"
@@ -429,6 +429,64 @@ describe "HttpController", ->
 			beforeEach ->
 				@DocumentManager.deleteCommentWithLock = sinon.stub().callsArgWith(3, new Error("oops"))
 				@HttpController.deleteComment(@req, @res, @next)
+
+			it "should call next with the error", ->
+				@next
+					.calledWith(new Error("oops"))
+					.should.equal true
+
+	describe "getProjectDocs", ->
+		beforeEach ->
+			@state = "01234567890abcdef"
+			@docs = [{_id: "1234", lines: "hello", v: 23}, {_id: "4567", lines: "world", v: 45}]
+			@req =
+				params:
+					project_id: @project_id
+				query:
+					state: @state
+
+		describe "successfully", ->
+			beforeEach ->
+				@ProjectManager.getProjectDocs = sinon.stub().callsArgWith(3,null, @docs)
+				@HttpController.getProjectDocs(@req, @res, @next)
+
+			it "should get docs from the project manager", ->
+				@ProjectManager.getProjectDocs
+					.calledWith(@project_id, @state, {})
+					.should.equal true
+
+			it "should return a successful response", ->
+				@res.send
+					.calledWith(@docs)
+					.should.equal true
+
+			it "should log the request", ->
+				@logger.log
+					.calledWith({project_id: @project_id, exclude: []}, "getting docs via http")
+					.should.equal true
+
+			it "should log the response", ->
+				@logger.log
+					.calledWith({project_id: @project_id, result: ["1234:23", "4567:45"]}, "got docs via http")
+					.should.equal true
+
+			it "should time the request", ->
+				@Metrics.Timer::done.called.should.equal true
+
+		describe "when there is a conflict", ->
+			beforeEach ->
+				@ProjectManager.getProjectDocs = sinon.stub().callsArgWith(3, new Errors.ProjectStateChangedError("project state changed"))
+				@HttpController.getProjectDocs(@req, @res, @next)
+
+			it "should return an HTTP 409 Conflict response", ->
+				@res.send
+					.calledWith(409)
+					.should.equal true
+
+		describe "when an error occurs", ->
+			beforeEach ->
+				@ProjectManager.getProjectDocs = sinon.stub().callsArgWith(3, new Error("oops"))
+				@HttpController.getProjectDocs(@req, @res, @next)
 
 			it "should call next with the error", ->
 				@next

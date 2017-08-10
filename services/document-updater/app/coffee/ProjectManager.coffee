@@ -58,7 +58,7 @@ module.exports = ProjectManager =
 				else
 					callback(null)
 
-	getProjectDocs: (project_id, projectStateHash, excludeVersions = {}, _callback = (error) ->) ->
+	getProjectDocs: (project_id, projectStateHash, excludeVersions = {}, _callback = (error, docs) ->) ->
 		timer = new Metrics.Timer("projectManager.getProjectDocs")
 		callback = (args...) ->
 			timer.done()
@@ -78,12 +78,16 @@ module.exports = ProjectManager =
 						jobs.push (cb) ->
 							# check the doc version first
 							RedisManager.getDocVersion doc_id, (error, version) ->
-								return cb(error) if error?
+								if error?
+									logger.error err: error, project_id: project_id, doc_id: doc_id, "error getting project doc version"
+									return cb(error)
 								# skip getting the doc if we already have that version
-								return cb() if version is excludeVersions[doc_id]
+								return cb() if version? and version is excludeVersions[doc_id]
 								# otherwise get the doc lines from redis
 								RedisManager.getDocLines doc_id, (error, lines) ->
-									return cb(error) if error?
+									if error?
+										logger.error err: error, project_id: project_id, doc_id: doc_id, "error getting project doc lines"
+										return cb(error)
 									docs.push {_id: doc_id, lines: lines, v: version}
 									cb()
 				async.series jobs, (error) ->
