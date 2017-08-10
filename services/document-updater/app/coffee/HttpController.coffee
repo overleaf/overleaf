@@ -56,7 +56,7 @@ module.exports = HttpController =
 			else if error?
 				return next(error)
 			else
-				logger.log project_id: project_id, result: ("#{doc._id}:#{doc.rev}" for doc in result), "got docs via http"
+				logger.log project_id: project_id, result: ("#{doc._id}:#{doc.v}" for doc in result), "got docs via http"
 				res.send result
 
 	setDoc: (req, res, next = (error) ->) ->
