@@ -146,8 +146,6 @@ module.exports = DocumentUpdaterHandler =
 				logger.log project_id:project_id, "got project docs from document document updater"
 				try
 					docs = JSON.parse(body)
-					for doc in docs or []
-						doc.lines = JSON.parse(doc.lines)
 				catch error
 					return callback(error)
 				callback null, docs
