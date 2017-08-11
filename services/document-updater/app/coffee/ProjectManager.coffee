@@ -88,7 +88,10 @@ module.exports = ProjectManager =
 									if error?
 										logger.error err: error, project_id: project_id, doc_id: doc_id, "error getting project doc lines"
 										return cb(error)
-									docs.push {_id: doc_id, lines: lines, v: version}
+									try
+										docs.push {_id: doc_id, lines: JSON.parse(lines), v: version}
+									catch e
+										return cb(e)
 									cb()
 				async.series jobs, (error) ->
 					return callback(error) if error?
