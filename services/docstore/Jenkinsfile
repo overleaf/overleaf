@@ -41,7 +41,9 @@ pipeline {
     stage('Acceptance Tests') {
       steps {
         sh 'docker pull sharelatex/acceptance-test-runner'
-        sh 'docker run --rm -v $(pwd):/app sharelatex/acceptance-test-runner'
+        withCredentials([usernamePassword(credentialsId: 'S3_DOCSTORE_TEST_AWS_KEYS', passwordVariable: 'AWS_SECRET', usernameVariable: 'AWS_ID')]) {
+          sh 'docker run --rm -e AWS_BUCKET="sl-doc-archive-testing" -e AWS_ACCESS_KEY_ID=$AWS_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET -v $(pwd):/app sharelatex/acceptance-test-runner'
+        }
       }
     }
     stage('Package') {
