@@ -34,7 +34,7 @@ pipeline {
       }
       steps {
         sh 'node_modules/.bin/grunt compile'
-        // sh 'node_modules/.bin/grunt compile:acceptance_tests'
+        sh 'node_modules/.bin/grunt compile:acceptance_tests'
         sh 'NODE_ENV=development node_modules/.bin/grunt test:unit'
       }
     }
