@@ -781,6 +781,41 @@ describe 'ProjectEntityHandler', ->
 					})
 					.should.equal true
 
+		describe "getAllFoldersFromProject", ->
+			beforeEach ->
+				@callback = sinon.stub()
+				@ProjectEntityHandler.getAllFoldersFromProject @project, @callback
+
+			it "should call the callback with the folders", ->
+				@callback
+					.calledWith(null, {
+						"/": @project.rootFolder[0]
+						"/folder1": @folder1
+					})
+					.should.equal true
+
+		describe "getAllDocPathsFromProject", ->
+			beforeEach ->
+				@docs = [{
+					_id:   @doc1._id
+					lines: @lines1 = ["one"]
+					rev:   @rev1 = 1
+				}, {
+					_id:   @doc2._id
+					lines: @lines2 = ["two"]
+					rev:   @rev2 = 2
+				}]
+				@callback = sinon.stub()
+				@ProjectEntityHandler.getAllDocPathsFromProject @project, @callback
+
+			it "should call the callback with the path for each doc_id", ->
+				@expected = {}
+				@expected[@doc1._id] = "/#{@doc1.name}"
+				@expected[@doc2._id] = "/folder1/#{@doc2.name}"
+				@callback
+					.calledWith(null, @expected)
+					.should.equal true
+
 	describe "flushProjectToThirdPartyDataStore", ->
 		beforeEach (done) ->
 			@project = {
