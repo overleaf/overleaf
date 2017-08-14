@@ -252,6 +252,47 @@ describe 'DocumentUpdaterHandler', ->
 					.calledWith(new Error("doc updater returned failure status code: 500"))
 					.should.equal true
 
+	describe "getProjectDocsIfMatch", ->
+		beforeEach ->
+			@callback = sinon.stub()
+			@project_state_hash = "1234567890abcdef"
+
+		describe "successfully", ->
+			beforeEach ->
+				@doc0 =
+					_id: @doc_id
+					lines: @lines
+					v: @version
+				@docs = [ @doc0, @doc0, @doc0 ]
+				@body = JSON.stringify @docs
+				@request.get = sinon.stub().callsArgWith(1, null, {statusCode: 200}, @body)
+				@handler.getProjectDocsIfMatch @project_id, @project_state_hash, @callback
+
+			it 'should get the documenst from the document updater', ->
+				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}/doc?state=#{@project_state_hash}"
+				@request.get.calledWith(url).should.equal true
+
+			it "should call the callback with the documents", ->
+				@callback.calledWithExactly(null, @docs).should.equal true
+
+		describe "when the document updater API returns an error", ->
+			beforeEach ->
+				@request.get = sinon.stub().callsArgWith(1, @error = new Error("something went wrong"), null, null)
+				@handler.getProjectDocsIfMatch @project_id, @project_state_hash, @callback
+
+			it "should return an error to the callback", ->
+				@callback.calledWith(@error).should.equal true
+
+		describe "when the document updater returns a conflict error code", ->
+			beforeEach ->
+				@request.get = sinon.stub().callsArgWith(1, null, { statusCode: 409 }, "Conflict")
+				@handler.getProjectDocsIfMatch @project_id, @project_state_hash, @callback
+
+			it "should return the callback with no documents", ->
+				@callback
+					.alwaysCalledWithExactly()
+					.should.equal true
+
 	describe "acceptChanges", ->
 		beforeEach ->
 			@change_id = "mock-change-id-1"
