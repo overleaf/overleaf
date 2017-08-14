@@ -112,10 +112,12 @@ define [
 							else
 								callback null, result
 
-			@editor.completers = [@suggestionManager,
-								  SnippetCompleter,
-								  ReferencesCompleter,
-								  LabelsCompleter]
+			@editor.completers = [
+								@suggestionManager,
+								SnippetCompleter,
+								ReferencesCompleter,
+								LabelsCompleter
+							]
 
 		disable: () ->
 			@editor.setOptions({
