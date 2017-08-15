@@ -227,6 +227,51 @@ describe "ClsiManager", ->
 						}]
 				)
 
+		describe "with the incremental compile option", ->
+			beforeEach (done) ->
+				@ClsiStateManager.computeHash = sinon.stub().callsArgWith(1, null, @project_state_hash = "01234567890abcdef")
+				@DocumentUpdaterHandler.getProjectDocsIfMatch = sinon.stub().callsArgWith(2, null, [{_id:@doc_1._id, lines:  @doc_1.lines, v: 123}])
+				@ProjectEntityHandler.getAllDocPathsFromProject = sinon.stub().callsArgWith(1, null, {"mock-doc-id-1":"main.tex"})
+				@ClsiManager._buildRequest @project_id, {timeout:100, incrementalCompilesEnabled:true}, (error, request) =>
+					@request = request
+					done()
+
+			it "should get the project with the required fields", ->
+				@ProjectGetter.getProject
+					.calledWith(@project_id, {compiler:1, rootDoc_id: 1, imageName: 1, rootFolder: 1})
+					.should.equal true
+
+			it "should flush the project to the database", ->
+				@DocumentUpdaterHandler.flushProjectToMongo
+					.calledWith(@project_id)
+					.should.equal true
+
+			it "should get only the live docs from the docupdater", ->
+				@DocumentUpdaterHandler.getProjectDocsIfMatch
+					.calledWith(@project_id)
+					.should.equal true
+
+			it "should not get any of the files", ->
+				@ProjectEntityHandler.getAllFiles
+					.called.should.equal false
+
+			it "should build up the CLSI request", ->
+				expect(@request).to.deep.equal(
+					compile:
+						options:
+							compiler: @compiler
+							timeout : 100
+							imageName: @image
+							draft: false
+							check: undefined
+							syncType: "incremental"
+							syncState: "01234567890abcdef"
+						rootResourcePath: "main.tex"
+						resources: [{
+							path:    "main.tex"
+							content: @doc_1.lines.join("\n")
+						}]
+				)
 
 		describe "when root doc override is valid", ->
 			beforeEach (done) ->
