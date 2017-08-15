@@ -103,6 +103,25 @@ describe "ClsiManager", ->
 			it "should call the callback with a failure statue", ->
 				@callback.calledWith(null, @status).should.equal true
 
+		describe "with a sync conflict", ->
+			beforeEach ->
+				@ClsiManager.sendRequestOnce = sinon.stub()
+				@ClsiManager.sendRequestOnce.withArgs(@project_id, @user_id, {syncType:"full"}).callsArgWith(3, null,	@status = "success")
+				@ClsiManager.sendRequestOnce.withArgs(@project_id, @user_id, {}).callsArgWith(3, null, "conflict")
+				@ClsiManager.sendRequest @project_id, @user_id, {}, @callback
+
+			it "should call the sendRequestOnce method twice", ->
+				@ClsiManager.sendRequestOnce.calledTwice.should.equal true
+
+			it "should call the sendRequestOnce method once with syncType:full", ->
+				@ClsiManager.sendRequestOnce.withArgs(@project_id, @user_id, {syncType:"full"}).calledOnce.should.equal true
+
+			it "should call the sendRequestOnce method once without syncType:full", ->
+				@ClsiManager.sendRequestOnce.withArgs(@project_id, @user_id, {}).calledOnce.should.equal true
+
+			it "should call the callback with a success status", ->
+				@callback.calledWith(null, @status, ).should.equal true
+
 	describe "deleteAuxFiles", ->
 		beforeEach ->
 			@ClsiManager._makeRequest = sinon.stub().callsArg(2)
