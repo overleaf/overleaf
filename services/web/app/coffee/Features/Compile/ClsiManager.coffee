@@ -133,8 +133,13 @@ module.exports = ClsiManager =
 					logger.log project_id: project_id, projectStateHash: projectStateHash, docs: docUpdaterDocs?, "checked project state"
 					# see if we can send an incremental update to the CLSI
 					if docUpdaterDocs? and options.syncType isnt "full"
-						Metrics.inc "compile-from-redis"
-						ClsiManager._buildRequestFromDocupdater project_id, options, project, projectStateHash, docUpdaterDocs, callback
+						# Workaround: for now, always flush project to mongo on compile
+						# until we have automatic periodic flushing on the docupdater
+						# side, to prevent documents staying in redis too long.
+						DocumentUpdaterHandler.flushProjectToMongo project_id, (error) ->
+							return callback(error) if error?
+							Metrics.inc "compile-from-redis"
+							ClsiManager._buildRequestFromDocupdater project_id, options, project, projectStateHash, docUpdaterDocs, callback
 					else
 						Metrics.inc "compile-from-mongo"
 						ClsiManager._buildRequestFromMongo project_id, options, project, projectStateHash, callback
@@ -172,16 +177,6 @@ module.exports = ClsiManager =
 			options.syncType = "full"
 			options.syncState = projectStateHash
 			ClsiManager._finaliseRequest project_id, options, project, docs, files, callback
-
-	_getContentFromDocUpdater: (project_id, callback = (error, docs) ->) ->
-		# Workaround: for now, always flush project to mongo on compile
-		# until we have automatic periodic flushing on the docupdater
-		# side, to prevent documents staying in redis too long.
-		DocumentUpdaterHandler.flushProjectToMongo project_id, (error) ->
-			return callback(error) if error?
-			DocumentUpdaterHandler.getProjectDocs project_id, (error, docs) ->
-				return callback(error) if error?
-				callback(null, docs)
 
 	_getContentFromMongo: (project_id, callback = (error, docs, files) ->) ->
 		DocumentUpdaterHandler.flushProjectToMongo project_id, (error) ->
