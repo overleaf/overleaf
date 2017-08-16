@@ -159,7 +159,7 @@ define [], () ->
 			else
 				return false
 
-	class SuggestionManager
+	class CommandManager
 		getCompletions: (editor, session, pos, prefix, callback) ->
 			doc = session.getValue()
 			parser = new Parser(doc, prefix)

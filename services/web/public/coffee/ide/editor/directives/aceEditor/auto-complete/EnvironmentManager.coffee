@@ -129,7 +129,7 @@ define () ->
 				return result
 		return result
 
-	class SnippetManager
+	class EnvironmentManager
 		getCompletions: (editor, session, pos, prefix, callback) ->
 			docText = session.getValue()
 			customEnvironments = parseCustomEnvironments(docText)
@@ -164,4 +164,4 @@ define () ->
 			)
 			callback null, snippets
 
-	return SnippetManager
+	return EnvironmentManager
