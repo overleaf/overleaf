@@ -1,6 +1,7 @@
 Settings = require "settings-sharelatex"
 logger = require "logger-sharelatex"
 crypto = require "crypto"
+ProjectEntityHandler = require "../Project/ProjectEntityHandler"
 
 # The "state" of a project is a hash of the relevant attributes in the
 # project object in this case we only need the rootFolder.
@@ -16,12 +17,15 @@ crypto = require "crypto"
 # The docupdater is responsible for setting the key in redis, and
 # unsetting it if it removes any documents from the doc updater.
 
-buildState = (project) ->
-	json = JSON.stringify(project.rootFolder)
-	return crypto.createHash('sha1').update(json, 'utf8').digest('hex')
+buildState = (s) ->
+	return crypto.createHash('sha1').update(s, 'utf8').digest('hex')
 
 module.exports = ClsiStateManager =
 
 	computeHash: (project, callback = (err, hash) ->) ->
-		hash = buildState(project)
-		callback(null, hash)
+		ProjectEntityHandler.getAllEntitiesFromProject project, (err, docs, files) ->
+			fileList = ("#{f.file._id}:#{f.file.rev}:#{f.file.created}:#{f.path}" for f in files or [])
+			docList = ("#{d.doc._id}:#{d.path}" for d in docs or [])
+			sortedEntityList = [docList..., fileList...].sort()
+			hash = buildState(sortedEntityList.join("\n"))
+			callback(null, hash)

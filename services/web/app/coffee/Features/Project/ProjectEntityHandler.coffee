@@ -77,6 +77,21 @@ module.exports = ProjectEntityHandler =
 		processFolder "/", project.rootFolder[0]
 		callback null, folders
 
+	getAllEntitiesFromProject: (project, callback) ->
+		logger.log project:project, "getting all files for project"
+		@getAllFoldersFromProject project, (err, folders = {}) ->
+			return callback(err) if err?
+			docs = []
+			files = []
+			for folderPath, folder of folders
+				for doc in (folder.docs or [])
+					if doc?
+						docs.push({path: path.join(folderPath, doc.name), doc:doc})
+				for file in (folder.fileRefs or [])
+					if file?
+						files.push({path: path.join(folderPath, file.name), file:file})
+			callback null, docs, files
+
 	getAllDocPathsFromProject: (project, callback) ->
 		logger.log project:project, "getting all docs for project"
 		@getAllFoldersFromProject project, (err, folders = {}) ->
