@@ -1,4 +1,75 @@
 define [], () ->
+	noArgumentCommands = [
+		'item', 'hline', 'lipsum', 'centering', 'noindent', 'textwidth', 'draw',
+		'maketitle', 'newpage', 'verb', 'bibliography', 'fi', 'hfill', 'par',
+		'in', 'sum', 'cdot', 'alpha', 'ldots', 'else', 'linewidth', 'left',
+		'right', 'today', 'clearpage', 'newline', 'endinput', 'mu',
+		'tableofcontents', 'vfill', 'bigskip', 'fill', 'cleardoublepage'
+	]
+	singleArgumentCommands = [
+		'chapter', 'usepackage', 'section', 'label', 'textbf', 'subsection',
+		'vspace', 'cite', 'textit', 'documentclass', 'includegraphics', 'input',
+		'emph','caption', 'ref', 'title', 'author', 'texttt', 'include',
+		'hspace', 'bibitem', 'url', 'large', 'subsubsection', 'textsc', 'date',
+		'footnote', 'small', 'thanks', 'underline', 'graphicspath', 'pageref',
+		'section*', 'subsection*', 'subsubsection*', 'sqrt', 'text',
+		'normalsize', 'Large', 'paragraph', 'pagestyle', 'thispagestyle',
+		'bibliographystyle'
+	]
+	doubleArgumentCommands = [
+		'newcommand', 'frac', 'renewcommand', 'setlength', 'href', 'newtheorem'
+	]
+	tripleArgumentCommands = [
+		'addcontentsline', 'newacronym', 'multicolumn'
+	]
+	special = ['LaTeX', 'TeX']
+
+	rawCommands = [].concat(
+						noArgumentCommands,
+						singleArgumentCommands,
+						doubleArgumentCommands,
+						tripleArgumentCommands,
+						special
+					)
+
+	noArgumentCommands = for cmd in noArgumentCommands
+		{
+			caption: "\\#{cmd}"
+			snippet: "\\#{cmd}"
+			meta: "cmd"
+		}
+	singleArgumentCommands = for cmd in singleArgumentCommands
+		{
+			caption: "\\#{cmd}{}"
+			snippet: "\\#{cmd}{$1}"
+			meta: "cmd"
+		}
+	doubleArgumentCommands = for cmd in doubleArgumentCommands
+		{
+			caption: "\\#{cmd}{}{}"
+			snippet: "\\#{cmd}{$1}{$2}"
+			meta: "cmd"
+		}
+	tripleArgumentCommands = for cmd in tripleArgumentCommands
+		{
+			caption: "\\#{cmd}{}{}{}"
+			snippet: "\\#{cmd}{$1}{$2}{$3}"
+			meta: "cmd"
+		}
+	special = for cmd in special
+			{
+				caption: "\\#{cmd}{}"
+				snippet: "\\#{cmd}{}"
+				meta: "cmd"
+			}
+
+	staticCommands = [].concat(
+						noArgumentCommands,
+						singleArgumentCommands,
+						doubleArgumentCommands,
+						tripleArgumentCommands,
+						special
+					)
 
 	class Parser
 		constructor: (@doc, @prefix) ->
@@ -95,26 +166,28 @@ define [], () ->
 			commands = parser.parse()
 			completions = []
 			for command in commands
-				caption = "\\#{command[0]}"
-				score = if caption == prefix then 99 else 50
-				snippet = caption
-				i = 1
-				_.times command[1], () ->
-					snippet += "[${#{i}}]"
-					caption += "[]"
-					i++
-				_.times command[2], () ->
-					snippet += "{${#{i}}}"
-					caption += "{}"
-					i++
-				completions.push {
-					caption: caption
-					snippet: snippet
-					meta: "cmd"
-					score: score
-				}
+				if command[0] not in rawCommands
+					caption = "\\#{command[0]}"
+					score = if caption == prefix then 99 else 50
+					snippet = caption
+					i = 1
+					_.times command[1], () ->
+						snippet += "[${#{i}}]"
+						caption += "[]"
+						i++
+					_.times command[2], () ->
+						snippet += "{${#{i}}}"
+						caption += "{}"
+						i++
+					completions.push {
+						caption: caption
+						snippet: snippet
+						meta: "cmd"
+						score: score
+					}
+			completions = completions.concat staticCommands
 
-			callback null, completions
+			callback(null, completions)
 
 		loadCommandsFromDoc: (doc) ->
 			parser = new Parser(doc)
