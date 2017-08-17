@@ -113,11 +113,11 @@ describe "ClsiManager", ->
 			it "should call the sendRequestOnce method twice", ->
 				@ClsiManager.sendRequestOnce.calledTwice.should.equal true
 
-			it "should call the sendRequestOnce method once with syncType:full", ->
-				@ClsiManager.sendRequestOnce.withArgs(@project_id, @user_id, {syncType:"full"}).calledOnce.should.equal true
+			it "should call the sendRequestOnce method with syncType:full", ->
+				@ClsiManager.sendRequestOnce.calledWith(@project_id, @user_id, {syncType:"full"}).should.equal true
 
-			it "should call the sendRequestOnce method once without syncType:full", ->
-				@ClsiManager.sendRequestOnce.withArgs(@project_id, @user_id, {}).calledOnce.should.equal true
+			it "should call the sendRequestOnce method without syncType:full", ->
+				@ClsiManager.sendRequestOnce.calledWith(@project_id, @user_id, {}).should.equal true
 
 			it "should call the callback with a success status", ->
 				@callback.calledWith(null, @status, ).should.equal true
