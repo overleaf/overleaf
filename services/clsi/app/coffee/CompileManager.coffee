@@ -42,14 +42,12 @@ module.exports = CompileManager =
 			logger.log project_id: request.project_id, user_id: request.user_id, time_taken: Date.now() - timer.start, "written files to disk"
 			timer.done()
 
-			# FIXME - for incremental compiles we don't want to inject this multiple times
 			injectDraftModeIfRequired = (callback) ->
 				if request.draft
 					DraftModeManager.injectDraftMode Path.join(compileDir, request.rootResourcePath), callback
 				else
 					callback()
 
-			# FIXME - for incremental compiles we may need to update output.tex every time
 			createTikzFileIfRequired = (callback) ->
 				if TikzManager.needsOutputFile(request.rootResourcePath, resourceList)
 					TikzManager.injectOutputFile compileDir, request.rootResourcePath, callback
