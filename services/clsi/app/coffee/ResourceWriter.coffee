@@ -4,6 +4,7 @@ fs = require "fs"
 async = require "async"
 mkdirp = require "mkdirp"
 OutputFileFinder = require "./OutputFileFinder"
+ResourceListManager = require "./ResourceListManager"
 Metrics = require "./Metrics"
 Errors = require "./Errors"
 logger = require "logger-sharelatex"
@@ -13,16 +14,22 @@ parallelFileDownloads = settings.parallelFileDownloads or 1
 
 module.exports = ResourceWriter =
 
-	syncResourcesToDisk: (request, basePath, callback = (error) ->) ->
+	syncResourcesToDisk: (request, basePath, callback = (error, resourceList) ->) ->
 		if request.syncType is "incremental"
 			ResourceWriter.checkSyncState request.syncState, basePath, (error, syncStateOk) ->
 				logger.log syncState: request.syncState, result:syncStateOk, "checked state on incremental request"
 				return callback new Errors.FilesOutOfSyncError("invalid state for incremental update") if not syncStateOk
-				ResourceWriter.saveIncrementalResourcesToDisk request.project_id, request.resources, basePath, callback
+				ResourceWriter.saveIncrementalResourcesToDisk request.project_id, request.resources, basePath, (error) ->
+					return callback(error) if error?
+					ResourceListManager.loadResourceList basePath, callback
 		else
 			@saveAllResourcesToDisk request.project_id, request.resources, basePath, (error) ->
 				return callback(error) if error?
-				ResourceWriter.storeSyncState request.syncState, basePath, callback
+				ResourceWriter.storeSyncState request.syncState, basePath, (error) ->
+					return callback(error) if error?
+					ResourceListManager.saveResourceList request.resources, basePath, (error) =>
+						return callback(error) if error?
+						callback(null, request.resources)
 
 	# The sync state is an identifier which must match for an
 	# incremental update to be allowed.

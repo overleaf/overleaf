@@ -10,6 +10,7 @@ describe "ResourceWriter", ->
 			"fs": @fs =
 				mkdir: sinon.stub().callsArg(1)
 				unlink: sinon.stub().callsArg(1)
+			"./ResourceListManager": @ResourceListManager = {}
 			"wrench": @wrench = {}
 			"./UrlCache" : @UrlCache = {}
 			"mkdirp" : @mkdirp = sinon.stub().callsArg(1)
@@ -33,6 +34,8 @@ describe "ResourceWriter", ->
 			@ResourceWriter._removeExtraneousFiles = sinon.stub().callsArg(2)
 			@ResourceWriter.checkSyncState = sinon.stub().callsArg(2)
 			@ResourceWriter.storeSyncState = sinon.stub().callsArg(2)
+			@ResourceListManager.saveResourceList = sinon.stub().callsArg(2)
+			@ResourceListManager.loadResourceList = sinon.stub().callsArg(1)
 			@ResourceWriter.syncResourcesToDisk({project_id: @project_id, resources: @resources}, @basePath, @callback)
 
 		it "should remove old files", ->

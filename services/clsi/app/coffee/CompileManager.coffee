@@ -31,7 +31,8 @@ module.exports = CompileManager =
 
 		timer = new Metrics.Timer("write-to-disk")
 		logger.log project_id: request.project_id, user_id: request.user_id, "syncing resources to disk"
-		ResourceWriter.syncResourcesToDisk request, compileDir, (error) ->
+		ResourceWriter.syncResourcesToDisk request, compileDir, (error, resourceList) ->
+			# NOTE: resourceList is insecure, it should only be used to exclude files from the output list
 			if error? and error instanceof Errors.FilesOutOfSyncError
 				logger.warn project_id: request.project_id, user_id: request.user_id, "files out of sync, please retry"
 				return callback(error)
@@ -40,15 +41,17 @@ module.exports = CompileManager =
 				return callback(error)
 			logger.log project_id: request.project_id, user_id: request.user_id, time_taken: Date.now() - timer.start, "written files to disk"
 			timer.done()
-			
+
+			# FIXME - for incremental compiles we don't want to inject this multiple times
 			injectDraftModeIfRequired = (callback) ->
 				if request.draft
 					DraftModeManager.injectDraftMode Path.join(compileDir, request.rootResourcePath), callback
 				else
 					callback()
 
+			# FIXME - for incremental compiles we may need to update output.tex every time
 			createTikzFileIfRequired = (callback) ->
-				if TikzManager.needsOutputFile(request.rootResourcePath, request.resources)
+				if TikzManager.needsOutputFile(request.rootResourcePath, resourceList)
 					TikzManager.injectOutputFile compileDir, request.rootResourcePath, callback
 				else
 					callback()
@@ -94,7 +97,7 @@ module.exports = CompileManager =
 						error.validate = "fail"
 					# compile was killed by user, was a validation, or a compile which failed validation
 					if error?.terminated or error?.validate
-						OutputFileFinder.findOutputFiles request.resources, compileDir, (err, outputFiles) ->
+						OutputFileFinder.findOutputFiles resourceList, compileDir, (err, outputFiles) ->
 							return callback(err) if err?
 							callback(error, outputFiles) # return output files so user can check logs
 						return
@@ -114,7 +117,7 @@ module.exports = CompileManager =
 					if stats?["latex-runs"] > 0 and timings?["cpu-time"] > 0
 						Metrics.timing("run-compile-cpu-time-per-pass", timings["cpu-time"] / stats["latex-runs"])
 
-					OutputFileFinder.findOutputFiles request.resources, compileDir, (error, outputFiles) ->
+					OutputFileFinder.findOutputFiles resourceList, compileDir, (error, outputFiles) ->
 						return callback(error) if error?
 						OutputCacheManager.saveOutputFiles outputFiles, compileDir,  (error, newOutputFiles) ->
 							callback null, newOutputFiles

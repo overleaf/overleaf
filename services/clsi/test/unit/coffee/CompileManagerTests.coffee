@@ -51,7 +51,7 @@ describe "CompileManager", ->
 			@env = {}
 			@Settings.compileDir = "compiles"
 			@compileDir = "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}"
-			@ResourceWriter.syncResourcesToDisk = sinon.stub().callsArg(2)
+			@ResourceWriter.syncResourcesToDisk = sinon.stub().callsArgWith(2, null, @resources)
 			@LatexRunner.runLatex = sinon.stub().callsArg(2)
 			@OutputFileFinder.findOutputFiles = sinon.stub().callsArgWith(2, null, @output_files)
 			@OutputCacheManager.saveOutputFiles = sinon.stub().callsArgWith(2, null, @build_files)
