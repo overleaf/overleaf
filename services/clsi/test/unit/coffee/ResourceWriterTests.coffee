@@ -23,7 +23,7 @@ describe "ResourceWriter", ->
 		@basePath = "/path/to/write/files/to"
 		@callback = sinon.stub()
 
-	describe "syncResourcesToDisk", ->
+	describe "syncResourcesToDisk on a full request", ->
 		beforeEach ->
 			@resources = [
 				"resource-1-mock"
@@ -36,7 +36,59 @@ describe "ResourceWriter", ->
 			@ResourceWriter.storeSyncState = sinon.stub().callsArg(2)
 			@ResourceListManager.saveResourceList = sinon.stub().callsArg(2)
 			@ResourceListManager.loadResourceList = sinon.stub().callsArg(1)
-			@ResourceWriter.syncResourcesToDisk({project_id: @project_id, resources: @resources}, @basePath, @callback)
+			@ResourceWriter.syncResourcesToDisk({
+				project_id: @project_id
+				syncState: @syncState = "0123456789abcdef"
+				resources: @resources
+			}, @basePath, @callback)
+
+		it "should remove old files", ->
+			@ResourceWriter._removeExtraneousFiles
+				.calledWith(@resources, @basePath)
+				.should.equal true
+
+		it "should write each resource to disk", ->
+			for resource in @resources
+				@ResourceWriter._writeResourceToDisk
+					.calledWith(@project_id, resource, @basePath)
+					.should.equal true
+
+		it "should store the sync state", ->
+			console.log "CHECKING", @syncState, @basePath
+			@ResourceWriter.storeSyncState
+				.calledWith(@syncState, @basePath)
+				.should.equal true
+
+		it "should save the resource list", ->
+			@ResourceListManager.saveResourceList
+				.calledWith(@resources, @basePath)
+				.should.equal true
+
+		it "should call the callback", ->
+			@callback.called.should.equal true
+
+	describe "syncResourcesToDisk on an incremental update", ->
+		beforeEach ->
+			@resources = [
+				"resource-1-mock"
+			]
+			@ResourceWriter._writeResourceToDisk = sinon.stub().callsArg(3)
+			@ResourceWriter._removeExtraneousFiles = sinon.stub().callsArg(2)
+			@ResourceWriter.checkSyncState = sinon.stub().callsArgWith(2, null, true)
+			@ResourceWriter.storeSyncState = sinon.stub().callsArg(2)
+			@ResourceListManager.saveResourceList = sinon.stub().callsArg(2)
+			@ResourceListManager.loadResourceList = sinon.stub().callsArg(1)
+			@ResourceWriter.syncResourcesToDisk({
+				project_id: @project_id,
+				syncType: "incremental",
+				syncState: @syncState = "1234567890abcdef",
+				resources: @resources
+			}, @basePath, @callback)
+
+		it "should check the sync state matches", ->
+			@ResourceWriter.checkSyncState
+				.calledWith(@syncState, @basePath)
+				.should.equal true
 
 		it "should remove old files", ->
 			@ResourceWriter._removeExtraneousFiles

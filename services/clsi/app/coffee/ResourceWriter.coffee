@@ -19,9 +19,14 @@ module.exports = ResourceWriter =
 			ResourceWriter.checkSyncState request.syncState, basePath, (error, syncStateOk) ->
 				logger.log syncState: request.syncState, result:syncStateOk, "checked state on incremental request"
 				return callback new Errors.FilesOutOfSyncError("invalid state for incremental update") if not syncStateOk
-				ResourceWriter.saveIncrementalResourcesToDisk request.project_id, request.resources, basePath, (error) ->
+				ResourceListManager.loadResourceList basePath, (error, resourceList) ->
 					return callback(error) if error?
-					ResourceListManager.loadResourceList basePath, callback
+					ResourceWriter._removeExtraneousFiles resourceList, basePath, (error) =>
+						return callback(error) if error?
+						ResourceWriter.saveIncrementalResourcesToDisk request.project_id, request.resources, basePath, (error) ->
+							return callback(error) if error?
+							callback(null, resourceList)
+
 		else
 			@saveAllResourcesToDisk request.project_id, request.resources, basePath, (error) ->
 				return callback(error) if error?
@@ -112,6 +117,8 @@ module.exports = ResourceWriter =
 					path = file.path
 					should_delete = true
 					if path.match(/^output\./) or path.match(/\.aux$/) or path.match(/^cache\//) # knitr cache
+						should_delete = false
+					if path in ['.project-resource-list', '.project-sync-state']
 						should_delete = false
 					if path == "output.pdf" or path == "output.dvi" or path == "output.log" or path == "output.xdv"
 						should_delete = true
