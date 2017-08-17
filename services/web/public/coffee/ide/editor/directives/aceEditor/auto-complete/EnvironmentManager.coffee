@@ -11,6 +11,20 @@ define () ->
 		"center"
 	]
 
+	snippetNames = [
+		"array",
+		"figure",
+		"tabular",
+		"table",
+		"list",
+		"enumerate",
+		"itemize",
+		"frame",
+		"thebibliography"
+	]
+
+	environmentNames = snippetNames.concat environments
+
 	staticSnippets = for env in environments
 		{
 			caption: "\\begin{#{env}}..."
@@ -123,10 +137,11 @@ define () ->
 		result = []
 		iterations = 0
 		while match = re.exec(text)
-			result.push {name: match[1], whitespace: match[2]}
-			iterations += 1
-			if iterations >= 1000
-				return result
+			if match[1] not in environmentNames
+				result.push {name: match[1], whitespace: match[2]}
+				iterations += 1
+				if iterations >= 1000
+					return result
 		return result
 
 	class EnvironmentManager
