@@ -38,6 +38,7 @@ app.param 'doc_id', (req, res, next, doc_id) ->
 		next new Error("invalid doc id")
 
 app.get    '/project/:project_id/doc/:doc_id',                          HttpController.getDoc
+app.get    '/project/:project_id/doc',                                  HttpController.getProjectDocs
 app.post   '/project/:project_id/doc/:doc_id',                          HttpController.setDoc
 app.post   '/project/:project_id/doc/:doc_id/flush',                    HttpController.flushDocIfLoaded
 app.delete '/project/:project_id/doc/:doc_id',                          HttpController.flushAndDeleteDoc

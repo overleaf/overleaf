@@ -80,3 +80,9 @@ module.exports = DocUpdaterClient =
 
 	removeComment: (project_id, doc_id, comment, callback = () ->) ->
 		request.del "http://localhost:3003/project/#{project_id}/doc/#{doc_id}/comment/#{comment}", callback
+
+	getProjectDocs: (project_id, projectStateHash, callback = () ->) ->
+		request.get "http://localhost:3003/project/#{project_id}/doc?state=#{projectStateHash}", (error, res, body) ->
+			if body? and res.statusCode >= 200 and res.statusCode < 300
+				body = JSON.parse(body)
+			callback error, res, body

@@ -551,7 +551,7 @@ describe "RedisManager", ->
 	describe "removeDocFromMemory", ->
 		beforeEach (done) ->
 			@rclient.del = sinon.stub()
-			@rclient.srem = sinon.stub().yields()
+			@rclient.srem = sinon.stub()
 			@rclient.exec.yields()
 			@RedisManager.removeDocFromMemory @project_id, @doc_id, done
 		

@@ -88,7 +88,19 @@ module.exports = RedisManager =
 		multi.del keys.ranges(doc_id:doc_id)
 		multi.exec (error) ->
 			return callback(error) if error?
-			rclient.srem keys.docsInProject(project_id:project_id), doc_id, callback
+			multi = rclient.multi()
+			multi.srem keys.docsInProject(project_id:project_id), doc_id
+			multi.del keys.projectState(project_id:project_id)
+			multi.exec callback
+
+	checkOrSetProjectState: (project_id, newState, callback = (error, stateChanged) ->) ->
+		multi = rclient.multi()
+		multi.getset keys.projectState(project_id:project_id), newState
+		multi.expire keys.projectState(project_id:project_id), 30 * minutes
+		multi.exec (error, response) ->
+			return callback(error) if error?
+			logger.log project_id: project_id, newState:newState, oldState: response[0], "checking project state"
+			callback(null, response[0] isnt newState)
 
 	getDoc : (project_id, doc_id, callback = (error, lines, version, ranges) ->)->
 		timer = new metrics.Timer("redis.get-doc")
@@ -141,6 +153,11 @@ module.exports = RedisManager =
 			return callback(error) if error?
 			version = parseInt(version, 10)
 			callback null, version
+
+	getDocLines: (doc_id, callback = (error, version) ->) ->
+		rclient.get keys.docLines(doc_id: doc_id), (error, docLines) ->
+			return callback(error) if error?
+			callback null, docLines
 
 	getPreviousDocOps: (doc_id, start, end, callback = (error, jsonOps) ->) ->
 		timer = new metrics.Timer("redis.get-prev-docops")
@@ -239,7 +256,7 @@ module.exports = RedisManager =
 
 	getDocIdsInProject: (project_id, callback = (error, doc_ids) ->) ->
 		rclient.smembers keys.docsInProject(project_id: project_id), callback
-	
+
 	_serializeRanges: (ranges, callback = (error, serializedRanges) ->) ->
 		jsonRanges = JSON.stringify(ranges)
 		if jsonRanges? and jsonRanges.length > MAX_RANGES_SIZE
