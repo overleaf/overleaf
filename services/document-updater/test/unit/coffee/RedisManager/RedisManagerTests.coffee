@@ -29,6 +29,7 @@ describe "RedisManager", ->
 								pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
 								docsInProject: ({project_id}) -> "DocsIn:#{project_id}"
 								ranges: ({doc_id}) -> "Ranges:#{doc_id}"
+								projectState: ({project_id}) -> "ProjectState:#{project_id}"
 						history:
 							key_schema:
 								uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
