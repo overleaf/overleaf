@@ -53,7 +53,7 @@ module.exports = ResourceWriter =
 
 	storeSyncState: (state, basePath, callback) ->
 		stateFile = Path.join(basePath, @SYNC_STATE_FILE)
-		if not state? # remove the  file if no state passed in
+		if not state? # remove the file if no state passed in
 			logger.log state:state, basePath:basePath, "clearing sync state"
 			fs.unlink stateFile, (err) ->
 				if err? and err.code isnt 'ENOENT'
