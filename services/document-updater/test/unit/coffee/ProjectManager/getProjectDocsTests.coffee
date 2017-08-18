@@ -34,9 +34,9 @@ describe "ProjectManager - getProjectDocs", ->
 			@RedisManager.getDocVersion.withArgs(@doc_ids[1]).callsArgWith(1, null, @doc_versions[1])
 			@RedisManager.getDocVersion.withArgs(@doc_ids[2]).callsArgWith(1, null, @doc_versions[2])
 			@RedisManager.getDocLines = sinon.stub()
-			@RedisManager.getDocLines.withArgs(@doc_ids[0]).callsArgWith(1, null, @doc_lines[0])
-			@RedisManager.getDocLines.withArgs(@doc_ids[1]).callsArgWith(1, null, @doc_lines[1])
-			@RedisManager.getDocLines.withArgs(@doc_ids[2]).callsArgWith(1, null, @doc_lines[2])
+			@RedisManager.getDocLines.withArgs(@doc_ids[0]).callsArgWith(1, null, JSON.stringify(@doc_lines[0]))
+			@RedisManager.getDocLines.withArgs(@doc_ids[1]).callsArgWith(1, null, JSON.stringify(@doc_lines[1]))
+			@RedisManager.getDocLines.withArgs(@doc_ids[2]).callsArgWith(1, null, JSON.stringify(@doc_lines[2]))
 			@ProjectManager.getProjectDocs @project_id, @projectStateHash, @excludeVersions,  (error, docs) =>
 				@callback(error, docs)
 				done()
@@ -83,7 +83,7 @@ describe "ProjectManager - getProjectDocs", ->
 			@RedisManager.getDocIdsInProject = sinon.stub().callsArgWith(1, null, @doc_ids)
 			@RedisManager.getDocVersion = sinon.stub().callsArgWith(1, null)
 			@RedisManager.getDocLines = sinon.stub()
-			@RedisManager.getDocLines.withArgs("doc-id-1").callsArgWith(1, null)
+			@RedisManager.getDocLines.withArgs("doc-id-1").callsArgWith(1, null, JSON.stringify(["test doc content"]))
 			@RedisManager.getDocLines.withArgs("doc-id-2").callsArgWith(1, @error = new Error("oops")) # trigger an error
 			@ProjectManager.getProjectDocs @project_id, @projectStateHash, @excludeVersions, (error, docs) =>
 				@callback(error)
