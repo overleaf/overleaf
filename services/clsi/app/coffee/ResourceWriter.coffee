@@ -4,9 +4,9 @@ fs = require "fs"
 async = require "async"
 mkdirp = require "mkdirp"
 OutputFileFinder = require "./OutputFileFinder"
+ResourceStateManager = require "./ResourceStateManager"
 ResourceListManager = require "./ResourceListManager"
 Metrics = require "./Metrics"
-Errors = require "./Errors"
 logger = require "logger-sharelatex"
 settings = require("settings-sharelatex")
 
@@ -16,9 +16,8 @@ module.exports = ResourceWriter =
 
 	syncResourcesToDisk: (request, basePath, callback = (error, resourceList) ->) ->
 		if request.syncType is "incremental"
-			ResourceWriter.checkSyncState request.syncState, basePath, (error, syncStateOk) ->
-				logger.log syncState: request.syncState, result:syncStateOk, "checked state on incremental request"
-				return callback new Errors.FilesOutOfSyncError("invalid state for incremental update") if not syncStateOk
+			ResourceStateManager.checkProjectStateHashMatches request.syncState, basePath, (error) ->
+				return callback(error) if error?
 				ResourceListManager.loadResourceList basePath, (error, resourceList) ->
 					return callback(error) if error?
 					ResourceWriter._removeExtraneousFiles resourceList, basePath, (error) =>
@@ -26,52 +25,14 @@ module.exports = ResourceWriter =
 						ResourceWriter.saveIncrementalResourcesToDisk request.project_id, request.resources, basePath, (error) ->
 							return callback(error) if error?
 							callback(null, resourceList)
-
 		else
 			@saveAllResourcesToDisk request.project_id, request.resources, basePath, (error) ->
 				return callback(error) if error?
-				ResourceWriter.storeSyncState request.syncState, basePath, (error) ->
+				ResourceStateManager.saveProjectStateHash request.syncState, basePath, (error) ->
 					return callback(error) if error?
 					ResourceListManager.saveResourceList request.resources, basePath, (error) =>
 						return callback(error) if error?
 						callback(null, request.resources)
-
-	# The sync state is an identifier which must match for an
-	# incremental update to be allowed.
-	#
-	# The initial value is passed in and stored on a full
-	# compile.
-	#
-	# Subsequent incremental compiles must come with the same value - if
-	# not they will be rejected with a 409 Conflict response.
-	#
-	# An incremental compile can only update existing files with new
-	# content.  The sync state identifier must change if any docs or
-	# files are moved, added, deleted or renamed.
-
-	SYNC_STATE_FILE: ".project-sync-state"
-
-	storeSyncState: (state, basePath, callback) ->
-		stateFile = Path.join(basePath, @SYNC_STATE_FILE)
-		if not state? # remove the file if no state passed in
-			logger.log state:state, basePath:basePath, "clearing sync state"
-			fs.unlink stateFile, (err) ->
-				if err? and err.code isnt 'ENOENT'
-					return callback(err)
-				else
-					return callback()
-		else
-			logger.log state:state, basePath:basePath, "writing sync state"
-			fs.writeFile stateFile, state, {encoding: 'ascii'}, callback
-
-	checkSyncState: (state, basePath, callback) ->
-		stateFile = Path.join(basePath, @SYNC_STATE_FILE)
-		fs.readFile stateFile, {encoding:'ascii'}, (err, oldState) ->
-			if err? and err.code isnt 'ENOENT'
-				return callback(err)
-			else
-				# return true if state matches, false otherwise (including file not existing)
-				callback(null, if state is oldState then true else false)
 
 	saveIncrementalResourcesToDisk: (project_id, resources, basePath, callback = (error) ->) ->
 		@_createDirectory basePath, (error) =>

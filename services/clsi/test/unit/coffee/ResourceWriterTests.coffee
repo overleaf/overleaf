@@ -11,6 +11,7 @@ describe "ResourceWriter", ->
 				mkdir: sinon.stub().callsArg(1)
 				unlink: sinon.stub().callsArg(1)
 			"./ResourceListManager": @ResourceListManager = {}
+			"./ResourceStateManager": @ResourceStateManager = {}
 			"wrench": @wrench = {}
 			"./UrlCache" : @UrlCache = {}
 			"mkdirp" : @mkdirp = sinon.stub().callsArg(1)
@@ -32,8 +33,8 @@ describe "ResourceWriter", ->
 			]
 			@ResourceWriter._writeResourceToDisk = sinon.stub().callsArg(3)
 			@ResourceWriter._removeExtraneousFiles = sinon.stub().callsArg(2)
-			@ResourceWriter.checkSyncState = sinon.stub().callsArg(2)
-			@ResourceWriter.storeSyncState = sinon.stub().callsArg(2)
+			@ResourceStateManager.checkProjectStateHashMatches = sinon.stub().callsArg(2)
+			@ResourceStateManager.saveProjectStateHash = sinon.stub().callsArg(2)
 			@ResourceListManager.saveResourceList = sinon.stub().callsArg(2)
 			@ResourceListManager.loadResourceList = sinon.stub().callsArg(1)
 			@ResourceWriter.syncResourcesToDisk({
@@ -54,7 +55,7 @@ describe "ResourceWriter", ->
 					.should.equal true
 
 		it "should store the sync state", ->
-			@ResourceWriter.storeSyncState
+			@ResourceStateManager.saveProjectStateHash
 				.calledWith(@syncState, @basePath)
 				.should.equal true
 
@@ -73,8 +74,8 @@ describe "ResourceWriter", ->
 			]
 			@ResourceWriter._writeResourceToDisk = sinon.stub().callsArg(3)
 			@ResourceWriter._removeExtraneousFiles = sinon.stub().callsArg(2)
-			@ResourceWriter.checkSyncState = sinon.stub().callsArgWith(2, null, true)
-			@ResourceWriter.storeSyncState = sinon.stub().callsArg(2)
+			@ResourceStateManager.checkProjectStateHashMatches = sinon.stub().callsArg(2)
+			@ResourceStateManager.saveProjectStateHash = sinon.stub().callsArg(2)
 			@ResourceListManager.saveResourceList = sinon.stub().callsArg(2)
 			@ResourceListManager.loadResourceList = sinon.stub().callsArgWith(1, null, @resources)
 			@ResourceWriter.syncResourcesToDisk({
@@ -85,7 +86,7 @@ describe "ResourceWriter", ->
 			}, @basePath, @callback)
 
 		it "should check the sync state matches", ->
-			@ResourceWriter.checkSyncState
+			@ResourceStateManager.checkProjectStateHashMatches
 				.calledWith(@syncState, @basePath)
 				.should.equal true
 
@@ -102,6 +103,28 @@ describe "ResourceWriter", ->
 
 		it "should call the callback", ->
 			@callback.called.should.equal true
+
+	describe "syncResourcesToDisk on an incremental update when the state does not match", ->
+		beforeEach ->
+			@resources = [
+				"resource-1-mock"
+			]
+			@ResourceStateManager.checkProjectStateHashMatches = sinon.stub().callsArgWith(2, @error = new Error())
+			@ResourceWriter.syncResourcesToDisk({
+				project_id: @project_id,
+				syncType: "incremental",
+				syncState: @syncState = "1234567890abcdef",
+				resources: @resources
+			}, @basePath, @callback)
+
+		it "should check whether the sync state matches", ->
+			@ResourceStateManager.checkProjectStateHashMatches
+				.calledWith(@syncState, @basePath)
+				.should.equal true
+
+		it "should call the callback with an error", ->
+			@callback.calledWith(@error).should.equal true
+
 
 	describe "_removeExtraneousFiles", ->
 		beforeEach ->
