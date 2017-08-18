@@ -54,7 +54,6 @@ describe "ResourceWriter", ->
 					.should.equal true
 
 		it "should store the sync state", ->
-			console.log "CHECKING", @syncState, @basePath
 			@ResourceWriter.storeSyncState
 				.calledWith(@syncState, @basePath)
 				.should.equal true
@@ -77,7 +76,7 @@ describe "ResourceWriter", ->
 			@ResourceWriter.checkSyncState = sinon.stub().callsArgWith(2, null, true)
 			@ResourceWriter.storeSyncState = sinon.stub().callsArg(2)
 			@ResourceListManager.saveResourceList = sinon.stub().callsArg(2)
-			@ResourceListManager.loadResourceList = sinon.stub().callsArg(1)
+			@ResourceListManager.loadResourceList = sinon.stub().callsArgWith(1, null, @resources)
 			@ResourceWriter.syncResourcesToDisk({
 				project_id: @project_id,
 				syncType: "incremental",
