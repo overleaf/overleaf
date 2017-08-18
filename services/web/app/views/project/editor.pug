@@ -8,8 +8,8 @@ block vars
 block content
 	.editor(ng-controller="IdeController").full-size
 		.loading-screen(ng-if="state.loading")
-			.loading-screen-lion-container
-				.loading-screen-lion(
+			.loading-screen-brand-container
+				.loading-screen-brand(
 					style="height: 20%;"
 					ng-style="{ 'height': state.load_progress + '%' }"
 				)
@@ -106,7 +106,7 @@ block requirejs
 	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
 	//- and doesn't prematurely end the script tag.
 	script#data(type="application/json").
-		!{JSON.stringify({userSettings: userSettings, user: user}).replace(/\//g, '\\/')}
+		!{JSON.stringify({userSettings: userSettings, user: user, trackChangesState: trackChangesState}).replace(/\//g, '\\/')}
 
 	script(type="text/javascript").
 		window.data = JSON.parse($("#data").text());
@@ -118,8 +118,9 @@ block requirejs
 		window.csrfToken = "!{csrfToken}";
 		window.anonymous = #{anonymous};
 		window.maxDocLength = #{maxDocLength};
-		window.trackChangesEnabled = #{trackChangesEnabled};
+		window.trackChangesState = data.trackChangesState;
 		window.showTrackChangesOnboarding = #{!!showTrackChangesOnboarding};
+		window.showPerUserTCNotice = #{!!showPerUserTCNotice};
 		window.wikiEnabled = #{!!(settings.apis.wiki && settings.apis.wiki.url)};
 		window.requirejs = {
 			"paths" : {

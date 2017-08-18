@@ -37,6 +37,7 @@ describe "SubscriptionUpdater", ->
 			constructor: (opts)-> 
 				subscription.admin_id = opts.admin_id
 				return subscription
+			@remove: sinon.stub().yields()
 		@SubscriptionModel.update = @updateStub
 		@SubscriptionModel.findAndModify = @findAndModifyStub
 
@@ -230,3 +231,35 @@ describe "SubscriptionUpdater", ->
 				@ReferalAllocator.assignBonus.calledWith(@adminuser_id).should.equal true
 				done()
 
+	describe "deleteSubscription", ->
+		beforeEach (done) ->
+			@subscription_id = ObjectId().toString()
+			@subscription = {
+				"mock": "subscription",
+				admin_id: ObjectId(),
+				member_ids: [ ObjectId(), ObjectId(), ObjectId() ]
+			}
+			@SubscriptionLocator.getSubscription = sinon.stub().yields(null, @subscription)
+			@SubscriptionUpdater._setUsersMinimumFeatures = sinon.stub().yields()
+			@SubscriptionUpdater.deleteSubscription @subscription_id, done
+			
+		it "should look up the subscription", ->
+			@SubscriptionLocator.getSubscription
+				.calledWith(@subscription_id)
+				.should.equal true
+		
+		it "should remove the subscription", ->
+			@SubscriptionModel.remove
+				.calledWith({_id: ObjectId(@subscription_id)})
+				.should.equal true
+		
+		it "should downgrade the admin_id", ->
+			@SubscriptionUpdater._setUsersMinimumFeatures
+				.calledWith(@subscription.admin_id)
+				.should.equal true
+		
+		it "should downgrade all of the members", ->
+			for user_id in @subscription.member_ids
+				@SubscriptionUpdater._setUsersMinimumFeatures
+					.calledWith(user_id)
+					.should.equal true

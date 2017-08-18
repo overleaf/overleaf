@@ -1509,7 +1509,7 @@
         },
         "minimatch": {
           "version": "3.0.4",
-          "from": "minimatch@^3.0.4",
+          "from": "minimatch@^3.0.2",
           "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-3.0.4.tgz",
           "dev": true
         },
@@ -1678,7 +1678,7 @@
     },
     "iconv-lite": {
       "version": "0.2.11",
-      "from": "iconv-lite@>=0.2.11 <0.3.0",
+      "from": "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.2.11.tgz",
       "resolved": "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.2.11.tgz"
     },
     "ieee754": {
@@ -1698,7 +1698,7 @@
     },
     "inherits": {
       "version": "2.0.3",
-      "from": "inherits@>=2.0.1 <2.1.0",
+      "from": "inherits@>=2.0.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.3.tgz"
     },
     "ini": {
@@ -2728,6 +2728,11 @@
       "from": "node-forge@0.2.24",
       "resolved": "https://registry.npmjs.org/node-forge/-/node-forge-0.2.24.tgz"
     },
+    "node-html-encoder": {
+      "version": "0.0.2",
+      "from": "node-html-encoder@0.0.2",
+      "resolved": "https://registry.npmjs.org/node-html-encoder/-/node-html-encoder-0.0.2.tgz"
+    },
     "node-pre-gyp": {
       "version": "0.6.30",
       "from": "node-pre-gyp@0.6.30",
@@ -2841,6 +2846,11 @@
       "version": "1.0.1",
       "from": "number-is-nan@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/number-is-nan/-/number-is-nan-1.0.1.tgz"
+    },
+    "oauth": {
+      "version": "0.9.15",
+      "from": "oauth@>=0.9.0 <0.10.0",
+      "resolved": "https://registry.npmjs.org/oauth/-/oauth-0.9.15.tgz"
     },
     "oauth-sign": {
       "version": "0.8.2",
@@ -3064,6 +3074,11 @@
       "version": "1.0.0",
       "from": "passport-local@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/passport-local/-/passport-local-1.0.0.tgz"
+    },
+    "passport-oauth2": {
+      "version": "1.4.0",
+      "from": "passport-oauth2@latest",
+      "resolved": "https://registry.npmjs.org/passport-oauth2/-/passport-oauth2-1.4.0.tgz"
     },
     "passport-saml": {
       "version": "0.15.0",
@@ -4286,6 +4301,11 @@
       "version": "2.1.4",
       "from": "uid-safe@2.1.4",
       "resolved": "https://registry.npmjs.org/uid-safe/-/uid-safe-2.1.4.tgz"
+    },
+    "uid2": {
+      "version": "0.0.3",
+      "from": "uid2@>=0.0.0 <0.1.0",
+      "resolved": "https://registry.npmjs.org/uid2/-/uid2-0.0.3.tgz"
     },
     "underscore": {
       "version": "1.6.0",

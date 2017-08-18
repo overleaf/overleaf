@@ -225,6 +225,10 @@
 
 // Hide tabbable panes to start, show them when `.active`
 .tab-content {
+  background-color: @nav-tabs-active-link-hover-bg;
+  border: 1px solid @nav-tabs-border-color;
+  border-top: none;
+  padding: @line-height-computed / 2;
   > .tab-pane {
     display: none;
   }

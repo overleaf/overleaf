@@ -11,7 +11,13 @@ define [
 			CUR_FILE : "cur_file"
 			OVERVIEW : "overview"
 
+		$scope.UserTCSyncState = UserTCSyncState =
+			SYNCED  : "synced"
+			PENDING : "pending"
+
 		$scope.reviewPanel =
+			trackChangesState: {}
+			trackChangesOnForEveryone: false
 			entries: {}
 			resolvedComments: {}
 			hasEntries: false
@@ -25,6 +31,8 @@ define [
 			commentThreads: {}
 			resolvedThreadIds: {}
 			rendererData: {}
+			formattedProjectMembers: {}
+			fullTCStateCollapsed: true
 			loadingThreads: false
 			# All selected changes. If a aggregated change (insertion + deletion) is selection, the two ids
 			# will be present. The length of this array will differ from the count below (see explanation).
@@ -32,6 +40,7 @@ define [
 			# A count of user-facing selected changes. An aggregated change (insertion + deletion) will count
 			# as only one.
 			nVisibleSelectedChanges: 0
+			showPerUserTCNotice: window.showPerUserTCNotice
 
 		window.addEventListener "beforeunload", () ->
 			collapsedStates = {}
@@ -58,6 +67,15 @@ define [
 			return if !visible?
 			if !visible
 				$scope.ui.reviewPanelOpen = false
+
+		$scope.$watch "project.members", (members) ->
+			$scope.reviewPanel.formattedProjectMembers = {}
+			if $scope.project?.owner?
+				$scope.reviewPanel.formattedProjectMembers[$scope.project.owner._id] = formatUser($scope.project.owner)
+			if $scope.project?.members?
+				for member in members
+					if member.privileges == "readAndWrite"
+						$scope.reviewPanel.formattedProjectMembers[member._id] = formatUser(member)
 
 		$scope.commentState =
 			adding: false
@@ -416,6 +434,8 @@ define [
 			$scope.toggleReviewPanel()
 
 		$scope.addNewCommentFromKbdShortcut = () ->
+			if !$scope.project.features.trackChangesVisible
+				return
 			$scope.$broadcast "comment:select_line"
 			if !$scope.ui.reviewPanelOpen
 				$scope.toggleReviewPanel()
@@ -565,24 +585,83 @@ define [
 						
 		$scope.gotoEntry = (doc_id, entry) ->
 			ide.editorManager.openDocId(doc_id, { gotoOffset: entry.offset })
-		
-		$scope.toggleTrackChanges = (value) ->
+
+		$scope.toggleFullTCStateCollapse = () ->
 			if $scope.project.features.trackChanges
-				$scope.editor.wantTrackChanges = value
-				$http.post "/project/#{$scope.project_id}/track_changes", {_csrf: window.csrfToken, on: value}
-				event_tracking.sendMB "rp-trackchanges-toggle", { value }
+				if $scope.reviewPanel.showPerUserTCNotice
+					$scope.openPerUserTCNoticeModal()
+				$scope.reviewPanel.fullTCStateCollapsed = !$scope.reviewPanel.fullTCStateCollapsed
 			else
 				$scope.openTrackChangesUpgradeModal()
 
-		$scope.toggleTrackChangesFromKbdShortcut = () ->
-			if $scope.editor.wantTrackChanges
-				$scope.toggleTrackChanges false
-			else 
-				$scope.toggleTrackChanges true
+		_setUserTCState = (userId, newValue, isLocal = false) ->
+			$scope.reviewPanel.trackChangesState[userId] ?= {}
+			state = $scope.reviewPanel.trackChangesState[userId]
+
+			if !state.syncState? or state.syncState == UserTCSyncState.SYNCED
+				state.value = newValue
+				state.syncState = UserTCSyncState.SYNCED
+			else if state.syncState == UserTCSyncState.PENDING and state.value == newValue
+				state.syncState = UserTCSyncState.SYNCED
+			else if isLocal
+				state.value = newValue
+				state.syncState = UserTCSyncState.PENDING
+			
+			if userId == ide.$scope.user.id
+				$scope.editor.wantTrackChanges = newValue		
+
+		_setEveryoneTCState = (newValue, isLocal = false) ->
+			$scope.reviewPanel.trackChangesOnForEveryone = newValue
+			for member in $scope.project.members
+				_setUserTCState(member._id, newValue, isLocal)
+			_setUserTCState($scope.project.owner._id, newValue, isLocal)
+
+		applyClientTrackChangesStateToServer = () ->
+			if $scope.reviewPanel.trackChangesOnForEveryone
+				data = {on : true}
+			else
+				data = {on_for: {}}
+				for userId, userState of $scope.reviewPanel.trackChangesState
+					data.on_for[userId] = userState.value
+			data._csrf = window.csrfToken
+			$http.post "/project/#{$scope.project_id}/track_changes", data
+
+		applyTrackChangesStateToClient = (state) ->
+			if typeof state is "boolean"
+				_setEveryoneTCState state
+			else
+				$scope.reviewPanel.trackChangesOnForEveryone = false
+				for member in $scope.project.members
+					_setUserTCState(member._id, state[member._id] ? false)
+				_setUserTCState($scope.project.owner._id, state[$scope.project.owner._id] ? false)
 		
-		ide.socket.on "toggle-track-changes", (value) ->
+		$scope.toggleTrackChangesForEveryone = (onForEveryone) ->
+			_setEveryoneTCState onForEveryone, true
+			applyClientTrackChangesStateToServer()
+	
+		$scope.toggleTrackChangesForUser = (onForUser, userId) ->
+			_setUserTCState userId, onForUser, true
+			applyClientTrackChangesStateToServer()				
+
+		ide.socket.on "toggle-track-changes", (state) ->
 			$scope.$apply () ->
-				$scope.editor.wantTrackChanges = value
+				applyTrackChangesStateToClient(state)
+
+		$scope.toggleTrackChangesFromKbdShortcut = () ->
+			if !$scope.project.features.trackChangesVisible
+				return
+			$scope.toggleTrackChangesForUser !$scope.reviewPanel.trackChangesState[ide.$scope.user.id].value, ide.$scope.user.id
+
+		_inited = false
+		ide.$scope.$on "project:joined", () ->
+			return if _inited
+			project = ide.$scope.project
+			if project.features.trackChanges
+				window.trackChangesState ?= false
+				applyTrackChangesStateToClient(window.trackChangesState)
+			else
+				applyTrackChangesStateToClient(false)
+			_inited = true
 
 		_refreshingRangeUsers = false
 		_refreshedForUserIds = {}
@@ -676,3 +755,11 @@ define [
 				controller: "TrackChangesUpgradeModalController"
 				scope: $scope.$new()
 			}
+
+		$scope.openPerUserTCNoticeModal = () ->
+			$scope.reviewPanel.showPerUserTCNotice = false
+			$modal.open({
+				templateUrl: "perUserTCNoticeModalTemplate"
+			}).result.finally () ->
+				event_tracking.sendMB "shown-per-user-tc-notice"
+

@@ -17,7 +17,7 @@ define [
 		commandFragment?.match(/\\(\w+)\{/)?[1]
 
 	class AutoCompleteManager
-		constructor: (@$scope, @editor, @element, @labelsManager) ->
+		constructor: (@$scope, @editor, @element, @labelsManager, @graphics, @preamble) ->
 			@suggestionManager = new CommandManager()
 
 			@monkeyPatchAutocomplete()
@@ -43,6 +43,37 @@ define [
 			})
 
 			SnippetCompleter = new EnvironmentManager()
+
+			Graphics = @graphics
+			Preamble = @preamble
+			GraphicsCompleter =
+				getCompletions: (editor, session, pos, prefix, callback) ->
+					upToCursorRange = new Range(pos.row, 0, pos.row, pos.column)
+					lineUpToCursor = editor.getSession().getTextRange(upToCursorRange)
+					commandFragment = getLastCommandFragment(lineUpToCursor)
+					if commandFragment
+						match = commandFragment.match(/^~?\\(includegraphics(?:\[.*])?){([^}]*, *)?(\w*)/)
+						if match
+							beyondCursorRange = new Range(pos.row, pos.column, pos.row, 99999)
+							lineBeyondCursor = editor.getSession().getTextRange(beyondCursorRange)
+							needsClosingBrace = !lineBeyondCursor.match(/^[^{]*}/)
+							commandName = match[1]
+							currentArg = match[3]
+							graphicsPaths = Preamble.getGraphicsPaths()
+							result = []
+							for graphic in Graphics.getGraphicsFiles()
+								path = graphic.path
+								for graphicsPath in graphicsPaths
+									if path.indexOf(graphicsPath) == 0
+										path = path.slice(graphicsPath.length)
+										break
+								result.push {
+									caption: "\\#{commandName}{#{path}#{if needsClosingBrace then '}' else ''}",
+									value: "\\#{commandName}{#{path}#{if needsClosingBrace then '}' else ''}",
+									meta: "graphic",
+									score: 50
+								}
+							callback null, result
 
 			labelsManager = @labelsManager
 			LabelsCompleter =
@@ -113,11 +144,12 @@ define [
 								callback null, result
 
 			@editor.completers = [
-								@suggestionManager,
-								SnippetCompleter,
-								ReferencesCompleter,
-								LabelsCompleter
-							]
+				@suggestionManager,
+				SnippetCompleter,
+				ReferencesCompleter,
+				LabelsCompleter,
+				GraphicsCompleter
+			]
 
 		disable: () ->
 			@editor.setOptions({
@@ -250,7 +282,22 @@ define [
 						editor.completer.autoSelect = true
 						editor.completer.showPopup(editor)
 						editor.completer.cancelContextMenu()
-						$(editor.completer.popup?.container).css({'font-size': @$scope.fontSize + 'px'})
+						container = $(editor.completer.popup?.container)
+						container.css({'font-size': @$scope.fontSize + 'px'})
+						# Dynamically set width of autocomplete popup
+						if filtered = editor?.completer?.completions?.filtered
+							longestCaption = _.max(filtered.map( (c) -> c.caption.length ))
+							longestMeta = _.max(filtered.map( (c) -> c.meta.length ))
+							charWidth = editor.renderer.characterWidth
+							# between 280 and 700 px
+							width = Math.max(
+								Math.min(
+									Math.round(longestCaption*charWidth + longestMeta*charWidth + 5*charWidth),
+									700
+								),
+								280
+							)
+							container.css({width: "#{width}px"})
 						if editor.completer?.completions?.filtered?.length == 0
 							editor.completer.detach()
 					bindKey: "Ctrl-Space|Ctrl-Shift-Space|Alt-Space"

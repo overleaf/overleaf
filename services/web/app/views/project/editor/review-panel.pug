@@ -46,21 +46,40 @@
 			is-loading="reviewPanel.dropdown.loading"
 			permissions="permissions"
 		)
-		span.review-panel-toolbar-label(ng-if="permissions.write")
-			span(ng-click="toggleTrackChanges(true)", ng-if="editor.wantTrackChanges === false") !{translate("track_changes_is_off")}
-			span(ng-click="toggleTrackChanges(false)", ng-if="editor.wantTrackChanges === true") !{translate("track_changes_is_on")}
-			review-panel-toggle(
-				ng-if="editor.wantTrackChanges == editor.trackChanges"
-				ng-model="editor.wantTrackChanges"
-				on-toggle="toggleTrackChanges"
-				disabled="!project.features.trackChanges"
-				on-disabled-click="openTrackChangesUpgradeModal"
+		span.review-panel-toolbar-label
+			span.review-panel-toolbar-icon-on(
+				ng-if="editor.wantTrackChanges === true"
 			)
-		span.review-panel-toolbar-label.review-panel-toolbar-label-disabled(ng-if="!permissions.write")
-			span(ng-if="editor.wantTrackChanges === false") !{translate("track_changes_is_off")}
-			span(ng-if="editor.wantTrackChanges === true") !{translate("track_changes_is_on")}
-		span.review-panel-toolbar-spinner(ng-if="editor.wantTrackChanges != editor.trackChanges")
-			i.fa.fa-spin.fa-spinner
+				i.fa.fa-circle
+			span(ng-click="toggleFullTCStateCollapse();")
+				span(ng-if="editor.wantTrackChanges === false") !{translate("track_changes_is_off")}
+				span(ng-if="editor.wantTrackChanges === true") !{translate("track_changes_is_on")}
+				span.rp-tc-state-collapse(
+					ng-class="{ 'rp-tc-state-collapse-on': reviewPanel.fullTCStateCollapsed }"
+				)
+					i.fa.fa-angle-down
+		ul.rp-tc-state(
+			review-panel-collapse-height="reviewPanel.fullTCStateCollapsed"
+		)
+			li.rp-tc-state-item.rp-tc-state-item-everyone
+				span.rp-tc-state-item-name !{translate("tc_everyone")}
+				review-panel-toggle(
+					ng-model="reviewPanel.trackChangesOnForEveryone"
+					on-toggle="toggleTrackChangesForEveryone(isOn);"
+					disabled="!project.features.trackChanges || !permissions.write"
+				)
+			li.rp-tc-state-item(
+				ng-repeat="member in reviewPanel.formattedProjectMembers"
+			)
+				span.rp-tc-state-item-name(
+					ng-class="{ 'rp-tc-state-item-name-disabled' : reviewPanel.trackChangesOnForEveryone}"
+					style="color: hsl({{ member.hue }}, 70%, 40%);"
+				) {{ member.name }}
+				review-panel-toggle(
+					ng-model="reviewPanel.trackChangesState[member.id].value"
+					on-toggle="toggleTrackChangesForUser(isOn, member.id);"
+					disabled="reviewPanel.trackChangesOnForEveryone || !project.features.trackChanges || !permissions.write"
+				)
 
 	.rp-entry-list(
 		review-panel-sorted
@@ -494,7 +513,7 @@ script(type="text/ng-template", id="trackChangesUpgradeModalTemplate")
 	.modal-body
 		.teaser-video-container
 			video.teaser-video(autoplay, loop)
-				source(src="/img/teasers/track-changes/teaser-track-changes.mp4", type="video/mp4")
+				source(ng-src="{{ '/img/teasers/track-changes/teaser-track-changes.mp4' }}", type="video/mp4")
 				img(src="/img/teasers/track-changes/teaser-track-changes.gif")
 		
 		h4.teaser-title #{translate("see_changes_in_your_documents_live")}
@@ -529,6 +548,37 @@ script(type="text/ng-template", id="trackChangesUpgradeModalTemplate")
 	.modal-footer()
 		button.btn.btn-default(
 			ng-click="cancel()"
+		)
+			span #{translate("close")}
+
+script(type="text/ng-template", id="perUserTCNoticeModalTemplate")
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="$close()"
+		) &times;
+		h3 #{translate("per_user_tc_title")}
+	.modal-body
+		.teaser-video-container
+			video.teaser-video(autoplay, loop)
+				source(ng-src="{{ '/img/teasers/track-changes/per-user-track-changes.mp4' }}", type="video/mp4")
+				img(src="/img/teasers/track-changes/per-user-track-changes.gif")
+		h4.teaser-title #{translate("you_can_use_per_user_tc")}
+		.row
+			.col-md-8.col-md-offset-2
+				ul.list-unstyled
+					li
+						i.fa.fa-check &nbsp;
+						| #{translate("turn_tc_on_individuals")}
+					
+					li
+						i.fa.fa-check &nbsp;
+						| #{translate("keep_tc_on_like_before")}
+
+	.modal-footer()
+		button.btn.btn-default(
+			ng-click="$close()"
 		)
 			span #{translate("close")}
 
