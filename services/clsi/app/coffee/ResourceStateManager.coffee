@@ -1,9 +1,9 @@
 Path = require "path"
 fs = require "fs"
-mkdirp = require "mkdirp"
 logger = require "logger-sharelatex"
 settings = require("settings-sharelatex")
 Errors = require "./Errors"
+SafeReader = require "./SafeReader"
 
 module.exports = ResourceStateManager =
 
@@ -37,10 +37,9 @@ module.exports = ResourceStateManager =
 
 	checkProjectStateHashMatches: (state, basePath, callback) ->
 		stateFile = Path.join(basePath, @SYNC_STATE_FILE)
-		fs.readFile stateFile, {encoding:'ascii'}, (err, oldState) ->
-			if err? and err.code isnt 'ENOENT'
-				return callback(err)
-			else if state isnt oldState
+		SafeReader.readFile stateFile, 64, 'ascii', (err, oldState) ->
+			return callback(err) if err?
+			if state isnt oldState
 				return callback new Errors.FilesOutOfSyncError("invalid state for incremental update")
-			else if state is oldState
+			else
 				callback(null)

@@ -1,8 +1,8 @@
 Path = require "path"
 fs = require "fs"
-mkdirp = require "mkdirp"
 logger = require "logger-sharelatex"
 settings = require("settings-sharelatex")
+SafeReader = require "./SafeReader"
 
 module.exports = ResourceListManager =
 
@@ -18,7 +18,8 @@ module.exports = ResourceListManager =
 
 	loadResourceList: (basePath, callback = (error) ->) ->
 		resourceListFile = Path.join(basePath, @RESOURCE_LIST_FILE)
-		fs.readFile resourceListFile, (err, resourceList) ->
+		# limit file to 128K, compile directory is user accessible
+		SafeReader.readFile resourceListFile, 128*1024, 'utf8', (err, resourceList) ->
 			return callback(err) if err?
 			resources = ({path: path} for path in resourceList?.toString()?.split("\n") or [])
 			callback(null, resources)
