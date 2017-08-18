@@ -119,6 +119,7 @@ define () ->
 			$3
 			\\end{thebibliography}
 		"""
+		meta: "env"
 	}]
 
 	parseCustomEnvironments = (text) ->
