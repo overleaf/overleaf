@@ -17,15 +17,15 @@ DeletedDocSchema = new Schema
 ProjectSchema = new Schema
 	name              :   {type:String, default:'new project'}
 	lastUpdated       :   {type:Date, default: () -> new Date()}
-	lastOpened		  :   {type:Date}
-	active			  :   { type: Boolean,  default: true }
+	lastOpened        :   {type:Date}
+	active            :   { type: Boolean,  default: true }
 	owner_ref         :   {type:ObjectId, ref:'User'}
 	collaberator_refs :   [ type:ObjectId, ref:'User' ]
 	readOnly_refs     :   [ type:ObjectId, ref:'User' ]
 	rootDoc_id        :   {type: ObjectId}
 	rootFolder        :   [FolderSchema]
 	publicAccesLevel  :   {type: String, default: 'private'}
-	compiler		  :   {type:String, default:'pdflatex'}
+	compiler          :   {type:String, default:'pdflatex'}
 	spellCheckLanguage :   {type:String, default:'en'}
 	deletedByExternalDataSource : {type: Boolean, default: false}
 	description : {type:String, default:''}
@@ -33,6 +33,9 @@ ProjectSchema = new Schema
 	deletedDocs       : [DeletedDocSchema]
 	imageName         : { type: String }
 	track_changes     : { type: Object }
+	overleaf          :
+		id              : { type: Number }
+		imported_at_version : { type: Number }
 
 ProjectSchema.statics.getProject = (project_or_id, fields, callback)->
 	if project_or_id._id?

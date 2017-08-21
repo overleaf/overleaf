@@ -3075,6 +3075,11 @@
       "from": "passport-local@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/passport-local/-/passport-local-1.0.0.tgz"
     },
+    "passport-oauth2-refresh": {
+      "version": "1.0.0",
+      "from": "passport-oauth2-refresh@latest",
+      "resolved": "https://registry.npmjs.org/passport-oauth2-refresh/-/passport-oauth2-refresh-1.0.0.tgz"
+    },
     "passport-oauth2": {
       "version": "1.4.0",
       "from": "passport-oauth2@latest",

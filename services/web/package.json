@@ -50,6 +50,7 @@
     "passport-ldapauth": "^0.6.0",
     "passport-local": "^1.0.0",
     "passport-oauth2": "^1.4.0",
+    "passport-oauth2-refresh": "^1.0.0",
     "passport-saml": "^0.15.0",
     "pug": "^2.0.0-beta6",
     "redis": "0.10.1",
