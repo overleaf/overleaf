@@ -174,7 +174,7 @@ describe "HttpController", ->
 			it "should log out an error", ->
 				@logger.error
 					.calledWith(
-						err: new Error("null doc")
+						err: sinon.match.has('message', "null doc")
 						project_id: @project_id
 						"encountered null doc"
 					)

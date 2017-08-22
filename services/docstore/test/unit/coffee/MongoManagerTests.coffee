@@ -26,10 +26,12 @@ describe "MongoManager", ->
 			@MongoManager.findDoc @project_id, @doc_id, @filter, @callback
 
 		it "should find the doc", ->
-			@db.docs.find.lastCall.args.slice(0,2).should.deep.equal([
-				{_id: ObjectId(@doc_id), project_id: ObjectId(@project_id)},
-				@filter
-			])
+			@db.docs.find
+				.calledWith({
+					_id: ObjectId(@doc_id)
+					project_id: ObjectId(@project_id)
+				}, @filter)
+				.should.equal true
 
 		it "should call the callback with the doc", ->
 			@callback.calledWith(null, @doc).should.equal true
@@ -48,9 +50,12 @@ describe "MongoManager", ->
 				@MongoManager.getProjectsDocs @project_id, include_deleted: false, @filter, @callback
 
 			it "should find the non-deleted docs via the project_id", ->
-				@db.docs.find.lastCall.args.slice(0,1).should.deep.equal([
-					{project_id: ObjectId(@project_id), deleted: {$ne: true}}
-				])
+				@db.docs.find
+					.calledWith({
+						project_id: ObjectId(@project_id)
+						deleted: { $ne: true }
+					}, @filter)
+					.should.equal true
 
 			it "should call the callback with the docs", ->
 				@callback.calledWith(null, [@doc, @doc3, @doc4]).should.equal true
@@ -60,10 +65,11 @@ describe "MongoManager", ->
 				@MongoManager.getProjectsDocs @project_id, include_deleted: true, @filter, @callback
 
 			it "should find all via the project_id", ->
-				@db.docs.find.lastCall.args.slice(0,2).should.deep.equal([
-					{project_id: ObjectId(@project_id)},
-					@filter
-				])
+				@db.docs.find
+					.calledWith({
+						project_id: ObjectId(@project_id)
+					}, @filter)
+					.should.equal true
 
 			it "should call the callback with the docs", ->
 				@callback.calledWith(null, [@doc, @doc3, @doc4]).should.equal true
@@ -113,10 +119,9 @@ describe "MongoManager", ->
 				@MongoManager.getDocVersion @doc_id, @callback
 
 			it "should look for the doc in the database", ->
-				@db.docOps.find.lastCall.args.slice(0,2).should.deep.equal([
-					{ doc_id: ObjectId(@doc_id) },
-					{version: 1}
-				])
+				@db.docOps.find
+					.calledWith({ doc_id: ObjectId(@doc_id) }, {version: 1})
+					.should.equal true
 
 			it "should call the callback with the version", ->
 				@callback.calledWith(null, @version).should.equal true
@@ -136,11 +141,16 @@ describe "MongoManager", ->
 			@MongoManager.setDocVersion @doc_id, @version, @callback
 
 		it "should update the doc version", ->
-			@db.docOps.update.lastCall.args.slice(0,3).should.deep.equal([
-				{doc_id: ObjectId(@doc_id)},
-				{$set: {version: @version}},
-				{upsert: true}
-			])
+			@db.docOps.update
+				.calledWith({
+					doc_id: ObjectId(@doc_id)
+				}, {
+					$set:
+						version: @version
+				}, {
+					upsert: true 
+				})
+				.should.equal true
 
 		it "should call the callback", ->
 			@callback.called.should.equal true
