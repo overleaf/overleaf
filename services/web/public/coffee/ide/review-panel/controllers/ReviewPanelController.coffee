@@ -648,7 +648,7 @@ define [
 				applyTrackChangesStateToClient(state)
 
 		$scope.toggleTrackChangesFromKbdShortcut = () ->
-			if !$scope.project.features.trackChangesVisible
+			if !($scope.project.features.trackChangesVisible && $scope.project.features.trackChanges)
 				return
 			$scope.toggleTrackChangesForUser !$scope.reviewPanel.trackChangesState[ide.$scope.user.id].value, ide.$scope.user.id
 
