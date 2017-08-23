@@ -4,6 +4,7 @@ Settings = require "settings-sharelatex"
 Metrics = require "./Metrics"
 ProjectPersistenceManager = require "./ProjectPersistenceManager"
 logger = require "logger-sharelatex"
+Errors = require "./Errors"
 
 module.exports = CompileController =
 	compile: (req, res, next = (error) ->) ->
@@ -15,7 +16,10 @@ module.exports = CompileController =
 			ProjectPersistenceManager.markProjectAsJustAccessed request.project_id, (error) ->
 				return next(error) if error?
 				CompileManager.doCompile request, (error, outputFiles = []) ->
-					if error?.terminated
+					if error instanceof Errors.FilesOutOfSyncError
+						code = 409 # Http 409 Conflict
+						status = "retry"
+					else if error?.terminated
 						status = "terminated"
 					else if error?.validate
 						status = "validation-#{error.validate}"

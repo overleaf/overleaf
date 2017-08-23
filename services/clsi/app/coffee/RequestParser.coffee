@@ -32,6 +32,27 @@ module.exports = RequestParser =
 				compile.options.check,
 				type: "string"
 
+			# The syncType specifies whether the request contains all
+			# resources (full) or only those resources to be updated
+			# in-place (incremental).
+			response.syncType = @_parseAttribute "syncType",
+				compile.options.syncType,
+				validValues: ["full", "incremental"]
+				type: "string"
+
+			# The syncState is an identifier passed in with the request
+			# which has the property that it changes when any resource is
+			# added, deleted, moved or renamed.
+			#
+			# on syncType full the syncState identifier is passed in and
+			# stored
+			#
+			# on syncType incremental the syncState identifier must match
+			# the stored value
+			response.syncState = @_parseAttribute "syncState",
+				compile.options.syncState,
+				type: "string"
+
 			if response.timeout > RequestParser.MAX_TIMEOUT
 				response.timeout = RequestParser.MAX_TIMEOUT
 			response.timeout = response.timeout * 1000 # milliseconds

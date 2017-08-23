@@ -5,6 +5,9 @@ module.exports = DraftModeManager =
 	injectDraftMode: (filename, callback = (error) ->) ->
 		fs.readFile filename, "utf8", (error, content) ->
 			return callback(error) if error?
+			# avoid adding draft mode more than once
+			if content?.indexOf("\\documentclass\[draft") >= 0
+				return callback()
 			modified_content = DraftModeManager._injectDraftOption content
 			logger.log {
 				content: content.slice(0,1024), # \documentclass is normally v near the top

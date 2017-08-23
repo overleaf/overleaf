@@ -242,3 +242,13 @@ describe "RequestParser", ->
 		it "should return an error", ->
 			@callback.calledWith("relative path in root resource")
 				.should.equal true
+
+	describe "with an unknown syncType", ->
+		beforeEach ->
+			@validRequest.compile.options.syncType = "unexpected"
+			@RequestParser.parse @validRequest, @callback
+			@data = @callback.args[0][1]
+
+		it "should return an error", ->
+			@callback.calledWith("syncType attribute should be one of: full, incremental")
+				.should.equal true
