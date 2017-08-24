@@ -80,12 +80,12 @@ describe "CollaboratorsHandler", ->
 				{ id: "read-write-ref-2", privilegeLevel: "readAndWrite" }
 				{ id: "doesnt-exist", privilegeLevel: "readAndWrite" }
 			])
-			@UserGetter.getUser = sinon.stub()
-			@UserGetter.getUser.withArgs("read-only-ref-1").yields(null, { _id: "read-only-ref-1" })
-			@UserGetter.getUser.withArgs("read-only-ref-2").yields(null, { _id: "read-only-ref-2" })
-			@UserGetter.getUser.withArgs("read-write-ref-1").yields(null, { _id: "read-write-ref-1" })
-			@UserGetter.getUser.withArgs("read-write-ref-2").yields(null, { _id: "read-write-ref-2" })
-			@UserGetter.getUser.withArgs("doesnt-exist").yields(null, null)
+			@UserGetter.getUserOrUserStubById = sinon.stub()
+			@UserGetter.getUserOrUserStubById.withArgs("read-only-ref-1").yields(null, { _id: "read-only-ref-1" })
+			@UserGetter.getUserOrUserStubById.withArgs("read-only-ref-2").yields(null, { _id: "read-only-ref-2" })
+			@UserGetter.getUserOrUserStubById.withArgs("read-write-ref-1").yields(null, { _id: "read-write-ref-1" })
+			@UserGetter.getUserOrUserStubById.withArgs("read-write-ref-2").yields(null, { _id: "read-write-ref-2" })
+			@UserGetter.getUserOrUserStubById.withArgs("doesnt-exist").yields(null, null)
 			@CollaboratorHandler.getMembersWithPrivilegeLevels @project_id, @callback
 
 		it "should return an array of members with their privilege levels", ->
