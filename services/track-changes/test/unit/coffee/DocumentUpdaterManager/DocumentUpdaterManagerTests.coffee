@@ -31,7 +31,7 @@ describe "DocumentUpdaterManager", ->
 				@request.get.calledWith(url).should.equal true
 
 			it "should call the callback with the content and version", ->
-				@callback.calledWith(null, @lines.join("\n"), @version, @ops).should.equal true
+				@callback.calledWith(null, @lines.join("\n"), @version).should.equal true
 
 		describe "when the document updater API returns an error", ->
 			beforeEach ->
@@ -48,7 +48,7 @@ describe "DocumentUpdaterManager", ->
 
 			it "should return the callback with an error", ->
 				@callback
-					.calledWith(new Error("doc updater returned failure status code: 500"))
+					.calledWith(sinon.match.has('message', "doc updater returned a non-success status code: 500"))
 					.should.equal true
 
 	describe "setDocument", ->
@@ -91,5 +91,5 @@ describe "DocumentUpdaterManager", ->
 
 			it "should return the callback with an error", ->
 				@callback
-					.calledWith(new Error("doc updater returned failure status code: 500"))
+					.calledWith(sinon.match.has('message', "doc updater returned a non-success status code: 500"))
 					.should.equal true
