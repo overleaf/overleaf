@@ -12,6 +12,8 @@ describe "ClsiManager", ->
 			getCookieJar: sinon.stub().callsArgWith(1, null, @jar)
 			setServerId: sinon.stub().callsArgWith(2)
 			_getServerId:sinon.stub()
+		@ClsiStateManager =
+			computeHash: sinon.stub().callsArgWith(1, null, "01234567890abcdef")
 		@ClsiFormatChecker =
 			checkRecoursesForProblems:sinon.stub().callsArgWith(1)
 		@ClsiManager = SandboxedModule.require modulePath, requires:
@@ -26,10 +28,18 @@ describe "ClsiManager", ->
 						url: "https://clsipremium.example.com"
 			"../../models/Project": Project: @Project = {}
 			"../Project/ProjectEntityHandler": @ProjectEntityHandler = {}
+			"../Project/ProjectGetter": @ProjectGetter = {}
+			"../DocumentUpdater/DocumentUpdaterHandler": @DocumentUpdaterHandler =
+				getProjectDocsIfMatch: sinon.stub().callsArgWith(2,null,null)
 			"./ClsiCookieManager": @ClsiCookieManager
+			"./ClsiStateManager": @ClsiStateManager
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), warn: sinon.stub() }
 			"request": @request = sinon.stub()
 			"./ClsiFormatChecker": @ClsiFormatChecker
+			"metrics-sharelatex": @Metrics =
+				Timer: class Timer
+					done: sinon.stub()
+				inc: sinon.stub()
 		@project_id = "project-id"
 		@user_id = "user-id"
 		@callback = sinon.stub()
@@ -93,6 +103,25 @@ describe "ClsiManager", ->
 			it "should call the callback with a failure statue", ->
 				@callback.calledWith(null, @status).should.equal true
 
+		describe "with a sync conflict", ->
+			beforeEach ->
+				@ClsiManager.sendRequestOnce = sinon.stub()
+				@ClsiManager.sendRequestOnce.withArgs(@project_id, @user_id, {syncType:"full"}).callsArgWith(3, null,	@status = "success")
+				@ClsiManager.sendRequestOnce.withArgs(@project_id, @user_id, {}).callsArgWith(3, null, "conflict")
+				@ClsiManager.sendRequest @project_id, @user_id, {}, @callback
+
+			it "should call the sendRequestOnce method twice", ->
+				@ClsiManager.sendRequestOnce.calledTwice.should.equal true
+
+			it "should call the sendRequestOnce method with syncType:full", ->
+				@ClsiManager.sendRequestOnce.calledWith(@project_id, @user_id, {syncType:"full"}).should.equal true
+
+			it "should call the sendRequestOnce method without syncType:full", ->
+				@ClsiManager.sendRequestOnce.calledWith(@project_id, @user_id, {}).should.equal true
+
+			it "should call the callback with a success status", ->
+				@callback.calledWith(null, @status, ).should.equal true
+
 	describe "deleteAuxFiles", ->
 		beforeEach ->
 			@ClsiManager._makeRequest = sinon.stub().callsArg(2)
@@ -144,6 +173,8 @@ describe "ClsiManager", ->
 			@Project.findById = sinon.stub().callsArgWith(2, null, @project)
 			@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
 			@ProjectEntityHandler.getAllFiles = sinon.stub().callsArgWith(1, null, @files)
+			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, @project)
+			@DocumentUpdaterHandler.flushProjectToMongo = sinon.stub().callsArgWith(1, null)
 
 		describe "with a valid project", ->
 			beforeEach (done) ->
@@ -152,8 +183,13 @@ describe "ClsiManager", ->
 					done()
 
 			it "should get the project with the required fields", ->
-				@Project.findById
-					.calledWith(@project_id, {compiler:1, rootDoc_id: 1, imageName: 1})
+				@ProjectGetter.getProject
+					.calledWith(@project_id, {compiler:1, rootDoc_id: 1, imageName: 1, rootFolder: 1})
+					.should.equal true
+
+			it "should flush the project to the database", ->
+				@DocumentUpdaterHandler.flushProjectToMongo
+					.calledWith(@project_id)
 					.should.equal true
 
 			it "should get all the docs", ->
@@ -175,6 +211,8 @@ describe "ClsiManager", ->
 							imageName: @image
 							draft: false
 							check: undefined
+							syncType: undefined # "full"
+							syncState: undefined # "01234567890abcdef"
 						rootResourcePath: "main.tex"
 						resources: [{
 							path:    "main.tex"
@@ -189,6 +227,51 @@ describe "ClsiManager", ->
 						}]
 				)
 
+		describe "with the incremental compile option", ->
+			beforeEach (done) ->
+				@ClsiStateManager.computeHash = sinon.stub().callsArgWith(1, null, @project_state_hash = "01234567890abcdef")
+				@DocumentUpdaterHandler.getProjectDocsIfMatch = sinon.stub().callsArgWith(2, null, [{_id:@doc_1._id, lines:  @doc_1.lines, v: 123}])
+				@ProjectEntityHandler.getAllDocPathsFromProject = sinon.stub().callsArgWith(1, null, {"mock-doc-id-1":"main.tex"})
+				@ClsiManager._buildRequest @project_id, {timeout:100, incrementalCompilesEnabled:true}, (error, request) =>
+					@request = request
+					done()
+
+			it "should get the project with the required fields", ->
+				@ProjectGetter.getProject
+					.calledWith(@project_id, {compiler:1, rootDoc_id: 1, imageName: 1, rootFolder: 1})
+					.should.equal true
+
+			it "should flush the project to the database", ->
+				@DocumentUpdaterHandler.flushProjectToMongo
+					.calledWith(@project_id)
+					.should.equal true
+
+			it "should get only the live docs from the docupdater", ->
+				@DocumentUpdaterHandler.getProjectDocsIfMatch
+					.calledWith(@project_id)
+					.should.equal true
+
+			it "should not get any of the files", ->
+				@ProjectEntityHandler.getAllFiles
+					.called.should.equal false
+
+			it "should build up the CLSI request", ->
+				expect(@request).to.deep.equal(
+					compile:
+						options:
+							compiler: @compiler
+							timeout : 100
+							imageName: @image
+							draft: false
+							check: undefined
+							syncType: "incremental"
+							syncState: "01234567890abcdef"
+						rootResourcePath: "main.tex"
+						resources: [{
+							path:    "main.tex"
+							content: @doc_1.lines.join("\n")
+						}]
+				)
 
 		describe "when root doc override is valid", ->
 			beforeEach (done) ->

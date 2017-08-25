@@ -20,19 +20,11 @@ CooldownManager = require '../Cooldown/CooldownManager'
 
 module.exports = ProjectEntityHandler =
 	getAllFolders: (project_id,  callback) ->
-		logger.log project_id:project_id, "getting all folders for project" 
-		folders = {}
-		processFolder = (basePath, folder) ->
-			folders[basePath] = folder
-			for childFolder in (folder.folders or [])
-				if childFolder.name?
-					processFolder path.join(basePath, childFolder.name), childFolder
-
+		logger.log project_id:project_id, "getting all folders for project"
 		ProjectGetter.getProjectWithoutDocLines project_id, (err, project) ->
 			return callback(err) if err?
 			return callback("no project") if !project?
-			processFolder "/", project.rootFolder[0]
-			callback null, folders
+			ProjectEntityHandler.getAllFoldersFromProject project, callback
 
 	getAllDocs: (project_id, callback) ->
 		logger.log project_id:project_id, "getting all docs for project"
@@ -73,6 +65,43 @@ module.exports = ProjectEntityHandler =
 					if file?
 						files[path.join(folderPath, file.name)] = file
 			callback null, files
+
+	getAllFoldersFromProject: (project, callback) ->
+		folders = {}
+		processFolder = (basePath, folder) ->
+			folders[basePath] = folder
+			for childFolder in (folder.folders or [])
+				if childFolder.name?
+					processFolder path.join(basePath, childFolder.name), childFolder
+
+		processFolder "/", project.rootFolder[0]
+		callback null, folders
+
+	getAllEntitiesFromProject: (project, callback) ->
+		logger.log project:project, "getting all files for project"
+		@getAllFoldersFromProject project, (err, folders = {}) ->
+			return callback(err) if err?
+			docs = []
+			files = []
+			for folderPath, folder of folders
+				for doc in (folder.docs or [])
+					if doc?
+						docs.push({path: path.join(folderPath, doc.name), doc:doc})
+				for file in (folder.fileRefs or [])
+					if file?
+						files.push({path: path.join(folderPath, file.name), file:file})
+			callback null, docs, files
+
+	getAllDocPathsFromProject: (project, callback) ->
+		logger.log project:project, "getting all docs for project"
+		@getAllFoldersFromProject project, (err, folders = {}) ->
+			return callback(err) if err?
+			docPath = {}
+			for folderPath, folder of folders
+				for doc in (folder.docs or [])
+					docPath[doc._id] = path.join(folderPath, doc.name)
+			logger.log count:_.keys(docPath).length, project_id:project._id, "returning docPaths for project"
+			callback null, docPath
 
 	flushProjectToThirdPartyDataStore: (project_id, callback) ->
 		self = @

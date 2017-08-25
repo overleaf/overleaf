@@ -17,7 +17,6 @@ describe "CompileManager", ->
 				redis: web: {host: "localhost", port: 42}
 			"../../infrastructure/RedisWrapper":
 				client: () => @rclient = { auth: () -> }
-			"../DocumentUpdater/DocumentUpdaterHandler": @DocumentUpdaterHandler = {}
 			"../Project/ProjectRootDocManager": @ProjectRootDocManager = {}
 			"../../models/Project": Project: @Project = {}
 			"../User/UserGetter": @UserGetter = {}
@@ -40,7 +39,6 @@ describe "CompileManager", ->
 		beforeEach ->
 			@CompileManager._checkIfRecentlyCompiled = sinon.stub().callsArgWith(2, null, false)
 			@CompileManager._ensureRootDocumentIsSet = sinon.stub().callsArgWith(1, null)
-			@DocumentUpdaterHandler.flushProjectToMongo = sinon.stub().callsArgWith(1, null)
 			@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith(1, null, @limits)
 			@ClsiManager.sendRequest = sinon.stub().callsArgWith(3, null, @status = "mock-status", @outputFiles = "mock output files", @output = "mock output")
 
@@ -52,11 +50,6 @@ describe "CompileManager", ->
 			it "should check the project has not been recently compiled", ->
 				@CompileManager._checkIfRecentlyCompiled
 					.calledWith(@project_id, @user_id)
-					.should.equal true
-
-			it "should flush the project to the database", ->
-				@DocumentUpdaterHandler.flushProjectToMongo
-					.calledWith(@project_id)
 					.should.equal true
 
 			it "should ensure that the root document is set", ->

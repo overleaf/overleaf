@@ -1,7 +1,6 @@
 Settings = require('settings-sharelatex')
 RedisWrapper = require("../../infrastructure/RedisWrapper")
 rclient = RedisWrapper.client("clsi_recently_compiled")
-DocumentUpdaterHandler = require "../DocumentUpdater/DocumentUpdaterHandler"
 Project = require("../../models/Project").Project
 ProjectRootDocManager = require "../Project/ProjectRootDocManager"
 UserGetter = require "../User/UserGetter"
@@ -31,19 +30,17 @@ module.exports = CompileManager =
 				
 				CompileManager._ensureRootDocumentIsSet project_id, (error) ->
 					return callback(error) if error?
-					DocumentUpdaterHandler.flushProjectToMongo project_id, (error) ->
+					CompileManager.getProjectCompileLimits project_id, (error, limits) ->
 						return callback(error) if error?
-						CompileManager.getProjectCompileLimits project_id, (error, limits) ->
+						for key, value of limits
+							options[key] = value
+						# only pass user_id down to clsi if this is a per-user compile
+						compileAsUser = if Settings.disablePerUserCompiles then undefined else user_id
+						ClsiManager.sendRequest project_id, compileAsUser, options, (error, status, outputFiles, clsiServerId, validationProblems) ->
 							return callback(error) if error?
-							for key, value of limits
-								options[key] = value
-							# only pass user_id down to clsi if this is a per-user compile
-							compileAsUser = if Settings.disablePerUserCompiles then undefined else user_id
-							ClsiManager.sendRequest project_id, compileAsUser, options, (error, status, outputFiles, clsiServerId, validationProblems) ->
-								return callback(error) if error?
-								logger.log files: outputFiles, "output files"
-								callback(null, status, outputFiles, clsiServerId, limits, validationProblems)
-								
+							logger.log files: outputFiles, "output files"
+							callback(null, status, outputFiles, clsiServerId, limits, validationProblems)
+
 
 	stopCompile: (project_id, user_id, callback = (error) ->) ->
 		CompileManager.getProjectCompileLimits project_id, (error, limits) ->

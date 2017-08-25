@@ -3,17 +3,31 @@ async = require "async"
 Settings = require "settings-sharelatex"
 request = require('request')
 Project = require("../../models/Project").Project
+ProjectGetter = require("../Project/ProjectGetter")
 ProjectEntityHandler = require("../Project/ProjectEntityHandler")
 logger = require "logger-sharelatex"
 Url = require("url")
 ClsiCookieManager = require("./ClsiCookieManager")
+ClsiStateManager = require("./ClsiStateManager")
 _ = require("underscore")
 async = require("async")
 ClsiFormatChecker = require("./ClsiFormatChecker")
+DocumentUpdaterHandler = require "../DocumentUpdater/DocumentUpdaterHandler"
+Metrics = require('metrics-sharelatex')
 
 module.exports = ClsiManager =
 
-	sendRequest: (project_id, user_id, options = {}, callback = (error, status, outputFiles, clsiServerId, validationProblems) ->) ->
+	sendRequest: (project_id, user_id, options = {}, callback) ->
+		ClsiManager.sendRequestOnce project_id, user_id, options, (error, status, result...) ->
+			return callback(error) if error?
+			if status is 'conflict'
+				options = _.clone(options)
+				options.syncType = "full" #  force full compile
+				ClsiManager.sendRequestOnce project_id, user_id, options, callback # try again
+			else
+				callback(error, status, result...)
+
+	sendRequestOnce: (project_id, user_id, options = {}, callback = (error, status, outputFiles, clsiServerId, validationProblems) ->) ->
 		ClsiManager._buildRequest project_id, options, (error, req) ->
 			return callback(error) if error?
 			logger.log project_id: project_id, "sending compile to CLSI"
@@ -28,7 +42,7 @@ module.exports = ClsiManager =
 				if error?
 					logger.err err:error, project_id:project_id, "error sending request to clsi"
 					return callback(error)
-				logger.log project_id: project_id, outputFilesLength: response?.outputFiles?.length, status: response?.status, "received compile response from CLSI"
+				logger.log project_id: project_id, outputFilesLength: response?.outputFiles?.length, status: response?.status, compile_status: response?.compile?.status, "received compile response from CLSI"
 				ClsiCookieManager._getServerId project_id, (err, clsiServerId)->
 					if err?
 						logger.err err:err, project_id:project_id, "error getting server id"
@@ -85,6 +99,8 @@ module.exports = ClsiManager =
 				callback null, body
 			else if response.statusCode == 413
 				callback null, compile:status:"project-too-large"
+			else if response.statusCode == 409
+				callback null, compile:status:"conflict"
 			else
 				error = new Error("CLSI returned non-success code: #{response.statusCode}")
 				logger.error err: error, project_id: project_id, "CLSI returned failure code"
@@ -101,56 +117,116 @@ module.exports = ClsiManager =
 		return outputFiles
 
 	VALID_COMPILERS: ["pdflatex", "latex", "xelatex", "lualatex"]
+
 	_buildRequest: (project_id, options={}, callback = (error, request) ->) ->
-		Project.findById project_id, {compiler: 1, rootDoc_id: 1, imageName: 1}, (error, project) ->
+		ProjectGetter.getProject project_id, {compiler: 1, rootDoc_id: 1, imageName: 1, rootFolder:1}, (error, project) ->
 			return callback(error) if error?
 			return callback(new Errors.NotFoundError("project does not exist: #{project_id}")) if !project?
-
 			if project.compiler not in ClsiManager.VALID_COMPILERS
 				project.compiler = "pdflatex"
 
+			if options.incrementalCompilesEnabled or options.syncType? # new way, either incremental or full
+				timer = new Metrics.Timer("editor.compile-getdocs-redis")
+				ClsiManager.getContentFromDocUpdaterIfMatch project_id, project, (error, projectStateHash, docUpdaterDocs) ->
+					timer.done()
+					return callback(error) if error?
+					logger.log project_id: project_id, projectStateHash: projectStateHash, docs: docUpdaterDocs?, "checked project state"
+					# see if we can send an incremental update to the CLSI
+					if docUpdaterDocs? and options.syncType isnt "full"
+						# Workaround: for now, always flush project to mongo on compile
+						# until we have automatic periodic flushing on the docupdater
+						# side, to prevent documents staying in redis too long.
+						DocumentUpdaterHandler.flushProjectToMongo project_id, (error) ->
+							return callback(error) if error?
+							Metrics.inc "compile-from-redis"
+							ClsiManager._buildRequestFromDocupdater project_id, options, project, projectStateHash, docUpdaterDocs, callback
+					else
+						Metrics.inc "compile-from-mongo"
+						ClsiManager._buildRequestFromMongo project_id, options, project, projectStateHash, callback
+			else # old way, always from mongo
+				timer = new Metrics.Timer("editor.compile-getdocs-mongo")
+				ClsiManager._getContentFromMongo project_id, (error, docs, files) ->
+					timer.done()
+					return callback(error) if error?
+					ClsiManager._finaliseRequest project_id, options, project, docs, files, callback
+
+	getContentFromDocUpdaterIfMatch: (project_id, project, callback = (error, projectStateHash, docs) ->) ->
+		ClsiStateManager.computeHash project, (error, projectStateHash) ->
+			return callback(error) if error?
+			DocumentUpdaterHandler.getProjectDocsIfMatch project_id, projectStateHash, (error, docs) ->
+				return callback(error) if error?
+				callback(null, projectStateHash, docs)
+
+	_buildRequestFromDocupdater: (project_id, options, project, projectStateHash, docUpdaterDocs, callback = (error, request) ->) ->
+		ProjectEntityHandler.getAllDocPathsFromProject project, (error, docPath) ->
+				return callback(error) if error?
+				docs = {}
+				for doc in docUpdaterDocs or []
+					path = docPath[doc._id]
+					docs[path] = doc
+				# send new docs but not files as those are already on the clsi
+				options = _.clone(options)
+				options.syncType = "incremental"
+				options.syncState = projectStateHash
+				ClsiManager._finaliseRequest project_id, options, project, docs, [], callback
+
+	_buildRequestFromMongo: (project_id, options, project, projectStateHash, callback = (error, request) ->) ->
+		ClsiManager._getContentFromMongo project_id, (error, docs, files) ->
+			return callback(error) if error?
+			options = _.clone(options)
+			options.syncType = "full"
+			options.syncState = projectStateHash
+			ClsiManager._finaliseRequest project_id, options, project, docs, files, callback
+
+	_getContentFromMongo: (project_id, callback = (error, docs, files) ->) ->
+		DocumentUpdaterHandler.flushProjectToMongo project_id, (error) ->
+			return callback(error) if error?
 			ProjectEntityHandler.getAllDocs project_id, (error, docs = {}) ->
 				return callback(error) if error?
 				ProjectEntityHandler.getAllFiles project_id, (error, files = {}) ->
 					return callback(error) if error?
+					callback(null, docs, files)
 
-					resources = []
-					rootResourcePath = null
-					rootResourcePathOverride = null
+	_finaliseRequest: (project_id, options, project, docs, files, callback = (error, params) -> ) ->
+		resources = []
+		rootResourcePath = null
+		rootResourcePathOverride = null
 
-					for path, doc of docs
-						path = path.replace(/^\//, "") # Remove leading /
-						resources.push
-							path:    path
-							content: doc.lines.join("\n")
-						if project.rootDoc_id? and doc._id.toString() == project.rootDoc_id.toString()
-							rootResourcePath = path
-						if options.rootDoc_id? and doc._id.toString() == options.rootDoc_id.toString()
-							rootResourcePathOverride = path
+		for path, doc of docs
+			path = path.replace(/^\//, "") # Remove leading /
+			resources.push
+				path:    path
+				content: doc.lines.join("\n")
+			if project.rootDoc_id? and doc._id.toString() == project.rootDoc_id.toString()
+				rootResourcePath = path
+			if options.rootDoc_id? and doc._id.toString() == options.rootDoc_id.toString()
+				rootResourcePathOverride = path
 
-					rootResourcePath = rootResourcePathOverride if rootResourcePathOverride?
-					if !rootResourcePath?
-						logger.warn {project_id}, "no root document found, setting to main.tex"
-						rootResourcePath = "main.tex"
+		rootResourcePath = rootResourcePathOverride if rootResourcePathOverride?
+		if !rootResourcePath?
+			logger.warn {project_id}, "no root document found, setting to main.tex"
+			rootResourcePath = "main.tex"
 
-					for path, file of files
-						path = path.replace(/^\//, "") # Remove leading /
-						resources.push
-							path:     path
-							url:      "#{Settings.apis.filestore.url}/project/#{project._id}/file/#{file._id}"
-							modified: file.created?.getTime()
+		for path, file of files
+			path = path.replace(/^\//, "") # Remove leading /
+			resources.push
+				path:     path
+				url:      "#{Settings.apis.filestore.url}/project/#{project._id}/file/#{file._id}"
+				modified: file.created?.getTime()
 
-					callback null, {
-						compile:
-							options:
-								compiler: project.compiler
-								timeout: options.timeout
-								imageName: project.imageName
-								draft: !!options.draft
-								check: options.check
-							rootResourcePath: rootResourcePath
-							resources: resources
-					}
+		callback null, {
+			compile:
+				options:
+					compiler: project.compiler
+					timeout: options.timeout
+					imageName: project.imageName
+					draft: !!options.draft
+					check: options.check
+					syncType: options.syncType
+					syncState: options.syncState
+				rootResourcePath: rootResourcePath
+				resources: resources
+		}
 
 	wordCount: (project_id, user_id, file, options, callback = (error, response) ->) ->
 		ClsiManager._buildRequest project_id, options, (error, req) ->

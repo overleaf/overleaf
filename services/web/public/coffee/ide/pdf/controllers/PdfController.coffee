@@ -105,6 +105,7 @@ define [
 				rootDoc_id: options.rootDocOverride_id or null
 				draft: $scope.draft
 				check: checkType
+				incrementalCompilesEnabled: window.user?.betaProgram
 				_csrf: window.csrfToken
 			}, {params: params}
 
