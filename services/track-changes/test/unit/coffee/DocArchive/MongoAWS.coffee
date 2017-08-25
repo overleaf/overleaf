@@ -30,7 +30,7 @@ describe "MongoAWS", ->
 
 		@project_id = ObjectId().toString()
 		@doc_id = ObjectId().toString()
-		@pack_id = ObjectId().toString()
+		@pack_id = ObjectId()
 		@update = { v:123 }
 		@callback = sinon.stub()
 
