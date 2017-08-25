@@ -105,11 +105,10 @@ describe "UpdatesManager", ->
 						.should.equal true
 
 				# FIXME: Broken test, was hidden by an api mistake
-
-				# it "should defer the compression of raw ops until they are written in a new pack", ->
-				# 	console.log @UpdateCompressor.compressRawUpdates.called
-				# 	@UpdateCompressor.compressRawUpdates
-				# 		.called.should.not.equal true
+				it "should defer the compression of raw ops until they are written in a new pack", ->
+					console.log @UpdateCompressor.compressRawUpdates.called
+					@UpdateCompressor.compressRawUpdates
+						.called.should.not.equal true
 
 				it "should save the new compressed ops into a pack", ->
 					@PackManager.insertCompressedUpdates
