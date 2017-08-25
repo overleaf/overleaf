@@ -97,7 +97,6 @@ describe "UpdatesManager", ->
 					@lastCompressedUpdate = {pack: [{ v: 11, op: "compressed-op-11" }], v:11}
 					@rawUpdates = [{ v: 12, op: "mock-op-12" }, { v: 13, op: "mock-op-13" }]
 					@MongoManager.peekLastCompressedUpdate = sinon.stub().callsArgWith(1, null, @lastCompressedUpdate, @lastCompressedUpdate.v)
-					# @UpdateCompressor.compressRawUpdates = sinon.stub().returns(@compressedUpdates)
 					@UpdatesManager.compressAndSaveRawUpdates @project_id, @doc_id, @rawUpdates, @temporary, @callback
 
 				it "should look at the last compressed op", ->
