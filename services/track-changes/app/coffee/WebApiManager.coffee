@@ -30,7 +30,6 @@ module.exports = WebApiManager =
 				return callback null, body
 			else
 				error = new Error("web returned a non-success status code: #{res.statusCode} (attempts: #{res.attempts})")
-				console.log error.message
 				callback error
 
 	getUserInfo: (user_id, callback = (error, userInfo) ->) ->
