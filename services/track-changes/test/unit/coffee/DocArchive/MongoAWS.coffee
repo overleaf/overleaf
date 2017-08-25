@@ -39,7 +39,8 @@ describe "MongoAWS", ->
 		beforeEach (done) ->
 			@awssdk.config = { update: sinon.stub() }
 			@awssdk.S3 = sinon.stub()
-			@S3S.WriteStream = MemoryStream.createWriteStream
+			@S3S.WriteStream = () ->
+				MemoryStream.createWriteStream()
 			@db.docHistory = {}
 			@db.docHistory.findOne = sinon.stub().callsArgWith(1, null, {"pack":"hello"})
 
