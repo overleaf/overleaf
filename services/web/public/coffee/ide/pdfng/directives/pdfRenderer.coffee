@@ -15,7 +15,7 @@ define [
 
 			constructor: (@url, @options) ->
 				# set up external character mappings - needed for Japanese etc
-				window.PDFJS.cMapUrl = './bcmaps/'
+				window.PDFJS.cMapUrl = window.pdfCMapsPath # injected in editor.pug
 				window.PDFJS.cMapPacked = true
 
 				if window.location?.search?.indexOf("disable-font-face=true") >= 0
