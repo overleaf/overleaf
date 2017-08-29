@@ -104,9 +104,10 @@ describe "UpdatesManager", ->
 						.calledWith(@doc_id)
 						.should.equal true
 
-				it "should defer the compression of raw ops until they are written in a new pack", ->
+				it "should compress the raw ops", ->
 					@UpdateCompressor.compressRawUpdates
-						.should.not.be.called
+						.calledWith(null, @rawUpdates)
+						.should.equal true
 
 				it "should save the new compressed ops into a pack", ->
 					@PackManager.insertCompressedUpdates
