@@ -320,7 +320,7 @@ module.exports = (grunt) ->
 					ext: '.js'
 				}
 				config.mochaTest["module_#{module}_unit"] = {
-					src: ["modules/#{module}/test/unit/js/*.js"]
+					src: ["modules/#{module}/test/unit/js/**/*.js"]
 					options:
 						reporter: grunt.option('reporter') or 'spec'
 						grep: grunt.option("grep")
