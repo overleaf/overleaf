@@ -30,13 +30,14 @@ module.exports = CollaboratorsHandler =
 			return callback(error) if error?
 			return callback null, members.map (m) -> m.id
 
+	USER_PROJECTION: { _id: 1, email: 1 }
 	getMembersWithPrivilegeLevels: (project_id, callback = (error, members) ->) ->
 		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members = []) ->
 			return callback(error) if error?
 			result = []
 			async.mapLimit members, 3,
 				(member, cb) ->
-					UserGetter.getUser member.id, (error, user) ->
+					UserGetter.getUserOrUserStubById member.id, CollaboratorsHandler.USER_PROJECTION, (error, user) ->
 						return cb(error) if error?
 						if user?
 							result.push { user: user, privilegeLevel: member.privilegeLevel }
