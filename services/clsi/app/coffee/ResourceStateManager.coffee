@@ -39,6 +39,7 @@ module.exports = ResourceStateManager =
 		stateFile = Path.join(basePath, @SYNC_STATE_FILE)
 		SafeReader.readFile stateFile, 64, 'ascii', (err, oldState) ->
 			return callback(err) if err?
+			logger.log state:state, oldState: oldState, basePath:basePath, stateMatches: !(state isnt oldState), "checking sync state"
 			if state isnt oldState
 				return callback new Errors.FilesOutOfSyncError("invalid state for incremental update")
 			else

@@ -16,6 +16,7 @@ module.exports = ResourceWriter =
 
 	syncResourcesToDisk: (request, basePath, callback = (error, resourceList) ->) ->
 		if request.syncType is "incremental"
+			logger.log project_id: request.project_id, user_id: request.user_id, "incremental sync"
 			ResourceStateManager.checkProjectStateHashMatches request.syncState, basePath, (error) ->
 				return callback(error) if error?
 				ResourceListManager.loadResourceList basePath, (error, resourceList) ->
@@ -26,6 +27,7 @@ module.exports = ResourceWriter =
 							return callback(error) if error?
 							callback(null, resourceList)
 		else
+			logger.log project_id: request.project_id, user_id: request.user_id, "full sync"
 			@saveAllResourcesToDisk request.project_id, request.resources, basePath, (error) ->
 				return callback(error) if error?
 				ResourceStateManager.saveProjectStateHash request.syncState, basePath, (error) ->
