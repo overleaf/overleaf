@@ -35,7 +35,7 @@ ProjectSchema = new Schema
 	track_changes     : { type: Object }
 	overleaf          :
 		id              : { type: Number }
-		imported_at_version : { type: Number }
+		imported_at_ver_id : { type: Number }
 
 ProjectSchema.statics.getProject = (project_or_id, fields, callback)->
 	if project_or_id._id?
