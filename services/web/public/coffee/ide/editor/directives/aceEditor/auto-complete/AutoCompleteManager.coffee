@@ -1,9 +1,9 @@
 define [
-	"ide/editor/directives/aceEditor/auto-complete/SuggestionManager"
-	"ide/editor/directives/aceEditor/auto-complete/SnippetManager"
+	"ide/editor/directives/aceEditor/auto-complete/CommandManager"
+	"ide/editor/directives/aceEditor/auto-complete/EnvironmentManager"
 	"ace/ace"
 	"ace/ext-language_tools"
-], (SuggestionManager, SnippetManager) ->
+], (CommandManager, EnvironmentManager) ->
 	Range = ace.require("ace/range").Range
 	aceSnippetManager = ace.require('ace/snippets').snippetManager
 
@@ -18,7 +18,7 @@ define [
 
 	class AutoCompleteManager
 		constructor: (@$scope, @editor, @element, @labelsManager, @graphics, @preamble) ->
-			@suggestionManager = new SuggestionManager()
+			@suggestionManager = new CommandManager()
 
 			@monkeyPatchAutocomplete()
 
@@ -42,7 +42,7 @@ define [
 				enableLiveAutocompletion: false
 			})
 
-			SnippetCompleter = new SnippetManager()
+			SnippetCompleter = new EnvironmentManager()
 
 			Graphics = @graphics
 			Preamble = @preamble

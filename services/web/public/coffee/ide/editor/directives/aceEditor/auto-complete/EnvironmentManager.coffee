@@ -6,8 +6,24 @@ define () ->
 		"gather", "gather*",
 		"multline", "multline*",
 		"split",
-		"verbatim"
+		"verbatim",
+		"quote",
+		"center"
 	]
+
+	snippetNames = [
+		"array",
+		"figure",
+		"tabular",
+		"table",
+		"list",
+		"enumerate",
+		"itemize",
+		"frame",
+		"thebibliography"
+	]
+
+	environmentNames = snippetNames.concat environments
 
 	staticSnippets = for env in environments
 		{
@@ -95,8 +111,16 @@ define () ->
 			\\end{frame}
 		"""
 		meta: "env"
+	}, {
+		caption: "\\begin{thebibliography}..."
+		snippet: """
+			\\begin{thebibliography}{$1}
+			\\bibitem{$2}
+			$3
+			\\end{thebibliography}
+		"""
+		meta: "env"
 	}]
-
 
 	parseCustomEnvironments = (text) ->
 		re = /^\\newenvironment{(\w+)}.*$/gm
@@ -109,19 +133,19 @@ define () ->
 				return result
 		return result
 
-
 	parseBeginCommands = (text) ->
 		re = /^\\begin{(\w+)}.*\n([\t ]*).*$/gm
 		result = []
 		iterations = 0
 		while match = re.exec(text)
-			result.push {name: match[1], whitespace: match[2]}
-			iterations += 1
-			if iterations >= 1000
-				return result
+			if match[1] not in environmentNames
+				result.push {name: match[1], whitespace: match[2]}
+				iterations += 1
+				if iterations >= 1000
+					return result
 		return result
 
-	class SnippetManager
+	class EnvironmentManager
 		getCompletions: (editor, session, pos, prefix, callback) ->
 			docText = session.getValue()
 			customEnvironments = parseCustomEnvironments(docText)
@@ -156,4 +180,4 @@ define () ->
 			)
 			callback null, snippets
 
-	return SnippetManager
+	return EnvironmentManager
