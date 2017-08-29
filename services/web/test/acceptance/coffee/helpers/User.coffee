@@ -51,6 +51,17 @@ class User
 	ensure_admin: (callback = (error) ->) ->
 		db.users.update {_id: ObjectId(@id)}, { $set: { isAdmin: true }}, callback
 
+
+	full_delete_user: (email, callback = (error) ->) ->
+		db.users.findOne {email: email}, (error, user) =>
+			if !user?
+				return callback()
+			user_id = user._id
+			db.projects.remove owner_ref:ObjectId(user_id), {multi:true}, (err)->
+				if err? 
+					callback(err)
+				db.users.remove {_id: ObjectId(user_id)}, callback
+
 	createProject: (name, callback = (error, project_id) ->) ->
 		@request.post {
 			url: "/project/new",
@@ -104,9 +115,10 @@ class User
 			csrfMatches = body.match("window.csrfToken = \"(.*?)\";")
 			if !csrfMatches?
 				return callback(new Error("no csrf token found"))
+			@csrfToken = csrfMatches[1]
 			@request = @request.defaults({
 				headers:
-					"x-csrf-token": csrfMatches[1]
+					"x-csrf-token": @csrfToken
 			})
 			callback()
 
