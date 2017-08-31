@@ -102,6 +102,7 @@ block requirejs
 	//- don't use cdn for workers
 	- var aceWorkerPath = buildJsPath(lib('ace'), {cdn:false,fingerprint:false})
 	- var pdfWorkerPath = buildJsPath('/libs/' + lib('pdfjs') + '/pdf.worker', {cdn:false,fingerprint:false})
+	- var pdfCMapsPath = buildJsPath('/libs/' + lib('pdfjs') + '/bcmaps/', {cdn:false,fingerprint:false})
 
 	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
 	//- and doesn't prematurely end the script tag.
@@ -154,6 +155,7 @@ block requirejs
 		};
 		window.aceFingerprint = "#{fingerprint(jsPath + lib('ace') + '/ace.js')}"
 		window.aceWorkerPath = "#{aceWorkerPath}";
+		window.pdfCMapsPath = "#{pdfCMapsPath}"
 
 	script(
 		data-main=buildJsPath("ide.js", {fingerprint:false}),
