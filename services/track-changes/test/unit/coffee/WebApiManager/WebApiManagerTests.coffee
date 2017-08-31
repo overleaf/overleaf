@@ -64,12 +64,12 @@ describe "WebApiManager", ->
 
 		describe "when the web returns a failure error code", ->
 			beforeEach ->
-				@request.get = sinon.stub().callsArgWith(1, null, { statusCode: 500 }, "")
+				@request.get = sinon.stub().callsArgWith(1, null, { statusCode: 500, attempts: 42}, "")
 				@WebApiManager.getUserInfo @user_id, @callback
 
 			it "should return the callback with an error", ->
 				@callback
-					.calledWith(new Error("web returned failure status code: 500"))
+					.calledWith(sinon.match.has('message', "web returned a non-success status code: 500 (attempts: 42)"))
 					.should.equal true
 
 		describe "when the user cannot be found", ->
@@ -114,10 +114,10 @@ describe "WebApiManager", ->
 
 		describe "when the web returns a failure error code", ->
 			beforeEach ->
-				@request.get = sinon.stub().callsArgWith(1, null, { statusCode: 500 }, "")
+				@request.get = sinon.stub().callsArgWith(1, null, { statusCode: 500, attempts: 42 }, "")
 				@WebApiManager.getProjectDetails @project_id, @callback
 
 			it "should return the callback with an error", ->
 				@callback
-					.calledWith(new Error("web returned failure status code: 500"))
+					.calledWith(sinon.match.has('message', "web returned a non-success status code: 500 (attempts: 42)"))
 					.should.equal true

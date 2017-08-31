@@ -194,5 +194,5 @@ describe "LockManager", ->
 					@LockManager.releaseLock @key, @lockValue, @callback
 
 				it 'should return an error if the lock has expired', ->
-					@callback.calledWith(new Error("tried to release timed out lock")).should.equal true
+					@callback.calledWith(sinon.match.has('message', "tried to release timed out lock")).should.equal true
 

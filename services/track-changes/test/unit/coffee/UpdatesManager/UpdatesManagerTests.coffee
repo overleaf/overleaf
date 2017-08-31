@@ -135,7 +135,7 @@ describe "UpdatesManager", ->
 
 				it "should call the callback with an error", ->
 					@callback
-						.calledWith(new Error("Tried to apply raw op at version 13 to last compressed update with version 11"))
+						.calledWith(sinon.match.has('message', "Tried to apply raw op at version 13 to last compressed update with version 11 from unknown time"))
 						.should.equal true
 
 				it "should not insert any update into mongo", ->
@@ -148,7 +148,7 @@ describe "UpdatesManager", ->
 
 				it "should call the callback with an error", ->
 					@callback
-						.calledWith(new Error)
+						.calledWith(sinon.match.has('message'))
 						.should.equal true
 
 				it "should not insert any update into mongo", ->
