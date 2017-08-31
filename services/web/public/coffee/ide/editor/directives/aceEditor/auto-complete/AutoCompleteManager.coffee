@@ -142,8 +142,8 @@ define [
 		onChange: (change) ->
 			cursorPosition = @editor.getCursorPosition()
 			end = change.end
-			context = Helpers.getContext(editor, end)
-			{lineUpToCursor, commandFragment, lineBeyondCursor, needsClosingBrace} = context
+			context = Helpers.getContext(@editor, end)
+			{lineUpToCursor, commandFragment, commandName, lineBeyondCursor, needsClosingBrace} = context
 			if lineUpToCursor.match(/.*%.*/)
 				return
 			lastCharIsBackslash = lineUpToCursor.slice(-1) == "\\"
