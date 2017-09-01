@@ -1,7 +1,8 @@
 define [
 	"ide/pdf/controllers/PdfController"
 	"ide/pdf/controllers/PdfViewToggleController"
-	"ide/pdfng/directives/pdfJs"
+	"ide/pdfng/directives/pdfJs",
+	"ide/pdf/controllers/AutoCompileController"
 ], () ->
 	class PdfManager
 		constructor: (@ide, @$scope) ->
