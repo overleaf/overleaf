@@ -30,7 +30,7 @@ module.exports = CollaboratorsHandler =
 			return callback(error) if error?
 			return callback null, members.map (m) -> m.id
 
-	USER_PROJECTION: { _id: 1, email: 1 }
+	USER_PROJECTION: { _id: 1, email: 1, features: 1}
 	getMembersWithPrivilegeLevels: (project_id, callback = (error, members) ->) ->
 		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members = []) ->
 			return callback(error) if error?
