@@ -309,6 +309,9 @@ define [
 				@ide.pushEvent "op:acknowledged",
 					doc_id: @doc_id
 					op: op
+				@ide.$scope.$emit "ide:opAcknowledged",
+					doc_id: @doc_id
+					op: op
 				@trigger "op:acknowledged"
 			@doc.on "op:timeout", (op) =>
 				@ide.pushEvent "op:timeout",
