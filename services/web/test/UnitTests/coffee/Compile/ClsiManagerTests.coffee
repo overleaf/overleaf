@@ -13,7 +13,7 @@ describe "ClsiManager", ->
 			setServerId: sinon.stub().callsArgWith(2)
 			_getServerId:sinon.stub()
 		@ClsiStateManager =
-			computeHash: sinon.stub().callsArgWith(1, null, "01234567890abcdef")
+			computeHash: sinon.stub().callsArgWith(2, null, "01234567890abcdef")
 		@ClsiFormatChecker =
 			checkRecoursesForProblems:sinon.stub().callsArgWith(1)
 		@ClsiManager = SandboxedModule.require modulePath, requires:
@@ -229,7 +229,7 @@ describe "ClsiManager", ->
 
 		describe "with the incremental compile option", ->
 			beforeEach (done) ->
-				@ClsiStateManager.computeHash = sinon.stub().callsArgWith(1, null, @project_state_hash = "01234567890abcdef")
+				@ClsiStateManager.computeHash = sinon.stub().callsArgWith(2, null, @project_state_hash = "01234567890abcdef")
 				@DocumentUpdaterHandler.getProjectDocsIfMatch = sinon.stub().callsArgWith(2, null, [{_id:@doc_1._id, lines:  @doc_1.lines, v: 123}])
 				@ProjectEntityHandler.getAllDocPathsFromProject = sinon.stub().callsArgWith(1, null, {"mock-doc-id-1":"main.tex"})
 				@ClsiManager._buildRequest @project_id, {timeout:100, incrementalCompilesEnabled:true}, (error, request) =>

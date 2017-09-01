@@ -127,7 +127,7 @@ module.exports = ClsiManager =
 
 			if options.incrementalCompilesEnabled or options.syncType? # new way, either incremental or full
 				timer = new Metrics.Timer("editor.compile-getdocs-redis")
-				ClsiManager.getContentFromDocUpdaterIfMatch project_id, project, (error, projectStateHash, docUpdaterDocs) ->
+				ClsiManager.getContentFromDocUpdaterIfMatch project_id, project, options, (error, projectStateHash, docUpdaterDocs) ->
 					timer.done()
 					return callback(error) if error?
 					logger.log project_id: project_id, projectStateHash: projectStateHash, docs: docUpdaterDocs?, "checked project state"
@@ -150,8 +150,8 @@ module.exports = ClsiManager =
 					return callback(error) if error?
 					ClsiManager._finaliseRequest project_id, options, project, docs, files, callback
 
-	getContentFromDocUpdaterIfMatch: (project_id, project, callback = (error, projectStateHash, docs) ->) ->
-		ClsiStateManager.computeHash project, (error, projectStateHash) ->
+	getContentFromDocUpdaterIfMatch: (project_id, project, options, callback = (error, projectStateHash, docs) ->) ->
+		ClsiStateManager.computeHash project, options, (error, projectStateHash) ->
 			return callback(error) if error?
 			DocumentUpdaterHandler.getProjectDocsIfMatch project_id, projectStateHash, (error, docs) ->
 				return callback(error) if error?
