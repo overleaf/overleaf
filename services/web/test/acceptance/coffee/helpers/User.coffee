@@ -51,6 +51,34 @@ class User
 	ensure_admin: (callback = (error) ->) ->
 		db.users.update {_id: ObjectId(@id)}, { $set: { isAdmin: true }}, callback
 
+	upgradeFeatures: (callback = (error) -> ) ->
+		features = {
+			collaborators: -1 # Infinite
+			versioning: true
+			dropbox:true
+			compileTimeout: 60
+			compileGroup:"priority"
+			templates: true
+			references: true
+			trackChanges: true
+			trackChangesVisible: true
+		}
+		db.users.update {_id: ObjectId(@id)}, { $set: { features: features }}, callback
+
+	downgradeFeatures: (callback = (error) -> ) ->
+		features = {
+			collaborators: 1
+			versioning: false
+			dropbox:false
+			compileTimeout: 60
+			compileGroup:"standard"
+			templates: false
+			references: false
+			trackChanges: false
+			trackChangesVisible: false
+		}
+		db.users.update {_id: ObjectId(@id)}, { $set: { features: features }}, callback
+
 	createProject: (name, callback = (error, project_id) ->) ->
 		@request.post {
 			url: "/project/new",
