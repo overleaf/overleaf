@@ -79,6 +79,10 @@ class User
 		}
 		db.users.update {_id: ObjectId(@id)}, { $set: { features: features }}, callback
 
+	defaultFeatures: (callback = (error) -> ) ->
+		features = settings.defaultFeatures
+		db.users.update {_id: ObjectId(@id)}, { $set: { features: features }}, callback
+
 	createProject: (name, callback = (error, project_id) ->) ->
 		@request.post {
 			url: "/project/new",

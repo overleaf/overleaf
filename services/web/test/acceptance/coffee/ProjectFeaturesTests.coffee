@@ -35,6 +35,8 @@ describe "ProjectFeatures", ->
 		describe "with an upgraded account", ->
 			before (done) ->
 				@owner.upgradeFeatures done
+			after (done) ->
+				@owner.defaultFeatures done
 
 			it "should have premium features", (done) ->
 				joinProject @owner._id, @project_id, (error, response, body) ->
@@ -47,6 +49,8 @@ describe "ProjectFeatures", ->
 		describe "with an basic account", ->
 			before (done) ->
 				@owner.downgradeFeatures done
+			after (done) ->
+				@owner.defaultFeatures done
 
 			it "should have basic features", (done) ->
 				joinProject @owner._id, @project_id, (error, response, body) ->
