@@ -10,6 +10,7 @@ grep 'name:' config/services.js | \
 		nvm install &&
 		nvm use &&
 		echo '  installing Dependencies' &&
-		npm install
+		npm install &&
+		grunt install
 		popd
 	done
