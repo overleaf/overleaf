@@ -7,8 +7,8 @@ grep 'name:' config/services.js | \
 		pushd $service
 		echo "Installing Service $service"
 		echo '  installing Node'
-		type nvm && nvm install
-		type nvm && nvm use
+		type -t nvm && nvm install
+		type -t nvm && nvm use
 		echo '  installing Dependencies'
 		npm install
 		popd
