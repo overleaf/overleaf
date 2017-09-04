@@ -110,6 +110,9 @@ pipeline {
 
   // The options directive is for configuration that applies to the whole job.
   options {
+    // Only build one at a time
+    disableConcurrentBuilds()
+    
     // we'd like to make sure remove old builds, so we don't fill up our storage!
     buildDiscarder(logRotator(numToKeepStr:'50'))
     
