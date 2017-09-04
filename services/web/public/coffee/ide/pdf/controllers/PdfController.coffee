@@ -73,6 +73,11 @@ define [
 			$scope.pdf.view = 'errors'
 			$scope.pdf.renderingError = true
 
+		ide.$scope.$on "ide:opAcknowledged", _.debounce(() ->
+			if (!ide.$scope.hasLintingError)
+				$scope.recompile()
+		, 3000)
+
 		# abort compile if syntax checks fail
 		$scope.stop_on_validation_error = localStorage("stop_on_validation_error:#{$scope.project_id}")
 		$scope.stop_on_validation_error ?= true # turn on for all users by default
