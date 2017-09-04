@@ -378,7 +378,7 @@ define [
 					session.on('changeAnnotation', () ->
 						hasErrors = session
 							.getAnnotations()
-							.filter((annotation) -> annotation.type == 'error')
+							.filter((annotation) -> annotation.fromLinting && annotation.type == 'error')
 							.length > 0
 
 						if ($rootScope.hasLintingError != hasErrors)
