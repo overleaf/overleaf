@@ -35,7 +35,7 @@ define [
 			url = ace.config._moduleUrl(args...) + "?fingerprint=#{window.aceFingerprint}"
 			return url
 
-	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory, labels, graphics, preamble, ide) ->
+	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory, labels, graphics, preamble) ->
 		monkeyPatchSearch($rootScope, $compile)
 
 		return  {
@@ -374,16 +374,15 @@ define [
 					if scope.eventsBridge?
 						session.on "changeScrollTop", onScroll
 
-					hasLintingError = null
+					$rootScope.hasLintingError = false
 					session.on('changeAnnotation', () ->
 						hasErrors = session
 							.getAnnotations()
 							.filter((annotation) -> annotation.type == 'error')
 							.length > 0
 
-						if (hasLintingError != hasErrors)
-							ide.$scope.$broadcast('ide:lintingError', hasErrors)
-							hasLintingError = hasErrors
+						if ($rootScope.hasLintingError != hasErrors)
+							$rootScope.hasLintingError = hasErrors
 					)
 
 					setTimeout () ->
