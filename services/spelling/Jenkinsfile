@@ -44,6 +44,7 @@ pipeline {
     }
     stage('Package') {
       steps {
+        sh 'echo ${BUILD_NUMBER} > build_number.txt'
         sh 'touch build.tar.gz' // Avoid tar warning about files changing during read
         sh 'tar -czf build.tar.gz --exclude=build.tar.gz --exclude-vcs .'
       }
@@ -52,6 +53,8 @@ pipeline {
       steps {
         withAWS(credentials:'S3_CI_BUILDS_AWS_KEYS', region:"${S3_REGION_BUILD_ARTEFACTS}") {
             s3Upload(file:'build.tar.gz', bucket:"${S3_BUCKET_BUILD_ARTEFACTS}", path:"${JOB_NAME}/${BUILD_NUMBER}.tar.gz")
+            // The deployment process uses this file to figure out the latest build
+            s3Upload(file:'build_number.txt', bucket:"${S3_BUCKET_BUILD_ARTEFACTS}", path:"${JOB_NAME}/latest")
         }
       }
     }
