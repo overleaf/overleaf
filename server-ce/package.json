@@ -10,7 +10,7 @@
     "grunt-shell": "^1.1.1",
     "load-grunt-config": "^0.19.2",
     "lodash": "^3.0.0",
-    "mongojs": "^0.18.1",
+    "mongojs": "2.4.0",
     "redis": "^2.6.2",
     "rimraf": "~2.2.6",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git",
