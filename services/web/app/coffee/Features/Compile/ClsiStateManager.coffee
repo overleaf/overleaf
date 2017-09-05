@@ -22,10 +22,14 @@ buildState = (s) ->
 
 module.exports = ClsiStateManager =
 
-	computeHash: (project, callback = (err, hash) ->) ->
+	computeHash: (project, options, callback = (err, hash) ->) ->
 		ProjectEntityHandler.getAllEntitiesFromProject project, (err, docs, files) ->
 			fileList = ("#{f.file._id}:#{f.file.rev}:#{f.file.created}:#{f.path}" for f in files or [])
 			docList = ("#{d.doc._id}:#{d.path}" for d in docs or [])
 			sortedEntityList = [docList..., fileList...].sort()
-			hash = buildState(sortedEntityList.join("\n"))
+			# ignore the isAutoCompile options as it doesn't affect the
+			# output, but include all other options e.g. draft
+			optionsList = ("option #{key}:#{value}" for key, value of options or {} when not (key in ['isAutoCompile']))
+			sortedOptionsList = optionsList.sort()
+			hash = buildState([sortedEntityList..., sortedOptionsList...].join("\n"))
 			callback(null, hash)
