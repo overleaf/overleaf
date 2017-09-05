@@ -6,10 +6,22 @@ define [
 
 	Helpers =
 		getLastCommandFragment: (lineUpToCursor) ->
-			if m = lineUpToCursor.match(/(\\[^\\]+)$/)
-				return m[1]
+			if (index = Helpers.getLastCommandFragmentIndex(lineUpToCursor)) > -1
+				return lineUpToCursor.slice(index)
 			else
 				return null
+
+		getLastCommandFragmentIndex: (lineUpToCursor) ->
+			# This is hack to let us skip over commands in arguments, and
+			# go to the command on the same 'level' as us. E.g.
+			#    \includegraphics[width=\textwidth]{..
+			# should not match the \textwidth.
+			blankArguments = lineUpToCursor.replace /\[([^\]]*)\]/g, (args) ->
+				Array(args.length+1).join('.')
+			if m = blankArguments.match(/(\\[^\\]+)$/)
+				return m.index
+			else
+				return -1
 
 		getCommandNameFromFragment: (commandFragment) ->
 			commandFragment?.match(/\\(\w+)\{/)?[1]

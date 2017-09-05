@@ -213,10 +213,10 @@ define [
 											range.start.column,
 										)
 									)
-									# Delete back to last backslash, as appropriate
-									lastBackslashIndex = lineUpToCursor.lastIndexOf('\\')
-									if lastBackslashIndex != -1
-										leftRange.start.column = lastBackslashIndex
+									# Delete back to command start, as appropriate
+									commandStartIndex = Helpers.getLastCommandFragmentIndex(lineUpToCursor)
+									if commandStartIndex != -1
+										leftRange.start.column = commandStartIndex
 									else
 										leftRange.start.column -= completions.filterText.length
 									editor.session.remove(leftRange)
