@@ -1,5 +1,14 @@
 #! env bash
 
+[ -z "`type -t nvm`" ] && cat <<EOF
+
+==========================================================
+== NVM not installed, you should consider installing it ==
+==========================================================
+
+EOF
+
+
 grep 'name:' config/services.js | \
 	sed 's/.*name: "\(.*\)",/\1/' | \
 	while read service
