@@ -6,7 +6,7 @@ module.exports =
 
 	deactivateOldProjects: (req, res)->
 		logger.log "recived request to deactivate old projects"
-		numberOfProjectsToArchive = req.body.numberOfProjectsToArchive
+		numberOfProjectsToArchive = parseInt(req.body.numberOfProjectsToArchive, 10)
 		ageOfProjects = req.body.ageOfProjects
 		InactiveProjectManager.deactivateOldProjects numberOfProjectsToArchive, ageOfProjects, (err, projectsDeactivated)->
 			if err?
