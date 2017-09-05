@@ -45,6 +45,7 @@ pathList = [
 	["#{jsPath}libs/#{pdfjs}/pdf.worker.js"]
 	["#{jsPath}libs/#{pdfjs}/compatibility.js"]
 	["/stylesheets/style.css"]
+	["/stylesheets/ol-style.css"]
 ]
 
 for paths in pathList
