@@ -6,7 +6,6 @@ define [
 	"services/log-hints-feedback"
 ], (App, Ace, HumanReadableLogs, BibLogParser) ->
 	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, logHintsFeedback, localStorage) ->
-
 		# enable per-user containers by default
 		perUserCompile = true
 		autoCompile = true
@@ -76,7 +75,7 @@ define [
 		ide.$scope.$on "ide:opAcknowledged", _.debounce(() ->
 			if (!ide.$scope.hasLintingError)
 				$scope.recompile()
-		, 3000)
+		, 3000) if window.user?.betaProgram
 
 		# abort compile if syntax checks fail
 		$scope.stop_on_validation_error = localStorage("stop_on_validation_error:#{$scope.project_id}")
