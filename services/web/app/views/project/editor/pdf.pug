@@ -27,14 +27,16 @@ div.full-size.pdf(ng-controller="PdfController")
 				span.caret
 			ul.dropdown-menu.dropdown-menu-left
 				// Only show on beta program?
-				li.dropdown-header Auto-compile
-				li
-					a(href, ng-click="autocompile_enabled = true")
-						i.fa.fa-fw(ng-class="{'fa-check': autocompile_enabled}")
-						| &nbsp;On
-					a(href, ng-click="autocompile_enabled = false")
-						i.fa.fa-fw(ng-class="{'fa-check': !autocompile_enabled}")
-						| &nbsp;Off
+				if user.betaProgram
+					li.dropdown-header Auto-compile
+					li
+						a(href, ng-click="autocompile_enabled = true")
+							i.fa.fa-fw(ng-class="{'fa-check': autocompile_enabled}")
+							| &nbsp;On
+					li
+						a(href, ng-click="autocompile_enabled = false")
+							i.fa.fa-fw(ng-class="{'fa-check': !autocompile_enabled}")
+							| &nbsp;Off
 				li.dropdown-header #{translate("compile_mode")}
 				li
 					a(href, ng-click="draft = false")
