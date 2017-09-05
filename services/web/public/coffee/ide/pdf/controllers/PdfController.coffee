@@ -72,16 +72,26 @@ define [
 			$scope.pdf.view = 'errors'
 			$scope.pdf.renderingError = true
 
+		triggerAutoCompile = () ->
+			if (!ide.$scope.hasLintingError)
+				$scope.recompile()
+
+		autoCompileListener = null
+		toggleAutoCompile = (enabling) ->
+			if enabling
+				autoCompileListener = ide.$scope.$on "ide:opAcknowledged", _.debounce(triggerAutoCompile, 3000)
+			else
+				autoCompileListener() if autoCompileListener
+				autoCompileListener = null
+
 		$scope.autocompile_enabled = localStorage("autocompile_enabled:#{$scope.project_id}") or false
 		$scope.$watch "autocompile_enabled", (newValue, oldValue) ->
 			if newValue? and oldValue != newValue
 				localStorage("autocompile_enabled:#{$scope.project_id}", newValue)
+				toggleAutoCompile(newValue)
 
-#		TODO: toggle listener when setting changed?
-		ide.$scope.$on "ide:opAcknowledged", _.debounce(() ->
-			if (!ide.$scope.hasLintingError)
-				$scope.recompile()
-		, 3000) if window.user?.betaProgram and $scope.autocompile_enabled
+		if window.user?.betaProgram and $scope.autocompile_enabled
+			toggleAutoCompile(true)
 
 		# abort compile if syntax checks fail
 		$scope.stop_on_validation_error = localStorage("stop_on_validation_error:#{$scope.project_id}")
