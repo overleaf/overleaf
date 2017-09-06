@@ -29,6 +29,7 @@ RUN cd /var/www && npm install
 RUN cd /var/www/sharelatex; \
 	npm install; \
 	grunt install; \
+	bash -c 'source ./bin/install-services'; \
 	cd web; \
 	npm install; \
 	npm install bcrypt; \
