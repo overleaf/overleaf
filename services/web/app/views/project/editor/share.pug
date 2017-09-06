@@ -147,6 +147,8 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						| #{translate("cannot_invite_non_user")}
 					span(ng-switch-when="cannot_invite_self")
 						| #{translate("cannot_invite_self")}
+					span(ng-switch-when="invalid_email")
+						| #{translate("invalid_email")}
 					span(ng-switch-default)
 						| #{translate("generic_something_went_wrong")}
 		button.btn.btn-default(
