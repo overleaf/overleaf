@@ -1,4 +1,6 @@
 Settings = require "settings-sharelatex"
+bson = require('bson')
+BSON = new bson()
 fs = require("fs")
 mongojs = require("mongojs")
 ObjectId = mongojs.ObjectId
@@ -61,7 +63,7 @@ getAllDocs = (project_id, callback = (error, docs) ->) ->
 		if !project?
 			console.log "no such project #{project_id}"
 			return callback()
-		size = require("../node_modules/mongojs/node_modules/mongodb/node_modules/bson/").BSONPure.BSON.calculateObjectSize(project)
+		size = BSON.calculateObjectSize(project)
 		if size > 12000000 #12mb
 			return markProjectAsToLargeAndFinished project_id, callback
 		findAllDocsInProject project, (error, docs) ->
