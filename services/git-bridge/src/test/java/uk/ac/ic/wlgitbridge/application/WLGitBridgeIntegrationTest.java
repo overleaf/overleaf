@@ -693,6 +693,40 @@ public class WLGitBridgeIntegrationTest {
         wlgb.stop();
     }
 
+    @Test
+    public void usesCustomErrorHandler(
+    ) throws IOException, ExecutionException, InterruptedException {
+
+        int gitBridgePort = 33873;
+        int mockServerPort = 3873;
+
+        MockSnapshotServer server = new MockSnapshotServer(
+                mockServerPort, getResource("/canServePushedFiles").toFile());
+        server.start();
+        server.setState(states.get("canServePushedFiles").get("state"));
+
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+                makeConfigFile(gitBridgePort, mockServerPort)
+        });
+        wlgb.run();
+
+        // With an invalid project and no key, we should get a 404,
+        // which is rendered by our custom error handler.
+        String url = "http://127.0.0.1:" + gitBridgePort + "/api/notavalidproject/main.tex";
+        Response response = new AsyncHttpClient().prepareGet(url).execute().get();
+        assertEquals(404, response.getStatusCode());
+        assertEquals("{\"message\":\"HTTP error 404\"}", response.getResponseBody());
+
+        // With an unsupported URL outside the api, we should get a 500,
+        // which is rendered by our custom error handler.
+        url = "http://127.0.0.1:" + gitBridgePort + "/foo";
+        response = new AsyncHttpClient().prepareGet(url).execute().get();
+        assertEquals(500, response.getStatusCode());
+        assertEquals("{\"message\":\"HTTP error 500\"}", response.getResponseBody());
+
+        wlgb.stop();
+    }
+
     private String makeConfigFile(
             int port,
             int apiPort

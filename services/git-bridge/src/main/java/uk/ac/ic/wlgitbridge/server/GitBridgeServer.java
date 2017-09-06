@@ -123,6 +123,9 @@ public class GitBridgeServer {
         handlers.addHandler(new DefaultHandler());
 
         api.setHandler(handlers);
+
+        ProductionErrorHandler errorHandler = new ProductionErrorHandler();
+        api.setErrorHandler(errorHandler);
         return api;
     }
 
@@ -149,6 +152,8 @@ public class GitBridgeServer {
                 ),
                 "/*"
         );
+        ProductionErrorHandler errorHandler = new ProductionErrorHandler();
+        servletContextHandler.setErrorHandler(errorHandler);
         return servletContextHandler;
     }
 
