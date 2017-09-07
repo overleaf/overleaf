@@ -6,7 +6,8 @@ db = mongojs(Settings.mongo.url, ['docs','docHistory', 'docHistoryStats'])
 _ = require("underscore")
 async = require("async")
 exec = require("child_process").exec
-BSON = db.bson.BSON
+bson = require('bson')
+BSON = new bson()
 
 logger = {
 	log: ->
