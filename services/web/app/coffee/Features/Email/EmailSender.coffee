@@ -18,7 +18,7 @@ client =
 		logger.log options:options, "Would send email if enabled."
 		callback()
 
-if Settings?.email?.parameters?.AWSAccessKeyID?
+if Settings?.email?.parameters?.AWSAccessKeyID? or Settings?.email?.driver == 'ses'
 	logger.log "using aws ses for email"
 	nm_client = nodemailer.createTransport(sesTransport(Settings.email.parameters))
 else if Settings?.email?.parameters?.sendgridApiKey?
