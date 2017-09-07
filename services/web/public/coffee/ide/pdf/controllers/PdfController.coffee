@@ -76,7 +76,7 @@ define [
 
 		triggerAutoCompile = () ->
 			if (!ide.$scope.hasLintingError)
-				$scope.recompile()
+				$scope.recompile(isBackgroundAutoCompile: true)
 
 		autoCompileListener = null
 		toggleAutoCompile = (enabling) ->
