@@ -65,12 +65,16 @@ module.exports = ProjectManager =
 			_callback(args...)
 
 		RedisManager.checkOrSetProjectState project_id, projectStateHash, (error, projectStateChanged) ->
-			return callback(error) if error?
+			if error?
+				logger.error err: error, project_id: project_id, "error getting/setting project state in getProjectDocs"
+				return callback(error)
 			# we can't return docs if project structure has changed
 			return callback Errors.ProjectStateChangedError("project state changed") if projectStateChanged
 			# project structure hasn't changed, return doc content from redis
 			RedisManager.getDocIdsInProject project_id, (error, doc_ids) ->
-				return callback(error) if error?
+				if error?
+					logger.error err: error, project_id: project_id, "error getting doc ids in getProjectDocs"
+					return callback(error)
 				jobs = []
 				docs = []
 				for doc_id in doc_ids or []
@@ -79,18 +83,21 @@ module.exports = ProjectManager =
 							# check the doc version first
 							RedisManager.getDocVersion doc_id, (error, version) ->
 								if error?
-									logger.error err: error, project_id: project_id, doc_id: doc_id, "error getting project doc version"
+									logger.error err: error, project_id: project_id, doc_id: doc_id, "error getting project doc version in getProjectDocs"
 									return cb(error)
 								# skip getting the doc if we already have that version
-								return cb() if version? and version is excludeVersions[doc_id]
+								if version? and version is excludeVersions[doc_id]
+									logger.error err: error, project_id: project_id, doc_id: doc_id, version: version, "skipping doc version in getProjectDocs"
+									return cb()
 								# otherwise get the doc lines from redis
 								RedisManager.getDocLines doc_id, (error, lines) ->
 									if error?
-										logger.error err: error, project_id: project_id, doc_id: doc_id, "error getting project doc lines"
+										logger.error err: error, project_id: project_id, doc_id: doc_id, "error getting project doc lines in getProjectDocs"
 										return cb(error)
 									try
 										docs.push {_id: doc_id, lines: JSON.parse(lines), v: version}
 									catch e
+										logger.error err: e, project_id: project_id, doc_id: doc_id, lines: lines, version: version, "error parsing doc lines in getProjectDocs"
 										return cb(e)
 									cb()
 				async.series jobs, (error) ->
