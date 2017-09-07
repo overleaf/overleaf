@@ -8,7 +8,7 @@ module.exports = SafeReader =
 
 	readFile: (file, size, encoding, callback = (error, result) ->) ->
 		fs.open file, 'r', (err, fd) ->
-			return callback() if err? and  err.code is 'ENOENT'
+			return callback() if err? and err.code is 'ENOENT'
 			return callback(err) if err?
 
 			# safely return always closing the file
