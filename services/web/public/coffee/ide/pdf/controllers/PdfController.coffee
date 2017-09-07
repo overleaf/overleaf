@@ -91,6 +91,7 @@ define [
 			if newValue? and oldValue != newValue
 				localStorage("autocompile_enabled:#{$scope.project_id}", newValue)
 				toggleAutoCompile(newValue)
+				event_tracking.sendMB "autocompile-setting-changed", newValue
 
 		if window.user?.betaProgram and $scope.autocompile_enabled
 			toggleAutoCompile(true)
