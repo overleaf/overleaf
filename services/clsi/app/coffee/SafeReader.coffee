@@ -1,4 +1,5 @@
 fs = require "fs"
+logger = require "logger-sharelatex"
 
 module.exports = SafeReader =
 
@@ -21,4 +22,6 @@ module.exports = SafeReader =
 			fs.read fd, buff, 0, buff.length, 0, (err, bytesRead, buffer) ->
 				return callbackWithClose(err) if err?
 				result = buffer.toString(encoding, 0, bytesRead)
+				if bytesRead is size
+					logger.error file:file, size:size, bytesRead:bytesRead, "file truncated"
 				callbackWithClose(null, result)
