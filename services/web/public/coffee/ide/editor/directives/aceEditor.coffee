@@ -376,6 +376,10 @@ define [
 
 					$rootScope.hasLintingError = false
 					session.on('changeAnnotation', () ->
+						# Both linter errors and compile logs are set as error annotations,
+						# however when the user types something, the compile logs are
+						# replaced with linter errors. When we check for lint errors before
+						# autocompile we are guaranteed to get linter errors
 						hasErrors = session
 							.getAnnotations()
 							.filter((annotation) -> annotation.type == 'error')
