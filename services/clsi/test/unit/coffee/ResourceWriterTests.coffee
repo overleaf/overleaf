@@ -10,7 +10,6 @@ describe "ResourceWriter", ->
 			"fs": @fs =
 				mkdir: sinon.stub().callsArg(1)
 				unlink: sinon.stub().callsArg(1)
-			"./ResourceListManager": @ResourceListManager = {}
 			"./ResourceStateManager": @ResourceStateManager = {}
 			"wrench": @wrench = {}
 			"./UrlCache" : @UrlCache = {}
@@ -34,9 +33,7 @@ describe "ResourceWriter", ->
 			@ResourceWriter._writeResourceToDisk = sinon.stub().callsArg(3)
 			@ResourceWriter._removeExtraneousFiles = sinon.stub().callsArg(2)
 			@ResourceStateManager.checkProjectStateHashMatches = sinon.stub().callsArg(2)
-			@ResourceStateManager.saveProjectStateHash = sinon.stub().callsArg(2)
-			@ResourceListManager.saveResourceList = sinon.stub().callsArg(2)
-			@ResourceListManager.loadResourceList = sinon.stub().callsArg(1)
+			@ResourceStateManager.saveProjectStateHash = sinon.stub().callsArg(3)
 			@ResourceWriter.syncResourcesToDisk({
 				project_id: @project_id
 				syncState: @syncState = "0123456789abcdef"
@@ -54,14 +51,9 @@ describe "ResourceWriter", ->
 					.calledWith(@project_id, resource, @basePath)
 					.should.equal true
 
-		it "should store the sync state", ->
+		it "should store the sync state and resource list", ->
 			@ResourceStateManager.saveProjectStateHash
-				.calledWith(@syncState, @basePath)
-				.should.equal true
-
-		it "should save the resource list", ->
-			@ResourceListManager.saveResourceList
-				.calledWith(@resources, @basePath)
+				.calledWith(@syncState, @resources, @basePath)
 				.should.equal true
 
 		it "should call the callback", ->
@@ -74,10 +66,8 @@ describe "ResourceWriter", ->
 			]
 			@ResourceWriter._writeResourceToDisk = sinon.stub().callsArg(3)
 			@ResourceWriter._removeExtraneousFiles = sinon.stub().callsArg(2)
-			@ResourceStateManager.checkProjectStateHashMatches = sinon.stub().callsArg(2)
-			@ResourceStateManager.saveProjectStateHash = sinon.stub().callsArg(2)
-			@ResourceListManager.saveResourceList = sinon.stub().callsArg(2)
-			@ResourceListManager.loadResourceList = sinon.stub().callsArgWith(1, null, @resources)
+			@ResourceStateManager.checkProjectStateHashMatches = sinon.stub().callsArgWith(2, null, @resources)
+			@ResourceStateManager.saveProjectStateHash = sinon.stub().callsArg(3)
 			@ResourceWriter.syncResourcesToDisk({
 				project_id: @project_id,
 				syncType: "incremental",

@@ -5,7 +5,6 @@ async = require "async"
 mkdirp = require "mkdirp"
 OutputFileFinder = require "./OutputFileFinder"
 ResourceStateManager = require "./ResourceStateManager"
-ResourceListManager = require "./ResourceListManager"
 Metrics = require "./Metrics"
 logger = require "logger-sharelatex"
 settings = require("settings-sharelatex")
@@ -17,24 +16,20 @@ module.exports = ResourceWriter =
 	syncResourcesToDisk: (request, basePath, callback = (error, resourceList) ->) ->
 		if request.syncType is "incremental"
 			logger.log project_id: request.project_id, user_id: request.user_id, "incremental sync"
-			ResourceStateManager.checkProjectStateHashMatches request.syncState, basePath, (error) ->
+			ResourceStateManager.checkProjectStateHashMatches request.syncState, basePath, (error, resourceList) ->
 				return callback(error) if error?
-				ResourceListManager.loadResourceList basePath, (error, resourceList) ->
+				ResourceWriter._removeExtraneousFiles resourceList, basePath, (error) =>
 					return callback(error) if error?
-					ResourceWriter._removeExtraneousFiles resourceList, basePath, (error) =>
+					ResourceWriter.saveIncrementalResourcesToDisk request.project_id, request.resources, basePath, (error) ->
 						return callback(error) if error?
-						ResourceWriter.saveIncrementalResourcesToDisk request.project_id, request.resources, basePath, (error) ->
-							return callback(error) if error?
-							callback(null, resourceList)
+						callback(null, resourceList)
 		else
 			logger.log project_id: request.project_id, user_id: request.user_id, "full sync"
 			@saveAllResourcesToDisk request.project_id, request.resources, basePath, (error) ->
 				return callback(error) if error?
-				ResourceStateManager.saveProjectStateHash request.syncState, basePath, (error) ->
+				ResourceStateManager.saveProjectStateHash request.syncState, request.resources, basePath, (error) ->
 					return callback(error) if error?
-					ResourceListManager.saveResourceList request.resources, basePath, (error) =>
-						return callback(error) if error?
-						callback(null, request.resources)
+					callback(null, request.resources)
 
 	saveIncrementalResourcesToDisk: (project_id, resources, basePath, callback = (error) ->) ->
 		@_createDirectory basePath, (error) =>
@@ -81,7 +76,7 @@ module.exports = ResourceWriter =
 					should_delete = true
 					if path.match(/^output\./) or path.match(/\.aux$/) or path.match(/^cache\//) # knitr cache
 						should_delete = false
-					if path in ['.project-resource-list', '.project-sync-state']
+					if path == '.project-sync-state'
 						should_delete = false
 					if path == "output.pdf" or path == "output.dvi" or path == "output.log" or path == "output.xdv"
 						should_delete = true
