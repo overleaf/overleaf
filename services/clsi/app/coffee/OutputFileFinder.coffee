@@ -5,7 +5,7 @@ spawn = require("child_process").spawn
 logger = require "logger-sharelatex"
 
 module.exports = OutputFileFinder =
-	findOutputFiles: (resources, directory, callback = (error, outputFiles) ->) ->
+	findOutputFiles: (resources, directory, callback = (error, outputFiles, allFiles) ->) ->
 		incomingResources = {}
 		for resource in resources
 			incomingResources[resource.path] = true
@@ -16,7 +16,6 @@ module.exports = OutputFileFinder =
 			if error?
 				logger.err err:error, "error finding all output files"
 				return callback(error)
-			jobs = []
 			outputFiles = []
 			for file in allFiles
 				if !incomingResources[file]
@@ -24,7 +23,7 @@ module.exports = OutputFileFinder =
 						path: file
 						type: file.match(/\.([^\.]+)$/)?[1]
 					}
-			callback null, outputFiles
+			callback null, outputFiles, allFiles
 
 	_getAllFiles: (directory, _callback = (error, fileList) ->) ->
 		callback = (error, fileList) ->

@@ -18,11 +18,13 @@ module.exports = ResourceWriter =
 			logger.log project_id: request.project_id, user_id: request.user_id, "incremental sync"
 			ResourceStateManager.checkProjectStateHashMatches request.syncState, basePath, (error, resourceList) ->
 				return callback(error) if error?
-				ResourceWriter._removeExtraneousFiles resourceList, basePath, (error) =>
+				ResourceWriter._removeExtraneousFiles resourceList, basePath, (error, outputFiles, allFiles) ->
 					return callback(error) if error?
-					ResourceWriter.saveIncrementalResourcesToDisk request.project_id, request.resources, basePath, (error) ->
+					ResourceStateManager.checkResourceFiles resourceList, allFiles, basePath, (error) ->
 						return callback(error) if error?
-						callback(null, resourceList)
+						ResourceWriter.saveIncrementalResourcesToDisk request.project_id, request.resources, basePath, (error) ->
+							return callback(error) if error?
+							callback(null, resourceList)
 		else
 			logger.log project_id: request.project_id, user_id: request.user_id, "full sync"
 			@saveAllResourcesToDisk request.project_id, request.resources, basePath, (error) ->
@@ -60,13 +62,13 @@ module.exports = ResourceWriter =
 			else
 				return callback()
 
-	_removeExtraneousFiles: (resources, basePath, _callback = (error) ->) ->
+	_removeExtraneousFiles: (resources, basePath, _callback = (error, outputFiles, allFiles) ->) ->
 		timer = new Metrics.Timer("unlink-output-files")
-		callback = (error) ->
+		callback = (error, result...) ->
 			timer.done()
-			_callback(error)
+			_callback(error, result...)
 
-		OutputFileFinder.findOutputFiles resources, basePath, (error, outputFiles) ->
+		OutputFileFinder.findOutputFiles resources, basePath, (error, outputFiles, allFiles) ->
 			return callback(error) if error?
 
 			jobs = []
@@ -85,7 +87,9 @@ module.exports = ResourceWriter =
 					if should_delete
 						jobs.push (callback) -> ResourceWriter._deleteFileIfNotDirectory Path.join(basePath, path), callback
 
-			async.series jobs, callback
+			async.series jobs, (error) ->
+				return callback(error) if error?
+				callback(null, outputFiles, allFiles)
 
 	_deleteFileIfNotDirectory: (path, callback = (error) ->) ->
 		fs.stat path, (error, stat) ->

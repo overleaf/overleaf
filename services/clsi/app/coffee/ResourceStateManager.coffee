@@ -49,3 +49,15 @@ module.exports = ResourceStateManager =
 			else
 				resources = ({path: path} for path in resourceList)
 				callback(null, resources)
+
+	checkResourceFiles: (resources, allFiles, directory, callback = (error) ->) ->
+		# check if any of the input files are not present in list of files
+		seenFile = {}
+		for file in allFiles
+			seenFile[file] = true
+		missingFiles = (resource.path for resource in resources when not seenFile[resource.path])
+		if missingFiles.length > 0
+			logger.err missingFiles:missingFiles, dir:directory, allFiles:allFiles, resources:resources, "missing input files for project"
+			return callback new Errors.FilesOutOfSyncError("resource files missing in incremental update")
+		else
+			callback()
