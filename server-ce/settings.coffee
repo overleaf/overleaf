@@ -396,6 +396,7 @@ if process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]?
 	settings.email =
 		fromAddress: process.env["SHARELATEX_EMAIL_FROM_ADDRESS"]
 		replyTo: process.env["SHARELATEX_EMAIL_REPLY_TO"] or ""
+		driver: process.env["SHARELATEX_EMAIL_DRIVER"]
 		parameters:
 			#AWS Creds
 			AWSAccessKeyID: process.env["SHARELATEX_EMAIL_AWS_SES_ACCESS_KEY_ID"]
