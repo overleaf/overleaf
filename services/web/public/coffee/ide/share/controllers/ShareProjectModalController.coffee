@@ -130,7 +130,7 @@ define [
 						.catch (err) ->
 							$scope.state.inflight = false
 							$scope.state.error = true
-							if (err.status? and err.status == 400)
+							if err.status? and err.status == 400
 								$scope.state.errorReason = 'invalid_email'
 							else
 								$scope.state.errorReason = null
