@@ -382,7 +382,7 @@ define [
 						# autocompile we are guaranteed to get linter errors
 						hasErrors = session
 							.getAnnotations()
-							.filter((annotation) -> annotation.type == 'error')
+							.filter((annotation) -> annotation.type != 'info')
 							.length > 0
 
 						if ($rootScope.hasLintingError != hasErrors)
