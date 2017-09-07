@@ -5,7 +5,7 @@ define [
 	"libs/bib-log-parser"
 	"services/log-hints-feedback"
 ], (App, Ace, HumanReadableLogs, BibLogParser) ->
-	AUTO_COMPILE_TIMEOUT = 3000
+	AUTO_COMPILE_TIMEOUT = 5000
 
 	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, logHintsFeedback, localStorage) ->
 		# enable per-user containers by default
