@@ -105,7 +105,9 @@ define [
 				rootDoc_id: options.rootDocOverride_id or null
 				draft: $scope.draft
 				check: checkType
-				incrementalCompilesEnabled: window.user?.betaProgram
+				# use incremental compile for beta users but revert to a full
+				# compile if there is a server error
+				incrementalCompilesEnabled: window.user?.betaProgram and not $scope.pdf.error
 				_csrf: window.csrfToken
 			}, {params: params}
 
