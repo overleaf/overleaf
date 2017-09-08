@@ -32,7 +32,7 @@ describe "ResourceWriter", ->
 			]
 			@ResourceWriter._writeResourceToDisk = sinon.stub().callsArg(3)
 			@ResourceWriter._removeExtraneousFiles = sinon.stub().callsArg(2)
-			@ResourceStateManager.saveProjectStateHash = sinon.stub().callsArg(3)
+			@ResourceStateManager.saveProjectState = sinon.stub().callsArg(3)
 			@ResourceWriter.syncResourcesToDisk({
 				project_id: @project_id
 				syncState: @syncState = "0123456789abcdef"
@@ -51,7 +51,7 @@ describe "ResourceWriter", ->
 					.should.equal true
 
 		it "should store the sync state and resource list", ->
-			@ResourceStateManager.saveProjectStateHash
+			@ResourceStateManager.saveProjectState
 				.calledWith(@syncState, @resources, @basePath)
 				.should.equal true
 
@@ -65,8 +65,8 @@ describe "ResourceWriter", ->
 			]
 			@ResourceWriter._writeResourceToDisk = sinon.stub().callsArg(3)
 			@ResourceWriter._removeExtraneousFiles = sinon.stub().callsArgWith(2, null, @outputFiles = [], @allFiles = [])
-			@ResourceStateManager.checkProjectStateHashMatches = sinon.stub().callsArgWith(2, null, @resources)
-			@ResourceStateManager.saveProjectStateHash = sinon.stub().callsArg(3)
+			@ResourceStateManager.checkProjectStateMatches = sinon.stub().callsArgWith(2, null, @resources)
+			@ResourceStateManager.saveProjectState = sinon.stub().callsArg(3)
 			@ResourceStateManager.checkResourceFiles = sinon.stub().callsArg(3)
 			@ResourceWriter.syncResourcesToDisk({
 				project_id: @project_id,
@@ -76,7 +76,7 @@ describe "ResourceWriter", ->
 			}, @basePath, @callback)
 
 		it "should check the sync state matches", ->
-			@ResourceStateManager.checkProjectStateHashMatches
+			@ResourceStateManager.checkProjectStateMatches
 				.calledWith(@syncState, @basePath)
 				.should.equal true
 
@@ -104,7 +104,7 @@ describe "ResourceWriter", ->
 			@resources = [
 				"resource-1-mock"
 			]
-			@ResourceStateManager.checkProjectStateHashMatches = sinon.stub().callsArgWith(2, @error = new Error())
+			@ResourceStateManager.checkProjectStateMatches = sinon.stub().callsArgWith(2, @error = new Error())
 			@ResourceWriter.syncResourcesToDisk({
 				project_id: @project_id,
 				syncType: "incremental",
@@ -113,7 +113,7 @@ describe "ResourceWriter", ->
 			}, @basePath, @callback)
 
 		it "should check whether the sync state matches", ->
-			@ResourceStateManager.checkProjectStateHashMatches
+			@ResourceStateManager.checkProjectStateMatches
 				.calledWith(@syncState, @basePath)
 				.should.equal true
 

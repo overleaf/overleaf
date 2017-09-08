@@ -23,7 +23,7 @@ module.exports = ResourceStateManager =
 
 	SYNC_STATE_FILE: ".project-sync-state"
 
-	saveProjectStateHash: (state, resources, basePath, callback = (error) ->) ->
+	saveProjectState: (state, resources, basePath, callback = (error) ->) ->
 		stateFile = Path.join(basePath, @SYNC_STATE_FILE)
 		if not state? # remove the file if no state passed in
 			logger.log state:state, basePath:basePath, "clearing sync state"
@@ -37,7 +37,7 @@ module.exports = ResourceStateManager =
 			resourceList = (resource.path for resource in resources)
 			fs.writeFile stateFile, [resourceList..., "stateHash:#{state}"].join("\n"), callback
 
-	checkProjectStateHashMatches: (state, basePath, callback = (error, resources) ->) ->
+	checkProjectStateMatches: (state, basePath, callback = (error, resources) ->) ->
 		stateFile = Path.join(basePath, @SYNC_STATE_FILE)
 		SafeReader.readFile stateFile, 128*1024, 'utf8', (err, result) ->
 			return callback(err) if err?
