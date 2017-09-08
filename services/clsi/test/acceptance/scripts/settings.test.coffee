@@ -16,6 +16,7 @@ module.exports =
 		clsiCacheDir: Path.resolve(__dirname + "/../../../cache")
 		#synctexBaseDir: (project_id) -> Path.join(@compilesDir, project_id)
 		synctexBaseDir: () -> "/compile"
+		sandboxedCompilesHostDir: process.env['SANDBOXED_COMPILES_HOST_DIR']
 
 	clsi:
 		#strace: true
@@ -23,13 +24,13 @@ module.exports =
 		commandRunner: "docker-runner-sharelatex"
 		latexmkCommandPrefix: ["/usr/bin/time", "-v"]         # on Linux
 		docker:
-			image: "texlive-full:2017.1-opt"
+			image: process.env.TEXLIVE_IMAGE || "texlive-full:2017.1-opt"
 			env:
 				PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/texlive/2017/bin/x86_64-linux/"
 				HOME: "/tmp"
 			modem:
 				socketPath: false
-			user: "111"
+			user: process.env.SIBLING_CONTAINER_USER ||"111"
 
 	internal:
 		clsi:
