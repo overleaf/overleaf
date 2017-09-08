@@ -87,6 +87,8 @@ module.exports = ProjectManager =
 									return cb(error)
 								# skip getting the doc if we already have that version
 								if version? and version is excludeVersions[doc_id]
+									# not currently using excludeVersions so we shouldn't get here!
+									# change to logger.log when this code path is in use
 									logger.error err: error, project_id: project_id, doc_id: doc_id, version: version, "skipping doc version in getProjectDocs"
 									return cb()
 								# otherwise get the doc lines from redis
