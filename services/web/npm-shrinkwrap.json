@@ -4243,7 +4243,7 @@
     "translations-sharelatex": {
       "version": "0.1.4",
       "from": "git+https://github.com/sharelatex/translations-sharelatex.git#master",
-      "resolved": "git+https://github.com/sharelatex/translations-sharelatex.git#c2bcc5c8b39034d3dfa2f4509fcc8e1e0be6ed75",
+      "resolved": "git+https://github.com/sharelatex/translations-sharelatex.git#d6053d8f3a2401a0a12ea7164e5ac586c6c63bc5",
       "dev": true,
       "dependencies": {
         "async": {
