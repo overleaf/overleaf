@@ -6,6 +6,7 @@ define [
 	"services/log-hints-feedback"
 ], (App, Ace, HumanReadableLogs, BibLogParser) ->
 	AUTO_COMPILE_TIMEOUT = 5000
+	OP_ACKNOWLEDGEMENT_TIMEOUT = 1100
 
 	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, logHintsFeedback, localStorage) ->
 		# enable per-user containers by default
@@ -74,14 +75,26 @@ define [
 			$scope.pdf.view = 'errors'
 			$scope.pdf.renderingError = true
 
+		autoCompileTimeout = null
 		triggerAutoCompile = () ->
-			if (!ide.$scope.hasLintingError)
-				$scope.recompile(isBackgroundAutoCompile: true)
+			return if autoCompileTimeout
+
+			timeSinceLastCompile = Date.now() - $scope.recompiledAt
+
+			if timeSinceLastCompile >= AUTO_COMPILE_TIMEOUT
+				if (!ide.$scope.hasLintingError)
+					$scope.recompile(isBackgroundAutoCompile: true)
+			else
+				# Extend remainder of timeout
+				autoCompileTimeout = setTimeout () ->
+					autoCompileTimeout = null
+					triggerAutoCompile()
+				, AUTO_COMPILE_TIMEOUT - timeSinceLastCompile
 
 		autoCompileListener = null
 		toggleAutoCompile = (enabling) ->
 			if enabling
-				autoCompileListener = ide.$scope.$on "ide:opAcknowledged", _.debounce(triggerAutoCompile, AUTO_COMPILE_TIMEOUT)
+				autoCompileListener = ide.$scope.$on "ide:opAcknowledged", _.debounce(triggerAutoCompile, OP_ACKNOWLEDGEMENT_TIMEOUT)
 			else
 				autoCompileListener() if autoCompileListener
 				autoCompileListener = null
@@ -422,6 +435,8 @@ define [
 					$scope.pdf.renderingError = false
 					$scope.pdf.error = true
 					$scope.pdf.view = 'errors'
+				.finally () ->
+					$scope.recompiledAt = Date.now()
 
 		# This needs to be public.
 		ide.$scope.recompile = $scope.recompile
