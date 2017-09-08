@@ -85,6 +85,7 @@ public class Oauth2Filter implements Filter {
     ) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
+        String capturedUsername = "(unknown)";
 
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null) {
@@ -103,6 +104,9 @@ public class Oauth2Filter implements Filter {
                             String username = split[0];
                             String password = split[1];
                             String accessToken = null;
+                            if (username.length() > 0) {
+                                capturedUsername = username;
+                            }
                             try {
                                 accessToken = new PasswordTokenRequest(
                                         Instance.httpTransport,
@@ -120,7 +124,7 @@ public class Oauth2Filter implements Filter {
                                         )
                                 ).execute().getAccessToken();
                             } catch (TokenResponseException e) {
-                                unauthorized(projectName, response);
+                                unauthorized(projectName, capturedUsername, e.getStatusCode(), request, response);
                                 return;
                             }
                             final Credential cred = new Credential.Builder(
@@ -135,7 +139,7 @@ public class Oauth2Filter implements Filter {
                                     servletResponse
                             );
                         } else {
-                            unauthorized(projectName, response);
+                            unauthorized(projectName, capturedUsername, 0, request, response);
                         }
                     } catch (UnsupportedEncodingException e) {
                         throw new Error("Couldn't retrieve authentication", e);
@@ -143,7 +147,7 @@ public class Oauth2Filter implements Filter {
                 }
             }
         } else {
-            unauthorized(projectName, response);
+            unauthorized(projectName, capturedUsername, 0, request, response);
         }
     }
 
@@ -152,10 +156,19 @@ public class Oauth2Filter implements Filter {
 
     private void unauthorized(
             String projectName,
-            ServletResponse servletResponse
+            String userName,
+            int statusCode,
+            HttpServletRequest servletRequest,
+            HttpServletResponse servletResponse
     ) throws IOException {
-        Log.info("[{}] Unauthorized", projectName);
-        HttpServletResponse response = (HttpServletResponse) servletResponse;
+        Log.info(
+            "[{}] Unauthorized, User '{}' status={} ip={}",
+            projectName,
+            userName,
+            statusCode,
+            servletRequest.getRemoteAddr()
+        );
+        HttpServletResponse response = servletResponse;
         response.setContentType("text/plain");
         response.setHeader("WWW-Authenticate", "Basic realm=\"Git Bridge\"");
         response.setStatus(401);
