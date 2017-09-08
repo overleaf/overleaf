@@ -39,7 +39,7 @@ define [
 					$scope.autocompleteContacts = data.contacts or []
 					for contact in $scope.autocompleteContacts
 						if contact.type == "user"
-							if contact.last_name == "" and contact.first_name = contact.email.split("@")[0]
+							if contact.last_name == "" and contact.first_name == contact.email.split("@")[0]
 								# User has not set their proper name so use email as canonical display property
 								contact.display = contact.email
 							else
@@ -127,10 +127,13 @@ define [
 								# with new collaborator information.
 								addNextMember()
 							, 0
-						.catch () ->
+						.catch (err) ->
 							$scope.state.inflight = false
 							$scope.state.error = true
-							$scope.state.errorReason = null
+							if err.status? and err.status == 400
+								$scope.state.errorReason = 'invalid_email'
+							else
+								$scope.state.errorReason = null
 
 			$timeout addMembers, 50 # Give email list a chance to update
 
