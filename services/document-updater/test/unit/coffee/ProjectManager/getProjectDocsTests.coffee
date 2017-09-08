@@ -99,3 +99,18 @@ describe "ProjectManager - getProjectDocs", ->
 
 		it "should time the execution", ->
 			@Metrics.Timer::done.called.should.equal true
+
+	describe "clearing the project state with clearProjectState", ->
+		beforeEach (done) ->
+			@RedisManager.clearProjectState = sinon.stub().callsArg(1)
+			@ProjectManager.clearProjectState @project_id, (error) =>
+				@callback(error)
+				done()
+
+		it "should clear the project state", ->
+			@RedisManager.clearProjectState
+			.calledWith(@project_id)
+			.should.equal true
+
+		it "should call the callback", ->
+			@callback.called.should.equal true

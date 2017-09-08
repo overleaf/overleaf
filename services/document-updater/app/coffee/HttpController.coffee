@@ -59,6 +59,17 @@ module.exports = HttpController =
 				logger.log project_id: project_id, result: ("#{doc._id}:#{doc.v}" for doc in result), "got docs via http"
 				res.send result
 
+	clearProjectState: (req, res, next = (error) ->) ->
+		project_id = req.params.project_id
+		timer = new Metrics.Timer("http.clearProjectState")
+		logger.log project_id: project_id, "clearing project state via http"
+		ProjectManager.clearProjectState project_id, (error) ->
+			timer.done()
+			if error?
+				return next(error)
+			else
+				res.send 200
+
 	setDoc: (req, res, next = (error) ->) ->
 		doc_id = req.params.doc_id
 		project_id = req.params.project_id
