@@ -62,7 +62,13 @@ module.exports = ClsiManager =
 		opts =
 			url:compilerUrl
 			method:"DELETE"
-		ClsiManager._makeRequest project_id, opts, callback
+		ClsiManager._makeRequest project_id, opts, (clsiError) ->
+			# always clear the project state from the docupdater, even if there
+			# was a problem with the request to the clsi
+			DocumentUpdaterHandler.clearProjectState project_id, (docUpdaterError) ->
+				error = clsiError or docUpdaterError
+				return callback(error) if error?
+				callback()
 
 	_makeRequest: (project_id, opts, callback)->
 		ClsiCookieManager.getCookieJar project_id, (err, jar)->
