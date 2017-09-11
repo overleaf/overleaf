@@ -91,7 +91,7 @@ describe "ProjectManager - getProjectDocs", ->
 
 		it "should record the error", ->
 			@logger.error
-				.calledWith(err: @error, project_id: @project_id, doc_id: "doc-id-2", "error getting project doc lines")
+				.calledWith(err: @error, project_id: @project_id, doc_id: "doc-id-2", "error getting project doc lines in getProjectDocs")
 				.should.equal true
 
 		it "should call the callback with an error", ->
