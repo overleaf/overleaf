@@ -11,10 +11,11 @@ module.exports = ResourceStateManager =
 	# incremental update to be allowed.
 	#
 	# The initial value is passed in and stored on a full
-	# compile.
+	# compile, along with the list of resources..
 	#
 	# Subsequent incremental compiles must come with the same value - if
-	# not they will be rejected with a 409 Conflict response.
+	# not they will be rejected with a 409 Conflict response. The
+	# previous list of resources is returned.
 	#
 	# An incremental compile can only update existing files with new
 	# content.  The sync state identifier must change if any docs or
@@ -22,7 +23,7 @@ module.exports = ResourceStateManager =
 
 	SYNC_STATE_FILE: ".project-sync-state"
 
-	saveProjectStateHash: (state, basePath, callback) ->
+	saveProjectState: (state, resources, basePath, callback = (error) ->) ->
 		stateFile = Path.join(basePath, @SYNC_STATE_FILE)
 		if not state? # remove the file if no state passed in
 			logger.log state:state, basePath:basePath, "clearing sync state"
@@ -33,14 +34,30 @@ module.exports = ResourceStateManager =
 					return callback()
 		else
 			logger.log state:state, basePath:basePath, "writing sync state"
-			fs.writeFile stateFile, state, {encoding: 'ascii'}, callback
+			resourceList = (resource.path for resource in resources)
+			fs.writeFile stateFile, [resourceList..., "stateHash:#{state}"].join("\n"), callback
 
-	checkProjectStateHashMatches: (state, basePath, callback) ->
+	checkProjectStateMatches: (state, basePath, callback = (error, resources) ->) ->
 		stateFile = Path.join(basePath, @SYNC_STATE_FILE)
-		SafeReader.readFile stateFile, 64, 'ascii', (err, oldState) ->
+		SafeReader.readFile stateFile, 128*1024, 'utf8', (err, result) ->
 			return callback(err) if err?
-			logger.log state:state, oldState: oldState, basePath:basePath, stateMatches: !(state isnt oldState), "checking sync state"
-			if state isnt oldState
+			[resourceList..., oldState] = result?.toString()?.split("\n") or []
+			newState = "stateHash:#{state}"
+			logger.log state:state, oldState: oldState, basePath:basePath, stateMatches: (newState is oldState), "checking sync state"
+			if newState isnt oldState
 				return callback new Errors.FilesOutOfSyncError("invalid state for incremental update")
 			else
-				callback(null)
+				resources = ({path: path} for path in resourceList)
+				callback(null, resources)
+
+	checkResourceFiles: (resources, allFiles, directory, callback = (error) ->) ->
+		# check if any of the input files are not present in list of files
+		seenFile = {}
+		for file in allFiles
+			seenFile[file] = true
+		missingFiles = (resource.path for resource in resources when not seenFile[resource.path])
+		if missingFiles.length > 0
+			logger.err missingFiles:missingFiles, dir:directory, allFiles:allFiles, resources:resources, "missing input files for project"
+			return callback new Errors.FilesOutOfSyncError("resource files missing in incremental update")
+		else
+			callback()
