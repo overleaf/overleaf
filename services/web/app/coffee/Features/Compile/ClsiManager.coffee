@@ -129,10 +129,15 @@ module.exports = ClsiManager =
 				timer = new Metrics.Timer("editor.compile-getdocs-redis")
 				ClsiManager.getContentFromDocUpdaterIfMatch project_id, project, options, (error, projectStateHash, docUpdaterDocs) ->
 					timer.done()
-					return callback(error) if error?
-					logger.log project_id: project_id, projectStateHash: projectStateHash, docs: docUpdaterDocs?, "checked project state"
+					if error?
+						logger.error err: error, project_id: project_id, "error checking project state"
+						# note: we don't bail out when there's an error getting
+						# incremental files from the docupdater, we just fall back
+						# to a normal compile below
+					else
+						logger.log project_id: project_id, projectStateHash: projectStateHash, docs: docUpdaterDocs?, "checked project state"
 					# see if we can send an incremental update to the CLSI
-					if docUpdaterDocs? and options.syncType isnt "full"
+					if docUpdaterDocs? and (options.syncType isnt "full") and not error?
 						# Workaround: for now, always flush project to mongo on compile
 						# until we have automatic periodic flushing on the docupdater
 						# side, to prevent documents staying in redis too long.
