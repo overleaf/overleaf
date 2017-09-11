@@ -79,7 +79,7 @@ define [], () ->
 			# hacky solution: limit iterations
 			limit = null
 			if window?._ide?.browserIsSafari
-				limit = 100
+				limit = 5000
 
 			# fully formed commands
 			realCommands = []
