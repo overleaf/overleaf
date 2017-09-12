@@ -273,6 +273,19 @@ describe "ClsiManager", ->
 						}]
 				)
 
+
+			describe "when the root doc is set and not in the docupdater", ->
+				beforeEach (done) ->
+					@ClsiStateManager.computeHash = sinon.stub().callsArgWith(2, null, @project_state_hash = "01234567890abcdef")
+					@DocumentUpdaterHandler.getProjectDocsIfMatch = sinon.stub().callsArgWith(2, null, [{_id:@doc_1._id, lines:  @doc_1.lines, v: 123}])
+					@ProjectEntityHandler.getAllDocPathsFromProject = sinon.stub().callsArgWith(1, null, {"mock-doc-id-1":"main.tex", "mock-doc-id-2":"/chapters/chapter1.tex"})
+					@ClsiManager._buildRequest @project_id, {timeout:100, incrementalCompilesEnabled:true, rootDoc_id:"mock-doc-id-2"}, (error, request) =>
+						@request = request
+						done()
+
+				it "should still change the root path", ->
+					@request.compile.rootResourcePath.should.equal "chapters/chapter1.tex"
+
 		describe "when root doc override is valid", ->
 			beforeEach (done) ->
 				@ClsiManager._buildRequest @project_id, {rootDoc_id:"mock-doc-id-2"}, (error, request) =>
