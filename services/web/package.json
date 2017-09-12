@@ -73,7 +73,7 @@
   "devDependencies": {
     "autoprefixer": "^6.6.1",
     "bunyan": "0.22.1",
-    "chai": "",
+    "chai": "3.5.0",
     "chai-spies": "",
     "grunt": "0.4.5",
     "clean-css": "^3.4.18",
