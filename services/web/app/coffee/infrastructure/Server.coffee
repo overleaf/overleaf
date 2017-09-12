@@ -6,6 +6,7 @@ metrics = require('metrics-sharelatex')
 crawlerLogger = require('./CrawlerLogger')
 expressLocals = require('./ExpressLocals')
 Router = require('../router')
+helmet = require "helmet"
 metrics.inc("startup")
 UserSessionsRedis = require('../Features/User/UserSessionsRedis')
 
@@ -142,6 +143,17 @@ webRouter.use (req, res, next) ->
 	else
 		res.status(503)
 		res.render("general/closed", {title:"maintenance"})
+
+# add security headers using Helmet
+webRouter.use (req, res, next) ->
+	isLoggedIn = AuthenticationController.isUserLoggedIn(req)
+	isProjectPage = !!req.path.match('^/project/[a-f0-9]{24}$')
+
+	helmet({ # note that more headers are added by default
+		dnsPrefetchControl: false
+		referrerPolicy: { policy: 'origin-when-cross-origin' }
+		noCache: isLoggedIn || isProjectPage
+	})(req, res, next)
 
 profiler = require "v8-profiler"
 privateApiRouter.get "/profile", (req, res) ->
