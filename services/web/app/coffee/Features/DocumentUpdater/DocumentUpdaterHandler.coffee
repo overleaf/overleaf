@@ -155,7 +155,7 @@ module.exports = DocumentUpdaterHandler =
 
 	clearProjectState: (project_id, callback = (error) ->) ->
 		timer = new metrics.Timer("clear-project-state")
-		url = "#{settings.apis.documentupdater.url}/project/#{project_id}/clear"
+		url = "#{settings.apis.documentupdater.url}/project/#{project_id}/clearState"
 		logger.log project_id:project_id, "clearing project state from document updater"
 		request.post url, (error, res)->
 			timer.done()
