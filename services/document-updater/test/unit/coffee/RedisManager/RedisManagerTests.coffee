@@ -581,3 +581,12 @@ describe "RedisManager", ->
 				.calledWith("DocsIn:#{@project_id}", @doc_id)
 				.should.equal true
 
+	describe "clearProjectState", ->
+		beforeEach (done) ->
+			@rclient.del = sinon.stub().callsArg(1)
+			@RedisManager.clearProjectState @project_id, done
+
+		it "should delete the project state", ->
+			@rclient.del
+				.calledWith("ProjectState:#{@project_id}")
+				.should.equal true

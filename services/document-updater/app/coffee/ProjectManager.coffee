@@ -105,3 +105,6 @@ module.exports = ProjectManager =
 				async.series jobs, (error) ->
 					return callback(error) if error?
 					callback(null, docs)
+
+	clearProjectState: (project_id, callback = (error) ->) ->
+		RedisManager.clearProjectState project_id, callback

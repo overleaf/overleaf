@@ -102,6 +102,9 @@ module.exports = RedisManager =
 			logger.log project_id: project_id, newState:newState, oldState: response[0], "checking project state"
 			callback(null, response[0] isnt newState)
 
+	clearProjectState: (project_id, callback = (error) ->) ->
+		rclient.del keys.projectState(project_id:project_id), callback
+
 	getDoc : (project_id, doc_id, callback = (error, lines, version, ranges) ->)->
 		timer = new metrics.Timer("redis.get-doc")
 		multi = rclient.multi()
