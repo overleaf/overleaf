@@ -5,9 +5,6 @@ request = require('./helpers/request')
 
 assert_has_common_headers = (response) ->
 	headers = response.headers
-	assert.equal(headers['x-frame-options'], 'SAMEORIGIN')
-	assert.equal(headers['strict-transport-security'], 'max-age=15552000; includeSubDomains')
-	assert.equal(headers['x-content-type-options'], 'nosniff')
 	assert.equal(headers['x-download-options'], 'noopen')
 	assert.equal(headers['x-xss-protection'], '1; mode=block')
 	assert.equal(headers['referrer-policy'], 'origin-when-cross-origin')
