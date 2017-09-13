@@ -173,6 +173,13 @@ module.exports = ClsiManager =
 				options = _.clone(options)
 				options.syncType = "incremental"
 				options.syncState = projectStateHash
+				# create stub doc entries for any possible root docs, if not
+				# present in the docupdater. This allows finaliseRequest to
+				# identify the root doc.
+				possibleRootDocIds = [options.rootDoc_id, project.rootDoc_id]
+				for rootDoc_id in possibleRootDocIds when rootDoc_id?
+					path = docPath[rootDoc_id]
+					docs[path] ?= {_id: rootDoc_id, path: path}
 				ClsiManager._finaliseRequest project_id, options, project, docs, [], callback
 
 	_buildRequestFromMongo: (project_id, options, project, projectStateHash, callback = (error, request) ->) ->
@@ -199,9 +206,10 @@ module.exports = ClsiManager =
 
 		for path, doc of docs
 			path = path.replace(/^\//, "") # Remove leading /
-			resources.push
-				path:    path
-				content: doc.lines.join("\n")
+			if doc.lines? # add doc to resources unless it is just a stub entry
+				resources.push
+					path:    path
+					content: doc.lines.join("\n")
 			if project.rootDoc_id? and doc._id.toString() == project.rootDoc_id.toString()
 				rootResourcePath = path
 			if options.rootDoc_id? and doc._id.toString() == options.rootDoc_id.toString()
