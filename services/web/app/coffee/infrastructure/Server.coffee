@@ -153,6 +153,9 @@ webRouter.use (req, res, next) ->
 		dnsPrefetchControl: false
 		referrerPolicy: { policy: 'origin-when-cross-origin' }
 		noCache: isLoggedIn || isProjectPage
+		noSniff: false
+		hsts: false
+		frameguard: false
 	})(req, res, next)
 
 profiler = require "v8-profiler"
