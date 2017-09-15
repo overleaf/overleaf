@@ -4,6 +4,7 @@ logger = require "logger-sharelatex"
 settings = require("settings-sharelatex")
 Errors = require "./Errors"
 SafeReader = require "./SafeReader"
+async = require "async"
 
 module.exports = ResourceStateManager =
 
@@ -50,14 +51,31 @@ module.exports = ResourceStateManager =
 				resources = ({path: path} for path in resourceList)
 				callback(null, resources)
 
-	checkResourceFiles: (resources, allFiles, directory, callback = (error) ->) ->
+	checkResourceFiles: (resources, allFiles, basePath, callback = (error) ->) ->
+		# check the paths are all relative to current directory
+		for file in resources or []
+			for dir in file?.path?.split('/')
+				if dir == '..'
+					return callback new Error("relative path in resource file list")
 		# check if any of the input files are not present in list of files
 		seenFile = {}
 		for file in allFiles
 			seenFile[file] = true
-		missingFiles = (resource.path for resource in resources when not seenFile[resource.path])
-		if missingFiles.length > 0
-			logger.err missingFiles:missingFiles, dir:directory, allFiles:allFiles, resources:resources, "missing input files for project"
-			return callback new Errors.FilesOutOfSyncError("resource files missing in incremental update")
+		missingFileCandidates = (resource.path for resource in resources when not seenFile[resource.path])
+		# now check if they are really missing
+		ResourceStateManager._checkMissingFiles missingFileCandidates, basePath, (missingFiles) ->
+			if missingFiles?.length > 0
+				logger.err missingFiles:missingFiles, basePath:basePath, allFiles:allFiles, resources:resources, "missing input files for project"
+				return callback new Errors.FilesOutOfSyncError("resource files missing in incremental update")
+			else
+				callback()
+
+	_checkMissingFiles: (missingFileCandidates, basePath, callback = (missingFiles) ->) ->
+		if missingFileCandidates.length > 0
+			fileDoesNotExist = (file, cb) ->
+				fs.stat Path.join(basePath, file), (err) ->
+					logger.log file:file, err:err, result: err?, "stating potential missing file"
+					cb(err?)
+			async.filterSeries missingFileCandidates, fileDoesNotExist, callback
 		else
-			callback()
+			callback([])
