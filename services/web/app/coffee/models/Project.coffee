@@ -36,6 +36,8 @@ ProjectSchema = new Schema
 	overleaf          :
 		id              : { type: Number }
 		imported_at_ver_id : { type: Number }
+		token           : { type: String }
+		read_token      : { type: String }
 
 ProjectSchema.statics.getProject = (project_or_id, fields, callback)->
 	if project_or_id._id?
