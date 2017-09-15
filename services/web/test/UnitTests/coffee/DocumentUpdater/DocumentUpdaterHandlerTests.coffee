@@ -293,6 +293,42 @@ describe 'DocumentUpdaterHandler', ->
 					.alwaysCalledWithExactly()
 					.should.equal true
 
+
+	describe "clearProjectState", ->
+		beforeEach ->
+			@callback = sinon.stub()
+
+		describe "successfully", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 200})
+				@handler.clearProjectState @project_id, @callback
+
+			it 'should clear the project state from the document updater', ->
+				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}/clear"
+				@request.post.calledWith(url).should.equal true
+
+			it "should call the callback", ->
+				@callback.calledWithExactly().should.equal true
+
+		describe "when the document updater API returns an error", ->
+			beforeEach ->
+				@request.get = sinon.stub().callsArgWith(1, @error = new Error("something went wrong"), null, null)
+				@handler.getProjectDocsIfMatch @project_id, @project_state_hash, @callback
+
+			it "should return an error to the callback", ->
+				@callback.calledWith(@error).should.equal true
+
+		describe "when the document updater returns a conflict error code", ->
+			beforeEach ->
+				@request.get = sinon.stub().callsArgWith(1, null, { statusCode: 409 }, "Conflict")
+				@handler.getProjectDocsIfMatch @project_id, @project_state_hash, @callback
+
+			it "should return the callback with no documents", ->
+				@callback
+					.alwaysCalledWithExactly()
+					.should.equal true
+
+
 	describe "acceptChanges", ->
 		beforeEach ->
 			@change_id = "mock-change-id-1"

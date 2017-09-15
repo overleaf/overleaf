@@ -125,6 +125,7 @@ describe "ClsiManager", ->
 	describe "deleteAuxFiles", ->
 		beforeEach ->
 			@ClsiManager._makeRequest = sinon.stub().callsArg(2)
+			@DocumentUpdaterHandler.clearProjectState = sinon.stub().callsArg(1)
 			
 		describe "with the standard compileGroup", ->
 			beforeEach ->
@@ -133,6 +134,11 @@ describe "ClsiManager", ->
 			it "should call the delete method in the standard CLSI", ->
 				@ClsiManager._makeRequest
 					.calledWith(@project_id, { method:"DELETE", url:"#{@settings.apis.clsi.url}/project/#{@project_id}/user/#{@user_id}"})
+					.should.equal true
+
+			it "should clear the project state from the docupdater", ->
+				@DocumentUpdaterHandler.clearProjectState
+					.calledWith(@project_id)
 					.should.equal true
 
 			it "should call the callback", ->
