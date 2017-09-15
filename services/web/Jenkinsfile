@@ -1,11 +1,6 @@
 pipeline {
   
-  agent {
-    docker {
-      image 'node:6.9.5'
-      args "-v /var/lib/jenkins/.npm:/tmp/.npm"
-    }
-  }
+  agent any
   
   environment  {
       HOME = "/tmp"
@@ -18,6 +13,12 @@ pipeline {
   
   stages {
     stage('Set up') {
+      agent {
+        docker {
+          image 'node:6.9.5'
+          reuseNode true
+        }
+      }
       steps {
         // we need to disable logallrefupdates, else git clones during the npm install will require git to lookup the user id
         // which does not exist in the container's /etc/passwd file, causing the clone to fail.
@@ -44,7 +45,15 @@ pipeline {
     }
     
     stage('Install') {
+      agent {
+        docker {
+          image 'node:6.9.5'
+          args "-v /var/lib/jenkins/.npm:/tmp/.npm"
+          reuseNode true
+        }
+      }
       steps {
+        sh 'git config --global core.logallrefupdates false'
         sh 'mv app/views/external/robots.txt public/robots.txt'
         sh 'mv app/views/external/googlebdb0f8f7f4a17241.html public/googlebdb0f8f7f4a17241.html'
         sh 'npm install'
@@ -56,24 +65,48 @@ pipeline {
     }
 
     stage('Compile') {
+      agent {
+        docker {
+          image 'node:6.9.5'
+          reuseNode true
+        }
+      }
       steps {
         sh 'node_modules/.bin/grunt compile  --verbose'
       }
     }
 
     stage('Smoke Test') {
+      agent {
+        docker {
+          image 'node:6.9.5'
+          reuseNode true
+        }
+      }
       steps {
         sh 'node_modules/.bin/grunt compile:smoke_tests'
       }
     }
 
     stage('Minify') {
+      agent {
+        docker {
+          image 'node:6.9.5'
+          reuseNode true
+        }
+      }
       steps {
         sh 'node_modules/.bin/grunt compile:minify'
       }
     }
     
     stage('Unit Test') {
+      agent {
+        docker {
+          image 'node:6.9.5'
+          reuseNode true
+        }
+      }
       steps {
         sh 'env NODE_ENV=development ./node_modules/.bin/grunt test:unit --reporter=tap'
       }
@@ -87,12 +120,25 @@ pipeline {
         sh 'tar -czf build.tar.gz --exclude=build.tar.gz --exclude-vcs .'
       }
     }
+    
     stage('Publish') {
       steps {
         withAWS(credentials:'S3_CI_BUILDS_AWS_KEYS', region:"${S3_REGION_BUILD_ARTEFACTS}") {
             s3Upload(file:'build.tar.gz', bucket:"${S3_BUCKET_BUILD_ARTEFACTS}", path:"${JOB_NAME}/${BUILD_NUMBER}.tar.gz")
             // The deployment process uses this file to figure out the latest build
             s3Upload(file:'build_number.txt', bucket:"${S3_BUCKET_BUILD_ARTEFACTS}", path:"${JOB_NAME}/latest")
+        }
+      }
+    }
+    
+    
+    stage('Sync OSS') {
+      when {
+        branch 'master'
+      }
+      steps {
+        sshagent (credentials: ['GIT_DEPLOY_KEY']) {
+          sh 'git push git@github.com:sharelatex/web-sharelatex.git HEAD:ja-oss-test'
         }
       }
     }
