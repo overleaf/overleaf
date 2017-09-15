@@ -304,7 +304,7 @@ describe 'DocumentUpdaterHandler', ->
 				@handler.clearProjectState @project_id, @callback
 
 			it 'should clear the project state from the document updater', ->
-				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}/clear"
+				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}/clearState"
 				@request.post.calledWith(url).should.equal true
 
 			it "should call the callback", ->
