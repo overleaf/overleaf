@@ -69,6 +69,65 @@ describe "LoginRateLimit", ->
 			)
 
 
+describe "CSRF protection", ->
+
+	beforeEach ->
+		@user = new User()
+		@email = "test+#{Math.random()}@example.com"
+		@password = "password11"
+
+	afterEach ->
+		@user.full_delete_user(@email)
+		
+
+	it 'should register with the csrf token', (done) ->
+		@user.request.get '/login', (err, res, body) =>
+			@user.getCsrfToken (error) =>
+				@user.request.post {
+					url: "/register"
+					json:
+						email: @email
+						password: @password
+					headers:{
+						"x-csrf-token": @user.csrfToken
+					}
+				}, (error, response, body) =>
+					expect(err?).to.equal false
+					expect(response.statusCode).to.equal 200
+					done()
+
+	it 'should fail with no csrf token', (done) ->
+		@user.request.get '/login', (err, res, body) =>
+			@user.getCsrfToken (error) =>
+				@user.request.post {
+					url: "/register"
+					json:
+						email: @email
+						password: @password
+					headers:{
+						"x-csrf-token": ""
+					}
+				}, (error, response, body) =>
+					expect(response.statusCode).to.equal 403
+					done()
+
+	it 'should fail with a stale csrf token', (done) ->
+		@user.request.get '/login', (err, res, body) =>
+			@user.getCsrfToken (error) =>
+				oldCsrfToken = @user.csrfToken
+				@user.request.get '/logout', (err, res, body) =>
+					@user.request.post {
+						url: "/register"
+						json:
+							email: @email
+							password: @password
+						headers:{
+							"x-csrf-token": oldCsrfToken
+						}
+					}, (error, response, body) =>
+						expect(response.statusCode).to.equal 403
+						done()
+
 describe "LoginViaRegistration", ->
 
 	before (done) ->
