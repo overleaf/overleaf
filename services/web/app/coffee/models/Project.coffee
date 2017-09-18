@@ -33,6 +33,9 @@ ProjectSchema = new Schema
 	deletedDocs       : [DeletedDocSchema]
 	imageName         : { type: String }
 	track_changes     : { type: Object }
+	tokens            :
+		readOnly        : { type: String }
+		readAndWrite    : { type: String }
 	overleaf          :
 		id              : { type: Number }
 		imported_at_ver_id : { type: Number }
