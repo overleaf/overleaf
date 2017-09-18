@@ -138,7 +138,7 @@ pipeline {
       }
       steps {
         sshagent (credentials: ['GIT_DEPLOY_KEY']) {
-          sh 'git push git@github.com:sharelatex/web-sharelatex.git HEAD:ja-oss-test'
+          sh 'git push git@github.com:sharelatex/web-sharelatex.git HEAD:master'
         }
       }
     }
