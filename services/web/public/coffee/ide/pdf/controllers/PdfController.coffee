@@ -5,8 +5,10 @@ define [
 	"libs/bib-log-parser"
 	"services/log-hints-feedback"
 ], (App, Ace, HumanReadableLogs, BibLogParser) ->
-	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, logHintsFeedback, localStorage) ->
+	AUTO_COMPILE_TIMEOUT = 5000
+	OP_ACKNOWLEDGEMENT_TIMEOUT = 1100
 
+	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, logHintsFeedback, localStorage) ->
 		# enable per-user containers by default
 		perUserCompile = true
 		autoCompile = true
@@ -72,6 +74,43 @@ define [
 		$scope.$on "pdf:error:display", () ->
 			$scope.pdf.view = 'errors'
 			$scope.pdf.renderingError = true
+
+		autoCompileTimeout = null
+		triggerAutoCompile = () ->
+			return if autoCompileTimeout
+
+			timeSinceLastCompile = Date.now() - $scope.recompiledAt
+			# If time is non-monotonic, assume that the user's system clock has been
+			# changed and continue with recompile
+			isTimeNonMonotonic = timeSinceLastCompile < 0
+
+			if isTimeNonMonotonic || timeSinceLastCompile >= AUTO_COMPILE_TIMEOUT
+				if (!ide.$scope.hasLintingError)
+					$scope.recompile(isBackgroundAutoCompile: true)
+			else
+				# Extend remainder of timeout
+				autoCompileTimeout = setTimeout () ->
+					autoCompileTimeout = null
+					triggerAutoCompile()
+				, AUTO_COMPILE_TIMEOUT - timeSinceLastCompile
+
+		autoCompileListener = null
+		toggleAutoCompile = (enabling) ->
+			if enabling
+				autoCompileListener = ide.$scope.$on "ide:opAcknowledged", _.debounce(triggerAutoCompile, OP_ACKNOWLEDGEMENT_TIMEOUT)
+			else
+				autoCompileListener() if autoCompileListener
+				autoCompileListener = null
+
+		$scope.autocompile_enabled = localStorage("autocompile_enabled:#{$scope.project_id}") or false
+		$scope.$watch "autocompile_enabled", (newValue, oldValue) ->
+			if newValue? and oldValue != newValue
+				localStorage("autocompile_enabled:#{$scope.project_id}", newValue)
+				toggleAutoCompile(newValue)
+				event_tracking.sendMB "autocompile-setting-changed", newValue
+
+		if window.user?.betaProgram and $scope.autocompile_enabled
+			toggleAutoCompile(true)
 
 		# abort compile if syntax checks fail
 		$scope.stop_on_validation_error = localStorage("stop_on_validation_error:#{$scope.project_id}")
@@ -401,6 +440,8 @@ define [
 					$scope.pdf.renderingError = false
 					$scope.pdf.error = true
 					$scope.pdf.view = 'errors'
+				.finally () ->
+					$scope.recompiledAt = Date.now()
 
 		# This needs to be public.
 		ide.$scope.recompile = $scope.recompile
