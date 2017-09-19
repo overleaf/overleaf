@@ -44,7 +44,7 @@ module.exports = CollaboratorsHandler =
 			result = []
 			async.mapLimit members, 3,
 				(member, cb) ->
-					UserGetter.getUserOrUserStubById member.id, CollaboratorsHandler.USER_PROJECTION, (error, user) ->
+					UserGetter.getUserById member.id, CollaboratorsHandler.USER_PROJECTION, (error, user) ->
 						return cb(error) if error?
 						if user?
 							result.push { user: user, privilegeLevel: member.privilegeLevel }

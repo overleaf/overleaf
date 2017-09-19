@@ -27,19 +27,18 @@ module.exports = UserGetter =
 		
 		db.users.find { _id: { $in: user_ids} }, projection, callback
 
-	getUserOrUserStubById: (user_id, projection, callback = (error, user) ->) ->
+	getUserById: (user_id, projection, callback = (error, user) ->) ->
 		try
 			query = _id: ObjectId(user_id.toString())
 		catch e
 			return callback(new Error(e))
 		db.users.findOne query, projection, (error, user) ->
 			return callback(error) if error?
-			return callback(null, user) if user?
-			db.userstubs.findOne query, projection, callback
+			callback(null, user)
 
 [
 	'getUser',
 	'getUsers',
-	'getUserOrUserStubById'
+	'getUserById'
 ].map (method) ->
 	metrics.timeAsyncMethod UserGetter, method, 'mongo.UserGetter', logger
