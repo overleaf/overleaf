@@ -110,16 +110,6 @@ module.exports = CollaboratorsHandler =
 						CollaboratorsHandler.removeUserFromProject project._id, user_id, cb
 			async.series jobs, callback
 
-	addEmailToProject: (project_id, adding_user_id, unparsed_email, privilegeLevel, callback = (error, user) ->) ->
-		email = EmailHelper.parseEmail(unparsed_email)
-		if !email? or email == ""
-			return callback(new Error("no valid email provided: '#{unparsed_email}'"))
-		UserCreator.getUserOrCreateHoldingAccount email, (error, user) ->
-			return callback(error) if error?
-			CollaboratorsHandler.addUserIdToProject project_id, adding_user_id, user._id, privilegeLevel, (error) ->
-				return callback(error) if error?
-				return callback null, user._id
-
 	addUserIdToProject: (project_id, adding_user_id, user_id, privilegeLevel, callback = (error) ->)->
 		Project.findOne { _id: project_id }, { collaberator_refs: 1, readOnly_refs: 1 }, (error, project) ->
 			return callback(error) if error?

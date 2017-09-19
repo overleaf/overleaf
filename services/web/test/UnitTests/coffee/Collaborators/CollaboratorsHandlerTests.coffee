@@ -238,38 +238,6 @@ describe "CollaboratorsHandler", ->
 			it "should not add the user again", ->
 				@Project.update.called.should.equal false
 
-	describe "addEmailToProject", ->
-		beforeEach ->
-			@UserCreator.getUserOrCreateHoldingAccount = sinon.stub().callsArgWith(1, null, @user = {_id: @user_id})
-			@CollaboratorHandler.addUserIdToProject = sinon.stub().callsArg(4)
-
-		describe "with a valid email", ->
-			beforeEach ->
-				@CollaboratorHandler.addEmailToProject @project_id, @adding_user_id, (@email = "Joe@example.com"), (@privilegeLevel = "readAndWrite"), @callback
-
-			it "should get the user with the lowercased email", ->
-				@UserCreator.getUserOrCreateHoldingAccount
-					.calledWith(@email.toLowerCase())
-					.should.equal true
-
-			it "should add the user to the project by id", ->
-				@CollaboratorHandler.addUserIdToProject
-					.calledWith(@project_id, @adding_user_id, @user_id, @privilegeLevel)
-					.should.equal true
-
-			it "should return the callback with the user_id", ->
-				@callback.calledWith(null, @user_id).should.equal true
-
-		describe "with an invalid email", ->
-			beforeEach ->
-				@CollaboratorHandler.addEmailToProject @project_id, @adding_user_id, "not-and-email", (@privilegeLevel = "readAndWrite"), @callback
-
-			it "should call the callback with an error", ->
-				@callback.calledWith(new Error()).should.equal true
-
-			it "should not add any users to the proejct", ->
-				@CollaboratorHandler.addUserIdToProject.called.should.equal false
-
 	describe "removeUserFromAllProjects", ->
 		beforeEach (done) ->
 			@CollaboratorHandler.getProjectsUserIsCollaboratorOf = sinon.stub()
