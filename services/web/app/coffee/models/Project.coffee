@@ -36,6 +36,8 @@ ProjectSchema = new Schema
 	tokens            :
 		readOnly        : { type: String }
 		readAndWrite    : { type: String }
+	tokenAccessReadOnly_refs         : [ type:ObjectId, ref:'User' ]
+	tokenAccessReadAndWrite_refs     : [ type:ObjectId, ref:'User' ]
 	overleaf          :
 		id              : { type: Number }
 		imported_at_ver_id : { type: Number }
