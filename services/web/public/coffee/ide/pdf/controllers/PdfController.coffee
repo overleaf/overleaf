@@ -82,7 +82,7 @@ define [
 			timeSinceLastCompile = Date.now() - $scope.recompiledAt
 			# If time is non-monotonic, assume that the user's system clock has been
 			# changed and continue with recompile
-			isTimeNonMonotonic = timeSinceLastPoll < 0;
+			isTimeNonMonotonic = timeSinceLastCompile < 0
 
 			if isTimeNonMonotonic || timeSinceLastCompile >= AUTO_COMPILE_TIMEOUT
 				if (!ide.$scope.hasLintingError)
