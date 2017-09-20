@@ -79,7 +79,7 @@ describe "LimitationsManager", ->
 
 	describe "canAddXCollaborators", ->
 		beforeEach ->
-			@CollaboratorsHandler.getCollaboratorCount = (project_id, callback) => callback(null, @current_number)
+			@CollaboratorsHandler.getInvitedCollaboratorCount = (project_id, callback) => callback(null, @current_number)
 			@CollaboratorsInviteHandler.getInviteCount = (project_id, callback) => callback(null, @invite_count)
 			sinon.stub @LimitationsManager,
 					   "allowedNumberOfCollaboratorsInProject",

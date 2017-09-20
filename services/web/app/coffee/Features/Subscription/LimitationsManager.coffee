@@ -24,7 +24,7 @@ module.exports =
 	canAddXCollaborators: (project_id, x_collaborators, callback = (error, allowed)->) ->
 		@allowedNumberOfCollaboratorsInProject project_id, (error, allowed_number) =>
 			return callback(error) if error?
-			CollaboratorsHandler.getCollaboratorCount project_id, (error, current_number) =>
+			CollaboratorsHandler.getInvitedCollaboratorCount project_id, (error, current_number) =>
 				return callback(error) if error?
 				CollaboratorsInvitesHandler.getInviteCount project_id, (error, invite_count) =>
 					return callback(error) if error?

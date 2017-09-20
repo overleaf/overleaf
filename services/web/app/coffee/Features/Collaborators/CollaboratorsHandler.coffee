@@ -89,13 +89,13 @@ module.exports = CollaboratorsHandler =
 					return callback null, member.privilegeLevel
 			return callback null, PrivilegeLevels.NONE
 
-	getMemberCount: (project_id, callback = (error, count) ->) ->
+	getInvitedMemberCount: (project_id, callback = (error, count) ->) ->
 		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members) ->
 			return callback(error) if error?
-			return callback null, (members or []).length
+			return callback null, (members or []).filter((m) -> m.source == Sources.INVITE).length
 
-	getCollaboratorCount: (project_id, callback = (error, count) ->) ->
-		CollaboratorsHandler.getMemberCount project_id, (error, count) ->
+	getInvitedCollaboratorCount: (project_id, callback = (error, count) ->) ->
+		CollaboratorsHandler.getInvitedMemberCount project_id, (error, count) ->
 			return callback(error) if error?
 			return callback null, count - 1 # Don't count project owner
 
