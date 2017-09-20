@@ -125,7 +125,7 @@ module.exports = TpdsUpdateSender =
 getProjectsUsersIds = (project_id, callback = (err, owner_id, allUserIds)->)->
 	Project.findById project_id, "_id owner_ref", (err, project) ->
 		return callback(err) if err?
-		CollaboratorsHandler.getMemberIds project_id, (err, member_ids) ->
+		CollaboratorsHandler.getInvitedMemberIds project_id, (err, member_ids) ->
 			return callback(err) if err?
 			callback err, project?.owner_ref, member_ids
 

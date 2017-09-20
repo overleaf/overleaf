@@ -23,7 +23,7 @@ describe 'TpdsUpdateSender', ->
 		project = {owner_ref:user_id}
 		member_ids = [collaberator_ref_1, read_only_ref_1, user_id]
 		@CollaboratorsHandler =
-			getMemberIds: sinon.stub().yields(null, member_ids)
+			getInvitedMemberIds: sinon.stub().yields(null, member_ids)
 		@Project = findById:sinon.stub().callsArgWith(2, null, project)
 		@docstoreUrl = "docstore.sharelatex.env"
 		@request = sinon.stub().returns(pipe:->)
