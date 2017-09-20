@@ -98,7 +98,7 @@ module.exports = DocManager =
 						update.lines = lines
 					if updateRanges
 						update.ranges = ranges
-					logger.log { project_id, doc_id, oldDoc: doc, update: update }, "updating doc lines and ranges"
+					logger.log { project_id, doc_id, oldDoc: doc }, "updating doc lines and ranges"
 					
 					modified = true
 					rev += 1 # rev will be incremented in mongo by MongoManager.upsertIntoDocCollection
