@@ -35,7 +35,7 @@ module.exports = EditorHttpController =
 		ProjectGetter.getProjectWithoutDocLines project_id, (error, project) ->
 			return callback(error) if error?
 			return callback(new Error("not found")) if !project?
-			CollaboratorsHandler.getMembersWithPrivilegeLevels project, (error, members) ->
+			CollaboratorsHandler.getInvitedMembersWithPrivilegeLevels project, (error, members) ->
 				return callback(error) if error?
 				UserGetter.getUser user_id, { isAdmin: true }, (error, user) ->
 					return callback(error) if error?

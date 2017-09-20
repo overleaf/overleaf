@@ -53,20 +53,31 @@ module.exports = CollaboratorsHandler =
 		last_name: 1,
 		signUpDate: 1
 	}
+	_loadMembers: (members, callback=(error, users) ->) ->
+		result = []
+		async.mapLimit members, 3,
+			(member, cb) ->
+				UserGetter.getUserById member.id, CollaboratorsHandler.USER_PROJECTION, (error, user) ->
+					return cb(error) if error?
+					if user?
+						result.push { user: user, privilegeLevel: member.privilegeLevel }
+					cb()
+			(error) ->
+				return callback(error) if error?
+				callback null, result
+
 	getMembersWithPrivilegeLevels: (project_id, callback = (error, members) ->) ->
 		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members = []) ->
 			return callback(error) if error?
-			result = []
-			async.mapLimit members, 3,
-				(member, cb) ->
-					UserGetter.getUserById member.id, CollaboratorsHandler.USER_PROJECTION, (error, user) ->
-						return cb(error) if error?
-						if user?
-							result.push { user: user, privilegeLevel: member.privilegeLevel }
-						cb()
-				(error) ->
-					return callback(error) if error?
-					callback null, result
+			CollaboratorsHandler._loadMembers members, (error, users) ->
+				callback error, users
+
+	getInvitedMembersWithPrivilegeLevels: (project_id, callback = (error, members) ->) ->
+		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members = []) ->
+			return callback(error) if error?
+			members = members.filter((m) -> m.source == Sources.INVITE)
+			CollaboratorsHandler._loadMembers members, (error, users) ->
+				callback error, users
 
 	getMemberIdPrivilegeLevel: (user_id, project_id, callback = (error, privilegeLevel) ->) ->
 		# In future if the schema changes and getting all member ids is more expensive (multiple documents)

@@ -109,7 +109,7 @@ describe "EditorHttpController", ->
 			]
 			@ProjectEditorHandler.buildProjectModelView = sinon.stub().returns(@projectModelView)
 			@ProjectGetter.getProjectWithoutDocLines = sinon.stub().callsArgWith(1, null, @project)
-			@CollaboratorsHandler.getMembersWithPrivilegeLevels = sinon.stub().callsArgWith(1, null, @members)
+			@CollaboratorsHandler.getInvitedMembersWithPrivilegeLevels = sinon.stub().callsArgWith(1, null, @members)
 			@CollaboratorsInviteHandler.getAllInvites = sinon.stub().callsArgWith(1, null, @invites)
 			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user)
 				
@@ -125,7 +125,7 @@ describe "EditorHttpController", ->
 					.should.equal true
 
 			it "should get the list of users in the project", ->
-				@CollaboratorsHandler.getMembersWithPrivilegeLevels
+				@CollaboratorsHandler.getInvitedMembersWithPrivilegeLevels
 					.calledWith(@project)
 					.should.equal true
 			
