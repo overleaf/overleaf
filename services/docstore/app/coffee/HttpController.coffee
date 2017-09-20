@@ -12,7 +12,7 @@ module.exports = HttpController =
 		logger.log project_id: project_id, doc_id: doc_id, "getting doc"
 		DocManager.getFullDoc project_id, doc_id, (error, doc) ->
 			return next(error) if error?
-			logger.log doc: doc, "got doc"
+			logger.log {doc_id, project_id}, "got doc"
 			if !doc?
 				res.send 404
 			else if doc.deleted && !include_deleted
