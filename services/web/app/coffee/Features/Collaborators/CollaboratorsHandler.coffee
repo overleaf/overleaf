@@ -40,6 +40,11 @@ module.exports = CollaboratorsHandler =
 			return callback(error) if error?
 			return callback null, members.map (m) -> m.id
 
+	getInvitedMemberIds: (project_id, callback = (error, member_ids) ->) ->
+		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members) ->
+			return callback(error) if error?
+			return callback null, members.filter((m) -> m.source == Sources.INVITE).map((m) -> m.id)
+
 	USER_PROJECTION: {
 		_id: 1,
 		email: 1,
