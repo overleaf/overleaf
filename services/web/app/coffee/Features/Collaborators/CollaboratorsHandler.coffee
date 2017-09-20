@@ -10,6 +10,9 @@ Errors = require "../Errors/Errors"
 EmailHelper = require "../Helpers/EmailHelper"
 ProjectEditorHandler = require "../Project/ProjectEditorHandler"
 
+Sources =
+	INVITE: 'invite'
+	TOKEN: 'token'
 
 module.exports = CollaboratorsHandler =
 
@@ -18,11 +21,18 @@ module.exports = CollaboratorsHandler =
 			return callback(error) if error?
 			return callback new Errors.NotFoundError("no project found with id #{project_id}") if !project?
 			members = []
+			# Project owner
 			members.push { id: project.owner_ref.toString(), privilegeLevel: PrivilegeLevels.OWNER }
+			# Invited members
 			for member_id in project.readOnly_refs or []
-				members.push { id: member_id.toString(), privilegeLevel: PrivilegeLevels.READ_ONLY }
+				members.push { id: member_id.toString(), privilegeLevel: PrivilegeLevels.READ_ONLY, source: Sources.INVITE }
 			for member_id in project.collaberator_refs or []
-				members.push { id: member_id.toString(), privilegeLevel: PrivilegeLevels.READ_AND_WRITE }
+				members.push { id: member_id.toString(), privilegeLevel: PrivilegeLevels.READ_AND_WRITE, source: Sources.INVITE }
+			# Token access
+			for member_id in project.tokenAccessReadOnly_refs or []
+				members.push { id: member_id.toString(), privilegeLevel: PrivilegeLevels.READ_ONLY, source: Sources.TOKEN }
+			for member_id in project.tokenAccessReadAndWrite_refs or []
+				members.push { id: member_id.toString(), privilegeLevel: PrivilegeLevels.READ_AND_WRITE, source: Sources.TOKEN }
 			return callback null, members
 
 	getMemberIds: (project_id, callback = (error, member_ids) ->) ->

@@ -41,10 +41,10 @@ describe "CollaboratorsHandler", ->
 				@callback
 					.calledWith(null, [
 						{ id: "owner-ref", privilegeLevel: "owner" }
-						{ id: "read-only-ref-1", privilegeLevel: "readOnly" }
-						{ id: "read-only-ref-2", privilegeLevel: "readOnly" }
-						{ id: "read-write-ref-1", privilegeLevel: "readAndWrite" }
-						{ id: "read-write-ref-2", privilegeLevel: "readAndWrite" }
+						{ id: "read-only-ref-1", privilegeLevel: "readOnly", source: 'invite'}
+						{ id: "read-only-ref-2", privilegeLevel: "readOnly", source: 'invite'}
+						{ id: "read-write-ref-1", privilegeLevel: "readAndWrite", source: 'invite'}
+						{ id: "read-write-ref-2", privilegeLevel: "readAndWrite", source: 'invite' }
 					])
 					.should.equal true
 
@@ -74,11 +74,11 @@ describe "CollaboratorsHandler", ->
 		beforeEach ->
 			@CollaboratorHandler.getMemberIdsWithPrivilegeLevels = sinon.stub()
 			@CollaboratorHandler.getMemberIdsWithPrivilegeLevels.withArgs(@project_id).yields(null, [
-				{ id: "read-only-ref-1", privilegeLevel: "readOnly" }
-				{ id: "read-only-ref-2", privilegeLevel: "readOnly" }
-				{ id: "read-write-ref-1", privilegeLevel: "readAndWrite" }
-				{ id: "read-write-ref-2", privilegeLevel: "readAndWrite" }
-				{ id: "doesnt-exist", privilegeLevel: "readAndWrite" }
+				{ id: "read-only-ref-1", privilegeLevel: "readOnly", source: 'invite' }
+				{ id: "read-only-ref-2", privilegeLevel: "readOnly", source: 'invite' }
+				{ id: "read-write-ref-1", privilegeLevel: "readAndWrite", source: 'invite' }
+				{ id: "read-write-ref-2", privilegeLevel: "readAndWrite", source: 'invite' }
+				{ id: "doesnt-exist", privilegeLevel: "readAndWrite", source: 'invite' }
 			])
 			@UserGetter.getUserById = sinon.stub()
 			@UserGetter.getUserById.withArgs("read-only-ref-1").yields(null, { _id: "read-only-ref-1" })
