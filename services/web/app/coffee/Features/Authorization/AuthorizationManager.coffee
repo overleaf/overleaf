@@ -25,9 +25,11 @@ module.exports = AuthorizationManager =
 					return callback null, PrivilegeLevels.READ_ONLY, true
 				else if project.publicAccesLevel == PublicAccessLevels.READ_AND_WRITE
 					return callback null, PrivilegeLevels.READ_AND_WRITE, true
+				else if project.publicAccesLevel == PublicAccessLevels.TOKEN_BASED
+					return callback null, PrivilegeLevels.READ_ONLY, false
 				else
 					return callback null, PrivilegeLevels.NONE, false
-		
+
 		if !user_id?
 			getPublicAccessLevel()
 		else
