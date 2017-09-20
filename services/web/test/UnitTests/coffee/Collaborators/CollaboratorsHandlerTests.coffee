@@ -192,11 +192,21 @@ describe "CollaboratorsHandler", ->
 			@Project.find = sinon.stub()
 			@Project.find.withArgs({collaberator_refs:@user_id}, @fields).yields(null, ["mock-read-write-project-1", "mock-read-write-project-2"])
 			@Project.find.withArgs({readOnly_refs:@user_id}, @fields).yields(null, ["mock-read-only-project-1", "mock-read-only-project-2"])
+			@Project.find.withArgs({tokenAccessReadAndWrite_refs:@user_id}, @fields).yields(null, ["mock-token-read-write-project-1", "mock-token-read-write-project-2"])
+			@Project.find.withArgs({tokenAccessReadOnly_refs:@user_id}, @fields).yields(null, ["mock-token-read-only-project-1", "mock-token-read-only-project-2"])
 			@CollaboratorHandler.getProjectsUserIsMemberOf @user_id, @fields, @callback
 
 		it "should call the callback with the projects", ->
 			@callback
-				.calledWith(null, ["mock-read-write-project-1", "mock-read-write-project-2"], ["mock-read-only-project-1", "mock-read-only-project-2"])
+				.calledWith(
+					null,
+					{
+						readAndWrite:      ["mock-read-write-project-1", "mock-read-write-project-2"],
+						readOnly:          ["mock-read-only-project-1", "mock-read-only-project-2"],
+						tokenReadAndWrite: ["mock-token-read-write-project-1", "mock-token-read-write-project-2"],
+						tokenReadOnly:     ["mock-token-read-only-project-1", "mock-token-read-only-project-2"]
+					}
+				)
 				.should.equal true
 
 	describe "removeUserFromProject", ->
@@ -282,14 +292,24 @@ describe "CollaboratorsHandler", ->
 			@CollaboratorHandler.getProjectsUserIsMemberOf = sinon.stub()
 			@CollaboratorHandler.getProjectsUserIsMemberOf.withArgs(@user_id, { _id: 1 }).yields(
 				null,
-				[ { _id: "read-and-write-0" }, { _id: "read-and-write-1" }, null ],
-				[ { _id: "read-only-0" }, { _id: "read-only-1" }, null ]
+				{
+					readAndWrite:      [ { _id: "read-and-write-0" }, { _id: "read-and-write-1" }, null ],
+					readOnly:          [ { _id: "read-only-0" }, { _id: "read-only-1" }, null ]
+					tokenReadAndWrite: [ { _id: "token-read-and-write-0" }, { _id: "token-read-and-write-1" }, null ]
+					tokenReadOnly:     [ { _id: "token-read-only-0" }, { _id: "token-read-only-1" }, null ]
+				}
 			)
 			@CollaboratorHandler.removeUserFromProject = sinon.stub().yields()
 			@CollaboratorHandler.removeUserFromAllProjets @user_id, done
 
 		it "should remove the user from each project", ->
-			for project_id in ["read-and-write-0", "read-and-write-1", "read-only-0", "read-only-1"]
+			expectedProjects = [
+				"read-and-write-0", "read-and-write-1",
+				"read-only-0", "read-only-1",
+				"token-read-and-write-0", "token-read-and-write-1",
+				"token-read-only-0", "token-read-only-1",
+			]
+			for project_id in expectedProjects
 				@CollaboratorHandler.removeUserFromProject
 					.calledWith(project_id, @user_id)
 					.should.equal true

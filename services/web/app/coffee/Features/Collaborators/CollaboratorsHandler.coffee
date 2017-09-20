@@ -107,12 +107,29 @@ module.exports = CollaboratorsHandler =
 					return callback null, true, member.privilegeLevel
 			return callback null, false, null
 
-	getProjectsUserIsMemberOf: (user_id, fields, callback = (error, readAndWriteProjects, readOnlyProjects) ->) ->
-		Project.find {collaberator_refs:user_id}, fields, (err, readAndWriteProjects)=>
-			return callback(err) if err?
-			Project.find {readOnly_refs:user_id}, fields, (err, readOnlyProjects)=>
-				return callback(err) if err?
-				callback(null, readAndWriteProjects, readOnlyProjects)
+	getProjectsUserIsMemberOf: (user_id, fields, callback = (error, {readAndWrite:[],readOnly:[],tokenReadAndWrite:[],tokenReadOnly:[]}) ->) ->
+		async.mapLimit(
+			[
+				'collaberator_refs',
+				'readOnly_refs',
+				'tokenAccessReadAndWrite_refs',
+				'tokenAccessReadOnly_refs'
+			]
+			, 2
+			, (key, cb) ->
+				query = {}
+				query[key] = user_id
+				Project.find query, fields, cb
+			, (error, results) ->
+				return callback(error) if error?
+				projects = {
+					readAndWrite:      results[0]
+					readOnly:          results[1]
+					tokenReadAndWrite: results[2]
+					tokenReadOnly:     results[3]
+				}
+				callback(null, projects)
+		)
 
 	removeUserFromProject: (project_id, user_id, callback = (error) ->)->
 		logger.log user_id: user_id, project_id: project_id, "removing user"
@@ -125,9 +142,13 @@ module.exports = CollaboratorsHandler =
 			callback(err)
 
 	removeUserFromAllProjets: (user_id, callback = (error) ->) ->
-		CollaboratorsHandler.getProjectsUserIsMemberOf user_id, { _id: 1 }, (error, readAndWriteProjects = [], readOnlyProjects = []) ->
+		CollaboratorsHandler.getProjectsUserIsMemberOf user_id, { _id: 1 }, (error, {readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly}) ->
 			return callback(error) if error?
-			allProjects = readAndWriteProjects.concat(readOnlyProjects)
+			allProjects =
+				readAndWrite
+				.concat(readOnly)
+				.concat(tokenReadAndWrite)
+				.concat(tokenReadOnly)
 			jobs = []
 			for project in allProjects
 				do (project) ->
