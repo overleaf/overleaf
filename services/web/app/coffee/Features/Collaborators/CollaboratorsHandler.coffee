@@ -107,7 +107,7 @@ module.exports = CollaboratorsHandler =
 					return callback null, true, member.privilegeLevel
 			return callback null, false, null
 
-	getProjectsUserIsCollaboratorOf: (user_id, fields, callback = (error, readAndWriteProjects, readOnlyProjects) ->) ->
+	getProjectsUserIsMemberOf: (user_id, fields, callback = (error, readAndWriteProjects, readOnlyProjects) ->) ->
 		Project.find {collaberator_refs:user_id}, fields, (err, readAndWriteProjects)=>
 			return callback(err) if err?
 			Project.find {readOnly_refs:user_id}, fields, (err, readOnlyProjects)=>
@@ -125,7 +125,7 @@ module.exports = CollaboratorsHandler =
 			callback(err)
 
 	removeUserFromAllProjets: (user_id, callback = (error) ->) ->
-		CollaboratorsHandler.getProjectsUserIsCollaboratorOf user_id, { _id: 1 }, (error, readAndWriteProjects = [], readOnlyProjects = []) ->
+		CollaboratorsHandler.getProjectsUserIsMemberOf user_id, { _id: 1 }, (error, readAndWriteProjects = [], readOnlyProjects = []) ->
 			return callback(error) if error?
 			allProjects = readAndWriteProjects.concat(readOnlyProjects)
 			jobs = []

@@ -186,13 +186,13 @@ describe "CollaboratorsHandler", ->
 					.calledWith(null, false, null)
 					.should.equal true
 
-	describe "getProjectsUserIsCollaboratorOf", ->
+	describe "getProjectsUserIsMemberOf", ->
 		beforeEach ->
 			@fields = "mock fields"
 			@Project.find = sinon.stub()
 			@Project.find.withArgs({collaberator_refs:@user_id}, @fields).yields(null, ["mock-read-write-project-1", "mock-read-write-project-2"])
 			@Project.find.withArgs({readOnly_refs:@user_id}, @fields).yields(null, ["mock-read-only-project-1", "mock-read-only-project-2"])
-			@CollaboratorHandler.getProjectsUserIsCollaboratorOf @user_id, @fields, @callback
+			@CollaboratorHandler.getProjectsUserIsMemberOf @user_id, @fields, @callback
 
 		it "should call the callback with the projects", ->
 			@callback
@@ -279,8 +279,8 @@ describe "CollaboratorsHandler", ->
 
 	describe "removeUserFromAllProjects", ->
 		beforeEach (done) ->
-			@CollaboratorHandler.getProjectsUserIsCollaboratorOf = sinon.stub()
-			@CollaboratorHandler.getProjectsUserIsCollaboratorOf.withArgs(@user_id, { _id: 1 }).yields(
+			@CollaboratorHandler.getProjectsUserIsMemberOf = sinon.stub()
+			@CollaboratorHandler.getProjectsUserIsMemberOf.withArgs(@user_id, { _id: 1 }).yields(
 				null,
 				[ { _id: "read-and-write-0" }, { _id: "read-and-write-1" }, null ],
 				[ { _id: "read-only-0" }, { _id: "read-only-1" }, null ]
