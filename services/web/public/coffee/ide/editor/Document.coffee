@@ -271,11 +271,14 @@ define [
 
 		_decodeRanges: (ranges) ->
 			decodeFromWebsockets = (text) -> decodeURIComponent(escape(text))
-			for change in ranges.changes or []
-				change.op.i = decodeFromWebsockets(change.op.i) if change.op.i
-				change.op.d = decodeFromWebsockets(change.op.d) if change.op.d
-			for comment in ranges.comments or []
-				comment.op.c = decodeFromWebsockets(comment.op.c)
+			try
+				for change in ranges.changes or []
+					change.op.i = decodeFromWebsockets(change.op.i) if change.op.i
+					change.op.d = decodeFromWebsockets(change.op.d) if change.op.d
+				for comment in ranges.comments or []
+					comment.op.c = decodeFromWebsockets(comment.op.c)
+			catch err
+				console.log(err)
 
 		_leaveDoc: (callback = (error) ->) ->
 			sl_console.log '[_leaveDoc] Sending leaveDoc request'
