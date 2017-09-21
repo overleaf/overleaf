@@ -18,7 +18,13 @@ Sources =
 module.exports = CollaboratorsHandler =
 
 	getMemberIdsWithPrivilegeLevels: (project_id, callback = (error, members) ->) ->
-		Project.findOne { _id: project_id }, { owner_ref: 1, collaberator_refs: 1, readOnly_refs: 1 }, (error, project) ->
+		projection =
+			owner_ref: 1,
+			collaberator_refs: 1,
+			readOnly_refs: 1,
+			tokenAccessReadOnly_refs: 1,
+			tokenAccessReadAndWrite_refs: 1
+		Project.findOne { _id: project_id }, projection, (error, project) ->
 			return callback(error) if error?
 			return callback new Errors.NotFoundError("no project found with id #{project_id}") if !project?
 			members = []
