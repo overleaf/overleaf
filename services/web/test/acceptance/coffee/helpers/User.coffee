@@ -121,13 +121,13 @@ class User
 				return callback(err)
 			callback(null)
 
-	addUserToProject: (project_id, email, privileges, callback = (error, user) ->) ->
-		@request.post {
-			url: "/project/#{project_id}/users",
-			json: {email, privileges}
-		}, (error, response, body) ->
-			return callback(error) if error?
-			callback(null, body.user)
+	addUserToProject: (project_id, user, privileges, callback = (error, user) ->) ->
+		if privileges == 'readAndWrite'
+			updateOp = {$addToSet: {collaberator_refs: user._id.toString()}}
+		else if privileges == 'readOnly'
+			updateOp = {$addToSet: {readOnly_refs: user._id.toString()}}
+		db.projects.update {_id: db.ObjectId(project_id)}, updateOp, (err) ->
+			callback(err)
 
 	makePublic: (project_id, level, callback = (error) ->) ->
 		@request.post {

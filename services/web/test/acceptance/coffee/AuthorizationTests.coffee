@@ -213,9 +213,9 @@ describe "Authorization", ->
 			@owner.createProject "private-project", (error, project_id) =>
 				return done(error) if error?
 				@project_id = project_id
-				@owner.addUserToProject @project_id, @ro_user.email, "readOnly", (error) =>
+				@owner.addUserToProject @project_id, @ro_user, "readOnly", (error) =>
 					return done(error) if error?
-					@owner.addUserToProject @project_id, @rw_user.email, "readAndWrite", (error) =>
+					@owner.addUserToProject @project_id, @rw_user, "readAndWrite", (error) =>
 						return done(error) if error?
 						done()
 
