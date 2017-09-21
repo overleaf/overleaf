@@ -33,7 +33,7 @@ module.exports = CollaboratorsController =
 	getAllMembers: (req, res, next) ->
 		projectId = req.params.Project_id
 		logger.log {projectId}, "getting all active members for project"
-		CollaboratorsHandler.getAllMembers projectId, (err, members) ->
+		CollaboratorsHandler.getAllInvitedMembers projectId, (err, members) ->
 			if err?
 				logger.err {projectId}, "error getting members for project"
 				return next(err)

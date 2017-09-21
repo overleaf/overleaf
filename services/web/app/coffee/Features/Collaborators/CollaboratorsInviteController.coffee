@@ -114,7 +114,7 @@ module.exports = CollaboratorsInviteController =
 			res.render "project/invite/not-valid", {title: "Invalid Invite"}
 		# check if the user is already a member of the project
 		currentUser = AuthenticationController.getSessionUser(req)
-		CollaboratorsHandler.isUserMemberOfProject currentUser._id, projectId, (err, isMember, _privilegeLevel) ->
+		CollaboratorsHandler.isUserInvitedMemberOfProject currentUser._id, projectId, (err, isMember, _privilegeLevel) ->
 			if err?
 				logger.err {err, projectId}, "error checking if user is member of project"
 				return next(err)

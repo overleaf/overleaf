@@ -157,17 +157,17 @@ describe "CollaboratorsHandler", ->
 				expect(level).to.equal false
 				done()
 
-	describe "isUserMemberOfProject", ->
+	describe "isUserInvitedMemberOfProject", ->
 		beforeEach ->
 			@CollaboratorHandler.getMemberIdsWithPrivilegeLevels = sinon.stub()
 
 		describe "when user is a member of the project", ->
 			beforeEach ->
 				@CollaboratorHandler.getMemberIdsWithPrivilegeLevels.withArgs(@project_id).yields(null, [
-					{ id: "not-the-user", privilegeLevel: "readOnly" }
-					{ id: @user_id, privilegeLevel: "readAndWrite" }
+					{ id: "not-the-user", privilegeLevel: "readOnly", source: 'invite' }
+					{ id: @user_id, privilegeLevel: "readAndWrite", source: 'invite' }
 				])
-				@CollaboratorHandler.isUserMemberOfProject @user_id, @project_id, @callback
+				@CollaboratorHandler.isUserInvitedMemberOfProject @user_id, @project_id, @callback
 
 			it "should return true and the privilegeLevel", ->
 				@callback
@@ -179,7 +179,7 @@ describe "CollaboratorsHandler", ->
 				@CollaboratorHandler.getMemberIdsWithPrivilegeLevels.withArgs(@project_id).yields(null, [
 					{ id: "not-the-user", privilegeLevel: "readOnly" }
 				])
-				@CollaboratorHandler.isUserMemberOfProject @user_id, @project_id, @callback
+				@CollaboratorHandler.isUserInvitedMemberOfProject @user_id, @project_id, @callback
 
 			it "should return false", ->
 				@callback
@@ -314,7 +314,7 @@ describe "CollaboratorsHandler", ->
 					.calledWith(project_id, @user_id)
 					.should.equal true
 
-	describe 'getAllMembers', ->
+	describe 'getAllInvitedMembers', ->
 
 		beforeEach ->
 			@owning_user = {_id: 'owner-id', email: 'owner@example.com', features: {a: 1}}
@@ -323,14 +323,14 @@ describe "CollaboratorsHandler", ->
 				{user: @owning_user,    privilegeLevel: "owner"},
 				{user: @readwrite_user, privilegeLevel: "readAndWrite"}
 			]
-			@CollaboratorHandler.getMembersWithPrivilegeLevels = sinon.stub().callsArgWith(1, null, @members)
+			@CollaboratorHandler.getInvitedMembersWithPrivilegeLevels = sinon.stub().callsArgWith(1, null, @members)
 			@ProjectEditorHandler.buildOwnerAndMembersViews = sinon.stub().returns(@views = {
 				owner: @owning_user,
 				ownerFeatures: @owning_user.features,
 				members: [ {_id: @readwrite_user._id, email: @readwrite_user.email} ]
 			})
 			@callback = sinon.stub()
-			@CollaboratorHandler.getAllMembers @project_id, @callback
+			@CollaboratorHandler.getAllInvitedMembers @project_id, @callback
 
 		it 'should not produce an error', ->
 			@callback.callCount.should.equal 1
@@ -341,8 +341,8 @@ describe "CollaboratorsHandler", ->
 			expect(@callback.firstCall.args[1]).to.deep.equal @views.members
 
 		it 'should call getMembersWithPrivileges', ->
-			@CollaboratorHandler.getMembersWithPrivilegeLevels.callCount.should.equal 1
-			@CollaboratorHandler.getMembersWithPrivilegeLevels.firstCall.args[0].should.equal @project_id
+			@CollaboratorHandler.getInvitedMembersWithPrivilegeLevels.callCount.should.equal 1
+			@CollaboratorHandler.getInvitedMembersWithPrivilegeLevels.firstCall.args[0].should.equal @project_id
 
 		it 'should call ProjectEditorHandler.buildOwnerAndMembersViews', ->
 			@ProjectEditorHandler.buildOwnerAndMembersViews.callCount.should.equal 1
@@ -351,14 +351,14 @@ describe "CollaboratorsHandler", ->
 		describe 'when getMembersWithPrivileges produces an error', ->
 
 			beforeEach ->
-				@CollaboratorHandler.getMembersWithPrivilegeLevels = sinon.stub().callsArgWith(1, new Error('woops'))
+				@CollaboratorHandler.getInvitedMembersWithPrivilegeLevels = sinon.stub().callsArgWith(1, new Error('woops'))
 				@ProjectEditorHandler.buildOwnerAndMembersViews = sinon.stub().returns(@views = {
 					owner: @owning_user,
 					ownerFeatures: @owning_user.features,
 					members: [ {_id: @readwrite_user._id, email: @readwrite_user.email} ]
 				})
 				@callback = sinon.stub()
-				@CollaboratorHandler.getAllMembers @project_id, @callback
+				@CollaboratorHandler.getAllInvitedMembers @project_id, @callback
 
 			it 'should produce an error', ->
 				@callback.callCount.should.equal 1
@@ -366,8 +366,8 @@ describe "CollaboratorsHandler", ->
 				expect(@callback.firstCall.args[0]).to.be.instanceof Error
 
 			it 'should call getMembersWithPrivileges', ->
-				@CollaboratorHandler.getMembersWithPrivilegeLevels.callCount.should.equal 1
-				@CollaboratorHandler.getMembersWithPrivilegeLevels.firstCall.args[0].should.equal @project_id
+				@CollaboratorHandler.getInvitedMembersWithPrivilegeLevels.callCount.should.equal 1
+				@CollaboratorHandler.getInvitedMembersWithPrivilegeLevels.firstCall.args[0].should.equal @project_id
 
 			it 'should not call ProjectEditorHandler.buildOwnerAndMembersViews', ->
 				@ProjectEditorHandler.buildOwnerAndMembersViews.callCount.should.equal 0

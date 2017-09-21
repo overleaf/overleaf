@@ -82,7 +82,7 @@ describe "CollaboratorsController", ->
 			@res.json = sinon.stub()
 			@next = sinon.stub()
 			@members = [{a: 1}]
-			@CollaboratorsHandler.getAllMembers = sinon.stub().callsArgWith(1, null, @members)
+			@CollaboratorsHandler.getAllInvitedMembers = sinon.stub().callsArgWith(1, null, @members)
 			@CollaboratorsController.getAllMembers(@req, @res, @next)
 
 		it 'should not produce an error', ->
@@ -93,13 +93,13 @@ describe "CollaboratorsController", ->
 			@res.json.calledWith({members: @members}).should.equal true
 
 		it 'should call CollaboratorsHandler.getAllMembers', ->
-			@CollaboratorsHandler.getAllMembers.callCount.should.equal 1
+			@CollaboratorsHandler.getAllInvitedMembers.callCount.should.equal 1
 
-		describe 'when CollaboratorsHandler.getAllMembers produces an error', ->
+		describe 'when CollaboratorsHandler.getAllInvitedMembers produces an error', ->
 			beforeEach ->
 				@res.json = sinon.stub()
 				@next = sinon.stub()
-				@CollaboratorsHandler.getAllMembers = sinon.stub().callsArgWith(1, new Error('woops'))
+				@CollaboratorsHandler.getAllInvitedMembers = sinon.stub().callsArgWith(1, new Error('woops'))
 				@CollaboratorsController.getAllMembers(@req, @res, @next)
 
 			it 'should produce an error', ->

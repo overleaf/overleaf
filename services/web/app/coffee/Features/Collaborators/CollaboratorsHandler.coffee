@@ -99,11 +99,11 @@ module.exports = CollaboratorsHandler =
 			return callback(error) if error?
 			return callback null, count - 1 # Don't count project owner
 
-	isUserMemberOfProject: (user_id, project_id, callback = (error, isMember, privilegeLevel) ->) ->
+	isUserInvitedMemberOfProject: (user_id, project_id, callback = (error, isMember, privilegeLevel) ->) ->
 		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members = []) ->
 			return callback(error) if error?
 			for member in members
-				if member.id.toString() == user_id.toString()
+				if member.id.toString() == user_id.toString() and member.source == Sources.INVITE
 					return callback null, true, member.privilegeLevel
 			return callback null, false, null
 
@@ -186,9 +186,9 @@ module.exports = CollaboratorsHandler =
 						logger.error {err: error, project_id, user_id}, "error flushing to TPDS after adding collaborator"
 				callback()
 
-	getAllMembers: (projectId, callback=(err, members)->) ->
+	getAllInvitedMembers: (projectId, callback=(err, members)->) ->
 		logger.log {projectId}, "fetching all members"
-		CollaboratorsHandler.getMembersWithPrivilegeLevels projectId, (error, rawMembers) ->
+		CollaboratorsHandler.getInvitedMembersWithPrivilegeLevels projectId, (error, rawMembers) ->
 			if error?
 				logger.err {projectId, error}, "error getting members for project"
 				return callback(error)
