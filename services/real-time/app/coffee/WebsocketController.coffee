@@ -91,38 +91,28 @@ module.exports = WebsocketController =
 				return callback(error) if error?
 				DocumentUpdaterManager.getDocument project_id, doc_id, fromVersion, (error, lines, version, ranges, ops) ->
 					return callback(error) if error?
+
 					# Encode any binary bits of data so it can go via WebSockets
 					# See http://ecmanaut.blogspot.co.uk/2006/07/encoding-decoding-utf8-in-javascript.html
+					encodeForWebsockets = (text) -> unescape(encodeURIComponent(text))
 					escapedLines = []
 					for line in lines
 						try
-							line = unescape(encodeURIComponent(line))
+							line = encodeForWebsockets(line)
 						catch err
 							logger.err {err, project_id, doc_id, fromVersion, line, client_id: client.id}, "error encoding line uri component"
 							return callback(err)
 						escapedLines.push line
 					if options.encodeRanges
-						if ranges.comments
-							escapedComments = []
-							for comment in ranges.comments
-								try
-									comment.op.c = unescape(encodeURIComponent(comment.op.c))
-								catch err
-									logger.err {err, project_id, doc_id, fromVersion, comment, client_id: client.id}, "error encoding comment uri component"
-									return callback(err)
-								escapedComments.push comment
-							ranges.comments = escapedComments
-						if ranges.changes
-							escapedChanges = []
-							for change in ranges.changes
-								try
-									change.op.i = unescape(encodeURIComponent(change.op.i)) if change.op.i
-									change.op.d = unescape(encodeURIComponent(change.op.d)) if change.op.d
-								catch err
-									logger.err {err, project_id, doc_id, fromVersion, change, client_id: client.id}, "error encoding change uri component"
-									return callback(err)
-								escapedChanges.push change
-							ranges.changes = escapedChanges
+						try
+							for comment in ranges?.comments or []
+								comment.op.c = encodeForWebsockets(comment.op.c)
+							for change in ranges?.changes or []
+								change.op.i = encodeForWebsockets(comment.op.i) if change.op.i
+								change.op.d = encodeForWebsockets(comment.op.d) if change.op.d
+						catch err
+							logger.err {err, project_id, doc_id, fromVersion, ranges, client_id: client.id}, "error encoding range uri component"
+							return callback(err)
 
 					AuthorizationManager.addAccessToDoc client, doc_id
 					client.join(doc_id)
