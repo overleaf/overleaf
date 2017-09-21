@@ -7,6 +7,13 @@ sanitize = require('sanitizer')
 concreteObjectId = require('mongoose').Types.ObjectId
 Errors  = require "../Features/Errors/Errors"
 
+generateToken = (length) ->
+	tokenAlpha = 'bcdfghjkmnpqrstvwxyz'
+	result = ''
+	for _n in [1..length]
+		i = Math.floor(Math.floor(Math.random() * tokenAlpha.length))
+		result += tokenAlpha[i]
+	return result
 
 Schema = mongoose.Schema
 ObjectId = Schema.ObjectId
@@ -34,8 +41,14 @@ ProjectSchema = new Schema
 	imageName         : { type: String }
 	track_changes     : { type: Object }
 	tokens            :
-		readOnly        : { type: String }
-		readAndWrite    : { type: String }
+		readOnly        : {
+			type: String,
+			default: generateToken(14)
+		}
+		readAndWrite    : {
+			type: String,
+			default: Math.random().toString().slice(2, 10) + generateToken(12)
+		}
 	tokenAccessReadOnly_refs         : [ type:ObjectId, ref:'User' ]
 	tokenAccessReadAndWrite_refs     : [ type:ObjectId, ref:'User' ]
 	overleaf          :
