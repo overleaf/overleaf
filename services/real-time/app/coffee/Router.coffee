@@ -85,17 +85,22 @@ module.exports = Router =
 			# doc_id, options, callback
 			# doc_id, fromVersion, options, callback
 			client.on "joinDoc", (doc_id, fromVersion, options, callback) ->
-				if typeof fromVersion == "function"
-					fromVersion = -1
-					options = {}
+				if typeof fromVersion == "function" and !options
 					callback = fromVersion
-				else if typeof fromVersion == "object"
 					fromVersion = -1
-					options = fromVersion
-					callback = options
-				if typeof options == "function"
 					options = {}
+				else if typeof fromVersion == "number" and typeof options == "function"
 					callback = options
+					options = {}
+				else if typeof fromVersion == "object" and typeof options == "function"
+					callback = options
+					options = fromVersion
+					fromVersion = -1
+				else if typeof fromVersion == "number" and typeof options == "object"
+					# Called with 4 args, things are as expected
+				else
+					logger.error { arguments: arguments }, "unexpected arguments"
+					return {} # ????
 
 				WebsocketController.joinDoc client, doc_id, options, fromVersion, (err, args...) ->
 					if err?
