@@ -79,26 +79,23 @@ module.exports = Router =
 					if err?
 						Router._handleError null, err, client, "leaveProject"
 
-			# Variadic. The possible options:
+			# Variadic. The possible arguments:
 			# doc_id, callback
 			# doc_id, fromVersion, callback
 			# doc_id, options, callback
-			# doc_id, options, fromVersion, callback
-			client.on "joinDoc", (doc_id, options, fromVersion, callback) ->
-				# options is optional
+			# doc_id, fromVersion, options, callback
+			client.on "joinDoc", (doc_id, fromVersion, options, callback) ->
+				if typeof fromVersion == "function"
+					fromVersion = -1
+					options = {}
+					callback = fromVersion
+				else if typeof fromVersion == "object"
+					fromVersion = -1
+					options = fromVersion
+					callback = options
 				if typeof options == "function"
 					options = {}
 					callback = options
-					fromVersion = -1
-				else if typeof options == "number"
-					options = {}
-					fromVersion = options
-					callback = fromVersion
-
-				# fromVersion is optional
-				if typeof fromVersion == "function"
-					callback = fromVersion
-					fromVersion = -1
 
 				WebsocketController.joinDoc client, doc_id, options, fromVersion, (err, args...) ->
 					if err?
