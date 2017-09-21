@@ -80,7 +80,7 @@ module.exports = WebsocketController =
 				callback()
 			, WebsocketController.FLUSH_IF_EMPTY_DELAY
 			
-	joinDoc: (client, doc_id, fromVersion = -1, callback = (error, doclines, version, ops, ranges) ->) ->
+	joinDoc: (client, doc_id, options, fromVersion = -1, callback = (error, doclines, version, ops, ranges) ->) ->
 		metrics.inc "editor.join-doc"
 		Utils.getClientAttributes client, ["project_id", "user_id"], (error, {project_id, user_id}) ->
 			return callback(error) if error?
@@ -101,29 +101,28 @@ module.exports = WebsocketController =
 							logger.err {err, project_id, doc_id, fromVersion, line, client_id: client.id}, "error encoding line uri component"
 							return callback(err)
 						escapedLines.push line
-
-					if ranges.comments
-						escapedComments = []
-						for comment in ranges.comments
-							try
-								comment.op.c = unescape(encodeURIComponent(comment.op.c))
-							catch err
-								logger.err {err, project_id, doc_id, fromVersion, comment, client_id: client.id}, "error encoding comment uri component"
-								return callback(err)
-							escapedComments.push comment
-						ranges.comments = escapedComments
-
-					if ranges.changes
-						escapedChanges = []
-						for change in ranges.changes
-							try
-								change.op.i = unescape(encodeURIComponent(change.op.i)) if change.op.i
-								change.op.d = unescape(encodeURIComponent(change.op.d)) if change.op.d
-							catch err
-								logger.err {err, project_id, doc_id, fromVersion, change, client_id: client.id}, "error encoding change uri component"
-								return callback(err)
-							escapedChanges.push change
-						ranges.changes = escapedChanges
+					if options.encodeRanges
+						if ranges.comments
+							escapedComments = []
+							for comment in ranges.comments
+								try
+									comment.op.c = unescape(encodeURIComponent(comment.op.c))
+								catch err
+									logger.err {err, project_id, doc_id, fromVersion, comment, client_id: client.id}, "error encoding comment uri component"
+									return callback(err)
+								escapedComments.push comment
+							ranges.comments = escapedComments
+						if ranges.changes
+							escapedChanges = []
+							for change in ranges.changes
+								try
+									change.op.i = unescape(encodeURIComponent(change.op.i)) if change.op.i
+									change.op.d = unescape(encodeURIComponent(change.op.d)) if change.op.d
+								catch err
+									logger.err {err, project_id, doc_id, fromVersion, change, client_id: client.id}, "error encoding change uri component"
+									return callback(err)
+								escapedChanges.push change
+							ranges.changes = escapedChanges
 
 					AuthorizationManager.addAccessToDoc client, doc_id
 					client.join(doc_id)

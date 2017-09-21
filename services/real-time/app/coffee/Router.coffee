@@ -80,13 +80,13 @@ module.exports = Router =
 						Router._handleError null, err, client, "leaveProject"
 
 
-			client.on "joinDoc", (doc_id, fromVersion, callback) ->
+			client.on "joinDoc", (doc_id, options, fromVersion, callback) ->
 				# fromVersion is optional
 				if typeof fromVersion == "function"
 					callback = fromVersion
 					fromVersion = -1
 
-				WebsocketController.joinDoc client, doc_id, fromVersion, (err, args...) ->
+				WebsocketController.joinDoc client, doc_id, options, fromVersion, (err, args...) ->
 					if err?
 						Router._handleError callback, err, client, "joinDoc", {doc_id, fromVersion}
 					else
