@@ -252,7 +252,7 @@ define [
 
 		_joinDoc: (callback = (error) ->) ->
 			if @doc?
-				@ide.socket.emit 'joinDoc', @doc_id, { encodeRanges: true }, @doc.getVersion(), (error, docLines, version, updates, ranges) =>
+				@ide.socket.emit 'joinDoc', @doc_id, @doc.getVersion(), { encodeRanges: true }, (error, docLines, version, updates, ranges) =>
 					return callback(error) if error?
 					@joined = true
 					@doc.catchUp( updates )
