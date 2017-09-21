@@ -35,11 +35,18 @@ pipeline {
     stage('Compile') {
       steps {
         sh 'node_modules/.bin/grunt install'
+        sh 'node_modules/.bin/grunt compile:acceptance_tests'
       }
     }
     stage('Test') {
       steps {
         sh 'node_modules/.bin/grunt test:unit'
+      }
+    }
+    stage('Acceptance Tests') {
+      steps {
+        sh 'docker pull sharelatex/acceptance-test-runner'
+        sh 'docker run --rm -v $(pwd):/app sharelatex/acceptance-test-runner'
       }
     }
     stage('Package') {
