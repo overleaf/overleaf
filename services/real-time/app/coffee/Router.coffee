@@ -102,7 +102,7 @@ module.exports = Router =
 					logger.error { arguments: arguments }, "unexpected arguments"
 					return {} # ????
 
-				WebsocketController.joinDoc client, doc_id, options, fromVersion, (err, args...) ->
+				WebsocketController.joinDoc client, doc_id, fromVersion, options, (err, args...) ->
 					if err?
 						Router._handleError callback, err, client, "joinDoc", {doc_id, fromVersion}
 					else
