@@ -100,7 +100,7 @@ module.exports = Router =
 					# Called with 4 args, things are as expected
 				else
 					logger.error { arguments: arguments }, "unexpected arguments"
-					return {} # ????
+					return # ????
 
 				WebsocketController.joinDoc client, doc_id, fromVersion, options, (err, args...) ->
 					if err?
