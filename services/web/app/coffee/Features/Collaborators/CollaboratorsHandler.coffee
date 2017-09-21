@@ -44,7 +44,7 @@ module.exports = CollaboratorsHandler =
 	getInvitedMemberIds: (project_id, callback = (error, member_ids) ->) ->
 		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members) ->
 			return callback(error) if error?
-			return callback null, members.filter((m) -> m.source == Sources.INVITE).map((m) -> m.id)
+			return callback null, members.filter((m) -> m.source != Sources.TOKEN).map((m) -> m.id)
 
 	USER_PROJECTION: {
 		_id: 1,
@@ -76,7 +76,7 @@ module.exports = CollaboratorsHandler =
 	getInvitedMembersWithPrivilegeLevels: (project_id, callback = (error, members) ->) ->
 		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members = []) ->
 			return callback(error) if error?
-			members = members.filter((m) -> m.source == Sources.INVITE)
+			members = members.filter((m) -> m.source != Sources.TOKEN)
 			CollaboratorsHandler._loadMembers members, (error, users) ->
 				callback error, users
 
@@ -93,7 +93,7 @@ module.exports = CollaboratorsHandler =
 	getInvitedMemberCount: (project_id, callback = (error, count) ->) ->
 		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members) ->
 			return callback(error) if error?
-			return callback null, (members or []).filter((m) -> m.source == Sources.INVITE).length
+			return callback null, (members or []).filter((m) -> m.source != Sources.TOKEN).length
 
 	getInvitedCollaboratorCount: (project_id, callback = (error, count) ->) ->
 		CollaboratorsHandler.getInvitedMemberCount project_id, (error, count) ->
@@ -104,7 +104,7 @@ module.exports = CollaboratorsHandler =
 		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members = []) ->
 			return callback(error) if error?
 			for member in members
-				if member.id.toString() == user_id.toString() and member.source == Sources.INVITE
+				if member.id.toString() == user_id.toString() and member.source != Sources.TOKEN
 					return callback null, true, member.privilegeLevel
 			return callback null, false, null
 
