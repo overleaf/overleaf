@@ -1,11 +1,6 @@
 pipeline {
   
-  agent {
-    docker {
-      image 'node:4.2.1'
-      args "-v /var/lib/jenkins/.npm:/tmp/.npm"
-    }
-  }
+  agent any
 
   environment  {
       HOME = "/tmp"
@@ -17,29 +12,35 @@ pipeline {
   }
 
   stages {
-    stage('Set up') {
+    stage('Install') {
+      agent {
+        docker {
+          image 'node:4.2.1'
+          args "-v /var/lib/jenkins/.npm:/tmp/.npm -e HOME=/tmp"
+          reuseNode true
+        }
+      }
       steps {
         // we need to disable logallrefupdates, else git clones during the npm install will require git to lookup the user id
         // which does not exist in the container's /etc/passwd file, causing the clone to fail.
         sh 'git config --global core.logallrefupdates false'
-      }
-    }
-    stage('Install') {
-      steps {
         sh 'rm -fr node_modules'
         sh 'npm install'
         sh 'npm rebuild'
         sh 'npm install --quiet grunt-cli'
       }
     }
-    stage('Compile') {
+    stage('Compile and Test') {
+      agent {
+        docker {
+          image 'node:4.2.1'
+          args "-v /var/lib/jenkins/.npm:/tmp/.npm -e HOME=/tmp"
+          reuseNode true
+        }
+      }
       steps {
         sh 'node_modules/.bin/grunt install'
         sh 'node_modules/.bin/grunt compile:acceptance_tests'
-      }
-    }
-    stage('Test') {
-      steps {
         sh 'node_modules/.bin/grunt test:unit'
       }
     }
