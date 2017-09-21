@@ -256,14 +256,36 @@ define [
 					return callback(error) if error?
 					@joined = true
 					@doc.catchUp( updates )
-					@_catchUpRanges( ranges?.changes, ranges?.comments )
+
+					if ranges?.changes
+						changes = for change in ranges.changes
+							change.op.i = decodeURIComponent(escape(change.op.i)) if change.op.i
+							change.op.d = decodeURIComponent(escape(change.op.d)) if change.op.d
+							change
+					if ranges?.comments
+						comments = for comment in ranges.comments
+							comment.op.c = decodeURIComponent(escape(comment.op.c))
+							comment
+
+					@_catchUpRanges( changes, comments )
 					callback()
 			else
 				@ide.socket.emit 'joinDoc', @doc_id, (error, docLines, version, updates, ranges) =>
 					return callback(error) if error?
 					@joined = true
 					@doc = new ShareJsDoc @doc_id, docLines, version, @ide.socket
-					@ranges = new RangesTracker(ranges?.changes, ranges?.comments)
+
+					if ranges?.changes
+						changes = for change in ranges.changes
+							change.op.i = decodeURIComponent(escape(change.op.i)) if change.op.i
+							change.op.d = decodeURIComponent(escape(change.op.d)) if change.op.d
+							change
+					if ranges?.comments
+						comments = for comment in ranges.comments
+							comment.op.c = decodeURIComponent(escape(comment.op.c))
+							comment
+
+					@ranges = new RangesTracker(changes, comments)
 					@_bindToShareJsDocEvents()
 					callback()
 
