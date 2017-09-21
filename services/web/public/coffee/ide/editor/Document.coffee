@@ -256,30 +256,26 @@ define [
 					return callback(error) if error?
 					@joined = true
 					@doc.catchUp( updates )
-					{ changes, comments } = @_decodeRanges(ranges)
-					@_catchUpRanges( changes, comments )
+					@_decodeRanges(ranges)
+					@_catchUpRanges(ranges?.changes, ranges?.comments)
 					callback()
 			else
 				@ide.socket.emit 'joinDoc', @doc_id, { encodeRanges: true }, (error, docLines, version, updates, ranges) =>
 					return callback(error) if error?
 					@joined = true
 					@doc = new ShareJsDoc @doc_id, docLines, version, @ide.socket
-					{ changes, comments } = @_decodeRanges(ranges)
-					@ranges = new RangesTracker(changes, comments)
+					@_decodeRanges(ranges)
+					@ranges = new RangesTracker(ranges?.changes, ranges?.comments)
 					@_bindToShareJsDocEvents()
 					callback()
 
 		_decodeRanges: (ranges) ->
-			if ranges?.changes
-				changes = for change in ranges.changes
-					change.op.i = decodeURIComponent(escape(change.op.i)) if change.op.i
-					change.op.d = decodeURIComponent(escape(change.op.d)) if change.op.d
-					change
-			if ranges?.comments
-				comments = for comment in ranges.comments
-					comment.op.c = decodeURIComponent(escape(comment.op.c))
-					comment
-			{ changes, comments }
+			decodeFromWebsockets = (text) -> decodeURIComponent(escape(text))
+			for change in ranges.changes or []
+				change.op.i = decodeFromWebsockets(change.op.i) if change.op.i
+				change.op.d = decodeFromWebsockets(change.op.d) if change.op.d
+			for comment in ranges.comments or []
+				comment.op.c = decodeFromWebsockets(comment.op.c)
 
 		_leaveDoc: (callback = (error) ->) ->
 			sl_console.log '[_leaveDoc] Sending leaveDoc request'
