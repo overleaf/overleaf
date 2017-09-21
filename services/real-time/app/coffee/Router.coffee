@@ -79,8 +79,22 @@ module.exports = Router =
 					if err?
 						Router._handleError null, err, client, "leaveProject"
 
-
+			# Variadic. The possible options:
+			# doc_id, callback
+			# doc_id, fromVersion, callback
+			# doc_id, options, callback
+			# doc_id, options, fromVersion, callback
 			client.on "joinDoc", (doc_id, options, fromVersion, callback) ->
+				# options is optional
+				if typeof options == "function"
+					options = {}
+					callback = options
+					fromVersion = -1
+				else if typeof options == "number"
+					options = {}
+					fromVersion = options
+					callback = fromVersion
+
 				# fromVersion is optional
 				if typeof fromVersion == "function"
 					callback = fromVersion
