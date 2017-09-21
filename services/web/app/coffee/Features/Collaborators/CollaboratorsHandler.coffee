@@ -13,6 +13,7 @@ ProjectEditorHandler = require "../Project/ProjectEditorHandler"
 Sources =
 	INVITE: 'invite'
 	TOKEN: 'token'
+	OWNER: 'owner'
 
 module.exports = CollaboratorsHandler =
 
@@ -22,7 +23,7 @@ module.exports = CollaboratorsHandler =
 			return callback new Errors.NotFoundError("no project found with id #{project_id}") if !project?
 			members = []
 			# Project owner
-			members.push { id: project.owner_ref.toString(), privilegeLevel: PrivilegeLevels.OWNER }
+			members.push { id: project.owner_ref.toString(), privilegeLevel: PrivilegeLevels.OWNER, source: Sources.OWNER }
 			# Invited members
 			for member_id in project.readOnly_refs or []
 				members.push { id: member_id.toString(), privilegeLevel: PrivilegeLevels.READ_ONLY, source: Sources.INVITE }

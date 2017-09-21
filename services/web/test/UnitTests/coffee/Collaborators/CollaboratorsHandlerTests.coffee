@@ -40,7 +40,7 @@ describe "CollaboratorsHandler", ->
 			it "should return an array of member ids with their privilege levels", ->
 				@callback
 					.calledWith(null, [
-						{ id: "owner-ref", privilegeLevel: "owner" }
+						{ id: "owner-ref", privilegeLevel: "owner", source: 'owner'}
 						{ id: "read-only-ref-1", privilegeLevel: "readOnly", source: 'invite'}
 						{ id: "read-only-ref-2", privilegeLevel: "readOnly", source: 'invite'}
 						{ id: "read-write-ref-1", privilegeLevel: "readAndWrite", source: 'invite'}
