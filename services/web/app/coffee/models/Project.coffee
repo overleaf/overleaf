@@ -43,11 +43,13 @@ ProjectSchema = new Schema
 	tokens            :
 		readOnly        : {
 			type: String,
-			default: generateToken(14)
+			default: generateToken(14),
+			index: {unique: true}
 		}
 		readAndWrite    : {
 			type: String,
 			default: Math.random().toString().slice(2, 10) + generateToken(12)
+			index: {unique: true}
 		}
 	tokenAccessReadOnly_refs         : [ type:ObjectId, ref:'User' ]
 	tokenAccessReadAndWrite_refs     : [ type:ObjectId, ref:'User' ]
