@@ -273,10 +273,10 @@ define [
 			decodeFromWebsockets = (text) -> decodeURIComponent(escape(text))
 			try
 				for change in ranges.changes or []
-					change.op.i = decodeFromWebsockets(change.op.i) if change.op.i
-					change.op.d = decodeFromWebsockets(change.op.d) if change.op.d
+					change.op.i = decodeFromWebsockets(change.op.i) if change.op.i?
+					change.op.d = decodeFromWebsockets(change.op.d) if change.op.d?
 				for comment in ranges.comments or []
-					comment.op.c = decodeFromWebsockets(comment.op.c)
+					comment.op.c = decodeFromWebsockets(comment.op.c) if comment.op.c?
 			catch err
 				console.log(err)
 
