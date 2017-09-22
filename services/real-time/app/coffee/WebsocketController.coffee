@@ -106,7 +106,7 @@ module.exports = WebsocketController =
 					if options.encodeRanges
 						try
 							for comment in ranges?.comments or []
-								comment.op.c = encodeForWebsockets(comment.op.c)
+								comment.op.c = encodeForWebsockets(comment.op.c) if comment.op.c?
 							for change in ranges?.changes or []
 								change.op.i = encodeForWebsockets(change.op.i) if change.op.i?
 								change.op.d = encodeForWebsockets(change.op.d) if change.op.d?
