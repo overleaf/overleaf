@@ -44,10 +44,10 @@ describe "CollaboratorsHandler", ->
 				@callback
 					.calledWith(null, [
 						{ id: "owner-ref", privilegeLevel: "owner", source: 'owner'}
-						{ id: "read-only-ref-1", privilegeLevel: "readOnly", source: 'invite'}
-						{ id: "read-only-ref-2", privilegeLevel: "readOnly", source: 'invite'}
 						{ id: "read-write-ref-1", privilegeLevel: "readAndWrite", source: 'invite'}
 						{ id: "read-write-ref-2", privilegeLevel: "readAndWrite", source: 'invite' }
+						{ id: "read-only-ref-1", privilegeLevel: "readOnly", source: 'invite'}
+						{ id: "read-only-ref-2", privilegeLevel: "readOnly", source: 'invite'}
 					])
 					.should.equal true
 
