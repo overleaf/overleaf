@@ -252,20 +252,33 @@ define [
 
 		_joinDoc: (callback = (error) ->) ->
 			if @doc?
-				@ide.socket.emit 'joinDoc', @doc_id, @doc.getVersion(), (error, docLines, version, updates, ranges) =>
+				@ide.socket.emit 'joinDoc', @doc_id, @doc.getVersion(), { encodeRanges: true }, (error, docLines, version, updates, ranges) =>
 					return callback(error) if error?
 					@joined = true
 					@doc.catchUp( updates )
-					@_catchUpRanges( ranges?.changes, ranges?.comments )
+					@_decodeRanges(ranges)
+					@_catchUpRanges(ranges?.changes, ranges?.comments)
 					callback()
 			else
-				@ide.socket.emit 'joinDoc', @doc_id, (error, docLines, version, updates, ranges) =>
+				@ide.socket.emit 'joinDoc', @doc_id, { encodeRanges: true }, (error, docLines, version, updates, ranges) =>
 					return callback(error) if error?
 					@joined = true
 					@doc = new ShareJsDoc @doc_id, docLines, version, @ide.socket
+					@_decodeRanges(ranges)
 					@ranges = new RangesTracker(ranges?.changes, ranges?.comments)
 					@_bindToShareJsDocEvents()
 					callback()
+
+		_decodeRanges: (ranges) ->
+			decodeFromWebsockets = (text) -> decodeURIComponent(escape(text))
+			try
+				for change in ranges.changes or []
+					change.op.i = decodeFromWebsockets(change.op.i) if change.op.i?
+					change.op.d = decodeFromWebsockets(change.op.d) if change.op.d?
+				for comment in ranges.comments or []
+					comment.op.c = decodeFromWebsockets(comment.op.c) if comment.op.c?
+			catch err
+				console.log(err)
 
 		_leaveDoc: (callback = (error) ->) ->
 			sl_console.log '[_leaveDoc] Sending leaveDoc request'
