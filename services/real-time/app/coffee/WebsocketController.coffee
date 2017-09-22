@@ -108,8 +108,8 @@ module.exports = WebsocketController =
 							for comment in ranges?.comments or []
 								comment.op.c = encodeForWebsockets(comment.op.c)
 							for change in ranges?.changes or []
-								change.op.i = encodeForWebsockets(change.op.i) if change.op.i
-								change.op.d = encodeForWebsockets(change.op.d) if change.op.d
+								change.op.i = encodeForWebsockets(change.op.i) if change.op.i?
+								change.op.d = encodeForWebsockets(change.op.d) if change.op.d?
 						catch err
 							logger.err {err, project_id, doc_id, fromVersion, ranges, client_id: client.id}, "error encoding range uri component"
 							return callback(err)
