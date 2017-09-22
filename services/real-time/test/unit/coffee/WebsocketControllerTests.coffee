@@ -282,6 +282,36 @@ describe 'WebsocketController', ->
 				# Check that unescaping works
 				decodeURIComponent(escape(escaped_word)).should.equal "räksmörgås"
 
+		describe "with comments that need encoding", ->
+			beforeEach ->
+				@ranges.comments = [{ op: { c: "räksmörgås" } }]
+				@WebsocketController.joinDoc @client, @doc_id, -1, { encodeRanges: true }, @callback
+
+			it "should call the callback with the encoded comment", ->
+				encoded_comments = @callback.args[0][4]
+				encoded_comment = encoded_comments.comments.pop()
+				encoded_comment_text = encoded_comment.op.c
+				encoded_comment_text.should.equal 'rÃ¤ksmÃ¶rgÃ¥s'
+
+		describe "with changes that need encoding", ->
+			it "should call the callback with the encoded insert change", ->
+				@ranges.changes = [{ op: { i: "räksmörgås" } }]
+				@WebsocketController.joinDoc @client, @doc_id, -1, { encodeRanges: true }, @callback
+
+				encoded_changes = @callback.args[0][4]
+				encoded_change = encoded_changes.changes.pop()
+				encoded_change_text = encoded_change.op.i
+				encoded_change_text.should.equal 'rÃ¤ksmÃ¶rgÃ¥s'
+
+			it "should call the callback with the encoded delete change", ->
+				@ranges.changes = [{ op: { d: "räksmörgås" } }]
+				@WebsocketController.joinDoc @client, @doc_id, -1, { encodeRanges: true }, @callback
+
+				encoded_changes = @callback.args[0][4]
+				encoded_change = encoded_changes.changes.pop()
+				encoded_change_text = encoded_change.op.d
+				encoded_change_text.should.equal 'rÃ¤ksmÃ¶rgÃ¥s'
+
 		describe "when not authorized", ->
 			beforeEach ->
 				@AuthorizationManager.assertClientCanViewProject = sinon.stub().callsArgWith(1, @err = new Error("not authorized"))
