@@ -221,49 +221,59 @@ describe 'WebsocketController', ->
 			@version = 42
 			@ops = ["mock", "ops"]
 			@ranges = { "mock": "ranges" }
+			@options = {}
 			
 			@client.params.project_id = @project_id
 			@AuthorizationManager.addAccessToDoc = sinon.stub()
 			@AuthorizationManager.assertClientCanViewProject = sinon.stub().callsArgWith(1, null)
 			@DocumentUpdaterManager.getDocument = sinon.stub().callsArgWith(3, null, @doc_lines, @version, @ranges, @ops)
-			
-		describe "with a fromVersion", ->
+
+		describe "works", ->
 			beforeEach ->
-				@fromVersion = 40
-				@WebsocketController.joinDoc @client, @doc_id, @fromVersion, @callback
-				
+				@WebsocketController.joinDoc @client, @doc_id, -1, @options, @callback
+
 			it "should check that the client is authorized to view the project", ->
 				@AuthorizationManager.assertClientCanViewProject
 					.calledWith(@client)
 					.should.equal true
-					
-			it "should get the document from the DocumentUpdaterManager", ->
+
+			it "should get the document from the DocumentUpdaterManager with fromVersion", ->
 				@DocumentUpdaterManager.getDocument
-					.calledWith(@project_id, @doc_id, @fromVersion)
+					.calledWith(@project_id, @doc_id, -1)
 					.should.equal true
 
 			it "should add permissions for the client to access the doc", ->
 				@AuthorizationManager.addAccessToDoc
 					.calledWith(@client, @doc_id)
 					.should.equal true
-					
+
 			it "should join the client to room for the doc_id", ->
 				@client.join
 					.calledWith(@doc_id)
 					.should.equal true
-					
+
 			it "should call the callback with the lines, version, ranges and ops", ->
 				@callback
 					.calledWith(null, @doc_lines, @version, @ops, @ranges)
 					.should.equal true
-					
+
 			it "should increment the join-doc metric", ->
 				@metrics.inc.calledWith("editor.join-doc").should.equal true
+
+		describe "with a fromVersion", ->
+			beforeEach ->
+				@fromVersion = 40
+				@WebsocketController.joinDoc @client, @doc_id, @fromVersion, @options, @callback
 					
+			it "should get the document from the DocumentUpdaterManager with fromVersion", ->
+				@DocumentUpdaterManager.getDocument
+					.calledWith(@project_id, @doc_id, @fromVersion)
+					.should.equal true
+
 		describe "with doclines that need escaping", ->
 			beforeEach ->
 				@doc_lines.push ["räksmörgås"]
-				@WebsocketController.joinDoc @client, @doc_id, -1, @callback
+				@WebsocketController.joinDoc @client, @doc_id, -1, @options, @callback
 						
 			it "should call the callback with the escaped lines", ->
 				escaped_lines = @callback.args[0][1]
@@ -271,11 +281,11 @@ describe 'WebsocketController', ->
 				escaped_word.should.equal 'rÃ¤ksmÃ¶rgÃ¥s'
 				# Check that unescaping works
 				decodeURIComponent(escape(escaped_word)).should.equal "räksmörgås"
-				
+
 		describe "when not authorized", ->
 			beforeEach ->
 				@AuthorizationManager.assertClientCanViewProject = sinon.stub().callsArgWith(1, @err = new Error("not authorized"))
-				@WebsocketController.joinDoc @client, @doc_id, -1, @callback
+				@WebsocketController.joinDoc @client, @doc_id, -1, @options, @callback
 				
 			it "should call the callback with an error", ->
 				@callback.calledWith(@err).should.equal true
