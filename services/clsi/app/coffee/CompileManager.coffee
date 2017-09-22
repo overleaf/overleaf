@@ -9,6 +9,7 @@ Metrics = require "./Metrics"
 child_process = require "child_process"
 DraftModeManager = require "./DraftModeManager"
 TikzManager = require "./TikzManager"
+LockManager = require "./LockManager"
 fs = require("fs")
 fse = require "fs-extra"
 os = require("os")
@@ -26,6 +27,18 @@ getCompileDir = (project_id, user_id) ->
 	Path.join(Settings.path.compilesDir, getCompileName(project_id, user_id))
 
 module.exports = CompileManager =
+
+	doCompileWithLock: (request, callback = (error, outputFiles) ->) ->
+		compileDir = getCompileDir(request.project_id, request.user_id)
+		lockFile = Path.join(compileDir, ".project-lock")
+		# use a .project-lock file in the compile directory to prevent
+		# simultaneous compiles
+		fse.ensureDir compileDir, (error) ->
+			return callback(error) if error?
+			LockManager.runWithLock lockFile, (releaseLock) ->
+				CompileManager.doCompile(request, releaseLock)
+			, callback
+
 	doCompile: (request, callback = (error, outputFiles) ->) ->
 		compileDir = getCompileDir(request.project_id, request.user_id)
 

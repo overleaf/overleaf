@@ -78,7 +78,7 @@ module.exports = ResourceWriter =
 					should_delete = true
 					if path.match(/^output\./) or path.match(/\.aux$/) or path.match(/^cache\//) # knitr cache
 						should_delete = false
-					if path == '.project-sync-state'
+					if path == '.project-sync-state' or path == '.project-lock'
 						should_delete = false
 					if path == "output.pdf" or path == "output.dvi" or path == "output.log" or path == "output.xdv"
 						should_delete = true

@@ -49,7 +49,7 @@ describe "CompileController", ->
 
 		describe "successfully", ->
 			beforeEach ->
-				@CompileManager.doCompile = sinon.stub().callsArgWith(1, null, @output_files)
+				@CompileManager.doCompileWithLock = sinon.stub().callsArgWith(1, null, @output_files)
 				@CompileController.compile @req, @res
 
 			it "should parse the request", ->
@@ -58,7 +58,7 @@ describe "CompileController", ->
 					.should.equal true
 
 			it "should run the compile for the specified project", ->
-				@CompileManager.doCompile
+				@CompileManager.doCompileWithLock
 					.calledWith(@request_with_project_id)
 					.should.equal true
 
@@ -84,7 +84,7 @@ describe "CompileController", ->
 			
 		describe "with an error", ->
 			beforeEach ->
-				@CompileManager.doCompile = sinon.stub().callsArgWith(1, new Error(@message = "error message"), null)
+				@CompileManager.doCompileWithLock = sinon.stub().callsArgWith(1, new Error(@message = "error message"), null)
 				@CompileController.compile @req, @res
 		
 			it "should return the JSON response with the error", ->
@@ -102,7 +102,7 @@ describe "CompileController", ->
 			beforeEach ->
 				@error = new Error(@message = "container timed out")
 				@error.timedout = true
-				@CompileManager.doCompile = sinon.stub().callsArgWith(1, @error, null)
+				@CompileManager.doCompileWithLock = sinon.stub().callsArgWith(1, @error, null)
 				@CompileController.compile @req, @res
 		
 			it "should return the JSON response with the timeout status", ->
@@ -118,7 +118,7 @@ describe "CompileController", ->
 
 		describe "when the request returns no output files", ->
 			beforeEach ->
-				@CompileManager.doCompile = sinon.stub().callsArgWith(1, null, [])
+				@CompileManager.doCompileWithLock = sinon.stub().callsArgWith(1, null, [])
 				@CompileController.compile @req, @res
 		
 			it "should return the JSON response with the failure status", ->

@@ -19,8 +19,49 @@ describe "CompileManager", ->
 			"./CommandRunner": @CommandRunner = {}
 			"./DraftModeManager": @DraftModeManager = {}
 			"./TikzManager": @TikzManager = {}
+			"./LockManager": @LockManager = {}
 			"fs": @fs = {}
 		@callback = sinon.stub()
+
+	describe "doCompileWithLock", ->
+		beforeEach ->
+			@request =
+				resources: @resources = "mock-resources"
+				project_id: @project_id = "project-id-123"
+				user_id: @user_id = "1234"
+			@output_files = ["foo", "bar"]
+			@CompileManager.doCompile = sinon.stub().callsArgWith(1, null, @output_files)
+			@LockManager.runWithLock = (lockFile, runner, callback) ->
+				runner (err, result...) ->
+					callback(err, result...)
+
+		describe "when the project is not locked", ->
+			beforeEach ->
+				@CompileManager.doCompileWithLock @request, @callback
+
+			it "should call doCompile with the request", ->
+				@CompileManager.doCompile
+				.calledWith(@request)
+				.should.equal true
+
+			it "should call the callback with the output files", ->
+				@callback.calledWithExactly(null, @output_files)
+				.should.equal true
+
+		describe "when the project is locked", ->
+			beforeEach ->
+				@error = new Error("locked")
+				@LockManager.runWithLock = (lockFile, runner, callback) =>
+					callback(@error)
+				@CompileManager.doCompileWithLock @request, @callback
+
+			it "should not call doCompile with the request", ->
+				@CompileManager.doCompile
+				.called.should.equal false
+
+			it "should call the callback with the error", ->
+				@callback.calledWithExactly(@error)
+				.should.equal true
 
 	describe "doCompile", ->
 		beforeEach ->

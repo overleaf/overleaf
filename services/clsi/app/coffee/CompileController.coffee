@@ -15,8 +15,11 @@ module.exports = CompileController =
 			request.user_id = req.params.user_id if req.params.user_id?
 			ProjectPersistenceManager.markProjectAsJustAccessed request.project_id, (error) ->
 				return next(error) if error?
-				CompileManager.doCompile request, (error, outputFiles = []) ->
-					if error instanceof Errors.FilesOutOfSyncError
+				CompileManager.doCompileWithLock request, (error, outputFiles = []) ->
+					if error instanceof Errors.AlreadyCompilingError
+						code = 423 # Http 443 Locked
+						status = "compile-in-progress"
+					else if error instanceof Errors.FilesOutOfSyncError
 						code = 409 # Http 409 Conflict
 						status = "retry"
 					else if error?.terminated
