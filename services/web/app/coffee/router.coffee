@@ -44,6 +44,7 @@ SudoModeMiddlewear = require('./Features/SudoMode/SudoModeMiddlewear')
 AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 AnnouncementsController = require("./Features/Announcements/AnnouncementsController")
 LabelsController = require('./Features/Labels/LabelsController')
+TokenAccessController = require('./Features/TokenAccess/TokenAccessController')
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -336,5 +337,13 @@ module.exports = class Router
 			logger.warn err: req.body.error, meta: req.body.meta, "client side error"
 			metrics.inc("client-side-error")
 			res.sendStatus(204)
+
+
+		webRouter.get '/read/:read_only_token([a-z]+)',
+			TokenAccessController.readOnlyToken
+
+		webRouter.get '/:read_and_write_token([0-9]+[a-z]+)',
+			AuthenticationController.requireLogin(),
+			TokenAccessController.readAndWriteToken
 
 		webRouter.get '*', ErrorController.notFound
