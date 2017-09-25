@@ -19,7 +19,20 @@
 
 .project-list-page {
 	position: relative;
+	padding-top: 0;
+	padding-bottom: 0;
 }
+
+	.project-list-sidebar {
+		background-color: @sidebar-bg;
+		padding-top: @content-margin-top;
+		padding-bottom: @content-margin-top;	
+	} 
+
+	.project-list-main {
+		padding-top: @content-margin-top;
+		padding-bottom: @content-margin-top;	
+	}
 
 .project-header {
 	.btn-group > .btn {
@@ -76,7 +89,7 @@
 }
 
 ul.folders-menu {
-	margin: 0;
+	margin: 0 -(@grid-gutter-width / 2);
 	.subdued {
 		color: @gray-light;
 	}
@@ -85,18 +98,22 @@ ul.folders-menu {
 		line-height: 1.8;
 		position: relative;
 		> a {
+			display: block;
 			font-size: 0.9rem;
-			color: #333;
-			padding: (@line-height-computed / 4);
-			display: inline-block;
+			color: @sidebar-link-color;
+			padding: (@line-height-computed / 4) (@grid-gutter-width / 2);
 			line-height: 1.2;
+			&:hover {
+				background-color: @sidebar-hover-bg;
+				text-decoration: @sidebar-hover-text-decoration;
+			}
 		}
 	}
 	> li.active {
 		//border-right: 4px solid @red;
-		background-color: @link-color;
-		border-radius: @border-radius-small;
+		border-radius: @sidebar-active-border-radius;
 		> a {
+			background-color: @sidebar-active-bg;
 			font-weight: 700;
 			color: white;
 			.subdued {
