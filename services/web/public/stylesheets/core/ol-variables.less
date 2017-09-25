@@ -37,6 +37,49 @@
 
 @card-border-radius-base: 3px;
 
+// Button colors and sizing
+@btn-border-width        : 0;
+@btn-border-bottom-width : 0;
+
+@btn-default-color       : #FFF;
+@btn-default-bg          : @ol-blue-gray-4;
+@btn-default-border      : transparent;
+
+@btn-primary-color       : #FFF;
+@btn-primary-bg          : @ol-green;
+@btn-primary-border      : transparent;
+
+@btn-success-color       : #FFF;
+@btn-success-bg          : @ol-green;
+@btn-success-border      : transparent;
+
+@btn-info-color          : #FFF;
+@btn-info-bg             : @ol-blue;
+@btn-info-border         : transparent;
+
+// TODO Warning color-orange?
+@btn-warning-color       : #FFF;
+@btn-warning-bg          : @ol-red;
+@btn-warning-border      : transparent;
+
+@btn-danger-color         : #FFF;
+@btn-danger-bg            : @ol-red;
+@btn-danger-border        : transparent;
+
+
+
+.btn-info {
+  .button-variant(@btn-info-color; @btn-info-bg; @btn-info-border);
+}
+// Warning appears as orange
+.btn-warning {
+  .button-variant(@btn-warning-color; @btn-warning-bg; @btn-warning-border);
+}
+// Danger and error appear as red
+.btn-danger {
+  .button-variant(@btn-danger-color; @btn-danger-bg; @btn-danger-border);
+}
+
 //== Colors
 //
 //## Gray and brand colors for use across Bootstrap.
