@@ -1,11 +1,45 @@
-@ol-green:      #4A9F48;
-@ol-dark-green: #1C5B26;
+@import "./_common-variables.less";
+
+// Styleguide colors
+@ol-blue-gray-1 : #E4E8EE;
+@ol-blue-gray-2 : #9DA7B7;
+@ol-blue-gray-3 : #5D6879;
+@ol-blue-gray-4 : #485973;
+@ol-blue-gray-5 : #2C3645;
+@ol-blue-gray-6 : #1E2530;
+
+@ol-green       : #4F9C45;
+@ol-dark-green  : #1C5B26;
+@ol-blue        : #4B7FD1;
+@ol-dark-blue   : #2857A1;
+@ol-red         : #C9453E;
+@ol-dark-red    : #A6312B;
+
+@ol-type-color  : @ol-blue-gray-3;
+
+// Navbar customization
+@navbar-default-color   : #FFF;
+@navbar-default-bg      : @ol-blue-gray-6;
+@navbar-default-border  : transparent;
+@navbar-brand-image-url : url(/img/ol-brand/logo-horizontal.png);
+
+// Backgrounds
+@body-bg                : @ol-blue-gray-1;
+@content-alt-bg-color   : @ol-blue-gray-1;
+
+// Typography
+@text-color             : @ol-type-color;
+
+// Border radius (used for components, e.g. buttons)
+@border-radius-base     : 999px; // Large enough value to be fully rounded everywhere
+@border-radius-large    : 999px; // As above
+@border-radius-small    : 999px; // As above
+
+@card-border-radius-base: 3px;
 
 //== Colors
 //
 //## Gray and brand colors for use across Bootstrap.
-
-
 @gray-darker:           #252525;
 @gray-dark:             #505050;
 @gray:                  #7a7a7a;
@@ -28,10 +62,7 @@
 @brand-warning:         @orange;
 @brand-danger:          #E03A06;
 
-@navbar-brand-image-url: url(/img/ol-brand/logo-horizontal.png);
 
 @editor-loading-logo-padding-top: 115.44%;
 @editor-loading-logo-background-url: url(/img/ol-brand/overleaf-o-grey.svg);
 @editor-loading-logo-foreground-url: url(/img/ol-brand/overleaf-o.svg);
-
-@import "./_common-variables.less";
