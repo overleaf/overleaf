@@ -21,6 +21,7 @@ describe "CompileManager", ->
 			"./TikzManager": @TikzManager = {}
 			"./LockManager": @LockManager = {}
 			"fs": @fs = {}
+			"fs-extra": @fse = { ensureDir: sinon.stub().callsArg(1) }
 		@callback = sinon.stub()
 
 	describe "doCompileWithLock", ->
@@ -30,6 +31,8 @@ describe "CompileManager", ->
 				project_id: @project_id = "project-id-123"
 				user_id: @user_id = "1234"
 			@output_files = ["foo", "bar"]
+			@Settings.compileDir = "compiles"
+			@compileDir = "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}"
 			@CompileManager.doCompile = sinon.stub().callsArgWith(1, null, @output_files)
 			@LockManager.runWithLock = (lockFile, runner, callback) ->
 				runner (err, result...) ->
@@ -38,6 +41,10 @@ describe "CompileManager", ->
 		describe "when the project is not locked", ->
 			beforeEach ->
 				@CompileManager.doCompileWithLock @request, @callback
+
+			it "should ensure that the compile directory exists", ->
+				@fse.ensureDir.calledWith(@compileDir)
+				.should.equal true
 
 			it "should call doCompile with the request", ->
 				@CompileManager.doCompile
@@ -54,6 +61,10 @@ describe "CompileManager", ->
 				@LockManager.runWithLock = (lockFile, runner, callback) =>
 					callback(@error)
 				@CompileManager.doCompileWithLock @request, @callback
+
+			it "should ensure that the compile directory exists", ->
+				@fse.ensureDir.calledWith(@compileDir)
+				.should.equal true
 
 			it "should not call doCompile with the request", ->
 				@CompileManager.doCompile
