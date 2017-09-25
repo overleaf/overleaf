@@ -1,6 +1,6 @@
 .card {
   background-color: white;
-  border-radius: @card-border-radius-base;
+  border-radius: @border-radius-base;
   -webkit-box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   box-shadow: 0 2px 4px rgba(0,0,0,0.15);
   padding: @line-height-computed;
@@ -39,16 +39,16 @@
             z-index: 1;
             // Make it taller and card like
             margin-top: 0;
-            border-radius: @card-border-radius-base;
+            border-radius: @border-radius-base;
         }
 
         &.card-first {
-            border-top-left-radius: @card-border-radius-base;
-            border-bottom-left-radius: @card-border-radius-base;
+            border-top-left-radius: @border-radius-base;
+            border-bottom-left-radius: @border-radius-base;
         }
         &.card-last {
-            border-top-right-radius: @card-border-radius-base;
-            border-bottom-right-radius: @card-border-radius-base;
+            border-top-right-radius: @border-radius-base;
+            border-bottom-right-radius: @border-radius-base;
         }
     }
 }
