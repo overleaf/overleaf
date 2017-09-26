@@ -9,7 +9,7 @@ Errors = require("../Errors/Errors")
 
 module.exports = ProjectDetailsHandler =
 	getDetails: (project_id, callback)->
-		ProjectGetter.getProject project_id, {name:true, description:true, compiler:true, features:true, owner_ref:true}, (err, project)->
+		ProjectGetter.getProject project_id, {name:true, description:true, compiler:true, features:true, owner_ref:true, overleaf:true}, (err, project)->
 			if err?
 				logger.err err:err, project_id:project_id, "error getting project"
 				return callback(err)
@@ -21,7 +21,11 @@ module.exports = ProjectDetailsHandler =
 					description: project.description
 					compiler: project.compiler
 					features: user.features
-				logger.log project_id:project_id, details:details, "getting project details"
+
+				if project.overleaf?
+					details.overleaf = project.overleaf
+
+				logger.log project_id:project_id, details: details, "getting project details"
 				callback(err, details)
 
 	getProjectDescription: (project_id, callback)->

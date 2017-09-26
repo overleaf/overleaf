@@ -12,7 +12,7 @@ describe 'ProjectDetailsHandler', ->
 	beforeEach ->
 		@project_id = "321l3j1kjkjl"
 		@user_id = "user-id-123"
-		@project = 
+		@project =
 			name: "project"
 			description: "this is a great project"
 			something:"should not exist"
@@ -20,7 +20,7 @@ describe 'ProjectDetailsHandler', ->
 			owner_ref: @user_id
 		@user =
 			features: "mock-features"
-		@ProjectGetter = 
+		@ProjectGetter =
 			getProjectWithoutDocLines: sinon.stub().callsArgWith(1, null, @project)
 			getProject: sinon.stub().callsArgWith(2, null, @project)
 		@ProjectModel =
@@ -42,11 +42,18 @@ describe 'ProjectDetailsHandler', ->
 	describe "getDetails", ->
 
 		it "should find the project and owner", (done)->
-			@handler.getDetails @project_id, (err, details)=>				
+			@handler.getDetails @project_id, (err, details)=>
 				details.name.should.equal @project.name
 				details.description.should.equal @project.description
 				details.compiler.should.equal @project.compiler
 				details.features.should.equal @user.features
+				assert.equal(details.something, undefined)
+				done()
+
+		it "should find overleaf metadata if it exists", (done)->
+			@project.overleaf = { id: 'id' }
+			@handler.getDetails @project_id, (err, details)=>
+				details.overleaf.should.equal @project.overleaf
 				assert.equal(details.something, undefined)
 				done()
 
@@ -79,7 +86,7 @@ describe 'ProjectDetailsHandler', ->
 			@handler.getProjectDescription @project_id, (returnedErr, returnedDescription)=>
 				err.should.equal returnedErr
 				description.should.equal returnedDescription
-				done()	
+				done()
 
 	describe "setProjectDescription", ->
 
@@ -110,7 +117,7 @@ describe 'ProjectDetailsHandler', ->
 			@handler.renameProject @project_id, @newName, =>
 				@tpdsUpdateSender.moveEntity.calledWith({project_id:@project_id, project_name:@project.name, newProjectName:@newName}).should.equal true
 				done()
-		
+
 		it "should not do anything with an invalid name", (done) ->
 			@handler.validateProjectName = sinon.stub().yields(new Error("invalid name"))
 			@handler.renameProject @project_id, @newName, =>
