@@ -4,6 +4,7 @@ UserDeleter = require("./UserDeleter")
 UserUpdater = require("./UserUpdater")
 sanitize = require('sanitizer')
 AuthenticationController = require('../Authentication/AuthenticationController')
+ObjectId = require("mongojs").ObjectId
 
 module.exports = UserController =
 	getLoggedInUsersPersonalInfo: (req, res, next = (error) ->) ->
@@ -19,8 +20,17 @@ module.exports = UserController =
 			UserController.sendFormattedPersonalInfo(user, res, next)
 
 	getPersonalInfo: (req, res, next = (error) ->) ->
-		UserGetter.getUser req.params.user_id, { _id: true, first_name: true, last_name: true, email: true}, (error, user) ->
-			logger.log user_id: req.params.user_id, "reciving request for getting users personal info"
+		{user_id} = req.params
+
+		if user_id.match(/^\d+$/)
+			query = { "overleaf.id": parseInt(user_id, 10) }
+		else if user_id.match(/^[a-f0-9]{24}$/)
+			query = { _id: ObjectId(user_id) }
+		else
+			return res.send(400)
+
+		UserGetter.getUser query, { _id: true, first_name: true, last_name: true, email: true}, (error, user) ->
+			logger.log user_id: req.params.user_id, "receiving request for getting users personal info"
 			return next(error) if error?
 			return res.send(404) if !user?
 			UserController.sendFormattedPersonalInfo(user, res, next)
