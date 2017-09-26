@@ -8,6 +8,7 @@ describe 'WebApiManager', ->
 	beforeEach ->
 		@project_id = "project-id-123"
 		@user_id = "user-id-123"
+		@user = {_id: @user_id}
 		@callback = sinon.stub()
 		@WebApiManager = SandboxedModule.require modulePath, requires:
 			"request": @request = {}
@@ -27,7 +28,7 @@ describe 'WebApiManager', ->
 					privilegeLevel: "owner"
 				}
 				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 200}, @response)
-				@WebApiManager.joinProject @project_id, @user_id, @callback
+				@WebApiManager.joinProject @project_id, @user, @callback
 				
 			it "should send a request to web to join the project", ->
 				@request.post
@@ -41,6 +42,7 @@ describe 'WebApiManager', ->
 							sendImmediately: true
 						json: true
 						jar: false
+						headers: {}
 					})
 					.should.equal true
 					

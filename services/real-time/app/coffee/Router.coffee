@@ -67,6 +67,9 @@ module.exports = Router =
 				user = {_id: "anonymous-user"}
 
 			client.on "joinProject", (data = {}, callback) ->
+				anonToken = session?.anonReadOnlyTokenAccess?[data.project_id]
+				if anonToken
+					user.anonToken = anonToken
 				WebsocketController.joinProject client, user, data.project_id, (err, args...) ->
 					if err?
 						Router._handleError callback, err, client, "joinProject", {project_id: data.project_id, user_id: user?.id}

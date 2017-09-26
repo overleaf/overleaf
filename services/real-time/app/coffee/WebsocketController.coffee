@@ -17,7 +17,7 @@ module.exports = WebsocketController =
 		user_id = user?._id
 		logger.log {user_id, project_id, client_id: client.id}, "user joining project"
 		metrics.inc "editor.join-project"
-		WebApiManager.joinProject project_id, user_id, (error, project, privilegeLevel) ->
+		WebApiManager.joinProject project_id, user, (error, project, privilegeLevel) ->
 			return callback(error) if error?
 
 			if !privilegeLevel or privilegeLevel == ""

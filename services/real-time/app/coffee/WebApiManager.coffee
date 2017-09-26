@@ -3,9 +3,13 @@ settings = require "settings-sharelatex"
 logger = require "logger-sharelatex"
 
 module.exports = WebApiManager =
-	joinProject: (project_id, user_id, callback = (error, project, privilegeLevel) ->) ->
+	joinProject: (project_id, user, callback = (error, project, privilegeLevel) ->) ->
+		user_id = user._id
 		logger.log {project_id, user_id}, "sending join project request to web"
 		url = "#{settings.apis.web.url}/project/#{project_id}/join"
+		headers = {}
+		if user.anonToken?
+			headers['x-sl-anon-token'] = user.anonToken
 		request.post {
 			url: url
 			qs: {user_id}
@@ -15,6 +19,7 @@ module.exports = WebApiManager =
 				sendImmediately: true
 			json: true
 			jar: false
+			headers: headers
 		}, (error, response, data) ->
 			return callback(error) if error?
 			if 200 <= response.statusCode < 300

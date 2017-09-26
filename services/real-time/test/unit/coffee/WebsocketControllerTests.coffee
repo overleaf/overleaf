@@ -58,7 +58,7 @@ describe 'WebsocketController', ->
 				
 			it "should load the project from web", ->
 				@WebApiManager.joinProject
-					.calledWith(@project_id, @user._id)
+					.calledWith(@project_id, @user)
 					.should.equal true
 					
 			it "should join the project room", ->
