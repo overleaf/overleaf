@@ -107,6 +107,8 @@ module.exports = ClsiManager =
 				callback null, compile:status:"project-too-large"
 			else if response.statusCode == 409
 				callback null, compile:status:"conflict"
+			else if response.statusCode == 423
+				callback null, compile:status:"compile-in-progress"
 			else
 				error = new Error("CLSI returned non-success code: #{response.statusCode}")
 				logger.error err: error, project_id: project_id, "CLSI returned failure code"
