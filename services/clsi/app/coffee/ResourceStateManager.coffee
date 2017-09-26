@@ -4,7 +4,6 @@ logger = require "logger-sharelatex"
 settings = require("settings-sharelatex")
 Errors = require "./Errors"
 SafeReader = require "./SafeReader"
-async = require "async"
 
 module.exports = ResourceStateManager =
 
@@ -61,21 +60,9 @@ module.exports = ResourceStateManager =
 		seenFile = {}
 		for file in allFiles
 			seenFile[file] = true
-		missingFileCandidates = (resource.path for resource in resources when not seenFile[resource.path])
-		# now check if they are really missing
-		ResourceStateManager._checkMissingFiles missingFileCandidates, basePath, (missingFiles) ->
-			if missingFiles?.length > 0
-				logger.err missingFiles:missingFiles, basePath:basePath, allFiles:allFiles, resources:resources, "missing input files for project"
-				return callback new Errors.FilesOutOfSyncError("resource files missing in incremental update")
-			else
-				callback()
-
-	_checkMissingFiles: (missingFileCandidates, basePath, callback = (missingFiles) ->) ->
-		if missingFileCandidates.length > 0
-			fileDoesNotExist = (file, cb) ->
-				fs.stat Path.join(basePath, file), (err) ->
-					logger.log file:file, err:err, result: err?, "stating potential missing file"
-					cb(err?)
-			async.filterSeries missingFileCandidates, fileDoesNotExist, callback
+		missingFiles = (resource.path for resource in resources when not seenFile[resource.path])
+		if missingFiles?.length > 0
+			logger.err missingFiles:missingFiles, basePath:basePath, allFiles:allFiles, resources:resources, "missing input files for project"
+			return callback new Errors.FilesOutOfSyncError("resource files missing in incremental update")
 		else
-			callback([])
+			callback()

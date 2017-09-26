@@ -88,26 +88,11 @@ describe "ResourceStateManager", ->
 			it "should call the callback", ->
 				@callback.calledWithExactly().should.equal true
 
-		describe "when there is a file missing from the outputFileFinder but present on disk", ->
-			beforeEach ->
-				@allFiles = [ @resources[0].path, @resources[1].path]
-				@fs.stat = sinon.stub().callsArg(1)
-				@ResourceStateManager.checkResourceFiles(@resources, @allFiles, @basePath, @callback)
-
-			it "should stat the file to see if it is present", ->
-				@fs.stat.called.should.equal true
-
-			it "should call the callback", ->
-				@callback.calledWithExactly().should.equal true
-
 		describe "when there is a missing file", ->
 			beforeEach ->
 				@allFiles = [ @resources[0].path, @resources[1].path]
 				@fs.stat = sinon.stub().callsArgWith(1, new Error())
 				@ResourceStateManager.checkResourceFiles(@resources, @allFiles, @basePath, @callback)
-
-			it "should stat the file to see if it is present", ->
-				@fs.stat.called.should.equal true
 
 			it "should call the callback with an error", ->
 				error = new Errors.FilesOutOfSyncError("resource files missing in incremental update")
