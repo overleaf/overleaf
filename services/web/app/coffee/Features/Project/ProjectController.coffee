@@ -248,6 +248,8 @@ module.exports = ProjectController =
 						return cb(null, false)
 					else
 						return cb(null, true)
+			showAutoCompileOnboarding: (cb) ->
+				return cb(null, true)
 		}, (err, results)->
 			if err?
 				logger.err err:err, "error getting details for project page"
@@ -255,9 +257,9 @@ module.exports = ProjectController =
 			project = results.project
 			user = results.user
 			subscription = results.subscription
-			{ showTrackChangesOnboarding, showPerUserTCNotice } = results
+			{ showTrackChangesOnboarding, showPerUserTCNotice, showAutoCompileOnboarding } = results
 
-			daysSinceLastUpdated =  (new Date() - project.lastUpdated) /86400000
+			daysSinceLastUpdated =  (new Date() - project.lastUpdated) / 86400000
 			logger.log project_id:project_id, daysSinceLastUpdated:daysSinceLastUpdated, "got db results for loading editor"
 
 			AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, (error, privilegeLevel)->
@@ -300,6 +302,7 @@ module.exports = ProjectController =
 					trackChangesState: project.track_changes
 					showTrackChangesOnboarding: !!showTrackChangesOnboarding
 					showPerUserTCNotice: !!showPerUserTCNotice
+					showAutoCompileOnboarding: !!showAutoCompileOnboarding
 					privilegeLevel: privilegeLevel
 					chatUrl: Settings.apis.chat.url
 					anonymous: anonymous

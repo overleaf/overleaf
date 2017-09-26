@@ -73,7 +73,8 @@ define [
 			pdfLayout: 'sideBySide'
 			pdfHidden: false,
 			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}")
-			miniReviewPanelVisible: false
+			miniReviewPanelVisible: false,
+			showAutoCompileOnboarding: window.user.betaProgram and window.showAutoCompileOnboarding
 		}
 		$scope.user = window.user
 
