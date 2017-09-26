@@ -71,11 +71,12 @@ define [
 			view: "editor"
 			chatOpen: false
 			pdfLayout: 'sideBySide'
+			pdfHidden: false,
 			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}")
 			miniReviewPanelVisible: false
 		}
 		$scope.user = window.user
-		
+
 		$scope.$watch "project.features.trackChangesVisible", (visible) ->
 			return if !visible?
 			$scope.ui.showCollabFeaturesOnboarding = window.showTrackChangesOnboarding and visible
@@ -98,6 +99,9 @@ define [
 		$scope.$watch "ui.reviewPanelOpen", (value) ->
 			if value?
 				localStorage "ui.reviewPanelOpen.#{window.project_id}", value
+
+		$scope.$on "layout:pdf:resize", (_, layoutState) ->
+			$scope.ui.pdfHidden = layoutState.east.initClosed
 
 		# Tracking code.
 		$scope.$watch "ui.view", (newView, oldView) ->

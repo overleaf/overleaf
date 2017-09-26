@@ -77,7 +77,7 @@ define [
 
 		autoCompileTimeout = null
 		triggerAutoCompile = () ->
-			return if autoCompileTimeout
+			return if autoCompileTimeout or $scope.ui.pdfHidden
 
 			timeSinceLastCompile = Date.now() - $scope.recompiledAt
 			# If time is non-monotonic, assume that the user's system clock has been
