@@ -113,6 +113,12 @@ pipeline {
       }
     }
     
+    stage('Acceptance Tests') {
+      steps {
+        sh './node_modules/.bin/grunt test:acceptance:docker'
+      }
+    }
+    
     stage('Package') {
       steps {
         sh 'rm -rf ./node_modules/grunt*'
