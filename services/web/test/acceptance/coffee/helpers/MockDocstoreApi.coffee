@@ -2,7 +2,7 @@ express = require("express")
 bodyParser = require "body-parser"
 app = express()
 
-module.exports = MockDocUpdaterApi =
+module.exports = MockDocStoreApi =
 	docs: {}
 
 	run: () ->
