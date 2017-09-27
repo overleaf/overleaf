@@ -77,6 +77,9 @@ define [
 			miniReviewPanelVisible: false,
 			showAutoCompileOnboarding: window.user.betaProgram and window.showAutoCompileOnboarding
 		}
+		$scope.onboarding = {
+			autoCompile: 'unseen'
+		}
 		$scope.user = window.user
 
 		$scope.$watch "project.features.trackChangesVisible", (visible) ->
