@@ -12,7 +12,8 @@ define [
 	"ide/labels/LabelsManager"
 	"ide/review-panel/ReviewPanelManager"
 	"ide/SafariScrollPatcher"
-	"ide/FeatureOnboardingController"
+	"ide/FeatureOnboardingController",
+	"ide/AutoCompileOnboardingController",
 	"ide/settings/index"
 	"ide/share/index"
 	"ide/chat/index"
