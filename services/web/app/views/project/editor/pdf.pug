@@ -344,6 +344,10 @@ div.full-size.pdf(ng-controller="PdfController")
 				strong #{translate("pdf_compile_rate_limit_hit")} 
 				span #{translate("project_flagged_too_many_compiles")}
 
+			.alert.alert-danger(ng-show="pdf.compileInProgress")
+				strong #{translate("pdf_compile_in_progress_error")}
+				span #{translate("pdf_compile_try_again")}
+
 			.alert.alert-danger(ng-show="pdf.timedout")
 				p
 					strong #{translate("timedout")}. 

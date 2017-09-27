@@ -167,6 +167,7 @@ define [
 			$scope.pdf.compileTerminated = false
 			$scope.pdf.compileExited = false
 			$scope.pdf.failedCheck = false
+			$scope.pdf.compileInProgress = false
 
 			# make a cache to look up files by name
 			fileByPath = {}
@@ -223,6 +224,9 @@ define [
 			else if response.status == "validation-problems"
 				$scope.pdf.view = "validation-problems"
 				$scope.pdf.validation = response.validationProblems
+			else if response.status == "compile-in-progress"
+				$scope.pdf.view = 'errors'
+				$scope.pdf.compileInProgress = true
 			else if response.status == "success"
 				$scope.pdf.view = 'pdf'
 				$scope.shouldShowLogs = false
