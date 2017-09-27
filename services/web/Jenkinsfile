@@ -115,7 +115,8 @@ pipeline {
     
     stage('Acceptance Tests') {
       steps {
-        sh './node_modules/.bin/grunt test:acceptance:docker'
+        sh 'docker pull sharelatex/acceptance-test-runner'
+        sh 'docker run --rm -v $(pwd):/app --env SHARELATEX_ALLOW_PUBLIC_ACCESS=true sharelatex/acceptance-test-runner'
       }
     }
     
