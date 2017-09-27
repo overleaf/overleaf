@@ -10,7 +10,7 @@ module.exports = TokenAccessHandler =
 		Project.findOne {
 			'tokens.readOnly': token,
 			'publicAccesLevel': PublicAccessLevels.TOKEN_BASED
-		}, {_id: 1}, (err, project) ->
+		}, {_id: 1, publicAccesLevel: 1}, (err, project) ->
 			return callback(err) if err?
 			callback(null, project)
 
@@ -18,7 +18,7 @@ module.exports = TokenAccessHandler =
 		Project.findOne {
 			'tokens.readAndWrite': token,
 			'publicAccesLevel': PublicAccessLevels.TOKEN_BASED
-		}, {_id: 1}, (err, project) ->
+		}, {_id: 1, publicAccesLevel: 1}, (err, project) ->
 			return callback(err) if err?
 			callback(null, project)
 
@@ -42,13 +42,25 @@ module.exports = TokenAccessHandler =
 		}, (err) ->
 			callback(err)
 
-	grantAnonymousUserTokenAccessViaSession: (req, projectId) ->
+	grantSessionReadOnlyTokenAccess: (req, projectId, token) ->
 		if req.session?
 			if !req.session.anonReadOnlyTokenAccess?
 				req.session.anonReadOnlyTokenAccess = {}
-			req.session.anonReadOnlyTokenAccess[projectId.toString()] = true
+			req.session.anonReadOnlyTokenAccess[projectId.toString()] = token.toString()
 
-	anonymousUserHasTokenAccessViaSession: (req, projectId) ->
-		req?.session?.anonReadOnlyTokenAccess?[projectId.toString()] == true
-
+	requestHasReadOnlyTokenAccess: (req, projectId, callback=(err, allowed)->) ->
+		token = (
+			req?.session?.anonReadOnlyTokenAccess?[projectId.toString()] or
+			req.headers['x-sl-anon-token']
+		)
+		if !token
+			return callback null, false
+		TokenAccessHandler.findProjectWithReadOnlyToken token, (err, project) ->
+			return callback(err) if err?
+			isAllowed = (
+				project? and
+				project.publicAccesLevel == PublicAccessLevels.TOKEN_BASED and
+				project._id.toString() == projectId.toString()
+			)
+			callback null, isAllowed
 

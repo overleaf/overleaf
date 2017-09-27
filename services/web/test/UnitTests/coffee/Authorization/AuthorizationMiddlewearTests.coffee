@@ -55,7 +55,7 @@ describe "AuthorizationMiddlewear", ->
 					describe "when user has permission", ->
 						beforeEach ->
 							@AuthorizationManager[managerMethod]
-								.withArgs(@user_id, @project_id)
+								.withArgs(sinon.match.any, @user_id, @project_id)
 								.yields(null, true)
 
 						it "should return next", ->
@@ -65,7 +65,7 @@ describe "AuthorizationMiddlewear", ->
 					describe "when user doesn't have permission", ->
 						beforeEach ->
 							@AuthorizationManager[managerMethod]
-								.withArgs(@user_id, @project_id)
+								.withArgs(sinon.match.any, @user_id, @project_id)
 								.yields(null, false)
 
 						it "should redirect to redirectToRestricted", ->
@@ -80,7 +80,7 @@ describe "AuthorizationMiddlewear", ->
 						beforeEach ->
 							@AuthenticationController.getLoggedInUserId.returns(null)
 							@AuthorizationManager[managerMethod]
-								.withArgs(null, @project_id)
+								.withArgs(@req, null, @project_id)
 								.yields(null, true)
 
 						it "should return next", ->
@@ -91,7 +91,7 @@ describe "AuthorizationMiddlewear", ->
 						beforeEach ->
 							@AuthenticationController.getLoggedInUserId.returns(null)
 							@AuthorizationManager[managerMethod]
-								.withArgs(null, @project_id)
+								.withArgs(@req, null, @project_id)
 								.yields(null, false)
 
 						it "should redirect to redirectToRestricted", ->
@@ -184,10 +184,10 @@ describe "AuthorizationMiddlewear", ->
 			describe "when user has permission to access all projects", ->
 				beforeEach ->
 					@AuthorizationManager.canUserReadProject
-						.withArgs(@user_id, "project1")
+						.withArgs(sinon.match.any, @user_id, "project1")
 						.yields(null, true)
 					@AuthorizationManager.canUserReadProject
-						.withArgs(@user_id, "project2")
+						.withArgs(sinon.match.any, @user_id, "project2")
 						.yields(null, true)
 
 				it "should return next", ->
@@ -197,10 +197,10 @@ describe "AuthorizationMiddlewear", ->
 			describe "when user doesn't have permission to access one of the projects", ->
 				beforeEach ->
 					@AuthorizationManager.canUserReadProject
-						.withArgs(@user_id, "project1")
+						.withArgs(sinon.match.any, @user_id, "project1")
 						.yields(null, true)
 					@AuthorizationManager.canUserReadProject
-						.withArgs(@user_id, "project2")
+						.withArgs(sinon.match.any, @user_id, "project2")
 						.yields(null, false)
 
 				it "should redirect to redirectToRestricted", ->
@@ -216,10 +216,10 @@ describe "AuthorizationMiddlewear", ->
 					beforeEach ->
 						@AuthenticationController.getLoggedInUserId.returns(null)
 						@AuthorizationManager.canUserReadProject
-							.withArgs(null, "project1")
+							.withArgs(sinon.match.any, null, "project1")
 							.yields(null, true)
 						@AuthorizationManager.canUserReadProject
-							.withArgs(null, "project2")
+							.withArgs(sinon.match.any, null, "project2")
 							.yields(null, true)
 
 					it "should return next", ->
@@ -230,10 +230,10 @@ describe "AuthorizationMiddlewear", ->
 					beforeEach ->
 						@AuthenticationController.getLoggedInUserId.returns(null)
 						@AuthorizationManager.canUserReadProject
-							.withArgs(null, "project1")
+							.withArgs(sinon.match.any, null, "project1")
 							.yields(null, true)
 						@AuthorizationManager.canUserReadProject
-							.withArgs(null, "project2")
+							.withArgs(sinon.match.any, null, "project2")
 							.yields(null, false)
 
 					it "should redirect to redirectToRestricted", ->

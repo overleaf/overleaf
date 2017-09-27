@@ -302,7 +302,7 @@ describe "ProjectController", ->
 			@ProjectGetter.getProject.callsArgWith 2, null, @project
 			@UserModel.findById.callsArgWith(1, null, @user)
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, {})
-			@AuthorizationManager.getPrivilegeLevelForProject.callsArgWith 2, null, "owner"
+			@AuthorizationManager.getPrivilegeLevelForProject.callsArgWith 3, null, "owner"
 			@ProjectDeleter.unmarkAsDeletedByExternalSource = sinon.stub()
 			@InactiveProjectManager.reactivateProjectIfRequired.callsArgWith(1)
 			@AnalyticsManager.getLastOccurance.yields(null, {"mock": "event"})
@@ -335,7 +335,7 @@ describe "ProjectController", ->
 			@ProjectController.loadEditor @req, @res
 
 		it "should not render the page if the project can not be accessed", (done)->
-			@AuthorizationManager.getPrivilegeLevelForProject = sinon.stub().callsArgWith 2, null, null
+			@AuthorizationManager.getPrivilegeLevelForProject = sinon.stub().callsArgWith 3, null, null
 			@res.sendStatus = (resCode, opts)=>
 				resCode.should.equal 401
 				done()

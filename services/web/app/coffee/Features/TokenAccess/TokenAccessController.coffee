@@ -28,7 +28,7 @@ module.exports = TokenAccessController =
 					logger.err {err, token, userId, projectId: project._id},
 						"error adding user to project with readAndWrite token"
 					return next(err)
-				return res.redirect("/project/#{project._id}")
+				return res.redirect(307, "/project/#{project._id}")
 
 	readOnlyToken: (req, res, next) ->
 		userId = AuthenticationController.getLoggedInUserId(req)
@@ -46,8 +46,8 @@ module.exports = TokenAccessController =
 			if !userId?
 				logger.log {userId, projectId: project._id},
 					"adding anonymous user to project with readOnly token"
-				TokenAccessHandler.grantAnonymousUserTokenAccessViaSession(req, project._id)
-				return res.redirect("/project/#{project._id}")
+				TokenAccessHandler.grantSessionReadOnlyTokenAccess(req, project._id, token)
+				return res.redirect(307, "/project/#{project._id}")
 			else
 				logger.log {userId, projectId: project._id},
 					"adding user to project with readOnly token"
@@ -56,6 +56,6 @@ module.exports = TokenAccessController =
 						logger.err {err, token, userId, projectId: project._id},
 							"error adding user to project with readAndWrite token"
 						return next(err)
-					res.redirect("/project/#{project._id}")
+					res.redirect(307, "/project/#{project._id}")
 
 

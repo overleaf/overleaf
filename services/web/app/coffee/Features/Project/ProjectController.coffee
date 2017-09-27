@@ -260,7 +260,7 @@ module.exports = ProjectController =
 			daysSinceLastUpdated =  (new Date() - project.lastUpdated) /86400000
 			logger.log project_id:project_id, daysSinceLastUpdated:daysSinceLastUpdated, "got db results for loading editor"
 
-			AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, (error, privilegeLevel)->
+			AuthorizationManager.getPrivilegeLevelForProject req, user_id, project_id, (error, privilegeLevel)->
 				return next(error) if error?
 				if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
 					return res.sendStatus 401

@@ -20,7 +20,7 @@ module.exports = EditorHttpController =
 			user_id = null
 		logger.log {user_id, project_id}, "join project request"
 		Metrics.inc "editor.join-project"
-		EditorHttpController._buildJoinProjectView project_id, user_id, (error, project, privilegeLevel) ->
+		EditorHttpController._buildJoinProjectView req, project_id, user_id, (error, project, privilegeLevel) ->
 			return next(error) if error?
 			res.json {
 				project: project
@@ -30,7 +30,7 @@ module.exports = EditorHttpController =
 			if project?.deletedByExternalDataSource
 				ProjectDeleter.unmarkAsDeletedByExternalSource project_id
 
-	_buildJoinProjectView: (project_id, user_id, callback = (error, project, privilegeLevel) ->) ->
+	_buildJoinProjectView: (req, project_id, user_id, callback = (error, project, privilegeLevel) ->) ->
 		logger.log {project_id, user_id}, "building the joinProject view"
 		ProjectGetter.getProjectWithoutDocLines project_id, (error, project) ->
 			return callback(error) if error?
@@ -39,7 +39,7 @@ module.exports = EditorHttpController =
 				return callback(error) if error?
 				UserGetter.getUser user_id, { isAdmin: true }, (error, user) ->
 					return callback(error) if error?
-					AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, (error, privilegeLevel) ->
+					AuthorizationManager.getPrivilegeLevelForProject req, user_id, project_id, (error, privilegeLevel) ->
 						return callback(error) if error?
 						if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
 							logger.log {project_id, user_id, privilegeLevel}, "not an acceptable privilege level, returning null"

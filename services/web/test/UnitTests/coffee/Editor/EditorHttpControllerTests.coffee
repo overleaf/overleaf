@@ -39,7 +39,7 @@ describe "EditorHttpController", ->
 			@projectView = {
 				_id: @project_id
 			}
-			@EditorHttpController._buildJoinProjectView = sinon.stub().callsArgWith(2, null, @projectView, "owner")
+			@EditorHttpController._buildJoinProjectView = sinon.stub().callsArgWith(3, null, @projectView, "owner")
 			@ProjectDeleter.unmarkAsDeletedByExternalSource = sinon.stub()
 			
 		describe "successfully", ->
@@ -48,7 +48,7 @@ describe "EditorHttpController", ->
 				
 			it "should get the project view", ->
 				@EditorHttpController._buildJoinProjectView
-					.calledWith(@project_id, @user_id)
+					.calledWith(@req, @project_id, @user_id)
 					.should.equal true
 					
 			it "should return the project and privilege level", ->
@@ -87,7 +87,7 @@ describe "EditorHttpController", ->
 			
 			it "should pass the user id as null", ->
 				@EditorHttpController._buildJoinProjectView
-					.calledWith(@project_id, null)
+					.calledWith(@req, @project_id, null)
 					.should.equal true
 
 	describe "_buildJoinProjectView", ->
@@ -116,8 +116,8 @@ describe "EditorHttpController", ->
 		describe "when authorized", ->
 			beforeEach ->
 				@AuthorizationManager.getPrivilegeLevelForProject =
-					sinon.stub().callsArgWith(2, null, "owner")
-				@EditorHttpController._buildJoinProjectView(@project_id, @user_id, @callback)
+					sinon.stub().callsArgWith(3, null, "owner")
+				@EditorHttpController._buildJoinProjectView(@req, @project_id, @user_id, @callback)
 				
 			it "should find the project without doc lines", ->
 				@ProjectGetter.getProjectWithoutDocLines
@@ -136,7 +136,7 @@ describe "EditorHttpController", ->
 					
 			it "should check the privilege level", ->
 				@AuthorizationManager.getPrivilegeLevelForProject
-					.calledWith(@user_id, @project_id)
+					.calledWith(@req, @user_id, @project_id)
 					.should.equal true
 
 			it 'should include the invites', ->
@@ -150,8 +150,8 @@ describe "EditorHttpController", ->
 		describe "when not authorized", ->
 			beforeEach ->
 				@AuthorizationManager.getPrivilegeLevelForProject =
-					sinon.stub().callsArgWith(2, null, null)
-				@EditorHttpController._buildJoinProjectView(@project_id, @user_id, @callback)
+					sinon.stub().callsArgWith(3, null, null)
+				@EditorHttpController._buildJoinProjectView(@req, @project_id, @user_id, @callback)
 				
 			it "should return false in the callback", ->
 				@callback.calledWith(null, null, false).should.equal true
