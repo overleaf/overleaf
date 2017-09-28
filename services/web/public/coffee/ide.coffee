@@ -74,12 +74,11 @@ define [
 			pdfLayout: 'sideBySide'
 			pdfHidden: false,
 			pdfWidth: 0,
-			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}")
+			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}"),
 			miniReviewPanelVisible: false,
-			showAutoCompileOnboarding: window.user.betaProgram and window.showAutoCompileOnboarding
 		}
 		$scope.onboarding = {
-			autoCompile: 'unseen'
+			autoCompile: if window.user.betaProgram and window.showAutoCompileOnboarding then 'unseen' else 'dismissed'
 		}
 		$scope.user = window.user
 
