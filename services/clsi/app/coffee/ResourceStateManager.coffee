@@ -50,14 +50,19 @@ module.exports = ResourceStateManager =
 				resources = ({path: path} for path in resourceList)
 				callback(null, resources)
 
-	checkResourceFiles: (resources, allFiles, directory, callback = (error) ->) ->
+	checkResourceFiles: (resources, allFiles, basePath, callback = (error) ->) ->
+		# check the paths are all relative to current directory
+		for file in resources or []
+			for dir in file?.path?.split('/')
+				if dir == '..'
+					return callback new Error("relative path in resource file list")
 		# check if any of the input files are not present in list of files
 		seenFile = {}
 		for file in allFiles
 			seenFile[file] = true
 		missingFiles = (resource.path for resource in resources when not seenFile[resource.path])
-		if missingFiles.length > 0
-			logger.err missingFiles:missingFiles, dir:directory, allFiles:allFiles, resources:resources, "missing input files for project"
+		if missingFiles?.length > 0
+			logger.err missingFiles:missingFiles, basePath:basePath, allFiles:allFiles, resources:resources, "missing input files for project"
 			return callback new Errors.FilesOutOfSyncError("resource files missing in incremental update")
 		else
 			callback()

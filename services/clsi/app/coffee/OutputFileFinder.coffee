@@ -29,8 +29,10 @@ module.exports = OutputFileFinder =
 		callback = (error, fileList) ->
 			_callback(error, fileList)
 			_callback = () ->
-				
-		args = [directory, "-name", ".*", "-prune", "-o", "-type", "f", "-print"]
+
+		# don't include clsi-specific files/directories in the output list
+		EXCLUDE_DIRS = ["-name", ".cache", "-o", "-name", ".archive","-o", "-name", ".project-*"]
+		args = [directory, "(", EXCLUDE_DIRS..., ")", "-prune", "-o", "-type", "f", "-print"]
 		logger.log args: args, "running find command"
 
 		proc = spawn("find", args)
