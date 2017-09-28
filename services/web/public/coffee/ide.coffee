@@ -73,6 +73,7 @@ define [
 			chatOpen: false
 			pdfLayout: 'sideBySide'
 			pdfHidden: false,
+			pdfWidth: 0,
 			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}")
 			miniReviewPanelVisible: false,
 			showAutoCompileOnboarding: window.user.betaProgram and window.showAutoCompileOnboarding
@@ -107,6 +108,7 @@ define [
 
 		$scope.$on "layout:pdf:resize", (_, layoutState) ->
 			$scope.ui.pdfHidden = layoutState.east.initClosed
+			$scope.ui.pdfWidth = layoutState.east.size
 
 		# Tracking code.
 		$scope.$watch "ui.view", (newView, oldView) ->
