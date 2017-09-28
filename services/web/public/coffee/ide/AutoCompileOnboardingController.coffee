@@ -10,15 +10,14 @@ define [
 			$scope.placement = 'left'
 			popover.offset({
 				top: top,
-				left: left - popover.width() - 11 # Width of arrow
+				left: left - popover.width()
 			})
 		else
 			$scope.placement = 'right'
 			angular.element('.onboarding__autocompile').offset({
 				top: top,
-				left: left + recompileBtn.width() + 11 # Width of arrow
+				left: left + recompileBtn.width()
 			})
-
 
 		$scope.dismiss = () ->
 			$scope.onboarding.autoCompile = 'dismissed'
