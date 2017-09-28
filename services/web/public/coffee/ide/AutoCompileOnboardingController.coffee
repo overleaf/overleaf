@@ -6,6 +6,8 @@ define [
 		popover = angular.element('.onboarding__autocompile')
 		{ top, left } = recompileBtn.offset()
 
+		# If pdf panel smaller than recompile button + popover, show to left.
+		# Otherwise show to right
 		if $scope.ui.pdfWidth < 475
 			$scope.placement = 'left'
 			popover.offset({
