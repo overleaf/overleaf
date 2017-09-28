@@ -193,7 +193,6 @@ define [
 				chromeVersion? &&
 				(chromeVersion == 61 || chromeVersion == 62)
 			)
-			console.log chromeVersion, browserIsChrome61or62
 			if browserIsChrome61or62
 				document.styleSheets[0].insertRule(".ace_editor.ace_autocomplete .ace_completion-highlight { text-shadow: none !important; }", 1)
 		catch err
