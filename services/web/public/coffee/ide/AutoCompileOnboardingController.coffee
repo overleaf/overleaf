@@ -6,7 +6,7 @@ define [
 		{ top, left } = recompileBtn.offset()
 		angular.element('.onboarding__autocompile').offset({
 			top: top,
-			left: left + 170
+			left: left + recompileBtn.width() + 11 # Width of arrow
 		})
 
 		$scope.dismiss = () ->
