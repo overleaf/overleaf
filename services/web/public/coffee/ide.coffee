@@ -185,6 +185,21 @@ define [
 		if ide.browserIsSafari
 			ide.safariScrollPatcher = new SafariScrollPatcher($scope)
 
+		# Fix Chrome 61 and 62 text-shadow rendering
+		browserIsChrome61or62 = false
+		try
+			chromeVersion = parseFloat(navigator.userAgent.split(" Chrome/")[1]) || null;
+			browserIsChrome61or62 = (
+				chromeVersion? &&
+				(chromeVersion == 61 || chromeVersion == 62)
+			)
+			console.log chromeVersion, browserIsChrome61or62
+			if browserIsChrome61or62
+				document.styleSheets[0].insertRule(".ace_editor.ace_autocomplete .ace_completion-highlight { text-shadow: none !important; }", 1)
+		catch err
+			console.error err
+
+
 		# User can append ?ft=somefeature to url to activate a feature toggle
 		ide.featureToggle = location?.search?.match(/^\?ft=(\w+)$/)?[1]
 
