@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "AutoCompileOnboardingController", ($scope) ->
+	App.controller "AutoCompileOnboardingController", ($scope, event_tracking) ->
 		recompileBtn = angular.element('#recompile')
 		popover = angular.element('.onboarding__autocompile')
 		{ top, left } = recompileBtn.offset()
