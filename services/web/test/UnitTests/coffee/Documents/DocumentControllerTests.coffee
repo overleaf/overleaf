@@ -24,6 +24,7 @@ describe "DocumentController", ->
 		@doc_lines = ["one", "two", "three"]
 		@version = 42
 		@ranges = {"mock": "ranges"}
+		@pathname = '/a/b/c/file.tex'
 		@rev = 5
 
 	describe "getDocument", ->
@@ -34,12 +35,12 @@ describe "DocumentController", ->
 
 		describe "when the document exists", ->
 			beforeEach ->
-				@ProjectEntityHandler.getDoc = sinon.stub().callsArgWith(2, null, @doc_lines, @rev, @version, @ranges)
+				@ProjectEntityHandler.getDoc = sinon.stub().callsArgWith(3, null, @doc_lines, @rev, @version, @ranges, @pathname)
 				@DocumentController.getDocument(@req, @res, @next)
 
 			it "should get the document from Mongo", ->
 				@ProjectEntityHandler.getDoc
-					.calledWith(@project_id, @doc_id)
+					.calledWith(@project_id, @doc_id, pathname: true)
 					.should.equal true
 
 			it "should return the document data to the client as JSON", ->
@@ -48,10 +49,11 @@ describe "DocumentController", ->
 					lines: @doc_lines
 					version: @version
 					ranges: @ranges
+					pathname: @pathname
 
 		describe "when the document doesn't exist", ->
 			beforeEach ->
-				@ProjectEntityHandler.getDoc = sinon.stub().callsArgWith(2, new Errors.NotFoundError("not found"), null)
+				@ProjectEntityHandler.getDoc = sinon.stub().callsArgWith(3, new Errors.NotFoundError("not found"), null)
 				@DocumentController.getDocument(@req, @res, @next)
 
 			it "should call next with the NotFoundError", ->
