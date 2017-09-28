@@ -378,7 +378,7 @@
 .navbar-default {
   background-color: @navbar-default-bg;
   border-color: @navbar-default-border;
-  padding: 1rem 2rem;
+  padding: @navbar-default-padding;
 
   .navbar-brand {
     position: absolute;
@@ -400,11 +400,11 @@
     > li > a {
       color: @navbar-default-link-color;
       border: 2px solid transparent;
-      border-radius: @border-radius-base;
-      font-size: @font-size-base * .8;
-      font-weight: 700;
-      line-height: 1;
-      padding: 10px 10px 11px;
+      border-radius: @navbar-btn-border-radius;
+      font-size: @navbar-btn-font-size;
+      font-weight: @navbar-btn-font-weight;
+      line-height: @navbar-btn-line-height;
+      padding: @navbar-btn-padding;
 
       &:hover,
       &:focus {
@@ -432,15 +432,15 @@
 
     > li.subdued > a {
       border: 0;
-      color: @gray;
-      padding: 12px 12px 13px;
+      color: @navbar-subdued-color;
+      padding: @navbar-subdued-padding;
       margin-left: 0;
       &:hover {
-        color: @gray-dark;
-        background-color: @gray-lightest;
+        color: @navbar-subdued-hover-color;
+        background-color: @navbar-subdued-hover-bg;
       }
       &:focus {
-          color: @gray;
+          color: @navbar-subdued-color;
           background-color: transparent;
       }
     }
@@ -485,8 +485,8 @@
       &,
       &:hover,
       &:focus {
-        color: @gray-dark;
-        background-color: @gray-lightest;
+        color: @navbar-subdued-hover-color;
+        background-color: @navbar-subdued-hover-bg;
       }
     }
 

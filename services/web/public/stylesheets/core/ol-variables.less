@@ -21,7 +21,7 @@
 @navbar-default-color   : #FFF;
 @navbar-default-bg      : @ol-blue-gray-6;
 @navbar-default-border  : transparent;
-@navbar-brand-image-url : url(/img/ol-brand/logo-horizontal.png);
+@navbar-brand-image-url : url(/img/ol-brand/overleaf-white.svg);
 
 // Backgrounds
 @body-bg                : @ol-blue-gray-1;
@@ -56,6 +56,23 @@
 @btn-info-bg             : @ol-blue;
 @btn-info-border         : transparent;
 
+// Navbar
+@navbar-default-padding           : (@grid-gutter-width / 2) 0;
+@navbar-default-link-color        : #FFF;
+@navbar-default-link-hover-bg     : @ol-green;
+@navbar-default-link-active-bg    : @ol-green;
+@navbar-default-link-hover-color  : @ol-green;
+@navbar-btn-font-size             : @font-size-base;
+@navbar-btn-border-radius         : @btn-border-radius-base;
+@navbar-btn-font-weight           : 400;
+@navbar-btn-padding               : (@padding-base-vertical - 1) @padding-base-horizontal @padding-base-vertical;
+@navbar-btn-line-height           : @line-height-base;
+
+@navbar-subdued-color             : #FFF;
+@navbar-subdued-padding           : (@padding-base-vertical + 1) (@padding-base-horizontal + 1) (@padding-base-vertical + 2);
+@navbar-subdued-hover-bg          : #FFF;
+@navbar-subdued-hover-color       : @ol-green;
+
 // TODO Warning color-orange?
 @btn-warning-color       : #FFF;
 @btn-warning-bg          : @ol-red;
@@ -75,7 +92,6 @@
 @sidebar-active-bg              : @ol-blue-gray-6;
 @sidebar-hover-bg               : @ol-blue-gray-4;
 @sidebar-hover-text-decoration  : none;
-
 
 // Project table
 @structured-list-link-color     : @ol-blue;
@@ -107,7 +123,6 @@
 @brand-info:            @ol-dark-green;
 @brand-warning:         @orange;
 @brand-danger:          #E03A06;
-
 
 @editor-loading-logo-padding-top: 115.44%;
 @editor-loading-logo-background-url: url(/img/ol-brand/overleaf-o-grey.svg);
