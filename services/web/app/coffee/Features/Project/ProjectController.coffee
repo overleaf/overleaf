@@ -249,7 +249,16 @@ module.exports = ProjectController =
 					else
 						return cb(null, true)
 			showAutoCompileOnboarding: (cb) ->
-				return cb(null, true)
+				cb = underscore.once(cb)
+				if (!user_id?)
+					return cb()
+				AnalyticsManager.getLastOccurance user_id, "shown-autocompile-onboarding", (error, event) ->
+					if error?
+						return cb(null, false)
+					else if event?
+						return cb(null, false)
+					else
+						return cb(null, true)
 		}, (err, results)->
 			if err?
 				logger.err err:err, "error getting details for project page"
