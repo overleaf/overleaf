@@ -192,6 +192,13 @@ define [
 				scope: $scope
 			}
 
+		$scope.openMakeTokenBasedModal = () ->
+			$modal.open {
+				templateUrl: "makeTokenBasedModalTemplate"
+				controller:  "MakeTokenBasedModalController"
+				scope: $scope
+			}
+
 		$scope.done = () ->
 			$modalInstance.close()
 
@@ -206,6 +213,17 @@ define [
 		$scope.makePublic = () ->
 			$scope.project.publicAccesLevel = $scope.inputs.privileges
 			settings.saveProjectAdminSettings({publicAccessLevel: $scope.inputs.privileges})
+			$modalInstance.close()
+
+		$scope.cancel = () ->
+			$modalInstance.dismiss()
+	]
+
+	App.controller "MakeTokenBasedModalController", ["$scope", "$modalInstance", "settings", ($scope, $modalInstance, settings) ->
+
+		$scope.makeTokenBased = () ->
+			$scope.project.publicAccesLevel = "tokenBased"
+			settings.saveProjectAdminSettings({publicAccessLevel: "tokenBased"})
 			$modalInstance.close()
 
 		$scope.cancel = () ->

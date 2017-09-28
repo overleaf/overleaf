@@ -64,6 +64,7 @@ module.exports = ProjectDetailsHandler =
 
 	setPublicAccessLevel : (project_id, newAccessLevel, callback = ->)->
 		logger.log project_id: project_id, level: newAccessLevel, "set public access level"
-		if project_id? && newAccessLevel? and _.include [PublicAccessLevels.READ_ONLY, PublicAccessLevels.READ_AND_WRITE, PublicAccessLevels.PRIVATE], newAccessLevel
+		# TODO: remove the read-only and read-and-write items from here
+		if project_id? && newAccessLevel? and _.include [PublicAccessLevels.READ_ONLY, PublicAccessLevels.READ_AND_WRITE, PublicAccessLevels.PRIVATE, PublicAccessLevels.TOKEN_BASED], newAccessLevel
 			Project.update {_id:project_id},{publicAccesLevel:newAccessLevel}, (err)->
 				callback()

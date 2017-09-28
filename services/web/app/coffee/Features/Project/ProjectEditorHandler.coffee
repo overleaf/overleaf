@@ -18,6 +18,7 @@ module.exports = ProjectEditorHandler =
 			deletedDocs: project.deletedDocs
 			members:     []
 			invites:     invites
+			tokens:      project.tokens
 
 		if !result.invites?
 			result.invites = []

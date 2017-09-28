@@ -8,15 +8,30 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 		h3 #{translate("share_project")}
 	.modal-body.modal-body-share
 		.container-fluid
+
+			//- Private
 			.row.public-access-level(ng-show="project.publicAccesLevel == 'private'")
 				.col-xs-12.text-center
 					| #{translate("this_project_is_private")}
 					| &nbsp;&nbsp;
 					a(
 						href
-						ng-click="openMakePublicModal()"
-					) #{translate("make_public")}
-			.row.public-access-level(ng-show="project.publicAccesLevel != 'private'")
+						ng-click="openMakeTokenBasedModal()"
+					) #{translate("make_token_based")}
+
+			//- Token-based access
+			.row.public-access-level(ng-show="project.publicAccesLevel == 'tokenBased'")
+				.col-xs-12.text-center
+					strong
+						| #{translate("this_project_is_token_based_access")}
+						| &nbsp;&nbsp;
+					a(
+						href
+						ng-click="openMakePrivateModal()"
+					) #{translate("make_private")}
+
+			//- legacy public-access
+			.row.public-access-level(ng-show="project.publicAccesLevel == 'readAndWrite' || project.publicAccesLevel == 'readOnly'")
 				.col-xs-12.text-center
 					strong(ng-if="project.publicAccesLevel == 'readAndWrite'") #{translate("this_project_is_public")}
 					strong(ng-if="project.publicAccesLevel == 'readOnly'") #{translate("this_project_is_public_read_only")}
@@ -25,6 +40,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						href
 						ng-click="openMakePrivateModal()"
 					) #{translate("make_private")}
+
 			.row.project-member
 				.col-xs-8 {{ project.owner.email }}
 				.text-left(
@@ -179,6 +195,24 @@ script(type="text/ng-template", id="makePublicModalTemplate")
 		button.btn.btn-info(
 			ng-click="makePublic()"
 		) #{translate("make_public")}
+
+script(type="text/ng-template", id="makeTokenBasedModalTemplate")
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
+		h3 #{translate("make_project_token_based")}?
+	.modal-body.modal-body-share
+		p #{translate("make_project_token_based_consequences")}
+	.modal-footer
+		button.btn.btn-default(
+			ng-click="cancel()"
+		) #{translate("cancel")}
+		button.btn.btn-info(
+			ng-click="makeTokenBased()"
+		) #{translate("make_token_based")}
 
 script(type="text/ng-template", id="makePrivateModalTemplate")
 	.modal-header
