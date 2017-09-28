@@ -64,7 +64,7 @@ module.exports = AuthorizationManager =
 								return callback(err) if err?
 								if publicAccessLevel == PublicAccessLevels.READ_ONLY
 									callback null, PrivilegeLevels.READ_ONLY, true
-								if publicAccessLevel == PublicAccessLevels.READ_AND_WRITE
+								else if publicAccessLevel == PublicAccessLevels.READ_AND_WRITE
 									callback null, PrivilegeLevels.READ_AND_WRITE, true
 								else
 									callback null, PrivilegeLevels.NONE, false
