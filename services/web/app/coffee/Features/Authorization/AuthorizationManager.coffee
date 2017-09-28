@@ -10,6 +10,15 @@ TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
 
 module.exports = AuthorizationManager =
 
+	getPublicAccessLevel: (project_id, callback=(err, level)->) ->
+		if !ObjectId.isValid(project_id)
+			return callback(new Error("invalid project id"))
+		# Note, the Project property in the DB is `publicAccesLevel`, without the second `s`
+		Project.findOne { _id: project_id }, { publicAccesLevel: 1 }, (error, project) ->
+			return callback(error) if error?
+			if !project?
+				return callback new Errors.NotFoundError("no project found with id #{project_id}")
+			callback null, project.publicAccesLevel
 
 	# Get the privilege level that the user has for the project
 	# Returns:
@@ -18,19 +27,9 @@ module.exports = AuthorizationManager =
 	#   * becausePublic: true if the access level is only because the project is public.
 	getPrivilegeLevelForProject: (req, user_id, project_id,
 																callback = (error, privilegeLevel, becausePublic) ->) ->
-
-		getPublicAccessLevel = (project_id, cb=(err, level)->) ->
-			if !ObjectId.isValid(project_id)
-				return cb(new Error("invalid project id"))
-			Project.findOne { _id: project_id }, { publicAccesLevel: 1 }, (error, project) ->
-				return cb(error) if error?
-				if !project?
-					return cb new Errors.NotFoundError("no project found with id #{project_id}")
-				cb null, project.publicAccesLevel
-
 		if !user_id?
 			# User is Anonymous, Try Token-based access
-			getPublicAccessLevel project_id, (err, publicAccessLevel) ->
+			AuthorizationManager.getPublicAccessLevel project_id, (err, publicAccessLevel) ->
 				return callback(err) if err?
 				if publicAccessLevel == PublicAccessLevels.TOKEN_BASED
 					TokenAccessHandler.requestHasReadOnlyTokenAccess req, project_id, (err, allowed) ->
@@ -60,7 +59,7 @@ module.exports = AuthorizationManager =
 						else
 							# Legacy public-access system
 							# User is present (not anonymous), but does not have direct access
-							getPublicAccessLevel project_id, (err, publicAccessLevel) ->
+							AuthorizationManager.getPublicAccessLevel project_id, (err, publicAccessLevel) ->
 								return callback(err) if err?
 								if publicAccessLevel == PublicAccessLevels.READ_ONLY
 									callback null, PrivilegeLevels.READ_ONLY, true
