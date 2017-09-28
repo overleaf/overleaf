@@ -19,7 +19,7 @@ pipeline {
       agent {
         docker {
           image 'node:6.11.2'
-          args "-e HOME=/tmp"
+          args "-v /var/lib/jenkins/.npm:/tmp/.npm -e HOME=/tmp"
           reuseNode true
         }
       }
