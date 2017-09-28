@@ -12,6 +12,9 @@ catch e
 
 convertToPng = (pdfPath, pngPath, callback = (error) ->) ->
 	convert = ChildProcess.exec "convert #{fixturePath(pdfPath)} #{fixturePath(pngPath)}"
+	stdout = ""
+	convert.stdout.on "data", (chunk) -> console.log "STDOUT", chunk.toString()
+	convert.stderr.on "data", (chunk) -> console.log "STDERR", chunk.toString()
 	convert.on "exit", () ->
 		callback()
 
