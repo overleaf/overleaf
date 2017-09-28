@@ -95,17 +95,17 @@ div.full-size(
 )
 	include ./pdf
 
-div(
+.onboarding__autocompile.popover(
 	ng-controller="AutoCompileOnboardingController"
 	ng-if="onboarding.autoCompile == 'show'"
+	ng-class="placement"
 )
-	.onboarding__autocompile.popover(ng-class="placement")
-		.arrow
-		.popover-inner
-			h3.popover-title Auto Compile
-			.popover-content
-				p Try out the new auto compile setting!
-				img(src="/img/onboarding/autocompile/setting-dropdown.png" width="100%")
-				p When enabled, your project will be compiled after you finish your sentence.
-				button.btn.btn-default.btn-block(ng-click="dismiss()")
-					| Got it
+	.arrow
+	.popover-inner
+		h3.popover-title Auto Compile
+		.popover-content
+			p Try out the new auto compile setting!
+			img(src="/img/onboarding/autocompile/setting-dropdown.png" width="100%")
+			p When enabled, your project will be compiled after you finish your sentence.
+			button.btn.btn-default.btn-block(ng-click="dismiss()")
+				| Got it
