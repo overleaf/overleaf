@@ -30,6 +30,7 @@ pipeline {
         sh 'npm install ./_docker-runner'
         sh 'rm -fr ./_docker-runner ./_docker-runner@tmp'
         sh 'npm install'
+        sh 'npm rebuild'
         sh 'npm install --quiet grunt-cli'
       }
     }
