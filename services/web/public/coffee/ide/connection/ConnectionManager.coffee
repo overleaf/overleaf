@@ -154,9 +154,12 @@ define [], () ->
 			# Note: if the "joinProject" message doesn't reach the server
 			# (e.g. if we are in a disconnected state at this point) the
 			# callback will never be executed
-			@ide.socket.emit 'joinProject', {
+			data = {
 				project_id: @ide.project_id
-			}, (err, project, permissionsLevel, protocolVersion) =>
+			}
+			if window.anonToken
+				data.anonToken = window.anonToken
+			@ide.socket.emit 'joinProject', data, (err, project, permissionsLevel, protocolVersion) =>
 				if err? or !project?
 					return @reportConnectionError(err)
 

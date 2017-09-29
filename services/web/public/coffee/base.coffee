@@ -19,7 +19,7 @@ define [
 		"ngTagsInput"
 	]).config ($qProvider, sixpackProvider, $httpProvider)->
 		if window.anonToken
-			$httpProvider.defaults.headers.common['Authorization'] = window.anonToken
+			$httpProvider.defaults.headers.common['x-sl-anon-token'] = window.anonToken
 		$qProvider.errorOnUnhandledRejections(false)
 		sixpackProvider.setOptions({
 			debug: false
