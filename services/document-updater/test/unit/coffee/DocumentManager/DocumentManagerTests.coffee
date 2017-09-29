@@ -160,7 +160,7 @@ describe "DocumentManager", ->
 					.should.equal true
 
 			it "should call the callback with the doc info", ->
-				@callback.calledWith(null, @lines, @version, @ranges, @unflushedTime, true).should.equal true
+				@callback.calledWith(null, @lines, @version, @ranges, @pathname, @unflushedTime, true).should.equal true
 
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
@@ -188,7 +188,7 @@ describe "DocumentManager", ->
 					.should.equal true
 
 			it "should call the callback with the doc info", ->
-				@callback.calledWith(null, @lines, @version, @ranges, null, false).should.equal true
+				@callback.calledWith(null, @lines, @version, @ranges, @pathname, null, false).should.equal true
 
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
@@ -199,7 +199,7 @@ describe "DocumentManager", ->
 				@beforeLines = ["before", "lines"]
 				@afterLines = ["after", "lines"]
 				@ops = [{ i: "foo", p: 4 }, { d: "bar", p: 42 }]
-				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @beforeLines, @version, @ranges, @unflushedTime, true)
+				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @beforeLines, @version, @ranges, @pathname, @unflushedTime, true)
 				@DiffCodec.diffAsShareJsOp = sinon.stub().callsArgWith(2, null, @ops)
 				@UpdateManager.applyUpdate = sinon.stub().callsArgWith(3, null)
 				@DocumentManager.flushDocIfLoaded = sinon.stub().callsArg(2)
@@ -250,7 +250,7 @@ describe "DocumentManager", ->
 
 			describe "when not already loaded", ->
 				beforeEach ->
-					@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @beforeLines, @version, null, false)
+					@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @beforeLines, @version, @pathname, null, false)
 					@DocumentManager.setDoc @project_id, @doc_id, @afterLines, @source, @user_id, false, @callback
 
 				it "should flush and delete the doc from the doc updater", ->
@@ -408,7 +408,7 @@ describe "DocumentManager", ->
 
 			describe "and has only changes that don't need to be flushed", ->
 				beforeEach ->
-					@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, Date.now() - 100, true)
+					@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname, Date.now() - 100, true)
 					@DocumentManager.getDocAndFlushIfOld @project_id, @doc_id, @callback
 
 				it "should get the doc", ->

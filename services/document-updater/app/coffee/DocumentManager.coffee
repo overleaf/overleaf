@@ -11,7 +11,7 @@ RangesManager = require "./RangesManager"
 MAX_UNFLUSHED_AGE = 300 * 1000 # 5 mins, document should be flushed to mongo this time after a change
 
 module.exports = DocumentManager =
-	getDoc: (project_id, doc_id, _callback = (error, lines, version, ranges, unflushedTime, alreadyLoaded) ->) ->
+	getDoc: (project_id, doc_id, _callback = (error, lines, version, ranges, pathname, unflushedTime, alreadyLoaded) ->) ->
 		timer = new Metrics.Timer("docManager.getDoc")
 		callback = (args...) ->
 			timer.done()
@@ -26,9 +26,9 @@ module.exports = DocumentManager =
 					logger.log {project_id, doc_id, lines, version}, "got doc from persistence API"
 					RedisManager.putDocInMemory project_id, doc_id, lines, version, ranges, pathname, (error) ->
 						return callback(error) if error?
-						callback null, lines, version, ranges, null, false
+						callback null, lines, version, ranges, pathname, null, false
 			else
-				callback null, lines, version, ranges, unflushedTime, true
+				callback null, lines, version, ranges, pathname, unflushedTime, true
 
 	getDocAndRecentOps: (project_id, doc_id, fromVersion, _callback = (error, lines, version, recentOps, ranges) ->) ->
 		timer = new Metrics.Timer("docManager.getDocAndRecentOps")
@@ -55,7 +55,7 @@ module.exports = DocumentManager =
 			return callback(new Error("No lines were provided to setDoc"))
 
 		UpdateManager = require "./UpdateManager"
-		DocumentManager.getDoc project_id, doc_id, (error, oldLines, version, ranges, unflushedTime, alreadyLoaded) ->
+		DocumentManager.getDoc project_id, doc_id, (error, oldLines, version, ranges, pathname, unflushedTime, alreadyLoaded) ->
 			return callback(error) if error?
 
 			if oldLines? and oldLines.length > 0 and oldLines[0].text?
