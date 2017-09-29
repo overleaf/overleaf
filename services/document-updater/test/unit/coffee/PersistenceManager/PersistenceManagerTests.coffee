@@ -22,6 +22,7 @@ describe "PersistenceManager", ->
 		@version = 42
 		@callback = sinon.stub()
 		@ranges = { comments: "mock", entries: "mock" }
+		@pathname = '/a/b/c.tex'
 		@Settings.apis =
 			web:
 				url: @url = "www.example.com"
@@ -29,13 +30,14 @@ describe "PersistenceManager", ->
 				pass: @pass = "password"
 
 	describe "getDoc", ->
-	
+
 		describe "with a successful response from the web api", ->
 			beforeEach ->
 				@request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify({
 					lines: @lines,
 					version: @version,
 					ranges: @ranges
+					pathname: @pathname,
 				}))
 				@PersistenceManager.getDoc(@project_id, @doc_id, @callback)
 
@@ -56,7 +58,7 @@ describe "PersistenceManager", ->
 					.should.equal true
 
 			it "should call the callback with the doc lines, version and ranges", ->
-				@callback.calledWith(null, @lines, @version, @ranges).should.equal true
+				@callback.calledWith(null, @lines, @version, @ranges, @pathname).should.equal true
 
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
@@ -76,7 +78,7 @@ describe "PersistenceManager", ->
 			beforeEach ->
 				@request.callsArgWith(1, null, {statusCode: 404}, "")
 				@PersistenceManager.getDoc(@project_id, @doc_id, @callback)
-				
+
 			it "should return a NotFoundError", ->
 				@callback.calledWith(new Errors.NotFoundError("not found")).should.equal true
 
@@ -87,7 +89,7 @@ describe "PersistenceManager", ->
 			beforeEach ->
 				@request.callsArgWith(1, null, {statusCode: 500}, "")
 				@PersistenceManager.getDoc(@project_id, @doc_id, @callback)
-				
+
 			it "should return an error", ->
 				@callback.calledWith(new Error("web api error")).should.equal true
 
@@ -155,7 +157,7 @@ describe "PersistenceManager", ->
 			beforeEach ->
 				@request.callsArgWith(1, null, {statusCode: 404}, "")
 				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @ranges, @callback)
-				
+
 			it "should return a NotFoundError", ->
 				@callback.calledWith(new Errors.NotFoundError("not found")).should.equal true
 
@@ -166,7 +168,7 @@ describe "PersistenceManager", ->
 			beforeEach ->
 				@request.callsArgWith(1, null, {statusCode: 500}, "")
 				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @ranges, @callback)
-				
+
 			it "should return an error", ->
 				@callback.calledWith(new Error("web api error")).should.equal true
 
