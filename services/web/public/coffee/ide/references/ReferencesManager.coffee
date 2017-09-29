@@ -44,22 +44,18 @@ define [
 				docIds: docIds
 				shouldBroadcast: shouldBroadcast
 				_csrf: window.csrfToken
-			$.post(
+			@ide.$http.post(
 				"/project/#{@$scope.project_id}/references/index",
-				opts,
-				(data) =>
-					# console.log ">> got keys ", data
-					@_storeReferencesKeys(data.keys)
-			)
+				opts
+			).then (response) =>
+				@_storeReferencesKeys(response.data.keys)
 
 		indexAllReferences: (shouldBroadcast) ->
 			opts =
 				shouldBroadcast: shouldBroadcast
 				_csrf: window.csrfToken
-			$.post(
+			@ide.$http.post(
 				"/project/#{@$scope.project_id}/references/indexAll",
-				opts,
-				(data) =>
-					# console.log ">> got keys ", data
-					@_storeReferencesKeys(data.keys)
-			)
+				opts
+			).then (response) =>
+				@_storeReferencesKeys(response.data.keys)
