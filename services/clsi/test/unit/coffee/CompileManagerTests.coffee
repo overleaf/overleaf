@@ -108,7 +108,7 @@ describe "CompileManager", ->
 			@OutputFileFinder.findOutputFiles = sinon.stub().callsArgWith(2, null, @output_files)
 			@OutputCacheManager.saveOutputFiles = sinon.stub().callsArgWith(2, null, @build_files)
 			@DraftModeManager.injectDraftMode = sinon.stub().callsArg(1)
-			@TikzManager.needsOutputFile = sinon.stub().returns(false)
+			@TikzManager.checkMainFile = sinon.stub().callsArg(3, false)
 		
 		describe "normally", ->
 			beforeEach ->

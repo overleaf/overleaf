@@ -7,34 +7,63 @@ describe 'TikzManager', ->
 	beforeEach ->
 		@TikzManager = SandboxedModule.require modulePath, requires:
 			"./ResourceWriter": @ResourceWriter = {}
+			"./SafeReader": @SafeReader = {}
 			"fs": @fs = {}
 			"logger-sharelatex": @logger = {log: () ->}
 
-	describe "needsOutputFile", ->
-		it "should return true if there is a \\tikzexternalize", ->
-			@TikzManager.needsOutputFile("main.tex", [
-				{ path: 'foo.tex' },
-				{ path: 'main.tex', content:'foo \\usepackage{tikz} \\tikzexternalize' }
-			]).should.equal true
+	describe "checkMainFile", ->
+		beforeEach ->
+				@compileDir = "compile-dir"
+				@mainFile = "main.tex"
+				@callback = sinon.stub()
 
-		it "should return false if there is no \\tikzexternalize", ->
-			@TikzManager.needsOutputFile("main.tex", [
-				{ path: 'foo.tex' },
-				{ path: 'main.tex', content:'foo \\usepackage{tikz}' }
-			]).should.equal false
+		describe "if there is already an output.tex file in the resources", ->
+			beforeEach ->
+				@resources = [{path:"main.tex"},{path:"output.tex"}]
+				@TikzManager.checkMainFile @compileDir, @mainFile, @resources, @callback
 
-		it "should return false if there is already an output.tex file", ->
-			@TikzManager.needsOutputFile("main.tex", [
-				{ path: 'foo.tex' },
-				{ path: 'main.tex', content:'foo \\usepackage{tikz} \\tikzexternalize' },
-				{ path: 'output.tex' }
-			]).should.equal false
+			it "should call the callback with false ", ->
+				@callback.calledWithExactly(null, false)
+				.should.equal true
 
-		it "should return false if the file has no content", ->
-			@TikzManager.needsOutputFile("main.tex", [
-				{ path: 'foo.tex' },
-				{ path: 'main.tex' }
-			]).should.equal false
+		describe "if there is no output.tex file in the resources", ->
+			beforeEach ->
+				@resources = [{path:"main.tex"}]
+				@ResourceWriter.checkPath = sinon.stub()
+					.withArgs(@compileDir, @mainFile)
+					.callsArgWith(2, null, "#{@compileDir}/#{@mainFile}")
+
+			describe "and the main file contains tikzexternalize", ->
+				beforeEach ->
+					@SafeReader.readFile = sinon.stub()
+						.withArgs("#{@compileDir}/#{@mainFile}")
+						.callsArgWith(3, null, "hello \\tikzexternalize")
+					@TikzManager.checkMainFile @compileDir, @mainFile, @resources, @callback
+
+				it "should look at the file on disk", ->
+					@SafeReader.readFile
+					.calledWith("#{@compileDir}/#{@mainFile}")
+					.should.equal true
+
+				it "should call the callback with true ", ->
+					@callback.calledWithExactly(null, true)
+					.should.equal true
+
+			describe "and the main file does not contain tikzexternalize", ->
+				beforeEach ->
+					@SafeReader.readFile = sinon.stub()
+						.withArgs("#{@compileDir}/#{@mainFile}")
+						.callsArgWith(3, null, "hello")
+					@TikzManager.checkMainFile @compileDir, @mainFile, @resources, @callback
+
+				it "should look at the file on disk", ->
+					@SafeReader.readFile
+					.calledWith("#{@compileDir}/#{@mainFile}")
+					.should.equal true
+
+				it "should call the callback with false", ->
+					@callback.calledWithExactly(null, false)
+					.should.equal true
 
 	describe "injectOutputFile", ->
 		beforeEach ->
