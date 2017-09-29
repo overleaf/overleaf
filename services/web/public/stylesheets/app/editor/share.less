@@ -6,15 +6,6 @@
 		font-size: 1rem;
 	}
 
-	.access-token-display {
-		padding-top: 8px;
-		.access-token {
-			background-color: @gray-lightest;
-			border: 1px solid @gray-lighter;
-			padding: 6px 12px 6px 12px
-		}
-	}
-
 	.project-member, .project-invite, .public-access-level {
 		padding: (@line-height-computed / 2) 0;
 		border-bottom: 1px solid @gray-lighter;
@@ -25,7 +16,19 @@
 		color: @gray;
 		padding-top: 0;
 		font-size: 12px;
-		padding-bottom: @line-height-computed;
+		padding-bottom: @line-height-computed/2;
+		.access-token-display-area {
+			margin-top: @line-height-computed/4;
+			.access-token-wrapper {
+				padding-top: @line-height-computed/4;
+				.access-token {
+					margin-top: @line-height-computed/4;
+					background-color: @gray-lightest;
+					border: 1px solid @gray-lighter;
+					padding: 6px 12px 6px 12px
+				}
+			}
+		}
 	}
 
 	.project-member, .project-invite {

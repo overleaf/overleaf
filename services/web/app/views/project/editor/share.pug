@@ -12,30 +12,30 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 			//- Private
 			.row.public-access-level(ng-show="project.publicAccesLevel == 'private'")
 				.col-xs-12.text-center
-					| #{translate("this_project_is_private")}
+					| Link-sharing is off, only invited users can view this project.
 					| &nbsp;&nbsp;
 					a(
 						href
 						ng-click="openMakeTokenBasedModal()"
-					) #{translate("make_token_based")}
+					) Turn on link-sharing
 
 			//- Token-based access
 			.row.public-access-level(ng-show="project.publicAccesLevel == 'tokenBased'")
 				.col-xs-12.text-center
 					strong
-						| #{translate("this_project_is_token_based_access")}
+						| Link-sharing is on.
 						| &nbsp;&nbsp;
 					a(
 						href
 						ng-click="openMakePrivateModal()"
-					) #{translate("make_private")}
-				.col-xs-12.access-token-display
-					div
-						strong #{translate("read_only")}
-						pre.access-token {{ getReadOnlyTokenLink() }}
-					div
-						strong #{translate("read_and_write")}
+					) Turn off link-sharing
+				.col-xs-12.access-token-display-area
+					div.access-token-wrapper
+						strong Anyone with this link can edit this project
 						pre.access-token {{ getReadAndWriteTokenLink() }}
+					div.access-token-wrapper
+						strong Anyone with this link can access this project
+						pre.access-token {{ getReadOnlyTokenLink() }}
 
 			//- legacy public-access
 			.row.public-access-level(ng-show="project.publicAccesLevel == 'readAndWrite' || project.publicAccesLevel == 'readOnly'")
