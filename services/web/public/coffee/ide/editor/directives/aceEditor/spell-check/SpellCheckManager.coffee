@@ -5,7 +5,7 @@ define [
 	Range = ace.require("ace/range").Range
 
 	class SpellCheckManager
-		constructor: (@$scope, @editor, @element, @cache) ->
+		constructor: (@$scope, @editor, @element, @cache, @$http) ->
 			$(document.body).append @element.find(".spell-check-menu")
 			
 			@updatedLines = []
@@ -235,18 +235,11 @@ define [
 		apiRequest: (endpoint, data, callback = (error, result) ->)->
 			data.token = window.user.id
 			data._csrf = window.csrfToken
-			options =
-				url: "/spelling" + endpoint
-				type: "POST"
-				dataType: "json"
-				headers:
-					"Content-Type": "application/json"
-				data: JSON.stringify data
-				success: (data, status, xhr) ->
-					callback null, data
-				error: (xhr, status, error) ->
-					callback error
-			return $.ajax options
+			@$http.post("/spelling" + endpoint, data)
+			.then (response) =>
+				callback(null, response.data)
+			.catch (response) =>
+				callback(new Error('api failure'))
 
 		blacklistedCommandRegex: ///
 			\\                    # initial backslash
