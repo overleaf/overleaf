@@ -14,6 +14,9 @@ module.exports =
 			pass: "password"
 		trackchanges:
 			url: "http://localhost:3015"
+		project_history:
+			url: "http://localhost:3054"
+			enabled: true
 
 	redis:
 		realtime:
@@ -65,6 +68,10 @@ module.exports =
 			key_schema:
 				uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
 				docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:#{project_id}"
+
+		project_history:
+			key_schema:
+				projectHistoryOps: ({project_id}) -> "ProjectHistory:Ops:#{project_id}"
 			# cluster: [{
 			# 	port: "7000"
 			# 	host: "localhost"

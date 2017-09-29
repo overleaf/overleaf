@@ -138,7 +138,7 @@ module.exports = DocumentManager =
 				return callback(new Errors.NotFoundError("document not found: #{doc_id}"))
 			RangesManager.acceptChanges change_ids, ranges, (error, new_ranges) ->
 				return callback(error) if error?
-				RedisManager.updateDocument doc_id, lines, version, [], new_ranges, (error) ->
+				RedisManager.updateDocument project_id, doc_id, lines, version, [], new_ranges, (error) ->
 					return callback(error) if error?
 					callback()
 
@@ -154,7 +154,7 @@ module.exports = DocumentManager =
 				return callback(new Errors.NotFoundError("document not found: #{doc_id}"))
 			RangesManager.deleteComment comment_id, ranges, (error, new_ranges) ->
 				return callback(error) if error?
-				RedisManager.updateDocument doc_id, lines, version, [], new_ranges, (error) ->
+				RedisManager.updateDocument project_id, doc_id, lines, version, [], new_ranges, (error) ->
 					return callback(error) if error?
 					callback()
 

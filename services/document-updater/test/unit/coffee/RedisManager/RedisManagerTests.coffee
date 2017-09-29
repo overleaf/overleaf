@@ -15,8 +15,10 @@ describe "RedisManager", ->
 		@RedisManager = SandboxedModule.require modulePath,
 			requires:
 				"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }
-				"settings-sharelatex": {
+				"settings-sharelatex": @settings = {
 					documentupdater: {logHashErrors: {write:true, read:true}}
+					apis:
+						project_history: {enabled: true}
 					redis:
 						documentupdater:
 							key_schema:
@@ -36,6 +38,9 @@ describe "RedisManager", ->
 							key_schema:
 								uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
 								docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:#{project_id}"
+						project_history:
+							key_schema:
+								projectHistoryOps: ({project_id}) -> "ProjectHistory:Ops:#{project_id}"
 				}
 				"redis-sharelatex":
 					createClient: () => @rclient
@@ -314,83 +319,117 @@ describe "RedisManager", ->
 
 	describe "updateDocument", ->
 		beforeEach ->
+			@lines = ["one", "two", "three", "これは"]
+			@ops = [{ op: [{ i: "foo", p: 4 }] },{ op: [{ i: "bar", p: 8 }] }]
+			@version = 42
+			@hash = crypto.createHash('sha1').update(JSON.stringify(@lines),'utf8').digest('hex')
+			@ranges = { comments: "mock", entries: "mock" }
+			@doc_update_list_length = sinon.stub()
+			@project_update_list_length = sinon.stub()
+
+			@RedisManager.getDocVersion = sinon.stub()
 			@multi.set = sinon.stub()
 			@multi.rpush = sinon.stub()
 			@multi.expire = sinon.stub()
 			@multi.ltrim = sinon.stub()
 			@multi.del = sinon.stub()
 			@multi.eval = sinon.stub()
-			@RedisManager.getDocVersion = sinon.stub()
-
-			@lines = ["one", "two", "three", "これは"]
-			@ops = [{ op: [{ i: "foo", p: 4 }] },{ op: [{ i: "bar", p: 8 }] }]
-			@version = 42
-			@hash = crypto.createHash('sha1').update(JSON.stringify(@lines),'utf8').digest('hex')
-			@ranges = { comments: "mock", entries: "mock" }
-
-			@multi.exec = sinon.stub().callsArg(0, null, [@hash])
+			@multi.exec = sinon.stub().callsArgWith(0, null,
+				[@hash, null, null, null, null, null, null, @doc_update_list_length]
+			)
+			@rclient.rpush = sinon.stub().callsArgWith(@ops.length + 1, null, @project_update_list_length)
 
 		describe "with a consistent version", ->
 			beforeEach ->
 				@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version - @ops.length)
-				@RedisManager.updateDocument @doc_id, @lines, @version, @ops, @ranges, @callback
 
-			it "should get the current doc version to check for consistency", ->
-				@RedisManager.getDocVersion
-					.calledWith(@doc_id)
-					.should.equal true
+			describe "with project history enabled", ->
+				beforeEach ->
+					@settings.apis.project_history.enabled = true
+					@RedisManager.updateDocument @project_id, @doc_id, @lines, @version, @ops, @ranges, @callback
 
-			it "should set the doclines", ->
-				@multi.eval
-					.calledWith(sinon.match(/redis.call/), 1, "doclines:#{@doc_id}", JSON.stringify(@lines))
-					.should.equal true
+				it "should get the current doc version to check for consistency", ->
+					@RedisManager.getDocVersion
+						.calledWith(@doc_id)
+						.should.equal true
 
-			it "should set the version", ->
-				@multi.set
-					.calledWith("DocVersion:#{@doc_id}", @version)
-					.should.equal true
+				it "should set the doclines", ->
+					@multi.eval
+						.calledWith(sinon.match(/redis.call/), 1, "doclines:#{@doc_id}", JSON.stringify(@lines))
+						.should.equal true
 
-			it "should set the hash", ->
-				@multi.set
-					.calledWith("DocHash:#{@doc_id}", @hash)
-					.should.equal true
+				it "should set the version", ->
+					@multi.set
+						.calledWith("DocVersion:#{@doc_id}", @version)
+						.should.equal true
 
-			it "should set the ranges", ->
-				@multi.set
-					.calledWith("Ranges:#{@doc_id}", JSON.stringify(@ranges))
-					.should.equal true
+				it "should set the hash", ->
+					@multi.set
+						.calledWith("DocHash:#{@doc_id}", @hash)
+						.should.equal true
 
-			it "should set the unflushed time", ->
-				@multi.set
-					.calledWith("UnflushedTime:#{@doc_id}", Date.now(), "NX")
-					.should.equal true
+				it "should set the ranges", ->
+					@multi.set
+						.calledWith("Ranges:#{@doc_id}", JSON.stringify(@ranges))
+						.should.equal true
 
-			it "should push the doc op into the doc ops list", ->
-				@multi.rpush
-					.calledWith("DocOps:#{@doc_id}", JSON.stringify(@ops[0]), JSON.stringify(@ops[1]))
-					.should.equal true
+				it "should set the unflushed time", ->
+					@multi.set
+						.calledWith("UnflushedTime:#{@doc_id}", Date.now(), "NX")
+						.should.equal true
 
-			it "should renew the expiry ttl on the doc ops array", ->
-				@multi.expire
-					.calledWith("DocOps:#{@doc_id}", @RedisManager.DOC_OPS_TTL)
-					.should.equal true
+				it "should push the doc op into the doc ops list", ->
+					@multi.rpush
+						.calledWith("DocOps:#{@doc_id}", JSON.stringify(@ops[0]), JSON.stringify(@ops[1]))
+						.should.equal true
 
-			it "should truncate the list to 100 members", ->
-				@multi.ltrim
-					.calledWith("DocOps:#{@doc_id}", -@RedisManager.DOC_OPS_MAX_LENGTH, -1)
-					.should.equal true
+				it "should renew the expiry ttl on the doc ops array", ->
+					@multi.expire
+						.calledWith("DocOps:#{@doc_id}", @RedisManager.DOC_OPS_TTL)
+						.should.equal true
 
-			it "should call the callback", ->
-				@callback.called.should.equal true
+				it "should truncate the list to 100 members", ->
+					@multi.ltrim
+						.calledWith("DocOps:#{@doc_id}", -@RedisManager.DOC_OPS_MAX_LENGTH, -1)
+						.should.equal true
 
-			it 'should not log any errors', ->
-				@logger.error.calledWith()
-					.should.equal false
+				it "should push the updates into the history ops list", ->
+					@multi.rpush
+						.calledWith("UncompressedHistoryOps:#{@doc_id}", JSON.stringify(@ops[0]), JSON.stringify(@ops[1]))
+						.should.equal true
+
+				it "should push the updates into the project history ops list", ->
+					@rclient.rpush
+						.calledWith("ProjectHistory:Ops:#{@project_id}", JSON.stringify(@ops[0]), JSON.stringify(@ops[1]))
+						.should.equal true
+
+				it "should call the callback", ->
+					@callback
+						.calledWith(null, @doc_update_list_length, @project_update_list_length)
+						.should.equal true
+
+				it 'should not log any errors', ->
+					@logger.error.calledWith()
+						.should.equal false
+
+			describe "with project history disabled", ->
+				beforeEach ->
+					@rclient.rpush = sinon.stub()
+					@settings.apis.project_history.enabled = false
+					@RedisManager.updateDocument @project_id, @doc_id, @lines, @version, @ops, @ranges, @callback
+
+				it "should not push the updates into the project history ops list", ->
+					@rclient.rpush.called.should.equal false
+
+				it "should call the callback", ->
+					@callback
+						.calledWith(null, @doc_update_list_length)
+						.should.equal true
 
 		describe "with an inconsistent version", ->
 			beforeEach ->
 				@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version - @ops.length - 1)
-				@RedisManager.updateDocument @doc_id, @lines, @version, @ops, @ranges, @callback
+				@RedisManager.updateDocument @project_id, @doc_id, @lines, @version, @ops, @ranges, @callback
 
 			it "should not call multi.exec", ->
 				@multi.exec.called.should.equal false
@@ -402,12 +441,17 @@ describe "RedisManager", ->
 
 		describe "with no updates", ->
 			beforeEach ->
-				@multi.rpush = sinon.stub().callsArg(1)
+				@rclient.rpush = sinon.stub().callsArgWith(1, null, @project_update_list_length)
 				@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version)
-				@RedisManager.updateDocument @doc_id, @lines, @version, [], @ranges, @callback
+				@RedisManager.updateDocument @project_id, @doc_id, @lines, @version, [], @ranges, @callback
 
-			it "should not do an rpush", ->
+			it "should not try to enqueue doc updates", ->
 				@multi.rpush
+					.called
+					.should.equal false
+
+			it "should not try to enqueue project updates", ->
+				@rclient.rpush
 					.called
 					.should.equal false
 
@@ -419,7 +463,7 @@ describe "RedisManager", ->
 		describe "with empty ranges", ->
 			beforeEach ->
 				@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version - @ops.length)
-				@RedisManager.updateDocument @doc_id, @lines, @version, @ops, {}, @callback
+				@RedisManager.updateDocument @project_id, @doc_id, @lines, @version, @ops, {}, @callback
 
 			it "should not set the ranges", ->
 				@multi.set
@@ -436,7 +480,7 @@ describe "RedisManager", ->
 				@badHash = "INVALID-HASH-VALUE"
 				@multi.exec = sinon.stub().callsArgWith(0, null, [@badHash])
 				@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version - @ops.length)
-				@RedisManager.updateDocument @doc_id, @lines, @version, @ops, @ranges, @callback
+				@RedisManager.updateDocument @project_id, @doc_id, @lines, @version, @ops, @ranges, @callback
 
 			it 'should log a hash error', ->
 				@logger.error.calledWith()
@@ -450,7 +494,7 @@ describe "RedisManager", ->
 				@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version - @ops.length)
 				@_stringify = JSON.stringify
 				@JSON.stringify = () -> return '["bad bytes! \u0000 <- here"]'
-				@RedisManager.updateDocument @doc_id, @lines, @version, @ops, @ranges, @callback
+				@RedisManager.updateDocument @project_id, @doc_id, @lines, @version, @ops, @ranges, @callback
 
 			afterEach ->
 				@JSON.stringify = @_stringify
@@ -465,7 +509,7 @@ describe "RedisManager", ->
 			beforeEach ->
 				@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version - @ops.length)
 				@RedisManager._serializeRanges = sinon.stub().yields(new Error("ranges are too large"))
-				@RedisManager.updateDocument @doc_id, @lines, @version, @ops, @ranges, @callback
+				@RedisManager.updateDocument @project_id, @doc_id, @lines, @version, @ops, @ranges, @callback
 
 			it 'should log an error', ->
 				@logger.error.called.should.equal true

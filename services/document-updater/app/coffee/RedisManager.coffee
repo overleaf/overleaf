@@ -32,6 +32,7 @@ MAX_RANGES_SIZE = 3 * MEGABYTES
 
 keys = Settings.redis.documentupdater.key_schema
 historyKeys = Settings.redis.history.key_schema
+projectHistoryKeys = Settings.redis.project_history.key_schema
 
 module.exports = RedisManager =
 	rclient: rclient
@@ -204,7 +205,7 @@ module.exports = RedisManager =
 
 	DOC_OPS_TTL: 60 * minutes
 	DOC_OPS_MAX_LENGTH: 100
-	updateDocument : (doc_id, docLines, newVersion, appliedOps = [], ranges, callback = (error) ->)->
+	updateDocument : (project_id, doc_id, docLines, newVersion, appliedOps = [], ranges, callback = (error) ->)->
 		RedisManager.getDocVersion doc_id, (error, currentVersion) ->
 			return callback(error) if error?
 			if currentVersion + appliedOps.length != newVersion
@@ -262,9 +263,16 @@ module.exports = RedisManager =
 						writeHash = result?[0]
 						if logHashWriteErrors and writeHash? and writeHash isnt newHash
 							logger.error doc_id: doc_id, writeHash: writeHash, origHash: newHash, docLines:newDocLines, "hash mismatch on updateDocument"
-						# return length of uncompressedHistoryOps queue (index 7)
-						uncompressedHistoryOpsLength = result?[7]
-						return callback(null, uncompressedHistoryOpsLength)
+
+						# length of uncompressedHistoryOps queue (index 7)
+						docUpdateCount = result[7]
+
+						if jsonOps.length > 0 && Settings.apis?.project_history?.enabled
+							rclient.rpush projectHistoryKeys.projectHistoryOps({project_id}), jsonOps..., (error, projectUpdateCount) ->
+								callback null, docUpdateCount, projectUpdateCount
+						else
+							callback null, docUpdateCount
+
 
 	clearUnflushedTime: (doc_id, callback = (error) ->) ->
 		rclient.del keys.unflushedTime(doc_id:doc_id), callback
@@ -280,7 +288,7 @@ module.exports = RedisManager =
 			# Most doc will have empty ranges so don't fill redis with lots of '{}' keys
 			jsonRanges = null
 		return callback null, jsonRanges
-	
+
 	_deserializeRanges: (ranges) ->
 		if !ranges? or ranges == ""
 			return {}

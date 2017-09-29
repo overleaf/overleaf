@@ -80,7 +80,7 @@ module.exports = UpdateManager =
 				RangesManager.applyUpdate project_id, doc_id, ranges, appliedOps, updatedDocLines, (error, new_ranges) ->
 					profile.log("RangesManager.applyUpdate")
 					return callback(error) if error?
-					RedisManager.updateDocument doc_id, updatedDocLines, version, appliedOps, new_ranges, (error, historyOpsLength) ->
+					RedisManager.updateDocument project_id, doc_id, updatedDocLines, version, appliedOps, new_ranges, (error, historyOpsLength) ->
 						profile.log("RedisManager.updateDocument")
 						return callback(error) if error?
 						HistoryManager.recordAndFlushHistoryOps project_id, doc_id, appliedOps, historyOpsLength, (error) ->

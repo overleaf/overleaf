@@ -60,14 +60,14 @@ describe "UpdateManager", ->
 
 				it "should process the outstanding updates", ->
 					@UpdateManager.processOutstandingUpdates.calledWith(@project_id, @doc_id).should.equal true
-					
+
 				it "should do everything with the lock acquired", ->
 					@UpdateManager.processOutstandingUpdates.calledAfter(@LockManager.tryLock).should.equal true
 					@UpdateManager.processOutstandingUpdates.calledBefore(@LockManager.releaseLock).should.equal true
 
 				it "should continue processing new updates that may have come in", ->
 					@UpdateManager.continueProcessingUpdatesWithLock.calledWith(@project_id, @doc_id).should.equal true
-				
+
 				it "should return the callback", ->
 					@callback.called.should.equal true
 
@@ -78,7 +78,7 @@ describe "UpdateManager", ->
 
 				it "should free the lock", ->
 					@LockManager.releaseLock.calledWith(@doc_id, @lockValue).should.equal true
-					
+
 				it "should return the error in the callback", ->
 					@callback.calledWith(@error).should.equal true
 
@@ -93,7 +93,7 @@ describe "UpdateManager", ->
 
 			it "should not process the updates", ->
 				@UpdateManager.processOutstandingUpdates.called.should.equal false
-				
+
 	describe "continueProcessingUpdatesWithLock", ->
 		describe "when there are outstanding updates", ->
 			beforeEach ->
@@ -137,7 +137,7 @@ describe "UpdateManager", ->
 					@UpdateManager.applyUpdate
 						.calledWith(@project_id, @doc_id, update)
 						.should.equal true
-		
+
 			it "should call the callback", ->
 				@callback.called.should.equal true
 
@@ -154,7 +154,7 @@ describe "UpdateManager", ->
 
 			it "should call the callback", ->
 				@callback.called.should.equal true
-				
+
 	describe "applyUpdate", ->
 		beforeEach ->
 			@update = {op: [{p: 42, i: "foo"}]}
@@ -170,16 +170,16 @@ describe "UpdateManager", ->
 			@RedisManager.updateDocument = sinon.stub().yields()
 			@RealTimeRedisManager.sendData = sinon.stub()
 			@HistoryManager.recordAndFlushHistoryOps = sinon.stub().callsArg(4)
-		
+
 		describe "normally", ->
 			beforeEach ->
 				@UpdateManager.applyUpdate @project_id, @doc_id, @update, @callback
-			
+
 			it "should apply the updates via ShareJS", ->
 				@ShareJsUpdateManager.applyUpdate
 					.calledWith(@project_id, @doc_id, @update, @lines, @version)
 					.should.equal true
-			
+
 			it "should update the ranges", ->
 				@RangesManager.applyUpdate
 					.calledWith(@project_id, @doc_id, @ranges, @appliedOps, @updatedDocLines)
@@ -187,9 +187,9 @@ describe "UpdateManager", ->
 
 			it "should save the document", ->
 				@RedisManager.updateDocument
-					.calledWith(@doc_id, @updatedDocLines, @version, @appliedOps, @updated_ranges)
+					.calledWith(@project_id, @doc_id, @updatedDocLines, @version, @appliedOps, @updated_ranges)
 					.should.equal true
-			
+
 			it "should push the applied ops into the history queue", ->
 				@HistoryManager.recordAndFlushHistoryOps
 					.calledWith(@project_id, @doc_id, @appliedOps)
@@ -207,16 +207,16 @@ describe "UpdateManager", ->
 				@ShareJsUpdateManager.applyUpdate
 					.calledWith(@project_id, @doc_id, @update)
 					.should.equal true
-				
+
 				# \uFFFD is 'replacement character'
 				@update.op[0].i.should.equal "\uFFFD\uFFFD"
-		
+
 		describe "with an error", ->
 			beforeEach ->
 				@error = new Error("something went wrong")
 				@ShareJsUpdateManager.applyUpdate = sinon.stub().yields(@error)
 				@UpdateManager.applyUpdate @project_id, @doc_id, @update, @callback
-			
+
 			it "should call RealTimeRedisManager.sendData with the error", ->
 				@RealTimeRedisManager.sendData
 					.calledWith({
@@ -228,7 +228,7 @@ describe "UpdateManager", ->
 
 			it "should call the callback with the error", ->
 				@callback.calledWith(@error).should.equal true
-			
+
 
 	describe "lockUpdatesAndDo", ->
 		beforeEach ->
@@ -283,7 +283,7 @@ describe "UpdateManager", ->
 
 			it "should free the lock", ->
 				@LockManager.releaseLock.calledWith(@doc_id, @lockValue).should.equal true
-				
+
 			it "should return the error in the callback", ->
 				@callback.calledWith(@error).should.equal true
 
@@ -295,7 +295,7 @@ describe "UpdateManager", ->
 
 			it "should free the lock", ->
 				@LockManager.releaseLock.calledWith(@doc_id, @lockValue).should.equal true
-				
+
 			it "should return the error in the callback", ->
 				@callback.calledWith(@error).should.equal true
 
