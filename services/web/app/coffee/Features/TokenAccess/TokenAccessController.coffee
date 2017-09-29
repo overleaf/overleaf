@@ -61,6 +61,7 @@ module.exports = TokenAccessController =
 							"error adding user to project with readAndWrite token"
 						return next(err)
 					req.params.Project_id = project._id.toString()
+					req._anonToken = token
 					return ProjectController.loadEditor(req, res, next)
 
 

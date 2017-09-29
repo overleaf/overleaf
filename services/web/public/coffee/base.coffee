@@ -17,7 +17,9 @@ define [
 		"ErrorCatcher"
 		"localStorage"
 		"ngTagsInput"
-	]).config ($qProvider, sixpackProvider)->
+	]).config ($qProvider, sixpackProvider, $httpProvider)->
+		if window.anonToken
+			$httpProvider.defaults.headers.common['Authorization'] = window.anonToken
 		$qProvider.errorOnUnhandledRejections(false)
 		sixpackProvider.setOptions({
 			debug: false
