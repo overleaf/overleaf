@@ -3,7 +3,7 @@ define [
 ], (App) ->
 	App.controller "AutoCompileOnboardingController", ($scope, event_tracking) ->
 		recompileBtn = angular.element('#recompile')
-		popover = angular.element('.onboarding__autocompile')
+		popover = angular.element('#onboarding-autocompile')
 		{ top, left } = recompileBtn.offset()
 
 		# If pdf panel smaller than recompile button + popover, show to left.
