@@ -163,14 +163,16 @@ describe "UpdateManager", ->
 			@lines = ["original", "lines"]
 			@ranges = { entries: "mock", comments: "mock" }
 			@updated_ranges = { entries: "updated", comments: "updated" }
-			@appliedOps = ["mock-applied-ops"]
+			@appliedOps = [ {v: 42, op: "mock-op-42"}, { v: 45, op: "mock-op-45" }]
 			@doc_ops_length = sinon.stub()
 			@project_ops_length = sinon.stub()
-			@DocumentManager.getDoc = sinon.stub().yields(null, @lines, @version, @ranges)
+			@pathname = '/a/b/c.tex'
+			@DocumentManager.getDoc = sinon.stub().yields(null, @lines, @version, @ranges, @pathname)
 			@RangesManager.applyUpdate = sinon.stub().yields(null, @updated_ranges)
 			@ShareJsUpdateManager.applyUpdate = sinon.stub().yields(null, @updatedDocLines, @version, @appliedOps)
 			@RedisManager.updateDocument = sinon.stub().yields(null, @doc_ops_length, @project_ops_length)
 			@RealTimeRedisManager.sendData = sinon.stub()
+			@UpdateManager._addProjectHistoryMetadataToOps = sinon.stub()
 			@HistoryManager.recordAndFlushHistoryOps = sinon.stub().callsArg(5)
 
 		describe "normally", ->
@@ -190,6 +192,11 @@ describe "UpdateManager", ->
 			it "should save the document", ->
 				@RedisManager.updateDocument
 					.calledWith(@project_id, @doc_id, @updatedDocLines, @version, @appliedOps, @updated_ranges)
+					.should.equal true
+
+			it "shoould add metadata to the ops" , ->
+				@UpdateManager._addProjectHistoryMetadataToOps
+					.calledWith(@appliedOps, @pathname, @updatedDocLines)
 					.should.equal true
 
 			it "should push the applied ops into the history queue", ->
@@ -231,6 +238,28 @@ describe "UpdateManager", ->
 			it "should call the callback with the error", ->
 				@callback.calledWith(@error).should.equal true
 
+	describe "_addProjectHistoryMetadataToOps", ->
+		it "should add pathname and doc_length metadata to the ops", ->
+			lines = [
+				'some'
+				'test'
+				'data'
+			]
+			appliedOps = [ {v: 42, op: "mock-op-42"}, { v: 45, op: "mock-op-45" }]
+			@UpdateManager._addProjectHistoryMetadataToOps(appliedOps, @pathname, lines)
+			appliedOps.should.deep.equal [{
+				v: 42
+				op: "mock-op-42"
+				meta:
+					pathname: @pathname
+					doc_length: 14
+			}, {
+				v: 45
+				op: "mock-op-45"
+				meta:
+					pathname: @pathname
+					doc_length: 14
+			}]
 
 	describe "lockUpdatesAndDo", ->
 		beforeEach ->
