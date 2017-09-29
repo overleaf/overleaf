@@ -199,6 +199,12 @@ define [
 				scope: $scope
 			}
 
+		$scope.getReadAndWriteTokenLink = () ->
+			location.origin + "/" + $scope.project.tokens.readAndWrite
+
+		$scope.getReadOnlyTokenLink = () ->
+			location.origin + "/" + $scope.project.tokens.readOnly
+
 		$scope.done = () ->
 			$modalInstance.close()
 

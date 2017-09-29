@@ -29,6 +29,13 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						href
 						ng-click="openMakePrivateModal()"
 					) #{translate("make_private")}
+				.col-xs-12.access-token-display
+					div
+						strong #{translate("read_only")}
+						pre.access-token {{ getReadOnlyTokenLink() }}
+					div
+						strong #{translate("read_and_write")}
+						pre.access-token {{ getReadAndWriteTokenLink() }}
 
 			//- legacy public-access
 			.row.public-access-level(ng-show="project.publicAccesLevel == 'readAndWrite' || project.publicAccesLevel == 'readOnly'")
