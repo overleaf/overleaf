@@ -41,6 +41,7 @@ module.exports =
 				projectKey: ({doc_id}) -> "ProjectId:#{doc_id}"
 				docsInProject: ({project_id}) -> "DocsIn:#{project_id}"
 				ranges: ({doc_id}) -> "Ranges:#{doc_id}"
+				pathname: ({doc_id}) -> "Pathname:#{doc_id}"
 				projectState: ({project_id}) -> "ProjectState:#{project_id}"
 				unflushedTime: ({doc_id}) -> "UnflushedTime:#{doc_id}"
 			# cluster: [{
