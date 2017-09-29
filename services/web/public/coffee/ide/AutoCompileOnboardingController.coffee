@@ -16,7 +16,7 @@ define [
 			})
 		else
 			$scope.placement = 'right'
-			angular.element('.onboarding__autocompile').offset({
+			popover.offset({
 				top: top,
 				left: left + recompileBtn.width()
 			})
