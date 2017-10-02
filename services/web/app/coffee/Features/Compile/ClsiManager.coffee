@@ -38,17 +38,17 @@ module.exports = ClsiManager =
 				if validationProblems?
 					logger.log project_id:project_id, validationProblems:validationProblems, "problems with users latex before compile was attempted"
 					return callback(null, "validation-problems", null, null, validationProblems)
-			ClsiManager._postToClsi project_id, user_id, req, options.compileGroup, (error, response) ->
-				if error?
-					logger.err err:error, project_id:project_id, "error sending request to clsi"
-					return callback(error)
-				logger.log project_id: project_id, outputFilesLength: response?.outputFiles?.length, status: response?.status, compile_status: response?.compile?.status, "received compile response from CLSI"
-				ClsiCookieManager._getServerId project_id, (err, clsiServerId)->
-					if err?
-						logger.err err:err, project_id:project_id, "error getting server id"
-						return callback(err)
-					outputFiles = ClsiManager._parseOutputFiles(project_id, response?.compile?.outputFiles)
-					callback(null, response?.compile?.status, outputFiles, clsiServerId)
+				ClsiManager._postToClsi project_id, user_id, req, options.compileGroup, (error, response) ->
+					if error?
+						logger.err err:error, project_id:project_id, "error sending request to clsi"
+						return callback(error)
+					logger.log project_id: project_id, outputFilesLength: response?.outputFiles?.length, status: response?.status, compile_status: response?.compile?.status, "received compile response from CLSI"
+					ClsiCookieManager._getServerId project_id, (err, clsiServerId)->
+						if err?
+							logger.err err:err, project_id:project_id, "error getting server id"
+							return callback(err)
+						outputFiles = ClsiManager._parseOutputFiles(project_id, response?.compile?.outputFiles)
+						callback(null, response?.compile?.status, outputFiles, clsiServerId)
 
 	stopCompile: (project_id, user_id, options, callback = (error) ->) ->
 		compilerUrl = @_getCompilerUrl(options?.compileGroup, project_id, user_id, "compile/stop")
