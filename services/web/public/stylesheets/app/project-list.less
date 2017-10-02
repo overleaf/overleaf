@@ -294,6 +294,12 @@ ul.project-list {
 				display: inline-block;
 				padding-top: 0.3em;
 				color: #FFF;
+				border-radius: @tag-border-radius;
+				background-color: @tag-bg-color;
+				&:hover,
+				&:focus {
+					background-color: @tag-bg-hover-color;
+				}
 			}
 			.tag-label-name {
 				padding-right: 0.3em;
