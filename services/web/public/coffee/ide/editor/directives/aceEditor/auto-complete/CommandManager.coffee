@@ -63,19 +63,19 @@ define [], () ->
 			meta: "cmd"
 		}
 	special = for cmd in special
-			{
-				caption: "\\#{cmd}{}"
-				snippet: "\\#{cmd}{}"
-				meta: "cmd"
-			}
+		{
+			caption: "\\#{cmd}{}"
+			snippet: "\\#{cmd}{}"
+			meta: "cmd"
+		}
 
 	staticCommands = [].concat(
-						noArgumentCommands,
-						singleArgumentCommands,
-						doubleArgumentCommands,
-						tripleArgumentCommands,
-						special
-					)
+		noArgumentCommands,
+		singleArgumentCommands,
+		doubleArgumentCommands,
+		tripleArgumentCommands,
+		special
+	)
 
 	class Parser
 		constructor: (@doc, @prefix) ->
