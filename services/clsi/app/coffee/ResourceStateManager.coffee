@@ -22,6 +22,7 @@ module.exports = ResourceStateManager =
 	# files are moved, added, deleted or renamed.
 
 	SYNC_STATE_FILE: ".project-sync-state"
+	SYNC_STATE_MAX_SIZE: 128*1024
 
 	saveProjectState: (state, resources, basePath, callback = (error) ->) ->
 		stateFile = Path.join(basePath, @SYNC_STATE_FILE)
@@ -39,8 +40,11 @@ module.exports = ResourceStateManager =
 
 	checkProjectStateMatches: (state, basePath, callback = (error, resources) ->) ->
 		stateFile = Path.join(basePath, @SYNC_STATE_FILE)
-		SafeReader.readFile stateFile, 128*1024, 'utf8', (err, result) ->
+		size = @SYNC_STATE_MAX_SIZE
+		SafeReader.readFile stateFile, size, 'utf8', (err, result, bytesRead) ->
 			return callback(err) if err?
+			if bytesRead is size
+				logger.error file:stateFile, size:size, bytesRead:bytesRead, "project state file truncated"
 			[resourceList..., oldState] = result?.toString()?.split("\n") or []
 			newState = "stateHash:#{state}"
 			logger.log state:state, oldState: oldState, basePath:basePath, stateMatches: (newState is oldState), "checking sync state"

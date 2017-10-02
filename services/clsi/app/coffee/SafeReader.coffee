@@ -12,16 +12,14 @@ module.exports = SafeReader =
 			return callback(err) if err?
 
 			# safely return always closing the file
-			callbackWithClose = (err, result) ->
+			callbackWithClose = (err, result...) ->
 				fs.close fd, (err1) ->
 					return callback(err) if err?
 					return callback(err1) if err1?
-					callback(null, result)
+					callback(null, result...)
 
 			buff = new Buffer(size, 0) # fill with zeros
 			fs.read fd, buff, 0, buff.length, 0, (err, bytesRead, buffer) ->
 				return callbackWithClose(err) if err?
 				result = buffer.toString(encoding, 0, bytesRead)
-				if bytesRead is size
-					logger.error file:file, size:size, bytesRead:bytesRead, "file truncated"
-				callbackWithClose(null, result)
+				callbackWithClose(null, result, bytesRead)
