@@ -74,6 +74,8 @@ pipeline {
       }
       steps {
         sh 'node_modules/.bin/grunt compile  --verbose'
+        // replace the build number placeholder for sentry
+        sh 'node_modules/.bin/grunt version'
       }
     }
 
