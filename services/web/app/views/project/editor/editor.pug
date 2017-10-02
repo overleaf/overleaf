@@ -101,7 +101,9 @@ div.full-size(
 	ng-class="placement"
 )
 	.popover-inner
-		h3.popover-title #{translate("auto_compile")}
+		h3.popover-title
+			| #{translate("auto_compile")}
+			span.beta-feature-badge
 		.popover-content
 			p #{translate("try_out_auto_compile_setting")}
 			img(src="/img/onboarding/autocompile/setting-dropdown.png" width="100%")
