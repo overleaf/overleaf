@@ -78,6 +78,8 @@ module.exports = ResourceWriter =
 					should_delete = true
 					if path.match(/^output\./) or path.match(/\.aux$/) or path.match(/^cache\//) # knitr cache
 						should_delete = false
+					if path.match(/^output-.*/) # Tikz cached figures
+						should_delete = false
 					if path == "output.pdf" or path == "output.dvi" or path == "output.log" or path == "output.xdv"
 						should_delete = true
 					if path == "output.tex" # created by TikzManager if present in output files
