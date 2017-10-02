@@ -18,8 +18,8 @@ define [
 		"localStorage"
 		"ngTagsInput"
 	]).config ($qProvider, sixpackProvider, $httpProvider)->
-		if window.anonToken
-			$httpProvider.defaults.headers.common['x-sl-anon-token'] = window.anonToken
+		# if window.anonToken
+		# 	$httpProvider.defaults.headers.common['x-sl-anon-token'] = window.anonToken
 		$qProvider.errorOnUnhandledRejections(false)
 		sixpackProvider.setOptions({
 			debug: false
