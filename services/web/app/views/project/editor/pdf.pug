@@ -1,6 +1,6 @@
 div.full-size.pdf(ng-controller="PdfController")
 	.toolbar.toolbar-tall
-		.btn-group(
+		.btn-group#recompile(
 			dropdown,
 			tooltip-html="'"+translate('recompile_pdf')+" <span class=\"keyboard-shortcut\">({{modifierKey}} + Enter)</span>'"
 			tooltip-class="keyboard-tooltip"
@@ -28,7 +28,9 @@ div.full-size.pdf(ng-controller="PdfController")
 			ul.dropdown-menu.dropdown-menu-left
 				// Only show on beta program?
 				if user.betaProgram
-					li.dropdown-header #{translate("auto_compile")}
+					li.dropdown-header
+						| #{translate("auto_compile")}
+						span.beta-feature-badge
 					li
 						a(href, ng-click="autocompile_enabled = true")
 							i.fa.fa-fw(ng-class="{'fa-check': autocompile_enabled}")

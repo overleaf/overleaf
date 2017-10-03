@@ -12,7 +12,8 @@ define [
 	"ide/labels/LabelsManager"
 	"ide/review-panel/ReviewPanelManager"
 	"ide/SafariScrollPatcher"
-	"ide/FeatureOnboardingController"
+	"ide/FeatureOnboardingController",
+	"ide/AutoCompileOnboardingController",
 	"ide/settings/index"
 	"ide/share/index"
 	"ide/chat/index"
@@ -72,8 +73,12 @@ define [
 			chatOpen: false
 			pdfLayout: 'sideBySide'
 			pdfHidden: false,
-			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}")
-			miniReviewPanelVisible: false
+			pdfWidth: 0,
+			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}"),
+			miniReviewPanelVisible: false,
+		}
+		$scope.onboarding = {
+			autoCompile: if window.user.betaProgram and window.showAutoCompileOnboarding then 'unseen' else 'dismissed'
 		}
 		$scope.user = window.user
 
@@ -102,6 +107,7 @@ define [
 
 		$scope.$on "layout:pdf:resize", (_, layoutState) ->
 			$scope.ui.pdfHidden = layoutState.east.initClosed
+			$scope.ui.pdfWidth = layoutState.east.size
 
 		# Tracking code.
 		$scope.$watch "ui.view", (newView, oldView) ->

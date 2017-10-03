@@ -412,6 +412,9 @@ define [
 		$scope.recompile = (options = {}) ->
 			return if $scope.pdf.compiling
 
+			if !options.isAutoCompile and $scope.onboarding.autoCompile == 'unseen'
+				$scope.onboarding.autoCompile = 'show'
+
 			event_tracking.sendMBSampled "editor-recompile-sampled", options
 
 			$scope.pdf.compiling = true
