@@ -252,8 +252,15 @@ module.exports = ProjectController =
 				cb = underscore.once(cb)
 				if !user_id?
 					return cb()
-				timestamp = user_id.toString().substring(0,8)
-				userSignupDate = new Date( parseInt( timestamp, 16 ) * 1000 )
+
+				# Extract data from user's ObjectId
+				timestamp = parseInt(user_id.toString().substring(0, 8), 16)
+				counter = parseInt(user_id.toString().substring(18, 24), 16)
+
+				if counter % 5000 != 0
+					# Don't show if user is not part of roll out
+					return cb(null, false)
+				userSignupDate = new Date(timestamp * 1000)
 				if userSignupDate > new Date("2017-10-03")
 					# Don't show for users who registered after it was released
 					return cb(null, false)
