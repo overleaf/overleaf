@@ -1,11 +1,8 @@
-ProjectGetter = require "../Project/ProjectGetter"
 ProjectController = require "../Project/ProjectController"
-ProjectEditorHandler = require "../Project/ProjectEditorHandler"
-UserGetter = require "../User/UserGetter"
 AuthenticationController = require '../Authentication/AuthenticationController'
-logger = require 'logger-sharelatex'
 TokenAccessHandler = require './TokenAccessHandler'
 Errors = require '../Errors/Errors'
+logger = require 'logger-sharelatex'
 
 
 module.exports = TokenAccessController =
@@ -39,7 +36,7 @@ module.exports = TokenAccessController =
 		logger.log {userId, token}, "requesting read-only token access"
 		TokenAccessHandler.findProjectWithReadOnlyToken token, (err, project) ->
 			if err?
-				logger.err {err, token, user_id: currentUserId},
+				logger.err {err, token, userId},
 					"error getting project by readOnly token"
 				return next(err)
 			if !project?
