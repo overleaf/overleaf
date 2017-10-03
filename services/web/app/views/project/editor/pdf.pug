@@ -27,7 +27,7 @@ div.full-size.pdf(ng-controller="PdfController")
 				span.caret
 			ul.dropdown-menu.dropdown-menu-left
 				// Only show on beta program?
-				if user.betaProgram
+				if user.betaProgram || showAutoCompileOnboarding
 					li.dropdown-header
 						| #{translate("auto_compile")}
 						span.beta-feature-badge

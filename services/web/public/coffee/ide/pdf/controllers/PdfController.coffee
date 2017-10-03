@@ -109,7 +109,7 @@ define [
 				toggleAutoCompile(newValue)
 				event_tracking.sendMB "autocompile-setting-changed", { value: newValue }
 
-		if window.user?.betaProgram and $scope.autocompile_enabled
+		if (window.user?.betaProgram or window.showAutoCompileOnboarding) and $scope.autocompile_enabled
 			toggleAutoCompile(true)
 
 		# abort compile if syntax checks fail
