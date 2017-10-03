@@ -27,20 +27,12 @@ define () ->
 			meta: "pkg"
 		}
 
-	parseLoadedPackages = (text) ->
-		re = /^\\usepackage(?:\[(.*?)])?.*?{((?:.|\n)*?)}/gm
-		result = []
-		iterations = 0
-		while match = re.exec(text)
-			if match[2]
-				for pkg in match[2].split(",")
-					cleaned = pkg.replace(/%.*\n/gm,'').trim()
-					if cleaned not in result
-						result.push cleaned
-						iterations += 1
-						if iterations >= 1000
-							return result
-		return result
+	packageSnippets.push {
+		caption: "\\usepackage{}"
+		snippet: "\\usepackage{}"
+		meta: "pkg"
+		score: 70
+	}
 
 	class PackageManager
 		getCompletions: (editor, session, pos, prefix, callback) ->
