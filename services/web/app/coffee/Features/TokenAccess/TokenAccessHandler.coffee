@@ -8,17 +8,13 @@ module.exports = TokenAccessHandler =
 		Project.findOne {
 			'tokens.readOnly': token,
 			'publicAccesLevel': PublicAccessLevels.TOKEN_BASED
-		}, {_id: 1, publicAccesLevel: 1}, (err, project) ->
-			return callback(err) if err?
-			callback(null, project)
+		}, {_id: 1, publicAccesLevel: 1}, callback
 
 	findProjectWithReadAndWriteToken: (token, callback=(err, project)->) ->
 		Project.findOne {
 			'tokens.readAndWrite': token,
 			'publicAccesLevel': PublicAccessLevels.TOKEN_BASED
-		}, {_id: 1, publicAccesLevel: 1}, (err, project) ->
-			return callback(err) if err?
-			callback(null, project)
+		}, {_id: 1, publicAccesLevel: 1}, callback
 
 	addReadOnlyUserToProject: (userId, projectId, callback=(err)->) ->
 		userId = ObjectId(userId.toString())
@@ -27,8 +23,7 @@ module.exports = TokenAccessHandler =
 			_id: projectId
 		}, {
 			$addToSet: {tokenAccessReadOnly_refs: userId}
-		}, (err) ->
-			callback(err)
+		}, callback
 
 	addReadAndWriteUserToProject: (userId, projectId, callback=(err)->) ->
 		userId = ObjectId(userId.toString())
@@ -37,8 +32,7 @@ module.exports = TokenAccessHandler =
 			_id: projectId
 		}, {
 			$addToSet: {tokenAccessReadAndWrite_refs: userId}
-		}, (err) ->
-			callback(err)
+		}, callback
 
 	grantSessionReadOnlyTokenAccess: (req, projectId, token) ->
 		if req.session?
