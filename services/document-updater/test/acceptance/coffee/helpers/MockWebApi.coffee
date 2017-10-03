@@ -9,6 +9,7 @@ module.exports = MockWebApi =
 	insertDoc: (project_id, doc_id, doc) ->
 		doc.version ?= 0
 		doc.lines ?= []
+		doc.pathname = '/a/b/c.tex'
 		@docs["#{project_id}:#{doc_id}"] = doc
 
 	setDocument: (project_id, doc_id, lines, version, ranges, callback = (error) ->) ->
@@ -16,6 +17,7 @@ module.exports = MockWebApi =
 		doc.lines = lines
 		doc.version = version
 		doc.ranges = ranges
+		doc.pathname = '/a/b/c.tex'
 		callback null
 
 	getDocument: (project_id, doc_id, callback = (error, doc) ->) ->
