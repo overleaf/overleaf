@@ -1,6 +1,4 @@
-ProjectGetter = require '../Project/ProjectGetter'
 Project = require('../../models/Project').Project
-AuthenticationController = require '../Authentication/AuthenticationController'
 PublicAccessLevels = require '../Authorization/PublicAccessLevels'
 ObjectId = require("mongojs").ObjectId
 
