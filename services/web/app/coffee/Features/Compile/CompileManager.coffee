@@ -34,12 +34,16 @@ module.exports = CompileManager =
 						return callback(error) if error?
 						for key, value of limits
 							options[key] = value
-						# only pass user_id down to clsi if this is a per-user compile
-						compileAsUser = if Settings.disablePerUserCompiles then undefined else user_id
-						ClsiManager.sendRequest project_id, compileAsUser, options, (error, status, outputFiles, clsiServerId, validationProblems) ->
-							return callback(error) if error?
-							logger.log files: outputFiles, "output files"
-							callback(null, status, outputFiles, clsiServerId, limits, validationProblems)
+						# Put a lower limit on autocompiles for free users
+						CompileManager._checkIfFreeAutoCompileLimitHasBeenHit options.isAutoCompile, limits.compileGroup, (err, canCompile)->
+							if !canCompile
+								return callback null, "autocompile-backoff", []
+							# only pass user_id down to clsi if this is a per-user compile
+							compileAsUser = if Settings.disablePerUserCompiles then undefined else user_id
+							ClsiManager.sendRequest project_id, compileAsUser, options, (error, status, outputFiles, clsiServerId, validationProblems) ->
+								return callback(error) if error?
+								logger.log files: outputFiles, "output files"
+								callback(null, status, outputFiles, clsiServerId, limits, validationProblems)
 
 
 	stopCompile: (project_id, user_id, callback = (error) ->) ->
@@ -75,15 +79,41 @@ module.exports = CompileManager =
 	_checkIfAutoCompileLimitHasBeenHit: (isAutoCompile, callback = (err, canCompile)->)->
 		if !isAutoCompile
 			return callback(null, true)
-		opts = 
+		Metrics.inc "auto-compile"
+		opts =
 			endpointName:"auto_compile"
 			timeInterval:20
 			subjectName:"everyone"
-			throttle: 25
+			throttle: 200
 		rateLimiter.addCount opts, (err, canCompile)->
 			if err?
 				canCompile = false
 			logger.log canCompile:canCompile, opts:opts, "checking if auto compile limit has been hit"
+			if !canCompile
+				Metrics.inc "auto-compile-rate-limited"
+			callback err, canCompile
+
+
+	_checkIfFreeAutoCompileLimitHasBeenHit: (isAutoCompile, compileGroup, callback = (err, canCompile)->)->
+		if !isAutoCompile
+			return callback(null, true)
+
+		if compileGroup is "priority"
+			Metrics.inc "auto-compile-priority"
+			return callback(null, true)
+
+		Metrics.inc "auto-compile-free"
+		opts =
+			endpointName:"auto_compile"
+			timeInterval:20
+			subjectName:"free"
+			throttle: 100
+		rateLimiter.addCount opts, (err, canCompile)->
+			if err?
+				canCompile = false
+			logger.log canCompile:canCompile, opts:opts, "checking if free users auto compile limit has been hit"
+			if !canCompile
+				Metrics.inc "auto-compile-free-rate-limited"
 			callback err, canCompile
 
 	_ensureRootDocumentIsSet: (project_id, callback = (error) ->) ->
