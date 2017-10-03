@@ -391,6 +391,12 @@ div.full-size.pdf(ng-controller="PdfController")
 						ng-click="startFreeTrial('compile-timeout')"
 					) #{translate("start_free_trial")}
 
+
+			.alert.alert-danger(ng-show="pdf.autocompile_disabled")
+				p
+					strong #{translate("autocompile_disabled")}. 
+					span #{translate("autocompile_disabled_reason")}
+
 			.alert.alert-danger(ng-show="pdf.projectTooLarge")
 				strong #{translate("project_too_large")} 
 				span #{translate("project_too_large_please_reduce")}

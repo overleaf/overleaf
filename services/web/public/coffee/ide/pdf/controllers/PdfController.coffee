@@ -127,7 +127,7 @@ define [
 		sendCompileRequest = (options = {}) ->
 			url = "/project/#{$scope.project_id}/compile"
 			params = {}
-			if options.isAutoCompile
+			if options.isAutoCompile or options.isBackgroundAutoCompile
 				params["auto_compile"]=true
 			# if the previous run was a check, clear the error logs
 			$scope.pdf.logEntries = [] if $scope.check
@@ -168,6 +168,7 @@ define [
 			$scope.pdf.compileExited = false
 			$scope.pdf.failedCheck = false
 			$scope.pdf.compileInProgress = false
+			$scope.pdf.autocompile_disabled = false
 
 			# make a cache to look up files by name
 			fileByPath = {}
@@ -206,7 +207,13 @@ define [
 				$scope.shouldShowLogs = true
 				fetchLogs(fileByPath)
 			else if response.status == "autocompile-backoff"
-				$scope.pdf.view = 'uncompiled'
+				if $scope.pdf.isAutoCompile # initial autocompile
+					$scope.pdf.view = 'uncompiled'
+				else # background autocompile from typing
+					$scope.pdf.view = 'errors'
+					$scope.pdf.autocompile_disabled = true
+					$scope.autocompile_enabled = false # disable any further autocompiles
+					event_tracking.sendMB "autocompile-rate-limited", {hasPremiumCompile: $scope.hasPremiumCompile}
 			else if response.status == "project-too-large"
 				$scope.pdf.view = 'errors'
 				$scope.pdf.projectTooLarge = true
@@ -415,6 +422,7 @@ define [
 			event_tracking.sendMBSampled "editor-recompile-sampled", options
 
 			$scope.pdf.compiling = true
+			$scope.pdf.isAutoCompile = options?.isAutoCompile # initial autocompile
 
 			if options?.force
 				# for forced compile, turn off validation check and ignore errors
