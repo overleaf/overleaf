@@ -9,6 +9,7 @@ DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 EditorRealTimeController = require("./EditorRealTimeController")
 async = require('async')
 LockManager = require("../../infrastructure/LockManager")
+PublicAccessLevels = require("../Authorization/PublicAccessLevels")
 _ = require('underscore')
 
 module.exports = EditorController =
@@ -200,8 +201,22 @@ module.exports = EditorController =
 	setPublicAccessLevel : (project_id, newAccessLevel, callback = (err) ->) ->
 		ProjectDetailsHandler.setPublicAccessLevel project_id, newAccessLevel, (err) ->
 			return callback(err) if err?
-			EditorRealTimeController.emitToRoom project_id, 'publicAccessLevelUpdated', newAccessLevel
-			callback()
+			EditorRealTimeController.emitToRoom(
+				project_id,
+				'project:publicAccessLevel:changed',
+				{newAccessLevel}
+			)
+			if newAccessLevel == PublicAccessLevels.TOKEN_BASED
+				ProjectDetailsHandler.ensureTokensArePresent project_id, (err, tokens) ->
+					return callback(err) if err?
+					EditorRealTimeController.emitToRoom(
+						project_id,
+						'project:tokens:changed',
+						{tokens}
+					)
+					callback()
+			else
+				callback()
 
 	setRootDoc: (project_id, newRootDocID, callback = (err) ->) ->
 		ProjectEntityHandler.setRootDoc project_id, newRootDocID, (err) ->

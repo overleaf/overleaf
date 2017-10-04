@@ -564,20 +564,99 @@ describe "EditorController", ->
 
 	describe "setPublicAccessLevel", ->
 
-		beforeEach ->
-			@newAccessLevel = "public"
-			@ProjectDetailsHandler.setPublicAccessLevel = sinon.stub().callsArgWith(2, null)
-			@EditorRealTimeController.emitToRoom = sinon.stub()
+		describe 'when setting to private', ->
+			beforeEach ->
+				@newAccessLevel = 'private'
+				@ProjectDetailsHandler.setPublicAccessLevel = sinon.stub().callsArgWith(2, null)
+				@ProjectDetailsHandler.ensureTokensArePresent = sinon.stub()
+					.callsArgWith(1, null, @tokens)
+				@EditorRealTimeController.emitToRoom = sinon.stub()
 
-		it "should call the EditorController", (done)->
-			@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
-				@ProjectDetailsHandler.setPublicAccessLevel.calledWith(@project_id, @newAccessLevel).should.equal true
-				done()
+			it 'should set the access level', (done) ->
+				@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
+					@ProjectDetailsHandler.setPublicAccessLevel
+						.calledWith(@project_id, @newAccessLevel).should.equal true
+					done()
 
-		it "should emit the update to the room", (done)->
-			@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
-				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'publicAccessLevelUpdated', @newAccessLevel).should.equal true				
-				done()
+			it 'should broadcast the access level change', (done) ->
+				@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
+					@EditorRealTimeController.emitToRoom
+						.calledWith(@project_id, 'project:publicAccessLevel:changed').should.equal true
+					done()
+
+			it 'should not ensure tokens are present for project', (done) ->
+				@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
+					@ProjectDetailsHandler.ensureTokensArePresent
+						.calledWith(@project_id).should.equal false
+					done()
+
+			it 'should not broadcast a token change', (done) ->
+				@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
+					@EditorRealTimeController.emitToRoom
+						.calledWith(@project_id, 'project:tokens:changed', {tokens: @tokens})
+							.should.equal false
+					done()
+
+			it 'should not produce an error', (done) ->
+				@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, (err) =>
+					expect(err).to.not.exist
+					done()
+
+		describe 'when setting to tokenBased', ->
+			beforeEach ->
+				@newAccessLevel = 'tokenBased'
+				@tokens = {readOnly: 'aaa', readAndWrite: '42bbb'}
+				@ProjectDetailsHandler.setPublicAccessLevel = sinon.stub()
+					.callsArgWith(2, null)
+				@ProjectDetailsHandler.ensureTokensArePresent = sinon.stub()
+					.callsArgWith(1, null, @tokens)
+				@EditorRealTimeController.emitToRoom = sinon.stub()
+
+			it 'should set the access level', (done) ->
+				@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
+					@ProjectDetailsHandler.setPublicAccessLevel
+						.calledWith(@project_id, @newAccessLevel).should.equal true
+					done()
+
+			it 'should broadcast the access level change', (done) ->
+				@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
+					@EditorRealTimeController.emitToRoom
+						.calledWith(@project_id, 'project:publicAccessLevel:changed')
+							.should.equal true
+					done()
+
+			it 'should ensure tokens are present for project', (done) ->
+				@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
+					@ProjectDetailsHandler.ensureTokensArePresent
+						.calledWith(@project_id).should.equal true
+					done()
+
+			it 'should broadcast the token change too', (done) ->
+				@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
+					@EditorRealTimeController.emitToRoom
+						.calledWith(@project_id, 'project:tokens:changed', {tokens: @tokens})
+							.should.equal true
+					done()
+
+			it 'should not produce an error', (done) ->
+				@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, (err) =>
+					expect(err).to.not.exist
+					done()
+
+		# beforeEach ->
+		# 	@newAccessLevel = "public"
+		# 	@ProjectDetailsHandler.setPublicAccessLevel = sinon.stub().callsArgWith(2, null)
+		# 	@EditorRealTimeController.emitToRoom = sinon.stub()
+
+		# it "should call the EditorController", (done)->
+		# 	@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
+		# 		@ProjectDetailsHandler.setPublicAccessLevel.calledWith(@project_id, @newAccessLevel).should.equal true
+		# 		done()
+
+		# it "should emit the update to the room", (done)->
+		# 	@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
+		# 		@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'publicAccessLevelUpdated', @newAccessLevel).should.equal true				
+		# 		done()
 
 	describe "setRootDoc", ->
 

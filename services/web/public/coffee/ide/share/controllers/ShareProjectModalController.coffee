@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "ShareProjectModalController", ($scope, $modalInstance, $timeout, projectMembers, projectInvites, $modal, $http) ->
+	App.controller "ShareProjectModalController", ($scope, $modalInstance, $timeout, projectMembers, projectInvites, $modal, $http, ide) ->
 		$scope.inputs = {
 			privileges: "readAndWrite"
 			contacts: []
@@ -200,10 +200,16 @@ define [
 			}
 
 		$scope.getReadAndWriteTokenLink = () ->
-			location.origin + "/" + $scope.project.tokens.readAndWrite
+			if $scope?.project?.tokens?.readAndWrite?
+				location.origin + "/" + $scope.project.tokens.readAndWrite
+			else
+				''
 
 		$scope.getReadOnlyTokenLink = () ->
-			location.origin + "/read/" + $scope.project.tokens.readOnly
+			if $scope?.project?.tokens?.readOnly?
+				location.origin + "/read/" + $scope.project.tokens.readOnly
+			else
+				''
 
 		$scope.done = () ->
 			$modalInstance.close()

@@ -6,6 +6,7 @@ tpdsUpdateSender = require '../ThirdPartyDataStore/TpdsUpdateSender'
 _ = require("underscore")
 PublicAccessLevels = require("../Authorization/PublicAccessLevels")
 Errors = require("../Errors/Errors")
+ProjectTokenGenerator = require('./ProjectTokenGenerator')
 
 module.exports = ProjectDetailsHandler =
 	getDetails: (project_id, callback)->
@@ -65,6 +66,25 @@ module.exports = ProjectDetailsHandler =
 	setPublicAccessLevel : (project_id, newAccessLevel, callback = ->)->
 		logger.log project_id: project_id, level: newAccessLevel, "set public access level"
 		# TODO: remove the read-only and read-and-write items from here
-		if project_id? && newAccessLevel? and _.include [PublicAccessLevels.READ_ONLY, PublicAccessLevels.READ_AND_WRITE, PublicAccessLevels.PRIVATE, PublicAccessLevels.TOKEN_BASED], newAccessLevel
+		if project_id? && newAccessLevel? and _.include [
+			PublicAccessLevels.READ_ONLY,
+			PublicAccessLevels.READ_AND_WRITE,
+			PublicAccessLevels.PRIVATE,
+			PublicAccessLevels.TOKEN_BASED
+		], newAccessLevel
 			Project.update {_id:project_id},{publicAccesLevel:newAccessLevel}, (err)->
 				callback()
+
+	ensureTokensArePresent: (project_id, callback=(err, tokens)->) ->
+		ProjectGetter.getProject project_id, {tokens: 1}, (err, project) ->
+			return callback(err) if err?
+			if project.tokens? and project.tokens.readOnly? and project.tokens.readAndWrite?
+				return callback(null, project.tokens)
+			else
+				tokens =
+					readOnly: ProjectTokenGenerator.readOnlyToken()
+					readAndWrite: ProjectTokenGenerator.readAndWriteToken()
+				Project.update {_id: project_id}, {$set: {tokens: tokens}}, (err) ->
+					return callback(err) if err?
+					callback(null, tokens)
+

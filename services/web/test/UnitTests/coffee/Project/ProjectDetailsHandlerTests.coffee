@@ -38,6 +38,7 @@ describe 'ProjectDetailsHandler', ->
 			'logger-sharelatex':
 				log:->
 				err:->
+			'./ProjectTokenGenerator': @ProjectTokenGenerator = {}
 
 	describe "getDetails", ->
 
@@ -149,3 +150,76 @@ describe 'ProjectDetailsHandler', ->
 				@ProjectModel.update.calledWith({_id: @project_id}, {publicAccesLevel: @accessLevel}).should.equal true
 				done()
 
+	describe "ensureTokensArePresent", ->
+		beforeEach ->
+
+		describe 'when the project has tokens', ->
+			beforeEach ->
+				@project =
+					_id: @project_id
+					tokens:
+						readOnly: 'aaa'
+						readAndWrite: '42bbb'
+				@ProjectGetter.getProject = sinon.stub()
+					.callsArgWith(2, null, @project)
+				@ProjectModel.update = sinon.stub()
+
+			it 'should get the project', (done) ->
+				@handler.ensureTokensArePresent @project_id, (err, tokens) =>
+					expect(@ProjectGetter.getProject.callCount).to.equal 1
+					expect(@ProjectGetter.getProject.calledWith(@project_id, {tokens: 1}))
+						.to.equal true
+					done()
+
+			it 'should not update the project with new tokens', (done) ->
+				@handler.ensureTokensArePresent @project_id, (err, tokens) =>
+					expect(@ProjectModel.update.callCount).to.equal 0
+					done()
+
+			it 'should produce the tokens without error', (done) ->
+				@handler.ensureTokensArePresent @project_id, (err, tokens) =>
+					expect(err).to.not.exist
+					expect(tokens).to.deep.equal @project.tokens
+					done()
+
+		describe 'when tokens are missing', ->
+			beforeEach ->
+				@project =
+					_id: @project_id
+				@ProjectGetter.getProject = sinon.stub()
+					.callsArgWith(2, null, @project)
+				@readOnlyToken = 'abc'
+				@readAndWriteToken = '42def'
+				@ProjectTokenGenerator.readOnlyToken = sinon.stub().returns(@readOnlyToken)
+				@ProjectTokenGenerator.readAndWriteToken = sinon.stub().returns(@readAndWriteToken)
+				@ProjectModel.update = sinon.stub()
+					.callsArgWith(2, null)
+
+			it 'should get the project', (done) ->
+				@handler.ensureTokensArePresent @project_id, (err, tokens) =>
+					expect(@ProjectGetter.getProject.callCount).to.equal 1
+					expect(@ProjectGetter.getProject.calledWith(@project_id, {tokens: 1}))
+						.to.equal true
+					done()
+
+			it 'should update the project with new tokens', (done) ->
+				@handler.ensureTokensArePresent @project_id, (err, tokens) =>
+					expect(@ProjectTokenGenerator.readOnlyToken.callCount)
+						.to.equal 1
+					expect(@ProjectTokenGenerator.readAndWriteToken.callCount)
+						.to.equal 1
+					expect(@ProjectModel.update.callCount).to.equal 1
+					expect(@ProjectModel.update.calledWith(
+						{_id: @project_id},
+						{$set: {tokens: {readOnly: @readOnlyToken, readAndWrite: @readAndWriteToken}}}
+					)).to.equal true
+					done()
+
+			it 'should produce the tokens without error', (done) ->
+				@handler.ensureTokensArePresent @project_id, (err, tokens) =>
+					expect(err).to.not.exist
+					expect(tokens).to.deep.equal {
+						readOnly: @readOnlyToken,
+						readAndWrite: @readAndWriteToken
+					}
+					done()

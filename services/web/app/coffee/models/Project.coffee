@@ -6,14 +6,7 @@ logger = require('logger-sharelatex')
 sanitize = require('sanitizer')
 concreteObjectId = require('mongoose').Types.ObjectId
 Errors  = require "../Features/Errors/Errors"
-
-generateToken = (length) ->
-	tokenAlpha = 'bcdfghjkmnpqrstvwxyz'
-	result = ''
-	for _n in [1..length]
-		i = Math.floor(Math.floor(Math.random() * tokenAlpha.length))
-		result += tokenAlpha[i]
-	return result
+ProjectTokenGenerator = require '../Features/Project/ProjectTokenGenerator'
 
 Schema = mongoose.Schema
 ObjectId = Schema.ObjectId
@@ -43,13 +36,11 @@ ProjectSchema = new Schema
 	tokens            :
 		readOnly        : {
 			type: String,
-			default: generateToken(14),
-			index: {unique: true}
+			default: ProjectTokenGenerator.readOnlyToken()
 		}
 		readAndWrite    : {
 			type: String,
-			default: Math.random().toString().slice(2, 10) + generateToken(12)
-			index: {unique: true}
+			default: ProjectTokenGenerator.readAndWriteToken()
 		}
 	tokenAccessReadOnly_refs         : [ type:ObjectId, ref:'User' ]
 	tokenAccessReadAndWrite_refs     : [ type:ObjectId, ref:'User' ]
