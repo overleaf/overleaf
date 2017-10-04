@@ -60,6 +60,17 @@ pipeline {
         }
       }
     }
+
+    stage('Sync OSS') {
+      when {
+        branch 'master'
+      }
+      steps {
+        sshagent (credentials: ['GIT_DEPLOY_KEY']) {
+          sh 'git push git@github.com:sharelatex/document-updater-sharelatex.git HEAD:master'
+        }
+      }
+    }
   }
 
   post {
