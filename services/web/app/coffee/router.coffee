@@ -204,6 +204,9 @@ module.exports = class Router
 		webRouter.get '/project/:project_id/labels', AuthorizationMiddlewear.ensureUserCanReadProject, AuthenticationController.requireLogin(), LabelsController.getAllLabels
 		webRouter.post '/project/:project_id/doc/:doc_id/labels', AuthorizationMiddlewear.ensureUserCanReadProject, AuthenticationController.requireLogin(), LabelsController.broadcastLabelsForDoc
 
+		webRouter.get '/project/:project_id/metadata', AuthorizationMiddlewear.ensureUserCanReadProject, AuthenticationController.requireLogin(), MetadataController.getAllMetadata
+		webRouter.post '/project/:project_id/doc/:doc_id/metadata'. AuthorizationMiddlewear.ensureUserCanReadProject, AuthenticationController.requireLogin(), MetadataController.broadcastMetadataForDoc
+
 		webRouter.get    '/tag', AuthenticationController.requireLogin(), TagsController.getAllTags
 		webRouter.post   '/tag', AuthenticationController.requireLogin(), TagsController.createTag
 		webRouter.post   '/tag/:tag_id/rename', AuthenticationController.requireLogin(), TagsController.renameTag
