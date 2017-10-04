@@ -12,7 +12,8 @@ define [
 	"ide/labels/LabelsManager"
 	"ide/review-panel/ReviewPanelManager"
 	"ide/SafariScrollPatcher"
-	"ide/FeatureOnboardingController"
+	"ide/FeatureOnboardingController",
+	"ide/AutoCompileOnboardingController",
 	"ide/settings/index"
 	"ide/share/index"
 	"ide/chat/index"
@@ -72,8 +73,12 @@ define [
 			chatOpen: false
 			pdfLayout: 'sideBySide'
 			pdfHidden: false,
-			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}")
-			miniReviewPanelVisible: false
+			pdfWidth: 0,
+			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}"),
+			miniReviewPanelVisible: false,
+		}
+		$scope.onboarding = {
+			autoCompile: if window.user.betaProgram and window.showAutoCompileOnboarding then 'unseen' else 'dismissed'
 		}
 		$scope.user = window.user
 
@@ -102,6 +107,7 @@ define [
 
 		$scope.$on "layout:pdf:resize", (_, layoutState) ->
 			$scope.ui.pdfHidden = layoutState.east.initClosed
+			$scope.ui.pdfWidth = layoutState.east.size
 
 		# Tracking code.
 		$scope.$watch "ui.view", (newView, oldView) ->
@@ -184,6 +190,20 @@ define [
 
 		if ide.browserIsSafari
 			ide.safariScrollPatcher = new SafariScrollPatcher($scope)
+
+		# Fix Chrome 61 and 62 text-shadow rendering
+		browserIsChrome61or62 = false
+		try
+			chromeVersion = parseFloat(navigator.userAgent.split(" Chrome/")[1]) || null;
+			browserIsChrome61or62 = (
+				chromeVersion? &&
+				(chromeVersion == 61 || chromeVersion == 62)
+			)
+			if browserIsChrome61or62
+				document.styleSheets[0].insertRule(".ace_editor.ace_autocomplete .ace_completion-highlight { text-shadow: none !important; }", 1)
+		catch err
+			console.error err
+
 
 		# User can append ?ft=somefeature to url to activate a feature toggle
 		ide.featureToggle = location?.search?.match(/^\?ft=(\w+)$/)?[1]
