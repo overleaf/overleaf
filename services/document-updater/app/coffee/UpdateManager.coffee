@@ -80,13 +80,12 @@ module.exports = UpdateManager =
 				RangesManager.applyUpdate project_id, doc_id, ranges, appliedOps, updatedDocLines, (error, new_ranges) ->
 					profile.log("RangesManager.applyUpdate")
 					return callback(error) if error?
-					RedisManager.updateDocument project_id, doc_id, updatedDocLines, version, appliedOps, new_ranges, (error, historyOpsLength) ->
+					RedisManager.updateDocument project_id, doc_id, updatedDocLines, version, appliedOps, new_ranges, (error, doc_ops_length, project_ops_length) ->
 						profile.log("RedisManager.updateDocument")
 						return callback(error) if error?
-						HistoryManager.recordAndFlushHistoryOps project_id, doc_id, appliedOps, historyOpsLength, (error) ->
+						HistoryManager.recordAndFlushHistoryOps project_id, doc_id, appliedOps, doc_ops_length, project_ops_length, (error) ->
 							profile.log("recordAndFlushHistoryOps")
-							return callback(error) if error?
-							callback()
+							callback(error)
 
 	lockUpdatesAndDo: (method, project_id, doc_id, args..., callback) ->
 		profile = new Profiler("lockUpdatesAndDo", {project_id, doc_id})

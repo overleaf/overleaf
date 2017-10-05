@@ -7,106 +7,171 @@ describe "HistoryManager", ->
 	beforeEach ->
 		@HistoryManager = SandboxedModule.require modulePath, requires:
 			"request": @request = {}
-			"settings-sharelatex": @Settings = {}
+			"settings-sharelatex": @Settings = {
+				apis:
+					project_history:
+						enabled: true
+						url: "http://project_history.example.com"
+					trackchanges:
+						url: "http://trackchanges.example.com"
+			}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"./HistoryRedisManager": @HistoryRedisManager = {}
 		@project_id = "mock-project-id"
 		@doc_id = "mock-doc-id"
 		@callback = sinon.stub()
 
-	describe "flushDocChanges", ->
+	describe "flushChangesAsync", ->
 		beforeEach ->
-			@Settings.apis =
-				trackchanges: url: "http://trackchanges.example.com"
+			@HistoryManager._flushDocChangesAsync = sinon.stub()
+			@HistoryManager._flushProjectChangesAsync = sinon.stub()
 
-		describe "successfully", ->
-			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, null, statusCode: 204)
-				@HistoryManager.flushDocChanges @project_id, @doc_id, @callback
+			@HistoryManager.flushChangesAsync(@project_id, @doc_id)
 
-			it "should send a request to the track changes api", ->
-				@request.post
-					.calledWith("#{@Settings.apis.trackchanges.url}/project/#{@project_id}/doc/#{@doc_id}/flush")
-					.should.equal true
+		it "flushes doc changes", ->
+			@HistoryManager._flushDocChangesAsync
+				.calledWith(@project_id, @doc_id)
+				.should.equal true
 
-			it "should return the callback", ->
-				@callback.calledWith(null).should.equal true
+		it "flushes project changes", ->
+			@HistoryManager._flushProjectChangesAsync
+				.calledWith(@project_id)
+				.should.equal true
 
-		describe "when the track changes api returns an error", ->
-			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, null, statusCode: 500)
-				@HistoryManager.flushDocChanges @project_id, @doc_id, @callback
+	describe "_flushDocChangesAsync", ->
+		beforeEach ->
+			@request.post = sinon.stub().callsArgWith(1, null, statusCode: 204)
 
-			it "should return the callback with an error", ->
-				@callback.calledWith(new Error("track changes api return non-success code: 500")).should.equal true
+			@HistoryManager._flushDocChangesAsync @project_id, @doc_id
+
+		it "should send a request to the track changes api", ->
+			@request.post
+				.calledWith("#{@Settings.apis.trackchanges.url}/project/#{@project_id}/doc/#{@doc_id}/flush")
+				.should.equal true
+
+	describe "_flushProjectChangesAsync", ->
+		beforeEach ->
+			@request.post = sinon.stub().callsArgWith(1, null, statusCode: 204)
+
+			@HistoryManager._flushProjectChangesAsync @project_id
+
+		it "should send a request to the project history api", ->
+			@request.post
+				.calledWith("#{@Settings.apis.project_history.url}/project/#{@project_id}/flush")
+				.should.equal true
 
 	describe "recordAndFlushHistoryOps", ->
 		beforeEach ->
-			@ops = ["mock-ops"]
-			@HistoryManager.flushDocChanges = sinon.stub().callsArg(2)
+			@ops = [ 'mock-ops' ]
+			@project_ops_length = 10
+			@doc_ops_length = 5
 
-		describe "pushing the op", ->
+			@HistoryManager._flushProjectChangesAsync = sinon.stub()
+			@HistoryRedisManager.recordDocHasHistoryOps = sinon.stub().callsArg(3)
+			@HistoryManager._flushDocChangesAsync = sinon.stub()
+
+		describe "with no ops", ->
 			beforeEach ->
-				@HistoryRedisManager.recordDocHasHistoryOps = sinon.stub().callsArgWith(3, null)
-				@HistoryManager.recordAndFlushHistoryOps @project_id, @doc_id, @ops, 1, @callback
+				@HistoryManager.recordAndFlushHistoryOps(
+					@project_id, @doc_id, [], @doc_ops_length, @project_ops_length, @callback
+				)
 
-			it "should push the ops into redis", ->
+			it "should not flush project changes", ->
+				@HistoryManager._flushProjectChangesAsync.called.should.equal false
+
+			it "should not record doc has history ops", ->
+				@HistoryRedisManager.recordDocHasHistoryOps.called.should.equal false
+
+			it "should not flush doc changes", ->
+				@HistoryManager._flushDocChangesAsync.called.should.equal false
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+		describe "with enough ops to flush project changes", ->
+			beforeEach ->
+				@HistoryManager._shouldFlushHistoryOps = sinon.stub()
+				@HistoryManager._shouldFlushHistoryOps.withArgs(@project_ops_length).returns(true)
+				@HistoryManager._shouldFlushHistoryOps.withArgs(@doc_ops_length).returns(false)
+
+				@HistoryManager.recordAndFlushHistoryOps(
+					@project_id, @doc_id, @ops, @doc_ops_length, @project_ops_length, @callback
+				)
+
+			it "should flush project changes", ->
+				@HistoryManager._flushProjectChangesAsync
+					.calledWith(@project_id)
+					.should.equal true
+
+			it "should record doc has history ops", ->
 				@HistoryRedisManager.recordDocHasHistoryOps
 					.calledWith(@project_id, @doc_id, @ops)
+
+			it "should not flush doc changes", ->
+				@HistoryManager._flushDocChangesAsync.called.should.equal false
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+		describe "with enough ops to flush doc changes", ->
+			beforeEach ->
+				@HistoryManager._shouldFlushHistoryOps = sinon.stub()
+				@HistoryManager._shouldFlushHistoryOps.withArgs(@project_ops_length).returns(false)
+				@HistoryManager._shouldFlushHistoryOps.withArgs(@doc_ops_length).returns(true)
+
+				@HistoryManager.recordAndFlushHistoryOps(
+					@project_id, @doc_id, @ops, @doc_ops_length, @project_ops_length, @callback
+				)
+
+			it "should not flush project changes", ->
+				@HistoryManager._flushProjectChangesAsync.called.should.equal false
+
+			it "should record doc has history ops", ->
+				@HistoryRedisManager.recordDocHasHistoryOps
+					.calledWith(@project_id, @doc_id, @ops)
+
+			it "should flush doc changes", ->
+				@HistoryManager._flushDocChangesAsync
+					.calledWith(@project_id, @doc_id)
 					.should.equal true
 
 			it "should call the callback", ->
 				@callback.called.should.equal true
 
-			it "should not try to flush the op", ->
-				@HistoryManager.flushDocChanges.called.should.equal false
-
-		describe "when we hit a multiple of FLUSH_EVERY_N_OPS ops", ->
+		describe "when recording doc has history ops errors", ->
 			beforeEach ->
+				@error = new Error("error")
 				@HistoryRedisManager.recordDocHasHistoryOps =
-					sinon.stub().callsArgWith(3, null)
-				@HistoryManager.recordAndFlushHistoryOps @project_id, @doc_id, @ops, 2 * @HistoryManager.FLUSH_EVERY_N_OPS,@callback
+					sinon.stub().callsArgWith(3, @error)
 
-			it "should tell the track changes api to flush", ->
-				@HistoryManager.flushDocChanges
-					.calledWith(@project_id, @doc_id)
-					.should.equal true
+				@HistoryManager.recordAndFlushHistoryOps(
+					@project_id, @doc_id, @ops, @doc_ops_length, @project_ops_length, @callback
+				)
 
-		describe "when we go over a multiple of FLUSH_EVERY_N_OPS ops", ->
-			beforeEach ->
-				@ops = ["op1", "op2", "op3"]
-				@HistoryRedisManager.recordDocHasHistoryOps =
-					sinon.stub().callsArgWith(3, null)
-				@HistoryManager.recordAndFlushHistoryOps @project_id, @doc_id, @ops, 2 * @HistoryManager.FLUSH_EVERY_N_OPS + 1, @callback
+			it "should not flush doc changes", ->
+				@HistoryManager._flushDocChangesAsync.called.should.equal false
 
-			it "should tell the track changes api to flush", ->
-				@HistoryManager.flushDocChanges
-					.calledWith(@project_id, @doc_id)
-					.should.equal true
+			it "should call the callback with the error", ->
+				@callback.calledWith(@error).should.equal true
 
-		describe "when HistoryManager errors", ->
-			beforeEach ->
-				@HistoryRedisManager.recordDocHasHistoryOps =
-					sinon.stub().callsArgWith(3, null)
-				@HistoryManager.flushDocChanges = sinon.stub().callsArgWith(2, @error = new Error("oops"))
-				@HistoryManager.recordAndFlushHistoryOps @project_id, @doc_id, @ops, 2 * @HistoryManager.FLUSH_EVERY_N_OPS, @callback
+		describe "_shouldFlushHistoryOps", ->
+			it "should return false if the number of ops is not known", ->
+				@HistoryManager._shouldFlushHistoryOps(null, ['a', 'b', 'c'], 1).should.equal false
 
-			it "should log out the error", ->
-				@logger.error
-					.calledWith(
-						err: @error
-						doc_id: @doc_id
-						project_id: @project_id
-						"error flushing doc to track changes api"
-					)
-					.should.equal true
-		
-		describe "with no ops", ->
-			beforeEach ->
-				@HistoryRedisManager.recordDocHasHistoryOps = sinon.stub().callsArgWith(3, null)
-				@HistoryManager.recordAndFlushHistoryOps @project_id, @doc_id, [], 1, @callback
-			
-			it "should not call HistoryRedisManager.recordDocHasHistoryOps", ->
-				@HistoryRedisManager.recordDocHasHistoryOps.called.should.equal false
-			
+			it "should return false if the updates didn't take us past the threshold", ->
+				# Currently there are 14 ops
+				# Previously we were on 11 ops
+				# We didn't pass over a multiple of 5
+				@HistoryManager._shouldFlushHistoryOps(14, ['a', 'b', 'c'], 5).should.equal false
 
+		  it "should return true if the updates took to the threshold", ->
+				# Currently there are 15 ops
+				# Previously we were on 12 ops
+				# We've reached a new multiple of 5
+				@HistoryManager._shouldFlushHistoryOps(15, ['a', 'b', 'c'], 5).should.equal true
+
+			it "should return true if the updates took past the threshold", ->
+				# Currently there are 19 ops
+				# Previously we were on 16 ops
+				# We didn't pass over a multiple of 5
+				@HistoryManager._shouldFlushHistoryOps(17, ['a', 'b', 'c'], 5).should.equal true

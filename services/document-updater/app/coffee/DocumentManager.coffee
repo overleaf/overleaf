@@ -116,11 +116,8 @@ module.exports = DocumentManager =
 		DocumentManager.flushDocIfLoaded project_id, doc_id, (error) ->
 			return callback(error) if error?
 
-			# Flush in the background since it requires and http request
-			# to track changes
-			HistoryManager.flushDocChanges project_id, doc_id, (err) ->
-				if err?
-					logger.err {err, project_id, doc_id}, "error flushing to track changes"
+			# Flush in the background since it requires a http request
+			HistoryManager.flushChangesAsync project_id, doc_id
 
 			RedisManager.removeDocFromMemory project_id, doc_id, (error) ->
 				return callback(error) if error?

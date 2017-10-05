@@ -35,7 +35,7 @@ describe "DocumentManager", ->
 			beforeEach ->
 				@RedisManager.removeDocFromMemory = sinon.stub().callsArg(2)
 				@DocumentManager.flushDocIfLoaded = sinon.stub().callsArgWith(2)
-				@HistoryManager.flushDocChanges = sinon.stub().callsArg(2)
+				@HistoryManager.flushChangesAsync = sinon.stub()
 				@DocumentManager.flushAndDeleteDoc @project_id, @doc_id, @callback
 
 			it "should flush the doc", ->
@@ -55,7 +55,7 @@ describe "DocumentManager", ->
 				@Metrics.Timer::done.called.should.equal true
 
 			it "should flush to the history api", ->
-				@HistoryManager.flushDocChanges
+				@HistoryManager.flushChangesAsync
 					.calledWith(@project_id, @doc_id)
 					.should.equal true
 

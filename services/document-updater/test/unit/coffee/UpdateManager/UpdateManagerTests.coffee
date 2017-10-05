@@ -19,7 +19,7 @@ describe "UpdateManager", ->
 			"./Metrics": @Metrics =
 				Timer: class Timer
 					done: sinon.stub()
-			"settings-sharelatex": Settings = {}
+			"settings-sharelatex": @Settings = {}
 			"./DocumentManager": @DocumentManager = {}
 			"./RangesManager": @RangesManager = {}
 			"./Profiler": class Profiler
@@ -164,12 +164,14 @@ describe "UpdateManager", ->
 			@ranges = { entries: "mock", comments: "mock" }
 			@updated_ranges = { entries: "updated", comments: "updated" }
 			@appliedOps = ["mock-applied-ops"]
+			@doc_ops_length = sinon.stub()
+			@project_ops_length = sinon.stub()
 			@DocumentManager.getDoc = sinon.stub().yields(null, @lines, @version, @ranges)
 			@RangesManager.applyUpdate = sinon.stub().yields(null, @updated_ranges)
 			@ShareJsUpdateManager.applyUpdate = sinon.stub().yields(null, @updatedDocLines, @version, @appliedOps)
-			@RedisManager.updateDocument = sinon.stub().yields()
+			@RedisManager.updateDocument = sinon.stub().yields(null, @doc_ops_length, @project_ops_length)
 			@RealTimeRedisManager.sendData = sinon.stub()
-			@HistoryManager.recordAndFlushHistoryOps = sinon.stub().callsArg(4)
+			@HistoryManager.recordAndFlushHistoryOps = sinon.stub().callsArg(5)
 
 		describe "normally", ->
 			beforeEach ->
@@ -192,7 +194,7 @@ describe "UpdateManager", ->
 
 			it "should push the applied ops into the history queue", ->
 				@HistoryManager.recordAndFlushHistoryOps
-					.calledWith(@project_id, @doc_id, @appliedOps)
+					.calledWith(@project_id, @doc_id, @appliedOps, @doc_ops_length, @project_ops_length)
 					.should.equal true
 
 			it "should call the callback", ->
