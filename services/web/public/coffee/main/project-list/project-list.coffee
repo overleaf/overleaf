@@ -454,6 +454,15 @@ define [
 			$scope.updateVisibleProjects()
 
 	App.controller "ProjectListItemController", ($scope) ->
+
+		$scope.projectLink = (project) ->
+			if project.accessLevel == 'tokenReadAndWrite'
+				"/#{project.tokens.readAndWrite}"
+			else if project.accessLevel == 'tokenReadOnly'
+				"/read/#{project.tokens.readOnly}"
+			else
+				"/project/#{project.id}"
+
 		$scope.ownerName = () ->
 			if $scope.project.accessLevel == "owner"
 				return "You"

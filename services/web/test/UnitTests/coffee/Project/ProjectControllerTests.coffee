@@ -221,6 +221,8 @@ describe "ProjectController", ->
 			@projects = [{lastUpdated:1, _id:1, owner_ref: "user-1"}, {lastUpdated:2, _id:2, owner_ref: "user-2"}]
 			@collabertions = [{lastUpdated:5, _id:5, owner_ref: "user-1"}]
 			@readOnly = [{lastUpdated:3, _id:3, owner_ref: "user-1"}]
+			@tokenReadAndWrite = [{lastUpdated:5, _id:6, owner_ref: "user-4"}]
+			@tokenReadOnly = [{lastUpdated:4, _id:7, owner_ref: "user-5"}]
 
 			@users =
 				'user-1':
@@ -234,7 +236,7 @@ describe "ProjectController", ->
 			@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, false)
 			@TagsHandler.getAllTags.callsArgWith(1, null, @tags, {})
 			@NotificationsHandler.getUserNotifications = sinon.stub().callsArgWith(1, null, @notifications, {})
-			@ProjectGetter.findAllUsersProjects.callsArgWith(2, null, @projects, @collabertions, @readOnly)
+			@ProjectGetter.findAllUsersProjects.callsArgWith(2, null, @projects, @collabertions, @readOnly, @tokenReadAndWrite, @tokenReadOnly)
 
 		it "should render the project/list page", (done)->
 			@res.render = (pageName, opts)=>
@@ -250,7 +252,7 @@ describe "ProjectController", ->
 
 		it "should send the projects", (done)->
 			@res.render = (pageName, opts)=>
-				opts.projects.length.should.equal (@projects.length + @collabertions.length + @readOnly.length)
+				opts.projects.length.should.equal (@projects.length + @collabertions.length + @readOnly.length + @tokenReadAndWrite.length + @tokenReadOnly.length)
 				done()
 			@ProjectController.projectListPage @req, @res
 

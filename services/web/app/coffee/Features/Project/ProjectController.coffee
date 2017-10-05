@@ -135,7 +135,7 @@ module.exports = ProjectController =
 			notifications: (cb)->
 				NotificationsHandler.getUserNotifications user_id, cb
 			projects: (cb)->
-				ProjectGetter.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref', cb
+				ProjectGetter.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref tokens', cb
 			hasSubscription: (cb)->
 				LimitationsManager.userHasSubscriptionOrIsGroupMember currentUser, cb
 			user: (cb) ->
@@ -146,16 +146,13 @@ module.exports = ProjectController =
 					return next(err)
 				logger.log results:results, user_id:user_id, "rendering project list"
 				tags = results.tags[0]
-				
-
 				notifications = require("underscore").map results.notifications, (notification)->
 					notification.html = req.i18n.translate(notification.templateKey, notification.messageOpts)
 					return notification
-				projects = ProjectController._buildProjectList results.projects[0], results.projects[1], results.projects[2]
+				projects = ProjectController._buildProjectList results.projects[0], results.projects[1], results.projects[2], results.projects[3], results.projects[4]
 				user = results.user
 				ProjectController._injectProjectOwners projects, (error, projects) ->
 					return next(error) if error?
-
 					viewModel = {
 						title:'your_projects'
 						priority_title: true
@@ -309,19 +306,33 @@ module.exports = ProjectController =
 					maxDocLength: Settings.max_doc_length
 				timer.done()
 
-	_buildProjectList: (ownedProjects, sharedProjects, readOnlyProjects)->
+	_buildProjectList: (ownedProjects, readAndWriteProjects, readOnlyProjects, tokenReadAndWriteProjects, tokenReadOnlyProjects)->
 		projects = []
 		for project in ownedProjects
 			projects.push ProjectController._buildProjectViewModel(project, "owner")
-		for project in sharedProjects
+		# Invite-access
+		for project in readAndWriteProjects
 			projects.push ProjectController._buildProjectViewModel(project, "readWrite")
 		for project in readOnlyProjects
 			projects.push ProjectController._buildProjectViewModel(project, "readOnly")
+		# Token-access
+		for project in tokenReadAndWriteProjects
+			projects.push ProjectController._buildProjectViewModel(project, "tokenReadAndWrite")
+		for project in tokenReadOnlyProjects
+			projects.push ProjectController._buildProjectViewModel(project, "tokenReadOnly")
 
 		return projects
 
 	_buildProjectViewModel: (project, accessLevel) ->
-		{
+		tokens =
+			readOnly: ''
+			readAndWrite: ''
+		if project.tokens?
+			if accessLevel in ['tokenReadAndWrite', 'owner']
+				tokens.readAndWrite = project.tokens.readAndWrite
+			if accessLevel in ['tokenReadOnly', 'owner']
+				tokens.readOnly = project.tokens.readOnly
+		model = {
 			id: project._id
 			name: project.name
 			lastUpdated: project.lastUpdated
@@ -329,7 +340,9 @@ module.exports = ProjectController =
 			accessLevel: accessLevel
 			archived: !!project.archived
 			owner_ref: project.owner_ref
+			tokens: tokens
 		}
+		return model
 
 	_injectProjectOwners: (projects, callback = (error, projects) ->) ->
 		users = {}
