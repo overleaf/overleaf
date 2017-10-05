@@ -33,6 +33,13 @@ footer.site-footer {
 	}
 }
 
+.site-footer-content when (@is-overleaf = true) {
+	.container-fluid;
+}
+.site-footer-content when (@is-overleaf = false) {
+	.container;
+}
+
 .sprite-icon-lang {
 	display: inline-block;
 	vertical-align: middle;

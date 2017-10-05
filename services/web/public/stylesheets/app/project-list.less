@@ -27,6 +27,13 @@
 	width: 100%;
 }
 
+.project-list-content when (@is-overleaf = true) {
+	.container-fluid;
+}
+.project-list-content when (@is-overleaf = false) {
+	.container;
+}
+
 	.project-list-row {
 		display: flex;
 		flex-direction: column;
@@ -108,7 +115,7 @@
 }
 
 ul.folders-menu {
-	margin: 0 -(@grid-gutter-width / 2);
+	margin: @folders-menu-margin;
 	.subdued {
 		color: @gray-light;
 	}
@@ -116,6 +123,7 @@ ul.folders-menu {
 		cursor: pointer;
 		position: relative;
 		> a {
+			font-size: 0.9rem;
 			line-height: @folders-menu-line-height;
 			display: block;
 			color: @sidebar-link-color;
@@ -125,6 +133,9 @@ ul.folders-menu {
 				background-color: @sidebar-hover-bg;
 				text-decoration: @sidebar-hover-text-decoration;
 			}
+		}
+		> a when (@is-overleaf = false) {
+			font-size: 0.9rem;
 		}
 		&.separator {
 			cursor: auto;
@@ -270,8 +281,12 @@ ul.structured-list {
 		a {
 			color: @structured-list-link-color;
 		}
-		.header {
+		.header when (@is-overleaf = true) {
 			font-weight: 600;
+		}
+
+		.header when (@is-overleaf = false) {
+			text-transform: uppercase;
 		}
 		.select-item, .select-all {
 			display: inline-block;
@@ -299,16 +314,19 @@ ul.structured-list {
 ul.project-list {
 	li {
 		line-height: @structured-list-line-height;
-		padding: 0;
-		// .last-modified, .owner {
-		// 	font-size: .8rem;
-		// }
-		// .owner {
-		// 	margin-right: 0;
-		// }
-		// .projectName {
-		// 	margin-right: @line-height-computed / 4;
-		// }
+		.last-modified when (@is-overleaf = false) {
+			font-size: .8rem;
+		}
+		.owner when (@is-overleaf = false) {
+			font-size: .8rem;
+		}
+		.owner when (@is-overleaf = false) {
+			margin-right: 0;
+		}
+		.projectName when (@is-overleaf = false) {
+			margin-right: @line-height-computed / 4;
+		}
+
 		.tag-label {
 			margin-left: @line-height-computed / 4;
 			position: relative;
@@ -337,6 +355,9 @@ ul.project-list {
 				border-top-left-radius: 0;
 				border-bottom-left-radius: 0;
 			}
+	}
+	li when (@is-overleaf = true) {
+		padding: 0;
 	}
 	i.tablesort {
 		padding-left: 8px;

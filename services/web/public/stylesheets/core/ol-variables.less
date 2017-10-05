@@ -1,5 +1,7 @@
 @import "./_common-variables.less";
 
+@is-overleaf: true;
+
 // Styleguide colors
 @ol-blue-gray-1 : #E4E8EE;
 @ol-blue-gray-2 : #9DA7B7;
@@ -102,13 +104,7 @@
 @sidebar-hover-bg               : @ol-blue-gray-4;
 @sidebar-hover-text-decoration  : none;
 
-// Project table
-@structured-list-link-color     : @ol-blue;
-@structured-header-border-color : shade(@ol-blue-gray-1, 5%);
-@structured-list-border-color   : @ol-blue-gray-1;
-@structured-list-hover-color    : lighten(@ol-blue-gray-1, 5%);
-
-@structured-list-line-height    : 2.5;
+@folders-menu-margin            : 0 -(@grid-gutter-width / 2);;
 @folders-menu-line-height       : @structured-list-line-height;
 @folders-menu-item-v-padding    : 0;
 @folders-title-margin-top       : 0;
@@ -129,6 +125,13 @@
 @folders-tag-menu-hover         : rgba(0, 0, 0, .1);
 @folders-tag-menu-active-hover  : rgba(0, 0, 0, .1);
 @folders-untagged-line-height   : @folders-menu-line-height;
+
+// Project table
+@structured-list-line-height    : 2.5;
+@structured-list-link-color     : @ol-blue;
+@structured-header-border-color : shade(@ol-blue-gray-1, 5%);
+@structured-list-border-color   : @ol-blue-gray-1;
+@structured-list-hover-color    : lighten(@ol-blue-gray-1, 5%);
 
 // Footer
 @footer-bg-color                : #FFF;
