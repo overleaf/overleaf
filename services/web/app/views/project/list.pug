@@ -56,8 +56,8 @@ block content
 							ng-click="showAll();"
 						) Show all
 
-		.row(ng-cloak)
-			span(ng-if="projects.length > 0")
+		.row.project-list-row(ng-cloak)
+			.project-list-container(ng-if="projects.length > 0")
 				aside.project-list-sidebar.col-md-2.col-xs-3
 					include ./list/side-bar
 
@@ -65,7 +65,7 @@ block content
 					include ./list/notifications
 					include ./list/project-list
 			
-			span(ng-if="projects.length === 0")
+			.project-list-empty(ng-if="projects.length === 0")
 				.col-md-offset-2.col-md-8.col-md-offset-2.col-xs-8
 					include ./list/empty-project-list
 

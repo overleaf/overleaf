@@ -18,21 +18,40 @@
 }
 
 .project-list-page {
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
 	position: relative;
 	padding-top: 0;
 	padding-bottom: 0;
+	width: 100%;
 }
 
-	.project-list-sidebar {
-		background-color: @sidebar-bg;
-		padding-top: @content-margin-top;
-		padding-bottom: @content-margin-top;	
-	} 
-
-	.project-list-main {
-		padding-top: @content-margin-top;
-		padding-bottom: @content-margin-top;	
+	.project-list-row {
+		display: flex;
+		flex-direction: column;
+		flex-grow: 1;
 	}
+		.project-list-container {
+			display: flex;
+			align-items: stretch;
+			flex-grow: 1;
+		}
+
+		.project-list-empty {
+
+		}
+
+		.project-list-sidebar {
+			background-color: @sidebar-bg;
+			padding-top: @content-margin-top;
+			padding-bottom: @content-margin-top;	
+		} 
+
+		.project-list-main {
+			padding-top: @content-margin-top;
+			padding-bottom: @content-margin-top;	
+		}
 
 .project-header {
 	.btn-group > .btn {
