@@ -344,3 +344,103 @@ describe "CollaboratorsHandler", ->
 
 			it 'should not call ProjectEditorHandler.buildOwnerAndMembersViews', ->
 				@ProjectEditorHandler.buildOwnerAndMembersViews.callCount.should.equal 0
+
+	describe 'transferProjects', ->
+		beforeEach ->
+			@from_user_id = "from-user-id"
+			@to_user_id = "to-user-id"
+			@projects = [{
+				_id: "project-id-1"
+			}, {
+				_id: "project-id-2"
+			}]
+			@Project.find = sinon.stub().yields(null, @projects)
+			@Project.update = sinon.stub().yields()
+			@ProjectEntityHandler.flushProjectToThirdPartyDataStore = sinon.stub().yields()
+
+		describe "successfully", ->
+			beforeEach ->
+				@CollaboratorHandler.transferProjects @from_user_id, @to_user_id, @callback
+
+			it "should look up the affected projects", ->
+				@Project.find
+					.calledWith({
+						$or : [
+							{ owner_ref: @from_user_id }
+							{ collaberator_refs: @from_user_id }
+							{ readOnly_refs: @from_user_id }
+						]
+					})
+					.should.equal true
+
+			it "should transfer owned projects", ->
+				@Project.update
+					.calledWith({
+						owner_ref: @from_user_id	
+					}, {
+						$set: { owner_ref: @to_user_id }
+					}, {
+						multi: true
+					})
+					.should.equal true
+
+			it "should transfer collaborator projects", ->
+				@Project.update
+					.calledWith({
+						collaberator_refs: @from_user_id	
+					}, {
+						$addToSet: { collaberator_refs: @to_user_id }
+					}, {
+						multi: true
+					})
+					.should.equal true
+				@Project.update
+					.calledWith({
+						collaberator_refs: @from_user_id	
+					}, {
+						$pull: { collaberator_refs: @from_user_id }
+					}, {
+						multi: true
+					})
+					.should.equal true
+
+			it "should transfer read only collaborator projects", ->
+				@Project.update
+					.calledWith({
+						readOnly_refs: @from_user_id	
+					}, {
+						$addToSet: { readOnly_refs: @to_user_id }
+					}, {
+						multi: true
+					})
+					.should.equal true
+				@Project.update
+					.calledWith({
+						readOnly_refs: @from_user_id	
+					}, {
+						$pull: { readOnly_refs: @from_user_id }
+					}, {
+						multi: true
+					})
+					.should.equal true
+
+			it "should flush each project to the TPDS", ->
+				for project in @projects
+					@ProjectEntityHandler.flushProjectToThirdPartyDataStore
+						.calledWith(project._id)
+						.should.equal true
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+		describe "when flushing to TPDS fails", ->
+			beforeEach ->
+				@ProjectEntityHandler.flushProjectToThirdPartyDataStore = sinon.stub().yields(new Error('oops'))
+				@CollaboratorHandler.transferProjects @from_user_id, @to_user_id, @callback
+
+			it "should log an error", ->
+				@logger.err.called.should.equal true
+
+			it "should not return an error since it happens in the background", ->
+				@callback.called.should.equal true
+				@callback.calledWith(new Error('oops')).should.equal false
