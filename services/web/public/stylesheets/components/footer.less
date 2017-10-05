@@ -1,4 +1,5 @@
 footer.site-footer {
+	background-color: @footer-bg-color;
 	border-top: 1px solid @gray-lighter;
 	padding: 2em;
 	font-size: 0.9rem;
@@ -20,6 +21,14 @@ footer.site-footer {
 
 		img {
 			vertical-align: text-bottom;
+		}
+	}
+
+	a {
+		color: @footer-link-color;
+		&:hover,
+		&:focus {
+			color: @footer-link-hover-color;
 		}
 	}
 }
