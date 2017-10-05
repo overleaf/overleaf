@@ -15,8 +15,8 @@ module.exports =
 		trackchanges:
 			url: "http://localhost:3015"
 		project_history:
+			enabled: process.env.SHARELATEX_ENABLE_PROJECT_HISTORY == 'true'
 			url: "http://localhost:3054"
-			enabled: true
 
 	redis:
 		realtime:

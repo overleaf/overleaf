@@ -8,6 +8,7 @@ rclient_history = require("redis-sharelatex").createClient(Settings.redis.histor
 rclient_du = require("redis-sharelatex").createClient(Settings.redis.documentupdater)
 Keys = Settings.redis.documentupdater.key_schema
 HistoryKeys = Settings.redis.history.key_schema
+ProjectHistoryKeys = Settings.redis.project_history.key_schema
 
 MockTrackChangesApi = require "./helpers/MockTrackChangesApi"
 MockWebApi = require "./helpers/MockWebApi"
@@ -58,6 +59,11 @@ describe "Applying updates to a doc", ->
 					result.should.equal 1
 					done()
 
+		it "should push the applied updates to the project history changes api", (done) ->
+			rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
+				throw error if error?
+				JSON.parse(updates[0]).op.should.deep.equal @update.op
+				done()
 
 	describe "when the document is loaded", ->
 		before (done) ->
@@ -88,6 +94,12 @@ describe "Applying updates to a doc", ->
 				rclient_history.sismember HistoryKeys.docsWithHistoryOps({@project_id}), @doc_id, (error, result) =>
 					result.should.equal 1
 					done()
+
+		it "should push the applied updates to the project history changes api", (done) ->
+			rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
+				JSON.parse(updates[0]).op.should.deep.equal @update.op
+				done()
+
 
 	describe "when the document has been deleted", ->
 		describe "when the ops come in a single linear order", ->
