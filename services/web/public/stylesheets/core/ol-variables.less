@@ -80,18 +80,18 @@
 
 // Forms
 @input-border-radius              : unit(@line-height-base, em);
-@input-height-base                : @line-height-computed + (@padding-base-vertical * 2);
+@input-height-base                : @line-height-computed + (@padding-base-vertical * 2) - 1;
 // TODO Warning color-orange?
-@btn-warning-color       : #FFF;
-@btn-warning-bg          : @ol-red;
-@btn-warning-border      : transparent;
+@btn-warning-color                : #FFF;
+@btn-warning-bg                   : @ol-red;
+@btn-warning-border               : transparent;
 
-@btn-danger-color        : #FFF;
-@btn-danger-bg           : @ol-red;
-@btn-danger-border       : transparent;
+@btn-danger-color                 : #FFF;
+@btn-danger-bg                    : @ol-red;
+@btn-danger-border                : transparent;
 
 // Cards
-@card-box-shadow         : none;
+@card-box-shadow                  : none;
 
 // Sidebar
 @sidebar-bg                     : @ol-blue-gray-5;
@@ -107,6 +107,27 @@
 @structured-list-border-color   : @ol-blue-gray-1;
 @structured-list-hover-color    : lighten(@ol-blue-gray-1, 5%);
 
+@structured-list-line-height    : 2.5;
+@folders-menu-line-height       : @structured-list-line-height;
+@folders-menu-item-v-padding    : 0;
+@folders-title-margin-top       : 0;
+@folders-title-margin-bottom    : 0;
+@folders-title-font-weight      : normal;
+@folders-title-font-size        : @font-size-small;
+@folders-title-line-height      : unit((@font-size-base / @font-size-small) * @folders-menu-line-height);
+@folders-title-color            : @ol-blue-gray-3;
+@folders-title-text-transform   : uppercase;
+@folders-tag-display            : block;
+@folders-tag-margin-right       : 0;
+@folders-tag-icon-position      : static;
+@folders-tag-padding            : @folders-menu-item-v-padding (@grid-gutter-width / 2);
+@folders-tag-spacing            : 0.5em;
+@folders-tag-menu-color         : #FFF;
+@folders-tag-hover              : @sidebar-hover-bg;
+@folders-tag-border-color       : @folders-tag-menu-color;
+@folders-tag-menu-hover         : rgba(0, 0, 0, .1);
+@folders-tag-menu-active-hover  : rgba(0, 0, 0, .1);
+@folders-untagged-line-height   : @folders-menu-line-height;
 //== Colors
 //
 //## Gray and brand colors for use across Bootstrap.

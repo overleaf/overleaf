@@ -95,18 +95,20 @@ ul.folders-menu {
 	}
 	> li {
 		cursor: pointer;
-		line-height: 1.8;
 		position: relative;
 		> a {
+			line-height: @folders-menu-line-height;
 			display: block;
-			font-size: 0.9rem;
 			color: @sidebar-link-color;
-			padding: (@line-height-computed / 4) (@grid-gutter-width / 2);
-			line-height: 1.2;
+			padding: @folders-menu-item-v-padding (@grid-gutter-width / 2);
+			border-bottom: solid 1px transparent;
 			&:hover {
 				background-color: @sidebar-hover-bg;
 				text-decoration: @sidebar-hover-text-decoration;
 			}
+		}
+		&.separator {
+			cursor: auto;
 		}
 	}
 	> li.active {
@@ -125,10 +127,14 @@ ul.folders-menu {
 		color: @gray;
 	}
 	h2 {
-		margin-top: @line-height-computed / 2;
-		margin-bottom: @line-height-computed / 4;
-		font-size: @font-size-base;
-		font-weight: 500;
+		margin-top: @folders-title-margin-top;
+		margin-bottom: @folders-title-margin-bottom;
+		font-size: @folders-title-font-size;
+		color: @folders-title-color;
+		line-height: @folders-title-line-height;
+		text-transform: @folders-title-text-transform;
+		padding: @folders-menu-item-v-padding (@grid-gutter-width / 2);
+		font-weight: @folders-title-font-weight;
 		font-family: @font-family-sans-serif;
 	}
 	> li.tag {
@@ -137,7 +143,7 @@ ul.folders-menu {
 				color: white;
 				border-color: white;
 				&:hover {
-					background-color: darken(@brand-primary, 10%);
+					background-color: @folders-tag-menu-active-hover;
 				}
 			}
 		}
@@ -145,7 +151,7 @@ ul.folders-menu {
 			font-style: italic;
 			margin-bottom: @line-height-computed / 4;
 			a {
-				line-height: 1.7;
+				line-height: @folders-untagged-line-height;
 				&:hover,
 				&:focus {
 					text-decoration: none;
@@ -157,7 +163,7 @@ ul.folders-menu {
 		}
 		&:hover {
 			&:not(.active) {
-				background-color: darken(@gray-lightest, 2%);
+				background-color: @folders-tag-hover;
 			}
 			.tag-menu {
 				display: block
@@ -165,30 +171,30 @@ ul.folders-menu {
 		}
 		&:not(.active) {
 			.tag-menu > a:hover {
-				background-color: @gray-light;
+				background-color: @folders-tag-menu-hover;
 			}
 		}
 		a.tag-name {
-			padding: 2px (@line-height-computed / 4);
-			margin-right: 18px;
-			display: inline-block;
+			padding: @folders-tag-padding;
+			margin-right: @folders-tag-margin-right;
+			display: @folders-tag-display;
 			position: relative;
 			i {
-				position: absolute;
+				position: @folders-tag-icon-position;
 				top: 5px;
 				left: 6px;
 			}
 			span.name {
 				display: inline-block;
-				padding-left: 22px;
+				padding-left: @folders-tag-spacing;
 				line-height: 1.4;
 			}
 		}
 		.tag-menu {
 			> a {
-				border: 1px solid @gray;
+				border: 1px solid @folders-tag-border-color;
 				border-radius: @border-radius-small;
-				color: @text-color;
+				color: @folders-tag-menu-color;
 				display: block;
 				width: 16px;
 				height: 16px;
@@ -201,7 +207,8 @@ ul.folders-menu {
 			}
 			display: none;
 			position: absolute;
-			top: 6px;
+			top: 50%;
+			margin-top: -8px; // Half the element height.
 			right: 4px;
 			&.open {
 				display: block;
@@ -272,7 +279,7 @@ ul.structured-list {
 
 ul.project-list {
 	li {
-		line-height: 3;
+		line-height: @structured-list-line-height;
 		padding: 0;
 		// .last-modified, .owner {
 		// 	font-size: .8rem;

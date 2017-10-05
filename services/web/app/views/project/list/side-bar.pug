@@ -45,7 +45,7 @@
 			a(href) #{translate("shared_with_you")}
 		li(ng-class="{active: (filter == 'archived')}", ng-click="filterProjects('archived')")
 			a(href) #{translate("deleted_projects")}
-		li
+		li.separator
 			h2 #{translate("folders")}
 		li.tag(
 			ng-repeat="tag in tags | orderBy:'name'",
