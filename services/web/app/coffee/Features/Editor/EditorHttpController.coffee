@@ -22,6 +22,9 @@ module.exports = EditorHttpController =
 		Metrics.inc "editor.join-project"
 		EditorHttpController._buildJoinProjectView req, project_id, user_id, (error, project, privilegeLevel) ->
 			return next(error) if error?
+			# Hide access tokens if this is not the project owner
+			if privilegeLevel != 'owner' && project.tokens?
+				project.tokens = {readOnly: '', readAndWrite: ''}
 			res.json {
 				project: project
 				privilegeLevel: privilegeLevel
