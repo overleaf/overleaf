@@ -161,24 +161,6 @@ module.exports = CollaboratorsHandler =
 	transferProjects: (from_user_id, to_user_id, callback=(err, projects) ->) ->
 		MEMBER_KEYS = ['collaberator_refs', 'readOnly_refs']
 
-		# jobs = []
-		# project_ids = []
-		# jobs.push (cb) ->
-		# 	Project.find { owner_ref: from_user_id }, { _id: 1 }, (error, projects = []) ->
-		# 		return callback(error) if error?
-		# 		project_ids = project_ids.concat(projects.map (p) -> p._id)
-		# 		Project.update { owner_ref: from_user_id }, { $set: { owner_ref: to_user_id }}, { multi: true }, cb
-
-		# for key in MEMBER_KEYS
-		# 	do (key) ->
-		# 		jobs.push (cb) ->
-		# 			query = {}
-		# 			query[]
-		# 			Project.find { owner_ref: from_user_id }, { _id: 1 }, (error, projects = []) ->
-		# 		return callback(error) if error?
-		# 		project_ids = project_ids.concat(projects.map (p) -> p._id)
-		# 		Project.update { owner_ref: from_user_id }, { $set: { owner_ref: to_user_id }}, { multi: true }, cb
-
 		# Find all the projects this user is part of so we can flush them to TPDS
 		query =
 			$or:
