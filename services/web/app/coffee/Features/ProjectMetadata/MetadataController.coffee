@@ -5,6 +5,30 @@ logger = require 'logger-sharelatex'
 
 module.exports = MetadataController =
 
+	getAllLabels: (req, res, next) ->
+		project_id = req.params.project_id
+		logger.log {project_id}, "getting labels for project"
+		MetadataHandler.getMetadataForProject project_id, (err, projectMetadata) ->
+			if err?
+				logger.err {project_id, err}, "[MetadataController] error getting labels from project"
+				return next err
+			res.json {
+				projectId: project_id
+				projectLabels: projectMetadata["labels"]
+			}
+
+	getAllPackages: (req, res, next) ->
+		project_id = req.params.project_id
+		logger.log {project_id}, "getting labels for project"
+		MetadataHandler.getMetadataForProject project_id, (err, projectMetadata) ->
+			if err?
+				logger.err {project_id, err}, "[MetadataController] error getting labels from project"
+				return next err
+			res.json {
+				projectId: project_id
+				projectPackages: projectMetadata["packages"]
+			}
+
 	getAllMetadata: (req, res, next) ->
 		project_id = req.params.project_id
 		logger.log {project_id}, "getting metadata for project"
@@ -33,4 +57,4 @@ module.exports = MetadataController =
 					packages: docMetadata["packages"]
 				}
 			}
-			res.sendStatus(200)
+			res.sendStatus 200
