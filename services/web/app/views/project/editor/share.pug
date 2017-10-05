@@ -210,16 +210,16 @@ script(type="text/ng-template", id="makeTokenBasedModalTemplate")
 			data-dismiss="modal"
 			ng-click="cancel()"
 		) &times;
-		h3 #{translate("make_project_token_based")}?
+		h3 Enable link-sharing?
 	.modal-body.modal-body-share
-		p #{translate("make_project_token_based_consequences")}
+		p When link-sharing is enabled, anyone with the relevant link will be able to access this project
 	.modal-footer
 		button.btn.btn-default(
 			ng-click="cancel()"
 		) #{translate("cancel")}
 		button.btn.btn-info(
 			ng-click="makeTokenBased()"
-		) #{translate("make_token_based")}
+		) Enable Link-Sharing
 
 script(type="text/ng-template", id="makePrivateModalTemplate")
 	.modal-header
