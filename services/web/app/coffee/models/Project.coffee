@@ -36,11 +36,11 @@ ProjectSchema = new Schema
 	tokens            :
 		readOnly        : {
 			type: String,
-			default: ProjectTokenGenerator.readOnlyToken()
+			default: () -> ProjectTokenGenerator.readOnlyToken()
 		}
 		readAndWrite    : {
 			type: String,
-			default: ProjectTokenGenerator.readAndWriteToken()
+			default: () -> ProjectTokenGenerator.readAndWriteToken()
 		}
 	tokenAccessReadOnly_refs         : [ type:ObjectId, ref:'User' ]
 	tokenAccessReadAndWrite_refs     : [ type:ObjectId, ref:'User' ]
