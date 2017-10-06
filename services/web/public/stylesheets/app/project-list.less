@@ -18,44 +18,45 @@
 }
 
 .project-list-page {
-	// display: flex;
-	// flex-direction: column;
-	// flex-grow: 1;
 	position: absolute;
 	top: @header-height;
 	bottom: @footer-height;
 	padding-top: 0;
 	padding-bottom: 0;
 	width: 100%;
+	overflow: scroll;
 }
 
-.project-list-content when (@is-overleaf = true) {
+.project-list-content when (@is-overleaf) {
 	.container-fluid;
 	margin: 0;
+	height: 100%;
 }
 
 .project-list-content when (@is-overleaf = false) {
 	.container;
 }
 
-.project-list-content {
-	height: 100%;
-}
+// .project-list-content when (@is-overleaf) {
+// 	height: 100%;
+// }
+
+// .project-list-content when (@is-overleaf = false) {
+// 	overflow: scroll;
+// }
+
+
 
 .sidebar-new-proj-btn when (@is-overleaf) {
 	.btn-block;
 }
 
-	.project-list-row {
+	.project-list-row when (@is-overleaf) {
 		height: 100%;
 	}
-		.project-list-container {
+		.project-list-container when (@is-overleaf) {
 			height: 100%;
 		}
-		.project-list-content when (@is-overleaf = false) {
-			overflow: scroll;
-		}
-
 		.project-list-sidebar {
 			background-color: @sidebar-bg;
 			padding-top: @content-margin-top;

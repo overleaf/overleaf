@@ -38,8 +38,8 @@ define [
 			# footer. So we now start to track to the bottom of the window, with a 25px padding
 			# since the footer is hidden below the fold. Don't ever get bigger than the sidebar
 			# though since that's what triggered this happening in the first place.
-			if height < sideBarHeight
-				height = Math.min(sideBarHeight, $window.innerHeight - topOffset - 25)
+			# if height < sideBarHeight
+			# 	height = Math.min(sideBarHeight, $window.innerHeight - topOffset - 25)
 			$scope.projectListHeight = height
 		
 
