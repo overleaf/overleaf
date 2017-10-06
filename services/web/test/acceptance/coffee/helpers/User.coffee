@@ -93,6 +93,9 @@ class User
 					callback(err)
 				db.users.remove {_id: ObjectId(user_id)}, callback
 
+	getProject: (project_id, callback = (error, project)->) ->
+		db.projects.findOne {_id: ObjectId(project_id.toString())}, callback
+
 	createProject: (name, callback = (error, project_id) ->) ->
 		@request.post {
 			url: "/project/new",
@@ -134,6 +137,24 @@ class User
 			url: "/project/#{project_id}/settings/admin",
 			json:
 				publicAccessLevel: level
+		}, (error, response, body) ->
+			return callback(error) if error?
+			callback(null)
+
+	makePrivate: (project_id, callback = (error) ->) ->
+		@request.post {
+			url: "/project/#{project_id}/settings/admin",
+			json:
+				publicAccessLevel: 'private'
+		}, (error, response, body) ->
+			return callback(error) if error?
+			callback(null)
+
+	makeTokenBased: (project_id, callback = (error) ->) ->
+		@request.post {
+			url: "/project/#{project_id}/settings/admin",
+			json:
+				publicAccessLevel: 'tokenBased'
 		}, (error, response, body) ->
 			return callback(error) if error?
 			callback(null)
