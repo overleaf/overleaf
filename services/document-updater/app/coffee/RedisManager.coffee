@@ -86,6 +86,7 @@ module.exports = RedisManager =
 		multi.del keys.docVersion(doc_id:doc_id)
 		multi.del keys.docHash(doc_id:doc_id)
 		multi.del keys.ranges(doc_id:doc_id)
+		multi.del keys.unflushedTime(doc_id:doc_id)
 		multi.exec (error) ->
 			return callback(error) if error?
 			multi = rclient.multi()
@@ -105,7 +106,7 @@ module.exports = RedisManager =
 	clearProjectState: (project_id, callback = (error) ->) ->
 		rclient.del keys.projectState(project_id:project_id), callback
 
-	getDoc : (project_id, doc_id, callback = (error, lines, version, ranges) ->)->
+	getDoc : (project_id, doc_id, callback = (error, lines, version, ranges, unflushedTime) ->)->
 		timer = new metrics.Timer("redis.get-doc")
 		multi = rclient.multi()
 		multi.get keys.docLines(doc_id:doc_id)
@@ -113,7 +114,8 @@ module.exports = RedisManager =
 		multi.get keys.docHash(doc_id:doc_id)
 		multi.get keys.projectKey(doc_id:doc_id)
 		multi.get keys.ranges(doc_id:doc_id)
-		multi.exec (error, [docLines, version, storedHash, doc_project_id, ranges])->
+		multi.get keys.unflushedTime(doc_id:doc_id)
+		multi.exec (error, [docLines, version, storedHash, doc_project_id, ranges, unflushedTime])->
 			timeSpan = timer.done()
 			return callback(error) if error?
 			# check if request took too long and bail out.  only do this for
@@ -149,7 +151,7 @@ module.exports = RedisManager =
 				return callback(error) if error?
 				if result isnt 0 # doc should already be in set
 					logger.error project_id: project_id, doc_id: doc_id, doc_project_id: doc_project_id, "doc missing from docsInProject set"
-				callback null, docLines, version, ranges
+				callback null, docLines, version, ranges, unflushedTime
 
 	getDocVersion: (doc_id, callback = (error, version) ->) ->
 		rclient.get keys.docVersion(doc_id: doc_id), (error, version) ->
@@ -247,6 +249,10 @@ module.exports = RedisManager =
 					# expire must come after rpush since before it will be a no-op if the list is empty
 					multi.expire keys.docOps(doc_id: doc_id), RedisManager.DOC_OPS_TTL           # index 6
 					multi.rpush  historyKeys.uncompressedHistoryOps(doc_id: doc_id), jsonOps...  # index 7
+					# Set the unflushed timestamp to the current time if the doc
+					# hasn't been modified before (the content in mongo has been
+					# valid up to this point). Otherwise leave it alone ("NX" flag).
+					multi.set    keys.unflushedTime(doc_id: doc_id), Date.now(), "NX"
 				multi.exec (error, result) ->
 						return callback(error) if error?
 						# check the hash computed on the redis server
@@ -256,6 +262,9 @@ module.exports = RedisManager =
 						# return length of uncompressedHistoryOps queue (index 7)
 						uncompressedHistoryOpsLength = result?[7]
 						return callback(null, uncompressedHistoryOpsLength)
+
+	clearUnflushedTime: (doc_id, callback = (error) ->) ->
+		rclient.del keys.unflushedTime(doc_id:doc_id), callback
 
 	getDocIdsInProject: (project_id, callback = (error, doc_ids) ->) ->
 		rclient.smembers keys.docsInProject(project_id: project_id), callback

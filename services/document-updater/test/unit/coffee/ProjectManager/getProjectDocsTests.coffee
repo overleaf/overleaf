@@ -29,14 +29,13 @@ describe "ProjectManager - getProjectDocs", ->
 			]
 			@RedisManager.checkOrSetProjectState = sinon.stub().callsArgWith(2, null)
 			@RedisManager.getDocIdsInProject = sinon.stub().callsArgWith(1, null, @doc_ids)
-			@RedisManager.getDocVersion = sinon.stub()
-			@RedisManager.getDocVersion.withArgs(@doc_ids[0]).callsArgWith(1, null, @doc_versions[0])
-			@RedisManager.getDocVersion.withArgs(@doc_ids[1]).callsArgWith(1, null, @doc_versions[1])
-			@RedisManager.getDocVersion.withArgs(@doc_ids[2]).callsArgWith(1, null, @doc_versions[2])
-			@RedisManager.getDocLines = sinon.stub()
-			@RedisManager.getDocLines.withArgs(@doc_ids[0]).callsArgWith(1, null, JSON.stringify(@doc_lines[0]))
-			@RedisManager.getDocLines.withArgs(@doc_ids[1]).callsArgWith(1, null, JSON.stringify(@doc_lines[1]))
-			@RedisManager.getDocLines.withArgs(@doc_ids[2]).callsArgWith(1, null, JSON.stringify(@doc_lines[2]))
+			@DocumentManager.getDocAndFlushIfOldWithLock = sinon.stub()
+			@DocumentManager.getDocAndFlushIfOldWithLock.withArgs(@project_id, @doc_ids[0])
+				.callsArgWith(2, null, @doc_lines[0], @doc_versions[0])
+			@DocumentManager.getDocAndFlushIfOldWithLock.withArgs(@project_id, @doc_ids[1])
+				.callsArgWith(2, null, @doc_lines[1], @doc_versions[1])
+			@DocumentManager.getDocAndFlushIfOldWithLock.withArgs(@project_id, @doc_ids[2])
+				.callsArgWith(2, null, @doc_lines[2], @doc_versions[2])
 			@ProjectManager.getProjectDocs @project_id, @projectStateHash, @excludeVersions,  (error, docs) =>
 				@callback(error, docs)
 				done()
@@ -81,10 +80,11 @@ describe "ProjectManager - getProjectDocs", ->
 			@doc_ids = ["doc-id-1", "doc-id-2", "doc-id-3"]
 			@RedisManager.checkOrSetProjectState = sinon.stub().callsArgWith(2, null)
 			@RedisManager.getDocIdsInProject = sinon.stub().callsArgWith(1, null, @doc_ids)
-			@RedisManager.getDocVersion = sinon.stub().callsArgWith(1, null)
-			@RedisManager.getDocLines = sinon.stub()
-			@RedisManager.getDocLines.withArgs("doc-id-1").callsArgWith(1, null, JSON.stringify(["test doc content"]))
-			@RedisManager.getDocLines.withArgs("doc-id-2").callsArgWith(1, @error = new Error("oops")) # trigger an error
+			@DocumentManager.getDocAndFlushIfOldWithLock = sinon.stub()
+			@DocumentManager.getDocAndFlushIfOldWithLock.withArgs(@project_id, "doc-id-1")
+				.callsArgWith(2, null, ["test doc content"], @doc_versions[1])
+			@DocumentManager.getDocAndFlushIfOldWithLock.withArgs(@project_id, "doc-id-2")
+				.callsArgWith(2, @error = new Error("oops")) # trigger an error
 			@ProjectManager.getProjectDocs @project_id, @projectStateHash, @excludeVersions, (error, docs) =>
 				@callback(error)
 				done()

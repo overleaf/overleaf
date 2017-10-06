@@ -4,6 +4,7 @@ should = chai.should()
 modulePath = "../../../../app/js/DocumentManager.js"
 SandboxedModule = require('sandboxed-module')
 Errors = require "../../../../app/js/Errors"
+tk = require "timekeeper"
 
 describe "DocumentManager", ->
 	beforeEach ->
@@ -60,6 +61,7 @@ describe "DocumentManager", ->
 		describe "when the doc is in Redis", ->
 			beforeEach ->
 				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges)
+				@RedisManager.clearUnflushedTime = sinon.stub().callsArgWith(1, null)
 				@PersistenceManager.setDoc = sinon.stub().yields()
 				@DocumentManager.flushDocIfLoaded @project_id, @doc_id, @callback
 
@@ -374,3 +376,64 @@ describe "DocumentManager", ->
 			it "should call the callback with a not found error", ->
 				error = new Errors.NotFoundError("document not found: #{@doc_id}")
 				@callback.calledWith(error).should.equal true
+
+	describe "getDocAndFlushIfOld", ->
+		beforeEach ->
+			tk.freeze(new Date())
+			@DocumentManager.flushDocIfLoaded = sinon.stub().callsArg(2)
+
+		afterEach ->
+			tk.reset()
+
+		describe "when the doc is in Redis", ->
+			describe "and has changes to be flushed", ->
+				beforeEach ->
+					@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, true, Date.now() - 1e9)
+					@DocumentManager.getDocAndFlushIfOld @project_id, @doc_id, @callback
+
+				it "should get the doc", ->
+					@DocumentManager.getDoc
+						.calledWith(@project_id, @doc_id)
+						.should.equal true
+
+				it "should flush the doc", ->
+					@DocumentManager.flushDocIfLoaded
+					.calledWith(@project_id, @doc_id)
+					.should.equal true
+
+				it "should call the callback with the lines and versions", ->
+					@callback.calledWith(null, @lines, @version).should.equal true
+
+			describe "and has only changes that don't need to be flushed", ->
+				beforeEach ->
+					@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, true, Date.now() - 100)
+					@DocumentManager.getDocAndFlushIfOld @project_id, @doc_id, @callback
+
+				it "should get the doc", ->
+					@DocumentManager.getDoc
+						.calledWith(@project_id, @doc_id)
+						.should.equal true
+
+				it "should not flush the doc", ->
+					@DocumentManager.flushDocIfLoaded
+					.called.should.equal false
+
+				it "should call the callback with the lines and versions", ->
+					@callback.calledWith(null, @lines, @version).should.equal true
+
+		describe "when the doc is not in Redis", ->
+			beforeEach ->
+				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, false)
+				@DocumentManager.getDocAndFlushIfOld @project_id, @doc_id, @callback
+
+			it "should get the doc", ->
+				@DocumentManager.getDoc
+					.calledWith(@project_id, @doc_id)
+					.should.equal true
+
+			it "should not flush the doc", ->
+				@DocumentManager.flushDocIfLoaded
+				.called.should.equal false
+
+			it "should call the callback with the lines and versions", ->
+				@callback.calledWith(null, @lines, @version).should.equal true

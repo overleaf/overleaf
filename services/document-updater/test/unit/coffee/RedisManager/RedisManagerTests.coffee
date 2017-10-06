@@ -5,6 +5,7 @@ modulePath = "../../../../app/js/RedisManager.js"
 SandboxedModule = require('sandboxed-module')
 Errors = require "../../../../app/js/Errors"
 crypto = require "crypto"
+tk = require "timekeeper"
 
 describe "RedisManager", ->
 	beforeEach ->
@@ -30,6 +31,7 @@ describe "RedisManager", ->
 								docsInProject: ({project_id}) -> "DocsIn:#{project_id}"
 								ranges: ({doc_id}) -> "Ranges:#{doc_id}"
 								projectState: ({project_id}) -> "ProjectState:#{project_id}"
+								unflushedTime: ({doc_id}) -> "UnflushedTime:#{doc_id}"
 						history:
 							key_schema:
 								uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
@@ -61,8 +63,9 @@ describe "RedisManager", ->
 			@hash = crypto.createHash('sha1').update(@jsonlines,'utf8').digest('hex')
 			@ranges = { comments: "mock", entries: "mock" }
 			@json_ranges = JSON.stringify @ranges
+			@unflushed_time = 12345
 			@rclient.get = sinon.stub()
-			@rclient.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version, @hash, @project_id, @json_ranges])
+			@rclient.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version, @hash, @project_id, @json_ranges, @unflushed_time])
 			@rclient.sadd = sinon.stub().yields(null, 0)
 
 		describe "successfully", ->
@@ -89,6 +92,11 @@ describe "RedisManager", ->
 					.calledWith("Ranges:#{@doc_id}")
 					.should.equal true
 
+			it "should get the unflushed time", ->
+				@rclient.get
+					.calledWith("UnflushedTime:#{@doc_id}")
+					.should.equal true
+
 			it "should check if the document is in the DocsIn set", ->
 				@rclient.sadd
 					.calledWith("DocsIn:#{@project_id}")
@@ -96,7 +104,7 @@ describe "RedisManager", ->
 
 			it 'should return the document', ->
 				@callback
-					.calledWith(null, @lines, @version, @ranges)
+					.calledWithExactly(null, @lines, @version, @ranges, @unflushed_time)
 					.should.equal true
 
 			it 'should not log any errors', ->
@@ -116,7 +124,7 @@ describe "RedisManager", ->
 
 			it 'should return an empty result', ->
 				@callback
-					.calledWith(null, null, 0, {})
+					.calledWithExactly(null, null, 0, {})
 					.should.equal true
 
 			it 'should not log any errors', ->
@@ -134,7 +142,7 @@ describe "RedisManager", ->
 
 			it 'should return the document', ->
 				@callback
-					.calledWith(null, @lines, @version, @ranges)
+					.calledWithExactly(null, @lines, @version, @ranges, @unflushed_time)
 					.should.equal true
 
 		describe "with a corrupted document", ->
@@ -155,11 +163,11 @@ describe "RedisManager", ->
 
 		describe "with a slow request to redis", ->
 			beforeEach ->
-				@rclient.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version, @badHash, @project_id, @json_ranges])
+				@rclient.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version, @badHash, @project_id, @json_ranges, @unflushed_time])
 				@clock = sinon.useFakeTimers();
 				@rclient.exec = (cb) =>
 					@clock.tick(6000);
-					cb(null, [@jsonlines, @version, @another_project_id, @json_ranges])
+					cb(null, [@jsonlines, @version, @another_project_id, @json_ranges, @unflushed_time])
 
 				@RedisManager.getDoc @project_id, @doc_id, @callback
 
@@ -174,7 +182,7 @@ describe "RedisManager", ->
 		describe "getDoc with an invalid project id", ->
 			beforeEach ->
 				@another_project_id = "project-id-456"
-				@rclient.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version, @another_project_id, @json_ranges])
+				@rclient.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version, @another_project_id, @json_ranges, @unflushed_time])
 				@RedisManager.getDoc @project_id, @doc_id, @callback
 
 			it 'should return an error', ->
@@ -317,6 +325,10 @@ describe "RedisManager", ->
 			beforeEach ->
 				@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version - @ops.length)
 				@RedisManager.updateDocument @doc_id, @lines, @version, @ops, @ranges, @callback
+				tk.freeze(new Date())
+
+			afterEach ->
+				tk.reset()
 		
 			it "should get the current doc version to check for consistency", ->
 				@RedisManager.getDocVersion
@@ -341,6 +353,11 @@ describe "RedisManager", ->
 			it "should set the ranges", ->
 				@rclient.set
 					.calledWith("Ranges:#{@doc_id}", JSON.stringify(@ranges))
+					.should.equal true
+
+			it "should set the unflushed time", ->
+				@rclient.set
+					.calledWith("UnflushedTime:#{@doc_id}", Date.now(), "NX")
 					.should.equal true
 
 			it "should push the doc op into the doc ops list", ->
@@ -569,6 +586,11 @@ describe "RedisManager", ->
 		it "should delete the hash", ->
 			@rclient.del
 				.calledWith("DocHash:#{@doc_id}")
+				.should.equal true
+
+		it "should delete the unflushed time", ->
+			@rclient.del
+				.calledWith("UnflushedTime:#{@doc_id}")
 				.should.equal true
 		
 		it "should delete the project_id for the doc", ->
