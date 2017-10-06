@@ -18,10 +18,12 @@
 }
 
 .project-list-page {
-	display: flex;
-	flex-direction: column;
-	flex-grow: 1;
-	position: relative;
+	// display: flex;
+	// flex-direction: column;
+	// flex-grow: 1;
+	position: absolute;
+	top: @header-height;
+	bottom: @footer-height;
 	padding-top: 0;
 	padding-bottom: 0;
 	width: 100%;
@@ -37,9 +39,7 @@
 }
 
 .project-list-content {
-	display: flex;
-	flex-direction: column;	
-	flex: 1 0 100%;
+	height: 100%;
 }
 
 .sidebar-new-proj-btn when (@is-overleaf) {
@@ -47,29 +47,31 @@
 }
 
 	.project-list-row {
-		display: flex;
-		flex-direction: column;
-		flex-grow: 1;
+		height: 100%;
 	}
 		.project-list-container {
-			display: flex;
-			align-items: stretch;
-			flex-grow: 1;
+			height: 100%;
 		}
-
-		.project-list-empty {
-
+		.project-list-content when (@is-overleaf = false) {
+			overflow: scroll;
 		}
 
 		.project-list-sidebar {
 			background-color: @sidebar-bg;
 			padding-top: @content-margin-top;
-			padding-bottom: @content-margin-top;	
+			padding-bottom: @content-margin-top;
 		} 
+
+		.project-list-sidebar when (@is-overleaf) {
+			height: 100%;
+			overflow: scroll;
+		}
 
 		.project-list-main {
 			padding-top: @content-margin-top;
-			padding-bottom: @content-margin-top;	
+			padding-bottom: @content-margin-top;
+			height: 100%;
+			overflow: hidden;
 		}
 
 .project-header {
