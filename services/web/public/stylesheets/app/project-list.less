@@ -34,6 +34,10 @@
 	.container;
 }
 
+.sidebar-new-proj-btn when (@is-overleaf) {
+	.btn-block;
+}
+
 	.project-list-row {
 		display: flex;
 		flex-direction: column;
@@ -307,7 +311,7 @@ ul.structured-list {
 	}
 }
 
-.project-list-card {
+.project-list-card when (@is-overleaf) {
 	padding: 0 (@line-height-computed / 4);
 }
 
