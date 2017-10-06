@@ -23,9 +23,22 @@ define [
 				range = new Range(end.row, 0, end.row, end.column)
 				lineUpToCursor = @editor.getSession().getTextRange(range)
 				commandFragment = getLastCommandFragment(lineUpToCursor)
-				linesContainLabel = _.any(change.lines, (line) -> line.match(/\\label\{[^\}\n\\]{0,80}\}/))
-				lastCommandFragmentIsLabel = commandFragment?.slice(0,7) == '\\label{'
-				if linesContainLabel or lastCommandFragmentIsLabel
+
+				linesContainPackage = _.any(
+					change.lines,
+					(line) -> line.match(/\\usepackage(?:\[.*?])?\s*{.*?}/)
+				)
+				linesContainLabel = _.any(
+					change.lines,
+					(line) -> line.match(/\\label\{[^\}\n\\]{0,80}\}/)
+				)
+				linesContainMeta = linesContainPackage or linesContainLabel
+
+				lastCommandFragmentIsLabel = commandFragment?.startsWith '\\label{'
+				lastCommandFragmentIsPackage = commandFragment?.startsWith '\\usepackage'
+				lastCommandFragmentIsMeta = lastCommandFragmentIsPackage or lastCommandFragmentIsLabel
+
+				if linesContainMeta or lastCommandFragmentIsMeta
 					@scheduleLoadCurrentDocLabelsFromServer()
 
 			@editor.on "changeSession", (e) =>
@@ -34,10 +47,10 @@ define [
 
 		loadCurrentDocLabelsFromServer: () ->
 			currentDocId = @$scope.docId
-			@Labels.loadDocLabelsFromServer(currentDocId)
+			@Labels.loadDocLabelsFromServer currentDocId
 
 		loadDocLabelsFromServer: (docId) ->
-			@Labels.loadDocLabelsFromServer(docId)
+			@Labels.loadDocLabelsFromServer docId
 
 		scheduleLoadCurrentDocLabelsFromServer: () ->
 			# De-bounce loading labels with a timeout
@@ -48,7 +61,7 @@ define [
 				delete @debouncer[currentDocId]
 			@debouncer[currentDocId] = setTimeout(
 				() =>
-					@loadDocLabelsFromServer(currentDocId)
+					@loadDocLabelsFromServer currentDocId
 					delete @debouncer[currentDocId]
 				, 1000
 				, this
@@ -56,3 +69,6 @@ define [
 
 		getAllLabels: () ->
 			@Labels.getAllLabels()
+
+		getAllPackages: () ->
+			@Labels.getAllPackages()

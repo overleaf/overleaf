@@ -77,6 +77,11 @@ define [], () ->
 						special
 					)
 
+	packageCommandMappings = {
+		amsmath: ['holyshititworks', 'mathematics']
+		natbib: ['somebibliographystuff']
+	}
+
 	class Parser
 		constructor: (@doc, @prefix) ->
 
@@ -166,7 +171,20 @@ define [], () ->
 				return false
 
 	class CommandManager
+		constructor: (@labelsManager) ->
+
 		getCompletions: (editor, session, pos, prefix, callback) ->
+			packages = @labelsManager.getAllPackages()
+			packageCommands = []
+			for pkg in packages
+				if packageCommandMappings[pkg]?
+					for cmd in packageCommandMappings[pkg]
+						packageCommands.push {
+							caption: "\\#{cmd}"
+							snippet: "\\#{cmd}"
+							meta: "cmd"
+						}
+
 			doc = session.getValue()
 			parser = new Parser(doc, prefix)
 			commands = parser.parse()
@@ -191,9 +209,9 @@ define [], () ->
 						meta: "cmd"
 						score: score
 					}
-			completions = completions.concat staticCommands
+			completions = completions.concat staticCommands, packageCommands
 
-			callback(null, completions)
+			callback null, completions
 
 		loadCommandsFromDoc: (doc) ->
 			parser = new Parser(doc)

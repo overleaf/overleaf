@@ -11,8 +11,8 @@ define [
 		}
 
 		labels.onBroadcastDocLabels = (data) ->
-			if data.docId and data.labels
-				state.documents[data.docId] = data.labels
+			if data.docId? and data.meta?
+				state.documents[data.docId] = data.meta
 
 		labels.onEntityDeleted = (e, entity) ->
 			if entity.type == 'doc'
@@ -20,19 +20,22 @@ define [
 
 		labels.onFileUploadComplete = (e, upload) ->
 			if upload.entity_type == 'doc'
-				labels.loadDocLabelsFromServer(upload.entity_id)
+				labels.loadDocLabelsFromServer upload.entity_id
 
 		labels.getAllLabels = () ->
-			_.flatten(labels for docId, labels of state.documents)
+			_.flatten(meta.labels for docId, meta of state.documents)
+
+		labels.getAllPackages = () ->
+			_.flatten(meta.packages for docId, meta of state.documents)
 
 		labels.loadProjectLabelsFromServer = () ->
 			$http
 				.get("/project/#{window.project_id}/labels")
 				.then (response) ->
 					{ data } = response
-					if data.projectLabels
-						for docId, docLabels of data.projectLabels
-							state.documents[docId] = docLabels
+					if data.projectMeta
+						for docId, docMeta of data.projectMeta
+							state.documents[docId] = docMeta.labels
 
 		labels.loadDocLabelsFromServer = (docId) ->
 			$http

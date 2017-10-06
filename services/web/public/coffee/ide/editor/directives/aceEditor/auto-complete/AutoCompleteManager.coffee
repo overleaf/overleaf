@@ -9,8 +9,8 @@ define [
 	aceSnippetManager = ace.require('ace/snippets').snippetManager
 
 	class AutoCompleteManager
-		constructor: (@$scope, @editor, @element, @metadataManager, @graphics, @preamble) ->
-			@suggestionManager = new CommandManager()
+		constructor: (@$scope, @editor, @element, @labelsManager, @graphics, @preamble) ->
+			@suggestionManager = new CommandManager(@labelsManager)
 
 			@monkeyPatchAutocomplete()
 
@@ -65,7 +65,7 @@ define [
 								}
 							callback null, result
 
-			metadataManager = @metadataManager
+			labelsManager = @labelsManager
 			LabelsCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
 					context = Helpers.getContext(editor, pos)
@@ -76,13 +76,14 @@ define [
 							commandName = refMatch[1]
 							currentArg = refMatch[2]
 							result = []
-							result.push {
-								caption: "\\#{commandName}{}",
-								snippet: "\\#{commandName}{}",
-								meta: "cross-reference",
-								score: 60
-							}
-							for label in metadataManager.getAllLabels()
+							if commandName != 'ref' # ref is in top 100 commands
+								result.push {
+									caption: "\\#{commandName}{}",
+									snippet: "\\#{commandName}{}",
+									meta: "cross-reference",
+									score: 60
+								}
+							for label in labelsManager.getAllLabels()
 								result.push {
 									caption: "\\#{commandName}{#{label}#{if needsClosingBrace then '}' else ''}",
 									value: "\\#{commandName}{#{label}#{if needsClosingBrace then '}' else ''}",
