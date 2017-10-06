@@ -6,6 +6,7 @@ ContactManager = require "../Contacts/ContactManager"
 CollaboratorsEmailHandler = require "./CollaboratorsEmailHandler"
 async = require "async"
 PrivilegeLevels = require "../Authorization/PrivilegeLevels"
+PublicAccessLevels = require "../Authorization/PublicAccessLevels"
 Errors = require "../Errors/Errors"
 EmailHelper = require "../Helpers/EmailHelper"
 ProjectEditorHandler = require "../Project/ProjectEditorHandler"
@@ -24,6 +25,7 @@ module.exports = CollaboratorsHandler =
 			readOnly_refs: 1,
 			tokenAccessReadOnly_refs: 1,
 			tokenAccessReadAndWrite_refs: 1
+			publicAccesLevel: 1
 		Project.findOne { _id: project_id }, projection, (error, project) ->
 			return callback(error) if error?
 			return callback new Errors.NotFoundError("no project found with id #{project_id}") if !project?
@@ -32,13 +34,15 @@ module.exports = CollaboratorsHandler =
 			# read-and-write
 			for member_id in project.collaberator_refs or []
 				members.push { id: member_id.toString(), privilegeLevel: PrivilegeLevels.READ_AND_WRITE, source: Sources.INVITE }
-			for member_id in project.tokenAccessReadAndWrite_refs or []
-				members.push { id: member_id.toString(), privilegeLevel: PrivilegeLevels.READ_AND_WRITE, source: Sources.TOKEN }
+			if project.publicAccesLevel == PublicAccessLevels.TOKEN_BASED
+				for member_id in project.tokenAccessReadAndWrite_refs or []
+					members.push { id: member_id.toString(), privilegeLevel: PrivilegeLevels.READ_AND_WRITE, source: Sources.TOKEN }
 			# read-only
 			for member_id in project.readOnly_refs or []
 				members.push { id: member_id.toString(), privilegeLevel: PrivilegeLevels.READ_ONLY, source: Sources.INVITE }
-			for member_id in project.tokenAccessReadOnly_refs or []
-				members.push { id: member_id.toString(), privilegeLevel: PrivilegeLevels.READ_ONLY, source: Sources.TOKEN }
+			if project.publicAccesLevel == PublicAccessLevels.TOKEN_BASED
+				for member_id in project.tokenAccessReadOnly_refs or []
+					members.push { id: member_id.toString(), privilegeLevel: PrivilegeLevels.READ_ONLY, source: Sources.TOKEN }
 			return callback null, members
 
 	getMemberIds: (project_id, callback = (error, member_ids) ->) ->

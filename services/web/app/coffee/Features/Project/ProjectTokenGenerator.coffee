@@ -1,6 +1,5 @@
 module.exports = ProjectTokenGenerator =
 
-
 	readOnlyToken: () ->
 		length = 12
 		tokenAlpha = 'bcdfghjkmnpqrstvwxyz'

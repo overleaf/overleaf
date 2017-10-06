@@ -32,7 +32,8 @@ describe "CollaboratorsHandler", ->
 				@Project.findOne = sinon.stub()
 				@Project.findOne.withArgs(
 					{_id: @project_id},
-					{owner_ref: 1, collaberator_refs: 1, readOnly_refs: 1, tokenAccessReadOnly_refs: 1, tokenAccessReadAndWrite_refs: 1}
+					{owner_ref: 1, collaberator_refs: 1, readOnly_refs: 1,
+					tokenAccessReadOnly_refs: 1, tokenAccessReadAndWrite_refs: 1, publicAccesLevel: 1}
 				).yields(null, @project = {
 					owner_ref: [ "owner-ref" ]
 					readOnly_refs: [ "read-only-ref-1", "read-only-ref-2" ]
