@@ -131,7 +131,7 @@ ul.folders-menu {
 			line-height: @folders-menu-line-height;
 			display: block;
 			color: @sidebar-link-color;
-			padding: @folders-menu-item-v-padding (@grid-gutter-width / 2);
+			padding: @folders-menu-item-v-padding @folders-menu-item-h-padding;
 			border-bottom: solid 1px transparent;
 			&:hover {
 				background-color: @sidebar-hover-bg;
@@ -167,7 +167,7 @@ ul.folders-menu {
 		color: @folders-title-color;
 		line-height: @folders-title-line-height;
 		text-transform: @folders-title-text-transform;
-		padding: @folders-menu-item-v-padding (@grid-gutter-width / 2);
+		padding: @folders-title-padding;
 		font-weight: @folders-title-font-weight;
 		font-family: @font-family-sans-serif;
 	}
@@ -210,18 +210,11 @@ ul.folders-menu {
 		}
 		a.tag-name {
 			padding: @folders-tag-padding;
-			margin-right: @folders-tag-margin-right;
 			display: @folders-tag-display;
 			position: relative;
-			i {
-				position: @folders-tag-icon-position;
-				top: 5px;
-				left: 6px;
-			}
 			span.name {
-				display: inline-block;
-				padding-left: @folders-tag-spacing;
-				line-height: 1.4;
+				padding-left: 0.5em;
+				line-height: @folders-tag-line-height;
 			}
 		}
 		.tag-menu {

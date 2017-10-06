@@ -107,6 +107,8 @@
 @folders-menu-margin            : 0 -(@grid-gutter-width / 2);;
 @folders-menu-line-height       : @structured-list-line-height;
 @folders-menu-item-v-padding    : 0;
+@folders-menu-item-h-padding    : (@grid-gutter-width / 2);
+@folders-title-padding          : @folders-menu-item-v-padding @folders-menu-item-v-padding;
 @folders-title-margin-top       : 0;
 @folders-title-margin-bottom    : 0;
 @folders-title-font-weight      : normal;
@@ -115,10 +117,8 @@
 @folders-title-color            : @ol-blue-gray-3;
 @folders-title-text-transform   : uppercase;
 @folders-tag-display            : block;
-@folders-tag-margin-right       : 0;
-@folders-tag-icon-position      : static;
-@folders-tag-padding            : @folders-menu-item-v-padding (@grid-gutter-width / 2);
-@folders-tag-spacing            : 0.5em;
+@folders-tag-line-height        : 1.4;
+@folders-tag-padding            : @folders-menu-item-v-padding 20px @folders-menu-item-v-padding @folders-menu-item-v-padding;
 @folders-tag-menu-color         : #FFF;
 @folders-tag-hover              : @sidebar-hover-bg;
 @folders-tag-border-color       : @folders-tag-menu-color;
