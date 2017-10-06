@@ -29,9 +29,17 @@
 
 .project-list-content when (@is-overleaf = true) {
 	.container-fluid;
+	margin: 0;
 }
+
 .project-list-content when (@is-overleaf = false) {
 	.container;
+}
+
+.project-list-content {
+	display: flex;
+	flex-direction: column;	
+	flex: 1 0 100%;
 }
 
 .sidebar-new-proj-btn when (@is-overleaf) {
