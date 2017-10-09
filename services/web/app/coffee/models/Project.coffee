@@ -6,7 +6,6 @@ logger = require('logger-sharelatex')
 sanitize = require('sanitizer')
 concreteObjectId = require('mongoose').Types.ObjectId
 Errors  = require "../Features/Errors/Errors"
-ProjectTokenGenerator = require '../Features/Project/ProjectTokenGenerator'
 
 Schema = mongoose.Schema
 ObjectId = Schema.ObjectId
@@ -34,14 +33,8 @@ ProjectSchema = new Schema
 	imageName         : { type: String }
 	track_changes     : { type: Object }
 	tokens            :
-		readOnly        : {
-			type: String,
-			default: () -> ProjectTokenGenerator.readOnlyToken()
-		}
-		readAndWrite    : {
-			type: String,
-			default: () -> ProjectTokenGenerator.readAndWriteToken()
-		}
+		readOnly        : { type: String }
+		readAndWrite    : { type: String }
 	tokenAccessReadOnly_refs         : [ type:ObjectId, ref:'User' ]
 	tokenAccessReadAndWrite_refs     : [ type:ObjectId, ref:'User' ]
 	overleaf          :
