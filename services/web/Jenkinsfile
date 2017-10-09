@@ -60,6 +60,9 @@ pipeline {
         sh 'mv app/views/external/googlebdb0f8f7f4a17241.html public/googlebdb0f8f7f4a17241.html'
         sh 'npm install'
         sh 'npm rebuild'
+        // It's too easy to end shrinkwrapping to a local, outdated version of translations.
+        // Ensure translations are always latest, regardless of shrinkwrap
+        sh 'npm install git+https://github.com/sharelatex/translations-sharelatex.git#master'
         sh 'npm install --quiet grunt'
         sh 'npm install --quiet grunt-cli'
         sh 'ls -l node_modules/.bin'
