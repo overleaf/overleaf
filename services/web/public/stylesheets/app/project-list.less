@@ -102,6 +102,9 @@
 	}
 	p {
 		margin-bottom: @line-height-computed / 4;
+		&.small {
+			color: @sidebar-color;
+		}
 	}
 }
 
@@ -148,11 +151,15 @@ ul.folders-menu {
 				background-color: @sidebar-hover-bg;
 				text-decoration: @sidebar-hover-text-decoration;
 			}
+			&:focus {
+				text-decoration: none;
+			}
 		}
 		> a when (@is-overleaf = false) {
 			font-size: 0.9rem;
 		}
 		&.separator {
+			padding: @folders-menu-item-v-padding @folders-menu-item-h-padding;
 			cursor: auto;
 		}
 	}
