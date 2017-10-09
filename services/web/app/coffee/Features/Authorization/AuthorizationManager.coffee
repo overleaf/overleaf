@@ -34,17 +34,24 @@ module.exports = AuthorizationManager =
 			AuthorizationManager.getPublicAccessLevel project_id, (err, publicAccessLevel) ->
 				return callback(err) if err?
 				if publicAccessLevel == PublicAccessLevels.TOKEN_BASED
+					# Anonymous users can have read-only access to token-based projects,
+					# while read-write access must be logged in
 					TokenAccessHandler.requestHasReadOnlyTokenAccess req, project_id, (err, allowed) ->
 						return callback(err) if err?
 						if allowed
+							# Grant anonymous user read-only access
 							callback null, PrivilegeLevels.READ_ONLY, false
 						else
+							# Deny anonymous user access
 							callback null, PrivilegeLevels.NONE, false
 				else if publicAccessLevel == PublicAccessLevels.READ_ONLY
+					# Legacy public read-only access for anonymous user
 					callback null, PrivilegeLevels.READ_ONLY, true
 				else if publicAccessLevel == PublicAccessLevels.READ_AND_WRITE
+					# Legacy public read-write access for anonymous user
 					callback null, PrivilegeLevels.READ_AND_WRITE, true
 				else
+					# Deny anonymous user access
 					callback null, PrivilegeLevels.NONE, false
 		else
 			# User is present, get their privilege level from database
