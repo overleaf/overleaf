@@ -1,5 +1,4 @@
 Project = require('../../models/Project').Project
-ProjectGetter = require("./ProjectGetter")
 logger = require('logger-sharelatex')
 documentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 tagsHandler = require("../Tags/TagsHandler")
@@ -38,28 +37,22 @@ module.exports = ProjectDeleter =
 
 	archiveProject: (project_id, callback = (error) ->)->
 		logger.log project_id:project_id, "archived project from user request"
-		# TODO: the *_refs properties are probably not needed here
-		ProjectGetter.getProject project_id, {owner_ref:true, collaberator_refs:true, readOnly_refs:true}, (err, project)=>
-			if err? or !project?
-				logger.err err:err, project_id:project_id, "error getting project to archived it"
-				callback(err)
-			else
-				async.series [
-					(cb)->
-						documentUpdaterHandler.flushProjectToMongoAndDelete project_id, cb
-					(cb)->
-						CollaboratorsHandler.getMemberIds project_id, (error, member_ids = []) ->
-							for member_id in member_ids
-								tagsHandler.removeProjectFromAllTags member_id, project_id, (err)->
-						cb() #doesn't matter if this fails or the order it happens in
-					(cb)->
-						Project.update {_id:project_id}, { $set: { archived: true }}, cb
-				], (err)->
-					if err?
-						logger.err err:err, "problem archived project"
-						return callback(err)
-					logger.log project_id:project_id, "succesfully archived project from user request"
-					callback()
+		async.series [
+			(cb)->
+				documentUpdaterHandler.flushProjectToMongoAndDelete project_id, cb
+			(cb)->
+				CollaboratorsHandler.getMemberIds project_id, (error, member_ids = []) ->
+					for member_id in member_ids
+						tagsHandler.removeProjectFromAllTags member_id, project_id, (err)->
+				cb() #doesn't matter if this fails or the order it happens in
+			(cb)->
+				Project.update {_id:project_id}, { $set: { archived: true }}, cb
+		], (err)->
+			if err?
+				logger.err err:err, "problem archived project"
+				return callback(err)
+			logger.log project_id:project_id, "succesfully archived project from user request"
+			callback()
 
 	restoreProject: (project_id, callback = (error) ->) ->
 		Project.update {_id:project_id}, { $unset: { archived: true }}, callback
