@@ -25,8 +25,10 @@ module.exports = AuthorizationManager =
 	#	* privilegeLevel: "owner", "readAndWrite", of "readOnly" if the user has
 	#	  access. false if the user does not have access
 	#   * becausePublic: true if the access level is only because the project is public.
-	getPrivilegeLevelForProject: (req, user_id, project_id,
-																callback = (error, privilegeLevel, becausePublic) ->) ->
+	getPrivilegeLevelForProject: (
+		req, user_id, project_id,
+		callback = (error, privilegeLevel, becausePublic) ->
+	) ->
 		if !user_id?
 			# User is Anonymous, Try Token-based access
 			AuthorizationManager.getPublicAccessLevel project_id, (err, publicAccessLevel) ->
