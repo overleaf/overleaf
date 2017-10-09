@@ -141,8 +141,6 @@ ul.folders-menu {
 		cursor: pointer;
 		position: relative;
 		> a {
-			font-size: 0.9rem;
-			line-height: @folders-menu-line-height;
 			display: block;
 			color: @sidebar-link-color;
 			padding: @folders-menu-item-v-padding @folders-menu-item-h-padding;
@@ -183,7 +181,6 @@ ul.folders-menu {
 		margin-bottom: @folders-title-margin-bottom;
 		font-size: @folders-title-font-size;
 		color: @folders-title-color;
-		line-height: @folders-title-line-height;
 		text-transform: @folders-title-text-transform;
 		padding: @folders-title-padding;
 		font-weight: @folders-title-font-weight;
@@ -303,17 +300,17 @@ ul.structured-list {
 		.header when (@is-overleaf = false) {
 			text-transform: uppercase;
 		}
-		.select-item, .select-all {
-			display: inline-block;
-			margin: 0 (@line-height-computed / 4);
-		}
 		// .select-item, .select-all {
-		// 	position: absolute;
-		// 	left: @line-height-computed;
+		// 	display: inline-block;
+		// 	margin: 0 (@line-height-computed / 4);
 		// }
+		.select-item, .select-all {
+			position: absolute;
+			left: @line-height-computed;
+		}
 		.select-item + span, .select-all + span {
 			display: inline-block;
-			padding-left: (@line-height-computed / 4);
+			padding-left: @line-height-computed * 1.5;
 			max-width: 100%;
 			overflow: hidden;
 			text-overflow: ellipsis;
@@ -328,7 +325,6 @@ ul.structured-list {
 
 ul.project-list {
 	li {
-		line-height: @structured-list-line-height;
 		.last-modified when (@is-overleaf = false) {
 			font-size: .8rem;
 		}
@@ -338,7 +334,7 @@ ul.project-list {
 		.owner when (@is-overleaf = false) {
 			margin-right: 0;
 		}
-		.projectName when (@is-overleaf = false) {
+		.projectName {
 			margin-right: @line-height-computed / 4;
 		}
 
@@ -370,9 +366,6 @@ ul.project-list {
 				border-top-left-radius: 0;
 				border-bottom-left-radius: 0;
 			}
-	}
-	li when (@is-overleaf = true) {
-		padding: 0;
 	}
 	i.tablesort {
 		padding-left: 8px;
