@@ -168,7 +168,7 @@ define [
 			$scope.pdf.compileExited = false
 			$scope.pdf.failedCheck = false
 			$scope.pdf.compileInProgress = false
-			$scope.pdf.autocompile_disabled = false
+			$scope.pdf.autoCompileDisabled = false
 
 			# make a cache to look up files by name
 			fileByPath = {}
@@ -211,7 +211,7 @@ define [
 					$scope.pdf.view = 'uncompiled'
 				else # background autocompile from typing
 					$scope.pdf.view = 'errors'
-					$scope.pdf.autocompile_disabled = true
+					$scope.pdf.autoCompileDisabled = true
 					$scope.autocompile_enabled = false # disable any further autocompiles
 					event_tracking.sendMB "autocompile-rate-limited", {hasPremiumCompile: $scope.hasPremiumCompile}
 			else if response.status == "project-too-large"
