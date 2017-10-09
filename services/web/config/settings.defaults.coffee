@@ -437,3 +437,8 @@ module.exports = settings =
 	#	name : "all projects",
 	#	url: "/templates/all"
 	#}]
+
+	rateLimits:
+		autoCompile:
+			everyone: 100
+			standard: 25

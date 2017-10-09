@@ -44,7 +44,7 @@ describe "CompileManager", ->
 
 		describe "succesfully", ->
 			beforeEach ->
-				@CompileManager._checkIfAutoCompileLimitHasBeenHit = (_, cb)-> cb(null, true)
+				@CompileManager._checkIfAutoCompileLimitHasBeenHit = (isAutoCompile, compileGroup, cb)-> cb(null, true)
 				@CompileManager.compile @project_id, @user_id, {}, @callback
 
 			it "should check the project has not been recently compiled", ->
@@ -84,7 +84,7 @@ describe "CompileManager", ->
 				
 		describe "when the project has been recently compiled", ->
 			it "should return", (done)->
-				@CompileManager._checkIfAutoCompileLimitHasBeenHit = (_, cb)-> cb(null, true)
+				@CompileManager._checkIfAutoCompileLimitHasBeenHit = (isAutoCompile, compileGroup, cb)-> cb(null, true)
 				@CompileManager._checkIfRecentlyCompiled = sinon.stub().callsArgWith(2, null, true)
 				@CompileManager.compile @project_id, @user_id, {}, (err, status)->
 					status.should.equal "too-recently-compiled"
@@ -92,7 +92,7 @@ describe "CompileManager", ->
 
 		describe "should check the rate limit", ->
 			it "should return", (done)->
-				@CompileManager._checkIfAutoCompileLimitHasBeenHit = sinon.stub().callsArgWith(1, null, false)
+				@CompileManager._checkIfAutoCompileLimitHasBeenHit = sinon.stub().callsArgWith(2, null, false)
 				@CompileManager.compile @project_id, @user_id, {}, (err, status)->
 					status.should.equal "autocompile-backoff"
 					done()
@@ -222,14 +222,14 @@ describe "CompileManager", ->
 	describe "_checkIfAutoCompileLimitHasBeenHit", ->
 
 		it "should be able to compile if it is not an autocompile", (done)->
-			@ratelimiter.addCount.callsArgWith(1, null, true)
-			@CompileManager._checkIfAutoCompileLimitHasBeenHit false, (err, canCompile)=>
+			@ratelimiter.addCount.callsArgWith(2, null, true)
+			@CompileManager._checkIfAutoCompileLimitHasBeenHit false, "everyone", (err, canCompile)=>
 				canCompile.should.equal true
 				done()
 
 		it "should be able to compile if rate limit has remianing", (done)->
 			@ratelimiter.addCount.callsArgWith(1, null, true)
-			@CompileManager._checkIfAutoCompileLimitHasBeenHit true, (err, canCompile)=>
+			@CompileManager._checkIfAutoCompileLimitHasBeenHit true, "everyone", (err, canCompile)=>
 				args = @ratelimiter.addCount.args[0][0]
 				args.throttle.should.equal 25
 				args.subjectName.should.equal "everyone"
@@ -240,13 +240,13 @@ describe "CompileManager", ->
 
 		it "should be not able to compile if rate limit has no remianing", (done)->
 			@ratelimiter.addCount.callsArgWith(1, null, false)
-			@CompileManager._checkIfAutoCompileLimitHasBeenHit true, (err, canCompile)=>
+			@CompileManager._checkIfAutoCompileLimitHasBeenHit true, "everyone", (err, canCompile)=>
 				canCompile.should.equal false
 				done()
 
 		it "should return false if there is an error in the rate limit", (done)->
 			@ratelimiter.addCount.callsArgWith(1, "error")
-			@CompileManager._checkIfAutoCompileLimitHasBeenHit true, (err, canCompile)=>
+			@CompileManager._checkIfAutoCompileLimitHasBeenHit true, "everyone", (err, canCompile)=>
 				canCompile.should.equal false
 				done()
 

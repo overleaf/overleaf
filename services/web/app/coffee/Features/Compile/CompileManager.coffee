@@ -18,7 +18,7 @@ module.exports = CompileManager =
 			timer.done()
 			_callback(args...)
 
-		@_checkIfAutoCompileLimitHasBeenHit options.isAutoCompile, (err, canCompile)->
+		@_checkIfAutoCompileLimitHasBeenHit options.isAutoCompile, "everyone", (err, canCompile)->
 			if !canCompile
 				return callback null, "autocompile-backoff", []
 			logger.log project_id: project_id, user_id: user_id, "compiling project"
@@ -34,8 +34,8 @@ module.exports = CompileManager =
 						return callback(error) if error?
 						for key, value of limits
 							options[key] = value
-						# Put a lower limit on autocompiles for free users
-						CompileManager._checkIfFreeAutoCompileLimitHasBeenHit options.isAutoCompile, limits.compileGroup, (err, canCompile)->
+						# Put a lower limit on autocompiles for free users, based on compileGroup
+						CompileManager._checkCompileGroupAutoCompileLimit options.isAutoCompile, limits.compileGroup, (err, canCompile)->
 							if !canCompile
 								return callback null, "autocompile-backoff", []
 							# only pass user_id down to clsi if this is a per-user compile
@@ -76,44 +76,27 @@ module.exports = CompileManager =
 			else
 				return callback null, true
 
-	_checkIfAutoCompileLimitHasBeenHit: (isAutoCompile, callback = (err, canCompile)->)->
+	_checkCompileGroupAutoCompileLimit: (isAutoCompile, compileGroup, callback = (err, canCompile)->)->
+		if compileGroup is "default"
+			CompileManager._checkIfAutoCompileLimitHasBeenHit isAutoCompile, compileGroup, callback
+		else
+			Metrics.inc "auto-compile-#{compileGroup}"
+			return callback(null, true)	# always allow priority group users to compile
+
+	_checkIfAutoCompileLimitHasBeenHit: (isAutoCompile, compileGroup, callback = (err, canCompile)->)->
 		if !isAutoCompile
 			return callback(null, true)
-		Metrics.inc "auto-compile"
+		Metrics.inc "auto-compile-#{compileGroup}"
 		opts =
 			endpointName:"auto_compile"
 			timeInterval:20
-			subjectName:"everyone"
-			throttle: 200
+			subjectName:compileGroup
+			throttle: Settings?.rateLimit?.autoCompile?[compileGroup] || 25
 		rateLimiter.addCount opts, (err, canCompile)->
 			if err?
 				canCompile = false
-			logger.log canCompile:canCompile, opts:opts, "checking if auto compile limit has been hit"
 			if !canCompile
-				Metrics.inc "auto-compile-rate-limited"
-			callback err, canCompile
-
-
-	_checkIfFreeAutoCompileLimitHasBeenHit: (isAutoCompile, compileGroup, callback = (err, canCompile)->)->
-		if !isAutoCompile
-			return callback(null, true)
-
-		if compileGroup is "priority"
-			Metrics.inc "auto-compile-priority"
-			return callback(null, true)
-
-		Metrics.inc "auto-compile-free"
-		opts =
-			endpointName:"auto_compile"
-			timeInterval:20
-			subjectName:"free"
-			throttle: 100
-		rateLimiter.addCount opts, (err, canCompile)->
-			if err?
-				canCompile = false
-			logger.log canCompile:canCompile, opts:opts, "checking if free users auto compile limit has been hit"
-			if !canCompile
-				Metrics.inc "auto-compile-free-rate-limited"
+				Metrics.inc "auto-compile-#{compileGroup}-limited"
 			callback err, canCompile
 
 	_ensureRootDocumentIsSet: (project_id, callback = (error) ->) ->
