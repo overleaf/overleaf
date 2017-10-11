@@ -11,7 +11,7 @@ RangesManager = require "./RangesManager"
 MAX_UNFLUSHED_AGE = 300 * 1000 # 5 mins, document should be flushed to mongo this time after a change
 
 module.exports = DocumentManager =
-	getDoc: (project_id, doc_id, _callback = (error, lines, version, ranges, alreadyLoaded, unflushedTime) ->) ->
+	getDoc: (project_id, doc_id, _callback = (error, lines, version, ranges, unflushedTime, alreadyLoaded) ->) ->
 		timer = new Metrics.Timer("docManager.getDoc")
 		callback = (args...) ->
 			timer.done()
@@ -26,9 +26,9 @@ module.exports = DocumentManager =
 					logger.log {project_id, doc_id, lines, version}, "got doc from persistence API"
 					RedisManager.putDocInMemory project_id, doc_id, lines, version, ranges, (error) ->
 						return callback(error) if error?
-						callback null, lines, version, ranges, false, null
+						callback null, lines, version, ranges, null, false
 			else
-				callback null, lines, version, ranges, true, unflushedTime
+				callback null, lines, version, ranges, unflushedTime, true
 
 	getDocAndRecentOps: (project_id, doc_id, fromVersion, _callback = (error, lines, version, recentOps, ranges) ->) ->
 		timer = new Metrics.Timer("docManager.getDocAndRecentOps")
@@ -55,7 +55,7 @@ module.exports = DocumentManager =
 			return callback(new Error("No lines were provided to setDoc"))
 
 		UpdateManager = require "./UpdateManager"
-		DocumentManager.getDoc project_id, doc_id, (error, oldLines, version, ranges, alreadyLoaded) ->
+		DocumentManager.getDoc project_id, doc_id, (error, oldLines, version, ranges, unflushedTime, alreadyLoaded) ->
 			return callback(error) if error?
 			
 			if oldLines? and oldLines.length > 0 and oldLines[0].text?
@@ -159,7 +159,7 @@ module.exports = DocumentManager =
 					callback()
 
 	getDocAndFlushIfOld: (project_id, doc_id, callback = (error, doc) ->) ->
-		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges, alreadyLoaded, unflushedTime) ->
+		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges, unflushedTime, alreadyLoaded) ->
 			return callback(error) if error?
 			# if doc was already loaded see if it needs to be flushed
 			if alreadyLoaded and unflushedTime? and (Date.now() - unflushedTime) > MAX_UNFLUSHED_AGE
