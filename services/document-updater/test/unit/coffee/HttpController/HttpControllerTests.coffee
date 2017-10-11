@@ -435,7 +435,7 @@ describe "HttpController", ->
 					.calledWith(new Error("oops"))
 					.should.equal true
 
-	describe "getProjectDocs", ->
+	describe "getProjectDocsAndFlushIfOld", ->
 		beforeEach ->
 			@state = "01234567890abcdef"
 			@docs = [{_id: "1234", lines: "hello", v: 23}, {_id: "4567", lines: "world", v: 45}]
@@ -447,11 +447,11 @@ describe "HttpController", ->
 
 		describe "successfully", ->
 			beforeEach ->
-				@ProjectManager.getProjectDocs = sinon.stub().callsArgWith(3,null, @docs)
-				@HttpController.getProjectDocs(@req, @res, @next)
+				@ProjectManager.getProjectDocsAndFlushIfOld = sinon.stub().callsArgWith(3,null, @docs)
+				@HttpController.getProjectDocsAndFlushIfOld(@req, @res, @next)
 
 			it "should get docs from the project manager", ->
-				@ProjectManager.getProjectDocs
+				@ProjectManager.getProjectDocsAndFlushIfOld
 					.calledWith(@project_id, @state, {})
 					.should.equal true
 
@@ -475,8 +475,8 @@ describe "HttpController", ->
 
 		describe "when there is a conflict", ->
 			beforeEach ->
-				@ProjectManager.getProjectDocs = sinon.stub().callsArgWith(3, new Errors.ProjectStateChangedError("project state changed"))
-				@HttpController.getProjectDocs(@req, @res, @next)
+				@ProjectManager.getProjectDocsAndFlushIfOld = sinon.stub().callsArgWith(3, new Errors.ProjectStateChangedError("project state changed"))
+				@HttpController.getProjectDocsAndFlushIfOld(@req, @res, @next)
 
 			it "should return an HTTP 409 Conflict response", ->
 				@res.send
@@ -485,8 +485,8 @@ describe "HttpController", ->
 
 		describe "when an error occurs", ->
 			beforeEach ->
-				@ProjectManager.getProjectDocs = sinon.stub().callsArgWith(3, new Error("oops"))
-				@HttpController.getProjectDocs(@req, @res, @next)
+				@ProjectManager.getProjectDocsAndFlushIfOld = sinon.stub().callsArgWith(3, new Error("oops"))
+				@HttpController.getProjectDocsAndFlushIfOld(@req, @res, @next)
 
 			it "should call next with the error", ->
 				@next

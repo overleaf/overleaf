@@ -5,7 +5,7 @@ modulePath = "../../../../app/js/ProjectManager.js"
 SandboxedModule = require('sandboxed-module')
 Errors = require "../../../../app/js/Errors.js"
 
-describe "ProjectManager - getProjectDocs", ->
+describe "ProjectManager - getProjectDocsAndFlushIfOld", ->
 	beforeEach ->
 		@ProjectManager = SandboxedModule.require modulePath, requires:
 			"./RedisManager": @RedisManager = {}
@@ -36,7 +36,7 @@ describe "ProjectManager - getProjectDocs", ->
 				.callsArgWith(2, null, @doc_lines[1], @doc_versions[1])
 			@DocumentManager.getDocAndFlushIfOldWithLock.withArgs(@project_id, @doc_ids[2])
 				.callsArgWith(2, null, @doc_lines[2], @doc_versions[2])
-			@ProjectManager.getProjectDocs @project_id, @projectStateHash, @excludeVersions,  (error, docs) =>
+			@ProjectManager.getProjectDocsAndFlushIfOld @project_id, @projectStateHash, @excludeVersions,  (error, docs) =>
 				@callback(error, docs)
 				done()
 
@@ -60,7 +60,7 @@ describe "ProjectManager - getProjectDocs", ->
 		beforeEach (done) ->
 			@doc_ids = ["doc-id-1", "doc-id-2", "doc-id-3"]
 			@RedisManager.checkOrSetProjectState = sinon.stub().callsArgWith(2, null, true)
-			@ProjectManager.getProjectDocs @project_id, @projectStateHash, @excludeVersions,  (error, docs) =>
+			@ProjectManager.getProjectDocsAndFlushIfOld @project_id, @projectStateHash, @excludeVersions,  (error, docs) =>
 				@callback(error, docs)
 				done()
 
@@ -85,13 +85,13 @@ describe "ProjectManager - getProjectDocs", ->
 				.callsArgWith(2, null, ["test doc content"], @doc_versions[1])
 			@DocumentManager.getDocAndFlushIfOldWithLock.withArgs(@project_id, "doc-id-2")
 				.callsArgWith(2, @error = new Error("oops")) # trigger an error
-			@ProjectManager.getProjectDocs @project_id, @projectStateHash, @excludeVersions, (error, docs) =>
+			@ProjectManager.getProjectDocsAndFlushIfOld @project_id, @projectStateHash, @excludeVersions, (error, docs) =>
 				@callback(error)
 				done()
 
 		it "should record the error", ->
 			@logger.error
-				.calledWith(err: @error, project_id: @project_id, doc_id: "doc-id-2", "error getting project doc lines in getProjectDocs")
+				.calledWith(err: @error, project_id: @project_id, doc_id: "doc-id-2", "error getting project doc lines in getProjectDocsAndFlushIfOld")
 				.should.equal true
 
 		it "should call the callback with an error", ->

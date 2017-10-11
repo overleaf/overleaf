@@ -58,15 +58,15 @@ module.exports = ProjectManager =
 				else
 					callback(null)
 
-	getProjectDocs: (project_id, projectStateHash, excludeVersions = {}, _callback = (error, docs) ->) ->
-		timer = new Metrics.Timer("projectManager.getProjectDocs")
+	getProjectDocsAndFlushIfOld: (project_id, projectStateHash, excludeVersions = {}, _callback = (error, docs) ->) ->
+		timer = new Metrics.Timer("projectManager.getProjectDocsAndFlushIfOld")
 		callback = (args...) ->
 			timer.done()
 			_callback(args...)
 
 		RedisManager.checkOrSetProjectState project_id, projectStateHash, (error, projectStateChanged) ->
 			if error?
-				logger.error err: error, project_id: project_id, "error getting/setting project state in getProjectDocs"
+				logger.error err: error, project_id: project_id, "error getting/setting project state in getProjectDocsAndFlushIfOld"
 				return callback(error)
 			# we can't return docs if project structure has changed
 			if projectStateChanged
@@ -83,7 +83,7 @@ module.exports = ProjectManager =
 							# get the doc lines from redis
 							DocumentManager.getDocAndFlushIfOldWithLock project_id, doc_id, (err, lines, version) ->
 								if err?
-									logger.error err:err, project_id: project_id, doc_id: doc_id, "error getting project doc lines in getProjectDocs"
+									logger.error err:err, project_id: project_id, doc_id: doc_id, "error getting project doc lines in getProjectDocsAndFlushIfOld"
 									return cb(err)
 								doc = {_id:doc_id, lines:lines, v:version} # create a doc object to return
 								cb(null, doc)
