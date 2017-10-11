@@ -38,6 +38,9 @@ app.param 'doc_id', (req, res, next, doc_id) ->
 		next new Error("invalid doc id")
 
 app.get    '/project/:project_id/doc/:doc_id',                          HttpController.getDoc
+# temporarily keep the GET method for backwards compatibility
+app.get    '/project/:project_id/doc',                                  HttpController.getProjectDocsAndFlushIfOld
+# will migrate to the POST method of get_and_flush_if_old instead
 app.post   '/project/:project_id/get_and_flush_if_old',                 HttpController.getProjectDocsAndFlushIfOld
 app.post   '/project/:project_id/clearState',                           HttpController.clearProjectState
 app.post   '/project/:project_id/doc/:doc_id',                          HttpController.setDoc
