@@ -128,9 +128,9 @@ module.exports = DocumentUpdaterHandler =
 		# docs from redis via the docupdater. Otherwise we will need to
 		# fall back to getting them from mongo.
 		timer = new metrics.Timer("get-project-docs")
-		url = "#{settings.apis.documentupdater.url}/project/#{project_id}/doc?state=#{projectStateHash}"
+		url = "#{settings.apis.documentupdater.url}/project/#{project_id}/get_and_flush_if_old?state=#{projectStateHash}"
 		logger.log project_id:project_id, "getting project docs from document updater"
-		request.get url, (error, res, body)->
+		request.post url, (error, res, body)->
 			timer.done()
 			if error?
 				logger.error err:error, url:url, project_id:project_id, "error getting project docs from doc updater"
