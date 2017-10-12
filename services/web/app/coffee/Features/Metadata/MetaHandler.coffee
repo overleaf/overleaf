@@ -1,5 +1,5 @@
 ProjectEntityHandler = require "../Project/ProjectEntityHandler"
-DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
+DocumentUpdaterHandler = require '../DocumentUpdater/DocumentUpdaterHandler'
 
 
 module.exports = MetaHandler =
