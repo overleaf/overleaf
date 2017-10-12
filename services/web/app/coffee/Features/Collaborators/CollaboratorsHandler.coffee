@@ -133,15 +133,19 @@ module.exports = CollaboratorsHandler =
 	getProjectsUserIsMemberOf: (user_id, fields, callback = (error, {readAndWrite:[],readOnly:[],tokenReadAndWrite:[],tokenReadOnly:[]}) ->) ->
 		async.mapLimit(
 			[
-				'collaberator_refs',
-				'readOnly_refs',
-				'tokenAccessReadAndWrite_refs',
-				'tokenAccessReadOnly_refs'
+				{collaberator_refs: user_id},
+				{readOnly_refs: user_id},
+				{
+					tokenAccessReadAndWrite_refs: user_id,
+					publicAccesLevel: PublicAccessLevels.TOKEN_BASED
+				},
+				{
+					tokenAccessReadOnly_refs: user_id,
+					publicAccesLevel: PublicAccessLevels.TOKEN_BASED
+				}
 			]
 			, 2
-			, (key, cb) ->
-				query = {}
-				query[key] = user_id
+			, (query, cb) ->
 				Project.find query, fields, cb
 			, (error, results) ->
 				return callback(error) if error?

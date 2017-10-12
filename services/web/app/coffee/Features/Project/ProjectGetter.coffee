@@ -56,7 +56,6 @@ module.exports = ProjectGetter =
 			return callback(error) if error?
 			CollaboratorsHandler.getProjectsUserIsMemberOf user_id, fields, (error, projects) ->
 				return callback(error) if error?
-				# TODO: Add token projects too
 				callback null, ownedProjects, projects.readAndWrite, projects.readOnly, projects.tokenReadAndWrite, projects.tokenReadOnly
 
 

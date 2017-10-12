@@ -196,8 +196,8 @@ describe "CollaboratorsHandler", ->
 			@Project.find = sinon.stub()
 			@Project.find.withArgs({collaberator_refs:@user_id}, @fields).yields(null, ["mock-read-write-project-1", "mock-read-write-project-2"])
 			@Project.find.withArgs({readOnly_refs:@user_id}, @fields).yields(null, ["mock-read-only-project-1", "mock-read-only-project-2"])
-			@Project.find.withArgs({tokenAccessReadAndWrite_refs:@user_id}, @fields).yields(null, ["mock-token-read-write-project-1", "mock-token-read-write-project-2"])
-			@Project.find.withArgs({tokenAccessReadOnly_refs:@user_id}, @fields).yields(null, ["mock-token-read-only-project-1", "mock-token-read-only-project-2"])
+			@Project.find.withArgs({tokenAccessReadAndWrite_refs:@user_id, publicAccesLevel: 'tokenBased'}, @fields).yields(null, ["mock-token-read-write-project-1", "mock-token-read-write-project-2"])
+			@Project.find.withArgs({tokenAccessReadOnly_refs:@user_id, publicAccesLevel: 'tokenBased'}, @fields).yields(null, ["mock-token-read-only-project-1", "mock-token-read-only-project-2"])
 			@CollaboratorHandler.getProjectsUserIsMemberOf @user_id, @fields, @callback
 
 		it "should call the callback with the projects", ->
