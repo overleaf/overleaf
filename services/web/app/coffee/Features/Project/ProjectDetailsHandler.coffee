@@ -80,8 +80,15 @@ module.exports = ProjectDetailsHandler =
 		ProjectGetter.getProject project_id, {tokens: 1}, (err, project) ->
 			return callback(err) if err?
 			if project.tokens? and project.tokens.readOnly? and project.tokens.readAndWrite?
+				logger.log {project_id}, "project already has tokens"
 				return callback(null, project.tokens)
 			else
+				logger.log {
+					project_id,
+					has_tokens: project.tokens?,
+					has_readOnly: project?.tokens?.readOnly?,
+					has_readAndWrite: project?.tokens?.readAndWrite?
+				}, "generating tokens for project"
 				tokens = project.tokens || {}
 				if !tokens.readOnly?
 					tokens.readOnly = ProjectTokenGenerator.readOnlyToken()
