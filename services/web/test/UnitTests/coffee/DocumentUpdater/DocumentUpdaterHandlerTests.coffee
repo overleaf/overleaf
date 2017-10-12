@@ -265,19 +265,19 @@ describe 'DocumentUpdaterHandler', ->
 					v: @version
 				@docs = [ @doc0, @doc0, @doc0 ]
 				@body = JSON.stringify @docs
-				@request.get = sinon.stub().callsArgWith(1, null, {statusCode: 200}, @body)
+				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 200}, @body)
 				@handler.getProjectDocsIfMatch @project_id, @project_state_hash, @callback
 
 			it 'should get the documenst from the document updater', ->
-				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}/doc?state=#{@project_state_hash}"
-				@request.get.calledWith(url).should.equal true
+				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}/get_and_flush_if_old?state=#{@project_state_hash}"
+				@request.post.calledWith(url).should.equal true
 
 			it "should call the callback with the documents", ->
 				@callback.calledWithExactly(null, @docs).should.equal true
 
 		describe "when the document updater API returns an error", ->
 			beforeEach ->
-				@request.get = sinon.stub().callsArgWith(1, @error = new Error("something went wrong"), null, null)
+				@request.post = sinon.stub().callsArgWith(1, @error = new Error("something went wrong"), null, null)
 				@handler.getProjectDocsIfMatch @project_id, @project_state_hash, @callback
 
 			it "should return an error to the callback", ->
@@ -285,7 +285,7 @@ describe 'DocumentUpdaterHandler', ->
 
 		describe "when the document updater returns a conflict error code", ->
 			beforeEach ->
-				@request.get = sinon.stub().callsArgWith(1, null, { statusCode: 409 }, "Conflict")
+				@request.post = sinon.stub().callsArgWith(1, null, { statusCode: 409 }, "Conflict")
 				@handler.getProjectDocsIfMatch @project_id, @project_state_hash, @callback
 
 			it "should return the callback with no documents", ->
@@ -312,7 +312,7 @@ describe 'DocumentUpdaterHandler', ->
 
 		describe "when the document updater API returns an error", ->
 			beforeEach ->
-				@request.get = sinon.stub().callsArgWith(1, @error = new Error("something went wrong"), null, null)
+				@request.post = sinon.stub().callsArgWith(1, @error = new Error("something went wrong"), null, null)
 				@handler.getProjectDocsIfMatch @project_id, @project_state_hash, @callback
 
 			it "should return an error to the callback", ->
@@ -320,7 +320,7 @@ describe 'DocumentUpdaterHandler', ->
 
 		describe "when the document updater returns a conflict error code", ->
 			beforeEach ->
-				@request.get = sinon.stub().callsArgWith(1, null, { statusCode: 409 }, "Conflict")
+				@request.post = sinon.stub().callsArgWith(1, null, { statusCode: 409 }, "Conflict")
 				@handler.getProjectDocsIfMatch @project_id, @project_state_hash, @callback
 
 			it "should return the callback with no documents", ->
