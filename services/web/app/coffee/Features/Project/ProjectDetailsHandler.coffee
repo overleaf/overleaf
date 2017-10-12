@@ -82,9 +82,11 @@ module.exports = ProjectDetailsHandler =
 			if project.tokens? and project.tokens.readOnly? and project.tokens.readAndWrite?
 				return callback(null, project.tokens)
 			else
-				tokens =
-					readOnly: ProjectTokenGenerator.readOnlyToken()
-					readAndWrite: ProjectTokenGenerator.readAndWriteToken()
+				tokens = project.tokens || {}
+				if !tokens.readOnly?
+					tokens.readOnly = ProjectTokenGenerator.readOnlyToken()
+				if !tokens.readAndWrite?
+					tokens.readAndWrite = ProjectTokenGenerator.readAndWriteToken()
 				Project.update {_id: project_id}, {$set: {tokens: tokens}}, (err) ->
 					return callback(err) if err?
 					callback(null, tokens)
