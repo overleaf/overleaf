@@ -158,7 +158,11 @@ module.exports = CollaboratorsHandler =
 		logger.log user_id: user_id, project_id: project_id, "removing user"
 		conditions = _id:project_id
 		update = $pull:{}
-		update["$pull"] = collaberator_refs:user_id, readOnly_refs:user_id
+		update["$pull"] =
+			collaberator_refs:user_id,
+			readOnly_refs:user_id
+			tokenAccessReadOnly_refs:user_id
+			tokenAccessReadAndWrite_refs:user_id
 		Project.update conditions, update, (err)->
 			if err?
 				logger.error err: err, "problem removing user from project collaberators"

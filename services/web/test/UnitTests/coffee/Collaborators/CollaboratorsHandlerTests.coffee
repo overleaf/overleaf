@@ -223,7 +223,10 @@ describe "CollaboratorsHandler", ->
 				.calledWith({
 					_id: @project_id
 				}, {
-					"$pull":{collaberator_refs:@user_id, readOnly_refs:@user_id}
+					"$pull":{
+						collaberator_refs:@user_id, readOnly_refs:@user_id,
+						tokenAccessReadOnly_refs:@user_id, tokenAccessReadAndWrite_refs:@user_id
+					}
 				})
 				.should.equal true
 
