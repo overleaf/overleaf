@@ -21,6 +21,7 @@ PrivilegeLevels = require("../Authorization/PrivilegeLevels")
 AuthenticationController = require("../Authentication/AuthenticationController")
 PackageVersions = require("../../infrastructure/PackageVersions")
 AnalyticsManager = require "../Analytics/AnalyticsManager"
+Sources = require "../Authorization/Sources"
 
 module.exports = ProjectController =
 
@@ -309,28 +310,28 @@ module.exports = ProjectController =
 	_buildProjectList: (ownedProjects, readAndWriteProjects, readOnlyProjects, tokenReadAndWriteProjects, tokenReadOnlyProjects)->
 		projects = []
 		for project in ownedProjects
-			projects.push ProjectController._buildProjectViewModel(project, "owner")
+			projects.push ProjectController._buildProjectViewModel(project, "owner", Sources.OWNER)
 		# Invite-access
 		for project in readAndWriteProjects
-			projects.push ProjectController._buildProjectViewModel(project, "readWrite")
+			projects.push ProjectController._buildProjectViewModel(project, "readWrite", Sources.INVITE)
 		for project in readOnlyProjects
-			projects.push ProjectController._buildProjectViewModel(project, "readOnly")
+			projects.push ProjectController._buildProjectViewModel(project, "readOnly", Sources.INVITE)
 		# Token-access
 		for project in tokenReadAndWriteProjects
-			projects.push ProjectController._buildProjectViewModel(project, "tokenReadAndWrite")
+			projects.push ProjectController._buildProjectViewModel(project, "readAndWrite", Sources.TOKEN)
 		for project in tokenReadOnlyProjects
-			projects.push ProjectController._buildProjectViewModel(project, "tokenReadOnly")
+			projects.push ProjectController._buildProjectViewModel(project, "readOnly", Sources.TOKEN)
 
 		return projects
 
-	_buildProjectViewModel: (project, accessLevel) ->
+	_buildProjectViewModel: (project, accessLevel, source) ->
 		tokens =
 			readOnly: ''
 			readAndWrite: ''
 		if project.tokens?
-			if accessLevel in ['tokenReadAndWrite', 'owner']
+			if accessLevel == 'owner' || (accessLevel == 'readAndWrite' && source == 'token')
 				tokens.readAndWrite = project.tokens.readAndWrite
-			if accessLevel in ['tokenReadOnly', 'owner']
+			if accessLevel == 'owner' || (accessLevel == 'readOnly' && source == 'token')
 				tokens.readOnly = project.tokens.readOnly
 		model = {
 			id: project._id
@@ -338,6 +339,7 @@ module.exports = ProjectController =
 			lastUpdated: project.lastUpdated
 			publicAccessLevel: project.publicAccesLevel
 			accessLevel: accessLevel
+			source: source
 			archived: !!project.archived
 			owner_ref: project.owner_ref
 			tokens: tokens

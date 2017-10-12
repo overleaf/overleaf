@@ -456,9 +456,9 @@ define [
 	App.controller "ProjectListItemController", ($scope) ->
 
 		$scope.projectLink = (project) ->
-			if project.accessLevel == 'tokenReadAndWrite'
+			if project.accessLevel == 'readAndWrite' and project.source == 'token'
 				"/#{project.tokens.readAndWrite}"
-			else if project.accessLevel == 'tokenReadOnly'
+			else if project.accessLevel == 'readOnly' and project.source == 'token'
 				"/read/#{project.tokens.readOnly}"
 			else
 				"/project/#{project.id}"

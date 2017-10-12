@@ -10,11 +10,7 @@ PublicAccessLevels = require "../Authorization/PublicAccessLevels"
 Errors = require "../Errors/Errors"
 EmailHelper = require "../Helpers/EmailHelper"
 ProjectEditorHandler = require "../Project/ProjectEditorHandler"
-
-Sources =
-	INVITE: 'invite'
-	TOKEN: 'token'
-	OWNER: 'owner'
+Sources = require "../Authorization/Sources"
 
 module.exports = CollaboratorsHandler =
 
