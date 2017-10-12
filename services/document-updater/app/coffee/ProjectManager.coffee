@@ -58,51 +58,36 @@ module.exports = ProjectManager =
 				else
 					callback(null)
 
-	getProjectDocs: (project_id, projectStateHash, excludeVersions = {}, _callback = (error, docs) ->) ->
-		timer = new Metrics.Timer("projectManager.getProjectDocs")
+	getProjectDocsAndFlushIfOld: (project_id, projectStateHash, excludeVersions = {}, _callback = (error, docs) ->) ->
+		timer = new Metrics.Timer("projectManager.getProjectDocsAndFlushIfOld")
 		callback = (args...) ->
 			timer.done()
 			_callback(args...)
 
 		RedisManager.checkOrSetProjectState project_id, projectStateHash, (error, projectStateChanged) ->
 			if error?
-				logger.error err: error, project_id: project_id, "error getting/setting project state in getProjectDocs"
+				logger.error err: error, project_id: project_id, "error getting/setting project state in getProjectDocsAndFlushIfOld"
 				return callback(error)
 			# we can't return docs if project structure has changed
-			return callback Errors.ProjectStateChangedError("project state changed") if projectStateChanged
+			if projectStateChanged
+				return callback Errors.ProjectStateChangedError("project state changed")
 			# project structure hasn't changed, return doc content from redis
 			RedisManager.getDocIdsInProject project_id, (error, doc_ids) ->
 				if error?
 					logger.error err: error, project_id: project_id, "error getting doc ids in getProjectDocs"
 					return callback(error)
 				jobs = []
-				docs = []
 				for doc_id in doc_ids or []
 					do (doc_id) ->
 						jobs.push (cb) ->
-							# check the doc version first
-							RedisManager.getDocVersion doc_id, (error, version) ->
-								if error?
-									logger.error err: error, project_id: project_id, doc_id: doc_id, "error getting project doc version in getProjectDocs"
-									return cb(error)
-								# skip getting the doc if we already have that version
-								if version? and version is excludeVersions[doc_id]
-									# not currently using excludeVersions so we shouldn't get here!
-									# change to logger.log when this code path is in use
-									logger.error err: error, project_id: project_id, doc_id: doc_id, version: version, "skipping doc version in getProjectDocs"
-									return cb()
-								# otherwise get the doc lines from redis
-								RedisManager.getDocLines doc_id, (error, lines) ->
-									if error?
-										logger.error err: error, project_id: project_id, doc_id: doc_id, "error getting project doc lines in getProjectDocs"
-										return cb(error)
-									try
-										docs.push {_id: doc_id, lines: JSON.parse(lines), v: version}
-									catch e
-										logger.error err: e, project_id: project_id, doc_id: doc_id, lines: lines, version: version, "error parsing doc lines in getProjectDocs"
-										return cb(e)
-									cb()
-				async.series jobs, (error) ->
+							# get the doc lines from redis
+							DocumentManager.getDocAndFlushIfOldWithLock project_id, doc_id, (err, lines, version) ->
+								if err?
+									logger.error err:err, project_id: project_id, doc_id: doc_id, "error getting project doc lines in getProjectDocsAndFlushIfOld"
+									return cb(err)
+								doc = {_id:doc_id, lines:lines, v:version} # create a doc object to return
+								cb(null, doc)
+				async.series jobs, (error, docs) ->
 					return callback(error) if error?
 					callback(null, docs)
 

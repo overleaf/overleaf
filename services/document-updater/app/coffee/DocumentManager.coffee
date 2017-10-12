@@ -8,14 +8,16 @@ RealTimeRedisManager = require "./RealTimeRedisManager"
 Errors = require "./Errors"
 RangesManager = require "./RangesManager"
 
+MAX_UNFLUSHED_AGE = 300 * 1000 # 5 mins, document should be flushed to mongo this time after a change
+
 module.exports = DocumentManager =
-	getDoc: (project_id, doc_id, _callback = (error, lines, version, alreadyLoaded) ->) ->
+	getDoc: (project_id, doc_id, _callback = (error, lines, version, ranges, unflushedTime, alreadyLoaded) ->) ->
 		timer = new Metrics.Timer("docManager.getDoc")
 		callback = (args...) ->
 			timer.done()
 			_callback(args...)
 
-		RedisManager.getDoc project_id, doc_id, (error, lines, version, ranges) ->
+		RedisManager.getDoc project_id, doc_id, (error, lines, version, ranges, unflushedTime) ->
 			return callback(error) if error?
 			if !lines? or !version?
 				logger.log {project_id, doc_id}, "doc not in redis so getting from persistence API"
@@ -24,9 +26,9 @@ module.exports = DocumentManager =
 					logger.log {project_id, doc_id, lines, version}, "got doc from persistence API"
 					RedisManager.putDocInMemory project_id, doc_id, lines, version, ranges, (error) ->
 						return callback(error) if error?
-						callback null, lines, version, ranges, false
+						callback null, lines, version, ranges, null, false
 			else
-				callback null, lines, version, ranges, true
+				callback null, lines, version, ranges, unflushedTime, true
 
 	getDocAndRecentOps: (project_id, doc_id, fromVersion, _callback = (error, lines, version, recentOps, ranges) ->) ->
 		timer = new Metrics.Timer("docManager.getDocAndRecentOps")
@@ -53,7 +55,7 @@ module.exports = DocumentManager =
 			return callback(new Error("No lines were provided to setDoc"))
 
 		UpdateManager = require "./UpdateManager"
-		DocumentManager.getDoc project_id, doc_id, (error, oldLines, version, ranges, alreadyLoaded) ->
+		DocumentManager.getDoc project_id, doc_id, (error, oldLines, version, ranges, unflushedTime, alreadyLoaded) ->
 			return callback(error) if error?
 			
 			if oldLines? and oldLines.length > 0 and oldLines[0].text?
@@ -103,7 +105,7 @@ module.exports = DocumentManager =
 				logger.log project_id: project_id, doc_id: doc_id, version: version, "flushing doc"
 				PersistenceManager.setDoc project_id, doc_id, lines, version, ranges, (error) ->
 					return callback(error) if error?
-					callback null
+					RedisManager.clearUnflushedTime doc_id, callback
 
 	flushAndDeleteDoc: (project_id, doc_id, _callback = (error) ->) ->
 		timer = new Metrics.Timer("docManager.flushAndDeleteDoc")
@@ -156,6 +158,17 @@ module.exports = DocumentManager =
 					return callback(error) if error?
 					callback()
 
+	getDocAndFlushIfOld: (project_id, doc_id, callback = (error, doc) ->) ->
+		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges, unflushedTime, alreadyLoaded) ->
+			return callback(error) if error?
+			# if doc was already loaded see if it needs to be flushed
+			if alreadyLoaded and unflushedTime? and (Date.now() - unflushedTime) > MAX_UNFLUSHED_AGE
+				DocumentManager.flushDocIfLoaded project_id, doc_id, (error) ->
+					return callback(error) if error?
+					callback(null, lines, version)
+			else
+				callback(null, lines, version)
+
 	getDocWithLock: (project_id, doc_id, callback = (error, lines, version) ->) ->
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.getDoc, project_id, doc_id, callback
@@ -163,7 +176,11 @@ module.exports = DocumentManager =
 	getDocAndRecentOpsWithLock: (project_id, doc_id, fromVersion, callback = (error, lines, version) ->) ->
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.getDocAndRecentOps, project_id, doc_id, fromVersion, callback
-		
+
+	getDocAndFlushIfOldWithLock: (project_id, doc_id, callback = (error, doc) ->) ->
+		UpdateManager = require "./UpdateManager"
+		UpdateManager.lockUpdatesAndDo DocumentManager.getDocAndFlushIfOld, project_id, doc_id, callback
+
 	setDocWithLock: (project_id, doc_id, lines, source, user_id, undoing, callback = (error) ->) ->
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.setDoc, project_id, doc_id, lines, source, user_id, undoing, callback

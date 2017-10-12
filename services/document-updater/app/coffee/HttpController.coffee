@@ -37,7 +37,7 @@ module.exports = HttpController =
 			size += (line.length + 1)
 		return size
 
-	getProjectDocs: (req, res, next = (error) ->) ->
+	getProjectDocsAndFlushIfOld: (req, res, next = (error) ->) ->
 		project_id = req.params.project_id
 		projectStateHash = req.query?.state
 		# exclude is string of existing docs "id:version,id:version,..."
@@ -49,7 +49,7 @@ module.exports = HttpController =
 			[id,version] = item?.split(':')
 			excludeVersions[id] = version
 		logger.log {project_id: project_id, projectStateHash: projectStateHash, excludeVersions: excludeVersions}, "excluding versions"
-		ProjectManager.getProjectDocs project_id, projectStateHash, excludeVersions, (error, result) ->
+		ProjectManager.getProjectDocsAndFlushIfOld project_id, projectStateHash, excludeVersions, (error, result) ->
 			timer.done()
 			if error instanceof Errors.ProjectStateChangedError
 				res.send 409 # conflict
