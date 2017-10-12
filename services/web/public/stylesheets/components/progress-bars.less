@@ -29,8 +29,8 @@
   height: @line-height-computed;
   margin-bottom: @line-height-computed;
   background-color: @progress-bg;
-  border-radius: @border-radius-base;
-  border: 1px solid @progress-border-color;
+  border-radius: @progress-border-radius;
+  border: @progress-border-width solid @progress-border-color;
   .box-shadow(inset 0 1px 2px rgba(0,0,0,.1));
 }
 
@@ -44,7 +44,7 @@
   color: @progress-bar-color;
   text-align: center;
   background-color: @progress-bar-bg;
-  .box-shadow(inset 0 -1px 0 rgba(0,0,0,.15));
+  .box-shadow(@progress-bar-shadow);
   .transition(width .6s ease);
 }
 
