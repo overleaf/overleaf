@@ -6,7 +6,7 @@ footer.site-footer {
 	bottom: 0;
 	width: 100%;
 	height: @footer-height;
-	line-height: @footer-height;
+	line-height: @footer-height - 1; // Hack — in Chrome, using @line-height would generate vertical scrolling
 		
 	ul {
 		list-style: none;
