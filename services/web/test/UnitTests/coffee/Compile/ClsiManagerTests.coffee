@@ -33,7 +33,7 @@ describe "ClsiManager", ->
 				getProjectDocsIfMatch: sinon.stub().callsArgWith(2,null,null)
 			"./ClsiCookieManager": @ClsiCookieManager
 			"./ClsiStateManager": @ClsiStateManager
-			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), warn: sinon.stub() }
+			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), err: sinon.stub(), warn: sinon.stub() }
 			"request": @request = sinon.stub()
 			"./ClsiFormatChecker": @ClsiFormatChecker
 			"metrics-sharelatex": @Metrics =
@@ -121,6 +121,21 @@ describe "ClsiManager", ->
 
 			it "should call the callback with a success status", ->
 				@callback.calledWith(null, @status, ).should.equal true
+
+		describe "when the resources fail the precompile check", ->
+			beforeEach ->
+				@ClsiFormatChecker.checkRecoursesForProblems = sinon.stub().callsArgWith(1, new Error("failed"))
+				@ClsiManager._postToClsi = sinon.stub().callsArgWith(4, null, {
+					compile:
+						status: @status = "failure"
+				})
+				@ClsiManager.sendRequest @project_id, @user_id, {}, @callback
+
+			it "should call the callback only once", ->
+				@callback.calledOnce.should.equal true
+
+			it "should call the callback with an error", ->
+				@callback.calledWithExactly(new Error("failed")).should.equal true
 
 	describe "deleteAuxFiles", ->
 		beforeEach ->
