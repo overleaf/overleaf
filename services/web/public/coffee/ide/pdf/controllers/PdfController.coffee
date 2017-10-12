@@ -68,7 +68,7 @@ define [
 		$scope.$on "project:joined", () ->
 			return if !autoCompile
 			autoCompile = false
-			$scope.recompile(isAutoCompile: true)
+			$scope.recompile(isAutoCompileOnLoad: true)
 			$scope.hasPremiumCompile = $scope.project.features.compileGroup == "priority"
 
 		$scope.$on "pdf:error:display", () ->
@@ -86,7 +86,7 @@ define [
 
 			if isTimeNonMonotonic || timeSinceLastCompile >= AUTO_COMPILE_TIMEOUT
 				if (!ide.$scope.hasLintingError)
-					$scope.recompile(isBackgroundAutoCompile: true)
+					$scope.recompile(isAutoCompileOnChange: true)
 			else
 				# Extend remainder of timeout
 				autoCompileTimeout = setTimeout () ->
@@ -127,7 +127,7 @@ define [
 		sendCompileRequest = (options = {}) ->
 			url = "/project/#{$scope.project_id}/compile"
 			params = {}
-			if options.isAutoCompile
+			if options.isAutoCompileOnLoad or options.isAutoCompileOnChange
 				params["auto_compile"]=true
 			# if the previous run was a check, clear the error logs
 			$scope.pdf.logEntries = [] if $scope.check
@@ -168,6 +168,7 @@ define [
 			$scope.pdf.compileExited = false
 			$scope.pdf.failedCheck = false
 			$scope.pdf.compileInProgress = false
+			$scope.pdf.autoCompileDisabled = false
 
 			# make a cache to look up files by name
 			fileByPath = {}
@@ -206,7 +207,13 @@ define [
 				$scope.shouldShowLogs = true
 				fetchLogs(fileByPath)
 			else if response.status == "autocompile-backoff"
-				$scope.pdf.view = 'uncompiled'
+				if $scope.pdf.isAutoCompileOnLoad # initial autocompile
+					$scope.pdf.view = 'uncompiled'
+				else # background autocompile from typing
+					$scope.pdf.view = 'errors'
+					$scope.pdf.autoCompileDisabled = true
+					$scope.autocompile_enabled = false # disable any further autocompiles
+					event_tracking.sendMB "autocompile-rate-limited", {hasPremiumCompile: $scope.hasPremiumCompile}
 			else if response.status == "project-too-large"
 				$scope.pdf.view = 'errors'
 				$scope.pdf.projectTooLarge = true
@@ -418,6 +425,7 @@ define [
 			event_tracking.sendMBSampled "editor-recompile-sampled", options
 
 			$scope.pdf.compiling = true
+			$scope.pdf.isAutoCompileOnLoad = options?.isAutoCompileOnLoad # initial autocompile
 
 			if options?.force
 				# for forced compile, turn off validation check and ignore errors
