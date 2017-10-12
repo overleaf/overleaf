@@ -1,12 +1,12 @@
+crypto = require 'crypto'
+
 module.exports = ProjectTokenGenerator =
 
 	readOnlyToken: () ->
 		length = 12
 		tokenAlpha = 'bcdfghjkmnpqrstvwxyz'
 		result = ''
-		for _n in [1..length]
-			i = Math.floor(Math.floor(Math.random() * tokenAlpha.length))
-			result += tokenAlpha[i]
+		crypto.randomBytes(length).map( (a) -> result += tokenAlpha[a % tokenAlpha.length] )
 		return result
 
 	readAndWriteToken: () ->
