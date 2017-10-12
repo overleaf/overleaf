@@ -77,7 +77,10 @@ module.exports = CompileManager =
 				return callback null, true
 
 	_checkCompileGroupAutoCompileLimit: (isAutoCompile, compileGroup, callback = (err, canCompile)->)->
-		if compileGroup is "default"
+		if !isAutoCompile
+			return callback(null, true)
+		if compileGroup is "standard"
+			# apply extra limits to the standard compile group
 			CompileManager._checkIfAutoCompileLimitHasBeenHit isAutoCompile, compileGroup, callback
 		else
 			Metrics.inc "auto-compile-#{compileGroup}"
