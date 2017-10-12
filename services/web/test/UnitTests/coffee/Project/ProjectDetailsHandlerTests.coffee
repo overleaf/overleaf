@@ -126,6 +126,12 @@ describe 'ProjectDetailsHandler', ->
 				done()
 
 	describe "validateProjectName", ->
+
+		it "should reject undefined names", (done) ->
+			@handler.validateProjectName undefined, (error) ->
+				expect(error).to.exist
+				done()
+
 		it "should reject empty names", (done) ->
 			@handler.validateProjectName "", (error) ->
 				expect(error).to.exist
