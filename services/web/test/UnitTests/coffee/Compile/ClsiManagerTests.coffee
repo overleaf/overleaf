@@ -247,12 +247,12 @@ describe "ClsiManager", ->
 					.calledWith(@project_id, {compiler:1, rootDoc_id: 1, imageName: 1, rootFolder: 1})
 					.should.equal true
 
-			it "should flush the project to the database", ->
+			it "should not explicitly flush the project to the database", ->
 				@DocumentUpdaterHandler.flushProjectToMongo
 					.calledWith(@project_id)
-					.should.equal true
+					.should.equal false
 
-			it "should get only the live docs from the docupdater", ->
+			it "should get only the live docs from the docupdater with a background flush in docupdater", ->
 				@DocumentUpdaterHandler.getProjectDocsIfMatch
 					.calledWith(@project_id)
 					.should.equal true
