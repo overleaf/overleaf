@@ -2,46 +2,46 @@ define [
 	"base"
 ], (App) ->
 
-	App.factory 'labels', ($http, ide) ->
+	App.factory 'metadata', ($http, ide) ->
 
 		state = {documents: {}}
 
-		labels = {
+		metadata = {
 			state: state
 		}
 
-		labels.onBroadcastDocLabels = (data) ->
+		metadata.onBroadcastDocMeta = (data) ->
 			if data.docId? and data.meta?
 				state.documents[data.docId] = data.meta
 
-		labels.onEntityDeleted = (e, entity) ->
+		metadata.onEntityDeleted = (e, entity) ->
 			if entity.type == 'doc'
 				delete state.documents[entity.id]
 
-		labels.onFileUploadComplete = (e, upload) ->
+		metadata.onFileUploadComplete = (e, upload) ->
 			if upload.entity_type == 'doc'
-				labels.loadDocLabelsFromServer upload.entity_id
+				metadata.loadDocMetaFromServer upload.entity_id
 
-		labels.getAllLabels = () ->
+		metadata.getAllLabels = () ->
 			_.flatten(meta.labels for docId, meta of state.documents)
 
-		labels.getAllPackages = () ->
+		metadata.getAllPackages = () ->
 			_.flatten(meta.packages for docId, meta of state.documents)
 
-		labels.loadProjectLabelsFromServer = () ->
+		metadata.loadProjectMetaFromServer = () ->
 			$http
-				.get("/project/#{window.project_id}/labels")
+				.get("/project/#{window.project_id}/metadata")
 				.then (response) ->
 					{ data } = response
 					if data.projectMeta
 						for docId, docMeta of data.projectMeta
-							state.documents[docId] = docMeta.labels
+							state.documents[docId] = docMeta
 
-		labels.loadDocLabelsFromServer = (docId) ->
+		metadata.loadDocMetaFromServer = (docId) ->
 			$http
 				.post(
-					"/project/#{window.project_id}/doc/#{docId}/labels",
+					"/project/#{window.project_id}/doc/#{docId}/metadata",
 					{_csrf: window.csrfToken}
 				)
 
-		return labels
+		return metadata

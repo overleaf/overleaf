@@ -9,7 +9,7 @@ define [
 	"ide/pdf/PdfManager"
 	"ide/binary-files/BinaryFilesManager"
 	"ide/references/ReferencesManager"
-	"ide/labels/LabelsManager"
+	"ide/metadata/MetadataManager"
 	"ide/review-panel/ReviewPanelManager"
 	"ide/SafariScrollPatcher"
 	"ide/FeatureOnboardingController",
@@ -47,12 +47,12 @@ define [
 	PdfManager
 	BinaryFilesManager
 	ReferencesManager
-	LabelsManager
+	MetadataManager
 	ReviewPanelManager
 	SafariScrollPatcher
 ) ->
 
-	App.controller "IdeController", ($scope, $timeout, ide, localStorage, sixpack, event_tracking, labels) ->
+	App.controller "IdeController", ($scope, $timeout, ide, localStorage, sixpack, event_tracking, metadata) ->
 		# Don't freak out if we're already in an apply callback
 		$scope.$originalApply = $scope.$apply
 		$scope.$apply = (fn = () ->) ->
@@ -72,10 +72,10 @@ define [
 			view: "editor"
 			chatOpen: false
 			pdfLayout: 'sideBySide'
-			pdfHidden: false,
-			pdfWidth: 0,
-			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}"),
-			miniReviewPanelVisible: false,
+			pdfHidden: false
+			pdfWidth: 0
+			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}")
+			miniReviewPanelVisible: false
 		}
 		$scope.onboarding = {
 			autoCompile: if window.user.betaProgram and window.showAutoCompileOnboarding then 'unseen' else 'dismissed'
@@ -140,7 +140,7 @@ define [
 		ide.pdfManager = new PdfManager(ide, $scope)
 		ide.permissionsManager = new PermissionsManager(ide, $scope)
 		ide.binaryFilesManager = new BinaryFilesManager(ide, $scope)
-		ide.labelsManager = new LabelsManager(ide, $scope, labels)
+		ide.metadataManager = new MetadataManager(ide, $scope, metadata)
 
 		inited = false
 		$scope.$on "project:joined", () ->
@@ -155,7 +155,7 @@ define [
 			$timeout(
 				() ->
 					if $scope.permissions.write
-						ide.labelsManager.loadProjectLabelsFromServer()
+						ide.metadataManager.loadProjectMetaFromServer()
 						_labelsInitialLoadDone = true
 				, 200
 			)

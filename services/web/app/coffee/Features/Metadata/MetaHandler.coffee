@@ -2,7 +2,7 @@ ProjectEntityHandler = require "../Project/ProjectEntityHandler"
 DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 
 
-module.exports = LabelsHandler =
+module.exports = MetaHandler =
 
 	labelCaptureRegex: () ->
 		/\\label\{([^\}\n\\]{0,80})\}/g
@@ -17,7 +17,7 @@ module.exports = LabelsHandler =
 			ProjectEntityHandler.getAllDocs projectId, (err, docs) ->
 				if err?
 					return callback err
-				projectMeta = LabelsHandler.extractMetaFromProjectDocs docs
+				projectMeta = MetaHandler.extractMetaFromProjectDocs docs
 				callback null, projectMeta
 
 	getMetaForDoc: (projectId, docId, callback=(err, docMeta)->) ->
@@ -27,13 +27,13 @@ module.exports = LabelsHandler =
 			ProjectEntityHandler.getDoc projectId, docId, (err, lines) ->
 				if err?
 					return callback err
-				docMeta = LabelsHandler.extractMetaFromDoc lines
+				docMeta = MetaHandler.extractMetaFromDoc lines
 				callback null, docMeta
 
 	extractMetaFromDoc: (lines) ->
 		docMeta = {labels: [], packages: []}
-		label_re = LabelsHandler.labelCaptureRegex()
-		package_re = LabelsHandler.packageCaptureRegex()
+		label_re = MetaHandler.labelCaptureRegex()
+		package_re = MetaHandler.packageCaptureRegex()
 		for line in lines
 			while labelMatch = label_re.exec line
 				if labelMatch[1]
@@ -41,11 +41,12 @@ module.exports = LabelsHandler =
 			while packageMatch = package_re.exec line
 				if packageMatch[2]
 					for pkg in packageMatch[2].split ','
-						docMeta.packages.push pkg.trim()
+						if pkg.trim()
+							docMeta.packages.push pkg.trim()
 		return docMeta
 
 	extractMetaFromProjectDocs: (projectDocs) ->
 		projectMeta = {}
 		for _path, doc of projectDocs
-			projectMeta[doc._id] = LabelsHandler.extractMetaFromDoc doc.lines
+			projectMeta[doc._id] = MetaHandler.extractMetaFromDoc doc.lines
 		return projectMeta

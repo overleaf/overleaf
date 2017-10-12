@@ -9,8 +9,7 @@ define [
 	aceSnippetManager = ace.require('ace/snippets').snippetManager
 
 	class AutoCompleteManager
-		constructor: (@$scope, @editor, @element, @labelsManager, @graphics, @preamble) ->
-			@suggestionManager = new CommandManager(@labelsManager)
+		constructor: (@$scope, @editor, @element, @metadataManager, @graphics, @preamble) ->
 
 			@monkeyPatchAutocomplete()
 
@@ -34,7 +33,7 @@ define [
 				enableLiveAutocompletion: false
 			})
 
-			# metadataManager = @metadataManager
+			commandCompleter = new CommandManager(@metadataManager)
 
 			SnippetCompleter = new EnvironmentManager()
 
@@ -65,7 +64,7 @@ define [
 								}
 							callback null, result
 
-			labelsManager = @labelsManager
+			metadataManager = @metadataManager
 			LabelsCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
 					context = Helpers.getContext(editor, pos)
@@ -83,7 +82,7 @@ define [
 									meta: "cross-reference",
 									score: 60
 								}
-							for label in labelsManager.getAllLabels()
+							for label in metadataManager.getAllLabels()
 								result.push {
 									caption: "\\#{commandName}{#{label}#{if needsClosingBrace then '}' else ''}",
 									value: "\\#{commandName}{#{label}#{if needsClosingBrace then '}' else ''}",
@@ -129,10 +128,10 @@ define [
 								callback null, result
 
 			@editor.completers = [
-				@suggestionManager,
-				SnippetCompleter,
-				ReferencesCompleter,
-				LabelsCompleter,
+				commandCompleter
+				SnippetCompleter
+				ReferencesCompleter
+				LabelsCompleter
 				GraphicsCompleter
 			]
 

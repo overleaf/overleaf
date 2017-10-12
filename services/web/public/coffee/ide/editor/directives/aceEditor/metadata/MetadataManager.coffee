@@ -9,8 +9,8 @@ define [
 		else
 			return null
 
-	class LabelsManager
-		constructor: (@$scope, @editor, @element, @Labels) ->
+	class MetadataManager
+		constructor: (@$scope, @editor, @element, @Metadata) ->
 			@debouncer = {}  # DocId => Timeout
 
 			onChange = (change) =>
@@ -21,8 +21,12 @@ define [
 				cursorPosition = @editor.getCursorPosition()
 				end = change.end
 				range = new Range(end.row, 0, end.row, end.column)
-				lineUpToCursor = @editor.getSession().getTextRange(range)
-				commandFragment = getLastCommandFragment(lineUpToCursor)
+				lineUpToCursor = @editor.getSession().getTextRange range
+				if lineUpToCursor.trim() == '%' or lineUpToCursor.startsWith '\\'
+					# fix in case change is just (un)comment out a package
+					range = new Range end.row, 0, end.row, end.column + 80
+					lineUpToCursor = @editor.getSession().getTextRange range
+				commandFragment = getLastCommandFragment lineUpToCursor
 
 				linesContainPackage = _.any(
 					change.lines,
@@ -39,20 +43,20 @@ define [
 				lastCommandFragmentIsMeta = lastCommandFragmentIsPackage or lastCommandFragmentIsLabel
 
 				if linesContainMeta or lastCommandFragmentIsMeta
-					@scheduleLoadCurrentDocLabelsFromServer()
+					@scheduleLoadCurrentDocMetaFromServer()
 
 			@editor.on "changeSession", (e) =>
 				e.oldSession.off "change", onChange
 				e.session.on "change", onChange
 
-		loadCurrentDocLabelsFromServer: () ->
-			currentDocId = @$scope.docId
-			@Labels.loadDocLabelsFromServer currentDocId
+		# loadCurrentDocLabelsFromServer: () ->
+		# 	currentDocId = @$scope.docId
+		# 	@Metadata.loadDocMetaFromServer currentDocId
 
-		loadDocLabelsFromServer: (docId) ->
-			@Labels.loadDocLabelsFromServer docId
+		loadDocMetaFromServer: (docId) ->
+			@Metadata.loadDocMetaFromServer docId
 
-		scheduleLoadCurrentDocLabelsFromServer: () ->
+		scheduleLoadCurrentDocMetaFromServer: () ->
 			# De-bounce loading labels with a timeout
 			currentDocId = @$scope.docId
 			existingTimeout = @debouncer[currentDocId]
@@ -61,14 +65,14 @@ define [
 				delete @debouncer[currentDocId]
 			@debouncer[currentDocId] = setTimeout(
 				() =>
-					@loadDocLabelsFromServer currentDocId
+					@loadDocMetaFromServer currentDocId
 					delete @debouncer[currentDocId]
 				, 1000
 				, this
 			)
 
 		getAllLabels: () ->
-			@Labels.getAllLabels()
+			@Metadata.getAllLabels()
 
 		getAllPackages: () ->
-			@Labels.getAllPackages()
+			@Metadata.getAllPackages()

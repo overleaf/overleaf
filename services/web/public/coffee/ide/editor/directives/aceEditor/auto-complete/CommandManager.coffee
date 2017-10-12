@@ -1,4 +1,6 @@
-define [], () ->
+define [
+	"./package_definitions"
+	], (packageCommandMappings) ->
 	noArgumentCommands = [
 		'item', 'hline', 'lipsum', 'centering', 'noindent', 'textwidth', 'draw',
 		'maketitle', 'newpage', 'verb', 'bibliography', 'hfill', 'par',
@@ -77,10 +79,10 @@ define [], () ->
 						special
 					)
 
-	packageCommandMappings = {
-		amsmath: ['holyshititworks', 'mathematics']
-		natbib: ['somebibliographystuff']
-	}
+	# packageCommandMappings = {
+	# 	amsmath: ['holyshititworks', 'mathematics']
+	# 	natbib: ['somebibliographystuff']
+	# }
 
 	class Parser
 		constructor: (@doc, @prefix) ->
@@ -171,10 +173,10 @@ define [], () ->
 				return false
 
 	class CommandManager
-		constructor: (@labelsManager) ->
+		constructor: (@metadataManager) ->
 
 		getCompletions: (editor, session, pos, prefix, callback) ->
-			packages = @labelsManager.getAllPackages()
+			packages = @metadataManager.getAllPackages()
 			packageCommands = []
 			for pkg in packages
 				if packageCommandMappings[pkg]?
@@ -182,7 +184,8 @@ define [], () ->
 						packageCommands.push {
 							caption: "\\#{cmd}"
 							snippet: "\\#{cmd}"
-							meta: "cmd"
+							meta: "#{pkg}-cmd"
+							score: 60
 						}
 
 			doc = session.getValue()

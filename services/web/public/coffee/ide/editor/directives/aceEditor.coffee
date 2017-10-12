@@ -9,11 +9,11 @@ define [
 	"ide/editor/directives/aceEditor/highlights/HighlightsManager"
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
 	"ide/editor/directives/aceEditor/track-changes/TrackChangesManager"
-	"ide/editor/directives/aceEditor/labels/LabelsManager"
-	"ide/labels/services/labels"
+	"ide/editor/directives/aceEditor/metadata/MetadataManager"
+	"ide/metadata/services/metadata"
 	"ide/graphics/services/graphics"
 	"ide/preamble/services/preamble"
-], (App, Ace, SearchBox, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager, LabelsManager) ->
+], (App, Ace, SearchBox, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager, MetadataManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
 	ModeList = ace.require('ace/ext/modelist')
 
@@ -35,9 +35,8 @@ define [
 			url = ace.config._moduleUrl(args...) + "?fingerprint=#{window.aceFingerprint}"
 			return url
 
-	# console.log 'making it to right before aceEditor'
 
-	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory, labels, graphics, preamble) ->
+	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory, metadata, graphics, preamble) ->
 		monkeyPatchSearch($rootScope, $compile)
 
 		return  {
@@ -104,8 +103,8 @@ define [
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
 				trackChangesManager   = new TrackChangesManager(scope, editor, element)
-				labelsManager = new LabelsManager(scope, editor, element, labels)
-				autoCompleteManager = new AutoCompleteManager(scope, editor, element, labelsManager, graphics, preamble)
+				metadataManager = new MetadataManager(scope, editor, element, metadata)
+				autoCompleteManager = new AutoCompleteManager(scope, editor, element, metadataManager, graphics, preamble)
 
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
