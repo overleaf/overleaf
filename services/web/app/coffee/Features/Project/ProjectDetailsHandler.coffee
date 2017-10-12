@@ -65,7 +65,8 @@ module.exports = ProjectDetailsHandler =
 
 	setPublicAccessLevel : (project_id, newAccessLevel, callback = ->)->
 		logger.log project_id: project_id, level: newAccessLevel, "set public access level"
-		# TODO: remove the read-only and read-and-write items from here
+		# DEPRECATED: `READ_ONLY` and `READ_AND_WRITE` are still valid in, but should no longer
+		# be passed here. Remove after token-based access has been live for a while
 		if project_id? && newAccessLevel? and _.include [
 			PublicAccessLevels.READ_ONLY,
 			PublicAccessLevels.READ_AND_WRITE,
