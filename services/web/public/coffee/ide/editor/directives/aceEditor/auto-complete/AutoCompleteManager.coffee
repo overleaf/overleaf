@@ -1,10 +1,11 @@
 define [
 	"ide/editor/directives/aceEditor/auto-complete/CommandManager"
 	"ide/editor/directives/aceEditor/auto-complete/EnvironmentManager"
+	"ide/editor/directives/aceEditor/auto-complete/PackageManager"
 	"ide/editor/directives/aceEditor/auto-complete/Helpers"
 	"ace/ace"
 	"ace/ext-language_tools"
-], (CommandManager, EnvironmentManager, Helpers) ->
+], (CommandManager, EnvironmentManager, PackageManager, Helpers) ->
 	Range = ace.require("ace/range").Range
 	aceSnippetManager = ace.require('ace/snippets').snippetManager
 
@@ -35,6 +36,7 @@ define [
 			})
 
 			SnippetCompleter = new EnvironmentManager()
+			PackageCompleter = new PackageManager()
 
 			Graphics = @graphics
 			Preamble = @preamble
@@ -126,10 +128,11 @@ define [
 								callback null, result
 
 			@editor.completers = [
-				@suggestionManager,
-				SnippetCompleter,
-				ReferencesCompleter,
-				LabelsCompleter,
+				@suggestionManager
+				SnippetCompleter
+				PackageCompleter
+				ReferencesCompleter
+				LabelsCompleter
 				GraphicsCompleter
 			]
 
