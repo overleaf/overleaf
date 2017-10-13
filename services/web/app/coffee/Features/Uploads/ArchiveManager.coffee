@@ -3,54 +3,96 @@ logger  = require "logger-sharelatex"
 metrics = require "metrics-sharelatex"
 fs      = require "fs"
 Path    = require "path"
+fse     = require "fs-extra"
+yauzl   = require "yauzl"
+Settings = require "settings-sharelatex"
 _ = require("underscore")
 
 ONE_MEG = 1024 * 1024
 
 module.exports = ArchiveManager =
 
-
 	_isZipTooLarge: (source, callback = (err, isTooLarge)->)->
 		callback = _.once callback
 
-		unzip = child.spawn("unzip", ["-l", source])
+		totalSizeInBytes = 0
+		yauzl.open source, {lazyEntries: true}, (err, zipfile) ->
+			return callback(err) if err?
 
-		output = ""
-		unzip.stdout.on "data", (d)->
-			output += d
+			if Settings.maxEntitiesPerProject? and zipfile.entryCount > Settings.maxEntitiesPerProject
+				return callback(null, true) # too many files in zip file
 
-		error = null
-		unzip.stderr.on "data", (chunk) ->
-			error ||= ""
-			error += chunk
+			zipfile.on "error", callback
 
-		unzip.on "error", (err) ->
-			logger.error {err, source}, "unzip failed"
-			if err.code == "ENOENT"
-				logger.error "unzip command not found. Please check the unzip command is installed"
-			callback(err)
+			# read all the entries
+			zipfile.readEntry()
+			zipfile.on "entry", (entry) ->
+				totalSizeInBytes += entry.uncompressedSize
+				zipfile.readEntry() # get the next entry
 
-		unzip.on "close", (exitCode) ->
-			if error?
-				error = new Error(error)
-				logger.warn err:error, source: source, "error checking zip size"
+			# no more entries to read
+			zipfile.on "end", () ->
+				if !totalSizeInBytes? or isNaN(totalSizeInBytes)
+					logger.err source:source, totalSizeInBytes:totalSizeInBytes, "error getting bytes of zip"
+					return callback(new Error("error getting bytes of zip"))
+				isTooLarge = totalSizeInBytes > (ONE_MEG * 300)
+				callback(null, isTooLarge)
 
-			lines = output.split("\n")
-			lastLine = lines[lines.length - 2]?.trim()
-			totalSizeInBytes = lastLine?.split(" ")?[0]
+	_checkFilePath: (entry, destination, callback = (err, destFile) ->) ->
+		# check if the entry is a directory
+		if /\/$/.test(entry.fileName)
+			return callback() # don't give a destfile for directory
+		# check that the file does not use a relative path
+		for dir in entry.fileName.split('/')
+			if dir == '..'
+				return callback(new Error("relative path"))
+		# check that the destination file path is normalized
+		dest = "#{destination}/#{entry.fileName}"
+		if dest != Path.normalize(dest)
+			return callback(new Error("unnormalized path"))
+		else
+			return callback(null, dest)
 
-			totalSizeInBytesAsInt = parseInt(totalSizeInBytes)
+	_writeFileEntry: (zipfile, entry, destFile, callback = (err)->) ->
+		callback = _.once callback
 
-			if !totalSizeInBytesAsInt? or isNaN(totalSizeInBytesAsInt)
-				logger.err source:source, totalSizeInBytes:totalSizeInBytes, totalSizeInBytesAsInt:totalSizeInBytesAsInt, lastLine:lastLine, exitCode:exitCode, "error getting bytes of zip"
-				return callback(new Error("error getting bytes of zip"))
+		zipfile.openReadStream entry, (err, readStream) ->
+			return callback(err) if err?
+			readStream.on "error", callback
+			readStream.on "end", callback
 
-			isTooLarge = totalSizeInBytes > (ONE_MEG * 300)
+			fse.ensureDir Path.dirname(destFile), (err) ->
+				return callback(err) if err?
+				writeStream = fs.createWriteStream destFile
+				writeStream.on 'error', (err) ->
+					return callback(err)
+				readStream.pipe(writeStream)
 
-			callback(error, isTooLarge)
+	_extractZipFiles: (source, destination, callback = (err) ->) ->
+		callback = _.once callback
 
+		yauzl.open source, {lazyEntries: true}, (err, zipfile) ->
+			return callback(err) if err?
+			zipfile.on "error", callback
+			# read all the entries
+			zipfile.readEntry()
+			zipfile.on "entry", (entry) ->
+				ArchiveManager._checkFilePath entry, destination, (err, destFile) ->
+					if err?
+						logger.warn err:err, source:source, destination:destination, "skipping bad file path"
+						zipfile.readEntry() # bad path, just skip to the next file
+						return
+					if destFile? # only write files
+						ArchiveManager._writeFileEntry zipfile, entry, destFile, (err) ->
+							if err?
+								logger.error err:err, source:source, destFile:destFile, "error unzipping file entry"
+								zipfile.close() # bail out, stop reading file entries
+								return callback(err)
+							else
+								zipfile.readEntry() # continue to the next file
+			# no more entries to read
+			zipfile.on "end", callback
 
-					
 	extractZipArchive: (source, destination, _callback = (err) ->) ->
 		callback = (args...) ->
 			_callback(args...)
@@ -62,36 +104,18 @@ module.exports = ArchiveManager =
 				return callback(err)
 
 			if isTooLarge
-				return callback(new Error("zip_too_large"))		
-
+				return callback(new Error("zip_too_large"))
 
 			timer = new metrics.Timer("unzipDirectory")
 			logger.log source: source, destination: destination, "unzipping file"
 
-			unzip = child.spawn("unzip", [source, "-d", destination])
+			ArchiveManager._extractZipFiles source, destination, (err) ->
+				if err?
+					logger.error {err, source, destination}, "unzip failed"
+					callback(err)
+				else
+					callback()
 
-			# don't remove this line, some zips need
-			# us to listen on this for some unknow reason
-			unzip.stdout.on "data", (d)->
-
-			error = null
-			unzip.stderr.on "data", (chunk) ->
-				error ||= ""
-				error += chunk
-
-			unzip.on "error", (err) ->
-				logger.error {err, source, destination}, "unzip failed"
-				if err.code == "ENOENT"
-					logger.error "unzip command not found. Please check the unzip command is installed"
-				callback(err)
-
-			unzip.on "close", () ->
-				timer.done()
-				if error?
-					error = new Error(error)
-					logger.error err:error, source: source, destination: destination, "error unzipping file"
-				callback(error)
-	
 	findTopLevelDirectory: (directory, callback = (error, topLevelDir) ->) ->
 		fs.readdir directory, (error, files) ->
 			return callback(error) if error?
