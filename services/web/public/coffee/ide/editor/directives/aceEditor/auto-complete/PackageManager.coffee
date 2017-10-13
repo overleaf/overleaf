@@ -23,7 +23,7 @@ define () ->
 	packageSnippets = for pkg in packages
 		{
 			caption: "\\usepackage{#{pkg}}"
-			snippet: """\\usepackage{#{pkg}}"""
+			snippet: "\\usepackage{#{pkg}}"
 			meta: "pkg"
 		}
 
@@ -31,14 +31,13 @@ define () ->
 		caption: "\\usepackage{}"
 		snippet: "\\usepackage{}"
 		meta: "pkg"
-		score: 70
+		score: 55
 	}
 
 	class PackageManager
 		getCompletions: (editor, session, pos, prefix, callback) ->
 			docText = session.getValue()
-			loaded = parseLoadedPackages(docText)
-			# console.log loaded
+			loaded = parseLoadedPackages docText
 			callback null, packageSnippets
 
 	return PackageManager
