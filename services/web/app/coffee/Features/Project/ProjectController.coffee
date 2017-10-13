@@ -22,6 +22,7 @@ AuthenticationController = require("../Authentication/AuthenticationController")
 PackageVersions = require("../../infrastructure/PackageVersions")
 AnalyticsManager = require "../Analytics/AnalyticsManager"
 Sources = require "../Authorization/Sources"
+TokenAccessHandler = require '../TokenAccess/TokenAccessHandler'
 
 module.exports = ProjectController =
 
@@ -258,7 +259,8 @@ module.exports = ProjectController =
 			daysSinceLastUpdated =  (new Date() - project.lastUpdated) /86400000
 			logger.log project_id:project_id, daysSinceLastUpdated:daysSinceLastUpdated, "got db results for loading editor"
 
-			AuthorizationManager.getPrivilegeLevelForProject req, user_id, project_id, (error, privilegeLevel)->
+			token = TokenAccessHandler.getRequestToken(req, project_id)
+			AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, token, (error, privilegeLevel)->
 				return next(error) if error?
 				if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
 					return res.sendStatus 401

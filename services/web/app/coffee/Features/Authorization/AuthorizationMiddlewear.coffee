@@ -4,6 +4,7 @@ logger = require "logger-sharelatex"
 ObjectId = require("mongojs").ObjectId
 Errors = require "../Errors/Errors"
 AuthenticationController = require "../Authentication/AuthenticationController"
+TokenAccessHandler = require '../TokenAccess/TokenAccessHandler'
 
 module.exports = AuthorizationMiddlewear =
 	ensureUserCanReadMultipleProjects: (req, res, next) ->
@@ -13,7 +14,8 @@ module.exports = AuthorizationMiddlewear =
 			# Remove the projects we have access to. Note rejectSeries doesn't use
 			# errors in callbacks
 			async.rejectSeries project_ids, (project_id, cb) ->
-				AuthorizationManager.canUserReadProject req, user_id, project_id, (error, canRead) ->
+				token = TokenAccessHandler.getRequestToken(req, project_id)
+				AuthorizationManager.canUserReadProject user_id, project_id, token, (error, canRead) ->
 					return next(error) if error?
 					cb(canRead)
 			, (unauthorized_project_ids) ->
@@ -25,7 +27,8 @@ module.exports = AuthorizationMiddlewear =
 	ensureUserCanReadProject: (req, res, next) ->
 		AuthorizationMiddlewear._getUserAndProjectId req, (error, user_id, project_id) ->
 			return next(error) if error?
-			AuthorizationManager.canUserReadProject req, user_id, project_id, (error, canRead) ->
+			token = TokenAccessHandler.getRequestToken(req, project_id)
+			AuthorizationManager.canUserReadProject user_id, project_id, token, (error, canRead) ->
 				return next(error) if error?
 				if canRead
 					logger.log {user_id, project_id}, "allowing user read access to project"
@@ -37,7 +40,8 @@ module.exports = AuthorizationMiddlewear =
 	ensureUserCanWriteProjectSettings: (req, res, next) ->
 		AuthorizationMiddlewear._getUserAndProjectId req, (error, user_id, project_id) ->
 			return next(error) if error?
-			AuthorizationManager.canUserWriteProjectSettings req, user_id, project_id, (error, canWrite) ->
+			token = TokenAccessHandler.getRequestToken(req, project_id)
+			AuthorizationManager.canUserWriteProjectSettings user_id, project_id, token, (error, canWrite) ->
 				return next(error) if error?
 				if canWrite
 					logger.log {user_id, project_id}, "allowing user write access to project settings"
@@ -49,7 +53,8 @@ module.exports = AuthorizationMiddlewear =
 	ensureUserCanWriteProjectContent: (req, res, next) ->
 		AuthorizationMiddlewear._getUserAndProjectId req, (error, user_id, project_id) ->
 			return next(error) if error?
-			AuthorizationManager.canUserWriteProjectContent req, user_id, project_id, (error, canWrite) ->
+			token = TokenAccessHandler.getRequestToken(req, project_id)
+			AuthorizationManager.canUserWriteProjectContent user_id, project_id, token, (error, canWrite) ->
 				return next(error) if error?
 				if canWrite
 					logger.log {user_id, project_id}, "allowing user write access to project content"
@@ -61,7 +66,8 @@ module.exports = AuthorizationMiddlewear =
 	ensureUserCanAdminProject: (req, res, next) ->
 		AuthorizationMiddlewear._getUserAndProjectId req, (error, user_id, project_id) ->
 			return next(error) if error?
-			AuthorizationManager.canUserAdminProject req, user_id, project_id, (error, canAdmin) ->
+			token = TokenAccessHandler.getRequestToken(req, project_id)
+			AuthorizationManager.canUserAdminProject user_id, project_id, token, (error, canAdmin) ->
 				return next(error) if error?
 				if canAdmin
 					logger.log {user_id, project_id}, "allowing user admin access to project"

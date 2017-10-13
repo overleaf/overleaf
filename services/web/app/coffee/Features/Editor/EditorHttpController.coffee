@@ -11,6 +11,7 @@ Metrics = require('metrics-sharelatex')
 CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
 CollaboratorsInviteHandler = require("../Collaborators/CollaboratorsInviteHandler")
 PrivilegeLevels = require "../Authorization/PrivilegeLevels"
+TokenAccessHandler = require '../TokenAccess/TokenAccessHandler'
 
 module.exports = EditorHttpController =
 	joinProject: (req, res, next) ->
@@ -42,7 +43,8 @@ module.exports = EditorHttpController =
 				return callback(error) if error?
 				UserGetter.getUser user_id, { isAdmin: true }, (error, user) ->
 					return callback(error) if error?
-					AuthorizationManager.getPrivilegeLevelForProject req, user_id, project_id, (error, privilegeLevel) ->
+					token = TokenAccessHandler.getRequestToken(req, project_id)
+					AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, token, (error, privilegeLevel) ->
 						return callback(error) if error?
 						if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
 							logger.log {project_id, user_id, privilegeLevel}, "not an acceptable privilege level, returning null"

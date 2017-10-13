@@ -10,6 +10,7 @@ describe "AuthorizationMiddlewear", ->
 	beforeEach ->
 		@user_id = "user-id-123"
 		@project_id = "project-id-123"
+		@token = 'some-token'
 		@AuthenticationController =
 			getLoggedInUserId: sinon.stub().returns(@user_id)
 			isUserLoggedIn: sinon.stub().returns(true)
@@ -19,6 +20,8 @@ describe "AuthorizationMiddlewear", ->
 			"mongojs": ObjectId: @ObjectId = {}
 			"../Errors/Errors": Errors
 			'../Authentication/AuthenticationController': @AuthenticationController
+			"../TokenAccess/TokenAccessHandler": @TokenAccessHandler =
+				getRequestToken: sinon.stub().returns(@token)
 		@req = {}
 		@res = {}
 		@ObjectId.isValid = sinon.stub()
@@ -55,7 +58,7 @@ describe "AuthorizationMiddlewear", ->
 					describe "when user has permission", ->
 						beforeEach ->
 							@AuthorizationManager[managerMethod]
-								.withArgs(sinon.match.any, @user_id, @project_id)
+								.withArgs(@user_id, @project_id, @token)
 								.yields(null, true)
 
 						it "should return next", ->
@@ -65,7 +68,7 @@ describe "AuthorizationMiddlewear", ->
 					describe "when user doesn't have permission", ->
 						beforeEach ->
 							@AuthorizationManager[managerMethod]
-								.withArgs(sinon.match.any, @user_id, @project_id)
+								.withArgs(@user_id, @project_id, @token)
 								.yields(null, false)
 
 						it "should redirect to redirectToRestricted", ->
@@ -80,7 +83,7 @@ describe "AuthorizationMiddlewear", ->
 						beforeEach ->
 							@AuthenticationController.getLoggedInUserId.returns(null)
 							@AuthorizationManager[managerMethod]
-								.withArgs(@req, null, @project_id)
+								.withArgs(null, @project_id, @token)
 								.yields(null, true)
 
 						it "should return next", ->
@@ -91,7 +94,7 @@ describe "AuthorizationMiddlewear", ->
 						beforeEach ->
 							@AuthenticationController.getLoggedInUserId.returns(null)
 							@AuthorizationManager[managerMethod]
-								.withArgs(@req, null, @project_id)
+								.withArgs(null, @project_id, @token)
 								.yields(null, false)
 
 						it "should redirect to redirectToRestricted", ->
@@ -184,10 +187,10 @@ describe "AuthorizationMiddlewear", ->
 			describe "when user has permission to access all projects", ->
 				beforeEach ->
 					@AuthorizationManager.canUserReadProject
-						.withArgs(sinon.match.any, @user_id, "project1")
+						.withArgs(@user_id, "project1", @token)
 						.yields(null, true)
 					@AuthorizationManager.canUserReadProject
-						.withArgs(sinon.match.any, @user_id, "project2")
+						.withArgs(@user_id, "project2", @token)
 						.yields(null, true)
 
 				it "should return next", ->
@@ -197,10 +200,10 @@ describe "AuthorizationMiddlewear", ->
 			describe "when user doesn't have permission to access one of the projects", ->
 				beforeEach ->
 					@AuthorizationManager.canUserReadProject
-						.withArgs(sinon.match.any, @user_id, "project1")
+						.withArgs(@user_id, "project1", @token)
 						.yields(null, true)
 					@AuthorizationManager.canUserReadProject
-						.withArgs(sinon.match.any, @user_id, "project2")
+						.withArgs(@user_id, "project2", @token)
 						.yields(null, false)
 
 				it "should redirect to redirectToRestricted", ->
@@ -216,10 +219,10 @@ describe "AuthorizationMiddlewear", ->
 					beforeEach ->
 						@AuthenticationController.getLoggedInUserId.returns(null)
 						@AuthorizationManager.canUserReadProject
-							.withArgs(sinon.match.any, null, "project1")
+							.withArgs(null, "project1", @token)
 							.yields(null, true)
 						@AuthorizationManager.canUserReadProject
-							.withArgs(sinon.match.any, null, "project2")
+							.withArgs(null, "project2", @token)
 							.yields(null, true)
 
 					it "should return next", ->
@@ -230,10 +233,10 @@ describe "AuthorizationMiddlewear", ->
 					beforeEach ->
 						@AuthenticationController.getLoggedInUserId.returns(null)
 						@AuthorizationManager.canUserReadProject
-							.withArgs(sinon.match.any, null, "project1")
+							.withArgs(null, "project1", @token)
 							.yields(null, true)
 						@AuthorizationManager.canUserReadProject
-							.withArgs(sinon.match.any, null, "project2")
+							.withArgs(null, "project2", @token)
 							.yields(null, false)
 
 					it "should redirect to redirectToRestricted", ->

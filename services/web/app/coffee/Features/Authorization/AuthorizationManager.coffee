@@ -26,7 +26,7 @@ module.exports = AuthorizationManager =
 	#	  access. false if the user does not have access
 	#   * becausePublic: true if the access level is only because the project is public.
 	getPrivilegeLevelForProject: (
-		req, user_id, project_id,
+		user_id, project_id, token,
 		callback = (error, privilegeLevel, becausePublic) ->
 	) ->
 		if !user_id?
@@ -36,9 +36,9 @@ module.exports = AuthorizationManager =
 				if publicAccessLevel == PublicAccessLevels.TOKEN_BASED
 					# Anonymous users can have read-only access to token-based projects,
 					# while read-write access must be logged in
-					TokenAccessHandler.requestHasReadOnlyTokenAccess req, project_id, (err, allowed) ->
+					TokenAccessHandler.isValidReadOnlyToken project_id, token,  (err, isValid) ->
 						return callback(err) if err?
-						if allowed
+						if isValid
 							# Grant anonymous user read-only access
 							callback null, PrivilegeLevels.READ_ONLY, false
 						else
@@ -77,18 +77,18 @@ module.exports = AuthorizationManager =
 								else
 									callback null, PrivilegeLevels.NONE, false
 
-	canUserReadProject: (req, user_id, project_id, callback = (error, canRead) ->) ->
-		AuthorizationManager.getPrivilegeLevelForProject req, user_id, project_id, (error, privilegeLevel) ->
+	canUserReadProject: (user_id, project_id, token, callback = (error, canRead) ->) ->
+		AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, token, (error, privilegeLevel) ->
 			return callback(error) if error?
 			return callback null, (privilegeLevel in [PrivilegeLevels.OWNER, PrivilegeLevels.READ_AND_WRITE, PrivilegeLevels.READ_ONLY])
 		
-	canUserWriteProjectContent: (req, user_id, project_id, callback = (error, canWriteContent) ->) ->
-		AuthorizationManager.getPrivilegeLevelForProject req, user_id, project_id, (error, privilegeLevel) ->
+	canUserWriteProjectContent: (user_id, project_id, token, callback = (error, canWriteContent) ->) ->
+		AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, token, (error, privilegeLevel) ->
 			return callback(error) if error?
 			return callback null, (privilegeLevel in [PrivilegeLevels.OWNER, PrivilegeLevels.READ_AND_WRITE])
 		
-	canUserWriteProjectSettings: (req, user_id, project_id, callback = (error, canWriteSettings) ->) ->
-		AuthorizationManager.getPrivilegeLevelForProject req, user_id, project_id, (error, privilegeLevel, becausePublic) ->
+	canUserWriteProjectSettings: (user_id, project_id, token, callback = (error, canWriteSettings) ->) ->
+		AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, token, (error, privilegeLevel, becausePublic) ->
 			return callback(error) if error?
 			if privilegeLevel == PrivilegeLevels.OWNER
 				return callback null, true
@@ -97,8 +97,8 @@ module.exports = AuthorizationManager =
 			else
 				return callback null, false
 	
-	canUserAdminProject: (req, user_id, project_id, callback = (error, canAdmin) ->) ->
-		AuthorizationManager.getPrivilegeLevelForProject req, user_id, project_id, (error, privilegeLevel) ->
+	canUserAdminProject: (user_id, project_id, token, callback = (error, canAdmin) ->) ->
+		AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, token, (error, privilegeLevel) ->
 			return callback(error) if error?
 			return callback null, (privilegeLevel == PrivilegeLevels.OWNER)
 	

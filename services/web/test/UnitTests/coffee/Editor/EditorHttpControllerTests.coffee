@@ -18,6 +18,7 @@ describe "EditorHttpController", ->
 			'metrics-sharelatex': @Metrics = {inc: sinon.stub()}
 			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler = {}
 			"../Collaborators/CollaboratorsInviteHandler": @CollaboratorsInviteHandler = {}
+			"../TokenAccess/TokenAccessHandler": @TokenAccessHandler = {}
 
 		@project_id = "mock-project-id"
 		@doc_id = "mock-doc-id"
@@ -29,6 +30,7 @@ describe "EditorHttpController", ->
 			sendStatus: sinon.stub()
 			json: sinon.stub()
 		@callback = sinon.stub()
+		@TokenAccessHandler.getRequestToken = sinon.stub().returns(@token = null)
 			
 	describe "joinProject", ->
 		beforeEach ->
@@ -136,7 +138,7 @@ describe "EditorHttpController", ->
 					
 			it "should check the privilege level", ->
 				@AuthorizationManager.getPrivilegeLevelForProject
-					.calledWith(@req, @user_id, @project_id)
+					.calledWith(@user_id, @project_id, @token)
 					.should.equal true
 
 			it 'should include the invites', ->

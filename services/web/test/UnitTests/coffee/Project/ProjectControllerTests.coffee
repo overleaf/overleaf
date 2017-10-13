@@ -20,6 +20,7 @@ describe "ProjectController", ->
 				chat:
 					url:"chat.com"
 			siteUrl: "mysite.com"
+		@token = 'some-token'
 		@ProjectDeleter =
 			archiveProject: sinon.stub().callsArg(1)
 			deleteProject: sinon.stub().callsArg(1)
@@ -60,6 +61,8 @@ describe "ProjectController", ->
 			isUserLoggedIn: sinon.stub().returns(true)
 		@AnalyticsManager =
 			getLastOccurance: sinon.stub()
+		@TokenAccessHandler =
+			getRequestToken: sinon.stub().returns(@token)
 		@ProjectController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex":
@@ -85,6 +88,7 @@ describe "ProjectController", ->
 			"./ProjectGetter": @ProjectGetter
 			'../Authentication/AuthenticationController': @AuthenticationController
 			"../Analytics/AnalyticsManager": @AnalyticsManager
+			"../TokenAccess/TokenAccessHandler": @TokenAccessHandler
 
 		@projectName = "£12321jkj9ujkljds"
 		@req =

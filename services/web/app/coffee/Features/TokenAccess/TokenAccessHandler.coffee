@@ -40,11 +40,14 @@ module.exports = TokenAccessHandler =
 				req.session.anonReadOnlyTokenAccess = {}
 			req.session.anonReadOnlyTokenAccess[projectId.toString()] = token.toString()
 
-	requestHasReadOnlyTokenAccess: (req, projectId, callback=(err, allowed)->) ->
+	getRequestToken: (req, projectId) ->
 		token = (
 			req?.session?.anonReadOnlyTokenAccess?[projectId.toString()] or
-			req.headers['x-sl-anon-token']
+			req?.headers['x-sl-anon-token']
 		)
+		return token
+
+	isValidReadOnlyToken: (projectId, token, callback=(err, allowed)->) ->
 		if !token
 			return callback null, false
 		TokenAccessHandler.findProjectWithReadOnlyToken token, (err, project) ->
