@@ -12,29 +12,30 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 			//- Private
 			.row.public-access-level(ng-show="project.publicAccesLevel == 'private'")
 				.col-xs-12.text-center
-					| Link-sharing is off, only invited users can view this project.
+					| #{translate('link_sharing_is_off')}.
 					| &nbsp;&nbsp;
 					a(
 						href
 						ng-click="openMakeTokenBasedModal()"
-					) Turn on link-sharing
+					) #{translate('turn_on_link_sharing')}
 
 			//- Token-based access
 			.row.public-access-level(ng-show="project.publicAccesLevel == 'tokenBased'")
 				.col-xs-12.text-center
 					strong
-						| Link-sharing is on.
+						| #{translate('link_sharing_is_on')}.
 						| &nbsp;&nbsp;
 					a(
 						href
 						ng-click="openMakePrivateModal()"
-					) Turn off link-sharing
+					) #{translate('turn_off_link_sharing')}
+
 				.col-xs-12.access-token-display-area
 					div.access-token-wrapper
-						strong Anyone with this link can edit this project
+						strong #{translate('anyone_with_link_can_edit')}
 						pre.access-token {{ getReadAndWriteTokenLink() }}
 					div.access-token-wrapper
-						strong Anyone with this link can access this project
+						strong #{translate('anyone_with_link_can_view')}
 						pre.access-token {{ getReadOnlyTokenLink() }}
 
 			//- legacy public-access
@@ -212,14 +213,14 @@ script(type="text/ng-template", id="makeTokenBasedModalTemplate")
 		) &times;
 		h3 Enable link-sharing?
 	.modal-body.modal-body-share
-		p When link-sharing is enabled, anyone with the relevant link will be able to access this project
+		p #{translate('turn_on_link_sharing_consequences')}
 	.modal-footer
 		button.btn.btn-default(
 			ng-click="cancel()"
 		) #{translate("cancel")}
 		button.btn.btn-info(
 			ng-click="makeTokenBased()"
-		) Enable Link-Sharing
+		) #{translate('turn_on_link_sharing')}
 
 script(type="text/ng-template", id="makePrivateModalTemplate")
 	.modal-header
@@ -230,14 +231,14 @@ script(type="text/ng-template", id="makePrivateModalTemplate")
 		) &times;
 		h3 #{translate("make_project_private")}?
 	.modal-body.modal-body-share
-		p #{translate("make_project_private_consequences")}
+		p #{translate('turn_off_link_sharing_consequences')}
 	.modal-footer
 		button.btn.btn-default(
 			ng-click="cancel()"
 		) #{translate("cancel")}
 		button.btn.btn-info(
 			ng-click="makePrivate()"
-		) #{translate("make_private")}
+		) #{translate("turn_off_link_sharing")}
 
 script(type="text/ng-template", id="shareTagTemplate")
 	.tag-template
