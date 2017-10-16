@@ -24,7 +24,8 @@
 	padding-top: 0;
 	padding-bottom: 0;
 	width: 100%;
-	overflow: scroll;
+	overflow-x: hidden;
+	overflow-y: auto;
 }
 
 .project-list-content when (@is-overleaf) {
@@ -65,7 +66,8 @@
 
 		.project-list-sidebar when (@is-overleaf) {
 			height: 100%;
-			overflow: scroll;
+			overflow-x: hidden;
+			overflow-y: auto;
 		}
 
 		.project-list-main {
