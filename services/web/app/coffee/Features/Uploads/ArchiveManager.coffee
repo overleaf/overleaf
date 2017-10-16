@@ -15,7 +15,7 @@ module.exports = ArchiveManager =
 	_isZipTooLarge: (source, callback = (err, isTooLarge)->)->
 		callback = _.once callback
 
-		totalSizeInBytes = 0
+		totalSizeInBytes = null
 		yauzl.open source, {lazyEntries: true}, (err, zipfile) ->
 			return callback(err) if err?
 
@@ -61,11 +61,15 @@ module.exports = ArchiveManager =
 			readStream.on "error", callback
 			readStream.on "end", callback
 
+			errorHandler = (err) -> # clean up before calling callback
+				readStream.unpipe()
+				readStream.destroy()
+				callback(err)
+
 			fse.ensureDir Path.dirname(destFile), (err) ->
-				return callback(err) if err?
+				return errorHandler(err) if err?
 				writeStream = fs.createWriteStream destFile
-				writeStream.on 'error', (err) ->
-					return callback(err)
+				writeStream.on 'error', errorHandler
 				readStream.pipe(writeStream)
 
 	_extractZipFiles: (source, destination, callback = (err) ->) ->
@@ -110,6 +114,7 @@ module.exports = ArchiveManager =
 			logger.log source: source, destination: destination, "unzipping file"
 
 			ArchiveManager._extractZipFiles source, destination, (err) ->
+				timer.done()
 				if err?
 					logger.error {err, source, destination}, "unzip failed"
 					callback(err)

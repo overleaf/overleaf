@@ -10,24 +10,22 @@ describe "ArchiveManager", ->
 	beforeEach ->
 		@logger =
 			error: sinon.stub()
+			warn: sinon.stub()
 			err:->
 			log: sinon.stub()
-		@process = new events.EventEmitter
-		@process.stdout = new events.EventEmitter
-		@process.stderr = new events.EventEmitter
-
-		@child =
-			spawn: sinon.stub().returns(@process)
-
-
 		@metrics =
 			Timer: class Timer
 				done: sinon.stub()
+		@zipfile = new events.EventEmitter
+		@zipfile.readEntry = sinon.stub()
+		@zipfile.close = sinon.stub()
+
 		@ArchiveManager = SandboxedModule.require modulePath, requires:
-			"child_process": @child
+			"yauzl": @yauzl = {open: sinon.stub().callsArgWith(2, null, @zipfile)}
 			"logger-sharelatex": @logger
 			"metrics-sharelatex": @metrics
 			"fs": @fs = {}
+			"fs-extra": @fse = {}
 	
 	describe "extractZipArchive", ->
 		beforeEach ->
@@ -39,10 +37,10 @@ describe "ArchiveManager", ->
 		describe "successfully", ->
 			beforeEach (done) ->
 				@ArchiveManager.extractZipArchive @source, @destination, done
-				@process.emit "close"
+				@zipfile.emit "end"
 
-			it "should run unzip", ->
-				@child.spawn.calledWithExactly("unzip", [@source, "-d", @destination]).should.equal true
+			it "should run yauzl", ->
+				@yauzl.open.calledWith(@source).should.equal true
 
 			it "should time the unzip", ->
 				@metrics.Timer::done.called.should.equal true
@@ -50,13 +48,12 @@ describe "ArchiveManager", ->
 			it "should log the unzip", ->
 				@logger.log.calledWith(sinon.match.any, "unzipping file").should.equal true
 
-		describe "with an error on stderr", ->
+		describe "with an error in the zip file header", ->
 			beforeEach (done) ->
+				@yauzl.open = sinon.stub().callsArgWith(2, new Error("Something went wrong"))
 				@ArchiveManager.extractZipArchive @source, @destination, (error) =>
 					@callback(error)
 					done()
-				@process.stderr.emit "data", "Something went wrong"
-				@process.emit "close"
 
 			it "should return the callback with an error", ->
 				@callback.calledWithExactly(new Error("Something went wrong")).should.equal true
@@ -74,60 +71,177 @@ describe "ArchiveManager", ->
 			it "should return the callback with an error", ->
 				@callback.calledWithExactly(new Error("zip_too_large")).should.equal true
 
-			it "should not call spawn", ->
-				@child.spawn.called.should.equal false
+			it "should not call yauzl.open", ->
+				@yauzl.open.called.should.equal false
 
-		describe "with an error on the process", ->
+		describe "with an error in the extracted files", ->
 			beforeEach (done) ->
 				@ArchiveManager.extractZipArchive @source, @destination, (error) =>
 					@callback(error)
 					done()
-				@process.emit "error", new Error("Something went wrong")
+				@zipfile.emit "error", new Error("Something went wrong")
 
 			it "should return the callback with an error", ->
 				@callback.calledWithExactly(new Error("Something went wrong")).should.equal true
 
 			it "should log out the error", ->
 				@logger.error.called.should.equal true
-	
+
+		describe "with a relative extracted file path", ->
+			beforeEach (done) ->
+				@zipfile.openReadStream = sinon.stub()
+				@ArchiveManager.extractZipArchive @source, @destination, (error) =>
+					@callback(error)
+					done()
+				@zipfile.emit "entry", {fileName: "../testfile.txt"}
+				@zipfile.emit "end"
+
+			it "should not write try to read the file entry", ->
+				@zipfile.openReadStream.called.should.equal false
+
+			it "should log out a warning", ->
+				@logger.warn.called.should.equal true
+
+		describe "with an unnormalized extracted file path", ->
+			beforeEach (done) ->
+				@zipfile.openReadStream = sinon.stub()
+				@ArchiveManager.extractZipArchive @source, @destination, (error) =>
+					@callback(error)
+					done()
+				@zipfile.emit "entry", {fileName: "foo/./testfile.txt"}
+				@zipfile.emit "end"
+
+			it "should not write try to read the file entry", ->
+				@zipfile.openReadStream.called.should.equal false
+
+			it "should log out a warning", ->
+				@logger.warn.called.should.equal true
+
+		describe "with a directory entry", ->
+			beforeEach (done) ->
+				@zipfile.openReadStream = sinon.stub()
+				@ArchiveManager.extractZipArchive @source, @destination, (error) =>
+					@callback(error)
+					done()
+				@zipfile.emit "entry", {fileName: "testdir/"}
+				@zipfile.emit "end"
+
+			it "should not write try to read the entry", ->
+				@zipfile.openReadStream.called.should.equal false
+
+			it "should not log out a warning", ->
+				@logger.warn.called.should.equal false
+
+		describe "with an error opening the file read stream", ->
+			beforeEach (done) ->
+				@zipfile.openReadStream = sinon.stub().callsArgWith(1, new Error("Something went wrong"))
+				@writeStream = new events.EventEmitter
+				@ArchiveManager.extractZipArchive @source, @destination, (error) =>
+					@callback(error)
+					done()
+				@zipfile.emit "entry", {fileName: "testfile.txt"}
+				@zipfile.emit "end"
+
+			it "should return the callback with an error", ->
+				@callback.calledWithExactly(new Error("Something went wrong")).should.equal true
+
+			it "should log out the error", ->
+				@logger.error.called.should.equal true
+
+			it "should close the zipfile", ->
+				@zipfile.close.called.should.equal true
+
+		describe "with an error in the file read stream", ->
+			beforeEach (done) ->
+				@readStream = new events.EventEmitter
+				@readStream.pipe = sinon.stub()
+				@zipfile.openReadStream = sinon.stub().callsArgWith(1, null, @readStream)
+				@writeStream = new events.EventEmitter
+				@fs.createWriteStream = sinon.stub().returns @writeStream
+				@fse.ensureDir = sinon.stub().callsArg(1)
+				@ArchiveManager.extractZipArchive @source, @destination, (error) =>
+					@callback(error)
+					done()
+				@zipfile.emit "entry", {fileName: "testfile.txt"}
+				@readStream.emit "error", new Error("Something went wrong")
+				@zipfile.emit "end"
+
+			it "should return the callback with an error", ->
+				@callback.calledWithExactly(new Error("Something went wrong")).should.equal true
+
+			it "should log out the error", ->
+				@logger.error.called.should.equal true
+
+			it "should close the zipfile", ->
+				@zipfile.close.called.should.equal true
+
+		describe "with an error in the file write stream", ->
+			beforeEach (done) ->
+				@readStream = new events.EventEmitter
+				@readStream.pipe = sinon.stub()
+				@readStream.unpipe = sinon.stub()
+				@readStream.destroy = sinon.stub()
+				@zipfile.openReadStream = sinon.stub().callsArgWith(1, null, @readStream)
+				@writeStream = new events.EventEmitter
+				@fs.createWriteStream = sinon.stub().returns @writeStream
+				@fse.ensureDir = sinon.stub().callsArg(1)
+				@ArchiveManager.extractZipArchive @source, @destination, (error) =>
+					@callback(error)
+					done()
+				@zipfile.emit "entry", {fileName: "testfile.txt"}
+				@writeStream.emit "error", new Error("Something went wrong")
+				@zipfile.emit "end"
+
+			it "should return the callback with an error", ->
+				@callback.calledWithExactly(new Error("Something went wrong")).should.equal true
+
+			it "should log out the error", ->
+				@logger.error.called.should.equal true
+
+			it "should unpipe from the readstream", ->
+				@readStream.unpipe.called.should.equal true
+
+			it "should destroy the readstream", ->
+				@readStream.destroy.called.should.equal true
+
+			it "should close the zipfile", ->
+				@zipfile.close.called.should.equal true
+
 	describe "_isZipTooLarge", ->
-		beforeEach ->
-			@output = (totalSize)->"  Length     Date   Time    Name \n--------    ----   ----    ---- \n241  03-12-16 12:20   main.tex \n108801  03-12-16 12:20   ddd/x1J5kHh.jpg \n--------                   ------- \n#{totalSize}                   2 files\n"
 
 		it "should return false with small output", (done)->
 			@ArchiveManager._isZipTooLarge @source, (error, isTooLarge) =>
 				isTooLarge.should.equal false
 				done()
-			@process.stdout.emit "data", @output("109042")
-			@process.emit "close"
+			@zipfile.emit "entry", {uncompressedSize: 109042}
+			@zipfile.emit "end"
 
 		it "should return true with large bytes", (done)->
 			@ArchiveManager._isZipTooLarge @source, (error, isTooLarge) =>
 				isTooLarge.should.equal true
 				done()
-			@process.stdout.emit "data", @output("1090000000000000042")
-			@process.emit "close"
+			@zipfile.emit "entry", {uncompressedSize: 1090000000000000042}
+			@zipfile.emit "end"
 
 		it "should return error on no data", (done)->
 			@ArchiveManager._isZipTooLarge @source, (error, isTooLarge) =>
 				expect(error).to.exist
 				done()
-			@process.stdout.emit "data", ""
-			@process.emit "close"
+			@zipfile.emit "entry", {}
+			@zipfile.emit "end"
 
 		it "should return error if it didn't get a number", (done)->
 			@ArchiveManager._isZipTooLarge @source, (error, isTooLarge) =>
 				expect(error).to.exist
 				done()
-			@process.stdout.emit "data", @output("total_size_string")
-			@process.emit "close"
+			@zipfile.emit "entry", {uncompressedSize:"random-error"}
+			@zipfile.emit "end"
 
-		it "should return error if the is only a bit of data", (done)->
+		it "should return error if there is no data", (done)->
 			@ArchiveManager._isZipTooLarge @source, (error, isTooLarge) =>
 				expect(error).to.exist
 				done()
-			@process.stdout.emit "data", "  Length     Date   Time    Name \n--------"
-			@process.emit "close"
+			@zipfile.emit "end"
 
 	describe "findTopLevelDirectory", ->
 		beforeEach ->
