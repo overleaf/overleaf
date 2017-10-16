@@ -39,7 +39,8 @@ module.exports = ArchiveManager =
 
 	_checkFilePath: (entry, destination, callback = (err, destFile) ->) ->
 		# check if the entry is a directory
-		if /\/$/.test(entry.fileName)
+		endsWithSlash = /\/$/
+		if endsWithSlash.test(entry.fileName)
 			return callback() # don't give a destfile for directory
 		# check that the file does not use a relative path
 		for dir in entry.fileName.split('/')
