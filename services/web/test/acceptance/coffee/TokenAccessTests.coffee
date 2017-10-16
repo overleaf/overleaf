@@ -3,6 +3,7 @@ async = require("async")
 User = require "./helpers/User"
 request = require "./helpers/request"
 settings = require "settings-sharelatex"
+{db, ObjectId} = require("../../../app/js/infrastructure/mongojs")
 
 try_read_access = (user, project_id, test, callback) ->
 	async.series [
@@ -79,40 +80,6 @@ try_anon_content_access = (user, project_id, token, test, callback) ->
 		return callback(error) if error?
 		test(response, body)
 		callback()
-
-expect_content_write_access = (user, project_id, callback) ->
-	try_content_access(user, project_id, (response, body) ->
-		expect(body.privilegeLevel).to.be.oneOf ["readAndWrite"]
-	, callback)
-
-expect_content_read_access = (user, project_id, callback) ->
-	try_content_access(user, project_id, (response, body) ->
-		expect(body.privilegeLevel).to.be.oneOf ["readOnly"]
-	, callback)
-
-expect_read_only_access = (user, project_id, token, callback) ->
-	async.series [
-		(cb) ->
-			try_read_only_token_access(user, token, (response, body) ->
-				expect(response.statusCode).to.be.oneOf [200, 204]
-			, cb)
-		(cb) ->
-			try_content_access(user, project_id, (response, body) ->
-				expect(body.privilegeLevel).to.be.oneOf ["readOnly"]
-			, cb)
-	], callback
-
-expect_read_and_write_access = (user, project_id, token, callback) ->
-	async.series [
-		(cb) ->
-			try_read_and_write_token_access(user, token, (response, body) ->
-				expect(response.statusCode).to.be.oneOf [200, 204]
-			, cb)
-		(cb) ->
-			try_content_access(user, project_id, (response, body) ->
-				expect(body.privilegeLevel).to.be.oneOf ["readAndWrite"]
-			, cb)
-	], callback
 
 
 describe 'TokenAccess', ->
@@ -240,6 +207,7 @@ describe 'TokenAccess', ->
 		it 'should deny access before the token is used', (done) ->
 			try_read_access(@other1, @project_id, (response, body) =>
 				expect(response.statusCode).to.equal 302
+				expect(response.headers.location).to.match /\/restricted.*/
 				expect(body).to.match /.*\/restricted.*/
 			, done)
 
@@ -273,3 +241,39 @@ describe 'TokenAccess', ->
 					expect(body.privilegeLevel).to.equal false
 				, done)
 
+
+	describe 'private overleaf project', ->
+		before (done) ->
+			@owner.createProject 'overleaf-import', (err, project_id) =>
+				@project_id = project_id
+				@owner.makeTokenBased @project_id, (err) =>
+					@owner.getProject @project_id, (err, project) =>
+						@tokens = project.tokens
+						@owner.makePrivate @project_id, () =>
+							db.projects.update {_id: project._id}, {
+								$set: {
+									overleaf: {id: 1234}
+								}
+							}, (err) =>
+								done()
+
+		it 'should redirect to canonical path, when owner uses read-write token', (done) ->
+			try_read_and_write_token_access(@owner, @tokens.readAndWrite, (response, body) =>
+				expect(response.statusCode).to.equal 302
+				expect(response.headers.location).to.equal "/project/#{@project_id}"
+			, done)
+
+		it 'should allow the owner access to the project', (done) ->
+			try_read_access(@owner, @project_id, (response, body) =>
+				expect(response.statusCode).to.equal 200
+			, done)
+
+		it 'should allow owner to join the project', (done) ->
+			try_content_access(@owner, @project_id, (response, body) =>
+				expect(body.privilegeLevel).to.equal 'owner'
+			, done)
+
+		it 'should not allow other user to join the project', (done) ->
+			try_content_access(@other2, @project_id, (response, body) =>
+				expect(body.privilegeLevel).to.equal false
+			, done)
