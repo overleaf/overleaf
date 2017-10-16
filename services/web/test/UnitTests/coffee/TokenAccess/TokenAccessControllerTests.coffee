@@ -16,12 +16,14 @@ describe "TokenAccessController", ->
 		@readOnlyToken = 'somereadonlytoken'
 		@readAndWriteToken = '42somereadandwritetoken'
 		@projectId = ObjectId()
+		@ownerId = 'owner'
 		@project =
 			_id: @projectId
 			publicAccesLevel: 'tokenBased'
 			tokens:
 				readOnly: @readOnlyToken
 				readAndWrite: @readAndWriteToken
+			owner_ref: @ownerId
 		@userId = ObjectId()
 		@TokenAccessController = SandboxedModule.require modulePath, requires:
 			'../Project/ProjectController': @ProjectController = {}
@@ -62,6 +64,38 @@ describe "TokenAccessController", ->
 					@userId.toString(), @projectId
 				))
 					.to.equal true
+				done()
+
+			it 'should pass control to loadEditor', (done) ->
+				expect(@req.params.Project_id).to.equal @projectId.toString()
+				expect(@ProjectController.loadEditor.callCount).to.equal 1
+				expect(@ProjectController.loadEditor.calledWith(@req, @res, @next)).to.equal true
+				done()
+
+		describe 'when the user is already the owner', ->
+			beforeEach ->
+				@req = new MockRequest()
+				@res = new MockResponse()
+				@next = sinon.stub()
+				@req.params['read_and_write_token'] = @readAndWriteToken
+				@project.owner_ref = @userId
+				@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
+					.callsArgWith(1, null, @project)
+				@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
+					.callsArgWith(2, null)
+				@ProjectController.loadEditor = sinon.stub()
+				@TokenAccessController.readAndWriteToken @req, @res, @next
+
+			it 'should try to find a project with this token', (done) ->
+				expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.callCount)
+					.to.equal 1
+				expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.calledWith(@readAndWriteToken))
+					.to.equal true
+				done()
+
+			it 'should not add the user to the project with read-write access', (done) ->
+				expect(@TokenAccessHandler.addReadAndWriteUserToProject.callCount)
+					.to.equal 0
 				done()
 
 			it 'should pass control to loadEditor', (done) ->
@@ -282,7 +316,39 @@ describe "TokenAccessController", ->
 					expect(@ProjectController.loadEditor.callCount).to.equal 1
 					expect(@ProjectController.loadEditor.calledWith(@req, @res, @next)).to.equal true
 					done()
-					
+
+			describe 'when the user is already the owner', ->
+				beforeEach ->
+					@req = new MockRequest()
+					@res = new MockResponse()
+					@next = sinon.stub()
+					@req.params['read_only_token'] = @readOnlyToken
+					@project.owner_ref = @userId
+					@TokenAccessHandler.findProjectWithReadOnlyToken = sinon.stub()
+						.callsArgWith(1, null, @project)
+					@TokenAccessHandler.addReadOnlyUserToProject = sinon.stub()
+						.callsArgWith(2, null)
+					@ProjectController.loadEditor = sinon.stub()
+					@TokenAccessController.readOnlyToken @req, @res, @next
+
+				it 'should try to find a project with this token', (done) ->
+					expect(@TokenAccessHandler.findProjectWithReadOnlyToken.callCount)
+						.to.equal 1
+					expect(@TokenAccessHandler.findProjectWithReadOnlyToken.calledWith(@readOnlyToken))
+						.to.equal true
+					done()
+
+				it 'should not add the user to the project with read-only access', (done) ->
+					expect(@TokenAccessHandler.addReadOnlyUserToProject.callCount)
+						.to.equal 0
+					done()
+
+				it 'should pass control to loadEditor', (done) ->
+					expect(@req.params.Project_id).to.equal @projectId.toString()
+					expect(@ProjectController.loadEditor.callCount).to.equal 1
+					expect(@ProjectController.loadEditor.calledWith(@req, @res, @next)).to.equal true
+					done()
+
 			describe 'when findProject produces an error', ->
 				beforeEach ->
 					@req = new MockRequest()

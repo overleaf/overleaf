@@ -7,6 +7,10 @@ logger = require 'logger-sharelatex'
 
 module.exports = TokenAccessController =
 
+	_loadEditor: (projectId, req, res, next) ->
+		req.params.Project_id = projectId.toString()
+		return ProjectController.loadEditor(req, res, next)
+
 	readAndWriteToken: (req, res, next) ->
 		userId = AuthenticationController.getLoggedInUserId(req)
 		token = req.params['read_and_write_token']
@@ -32,6 +36,10 @@ module.exports = TokenAccessController =
 						logger.log {token, projectId: project._id}, "redirecting user to project"
 						res.redirect(302, "/project/#{project._id}")
 			else
+				if project.owner_ref.toString() == userId
+					logger.log {userId, projectId: project._id},
+						"user is already project owner"
+					return TokenAccessController._loadEditor(project._id, req, res, next)
 				logger.log {userId, projectId: project._id},
 					"adding user to project with readAndWrite token"
 				TokenAccessHandler.addReadAndWriteUserToProject userId, project._id, (err) ->
@@ -39,8 +47,7 @@ module.exports = TokenAccessController =
 						logger.err {err, token, userId, projectId: project._id},
 							"error adding user to project with readAndWrite token"
 						return next(err)
-					req.params.Project_id = project._id.toString()
-					return ProjectController.loadEditor(req, res, next)
+					return TokenAccessController._loadEditor(project._id, req, res, next)
 
 	readOnlyToken: (req, res, next) ->
 		userId = AuthenticationController.getLoggedInUserId(req)
@@ -59,10 +66,13 @@ module.exports = TokenAccessController =
 				logger.log {userId, projectId: project._id},
 					"adding anonymous user to project with readOnly token"
 				TokenAccessHandler.grantSessionReadOnlyTokenAccess(req, project._id, token)
-				req.params.Project_id = project._id.toString()
 				req._anonToken = token
-				return ProjectController.loadEditor(req, res, next)
+				return TokenAccessController._loadEditor(project._id, req, res, next)
 			else
+				if project.owner_ref.toString() == userId
+					logger.log {userId, projectId: project._id},
+						"user is already project owner"
+					return TokenAccessController._loadEditor(project._id, req, res, next)
 				logger.log {userId, projectId: project._id},
 					"adding user to project with readOnly token"
 				TokenAccessHandler.addReadOnlyUserToProject userId, project._id, (err) ->

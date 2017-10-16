@@ -8,13 +8,13 @@ module.exports = TokenAccessHandler =
 		Project.findOne {
 			'tokens.readOnly': token,
 			'publicAccesLevel': PublicAccessLevels.TOKEN_BASED
-		}, {_id: 1, publicAccesLevel: 1}, callback
+		}, {_id: 1, publicAccesLevel: 1, owner_ref: 1}, callback
 
 	findProjectWithReadAndWriteToken: (token, callback=(err, project)->) ->
 		Project.findOne {
 			'tokens.readAndWrite': token,
 			'publicAccesLevel': PublicAccessLevels.TOKEN_BASED
-		}, {_id: 1, publicAccesLevel: 1}, callback
+		}, {_id: 1, publicAccesLevel: 1, owner_ref: 1}, callback
 
 	findPrivateOverleafProjectWithReadAndWriteToken: (token, callback=(err, project)->) ->
 		Project.findOne {

@@ -1,5 +1,5 @@
 module.exports =
-	READ_ONLY: "readOnly"
-	READ_AND_WRITE: "readAndWrite"
+	READ_ONLY: "readOnly"           # LEGACY
+	READ_AND_WRITE: "readAndWrite"  # LEGACY
 	PRIVATE: "private"
 	TOKEN_BASED: "tokenBased"
