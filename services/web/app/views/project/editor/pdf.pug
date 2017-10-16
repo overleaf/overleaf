@@ -26,11 +26,9 @@ div.full-size.pdf(ng-controller="PdfController")
 			)
 				span.caret
 			ul.dropdown-menu.dropdown-menu-left
-				// Only show on beta program?
-				if user.betaProgram
-					li.dropdown-header
-						| #{translate("auto_compile")}
-						span.beta-feature-badge
+				// Only show if on beta program or part of rollout
+				if user.betaProgram || showAutoCompileOnboarding
+					li.dropdown-header #{translate("auto_compile")}
 					li
 						a(href, ng-click="autocompile_enabled = true")
 							i.fa.fa-fw(ng-class="{'fa-check': autocompile_enabled}")

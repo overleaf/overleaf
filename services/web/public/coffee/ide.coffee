@@ -78,7 +78,7 @@ define [
 			miniReviewPanelVisible: false,
 		}
 		$scope.onboarding = {
-			autoCompile: if window.user.betaProgram and window.showAutoCompileOnboarding then 'unseen' else 'dismissed'
+			autoCompile: if window.showAutoCompileOnboarding then 'unseen' else 'dismissed'
 		}
 		$scope.user = window.user
 
