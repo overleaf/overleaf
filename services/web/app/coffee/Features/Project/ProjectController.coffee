@@ -262,7 +262,7 @@ module.exports = ProjectController =
 					# Don't show if user is not part of roll out
 					return cb(null, false)
 				userSignupDate = new Date(timestamp * 1000)
-				if userSignupDate > new Date("2017-10-03")
+				if userSignupDate > new Date("2017-10-16")
 					# Don't show for users who registered after it was released
 					return cb(null, false)
 				timeout = setTimeout cb, 500
