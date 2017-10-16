@@ -16,6 +16,13 @@ module.exports = TokenAccessHandler =
 			'publicAccesLevel': PublicAccessLevels.TOKEN_BASED
 		}, {_id: 1, publicAccesLevel: 1}, callback
 
+	findPrivateOverleafProjectWithReadAndWriteToken: (token, callback=(err, project)->) ->
+		Project.findOne {
+			'tokens.readAndWrite': token,
+			'publicAccesLevel': PublicAccessLevels.PRIVATE,
+			'overleaf.id': {'$exists': true}
+		}, {_id: 1, publicAccesLevel: 1, owner_ref: 1}, callback
+
 	addReadOnlyUserToProject: (userId, projectId, callback=(err)->) ->
 		userId = ObjectId(userId.toString())
 		projectId = ObjectId(projectId.toString())

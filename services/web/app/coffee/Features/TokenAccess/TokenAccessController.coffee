@@ -19,16 +19,28 @@ module.exports = TokenAccessController =
 			if !project?
 				logger.log {token, userId},
 					"no project found for readAndWrite token"
-				return next(new Errors.NotFoundError())
-			logger.log {userId, projectId: project._id},
-				"adding user to project with readAndWrite token"
-			TokenAccessHandler.addReadAndWriteUserToProject userId, project._id, (err) ->
-				if err?
-					logger.err {err, token, userId, projectId: project._id},
-						"error adding user to project with readAndWrite token"
-					return next(err)
-				req.params.Project_id = project._id.toString()
-				return ProjectController.loadEditor(req, res, next)
+				TokenAccessHandler
+					.findPrivateOverleafProjectWithReadAndWriteToken token, (err, project) ->
+						if err?
+							logger.err {err, token, userId},
+								"error getting project by readAndWrite token"
+							return next(err)
+						if !project?
+							logger.log {token, userId},
+								"no private-overleaf project found with readAndWriteToken"
+							return next(new Errors.NotFoundError())
+						logger.log {token, projectId: project._id}, "redirecting user to project"
+						res.redirect(302, "/project/#{project._id}")
+			else
+				logger.log {userId, projectId: project._id},
+					"adding user to project with readAndWrite token"
+				TokenAccessHandler.addReadAndWriteUserToProject userId, project._id, (err) ->
+					if err?
+						logger.err {err, token, userId, projectId: project._id},
+							"error adding user to project with readAndWrite token"
+						return next(err)
+					req.params.Project_id = project._id.toString()
+					return ProjectController.loadEditor(req, res, next)
 
 	readOnlyToken: (req, res, next) ->
 		userId = AuthenticationController.getLoggedInUserId(req)

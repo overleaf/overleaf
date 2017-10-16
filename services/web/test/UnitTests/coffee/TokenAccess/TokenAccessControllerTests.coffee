@@ -107,38 +107,99 @@ describe "TokenAccessController", ->
 
 		describe 'when findProject does not find a project', ->
 			beforeEach ->
-				@req = new MockRequest()
-				@res = new MockResponse()
-				@next = sinon.stub()
-				@req.params['read_and_write_token'] = @readAndWriteToken
-				@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
-					.callsArgWith(1, null, null)
-				@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
-					.callsArgWith(2, null)
-				@ProjectController.loadEditor = sinon.stub()
-				@TokenAccessController.readAndWriteToken @req, @res, @next
 
-			it 'should try to find a project with this token', (done) ->
-				expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.callCount)
-					.to.equal 1
-				expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.calledWith(@readAndWriteToken))
-					.to.equal true
-				done()
+			describe 'when it is a private overleaf project', ->
+				beforeEach ->
+					@req = new MockRequest()
+					@res = new MockResponse()
+					@res.redirect = sinon.stub()
+					@next = sinon.stub()
+					@req.params['read_and_write_token'] = @readAndWriteToken
+					@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
+						.callsArgWith(1, null, null)
+					@TokenAccessHandler.findPrivateOverleafProjectWithReadAndWriteToken =
+						sinon.stub()
+						.callsArgWith(1, null, @project)
+					@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
+						.callsArgWith(2, null)
+					@ProjectController.loadEditor = sinon.stub()
+					@TokenAccessController.readAndWriteToken @req, @res, @next
 
-			it 'should not add the user to the project with read-write access', (done) ->
-				expect(@TokenAccessHandler.addReadAndWriteUserToProject.callCount)
-					.to.equal 0
-				done()
+				it 'should try to find a project with this token', (done) ->
+					expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.callCount)
+						.to.equal 1
+					expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.calledWith(@readAndWriteToken))
+						.to.equal true
+					done()
 
-			it 'should not pass control to loadEditor', (done) ->
-				expect(@ProjectController.loadEditor.callCount).to.equal 0
-				expect(@ProjectController.loadEditor.calledWith(@req, @res, @next)).to.equal false
-				done()
+				it 'should try to find a private overleaf project', (done) ->
+					expect(
+						@TokenAccessHandler.findPrivateOverleafProjectWithReadAndWriteToken
+							.callCount
+					).to.equal 1
+					expect(
+						@TokenAccessHandler.findPrivateOverleafProjectWithReadAndWriteToken
+							.calledWith(@readAndWriteToken)
+					).to.equal true
+					done()
 
-			it 'should call next with a not-found error', (done) ->
-				expect(@next.callCount).to.equal 1
-				expect(@next.lastCall.args[0]).to.be.instanceof Error
-				done()
+				it 'should not add the user to the project with read-write access', (done) ->
+					expect(@TokenAccessHandler.addReadAndWriteUserToProject.callCount)
+						.to.equal 0
+					done()
+
+				it 'should not pass control to loadEditor', (done) ->
+					expect(@ProjectController.loadEditor.callCount).to.equal 0
+					expect(@ProjectController.loadEditor.calledWith(@req, @res, @next)).to.equal false
+					done()
+
+				it 'should not call next with a not-found error', (done) ->
+					expect(@next.callCount).to.equal 0
+					done()
+
+				it 'should redirect to the canonical project url', (done) ->
+					expect(@res.redirect.callCount).to.equal 1
+					expect(@res.redirect.calledWith(302, "/project/#{@project._id}")).to.equal true
+					done()
+
+			describe 'when it is not a private overleaf project', ->
+				beforeEach ->
+					@req = new MockRequest()
+					@res = new MockResponse()
+					@next = sinon.stub()
+					@req.params['read_and_write_token'] = @readAndWriteToken
+					@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
+						.callsArgWith(1, null, null)
+					@TokenAccessHandler.findPrivateOverleafProjectWithReadAndWriteToken =
+						sinon.stub()
+						.callsArgWith(1, null, null)
+					@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
+						.callsArgWith(2, null)
+					@ProjectController.loadEditor = sinon.stub()
+					@TokenAccessController.readAndWriteToken @req, @res, @next
+
+				it 'should try to find a project with this token', (done) ->
+					expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.callCount)
+						.to.equal 1
+					expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.calledWith(
+						@readAndWriteToken
+					)).to.equal true
+					done()
+
+				it 'should not add the user to the project with read-write access', (done) ->
+					expect(@TokenAccessHandler.addReadAndWriteUserToProject.callCount)
+						.to.equal 0
+					done()
+
+				it 'should not pass control to loadEditor', (done) ->
+					expect(@ProjectController.loadEditor.callCount).to.equal 0
+					expect(@ProjectController.loadEditor.calledWith(@req, @res, @next)).to.equal false
+					done()
+
+				it 'should call next with a not-found error', (done) ->
+					expect(@next.callCount).to.equal 1
+					expect(@next.lastCall.args[0]).to.be.instanceof Error
+					done()
 
 		describe 'when adding user to project produces an error', ->
 			beforeEach ->

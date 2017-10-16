@@ -84,6 +84,39 @@ describe "TokenAccessHandler", ->
 					done()
 
 
+	describe 'findPrivateOverleafProjectWithReadAndWriteToken', ->
+		beforeEach ->
+			@Project.findOne = sinon.stub().callsArgWith(2, null, @project)
+
+		it 'should call Project.findOne', (done) ->
+			@TokenAccessHandler.findPrivateOverleafProjectWithReadAndWriteToken @token, (err, project) =>
+				expect(@Project.findOne.callCount).to.equal 1
+				expect(@Project.findOne.calledWith({
+					'tokens.readAndWrite': @token,
+					'publicAccesLevel': 'private',
+					'overleaf.id': {$exists: true}
+				})).to.equal true
+				done()
+
+		it 'should produce a project object with no error', (done) ->
+			@TokenAccessHandler.findPrivateOverleafProjectWithReadAndWriteToken @token, (err, project) =>
+				expect(err).to.not.exist
+				expect(project).to.exist
+				expect(project).to.deep.equal @project
+				done()
+
+		describe 'when Project.findOne produces an error', ->
+			beforeEach ->
+				@Project.findOne = sinon.stub().callsArgWith(2, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@TokenAccessHandler.findPrivateOverleafProjectWithReadAndWriteToken @token, (err, project) =>
+					expect(err).to.exist
+					expect(project).to.not.exist
+					expect(err).to.be.instanceof Error
+					done()
+
+
 	describe 'addReadOnlyUserToProject', ->
 		beforeEach ->
 			@Project.update = sinon.stub().callsArgWith(2, null)
