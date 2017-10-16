@@ -1,4 +1,3 @@
-child   = require "child_process"
 logger  = require "logger-sharelatex"
 metrics = require "metrics-sharelatex"
 fs      = require "fs"
