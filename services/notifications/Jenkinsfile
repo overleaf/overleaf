@@ -62,10 +62,6 @@ pipeline {
   
   post {
     failure {
-      when {
-        branch 'master'
-      }
-      
       mail(from: "${EMAIL_ALERT_FROM}", 
            to: "${EMAIL_ALERT_TO}", 
            subject: "Jenkins build failed: ${JOB_NAME}:${BUILD_NUMBER}",
