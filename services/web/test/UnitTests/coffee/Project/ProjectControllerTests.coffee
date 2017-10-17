@@ -222,11 +222,22 @@ describe "ProjectController", ->
 		beforeEach ->
 			@tags = [{name:1, project_ids:["1","2","3"]}, {name:2, project_ids:["a","1"]}, {name:3, project_ids:["a", "b", "c", "d"]}]
 			@notifications = [{_id:'1',user_id:'2',templateKey:'3',messageOpts:'4',key:'5'}]
-			@projects = [{lastUpdated:1, _id:1, owner_ref: "user-1"}, {lastUpdated:2, _id:2, owner_ref: "user-2"}]
-			@collabertions = [{lastUpdated:5, _id:5, owner_ref: "user-1"}]
-			@readOnly = [{lastUpdated:3, _id:3, owner_ref: "user-1"}]
-			@tokenReadAndWrite = [{lastUpdated:5, _id:6, owner_ref: "user-4"}]
-			@tokenReadOnly = [{lastUpdated:4, _id:7, owner_ref: "user-5"}]
+			@projects = [
+				{_id:1, lastUpdated:1, owner_ref: "user-1"},
+				{_id:2, lastUpdated:2, owner_ref: "user-2"}
+			]
+			@collabertions = [
+				{_id:5, lastUpdated:5, owner_ref: "user-1"}
+			]
+			@readOnly = [
+				{_id:3, lastUpdated:3, owner_ref: "user-1"}
+			]
+			@tokenReadAndWrite = [
+				{_id:6, lastUpdated:5, owner_ref: "user-4"}
+			]
+			@tokenReadOnly = [
+				{_id:7, lastUpdated:4, owner_ref: "user-5"}
+			]
 
 			@users =
 				'user-1':
@@ -270,6 +281,57 @@ describe "ProjectController", ->
 			@res.render = (pageName, opts)=>
 				opts.projects[0].owner.should.equal (@users[@projects[0].owner_ref])
 				opts.projects[1].owner.should.equal (@users[@projects[1].owner_ref])
+				done()
+			@ProjectController.projectListPage @req, @res
+
+	describe "projectListPage with duplicate projects", ->
+
+		beforeEach ->
+			@tags = [{name:1, project_ids:["1","2","3"]}, {name:2, project_ids:["a","1"]}, {name:3, project_ids:["a", "b", "c", "d"]}]
+			@notifications = [{_id:'1',user_id:'2',templateKey:'3',messageOpts:'4',key:'5'}]
+			@projects = [
+				{_id:1, lastUpdated:1, owner_ref: "user-1"},
+				{_id:2, lastUpdated:2, owner_ref: "user-2"}
+			]
+			@collabertions = [
+				{_id:5, lastUpdated:5, owner_ref: "user-1"}
+			]
+			@readOnly = [
+				{_id:3, lastUpdated:3, owner_ref: "user-1"}
+			]
+			@tokenReadAndWrite = [
+				{_id:6, lastUpdated:5, owner_ref: "user-4"}
+			]
+			@tokenReadOnly = [
+				{_id:6, lastUpdated:5, owner_ref: "user-4"} # Also in tokenReadAndWrite
+				{_id:7, lastUpdated:4, owner_ref: "user-5"}
+			]
+
+			@users =
+				'user-1':
+					first_name: 'James'
+				'user-2':
+					first_name: 'Henry'
+			@users[@user._id] = @user # Owner
+			@UserModel.findById = (id, fields, callback) =>
+				callback null, @users[id]
+
+			@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, false)
+			@TagsHandler.getAllTags.callsArgWith(1, null, @tags, {})
+			@NotificationsHandler.getUserNotifications = sinon.stub().callsArgWith(1, null, @notifications, {})
+			@ProjectGetter.findAllUsersProjects.callsArgWith(2, null, @projects, @collabertions, @readOnly, @tokenReadAndWrite, @tokenReadOnly)
+
+		it "should render the project/list page", (done)->
+			@res.render = (pageName, opts)=>
+				pageName.should.equal "project/list"
+				done()
+			@ProjectController.projectListPage @req, @res
+
+		it "should omit one of the projects", (done)->
+			@res.render = (pageName, opts)=>
+				opts.projects.length.should.equal (
+					@projects.length + @collabertions.length + @readOnly.length + @tokenReadAndWrite.length + @tokenReadOnly.length - 1
+				)
 				done()
 			@ProjectController.projectListPage @req, @res
 

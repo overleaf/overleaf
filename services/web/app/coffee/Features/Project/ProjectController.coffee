@@ -319,10 +319,14 @@ module.exports = ProjectController =
 		for project in readOnlyProjects
 			projects.push ProjectController._buildProjectViewModel(project, "readOnly", Sources.INVITE)
 		# Token-access
+		#   Only add these projects if they're not already present, this gives us cascading access
+		#   from 'owner' => 'token-read-only'
 		for project in tokenReadAndWriteProjects
-			projects.push ProjectController._buildProjectViewModel(project, "readAndWrite", Sources.TOKEN)
+			if projects.filter((p) -> p.id.toString() == project._id.toString()).length == 0
+				projects.push ProjectController._buildProjectViewModel(project, "readAndWrite", Sources.TOKEN)
 		for project in tokenReadOnlyProjects
-			projects.push ProjectController._buildProjectViewModel(project, "readOnly", Sources.TOKEN)
+			if projects.filter((p) -> p.id.toString() == project._id.toString()).length == 0
+				projects.push ProjectController._buildProjectViewModel(project, "readOnly", Sources.TOKEN)
 
 		return projects
 
