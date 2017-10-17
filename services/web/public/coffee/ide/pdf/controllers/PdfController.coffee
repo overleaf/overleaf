@@ -231,6 +231,7 @@ define [
 			else if response.status == "validation-problems"
 				$scope.pdf.view = "validation-problems"
 				$scope.pdf.validation = response.validationProblems
+				$scope.shouldShowLogs = false
 			else if response.status == "compile-in-progress"
 				$scope.pdf.view = 'errors'
 				$scope.pdf.compileInProgress = true
