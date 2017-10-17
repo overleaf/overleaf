@@ -18,6 +18,7 @@ module.exports = FileTypeManager =
 
 	IGNORE_FILENAMES : [
 		"__MACOSX"
+		".git"
 	]
 	
 	MAX_TEXT_FILE_SIZE: 1 * 1024 * 1024 # 1 MB
