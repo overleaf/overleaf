@@ -184,7 +184,7 @@ module.exports = ClsiManager =
 				# present in the docupdater. This allows finaliseRequest to
 				# identify the root doc.
 				possibleRootDocIds = [options.rootDoc_id, project.rootDoc_id]
-				for rootDoc_id in possibleRootDocIds when rootDoc_id?
+				for rootDoc_id in possibleRootDocIds when rootDoc_id? and rootDoc_id of docPath
 					path = docPath[rootDoc_id]
 					docs[path] ?= {_id: rootDoc_id, path: path}
 				ClsiManager._finaliseRequest project_id, options, project, docs, [], callback
