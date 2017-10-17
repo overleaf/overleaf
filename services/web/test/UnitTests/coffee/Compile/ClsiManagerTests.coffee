@@ -346,7 +346,49 @@ describe "ClsiManager", ->
 
 			it "should set to main.tex", ->
 				@request.compile.rootResourcePath.should.equal "main.tex"
-		
+
+		describe "when there is no valid root document and no main.tex document", ->
+			beforeEach () ->
+				@project.rootDoc_id = "not-valid"
+				@docs = {
+					"/other.tex": @doc_1 = {
+						name: "other.tex"
+						_id: "mock-doc-id-1"
+						lines: ["Hello", "world"]
+					},
+					"/chapters/chapter1.tex": @doc_2 = {
+						name: "chapter1.tex"
+						_id: "mock-doc-id-2"
+						lines: [
+							"Chapter 1"
+						]
+					}
+				}
+				@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
+				@ClsiManager._buildRequest @project, null, @callback
+
+			it "should report an error", ->
+				@callback.calledWith(new Error("no main file specified")).should.equal true
+
+
+		describe "when there is no valid root document and a single document which is not main.tex", ->
+			beforeEach (done) ->
+				@project.rootDoc_id = "not-valid"
+				@docs = {
+					"/other.tex": @doc_1 = {
+						name: "other.tex"
+						_id: "mock-doc-id-1"
+						lines: ["Hello", "world"]
+					}
+				}
+				@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
+				@ClsiManager._buildRequest @project, null, (@error, @request) =>
+					done()
+
+			it "should set io to the only file", ->
+				@request.compile.rootResourcePath.should.equal "other.tex"
+
+
 		describe "with the draft option", ->
 			it "should add the draft option into the request", (done) ->
 				@ClsiManager._buildRequest @project_id, {timeout:100, draft: true}, (error, request) =>
