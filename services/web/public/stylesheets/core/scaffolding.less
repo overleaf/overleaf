@@ -33,6 +33,9 @@ body {
   position: relative;
   padding-top: @header-height;
   padding-bottom: @footer-height;
+  & > .content {
+    min-height: calc(~"100vh -" (@header-height + @footer-height));
+  }
 }
 
 // Reset fonts for relevant elements
