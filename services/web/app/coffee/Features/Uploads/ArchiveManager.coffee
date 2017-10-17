@@ -94,6 +94,8 @@ module.exports = ArchiveManager =
 								return callback(err)
 							else
 								zipfile.readEntry() # continue to the next file
+					else # if it's a directory, continue
+						zipfile.readEntry()
 			# no more entries to read
 			zipfile.on "end", callback
 
