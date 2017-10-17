@@ -81,6 +81,7 @@ module.exports = ArchiveManager =
 			# read all the entries
 			zipfile.readEntry()
 			zipfile.on "entry", (entry) ->
+				logger.log {source:source, fileName: entry.fileName}, "processing zip file entry"
 				ArchiveManager._checkFilePath entry, destination, (err, destFile) ->
 					if err?
 						logger.warn err:err, source:source, destination:destination, "skipping bad file path"
