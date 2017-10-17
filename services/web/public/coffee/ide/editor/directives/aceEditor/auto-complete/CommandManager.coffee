@@ -12,7 +12,7 @@ define [], () ->
 		'Lambda', 'Xi', 'Pi', 'Sigma', 'Upsilon', 'Phi', 'Psi', 'Omega'
 	]
 	singleArgumentCommands = [
-		'chapter', 'section', 'label', 'textbf', 'subsection',
+		'chapter', 'usepackage', 'section', 'label', 'textbf', 'subsection',
 		'vspace', 'cite', 'textit', 'documentclass', 'includegraphics', 'input',
 		'emph','caption', 'ref', 'title', 'author', 'texttt', 'include',
 		'hspace', 'bibitem', 'url', 'large', 'subsubsection', 'textsc', 'date',
@@ -63,19 +63,19 @@ define [], () ->
 			meta: "cmd"
 		}
 	special = for cmd in special
-		{
-			caption: "\\#{cmd}{}"
-			snippet: "\\#{cmd}{}"
-			meta: "cmd"
-		}
+			{
+				caption: "\\#{cmd}{}"
+				snippet: "\\#{cmd}{}"
+				meta: "cmd"
+			}
 
 	staticCommands = [].concat(
-		noArgumentCommands,
-		singleArgumentCommands,
-		doubleArgumentCommands,
-		tripleArgumentCommands,
-		special
-	)
+						noArgumentCommands,
+						singleArgumentCommands,
+						doubleArgumentCommands,
+						tripleArgumentCommands,
+						special
+					)
 
 	class Parser
 		constructor: (@doc, @prefix) ->
@@ -172,7 +172,7 @@ define [], () ->
 			commands = parser.parse()
 			completions = []
 			for command in commands
-				if command[0] not in rawCommands and command[0] != "usepackage"
+				if command[0] not in rawCommands
 					caption = "\\#{command[0]}"
 					score = if caption == prefix then 99 else 50
 					snippet = caption
