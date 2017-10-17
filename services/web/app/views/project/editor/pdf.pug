@@ -317,6 +317,9 @@ div.full-size.pdf(ng-controller="PdfController")
 				div
 					li(ng-repeat="entry in pdf.validation.conflictedPaths") {{ '/'+entry['path'] }}
 
+			.alert.alert-danger(ng-show="pdf.validation.mainFile")
+				strong #{translate("main_file_not_found")} 
+				span #{translate("please_set_main_file")}
 
 		.pdf-errors(ng-switch-when="errors")
 	
