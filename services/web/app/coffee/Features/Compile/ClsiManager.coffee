@@ -29,7 +29,11 @@ module.exports = ClsiManager =
 
 	sendRequestOnce: (project_id, user_id, options = {}, callback = (error, status, outputFiles, clsiServerId, validationProblems) ->) ->
 		ClsiManager._buildRequest project_id, options, (error, req) ->
-			return callback(error) if error?
+			if error?
+				if error.message is "no main file specified"
+					return callback(null, "validation-problems", null, null, {mainFile:error.message})
+				else
+					return callback(error)
 			logger.log project_id: project_id, "sending compile to CLSI"
 			ClsiFormatChecker.checkRecoursesForProblems req.compile?.resources, (err, validationProblems)->
 				if err?
@@ -180,7 +184,7 @@ module.exports = ClsiManager =
 				# present in the docupdater. This allows finaliseRequest to
 				# identify the root doc.
 				possibleRootDocIds = [options.rootDoc_id, project.rootDoc_id]
-				for rootDoc_id in possibleRootDocIds when rootDoc_id?
+				for rootDoc_id in possibleRootDocIds when rootDoc_id? and rootDoc_id of docPath
 					path = docPath[rootDoc_id]
 					docs[path] ?= {_id: rootDoc_id, path: path}
 				ClsiManager._finaliseRequest project_id, options, project, docs, [], callback
@@ -206,9 +210,12 @@ module.exports = ClsiManager =
 		resources = []
 		rootResourcePath = null
 		rootResourcePathOverride = null
+		hasMainFile = false
+		numberOfDocsInProject = 0
 
 		for path, doc of docs
 			path = path.replace(/^\//, "") # Remove leading /
+			numberOfDocsInProject++
 			if doc.lines? # add doc to resources unless it is just a stub entry
 				resources.push
 					path:    path
@@ -217,11 +224,20 @@ module.exports = ClsiManager =
 				rootResourcePath = path
 			if options.rootDoc_id? and doc._id.toString() == options.rootDoc_id.toString()
 				rootResourcePathOverride = path
+			if path is "main.tex"
+				hasMainFile = true
 
 		rootResourcePath = rootResourcePathOverride if rootResourcePathOverride?
 		if !rootResourcePath?
-			logger.warn {project_id}, "no root document found, setting to main.tex"
-			rootResourcePath = "main.tex"
+			if hasMainFile
+				logger.warn {project_id}, "no root document found, setting to main.tex"
+				rootResourcePath = "main.tex"
+			else if numberOfDocsInProject is 1 # only one file, must be the main document
+				for path, doc of docs
+					rootResourcePath = path.replace(/^\//, "") # Remove leading /
+				logger.warn {project_id, rootResourcePath: rootResourcePath}, "no root document found, single document in project"
+			else
+				return callback new Error("no main file specified")
 
 		for path, file of files
 			path = path.replace(/^\//, "") # Remove leading /
