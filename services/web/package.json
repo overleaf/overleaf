@@ -25,6 +25,7 @@
     "dateformat": "1.0.4-1.2.3",
     "express": "4.13.0",
     "express-session": "^1.14.2",
+    "fs-extra": "^4.0.2",
     "heapdump": "^0.3.7",
     "helmet": "^3.8.1",
     "http-proxy": "^1.8.1",
@@ -69,7 +70,8 @@
     "underscore": "1.6.0",
     "uuid": "^3.0.1",
     "v8-profiler": "^5.2.3",
-    "xml2js": "0.2.0"
+    "xml2js": "0.2.0",
+    "yauzl": "^2.8.0"
   },
   "devDependencies": {
     "autoprefixer": "^6.6.1",
