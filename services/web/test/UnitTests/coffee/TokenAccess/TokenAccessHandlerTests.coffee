@@ -19,6 +19,7 @@ describe "TokenAccessHandler", ->
 		@req = {}
 		@TokenAccessHandler = SandboxedModule.require modulePath, requires:
 			'../../models/Project': {Project: @Project = {}}
+			'settings-sharelatex': {}
 
 
 	describe 'findProjectWithReadOnlyToken', ->
@@ -175,98 +176,187 @@ describe "TokenAccessHandler", ->
 					done()
 
 
-	describe 'grantSessionReadOnlyTokenAccess', ->
+	describe 'grantSessionTokenAccess', ->
 		beforeEach ->
 			@req = {session: {}, headers: {}}
 
 		it 'should add the token to the session', (done) ->
-			@TokenAccessHandler.grantSessionReadOnlyTokenAccess(@req, @projectId, @token)
-			expect(@req.session.anonReadOnlyTokenAccess[@projectId.toString()])
+			@TokenAccessHandler.grantSessionTokenAccess(@req, @projectId, @token)
+			expect(@req.session.anonTokenAccess[@projectId.toString()])
 				.to.equal @token
 			done()
 
 
-	describe 'isValidReadOnlyToken', ->
-		beforeEach ->
-			@TokenAccessHandler.findProjectWithReadOnlyToken = sinon.stub()
-				.callsArgWith(1, null, @project)
 
-		it 'should call findProjectWithReadOnlyToken', (done) ->
-			@TokenAccessHandler.isValidReadOnlyToken @projectId, @token, (err, allowed) =>
-				expect(@TokenAccessHandler.findProjectWithReadOnlyToken.callCount)
-					.to.equal 1
-				done()
 
-		it 'should allow access', (done) ->
-			@TokenAccessHandler.isValidReadOnlyToken @projectId, @token, (err, allowed) =>
-				expect(err).to.not.exist
-				expect(allowed).to.equal true
-				done()
 
-		describe 'when no project is found', ->
+
+
+	describe 'isValidToken', ->
+
+		describe 'when a read-only project is found', ->
+
 			beforeEach ->
-				@TokenAccessHandler.findProjectWithReadOnlyToken = sinon.stub()
+				@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
 					.callsArgWith(1, null, null)
+				@TokenAccessHandler.findProjectWithReadOnlyToken = sinon.stub()
+					.callsArgWith(1, null, @project)
 
-			it 'should call findProjectWithReadOnlyToken', (done) ->
-				@TokenAccessHandler.isValidReadOnlyToken @projectId, @token, (err, allowed) =>
+			it 'should try to find projects with both kinds of token', (done) ->
+				@TokenAccessHandler.isValidToken @projectId, @token, (err, allowed) =>
+					expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.callCount)
+						.to.equal 1
 					expect(@TokenAccessHandler.findProjectWithReadOnlyToken.callCount)
 						.to.equal 1
 					done()
 
-			it 'should not allow access', (done) ->
-				@TokenAccessHandler.isValidReadOnlyToken @req, @projectId, (err, allowed) =>
+			it 'should allow read-only access', (done) ->
+				@TokenAccessHandler.isValidToken @projectId, @token, (err, rw, ro) =>
 					expect(err).to.not.exist
-					expect(allowed).to.equal false
+					expect(rw).to.equal false
+					expect(ro).to.equal true
 					done()
 
-		describe 'when no findProject produces an error', ->
+		describe 'when a read-and-write project is found', ->
+
 			beforeEach ->
+				@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
+					.callsArgWith(1, null, @project)
+				@TokenAccessHandler.findProjectWithReadOnlyToken = sinon.stub()
+					.callsArgWith(1, null, null)
+
+			it 'should try to find projects with both kinds of token', (done) ->
+				@TokenAccessHandler.isValidToken @projectId, @token, (err, allowed) =>
+					expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.callCount)
+						.to.equal 1
+					expect(@TokenAccessHandler.findProjectWithReadOnlyToken.callCount)
+						.to.equal 1
+					done()
+
+			it 'should allow read-and-write access', (done) ->
+				@TokenAccessHandler.isValidToken @projectId, @token, (err, rw, ro) =>
+					expect(err).to.not.exist
+					expect(rw).to.equal true
+					expect(ro).to.equal false
+					done()
+
+		describe 'when no project is found', ->
+			beforeEach ->
+				@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
+					.callsArgWith(1, null, null)
+				@TokenAccessHandler.findProjectWithReadOnlyToken = sinon.stub()
+					.callsArgWith(1, null, null)
+
+			it 'should try to find projects with both kinds of token', (done) ->
+				@TokenAccessHandler.isValidToken @projectId, @token, (err, allowed) =>
+					expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.callCount)
+						.to.equal 1
+					expect(@TokenAccessHandler.findProjectWithReadOnlyToken.callCount)
+						.to.equal 1
+					done()
+
+			it 'should not allow any access', (done) ->
+				@TokenAccessHandler.isValidToken @projectId, @token, (err, rw, ro) =>
+					expect(err).to.not.exist
+					expect(rw).to.equal false
+					expect(ro).to.equal false
+					done()
+
+		describe 'when findProject produces an error', ->
+			beforeEach ->
+				@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
+					.callsArgWith(1, null, null)
 				@TokenAccessHandler.findProjectWithReadOnlyToken = sinon.stub()
 					.callsArgWith(1, new Error('woops'))
 
-			it 'should call findProjectWithReadOnlyToken', (done) ->
-				@TokenAccessHandler.isValidReadOnlyToken @projectId, @token, (err, allowed) =>
+			it 'should try to find projects with both kinds of token', (done) ->
+				@TokenAccessHandler.isValidToken @projectId, @token, (err, allowed) =>
+					expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.callCount)
+						.to.equal 1
 					expect(@TokenAccessHandler.findProjectWithReadOnlyToken.callCount)
 						.to.equal 1
 					done()
 
 			it 'should produce an error and not allow access', (done) ->
-				@TokenAccessHandler.isValidReadOnlyToken @projectId, @token, (err, allowed) =>
+				@TokenAccessHandler.isValidToken @projectId, @token, (err, rw, ro) =>
 					expect(err).to.exist
 					expect(err).to.be.instanceof Error
-					expect(allowed).to.equal undefined
+					expect(rw).to.equal undefined
+					expect(ro).to.equal undefined
 					done()
 
 		describe 'when project is not set to token-based access', ->
 			beforeEach ->
 				@project.publicAccesLevel = 'private'
-				@TokenAccessHandler.findProjectWithReadOnlyToken = sinon.stub()
-					.callsArgWith(1, null, @project)
 
-			it 'should call findProjectWithReadOnlyToken', (done) ->
-				@TokenAccessHandler.isValidReadOnlyToken @projectId, @token, (err, allowed) =>
-					expect(@TokenAccessHandler.findProjectWithReadOnlyToken.callCount)
-						.to.equal 1
-					done()
+			describe 'for read-and-write project', ->
+				beforeEach ->
+					@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
+						.callsArgWith(1, null, @project)
+					@TokenAccessHandler.findProjectWithReadOnlyToken = sinon.stub()
+						.callsArgWith(1, null, null)
 
-			it 'should not allow access', (done) ->
-				@TokenAccessHandler.isValidReadOnlyToken @projectId, @token, (err, allowed) =>
-					expect(err).to.not.exist
-					expect(allowed).to.equal false
-					done()
+				it 'should try to find projects with both kinds of token', (done) ->
+					@TokenAccessHandler.isValidToken @projectId, @token, (err, allowed) =>
+						expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.callCount)
+							.to.equal 1
+						expect(@TokenAccessHandler.findProjectWithReadOnlyToken.callCount)
+							.to.equal 1
+						done()
+
+				it 'should not allow any access', (done) ->
+					@TokenAccessHandler.isValidToken @projectId, @token, (err, rw, ro) =>
+						expect(err).to.not.exist
+						expect(rw).to.equal false
+						expect(ro).to.equal false
+						done()
+
+			describe 'for read-only project', ->
+				beforeEach ->
+					@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
+						.callsArgWith(1, null, null)
+					@TokenAccessHandler.findProjectWithReadOnlyToken = sinon.stub()
+						.callsArgWith(1, null, @project)
+
+				it 'should try to find projects with both kinds of token', (done) ->
+					@TokenAccessHandler.isValidToken @projectId, @token, (err, allowed) =>
+						expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.callCount)
+							.to.equal 1
+						expect(@TokenAccessHandler.findProjectWithReadOnlyToken.callCount)
+							.to.equal 1
+						done()
+
+				it 'should not allow any access', (done) ->
+					@TokenAccessHandler.isValidToken @projectId, @token, (err, rw, ro) =>
+						expect(err).to.not.exist
+						expect(rw).to.equal false
+						expect(ro).to.equal false
+						done()
 
 		describe 'with nothing', ->
 			beforeEach ->
+				@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
+					.callsArgWith(1, null, @project)
+				@TokenAccessHandler.findProjectWithReadOnlyToken = sinon.stub()
+					.callsArgWith(1, null, null)
 
 			it 'should not call findProjectWithReadOnlyToken', (done) ->
-				@TokenAccessHandler.isValidReadOnlyToken @projectId, null, (err, allowed) =>
+				@TokenAccessHandler.isValidToken @projectId, null, (err, allowed) =>
 					expect(@TokenAccessHandler.findProjectWithReadOnlyToken.callCount)
 						.to.equal 0
 					done()
 
-			it 'should not allow access', (done) ->
-				@TokenAccessHandler.isValidReadOnlyToken @req, @projectId, (err, allowed) =>
+			it 'should try to find projects with both kinds of token', (done) ->
+				@TokenAccessHandler.isValidToken @projectId, null, (err, allowed) =>
+					expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.callCount)
+						.to.equal 0
+					expect(@TokenAccessHandler.findProjectWithReadOnlyToken.callCount)
+						.to.equal 0
+					done()
+
+			it 'should not allow any access', (done) ->
+				@TokenAccessHandler.isValidToken @projectId, null, (err, rw, ro) =>
 					expect(err).to.not.exist
-					expect(allowed).to.equal false
+					expect(rw).to.equal false
+					expect(ro).to.equal false
 					done()

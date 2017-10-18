@@ -463,7 +463,7 @@ describe "TokenAccessController", ->
 		describe 'anonymous', ->
 			beforeEach ->
 				@AuthenticationController.getLoggedInUserId = sinon.stub().returns(null)
-				@TokenAccessHandler.grantSessionReadOnlyTokenAccess = sinon.stub()
+				@TokenAccessHandler.grantSessionTokenAccess = sinon.stub()
 
 			describe 'when all goes well', ->
 				beforeEach ->
@@ -486,9 +486,9 @@ describe "TokenAccessController", ->
 					done()
 
 				it 'should give the user session read-only access', (done) ->
-					expect(@TokenAccessHandler.grantSessionReadOnlyTokenAccess.callCount)
+					expect(@TokenAccessHandler.grantSessionTokenAccess.callCount)
 						.to.equal 1
-					expect(@TokenAccessHandler.grantSessionReadOnlyTokenAccess.calledWith(
+					expect(@TokenAccessHandler.grantSessionTokenAccess.calledWith(
 						@req, @projectId, @readOnlyToken
 					))
 						.to.equal true
@@ -527,7 +527,7 @@ describe "TokenAccessController", ->
 					done()
 
 				it 'should not give the user session read-only access', (done) ->
-					expect(@TokenAccessHandler.grantSessionReadOnlyTokenAccess.callCount)
+					expect(@TokenAccessHandler.grantSessionTokenAccess.callCount)
 						.to.equal 0
 					done()
 
@@ -567,7 +567,7 @@ describe "TokenAccessController", ->
 					done()
 
 				it 'should not give the user session read-only access', (done) ->
-					expect(@TokenAccessHandler.grantSessionReadOnlyTokenAccess.callCount)
+					expect(@TokenAccessHandler.grantSessionTokenAccess.callCount)
 						.to.equal 0
 					done()
 

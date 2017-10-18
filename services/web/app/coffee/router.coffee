@@ -343,7 +343,6 @@ module.exports = class Router
 			TokenAccessController.readOnlyToken
 
 		webRouter.get '/:read_and_write_token([0-9]+[a-z]+)',
-			AuthenticationController.requireLogin(),
 			TokenAccessController.readAndWriteToken
 
 		webRouter.get '*', ErrorController.notFound

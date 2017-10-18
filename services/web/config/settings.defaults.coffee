@@ -16,6 +16,11 @@ httpAuthUsers[httpAuthUser] = httpAuthPass
 sessionSecret = "secret-please-change"
 
 module.exports = settings =
+
+	allowAnonymousReadAndWriteSharing:
+		process.env['SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING'] == 'true'
+
+
 	# File storage
 	# ------------
 	#

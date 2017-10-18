@@ -1,8 +1,12 @@
 Project = require('../../models/Project').Project
 PublicAccessLevels = require '../Authorization/PublicAccessLevels'
 ObjectId = require("mongojs").ObjectId
+Settings = require('settings-sharelatex')
 
 module.exports = TokenAccessHandler =
+
+	ANONYMOUS_READ_AND_WRITE_ENABLED:
+		Settings.allowAnonymousReadAndWriteSharing == true
 
 	findProjectWithReadOnlyToken: (token, callback=(err, project)->) ->
 		Project.findOne {
@@ -41,28 +45,30 @@ module.exports = TokenAccessHandler =
 			$addToSet: {tokenAccessReadAndWrite_refs: userId}
 		}, callback
 
-	grantSessionReadOnlyTokenAccess: (req, projectId, token) ->
+	grantSessionTokenAccess: (req, projectId, token) ->
 		if req.session?
-			if !req.session.anonReadOnlyTokenAccess?
-				req.session.anonReadOnlyTokenAccess = {}
-			req.session.anonReadOnlyTokenAccess[projectId.toString()] = token.toString()
+			if !req.session.anonTokenAccess?
+				req.session.anonTokenAccess = {}
+			req.session.anonTokenAccess[projectId.toString()] = token.toString()
 
 	getRequestToken: (req, projectId) ->
 		token = (
-			req?.session?.anonReadOnlyTokenAccess?[projectId.toString()] or
+			req?.session?.anonTokenAccess?[projectId.toString()] or
 			req?.headers['x-sl-anon-token']
 		)
 		return token
 
-	isValidReadOnlyToken: (projectId, token, callback=(err, allowed)->) ->
+	isValidToken: (projectId, token, callback=(err, isValidReadAndWrite, isValidReadOnly)->) ->
 		if !token
-			return callback null, false
-		TokenAccessHandler.findProjectWithReadOnlyToken token, (err, project) ->
+			return callback null, false, false
+		_validate = (project) ->
+			project? and
+			project.publicAccesLevel == PublicAccessLevels.TOKEN_BASED and
+			project._id.toString() == projectId.toString()
+		TokenAccessHandler.findProjectWithReadAndWriteToken token, (err, readAndWriteProject) ->
 			return callback(err) if err?
-			isAllowed = (
-				project? and
-				project.publicAccesLevel == PublicAccessLevels.TOKEN_BASED and
-				project._id.toString() == projectId.toString()
-			)
-			callback null, isAllowed
-
+			isValidReadAndWrite = _validate(readAndWriteProject)
+			TokenAccessHandler.findProjectWithReadOnlyToken token, (err, readOnlyProject) ->
+				return callback(err) if err?
+				isValidReadOnly = _validate(readOnlyProject)
+				callback null, isValidReadAndWrite, isValidReadOnly

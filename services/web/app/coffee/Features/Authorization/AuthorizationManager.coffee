@@ -35,15 +35,23 @@ module.exports = AuthorizationManager =
 				return callback(err) if err?
 				if publicAccessLevel == PublicAccessLevels.TOKEN_BASED
 					# Anonymous users can have read-only access to token-based projects,
-					# while read-write access must be logged in
-					TokenAccessHandler.isValidReadOnlyToken project_id, token,  (err, isValid) ->
-						return callback(err) if err?
-						if isValid
-							# Grant anonymous user read-only access
-							callback null, PrivilegeLevels.READ_ONLY, false
-						else
-							# Deny anonymous user access
-							callback null, PrivilegeLevels.NONE, false
+					# while read-write access must be logged in,
+					# unless the `enableAnonymousReadAndWriteSharing` setting is enabled
+					TokenAccessHandler.isValidToken project_id, token,
+						(err, isValidReadAndWrite, isValidReadOnly) ->
+							return callback(err) if err?
+							if isValidReadOnly
+								# Grant anonymous user read-only access
+								callback null, PrivilegeLevels.READ_ONLY, false
+							else if (
+								isValidReadAndWrite and
+								TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED
+							)
+								# Grant anonymous user read-and-write access
+								callback null, PrivilegeLevels.READ_AND_WRITE, false
+							else
+								# Deny anonymous access
+								callback null, PrivilegeLevels.NONE, false
 				else if publicAccessLevel == PublicAccessLevels.READ_ONLY
 					# Legacy public read-only access for anonymous user
 					callback null, PrivilegeLevels.READ_ONLY, true

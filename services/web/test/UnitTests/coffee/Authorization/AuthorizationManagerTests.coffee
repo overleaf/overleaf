@@ -14,7 +14,7 @@ describe "AuthorizationManager", ->
 			"../../models/User": User: @User = {}
 			"../Errors/Errors": Errors
 			"../TokenAccess/TokenAccessHandler": @TokenAccessHandler = {
-				isValidReadOnlyToken: sinon.stub().callsArgWith(2, null, false)
+				isValidToken: sinon.stub().callsArgWith(2, null, false, false)
 			}
 		@user_id = "user-id-1"
 		@project_id = "project-id-1"

@@ -241,6 +241,57 @@ describe 'TokenAccess', ->
 					expect(body.privilegeLevel).to.equal false
 				, done)
 
+	if !settings.allowAnonymousReadAndWriteSharing
+		console.log ">> Skipping anonymous read-write token tests"
+	else
+		describe 'anonymous read-and-write token', ->
+			before (done) ->
+				@owner.createProject 'token-anon-rw-test#{Math.random()}', (err, project_id) =>
+					return done(err) if err?
+					@project_id = project_id
+					@owner.makeTokenBased @project_id, (err) =>
+						return done(err) if err?
+						@owner.getProject @project_id, (err, project) =>
+							return done(err) if err?
+							@tokens = project.tokens
+							done()
+
+			it 'should deny access before the token is used', (done) ->
+				try_read_access(@anon, @project_id, (response, body) =>
+					expect(response.statusCode).to.equal 302
+					expect(body).to.match /.*\/restricted.*/
+				, done)
+
+			it 'should allow the user to access project via read-and-write token url', (done) ->
+				try_read_and_write_token_access(@anon, @tokens.readAndWrite, (response, body) =>
+					expect(response.statusCode).to.equal 200
+				, done)
+
+			it 'should allow the user to anonymously join the project with read-and-write access', (done) ->
+				try_anon_content_access(@anon, @project_id, @tokens.readAndWrite, (response, body) =>
+					expect(body.privilegeLevel).to.equal 'readAndWrite'
+				, done)
+
+			describe 'made private again', ->
+				before (done) ->
+					@owner.makePrivate @project_id, () -> setTimeout(done, 1000)
+
+				it 'should deny access to project', (done) ->
+					try_read_access(@anon, @project_id, (response, body) =>
+						expect(response.statusCode).to.equal 302
+						expect(body).to.match /.*\/restricted.*/
+					, done)
+
+				it 'should not allow the user to access read-and-write token', (done) ->
+					try_read_and_write_token_access(@anon, @tokens.readAndWrite, (response, body) =>
+						expect(response.statusCode).to.equal 404
+					, done)
+
+				it 'should not allow the user to join the project', (done) ->
+					try_anon_content_access(@anon, @project_id, @tokens.readAndWrite, (response, body) =>
+						expect(body.privilegeLevel).to.equal false
+					, done)
+
 
 	describe 'private overleaf project', ->
 		before (done) ->
