@@ -57,7 +57,7 @@ module.exports = ProjectDetailsHandler =
 
 	MAX_PROJECT_NAME_LENGTH: 150
 	validateProjectName: (name, callback = (error) ->) ->
-		if name.length == 0
+		if !name? or name.length == 0
 			return callback(new Errors.InvalidNameError("Project name cannot be blank"))
 		else if name.length > @MAX_PROJECT_NAME_LENGTH
 			return callback(new Errors.InvalidNameError("Project name is too long"))
