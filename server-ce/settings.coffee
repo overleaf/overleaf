@@ -22,6 +22,9 @@ TMP_DIR = '/var/lib/sharelatex/tmp'
 
 settings =
 
+	allowAnonymousReadAndWriteSharing:
+		process.env['SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING'] == 'true'
+
 	# Databases
 	# ---------
 
