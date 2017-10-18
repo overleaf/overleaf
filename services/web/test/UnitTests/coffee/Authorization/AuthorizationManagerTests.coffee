@@ -27,6 +27,129 @@ describe "AuthorizationManager", ->
 			@AuthorizationManager.isUserSiteAdmin = sinon.stub()
 			@CollaboratorsHandler.getMemberIdPrivilegeLevel = sinon.stub()
 
+		describe 'with a token-based project', ->
+			beforeEach ->
+				@Project.findOne
+					.withArgs({ _id: @project_id }, { publicAccesLevel: 1 })
+					.yields(null, { publicAccesLevel: "tokenBased" })
+
+			describe "with a user_id with a privilege level", ->
+				beforeEach ->
+					@AuthorizationManager.isUserSiteAdmin.withArgs(@user_id).yields(null, false)
+					@CollaboratorsHandler.getMemberIdPrivilegeLevel
+						.withArgs(@user_id, @project_id)
+						.yields(null, "readOnly")
+					@AuthorizationManager.getPrivilegeLevelForProject @user_id, @project_id, @token, @callback
+
+				it "should return the user's privilege level", ->
+					@callback.calledWith(null, "readOnly", false).should.equal true
+
+			describe "with a user_id with no privilege level", ->
+				beforeEach ->
+					@AuthorizationManager.isUserSiteAdmin.withArgs(@user_id).yields(null, false)
+					@CollaboratorsHandler.getMemberIdPrivilegeLevel
+						.withArgs(@user_id, @project_id)
+						.yields(null, false)
+					@AuthorizationManager.getPrivilegeLevelForProject @user_id, @project_id, @token, @callback
+
+				it "should return false", ->
+					@callback.calledWith(null, false, false).should.equal true
+
+			describe "with a user_id who is an admin", ->
+				beforeEach ->
+					@AuthorizationManager.isUserSiteAdmin.withArgs(@user_id).yields(null, true)
+					@CollaboratorsHandler.getMemberIdPrivilegeLevel
+						.withArgs(@user_id, @project_id)
+						.yields(null, false)
+					@AuthorizationManager.getPrivilegeLevelForProject @user_id, @project_id, @token, @callback
+
+				it "should return the user as an owner", ->
+					@callback.calledWith(null, "owner", false).should.equal true
+
+			describe "with no user (anonymous)", ->
+
+				describe 'when the token is not valid', ->
+
+					beforeEach ->
+						@TokenAccessHandler.isValidToken = sinon.stub()
+							.withArgs(@project_id, @token)
+							.yields(null, false, false)
+						@AuthorizationManager.getPrivilegeLevelForProject null, @project_id, @token, @callback
+
+					it "should not call CollaboratorsHandler.getMemberIdPrivilegeLevel", ->
+						@CollaboratorsHandler.getMemberIdPrivilegeLevel.called.should.equal false
+
+					it "should not call AuthorizationManager.isUserSiteAdmin", ->
+						@AuthorizationManager.isUserSiteAdmin.called.should.equal false
+
+					it 'should check if the token is valid', ->
+						@TokenAccessHandler.isValidToken.calledWith(@project_id, @token).should.equal true
+
+					it "should return false", ->
+						@callback.calledWith(null, false, false).should.equal true
+
+				describe 'when the token is valid for read-and-write', ->
+
+					describe 'when read-write-sharing is not enabled', ->
+						beforeEach ->
+							@TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED = false
+							@TokenAccessHandler.isValidToken = sinon.stub()
+								.withArgs(@project_id, @token)
+								.yields(null, true, false)
+							@AuthorizationManager.getPrivilegeLevelForProject null, @project_id, @token, @callback
+
+						it "should not call CollaboratorsHandler.getMemberIdPrivilegeLevel", ->
+							@CollaboratorsHandler.getMemberIdPrivilegeLevel.called.should.equal false
+
+						it "should not call AuthorizationManager.isUserSiteAdmin", ->
+							@AuthorizationManager.isUserSiteAdmin.called.should.equal false
+
+						it 'should check if the token is valid', ->
+							@TokenAccessHandler.isValidToken.calledWith(@project_id, @token).should.equal true
+
+						it "should deny access", ->
+							@callback.calledWith(null, false, false).should.equal true
+
+					describe 'when read-write-sharing is enabled', ->
+						beforeEach ->
+							@TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED = true
+							@TokenAccessHandler.isValidToken = sinon.stub()
+								.withArgs(@project_id, @token)
+								.yields(null, true, false)
+							@AuthorizationManager.getPrivilegeLevelForProject null, @project_id, @token, @callback
+
+						it "should not call CollaboratorsHandler.getMemberIdPrivilegeLevel", ->
+							@CollaboratorsHandler.getMemberIdPrivilegeLevel.called.should.equal false
+
+						it "should not call AuthorizationManager.isUserSiteAdmin", ->
+							@AuthorizationManager.isUserSiteAdmin.called.should.equal false
+
+						it 'should check if the token is valid', ->
+							@TokenAccessHandler.isValidToken.calledWith(@project_id, @token).should.equal true
+
+						it "should give read-write access", ->
+							@callback.calledWith(null, "readAndWrite", false).should.equal true
+
+				describe 'when the token is valid for read-only', ->
+
+					beforeEach ->
+						@TokenAccessHandler.isValidToken = sinon.stub()
+							.withArgs(@project_id, @token)
+							.yields(null, false, true)
+						@AuthorizationManager.getPrivilegeLevelForProject null, @project_id, @token, @callback
+
+					it "should not call CollaboratorsHandler.getMemberIdPrivilegeLevel", ->
+						@CollaboratorsHandler.getMemberIdPrivilegeLevel.called.should.equal false
+
+					it "should not call AuthorizationManager.isUserSiteAdmin", ->
+						@AuthorizationManager.isUserSiteAdmin.called.should.equal false
+
+					it 'should check if the token is valid', ->
+						@TokenAccessHandler.isValidToken.calledWith(@project_id, @token).should.equal true
+
+					it "should give read-only access", ->
+						@callback.calledWith(null, "readOnly", false).should.equal true
+
 		describe "with a private project", ->
 			beforeEach ->
 				@Project.findOne
