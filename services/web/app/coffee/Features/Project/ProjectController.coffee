@@ -331,14 +331,7 @@ module.exports = ProjectController =
 		return projects
 
 	_buildProjectViewModel: (project, accessLevel, source) ->
-		tokens =
-			readOnly: ''
-			readAndWrite: ''
-		if project.tokens?
-			if accessLevel == 'owner' || (accessLevel == 'readAndWrite' && source == 'token')
-				tokens.readAndWrite = project.tokens.readAndWrite
-			if accessLevel == 'owner' || (accessLevel == 'readOnly' && source == 'token')
-				tokens.readOnly = project.tokens.readOnly
+		TokenAccessHandler.protectTokens(project, accessLevel)
 		model = {
 			id: project._id
 			name: project.name
@@ -348,7 +341,7 @@ module.exports = ProjectController =
 			source: source
 			archived: !!project.archived
 			owner_ref: project.owner_ref
-			tokens: tokens
+			tokens: project.tokens
 		}
 		return model
 

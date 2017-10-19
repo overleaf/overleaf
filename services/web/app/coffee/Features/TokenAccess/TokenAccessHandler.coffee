@@ -1,5 +1,6 @@
 Project = require('../../models/Project').Project
 PublicAccessLevels = require '../Authorization/PublicAccessLevels'
+PrivilegeLevels = require '../Authorization/PrivilegeLevels'
 ObjectId = require("mongojs").ObjectId
 Settings = require('settings-sharelatex')
 
@@ -72,3 +73,12 @@ module.exports = TokenAccessHandler =
 				return callback(err) if err?
 				isValidReadOnly = _validate(readOnlyProject)
 				callback null, isValidReadAndWrite, isValidReadOnly
+
+	protectTokens: (project, privilegeLevel) ->
+		if project? && project.tokens?
+			if privilegeLevel == PrivilegeLevels.OWNER
+				return
+			if privilegeLevel != PrivilegeLevels.READ_AND_WRITE
+				project.tokens.readAndWrite = ''
+			if privilegeLevel != PrivilegeLevels.READ_ONLY
+				project.tokens.readOnly = ''

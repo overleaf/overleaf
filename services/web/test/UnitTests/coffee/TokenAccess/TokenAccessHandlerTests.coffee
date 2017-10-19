@@ -360,3 +360,23 @@ describe "TokenAccessHandler", ->
 					expect(rw).to.equal false
 					expect(ro).to.equal false
 					done()
+
+
+	describe 'protectTokens', ->
+		beforeEach ->
+			@project = {tokens: {readAndWrite: 'rw', readOnly: 'ro'}}
+
+		it 'should hide write token from read-only user', ->
+			@TokenAccessHandler.protectTokens(@project, 'readOnly')
+			expect(@project.tokens.readAndWrite).to.equal ''
+			expect(@project.tokens.readOnly).to.equal 'ro'
+
+		it 'should hide read token from read-write user', ->
+			@TokenAccessHandler.protectTokens(@project, 'readAndWrite')
+			expect(@project.tokens.readAndWrite).to.equal 'rw'
+			expect(@project.tokens.readOnly).to.equal ''
+
+		it 'should leave tokens in place for owner', ->
+			@TokenAccessHandler.protectTokens(@project, 'owner')
+			expect(@project.tokens.readAndWrite).to.equal 'rw'
+			expect(@project.tokens.readOnly).to.equal 'ro'

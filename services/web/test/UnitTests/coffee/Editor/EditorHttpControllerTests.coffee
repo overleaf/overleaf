@@ -31,6 +31,7 @@ describe "EditorHttpController", ->
 			json: sinon.stub()
 		@callback = sinon.stub()
 		@TokenAccessHandler.getRequestToken = sinon.stub().returns(@token = null)
+		@TokenAccessHandler.protectTokens = sinon.stub()
 			
 	describe "joinProject", ->
 		beforeEach ->

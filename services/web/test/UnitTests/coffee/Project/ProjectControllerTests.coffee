@@ -63,6 +63,7 @@ describe "ProjectController", ->
 			getLastOccurance: sinon.stub()
 		@TokenAccessHandler =
 			getRequestToken: sinon.stub().returns(@token)
+			protectTokens: sinon.stub()
 		@ProjectController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex":

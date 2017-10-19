@@ -24,8 +24,7 @@ module.exports = EditorHttpController =
 		EditorHttpController._buildJoinProjectView req, project_id, user_id, (error, project, privilegeLevel) ->
 			return next(error) if error?
 			# Hide access tokens if this is not the project owner
-			if privilegeLevel != 'owner' && project?.tokens?
-				project.tokens = {readOnly: '', readAndWrite: ''}
+			TokenAccessHandler.protectTokens(project, privilegeLevel)
 			res.json {
 				project: project
 				privilegeLevel: privilegeLevel
