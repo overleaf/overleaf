@@ -8,7 +8,7 @@ module.exports = ProjectTokenGenerator =
 
 	# (From Overleaf `random_token.rb`)
   #   Letters (not numbers! see generate_token) used in tokens. They're all
-  #   consonsants, to avoid embarassing words (I can't think of any that use only
+  #   consonants, to avoid embarassing words (I can't think of any that use only
   #   a y), and lower case "l" is omitted, because in many fonts it is
   #   indistinguishable from an upper case "I" (and sometimes even the number 1).
 	TOKEN_ALPHA: 'bcdfghjkmnpqrstvwxyz'
