@@ -273,6 +273,7 @@ module.exports = ProjectController =
 					else if event?
 						return cb(null, false)
 					else
+						logger.log user_id, event, "autocompile onboarding not shown yet to this user"
 						return cb(null, true)
 		}, (err, results)->
 			if err?
