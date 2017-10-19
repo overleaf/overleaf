@@ -101,6 +101,7 @@ describe "EditorHttpController", ->
 				_id: @user_id = "user-id"
 				projects: {}
 			@members = ["members", "mock"]
+			@tokenMembers = ['one', 'two']
 			@projectModelView = 
 				_id: @project_id
 				owner:{_id:"something"}
@@ -112,6 +113,7 @@ describe "EditorHttpController", ->
 			@ProjectEditorHandler.buildProjectModelView = sinon.stub().returns(@projectModelView)
 			@ProjectGetter.getProjectWithoutDocLines = sinon.stub().callsArgWith(1, null, @project)
 			@CollaboratorsHandler.getInvitedMembersWithPrivilegeLevels = sinon.stub().callsArgWith(1, null, @members)
+			@CollaboratorsHandler.getTokenMembersWithPrivilegeLevels = sinon.stub().callsArgWith(1, null, @tokenMembers)
 			@CollaboratorsInviteHandler.getAllInvites = sinon.stub().callsArgWith(1, null, @invites)
 			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user)
 				
@@ -131,6 +133,11 @@ describe "EditorHttpController", ->
 					.calledWith(@project)
 					.should.equal true
 			
+			it "should get the list of users who access the project via token links", ->
+				@CollaboratorsHandler.getTokenMembersWithPrivilegeLevels
+					.calledWith(@project)
+					.should.equal true
+
 			it "should look up the user", ->
 				@UserGetter.getUser
 					.calledWith(@user_id, { isAdmin: true })

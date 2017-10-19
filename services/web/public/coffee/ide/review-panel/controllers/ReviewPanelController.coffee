@@ -32,6 +32,7 @@ define [
 			resolvedThreadIds: {}
 			rendererData: {}
 			formattedProjectMembers: {}
+			formattedProjectTokenMembers: {}
 			fullTCStateCollapsed: true
 			loadingThreads: false
 			# All selected changes. If a aggregated change (insertion + deletion) is selection, the two ids
@@ -76,6 +77,13 @@ define [
 				for member in members
 					if member.privileges == "readAndWrite"
 						$scope.reviewPanel.formattedProjectMembers[member._id] = formatUser(member)
+
+		$scope.$watch "project.tokenMembers", (tokenMembers) ->
+			$scope.reviewPanel.formattedProjectTokenMembers = {}
+			if $scope.project?.tokenMembers?
+				for member in tokenMembers
+					if member.privileges == "readAndWrite"
+						$scope.reviewPanel.formattedProjectTokenMembers[member._id] = formatUser(member)
 
 		$scope.commentState =
 			adding: false
@@ -612,9 +620,10 @@ define [
 
 		_setEveryoneTCState = (newValue, isLocal = false) ->
 			$scope.reviewPanel.trackChangesOnForEveryone = newValue
-			for member in $scope.project.members
+			project = $scope.project
+			for member in project.members.concat(project.tokenMembers)
 				_setUserTCState(member._id, newValue, isLocal)
-			_setUserTCState($scope.project.owner._id, newValue, isLocal)
+			_setUserTCState(project.owner._id, newValue, isLocal)
 
 		applyClientTrackChangesStateToServer = () ->
 			if $scope.reviewPanel.trackChangesOnForEveryone
@@ -630,8 +639,9 @@ define [
 			if typeof state is "boolean"
 				_setEveryoneTCState state
 			else
+				project = $scope.project
 				$scope.reviewPanel.trackChangesOnForEveryone = false
-				for member in $scope.project.members
+				for member in project.members.concat(project.tokenMembers)
 					_setUserTCState(member._id, state[member._id] ? false)
 				_setUserTCState($scope.project.owner._id, state[$scope.project.owner._id] ? false)
 		

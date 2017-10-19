@@ -102,6 +102,13 @@ module.exports = CollaboratorsHandler =
 			CollaboratorsHandler._loadMembers members, (error, users) ->
 				callback error, users
 
+	getTokenMembersWithPrivilegeLevels: (project_id, callback = (error, members) ->) ->
+		CollaboratorsHandler.getMemberIdsWithPrivilegeLevels project_id, (error, members = []) ->
+			return callback(error) if error?
+			members = members.filter((m) -> m.source == Sources.TOKEN)
+			CollaboratorsHandler._loadMembers members, (error, users) ->
+				callback error, users
+
 	getMemberIdPrivilegeLevel: (user_id, project_id, callback = (error, privilegeLevel) ->) ->
 		# In future if the schema changes and getting all member ids is more expensive (multiple documents)
 		# then optimise this.

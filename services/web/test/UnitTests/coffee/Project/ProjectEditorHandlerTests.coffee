@@ -68,6 +68,15 @@ describe "ProjectEditorHandler", ->
 			},
 			privilegeLevel: "readAndWrite"
 		}]
+		@tokenMembers = [{
+			user: {
+				_id: "token-read-only-id"
+				first_name : "TRead"
+				last_name  : "TOnly"
+				email      : "token-read-only@sharelatex.com"
+			},
+			privilegeLevel: "readOnly"
+		}]
 		@invites = [
 			{_id: "invite_one", email: "user-one@example.com", privileges: "readOnly", projectId: @project._id}
 			{_id: "invite_two", email: "user-two@example.com", privileges: "readOnly", projectId: @project._id}
@@ -77,7 +86,7 @@ describe "ProjectEditorHandler", ->
 	describe "buildProjectModelView", ->
 		describe "with owner and members included", ->
 			beforeEach ->
-				@result = @handler.buildProjectModelView @project, @members, @invites
+				@result = @handler.buildProjectModelView @project, @members, @invites, @tokenMembers
 
 			it "should include the id", ->
 				should.exist @result._id
@@ -127,6 +136,10 @@ describe "ProjectEditorHandler", ->
 				findMember("read-write-id").last_name.should.equal "Write"
 				findMember("read-write-id").email.should.equal "read-write@sharelatex.com"
 
+			it 'should include a list of tokenMembers', ->
+				@result.tokenMembers.length.should.equal 1
+				@result.tokenMembers[0]._id.should.equal @tokenMembers[0].user._id
+
 			it "should include folders in the project", ->
 				@result.rootFolder[0]._id.should.equal "root-folder-id"
 				@result.rootFolder[0].name.should.equal ""
@@ -157,16 +170,16 @@ describe "ProjectEditorHandler", ->
 
 			it "should set the deletedByExternalDataSource flag to false when it is not there", ->
 				delete @project.deletedByExternalDataSource
-				result = @handler.buildProjectModelView @project, @members
+				result = @handler.buildProjectModelView @project, @members, [], []
 				result.deletedByExternalDataSource.should.equal false
 
 			it "should set the deletedByExternalDataSource flag to false when it is false", ->
-				result = @handler.buildProjectModelView @project, @members
+				result = @handler.buildProjectModelView @project, @members, [], []
 				result.deletedByExternalDataSource.should.equal false
 
 			it "should set the deletedByExternalDataSource flag to true when it is true", ->
 				@project.deletedByExternalDataSource = true
-				result = @handler.buildProjectModelView @project, @members
+				result = @handler.buildProjectModelView @project, @members, [], []
 				result.deletedByExternalDataSource.should.equal true
 
 		describe "features", ->
@@ -176,7 +189,7 @@ describe "ProjectEditorHandler", ->
 					collaborators: 3
 					compileGroup:"priority"
 					compileTimeout: 96
-				@result = @handler.buildProjectModelView @project, @members
+				@result = @handler.buildProjectModelView @project, @members, [], []
 
 			it "should copy the owner features to the project", ->
 				@result.features.versioning.should.equal @owner.features.versioning
@@ -191,16 +204,20 @@ describe "ProjectEditorHandler", ->
 				collaborators: 3
 				compileGroup:"priority"
 				compileTimeout: 22
-			@result = @handler.buildOwnerAndMembersViews @members
+			@result = @handler.buildOwnerAndMembersViews @members, @tokenMembers
 
-		it 'should produce an object with owner, ownerFeatures and members keys', ->
-			expect(@result).to.have.all.keys ['owner', 'ownerFeatures', 'members']
+		it 'should produce an object with the right keys', ->
+			expect(@result).to.have.all.keys ['owner', 'ownerFeatures', 'members', 'tokenMembers']
 
 		it 'should separate the owner from the members', ->
 			@result.members.length.should.equal(@members.length-1)
 			expect(@result.owner._id).to.equal @owner._id
 			expect(@result.owner.email).to.equal @owner.email
 			expect(@result.members.filter((m) => m._id == @owner._id).length).to.equal 0
+
+		it 'should include a list of tokenMembers', ->
+			@result.tokenMembers.length.should.equal 1
+			@result.tokenMembers[0]._id.should.equal @tokenMembers[0].user._id
 
 		it 'should extract the ownerFeatures from the owner object', ->
 			expect(@result.ownerFeatures).to.deep.equal @owner.features
@@ -209,10 +226,10 @@ describe "ProjectEditorHandler", ->
 			beforeEach ->
 				# remove the owner from members list
 				@membersWithoutOwner = @members.filter((m) => m.user._id != @owner._id)
-				@result = @handler.buildOwnerAndMembersViews @membersWithoutOwner
+				@result = @handler.buildOwnerAndMembersViews @membersWithoutOwner, @tokenMembers
 
-			it 'should produce an object with owner, ownerFeatures and members keys', ->
-				expect(@result).to.have.all.keys ['owner', 'ownerFeatures', 'members']
+			it 'should produce an object with the right keys', ->
+				expect(@result).to.have.all.keys ['owner', 'ownerFeatures', 'members', 'tokenMembers']
 
 			it 'should not separate out an owner', ->
 				@result.members.length.should.equal @membersWithoutOwner.length

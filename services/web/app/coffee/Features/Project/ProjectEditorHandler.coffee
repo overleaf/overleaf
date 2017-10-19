@@ -3,7 +3,7 @@ _ = require("underscore")
 module.exports = ProjectEditorHandler =
 	trackChangesAvailable: false
 
-	buildProjectModelView: (project, members, invites) ->
+	buildProjectModelView: (project, members, invites, tokenMembers=[]) ->
 		result =
 			_id        : project._id
 			name       : project.name
@@ -17,15 +17,20 @@ module.exports = ProjectEditorHandler =
 			deletedByExternalDataSource : project.deletedByExternalDataSource || false
 			deletedDocs: project.deletedDocs
 			members:     []
+			tokenMembers: []
 			invites:     invites
 			tokens:      project.tokens
 
 		if !result.invites?
 			result.invites = []
-			
-		{owner, ownerFeatures, members} = @buildOwnerAndMembersViews(members)
+
+		{owner, ownerFeatures, members, tokenMembers} = @buildOwnerAndMembersViews(
+			members,
+			tokenMembers
+		)
 		result.owner = owner
 		result.members = members
+		result.tokenMembers = tokenMembers
 
 		result.features = _.defaults(ownerFeatures or {}, {
 			collaborators: -1 # Infinite
@@ -41,17 +46,25 @@ module.exports = ProjectEditorHandler =
 
 		return result
 
-	buildOwnerAndMembersViews: (members) ->
+	buildOwnerAndMembersViews: (members, tokenMembers) ->
 		owner = null
 		ownerFeatures = null
 		filteredMembers = []
+		filteredTokenMembers = []
 		for member in members
 			if member.privilegeLevel == "owner"
 				ownerFeatures = member.user.features
 				owner = @buildUserModelView member.user, "owner"
 			else
 				filteredMembers.push @buildUserModelView member.user, member.privilegeLevel
-		{owner: owner, ownerFeatures: ownerFeatures, members: filteredMembers}
+		for tokenMember in tokenMembers
+			filteredTokenMembers.push @buildUserModelView tokenMember.user, tokenMember.privilegeLevel
+		return {
+			owner: owner,
+			ownerFeatures: ownerFeatures,
+			members: filteredMembers,
+			tokenMembers: filteredTokenMembers
+		}
 
 	buildUserModelView: (user, privileges) ->
 		_id        : user._id

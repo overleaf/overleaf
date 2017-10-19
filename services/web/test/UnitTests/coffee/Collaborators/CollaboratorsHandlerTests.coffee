@@ -141,6 +141,32 @@ describe "CollaboratorsHandler", ->
 				])
 				.should.equal true
 
+	describe "getTokenMembersWithPrivilegeLevels", ->
+		beforeEach ->
+			@CollaboratorHandler.getMemberIdsWithPrivilegeLevels = sinon.stub()
+			@CollaboratorHandler.getMemberIdsWithPrivilegeLevels.withArgs(@project_id).yields(null, [
+				{ id: "read-only-ref-1", privilegeLevel: "readOnly", source: 'token' }
+				{ id: "read-only-ref-2", privilegeLevel: "readOnly", source: 'invite' }
+				{ id: "read-write-ref-1", privilegeLevel: "readAndWrite", source: 'token' }
+				{ id: "read-write-ref-2", privilegeLevel: "readAndWrite", source: 'invite' }
+				{ id: "doesnt-exist", privilegeLevel: "readAndWrite", source: 'invite' }
+			])
+			@UserGetter.getUserOrUserStubById = sinon.stub()
+			@UserGetter.getUserOrUserStubById.withArgs("read-only-ref-1").yields(null, { _id: "read-only-ref-1" })
+			@UserGetter.getUserOrUserStubById.withArgs("read-only-ref-2").yields(null, { _id: "read-only-ref-2" })
+			@UserGetter.getUserOrUserStubById.withArgs("read-write-ref-1").yields(null, { _id: "read-write-ref-1" })
+			@UserGetter.getUserOrUserStubById.withArgs("read-write-ref-2").yields(null, { _id: "read-write-ref-2" })
+			@UserGetter.getUserOrUserStubById.withArgs("doesnt-exist").yields(null, null)
+			@CollaboratorHandler.getTokenMembersWithPrivilegeLevels @project_id, @callback
+
+		it "should return an array of token members with their privilege levels", ->
+			@callback
+				.calledWith(null, [
+					{ user: { _id: "read-only-ref-1" }, privilegeLevel: "readOnly" }
+					{ user: { _id: "read-write-ref-1" }, privilegeLevel: "readAndWrite"}
+				])
+				.should.equal true
+
 	describe "getMemberIdPrivilegeLevel", ->
 		beforeEach ->
 			@CollaboratorHandler.getMemberIdsWithPrivilegeLevels = sinon.stub()
