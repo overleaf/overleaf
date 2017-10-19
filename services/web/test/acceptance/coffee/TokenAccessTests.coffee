@@ -96,9 +96,30 @@ describe 'TokenAccess', ->
 			(cb) => @anon.getCsrfToken cb
 		], done
 
+	describe 'no token-access', ->
+		before (done) ->
+			@owner.createProject "token-ro-test#{Math.random()}", (err, project_id) =>
+				return done(err) if err?
+				@project_id = project_id
+				# Note, never made token-based,
+				# thus no tokens
+				done()
+
+		it 'should deny access ', (done) ->
+			try_read_access(@other1, @project_id, (response, body) =>
+				expect(response.statusCode).to.equal 302
+				expect(body).to.match /.*\/restricted.*/
+			, done)
+
+		it 'should not allow the user to join the project', (done) ->
+			try_content_access(@other1, @project_id, (response, body) =>
+				expect(body.privilegeLevel).to.equal false
+			, done)
+
+
 	describe 'read-only token', ->
 		before (done) ->
-			@owner.createProject 'token-ro-test#{Math.random()}', (err, project_id) =>
+			@owner.createProject "token-ro-test#{Math.random()}", (err, project_id) =>
 				return done(err) if err?
 				@project_id = project_id
 				@owner.makeTokenBased @project_id, (err) =>
@@ -146,7 +167,7 @@ describe 'TokenAccess', ->
 
 	describe 'anonymous read-only token', ->
 		before (done) ->
-			@owner.createProject 'token-anon-ro-test#{Math.random()}', (err, project_id) =>
+			@owner.createProject "token-anon-ro-test#{Math.random()}", (err, project_id) =>
 				return done(err) if err?
 				@project_id = project_id
 				@owner.makeTokenBased @project_id, (err) =>
@@ -194,7 +215,7 @@ describe 'TokenAccess', ->
 
 	describe 'read-and-write token', ->
 		before (done) ->
-			@owner.createProject 'token-rw-test#{Math.random()}', (err, project_id) =>
+			@owner.createProject "token-rw-test#{Math.random()}", (err, project_id) =>
 				return done(err) if err?
 				@project_id = project_id
 				@owner.makeTokenBased @project_id, (err) =>
@@ -246,7 +267,7 @@ describe 'TokenAccess', ->
 	else
 		describe 'anonymous read-and-write token', ->
 			before (done) ->
-				@owner.createProject 'token-anon-rw-test#{Math.random()}', (err, project_id) =>
+				@owner.createProject "token-anon-rw-test#{Math.random()}", (err, project_id) =>
 					return done(err) if err?
 					@project_id = project_id
 					@owner.makeTokenBased @project_id, (err) =>
