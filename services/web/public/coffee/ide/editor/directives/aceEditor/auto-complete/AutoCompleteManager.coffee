@@ -149,7 +149,7 @@ define [
 			lastCharIsBackslash = lineUpToCursor.slice(-1) == "\\"
 			lastTwoChars = lineUpToCursor.slice(-2)
 			# Don't offer autocomplete on double-backslash, backslash-colon, etc
-			if lastTwoChars.match(/^\\[^a-z]$/)
+			if lastTwoChars.match(/^\\[^a-zA-Z]$/)
 				@editor?.completer?.detach?()
 				return
 			if commandName in ['begin', 'end']
@@ -230,7 +230,7 @@ define [
 										)
 									)
 									if lineBeyondCursor
-										if partialCommandMatch = lineBeyondCursor.match(/^([a-z0-9]+)\{/)
+										if partialCommandMatch = lineBeyondCursor.match(/^([a-zA-Z0-9]+)\{/)
 											# We've got a partial command after the cursor
 											commandTail = partialCommandMatch[1]
 											# remove rest of the partial command, right of cursor
