@@ -8,8 +8,8 @@ module.exports = WebApiManager =
 		logger.log {project_id, user_id}, "sending join project request to web"
 		url = "#{settings.apis.web.url}/project/#{project_id}/join"
 		headers = {}
-		if user.anonToken?
-			headers['x-sl-anon-token'] = user.anonToken
+		if user.anonymousAccessToken?
+			headers['x-sl-anonymous-access-token'] = user.anonToken
 		request.post {
 			url: url
 			qs: {user_id}
