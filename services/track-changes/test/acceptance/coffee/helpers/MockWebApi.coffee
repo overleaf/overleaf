@@ -33,6 +33,9 @@ module.exports = MockWebApi =
 
 		app.listen 3000, (error) ->
 			throw error if error?
+		.on "error", (error) ->
+			console.error "error starting MockWebApiServer:", error.message
+			process.exit(1)
 
 MockWebApi.run()
 

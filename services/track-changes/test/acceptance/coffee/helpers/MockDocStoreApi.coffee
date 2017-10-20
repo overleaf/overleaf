@@ -19,6 +19,9 @@ module.exports = MockDocUpdaterApi =
 
 		app.listen 3016, (error) ->
 			throw error if error?
+		.on "error", (error) ->
+			console.error "error starting MockDocStoreApi:", error.message
+			process.exit(1)
 
 MockDocUpdaterApi.run()
 
