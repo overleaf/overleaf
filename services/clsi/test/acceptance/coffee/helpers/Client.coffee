@@ -30,7 +30,10 @@ module.exports = Client =
 		express = require("express")
 		app = express()
 		app.use express.static(directory)
-		app.listen(port, host)
+		app.listen(port, host).on "error", (error) ->
+			console.error "error starting server:", error.message
+			process.exit(1)
+
 
 	syncFromCode: (project_id, file, line, column, callback = (error, pdfPositions) ->) ->
 		request.get {
