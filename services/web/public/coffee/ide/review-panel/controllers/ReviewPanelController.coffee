@@ -83,7 +83,8 @@ define [
 			if $scope.project?.tokenMembers?
 				for member in tokenMembers
 					if member.privileges == "readAndWrite"
-						$scope.reviewPanel.formattedProjectTokenMembers[member._id] = formatUser(member)
+						if !_.find($scope.reviewPanel.formattedProjectMembers, (m) -> m.id == member._id)
+							$scope.reviewPanel.formattedProjectTokenMembers[member._id] = formatUser(member)
 
 		$scope.commentState =
 			adding: false
