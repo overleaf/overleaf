@@ -33,7 +33,7 @@
 					loop
 				)
 					source(ng-src="{{ '/img/onboarding/review-panel/open-review.mp4' }}", type="video/mp4")
-					img(src="/img/onboarding/review-panel/open-review.gif")
+					img(ng-src="{{ '/img/onboarding/review-panel/open-review.gif' }}", alt="Open review panel demo")
 			div(ng-show="onboarding.innerStep === 2;")
 				video.feat-onboard-video(
 					video-play-state="onboarding.innerStep === 2;"
@@ -41,7 +41,7 @@
 					loop
 				)
 					source(ng-src="{{ '/img/onboarding/review-panel/commenting.mp4' }}", type="video/mp4")
-					img(src="/img/onboarding/review-panel/commenting.gif")
+					img(ng-src="{{ '/img/onboarding/review-panel/commenting.gif' }}", alt="Commenting demo")
 			div(ng-show="onboarding.innerStep === 3;")
 				video.feat-onboard-video(
 					video-play-state="onboarding.innerStep === 3;"
@@ -49,7 +49,7 @@
 					loop
 				)
 					source(ng-src="{{ '/img/onboarding/review-panel/add-changes.mp4' }}", type="video/mp4")
-					img(src="/img/onboarding/review-panel/add-changes.gif")
+					img(ng-src="{{ '/img/onboarding/review-panel/add-changes.gif' }}", alt="Add changes demo")
 			div(ng-show="onboarding.innerStep === 4;")
 				video.feat-onboard-video(
 					video-play-state="onboarding.innerStep === 4;"
@@ -57,7 +57,7 @@
 					loop
 				)
 					source(ng-src="{{ '/img/onboarding/review-panel/accept-changes.mp4' }}", type="video/mp4")
-					img(src="/img/onboarding/review-panel/accept-changes.gif")
+					img(ng-src="{{ '/img/onboarding/review-panel/accept-changes.gif' }}", alt="Accept changes demo")
 			button.btn.btn-primary.feat-onboard-nav-btn(
 				ng-click="gotoNextStep();"
 				ng-disabled="onboarding.innerStep === onboarding.nSteps;")
