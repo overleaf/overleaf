@@ -55,7 +55,7 @@ module.exports = TokenAccessHandler =
 	getRequestToken: (req, projectId) ->
 		token = (
 			req?.session?.anonTokenAccess?[projectId.toString()] or
-			req?.headers['x-sl-anon-token']
+			req?.headers['x-sl-anonymous-access-token']
 		)
 		return token
 

@@ -44,7 +44,7 @@ module.exports = TokenAccessController =
 						logger.log {token, projectId: project._id},
 							"allow anonymous read-and-write token access"
 						TokenAccessHandler.grantSessionTokenAccess(req, project._id, token)
-						req._anonToken = token
+						req._anonymousAccessToken = token
 						return TokenAccessController._loadEditor(project._id, req, res, next)
 					else
 						logger.log {token, projectId: project._id},
@@ -80,7 +80,7 @@ module.exports = TokenAccessController =
 				logger.log {userId, projectId: project._id},
 					"adding anonymous user to project with readOnly token"
 				TokenAccessHandler.grantSessionTokenAccess(req, project._id, token)
-				req._anonToken = token
+				req._anonymousAccessToken = token
 				return TokenAccessController._loadEditor(project._id, req, res, next)
 			else
 				if project.owner_ref.toString() == userId

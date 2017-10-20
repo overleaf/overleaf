@@ -303,7 +303,7 @@ module.exports = ProjectController =
 					privilegeLevel: privilegeLevel
 					chatUrl: Settings.apis.chat.url
 					anonymous: anonymous
-					anonToken: req._anonToken
+					anonymousAccessToken: req._anonymousAccessToken
 					languages: Settings.languages
 					themes: THEME_LIST
 					maxDocLength: Settings.max_doc_length

@@ -73,7 +73,7 @@ try_anon_content_access = (user, project_id, token, test, callback) ->
 			pass: settings.apis.web.pass
 			sendImmediately: true
 		headers:
-			'x-sl-anon-token': token
+			'x-sl-anonymous-access-token': token
 		json: true
 		jar: false
 	}, (error, response, body) ->

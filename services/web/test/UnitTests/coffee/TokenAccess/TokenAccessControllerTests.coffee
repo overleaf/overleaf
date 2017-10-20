@@ -501,7 +501,7 @@ describe "TokenAccessController", ->
 
 				it 'should pass control to loadEditor', (done) ->
 					expect(@req.params.Project_id).to.equal @projectId.toString()
-					expect(@req._anonToken).to.equal @readOnlyToken
+					expect(@req._anonymousAccessToken).to.equal @readOnlyToken
 					expect(@ProjectController.loadEditor.callCount).to.equal 1
 					expect(@ProjectController.loadEditor.calledWith(@req, @res, @next)).to.equal true
 					done()

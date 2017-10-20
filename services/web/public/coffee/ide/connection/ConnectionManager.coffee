@@ -157,8 +157,8 @@ define [], () ->
 			data = {
 				project_id: @ide.project_id
 			}
-			if window.anonToken
-				data.anonToken = window.anonToken
+			if window.anonymousAccessToken
+				data.anonymousAccessToken = window.anonymousAccessToken
 			@ide.socket.emit 'joinProject', data, (err, project, permissionsLevel, protocolVersion) =>
 				if err? or !project?
 					return @reportConnectionError(err)
