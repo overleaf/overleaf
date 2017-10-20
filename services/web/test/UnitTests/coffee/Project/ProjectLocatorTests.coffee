@@ -317,7 +317,9 @@ describe 'ProjectLocator', ->
 		it 'should return the project from an array case insenstive', (done)->
 			user_id = "123jojoidns"
 			stubbedProject = {name:"findThis"}
-			projects = [{name:"notThis"}, {name:"wellll"}, stubbedProject, {name:"Noooo"}]	
+			projects = {
+				owned: [{name:"notThis"}, {name:"wellll"}, stubbedProject, {name:"Noooo"}]
+			}
 			@ProjectGetter.findAllUsersProjects = sinon.stub().callsArgWith(2, null, projects)
 			@locator.findUsersProjectByName user_id, stubbedProject.name.toLowerCase(), (err, project)->
 				project.should.equal stubbedProject
@@ -326,7 +328,16 @@ describe 'ProjectLocator', ->
 		it 'should return the project which is not archived', (done)->
 			user_id = "123jojoidns"
 			stubbedProject = {name:"findThis", _id:12331321}
-			projects = [{name:"notThis"}, {name:"wellll"}, {name:"findThis",archived:true}, stubbedProject, {name:"findThis",archived:true}, {name:"Noooo"}]	
+			projects = {
+				owned: [
+					{name:"notThis"},
+					{name:"wellll"},
+					{name:"findThis",archived:true},
+					stubbedProject,
+					{name:"findThis",archived:true},
+					{name:"Noooo"}
+				]
+			}
 			@ProjectGetter.findAllUsersProjects = sinon.stub().callsArgWith(2, null, projects)
 			@locator.findUsersProjectByName user_id, stubbedProject.name.toLowerCase(), (err, project)->
 				project._id.should.equal stubbedProject._id
@@ -335,8 +346,11 @@ describe 'ProjectLocator', ->
 		it 'should search collab projects as well', (done)->
 			user_id = "123jojoidns"
 			stubbedProject = {name:"findThis"}
-			projects = [{name:"notThis"}, {name:"wellll"}, {name:"Noooo"}]	
-			@ProjectGetter.findAllUsersProjects = sinon.stub().callsArgWith(2, null, projects, [stubbedProject])
+			projects = {
+				owned: [{name:"notThis"}, {name:"wellll"}, {name:"Noooo"}]
+				readAndWrite: [stubbedProject]
+			}
+			@ProjectGetter.findAllUsersProjects = sinon.stub().callsArgWith(2, null, projects)
 			@locator.findUsersProjectByName user_id, stubbedProject.name.toLowerCase(), (err, project)->
 				project.should.equal stubbedProject
 				done()

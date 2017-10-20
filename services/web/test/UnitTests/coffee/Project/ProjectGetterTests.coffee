@@ -152,12 +152,21 @@ describe "ProjectGetter", ->
 			@CollaboratorsHandler.getProjectsUserIsMemberOf.withArgs(@user_id, @fields).yields(
 				null,
 				{
-					readAndWrite: ["mock-rw-projects"], readOnly: ["mock-ro-projects"]
+					readAndWrite: ["mock-rw-projects"],
+					readOnly: ["mock-ro-projects"],
+					tokenReadAndWrite: ['mock-token-rw-projects'],
+					tokenReadOnly: ['mock-token-ro-projects']
 				}
 			)
 			@ProjectGetter.findAllUsersProjects @user_id, @fields, @callback
 		
 		it "should call the callback with all the projects", ->
 			@callback
-				.calledWith(null, ["mock-owned-projects"], ["mock-rw-projects"], ["mock-ro-projects"])
+				.calledWith(null, {
+					owned: ["mock-owned-projects"],
+					readAndWrite: ["mock-rw-projects"],
+					readOnly: ["mock-ro-projects"]
+					tokenReadAndWrite: ['mock-token-rw-projects'],
+					tokenReadOnly: ['mock-token-ro-projects']
+				})
 				.should.equal true

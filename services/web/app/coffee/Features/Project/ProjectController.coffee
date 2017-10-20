@@ -151,7 +151,7 @@ module.exports = ProjectController =
 				notifications = require("underscore").map results.notifications, (notification)->
 					notification.html = req.i18n.translate(notification.templateKey, notification.messageOpts)
 					return notification
-				projects = ProjectController._buildProjectList results.projects[0], results.projects[1], results.projects[2], results.projects[3], results.projects[4]
+				projects = ProjectController._buildProjectList results.projects
 				user = results.user
 				ProjectController._injectProjectOwners projects, (error, projects) ->
 					return next(error) if error?
@@ -309,22 +309,23 @@ module.exports = ProjectController =
 					maxDocLength: Settings.max_doc_length
 				timer.done()
 
-	_buildProjectList: (ownedProjects, readAndWriteProjects, readOnlyProjects, tokenReadAndWriteProjects, tokenReadOnlyProjects)->
+	_buildProjectList: (allProjects)->
+		{owned, readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly} = allProjects
 		projects = []
-		for project in ownedProjects
+		for project in owned
 			projects.push ProjectController._buildProjectViewModel(project, "owner", Sources.OWNER)
 		# Invite-access
-		for project in readAndWriteProjects
+		for project in readAndWrite
 			projects.push ProjectController._buildProjectViewModel(project, "readWrite", Sources.INVITE)
-		for project in readOnlyProjects
+		for project in readOnly
 			projects.push ProjectController._buildProjectViewModel(project, "readOnly", Sources.INVITE)
 		# Token-access
 		#   Only add these projects if they're not already present, this gives us cascading access
 		#   from 'owner' => 'token-read-only'
-		for project in tokenReadAndWriteProjects
+		for project in tokenReadAndWrite
 			if projects.filter((p) -> p.id.toString() == project._id.toString()).length == 0
 				projects.push ProjectController._buildProjectViewModel(project, "readAndWrite", Sources.TOKEN)
-		for project in tokenReadOnlyProjects
+		for project in tokenReadOnly
 			if projects.filter((p) -> p.id.toString() == project._id.toString()).length == 0
 				projects.push ProjectController._buildProjectViewModel(project, "readOnly", Sources.TOKEN)
 

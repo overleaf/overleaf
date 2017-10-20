@@ -239,6 +239,13 @@ describe "ProjectController", ->
 			@tokenReadOnly = [
 				{_id:7, lastUpdated:4, owner_ref: "user-5"}
 			]
+			@allProjects = {
+				owned: @projects,
+				readAndWrite: @collabertions,
+				readOnly: @readOnly,
+				tokenReadAndWrite: @tokenReadAndWrite,
+				tokenReadOnly: @tokenReadOnly
+			}
 
 			@users =
 				'user-1':
@@ -252,7 +259,7 @@ describe "ProjectController", ->
 			@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, false)
 			@TagsHandler.getAllTags.callsArgWith(1, null, @tags, {})
 			@NotificationsHandler.getUserNotifications = sinon.stub().callsArgWith(1, null, @notifications, {})
-			@ProjectGetter.findAllUsersProjects.callsArgWith(2, null, @projects, @collabertions, @readOnly, @tokenReadAndWrite, @tokenReadOnly)
+			@ProjectGetter.findAllUsersProjects.callsArgWith(2, null, @allProjects)
 
 		it "should render the project/list page", (done)->
 			@res.render = (pageName, opts)=>
@@ -307,6 +314,13 @@ describe "ProjectController", ->
 				{_id:6, lastUpdated:5, owner_ref: "user-4"} # Also in tokenReadAndWrite
 				{_id:7, lastUpdated:4, owner_ref: "user-5"}
 			]
+			@allProjects = {
+				owned: @projects,
+				readAndWrite: @collabertions,
+				readOnly: @readOnly,
+				tokenReadAndWrite: @tokenReadAndWrite,
+				tokenReadOnly: @tokenReadOnly
+			}
 
 			@users =
 				'user-1':
@@ -320,7 +334,7 @@ describe "ProjectController", ->
 			@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, false)
 			@TagsHandler.getAllTags.callsArgWith(1, null, @tags, {})
 			@NotificationsHandler.getUserNotifications = sinon.stub().callsArgWith(1, null, @notifications, {})
-			@ProjectGetter.findAllUsersProjects.callsArgWith(2, null, @projects, @collabertions, @readOnly, @tokenReadAndWrite, @tokenReadOnly)
+			@ProjectGetter.findAllUsersProjects.callsArgWith(2, null, @allProjects)
 
 		it "should render the project/list page", (done)->
 			@res.render = (pageName, opts)=>

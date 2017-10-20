@@ -50,14 +50,24 @@ module.exports = ProjectGetter =
 				return callback(err)
 			callback(null, project?[0])
 
-	findAllUsersProjects: (user_id, fields, callback = (error, ownedProjects, readAndWriteProjects, readOnlyProjects, tokenReadAndWrite, tokenReadOnly) ->) ->
+	findAllUsersProjects: (
+		user_id,
+		fields,
+		callback = (error, projects={owned: [], readAndWrite: [], readOnly: [], tokenReadAndWrite: [], tokenReadOnly: []}) ->
+	) ->
 		CollaboratorsHandler = require "../Collaborators/CollaboratorsHandler"
 		Project.find {owner_ref: user_id}, fields, (error, ownedProjects) ->
 			return callback(error) if error?
 			CollaboratorsHandler.getProjectsUserIsMemberOf user_id, fields, (error, projects) ->
 				return callback(error) if error?
-				callback null, ownedProjects, projects.readAndWrite, projects.readOnly, projects.tokenReadAndWrite, projects.tokenReadOnly
-
+				result = {
+					owned: ownedProjects || [],
+					readAndWrite: projects.readAndWrite || [],
+					readOnly: projects.readOnly || [],
+					tokenReadAndWrite: projects.tokenReadAndWrite || [],
+					tokenReadOnly: projects.tokenReadOnly || []
+				}
+				callback null, result
 
 [
 	'getProject',

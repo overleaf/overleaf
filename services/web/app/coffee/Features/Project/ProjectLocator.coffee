@@ -150,9 +150,10 @@ module.exports = ProjectLocator =
 			async.waterfall jobs, callback
 
 	findUsersProjectByName: (user_id, projectName, callback)->
-		ProjectGetter.findAllUsersProjects user_id, 'name archived', (err, projects, collabertions=[])->
+		ProjectGetter.findAllUsersProjects user_id, 'name archived', (err, allProjects)->
 			return callback(error) if error?
-			projects = projects.concat(collabertions)
+			{owned, readAndWrite} = allProjects
+			projects = owned.concat(readAndWrite)
 			projectName = projectName.toLowerCase()
 			project = _.find projects, (project)->
 				project.name.toLowerCase() == projectName and project.archived != true
