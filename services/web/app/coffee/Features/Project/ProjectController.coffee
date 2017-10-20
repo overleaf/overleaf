@@ -229,6 +229,7 @@ module.exports = ProjectController =
 					else if event?
 						return cb(null, false)
 					else
+						logger.log { user_id, event }, "track changes onboarding not shown yet to this user"
 						return cb(null, true)
 			showPerUserTCNotice: (cb) ->
 				cb = underscore.once(cb)
@@ -247,6 +248,7 @@ module.exports = ProjectController =
 					else if event?
 						return cb(null, false)
 					else
+						logger.log { user_id, event }, "per user track changes notice not shown yet to this user"
 						return cb(null, true)
 			showAutoCompileOnboarding: (cb) ->
 				cb = underscore.once(cb)
@@ -273,6 +275,7 @@ module.exports = ProjectController =
 					else if event?
 						return cb(null, false)
 					else
+						logger.log { user_id, event }, "autocompile onboarding not shown yet to this user"
 						return cb(null, true)
 		}, (err, results)->
 			if err?
