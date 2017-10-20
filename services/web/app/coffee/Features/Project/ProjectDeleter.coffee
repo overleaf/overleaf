@@ -51,7 +51,7 @@ module.exports = ProjectDeleter =
 			if err?
 				logger.err err:err, "problem archived project"
 				return callback(err)
-			logger.log project_id:project_id, "succesfully archived project from user request"
+			logger.log project_id:project_id, "successfully archived project from user request"
 			callback()
 
 	restoreProject: (project_id, callback = (error) ->) ->
