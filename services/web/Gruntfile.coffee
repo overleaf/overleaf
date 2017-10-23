@@ -137,13 +137,17 @@ module.exports = (grunt) ->
 
 		less:
 			app:
-				# options:
-				# 	sourceMap: true
+				options:
+					sourceMap: true
+					sourceMapFilename: "public/stylesheets/style.map"
+					sourceMapBasepath: "public/stylesheets"
 				files:
 					"public/stylesheets/style.css": "public/stylesheets/style.less"
 			ol:
-				# options:
-				# 	sourceMap: true
+				options:
+					sourceMap: true
+					sourceMapFilename: "public/stylesheets/ol-style.map"
+					sourceMapBasepath: "public/stylesheets"
 				files:
 					"public/stylesheets/ol-style.css": "public/stylesheets/ol-style.less"
 
