@@ -128,7 +128,7 @@
 							input.select-all(
 								select-all,
 								type="checkbox"
-								aria-label="Select all"
+								aria-label=translate('select_all_projects')
 							)
 							span.header.clickable(ng-click="changePredicate('name')") #{translate("title")}
 								i.tablesort.fa(ng-class="getSortIconClass('name')")
@@ -149,7 +149,7 @@
 								type="checkbox",
 								ng-model="project.selected"
 								stop-propagation="click"
-								aria-label="Select {{ project.name }}"
+								aria-label=translate('select_project') + " '{{ project.name }}'"
 							)
 							span
 								a.projectName(
