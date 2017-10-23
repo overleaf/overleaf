@@ -27,8 +27,8 @@ define [
 
 		recalculateProjectListHeight = () ->
 			$projListCard = $(".project-list-card")
-			topOffset = $projListCard?.offset()?.top
-			cardPadding = $projListCard?.outerHeight() - $projListCard?.height()
+			topOffset = $projListCard.offset()?.top
+			cardPadding = $projListCard.outerHeight() - $projListCard.height()
 			bottomOffset = $("footer").outerHeight()
 			height = $window.innerHeight - topOffset - bottomOffset - cardPadding
 			$scope.projectListHeight = height
