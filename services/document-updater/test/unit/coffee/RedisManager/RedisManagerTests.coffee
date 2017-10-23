@@ -13,6 +13,7 @@ describe "RedisManager", ->
 			auth: () ->
 			exec: sinon.stub()
 		@rclient.multi = () => @rclient
+		tk.freeze(new Date())
 		@RedisManager = SandboxedModule.require modulePath,
 			requires:
 				"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }
@@ -50,6 +51,9 @@ describe "RedisManager", ->
 				"./Errors": Errors
 			globals:
 				JSON: @JSON = JSON
+
+		afterEach ->
+			tk.reset()
 		
 		@doc_id = "doc-id-123"
 		@project_id = "project-id-123"
@@ -323,12 +327,8 @@ describe "RedisManager", ->
 
 		describe "with a consistent version", ->
 			beforeEach ->
-				tk.freeze(new Date())
 				@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version - @ops.length)
 				@RedisManager.updateDocument @doc_id, @lines, @version, @ops, @ranges, @callback
-
-			afterEach ->
-				tk.reset()
 		
 			it "should get the current doc version to check for consistency", ->
 				@RedisManager.getDocVersion
