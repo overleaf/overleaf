@@ -323,9 +323,9 @@ describe "RedisManager", ->
 
 		describe "with a consistent version", ->
 			beforeEach ->
+				tk.freeze(new Date())
 				@RedisManager.getDocVersion.withArgs(@doc_id).yields(null, @version - @ops.length)
 				@RedisManager.updateDocument @doc_id, @lines, @version, @ops, @ranges, @callback
-				tk.freeze(new Date())
 
 			afterEach ->
 				tk.reset()
