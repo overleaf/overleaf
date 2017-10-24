@@ -229,6 +229,7 @@ define [
 											99999
 										)
 									)
+
 									if lineBeyondCursor
 										if partialCommandMatch = lineBeyondCursor.match(/^([a-z0-9]+)\{/)
 											# We've got a partial command after the cursor

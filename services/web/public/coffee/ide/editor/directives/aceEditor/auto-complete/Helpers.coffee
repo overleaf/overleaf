@@ -17,8 +17,8 @@ define [
 			#    \includegraphics[width=\textwidth]{..
 			# should not match the \textwidth.
 			blankArguments = lineUpToCursor.replace /\[([^\]]*)\]/g, (args) ->
-				Array(args.length+1).join('.')
-			if m = blankArguments.match(/(\\[^\\]+)$/)
+				Array(args.length + 1).join('.')
+			if m = blankArguments.match(/(\\[^\\]*)$/)
 				return m.index
 			else
 				return -1
