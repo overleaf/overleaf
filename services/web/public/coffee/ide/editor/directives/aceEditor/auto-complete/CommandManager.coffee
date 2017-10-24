@@ -1,14 +1,8 @@
 define [
-	"./top_hundred_snippets",
-	"./package_definition_snippets"
-], (topHundred, packageCommandMappings) ->
+	"./top_hundred_snippets"
+], (topHundred) ->
 
-	rawCommands = Object.keys topHundred
-
-	commandSnippets = []
-	for cmd, snippets of topHundred
-		for snippet in snippets
-			commandSnippets.push snippet
+	commandNames = (snippet.caption.match(/\w+/)[0] for snippet in topHundred)
 
 	class Parser
 		constructor: (@doc, @prefix) ->
@@ -104,29 +98,16 @@ define [
 		getCompletions: (editor, session, pos, prefix, callback) ->
 			packages = @metadataManager.getAllPackages()
 			packageCommands = []
-			for pkg in packages
-				commands = packageCommandMappings[pkg]
-				if commands?
-					for command, snippets of commands
-						if command not in rawCommands
-							for snippet in snippets
-								packageCommands.push snippet
-			# for pkg in packages
-			# 	if packageCommandMappings[pkg]?
-			# 		for cmd in packageCommandMappings[pkg]
-			# 			packageCommands.push {
-			# 				caption: "\\#{cmd}"
-			# 				snippet: "\\#{cmd}"
-			# 				meta: "#{pkg}-cmd"
-			# 				score: 60
-			# 			}
+			for pkg, snippets of packages
+				for snippet in snippets
+					packageCommands.push snippet
 
 			doc = session.getValue()
 			parser = new Parser(doc, prefix)
 			commands = parser.parse()
 			completions = []
 			for command in commands
-				if command[0] not in rawCommands
+				if command[0] not in commandNames
 					caption = "\\#{command[0]}"
 					score = if caption == prefix then 99 else 50
 					snippet = caption
@@ -145,7 +126,7 @@ define [
 						meta: "cmd"
 						score: score
 					}
-			completions = completions.concat commandSnippets, packageCommands
+			completions = completions.concat topHundred, packageCommands
 
 			callback null, completions
 

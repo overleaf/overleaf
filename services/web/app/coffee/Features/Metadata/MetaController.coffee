@@ -26,4 +26,3 @@ module.exports = MetaController =
 				docId: doc_id, meta: docMeta
 			}
 			res.sendStatus 200
-MetaController

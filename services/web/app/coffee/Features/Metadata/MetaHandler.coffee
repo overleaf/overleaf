@@ -1,14 +1,18 @@
 ProjectEntityHandler = require "../Project/ProjectEntityHandler"
 DocumentUpdaterHandler = require '../DocumentUpdater/DocumentUpdaterHandler'
+packageMapping = require "./packageMapping"
 
 
 module.exports = MetaHandler =
 
-	labelCaptureRegex: () ->
-		/\\label\{([^\}\n\\]{0,80})\}/g
+	labelRegex: () ->
+		/\\label{(.{0,80}?)}/g
 
-	packageCaptureRegex: () ->
-		/^\\usepackage(?:\[((?:.|\n)*?)])?\s*?{((?:.|\n)*?)}/gm
+	usepackageRegex: () ->
+		/^\\usepackage(?:\[.{0,80}?])?{(.{0,80}?)}/g
+
+	ReqPackageRegex: () ->
+		/^\\RequirePackage(?:\[.{0,80}?])?{(.{0,80}?)}/g
 
 	getAllMetaForProject: (projectId, callback=(err, projectMeta)->) ->
 		DocumentUpdaterHandler.flushProjectToMongo projectId, (err) ->
@@ -31,18 +35,28 @@ module.exports = MetaHandler =
 				callback null, docMeta
 
 	extractMetaFromDoc: (lines) ->
-		docMeta = {labels: [], packages: []}
-		label_re = MetaHandler.labelCaptureRegex()
-		package_re = MetaHandler.packageCaptureRegex()
+		docMeta = {labels: [], packages: {}}
+		packages = []
+		label_re = MetaHandler.labelRegex()
+		package_re = MetaHandler.usepackageRegex()
+		req_package_re = MetaHandler.ReqPackageRegex()
 		for line in lines
 			while labelMatch = label_re.exec line
-				if labelMatch[1]
-					docMeta.labels.push labelMatch[1]
+				if label = labelMatch[1]
+					docMeta.labels.push label
 			while packageMatch = package_re.exec line
-				if packageMatch[2]
-					for pkg in packageMatch[2].split ','
-						if pkg.trim()
-							docMeta.packages.push pkg.trim()
+				if messy = packageMatch[1]
+					for pkg in messy.split ','
+						if clean = pkg.trim()
+							packages.push clean
+			while packageMatch = req_package_re.exec line
+				if messy = packageMatch[1]
+					for pkg in messy.split ','
+						if clean = pkg.trim()
+							packages.push clean
+		for pkg in packages
+			if packageMapping[pkg]?
+				docMeta.packages[pkg] = packageMapping[pkg]
 		return docMeta
 
 	extractMetaFromProjectDocs: (projectDocs) ->

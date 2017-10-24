@@ -17,15 +17,39 @@ describe 'MetaHandler', ->
 		@DocumentUpdaterHandler = {
 			flushDocToMongo: sinon.stub()
 		}
+		@packageMapping =
+			foo: [
+				{
+					caption: '\\bar'
+					snippet: '\\bar'
+					meta: 'foo-cmd'
+					score: 12
+				}, {
+					caption: '\\bat[]{}'
+					snippet: '\\bar[$1]{$2}'
+					meta: 'foo-cmd'
+					score: 10
+				}
+			],
+			baz: [
+				{
+					caption: '\\longercommandtest{}'
+					snippet: '\\longercommandtest{$1}'
+					meta: 'baz-cmd'
+					score: 50
+				}
+			]
+
 		@MetaHandler = SandboxedModule.require modulePath, requires:
 			'../Project/ProjectEntityHandler': @ProjectEntityHandler
 			'../DocumentUpdater/DocumentUpdaterHandler': @DocumentUpdaterHandler
+			'./packageMapping': @packageMapping
 
 	describe 'extractMetaFromDoc', ->
 		beforeEach ->
 			@lines = [
 				'\\usepackage{foo}'
-				'\\usepackage{bar, baz}'
+				'\\usepackage{amsmath, booktabs}'
 				'one'
 				'two'
 				'three \\label{aaa}'
@@ -38,7 +62,20 @@ describe 'MetaHandler', ->
 			docMeta = @MetaHandler.extractMetaFromDoc @lines
 			expect(docMeta).to.deep.equal {
 				labels: ['aaa', 'bbb']
-				packages: ['foo', 'bar', 'baz']
+				packages:
+					foo: [
+						{
+							caption: '\\bar'
+							snippet: '\\bar'
+							meta: 'foo-cmd'
+							score: 12
+						}, {
+							caption: '\\bat[]{}'
+							snippet: '\\bar[$1]{$2}'
+							meta: 'foo-cmd'
+							score: 10
+						}
+					]
 			}
 
 	describe 'extractMetaFromProjectDocs', ->
@@ -60,13 +97,13 @@ describe 'MetaHandler', ->
 				'doc_four':
 					_id: 'id_four'
 					lines: [
-						'\\usepackage[foo=bar,baz=bat]{ddd}'
-						'\\usepackage[draft]{something}'
+						'\\usepackage[width=\\textwidth]{baz}'
+						'\\usepackage{amsmath}'
 					]
 				'doc_five':
 					_id: 'id_five'
 					lines: [
-						'\\usepackage{this,that}'
+						'\\usepackage{foo,baz}'
 						'\\usepackage[options=foo]{hello}'
 						'some text'
 						'\\section{this}\\label{sec:intro}'
@@ -77,11 +114,41 @@ describe 'MetaHandler', ->
 		it 'should extract all metadata', ->
 			projectMeta = @MetaHandler.extractMetaFromProjectDocs @docs
 			expect(projectMeta).to.deep.equal {
-				'id_one': {labels: ['aaa'], packages: []}
-				'id_two': {labels: [], packages: []}
-				'id_three': {labels: ['bbb', 'ccc'], packages: []}
-				'id_four': {labels: [], packages: ['ddd', 'something']}
-				'id_five': {labels: ['sec:intro'], packages: ['this', 'that', 'hello']}
+				'id_one': {labels: ['aaa'], packages: {}}
+				'id_two': {labels: [], packages: {}}
+				'id_three': {labels: ['bbb', 'ccc'], packages: {}}
+				'id_four':
+					labels: []
+					packages:
+						baz: [{
+							caption: '\\longercommandtest{}'
+							snippet: '\\longercommandtest{$1}'
+							meta: 'baz-cmd'
+							score: 50}]
+				'id_five':
+					labels: ['sec:intro']
+					packages:
+						foo: [
+							{
+								caption: '\\bar'
+								snippet: '\\bar'
+								meta: 'foo-cmd'
+								score: 12
+							}, {
+								caption: '\\bat[]{}'
+								snippet: '\\bar[$1]{$2}'
+								meta: 'foo-cmd'
+								score: 10
+							}
+						]
+						baz: [
+							{
+								caption: '\\longercommandtest{}'
+								snippet: '\\longercommandtest{$1}'
+								meta: 'baz-cmd'
+								score: 50
+							}
+						]
 			}
 
 	describe 'getMetaForDoc', ->
@@ -127,11 +194,26 @@ describe 'MetaHandler', ->
 			@fakeDocs =
 				'doc_one':
 					lines: [
-						'\\usepackage[some-options,more=foo]{pkg}'
+						'\\usepackage[some-options,more=foo]{foo}'
 						'\\label{aaa}'
 					]
 
-			@fakeMeta = {labels: ['aaa'], packages: ['pkg']}
+			@fakeMeta =
+				labels: ['aaa']
+				packages:
+					foo: [
+						{
+							caption: '\\bar'
+							snippet: '\\bar'
+							meta: 'foo-cmd'
+							score: 12
+						}, {
+							caption: '\\bat[]{}'
+							snippet: '\\bar[$1]{$2}'
+							meta: 'foo-cmd'
+							score: 10
+						}
+					]
 			@DocumentUpdaterHandler.flushProjectToMongo = sinon.stub().callsArgWith 1, null
 			@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith 1, null, @fakeDocs
 			@MetaHandler.extractMetaFromProjectDocs = sinon.stub().returns @fakeMeta

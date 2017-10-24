@@ -23,24 +23,34 @@ define [
 				range = new Range(end.row, 0, end.row, end.column)
 				lineUpToCursor = @editor.getSession().getTextRange range
 				if lineUpToCursor.trim() == '%' or lineUpToCursor.startsWith '\\'
-					# fix in case change is just (un)comment out a package
-					range = new Range end.row, 0, end.row, end.column + 80
+					range = new Range(end.row, 0, end.row, end.column + 80)
 					lineUpToCursor = @editor.getSession().getTextRange range
 				commandFragment = getLastCommandFragment lineUpToCursor
 
 				linesContainPackage = _.any(
 					change.lines,
-					(line) -> line.match(/\\usepackage(?:\[.*?])?\s*{.*?}/)
+					(line) -> line.match(/^\\usepackage(?:\[.{0,80}?])?{(.{0,80}?)}/)
+				)
+				linesContainReqPackage = _.any(
+					change.lines,
+					(line) -> line.match(/^\\RequirePackage(?:\[.{0,80}?])?{(.{0,80}?)}/)
 				)
 				linesContainLabel = _.any(
 					change.lines,
-					(line) -> line.match(/\\label\{[^\}\n\\]{0,80}\}/)
+					(line) -> line.match(/\\label{(.{0,80}?)}/)
 				)
-				linesContainMeta = linesContainPackage or linesContainLabel
+				linesContainMeta =
+					linesContainPackage or
+					linesContainLabel or
+					linesContainReqPackage
 
 				lastCommandFragmentIsLabel = commandFragment?.startsWith '\\label{'
 				lastCommandFragmentIsPackage = commandFragment?.startsWith '\\usepackage'
-				lastCommandFragmentIsMeta = lastCommandFragmentIsPackage or lastCommandFragmentIsLabel
+				lastCommandFragmentIsReqPack = commandFragment?.startsWith '\\RequirePackage'
+				lastCommandFragmentIsMeta =
+					lastCommandFragmentIsPackage or
+					lastCommandFragmentIsLabel or
+					lastCommandFragmentIsReqPack
 
 				if linesContainMeta or lastCommandFragmentIsMeta
 					@scheduleLoadCurrentDocMetaFromServer()
@@ -49,9 +59,6 @@ define [
 				e.oldSession.off "change", onChange
 				e.session.on "change", onChange
 
-		# loadCurrentDocLabelsFromServer: () ->
-		# 	currentDocId = @$scope.docId
-		# 	@Metadata.loadDocMetaFromServer currentDocId
 
 		loadDocMetaFromServer: (docId) ->
 			@Metadata.loadDocMetaFromServer docId

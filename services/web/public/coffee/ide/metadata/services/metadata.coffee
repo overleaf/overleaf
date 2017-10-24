@@ -6,9 +6,7 @@ define [
 
 		state = {documents: {}}
 
-		metadata = {
-			state: state
-		}
+		metadata = {state: state}
 
 		metadata.onBroadcastDocMeta = (data) ->
 			if data.docId? and data.meta?
@@ -26,7 +24,11 @@ define [
 			_.flatten(meta.labels for docId, meta of state.documents)
 
 		metadata.getAllPackages = () ->
-			_.flatten(meta.packages for docId, meta of state.documents)
+			packageCommandMapping = {}
+			for _docId, meta of state.documents
+				for packageName, commandSnippets of meta.packages
+					packageCommandMapping[packageName] = commandSnippets
+			return packageCommandMapping
 
 		metadata.loadProjectMetaFromServer = () ->
 			$http
