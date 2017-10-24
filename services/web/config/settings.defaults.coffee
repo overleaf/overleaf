@@ -104,6 +104,9 @@ module.exports = settings =
 			url : "http://localhost:3005"
 		trackchanges:
 			url : "http://localhost:3015"
+		project_history:
+			enabled: false
+			url : "http://localhost:3054"
 		docstore:
 			url : "http://localhost:3016"
 			pubUrl: "http://localhost:3016"
