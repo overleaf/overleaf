@@ -28,8 +28,10 @@ module.exports = (grunt) ->
 		exec:
 			run:
 				command:"node app.js | ./node_modules/logger-sharelatex/node_modules/bunyan/bin/bunyan --color"
-			cssmin:
-				command:"node_modules/clean-css/bin/cleancss --s0 -o public/stylesheets/style.css public/stylesheets/style.css"
+			cssmin_sl:
+				command:"node_modules/clean-css/bin/cleancss --s0 --source-map -o public/stylesheets/style.css public/stylesheets/style.css"
+			cssmin_ol:
+				command:"node_modules/clean-css/bin/cleancss --s0 --source-map -o public/stylesheets/ol-style.css public/stylesheets/ol-style.css"
 
 
 		watch:
@@ -139,26 +141,29 @@ module.exports = (grunt) ->
 			app:
 				options:
 					sourceMap: true
-					sourceMapFilename: "public/stylesheets/style.map"
+					sourceMapFilename: "public/stylesheets/style.css.map"
 					sourceMapBasepath: "public/stylesheets"
 				files:
 					"public/stylesheets/style.css": "public/stylesheets/style.less"
 			ol:
 				options:
 					sourceMap: true
-					sourceMapFilename: "public/stylesheets/ol-style.map"
+					sourceMapFilename: "public/stylesheets/ol-style.css.map"
 					sourceMapBasepath: "public/stylesheets"
 				files:
 					"public/stylesheets/ol-style.css": "public/stylesheets/ol-style.less"
 
 		postcss:
 			options:
-				map: true,
+				map: 
+					prev: "public/stylesheets/"
+					inline: false
+					sourcesContent: true
 				processors: [
 					require('autoprefixer')({browsers: [ 'last 2 versions', 'ie >= 10' ]})
 				]
 			dist:
-				src: 'public/stylesheets/style.css'
+				src: [ "public/stylesheets/style.css", "public/stylesheets/ol-style.css" ]
 
 		env:
 			run:
@@ -389,7 +394,7 @@ module.exports = (grunt) ->
 	grunt.registerTask 'compile:server', 'Compile the server side coffee script', ['clean:app', 'coffee:app', 'coffee:app_dir', 'compile:modules:server']
 	grunt.registerTask 'compile:client', 'Compile the client side coffee script', ['coffee:client', 'coffee:sharejs', 'wrap_sharejs', "compile:modules:client", 'compile:modules:inject_clientside_includes']
 	grunt.registerTask 'compile:css', 'Compile the less files to css', ['less', 'postcss:dist']
-	grunt.registerTask 'compile:minify', 'Concat and minify the client side js', ['requirejs', "file_append", "exec:cssmin",]
+	grunt.registerTask 'compile:minify', 'Concat and minify the client side js and css', ['requirejs', "file_append", "exec:cssmin_sl", "exec:cssmin_ol"]
 	grunt.registerTask 'compile:unit_tests', 'Compile the unit tests', ['clean:unit_tests', 'coffee:unit_tests']
 	grunt.registerTask 'compile:acceptance_tests', 'Compile the acceptance tests', ['clean:acceptance_tests', 'coffee:acceptance_tests']
 	grunt.registerTask 'compile:smoke_tests', 'Compile the smoke tests', ['coffee:smoke_tests']
