@@ -2,11 +2,12 @@ logger = require('logger-sharelatex')
 async = require("async")
 metrics = require('metrics-sharelatex')
 Settings = require('settings-sharelatex')
-ObjectId = require('mongoose').Types.ObjectId	
+ObjectId = require('mongoose').Types.ObjectId
 Project = require('../../models/Project').Project
 Folder = require('../../models/Folder').Folder
 ProjectEntityHandler = require('./ProjectEntityHandler')
 ProjectDetailsHandler = require('./ProjectDetailsHandler')
+HistoryController = require('../History/HistoryController')
 User = require('../../models/User').User
 fs = require('fs')
 Path = require "path"
@@ -19,18 +20,22 @@ module.exports = ProjectCreationHandler =
 		ProjectDetailsHandler.validateProjectName projectName, (error) ->
 			return callback(error) if error?
 			logger.log owner_id:owner_id, projectName:projectName, "creating blank project"
-			rootFolder = new Folder {'name':'rootFolder'}
-			project = new Project
-				 owner_ref  : new ObjectId(owner_id)
-				 name       : projectName
-			if Settings.currentImageName?
-				project.imageName = Settings.currentImageName
-			project.rootFolder[0] = rootFolder
-			User.findById owner_id, "ace.spellCheckLanguage", (err, user)->
-				project.spellCheckLanguage = user.ace.spellCheckLanguage
-				project.save (err)->
-					return callback(err) if err?
-					callback err, project
+			HistoryController.initializeProject (error, history) ->
+				return callback(error) if error?
+				rootFolder = new Folder {'name':'rootFolder'}
+				project = new Project
+					 owner_ref          : new ObjectId(owner_id)
+					 name               : projectName
+				if history?.overleaf_id?
+					project.overleaf.id = history.overleaf_id
+				if Settings.currentImageName?
+					project.imageName = Settings.currentImageName
+				project.rootFolder[0] = rootFolder
+				User.findById owner_id, "ace.spellCheckLanguage", (err, user)->
+					project.spellCheckLanguage = user.ace.spellCheckLanguage
+					project.save (err)->
+						return callback(err) if err?
+						callback err, project
 
 	createBasicProject :  (owner_id, projectName, callback = (error, project) ->)->
 		self = @

@@ -22,6 +22,7 @@ describe 'ProjectCreationHandler', ->
 				@._id = project_id
 				@owner_ref = options.owner_ref
 				@name = options.name
+				@overleaf = {}
 			save: sinon.stub().callsArg(0)
 			rootFolder:[{
 				_id: rootFolderId
@@ -36,11 +37,13 @@ describe 'ProjectCreationHandler', ->
 			setRootDoc: sinon.stub().callsArg(2)
 		@ProjectDetailsHandler =
 			validateProjectName: sinon.stub().yields()
+		@HistoryController =
+			initializeProject: sinon.stub().callsArg(0)
 
-		@user = 
+		@user =
 			first_name:"first name here"
 			last_name:"last name here"
-			ace: 
+			ace:
 				spellCheckLanguage:"de"
 
 		@User = findById:sinon.stub().callsArgWith(2, null, @user)
@@ -49,6 +52,7 @@ describe 'ProjectCreationHandler', ->
 			'../../models/User': User:@User
 			'../../models/Project':{Project:@ProjectModel}
 			'../../models/Folder':{Folder:@FolderModel}
+			'../History/HistoryController': @HistoryController
 			'./ProjectEntityHandler':@ProjectEntityHandler
 			"./ProjectDetailsHandler":@ProjectDetailsHandler
 			"settings-sharelatex": @Settings = {}
@@ -68,24 +72,35 @@ describe 'ProjectCreationHandler', ->
 				@handler.createBlankProject ownerId, projectName, =>
 					@ProjectModel::save.called.should.equal true
 					done()
-				
+
 			it "should return the project in the callback", (done)->
 				@handler.createBlankProject ownerId, projectName, (err, project)->
 					project.name.should.equal projectName
 					(project.owner_ref + "").should.equal ownerId
 					done()
 
+			it "should initialize the project history", (done)->
+				@handler.createBlankProject ownerId, projectName, done
+				@HistoryController.initializeProject.calledWith().should.equal true
+
+			it "should set the overleaf id", (done)->
+				overleaf_id = 1234
+				@HistoryController.initializeProject = sinon.stub().callsArgWith(0, null, { overleaf_id })
+				@handler.createBlankProject ownerId, projectName, (err, project)->
+					project.overleaf.id.should.equal overleaf_id
+					done()
+
 			it "should set the language from the user", (done)->
 				@handler.createBlankProject ownerId, projectName, (err, project)->
 					project.spellCheckLanguage.should.equal "de"
 					done()
-			
+
 			it "should set the imageName to currentImageName if set", (done) ->
 				@Settings.currentImageName = "mock-image-name"
 				@handler.createBlankProject ownerId, projectName, (err, project)=>
 					project.imageName.should.equal @Settings.currentImageName
 					done()
-			
+
 			it "should not set the imageName if no currentImageName", (done) ->
 				@Settings.currentImageName = null
 				@handler.createBlankProject ownerId, projectName, (err, project)=>
@@ -96,21 +111,21 @@ describe 'ProjectCreationHandler', ->
 			beforeEach ->
 				@ProjectModel::save = sinon.stub().callsArgWith(0, new Error("something went wrong"))
 				@handler.createBlankProject ownerId, projectName, @callback
-			
+
 			it 'should return the error to the callback', ->
 				should.exist @callback.args[0][0]
-		
+
 		describe "with an invalid name", ->
 			beforeEach ->
 				@ProjectDetailsHandler.validateProjectName = sinon.stub().yields(new Error("bad name"))
 				@handler.createBlankProject ownerId, projectName, @callback
-			
+
 			it 'should return the error to the callback', ->
 				should.exist @callback.args[0][0]
-			
+
 			it 'should not try to create the project', ->
 				@ProjectModel::save.called.should.equal false
-				
+
 
 	describe 'Creating a basic project', ->
 		beforeEach ->
