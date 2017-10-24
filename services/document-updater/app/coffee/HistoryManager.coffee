@@ -1,7 +1,6 @@
 settings = require "settings-sharelatex"
 request  = require "request"
 logger = require "logger-sharelatex"
-async = require "async"
 HistoryRedisManager = require "./HistoryRedisManager"
 
 module.exports = HistoryManager =

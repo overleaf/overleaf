@@ -1,7 +1,6 @@
 Settings = require('settings-sharelatex')
 rclient = require("redis-sharelatex").createClient(Settings.redis.history)
 Keys = Settings.redis.history.key_schema
-async = require "async"
 logger = require('logger-sharelatex')
 
 module.exports = HistoryRedisManager =

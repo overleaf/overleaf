@@ -1,6 +1,5 @@
 ShareJsModel = require "./sharejs/server/model"
 ShareJsDB = require "./ShareJsDB"
-async = require "async"
 logger = require "logger-sharelatex"
 Settings = require('settings-sharelatex')
 Keys = require "./UpdateKeys"
