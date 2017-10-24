@@ -157,3 +157,55 @@ module.exports = CollaboratorsHandler =
 				return callback(error)
 			{owner, members} = ProjectEditorHandler.buildOwnerAndMembersViews(rawMembers)
 			callback(null, members)
+
+	transferProjects: (from_user_id, to_user_id, callback=(err, projects) ->) ->
+		MEMBER_KEYS = ['collaberator_refs', 'readOnly_refs']
+
+		# Find all the projects this user is part of so we can flush them to TPDS
+		query =
+			$or:
+				[{ owner_ref: from_user_id }]
+				.concat(
+					MEMBER_KEYS.map (key) ->
+						q = {}
+						q[key] = from_user_id
+						return q
+				) # [{ collaberator_refs: from_user_id }, ...]
+		Project.find query, { _id: 1 }, (error, projects = []) ->
+			return callback(error) if error?
+
+			project_ids = projects.map (p) -> p._id
+			logger.log {project_ids, from_user_id, to_user_id}, "transferring projects"
+
+			update_jobs = []
+			update_jobs.push (cb) ->
+				Project.update { owner_ref: from_user_id }, { $set: { owner_ref: to_user_id }}, { multi: true }, cb
+			for key in MEMBER_KEYS
+				do (key) ->
+					update_jobs.push (cb) ->
+						query = {}
+						addNewUserUpdate = $addToSet: {}
+						removeOldUserUpdate = $pull: {}
+						query[key] = from_user_id
+						removeOldUserUpdate.$pull[key] = from_user_id
+						addNewUserUpdate.$addToSet[key] = to_user_id
+						# Mongo won't let us pull and addToSet in the same query, so do it in
+						# two. Note we need to add first, since the query is based on the old user.
+						Project.update query, addNewUserUpdate, { multi: true }, (error) ->
+							return cb(error) if error?
+							Project.update query, removeOldUserUpdate, { multi: true }, cb
+
+			# Flush each project to TPDS to add files to new user's Dropbox
+			ProjectEntityHandler = require("../Project/ProjectEntityHandler")
+			flush_jobs = []
+			for project_id in project_ids
+				do (project_id) ->
+					flush_jobs.push (cb) ->
+						ProjectEntityHandler.flushProjectToThirdPartyDataStore project_id, cb
+
+			# Flush in background, no need to block on this
+			async.series flush_jobs, (error) ->
+				if error?
+					logger.err {err: error, project_ids, from_user_id, to_user_id}, "error flushing tranferred projects to TPDS"
+
+			async.series update_jobs, callback

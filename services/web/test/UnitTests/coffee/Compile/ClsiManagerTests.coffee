@@ -33,7 +33,7 @@ describe "ClsiManager", ->
 				getProjectDocsIfMatch: sinon.stub().callsArgWith(2,null,null)
 			"./ClsiCookieManager": @ClsiCookieManager
 			"./ClsiStateManager": @ClsiStateManager
-			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), warn: sinon.stub() }
+			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), err: sinon.stub(), warn: sinon.stub() }
 			"request": @request = sinon.stub()
 			"./ClsiFormatChecker": @ClsiFormatChecker
 			"metrics-sharelatex": @Metrics =
@@ -121,6 +121,21 @@ describe "ClsiManager", ->
 
 			it "should call the callback with a success status", ->
 				@callback.calledWith(null, @status, ).should.equal true
+
+		describe "when the resources fail the precompile check", ->
+			beforeEach ->
+				@ClsiFormatChecker.checkRecoursesForProblems = sinon.stub().callsArgWith(1, new Error("failed"))
+				@ClsiManager._postToClsi = sinon.stub().callsArgWith(4, null, {
+					compile:
+						status: @status = "failure"
+				})
+				@ClsiManager.sendRequest @project_id, @user_id, {}, @callback
+
+			it "should call the callback only once", ->
+				@callback.calledOnce.should.equal true
+
+			it "should call the callback with an error", ->
+				@callback.calledWithExactly(new Error("failed")).should.equal true
 
 	describe "deleteAuxFiles", ->
 		beforeEach ->
@@ -247,12 +262,12 @@ describe "ClsiManager", ->
 					.calledWith(@project_id, {compiler:1, rootDoc_id: 1, imageName: 1, rootFolder: 1})
 					.should.equal true
 
-			it "should flush the project to the database", ->
+			it "should not explicitly flush the project to the database", ->
 				@DocumentUpdaterHandler.flushProjectToMongo
 					.calledWith(@project_id)
-					.should.equal true
+					.should.equal false
 
-			it "should get only the live docs from the docupdater", ->
+			it "should get only the live docs from the docupdater with a background flush in docupdater", ->
 				@DocumentUpdaterHandler.getProjectDocsIfMatch
 					.calledWith(@project_id)
 					.should.equal true
@@ -331,7 +346,49 @@ describe "ClsiManager", ->
 
 			it "should set to main.tex", ->
 				@request.compile.rootResourcePath.should.equal "main.tex"
-		
+
+		describe "when there is no valid root document and no main.tex document", ->
+			beforeEach () ->
+				@project.rootDoc_id = "not-valid"
+				@docs = {
+					"/other.tex": @doc_1 = {
+						name: "other.tex"
+						_id: "mock-doc-id-1"
+						lines: ["Hello", "world"]
+					},
+					"/chapters/chapter1.tex": @doc_2 = {
+						name: "chapter1.tex"
+						_id: "mock-doc-id-2"
+						lines: [
+							"Chapter 1"
+						]
+					}
+				}
+				@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
+				@ClsiManager._buildRequest @project, null, @callback
+
+			it "should report an error", ->
+				@callback.calledWith(new Error("no main file specified")).should.equal true
+
+
+		describe "when there is no valid root document and a single document which is not main.tex", ->
+			beforeEach (done) ->
+				@project.rootDoc_id = "not-valid"
+				@docs = {
+					"/other.tex": @doc_1 = {
+						name: "other.tex"
+						_id: "mock-doc-id-1"
+						lines: ["Hello", "world"]
+					}
+				}
+				@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
+				@ClsiManager._buildRequest @project, null, (@error, @request) =>
+					done()
+
+			it "should set io to the only file", ->
+				@request.compile.rootResourcePath.should.equal "other.tex"
+
+
 		describe "with the draft option", ->
 			it "should add the draft option into the request", (done) ->
 				@ClsiManager._buildRequest @project_id, {timeout:100, draft: true}, (error, request) =>

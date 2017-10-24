@@ -9,7 +9,7 @@ Errors = require("../Errors/Errors")
 
 module.exports = ProjectDetailsHandler =
 	getDetails: (project_id, callback)->
-		ProjectGetter.getProject project_id, {name:true, description:true, compiler:true, features:true, owner_ref:true}, (err, project)->
+		ProjectGetter.getProject project_id, {name:true, description:true, compiler:true, features:true, owner_ref:true, overleaf:true}, (err, project)->
 			if err?
 				logger.err err:err, project_id:project_id, "error getting project"
 				return callback(err)
@@ -21,7 +21,11 @@ module.exports = ProjectDetailsHandler =
 					description: project.description
 					compiler: project.compiler
 					features: user.features
-				logger.log project_id:project_id, details:details, "getting project details"
+
+				if project.overleaf?
+					details.overleaf = project.overleaf
+
+				logger.log project_id:project_id, details: details, "getting project details"
 				callback(err, details)
 
 	getProjectDescription: (project_id, callback)->
@@ -53,7 +57,7 @@ module.exports = ProjectDetailsHandler =
 
 	MAX_PROJECT_NAME_LENGTH: 150
 	validateProjectName: (name, callback = (error) ->) ->
-		if name.length == 0
+		if !name? or name.length == 0
 			return callback(new Errors.InvalidNameError("Project name cannot be blank"))
 		else if name.length > @MAX_PROJECT_NAME_LENGTH
 			return callback(new Errors.InvalidNameError("Project name is too long"))

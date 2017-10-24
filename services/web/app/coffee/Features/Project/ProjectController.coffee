@@ -229,6 +229,7 @@ module.exports = ProjectController =
 					else if event?
 						return cb(null, false)
 					else
+						logger.log { user_id, event }, "track changes onboarding not shown yet to this user"
 						return cb(null, true)
 			showPerUserTCNotice: (cb) ->
 				cb = underscore.once(cb)
@@ -247,6 +248,34 @@ module.exports = ProjectController =
 					else if event?
 						return cb(null, false)
 					else
+						logger.log { user_id, event }, "per user track changes notice not shown yet to this user"
+						return cb(null, true)
+			showAutoCompileOnboarding: (cb) ->
+				cb = underscore.once(cb)
+				if !user_id?
+					return cb()
+
+				# Extract data from user's ObjectId
+				timestamp = parseInt(user_id.toString().substring(0, 8), 16)
+				counter = parseInt(user_id.toString().substring(18, 24), 16)
+
+				rolloutPercentage = 5 # Percentage of users to roll out to
+				if counter % 100 > rolloutPercentage
+					# Don't show if user is not part of roll out
+					return cb(null, false)
+				userSignupDate = new Date(timestamp * 1000)
+				if userSignupDate > new Date("2017-10-16")
+					# Don't show for users who registered after it was released
+					return cb(null, false)
+				timeout = setTimeout cb, 500
+				AnalyticsManager.getLastOccurance user_id, "shown-autocompile-onboarding", (error, event) ->
+					clearTimeout timeout
+					if error?
+						return cb(null, false)
+					else if event?
+						return cb(null, false)
+					else
+						logger.log { user_id, event }, "autocompile onboarding not shown yet to this user"
 						return cb(null, true)
 		}, (err, results)->
 			if err?
@@ -255,9 +284,9 @@ module.exports = ProjectController =
 			project = results.project
 			user = results.user
 			subscription = results.subscription
-			{ showTrackChangesOnboarding, showPerUserTCNotice } = results
+			{ showTrackChangesOnboarding, showPerUserTCNotice, showAutoCompileOnboarding } = results
 
-			daysSinceLastUpdated =  (new Date() - project.lastUpdated) /86400000
+			daysSinceLastUpdated =  (new Date() - project.lastUpdated) / 86400000
 			logger.log project_id:project_id, daysSinceLastUpdated:daysSinceLastUpdated, "got db results for loading editor"
 
 			AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, (error, privilegeLevel)->
@@ -300,6 +329,7 @@ module.exports = ProjectController =
 					trackChangesState: project.track_changes
 					showTrackChangesOnboarding: !!showTrackChangesOnboarding
 					showPerUserTCNotice: !!showPerUserTCNotice
+					showAutoCompileOnboarding: !!showAutoCompileOnboarding
 					privilegeLevel: privilegeLevel
 					chatUrl: Settings.apis.chat.url
 					anonymous: anonymous

@@ -115,7 +115,10 @@ define [
 			$scope.resetHoverState()
 
 		$scope.displayName = (user) ->
-			full_name = "#{user.first_name} #{user.last_name}"
+			if user.name?
+				full_name = user.name
+			else
+				full_name = "#{user.first_name} #{user.last_name}"
 			fallback_name = "Unknown"
 			if !user?
 				fallback_name

@@ -68,7 +68,7 @@ define [
 		$scope.$on "project:joined", () ->
 			return if !autoCompile
 			autoCompile = false
-			$scope.recompile(isAutoCompile: true)
+			$scope.recompile(isAutoCompileOnLoad: true)
 			$scope.hasPremiumCompile = $scope.project.features.compileGroup == "priority"
 
 		$scope.$on "pdf:error:display", () ->
@@ -77,7 +77,7 @@ define [
 
 		autoCompileTimeout = null
 		triggerAutoCompile = () ->
-			return if autoCompileTimeout
+			return if autoCompileTimeout or $scope.ui.pdfHidden
 
 			timeSinceLastCompile = Date.now() - $scope.recompiledAt
 			# If time is non-monotonic, assume that the user's system clock has been
@@ -86,7 +86,7 @@ define [
 
 			if isTimeNonMonotonic || timeSinceLastCompile >= AUTO_COMPILE_TIMEOUT
 				if (!ide.$scope.hasLintingError)
-					$scope.recompile(isBackgroundAutoCompile: true)
+					$scope.recompile(isAutoCompileOnChange: true)
 			else
 				# Extend remainder of timeout
 				autoCompileTimeout = setTimeout () ->
@@ -109,7 +109,7 @@ define [
 				toggleAutoCompile(newValue)
 				event_tracking.sendMB "autocompile-setting-changed", { value: newValue }
 
-		if window.user?.betaProgram and $scope.autocompile_enabled
+		if (window.user?.betaProgram or window.showAutoCompileOnboarding) and $scope.autocompile_enabled
 			toggleAutoCompile(true)
 
 		# abort compile if syntax checks fail
@@ -127,7 +127,7 @@ define [
 		sendCompileRequest = (options = {}) ->
 			url = "/project/#{$scope.project_id}/compile"
 			params = {}
-			if options.isAutoCompile
+			if options.isAutoCompileOnLoad or options.isAutoCompileOnChange
 				params["auto_compile"]=true
 			# if the previous run was a check, clear the error logs
 			$scope.pdf.logEntries = [] if $scope.check
@@ -144,9 +144,9 @@ define [
 				rootDoc_id: options.rootDocOverride_id or null
 				draft: $scope.draft
 				check: checkType
-				# use incremental compile for beta users but revert to a full
+				# use incremental compile for all users but revert to a full
 				# compile if there is a server error
-				incrementalCompilesEnabled: window.user?.betaProgram and not $scope.pdf.error
+				incrementalCompilesEnabled: not $scope.pdf.error
 				_csrf: window.csrfToken
 			}, {params: params}
 
@@ -167,6 +167,8 @@ define [
 			$scope.pdf.compileTerminated = false
 			$scope.pdf.compileExited = false
 			$scope.pdf.failedCheck = false
+			$scope.pdf.compileInProgress = false
+			$scope.pdf.autoCompileDisabled = false
 
 			# make a cache to look up files by name
 			fileByPath = {}
@@ -205,7 +207,13 @@ define [
 				$scope.shouldShowLogs = true
 				fetchLogs(fileByPath)
 			else if response.status == "autocompile-backoff"
-				$scope.pdf.view = 'uncompiled'
+				if $scope.pdf.isAutoCompileOnLoad # initial autocompile
+					$scope.pdf.view = 'uncompiled'
+				else # background autocompile from typing
+					$scope.pdf.view = 'errors'
+					$scope.pdf.autoCompileDisabled = true
+					$scope.autocompile_enabled = false # disable any further autocompiles
+					event_tracking.sendMB "autocompile-rate-limited", {hasPremiumCompile: $scope.hasPremiumCompile}
 			else if response.status == "project-too-large"
 				$scope.pdf.view = 'errors'
 				$scope.pdf.projectTooLarge = true
@@ -223,6 +231,10 @@ define [
 			else if response.status == "validation-problems"
 				$scope.pdf.view = "validation-problems"
 				$scope.pdf.validation = response.validationProblems
+				$scope.shouldShowLogs = false
+			else if response.status == "compile-in-progress"
+				$scope.pdf.view = 'errors'
+				$scope.pdf.compileInProgress = true
 			else if response.status == "success"
 				$scope.pdf.view = 'pdf'
 				$scope.shouldShowLogs = false
@@ -408,9 +420,13 @@ define [
 		$scope.recompile = (options = {}) ->
 			return if $scope.pdf.compiling
 
+			if !options.isAutoCompileOnLoad and $scope.onboarding.autoCompile == 'unseen'
+				$scope.onboarding.autoCompile = 'show'
+
 			event_tracking.sendMBSampled "editor-recompile-sampled", options
 
 			$scope.pdf.compiling = true
+			$scope.pdf.isAutoCompileOnLoad = options?.isAutoCompileOnLoad # initial autocompile
 
 			if options?.force
 				# for forced compile, turn off validation check and ignore errors

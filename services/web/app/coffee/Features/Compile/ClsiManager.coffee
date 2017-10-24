@@ -29,7 +29,11 @@ module.exports = ClsiManager =
 
 	sendRequestOnce: (project_id, user_id, options = {}, callback = (error, status, outputFiles, clsiServerId, validationProblems) ->) ->
 		ClsiManager._buildRequest project_id, options, (error, req) ->
-			return callback(error) if error?
+			if error?
+				if error.message is "no main file specified"
+					return callback(null, "validation-problems", null, null, {mainFile:error.message})
+				else
+					return callback(error)
 			logger.log project_id: project_id, "sending compile to CLSI"
 			ClsiFormatChecker.checkRecoursesForProblems req.compile?.resources, (err, validationProblems)->
 				if err?
@@ -38,17 +42,17 @@ module.exports = ClsiManager =
 				if validationProblems?
 					logger.log project_id:project_id, validationProblems:validationProblems, "problems with users latex before compile was attempted"
 					return callback(null, "validation-problems", null, null, validationProblems)
-			ClsiManager._postToClsi project_id, user_id, req, options.compileGroup, (error, response) ->
-				if error?
-					logger.err err:error, project_id:project_id, "error sending request to clsi"
-					return callback(error)
-				logger.log project_id: project_id, outputFilesLength: response?.outputFiles?.length, status: response?.status, compile_status: response?.compile?.status, "received compile response from CLSI"
-				ClsiCookieManager._getServerId project_id, (err, clsiServerId)->
-					if err?
-						logger.err err:err, project_id:project_id, "error getting server id"
-						return callback(err)
-					outputFiles = ClsiManager._parseOutputFiles(project_id, response?.compile?.outputFiles)
-					callback(null, response?.compile?.status, outputFiles, clsiServerId)
+				ClsiManager._postToClsi project_id, user_id, req, options.compileGroup, (error, response) ->
+					if error?
+						logger.err err:error, project_id:project_id, "error sending request to clsi"
+						return callback(error)
+					logger.log project_id: project_id, outputFilesLength: response?.outputFiles?.length, status: response?.status, compile_status: response?.compile?.status, "received compile response from CLSI"
+					ClsiCookieManager._getServerId project_id, (err, clsiServerId)->
+						if err?
+							logger.err err:err, project_id:project_id, "error getting server id"
+							return callback(err)
+						outputFiles = ClsiManager._parseOutputFiles(project_id, response?.compile?.outputFiles)
+						callback(null, response?.compile?.status, outputFiles, clsiServerId)
 
 	stopCompile: (project_id, user_id, options, callback = (error) ->) ->
 		compilerUrl = @_getCompilerUrl(options?.compileGroup, project_id, user_id, "compile/stop")
@@ -107,6 +111,8 @@ module.exports = ClsiManager =
 				callback null, compile:status:"project-too-large"
 			else if response.statusCode == 409
 				callback null, compile:status:"conflict"
+			else if response.statusCode == 423
+				callback null, compile:status:"compile-in-progress"
 			else
 				error = new Error("CLSI returned non-success code: #{response.statusCode}")
 				logger.error err: error, project_id: project_id, "CLSI returned failure code"
@@ -144,13 +150,8 @@ module.exports = ClsiManager =
 						logger.log project_id: project_id, projectStateHash: projectStateHash, docs: docUpdaterDocs?, "checked project state"
 					# see if we can send an incremental update to the CLSI
 					if docUpdaterDocs? and (options.syncType isnt "full") and not error?
-						# Workaround: for now, always flush project to mongo on compile
-						# until we have automatic periodic flushing on the docupdater
-						# side, to prevent documents staying in redis too long.
-						DocumentUpdaterHandler.flushProjectToMongo project_id, (error) ->
-							return callback(error) if error?
-							Metrics.inc "compile-from-redis"
-							ClsiManager._buildRequestFromDocupdater project_id, options, project, projectStateHash, docUpdaterDocs, callback
+						Metrics.inc "compile-from-redis"
+						ClsiManager._buildRequestFromDocupdater project_id, options, project, projectStateHash, docUpdaterDocs, callback
 					else
 						Metrics.inc "compile-from-mongo"
 						ClsiManager._buildRequestFromMongo project_id, options, project, projectStateHash, callback
@@ -183,7 +184,7 @@ module.exports = ClsiManager =
 				# present in the docupdater. This allows finaliseRequest to
 				# identify the root doc.
 				possibleRootDocIds = [options.rootDoc_id, project.rootDoc_id]
-				for rootDoc_id in possibleRootDocIds when rootDoc_id?
+				for rootDoc_id in possibleRootDocIds when rootDoc_id? and rootDoc_id of docPath
 					path = docPath[rootDoc_id]
 					docs[path] ?= {_id: rootDoc_id, path: path}
 				ClsiManager._finaliseRequest project_id, options, project, docs, [], callback
@@ -209,9 +210,12 @@ module.exports = ClsiManager =
 		resources = []
 		rootResourcePath = null
 		rootResourcePathOverride = null
+		hasMainFile = false
+		numberOfDocsInProject = 0
 
 		for path, doc of docs
 			path = path.replace(/^\//, "") # Remove leading /
+			numberOfDocsInProject++
 			if doc.lines? # add doc to resources unless it is just a stub entry
 				resources.push
 					path:    path
@@ -220,11 +224,20 @@ module.exports = ClsiManager =
 				rootResourcePath = path
 			if options.rootDoc_id? and doc._id.toString() == options.rootDoc_id.toString()
 				rootResourcePathOverride = path
+			if path is "main.tex"
+				hasMainFile = true
 
 		rootResourcePath = rootResourcePathOverride if rootResourcePathOverride?
 		if !rootResourcePath?
-			logger.warn {project_id}, "no root document found, setting to main.tex"
-			rootResourcePath = "main.tex"
+			if hasMainFile
+				logger.warn {project_id}, "no root document found, setting to main.tex"
+				rootResourcePath = "main.tex"
+			else if numberOfDocsInProject is 1 # only one file, must be the main document
+				for path, doc of docs
+					rootResourcePath = path.replace(/^\//, "") # Remove leading /
+				logger.warn {project_id, rootResourcePath: rootResourcePath}, "no root document found, single document in project"
+			else
+				return callback new Error("no main file specified")
 
 		for path, file of files
 			path = path.replace(/^\//, "") # Remove leading /

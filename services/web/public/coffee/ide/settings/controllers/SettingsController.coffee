@@ -55,7 +55,11 @@ define [
 
 		$scope.$watch "project.rootDoc_id", (rootDoc_id, oldRootDoc_id) =>
 			return if @ignoreUpdates
-			if oldRootDoc_id? and rootDoc_id != oldRootDoc_id
+			# don't save on initialisation, Angular passes oldRootDoc_id as
+			# undefined in this case.
+			return if typeof oldRootDoc_id is "undefined"
+			# otherwise only save changes, null values are allowed
+			if (rootDoc_id != oldRootDoc_id)
 				settings.saveProjectSettings({rootDocId: rootDoc_id})
 
 

@@ -20,6 +20,8 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-parallel'
 	grunt.loadNpmTasks 'grunt-exec'
 	grunt.loadNpmTasks 'grunt-postcss'
+	grunt.loadNpmTasks 'grunt-forever'
+	grunt.loadNpmTasks 'grunt-shell'
 	# grunt.loadNpmTasks 'grunt-contrib-imagemin'
 	# grunt.loadNpmTasks 'grunt-sprity'
 
@@ -33,6 +35,10 @@ module.exports = (grunt) ->
 			cssmin_ol:
 				command:"node_modules/clean-css/bin/cleancss --s0 --source-map -o public/stylesheets/ol-style.css public/stylesheets/ol-style.css"
 
+		forever:
+			app:
+				options:
+					index: "app.js"
 
 		watch:
 			coffee:
@@ -257,8 +263,11 @@ module.exports = (grunt) ->
 				pattern: "@@RELEASE@@"
 				replacement: process.env.BUILD_NUMBER || "(unknown build)"
 
-
-			
+		shell:
+			fullAcceptanceTests:
+				command: "bash ./test/acceptance/scripts/full-test.sh"
+			dockerTests:
+				command: 'docker run -v "$(pwd):/app" --env SHARELATEX_ALLOW_PUBLIC_ACCESS=true --rm sharelatex/acceptance-test-runner'
 
 		availabletasks:
 			tasks:
@@ -408,6 +417,18 @@ module.exports = (grunt) ->
 	grunt.registerTask 'test:unit', 'Run the unit tests (use --grep=<regex> or --feature=<feature> for individual tests)', ['compile:server', 'compile:modules:server', 'compile:unit_tests', 'compile:modules:unit_tests', 'mochaTest:unit'].concat(moduleUnitTestTasks)
 	grunt.registerTask 'test:acceptance', 'Run the acceptance tests (use --grep=<regex> or --feature=<feature> for individual tests)', ['compile:acceptance_tests', 'mochaTest:acceptance']
 	grunt.registerTask 'test:smoke', 'Run the smoke tests', ['compile:smoke_tests', 'mochaTest:smoke']
+	
+	grunt.registerTask(
+		'test:acceptance:full',
+		"Start server and run acceptance tests",
+		['shell:fullAcceptanceTests']
+	)
+
+	grunt.registerTask(
+		'test:acceptance:docker',
+		"Run acceptance tests inside docker container",
+		['compile:acceptance_tests', 'shell:dockerTests']
+	)
 	
 	grunt.registerTask 'test:modules:unit', 'Run the unit tests for the modules', ['compile:modules:server', 'compile:modules:unit_tests'].concat(moduleUnitTestTasks)
 

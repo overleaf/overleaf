@@ -12,9 +12,9 @@ ObjectId = require("mongojs").ObjectId
 
 describe "UserInfoController", ->
 	beforeEach ->
-		@UserDeleter = 
+		@UserDeleter =
 			deleteUser: sinon.stub().callsArgWith(1)
-		@UserUpdater = 
+		@UserUpdater =
 			updatePersonalInfo: sinon.stub()
 		@sanitizer = escape:(v)->v
 		sinon.spy @sanitizer, "escape"
@@ -50,23 +50,47 @@ describe "UserInfoController", ->
 				.should.equal true
 
 	describe "getPersonalInfo", ->
-		beforeEach ->
-			@user_id = ObjectId().toString()
-			@user =
-				_id: ObjectId(@user_id)
-			@req.params = user_id: @user_id
-
-		describe "when the user exists", ->
+		describe "when the user exists with sharelatex id", ->
 			beforeEach ->
+				@user_id = ObjectId().toString()
+				@user =
+					_id: ObjectId(@user_id)
+				@req.params = user_id: @user_id
 				@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user)
 				@UserInfoController.sendFormattedPersonalInfo = sinon.stub()
 				@UserInfoController.getPersonalInfo(@req, @res, @next)
 
 			it "should look up the user in the database", ->
 				@UserGetter.getUser
-					.calledWith(@user_id, { _id: true, first_name: true, last_name: true, email: true })
+					.calledWith(
+						{ _id: ObjectId(@user_id) },
+						{ _id: true, first_name: true, last_name: true, email: true }
+					).should.equal true
+
+			it "should send the formatted details back to the client", ->
+				@UserInfoController.sendFormattedPersonalInfo
+					.calledWith(@user, @res, @next)
 					.should.equal true
-				
+
+		describe "when the user exists with overleaf id", ->
+			beforeEach ->
+				@user_id = 12345
+				@user =
+					_id: ObjectId()
+					overleaf:
+						id: @user_id
+				@req.params = user_id: @user_id.toString()
+				@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user)
+				@UserInfoController.sendFormattedPersonalInfo = sinon.stub()
+				@UserInfoController.getPersonalInfo(@req, @res, @next)
+
+			it "should look up the user in the database", ->
+				@UserGetter.getUser
+					.calledWith(
+						{ "overleaf.id": @user_id },
+						{ _id: true, first_name: true, last_name: true, email: true }
+					).should.equal true
+
 			it "should send the formatted details back to the client", ->
 				@UserInfoController.sendFormattedPersonalInfo
 					.calledWith(@user, @res, @next)
@@ -74,12 +98,23 @@ describe "UserInfoController", ->
 
 		describe "when the user does not exist", ->
 			beforeEach ->
+				@user_id = ObjectId().toString()
+				@req.params = user_id: @user_id
 				@UserGetter.getUser = sinon.stub().callsArgWith(2, null, null)
-				@UserInfoController.sendFormattedPersonalInfo = sinon.stub()
 				@UserInfoController.getPersonalInfo(@req, @res, @next)
 
 			it "should return 404 to the client", ->
 				@res.statusCode.should.equal 404
+
+		describe "when the user id is invalid", ->
+			beforeEach ->
+				@user_id = "invalid"
+				@req.params = user_id: @user_id
+				@UserGetter.getUser = sinon.stub().callsArgWith(2, null, null)
+				@UserInfoController.getPersonalInfo(@req, @res, @next)
+
+			it "should return 400 to the client", ->
+				@res.statusCode.should.equal 400
 
 	describe "sendFormattedPersonalInfo", ->
 		beforeEach ->

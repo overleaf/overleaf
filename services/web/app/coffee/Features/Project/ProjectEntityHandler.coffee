@@ -131,7 +131,7 @@ module.exports = ProjectEntityHandler =
 	setRootDoc: (project_id, newRootDocID, callback = (error) ->)->
 		logger.log project_id: project_id, rootDocId: newRootDocID, "setting root doc"
 		Project.update {_id:project_id}, {rootDoc_id:newRootDocID}, {}, callback
-	
+
 	unsetRootDoc: (project_id, callback = (error) ->) ->
 		logger.log project_id: project_id, "removing root doc"
 		Project.update {_id:project_id}, {$unset: {rootDoc_id: true}}, {}, callback
@@ -140,8 +140,15 @@ module.exports = ProjectEntityHandler =
 		if typeof(options) == "function"
 			callback = options
 			options = {}
-		DocstoreManager.getDoc project_id, doc_id, options, callback
 
+		if options["pathname"]
+			delete options["pathname"]
+			projectLocator.findElement {project_id: project_id, element_id: doc_id, type: 'doc'}, (error, doc, path) =>
+				return callback(error) if error?
+				DocstoreManager.getDoc project_id, doc_id, options, (error, lines, rev, version, ranges) =>
+					callback(error, lines, rev, version, ranges, path.fileSystem)
+		else
+			DocstoreManager.getDoc project_id, doc_id, options, callback
 
 	addDoc: (project_id, folder_id, docName, docLines, callback = (error, doc, folder_id) ->)=>
 		ProjectGetter.getProjectWithOnlyFolders project_id, (err, project) ->
@@ -158,7 +165,7 @@ module.exports = ProjectEntityHandler =
 			# Put doc in docstore first, so that if it errors, we don't have a doc_id in the project
 			# which hasn't been created in docstore.
 			DocstoreManager.updateDoc project_id.toString(), doc._id.toString(), docLines, 0, {}, (err, modified, rev) ->
-				return callback(err) if err? 
+				return callback(err) if err?
 
 				ProjectEntityHandler._putElement project, folder_id, doc, "doc", (err, result)=>
 					return callback(err) if err?
@@ -207,7 +214,7 @@ module.exports = ProjectEntityHandler =
 	replaceFile: (project_id, file_id, fsPath, callback)->
 		ProjectGetter.getProject project_id, {name:true}, (err, project) ->
 			return callback(err) if err?
-			findOpts = 
+			findOpts =
 				project_id:project._id
 				element_id:file_id
 				type:"file"
@@ -280,7 +287,7 @@ module.exports = ProjectEntityHandler =
 			procesFolder = (previousFolders, folderName, callback)=>
 				previousFolders = previousFolders || []
 				parentFolder = previousFolders[previousFolders.length-1]
-				if parentFolder?  
+				if parentFolder?
 					parentFolder_id = parentFolder._id
 				builtUpPath = "#{builtUpPath}/#{folderName}"
 				projectLocator.findElementByPath project, builtUpPath, (err, foundFolder)=>
@@ -360,7 +367,7 @@ module.exports = ProjectEntityHandler =
 			return callback(err) if err?
 			projectLocator.findElement {project:project, element_id:entity_id, type:entityType}, (err, entity, path)->
 				return callback(err) if err?
-				
+
 				if entityType.match(/folder/)
 					ensureFolderIsNotMovedIntoChild = (callback = (error) ->) ->
 						projectLocator.findElement {project: project, element_id: folder_id, type:"folder"}, (err, destEntity, destPath) ->
@@ -372,7 +379,7 @@ module.exports = ProjectEntityHandler =
 								callback()
 				else
 					ensureFolderIsNotMovedIntoChild = (callback = () ->) -> callback()
-					
+
 				ensureFolderIsNotMovedIntoChild (error) ->
 					return callback(error) if error?
 					self._removeElementFromMongoArray Project, project_id, path.mongo, (err)->
@@ -382,7 +389,7 @@ module.exports = ProjectEntityHandler =
 							return callback(err) if err?
 							ProjectEntityHandler._putElement project, destinationFolder_id, entity, entityType, (err, result)->
 								return callback(err) if err?
-								opts = 
+								opts =
 									project_id:project_id
 									project_name:project.name
 									startPath:path.fileSystem
@@ -506,7 +513,7 @@ module.exports = ProjectEntityHandler =
 
 
 	_countElements : (project, callback)->
-	
+
 		countFolder = (folder, cb = (err, count)->)->
 
 			jobs = _.map folder?.folders, (folder)->

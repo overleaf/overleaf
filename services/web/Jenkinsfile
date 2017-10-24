@@ -42,6 +42,7 @@ pipeline {
         checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/templates'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/templates-webmodule.git']]])
         checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/track-changes'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/track-changes-web-module.git']]])
         checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/overleaf-integration'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/overleaf-integration-web-module.git']]])
+        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/overleaf-account-merge'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/overleaf-account-merge.git']]])
       }
     }
     
@@ -59,6 +60,9 @@ pipeline {
         sh 'mv app/views/external/googlebdb0f8f7f4a17241.html public/googlebdb0f8f7f4a17241.html'
         sh 'npm install'
         sh 'npm rebuild'
+        // It's too easy to end up shrinkwrapping to an outdated version of translations.
+        // Ensure translations are always latest, regardless of shrinkwrap
+        sh 'npm install git+https://github.com/sharelatex/translations-sharelatex.git#master'
         sh 'npm install --quiet grunt'
         sh 'npm install --quiet grunt-cli'
         sh 'ls -l node_modules/.bin'
@@ -74,6 +78,8 @@ pipeline {
       }
       steps {
         sh 'node_modules/.bin/grunt compile  --verbose'
+        // replace the build number placeholder for sentry
+        sh 'node_modules/.bin/grunt version'
       }
     }
 
@@ -110,6 +116,13 @@ pipeline {
       }
       steps {
         sh 'env NODE_ENV=development ./node_modules/.bin/grunt test:unit --reporter=tap'
+      }
+    }
+    
+    stage('Acceptance Tests') {
+      steps {
+        sh 'docker pull sharelatex/acceptance-test-runner'
+        sh 'docker run --rm -v $(pwd):/app --env SHARELATEX_ALLOW_PUBLIC_ACCESS=true sharelatex/acceptance-test-runner'
       }
     }
     

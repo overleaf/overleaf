@@ -1,6 +1,6 @@
 div.full-size.pdf(ng-controller="PdfController")
 	.toolbar.toolbar-tall
-		.btn-group(
+		.btn-group#recompile(
 			dropdown,
 			tooltip-html="'"+translate('recompile_pdf')+" <span class=\"keyboard-shortcut\">({{modifierKey}} + Enter)</span>'"
 			tooltip-class="keyboard-tooltip"
@@ -26,8 +26,8 @@ div.full-size.pdf(ng-controller="PdfController")
 			)
 				span.caret
 			ul.dropdown-menu.dropdown-menu-left
-				// Only show on beta program?
-				if user.betaProgram
+				// Only show if on beta program or part of rollout
+				if user.betaProgram || showAutoCompileOnboarding
 					li.dropdown-header #{translate("auto_compile")}
 					li
 						a(href, ng-click="autocompile_enabled = true")
@@ -317,6 +317,9 @@ div.full-size.pdf(ng-controller="PdfController")
 				div
 					li(ng-repeat="entry in pdf.validation.conflictedPaths") {{ '/'+entry['path'] }}
 
+			.alert.alert-danger(ng-show="pdf.validation.mainFile")
+				strong #{translate("main_file_not_found")} 
+				span #{translate("please_set_main_file")}
 
 		.pdf-errors(ng-switch-when="errors")
 	
@@ -343,6 +346,10 @@ div.full-size.pdf(ng-controller="PdfController")
 			.alert.alert-danger(ng-show="pdf.rateLimited")
 				strong #{translate("pdf_compile_rate_limit_hit")} 
 				span #{translate("project_flagged_too_many_compiles")}
+
+			.alert.alert-danger(ng-show="pdf.compileInProgress")
+				strong #{translate("pdf_compile_in_progress_error")}. 
+				span #{translate("pdf_compile_try_again")}
 
 			.alert.alert-danger(ng-show="pdf.timedout")
 				p
@@ -386,6 +393,12 @@ div.full-size.pdf(ng-controller="PdfController")
 						sixpack-convert="track_changes_feature_info"
 						ng-click="startFreeTrial('compile-timeout')"
 					) #{translate("start_free_trial")}
+
+
+			.alert.alert-danger(ng-show="pdf.autoCompileDisabled")
+				p
+					strong #{translate("autocompile_disabled")}. 
+					span #{translate("autocompile_disabled_reason")}
 
 			.alert.alert-danger(ng-show="pdf.projectTooLarge")
 				strong #{translate("project_too_large")} 
