@@ -1,23 +1,25 @@
 {
   "name": "redis-sharelatex",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Redis wrapper for node which will either use cluster, sentinal, or single instance redis",
   "main": "index.js",
   "author": "ShareLaTeX",
   "license": "ISC",
   "dependencies": {
-    "async": "^2.4.0",
-    "chai": "1.9.1",
+    "async": "^2.5.0",
     "coffee-script": "1.8.0",
+    "ioredis": "^3.2.1",
+    "redis": "0.12.1",
+    "redis-sentinel": "0.1.1",
+    "underscore": "1.7.0"
+  },
+  "devDependencies": {
+    "chai": "1.9.1",
     "grunt": "0.4.5",
     "grunt-contrib-coffee": "0.11.1",
     "grunt-mocha-test": "0.12.0",
-    "ioredis": "^2.5.0",
     "mocha": "1.21.4",
-    "redis": "0.12.1",
-    "redis-sentinel": "0.1.1",
     "sandboxed-module": "1.0.1",
-    "sinon": "1.10.3",
-    "underscore": "1.7.0"
+    "sinon": "1.10.3"
   }
 }
