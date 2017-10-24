@@ -21,7 +21,7 @@ module.exports = HistoryController =
 			next(error)
 
 	buildHistoryServiceUrl: () ->
-		if settings.apis.project_history.enabled
+		if settings.apis.project_history?.enabled
 			return settings.apis.project_history.url
 		else
 			return settings.apis.trackchanges.url
