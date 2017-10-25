@@ -1,5 +1,6 @@
 async = require("async")
 logger = require("logger-sharelatex")
+Settings = require('settings-sharelatex')
 projectDeleter = require("./ProjectDeleter")
 projectDuplicator = require("./ProjectDuplicator")
 projectCreationHandler = require("./ProjectCreationHandler")
@@ -148,6 +149,11 @@ module.exports = ProjectController =
 				NotificationsHandler.getUserNotifications user_id, cb
 			projects: (cb)->
 				ProjectGetter.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref tokens', cb
+			olProjects: (cb) ->
+				console.log('OOOOOOOOOOOOOOOOOOOOOOO')
+				if Settings.brandPrefix == "ol-"
+					OlProjectGetter.findAllUsersProjects user_id, cb
+				cb()
 			hasSubscription: (cb)->
 				LimitationsManager.userHasSubscriptionOrIsGroupMember currentUser, cb
 			user: (cb) ->
