@@ -15,6 +15,9 @@ module.exports = MockTrackChangesApi =
 
 		app.listen 3015, (error) ->
 			throw error if error?
+		.on "error", (error) ->
+			console.error "error starting MockTrackChangesApi:", error.message
+			process.exit(1)
 
 MockTrackChangesApi.run()
 
