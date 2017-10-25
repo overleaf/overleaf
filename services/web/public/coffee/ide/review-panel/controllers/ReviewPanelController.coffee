@@ -22,6 +22,7 @@ define [
 			trackChangesOnForEveryone: false
 			trackChangesOnForGuests: false
 			trackChangesOnForThisGuestClient: false
+			trackChangesForGuestsAvailable: false
 			entries: {}
 			resolvedComments: {}
 			hasEntries: false
@@ -80,6 +81,13 @@ define [
 				for member in members
 					if member.privileges == "readAndWrite"
 						$scope.reviewPanel.formattedProjectMembers[member._id] = formatUser(member)
+
+		$scope.$watch 'project.publicAccesLevel', (level) ->
+			if level?
+				available = $scope.trackChangesForGuestsAvailable = level == 'tokenBased'
+				if !available
+					$scope.trackChangesOnForThisGuestClient = false
+					$scope.toggleTrackChangesForGuests false
 
 		$scope.commentState =
 			adding: false
@@ -650,7 +658,6 @@ define [
 			$http.post "/project/#{$scope.project_id}/track_changes", data
 
 		applyTrackChangesStateToClient = (state) ->
-			console.log ">> applying tc state to client", state
 			if typeof state is "boolean"
 				_setEveryoneTCState state
 				_setGuestsTCState state

@@ -83,12 +83,11 @@
 
 			li.rp-tc-state-separator
 			li.rp-tc-state-item.rp-tc-state-item-guests
-				// span.rp-tc-state-item-name !{translate("tc_guests")}
-				span.rp-tc-state-item-name Guests
+				span.rp-tc-state-item-name !{translate("tc_guests")}
 				review-panel-toggle(
 					ng-model="reviewPanel.trackChangesOnForGuests"
 					on-toggle="toggleTrackChangesForGuests(isOn);"
-					disabled="!project.features.trackChanges || !permissions.write"
+					disabled="!project.features.trackChanges || !permissions.write || !trackChangesForGuestsAvailable"
 				)
 
 	.rp-entry-list(
