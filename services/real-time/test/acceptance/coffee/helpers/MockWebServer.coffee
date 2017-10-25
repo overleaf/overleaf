@@ -35,5 +35,9 @@ module.exports = MockWebServer =
 		app.listen 3000, (error) ->
 			MockWebServer.running = true
 			callback(error)
+		.on "error", (error) ->
+			console.error "error starting MockWebServer:", error.message
+			process.exit(1)
+
 			
 sinon.spy MockWebServer, "joinProject"

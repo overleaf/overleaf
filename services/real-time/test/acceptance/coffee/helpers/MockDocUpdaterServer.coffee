@@ -38,5 +38,9 @@ module.exports = MockDocUpdaterServer =
 		app.listen 3003, (error) ->
 			MockDocUpdaterServer.running = true
 			callback(error)
+		.on "error", (error) ->
+			console.error "error starting MockDocUpdaterServer:", error.message
+			process.exit(1)
+
 			
 sinon.spy MockDocUpdaterServer, "getDocument"
