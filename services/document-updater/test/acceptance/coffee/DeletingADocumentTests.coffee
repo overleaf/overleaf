@@ -3,6 +3,7 @@ chai = require("chai")
 chai.should()
 
 MockTrackChangesApi = require "./helpers/MockTrackChangesApi"
+MockProjectHistoryApi = require "./helpers/MockProjectHistoryApi"
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
 
@@ -18,11 +19,13 @@ describe "Deleting a document", ->
 			}]
 			v: @version
 		@result = ["one", "one and a half", "two", "three"]
-		
+
 		sinon.spy MockTrackChangesApi, "flushDoc"
-	
+		sinon.spy MockProjectHistoryApi, "flushProject"
+
 	after ->
 		MockTrackChangesApi.flushDoc.restore()
+		MockProjectHistoryApi.flushProject.restore()
 
 	describe "when the updated doc exists in the doc updater", ->
 		before (done) ->
@@ -60,9 +63,12 @@ describe "Deleting a document", ->
 					.calledWith(@project_id, @doc_id)
 					.should.equal true
 				done()
-		
+
 		it "should flush track changes", ->
 			MockTrackChangesApi.flushDoc.calledWith(@doc_id).should.equal true
+
+		it "should flush project history", ->
+			MockProjectHistoryApi.flushProject.calledWith(@project_id).should.equal true
 
 	describe "when the doc is not in the doc updater", ->
 		before (done) ->
@@ -93,9 +99,9 @@ describe "Deleting a document", ->
 					.calledWith(@project_id, @doc_id)
 					.should.equal true
 				done()
-		
+
 		it "should flush track changes", ->
 			MockTrackChangesApi.flushDoc.calledWith(@doc_id).should.equal true
 
-		
-
+		it "should flush project history", ->
+			MockProjectHistoryApi.flushProject.calledWith(@project_id).should.equal true

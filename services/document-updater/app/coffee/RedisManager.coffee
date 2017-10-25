@@ -31,11 +31,12 @@ MAX_RANGES_SIZE = 3 * MEGABYTES
 
 keys = Settings.redis.documentupdater.key_schema
 historyKeys = Settings.redis.history.key_schema
+projectHistoryKeys = Settings.redis.project_history.key_schema
 
 module.exports = RedisManager =
 	rclient: rclient
 
-	putDocInMemory : (project_id, doc_id, docLines, version, ranges, _callback)->
+	putDocInMemory : (project_id, doc_id, docLines, version, ranges, pathname, _callback)->
 		timer = new metrics.Timer("redis.put-doc")
 		callback = (error) ->
 			timer.done()
@@ -60,6 +61,7 @@ module.exports = RedisManager =
 				multi.set keys.ranges(doc_id:doc_id), ranges
 			else
 				multi.del keys.ranges(doc_id:doc_id)
+			multi.set keys.pathname(doc_id:doc_id), pathname
 			multi.exec (error, result) ->
 				return callback(error) if error?
 				# check the hash computed on the redis server
@@ -85,6 +87,7 @@ module.exports = RedisManager =
 		multi.del keys.docVersion(doc_id:doc_id)
 		multi.del keys.docHash(doc_id:doc_id)
 		multi.del keys.ranges(doc_id:doc_id)
+		multi.del keys.pathname(doc_id:doc_id)
 		multi.del keys.unflushedTime(doc_id:doc_id)
 		multi.exec (error) ->
 			return callback(error) if error?
@@ -105,7 +108,7 @@ module.exports = RedisManager =
 	clearProjectState: (project_id, callback = (error) ->) ->
 		rclient.del keys.projectState(project_id:project_id), callback
 
-	getDoc : (project_id, doc_id, callback = (error, lines, version, ranges, unflushedTime) ->)->
+	getDoc : (project_id, doc_id, callback = (error, lines, version, ranges, pathname, unflushedTime) ->)->
 		timer = new metrics.Timer("redis.get-doc")
 		multi = rclient.multi()
 		multi.get keys.docLines(doc_id:doc_id)
@@ -113,8 +116,9 @@ module.exports = RedisManager =
 		multi.get keys.docHash(doc_id:doc_id)
 		multi.get keys.projectKey(doc_id:doc_id)
 		multi.get keys.ranges(doc_id:doc_id)
+		multi.get keys.pathname(doc_id:doc_id)
 		multi.get keys.unflushedTime(doc_id:doc_id)
-		multi.exec (error, [docLines, version, storedHash, doc_project_id, ranges, unflushedTime])->
+		multi.exec (error, [docLines, version, storedHash, doc_project_id, ranges, pathname, unflushedTime])->
 			timeSpan = timer.done()
 			return callback(error) if error?
 			# check if request took too long and bail out.  only do this for
@@ -143,14 +147,14 @@ module.exports = RedisManager =
 
 			# doc is not in redis, bail out
 			if !docLines?
-				return callback null, docLines, version, ranges
+				return callback null, docLines, version, ranges, pathname, unflushedTime
 
 			# doc should be in project set, check if missing (workaround for missing docs from putDoc)
 			rclient.sadd keys.docsInProject(project_id:project_id), doc_id, (error, result) ->
 				return callback(error) if error?
 				if result isnt 0 # doc should already be in set
 					logger.error project_id: project_id, doc_id: doc_id, doc_project_id: doc_project_id, "doc missing from docsInProject set"
-				callback null, docLines, version, ranges, unflushedTime
+				callback null, docLines, version, ranges, pathname, unflushedTime
 
 	getDocVersion: (doc_id, callback = (error, version) ->) ->
 		rclient.get keys.docVersion(doc_id: doc_id), (error, version) ->
@@ -200,7 +204,7 @@ module.exports = RedisManager =
 
 	DOC_OPS_TTL: 60 * minutes
 	DOC_OPS_MAX_LENGTH: 100
-	updateDocument : (doc_id, docLines, newVersion, appliedOps = [], ranges, callback = (error) ->)->
+	updateDocument : (project_id, doc_id, docLines, newVersion, appliedOps = [], ranges, callback = (error) ->)->
 		RedisManager.getDocVersion doc_id, (error, currentVersion) ->
 			return callback(error) if error?
 			if currentVersion + appliedOps.length != newVersion
@@ -258,9 +262,16 @@ module.exports = RedisManager =
 						writeHash = result?[0]
 						if logHashWriteErrors and writeHash? and writeHash isnt newHash
 							logger.error doc_id: doc_id, writeHash: writeHash, origHash: newHash, docLines:newDocLines, "hash mismatch on updateDocument"
-						# return length of uncompressedHistoryOps queue (index 7)
-						uncompressedHistoryOpsLength = result?[7]
-						return callback(null, uncompressedHistoryOpsLength)
+
+						# length of uncompressedHistoryOps queue (index 7)
+						docUpdateCount = result[7]
+
+						if jsonOps.length > 0 && Settings.apis?.project_history?.enabled
+							rclient.rpush projectHistoryKeys.projectHistoryOps({project_id}), jsonOps..., (error, projectUpdateCount) ->
+								callback null, docUpdateCount, projectUpdateCount
+						else
+							callback null, docUpdateCount
+
 
 	clearUnflushedTime: (doc_id, callback = (error) ->) ->
 		rclient.del keys.unflushedTime(doc_id:doc_id), callback
@@ -276,7 +287,7 @@ module.exports = RedisManager =
 			# Most doc will have empty ranges so don't fill redis with lots of '{}' keys
 			jsonRanges = null
 		return callback null, jsonRanges
-	
+
 	_deserializeRanges: (ranges) ->
 		if !ranges? or ranges == ""
 			return {}

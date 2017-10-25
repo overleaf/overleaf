@@ -11,31 +11,31 @@ RangesManager = require "./RangesManager"
 MAX_UNFLUSHED_AGE = 300 * 1000 # 5 mins, document should be flushed to mongo this time after a change
 
 module.exports = DocumentManager =
-	getDoc: (project_id, doc_id, _callback = (error, lines, version, ranges, unflushedTime, alreadyLoaded) ->) ->
+	getDoc: (project_id, doc_id, _callback = (error, lines, version, ranges, pathname, unflushedTime, alreadyLoaded) ->) ->
 		timer = new Metrics.Timer("docManager.getDoc")
 		callback = (args...) ->
 			timer.done()
 			_callback(args...)
 
-		RedisManager.getDoc project_id, doc_id, (error, lines, version, ranges, unflushedTime) ->
+		RedisManager.getDoc project_id, doc_id, (error, lines, version, ranges, pathname, unflushedTime) ->
 			return callback(error) if error?
 			if !lines? or !version?
 				logger.log {project_id, doc_id}, "doc not in redis so getting from persistence API"
-				PersistenceManager.getDoc project_id, doc_id, (error, lines, version, ranges) ->
+				PersistenceManager.getDoc project_id, doc_id, (error, lines, version, ranges, pathname) ->
 					return callback(error) if error?
 					logger.log {project_id, doc_id, lines, version}, "got doc from persistence API"
-					RedisManager.putDocInMemory project_id, doc_id, lines, version, ranges, (error) ->
+					RedisManager.putDocInMemory project_id, doc_id, lines, version, ranges, pathname, (error) ->
 						return callback(error) if error?
-						callback null, lines, version, ranges, null, false
+						callback null, lines, version, ranges, pathname, null, false
 			else
-				callback null, lines, version, ranges, unflushedTime, true
+				callback null, lines, version, ranges, pathname, unflushedTime, true
 
 	getDocAndRecentOps: (project_id, doc_id, fromVersion, _callback = (error, lines, version, recentOps, ranges) ->) ->
 		timer = new Metrics.Timer("docManager.getDocAndRecentOps")
 		callback = (args...) ->
 			timer.done()
 			_callback(args...)
-		
+
 		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges) ->
 			return callback(error) if error?
 			if fromVersion == -1
@@ -55,9 +55,9 @@ module.exports = DocumentManager =
 			return callback(new Error("No lines were provided to setDoc"))
 
 		UpdateManager = require "./UpdateManager"
-		DocumentManager.getDoc project_id, doc_id, (error, oldLines, version, ranges, unflushedTime, alreadyLoaded) ->
+		DocumentManager.getDoc project_id, doc_id, (error, oldLines, version, ranges, pathname, unflushedTime, alreadyLoaded) ->
 			return callback(error) if error?
-			
+
 			if oldLines? and oldLines.length > 0 and oldLines[0].text?
 				logger.log doc_id: doc_id, project_id: project_id, oldLines: oldLines, newLines: newLines, "document is JSON so not updating"
 				return callback(null)
@@ -115,12 +115,9 @@ module.exports = DocumentManager =
 
 		DocumentManager.flushDocIfLoaded project_id, doc_id, (error) ->
 			return callback(error) if error?
-			
-			# Flush in the background since it requires and http request
-			# to track changes
-			HistoryManager.flushDocChanges project_id, doc_id, (err) ->
-				if err?
-					logger.err {err, project_id, doc_id}, "error flushing to track changes"
+
+			# Flush in the background since it requires a http request
+			HistoryManager.flushChangesAsync project_id, doc_id
 
 			RedisManager.removeDocFromMemory project_id, doc_id, (error) ->
 				return callback(error) if error?
@@ -138,10 +135,10 @@ module.exports = DocumentManager =
 				return callback(new Errors.NotFoundError("document not found: #{doc_id}"))
 			RangesManager.acceptChanges change_ids, ranges, (error, new_ranges) ->
 				return callback(error) if error?
-				RedisManager.updateDocument doc_id, lines, version, [], new_ranges, (error) ->
+				RedisManager.updateDocument project_id, doc_id, lines, version, [], new_ranges, (error) ->
 					return callback(error) if error?
 					callback()
-	
+
 	deleteComment: (project_id, doc_id, comment_id, _callback = (error) ->) ->
 		timer = new Metrics.Timer("docManager.deleteComment")
 		callback = (args...) ->
@@ -154,12 +151,12 @@ module.exports = DocumentManager =
 				return callback(new Errors.NotFoundError("document not found: #{doc_id}"))
 			RangesManager.deleteComment comment_id, ranges, (error, new_ranges) ->
 				return callback(error) if error?
-				RedisManager.updateDocument doc_id, lines, version, [], new_ranges, (error) ->
+				RedisManager.updateDocument project_id, doc_id, lines, version, [], new_ranges, (error) ->
 					return callback(error) if error?
 					callback()
 
 	getDocAndFlushIfOld: (project_id, doc_id, callback = (error, doc) ->) ->
-		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges, unflushedTime, alreadyLoaded) ->
+		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges, pathname, unflushedTime, alreadyLoaded) ->
 			return callback(error) if error?
 			# if doc was already loaded see if it needs to be flushed
 			if alreadyLoaded and unflushedTime? and (Date.now() - unflushedTime) > MAX_UNFLUSHED_AGE
@@ -172,7 +169,7 @@ module.exports = DocumentManager =
 	getDocWithLock: (project_id, doc_id, callback = (error, lines, version) ->) ->
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.getDoc, project_id, doc_id, callback
-		
+
 	getDocAndRecentOpsWithLock: (project_id, doc_id, fromVersion, callback = (error, lines, version) ->) ->
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.getDocAndRecentOps, project_id, doc_id, fromVersion, callback
@@ -184,7 +181,7 @@ module.exports = DocumentManager =
 	setDocWithLock: (project_id, doc_id, lines, source, user_id, undoing, callback = (error) ->) ->
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.setDoc, project_id, doc_id, lines, source, user_id, undoing, callback
-		
+
 	flushDocIfLoadedWithLock: (project_id, doc_id, callback = (error) ->) ->
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.flushDocIfLoaded, project_id, doc_id, callback

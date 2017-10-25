@@ -19,7 +19,7 @@ describe "UpdateManager", ->
 			"./Metrics": @Metrics =
 				Timer: class Timer
 					done: sinon.stub()
-			"settings-sharelatex": Settings = {}
+			"settings-sharelatex": @Settings = {}
 			"./DocumentManager": @DocumentManager = {}
 			"./RangesManager": @RangesManager = {}
 			"./Profiler": class Profiler
@@ -60,14 +60,14 @@ describe "UpdateManager", ->
 
 				it "should process the outstanding updates", ->
 					@UpdateManager.processOutstandingUpdates.calledWith(@project_id, @doc_id).should.equal true
-					
+
 				it "should do everything with the lock acquired", ->
 					@UpdateManager.processOutstandingUpdates.calledAfter(@LockManager.tryLock).should.equal true
 					@UpdateManager.processOutstandingUpdates.calledBefore(@LockManager.releaseLock).should.equal true
 
 				it "should continue processing new updates that may have come in", ->
 					@UpdateManager.continueProcessingUpdatesWithLock.calledWith(@project_id, @doc_id).should.equal true
-				
+
 				it "should return the callback", ->
 					@callback.called.should.equal true
 
@@ -78,7 +78,7 @@ describe "UpdateManager", ->
 
 				it "should free the lock", ->
 					@LockManager.releaseLock.calledWith(@doc_id, @lockValue).should.equal true
-					
+
 				it "should return the error in the callback", ->
 					@callback.calledWith(@error).should.equal true
 
@@ -93,7 +93,7 @@ describe "UpdateManager", ->
 
 			it "should not process the updates", ->
 				@UpdateManager.processOutstandingUpdates.called.should.equal false
-				
+
 	describe "continueProcessingUpdatesWithLock", ->
 		describe "when there are outstanding updates", ->
 			beforeEach ->
@@ -137,7 +137,7 @@ describe "UpdateManager", ->
 					@UpdateManager.applyUpdate
 						.calledWith(@project_id, @doc_id, update)
 						.should.equal true
-		
+
 			it "should call the callback", ->
 				@callback.called.should.equal true
 
@@ -154,7 +154,7 @@ describe "UpdateManager", ->
 
 			it "should call the callback", ->
 				@callback.called.should.equal true
-				
+
 	describe "applyUpdate", ->
 		beforeEach ->
 			@update = {op: [{p: 42, i: "foo"}]}
@@ -163,23 +163,27 @@ describe "UpdateManager", ->
 			@lines = ["original", "lines"]
 			@ranges = { entries: "mock", comments: "mock" }
 			@updated_ranges = { entries: "updated", comments: "updated" }
-			@appliedOps = ["mock-applied-ops"]
-			@DocumentManager.getDoc = sinon.stub().yields(null, @lines, @version, @ranges)
+			@appliedOps = [ {v: 42, op: "mock-op-42"}, { v: 45, op: "mock-op-45" }]
+			@doc_ops_length = sinon.stub()
+			@project_ops_length = sinon.stub()
+			@pathname = '/a/b/c.tex'
+			@DocumentManager.getDoc = sinon.stub().yields(null, @lines, @version, @ranges, @pathname)
 			@RangesManager.applyUpdate = sinon.stub().yields(null, @updated_ranges)
 			@ShareJsUpdateManager.applyUpdate = sinon.stub().yields(null, @updatedDocLines, @version, @appliedOps)
-			@RedisManager.updateDocument = sinon.stub().yields()
+			@RedisManager.updateDocument = sinon.stub().yields(null, @doc_ops_length, @project_ops_length)
 			@RealTimeRedisManager.sendData = sinon.stub()
-			@HistoryManager.recordAndFlushHistoryOps = sinon.stub().callsArg(4)
-		
+			@UpdateManager._addProjectHistoryMetadataToOps = sinon.stub()
+			@HistoryManager.recordAndFlushHistoryOps = sinon.stub().callsArg(5)
+
 		describe "normally", ->
 			beforeEach ->
 				@UpdateManager.applyUpdate @project_id, @doc_id, @update, @callback
-			
+
 			it "should apply the updates via ShareJS", ->
 				@ShareJsUpdateManager.applyUpdate
 					.calledWith(@project_id, @doc_id, @update, @lines, @version)
 					.should.equal true
-			
+
 			it "should update the ranges", ->
 				@RangesManager.applyUpdate
 					.calledWith(@project_id, @doc_id, @ranges, @appliedOps, @updatedDocLines)
@@ -187,12 +191,17 @@ describe "UpdateManager", ->
 
 			it "should save the document", ->
 				@RedisManager.updateDocument
-					.calledWith(@doc_id, @updatedDocLines, @version, @appliedOps, @updated_ranges)
+					.calledWith(@project_id, @doc_id, @updatedDocLines, @version, @appliedOps, @updated_ranges)
 					.should.equal true
-			
+
+			it "shoould add metadata to the ops" , ->
+				@UpdateManager._addProjectHistoryMetadataToOps
+					.calledWith(@appliedOps, @pathname, @updatedDocLines)
+					.should.equal true
+
 			it "should push the applied ops into the history queue", ->
 				@HistoryManager.recordAndFlushHistoryOps
-					.calledWith(@project_id, @doc_id, @appliedOps)
+					.calledWith(@project_id, @doc_id, @appliedOps, @doc_ops_length, @project_ops_length)
 					.should.equal true
 
 			it "should call the callback", ->
@@ -207,16 +216,16 @@ describe "UpdateManager", ->
 				@ShareJsUpdateManager.applyUpdate
 					.calledWith(@project_id, @doc_id, @update)
 					.should.equal true
-				
+
 				# \uFFFD is 'replacement character'
 				@update.op[0].i.should.equal "\uFFFD\uFFFD"
-		
+
 		describe "with an error", ->
 			beforeEach ->
 				@error = new Error("something went wrong")
 				@ShareJsUpdateManager.applyUpdate = sinon.stub().yields(@error)
 				@UpdateManager.applyUpdate @project_id, @doc_id, @update, @callback
-			
+
 			it "should call RealTimeRedisManager.sendData with the error", ->
 				@RealTimeRedisManager.sendData
 					.calledWith({
@@ -228,7 +237,29 @@ describe "UpdateManager", ->
 
 			it "should call the callback with the error", ->
 				@callback.calledWith(@error).should.equal true
-			
+
+	describe "_addProjectHistoryMetadataToOps", ->
+		it "should add pathname and doc_length metadata to the ops", ->
+			lines = [
+				'some'
+				'test'
+				'data'
+			]
+			appliedOps = [ {v: 42, op: "mock-op-42"}, { v: 45, op: "mock-op-45" }]
+			@UpdateManager._addProjectHistoryMetadataToOps(appliedOps, @pathname, lines)
+			appliedOps.should.deep.equal [{
+				v: 42
+				op: "mock-op-42"
+				meta:
+					pathname: @pathname
+					doc_length: 14
+			}, {
+				v: 45
+				op: "mock-op-45"
+				meta:
+					pathname: @pathname
+					doc_length: 14
+			}]
 
 	describe "lockUpdatesAndDo", ->
 		beforeEach ->
@@ -283,7 +314,7 @@ describe "UpdateManager", ->
 
 			it "should free the lock", ->
 				@LockManager.releaseLock.calledWith(@doc_id, @lockValue).should.equal true
-				
+
 			it "should return the error in the callback", ->
 				@callback.calledWith(@error).should.equal true
 
@@ -295,7 +326,7 @@ describe "UpdateManager", ->
 
 			it "should free the lock", ->
 				@LockManager.releaseLock.calledWith(@doc_id, @lockValue).should.equal true
-				
+
 			it "should return the error in the callback", ->
 				@callback.calledWith(@error).should.equal true
 

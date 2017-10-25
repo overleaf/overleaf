@@ -41,7 +41,7 @@ pipeline {
     stage('Acceptance Tests') {
       steps {
         sh 'docker pull sharelatex/acceptance-test-runner'
-        sh 'docker run --rm -v $(pwd):/app sharelatex/acceptance-test-runner'
+        sh 'docker run --rm -e SHARELATEX_ENABLE_PROJECT_HISTORY=true -v $(pwd):/app sharelatex/acceptance-test-runner'
       }
     }
     stage('Package') {

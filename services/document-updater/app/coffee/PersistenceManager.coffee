@@ -13,7 +13,7 @@ request = (require("requestretry")).defaults({
 MAX_HTTP_REQUEST_LENGTH = 5000 # 5 seconds
 
 module.exports = PersistenceManager =
-	getDoc: (project_id, doc_id, _callback = (error, lines, version, ranges) ->) ->
+	getDoc: (project_id, doc_id, _callback = (error, lines, version, ranges, pathname) ->) ->
 		timer = new Metrics.Timer("persistenceManager.getDoc")
 		callback = (args...) ->
 			timer.done()
@@ -42,7 +42,7 @@ module.exports = PersistenceManager =
 					return callback(new Error("web API response had no doc lines"))
 				if !body.version? or not body.version instanceof Number
 					return callback(new Error("web API response had no valid doc version"))
-				return callback null, body.lines, body.version, body.ranges
+				return callback null, body.lines, body.version, body.ranges, body.pathname
 			else if res.statusCode == 404
 				return callback(new Errors.NotFoundError("doc not not found: #{url}"))
 			else

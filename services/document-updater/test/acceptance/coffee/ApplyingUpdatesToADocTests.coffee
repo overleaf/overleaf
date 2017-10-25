@@ -8,6 +8,7 @@ rclient_history = require("redis-sharelatex").createClient(Settings.redis.histor
 rclient_du = require("redis-sharelatex").createClient(Settings.redis.documentupdater)
 Keys = Settings.redis.documentupdater.key_schema
 HistoryKeys = Settings.redis.history.key_schema
+ProjectHistoryKeys = Settings.redis.project_history.key_schema
 
 MockTrackChangesApi = require "./helpers/MockTrackChangesApi"
 MockWebApi = require "./helpers/MockWebApi"
@@ -58,6 +59,11 @@ describe "Applying updates to a doc", ->
 					result.should.equal 1
 					done()
 
+		it "should push the applied updates to the project history changes api", (done) ->
+			rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
+				throw error if error?
+				JSON.parse(updates[0]).op.should.deep.equal @update.op
+				done()
 
 	describe "when the document is loaded", ->
 		before (done) ->
@@ -88,6 +94,12 @@ describe "Applying updates to a doc", ->
 				rclient_history.sismember HistoryKeys.docsWithHistoryOps({@project_id}), @doc_id, (error, result) =>
 					result.should.equal 1
 					done()
+
+		it "should push the applied updates to the project history changes api", (done) ->
+			rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
+				JSON.parse(updates[0]).op.should.deep.equal @update.op
+				done()
+
 
 	describe "when the document has been deleted", ->
 		describe "when the ops come in a single linear order", ->
@@ -136,7 +148,7 @@ describe "Applying updates to a doc", ->
 					rclient_history.sismember HistoryKeys.docsWithHistoryOps({@project_id}), @doc_id, (error, result) =>
 						result.should.equal 1
 						done()
-			
+
 			it "should store the doc ops in the correct order", (done) ->
 				rclient_du.lrange Keys.docOps({doc_id: @doc_id}), 0, -1, (error, updates) =>
 					updates = (JSON.parse(u) for u in updates)
@@ -181,7 +193,7 @@ describe "Applying updates to a doc", ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 			@broken_update = { doc_id: @doc_id, v: @version, op: [d: "not the correct content", p: 0 ] }
 			MockWebApi.insertDoc @project_id, @doc_id, {lines: @lines, version: @version}
-	
+
 			DocUpdaterClient.subscribeToAppliedOps @messageCallback = sinon.stub()
 
 			DocUpdaterClient.sendUpdate @project_id, @doc_id, @broken_update, (error) ->
@@ -192,14 +204,14 @@ describe "Applying updates to a doc", ->
 			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
 				doc.lines.should.deep.equal @lines
 				done()
-		
+
 		it "should send a message with an error", ->
 			@messageCallback.called.should.equal true
 			[channel, message] = @messageCallback.args[0]
 			channel.should.equal "applied-ops"
 			JSON.parse(message).should.deep.equal {
 				project_id: @project_id,
-				doc_id: @doc_id, 
+				doc_id: @doc_id,
 				error:'Delete component \'not the correct content\' does not match deleted text \'one\ntwo\nthree\''
 			}
 
@@ -240,7 +252,7 @@ describe "Applying updates to a doc", ->
 				lines: @lines
 			}
 
-			update = 
+			update =
 				doc: @doc_id
 				op: @update.op
 				v: 0
@@ -252,12 +264,12 @@ describe "Applying updates to a doc", ->
 			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
 				doc.lines.should.deep.equal @result
 				done()
-	
+
 	describe "when the sending duplicate ops", ->
 		before (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 			MockWebApi.insertDoc @project_id, @doc_id, {lines: @lines, version: @version}
-	
+
 			DocUpdaterClient.subscribeToAppliedOps @messageCallback = sinon.stub()
 
 			# One user delete 'one', the next turns it into 'once'. The second becomes a NOP.
@@ -292,7 +304,7 @@ describe "Applying updates to a doc", ->
 			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, doc) =>
 				doc.lines.should.deep.equal @result
 				done()
-		
+
 		it "should return a message about duplicate ops", ->
 			@messageCallback.calledTwice.should.equal true
 			@messageCallback.args[0][0].should.equal "applied-ops"

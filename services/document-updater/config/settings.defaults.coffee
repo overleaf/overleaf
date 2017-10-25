@@ -14,6 +14,9 @@ module.exports =
 			pass: "password"
 		trackchanges:
 			url: "http://localhost:3015"
+		project_history:
+			enabled: process.env.SHARELATEX_ENABLE_PROJECT_HISTORY == 'true'
+			url: "http://localhost:3054"
 
 	redis:
 		realtime:
@@ -41,6 +44,7 @@ module.exports =
 				projectKey: ({doc_id}) -> "ProjectId:#{doc_id}"
 				docsInProject: ({project_id}) -> "DocsIn:#{project_id}"
 				ranges: ({doc_id}) -> "Ranges:#{doc_id}"
+				pathname: ({doc_id}) -> "Pathname:#{doc_id}"
 				projectState: ({project_id}) -> "ProjectState:#{project_id}"
 				unflushedTime: ({doc_id}) -> "UnflushedTime:#{doc_id}"
 			# cluster: [{
@@ -64,6 +68,10 @@ module.exports =
 			key_schema:
 				uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
 				docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:#{project_id}"
+
+		project_history:
+			key_schema:
+				projectHistoryOps: ({project_id}) -> "ProjectHistory:Ops:#{project_id}"
 			# cluster: [{
 			# 	port: "7000"
 			# 	host: "localhost"

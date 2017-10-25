@@ -4,6 +4,7 @@ RealTimeRedisManager = require "./RealTimeRedisManager"
 ShareJsUpdateManager = require "./ShareJsUpdateManager"
 HistoryManager = require "./HistoryManager"
 Settings = require('settings-sharelatex')
+_ = require("underscore")
 async = require("async")
 logger = require('logger-sharelatex')
 Metrics = require "./Metrics"
@@ -69,7 +70,7 @@ module.exports = UpdateManager =
 		profile = new Profiler("applyUpdate", {project_id, doc_id})
 		UpdateManager._sanitizeUpdate update
 		profile.log("sanitizeUpdate")
-		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges) ->
+		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges, pathname) ->
 			profile.log("getDoc")
 			return callback(error) if error?
 			if !lines? or !version?
@@ -78,15 +79,15 @@ module.exports = UpdateManager =
 				profile.log("sharejs.applyUpdate")
 				return callback(error) if error?
 				RangesManager.applyUpdate project_id, doc_id, ranges, appliedOps, updatedDocLines, (error, new_ranges) ->
+					UpdateManager._addProjectHistoryMetadataToOps(appliedOps, pathname, updatedDocLines)
 					profile.log("RangesManager.applyUpdate")
 					return callback(error) if error?
-					RedisManager.updateDocument doc_id, updatedDocLines, version, appliedOps, new_ranges, (error, historyOpsLength) ->
+					RedisManager.updateDocument project_id, doc_id, updatedDocLines, version, appliedOps, new_ranges, (error, doc_ops_length, project_ops_length) ->
 						profile.log("RedisManager.updateDocument")
 						return callback(error) if error?
-						HistoryManager.recordAndFlushHistoryOps project_id, doc_id, appliedOps, historyOpsLength, (error) ->
+						HistoryManager.recordAndFlushHistoryOps project_id, doc_id, appliedOps, doc_ops_length, project_ops_length, (error) ->
 							profile.log("recordAndFlushHistoryOps")
-							return callback(error) if error?
-							callback()
+							callback(error)
 
 	lockUpdatesAndDo: (method, project_id, doc_id, args..., callback) ->
 		profile = new Profiler("lockUpdatesAndDo", {project_id, doc_id})
@@ -109,15 +110,15 @@ module.exports = UpdateManager =
 	_handleErrorInsideLock: (doc_id, lockValue, original_error, callback = (error) ->) ->
 		LockManager.releaseLock doc_id, lockValue, (lock_error) ->
 			callback(original_error)
-	
+
 	_sanitizeUpdate: (update) ->
 		# In Javascript, characters are 16-bits wide. It does not understand surrogates as characters.
-		# 
+		#
 		# From Wikipedia (http://en.wikipedia.org/wiki/Plane_(Unicode)#Basic_Multilingual_Plane):
 		# "The High Surrogates (U+D800–U+DBFF) and Low Surrogate (U+DC00–U+DFFF) codes are reserved
 		# for encoding non-BMP characters in UTF-16 by using a pair of 16-bit codes: one High Surrogate
 		# and one Low Surrogate. A single surrogate code point will never be assigned a character.""
-		# 
+		#
 		# The main offender seems to be \uD835 as a stand alone character, which would be the first
 		# 16-bit character of a blackboard bold character (http://www.fileformat.info/info/unicode/char/1d400/index.htm).
 		# Something must be going on client side that is screwing up the encoding and splitting the
@@ -128,3 +129,12 @@ module.exports = UpdateManager =
 				op.i = op.i.replace(/[\uD800-\uDFFF]/g, "\uFFFD")
 		return update
 
+	_addProjectHistoryMetadataToOps: (ops, pathname, lines) ->
+		doc_length = _.reduce lines,
+			(chars, line) -> chars + line.length,
+			0
+		doc_length += lines.length - 1  # count newline characters
+		ops.forEach (op) ->
+			op.meta ||= {}
+			op.meta.pathname = pathname
+			op.meta.doc_length = doc_length
