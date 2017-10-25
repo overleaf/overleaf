@@ -6,6 +6,7 @@ sinon = require('sinon')
 modulePath = path.join __dirname, "../../../../app/js/Features/Collaborators/CollaboratorsHandler"
 expect = require("chai").expect
 Errors = require "../../../../app/js/Features/Errors/Errors.js"
+ObjectId = require('mongojs').ObjectId
 
 describe "CollaboratorsHandler", ->
 	beforeEach ->
@@ -404,3 +405,29 @@ describe "CollaboratorsHandler", ->
 
 			it 'should not call ProjectEditorHandler.buildOwnerAndMembersViews', ->
 				@ProjectEditorHandler.buildOwnerAndMembersViews.callCount.should.equal 0
+
+	describe 'userIsTokenMember', ->
+		beforeEach ->
+			@user_id = ObjectId()
+			@project_id = ObjectId()
+			@project = {_id: @project_id}
+			@Project.findOne = sinon.stub().callsArgWith(2, null, @project)
+
+		it 'should check the database', (done) ->
+			@CollaboratorHandler.userIsTokenMember @user_id, @project_id, (err, isTokenMember) =>
+				@Project.findOne.callCount.should.equal 1
+				done()
+
+		it 'should return true when the project is found', (done) ->
+			@CollaboratorHandler.userIsTokenMember @user_id, @project_id, (err, isTokenMember) =>
+				expect(err).to.not.exist
+				expect(isTokenMember).to.equal true
+				done()
+
+		it 'should return false when the project is not found', (done) ->
+			@project = null
+			@Project.findOne = sinon.stub().callsArgWith(2, null, @project)
+			@CollaboratorHandler.userIsTokenMember @user_id, @project_id, (err, isTokenMember) =>
+				expect(err).to.not.exist
+				expect(isTokenMember).to.equal false
+				done()
