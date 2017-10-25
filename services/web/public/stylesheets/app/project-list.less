@@ -18,8 +18,55 @@
 }
 
 .project-list-page {
-	position: relative;
+	position: absolute;
+	top: @header-height;
+	bottom: @footer-height;
+	padding-top: 0;
+	padding-bottom: 0;
+	width: 100%;
+	overflow-x: hidden;
+	overflow-y: auto;
 }
+
+.project-list-content when (@is-overleaf) {
+	.container-fluid;
+	margin: 0;
+	height: 100%;
+}
+
+.project-list-content when (@is-overleaf = false) {
+	.container;
+}
+
+.sidebar-new-proj-btn when (@is-overleaf) {
+	.btn-block;
+}
+
+	.project-list-row when (@is-overleaf) {
+		height: 100%;
+	}
+		.project-list-container when (@is-overleaf) {
+			height: 100%;
+		}
+		.project-list-sidebar {
+			background-color: @sidebar-bg;
+			padding-top: @content-margin-vertical;
+			padding-bottom: @content-margin-vertical;
+		} 
+
+		.project-list-sidebar when (@is-overleaf) {
+			height: 100%;
+			overflow-x: hidden;
+			overflow-y: auto;
+			-ms-overflow-style: -ms-autohiding-scrollbar;
+		}
+
+		.project-list-main {
+			padding-top: @content-margin-vertical;
+			padding-bottom: @content-margin-vertical;
+			height: 100%;
+			overflow: hidden;
+		}
 
 .project-header {
 	.btn-group > .btn {
@@ -48,6 +95,9 @@
 	}
 	p {
 		margin-bottom: @line-height-computed / 4;
+		&.small {
+			color: @sidebar-color;
+		}
 	}
 }
 
@@ -76,27 +126,38 @@
 }
 
 ul.folders-menu {
-	margin: 0;
+	margin: @folders-menu-margin;
 	.subdued {
 		color: @gray-light;
 	}
 	> li {
 		cursor: pointer;
-		line-height: 1.8;
 		position: relative;
 		> a {
+			display: block;
+			color: @sidebar-link-color;
+			padding: @folders-menu-item-v-padding @folders-menu-item-h-padding;
+			border-bottom: solid 1px transparent;
+			&:hover {
+				background-color: @sidebar-hover-bg;
+				text-decoration: @sidebar-hover-text-decoration;
+			}
+			&:focus {
+				text-decoration: none;
+			}
+		}
+		> a when (@is-overleaf = false) {
 			font-size: 0.9rem;
-			color: #333;
-			padding: (@line-height-computed / 4);
-			display: inline-block;
-			line-height: 1.2;
+		}
+		&.separator {
+			padding: @folders-menu-item-v-padding @folders-menu-item-h-padding;
+			cursor: auto;
 		}
 	}
 	> li.active {
-		//border-right: 4px solid @red;
-		background-color: @link-color;
-		border-radius: @border-radius-small;
+		border-radius: @sidebar-active-border-radius;
 		> a {
+			background-color: @sidebar-active-bg;
 			font-weight: 700;
 			color: white;
 			.subdued {
@@ -108,10 +169,13 @@ ul.folders-menu {
 		color: @gray;
 	}
 	h2 {
-		margin-top: @line-height-computed / 2;
-		margin-bottom: @line-height-computed / 4;
-		font-size: @font-size-base;
-		font-weight: 500;
+		margin-top: @folders-title-margin-top;
+		margin-bottom: @folders-title-margin-bottom;
+		font-size: @folders-title-font-size;
+		color: @folders-title-color;
+		text-transform: @folders-title-text-transform;
+		padding: @folders-title-padding;
+		font-weight: @folders-title-font-weight;
 		font-family: @font-family-sans-serif;
 	}
 	> li.tag {
@@ -120,7 +184,7 @@ ul.folders-menu {
 				color: white;
 				border-color: white;
 				&:hover {
-					background-color: darken(@brand-primary, 10%);
+					background-color: @folders-tag-menu-active-hover;
 				}
 			}
 		}
@@ -128,7 +192,7 @@ ul.folders-menu {
 			font-style: italic;
 			margin-bottom: @line-height-computed / 4;
 			a {
-				line-height: 1.7;
+				line-height: @folders-untagged-line-height;
 				&:hover,
 				&:focus {
 					text-decoration: none;
@@ -140,7 +204,7 @@ ul.folders-menu {
 		}
 		&:hover {
 			&:not(.active) {
-				background-color: darken(@gray-lightest, 2%);
+				background-color: @folders-tag-hover;
 			}
 			.tag-menu {
 				display: block
@@ -148,30 +212,23 @@ ul.folders-menu {
 		}
 		&:not(.active) {
 			.tag-menu > a:hover {
-				background-color: @gray-light;
+				background-color: @folders-tag-menu-hover;
 			}
 		}
 		a.tag-name {
-			padding: 2px (@line-height-computed / 4);
-			margin-right: 18px;
-			display: inline-block;
+			padding: @folders-tag-padding;
+			display: @folders-tag-display;
 			position: relative;
-			i {
-				position: absolute;
-				top: 5px;
-				left: 6px;
-			}
 			span.name {
-				display: inline-block;
-				padding-left: 22px;
-				line-height: 1.4;
+				padding-left: 0.5em;
+				line-height: @folders-tag-line-height;
 			}
 		}
 		.tag-menu {
 			> a {
-				border: 1px solid @gray;
+				border: 1px solid @folders-tag-border-color;
 				border-radius: @border-radius-small;
-				color: @text-color;
+				color: @folders-tag-menu-color;
 				display: block;
 				width: 16px;
 				height: 16px;
@@ -184,7 +241,8 @@ ul.folders-menu {
 			}
 			display: none;
 			position: absolute;
-			top: 6px;
+			top: 50%;
+			margin-top: -8px; // Half the element height.
 			right: 4px;
 			&.open {
 				display: block;
@@ -204,32 +262,34 @@ ul.structured-list {
 	margin: 0;
 	overflow: hidden;
 	overflow-y: auto;
+	-ms-overflow-style: -ms-autohiding-scrollbar;
 	li {
-		border-bottom: 1px solid @gray-lightest;
+		border-bottom: 1px solid @structured-list-border-color;
 		padding: (@line-height-computed / 4) 0;
-		&:first-child {
-			.header {
-				font-size: 1rem;
-			}
-		}
+		
 		&:last-child {
 			border-bottom: 0 none;
 		}
 		&:hover {
-			background-color: @gray-lightest;
+			background-color: @structured-list-hover-color;
 		}
-		&:first-child:hover {
-			background-color: white;
+		&:first-child {
+			border-bottom-color: @structured-header-border-color;
+			&:hover {
+				background-color: transparent;
+			}
 		}
 		a {
-			color: darken(@blue, 10%);
+			color: @structured-list-link-color;
 		}
-		.header {
+		.header when (@is-overleaf = true) {
+			font-weight: 600;
+		}
+
+		.header when (@is-overleaf = false) {
 			text-transform: uppercase;
 		}
-		.select-item, .select-all {
-			display: inline-block;
-		}
+		
 		.select-item, .select-all {
 			position: absolute;
 			left: @line-height-computed;
@@ -245,17 +305,25 @@ ul.structured-list {
 	}
 }
 
+.project-list-card when (@is-overleaf) {
+	padding: 0 (@line-height-computed / 4);
+}
+
 ul.project-list {
 	li {
-		.last-modified, .owner {
+		.last-modified when (@is-overleaf = false) {
 			font-size: .8rem;
 		}
-		.owner {
+		.owner when (@is-overleaf = false) {
+			font-size: .8rem;
+		}
+		.owner when (@is-overleaf = false) {
 			margin-right: 0;
 		}
 		.projectName {
 			margin-right: @line-height-computed / 4;
 		}
+
 		.tag-label {
 			margin-left: @line-height-computed / 4;
 			position: relative;
@@ -267,6 +335,12 @@ ul.project-list {
 				display: inline-block;
 				padding-top: 0.3em;
 				color: #FFF;
+				border-radius: @tag-border-radius;
+				background-color: @tag-bg-color;
+				&:hover,
+				&:focus {
+					background-color: @tag-bg-hover-color;
+				}
 			}
 			.tag-label-name {
 				padding-right: 0.3em;

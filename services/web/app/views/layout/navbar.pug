@@ -4,11 +4,11 @@ nav.navbar.navbar-default
 			button.navbar-toggle(ng-init="navCollapsed = true", ng-click="navCollapsed = !navCollapsed", ng-class="{active: !navCollapsed}")
 				i.fa.fa-bars
 			if settings.nav.custom_logo
-				a(href='/', style='background-image:url("'+settings.nav.custom_logo+'")').navbar-brand
+				a(href='/', aria-label=settings.appName, style='background-image:url("'+settings.nav.custom_logo+'")').navbar-brand
 			else if (nav.title)
-				a(href='/').navbar-title #{nav.title}
+				a(href='/', aria-label=settings.appName).navbar-title #{nav.title}
 			else
-				a(href='/').navbar-brand
+				a(href='/', aria-label=settings.appName).navbar-brand
 
 		.navbar-collapse.collapse(collapse="navCollapsed")
 

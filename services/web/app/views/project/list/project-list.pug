@@ -7,6 +7,7 @@
 			.form-group.has-feedback.has-feedback-left.col-md-7.col-xs-12
 				input.form-control.col-md-7.col-xs-12(
 					placeholder=translate('search_projects')+"…",
+					aria-label=translate('search_projects')+"…",
 					autofocus='autofocus',
 					ng-model="searchText.value",
 					focus-on='search:clear',
@@ -127,6 +128,7 @@
 							input.select-all(
 								select-all,
 								type="checkbox"
+								aria-label=translate('select_all_projects')
 							)
 							span.header.clickable(ng-click="changePredicate('name')") #{translate("title")}
 								i.tablesort.fa(ng-class="getSortIconClass('name')")
@@ -147,6 +149,7 @@
 								type="checkbox",
 								ng-model="project.selected"
 								stop-propagation="click"
+								aria-label=translate('select_project') + " '{{ project.name }}'"
 							)
 							span
 								a.projectName(

@@ -16,7 +16,7 @@ block content
 		};
 
 	.content.content-alt.project-list-page(ng-controller="ProjectPageController")
-		.container
+		.project-list-content
 			.announcements(
 				ng-controller="AnnouncementsController"
 				ng-class="{ 'announcements-open': ui.isOpen }"
@@ -57,16 +57,16 @@ block content
 								ng-click="showAll();"
 							) Show all
 
-			.row(ng-cloak)
-				span(ng-if="projects.length > 0")
-					aside.col-md-2.col-xs-3
+			.row.project-list-row(ng-cloak)
+				.project-list-container(ng-if="projects.length > 0")
+					aside.project-list-sidebar.col-md-2.col-xs-3
 						include ./list/side-bar
 
-					.col-md-10.col-xs-9
+					.project-list-main.col-md-10.col-xs-9
 						include ./list/notifications
 						include ./list/project-list
 				
-				span(ng-if="projects.length === 0")
+				.project-list-empty(ng-if="projects.length === 0")
 					.col-md-offset-2.col-md-8.col-md-offset-2.col-xs-8
 						include ./list/empty-project-list
 
