@@ -23,6 +23,7 @@ PackageVersions = require("../../infrastructure/PackageVersions")
 AnalyticsManager = require "../Analytics/AnalyticsManager"
 Sources = require "../Authorization/Sources"
 TokenAccessHandler = require '../TokenAccess/TokenAccessHandler'
+CollaboratorsHandler = require '../Collaborators/CollaboratorsHandler'
 
 module.exports = ProjectController =
 
@@ -247,6 +248,11 @@ module.exports = ProjectController =
 						return cb(null, false)
 					else
 						return cb(null, true)
+			isTokenMember: (cb) ->
+				cb = underscore.once(cb)
+				if !user_id?
+					return cb()
+				CollaboratorsHandler.userIsTokenMember user_id, project_id, cb
 		}, (err, results)->
 			if err?
 				logger.err err:err, "error getting details for project page"
@@ -260,6 +266,7 @@ module.exports = ProjectController =
 			logger.log project_id:project_id, daysSinceLastUpdated:daysSinceLastUpdated, "got db results for loading editor"
 
 			token = TokenAccessHandler.getRequestToken(req, project_id)
+			isTokenMember = results.isTokenMember
 			AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, token, (error, privilegeLevel)->
 				return next(error) if error?
 				if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
@@ -304,6 +311,7 @@ module.exports = ProjectController =
 					chatUrl: Settings.apis.chat.url
 					anonymous: anonymous
 					anonymousAccessToken: req._anonymousAccessToken
+					isTokenMember: isTokenMember
 					languages: Settings.languages
 					themes: THEME_LIST
 					maxDocLength: Settings.max_doc_length

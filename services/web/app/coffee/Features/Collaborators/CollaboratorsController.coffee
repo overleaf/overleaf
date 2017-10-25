@@ -38,3 +38,13 @@ module.exports = CollaboratorsController =
 				logger.err {projectId}, "error getting members for project"
 				return next(err)
 			res.json({members: members})
+
+	getTokenMembers: (req, res, next) ->
+		projectId = req.params.Project_id
+		logger.log {projectId}, "getting token members for project"
+		CollaboratorsHandler.getTokenMembers projectId, (err, tokenMembers) ->
+			tokenMembers = tokenMembers.slice(0, 100)
+			if err?
+				logger.err {projectId}, "error getting token members for project"
+				return next(err)
+			res.json({tokenMembers})

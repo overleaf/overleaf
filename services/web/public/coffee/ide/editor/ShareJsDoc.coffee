@@ -25,6 +25,7 @@ define [
 					if @track_changes
 						update.meta ?= {}
 						update.meta.tc = @track_changes_id_seeds.inflight
+					# console.log ">> update", @doc_id, update
 					@socket.emit "applyOtUpdate", @doc_id, update, (error) =>
 						return @_handleError(error) if error?
 				state: "ok"

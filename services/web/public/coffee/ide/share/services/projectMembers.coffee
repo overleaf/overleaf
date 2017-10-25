@@ -25,5 +25,12 @@ define [
 						"X-Csrf-Token": window.csrfToken
 				})
 
+			getTokenMembers: () ->
+				$http.get("/project/#{ide.project_id}/token_members", {
+					json: true
+					headers:
+						"X-Csrf-Token": window.csrfToken
+				})
+
 		}
 	]

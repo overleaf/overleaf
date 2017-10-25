@@ -86,6 +86,7 @@ define [
 
 		$scope.settings = window.userSettings
 		$scope.anonymous = window.anonymous
+		$scope.isTokenMember = window.isTokenMember
 
 		$scope.chat = {}
 

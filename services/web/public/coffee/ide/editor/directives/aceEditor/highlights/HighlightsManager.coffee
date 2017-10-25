@@ -66,6 +66,7 @@ define [
 			for annotation in @$scope.highlights or []
 				do (annotation) =>
 					colorScheme = ColorManager.getColorScheme(annotation.hue, @element)
+					console.log ">> color", colorScheme
 					if annotation.cursor?
 						@labels.push {
 							text: annotation.label

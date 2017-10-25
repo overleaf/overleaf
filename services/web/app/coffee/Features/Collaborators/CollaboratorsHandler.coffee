@@ -11,6 +11,7 @@ Errors = require "../Errors/Errors"
 EmailHelper = require "../Helpers/EmailHelper"
 ProjectEditorHandler = require "../Project/ProjectEditorHandler"
 Sources = require "../Authorization/Sources"
+ObjectId = require('mongojs').ObjectId
 
 module.exports = CollaboratorsHandler =
 
@@ -232,3 +233,31 @@ module.exports = CollaboratorsHandler =
 				return callback(error)
 			{owner, members} = ProjectEditorHandler.buildOwnerAndMembersViews(rawMembers)
 			callback(null, members)
+
+	getTokenMembers: (projectId, callback=(err, members)->) ->
+		logger.log {projectId}, "fetching all token members"
+		CollaboratorsHandler.getTokenMembersWithPrivilegeLevels projectId, (error, rawTokenMembers) ->
+			if error?
+				logger.err {projectId, error}, "error getting token members for project"
+				return callback(error)
+			{_owner, tokenMembers} = ProjectEditorHandler.buildOwnerAndMembersViews(
+				null,
+				rawTokenMembers
+			)
+			callback(null, tokenMembers)
+
+	userIsTokenMember: (userId, projectId, callback=(err, isTokenMember)->) ->
+		userId = ObjectId(userId.toString())
+		projectId = ObjectId(projectId.toString())
+		Project.findOne {
+			_id: projectId,
+			$or: [
+				{tokenAccessReadOnly_refs: userId},
+				{tokenAccessReadAndWrite_refs: userId}
+			]
+		}, {
+			_id: 1
+		}, (err, project) ->
+			if err?
+				return callback(err)
+			callback(null, project?)

@@ -51,13 +51,13 @@ module.exports = ProjectEditorHandler =
 		ownerFeatures = null
 		filteredMembers = []
 		filteredTokenMembers = []
-		for member in members
+		for member in (members || [])
 			if member.privilegeLevel == "owner"
 				ownerFeatures = member.user.features
 				owner = @buildUserModelView member.user, "owner"
 			else
 				filteredMembers.push @buildUserModelView member.user, member.privilegeLevel
-		for tokenMember in tokenMembers
+		for tokenMember in (tokenMembers || [])
 			filteredTokenMembers.push @buildUserModelView tokenMember.user, tokenMember.privilegeLevel
 		return {
 			owner: owner,

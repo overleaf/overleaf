@@ -80,18 +80,15 @@
 					on-toggle="toggleTrackChangesForUser(isOn, member.id);"
 					disabled="reviewPanel.trackChangesOnForEveryone || !project.features.trackChanges || !permissions.write"
 				)
+
 			li.rp-tc-state-separator
-			li.rp-tc-state-item(
-				ng-repeat="member in reviewPanel.formattedProjectTokenMembers"
-			)
-				span.rp-tc-state-item-name(
-					ng-class="{ 'rp-tc-state-item-name-disabled' : reviewPanel.trackChangesOnForEveryone}"
-					style="color: hsl({{ member.hue }}, 70%, 40%);"
-				) {{ member.name }}
+			li.rp-tc-state-item.rp-tc-state-item-guests
+				// span.rp-tc-state-item-name !{translate("tc_guests")}
+				span.rp-tc-state-item-name Guests
 				review-panel-toggle(
-					ng-model="reviewPanel.trackChangesState[member.id].value"
-					on-toggle="toggleTrackChangesForUser(isOn, member.id);"
-					disabled="reviewPanel.trackChangesOnForEveryone || !project.features.trackChanges || !permissions.write"
+					ng-model="reviewPanel.trackChangesOnForGuests"
+					on-toggle="toggleTrackChangesForGuests(isOn);"
+					disabled="!project.features.trackChanges || !permissions.write"
 				)
 
 	.rp-entry-list(

@@ -346,3 +346,4 @@ module.exports = class Router
 			TokenAccessController.readAndWriteToken
 
 		webRouter.get '*', ErrorController.notFound
+

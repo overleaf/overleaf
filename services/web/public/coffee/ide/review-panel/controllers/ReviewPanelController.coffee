@@ -6,6 +6,8 @@ define [
 ], (App, EventEmitter, ColorManager, RangesTracker) ->
 	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout, $http, $modal, event_tracking, localStorage) ->
 		$reviewPanelEl = $element.find "#review-panel"
+		# TODO: remove debug code
+		window.S = $scope
 
 		$scope.SubViews =
 			CUR_FILE : "cur_file"
@@ -18,6 +20,8 @@ define [
 		$scope.reviewPanel =
 			trackChangesState: {}
 			trackChangesOnForEveryone: false
+			trackChangesOnForGuests: false
+			trackChangesOnForThisGuestClient: false
 			entries: {}
 			resolvedComments: {}
 			hasEntries: false
@@ -32,7 +36,6 @@ define [
 			resolvedThreadIds: {}
 			rendererData: {}
 			formattedProjectMembers: {}
-			formattedProjectTokenMembers: {}
 			fullTCStateCollapsed: true
 			loadingThreads: false
 			# All selected changes. If a aggregated change (insertion + deletion) is selection, the two ids
@@ -77,14 +80,6 @@ define [
 				for member in members
 					if member.privileges == "readAndWrite"
 						$scope.reviewPanel.formattedProjectMembers[member._id] = formatUser(member)
-
-		$scope.$watch "project.tokenMembers", (tokenMembers) ->
-			$scope.reviewPanel.formattedProjectTokenMembers = {}
-			if $scope.project?.tokenMembers?
-				for member in tokenMembers
-					if member.privileges == "readAndWrite"
-						if !_.find($scope.reviewPanel.formattedProjectMembers, (m) -> m.id == member._id)
-							$scope.reviewPanel.formattedProjectTokenMembers[member._id] = formatUser(member)
 
 		$scope.commentState =
 			adding: false
@@ -615,41 +610,67 @@ define [
 			else if isLocal
 				state.value = newValue
 				state.syncState = UserTCSyncState.PENDING
-			
+
 			if userId == ide.$scope.user.id
-				$scope.editor.wantTrackChanges = newValue		
+				$scope.editor.wantTrackChanges = newValue
 
 		_setEveryoneTCState = (newValue, isLocal = false) ->
 			$scope.reviewPanel.trackChangesOnForEveryone = newValue
 			project = $scope.project
-			for member in project.members.concat(project.tokenMembers)
+			for member in project.members
 				_setUserTCState(member._id, newValue, isLocal)
+			_setGuestsTCState(newValue, isLocal)
 			_setUserTCState(project.owner._id, newValue, isLocal)
 
+		_setGuestsTCState = (newValue, isLocal = false) ->
+			$scope.reviewPanel.trackChangesOnForGuests = newValue
+			if (
+				ide.$scope.project.publicAccesLevel == 'tokenBased' &&
+				ide.$scope.isTokenMember &&
+				ide.$scope?.user?.id?
+			)
+				$scope.trackChangesOnForThisGuestClient = newValue
+				_setUserTCState(ide.$scope.user.id, newValue, isLocal)
+
 		applyClientTrackChangesStateToServer = () ->
+			data = {}
+			if $scope.reviewPanel.trackChangesOnForGuests
+				data.on_for_guests = true
 			if $scope.reviewPanel.trackChangesOnForEveryone
-				data = {on : true}
+				data.on = true
 			else
-				data = {on_for: {}}
+				data.on_for = {}
 				for userId, userState of $scope.reviewPanel.trackChangesState
-					data.on_for[userId] = userState.value
+					if !(
+						$scope.reviewPanel.trackChangesOnForGuests &&
+						$scope.reviewPanel.trackChangesOnForThisGuestClient
+					)
+						data.on_for[userId] = userState.value
 			data._csrf = window.csrfToken
 			$http.post "/project/#{$scope.project_id}/track_changes", data
 
 		applyTrackChangesStateToClient = (state) ->
+			console.log ">> applying tc state to client", state
 			if typeof state is "boolean"
 				_setEveryoneTCState state
+				_setGuestsTCState state
 			else
 				project = $scope.project
 				$scope.reviewPanel.trackChangesOnForEveryone = false
-				for member in project.members.concat(project.tokenMembers)
+				_setGuestsTCState(state.__guests__ == true)
+				for member in project.members
 					_setUserTCState(member._id, state[member._id] ? false)
 				_setUserTCState($scope.project.owner._id, state[$scope.project.owner._id] ? false)
-		
+
 		$scope.toggleTrackChangesForEveryone = (onForEveryone) ->
 			_setEveryoneTCState onForEveryone, true
+			_setGuestsTCState onForEveryone, true
 			applyClientTrackChangesStateToServer()
-	
+
+		$scope.toggleTrackChangesForGuests = (onForGuests) ->
+			_setGuestsTCState onForGuests, true
+			applyClientTrackChangesStateToServer()
+
 		$scope.toggleTrackChangesForUser = (onForUser, userId) ->
 			_setUserTCState userId, onForUser, true
 			applyClientTrackChangesStateToServer()				
