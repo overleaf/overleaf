@@ -31,7 +31,7 @@ MAX_RANGES_SIZE = 3 * MEGABYTES
 
 keys = Settings.redis.documentupdater.key_schema
 historyKeys = Settings.redis.history.key_schema
-projectHistoryKeys = Settings.redis.project_history.key_schema
+projectHistoryKeys = Settings.redis?.project_history?.key_schema
 
 module.exports = RedisManager =
 	rclient: rclient
