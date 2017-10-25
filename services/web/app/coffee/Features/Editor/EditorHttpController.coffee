@@ -40,23 +40,21 @@ module.exports = EditorHttpController =
 			return callback(new Error("not found")) if !project?
 			CollaboratorsHandler.getInvitedMembersWithPrivilegeLevels project, (error, members) ->
 				return callback(error) if error?
-				CollaboratorsHandler.getTokenMembersWithPrivilegeLevels project, (error, tokenMembers) ->
+				UserGetter.getUser user_id, { isAdmin: true }, (error, user) ->
 					return callback(error) if error?
-					UserGetter.getUser user_id, { isAdmin: true }, (error, user) ->
+					token = TokenAccessHandler.getRequestToken(req, project_id)
+					AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, token, (error, privilegeLevel) ->
 						return callback(error) if error?
-						token = TokenAccessHandler.getRequestToken(req, project_id)
-						AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, token, (error, privilegeLevel) ->
+						if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
+							logger.log {project_id, user_id, privilegeLevel}, "not an acceptable privilege level, returning null"
+							return callback null, null, false
+						CollaboratorsInviteHandler.getAllInvites project_id, (error, invites) ->
 							return callback(error) if error?
-							if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
-								logger.log {project_id, user_id, privilegeLevel}, "not an acceptable privilege level, returning null"
-								return callback null, null, false
-							CollaboratorsInviteHandler.getAllInvites project_id, (error, invites) ->
-								return callback(error) if error?
-								logger.log {project_id, user_id, memberCount: members.length, inviteCount: invites.length, privilegeLevel}, "returning project model view"
-								callback(null,
-									ProjectEditorHandler.buildProjectModelView(project, members, invites, tokenMembers),
-									privilegeLevel
-								)
+							logger.log {project_id, user_id, memberCount: members.length, inviteCount: invites.length, privilegeLevel}, "returning project model view"
+							callback(null,
+								ProjectEditorHandler.buildProjectModelView(project, members, invites),
+								privilegeLevel
+							)
 
 	restoreDoc: (req, res, next) ->
 		project_id = req.params.Project_id

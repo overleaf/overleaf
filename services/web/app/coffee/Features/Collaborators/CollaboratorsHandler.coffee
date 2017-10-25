@@ -234,18 +234,6 @@ module.exports = CollaboratorsHandler =
 			{owner, members} = ProjectEditorHandler.buildOwnerAndMembersViews(rawMembers)
 			callback(null, members)
 
-	getTokenMembers: (projectId, callback=(err, members)->) ->
-		logger.log {projectId}, "fetching all token members"
-		CollaboratorsHandler.getTokenMembersWithPrivilegeLevels projectId, (error, rawTokenMembers) ->
-			if error?
-				logger.err {projectId, error}, "error getting token members for project"
-				return callback(error)
-			{_owner, tokenMembers} = ProjectEditorHandler.buildOwnerAndMembersViews(
-				null,
-				rawTokenMembers
-			)
-			callback(null, tokenMembers)
-
 	userIsTokenMember: (userId, projectId, callback=(err, isTokenMember)->) ->
 		userId = ObjectId(userId.toString())
 		projectId = ObjectId(projectId.toString())

@@ -133,11 +133,6 @@ describe "EditorHttpController", ->
 				@CollaboratorsHandler.getInvitedMembersWithPrivilegeLevels
 					.calledWith(@project)
 					.should.equal true
-			
-			it "should get the list of users who access the project via token links", ->
-				@CollaboratorsHandler.getTokenMembersWithPrivilegeLevels
-					.calledWith(@project)
-					.should.equal true
 
 			it "should look up the user", ->
 				@UserGetter.getUser

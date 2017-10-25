@@ -39,14 +39,4 @@ define [
 								$scope.project.invites = data.invites
 						.catch () =>
 							console.error "Error fetching invites for project"
-				if data.tokenMembers
-					console.log ">> token members changed"
-					projectTokenMembers.getTokenMembers()
-						.then (response) =>
-							{ data } = response
-							console.log ">> got token members", data
-							if data.tokenMembers
-								$scope.project.tokenMembers = data.tokenMembers
-						.catch () =>
-							console.error "Error fetching tokenMembers for project"
 	]

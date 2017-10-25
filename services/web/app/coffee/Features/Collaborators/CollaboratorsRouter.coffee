@@ -17,13 +17,6 @@ module.exports =
 			CollaboratorsController.getAllMembers
 		)
 
-		webRouter.get(
-			'/project/:Project_id/token_members',
-			AuthenticationController.requireLogin(),
-			AuthorizationMiddlewear.ensureUserCanAdminProject,
-			CollaboratorsController.getTokenMembers
-		)
-
 		# invites
 		webRouter.post(
 			'/project/:Project_id/invite',

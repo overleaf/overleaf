@@ -64,6 +64,8 @@ describe "ProjectController", ->
 		@TokenAccessHandler =
 			getRequestToken: sinon.stub().returns(@token)
 			protectTokens: sinon.stub()
+		@CollaboratorsHandler =
+			userIsTokenMember: sinon.stub().callsArgWith(2, null, false)
 		@ProjectController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex":
@@ -90,6 +92,7 @@ describe "ProjectController", ->
 			'../Authentication/AuthenticationController': @AuthenticationController
 			"../Analytics/AnalyticsManager": @AnalyticsManager
 			"../TokenAccess/TokenAccessHandler": @TokenAccessHandler
+			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler
 
 		@projectName = "£12321jkj9ujkljds"
 		@req =
