@@ -340,9 +340,19 @@ module.exports = class Router
 
 
 		webRouter.get '/read/:read_only_token([a-z]+)',
+			RateLimiterMiddlewear.rateLimit({
+				endpointName: 'read-only-token',
+				maxRequests: 10,
+				timeInterval: 60
+			}),
 			TokenAccessController.readOnlyToken
 
 		webRouter.get '/:read_and_write_token([0-9]+[a-z]+)',
+			RateLimiterMiddlewear.rateLimit({
+				endpointName: 'read-and-write-token',
+				maxRequests: 10,
+				timeInterval: 60
+			}),
 			TokenAccessController.readAndWriteToken
 
 		webRouter.get '*', ErrorController.notFound
