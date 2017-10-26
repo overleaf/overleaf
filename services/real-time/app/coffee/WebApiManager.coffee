@@ -9,7 +9,7 @@ module.exports = WebApiManager =
 		url = "#{settings.apis.web.url}/project/#{project_id}/join"
 		headers = {}
 		if user.anonymousAccessToken?
-			headers['x-sl-anonymous-access-token'] = user.anonToken
+			headers['x-sl-anonymous-access-token'] = user.anonymousAccessToken
 		request.post {
 			url: url
 			qs: {user_id}
