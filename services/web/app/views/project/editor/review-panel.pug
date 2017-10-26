@@ -62,7 +62,12 @@
 			review-panel-collapse-height="reviewPanel.fullTCStateCollapsed"
 		)
 			li.rp-tc-state-item.rp-tc-state-item-everyone
-				span.rp-tc-state-item-name !{translate("tc_everyone")}
+				span.rp-tc-state-item-name(
+					tooltip=translate('tc_switch_everyone_tip')
+					tooltip-placement="left"
+					tooltip-append-to-body="true"
+					tooltip-popup-delay="1000"
+				) !{translate("tc_everyone")}
 				review-panel-toggle(
 					ng-model="reviewPanel.trackChangesOnForEveryone"
 					on-toggle="toggleTrackChangesForEveryone(isOn);"
@@ -74,6 +79,10 @@
 				span.rp-tc-state-item-name(
 					ng-class="{ 'rp-tc-state-item-name-disabled' : reviewPanel.trackChangesOnForEveryone}"
 					style="color: hsl({{ member.hue }}, 70%, 40%);"
+					tooltip=translate('tc_switch_user_tip')
+					tooltip-placement="left"
+					tooltip-append-to-body="true"
+					tooltip-popup-delay="1000"
 				) {{ member.name }}
 				review-panel-toggle(
 					ng-model="reviewPanel.trackChangesState[member.id].value"
@@ -83,7 +92,12 @@
 
 			li.rp-tc-state-separator
 			li.rp-tc-state-item.rp-tc-state-item-guests
-				span.rp-tc-state-item-name !{translate("tc_guests")}
+				span.rp-tc-state-item-name(
+					tooltip=translate('tc_switch_guests_tip')
+					tooltip-placement="left"
+					tooltip-append-to-body="true"
+					tooltip-popup-delay="1000"
+				) !{translate("tc_guests")}
 				review-panel-toggle(
 					ng-model="reviewPanel.trackChangesOnForGuests"
 					on-toggle="toggleTrackChangesForGuests(isOn);"
