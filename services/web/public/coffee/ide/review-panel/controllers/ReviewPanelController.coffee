@@ -6,8 +6,6 @@ define [
 ], (App, EventEmitter, ColorManager, RangesTracker) ->
 	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout, $http, $modal, event_tracking, localStorage) ->
 		$reviewPanelEl = $element.find "#review-panel"
-		# TODO: remove debug code
-		window.S = $scope
 
 		$scope.SubViews =
 			CUR_FILE : "cur_file"
