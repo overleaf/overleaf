@@ -12,19 +12,33 @@ module.exports = ProjectTokenGenerator =
   #   a y), and lower case "l" is omitted, because in many fonts it is
   #   indistinguishable from an upper case "I" (and sometimes even the number 1).
 	TOKEN_ALPHA: 'bcdfghjkmnpqrstvwxyz'
+	TOKEN_NUMERICS: '123456789'
+
+	_randomString: (length, alphabet) ->
+		result = ''
+		crypto.randomBytes(length).map(
+			(b) -> result += alphabet[b % alphabet.length]
+		)
+		return result
 
 	# Generate a 12-char token with only characters from TOKEN_ALPHA,
 	# suitable for use as a read-only token for a project
 	readOnlyToken: () ->
-		length = 12
-		tokenAlpha = ProjectTokenGenerator.TOKEN_ALPHA
-		result = ''
-		crypto.randomBytes(length).map( (a) -> result += tokenAlpha[a % tokenAlpha.length] )
-		return result
+		return ProjectTokenGenerator._randomString(
+			12,
+			ProjectTokenGenerator.TOKEN_ALPHA
+		)
 
 	# Generate a longer token, with a numeric prefix,
 	# suitable for use as a read-and-write token for a project
 	readAndWriteToken: () ->
-		numerics = Math.random().toString().slice(2, 12)
-		token = ProjectTokenGenerator.readOnlyToken()
-		return "#{numerics}#{token}"
+		numerics = ProjectTokenGenerator._randomString(
+			10,
+			ProjectTokenGenerator.TOKEN_NUMERICS
+		)
+		token = ProjectTokenGenerator._randomString(
+			12,
+			ProjectTokenGenerator.TOKEN_ALPHA
+		)
+		fullToken = "#{numerics}#{token}"
+		return fullToken
