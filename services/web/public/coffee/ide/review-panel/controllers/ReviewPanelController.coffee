@@ -629,14 +629,15 @@ define [
 			_setUserTCState(project.owner._id, newValue, isLocal)
 
 		_setGuestsTCState = (newValue, isLocal = false) ->
-			$scope.reviewPanel.trackChangesOnForGuests = newValue
-			if (
-				ide.$scope.project.publicAccesLevel == 'tokenBased' &&
-				ide.$scope.isTokenMember &&
-				ide.$scope?.user?.id?
-			)
-				$scope.trackChangesOnForThisGuestClient = newValue
-				_setUserTCState(ide.$scope.user.id, newValue, isLocal)
+			if $scope.reviewPanel.trackChangesForGuestsAvailable
+				$scope.reviewPanel.trackChangesOnForGuests = newValue
+				if (
+					ide.$scope.project.publicAccesLevel == 'tokenBased' &&
+					ide.$scope.isTokenMember &&
+					ide.$scope?.user?.id?
+				)
+					$scope.trackChangesOnForThisGuestClient = newValue
+					_setUserTCState(ide.$scope.user.id, newValue, isLocal)
 
 		applyClientTrackChangesStateToServer = () ->
 			data = {}
