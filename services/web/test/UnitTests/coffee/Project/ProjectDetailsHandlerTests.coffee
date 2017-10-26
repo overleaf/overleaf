@@ -150,6 +150,21 @@ describe 'ProjectDetailsHandler', ->
 				@ProjectModel.update.calledWith({_id: @project_id}, {publicAccesLevel: @accessLevel}).should.equal true
 				done()
 
+		it 'should not produce an error', (done) ->
+			@handler.setPublicAccessLevel @project_id, @accessLevel, (err) =>
+				expect(err).to.not.exist
+				done()
+
+		describe 'when update produces an error', ->
+			beforeEach ->
+				@ProjectModel.update.callsArgWith(2, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@handler.setPublicAccessLevel @project_id, @accessLevel, (err) =>
+					expect(err).to.exist
+					expect(err).to.be.instanceof Error
+					done()
+
 	describe "ensureTokensArePresent", ->
 		beforeEach ->
 

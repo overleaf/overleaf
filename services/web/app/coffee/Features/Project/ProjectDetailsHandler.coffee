@@ -74,7 +74,7 @@ module.exports = ProjectDetailsHandler =
 			PublicAccessLevels.TOKEN_BASED
 		], newAccessLevel
 			Project.update {_id:project_id},{publicAccesLevel:newAccessLevel}, (err)->
-				callback()
+				callback(err)
 
 	ensureTokensArePresent: (project_id, callback=(err, tokens)->) ->
 		ProjectGetter.getProject project_id, {tokens: 1}, (err, project) ->
