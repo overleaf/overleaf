@@ -185,4 +185,9 @@ define [
 		# User can append ?ft=somefeature to url to activate a feature toggle
 		ide.featureToggle = location?.search?.match(/^\?ft=(\w+)$/)?[1]
 
+		ide.socket.on 'project:publicAccessLevel:changed', (data) =>
+			if data.newAccessLevel?
+				ide.$scope.project.publicAccesLevel = data.newAccessLevel
+				$scope.$digest()
+
 	angular.bootstrap(document.body, ["SharelatexApp"])

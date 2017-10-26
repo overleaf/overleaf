@@ -17,11 +17,6 @@ define [
 					ide.$scope.project.tokens = data.tokens
 					$scope.$digest()
 
-			ide.socket.on 'project:publicAccessLevel:changed', (data) =>
-				if data.newAccessLevel?
-					ide.$scope.project.publicAccesLevel = data.newAccessLevel
-					$scope.$digest()
-
 			ide.socket.on 'project:membership:changed', (data) =>
 				if data.members
 					projectMembers.getMembers()
