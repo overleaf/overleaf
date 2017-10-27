@@ -33,8 +33,8 @@ ProjectSchema = new Schema
 	imageName         : { type: String }
 	track_changes     : { type: Object }
 	tokens            :
-		readOnly        : { type: String }
-		readAndWrite    : { type: String }
+		readOnly        : { type: String, index: {unique: true} }
+		readAndWrite    : { type: String, index: {unique: true} }
 	tokenAccessReadOnly_refs         : [ type:ObjectId, ref:'User' ]
 	tokenAccessReadAndWrite_refs     : [ type:ObjectId, ref:'User' ]
 	overleaf          :
