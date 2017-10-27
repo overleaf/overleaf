@@ -15,27 +15,36 @@ _ = require "underscore"
 
 module.exports = ProjectCreationHandler =
 
-	createBlankProject : (owner_id, projectName, callback = (error, project) ->)->
+	createBlankProject : (owner_id, projectName, overleafId, callback = (error, project) ->)->
 		metrics.inc("project-creation")
+		if arguments.length == 3
+			callback = overleafId
+			overleafId = null
+
 		ProjectDetailsHandler.validateProjectName projectName, (error) ->
 			return callback(error) if error?
 			logger.log owner_id:owner_id, projectName:projectName, "creating blank project"
-			HistoryController.initializeProject (error, history) ->
-				return callback(error) if error?
-				rootFolder = new Folder {'name':'rootFolder'}
-				project = new Project
-					 owner_ref          : new ObjectId(owner_id)
-					 name               : projectName
-				if history?.overleaf_id?
-					project.overleaf.id = history.overleaf_id
-				if Settings.currentImageName?
-					project.imageName = Settings.currentImageName
-				project.rootFolder[0] = rootFolder
-				User.findById owner_id, "ace.spellCheckLanguage", (err, user)->
-					project.spellCheckLanguage = user.ace.spellCheckLanguage
-					project.save (err)->
-						return callback(err) if err?
-						callback err, project
+			if overleafId?
+				ProjectCreationHandler._createBlankProject owner_id, projectName, overleafId, callback
+			else
+				HistoryController.initializeProject (error, history) ->
+					return callback(error) if error?
+					ProjectCreationHandler._createBlankProject owner_id, projectName, history.overleaf_id, callback
+
+	_createBlankProject : (owner_id, projectName, overleafId, callback = (error, project) ->)->
+		rootFolder = new Folder {'name':'rootFolder'}
+		project = new Project
+			 owner_ref          : new ObjectId(owner_id)
+			 name               : projectName
+		project.overleaf.id = overleafId
+		if Settings.currentImageName?
+			project.imageName = Settings.currentImageName
+		project.rootFolder[0] = rootFolder
+		User.findById owner_id, "ace.spellCheckLanguage", (err, user)->
+			project.spellCheckLanguage = user.ace.spellCheckLanguage
+			project.save (err)->
+				return callback(err) if err?
+				callback err, project
 
 	createBasicProject :  (owner_id, projectName, callback = (error, project) ->)->
 		self = @

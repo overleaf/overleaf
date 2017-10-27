@@ -64,10 +64,11 @@ describe 'ProjectCreationHandler', ->
 
 	describe 'Creating a Blank project', ->
 		beforeEach ->
+			@overleaf_id = 1234
+			@HistoryController.initializeProject = sinon.stub().callsArgWith(0, null, { @overleaf_id })
 			@ProjectModel::save = sinon.stub().callsArg(0)
 
 		describe "successfully", ->
-
 			it "should save the project", (done)->
 				@handler.createBlankProject ownerId, projectName, =>
 					@ProjectModel::save.called.should.equal true
@@ -79,14 +80,18 @@ describe 'ProjectCreationHandler', ->
 					(project.owner_ref + "").should.equal ownerId
 					done()
 
-			it "should initialize the project history", (done)->
+			it "should initialize the project overleaf if history id not provided", (done)->
 				@handler.createBlankProject ownerId, projectName, done
 				@HistoryController.initializeProject.calledWith().should.equal true
 
-			it "should set the overleaf id", (done)->
-				overleaf_id = 1234
-				@HistoryController.initializeProject = sinon.stub().callsArgWith(0, null, { overleaf_id })
-				@handler.createBlankProject ownerId, projectName, (err, project)->
+			it "should set the overleaf id if overleaf id not provided", (done)->
+				@handler.createBlankProject ownerId, projectName, (err, project)=>
+					project.overleaf.id.should.equal @overleaf_id
+					done()
+
+			it "should set the overleaf id if overleaf id provided", (done)->
+				overleaf_id = 2345
+				@handler.createBlankProject ownerId, projectName, overleaf_id, (err, project)->
 					project.overleaf.id.should.equal overleaf_id
 					done()
 
