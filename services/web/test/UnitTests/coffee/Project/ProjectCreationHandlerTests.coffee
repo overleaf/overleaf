@@ -22,7 +22,8 @@ describe 'ProjectCreationHandler', ->
 				@._id = project_id
 				@owner_ref = options.owner_ref
 				@name = options.name
-				@overleaf = {}
+				@overleaf =
+					history: {}
 			save: sinon.stub().callsArg(0)
 			rootFolder:[{
 				_id: rootFolderId
@@ -86,13 +87,13 @@ describe 'ProjectCreationHandler', ->
 
 			it "should set the overleaf id if overleaf id not provided", (done)->
 				@handler.createBlankProject ownerId, projectName, (err, project)=>
-					project.overleaf.id.should.equal @overleaf_id
+					project.overleaf.history.id.should.equal @overleaf_id
 					done()
 
 			it "should set the overleaf id if overleaf id provided", (done)->
 				overleaf_id = 2345
 				@handler.createBlankProject ownerId, projectName, overleaf_id, (err, project)->
-					project.overleaf.id.should.equal overleaf_id
+					project.overleaf.history.id.should.equal overleaf_id
 					done()
 
 			it "should set the language from the user", (done)->
