@@ -463,6 +463,9 @@ define [
 			else
 				"/project/#{project.id}"
 
+		$scope.isLinkSharingProject = (project) ->
+			return project.source == 'token'
+
 		$scope.ownerName = () ->
 			if $scope.project.accessLevel == "owner"
 				return "You"
