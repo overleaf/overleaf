@@ -82,8 +82,8 @@ define [
 
 		$scope.$watch 'project.publicAccesLevel', (level) ->
 			if level?
-				available = $scope.trackChangesForGuestsAvailable = level == 'tokenBased'
-				if !available
+				$scope.reviewPanel.trackChangesForGuestsAvailable = level == 'tokenBased'
+				if !$scope.reviewPanel.trackChangesForGuestsAvailable
 					$scope.trackChangesOnForThisGuestClient = false
 					$scope.toggleTrackChangesForGuests false
 
@@ -638,6 +638,10 @@ define [
 				)
 					$scope.trackChangesOnForThisGuestClient = newValue
 					_setUserTCState(ide.$scope.user.id, newValue, isLocal)
+			else
+				$scope.reviewPanel.trackChangesOnForGuests = false
+				$scope.trackChangesOnForThisGuestClient = false
+				_setUserTCState(ide.$scope.user.id, false, isLocal)
 
 		applyClientTrackChangesStateToServer = () ->
 			data = {}

@@ -101,7 +101,7 @@
 				review-panel-toggle(
 					ng-model="reviewPanel.trackChangesOnForGuests"
 					on-toggle="toggleTrackChangesForGuests(isOn);"
-					disabled="!project.features.trackChanges || !permissions.write || !trackChangesForGuestsAvailable"
+					disabled="!project.features.trackChanges || !permissions.write || !reviewPanel.trackChangesForGuestsAvailable"
 				)
 
 	.rp-entry-list(
