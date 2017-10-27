@@ -29,7 +29,7 @@ module.exports = ProjectCreationHandler =
 			else
 				HistoryController.initializeProject (error, history) ->
 					return callback(error) if error?
-					ProjectCreationHandler._createBlankProject owner_id, projectName, history.overleaf_id, callback
+					ProjectCreationHandler._createBlankProject owner_id, projectName, history?.overleaf_id, callback
 
 	_createBlankProject : (owner_id, projectName, projectHistoryId, callback = (error, project) ->)->
 		rootFolder = new Folder {'name':'rootFolder'}
