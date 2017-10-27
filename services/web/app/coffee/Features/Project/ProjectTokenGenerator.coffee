@@ -15,10 +15,9 @@ module.exports = ProjectTokenGenerator =
 	TOKEN_NUMERICS: '123456789'
 
 	_randomString: (length, alphabet) ->
-		result = ''
-		crypto.randomBytes(length).map(
-			(b) -> result += alphabet[b % alphabet.length]
-		)
+		result = crypto.randomBytes(length).toJSON().data.map(
+			(b) -> alphabet[b % alphabet.length]
+		).join('')
 		return result
 
 	# Generate a 12-char token with only characters from TOKEN_ALPHA,
