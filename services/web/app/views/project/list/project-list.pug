@@ -143,12 +143,12 @@
 					ng-controller="ProjectListItemController"
 				)
 					.row(
-						ng-if="!project.isOLProject"
+						ng-if="!project.isV1Project"
 						select-row
 					)
 						include ./item
 					.row(
-						ng-if="project.isOLProject"
+						ng-if="project.isV1Project"
 					)
 						include ./ol-item
 				li(

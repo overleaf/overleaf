@@ -117,7 +117,7 @@ define [
 					visible = false
 
 				# Hide projects from V1 if we only want to see shared projects
-				if $scope.filter == "shared" and project.isOLProject
+				if $scope.filter == "shared" and project.isV1Project
 					visible = false
 
 				# Hide projects we don't own if we only want to see owned projects

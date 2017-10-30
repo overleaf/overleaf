@@ -434,6 +434,7 @@ module.exports = ProjectController =
 			archived: !!project.archived
 			owner_ref: project.owner_ref
 			tokens: project.tokens
+			isV1Project: false
 		}
 		return model
 
@@ -444,7 +445,7 @@ module.exports = ProjectController =
 			lastUpdated: moment.unix(project.updated_at)
 			accessLevel: "readOnly",
 			archived: project.removed || project.archived
-			isOLProject: true
+			isV1Project: true
 		}
 
 	_injectProjectOwners: (projects, callback = (error, projects) ->) ->
