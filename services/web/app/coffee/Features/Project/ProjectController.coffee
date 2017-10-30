@@ -1,4 +1,5 @@
 async = require("async")
+moment = require('moment')
 logger = require("logger-sharelatex")
 Settings = require('settings-sharelatex')
 projectDeleter = require("./ProjectDeleter")
@@ -440,7 +441,7 @@ module.exports = ProjectController =
 		{
 			id: project.id
 			name: project.title
-			lastUpdated: project.updated_at
+			lastUpdated: moment.unix(project.updated_at)
 #			publicAccessLevel:
 #			accessLevel:
 			archived: project.archived
