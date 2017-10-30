@@ -144,6 +144,7 @@ module.exports = ProjectController =
 		timer = new metrics.Timer("project-list")
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		currentUser = AuthenticationController.getSessionUser(req)
+		isV1 = Settings.brandPrefix == "ol-"
 		async.parallel {
 			tags: (cb)->
 				TagsHandler.getAllTags user_id, cb
@@ -152,7 +153,7 @@ module.exports = ProjectController =
 			projects: (cb)->
 				ProjectGetter.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref tokens', cb
 			olProjects: (cb) ->
-				if Settings.brandPrefix == "ol-"
+				if isV1
 					OlProjectGetter.findAllUsersProjects user_id, cb
 				else
 					cb()
@@ -181,6 +182,7 @@ module.exports = ProjectController =
 						notifications: notifications or []
 						user: user
 						hasSubscription: results.hasSubscription[0]
+						isV1: isV1
 					}
 
 					if Settings?.algolia?.app_id? and Settings?.algolia?.read_only_api_key?
