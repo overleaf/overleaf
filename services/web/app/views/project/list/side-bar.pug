@@ -45,6 +45,9 @@
 			a(href) #{translate("shared_with_you")}
 		li(ng-class="{active: (filter == 'archived')}", ng-click="filterProjects('archived')")
 			a(href) #{translate("deleted_projects")}
+		if isV1
+			li(ng-class="{active: (filter == 'v1')}", ng-click="filterProjects('v1')")
+				a(href) #{translate("v1_projects")}
 		li.separator
 			h2 #{translate("folders")}
 		li.tag(

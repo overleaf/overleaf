@@ -133,6 +133,9 @@ define [
 					if project.archived
 						visible = false
 
+				if $scope.filter == "v1" and !project.isV1Project
+					visible = false
+
 				if visible
 					$scope.visibleProjects.push project
 				else
