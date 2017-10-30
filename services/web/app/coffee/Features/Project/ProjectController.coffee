@@ -168,7 +168,7 @@ module.exports = ProjectController =
 				notifications = require("underscore").map results.notifications, (notification)->
 					notification.html = req.i18n.translate(notification.templateKey, notification.messageOpts)
 					return notification
-				projects = ProjectController._buildProjectList results.projects, results.olProjects.projects
+				projects = ProjectController._buildProjectList results.projects, results.olProjects?.projects
 				user = results.user
 				ProjectController._injectProjectOwners projects, (error, projects) ->
 					return next(error) if error?
