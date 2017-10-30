@@ -254,7 +254,8 @@ script(type="text/ng-template", id="makeTokenBasedModalTemplate")
 		) #{translate('turn_on_link_sharing')}
 
 script(type="text/ng-template", id="makePrivateModalTemplate")
-	div(ng-if="__enableTokenAccessUI")
+	//- Token
+	div(ng-if="project.publicAccesLevel == 'tokenBased'")
 		.modal-header
 			button.close(
 				type="button"
@@ -271,7 +272,8 @@ script(type="text/ng-template", id="makePrivateModalTemplate")
 			button.btn.btn-info(
 				ng-click="makePrivate()"
 			) #{translate("turn_off_link_sharing")}
-	div(ng-if="!__enableTokenAccessUI")
+	//- Legacy public-access
+	div(ng-if="project.publicAccesLevel != 'tokenBased'")
 		.modal-header
 			button.close(
 				type="button"
