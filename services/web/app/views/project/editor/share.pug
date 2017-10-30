@@ -18,6 +18,15 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						href
 						ng-click="openMakeTokenBasedModal()"
 					) #{translate('turn_on_link_sharing')}
+					span &nbsp;&nbsp;
+					a(
+						href="/learn/Link_Sharing"
+						target="_blank"
+					)
+						i.fa.fa-question-circle(
+							tooltip=translate('learn_more_about_link_sharing')
+						)
+						| &nbsp;
 
 			//- Token-based access
 			.row.public-access-level(ng-show="project.publicAccesLevel == 'tokenBased'")
@@ -29,6 +38,15 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						href
 						ng-click="openMakePrivateModal()"
 					) #{translate('turn_off_link_sharing')}
+					span &nbsp;&nbsp;
+					a(
+						href="/learn/Link_Sharing"
+						target="_blank"
+					)
+						i.fa.fa-question-circle(
+							tooltip=translate('learn_more_about_link_sharing')
+						)
+						| &nbsp;
 
 				.col-xs-12.access-token-display-area
 					div.access-token-wrapper
@@ -175,9 +193,10 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						| #{translate("invalid_email")}
 					span(ng-switch-default)
 						| #{translate("generic_something_went_wrong")}
-		button.btn.btn-default(
-			ng-click="done()"
-		) #{translate("close")}
+		.modal-footer-right
+			button.btn.btn-default(
+				ng-click="done()"
+			) #{translate("close")}
 
 script(type="text/ng-template", id="makePublicModalTemplate")
 	.modal-header
@@ -214,6 +233,8 @@ script(type="text/ng-template", id="makeTokenBasedModalTemplate")
 		h3 Enable link-sharing?
 	.modal-body.modal-body-share
 		p #{translate('turn_on_link_sharing_consequences')}
+		a(href="/learn/Link_Sharing" target="blank")
+			| #{translate('learn_more_about_link_sharing')}
 	.modal-footer
 		button.btn.btn-default(
 			ng-click="cancel()"
