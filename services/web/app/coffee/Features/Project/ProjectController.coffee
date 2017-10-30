@@ -18,6 +18,7 @@ fs = require "fs"
 InactiveProjectManager = require("../InactiveData/InactiveProjectManager")
 ProjectUpdateHandler = require("./ProjectUpdateHandler")
 ProjectGetter = require("./ProjectGetter")
+OlProjectGetter = require("./OlProjectGetter")
 PrivilegeLevels = require("../Authorization/PrivilegeLevels")
 AuthenticationController = require("../Authentication/AuthenticationController")
 PackageVersions = require("../../infrastructure/PackageVersions")
@@ -150,10 +151,10 @@ module.exports = ProjectController =
 			projects: (cb)->
 				ProjectGetter.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref tokens', cb
 			olProjects: (cb) ->
-				console.log('OOOOOOOOOOOOOOOOOOOOOOO')
 				if Settings.brandPrefix == "ol-"
 					OlProjectGetter.findAllUsersProjects user_id, cb
-				cb()
+				else
+					cb()
 			hasSubscription: (cb)->
 				LimitationsManager.userHasSubscriptionOrIsGroupMember currentUser, cb
 			user: (cb) ->
@@ -167,7 +168,7 @@ module.exports = ProjectController =
 				notifications = require("underscore").map results.notifications, (notification)->
 					notification.html = req.i18n.translate(notification.templateKey, notification.messageOpts)
 					return notification
-				projects = ProjectController._buildProjectList results.projects
+				projects = ProjectController._buildProjectList results.projects, results.olProjects.projects
 				user = results.user
 				ProjectController._injectProjectOwners projects, (error, projects) ->
 					return next(error) if error?
@@ -396,7 +397,7 @@ module.exports = ProjectController =
 					showLinkSharingOnboarding: showLinkSharingOnboarding
 				timer.done()
 
-	_buildProjectList: (allProjects)->
+	_buildProjectList: (allProjects, olProjects = [])->
 		{owned, readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly} = allProjects
 		projects = []
 		for project in owned
@@ -406,6 +407,8 @@ module.exports = ProjectController =
 			projects.push ProjectController._buildProjectViewModel(project, "readWrite", Sources.INVITE)
 		for project in readOnly
 			projects.push ProjectController._buildProjectViewModel(project, "readOnly", Sources.INVITE)
+		for project in olProjects
+			projects.push ProjectController._buildOlProjectViwModel(project)
 		# Token-access
 		#   Only add these projects if they're not already present, this gives us cascading access
 		#   from 'owner' => 'token-read-only'
@@ -432,6 +435,18 @@ module.exports = ProjectController =
 			tokens: project.tokens
 		}
 		return model
+
+	_buildOlProjectViewModel: (project) ->
+		{
+			id: project.id
+			name: project.title
+			lastUpdated: project.updated_at
+#			publicAccessLevel:
+#			accessLevel:
+			archived: project.archived
+#			owner_ref:
+			isOLProject: true
+		}
 
 	_injectProjectOwners: (projects, callback = (error, projects) ->) ->
 		users = {}
