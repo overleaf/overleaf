@@ -2,7 +2,7 @@
 	span.label.label-default.ol-label OL
 	span
 		a.projectName(
-			href="/project/{{project.id}}"
+			href=settings.overleaf.host + "/{{project.id}}"
 			stop-propagation="click"
 		) {{project.name}}
 
