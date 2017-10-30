@@ -91,7 +91,9 @@
 				)
 
 			li.rp-tc-state-separator
-			li.rp-tc-state-item.rp-tc-state-item-guests
+			li.rp-tc-state-item.rp-tc-state-item-guests(
+				ng-if="__enableTokenAccessUI"
+			)
 				span.rp-tc-state-item-name(
 					tooltip=translate('tc_switch_guests_tip')
 					tooltip-placement="left"
