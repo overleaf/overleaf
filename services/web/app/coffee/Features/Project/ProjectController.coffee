@@ -444,7 +444,7 @@ module.exports = ProjectController =
 			lastUpdated: moment.unix(project.updated_at)
 #			publicAccessLevel:
 #			accessLevel:
-			archived: project.archived
+			archived: project.removed || project.archived
 #			owner_ref:
 			isOLProject: true
 		}
