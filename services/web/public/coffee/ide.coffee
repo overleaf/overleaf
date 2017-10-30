@@ -75,6 +75,7 @@ define [
 			miniReviewPanelVisible: false
 		}
 		$scope.user = window.user
+		$scope.__enableTokenAccessUI = window.enableTokenAccessUI == true
 		
 		$scope.$watch "project.features.trackChangesVisible", (visible) ->
 			return if !visible?
