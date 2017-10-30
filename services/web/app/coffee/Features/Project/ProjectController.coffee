@@ -442,10 +442,8 @@ module.exports = ProjectController =
 			id: project.id
 			name: project.title
 			lastUpdated: moment.unix(project.updated_at)
-#			publicAccessLevel:
-#			accessLevel:
+			accessLevel: "readOnly",
 			archived: project.removed || project.archived
-#			owner_ref:
 			isOLProject: true
 		}
 
