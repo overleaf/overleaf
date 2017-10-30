@@ -57,7 +57,7 @@
     "passport-saml": "^0.15.0",
     "pug": "^2.0.0-beta6",
     "redis": "0.10.1",
-    "redis-sharelatex": "git+https://github.com/sharelatex/redis-sharelatex.git#v1.0.2",
+    "redis-sharelatex": "git+https://github.com/sharelatex/redis-sharelatex.git#v1.0.4",
     "request": "^2.69.0",
     "requests": "^0.1.7",
     "rimraf": "2.2.6",
