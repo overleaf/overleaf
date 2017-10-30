@@ -1,6 +1,8 @@
 request = require 'request'
 settings = require 'settings-sharelatex'
+logger = require 'logger-sharelatex'
 Errors = require '../Errors/Errors'
+oAuthRequest = require '../../../../modules/overleaf-integration-web-module/app/coffee/oauth/OAuthRequest'
 
 makeRequest = (opts, callback) ->
 	if settings.apis?.olProjects?.url?
@@ -12,7 +14,11 @@ makeRequest = (opts, callback) ->
 
 module.exports = OlProjectGetter =
 	findAllUsersProjects: (userId, callback = (error, projects) ->) ->
-		opts =
+		oAuthRequest userId, {
+			url: "#{settings.overleaf.host}/api/v1/sharelatex/docs"
 			method: 'GET'
-			url: '/api/v0/current_user'
 			json: true
+		}, (error, docs) ->
+			return callback(error) if error?
+			logger.log {userId, docs}, "got projects from OL"
+			callback(null, docs)
