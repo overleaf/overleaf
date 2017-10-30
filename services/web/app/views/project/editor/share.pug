@@ -10,7 +10,17 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 		.container-fluid
 
 			//- Private
-			.row.public-access-level(ng-show="project.publicAccesLevel == 'private'")
+			.row.public-access-level(ng-show="project.publicAccesLevel == 'private' && __enableTokenAccessUI == false")
+				.col-xs-12.text-center
+					| #{translate("this_project_is_private")}
+					| &nbsp;&nbsp;
+					a(
+						href
+						ng-click="openMakePublicModal()"
+					) #{translate("make_public")}
+
+			//- Private (with token-access available)
+			.row.public-access-level(ng-show="project.publicAccesLevel == 'private' && __enableTokenAccessUI == true")
 				.col-xs-12.text-center
 					| #{translate('link_sharing_is_off')}.
 					| &nbsp;&nbsp;
@@ -244,22 +254,40 @@ script(type="text/ng-template", id="makeTokenBasedModalTemplate")
 		) #{translate('turn_on_link_sharing')}
 
 script(type="text/ng-template", id="makePrivateModalTemplate")
-	.modal-header
-		button.close(
-			type="button"
-			data-dismiss="modal"
-			ng-click="cancel()"
-		) &times;
-		h3 #{translate("make_project_private")}?
-	.modal-body.modal-body-share
-		p #{translate('turn_off_link_sharing_consequences')}
-	.modal-footer
-		button.btn.btn-default(
-			ng-click="cancel()"
-		) #{translate("cancel")}
-		button.btn.btn-info(
-			ng-click="makePrivate()"
-		) #{translate("turn_off_link_sharing")}
+	div(ng-if="__enableTokenAccessUI")
+		.modal-header
+			button.close(
+				type="button"
+				data-dismiss="modal"
+				ng-click="cancel()"
+			) &times;
+			h3 #{translate("make_project_private")}?
+		.modal-body.modal-body-share
+			p #{translate('turn_off_link_sharing_consequences')}
+		.modal-footer
+			button.btn.btn-default(
+				ng-click="cancel()"
+			) #{translate("cancel")}
+			button.btn.btn-info(
+				ng-click="makePrivate()"
+			) #{translate("turn_off_link_sharing")}
+	div(ng-if="!__enableTokenAccessUI")
+		.modal-header
+			button.close(
+				type="button"
+				data-dismiss="modal"
+				ng-click="cancel()"
+			) &times;
+			h3 #{translate("make_project_private")}?
+		.modal-body.modal-body-share
+			p #{translate("make_project_private_consequences")}
+		.modal-footer
+			button.btn.btn-default(
+				ng-click="cancel()"
+			) #{translate("cancel")}
+			button.btn.btn-info(
+				ng-click="makePrivate()"
+			) #{translate("make_private")}
 
 script(type="text/ng-template", id="shareTagTemplate")
 	.tag-template

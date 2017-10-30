@@ -3,6 +3,7 @@ define [
 ], (App) ->
 	App.controller "ShareController", ["$scope", "$modal", "ide", "projectInvites", "projectMembers", "event_tracking",
 	($scope, $modal, ide, projectInvites, projectMembers, event_tracking) ->
+			$scope.__enableTokenAccessUI = window.enableTokenAccessUI == true
 			$scope.openShareProjectModal = () ->
 				event_tracking.sendMBOnce "ide-open-share-modal-once"
 

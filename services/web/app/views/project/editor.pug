@@ -125,6 +125,7 @@ block requirejs
 		window.showTrackChangesOnboarding = #{!!showTrackChangesOnboarding};
 		window.showPerUserTCNotice = #{!!showPerUserTCNotice};
 		window.wikiEnabled = #{!!(settings.apis.wiki && settings.apis.wiki.url)};
+		window.enableTokenAccessUI = #{enableTokenAccessUI}
 		window.requirejs = {
 			"paths" : {
 				"mathjax": "#{buildJsPath('/libs/mathjax/MathJax.js', {cdn:false, fingerprint:false, qs:{config:'TeX-AMS_HTML'}})}",

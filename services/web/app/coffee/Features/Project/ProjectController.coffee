@@ -315,6 +315,7 @@ module.exports = ProjectController =
 					languages: Settings.languages
 					themes: THEME_LIST
 					maxDocLength: Settings.max_doc_length
+					enableTokenAccessUI: true
 				timer.done()
 
 	_buildProjectList: (allProjects)->
