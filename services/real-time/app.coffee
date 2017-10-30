@@ -1,5 +1,7 @@
 logger = require "logger-sharelatex"
 logger.initialize("real-time-sharelatex")
+if Settings.sentry?.dsn?
+	logger.initializeErrorReporting(Settings.sentry.dsn)
 
 express = require("express")
 session = require("express-session")
