@@ -46,4 +46,6 @@ module.exports = SpellingAPIManager =
 
 		LearnedWordsManager.learnWord token, request.word, callback
 
+	deleteDic: (token, callback)->
+		LearnedWordsManager.deleteUsersLearnedWords token, callback
 
