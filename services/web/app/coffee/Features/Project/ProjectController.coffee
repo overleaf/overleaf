@@ -166,7 +166,8 @@ module.exports = ProjectController =
 					logger.err err:err, "error getting data for project list page"
 					return next(err)
 				logger.log results:results, user_id:user_id, "rendering project list"
-				tags = results.tags[0]
+				v1Tags = results.v1Projects?.tags or []
+				tags = results.tags[0].concat(v1Tags)
 				notifications = require("underscore").map results.notifications, (notification)->
 					notification.html = req.i18n.translate(notification.templateKey, notification.messageOpts)
 					return notification
