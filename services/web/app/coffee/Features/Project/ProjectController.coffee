@@ -152,7 +152,7 @@ module.exports = ProjectController =
 				NotificationsHandler.getUserNotifications user_id, cb
 			projects: (cb)->
 				ProjectGetter.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref tokens', cb
-			olProjects: (cb) ->
+			v1Projects: (cb) ->
 				if isV1
 					OlProjectGetter.findAllUsersProjects user_id, cb
 				else
@@ -170,7 +170,7 @@ module.exports = ProjectController =
 				notifications = require("underscore").map results.notifications, (notification)->
 					notification.html = req.i18n.translate(notification.templateKey, notification.messageOpts)
 					return notification
-				projects = ProjectController._buildProjectList results.projects, results.olProjects?.projects
+				projects = ProjectController._buildProjectList results.projects, results.v1Projects?.projects
 				user = results.user
 				ProjectController._injectProjectOwners projects, (error, projects) ->
 					return next(error) if error?
