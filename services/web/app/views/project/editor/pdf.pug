@@ -27,7 +27,7 @@ div.full-size.pdf(ng-controller="PdfController")
 				span.caret
 			ul.dropdown-menu.dropdown-menu-left
 				// Only show if on beta program or part of rollout
-				if user.betaProgram || showAutoCompileOnboarding
+				if user.betaProgram || autoCompileEnabled
 					li.dropdown-header #{translate("auto_compile")}
 					li
 						a(href, ng-click="autocompile_enabled = true")
