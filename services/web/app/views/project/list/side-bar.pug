@@ -65,6 +65,7 @@
 				)
 				span.name {{tag.name}} 
 					span.subdued  ({{tag.project_ids.length}})
+					span.v1-badge(ng-if="tag.isV1", ng-cloak)
 			span.dropdown.tag-menu(dropdown)
 				a.dropdown-toggle(
 					href="#",
