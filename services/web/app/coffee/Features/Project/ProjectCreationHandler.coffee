@@ -2,11 +2,12 @@ logger = require('logger-sharelatex')
 async = require("async")
 metrics = require('metrics-sharelatex')
 Settings = require('settings-sharelatex')
-ObjectId = require('mongoose').Types.ObjectId	
+ObjectId = require('mongoose').Types.ObjectId
 Project = require('../../models/Project').Project
 Folder = require('../../models/Folder').Folder
 ProjectEntityHandler = require('./ProjectEntityHandler')
 ProjectDetailsHandler = require('./ProjectDetailsHandler')
+HistoryController = require('../History/HistoryController')
 User = require('../../models/User').User
 fs = require('fs')
 Path = require "path"
@@ -14,23 +15,36 @@ _ = require "underscore"
 
 module.exports = ProjectCreationHandler =
 
-	createBlankProject : (owner_id, projectName, callback = (error, project) ->)->
+	createBlankProject : (owner_id, projectName, projectHistoryId, callback = (error, project) ->)->
 		metrics.inc("project-creation")
+		if arguments.length == 3
+			callback = projectHistoryId
+			projectHistoryId = null
+
 		ProjectDetailsHandler.validateProjectName projectName, (error) ->
 			return callback(error) if error?
 			logger.log owner_id:owner_id, projectName:projectName, "creating blank project"
-			rootFolder = new Folder {'name':'rootFolder'}
-			project = new Project
-				 owner_ref  : new ObjectId(owner_id)
-				 name       : projectName
-			if Settings.currentImageName?
-				project.imageName = Settings.currentImageName
-			project.rootFolder[0] = rootFolder
-			User.findById owner_id, "ace.spellCheckLanguage", (err, user)->
-				project.spellCheckLanguage = user.ace.spellCheckLanguage
-				project.save (err)->
-					return callback(err) if err?
-					callback err, project
+			if projectHistoryId?
+				ProjectCreationHandler._createBlankProject owner_id, projectName, projectHistoryId, callback
+			else
+				HistoryController.initializeProject (error, history) ->
+					return callback(error) if error?
+					ProjectCreationHandler._createBlankProject owner_id, projectName, history?.overleaf_id, callback
+
+	_createBlankProject : (owner_id, projectName, projectHistoryId, callback = (error, project) ->)->
+		rootFolder = new Folder {'name':'rootFolder'}
+		project = new Project
+			 owner_ref          : new ObjectId(owner_id)
+			 name               : projectName
+		project.overleaf.history.id = projectHistoryId
+		if Settings.currentImageName?
+			project.imageName = Settings.currentImageName
+		project.rootFolder[0] = rootFolder
+		User.findById owner_id, "ace.spellCheckLanguage", (err, user)->
+			project.spellCheckLanguage = user.ace.spellCheckLanguage
+			project.save (err)->
+				return callback(err) if err?
+				callback err, project
 
 	createBasicProject :  (owner_id, projectName, callback = (error, project) ->)->
 		self = @
