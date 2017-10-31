@@ -231,11 +231,12 @@ define [
 			$modalInstance.dismiss()
 	]
 
-	App.controller "MakeTokenBasedModalController", ["$scope", "$modalInstance", "settings", ($scope, $modalInstance, settings) ->
+	App.controller "MakeTokenBasedModalController", ["$scope", "$modalInstance", "settings", "event_tracking", ($scope, $modalInstance, settings, event_tracking) ->
 
 		$scope.makeTokenBased = () ->
 			$scope.project.publicAccesLevel = "tokenBased"
 			settings.saveProjectAdminSettings({publicAccessLevel: "tokenBased"})
+			event_tracking.sendMB 'project-make-token-based'
 			$modalInstance.close()
 
 		$scope.cancel = () ->
