@@ -62,13 +62,6 @@ module.exports = TokenAccessController =
 						logger.err {err, token, userId, projectId: project._id},
 							"[TokenAccess] error adding user to project with readAndWrite token"
 						return next(err)
-					# TODO: check if this is still needed by the client
-					setTimeout( () ->
-						EditorRealTimeController.emitToRoom(
-							'project:membership:changed',
-							{tokenMembers: true}
-						)
-					, 1000)
 					return TokenAccessController._loadEditor(project._id, req, res, next)
 
 	readOnlyToken: (req, res, next) ->
