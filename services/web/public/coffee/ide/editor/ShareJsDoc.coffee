@@ -104,8 +104,8 @@ define [
 		getInflightOp: () -> @_doc.inflightOp
 		getPendingOp: () -> @_doc.pendingOp
 		getRecentAck: () ->
-			# check if we have received an ack recently (within the flush delay)
-			@lastAcked? and new Date() - @lastAcked < @_doc._flushDelay
+			# check if we have received an ack recently (within a factor of two of the single user flush delay)
+			@lastAcked? and new Date() - @lastAcked <  2 * SINGLE_USER_FLUSH_DELAY
 		getOpSize: (op) ->
 			# compute size of an op from its components
 			# (total number of characters inserted and deleted)
