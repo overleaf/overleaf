@@ -11,6 +11,20 @@ module.exports = TokenAccessController =
 		req.params.Project_id = projectId.toString()
 		return ProjectController.loadEditor(req, res, next)
 
+	_tryHigherAccess: (token, userId, req, res, next) ->
+		TokenAccessHandler.findProjectWithHigherAccess token, userId, (err, project) ->
+			if err?
+				logger.err {err, token, userId},
+					"[TokenAccess] error finding project with higher access"
+				return next(err)
+			if !project?
+				logger.log {token, userId},
+					"[TokenAccess] no project with higher access found for this user and token"
+				return next(new Errors.NotFoundError())
+			logger.log {token, userId, projectId: project._id},
+				"[TokenAccess] user has higher access to project, redirecting"
+			res.redirect(302, "/project/#{project._id}")
+
 	readAndWriteToken: (req, res, next) ->
 		userId = AuthenticationController.getLoggedInUserId(req)
 		token = req.params['read_and_write_token']
@@ -27,18 +41,7 @@ module.exports = TokenAccessController =
 					logger.log {token},
 						"[TokenAccess] No project found with read-write token, anonymous user, deny"
 					return next(new Errors.NotFoundError())
-				TokenAccessHandler.findProjectWithHigherAccess token, userId, (err, project) ->
-					if err?
-						logger.err {err, token, userId},
-							"[TokenAccess] error finding project with higher access"
-						return next(err)
-					if !project?
-						logger.log {token, userId},
-							"[TokenAccess] no project with higher access found for this user and token"
-						return next(new Errors.NotFoundError())
-					logger.log {token, userId, projectId: project._id},
-						"[TokenAccess] user has higher access to project, redirecting"
-					res.redirect(302, "/project/#{project._id}")
+				TokenAccessController._tryHigherAccess(token, userId, req, res, next)
 			else
 				if !userId?
 					if TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED
@@ -80,18 +83,7 @@ module.exports = TokenAccessController =
 					logger.log {token},
 						"[TokenAccess] No project found with readOnly token, anonymous user, deny"
 					return next(new Errors.NotFoundError())
-				TokenAccessHandler.findProjectWithHigherAccess token, userId, (err, project) ->
-					if err?
-						logger.err {err, token, userId},
-							"[TokenAccess] error finding project with higher access"
-						return next(err)
-					if !project?
-						logger.log {token, userId},
-							"[TokenAccess] no project with higher access found for this user and token"
-						return next(new Errors.NotFoundError())
-					logger.log {token, userId, projectId: project._id},
-						"[TokenAccess] user has higher access to project, redirecting"
-					res.redirect(302, "/project/#{project._id}")
+				TokenAccessController._tryHigherAccess(token, userId, req, res, next)
 			else
 				if !userId?
 					logger.log {userId, projectId: project._id},
