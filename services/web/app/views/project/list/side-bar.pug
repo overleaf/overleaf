@@ -45,7 +45,7 @@
 			a(href) #{translate("shared_with_you")}
 		li(ng-class="{active: (filter == 'archived')}", ng-click="filterProjects('archived')")
 			a(href) #{translate("deleted_projects")}
-		if isV1
+		if isShowingV1Projects
 			li(ng-class="{active: (filter == 'v1')}", ng-click="filterProjects('v1')")
 				a(href) #{translate("v1_projects")}
 		li.separator
@@ -65,7 +65,7 @@
 				)
 				span.name {{tag.name}} 
 					span.subdued  ({{tag.project_ids.length}})
-					span.v1-badge(ng-if="tag.isV1", ng-cloak)
+					span.v1-badge(ng-if="tag.isShowingV1Projects", ng-cloak)
 			span.dropdown.tag-menu(dropdown)
 				a.dropdown-toggle(
 					href="#",

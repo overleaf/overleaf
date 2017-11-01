@@ -179,7 +179,7 @@ module.exports = ProjectController =
 						notifications: notifications or []
 						user: user
 						hasSubscription: results.hasSubscription[0]
-						isV1: results.v1Projects?
+						isShowingV1Projects: results.v1Projects?
 					}
 
 					if Settings?.algolia?.app_id? and Settings?.algolia?.read_only_api_key?
