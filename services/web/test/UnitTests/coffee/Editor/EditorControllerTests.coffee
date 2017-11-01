@@ -489,23 +489,21 @@ describe "EditorController", ->
 
 
 	describe "renameEntity", ->
-
 		beforeEach ->
-			@err = "errro"
 			@entity_id = "entity_id_here"
 			@entityType = "doc"
 			@newName = "bobsfile.tex"
-			@ProjectEntityHandler.renameEntity = sinon.stub().callsArgWith(4, @err)
+			@ProjectEntityHandler.renameEntity = sinon.stub().callsArg(5)
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 
 		it "should call the project handler", (done)->
-			@EditorController.renameEntity @project_id, @entity_id, @entityType, @newName, =>
-				@ProjectEntityHandler.renameEntity.calledWith(@project_id, @entity_id, @entityType, @newName).should.equal true
+			@EditorController.renameEntity @project_id, @entity_id, @entityType, @newName, @user_id, =>
+				@ProjectEntityHandler.renameEntity.calledWith(@project_id, @entity_id, @entityType, @newName, @user_id).should.equal true
 				done()
 
 
 		it "should emit the update to the room", (done)->
-			@EditorController.renameEntity @project_id, @entity_id, @entityType, @newName, =>
+			@EditorController.renameEntity @project_id, @entity_id, @entityType, @newName, @user_id, =>
 				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'reciveEntityRename', @entity_id, @newName).should.equal true				
 				done()
 

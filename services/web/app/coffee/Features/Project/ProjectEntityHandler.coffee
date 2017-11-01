@@ -417,25 +417,30 @@ module.exports = ProjectEntityHandler =
 							callback null
 
 
-	renameEntity: (project_id, entity_id, entityType, newName, callback)->
+	renameEntity: (project_id, entity_id, entityType, newName, userId, callback)->
 		logger.log(entity_id: entity_id, project_id: project_id, ('renaming '+entityType))
 		if !entityType?
 			logger.err err: "No entityType set", project_id: project_id, entity_id: entity_id
 			return callback("No entityType set")
 		entityType = entityType.toLowerCase()
-		ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (err, project)=>
-			projectLocator.findElement {project:project, element_id:entity_id, type:entityType}, (err, entity, path, folder)=>
-				if err?
-					return callback err
-				conditons = {_id:project_id}
-				update = "$set":{}
-				namePath = path.mongo+".name"
-				update["$set"][namePath] = newName
-				endPath = path.fileSystem.replace(entity.name, newName)
-				tpdsUpdateSender.moveEntity({project_id:project_id, startPath:path.fileSystem, endPath:endPath, project_name:project.name, rev:entity.rev})
-				Project.update conditons, update, {}, (err)->
-					if callback?
-						callback err
+		ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (error, project)=>
+			return callback(error) if error?
+			ProjectEntityHandler.getAllEntitiesFromProject project, (error, oldDocs) =>
+				return callback(error) if error?
+				projectLocator.findElement {project:project, element_id:entity_id, type:entityType}, (error, entity, path)=>
+					return callback(error) if error?
+					endPath = path.fileSystem.replace(entity.name, newName)
+					conditions = {_id:project_id}
+					update = "$set":{}
+					namePath = path.mongo+".name"
+					update["$set"][namePath] = newName
+					tpdsUpdateSender.moveEntity({project_id:project_id, startPath:path.fileSystem, endPath:endPath, project_name:project.name, rev:entity.rev})
+					Project.findOneAndUpdate conditions, update, { "new": true}, (error, newProject) ->
+						return callback(error) if error?
+						ProjectEntityHandler.getAllEntitiesFromProject newProject, (error, newDocs) =>
+							return callback(error) if error?
+							documentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
+							documentUpdaterHandler.updateProjectStructure project_id, userId, oldDocs, newDocs, callback
 
 	_cleanUpEntity: (project, entity, entityType, callback = (error) ->) ->
 		if(entityType.indexOf("file") != -1)

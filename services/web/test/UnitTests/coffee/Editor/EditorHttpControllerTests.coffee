@@ -19,6 +19,7 @@ describe "EditorHttpController", ->
 			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler = {}
 			"../Collaborators/CollaboratorsInviteHandler": @CollaboratorsInviteHandler = {}
 			"../TokenAccess/TokenAccessHandler": @TokenAccessHandler = {}
+			"../Authentication/AuthenticationController": @AuthenticationController = {}
 
 		@project_id = "mock-project-id"
 		@doc_id = "mock-doc-id"
@@ -264,12 +265,14 @@ describe "EditorHttpController", ->
 				entity_type: @entity_type = "entity-type"
 			@req.body =
 				name: @name = "new-name"
-			@EditorController.renameEntity = sinon.stub().callsArg(4)
+			@userId = 1234
+			@AuthenticationController.getLoggedInUserId = sinon.stub().returns(@userId)
+			@EditorController.renameEntity = sinon.stub().callsArg(5)
 			@EditorHttpController.renameEntity @req, @res
 
 		it "should call EditorController.renameEntity", ->
 			@EditorController.renameEntity
-				.calledWith(@project_id, @entity_id, @entity_type, @name)
+				.calledWith(@project_id, @entity_id, @entity_type, @name, @userId)
 				.should.equal true
 
 		it "should send back a success response", ->
@@ -283,6 +286,8 @@ describe "EditorHttpController", ->
 				entity_type: @entity_type = "entity-type"
 			@req.body =
 				name: @name = "EDMUBEEBKBXUUUZERMNSXFFWIBHGSDAWGMRIQWJBXGWSBVWSIKLFPRBYSJEKMFHTRZBHVKJSRGKTBHMJRXPHORFHAKRNPZGGYIOTEDMUBEEBKBXUUUZERMNSXFFWIBHGSDAWGMRIQWJBXGWSBVWSIKLFPRBYSJEKMFHTRZBHVKJSRGKTBHMJRXPHORFHAKRNPZGGYIOT"
+			@userId = 1234
+			@AuthenticationController.getLoggedInUserId = sinon.stub().returns(@userId)
 			@EditorController.renameEntity = sinon.stub().callsArg(4)
 			@EditorHttpController.renameEntity @req, @res
 
@@ -290,7 +295,6 @@ describe "EditorHttpController", ->
 			@res.sendStatus.calledWith(400).should.equal true
 
 	describe "rename entity with 0 length name", ->
-
 		beforeEach ->
 			@req.params =
 				Project_id: @project_id
@@ -298,12 +302,13 @@ describe "EditorHttpController", ->
 				entity_type: @entity_type = "entity-type"
 			@req.body =
 				name: @name = ""
+			@userId = 1234
+			@AuthenticationController.getLoggedInUserId = sinon.stub().returns(@userId)
 			@EditorController.renameEntity = sinon.stub().callsArg(4)
 			@EditorHttpController.renameEntity @req, @res
 
 		it "should send back a bad request status code", ->
 			@res.sendStatus.calledWith(400).should.equal true
-
 
 	describe "moveEntity", ->
 		beforeEach ->

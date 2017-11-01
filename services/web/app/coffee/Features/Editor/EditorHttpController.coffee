@@ -12,6 +12,7 @@ CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
 CollaboratorsInviteHandler = require("../Collaborators/CollaboratorsInviteHandler")
 PrivilegeLevels = require "../Authorization/PrivilegeLevels"
 TokenAccessHandler = require '../TokenAccess/TokenAccessHandler'
+AuthenticationController = require "../Authentication/AuthenticationController"
 
 module.exports = EditorHttpController =
 	joinProject: (req, res, next) ->
@@ -112,9 +113,10 @@ module.exports = EditorHttpController =
 		entity_id   = req.params.entity_id
 		entity_type = req.params.entity_type
 		name = req.body.name
+		user_id = AuthenticationController.getLoggedInUserId(req)
 		if !EditorHttpController._nameIsAcceptableLength(name)
 			return res.sendStatus 400
-		EditorController.renameEntity project_id, entity_id, entity_type, name, (error) ->
+		EditorController.renameEntity project_id, entity_id, entity_type, name, user_id, (error) ->
 			return next(error) if error?
 			res.sendStatus 204
 

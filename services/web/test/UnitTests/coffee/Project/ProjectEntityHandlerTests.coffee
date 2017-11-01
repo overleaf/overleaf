@@ -976,19 +976,34 @@ describe 'ProjectEntityHandler', ->
 			@entityType = "doc"
 			@newName = "new.tex"
 			@path = mongo: "mongo.path", fileSystem: "/file/system/old.tex"
-			@projectLocator.findElement = sinon.stub().callsArgWith(1, null, @entity = { _id: @entity_id, name:"old.tex", rev:4 }, @path)
-			@ProjectModel.update = sinon.stub().callsArgWith(3)
-			@tpdsUpdateSender.moveEntity = sinon.stub()
+			@userId = 1234
+
 			@ProjectGetter.getProject.callsArgWith(2, null, @project)
+			@ProjectEntityHandler.getAllEntitiesFromProject = sinon.stub()
+			@ProjectEntityHandler.getAllEntitiesFromProject
+				.onFirstCall().callsArgWith(1, null, @oldDocs = [])
+			@ProjectEntityHandler.getAllEntitiesFromProject
+				.onSecondCall().callsArgWith(1, null, @newDocs = [])
+
+			@projectLocator.findElement = sinon.stub().callsArgWith(1, null, @entity = { _id: @entity_id, name:"old.tex", rev:4 }, @path)
+			@tpdsUpdateSender.moveEntity = sinon.stub()
+			@ProjectModel.findOneAndUpdate = sinon.stub().callsArgWith(3, null, @project)
+			@documentUpdaterHandler.updateProjectStructure = sinon.stub().callsArg(4)
+
+		it "should should send the old and new project structure to the doc updater", (done) ->
+			@ProjectEntityHandler.renameEntity @project_id, @entity_id, @entityType, @newName, @userId, =>
+				@documentUpdaterHandler.updateProjectStructure.calledWith(
+					@project_id, @userId, @oldDocs, @newDocs,
+				).should.equal true
+				done()
 
 		it "should update the name in mongo", (done)->
-
-			@ProjectEntityHandler.renameEntity @project_id, @entity_id, @entityType, @newName, =>
-				@ProjectModel.update.calledWith({_id : @project_id}, {"$set":{"mongo.path.name":@newName}}).should.equal true
+			@ProjectEntityHandler.renameEntity @project_id, @entity_id, @entityType, @newName, @userId, =>
+				@ProjectModel.findOneAndUpdate.calledWith({_id: @project_id}, {"$set":{"mongo.path.name": @newName}}, {"new": true}).should.equal true
 				done()
 
 		it "should send the update to the tpds", (done)->
-			@ProjectEntityHandler.renameEntity @project_id, @entity_id, @entityType, @newName, =>
+			@ProjectEntityHandler.renameEntity @project_id, @entity_id, @entityType, @newName, @userId, =>
 				@tpdsUpdateSender.moveEntity.calledWith({project_id:@project_id, startPath:@path.fileSystem, endPath:"/file/system/new.tex", project_name:@project.name, rev:4}).should.equal true
 				done()
 
