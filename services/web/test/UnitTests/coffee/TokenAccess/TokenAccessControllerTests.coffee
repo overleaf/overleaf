@@ -142,7 +142,7 @@ describe "TokenAccessController", ->
 		describe 'when findProject does not find a project', ->
 			beforeEach ->
 
-			describe 'when it is a private overleaf project', ->
+			describe 'when token access is off, but user has higher access anyway', ->
 				beforeEach ->
 					@req = new MockRequest()
 					@res = new MockResponse()
@@ -151,9 +151,9 @@ describe "TokenAccessController", ->
 					@req.params['read_and_write_token'] = @readAndWriteToken
 					@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
 						.callsArgWith(1, null, null)
-					@TokenAccessHandler.findPrivateOverleafProjectWithReadAndWriteToken =
+					@TokenAccessHandler.findProjectWithHigherAccess =
 						sinon.stub()
-						.callsArgWith(1, null, @project)
+						.callsArgWith(2, null, @project)
 					@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
 						.callsArgWith(2, null)
 					@ProjectController.loadEditor = sinon.stub()
@@ -166,15 +166,10 @@ describe "TokenAccessController", ->
 						.to.equal true
 					done()
 
-				it 'should try to find a private overleaf project', (done) ->
+				it 'should check if user has higher access to the token project', (done) ->
 					expect(
-						@TokenAccessHandler.findPrivateOverleafProjectWithReadAndWriteToken
-							.callCount
+						@TokenAccessHandler.findProjectWithHigherAccess.callCount
 					).to.equal 1
-					expect(
-						@TokenAccessHandler.findPrivateOverleafProjectWithReadAndWriteToken
-							.calledWith(@readAndWriteToken)
-					).to.equal true
 					done()
 
 				it 'should not add the user to the project with read-write access', (done) ->
@@ -196,7 +191,7 @@ describe "TokenAccessController", ->
 					expect(@res.redirect.calledWith(302, "/project/#{@project._id}")).to.equal true
 					done()
 
-			describe 'when it is not a private overleaf project', ->
+			describe 'when higher access is not available', ->
 				beforeEach ->
 					@req = new MockRequest()
 					@res = new MockResponse()
@@ -204,9 +199,9 @@ describe "TokenAccessController", ->
 					@req.params['read_and_write_token'] = @readAndWriteToken
 					@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
 						.callsArgWith(1, null, null)
-					@TokenAccessHandler.findPrivateOverleafProjectWithReadAndWriteToken =
+					@TokenAccessHandler.findProjectWithHigherAccess =
 						sinon.stub()
-						.callsArgWith(1, null, null)
+						.callsArgWith(2, null, null)
 					@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
 						.callsArgWith(2, null)
 					@ProjectController.loadEditor = sinon.stub()
@@ -218,6 +213,12 @@ describe "TokenAccessController", ->
 					expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.calledWith(
 						@readAndWriteToken
 					)).to.equal true
+					done()
+
+				it 'should check if user has higher access to the token project', (done) ->
+					expect(
+						@TokenAccessHandler.findProjectWithHigherAccess.callCount
+					).to.equal 1
 					done()
 
 				it 'should not add the user to the project with read-write access', (done) ->

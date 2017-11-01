@@ -349,3 +349,35 @@ describe 'TokenAccess', ->
 			try_content_access(@other2, @project_id, (response, body) =>
 				expect(body.privilegeLevel).to.equal false
 			, done)
+
+	describe 'private project, with higher access', ->
+		before (done) ->
+			@owner.createProject "higher-access-test-#{Math.random()}", (err, project_id) =>
+				@project_id = project_id
+				@owner.addUserToProject @project_id, @other1, 'readAndWrite', (err) =>
+					@owner.makeTokenBased @project_id, (err) =>
+						@owner.getProject @project_id, (err, project) =>
+							@tokens = project.tokens
+							@owner.makePrivate @project_id, () =>
+								setTimeout done, 1000
+
+		it 'should redirect to canonical path, when user uses read-write token', (done) ->
+			try_read_and_write_token_access(@other1, @tokens.readAndWrite, (response, body) =>
+				expect(response.statusCode).to.equal 302
+				expect(response.headers.location).to.equal "/project/#{@project_id}"
+			, done)
+
+		it 'should allow the user access to the project', (done) ->
+			try_read_access(@other1, @project_id, (response, body) =>
+				expect(response.statusCode).to.equal 200
+			, done)
+
+		it 'should allow user to join the project', (done) ->
+			try_content_access(@other1, @project_id, (response, body) =>
+				expect(body.privilegeLevel).to.equal 'readAndWrite'
+			, done)
+
+		it 'should not allow a different user to join the project', (done) ->
+			try_content_access(@other2, @project_id, (response, body) =>
+				expect(body.privilegeLevel).to.equal false
+			, done)

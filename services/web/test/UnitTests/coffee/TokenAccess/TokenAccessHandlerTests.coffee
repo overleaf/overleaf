@@ -20,6 +20,7 @@ describe "TokenAccessHandler", ->
 		@TokenAccessHandler = SandboxedModule.require modulePath, requires:
 			'../../models/Project': {Project: @Project = {}}
 			'settings-sharelatex': {}
+			'../Collaborators/CollaboratorsHandler': @CollaboratorsHandler = {}
 
 
 	describe 'findProjectWithReadOnlyToken', ->
@@ -85,38 +86,91 @@ describe "TokenAccessHandler", ->
 					done()
 
 
-	describe 'findPrivateOverleafProjectWithReadAndWriteToken', ->
-		beforeEach ->
-			@Project.findOne = sinon.stub().callsArgWith(2, null, @project)
+	describe 'findProjectWithHigherAccess', ->
+		describe 'when user does have higher access', ->
+			beforeEach ->
+				@Project.findOne = sinon.stub().callsArgWith(2, null, @project)
+				@CollaboratorsHandler.isUserInvitedMemberOfProject = sinon.stub()
+					.callsArgWith(2, null, true)
 
-		it 'should call Project.findOne', (done) ->
-			@TokenAccessHandler.findPrivateOverleafProjectWithReadAndWriteToken @token, (err, project) =>
-				expect(@Project.findOne.callCount).to.equal 1
-				expect(@Project.findOne.calledWith({
-					'tokens.readAndWrite': @token,
-					'publicAccesLevel': 'private',
-					'overleaf.id': {$exists: true}
-				})).to.equal true
-				done()
+			it 'should call Project.findOne', (done) ->
+				@TokenAccessHandler.findProjectWithHigherAccess @token, @userId, (err, project) =>
+					expect(@Project.findOne.callCount).to.equal 1
+					expect(@Project.findOne.calledWith($or: [
+						{'tokens.readAndWrite': @token},
+						{'tokens.readOnly': @token}
+					])).to.equal true
+					done()
 
-		it 'should produce a project object with no error', (done) ->
-			@TokenAccessHandler.findPrivateOverleafProjectWithReadAndWriteToken @token, (err, project) =>
-				expect(err).to.not.exist
-				expect(project).to.exist
-				expect(project).to.deep.equal @project
-				done()
+			it 'should call isUserInvitedMemberOfProject', (done) ->
+				@TokenAccessHandler.findProjectWithHigherAccess @token, @userId, (err, project) =>
+					expect(@CollaboratorsHandler.isUserInvitedMemberOfProject.callCount)
+						.to.equal 1
+					expect(@CollaboratorsHandler.isUserInvitedMemberOfProject.calledWith(
+						@userId, @project._id
+					)).to.equal true
+					done()
+
+			it 'should produce a project object', (done) ->
+				@TokenAccessHandler.findProjectWithHigherAccess @token, @userId, (err, project) =>
+					expect(err).to.not.exist
+					expect(project).to.exist
+					expect(project).to.deep.equal @project
+					done()
+
+		describe 'when user does not have higher access', ->
+			beforeEach ->
+				@Project.findOne = sinon.stub().callsArgWith(2, null, @project)
+				@CollaboratorsHandler.isUserInvitedMemberOfProject = sinon.stub()
+					.callsArgWith(2, null, false)
+
+			it 'should call Project.findOne', (done) ->
+				@TokenAccessHandler.findProjectWithHigherAccess @token, @userId, (err, project) =>
+					expect(@Project.findOne.callCount).to.equal 1
+					expect(@Project.findOne.calledWith($or: [
+						{'tokens.readAndWrite': @token},
+						{'tokens.readOnly': @token}
+					])).to.equal true
+					done()
+
+			it 'should call isUserInvitedMemberOfProject', (done) ->
+				@TokenAccessHandler.findProjectWithHigherAccess @token, @userId, (err, project) =>
+					expect(@CollaboratorsHandler.isUserInvitedMemberOfProject.callCount)
+						.to.equal 1
+					expect(@CollaboratorsHandler.isUserInvitedMemberOfProject.calledWith(
+						@userId, @project._id
+					)).to.equal true
+					done()
+
+			it 'should not produce a project', (done) ->
+				@TokenAccessHandler.findProjectWithHigherAccess @token, @userId, (err, project) =>
+					expect(err).to.not.exist
+					expect(project).to.not.exist
+					done()
 
 		describe 'when Project.findOne produces an error', ->
 			beforeEach ->
 				@Project.findOne = sinon.stub().callsArgWith(2, new Error('woops'))
 
 			it 'should produce an error', (done) ->
-				@TokenAccessHandler.findPrivateOverleafProjectWithReadAndWriteToken @token, (err, project) =>
+				@TokenAccessHandler.findProjectWithHigherAccess @token, @userId, (err, project) =>
 					expect(err).to.exist
 					expect(project).to.not.exist
 					expect(err).to.be.instanceof Error
 					done()
 
+		describe 'when isUserInvitedMemberOfProject produces an error', ->
+			beforeEach ->
+				@Project.findOne = sinon.stub().callsArgWith(2, null, @project)
+				@CollaboratorsHandler.isUserInvitedMemberOfProject = sinon.stub()
+					.callsArgWith(2, new Error('woops'))
+
+			it 'should produce an error', (done) ->
+				@TokenAccessHandler.findProjectWithHigherAccess @token, @userId, (err, project) =>
+					expect(err).to.exist
+					expect(project).to.not.exist
+					expect(err).to.be.instanceof Error
+					done()
 
 	describe 'addReadOnlyUserToProject', ->
 		beforeEach ->

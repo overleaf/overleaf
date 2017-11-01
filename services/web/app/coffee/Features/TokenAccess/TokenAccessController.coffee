@@ -22,23 +22,23 @@ module.exports = TokenAccessController =
 				return next(err)
 			if !project?
 				logger.log {token, userId},
-					"[TokenAccess] no project found for readAndWrite token"
+					"[TokenAccess] no token-based project found for readAndWrite token"
 				if !userId?
 					logger.log {token},
 						"[TokenAccess] No project found with read-write token, anonymous user"
 					return next(new Errors.NotFoundError())
-				TokenAccessHandler
-					.findPrivateOverleafProjectWithReadAndWriteToken token, (err, project) ->
-						if err?
-							logger.err {err, token, userId},
-								"[TokenAccess] error getting project by readAndWrite token"
-							return next(err)
-						if !project?
-							logger.log {token, userId},
-								"[TokenAccess] no private-overleaf project found with readAndWriteToken"
-							return next(new Errors.NotFoundError())
-						logger.log {token, projectId: project._id}, "[TokenAccess] redirecting user to project"
-						res.redirect(302, "/project/#{project._id}")
+				TokenAccessHandler.findProjectWithHigherAccess token, userId, (err, project) ->
+					if err?
+						logger.err {err, token, userId},
+							"[TokenAccess] error finding project with higher access"
+						return next(err)
+					if !project?
+						logger.log {token, userId},
+							"[TokenAccess] no project with higher access found for token and user"
+						return next(new Errors.NotFoundError())
+					logger.log {token, userId, projectId: project._id},
+						"[TokenAccess] user has higher access to project, redirecting"
+					res.redirect(302, "/project/#{project._id}")
 			else
 				if !userId?
 					if TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED

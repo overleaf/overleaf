@@ -1,4 +1,5 @@
 Project = require('../../models/Project').Project
+CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
 PublicAccessLevels = require '../Authorization/PublicAccessLevels'
 PrivilegeLevels = require '../Authorization/PrivilegeLevels'
 ObjectId = require("mongojs").ObjectId
@@ -21,12 +22,22 @@ module.exports = TokenAccessHandler =
 			'publicAccesLevel': PublicAccessLevels.TOKEN_BASED
 		}, {_id: 1, publicAccesLevel: 1, owner_ref: 1}, callback
 
-	findPrivateOverleafProjectWithReadAndWriteToken: (token, callback=(err, project)->) ->
+	findProjectWithHigherAccess: (token, userId, callback=(err, project)->) ->
 		Project.findOne {
-			'tokens.readAndWrite': token,
-			'publicAccesLevel': PublicAccessLevels.PRIVATE,
-			'overleaf.id': {'$exists': true}
-		}, {_id: 1, publicAccesLevel: 1, owner_ref: 1}, callback
+			$or: [
+				{'tokens.readAndWrite': token},
+				{'tokens.readOnly': token}
+			]
+		}, {_id: 1}, (err, project) ->
+			if err?
+				return callback(err)
+			if !project?
+				return callback(null, null)
+			projectId = project._id
+			CollaboratorsHandler.isUserInvitedMemberOfProject userId, projectId, (err, isMember) ->
+				if err?
+					return callback(err)
+				callback(null, if isMember == true then project else null)
 
 	addReadOnlyUserToProject: (userId, projectId, callback=(err)->) ->
 		userId = ObjectId(userId.toString())
