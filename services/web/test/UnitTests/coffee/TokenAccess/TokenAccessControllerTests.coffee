@@ -104,6 +104,82 @@ describe "TokenAccessController", ->
 				expect(@ProjectController.loadEditor.calledWith(@req, @res, @next)).to.equal true
 				done()
 
+
+		describe 'when there is no user', ->
+			beforeEach ->
+				@AuthenticationController.getLoggedInUserId =
+					sinon.stub().returns(null)
+
+			describe 'when anonymous read-write access is enabled', ->
+				beforeEach ->
+					@TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED = true
+					@req = new MockRequest()
+					@res = new MockResponse()
+					@next = sinon.stub()
+					@req.params['read_and_write_token'] = @readAndWriteToken
+					@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
+						.callsArgWith(1, null, @project)
+					@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
+						.callsArgWith(2, null)
+					@ProjectController.loadEditor = sinon.stub()
+					@TokenAccessHandler.grantSessionTokenAccess = sinon.stub()
+					@TokenAccessController.readAndWriteToken @req, @res, @next
+
+				it 'should not add the user to the project with read-write access', (done) ->
+					expect(@TokenAccessHandler.addReadAndWriteUserToProject.callCount)
+						.to.equal 0
+					done()
+
+				it 'should give the user session token access', (done) ->
+					expect(@TokenAccessHandler.grantSessionTokenAccess.callCount)
+						.to.equal 1
+					expect(@TokenAccessHandler.grantSessionTokenAccess.calledWith(
+						@req, @projectId, @readAndWriteToken
+					))
+						.to.equal true
+					done()
+
+				it 'should pass control to loadEditor', (done) ->
+					expect(@req.params.Project_id).to.equal @projectId.toString()
+					expect(@ProjectController.loadEditor.callCount).to.equal 1
+					expect(@ProjectController.loadEditor.calledWith(@req, @res, @next)).to.equal true
+					done()
+
+			describe 'when anonymous read-write access is not enabled', ->
+				beforeEach ->
+					@TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED = false
+					@req = new MockRequest()
+					@res = new MockResponse()
+					@next = sinon.stub()
+					@req.params['read_and_write_token'] = @readAndWriteToken
+					@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
+						.callsArgWith(1, null, @project)
+					@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
+						.callsArgWith(2, null)
+					@ProjectController.loadEditor = sinon.stub()
+					@TokenAccessHandler.grantSessionTokenAccess = sinon.stub()
+					@TokenAccessController.readAndWriteToken @req, @res, @next
+
+				it 'should not add the user to the project with read-write access', (done) ->
+					expect(@TokenAccessHandler.addReadAndWriteUserToProject.callCount)
+						.to.equal 0
+					done()
+
+				it 'should give the user session token access', (done) ->
+					expect(@TokenAccessHandler.grantSessionTokenAccess.callCount)
+						.to.equal 0
+					done()
+
+				it 'should not pass control to loadEditor', (done) ->
+					expect(@ProjectController.loadEditor.callCount).to.equal 0
+					expect(@ProjectController.loadEditor.calledWith(@req, @res, @next)).to.equal false
+					done()
+
+				it 'should call next with an error', (done) ->
+					expect(@next.callCount).to.equal 1
+					expect(@next.lastCall.args[0]).to.be.instanceof Error
+					done()
+
 		describe 'when findProject produces an error', ->
 			beforeEach ->
 				@req = new MockRequest()
@@ -142,99 +218,105 @@ describe "TokenAccessController", ->
 		describe 'when findProject does not find a project', ->
 			beforeEach ->
 
-			describe 'when token access is off, but user has higher access anyway', ->
+			describe 'when user is present', ->
 				beforeEach ->
-					@req = new MockRequest()
-					@res = new MockResponse()
-					@res.redirect = sinon.stub()
-					@next = sinon.stub()
-					@req.params['read_and_write_token'] = @readAndWriteToken
-					@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
-						.callsArgWith(1, null, null)
-					@TokenAccessHandler.findProjectWithHigherAccess =
-						sinon.stub()
-						.callsArgWith(2, null, @project)
-					@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
-						.callsArgWith(2, null)
-					@ProjectController.loadEditor = sinon.stub()
-					@TokenAccessController.readAndWriteToken @req, @res, @next
+					@AuthenticationController.getLoggedInUserId =
+						sinon.stub().returns(@userId.toString())
 
-				it 'should try to find a project with this token', (done) ->
-					expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.callCount)
-						.to.equal 1
-					expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.calledWith(@readAndWriteToken))
-						.to.equal true
-					done()
+				describe 'when token access is off, but user has higher access anyway', ->
+					beforeEach ->
+						@req = new MockRequest()
+						@res = new MockResponse()
+						@res.redirect = sinon.stub()
+						@next = sinon.stub()
+						@req.params['read_and_write_token'] = @readAndWriteToken
+						@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
+							.callsArgWith(1, null, null)
+						@TokenAccessHandler.findProjectWithHigherAccess =
+							sinon.stub()
+							.callsArgWith(2, null, @project)
+						@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
+							.callsArgWith(2, null)
+						@ProjectController.loadEditor = sinon.stub()
+						@TokenAccessController.readAndWriteToken @req, @res, @next
 
-				it 'should check if user has higher access to the token project', (done) ->
-					expect(
-						@TokenAccessHandler.findProjectWithHigherAccess.callCount
-					).to.equal 1
-					done()
+					it 'should try to find a project with this token', (done) ->
+						expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.callCount)
+							.to.equal 1
+						expect(@TokenAccessHandler.findProjectWithReadAndWriteToken
+							.calledWith(@readAndWriteToken)
+						).to.equal true
+						done()
 
-				it 'should not add the user to the project with read-write access', (done) ->
-					expect(@TokenAccessHandler.addReadAndWriteUserToProject.callCount)
-						.to.equal 0
-					done()
+					it 'should check if user has higher access to the token project', (done) ->
+						expect(
+							@TokenAccessHandler.findProjectWithHigherAccess.callCount
+						).to.equal 1
+						done()
 
-				it 'should not pass control to loadEditor', (done) ->
-					expect(@ProjectController.loadEditor.callCount).to.equal 0
-					expect(@ProjectController.loadEditor.calledWith(@req, @res, @next)).to.equal false
-					done()
+					it 'should not add the user to the project with read-write access', (done) ->
+						expect(@TokenAccessHandler.addReadAndWriteUserToProject.callCount)
+							.to.equal 0
+						done()
 
-				it 'should not call next with a not-found error', (done) ->
-					expect(@next.callCount).to.equal 0
-					done()
+					it 'should not pass control to loadEditor', (done) ->
+						expect(@ProjectController.loadEditor.callCount).to.equal 0
+						expect(@ProjectController.loadEditor.calledWith(@req, @res, @next)).to.equal false
+						done()
 
-				it 'should redirect to the canonical project url', (done) ->
-					expect(@res.redirect.callCount).to.equal 1
-					expect(@res.redirect.calledWith(302, "/project/#{@project._id}")).to.equal true
-					done()
+					it 'should not call next with a not-found error', (done) ->
+						expect(@next.callCount).to.equal 0
+						done()
 
-			describe 'when higher access is not available', ->
-				beforeEach ->
-					@req = new MockRequest()
-					@res = new MockResponse()
-					@next = sinon.stub()
-					@req.params['read_and_write_token'] = @readAndWriteToken
-					@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
-						.callsArgWith(1, null, null)
-					@TokenAccessHandler.findProjectWithHigherAccess =
-						sinon.stub()
-						.callsArgWith(2, null, null)
-					@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
-						.callsArgWith(2, null)
-					@ProjectController.loadEditor = sinon.stub()
-					@TokenAccessController.readAndWriteToken @req, @res, @next
+					it 'should redirect to the canonical project url', (done) ->
+						expect(@res.redirect.callCount).to.equal 1
+						expect(@res.redirect.calledWith(302, "/project/#{@project._id}")).to.equal true
+						done()
 
-				it 'should try to find a project with this token', (done) ->
-					expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.callCount)
-						.to.equal 1
-					expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.calledWith(
-						@readAndWriteToken
-					)).to.equal true
-					done()
+				describe 'when higher access is not available', ->
+					beforeEach ->
+						@req = new MockRequest()
+						@res = new MockResponse()
+						@next = sinon.stub()
+						@req.params['read_and_write_token'] = @readAndWriteToken
+						@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
+							.callsArgWith(1, null, null)
+						@TokenAccessHandler.findProjectWithHigherAccess =
+							sinon.stub()
+							.callsArgWith(2, null, null)
+						@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
+							.callsArgWith(2, null)
+						@ProjectController.loadEditor = sinon.stub()
+						@TokenAccessController.readAndWriteToken @req, @res, @next
 
-				it 'should check if user has higher access to the token project', (done) ->
-					expect(
-						@TokenAccessHandler.findProjectWithHigherAccess.callCount
-					).to.equal 1
-					done()
+					it 'should try to find a project with this token', (done) ->
+						expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.callCount)
+							.to.equal 1
+						expect(@TokenAccessHandler.findProjectWithReadAndWriteToken.calledWith(
+							@readAndWriteToken
+						)).to.equal true
+						done()
 
-				it 'should not add the user to the project with read-write access', (done) ->
-					expect(@TokenAccessHandler.addReadAndWriteUserToProject.callCount)
-						.to.equal 0
-					done()
+					it 'should check if user has higher access to the token project', (done) ->
+						expect(
+							@TokenAccessHandler.findProjectWithHigherAccess.callCount
+						).to.equal 1
+						done()
 
-				it 'should not pass control to loadEditor', (done) ->
-					expect(@ProjectController.loadEditor.callCount).to.equal 0
-					expect(@ProjectController.loadEditor.calledWith(@req, @res, @next)).to.equal false
-					done()
+					it 'should not add the user to the project with read-write access', (done) ->
+						expect(@TokenAccessHandler.addReadAndWriteUserToProject.callCount)
+							.to.equal 0
+						done()
 
-				it 'should call next with a not-found error', (done) ->
-					expect(@next.callCount).to.equal 1
-					expect(@next.lastCall.args[0]).to.be.instanceof Error
-					done()
+					it 'should not pass control to loadEditor', (done) ->
+						expect(@ProjectController.loadEditor.callCount).to.equal 0
+						expect(@ProjectController.loadEditor.calledWith(@req, @res, @next)).to.equal false
+						done()
+
+					it 'should call next with a not-found error', (done) ->
+						expect(@next.callCount).to.equal 1
+						expect(@next.lastCall.args[0]).to.be.instanceof Error
+						done()
 
 		describe 'when adding user to project produces an error', ->
 			beforeEach ->
