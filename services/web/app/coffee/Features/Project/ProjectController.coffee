@@ -144,7 +144,6 @@ module.exports = ProjectController =
 		timer = new metrics.Timer("project-list")
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		currentUser = AuthenticationController.getSessionUser(req)
-		isV1 = Settings.brandPrefix == "ol-"
 		async.parallel {
 			tags: (cb)->
 				TagsHandler.getAllTags user_id, cb
@@ -180,7 +179,7 @@ module.exports = ProjectController =
 						notifications: notifications or []
 						user: user
 						hasSubscription: results.hasSubscription[0]
-						isV1: isV1
+						isV1: results.v1Projects?
 					}
 
 					if Settings?.algolia?.app_id? and Settings?.algolia?.read_only_api_key?
