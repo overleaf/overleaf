@@ -204,6 +204,42 @@ module.exports = DocumentUpdaterHandler =
 				logger.error {project_id, doc_id, thread_id}, "doc updater returned a non-success status code: #{res.statusCode}"
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
+	updateProjectStructure : (project_id, user_id, oldDocs, newDocs, callback = (error) ->)->
+		return callback() if !settings.apis.project_history?.enabled
+
+		docRenameUpdates = []
+
+		for oldDoc in oldDocs
+			newDoc = _.find newDocs, (newDoc) ->
+				newDoc.doc._id.toString() == oldDoc.doc._id.toString()
+			if newDoc.path != oldDoc.path
+				docRenameUpdates.push
+					id: oldDoc.doc._id
+					pathname: oldDoc.path
+					newPathname: newDoc.path
+
+		timer = new metrics.Timer("set-document")
+		url = "#{settings.apis.documentupdater.url}/project/#{project_id}"
+		body =
+			url: url
+			json:
+				updates: docRenameUpdates
+				user_id: user_id
+
+		return callback() if docRenameUpdates.length < 1
+
+		request.post body, (error, res, body)->
+			timer.done()
+			if error?
+				logger.error {error, url, project_id}, "error update project structure in doc updater"
+				callback(error)
+			else if res.statusCode >= 200 and res.statusCode < 300
+				logger.error {project_id}, "updated project structure in doc updater"
+				callback(null)
+			else
+				logger.error {project_id, url}, "doc updater returned a non-success status code: #{res.statusCode}"
+				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
+
 PENDINGUPDATESKEY = "PendingUpdates"
 DOCLINESKEY = "doclines"
 DOCIDSWITHPENDINGUPDATES = "DocsWithPendingUpdates"

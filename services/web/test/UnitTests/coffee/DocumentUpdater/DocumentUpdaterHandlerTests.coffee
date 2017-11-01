@@ -6,6 +6,7 @@ SandboxedModule = require('sandboxed-module')
 assert = require('chai').assert
 path = require 'path'
 _ = require 'underscore'
+ObjectId = require("mongojs").ObjectId;
 modulePath = path.join __dirname, '../../../../app/js/Features/DocumentUpdater/DocumentUpdaterHandler'
 
 describe 'DocumentUpdaterHandler', ->
@@ -20,8 +21,14 @@ describe 'DocumentUpdaterHandler', ->
 
 		@request = {}
 		@projectEntityHandler = {}
-		@settings = 
-			apis : documentupdater: url : "http://something.com"
+		@settings =
+			apis:
+				documentupdater:
+					url : "http://document_updater.example.com"
+				project_history:
+					url: "http://project_history.example.com"
+
+		@callback = sinon.stub()
 		@handler = SandboxedModule.require modulePath, requires:
 			'request': defaults:=> return @request
 			'settings-sharelatex':@settings
@@ -29,14 +36,11 @@ describe 'DocumentUpdaterHandler', ->
 			'../Project/ProjectEntityHandler':@projectEntityHandler
 			"../../models/Project": Project: @Project={}
 			'../../Features/Project/ProjectLocator':{}
-			"metrics-sharelatex": 
+			"metrics-sharelatex":
 				Timer:->
 					done:->
 
 	describe 'flushProjectToMongo', ->
-		beforeEach ->
-			@callback = sinon.stub()
-
 		describe "successfully", ->
 			beforeEach ->
 				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
@@ -68,9 +72,6 @@ describe 'DocumentUpdaterHandler', ->
 					.should.equal true
 
 	describe 'flushProjectToMongoAndDelete', ->
-		beforeEach ->
-			@callback = sinon.stub()
-
 		describe "successfully", ->
 			beforeEach ->
 				@request.del = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
@@ -102,9 +103,6 @@ describe 'DocumentUpdaterHandler', ->
 					.should.equal true
 
 	describe 'flushDocToMongo', ->
-		beforeEach ->
-			@callback = sinon.stub()
-
 		describe "successfully", ->
 			beforeEach ->
 				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
@@ -136,9 +134,6 @@ describe 'DocumentUpdaterHandler', ->
 					.should.equal true
 
 	describe "deleteDoc", ->
-		beforeEach ->
-			@callback = sinon.stub()
-
 		describe "successfully", ->
 			beforeEach ->
 				@request.del = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
@@ -171,7 +166,6 @@ describe 'DocumentUpdaterHandler', ->
 
 	describe "setDocument", ->
 		beforeEach ->
-			@callback = sinon.stub()
 			@source = "dropbox"
 
 		describe "successfully", ->
@@ -213,9 +207,6 @@ describe 'DocumentUpdaterHandler', ->
 					.should.equal true
 
 	describe "getDocument", ->
-		beforeEach ->
-			@callback = sinon.stub()
-
 		describe "successfully", ->
 			beforeEach ->
 				@body = JSON.stringify
@@ -254,7 +245,6 @@ describe 'DocumentUpdaterHandler', ->
 
 	describe "getProjectDocsIfMatch", ->
 		beforeEach ->
-			@callback = sinon.stub()
 			@project_state_hash = "1234567890abcdef"
 
 		describe "successfully", ->
@@ -295,9 +285,6 @@ describe 'DocumentUpdaterHandler', ->
 
 
 	describe "clearProjectState", ->
-		beforeEach ->
-			@callback = sinon.stub()
-
 		describe "successfully", ->
 			beforeEach ->
 				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 200})
@@ -332,7 +319,6 @@ describe 'DocumentUpdaterHandler', ->
 	describe "acceptChanges", ->
 		beforeEach ->
 			@change_id = "mock-change-id-1"
-			@callback = sinon.stub()
 
 		describe "successfully", ->
 			beforeEach ->
@@ -370,7 +356,6 @@ describe 'DocumentUpdaterHandler', ->
 	describe "deleteThread", ->
 		beforeEach ->
 			@thread_id = "mock-thread-id-1"
-			@callback = sinon.stub()
 
 		describe "successfully", ->
 			beforeEach ->
@@ -401,3 +386,52 @@ describe 'DocumentUpdaterHandler', ->
 				@callback
 					.calledWith(new Error("doc updater returned failure status code: 500"))
 					.should.equal true
+
+	describe "updateProjectStructure ", ->
+		beforeEach ->
+			@user_id = 1234
+			@docIdA = new ObjectId()
+			@docIdB = new ObjectId()
+			@oldDocs = [
+				{ path: '/old_a', doc: _id: @docIdA }
+				{ path: '/old_b', doc: _id: @docIdB }
+			]
+			# create new instances of the same ObjectIds so that == doens't pass
+			@newDocs = [
+				{ path: '/old_a', doc: _id: new ObjectId(@docIdA.toString()) }
+				{ path: '/new_b', doc: _id: new ObjectId(@docIdB.toString()) }
+			]
+
+		describe "with project history disabled", ->
+			beforeEach ->
+				@settings.apis.project_history.enabled = false
+				@request.post = sinon.stub()
+
+				@handler.updateProjectStructure @project_id, @user_id, @oldDocs, @newDocs, @callback
+
+			it 'does not make a web request', ->
+				@request.post.called.should.equal false
+
+			it 'calls the callback', ->
+				@callback.called.should.equal true
+
+		describe "with project history enabled", ->
+			beforeEach ->
+				@settings.apis.project_history.enabled = true
+				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
+				@handler.updateProjectStructure @project_id, @user_id, @oldDocs, @newDocs, @callback
+
+			it 'should send the structure update to the document updater', ->
+				updates = [
+					id: @docIdB,
+					pathname: "/old_b"
+					newPathname: "/new_b"
+				]
+
+				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}"
+				@request.post
+					.calledWith(url: url, json: {updates, @user_id})
+					.should.equal true
+
+			it "should call the callback with no error", ->
+				@callback.calledWith(null).should.equal true
