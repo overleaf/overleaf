@@ -4,7 +4,7 @@ logger = require 'logger-sharelatex'
 
 INTEGRATION_MODULE_PATH = path.resolve(__dirname, '../../../../modules/overleaf-integration-web-module')
 
-module.exports = OlProjectGetter =
+module.exports = V1ProjectGetter =
 	integrationModuleExists: (callback = (error, stats) ->) ->
 		fs.stat INTEGRATION_MODULE_PATH, (error, stats) ->
 			if error? or !stats.isDirectory()
@@ -12,7 +12,7 @@ module.exports = OlProjectGetter =
 			return callback(true)
 
 	findAllUsersProjects: (userId, callback = (error, projects) ->) ->
-		OlProjectGetter.integrationModuleExists (exists) ->
+		V1ProjectGetter.integrationModuleExists (exists) ->
 			if exists
 				logger.log {exists}, "integration module does exist, loading V1 projects"
 				V1ProjectListGetter = require(path.join(INTEGRATION_MODULE_PATH, 'app/coffee/ProjectList/ProjectListGetter'))
