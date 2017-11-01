@@ -272,6 +272,22 @@ module.exports = RedisManager =
 						else
 							callback null, docUpdateCount
 
+	renameDoc: (project_id, doc_id, user_id, update, callback = (error) ->) ->
+		update =
+			doc: doc_id
+			pathname: update.pathname
+			new_pathname: update.newPathname
+			meta:
+				user_id: user_id
+				ts: new Date()
+		jsonUpdate = JSON.stringify(update)
+
+		RedisManager.getDoc project_id, doc_id, (error, lines, version) ->
+			return callback(error) if error?
+			if lines? and version?
+				rclient.set keys.pathname(doc_id:doc_id), update.new_pathname
+
+			rclient.rpush projectHistoryKeys.projectHistoryOps({project_id}), jsonUpdate, callback
 
 	clearUnflushedTime: (doc_id, callback = (error) ->) ->
 		rclient.del keys.unflushedTime(doc_id:doc_id), callback

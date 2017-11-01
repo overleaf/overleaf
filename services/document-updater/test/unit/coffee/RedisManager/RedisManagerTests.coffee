@@ -673,3 +673,45 @@ describe "RedisManager", ->
 			@rclient.del
 				.calledWith("ProjectState:#{@project_id}")
 				.should.equal true
+
+	describe "renameDoc", ->
+		beforeEach () ->
+			@rclient.rpush = sinon.stub().callsArg(2)
+			@rclient.set = sinon.stub()
+			@update =
+				id: @doc_id
+				pathname: @pathname = 'pathname'
+				newPathname: @newPathname = 'new-pathname'
+
+		describe "the document is cached in redis", ->
+			beforeEach ->
+				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, 'lines', 'version')
+				@RedisManager.renameDoc @project_id, @doc_id, @userId, @update, @callback
+
+			it "update the cached pathname", ->
+				@rclient.set
+					.calledWith("Pathname:#{@doc_id}", @newPathname)
+					.should.equal true
+
+			it "should queue an update", ->
+				update =
+					doc: @doc_id
+					pathname: @pathname
+					new_pathname: @newPathname
+					meta:
+						user_id: @userId
+						ts: new Date()
+				@rclient.rpush
+					.calledWith("ProjectHistory:Ops:#{@project_id}", JSON.stringify(update))
+					.should.equal true
+
+			it "should call the callback", ->
+				@callback.calledWith().should.equal true
+
+		describe "the document is not cached in redis", ->
+			beforeEach ->
+				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, null, null)
+				@RedisManager.renameDoc @project_id, @doc_id, @userId, @update, @callback
+
+			it "does not update the cached pathname", ->
+				@rclient.set.called.should.equal false

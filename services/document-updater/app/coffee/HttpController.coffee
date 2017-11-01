@@ -141,7 +141,7 @@ module.exports = HttpController =
 			return next(error) if error?
 			logger.log {project_id, doc_id}, "accepted #{ change_ids.length } changes via http"
 			res.send 204 # No Content
-	
+
 	deleteComment: (req, res, next = (error) ->) ->
 		{project_id, doc_id, comment_id} = req.params
 		logger.log {project_id, doc_id, comment_id}, "deleting comment via http"
@@ -151,5 +151,15 @@ module.exports = HttpController =
 			return next(error) if error?
 			logger.log {project_id, doc_id, comment_id}, "deleted comment via http"
 			res.send 204 # No Content
-		
 
+	updateProject: (req, res, next = (error) ->) ->
+		timer = new Metrics.Timer("http.updateProject")
+		project_id = req.params.project_id
+		{userId, docUpdates} = req.body
+		logger.log {project_id, docUpdates}, "updating project via http"
+
+		ProjectManager.updateProjectWithLocks project_id, userId, docUpdates, (error) ->
+			timer.done()
+			return next(error) if error?
+			logger.log project_id: project_id, "updated project via http"
+			res.send 204 # No Content

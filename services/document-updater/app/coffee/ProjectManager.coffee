@@ -93,3 +93,15 @@ module.exports = ProjectManager =
 
 	clearProjectState: (project_id, callback = (error) ->) ->
 		RedisManager.clearProjectState project_id, callback
+
+	updateProjectWithLocks: (project_id, user_id, updates, _callback = (error) ->) ->
+		timer = new Metrics.Timer("projectManager.updateProject")
+		callback = (args...) ->
+			timer.done()
+			_callback(args...)
+
+		handleUpdate = (update, cb) ->
+			doc_id = update.id
+			DocumentManager.renameDocWithLock project_id, doc_id, user_id, update, cb
+
+		async.each updates, handleUpdate, callback

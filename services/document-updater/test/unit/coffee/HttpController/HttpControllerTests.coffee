@@ -492,3 +492,40 @@ describe "HttpController", ->
 				@next
 					.calledWith(new Error("oops"))
 					.should.equal true
+
+	describe "updateProject", ->
+		beforeEach ->
+			@userId = "user-id-123"
+			@docUpdates = sinon.stub()
+			@req =
+				body: {@userId, @docUpdates}
+				params:
+					project_id: @project_id
+
+		describe "successfully", ->
+			beforeEach ->
+				@ProjectManager.updateProjectWithLocks = sinon.stub().callsArgWith(3)
+				@HttpController.updateProject(@req, @res, @next)
+
+			it "should accept the change", ->
+				@ProjectManager.updateProjectWithLocks
+					.calledWith(@project_id, @userId, @docUpdates)
+					.should.equal true
+
+			it "should return a successful No Content response", ->
+				@res.send
+					.calledWith(204)
+					.should.equal true
+
+			it "should time the request", ->
+				@Metrics.Timer::done.called.should.equal true
+
+		describe "when an errors occurs", ->
+			beforeEach ->
+				@ProjectManager.updateProjectWithLocks = sinon.stub().callsArgWith(3, new Error("oops"))
+				@HttpController.updateProject(@req, @res, @next)
+
+			it "should call next with the error", ->
+				@next
+					.calledWith(new Error("oops"))
+					.should.equal true

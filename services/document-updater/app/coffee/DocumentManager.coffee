@@ -7,6 +7,7 @@ HistoryManager = require "./HistoryManager"
 RealTimeRedisManager = require "./RealTimeRedisManager"
 Errors = require "./Errors"
 RangesManager = require "./RangesManager"
+async = require "async"
 
 MAX_UNFLUSHED_AGE = 300 * 1000 # 5 mins, document should be flushed to mongo this time after a change
 
@@ -155,6 +156,14 @@ module.exports = DocumentManager =
 					return callback(error) if error?
 					callback()
 
+	renameDoc: (project_id, doc_id, user_id, update, _callback = (error) ->) ->
+		timer = new Metrics.Timer("docManager.updateProject")
+		callback = (args...) ->
+			timer.done()
+			_callback(args...)
+
+		RedisManager.renameDoc project_id, doc_id, user_id, update, callback
+
 	getDocAndFlushIfOld: (project_id, doc_id, callback = (error, doc) ->) ->
 		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges, pathname, unflushedTime, alreadyLoaded) ->
 			return callback(error) if error?
@@ -197,3 +206,7 @@ module.exports = DocumentManager =
 	deleteCommentWithLock: (project_id, doc_id, thread_id, callback = (error) ->) ->
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.deleteComment, project_id, doc_id, thread_id, callback
+
+	renameDocWithLock: (project_id, doc_id, user_id, update, callback = (error) ->) ->
+		UpdateManager = require "./UpdateManager"
+		UpdateManager.lockUpdatesAndDo DocumentManager.renameDoc, project_id, doc_id, user_id, update, callback
