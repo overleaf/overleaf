@@ -25,7 +25,7 @@ module.exports = TokenAccessController =
 					"[TokenAccess] no token-based project found for readAndWrite token"
 				if !userId?
 					logger.log {token},
-						"[TokenAccess] No project found with read-write token, anonymous user"
+						"[TokenAccess] No project found with read-write token, anonymous user, deny"
 					return next(new Errors.NotFoundError())
 				TokenAccessHandler.findProjectWithHigherAccess token, userId, (err, project) ->
 					if err?
@@ -34,7 +34,7 @@ module.exports = TokenAccessController =
 						return next(err)
 					if !project?
 						logger.log {token, userId},
-							"[TokenAccess] no project with higher access found for token and user"
+							"[TokenAccess] no project with higher access found for this user and token"
 						return next(new Errors.NotFoundError())
 					logger.log {token, userId, projectId: project._id},
 						"[TokenAccess] user has higher access to project, redirecting"
@@ -75,25 +75,41 @@ module.exports = TokenAccessController =
 				return next(err)
 			if !project?
 				logger.log {token, userId},
-					"[TokenAccess] no project found for readAndWrite token"
-				return next(new Errors.NotFoundError())
-			if !userId?
-				logger.log {userId, projectId: project._id},
-					"[TokenAccess] adding anonymous user to project with readOnly token"
-				TokenAccessHandler.grantSessionTokenAccess(req, project._id, token)
-				req._anonymousAccessToken = token
-				return TokenAccessController._loadEditor(project._id, req, res, next)
-			else
-				if project.owner_ref.toString() == userId
-					logger.log {userId, projectId: project._id},
-						"[TokenAccess] user is already project owner"
-					return TokenAccessController._loadEditor(project._id, req, res, next)
-				logger.log {userId, projectId: project._id},
-					"[TokenAccess] adding user to project with readOnly token"
-				TokenAccessHandler.addReadOnlyUserToProject userId, project._id, (err) ->
+					"[TokenAccess] no project found for readOnly token"
+				if !userId?
+					logger.log {token},
+						"[TokenAccess] No project found with readOnly token, anonymous user, deny"
+					return next(new Errors.NotFoundError())
+				TokenAccessHandler.findProjectWithHigherAccess token, userId, (err, project) ->
 					if err?
-						logger.err {err, token, userId, projectId: project._id},
-							"[TokenAccess] error adding user to project with readAndWrite token"
+						logger.err {err, token, userId},
+							"[TokenAccess] error finding project with higher access"
 						return next(err)
+					if !project?
+						logger.log {token, userId},
+							"[TokenAccess] no project with higher access found for this user and token"
+						return next(new Errors.NotFoundError())
+					logger.log {token, userId, projectId: project._id},
+						"[TokenAccess] user has higher access to project, redirecting"
+					res.redirect(302, "/project/#{project._id}")
+			else
+				if !userId?
+					logger.log {userId, projectId: project._id},
+						"[TokenAccess] adding anonymous user to project with readOnly token"
+					TokenAccessHandler.grantSessionTokenAccess(req, project._id, token)
+					req._anonymousAccessToken = token
 					return TokenAccessController._loadEditor(project._id, req, res, next)
+				else
+					if project.owner_ref.toString() == userId
+						logger.log {userId, projectId: project._id},
+							"[TokenAccess] user is already project owner"
+						return TokenAccessController._loadEditor(project._id, req, res, next)
+					logger.log {userId, projectId: project._id},
+						"[TokenAccess] adding user to project with readOnly token"
+					TokenAccessHandler.addReadOnlyUserToProject userId, project._id, (err) ->
+						if err?
+							logger.err {err, token, userId, projectId: project._id},
+								"[TokenAccess] error adding user to project with readAndWrite token"
+							return next(err)
+						return TokenAccessController._loadEditor(project._id, req, res, next)
 

@@ -367,6 +367,12 @@ describe 'TokenAccess', ->
 				expect(response.headers.location).to.equal "/project/#{@project_id}"
 			, done)
 
+		it 'should redirect to canonical path, when user uses read-only token', (done) ->
+			try_read_only_token_access(@other1, @tokens.readOnly, (response, body) =>
+				expect(response.statusCode).to.equal 302
+				expect(response.headers.location).to.equal "/project/#{@project_id}"
+			, done)
+
 		it 'should allow the user access to the project', (done) ->
 			try_read_access(@other1, @project_id, (response, body) =>
 				expect(response.statusCode).to.equal 200
