@@ -153,10 +153,7 @@ module.exports = ProjectController =
 			projects: (cb)->
 				ProjectGetter.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref tokens', cb
 			v1Projects: (cb) ->
-				if isV1
-					OlProjectGetter.findAllUsersProjects user_id, cb
-				else
-					cb()
+				OlProjectGetter.findAllUsersProjects user_id, cb
 			hasSubscription: (cb)->
 				LimitationsManager.userHasSubscriptionOrIsGroupMember currentUser, cb
 			user: (cb) ->

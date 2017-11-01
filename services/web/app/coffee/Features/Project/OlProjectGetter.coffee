@@ -1,24 +1,22 @@
-request = require 'request'
-settings = require 'settings-sharelatex'
+fs = require 'fs'
+path = require 'path'
 logger = require 'logger-sharelatex'
-Errors = require '../Errors/Errors'
-oAuthRequest = require '../../../../modules/overleaf-integration-web-module/app/coffee/oauth/OAuthRequest'
 
-makeRequest = (opts, callback) ->
-	if settings.apis?.olProjects?.url?
-		urlPath = opts.url
-		opts.url = "#{settings.apis.olProjects.url}#{urlPath}"
-		request opts, callback
-	else
-		callback(new Errors.ServiceNotConfiguredError('OL Projects service not configured'))
+INTEGRATION_MODULE_PATH = path.resolve(__dirname, '../../../../modules/overleaf-integration-web-module')
 
 module.exports = OlProjectGetter =
+	integrationModuleExists: (callback = (error, stats) ->) ->
+		fs.stat INTEGRATION_MODULE_PATH, (error, stats) ->
+			if error? or !stats.isDirectory()
+				return callback(false)
+			return callback(true)
+
 	findAllUsersProjects: (userId, callback = (error, projects) ->) ->
-		oAuthRequest userId, {
-			url: "#{settings.overleaf.host}/api/v1/sharelatex/docs"
-			method: 'GET'
-			json: true
-		}, (error, docs) ->
-			return callback(error) if error?
-			logger.log {userId, docs}, "got projects from OL"
-			callback(null, docs)
+		OlProjectGetter.integrationModuleExists (exists) ->
+			if exists
+				logger.log {exists}, "integration module does exist, loading V1 projects"
+				V1ProjectListGetter = require(path.join(INTEGRATION_MODULE_PATH, 'app/coffee/ProjectList/ProjectListGetter'))
+				V1ProjectListGetter.findAllUsersProjects(userId, callback)
+			else
+				logger.log {exists}, "integration modules doesn't exists, not loading V1 projects"
+				return callback()
