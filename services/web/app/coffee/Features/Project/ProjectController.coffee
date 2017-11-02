@@ -1,7 +1,6 @@
 async = require("async")
 moment = require('moment')
 logger = require("logger-sharelatex")
-Settings = require('settings-sharelatex')
 projectDeleter = require("./ProjectDeleter")
 projectDuplicator = require("./ProjectDuplicator")
 projectCreationHandler = require("./ProjectCreationHandler")
