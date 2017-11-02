@@ -355,47 +355,49 @@ module.exports = ProjectEntityHandler =
 					else
 						callback()
 
-	moveEntity: (project_id, entity_id, folder_id, entityType, callback = (error) ->)->
+	moveEntity: (project_id, entity_id, destFolderId, entityType, userId, callback = (error) ->)->
 		self = @
-		destinationFolder_id = folder_id
-		logger.log entityType:entityType, entity_id:entity_id, project_id:project_id, folder_id:folder_id, "moving entity"
+		logger.log {entityType, entity_id, project_id, destFolderId}, "moving entity"
 		if !entityType?
-			logger.err err: "No entityType set", project_id: project_id, entity_id: entity_id
+			logger.err {err: "No entityType set", project_id, entity_id}
 			return callback("No entityType set")
 		entityType = entityType.toLowerCase()
 		ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (err, project)=>
 			return callback(err) if err?
-			projectLocator.findElement {project:project, element_id:entity_id, type:entityType}, (err, entity, path)->
+			projectLocator.findElement {project, element_id: entity_id, type: entityType}, (err, entity, entityPath)->
 				return callback(err) if err?
-
-				if entityType.match(/folder/)
-					ensureFolderIsNotMovedIntoChild = (callback = (error) ->) ->
-						projectLocator.findElement {project: project, element_id: folder_id, type:"folder"}, (err, destEntity, destPath) ->
-							logger.log destPath: destPath.fileSystem, folderPath: path.fileSystem, "checking folder is not moving into child folder"
-							if (destPath.fileSystem.slice(0, path.fileSystem.length) == path.fileSystem)
-								logger.log "destination is a child folder, aborting"
-								callback(new Error("destination folder is a child folder of me"))
-							else
-								callback()
-				else
-					ensureFolderIsNotMovedIntoChild = (callback = () ->) -> callback()
-
-				ensureFolderIsNotMovedIntoChild (error) ->
+				self._checkValidMove project, entityType, entityPath, destFolderId, (error) ->
 					return callback(error) if error?
-					self._removeElementFromMongoArray Project, project_id, path.mongo, (err)->
-						return callback(err) if err?
-						# We've updated the project structure by removing the element, so must refresh it.
-						ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (err, project)=>
+					ProjectEntityHandler.getAllEntitiesFromProject project, (error, oldDocs) =>
+						return callback(error) if error?
+						self._removeElementFromMongoArray Project, project_id, entityPath.mongo, (err, newProject)->
 							return callback(err) if err?
-							ProjectEntityHandler._putElement project, destinationFolder_id, entity, entityType, (err, result)->
+							ProjectEntityHandler._putElement newProject, destFolderId, entity, entityType, (err, result, newProject)->
 								return callback(err) if err?
 								opts =
-									project_id:project_id
-									project_name:project.name
-									startPath:path.fileSystem
-									endPath:result.path.fileSystem,
-									rev:entity.rev
-								tpdsUpdateSender.moveEntity opts, callback
+									project_id: project_id
+									project_name: project.name
+									startPath: entityPath.fileSystem
+									endPath: result.path.fileSystem,
+									rev: entity.rev
+								tpdsUpdateSender.moveEntity opts
+								ProjectEntityHandler.getAllEntitiesFromProject newProject, (error, newDocs) =>
+									return callback(error) if error?
+									documentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
+									documentUpdaterHandler.updateProjectStructure project_id, userId, oldDocs, newDocs, callback
+
+	_checkValidMove: (project, entityType, entityPath, destFolderId, callback = (error) ->) ->
+		return callback() if !entityType.match(/folder/)
+
+		projectLocator.findElement { project, element_id: destFolderId, type:"folder"}, (err, destEntity, destFolderPath) ->
+			return callback(err) if err?
+			logger.log destFolderPath: destFolderPath.fileSystem, folderPath: entityPath.fileSystem, "checking folder is not moving into child folder"
+			isNestedFolder = destFolderPath.fileSystem.slice(0, entityPath.fileSystem.length) == entityPath.fileSystem
+			if isNestedFolder
+				callback(new Error("destination folder is a child folder of me"))
+			else
+				callback()
+
 
 	deleteEntity: (project_id, entity_id, entityType, callback = (error) ->)->
 		self = @

@@ -25,6 +25,8 @@ describe "EditorHttpController", ->
 		@doc_id = "mock-doc-id"
 		@user_id = "mock-user-id"
 		@parent_folder_id = "mock-folder-id"
+		@userId = 1234
+		@AuthenticationController.getLoggedInUserId = sinon.stub().returns(@userId)
 		@req = {}
 		@res =
 			send: sinon.stub()
@@ -265,8 +267,6 @@ describe "EditorHttpController", ->
 				entity_type: @entity_type = "entity-type"
 			@req.body =
 				name: @name = "new-name"
-			@userId = 1234
-			@AuthenticationController.getLoggedInUserId = sinon.stub().returns(@userId)
 			@EditorController.renameEntity = sinon.stub().callsArg(5)
 			@EditorHttpController.renameEntity @req, @res
 
@@ -286,8 +286,6 @@ describe "EditorHttpController", ->
 				entity_type: @entity_type = "entity-type"
 			@req.body =
 				name: @name = "EDMUBEEBKBXUUUZERMNSXFFWIBHGSDAWGMRIQWJBXGWSBVWSIKLFPRBYSJEKMFHTRZBHVKJSRGKTBHMJRXPHORFHAKRNPZGGYIOTEDMUBEEBKBXUUUZERMNSXFFWIBHGSDAWGMRIQWJBXGWSBVWSIKLFPRBYSJEKMFHTRZBHVKJSRGKTBHMJRXPHORFHAKRNPZGGYIOT"
-			@userId = 1234
-			@AuthenticationController.getLoggedInUserId = sinon.stub().returns(@userId)
 			@EditorController.renameEntity = sinon.stub().callsArg(4)
 			@EditorHttpController.renameEntity @req, @res
 
@@ -302,8 +300,6 @@ describe "EditorHttpController", ->
 				entity_type: @entity_type = "entity-type"
 			@req.body =
 				name: @name = ""
-			@userId = 1234
-			@AuthenticationController.getLoggedInUserId = sinon.stub().returns(@userId)
 			@EditorController.renameEntity = sinon.stub().callsArg(4)
 			@EditorHttpController.renameEntity @req, @res
 
@@ -318,12 +314,12 @@ describe "EditorHttpController", ->
 				entity_type: @entity_type = "entity-type"
 			@req.body =
 				folder_id: @folder_id = "folder-id-123"
-			@EditorController.moveEntity = sinon.stub().callsArg(4)
+			@EditorController.moveEntity = sinon.stub().callsArg(5)
 			@EditorHttpController.moveEntity @req, @res
 
 		it "should call EditorController.moveEntity", ->
 			@EditorController.moveEntity
-				.calledWith(@project_id, @entity_id, @folder_id, @entity_type)
+				.calledWith(@project_id, @entity_id, @folder_id, @entity_type, @userId)
 				.should.equal true
 
 		it "should send back a success response", ->

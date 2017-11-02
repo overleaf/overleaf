@@ -508,34 +508,32 @@ describe "EditorController", ->
 				done()
 
 	describe "moveEntity", ->
-
 		beforeEach ->
-			@err = "errro"
 			@entity_id = "entity_id_here"
 			@entityType = "doc"
 			@folder_id = "313dasd21dasdsa"
-			@ProjectEntityHandler.moveEntity = sinon.stub().callsArgWith(4, @err)
+			@ProjectEntityHandler.moveEntity = sinon.stub().callsArg(5)
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 			@LockManager.releaseLock.callsArgWith(1)
 			@LockManager.getLock.callsArgWith(1)
 
 		it "should call the ProjectEntityHandler", (done)->
-			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, =>
-				@ProjectEntityHandler.moveEntity.calledWith(@project_id, @entity_id, @folder_id, @entityType).should.equal true
+			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, @user_id, =>
+				@ProjectEntityHandler.moveEntity.calledWith(@project_id, @entity_id, @folder_id, @entityType, @user_id).should.equal true
 				done()
 
 		it "should take the lock", (done)->
-			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, =>
+			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, @user_id, =>
 				@LockManager.getLock.calledWith(@project_id).should.equal true
 				done()
 
 		it "should release the lock", (done)->
-			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, =>
+			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, @user_id, =>
 				@LockManager.releaseLock.calledWith(@project_id).should.equal true
 				done()
 
 		it "should emit the update to the room", (done)->
-			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, =>
+			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, @user_id, =>
 				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'reciveEntityMove', @entity_id, @folder_id).should.equal true				
 				done()
 

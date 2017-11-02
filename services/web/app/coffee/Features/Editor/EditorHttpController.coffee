@@ -125,7 +125,8 @@ module.exports = EditorHttpController =
 		entity_id   = req.params.entity_id
 		entity_type = req.params.entity_type
 		folder_id = req.body.folder_id
-		EditorController.moveEntity project_id, entity_id, folder_id, entity_type, (error) ->
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		EditorController.moveEntity project_id, entity_id, folder_id, entity_type, user_id, (error) ->
 			return next(error) if error?
 			res.sendStatus 204
 
