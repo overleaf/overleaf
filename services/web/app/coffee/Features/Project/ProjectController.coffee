@@ -27,6 +27,10 @@ CollaboratorsHandler = require '../Collaborators/CollaboratorsHandler'
 
 module.exports = ProjectController =
 
+	_isInPercentageRollout: (objectId, percentage) ->
+		counter = parseInt(objectId.toString().substring(18, 24), 16)
+		return (counter % 100) < percentage
+
 	updateProjectSettings: (req, res, next) ->
 		project_id = req.params.Project_id
 
@@ -194,7 +198,11 @@ module.exports = ProjectController =
 
 		async.parallel {
 			project: (cb)->
-				ProjectGetter.getProject project_id, { name: 1, lastUpdated: 1, track_changes: 1 }, cb
+				ProjectGetter.getProject(
+					project_id,
+					{ name: 1, lastUpdated: 1, track_changes: 1, owner_ref: 1 },
+					cb
+				)
 			user: (cb)->
 				if !user_id?
 					cb null, defaultSettingsForAnonymousUser(user_id)
@@ -296,6 +304,7 @@ module.exports = ProjectController =
 
 			token = TokenAccessHandler.getRequestToken(req, project_id)
 			isTokenMember = results.isTokenMember
+			enableTokenAccessUI = ProjectController._isInPercentageRollout(project.owner_ref, 10)
 			AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, token, (error, privilegeLevel)->
 				return next(error) if error?
 				if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
@@ -346,7 +355,7 @@ module.exports = ProjectController =
 					languages: Settings.languages
 					themes: THEME_LIST
 					maxDocLength: Settings.max_doc_length
-					enableTokenAccessUI: true
+					enableTokenAccessUI: enableTokenAccessUI
 				timer.done()
 
 	_buildProjectList: (allProjects)->
