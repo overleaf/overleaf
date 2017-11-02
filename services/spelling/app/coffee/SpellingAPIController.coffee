@@ -21,3 +21,9 @@ module.exports = SpellingAPIController =
 			next()
 
 
+	deleteDic: (req, res, next)->
+		logger.log token: req?.params?.user_id, word: req?.body?.word, "deleting user dictionary"
+		SpellingAPIManager.deleteDic req.params.user_id, (error) ->
+			return next(error) if error?
+			res.sendStatus(204)
+

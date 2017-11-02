@@ -29,6 +29,9 @@ module.exports = LearnedWordsManager =
 			mongoCache.set(user_token, words)
 			callback null, words
 
+	deleteUsersLearnedWords: (user_token, callback =(error)->)->
+		db.spellingPreferences.remove token: user_token, callback
+
 
 [
 	'learnWord',
