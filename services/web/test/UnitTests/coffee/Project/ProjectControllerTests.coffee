@@ -314,6 +314,13 @@ describe "ProjectController", ->
 			it 'should include V1 projects', (done) ->
 				@res.render = (pageName, opts) =>
 					opts.projects.length.should.equal (@projects.length + @collabertions.length + @readOnly.length + @V1Response.projects.length)
+					opts.projects.forEach (p) ->
+						# Check properties correctly mapped from V1
+						expect(p).to.have.property 'id'
+						expect(p).to.have.property 'name'
+						expect(p).to.have.property 'lastUpdated'
+						expect(p).to.have.property 'accessLevel'
+						expect(p).to.have.property 'archived'
 					done()
 				@ProjectController.projectListPage @req, @res
 
