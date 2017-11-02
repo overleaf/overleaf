@@ -87,11 +87,11 @@ describe "LearnedWordsManager", ->
 
 	describe "deleteUsersLearnedWords", ->
 		beforeEach ->
-			@db.spellingPreferences.delete = sinon.stub().callsArgWith(1)
+			@db.spellingPreferences.remove = sinon.stub().callsArgWith(1)
 
 
 		it "should get the word list for the given user", (done)->
 			@LearnedWordsManager.deleteUsersLearnedWords @token, =>
-				@db.spellingPreferences.delete.calledWith(token: @token).should.equal true
+				@db.spellingPreferences.remove.calledWith(token: @token).should.equal true
 				done()
 
