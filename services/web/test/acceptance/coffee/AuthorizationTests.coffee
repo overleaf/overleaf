@@ -4,6 +4,9 @@ User = require "./helpers/User"
 request = require "./helpers/request"
 settings = require "settings-sharelatex"
 
+MockDocstoreApi = require './helpers/MockDocstoreApi'
+MockDocUpdaterApi = require './helpers/MockDocUpdaterApi'
+
 try_read_access = (user, project_id, test, callback) ->
 	async.series [
 		(cb) ->

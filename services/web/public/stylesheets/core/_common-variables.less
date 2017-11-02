@@ -85,7 +85,6 @@
 @border-radius-base:        3px;
 @border-radius-large:       5px;
 @border-radius-small:       2px;
-
 //** Global color for active items (e.g., navs or dropdowns).
 @component-active-color:    #fff;
 //** Global background color for active items (e.g., navs or dropdowns).
@@ -789,10 +788,7 @@
 //** Horizontal offset for forms and lists.
 @component-offset-horizontal: 180px;
 
-@content-margin-top: @line-height-computed;
-@content-margin-top: @line-height-computed;
-
-// Custom
+@content-margin-vertical: @line-height-computed;
 
 @left-menu-width: 260px;
 @left-menu-animation-duration: 0.35s;
@@ -803,3 +799,94 @@
 @editor-dark-background-color: #333;
 @editor-dark-toolbar-border-color: #222;
 @editor-dark-highlight-color: #FFA03A;
+
+
+// Custom
+@is-overleaf   : false;
+@header-height : 68px;
+@footer-height : 50px;
+
+// Backgrounds
+@content-alt-bg-color: lighten(@gray-lightest, 2.5%);
+
+// Typography
+@text-small-color: @gray;
+
+// Navbar
+@navbar-title-color         : #666;
+@navbar-title-color-hover   : #333;
+@navbar-default-padding     : 1rem 2rem;
+@navbar-brand-width         : 180px;
+@navbar-btn-font-size       : @font-size-base * 0.8;
+@navbar-btn-border-radius   : @border-radius-base;
+@navbar-btn-font-weight     : 700;
+@navbar-btn-padding         : 10px 10px 11px;
+@navbar-btn-line-height     : 1;
+@navbar-subdued-padding     : 12px 12px 13px;
+@navbar-subdued-color       : @gray;
+@navbar-subdued-hover-bg    : @gray-lightest;
+@navbar-subdued-hover-color : @gray-dark;
+
+// Button colors and sizing
+@btn-border-radius-large : @border-radius-large;
+@btn-border-radius-base  : @border-radius-base;
+@btn-border-radius-small : @border-radius-small;
+@btn-border-width        : 1px;
+@btn-border-bottom-width : 2px; 
+
+// Cards
+@card-box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+
+// Project table
+@structured-list-link-color     : darken(@blue, 10%);
+@structured-header-border-color : @gray-lightest;
+@structured-list-border-color   : @gray-lightest;
+@structured-list-hover-color    : @gray-lightest;
+@structured-list-line-height    : @line-height-base;
+
+// Sidebar
+@sidebar-bg                    : transparent;
+@sidebar-color                 : @gray;
+@sidebar-link-color            : #333;
+@sidebar-active-border-radius  : @border-radius-small;
+@sidebar-active-bg             : @link-color;
+@sidebar-hover-bg              : transparent;
+@sidebar-hover-text-decoration : underline;
+
+@folders-menu-margin           : 0;
+@folders-menu-line-height      : 1.2;
+@folders-menu-item-v-padding   : (@line-height-computed / 4);
+@folders-menu-item-h-padding   : (@line-height-computed / 4);
+@folders-title-padding         : 0;
+@folders-title-margin-top      : (@line-height-computed / 2);
+@folders-title-margin-bottom   : (@line-height-computed / 4);
+@folders-title-font-size       : @font-size-base;
+@folders-title-font-weight     : 500;
+@folders-title-line-height     : @headings-line-height;
+@folders-title-color           : inherit;
+@folders-title-text-transform  : none;
+@folders-tag-padding           : 2px 20px 2px @folders-menu-item-h-padding;
+@folders-tag-line-height       : 1.8;
+@folders-tag-display           : block;
+@folders-tag-menu-color        : @gray;
+@folders-tag-hover             : darken(@gray-lightest, 2%);
+@folders-tag-border-color      : @text-color;
+@folders-tag-menu-active-hover : darken(@brand-primary, 10%);
+@folders-tag-menu-hover        : @gray-light;
+@folders-untagged-line-height  : 1.7;
+
+// Progress bars
+@progress-border-radius : @border-radius-base;
+@progress-border-width  : 1px;
+@progress-bar-shadow    : inset 0 -1px 0 rgba(0,0,0,.15);
+
+// Footer
+@footer-link-color       : @link-color;
+@footer-link-hover-color : @link-hover-color;
+@footer-bg-color         : transparent;
+@footer-padding          : 2em;
+
+// Tags
+@tag-border-radius  : 0.25em;
+@tag-bg-color       : @label-default-bg;
+@tag-bg-hover-color : darken(@label-default-bg, 10%);

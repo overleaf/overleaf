@@ -14,6 +14,7 @@ module.exports =
 		webRouter.get '/privacy_policy', HomeController.externalPage("privacy", "Privacy Policy")
 		webRouter.get '/planned_maintenance', HomeController.externalPage("planned_maintenance", "Planned Maintenance")
 		webRouter.get '/style', HomeController.externalPage("style_guide", "Style Guide")
+		webRouter.get '/ol-style', HomeController.externalPage("ol_style_guide", "Overleaf Style Guide")
 		webRouter.get '/jobs', HomeController.externalPage("jobs", "Jobs")
 
 		webRouter.get '/track-changes-and-comments-in-latex', HomeController.externalPage("review-features-page", "Review features")

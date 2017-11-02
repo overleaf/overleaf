@@ -1,11 +1,164 @@
-@ol-green:      #4A9F48;
-@ol-dark-green: #1C5B26;
+@import "./_common-variables.less";
+
+@is-overleaf: true;
+@header-height: 68px;
+@footer-height: 50px;
+
+// Styleguide colors
+@ol-blue-gray-1 : #E4E8EE;
+@ol-blue-gray-2 : #9DA7B7;
+@ol-blue-gray-3 : #5D6879;
+@ol-blue-gray-4 : #485973;
+@ol-blue-gray-5 : #2C3645;
+@ol-blue-gray-6 : #1E2530;
+
+@ol-green       : #4F9C45;
+@ol-dark-green  : #1C5B26;
+@ol-blue        : #4B7FD1;
+@ol-dark-blue   : #2857A1;
+@ol-red         : #C9453E;
+@ol-dark-red    : #A6312B;
+
+@ol-type-color  : @ol-blue-gray-3;
+
+// Navbar customization
+@navbar-title-color       : @ol-blue-gray-1;
+@navbar-title-color-hover : @ol-blue-gray-2;
+@navbar-brand-width       : 130px;
+@navbar-default-color     : #FFF;
+@navbar-default-bg        : @ol-blue-gray-6;
+@navbar-default-border    : transparent;
+@navbar-brand-image-url   : url(/img/ol-brand/overleaf-white.svg);
+
+// Backgrounds
+@body-bg                : #FFF;
+@content-alt-bg-color   : @ol-blue-gray-1;
+
+// Typography
+@text-small-color       : @ol-type-color;
+@text-color             : @ol-type-color;
+@link-color             : @ol-blue;
+@link-hover-color       : @ol-dark-blue;
+
+// Button colors and sizing
+@btn-border-width        : 0;
+@btn-border-bottom-width : 0;
+
+@btn-border-radius-large : 9999px;
+@btn-border-radius-base  : 9999px;
+@btn-border-radius-small : 9999px;
+
+@btn-default-color       : #FFF;
+@btn-default-bg          : @ol-blue-gray-4;
+@btn-default-border      : transparent;
+
+@btn-primary-color       : #FFF;
+@btn-primary-bg          : @ol-green;
+@btn-primary-border      : transparent;
+
+@btn-success-color       : #FFF;
+@btn-success-bg          : @ol-green;
+@btn-success-border      : transparent;
+
+@btn-info-color          : #FFF;
+@btn-info-bg             : @ol-blue;
+@btn-info-border         : transparent;
+
+// Tags
+@tag-border-radius       : 9999px;
+@tag-bg-color            : @ol-green;
+@tag-bg-hover-color      : @ol-dark-green;
+
+// Navbar
+@navbar-default-padding           : (@grid-gutter-width / 2) 0;
+@navbar-default-link-color        : #FFF;
+@navbar-default-link-hover-bg     : @ol-green;
+@navbar-default-link-active-bg    : @ol-green;
+@navbar-default-link-hover-color  : @ol-green;
+@navbar-btn-font-size             : @font-size-base;
+@navbar-btn-border-radius         : @btn-border-radius-base;
+@navbar-btn-font-weight           : 400;
+@navbar-btn-padding               : (@padding-base-vertical - 1) @padding-base-horizontal @padding-base-vertical;
+@navbar-btn-line-height           : @line-height-base;
+
+@navbar-subdued-color             : #FFF;
+@navbar-subdued-padding           : (@padding-base-vertical + 1) (@padding-base-horizontal + 1) (@padding-base-vertical + 2);
+@navbar-subdued-hover-bg          : #FFF;
+@navbar-subdued-hover-color       : @ol-green;
+
+// Forms
+@input-color                      : @ol-blue-gray-3;
+@input-border-radius              : unit(@line-height-base, em);
+@input-height-base                : @line-height-computed + (@padding-base-vertical * 2) - 1;
+// TODO Warning color-orange?
+@btn-warning-color                : #FFF;
+@btn-warning-bg                   : @ol-red;
+@btn-warning-border               : transparent;
+
+@btn-danger-color                 : #FFF;
+@btn-danger-bg                    : @ol-red;
+@btn-danger-border                : transparent;
+
+// Cards
+@card-box-shadow                  : none;
+
+// Sidebar
+@sidebar-bg                     : @ol-blue-gray-5;
+@sidebar-color                  : @ol-blue-gray-2;
+@sidebar-link-color             : #FFF;
+@sidebar-active-border-radius   : 0;
+@sidebar-active-bg              : @ol-blue-gray-6;
+@sidebar-hover-bg               : @ol-blue-gray-4;
+@sidebar-hover-text-decoration  : none;
+
+@folders-menu-margin            : 0 -(@grid-gutter-width / 2);
+@folders-menu-line-height       : @structured-list-line-height;
+@folders-menu-item-v-padding    : (@line-height-computed / 4);
+@folders-menu-item-h-padding    : (@grid-gutter-width / 2);
+@folders-title-padding          : @folders-menu-item-v-padding 0;
+@folders-title-margin-top       : 0;
+@folders-title-margin-bottom    : 0;
+@folders-title-font-weight      : normal;
+@folders-title-font-size        : @font-size-small;
+@folders-title-color            : @ol-blue-gray-2;
+@folders-title-text-transform   : uppercase;
+@folders-tag-display            : block;
+@folders-tag-line-height        : 1.4;
+@folders-tag-padding            : @folders-menu-item-v-padding 20px @folders-menu-item-v-padding @folders-menu-item-h-padding;
+@folders-tag-menu-color         : #FFF;
+@folders-tag-hover              : @sidebar-hover-bg;
+@folders-tag-border-color       : @folders-tag-menu-color;
+@folders-tag-menu-hover         : rgba(0, 0, 0, .1);
+@folders-tag-menu-active-hover  : rgba(0, 0, 0, .1);
+@folders-untagged-line-height   : @folders-menu-line-height;
+
+// Project table
+@structured-list-line-height    : 2.5;
+@structured-list-link-color     : @ol-blue;
+@structured-header-border-color : shade(@ol-blue-gray-1, 5%);
+@structured-list-border-color   : @ol-blue-gray-1;
+@structured-list-hover-color    : lighten(@ol-blue-gray-1, 5%);
+
+
+// Progress bars
+@progress-border-radius         : @line-height-computed;
+@progress-border-width          : 0;
+@progress-bar-bg                : @ol-blue-gray-4;
+@progress-bar-success-bg        : @ol-green;
+@progress-bar-warning-bg        : @brand-warning;
+@progress-bar-danger-bg         : @ol-red;
+@progress-bar-info-bg           : @ol-blue;
+@progress-bar-shadow            : none;
+
+// Footer
+@footer-bg-color                : #FFF;
+@footer-link-color              : @ol-green;
+@footer-link-hover-color        : @ol-dark-green;
+@footer-padding                 : 2em 0;
 
 //== Colors
 //
 //## Gray and brand colors for use across Bootstrap.
-
-
 @gray-darker:           #252525;
 @gray-dark:             #505050;
 @gray:                  #7a7a7a;
@@ -28,10 +181,6 @@
 @brand-warning:         @orange;
 @brand-danger:          #E03A06;
 
-@navbar-brand-image-url: url(/img/ol-brand/logo-horizontal.png);
-
 @editor-loading-logo-padding-top: 115.44%;
 @editor-loading-logo-background-url: url(/img/ol-brand/overleaf-o-grey.svg);
 @editor-loading-logo-foreground-url: url(/img/ol-brand/overleaf-o.svg);
-
-@import "./_common-variables.less";

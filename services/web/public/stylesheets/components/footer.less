@@ -1,7 +1,13 @@
 footer.site-footer {
+	background-color: @footer-bg-color;
 	border-top: 1px solid @gray-lighter;
-	padding: 2em;
 	font-size: 0.9rem;
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	height: @footer-height;
+	line-height: @footer-height - 1; // Hack — in Chrome, using the full @footer-height would generate vertical scrolling
+		
 	ul {
 		list-style: none;
 		margin: 0px;
@@ -22,6 +28,21 @@ footer.site-footer {
 			vertical-align: text-bottom;
 		}
 	}
+
+	a {
+		color: @footer-link-color;
+		&:hover,
+		&:focus {
+			color: @footer-link-hover-color;
+		}
+	}
+}
+
+.site-footer-content when (@is-overleaf = true) {
+	.container-fluid;
+}
+.site-footer-content when (@is-overleaf = false) {
+	.container;
 }
 
 .sprite-icon-lang {

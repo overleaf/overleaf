@@ -42,6 +42,8 @@ ProjectSchema = new Schema
 		imported_at_ver_id : { type: Number }
 		token           : { type: String }
 		read_token      : { type: String }
+		history         :
+			id            : { type: Number }
 
 ProjectSchema.statics.getProject = (project_or_id, fields, callback)->
 	if project_or_id._id?

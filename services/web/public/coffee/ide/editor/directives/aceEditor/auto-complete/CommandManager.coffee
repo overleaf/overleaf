@@ -1,10 +1,15 @@
 define [], () ->
 	noArgumentCommands = [
 		'item', 'hline', 'lipsum', 'centering', 'noindent', 'textwidth', 'draw',
-		'maketitle', 'newpage', 'verb', 'bibliography', 'fi', 'hfill', 'par',
-		'in', 'sum', 'cdot', 'alpha', 'ldots', 'else', 'linewidth', 'left',
-		'right', 'today', 'clearpage', 'newline', 'endinput', 'mu',
-		'tableofcontents', 'vfill', 'bigskip', 'fill', 'cleardoublepage'
+		'maketitle', 'newpage', 'verb', 'bibliography', 'hfill', 'par',
+		'in', 'sum', 'cdot', 'ldots', 'linewidth', 'left', 'right', 'today',
+		'clearpage', 'newline', 'endinput', 'tableofcontents', 'vfill',
+		'bigskip', 'fill', 'cleardoublepage', 'infty', 'leq', 'geq', 'times',
+		'alpha', 'beta', 'gamma', 'delta', 'epsilon', 'varepsilon', 'zeta',
+		'eta', 'theta', 'vartheta', 'iota', 'kappa', 'lambda', 'mu', 'nu', 'xi',
+		'pi', 'varpi', 'rho', 'varrho', 'sigma', 'varsigma', 'tau', 'upsilon',
+		'phi', 'varphi', 'chi', 'psi', 'omega', 'Gamma', 'Delta', 'Theta',
+		'Lambda', 'Xi', 'Pi', 'Sigma', 'Upsilon', 'Phi', 'Psi', 'Omega'
 	]
 	singleArgumentCommands = [
 		'chapter', 'usepackage', 'section', 'label', 'textbf', 'subsection',
@@ -13,11 +18,12 @@ define [], () ->
 		'hspace', 'bibitem', 'url', 'large', 'subsubsection', 'textsc', 'date',
 		'footnote', 'small', 'thanks', 'underline', 'graphicspath', 'pageref',
 		'section*', 'subsection*', 'subsubsection*', 'sqrt', 'text',
-		'normalsize', 'Large', 'paragraph', 'pagestyle', 'thispagestyle',
-		'bibliographystyle'
+		'normalsize', 'footnotesize', 'Large', 'paragraph', 'pagestyle',
+		'thispagestyle', 'bibliographystyle', 'hat'
 	]
 	doubleArgumentCommands = [
-		'newcommand', 'frac', 'renewcommand', 'setlength', 'href', 'newtheorem'
+		'newcommand', 'frac', 'dfrac', 'renewcommand', 'setlength', 'href',
+		'newtheorem'
 	]
 	tripleArgumentCommands = [
 		'addcontentsline', 'newacronym', 'multicolumn'
@@ -25,12 +31,12 @@ define [], () ->
 	special = ['LaTeX', 'TeX']
 
 	rawCommands = [].concat(
-						noArgumentCommands,
-						singleArgumentCommands,
-						doubleArgumentCommands,
-						tripleArgumentCommands,
-						special
-					)
+		noArgumentCommands,
+		singleArgumentCommands,
+		doubleArgumentCommands,
+		tripleArgumentCommands,
+		special
+	)
 
 	noArgumentCommands = for cmd in noArgumentCommands
 		{
@@ -79,7 +85,7 @@ define [], () ->
 			# hacky solution: limit iterations
 			limit = null
 			if window?._ide?.browserIsSafari
-				limit = 100
+				limit = 5000
 
 			# fully formed commands
 			realCommands = []

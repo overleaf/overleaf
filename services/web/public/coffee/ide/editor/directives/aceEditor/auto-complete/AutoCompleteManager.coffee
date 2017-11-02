@@ -1,20 +1,12 @@
 define [
 	"ide/editor/directives/aceEditor/auto-complete/CommandManager"
 	"ide/editor/directives/aceEditor/auto-complete/EnvironmentManager"
+	"ide/editor/directives/aceEditor/auto-complete/Helpers"
 	"ace/ace"
 	"ace/ext-language_tools"
-], (CommandManager, EnvironmentManager) ->
+], (CommandManager, EnvironmentManager, Helpers) ->
 	Range = ace.require("ace/range").Range
 	aceSnippetManager = ace.require('ace/snippets').snippetManager
-
-	getLastCommandFragment = (lineUpToCursor) ->
-		if m = lineUpToCursor.match(/(\\[^\\]+)$/)
-			return m[1]
-		else
-			return null
-
-	getCommandNameFromFragment = (commandFragment) ->
-		commandFragment?.match(/\\(\w+)\{/)?[1]
 
 	class AutoCompleteManager
 		constructor: (@$scope, @editor, @element, @labelsManager, @graphics, @preamble) ->
@@ -48,15 +40,11 @@ define [
 			Preamble = @preamble
 			GraphicsCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
-					upToCursorRange = new Range(pos.row, 0, pos.row, pos.column)
-					lineUpToCursor = editor.getSession().getTextRange(upToCursorRange)
-					commandFragment = getLastCommandFragment(lineUpToCursor)
+					context = Helpers.getContext(editor, pos)
+					{lineUpToCursor, commandFragment, lineBeyondCursor, needsClosingBrace} = context
 					if commandFragment
 						match = commandFragment.match(/^~?\\(includegraphics(?:\[.*])?){([^}]*, *)?(\w*)/)
 						if match
-							beyondCursorRange = new Range(pos.row, pos.column, pos.row, 99999)
-							lineBeyondCursor = editor.getSession().getTextRange(beyondCursorRange)
-							needsClosingBrace = !lineBeyondCursor.match(/^[^{]*}/)
 							commandName = match[1]
 							currentArg = match[3]
 							graphicsPaths = Preamble.getGraphicsPaths()
@@ -78,15 +66,11 @@ define [
 			labelsManager = @labelsManager
 			LabelsCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
-					upToCursorRange = new Range(pos.row, 0, pos.row, pos.column)
-					lineUpToCursor = editor.getSession().getTextRange(upToCursorRange)
-					commandFragment = getLastCommandFragment(lineUpToCursor)
+					context = Helpers.getContext(editor, pos)
+					{lineUpToCursor, commandFragment, lineBeyondCursor, needsClosingBrace} = context
 					if commandFragment
 						refMatch = commandFragment.match(/^~?\\([a-z]*ref){([^}]*, *)?(\w*)/)
 						if refMatch
-							beyondCursorRange = new Range(pos.row, pos.column, pos.row, 99999)
-							lineBeyondCursor = editor.getSession().getTextRange(beyondCursorRange)
-							needsClosingBrace = !lineBeyondCursor.match(/^[^{]*}/)
 							commandName = refMatch[1]
 							currentArg = refMatch[2]
 							result = []
@@ -108,15 +92,13 @@ define [
 			references = @$scope.$root._references
 			ReferencesCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
-					upToCursorRange = new Range(pos.row, 0, pos.row, pos.column)
-					lineUpToCursor = editor.getSession().getTextRange(upToCursorRange)
-					commandFragment = getLastCommandFragment(lineUpToCursor)
+					context = Helpers.getContext(editor, pos)
+					{lineUpToCursor, commandFragment, lineBeyondCursor, needsClosingBrace} = context
 					if commandFragment
-						citeMatch = commandFragment.match(/^~?\\([a-z]*cite[a-z]*(?:\[.*])?){([^}]*, *)?(\w*)/)
+						citeMatch = commandFragment.match(
+							/^~?\\([a-z]*cite[a-z]*(?:\[.*])?){([^}]*, *)?(\w*)/
+						)
 						if citeMatch
-							beyondCursorRange = new Range(pos.row, pos.column, pos.row, 99999)
-							lineBeyondCursor = editor.getSession().getTextRange(beyondCursorRange)
-							needsClosingBrace = !lineBeyondCursor.match(/^[^{]*}/)
 							commandName = citeMatch[1]
 							previousArgs = citeMatch[2]
 							currentArg = citeMatch[3]
@@ -160,8 +142,8 @@ define [
 		onChange: (change) ->
 			cursorPosition = @editor.getCursorPosition()
 			end = change.end
-			range = new Range(end.row, 0, end.row, end.column)
-			lineUpToCursor = @editor.getSession().getTextRange(range)
+			context = Helpers.getContext(@editor, end)
+			{lineUpToCursor, commandFragment, commandName, lineBeyondCursor, needsClosingBrace} = context
 			if lineUpToCursor.match(/.*%.*/)
 				return
 			lastCharIsBackslash = lineUpToCursor.slice(-1) == "\\"
@@ -170,8 +152,6 @@ define [
 			if lastTwoChars.match(/^\\[^a-z]$/)
 				@editor?.completer?.detach?()
 				return
-			commandFragment = getLastCommandFragment(lineUpToCursor)
-			commandName = getCommandNameFromFragment(commandFragment)
 			if commandName in ['begin', 'end']
 				return
 			# Check that this change was made by us, not a collaborator
@@ -233,10 +213,10 @@ define [
 											range.start.column,
 										)
 									)
-									# Delete back to last backslash, as appropriate
-									lastBackslashIndex = lineUpToCursor.lastIndexOf('\\')
-									if lastBackslashIndex != -1
-										leftRange.start.column = lastBackslashIndex
+									# Delete back to command start, as appropriate
+									commandStartIndex = Helpers.getLastCommandFragmentIndex(lineUpToCursor)
+									if commandStartIndex != -1
+										leftRange.start.column = commandStartIndex
 									else
 										leftRange.start.column -= completions.filterText.length
 									editor.session.remove(leftRange)
@@ -310,5 +290,5 @@ define [
 						currentLineOffset = i + 1
 						break
 				currentLine = text.slice(currentLineOffset, pos)
-				fragment = getLastCommandFragment(currentLine) or ""
+				fragment = Helpers.getLastCommandFragment(currentLine) or ""
 				return fragment

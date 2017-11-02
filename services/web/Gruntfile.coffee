@@ -20,6 +20,8 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks 'grunt-parallel'
 	grunt.loadNpmTasks 'grunt-exec'
 	grunt.loadNpmTasks 'grunt-postcss'
+	grunt.loadNpmTasks 'grunt-forever'
+	grunt.loadNpmTasks 'grunt-shell'
 	# grunt.loadNpmTasks 'grunt-contrib-imagemin'
 	# grunt.loadNpmTasks 'grunt-sprity'
 
@@ -28,9 +30,15 @@ module.exports = (grunt) ->
 		exec:
 			run:
 				command:"node app.js | ./node_modules/logger-sharelatex/node_modules/bunyan/bin/bunyan --color"
-			cssmin:
-				command:"node_modules/clean-css/bin/cleancss --s0 -o public/stylesheets/style.css public/stylesheets/style.css"
+			cssmin_sl:
+				command:"node_modules/clean-css/bin/cleancss --s0 --source-map -o public/stylesheets/style.css public/stylesheets/style.css"
+			cssmin_ol:
+				command:"node_modules/clean-css/bin/cleancss --s0 --source-map -o public/stylesheets/ol-style.css public/stylesheets/ol-style.css"
 
+		forever:
+			app:
+				options:
+					index: "app.js"
 
 		watch:
 			coffee:
@@ -137,20 +145,31 @@ module.exports = (grunt) ->
 
 		less:
 			app:
+				options:
+					sourceMap: true
+					sourceMapFilename: "public/stylesheets/style.css.map"
+					sourceMapBasepath: "public/stylesheets"
 				files:
 					"public/stylesheets/style.css": "public/stylesheets/style.less"
 			ol:
+				options:
+					sourceMap: true
+					sourceMapFilename: "public/stylesheets/ol-style.css.map"
+					sourceMapBasepath: "public/stylesheets"
 				files:
 					"public/stylesheets/ol-style.css": "public/stylesheets/ol-style.less"
 
 		postcss:
 			options:
-				map: true,
+				map: 
+					prev: "public/stylesheets/"
+					inline: false
+					sourcesContent: true
 				processors: [
 					require('autoprefixer')({browsers: [ 'last 2 versions', 'ie >= 10' ]})
 				]
 			dist:
-				src: 'public/stylesheets/style.css'
+				src: [ "public/stylesheets/style.css", "public/stylesheets/ol-style.css" ]
 
 		env:
 			run:
@@ -244,8 +263,11 @@ module.exports = (grunt) ->
 				pattern: "@@RELEASE@@"
 				replacement: process.env.BUILD_NUMBER || "(unknown build)"
 
-
-			
+		shell:
+			fullAcceptanceTests:
+				command: "bash ./test/acceptance/scripts/full-test.sh"
+			dockerTests:
+				command: 'docker run -v "$(pwd):/app" --env SHARELATEX_ALLOW_PUBLIC_ACCESS=true --rm sharelatex/acceptance-test-runner'
 
 		availabletasks:
 			tasks:
@@ -381,7 +403,7 @@ module.exports = (grunt) ->
 	grunt.registerTask 'compile:server', 'Compile the server side coffee script', ['clean:app', 'coffee:app', 'coffee:app_dir', 'compile:modules:server']
 	grunt.registerTask 'compile:client', 'Compile the client side coffee script', ['coffee:client', 'coffee:sharejs', 'wrap_sharejs', "compile:modules:client", 'compile:modules:inject_clientside_includes']
 	grunt.registerTask 'compile:css', 'Compile the less files to css', ['less', 'postcss:dist']
-	grunt.registerTask 'compile:minify', 'Concat and minify the client side js', ['requirejs', "file_append", "exec:cssmin",]
+	grunt.registerTask 'compile:minify', 'Concat and minify the client side js and css', ['requirejs', "file_append", "exec:cssmin_sl", "exec:cssmin_ol"]
 	grunt.registerTask 'compile:unit_tests', 'Compile the unit tests', ['clean:unit_tests', 'coffee:unit_tests']
 	grunt.registerTask 'compile:acceptance_tests', 'Compile the acceptance tests', ['clean:acceptance_tests', 'coffee:acceptance_tests']
 	grunt.registerTask 'compile:smoke_tests', 'Compile the smoke tests', ['coffee:smoke_tests']
@@ -395,6 +417,18 @@ module.exports = (grunt) ->
 	grunt.registerTask 'test:unit', 'Run the unit tests (use --grep=<regex> or --feature=<feature> for individual tests)', ['compile:server', 'compile:modules:server', 'compile:unit_tests', 'compile:modules:unit_tests', 'mochaTest:unit'].concat(moduleUnitTestTasks)
 	grunt.registerTask 'test:acceptance', 'Run the acceptance tests (use --grep=<regex> or --feature=<feature> for individual tests)', ['compile:acceptance_tests', 'mochaTest:acceptance']
 	grunt.registerTask 'test:smoke', 'Run the smoke tests', ['compile:smoke_tests', 'mochaTest:smoke']
+	
+	grunt.registerTask(
+		'test:acceptance:full',
+		"Start server and run acceptance tests",
+		['shell:fullAcceptanceTests']
+	)
+
+	grunt.registerTask(
+		'test:acceptance:docker',
+		"Run acceptance tests inside docker container",
+		['compile:acceptance_tests', 'shell:dockerTests']
+	)
 	
 	grunt.registerTask 'test:modules:unit', 'Run the unit tests for the modules', ['compile:modules:server', 'compile:modules:unit_tests'].concat(moduleUnitTestTasks)
 

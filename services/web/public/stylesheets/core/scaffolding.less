@@ -21,6 +21,7 @@
 html {
   //font-size: 62.5%;
   -webkit-tap-highlight-color: rgba(0,0,0,0);
+  height: 100%;
 }
 
 body {
@@ -29,6 +30,13 @@ body {
   line-height: @line-height-base;
   color: @text-color;
   background-color: @body-bg;
+  min-height: 100%;
+  position: relative;
+  padding-top: @header-height;
+  padding-bottom: @footer-height;
+  & > .content {
+    min-height: calc(~"100vh -" (@header-height + @footer-height));
+  }
 }
 
 // Reset fonts for relevant elements
@@ -137,12 +145,12 @@ hr {
 }
 
 .content {
-  padding-top: @content-margin-top;
-  padding-bottom: @content-margin-top;
+  padding-top: @content-margin-vertical;
+  padding-bottom: @content-margin-vertical;
 }
 
 .content-alt {
-  background-color: lighten(@gray-lightest, 2.5%);
+  background-color: @content-alt-bg-color;
 }
 
 .row-spaced {

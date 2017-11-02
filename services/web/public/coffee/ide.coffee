@@ -12,7 +12,8 @@ define [
 	"ide/labels/LabelsManager"
 	"ide/review-panel/ReviewPanelManager"
 	"ide/SafariScrollPatcher"
-	"ide/FeatureOnboardingController"
+	"ide/FeatureOnboardingController",
+	"ide/AutoCompileOnboardingController",
 	"ide/settings/index"
 	"ide/share/index"
 	"ide/chat/index"
@@ -71,12 +72,17 @@ define [
 			view: "editor"
 			chatOpen: false
 			pdfLayout: 'sideBySide'
-			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}")
-			miniReviewPanelVisible: false
+			pdfHidden: false,
+			pdfWidth: 0,
+			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}"),
+			miniReviewPanelVisible: false,
+		}
+		$scope.onboarding = {
+			autoCompile: if window.showAutoCompileOnboarding then 'unseen' else 'dismissed'
 		}
 		$scope.user = window.user
 		$scope.__enableTokenAccessUI = window.enableTokenAccessUI == true
-		
+
 		$scope.$watch "project.features.trackChangesVisible", (visible) ->
 			return if !visible?
 			$scope.ui.showCollabFeaturesOnboarding = window.showTrackChangesOnboarding and visible
@@ -100,6 +106,10 @@ define [
 		$scope.$watch "ui.reviewPanelOpen", (value) ->
 			if value?
 				localStorage "ui.reviewPanelOpen.#{window.project_id}", value
+
+		$scope.$on "layout:pdf:resize", (_, layoutState) ->
+			$scope.ui.pdfHidden = layoutState.east.initClosed
+			$scope.ui.pdfWidth = layoutState.east.size
 
 		# Tracking code.
 		$scope.$watch "ui.view", (newView, oldView) ->
@@ -182,6 +192,20 @@ define [
 
 		if ide.browserIsSafari
 			ide.safariScrollPatcher = new SafariScrollPatcher($scope)
+
+		# Fix Chrome 61 and 62 text-shadow rendering
+		browserIsChrome61or62 = false
+		try
+			chromeVersion = parseFloat(navigator.userAgent.split(" Chrome/")[1]) || null;
+			browserIsChrome61or62 = (
+				chromeVersion? &&
+				(chromeVersion == 61 || chromeVersion == 62)
+			)
+			if browserIsChrome61or62
+				document.styleSheets[0].insertRule(".ace_editor.ace_autocomplete .ace_completion-highlight { text-shadow: none !important; }", 1)
+		catch err
+			console.error err
+
 
 		# User can append ?ft=somefeature to url to activate a feature toggle
 		ide.featureToggle = location?.search?.match(/^\?ft=(\w+)$/)?[1]

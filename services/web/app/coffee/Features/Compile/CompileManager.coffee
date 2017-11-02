@@ -18,7 +18,7 @@ module.exports = CompileManager =
 			timer.done()
 			_callback(args...)
 
-		@_checkIfAutoCompileLimitHasBeenHit options.isAutoCompile, (err, canCompile)->
+		@_checkIfAutoCompileLimitHasBeenHit options.isAutoCompile, "everyone", (err, canCompile)->
 			if !canCompile
 				return callback null, "autocompile-backoff", []
 			logger.log project_id: project_id, user_id: user_id, "compiling project"
@@ -34,12 +34,16 @@ module.exports = CompileManager =
 						return callback(error) if error?
 						for key, value of limits
 							options[key] = value
-						# only pass user_id down to clsi if this is a per-user compile
-						compileAsUser = if Settings.disablePerUserCompiles then undefined else user_id
-						ClsiManager.sendRequest project_id, compileAsUser, options, (error, status, outputFiles, clsiServerId, validationProblems) ->
-							return callback(error) if error?
-							logger.log files: outputFiles, "output files"
-							callback(null, status, outputFiles, clsiServerId, limits, validationProblems)
+						# Put a lower limit on autocompiles for free users, based on compileGroup
+						CompileManager._checkCompileGroupAutoCompileLimit options.isAutoCompile, limits.compileGroup, (err, canCompile)->
+							if !canCompile
+								return callback null, "autocompile-backoff", []
+							# only pass user_id down to clsi if this is a per-user compile
+							compileAsUser = if Settings.disablePerUserCompiles then undefined else user_id
+							ClsiManager.sendRequest project_id, compileAsUser, options, (error, status, outputFiles, clsiServerId, validationProblems) ->
+								return callback(error) if error?
+								logger.log files: outputFiles, "output files"
+								callback(null, status, outputFiles, clsiServerId, limits, validationProblems)
 
 
 	stopCompile: (project_id, user_id, callback = (error) ->) ->
@@ -72,18 +76,30 @@ module.exports = CompileManager =
 			else
 				return callback null, true
 
-	_checkIfAutoCompileLimitHasBeenHit: (isAutoCompile, callback = (err, canCompile)->)->
+	_checkCompileGroupAutoCompileLimit: (isAutoCompile, compileGroup, callback = (err, canCompile)->)->
 		if !isAutoCompile
 			return callback(null, true)
-		opts = 
+		if compileGroup is "standard"
+			# apply extra limits to the standard compile group
+			CompileManager._checkIfAutoCompileLimitHasBeenHit isAutoCompile, compileGroup, callback
+		else
+			Metrics.inc "auto-compile-#{compileGroup}"
+			return callback(null, true)	# always allow priority group users to compile
+
+	_checkIfAutoCompileLimitHasBeenHit: (isAutoCompile, compileGroup, callback = (err, canCompile)->)->
+		if !isAutoCompile
+			return callback(null, true)
+		Metrics.inc "auto-compile-#{compileGroup}"
+		opts =
 			endpointName:"auto_compile"
 			timeInterval:20
-			subjectName:"everyone"
-			throttle: 25
+			subjectName:compileGroup
+			throttle: Settings?.rateLimit?.autoCompile?[compileGroup] || 25
 		rateLimiter.addCount opts, (err, canCompile)->
 			if err?
 				canCompile = false
-			logger.log canCompile:canCompile, opts:opts, "checking if auto compile limit has been hit"
+			if !canCompile
+				Metrics.inc "auto-compile-#{compileGroup}-limited"
 			callback err, canCompile
 
 	_ensureRootDocumentIsSet: (project_id, callback = (error) ->) ->

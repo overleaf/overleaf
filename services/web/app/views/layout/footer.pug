@@ -1,7 +1,7 @@
 
 
 footer.site-footer
-	.container
+	.site-footer-content
 		.row
 			ul.col-md-9
 				
@@ -38,6 +38,6 @@ footer.site-footer
 				each item in nav.right_footer
 					li
 						if item.url
-							a(href=item.url, class=item.class) !{item.text}
+							a(href=item.url, class=item.class, aria-label=item.label) !{item.text}
 						else
 							| !{item.text}
