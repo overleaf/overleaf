@@ -304,7 +304,7 @@ module.exports = ProjectController =
 
 			token = TokenAccessHandler.getRequestToken(req, project_id)
 			isTokenMember = results.isTokenMember
-			enableTokenAccessUI = ProjectController._isInPercentageRollout(project.owner_ref, 10)
+			enableTokenAccessUI = ProjectController._isInPercentageRollout(project.owner_ref, 0)
 			AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, token, (error, privilegeLevel)->
 				return next(error) if error?
 				if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
