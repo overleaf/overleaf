@@ -327,6 +327,9 @@ describe "ProjectController", ->
 			it 'should include V1 tags', (done) ->
 				@res.render = (pageName, opts) =>
 					opts.tags.length.should.equal (@tags.length + @V1Response.tags.length)
+					opts.tags.forEach (t) ->
+						expect(t).to.have.property 'name'
+						expect(t).to.have.property 'project_ids'
 					done()
 				@ProjectController.projectListPage @req, @res
 
