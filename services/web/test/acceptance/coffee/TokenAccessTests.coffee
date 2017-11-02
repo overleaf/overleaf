@@ -263,9 +263,36 @@ describe 'TokenAccess', ->
 				, done)
 
 	if !settings.allowAnonymousReadAndWriteSharing
-		console.log ">> Skipping anonymous read-write token tests"
+		describe 'anonymous read-and-write token, disabled', ->
+			before (done) ->
+				@owner.createProject "token-anon-rw-test#{Math.random()}", (err, project_id) =>
+					return done(err) if err?
+					@project_id = project_id
+					@owner.makeTokenBased @project_id, (err) =>
+						return done(err) if err?
+						@owner.getProject @project_id, (err, project) =>
+							return done(err) if err?
+							@tokens = project.tokens
+							done()
+
+			it 'should deny access before the token is used', (done) ->
+				try_read_access(@anon, @project_id, (response, body) =>
+					expect(response.statusCode).to.equal 302
+					expect(body).to.match /.*\/restricted.*/
+				, done)
+
+			it 'should not allow the user to access read-and-write token', (done) ->
+				try_read_and_write_token_access(@anon, @tokens.readAndWrite, (response, body) =>
+					expect(response.statusCode).to.equal 404
+				, done)
+
+			it 'should not allow the user to join the project', (done) ->
+				try_anon_content_access(@anon, @project_id, @tokens.readAndWrite, (response, body) =>
+					expect(body.privilegeLevel).to.equal false
+				, done)
+
 	else
-		describe 'anonymous read-and-write token', ->
+		describe 'anonymous read-and-write token, enabled', ->
 			before (done) ->
 				@owner.createProject "token-anon-rw-test#{Math.random()}", (err, project_id) =>
 					return done(err) if err?
