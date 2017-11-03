@@ -29,6 +29,7 @@ describe 'V1ProjectGetter', ->
 
 		it 'should call the callback with no arguments', ->
 			@callback.calledWith().should.equal true
+			@IntegrationProjectListGetter.findAllUsersProjects.called.should.equal false
 
 	describe 'with overleaf-integration-web-module', ->
 		beforeEach ->
@@ -50,3 +51,4 @@ describe 'V1ProjectGetter', ->
 
 		it 'should call the callback with all the projects and tags', ->
 			@callback.calledWith(null, @response).should.equal true
+			@IntegrationProjectListGetter.findAllUsersProjects.called.should.equal true
