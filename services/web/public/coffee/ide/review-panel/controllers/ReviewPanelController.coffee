@@ -640,7 +640,11 @@ define [
 					_setUserTCState(ide.$scope.user.id, newValue, isLocal)
 			else
 				$scope.reviewPanel.trackChangesOnForGuests = false
-				if $scope.isTokenMember
+				if (
+					$scope.isTokenMember &&
+					$scope.user?.id? &&
+					!_.any($scope.project.members, (m) -> m._id == $scope.user.id)
+				)
 					$scope.trackChangesOnForThisGuestClient = false
 					_setUserTCState(ide.$scope.user.id, false, isLocal)
 
