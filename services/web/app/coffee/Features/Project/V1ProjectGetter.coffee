@@ -4,19 +4,18 @@ logger = require 'logger-sharelatex'
 
 INTEGRATION_MODULE_PATH = path.resolve(__dirname, '../../../../modules/overleaf-integration-web-module')
 
-module.exports = V1ProjectGetter =
-	integrationModuleExists: (callback = (error, stats) ->) ->
-		fs.stat INTEGRATION_MODULE_PATH, (error, stats) ->
-			if error? or !stats.isDirectory()
-				return callback(false)
-			return callback(true)
-
+V1ProjectGetter =
+	# Default implementation is a no-op
 	findAllUsersProjects: (userId, callback = (error, projects) ->) ->
-		V1ProjectGetter.integrationModuleExists (exists) ->
-			if exists
-				logger.log {exists}, "integration module does exist, loading V1 projects"
-				V1ProjectListGetter = require(path.join(INTEGRATION_MODULE_PATH, 'app/coffee/ProjectList/ProjectListGetter'))
-				V1ProjectListGetter.findAllUsersProjects(userId, callback)
-			else
-				logger.log {exists}, "integration modules doesn't exists, not loading V1 projects"
-				return callback()
+		logger.log {}, "integration modules doesn't exist, not loading V1 projects"
+		return callback()
+
+fs.stat INTEGRATION_MODULE_PATH, (error, stats) ->
+	return if error? or !stats.isDirectory()
+	logger.log {isDirectory: stats.isDirectory}, "integration module does exist, loading V1 projects"
+	# Monkey patch impl to actually fetch projects
+	V1ProjectGetter.findAllUsersProjects = (userId, callback = (error, projects) ->) ->
+		IntegrationProjectListGetter = require(path.join(INTEGRATION_MODULE_PATH, 'app/coffee/ProjectList/ProjectListGetter'))
+		IntegrationProjectListGetter.findAllUsersProjects(userId, callback)
+
+module.exports = V1ProjectGetter

@@ -6,25 +6,24 @@ modulePath = '../../../../app/js/Features/Project/V1ProjectGetter.js'
 
 describe 'V1ProjectGetter', ->
 	beforeEach ->
-		@fs =
-			stat: sinon.stub()
 		@path =
 			resolve: sinon.stub().returns('path/to/integration/module')
 			join: sinon.stub().returns('path/to/file/in/integration/module')
 		@IntegrationProjectListGetter =
 			findAllUsersProjects: sinon.stub()
-		@V1ProjectGetter = SandboxedModule.require modulePath, requires:
-			'fs': @fs
-			'path': @path
-			'logger-sharelatex': log: ->
-			'path/to/file/in/integration/module': @IntegrationProjectListGetter
 		@userId = 123
 		@callback = sinon.stub()
 
 	describe 'without overleaf-integration-web-module', ->
 		beforeEach ->
-			# Mock not finding integration module
-			@fs.stat.yields({ code: 'mock-ENOENT-error' })
+			@fs =
+				stat: sinon.stub().yields({code: 'mock-ENOENT-error'})
+			@V1ProjectGetter = SandboxedModule.require modulePath, requires:
+				# Mock not finding integration module
+				'fs': @fs
+				'path': @path
+				'logger-sharelatex': log: ->
+				'path/to/file/in/integration/module': @IntegrationProjectListGetter
 			# Call method
 			@V1ProjectGetter.findAllUsersProjects @userId, @callback
 
@@ -33,8 +32,14 @@ describe 'V1ProjectGetter', ->
 
 	describe 'with overleaf-integration-web-module', ->
 		beforeEach ->
-			# Mock finding integration module
-			@fs.stat.yields(null, isDirectory: sinon.stub().returns(true))
+			@fs =
+				stat: sinon.stub().yields(null, isDirectory: sinon.stub().returns(true))
+			@V1ProjectGetter = SandboxedModule.require modulePath, requires:
+				# Mock finding integration module
+				'fs': @fs
+				'path': @path
+				'logger-sharelatex': log: ->
+				'path/to/file/in/integration/module': @IntegrationProjectListGetter
 			# Mock integration module response
 			@IntegrationProjectListGetter.findAllUsersProjects.yields(null, @response = {
 				projects: [{ id: '123mockV1Id', title: 'mock title' }]
