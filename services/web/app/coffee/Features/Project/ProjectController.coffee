@@ -1,5 +1,4 @@
 async = require("async")
-moment = require('moment')
 logger = require("logger-sharelatex")
 projectDeleter = require("./ProjectDeleter")
 projectDuplicator = require("./ProjectDuplicator")
@@ -440,7 +439,7 @@ module.exports = ProjectController =
 		{
 			id: project.id
 			name: project.title
-			lastUpdated: moment.unix(project.updated_at)
+			lastUpdated: new Date(project.updated_at * 1000) # Convert from epoch
 			accessLevel: "readOnly",
 			archived: project.removed || project.archived
 			isV1Project: true
