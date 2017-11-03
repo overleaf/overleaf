@@ -216,9 +216,9 @@ ul.folders-menu {
 			}
 		}
 		a.tag-name {
+			position: relative;
 			padding: @folders-tag-padding;
 			display: @folders-tag-display;
-			position: relative;
 			span.name {
 				padding-left: 0.5em;
 				line-height: @folders-tag-line-height;
@@ -345,7 +345,11 @@ ul.project-list {
 			.tag-label-name {
 				padding-right: 0.3em;
 				border-top-right-radius: 0;
-				border-bottom-right-radius: 0;	
+				border-bottom-right-radius: 0;
+				max-width: @tag-max-width;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				vertical-align: text-bottom;
 			}
 			.tag-label-remove {
 				padding-left: 0.3em;
