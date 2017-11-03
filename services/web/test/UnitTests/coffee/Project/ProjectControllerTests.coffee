@@ -379,6 +379,7 @@ describe "ProjectController", ->
 			@project =
 				name:"my proj"
 				_id:"213123kjlkj"
+				owner_ref: '59fc84d5fbea77482d436e1b'
 			@user =
 				_id: "588f3ddae8ebc1bac07c9fa4"
 				ace:
