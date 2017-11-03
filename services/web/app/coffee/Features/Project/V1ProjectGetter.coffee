@@ -12,7 +12,7 @@ V1ProjectGetter =
 
 fs.stat INTEGRATION_MODULE_PATH, (error, stats) ->
 	return if error? or !stats.isDirectory()
-	logger.log {isDirectory: stats.isDirectory}, "integration module does exist, loading V1 projects"
+	logger.log {isDirectory: stats.isDirectory()}, "integration module does exist, loading V1 projects"
 	# Monkey patch impl to actually fetch projects
 	V1ProjectGetter.findAllUsersProjects = (userId, callback = (error, projects) ->) ->
 		IntegrationProjectListGetter = require(path.join(INTEGRATION_MODULE_PATH, 'app/coffee/ProjectList/ProjectListGetter'))
