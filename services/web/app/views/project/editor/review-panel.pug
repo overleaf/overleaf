@@ -95,6 +95,7 @@
 				ng-if="__enableTokenAccessUI"
 			)
 				span.rp-tc-state-item-name(
+					ng-class="{ 'rp-tc-state-item-name-disabled' : reviewPanel.trackChangesOnForEveryone}"
 					tooltip=translate('tc_switch_guests_tip')
 					tooltip-placement="left"
 					tooltip-append-to-body="true"
@@ -103,7 +104,7 @@
 				review-panel-toggle(
 					ng-model="reviewPanel.trackChangesOnForGuests"
 					on-toggle="toggleTrackChangesForGuests(isOn);"
-					disabled="!project.features.trackChanges || !permissions.write || !reviewPanel.trackChangesForGuestsAvailable"
+					disabled="reviewPanel.trackChangesOnForEveryone || !project.features.trackChanges || !permissions.write || !reviewPanel.trackChangesForGuestsAvailable"
 				)
 
 	.rp-entry-list(
