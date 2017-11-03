@@ -85,8 +85,10 @@ define [
 		# TODO: remove after rollout and testing
 		window.turnOnTokenAccessUI = () ->
 			$scope.__enableTokenAccessUI = true
+			$scope.$digest
 		window.turnOffTokenAccessUI = () ->
 			$scope.__enableTokenAccessUI = false
+			$scope.$digest
 
 		$scope.$watch "project.features.trackChangesVisible", (visible) ->
 			return if !visible?
