@@ -1,7 +1,6 @@
 ProjectController = require "../Project/ProjectController"
 AuthenticationController = require '../Authentication/AuthenticationController'
 TokenAccessHandler = require './TokenAccessHandler'
-EditorRealTimeController = require "../Editor/EditorRealTimeController"
 Errors = require '../Errors/Errors'
 logger = require 'logger-sharelatex'
 
