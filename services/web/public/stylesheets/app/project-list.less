@@ -65,7 +65,7 @@
 			padding-top: @content-margin-vertical;
 			padding-bottom: @content-margin-vertical;
 			height: 100%;
-			overflow: hidden;
+			// overflow: hidden;
 		}
 
 .project-header {
@@ -81,6 +81,16 @@
 
 .project-tools {
 	display: inline;
+	float: right;
+}
+
+.js-tags-dropdown-menu {
+	max-width: 50vw;
+
+	&.dropdown-menu > li > a {
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
 }
 
 .first-project {
