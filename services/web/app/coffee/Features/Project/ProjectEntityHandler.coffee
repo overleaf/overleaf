@@ -368,7 +368,7 @@ module.exports = ProjectEntityHandler =
 				return callback(err) if err?
 				self._checkValidMove project, entityType, entityPath, destFolderId, (error) ->
 					return callback(error) if error?
-					ProjectEntityHandler.getAllEntitiesFromProject project, (error, oldDocs) =>
+					ProjectEntityHandler.getAllEntitiesFromProject project, (error, oldDocs, oldFiles) =>
 						return callback(error) if error?
 						self._removeElementFromMongoArray Project, project_id, entityPath.mongo, (err, newProject)->
 							return callback(err) if err?
@@ -381,10 +381,11 @@ module.exports = ProjectEntityHandler =
 									endPath: result.path.fileSystem,
 									rev: entity.rev
 								tpdsUpdateSender.moveEntity opts
-								ProjectEntityHandler.getAllEntitiesFromProject newProject, (error, newDocs) =>
+								ProjectEntityHandler.getAllEntitiesFromProject newProject, (error, newDocs, newFiles
+								) =>
 									return callback(error) if error?
 									documentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
-									documentUpdaterHandler.updateProjectStructure project_id, userId, oldDocs, newDocs, callback
+									documentUpdaterHandler.updateProjectStructure project_id, userId, oldDocs, newDocs, oldFiles, newFiles, callback
 
 	_checkValidMove: (project, entityType, entityPath, destFolderId, callback = (error) ->) ->
 		return callback() if !entityType.match(/folder/)
@@ -427,7 +428,7 @@ module.exports = ProjectEntityHandler =
 		entityType = entityType.toLowerCase()
 		ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (error, project)=>
 			return callback(error) if error?
-			ProjectEntityHandler.getAllEntitiesFromProject project, (error, oldDocs) =>
+			ProjectEntityHandler.getAllEntitiesFromProject project, (error, oldDocs, oldFiles) =>
 				return callback(error) if error?
 				projectLocator.findElement {project:project, element_id:entity_id, type:entityType}, (error, entity, path)=>
 					return callback(error) if error?
@@ -439,10 +440,10 @@ module.exports = ProjectEntityHandler =
 					tpdsUpdateSender.moveEntity({project_id:project_id, startPath:path.fileSystem, endPath:endPath, project_name:project.name, rev:entity.rev})
 					Project.findOneAndUpdate conditions, update, { "new": true}, (error, newProject) ->
 						return callback(error) if error?
-						ProjectEntityHandler.getAllEntitiesFromProject newProject, (error, newDocs) =>
+						ProjectEntityHandler.getAllEntitiesFromProject newProject, (error, newDocs, newFiles) =>
 							return callback(error) if error?
 							documentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
-							documentUpdaterHandler.updateProjectStructure project_id, userId, oldDocs, newDocs, callback
+							documentUpdaterHandler.updateProjectStructure project_id, userId, oldDocs, newDocs, oldFiles, newFiles, callback
 
 	_cleanUpEntity: (project, entity, entityType, callback = (error) ->) ->
 		if(entityType.indexOf("file") != -1)

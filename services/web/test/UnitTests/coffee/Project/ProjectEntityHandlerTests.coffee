@@ -240,12 +240,14 @@ describe 'ProjectEntityHandler', ->
 			@ProjectEntityHandler._putElement = sinon.stub().callsArgWith(4, null, path: @pathAfterMove)
 			@ProjectGetter.getProject.callsArgWith(2, null, @project)
 			@tpdsUpdateSender.moveEntity = sinon.stub()
-			@documentUpdaterHandler.updateProjectStructure = sinon.stub().callsArg(4)
+			@documentUpdaterHandler.updateProjectStructure = sinon.stub().callsArg(6)
 			@ProjectEntityHandler.getAllEntitiesFromProject = sinon.stub()
 			@ProjectEntityHandler.getAllEntitiesFromProject
-				.onFirstCall().callsArgWith(1, null, @oldDocs = [])
+				.onFirstCall()
+				.callsArgWith(1, null, @oldDocs = ['old-doc'], @oldFiles = ['old-file'])
 			@ProjectEntityHandler.getAllEntitiesFromProject
-				.onSecondCall().callsArgWith(1, null, @newDocs = [])
+				.onSecondCall()
+				.callsArgWith(1, null, @newDocs = ['new-doc'], @newFiles = ['new-file'])
 
 		describe "moving a doc", ->
 			beforeEach (done) ->
@@ -270,7 +272,7 @@ describe 'ProjectEntityHandler', ->
 
 			it "should should send the update to the doc updater", ->
 				@documentUpdaterHandler.updateProjectStructure
-					.calledWith(project_id, userId, @oldDocs, @newDocs)
+					.calledWith(project_id, userId, @oldDocs, @newDocs, @oldFiles, @newFiles)
 					.should.equal true
 
 			it 'should remove the element from its current position', ->
@@ -322,7 +324,7 @@ describe 'ProjectEntityHandler', ->
 
 				it "should should send the update to the doc updater", ->
 					@documentUpdaterHandler.updateProjectStructure
-						.calledWith(project_id, userId, @oldDocs, @newDocs)
+						.calledWith(project_id, userId, @oldDocs, @newDocs, @oldFiles, @newFiles)
 						.should.equal true
 
 				it 'should remove the element from its current position', ->
@@ -1001,20 +1003,22 @@ describe 'ProjectEntityHandler', ->
 			@ProjectGetter.getProject.callsArgWith(2, null, @project)
 			@ProjectEntityHandler.getAllEntitiesFromProject = sinon.stub()
 			@ProjectEntityHandler.getAllEntitiesFromProject
-				.onFirstCall().callsArgWith(1, null, @oldDocs = [])
+				.onFirstCall()
+				.callsArgWith(1, null, @oldDocs = ['old-doc'], @oldFiles = ['old-file'])
 			@ProjectEntityHandler.getAllEntitiesFromProject
-				.onSecondCall().callsArgWith(1, null, @newDocs = [])
+				.onSecondCall()
+				.callsArgWith(1, null, @newDocs = ['new-doc'], @newFiles = ['new-file'])
 
 			@projectLocator.findElement = sinon.stub().callsArgWith(1, null, @entity = { _id: @entity_id, name:"old.tex", rev:4 }, @path)
 			@tpdsUpdateSender.moveEntity = sinon.stub()
 			@ProjectModel.findOneAndUpdate = sinon.stub().callsArgWith(3, null, @project)
-			@documentUpdaterHandler.updateProjectStructure = sinon.stub().callsArg(4)
+			@documentUpdaterHandler.updateProjectStructure = sinon.stub().callsArg(6)
 
 		it "should should send the old and new project structure to the doc updater", (done) ->
 			@ProjectEntityHandler.renameEntity project_id, @entity_id, @entityType, @newName, userId, =>
-				@documentUpdaterHandler.updateProjectStructure.calledWith(
-					project_id, userId, @oldDocs, @newDocs,
-				).should.equal true
+				@documentUpdaterHandler.updateProjectStructure
+					.calledWith(project_id, userId, @oldDocs, @newDocs, @oldFiles, @newFiles)
+					.should.equal true
 				done()
 
 		it "should update the name in mongo", (done)->

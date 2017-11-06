@@ -401,13 +401,15 @@ describe 'DocumentUpdaterHandler', ->
 				{ path: '/old_a', doc: _id: new ObjectId(@docIdA.toString()) }
 				{ path: '/new_b', doc: _id: new ObjectId(@docIdB.toString()) }
 			]
+			@oldFiles = []
+			@newFiles = []
 
 		describe "with project history disabled", ->
 			beforeEach ->
 				@settings.apis.project_history.enabled = false
 				@request.post = sinon.stub()
 
-				@handler.updateProjectStructure @project_id, @user_id, @oldDocs, @newDocs, @callback
+				@handler.updateProjectStructure @project_id, @user_id, @oldDocs, @newDocs, @oldFiles, @newFiles, @callback
 
 			it 'does not make a web request', ->
 				@request.post.called.should.equal false
@@ -419,10 +421,10 @@ describe 'DocumentUpdaterHandler', ->
 			beforeEach ->
 				@settings.apis.project_history.enabled = true
 				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
-				@handler.updateProjectStructure @project_id, @user_id, @oldDocs, @newDocs, @callback
+				@handler.updateProjectStructure @project_id, @user_id, @oldDocs, @newDocs, @oldFiles, @newFiles, @callback
 
 			it 'should send the structure update to the document updater', ->
-				updates = [
+				docUpdates = [
 					id: @docIdB,
 					pathname: "/old_b"
 					newPathname: "/new_b"
@@ -430,7 +432,7 @@ describe 'DocumentUpdaterHandler', ->
 
 				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}"
 				@request.post
-					.calledWith(url: url, json: {updates, @user_id})
+					.calledWith(url: url, json: {docUpdates, fileUpdates: [], userId: @user_id})
 					.should.equal true
 
 			it "should call the callback with no error", ->

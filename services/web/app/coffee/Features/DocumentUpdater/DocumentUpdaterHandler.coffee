@@ -204,29 +204,19 @@ module.exports = DocumentUpdaterHandler =
 				logger.error {project_id, doc_id, thread_id}, "doc updater returned a non-success status code: #{res.statusCode}"
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
-	updateProjectStructure : (project_id, user_id, oldDocs, newDocs, callback = (error) ->)->
+	updateProjectStructure : (project_id, userId, oldDocs, newDocs, oldFiles, newFiles, callback = (error) ->)->
 		return callback() if !settings.apis.project_history?.enabled
 
-		docRenameUpdates = []
-
-		for oldDoc in oldDocs
-			newDoc = _.find newDocs, (newDoc) ->
-				newDoc.doc._id.toString() == oldDoc.doc._id.toString()
-			if newDoc.path != oldDoc.path
-				docRenameUpdates.push
-					id: oldDoc.doc._id
-					pathname: oldDoc.path
-					newPathname: newDoc.path
+		docUpdates = DocumentUpdaterHandler._getRenameUpdates('doc', oldDocs, newDocs)
+		fileUpdates = DocumentUpdaterHandler._getRenameUpdates('file', oldFiles, newFiles)
 
 		timer = new metrics.Timer("set-document")
 		url = "#{settings.apis.documentupdater.url}/project/#{project_id}"
 		body =
 			url: url
-			json:
-				updates: docRenameUpdates
-				user_id: user_id
+			json: { docUpdates, fileUpdates, userId }
 
-		return callback() if docRenameUpdates.length < 1
+		return callback() if (docUpdates.length + fileUpdates.length) < 1
 
 		request.post body, (error, res, body)->
 			timer.done()
@@ -239,6 +229,22 @@ module.exports = DocumentUpdaterHandler =
 			else
 				logger.error {project_id, url}, "doc updater returned a non-success status code: #{res.statusCode}"
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
+
+	_getRenameUpdates: (entityType, oldEntities, newEntities) ->
+		updates = []
+
+		for oldEntity in oldEntities
+			id = oldEntity[entityType]._id
+			newEntity = _.find newEntities, (newEntity) ->
+				newEntity[entityType]._id.toString() == id.toString()
+
+			if newEntity.path != oldEntity.path
+				updates.push
+					id: id
+					pathname: oldEntity.path
+					newPathname: newEntity.path
+
+		updates
 
 PENDINGUPDATESKEY = "PendingUpdates"
 DOCLINESKEY = "doclines"
