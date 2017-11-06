@@ -31,20 +31,20 @@ module.exports = DocumentManager =
 			else
 				callback null, lines, version, ranges, pathname, unflushedTime, true
 
-	getDocAndRecentOps: (project_id, doc_id, fromVersion, _callback = (error, lines, version, recentOps, ranges) ->) ->
+	getDocAndRecentOps: (project_id, doc_id, fromVersion, _callback = (error, lines, version, ops, ranges, pathname) ->) ->
 		timer = new Metrics.Timer("docManager.getDocAndRecentOps")
 		callback = (args...) ->
 			timer.done()
 			_callback(args...)
 
-		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges) ->
+		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges, pathname) ->
 			return callback(error) if error?
 			if fromVersion == -1
-				callback null, lines, version, [], ranges
+				callback null, lines, version, [], ranges, pathname
 			else
 				RedisManager.getPreviousDocOps doc_id, fromVersion, version, (error, ops) ->
 					return callback(error) if error?
-					callback null, lines, version, ops, ranges
+					callback null, lines, version, ops, ranges, pathname
 
 	setDoc: (project_id, doc_id, newLines, source, user_id, undoing, _callback = (error) ->) ->
 		timer = new Metrics.Timer("docManager.setDoc")
@@ -179,7 +179,7 @@ module.exports = DocumentManager =
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.getDoc, project_id, doc_id, callback
 
-	getDocAndRecentOpsWithLock: (project_id, doc_id, fromVersion, callback = (error, lines, version) ->) ->
+	getDocAndRecentOpsWithLock: (project_id, doc_id, fromVersion, callback = (error, lines, version, ops, ranges, pathname) ->) ->
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.getDocAndRecentOps, project_id, doc_id, fromVersion, callback
 

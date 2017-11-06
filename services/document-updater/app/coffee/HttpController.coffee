@@ -18,7 +18,7 @@ module.exports = HttpController =
 		else
 			fromVersion = -1
 
-		DocumentManager.getDocAndRecentOpsWithLock project_id, doc_id, fromVersion, (error, lines, version, ops, ranges) ->
+		DocumentManager.getDocAndRecentOpsWithLock project_id, doc_id, fromVersion, (error, lines, version, ops, ranges, pathname) ->
 			timer.done()
 			return next(error) if error?
 			logger.log project_id: project_id, doc_id: doc_id, "got doc via http"
@@ -30,6 +30,7 @@ module.exports = HttpController =
 				version: version
 				ops: ops
 				ranges: ranges
+				pathname: pathname
 
 	_getTotalSizeOfLines: (lines) ->
 		size = 0

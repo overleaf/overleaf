@@ -109,7 +109,7 @@ describe "DocumentManager", ->
 	describe "getDocAndRecentOps", ->
 		describe "with a previous version specified", ->
 			beforeEach ->
-				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges)
+				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname)
 				@RedisManager.getPreviousDocOps = sinon.stub().callsArgWith(3, null, @ops)
 				@DocumentManager.getDocAndRecentOps @project_id, @doc_id, @fromVersion, @callback
 
@@ -124,14 +124,14 @@ describe "DocumentManager", ->
 					.should.equal true
 
 			it "should call the callback with the doc info", ->
-				@callback.calledWith(null, @lines, @version, @ops, @ranges).should.equal true
+				@callback.calledWith(null, @lines, @version, @ops, @ranges, @pathname).should.equal true
 
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
 
 		describe "with no previous version specified", ->
 			beforeEach ->
-				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges)
+				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname)
 				@RedisManager.getPreviousDocOps = sinon.stub().callsArgWith(3, null, @ops)
 				@DocumentManager.getDocAndRecentOps @project_id, @doc_id, -1, @callback
 
@@ -144,7 +144,7 @@ describe "DocumentManager", ->
 				@RedisManager.getPreviousDocOps.called.should.equal false
 
 			it "should call the callback with the doc info", ->
-				@callback.calledWith(null, @lines, @version, [], @ranges).should.equal true
+				@callback.calledWith(null, @lines, @version, [], @ranges, @pathname).should.equal true
 
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true

@@ -28,6 +28,7 @@ describe "HttpController", ->
 			@version = 42
 			@fromVersion = 42
 			@ranges = { changes: "mock", comments: "mock" }
+			@pathname = '/a/b/c'
 			@req =
 				params:
 					project_id: @project_id
@@ -35,7 +36,7 @@ describe "HttpController", ->
 
 		describe "when the document exists and no recent ops are requested", ->
 			beforeEach ->
-				@DocumentManager.getDocAndRecentOpsWithLock = sinon.stub().callsArgWith(3, null, @lines, @version, [], @ranges)
+				@DocumentManager.getDocAndRecentOpsWithLock = sinon.stub().callsArgWith(3, null, @lines, @version, [], @ranges, @pathname)
 				@HttpController.getDoc(@req, @res, @next)
 
 			it "should get the doc", ->
@@ -51,6 +52,7 @@ describe "HttpController", ->
 						version: @version
 						ops: []
 						ranges: @ranges
+						pathname: @pathname
 					}))
 					.should.equal true
 
