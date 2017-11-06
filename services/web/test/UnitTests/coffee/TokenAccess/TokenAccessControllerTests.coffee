@@ -150,6 +150,7 @@ describe "TokenAccessController", ->
 					@TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED = false
 					@req = new MockRequest()
 					@res = new MockResponse()
+					@res.redirect = sinon.stub()
 					@next = sinon.stub()
 					@req.params['read_and_write_token'] = @readAndWriteToken
 					@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
@@ -175,9 +176,9 @@ describe "TokenAccessController", ->
 					expect(@ProjectController.loadEditor.calledWith(@req, @res, @next)).to.equal false
 					done()
 
-				it 'should call next with an error', (done) ->
-					expect(@next.callCount).to.equal 1
-					expect(@next.lastCall.args[0]).to.be.instanceof Error
+				it 'should redirect to restricted page', (done) ->
+					expect(@res.redirect.callCount).to.equal 1
+					expect(@res.redirect.calledWith('/restricted')).to.equal true
 					done()
 
 		describe 'when findProject produces an error', ->

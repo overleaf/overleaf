@@ -52,7 +52,7 @@ module.exports = TokenAccessController =
 					else
 						logger.log {token, projectId: project._id},
 							"[TokenAccess] deny anonymous read-and-write token access"
-						return next(new Errors.NotFoundError())
+						return res.redirect('/restricted')
 				if project.owner_ref.toString() == userId
 					logger.log {userId, projectId: project._id},
 						"[TokenAccess] user is already project owner"

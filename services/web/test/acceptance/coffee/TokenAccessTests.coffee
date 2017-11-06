@@ -283,7 +283,8 @@ describe 'TokenAccess', ->
 
 			it 'should not allow the user to access read-and-write token', (done) ->
 				try_read_and_write_token_access(@anon, @tokens.readAndWrite, (response, body) =>
-					expect(response.statusCode).to.equal 404
+					expect(response.statusCode).to.equal 302
+					expect(body).to.match /.*\/restricted.*/
 				, done)
 
 			it 'should not allow the user to join the project', (done) ->
