@@ -273,21 +273,32 @@ module.exports = RedisManager =
 							callback null, docUpdateCount
 
 	renameDoc: (project_id, doc_id, user_id, update, callback = (error) ->) ->
+		RedisManager.getDoc project_id, doc_id, (error, lines, version) ->
+			return callback(error) if error?
+
+			if lines? and version?
+				rclient.set keys.pathname(doc_id:doc_id), update.newPathname, (error) ->
+					return callback(error) if error?
+					RedisManager._renameEntity project_id, 'doc', doc_id, user_id, update, callback
+			else
+				RedisManager._renameEntity project_id, 'doc', doc_id, user_id, update, callback
+
+	renameFile: (project_id, file_id, user_id, update, callback = (error) ->) ->
+		RedisManager._renameEntity project_id, 'file', file_id, user_id, update, callback
+
+	_renameEntity: (project_id, entity_type, entity_id, user_id, update, callback = (error) ->) ->
 		update =
-			doc: doc_id
 			pathname: update.pathname
 			new_pathname: update.newPathname
 			meta:
 				user_id: user_id
 				ts: new Date()
+		update[entity_type] = entity_id
+
+		logger.log {project_id, update}, "queue rename operation to project-history"
 		jsonUpdate = JSON.stringify(update)
 
-		RedisManager.getDoc project_id, doc_id, (error, lines, version) ->
-			return callback(error) if error?
-			if lines? and version?
-				rclient.set keys.pathname(doc_id:doc_id), update.new_pathname
-
-			rclient.rpush projectHistoryKeys.projectHistoryOps({project_id}), jsonUpdate, callback
+		rclient.rpush projectHistoryKeys.projectHistoryOps({project_id}), jsonUpdate, callback
 
 	clearUnflushedTime: (doc_id, callback = (error) ->) ->
 		rclient.del keys.unflushedTime(doc_id:doc_id), callback

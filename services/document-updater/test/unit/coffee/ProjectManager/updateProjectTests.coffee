@@ -20,25 +20,35 @@ describe "ProjectManager", ->
 
 	describe "updateProjectWithLocks", ->
 		beforeEach ->
-			@firstUpdate =
+			@firstDocUpdate =
 				id: 1
 				update: 'foo'
-			@secondUpdate =
+			@secondDocUpdate =
 				id: 2
 				update: 'bar'
-			@updates = [ @firstUpdate, @secondUpdate ]
+			@docUpdates = [ @firstDocUpdate, @secondDocUpdate ]
+			@firstFileUpdate =
+				id: 2
+				update: 'bar'
+			@fileUpdates = [ @firstFileUpdate ]
+			@DocumentManager.renameDocWithLock = sinon.stub().yields()
+			@RedisManager.renameFile = sinon.stub().yields()
 
 		describe "successfully", ->
 			beforeEach ->
-				@DocumentManager.renameDocWithLock = sinon.stub().yields()
-				@ProjectManager.updateProjectWithLocks @project_id, @user_id, @updates, @callback
+				@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @callback
 
-			it "should rename the documents in the updates", ->
+			it "should rename the docs in the updates", ->
 				@DocumentManager.renameDocWithLock
-					.calledWith(@project_id, @firstUpdate.id, @user_id, @firstUpdate)
+					.calledWith(@project_id, @firstDocUpdate.id, @user_id, @firstDocUpdate)
 					.should.equal true
 				@DocumentManager.renameDocWithLock
-					.calledWith(@project_id, @secondUpdate.id, @user_id, @secondUpdate)
+					.calledWith(@project_id, @secondDocUpdate.id, @user_id, @secondDocUpdate)
+					.should.equal true
+
+			it "should rename the files in the updates", ->
+				@RedisManager.renameFile
+					.calledWith(@project_id, @firstFileUpdate.id, @user_id, @firstFileUpdate)
 					.should.equal true
 
 			it "should call the callback", ->
@@ -48,7 +58,16 @@ describe "ProjectManager", ->
 			beforeEach ->
 				@error = new Error('error')
 				@DocumentManager.renameDocWithLock = sinon.stub().yields(@error)
-				@ProjectManager.updateProjectWithLocks @project_id, @user_id, @updates, @callback
+				@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @callback
+
+			it "should call the callback with the error", ->
+				@callback.calledWith(@error).should.equal true
+
+		describe "when renaming a file fails", ->
+			beforeEach ->
+				@error = new Error('error')
+				@RedisManager.renameFile = sinon.stub().yields(@error)
+				@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @callback
 
 			it "should call the callback with the error", ->
 				@callback.calledWith(@error).should.equal true
