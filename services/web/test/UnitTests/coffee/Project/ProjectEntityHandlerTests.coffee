@@ -361,23 +361,29 @@ describe 'ProjectEntityHandler', ->
 						.calledWith(new Error("destination folder is a child folder of me"))
 						.should.equal true
 
-	describe 'removing element from mongo array', ->
-		it 'should call update with log the path', (done)->
-			mongoPath = "folders[0].folders[5]"
-			id = "12344"
-			firstUpdate = true
-			model =
-				update: (conditions, update, opts, callback)->
-					if firstUpdate
-						conditions._id.should.equal id
-						update.$unset[mongoPath].should.equal 1
-						firstUpdate = false
-						callback()
-					else
-						conditions._id.should.equal id
-						assert.deepEqual update, { '$pull': { 'folders[0]': null } }
-						done()
-			@ProjectEntityHandler._removeElementFromMongoArray model, id, mongoPath, ->
+	describe '_removeElementFromMongoArray ', ->
+		beforeEach ->
+			@mongoPath = "folders[0].folders[5]"
+			@id = "12344"
+			@project = 'a project'
+			@ProjectModel.update = sinon.stub().callsArg(3)
+			@ProjectModel.findOneAndUpdate = sinon.stub().callsArgWith(3, null, @project)
+			@ProjectEntityHandler._removeElementFromMongoArray @ProjectModel, @id, @mongoPath, @callback
+
+		it 'should unset', ->
+			update = { '$unset': { } }
+			update['$unset'][@mongoPath] = 1
+			@ProjectModel.update
+				.calledWith({ _id: @id }, update, {})
+				.should.equal true
+
+		it 'should pull', ->
+			@ProjectModel.findOneAndUpdate
+				.calledWith({ _id: @id }, { '$pull': { 'folders[0]': null } }, {'new': true})
+				.should.equal true
+
+		it 'should call the callback', ->
+			@callback.calledWith(null, @project).should.equal true
 
 	describe 'getDoc', ->
 		beforeEach ->
@@ -1100,27 +1106,28 @@ describe 'ProjectEntityHandler', ->
 			@path = mongo: "mongo.path", fileSystem: "/file/system/old.tex"
 			@ProjectGetter.getProject.callsArgWith(2, null, @project)
 			@projectLocator.findElement.callsArgWith(1, null, @folder, @path)
-			@ProjectUpdateStub.callsArgWith(3)
-
+			@ProjectModel.findOneAndUpdate = sinon.stub().callsArgWith(3, null, @project)
 
 		describe "updating the project", ->
-
-
 			it "should use the correct mongo path", (done)->
 				@ProjectEntityHandler._putElement @project, @folder._id, @doc, "docs", (err)=>
-					@ProjectModel.update.args[0][0]._id.should.equal @project._id
-					assert.deepEqual @ProjectModel.update.args[0][1].$push[@path.mongo+".docs"], @doc
+					@ProjectModel.findOneAndUpdate.args[0][0]._id.should.equal @project._id
+					assert.deepEqual @ProjectModel.findOneAndUpdate.args[0][1].$push[@path.mongo+".docs"], @doc
+					done()
+
+			it "should return the project in the callback", (done)->
+				@ProjectEntityHandler._putElement @project, @folder._id, @doc, "docs", (err, path, project)=>
+					expect(project).to.equal @project
 					done()
 
 			it "should add an s onto the type if not included", (done)->
 				@ProjectEntityHandler._putElement @project, @folder._id, @doc, "doc", (err)=>
-					assert.deepEqual @ProjectModel.update.args[0][1].$push[@path.mongo+".docs"], @doc
+					assert.deepEqual @ProjectModel.findOneAndUpdate.args[0][1].$push[@path.mongo+".docs"], @doc
 					done()
 
-
-			it "should not call update if elemenet is null", (done)->
+			it "should not call update if element is null", (done)->
 				@ProjectEntityHandler._putElement @project, @folder._id, null, "doc", (err)=>
-					@ProjectModel.update.called.should.equal false
+					@ProjectModel.findOneAndUpdate.called.should.equal false
 					done()
 
 			it "should default to root folder insert", (done)->
@@ -1132,10 +1139,8 @@ describe 'ProjectEntityHandler', ->
 				doc =
 					name:"something"
 				@ProjectEntityHandler._putElement @project, @folder._id, doc, "doc", (err)=>
-					@ProjectModel.update.called.should.equal false
+					@ProjectModel.findOneAndUpdate.called.should.equal false
 					done()
-
-
 
 		describe "_countElements", ->
 

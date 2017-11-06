@@ -492,17 +492,15 @@ module.exports = ProjectEntityHandler =
 
 		async.series jobs, callback
 
-	_removeElementFromMongoArray : (model, model_id, path, callback)->
-		conditons = {_id:model_id}
+	_removeElementFromMongoArray : (model, model_id, path, callback = (err, project) ->)->
+		conditions = {_id:model_id}
 		update = {"$unset":{}}
 		update["$unset"][path] = 1
-		model.update conditons, update, {}, (err)->
+		model.update conditions, update, {}, (err)->
 			pullUpdate = {"$pull":{}}
 			nonArrayPath = path.slice(0, path.lastIndexOf("."))
 			pullUpdate["$pull"][nonArrayPath] = null
-			model.update conditons, pullUpdate, {}, (err)->
-				if callback?
-					callback(err)
+			model.findOneAndUpdate conditions, pullUpdate, {"new": true}, callback
 
 	_insertDeletedDocReference: (project_id, doc, callback = (error) ->) ->
 		Project.update {
@@ -539,8 +537,7 @@ module.exports = ProjectEntityHandler =
 
 		countFolder project.rootFolder[0], callback
 
-	_putElement: (project, folder_id, element, type, callback = (err, path)->)->
-
+	_putElement: (project, folder_id, element, type, callback = (err, path, project)->)->
 		sanitizeTypeOfElement = (elementType)->
 			lastChar = elementType.slice -1
 			if lastChar != "s"
@@ -581,11 +578,11 @@ module.exports = ProjectEntityHandler =
 				update = "$push":{}
 				update["$push"][mongopath] = element
 				logger.log project_id: project._id, element_id: element._id, fileType: type, folder_id: folder_id, mongopath:mongopath, "adding element to project"
-				Project.update conditions, update, {}, (err)->
+				Project.findOneAndUpdate conditions, update, {"new": true}, (err, project)->
 					if err?
 						logger.err err: err, project_id: project._id, 'error saving in putElement project'
 						return callback(err)
-					callback(err, {path:newPath})
+					callback(err, {path:newPath}, project)
 
 
 confirmFolder = (project, folder_id, callback)->
