@@ -71,7 +71,7 @@ header.toolbar.toolbar-header.toolbar-with-labels(
 					popover-append-to-body="true"
 					popover-trigger="mouseenter"
 					ng-click="gotoUser(user)"
-				) {{ user.name.slice(0,1) }}
+				) {{ userInitial(user) }}
 			
 			span.dropdown(dropdown, ng-if="onlineUsersArray.length >= 4")
 				span.online-user.online-user-multi(
