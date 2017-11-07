@@ -368,11 +368,11 @@ module.exports = ProjectEntityHandler =
 				return callback(err) if err?
 				self._checkValidMove project, entityType, entityPath, destFolderId, (error) ->
 					return callback(error) if error?
-					ProjectEntityHandler.getAllEntitiesFromProject project, (error, oldDocs, oldFiles) =>
+					self.getAllEntitiesFromProject project, (error, oldDocs, oldFiles) =>
 						return callback(error) if error?
 						self._removeElementFromMongoArray Project, project_id, entityPath.mongo, (err, newProject)->
 							return callback(err) if err?
-							ProjectEntityHandler._putElement newProject, destFolderId, entity, entityType, (err, result, newProject)->
+							self._putElement newProject, destFolderId, entity, entityType, (err, result, newProject)->
 								return callback(err) if err?
 								opts =
 									project_id: project_id
@@ -381,7 +381,7 @@ module.exports = ProjectEntityHandler =
 									endPath: result.path.fileSystem,
 									rev: entity.rev
 								tpdsUpdateSender.moveEntity opts
-								ProjectEntityHandler.getAllEntitiesFromProject newProject, (error, newDocs, newFiles
+								self.getAllEntitiesFromProject newProject, (error, newDocs, newFiles
 								) =>
 									return callback(error) if error?
 									documentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
