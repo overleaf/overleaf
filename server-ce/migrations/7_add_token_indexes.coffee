@@ -30,8 +30,16 @@ exports.migrate = (client, done=()->) ->
 		}, (err) ->
 			if err?
 				return done(err)
-			console.log ">> done adding indexes for token-based project access"
-			done()
+			db.projects.ensureIndex {tokenAccessReadAndWrite_refs: 1}, {
+				background: true
+			}, (err) ->
+				if err?
+					return done(err)
+				db.projects.ensureIndex {tokenAccessOnly_refs: 1}, {
+					background: true
+				}, (err) ->
+					console.log ">> done adding indexes for token-based project access"
+					done()
 
 
 exports.rollback = (client, done) ->
