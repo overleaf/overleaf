@@ -268,7 +268,7 @@ module.exports = ProjectController =
 					# Don't show for users who registered after it was released
 					return cb(null, { enabled: true, showOnboarding: false })
 				timeout = setTimeout cb, 500
-				AnalyticsManager.getLastOccurance user_id, "shown-autocompile-onboarding", (error, event) ->
+				AnalyticsManager.getLastOccurance user_id, "shown-autocompile-onboarding-2", (error, event) ->
 					clearTimeout timeout
 					if error?
 						return cb(null, { enabled: true, showOnboarding: false })

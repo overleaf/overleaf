@@ -23,4 +23,4 @@ define [
 
 		$scope.dismiss = () ->
 			$scope.onboarding.autoCompile = 'dismissed'
-			event_tracking.sendMB "shown-autocompile-onboarding"
+			event_tracking.sendMB "shown-autocompile-onboarding-2"
