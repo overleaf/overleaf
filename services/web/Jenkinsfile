@@ -1,3 +1,5 @@
+String cron_string = BRANCH_NAME == "master" ? "@daily" : ""
+
 pipeline {
   
   agent any
@@ -8,7 +10,7 @@ pipeline {
   
   triggers {
     pollSCM('* * * * *')
-    cron('@daily')
+    cron(cron_string)
   }
   
   stages {
