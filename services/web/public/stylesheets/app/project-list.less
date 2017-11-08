@@ -65,7 +65,6 @@
 			padding-top: @content-margin-vertical;
 			padding-bottom: @content-margin-vertical;
 			height: 100%;
-			overflow: hidden;
 		}
 
 .project-header {
@@ -81,6 +80,16 @@
 
 .project-tools {
 	display: inline;
+	float: right;
+}
+
+.tags-dropdown-menu {
+	max-width: 50vw;
+
+	&.dropdown-menu > li > a {
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
 }
 
 .first-project {
@@ -216,9 +225,9 @@ ul.folders-menu {
 			}
 		}
 		a.tag-name {
+			position: relative;
 			padding: @folders-tag-padding;
 			display: @folders-tag-display;
-			position: relative;
 			span.name {
 				padding-left: 0.5em;
 				line-height: @folders-tag-line-height;
@@ -329,6 +338,7 @@ ul.project-list {
 			position: relative;
 			top: -2px;
 			display: inline-block;
+			white-space: nowrap;
 		}
 			.tag-label-name,
 			.tag-label-remove {
@@ -337,6 +347,7 @@ ul.project-list {
 				color: #FFF;
 				border-radius: @tag-border-radius;
 				background-color: @tag-bg-color;
+				vertical-align: text-bottom;
 				&:hover,
 				&:focus {
 					background-color: @tag-bg-hover-color;
@@ -345,7 +356,10 @@ ul.project-list {
 			.tag-label-name {
 				padding-right: 0.3em;
 				border-top-right-radius: 0;
-				border-bottom-right-radius: 0;	
+				border-bottom-right-radius: 0;
+				max-width: @tag-max-width;
+				overflow: hidden;
+				text-overflow: ellipsis;
 			}
 			.tag-label-remove {
 				padding-left: 0.3em;
