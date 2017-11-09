@@ -11,7 +11,6 @@ define [
 			event_tracking.sendMB "shown-linksharing-onboarding"
 
 		$scope.$on 'ide:loaded', () ->
-			console.log ">> woot"
 			shareBtn = angular.element('#shareButton')
 			offset = shareBtn.offset()
 			popover.show()
