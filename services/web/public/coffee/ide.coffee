@@ -14,6 +14,7 @@ define [
 	"ide/SafariScrollPatcher"
 	"ide/FeatureOnboardingController",
 	"ide/AutoCompileOnboardingController",
+	"ide/LinkSharingOnboardingController",
 	"ide/settings/index"
 	"ide/share/index"
 	"ide/chat/index"
@@ -79,6 +80,7 @@ define [
 		}
 		$scope.onboarding = {
 			autoCompile: if window.showAutoCompileOnboarding then 'unseen' else 'dismissed'
+			linkSharing: if window.showLinkSharingOnboarding then 'unseen' else 'dismissed'
 		}
 		$scope.user = window.user
 		$scope.__enableTokenAccessUI = window.enableTokenAccessUI == true

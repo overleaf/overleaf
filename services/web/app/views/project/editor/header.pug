@@ -99,7 +99,7 @@ header.toolbar.toolbar-header.toolbar-with-labels(
 			i.review-icon
 			p.toolbar-label
 				| #{translate("review")}
-		a.btn.btn-full-height(
+		a.btn.btn-full-height#shareButton(
 			href,
 			ng-if="permissions.admin",
 			ng-click="openShareProjectModal();",
