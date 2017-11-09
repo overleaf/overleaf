@@ -28,6 +28,7 @@ describe "HttpController", ->
 			@version = 42
 			@fromVersion = 42
 			@ranges = { changes: "mock", comments: "mock" }
+			@pathname = '/a/b/c'
 			@req =
 				params:
 					project_id: @project_id
@@ -35,7 +36,7 @@ describe "HttpController", ->
 
 		describe "when the document exists and no recent ops are requested", ->
 			beforeEach ->
-				@DocumentManager.getDocAndRecentOpsWithLock = sinon.stub().callsArgWith(3, null, @lines, @version, [], @ranges)
+				@DocumentManager.getDocAndRecentOpsWithLock = sinon.stub().callsArgWith(3, null, @lines, @version, [], @ranges, @pathname)
 				@HttpController.getDoc(@req, @res, @next)
 
 			it "should get the doc", ->
@@ -51,6 +52,7 @@ describe "HttpController", ->
 						version: @version
 						ops: []
 						ranges: @ranges
+						pathname: @pathname
 					}))
 					.should.equal true
 
@@ -487,6 +489,44 @@ describe "HttpController", ->
 			beforeEach ->
 				@ProjectManager.getProjectDocsAndFlushIfOld = sinon.stub().callsArgWith(3, new Error("oops"))
 				@HttpController.getProjectDocsAndFlushIfOld(@req, @res, @next)
+
+			it "should call next with the error", ->
+				@next
+					.calledWith(new Error("oops"))
+					.should.equal true
+
+	describe "updateProject", ->
+		beforeEach ->
+			@userId = "user-id-123"
+			@docUpdates = sinon.stub()
+			@fileUpdates = sinon.stub()
+			@req =
+				body: {@userId, @docUpdates, @fileUpdates}
+				params:
+					project_id: @project_id
+
+		describe "successfully", ->
+			beforeEach ->
+				@ProjectManager.updateProjectWithLocks = sinon.stub().callsArgWith(4)
+				@HttpController.updateProject(@req, @res, @next)
+
+			it "should accept the change", ->
+				@ProjectManager.updateProjectWithLocks
+					.calledWith(@project_id, @userId, @docUpdates, @fileUpdates)
+					.should.equal true
+
+			it "should return a successful No Content response", ->
+				@res.send
+					.calledWith(204)
+					.should.equal true
+
+			it "should time the request", ->
+				@Metrics.Timer::done.called.should.equal true
+
+		describe "when an errors occurs", ->
+			beforeEach ->
+				@ProjectManager.updateProjectWithLocks = sinon.stub().callsArgWith(4, new Error("oops"))
+				@HttpController.updateProject(@req, @res, @next)
 
 			it "should call next with the error", ->
 				@next

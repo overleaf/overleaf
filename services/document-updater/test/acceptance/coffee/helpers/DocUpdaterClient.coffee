@@ -86,3 +86,10 @@ module.exports = DocUpdaterClient =
 			if body? and res.statusCode >= 200 and res.statusCode < 300
 				body = JSON.parse(body)
 			callback error, res, body
+
+	sendProjectUpdate: (project_id, userId, docUpdates, fileUpdates, callback = (error) ->) ->
+		request.post {
+			url: "http://localhost:3003/project/#{project_id}"
+			json: { userId, docUpdates, fileUpdates }
+		}, (error, res, body) ->
+			callback error, res, body

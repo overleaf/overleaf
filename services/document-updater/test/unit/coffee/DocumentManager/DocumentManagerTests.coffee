@@ -23,6 +23,7 @@ describe "DocumentManager", ->
 			"./RangesManager": @RangesManager = {}
 		@project_id = "project-id-123"
 		@doc_id = "doc-id-123"
+		@user_id = 1234
 		@callback = sinon.stub()
 		@lines = ["one", "two", "three"]
 		@version = 42
@@ -108,7 +109,7 @@ describe "DocumentManager", ->
 	describe "getDocAndRecentOps", ->
 		describe "with a previous version specified", ->
 			beforeEach ->
-				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges)
+				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname)
 				@RedisManager.getPreviousDocOps = sinon.stub().callsArgWith(3, null, @ops)
 				@DocumentManager.getDocAndRecentOps @project_id, @doc_id, @fromVersion, @callback
 
@@ -123,14 +124,14 @@ describe "DocumentManager", ->
 					.should.equal true
 
 			it "should call the callback with the doc info", ->
-				@callback.calledWith(null, @lines, @version, @ops, @ranges).should.equal true
+				@callback.calledWith(null, @lines, @version, @ops, @ranges, @pathname).should.equal true
 
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
 
 		describe "with no previous version specified", ->
 			beforeEach ->
-				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges)
+				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname)
 				@RedisManager.getPreviousDocOps = sinon.stub().callsArgWith(3, null, @ops)
 				@DocumentManager.getDocAndRecentOps @project_id, @doc_id, -1, @callback
 
@@ -143,7 +144,7 @@ describe "DocumentManager", ->
 				@RedisManager.getPreviousDocOps.called.should.equal false
 
 			it "should call the callback with the doc info", ->
-				@callback.calledWith(null, @lines, @version, [], @ranges).should.equal true
+				@callback.calledWith(null, @lines, @version, [], @ranges, @pathname).should.equal true
 
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
@@ -439,3 +440,20 @@ describe "DocumentManager", ->
 
 			it "should call the callback with the lines and versions", ->
 				@callback.calledWith(null, @lines, @version).should.equal true
+
+	describe "renameDoc", ->
+		beforeEach ->
+			@update = 'some-update'
+			@RedisManager.renameDoc = sinon.stub().yields()
+
+		describe "successfully", ->
+			beforeEach ->
+				@DocumentManager.renameDoc @project_id, @doc_id, @user_id, @update, @callback
+
+			it "should rename the document", ->
+				@RedisManager.renameDoc
+					.calledWith(@project_id, @doc_id, @user_id, @update)
+					.should.equal true
+
+			it "should call the callback", ->
+				@callback.called.should.equal true

@@ -673,3 +673,69 @@ describe "RedisManager", ->
 			@rclient.del
 				.calledWith("ProjectState:#{@project_id}")
 				.should.equal true
+
+	describe "renameDoc", ->
+		beforeEach () ->
+			@rclient.rpush = sinon.stub().yields()
+			@rclient.set = sinon.stub().yields()
+			@update =
+				id: @doc_id
+				pathname: @pathname = 'pathname'
+				newPathname: @newPathname = 'new-pathname'
+
+		describe "the document is cached in redis", ->
+			beforeEach ->
+				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, 'lines', 'version')
+				@RedisManager.renameDoc @project_id, @doc_id, @userId, @update, @callback
+
+			it "update the cached pathname", ->
+				@rclient.set
+					.calledWith("Pathname:#{@doc_id}", @newPathname)
+					.should.equal true
+
+			it "should queue an update", ->
+				update =
+					pathname: @pathname
+					new_pathname: @newPathname
+					meta:
+						user_id: @userId
+						ts: new Date()
+					doc: @doc_id
+				@rclient.rpush
+					.calledWith("ProjectHistory:Ops:#{@project_id}", JSON.stringify(update))
+					.should.equal true
+
+			it "should call the callback", ->
+				@callback.calledWith().should.equal true
+
+		describe "the document is not cached in redis", ->
+			beforeEach ->
+				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, null, null)
+				@RedisManager.renameDoc @project_id, @doc_id, @userId, @update, @callback
+
+			it "does not update the cached pathname", ->
+				@rclient.set.called.should.equal false
+
+	describe "renameFile", ->
+		beforeEach () ->
+			@rclient.rpush = sinon.stub().yields()
+			@file_id = 1234
+
+			@update =
+				pathname: @pathname = '/old'
+				newPathname: @newPathname = '/new'
+
+			@RedisManager.renameFile @project_id, @file_id, @userId, @update
+
+		it "should queue an update", ->
+			update =
+				pathname: @pathname
+				new_pathname: @newPathname
+				meta:
+					user_id: @userId
+					ts: new Date()
+				file: @file_id
+
+			@rclient.rpush
+				.calledWith("ProjectHistory:Ops:#{@project_id}", JSON.stringify(update))
+				.should.equal true

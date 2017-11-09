@@ -7,6 +7,7 @@ HistoryManager = require "./HistoryManager"
 RealTimeRedisManager = require "./RealTimeRedisManager"
 Errors = require "./Errors"
 RangesManager = require "./RangesManager"
+async = require "async"
 
 MAX_UNFLUSHED_AGE = 300 * 1000 # 5 mins, document should be flushed to mongo this time after a change
 
@@ -30,20 +31,20 @@ module.exports = DocumentManager =
 			else
 				callback null, lines, version, ranges, pathname, unflushedTime, true
 
-	getDocAndRecentOps: (project_id, doc_id, fromVersion, _callback = (error, lines, version, recentOps, ranges) ->) ->
+	getDocAndRecentOps: (project_id, doc_id, fromVersion, _callback = (error, lines, version, ops, ranges, pathname) ->) ->
 		timer = new Metrics.Timer("docManager.getDocAndRecentOps")
 		callback = (args...) ->
 			timer.done()
 			_callback(args...)
 
-		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges) ->
+		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges, pathname) ->
 			return callback(error) if error?
 			if fromVersion == -1
-				callback null, lines, version, [], ranges
+				callback null, lines, version, [], ranges, pathname
 			else
 				RedisManager.getPreviousDocOps doc_id, fromVersion, version, (error, ops) ->
 					return callback(error) if error?
-					callback null, lines, version, ops, ranges
+					callback null, lines, version, ops, ranges, pathname
 
 	setDoc: (project_id, doc_id, newLines, source, user_id, undoing, _callback = (error) ->) ->
 		timer = new Metrics.Timer("docManager.setDoc")
@@ -155,6 +156,14 @@ module.exports = DocumentManager =
 					return callback(error) if error?
 					callback()
 
+	renameDoc: (project_id, doc_id, user_id, update, _callback = (error) ->) ->
+		timer = new Metrics.Timer("docManager.updateProject")
+		callback = (args...) ->
+			timer.done()
+			_callback(args...)
+
+		RedisManager.renameDoc project_id, doc_id, user_id, update, callback
+
 	getDocAndFlushIfOld: (project_id, doc_id, callback = (error, doc) ->) ->
 		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges, pathname, unflushedTime, alreadyLoaded) ->
 			return callback(error) if error?
@@ -170,7 +179,7 @@ module.exports = DocumentManager =
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.getDoc, project_id, doc_id, callback
 
-	getDocAndRecentOpsWithLock: (project_id, doc_id, fromVersion, callback = (error, lines, version) ->) ->
+	getDocAndRecentOpsWithLock: (project_id, doc_id, fromVersion, callback = (error, lines, version, ops, ranges, pathname) ->) ->
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.getDocAndRecentOps, project_id, doc_id, fromVersion, callback
 
@@ -197,3 +206,7 @@ module.exports = DocumentManager =
 	deleteCommentWithLock: (project_id, doc_id, thread_id, callback = (error) ->) ->
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.deleteComment, project_id, doc_id, thread_id, callback
+
+	renameDocWithLock: (project_id, doc_id, user_id, update, callback = (error) ->) ->
+		UpdateManager = require "./UpdateManager"
+		UpdateManager.lockUpdatesAndDo DocumentManager.renameDoc, project_id, doc_id, user_id, update, callback
