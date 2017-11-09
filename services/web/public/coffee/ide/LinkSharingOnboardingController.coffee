@@ -2,7 +2,6 @@ define [
 	"base"
 ], (App) ->
 	App.controller "LinkSharingOnboardingController", ($scope, $timeout, event_tracking) ->
-		$scope._shown = false
 
 		popover = angular.element('#onboarding-linksharing')
 		popover.hide()
@@ -11,8 +10,8 @@ define [
 			$scope.onboarding.linkSharing = 'dismissed'
 			event_tracking.sendMB "shown-linksharing-onboarding"
 
-		$scope.$on 'doc:opened', () ->
-			return if $scope._shown
+		$scope.$on 'ide:loaded', () ->
+			console.log ">> woot"
 			shareBtn = angular.element('#shareButton')
 			offset = shareBtn.offset()
 			popover.show()
@@ -21,4 +20,3 @@ define [
 				top: offset.top + 8 + shareBtn.height(),
 				left: offset.left
 			})
-			$scope.shown = true
