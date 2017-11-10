@@ -495,8 +495,6 @@ describe "ProjectController", ->
 			]
 
 		it 'should produce the expected results', ->
-			result = @ids.map (i) =>
-				@ProjectController._isInPercentageRollout('abcd', i, 50)
 			expect(
 				@ids.map (i) =>
 					@ProjectController._isInPercentageRollout('abcd', i, 50)
