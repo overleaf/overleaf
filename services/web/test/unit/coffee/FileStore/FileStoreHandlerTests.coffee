@@ -16,7 +16,7 @@ describe "FileStoreHandler", ->
 			})
 		@writeStream =
 			my:"writeStream"
-			on: (type, cb)-> 
+			on: (type, cb)->
 				if type == "response"
 					cb({statusCode: 200})
 		@readStream = {my:"readStream", on: sinon.stub()}
@@ -38,7 +38,7 @@ describe "FileStoreHandler", ->
 			@isSafeOnFileSystem = true
 
 		it "should create read stream", (done)->
-			@fs.createReadStream.returns 
+			@fs.createReadStream.returns
 				pipe:->
 				on: (type, cb)->
 					if type == "open"
@@ -49,8 +49,8 @@ describe "FileStoreHandler", ->
 
 		it "should pipe the read stream to request", (done)->
 			@request.returns(@writeStream)
-			@fs.createReadStream.returns 
-				on: (type, cb)-> 
+			@fs.createReadStream.returns
+				on: (type, cb)->
 					if type == "open"
 						cb()
 				pipe:(o)=>
@@ -59,9 +59,9 @@ describe "FileStoreHandler", ->
 			@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, =>
 
 		it "should pass the correct options to request", (done)->
-			@fs.createReadStream.returns 
+			@fs.createReadStream.returns
 				pipe:->
-				on: (type, cb)-> 
+				on: (type, cb)->
 					if type == "open"
 						cb()
 			@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, =>
@@ -70,23 +70,24 @@ describe "FileStoreHandler", ->
 				done()
 
 		it "builds the correct url", (done)->
-			@fs.createReadStream.returns 
+			@fs.createReadStream.returns
 				pipe:->
-				on: (type, cb)-> 
+				on: (type, cb)->
 					if type == "open"
 						cb()
 			@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, =>
 				@handler._buildUrl.calledWith(@project_id, @file_id).should.equal true
 				done()
 
-		it 'should callback with null', (done) ->
+		it 'should callback with the url', (done) ->
 			@fs.createReadStream.returns
 				pipe:->
 				on: (type, cb)->
 					if type == "open"
 						cb()
-			@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, (err) =>
+			@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, (err, url) =>
 				expect(err).to.not.exist
+				expect(url).to.equal(@handler._buildUrl())
 				done()
 
 		describe "symlink", ->
