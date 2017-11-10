@@ -28,7 +28,7 @@ CollaboratorsHandler = require '../Collaborators/CollaboratorsHandler'
 module.exports = ProjectController =
 
 	_isInPercentageRollout: (objectId, percentage) ->
-		if Settings.bypassPercentageRollouts = true
+		if Settings.bypassPercentageRollouts == true
 			return true
 		counter = parseInt(objectId.toString().substring(18, 24), 16)
 		return (counter % 100) < percentage
