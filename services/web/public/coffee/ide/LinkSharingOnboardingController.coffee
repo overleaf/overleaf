@@ -16,6 +16,6 @@ define [
 			popover.show()
 			$scope.placement = 'bottom'
 			popover.offset({
-				top: offset.top + 8 + shareBtn.height(),
-				left: offset.left
+				top: offset.top + 11 + shareBtn.height(),
+				left: offset.left - 180
 			})
