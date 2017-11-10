@@ -102,11 +102,17 @@ module.exports = ProjectManager =
 
 		handleDocUpdate = (update, cb) ->
 			doc_id = update.id
-			DocumentManager.renameDocWithLock project_id, doc_id, user_id, update, cb
+			if update.docLines?
+				RedisManager.addEntity project_id, 'doc', doc_id, user_id, update, cb
+			else
+				DocumentManager.renameDocWithLock project_id, doc_id, user_id, update, cb
 
 		handleFileUpdate = (update, cb) ->
 			file_id = update.id
-			RedisManager.renameFile project_id, file_id, user_id, update, cb
+			if update.url?
+				RedisManager.addEntity project_id, 'file', file_id, user_id, update, cb
+			else
+				RedisManager.renameFile project_id, file_id, user_id, update, cb
 
 		async.each docUpdates, handleDocUpdate, (error) ->
 			return callback(error) if error?
