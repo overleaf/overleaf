@@ -29,7 +29,7 @@ crypto = require 'crypto'
 module.exports = ProjectController =
 
 	_isInPercentageRollout: (rolloutName, objectId, percentage) ->
-		if Settings.bypassPercentageRollouts = true
+		if Settings.bypassPercentageRollouts == true
 			return true
 		data = "#{rolloutName}:#{objectId.toString()}"
 		md5hash = crypto.createHash('md5').update(data).digest('hex')
