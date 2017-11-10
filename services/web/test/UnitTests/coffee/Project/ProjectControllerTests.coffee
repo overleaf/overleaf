@@ -497,7 +497,10 @@ describe "ProjectController", ->
 		it 'should produce the expected results', ->
 			result = @ids.map (i) =>
 				@ProjectController._isInPercentageRollout('abcd', i, 50)
-			expect(result).to.deep.equal [
+			expect(
+				@ids.map (i) =>
+					@ProjectController._isInPercentageRollout('abcd', i, 50)
+			).to.deep.equal [
 				false,
 				false,
 				false,
@@ -518,6 +521,31 @@ describe "ProjectController", ->
 				true,
 				false,
 				true
+				]
+			expect(
+				@ids.map (i) =>
+					@ProjectController._isInPercentageRollout('efgh', i, 50)
+			).to.deep.equal [
+				false,
+				false,
+				false,
+				false,
+				true,
+				false,
+				false,
+				true,
+				false,
+				false,
+				true,
+				true,
+				true,
+				false,
+				true,
+				false,
+				true,
+				true,
+				false,
+				false
 			]
 
 
