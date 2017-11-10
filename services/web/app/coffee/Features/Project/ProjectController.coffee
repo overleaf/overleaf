@@ -272,10 +272,9 @@ module.exports = ProjectController =
 
 				# Extract data from user's ObjectId
 				timestamp = parseInt(user_id.toString().substring(0, 8), 16)
-				counter = parseInt(user_id.toString().substring(18, 24), 16)
 
 				rolloutPercentage = 60 # Percentage of users to roll out to
-				if counter % 100 > rolloutPercentage
+				if !ProjectController._isInPercentageRollout(user_id, rolloutPercentage)
 					# Don't show if user is not part of roll out
 					return cb(null, { enabled: false, showOnboarding: false })
 				userSignupDate = new Date(timestamp * 1000)
