@@ -244,6 +244,18 @@ module.exports = DocumentUpdaterHandler =
 					pathname: oldEntity.path
 					newPathname: newEntity.path
 
+		for newEntity in newEntities
+			id = newEntity[entityType]._id
+			oldEntity = _.find oldEntities, (oldEntity) ->
+				oldEntity[entityType]._id.toString() == id.toString()
+
+			if !oldEntity?
+				updates.push
+					id: id
+					pathname: newEntity.path
+					docLines: newEntity.docLines
+					url: newEntity.url
+
 		updates
 
 PENDINGUPDATESKEY = "PendingUpdates"
