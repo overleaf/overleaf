@@ -17,8 +17,9 @@ describe 'ProjectEntityHandler', ->
 	userId = 1234
 
 	beforeEach ->
+		@fileUrl = 'filestore.example.com/file'
 		@FileStoreHandler =
-			uploadFileFromDisk:(project_id, fileRef,  localImagePath, callback)->callback()
+			uploadFileFromDisk: sinon.stub().callsArgWith(3, null, @fileUrl)
 			copyFile: sinon.stub().callsArgWith(4, null)
 		@tpdsUpdateSender =
 			addDoc:sinon.stub().callsArg(1)
@@ -67,6 +68,9 @@ describe 'ProjectEntityHandler', ->
 			findElement : sinon.stub()
 		@settings =
 			maxEntitiesPerProject:200
+		@documentUpdaterHandler =
+			updateProjectStructure: sinon.stub().callsArg(6)
+			deleteDoc: sinon.stub().callsArg(2)
 		@ProjectEntityHandler = SandboxedModule.require modulePath, requires:
 			'../../models/Project': Project:@ProjectModel
 			'../../models/Doc': Doc:@DocModel
@@ -75,7 +79,7 @@ describe 'ProjectEntityHandler', ->
 			'../FileStore/FileStoreHandler':@FileStoreHandler
 			'../ThirdPartyDataStore/TpdsUpdateSender':@tpdsUpdateSender
 			'./ProjectLocator': @projectLocator
-			'../../Features/DocumentUpdater/DocumentUpdaterHandler':@documentUpdaterHandler = {}
+			'../../Features/DocumentUpdater/DocumentUpdaterHandler':@documentUpdaterHandler
 			'../Docstore/DocstoreManager': @DocstoreManager = {}
 			'logger-sharelatex': @logger = {log:sinon.stub(), error: sinon.stub(), err:->}
 			'./ProjectUpdateHandler': @projectUpdater
@@ -184,7 +188,6 @@ describe 'ProjectEntityHandler', ->
 	describe "_cleanUpEntity", ->
 		beforeEach ->
 			@entity_id = "4eecaffcbffa66588e000009"
-			@documentUpdaterHandler.deleteDoc = sinon.stub().callsArg(2)
 			@FileStoreHandler.deleteFile = sinon.stub().callsArg(2)
 			@ProjectEntityHandler.unsetRootDoc = sinon.stub().callsArg(1)
 
@@ -240,7 +243,6 @@ describe 'ProjectEntityHandler', ->
 			@ProjectEntityHandler._putElement = sinon.stub().callsArgWith(4, null, path: @pathAfterMove)
 			@ProjectGetter.getProject.callsArgWith(2, null, @project)
 			@tpdsUpdateSender.moveEntity = sinon.stub()
-			@documentUpdaterHandler.updateProjectStructure = sinon.stub().callsArg(6)
 			@ProjectEntityHandler.getAllEntitiesFromProject = sinon.stub()
 			@ProjectEntityHandler.getAllEntitiesFromProject
 				.onFirstCall()
@@ -484,6 +486,15 @@ describe 'ProjectEntityHandler', ->
 				.calledWith(project_id, @doc._id.toString(), @lines)
 				.should.equal true
 
+		it "should should send the change in project structure to the doc updater", () ->
+			newDoc =
+				doc: @doc
+				path: @path
+				docLines: @lines.join('\n')
+			@documentUpdaterHandler.updateProjectStructure
+				.calledWith(project_id, null, [], [newDoc], [], [])
+				.should.equal true
+
 	describe "restoreDoc", ->
 		beforeEach ->
 			@name = "doc-name"
@@ -512,7 +523,10 @@ describe 'ProjectEntityHandler', ->
 	describe 'addFile', ->
 		fileName = "something.jpg"
 		beforeEach ->
+			@fileSystemPath = "somehintg"
+			@ProjectEntityHandler._putElement = sinon.stub().callsArgWith(4, null, {path:{fileSystem: @fileSystemPath}})
 			@filePath = "somewhere"
+
 		it 'should upload it via the FileStoreHandler', (done)->
 			@FileStoreHandler.uploadFileFromDisk = (passedProject_id, file_id, filePath, callback)=>
 				file_id.should.equal "file_id"
@@ -533,7 +547,6 @@ describe 'ProjectEntityHandler', ->
 			@ProjectEntityHandler.addFile project_id, folder_id, fileName, {}, (err, fileRef, parentFolder)->
 
 		it 'should return doc and parent folder', (done)->
-			@ProjectEntityHandler._putElement = sinon.stub().callsArgWith(4, null, {path:{fileSystem:"somehintg"}})
 			@ProjectEntityHandler.addFile project_id, folder_id, fileName, {}, (err, fileRef, parentFolder)->
 				parentFolder.should.equal folder_id
 				fileRef.name.should.equal fileName
@@ -556,6 +569,18 @@ describe 'ProjectEntityHandler', ->
 
 			@ProjectEntityHandler.addFile project_id, folder_id, fileName, {}, (err, fileRef, parentFolder)->
 
+		it "should should send the change in project structure to the doc updater", (done) ->
+			@documentUpdaterHandler.updateProjectStructure = (project_id, user_id, oldDocs, newDocs, oldFiles, newFiles) =>
+				project_id.should.equal project_id
+				newFiles.length.should.equal 1
+				newFile = newFiles[0]
+				newFile.file.name.should.equal fileName
+				newFile.path.should.equal @fileSystemPath
+				newFile.url.should.equal @fileUrl
+				done()
+
+			@ProjectEntityHandler.addFile project_id, folder_id, fileName, {}, () ->
+
 	describe 'replacing a file', ->
 
 		beforeEach ->
@@ -575,11 +600,9 @@ describe 'ProjectEntityHandler', ->
 				done()
 
 		it 'should tell the file store handler to upload the file from disk', (done)->
-			@FileStoreHandler.uploadFileFromDisk = sinon.stub().callsArgWith(3)
 			@ProjectEntityHandler.replaceFile project_id, @file_id, @fsPath, =>
 				@FileStoreHandler.uploadFileFromDisk.calledWith(project_id, @file_id, @fsPath).should.equal true
 				done()
-
 
 		it 'should send the file to the tpds with an incremented rev', (done)->
 			@tpdsUpdateSender.addFile = (options)=>

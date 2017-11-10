@@ -177,7 +177,14 @@ module.exports = ProjectEntityHandler =
 						rev:          0
 					}, (err) ->
 						return callback(err) if err?
-						callback(null, doc, folder_id)
+						newDoc =
+							doc: doc
+							path: result?.path?.fileSystem
+							docLines: docLines.join('\n')
+						documentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
+						documentUpdaterHandler.updateProjectStructure project_id, null, [], [newDoc], [], [], (error) ->
+							return callback(error) if error?
+							callback null, doc, folder_id
 
 	restoreDoc: (project_id, doc_id, name, callback = (error, doc, folder_id) ->) ->
 		# getDoc will return the deleted doc's lines, but we don't actually remove
@@ -191,15 +198,15 @@ module.exports = ProjectEntityHandler =
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add file"
 				return callback(err)
-			ProjectEntityHandler.addFileWithProject project, folder_id, fileName, path, callback
+			ProjectEntityHandler.addFileWithProject project, folder_id, fileName, path, null, callback
 
-	addFileWithProject: (project, folder_id, fileName, path, callback = (error, fileRef, folder_id) ->)->
+	addFileWithProject: (project, folder_id, fileName, path, userId, callback = (error, fileRef, folder_id) ->)->
 		project_id = project._id
 		logger.log project_id: project._id, folder_id: folder_id, file_name: fileName, path:path, "adding file"
 		return callback(err) if err?
 		confirmFolder project, folder_id, (folder_id)->
 			fileRef = new File name : fileName
-			FileStoreHandler.uploadFileFromDisk project._id, fileRef._id, path, (err)->
+			FileStoreHandler.uploadFileFromDisk project._id, fileRef._id, path, (err, fileStoreUrl)->
 				if err?
 					logger.err err:err, project_id: project._id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error uploading image to s3"
 					return callback(err)
@@ -209,7 +216,14 @@ module.exports = ProjectEntityHandler =
 						return callback(err)
 					tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:result?.path?.fileSystem, project_name:project.name, rev:fileRef.rev}, (err) ->
 						return callback(err) if err?
-						callback(null, fileRef, folder_id)
+						newFile =
+							file: fileRef
+							path: result?.path?.fileSystem
+							url: fileStoreUrl
+						documentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
+						documentUpdaterHandler.updateProjectStructure project_id, userId, [], [], [], [newFile], (error) ->
+							return callback(error) if error?
+							callback null, fileRef, folder_id
 
 	replaceFile: (project_id, file_id, fsPath, callback)->
 		ProjectGetter.getProject project_id, {name:true}, (err, project) ->
