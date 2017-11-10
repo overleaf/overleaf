@@ -111,7 +111,7 @@ div.full-size(
 
 #onboarding-linksharing.onboarding-linksharing.popover(
 	ng-controller="LinkSharingOnboardingController"
-	ng-if="onboarding.linkSharing == 'unseen'"
+	ng-if="permissions.admin && onboarding.linkSharing == 'unseen'"
 	ng-class="placement"
 )
 	.popover-inner
