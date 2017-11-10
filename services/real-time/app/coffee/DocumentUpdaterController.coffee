@@ -36,7 +36,7 @@ module.exports = DocumentUpdaterController =
 
 	_processErrorFromDocumentUpdater: (io, doc_id, error, message) ->
 		for client in io.sockets.clients(doc_id)
-			logger.error err: error, doc_id: doc_id, client_id: client.id, "error from document updater, disconnecting client"
+			logger.warn err: error, doc_id: doc_id, client_id: client.id, "error from document updater, disconnecting client"
 			client.emit "otUpdateError", error, message
 			client.disconnect()
 

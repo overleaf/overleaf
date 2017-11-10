@@ -182,7 +182,7 @@ module.exports = WebsocketController =
 			return callback(new Error("no project_id found on client")) if !project_id?
 			WebsocketController._assertClientCanApplyUpdate client, doc_id, update, (error) ->
 				if error?
-					logger.error {err: error, doc_id, client_id: client.id, version: update.v}, "client is not authorized to make update"
+					logger.warn {err: error, doc_id, client_id: client.id, version: update.v}, "client is not authorized to make update"
 					setTimeout () ->
 						# Disconnect, but give the client the chance to receive the error
 						client.disconnect()
