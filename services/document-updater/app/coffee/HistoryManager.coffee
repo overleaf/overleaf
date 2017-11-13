@@ -39,13 +39,15 @@ module.exports = HistoryManager =
 			else if res.statusCode < 200 and res.statusCode >= 300
 				logger.error { project_id }, "project history api returned a failure status code: #{res.statusCode}"
 
-	FLUSH_EVERY_N_OPS: 100
+	FLUSH_DOC_EVERY_N_OPS: 100
+	FLUSH_PROJECT_EVERY_N_OPS: 500
+
 	recordAndFlushHistoryOps: (project_id, doc_id, ops = [], doc_ops_length, project_ops_length, callback = (error) ->) ->
 		if ops.length == 0
 			return callback()
 
 		if Settings.apis?.project_history?.enabled
-			if HistoryManager._shouldFlushHistoryOps(project_ops_length, ops, HistoryManager.FLUSH_EVERY_N_OPS)
+			if HistoryManager._shouldFlushHistoryOps(project_ops_length, ops, HistoryManager.FLUSH_PROJECT_EVERY_N_OPS)
 				# Do this in the background since it uses HTTP and so may be too
 				# slow to wait for when processing a doc update.
 				logger.log { project_ops_length, project_id }, "flushing project history api"
@@ -53,7 +55,7 @@ module.exports = HistoryManager =
 
 		HistoryRedisManager.recordDocHasHistoryOps project_id, doc_id, ops, (error) ->
 			return callback(error) if error?
-			if HistoryManager._shouldFlushHistoryOps(doc_ops_length, ops, HistoryManager.FLUSH_EVERY_N_OPS)
+			if HistoryManager._shouldFlushHistoryOps(doc_ops_length, ops, HistoryManager.FLUSH_DOC_EVERY_N_OPS)
 				# Do this in the background since it uses HTTP and so may be too
 				# slow to wait for when processing a doc update.
 				logger.log { doc_ops_length, doc_id, project_id }, "flushing track changes api"
