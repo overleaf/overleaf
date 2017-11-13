@@ -24,13 +24,16 @@ AnalyticsManager = require "../Analytics/AnalyticsManager"
 Sources = require "../Authorization/Sources"
 TokenAccessHandler = require '../TokenAccess/TokenAccessHandler'
 CollaboratorsHandler = require '../Collaborators/CollaboratorsHandler'
+crypto = require 'crypto'
 
 module.exports = ProjectController =
 
-	_isInPercentageRollout: (objectId, percentage) ->
+	_isInPercentageRollout: (rolloutName, objectId, percentage) ->
 		if Settings.bypassPercentageRollouts == true
 			return true
-		counter = parseInt(objectId.toString().substring(18, 24), 16)
+		data = "#{rolloutName}:#{objectId.toString()}"
+		md5hash = crypto.createHash('md5').update(data).digest('hex')
+		counter = parseInt(md5hash.slice(26, 32), 16)
 		return (counter % 100) < percentage
 
 	updateProjectSettings: (req, res, next) ->
@@ -274,7 +277,7 @@ module.exports = ProjectController =
 				timestamp = parseInt(user_id.toString().substring(0, 8), 16)
 
 				rolloutPercentage = 60 # Percentage of users to roll out to
-				if !ProjectController._isInPercentageRollout(user_id, rolloutPercentage)
+				if !ProjectController._isInPercentageRollout('autocompile', user_id, rolloutPercentage)
 					# Don't show if user is not part of roll out
 					return cb(null, { enabled: false, showOnboarding: false })
 				userSignupDate = new Date(timestamp * 1000)
@@ -305,7 +308,11 @@ module.exports = ProjectController =
 
 			token = TokenAccessHandler.getRequestToken(req, project_id)
 			isTokenMember = results.isTokenMember
-			enableTokenAccessUI = ProjectController._isInPercentageRollout(project.owner_ref, 0)
+			enableTokenAccessUI = ProjectController._isInPercentageRollout(
+				'linksharing',
+				project.owner_ref,
+				0
+			)
 			AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, token, (error, privilegeLevel)->
 				return next(error) if error?
 				if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE

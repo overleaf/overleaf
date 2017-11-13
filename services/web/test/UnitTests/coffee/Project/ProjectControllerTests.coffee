@@ -468,3 +468,82 @@ describe "ProjectController", ->
 				opts.showTrackChangesOnboarding.should.equal false
 				done()
 			@ProjectController.loadEditor @req, @res
+
+	describe '_isInPercentageRollout', ->
+		before ->
+			@ids = [
+				'5a05cd7621f9fe22be131740',
+				'5a05cd7821f9fe22be131741',
+				'5a05cd7921f9fe22be131742',
+				'5a05cd7a21f9fe22be131743',
+				'5a05cd7b21f9fe22be131744',
+				'5a05cd7c21f9fe22be131745',
+				'5a05cd7d21f9fe22be131746',
+				'5a05cd7e21f9fe22be131747',
+				'5a05cd7f21f9fe22be131748',
+				'5a05cd8021f9fe22be131749',
+				'5a05cd8021f9fe22be13174a',
+				'5a05cd8121f9fe22be13174b',
+				'5a05cd8221f9fe22be13174c',
+				'5a05cd8221f9fe22be13174d',
+				'5a05cd8321f9fe22be13174e',
+				'5a05cd8321f9fe22be13174f',
+				'5a05cd8421f9fe22be131750',
+				'5a05cd8421f9fe22be131751',
+				'5a05cd8421f9fe22be131752',
+				'5a05cd8521f9fe22be131753'
+			]
+
+		it 'should produce the expected results', ->
+			expect(
+				@ids.map (i) =>
+					@ProjectController._isInPercentageRollout('abcd', i, 50)
+			).to.deep.equal [
+				false,
+				false,
+				false,
+				false,
+				false,
+				false,
+				true,
+				false,
+				true,
+				true,
+				true,
+				true,
+				true,
+				true,
+				false,
+				false,
+				false,
+				true,
+				false,
+				true
+				]
+			expect(
+				@ids.map (i) =>
+					@ProjectController._isInPercentageRollout('efgh', i, 50)
+			).to.deep.equal [
+				false,
+				false,
+				false,
+				false,
+				true,
+				false,
+				false,
+				true,
+				false,
+				false,
+				true,
+				true,
+				true,
+				false,
+				true,
+				false,
+				true,
+				true,
+				false,
+				false
+			]
+
+
