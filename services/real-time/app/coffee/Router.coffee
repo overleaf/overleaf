@@ -21,7 +21,7 @@ module.exports = Router =
 				attrs[key] = value
 			attrs.client_id = client.id
 			attrs.err = error
-			if error.message in ["not authorized", "doc updater could not load requested ops"]
+			if error.message in ["not authorized", "doc updater could not load requested ops", "no project_id found on client"]
 				logger.warn attrs, error.message
 				return callback {message: error.message}
 			else
@@ -40,7 +40,7 @@ module.exports = Router =
 
 		session.on 'connection', (error, client, session) ->
 			if client? and error?.message?.match(/could not look up session by key/)
-				logger.err err: error, client: client?, session: session?, "invalid session"
+				logger.warn err: error, client: client?, session: session?, "invalid session"
 				# tell the client to reauthenticate if it has an invalid session key
 				client.emit("connectionRejected", {message: "invalid session"})
 				client.disconnect()
