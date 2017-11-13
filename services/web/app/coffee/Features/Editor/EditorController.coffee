@@ -39,20 +39,20 @@ module.exports = EditorController =
 			EditorRealTimeController.emitToRoom(project_id, 'reciveNewDoc', folder_id, doc, source)
 			callback(err, doc)
 
-	addFile: (project_id, folder_id, fileName, path, source, callback = (error, file)->)->
+	addFile: (project_id, folder_id, fileName, path, source, user_id, callback = (error, file)->)->
 		LockManager.getLock project_id, (err)->
 			if err?
 				logger.err err:err, project_id:project_id, source:source,  "could not get lock to addFile"
 				return callback(err)
-			EditorController.addFileWithoutLock project_id, folder_id, fileName, path, source, (error, file)->
+			EditorController.addFileWithoutLock project_id, folder_id, fileName, path, source, user_id, (error, file)->
 				LockManager.releaseLock project_id, ->
 					callback(error, file)	
 
-	addFileWithoutLock: (project_id, folder_id, fileName, path, source, callback = (error, file)->)->
+	addFileWithoutLock: (project_id, folder_id, fileName, path, source, user_id, callback = (error, file)->)->
 		fileName = fileName.trim()
 		logger.log {project_id, folder_id, fileName, path}, "sending new file to project"
 		Metrics.inc "editor.add-file"
-		ProjectEntityHandler.addFile project_id, folder_id, fileName, path, null, (err, fileRef, folder_id)=>
+		ProjectEntityHandler.addFile project_id, folder_id, fileName, path, user_id, (err, fileRef, folder_id)=>
 			if err?
 				logger.err err:err, project_id:project_id, folder_id:folder_id, fileName:fileName, "error adding file without lock"
 				return callback(err)

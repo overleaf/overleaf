@@ -197,14 +197,14 @@ describe "EditorController", ->
 
 		it 'should add the folder using the project entity handler', (done)->
 			@ProjectEntityHandler.addFile = sinon.stub().callsArgWith(5)
-			@EditorController.addFileWithoutLock @project_id, @folder_id, @fileName, @stream, @source, =>
-				@ProjectEntityHandler.addFile.calledWith(@project_id, @folder_id).should.equal true
+			@EditorController.addFileWithoutLock @project_id, @folder_id, @fileName, @stream, @source, @user_id, =>
+				@ProjectEntityHandler.addFile.calledWith(@project_id, @folder_id, @fileName, @stream, @user_id).should.equal true
 				done()
 
 		it 'should send the update of a new folder out to the users in the project', (done)->
 			@ProjectEntityHandler.addFile = sinon.stub().callsArgWith(5, null, @file, @folder_id)
 
-			@EditorController.addFileWithoutLock @project_id, @folder_id, @fileName, @stream, @source, =>
+			@EditorController.addFileWithoutLock @project_id, @folder_id, @fileName, @stream, @source, @user_id, =>
 				@EditorRealTimeController.emitToRoom
 					.calledWith(@project_id, "reciveNewFile", @folder_id, @file, @source)
 					.should.equal true
@@ -212,7 +212,7 @@ describe "EditorController", ->
 
 		it "should return the file in the callback", (done) ->
 			@ProjectEntityHandler.addFile = sinon.stub().callsArgWith(5, null, @file, @folder_id)
-			@EditorController.addFileWithoutLock @project_id, @folder_id, @fileName, @stream, @source, (error, file) =>
+			@EditorController.addFileWithoutLock @project_id, @folder_id, @fileName, @stream, @source, @user_id, (error, file) =>
 				file.should.equal @file
 				done()
 
@@ -222,28 +222,28 @@ describe "EditorController", ->
 		beforeEach ->
 			@LockManager.getLock.callsArgWith(1)
 			@LockManager.releaseLock.callsArgWith(1)
-			@EditorController.addFileWithoutLock = sinon.stub().callsArgWith(5)
+			@EditorController.addFileWithoutLock = sinon.stub().callsArgWith(6)
 
 		it "should call addFileWithoutLock", (done)->
-			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, (error, file) =>
-				@EditorController.addFileWithoutLock.calledWith(@project_id, @folder_id, @fileName, @stream, @source).should.equal true
+			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, @user_id, (error, file) =>
+				@EditorController.addFileWithoutLock.calledWith(@project_id, @folder_id, @fileName, @stream, @source, @user_id).should.equal true
 				done()
 
 		it "should take the lock", (done)->
-			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, (error, file) =>
+			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, @user_id, (error, file) =>
 				@LockManager.getLock.calledWith(@project_id).should.equal true
 				done()
 
 		it "should release the lock", (done)->
-			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, (error, file) =>
+			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, @user_id, (error, file) =>
 				@LockManager.releaseLock.calledWith(@project_id).should.equal true
 				done()
 
 		it "should error if it can't cat the lock", (done)->
 			@LockManager.getLock = sinon.stub().callsArgWith(1, "timed out")
-			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, (err, file) =>
-				expect(err).to.exist
-				err.should.equal "timed out"
+			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, @user_id, (error, file) =>
+				expect(error).to.exist
+				error.should.equal "timed out"
 				done()			
 
 
