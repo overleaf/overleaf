@@ -108,3 +108,17 @@ div.full-size(
 			p #{translate("auto_compile_onboarding_description")}
 			button.btn.btn-default.btn-block(ng-click="dismiss()")
 				| #{translate("got_it")}
+
+#onboarding-linksharing.onboarding-linksharing.popover(
+	ng-controller="LinkSharingOnboardingController"
+	ng-if="permissions.admin && onboarding.linkSharing == 'unseen'"
+	ng-class="placement"
+)
+	.popover-inner
+		h3.popover-title #{translate("link_sharing")}
+		.popover-content
+			p #{translate("try_out_link_sharing")}
+			img(src="/img/onboarding/linksharing/link-sharing.png" width="100%")
+			p #{translate("try_link_sharing_description")}
+			button.btn.btn-default.btn-block(ng-click="dismiss()")
+				| #{translate("got_it")}

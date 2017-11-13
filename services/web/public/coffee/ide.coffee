@@ -14,6 +14,7 @@ define [
 	"ide/SafariScrollPatcher"
 	"ide/FeatureOnboardingController",
 	"ide/AutoCompileOnboardingController",
+	"ide/LinkSharingOnboardingController",
 	"ide/settings/index"
 	"ide/share/index"
 	"ide/chat/index"
@@ -79,6 +80,7 @@ define [
 		}
 		$scope.onboarding = {
 			autoCompile: if window.showAutoCompileOnboarding then 'unseen' else 'dismissed'
+			linkSharing: if window.showLinkSharingOnboarding then 'unseen' else 'dismissed'
 		}
 		$scope.user = window.user
 		$scope.__enableTokenAccessUI = window.enableTokenAccessUI == true
@@ -168,6 +170,16 @@ define [
 						_labelsInitialLoadDone = true
 				, 200
 			)
+
+		# Count the first 'doc:opened' as a sign that the ide is loaded
+		# and broadcast a message. This is a good event to listen for
+		# if you want to wait until the ide is fully loaded and initialized
+		_loaded = false
+		$scope.$on 'doc:opened', () ->
+			if _loaded
+				return
+			$scope.$broadcast('ide:loaded')
+			_loaded = true
 
 		DARK_THEMES = [
 			"ambiance", "chaos", "clouds_midnight", "cobalt", "idle_fingers",
