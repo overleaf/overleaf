@@ -301,7 +301,7 @@ module.exports = ProjectController =
 				# Extract data from user's ObjectId
 				timestamp = parseInt(user_id.toString().substring(0, 8), 16)
 				userSignupDate = new Date(timestamp * 1000)
-				if userSignupDate > new Date("2017-11-10")
+				if userSignupDate > new Date("2017-11-13")
 					# Don't show for users who registered after it was released
 					return cb(null, false)
 				timeout = setTimeout cb, 500
@@ -329,7 +329,7 @@ module.exports = ProjectController =
 			enableTokenAccessUI = ProjectController._isInPercentageRollout(
 				'linksharing',
 				project.owner_ref,
-				0
+				10
 			)
 			showLinkSharingOnboarding = enableTokenAccessUI && results.couldShowLinkSharingOnboarding
 			AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, token, (error, privilegeLevel)->
