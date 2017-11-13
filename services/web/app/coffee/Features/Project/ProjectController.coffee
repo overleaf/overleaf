@@ -276,7 +276,7 @@ module.exports = ProjectController =
 				# Extract data from user's ObjectId
 				timestamp = parseInt(user_id.toString().substring(0, 8), 16)
 
-				rolloutPercentage = 60 # Percentage of users to roll out to
+				rolloutPercentage = 1 # Percentage of users to roll out to
 				if !ProjectController._isInPercentageRollout('autocompile', user_id, rolloutPercentage)
 					# Don't show if user is not part of roll out
 					return cb(null, { enabled: false, showOnboarding: false })
@@ -285,7 +285,7 @@ module.exports = ProjectController =
 					# Don't show for users who registered after it was released
 					return cb(null, { enabled: true, showOnboarding: false })
 				timeout = setTimeout cb, 500
-				AnalyticsManager.getLastOccurance user_id, "shown-autocompile-onboarding", (error, event) ->
+				AnalyticsManager.getLastOccurance user_id, "shown-autocompile-onboarding-2", (error, event) ->
 					clearTimeout timeout
 					if error?
 						return cb(null, { enabled: true, showOnboarding: false })
