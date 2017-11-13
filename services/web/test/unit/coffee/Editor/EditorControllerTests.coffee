@@ -196,13 +196,13 @@ describe "EditorController", ->
 			@stream = new ArrayBuffer()
 
 		it 'should add the folder using the project entity handler', (done)->
-			@ProjectEntityHandler.addFile = sinon.stub().callsArgWith(4)
+			@ProjectEntityHandler.addFile = sinon.stub().callsArgWith(5)
 			@EditorController.addFileWithoutLock @project_id, @folder_id, @fileName, @stream, @source, =>
 				@ProjectEntityHandler.addFile.calledWith(@project_id, @folder_id).should.equal true
 				done()
 
 		it 'should send the update of a new folder out to the users in the project', (done)->
-			@ProjectEntityHandler.addFile = sinon.stub().callsArgWith(4, null, @file, @folder_id)
+			@ProjectEntityHandler.addFile = sinon.stub().callsArgWith(5, null, @file, @folder_id)
 
 			@EditorController.addFileWithoutLock @project_id, @folder_id, @fileName, @stream, @source, =>
 				@EditorRealTimeController.emitToRoom
@@ -211,7 +211,7 @@ describe "EditorController", ->
 				done()
 
 		it "should return the file in the callback", (done) ->
-			@ProjectEntityHandler.addFile = sinon.stub().callsArgWith(4, null, @file, @folder_id)
+			@ProjectEntityHandler.addFile = sinon.stub().callsArgWith(5, null, @file, @folder_id)
 			@EditorController.addFileWithoutLock @project_id, @folder_id, @fileName, @stream, @source, (error, file) =>
 				file.should.equal @file
 				done()

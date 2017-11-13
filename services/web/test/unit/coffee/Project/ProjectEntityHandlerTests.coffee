@@ -534,7 +534,7 @@ describe 'ProjectEntityHandler', ->
 				filePath.should.equal @filePath
 				done()
 
-			@ProjectEntityHandler.addFile project_id, folder_id, fileName, @filePath, (err, fileRef, parentFolder)->
+			@ProjectEntityHandler.addFile project_id, folder_id, fileName, @filePath, userId, (err, fileRef, parentFolder)->
 
 		it 'should put file into folder by calling put element', (done)->
 			@ProjectEntityHandler._putElement = (passedProject, passedFolder_id, passedFileRef, passedType, callback)->
@@ -544,10 +544,10 @@ describe 'ProjectEntityHandler', ->
 				passedType.should.equal 'file'
 				done()
 
-			@ProjectEntityHandler.addFile project_id, folder_id, fileName, {}, (err, fileRef, parentFolder)->
+			@ProjectEntityHandler.addFile project_id, folder_id, fileName, {}, userId, (err, fileRef, parentFolder)->
 
 		it 'should return doc and parent folder', (done)->
-			@ProjectEntityHandler.addFile project_id, folder_id, fileName, {}, (err, fileRef, parentFolder)->
+			@ProjectEntityHandler.addFile project_id, folder_id, fileName, {}, userId, (err, fileRef, parentFolder)->
 				parentFolder.should.equal folder_id
 				fileRef.name.should.equal fileName
 				done()
@@ -567,11 +567,12 @@ describe 'ProjectEntityHandler', ->
 				options.rev.should.equal 0
 				done()
 
-			@ProjectEntityHandler.addFile project_id, folder_id, fileName, {}, (err, fileRef, parentFolder)->
+			@ProjectEntityHandler.addFile project_id, folder_id, fileName, {}, userId, (err, fileRef, parentFolder)->
 
 		it "should should send the change in project structure to the doc updater", (done) ->
 			@documentUpdaterHandler.updateProjectStructure = (project_id, user_id, oldDocs, newDocs, oldFiles, newFiles) =>
 				project_id.should.equal project_id
+				user_id.should.equal user_id
 				newFiles.length.should.equal 1
 				newFile = newFiles[0]
 				newFile.file.name.should.equal fileName
@@ -579,7 +580,7 @@ describe 'ProjectEntityHandler', ->
 				newFile.url.should.equal @fileUrl
 				done()
 
-			@ProjectEntityHandler.addFile project_id, folder_id, fileName, {}, () ->
+			@ProjectEntityHandler.addFile project_id, folder_id, fileName, {}, userId, () ->
 
 	describe 'replacing a file', ->
 

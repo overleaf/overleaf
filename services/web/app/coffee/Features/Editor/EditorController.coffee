@@ -52,7 +52,7 @@ module.exports = EditorController =
 		fileName = fileName.trim()
 		logger.log {project_id, folder_id, fileName, path}, "sending new file to project"
 		Metrics.inc "editor.add-file"
-		ProjectEntityHandler.addFile project_id, folder_id, fileName, path, (err, fileRef, folder_id)=>
+		ProjectEntityHandler.addFile project_id, folder_id, fileName, path, null, (err, fileRef, folder_id)=>
 			if err?
 				logger.err err:err, project_id:project_id, folder_id:folder_id, fileName:fileName, "error adding file without lock"
 				return callback(err)

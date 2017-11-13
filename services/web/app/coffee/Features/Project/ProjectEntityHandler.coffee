@@ -193,12 +193,12 @@ module.exports = ProjectEntityHandler =
 			return callback(error) if error?
 			ProjectEntityHandler.addDoc project_id, null, name, lines, callback
 
-	addFile: (project_id, folder_id, fileName, path, callback = (error, fileRef, folder_id) ->)->
+	addFile: (project_id, folder_id, fileName, path, userId, callback = (error, fileRef, folder_id) ->)->
 		ProjectGetter.getProjectWithOnlyFolders project_id, (err, project) ->
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add file"
 				return callback(err)
-			ProjectEntityHandler.addFileWithProject project, folder_id, fileName, path, null, callback
+			ProjectEntityHandler.addFileWithProject project, folder_id, fileName, path, userId, callback
 
 	addFileWithProject: (project, folder_id, fileName, path, userId, callback = (error, fileRef, folder_id) ->)->
 		project_id = project._id
