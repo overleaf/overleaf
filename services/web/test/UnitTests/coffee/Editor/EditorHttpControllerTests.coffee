@@ -19,11 +19,14 @@ describe "EditorHttpController", ->
 			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler = {}
 			"../Collaborators/CollaboratorsInviteHandler": @CollaboratorsInviteHandler = {}
 			"../TokenAccess/TokenAccessHandler": @TokenAccessHandler = {}
+			"../Authentication/AuthenticationController": @AuthenticationController = {}
 
 		@project_id = "mock-project-id"
 		@doc_id = "mock-doc-id"
 		@user_id = "mock-user-id"
 		@parent_folder_id = "mock-folder-id"
+		@userId = 1234
+		@AuthenticationController.getLoggedInUserId = sinon.stub().returns(@userId)
 		@req = {}
 		@res =
 			send: sinon.stub()
@@ -264,12 +267,12 @@ describe "EditorHttpController", ->
 				entity_type: @entity_type = "entity-type"
 			@req.body =
 				name: @name = "new-name"
-			@EditorController.renameEntity = sinon.stub().callsArg(4)
+			@EditorController.renameEntity = sinon.stub().callsArg(5)
 			@EditorHttpController.renameEntity @req, @res
 
 		it "should call EditorController.renameEntity", ->
 			@EditorController.renameEntity
-				.calledWith(@project_id, @entity_id, @entity_type, @name)
+				.calledWith(@project_id, @entity_id, @entity_type, @name, @userId)
 				.should.equal true
 
 		it "should send back a success response", ->
@@ -290,7 +293,6 @@ describe "EditorHttpController", ->
 			@res.sendStatus.calledWith(400).should.equal true
 
 	describe "rename entity with 0 length name", ->
-
 		beforeEach ->
 			@req.params =
 				Project_id: @project_id
@@ -304,7 +306,6 @@ describe "EditorHttpController", ->
 		it "should send back a bad request status code", ->
 			@res.sendStatus.calledWith(400).should.equal true
 
-
 	describe "moveEntity", ->
 		beforeEach ->
 			@req.params =
@@ -313,12 +314,12 @@ describe "EditorHttpController", ->
 				entity_type: @entity_type = "entity-type"
 			@req.body =
 				folder_id: @folder_id = "folder-id-123"
-			@EditorController.moveEntity = sinon.stub().callsArg(4)
+			@EditorController.moveEntity = sinon.stub().callsArg(5)
 			@EditorHttpController.moveEntity @req, @res
 
 		it "should call EditorController.moveEntity", ->
 			@EditorController.moveEntity
-				.calledWith(@project_id, @entity_id, @folder_id, @entity_type)
+				.calledWith(@project_id, @entity_id, @folder_id, @entity_type, @userId)
 				.should.equal true
 
 		it "should send back a success response", ->
