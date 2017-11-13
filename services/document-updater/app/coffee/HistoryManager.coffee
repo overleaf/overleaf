@@ -18,15 +18,9 @@ module.exports = HistoryManager =
 		logger.log { project_id, doc_id, url }, "flushing doc in track changes api"
 		request.post url, (error, res, body)->
 			if error?
-				logger.error(
-				   { error, doc_id, project_id},
-					"track changes doc to track changes api"
-				)
+				logger.error { error, doc_id, project_id}, "track changes doc to track changes api"
 			else if res.statusCode < 200 and res.statusCode >= 300
-				logger.error(
-					{ doc_id, project_id },
-					"track changes api returned a failure status code: #{res.statusCode}"
-				)
+				logger.error { doc_id, project_id }, "track changes api returned a failure status code: #{res.statusCode}"
 
 	_flushProjectChangesAsync: (project_id) ->
 		return if !Settings.apis?.project_history?
