@@ -48,18 +48,18 @@
 		border: none;
 		border-radius: 0;
 		border-right: 1px solid @toolbar-border-color;
-		color: @link-color;
+		color: @toolbar-btn-color;
 		padding: 3px 10px 5px;
 		font-size: 20px;
 		&:hover {
-			text-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
-			background-color: darken(white, 10%);
-			color: @link-hover-color;
+			text-shadow: @toolbar-btn-hover-text-shadow;
+			background-color: @toolbar-btn-hover-bg-color;
+			color: @toolbar-btn-hover-color;
 		}
 		&.active, &:active {
-			color: white;
-			background-color: @link-color;
-			.box-shadow(inset 0 3px 5px rgba(0, 0, 0, 0.225));
+			color: @toolbar-btn-active-color;
+			background-color: @toolbar-btn-active-bg-color;
+			box-shadow: @toolbar-btn-active-shadow;
 		}
 		.label {
 			top: 4px;
@@ -96,7 +96,8 @@
 	}
 
 	&.toolbar-header {
-		box-shadow: 0 0 2px #ccc;
+		background-color: @toolbar-header-bg-color;
+		box-shadow: @toolbar-header-shadow;
 		position: absolute;
 		top: 0;
 		left: 0;
