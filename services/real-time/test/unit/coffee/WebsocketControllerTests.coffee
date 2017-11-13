@@ -32,7 +32,7 @@ describe 'WebsocketController', ->
 			"./DocumentUpdaterManager": @DocumentUpdaterManager = {}
 			"./ConnectedUsersManager": @ConnectedUsersManager = {}
 			"./WebsocketLoadBalancer": @WebsocketLoadBalancer = {}
-			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), warn: sinon.stub() }
 			"metrics-sharelatex": @metrics =
 				inc: sinon.stub()
 				set: sinon.stub()
@@ -514,8 +514,8 @@ describe 'WebsocketController', ->
 			# it "should disconnect the client", ->
 			# 	@client.disconnect.called.should.equal true
 
-			it "should log an error", ->
-				@logger.error.called.should.equal true
+			it "should log a warning", ->
+				@logger.warn.called.should.equal true
 
 			it "should call the callback with the error", ->
 				@callback.calledWith(@error).should.equal true

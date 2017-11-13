@@ -11,7 +11,7 @@ describe "DocumentUpdaterController", ->
 		@callback = sinon.stub()
 		@io = { "mock": "socket.io" }
 		@EditorUpdatesController = SandboxedModule.require modulePath, requires:
-			"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub() }
+			"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }
 			"settings-sharelatex": @settings =
 				redis:
 					documentupdater:
@@ -125,8 +125,8 @@ describe "DocumentUpdaterController", ->
 				clients: sinon.stub().returns(@clients)
 			@EditorUpdatesController._processErrorFromDocumentUpdater @io, @doc_id, "Something went wrong"
 
-		it "should log out an error", ->
-			@logger.error.called.should.equal true
+		it "should log a warning", ->
+			@logger.warn.called.should.equal true
 
 		it "should disconnect all clients in that document", ->
 			@io.sockets.clients.calledWith(@doc_id).should.equal true
