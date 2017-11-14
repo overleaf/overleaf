@@ -282,7 +282,7 @@ describe "ProjectController", ->
 
 		it "should send the projects", (done)->
 			@res.render = (pageName, opts)=>
-				opts.projects.length.should.equal (@projects.length + @collabertions.length + @readOnly.length)
+				opts.projects.length.should.equal (@projects.length + @collabertions.length + @readOnly.length + @tokenReadAndWrite.length + @tokenReadOnly.length)
 				done()
 			@ProjectController.projectListPage @req, @res
 
@@ -313,7 +313,14 @@ describe "ProjectController", ->
 
 			it 'should include V1 projects', (done) ->
 				@res.render = (pageName, opts) =>
-					opts.projects.length.should.equal (@projects.length + @collabertions.length + @readOnly.length + @V1Response.projects.length)
+					opts.projects.length.should.equal (
+						@projects.length +
+						@collabertions.length +
+						@readOnly.length +
+						@tokenReadAndWrite.length +
+						@tokenReadOnly.length +
+						@V1Response.projects.length
+					)
 					opts.projects.forEach (p) ->
 						# Check properties correctly mapped from V1
 						expect(p).to.have.property 'id'
