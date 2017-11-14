@@ -389,6 +389,7 @@ describe "ProjectController", ->
 			@TagsHandler.getAllTags.callsArgWith(1, null, @tags, {})
 			@NotificationsHandler.getUserNotifications = sinon.stub().callsArgWith(1, null, @notifications, {})
 			@ProjectGetter.findAllUsersProjects.callsArgWith(2, null, @allProjects)
+			@V1ProjectGetter.findAllUsersProjects.callsArg(1) # Without integration module cb returns without args
 
 		it "should render the project/list page", (done)->
 			@res.render = (pageName, opts)=>
