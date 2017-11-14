@@ -427,7 +427,7 @@ describe 'DocumentUpdaterHandler', ->
 					@newFiles = []
 
 					docUpdates = [
-						id: @docIdB,
+						id: @docIdB.toString(),
 						pathname: "/old_b"
 						newPathname: "/new_b"
 					]
@@ -449,7 +449,7 @@ describe 'DocumentUpdaterHandler', ->
 					@newFiles = []
 
 					docUpdates = [
-						id: @docId,
+						id: @docId.toString(),
 						pathname: "/foo"
 						docLines: 'a\nb'
 						url: undefined
@@ -472,7 +472,7 @@ describe 'DocumentUpdaterHandler', ->
 					]
 
 					fileUpdates = [
-						id: @fileId,
+						id: @fileId.toString(),
 						pathname: "/bar"
 						url: 'filestore.example.com/file'
 						docLines: undefined

@@ -233,22 +233,23 @@ module.exports = DocumentUpdaterHandler =
 	_getRenameUpdates: (entityType, oldEntities, newEntities) ->
 		updates = []
 
-		for oldEntity in oldEntities
-			id = oldEntity[entityType]._id
-			newEntity = _.find newEntities, (newEntity) ->
-				newEntity[entityType]._id.toString() == id.toString()
+		oldEntitiesHash = _.indexBy oldEntities, (entity) -> entity[entityType]._id.toString()
+		newEntitiesHash = _.indexBy newEntities, (entity) -> entity[entityType]._id.toString()
 
+		for id, oldEntity of oldEntitiesHash
+			newEntity = newEntitiesHash[id]
+
+			# renamed entities
 			if newEntity.path != oldEntity.path
 				updates.push
 					id: id
 					pathname: oldEntity.path
 					newPathname: newEntity.path
 
-		for newEntity in newEntities
-			id = newEntity[entityType]._id
-			oldEntity = _.find oldEntities, (oldEntity) ->
-				oldEntity[entityType]._id.toString() == id.toString()
+		for id, newEntity of newEntitiesHash
+			oldEntity = oldEntitiesHash[id]
 
+			# removed entities
 			if !oldEntity?
 				updates.push
 					id: id
