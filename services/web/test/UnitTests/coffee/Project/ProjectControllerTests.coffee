@@ -54,8 +54,6 @@ describe "ProjectController", ->
 		@ProjectGetter =
 			findAllUsersProjects: sinon.stub()
 			getProject: sinon.stub()
-		@V1ProjectGetter =
-			findAllUsersProjects: sinon.stub()
 		@AuthenticationController =
 			getLoggedInUser: sinon.stub().callsArgWith(1, null, @user)
 			getLoggedInUserId: sinon.stub().returns(@user._id)
@@ -68,6 +66,9 @@ describe "ProjectController", ->
 			protectTokens: sinon.stub()
 		@CollaboratorsHandler =
 			userIsTokenMember: sinon.stub().callsArgWith(2, null, false)
+		@Modules =
+			hooks:
+				fire: sinon.stub()
 		@ProjectController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex":
@@ -91,11 +92,11 @@ describe "ProjectController", ->
 			"./ProjectUpdateHandler":@ProjectUpdateHandler
 			"../ReferencesSearch/ReferencesSearchHandler": @ReferencesSearchHandler
 			"./ProjectGetter": @ProjectGetter
-			'./V1ProjectGetter': @V1ProjectGetter
 			'../Authentication/AuthenticationController': @AuthenticationController
 			"../Analytics/AnalyticsManager": @AnalyticsManager
 			"../TokenAccess/TokenAccessHandler": @TokenAccessHandler
 			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler
+			"../../infrastructure/Modules": @Modules
 
 		@projectName = "£12321jkj9ujkljds"
 		@req =
@@ -266,7 +267,7 @@ describe "ProjectController", ->
 			@TagsHandler.getAllTags.callsArgWith(1, null, @tags, {})
 			@NotificationsHandler.getUserNotifications = sinon.stub().callsArgWith(1, null, @notifications, {})
 			@ProjectGetter.findAllUsersProjects.callsArgWith(2, null, @allProjects)
-			@V1ProjectGetter.findAllUsersProjects.callsArg(1) # Without integration module cb returns without args
+			@Modules.hooks.fire.yields(undefined) # Without integration module hook, cb returns undefined
 
 		it "should render the project/list page", (done)->
 			@res.render = (pageName, opts)=>
@@ -299,7 +300,7 @@ describe "ProjectController", ->
 				done()
 			@ProjectController.projectListPage @req, @res
 
-		describe 'with overleaf-integration-web-module', ->
+		describe 'with overleaf-integration-web-module hook', ->
 			beforeEach ->
 				@V1Response =
 					projects: [
@@ -309,7 +310,7 @@ describe "ProjectController", ->
 					tags: [
 						{ name: 'mock tag', project_ids: ['123mockV1Id'] }
 					]
-				@V1ProjectGetter.findAllUsersProjects.callsArgWith(1, null, @V1Response)
+				@Modules.hooks.fire.withArgs('findAllUsersProjects', @user._id).yields(null, [@V1Response]) # Need to wrap response in array, as multiple hooks could fire
 
 			it 'should include V1 projects', (done) ->
 				@res.render = (pageName, opts) =>
@@ -389,7 +390,7 @@ describe "ProjectController", ->
 			@TagsHandler.getAllTags.callsArgWith(1, null, @tags, {})
 			@NotificationsHandler.getUserNotifications = sinon.stub().callsArgWith(1, null, @notifications, {})
 			@ProjectGetter.findAllUsersProjects.callsArgWith(2, null, @allProjects)
-			@V1ProjectGetter.findAllUsersProjects.callsArg(1) # Without integration module cb returns without args
+			@Modules.hooks.fire.withArgs('findAllUsersProjects', @user._id).yields(undefined) # Without integration module hook, cb returns undefined
 
 		it "should render the project/list page", (done)->
 			@res.render = (pageName, opts)=>

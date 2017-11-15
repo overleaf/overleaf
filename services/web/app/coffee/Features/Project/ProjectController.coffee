@@ -17,7 +17,6 @@ fs = require "fs"
 InactiveProjectManager = require("../InactiveData/InactiveProjectManager")
 ProjectUpdateHandler = require("./ProjectUpdateHandler")
 ProjectGetter = require("./ProjectGetter")
-V1ProjectGetter = require("./V1ProjectGetter")
 PrivilegeLevels = require("../Authorization/PrivilegeLevels")
 AuthenticationController = require("../Authentication/AuthenticationController")
 PackageVersions = require("../../infrastructure/PackageVersions")
@@ -25,6 +24,7 @@ AnalyticsManager = require "../Analytics/AnalyticsManager"
 Sources = require "../Authorization/Sources"
 TokenAccessHandler = require '../TokenAccess/TokenAccessHandler'
 CollaboratorsHandler = require '../Collaborators/CollaboratorsHandler'
+Modules = require '../../infrastructure/Modules'
 crypto = require 'crypto'
 
 module.exports = ProjectController =
@@ -150,7 +150,8 @@ module.exports = ProjectController =
 			projects: (cb)->
 				ProjectGetter.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref tokens', cb
 			v1Projects: (cb) ->
-				V1ProjectGetter.findAllUsersProjects user_id, cb
+				Modules.hooks.fire "findAllUsersProjects", user_id, (error, projects = []) ->
+					cb error, projects[0] # hooks.fire returns an array of results, only need first
 			hasSubscription: (cb)->
 				LimitationsManager.userHasSubscriptionOrIsGroupMember currentUser, cb
 			user: (cb) ->
