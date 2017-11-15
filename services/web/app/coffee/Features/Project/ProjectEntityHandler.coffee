@@ -16,7 +16,7 @@ projectUpdateHandler = require('./ProjectUpdateHandler')
 DocstoreManager = require "../Docstore/DocstoreManager"
 ProjectGetter = require "./ProjectGetter"
 CooldownManager = require '../Cooldown/CooldownManager'
-documentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
+DocumentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
 
 module.exports = ProjectEntityHandler =
 	getAllFolders: (project_id,  callback) ->
@@ -106,7 +106,7 @@ module.exports = ProjectEntityHandler =
 	flushProjectToThirdPartyDataStore: (project_id, callback) ->
 		self = @
 		logger.log project_id:project_id, "flushing project to tpds"
-		documentUpdaterHandler.flushProjectToMongo project_id, (error) ->
+		DocumentUpdaterHandler.flushProjectToMongo project_id, (error) ->
 			return callback(error) if error?
 			ProjectGetter.getProject project_id, {name:true}, (error, project) ->
 				return callback(error) if error?
@@ -180,7 +180,7 @@ module.exports = ProjectEntityHandler =
 							doc: doc
 							path: result?.path?.fileSystem
 							docLines: docLines.join('\n')
-						documentUpdaterHandler.updateProjectStructure project_id, null, [], [newDoc], [], [], (error) ->
+						DocumentUpdaterHandler.updateProjectStructure project_id, null, [], [newDoc], [], [], (error) ->
 							return callback(error) if error?
 							callback null, doc, folder_id
 
@@ -218,7 +218,7 @@ module.exports = ProjectEntityHandler =
 							file: fileRef
 							path: result?.path?.fileSystem
 							url: fileStoreUrl
-						documentUpdaterHandler.updateProjectStructure project_id, userId, [], [], [], [newFile], (error) ->
+						DocumentUpdaterHandler.updateProjectStructure project_id, userId, [], [], [], [newFile], (error) ->
 							return callback(error) if error?
 							callback null, fileRef, folder_id
 
@@ -395,7 +395,7 @@ module.exports = ProjectEntityHandler =
 								self.getAllEntitiesFromProject newProject, (error, newDocs, newFiles
 								) =>
 									return callback(error) if error?
-									documentUpdaterHandler.updateProjectStructure project_id, userId, oldDocs, newDocs, oldFiles, newFiles, callback
+									DocumentUpdaterHandler.updateProjectStructure project_id, userId, oldDocs, newDocs, oldFiles, newFiles, callback
 
 	_checkValidMove: (project, entityType, entityPath, destFolderId, callback = (error) ->) ->
 		return callback() if !entityType.match(/folder/)
@@ -452,7 +452,7 @@ module.exports = ProjectEntityHandler =
 						return callback(error) if error?
 						ProjectEntityHandler.getAllEntitiesFromProject newProject, (error, newDocs, newFiles) =>
 							return callback(error) if error?
-							documentUpdaterHandler.updateProjectStructure project_id, userId, oldDocs, newDocs, oldFiles, newFiles, callback
+							DocumentUpdaterHandler.updateProjectStructure project_id, userId, oldDocs, newDocs, oldFiles, newFiles, callback
 
 	_cleanUpEntity: (project, entity, entityType, callback = (error) ->) ->
 		if(entityType.indexOf("file") != -1)
@@ -475,7 +475,7 @@ module.exports = ProjectEntityHandler =
 
 		unsetRootDocIfRequired (error) ->
 			return callback(error) if error?
-			documentUpdaterHandler.deleteDoc project_id, doc_id, (error) ->
+			DocumentUpdaterHandler.deleteDoc project_id, doc_id, (error) ->
 				return callback(error) if error?
 				ProjectEntityHandler._insertDeletedDocReference project._id, doc, (error) ->
 					return callback(error) if error?
