@@ -236,26 +236,22 @@ module.exports = DocumentUpdaterHandler =
 		oldEntitiesHash = _.indexBy oldEntities, (entity) -> entity[entityType]._id.toString()
 		newEntitiesHash = _.indexBy newEntities, (entity) -> entity[entityType]._id.toString()
 
-		for id, oldEntity of oldEntitiesHash
-			newEntity = newEntitiesHash[id]
-
-			# renamed entities
-			if newEntity.path != oldEntity.path
-				updates.push
-					id: id
-					pathname: oldEntity.path
-					newPathname: newEntity.path
-
 		for id, newEntity of newEntitiesHash
 			oldEntity = oldEntitiesHash[id]
 
-			# removed entities
 			if !oldEntity?
+				# entity added
 				updates.push
 					id: id
 					pathname: newEntity.path
 					docLines: newEntity.docLines
 					url: newEntity.url
+			else if newEntity.path != oldEntity.path
+				# entity renamed
+				updates.push
+					id: id
+					pathname: oldEntity.path
+					newPathname: newEntity.path
 
 		updates
 

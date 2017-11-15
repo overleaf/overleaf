@@ -483,3 +483,18 @@ describe 'DocumentUpdaterHandler', ->
 							.calledWith(url: @url, json: {docUpdates: [], fileUpdates, userId: @user_id})
 							.should.equal true
 						done()
+
+			describe "when a doc has been deleted", ->
+				it 'should do nothing', (done) ->
+					@docId = new ObjectId()
+					@oldDocs = [
+						{ path: '/foo', docLines: 'a\nb', doc: _id: @docId }
+					]
+					@newDocs = []
+					@oldFiles = []
+					@newFiles = []
+
+					@handler.updateProjectStructure @project_id, @user_id, @oldDocs, @newDocs, @oldFiles, @newFiles, () =>
+						@request.post.called.should.equal false
+						done()
+
