@@ -11,7 +11,7 @@ define [
 	"ide/editor/directives/aceEditor/track-changes/TrackChangesManager"
 	"ide/editor/directives/aceEditor/metadata/MetadataManager"
 	"ide/editor/directives/aceEditor/labels/LabelsManager"
-	"ide/labels/servies/labels"
+	"ide/labels/services/labels"
 	"ide/metadata/services/metadata"
 	"ide/graphics/services/graphics"
 	"ide/preamble/services/preamble"
