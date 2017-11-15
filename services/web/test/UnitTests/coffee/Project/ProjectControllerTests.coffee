@@ -267,7 +267,7 @@ describe "ProjectController", ->
 			@TagsHandler.getAllTags.callsArgWith(1, null, @tags, {})
 			@NotificationsHandler.getUserNotifications = sinon.stub().callsArgWith(1, null, @notifications, {})
 			@ProjectGetter.findAllUsersProjects.callsArgWith(2, null, @allProjects)
-			@Modules.hooks.fire.yields(undefined) # Without integration module hook, cb returns undefined
+			@Modules.hooks.fire.withArgs('findAllV1Projects', @user._id).yields(undefined) # Without integration module hook, cb returns undefined
 
 		it "should render the project/list page", (done)->
 			@res.render = (pageName, opts)=>
@@ -310,7 +310,7 @@ describe "ProjectController", ->
 					tags: [
 						{ name: 'mock tag', project_ids: ['123mockV1Id'] }
 					]
-				@Modules.hooks.fire.withArgs('findAllUsersProjects', @user._id).yields(null, [@V1Response]) # Need to wrap response in array, as multiple hooks could fire
+				@Modules.hooks.fire.withArgs('findAllV1Projects', @user._id).yields(null, [@V1Response]) # Need to wrap response in array, as multiple hooks could fire
 
 			it 'should include V1 projects', (done) ->
 				@res.render = (pageName, opts) =>
@@ -390,7 +390,7 @@ describe "ProjectController", ->
 			@TagsHandler.getAllTags.callsArgWith(1, null, @tags, {})
 			@NotificationsHandler.getUserNotifications = sinon.stub().callsArgWith(1, null, @notifications, {})
 			@ProjectGetter.findAllUsersProjects.callsArgWith(2, null, @allProjects)
-			@Modules.hooks.fire.withArgs('findAllUsersProjects', @user._id).yields(undefined) # Without integration module hook, cb returns undefined
+			@Modules.hooks.fire.withArgs('findAllV1Projects', @user._id).yields(undefined) # Without integration module hook, cb returns undefined
 
 		it "should render the project/list page", (done)->
 			@res.render = (pageName, opts)=>

@@ -150,7 +150,7 @@ module.exports = ProjectController =
 			projects: (cb)->
 				ProjectGetter.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref tokens', cb
 			v1Projects: (cb) ->
-				Modules.hooks.fire "findAllUsersProjects", user_id, (error, projects = []) ->
+				Modules.hooks.fire "findAllV1Projects", user_id, (error, projects = []) ->
 					cb error, projects[0] # hooks.fire returns an array of results, only need first
 			hasSubscription: (cb)->
 				LimitationsManager.userHasSubscriptionOrIsGroupMember currentUser, cb
