@@ -44,6 +44,7 @@ SudoModeMiddlewear = require('./Features/SudoMode/SudoModeMiddlewear')
 AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 AnnouncementsController = require("./Features/Announcements/AnnouncementsController")
 MetaController = require('./Features/Metadata/MetaController')
+LabelsController = require('./Features/Labels/LabelsController')
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -203,6 +204,9 @@ module.exports = class Router
 
 		webRouter.get '/project/:project_id/metadata', AuthorizationMiddlewear.ensureUserCanReadProject, AuthenticationController.requireLogin(), MetaController.getMetadata
 		webRouter.post '/project/:project_id/doc/:doc_id/metadata', AuthorizationMiddlewear.ensureUserCanReadProject, AuthenticationController.requireLogin(), MetaController.broadcastMetadataForDoc
+
+		webRouter.get '/project/:project_id/labels', AuthorizationMiddlewear.ensureUserCanReadProject, AuthenticationController.requireLogin(), LabelsController.getAllLabels
+		webRouter.post '/project/:project_id/doc/:doc_id/labels', AuthorizationMiddlewear.ensureUserCanReadProject, AuthenticationController.requireLogin(), LabelsController.broadcastLabelsForDoc
 
 		webRouter.get    '/tag', AuthenticationController.requireLogin(), TagsController.getAllTags
 		webRouter.post   '/tag', AuthenticationController.requireLogin(), TagsController.createTag

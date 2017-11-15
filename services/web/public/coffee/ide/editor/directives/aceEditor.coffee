@@ -10,10 +10,12 @@ define [
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
 	"ide/editor/directives/aceEditor/track-changes/TrackChangesManager"
 	"ide/editor/directives/aceEditor/metadata/MetadataManager"
+	"ide/editor/directives/aceEditor/labels/LabelsManager"
+	"ide/labels/servies/labels"
 	"ide/metadata/services/metadata"
 	"ide/graphics/services/graphics"
 	"ide/preamble/services/preamble"
-], (App, Ace, SearchBox, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager, MetadataManager) ->
+], (App, Ace, SearchBox, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager, MetadataManager, LabelsManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
 	ModeList = ace.require('ace/ext/modelist')
 
@@ -36,7 +38,7 @@ define [
 			return url
 
 
-	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory, metadata, graphics, preamble) ->
+	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory, labels, metadata, graphics, preamble) ->
 		monkeyPatchSearch($rootScope, $compile)
 
 		return  {
@@ -103,8 +105,9 @@ define [
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
 				trackChangesManager   = new TrackChangesManager(scope, editor, element)
+				labelsManager = new LabelsManager(scope, editor, element, labels)
 				metadataManager = new MetadataManager(scope, editor, element, metadata)
-				autoCompleteManager = new AutoCompleteManager(scope, editor, element, metadataManager, graphics, preamble)
+				autoCompleteManager = new AutoCompleteManager(scope, editor, element, metadataManager, labelsManager, graphics, preamble)
 
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog

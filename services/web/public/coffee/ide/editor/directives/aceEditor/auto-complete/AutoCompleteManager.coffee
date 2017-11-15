@@ -9,7 +9,7 @@ define [
 	aceSnippetManager = ace.require('ace/snippets').snippetManager
 
 	class AutoCompleteManager
-		constructor: (@$scope, @editor, @element, @metadataManager, @graphics, @preamble) ->
+		constructor: (@$scope, @editor, @element, @metadataManager, @labelsManager, @graphics, @preamble) ->
 
 			@monkeyPatchAutocomplete()
 
