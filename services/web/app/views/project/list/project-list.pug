@@ -114,6 +114,10 @@
 					) #{translate("delete_forever")}
 
 .row.row-spaced
+	if noV1Connection
+		.col-xs-12
+			.alert.alert-warning No V1 Connection
+
 	.col-xs-12
 		.card.card-thin.project-list-card
 			ul.list-unstyled.project-list.structured-list(
