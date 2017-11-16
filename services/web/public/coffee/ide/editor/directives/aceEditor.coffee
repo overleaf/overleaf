@@ -356,6 +356,7 @@ define [
 						session.setOption("useWorker", scope.syntaxValidation);
 
 					# now attach session to editor
+					editor.setReadOnly(true)
 					editor.setSession(session)
 
 					doc = session.getDocument()
@@ -364,6 +365,7 @@ define [
 					editor.initing = true
 					sharejs_doc.attachToAce(editor)
 					editor.initing = false
+					editor.setReadOnly(false)
 
 					resetScrollMargins()
 
