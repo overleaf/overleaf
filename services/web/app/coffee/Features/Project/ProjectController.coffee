@@ -271,7 +271,7 @@ module.exports = ProjectController =
 			showAutoCompileOnboarding: (cb) ->
 				cb = underscore.once(cb)
 				# Force autocompile rollout if query param set
-				if req.query.ac == 't'
+				if req.query?.ac == 't'
 					return cb(null, { enabled: true, showOnboarding: true })
 
 				if !user_id?
