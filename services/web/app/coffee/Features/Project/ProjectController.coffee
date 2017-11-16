@@ -270,6 +270,10 @@ module.exports = ProjectController =
 				CollaboratorsHandler.userIsTokenMember user_id, project_id, cb
 			showAutoCompileOnboarding: (cb) ->
 				cb = underscore.once(cb)
+				# Force autocompile rollout if query param set
+				if req.query.ac == 't'
+					return cb(null, { enabled: true, showOnboarding: true })
+
 				if !user_id?
 					return cb()
 
