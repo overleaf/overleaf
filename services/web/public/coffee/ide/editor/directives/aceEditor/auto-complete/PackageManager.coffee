@@ -36,7 +36,6 @@ define () ->
 
 	class PackageManager
 		getCompletions: (editor, session, pos, prefix, callback) ->
-			console.log '>> making it here'
 			callback null, packageSnippets
 
 	return PackageManager
