@@ -356,7 +356,7 @@ define [
 						session.setOption("useWorker", scope.syntaxValidation);
 
 					# now attach session to editor
-					editor.setReadOnly(true)
+					editor.setReadOnly(true) # set to readonly until document change handlers are attached
 					editor.setSession(session)
 
 					doc = session.getDocument()
@@ -365,7 +365,8 @@ define [
 					editor.initing = true
 					sharejs_doc.attachToAce(editor)
 					editor.initing = false
-					editor.setReadOnly(false)
+					# now ready to edit document
+					editor.setReadOnly(scope.readOnly) # respect the readOnly setting, normally false
 
 					resetScrollMargins()
 
