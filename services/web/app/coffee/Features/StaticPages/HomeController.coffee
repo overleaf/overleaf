@@ -1,4 +1,5 @@
 logger = require('logger-sharelatex')
+Settings = require('settings-sharelatex')
 _ = require('underscore')
 
 Path = require "path"
@@ -20,11 +21,10 @@ module.exports = HomeController =
 			HomeController.home(req, res)
 
 	home: (req, res)->
-		if homepageExists
+		if Settings.showHomepage and homepageExists
 			res.render 'external/home'
 		else
 			res.redirect "/login"
-
 
 	externalPage: (page, title) ->
 		return (req, res, next = (error) ->) ->
