@@ -7,6 +7,7 @@ aside#file-tree {
 		left: 0;
 		right: 0;
 		overflow-y: auto;
+		background-color: @file-tree-bg;
 
 		&.no-toolbar {
 			top: 0;
@@ -20,10 +21,13 @@ aside#file-tree {
 		margin: (@line-height-computed / 2);
 	}
 
-	ul.file-tree-list {
+	ul.file-tree-list when (@is-overleaf = false) {
 		font-size: 0.8rem;
-		margin: 0;
 		padding: (@line-height-computed / 4) 0;
+	}
+
+	ul.file-tree-list {
+		margin: 0;
 		overflow-x: hidden;
 		height: 100%;
 
@@ -40,13 +44,13 @@ aside#file-tree {
 			}
 
 			.entity-name {
-				color: @gray-darker;
+				color: @file-tree-item-color;
 				cursor: pointer;
 				white-space: nowrap;
 				overflow: hidden;
 				text-overflow: ellipsis;
 				&:hover {
-					background-color: @gray-lightest;
+					background-color: @file-tree-item-hover-bg;
 				}
 				input {
 					line-height: 1.6;
@@ -57,7 +61,7 @@ aside#file-tree {
 			}
 
 			i.fa {
-				color: @gray-light;
+				color: @file-tree-item-color;
 				font-size: 14px;
 			}
 
@@ -111,7 +115,7 @@ aside#file-tree {
 	
 	&:not(.multi-selected) {
 		ul.file-tree-list li.selected {
-			> .entity > .entity-name {
+			> .entity > .entity-name when (@is-overleaf = false) {
 				color: @link-color;
 				border-right: 4px solid @link-color;
 				font-weight: bold;
@@ -121,6 +125,18 @@ aside#file-tree {
 				}
 				.entity-menu-toggle {
 					display: inline;
+				}
+			}
+
+			> .entity when (@is-overleaf = true) {
+				background-color: @file-tree-item-selected-bg;
+				> .entity-name {
+					font-weight: bold;
+					padding-right: 32px;
+
+					.entity-menu-toggle {
+						display: inline;
+					}
 				}
 			}
 		}
