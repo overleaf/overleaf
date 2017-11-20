@@ -1,0 +1,40 @@
+.col-xs-6
+	input.select-item(
+		select-individual,
+		type="checkbox",
+		ng-model="project.selected"
+		stop-propagation="click"
+		aria-label=translate('select_project') + " '{{ project.name }}'"
+	)
+	span
+		a.projectName(
+			ng-href="{{projectLink(project)}}"
+			stop-propagation="click"
+		) {{project.name}}
+		span(
+			ng-controller="TagListController"
+		)
+			.tag-label(
+				ng-repeat='tag in project.tags'
+				stop-propagation="click"
+			)
+				a.label.label-default.tag-label-name(
+					href,
+					ng-click="selectTag(tag)"
+				) {{tag.name}}
+				a.label.label-default.tag-label-remove(
+					href
+					ng-click="removeProjectFromTag(project, tag)"
+				) &times;
+
+.col-xs-2
+	span.owner {{ownerName()}}
+	span(ng-if="isLinkSharingProject(project)")
+		| &nbsp;
+		i.fa.fa-link.small(
+			tooltip=translate("link_sharing")
+			tooltip-placement="right"
+			tooltip-append-to-body="true"
+		)
+.col-xs-4
+	span.last-modified {{project.lastUpdated | formatDate}}

@@ -116,6 +116,10 @@ define [
 				if $scope.filter == "shared" and project.accessLevel == "owner"
 					visible = false
 
+				# Hide projects from V1 if we only want to see shared projects
+				if $scope.filter == "shared" and project.isV1Project
+					visible = false
+
 				# Hide projects we don't own if we only want to see owned projects
 				if $scope.filter == "owned" and project.accessLevel != "owner"
 					visible = false
@@ -128,6 +132,9 @@ define [
 					# Only show non-archived projects
 					if project.archived
 						visible = false
+
+				if $scope.filter == "v1" and !project.isV1Project
+					visible = false
 
 				if visible
 					$scope.visibleProjects.push project
