@@ -5,9 +5,9 @@ define [
 	Range = ace.require("ace/range").Range
 
 	class SpellCheckManager
-		constructor: (@$scope, @editor, @element, @cache, @$http) ->
+		constructor: (@$scope, @editor, @element, @cache, @$http, @$q) ->
 			$(document.body).append @element.find(".spell-check-menu")
-			
+			@inProgressRequest = null
 			@updatedLines = []
 			@highlightedWordManager = new HighlightedWordManager(@editor)
 
@@ -23,8 +23,8 @@ define [
 
 			@editor.on "changeSession", (e) =>
 				@highlightedWordManager.reset()
-				# if @inProgressRequest?
-				# 	@inProgressRequest.abort()
+				if @inProgressRequest?
+					@inProgressRequest.abort()
 
 				if @$scope.spellCheckEnabled and @$scope.spellCheckLanguage and @$scope.spellCheckLanguage != ""
 					@runSpellCheckSoon(200)
@@ -235,11 +235,18 @@ define [
 		apiRequest: (endpoint, data, callback = (error, result) ->)->
 			data.token = window.user.id
 			data._csrf = window.csrfToken
-			@$http.post("/spelling" + endpoint, data)
+			# use angular timeout option to cancel request if doc is changed
+			requestHandler = @$q.defer()
+			options = {timeout: requestHandler.promise}
+			httpRequest = @$http.post("/spelling" + endpoint, data, options)
 			.then (response) =>
 				callback(null, response.data)
 			.catch (response) =>
 				callback(new Error('api failure'))
+			# provide a method to cancel the request
+			abortRequest = () ->
+				requestHandler.resolve()
+			return { abort: abortRequest }
 
 		blacklistedCommandRegex: ///
 			\\                    # initial backslash
