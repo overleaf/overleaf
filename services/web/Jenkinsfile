@@ -79,7 +79,7 @@ pipeline {
         }
       }
       steps {
-        sh 'node_modules/.bin/grunt compile  --verbose'
+        sh 'node_modules/.bin/grunt compile compile:tests  --verbose'
         // replace the build number placeholder for sentry
         sh 'node_modules/.bin/grunt version'
       }
@@ -117,7 +117,7 @@ pipeline {
         }
       }
       steps {
-        sh 'env NODE_ENV=development ./node_modules/.bin/grunt test:unit --reporter=tap'
+        sh 'env NODE_ENV=development ./node_modules/.bin/grunt mochaTest:unit --reporter=tap'
       }
     }
     

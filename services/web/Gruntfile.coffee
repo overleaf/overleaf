@@ -407,7 +407,7 @@ module.exports = (grunt) ->
 	grunt.registerTask 'compile:unit_tests', 'Compile the unit tests', ['clean:unit_tests', 'coffee:unit_tests']
 	grunt.registerTask 'compile:acceptance_tests', 'Compile the acceptance tests', ['clean:acceptance_tests', 'coffee:acceptance_tests']
 	grunt.registerTask 'compile:smoke_tests', 'Compile the smoke tests', ['coffee:smoke_tests']
-	grunt.registerTask 'compile:tests', 'Compile all the tests', ['compile:smoke_tests', 'compile:unit_tests']
+	grunt.registerTask 'compile:tests', 'Compile all the tests', ['compile:smoke_tests', 'compile:unit_tests', 'compile:acceptance_tests']
 	grunt.registerTask 'compile', 'Compiles everything need to run web-sharelatex', ['compile:server', 'compile:client', 'compile:css']
 	grunt.registerTask 'quickcompile:coffee', 'Compiles only changed coffee files',['newer:coffee']
 
