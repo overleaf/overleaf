@@ -1,6 +1,7 @@
 define [
 	"base"
-], (App) ->
+	"libs/fineuploader"
+], (App, qq) ->
 	App.directive 'fineUpload', ($timeout) ->
 		return {
 			scope: {
@@ -23,6 +24,7 @@ define [
 				control: "="
 			}
 			link: (scope, element, attrs) ->
+				console.log ">> element", element
 				multiple = scope.multiple or false
 				endpoint = scope.endpoint
 				if scope.allowedExtensions?
@@ -70,19 +72,8 @@ define [
 						onSubmit: onSubmit
 						onCancel: onCancel
 					text: text
-					template: """
-						<div class="qq-uploader">
-							<div class="qq-upload-drop-area"><span>{dragZoneText}</span></div>
-							<div class="qq-upload-button btn btn-primary btn-lg">
-								<div>{uploadButtonText}</div>
-							</div>
-							<span class="or btn-lg"> or </span>
-							<span class="drag-here btn-lg">#{dragAreaText}</span>
-							<span class="qq-drop-processing"><span>{dropProcessingText}</span><span class="qq-drop-processing-spinner"></span></span>
-							<div class="small">#{hintText}</div>
-							<ul class="qq-upload-list"></ul>
-						</div>
-					"""
+					# template: "qq-uploader"
+					template: document.getElementById('qq-uploader')
 				window.q = q
 				scope.control?.q = q
 				return q
