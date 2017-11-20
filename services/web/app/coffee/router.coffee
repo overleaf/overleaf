@@ -45,6 +45,7 @@ AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 AnnouncementsController = require("./Features/Announcements/AnnouncementsController")
 LabelsController = require('./Features/Labels/LabelsController')
 TokenAccessController = require('./Features/TokenAccess/TokenAccessController')
+Features = require('./infrastructure/Features')
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -63,10 +64,9 @@ module.exports = class Router
 		webRouter.get  '/logout', UserController.logout
 		webRouter.get  '/restricted', AuthorizationMiddlewear.restricted
 
-		# Left as a placeholder for implementing a public register page
-		webRouter.get  '/register', UserPagesController.registerPage
-		AuthenticationController.addEndpointToLoginWhitelist '/register'
-
+		if Features.hasFeature('registration')
+			webRouter.get '/register', UserPagesController.registerPage
+			AuthenticationController.addEndpointToLoginWhitelist '/register'
 
 		EditorRouter.apply(webRouter, privateApiRouter)
 		CollaboratorsRouter.apply(webRouter, privateApiRouter)
