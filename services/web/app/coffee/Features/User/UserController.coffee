@@ -51,7 +51,6 @@ module.exports = UserController =
 
 	updateUserSettings : (req, res)->
 		user_id = AuthenticationController.getLoggedInUserId(req)
-		usingExternalAuth = settings.ldap? or settings.saml?
 		logger.log user_id: user_id, "updating account settings"
 		User.findById user_id, (err, user)->
 			if err? or !user?
@@ -84,7 +83,7 @@ module.exports = UserController =
 				user.ace.syntaxValidation = req.body.syntaxValidation
 			user.save (err)->
 				newEmail = req.body.email?.trim().toLowerCase()
-				if !newEmail? or newEmail == user.email or usingExternalAuth
+				if !newEmail? or newEmail == user.email or req.externalAuthenticationSystemUsed()
 					# end here, don't update email
 					AuthenticationController.setInSessionUser(req, {first_name: user.first_name, last_name: user.last_name})
 					return res.sendStatus 200
