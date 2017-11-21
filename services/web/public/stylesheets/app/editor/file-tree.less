@@ -68,7 +68,7 @@ aside#file-tree {
 					line-height: 1.6;
 				}
 				&.droppable-hover {
-					// TODO
+					// TODO pick right color for the OL Beta theme.
 					background-color: fade(@file-tree-droppable-background-color, 60%);
 				}
 			}
@@ -98,10 +98,14 @@ aside#file-tree {
 					}
 				}
 				> .entity when (@is-overleaf = true) {
-					i.fa {
-						color: #FFF;
-					}
 					> .entity-name {
+						> div > i.fa,
+						> i.fa,
+						.entity-menu-toggle i.fa {
+							color: #FFF;
+						}
+						color: #FFF;
+						font-weight: bold;
 						background-color: @file-tree-multiselect-bg;
 						box-shadow: -200px 0 0 @file-tree-multiselect-bg;
 						&:hover {
@@ -155,18 +159,20 @@ aside#file-tree {
 			}
 
 			> .entity when (@is-overleaf = true) {
-				i.fa {
-					color: #FFF;
-				}
 				> .entity-name {
+					> div > i.fa,
+					> i.fa,
+					.entity-menu-toggle i.fa {
+						color: #FFF;
+					}
 					background-color: @file-tree-item-selected-bg;
+					font-weight: bold;
+					padding-right: 32px;
 					// When the entity is a subfolder, the DOM element is "indented" via margin-left. This makes the
 					// element not fill the entire file-tree width (as it's spaced from the left-hand side via margin) 
 					// and, in consequence, the background gets clipped. The negative (in the x axis) box-shadow is a 
 					// hack to paint the unfilled left-hand region.
 					box-shadow: -200px 0 0 @file-tree-item-selected-bg;
-					font-weight: bold;
-					padding-right: 32px;
 
 					.entity-menu-toggle {
 						display: inline;
@@ -176,11 +182,13 @@ aside#file-tree {
 		}
 	}
 
+	// TODO pick right color for the OL Beta theme.
 	ul.droppable-hover {
 		background-color: fade(@file-tree-droppable-background-color, 60%);
 	}
 }
 
+// TODO check if the OL Beta theme is OK with darker themes.
 .editor-dark when (@is-overleaf = false) {
 	aside#file-tree {
 		// background-color: lighten(@editor-dark-background-color, 10%);
