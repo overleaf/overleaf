@@ -31,7 +31,11 @@ aside#file-tree {
 		overflow-x: hidden;
 		height: 100%;
 
-		ul {
+		ul when (@is-overleaf = false) {
+			margin-left: (@line-height-computed / 2);
+		}
+
+		ul when (@is-overleaf = true) {
 			margin-left: (@line-height-computed / 2);
 		}
 
@@ -52,6 +56,13 @@ aside#file-tree {
 				&:hover {
 					background-color: @file-tree-item-hover-bg;
 				}
+				&:hover when (@is-overleaf = true) {
+					// When the entity is a subfolder, the DOM element is "indented" via margin-left. This makes the
+					// element not fill the entire file-tree width (as it's spaced from the left-hand side via margin) 
+					// and, in consequence, the background gets clipped. The negative (in the x axis) box-shadow is a 
+					// hack to paint the unfilled left-hand region.
+					box-shadow: -200px 0 0 @file-tree-item-hover-bg;
+				}
 				input {
 					line-height: 1.6;
 				}
@@ -61,12 +72,12 @@ aside#file-tree {
 			}
 
 			i.fa {
-				color: @file-tree-item-color;
+				color: @file-tree-item-icon-color;
 				font-size: 14px;
 			}
 
 			i.fa-folder-open, i.fa-folder {
-				color: lighten(desaturate(@link-color, 10%), 5%);
+				color: @file-tree-item-folder-color;
 				font-size: 14px;
 			}
 
@@ -74,7 +85,7 @@ aside#file-tree {
 				width: 24px;
 				padding: 6px;
 				font-size: 0.7rem;
-				color: @gray
+				color: @file-tree-item-toggle-color;
 			}
 			
 			&.multi-selected {
@@ -129,8 +140,16 @@ aside#file-tree {
 			}
 
 			> .entity when (@is-overleaf = true) {
-				background-color: @file-tree-item-selected-bg;
+				i.fa {
+					color: #FFF;
+				}
 				> .entity-name {
+					background-color: @file-tree-item-selected-bg;
+					// When the entity is a subfolder, the DOM element is "indented" via margin-left. This makes the
+					// element not fill the entire file-tree width (as it's spaced from the left-hand side via margin) 
+					// and, in consequence, the background gets clipped. The negative (in the x axis) box-shadow is a 
+					// hack to paint the unfilled left-hand region.
+					box-shadow: -200px 0 0 @file-tree-item-selected-bg;
 					font-weight: bold;
 					padding-right: 32px;
 
@@ -147,7 +166,7 @@ aside#file-tree {
 	}
 }
 
-.editor-dark {
+.editor-dark when (@is-overleaf = false) {
 	aside#file-tree {
 		// background-color: lighten(@editor-dark-background-color, 10%);
 		
@@ -175,6 +194,4 @@ aside#file-tree {
 			}
 		}
 	}
-	
-	
 }
