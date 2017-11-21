@@ -14,6 +14,7 @@ aside#file-tree {
 		}
 	}
 
+	// TODO; Consolidate with "Project files" in Overleaf
 	h3 {
 		font-size: 1rem;
 		border-bottom: 1px solid @gray;
@@ -67,6 +68,7 @@ aside#file-tree {
 					line-height: 1.6;
 				}
 				&.droppable-hover {
+					// TODO
 					background-color: fade(@file-tree-droppable-background-color, 60%);
 				}
 			}
@@ -89,10 +91,23 @@ aside#file-tree {
 			}
 			
 			&.multi-selected {
-				> .entity > .entity-name {
-					background-color: lighten(@brand-info, 40%);
+				> .entity > .entity-name when (@is-overleaf = false) {
+					background-color: @file-tree-multiselect-bg;
 					&:hover {
-						background-color: lighten(@brand-info, 30%);
+						background-color: @file-tree-multiselect-hover-bg;
+					}
+				}
+				> .entity when (@is-overleaf = true) {
+					i.fa {
+						color: #FFF;
+					}
+					> .entity-name {
+						background-color: @file-tree-multiselect-bg;
+						box-shadow: -200px 0 0 @file-tree-multiselect-bg;
+						&:hover {
+							background-color: @file-tree-multiselect-hover-bg;
+							box-shadow: -200px 0 0 @file-tree-multiselect-hover-bg;
+						}
 					}
 				}
 			}
