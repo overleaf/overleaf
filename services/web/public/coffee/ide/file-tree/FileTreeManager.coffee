@@ -13,15 +13,15 @@ define [
 				@loadRootFolder()
 				@loadDeletedDocs()
 				@$scope.$emit "file-tree:initialized"
-				
+
 			@$scope.$watch "rootFolder", (rootFolder) =>
 				if rootFolder?
 					@recalculateDocList()
 
 			@_bindToSocketEvents()
-			
+
 			@$scope.multiSelectedCount = 0
-			
+
 			$(document).on "click", =>
 				@clearMultiSelectedEntities()
 				$scope.$digest()
@@ -46,7 +46,7 @@ define [
 						type: "file"
 					}
 					@recalculateDocList()
-					
+
 			@ide.socket.on "reciveNewFolder", (parent_folder_id, folder) =>
 				parent_folder = @findEntityById(parent_folder_id) or @$scope.rootFolder
 				@$scope.$apply () =>
@@ -85,25 +85,25 @@ define [
 			@ide.fileTreeManager.forEachEntity (entity) ->
 				entity.selected = false
 			entity.selected = true
-		
+
 		toggleMultiSelectEntity: (entity) ->
 			entity.multiSelected = !entity.multiSelected
 			@$scope.multiSelectedCount = @multiSelectedCount()
-		
+
 		multiSelectedCount: () ->
 			count = 0
 			@forEachEntity (entity) ->
 				if entity.multiSelected
 					count++
 			return count
-		
+
 		getMultiSelectedEntities: () ->
 			entities = []
 			@forEachEntity (e) ->
 				if e.multiSelected
 					entities.push e
 			return entities
-		
+
 		getMultiSelectedEntityChildNodes: () ->
 			entities = @getMultiSelectedEntities()
 			paths = {}
@@ -125,13 +125,13 @@ define [
 				if !prefixes[path]?
 					child_entities.push entity
 			return child_entities
-		
+
 		clearMultiSelectedEntities: () ->
 			return if @$scope.multiSelectedCount == 0 # Be efficient, this is called a lot on 'click'
 			@forEachEntity (entity) ->
 				entity.multiSelected = false
 			@$scope.multiSelectedCount = 0
-		
+
 		multiSelectSelectedEntity: () ->
 			@findSelectedEntity()?.multiSelected = true
 
@@ -140,7 +140,7 @@ define [
 			return false if !folder?
 			entity = @_findEntityByPathInFolder(folder, name)
 			return entity?
-			
+
 		findSelectedEntity: () ->
 			selected = null
 			@forEachEntity (entity) ->
@@ -178,7 +178,7 @@ define [
 			parts = path.split("/")
 			name = parts.shift()
 			rest = parts.join("/")
-			
+
 			if name == "."
 				return @_findEntityByPathInFolder(folder, rest)
 
@@ -268,7 +268,7 @@ define [
 					type: "doc"
 					deleted: true
 				}
-				
+
 		recalculateDocList: () ->
 			@$scope.docs = []
 			@forEachEntity (entity, parentFolder, path) =>
@@ -287,7 +287,7 @@ define [
 					return -1
 				else
 					return 1
-			
+
 		getEntityPath: (entity) ->
 			@_getEntityPathInFolder @$scope.rootFolder, entity
 
@@ -349,7 +349,7 @@ define [
 			}
 
 		deleteEntity: (entity, callback = (error) ->) ->
-			# We'll wait for the socket.io notification to 
+			# We'll wait for the socket.io notification to
 			# delete from scope.
 			return @ide.queuedHttp {
 				method: "DELETE"
@@ -367,7 +367,7 @@ define [
 				folder_id: parent_folder.id
 				_csrf: window.csrfToken
 			}
-			
+
 		_isChildFolder: (parent_folder, child_folder) ->
 			parent_path = @getEntityPath(parent_folder) or "" # null if root folder
 			child_path = @getEntityPath(child_folder) or "" # null if root folder
