@@ -163,7 +163,7 @@ class User
 		@request.get {
 			url: "/register"
 		}, (err, response, body) =>
-			return callback(error) if error?
+			return callback(err) if err?
 			csrfMatches = body.match("window.csrfToken = \"(.*?)\";")
 			if !csrfMatches?
 				return callback(new Error("no csrf token found"))
