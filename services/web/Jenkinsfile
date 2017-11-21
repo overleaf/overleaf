@@ -124,7 +124,7 @@ pipeline {
     stage('Acceptance Tests') {
       steps {
         sh 'docker pull sharelatex/acceptance-test-runner'
-        sh 'docker run --rm -v $(pwd):/app --env SHARELATEX_ALLOW_PUBLIC_ACCESS=true sharelatex/acceptance-test-runner'
+        sh 'docker run --rm -v $(pwd):/app --env SHARELATEX_ALLOW_PUBLIC_ACCESS=true sharelatex/acceptance-test-runner || (cat forever/app.log && false)'
       }
     }
     

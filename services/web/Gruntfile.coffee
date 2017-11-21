@@ -39,6 +39,7 @@ module.exports = (grunt) ->
 			app:
 				options:
 					index: "app.js"
+					logFile: "app.log"
 
 		watch:
 			coffee:
