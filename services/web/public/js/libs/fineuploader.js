@@ -6762,16 +6762,13 @@
             if (options.templateIdOrEl == null) {
                 throw new Error("You MUST specify either a template element or ID!");
             }
-					console.log(">> template", options.templateIdOrEl)
             if (qq.isString(options.templateIdOrEl)) {
-							console.log(">> is string")
                 scriptEl = document.getElementById(options.templateIdOrEl);
                 if (scriptEl === null) {
                     throw new Error(qq.format("Cannot find template script at ID '{}'!", options.templateIdOrEl));
                 }
                 scriptHtml = scriptEl.innerHTML;
             } else {
-							console.log(">> not  string")
                 if (options.templateIdOrEl.innerHTML === undefined) {
                     throw new Error("You have specified an invalid value for the template option!  " + "It must be an ID or an Element.");
                 }
