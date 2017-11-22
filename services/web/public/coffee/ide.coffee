@@ -13,7 +13,6 @@ define [
 	"ide/review-panel/ReviewPanelManager"
 	"ide/SafariScrollPatcher"
 	"ide/AutoCompileOnboardingController",
-	"ide/LinkSharingOnboardingController",
 	"ide/settings/index"
 	"ide/share/index"
 	"ide/chat/index"
@@ -79,17 +78,8 @@ define [
 		}
 		$scope.onboarding = {
 			autoCompile: if window.showAutoCompileOnboarding then 'unseen' else 'dismissed'
-			linkSharing: if window.showLinkSharingOnboarding then 'unseen' else 'dismissed'
 		}
 		$scope.user = window.user
-		$scope.__enableTokenAccessUI = window.enableTokenAccessUI == true
-		# TODO: remove after rollout and testing
-		window.turnOnTokenAccessUI = () ->
-			$scope.__enableTokenAccessUI = true
-			$scope.$digest
-		window.turnOffTokenAccessUI = () ->
-			$scope.__enableTokenAccessUI = false
-			$scope.$digest
 
 		$scope.shouldABTestPlans = false
 		if $scope.user.signUpDate >= '2016-10-27'

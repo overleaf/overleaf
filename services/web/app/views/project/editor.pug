@@ -122,9 +122,7 @@ block requirejs
 		window.trackChangesState = data.trackChangesState;
 		window.autoCompileEnabled = #{!!autoCompileEnabled};
 		window.showAutoCompileOnboarding = #{!!showAutoCompileOnboarding}
-		window.showLinkSharingOnboarding = #{!!showLinkSharingOnboarding}
 		window.wikiEnabled = #{!!(settings.apis.wiki && settings.apis.wiki.url)};
-		window.enableTokenAccessUI = #{enableTokenAccessUI}
 		window.requirejs = {
 			"paths" : {
 				"mathjax": "#{buildJsPath('/libs/mathjax/MathJax.js', {cdn:false, fingerprint:false, qs:{config:'TeX-AMS_HTML'}})}",

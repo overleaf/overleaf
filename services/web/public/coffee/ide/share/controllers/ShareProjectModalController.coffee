@@ -178,13 +178,6 @@ define [
 					$scope.state.error = "Sorry, something went wrong resending the invite :("
 					event.target.blur()
 
-		$scope.openMakePublicModal = () ->
-			$modal.open {
-				templateUrl: "makePublicModalTemplate"
-				controller:  "MakePublicModalController"
-				scope: $scope
-			}
-
 		$scope.openMakePrivateModal = () ->
 			$modal.open {
 				templateUrl: "makePrivateModalTemplate"

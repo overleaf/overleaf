@@ -269,23 +269,6 @@ module.exports = ProjectController =
 					else
 						logger.log { user_id, event }, "autocompile onboarding not shown yet to this user"
 						return cb(null, { enabled: true, showOnboarding: true })
-			couldShowLinkSharingOnboarding: (cb) ->
-				cb = underscore.once(cb)
-				if !user_id?
-					return cb()
-				# Extract data from user's ObjectId
-				timestamp = parseInt(user_id.toString().substring(0, 8), 16)
-				userSignupDate = new Date(timestamp * 1000)
-				if userSignupDate > new Date("2017-11-13")
-					# Don't show for users who registered after it was released
-					return cb(null, false)
-				timeout = setTimeout cb, 500
-				AnalyticsManager.getLastOccurance user_id, "shown-linksharing-onboarding", (error, event) ->
-					clearTimeout timeout
-					if error? || event?
-						return cb(null, false)
-					else
-						return cb(null, true)
 		}, (err, results)->
 			if err?
 				logger.err err:err, "error getting details for project page"
@@ -300,13 +283,6 @@ module.exports = ProjectController =
 
 			token = TokenAccessHandler.getRequestToken(req, project_id)
 			isTokenMember = results.isTokenMember
-			# Roll out token-access based on Project owner
-			enableTokenAccessUI = ProjectController._isInPercentageRollout(
-				'linksharing',
-				project.owner_ref,
-				100
-			)
-			showLinkSharingOnboarding = enableTokenAccessUI && results.couldShowLinkSharingOnboarding
 			AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, token, (error, privilegeLevel)->
 				return next(error) if error?
 				if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
@@ -355,8 +331,6 @@ module.exports = ProjectController =
 					languages: Settings.languages
 					themes: THEME_LIST
 					maxDocLength: Settings.max_doc_length
-					enableTokenAccessUI: enableTokenAccessUI
-					showLinkSharingOnboarding: showLinkSharingOnboarding
 				timer.done()
 
 	_buildProjectList: (allProjects, v1Projects = [])->
