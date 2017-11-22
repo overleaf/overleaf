@@ -67,10 +67,15 @@ aside#file-tree {
 				input {
 					line-height: 1.6;
 				}
-				&.droppable-hover {
-					// TODO pick right color for the OL Beta theme.
-					background-color: fade(@file-tree-droppable-background-color, 60%);
+				&.droppable-hover when (@is-overleaf = false) {
+					background-color: fade(@file-tree-droppable-bg-color, 60%);
 				}
+
+				&.droppable-hover when (@is-overleaf = true) {
+					background-color: @file-tree-droppable-bg-color;
+					box-shadow: -200px 0 0 @file-tree-droppable-bg-color;
+				}
+
 			}
 
 			i.fa {
@@ -130,6 +135,7 @@ aside#file-tree {
 				top: 1px;
 				left: 44px;
 				right: 32px;
+				color: @file-tree-item-input-color;
 				input {
 					width: 100%;
 				}
@@ -182,9 +188,12 @@ aside#file-tree {
 		}
 	}
 
-	// TODO pick right color for the OL Beta theme.
-	ul.droppable-hover {
-		background-color: fade(@file-tree-droppable-background-color, 60%);
+	ul.droppable-hover when (@is-overleaf = false) {
+		background-color: fade(@file-tree-droppable-bg-color, 60%);
+	}
+	ul.droppable-hover when (@is-overleaf = true) {
+		background-color: @file-tree-droppable-bg-color;
+		box-shadow: -200px 0 0 @file-tree-droppable-bg-color;
 	}
 }
 
