@@ -73,12 +73,14 @@ applyToAllFilesRecursivly = ProjectSchema.statics.applyToAllFilesRecursivly = (f
 	_.each folder.folders, (folder)->
 		applyToAllFilesRecursivly(folder, fun)
 
-
 ProjectSchema.methods.getSafeProjectName = ->
 	safeProjectName = this.name.replace(new RegExp("\\W", "g"), '_')
 	return sanitize.escape(safeProjectName)
 
-conn = mongoose.createConnection(Settings.mongo.url, server: poolSize: Settings.mongo.poolSize || 10)
+conn = mongoose.createConnection(Settings.mongo.url, {
+	server: {poolSize: Settings.mongo.poolSize || 10},
+	config: {autoIndex: false}
+})
 
 Project = conn.model('Project', ProjectSchema)
 
