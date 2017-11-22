@@ -78,7 +78,6 @@ define [
 							<span class="qq-upload-size-selector qq-upload-size"></span>
 							<a type="button" class="qq-btn qq-upload-cancel-selector qq-upload-cancel">Cancel</a>
 							<button type="button" class="qq-btn qq-upload-retry-selector qq-upload-retry">Retry</button>
-							<button type="button" class="qq-btn qq-upload-delete-selector qq-upload-delete">Delete</button>
 							<span role="status" class="qq-upload-status-text-selector qq-upload-status-text"></span>
 						<\li>
 					</ul>
