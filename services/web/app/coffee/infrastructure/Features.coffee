@@ -9,6 +9,6 @@ module.exports = Features =
 			when 'registration'
 				return not Features.externalAuthenticationSystemUsed()
 			when 'github-sync'
-				return not Settings.disableGithubSync
+				return Settings.enableGithubSync
 			else
 				throw new Error("unknown feature: #{feature}")
