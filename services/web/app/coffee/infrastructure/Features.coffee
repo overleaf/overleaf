@@ -6,7 +6,11 @@ module.exports = Features =
 
 	hasFeature: (feature) ->
 		switch feature
+			when 'homepage'
+				return Settings.enableHomepage
 			when 'registration'
 				return not Features.externalAuthenticationSystemUsed()
+			when 'github-sync'
+				return Settings.enableGithubSync
 			else
 				throw new Error("unknown feature: #{feature}")
