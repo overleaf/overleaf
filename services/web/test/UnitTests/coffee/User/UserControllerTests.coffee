@@ -187,6 +187,7 @@ describe "UserController", ->
 	describe "updateUserSettings", ->
 		beforeEach ->
 			@newEmail = "hello@world.com"
+			@req.externalAuthenticationSystemUsed = sinon.stub().returns(false)
 
 		it "should call save", (done)->
 			@req.body = {}
@@ -280,10 +281,7 @@ describe "UserController", ->
 			beforeEach ->
 				@UserUpdater.changeEmailAddress.callsArgWith(2)
 				@newEmail = 'someone23@example.com'
-				@settings.ldap = {active: true}
-
-			afterEach ->
-				delete @settings.ldap
+				@req.externalAuthenticationSystemUsed = sinon.stub().returns(true)
 
 			it 'should not set a new email', (done) ->
 				@req.body.email = @newEmail

@@ -35,7 +35,7 @@ define [
 			url = ace.config._moduleUrl(args...) + "?fingerprint=#{window.aceFingerprint}"
 			return url
 
-	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory, labels, graphics, preamble, $http) ->
+	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory, labels, graphics, preamble, $http, $q) ->
 		monkeyPatchSearch($rootScope, $compile)
 
 		return  {
@@ -97,7 +97,7 @@ define [
 
 				if scope.spellCheck # only enable spellcheck when explicitly required
 					spellCheckCache =  $cacheFactory("spellCheck-#{scope.name}", {capacity: 1000})
-					spellCheckManager = new SpellCheckManager(scope, editor, element, spellCheckCache, $http)
+					spellCheckManager = new SpellCheckManager(scope, editor, element, spellCheckCache, $http, $q)
 				undoManager           = new UndoManager(scope, editor, element)
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
@@ -356,6 +356,7 @@ define [
 						session.setOption("useWorker", scope.syntaxValidation);
 
 					# now attach session to editor
+					editor.setReadOnly(true) # set to readonly until document change handlers are attached
 					editor.setSession(session)
 
 					doc = session.getDocument()
@@ -364,6 +365,8 @@ define [
 					editor.initing = true
 					sharejs_doc.attachToAce(editor)
 					editor.initing = false
+					# now ready to edit document
+					editor.setReadOnly(scope.readOnly) # respect the readOnly setting, normally false
 
 					resetScrollMargins()
 

@@ -66,6 +66,9 @@ describe "ProjectController", ->
 			protectTokens: sinon.stub()
 		@CollaboratorsHandler =
 			userIsTokenMember: sinon.stub().callsArgWith(2, null, false)
+		@Modules =
+			hooks:
+				fire: sinon.stub()
 		@ProjectController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex":
@@ -93,6 +96,7 @@ describe "ProjectController", ->
 			"../Analytics/AnalyticsManager": @AnalyticsManager
 			"../TokenAccess/TokenAccessHandler": @TokenAccessHandler
 			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler
+			"../../infrastructure/Modules": @Modules
 
 		@projectName = "£12321jkj9ujkljds"
 		@req =
@@ -263,6 +267,7 @@ describe "ProjectController", ->
 			@TagsHandler.getAllTags.callsArgWith(1, null, @tags, {})
 			@NotificationsHandler.getUserNotifications = sinon.stub().callsArgWith(1, null, @notifications, {})
 			@ProjectGetter.findAllUsersProjects.callsArgWith(2, null, @allProjects)
+			@Modules.hooks.fire.withArgs('findAllV1Projects', @user._id).yields(undefined) # Without integration module hook, cb returns undefined
 
 		it "should render the project/list page", (done)->
 			@res.render = (pageName, opts)=>
@@ -294,6 +299,53 @@ describe "ProjectController", ->
 				opts.projects[1].owner.should.equal (@users[@projects[1].owner_ref])
 				done()
 			@ProjectController.projectListPage @req, @res
+
+		describe 'with overleaf-integration-web-module hook', ->
+			beforeEach ->
+				@V1Response =
+					projects: [
+						{ id: '123mockV1Id', title: 'mock title', updated_at: 1509616411, removed: false, archived: false }
+						{ id: '456mockV1Id', title: 'mock title 2', updated_at: 1509616411, removed: true, archived: false }
+					],
+					tags: [
+						{ name: 'mock tag', project_ids: ['123mockV1Id'] }
+					]
+				@Modules.hooks.fire.withArgs('findAllV1Projects', @user._id).yields(null, [@V1Response]) # Need to wrap response in array, as multiple hooks could fire
+
+			it 'should include V1 projects', (done) ->
+				@res.render = (pageName, opts) =>
+					opts.projects.length.should.equal (
+						@projects.length +
+						@collabertions.length +
+						@readOnly.length +
+						@tokenReadAndWrite.length +
+						@tokenReadOnly.length +
+						@V1Response.projects.length
+					)
+					opts.projects.forEach (p) ->
+						# Check properties correctly mapped from V1
+						expect(p).to.have.property 'id'
+						expect(p).to.have.property 'name'
+						expect(p).to.have.property 'lastUpdated'
+						expect(p).to.have.property 'accessLevel'
+						expect(p).to.have.property 'archived'
+					done()
+				@ProjectController.projectListPage @req, @res
+
+			it 'should include V1 tags', (done) ->
+				@res.render = (pageName, opts) =>
+					opts.tags.length.should.equal (@tags.length + @V1Response.tags.length)
+					opts.tags.forEach (t) ->
+						expect(t).to.have.property 'name'
+						expect(t).to.have.property 'project_ids'
+					done()
+				@ProjectController.projectListPage @req, @res
+
+			it 'should have isShowingV1Projects flag', (done) ->
+				@res.render = (pageName, opts) =>
+					opts.isShowingV1Projects.should.equal true
+					done()
+				@ProjectController.projectListPage @req, @res
 
 	describe "projectListPage with duplicate projects", ->
 
@@ -338,6 +390,7 @@ describe "ProjectController", ->
 			@TagsHandler.getAllTags.callsArgWith(1, null, @tags, {})
 			@NotificationsHandler.getUserNotifications = sinon.stub().callsArgWith(1, null, @notifications, {})
 			@ProjectGetter.findAllUsersProjects.callsArgWith(2, null, @allProjects)
+			@Modules.hooks.fire.withArgs('findAllV1Projects', @user._id).yields(undefined) # Without integration module hook, cb returns undefined
 
 		it "should render the project/list page", (done)->
 			@res.render = (pageName, opts)=>

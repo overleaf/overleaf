@@ -1,0 +1,11 @@
+.col-xs-8
+	span.v1-badge(aria-label=translate("v1_badge"))
+	span
+		if settings.overleaf && settings.overleaf.host
+			a.projectName(
+					href=settings.overleaf.host + "/{{project.id}}"
+				stop-propagation="click"
+			) {{project.name}}
+
+.col-xs-4
+	span.last-modified {{project.lastUpdated | formatDate}}

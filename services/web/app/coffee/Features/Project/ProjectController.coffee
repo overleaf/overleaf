@@ -24,6 +24,7 @@ AnalyticsManager = require "../Analytics/AnalyticsManager"
 Sources = require "../Authorization/Sources"
 TokenAccessHandler = require '../TokenAccess/TokenAccessHandler'
 CollaboratorsHandler = require '../Collaborators/CollaboratorsHandler'
+Modules = require '../../infrastructure/Modules'
 crypto = require 'crypto'
 
 module.exports = ProjectController =
@@ -148,6 +149,11 @@ module.exports = ProjectController =
 				NotificationsHandler.getUserNotifications user_id, cb
 			projects: (cb)->
 				ProjectGetter.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref tokens', cb
+			v1Projects: (cb) ->
+				Modules.hooks.fire "findAllV1Projects", user_id, (error, projects = []) ->
+					if error? and error.message == 'No V1 connection'
+						return cb(null, projects: [], tags: [], noConnection: true)
+					return cb(error, projects[0]) # hooks.fire returns an array of results, only need first
 			hasSubscription: (cb)->
 				LimitationsManager.userHasSubscriptionOrIsGroupMember currentUser, cb
 			user: (cb) ->
@@ -157,11 +163,12 @@ module.exports = ProjectController =
 					logger.err err:err, "error getting data for project list page"
 					return next(err)
 				logger.log results:results, user_id:user_id, "rendering project list"
-				tags = results.tags[0]
+				v1Tags = results.v1Projects?.tags or []
+				tags = results.tags[0].concat(v1Tags)
 				notifications = require("underscore").map results.notifications, (notification)->
 					notification.html = req.i18n.translate(notification.templateKey, notification.messageOpts)
 					return notification
-				projects = ProjectController._buildProjectList results.projects
+				projects = ProjectController._buildProjectList results.projects, results.v1Projects?.projects
 				user = results.user
 				ProjectController._injectProjectOwners projects, (error, projects) ->
 					return next(error) if error?
@@ -173,6 +180,8 @@ module.exports = ProjectController =
 						notifications: notifications or []
 						user: user
 						hasSubscription: results.hasSubscription[0]
+						isShowingV1Projects: results.v1Projects?
+						noV1Connection: results.v1Projects?.noConnection
 					}
 
 					if Settings?.algolia?.app_id? and Settings?.algolia?.read_only_api_key?
@@ -280,7 +289,7 @@ module.exports = ProjectController =
 				# Extract data from user's ObjectId
 				timestamp = parseInt(user_id.toString().substring(0, 8), 16)
 
-				rolloutPercentage = 5 # Percentage of users to roll out to
+				rolloutPercentage = 10 # Percentage of users to roll out to
 				if !ProjectController._isInPercentageRollout('autocompile', user_id, rolloutPercentage)
 					# Don't show if user is not part of roll out
 					return cb(null, { enabled: false, showOnboarding: false })
@@ -333,7 +342,7 @@ module.exports = ProjectController =
 			enableTokenAccessUI = ProjectController._isInPercentageRollout(
 				'linksharing',
 				project.owner_ref,
-				40
+				100
 			)
 			showLinkSharingOnboarding = enableTokenAccessUI && results.couldShowLinkSharingOnboarding
 			AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, token, (error, privilegeLevel)->
@@ -390,7 +399,7 @@ module.exports = ProjectController =
 					showLinkSharingOnboarding: showLinkSharingOnboarding
 				timer.done()
 
-	_buildProjectList: (allProjects)->
+	_buildProjectList: (allProjects, v1Projects = [])->
 		{owned, readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly} = allProjects
 		projects = []
 		for project in owned
@@ -400,6 +409,8 @@ module.exports = ProjectController =
 			projects.push ProjectController._buildProjectViewModel(project, "readWrite", Sources.INVITE)
 		for project in readOnly
 			projects.push ProjectController._buildProjectViewModel(project, "readOnly", Sources.INVITE)
+		for project in v1Projects
+			projects.push ProjectController._buildV1ProjectViewModel(project)
 		# Token-access
 		#   Only add these projects if they're not already present, this gives us cascading access
 		#   from 'owner' => 'token-read-only'
@@ -424,8 +435,19 @@ module.exports = ProjectController =
 			archived: !!project.archived
 			owner_ref: project.owner_ref
 			tokens: project.tokens
+			isV1Project: false
 		}
 		return model
+
+	_buildV1ProjectViewModel: (project) ->
+		{
+			id: project.id
+			name: project.title
+			lastUpdated: new Date(project.updated_at * 1000) # Convert from epoch
+			accessLevel: "readOnly",
+			archived: project.removed || project.archived
+			isV1Project: true
+		}
 
 	_injectProjectOwners: (projects, callback = (error, projects) ->) ->
 		users = {}
