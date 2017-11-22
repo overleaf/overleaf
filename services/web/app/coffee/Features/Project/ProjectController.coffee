@@ -300,13 +300,6 @@ module.exports = ProjectController =
 
 			token = TokenAccessHandler.getRequestToken(req, project_id)
 			isTokenMember = results.isTokenMember
-			# Roll out token-access based on Project owner
-			enableTokenAccessUI = ProjectController._isInPercentageRollout(
-				'linksharing',
-				project.owner_ref,
-				100
-			)
-			showLinkSharingOnboarding = enableTokenAccessUI && results.couldShowLinkSharingOnboarding
 			AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, token, (error, privilegeLevel)->
 				return next(error) if error?
 				if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
@@ -355,8 +348,7 @@ module.exports = ProjectController =
 					languages: Settings.languages
 					themes: THEME_LIST
 					maxDocLength: Settings.max_doc_length
-					enableTokenAccessUI: enableTokenAccessUI
-					showLinkSharingOnboarding: showLinkSharingOnboarding
+					showLinkSharingOnboarding: !!results.couldShowLinkSharingOnboarding
 				timer.done()
 
 	_buildProjectList: (allProjects, v1Projects = [])->

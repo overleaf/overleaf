@@ -9,18 +9,8 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 	.modal-body.modal-body-share
 		.container-fluid
 
-			//- Private
-			.row.public-access-level(ng-show="project.publicAccesLevel == 'private' && __enableTokenAccessUI == false")
-				.col-xs-12.text-center
-					| #{translate("this_project_is_private")}
-					| &nbsp;&nbsp;
-					a(
-						href
-						ng-click="openMakePublicModal()"
-					) #{translate("make_public")}
-
 			//- Private (with token-access available)
-			.row.public-access-level(ng-show="project.publicAccesLevel == 'private' && __enableTokenAccessUI == true")
+			.row.public-access-level(ng-show="project.publicAccesLevel == 'private'")
 				.col-xs-12.text-center
 					| #{translate('link_sharing_is_off')}.
 					| &nbsp;&nbsp;
@@ -205,31 +195,6 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 			button.btn.btn-default(
 				ng-click="done()"
 			) #{translate("close")}
-
-script(type="text/ng-template", id="makePublicModalTemplate")
-	.modal-header
-		button.close(
-			type="button"
-			data-dismiss="modal"
-			ng-click="cancel()"
-		) &times;
-		h3 #{translate("make_project_public")}?
-	.modal-body.modal-body-share
-		p #{translate("make_project_public_consequences")}
-		p
-			select.form-control(
-				ng-model="inputs.privileges"
-				name="privileges"
-			)
-				option(value="readAndWrite") #{translate("allow_public_editing")}
-				option(value="readOnly")     #{translate("allow_public_read_only")}
-	.modal-footer
-		button.btn.btn-default(
-			ng-click="cancel()"
-		) #{translate("cancel")}
-		button.btn.btn-info(
-			ng-click="makePublic()"
-		) #{translate("make_public")}
 
 script(type="text/ng-template", id="makeTokenBasedModalTemplate")
 	.modal-header

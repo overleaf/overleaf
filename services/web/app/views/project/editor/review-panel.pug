@@ -91,9 +91,7 @@
 				)
 
 			li.rp-tc-state-separator
-			li.rp-tc-state-item.rp-tc-state-item-guests(
-				ng-if="__enableTokenAccessUI"
-			)
+			li.rp-tc-state-item.rp-tc-state-item-guests
 				span.rp-tc-state-item-name(
 					ng-class="{ 'rp-tc-state-item-name-disabled' : reviewPanel.trackChangesOnForEveryone}"
 					tooltip=translate('tc_switch_guests_tip')
