@@ -342,7 +342,7 @@ module.exports = ProjectController =
 			enableTokenAccessUI = ProjectController._isInPercentageRollout(
 				'linksharing',
 				project.owner_ref,
-				40
+				100
 			)
 			showLinkSharingOnboarding = enableTokenAccessUI && results.couldShowLinkSharingOnboarding
 			AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, token, (error, privilegeLevel)->
