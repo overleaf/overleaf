@@ -123,8 +123,13 @@ pipeline {
     
     stage('Acceptance Tests') {
       steps {
-        sh 'docker pull sharelatex/acceptance-test-runner'
-        sh 'docker run --rm -v $(pwd):/app --env SHARELATEX_ALLOW_PUBLIC_ACCESS=true fauldsh/sl-acceptance-test-runner:node-6.9 || (cat forever/app.log && false)'
+        // This tagged relase of the acceptance test runner is a temporary fix
+        // to get the acceptance tests working before we move to a
+        // docker-compose workflow. See:
+        // https://github.com/sharelatex/web-sharelatex-internal/pull/148
+
+        sh 'docker pull sharelatex/sl-acceptance-test-runner:node-6.9-mongo-3.4'
+        sh 'docker run --rm -v $(pwd):/app --env SHARELATEX_ALLOW_PUBLIC_ACCESS=true sharelatex/sl-acceptance-test-runner:node-6.9-mongo-3.4 || (cat forever/app.log && false)'
       }
     }
     
