@@ -289,7 +289,7 @@ module.exports = ProjectController =
 				# Extract data from user's ObjectId
 				timestamp = parseInt(user_id.toString().substring(0, 8), 16)
 
-				rolloutPercentage = 5 # Percentage of users to roll out to
+				rolloutPercentage = 10 # Percentage of users to roll out to
 				if !ProjectController._isInPercentageRollout('autocompile', user_id, rolloutPercentage)
 					# Don't show if user is not part of roll out
 					return cb(null, { enabled: false, showOnboarding: false })
