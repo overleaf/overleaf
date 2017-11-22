@@ -54,7 +54,7 @@ nav.navbar.navbar-default
 				// logged out
 				if !getSessionUser()
 					// register link
-					if !externalAuthenticationSystemUsed()
+					if hasFeature('registration')
 						li
 							a(href="/register") #{translate('register')}
 
