@@ -66,15 +66,17 @@ define [
 					<ul class="qq-upload-list-selector">
 						<li>
 							<div class="qq-progress-bar-container-selector">
-								<div role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" class="qq-progress-bar-selector qq-progress-bar"></div>
+								<div
+									role="progressbar"
+									aria-valuenow="0"
+									aria-valuemin="0"
+									aria-valuemax="100"
+									class="qq-progress-bar-selector qq-progress-bar">
+								</div>
 							</div>
-							<span class="qq-upload-spinner-selector qq-upload-spinner"></span>
-							<img class="qq-thumbnail-selector" qq-max-size="100" qq-server-scale>
 							<span class="qq-upload-file-selector qq-upload-file"></span>
-							<span class="qq-edit-filename-icon-selector qq-edit-filename-icon" aria-label="Edit filename"></span>
-							<input class="qq-edit-filename-selector qq-edit-filename" tabindex="0" type="text">
 							<span class="qq-upload-size-selector qq-upload-size"></span>
-							<button type="button" class="qq-btn qq-upload-cancel-selector qq-upload-cancel">Cancel</button>
+							<a type="button" class="qq-btn qq-upload-cancel-selector qq-upload-cancel">Cancel</a>
 							<button type="button" class="qq-btn qq-upload-retry-selector qq-upload-retry">Retry</button>
 							<button type="button" class="qq-btn qq-upload-delete-selector qq-upload-delete">Delete</button>
 							<span role="status" class="qq-upload-status-text-selector qq-upload-status-text"></span>
