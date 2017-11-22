@@ -61,7 +61,7 @@ define [
 					</div>
 					<span class="or btn-lg"> or </span>
 					<span class="drag-here btn-lg">#{dragAreaText}</span>
-					<span class="qq-drop-processing-selector"><span>Processing</span><span class="qq-drop-processing-spinner-selector"></span></span>
+					<span class="qq-drop-processing-selector"><span>#{text.waitingForResponse}</span><span class="qq-drop-processing-spinner-selector"></span></span>
 					<div class="small">#{hintText}</div>
 					<ul class="qq-upload-list-selector">
 						<li>
