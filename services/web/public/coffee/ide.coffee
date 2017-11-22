@@ -12,7 +12,6 @@ define [
 	"ide/labels/LabelsManager"
 	"ide/review-panel/ReviewPanelManager"
 	"ide/SafariScrollPatcher"
-	"ide/FeatureOnboardingController",
 	"ide/AutoCompileOnboardingController",
 	"ide/LinkSharingOnboardingController",
 	"ide/settings/index"
@@ -91,10 +90,6 @@ define [
 		window.turnOffTokenAccessUI = () ->
 			$scope.__enableTokenAccessUI = false
 			$scope.$digest
-
-		$scope.$watch "project.features.trackChangesVisible", (visible) ->
-			return if !visible?
-			$scope.ui.showCollabFeaturesOnboarding = window.showTrackChangesOnboarding and visible
 
 		$scope.shouldABTestPlans = false
 		if $scope.user.signUpDate >= '2016-10-27'
