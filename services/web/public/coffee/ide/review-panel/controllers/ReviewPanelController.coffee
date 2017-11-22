@@ -43,7 +43,6 @@ define [
 			# A count of user-facing selected changes. An aggregated change (insertion + deletion) will count
 			# as only one.
 			nVisibleSelectedChanges: 0
-			showPerUserTCNotice: window.showPerUserTCNotice
 
 		window.addEventListener "beforeunload", () ->
 			collapsedStates = {}
@@ -598,8 +597,6 @@ define [
 
 		$scope.toggleFullTCStateCollapse = () ->
 			if $scope.project.features.trackChanges
-				if $scope.reviewPanel.showPerUserTCNotice
-					$scope.openPerUserTCNoticeModal()
 				$scope.reviewPanel.fullTCStateCollapsed = !$scope.reviewPanel.fullTCStateCollapsed
 			else
 				$scope.openTrackChangesUpgradeModal()
@@ -802,11 +799,3 @@ define [
 				controller: "TrackChangesUpgradeModalController"
 				scope: $scope.$new()
 			}
-
-		$scope.openPerUserTCNoticeModal = () ->
-			$scope.reviewPanel.showPerUserTCNotice = false
-			$modal.open({
-				templateUrl: "perUserTCNoticeModalTemplate"
-			}).result.finally () ->
-				event_tracking.sendMB "shown-per-user-tc-notice"
-
