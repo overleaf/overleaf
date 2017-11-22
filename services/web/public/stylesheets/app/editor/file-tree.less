@@ -188,10 +188,10 @@ aside#file-tree {
 		}
 	}
 
-	ul.droppable-hover when (@is-overleaf = false) {
+	ul.droppable-hover.file-tree-list when (@is-overleaf = false) {
 		background-color: fade(@file-tree-droppable-bg-color, 60%);
 	}
-	ul.droppable-hover when (@is-overleaf = true) {
+	ul.droppable-hover.file-tree-list when (@is-overleaf = true) {
 		background-color: @file-tree-droppable-bg-color;
 		box-shadow: -200px 0 0 @file-tree-droppable-bg-color;
 	}
