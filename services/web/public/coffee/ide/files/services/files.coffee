@@ -8,7 +8,7 @@ define [
 			getTeXFiles: () ->
 				texFiles = []
 				ide.fileTreeManager.forEachEntity (entity, folder, path) ->
-					if entity.type == 'doc' && entity?.name?.match?(/.*\.(tex|sty|cls|dtx|ltx|def)/)
+					if entity.type == 'doc' && entity?.name?.match?(/.*\.(tex|txt|md)/)
 						cloned = _.clone(entity)
 						cloned.path = path
 						texFiles.push cloned
