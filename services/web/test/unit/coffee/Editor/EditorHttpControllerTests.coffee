@@ -201,7 +201,7 @@ describe "EditorHttpController", ->
 			@req.body =
 				name: @name = "doc-name"
 				parent_folder_id: @parent_folder_id
-			@EditorController.addDoc = sinon.stub().callsArgWith(5, null, @doc)
+			@EditorController.addDoc = sinon.stub().callsArgWith(6, null, @doc)
 
 		describe "successfully", ->
 			beforeEach ->
@@ -209,7 +209,7 @@ describe "EditorHttpController", ->
 
 			it "should call EditorController.addDoc", ->
 				@EditorController.addDoc
-					.calledWith(@project_id, @parent_folder_id, @name, [], "editor")
+					.calledWith(@project_id, @parent_folder_id, @name, [], "editor", @userId)
 					.should.equal true
 
 			it "should send the doc back as JSON", ->

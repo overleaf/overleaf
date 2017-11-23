@@ -19,12 +19,12 @@ module.exports = EditorController =
 			DocumentUpdaterHandler.flushDocToMongo project_id, doc_id, callback
 
 
-	addDoc: (project_id, folder_id, docName, docLines, source, callback = (error, doc)->)->
+	addDoc: (project_id, folder_id, docName, docLines, source, user_id, callback = (error, doc)->)->
 		LockManager.getLock project_id, (err)->
 			if err?
 				logger.err err:err, project_id:project_id, source:source,  "could not get lock to addDoc"
 				return callback(err)
-			EditorController.addDocWithoutLock project_id, folder_id, docName, docLines, source, null, (error, doc)->
+			EditorController.addDocWithoutLock project_id, folder_id, docName, docLines, source, user_id, (error, doc)->
 				LockManager.releaseLock project_id, ->
 					callback(error, doc)
 

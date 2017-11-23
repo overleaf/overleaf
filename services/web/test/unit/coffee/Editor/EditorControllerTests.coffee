@@ -160,29 +160,26 @@ describe "EditorController", ->
 			@EditorController.addDocWithoutLock = sinon.stub().callsArgWith(6)
 
 		it "should call addDocWithoutLock", (done)->
-			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, =>
-				@EditorController.addDocWithoutLock.calledWith(@project_id, @folder_id, @docName, @docLines, @source).should.equal true
+			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, @user_id, =>
+				@EditorController.addDocWithoutLock.calledWith(@project_id, @folder_id, @docName, @docLines, @source, @user_id).should.equal true
 				done()
 
 		it "should take the lock", (done)->
-			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, =>
+			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, @user_id, =>
 				@LockManager.getLock.calledWith(@project_id).should.equal true
 				done()
 
 		it "should release the lock", (done)->
-			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, =>
+			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, @user_id, =>
 				@LockManager.releaseLock.calledWith(@project_id).should.equal true
 				done()
 
 		it "should error if it can't cat the lock", (done)->
 			@LockManager.getLock = sinon.stub().callsArgWith(1, "timed out")
-			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, (err)=>
+			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, @user_id, (err)=>
 				expect(err).to.exist
 				err.should.equal "timed out"
-				done()			
-
-
-
+				done()
 
 	describe 'addFileWithoutLock:', ->
 		beforeEach ->
