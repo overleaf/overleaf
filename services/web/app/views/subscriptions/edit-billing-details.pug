@@ -1,7 +1,5 @@
 extends ../layout
 
-block scripts
-	script(src=buildJsPath('libs/recurly.min.js', {fingerprint:false}))
 
 block content
 	.content.content-alt
@@ -11,17 +9,8 @@ block content
 					.card
 						.page-header
 							h1.text-centered #{translate("update_your_billing_details")}
-						#billingDetailsForm #{translate("loading_billing_form")}...
-	
-
-	script(type="text/javascript").
-		Recurly.config(!{recurlyConfig})
-		Recurly.buildBillingInfoUpdateForm({
-			target      : "#billingDetailsForm",
-			successURL  : "#{successURL}?_csrf=#{csrfToken}&origin=editBillingDetails",
-			signature   : "!{signature}",
-			accountCode : "#{user.id}"
-		});
-
-
-
+						div.text-center
+							a.btn.btn-primary.btn-lg(
+								href=hostedBillingDetailsPageLink
+								target="_blank"
+							) #{translate('open_your_billing_details_page')}

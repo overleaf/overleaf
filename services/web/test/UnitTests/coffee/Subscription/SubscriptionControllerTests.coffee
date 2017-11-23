@@ -55,7 +55,7 @@ describe "SubscriptionController", ->
 					collaborator:"COLLABORATORCODEHERE"
 			apis:
 				recurly:
-					subdomain:"sl.recurly.com"
+					subdomain:"sl"
 			siteUrl: "http://de.sharelatex.dev:3000"
 			gaExperiments:{}
 		@GeoIpLookup =
@@ -122,7 +122,12 @@ describe "SubscriptionController", ->
 	describe "editBillingDetailsPage", ->
 		describe "with a user with a subscription", ->
 			beforeEach (done) ->
-				@LimitationsManager.userHasSubscription.callsArgWith(1, null, true)
+				@settings.apis.recurly.subdomain = 'test'
+				@userSub = {account: {hosted_login_token: 'abcd'}}
+				@LimitationsManager.userHasSubscription
+					.callsArgWith(1, null, true, @activeRecurlySubscription)
+				@RecurlyWrapper.getSubscription = sinon.stub()
+					.callsArgWith(2, null, @userSub)
 				@user._id = @activeRecurlySubscription.account.account_code
 				@res.callback = done
 				@SubscriptionController.editBillingDetailsPage(@req, @res)
@@ -132,8 +137,10 @@ describe "SubscriptionController", ->
 				@res.renderedTemplate.should.equal "subscriptions/edit-billing-details"
 
 			it "should set the correct variables for the template", ->
-				should.exist @res.renderedVariables.signature
-				@res.renderedVariables.successURL.should.equal "#{@settings.siteUrl}/user/subscription/billing-details/update"
+				should.exist @res.renderedVariables.hostedBillingDetailsPageLink
+				@res.renderedVariables.hostedBillingDetailsPageLink.should.equal(
+					"https://test.recurly.com/account/billing_info/edit?ht=abcd"
+				)
 				@res.renderedVariables.user.id.should.equal @user._id
 
 		describe "with a user without subscription", ->

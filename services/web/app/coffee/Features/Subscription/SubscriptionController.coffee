@@ -127,24 +127,32 @@ module.exports = SubscriptionController =
 
 	editBillingDetailsPage: (req, res, next) ->
 		user = AuthenticationController.getSessionUser(req)
-		LimitationsManager.userHasSubscription user, (err, hasSubscription)->
+		LimitationsManager.userHasSubscription user, (err, hasSubscription, subscription)->
 			return next(err) if err?
 			if !hasSubscription
 				res.redirect "/user/subscription"
 			else
-				RecurlyWrapper.sign {
-					account_code: user._id
-				}, (error, signature) ->
-					return next(error) if error?
-					res.render "subscriptions/edit-billing-details",
-						title      : "update_billing_details"
-						recurlyConfig: JSON.stringify
-							currency: "USD"
-							subdomain: Settings.apis.recurly.subdomain
-						signature  : signature
-						successURL : "#{Settings.siteUrl}/user/subscription/billing-details/update"
-						user       :
-							id : user._id
+				RecurlyWrapper.getSubscription subscription.recurlySubscription_id,
+					includeAccount: true,
+					(err, usersSubscription)->
+						account = usersSubscription.account
+						hostedLoginToken = account.hosted_login_token
+						if !hostedLoginToken
+							err = new Error('no hosted_login_token on recurly account')
+							return next(err)
+						subdomain = Settings?.apis?.recurly?.subdomain
+						if !subdomain
+							err = new Error('recurly subdomain not configured')
+							return next(err)
+						link = "https://" +
+							subdomain +
+							".recurly.com/account/billing_info/edit?ht=" +
+							hostedLoginToken
+						res.render "subscriptions/edit-billing-details",
+							title: "update_billing_details"
+							hostedBillingDetailsPageLink: link
+							user:
+								id: user._id
 
 	updateBillingDetails: (req, res, next) ->
 		res.redirect "/user/subscription?saved_billing_details=true"
