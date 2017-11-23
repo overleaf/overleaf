@@ -109,23 +109,15 @@ pipeline {
       }
     }
     
-    stage('Unit Test') {
-      agent {
-        docker {
-          image 'node:6.9.5'
-          reuseNode true
-        }
-      }
+    stage('Unit Tests') {
       steps {
         sh 'make install'
-        sh 'make test_unit MOCHA_ARGS="--reporter=tap"'
-        sh 'env NODE_ENV=development ./node_modules/.bin/grunt mochaTest:unit --reporter=tap'
+        sh "make test_unit MOCHA_ARGS="--reporter=tap"'
       }
     }
     
     stage('Acceptance Tests') {
       steps {
-        sh 'make install'
         sh "make test_acceptance MOCHA_ARGS="--reporter=tap"'
       }
     }
