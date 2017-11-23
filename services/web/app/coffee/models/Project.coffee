@@ -33,8 +33,20 @@ ProjectSchema = new Schema
 	imageName         : { type: String }
 	track_changes     : { type: Object }
 	tokens            :
-		readOnly        : { type: String, index: {unique: true} }
-		readAndWrite    : { type: String, index: {unique: true} }
+		readOnly        : {
+			type: String,
+			index: {
+				unique: true,
+				partialFilterExpression: {'tokens.readOnly': {$exists: true}}
+			}
+		}
+		readAndWrite    : {
+			type: String,
+			index: {
+				unique: true,
+				partialFilterExpression: {'tokens.readAndWrite': {$exists: true}}
+			}
+		}
 	tokenAccessReadOnly_refs         : [ type:ObjectId, ref:'User' ]
 	tokenAccessReadAndWrite_refs     : [ type:ObjectId, ref:'User' ]
 	overleaf          :
@@ -61,12 +73,14 @@ applyToAllFilesRecursivly = ProjectSchema.statics.applyToAllFilesRecursivly = (f
 	_.each folder.folders, (folder)->
 		applyToAllFilesRecursivly(folder, fun)
 
-
 ProjectSchema.methods.getSafeProjectName = ->
 	safeProjectName = this.name.replace(new RegExp("\\W", "g"), '_')
 	return sanitize.escape(safeProjectName)
 
-conn = mongoose.createConnection(Settings.mongo.url, server: poolSize: Settings.mongo.poolSize || 10)
+conn = mongoose.createConnection(Settings.mongo.url, {
+	server: {poolSize: Settings.mongo.poolSize || 10},
+	config: {autoIndex: false}
+})
 
 Project = conn.model('Project', ProjectSchema)
 

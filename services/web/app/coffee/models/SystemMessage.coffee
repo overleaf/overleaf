@@ -6,7 +6,11 @@ ObjectId = Schema.ObjectId
 
 SystemMessageSchema = new Schema
 	content : type: String, default:''
-	
-conn = mongoose.createConnection(Settings.mongo.url, server: poolSize: Settings.mongo.poolSize || 10)
+
+conn = mongoose.createConnection(Settings.mongo.url, {
+	server: {poolSize: Settings.mongo.poolSize || 10},
+	config: {autoIndex: false}
+})
+
 
 exports.SystemMessage = conn.model('SystemMessage', SystemMessageSchema)

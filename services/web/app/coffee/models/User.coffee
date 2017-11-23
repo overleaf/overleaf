@@ -64,7 +64,10 @@ UserSchema = new Schema
 		accessToken: { type: String }
 		refreshToken: { type: String }
 
-conn = mongoose.createConnection(Settings.mongo.url, server: poolSize: 10)
+conn = mongoose.createConnection(Settings.mongo.url, {
+	server: {poolSize: Settings.mongo.poolSize || 10},
+	config: {autoIndex: false}
+})
 
 User = conn.model('User', UserSchema)
 
