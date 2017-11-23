@@ -1,3 +1,12 @@
+.toolbar.toolbar-pdf when (@is-overleaf = true) {
+	.toolbar-small-mixin;
+	.toolbar-alt-mixin;
+}
+
+.toolbar.toolbar-pdf when (@is-overleaf = false) {
+	.toolbar-tall-mixin;
+}
+
 .pdf-viewer, .pdf-logs, .pdf-errors, .pdf-uncompiled {
 	.full-size;
 	top: 58px;
