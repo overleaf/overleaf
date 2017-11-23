@@ -79,7 +79,7 @@ pipeline {
         }
       }
       steps {
-        sh 'node_modules/.bin/grunt compile  --verbose'
+        sh 'node_modules/.bin/grunt compile compile:tests  --verbose'
         // replace the build number placeholder for sentry
         sh 'node_modules/.bin/grunt version'
       }
@@ -117,14 +117,19 @@ pipeline {
         }
       }
       steps {
-        sh 'env NODE_ENV=development ./node_modules/.bin/grunt test:unit --reporter=tap'
+        sh 'env NODE_ENV=development ./node_modules/.bin/grunt mochaTest:unit --reporter=tap'
       }
     }
     
     stage('Acceptance Tests') {
       steps {
-        sh 'docker pull sharelatex/acceptance-test-runner'
-        sh 'docker run --rm -v $(pwd):/app --env SHARELATEX_ALLOW_PUBLIC_ACCESS=true sharelatex/acceptance-test-runner'
+        // This tagged relase of the acceptance test runner is a temporary fix
+        // to get the acceptance tests working before we move to a
+        // docker-compose workflow. See:
+        // https://github.com/sharelatex/web-sharelatex-internal/pull/148
+
+        sh 'docker pull sharelatex/sl-acceptance-test-runner:node-6.9-mongo-3.4'
+        sh 'docker run --rm -v $(pwd):/app --env SHARELATEX_ALLOW_PUBLIC_ACCESS=true sharelatex/sl-acceptance-test-runner:node-6.9-mongo-3.4 || (cat forever/app.log && false)'
       }
     }
     

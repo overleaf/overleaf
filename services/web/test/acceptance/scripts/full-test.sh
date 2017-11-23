@@ -1,26 +1,40 @@
 #! /usr/bin/env bash
 
-# If you're running on OS X, you probably need to manually
-# 'rm -r node_modules/bcrypt; npm install bcrypt' inside
-# the docker container, before it will start.
-# npm rebuild bcrypt
+# If you're running on OS X, you probably need to rebuild
+# some dependencies in the docker container, before it will start.
+#
+# npm rebuild --update-binary
 
 echo ">> Starting server..."
 
 grunt --no-color forever:app:start
 
-echo ">> Server started"
+echo ">> Waiting for Server"
 
-sleep 5
+count=1
+max_wait=60
 
-echo ">> Running acceptance tests..."
-grunt --no-color mochaTest:acceptance
-_test_exit_code=$?
+while [ $count -le $max_wait ]
+do
+  if nc -z localhost 3000
+  then
+    echo ">> Server Started"
 
-echo ">> Killing server"
+		echo ">> Running acceptance tests..."
+		grunt --no-color mochaTest:acceptance
+		_test_exit_code=$?
 
-grunt --no-color forever:app:stop
+		echo ">> Killing server"
 
-echo ">> Done"
+		grunt --no-color forever:app:stop
 
-exit $_test_exit_code
+		echo ">> Done"
+
+		exit $_test_exit_code
+  fi
+
+  sleep 1
+  echo -n "."
+  count=$((count+1))
+done
+exit 1
