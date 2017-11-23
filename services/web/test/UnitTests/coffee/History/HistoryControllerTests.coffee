@@ -15,12 +15,36 @@ describe "HistoryController", ->
 			"settings-sharelatex": @settings = {}
 			"logger-sharelatex": @logger = {log: sinon.stub(), error: sinon.stub()}
 			"../Authentication/AuthenticationController": @AuthenticationController
+			"../Project/ProjectDetailsHandler": @ProjectDetailsHandler = {}
 		@settings.apis =
 			trackchanges:
 				enabled: false
 				url: "http://trackchanges.example.com"
 			project_history:
 				url: "http://project_history.example.com"
+
+	describe "selectHistoryApi", ->
+		beforeEach ->
+			@req = { url: "/mock/url", method: "POST" }
+			@res = "mock-res"
+			@next = sinon.stub()
+
+		describe "for a project with project history", ->
+			beforeEach ->
+				@ProjectDetailsHandler.getDetails = sinon.stub().callsArgWith(1, null, {overleaf:{history:{}}})
+				@HistoryController.selectHistoryApi @req, @res, @next
+
+			it "should set the flag for project history to true", ->
+				@req.useProjectHistory.should.equal true
+
+		describe "for any other project ", ->
+			beforeEach ->
+				@ProjectDetailsHandler.getDetails = sinon.stub().callsArgWith(1, null, {})
+				@HistoryController.selectHistoryApi @req, @res, @next
+
+			it "should not set the flag for project history to false", ->
+				@req.useProjectHistory.should.equal false
+
 
 	describe "proxyToHistoryApi", ->
 		beforeEach ->
@@ -33,10 +57,13 @@ describe "HistoryController", ->
 				on: (event, handler) -> @events[event] = handler
 			@request.returns @proxy
 
-		describe "successfully", ->
-			describe "with project history enabled", ->
+		describe "with project history enabled", ->
+			beforeEach ->
+				@settings.apis.project_history.enabled = true
+
+			describe "for a project with the project history flag", ->
 				beforeEach ->
-					@settings.apis.project_history.enabled = true
+					@req.useProjectHistory = true
 					@HistoryController.proxyToHistoryApi @req, @res, @next
 
 				it "should get the user id", ->
@@ -59,9 +86,53 @@ describe "HistoryController", ->
 						.calledWith(@res)
 						.should.equal true
 
-			describe "with project history disabled", ->
+			describe "for a project without the project history flag", ->
 				beforeEach ->
-					@settings.apis.project_history.enabled = false
+					@req.useProjectHistory = false
+					@HistoryController.proxyToHistoryApi @req, @res, @next
+
+				it "should get the user id", ->
+					@AuthenticationController.getLoggedInUserId
+						.calledWith(@req)
+						.should.equal true
+
+				it "should call the track changes api", ->
+					@request
+						.calledWith({
+							url: "#{@settings.apis.trackchanges.url}#{@req.url}"
+							method: @req.method
+							headers:
+								"X-User-Id": @user_id
+						})
+						.should.equal true
+
+				it "should pipe the response to the client", ->
+					@proxy.pipe
+						.calledWith(@res)
+						.should.equal true
+
+		describe "with project history disabled", ->
+			beforeEach ->
+				@settings.apis.project_history.enabled = false
+
+			describe "for a project with the project history flag", ->
+				beforeEach ->
+					@req.useProjectHistory = true
+					@HistoryController.proxyToHistoryApi @req, @res, @next
+
+				it "should call the track changes api", ->
+					@request
+						.calledWith({
+							url: "#{@settings.apis.trackchanges.url}#{@req.url}"
+							method: @req.method
+							headers:
+								"X-User-Id": @user_id
+						})
+						.should.equal true
+
+			describe "for a project without the project history flag", ->
+				beforeEach ->
+					@req.useProjectHistory = false
 					@HistoryController.proxyToHistoryApi @req, @res, @next
 
 				it "should call the track changes api", ->
