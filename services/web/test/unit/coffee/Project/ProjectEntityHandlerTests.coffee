@@ -583,7 +583,6 @@ describe 'ProjectEntityHandler', ->
 			@ProjectEntityHandler.addFile project_id, folder_id, fileName, {}, userId, () ->
 
 	describe 'replacing a file', ->
-
 		beforeEach ->
 			@projectLocator
 			@file_id = "file_id_here"
@@ -591,13 +590,23 @@ describe 'ProjectEntityHandler', ->
 			@fileRef = {rev:3, _id:@file_id}
 			@filePaths = {fileSystem:"/folder1/file.png", mongo:"folder.1.files.somewhere"}
 			@projectLocator.findElement = sinon.stub().callsArgWith(1, null, @fileRef, @filePaths)
-			@ProjectModel.update = (_, __, ___, cb)-> cb()
+
+			@ProjectEntityHandler.getAllEntitiesFromProject = sinon.stub()
+			@ProjectEntityHandler.getAllEntitiesFromProject
+				.onFirstCall()
+				.callsArgWith(1, null, [], @oldFiles = ['old-file'])
+			@ProjectEntityHandler.getAllEntitiesFromProject
+				.onSecondCall()
+				.callsArgWith(1, null, [], @newFiles = ['new-file'])
+			@ProjectModel.findOneAndUpdate = sinon.stub().callsArgWith(3, null, @project)
+
 			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, @project)
 
 		it 'should find the file', (done)->
-
 			@ProjectEntityHandler.replaceFile project_id, @file_id, @fsPath, =>
-				@projectLocator.findElement.calledWith({element_id:@file_id, type:"file", project_id:project_id}).should.equal true
+				@projectLocator.findElement
+					.calledWith({element_id:@file_id, type:"file", project: @project})
+					.should.equal true
 				done()
 
 		it 'should tell the file store handler to upload the file from disk', (done)->
@@ -617,7 +626,7 @@ describe 'ProjectEntityHandler', ->
 			@ProjectEntityHandler.replaceFile project_id, @file_id, @fsPath, =>
 
 		it 'should inc the rev id', (done)->
-			@ProjectModel.update = (conditions, update, options, callback)=>
+			@ProjectModel.findOneAndUpdate = (conditions, update, options, callback)=>
 				conditions._id.should.equal project_id
 				update.$inc["#{@filePaths.mongo}.rev"].should.equal 1
 				done()
@@ -626,7 +635,7 @@ describe 'ProjectEntityHandler', ->
 
 		it 'should update the created at date', (done)->
 			d = new Date()
-			@ProjectModel.update = (conditions, update, options, callback)=>
+			@ProjectModel.findOneAndUpdate = (conditions, update, options, callback)=>
 				conditions._id.should.equal project_id
 				differenceInMs = update.$set["#{@filePaths.mongo}.created"].getTime() - d.getTime()
 				differenceInMs.should.be.below(20)
@@ -634,6 +643,12 @@ describe 'ProjectEntityHandler', ->
 
 			@ProjectEntityHandler.replaceFile project_id, @file_id, @fsPath, =>
 
+		it "should should send the old and new project structure to the doc updater", (done) ->
+			@ProjectEntityHandler.replaceFile project_id, @file_id, @fsPath, =>
+				@documentUpdaterHandler.updateProjectStructure
+					.calledWith(project_id, null, [], [], @oldFiles, @newFiles)
+					.should.equal true
+				done()
 
 	describe 'addFolder', ->
 		folderName = "folder1234"

@@ -223,12 +223,9 @@ module.exports = ProjectEntityHandler =
 							callback null, fileRef, folder_id
 
 	replaceFile: (project_id, file_id, fsPath, callback)->
+		self = ProjectEntityHandler
 		ProjectGetter.getProject project_id, {name:true}, (err, project) ->
 			return callback(err) if err?
-			findOpts =
-				project_id:project._id
-				element_id:file_id
-				type:"file"
 			FileStoreHandler.uploadFileFromDisk project._id, file_id, fsPath, (err)->
 				return callback(err) if err?
 				# Note there is a potential race condition here (and elsewhere)
@@ -236,20 +233,25 @@ module.exports = ProjectEntityHandler =
 				# then the path to the file element will be out of date. In practice
 				# this is not a problem so long as we do not do anything longer running
 				# between them (like waiting for the file to upload.)
-				projectLocator.findElement findOpts, (err, fileRef, path)=>
+				self.getAllEntitiesFromProject project, (err, oldDocs, oldFiles) =>
 					return callback(err) if err?
-					tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:path.fileSystem, rev:fileRef.rev+1, project_name:project.name}, (error) ->
+					projectLocator.findElement {project:project, element_id: file_id, type: 'file'}, (err, fileRef, path)=>
 						return callback(err) if err?
-						conditons = _id:project._id
-						inc = {}
-						inc["#{path.mongo}.rev"] = 1
-						set = {}
-						set["#{path.mongo}.created"] = new Date()
-						update =
-							"$inc": inc
-							"$set": set
-						Project.update conditons, update, {}, (err, second)->
-							callback()
+						tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:path.fileSystem, rev:fileRef.rev+1, project_name:project.name}, (err) ->
+							return callback(err) if err?
+							conditions = _id:project._id
+							inc = {}
+							inc["#{path.mongo}.rev"] = 1
+							set = {}
+							set["#{path.mongo}.created"] = new Date()
+							update =
+								"$inc": inc
+								"$set": set
+							Project.findOneAndUpdate conditions, update, { "new": true}, (err, newProject) ->
+								return callback(err) if err?
+								self.getAllEntitiesFromProject newProject, (err, newDocs, newFiles) =>
+									return callback(err) if err?
+									DocumentUpdaterHandler.updateProjectStructure project_id, null, oldDocs, newDocs, oldFiles, newFiles, callback
 
 	copyFileFromExistingProject: (project_id, folder_id, originalProject_id, origonalFileRef, callback = (error, fileRef, folder_id) ->)->
 		logger.log project_id:project_id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "copying file in s3"
@@ -392,8 +394,7 @@ module.exports = ProjectEntityHandler =
 									endPath: result.path.fileSystem,
 									rev: entity.rev
 								tpdsUpdateSender.moveEntity opts
-								self.getAllEntitiesFromProject newProject, (error, newDocs, newFiles
-								) =>
+								self.getAllEntitiesFromProject newProject, (error, newDocs, newFiles) =>
 									return callback(error) if error?
 									DocumentUpdaterHandler.updateProjectStructure project_id, userId, oldDocs, newDocs, oldFiles, newFiles, callback
 
