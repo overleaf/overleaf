@@ -1,0 +1,42 @@
+version: "2"
+
+volumes:
+  node_modules:
+
+services:
+  npm:
+    image: node:6.9.5
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    working_dir: /app
+
+  test_unit:
+    image: node:6.9.5
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    working_dir: /app
+    command: npm run test:unit
+
+  test_acceptance:
+    image: node:6.9.5
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    environment:
+      REDIS_HOST: redis
+      MONGO_HOST: mongo
+      SHARELATEX_ALLOW_PUBLIC_ACCESS: 'true'
+      LISTEN_ADDRESS: 0.0.0.0
+    depends_on:
+      - redis
+      - mongo
+    working_dir: /app
+    command: npm run start
+
+  redis:
+    image: redis
+
+  mongo:
+    image: mongo:3.4.6

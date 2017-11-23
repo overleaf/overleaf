@@ -9,6 +9,17 @@
   "directories": {
     "public": "./public"
   },
+  "scripts": {
+    "test:acceptance:wait_for_app": "echo 'Waiting for app to be accessible' && while (! curl -s -o /dev/null localhost:3000/status) do sleep 1; done",
+    "test:acceptance:run": "mocha --recursive --reporter spec --timeout 15000 $@ test/acceptance/js",
+    "test:acceptance": "npm run compile:acceptance_tests && npm run test:acceptance:wait_for_app && npm run test:acceptance:run -- $@",
+    "test:unit": "npm run compile:app && npm run compile:unit_tests && mocha --recursive --reporter spec $@ test/unit/js",
+    "compile:unit_tests": "coffee -o test/unit/js -c test/unit/coffee",
+    "compile:acceptance_tests": "coffee -o test/acceptance/js -c test/acceptance/coffee",
+    "compile:app": "coffee -o app/js -c app/coffee && coffee -c app.coffee",
+    "start": "npm run compile:app && node app.js",
+    "echo": "echo $@"
+  },
   "dependencies": {
     "archiver": "0.9.0",
     "async": "0.6.2",

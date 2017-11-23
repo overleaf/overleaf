@@ -6,7 +6,7 @@ module.exports = MockDocUpdaterApi =
 		app.post "/project/:project_id/flush", (req, res, next) =>
 			res.sendStatus 200
 
-		app.listen 3003, (error) ->
+		app.listen 3003, '0.0.0.0', (error) ->
 			throw error if error?
 		.on "error", (error) ->
 			console.error "error starting MockDocUpdaterApi:", error.message
