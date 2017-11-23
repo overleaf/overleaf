@@ -44,14 +44,14 @@ describe "FileSystemImportManager", ->
 
 		describe "with replace set to false", ->
 			beforeEach ->
-				@EditorController.addDocWithoutLock = sinon.stub().callsArg(5)
+				@EditorController.addDocWithoutLock = sinon.stub().callsArg(6)
 				@FileSystemImportManager.addDoc @user_id, @project_id, @folder_id, @name, @path_on_disk, false, @callback
 
 			it "should read the file from disk", ->
 				@fs.readFile.calledWith(@path_on_disk, "utf8").should.equal true
 
 			it "should insert the doc", ->
-				@EditorController.addDocWithoutLock.calledWith(@project_id, @folder_id, @name, @docLines, "upload")
+				@EditorController.addDocWithoutLock.calledWith(@project_id, @folder_id, @name, @docLines, "upload", @user_id)
 					.should.equal true
 
 		describe "with windows line ending", ->
@@ -59,11 +59,11 @@ describe "FileSystemImportManager", ->
 				@docContent = "one\r\ntwo\r\nthree"
 				@docLines = ["one", "two", "three"]
 				@fs.readFile = sinon.stub().callsArgWith(2, null, @docContent)
-				@EditorController.addDocWithoutLock = sinon.stub().callsArg(5)
+				@EditorController.addDocWithoutLock = sinon.stub().callsArg(6)
 				@FileSystemImportManager.addDoc @user_id, @project_id, @folder_id, @name, @path_on_disk, false, @callback
 
 			it "should strip the \\r characters before adding", ->
-				@EditorController.addDocWithoutLock.calledWith(@project_id, @folder_id, @name, @docLines, "upload")
+				@EditorController.addDocWithoutLock.calledWith(@project_id, @folder_id, @name, @docLines, "upload", @user_id)
 					.should.equal true
 		
 		describe "with replace set to true", ->
@@ -76,7 +76,7 @@ describe "FileSystemImportManager", ->
 						}]
 					}
 					@ProjectLocator.findElement = sinon.stub().callsArgWith(1, null, @folder)
-					@EditorController.addDocWithoutLock = sinon.stub().callsArg(5)
+					@EditorController.addDocWithoutLock = sinon.stub().callsArg(6)
 					@FileSystemImportManager.addDoc @user_id, @project_id, @folder_id, @name, @path_on_disk, true, @callback
 
 				it "should look up the folder", ->
@@ -85,7 +85,7 @@ describe "FileSystemImportManager", ->
 						.should.equal true
 
 				it "should insert the doc", ->
-					@EditorController.addDocWithoutLock.calledWith(@project_id, @folder_id, @name, @docLines, "upload")
+					@EditorController.addDocWithoutLock.calledWith(@project_id, @folder_id, @name, @docLines, "upload", @user_id)
 						.should.equal true
 
 			describe "when the doc does exist", ->

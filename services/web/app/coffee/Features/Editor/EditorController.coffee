@@ -24,15 +24,15 @@ module.exports = EditorController =
 			if err?
 				logger.err err:err, project_id:project_id, source:source,  "could not get lock to addDoc"
 				return callback(err)
-			EditorController.addDocWithoutLock project_id, folder_id, docName, docLines, source, (error, doc)->
+			EditorController.addDocWithoutLock project_id, folder_id, docName, docLines, source, null, (error, doc)->
 				LockManager.releaseLock project_id, ->
 					callback(error, doc)
 
-	addDocWithoutLock: (project_id, folder_id, docName, docLines, source, callback = (error, doc)->)->
+	addDocWithoutLock: (project_id, folder_id, docName, docLines, source, user_id, callback = (error, doc)->)->
 		docName = docName.trim()
 		logger.log {project_id, folder_id, docName, source}, "sending new doc to project"
 		Metrics.inc "editor.add-doc"
-		ProjectEntityHandler.addDoc project_id, folder_id, docName, docLines, null, (err, doc, folder_id)=>
+		ProjectEntityHandler.addDoc project_id, folder_id, docName, docLines, user_id, (err, doc, folder_id)=>
 			if err?
 				logger.err err:err, project_id:project_id, docName:docName, "error adding doc without lock"
 				return callback(err)

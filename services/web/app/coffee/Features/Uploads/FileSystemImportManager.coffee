@@ -28,9 +28,9 @@ module.exports = FileSystemImportManager =
 						if existingDoc?
 							EditorController.setDoc project_id, existingDoc._id, user_id, lines, "upload", callback
 						else
-							EditorController.addDocWithoutLock project_id, folder_id, name, lines, "upload", callback
+							EditorController.addDocWithoutLock project_id, folder_id, name, lines, "upload", user_id, callback
 				else
-					EditorController.addDocWithoutLock project_id, folder_id, name, lines, "upload", callback
+					EditorController.addDocWithoutLock project_id, folder_id, name, lines, "upload", user_id, callback
 
 	addFile: (user_id, project_id, folder_id, name, path, replace, callback = (error, file)-> )->
 		FileSystemImportManager._isSafeOnFileSystem path, (err, isSafe)->
