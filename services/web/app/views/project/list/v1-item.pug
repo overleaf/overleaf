@@ -1,4 +1,4 @@
-.col-xs-8
+.col-xs-6
 	span.v1-badge(
 		aria-label=translate("v1_badge")
 		tooltip-template="'v1ProjectTooltipTemplate'"
@@ -10,6 +10,9 @@
 					href=settings.overleaf.host + "/{{project.id}}"
 				stop-propagation="click"
 			) {{project.name}}
+
+.col-xs-2
+	span.owner {{ownerName()}}
 
 .col-xs-4
 	span.last-modified {{project.lastUpdated | formatDate}}
