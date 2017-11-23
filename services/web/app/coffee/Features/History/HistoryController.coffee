@@ -33,7 +33,7 @@ module.exports = HistoryController =
 		# find out which type of history service this project uses
 		ProjectDetailsHandler.getDetails project_id, (err, project) ->
 			return next(err) if err?
-			if project?.overleaf?.history?
+			if project?.overleaf?.history?.display
 				req.useProjectHistory = true
 			else
 				req.useProjectHistory = false
