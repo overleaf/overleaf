@@ -149,14 +149,14 @@ module.exports = ProjectEntityHandler =
 		else
 			DocstoreManager.getDoc project_id, doc_id, options, callback
 
-	addDoc: (project_id, folder_id, docName, docLines, callback = (error, doc, folder_id) ->)=>
+	addDoc: (project_id, folder_id, docName, docLines, userId, callback = (error, doc, folder_id) ->)=>
 		ProjectGetter.getProjectWithOnlyFolders project_id, (err, project) ->
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add doc"
 				return callback(err)
-			ProjectEntityHandler.addDocWithProject project, folder_id, docName, docLines, callback
+			ProjectEntityHandler.addDocWithProject project, folder_id, docName, docLines, userId, callback
 
-	addDocWithProject: (project, folder_id, docName, docLines, callback = (error, doc, folder_id) ->)=>
+	addDocWithProject: (project, folder_id, docName, docLines, userId, callback = (error, doc, folder_id) ->)=>
 		project_id = project._id
 		logger.log project_id: project_id, folder_id: folder_id, doc_name: docName, "adding doc to project with project"
 		confirmFolder project, folder_id, (folder_id)=>
@@ -180,7 +180,7 @@ module.exports = ProjectEntityHandler =
 							doc: doc
 							path: result?.path?.fileSystem
 							docLines: docLines.join('\n')
-						DocumentUpdaterHandler.updateProjectStructure project_id, null, [], [newDoc], [], [], (error) ->
+						DocumentUpdaterHandler.updateProjectStructure project_id, userId, [], [newDoc], [], [], (error) ->
 							return callback(error) if error?
 							callback null, doc, folder_id
 

@@ -32,7 +32,7 @@ module.exports = EditorController =
 		docName = docName.trim()
 		logger.log {project_id, folder_id, docName, source}, "sending new doc to project"
 		Metrics.inc "editor.add-doc"
-		ProjectEntityHandler.addDoc project_id, folder_id, docName, docLines, (err, doc, folder_id)=>
+		ProjectEntityHandler.addDoc project_id, folder_id, docName, docLines, null, (err, doc, folder_id)=>
 			if err?
 				logger.err err:err, project_id:project_id, docName:docName, "error adding doc without lock"
 				return callback(err)

@@ -457,7 +457,7 @@ describe 'ProjectEntityHandler', ->
 			@tpdsUpdateSender.addDoc = sinon.stub().callsArg(1)
 			@DocstoreManager.updateDoc = sinon.stub().yields(null, true, 0)
 
-			@ProjectEntityHandler.addDoc project_id, folder_id, @name, @lines, @callback
+			@ProjectEntityHandler.addDoc project_id, folder_id, @name, @lines, userId, @callback
 
 			# Created doc
 			@doc = @ProjectEntityHandler._putElement.args[0][2]
@@ -492,7 +492,7 @@ describe 'ProjectEntityHandler', ->
 				path: @path
 				docLines: @lines.join('\n')
 			@documentUpdaterHandler.updateProjectStructure
-				.calledWith(project_id, null, [], [newDoc], [], [])
+				.calledWith(project_id, userId, [], [newDoc], [], [])
 				.should.equal true
 
 	describe "restoreDoc", ->

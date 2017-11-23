@@ -64,7 +64,7 @@ describe 'ProjectDuplicator', ->
 		@projectOptionsHandler =
 			setCompiler : sinon.stub()								
 		@entityHandler =
-			addDocWithProject: sinon.stub().callsArgWith(4, null, {name:"somDoc"})
+			addDocWithProject: sinon.stub().callsArgWith(5, null, {name:"somDoc"})
 			copyFileFromExistingProjectWithProject: sinon.stub().callsArgWith(4)
 			setRootDoc: sinon.stub()
 			addFolderWithProject: sinon.stub().callsArgWith(3, null, @newFolder)
@@ -112,13 +112,13 @@ describe 'ProjectDuplicator', ->
 			done()
 
 	it 'should use the same compiler', (done)->
-		@entityHandler.addDocWithProject.callsArgWith(4, null, @rootFolder.docs[0])
+		@entityHandler.addDocWithProject.callsArgWith(5, null, @rootFolder.docs[0])
 		@duplicator.duplicate @owner, @old_project_id, "", (err, newProject)=>
 			@projectOptionsHandler.setCompiler.calledWith(@stubbedNewProject._id, @project.compiler).should.equal true
 			done()
 	
 	it 'should use the same root doc', (done)->
-		@entityHandler.addDocWithProject.callsArgWith(4, null, @rootFolder.docs[0])
+		@entityHandler.addDocWithProject.callsArgWith(5, null, @rootFolder.docs[0])
 		@duplicator.duplicate @owner, @old_project_id, "", (err, newProject)=>
 			@entityHandler.setRootDoc.calledWith(@stubbedNewProject._id, @rootFolder.docs[0]._id).should.equal true
 			done()

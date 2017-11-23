@@ -131,14 +131,14 @@ describe "EditorController", ->
 			@docLines = ["1234","dskl"]
 
 		it 'should add the doc using the project entity handler', (done)->
-			mock = sinon.mock(@ProjectEntityHandler).expects("addDoc").withArgs(@project_id, @folder_id, @docName, @docLines).callsArg(4)
+			mock = sinon.mock(@ProjectEntityHandler).expects("addDoc").withArgs(@project_id, @folder_id, @docName, @docLines).callsArg(5)
 
 			@EditorController.addDocWithoutLock @project_id, @folder_id, @docName, @docLines, @source, ->
 				mock.verify()
 				done()
 
 		it 'should send the update out to the users in the project', (done)->
-			@ProjectEntityHandler.addDoc = sinon.stub().callsArgWith(4, null, @doc, @folder_id)
+			@ProjectEntityHandler.addDoc = sinon.stub().callsArgWith(5, null, @doc, @folder_id)
 
 			@EditorController.addDocWithoutLock @project_id, @folder_id, @docName, @docLines, @source, =>
 				@EditorRealTimeController.emitToRoom
@@ -147,7 +147,7 @@ describe "EditorController", ->
 				done()
 
 		it 'should return the doc to the callback', (done) ->
-			@ProjectEntityHandler.addDoc = sinon.stub().callsArgWith(4, null, @doc, @folder_id)
+			@ProjectEntityHandler.addDoc = sinon.stub().callsArgWith(5, null, @doc, @folder_id)
 			@EditorController.addDocWithoutLock @project_id, @folder_id, @docName, @docLines, @source, (error, doc) =>
 				doc.should.equal @doc
 				done()
