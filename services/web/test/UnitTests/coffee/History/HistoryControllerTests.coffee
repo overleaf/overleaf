@@ -31,7 +31,7 @@ describe "HistoryController", ->
 
 		describe "for a project with project history", ->
 			beforeEach ->
-				@ProjectDetailsHandler.getDetails = sinon.stub().callsArgWith(1, null, {overleaf:{history:{}}})
+				@ProjectDetailsHandler.getDetails = sinon.stub().callsArgWith(1, null, {overleaf:{history:{display:true}}})
 				@HistoryController.selectHistoryApi @req, @res, @next
 
 			it "should set the flag for project history to true", ->
