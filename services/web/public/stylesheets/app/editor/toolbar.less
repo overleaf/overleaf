@@ -1,6 +1,8 @@
 .toolbar {
+	display: flex;
+	align-items: center;
 	height: 40px;
-	border-bottom: 1px solid @toolbar-border-color;
+	border-bottom: @toolbar-border-bottom;
 
 	> a, .toolbar-right > a {
 		position: relative;
@@ -23,8 +25,8 @@
 	.toolbar-right > a:not(.btn) {
 		display: inline-block;
 		color: @toolbar-icon-btn-color;
-		padding: 4px 10px 5px;
-		margin: 1px 2px;
+		padding: 0 5px;
+		// margin: 1px 2px;
 		border-radius: @border-radius-small;
 		&:hover {
 			text-shadow: @toolbar-icon-btn-hover-shadow;
@@ -72,12 +74,15 @@
 	}
 
 	.toolbar-left {
+		display: flex;
 		float: left;
 		text-align: center;
 	}
 
 	.toolbar-right {
-		float: right;
+		display: flex;
+		flex-grow: 1;
+		justify-content: flex-end;
 		.btn-full-height {
 			border-right: 0;
 			border-left: 1px solid @toolbar-border-color;
@@ -121,35 +126,11 @@
 
 .toolbar-small-mixin() {
 	height: 32px;
-	> a, .toolbar-right > a {
-		padding: 2px 4px 1px 4px;
-		margin: 0;
-		margin-top: 2px;
-	}
-	> a {
-		margin-left: 2px;
-	}
-	.toolbar-right > a {
-		margin-left: 0;
-		margin-right: 2px;
-	}
 }
 
 .toolbar-tall-mixin() {
 	height: 58px;
 	padding-top: 10px;
-	> a, .toolbar-right > a {
-		padding: 4px 10px 5px;
-	}
-	> a.btn, .toolbar-right > a.btn {
-		margin: 0 (@line-height-computed / 2);
-	}
-	.btn-group {
-		margin: 0 (@line-height-computed / 2);
-		> .btn-group {
-			margin: 0;
-		}
-	}
 }
 .toolbar-alt-mixin() {
 	background-color: @toolbar-alt-bg-color;

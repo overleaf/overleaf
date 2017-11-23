@@ -1,9 +1,9 @@
-.toolbar.toolbar-pdf when (@is-overleaf = true) {
+.pdf .toolbar.toolbar-pdf when (@is-overleaf = true) {
 	.toolbar-small-mixin;
 	.toolbar-alt-mixin;
 }
 
-.toolbar.toolbar-pdf when (@is-overleaf = false) {
+.pdf .toolbar.toolbar-pdf when (@is-overleaf = false) {
 	.toolbar-tall-mixin;
 }
 
@@ -20,6 +20,25 @@
 	.fa {
 		color: @blue;
 	}
+}
+
+.btn-recompile-group when (@is-overleaf = true) {
+	height: 100%;
+}
+
+.btn-recompile when (@is-overleaf = true) {
+	height: 100%;
+	.btn-primary;
+	padding-top: 3px;
+	padding-bottom: 3px;
+	&:first-child {
+		border-top-left-radius: 0;
+		border-bottom-left-radius: 0;
+	}
+}
+
+.btn-recompile when (@is-overleaf = false) {
+	.btn-info;
 }
 
 .pdf-viewer {
@@ -91,7 +110,6 @@
 
 .pdf .toolbar {
 	.toolbar-right {
-		margin-right: @line-height-computed / 2;
 		a {
 			&:hover {
 				i {
