@@ -234,44 +234,6 @@ module.exports = ProjectController =
 				#don't need to wait for this to complete
 				ProjectUpdateHandler.markAsOpened project_id, ->
 				cb()
-			showTrackChangesOnboarding: (cb) ->
-				cb = underscore.once(cb)
-				if !user_id?
-					return cb()
-				timestamp = user_id.toString().substring(0,8)
-				userSignupDate = new Date( parseInt( timestamp, 16 ) * 1000 )
-				if userSignupDate > new Date("2017-03-09") # 8th March
-					# Don't show for users who registered after it was released
-					return cb(null, false)
-				timeout = setTimeout cb, 500
-				AnalyticsManager.getLastOccurance user_id, "shown-track-changes-onboarding-2", (error, event) ->
-					clearTimeout timeout
-					if error?
-						return cb(null, false)
-					else if event?
-						return cb(null, false)
-					else
-						logger.log { user_id, event }, "track changes onboarding not shown yet to this user"
-						return cb(null, true)
-			showPerUserTCNotice: (cb) ->
-				cb = underscore.once(cb)
-				if !user_id?
-					return cb()
-				timestamp = user_id.toString().substring(0,8)
-				userSignupDate = new Date( parseInt( timestamp, 16 ) * 1000 )
-				if userSignupDate > new Date("2017-08-09")
-					# Don't show for users who registered after it was released
-					return cb(null, false)
-				timeout = setTimeout cb, 500
-				AnalyticsManager.getLastOccurance user_id, "shown-per-user-tc-notice", (error, event) ->
-					clearTimeout timeout
-					if error?
-						return cb(null, false)
-					else if event?
-						return cb(null, false)
-					else
-						logger.log { user_id, event }, "per user track changes notice not shown yet to this user"
-						return cb(null, true)
 			isTokenMember: (cb) ->
 				cb = underscore.once(cb)
 				if !user_id?
@@ -331,20 +293,13 @@ module.exports = ProjectController =
 			project = results.project
 			user = results.user
 			subscription = results.subscription
-			{ showTrackChangesOnboarding, showPerUserTCNotice, showAutoCompileOnboarding } = results
+			{ showAutoCompileOnboarding } = results
 
 			daysSinceLastUpdated =  (new Date() - project.lastUpdated) / 86400000
 			logger.log project_id:project_id, daysSinceLastUpdated:daysSinceLastUpdated, "got db results for loading editor"
 
 			token = TokenAccessHandler.getRequestToken(req, project_id)
 			isTokenMember = results.isTokenMember
-			# Roll out token-access based on Project owner
-			enableTokenAccessUI = ProjectController._isInPercentageRollout(
-				'linksharing',
-				project.owner_ref,
-				100
-			)
-			showLinkSharingOnboarding = enableTokenAccessUI && results.couldShowLinkSharingOnboarding
 			AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, token, (error, privilegeLevel)->
 				return next(error) if error?
 				if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
@@ -383,8 +338,6 @@ module.exports = ProjectController =
 						syntaxValidation: user.ace.syntaxValidation
 					}
 					trackChangesState: project.track_changes
-					showTrackChangesOnboarding: !!showTrackChangesOnboarding
-					showPerUserTCNotice: !!showPerUserTCNotice
 					autoCompileEnabled: !!showAutoCompileOnboarding?.enabled
 					showAutoCompileOnboarding: !!showAutoCompileOnboarding?.showOnboarding
 					privilegeLevel: privilegeLevel
@@ -395,8 +348,7 @@ module.exports = ProjectController =
 					languages: Settings.languages
 					themes: THEME_LIST
 					maxDocLength: Settings.max_doc_length
-					enableTokenAccessUI: enableTokenAccessUI
-					showLinkSharingOnboarding: showLinkSharingOnboarding
+					showLinkSharingOnboarding: !!results.couldShowLinkSharingOnboarding
 				timer.done()
 
 	_buildProjectList: (allProjects, v1Projects = [])->

@@ -493,35 +493,6 @@ describe "ProjectController", ->
 				done()
 			@ProjectController.loadEditor @req, @res
 		
-		it "should set showTrackChangesOnboarding = false if there is an event", (done) ->
-			@AnalyticsManager.getLastOccurance.yields(null, {"mock": "event"})
-			@res.render = (pageName, opts)=>
-				opts.showTrackChangesOnboarding.should.equal false
-				done()
-			@ProjectController.loadEditor @req, @res
-		
-		it "should set showTrackChangesOnboarding = true if there is no event", (done) ->
-			@AnalyticsManager.getLastOccurance.yields(null, null)
-			@res.render = (pageName, opts)=>
-				opts.showTrackChangesOnboarding.should.equal true
-				done()
-			@ProjectController.loadEditor @req, @res
-		
-		it "should set showTrackChangesOnboarding = false if there is an error", (done) ->
-			@AnalyticsManager.getLastOccurance.yields(new Error("oops"), null)
-			@res.render = (pageName, opts)=>
-				opts.showTrackChangesOnboarding.should.equal false
-				done()
-			@ProjectController.loadEditor @req, @res
-		
-		it "should set showTrackChangesOnboarding = false if the user signed up after release", (done) ->
-			@AuthenticationController.getLoggedInUserId.returns("58c11a608ba0d6e49e8ce5d5")
-			@AnalyticsManager.getLastOccurance.yields(null, null)
-			@res.render = (pageName, opts)=>
-				opts.showTrackChangesOnboarding.should.equal false
-				done()
-			@ProjectController.loadEditor @req, @res
-
 	describe '_isInPercentageRollout', ->
 		before ->
 			@ids = [
