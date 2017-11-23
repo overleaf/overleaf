@@ -1,5 +1,9 @@
 .col-xs-8
-	span.v1-badge(aria-label=translate("v1_badge"))
+	span.v1-badge(
+		aria-label=translate("v1_badge")
+		tooltip-template="'v1ProjectTooltipTemplate'"
+		tooltip-append-to-body="true"
+	)
 	span
 		if settings.overleaf && settings.overleaf.host
 			a.projectName(

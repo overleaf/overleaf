@@ -69,6 +69,8 @@
 						ng-if="tag.isV1",
 						ng-cloak,
 						aria-label=translate("v1_badge")
+						tooltip-template="'v1TagTooltipTemplate'"
+						tooltip-append-to-body="true"
 					)
 			span.dropdown.tag-menu(dropdown)
 				a.dropdown-toggle(
