@@ -12,7 +12,7 @@ logger = require("logger-sharelatex")
 
 module.exports = ProjectDuplicator =
 
-	_copyDocs: (newProject, originalRootDoc, originalFolder, desFolder, docContents, callback)->
+	_copyDocs: (owner_id, newProject, originalRootDoc, originalFolder, desFolder, docContents, callback)->
 		setRootDoc = _.once (doc_id)->
 			projectEntityHandler.setRootDoc newProject._id, doc_id
 		docs = originalFolder.docs or []
@@ -21,7 +21,7 @@ module.exports = ProjectDuplicator =
 				if !doc?._id?
 					return callback()
 				content = docContents[doc._id.toString()]
-				projectEntityHandler.addDocWithProject newProject, desFolder._id, doc.name, content.lines, null, (err, newDoc)->
+				projectEntityHandler.addDocWithProject newProject, desFolder._id, doc.name, content.lines, owner_id, (err, newDoc)->
 					if err?
 						logger.err err:err, "error copying doc"
 						return callback(err)
@@ -39,7 +39,7 @@ module.exports = ProjectDuplicator =
 		async.parallelLimit jobs, 5, callback
 
 
-	_copyFolderRecursivly: (newProject_id, originalProject_id, originalRootDoc, originalFolder, desFolder, docContents, callback)->
+	_copyFolderRecursivly: (owner_id, newProject_id, originalProject_id, originalRootDoc, originalFolder, desFolder, docContents, callback)->
 		ProjectGetter.getProject newProject_id, {rootFolder:true, name:true}, (err, newProject)->
 			if err?
 				logger.err project_id:newProject_id, "could not get project"
@@ -53,12 +53,12 @@ module.exports = ProjectDuplicator =
 						return cb()
 					projectEntityHandler.addFolderWithProject newProject, desFolder?._id, childFolder.name, (err, newFolder)->
 						return cb(err) if err?
-						ProjectDuplicator._copyFolderRecursivly newProject_id, originalProject_id, originalRootDoc, childFolder, newFolder, docContents, cb
+						ProjectDuplicator._copyFolderRecursivly owner_id, newProject_id, originalProject_id, originalRootDoc, childFolder, newFolder, docContents, cb
 
 			jobs.push (cb)->
 				ProjectDuplicator._copyFiles newProject, originalProject_id, originalFolder, desFolder, cb
 			jobs.push (cb)->
-				ProjectDuplicator._copyDocs newProject, originalRootDoc, originalFolder, desFolder, docContents, cb
+				ProjectDuplicator._copyDocs owner_id, newProject, originalRootDoc, originalFolder, desFolder, docContents, cb
 
 			async.series jobs, callback
 
@@ -90,7 +90,7 @@ module.exports = ProjectDuplicator =
 			
 			projectOptionsHandler.setCompiler newProject._id, originalProject.compiler, ->
 
-			ProjectDuplicator._copyFolderRecursivly newProject._id, originalProject_id, originalRootDoc, originalProject.rootFolder[0], newProject.rootFolder[0], docContents, ->
+			ProjectDuplicator._copyFolderRecursivly owner._id, newProject._id, originalProject_id, originalRootDoc, originalProject.rootFolder[0], newProject.rootFolder[0], docContents, ->
 				if err?
 					logger.err err:err, originalProject_id:originalProject_id,  newProjectName:newProjectName, "error cloning project"
 				callback(err, newProject)

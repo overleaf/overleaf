@@ -112,13 +112,13 @@ describe 'ProjectDuplicator', ->
 			done()
 
 	it 'should use the same compiler', (done)->
-		@entityHandler.addDocWithProject.callsArgWith(5, null, @rootFolder.docs[0])
+		@entityHandler.addDocWithProject.callsArgWith(5, null, @rootFolder.docs[0], @owner._id)
 		@duplicator.duplicate @owner, @old_project_id, "", (err, newProject)=>
 			@projectOptionsHandler.setCompiler.calledWith(@stubbedNewProject._id, @project.compiler).should.equal true
 			done()
 	
 	it 'should use the same root doc', (done)->
-		@entityHandler.addDocWithProject.callsArgWith(5, null, @rootFolder.docs[0])
+		@entityHandler.addDocWithProject.callsArgWith(5, null, @rootFolder.docs[0], @owner._id)
 		@duplicator.duplicate @owner, @old_project_id, "", (err, newProject)=>
 			@entityHandler.setRootDoc.calledWith(@stubbedNewProject._id, @rootFolder.docs[0]._id).should.equal true
 			done()
@@ -139,9 +139,15 @@ describe 'ProjectDuplicator', ->
 	it 'should copy all the docs', (done)->
 		@duplicator.duplicate @owner, @old_project_id, "", (err, newProject)=>
 			@DocstoreManager.getAllDocs.calledWith(@old_project_id).should.equal true
-			@entityHandler.addDocWithProject.calledWith(@stubbedNewProject, @stubbedNewProject.rootFolder[0]._id, @doc0.name, @doc0_lines).should.equal true
-			@entityHandler.addDocWithProject.calledWith(@stubbedNewProject, @newFolder._id, @doc1.name, @doc1_lines).should.equal true
-			@entityHandler.addDocWithProject.calledWith(@stubbedNewProject, @newFolder._id, @doc2.name, @doc2_lines).should.equal true
+			@entityHandler.addDocWithProject
+				.calledWith(@stubbedNewProject, @stubbedNewProject.rootFolder[0]._id, @doc0.name, @doc0_lines, @owner._id)
+				.should.equal true
+			@entityHandler.addDocWithProject
+				.calledWith(@stubbedNewProject, @newFolder._id, @doc1.name, @doc1_lines, @owner._id)
+				.should.equal true
+			@entityHandler.addDocWithProject
+				.calledWith(@stubbedNewProject, @newFolder._id, @doc2.name, @doc2_lines, @owner._id)
+				.should.equal true
 			done()
 
 	it 'should copy all the files', (done)->
