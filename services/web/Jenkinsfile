@@ -112,13 +112,13 @@ pipeline {
     stage('Unit Tests') {
       steps {
         sh 'make install'
-        sh "make test_unit MOCHA_ARGS="--reporter=tap"'
+        sh 'make test_unit MOCHA_ARGS="--reporter=tap"'
       }
     }
     
     stage('Acceptance Tests') {
       steps {
-        sh "make test_acceptance MOCHA_ARGS="--reporter=tap"'
+        sh 'make test_acceptance MOCHA_ARGS="--reporter=tap"'
       }
     }
     
