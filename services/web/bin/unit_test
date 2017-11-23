@@ -1,0 +1,14 @@
+#!/bin/bash
+set -e;
+
+MOCHA="node_modules/.bin/mocha --recursive --reporter spec"
+
+$MOCHA "$@" test/unit/js
+
+for dir in modules/*;
+do
+	if [ -d $dir/test/unit/js ]; then
+		$MOCHA "$@" $dir/test/unit/js
+	fi
+done
+
