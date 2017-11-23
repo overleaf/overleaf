@@ -135,6 +135,7 @@ module.exports = SubscriptionController =
 				RecurlyWrapper.getSubscription subscription.recurlySubscription_id,
 					includeAccount: true,
 					(err, usersSubscription)->
+						return next(err) if err?
 						account = usersSubscription.account
 						hostedLoginToken = account.hosted_login_token
 						if !hostedLoginToken
