@@ -253,7 +253,7 @@ describe "EditorController", ->
 			@fsPath = "/folder/file.png"
 
 		it 'should send the replace file message to the editor controller', (done)->
-			@ProjectEntityHandler.replaceFile = sinon.stub().callsArgWith(3)
+			@ProjectEntityHandler.replaceFile = sinon.stub().callsArgWith(4)
 			@EditorController.replaceFile @project_id, @file_id, @fsPath, @source, =>
 				@ProjectEntityHandler.replaceFile.calledWith(@project_id, @file_id, @fsPath).should.equal true
 				done()

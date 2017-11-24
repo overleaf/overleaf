@@ -60,7 +60,7 @@ module.exports = EditorController =
 			callback(err, fileRef)
 
 	replaceFile: (project_id, file_id, fsPath, source, callback = (error) ->)->
-		ProjectEntityHandler.replaceFile project_id, file_id, fsPath, callback
+		ProjectEntityHandler.replaceFile project_id, file_id, fsPath, null, callback
 
 	addFolder : (project_id, folder_id, folderName, source, callback = (error, folder)->)->
 		LockManager.getLock project_id, (err)->

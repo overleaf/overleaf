@@ -603,14 +603,14 @@ describe 'ProjectEntityHandler', ->
 			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, @project)
 
 		it 'should find the file', (done)->
-			@ProjectEntityHandler.replaceFile project_id, @file_id, @fsPath, =>
+			@ProjectEntityHandler.replaceFile project_id, @file_id, @fsPath, userId, =>
 				@projectLocator.findElement
 					.calledWith({element_id:@file_id, type:"file", project: @project})
 					.should.equal true
 				done()
 
 		it 'should tell the file store handler to upload the file from disk', (done)->
-			@ProjectEntityHandler.replaceFile project_id, @file_id, @fsPath, =>
+			@ProjectEntityHandler.replaceFile project_id, @file_id, @fsPath, userId, =>
 				@FileStoreHandler.uploadFileFromDisk.calledWith(project_id, @file_id, @fsPath).should.equal true
 				done()
 
@@ -623,7 +623,7 @@ describe 'ProjectEntityHandler', ->
 				options.rev.should.equal @fileRef.rev + 1
 				done()
 
-			@ProjectEntityHandler.replaceFile project_id, @file_id, @fsPath, =>
+			@ProjectEntityHandler.replaceFile project_id, @file_id, @fsPath, userId, =>
 
 		it 'should inc the rev id', (done)->
 			@ProjectModel.findOneAndUpdate = (conditions, update, options, callback)=>
@@ -631,7 +631,7 @@ describe 'ProjectEntityHandler', ->
 				update.$inc["#{@filePaths.mongo}.rev"].should.equal 1
 				done()
 
-			@ProjectEntityHandler.replaceFile project_id, @file_id, @fsPath, =>
+			@ProjectEntityHandler.replaceFile project_id, @file_id, @fsPath, userId, =>
 
 		it 'should update the created at date', (done)->
 			d = new Date()
@@ -641,12 +641,12 @@ describe 'ProjectEntityHandler', ->
 				differenceInMs.should.be.below(20)
 				done()
 
-			@ProjectEntityHandler.replaceFile project_id, @file_id, @fsPath, =>
+			@ProjectEntityHandler.replaceFile project_id, @file_id, @fsPath, userId, =>
 
 		it "should should send the old and new project structure to the doc updater", (done) ->
-			@ProjectEntityHandler.replaceFile project_id, @file_id, @fsPath, =>
+			@ProjectEntityHandler.replaceFile project_id, @file_id, @fsPath, userId, =>
 				@documentUpdaterHandler.updateProjectStructure
-					.calledWith(project_id, null, [], [], @oldFiles, @newFiles)
+					.calledWith(project_id, userId, [], [], @oldFiles, @newFiles)
 					.should.equal true
 				done()
 

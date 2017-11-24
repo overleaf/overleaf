@@ -222,7 +222,7 @@ module.exports = ProjectEntityHandler =
 							return callback(error) if error?
 							callback null, fileRef, folder_id
 
-	replaceFile: (project_id, file_id, fsPath, callback)->
+	replaceFile: (project_id, file_id, fsPath, userId, callback)->
 		self = ProjectEntityHandler
 		ProjectGetter.getProject project_id, {name:true}, (err, project) ->
 			return callback(err) if err?
@@ -251,7 +251,7 @@ module.exports = ProjectEntityHandler =
 								return callback(err) if err?
 								self.getAllEntitiesFromProject newProject, (err, newDocs, newFiles) =>
 									return callback(err) if err?
-									DocumentUpdaterHandler.updateProjectStructure project_id, null, oldDocs, newDocs, oldFiles, newFiles, callback
+									DocumentUpdaterHandler.updateProjectStructure project_id, userId, oldDocs, newDocs, oldFiles, newFiles, callback
 
 	copyFileFromExistingProjectWithProject: (project, folder_id, originalProject_id, origonalFileRef, callback = (error, fileRef, folder_id) ->)->
 		project_id = project._id
