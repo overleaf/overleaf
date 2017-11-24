@@ -69,7 +69,7 @@ module.exports =
 					logger.err err:err, project_id:project_id, file_id:file_id, path:path, "error processing file"
 					return callback(err)
 				else if file_id?
-					editorController.replaceFile project_id, file_id, fsPath, source, finish
+					editorController.replaceFile project_id, file_id, fsPath, source, user_id, finish
 				else
 					editorController.addFile project_id, folder?._id, fileName, fsPath, source, user_id, finish
 

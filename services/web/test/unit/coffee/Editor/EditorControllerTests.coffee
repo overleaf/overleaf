@@ -254,8 +254,8 @@ describe "EditorController", ->
 
 		it 'should send the replace file message to the editor controller', (done)->
 			@ProjectEntityHandler.replaceFile = sinon.stub().callsArgWith(4)
-			@EditorController.replaceFile @project_id, @file_id, @fsPath, @source, =>
-				@ProjectEntityHandler.replaceFile.calledWith(@project_id, @file_id, @fsPath).should.equal true
+			@EditorController.replaceFile @project_id, @file_id, @fsPath, @source, @user_id, =>
+				@ProjectEntityHandler.replaceFile.calledWith(@project_id, @file_id, @fsPath, @user_id).should.equal true
 				done()
 
 	describe 'addFolderWithoutLock :', ->
