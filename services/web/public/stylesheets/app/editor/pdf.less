@@ -7,6 +7,7 @@
 
 .pdf .toolbar.toolbar-pdf when (@is-overleaf = false) {
 	.toolbar-tall-mixin;
+	padding: 0 (@line-height-computed / 2);
 }
 
 .pdf-viewer, .pdf-logs, .pdf-errors, .pdf-uncompiled {
@@ -25,8 +26,14 @@
 }
 
 .btn-recompile-group when (@is-overleaf = true) {
+	align-self: stretch;
 	margin-right: 5px;
 }
+
+.btn-recompile-group when (@is-overleaf = false) {
+	margin-right: (@line-height-computed / 2);
+}
+
 
 .btn-recompile when (@is-overleaf = true) {
 	height: 100%;
