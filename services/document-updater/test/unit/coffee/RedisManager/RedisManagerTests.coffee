@@ -739,3 +739,30 @@ describe "RedisManager", ->
 			@rclient.rpush
 				.calledWith("ProjectHistory:Ops:#{@project_id}", JSON.stringify(update))
 				.should.equal true
+
+	describe "addEntity", ->
+		beforeEach (done) ->
+			@rclient.rpush = sinon.stub().yields()
+			@entity_id = 1234
+			@entity_type = 'type'
+
+			@update =
+				pathname: @pathname = '/old'
+				docLines: @docLines = 'a\nb'
+				url: @url = 'filestore.example.com'
+
+			@RedisManager.addEntity @project_id, @entity_type, @entity_id, @userId, @update, done
+
+		it "should queue an update", ->
+			update =
+				pathname: @pathname
+				docLines: @docLines
+				url: @url
+				meta:
+					user_id: @user_id
+					ts: new Date()
+			update[@entity_type] = @entity_id
+
+			@rclient.rpush
+				.calledWith("ProjectHistory:Ops:#{@project_id}", JSON.stringify(update))
+				.should.equal true

@@ -24,7 +24,7 @@ describe "Applying updates to a project's structure", ->
 				throw error if error?
 				setTimeout done, 200
 
-		it "should push the applied file renames to the project history changes api", (done) ->
+		it "should push the applied file renames to the project history api", (done) ->
 			rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
 				throw error if error?
 
@@ -52,7 +52,7 @@ describe "Applying updates to a project's structure", ->
 					throw error if error?
 					setTimeout done, 200
 
-			it "should push the applied doc renames to the project history changes api", (done) ->
+			it "should push the applied doc renames to the project history api", (done) ->
 				rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
 					throw error if error?
 
@@ -84,7 +84,7 @@ describe "Applying updates to a project's structure", ->
 					doc.pathname.should.equal @docUpdate.newPathname
 					done()
 
-			it "should push the applied doc renames to the project history changes api", (done) ->
+			it "should push the applied doc renames to the project history api", (done) ->
 				rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
 					throw error if error?
 
@@ -96,3 +96,54 @@ describe "Applying updates to a project's structure", ->
 					update.meta.ts.should.be.a('string')
 
 					done()
+
+	describe "adding a file", ->
+		before (done) ->
+			@project_id = DocUpdaterClient.randomId()
+			@fileUpdate =
+				id: DocUpdaterClient.randomId()
+				pathname: '/file-path'
+				url: 'filestore.example.com'
+			@fileUpdates = [ @fileUpdate ]
+			DocUpdaterClient.sendProjectUpdate @project_id, @user_id, [], @fileUpdates, (error) ->
+				throw error if error?
+				setTimeout done, 200
+
+		it "should push the file addition to the project history api", (done) ->
+			rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
+				throw error if error?
+
+				update = JSON.parse(updates[0])
+				update.file.should.equal @fileUpdate.id
+				update.pathname.should.equal '/file-path'
+				update.url.should.equal 'filestore.example.com'
+				update.meta.user_id.should.equal @user_id
+				update.meta.ts.should.be.a('string')
+
+				done()
+
+	describe "adding a doc", ->
+		before (done) ->
+			@project_id = DocUpdaterClient.randomId()
+			@docUpdate =
+				id: DocUpdaterClient.randomId()
+				pathname: '/file-path'
+				docLines: 'a\nb'
+			@docUpdates = [ @docUpdate ]
+			DocUpdaterClient.sendProjectUpdate @project_id, @user_id, @docUpdates, [], (error) ->
+				throw error if error?
+				setTimeout done, 200
+
+		it "should push the doc addition to the project history api", (done) ->
+			rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
+				throw error if error?
+
+				update = JSON.parse(updates[0])
+				update.doc.should.equal @docUpdate.id
+				update.pathname.should.equal '/file-path'
+				update.docLines.should.equal 'a\nb'
+				update.meta.user_id.should.equal @user_id
+				update.meta.ts.should.be.a('string')
+
+				done()
+

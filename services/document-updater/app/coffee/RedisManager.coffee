@@ -300,6 +300,21 @@ module.exports = RedisManager =
 
 		rclient.rpush projectHistoryKeys.projectHistoryOps({project_id}), jsonUpdate, callback
 
+	addEntity: (project_id, entity_type, entitiy_id, user_id, update, callback = (error) ->) ->
+		update =
+			pathname: update.pathname
+			docLines: update.docLines
+			url: update.url
+			meta:
+				user_id: user_id
+				ts: new Date()
+		update[entity_type] = entitiy_id
+
+		logger.log {project_id, update}, "queue add operation to project-history"
+		jsonUpdate = JSON.stringify(update)
+
+		rclient.rpush projectHistoryKeys.projectHistoryOps({project_id}), jsonUpdate, callback
+
 	clearUnflushedTime: (doc_id, callback = (error) ->) ->
 		rclient.del keys.unflushedTime(doc_id:doc_id), callback
 
