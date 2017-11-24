@@ -1,18 +1,4 @@
 #!/bin/bash
 set -e;
-
 MOCHA="node_modules/.bin/mocha --recursive --reporter spec --timeout 15000"
-
-$MOCHA "$@" test/acceptance/js
-
-# TODO: Module acceptance tests are hard to get working,
-# because they typically require the server to be instantiated
-# with a different config. 
-
-# for dir in modules/*;
-# do
-# 	if [ -d $dir/test/acceptance/js ]; then
-# 		$MOCHA "$@" $dir/test/acceptance/js
-# 	fi
-# done
-
+$MOCHA "$@"
