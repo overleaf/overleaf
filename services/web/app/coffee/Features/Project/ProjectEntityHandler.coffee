@@ -255,25 +255,31 @@ module.exports = ProjectEntityHandler =
 
 	copyFileFromExistingProjectWithProject: (project, folder_id, originalProject_id, origonalFileRef, callback = (error, fileRef, folder_id) ->)->
 		project_id = project._id
-		logger.log project_id:project_id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "copying file in s3 with project"
+		logger.log { project_id, folder_id, originalProject_id, origonalFileRef }, "copying file in s3 with project"
 		return callback(err) if err?
 		confirmFolder project, folder_id, (folder_id)=>
 			if !origonalFileRef?
-				logger.err project_id:project._id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "file trying to copy is null"
+				logger.err { project_id, folder_id, originalProject_id, origonalFileRef }, "file trying to copy is null"
 				return callback()
 			fileRef = new File name : origonalFileRef.name
-			FileStoreHandler.copyFile originalProject_id, origonalFileRef._id, project._id, fileRef._id, (err)->
+			FileStoreHandler.copyFile originalProject_id, origonalFileRef._id, project._id, fileRef._id, (err, fileStoreUrl)->
 				if err?
-					logger.err err:err, project_id:project._id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "error coping file in s3"
+					logger.err { err, project_id, folder_id, originalProject_id, origonalFileRef }, "error coping file in s3"
 					return callback(err)
 				ProjectEntityHandler._putElement project, folder_id, fileRef, "file", (err, result)=>
 					if err?
-						logger.err err:err, project_id:project._id, folder_id:folder_id, "error putting element as part of copy"
+						logger.err { err, project_id, folder_id }, "error putting element as part of copy"
 						return callback(err)
-					tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:result?.path?.fileSystem, rev:fileRef.rev, project_name:project.name}, (err) ->
+					tpdsUpdateSender.addFile { project_id, file_id:fileRef._id, path:result?.path?.fileSystem, rev:fileRef.rev, project_name:project.name}, (err) ->
 						if err?
-							logger.err err:err,  project_id:project._id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "error sending file to tpds worker"
-						callback(null, fileRef, folder_id)
+							logger.err { err, project_id, folder_id, originalProject_id, origonalFileRef }, "error sending file to tpds worker"
+						newFile =
+							file: fileRef
+							path: result?.path?.fileSystem
+							url: fileStoreUrl
+						DocumentUpdaterHandler.updateProjectStructure project_id, null, [], [], [], [newFile], (error) ->
+							return callback(error) if error?
+							callback null, fileRef, folder_id
 
 	mkdirp: (project_id, path, callback = (err, newlyCreatedFolders, lastFolderInPath)->)->
 		self = @

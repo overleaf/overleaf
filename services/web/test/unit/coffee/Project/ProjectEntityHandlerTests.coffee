@@ -20,7 +20,7 @@ describe 'ProjectEntityHandler', ->
 		@fileUrl = 'filestore.example.com/file'
 		@FileStoreHandler =
 			uploadFileFromDisk: sinon.stub().callsArgWith(3, null, @fileUrl)
-			copyFile: sinon.stub().callsArgWith(4, null)
+			copyFile: sinon.stub().callsArgWith(4, null, @fileUrl)
 		@tpdsUpdateSender =
 			addDoc:sinon.stub().callsArg(1)
 			addFile:sinon.stub().callsArg(1)
@@ -570,9 +570,9 @@ describe 'ProjectEntityHandler', ->
 			@ProjectEntityHandler.addFile project_id, folder_id, fileName, {}, userId, (err, fileRef, parentFolder)->
 
 		it "should should send the change in project structure to the doc updater", (done) ->
-			@documentUpdaterHandler.updateProjectStructure = (project_id, user_id, oldDocs, newDocs, oldFiles, newFiles) =>
-				project_id.should.equal project_id
-				user_id.should.equal user_id
+			@documentUpdaterHandler.updateProjectStructure = (passed_project_id, passed_user_id, oldDocs, newDocs, oldFiles, newFiles) =>
+				passed_project_id.should.equal project_id
+				passed_user_id.should.equal userId
 				newFiles.length.should.equal 1
 				newFile = newFiles[0]
 				newFile.file.name.should.equal fileName
@@ -989,7 +989,8 @@ describe 'ProjectEntityHandler', ->
 		oldFileRef = {name:fileName, _id:"oldFileRef"}
 
 		beforeEach ->
-			@ProjectEntityHandler._putElement = sinon.stub().callsArgWith(4, null, {path:{fileSystem:"somehintg"}})
+			@fileSystemPath = "somehintg"
+			@ProjectEntityHandler._putElement = sinon.stub().callsArgWith(4, null, {path:{fileSystem: @fileSystemPath}})
 
 		it 'should copy the file in FileStoreHandler', (done)->
 			@ProjectEntityHandler._putElement = sinon.stub().callsArgWith(4, null, {path:{fileSystem:"somehintg"}})
@@ -1026,6 +1027,19 @@ describe 'ProjectEntityHandler', ->
 				options.path.should.equal opts.path
 				options.file_id.should.not.be.null
 				options.rev.should.equal 0
+				done()
+
+			@ProjectEntityHandler.copyFileFromExistingProjectWithProject @project, folder_id, oldProject_id, oldFileRef, (err, fileRef, parentFolder)->
+
+		it "should should send the change in project structure to the doc updater", (done) ->
+			@documentUpdaterHandler.updateProjectStructure = (passed_project_id, passed_user_id, oldDocs, newDocs, oldFiles, newFiles) =>
+				passed_project_id.should.equal project_id
+				#passed_user_id.should.equal userId
+				newFiles.length.should.equal 1
+				newFile = newFiles[0]
+				newFile.file.name.should.equal fileName
+				newFile.path.should.equal @fileSystemPath
+				newFile.url.should.equal @fileUrl
 				done()
 
 			@ProjectEntityHandler.copyFileFromExistingProjectWithProject @project, folder_id, oldProject_id, oldFileRef, (err, fileRef, parentFolder)->
