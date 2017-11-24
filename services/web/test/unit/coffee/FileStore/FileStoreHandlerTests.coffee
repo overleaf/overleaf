@@ -219,6 +219,11 @@ describe "FileStoreHandler", ->
 				@handler._buildUrl.calledWith(@newProject_id, @newFile_id).should.equal true
 				done()
 
+		it "returns the url", (done)->
+			@request.callsArgWith(1, null)
+			@handler.copyFile @project_id, @file_id, @newProject_id, @newFile_id, (err, url) =>
+				url.should.equal "http://filestore.stubbedBuilder.com"
+				done()
 
 		it "should return the err", (done)->
 			error = "errrror"

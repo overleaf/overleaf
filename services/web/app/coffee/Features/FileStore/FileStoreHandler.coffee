@@ -92,7 +92,7 @@ module.exports = FileStoreHandler =
 		request opts, (err)->
 			if err?
 				logger.err err:err, oldProject_id:oldProject_id, oldFile_id:oldFile_id, newProject_id:newProject_id, newFile_id:newFile_id, "something went wrong telling filestore api to copy file"
-			callback(err)
+			callback(err, opts.uri)
 
 	_buildUrl: (project_id, file_id)->
 		return "#{settings.apis.filestore.url}/project/#{project_id}/file/#{file_id}"
