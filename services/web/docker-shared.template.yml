@@ -1,5 +1,10 @@
 version: "2"
 
+# We mount all the directories explicitly so that we are only mounting
+# the coffee directories, so that the compiled js is only written inside
+# the container, and not back to the local filesystem, where it would be
+# root owned, and conflict with working outside of the container.
+
 services:
   app:
     image: node:6.9.5
@@ -8,6 +13,10 @@ services:
       - ./npm-shrinkwrap.json:/app/npm-shrinkwrap.json
       - node_modules:/app/node_modules
       - ./bin:/app/bin
+      # Copying the whole public dir is fine for now, and needed for
+      # some unit tests to pass, but we will want to isolate the coffee
+      # and vendor js files, so that the compiled js files are not written
+      # back to the local filesystem.
       - ./public:/app/public
       - ./app.coffee:/app/app.coffee:ro
       - ./app/coffee:/app/app/coffee:ro
