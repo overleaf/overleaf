@@ -5,25 +5,21 @@ volumes:
 
 services:
   npm:
-    image: node:6.9.5
-    volumes:
-      - .:/app
-      - node_modules:/app/node_modules
-    working_dir: /app
+    extends:
+      file: docker-shared.yml
+      service: app
+    command: npm install
 
   test_unit:
-    image: node:6.9.5
-    volumes:
-      - .:/app
-      - node_modules:/app/node_modules
-    working_dir: /app
+    extends:
+      file: docker-shared.yml
+      service: app
     command: npm run test:unit
 
   test_acceptance:
-    image: node:6.9.5
-    volumes:
-      - .:/app
-      - node_modules:/app/node_modules
+    extends:
+      file: docker-shared.yml
+      service: app
     environment:
       REDIS_HOST: redis
       MONGO_HOST: mongo
@@ -32,7 +28,6 @@ services:
     depends_on:
       - redis
       - mongo
-    working_dir: /app
     command: npm run start
 
   redis:

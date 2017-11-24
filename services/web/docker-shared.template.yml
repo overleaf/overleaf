@@ -1,0 +1,21 @@
+version: "2"
+
+services:
+  app:
+    image: node:6.9.5
+    volumes:
+      - ./package.json:/app/package.json
+      - ./npm-shrinkwrap.json:/app/npm-shrinkwrap.json
+      - node_modules:/app/node_modules
+      - ./bin:/app/bin
+      - ./public:/app/public
+      - ./app.coffee:/app/app.coffee:ro
+      - ./app/coffee:/app/app/coffee:ro
+      - ./app/templates:/app/app/templates:ro
+      - ./app/views:/app/app/views:ro
+      - ./config:/app/config
+      - ./test/unit/coffee:/app/test/unit/coffee:ro
+      - ./test/acceptance/coffee:/app/test/acceptance/coffee:ro
+      - ./test/smoke/coffee:/app/test/smoke/coffee:ro
+      MODULE_VOLUMES
+    working_dir: /app
