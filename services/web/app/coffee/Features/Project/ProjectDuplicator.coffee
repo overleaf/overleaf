@@ -31,11 +31,11 @@ module.exports = ProjectDuplicator =
 
 		async.series jobs, callback
 
-	_copyFiles: (newProject, originalProject_id, originalFolder, desFolder, callback)->
+	_copyFiles: (owner_id, newProject, originalProject_id, originalFolder, desFolder, callback)->
 		fileRefs = originalFolder.fileRefs or []
 		jobs = fileRefs.map (file)->
 			return (cb)->
-				projectEntityHandler.copyFileFromExistingProjectWithProject newProject, desFolder._id, originalProject_id, file, cb
+				projectEntityHandler.copyFileFromExistingProjectWithProject newProject, desFolder._id, originalProject_id, file, owner_id, cb
 		async.parallelLimit jobs, 5, callback
 
 
@@ -56,7 +56,7 @@ module.exports = ProjectDuplicator =
 						ProjectDuplicator._copyFolderRecursivly owner_id, newProject_id, originalProject_id, originalRootDoc, childFolder, newFolder, docContents, cb
 
 			jobs.push (cb)->
-				ProjectDuplicator._copyFiles newProject, originalProject_id, originalFolder, desFolder, cb
+				ProjectDuplicator._copyFiles owner_id, newProject, originalProject_id, originalFolder, desFolder, cb
 			jobs.push (cb)->
 				ProjectDuplicator._copyDocs owner_id, newProject, originalRootDoc, originalFolder, desFolder, docContents, cb
 

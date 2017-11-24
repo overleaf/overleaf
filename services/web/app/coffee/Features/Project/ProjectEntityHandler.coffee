@@ -253,7 +253,7 @@ module.exports = ProjectEntityHandler =
 									return callback(err) if err?
 									DocumentUpdaterHandler.updateProjectStructure project_id, userId, oldDocs, newDocs, oldFiles, newFiles, callback
 
-	copyFileFromExistingProjectWithProject: (project, folder_id, originalProject_id, origonalFileRef, callback = (error, fileRef, folder_id) ->)->
+	copyFileFromExistingProjectWithProject: (project, folder_id, originalProject_id, origonalFileRef, userId, callback = (error, fileRef, folder_id) ->)->
 		project_id = project._id
 		logger.log { project_id, folder_id, originalProject_id, origonalFileRef }, "copying file in s3 with project"
 		return callback(err) if err?
@@ -277,7 +277,7 @@ module.exports = ProjectEntityHandler =
 							file: fileRef
 							path: result?.path?.fileSystem
 							url: fileStoreUrl
-						DocumentUpdaterHandler.updateProjectStructure project_id, null, [], [], [], [newFile], (error) ->
+						DocumentUpdaterHandler.updateProjectStructure project_id, userId, [], [], [], [newFile], (error) ->
 							return callback(error) if error?
 							callback null, fileRef, folder_id
 

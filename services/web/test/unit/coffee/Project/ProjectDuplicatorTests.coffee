@@ -65,7 +65,7 @@ describe 'ProjectDuplicator', ->
 			setCompiler : sinon.stub()								
 		@entityHandler =
 			addDocWithProject: sinon.stub().callsArgWith(5, null, {name:"somDoc"})
-			copyFileFromExistingProjectWithProject: sinon.stub().callsArgWith(4)
+			copyFileFromExistingProjectWithProject: sinon.stub().callsArgWith(5)
 			setRootDoc: sinon.stub()
 			addFolderWithProject: sinon.stub().callsArgWith(3, null, @newFolder)
 
@@ -152,7 +152,13 @@ describe 'ProjectDuplicator', ->
 
 	it 'should copy all the files', (done)->
 		@duplicator.duplicate @owner, @old_project_id, "", (err, newProject)=>
-			@entityHandler.copyFileFromExistingProjectWithProject.calledWith(@stubbedNewProject, @stubbedNewProject.rootFolder[0]._id, @project._id, @rootFolder.fileRefs[0]).should.equal true
-			@entityHandler.copyFileFromExistingProjectWithProject.calledWith(@stubbedNewProject, @newFolder._id, @project._id, @level1folder.fileRefs[0]).should.equal true
-			@entityHandler.copyFileFromExistingProjectWithProject.calledWith(@stubbedNewProject, @newFolder._id, @project._id, @level2folder.fileRefs[0]).should.equal true
+			@entityHandler.copyFileFromExistingProjectWithProject
+				.calledWith(@stubbedNewProject, @stubbedNewProject.rootFolder[0]._id, @project._id, @rootFolder.fileRefs[0], @owner._id)
+				.should.equal true
+			@entityHandler.copyFileFromExistingProjectWithProject
+				.calledWith(@stubbedNewProject, @newFolder._id, @project._id, @level1folder.fileRefs[0], @owner._id)
+				.should.equal true
+			@entityHandler.copyFileFromExistingProjectWithProject
+				.calledWith(@stubbedNewProject, @newFolder._id, @project._id, @level2folder.fileRefs[0], @owner._id)
+				.should.equal true
 			done()
