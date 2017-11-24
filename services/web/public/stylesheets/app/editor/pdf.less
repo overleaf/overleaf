@@ -41,6 +41,17 @@
 	.btn-info;
 }
 
+.btn-split-screen when (@is-overleaf = false) {
+	.fa {
+		display: none;
+	}
+}
+.btn-split-screen when (@is-overleaf = true) {
+	.fa {
+		display: none;
+	}
+}
+
 .pdf-viewer {
 	iframe {
 		width: 100%;
@@ -112,27 +123,40 @@
 	.toolbar-right {
 		a {
 			&:hover {
-				i {
+				i when (@is-overleaf = false) {
 					box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.25);
 					border-color: @gray-dark;
 				}
 			}
-			i {
+			i when (@is-overleaf = false) {
 				display: inline-block;
 				width: 16px;
 				height: 16px;
 				border: 1px solid @gray-light;
 				margin-top: 5px;
 			}
+
 			i.full-screen {
 				border-top-width: 3px;
 				border-radius: 2px;
+			}
+
+			i.full-screen when (@is-overleaf = true) {
+				display: none;
 			}
 			i.split-screen {
 				width: 7px;
 				border-top-width: 3px;
 				border-radius: 2px;
 				margin-left: 2px;
+			}
+
+			i.split-screen when (@is-overleaf = true) {
+				display: none;
+			}
+
+			i.fa when (@is-overleaf = false) {
+				display: none;
 			}
 		}
 	}
