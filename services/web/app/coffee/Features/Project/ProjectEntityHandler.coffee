@@ -253,15 +253,6 @@ module.exports = ProjectEntityHandler =
 									return callback(err) if err?
 									DocumentUpdaterHandler.updateProjectStructure project_id, null, oldDocs, newDocs, oldFiles, newFiles, callback
 
-	copyFileFromExistingProject: (project_id, folder_id, originalProject_id, origonalFileRef, callback = (error, fileRef, folder_id) ->)->
-		logger.log project_id:project_id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "copying file in s3"
-		ProjectGetter.getProject project_id, {name:true}, (err, project) ->
-			if err?
-				logger.err project_id:project_id, err:err, "error getting project for copy file from existing project"
-				return callback(err)
-			ProjectEntityHandler.copyFileFromExistingProjectWithProject project, folder_id, originalProject_id, origonalFileRef, callback
-
-
 	copyFileFromExistingProjectWithProject: (project, folder_id, originalProject_id, origonalFileRef, callback = (error, fileRef, folder_id) ->)->
 		project_id = project._id
 		logger.log project_id:project_id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "copying file in s3 with project"

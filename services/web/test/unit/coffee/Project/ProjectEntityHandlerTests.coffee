@@ -982,19 +982,18 @@ describe 'ProjectEntityHandler', ->
 			@ProjectModel.update.calledWith({_id : @project_id}, {$unset : {rootDoc_id: true}})
 				.should.equal true
 
-	describe 'copyFileFromExistingProject', ->
+	describe 'copyFileFromExistingProjectWithProject', ->
 		fileName = "something.jpg"
 		filePath = "dumpFolder/somewhere/image.jpeg"
 		oldProject_id = "123kljadas"
 		oldFileRef = {name:fileName, _id:"oldFileRef"}
-		beforeEach ->
-			@ProjectGetter.getProject = (project_id, fields, callback)=> callback(null, {name:@project.name, _id:@project._id})
-			@ProjectEntityHandler._putElement = sinon.stub().callsArgWith(4, null, {path:{fileSystem:"somehintg"}})
 
+		beforeEach ->
+			@ProjectEntityHandler._putElement = sinon.stub().callsArgWith(4, null, {path:{fileSystem:"somehintg"}})
 
 		it 'should copy the file in FileStoreHandler', (done)->
 			@ProjectEntityHandler._putElement = sinon.stub().callsArgWith(4, null, {path:{fileSystem:"somehintg"}})
-			@ProjectEntityHandler.copyFileFromExistingProject project_id, folder_id, oldProject_id, oldFileRef, (err, fileRef, parentFolder)=>
+			@ProjectEntityHandler.copyFileFromExistingProjectWithProject @project, folder_id, oldProject_id, oldFileRef, (err, fileRef, parentFolder)=>
 				@FileStoreHandler.copyFile.calledWith(oldProject_id, oldFileRef._id, project_id, fileRef._id).should.equal true
 				done()
 
@@ -1006,10 +1005,10 @@ describe 'ProjectEntityHandler', ->
 				passedType.should.equal 'file'
 				done()
 
-			@ProjectEntityHandler.copyFileFromExistingProject project_id, folder_id, oldProject_id, oldFileRef, (err, fileRef, parentFolder)->
+			@ProjectEntityHandler.copyFileFromExistingProjectWithProject @project, folder_id, oldProject_id, oldFileRef, (err, fileRef, parentFolder)->
 
 		it 'should return doc and parent folder', (done)->
-			@ProjectEntityHandler.copyFileFromExistingProject project_id, folder_id, oldProject_id, oldFileRef, (err, fileRef, parentFolder)->
+			@ProjectEntityHandler.copyFileFromExistingProjectWithProject @project, folder_id, oldProject_id, oldFileRef, (err, fileRef, parentFolder)->
 				parentFolder.should.equal folder_id
 				fileRef.name.should.equal fileName
 				done()
@@ -1029,8 +1028,7 @@ describe 'ProjectEntityHandler', ->
 				options.rev.should.equal 0
 				done()
 
-			@ProjectEntityHandler.copyFileFromExistingProject project_id, folder_id, oldProject_id, oldFileRef, (err, fileRef, parentFolder)->
-
+			@ProjectEntityHandler.copyFileFromExistingProjectWithProject @project, folder_id, oldProject_id, oldFileRef, (err, fileRef, parentFolder)->
 
 	describe "renameEntity", ->
 		beforeEach ->
