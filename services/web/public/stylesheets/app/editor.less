@@ -26,6 +26,16 @@
 	}
 }
 
+.editor-menu-icon when (@is-overleaf = true) {
+	&.fa::before {
+		// Disable the font-awesome icon when in Overleaf by replacing it with a
+		// non-breakable space instead (otherwise the browser would render a 
+		// zero-width element).
+		content: "\00a0"; 
+	}
+	background: url(/img/ol-brand/overleaf-o-white.svg) center / contain no-repeat;
+}
+
 .full-size {
 	position: absolute;
 	top: 0;
