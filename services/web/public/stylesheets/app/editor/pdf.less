@@ -1,6 +1,8 @@
 .pdf .toolbar.toolbar-pdf when (@is-overleaf = true) {
 	.toolbar-small-mixin;
 	.toolbar-alt-mixin;
+	border-bottom: 0;
+	padding-right: 5px;
 }
 
 .pdf .toolbar.toolbar-pdf when (@is-overleaf = false) {
@@ -23,7 +25,7 @@
 }
 
 .btn-recompile-group when (@is-overleaf = true) {
-	height: 100%;
+	margin-right: 5px;
 }
 
 .btn-recompile when (@is-overleaf = true) {
