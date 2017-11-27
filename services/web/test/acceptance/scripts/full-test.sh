@@ -3,7 +3,7 @@
 # If you're running on OS X, you probably need to rebuild
 # some dependencies in the docker container, before it will start.
 #
-# npm rebuild --update-binary
+#npm rebuild --update-binary
 
 echo ">> Starting server..."
 
