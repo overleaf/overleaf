@@ -123,3 +123,6 @@ define [
 		$scope.onComplete = (error, name, response) ->
 			if response.project_id?
 				window.location = '/project/' + response.project_id
+
+	App.controller 'V1ImportModalController', ($scope, $modalInstance, project) ->
+		console.log('V1ImportModalController', project)

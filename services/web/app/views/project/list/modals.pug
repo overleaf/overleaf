@@ -313,3 +313,26 @@ script(type="text/ng-template", id="userProfileModalTemplate")
 
 	.modal-footer
 		button.btn.btn-info(ng-click="done()") #{translate("done")}
+
+script(type="text/ng-template", id="v1ImportModalTemplate")
+	.modal-header
+		button.close(ng-click="dismiss()") &times;
+		h3 #{translate("import_project_to_v2")}
+
+	.modal-body
+		img(
+			src="/img/v1-import/v2-editor.png"
+			alt="The new V2 Editor."
+		)
+
+		h2 Try importing your project to V2!
+		p Some exciting copy about the new features:
+		ul
+			li Some stuff
+			li Some more stuff
+			li Yet more stuff
+
+	.modal-footer
+		button.btn.btn-primary(ng-click="openV1()") #{translate("open_in_v1")}
+		button.btn.btn-primary(ng-click="import()") #{translate("import_to_v2")}
+
