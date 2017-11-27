@@ -224,9 +224,9 @@ module.exports = ProjectEntityHandler =
 
 	replaceFile: (project_id, file_id, fsPath, userId, callback)->
 		self = ProjectEntityHandler
-		ProjectGetter.getProject project_id, {name:true}, (err, project) ->
+		FileStoreHandler.uploadFileFromDisk project_id, file_id, fsPath, (err)->
 			return callback(err) if err?
-			FileStoreHandler.uploadFileFromDisk project._id, file_id, fsPath, (err)->
+			ProjectGetter.getProject project_id, {rootFolder: true, name:true}, (err, project) ->
 				return callback(err) if err?
 				# Note there is a potential race condition here (and elsewhere)
 				# If the file tree changes between findElement and the Project.update
