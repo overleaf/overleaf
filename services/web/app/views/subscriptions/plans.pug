@@ -231,7 +231,9 @@ block content
 										input(ng-model="form.source", type="hidden", ng-init="form.source = '__ref__'; form.subject = 'General enquiry for larger ShareLaTeX use';")
 									.form-group.text-center
 										input#saveForm.btn-success.btn.btn-lg(name='saveForm', type='submit', ng-disabled="sending",  value='Request a quote')
-								span(ng-show="sent")
+								span(ng-show="sent && error")
+									p Error sending request.
+								span(ng-show="sent && error == false")
 									p Request Sent, Thank you.
 
 				.row

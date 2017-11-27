@@ -79,6 +79,7 @@ define [
 		$scope.form = {}
 		$scope.sent = false
 		$scope.sending = false
+		$scope.error = false
 		$scope.contactUs = ->
 			if !$scope.form.email?
 				console.log "email not set"
@@ -97,4 +98,5 @@ define [
 			request = $http.post "/support", data
 			request.then (response)->
 				$scope.sent = true
+				$scope.error = (response.status != 200)
 				$scope.$apply()
