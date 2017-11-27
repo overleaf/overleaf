@@ -22,6 +22,13 @@ clean: docker-shared.yml
 	rm -rf app/js
 	rm -rf test/unit/js
 	rm -rf test/acceptance/js
+	for dir in modules/*; \
+	do \
+		rm -f $$dir/index.js; \
+		rm -rf $$dir/app/js; \
+		rm -rf $$dir/test/unit/js; \
+		rm -rf $$dir/test/acceptance/js; \
+	done
 	# Deletes node_modules volume
 	docker-compose down --volumes
 	# Delete after docker-compose command
