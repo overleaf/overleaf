@@ -213,36 +213,32 @@ script(type='text/ng-template', id='deleteProjectsModalTemplate')
 			ng-click="delete()"
 		) #{translate("confirm")}
 
-script(type="text/template", id="qq-project-uploader-template").
-	<div class="qq-uploader-selector">
-		<div class="qq-upload-drop-area-selector qq-upload-drop-area" qq-hide-dropzone>
-			<span class="qq-upload-drop-area-text-selector">#{translate('drop_files_here_to_upload')}</span>
-		</div>
-		<div class="qq-upload-button-selector btn btn-primary btn-lg">
-			<div>#{translate('select_a_zip_file')}</div>
-		</div>
-		<span class="or btn-lg"> #{translate('or')} </span>
-		<span class="drag-here btn-lg">#{translate('drag_a_zip_file')}</span>
-		<span class="qq-drop-processing-selector"><span>#{translate('creating_project')}</span><span class="qq-drop-processing-spinner-selector"></span></span>
-		<ul class="qq-upload-list-selector">
-			<li>
-				<div class="qq-progress-bar-container-selector">
-					<div
+script(type="text/template", id="qq-project-uploader-template")
+	div.qq-uploader-selector
+		div(qq-hide-dropzone="").qq-upload-drop-area-selector.qq-upload-drop-area
+			span.qq-upload-drop-area-text-selector #{translate('drop_files_here_to_upload')}
+		div.qq-upload-button-selector.btn.btn-primary.btn-lg
+			div #{translate('select_a_zip_file')}
+		span.or.btn-lg #{translate('or')}
+		span.drag-here.btn-lg #{translate('drag_a_zip_file')}
+		span.qq-drop-processing-selector
+			span #{translate('creating_project')}
+			span.qq-drop-processing-spinner-selector
+		ul.qq-upload-list-selector
+			li
+				div.qq-progress-bar-container-selector
+					div(
 						role="progressbar"
 						aria-valuenow="0"
 						aria-valuemin="0"
 						aria-valuemax="100"
-						class="qq-progress-bar-selector qq-progress-bar">
-					</div>
-				</div>
-				<span class="qq-upload-file-selector qq-upload-file"></span>
-				<span class="qq-upload-size-selector qq-upload-size"></span>
-				<a type="button" class="qq-btn qq-upload-cancel-selector qq-upload-cancel">#{translate('cancel')}</a>
-				<button type="button" class="qq-btn qq-upload-retry-selector qq-upload-retry">#{translate('retry')}</button>
-				<span role="status" class="qq-upload-status-text-selector qq-upload-status-text"></span>
-			</li>
-		</ul>
-	</div>
+						class="qq-progress-bar-selector qq-progress-bar"
+					)
+				span.qq-upload-file-selector.qq-upload-file
+				span.qq-upload-size-selector.qq-upload-size
+				a(type="button").qq-btn.qq-upload-cancel-selector.qq-upload-cancel #{translate('cancel')}
+				button(type="button").qq-btn.qq-upload-retry-selector.qq-upload-retry #{translate('retry')}
+				span(role="status").qq-upload-status-text-selector.qq-upload-status-text
 
 script(type="text/ng-template", id="uploadProjectModalTemplate")
 	.modal-header
