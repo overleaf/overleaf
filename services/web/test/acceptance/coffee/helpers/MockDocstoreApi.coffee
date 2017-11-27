@@ -22,7 +22,7 @@ module.exports = MockDocStoreApi =
 			docs = (doc for doc_id, doc of @docs[req.params.project_id])
 			res.send JSON.stringify docs
 
-		app.listen 3016, '0.0.0.0', (error) ->
+		app.listen 3016, (error) ->
 			throw error if error?
 		.on "error", (error) ->
 			console.error "error starting MockDocStoreApi:", error.message
