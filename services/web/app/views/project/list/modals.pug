@@ -325,14 +325,14 @@ script(type="text/ng-template", id="v1ImportModalTemplate")
 			alt="The new V2 Editor."
 		)
 
-		h2 Try importing your project to V2!
+		h2.v1-import-title Try importing your project to V2!
 		p Some exciting copy about the new features:
 		ul
 			li Some stuff
 			li Some more stuff
 			li Yet more stuff
 
-	.modal-footer
-		button.btn.btn-primary(ng-click="openV1()") #{translate("open_in_v1")}
-		button.btn.btn-primary(ng-click="import()") #{translate("import_to_v2")}
+	.modal-footer.v1-import-footer
+		button.btn.btn-primary.v1-import-btn(ng-click="openV1()") #{translate("open_in_v1")}
+		button.btn.btn-primary.v1-import-btn(ng-click="import()") #{translate("import_to_v2")}
 

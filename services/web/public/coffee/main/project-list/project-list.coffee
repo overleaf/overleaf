@@ -447,6 +447,8 @@ define [
 			$modal.open(
 				templateUrl: 'v1ImportModalTemplate'
 				controller: 'UploadProjectModalController'
+				size: 'lg'
+				windowClass: 'v1-import-modal'
 				resolve:
 					project: () -> project
 			)
