@@ -442,6 +442,14 @@ define [
 				path = "/project/#{selected_project_ids[0]}/download/zip"
 
 			window.location = path
+
+		$scope.openV1ImportModal = (project) ->
+			$modal.open(
+				templateUrl: 'v1ImportModalTemplate'
+				controller: 'UploadProjectModalController'
+				resolve:
+					project: () -> project
+			)
 			
 		if storedUIOpts?.filter?
 			if storedUIOpts.filter == "tag" and storedUIOpts.selectedTagId?
