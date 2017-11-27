@@ -74,7 +74,7 @@ define [
 			$modalInstance.close()
 
 
-	App.controller 'UniverstiesContactController', ($scope, $modal) ->
+	App.controller 'UniverstiesContactController', ($scope, $modal, $http) ->
 
 		$scope.form = {}
 		$scope.sent = false
@@ -85,16 +85,16 @@ define [
 				return
 			$scope.sending = true
 			ticketNumber = Math.floor((1 + Math.random()) * 0x10000).toString(32)
-			params =
+			data =
+				_csrf : window.csrfToken
 				name: $scope.form.name || $scope.form.email
 				email: $scope.form.email
 				labels: "#{$scope.form.source} accounts"
 				message: "Please contact me with more details"
-				subject: $scope.form.subject + " - [#{ticketNumber}]"
-				about : "#{$scope.form.position || ''} #{$scope.form.university || ''}"
+				subject: "#{$scope.form.subject} - #{$scope.form.position} #{$scope.form.university}"
+				inbox: "accounts"
 
-			Groove.createTicket params, (err, json)->
+			request = $http.post "/support", data
+			request.then (response)->
 				$scope.sent = true
 				$scope.$apply()
-
-
