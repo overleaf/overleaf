@@ -91,7 +91,7 @@ define [
 				email: $scope.form.email
 				labels: "#{$scope.form.source} accounts"
 				message: "Please contact me with more details"
-				subject: "#{$scope.form.subject} - #{$scope.form.position} #{$scope.form.university}"
+				subject: "#{$scope.form.name} - General Enquiry - #{$scope.form.position} - #{$scope.form.university}"
 				inbox: "accounts"
 
 			request = $http.post "/support", data
