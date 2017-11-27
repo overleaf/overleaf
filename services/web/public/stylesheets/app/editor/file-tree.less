@@ -1,3 +1,13 @@
+.fake-full-width-bg(@bg-color) {
+	&::before {
+		content: '';
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		right: 100%;
+		background-color: @bg-color;
+	}
+}
 
 #file-tree {
 	.toolbar.toolbar-filetree {
@@ -66,9 +76,9 @@
 				&:hover when (@is-overleaf = true) {
 					// When the entity is a subfolder, the DOM element is "indented" via margin-left. This makes the
 					// element not fill the entire file-tree width (as it's spaced from the left-hand side via margin) 
-					// and, in consequence, the background gets clipped. The negative (in the x axis) box-shadow is a 
-					// hack to paint the unfilled left-hand region.
-					box-shadow: -200px 0 0 @file-tree-item-hover-bg;
+					// and, in consequence, the background gets clipped. The ::before pseudo-selector is used to fill
+					// the empty space.
+					.fake-full-width-bg(@file-tree-item-hover-bg);
 				}
 				input {
 					line-height: 1.6;
@@ -79,7 +89,7 @@
 
 				&.droppable-hover when (@is-overleaf = true) {
 					background-color: @file-tree-droppable-bg-color;
-					box-shadow: -200px 0 0 @file-tree-droppable-bg-color;
+					.fake-full-width-bg(@file-tree-droppable-bg-color);
 				}
 
 			}
@@ -118,10 +128,10 @@
 						color: #FFF;
 						font-weight: bold;
 						background-color: @file-tree-multiselect-bg;
-						box-shadow: -200px 0 0 @file-tree-multiselect-bg;
+						.fake-full-width-bg(@file-tree-multiselect-bg);
 						&:hover {
 							background-color: @file-tree-multiselect-hover-bg;
-							box-shadow: -200px 0 0 @file-tree-multiselect-hover-bg;
+							.fake-full-width-bg(@file-tree-multiselect-hover-bg);
 						}
 					}
 				}
@@ -180,11 +190,7 @@
 					background-color: @file-tree-item-selected-bg;
 					font-weight: bold;
 					padding-right: 32px;
-					// When the entity is a subfolder, the DOM element is "indented" via margin-left. This makes the
-					// element not fill the entire file-tree width (as it's spaced from the left-hand side via margin) 
-					// and, in consequence, the background gets clipped. The negative (in the x axis) box-shadow is a 
-					// hack to paint the unfilled left-hand region.
-					box-shadow: -200px 0 0 @file-tree-item-selected-bg;
+					.fake-full-width-bg(@file-tree-item-selected-bg);
 
 					.entity-menu-toggle {
 						display: inline;
@@ -199,7 +205,7 @@
 	}
 	ul.droppable-hover.file-tree-list when (@is-overleaf = true) {
 		background-color: @file-tree-droppable-bg-color;
-		box-shadow: -200px 0 0 @file-tree-droppable-bg-color;
+		.fake-full-width-bg(@file-tree-droppable-bg-color);
 	}
 }
 
