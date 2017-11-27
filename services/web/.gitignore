@@ -38,7 +38,7 @@ data/*
 
 app.js
 app/js/*
-test/UnitTests/js/*
+test/unit/js/*
 test/smoke/js/*
 test/acceptance/js/*
 cookies.txt

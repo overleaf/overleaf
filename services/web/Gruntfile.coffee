@@ -131,9 +131,9 @@ module.exports = (grunt) ->
 			unit_tests: 
 				expand: true,
 				flatten: false,
-				cwd: 'test/UnitTests/coffee',
+				cwd: 'test/unit/coffee',
 				src: ['**/*.coffee'],
-				dest: 'test/UnitTests/js/',
+				dest: 'test/unit/js/',
 				ext: '.js'
 
 			acceptance_tests: 
@@ -220,12 +220,12 @@ module.exports = (grunt) ->
 
 		clean:
 			app: ["app/js"]
-			unit_tests: ["test/UnitTests/js"]
+			unit_tests: ["test/unit/js"]
 			acceptance_tests: ["test/acceptance/js"]
 
 		mochaTest:
 			unit:
-				src: ["test/UnitTests/js/#{grunt.option('feature') or '**'}/*.js"]
+				src: ["test/unit/js/#{grunt.option('feature') or '**'}/*.js"]
 				options:
 					reporter: grunt.option('reporter') or 'spec'
 					grep: grunt.option("grep")
