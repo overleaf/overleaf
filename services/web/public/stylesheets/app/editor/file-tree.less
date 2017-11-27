@@ -1,9 +1,8 @@
 .fake-full-width-bg(@bg-color) {
 	&::before {
-		content: '';
+		content: '\00a0';
 		position: absolute;
 		width: 100%;
-		height: 100%;
 		right: 100%;
 		background-color: @bg-color;
 	}
