@@ -6,6 +6,7 @@ block content
 	script#data(type="application/json").
 		!{JSON.stringify({ projects: projects, tags: tags, notifications: notifications }).replace(/\//g, '\\/')}
 
+
 	script(type="text/javascript").
 		window.data = JSON.parse($("#data").text());
 		window.algolia = {
