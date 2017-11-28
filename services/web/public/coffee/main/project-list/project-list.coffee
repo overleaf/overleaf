@@ -446,7 +446,7 @@ define [
 		$scope.openV1ImportModal = (project) ->
 			$modal.open(
 				templateUrl: 'v1ImportModalTemplate'
-				controller: 'UploadProjectModalController'
+				controller: 'V1ImportModalController'
 				size: 'lg'
 				windowClass: 'v1-import-modal'
 				resolve:
