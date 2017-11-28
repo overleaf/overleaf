@@ -4,7 +4,7 @@ ace.define("ace/mode/latex_highlight_rules",["require","exports","module","ace/l
 var oop = require("../lib/oop");
 var TextHighlightRules = require("./text_highlight_rules").TextHighlightRules;
 
-var LatexHighlightRules = function() {  
+var LatexHighlightRules = function() {
 
     this.$rules = {
         "start" : [{
@@ -47,9 +47,9 @@ var LatexHighlightRules = function() {
             token : "constant.character.escape",
             regex : "\\\\(?:[^a-zA-Z]|[a-zA-Z]+)"
         }, {
-            token : "error", 
-            regex : "^\\s*$", 
-            next : "start" 
+            token : "error",
+            regex : "^\\s*$",
+            next : "start"
         }, {
             defaultToken : "string"
         }]
@@ -76,16 +76,16 @@ oop.inherits(FoldMode, BaseFoldMode);
 
 (function() {
 
-    this.foldingStartMarker = /^\s*\\(begin)|(section|subsection|paragraph)\b|{\s*$/;
+    this.foldingStartMarker = /^\s*\\(begin|section|subsection|subsubsection|paragraph|part|chapter)\b|{\s*$/;
     this.foldingStopMarker = /^\s*\\(end)\b|^\s*}/;
 
     this.getFoldWidgetRange = function(session, foldStyle, row) {
         var line = session.doc.getLine(row);
         var match = this.foldingStartMarker.exec(line);
         if (match) {
-            if (match[1])
+            if (match[1] === "begin")
                 return this.latexBlock(session, row, match[0].length - 1);
-            if (match[2])
+            else if (match[1])
                 return this.latexSection(session, row, match[0].length - 1);
 
             return this.openingBracketBlock(session, "{", row, match.index);
@@ -153,7 +153,7 @@ oop.inherits(FoldMode, BaseFoldMode);
     };
 
     this.latexSection = function(session, row, column) {
-        var keywords = ["\\subsection", "\\section", "\\begin", "\\end", "\\paragraph"];
+        var keywords = ["\\subsection", "\\section", "\\begin", "\\end", "\\paragraph", "\\part", "\\chapter"];
 
         var stream = new TokenIterator(session, row, column);
         var token = stream.getCurrentToken();
