@@ -396,8 +396,13 @@ module.exports = ProjectController =
 			id: project.id
 			name: project.title
 			lastUpdated: new Date(project.updated_at * 1000) # Convert from epoch
-			accessLevel: "readOnly",
+			accessLevel: if project.owner?.user_is_owner then "owner" else "readOnly"
 			archived: project.removed || project.archived
+			owner: {
+				# Unlisted V1 projects don't have an owner, so just show N/A
+				first_name: if project.owner then project.owner.name else 'N/A'
+				last_name: ''
+			}
 			isV1Project: true
 		}
 
