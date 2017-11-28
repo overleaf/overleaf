@@ -22,7 +22,8 @@ define [
 
 			@$scope.$on "entity:selected", (event, entity) =>
 				if (@$scope.ui.view == "history") and (entity.type == "doc")
-					@$scope.history.selection.doc = entity
+					# TODO: Set selection.doc_path to entity path name
+					# @$scope.history.selection.doc = entity
 					@reloadDiff()
 
 		show: () ->
@@ -83,30 +84,36 @@ define [
 
 		reloadDiff: () ->
 			diff = @$scope.history.diff
-			{updates, doc} = @$scope.history.selection
-			{fromV, toV, start_ts, end_ts}   = @_calculateRangeFromSelection()
+			{updates} = @$scope.history.selection
+			{fromV, toV, start_ts, end_ts, original_path} = @_calculateDiffDataFromSelection()
+			console.log "[reloadDiff] current diff", diff
+			console.log "[reloadDiff] new diff data", {fromV, toV, start_ts, end_ts, original_path}
 
-			return if !doc?
+			return if !original_path?
 
 			return if diff? and
-				diff.doc   == doc   and
-				diff.fromV == fromV and
-				diff.toV   == toV
+				diff.doc_path == original_path and
+				diff.fromV    == fromV and
+				diff.toV      == toV
 
 			@$scope.history.diff = diff = {
 				fromV:    fromV
 				toV:      toV
 				start_ts: start_ts
 				end_ts:   end_ts
-				doc:      doc
+				doc_path: original_path
 				error:    false
 			}
 
-			if !doc.deleted
+			# TODO: How do we track deleted files now? We can probably show the diffs easily
+			# with the new system!
+			if true # !doc.deleted
 				diff.loading = true
-				url = "/project/#{@$scope.project_id}/doc/#{diff.doc.id}/diff"
+				url = "/project/#{@$scope.project_id}/doc/by_path/diff"
+				query = ["path=#{encodeURIComponent(original_path)}"]
 				if diff.fromV? and diff.toV?
-					url += "?from=#{diff.fromV}&to=#{diff.toV}"
+					query.push "from=#{diff.fromV}", "to=#{diff.toV}"
+				url += "?" + query.join("&")
 
 				@ide.$http
 					.get(url)
@@ -190,8 +197,9 @@ define [
 			previousUpdate = @$scope.history.updates[@$scope.history.updates.length - 1]
 
 			for update in updates
-				for doc_id, doc of update.docs or {}
-					doc.entity = @ide.fileTreeManager.findEntityById(doc_id, includeDeleted: true)
+				for doc_path, doc of update.docs or {}
+					doc.path = doc_path
+					doc.entity = @ide.fileTreeManager.findEntityByPath(doc_path, includeDeleted: true)
 
 				for user in update.meta.users or []
 					if user?
@@ -210,50 +218,89 @@ define [
 
 			@$scope.history.updates =
 				@$scope.history.updates.concat(updates)
+			console.log "[_loadUpdates] updates", @$scope.history.updates
 
 			@autoSelectRecentUpdates() if firstLoad
 
-		_calculateRangeFromSelection: () ->
-			fromV = toV = start_ts = end_ts = null
+		_perDocSummaryOfUpdates: (updates) ->
+			current_paths = {}
+			docs_summary = {}
 
-			selected_doc_id = @$scope.history.selection.doc?.id
-
-			for update in @$scope.history.selection.updates or []
-				for doc_id, doc of update.docs
-					if doc_id == selected_doc_id
-						if fromV? and toV?
-							fromV = Math.min(fromV, doc.fromV)
-							toV = Math.max(toV, doc.toV)
-							start_ts = Math.min(start_ts, update.meta.start_ts)
-							end_ts = Math.max(end_ts, update.meta.end_ts)
+			for update in updates # Updates are reverse chronologically ordered
+				console.log "[_perDocSummaryOfUpdates] update", update
+				if update.docs?
+					for doc_path, doc of update.docs
+						# doc_path may not be the latest doc path that this doc has had
+						if !current_paths[doc_path]?
+							current_paths[doc_path] = doc_path
+						current_path = current_paths[doc_path]
+						console.log "[_perDocSummaryOfUpdates] doc", doc, current_path
+						if !docs_summary[current_path]?
+							# todo start_ts and end_ts
+							docs_summary[current_path] = {
+								fromV: doc.fromV, toV: doc.toV,
+								original_path: doc_path
+							}
 						else
-							fromV = doc.fromV
-							toV = doc.toV
-							start_ts = update.meta.start_ts
-							end_ts = update.meta.end_ts
-						break
+							docs_summary[current_path] = {
+								fromV: Math.min(docs_summary[current_path].fromV, doc.fromV),
+								toV: Math.max(docs_summary[current_path].toV, doc.toV),
+								original_path: doc_path
+							}
+				else if update.renames?
+					for rename in update.renames
+						console.log "[_perDocSummaryOfUpdates] rename", rename
+						if !current_paths[rename.newPathname]?
+							current_paths[rename.newPathname] = rename.newPathname
+						current_paths[rename.pathname] = current_paths[rename.newPathname]
+						delete current_paths[rename.newPathname]
 
-			return {fromV, toV, start_ts, end_ts}
+				console.log "[_perDocSummaryOfUpdates] docs_summary", docs_summary
+				console.log "[_perDocSummaryOfUpdates] current_paths", current_paths
+
+			return docs_summary
+
+		_calculateDiffDataFromSelection: () ->
+			fromV = toV = start_ts = end_ts = original_path = null
+
+			selected_doc_path = @$scope.history.selection.doc_path
+			console.log "[_calculateDiffDataFromSelection] selected_doc_path", selected_doc_path
+
+			for doc_path, doc of @_perDocSummaryOfUpdates(@$scope.history.selection.updates)
+				if doc_path == selected_doc_path
+					fromV = doc.fromV
+					toV = doc.toV
+					start_ts = doc.start_ts
+					end_ts = doc.end_ts
+					original_path = doc.original_path
+					break
+
+			return {fromV, toV, start_ts, end_ts, original_path}
 
 		# Set the track changes selected doc to one of the docs in the range
 		# of currently selected updates. If we already have a selected doc
 		# then prefer this one if present.
 		_selectDocFromUpdates: () ->
-			affected_docs = {}
-			for update in @$scope.history.selection.updates
-				for doc_id, doc of update.docs
-					affected_docs[doc_id] = doc.entity
+			affected_docs = @_perDocSummaryOfUpdates(@$scope.history.selection.updates)
+			console.log "[_selectDocFromUpdates] affected_docs", affected_docs
 
-			selected_doc = @$scope.history.selection.doc
-			if selected_doc? and affected_docs[selected_doc.id]?
+			selected_doc_path = @$scope.history.selection.doc_path
+			console.log "[_selectDocFromUpdates] current selected_doc_path", selected_doc_path
+			if selected_doc_path? and affected_docs[selected_doc_path]
 				# Selected doc is already open
 			else
-				for doc_id, doc of affected_docs
-					selected_doc = doc
+				# Set to first possible candidate
+				for doc_path, doc of affected_docs
+					selected_doc_path = doc_path
 					break
 
-			@$scope.history.selection.doc = selected_doc
-			@ide.fileTreeManager.selectEntity(selected_doc)
+			console.log "[_selectDocFromUpdates] new selected_doc_path", selected_doc_path
+
+			@$scope.history.selection.doc_path = selected_doc_path
+			if selected_doc_path?
+				entity = @ide.fileTreeManager.findEntityByPath(selected_doc_path)
+				if entity?
+					@ide.fileTreeManager.selectEntity(entity)
 
 		_updateContainsUserId: (update, user_id) ->
 			for user in update.meta.users
