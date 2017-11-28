@@ -96,6 +96,11 @@ define [
 				inbox: "accounts"
 
 			request = $http.post "/support", data
+			
+			request.catch ()->
+				$scope.error = true
+				$scope.$apply()
+
 			request.then (response)->
 				$scope.sent = true
 				$scope.error = (response.status != 200)

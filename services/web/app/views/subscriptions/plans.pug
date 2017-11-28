@@ -210,7 +210,7 @@ block content
 							h3 #{translate("group_plan_enquiry")}
 						.modal-body
 							form.text-left.form(ng-controller="UniverstiesContactController", ng-submit="contactUs()", ng-cloak)
-								span(ng-show="sent == false")
+								span(ng-show="sent == false && error == false")
 									.form-group
 										label#title9(for='Field9')
 											| Name
@@ -231,10 +231,10 @@ block content
 										input(ng-model="form.source", type="hidden", ng-init="form.source = '__ref__'; form.subject = 'General enquiry for larger ShareLaTeX use';")
 									.form-group.text-center
 										input#saveForm.btn-success.btn.btn-lg(name='saveForm', type='submit', ng-disabled="sending",  value='Request a quote')
-								span(ng-show="sent && error")
-									p Error sending request.
-								span(ng-show="sent && error == false")
+								span(ng-show="sent == true && error == false")
 									p Request Sent, Thank you.
+								span(ng-show="error")
+									p Error sending request.
 
 				.row
 					.col-md-12
