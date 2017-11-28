@@ -44,6 +44,7 @@ describe "SubscriptionController", ->
 
 		@RecurlyWrapper =
 			sign: sinon.stub().callsArgWith(1, null, "somthing")
+			getSubscription: sinon.stub().callsArgWith(2, null, {})
 
 		@SubscriptionViewModelBuilder =
 			buildUsersSubscriptionViewModel:sinon.stub().callsArgWith(1, null, @activeRecurlySubscription)
@@ -262,7 +263,12 @@ describe "SubscriptionController", ->
 			describe "with an existing subscription", ->
 				beforeEach (done)->
 					@res.callback = done
-					@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true)
+					@settings.apis.recurly.subdomain = 'test'
+					@userSub = {account: {hosted_login_token: 'abcd'}}
+					@RecurlyWrapper.getSubscription = sinon.stub()
+						.callsArgWith(2, null, @userSub)
+					@LimitationsManager.userHasSubscriptionOrIsGroupMember
+						.callsArgWith(1, null, true, {})
 					@SubscriptionController.userSubscriptionPage @req, @res
 
 
@@ -273,7 +279,7 @@ describe "SubscriptionController", ->
 			beforeEach (done) ->
 				@res.callback = done
 				@SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(1, null, @activeRecurlySubscription)
-				@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true)
+				@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true, {})
 				@SubscriptionController.userSubscriptionPage @req, @res
 
 			it "should render the dashboard", (done)->
@@ -288,7 +294,7 @@ describe "SubscriptionController", ->
 			beforeEach (done) ->
 				@res.callback = done
 				@SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(1, null, @activeRecurlySubscription)
-				@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true)
+				@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true, {})
 				@SubscriptionController.userSubscriptionPage @req, @res
 
 			it "should render the dashboard", ->
