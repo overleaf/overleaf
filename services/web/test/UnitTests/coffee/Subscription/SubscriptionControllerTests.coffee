@@ -119,41 +119,6 @@ describe "SubscriptionController", ->
 				@UserGetter.getUser.callCount.should.equal 0
 				done()
 
-
-	describe "editBillingDetailsPage", ->
-		describe "with a user with a subscription", ->
-			beforeEach (done) ->
-				@settings.apis.recurly.subdomain = 'test'
-				@userSub = {account: {hosted_login_token: 'abcd'}}
-				@LimitationsManager.userHasSubscription
-					.callsArgWith(1, null, true, @activeRecurlySubscription)
-				@RecurlyWrapper.getSubscription = sinon.stub()
-					.callsArgWith(2, null, @userSub)
-				@user._id = @activeRecurlySubscription.account.account_code
-				@res.callback = done
-				@SubscriptionController.editBillingDetailsPage(@req, @res)
-
-			it "should render the edit billing details page", ->
-				@res.rendered.should.equal true
-				@res.renderedTemplate.should.equal "subscriptions/edit-billing-details"
-
-			it "should set the correct variables for the template", ->
-				should.exist @res.renderedVariables.hostedBillingDetailsPageLink
-				@res.renderedVariables.hostedBillingDetailsPageLink.should.equal(
-					"https://test.recurly.com/account/billing_info/edit?ht=abcd"
-				)
-				@res.renderedVariables.user.id.should.equal @user._id
-
-		describe "with a user without subscription", ->
-			beforeEach (done) ->
-				@res.callback = done
-				@LimitationsManager.userHasSubscription.callsArgWith(1, null, false)
-				@SubscriptionController.reactivateSubscription @req, @res
-
-			it "should redirect to the subscription dashboard", ->
-				@res.redirected.should.equal true
-				@res.redirectedTo.should.equal "/user/subscription"
-
 	describe "paymentPage", ->
 		beforeEach ->
 			@req.headers = {}

@@ -143,40 +143,6 @@ module.exports = SubscriptionController =
 				title: "your_subscription"
 				subscription: subscription
 
-
-	editBillingDetailsPage: (req, res, next) ->
-		user = AuthenticationController.getSessionUser(req)
-		LimitationsManager.userHasSubscription user, (err, hasSubscription, subscription)->
-			return next(err) if err?
-			if !hasSubscription
-				res.redirect "/user/subscription"
-			else
-				RecurlyWrapper.getSubscription subscription.recurlySubscription_id,
-					includeAccount: true,
-					(err, usersSubscription)->
-						return next(err) if err?
-						account = usersSubscription.account
-						hostedLoginToken = account.hosted_login_token
-						if !hostedLoginToken
-							err = new Error('no hosted_login_token on recurly account')
-							return next(err)
-						subdomain = Settings?.apis?.recurly?.subdomain
-						if !subdomain
-							err = new Error('recurly subdomain not configured')
-							return next(err)
-						link = "https://" +
-							subdomain +
-							".recurly.com/account/billing_info/edit?ht=" +
-							hostedLoginToken
-						res.render "subscriptions/edit-billing-details",
-							title: "update_billing_details"
-							hostedBillingDetailsPageLink: link
-							user:
-								id: user._id
-
-	updateBillingDetails: (req, res, next) ->
-		res.redirect "/user/subscription?saved_billing_details=true"
-
 	createSubscription: (req, res, next)->
 		user = AuthenticationController.getSessionUser(req)
 		recurly_token_id = req.body.recurly_token_id
