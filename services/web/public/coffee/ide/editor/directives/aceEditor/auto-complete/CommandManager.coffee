@@ -1,81 +1,8 @@
-define [], () ->
-	noArgumentCommands = [
-		'item', 'hline', 'lipsum', 'centering', 'noindent', 'textwidth', 'draw',
-		'maketitle', 'newpage', 'verb', 'bibliography', 'hfill', 'par',
-		'in', 'sum', 'cdot', 'ldots', 'linewidth', 'left', 'right', 'today',
-		'clearpage', 'newline', 'endinput', 'tableofcontents', 'vfill',
-		'bigskip', 'fill', 'cleardoublepage', 'infty', 'leq', 'geq', 'times',
-		'alpha', 'beta', 'gamma', 'delta', 'epsilon', 'varepsilon', 'zeta',
-		'eta', 'theta', 'vartheta', 'iota', 'kappa', 'lambda', 'mu', 'nu', 'xi',
-		'pi', 'varpi', 'rho', 'varrho', 'sigma', 'varsigma', 'tau', 'upsilon',
-		'phi', 'varphi', 'chi', 'psi', 'omega', 'Gamma', 'Delta', 'Theta',
-		'Lambda', 'Xi', 'Pi', 'Sigma', 'Upsilon', 'Phi', 'Psi', 'Omega'
-	]
-	singleArgumentCommands = [
-		'chapter', 'section', 'label', 'textbf', 'subsection',
-		'vspace', 'cite', 'textit', 'documentclass', 'includegraphics', 'input',
-		'emph','caption', 'ref', 'title', 'author', 'texttt', 'include',
-		'hspace', 'bibitem', 'url', 'large', 'subsubsection', 'textsc', 'date',
-		'footnote', 'small', 'thanks', 'underline', 'graphicspath', 'pageref',
-		'section*', 'subsection*', 'subsubsection*', 'sqrt', 'text',
-		'normalsize', 'footnotesize', 'Large', 'paragraph', 'pagestyle',
-		'thispagestyle', 'bibliographystyle', 'hat'
-	]
-	doubleArgumentCommands = [
-		'newcommand', 'frac', 'dfrac', 'renewcommand', 'setlength', 'href',
-		'newtheorem'
-	]
-	tripleArgumentCommands = [
-		'addcontentsline', 'newacronym', 'multicolumn'
-	]
-	special = ['LaTeX', 'TeX']
+define [
+	"./top_hundred_snippets"
+], (topHundred) ->
 
-	rawCommands = ['usepackage'].concat(
-		noArgumentCommands,
-		singleArgumentCommands,
-		doubleArgumentCommands,
-		tripleArgumentCommands,
-		special
-	)
-
-	noArgumentCommands = for cmd in noArgumentCommands
-		{
-			caption: "\\#{cmd}"
-			snippet: "\\#{cmd}"
-			meta: "cmd"
-		}
-	singleArgumentCommands = for cmd in singleArgumentCommands
-		{
-			caption: "\\#{cmd}{}"
-			snippet: "\\#{cmd}{$1}"
-			meta: "cmd"
-		}
-	doubleArgumentCommands = for cmd in doubleArgumentCommands
-		{
-			caption: "\\#{cmd}{}{}"
-			snippet: "\\#{cmd}{$1}{$2}"
-			meta: "cmd"
-		}
-	tripleArgumentCommands = for cmd in tripleArgumentCommands
-		{
-			caption: "\\#{cmd}{}{}{}"
-			snippet: "\\#{cmd}{$1}{$2}{$3}"
-			meta: "cmd"
-		}
-	special = for cmd in special
-		{
-			caption: "\\#{cmd}{}"
-			snippet: "\\#{cmd}{}"
-			meta: "cmd"
-		}
-
-	staticCommands = [].concat(
-		noArgumentCommands,
-		singleArgumentCommands,
-		doubleArgumentCommands,
-		tripleArgumentCommands,
-		special
-	)
+	commandNames = (snippet.caption.match(/\w+/)[0] for snippet in topHundred)
 
 	class Parser
 		constructor: (@doc, @prefix) ->
@@ -129,10 +56,10 @@ define [], () ->
 			return realCommands
 
 		# Ignore single letter commands since auto complete is moot then.
-		commandRegex: /\\([a-zA-Z][a-zA-Z]+)/
+		commandRegex: /\\([a-zA-Z]{2,})/
 
 		nextCommand: () ->
-			i = @doc.search(@commandRegex)
+			i = @doc.search @commandRegex
 			if i == -1
 				return false
 			else
@@ -166,13 +93,21 @@ define [], () ->
 				return false
 
 	class CommandManager
+		constructor: (@metadataManager) ->
+
 		getCompletions: (editor, session, pos, prefix, callback) ->
+			packages = @metadataManager.getAllPackages()
+			packageCommands = []
+			for pkg, snippets of packages
+				for snippet in snippets
+					packageCommands.push snippet
+
 			doc = session.getValue()
 			parser = new Parser(doc, prefix)
 			commands = parser.parse()
 			completions = []
 			for command in commands
-				if command[0] not in rawCommands
+				if command[0] not in commandNames
 					caption = "\\#{command[0]}"
 					score = if caption == prefix then 99 else 50
 					snippet = caption
@@ -191,9 +126,9 @@ define [], () ->
 						meta: "cmd"
 						score: score
 					}
-			completions = completions.concat staticCommands
+			completions = completions.concat topHundred, packageCommands
 
-			callback(null, completions)
+			callback null, completions
 
 		loadCommandsFromDoc: (doc) ->
 			parser = new Parser(doc)

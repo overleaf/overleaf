@@ -1,5 +1,4 @@
-define [
-], () ->
+define [], () ->
 
 	class LabelsManager
 
