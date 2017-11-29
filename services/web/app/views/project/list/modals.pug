@@ -333,10 +333,8 @@ script(type="text/ng-template", id="v1ImportModalTemplate")
 				li Yet more stuff
 
 		.v1-import-step-2(ng-show="step === 2")
-			img.v1-import-img(
-				src="/img/v1-import/v2-editor.png"
-				alt="The new V2 Editor."
-			)
+			div.v1-import-warning(aria-label="Warning symbol.")
+				i.fa.fa-exclamation-triangle
 			h2.v1-import-title #[strong Warning:] Overleaf V2 is in beta
 			p Once importing your project you will lose access to the some of the features of Overleaf V1. This includes the git bridge, journal integrations, WYSIWYG and linked files. We’re working on bringing these features to V2!
 			p Once you have imported a project to V2 you #[strong cannot go back to V1].
