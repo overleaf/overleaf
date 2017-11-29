@@ -133,6 +133,3 @@ define [
 
 		$scope.moveToConfirmation = () ->
 			$scope.step = 2
-
-		$scope.import = () ->
-			console.log('IMPORT', project)
