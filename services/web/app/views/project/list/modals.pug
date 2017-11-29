@@ -342,8 +342,13 @@ script(type="text/ng-template", id="v1ImportModalTemplate")
 
 	.modal-footer.v1-import-footer
 		div(ng-show="step === 1")
-			a.btn.btn-primary.v1-import-btn(ng-href=settings.overleaf.host + "/{{project.id}}") #{translate("open_in_v1")}
-			button.btn.btn-primary.v1-import-btn(ng-click="moveToConfirmation()") #{translate("import_to_v2")}
+			if settings.overleaf && settings.overleaf.host
+				a.btn.btn-primary.v1-import-btn(
+					ng-href=settings.overleaf.host + "/{{project.id}}"
+				) #{translate("open_in_v1")}
+			button.btn.btn-primary.v1-import-btn(
+				ng-click="moveToConfirmation()"
+			) #{translate("import_to_v2")}
 		div(ng-show="step === 2")
 			form(
 				async-form="v1Import",
@@ -354,10 +359,11 @@ script(type="text/ng-template", id="v1ImportModalTemplate")
 			)
 				input(name='_csrf', type='hidden', value=csrfToken)
 				form-messages(for="v1ImportForm")
-				a.btn.btn-primary.v1-import-btn(
-					ng-href=settings.overleaf.host + "/{{project.id}}"
-					ng-class="{disabled: v1ImportForm.inflight || v1ImportForm.success}"
-				) #{translate("never_mind_open_in_v1")}
+				if settings.overleaf && settings.overleaf.host
+					a.btn.btn-primary.v1-import-btn(
+						ng-href=settings.overleaf.host + "/{{project.id}}"
+						ng-class="{disabled: v1ImportForm.inflight || v1ImportForm.success}"
+					) #{translate("never_mind_open_in_v1")}
 				input.btn.btn-primary.v1-import-btn(
 					type="submit",
 					value=translate('yes_im_sure')
