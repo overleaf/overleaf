@@ -1,4 +1,5 @@
-NPM := docker-compose -f docker-compose.yml ${DOCKER_COMPOSE_FLAGS} run --rm npm npm
+DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
+NPM := docker-compose ${DOCKER_COMPOSE_FLAGS} run --rm npm npm
 BUILD_NUMBER ?= local
 BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
 PROJECT_NAME = web
@@ -41,20 +42,20 @@ docker-shared.yml:
 test: test_unit test_acceptance
 
 test_unit: docker-shared.yml
-	docker-compose -f docker-compose.yml ${DOCKER_COMPOSE_FLAGS} run --rm test_unit npm run test:unit -- ${MOCHA_ARGS}
+	docker-compose ${DOCKER_COMPOSE_FLAGS} run --rm test_unit npm run test:unit -- ${MOCHA_ARGS}
 
 test_acceptance: test_acceptance_app test_acceptance_modules
 
 test_acceptance_app: test_acceptance_app_start_service test_acceptance_app_run test_acceptance_app_stop_service
 
-test_acceptance_app_start_service: docker-shared.yml
-	docker-compose -f docker-compose.yml ${DOCKER_COMPOSE_FLAGS} up -d test_acceptance
+test_acceptance_app_start_service: test_acceptance_app_stop_service docker-shared.yml
+	docker-compose ${DOCKER_COMPOSE_FLAGS} up -d test_acceptance
 
 test_acceptance_app_stop_service: docker-shared.yml
-	docker-compose -f docker-compose.yml ${DOCKER_COMPOSE_FLAGS} stop test_acceptance redis mongo
+	docker-compose ${DOCKER_COMPOSE_FLAGS} stop test_acceptance redis mongo
 
 test_acceptance_app_run: docker-shared.yml
-	docker-compose -f docker-compose.yml ${DOCKER_COMPOSE_FLAGS} exec -T test_acceptance npm run test:acceptance -- ${MOCHA_ARGS}
+	docker-compose ${DOCKER_COMPOSE_FLAGS} exec -T test_acceptance npm run test:acceptance -- ${MOCHA_ARGS}
 
 test_acceptance_modules: docker-shared.yml
 	for dir in modules/*; \

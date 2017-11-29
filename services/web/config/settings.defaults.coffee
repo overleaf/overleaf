@@ -35,7 +35,7 @@ module.exports = settings =
 	# Databases
 	# ---------
 	mongo:
-		url : "mongodb://#{process.env['MONGO_HOST'] || '127.0.0.1'}/sharelatex"
+		url : process.env['MONGO_URL'] || "mongodb://127.0.0.1/sharelatex"
 
 	redis:
 		web:

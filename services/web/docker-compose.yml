@@ -22,9 +22,8 @@ services:
       service: app
     environment:
       REDIS_HOST: redis
-      MONGO_HOST: mongo
+      MONGO_URL: "mongodb://mongo/sharelatex"
       SHARELATEX_ALLOW_PUBLIC_ACCESS: 'true'
-      LISTEN_ADDRESS: 0.0.0.0
     depends_on:
       - redis
       - mongo
