@@ -133,7 +133,7 @@ if Settings.smokeTest
 	do runSmokeTest = ->
 		logger.log("running smoke tests")
 		smokeTest.run(require.resolve(__dirname + "/test/smoke/js/SmokeTests.js"))({}, resCacher)
-		setTimeout(runSmokeTest, 20 * 1000)
+		setTimeout(runSmokeTest, 30 * 1000)
 
 app.get "/health_check", (req, res)->
 	res.contentType(resCacher?.setContentType)
