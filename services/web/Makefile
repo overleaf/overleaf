@@ -18,7 +18,7 @@ add_dev: docker-shared.yml
 install: docker-shared.yml
 	$(NPM) install
 
-clean: docker-shared.yml
+clean:
 	rm -f app.js
 	rm -rf app/js
 	rm -rf test/unit/js
@@ -32,8 +32,9 @@ clean: docker-shared.yml
 	done
 	# Deletes node_modules volume
 	docker-compose down --volumes
-	# Delete after docker-compose command
-	rm -f docker-shared.yml
+	# Regenerate docker-shared.yml - not stictly a 'clean',
+	# but lets `make clean install` work nicely
+	bin/generate_volumes_file
 
 # Need regenerating if you change the web modules you have installed
 docker-shared.yml:
