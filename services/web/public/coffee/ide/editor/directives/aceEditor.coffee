@@ -15,6 +15,7 @@ define [
 	"ide/metadata/services/metadata"
 	"ide/graphics/services/graphics"
 	"ide/preamble/services/preamble"
+    "ide/files/services/files"
 ], (App, Ace, SearchBox, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager, MetadataManager, LabelsManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
 	ModeList = ace.require('ace/ext/modelist')
@@ -37,7 +38,7 @@ define [
 			url = ace.config._moduleUrl(args...) + "?fingerprint=#{window.aceFingerprint}"
 			return url
 
-	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory, labels, metadata, graphics, preamble, $http, $q) ->
+	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory, labels, metadata, graphics, preamble, files, $http, $q) ->
 		monkeyPatchSearch($rootScope, $compile)
 
 		return  {
@@ -106,7 +107,7 @@ define [
 				trackChangesManager   = new TrackChangesManager(scope, editor, element)
 				labelsManager = new LabelsManager(scope, editor, element, labels)
 				metadataManager = new MetadataManager(scope, editor, element, metadata)
-				autoCompleteManager = new AutoCompleteManager(scope, editor, element, metadataManager, labelsManager, graphics, preamble)
+				autoCompleteManager = new AutoCompleteManager(scope, editor, element, metadataManager, labelsManager, graphics, preamble, files)
 
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
