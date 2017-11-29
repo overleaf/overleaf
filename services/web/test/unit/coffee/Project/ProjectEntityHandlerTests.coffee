@@ -582,24 +582,15 @@ describe 'ProjectEntityHandler', ->
 
 			@ProjectEntityHandler.addFile project_id, folder_id, fileName, {}, userId, () ->
 
-	describe 'replacing a file', ->
+	describe 'replaceFile', ->
 		beforeEach ->
 			@projectLocator
 			@file_id = "file_id_here"
 			@fsPath = "fs_path_here.png"
-			@fileRef = {rev:3, _id:@file_id}
-			@filePaths = {fileSystem:"/folder1/file.png", mongo:"folder.1.files.somewhere"}
+			@fileRef = {rev:3, _id: @file_id, name: @fileName = "fileName"}
+			@filePaths = {fileSystem: @fileSystemPath="/folder1/file.png", mongo:"folder.1.files.somewhere"}
 			@projectLocator.findElement = sinon.stub().callsArgWith(1, null, @fileRef, @filePaths)
-
-			@ProjectEntityHandler.getAllEntitiesFromProject = sinon.stub()
-			@ProjectEntityHandler.getAllEntitiesFromProject
-				.onFirstCall()
-				.callsArgWith(1, null, [], @oldFiles = ['old-file'])
-			@ProjectEntityHandler.getAllEntitiesFromProject
-				.onSecondCall()
-				.callsArgWith(1, null, [], @newFiles = ['new-file'])
-			@ProjectModel.findOneAndUpdate = sinon.stub().callsArgWith(3, null, @project)
-
+			@ProjectModel.findOneAndUpdate = sinon.stub().callsArgWith(3)
 			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, @project)
 
 		it 'should find the file', (done)->
@@ -644,11 +635,17 @@ describe 'ProjectEntityHandler', ->
 			@ProjectEntityHandler.replaceFile project_id, @file_id, @fsPath, userId, =>
 
 		it "should should send the old and new project structure to the doc updater", (done) ->
-			@ProjectEntityHandler.replaceFile project_id, @file_id, @fsPath, userId, =>
-				@documentUpdaterHandler.updateProjectStructure
-					.calledWith(project_id, userId, [], [], @oldFiles, @newFiles)
-					.should.equal true
+			@documentUpdaterHandler.updateProjectStructure = (passed_project_id, passed_user_id, oldDocs, newDocs, oldFiles, newFiles) =>
+				passed_project_id.should.equal project_id
+				passed_user_id.should.equal userId
+				newFiles.length.should.equal 1
+				newFile = newFiles[0]
+				newFile.file.name.should.equal @fileName
+				newFile.path.should.equal @fileSystemPath
+				newFile.url.should.equal @fileUrl
 				done()
+
+			@ProjectEntityHandler.replaceFile project_id, @file_id, @fsPath, userId, =>
 
 	describe 'addFolder', ->
 		folderName = "folder1234"

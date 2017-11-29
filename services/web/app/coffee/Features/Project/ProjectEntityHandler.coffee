@@ -224,7 +224,7 @@ module.exports = ProjectEntityHandler =
 
 	replaceFile: (project_id, file_id, fsPath, userId, callback)->
 		self = ProjectEntityHandler
-		FileStoreHandler.uploadFileFromDisk project_id, file_id, fsPath, (err)->
+		FileStoreHandler.uploadFileFromDisk project_id, file_id, fsPath, (err, fileStoreUrl)->
 			return callback(err) if err?
 			ProjectGetter.getProject project_id, {rootFolder: true, name:true}, (err, project) ->
 				return callback(err) if err?
@@ -233,25 +233,25 @@ module.exports = ProjectEntityHandler =
 				# then the path to the file element will be out of date. In practice
 				# this is not a problem so long as we do not do anything longer running
 				# between them (like waiting for the file to upload.)
-				self.getAllEntitiesFromProject project, (err, oldDocs, oldFiles) =>
+				projectLocator.findElement {project:project, element_id: file_id, type: 'file'}, (err, fileRef, path)=>
 					return callback(err) if err?
-					projectLocator.findElement {project:project, element_id: file_id, type: 'file'}, (err, fileRef, path)=>
+					tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:path.fileSystem, rev:fileRef.rev+1, project_name:project.name}, (err) ->
 						return callback(err) if err?
-						tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:path.fileSystem, rev:fileRef.rev+1, project_name:project.name}, (err) ->
+						conditions = _id:project._id
+						inc = {}
+						inc["#{path.mongo}.rev"] = 1
+						set = {}
+						set["#{path.mongo}.created"] = new Date()
+						update =
+							"$inc": inc
+							"$set": set
+						Project.findOneAndUpdate conditions, update, { "new": true}, (err) ->
 							return callback(err) if err?
-							conditions = _id:project._id
-							inc = {}
-							inc["#{path.mongo}.rev"] = 1
-							set = {}
-							set["#{path.mongo}.created"] = new Date()
-							update =
-								"$inc": inc
-								"$set": set
-							Project.findOneAndUpdate conditions, update, { "new": true}, (err, newProject) ->
-								return callback(err) if err?
-								self.getAllEntitiesFromProject newProject, (err, newDocs, newFiles) =>
-									return callback(err) if err?
-									DocumentUpdaterHandler.updateProjectStructure project_id, userId, oldDocs, newDocs, oldFiles, newFiles, callback
+							newFile =
+								file: fileRef
+								path: path.fileSystem
+								url: fileStoreUrl
+							DocumentUpdaterHandler.updateProjectStructure project_id, userId, [], [], [], [newFile], callback
 
 	copyFileFromExistingProjectWithProject: (project, folder_id, originalProject_id, origonalFileRef, userId, callback = (error, fileRef, folder_id) ->)->
 		project_id = project._id
