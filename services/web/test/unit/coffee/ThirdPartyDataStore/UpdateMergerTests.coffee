@@ -97,7 +97,7 @@ describe 'UpdateMerger :', ->
 			path = "folder1/folder2/#{docName}"
 			@editorController.mkdirp = sinon.stub().withArgs(@project_id).callsArgWith(2, null, [folder], folder)
 			@editorController.addDoc = ->
-			mock = sinon.mock(@editorController).expects("addDoc").withArgs(@project_id, folder._id, docName, @splitDocLines, @source).callsArg(5)
+			mock = sinon.mock(@editorController).expects("addDoc").withArgs(@project_id, folder._id, docName, @splitDocLines, @source, @user_id).callsArg(6)
 
 			@update.write(@docLines)
 			@update.end()

@@ -57,7 +57,7 @@ module.exports =
 						if err?
 							logger.err err:err, project_id:project_id, doc_id:doc_id, path:path, "error processing file"
 							return callback(err)
-						editorController.addDoc project_id, folder._id, fileName, docLines, source, callback
+						editorController.addDoc project_id, folder._id, fileName, docLines, source, user_id, callback
 
 		processFile: (project_id, file_id, fsPath, path, source, user_id, callback)->
 			finish = (err)->
