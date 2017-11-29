@@ -44,6 +44,7 @@ describe "SubscriptionController", ->
 
 		@RecurlyWrapper =
 			sign: sinon.stub().callsArgWith(1, null, "somthing")
+			getSubscription: sinon.stub().callsArgWith(2, null, {})
 
 		@SubscriptionViewModelBuilder =
 			buildUsersSubscriptionViewModel:sinon.stub().callsArgWith(1, null, @activeRecurlySubscription)
@@ -55,7 +56,7 @@ describe "SubscriptionController", ->
 					collaborator:"COLLABORATORCODEHERE"
 			apis:
 				recurly:
-					subdomain:"sl.recurly.com"
+					subdomain:"sl"
 			siteUrl: "http://de.sharelatex.dev:3000"
 			gaExperiments:{}
 		@GeoIpLookup =
@@ -117,34 +118,6 @@ describe "SubscriptionController", ->
 			it 'should not fetch the current user', (done) ->
 				@UserGetter.getUser.callCount.should.equal 0
 				done()
-
-
-	describe "editBillingDetailsPage", ->
-		describe "with a user with a subscription", ->
-			beforeEach (done) ->
-				@LimitationsManager.userHasSubscription.callsArgWith(1, null, true)
-				@user._id = @activeRecurlySubscription.account.account_code
-				@res.callback = done
-				@SubscriptionController.editBillingDetailsPage(@req, @res)
-
-			it "should render the edit billing details page", ->
-				@res.rendered.should.equal true
-				@res.renderedTemplate.should.equal "subscriptions/edit-billing-details"
-
-			it "should set the correct variables for the template", ->
-				should.exist @res.renderedVariables.signature
-				@res.renderedVariables.successURL.should.equal "#{@settings.siteUrl}/user/subscription/billing-details/update"
-				@res.renderedVariables.user.id.should.equal @user._id
-
-		describe "with a user without subscription", ->
-			beforeEach (done) ->
-				@res.callback = done
-				@LimitationsManager.userHasSubscription.callsArgWith(1, null, false)
-				@SubscriptionController.reactivateSubscription @req, @res
-
-			it "should redirect to the subscription dashboard", ->
-				@res.redirected.should.equal true
-				@res.redirectedTo.should.equal "/user/subscription"
 
 	describe "paymentPage", ->
 		beforeEach ->
@@ -255,7 +228,12 @@ describe "SubscriptionController", ->
 			describe "with an existing subscription", ->
 				beforeEach (done)->
 					@res.callback = done
-					@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true)
+					@settings.apis.recurly.subdomain = 'test'
+					@userSub = {account: {hosted_login_token: 'abcd'}}
+					@RecurlyWrapper.getSubscription = sinon.stub()
+						.callsArgWith(2, null, @userSub)
+					@LimitationsManager.userHasSubscriptionOrIsGroupMember
+						.callsArgWith(1, null, true, {})
 					@SubscriptionController.userSubscriptionPage @req, @res
 
 
@@ -266,7 +244,7 @@ describe "SubscriptionController", ->
 			beforeEach (done) ->
 				@res.callback = done
 				@SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(1, null, @activeRecurlySubscription)
-				@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true)
+				@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true, {})
 				@SubscriptionController.userSubscriptionPage @req, @res
 
 			it "should render the dashboard", (done)->
@@ -281,7 +259,7 @@ describe "SubscriptionController", ->
 			beforeEach (done) ->
 				@res.callback = done
 				@SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(1, null, @activeRecurlySubscription)
-				@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true)
+				@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true, {})
 				@SubscriptionController.userSubscriptionPage @req, @res
 
 			it "should render the dashboard", ->
