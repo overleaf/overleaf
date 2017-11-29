@@ -4,26 +4,24 @@ bodyParser = require "body-parser"
 jsonParser = bodyParser.json()
 
 module.exports = MockDocUpdaterApi =
-	project_structures_updates: {}
+	updates: {}
 
 	clearProjectStructureUpdates: () ->
-		@project_structures_updates = {}
+		@updates = {}
 
 	getProjectStructureUpdates: (project_id) ->
-		@project_structures_updates[project_id]
+		@updates[project_id] || { docUpdates: [], fileUpdates: [] }
 
 	addProjectStructureUpdates: (project_id, userId, docUpdates, fileUpdates) ->
-		@project_structures_updates[project_id] ||= {
-			docUpdates: []
-			fileUpdates: []
-		}
+		@updates[project_id] ||= { docUpdates: [], fileUpdates: [] }
+
 		for update in docUpdates
 			update.userId = userId
-			@project_structures_updates[project_id].docUpdates.push(update)
+			@updates[project_id].docUpdates.push(update)
 
 		for update in fileUpdates
 			update.userId = userId
-			@project_structures_updates[project_id].fileUpdates.push(update)
+			@updates[project_id].fileUpdates.push(update)
 
 	run: () ->
 		app.post "/project/:project_id/flush", (req, res, next) =>

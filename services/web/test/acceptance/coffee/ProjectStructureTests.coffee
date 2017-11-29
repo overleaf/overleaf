@@ -1,7 +1,10 @@
-async = require("async")
+async = require "async"
 expect = require("chai").expect
+mkdirp = require "mkdirp"
+ObjectId = require("mongojs").ObjectId
 Path = require "path"
 fs = require "fs"
+Settings = require "settings-sharelatex"
 _ = require "underscore"
 
 ProjectGetter = require "../../../app/js/Features/Project/ProjectGetter.js"
@@ -20,7 +23,7 @@ describe "ProjectStructureChanges", ->
 	describe "creating a project from the example template", ->
 		before (done) ->
 			MockDocUpdaterApi.clearProjectStructureUpdates()
-			@owner.createProject "project", {template: "example"}, (error, project_id) =>
+			@owner.createProject "example-project", {template: "example"}, (error, project_id) =>
 				throw error if error?
 				@example_project_id = project_id
 				done()
@@ -133,11 +136,13 @@ describe "ProjectStructureChanges", ->
 
 	describe "uploading a file", ->
 		before (done) ->
-			MockDocUpdaterApi.clearProjectStructureUpdates()
 			ProjectGetter.getProject @example_project_id, (error, projects) =>
 				throw error if error?
 				@root_folder_id = projects[0].rootFolder[0]._id.toString()
 				done()
+
+		beforeEach () ->
+			MockDocUpdaterApi.clearProjectStructureUpdates()
 
 		it "should version a newly uploaded file", (done) ->
 			image_file = fs.createReadStream(Path.resolve(__dirname + '/../files/1pixel.png'))
@@ -195,6 +200,108 @@ describe "ProjectStructureChanges", ->
 				done()
 
 	describe "tpds", ->
-		it "should version add a doc"
-		it "should version add a new file"
-		it "should version replacing a file"
+		before (done) ->
+			@tpds_project_name = "tpds-project-#{new ObjectId().toString()}"
+			@owner.createProject @tpds_project_name, (error, project_id) =>
+				throw error if error?
+				@tpds_project_id = project_id
+				mkdirp Settings.path.dumpFolder, done
+
+		beforeEach () ->
+			MockDocUpdaterApi.clearProjectStructureUpdates()
+
+		it "should version adding a doc", (done) ->
+			tex_file = fs.createReadStream(Path.resolve(__dirname + '/../files/test.tex'))
+
+			req = @owner.request.post {
+				uri: "/user/#{@owner._id}/update/#{@tpds_project_name}/test.tex",
+				auth:
+					user: _.keys(Settings.httpAuthUsers)[0]
+					pass: _.values(Settings.httpAuthUsers)[0]
+					sendImmediately: true
+			}
+
+			tex_file.on "error", (err) ->
+				throw err
+
+			req.on "error", (err) ->
+				throw err
+
+			req.on "response", (res) =>
+				if res.statusCode < 200 || res.statusCode >= 300
+					throw new Error("failed to upload file #{res.statusCode}")
+
+				updates = MockDocUpdaterApi.getProjectStructureUpdates(@tpds_project_id).docUpdates
+				expect(updates.length).to.equal(1)
+				update = updates[0]
+				expect(update.userId).to.equal(@owner._id)
+				expect(update.pathname).to.equal("/test.tex")
+				expect(update.docLines).to.equal("Test")
+
+				done()
+
+			tex_file.pipe(req)
+
+		it "should version adding a new file", (done) ->
+			image_file = fs.createReadStream(Path.resolve(__dirname + '/../files/1pixel.png'))
+
+			req = @owner.request.post {
+				uri: "/user/#{@owner._id}/update/#{@tpds_project_name}/1pixel.png",
+				auth:
+					user: _.keys(Settings.httpAuthUsers)[0]
+					pass: _.values(Settings.httpAuthUsers)[0]
+					sendImmediately: true
+			}
+
+			image_file.on "error", (err) ->
+				throw err
+
+			req.on "error", (err) ->
+				throw err
+
+			req.on "response", (res) =>
+				if res.statusCode < 200 || res.statusCode >= 300
+					throw new Error("failed to upload file #{res.statusCode}")
+
+				updates = MockDocUpdaterApi.getProjectStructureUpdates(@tpds_project_id).fileUpdates
+				expect(updates.length).to.equal(1)
+				update = updates[0]
+				expect(update.userId).to.equal(@owner._id)
+				expect(update.pathname).to.equal("/1pixel.png")
+				expect(update.url).to.be.a('string');
+
+				done()
+
+			image_file.pipe(req)
+
+		it "should version replacing a file", (done) ->
+			image_file = fs.createReadStream(Path.resolve(__dirname + '/../files/2pixel.png'))
+
+			req = @owner.request.post {
+				uri: "/user/#{@owner._id}/update/#{@tpds_project_name}/1pixel.png",
+				auth:
+					user: _.keys(Settings.httpAuthUsers)[0]
+					pass: _.values(Settings.httpAuthUsers)[0]
+					sendImmediately: true
+			}
+
+			image_file.on "error", (err) ->
+				throw err
+
+			req.on "error", (err) ->
+				throw err
+
+			req.on "response", (res) =>
+				if res.statusCode < 200 || res.statusCode >= 300
+					throw new Error("failed to upload file #{res.statusCode}")
+
+				updates = MockDocUpdaterApi.getProjectStructureUpdates(@tpds_project_id).fileUpdates
+				expect(updates.length).to.equal(1)
+				update = updates[0]
+				expect(update.userId).to.equal(@owner._id)
+				expect(update.pathname).to.equal("/1pixel.png")
+				expect(update.url).to.be.a('string');
+
+				done()
+
+			image_file.pipe(req)
