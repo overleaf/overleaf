@@ -12,13 +12,13 @@
   "scripts": {
     "test:acceptance:wait_for_app": "echo 'Waiting for app to be accessible' && while (! curl -s -o /dev/null localhost:3000/status) do sleep 1; done",
     "test:acceptance:run": "bin/acceptance_test $@",
-    "test:acceptance:dir": "npm run compile:acceptance_tests && npm run test:acceptance:wait_for_app && npm run test:acceptance:run -- $@",
-    "test:acceptance": "npm run test:acceptance:dir -- $@ test/acceptance/js",
-    "test:unit": "npm run compile:app && npm run compile:unit_tests && bin/unit_test $@",
+    "test:acceptance:dir": "npm -q run compile:acceptance_tests && npm -q run test:acceptance:wait_for_app && npm -q run test:acceptance:run -- $@",
+    "test:acceptance": "npm -q run test:acceptance:dir -- $@ test/acceptance/js",
+    "test:unit": "npm -q run compile:app && npm -q run compile:unit_tests && bin/unit_test $@",
     "compile:unit_tests": "bin/compile_unit_tests",
     "compile:acceptance_tests": "bin/compile_acceptance_tests",
     "compile:app": "bin/compile_app",
-    "start": "npm run compile:app && node app.js"
+    "start": "npm -q run compile:app && node app.js"
   },
   "dependencies": {
     "archiver": "0.9.0",
