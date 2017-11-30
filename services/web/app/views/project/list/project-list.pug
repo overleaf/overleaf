@@ -114,9 +114,9 @@
 					) #{translate("delete_forever")}
 
 .row.row-spaced
-	if noV1Connection
+	each warning in warnings
 		.col-xs-12
-			.alert.alert-warning No V1 Connection
+			.alert.alert-warning= warning
 
 	.col-xs-12
 		.card.card-thin.project-list-card

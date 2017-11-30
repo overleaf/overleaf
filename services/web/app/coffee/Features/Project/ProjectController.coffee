@@ -170,6 +170,8 @@ module.exports = ProjectController =
 					return notification
 				projects = ProjectController._buildProjectList results.projects, results.v1Projects?.projects
 				user = results.user
+				warnings = ProjectController._buildWarningsList results.v1Projects
+
 				ProjectController._injectProjectOwners projects, (error, projects) ->
 					return next(error) if error?
 					viewModel = {
@@ -181,7 +183,7 @@ module.exports = ProjectController =
 						user: user
 						hasSubscription: results.hasSubscription[0]
 						isShowingV1Projects: results.v1Projects?
-						noV1Connection: results.v1Projects?.noConnection
+						warnings: warnings
 					}
 
 					if Settings?.algolia?.app_id? and Settings?.algolia?.read_only_api_key?
@@ -426,6 +428,14 @@ module.exports = ProjectController =
 				if project.owner_ref?
 					project.owner = users[project.owner_ref.toString()]
 			callback null, projects
+
+	_buildWarningsList: (v1ProjectData = {}) ->
+		warnings = []
+		if v1ProjectData.noConnection
+			warnings.push 'No V1 Connection'
+		if v1ProjectData.hasHiddenV1Projects
+			warnings.push "Looks like you've got a lot of V1 projects! Some of them may be hidden on V2. To view them all, use the V1 dashboard."
+		return warnings
 
 defaultSettingsForAnonymousUser = (user_id)->
 	id : user_id
