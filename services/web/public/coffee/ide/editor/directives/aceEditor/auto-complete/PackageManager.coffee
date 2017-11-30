@@ -29,7 +29,7 @@ define () ->
 
 	packageSnippets.push {
 		caption: "\\usepackage{}"
-		snippet: "\\usepackage{}"
+		snippet: "\\usepackage{$1}"
 		meta: "pkg"
 		score: 70
 	}
