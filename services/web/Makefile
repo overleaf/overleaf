@@ -1,5 +1,5 @@
 DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
-npm -q := docker-compose ${DOCKER_COMPOSE_FLAGS} run --rm npm -q npm
+NPM := docker-compose ${DOCKER_COMPOSE_FLAGS} run --rm npm -q npm
 BUILD_NUMBER ?= local
 BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
 PROJECT_NAME = web
