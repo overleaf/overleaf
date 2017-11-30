@@ -11,12 +11,12 @@ define [
 					if attrs.spacingOpen?
 						spacingOpen = parseInt(attrs.spacingOpen, 10)
 					else
-						spacingOpen = 24
+						spacingOpen = window.uiConfig.defaultResizerSizeOpen
 
 					if attrs.spacingClosed?
 						spacingClosed = parseInt(attrs.spacingClosed, 10)
 					else
-						spacingClosed = 24
+						spacingClosed = window.uiConfig.defaultResizerSizeClosed
 
 					options =
 						spacing_open: spacingOpen
