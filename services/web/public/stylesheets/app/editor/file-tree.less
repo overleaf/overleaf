@@ -1,5 +1,20 @@
+.fake-full-width-bg(@bg-color) {
+	&::before {
+		content: '\00a0';
+		position: absolute;
+		width: 100%;
+		right: 100%;
+		background-color: @bg-color;
+	}
+}
 
-aside#file-tree {
+#file-tree {
+	.toolbar.toolbar-filetree {
+		.toolbar-small-mixin;
+		.toolbar-alt-mixin;
+		padding: 0 5px;
+	}
+	
 	.file-tree-inner {
 		position: absolute;
 		top: 32px;
@@ -7,12 +22,14 @@ aside#file-tree {
 		left: 0;
 		right: 0;
 		overflow-y: auto;
+		background-color: @file-tree-bg;
 
 		&.no-toolbar {
 			top: 0;
 		}
 	}
 
+	// TODO; Consolidate with "Project files" in Overleaf
 	h3 {
 		font-size: 1rem;
 		border-bottom: 1px solid @gray;
@@ -20,10 +37,13 @@ aside#file-tree {
 		margin: (@line-height-computed / 2);
 	}
 
-	ul.file-tree-list {
+	ul.file-tree-list when (@is-overleaf = false) {
 		font-size: 0.8rem;
-		margin: 0;
 		padding: (@line-height-computed / 4) 0;
+	}
+
+	ul.file-tree-list {
+		margin: 0;
 		overflow-x: hidden;
 		height: 100%;
 
@@ -40,29 +60,42 @@ aside#file-tree {
 			}
 
 			.entity-name {
-				color: @gray-darker;
+				color: @file-tree-item-color;
 				cursor: pointer;
 				white-space: nowrap;
 				overflow: hidden;
 				text-overflow: ellipsis;
 				&:hover {
-					background-color: @gray-lightest;
+					background-color: @file-tree-item-hover-bg;
+				}
+				&:hover when (@is-overleaf = true) {
+					// When the entity is a subfolder, the DOM element is "indented" via margin-left. This makes the
+					// element not fill the entire file-tree width (as it's spaced from the left-hand side via margin) 
+					// and, in consequence, the background gets clipped. The ::before pseudo-selector is used to fill
+					// the empty space.
+					.fake-full-width-bg(@file-tree-item-hover-bg);
 				}
 				input {
 					line-height: 1.6;
 				}
-				&.droppable-hover {
-					background-color: fade(@file-tree-droppable-background-color, 60%);
+				&.droppable-hover when (@is-overleaf = false) {
+					background-color: fade(@file-tree-droppable-bg-color, 60%);
 				}
+
+				&.droppable-hover when (@is-overleaf = true) {
+					background-color: @file-tree-droppable-bg-color;
+					.fake-full-width-bg(@file-tree-droppable-bg-color);
+				}
+
 			}
 
 			i.fa {
-				color: @gray-light;
+				color: @file-tree-item-icon-color;
 				font-size: 14px;
 			}
 
 			i.fa-folder-open, i.fa-folder {
-				color: lighten(desaturate(@link-color, 10%), 5%);
+				color: @file-tree-item-folder-color;
 				font-size: 14px;
 			}
 
@@ -70,14 +103,31 @@ aside#file-tree {
 				width: 24px;
 				padding: 6px;
 				font-size: 0.7rem;
-				color: @gray
+				color: @file-tree-item-toggle-color;
 			}
 			
 			&.multi-selected {
-				> .entity > .entity-name {
-					background-color: lighten(@brand-info, 40%);
+				> .entity > .entity-name when (@is-overleaf = false) {
+					background-color: @file-tree-multiselect-bg;
 					&:hover {
-						background-color: lighten(@brand-info, 30%);
+						background-color: @file-tree-multiselect-hover-bg;
+					}
+				}
+				> .entity when (@is-overleaf = true) {
+					> .entity-name {
+						> div > i.fa,
+						> i.fa,
+						.entity-menu-toggle i.fa {
+							color: #FFF;
+						}
+						color: #FFF;
+						font-weight: bold;
+						background-color: @file-tree-multiselect-bg;
+						.fake-full-width-bg(@file-tree-multiselect-bg);
+						&:hover {
+							background-color: @file-tree-multiselect-hover-bg;
+							.fake-full-width-bg(@file-tree-multiselect-hover-bg);
+						}
 					}
 				}
 			}
@@ -96,6 +146,7 @@ aside#file-tree {
 				top: 1px;
 				left: 44px;
 				right: 32px;
+				color: @file-tree-item-input-color;
 				input {
 					width: 100%;
 				}
@@ -111,7 +162,7 @@ aside#file-tree {
 	
 	&:not(.multi-selected) {
 		ul.file-tree-list li.selected {
-			> .entity > .entity-name {
+			> .entity > .entity-name when (@is-overleaf = false) {
 				color: @link-color;
 				border-right: 4px solid @link-color;
 				font-weight: bold;
@@ -123,15 +174,38 @@ aside#file-tree {
 					display: inline;
 				}
 			}
+
+			> .entity when (@is-overleaf = true) {
+				> .entity-name {
+					> div > i.fa,
+					> i.fa,
+					.entity-menu-toggle i.fa {
+						color: #FFF;
+					}
+					background-color: @file-tree-item-selected-bg;
+					font-weight: bold;
+					padding-right: 32px;
+					.fake-full-width-bg(@file-tree-item-selected-bg);
+
+					.entity-menu-toggle {
+						display: inline;
+					}
+				}
+			}
 		}
 	}
 
-	ul.droppable-hover {
-		background-color: fade(@file-tree-droppable-background-color, 60%);
+	ul.droppable-hover.file-tree-list when (@is-overleaf = false) {
+		background-color: fade(@file-tree-droppable-bg-color, 60%);
+	}
+	ul.droppable-hover.file-tree-list when (@is-overleaf = true) {
+		background-color: @file-tree-droppable-bg-color;
+		.fake-full-width-bg(@file-tree-droppable-bg-color);
 	}
 }
 
-.editor-dark {
+// TODO check if the OL Beta theme is OK with darker themes.
+.editor-dark when (@is-overleaf = false) {
 	aside#file-tree {
 		// background-color: lighten(@editor-dark-background-color, 10%);
 		
@@ -159,6 +233,4 @@ aside#file-tree {
 			}
 		}
 	}
-	
-	
 }

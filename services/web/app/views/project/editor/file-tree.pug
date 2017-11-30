@@ -1,5 +1,5 @@
 aside#file-tree(ng-controller="FileTreeController", ng-class="{ 'multi-selected': multiSelectedCount > 0 }").full-size
-	.toolbar.toolbar-small.toolbar-alt(ng-if="permissions.write")
+	.toolbar.toolbar-filetree(ng-if="permissions.write")
 		a(
 			href,
 			ng-click="openNewDocModal()",
