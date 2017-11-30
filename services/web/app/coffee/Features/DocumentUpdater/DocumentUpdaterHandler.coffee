@@ -204,11 +204,11 @@ module.exports = DocumentUpdaterHandler =
 				logger.error {project_id, doc_id, thread_id}, "doc updater returned a non-success status code: #{res.statusCode}"
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
-	updateProjectStructure : (project_id, userId, oldDocs, newDocs, oldFiles, newFiles, callback = (error) ->)->
+	updateProjectStructure : (project_id, userId, changes, callback = (error) ->)->
 		return callback() if !settings.apis.project_history?.enabled
 
-		docUpdates = DocumentUpdaterHandler._getRenameUpdates('doc', oldDocs, newDocs)
-		fileUpdates = DocumentUpdaterHandler._getRenameUpdates('file', oldFiles, newFiles)
+		docUpdates = DocumentUpdaterHandler._getRenameUpdates('doc', changes.oldDocs, changes.newDocs)
+		fileUpdates = DocumentUpdaterHandler._getRenameUpdates('file', changes.oldFiles, changes.newFiles)
 
 		timer = new metrics.Timer("set-document")
 		url = "#{settings.apis.documentupdater.url}/project/#{project_id}"
@@ -231,6 +231,8 @@ module.exports = DocumentUpdaterHandler =
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
 	_getRenameUpdates: (entityType, oldEntities, newEntities) ->
+		oldEntities ||= []
+		newEntities ||= []
 		updates = []
 
 		oldEntitiesHash = _.indexBy oldEntities, (entity) -> entity[entityType]._id.toString()

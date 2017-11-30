@@ -396,7 +396,7 @@ describe 'DocumentUpdaterHandler', ->
 				@settings.apis.project_history.enabled = false
 				@request.post = sinon.stub()
 
-				@handler.updateProjectStructure @project_id, @user_id, @oldDocs, @newDocs, @oldFiles, @newFiles, @callback
+				@handler.updateProjectStructure @project_id, @user_id, {}, @callback
 
 			it 'does not make a web request', ->
 				@request.post.called.should.equal false
@@ -414,17 +414,17 @@ describe 'DocumentUpdaterHandler', ->
 				it 'should send the structure update to the document updater', (done) ->
 					@docIdA = new ObjectId()
 					@docIdB = new ObjectId()
-					@oldDocs = [
-						{ path: '/old_a', doc: _id: @docIdA }
-						{ path: '/old_b', doc: _id: @docIdB }
-					]
-					# create new instances of the same ObjectIds so that == doens't pass
-					@newDocs = [
-						{ path: '/old_a', doc: _id: new ObjectId(@docIdA.toString()) }
-						{ path: '/new_b', doc: _id: new ObjectId(@docIdB.toString()) }
-					]
-					@oldFiles = []
-					@newFiles = []
+					@changes = {
+						oldDocs: [
+							{ path: '/old_a', doc: _id: @docIdA }
+							{ path: '/old_b', doc: _id: @docIdB }
+						]
+						# create new instances of the same ObjectIds so that == doesn't pass
+						newDocs: [
+							{ path: '/old_a', doc: _id: new ObjectId(@docIdA.toString()) }
+							{ path: '/new_b', doc: _id: new ObjectId(@docIdB.toString()) }
+						]
+					}
 
 					docUpdates = [
 						id: @docIdB.toString(),
@@ -432,7 +432,7 @@ describe 'DocumentUpdaterHandler', ->
 						newPathname: "/new_b"
 					]
 
-					@handler.updateProjectStructure @project_id, @user_id, @oldDocs, @newDocs, @oldFiles, @newFiles, () =>
+					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>
 						@request.post
 							.calledWith(url: @url, json: {docUpdates, fileUpdates: [], userId: @user_id})
 							.should.equal true
@@ -441,12 +441,9 @@ describe 'DocumentUpdaterHandler', ->
 			describe "when a doc has been added", ->
 				it 'should send the structure update to the document updater', (done) ->
 					@docId = new ObjectId()
-					@oldDocs = []
-					@newDocs = [
+					@changes = newDocs: [
 						{ path: '/foo', docLines: 'a\nb', doc: _id: @docId }
 					]
-					@oldFiles = []
-					@newFiles = []
 
 					docUpdates = [
 						id: @docId.toString(),
@@ -455,7 +452,7 @@ describe 'DocumentUpdaterHandler', ->
 						url: undefined
 					]
 
-					@handler.updateProjectStructure @project_id, @user_id, @oldDocs, @newDocs, @oldFiles, @newFiles, () =>
+					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>
 						@request.post
 							.calledWith(url: @url, json: {docUpdates, fileUpdates: [], userId: @user_id})
 							.should.equal true
@@ -464,10 +461,7 @@ describe 'DocumentUpdaterHandler', ->
 			describe "when a file has been added", ->
 				it 'should send the structure update to the document updater', (done) ->
 					@fileId = new ObjectId()
-					@oldDocs = []
-					@newDocs = []
-					@oldFiles = []
-					@newFiles = [
+					@changes = newFiles: [
 						{ path: '/bar', url: 'filestore.example.com/file', file: _id: @fileId }
 					]
 
@@ -478,7 +472,7 @@ describe 'DocumentUpdaterHandler', ->
 						docLines: undefined
 					]
 
-					@handler.updateProjectStructure @project_id, @user_id, @oldDocs, @newDocs, @oldFiles, @newFiles, () =>
+					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>
 						@request.post
 							.calledWith(url: @url, json: {docUpdates: [], fileUpdates, userId: @user_id})
 							.should.equal true
@@ -487,14 +481,11 @@ describe 'DocumentUpdaterHandler', ->
 			describe "when a doc has been deleted", ->
 				it 'should do nothing', (done) ->
 					@docId = new ObjectId()
-					@oldDocs = [
+					@changes = oldDocs: [
 						{ path: '/foo', docLines: 'a\nb', doc: _id: @docId }
 					]
-					@newDocs = []
-					@oldFiles = []
-					@newFiles = []
 
-					@handler.updateProjectStructure @project_id, @user_id, @oldDocs, @newDocs, @oldFiles, @newFiles, () =>
+					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>
 						@request.post.called.should.equal false
 						done()
 

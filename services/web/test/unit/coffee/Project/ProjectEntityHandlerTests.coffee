@@ -69,7 +69,7 @@ describe 'ProjectEntityHandler', ->
 		@settings =
 			maxEntitiesPerProject:200
 		@documentUpdaterHandler =
-			updateProjectStructure: sinon.stub().callsArg(6)
+			updateProjectStructure: sinon.stub().yields()
 			deleteDoc: sinon.stub().callsArg(2)
 		@ProjectEntityHandler = SandboxedModule.require modulePath, requires:
 			'../../models/Project': Project:@ProjectModel
@@ -274,7 +274,7 @@ describe 'ProjectEntityHandler', ->
 
 			it "should should send the update to the doc updater", ->
 				@documentUpdaterHandler.updateProjectStructure
-					.calledWith(project_id, userId, @oldDocs, @newDocs, @oldFiles, @newFiles)
+					.calledWith(project_id, userId, {@oldDocs, @newDocs, @oldFiles, @newFiles})
 					.should.equal true
 
 			it 'should remove the element from its current position', ->
@@ -326,7 +326,7 @@ describe 'ProjectEntityHandler', ->
 
 				it "should should send the update to the doc updater", ->
 					@documentUpdaterHandler.updateProjectStructure
-						.calledWith(project_id, userId, @oldDocs, @newDocs, @oldFiles, @newFiles)
+						.calledWith(project_id, userId, {@oldDocs, @newDocs, @oldFiles, @newFiles})
 						.should.equal true
 
 				it 'should remove the element from its current position', ->
@@ -487,12 +487,13 @@ describe 'ProjectEntityHandler', ->
 				.should.equal true
 
 		it "should should send the change in project structure to the doc updater", () ->
-			newDoc =
+			newDocs = [
 				doc: @doc
 				path: @path
 				docLines: @lines.join('\n')
+			]
 			@documentUpdaterHandler.updateProjectStructure
-				.calledWith(project_id, userId, [], [newDoc], [], [])
+				.calledWith(project_id, userId, {newDocs})
 				.should.equal true
 
 	describe "restoreDoc", ->
@@ -570,9 +571,10 @@ describe 'ProjectEntityHandler', ->
 			@ProjectEntityHandler.addFile project_id, folder_id, fileName, {}, userId, (err, fileRef, parentFolder)->
 
 		it "should should send the change in project structure to the doc updater", (done) ->
-			@documentUpdaterHandler.updateProjectStructure = (passed_project_id, passed_user_id, oldDocs, newDocs, oldFiles, newFiles) =>
+			@documentUpdaterHandler.updateProjectStructure = (passed_project_id, passed_user_id, changes) =>
 				passed_project_id.should.equal project_id
 				passed_user_id.should.equal userId
+				{ newFiles } = changes
 				newFiles.length.should.equal 1
 				newFile = newFiles[0]
 				newFile.file.name.should.equal fileName
@@ -635,9 +637,10 @@ describe 'ProjectEntityHandler', ->
 			@ProjectEntityHandler.replaceFile project_id, @file_id, @fsPath, userId, =>
 
 		it "should should send the old and new project structure to the doc updater", (done) ->
-			@documentUpdaterHandler.updateProjectStructure = (passed_project_id, passed_user_id, oldDocs, newDocs, oldFiles, newFiles) =>
+			@documentUpdaterHandler.updateProjectStructure = (passed_project_id, passed_user_id, changes) =>
 				passed_project_id.should.equal project_id
 				passed_user_id.should.equal userId
+				{ newFiles } = changes
 				newFiles.length.should.equal 1
 				newFile = newFiles[0]
 				newFile.file.name.should.equal @fileName
@@ -1029,9 +1032,10 @@ describe 'ProjectEntityHandler', ->
 			@ProjectEntityHandler.copyFileFromExistingProjectWithProject @project, folder_id, oldProject_id, oldFileRef, userId, (err, fileRef, parentFolder)->
 
 		it "should should send the change in project structure to the doc updater", (done) ->
-			@documentUpdaterHandler.updateProjectStructure = (passed_project_id, passed_user_id, oldDocs, newDocs, oldFiles, newFiles) =>
+			@documentUpdaterHandler.updateProjectStructure = (passed_project_id, passed_user_id, changes) =>
 				passed_project_id.should.equal project_id
 				passed_user_id.should.equal userId
+				{ newFiles } = changes
 				newFiles.length.should.equal 1
 				newFile = newFiles[0]
 				newFile.file.name.should.equal fileName
@@ -1060,12 +1064,12 @@ describe 'ProjectEntityHandler', ->
 			@projectLocator.findElement = sinon.stub().callsArgWith(1, null, @entity = { _id: @entity_id, name:"old.tex", rev:4 }, @path)
 			@tpdsUpdateSender.moveEntity = sinon.stub()
 			@ProjectModel.findOneAndUpdate = sinon.stub().callsArgWith(3, null, @project)
-			@documentUpdaterHandler.updateProjectStructure = sinon.stub().callsArg(6)
+			@documentUpdaterHandler.updateProjectStructure = sinon.stub().yields()
 
 		it "should should send the old and new project structure to the doc updater", (done) ->
 			@ProjectEntityHandler.renameEntity project_id, @entity_id, @entityType, @newName, userId, =>
 				@documentUpdaterHandler.updateProjectStructure
-					.calledWith(project_id, userId, @oldDocs, @newDocs, @oldFiles, @newFiles)
+					.calledWith(project_id, userId, {@oldDocs, @newDocs, @oldFiles, @newFiles})
 					.should.equal true
 				done()
 

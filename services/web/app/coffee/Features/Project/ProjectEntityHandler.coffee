@@ -176,11 +176,12 @@ module.exports = ProjectEntityHandler =
 						rev:          0
 					}, (err) ->
 						return callback(err) if err?
-						newDoc =
+						newDocs = [
 							doc: doc
 							path: result?.path?.fileSystem
 							docLines: docLines.join('\n')
-						DocumentUpdaterHandler.updateProjectStructure project_id, userId, [], [newDoc], [], [], (error) ->
+						]
+						DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newDocs}, (error) ->
 							return callback(error) if error?
 							callback null, doc, folder_id
 
@@ -214,11 +215,12 @@ module.exports = ProjectEntityHandler =
 						return callback(err)
 					tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:result?.path?.fileSystem, project_name:project.name, rev:fileRef.rev}, (err) ->
 						return callback(err) if err?
-						newFile =
+						newFiles = [
 							file: fileRef
 							path: result?.path?.fileSystem
 							url: fileStoreUrl
-						DocumentUpdaterHandler.updateProjectStructure project_id, userId, [], [], [], [newFile], (error) ->
+						]
+						DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newFiles}, (error) ->
 							return callback(error) if error?
 							callback null, fileRef, folder_id
 
@@ -247,11 +249,12 @@ module.exports = ProjectEntityHandler =
 							"$set": set
 						Project.findOneAndUpdate conditions, update, { "new": true}, (err) ->
 							return callback(err) if err?
-							newFile =
+							newFiles = [
 								file: fileRef
 								path: path.fileSystem
 								url: fileStoreUrl
-							DocumentUpdaterHandler.updateProjectStructure project_id, userId, [], [], [], [newFile], callback
+							]
+							DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newFiles}, callback
 
 	copyFileFromExistingProjectWithProject: (project, folder_id, originalProject_id, origonalFileRef, userId, callback = (error, fileRef, folder_id) ->)->
 		project_id = project._id
@@ -273,11 +276,12 @@ module.exports = ProjectEntityHandler =
 					tpdsUpdateSender.addFile { project_id, file_id:fileRef._id, path:result?.path?.fileSystem, rev:fileRef.rev, project_name:project.name}, (err) ->
 						if err?
 							logger.err { err, project_id, folder_id, originalProject_id, origonalFileRef }, "error sending file to tpds worker"
-						newFile =
+						newFiles = [
 							file: fileRef
 							path: result?.path?.fileSystem
 							url: fileStoreUrl
-						DocumentUpdaterHandler.updateProjectStructure project_id, userId, [], [], [], [newFile], (error) ->
+						]
+						DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newFiles}, (error) ->
 							return callback(error) if error?
 							callback null, fileRef, folder_id
 
@@ -393,7 +397,7 @@ module.exports = ProjectEntityHandler =
 								tpdsUpdateSender.moveEntity opts
 								self.getAllEntitiesFromProject newProject, (error, newDocs, newFiles) =>
 									return callback(error) if error?
-									DocumentUpdaterHandler.updateProjectStructure project_id, userId, oldDocs, newDocs, oldFiles, newFiles, callback
+									DocumentUpdaterHandler.updateProjectStructure project_id, userId, {oldDocs, newDocs, oldFiles, newFiles}, callback
 
 	_checkValidMove: (project, entityType, entityPath, destFolderId, callback = (error) ->) ->
 		return callback() if !entityType.match(/folder/)
@@ -450,7 +454,7 @@ module.exports = ProjectEntityHandler =
 						return callback(error) if error?
 						ProjectEntityHandler.getAllEntitiesFromProject newProject, (error, newDocs, newFiles) =>
 							return callback(error) if error?
-							DocumentUpdaterHandler.updateProjectStructure project_id, userId, oldDocs, newDocs, oldFiles, newFiles, callback
+							DocumentUpdaterHandler.updateProjectStructure project_id, userId, {oldDocs, newDocs, oldFiles, newFiles}, callback
 
 	_cleanUpEntity: (project, entity, entityType, callback = (error) ->) ->
 		if(entityType.indexOf("file") != -1)
