@@ -109,6 +109,7 @@
     "grunt-postcss": "^0.8.0",
     "grunt-sed": "^0.1.1",
     "grunt-shell": "^2.1.0",
+    "mkdirp": "https://registry.npmjs.org/mkdirp/-/mkdirp-0.5.1.tgz",
     "sandboxed-module": "0.2.0",
     "sinon": "^1.17.0",
     "timekeeper": "",
