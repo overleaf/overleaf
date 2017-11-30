@@ -290,3 +290,12 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 		res.locals.moduleIncludes = Modules.moduleIncludes
 		res.locals.moduleIncludesAvailable = Modules.moduleIncludesAvailable
 		next()
+
+	webRouter.use (req, res, next) ->
+		isOl = (Settings.brandPrefix == 'ol-')
+		res.locals.uiConfig = 
+			defaultResizerSizeOpen   : if isOl then 2 else 24
+			defaultResizerSizeClosed : if isOl then 2 else 24
+			chatResizerSizeOpen      : if isOl then 2 else 6
+			chatResizerSizeClosed    : 0
+		next()
