@@ -109,27 +109,16 @@ pipeline {
       }
     }
     
-    stage('Unit Test') {
-      agent {
-        docker {
-          image 'node:6.9.5'
-          reuseNode true
-        }
-      }
+    stage('Unit Tests') {
       steps {
-        sh 'env NODE_ENV=development ./node_modules/.bin/grunt mochaTest:unit --reporter=tap'
+        sh 'make install'
+        sh 'make test_unit MOCHA_ARGS="--reporter=tap"'
       }
     }
     
     stage('Acceptance Tests') {
       steps {
-        // This tagged relase of the acceptance test runner is a temporary fix
-        // to get the acceptance tests working before we move to a
-        // docker-compose workflow. See:
-        // https://github.com/sharelatex/web-sharelatex-internal/pull/148
-
-        sh 'docker pull sharelatex/sl-acceptance-test-runner:node-6.9-mongo-3.4'
-        sh 'docker run --rm -v $(pwd):/app --env SHARELATEX_ALLOW_PUBLIC_ACCESS=true sharelatex/sl-acceptance-test-runner:node-6.9-mongo-3.4 || (cat forever/app.log && false)'
+        sh 'make test_acceptance MOCHA_ARGS="--reporter=tap"'
       }
     }
     
