@@ -284,7 +284,19 @@
 }
 
 .ui-layout-resizer when (@is-overleaf = true) {
-	background-color: @editor-resizer-bg-color;
+	@extra-hit-area: 8px;
+	margin-left: -(@extra-hit-area) !important;
+	margin-right: -(@extra-hit-area - 1px) !important;
+	padding-left: @extra-hit-area !important;
+	padding-right: @extra-hit-area !important;
+	box-sizing: content-box;
+	background-image: linear-gradient(90deg, 
+		transparent,
+		transparent (@extra-hit-area - 1px),
+		@editor-resizer-bg-color (@extra-hit-area - 1px),
+		@editor-resizer-bg-color (@extra-hit-area + 1px),
+		transparent (@extra-hit-area + 1px),
+		transparent);
 
 	// .ui-layout-toggler {
 	// 	color: #999;
