@@ -261,9 +261,9 @@
 	}
 }
 
-.ui-layout-resizer {
+.ui-layout-resizer when (@is-overleaf = false) {
 	width: 6px;
-	background-color: #f4f4f4;
+	background-color: @editor-resizer-bg-color;
 	border-left: 1px solid @editor-border-color;
 	border-right: 1px solid @editor-border-color;
 	.ui-layout-toggler {
@@ -282,6 +282,27 @@
 		}
 	}
 }
+
+.ui-layout-resizer when (@is-overleaf = true) {
+	background-color: @editor-resizer-bg-color;
+
+	// .ui-layout-toggler {
+	// 	color: #999;
+	// 	font-family: FontAwesome;
+	// 	font-style: normal;
+	// 	font-weight: normal;
+	// 	line-height: 1;
+	// 	-webkit-font-smoothing: antialiased;
+	// 	-moz-osx-font-smoothing: grayscale;
+	// 	font-size: 16px !important;
+	// 	line-height: 50px;
+	// 	&:hover {
+	// 		background-color: #ddd;
+	// 		color: #333;
+	// 	}
+	// }
+}
+
 .ui-layout-resizer-west.ui-layout-resizer-open, .ui-layout-resizer-east.ui-layout-resizer-closed {
 	.ui-layout-toggler {
 		&:before {
