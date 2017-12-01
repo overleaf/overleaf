@@ -6,7 +6,7 @@ define [
 	"libs/underscore-1.3.3"
 	"libs/algolia-2.5.2"
 	"libs/jquery.storage"
-	"libs/fineuploader"
+	"fineuploader"
 	"libs/angular-sanitize-1.2.17"
 	"libs/angular-cookie"
 	"libs/passfield"
