@@ -161,13 +161,10 @@ class User
 
 	getCsrfToken: (callback = (error) ->) ->
 		@request.get {
-			url: "/register"
+			url: "/dev/csrf"
 		}, (err, response, body) =>
 			return callback(err) if err?
-			csrfMatches = body.match("window.csrfToken = \"(.*?)\";")
-			if !csrfMatches?
-				return callback(new Error("no csrf token found"))
-			@csrfToken = csrfMatches[1]
+			@csrfToken = body
 			@request = @request.defaults({
 				headers:
 					"x-csrf-token": @csrfToken
