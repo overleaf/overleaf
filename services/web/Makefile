@@ -59,6 +59,8 @@ test_acceptance_app_run: docker-shared.yml
 	docker-compose ${DOCKER_COMPOSE_FLAGS} exec -T test_acceptance npm -q run test:acceptance -- ${MOCHA_ARGS}
 
 test_acceptance_modules: docker-shared.yml
+	 # Break and error on any module failure
+	set -e; \
 	for dir in modules/*; \
 	do \
 		if [ -e $$dir/Makefile ]; then \
