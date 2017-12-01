@@ -61,7 +61,7 @@ test_acceptance_app_run: docker-shared.yml
 test_acceptance_modules: docker-shared.yml
 	for dir in modules/*; \
 	do \
-		if [ -e $$dir/makefile ]; then \
+		if [ -e $$dir/Makefile ]; then \
 			(make test_acceptance_module MODULE=$$dir) \
 		fi \
 	done
