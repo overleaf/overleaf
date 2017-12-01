@@ -70,6 +70,19 @@ pipeline {
         sh 'ls -l node_modules/.bin'
       }
     }
+    
+    stage('Unit Tests') {
+      steps {
+        sh 'make clean install' // Removes js files, so do before compile
+        sh 'make test_unit MOCHA_ARGS="--reporter=tap"'
+      }
+    }
+    
+    stage('Acceptance Tests') {
+      steps {
+        sh 'make test_acceptance MOCHA_ARGS="--reporter=tap"'
+      }
+    }
 
     stage('Compile') {
       agent {
@@ -106,19 +119,6 @@ pipeline {
       }
       steps {
         sh 'node_modules/.bin/grunt compile:minify'
-      }
-    }
-    
-    stage('Unit Tests') {
-      steps {
-        sh 'make clean install'
-        sh 'make test_unit MOCHA_ARGS="--reporter=tap"'
-      }
-    }
-    
-    stage('Acceptance Tests') {
-      steps {
-        sh 'make test_acceptance MOCHA_ARGS="--reporter=tap"'
       }
     }
     
