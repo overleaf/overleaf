@@ -63,6 +63,10 @@ block content
 					aside.project-list-sidebar.col-md-2.col-xs-3
 						include ./list/side-bar
 
+					.project-list-sidebar-v1-link.col-md-2.col-xs-3
+						span Want to go back to the V1 dashboard?
+						a.btn.btn-default(href=settings.overleaf.host + "/dash") Go back to V1
+
 					.project-list-main.col-md-10.col-xs-9
 						include ./list/notifications
 						include ./list/project-list
