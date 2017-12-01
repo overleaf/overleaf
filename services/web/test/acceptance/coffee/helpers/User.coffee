@@ -1,6 +1,9 @@
 request = require("./request")
+_ = require("underscore")
 settings = require("settings-sharelatex")
 {db, ObjectId} = require("../../../../app/js/infrastructure/mongojs")
+UserModel = require("../../../../app/js/models/User").User
+AuthenticationManager = require("../../../../app/js/Features/Authentication/AuthenticationManager")
 
 count = 0
 
@@ -17,20 +20,20 @@ class User
 	login: (callback = (error) ->) ->
 		@getCsrfToken (error) =>
 			return callback(error) if error?
-			@request.post {
-				url: "/register" # Register will log in, but also ensure user exists
-				json:
-					email: @email
-					password: @password
-			}, (error, response, body) =>
+			filter = {@email}
+			options = {upsert: true, new: true, setDefaultsOnInsert: true}
+			UserModel.findOneAndUpdate filter, {}, options, (error, user) =>
 				return callback(error) if error?
-				db.users.findOne {email: @email}, (error, user) =>
+				AuthenticationManager.setUserPassword user._id, @password, (error) =>
 					return callback(error) if error?
 					@id = user?._id?.toString()
 					@_id = user?._id?.toString()
 					@first_name = user?.first_name
 					@referal_id = user?.referal_id
-					callback()
+					@request.post {
+						url: "/login"
+						json: { @email, @password }
+					}, callback
 
 	logout: (callback = (error) ->) ->
 		@getCsrfToken (error) =>
