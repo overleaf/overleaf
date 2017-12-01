@@ -111,7 +111,7 @@ pipeline {
     
     stage('Unit Tests') {
       steps {
-        sh 'make install'
+        sh 'make clean install'
         sh 'make test_unit MOCHA_ARGS="--reporter=tap"'
       }
     }
