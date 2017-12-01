@@ -107,8 +107,10 @@ class User
 		}, (error, response, body) ->
 			return callback(error) if error?
 			if !body?.project_id?
-				console.error "SOMETHING WENT WRONG CREATING PROJECT", response.statusCode, response.headers["location"], body
-			callback(null, body.project_id)
+				error = new Error("SOMETHING WENT WRONG CREATING PROJECT", response.statusCode, response.headers["location"], body)
+				callback error
+			else
+				callback(null, body.project_id)
 
 	deleteProject: (project_id, callback=(error)) ->
 		@request.delete {
