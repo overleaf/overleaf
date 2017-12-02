@@ -132,8 +132,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 				// minimal requirejs configuration (can be extended/overridden)
 				window.requirejs = {
 					"paths" : {
-						"moment": "libs/#{lib('moment')}",
-						"fineuploader": "libs/#{lib('fineuploader')}"
+						"moment": "libs/#{lib('moment')}"
 					},
 					"urlArgs": "fingerprint=#{fingerprint(jsPath + 'main.js')}-#{fingerprint(jsPath + 'libs.js')}",
 					"config":{
