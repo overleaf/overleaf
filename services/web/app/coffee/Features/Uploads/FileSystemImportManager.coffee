@@ -28,9 +28,9 @@ module.exports = FileSystemImportManager =
 						if existingDoc?
 							EditorController.setDoc project_id, existingDoc._id, user_id, lines, "upload", callback
 						else
-							EditorController.addDocWithoutLock project_id, folder_id, name, lines, "upload", callback
+							EditorController.addDocWithoutLock project_id, folder_id, name, lines, "upload", user_id, callback
 				else
-					EditorController.addDocWithoutLock project_id, folder_id, name, lines, "upload", callback
+					EditorController.addDocWithoutLock project_id, folder_id, name, lines, "upload", user_id, callback
 
 	addFile: (user_id, project_id, folder_id, name, path, replace, callback = (error, file)-> )->
 		FileSystemImportManager._isSafeOnFileSystem path, (err, isSafe)->
@@ -39,7 +39,7 @@ module.exports = FileSystemImportManager =
 				return callback("path is symlink")
 
 			if !replace
-				EditorController.addFileWithoutLock project_id, folder_id, name, path, "upload", callback
+				EditorController.addFileWithoutLock project_id, folder_id, name, path, "upload", user_id, callback
 			else
 				ProjectLocator.findElement project_id: project_id, element_id: folder_id, type: "folder", (error, folder) ->
 					return callback(error) if error?
@@ -50,9 +50,9 @@ module.exports = FileSystemImportManager =
 							existingFile = fileRef
 							break
 					if existingFile?
-						EditorController.replaceFile project_id, existingFile._id, path, "upload", callback
+						EditorController.replaceFile project_id, existingFile._id, path, "upload", user_id, callback
 					else
-						EditorController.addFileWithoutLock project_id, folder_id, name, path, "upload", callback
+						EditorController.addFileWithoutLock project_id, folder_id, name, path, "upload", user_id, callback
 
 	addFolder: (user_id, project_id, folder_id, name, path, replace, callback = (error)-> ) ->
 		FileSystemImportManager._isSafeOnFileSystem path, (err, isSafe)->

@@ -390,26 +390,13 @@ describe 'DocumentUpdaterHandler', ->
 	describe "updateProjectStructure ", ->
 		beforeEach ->
 			@user_id = 1234
-			@docIdA = new ObjectId()
-			@docIdB = new ObjectId()
-			@oldDocs = [
-				{ path: '/old_a', doc: _id: @docIdA }
-				{ path: '/old_b', doc: _id: @docIdB }
-			]
-			# create new instances of the same ObjectIds so that == doens't pass
-			@newDocs = [
-				{ path: '/old_a', doc: _id: new ObjectId(@docIdA.toString()) }
-				{ path: '/new_b', doc: _id: new ObjectId(@docIdB.toString()) }
-			]
-			@oldFiles = []
-			@newFiles = []
 
 		describe "with project history disabled", ->
 			beforeEach ->
 				@settings.apis.project_history.enabled = false
 				@request.post = sinon.stub()
 
-				@handler.updateProjectStructure @project_id, @user_id, @oldDocs, @newDocs, @oldFiles, @newFiles, @callback
+				@handler.updateProjectStructure @project_id, @user_id, {}, @callback
 
 			it 'does not make a web request', ->
 				@request.post.called.should.equal false
@@ -420,20 +407,85 @@ describe 'DocumentUpdaterHandler', ->
 		describe "with project history enabled", ->
 			beforeEach ->
 				@settings.apis.project_history.enabled = true
+				@url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}"
 				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
-				@handler.updateProjectStructure @project_id, @user_id, @oldDocs, @newDocs, @oldFiles, @newFiles, @callback
 
-			it 'should send the structure update to the document updater', ->
-				docUpdates = [
-					id: @docIdB,
-					pathname: "/old_b"
-					newPathname: "/new_b"
-				]
+			describe "when an entity has changed name", ->
+				it 'should send the structure update to the document updater', (done) ->
+					@docIdA = new ObjectId()
+					@docIdB = new ObjectId()
+					@changes = {
+						oldDocs: [
+							{ path: '/old_a', doc: _id: @docIdA }
+							{ path: '/old_b', doc: _id: @docIdB }
+						]
+						# create new instances of the same ObjectIds so that == doesn't pass
+						newDocs: [
+							{ path: '/old_a', doc: _id: new ObjectId(@docIdA.toString()) }
+							{ path: '/new_b', doc: _id: new ObjectId(@docIdB.toString()) }
+						]
+					}
 
-				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}"
-				@request.post
-					.calledWith(url: url, json: {docUpdates, fileUpdates: [], userId: @user_id})
-					.should.equal true
+					docUpdates = [
+						id: @docIdB.toString(),
+						pathname: "/old_b"
+						newPathname: "/new_b"
+					]
 
-			it "should call the callback with no error", ->
-				@callback.calledWith(null).should.equal true
+					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>
+						@request.post
+							.calledWith(url: @url, json: {docUpdates, fileUpdates: [], userId: @user_id})
+							.should.equal true
+						done()
+
+			describe "when a doc has been added", ->
+				it 'should send the structure update to the document updater', (done) ->
+					@docId = new ObjectId()
+					@changes = newDocs: [
+						{ path: '/foo', docLines: 'a\nb', doc: _id: @docId }
+					]
+
+					docUpdates = [
+						id: @docId.toString(),
+						pathname: "/foo"
+						docLines: 'a\nb'
+						url: undefined
+					]
+
+					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>
+						@request.post
+							.calledWith(url: @url, json: {docUpdates, fileUpdates: [], userId: @user_id})
+							.should.equal true
+						done()
+
+			describe "when a file has been added", ->
+				it 'should send the structure update to the document updater', (done) ->
+					@fileId = new ObjectId()
+					@changes = newFiles: [
+						{ path: '/bar', url: 'filestore.example.com/file', file: _id: @fileId }
+					]
+
+					fileUpdates = [
+						id: @fileId.toString(),
+						pathname: "/bar"
+						url: 'filestore.example.com/file'
+						docLines: undefined
+					]
+
+					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>
+						@request.post
+							.calledWith(url: @url, json: {docUpdates: [], fileUpdates, userId: @user_id})
+							.should.equal true
+						done()
+
+			describe "when a doc has been deleted", ->
+				it 'should do nothing', (done) ->
+					@docId = new ObjectId()
+					@changes = oldDocs: [
+						{ path: '/foo', docLines: 'a\nb', doc: _id: @docId }
+					]
+
+					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>
+						@request.post.called.should.equal false
+						done()
+

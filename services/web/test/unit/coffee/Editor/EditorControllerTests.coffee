@@ -131,24 +131,24 @@ describe "EditorController", ->
 			@docLines = ["1234","dskl"]
 
 		it 'should add the doc using the project entity handler', (done)->
-			mock = sinon.mock(@ProjectEntityHandler).expects("addDoc").withArgs(@project_id, @folder_id, @docName, @docLines).callsArg(4)
+			mock = sinon.mock(@ProjectEntityHandler).expects("addDoc").withArgs(@project_id, @folder_id, @docName, @docLines).callsArg(5)
 
-			@EditorController.addDocWithoutLock @project_id, @folder_id, @docName, @docLines, @source, ->
+			@EditorController.addDocWithoutLock @project_id, @folder_id, @docName, @docLines, @source, @user_id, ->
 				mock.verify()
 				done()
 
 		it 'should send the update out to the users in the project', (done)->
-			@ProjectEntityHandler.addDoc = sinon.stub().callsArgWith(4, null, @doc, @folder_id)
+			@ProjectEntityHandler.addDoc = sinon.stub().callsArgWith(5, null, @doc, @folder_id)
 
-			@EditorController.addDocWithoutLock @project_id, @folder_id, @docName, @docLines, @source, =>
+			@EditorController.addDocWithoutLock @project_id, @folder_id, @docName, @docLines, @source, @user_id, =>
 				@EditorRealTimeController.emitToRoom
 					.calledWith(@project_id, "reciveNewDoc", @folder_id, @doc, @source)
 					.should.equal true
 				done()
 
 		it 'should return the doc to the callback', (done) ->
-			@ProjectEntityHandler.addDoc = sinon.stub().callsArgWith(4, null, @doc, @folder_id)
-			@EditorController.addDocWithoutLock @project_id, @folder_id, @docName, @docLines, @source, (error, doc) =>
+			@ProjectEntityHandler.addDoc = sinon.stub().callsArgWith(5, null, @doc, @folder_id)
+			@EditorController.addDocWithoutLock @project_id, @folder_id, @docName, @docLines, @source, @user_id, (error, doc) =>
 				doc.should.equal @doc
 				done()
 
@@ -157,32 +157,29 @@ describe "EditorController", ->
 		beforeEach ->
 			@LockManager.getLock.callsArgWith(1)
 			@LockManager.releaseLock.callsArgWith(1)
-			@EditorController.addDocWithoutLock = sinon.stub().callsArgWith(5)
+			@EditorController.addDocWithoutLock = sinon.stub().callsArgWith(6)
 
 		it "should call addDocWithoutLock", (done)->
-			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, =>
-				@EditorController.addDocWithoutLock.calledWith(@project_id, @folder_id, @docName, @docLines, @source).should.equal true
+			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, @user_id, =>
+				@EditorController.addDocWithoutLock.calledWith(@project_id, @folder_id, @docName, @docLines, @source, @user_id).should.equal true
 				done()
 
 		it "should take the lock", (done)->
-			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, =>
+			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, @user_id, =>
 				@LockManager.getLock.calledWith(@project_id).should.equal true
 				done()
 
 		it "should release the lock", (done)->
-			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, =>
+			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, @user_id, =>
 				@LockManager.releaseLock.calledWith(@project_id).should.equal true
 				done()
 
 		it "should error if it can't cat the lock", (done)->
 			@LockManager.getLock = sinon.stub().callsArgWith(1, "timed out")
-			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, (err)=>
+			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, @user_id, (err)=>
 				expect(err).to.exist
 				err.should.equal "timed out"
-				done()			
-
-
-
+				done()
 
 	describe 'addFileWithoutLock:', ->
 		beforeEach ->
@@ -196,23 +193,23 @@ describe "EditorController", ->
 			@stream = new ArrayBuffer()
 
 		it 'should add the folder using the project entity handler', (done)->
-			@ProjectEntityHandler.addFile = sinon.stub().callsArgWith(4)
-			@EditorController.addFileWithoutLock @project_id, @folder_id, @fileName, @stream, @source, =>
-				@ProjectEntityHandler.addFile.calledWith(@project_id, @folder_id).should.equal true
+			@ProjectEntityHandler.addFile = sinon.stub().callsArgWith(5)
+			@EditorController.addFileWithoutLock @project_id, @folder_id, @fileName, @stream, @source, @user_id, =>
+				@ProjectEntityHandler.addFile.calledWith(@project_id, @folder_id, @fileName, @stream, @user_id).should.equal true
 				done()
 
 		it 'should send the update of a new folder out to the users in the project', (done)->
-			@ProjectEntityHandler.addFile = sinon.stub().callsArgWith(4, null, @file, @folder_id)
+			@ProjectEntityHandler.addFile = sinon.stub().callsArgWith(5, null, @file, @folder_id)
 
-			@EditorController.addFileWithoutLock @project_id, @folder_id, @fileName, @stream, @source, =>
+			@EditorController.addFileWithoutLock @project_id, @folder_id, @fileName, @stream, @source, @user_id, =>
 				@EditorRealTimeController.emitToRoom
 					.calledWith(@project_id, "reciveNewFile", @folder_id, @file, @source)
 					.should.equal true
 				done()
 
 		it "should return the file in the callback", (done) ->
-			@ProjectEntityHandler.addFile = sinon.stub().callsArgWith(4, null, @file, @folder_id)
-			@EditorController.addFileWithoutLock @project_id, @folder_id, @fileName, @stream, @source, (error, file) =>
+			@ProjectEntityHandler.addFile = sinon.stub().callsArgWith(5, null, @file, @folder_id)
+			@EditorController.addFileWithoutLock @project_id, @folder_id, @fileName, @stream, @source, @user_id, (error, file) =>
 				file.should.equal @file
 				done()
 
@@ -222,28 +219,28 @@ describe "EditorController", ->
 		beforeEach ->
 			@LockManager.getLock.callsArgWith(1)
 			@LockManager.releaseLock.callsArgWith(1)
-			@EditorController.addFileWithoutLock = sinon.stub().callsArgWith(5)
+			@EditorController.addFileWithoutLock = sinon.stub().callsArgWith(6)
 
 		it "should call addFileWithoutLock", (done)->
-			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, (error, file) =>
-				@EditorController.addFileWithoutLock.calledWith(@project_id, @folder_id, @fileName, @stream, @source).should.equal true
+			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, @user_id, (error, file) =>
+				@EditorController.addFileWithoutLock.calledWith(@project_id, @folder_id, @fileName, @stream, @source, @user_id).should.equal true
 				done()
 
 		it "should take the lock", (done)->
-			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, (error, file) =>
+			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, @user_id, (error, file) =>
 				@LockManager.getLock.calledWith(@project_id).should.equal true
 				done()
 
 		it "should release the lock", (done)->
-			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, (error, file) =>
+			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, @user_id, (error, file) =>
 				@LockManager.releaseLock.calledWith(@project_id).should.equal true
 				done()
 
 		it "should error if it can't cat the lock", (done)->
 			@LockManager.getLock = sinon.stub().callsArgWith(1, "timed out")
-			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, (err, file) =>
-				expect(err).to.exist
-				err.should.equal "timed out"
+			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, @user_id, (error, file) =>
+				expect(error).to.exist
+				error.should.equal "timed out"
 				done()			
 
 
@@ -256,9 +253,9 @@ describe "EditorController", ->
 			@fsPath = "/folder/file.png"
 
 		it 'should send the replace file message to the editor controller', (done)->
-			@ProjectEntityHandler.replaceFile = sinon.stub().callsArgWith(3)
-			@EditorController.replaceFile @project_id, @file_id, @fsPath, @source, =>
-				@ProjectEntityHandler.replaceFile.calledWith(@project_id, @file_id, @fsPath).should.equal true
+			@ProjectEntityHandler.replaceFile = sinon.stub().callsArgWith(4)
+			@EditorController.replaceFile @project_id, @file_id, @fsPath, @source, @user_id, =>
+				@ProjectEntityHandler.replaceFile.calledWith(@project_id, @file_id, @fsPath, @user_id).should.equal true
 				done()
 
 	describe 'addFolderWithoutLock :', ->

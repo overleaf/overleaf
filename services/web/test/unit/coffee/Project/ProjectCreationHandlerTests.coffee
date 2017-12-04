@@ -33,8 +33,8 @@ describe 'ProjectCreationHandler', ->
 			constructor:(options)->
 				{@name} = options
 		@ProjectEntityHandler =
-			addDoc: sinon.stub().callsArgWith(4, null, {_id: docId})
-			addFile: sinon.stub().callsArg(4)
+			addDoc: sinon.stub().callsArgWith(5, null, {_id: docId})
+			addFile: sinon.stub().callsArg(5)
 			setRootDoc: sinon.stub().callsArg(2)
 		@ProjectDetailsHandler =
 			validateProjectName: sinon.stub().yields()
@@ -149,7 +149,7 @@ describe 'ProjectCreationHandler', ->
 				.should.equal true
 
 		it 'should insert main.tex', ->
-			@ProjectEntityHandler.addDoc.calledWith(project_id, rootFolderId, "main.tex", ["mainbasic.tex", "lines"])
+			@ProjectEntityHandler.addDoc.calledWith(project_id, rootFolderId, "main.tex", ["mainbasic.tex", "lines"], ownerId)
 				.should.equal true
 
 		it 'should set the main doc id', ->
@@ -180,19 +180,20 @@ describe 'ProjectCreationHandler', ->
 
 		it 'should insert main.tex', ->
 			@ProjectEntityHandler.addDoc
-				.calledWith(project_id, rootFolderId, "main.tex", ["main.tex", "lines"])
+				.calledWith(project_id, rootFolderId, "main.tex", ["main.tex", "lines"], ownerId)
 				.should.equal true
 
 		it 'should insert references.bib', ->
 			@ProjectEntityHandler.addDoc
-				.calledWith(project_id, rootFolderId, "references.bib", ["references.bib", "lines"])
+				.calledWith(project_id, rootFolderId, "references.bib", ["references.bib", "lines"], ownerId)
 				.should.equal true
 
 		it 'should insert universe.jpg', ->
 			@ProjectEntityHandler.addFile
 				.calledWith(
 					project_id, rootFolderId, "universe.jpg",
-					Path.resolve(__dirname + "/../../../../app/templates/project_files/universe.jpg")
+					Path.resolve(__dirname + "/../../../../app/templates/project_files/universe.jpg"),
+					ownerId
 				)
 				.should.equal true
 
