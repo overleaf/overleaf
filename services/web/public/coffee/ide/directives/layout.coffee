@@ -53,9 +53,7 @@ define [
 							else
 								controls.show()
 								controls.css({
-									position: "absolute"
 									right: state.east.size
-									"z-index": 3
 								})
 
 					resetOpenStates = () ->
@@ -112,7 +110,7 @@ define [
 						# Set the panel as overflowing (gives it higher z-index and sets overflow rules)
 						layoutObj.allowOverflow overflowPane
 						# Read the given z-index value and increment it, so that it's higher than synctex controls.
-						overflowPaneZVal = overflowPaneEl.css "z-index"
+						overflowPaneZVal = overflowPaneEl.zIndex()
 						overflowPaneEl.css "z-index", overflowPaneZVal + 1
 
 					resetOpenStates()

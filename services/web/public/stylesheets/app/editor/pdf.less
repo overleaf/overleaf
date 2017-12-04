@@ -229,13 +229,48 @@
 }
 
 .synctex-controls {
+	position: absolute;
+	z-index: @synctex-controls-z-index;
 	top: 68px;
 	padding: 0px 2px;
 	.btn-xs {
 		line-height: 1.3;
-		padding: 0 2px 0;
+		padding: @synctex-controls-btn-padding;
 	}
 }
+
+.synctex-controls when (@is-overleaf = true) {
+	margin-right: -9px;
+}
+	.synctex-control-goto-pdf,
+	.synctex-control-goto-code {
+		.btn;
+		.btn-default;
+		.btn-xs;
+
+		> .synctex-control-icon {
+			display: inline-block;
+			font: normal normal normal 14px/1 FontAwesome;
+			font-size: inherit;
+			text-rendering: auto;
+			-webkit-font-smoothing: antialiased;
+			-moz-osx-font-smoothing: grayscale;
+		}
+	}
+	
+	.synctex-control-goto-pdf > .synctex-control-icon::before when (@is-overleaf = true) {
+		content: "\f061";		
+	}
+	.synctex-control-goto-code > .synctex-control-icon::before when (@is-overleaf = true) {
+		content: "\f060";		
+	}
+	
+	.synctex-control-goto-pdf > .synctex-control-icon::before when (@is-overleaf = false) {
+		content: "\f178";		
+	}
+	.synctex-control-goto-code > .synctex-control-icon::before when (@is-overleaf = false) {
+		content: "\f177";		
+	}
 
 .editor-dark {
 	.pdf-logs {
