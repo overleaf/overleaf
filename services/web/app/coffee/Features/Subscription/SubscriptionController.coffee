@@ -97,20 +97,39 @@ module.exports = SubscriptionController =
 				logger.log user: user, "redirecting to plans"
 				res.redirect "/user/subscription/plans"
 			else
-				SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel user, (error, subscription, groupSubscriptions) ->
-					return next(error) if error?
-					logger.log user: user, subscription:subscription, hasSubOrIsGroupMember:hasSubOrIsGroupMember, groupSubscriptions:groupSubscriptions, "showing subscription dashboard"
-					plans = SubscriptionViewModelBuilder.buildViewModel()
-					res.render "subscriptions/dashboard",
-						title: "your_subscription"
-						recomendedCurrency: subscription?.currency
-						taxRate:subscription?.taxRate
-						plans: plans
-						subscription: subscription || {}
-						groupSubscriptions: groupSubscriptions
-						subscriptionTabActive: true
-						user:user
-						saved_billing_details: req.query.saved_billing_details?
+				RecurlyWrapper.getSubscription subscription.recurlySubscription_id,
+					includeAccount: true,
+					(err, usersSubscription)->
+						# always render the page, but skip the recurly link if
+						# we can't get it for some reason
+						if err?
+							logger.err {err, userId: user._id}, "error getting billing details link from recurly, proceeding"
+						hostedLoginToken = usersSubscription?.account?.hosted_login_token
+						recurlySubdomain = Settings?.apis?.recurly?.subdomain
+						if err? || !hostedLoginToken || !recurlySubdomain
+							billingDetailsLink = null
+						else
+							billingDetailsLink = [
+								"https://",
+								recurlySubdomain,
+								".recurly.com/account/billing_info/edit?ht=",
+								hostedLoginToken
+							].join("")
+						SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel user, (error, subscription, groupSubscriptions) ->
+							return next(error) if error?
+							logger.log {user, subscription, hasSubOrIsGroupMember, groupSubscriptions, billingDetailsLink}, "showing subscription dashboard"
+							plans = SubscriptionViewModelBuilder.buildViewModel()
+							res.render "subscriptions/dashboard",
+								title: "your_subscription"
+								recomendedCurrency: subscription?.currency
+								taxRate:subscription?.taxRate
+								plans: plans
+								subscription: subscription || {}
+								groupSubscriptions: groupSubscriptions
+								subscriptionTabActive: true
+								user:user
+								saved_billing_details: req.query.saved_billing_details?
+								billingDetailsLink: billingDetailsLink
 
 	userCustomSubscriptionPage: (req, res, next)->
 		user = AuthenticationController.getSessionUser(req)
@@ -123,31 +142,6 @@ module.exports = SubscriptionController =
 			res.render "subscriptions/custom_account",
 				title: "your_subscription"
 				subscription: subscription
-
-
-	editBillingDetailsPage: (req, res, next) ->
-		user = AuthenticationController.getSessionUser(req)
-		LimitationsManager.userHasSubscription user, (err, hasSubscription)->
-			return next(err) if err?
-			if !hasSubscription
-				res.redirect "/user/subscription"
-			else
-				RecurlyWrapper.sign {
-					account_code: user._id
-				}, (error, signature) ->
-					return next(error) if error?
-					res.render "subscriptions/edit-billing-details",
-						title      : "update_billing_details"
-						recurlyConfig: JSON.stringify
-							currency: "USD"
-							subdomain: Settings.apis.recurly.subdomain
-						signature  : signature
-						successURL : "#{Settings.siteUrl}/user/subscription/billing-details/update"
-						user       :
-							id : user._id
-
-	updateBillingDetails: (req, res, next) ->
-		res.redirect "/user/subscription?saved_billing_details=true"
 
 	createSubscription: (req, res, next)->
 		user = AuthenticationController.getSessionUser(req)

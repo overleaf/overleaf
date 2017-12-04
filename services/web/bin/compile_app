@@ -1,0 +1,23 @@
+#!/bin/bash
+set -e;
+
+COFFEE=node_modules/.bin/coffee
+
+echo Compiling app.coffee;
+$COFFEE -c app.coffee;
+
+echo Compiling app/coffee;
+$COFFEE -o app/js -c app/coffee;
+
+for dir in modules/*;
+do
+	if [ -d $dir/app/coffee ]; then
+		echo Compiling $dir/app/coffee;
+		$COFFEE -o $dir/app/js -c $dir/app/coffee;
+	fi
+
+	if [ -e $dir/index.coffee ]; then
+		echo Compiling $dir/index.coffee;
+		$COFFEE -c $dir/index.coffee;
+	fi
+done

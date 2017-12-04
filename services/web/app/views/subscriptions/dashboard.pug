@@ -61,7 +61,10 @@ block content
 									p !{translate("next_payment_of_x_collectected_on_y", {paymentAmmount:"<strong>" + subscription.price + "</strong>", collectionDate:"<strong>" + subscription.nextPaymentDueAt + "</strong>"})}
 									p.pull-right
 									p
-										a(href="/user/subscription/billing-details/edit").btn.btn-info #{translate("update_your_billing_details")}
+										if billingDetailsLink
+											a(href=billingDetailsLink, target="_blank").btn.btn-info #{translate("update_your_billing_details")}
+										else
+											a(href=billingDetailsLink, disabled).btn.btn-info.btn-disabled #{translate("update_your_billing_details")}
 										| &nbsp;
 										a(href, ng-click="switchToCancelationView()").btn.btn-primary !{translate("cancel_your_subscription")}
 								when "canceled"

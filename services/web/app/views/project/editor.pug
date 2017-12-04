@@ -130,7 +130,8 @@ block requirejs
 				"moment": "libs/#{lib('moment')}",
 				"pdfjs-dist/build/pdf": "libs/#{lib('pdfjs')}/pdf",
 				"pdfjs-dist/build/pdf.worker": "#{pdfWorkerPath}",
-				"ace": "#{lib('ace')}"
+				"ace": "#{lib('ace')}",
+				"fineuploader": "libs/#{lib('fineuploader')}"
 			},
 			"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'ide.js')}-#{fingerprint(jsPath + 'libs.js')}",
 			"waitSeconds": 0,
@@ -164,5 +165,3 @@ block requirejs
 		data-ace-base=buildJsPath(lib('ace'), {fingerprint:false}),
 		src=buildJsPath('libs/require.js')
 	)
-
-	

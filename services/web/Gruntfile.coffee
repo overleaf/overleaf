@@ -196,6 +196,7 @@ module.exports = (grunt) ->
 						"mathjax": "/js/libs/mathjax/MathJax.js?config=TeX-AMS_HTML"
 						"pdfjs-dist/build/pdf": "libs/#{PackageVersions.lib('pdfjs')}/pdf"
 						"ace": "#{PackageVersions.lib('ace')}"
+						"fineuploader": "libs/#{PackageVersions.lib('fineuploader')}"
 					shim:
 						"pdfjs-dist/build/pdf":
 							deps: ["libs/#{PackageVersions.lib('pdfjs')}/compatibility"]
