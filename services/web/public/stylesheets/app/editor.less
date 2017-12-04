@@ -276,8 +276,9 @@
 		-moz-osx-font-smoothing: grayscale;
 		font-size: 16px !important;
 		line-height: 50px;
+		background-color: @editor-toggler-bg-color;
 		&:hover {
-			background-color: #ddd;
+			background-color: @editor-toggler-hover-bg-color;
 			color: #333;
 		}
 	}
@@ -299,21 +300,26 @@
 		transparent (@extra-hit-area + 1px),
 		transparent);
 
-	// .ui-layout-toggler {
-	// 	color: #999;
-	// 	font-family: FontAwesome;
-	// 	font-style: normal;
-	// 	font-weight: normal;
-	// 	line-height: 1;
-	// 	-webkit-font-smoothing: antialiased;
-	// 	-moz-osx-font-smoothing: grayscale;
-	// 	font-size: 16px !important;
-	// 	line-height: 50px;
-	// 	&:hover {
-	// 		background-color: #ddd;
-	// 		color: #333;
-	// 	}
-	// }
+	.ui-layout-toggler {
+		padding: 0 @extra-hit-area !important;
+		background-image: linear-gradient(90deg, 
+			transparent,
+			transparent (@extra-hit-area - 1px),
+			@editor-toggler-bg-color (@extra-hit-area - 1px),
+			@editor-toggler-bg-color (@extra-hit-area + 1px),
+			transparent (@extra-hit-area + 1px),
+			transparent);
+
+		&:hover {
+			background-image: linear-gradient(90deg, 
+				transparent,
+				transparent (@extra-hit-area - 2px),
+				@editor-toggler-hover-bg-color (@extra-hit-area - 2px),
+				@editor-toggler-hover-bg-color (@extra-hit-area + 2px),
+				transparent (@extra-hit-area + 2px),
+				transparent);
+		}
+	}
 }
 
 .ui-layout-resizer-west.ui-layout-resizer-open, .ui-layout-resizer-east.ui-layout-resizer-closed {
