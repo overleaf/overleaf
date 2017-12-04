@@ -24,6 +24,7 @@ jsPath =
 
 ace = PackageVersions.lib('ace')
 pdfjs = PackageVersions.lib('pdfjs')
+fineuploader = PackageVersions.lib('fineuploader')
 
 getFileContent = (filePath)->
 	filePath = Path.join __dirname, "../../../", "public#{filePath}"
@@ -37,6 +38,7 @@ getFileContent = (filePath)->
 
 logger.log "Generating file fingerprints..."
 pathList = [
+	["#{jsPath}libs/#{fineuploader}.js"]
 	["#{jsPath}libs/require.js"]
 	["#{jsPath}ide.js"]
 	["#{jsPath}main.js"]

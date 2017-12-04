@@ -1,12 +1,6 @@
-*/app/js
-*/test/unit/js
-*/index.js
-ldap
-admin-panel
-groovehq
-launchpad
-learn-wiki
-references-search
-sharelatex-saml
-templates
-tpr-webmodule
+# Ignore all modules except for a whitelist
+*
+!dropbox
+!github-sync
+!public-registration
+!.gitignore

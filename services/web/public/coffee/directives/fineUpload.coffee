@@ -1,6 +1,6 @@
 define [
 	"base"
-	"libs/fineuploader"
+	"fineuploader"
 ], (App, qq) ->
 	App.directive 'fineUpload', ($timeout) ->
 		return {
