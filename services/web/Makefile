@@ -1,5 +1,5 @@
 DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
-NPM := docker-compose ${DOCKER_COMPOSE_FLAGS} run --rm npm npm
+NPM := docker-compose ${DOCKER_COMPOSE_FLAGS} run --rm npm npm -q
 BUILD_NUMBER ?= local
 BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
 PROJECT_NAME = web
@@ -30,11 +30,11 @@ clean:
 		rm -rf $$dir/test/unit/js; \
 		rm -rf $$dir/test/acceptance/js; \
 	done
-	# Deletes node_modules volume
-	docker-compose down --volumes
 	# Regenerate docker-shared.yml - not stictly a 'clean',
 	# but lets `make clean install` work nicely
 	bin/generate_volumes_file
+	# Deletes node_modules volume
+	docker-compose down --volumes
 
 # Need regenerating if you change the web modules you have installed
 docker-shared.yml:
@@ -43,7 +43,7 @@ docker-shared.yml:
 test: test_unit test_acceptance
 
 test_unit: docker-shared.yml
-	docker-compose ${DOCKER_COMPOSE_FLAGS} run --rm test_unit npm run test:unit -- ${MOCHA_ARGS}
+	docker-compose ${DOCKER_COMPOSE_FLAGS} run --rm test_unit npm -q run test:unit -- ${MOCHA_ARGS}
 
 test_acceptance: test_acceptance_app test_acceptance_modules
 
@@ -56,12 +56,14 @@ test_acceptance_app_stop_service: docker-shared.yml
 	docker-compose ${DOCKER_COMPOSE_FLAGS} stop test_acceptance redis mongo
 
 test_acceptance_app_run: docker-shared.yml
-	docker-compose ${DOCKER_COMPOSE_FLAGS} exec -T test_acceptance npm run test:acceptance -- ${MOCHA_ARGS}
+	docker-compose ${DOCKER_COMPOSE_FLAGS} exec -T test_acceptance npm -q run test:acceptance -- ${MOCHA_ARGS}
 
 test_acceptance_modules: docker-shared.yml
+	 # Break and error on any module failure
+	set -e; \
 	for dir in modules/*; \
 	do \
-		if [ -e $$dir/makefile ]; then \
+		if [ -e $$dir/Makefile ]; then \
 			(make test_acceptance_module MODULE=$$dir) \
 		fi \
 	done
