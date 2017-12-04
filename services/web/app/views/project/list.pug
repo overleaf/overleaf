@@ -60,7 +60,14 @@ block content
 
 			.row.project-list-row(ng-cloak)
 				.project-list-container(ng-if="projects.length > 0")
-					include ./list/side-bar
+					aside.project-list-sidebar.col-md-2.col-xs-3
+						include ./list/side-bar
+
+					if isShowingV1Projects && settings.overleaf && settings.overleaf.host
+						.project-list-sidebar-v1-link.col-md-2.col-xs-3
+							span Want to go back to the V1 dashboard?
+							a.btn.btn-default(href=settings.overleaf.host + "/dash?remember-dash=1")
+								| Go back to V1
 
 					.project-list-main.col-md-10.col-xs-9
 						include ./list/notifications
