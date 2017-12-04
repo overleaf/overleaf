@@ -30,11 +30,11 @@ clean:
 		rm -rf $$dir/test/unit/js; \
 		rm -rf $$dir/test/acceptance/js; \
 	done
-	# Deletes node_modules volume
-	docker-compose down --volumes
 	# Regenerate docker-shared.yml - not stictly a 'clean',
 	# but lets `make clean install` work nicely
 	bin/generate_volumes_file
+	# Deletes node_modules volume
+	docker-compose down --volumes
 
 # Need regenerating if you change the web modules you have installed
 docker-shared.yml:
