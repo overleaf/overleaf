@@ -182,7 +182,6 @@ module.exports = ProjectController =
 						hasSubscription: results.hasSubscription[0]
 						isShowingV1Projects: results.v1Projects?
 						noV1Connection: results.v1Projects?.noConnection
-						showV1DashLink: true # TODO: false if SL
 					}
 
 					if Settings?.algolia?.app_id? and Settings?.algolia?.read_only_api_key?

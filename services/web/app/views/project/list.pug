@@ -63,7 +63,7 @@ block content
 					aside.project-list-sidebar.col-md-2.col-xs-3
 						include ./list/side-bar
 
-					if showV1DashLink
+					if isShowingV1Projects
 						.project-list-sidebar-v1-link.col-md-2.col-xs-3
 							span Want to go back to the V1 dashboard?
 							a.btn.btn-default(href=settings.overleaf.host + "/dash") Go back to V1
