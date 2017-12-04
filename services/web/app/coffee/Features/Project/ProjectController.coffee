@@ -24,13 +24,17 @@ AnalyticsManager = require "../Analytics/AnalyticsManager"
 Sources = require "../Authorization/Sources"
 TokenAccessHandler = require '../TokenAccess/TokenAccessHandler'
 CollaboratorsHandler = require '../Collaborators/CollaboratorsHandler'
+Modules = require '../../infrastructure/Modules'
+crypto = require 'crypto'
 
 module.exports = ProjectController =
 
-	_isInPercentageRollout: (objectId, percentage) ->
-		if Settings.bypassPercentageRollouts = true
+	_isInPercentageRollout: (rolloutName, objectId, percentage) ->
+		if Settings.bypassPercentageRollouts == true
 			return true
-		counter = parseInt(objectId.toString().substring(18, 24), 16)
+		data = "#{rolloutName}:#{objectId.toString()}"
+		md5hash = crypto.createHash('md5').update(data).digest('hex')
+		counter = parseInt(md5hash.slice(26, 32), 16)
 		return (counter % 100) < percentage
 
 	updateProjectSettings: (req, res, next) ->
@@ -145,6 +149,11 @@ module.exports = ProjectController =
 				NotificationsHandler.getUserNotifications user_id, cb
 			projects: (cb)->
 				ProjectGetter.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref tokens', cb
+			v1Projects: (cb) ->
+				Modules.hooks.fire "findAllV1Projects", user_id, (error, projects = []) ->
+					if error? and error.message == 'No V1 connection'
+						return cb(null, projects: [], tags: [], noConnection: true)
+					return cb(error, projects[0]) # hooks.fire returns an array of results, only need first
 			hasSubscription: (cb)->
 				LimitationsManager.userHasSubscriptionOrIsGroupMember currentUser, cb
 			user: (cb) ->
@@ -154,11 +163,12 @@ module.exports = ProjectController =
 					logger.err err:err, "error getting data for project list page"
 					return next(err)
 				logger.log results:results, user_id:user_id, "rendering project list"
-				tags = results.tags[0]
+				v1Tags = results.v1Projects?.tags or []
+				tags = results.tags[0].concat(v1Tags)
 				notifications = require("underscore").map results.notifications, (notification)->
 					notification.html = req.i18n.translate(notification.templateKey, notification.messageOpts)
 					return notification
-				projects = ProjectController._buildProjectList results.projects
+				projects = ProjectController._buildProjectList results.projects, results.v1Projects?.projects
 				user = results.user
 				ProjectController._injectProjectOwners projects, (error, projects) ->
 					return next(error) if error?
@@ -170,6 +180,8 @@ module.exports = ProjectController =
 						notifications: notifications or []
 						user: user
 						hasSubscription: results.hasSubscription[0]
+						isShowingV1Projects: results.v1Projects?
+						noV1Connection: results.v1Projects?.noConnection
 					}
 
 					if Settings?.algolia?.app_id? and Settings?.algolia?.read_only_api_key?
@@ -222,44 +234,6 @@ module.exports = ProjectController =
 				#don't need to wait for this to complete
 				ProjectUpdateHandler.markAsOpened project_id, ->
 				cb()
-			showTrackChangesOnboarding: (cb) ->
-				cb = underscore.once(cb)
-				if !user_id?
-					return cb()
-				timestamp = user_id.toString().substring(0,8)
-				userSignupDate = new Date( parseInt( timestamp, 16 ) * 1000 )
-				if userSignupDate > new Date("2017-03-09") # 8th March
-					# Don't show for users who registered after it was released
-					return cb(null, false)
-				timeout = setTimeout cb, 500
-				AnalyticsManager.getLastOccurance user_id, "shown-track-changes-onboarding-2", (error, event) ->
-					clearTimeout timeout
-					if error?
-						return cb(null, false)
-					else if event?
-						return cb(null, false)
-					else
-						logger.log { user_id, event }, "track changes onboarding not shown yet to this user"
-						return cb(null, true)
-			showPerUserTCNotice: (cb) ->
-				cb = underscore.once(cb)
-				if !user_id?
-					return cb()
-				timestamp = user_id.toString().substring(0,8)
-				userSignupDate = new Date( parseInt( timestamp, 16 ) * 1000 )
-				if userSignupDate > new Date("2017-08-09")
-					# Don't show for users who registered after it was released
-					return cb(null, false)
-				timeout = setTimeout cb, 500
-				AnalyticsManager.getLastOccurance user_id, "shown-per-user-tc-notice", (error, event) ->
-					clearTimeout timeout
-					if error?
-						return cb(null, false)
-					else if event?
-						return cb(null, false)
-					else
-						logger.log { user_id, event }, "per user track changes notice not shown yet to this user"
-						return cb(null, true)
 			isTokenMember: (cb) ->
 				cb = underscore.once(cb)
 				if !user_id?
@@ -267,14 +241,18 @@ module.exports = ProjectController =
 				CollaboratorsHandler.userIsTokenMember user_id, project_id, cb
 			showAutoCompileOnboarding: (cb) ->
 				cb = underscore.once(cb)
+				# Force autocompile rollout if query param set
+				if req.query?.ac == 't'
+					return cb(null, { enabled: true, showOnboarding: true })
+
 				if !user_id?
 					return cb()
 
 				# Extract data from user's ObjectId
 				timestamp = parseInt(user_id.toString().substring(0, 8), 16)
 
-				rolloutPercentage = 60 # Percentage of users to roll out to
-				if !ProjectController._isInPercentageRollout(user_id, rolloutPercentage)
+				rolloutPercentage = 20 # Percentage of users to roll out to
+				if !ProjectController._isInPercentageRollout('autocompile', user_id, rolloutPercentage)
 					# Don't show if user is not part of roll out
 					return cb(null, { enabled: false, showOnboarding: false })
 				userSignupDate = new Date(timestamp * 1000)
@@ -282,7 +260,7 @@ module.exports = ProjectController =
 					# Don't show for users who registered after it was released
 					return cb(null, { enabled: true, showOnboarding: false })
 				timeout = setTimeout cb, 500
-				AnalyticsManager.getLastOccurance user_id, "shown-autocompile-onboarding", (error, event) ->
+				AnalyticsManager.getLastOccurance user_id, "shown-autocompile-onboarding-2", (error, event) ->
 					clearTimeout timeout
 					if error?
 						return cb(null, { enabled: true, showOnboarding: false })
@@ -291,6 +269,23 @@ module.exports = ProjectController =
 					else
 						logger.log { user_id, event }, "autocompile onboarding not shown yet to this user"
 						return cb(null, { enabled: true, showOnboarding: true })
+			couldShowLinkSharingOnboarding: (cb) ->
+				cb = underscore.once(cb)
+				if !user_id?
+					return cb()
+				# Extract data from user's ObjectId
+				timestamp = parseInt(user_id.toString().substring(0, 8), 16)
+				userSignupDate = new Date(timestamp * 1000)
+				if userSignupDate > new Date("2017-11-13")
+					# Don't show for users who registered after it was released
+					return cb(null, false)
+				timeout = setTimeout cb, 500
+				AnalyticsManager.getLastOccurance user_id, "shown-linksharing-onboarding", (error, event) ->
+					clearTimeout timeout
+					if error? || event?
+						return cb(null, false)
+					else
+						return cb(null, true)
 		}, (err, results)->
 			if err?
 				logger.err err:err, "error getting details for project page"
@@ -298,14 +293,13 @@ module.exports = ProjectController =
 			project = results.project
 			user = results.user
 			subscription = results.subscription
-			{ showTrackChangesOnboarding, showPerUserTCNotice, showAutoCompileOnboarding } = results
+			{ showAutoCompileOnboarding } = results
 
 			daysSinceLastUpdated =  (new Date() - project.lastUpdated) / 86400000
 			logger.log project_id:project_id, daysSinceLastUpdated:daysSinceLastUpdated, "got db results for loading editor"
 
 			token = TokenAccessHandler.getRequestToken(req, project_id)
 			isTokenMember = results.isTokenMember
-			enableTokenAccessUI = ProjectController._isInPercentageRollout(project.owner_ref, 0)
 			AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, token, (error, privilegeLevel)->
 				return next(error) if error?
 				if !privilegeLevel? or privilegeLevel == PrivilegeLevels.NONE
@@ -344,8 +338,6 @@ module.exports = ProjectController =
 						syntaxValidation: user.ace.syntaxValidation
 					}
 					trackChangesState: project.track_changes
-					showTrackChangesOnboarding: !!showTrackChangesOnboarding
-					showPerUserTCNotice: !!showPerUserTCNotice
 					autoCompileEnabled: !!showAutoCompileOnboarding?.enabled
 					showAutoCompileOnboarding: !!showAutoCompileOnboarding?.showOnboarding
 					privilegeLevel: privilegeLevel
@@ -356,10 +348,10 @@ module.exports = ProjectController =
 					languages: Settings.languages
 					themes: THEME_LIST
 					maxDocLength: Settings.max_doc_length
-					enableTokenAccessUI: enableTokenAccessUI
+					showLinkSharingOnboarding: !!results.couldShowLinkSharingOnboarding
 				timer.done()
 
-	_buildProjectList: (allProjects)->
+	_buildProjectList: (allProjects, v1Projects = [])->
 		{owned, readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly} = allProjects
 		projects = []
 		for project in owned
@@ -369,6 +361,8 @@ module.exports = ProjectController =
 			projects.push ProjectController._buildProjectViewModel(project, "readWrite", Sources.INVITE)
 		for project in readOnly
 			projects.push ProjectController._buildProjectViewModel(project, "readOnly", Sources.INVITE)
+		for project in v1Projects
+			projects.push ProjectController._buildV1ProjectViewModel(project)
 		# Token-access
 		#   Only add these projects if they're not already present, this gives us cascading access
 		#   from 'owner' => 'token-read-only'
@@ -393,8 +387,24 @@ module.exports = ProjectController =
 			archived: !!project.archived
 			owner_ref: project.owner_ref
 			tokens: project.tokens
+			isV1Project: false
 		}
 		return model
+
+	_buildV1ProjectViewModel: (project) ->
+		{
+			id: project.id
+			name: project.title
+			lastUpdated: new Date(project.updated_at * 1000) # Convert from epoch
+			accessLevel: if project.owner?.user_is_owner then "owner" else "readOnly"
+			archived: project.removed || project.archived
+			owner: {
+				# Unlisted V1 projects don't have an owner, so just show N/A
+				first_name: if project.owner then project.owner.name else 'N/A'
+				last_name: ''
+			}
+			isV1Project: true
+		}
 
 	_injectProjectOwners: (projects, callback = (error, projects) ->) ->
 		users = {}

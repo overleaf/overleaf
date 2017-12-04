@@ -333,6 +333,7 @@ script(type='text/ng-template', id='newDocModalTemplate')
 			span(ng-hide="state.inflight") #{translate("create")}
 			span(ng-show="state.inflight") #{translate("creating")}...
 
+
 script(type='text/ng-template', id='newFolderModalTemplate')
 	.modal-header
 		h3 #{translate("new_folder")}
@@ -363,6 +364,34 @@ script(type='text/ng-template', id='newFolderModalTemplate')
 			span(ng-hide="state.inflight") #{translate("create")}
 			span(ng-show="state.inflight") #{translate("creating")}...
 
+
+script(type="text/template", id="qq-file-uploader-template")
+	div.qq-uploader-selector
+		div(qq-hide-dropzone="").qq-upload-drop-area-selector.qq-upload-drop-area
+			span.qq-upload-drop-area-text-selector #{translate('drop_files_here_to_upload')}
+		div.qq-upload-button-selector.btn.btn-primary.btn-lg
+			div #{translate('upload')}
+		span.or.btn-lg #{translate('or')}
+		span.drag-here.btn-lg #{translate('drag_here')}
+		span.qq-drop-processing-selector
+			span #{translate('processing')}
+			span.qq-drop-processing-spinner-selector
+		ul.qq-upload-list-selector
+			li
+				div.qq-progress-bar-container-selector
+					div(
+						role="progressbar"
+						aria-valuenow="0"
+						aria-valuemin="0"
+						aria-valuemax="100"
+						class="qq-progress-bar-selector qq-progress-bar"
+					)
+				span.qq-upload-file-selector.qq-upload-file
+				span.qq-upload-size-selector.qq-upload-size
+				a(type="button").qq-btn.qq-upload-cancel-selector.qq-upload-cancel #{translate('cancel')}
+				button(type="button").qq-btn.qq-upload-retry-selector.qq-upload-retry #{translate('retry')}
+				span(role="status").qq-upload-status-text-selector.qq-upload-status-text
+
 script(type="text/ng-template", id="uploadFileModalTemplate")
 	.modal-header
 		h3 #{translate("upload_files")}
@@ -384,11 +413,7 @@ script(type="text/ng-template", id="uploadFileModalTemplate")
 	.modal-body(
 		fine-upload
 		endpoint="/project/{{ project_id }}/upload"
-		waiting-for-response-text="{{inserting_files}}"
-		failed-upload-text="{{upload_failed_sorry}}"
-		upload-button-text="{{select_files}}"
-		drag-area-text="{{drag_files}}"
-		hint-text="{{hint_press_and_hold_control_key}}"
+		template-id="qq-file-uploader-template"
 		multiple="true"
 		auto-upload="false"
 		on-complete-callback="onComplete"
@@ -400,9 +425,9 @@ script(type="text/ng-template", id="uploadFileModalTemplate")
 		control="control"
 		params="{'folder_id': parent_folder_id}"
 	)
-		span #{translate("upload_files")}
 	.modal-footer
 		button.btn.btn-default(ng-click="cancel()") #{translate("cancel")}
+
 
 script(type='text/ng-template', id='deleteEntityModalTemplate')
 	.modal-header

@@ -1,16 +1,16 @@
 define [
 	"ide/editor/directives/aceEditor/auto-complete/CommandManager"
 	"ide/editor/directives/aceEditor/auto-complete/EnvironmentManager"
+	"ide/editor/directives/aceEditor/auto-complete/PackageManager"
 	"ide/editor/directives/aceEditor/auto-complete/Helpers"
 	"ace/ace"
 	"ace/ext-language_tools"
-], (CommandManager, EnvironmentManager, Helpers) ->
+], (CommandManager, EnvironmentManager, PackageManager, Helpers) ->
 	Range = ace.require("ace/range").Range
 	aceSnippetManager = ace.require('ace/snippets').snippetManager
 
 	class AutoCompleteManager
-		constructor: (@$scope, @editor, @element, @labelsManager, @graphics, @preamble) ->
-			@suggestionManager = new CommandManager()
+		constructor: (@$scope, @editor, @element, @metadataManager, @labelsManager, @graphics, @preamble, @files) ->
 
 			@monkeyPatchAutocomplete()
 
@@ -34,10 +34,15 @@ define [
 				enableLiveAutocompletion: false
 			})
 
+			commandCompleter = new CommandManager(@metadataManager)
+
 			SnippetCompleter = new EnvironmentManager()
+			PackageCompleter = new PackageManager()
 
 			Graphics = @graphics
 			Preamble = @preamble
+			Files = @files
+
 			GraphicsCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
 					context = Helpers.getContext(editor, pos)
@@ -63,7 +68,28 @@ define [
 								}
 							callback null, result
 
-			labelsManager = @labelsManager
+			metadataManager = @metadataManager
+			FilesCompleter =
+				getCompletions: (editor, session, pos, prefix, callback) =>
+					context = Helpers.getContext(editor, pos)
+					{lineUpToCursor, commandFragment, lineBeyondCursor, needsClosingBrace} = context
+					if commandFragment
+						match = commandFragment.match(/^\\(input|include){(\w*)/)
+						if match
+							commandName = match[1]
+							currentArg = match[2]
+							result = []
+							for file in Files.getTeXFiles()
+								if file.id != @$scope.docId
+									path = file.path
+									result.push {
+										caption: "\\#{commandName}{#{path}#{if needsClosingBrace then '}' else ''}",
+										value: "\\#{commandName}{#{path}#{if needsClosingBrace then '}' else ''}",
+										meta: "file",
+										score: 50
+									}
+							callback null, result
+
 			LabelsCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
 					context = Helpers.getContext(editor, pos)
@@ -74,13 +100,14 @@ define [
 							commandName = refMatch[1]
 							currentArg = refMatch[2]
 							result = []
-							result.push {
-								caption: "\\#{commandName}{}",
-								snippet: "\\#{commandName}{}",
-								meta: "cross-reference",
-								score: 60
-							}
-							for label in labelsManager.getAllLabels()
+							if commandName != 'ref' # ref is in top 100 commands
+								result.push {
+									caption: "\\#{commandName}{}",
+									snippet: "\\#{commandName}{}",
+									meta: "cross-reference",
+									score: 60
+								}
+							for label in metadataManager.getAllLabels()
 								result.push {
 									caption: "\\#{commandName}{#{label}#{if needsClosingBrace then '}' else ''}",
 									value: "\\#{commandName}{#{label}#{if needsClosingBrace then '}' else ''}",
@@ -126,11 +153,13 @@ define [
 								callback null, result
 
 			@editor.completers = [
-				@suggestionManager,
-				SnippetCompleter,
-				ReferencesCompleter,
-				LabelsCompleter,
+				commandCompleter
+				SnippetCompleter
+                PackageCompleter
+				ReferencesCompleter
+				LabelsCompleter
 				GraphicsCompleter
+				FilesCompleter
 			]
 
 		disable: () ->
@@ -149,10 +178,8 @@ define [
 			lastCharIsBackslash = lineUpToCursor.slice(-1) == "\\"
 			lastTwoChars = lineUpToCursor.slice(-2)
 			# Don't offer autocomplete on double-backslash, backslash-colon, etc
-			if lastTwoChars.match(/^\\[^a-z]$/)
+			if lastTwoChars.match(/^\\[^a-zA-Z]$/)
 				@editor?.completer?.detach?()
-				return
-			if commandName in ['begin', 'end']
 				return
 			# Check that this change was made by us, not a collaborator
 			# (Cursor is still one place behind)
@@ -229,8 +256,9 @@ define [
 											99999
 										)
 									)
+
 									if lineBeyondCursor
-										if partialCommandMatch = lineBeyondCursor.match(/^([a-z0-9]+)\{/)
+										if partialCommandMatch = lineBeyondCursor.match(/^([a-zA-Z0-9]+)\{/)
 											# We've got a partial command after the cursor
 											commandTail = partialCommandMatch[1]
 											# remove rest of the partial command, right of cursor

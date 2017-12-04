@@ -42,7 +42,7 @@ pipeline {
         checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/tpr-webmodule'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/tpr-webmodule.git ']]])
         checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/learn-wiki'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@bitbucket.org:sharelatex/learn-wiki-web-module.git']]])
         checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/templates'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/templates-webmodule.git']]])
-        checkout([$class: 'GitSCM', branches: [[name: '*/sk-unlisted-projects']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/track-changes'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/track-changes-web-module.git']]])
+        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/track-changes'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/track-changes-web-module.git']]])
         checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/overleaf-integration'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/overleaf-integration-web-module.git']]])
         checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/overleaf-account-merge'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/overleaf-account-merge.git']]])
       }
@@ -70,6 +70,19 @@ pipeline {
         sh 'ls -l node_modules/.bin'
       }
     }
+    
+    stage('Unit Tests') {
+      steps {
+        sh 'make clean install' // Removes js files, so do before compile
+        sh 'make test_unit MOCHA_ARGS="--reporter=tap"'
+      }
+    }
+    
+    stage('Acceptance Tests') {
+      steps {
+        sh 'make test_acceptance MOCHA_ARGS="--reporter=tap"'
+      }
+    }
 
     stage('Compile') {
       agent {
@@ -79,7 +92,7 @@ pipeline {
         }
       }
       steps {
-        sh 'node_modules/.bin/grunt compile  --verbose'
+        sh 'node_modules/.bin/grunt compile compile:tests  --verbose'
         // replace the build number placeholder for sentry
         sh 'node_modules/.bin/grunt version'
       }
@@ -106,25 +119,6 @@ pipeline {
       }
       steps {
         sh 'node_modules/.bin/grunt compile:minify'
-      }
-    }
-    
-    stage('Unit Test') {
-      agent {
-        docker {
-          image 'node:6.9.5'
-          reuseNode true
-        }
-      }
-      steps {
-        sh 'env NODE_ENV=development ./node_modules/.bin/grunt test:unit --reporter=tap'
-      }
-    }
-    
-    stage('Acceptance Tests') {
-      steps {
-        sh 'docker pull sharelatex/acceptance-test-runner'
-        sh 'docker run --rm -v $(pwd):/app --env SHARELATEX_ALLOW_PUBLIC_ACCESS=true sharelatex/acceptance-test-runner'
       }
     }
     

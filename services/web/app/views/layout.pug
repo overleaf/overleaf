@@ -132,7 +132,8 @@ html(itemscope, itemtype='http://schema.org/Product')
 				// minimal requirejs configuration (can be extended/overridden)
 				window.requirejs = {
 					"paths" : {
-						"moment": "libs/#{lib('moment')}"
+						"moment": "libs/#{lib('moment')}",
+						"fineuploader": "libs/#{lib('fineuploader')}"
 					},
 					"urlArgs": "fingerprint=#{fingerprint(jsPath + 'main.js')}-#{fingerprint(jsPath + 'libs.js')}",
 					"config":{
@@ -148,6 +149,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 			)
 
 		include contact-us-modal
+		include v1-tooltip
 		include sentry
 		
 

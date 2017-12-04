@@ -85,7 +85,11 @@ define [
 			isTimeNonMonotonic = timeSinceLastCompile < 0
 
 			if isTimeNonMonotonic || timeSinceLastCompile >= AUTO_COMPILE_TIMEOUT
-				if (!ide.$scope.hasLintingError)
+				# If user has code check disabled, it is likely because they have
+				# linting errors that they are ignoring. Therefore it doesn't make sense
+				# to block auto compiles. It also causes problems where server-provided
+				# linting errors aren't cleared after typing
+				if (ide.$scope.settings.syntaxValidation and !ide.$scope.hasLintingError)
 					$scope.recompile(isAutoCompileOnChange: true)
 			else
 				# Extend remainder of timeout
@@ -109,7 +113,7 @@ define [
 				toggleAutoCompile(newValue)
 				event_tracking.sendMB "autocompile-setting-changed", { value: newValue }
 
-		if (window.user?.betaProgram or window.showAutoCompileOnboarding) and $scope.autocompile_enabled
+		if (window.user?.betaProgram or window.autoCompileEnabled) and $scope.autocompile_enabled
 			toggleAutoCompile(true)
 
 		# abort compile if syntax checks fail

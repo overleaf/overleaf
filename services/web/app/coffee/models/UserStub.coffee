@@ -9,7 +9,10 @@ UserStubSchema = new Schema
 	last_name  : { type : String, default : '' }
 	overleaf   : { id: { type: Number } }
 
-conn = mongoose.createConnection(Settings.mongo.url, server: poolSize: 10)
+conn = mongoose.createConnection(Settings.mongo.url, {
+	server: {poolSize: Settings.mongo.poolSize || 10},
+	config: {autoIndex: false}
+})
 
 UserStub = conn.model('UserStub', UserStubSchema)
 

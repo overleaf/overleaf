@@ -355,47 +355,50 @@ module.exports = ProjectEntityHandler =
 					else
 						callback()
 
-	moveEntity: (project_id, entity_id, folder_id, entityType, callback = (error) ->)->
+	moveEntity: (project_id, entity_id, destFolderId, entityType, userId, callback = (error) ->)->
 		self = @
-		destinationFolder_id = folder_id
-		logger.log entityType:entityType, entity_id:entity_id, project_id:project_id, folder_id:folder_id, "moving entity"
+		logger.log {entityType, entity_id, project_id, destFolderId}, "moving entity"
 		if !entityType?
-			logger.err err: "No entityType set", project_id: project_id, entity_id: entity_id
+			logger.err {err: "No entityType set", project_id, entity_id}
 			return callback("No entityType set")
 		entityType = entityType.toLowerCase()
 		ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (err, project)=>
 			return callback(err) if err?
-			projectLocator.findElement {project:project, element_id:entity_id, type:entityType}, (err, entity, path)->
+			projectLocator.findElement {project, element_id: entity_id, type: entityType}, (err, entity, entityPath)->
 				return callback(err) if err?
-
-				if entityType.match(/folder/)
-					ensureFolderIsNotMovedIntoChild = (callback = (error) ->) ->
-						projectLocator.findElement {project: project, element_id: folder_id, type:"folder"}, (err, destEntity, destPath) ->
-							logger.log destPath: destPath.fileSystem, folderPath: path.fileSystem, "checking folder is not moving into child folder"
-							if (destPath.fileSystem.slice(0, path.fileSystem.length) == path.fileSystem)
-								logger.log "destination is a child folder, aborting"
-								callback(new Error("destination folder is a child folder of me"))
-							else
-								callback()
-				else
-					ensureFolderIsNotMovedIntoChild = (callback = () ->) -> callback()
-
-				ensureFolderIsNotMovedIntoChild (error) ->
+				self._checkValidMove project, entityType, entityPath, destFolderId, (error) ->
 					return callback(error) if error?
-					self._removeElementFromMongoArray Project, project_id, path.mongo, (err)->
-						return callback(err) if err?
-						# We've updated the project structure by removing the element, so must refresh it.
-						ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (err, project)=>
+					self.getAllEntitiesFromProject project, (error, oldDocs, oldFiles) =>
+						return callback(error) if error?
+						self._removeElementFromMongoArray Project, project_id, entityPath.mongo, (err, newProject)->
 							return callback(err) if err?
-							ProjectEntityHandler._putElement project, destinationFolder_id, entity, entityType, (err, result)->
+							self._putElement newProject, destFolderId, entity, entityType, (err, result, newProject)->
 								return callback(err) if err?
 								opts =
-									project_id:project_id
-									project_name:project.name
-									startPath:path.fileSystem
-									endPath:result.path.fileSystem,
-									rev:entity.rev
-								tpdsUpdateSender.moveEntity opts, callback
+									project_id: project_id
+									project_name: project.name
+									startPath: entityPath.fileSystem
+									endPath: result.path.fileSystem,
+									rev: entity.rev
+								tpdsUpdateSender.moveEntity opts
+								self.getAllEntitiesFromProject newProject, (error, newDocs, newFiles
+								) =>
+									return callback(error) if error?
+									documentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
+									documentUpdaterHandler.updateProjectStructure project_id, userId, oldDocs, newDocs, oldFiles, newFiles, callback
+
+	_checkValidMove: (project, entityType, entityPath, destFolderId, callback = (error) ->) ->
+		return callback() if !entityType.match(/folder/)
+
+		projectLocator.findElement { project, element_id: destFolderId, type:"folder"}, (err, destEntity, destFolderPath) ->
+			return callback(err) if err?
+			logger.log destFolderPath: destFolderPath.fileSystem, folderPath: entityPath.fileSystem, "checking folder is not moving into child folder"
+			isNestedFolder = destFolderPath.fileSystem.slice(0, entityPath.fileSystem.length) == entityPath.fileSystem
+			if isNestedFolder
+				callback(new Error("destination folder is a child folder of me"))
+			else
+				callback()
+
 
 	deleteEntity: (project_id, entity_id, entityType, callback = (error) ->)->
 		self = @
@@ -417,25 +420,30 @@ module.exports = ProjectEntityHandler =
 							callback null
 
 
-	renameEntity: (project_id, entity_id, entityType, newName, callback)->
+	renameEntity: (project_id, entity_id, entityType, newName, userId, callback)->
 		logger.log(entity_id: entity_id, project_id: project_id, ('renaming '+entityType))
 		if !entityType?
 			logger.err err: "No entityType set", project_id: project_id, entity_id: entity_id
 			return callback("No entityType set")
 		entityType = entityType.toLowerCase()
-		ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (err, project)=>
-			projectLocator.findElement {project:project, element_id:entity_id, type:entityType}, (err, entity, path, folder)=>
-				if err?
-					return callback err
-				conditons = {_id:project_id}
-				update = "$set":{}
-				namePath = path.mongo+".name"
-				update["$set"][namePath] = newName
-				endPath = path.fileSystem.replace(entity.name, newName)
-				tpdsUpdateSender.moveEntity({project_id:project_id, startPath:path.fileSystem, endPath:endPath, project_name:project.name, rev:entity.rev})
-				Project.update conditons, update, {}, (err)->
-					if callback?
-						callback err
+		ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (error, project)=>
+			return callback(error) if error?
+			ProjectEntityHandler.getAllEntitiesFromProject project, (error, oldDocs, oldFiles) =>
+				return callback(error) if error?
+				projectLocator.findElement {project:project, element_id:entity_id, type:entityType}, (error, entity, path)=>
+					return callback(error) if error?
+					endPath = path.fileSystem.replace(entity.name, newName)
+					conditions = {_id:project_id}
+					update = "$set":{}
+					namePath = path.mongo+".name"
+					update["$set"][namePath] = newName
+					tpdsUpdateSender.moveEntity({project_id:project_id, startPath:path.fileSystem, endPath:endPath, project_name:project.name, rev:entity.rev})
+					Project.findOneAndUpdate conditions, update, { "new": true}, (error, newProject) ->
+						return callback(error) if error?
+						ProjectEntityHandler.getAllEntitiesFromProject newProject, (error, newDocs, newFiles) =>
+							return callback(error) if error?
+							documentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
+							documentUpdaterHandler.updateProjectStructure project_id, userId, oldDocs, newDocs, oldFiles, newFiles, callback
 
 	_cleanUpEntity: (project, entity, entityType, callback = (error) ->) ->
 		if(entityType.indexOf("file") != -1)
@@ -487,17 +495,15 @@ module.exports = ProjectEntityHandler =
 
 		async.series jobs, callback
 
-	_removeElementFromMongoArray : (model, model_id, path, callback)->
-		conditons = {_id:model_id}
+	_removeElementFromMongoArray : (model, model_id, path, callback = (err, project) ->)->
+		conditions = {_id:model_id}
 		update = {"$unset":{}}
 		update["$unset"][path] = 1
-		model.update conditons, update, {}, (err)->
+		model.update conditions, update, {}, (err)->
 			pullUpdate = {"$pull":{}}
 			nonArrayPath = path.slice(0, path.lastIndexOf("."))
 			pullUpdate["$pull"][nonArrayPath] = null
-			model.update conditons, pullUpdate, {}, (err)->
-				if callback?
-					callback(err)
+			model.findOneAndUpdate conditions, pullUpdate, {"new": true}, callback
 
 	_insertDeletedDocReference: (project_id, doc, callback = (error) ->) ->
 		Project.update {
@@ -534,8 +540,7 @@ module.exports = ProjectEntityHandler =
 
 		countFolder project.rootFolder[0], callback
 
-	_putElement: (project, folder_id, element, type, callback = (err, path)->)->
-
+	_putElement: (project, folder_id, element, type, callback = (err, path, project)->)->
 		sanitizeTypeOfElement = (elementType)->
 			lastChar = elementType.slice -1
 			if lastChar != "s"
@@ -576,11 +581,11 @@ module.exports = ProjectEntityHandler =
 				update = "$push":{}
 				update["$push"][mongopath] = element
 				logger.log project_id: project._id, element_id: element._id, fileType: type, folder_id: folder_id, mongopath:mongopath, "adding element to project"
-				Project.update conditions, update, {}, (err)->
+				Project.findOneAndUpdate conditions, update, {"new": true}, (err, project)->
 					if err?
 						logger.err err: err, project_id: project._id, 'error saving in putElement project'
 						return callback(err)
-					callback(err, {path:newPath})
+					callback(err, {path:newPath}, project)
 
 
 confirmFolder = (project, folder_id, callback)->

@@ -39,6 +39,7 @@ module.exports = (grunt) ->
 			app:
 				options:
 					index: "app.js"
+					logFile: "app.log"
 
 		watch:
 			coffee:
@@ -130,9 +131,9 @@ module.exports = (grunt) ->
 			unit_tests: 
 				expand: true,
 				flatten: false,
-				cwd: 'test/UnitTests/coffee',
+				cwd: 'test/unit/coffee',
 				src: ['**/*.coffee'],
-				dest: 'test/UnitTests/js/',
+				dest: 'test/unit/js/',
 				ext: '.js'
 
 			acceptance_tests: 
@@ -195,6 +196,7 @@ module.exports = (grunt) ->
 						"mathjax": "/js/libs/mathjax/MathJax.js?config=TeX-AMS_HTML"
 						"pdfjs-dist/build/pdf": "libs/#{PackageVersions.lib('pdfjs')}/pdf"
 						"ace": "#{PackageVersions.lib('ace')}"
+						"fineuploader": "libs/#{PackageVersions.lib('fineuploader')}"
 					shim:
 						"pdfjs-dist/build/pdf":
 							deps: ["libs/#{PackageVersions.lib('pdfjs')}/compatibility"]
@@ -219,12 +221,12 @@ module.exports = (grunt) ->
 
 		clean:
 			app: ["app/js"]
-			unit_tests: ["test/UnitTests/js"]
+			unit_tests: ["test/unit/js"]
 			acceptance_tests: ["test/acceptance/js"]
 
 		mochaTest:
 			unit:
-				src: ["test/UnitTests/js/#{grunt.option('feature') or '**'}/*.js"]
+				src: ["test/unit/js/#{grunt.option('feature') or '**'}/*.js"]
 				options:
 					reporter: grunt.option('reporter') or 'spec'
 					grep: grunt.option("grep")
@@ -407,7 +409,7 @@ module.exports = (grunt) ->
 	grunt.registerTask 'compile:unit_tests', 'Compile the unit tests', ['clean:unit_tests', 'coffee:unit_tests']
 	grunt.registerTask 'compile:acceptance_tests', 'Compile the acceptance tests', ['clean:acceptance_tests', 'coffee:acceptance_tests']
 	grunt.registerTask 'compile:smoke_tests', 'Compile the smoke tests', ['coffee:smoke_tests']
-	grunt.registerTask 'compile:tests', 'Compile all the tests', ['compile:smoke_tests', 'compile:unit_tests']
+	grunt.registerTask 'compile:tests', 'Compile all the tests', ['compile:smoke_tests', 'compile:unit_tests', 'compile:acceptance_tests']
 	grunt.registerTask 'compile', 'Compiles everything need to run web-sharelatex', ['compile:server', 'compile:client', 'compile:css']
 	grunt.registerTask 'quickcompile:coffee', 'Compiles only changed coffee files',['newer:coffee']
 

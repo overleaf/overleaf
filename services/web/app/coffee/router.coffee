@@ -43,8 +43,10 @@ SudoModeController = require('./Features/SudoMode/SudoModeController')
 SudoModeMiddlewear = require('./Features/SudoMode/SudoModeMiddlewear')
 AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 AnnouncementsController = require("./Features/Announcements/AnnouncementsController")
+MetaController = require('./Features/Metadata/MetaController')
 LabelsController = require('./Features/Labels/LabelsController')
 TokenAccessController = require('./Features/TokenAccess/TokenAccessController')
+Features = require('./infrastructure/Features')
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -63,10 +65,9 @@ module.exports = class Router
 		webRouter.get  '/logout', UserController.logout
 		webRouter.get  '/restricted', AuthorizationMiddlewear.restricted
 
-		# Left as a placeholder for implementing a public register page
-		webRouter.get  '/register', UserPagesController.registerPage
-		AuthenticationController.addEndpointToLoginWhitelist '/register'
-
+		if Features.hasFeature('registration')
+			webRouter.get '/register', UserPagesController.registerPage
+			AuthenticationController.addEndpointToLoginWhitelist '/register'
 
 		EditorRouter.apply(webRouter, privateApiRouter)
 		CollaboratorsRouter.apply(webRouter, privateApiRouter)
@@ -195,12 +196,15 @@ module.exports = class Router
 
 		webRouter.post '/project/:Project_id/rename', AuthorizationMiddlewear.ensureUserCanAdminProject, ProjectController.renameProject
 
-		webRouter.get  "/project/:Project_id/updates", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.proxyToHistoryApi
-		webRouter.get  "/project/:Project_id/doc/:doc_id/diff", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.proxyToHistoryApi
-		webRouter.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.proxyToHistoryApi
+		webRouter.get  "/project/:Project_id/updates", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApi
+		webRouter.get  "/project/:Project_id/doc/:doc_id/diff", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApi
+		webRouter.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApi
 
 		webRouter.get  '/Project/:Project_id/download/zip', AuthorizationMiddlewear.ensureUserCanReadProject, ProjectDownloadsController.downloadProject
 		webRouter.get  '/project/download/zip', AuthorizationMiddlewear.ensureUserCanReadMultipleProjects, ProjectDownloadsController.downloadMultipleProjects
+
+		webRouter.get '/project/:project_id/metadata', AuthorizationMiddlewear.ensureUserCanReadProject, AuthenticationController.requireLogin(), MetaController.getMetadata
+		webRouter.post '/project/:project_id/doc/:doc_id/metadata', AuthorizationMiddlewear.ensureUserCanReadProject, AuthenticationController.requireLogin(), MetaController.broadcastMetadataForDoc
 
 		webRouter.get '/project/:project_id/labels', AuthorizationMiddlewear.ensureUserCanReadProject, AuthenticationController.requireLogin(), LabelsController.getAllLabels
 		webRouter.post '/project/:project_id/doc/:doc_id/labels', AuthorizationMiddlewear.ensureUserCanReadProject, AuthenticationController.requireLogin(), LabelsController.broadcastLabelsForDoc

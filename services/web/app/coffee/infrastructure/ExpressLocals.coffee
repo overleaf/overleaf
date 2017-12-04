@@ -14,6 +14,7 @@ PackageVersions = require "./PackageVersions"
 htmlEncoder = new require("node-html-encoder").Encoder("numerical")
 fingerprints = {}
 Path = require 'path'
+Features = require "./Features"
 
 jsPath =
 	if Settings.useMinifiedJs
@@ -23,6 +24,7 @@ jsPath =
 
 ace = PackageVersions.lib('ace')
 pdfjs = PackageVersions.lib('pdfjs')
+fineuploader = PackageVersions.lib('fineuploader')
 
 getFileContent = (filePath)->
 	filePath = Path.join __dirname, "../../../", "public#{filePath}"
@@ -36,6 +38,7 @@ getFileContent = (filePath)->
 
 logger.log "Generating file fingerprints..."
 pathList = [
+	["#{jsPath}libs/#{fineuploader}.js"]
 	["#{jsPath}libs/require.js"]
 	["#{jsPath}ide.js"]
 	["#{jsPath}main.js"]
@@ -88,8 +91,9 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 	publicApiRouter.use addSetContentDisposition
 
 	webRouter.use (req, res, next)->
-		req.externalAuthenticationSystemUsed = res.locals.externalAuthenticationSystemUsed = ->
-			Settings.ldap? or Settings.saml?
+		req.externalAuthenticationSystemUsed = Features.externalAuthenticationSystemUsed
+		res.locals.externalAuthenticationSystemUsed = Features.externalAuthenticationSystemUsed
+		req.hasFeature = res.locals.hasFeature = Features.hasFeature
 		next()
 
 	webRouter.use (req, res, next)->

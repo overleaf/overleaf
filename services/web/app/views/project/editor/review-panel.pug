@@ -91,9 +91,7 @@
 				)
 
 			li.rp-tc-state-separator
-			li.rp-tc-state-item.rp-tc-state-item-guests(
-				ng-if="__enableTokenAccessUI"
-			)
+			li.rp-tc-state-item.rp-tc-state-item-guests
 				span.rp-tc-state-item-name(
 					ng-class="{ 'rp-tc-state-item-name-disabled' : reviewPanel.trackChangesOnForEveryone}"
 					tooltip=translate('tc_switch_guests_tip')
@@ -574,37 +572,6 @@ script(type="text/ng-template", id="trackChangesUpgradeModalTemplate")
 	.modal-footer()
 		button.btn.btn-default(
 			ng-click="cancel()"
-		)
-			span #{translate("close")}
-
-script(type="text/ng-template", id="perUserTCNoticeModalTemplate")
-	.modal-header
-		button.close(
-			type="button"
-			data-dismiss="modal"
-			ng-click="$close()"
-		) &times;
-		h3 #{translate("per_user_tc_title")}
-	.modal-body
-		.teaser-video-container
-			video.teaser-video(autoplay, loop)
-				source(ng-src="{{ '/img/teasers/track-changes/per-user-track-changes.mp4' }}", type="video/mp4")
-				img(src="/img/teasers/track-changes/per-user-track-changes.gif")
-		h4.teaser-title #{translate("you_can_use_per_user_tc")}
-		.row
-			.col-md-8.col-md-offset-2
-				ul.list-unstyled
-					li
-						i.fa.fa-check &nbsp;
-						| #{translate("turn_tc_on_individuals")}
-					
-					li
-						i.fa.fa-check &nbsp;
-						| #{translate("keep_tc_on_like_before")}
-
-	.modal-footer()
-		button.btn.btn-default(
-			ng-click="$close()"
 		)
 			span #{translate("close")}
 

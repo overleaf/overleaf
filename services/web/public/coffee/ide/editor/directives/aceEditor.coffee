@@ -9,11 +9,14 @@ define [
 	"ide/editor/directives/aceEditor/highlights/HighlightsManager"
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
 	"ide/editor/directives/aceEditor/track-changes/TrackChangesManager"
+	"ide/editor/directives/aceEditor/metadata/MetadataManager"
 	"ide/editor/directives/aceEditor/labels/LabelsManager"
 	"ide/labels/services/labels"
+	"ide/metadata/services/metadata"
 	"ide/graphics/services/graphics"
 	"ide/preamble/services/preamble"
-], (App, Ace, SearchBox, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager, LabelsManager) ->
+    "ide/files/services/files"
+], (App, Ace, SearchBox, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager, MetadataManager, LabelsManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
 	ModeList = ace.require('ace/ext/modelist')
 
@@ -35,7 +38,7 @@ define [
 			url = ace.config._moduleUrl(args...) + "?fingerprint=#{window.aceFingerprint}"
 			return url
 
-	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory, labels, graphics, preamble, $http) ->
+	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory, labels, metadata, graphics, preamble, files, $http, $q) ->
 		monkeyPatchSearch($rootScope, $compile)
 
 		return  {
@@ -97,13 +100,14 @@ define [
 
 				if scope.spellCheck # only enable spellcheck when explicitly required
 					spellCheckCache =  $cacheFactory("spellCheck-#{scope.name}", {capacity: 1000})
-					spellCheckManager = new SpellCheckManager(scope, editor, element, spellCheckCache, $http)
+					spellCheckManager = new SpellCheckManager(scope, editor, element, spellCheckCache, $http, $q)
 				undoManager           = new UndoManager(scope, editor, element)
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
 				trackChangesManager   = new TrackChangesManager(scope, editor, element)
 				labelsManager = new LabelsManager(scope, editor, element, labels)
-				autoCompleteManager = new AutoCompleteManager(scope, editor, element, labelsManager, graphics, preamble)
+				metadataManager = new MetadataManager(scope, editor, element, metadata)
+				autoCompleteManager = new AutoCompleteManager(scope, editor, element, metadataManager, labelsManager, graphics, preamble, files)
 
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
@@ -115,16 +119,16 @@ define [
 				editor.commands.removeCommand "transposeletters"
 				editor.commands.removeCommand "showSettingsMenu"
 				editor.commands.removeCommand "foldall"
-				
+
 				# For European keyboards, the / is above 7 so needs Shift pressing.
-				# This comes through as Command-Shift-/ on OS X, which is mapped to 
+				# This comes through as Command-Shift-/ on OS X, which is mapped to
 				# toggleBlockComment.
 				# This doesn't do anything for LaTeX, so remap this to togglecomment to
 				# work for European keyboards as normal.
 				# On Windows, the key combo comes as Ctrl-Shift-7.
 				editor.commands.removeCommand "toggleBlockComment"
 				editor.commands.removeCommand "togglecomment"
-				
+
 				editor.commands.addCommand {
 					name: "togglecomment",
 					bindKey: { win: "Ctrl-/|Ctrl-Shift-7", mac: "Command-/|Command-Shift-/" },
@@ -140,7 +144,7 @@ define [
 					exec: (editor) ->
 						ace.require("ace/ext/searchbox").Search(editor, true)
 					readOnly: true
-				
+
 				# Bold text on CMD+B
 				editor.commands.addCommand
 					name: "bold",
@@ -154,7 +158,7 @@ define [
 							text = editor.getCopyText()
 							editor.insert("\\textbf{" + text + "}")
 					readOnly: false
-                    
+
 				# Italicise text on CMD+I
 				editor.commands.addCommand
 					name: "italics",
@@ -171,7 +175,7 @@ define [
 
 				scope.$watch "onCtrlEnter", (callback) ->
 					if callback?
-						editor.commands.addCommand 
+						editor.commands.addCommand
 							name: "compile",
 							bindKey: win: "Ctrl-Enter", mac: "Command-Enter"
 							exec: (editor) =>
@@ -180,7 +184,7 @@ define [
 
 				scope.$watch "onCtrlJ", (callback) ->
 					if callback?
-						editor.commands.addCommand 
+						editor.commands.addCommand
 							name: "toggle-review-panel",
 							bindKey: win: "Ctrl-J", mac: "Command-J"
 							exec: (editor) =>
@@ -189,7 +193,7 @@ define [
 
 				scope.$watch "onCtrlShiftC", (callback) ->
 					if callback?
-						editor.commands.addCommand 
+						editor.commands.addCommand
 							name: "add-new-comment",
 							bindKey: win: "Ctrl-Shift-C", mac: "Command-Shift-C"
 							exec: (editor) =>
@@ -198,7 +202,7 @@ define [
 
 				scope.$watch "onCtrlShiftA", (callback) ->
 					if callback?
-						editor.commands.addCommand 
+						editor.commands.addCommand
 							name: "toggle-track-changes",
 							bindKey: win: "Ctrl-Shift-A", mac: "Command-Shift-A"
 							exec: (editor) =>
@@ -302,7 +306,7 @@ define [
 					if updateCount == 100
 						event_tracking.send 'editor-interaction', 'multi-doc-update'
 					scope.$emit "#{scope.name}:change"
-				
+
 				onScroll = (scrollTop) ->
 					return if !scope.eventsBridge?
 					height = editor.renderer.layerConfig.maxHeight
@@ -311,7 +315,7 @@ define [
 				onScrollbarVisibilityChanged = (event, vRenderer) ->
 					return if !scope.eventsBridge?
 					scope.eventsBridge.emit "aceScrollbarVisibilityChanged", vRenderer.scrollBarV.isVisible, vRenderer.scrollBarV.width
-					
+
 				if scope.eventsBridge?
 					editor.renderer.on "scrollbarVisibilityChanged", onScrollbarVisibilityChanged
 
@@ -356,6 +360,7 @@ define [
 						session.setOption("useWorker", scope.syntaxValidation);
 
 					# now attach session to editor
+					editor.setReadOnly(true) # set to readonly until document change handlers are attached
 					editor.setSession(session)
 
 					doc = session.getDocument()
@@ -364,6 +369,8 @@ define [
 					editor.initing = true
 					sharejs_doc.attachToAce(editor)
 					editor.initing = false
+					# now ready to edit document
+					editor.setReadOnly(scope.readOnly) # respect the readOnly setting, normally false
 
 					resetScrollMargins()
 
@@ -401,14 +408,14 @@ define [
 
 					session = editor.getSession()
 					session.off "changeScrollTop"
-					
+
 					doc = session.getDocument()
 					doc.off "change", onChange
-				
+
 				editor.renderer.on "changeCharacterSize", () ->
 					scope.$apply () ->
 						scope.rendererData.lineHeight = editor.renderer.lineHeight
-				
+
 				scope.$watch "rendererData", (rendererData) ->
 					if rendererData?
 						rendererData.lineHeight = editor.renderer.lineHeight

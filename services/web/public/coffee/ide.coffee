@@ -9,11 +9,11 @@ define [
 	"ide/pdf/PdfManager"
 	"ide/binary-files/BinaryFilesManager"
 	"ide/references/ReferencesManager"
-	"ide/labels/LabelsManager"
+	"ide/metadata/MetadataManager"
 	"ide/review-panel/ReviewPanelManager"
 	"ide/SafariScrollPatcher"
-	"ide/FeatureOnboardingController",
 	"ide/AutoCompileOnboardingController",
+	"ide/LinkSharingOnboardingController",
 	"ide/settings/index"
 	"ide/share/index"
 	"ide/chat/index"
@@ -47,12 +47,12 @@ define [
 	PdfManager
 	BinaryFilesManager
 	ReferencesManager
-	LabelsManager
+	MetadataManager
 	ReviewPanelManager
 	SafariScrollPatcher
 ) ->
 
-	App.controller "IdeController", ($scope, $timeout, ide, localStorage, sixpack, event_tracking, labels) ->
+	App.controller "IdeController", ($scope, $timeout, ide, localStorage, sixpack, event_tracking, metadata) ->
 		# Don't freak out if we're already in an apply callback
 		$scope.$originalApply = $scope.$apply
 		$scope.$apply = (fn = () ->) ->
@@ -72,27 +72,16 @@ define [
 			view: "editor"
 			chatOpen: false
 			pdfLayout: 'sideBySide'
-			pdfHidden: false,
-			pdfWidth: 0,
-			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}"),
-			miniReviewPanelVisible: false,
+			pdfHidden: false
+			pdfWidth: 0
+			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}")
+			miniReviewPanelVisible: false
 		}
 		$scope.onboarding = {
 			autoCompile: if window.showAutoCompileOnboarding then 'unseen' else 'dismissed'
+			linkSharing: if window.showLinkSharingOnboarding then 'unseen' else 'dismissed'
 		}
 		$scope.user = window.user
-		$scope.__enableTokenAccessUI = window.enableTokenAccessUI == true
-		# TODO: remove after rollout and testing
-		window.turnOnTokenAccessUI = () ->
-			$scope.__enableTokenAccessUI = true
-			$scope.$digest
-		window.turnOffTokenAccessUI = () ->
-			$scope.__enableTokenAccessUI = false
-			$scope.$digest
-
-		$scope.$watch "project.features.trackChangesVisible", (visible) ->
-			return if !visible?
-			$scope.ui.showCollabFeaturesOnboarding = window.showTrackChangesOnboarding and visible
 
 		$scope.shouldABTestPlans = false
 		if $scope.user.signUpDate >= '2016-10-27'
@@ -149,7 +138,7 @@ define [
 		ide.pdfManager = new PdfManager(ide, $scope)
 		ide.permissionsManager = new PermissionsManager(ide, $scope)
 		ide.binaryFilesManager = new BinaryFilesManager(ide, $scope)
-		ide.labelsManager = new LabelsManager(ide, $scope, labels)
+		ide.metadataManager = new MetadataManager(ide, $scope, metadata)
 
 		inited = false
 		$scope.$on "project:joined", () ->
@@ -164,10 +153,20 @@ define [
 			$timeout(
 				() ->
 					if $scope.permissions.write
-						ide.labelsManager.loadProjectLabelsFromServer()
+						ide.metadataManager.loadProjectMetaFromServer()
 						_labelsInitialLoadDone = true
 				, 200
 			)
+
+		# Count the first 'doc:opened' as a sign that the ide is loaded
+		# and broadcast a message. This is a good event to listen for
+		# if you want to wait until the ide is fully loaded and initialized
+		_loaded = false
+		$scope.$on 'doc:opened', () ->
+			if _loaded
+				return
+			$scope.$broadcast('ide:loaded')
+			_loaded = true
 
 		DARK_THEMES = [
 			"ambiance", "chaos", "clouds_midnight", "cobalt", "idle_fingers",

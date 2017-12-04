@@ -150,11 +150,11 @@ module.exports = EditorController =
 		logger.log project_id:project_id, "recived message to delete project"
 		ProjectDeleter.deleteProject project_id, callback
 
-	renameEntity: (project_id, entity_id, entityType, newName, callback)->
+	renameEntity: (project_id, entity_id, entityType, newName, userId, callback)->
 		newName = sanitize.escape(newName)
 		Metrics.inc "editor.rename-entity"
 		logger.log entity_id:entity_id, entity_id:entity_id, entity_id:entity_id, "reciving new name for entity for project"
-		ProjectEntityHandler.renameEntity project_id, entity_id, entityType, newName, ->
+		ProjectEntityHandler.renameEntity project_id, entity_id, entityType, newName, userId, (err) ->
 			if err?
 				logger.err err:err, project_id:project_id, entity_id:entity_id, entityType:entityType, newName:newName, "error renaming entity"
 				return callback(err)
@@ -162,13 +162,13 @@ module.exports = EditorController =
 				EditorRealTimeController.emitToRoom project_id, 'reciveEntityRename', entity_id, newName
 				callback?()
 
-	moveEntity: (project_id, entity_id, folder_id, entityType, callback)->
+	moveEntity: (project_id, entity_id, folder_id, entityType, userId, callback)->
 		Metrics.inc "editor.move-entity"
 		LockManager.getLock project_id, (err)->
 			if err?
 				logger.err err:err, project_id:project_id, "could not get lock for move entity"
 				return callback(err)
-			ProjectEntityHandler.moveEntity project_id, entity_id, folder_id, entityType, =>
+			ProjectEntityHandler.moveEntity project_id, entity_id, folder_id, entityType, userId, =>
 				if err?
 					logger.err err:err, project_id:project_id, entity_id:entity_id, folder_id:folder_id, "error moving entity"
 					return callback(err)

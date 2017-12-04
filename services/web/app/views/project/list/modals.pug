@@ -213,6 +213,33 @@ script(type='text/ng-template', id='deleteProjectsModalTemplate')
 			ng-click="delete()"
 		) #{translate("confirm")}
 
+script(type="text/template", id="qq-project-uploader-template")
+	div.qq-uploader-selector
+		div(qq-hide-dropzone="").qq-upload-drop-area-selector.qq-upload-drop-area
+			span.qq-upload-drop-area-text-selector #{translate('drop_files_here_to_upload')}
+		div.qq-upload-button-selector.btn.btn-primary.btn-lg
+			div #{translate('select_a_zip_file')}
+		span.or.btn-lg #{translate('or')}
+		span.drag-here.btn-lg #{translate('drag_a_zip_file')}
+		span.qq-drop-processing-selector
+			span #{translate('creating_project')}
+			span.qq-drop-processing-spinner-selector
+		ul.qq-upload-list-selector
+			li
+				div.qq-progress-bar-container-selector
+					div(
+						role="progressbar"
+						aria-valuenow="0"
+						aria-valuemin="0"
+						aria-valuemax="100"
+						class="qq-progress-bar-selector qq-progress-bar"
+					)
+				span.qq-upload-file-selector.qq-upload-file
+				span.qq-upload-size-selector.qq-upload-size
+				a(type="button").qq-btn.qq-upload-cancel-selector.qq-upload-cancel #{translate('cancel')}
+				button(type="button").qq-btn.qq-upload-retry-selector.qq-upload-retry #{translate('retry')}
+				span(role="status").qq-upload-status-text-selector.qq-upload-status-text
+
 script(type="text/ng-template", id="uploadProjectModalTemplate")
 	.modal-header
 		button.close(
@@ -224,15 +251,11 @@ script(type="text/ng-template", id="uploadProjectModalTemplate")
 	.modal-body(
 		fine-upload
 		endpoint="/project/new/upload"
-		waiting-for-response-text="Creating project..."
-		failed-upload-text="Upload failed. Is it a valid zip file?"
-		upload-button-text="Select a .zip file"
-		drag-area-text="drag .zip file"
+		template-id="qq-project-uploader-template"
 		multiple="false"
 		allowed-extensions="['zip']"
 		on-complete-callback="onComplete"
 	)
-		span #{translate("upload_a_zipped_project")}
 	.modal-footer
 		button.btn.btn-default(ng-click="cancel()") #{translate("cancel")}
 

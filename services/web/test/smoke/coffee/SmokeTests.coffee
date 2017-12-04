@@ -33,23 +33,19 @@ describe "Opening", ->
 				return done(err)
 			logger.log "smoke test: clearing rate limit "
 			require("../../../app/js/infrastructure/RateLimiter.js").clearRateLimit "open-project", "#{Settings.smokeTest.projectId}:#{Settings.smokeTest.userId}", ->
-				logger.log "smoke test: hitting /register"
+				logger.log "smoke test: hitting dev/csrf"
 				command =  """
-					curl -H  "X-Forwarded-Proto: https" -c #{cookeFilePath} #{buildUrl('register')}
+					curl -H  "X-Forwarded-Proto: https" -c #{cookeFilePath} #{buildUrl('dev/csrf')}
 				"""
 				child.exec command, (err, stdout, stderr)->
 					if err? then done(err)
-					csrfMatches = stdout.match("<input name=\"_csrf\" type=\"hidden\" value=\"(.*?)\">")
-					if !csrfMatches?
-						logger.err stdout:stdout, "smoke test: does not have csrf token"
-						return done("smoke test: does not have csrf token")
-					csrf = csrfMatches[1]
+					csrf = stdout
 					logger.log "smoke test: converting cookie file 1"
 					convertCookieFile (err) ->
 						return done(err) if err?
-						logger.log "smoke test: hitting /register with csrf"
+						logger.log "smoke test: hitting /login with csrf"
 						command = """
-							curl -c #{cookeFilePath} -H "Content-Type: application/json" -H "X-Forwarded-Proto: https" -d '{"_csrf":"#{csrf}", "email":"#{Settings.smokeTest.user}", "password":"#{Settings.smokeTest.password}"}' #{buildUrl('register')}
+							curl -c #{cookeFilePath} -H "Content-Type: application/json" -H "X-Forwarded-Proto: https" -d '{"_csrf":"#{csrf}", "email":"#{Settings.smokeTest.user}", "password":"#{Settings.smokeTest.password}"}' #{buildUrl('login')}
 						"""
 						child.exec command, (err) ->
 							return done(err) if err?

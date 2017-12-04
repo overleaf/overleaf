@@ -30,9 +30,10 @@ ProjectInviteSchema = new Schema(
 	}
 )
 
-
-conn = mongoose.createConnection(Settings.mongo.url, server: poolSize: Settings.mongo.poolSize || 10)
-
+conn = mongoose.createConnection(Settings.mongo.url, {
+	server: {poolSize: Settings.mongo.poolSize || 10},
+	config: {autoIndex: false}
+})
 
 ProjectInvite = conn.model('ProjectInvite', ProjectInviteSchema)
 

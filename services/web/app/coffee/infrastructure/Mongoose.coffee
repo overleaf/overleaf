@@ -2,7 +2,10 @@ mongoose = require('mongoose')
 Settings = require 'settings-sharelatex'
 logger = require('logger-sharelatex')
 
-mongoose.connect(Settings.mongo.url, server: poolSize: 10)
+mongoose.connect(Settings.mongo.url, {
+	server: {poolSize: 10},
+	config: {autoIndex: false}
+})
 
 mongoose.connection.on 'connected', () ->
 	logger.log {url:Settings.mongo.url}, 'mongoose default connection open'
