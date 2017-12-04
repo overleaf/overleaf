@@ -28,7 +28,7 @@ module.exports =
 				FileTypeManager.isBinary path, fsPath, (err, isFile)->
 					return callback(err) if err?
 					if isFile
-						self.p.processFile project_id, elementId, fsPath, path, source, callback
+						self.p.processFile project_id, elementId, fsPath, path, source, user_id, callback
 					else
 						self.p.processDoc project_id, elementId, user_id, fsPath, path, source, callback
 
@@ -57,9 +57,9 @@ module.exports =
 						if err?
 							logger.err err:err, project_id:project_id, doc_id:doc_id, path:path, "error processing file"
 							return callback(err)
-						editorController.addDoc project_id, folder._id, fileName, docLines, source, callback
+						editorController.addDoc project_id, folder._id, fileName, docLines, source, user_id, callback
 
-		processFile: (project_id, file_id, fsPath, path, source, callback)->
+		processFile: (project_id, file_id, fsPath, path, source, user_id, callback)->
 			finish = (err)->
 				logger.log project_id:project_id, file_id:file_id, path:path, "completed processing file update from tpds"
 				callback(err)
@@ -69,9 +69,9 @@ module.exports =
 					logger.err err:err, project_id:project_id, file_id:file_id, path:path, "error processing file"
 					return callback(err)
 				else if file_id?
-					editorController.replaceFile project_id, file_id, fsPath, source, finish
+					editorController.replaceFile project_id, file_id, fsPath, source, user_id, finish
 				else
-					editorController.addFile project_id, folder?._id, fileName, fsPath, source, finish
+					editorController.addFile project_id, folder?._id, fileName, fsPath, source, user_id, finish
 
 		writeStreamToDisk: (project_id, file_id, stream, callback = (err, fsPath)->)->
 			if !file_id?
