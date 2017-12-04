@@ -8,6 +8,7 @@ Settings = require("settings-sharelatex")
 logger = require("logger-sharelatex")
 ObjectId = require('mongoose').Types.ObjectId	
 ReferalAllocator = require("../Referal/ReferalAllocator")
+Modules = require '../../infrastructure/Modules'
 
 oneMonthInSeconds = 60 * 60 * 24 * 30
 
@@ -106,17 +107,26 @@ module.exports = SubscriptionUpdater =
 				SubscriptionLocator.getUsersSubscription user_id, cb
 			groupSubscription: (cb)->
 				SubscriptionLocator.getGroupSubscriptionMemberOf user_id, cb
+			overleafPlanCode: (cb) ->
+				Modules.hooks.fire 'getOverleafPlanCode', user_id, cb
 		async.series jobs, (err, results)->
 			if err?
 				logger.err err:err, user_id:user, "error getting subscription or group for _setUsersMinimumFeatures"
 				return callback(err)
-			{subscription, groupSubscription} = results
-			if subscription? and subscription.planCode? and subscription.planCode != Settings.defaultPlanCode
-				logger.log user_id:user_id, "using users subscription plan code for features"
-				UserFeaturesUpdater.updateFeatures user_id, subscription.planCode, callback
-			else if groupSubscription? and groupSubscription.planCode?
+			{subscription, groupSubscription, overleafPlanCode} = results
+			# Group Subscription
+			if groupSubscription? and groupSubscription.planCode?
 				logger.log user_id:user_id, "using group which user is memor of for features"
 				UserFeaturesUpdater.updateFeatures user_id, groupSubscription.planCode, callback
+			# Personal Subscription
+			else if subscription? and subscription.planCode? and subscription.planCode != Settings.defaultPlanCode
+				logger.log user_id:user_id, "using users subscription plan code for features"
+				UserFeaturesUpdater.updateFeatures user_id, subscription.planCode, callback
+			# Overleaf Subscription
+			else if overleafPlanCode?
+				logger.log user_id: user_id, "using the overleaf plan for features"
+				UserFeaturesUpdater.updateFeatures user_id, overleafPlanCode, callback
+			# Default
 			else
 				logger.log user_id:user_id, "using default features for user with no subscription or group"
 				UserFeaturesUpdater.updateFeatures user_id, Settings.defaultPlanCode, (err)->
