@@ -313,3 +313,59 @@ script(type="text/ng-template", id="userProfileModalTemplate")
 
 	.modal-footer
 		button.btn.btn-info(ng-click="done()") #{translate("done")}
+
+script(type="text/ng-template", id="v1ImportModalTemplate")
+	.modal-header
+		button.close(ng-click="dismiss()") &times;
+		h3 #{translate("import_project_to_v2")}
+
+	.modal-body.v1-import-wrapper
+		.v1-import-step-1(ng-show="step === 1")
+			img.v1-import-img(
+				src="/img/v1-import/v2-editor.png"
+				alt="The new V2 Editor."
+			)
+			h2.v1-import-title Try importing your project to V2!
+			p Some exciting copy about the new features:
+			ul
+				li Some stuff
+				li Some more stuff
+				li Yet more stuff
+
+		.v1-import-step-2(ng-show="step === 2")
+			div.v1-import-warning(aria-label="Warning symbol.")
+				i.fa.fa-exclamation-triangle
+			h2.v1-import-title #[strong Warning:] Overleaf V2 is in beta
+			p Once importing your project you will lose access to the some of the features of Overleaf V1. This includes the git bridge, journal integrations, WYSIWYG and linked files. We’re working on bringing these features to V2!
+			p Once you have imported a project to V2 you #[strong cannot go back to V1].
+			p Are you sure you want to import to V2?
+
+	.modal-footer.v1-import-footer
+		div(ng-show="step === 1")
+			if settings.overleaf && settings.overleaf.host
+				a.btn.btn-primary.v1-import-btn(
+					ng-href=settings.overleaf.host + "/{{project.id}}"
+				) #{translate("open_in_v1")}
+			button.btn.btn-primary.v1-import-btn(
+				ng-click="moveToConfirmation()"
+			) #{translate("import_to_v2")}
+		div(ng-show="step === 2")
+			form(
+				async-form="v1Import",
+				name="v1ImportForm",
+				action="{{'/overleaf/project/'+ project.id + '/import'}}"
+				method="POST"
+				ng-cloak
+			)
+				input(name='_csrf', type='hidden', value=csrfToken)
+				form-messages(for="v1ImportForm")
+				if settings.overleaf && settings.overleaf.host
+					a.btn.btn-primary.v1-import-btn(
+						ng-href=settings.overleaf.host + "/{{project.id}}"
+						ng-class="{disabled: v1ImportForm.inflight || v1ImportForm.success}"
+					) #{translate("never_mind_open_in_v1")}
+				input.btn.btn-primary.v1-import-btn(
+					type="submit",
+					value=translate('yes_im_sure')
+					ng-disabled="v1ImportForm.inflight || v1ImportForm.success"
+				)
