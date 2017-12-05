@@ -52,7 +52,7 @@ module.exports = ProjectCreationHandler =
 			return callback(error) if error?
 			self._buildTemplate "mainbasic.tex", owner_id, projectName, (error, docLines)->
 				return callback(error) if error?
-				ProjectEntityHandler.addDoc project._id, project.rootFolder[0]._id, "main.tex", docLines, (error, doc)->
+				ProjectEntityHandler.addDoc project._id, project.rootFolder[0]._id, "main.tex", docLines, owner_id, (error, doc)->
 					if error?
 						logger.err err:error, "error adding doc when creating basic project"
 						return callback(error)
@@ -67,17 +67,17 @@ module.exports = ProjectCreationHandler =
 				(callback) ->
 					self._buildTemplate "main.tex", owner_id, projectName, (error, docLines)->
 						return callback(error) if error?
-						ProjectEntityHandler.addDoc project._id, project.rootFolder[0]._id, "main.tex", docLines, (error, doc)->
+						ProjectEntityHandler.addDoc project._id, project.rootFolder[0]._id, "main.tex", docLines, owner_id, (error, doc)->
 							return callback(error) if error?
 							ProjectEntityHandler.setRootDoc project._id, doc._id, callback
 				(callback) ->
 					self._buildTemplate "references.bib", owner_id, projectName, (error, docLines)->
 						return callback(error) if error?
-						ProjectEntityHandler.addDoc project._id, project.rootFolder[0]._id, "references.bib", docLines, (error, doc)->
+						ProjectEntityHandler.addDoc project._id, project.rootFolder[0]._id, "references.bib", docLines, owner_id, (error, doc)->
 							callback(error)
 				(callback) ->
 					universePath = Path.resolve(__dirname + "/../../../templates/project_files/universe.jpg")
-					ProjectEntityHandler.addFile project._id, project.rootFolder[0]._id, "universe.jpg", universePath, callback
+					ProjectEntityHandler.addFile project._id, project.rootFolder[0]._id, "universe.jpg", universePath, owner_id, callback
 			], (error) ->
 				callback(error, project)
 

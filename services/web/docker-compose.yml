@@ -24,6 +24,7 @@ services:
       REDIS_HOST: redis
       MONGO_URL: "mongodb://mongo/sharelatex"
       SHARELATEX_ALLOW_PUBLIC_ACCESS: 'true'
+      PROJECT_HISTORY_ENABLED: 'true'
     depends_on:
       - redis
       - mongo

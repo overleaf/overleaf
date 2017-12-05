@@ -13,6 +13,7 @@ module.exports = MockDocStoreApi =
 			@docs[project_id][doc_id] = {lines, version, ranges}
 			@docs[project_id][doc_id].rev ?= 0
 			@docs[project_id][doc_id].rev += 1
+			@docs[project_id][doc_id]._id = doc_id
 			res.json {
 				modified: true
 				rev: @docs[project_id][doc_id].rev

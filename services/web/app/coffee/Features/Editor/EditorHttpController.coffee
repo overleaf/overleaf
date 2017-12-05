@@ -81,10 +81,11 @@ module.exports = EditorHttpController =
 		project_id = req.params.Project_id
 		name = req.body.name
 		parent_folder_id = req.body.parent_folder_id
+		user_id = AuthenticationController.getLoggedInUserId(req)
 		logger.log project_id:project_id, name:name, parent_folder_id:parent_folder_id, "getting request to add doc to project"
 		if !EditorHttpController._nameIsAcceptableLength(name)
 			return res.sendStatus 400
-		EditorController.addDoc project_id, parent_folder_id, name, [], "editor", (error, doc) ->
+		EditorController.addDoc project_id, parent_folder_id, name, [], "editor", user_id, (error, doc) ->
 			if error == "project_has_to_many_files"
 				res.status(400).json(req.i18n.translate("project_has_to_many_files"))
 			else if error?
@@ -113,9 +114,9 @@ module.exports = EditorHttpController =
 		entity_id   = req.params.entity_id
 		entity_type = req.params.entity_type
 		name = req.body.name
-		user_id = AuthenticationController.getLoggedInUserId(req)
 		if !EditorHttpController._nameIsAcceptableLength(name)
 			return res.sendStatus 400
+		user_id = AuthenticationController.getLoggedInUserId(req)
 		EditorController.renameEntity project_id, entity_id, entity_type, name, user_id, (error) ->
 			return next(error) if error?
 			res.sendStatus 204

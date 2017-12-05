@@ -204,11 +204,11 @@ module.exports = DocumentUpdaterHandler =
 				logger.error {project_id, doc_id, thread_id}, "doc updater returned a non-success status code: #{res.statusCode}"
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
-	updateProjectStructure : (project_id, userId, oldDocs, newDocs, oldFiles, newFiles, callback = (error) ->)->
+	updateProjectStructure : (project_id, userId, changes, callback = (error) ->)->
 		return callback() if !settings.apis.project_history?.enabled
 
-		docUpdates = DocumentUpdaterHandler._getRenameUpdates('doc', oldDocs, newDocs)
-		fileUpdates = DocumentUpdaterHandler._getRenameUpdates('file', oldFiles, newFiles)
+		docUpdates = DocumentUpdaterHandler._getRenameUpdates('doc', changes.oldDocs, changes.newDocs)
+		fileUpdates = DocumentUpdaterHandler._getRenameUpdates('file', changes.oldFiles, changes.newFiles)
 
 		timer = new metrics.Timer("set-document")
 		url = "#{settings.apis.documentupdater.url}/project/#{project_id}"
@@ -231,14 +231,25 @@ module.exports = DocumentUpdaterHandler =
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
 	_getRenameUpdates: (entityType, oldEntities, newEntities) ->
+		oldEntities ||= []
+		newEntities ||= []
 		updates = []
 
-		for oldEntity in oldEntities
-			id = oldEntity[entityType]._id
-			newEntity = _.find newEntities, (newEntity) ->
-				newEntity[entityType]._id.toString() == id.toString()
+		oldEntitiesHash = _.indexBy oldEntities, (entity) -> entity[entityType]._id.toString()
+		newEntitiesHash = _.indexBy newEntities, (entity) -> entity[entityType]._id.toString()
 
-			if newEntity.path != oldEntity.path
+		for id, newEntity of newEntitiesHash
+			oldEntity = oldEntitiesHash[id]
+
+			if !oldEntity?
+				# entity added
+				updates.push
+					id: id
+					pathname: newEntity.path
+					docLines: newEntity.docLines
+					url: newEntity.url
+			else if newEntity.path != oldEntity.path
+				# entity renamed
 				updates.push
 					id: id
 					pathname: oldEntity.path

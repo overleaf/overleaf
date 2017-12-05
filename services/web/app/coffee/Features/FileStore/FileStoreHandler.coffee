@@ -21,9 +21,9 @@ module.exports = FileStoreHandler =
 				return callback(new Error("can not upload symlink"))
 
 			_cb = callback
-			callback = (err) ->
+			callback = (err, url) ->
 				callback = ->	# avoid double callbacks
-				_cb(err)
+				_cb(err, url)
 
 			logger.log project_id:project_id, file_id:file_id, fsPath:fsPath, "uploading file from disk"
 			readStream = fs.createReadStream(fsPath)
@@ -31,9 +31,10 @@ module.exports = FileStoreHandler =
 				logger.err err:err, project_id:project_id, file_id:file_id, fsPath:fsPath, "something went wrong on the read stream of uploadFileFromDisk"
 				callback err
 			readStream.on "open", () ->
+				url = FileStoreHandler._buildUrl(project_id, file_id)
 				opts =
 					method: "post"
-					uri: FileStoreHandler._buildUrl(project_id, file_id)
+					uri: url
 					timeout:fiveMinsInMs
 				writeStream = request(opts)
 				writeStream.on "error", (err)->
@@ -45,7 +46,7 @@ module.exports = FileStoreHandler =
 						logger.err {err, statusCode: response.statusCode}, "error uploading to filestore"
 						callback(err)
 					else
-						callback(null)
+						callback(null, url)
 				readStream.pipe writeStream
 
 	getFileStream: (project_id, file_id, query, callback)->
@@ -91,7 +92,7 @@ module.exports = FileStoreHandler =
 		request opts, (err)->
 			if err?
 				logger.err err:err, oldProject_id:oldProject_id, oldFile_id:oldFile_id, newProject_id:newProject_id, newFile_id:newFile_id, "something went wrong telling filestore api to copy file"
-			callback(err)
+			callback(err, opts.uri)
 
 	_buildUrl: (project_id, file_id)->
 		return "#{settings.apis.filestore.url}/project/#{project_id}/file/#{file_id}"
