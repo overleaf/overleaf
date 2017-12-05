@@ -27,6 +27,10 @@
 		color: @toolbar-icon-btn-color;
 		padding: 0 5px;
 		border-radius: @border-radius-small;
+		&.toolbar-header-back-projects {
+			padding: 5px 10px 4px;
+			margin-bottom: 1px;
+		}
 		&:hover {
 			text-shadow: @toolbar-icon-btn-hover-shadow;
 			color: @toolbar-icon-btn-hover-color;
@@ -38,7 +42,7 @@
 			}
 			color: white;
 			background-color: @link-color;
-			.box-shadow(inset 0 3px 5px rgba(0, 0, 0, 0.225));
+			box-shadow: @toolbar-icon-btn-hover-boxshadow;
 			&:hover {
 				color: white;
 			}
@@ -123,7 +127,6 @@
 		.toolbar-alt-mixin;
 	}
 }
-
 
 .toolbar-small-mixin() {
 	height: 32px;
