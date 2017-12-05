@@ -99,11 +99,14 @@ class User
 	getProject: (project_id, callback = (error, project)->) ->
 		db.projects.findOne {_id: ObjectId(project_id.toString())}, callback
 
-	createProject: (name, callback = (error, project_id) ->) ->
+	createProject: (name, options, callback = (error, oroject_id) ->) ->
+		if typeof options == "function"
+			callback = options
+			options = {}
+
 		@request.post {
 			url: "/project/new",
-			json:
-				projectName: name
+			json: Object.assign({projectName: name}, options)
 		}, (error, response, body) ->
 			return callback(error) if error?
 			if !body?.project_id?
