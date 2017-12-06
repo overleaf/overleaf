@@ -118,7 +118,11 @@ div.full-size(
 		h3.popover-title #{translate("link_sharing")}
 		.popover-content
 			p #{translate("try_out_link_sharing")}
-			img(src="/img/onboarding/linksharing/link-sharing.png" width="100%")
+			img(
+				src="/img/onboarding/linksharing/link-sharing.png"
+				alt="Link sharing demo"
+				width="100%"
+			)
 			p #{translate("try_link_sharing_description")}
 			button.btn.btn-default.btn-block(ng-click="dismiss()")
 				| #{translate("got_it")}

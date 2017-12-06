@@ -123,3 +123,13 @@ define [
 		$scope.onComplete = (error, name, response) ->
 			if response.project_id?
 				window.location = '/project/' + response.project_id
+
+	App.controller 'V1ImportModalController', ($scope, $modalInstance, project) ->
+		$scope.project = project
+		$scope.step = 1
+
+		$scope.dismiss = () ->
+			$modalInstance.dismiss('cancel')
+
+		$scope.moveToConfirmation = () ->
+			$scope.step = 2

@@ -1,6 +1,6 @@
 div.full-size.pdf(ng-controller="PdfController")
-	.toolbar.toolbar-tall
-		.btn-group#recompile(
+	.toolbar.toolbar-pdf
+		.btn-group.btn-recompile-group#recompile(
 			dropdown,
 			tooltip-html="'"+translate('recompile_pdf')+" <span class=\"keyboard-shortcut\">({{modifierKey}} + Enter)</span>'"
 			tooltip-class="keyboard-tooltip"
@@ -8,7 +8,7 @@ div.full-size.pdf(ng-controller="PdfController")
 			tooltip-append-to-body="true"
 			tooltip-placement="bottom"
 		)
-			a.btn.btn-info(
+			a.btn.btn-recompile(
 				href,
 				ng-disabled="pdf.compiling",
 				ng-click="recompile()"
@@ -19,7 +19,7 @@ div.full-size.pdf(ng-controller="PdfController")
 				| &nbsp;&nbsp;
 				span(ng-show="!pdf.compiling") #{translate("recompile")}
 				span(ng-show="pdf.compiling") #{translate("compiling")}...
-			a.btn.btn-info.dropdown-toggle(
+			a.btn.btn-recompile.dropdown-toggle(
 				href,
 				ng-disabled="pdf.compiling",
 				dropdown-toggle
@@ -102,6 +102,7 @@ div.full-size.pdf(ng-controller="PdfController")
 				tooltip-placement="bottom"
 				tooltip-append-to-body="true"
 			)
+				i.fa.fa-expand
 				i.full-screen
 			a(
 				href,
@@ -111,6 +112,7 @@ div.full-size.pdf(ng-controller="PdfController")
 				tooltip-placement="bottom"
 				tooltip-append-to-body="true"
 			)
+				i.fa.fa-compress
 				i.split-screen
 				i.split-screen
 	// end of toolbar
