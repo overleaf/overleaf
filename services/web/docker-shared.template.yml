@@ -25,6 +25,7 @@ services:
       - ./config:/app/config
       - ./test/unit/coffee:/app/test/unit/coffee:ro
       - ./test/acceptance/coffee:/app/test/acceptance/coffee:ro
+      - ./test/acceptance/files:/app/test/acceptance/files:ro
       - ./test/smoke/coffee:/app/test/smoke/coffee:ro
       MODULE_VOLUMES
     working_dir: /app
