@@ -134,10 +134,11 @@ div#history(ng-show="ui.view == 'history'")
 
 					div.description(ng-click="select()")
 						div.time {{ update.meta.end_ts | formatDate:'h:mm a' }}
-						div.docs(ng-repeat="(doc_path, doc) in update.docs", ng-if="update.docs")
-							span.doc {{ doc_path }}
-						div.docs(ng-repeat="rename in update.renames", ng-if="update.renames")
-							span Renamed {{ rename.pathname }} to {{ rename.newPathname }}
+						div.docs(ng-repeat="pathname in update.docs", ng-if="update.docs")
+							span.doc {{ pathname }}
+						div.docs(ng-repeat="project_op in update.project_ops", ng-if="update.project_ops")
+							span(ng-if="project_op.rename")
+								| Renamed {{ project_op.rename.pathname }} to {{ project_op.rename.newPathname }}
 						div.users
 							div.user(ng-repeat="update_user in update.meta.users")
 								.color-square(ng-if="update_user != null", ng-style="{'background-color': 'hsl({{ update_user.hue }}, 70%, 50%)'}")
