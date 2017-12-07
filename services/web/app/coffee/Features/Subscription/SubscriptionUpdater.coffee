@@ -62,6 +62,9 @@ module.exports = SubscriptionUpdater =
 			invited_emails: email
 		}, callback
 
+	refreshSubscription: (user_id, callback=(err)->) ->
+		SubscriptionUpdater._setUsersMinimumFeatures user_id, callback
+
 	deleteSubscription: (subscription_id, callback = (error) ->) ->
 		SubscriptionLocator.getSubscription subscription_id, (err, subscription) ->
 			return callback(err) if err?
