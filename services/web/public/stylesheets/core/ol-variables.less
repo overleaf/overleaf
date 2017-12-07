@@ -64,6 +64,44 @@
 @btn-info-bg             : @ol-blue;
 @btn-info-border         : transparent;
 
+// Alerts
+@alert-padding : 15px;
+@alert-border-radius : @border-radius-base;
+@alert-link-font-weight : bold;
+
+@alert-success-bg    : @brand-success;
+@alert-success-text  : #FFF;
+@alert-success-border: transparent;
+
+@alert-info-bg       : @brand-info;
+@alert-info-text     : #FFF;
+@alert-info-border   : transparent;
+
+@alert-warning-bg    : @brand-warning;
+@alert-warning-text  : #FFF;
+@alert-warning-border: transparent;
+
+@alert-danger-bg     : @brand-danger;
+@alert-danger-text   : #FFF;
+@alert-danger-border : transparent;
+
+
+// @state-success-text:             darken(@brand-success, 20%);
+// @state-success-bg:               lighten(@brand-success, 50%);
+// @state-success-border:           darken(@brand-success, 5%);
+
+// @state-info-text:                darken(@brand-info, 20%);
+// @state-info-bg:                  lighten(@brand-info, 47%);
+// @state-info-border:              darken(@brand-info, 7%);
+
+// @state-warning-text:             darken(@brand-warning, 10%);
+// @state-warning-bg:               lighten(@brand-warning, 45%);
+// @state-warning-border:           @brand-warning;
+
+// @state-danger-text:              darken(@brand-danger, 10%);
+// @state-danger-bg:                lighten(@brand-danger, 50%);
+// @state-danger-border:            darken(@brand-danger, 5%);
+
 // Tags
 @tag-border-radius       : 9999px;
 @tag-bg-color            : @ol-green;
@@ -189,9 +227,11 @@
 
 // PDF
 @pdf-top-offset                 : @toolbar-small-height;
-@pdf-bg                         : transparent;
-@pdfjs-bg                       : @ol-blue-gray-1;
+@pdf-bg                         : @ol-blue-gray-1;
+@pdfjs-bg                       : transparent;
 @pdf-page-shadow-color          : rgba(0, 0, 0, 0.5);
+@log-line-no-color              : #FFF;
+@log-hints-color                : @ol-blue-gray-4;
 //== Colors
 //
 //## Gray and brand colors for use across Bootstrap.
@@ -213,7 +253,7 @@
 
 @brand-primary:         @ol-green;
 @brand-success:         @green;
-@brand-info:            @ol-dark-green;
+@brand-info:            @ol-blue;
 @brand-warning:         @orange;
 @brand-danger:          #E03A06;
 

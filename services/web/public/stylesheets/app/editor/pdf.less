@@ -10,7 +10,7 @@
 	padding: 0 (@line-height-computed / 2);
 }
 
-.pdf §{
+.pdf {
 	background-color: @pdf-bg;
 }
 
@@ -183,7 +183,7 @@
 		cursor: pointer;
 		.line-no {
 			float: right;
-			color: @gray;
+			color: @log-line-no-color;
 			font-weight: 700;
 
 			.fa {
@@ -303,22 +303,22 @@
 		}
 
 		.alert-danger & {
-			color: @alert-danger-border;
+			color: @state-danger-border;
 		}
 
 		.alert-warning & {
-			color: @alert-warning-border;
+			color: @state-warning-border;
 		}
 
 		.alert-info & {
-			color: @alert-info-border;
+			color: @state-info-border;
 		}
 
 	}
 
 	&-text, 
 	&-feedback-label {
-		color: @gray-dark;
+		color: @log-hints-color;
 		font-size: 0.9rem;
 		margin-bottom: 20px;
 	}
@@ -343,25 +343,25 @@
 	&-actions a,
 	&-text a {
 		.alert-danger & {
-			color: @alert-danger-text;
+			color: @state-danger-text;
 		}
 
 		.alert-warning & {
-			color: @alert-warning-text;
+			color: @state-warning-text;
 		}
 
 		.alert-info & {
-			color: @alert-info-text;
+			color: @state-info-text;
 		}
 	}
 
 	&-feedback {
-		color: @gray-dark;
+		color: @log-hints-color;
 		float: right;
 	}
 
 	&-extra-feedback {
-		color: @gray-dark;
+		color: @log-hints-color;
 		font-size: 0.8rem;
 		margin-top: 10px;
 		padding-bottom: 5px;
