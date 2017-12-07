@@ -16,7 +16,7 @@ projectUpdateHandler = require('./ProjectUpdateHandler')
 DocstoreManager = require "../Docstore/DocstoreManager"
 ProjectGetter = require "./ProjectGetter"
 CooldownManager = require '../Cooldown/CooldownManager'
-
+DocumentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
 
 module.exports = ProjectEntityHandler =
 	getAllFolders: (project_id,  callback) ->
@@ -106,8 +106,7 @@ module.exports = ProjectEntityHandler =
 	flushProjectToThirdPartyDataStore: (project_id, callback) ->
 		self = @
 		logger.log project_id:project_id, "flushing project to tpds"
-		documentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
-		documentUpdaterHandler.flushProjectToMongo project_id, (error) ->
+		DocumentUpdaterHandler.flushProjectToMongo project_id, (error) ->
 			return callback(error) if error?
 			ProjectGetter.getProject project_id, {name:true}, (error, project) ->
 				return callback(error) if error?
@@ -150,14 +149,14 @@ module.exports = ProjectEntityHandler =
 		else
 			DocstoreManager.getDoc project_id, doc_id, options, callback
 
-	addDoc: (project_id, folder_id, docName, docLines, callback = (error, doc, folder_id) ->)=>
+	addDoc: (project_id, folder_id, docName, docLines, userId, callback = (error, doc, folder_id) ->)=>
 		ProjectGetter.getProjectWithOnlyFolders project_id, (err, project) ->
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add doc"
 				return callback(err)
-			ProjectEntityHandler.addDocWithProject project, folder_id, docName, docLines, callback
+			ProjectEntityHandler.addDocWithProject project, folder_id, docName, docLines, userId, callback
 
-	addDocWithProject: (project, folder_id, docName, docLines, callback = (error, doc, folder_id) ->)=>
+	addDocWithProject: (project, folder_id, docName, docLines, userId, callback = (error, doc, folder_id) ->)=>
 		project_id = project._id
 		logger.log project_id: project_id, folder_id: folder_id, doc_name: docName, "adding doc to project with project"
 		confirmFolder project, folder_id, (folder_id)=>
@@ -177,7 +176,14 @@ module.exports = ProjectEntityHandler =
 						rev:          0
 					}, (err) ->
 						return callback(err) if err?
-						callback(null, doc, folder_id)
+						newDocs = [
+							doc: doc
+							path: result?.path?.fileSystem
+							docLines: docLines.join('\n')
+						]
+						DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newDocs}, (error) ->
+							return callback(error) if error?
+							callback null, doc, folder_id
 
 	restoreDoc: (project_id, doc_id, name, callback = (error, doc, folder_id) ->) ->
 		# getDoc will return the deleted doc's lines, but we don't actually remove
@@ -186,20 +192,20 @@ module.exports = ProjectEntityHandler =
 			return callback(error) if error?
 			ProjectEntityHandler.addDoc project_id, null, name, lines, callback
 
-	addFile: (project_id, folder_id, fileName, path, callback = (error, fileRef, folder_id) ->)->
+	addFile: (project_id, folder_id, fileName, path, userId, callback = (error, fileRef, folder_id) ->)->
 		ProjectGetter.getProjectWithOnlyFolders project_id, (err, project) ->
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add file"
 				return callback(err)
-			ProjectEntityHandler.addFileWithProject project, folder_id, fileName, path, callback
+			ProjectEntityHandler.addFileWithProject project, folder_id, fileName, path, userId, callback
 
-	addFileWithProject: (project, folder_id, fileName, path, callback = (error, fileRef, folder_id) ->)->
+	addFileWithProject: (project, folder_id, fileName, path, userId, callback = (error, fileRef, folder_id) ->)->
 		project_id = project._id
 		logger.log project_id: project._id, folder_id: folder_id, file_name: fileName, path:path, "adding file"
 		return callback(err) if err?
 		confirmFolder project, folder_id, (folder_id)->
 			fileRef = new File name : fileName
-			FileStoreHandler.uploadFileFromDisk project._id, fileRef._id, path, (err)->
+			FileStoreHandler.uploadFileFromDisk project._id, fileRef._id, path, (err, fileStoreUrl)->
 				if err?
 					logger.err err:err, project_id: project._id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error uploading image to s3"
 					return callback(err)
@@ -209,27 +215,31 @@ module.exports = ProjectEntityHandler =
 						return callback(err)
 					tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:result?.path?.fileSystem, project_name:project.name, rev:fileRef.rev}, (err) ->
 						return callback(err) if err?
-						callback(null, fileRef, folder_id)
+						newFiles = [
+							file: fileRef
+							path: result?.path?.fileSystem
+							url: fileStoreUrl
+						]
+						DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newFiles}, (error) ->
+							return callback(error) if error?
+							callback null, fileRef, folder_id
 
-	replaceFile: (project_id, file_id, fsPath, callback)->
-		ProjectGetter.getProject project_id, {name:true}, (err, project) ->
+	replaceFile: (project_id, file_id, fsPath, userId, callback)->
+		self = ProjectEntityHandler
+		FileStoreHandler.uploadFileFromDisk project_id, file_id, fsPath, (err, fileStoreUrl)->
 			return callback(err) if err?
-			findOpts =
-				project_id:project._id
-				element_id:file_id
-				type:"file"
-			FileStoreHandler.uploadFileFromDisk project._id, file_id, fsPath, (err)->
+			ProjectGetter.getProject project_id, {rootFolder: true, name:true}, (err, project) ->
 				return callback(err) if err?
 				# Note there is a potential race condition here (and elsewhere)
 				# If the file tree changes between findElement and the Project.update
 				# then the path to the file element will be out of date. In practice
 				# this is not a problem so long as we do not do anything longer running
 				# between them (like waiting for the file to upload.)
-				projectLocator.findElement findOpts, (err, fileRef, path)=>
+				projectLocator.findElement {project:project, element_id: file_id, type: 'file'}, (err, fileRef, path)=>
 					return callback(err) if err?
-					tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:path.fileSystem, rev:fileRef.rev+1, project_name:project.name}, (error) ->
+					tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:path.fileSystem, rev:fileRef.rev+1, project_name:project.name}, (err) ->
 						return callback(err) if err?
-						conditons = _id:project._id
+						conditions = _id:project._id
 						inc = {}
 						inc["#{path.mongo}.rev"] = 1
 						set = {}
@@ -237,39 +247,43 @@ module.exports = ProjectEntityHandler =
 						update =
 							"$inc": inc
 							"$set": set
-						Project.update conditons, update, {}, (err, second)->
-							callback()
+						Project.findOneAndUpdate conditions, update, { "new": true}, (err) ->
+							return callback(err) if err?
+							newFiles = [
+								file: fileRef
+								path: path.fileSystem
+								url: fileStoreUrl
+							]
+							DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newFiles}, callback
 
-	copyFileFromExistingProject: (project_id, folder_id, originalProject_id, origonalFileRef, callback = (error, fileRef, folder_id) ->)->
-		logger.log project_id:project_id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "copying file in s3"
-		ProjectGetter.getProject project_id, {name:true}, (err, project) ->
-			if err?
-				logger.err project_id:project_id, err:err, "error getting project for copy file from existing project"
-				return callback(err)
-			ProjectEntityHandler.copyFileFromExistingProjectWithProject project, folder_id, originalProject_id, origonalFileRef, callback
-
-
-	copyFileFromExistingProjectWithProject: (project, folder_id, originalProject_id, origonalFileRef, callback = (error, fileRef, folder_id) ->)->
+	copyFileFromExistingProjectWithProject: (project, folder_id, originalProject_id, origonalFileRef, userId, callback = (error, fileRef, folder_id) ->)->
 		project_id = project._id
-		logger.log project_id:project_id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "copying file in s3 with project"
+		logger.log { project_id, folder_id, originalProject_id, origonalFileRef }, "copying file in s3 with project"
 		return callback(err) if err?
 		confirmFolder project, folder_id, (folder_id)=>
 			if !origonalFileRef?
-				logger.err project_id:project._id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "file trying to copy is null"
+				logger.err { project_id, folder_id, originalProject_id, origonalFileRef }, "file trying to copy is null"
 				return callback()
 			fileRef = new File name : origonalFileRef.name
-			FileStoreHandler.copyFile originalProject_id, origonalFileRef._id, project._id, fileRef._id, (err)->
+			FileStoreHandler.copyFile originalProject_id, origonalFileRef._id, project._id, fileRef._id, (err, fileStoreUrl)->
 				if err?
-					logger.err err:err, project_id:project._id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "error coping file in s3"
+					logger.err { err, project_id, folder_id, originalProject_id, origonalFileRef }, "error coping file in s3"
 					return callback(err)
 				ProjectEntityHandler._putElement project, folder_id, fileRef, "file", (err, result)=>
 					if err?
-						logger.err err:err, project_id:project._id, folder_id:folder_id, "error putting element as part of copy"
+						logger.err { err, project_id, folder_id }, "error putting element as part of copy"
 						return callback(err)
-					tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:result?.path?.fileSystem, rev:fileRef.rev, project_name:project.name}, (err) ->
+					tpdsUpdateSender.addFile { project_id, file_id:fileRef._id, path:result?.path?.fileSystem, rev:fileRef.rev, project_name:project.name}, (err) ->
 						if err?
-							logger.err err:err,  project_id:project._id, folder_id:folder_id, originalProject_id:originalProject_id, origonalFileRef:origonalFileRef, "error sending file to tpds worker"
-						callback(null, fileRef, folder_id)
+							logger.err { err, project_id, folder_id, originalProject_id, origonalFileRef }, "error sending file to tpds worker"
+						newFiles = [
+							file: fileRef
+							path: result?.path?.fileSystem
+							url: fileStoreUrl
+						]
+						DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newFiles}, (error) ->
+							return callback(error) if error?
+							callback null, fileRef, folder_id
 
 	mkdirp: (project_id, path, callback = (err, newlyCreatedFolders, lastFolderInPath)->)->
 		self = @
@@ -381,11 +395,9 @@ module.exports = ProjectEntityHandler =
 									endPath: result.path.fileSystem,
 									rev: entity.rev
 								tpdsUpdateSender.moveEntity opts
-								self.getAllEntitiesFromProject newProject, (error, newDocs, newFiles
-								) =>
+								self.getAllEntitiesFromProject newProject, (error, newDocs, newFiles) =>
 									return callback(error) if error?
-									documentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
-									documentUpdaterHandler.updateProjectStructure project_id, userId, oldDocs, newDocs, oldFiles, newFiles, callback
+									DocumentUpdaterHandler.updateProjectStructure project_id, userId, {oldDocs, newDocs, oldFiles, newFiles}, callback
 
 	_checkValidMove: (project, entityType, entityPath, destFolderId, callback = (error) ->) ->
 		return callback() if !entityType.match(/folder/)
@@ -442,8 +454,7 @@ module.exports = ProjectEntityHandler =
 						return callback(error) if error?
 						ProjectEntityHandler.getAllEntitiesFromProject newProject, (error, newDocs, newFiles) =>
 							return callback(error) if error?
-							documentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
-							documentUpdaterHandler.updateProjectStructure project_id, userId, oldDocs, newDocs, oldFiles, newFiles, callback
+							DocumentUpdaterHandler.updateProjectStructure project_id, userId, {oldDocs, newDocs, oldFiles, newFiles}, callback
 
 	_cleanUpEntity: (project, entity, entityType, callback = (error) ->) ->
 		if(entityType.indexOf("file") != -1)
@@ -466,7 +477,7 @@ module.exports = ProjectEntityHandler =
 
 		unsetRootDocIfRequired (error) ->
 			return callback(error) if error?
-			require('../../Features/DocumentUpdater/DocumentUpdaterHandler').deleteDoc project_id, doc_id, (error) ->
+			DocumentUpdaterHandler.deleteDoc project_id, doc_id, (error) ->
 				return callback(error) if error?
 				ProjectEntityHandler._insertDeletedDocReference project._id, doc, (error) ->
 					return callback(error) if error?

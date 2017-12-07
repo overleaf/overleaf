@@ -63,11 +63,11 @@ describe 'UpdateMerger :', ->
 			file_id = "1231"
 			@projectLocator.findElementByPath = (_, __, cb)->cb(null, {_id:file_id})
 			@FileTypeManager.isBinary.callsArgWith(2, null, true)
-			@updateMerger.p.processFile = sinon.stub().callsArgWith(5)
+			@updateMerger.p.processFile = sinon.stub().callsArgWith(6)
 			filePath = "/folder/file1.png"
 
 			@updateMerger.mergeUpdate @user_id, @project_id, filePath, @update, @source, =>
-				@updateMerger.p.processFile.calledWith(@project_id, file_id, @fsPath, filePath, @source).should.equal true
+				@updateMerger.p.processFile.calledWith(@project_id, file_id, @fsPath, filePath, @source, @user_id).should.equal true
 				@FileTypeManager.isBinary.calledWith(filePath, @fsPath).should.equal true
 				@fs.unlink.calledWith(@fsPath).should.equal true
 				done()
@@ -97,7 +97,7 @@ describe 'UpdateMerger :', ->
 			path = "folder1/folder2/#{docName}"
 			@editorController.mkdirp = sinon.stub().withArgs(@project_id).callsArgWith(2, null, [folder], folder)
 			@editorController.addDoc = ->
-			mock = sinon.mock(@editorController).expects("addDoc").withArgs(@project_id, folder._id, docName, @splitDocLines, @source).callsArg(5)
+			mock = sinon.mock(@editorController).expects("addDoc").withArgs(@project_id, folder._id, docName, @splitDocLines, @source, @user_id).callsArg(6)
 
 			@update.write(@docLines)
 			@update.end()
@@ -114,22 +114,22 @@ describe 'UpdateMerger :', ->
 			@folder = _id: @folder_id
 			@fileName = "file.png"
 			@fsPath = "fs/path.tex"
-			@editorController.addFile = sinon.stub().callsArg(5)
-			@editorController.replaceFile = sinon.stub().callsArg(4)
+			@editorController.addFile = sinon.stub().callsArg(6)
+			@editorController.replaceFile = sinon.stub().callsArg(5)
 			@editorController.deleteEntity = sinon.stub()
 			@editorController.mkdirp = sinon.stub().withArgs(@project_id).callsArgWith(2, null, [@folder], @folder)
 			@updateMerger.p.writeStreamToDisk = sinon.stub().withArgs(@project_id, @file_id, @update).callsArgWith(3, null, @fsPath)
 
 		it 'should replace file if the file already exists', (done)->
-			@updateMerger.p.processFile @project_id, @file_id, @fsPath, @path, @source, =>
+			@updateMerger.p.processFile @project_id, @file_id, @fsPath, @path, @source, @user_id, =>
 				@editorController.addFile.called.should.equal false
-				@editorController.replaceFile.calledWith(@project_id, @file_id, @fsPath, @source).should.equal true
+				@editorController.replaceFile.calledWith(@project_id, @file_id, @fsPath, @source, @user_id).should.equal true
 				done()
 
 		it 'should call add file if the file does not exist', (done)->
-			@updateMerger.p.processFile @project_id, undefined, @fsPath, @path, @source, =>
+			@updateMerger.p.processFile @project_id, undefined, @fsPath, @path, @source, @user_id, =>
 				@editorController.mkdirp.calledWith(@project_id, "folder/").should.equal true
-				@editorController.addFile.calledWith(@project_id, @folder_id, @fileName, @fsPath, @source).should.equal true
+				@editorController.addFile.calledWith(@project_id, @folder_id, @fileName, @fsPath, @source, @user_id).should.equal true
 				@editorController.replaceFile.called.should.equal false
 				done()
 

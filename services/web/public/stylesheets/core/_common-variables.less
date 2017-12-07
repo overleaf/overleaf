@@ -794,7 +794,9 @@
 @left-menu-animation-duration: 0.35s;
 
 @toolbar-border-color: @gray-lighter;
-@file-tree-droppable-background-color: rgb(252, 231, 199);
+@common-border-color: @gray-lighter;
+@editor-border-color: @gray-lighter;
+@file-tree-droppable-bg-color: rgb(252, 231, 199);
 
 @editor-dark-background-color: #333;
 @editor-dark-toolbar-border-color: #222;
@@ -876,16 +878,45 @@
 @folders-untagged-line-height  : 1.7;
 
 // Progress bars
-@progress-border-radius : @border-radius-base;
-@progress-border-width  : 1px;
-@progress-bar-shadow    : inset 0 -1px 0 rgba(0,0,0,.15);
+@progress-border-radius        : @border-radius-base;
+@progress-border-width         : 1px;
+@progress-bar-shadow           : inset 0 -1px 0 rgba(0,0,0,.15);
 
 // Footer
-@footer-link-color       : @link-color;
-@footer-link-hover-color : @link-hover-color;
-@footer-bg-color         : transparent;
-@footer-padding          : 2em;
+@footer-link-color             : @link-color;
+@footer-link-hover-color       : @link-hover-color;
+@footer-bg-color               : transparent;
+@footer-padding                : 2em;
 
+// Editor header
+@toolbar-header-bg-color          : transparent;
+@toolbar-header-shadow            : 0 0 2px #ccc;
+@toolbar-btn-color                : @link-color;
+@toolbar-btn-hover-color          : @link-hover-color;
+@toolbar-btn-hover-bg-color       : darken(white, 10%);
+@toolbar-btn-hover-text-shadow    : 0 1px 0 rgba(0, 0, 0, 0.15);
+@toolbar-btn-active-color         : white;
+@toolbar-btn-active-bg-color      : @link-color;
+@toolbar-btn-active-shadow        : inset 0 3px 5px rgba(0, 0, 0, 0.225);
+@toolbar-alt-bg-color             : #fafafa;
+@toolbar-icon-btn-color           : @gray-light;
+@toolbar-icon-btn-hover-color     : @gray-dark;
+@toolbar-icon-btn-hover-shadow    : 0 1px 0 rgba(0, 0, 0, 0.25);
+@toolbar-icon-btn-hover-boxshadow : inset 0 3px 5px rgba(0, 0, 0, 0.225);
+@toolbar-border-bottom            : 1px solid @toolbar-border-color;
+
+// Editor file-tree
+@file-tree-bg                    : transparent;
+@file-tree-line-height           : 2.6;
+@file-tree-item-color            : @gray-darker;
+@file-tree-item-toggle-color     : @gray;
+@file-tree-item-icon-color       : @gray-light;
+@file-tree-item-input-color      : inherit;
+@file-tree-item-folder-color     : lighten(desaturate(@link-color, 10%), 5%);
+@file-tree-item-hover-bg         : @gray-lightest;
+@file-tree-item-selected-bg      : transparent;
+@file-tree-multiselect-bg        : lighten(@brand-info, 40%);
+@file-tree-multiselect-hover-bg  : lighten(@brand-info, 30%);
 // Tags
 @tag-border-radius  : 0.25em;
 @tag-bg-color       : @label-default-bg;

@@ -1,0 +1,26 @@
+#!/usr/bin/env python2
+
+from os import listdir
+from os.path import isfile, isdir, join
+
+volumes = []
+
+for module in listdir("modules/"):
+	if module[0] != '.':
+		if isfile(join("modules", module, 'index.coffee')):
+			volumes.append(join("modules", module, 'index.coffee'))
+		for directory in ['app/coffee', 'app/views', 'public/coffee', 'test/unit/coffee', 'test/acceptance/coffee', 'test/acceptance/config', 'test/acceptance/files']:
+			if isdir(join("modules", module, directory)):
+				volumes.append(join("modules", module, directory))
+
+volumes_string = map(lambda vol: "- ./" + vol + ":/app/" + vol + ":ro", volumes)
+volumes_string = "\n      ".join(volumes_string)
+
+with open("docker-shared.template.yml", "r") as f:
+	docker_shared_file = f.read()
+
+docker_shared_file = docker_shared_file.replace("MODULE_VOLUMES", volumes_string)
+
+with open("docker-shared.yml", "w") as f:
+	f.write(docker_shared_file)
+

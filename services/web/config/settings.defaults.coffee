@@ -35,12 +35,12 @@ module.exports = settings =
 	# Databases
 	# ---------
 	mongo:
-		url : 'mongodb://127.0.0.1/sharelatex'
+		url : process.env['MONGO_URL'] || "mongodb://127.0.0.1/sharelatex"
 
 	redis:
 		web:
-			host: "localhost"
-			port: "6379"
+			host: process.env['REDIS_HOST'] || "localhost"
+			port: process.env['REDIS_PORT'] || "6379"
 			password: ""
 
 		# websessions:
@@ -74,8 +74,8 @@ module.exports = settings =
 		# 	]
 
 		api:
-			host: "localhost"
-			port: "6379"
+			host: process.env['REDIS_HOST'] || "localhost"
+			port: process.env['REDIS_PORT'] || "6379"
 			password: ""
 
 	# Service locations
@@ -87,6 +87,7 @@ module.exports = settings =
 	internal:
 		web:
 			port: webPort = 3000
+			host: process.env['LISTEN_ADDRESS'] or 'localhost'
 		documentupdater:
 			port: docUpdaterPort = 3003
 
@@ -99,7 +100,7 @@ module.exports = settings =
 			user: httpAuthUser
 			pass: httpAuthPass
 		documentupdater:
-			url : "http://localhost:#{docUpdaterPort}"
+			url : "http://#{process.env['DOCUPDATER_HOST'] or 'localhost'}:#{docUpdaterPort}"
 		thirdPartyDataStore:
 			url : "http://localhost:3002"
 			emptyProjectFlushDelayMiliseconds: 5 * seconds
@@ -110,10 +111,10 @@ module.exports = settings =
 		trackchanges:
 			url : "http://localhost:3015"
 		project_history:
-			enabled: false
+			enabled: process.env.PROJECT_HISTORY_ENABLED == 'true' or false
 			url : "http://localhost:3054"
 		docstore:
-			url : "http://localhost:3016"
+			url : "http://#{process.env['DOCSTORE_HOST'] or 'localhost'}:3016"
 			pubUrl: "http://localhost:3016"
 		chat:
 			url: "http://localhost:3010"

@@ -22,7 +22,7 @@ define [
 				end = change.end
 				range = new Range(end.row, 0, end.row, end.column)
 				lineUpToCursor = @editor.getSession().getTextRange range
-				if lineUpToCursor.trim() == '%' or lineUpToCursor.startsWith '\\'
+				if lineUpToCursor.trim() == '%' or lineUpToCursor.slice(0, 1) == '\\'
 					range = new Range(end.row, 0, end.row, end.column + 80)
 					lineUpToCursor = @editor.getSession().getTextRange range
 				commandFragment = getLastCommandFragment lineUpToCursor
@@ -44,9 +44,9 @@ define [
 					linesContainLabel or
 					linesContainReqPackage
 
-				lastCommandFragmentIsLabel = commandFragment?.startsWith '\\label{'
-				lastCommandFragmentIsPackage = commandFragment?.startsWith '\\usepackage'
-				lastCommandFragmentIsReqPack = commandFragment?.startsWith '\\RequirePackage'
+				lastCommandFragmentIsLabel = commandFragment?.slice(0, 7) == '\\label{'
+				lastCommandFragmentIsPackage = commandFragment?.slice(0, 11) == '\\usepackage'
+				lastCommandFragmentIsReqPack = commandFragment?.slice(0, 15) == '\\RequirePackage'
 				lastCommandFragmentIsMeta =
 					lastCommandFragmentIsPackage or
 					lastCommandFragmentIsLabel or

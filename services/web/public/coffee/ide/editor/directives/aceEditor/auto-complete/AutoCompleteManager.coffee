@@ -10,7 +10,7 @@ define [
 	aceSnippetManager = ace.require('ace/snippets').snippetManager
 
 	class AutoCompleteManager
-		constructor: (@$scope, @editor, @element, @metadataManager, @labelsManager, @graphics, @preamble) ->
+		constructor: (@$scope, @editor, @element, @metadataManager, @labelsManager, @graphics, @preamble, @files) ->
 
 			@monkeyPatchAutocomplete()
 
@@ -41,6 +41,8 @@ define [
 
 			Graphics = @graphics
 			Preamble = @preamble
+			Files = @files
+
 			GraphicsCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
 					context = Helpers.getContext(editor, pos)
@@ -67,6 +69,27 @@ define [
 							callback null, result
 
 			metadataManager = @metadataManager
+			FilesCompleter =
+				getCompletions: (editor, session, pos, prefix, callback) =>
+					context = Helpers.getContext(editor, pos)
+					{lineUpToCursor, commandFragment, lineBeyondCursor, needsClosingBrace} = context
+					if commandFragment
+						match = commandFragment.match(/^\\(input|include){(\w*)/)
+						if match
+							commandName = match[1]
+							currentArg = match[2]
+							result = []
+							for file in Files.getTeXFiles()
+								if file.id != @$scope.docId
+									path = file.path
+									result.push {
+										caption: "\\#{commandName}{#{path}#{if needsClosingBrace then '}' else ''}",
+										value: "\\#{commandName}{#{path}#{if needsClosingBrace then '}' else ''}",
+										meta: "file",
+										score: 50
+									}
+							callback null, result
+
 			LabelsCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
 					context = Helpers.getContext(editor, pos)
@@ -136,6 +159,7 @@ define [
 				ReferencesCompleter
 				LabelsCompleter
 				GraphicsCompleter
+				FilesCompleter
 			]
 
 		disable: () ->
