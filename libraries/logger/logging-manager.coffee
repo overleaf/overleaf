@@ -53,6 +53,8 @@ module.exports = Logger =
 			catch
 				return # ignore any errors
 
+	debug : () ->
+		@logger.debug.apply(@logger, arguments)
 	info : ()->
 		@logger.info.apply(@logger, arguments)
 	log : ()->
