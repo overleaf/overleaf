@@ -10,9 +10,13 @@
 	padding: 0 (@line-height-computed / 2);
 }
 
+.pdf §{
+	background-color: @pdf-bg;
+}
+
 .pdf-viewer, .pdf-logs, .pdf-errors, .pdf-uncompiled {
 	.full-size;
-	top: 58px;
+	top: @pdf-top-offset;
 }
 
 .pdf-logs, .pdf-errors, .pdf-uncompiled, .pdf-validation-problems{
@@ -69,11 +73,11 @@
 	}
 	.pdfjs-viewer {
 		.full-size;
-		background-color: @gray-lighter;
+		background-color: @pdfjs-bg;
 		overflow: scroll;
 		canvas, div.pdf-canvas {
 			background: white;
-			box-shadow: black 0px 0px 10px;
+			box-shadow: @pdf-page-shadow-color 0px 0px 10px;
 		}
 		div.pdf-canvas.pdfng-empty {
 			background-color: white;
