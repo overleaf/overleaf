@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e;
+COFFEE=node_modules/.bin/coffee
+echo Compiling test/unit_frontend/coffee;
+$COFFEE -o test/unit_frontend/js -c test/unit_frontend/coffee;

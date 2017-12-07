@@ -39,6 +39,7 @@ data/*
 app.js
 app/js/*
 test/unit/js/*
+test/unit_frontend/js/*
 test/smoke/js/*
 test/acceptance/js/*
 cookies.txt

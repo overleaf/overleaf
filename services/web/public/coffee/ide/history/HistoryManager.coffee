@@ -191,13 +191,9 @@ define [
 			return {text, highlights}
 
 		_loadUpdates: (updates = []) ->
-			console.log "FOO"
 			previousUpdate = @$scope.history.updates[@$scope.history.updates.length - 1]
-			console.log "BAR", updates
 
 			for update in updates or []
-				console.log "_loadUpdates, loading", update
-
 				for user in update.meta.users or []
 					if user?
 						user.hue = ColorManager.getHueForUserId(user.id)
@@ -211,50 +207,41 @@ define [
 
 				previousUpdate = update
 
-			console.log("BAZ")
 			firstLoad = @$scope.history.updates.length == 0
 
 			@$scope.history.updates =
 				@$scope.history.updates.concat(updates)
-			console.log "[_loadUpdates] updates", @$scope.history.updates
 
 			@autoSelectRecentUpdates() if firstLoad
 
 		_perDocSummaryOfUpdates: (updates) ->
-			current_pathnames = {}
+			# Track current_pathname -> original_pathname
+			original_pathnames = {}
 			docs_summary = {}
 
-			for update in updates # Updates are reverse chronologically ordered
-				console.log "[_perDocSummaryOfUpdates] update", update
+			# Put updates in ascending chronological order
+			updates = updates.slice().reverse()
+			for update in updates
 				for pathname in update.docs or []
-					# current_pathname may not be the latest doc path that this doc has had
-					if !current_pathnames[pathname]?
-						current_pathnames[pathname] = pathname
-					current_pathname = current_pathnames[pathname]
-					if !docs_summary[current_pathname]?
-						docs_summary[current_pathname] = {
+					if !original_pathnames[pathname]?
+						original_pathnames[pathname] = pathname
+					original_pathname = original_pathnames[pathname]
+					if !docs_summary[original_pathname]?
+						docs_summary[original_pathname] = {
 							fromV: update.fromV, toV: update.toV,
-							pathname: pathname
 						}
-						console.log "[_perDocSummaryOfUpdates] creating summary", current_pathname, docs_summary[current_pathname]
 					else
-						console.log "[_perDocSummaryOfUpdates] updating summary", docs_summary[current_pathname], update
-						docs_summary[current_pathname] = {
-							fromV: Math.min(docs_summary[current_pathname].fromV, update.fromV),
-							toV: Math.max(docs_summary[current_pathname].toV, update.toV),
-							pathname: pathname
+						docs_summary[original_pathname] = {
+							fromV: Math.min(docs_summary[original_pathname].fromV, update.fromV),
+							toV: Math.max(docs_summary[original_pathname].toV, update.toV),
 						}
 				for project_op in update.project_ops or []
 					if project_op.rename?
 						rename = project_op.rename
-						console.log "[_perDocSummaryOfUpdates] rename", rename
-						if !current_pathnames[rename.newPathname]?
-							current_pathnames[rename.newPathname] = rename.newPathname
-						current_pathnames[rename.current_pathname] = current_pathnames[rename.newPathname]
-						delete current_pathnames[rename.newPathname]
-
-				console.log "[_perDocSummaryOfUpdates] docs_summary", docs_summary
-				console.log "[_perDocSummaryOfUpdates] current_pathnames", current_pathnames
+						if !original_pathnames[rename.pathname]?
+							original_pathnames[rename.pathname] = rename.pathname
+						original_pathnames[rename.newPathname] = original_pathnames[rename.pathname]
+						delete original_pathnames[rename.pathname]
 
 			return docs_summary
 
@@ -262,12 +249,10 @@ define [
 			fromV = toV = pathname = null
 
 			selected_pathname = @$scope.history.selection.pathname
-			console.log "[_calculateDiffDataFromSelection] selected_pathname", selected_pathname
 
 			for pathname, doc of @_perDocSummaryOfUpdates(@$scope.history.selection.updates)
-				console.log "[_calculateDiffDataFromSelection] pathname, doc", pathname, doc
 				if pathname == selected_pathname
-					{fromV, toV, pathname} = doc
+					{fromV, toV} = doc
 					break
 
 			return {fromV, toV, pathname}
@@ -277,10 +262,8 @@ define [
 		# then prefer this one if present.
 		_selectDocFromUpdates: () ->
 			affected_docs = @_perDocSummaryOfUpdates(@$scope.history.selection.updates)
-			console.log "[_selectDocFromUpdates] affected_docs", affected_docs
 
 			selected_pathname = @$scope.history.selection.pathname
-			console.log "[_selectDocFromUpdates] current selected_pathname", selected_pathname
 			if selected_pathname? and affected_docs[selected_pathname]
 				# Selected doc is already open
 			else
@@ -288,8 +271,6 @@ define [
 				for pathname, doc of affected_docs
 					selected_pathname = pathname
 					break
-
-			console.log "[_selectDocFromUpdates] new selected_pathname", selected_pathname
 
 			@$scope.history.selection.pathname = selected_pathname
 			if selected_pathname?
