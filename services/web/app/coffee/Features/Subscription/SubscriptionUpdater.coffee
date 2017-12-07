@@ -8,7 +8,6 @@ Settings = require("settings-sharelatex")
 logger = require("logger-sharelatex")
 ObjectId = require('mongoose').Types.ObjectId	
 ReferalAllocator = require("../Referal/ReferalAllocator")
-Modules = require '../../infrastructure/Modules'
 
 oneMonthInSeconds = 60 * 60 * 24 * 30
 
@@ -108,6 +107,7 @@ module.exports = SubscriptionUpdater =
 			groupSubscription: (cb)->
 				SubscriptionLocator.getGroupSubscriptionMemberOf user_id, cb
 			overleafPlanCode: (cb) ->
+				Modules = require '../../infrastructure/Modules'
 				Modules.hooks.fire 'getOverleafPlanCode', user_id, cb
 		async.series jobs, (err, results)->
 			if err?
