@@ -323,14 +323,14 @@
 }
 
 .ui-layout-resizer-west.ui-layout-resizer-open, .ui-layout-resizer-east.ui-layout-resizer-closed {
-	.ui-layout-toggler {
+	.ui-layout-toggler when (@is-overleaf = false) {
 		&:before {
 			content: "\f104"
 		}
 	}
 }
 .ui-layout-resizer-east.ui-layout-resizer-open, .ui-layout-resizer-west.ui-layout-resizer-closed {
-	.ui-layout-toggler {
+	.ui-layout-toggler when (@is-overleaf = false) {
 		&:before {
 			content: "\f105"
 		}
