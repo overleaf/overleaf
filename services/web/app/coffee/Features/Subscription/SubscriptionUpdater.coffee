@@ -112,10 +112,11 @@ module.exports = SubscriptionUpdater =
 			overleafPlanCode: (cb) ->
 				Modules = require '../../infrastructure/Modules'
 				Modules.hooks.fire 'getOverleafPlanCode', user_id, (err, results) ->
-					cb(err, results[0])
+					cb(err, results?[0] || null)
 		async.series jobs, (err, results)->
 			if err?
-				logger.err err:err, user_id:user, "error getting subscription or group for _setUsersMinimumFeatures"
+				logger.err err:err, user_id:user_id,
+					"error getting subscription or group for _setUsersMinimumFeatures"
 				return callback(err)
 			{subscription, groupSubscription, overleafPlanCode} = results
 			# Group Subscription
