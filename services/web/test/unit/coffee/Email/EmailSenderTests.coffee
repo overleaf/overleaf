@@ -31,6 +31,8 @@ describe "EmailSender", ->
 
 		@sender = SandboxedModule.require modulePath, requires:
 			'nodemailer': @ses
+			"nodemailer-mandrill-transport":{}
+			"nodemailer-sendgrid-transport":{}
 			"settings-sharelatex":@settings
 			'../../infrastructure/RateLimiter':@RateLimiter
 			"logger-sharelatex":
