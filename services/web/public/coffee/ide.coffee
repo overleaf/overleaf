@@ -33,6 +33,7 @@ define [
 	"directives/expandableTextArea"
 	"directives/videoPlayState"
 	"services/queued-http"
+	"services/validateCaptcha"
 	"filters/formatDate"
 	"main/event"
 	"main/account-upgrade"

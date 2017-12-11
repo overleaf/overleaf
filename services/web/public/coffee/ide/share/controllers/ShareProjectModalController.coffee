@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "ShareProjectModalController", ($scope, $modalInstance, $timeout, projectMembers, projectInvites, $modal, $http, ide) ->
+	App.controller "ShareProjectModalController", ($scope, $modalInstance, $timeout, projectMembers, projectInvites, $modal, $http, ide, validateCaptcha) ->
 		$scope.inputs = {
 			privileges: "readAndWrite"
 			contacts: []
@@ -54,25 +54,6 @@ define [
 
 		getCurrentInviteEmails = () ->
 			($scope.project.invites || []).map (u) -> u.email
-
-		_recaptchaCallbacks = []
-		onRecaptchaSubmit = (token) ->
-			for cb in _recaptchaCallbacks
-				cb(token)
-			_recaptchaCallbacks = []
-
-		recaptchaId = null
-		validateCaptcha = (callback = (response) ->) =>
-			if !grecaptcha?
-				return callback()
-			reset = () ->
-				grecaptcha.reset()
-			_recaptchaCallbacks.push callback
-			_recaptchaCallbacks.push reset
-			if !recaptchaId?
-				el = $('.g-recaptcha')[0]
-				recaptchaId = grecaptcha.render(el, {callback: onRecaptchaSubmit})
-			grecaptcha.execute(recaptchaId)
 
 		$scope.filterAutocompleteUsers = ($query) ->
 			currentMemberEmails = getCurrentMemberEmails()

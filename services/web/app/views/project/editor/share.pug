@@ -102,14 +102,6 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						i.fa.fa-times
 			.row.invite-controls
 				form(ng-show="canAddCollaborators")
-					- if (settings.recaptcha)
-						div(
-							id="recaptcha"
-					 		class="g-recaptcha"
-							data-sitekey=settings.recaptcha.siteKey
-							data-size="invisible"
-							data-badge="inline"
-						)
 					.small #{translate("share_with_your_collabs")}
 					.form-group
 						tags-input(
