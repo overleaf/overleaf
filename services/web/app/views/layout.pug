@@ -95,6 +95,10 @@ html(itemscope, itemtype='http://schema.org/Product')
 					cdnDomain : '!{settings.templates.cdnDomain}',
 					indexName : '!{settings.templates.indexName}'
 				}
+
+		- if (settings.overleaf && settings.overleaf.host)
+			script.
+				window.v1BaseUrl = '!{settings.overleaf.host}'
 				
 	body
 		if(settings.recaptcha)
