@@ -3,6 +3,7 @@ AuthenticationController = require('../Authentication/AuthenticationController')
 AuthorizationMiddlewear = require('../Authorization/AuthorizationMiddlewear')
 CollaboratorsInviteController = require('./CollaboratorsInviteController')
 RateLimiterMiddlewear = require('../Security/RateLimiterMiddlewear')
+CaptchaMiddleware = require '../Captcha/CaptchaMiddleware'
 
 module.exports =
 	apply: (webRouter, apiRouter) ->
@@ -32,6 +33,7 @@ module.exports =
 				maxRequests: 100
 				timeInterval: 60 * 10
 			}),
+			CaptchaMiddleware.validateCaptcha,
 			AuthenticationController.requireLogin(),
 			AuthorizationMiddlewear.ensureUserCanAdminProject,
 			CollaboratorsInviteController.inviteToProject
