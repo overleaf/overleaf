@@ -11,6 +11,7 @@ NotificationsBuilder = require("../Notifications/NotificationsBuilder")
 AnalyticsManger = require("../Analytics/AnalyticsManager")
 AuthenticationController = require("../Authentication/AuthenticationController")
 rateLimiter = require("../../infrastructure/RateLimiter")
+request = require 'request'
 
 module.exports = CollaboratorsInviteController =
 
@@ -46,43 +47,59 @@ module.exports = CollaboratorsInviteController =
 				throttle: collabLimit
 			rateLimiter.addCount opts, callback
 
+	_validateCaptcha: (response, callback = (error, valid) ->) ->
+		if !Settings.recaptcha?
+			return callback(null, true)
+		options =
+			form:
+				secret: Settings.recaptcha.secretKey
+				response: response
+			json: true
+		request.post "https://www.google.com/recaptcha/api/siteverify", options, (error, response, body) ->
+			return callback(error) if error?
+			return callback null, body?.success
+
 	inviteToProject: (req, res, next) ->
 		projectId = req.params.Project_id
 		email = req.body.email
-		sendingUser = AuthenticationController.getSessionUser(req)
-		sendingUserId = sendingUser._id
-		if email == sendingUser.email
-			logger.log {projectId, email, sendingUserId}, "cannot invite yourself to project"
-			return res.json {invite: null, error: 'cannot_invite_self'}
-		logger.log {projectId, email, sendingUserId}, "inviting to project"
-		LimitationsManager.canAddXCollaborators projectId, 1, (error, allowed) =>
+		CollaboratorsInviteController._validateCaptcha req.body['g-recaptcha-response'], (error, valid) ->
 			return next(error) if error?
-			if !allowed
-				logger.log {projectId, email, sendingUserId}, "not allowed to invite more users to project"
-				return res.json {invite: null}
-			{email, privileges} = req.body
-			email = EmailHelper.parseEmail(email)
-			if !email? or email == ""
-				logger.log {projectId, email, sendingUserId}, "invalid email address"
-				return res.sendStatus(400)
-			CollaboratorsInviteController._checkRateLimit sendingUserId, (error, underRateLimit) ->
+			if !valid
+				return res.sendStatus 400
+			sendingUser = AuthenticationController.getSessionUser(req)
+			sendingUserId = sendingUser._id
+			if email == sendingUser.email
+				logger.log {projectId, email, sendingUserId}, "cannot invite yourself to project"
+				return res.json {invite: null, error: 'cannot_invite_self'}
+			logger.log {projectId, email, sendingUserId}, "inviting to project"
+			LimitationsManager.canAddXCollaborators projectId, 1, (error, allowed) =>
 				return next(error) if error?
-				if !underRateLimit
-					return res.sendStatus(429)
-				CollaboratorsInviteController._checkShouldInviteEmail email, (err, shouldAllowInvite)->
-					if err?
-						logger.err {err, email, projectId, sendingUserId}, "error checking if we can invite this email address"
-						return next(err)
-					if !shouldAllowInvite
-						logger.log {email, projectId, sendingUserId}, "not allowed to send an invite to this email address"
-						return res.json {invite: null, error: 'cannot_invite_non_user'}
-					CollaboratorsInviteHandler.inviteToProject projectId, sendingUser, email, privileges, (err, invite) ->
+				if !allowed
+					logger.log {projectId, email, sendingUserId}, "not allowed to invite more users to project"
+					return res.json {invite: null}
+				{email, privileges} = req.body
+				email = EmailHelper.parseEmail(email)
+				if !email? or email == ""
+					logger.log {projectId, email, sendingUserId}, "invalid email address"
+					return res.sendStatus(400)
+				CollaboratorsInviteController._checkRateLimit sendingUserId, (error, underRateLimit) ->
+					return next(error) if error?
+					if !underRateLimit
+						return res.sendStatus(429)
+					CollaboratorsInviteController._checkShouldInviteEmail email, (err, shouldAllowInvite)->
 						if err?
-							logger.err {projectId, email, sendingUserId}, "error creating project invite"
+							logger.err {err, email, projectId, sendingUserId}, "error checking if we can invite this email address"
 							return next(err)
-						logger.log {projectId, email, sendingUserId}, "invite created"
-						EditorRealTimeController.emitToRoom(projectId, 'project:membership:changed', {invites: true})
-						return res.json {invite: invite}
+						if !shouldAllowInvite
+							logger.log {email, projectId, sendingUserId}, "not allowed to send an invite to this email address"
+							return res.json {invite: null, error: 'cannot_invite_non_user'}
+						CollaboratorsInviteHandler.inviteToProject projectId, sendingUser, email, privileges, (err, invite) ->
+							if err?
+								logger.err {projectId, email, sendingUserId}, "error creating project invite"
+								return next(err)
+							logger.log {projectId, email, sendingUserId}, "invite created"
+							EditorRealTimeController.emitToRoom(projectId, 'project:membership:changed', {invites: true})
+							return res.json {invite: invite}
 
 	revokeInvite: (req, res, next) ->
 		projectId = req.params.Project_id

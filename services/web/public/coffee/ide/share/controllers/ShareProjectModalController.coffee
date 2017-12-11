@@ -55,6 +55,25 @@ define [
 		getCurrentInviteEmails = () ->
 			($scope.project.invites || []).map (u) -> u.email
 
+		_recaptchaCallbacks = []
+		onRecaptchaSubmit = (token) ->
+			for cb in _recaptchaCallbacks
+				cb(token)
+			_recaptchaCallbacks = []
+
+		recaptchaId = null
+		validateCaptcha = (callback = (response) ->) =>
+			if !grecaptcha?
+				return callback()
+			reset = () ->
+				grecaptcha.reset()
+			_recaptchaCallbacks.push callback
+			_recaptchaCallbacks.push reset
+			if !recaptchaId?
+				el = $('.g-recaptcha')[0]
+				recaptchaId = grecaptcha.render(el, {callback: onRecaptchaSubmit})
+			grecaptcha.execute(recaptchaId)
+
 		$scope.filterAutocompleteUsers = ($query) ->
 			currentMemberEmails = getCurrentMemberEmails()
 			return $scope.autocompleteContacts.filter (contact) ->
@@ -100,7 +119,7 @@ define [
 					if email in currentInviteEmails and inviteId = _.find(($scope.project.invites || []), (invite) -> invite.email == email)?._id
 						request = projectInvites.resendInvite(inviteId)
 					else
-						request = projectInvites.sendInvite(email, $scope.inputs.privileges)
+						request = projectInvites.sendInvite(email, $scope.inputs.privileges, $scope.grecaptchaResponse)
 
 					request
 						.then (response) ->
@@ -135,7 +154,9 @@ define [
 							else
 								$scope.state.errorReason = null
 
-			$timeout addMembers, 50 # Give email list a chance to update
+			validateCaptcha (response) ->
+				$scope.grecaptchaResponse = response
+				$timeout addMembers, 50 # Give email list a chance to update
 
 		$scope.removeMember = (member) ->
 			$scope.state.error = null
@@ -209,6 +230,8 @@ define [
 
 		$scope.cancel = () ->
 			$modalInstance.dismiss()
+
+
 
 	App.controller "MakePublicModalController", ["$scope", "$modalInstance", "settings", ($scope, $modalInstance, settings) ->
 		$scope.inputs = {
