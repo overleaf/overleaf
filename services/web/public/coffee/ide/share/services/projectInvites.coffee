@@ -4,11 +4,12 @@ define [
 	App.factory "projectInvites", ["ide", "$http", (ide, $http) ->
 		return {
 
-			sendInvite: (email, privileges) ->
+			sendInvite: (email, privileges, grecaptchaResponse) ->
 				$http.post("/project/#{ide.project_id}/invite", {
 					email: email
 					privileges: privileges
 					_csrf: window.csrfToken
+					'g-recaptcha-response': grecaptchaResponse
 				})
 
 			revokeInvite: (inviteId) ->
