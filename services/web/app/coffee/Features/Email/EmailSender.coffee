@@ -24,9 +24,9 @@ if Settings?.email?.parameters?.AWSAccessKeyID? or Settings?.email?.driver == 's
 else if Settings?.email?.parameters?.sendgridApiKey?
 	logger.log "using sendgrid for email"
 	nm_client = nodemailer.createTransport(sgTransport({auth:{api_key:Settings?.email?.parameters?.sendgridApiKey}}))
-else if Settings?.email.parameters.MandrillApiKey?
+else if Settings?.email?.parameters?.MandrillApiKey?
 	logger.log "using mandril for email"
-	nm_client = nodemailer.createTransport(mandrillTransport({auth:{apiKey:Settings?.email.parameters.MandrillApiKey}}))
+	nm_client = nodemailer.createTransport(mandrillTransport({auth:{apiKey:Settings?.email?.parameters?.MandrillApiKey}}))
 else if Settings?.email?.parameters?
 	logger.log "using smtp for email"
 	smtp = _.pick(Settings?.email?.parameters, "host", "port", "secure", "auth", "ignoreTLS")
