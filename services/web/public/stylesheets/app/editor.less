@@ -370,6 +370,24 @@
 	}
 }
 
+.ui-layout-toggler-east when (@is-overleaf = true) {
+	&.ui-layout-toggler-open {
+		cursor: e-resize !important
+	}
+	&.ui-layout-toggler-closed {
+		cursor: w-resize !important
+	}
+}
+
+.ui-layout-toggler-west when (@is-overleaf = true) {
+	&.ui-layout-toggler-open {
+		cursor: w-resize !important
+	}
+	&.ui-layout-toggler-closed {
+		cursor: e-resize !important
+	}
+}
+
 .ui-layout-resizer-dragging {
 	background-color: @editor-resizer-bg-color-dragging;
 }
