@@ -17,7 +17,7 @@ define [
 			_recaptchaCallbacks.push callback
 			_recaptchaCallbacks.push reset
 			if !recaptchaId?
-				el = $('.g-recaptcha')[0]
+				el = $('#recaptcha')[0]
 				recaptchaId = grecaptcha.render(el, {callback: onRecaptchaSubmit})
 			grecaptcha.execute(recaptchaId)
 

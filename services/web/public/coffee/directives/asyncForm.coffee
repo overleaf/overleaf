@@ -2,7 +2,7 @@ define [
 	"base"
 	"libs/passfield"
 ], (App) ->
-	App.directive "asyncForm", ($http) ->
+	App.directive "asyncForm", ($http, validateCaptcha) ->
 		return {
 			controller: ['$scope', ($scope) ->
 				@getEmail = () ->
@@ -17,10 +17,22 @@ define [
 
 				element.on "submit", (e) ->
 					e.preventDefault()
+					validateCaptchaIfEnabled (response) ->
+						submitRequest e, response
 
+				validateCaptchaIfEnabled = (callback = (response) ->) ->
+					if attrs.captcha?
+						validateCaptcha callback
+					else
+						callback()
+
+				submitRequest = (e, grecaptchaResponse) ->
 					formData = {}
 					for data in element.serializeArray()
 						formData[data.name] = data.value
+
+					if grecaptchaResponse?
+						formData['g-recaptcha-response'] = grecaptchaResponse
 
 					scope[attrs.name].inflight = true
 

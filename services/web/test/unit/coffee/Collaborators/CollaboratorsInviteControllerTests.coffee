@@ -38,7 +38,6 @@ describe "CollaboratorsInviteController", ->
 			'../Authentication/AuthenticationController': @AuthenticationController
 			'settings-sharelatex': @settings = {}
 			"../../infrastructure/RateLimiter":@RateLimiter
-			'request': @request = {}
 		@res = new MockResponse()
 		@req = new MockRequest()
 
@@ -97,7 +96,6 @@ describe "CollaboratorsInviteController", ->
 			@req.body =
 				email: @targetEmail
 				privileges: @privileges = "readAndWrite"
-				'g-recaptcha-response': @grecaptchaResponse = 'grecaptcha response'
 			@res.json = sinon.stub()
 			@res.sendStatus = sinon.stub()
 			@invite = {
@@ -110,8 +108,6 @@ describe "CollaboratorsInviteController", ->
 			}
 			@LimitationsManager.canAddXCollaborators = sinon.stub().callsArgWith(2, null, true)
 			@CollaboratorsInviteHandler.inviteToProject = sinon.stub().callsArgWith(4, null, @invite)
-			@CollaboratorsInviteController._validateCaptcha = sinon.stub()
-			@CollaboratorsInviteController._validateCaptcha.withArgs(@grecaptchaResponse).yields(null, true)
 			@callback = sinon.stub()
 			@next = sinon.stub()
 
@@ -288,17 +284,6 @@ describe "CollaboratorsInviteController", ->
 
 			it 'should not call emitToRoom', ->
 				@EditorRealTimeController.emitToRoom.called.should.equal false
-
-		describe "when recaptcha is not valid", ->
-			beforeEach ->
-				@CollaboratorsInviteController._validateCaptcha = sinon.stub().yields(null, false)
-				@CollaboratorsInviteController.inviteToProject @req, @res, @next
-
-			it "should return 400", ->
-				@res.sendStatus.calledWith(400).should.equal true
-
-			it "should not inviteToProject", ->
-				@CollaboratorsInviteHandler.inviteToProject.called.should.equal false
 
 	describe "viewInvite", ->
 
