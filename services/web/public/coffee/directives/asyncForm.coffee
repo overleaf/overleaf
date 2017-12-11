@@ -18,7 +18,7 @@ define [
 				element.on "submit", (e) ->
 					e.preventDefault()
 					validateCaptchaIfEnabled (response) ->
-						submitRequest e, response
+						submitRequest response
 
 				validateCaptchaIfEnabled = (callback = (response) ->) ->
 					if attrs.captcha?
@@ -26,7 +26,7 @@ define [
 					else
 						callback()
 
-				submitRequest = (e, grecaptchaResponse) ->
+				submitRequest = (grecaptchaResponse) ->
 					formData = {}
 					for data in element.serializeArray()
 						formData[data.name] = data.value
