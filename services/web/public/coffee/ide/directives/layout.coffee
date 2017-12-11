@@ -44,6 +44,12 @@ define [
 							if !attrs.minimumRestoreSizeWest? or (state.west.size >= attrs.minimumRestoreSizeWest and !state.west.initClosed)
 								options.west = state.west
 
+					if window.uiConfig.eastResizerCursor?
+						options.east.resizerCursor = window.uiConfig.eastResizerCursor
+
+					if window.uiConfig.westResizerCursor?
+						options.west.resizerCursor = window.uiConfig.westResizerCursor
+						
 					repositionControls = () ->
 						state = element.layout().readState()
 						if state.east?

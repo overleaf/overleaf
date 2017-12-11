@@ -298,6 +298,8 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 		res.locals.uiConfig = 
 			defaultResizerSizeOpen   : if isOl then 2 else 24
 			defaultResizerSizeClosed : if isOl then 2 else 24
+			eastResizerCursor        : if isOl then "ew-resize" else null
+			westResizerCursor        : if isOl then "ew-resize" else null
 			chatResizerSizeOpen      : if isOl then 2 else 12
 			chatResizerSizeClosed    : 0
 		next()
