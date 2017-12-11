@@ -56,6 +56,7 @@
     "multer": "^0.1.8",
     "node-html-encoder": "0.0.2",
     "nodemailer": "2.1.0",
+    "nodemailer-mandrill-transport": "^1.2.0",
     "nodemailer-sendgrid-transport": "^0.2.0",
     "nodemailer-ses-transport": "^1.3.0",
     "optimist": "0.6.1",
