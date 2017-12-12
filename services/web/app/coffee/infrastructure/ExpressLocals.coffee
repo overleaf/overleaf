@@ -13,6 +13,7 @@ Url = require "url"
 PackageVersions = require "./PackageVersions"
 htmlEncoder = new require("node-html-encoder").Encoder("numerical")
 fingerprints = {}
+hashedFiles = {}
 Path = require 'path'
 Features = require "./Features"
 
@@ -58,6 +59,19 @@ for paths in pathList
 	_.each paths, (filePath)-> 
 		logger.log "#{filePath}: #{hash}"
 		fingerprints[filePath] = hash
+
+	if paths.length == 1
+		#todo deal with ace multi file hash
+		path = paths[0]
+		splitPath = path.split("/")
+		filenameSplit = splitPath.pop().split(".")
+		filenameSplit.splice(filenameSplit.length-1, 0, hash)
+		splitPath.push(filenameSplit.join("."))
+		hashPath = splitPath.join("/")
+		fsHashPath = Path.join __dirname, "../../../", "public#{hashPath}"
+		fs.writeFileSync(fsHashPath, content)
+		hashedFiles[paths] = hashPath
+
 
 getFingerprint = (path) ->
 	if fingerprints[path]?
@@ -123,6 +137,9 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 		res.locals.buildJsPath = (jsFile, opts = {})->
 			path = Path.join(jsPath, jsFile)
 
+			if opts.hashedPath
+				return hashedFiles[path]
+
 			doFingerPrint = opts.fingerprint != false
 
 			if !opts.qs?
@@ -140,8 +157,11 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 				path = path + "?" + qs
 			return path
 
-		res.locals.buildCssPath = (cssFile)->
+		res.locals.buildCssPath = (cssFile, opts)->
 			path = Path.join("/stylesheets/", cssFile)
+			if opts.hashedPath
+				hashedPath = hashedFiles[path]
+				return Url.resolve(staticFilesBase, hashedPath)
 			return Url.resolve(staticFilesBase, path) + "?fingerprint=" + getFingerprint(path)
 
 		res.locals.buildImgPath = (imgFile)->

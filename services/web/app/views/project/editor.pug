@@ -161,8 +161,8 @@ block requirejs
 		window.uiConfig = JSON.parse('!{JSON.stringify(uiConfig).replace(/\//g, "\\/")}');
 
 	script(
-		data-main=buildJsPath("ide.js", {fingerprint:false}),
+		data-main=buildJsPath("ide.js", {hashedPath:true}),
 		baseurl=fullJsPath,
 		data-ace-base=buildJsPath(lib('ace'), {fingerprint:false}),
-		src=buildJsPath('libs/require.js')
+		src=buildJsPath('libs/require.js', {hashedPath:true})
 	)

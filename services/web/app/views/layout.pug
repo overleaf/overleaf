@@ -23,7 +23,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 		link(rel="apple-touch-icon-precomposed", href="/" + settings.brandPrefix + "apple-touch-icon-precomposed.png")
 		link(rel="mask-icon", href="/" + settings.brandPrefix + "mask-favicon.svg", color="#a93529")
 			
-		link(rel='stylesheet', href=buildCssPath("/" + settings.brandPrefix + "style.css"))
+		link(rel='stylesheet', href=buildCssPath("/" + settings.brandPrefix + "style.css", {hashedPath:true}))
 
 		block _headLinks
 
@@ -152,7 +152,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 					}
 				};
 			script(
-				data-main=buildJsPath('main.js', {fingerprint:false}),
+				data-main=buildJsPath('main.js', {hashedPath:true}),
 				baseurl=fullJsPath,
 				src=buildJsPath('libs/require.js')
 			)
