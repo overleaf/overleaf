@@ -101,6 +101,7 @@ define [
 			for pkg, snippets of packages
 				for snippet in snippets
 					packageCommands.push snippet
+					commandNames.push snippet.caption.match(/\w+/)[0]
 
 			doc = session.getValue()
 			parser = new Parser(doc, prefix)
