@@ -430,6 +430,46 @@ describe 'WebsocketController', ->
 			it "should increment the update-client-position metric at 0.1 frequency", ->
 				@metrics.inc.calledWith("editor.update-client-position", 0.1).should.equal true
 
+		describe "with a logged in user who has no last_name set", ->
+			beforeEach ->
+				@clientParams = {
+					project_id: @project_id
+					first_name: @first_name = "Douglas"
+					last_name: undefined
+					email: @email = "joe@example.com"
+					user_id: @user_id = "user-id-123"
+				}
+				@client.get = (param, callback) => callback null, @clientParams[param]
+				@WebsocketController.updateClientPosition @client, @update
+
+				@populatedCursorData = 
+					doc_id: @doc_id,
+					id: @client.id
+					name: "#{@first_name}"
+					row: @row
+					column: @column
+					email: @email
+					user_id: @user_id
+
+			it "should send the update to the project room with the user's name", ->
+				@WebsocketLoadBalancer.emitToRoom.calledWith(@project_id, "clientTracking.clientUpdated", @populatedCursorData).should.equal true
+
+			it "should send the  cursor data to the connected user manager", (done)->
+				@ConnectedUsersManager.updateUserPosition.calledWith(@project_id, @client.id, {
+					_id: @user_id,
+					email: @email,
+					first_name: @first_name,
+					last_name: undefined
+				}, {
+					row: @row
+					column: @column
+					doc_id: @doc_id
+				}).should.equal true
+				done()
+
+			it "should increment the update-client-position metric at 0.1 frequency", ->
+				@metrics.inc.calledWith("editor.update-client-position", 0.1).should.equal true
+
 		describe "with an anonymous user", ->
 			beforeEach ->
 				@clientParams = {
