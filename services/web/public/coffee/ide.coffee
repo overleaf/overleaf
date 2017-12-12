@@ -33,6 +33,7 @@ define [
 	"directives/expandableTextArea"
 	"directives/videoPlayState"
 	"services/queued-http"
+	"services/validateCaptcha"
 	"filters/formatDate"
 	"main/event"
 	"main/account-upgrade"
@@ -76,6 +77,8 @@ define [
 			pdfWidth: 0
 			reviewPanelOpen: localStorage("ui.reviewPanelOpen.#{window.project_id}")
 			miniReviewPanelVisible: false
+			chatResizerSizeOpen: window.uiConfig.chatResizerSizeOpen
+			chatResizerSizeClosed: window.uiConfig.chatResizerSizeClosed
 		}
 		$scope.onboarding = {
 			autoCompile: if window.showAutoCompileOnboarding then 'unseen' else 'dismissed'

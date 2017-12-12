@@ -14,6 +14,9 @@
 @import "./editor/review-panel.less";
 @import "./editor/feature-onboarding.less";
 
+@ui-layout-toggler-def-height: 50px;
+@ui-resizer-extra-hit-area: 8px;
+
 @keyframes blink {
 	0% { 
 		opacity: 0.2;
@@ -261,9 +264,9 @@
 	}
 }
 
-.ui-layout-resizer {
+.ui-layout-resizer when (@is-overleaf = false) {
 	width: 6px;
-	background-color: #f4f4f4;
+	background-color: @editor-resizer-bg-color;
 	border-left: 1px solid @editor-border-color;
 	border-right: 1px solid @editor-border-color;
 	.ui-layout-toggler {
@@ -276,28 +279,117 @@
 		-moz-osx-font-smoothing: grayscale;
 		font-size: 16px !important;
 		line-height: 50px;
+		background-color: @editor-toggler-bg-color;
 		&:hover {
-			background-color: #ddd;
+			background-color: @editor-toggler-hover-bg-color;
 			color: #333;
 		}
 	}
 }
-.ui-layout-resizer-west.ui-layout-resizer-open, .ui-layout-resizer-east.ui-layout-resizer-closed {
+
+.ui-layout-resizer when (@is-overleaf = true) {
+	margin-left: -(@ui-resizer-extra-hit-area) !important;
+	margin-right: -(@ui-resizer-extra-hit-area - 1px) !important;
+	padding-left: @ui-resizer-extra-hit-area !important;
+	padding-right: @ui-resizer-extra-hit-area !important;
+	z-index: 5 !important;
+	box-sizing: content-box;
+	background-image: linear-gradient(90deg, 
+		transparent,
+		transparent (@ui-resizer-extra-hit-area - 1px),
+		@editor-resizer-bg-color (@ui-resizer-extra-hit-area - 1px),
+		@editor-resizer-bg-color (@ui-resizer-extra-hit-area + 1px),
+		transparent (@ui-resizer-extra-hit-area + 1px),
+		transparent);
+
 	.ui-layout-toggler {
+		padding: 0 @ui-resizer-extra-hit-area !important;
+		background-image: linear-gradient(90deg, 
+			transparent,
+			transparent (@ui-resizer-extra-hit-area - 1px),
+			@editor-toggler-bg-color (@ui-resizer-extra-hit-area - 1px),
+			@editor-toggler-bg-color (@ui-resizer-extra-hit-area + 1px),
+			transparent (@ui-resizer-extra-hit-area + 1px),
+			transparent);
+
+		&:hover {
+			background-image: linear-gradient(90deg, 
+				transparent,
+				transparent (@ui-resizer-extra-hit-area - 2px),
+				@editor-toggler-hover-bg-color (@ui-resizer-extra-hit-area - 2px),
+				@editor-toggler-hover-bg-color (@ui-resizer-extra-hit-area + 2px),
+				transparent (@ui-resizer-extra-hit-area + 2px),
+				transparent);
+		}
+	}
+}
+
+.ui-layout-resizer-west.ui-layout-resizer-open, .ui-layout-resizer-east.ui-layout-resizer-closed {
+	.ui-layout-toggler when (@is-overleaf = false) {
 		&:before {
 			content: "\f104"
 		}
 	}
 }
 .ui-layout-resizer-east.ui-layout-resizer-open, .ui-layout-resizer-west.ui-layout-resizer-closed {
-	.ui-layout-toggler {
+	.ui-layout-toggler when (@is-overleaf = false) {
 		&:before {
 			content: "\f105"
 		}
 	}
 }
+
+.ui-layout-toggler.ui-layout-toggler-closed when (@is-overleaf = true) {
+	background-color: @editor-resizer-bg-color;
+	background-image: none;
+	line-height: @ui-layout-toggler-def-height;
+	
+	&::before {
+		content: "\22EE"; // Vertical ellipsis
+		display: block;
+		color: #FFF;
+		font-weight: 700;
+		font-size: @font-size-h2;
+		width: @ui-resizer-extra-hit-area / 2;
+	}
+	&:hover {
+		background-color: @editor-toggler-hover-bg-color;
+		background-image: none;
+	}
+	.ui-layout-resizer-west > & {
+		border-radius: 0 @border-radius-base @border-radius-base 0;
+		&::before {
+			margin-left: -2px;
+		}
+	}
+	.ui-layout-resizer-east > & {
+		border-radius: @border-radius-base 0 0 @border-radius-base;
+		&::before {
+			margin-left: (-1 - @ui-resizer-extra-hit-area);
+		}
+	}
+}
+
+.ui-layout-toggler-east when (@is-overleaf = true) {
+	&.ui-layout-toggler-open {
+		cursor: e-resize !important
+	}
+	&.ui-layout-toggler-closed {
+		cursor: w-resize !important
+	}
+}
+
+.ui-layout-toggler-west when (@is-overleaf = true) {
+	&.ui-layout-toggler-open {
+		cursor: w-resize !important
+	}
+	&.ui-layout-toggler-closed {
+		cursor: e-resize !important
+	}
+}
+
 .ui-layout-resizer-dragging {
-	background-color: #ddd;
+	background-color: @editor-resizer-bg-color-dragging;
 }
 
 .context-menu {

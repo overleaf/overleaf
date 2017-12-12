@@ -97,6 +97,15 @@ html(itemscope, itemtype='http://schema.org/Product')
 				}
 				
 	body
+		if(settings.recaptcha)
+			script(src="https://www.google.com/recaptcha/api.js?render=explicit")
+			div(
+				id="recaptcha"
+				class="g-recaptcha"
+				data-sitekey=settings.recaptcha.siteKey
+				data-size="invisible"
+				data-badge="inline"
+			)
 
 		- if(typeof(suppressSystemMessages) == "undefined")
 			.system-messages(

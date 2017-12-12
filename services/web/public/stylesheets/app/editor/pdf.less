@@ -233,13 +233,68 @@
 }
 
 .synctex-controls {
+	position: absolute;
+	z-index: @synctex-controls-z-index;
+	padding: @synctex-controls-padding;
 	top: 68px;
-	padding: 0px 2px;
-	.btn-xs {
-		line-height: 1.3;
-		padding: 0 2px 0;
-	}
 }
+
+.synctex-controls when (@is-overleaf = true) {
+	margin-right: -11px;
+}
+	.synctex-control {
+		display: block;
+		margin-bottom: 3px;
+
+		> .synctex-control-icon {
+			display: inline-block;
+			font: normal normal normal 14px/1 FontAwesome;
+			font-size: inherit;
+			text-rendering: auto;
+			-webkit-font-smoothing: antialiased;
+			-moz-osx-font-smoothing: grayscale;
+		}
+	}
+
+	.synctex-control when (@is-overleaf = true) {
+		@ol-synctex-control-size: 24px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 1em;
+		width: @ol-synctex-control-size;
+		height: @ol-synctex-control-size;
+		border-radius: @ol-synctex-control-size / 2;
+		padding: 0 0 2px;
+		background-color: fade(@btn-default-bg, 80%);
+		transition: background 0.15s ease;
+		margin-bottom: @ol-synctex-control-size / 2;
+	}
+
+	.synctex-control when (@is-overleaf = false) {
+		line-height: 1.3;
+		padding: 0 2px;
+	}
+	
+	.synctex-control-goto-pdf > .synctex-control-icon when (@is-overleaf = true) {
+		text-indent: 1px; // "Optical" adjustment.
+		&::before {
+			content: "\f061";		
+		}
+	}
+	.synctex-control-goto-code > .synctex-control-icon when (@is-overleaf = true) {
+		text-indent: -1px; // "Optical" adjustment.
+		&::before {
+			content: "\f060";		
+		}
+	}
+	
+	.synctex-control-goto-pdf > .synctex-control-icon::before when (@is-overleaf = false) {
+		content: "\f178";		
+	}
+	.synctex-control-goto-code > .synctex-control-icon::before when (@is-overleaf = false) {
+		content: "\f177";		
+	}
 
 .editor-dark {
 	.pdf-logs {
