@@ -11,6 +11,7 @@ NotificationsBuilder = require("../Notifications/NotificationsBuilder")
 AnalyticsManger = require("../Analytics/AnalyticsManager")
 AuthenticationController = require("../Authentication/AuthenticationController")
 rateLimiter = require("../../infrastructure/RateLimiter")
+request = require 'request'
 
 module.exports = CollaboratorsInviteController =
 
@@ -32,7 +33,7 @@ module.exports = CollaboratorsInviteController =
 				callback(null, userExists)
 		else
 			callback(null, true)
-	
+
 	_checkRateLimit: (user_id, callback = (error) ->) ->
 		LimitationsManager.allowedNumberOfCollaboratorsForUser user_id, (err, collabLimit = 1)->
 			return callback(err) if err?

@@ -4,6 +4,7 @@ Settings = require('settings-sharelatex')
 nodemailer = require("nodemailer")
 sesTransport = require('nodemailer-ses-transport')
 sgTransport = require('nodemailer-sendgrid-transport')
+mandrillTransport = require('nodemailer-mandrill-transport')
 rateLimiter = require('../../infrastructure/RateLimiter')
 _ = require("underscore")
 
@@ -17,22 +18,22 @@ client =
 	sendMail: (options, callback = (err,status) ->) ->
 		logger.log options:options, "Would send email if enabled."
 		callback()
-
 if Settings?.email?.parameters?.AWSAccessKeyID? or Settings?.email?.driver == 'ses'
 	logger.log "using aws ses for email"
 	nm_client = nodemailer.createTransport(sesTransport(Settings.email.parameters))
 else if Settings?.email?.parameters?.sendgridApiKey?
 	logger.log "using sendgrid for email"
 	nm_client = nodemailer.createTransport(sgTransport({auth:{api_key:Settings?.email?.parameters?.sendgridApiKey}}))
+else if Settings?.email?.parameters?.MandrillApiKey?
+	logger.log "using mandril for email"
+	nm_client = nodemailer.createTransport(mandrillTransport({auth:{apiKey:Settings?.email?.parameters?.MandrillApiKey}}))
 else if Settings?.email?.parameters?
-	smtp = _.pick(Settings?.email?.parameters, "host", "port", "secure", "auth", "ignoreTLS")
-
-
 	logger.log "using smtp for email"
+	smtp = _.pick(Settings?.email?.parameters, "host", "port", "secure", "auth", "ignoreTLS")
 	nm_client = nodemailer.createTransport(smtp)
 else
-	nm_client = client
 	logger.warn "Email transport and/or parameters not defined. No emails will be sent."
+	nm_client = client
 
 if nm_client?
 		client = nm_client

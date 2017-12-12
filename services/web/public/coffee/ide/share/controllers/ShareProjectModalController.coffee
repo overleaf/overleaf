@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "ShareProjectModalController", ($scope, $modalInstance, $timeout, projectMembers, projectInvites, $modal, $http, ide) ->
+	App.controller "ShareProjectModalController", ($scope, $modalInstance, $timeout, projectMembers, projectInvites, $modal, $http, ide, validateCaptcha) ->
 		$scope.inputs = {
 			privileges: "readAndWrite"
 			contacts: []
@@ -100,7 +100,7 @@ define [
 					if email in currentInviteEmails and inviteId = _.find(($scope.project.invites || []), (invite) -> invite.email == email)?._id
 						request = projectInvites.resendInvite(inviteId)
 					else
-						request = projectInvites.sendInvite(email, $scope.inputs.privileges)
+						request = projectInvites.sendInvite(email, $scope.inputs.privileges, $scope.grecaptchaResponse)
 
 					request
 						.then (response) ->
@@ -135,7 +135,9 @@ define [
 							else
 								$scope.state.errorReason = null
 
-			$timeout addMembers, 50 # Give email list a chance to update
+			validateCaptcha (response) ->
+				$scope.grecaptchaResponse = response
+				$timeout addMembers, 50 # Give email list a chance to update
 
 		$scope.removeMember = (member) ->
 			$scope.state.error = null
@@ -209,6 +211,8 @@ define [
 
 		$scope.cancel = () ->
 			$modalInstance.dismiss()
+
+
 
 	App.controller "MakePublicModalController", ["$scope", "$modalInstance", "settings", ($scope, $modalInstance, settings) ->
 		$scope.inputs = {
