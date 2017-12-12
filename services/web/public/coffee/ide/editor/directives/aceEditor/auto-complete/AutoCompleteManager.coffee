@@ -37,7 +37,7 @@ define [
 			commandCompleter = new CommandManager(@metadataManager)
 
 			SnippetCompleter = new EnvironmentManager()
-			PackageCompleter = new PackageManager()
+			PackageCompleter = new PackageManager(@metadataManager)
 
 			Graphics = @graphics
 			Preamble = @preamble

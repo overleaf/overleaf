@@ -20,22 +20,26 @@ define () ->
 		'framed', 'aliascnt', 'layaureo', 'authblk'
 	]
 
-	packageSnippets = for pkg in packages
-		{
-			caption: "\\usepackage{#{pkg}}"
-			snippet: "\\usepackage{#{pkg}}"
-			meta: "pkg"
-		}
-
-	packageSnippets.push {
-		caption: "\\usepackage{}"
-		snippet: "\\usepackage{$1}"
-		meta: "pkg"
-		score: 70
-	}
-
 	class PackageManager
+		constructor: (@metadataManager) ->
+
 		getCompletions: (editor, session, pos, prefix, callback) ->
+			usedPackages = Object.keys(@metadataManager.getAllPackages())
+			packageSnippets = []
+			for pkg in packages
+				if pkg not in usedPackages
+					packageSnippets.push {
+						caption: "\\usepackage{#{pkg}}"
+						snippet: "\\usepackage{#{pkg}}"
+						meta: "pkg"
+					}
+
+			packageSnippets.push {
+				caption: "\\usepackage{}"
+				snippet: "\\usepackage{$1}"
+				meta: "pkg"
+				score: 70
+			}
 			callback null, packageSnippets
 
 	return PackageManager
