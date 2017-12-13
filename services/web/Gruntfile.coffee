@@ -205,11 +205,10 @@ module.exports = (grunt) ->
 					modules: [
 						{
 							name: "main",
-							exclude: ["libs"]
 						}, {
 							name: "ide",
-							exclude: ["libs", "pdfjs-dist/build/pdf"]
-						}, {
+							exclude: ["pdfjs-dist/build/pdf"]
+						},{
 							name: "libs"
 						},{
 							name: "ace/mode-latex"
