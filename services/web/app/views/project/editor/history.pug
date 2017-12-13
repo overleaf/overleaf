@@ -134,18 +134,17 @@ div#history(ng-show="ui.view == 'history'")
 
 					div.description(ng-click="select()")
 						div.time {{ update.meta.end_ts | formatDate:'h:mm a' }}
+						div.action.action-edited(ng-if="history.isV2 && update.pathnames.length > 0")
+							| Edited
 						div.docs(ng-repeat="pathname in update.pathnames")
-							i.fa.fa-pencil(ng-if="history.isV2")
-							span.doc {{ pathname }}
+							.doc {{ pathname }}
 						div.docs(ng-repeat="project_op in update.project_ops")
-							span(ng-if="project_op.rename")
-								span Renamed 
-								span.doc {{ project_op.rename.pathname }}
-								span  to 
-								span.doc {{ project_op.rename.newPathname }}
-							span(ng-if="project_op.add")
-								span Added 
-								span.doc {{ project_op.add.pathname }}
+							div(ng-if="project_op.rename")
+								.action Renamed
+								.doc {{ project_op.rename.pathname }} &rarr; {{ project_op.rename.newPathname }}
+							div(ng-if="project_op.add")
+								.action Created
+								.doc {{ project_op.add.pathname }}
 						div.users
 							div.user(ng-repeat="update_user in update.meta.users")
 								.color-square(ng-if="update_user != null", ng-style="{'background-color': 'hsl({{ update_user.hue }}, 70%, 50%)'}")
