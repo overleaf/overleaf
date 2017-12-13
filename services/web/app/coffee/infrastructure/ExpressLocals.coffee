@@ -302,8 +302,8 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 			westResizerCursor          : if isOl then "ew-resize" else null
 			chatResizerSizeOpen        : if isOl then 2 else 12
 			chatResizerSizeClosed      : 0
-			chatMessageBorderSaturation: if isOl then 90 else 70
-			chatMessageBorderLightness : if isOl then 50 else 70
-			chatMessageBgSaturation    : if isOl then 90 else 60
-			chatMessageBgLightness     : if isOl then 50 else 97
+			chatMessageBorderSaturation: if isOl then "90%" else "70%"
+			chatMessageBorderLightness : if isOl then "50%" else "70%"
+			chatMessageBgSaturation    : if isOl then "90%" else "60%"
+			chatMessageBgLightness     : if isOl then "50%" else "97%"
 		next()
