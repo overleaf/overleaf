@@ -31,11 +31,13 @@
 		right: 0;
 		bottom: @new-message-height;
 		overflow-x: hidden;
+		background-color: @chat-bg;
+
 		li.message {
 			margin: @line-height-computed / 2;
 			.date {
 				font-size: 12px;
-				color: @gray-light;
+				color: @chat-color;
 				border-bottom: 1px solid @gray-lightest;
 				margin-bottom: @line-height-computed / 2;
 				text-align: center;
@@ -63,8 +65,8 @@
 				.message {
 					border-left: 3px solid transparent;
 					font-size: 14px;
-					box-shadow: -1px 2px 3px #ddd;
-					border-raduis: @border-radius-base;
+					box-shadow: @chat-message-box-shadow;
+					border-radius: @chat-message-border-radius;
 					position: relative;
 					
 					.message-content {
@@ -124,7 +126,7 @@
 		.full-size;
 		top: auto;
 		height: @new-message-height;
-		background-color: @gray-lightest;
+		background-color: @chat-new-message-bg;
 		padding: @line-height-computed / 4;
 		border-top: 1px solid @editor-border-color;
 		textarea {
