@@ -11,12 +11,12 @@ define [
 					if attrs.spacingOpen?
 						spacingOpen = parseInt(attrs.spacingOpen, 10)
 					else
-						spacingOpen = 24
+						spacingOpen = window.uiConfig.defaultResizerSizeOpen
 
 					if attrs.spacingClosed?
 						spacingClosed = parseInt(attrs.spacingClosed, 10)
 					else
-						spacingClosed = 24
+						spacingClosed = window.uiConfig.defaultResizerSizeClosed
 
 					options =
 						spacing_open: spacingOpen
@@ -44,6 +44,12 @@ define [
 							if !attrs.minimumRestoreSizeWest? or (state.west.size >= attrs.minimumRestoreSizeWest and !state.west.initClosed)
 								options.west = state.west
 
+					if window.uiConfig.eastResizerCursor?
+						options.east.resizerCursor = window.uiConfig.eastResizerCursor
+
+					if window.uiConfig.westResizerCursor?
+						options.west.resizerCursor = window.uiConfig.westResizerCursor
+						
 					repositionControls = () ->
 						state = element.layout().readState()
 						if state.east?
@@ -53,9 +59,7 @@ define [
 							else
 								controls.show()
 								controls.css({
-									position: "absolute"
 									right: state.east.size
-									"z-index": 3
 								})
 
 					resetOpenStates = () ->
@@ -112,7 +116,7 @@ define [
 						# Set the panel as overflowing (gives it higher z-index and sets overflow rules)
 						layoutObj.allowOverflow overflowPane
 						# Read the given z-index value and increment it, so that it's higher than synctex controls.
-						overflowPaneZVal = overflowPaneEl.css "z-index"
+						overflowPaneZVal = overflowPaneEl.zIndex()
 						overflowPaneEl.css "z-index", overflowPaneZVal + 1
 
 					resetOpenStates()

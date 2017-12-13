@@ -26,8 +26,16 @@ InvalidNameError = (message) ->
 	return error
 InvalidNameError.prototype.__proto__ = Error.prototype
 
+UnsupportedFileTypeError = (message) ->
+	error = new Error(message)
+	error.name = "UnsupportedFileTypeError"
+	error.__proto__ = UnsupportedFileTypeError.prototype
+	return error
+UnsupportedFileTypeError.prototype.__proto___ = Error.prototype
+
 module.exports = Errors =
 	NotFoundError: NotFoundError
 	ServiceNotConfiguredError: ServiceNotConfiguredError
 	TooManyRequestsError: TooManyRequestsError
 	InvalidNameError: InvalidNameError
+	UnsupportedFileTypeError: UnsupportedFileTypeError
