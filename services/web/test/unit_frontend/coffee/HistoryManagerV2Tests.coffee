@@ -21,6 +21,7 @@ describe "HistoryV2Manager", ->
 
 	it "should setup the history scope on intialization", ->
 		expect(@scope.history).to.deep.equal({
+			isV2: true
 			updates: []
 			nextBeforeTimestamp: null
 			atEnd: false

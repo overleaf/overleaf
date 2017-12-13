@@ -37,6 +37,7 @@ define [
 
 		reset: () ->
 			@$scope.history = {
+				isV2: true
 				updates: []
 				nextBeforeTimestamp: null
 				atEnd: false
@@ -128,14 +129,6 @@ define [
 				diff.restoreInProgress = false
 				diff.restoreDeletedSuccess = false
 				diff.restoredDocNewId = null
-
-		restoreDeletedDoc: (doc) ->
-			url = "/project/#{@$scope.project_id}/doc/#{doc.id}/restore"
-			@ide.$http.post(url, name: doc.name, _csrf: window.csrfToken)
-
-		restoreDiff: (diff) ->
-			url = "/project/#{@$scope.project_id}/doc/#{diff.doc.id}/version/#{diff.fromV}/restore"
-			@ide.$http.post(url, _csrf: window.csrfToken)
 
 		_parseDiff: (diff) ->
 			row    = 0

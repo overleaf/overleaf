@@ -100,6 +100,7 @@ define [
 				end_ts:   end_ts
 				doc:      doc
 				error:    false
+				pathname: doc.name
 			}
 
 			if !doc.deleted

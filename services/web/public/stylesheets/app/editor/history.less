@@ -169,9 +169,19 @@
 					font-size: 0.8rem;
 					line-height: @line-height-computed;
 				}
-				.docs {
-					font-weight: bold;
+				.action {
 					font-size: 0.9rem;
+				}
+				.docs {
+					font-size: 0.9rem;
+					.doc {
+						font-weight: bold;
+					}
+					i {
+						font-size: 0.8rem;
+						color: @gray;
+						margin-right: 4px;
+					}
 				}
 			}
 			li.loading-changes, li.empty-message {

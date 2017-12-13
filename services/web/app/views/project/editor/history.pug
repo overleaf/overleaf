@@ -135,12 +135,17 @@ div#history(ng-show="ui.view == 'history'")
 					div.description(ng-click="select()")
 						div.time {{ update.meta.end_ts | formatDate:'h:mm a' }}
 						div.docs(ng-repeat="pathname in update.pathnames")
+							i.fa.fa-pencil(ng-if="history.isV2")
 							span.doc {{ pathname }}
 						div.docs(ng-repeat="project_op in update.project_ops")
 							span(ng-if="project_op.rename")
-								| Renamed {{ project_op.rename.pathname }} to {{ project_op.rename.newPathname }}
+								span Renamed 
+								span.doc {{ project_op.rename.pathname }}
+								span  to 
+								span.doc {{ project_op.rename.newPathname }}
 							span(ng-if="project_op.add")
-								| Added {{ project_op.add.pathname }}
+								span Added 
+								span.doc {{ project_op.add.pathname }}
 						div.users
 							div.user(ng-repeat="update_user in update.meta.users")
 								.color-square(ng-if="update_user != null", ng-style="{'background-color': 'hsl({{ update_user.hue }}, 70%, 50%)'}")
@@ -170,8 +175,8 @@ div#history(ng-show="ui.view == 'history'")
 							'other': 'changes'\
 						}"
 					)
-					|  in <strong>{{history.diff.doc.name}}</strong>
-				.toolbar-right
+					|  in <strong>{{history.diff.pathname}}</strong>
+				.toolbar-right(ng-if="!history.isV2")
 					a.btn.btn-danger.btn-sm(
 						href,
 						ng-click="openRestoreDiffModal()"
