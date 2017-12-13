@@ -134,11 +134,15 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 		res.locals.fullJsPath = Url.resolve(staticFilesBase, jsPath)
 		res.locals.lib = PackageVersions.lib
 
+
+
 		res.locals.buildJsPath = (jsFile, opts = {})->
 			path = Path.join(jsPath, jsFile)
 
+
+			# TODO CDN?
 			if opts.hashedPath
-				return hashedFiles[path]
+				path = hashedFiles[path]
 
 			doFingerPrint = opts.fingerprint != false
 
@@ -159,7 +163,7 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 
 		res.locals.buildCssPath = (cssFile, opts)->
 			path = Path.join("/stylesheets/", cssFile)
-			if opts.hashedPath
+			if opts?.hashedPath
 				hashedPath = hashedFiles[path]
 				return Url.resolve(staticFilesBase, hashedPath)
 			return Url.resolve(staticFilesBase, path) + "?fingerprint=" + getFingerprint(path)

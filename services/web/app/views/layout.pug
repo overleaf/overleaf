@@ -142,9 +142,9 @@ html(itemscope, itemtype='http://schema.org/Product')
 				window.requirejs = {
 					"paths" : {
 						"moment": "libs/#{lib('moment')}",
-						"fineuploader": "libs/#{lib('fineuploader')}"
+						"fineuploader": "libs/#{lib('fineuploader')}",
+						"main": "#{buildJsPath('main.js', {hashedPath:true, fingerprint:false}).slice(0,-3)}",
 					},
-					"urlArgs": "fingerprint=#{fingerprint(jsPath + 'main.js')}-#{fingerprint(jsPath + 'libs.js')}",
 					"config":{
 						"moment":{
 							"noGlobal": true
@@ -152,7 +152,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 					}
 				};
 			script(
-				data-main=buildJsPath('main.js', {hashedPath:true}),
+				data-main=buildJsPath('main.js', {hashedPath:false, fingerprint:false}),
 				baseurl=fullJsPath,
 				src=buildJsPath('libs/require.js')
 			)

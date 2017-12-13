@@ -131,7 +131,9 @@ block requirejs
 				"pdfjs-dist/build/pdf": "libs/#{lib('pdfjs')}/pdf",
 				"pdfjs-dist/build/pdf.worker": "#{pdfWorkerPath}",
 				"ace": "#{lib('ace')}",
-				"fineuploader": "libs/#{lib('fineuploader')}"
+				"fineuploader": "libs/#{lib('fineuploader')}",
+				"ide": "#{buildJsPath('ide.js', {hashedPath:true, fingerprint:false}).slice(0,-3)}",
+
 			},
 			"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'ide.js')}-#{fingerprint(jsPath + 'libs.js')}",
 			"waitSeconds": 0,
@@ -161,7 +163,7 @@ block requirejs
 		window.uiConfig = JSON.parse('!{JSON.stringify(uiConfig).replace(/\//g, "\\/")}');
 
 	script(
-		data-main=buildJsPath("ide.js", {hashedPath:true}),
+		data-main=buildJsPath("ide.js", {hashedPath:false}),
 		baseurl=fullJsPath,
 		data-ace-base=buildJsPath(lib('ace'), {fingerprint:false}),
 		src=buildJsPath('libs/require.js', {hashedPath:true})
