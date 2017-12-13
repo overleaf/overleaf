@@ -147,7 +147,7 @@
 	word-break: break-all;
 }
 
-.editor-dark {
+.editor-dark when (@is-overleaf = false) {
 	.chat {
 		.new-message {
 			background-color: lighten(@editor-dark-background-color, 10%);
