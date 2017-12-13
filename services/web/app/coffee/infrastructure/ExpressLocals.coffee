@@ -61,7 +61,6 @@ for paths in pathList
 		fingerprints[filePath] = hash
 
 	if paths.length == 1
-		#todo deal with ace multi file hash
 		path = paths[0]
 		splitPath = path.split("/")
 		filenameSplit = splitPath.pop().split(".")
@@ -139,8 +138,6 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 		res.locals.buildJsPath = (jsFile, opts = {})->
 			path = Path.join(jsPath, jsFile)
 
-
-			# TODO CDN?
 			if opts.hashedPath
 				path = hashedFiles[path]
 
