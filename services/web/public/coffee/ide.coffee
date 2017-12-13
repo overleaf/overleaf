@@ -5,6 +5,7 @@ define [
 	"ide/editor/EditorManager"
 	"ide/online-users/OnlineUsersManager"
 	"ide/history/HistoryManager"
+	"ide/history/HistoryV2Manager"
 	"ide/permissions/PermissionsManager"
 	"ide/pdf/PdfManager"
 	"ide/binary-files/BinaryFilesManager"
@@ -44,6 +45,7 @@ define [
 	EditorManager
 	OnlineUsersManager
 	HistoryManager
+	HistoryV2Manager
 	PermissionsManager
 	PdfManager
 	BinaryFilesManager
@@ -137,7 +139,10 @@ define [
 		ide.fileTreeManager = new FileTreeManager(ide, $scope)
 		ide.editorManager = new EditorManager(ide, $scope)
 		ide.onlineUsersManager = new OnlineUsersManager(ide, $scope)
-		ide.historyManager = new HistoryManager(ide, $scope)
+		if window.data.useV2History
+			ide.historyManager = new HistoryV2Manager(ide, $scope)
+		else
+			ide.historyManager = new HistoryManager(ide, $scope)
 		ide.pdfManager = new PdfManager(ide, $scope)
 		ide.permissionsManager = new PermissionsManager(ide, $scope)
 		ide.binaryFilesManager = new BinaryFilesManager(ide, $scope)

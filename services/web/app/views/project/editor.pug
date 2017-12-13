@@ -105,7 +105,7 @@ block requirejs
 	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
 	//- and doesn't prematurely end the script tag.
 	script#data(type="application/json").
-		!{JSON.stringify({userSettings: userSettings, user: user, trackChangesState: trackChangesState}).replace(/\//g, '\\/')}
+		!{JSON.stringify({userSettings: userSettings, user: user, trackChangesState: trackChangesState, useV2History: useV2History}).replace(/\//g, '\\/')}
 
 	script(type="text/javascript").
 		window.data = JSON.parse($("#data").text());
