@@ -37,9 +37,12 @@
 			margin: @line-height-computed / 2;
 			.date {
 				font-size: 12px;
-				color: @chat-color;
-				border-bottom: 1px solid @gray-lightest;
+				color: @chat-message-date-color;
 				margin-bottom: @line-height-computed / 2;
+				text-align: right;
+			}
+			.date when (@is-overleaf = false) {
+				border-bottom: 1px solid @gray-lightest;
 				text-align: center;
 			}
 			.avatar {
@@ -58,7 +61,7 @@
 
 				.name {
 					font-size: 12px;
-					color: @gray-light;
+					color: @chat-message-name-color;
 					margin-bottom: 4px;
 					min-height: 16px;
 				}
@@ -72,6 +75,7 @@
 					.message-content {
 						padding: @line-height-computed / 2;
 						overflow-x: auto;
+						color: @chat-message-color;
 					}
 
 					.arrow {
