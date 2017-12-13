@@ -157,6 +157,9 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 
 			qs = querystring.stringify(opts.qs)
 
+			if opts.removeExtension == true
+				path = path.slice(0,-3)
+				
 			if qs? and qs.length > 0
 				path = path + "?" + qs
 			return path
