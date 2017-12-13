@@ -133,9 +133,7 @@ block requirejs
 				"ace": "#{lib('ace')}",
 				"fineuploader": "libs/#{lib('fineuploader')}",
 				"ide": "#{buildJsPath('ide.js', {hashedPath:true, fingerprint:false, removeExtension:true})}"
-
 			},
-			"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'ide.js')}-#{fingerprint(jsPath + 'libs.js')}",
 			"waitSeconds": 0,
 			"shim": {
 				"pdfjs-dist/build/pdf": {
