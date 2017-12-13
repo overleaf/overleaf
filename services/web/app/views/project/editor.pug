@@ -132,7 +132,8 @@ block requirejs
 				"pdfjs-dist/build/pdf.worker": "#{pdfWorkerPath}",
 				"ace": "#{lib('ace')}",
 				"fineuploader": "libs/#{lib('fineuploader')}",
-				"ide": "#{buildJsPath('ide.js', {hashedPath:true, fingerprint:false, removeExtension:true})}"
+				"ide": "#{buildJsPath('ide.js', {hashedPath:settings.useMinifiedJs, fingerprint:false, removeExtension:true})}",
+				"libraries": "#{buildJsPath('libraries.js', {hashedPath:settings.useMinifiedJs, fingerprint:false, removeExtension:true})}",
 			},
 			"waitSeconds": 0,
 			"shim": {
