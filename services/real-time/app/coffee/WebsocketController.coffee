@@ -146,10 +146,12 @@ module.exports = WebsocketController =
 				cursorData.user_id = user_id if user_id?
 				cursorData.email   = email   if email?
 				if first_name? or last_name?
-					cursorData.name = if !last_name?
-						first_name
-					else
+					cursorData.name = if first_name && last_name
 						"#{first_name} #{last_name}"
+					else if first_name
+						first_name
+					else if last_name
+						last_name
 					ConnectedUsersManager.updateUserPosition(project_id, client.id, {
 						first_name: first_name,
 						last_name:  last_name,
