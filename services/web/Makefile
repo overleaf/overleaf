@@ -79,6 +79,6 @@ ci:
 	$(MAKE) install test
 
 .PHONY:
-	all add install update test test_unit test_unit_frontend test_acceptance \
+	all add install update test test_unit test_frontend test_acceptance \
 	test_acceptance_start_service test_acceptance_stop_service \
 	test_acceptance_run ci ci_clean
