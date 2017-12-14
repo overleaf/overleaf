@@ -261,12 +261,12 @@ describe "ProjectStructureChanges", ->
 					name: 'bar'
 			}, (error, res, body) =>
 				throw error if error?
-				example_folder_id_2 = JSON.parse(body)._id
+				@example_folder_id_2 = JSON.parse(body)._id
 
 				@owner.request.post {
 					uri: "project/#{@example_project_id}/Folder/#{@example_folder_id_1}/move",
 					json:
-						folder_id: example_folder_id_2
+						folder_id: @example_folder_id_2
 				}, (error, res, body) =>
 					throw error if error?
 					if res.statusCode < 200 || res.statusCode >= 300
@@ -287,6 +287,34 @@ describe "ProjectStructureChanges", ->
 					expect(update.newPathname).to.equal("/bar/foo/1pixel.png")
 
 					done()
+
+	describe "deleting entities", ->
+		beforeEach () ->
+			MockDocUpdaterApi.clearProjectStructureUpdates()
+
+		it "should version deleting a folder", (done) ->
+			@owner.request.delete {
+				uri: "project/#{@example_project_id}/Folder/#{@example_folder_id_2}",
+			}, (error, res, body) =>
+				throw error if error?
+				if res.statusCode < 200 || res.statusCode >= 300
+					throw new Error("failed to delete folder #{res.statusCode}")
+
+				updates = MockDocUpdaterApi.getProjectStructureUpdates(@example_project_id).docUpdates
+				expect(updates.length).to.equal(1)
+				update = updates[0]
+				#expect(update.userId).to.equal(@owner._id)
+				expect(update.pathname).to.equal("/bar/foo/new.tex")
+				expect(update.newPathname).to.equal("")
+
+				updates = MockDocUpdaterApi.getProjectStructureUpdates(@example_project_id).fileUpdates
+				expect(updates.length).to.equal(1)
+				update = updates[0]
+				#expect(update.userId).to.equal(@owner._id)
+				expect(update.pathname).to.equal("/bar/foo/1pixel.png")
+				expect(update.newPathname).to.equal("")
+
+				done()
 
 	describe "tpds", ->
 		before (done) ->
