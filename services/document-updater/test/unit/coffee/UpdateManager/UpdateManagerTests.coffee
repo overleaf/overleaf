@@ -194,9 +194,9 @@ describe "UpdateManager", ->
 					.calledWith(@project_id, @doc_id, @updatedDocLines, @version, @appliedOps, @updated_ranges)
 					.should.equal true
 
-			it "shoould add metadata to the ops" , ->
+			it "should add metadata to the ops" , ->
 				@UpdateManager._addProjectHistoryMetadataToOps
-					.calledWith(@appliedOps, @pathname, @updatedDocLines)
+					.calledWith(@appliedOps, @pathname, @lines)
 					.should.equal true
 
 			it "should push the applied ops into the history queue", ->
