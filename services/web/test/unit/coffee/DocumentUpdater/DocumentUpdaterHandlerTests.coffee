@@ -487,7 +487,8 @@ describe 'DocumentUpdaterHandler', ->
 
 					docUpdates = [
 						id: @docId.toString(),
-						pathname: "/foo",
+						pathname: '/foo',
+						newPathname: ''
 					]
 
 					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>

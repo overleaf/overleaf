@@ -91,6 +91,7 @@ describe "ProjectStructureChanges", ->
 					throw error if error?
 					if res.statusCode < 200 || res.statusCode >= 300
 						throw new Error("failed to add doc #{res.statusCode}")
+					@example_doc_id = body._id
 					done()
 
 		it "should version the doc added", ->
@@ -162,6 +163,8 @@ describe "ProjectStructureChanges", ->
 				if res.statusCode < 200 || res.statusCode >= 300
 					throw new Error("failed to upload file #{res.statusCode}")
 
+				@example_file_id = JSON.parse(body).entity_id
+
 				updates = MockDocUpdaterApi.getProjectStructureUpdates(@example_project_id).fileUpdates
 				expect(updates.length).to.equal(1)
 				update = updates[0]
@@ -198,6 +201,92 @@ describe "ProjectStructureChanges", ->
 				expect(update.url).to.be.a('string');
 
 				done()
+
+	describe "moving entities", ->
+		before (done) ->
+			@owner.request.post {
+				uri: "project/#{@example_project_id}/folder",
+				formData:
+					name: 'foo'
+			}, (error, res, body) =>
+				throw error if error?
+				@example_folder_id_1 = JSON.parse(body)._id
+				done()
+
+		beforeEach () ->
+			MockDocUpdaterApi.clearProjectStructureUpdates()
+
+		it "should version moving a doc", (done) ->
+			@owner.request.post {
+				uri: "project/#{@example_project_id}/Doc/#{@example_doc_id}/move",
+				json:
+					folder_id: @example_folder_id_1
+			}, (error, res, body) =>
+				throw error if error?
+				if res.statusCode < 200 || res.statusCode >= 300
+					throw new Error("failed to move doc #{res.statusCode}")
+
+				updates = MockDocUpdaterApi.getProjectStructureUpdates(@example_project_id).docUpdates
+				expect(updates.length).to.equal(1)
+				update = updates[0]
+				expect(update.userId).to.equal(@owner._id)
+				expect(update.pathname).to.equal("/new.tex")
+				expect(update.newPathname).to.equal("/foo/new.tex")
+
+				done()
+
+		it "should version moving a file", (done) ->
+			@owner.request.post {
+				uri: "project/#{@example_project_id}/File/#{@example_file_id}/move",
+				json:
+					folder_id: @example_folder_id_1
+			}, (error, res, body) =>
+				throw error if error?
+				if res.statusCode < 200 || res.statusCode >= 300
+					throw new Error("failed to move file #{res.statusCode}")
+
+				updates = MockDocUpdaterApi.getProjectStructureUpdates(@example_project_id).fileUpdates
+				expect(updates.length).to.equal(1)
+				update = updates[0]
+				expect(update.userId).to.equal(@owner._id)
+				expect(update.pathname).to.equal("/1pixel.png")
+				expect(update.newPathname).to.equal("/foo/1pixel.png")
+
+				done()
+
+		it "should version moving a folder", (done) ->
+			@owner.request.post {
+				uri: "project/#{@example_project_id}/folder",
+				formData:
+					name: 'bar'
+			}, (error, res, body) =>
+				throw error if error?
+				example_folder_id_2 = JSON.parse(body)._id
+
+				@owner.request.post {
+					uri: "project/#{@example_project_id}/Folder/#{@example_folder_id_1}/move",
+					json:
+						folder_id: example_folder_id_2
+				}, (error, res, body) =>
+					throw error if error?
+					if res.statusCode < 200 || res.statusCode >= 300
+						throw new Error("failed to move folder #{res.statusCode}")
+
+					updates = MockDocUpdaterApi.getProjectStructureUpdates(@example_project_id).docUpdates
+					expect(updates.length).to.equal(1)
+					update = updates[0]
+					expect(update.userId).to.equal(@owner._id)
+					expect(update.pathname).to.equal("/foo/new.tex")
+					expect(update.newPathname).to.equal("/bar/foo/new.tex")
+
+					updates = MockDocUpdaterApi.getProjectStructureUpdates(@example_project_id).fileUpdates
+					expect(updates.length).to.equal(1)
+					update = updates[0]
+					expect(update.userId).to.equal(@owner._id)
+					expect(update.pathname).to.equal("/foo/1pixel.png")
+					expect(update.newPathname).to.equal("/bar/foo/1pixel.png")
+
+					done()
 
 	describe "tpds", ->
 		before (done) ->

@@ -263,6 +263,7 @@ module.exports = DocumentUpdaterHandler =
 				updates.push
 					id: id
 					pathname: oldEntity.path
+					newPathname: ''
 
 		updates
 
