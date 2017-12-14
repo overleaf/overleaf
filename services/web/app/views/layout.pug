@@ -98,11 +98,8 @@ html(itemscope, itemtype='http://schema.org/Product')
 
 		- if (settings.overleaf && settings.overleaf.host)
 			script.
-				window.freeTrialBaseUrl = '!{settings.overleaf.host}/users/trial'
-		- else
-			script.
-				window.freeTrialBaseUrl = '/user/subscription/new'
-				
+				window.redirectToOLFreeTrialUrl = '!{settings.overleaf.host}/users/trial'
+
 	body
 		if(settings.recaptcha)
 			script(src="https://www.google.com/recaptcha/api.js?render=explicit")
