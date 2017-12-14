@@ -39,15 +39,10 @@ getFileContent = (filePath)->
 
 logger.log "Generating file fingerprints..."
 pathList = [
-	["#{jsPath}libs/#{fineuploader}.js"]
 	["#{jsPath}libs/require.js"]
 	["#{jsPath}ide.js"]
 	["#{jsPath}main.js"]
 	["#{jsPath}libraries.js"]
-	["#{jsPath}#{ace}/ace.js","#{jsPath}#{ace}/mode-latex.js","#{jsPath}#{ace}/worker-latex.js","#{jsPath}#{ace}/snippets/latex.js"]
-	["#{jsPath}libs/#{pdfjs}/pdf.js"]
-	["#{jsPath}libs/#{pdfjs}/pdf.worker.js"]
-	["#{jsPath}libs/#{pdfjs}/compatibility.js"]
 	["/stylesheets/style.css"]
 	["/stylesheets/ol-style.css"]
 ]
