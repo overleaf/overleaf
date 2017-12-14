@@ -71,16 +71,9 @@ pipeline {
       }
     }
     
-    stage('Unit Tests') {
+    stage('Test') {
       steps {
-        sh 'make clean install' // Removes js files, so do before compile
-        sh 'make test_unit MOCHA_ARGS="--reporter=tap"'
-      }
-    }
-    
-    stage('Acceptance Tests') {
-      steps {
-        sh 'make test_acceptance MOCHA_ARGS="--reporter=tap"'
+        sh 'make ci'
       }
     }
 
@@ -155,6 +148,10 @@ pipeline {
   }
   
   post {
+    always {
+      sh 'make ci_clean'
+    }
+
     failure {
       mail(from: "${EMAIL_ALERT_FROM}", 
            to: "${EMAIL_ALERT_TO}", 

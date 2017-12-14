@@ -16,9 +16,10 @@ add_dev: docker-shared.yml
 	$(NPM) install --save-dev ${P}
 
 install: docker-shared.yml
+	bin/generate_volumes_file
 	$(NPM) install
 
-clean:
+clean: ci_clean
 	rm -f app.js
 	rm -rf app/js
 	rm -rf test/unit/js
@@ -30,9 +31,8 @@ clean:
 		rm -rf $$dir/test/unit/js; \
 		rm -rf $$dir/test/acceptance/js; \
 	done
-	# Regenerate docker-shared.yml - not stictly a 'clean',
-	# but lets `make clean install` work nicely
-	bin/generate_volumes_file
+
+ci_clean:
 	# Deletes node_modules volume
 	docker-compose down --volumes
 
@@ -40,10 +40,13 @@ clean:
 docker-shared.yml:
 	bin/generate_volumes_file
 
-test: test_unit test_acceptance
+test: test_unit test_frontend test_acceptance
 
 test_unit: docker-shared.yml
 	docker-compose ${DOCKER_COMPOSE_FLAGS} run --rm test_unit npm -q run test:unit -- ${MOCHA_ARGS}
+
+test_frontend: docker-shared.yml
+	docker-compose ${DOCKER_COMPOSE_FLAGS} run --rm test_unit npm -q run test:frontend -- ${MOCHA_ARGS}
 
 test_acceptance: test_acceptance_app test_acceptance_modules
 
@@ -71,7 +74,9 @@ test_acceptance_modules: docker-shared.yml
 test_acceptance_module: docker-shared.yml
 	cd $(MODULE) && make test_acceptance
 
+ci: install test
+
 .PHONY:
-	all add install update test test_unit test_acceptance \
+	all add install update test test_unit test_unit_frontend test_acceptance \
 	test_acceptance_start_service test_acceptance_stop_service \
-	test_acceptance_run
+	test_acceptance_run ci ci_clean
