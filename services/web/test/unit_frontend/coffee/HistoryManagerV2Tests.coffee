@@ -27,7 +27,7 @@ describe "HistoryV2Manager", ->
 			atEnd: false
 			selection: {
 				updates: []
-				doc: null
+				pathname: null
 				range: {
 					fromV: null
 					toV: null

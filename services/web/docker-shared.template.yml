@@ -13,11 +13,8 @@ services:
       - ./npm-shrinkwrap.json:/app/npm-shrinkwrap.json
       - node_modules:/app/node_modules
       - ./bin:/app/bin
-      # Copying the whole public dir is fine for now, and needed for
-      # some unit tests to pass, but we will want to isolate the coffee
-      # and vendor js files, so that the compiled js files are not written
-      # back to the local filesystem.
-      - ./public:/app/public
+      - ./public/coffee:/app/public/coffee:ro
+      - ./public/js/ace-1.2.5:/app/public/js/ace-1.2.5
       - ./app.coffee:/app/app.coffee:ro
       - ./app/coffee:/app/app/coffee:ro
       - ./app/templates:/app/app/templates:ro
