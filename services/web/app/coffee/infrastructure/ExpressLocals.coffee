@@ -60,8 +60,7 @@ for paths in pathList
 		logger.log "#{filePath}: #{hash}"
 		fingerprints[filePath] = hash
 
-	if paths.length == 1
-		path = paths[0]
+	for path in paths
 		splitPath = path.split("/")
 		filenameSplit = splitPath.pop().split(".")
 		filenameSplit.splice(filenameSplit.length-1, 0, hash)

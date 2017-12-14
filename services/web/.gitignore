@@ -69,12 +69,16 @@ Gemfile.lock
 
 public/js/libs/fineuploader-5.15.4.*.js
 public/js/libs/fineuploader-*.js
-public/js/libs/pdfjs-1.7.225/compatibility.*.js
-public/js/libs/pdfjs-1.7.225/pdf.*.js
-public/js/libs/pdfjs-1.7.225/pdf.worker.*.js
+public/js/libs/pdfjs-*/compatibility.*.js
+public/js/libs/pdfjs-*/pdf.*.js
+public/js/libs/pdfjs-*/pdf.worker.*.js
 public/js/libs/require.*.js
 public/stylesheets/ol-style.*.css
 public/stylesheets/style.*.css
+public/js/ace-*/ace.*.js
+public/js/ace-*/mode-latex.*.js
+public/js/ace-*/snippets/latex.*.js
+public/js/ace-*/worker-latex.*.js
 
 *.swp
 .DS_Store
