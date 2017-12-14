@@ -26,7 +26,7 @@ describe "RealTimeRedisManager", ->
 	describe "getPendingUpdatesForDoc", ->
 		beforeEach ->
 			@rclient.lrange = sinon.stub()
-			@rclient.del = sinon.stub()
+			@rclient.ltrim = sinon.stub()
 
 		describe "successfully", ->
 			beforeEach ->
@@ -40,12 +40,12 @@ describe "RealTimeRedisManager", ->
 			
 			it "should get the pending updates", ->
 				@rclient.lrange
-					.calledWith("PendingUpdates:#{@doc_id}", 0, -1)
+					.calledWith("PendingUpdates:#{@doc_id}", 0, 7)
 					.should.equal true
 
 			it "should delete the pending updates", ->
-				@rclient.del
-					.calledWith("PendingUpdates:#{@doc_id}")
+				@rclient.ltrim
+					.calledWith("PendingUpdates:#{@doc_id}", 8, -1)
 					.should.equal true
 
 			it "should call the callback with the updates", ->
