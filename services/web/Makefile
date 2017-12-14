@@ -74,7 +74,9 @@ test_acceptance_modules: docker-shared.yml
 test_acceptance_module: docker-shared.yml
 	cd $(MODULE) && make test_acceptance
 
-ci: install test
+ci:
+	MOCHA_ARGS="--reporter tap" \
+	$(MAKE) install test
 
 .PHONY:
 	all add install update test test_unit test_unit_frontend test_acceptance \

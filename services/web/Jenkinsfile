@@ -60,7 +60,7 @@ pipeline {
         sh 'git config --global core.logallrefupdates false'
         sh 'mv app/views/external/robots.txt public/robots.txt'
         sh 'mv app/views/external/googlebdb0f8f7f4a17241.html public/googlebdb0f8f7f4a17241.html'
-        sh 'npm install'
+        sh 'npm --quiet install'
         sh 'npm rebuild'
         // It's too easy to end up shrinkwrapping to an outdated version of translations.
         // Ensure translations are always latest, regardless of shrinkwrap
