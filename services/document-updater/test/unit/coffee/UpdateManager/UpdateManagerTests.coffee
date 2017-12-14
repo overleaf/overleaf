@@ -245,20 +245,30 @@ describe "UpdateManager", ->
 				'test'
 				'data'
 			]
-			appliedOps = [ {v: 42, op: "mock-op-42"}, { v: 45, op: "mock-op-45" }]
+			appliedOps = [
+				{ v: 42, op: [{i: "foo", p: 4}, { i: "bar", p: 6 }] },
+				{ v: 45, op: [{d: "qux", p: 4}, { i: "bazbaz", p: 14 }] },
+				{ v: 49, op: [{i: "penguin", p: 18}] }
+			]
 			@UpdateManager._addProjectHistoryMetadataToOps(appliedOps, @pathname, lines)
 			appliedOps.should.deep.equal [{
 				v: 42
-				op: "mock-op-42"
+				op: [{i: "foo", p: 4}, { i: "bar", p: 6 }]
 				meta:
 					pathname: @pathname
 					doc_length: 14
 			}, {
 				v: 45
-				op: "mock-op-45"
+				op: [{d: "qux", p: 4}, { i: "bazbaz", p: 14 }]
 				meta:
 					pathname: @pathname
-					doc_length: 14
+					doc_length: 20 # 14 + 'foo' + 'bar'
+			}, {
+				v: 49
+				op: [{i: "penguin", p: 18}]
+				meta:
+					pathname: @pathname
+					doc_length: 23 # 14 - 'qux' + 'bazbaz'
 			}]
 
 	describe "lockUpdatesAndDo", ->

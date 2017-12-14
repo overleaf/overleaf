@@ -79,7 +79,7 @@ module.exports = UpdateManager =
 				profile.log("sharejs.applyUpdate")
 				return callback(error) if error?
 				RangesManager.applyUpdate project_id, doc_id, ranges, appliedOps, updatedDocLines, (error, new_ranges) ->
-					UpdateManager._addProjectHistoryMetadataToOps(appliedOps, pathname, updatedDocLines)
+					UpdateManager._addProjectHistoryMetadataToOps(appliedOps, pathname, lines)
 					profile.log("RangesManager.applyUpdate")
 					return callback(error) if error?
 					RedisManager.updateDocument project_id, doc_id, updatedDocLines, version, appliedOps, new_ranges, (error, doc_ops_length, project_ops_length) ->
@@ -129,12 +129,26 @@ module.exports = UpdateManager =
 				op.i = op.i.replace(/[\uD800-\uDFFF]/g, "\uFFFD")
 		return update
 
-	_addProjectHistoryMetadataToOps: (ops, pathname, lines) ->
+	_addProjectHistoryMetadataToOps: (updates, pathname, lines) ->
 		doc_length = _.reduce lines,
 			(chars, line) -> chars + line.length,
 			0
 		doc_length += lines.length - 1  # count newline characters
-		ops.forEach (op) ->
-			op.meta ||= {}
-			op.meta.pathname = pathname
-			op.meta.doc_length = doc_length
+		updates.forEach (update) ->
+			update.meta ||= {}
+			update.meta.pathname = pathname
+			update.meta.doc_length = doc_length
+			# Each update may contain multiple ops, i.e.
+			# [{
+			# 	ops: [{i: "foo", p: 4}, {d: "bar", p:8}]
+			# }, {
+			# 	ops: [{d: "baz", p: 40}, {i: "qux", p:8}]
+			# }]
+			# We want to include the doc_length at the start of each update,
+			# before it's ops are applied. However, we need to track any
+			# changes to it for the next update.
+			for op in update.op
+				if op.i?
+					doc_length += op.i.length
+				if op.d?
+					doc_length -= op.d.length
