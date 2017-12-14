@@ -12,7 +12,6 @@ Modules = require "./Modules"
 Url = require "url"
 PackageVersions = require "./PackageVersions"
 htmlEncoder = new require("node-html-encoder").Encoder("numerical")
-fingerprints = {}
 hashedFiles = {}
 Path = require 'path'
 Features = require "./Features"
@@ -31,49 +30,39 @@ getFileContent = (filePath)->
 	filePath = Path.join __dirname, "../../../", "public#{filePath}"
 	exists = fs.existsSync filePath
 	if exists
-		content = fs.readFileSync filePath
+		content = fs.readFileSync filePath, "UTF-8"
 		return content
 	else
-		logger.log filePath:filePath, "file does not exist for fingerprints"
+		logger.log filePath:filePath, "file does not exist for hashing"
 		return ""
 
-logger.log "Generating file fingerprints..."
+logger.log "Generating file hashes..."
 pathList = [
-	["#{jsPath}libs/require.js"]
-	["#{jsPath}ide.js"]
-	["#{jsPath}main.js"]
-	["#{jsPath}libraries.js"]
-	["/stylesheets/style.css"]
-	["/stylesheets/ol-style.css"]
+	"#{jsPath}libs/require.js"
+	"#{jsPath}ide.js"
+	"#{jsPath}main.js"
+	"#{jsPath}libraries.js"
+	"/stylesheets/style.css"
+	"/stylesheets/ol-style.css"
 ]
 
-for paths in pathList
-	contentList = _.map(paths, getFileContent)
-	content = contentList.join("")
+for path in pathList
+	content = getFileContent(path)
 	hash = crypto.createHash("md5").update(content).digest("hex")
-	_.each paths, (filePath)-> 
-		logger.log "#{filePath}: #{hash}"
-		fingerprints[filePath] = hash
+	
+	splitPath = path.split("/")
+	filenameSplit = splitPath.pop().split(".")
+	filenameSplit.splice(filenameSplit.length-1, 0, hash)
+	splitPath.push(filenameSplit.join("."))
 
-	for path in paths
-		splitPath = path.split("/")
-		filenameSplit = splitPath.pop().split(".")
-		filenameSplit.splice(filenameSplit.length-1, 0, hash)
-		splitPath.push(filenameSplit.join("."))
-		hashPath = splitPath.join("/")
-		fsHashPath = Path.join __dirname, "../../../", "public#{hashPath}"
-		fs.writeFileSync(fsHashPath, content)
-		hashedFiles[paths] = hashPath
+	hashPath = splitPath.join("/")
+	hashedFiles[path] = hashPath
+
+	fsHashPath = Path.join __dirname, "../../../", "public#{hashPath}"
+	fs.writeFileSync(fsHashPath, content)
 
 
-getFingerprint = (path) ->
-	if fingerprints[path]?
-		return fingerprints[path]
-	else
-		logger.err "No fingerprint for file: #{path}"
-		return ""
-
-logger.log "Finished generating file fingerprints"
+logger.log "Finished hashing static content"
 
 cdnAvailable = Settings.cdn?.web?.host?
 darkCdnAvailable = Settings.cdn?.web?.darkHost?
@@ -135,13 +124,8 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 			if opts.hashedPath
 				path = hashedFiles[path]
 
-			doFingerPrint = opts.fingerprint != false
-
 			if !opts.qs?
 				opts.qs = {}
-
-			if !opts.qs?.fingerprint? and doFingerPrint
-				opts.qs.fingerprint = getFingerprint(path)
 
 			if opts.cdn != false
 				path = Url.resolve(staticFilesBase, path)
@@ -160,7 +144,7 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 			if opts?.hashedPath
 				hashedPath = hashedFiles[path]
 				return Url.resolve(staticFilesBase, hashedPath)
-			return Url.resolve(staticFilesBase, path) + "?fingerprint=" + getFingerprint(path)
+			return Url.resolve(staticFilesBase, path)
 
 		res.locals.buildImgPath = (imgFile)->
 			path = Path.join("/img/", imgFile)
@@ -243,10 +227,6 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 	webRouter.use (req, res, next) ->
 		res.locals.getReqQueryParam = (field)->
 			return req.query?[field]
-		next()
-
-	webRouter.use (req, res, next)->
-		res.locals.fingerprint = getFingerprint
 		next()
 
 	webRouter.use (req, res, next)->
