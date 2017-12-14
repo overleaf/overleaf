@@ -22,8 +22,7 @@ define [
 
 			@$scope.$on "entity:selected", (event, entity) =>
 				if (@$scope.ui.view == "history") and (entity.type == "doc")
-					# TODO: Set selection.pathname to entity path name
-					# @$scope.history.selection.doc = entity
+					@$scope.history.selection.pathname = _ide.fileTreeManager.getEntityPath(entity)
 					@reloadDiff()
 
 		show: () ->
@@ -43,7 +42,7 @@ define [
 				atEnd: false
 				selection: {
 					updates: []
-					doc: null
+					pathname: null
 					range: {
 						fromV: null
 						toV: null
@@ -52,6 +51,7 @@ define [
 				diff: null
 			}
 
+		MAX_RECENT_UPDATES_TO_SELECT: 2
 		autoSelectRecentUpdates: () ->
 			return if @$scope.history.updates.length == 0
 
@@ -59,7 +59,7 @@ define [
 
 			indexOfLastUpdateNotByMe = 0
 			for update, i in @$scope.history.updates
-				if @_updateContainsUserId(update, @$scope.user.id)
+				if @_updateContainsUserId(update, @$scope.user.id) or i > @MAX_RECENT_UPDATES_TO_SELECT
 					break
 				indexOfLastUpdateNotByMe = i
 
@@ -75,7 +75,6 @@ define [
 				.get(url)
 				.then (response) =>
 					{ data } = response
-					console.log "fetchNextBatchOfUpdates", data.updates
 					@_loadUpdates(data.updates)
 					@$scope.history.nextBeforeTimestamp = data.nextBeforeTimestamp
 					if !data.nextBeforeTimestamp?
@@ -86,10 +85,10 @@ define [
 			diff = @$scope.history.diff
 			{updates} = @$scope.history.selection
 			{fromV, toV, pathname} = @_calculateDiffDataFromSelection()
-			console.log "[reloadDiff] current diff", diff
-			console.log "[reloadDiff] new diff data", {fromV, toV, pathname}
 
-			return if !pathname?
+			if !pathname?
+				@$scope.history.diff = null
+				return
 
 			return if diff? and
 				diff.pathname == pathname and
@@ -103,32 +102,24 @@ define [
 				error:    false
 			}
 
-			# TODO: How do we track deleted files now? We can probably show the diffs easily
-			# with the new system!
-			if true # !doc.deleted
-				diff.loading = true
-				url = "/project/#{@$scope.project_id}/diff"
-				query = ["pathname=#{encodeURIComponent(pathname)}"]
-				if diff.fromV? and diff.toV?
-					query.push "from=#{diff.fromV}", "to=#{diff.toV}"
-				url += "?" + query.join("&")
+			diff.loading = true
+			url = "/project/#{@$scope.project_id}/diff"
+			query = ["pathname=#{encodeURIComponent(pathname)}"]
+			if diff.fromV? and diff.toV?
+				query.push "from=#{diff.fromV}", "to=#{diff.toV}"
+			url += "?" + query.join("&")
 
-				@ide.$http
-					.get(url)
-					.then (response) =>
-						{ data } = response
-						diff.loading = false
-						{text, highlights} = @_parseDiff(data)
-						diff.text = text
-						diff.highlights = highlights
-					.catch () ->
-						diff.loading = false
-						diff.error = true
-			else
-				diff.deleted = true
-				diff.restoreInProgress = false
-				diff.restoreDeletedSuccess = false
-				diff.restoredDocNewId = null
+			@ide.$http
+				.get(url)
+				.then (response) =>
+					{ data } = response
+					diff.loading = false
+					{text, highlights} = @_parseDiff(data)
+					diff.text = text
+					diff.highlights = highlights
+				.catch () ->
+					diff.loading = false
+					diff.error = true
 
 		_parseDiff: (diff) ->
 			row    = 0
@@ -255,14 +246,12 @@ define [
 
 			selected_pathname = @$scope.history.selection.pathname
 
-			console.log "[_calculateDiffDataFromSelection]", @$scope.history.selection.updates
 			for pathname, doc of @_perDocSummaryOfUpdates(@$scope.history.selection.updates)
-				console.log "[_calculateDiffDataFromSelection] doc:", pathname, doc
 				if pathname == selected_pathname
 					{fromV, toV} = doc
-					break
+					return {fromV, toV, pathname}
 
-			return {fromV, toV, pathname}
+			return {}
 
 		# Set the track changes selected doc to one of the docs in the range
 		# of currently selected updates. If we already have a selected doc
