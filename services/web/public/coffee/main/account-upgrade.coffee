@@ -11,12 +11,9 @@ define [
 			w = window.open()
 			go = () ->
 				ga?('send', 'event', 'subscription-funnel', 'upgraded-free-trial', source)
-				if window.v1BaseUrl?
-					url = "#{window.v1BaseUrl}/users/trial"
-				else
-					url = "/user/subscription/new?planCode=#{plan}&ssp=true"
-					if couponCode?
-						url = "#{url}&cc=#{couponCode}"
+				url = "#{window.freeTrialBaseUrl}?planCode=#{plan}&ssp=true"
+				if couponCode?
+					url = "#{url}&cc=#{couponCode}"
 				$scope.startedFreeTrial = true
 
 				switch source
