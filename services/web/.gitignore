@@ -67,6 +67,10 @@ public/minjs/
 
 Gemfile.lock
 
+public/stylesheets/ol-style.*.css
+public/stylesheets/style.*.css
+
+
 *.swp
 .DS_Store
 

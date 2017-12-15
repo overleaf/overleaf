@@ -33,7 +33,7 @@ define [
 	if !ace.config._moduleUrl?
 		ace.config._moduleUrl = ace.config.moduleUrl
 		ace.config.moduleUrl = (args...) ->
-			url = ace.config._moduleUrl(args...) + "?fingerprint=#{window.aceFingerprint}"
+			url = ace.config._moduleUrl(args...)
 			return url
 
 	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory, metadata, graphics, preamble, files, $http, $q) ->

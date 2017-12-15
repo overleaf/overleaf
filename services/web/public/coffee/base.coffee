@@ -1,5 +1,5 @@
 define [
-	"libs"
+	"libraries"
 	"modules/recursionHelper"
 	"modules/errorCatcher"
 	"modules/localStorage"
