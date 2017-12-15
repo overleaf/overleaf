@@ -321,13 +321,13 @@ script(type="text/ng-template", id="v1ImportModalTemplate")
 
 	.modal-body.v1-import-wrapper
 		.v1-import-step-1(ng-show="step === 1")
-			.row
-				.col-xs-6
+			.v1-import-row
+				.v1-import-col
 					img.v1-import-img(
 						src="/img/v1-import/v2-editor.png"
 						alt="The new V2 Editor."
 					)
-				.col-xs-6.col-offset-6
+				.v1-import-col
 					h2.v1-import-title Try the Overleaf v2 Editor
 					p The Overleaf v2 editor has many great new features including:
 					ul
@@ -340,20 +340,23 @@ script(type="text/ng-template", id="v1ImportModalTemplate")
 			p.v1-import-cta Would you like to move #[strong {{project.name}}] into Overleaf v2?
 
 		.v1-import-step-2(ng-show="step === 2")
-			div.v1-import-warning(aria-label="Warning symbol.")
-				i.fa.fa-exclamation-triangle
-			h2.v1-import-title #[strong Warning:] Overleaf v2 is Experimental
-			p We are still working hard to bring some Overleaf v1 features to the v2 editor. If you move this project to v2 now, you will:
-			ul
-				li Lose access your project via git
-				li Not be able to use the Journals and Services menu to submit directly to our partners
-				li Not be able to use the Rich Text (WYSIWYG) mode
-				li Not be able to use linked files (to URLs or to files in other Overleaf projects)
-				li Not be able to use some bibliography integrations (Zotero, CiteULike)
-				li Lose access to your labelled versions and not be able to create new labelled versions
-			p
-				strong Please note: you cannot move this project back to v1 once you have moved it to v2. If this is an important project, please consider making a clone in v1 before you move the project to v2.
-			p Are you sure you want to move #[strong {{project.name}}] into Overleaf v2?
+			.v1-import-row
+				.v1-import-warning.v1-import-col(aria-label="Warning symbol.")
+					i.fa.fa-exclamation-triangle
+				.v1-import-col
+					h2.v1-import-title #[strong Warning:] Overleaf v2 is Experimental
+					p We are still working hard to bring some Overleaf v1 features to the v2 editor. If you move this project to v2 now, you will:
+					ul
+						li Lose access your project via git
+						li Not be able to use the Journals and Services menu to submit directly to our partners
+						li Not be able to use the Rich Text (WYSIWYG) mode
+						li Not be able to use linked files (to URLs or to files in other Overleaf projects)
+						li Not be able to use some bibliography integrations (Zotero, CiteULike)
+						li Lose access to your labelled versions and not be able to create new labelled versions
+			.v1-import-cta
+				p
+					strong Please note: you cannot move this project back to v1 once you have moved it to v2. If this is an important project, please consider making a clone in v1 before you move the project to v2.
+				p Are you sure you want to move #[strong {{project.name}}] into Overleaf v2?
 
 	.modal-footer.v1-import-footer
 		div(ng-show="step === 1")
