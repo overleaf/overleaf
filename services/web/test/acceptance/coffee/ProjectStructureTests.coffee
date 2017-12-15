@@ -422,3 +422,25 @@ describe "ProjectStructureChanges", ->
 				done()
 
 			image_file.pipe(req)
+
+		it "should version deleting a doc", (done) ->
+			req = @owner.request.delete {
+				uri: "/user/#{@owner._id}/update/#{@tpds_project_name}/test.tex",
+				auth:
+					user: _.keys(Settings.httpAuthUsers)[0]
+					pass: _.values(Settings.httpAuthUsers)[0]
+					sendImmediately: true
+			}, (error, res, body) =>
+				throw error if error?
+				if res.statusCode < 200 || res.statusCode >= 300
+					throw new Error("failed to delete doc #{res.statusCode}")
+
+				updates = MockDocUpdaterApi.getProjectStructureUpdates(@tpds_project_id).docUpdates
+				expect(updates.length).to.equal(1)
+				update = updates[0]
+				expect(update.userId).to.equal(@owner._id)
+				expect(update.pathname).to.equal("/test.tex")
+				expect(update.newPathname).to.equal("")
+
+				done()
+

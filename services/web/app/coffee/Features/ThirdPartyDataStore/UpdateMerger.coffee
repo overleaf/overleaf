@@ -32,13 +32,13 @@ module.exports =
 					else
 						self.p.processDoc project_id, elementId, user_id, fsPath, path, source, callback
 
-	deleteUpdate: (project_id, path, source, callback)->
+	deleteUpdate: (user_id, project_id, path, source, callback)->
 		projectLocator.findElementByPath project_id, path, (err, element, type)->
 			if  err? || !element?
 				logger.log element:element, project_id:project_id, path:path, "could not find entity for deleting, assuming it was already deleted"
 				return callback()
 			logger.log project_id:project_id, path:path, type:type, element:element, "processing update to delete entity from tpds"
-			editorController.deleteEntity project_id, element._id, type, source, (err)->
+			editorController.deleteEntity project_id, element._id, type, source, user_id, (err)->
 				logger.log project_id:project_id, path:path, "finished processing update to delete entity from tpds"
 				callback()
 

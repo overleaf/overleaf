@@ -47,7 +47,7 @@ module.exports =
 				logger.log user_id:user_id, filePath:path, projectName:projectName, project_id:project._id, "project found for delete update, path is root so marking project as deleted"
 				return projectDeleter.markAsDeletedByExternalSource project._id, callback
 			else
-				updateMerger.deleteUpdate project._id, path, source, (err)->
+				updateMerger.deleteUpdate user_id, project._id, path, source, (err)->
 					callback(err)
 
 
