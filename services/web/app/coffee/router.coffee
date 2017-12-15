@@ -324,6 +324,10 @@ module.exports = class Router
 				headers: req.headers
 			})
 
+		webRouter.get "/no-cache", (req, res, next)->
+			res.header("Cache-Control", "max-age=0")
+			res.sendStatus(404)
+
 		webRouter.get '/oops-express', (req, res, next) -> next(new Error("Test error"))
 		webRouter.get '/oops-internal', (req, res, next) -> throw new Error("Test error")
 		webRouter.get '/oops-mongo', (req, res, next) ->
