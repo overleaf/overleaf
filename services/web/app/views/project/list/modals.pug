@@ -334,7 +334,7 @@ script(type="text/ng-template", id="v1ImportModalTemplate")
 				li Tracked changes and commenting
 				li Improved LaTeX autocomplete
 				li Two-way Dropbox sync
-			p Would you like to move {{project.title}} into Overleaf v2?
+			p Would you like to move #[strong {{project.name}}] into Overleaf v2?
 
 		.v1-import-step-2(ng-show="step === 2")
 			div.v1-import-warning(aria-label="Warning symbol.")
@@ -350,7 +350,7 @@ script(type="text/ng-template", id="v1ImportModalTemplate")
 				li Lose access to your labelled versions and not be able to create new labelled versions
 			p
 				strong Please note: you cannot move this project back to v1 once you have moved it to v2. If this is an important project, please consider making a clone in v1 before you move the project to v2.
-			p Are you sure you want to move {{project.title}} into Overleaf v2?
+			p Are you sure you want to move #[strong {{project.name}}] into Overleaf v2?
 
 	.modal-footer.v1-import-footer
 		div(ng-show="step === 1")
