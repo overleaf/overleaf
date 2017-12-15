@@ -331,12 +331,12 @@ describe "EditorHttpController", ->
 				Project_id: @project_id
 				entity_id: @entity_id = "entity-id-123"
 				entity_type: @entity_type = "entity-type"
-			@EditorController.deleteEntity = sinon.stub().callsArg(4)
+			@EditorController.deleteEntity = sinon.stub().callsArg(5)
 			@EditorHttpController.deleteEntity @req, @res
 
 		it "should call EditorController.deleteEntity", ->
 			@EditorController.deleteEntity
-				.calledWith(@project_id, @entity_id, @entity_type, "editor")
+				.calledWith(@project_id, @entity_id, @entity_type, "editor", @userId)
 				.should.equal true
 
 		it "should send back a success response", ->

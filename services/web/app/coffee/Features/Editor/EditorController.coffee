@@ -105,12 +105,12 @@ module.exports = EditorController =
 			async.series jobs, (err)->
 				callback err, newFolders, lastFolder
 
-	deleteEntity : (project_id, entity_id, entityType, source, callback)->
+	deleteEntity : (project_id, entity_id, entityType, source, userId, callback)->
 		LockManager.getLock project_id, (err)->
 			if err?
 				logger.err err:err, project_id:project_id, "could not get lock to deleteEntity"
 				return callback(err)
-			EditorController.deleteEntityWithoutLock project_id, entity_id, entityType, source, null, (err)->
+			EditorController.deleteEntityWithoutLock project_id, entity_id, entityType, source, userId, (err)->
 				LockManager.releaseLock project_id, ()->
 					callback(err)
 

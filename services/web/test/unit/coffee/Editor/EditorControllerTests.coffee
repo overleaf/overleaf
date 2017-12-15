@@ -376,36 +376,34 @@ describe "EditorController", ->
 				err.should.equal "timed out"
 				done()			
 
-
 	describe "deleteEntity", ->
-
 		beforeEach ->
 			@LockManager.getLock.callsArgWith(1)
 			@LockManager.releaseLock.callsArgWith(1)
 			@EditorController.deleteEntityWithoutLock = sinon.stub().callsArgWith(5)
 
 		it "should call deleteEntityWithoutLock", (done)->
-			@EditorController.deleteEntity @project_id, @entity_id, @type, @source,  =>
+			@EditorController.deleteEntity @project_id, @entity_id, @type, @source, @user_id, =>
 				@EditorController.deleteEntityWithoutLock
-					.calledWith(@project_id, @entity_id, @type, @source, null)
+					.calledWith(@project_id, @entity_id, @type, @source, @user_id)
 					.should.equal true
 				done()
 
 		it "should take the lock", (done)->
-			@EditorController.deleteEntity @project_id, @entity_id, @type, @source,  =>
+			@EditorController.deleteEntity @project_id, @entity_id, @type, @source, @user_id, =>
 				@LockManager.getLock.calledWith(@project_id).should.equal true
 				done()
 
 		it "should release the lock", (done)->
-			@EditorController.deleteEntity @project_id, @entity_id, @type, @source, (error)=>
+			@EditorController.deleteEntity @project_id, @entity_id, @type, @source, @user_id, (error) =>
 				@LockManager.releaseLock.calledWith(@project_id).should.equal true
 				done()
 
 		it "should error if it can't cat the lock", (done)->
 			@LockManager.getLock = sinon.stub().callsArgWith(1, "timed out")
-			@EditorController.deleteEntity @project_id, @entity_id, @type, @source, (err)=>
-				expect(err).to.exist
-				err.should.equal "timed out"
+			@EditorController.deleteEntity @project_id, @entity_id, @type, @source, @user_id, (error) =>
+				expect(error).to.exist
+				error.should.equal "timed out"
 				done()
 
 	describe 'deleteEntityWithoutLock', ->

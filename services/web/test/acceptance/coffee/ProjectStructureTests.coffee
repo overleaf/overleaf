@@ -303,14 +303,14 @@ describe "ProjectStructureChanges", ->
 				updates = MockDocUpdaterApi.getProjectStructureUpdates(@example_project_id).docUpdates
 				expect(updates.length).to.equal(1)
 				update = updates[0]
-				#expect(update.userId).to.equal(@owner._id)
+				expect(update.userId).to.equal(@owner._id)
 				expect(update.pathname).to.equal("/bar/foo/new.tex")
 				expect(update.newPathname).to.equal("")
 
 				updates = MockDocUpdaterApi.getProjectStructureUpdates(@example_project_id).fileUpdates
 				expect(updates.length).to.equal(1)
 				update = updates[0]
-				#expect(update.userId).to.equal(@owner._id)
+				expect(update.userId).to.equal(@owner._id)
 				expect(update.pathname).to.equal("/bar/foo/1pixel.png")
 				expect(update.newPathname).to.equal("")
 

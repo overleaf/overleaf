@@ -147,6 +147,7 @@ module.exports = EditorHttpController =
 		project_id  = req.params.Project_id
 		entity_id   = req.params.entity_id
 		entity_type = req.params.entity_type
-		EditorController.deleteEntity project_id, entity_id, entity_type, "editor", (error) ->
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		EditorController.deleteEntity project_id, entity_id, entity_type, "editor", user_id, (error) ->
 			return next(error) if error?
 			res.sendStatus 204
