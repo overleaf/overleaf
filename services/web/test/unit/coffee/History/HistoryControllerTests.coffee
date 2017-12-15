@@ -31,7 +31,7 @@ describe "HistoryController", ->
 
 		describe "for a project with project history", ->
 			beforeEach ->
-				@ProjectDetailsHandler.getDetails = sinon.stub().callsArgWith(1, null, {overleaf:{history:{display:true}}})
+				@ProjectDetailsHandler.getDetails = sinon.stub().callsArgWith(1, null, {overleaf:{history:{id: 42, display:true}}})
 				@HistoryController.selectHistoryApi @req, @res, @next
 
 			it "should set the flag for project history to true", ->
@@ -57,93 +57,55 @@ describe "HistoryController", ->
 				on: (event, handler) -> @events[event] = handler
 			@request.returns @proxy
 
-		describe "with project history enabled", ->
+		describe "for a project with the project history flag", ->
 			beforeEach ->
-				@settings.apis.project_history.enabled = true
+				@req.useProjectHistory = true
+				@HistoryController.proxyToHistoryApi @req, @res, @next
 
-			describe "for a project with the project history flag", ->
-				beforeEach ->
-					@req.useProjectHistory = true
-					@HistoryController.proxyToHistoryApi @req, @res, @next
+			it "should get the user id", ->
+				@AuthenticationController.getLoggedInUserId
+					.calledWith(@req)
+					.should.equal true
 
-				it "should get the user id", ->
-					@AuthenticationController.getLoggedInUserId
-						.calledWith(@req)
-						.should.equal true
+			it "should call the project history api", ->
+				@request
+					.calledWith({
+						url: "#{@settings.apis.project_history.url}#{@req.url}"
+						method: @req.method
+						headers:
+							"X-User-Id": @user_id
+					})
+					.should.equal true
 
-				it "should call the project history api", ->
-					@request
-						.calledWith({
-							url: "#{@settings.apis.project_history.url}#{@req.url}"
-							method: @req.method
-							headers:
-								"X-User-Id": @user_id
-						})
-						.should.equal true
+			it "should pipe the response to the client", ->
+				@proxy.pipe
+					.calledWith(@res)
+					.should.equal true
 
-				it "should pipe the response to the client", ->
-					@proxy.pipe
-						.calledWith(@res)
-						.should.equal true
-
-			describe "for a project without the project history flag", ->
-				beforeEach ->
-					@req.useProjectHistory = false
-					@HistoryController.proxyToHistoryApi @req, @res, @next
-
-				it "should get the user id", ->
-					@AuthenticationController.getLoggedInUserId
-						.calledWith(@req)
-						.should.equal true
-
-				it "should call the track changes api", ->
-					@request
-						.calledWith({
-							url: "#{@settings.apis.trackchanges.url}#{@req.url}"
-							method: @req.method
-							headers:
-								"X-User-Id": @user_id
-						})
-						.should.equal true
-
-				it "should pipe the response to the client", ->
-					@proxy.pipe
-						.calledWith(@res)
-						.should.equal true
-
-		describe "with project history disabled", ->
+		describe "for a project without the project history flag", ->
 			beforeEach ->
-				@settings.apis.project_history.enabled = false
+				@req.useProjectHistory = false
+				@HistoryController.proxyToHistoryApi @req, @res, @next
 
-			describe "for a project with the project history flag", ->
-				beforeEach ->
-					@req.useProjectHistory = true
-					@HistoryController.proxyToHistoryApi @req, @res, @next
+			it "should get the user id", ->
+				@AuthenticationController.getLoggedInUserId
+					.calledWith(@req)
+					.should.equal true
 
-				it "should call the track changes api", ->
-					@request
-						.calledWith({
-							url: "#{@settings.apis.trackchanges.url}#{@req.url}"
-							method: @req.method
-							headers:
-								"X-User-Id": @user_id
-						})
-						.should.equal true
+			it "should call the track changes api", ->
+				@request
+					.calledWith({
+						url: "#{@settings.apis.trackchanges.url}#{@req.url}"
+						method: @req.method
+						headers:
+							"X-User-Id": @user_id
+					})
+					.should.equal true
 
-			describe "for a project without the project history flag", ->
-				beforeEach ->
-					@req.useProjectHistory = false
-					@HistoryController.proxyToHistoryApi @req, @res, @next
-
-				it "should call the track changes api", ->
-					@request
-						.calledWith({
-							url: "#{@settings.apis.trackchanges.url}#{@req.url}"
-							method: @req.method
-							headers:
-								"X-User-Id": @user_id
-						})
-						.should.equal true
+			it "should pipe the response to the client", ->
+				@proxy.pipe
+					.calledWith(@res)
+					.should.equal true
 
 		describe "with an error", ->
 			beforeEach ->
@@ -156,7 +118,7 @@ describe "HistoryController", ->
 	describe "initializeProject", ->
 		describe "with project history enabled", ->
 			beforeEach ->
-				@settings.apis.project_history.enabled = true
+				@settings.apis.project_history.initializeHistoryForNewProjects = true
 
 			describe "project history returns a successful response", ->
 				beforeEach ->
@@ -212,7 +174,7 @@ describe "HistoryController", ->
 
 		describe "with project history disabled", ->
 			beforeEach ->
-				@settings.apis.project_history.enabled = false
+				@settings.apis.project_history.initializeHistoryForNewProjects = false
 				@HistoryController.initializeProject @callback
 
 			it "should return the callback", ->
