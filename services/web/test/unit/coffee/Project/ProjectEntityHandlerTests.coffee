@@ -163,7 +163,7 @@ describe 'ProjectEntityHandler', ->
 
 		describe "deleting from Mongo", ->
 			beforeEach (done) ->
-				@ProjectEntityHandler.deleteEntity project_id, entity_id, @type = 'file', done
+				@ProjectEntityHandler.deleteEntity project_id, entity_id, @type = 'file', userId, done
 
 			it "should retreive the path", ->
 				@projectLocator.findElement.called.should.equal true
@@ -182,7 +182,7 @@ describe 'ProjectEntityHandler', ->
 
 			it "should clean up the entity from the rest of the system", ->
 				@ProjectEntityHandler._cleanUpEntity
-					.calledWith(@project, null, @entity, @type, @path.fileSystem)
+					.calledWith(@project, userId, @entity, @type, @path.fileSystem)
 					.should.equal true
 
 	describe "_cleanUpEntity", ->

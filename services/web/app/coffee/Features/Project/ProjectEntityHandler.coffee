@@ -412,7 +412,7 @@ module.exports = ProjectEntityHandler =
 				callback()
 
 
-	deleteEntity: (project_id, entity_id, entityType, callback = (error) ->)->
+	deleteEntity: (project_id, entity_id, entityType, userId, callback = (error) ->)->
 		self = @
 		logger.log entity_id:entity_id, entityType:entityType, project_id:project_id, "deleting project entity"
 		if !entityType?
@@ -423,7 +423,7 @@ module.exports = ProjectEntityHandler =
 			return callback(error) if error?
 			projectLocator.findElement {project: project, element_id: entity_id, type: entityType}, (error, entity, path)=>
 				return callback(error) if error?
-				ProjectEntityHandler._cleanUpEntity project, null, entity, entityType, path.fileSystem, (error) ->
+				ProjectEntityHandler._cleanUpEntity project, userId, entity, entityType, path.fileSystem, (error) ->
 					return callback(error) if error?
 					tpdsUpdateSender.deleteEntity project_id:project_id, path:path.fileSystem, project_name:project.name, (error) ->
 						return callback(error) if error?

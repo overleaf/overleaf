@@ -110,14 +110,14 @@ module.exports = EditorController =
 			if err?
 				logger.err err:err, project_id:project_id, "could not get lock to deleteEntity"
 				return callback(err)
-			EditorController.deleteEntityWithoutLock project_id, entity_id, entityType, source, (err)->
+			EditorController.deleteEntityWithoutLock project_id, entity_id, entityType, source, null, (err)->
 				LockManager.releaseLock project_id, ()->
 					callback(err)
 
-	deleteEntityWithoutLock: (project_id, entity_id, entityType, source, callback)->
+	deleteEntityWithoutLock: (project_id, entity_id, entityType, source, userId, callback)->
 		logger.log {project_id, entity_id, entityType, source}, "start delete process of entity"
 		Metrics.inc "editor.delete-entity"
-		ProjectEntityHandler.deleteEntity project_id, entity_id, entityType, (err)->
+		ProjectEntityHandler.deleteEntity project_id, entity_id, entityType, userId, (err)->
 			if err?
 				logger.err err:err, project_id:project_id, entity_id:entity_id, entityType:entityType, "error deleting entity"
 				return callback(err)
