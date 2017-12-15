@@ -2,8 +2,6 @@ define [
 	"./top_hundred_snippets"
 ], (topHundred) ->
 
-	commandNames = (snippet.caption.match(/\w+/)[0] for snippet in topHundred)
-
 	class Parser
 		constructor: (@doc, @prefix) ->
 
@@ -96,6 +94,10 @@ define [
 		constructor: (@metadataManager) ->
 
 		getCompletions: (editor, session, pos, prefix, callback) ->
+			console.log '>> this is running!'
+			commandNames = (
+				snippet.caption.match(/\w+/)[0] for snippet in topHundred
+			)
 			packages = @metadataManager.getAllPackages()
 			packageCommands = []
 			for pkg, snippets of packages
