@@ -145,7 +145,7 @@ module.exports = WebsocketController =
 				cursorData.id      = client.id
 				cursorData.user_id = user_id if user_id?
 				cursorData.email   = email   if email?
-				if first_name? or last_name?
+				if first_name or last_name
 					cursorData.name = if first_name && last_name
 						"#{first_name} #{last_name}"
 					else if first_name
