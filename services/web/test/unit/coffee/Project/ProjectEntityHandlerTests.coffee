@@ -496,6 +496,51 @@ describe 'ProjectEntityHandler', ->
 				.calledWith(project_id, userId, {newDocs})
 				.should.equal true
 
+	describe 'addDocWithoutUpdatingHistory', ->
+		beforeEach ->
+			@name = "some new doc"
+			@lines = ['1234','abc']
+			@path = "/path/to/doc"
+
+			@ProjectEntityHandler._putElement = sinon.stub().callsArgWith(4, null, {path:{fileSystem:@path}})
+			@callback = sinon.stub()
+			@tpdsUpdateSender.addDoc = sinon.stub().callsArg(1)
+			@DocstoreManager.updateDoc = sinon.stub().yields(null, true, 0)
+
+			@ProjectEntityHandler.addDocWithoutUpdatingHistory project_id, folder_id, @name, @lines, userId, @callback
+
+			# Created doc
+			@doc = @ProjectEntityHandler._putElement.args[0][2]
+			@doc.name.should.equal @name
+			expect(@doc.lines).to.be.undefined
+
+		it 'should call put element', ->
+			@ProjectEntityHandler._putElement.calledWith(@project, folder_id, @doc).should.equal true
+
+		it 'should return doc and parent folder', ->
+			@callback.calledWith(null, @doc, folder_id).should.equal true
+
+		it 'should call third party data store', ->
+			@tpdsUpdateSender.addDoc
+				.calledWith({
+					project_id: project_id
+					doc_id: doc_id
+					path: @path
+					project_name: @project.name
+					rev: 0
+				})
+				.should.equal true
+
+		it "should send the doc lines to the doc store", ->
+			@DocstoreManager.updateDoc
+				.calledWith(project_id, @doc._id.toString(), @lines)
+				.should.equal true
+
+		it "should not should send the change in project structure to the doc updater", () ->
+			@documentUpdaterHandler.updateProjectStructure
+				.called
+				.should.equal false
+
 	describe "restoreDoc", ->
 		beforeEach ->
 			@name = "doc-name"
@@ -583,6 +628,12 @@ describe 'ProjectEntityHandler', ->
 				done()
 
 			@ProjectEntityHandler.addFile project_id, folder_id, fileName, {}, userId, () ->
+
+		it "should not send the change in project structure to the doc updater when called as addFileWithoutUpdatingHistory", (done) ->
+			@documentUpdaterHandler.updateProjectStructure = sinon.stub().yields()
+			@ProjectEntityHandler.addFileWithoutUpdatingHistory project_id, folder_id, fileName, {}, userId, () =>
+				@documentUpdaterHandler.updateProjectStructure.called.should.equal false
+				done()
 
 	describe 'replaceFile', ->
 		beforeEach ->
