@@ -109,16 +109,16 @@ module.exports = SubscriptionUpdater =
 				SubscriptionLocator.getUsersSubscription user_id, cb
 			groupSubscription: (cb)->
 				SubscriptionLocator.getGroupSubscriptionMemberOf user_id, cb
-			overleafPlanCode: (cb) ->
+			v1PlanCode: (cb) ->
 				Modules = require '../../infrastructure/Modules'
-				Modules.hooks.fire 'getOverleafPlanCode', user_id, (err, results) ->
+				Modules.hooks.fire 'getV1PlanCode', user_id, (err, results) ->
 					cb(err, results?[0] || null)
 		async.series jobs, (err, results)->
 			if err?
 				logger.err err:err, user_id:user_id,
 					"error getting subscription or group for _setUsersMinimumFeatures"
 				return callback(err)
-			{subscription, groupSubscription, overleafPlanCode} = results
+			{subscription, groupSubscription, v1PlanCode} = results
 			# Group Subscription
 			if groupSubscription? and groupSubscription.planCode?
 				logger.log user_id:user_id, "using group which user is memor of for features"
@@ -127,10 +127,10 @@ module.exports = SubscriptionUpdater =
 			else if subscription? and subscription.planCode? and subscription.planCode != Settings.defaultPlanCode
 				logger.log user_id:user_id, "using users subscription plan code for features"
 				UserFeaturesUpdater.updateFeatures user_id, subscription.planCode, callback
-			# Overleaf Subscription
-			else if overleafPlanCode?
-				logger.log user_id: user_id, "using the overleaf plan for features"
-				UserFeaturesUpdater.updateFeatures user_id, overleafPlanCode, callback
+			# V1 Subscription
+			else if v1PlanCode?
+				logger.log user_id: user_id, "using the V1 plan for features"
+				UserFeaturesUpdater.updateFeatures user_id, v1PlanCode, callback
 			# Default
 			else
 				logger.log user_id:user_id, "using default features for user with no subscription or group"
