@@ -478,14 +478,22 @@ describe 'DocumentUpdaterHandler', ->
 							.should.equal true
 						done()
 
-			describe "when a doc has been deleted", ->
-				it 'should do nothing', (done) ->
+			describe "when an entity has been deleted", ->
+				it 'should end the structure update to the document updater', (done) ->
 					@docId = new ObjectId()
 					@changes = oldDocs: [
 						{ path: '/foo', docLines: 'a\nb', doc: _id: @docId }
 					]
 
+					docUpdates = [
+						id: @docId.toString(),
+						pathname: '/foo',
+						newPathname: ''
+					]
+
 					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>
-						@request.post.called.should.equal false
+						@request.post
+							.calledWith(url: @url, json: {docUpdates, fileUpdates: [], userId: @user_id})
+							.should.equal true
 						done()
 

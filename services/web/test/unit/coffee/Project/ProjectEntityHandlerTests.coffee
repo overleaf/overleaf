@@ -157,13 +157,13 @@ describe 'ProjectEntityHandler', ->
 			@ProjectGetter.getProject.callsArgWith(2, null, @project)
 			@tpdsUpdateSender.deleteEntity = sinon.stub().callsArg(1)
 			@ProjectEntityHandler._removeElementFromMongoArray = sinon.stub().callsArg(3)
-			@ProjectEntityHandler._cleanUpEntity = sinon.stub().callsArg(3)
+			@ProjectEntityHandler._cleanUpEntity = sinon.stub().callsArg(5)
 			@path = mongo: "mongo.path", fileSystem: "/file/system/path"
 			@projectLocator.findElement = sinon.stub().callsArgWith(1, null, @entity = { _id: entity_id }, @path)
 
 		describe "deleting from Mongo", ->
 			beforeEach (done) ->
-				@ProjectEntityHandler.deleteEntity project_id, entity_id, @type = 'file', done
+				@ProjectEntityHandler.deleteEntity project_id, entity_id, @type = 'file', userId, done
 
 			it "should retreive the path", ->
 				@projectLocator.findElement.called.should.equal true
@@ -182,7 +182,7 @@ describe 'ProjectEntityHandler', ->
 
 			it "should clean up the entity from the rest of the system", ->
 				@ProjectEntityHandler._cleanUpEntity
-					.calledWith(@project, @entity, @type)
+					.calledWith(@project, @entity, @type, @path.fileSystem, userId)
 					.should.equal true
 
 	describe "_cleanUpEntity", ->
@@ -193,7 +193,9 @@ describe 'ProjectEntityHandler', ->
 
 		describe "a file", ->
 			beforeEach (done) ->
-				@ProjectEntityHandler._cleanUpEntity @project, _id: @entity_id, 'file', done
+				@path = "/file/system/path.png"
+				@entity = _id: @entity_id
+				@ProjectEntityHandler._cleanUpEntity @project, @entity, 'file', @path, userId, done
 
 			it "should delete the file from FileStoreHandler", ->
 				@FileStoreHandler.deleteFile.calledWith(project_id, @entity_id).should.equal true
@@ -201,38 +203,56 @@ describe 'ProjectEntityHandler', ->
 			it "should not attempt to delete from the document updater", ->
 				@documentUpdaterHandler.deleteDoc.called.should.equal false
 
+			it "should should send the update to the doc updater", ->
+				oldFiles = [ file: @entity, path: @path ]
+				@documentUpdaterHandler.updateProjectStructure
+					.calledWith(project_id, userId, {oldFiles})
+					.should.equal true
+
 		describe "a doc", ->
 			beforeEach (done) ->
-				@ProjectEntityHandler._cleanUpDoc = sinon.stub().callsArg(2)
-				@ProjectEntityHandler._cleanUpEntity @project, @entity = {_id: @entity_id}, 'doc', done
+				@path = "/file/system/path.tex"
+				@ProjectEntityHandler._cleanUpDoc = sinon.stub().callsArg(4)
+				@entity = {_id: @entity_id}
+				@ProjectEntityHandler._cleanUpEntity @project, @entity, 'doc', @path, userId, done
 
 			it "should clean up the doc", ->
 				@ProjectEntityHandler._cleanUpDoc
-					.calledWith(@project, @entity)
+					.calledWith(@project, @entity, @path, userId)
 					.should.equal true
 
 		describe "a folder", ->
 			beforeEach (done) ->
 				@folder =
 					folders: [
-						fileRefs: [ @file1 = {_id: "file-id-1" } ]
-						docs:     [ @doc1  = { _id: "doc-id-1" } ]
+						name: "subfolder"
+						fileRefs: [ @file1 = { _id: "file-id-1", name: "file-name-1"} ]
+						docs:     [ @doc1  = { _id: "doc-id-1", name: "doc-name-1" } ]
 						folders:  []
 					]
-					fileRefs: [ @file2 = { _id: "file-id-2" } ]
-					docs:     [ @doc2  = { _id: "doc-id-2" } ]
+					fileRefs: [ @file2 = { _id: "file-id-2", name: "file-name-2" } ]
+					docs:     [ @doc2  = { _id: "doc-id-2", name: "doc-name-2" } ]
 
-				@ProjectEntityHandler._cleanUpDoc = sinon.stub().callsArg(2)
-				@ProjectEntityHandler._cleanUpFile = sinon.stub().callsArg(2)
-				@ProjectEntityHandler._cleanUpEntity @project, @folder, "folder", done
+				@ProjectEntityHandler._cleanUpDoc = sinon.stub().callsArg(4)
+				@ProjectEntityHandler._cleanUpFile = sinon.stub().callsArg(4)
+				path = "/folder"
+				@ProjectEntityHandler._cleanUpEntity @project, @folder, "folder", path, userId, done
 
 			it "should clean up all sub files", ->
-				@ProjectEntityHandler._cleanUpFile.calledWith(@project, @file1).should.equal true
-				@ProjectEntityHandler._cleanUpFile.calledWith(@project, @file2).should.equal true
+				@ProjectEntityHandler._cleanUpFile
+					.calledWith(@project, @file1, "/folder/subfolder/file-name-1", userId)
+					.should.equal true
+				@ProjectEntityHandler._cleanUpFile
+					.calledWith(@project, @file2, "/folder/file-name-2", userId)
+					.should.equal true
 
 			it "should clean up all sub docs", ->
-				@ProjectEntityHandler._cleanUpDoc.calledWith(@project, @doc1).should.equal true
-				@ProjectEntityHandler._cleanUpDoc.calledWith(@project, @doc2).should.equal true
+				@ProjectEntityHandler._cleanUpDoc
+					.calledWith(@project, @doc1, "/folder/subfolder/doc-name-1", userId)
+					.should.equal true
+				@ProjectEntityHandler._cleanUpDoc
+					.calledWith(@project, @doc2, "/folder/doc-name-2", userId)
+					.should.equal true
 
 	describe 'moveEntity', ->
 		beforeEach ->
@@ -1116,6 +1136,7 @@ describe 'ProjectEntityHandler', ->
 			@doc =
 				_id: ObjectId()
 				name: "test.tex"
+			@path = "/path/to/doc"
 			@ProjectEntityHandler.unsetRootDoc = sinon.stub().callsArg(1)
 			@ProjectEntityHandler._insertDeletedDocReference = sinon.stub().callsArg(2)
 			@documentUpdaterHandler.deleteDoc = sinon.stub().callsArg(2)
@@ -1125,7 +1146,7 @@ describe 'ProjectEntityHandler', ->
 		describe "when the doc is the root doc", ->
 			beforeEach ->
 				@project.rootDoc_id = @doc._id
-				@ProjectEntityHandler._cleanUpDoc @project, @doc, @callback
+				@ProjectEntityHandler._cleanUpDoc @project, @doc, @path, userId, @callback
 
 			it "should unset the root doc", ->
 				@ProjectEntityHandler.unsetRootDoc
@@ -1146,13 +1167,19 @@ describe 'ProjectEntityHandler', ->
 					.calledWith(project_id, @doc._id.toString())
 					.should.equal true
 
+			it "should should send the update to the doc updater", ->
+				oldDocs = [ doc: @doc, path: @path ]
+				@documentUpdaterHandler.updateProjectStructure
+					.calledWith(project_id, userId, {oldDocs})
+					.should.equal true
+
 			it "should call the callback", ->
 				@callback.called.should.equal true
 
 		describe "when the doc is not the root doc", ->
 			beforeEach ->
 				@project.rootDoc_id = ObjectId()
-				@ProjectEntityHandler._cleanUpDoc @project, @doc, @callback
+				@ProjectEntityHandler._cleanUpDoc @project, @doc, @path, userId, @callback
 
 			it "should not unset the root doc", ->
 				@ProjectEntityHandler.unsetRootDoc.called.should.equal false

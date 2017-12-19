@@ -412,7 +412,7 @@ module.exports = ProjectEntityHandler =
 				callback()
 
 
-	deleteEntity: (project_id, entity_id, entityType, callback = (error) ->)->
+	deleteEntity: (project_id, entity_id, entityType, userId, callback = (error) ->)->
 		self = @
 		logger.log entity_id:entity_id, entityType:entityType, project_id:project_id, "deleting project entity"
 		if !entityType?
@@ -423,7 +423,7 @@ module.exports = ProjectEntityHandler =
 			return callback(error) if error?
 			projectLocator.findElement {project: project, element_id: entity_id, type: entityType}, (error, entity, path)=>
 				return callback(error) if error?
-				ProjectEntityHandler._cleanUpEntity project, entity, entityType, (error) ->
+				ProjectEntityHandler._cleanUpEntity project, entity, entityType, path.fileSystem, userId, (error) ->
 					return callback(error) if error?
 					tpdsUpdateSender.deleteEntity project_id:project_id, path:path.fileSystem, project_name:project.name, (error) ->
 						return callback(error) if error?
@@ -456,17 +456,17 @@ module.exports = ProjectEntityHandler =
 							return callback(error) if error?
 							DocumentUpdaterHandler.updateProjectStructure project_id, userId, {oldDocs, newDocs, oldFiles, newFiles}, callback
 
-	_cleanUpEntity: (project, entity, entityType, callback = (error) ->) ->
+	_cleanUpEntity: (project, entity, entityType, path, userId, callback = (error) ->) ->
 		if(entityType.indexOf("file") != -1)
-			ProjectEntityHandler._cleanUpFile project, entity, callback
+			ProjectEntityHandler._cleanUpFile project, entity, path, userId, callback
 		else if (entityType.indexOf("doc") != -1)
-			ProjectEntityHandler._cleanUpDoc project, entity, callback
+			ProjectEntityHandler._cleanUpDoc project, entity, path, userId, callback
 		else if (entityType.indexOf("folder") != -1)
-			ProjectEntityHandler._cleanUpFolder project, entity, callback
+			ProjectEntityHandler._cleanUpFolder project, entity, path, userId, callback
 		else
 			callback()
 
-	_cleanUpDoc: (project, doc, callback = (error) ->) ->
+	_cleanUpDoc: (project, doc, path, userId, callback = (error) ->) ->
 		project_id = project._id.toString()
 		doc_id = doc._id.toString()
 		unsetRootDocIfRequired = (callback) =>
@@ -483,26 +483,33 @@ module.exports = ProjectEntityHandler =
 					return callback(error) if error?
 					DocstoreManager.deleteDoc project_id, doc_id, (error) ->
 						return callback(error) if error?
-						callback()
+						changes = oldDocs: [ {doc, path} ]
+						DocumentUpdaterHandler.updateProjectStructure project_id, userId, changes, callback
 
-	_cleanUpFile: (project, file, callback = (error) ->) ->
+	_cleanUpFile: (project, file, path, userId, callback = (error) ->) ->
 		project_id = project._id.toString()
 		file_id = file._id.toString()
-		FileStoreHandler.deleteFile project_id, file_id, callback
+		FileStoreHandler.deleteFile project_id, file_id, (error) ->
+			return callback(error) if error?
+			changes = oldFiles: [ {file, path} ]
+			DocumentUpdaterHandler.updateProjectStructure project_id, userId, changes, callback
 
-	_cleanUpFolder: (project, folder, callback = (error) ->) ->
+	_cleanUpFolder: (project, folder, folderPath, userId, callback = (error) ->) ->
 		jobs = []
 		for doc in folder.docs
 			do (doc) ->
-				jobs.push (callback) -> ProjectEntityHandler._cleanUpDoc project, doc, callback
+				docPath = path.join(folderPath, doc.name)
+				jobs.push (callback) -> ProjectEntityHandler._cleanUpDoc project, doc, docPath, userId, callback
 
 		for file in folder.fileRefs
 			do (file) ->
-				jobs.push (callback) -> ProjectEntityHandler._cleanUpFile project, file, callback
+				filePath = path.join(folderPath, file.name)
+				jobs.push (callback) -> ProjectEntityHandler._cleanUpFile project, file, filePath, userId, callback
 
 		for childFolder in folder.folders
 			do (childFolder) ->
-				jobs.push (callback) -> ProjectEntityHandler._cleanUpFolder project, childFolder, callback
+				folderPath = path.join(folderPath, childFolder.name)
+				jobs.push (callback) -> ProjectEntityHandler._cleanUpFolder project, childFolder, folderPath, userId, callback
 
 		async.series jobs, callback
 
