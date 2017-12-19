@@ -16,15 +16,9 @@ define [
 				return ColorManager.getHueForUserId(user.id)
 
 		$scope.getMessageStyle = (user) ->
-			style =
-				"border-color"     : "hsl(#{ hue(user) }, #{ hslColorConfigs.borderSaturation }, #{ hslColorConfigs.borderLightness })"
-				"background-color" : "hsl(#{ hue(user) }, #{ hslColorConfigs.bgSaturation }, #{ hslColorConfigs.bgLightness })"
-			console.log style
-			return style
+			"border-color"     : "hsl(#{ hue(user) }, #{ hslColorConfigs.borderSaturation }, #{ hslColorConfigs.borderLightness })"
+			"background-color" : "hsl(#{ hue(user) }, #{ hslColorConfigs.bgSaturation }, #{ hslColorConfigs.bgLightness })"
 
 		$scope.getArrowStyle = (user) ->
-			style =
-				"border-color"     : "hsl(#{ hue(user) }, #{ hslColorConfigs.borderSaturation }, #{ hslColorConfigs.borderLightness })"
-			console.log style
-			return style
+			"border-color"     : "hsl(#{ hue(user) }, #{ hslColorConfigs.borderSaturation }, #{ hslColorConfigs.borderLightness })"
 	]
