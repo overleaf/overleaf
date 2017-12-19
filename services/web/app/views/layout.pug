@@ -95,7 +95,11 @@ html(itemscope, itemtype='http://schema.org/Product')
 					cdnDomain : '!{settings.templates.cdnDomain}',
 					indexName : '!{settings.templates.indexName}'
 				}
-				
+
+		- if (settings.overleaf && settings.overleaf.useOLFreeTrial)
+			script.
+				window.redirectToOLFreeTrialUrl = '!{settings.overleaf.host}/users/trial'
+
 	body
 		if(settings.recaptcha)
 			script(src="https://www.google.com/recaptcha/api.js?render=explicit")

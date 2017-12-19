@@ -533,14 +533,6 @@ define [
 		else
 			$scope.switchToSideBySideLayout()
 
-		$scope.startFreeTrial = (source) ->
-			ga?('send', 'event', 'subscription-funnel', 'compile-timeout', source)
-
-			event_tracking.sendMB "subscription-start-trial", { source }
-
-			window.open("/user/subscription/new?planCode=#{$scope.startTrialPlanCode}")
-			$scope.startedFreeTrial = true
-
 	App.factory "synctex", ["ide", "$http", "$q", (ide, $http, $q) ->
 		# enable per-user containers by default
 		perUserCompile = true
