@@ -70,7 +70,7 @@ Gemfile.lock
 
 public/stylesheets/ol-style.*.css
 public/stylesheets/style.*.css
-public/js/libs/require.js
+public/js/libs/require*.js
 
 
 *.swp
