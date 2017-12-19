@@ -94,7 +94,6 @@ define [
 		constructor: (@metadataManager) ->
 
 		getCompletions: (editor, session, pos, prefix, callback) ->
-			console.log '>> this is running!'
 			commandNames = (
 				snippet.caption.match(/\w+/)[0] for snippet in topHundred
 			)
