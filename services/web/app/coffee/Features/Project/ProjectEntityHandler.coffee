@@ -150,11 +150,11 @@ module.exports = ProjectEntityHandler =
 			DocstoreManager.getDoc project_id, doc_id, options, callback
 
 	addDoc: (project_or_id, folder_id, docName, docLines, userId, callback = (error, doc, folder_id) ->)=>
-		ProjectEntityHandler.addDocWithoutUpdatingHistory project_or_id, folder_id, docName, docLines, userId, (error, doc, folder_id, result) ->
+		ProjectEntityHandler.addDocWithoutUpdatingHistory project_or_id, folder_id, docName, docLines, userId, (error, doc, folder_id, path) ->
 			return callback(error) if error?
 			newDocs = [
 				doc: doc
-				path: result?.path?.fileSystem
+				path: path
 				docLines: docLines.join('\n')
 			]
 			project_id = project_or_id._id or project_or_id
@@ -177,7 +177,7 @@ module.exports = ProjectEntityHandler =
 				return callback(err)
 			ProjectEntityHandler._addDocWithProject project, folder_id, docName, docLines, userId, callback
 
-	_addDocWithProject: (project, folder_id, docName, docLines, userId, callback = (error, doc, folder_id, result) ->)=>
+	_addDocWithProject: (project, folder_id, docName, docLines, userId, callback = (error, doc, folder_id, path) ->)=>
 		project_id = project._id
 		logger.log project_id: project_id, folder_id: folder_id, doc_name: docName, "adding doc to project with project"
 		confirmFolder project, folder_id, (folder_id)=>
@@ -197,7 +197,7 @@ module.exports = ProjectEntityHandler =
 						rev:          0
 					}, (err) ->
 						return callback(err) if err?
-						callback(null, doc, folder_id, result)
+						callback(null, doc, folder_id, result?.path?.fileSystem)
 
 	restoreDoc: (project_id, doc_id, name, callback = (error, doc, folder_id) ->) ->
 		# getDoc will return the deleted doc's lines, but we don't actually remove
@@ -206,7 +206,7 @@ module.exports = ProjectEntityHandler =
 			return callback(error) if error?
 			ProjectEntityHandler.addDoc project_id, null, name, lines, callback
 
-	addFileWithoutUpdatingHistory: (project_id, folder_id, fileName, path, userId, callback = (error, fileRef, folder_id, result, fileStoreUrl) ->)->
+	addFileWithoutUpdatingHistory: (project_id, folder_id, fileName, path, userId, callback = (error, fileRef, folder_id, path, fileStoreUrl) ->)->
 		ProjectGetter.getProjectWithOnlyFolders project_id, (err, project) ->
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add file"
@@ -225,13 +225,13 @@ module.exports = ProjectEntityHandler =
 							return callback(err)
 						tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:result?.path?.fileSystem, project_name:project.name, rev:fileRef.rev}, (err) ->
 							return callback(err) if err?
-							callback(null, fileRef, folder_id, result, fileStoreUrl)
+							callback(null, fileRef, folder_id, result?.path?.fileSystem, fileStoreUrl)
 
-	addFile:  (project_id, folder_id, fileName, path, userId, callback = (error, fileRef, folder_id) ->)->
-		ProjectEntityHandler.addFileWithoutUpdatingHistory project_id, folder_id, fileName, path, userId, (error, fileRef, folder_id, result, fileStoreUrl) ->
+	addFile:  (project_id, folder_id, fileName, fsPath, userId, callback = (error, fileRef, folder_id) ->)->
+		ProjectEntityHandler.addFileWithoutUpdatingHistory project_id, folder_id, fileName, fsPath, userId, (error, fileRef, folder_id, path, fileStoreUrl) ->
 			newFiles = [
 				file: fileRef
-				path: result?.path?.fileSystem
+				path: path
 				url: fileStoreUrl
 			]
 			DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newFiles}, (error) ->
