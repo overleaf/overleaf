@@ -207,16 +207,25 @@
 			}
 		}
 
-		&.alert-danger:hover {
-			background-color: darken(@alert-danger-bg, 5%);
+		&.alert-danger {
+			background-color: tint(@alert-danger-bg, 15%);
+			&:hover {
+				background-color: @alert-danger-bg;
+			}
 		}
 
-		&.alert-warning:hover {
-			background-color: darken(@alert-warning-bg, 5%);
+		&.alert-warning {
+			background-color: tint(@alert-warning-bg, 15%);
+			&:hover {
+				background-color: @alert-warning-bg;
+			}
 		}
 
-		&.alert-info:hover {
-			background-color: darken(@alert-info-bg, 5%);
+		&.alert-info {
+			background-color: tint(@alert-info-bg, 15%);
+			&:hover {
+				background-color: @alert-info-bg;
+			}
 		}
 
 	}
