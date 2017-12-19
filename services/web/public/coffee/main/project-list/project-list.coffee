@@ -462,6 +462,9 @@ define [
 
 	App.controller "ProjectListItemController", ($scope) ->
 
+		$scope.shouldDisableCheckbox = (project) ->
+			$scope.filter == 'archived' && project.accessLevel != 'owner'
+
 		$scope.projectLink = (project) ->
 			if project.accessLevel == 'readAndWrite' and project.source == 'token'
 				"/#{project.tokens.readAndWrite}"
