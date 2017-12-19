@@ -56,6 +56,7 @@ ProjectSchema = new Schema
 		read_token      : { type: String }
 		history         :
 			id            : { type: Number }
+			display       : { type: Boolean }
 
 ProjectSchema.statics.getProject = (project_or_id, fields, callback)->
 	if project_or_id._id?

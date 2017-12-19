@@ -59,7 +59,7 @@ describe "ProjectStructureChanges", ->
 				@dup_project_id = body.project_id
 				done()
 
-		it "should version the dosc created", ->
+		it "should version the docs created", ->
 			updates = MockDocUpdaterApi.getProjectStructureUpdates(@dup_project_id).docUpdates
 			expect(updates.length).to.equal(2)
 			_.each updates, (update) =>
