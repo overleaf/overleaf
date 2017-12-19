@@ -20,10 +20,15 @@ module.exports = ProjectManager =
 				do (doc_id) ->
 					jobs.push (callback) ->
 						DocumentManager.flushDocIfLoadedWithLock project_id, doc_id, (error) ->
-							if error?
+							if error? and error instanceof Errors.NotFoundError
+								logger.warn err: error, project_id: project_id, doc_id: doc_id, "found deleted doc when flushing, removing from redis"
+								callback()
+							else if error?
 								logger.error err: error, project_id: project_id, doc_id: doc_id, "error flushing doc"
 								errors.push(error)
-							callback()
+								callback()
+							else
+								callback()
 
 			logger.log project_id: project_id, doc_ids: doc_ids, "flushing docs"
 			async.series jobs, () ->
