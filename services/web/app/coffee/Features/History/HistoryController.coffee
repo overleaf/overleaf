@@ -6,7 +6,7 @@ ProjectDetailsHandler = require "../Project/ProjectDetailsHandler"
 
 module.exports = HistoryController =
 	initializeProject: (callback = (error, history_id) ->) ->
-		return callback() if !settings.apis.project_history?.enabled
+		return callback() if !settings.apis.project_history?.initializeHistoryForNewProjects
 		request.post {
 			url: "#{settings.apis.project_history.url}/project"
 		}, (error, res, body)->
@@ -33,7 +33,8 @@ module.exports = HistoryController =
 		# find out which type of history service this project uses
 		ProjectDetailsHandler.getDetails project_id, (err, project) ->
 			return next(err) if err?
-			if project?.overleaf?.history?.display
+			history = project.overleaf?.history
+			if history?.id? and history?.display
 				req.useProjectHistory = true
 			else
 				req.useProjectHistory = false
@@ -58,7 +59,7 @@ module.exports = HistoryController =
 	buildHistoryServiceUrl: (useProjectHistory) ->
 		# choose a history service, either document-level (trackchanges)
 		# or project-level (project_history)
-		if settings.apis.project_history?.enabled && useProjectHistory
+		if useProjectHistory
 			return settings.apis.project_history.url
 		else
 			return settings.apis.trackchanges.url

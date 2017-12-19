@@ -205,7 +205,7 @@ module.exports = DocumentUpdaterHandler =
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
 	updateProjectStructure : (project_id, userId, changes, callback = (error) ->)->
-		return callback() if !settings.apis.project_history?.enabled
+		return callback() if !settings.apis.project_history?.sendProjectStructureOps
 
 		docUpdates = DocumentUpdaterHandler._getUpdates('doc', changes.oldDocs, changes.newDocs)
 		fileUpdates = DocumentUpdaterHandler._getUpdates('file', changes.oldFiles, changes.newFiles)

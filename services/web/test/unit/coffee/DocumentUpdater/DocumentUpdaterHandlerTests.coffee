@@ -393,7 +393,7 @@ describe 'DocumentUpdaterHandler', ->
 
 		describe "with project history disabled", ->
 			beforeEach ->
-				@settings.apis.project_history.enabled = false
+				@settings.apis.project_history.sendProjectStructureOps = false
 				@request.post = sinon.stub()
 
 				@handler.updateProjectStructure @project_id, @user_id, {}, @callback
@@ -406,7 +406,7 @@ describe 'DocumentUpdaterHandler', ->
 
 		describe "with project history enabled", ->
 			beforeEach ->
-				@settings.apis.project_history.enabled = true
+				@settings.apis.project_history.sendProjectStructureOps = true
 				@url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}"
 				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
 

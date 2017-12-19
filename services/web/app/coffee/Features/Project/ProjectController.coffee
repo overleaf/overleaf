@@ -216,7 +216,7 @@ module.exports = ProjectController =
 			project: (cb)->
 				ProjectGetter.getProject(
 					project_id,
-					{ name: 1, lastUpdated: 1, track_changes: 1, owner_ref: 1 },
+					{ name: 1, lastUpdated: 1, track_changes: 1, owner_ref: 1, 'overleaf.history.display': 1 },
 					cb
 				)
 			user: (cb)->
@@ -351,6 +351,7 @@ module.exports = ProjectController =
 					themes: THEME_LIST
 					maxDocLength: Settings.max_doc_length
 					showLinkSharingOnboarding: !!results.couldShowLinkSharingOnboarding
+					useV2History: !!project.overleaf?.history?.display
 				timer.done()
 
 	_buildProjectList: (allProjects, v1Projects = [])->
