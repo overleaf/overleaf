@@ -57,6 +57,7 @@ describe "SubscriptionUpdater", ->
 
 		@ReferalAllocator = assignBonus:sinon.stub().callsArgWith(1)
 		@ReferalAllocator.cock = true
+		@Modules = {hooks: {fire: sinon.stub().callsArgWith(2, null, null)}}
 		@SubscriptionUpdater = SandboxedModule.require modulePath, requires:
 			'../../models/Subscription': Subscription:@SubscriptionModel
 			'./UserFeaturesUpdater': @UserFeaturesUpdater
@@ -65,6 +66,7 @@ describe "SubscriptionUpdater", ->
 			"logger-sharelatex": log:->
 			'settings-sharelatex': @Settings
 			"../Referal/ReferalAllocator" : @ReferalAllocator
+			'../../infrastructure/Modules': @Modules
 
 
 	describe "syncSubscription", ->
@@ -204,10 +206,22 @@ describe "SubscriptionUpdater", ->
 				assert.equal args[1], @groupSubscription.planCode
 				done()
 
+		it "should call updateFeatures with the overleaf subscription if set", (done)->
+			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null)
+			@SubscriptionLocator.getGroupSubscriptionMemberOf.callsArgWith(1, null, null)
+			@Modules.hooks.fire = sinon.stub().callsArgWith(2, null, ['ol_pro'])
+
+			@SubscriptionUpdater._setUsersMinimumFeatures @adminUser._id, (err)=>
+				args = @UserFeaturesUpdater.updateFeatures.args[0]
+				assert.equal args[0], @adminUser._id
+				assert.equal args[1], 'ol_pro'
+				done()
+
 		it "should call not call updateFeatures  with users subscription if the subscription plan code is the default one (downgraded)", (done)->
 			@subscription.planCode = @Settings.defaultPlanCode
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @subscription)
 			@SubscriptionLocator.getGroupSubscriptionMemberOf.callsArgWith(1, null, @groupSubscription)
+			@Modules.hooks.fire = sinon.stub().callsArgWith(2, null, null)
 			@SubscriptionUpdater._setUsersMinimumFeatures @adminuser_id, (err)=>
 				args = @UserFeaturesUpdater.updateFeatures.args[0]
 				assert.equal args[0], @adminUser._id
@@ -218,6 +232,7 @@ describe "SubscriptionUpdater", ->
 		it "should call updateFeatures with default if there are no subscriptions for user", (done)->
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null)
 			@SubscriptionLocator.getGroupSubscriptionMemberOf.callsArgWith(1, null)
+			@Modules.hooks.fire = sinon.stub().callsArgWith(2, null, null)
 			@SubscriptionUpdater._setUsersMinimumFeatures @adminuser_id, (err)=>
 				args = @UserFeaturesUpdater.updateFeatures.args[0]
 				assert.equal args[0], @adminUser._id
@@ -263,3 +278,13 @@ describe "SubscriptionUpdater", ->
 				@SubscriptionUpdater._setUsersMinimumFeatures
 					.calledWith(user_id)
 					.should.equal true
+
+	describe 'refreshSubscription', ->
+		beforeEach ->
+			@SubscriptionUpdater._setUsersMinimumFeatures = sinon.stub()
+				.callsArgWith(1, null)
+
+		it 'should call to _setUsersMinimumFeatures', ->
+			@SubscriptionUpdater.refreshSubscription(@adminUser._id, ()->)
+			@SubscriptionUpdater._setUsersMinimumFeatures.callCount.should.equal 1
+			@SubscriptionUpdater._setUsersMinimumFeatures.calledWith(@adminUser._id).should.equal true
