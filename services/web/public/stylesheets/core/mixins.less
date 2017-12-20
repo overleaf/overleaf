@@ -434,6 +434,16 @@
   .alert-link {
     color: darken(@text-color, 10%);
   }
+
+  .alert-link-as-btn when (@is-overleaf = true) {
+    display: inline-block;
+    font-weight: bold;
+    .button-variant(#FFF, shade(@background, 20%), transparent);
+    .button-size(@padding-xs-vertical; @padding-small-horizontal; @font-size-small; @line-height-small; @btn-border-radius-small);
+    &:hover {
+      text-decoration: none;
+    }
+  }
 }
 
 // Tables
