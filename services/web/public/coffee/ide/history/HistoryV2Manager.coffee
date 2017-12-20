@@ -21,7 +21,6 @@ define [
 					@reloadDiff()
 
 			@$scope.$watch "history.selection.pathname", () =>
-				console.log("pathname updated, reloading diff")
 				@reloadDiff()
 
 		show: () ->
