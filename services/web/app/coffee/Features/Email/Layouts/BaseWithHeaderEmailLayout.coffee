@@ -11,7 +11,6 @@ module.exports = _.template """
 		
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<meta name="viewport" content="width=device-width">
-		<title>Project invite</title>
 		<style>.avoid-auto-linking a,
 .avoid-auto-linking a[href] {
 	color: #a93529 !important;
