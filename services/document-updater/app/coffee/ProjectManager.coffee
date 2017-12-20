@@ -21,7 +21,7 @@ module.exports = ProjectManager =
 					jobs.push (callback) ->
 						DocumentManager.flushDocIfLoadedWithLock project_id, doc_id, (error) ->
 							if error? and error instanceof Errors.NotFoundError
-								logger.warn err: error, project_id: project_id, doc_id: doc_id, "found deleted doc when flushing, removing from redis"
+								logger.warn err: error, project_id: project_id, doc_id: doc_id, "found deleted doc when flushing"
 								callback()
 							else if error?
 								logger.error err: error, project_id: project_id, doc_id: doc_id, "error flushing doc"
