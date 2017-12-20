@@ -297,10 +297,14 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 	webRouter.use (req, res, next) ->
 		isOl = (Settings.brandPrefix == 'ol-')
 		res.locals.uiConfig = 
-			defaultResizerSizeOpen   : if isOl then 2 else 24
-			defaultResizerSizeClosed : if isOl then 2 else 24
-			eastResizerCursor        : if isOl then "ew-resize" else null
-			westResizerCursor        : if isOl then "ew-resize" else null
-			chatResizerSizeOpen      : if isOl then 2 else 12
-			chatResizerSizeClosed    : 0
+			defaultResizerSizeOpen     : if isOl then 2 else 24
+			defaultResizerSizeClosed   : if isOl then 2 else 24
+			eastResizerCursor          : if isOl then "ew-resize" else null
+			westResizerCursor          : if isOl then "ew-resize" else null
+			chatResizerSizeOpen        : if isOl then 2 else 12
+			chatResizerSizeClosed      : 0
+			chatMessageBorderSaturation: if isOl then "85%" else "70%"
+			chatMessageBorderLightness : if isOl then "40%" else "70%"
+			chatMessageBgSaturation    : if isOl then "85%" else "60%"
+			chatMessageBgLightness     : if isOl then "40%" else "97%"
 		next()

@@ -31,13 +31,18 @@
 		right: 0;
 		bottom: @new-message-height;
 		overflow-x: hidden;
+		background-color: @chat-bg;
+
 		li.message {
 			margin: @line-height-computed / 2;
 			.date {
 				font-size: 12px;
-				color: @gray-light;
-				border-bottom: 1px solid @gray-lightest;
+				color: @chat-message-date-color;
 				margin-bottom: @line-height-computed / 2;
+				text-align: right;
+			}
+			.date when (@is-overleaf = false) {
+				border-bottom: 1px solid @gray-lightest;
 				text-align: center;
 			}
 			.avatar {
@@ -56,20 +61,22 @@
 
 				.name {
 					font-size: 12px;
-					color: @gray-light;
+					color: @chat-message-name-color;
 					margin-bottom: 4px;
 					min-height: 16px;
 				}
 				.message {
 					border-left: 3px solid transparent;
 					font-size: 14px;
-					box-shadow: -1px 2px 3px #ddd;
-					border-raduis: @border-radius-base;
+					box-shadow: @chat-message-box-shadow;
+					border-radius: @chat-message-border-radius;
 					position: relative;
 					
 					.message-content {
-						padding: @line-height-computed / 2;
+						padding: @chat-message-padding;
 						overflow-x: auto;
+						color: @chat-message-color;
+						font-weight: @chat-message-weight;
 					}
 
 					.arrow {
@@ -124,7 +131,7 @@
 		.full-size;
 		top: auto;
 		height: @new-message-height;
-		background-color: @gray-lightest;
+		background-color: @chat-new-message-bg;
 		padding: @line-height-computed / 4;
 		border-top: 1px solid @editor-border-color;
 		textarea {
@@ -134,9 +141,10 @@
 			border: 1px solid @editor-border-color;
 			height: 100%;
 			width: 100%;
-			color: @gray-dark;
+			color: @chat-new-message-textarea-color;
 			font-size: 14px;
 			padding: @line-height-computed / 4;
+			background-color: @chat-new-message-textarea-bg;
 		}
 	}
 }
@@ -145,7 +153,7 @@
 	word-break: break-all;
 }
 
-.editor-dark {
+.editor-dark when (@is-overleaf = false) {
 	.chat {
 		.new-message {
 			background-color: lighten(@editor-dark-background-color, 10%);
