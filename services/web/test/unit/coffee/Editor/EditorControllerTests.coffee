@@ -424,21 +424,6 @@ describe "EditorController", ->
 				.calledWith(@project_id, "removeEntity", @entity_id, @source)
 				.should.equal true
 
-	describe "getting a list of project paths", ->
-
-		it 'should call the project entity handler to get an array of docs', (done)->
-			fullDocsHash = 
-				"/doc1.tex":{lines:["das"], _id:"1234"}
-				"/doc2.tex":{lines:["dshajkh"]}
-			project_id = "d312nkjnajn"
-			@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, fullDocsHash)
-			@EditorController.getListOfDocPaths project_id, (err, returnedDocs)->
-				returnedDocs.length.should.equal 2
-				returnedDocs[0]._id.should.equal "1234"
-				assert.equal returnedDocs[0].lines, undefined
-				returnedDocs[1].path.should.equal "doc2.tex"	
-				done()
-
 	describe "notifyUsersProjectHasBeenDeletedOrRenamed", ->
 		it 'should emmit a message to all users in a project', (done)->
 			@EditorRealTimeController.emitToRoom = sinon.stub()

@@ -126,12 +126,6 @@ module.exports = EditorController =
 			if callback?
 				callback()
 
-	getListOfDocPaths: (project_id, callback)->
-		ProjectEntityHandler.getAllDocs project_id, (err, docs)->
-			docList = _.map docs, (doc, path)->
-				return {_id:doc._id, path:path.substring(1)}
-			callback(null, docList)
-
 	notifyUsersProjectHasBeenDeletedOrRenamed: (project_id, callback)->
 		EditorRealTimeController.emitToRoom(project_id, 'projectRenamedOrDeletedByExternalSource')
 		callback()
