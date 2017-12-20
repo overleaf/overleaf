@@ -1,0 +1,17 @@
+aside.file-tree.file-tree-history(ng-controller="FileTreeController", ng-class="{ 'multi-selected': multiSelectedCount > 0 }", ng-show="ui.view == 'history' && history.isV2").full-size
+	.toolbar.toolbar-filetree
+		span Modified files
+
+	.file-tree-inner
+		ul.list-unstyled.file-tree-list
+			li(
+				ng-repeat="(pathname, doc) in history.selection.docs"
+				ng-class="{ 'selected': history.selection.pathname == pathname }"
+			)
+				.entity
+					.entity-name.entity-name-history(
+						ng-click="history.selection.pathname = pathname",
+						ng-class="{ 'deleted': doc.deleted }"
+					)
+						i.fa.fa-fw.fa-pencil
+						span  {{ pathname }}
