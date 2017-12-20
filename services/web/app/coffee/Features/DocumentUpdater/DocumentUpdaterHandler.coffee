@@ -205,10 +205,10 @@ module.exports = DocumentUpdaterHandler =
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
 	updateProjectStructure : (project_id, userId, changes, callback = (error) ->)->
-		return callback() if !settings.apis.project_history?.enabled
+		return callback() if !settings.apis.project_history?.sendProjectStructureOps
 
-		docUpdates = DocumentUpdaterHandler._getRenameUpdates('doc', changes.oldDocs, changes.newDocs)
-		fileUpdates = DocumentUpdaterHandler._getRenameUpdates('file', changes.oldFiles, changes.newFiles)
+		docUpdates = DocumentUpdaterHandler._getUpdates('doc', changes.oldDocs, changes.newDocs)
+		fileUpdates = DocumentUpdaterHandler._getUpdates('file', changes.oldFiles, changes.newFiles)
 
 		timer = new metrics.Timer("set-document")
 		url = "#{settings.apis.documentupdater.url}/project/#{project_id}"
@@ -230,7 +230,7 @@ module.exports = DocumentUpdaterHandler =
 				logger.error {project_id, url}, "doc updater returned a non-success status code: #{res.statusCode}"
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
-	_getRenameUpdates: (entityType, oldEntities, newEntities) ->
+	_getUpdates: (entityType, oldEntities, newEntities) ->
 		oldEntities ||= []
 		newEntities ||= []
 		updates = []
@@ -254,6 +254,16 @@ module.exports = DocumentUpdaterHandler =
 					id: id
 					pathname: oldEntity.path
 					newPathname: newEntity.path
+
+		for id, oldEntity of oldEntitiesHash
+			newEntity = newEntitiesHash[id]
+
+			if !newEntity?
+				# entity deleted
+				updates.push
+					id: id
+					pathname: oldEntity.path
+					newPathname: ''
 
 		updates
 

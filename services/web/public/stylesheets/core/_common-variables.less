@@ -545,7 +545,7 @@
 //## Define alert colors, border radius, and padding.
 
 @alert-padding:               15px;
-@alert-border-radius:         @border-radius-base;
+@alert-border-radius:         0;
 @alert-link-font-weight:      bold;
 
 @alert-success-bg:            @state-success-bg;
@@ -899,20 +899,22 @@
 @toolbar-icon-btn-hover-color   : @gray-dark;
 @toolbar-icon-btn-hover-shadow  : 0 1px 0 rgba(0, 0, 0, 0.25);
 @toolbar-icon-btn-hover-boxshadow : inset 0 3px 5px rgba(0, 0, 0, 0.225);
-@toolbar-border-bottom          : 1px solid @toolbar-border-color;
+@toolbar-border-bottom            : 1px solid @toolbar-border-color;
+@toolbar-small-height             : 32px;
+@toolbar-tall-height              : 58px;
 
 // Editor file-tree
-@file-tree-bg                   : transparent;
-@file-tree-line-height          : 2.6;
-@file-tree-item-color           : @gray-darker;
-@file-tree-item-toggle-color    : @gray;
-@file-tree-item-icon-color      : @gray-light;
-@file-tree-item-input-color     : inherit;
-@file-tree-item-folder-color    : lighten(desaturate(@link-color, 10%), 5%);
-@file-tree-item-hover-bg        : @gray-lightest;
-@file-tree-item-selected-bg     : transparent;
-@file-tree-multiselect-bg       : lighten(@brand-info, 40%);
-@file-tree-multiselect-hover-bg : lighten(@brand-info, 30%);
+@file-tree-bg                    : transparent;
+@file-tree-line-height           : 2.6;
+@file-tree-item-color            : @gray-darker;
+@file-tree-item-toggle-color     : @gray;
+@file-tree-item-icon-color       : @gray-light;
+@file-tree-item-input-color      : inherit;
+@file-tree-item-folder-color     : lighten(desaturate(@link-color, 10%), 5%);
+@file-tree-item-hover-bg         : @gray-lightest;
+@file-tree-item-selected-bg      : transparent;
+@file-tree-multiselect-bg        : lighten(@brand-info, 40%);
+@file-tree-multiselect-hover-bg  : lighten(@brand-info, 30%);
 
 // Editor resizers
 @editor-resizer-bg-color          : #F4F4F4;
@@ -934,6 +936,14 @@
 @chat-new-message-bg              : @gray-lightest;
 @chat-new-message-textarea-bg     : #FFF;
 @chat-new-message-textarea-color  : @gray-dark;
+
+// PDF
+@pdf-top-offset                  : @toolbar-tall-height;
+@pdf-bg                          : transparent;
+@pdfjs-bg                        : @gray-lighter;
+@pdf-page-shadow-color           : #000;
+@log-line-no-color               : @gray; 
+@log-hints-color                 : @gray-dark;
 
 // Tags
 @tag-border-radius  : 0.25em;

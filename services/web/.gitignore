@@ -39,6 +39,7 @@ data/*
 app.js
 app/js/*
 test/unit/js/*
+test/unit_frontend/js/*
 test/smoke/js/*
 test/acceptance/js/*
 cookies.txt
@@ -66,6 +67,11 @@ public/brand/plans.css
 public/minjs/
 
 Gemfile.lock
+
+public/stylesheets/ol-style.*.css
+public/stylesheets/style.*.css
+public/js/libs/require*.js
+
 
 *.swp
 .DS_Store

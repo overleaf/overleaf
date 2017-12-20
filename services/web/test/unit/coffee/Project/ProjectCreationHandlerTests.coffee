@@ -38,7 +38,7 @@ describe 'ProjectCreationHandler', ->
 			setRootDoc: sinon.stub().callsArg(2)
 		@ProjectDetailsHandler =
 			validateProjectName: sinon.stub().yields()
-		@HistoryController =
+		@HistoryManager =
 			initializeProject: sinon.stub().callsArg(0)
 
 		@user =
@@ -53,7 +53,7 @@ describe 'ProjectCreationHandler', ->
 			'../../models/User': User:@User
 			'../../models/Project':{Project:@ProjectModel}
 			'../../models/Folder':{Folder:@FolderModel}
-			'../History/HistoryController': @HistoryController
+			'../History/HistoryManager': @HistoryManager
 			'./ProjectEntityHandler':@ProjectEntityHandler
 			"./ProjectDetailsHandler":@ProjectDetailsHandler
 			"settings-sharelatex": @Settings = {}
@@ -66,7 +66,7 @@ describe 'ProjectCreationHandler', ->
 	describe 'Creating a Blank project', ->
 		beforeEach ->
 			@overleaf_id = 1234
-			@HistoryController.initializeProject = sinon.stub().callsArgWith(0, null, { @overleaf_id })
+			@HistoryManager.initializeProject = sinon.stub().callsArgWith(0, null, { @overleaf_id })
 			@ProjectModel::save = sinon.stub().callsArg(0)
 
 		describe "successfully", ->
@@ -83,7 +83,7 @@ describe 'ProjectCreationHandler', ->
 
 			it "should initialize the project overleaf if history id not provided", (done)->
 				@handler.createBlankProject ownerId, projectName, done
-				@HistoryController.initializeProject.calledWith().should.equal true
+				@HistoryManager.initializeProject.calledWith().should.equal true
 
 			it "should set the overleaf id if overleaf id not provided", (done)->
 				@handler.createBlankProject ownerId, projectName, (err, project)=>

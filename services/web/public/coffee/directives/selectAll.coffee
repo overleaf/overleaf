@@ -49,18 +49,21 @@ define [
 						selectAllListController.clearSelectAllState()
 
 				scope.$on "select-all:select", () ->
+					return if element.prop('disabled')
 					ignoreChanges = true
 					scope.$apply () ->
 						scope.ngModel = true
 					ignoreChanges = false
 
 				scope.$on "select-all:deselect", () ->
+					return if element.prop('disabled')
 					ignoreChanges = true
 					scope.$apply () ->
 						scope.ngModel = false
 					ignoreChanges = false
 
 				scope.$on "select-all:row-clicked", () ->
+					return if element.prop('disabled')
 					ignoreChanges = true
 					scope.$apply () ->
 						scope.ngModel = !scope.ngModel

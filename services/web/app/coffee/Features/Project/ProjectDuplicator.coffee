@@ -21,7 +21,7 @@ module.exports = ProjectDuplicator =
 				if !doc?._id?
 					return callback()
 				content = docContents[doc._id.toString()]
-				projectEntityHandler.addDocWithProject newProject, desFolder._id, doc.name, content.lines, owner_id, (err, newDoc)->
+				projectEntityHandler.addDoc newProject, desFolder._id, doc.name, content.lines, owner_id, (err, newDoc)->
 					if err?
 						logger.err err:err, "error copying doc"
 						return callback(err)

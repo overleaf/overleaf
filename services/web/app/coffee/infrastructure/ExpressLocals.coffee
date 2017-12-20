@@ -12,7 +12,7 @@ Modules = require "./Modules"
 Url = require "url"
 PackageVersions = require "./PackageVersions"
 htmlEncoder = new require("node-html-encoder").Encoder("numerical")
-fingerprints = {}
+hashedFiles = {}
 Path = require 'path'
 Features = require "./Features"
 
@@ -30,43 +30,42 @@ getFileContent = (filePath)->
 	filePath = Path.join __dirname, "../../../", "public#{filePath}"
 	exists = fs.existsSync filePath
 	if exists
-		content = fs.readFileSync filePath
+		content = fs.readFileSync filePath, "UTF-8"
 		return content
 	else
-		logger.log filePath:filePath, "file does not exist for fingerprints"
+		logger.log filePath:filePath, "file does not exist for hashing"
 		return ""
 
-logger.log "Generating file fingerprints..."
 pathList = [
-	["#{jsPath}libs/#{fineuploader}.js"]
-	["#{jsPath}libs/require.js"]
-	["#{jsPath}ide.js"]
-	["#{jsPath}main.js"]
-	["#{jsPath}libs.js"]
-	["#{jsPath}#{ace}/ace.js","#{jsPath}#{ace}/mode-latex.js","#{jsPath}#{ace}/worker-latex.js","#{jsPath}#{ace}/snippets/latex.js"]
-	["#{jsPath}libs/#{pdfjs}/pdf.js"]
-	["#{jsPath}libs/#{pdfjs}/pdf.worker.js"]
-	["#{jsPath}libs/#{pdfjs}/compatibility.js"]
-	["/stylesheets/style.css"]
-	["/stylesheets/ol-style.css"]
+	"#{jsPath}libs/require.js"
+	"#{jsPath}ide.js"
+	"#{jsPath}main.js"
+	"#{jsPath}libraries.js"
+	"/stylesheets/style.css"
+	"/stylesheets/ol-style.css"
 ]
 
-for paths in pathList
-	contentList = _.map(paths, getFileContent)
-	content = contentList.join("")
-	hash = crypto.createHash("md5").update(content).digest("hex")
-	_.each paths, (filePath)-> 
-		logger.log "#{filePath}: #{hash}"
-		fingerprints[filePath] = hash
+if !Settings.useMinifiedJs 
+	logger.log "not using minified JS, not hashing static files"
+else
+	logger.log "Generating file hashes..."
+	for path in pathList
+		content = getFileContent(path)
+		hash = crypto.createHash("md5").update(content).digest("hex")
+		
+		splitPath = path.split("/")
+		filenameSplit = splitPath.pop().split(".")
+		filenameSplit.splice(filenameSplit.length-1, 0, hash)
+		splitPath.push(filenameSplit.join("."))
 
-getFingerprint = (path) ->
-	if fingerprints[path]?
-		return fingerprints[path]
-	else
-		logger.err "No fingerprint for file: #{path}"
-		return ""
+		hashPath = splitPath.join("/")
+		hashedFiles[path] = hashPath
 
-logger.log "Finished generating file fingerprints"
+		fsHashPath = Path.join __dirname, "../../../", "public#{hashPath}"
+		fs.writeFileSync(fsHashPath, content)
+
+
+		logger.log "Finished hashing static content"
 
 cdnAvailable = Settings.cdn?.web?.host?
 darkCdnAvailable = Settings.cdn?.web?.darkHost?
@@ -120,29 +119,35 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 		res.locals.fullJsPath = Url.resolve(staticFilesBase, jsPath)
 		res.locals.lib = PackageVersions.lib
 
+
+
 		res.locals.buildJsPath = (jsFile, opts = {})->
 			path = Path.join(jsPath, jsFile)
 
-			doFingerPrint = opts.fingerprint != false
+			if opts.hashedPath && hashedFiles[path]?
+				path = hashedFiles[path]
 
 			if !opts.qs?
 				opts.qs = {}
-
-			if !opts.qs?.fingerprint? and doFingerPrint
-				opts.qs.fingerprint = getFingerprint(path)
 
 			if opts.cdn != false
 				path = Url.resolve(staticFilesBase, path)
 
 			qs = querystring.stringify(opts.qs)
 
+			if opts.removeExtension == true
+				path = path.slice(0,-3)
+				
 			if qs? and qs.length > 0
 				path = path + "?" + qs
 			return path
 
-		res.locals.buildCssPath = (cssFile)->
+		res.locals.buildCssPath = (cssFile, opts)->
 			path = Path.join("/stylesheets/", cssFile)
-			return Url.resolve(staticFilesBase, path) + "?fingerprint=" + getFingerprint(path)
+			if opts?.hashedPath && hashedFiles[path]?
+				hashedPath = hashedFiles[path]
+				return Url.resolve(staticFilesBase, hashedPath)
+			return Url.resolve(staticFilesBase, path)
 
 		res.locals.buildImgPath = (imgFile)->
 			path = Path.join("/img/", imgFile)
@@ -225,10 +230,6 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 	webRouter.use (req, res, next) ->
 		res.locals.getReqQueryParam = (field)->
 			return req.query?[field]
-		next()
-
-	webRouter.use (req, res, next)->
-		res.locals.fingerprint = getFingerprint
 		next()
 
 	webRouter.use (req, res, next)->

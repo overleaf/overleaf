@@ -197,6 +197,7 @@ module.exports = class Router
 
 		webRouter.get  "/project/:Project_id/updates", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApi
 		webRouter.get  "/project/:Project_id/doc/:doc_id/diff", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApi
+		webRouter.get  "/project/:Project_id/diff", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApi
 		webRouter.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApi
 
 		webRouter.get  '/Project/:Project_id/download/zip', AuthorizationMiddlewear.ensureUserCanReadProject, ProjectDownloadsController.downloadProject
@@ -323,6 +324,10 @@ module.exports = class Router
 				ips: req.ips
 				headers: req.headers
 			})
+
+		webRouter.get "/no-cache", (req, res, next)->
+			res.header("Cache-Control", "max-age=0")
+			res.sendStatus(404)
 
 		webRouter.get '/oops-express', (req, res, next) -> next(new Error("Test error"))
 		webRouter.get '/oops-internal', (req, res, next) -> throw new Error("Test error")

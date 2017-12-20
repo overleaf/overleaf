@@ -23,7 +23,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 		link(rel="apple-touch-icon-precomposed", href="/" + settings.brandPrefix + "apple-touch-icon-precomposed.png")
 		link(rel="mask-icon", href="/" + settings.brandPrefix + "mask-favicon.svg", color="#a93529")
 			
-		link(rel='stylesheet', href=buildCssPath("/" + settings.brandPrefix + "style.css"))
+		link(rel='stylesheet', href=buildCssPath("/" + settings.brandPrefix + "style.css", {hashedPath:true}))
 
 		block _headLinks
 
@@ -57,7 +57,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 		script(type="text/javascript").
 			window.csrfToken = "#{csrfToken}";
 			
-		script(src=buildJsPath("libs/jquery-1.11.1.min.js", {fingerprint:false}))
+		script(src=buildJsPath("libs/jquery-1.11.1.min.js"))
 		script(type="text/javascript").
 			var noCdnKey = "nocdn=true"
 			var cdnBlocked = typeof jQuery === 'undefined'
@@ -68,7 +68,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 
 		block scripts
 
-		script(src=buildJsPath("libs/angular-1.6.4.min.js", {fingerprint:false}))
+		script(src=buildJsPath("libs/angular-1.6.4.min.js"))
 
 		script.
 			window.sharelatex = {
@@ -95,7 +95,11 @@ html(itemscope, itemtype='http://schema.org/Product')
 					cdnDomain : '!{settings.templates.cdnDomain}',
 					indexName : '!{settings.templates.indexName}'
 				}
-				
+
+		- if (settings.overleaf && settings.overleaf.useOLFreeTrial)
+			script.
+				window.redirectToOLFreeTrialUrl = '!{settings.overleaf.host}/users/trial'
+
 	body
 		if(settings.recaptcha)
 			script(src="https://www.google.com/recaptcha/api.js?render=explicit")
@@ -142,9 +146,10 @@ html(itemscope, itemtype='http://schema.org/Product')
 				window.requirejs = {
 					"paths" : {
 						"moment": "libs/#{lib('moment')}",
-						"fineuploader": "libs/#{lib('fineuploader')}"
+						"fineuploader": "libs/#{lib('fineuploader')}",
+						"main": "#{buildJsPath('main.js', {hashedPath:settings.useMinifiedJs, removeExtension:true})}",
+						"libraries": "#{buildJsPath('libraries.js', {hashedPath:settings.useMinifiedJs, removeExtension:true})}",
 					},
-					"urlArgs": "fingerprint=#{fingerprint(jsPath + 'main.js')}-#{fingerprint(jsPath + 'libs.js')}",
 					"config":{
 						"moment":{
 							"noGlobal": true
@@ -152,9 +157,9 @@ html(itemscope, itemtype='http://schema.org/Product')
 					}
 				};
 			script(
-				data-main=buildJsPath('main.js', {fingerprint:false}),
+				data-main=buildJsPath('main.js', {hashedPath:false}),
 				baseurl=fullJsPath,
-				src=buildJsPath('libs/require.js')
+				src=buildJsPath('libs/require.js', {hashedPath:true})
 			)
 
 		include contact-us-modal
