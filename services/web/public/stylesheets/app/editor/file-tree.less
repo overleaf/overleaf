@@ -8,7 +8,7 @@
 	}
 }
 
-#file-tree {
+.file-tree {
 	.toolbar.toolbar-filetree {
 		.toolbar-small-mixin;
 		.toolbar-alt-mixin;
@@ -40,6 +40,15 @@
 	ul.file-tree-list when (@is-overleaf = false) {
 		font-size: 0.8rem;
 		padding: (@line-height-computed / 4) 0;
+	}
+
+	&-history {
+		.entity-name {
+			padding-left: 6px;
+			&.deleted {
+				text-decoration: line-through;
+			}
+		}
 	}
 
 	ul.file-tree-list {

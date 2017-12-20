@@ -178,11 +178,15 @@ div#history(ng-show="ui.view == 'history'")
 						}"
 					)
 					|  in <strong>{{history.diff.pathname}}</strong>
-				.toolbar-right(ng-if="!history.isV2")
+				.toolbar-right
 					a.btn.btn-danger.btn-sm(
 						href,
+						ng-if="!history.isV2"
 						ng-click="openRestoreDiffModal()"
 					) #{translate("restore_to_before_these_changes")}
+					.deleted-warning(
+						ng-show="history.selection.docs[history.selection.pathname].deleted"
+					) This file was deleted
 			.diff-editor.hide-ace-cursor(
 				ace-editor="history",
 				theme="settings.theme",

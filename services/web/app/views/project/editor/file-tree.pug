@@ -1,4 +1,4 @@
-aside#file-tree(ng-controller="FileTreeController", ng-class="{ 'multi-selected': multiSelectedCount > 0 }").full-size
+aside.file-tree(ng-controller="FileTreeController", ng-class="{ 'multi-selected': multiSelectedCount > 0 }", ng-show="ui.view != 'history' || !history.isV2").full-size
 	.toolbar.toolbar-filetree(ng-if="permissions.write")
 		a(
 			href,

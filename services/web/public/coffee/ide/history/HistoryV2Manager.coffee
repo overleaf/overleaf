@@ -20,10 +20,9 @@ define [
 					@_selectDocFromUpdates()
 					@reloadDiff()
 
-			@$scope.$on "entity:selected", (event, entity) =>
-				if (@$scope.ui.view == "history") and (entity.type == "doc")
-					@$scope.history.selection.pathname = _ide.fileTreeManager.getEntityPath(entity)
-					@reloadDiff()
+			@$scope.$watch "history.selection.pathname", () =>
+				console.log("pathname updated, reloading diff")
+				@reloadDiff()
 
 		show: () ->
 			@$scope.ui.view = "history"
@@ -31,8 +30,6 @@ define [
 
 		hide: () ->
 			@$scope.ui.view = "editor"
-			# Make sure we run the 'open' logic for whatever is currently selected
-			@$scope.$emit "entity:selected", @ide.fileTreeManager.findSelectedEntity()
 
 		reset: () ->
 			@$scope.history = {
@@ -42,6 +39,7 @@ define [
 				atEnd: false
 				selection: {
 					updates: []
+					docs: {}
 					pathname: null
 					range: {
 						fromV: null
@@ -51,7 +49,7 @@ define [
 				diff: null
 			}
 
-		MAX_RECENT_UPDATES_TO_SELECT: 2
+		MAX_RECENT_UPDATES_TO_SELECT: 5
 		autoSelectRecentUpdates: () ->
 			return if @$scope.history.updates.length == 0
 
@@ -205,7 +203,7 @@ define [
 			# Map of original pathname -> doc summary
 			docs_summary = {}
 
-			updatePathnameWithUpdateVersions = (pathname, update) ->
+			updatePathnameWithUpdateVersions = (pathname, update, deleted) ->
 				# docs_summary is indexed by the original pathname the doc
 				# had at the start, so we have to look this up from the current
 				# pathname via original_pathname first
@@ -223,6 +221,8 @@ define [
 					doc_summary.toV,
 					update.toV
 				)
+				if deleted?
+					doc_summary.deleted = true
 
 			# Put updates in ascending chronological order
 			updates = updates.slice().reverse()
@@ -238,6 +238,9 @@ define [
 					if project_op.add?
 						add = project_op.add
 						updatePathnameWithUpdateVersions(add.pathname, update)
+					if project_op.remove?
+						remove = project_op.remove
+						updatePathnameWithUpdateVersions(remove.pathname, update, true)
 
 			return docs_summary
 
@@ -258,6 +261,7 @@ define [
 		# then prefer this one if present.
 		_selectDocFromUpdates: () ->
 			affected_docs = @_perDocSummaryOfUpdates(@$scope.history.selection.updates)
+			@$scope.history.selection.docs = affected_docs
 
 			selected_pathname = @$scope.history.selection.pathname
 			if selected_pathname? and affected_docs[selected_pathname]
@@ -269,10 +273,6 @@ define [
 					break
 
 			@$scope.history.selection.pathname = selected_pathname
-			if selected_pathname?
-				entity = @ide.fileTreeManager.findEntityByPath(selected_pathname)
-				if entity?
-					@ide.fileTreeManager.selectEntity(entity)
 
 		_updateContainsUserId: (update, user_id) ->
 			for user in update.meta.users
