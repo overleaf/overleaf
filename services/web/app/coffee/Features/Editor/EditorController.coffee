@@ -148,13 +148,18 @@ module.exports = EditorController =
 		newName = sanitize.escape(newName)
 		Metrics.inc "editor.rename-entity"
 		logger.log entity_id:entity_id, entity_id:entity_id, entity_id:entity_id, "reciving new name for entity for project"
-		ProjectEntityHandler.renameEntity project_id, entity_id, entityType, newName, userId, (err) ->
+		LockManager.getLock project_id, (err)->
 			if err?
-				logger.err err:err, project_id:project_id, entity_id:entity_id, entityType:entityType, newName:newName, "error renaming entity"
+				logger.err err:err, project_id:project_id, "could not get lock for rename entity"
 				return callback(err)
-			if newName.length > 0
-				EditorRealTimeController.emitToRoom project_id, 'reciveEntityRename', entity_id, newName
-				callback?()
+			ProjectEntityHandler.renameEntity project_id, entity_id, entityType, newName, userId, (err) ->
+				if err?
+					logger.err err:err, project_id:project_id, entity_id:entity_id, entityType:entityType, newName:newName, "error renaming entity"
+					return callback(err)
+				LockManager.releaseLock project_id, ->
+					if newName.length > 0
+						EditorRealTimeController.emitToRoom project_id, 'reciveEntityRename', entity_id, newName
+					callback?()
 
 	moveEntity: (project_id, entity_id, folder_id, entityType, userId, callback)->
 		Metrics.inc "editor.move-entity"

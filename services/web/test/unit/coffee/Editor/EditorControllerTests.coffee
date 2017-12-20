@@ -466,23 +466,37 @@ describe "EditorController", ->
 
 
 	describe "renameEntity", ->
-		beforeEach ->
+		beforeEach (done) ->
 			@entity_id = "entity_id_here"
 			@entityType = "doc"
 			@newName = "bobsfile.tex"
 			@ProjectEntityHandler.renameEntity = sinon.stub().callsArg(5)
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 
-		it "should call the project handler", (done)->
-			@EditorController.renameEntity @project_id, @entity_id, @entityType, @newName, @user_id, =>
-				@ProjectEntityHandler.renameEntity.calledWith(@project_id, @entity_id, @entityType, @newName, @user_id).should.equal true
-				done()
+			@LockManager.releaseLock.callsArgWith(1)
+			@LockManager.getLock.callsArgWith(1)
 
+			@EditorController.renameEntity @project_id, @entity_id, @entityType, @newName, @user_id, done
 
-		it "should emit the update to the room", (done)->
-			@EditorController.renameEntity @project_id, @entity_id, @entityType, @newName, @user_id, =>
-				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'reciveEntityRename', @entity_id, @newName).should.equal true				
-				done()
+		it "should call the project handler", ->
+			@ProjectEntityHandler.renameEntity
+				.calledWith(@project_id, @entity_id, @entityType, @newName, @user_id)
+				.should.equal true
+
+		it "should take the lock", ->
+			@LockManager.getLock
+				.calledWith(@project_id)
+				.should.equal true
+
+		it "should release the lock", ->
+			@LockManager.releaseLock
+				.calledWith(@project_id)
+				.should.equal true
+
+		it "should emit the update to the room", ->
+			@EditorRealTimeController.emitToRoom
+				.calledWith(@project_id, 'reciveEntityRename', @entity_id, @newName)
+				.should.equal true
 
 	describe "moveEntity", ->
 		beforeEach ->
