@@ -145,6 +145,9 @@ div#history(ng-show="ui.view == 'history'")
 							div(ng-if="project_op.add")
 								.action Created
 								.doc {{ project_op.add.pathname }}
+							div(ng-if="project_op.remove")
+								.action Deleted
+								.doc {{ project_op.remove.pathname }}
 						div.users
 							div.user(ng-repeat="update_user in update.meta.users")
 								.color-square(ng-if="update_user != null", ng-style="{'background-color': 'hsl({{ update_user.hue }}, 70%, 50%)'}")
