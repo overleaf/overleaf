@@ -59,7 +59,7 @@ module.exports = EditorController =
 			EditorRealTimeController.emitToRoom(project_id, 'reciveNewFile', folder_id, fileRef, source)
 			callback(err, fileRef)
 
-	replaceFile: (project_id, file_id, fsPath, source, user_id, callback = (error) ->)->
+	replaceFileWithoutLock: (project_id, file_id, fsPath, source, user_id, callback = (error) ->)->
 		ProjectEntityHandler.replaceFile project_id, file_id, fsPath, user_id, callback
 
 	addFolder : (project_id, folder_id, folderName, source, callback = (error, folder)->)->

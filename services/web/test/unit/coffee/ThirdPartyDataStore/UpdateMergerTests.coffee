@@ -115,7 +115,7 @@ describe 'UpdateMerger :', ->
 			@fileName = "file.png"
 			@fsPath = "fs/path.tex"
 			@editorController.addFile = sinon.stub().callsArg(6)
-			@editorController.replaceFile = sinon.stub().callsArg(5)
+			@editorController.replaceFileWithoutLock = sinon.stub().callsArg(5)
 			@editorController.deleteEntity = sinon.stub()
 			@editorController.mkdirp = sinon.stub().withArgs(@project_id).callsArgWith(2, null, [@folder], @folder)
 			@updateMerger.p.writeStreamToDisk = sinon.stub().withArgs(@project_id, @file_id, @update).callsArgWith(3, null, @fsPath)
@@ -123,14 +123,14 @@ describe 'UpdateMerger :', ->
 		it 'should replace file if the file already exists', (done)->
 			@updateMerger.p.processFile @project_id, @file_id, @fsPath, @path, @source, @user_id, =>
 				@editorController.addFile.called.should.equal false
-				@editorController.replaceFile.calledWith(@project_id, @file_id, @fsPath, @source, @user_id).should.equal true
+				@editorController.replaceFileWithoutLock.calledWith(@project_id, @file_id, @fsPath, @source, @user_id).should.equal true
 				done()
 
 		it 'should call add file if the file does not exist', (done)->
 			@updateMerger.p.processFile @project_id, undefined, @fsPath, @path, @source, @user_id, =>
 				@editorController.mkdirp.calledWith(@project_id, "folder/").should.equal true
 				@editorController.addFile.calledWith(@project_id, @folder_id, @fileName, @fsPath, @source, @user_id).should.equal true
-				@editorController.replaceFile.called.should.equal false
+				@editorController.replaceFileWithoutLock.called.should.equal false
 				done()
 
 	describe 'delete entity :', (done)->
