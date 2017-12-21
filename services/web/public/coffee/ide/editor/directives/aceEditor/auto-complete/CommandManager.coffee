@@ -94,22 +94,23 @@ define [
 		constructor: (@metadataManager) ->
 
 		getCompletions: (editor, session, pos, prefix, callback) ->
-			commandNames = (
-				snippet.caption.match(/\w+/)[0] for snippet in topHundred
-			)
+			commandNames = {}
+			for snippet in topHundred
+				commandNames[snippet.caption.match(/\w+/)[0]] = true
+
 			packages = @metadataManager.getAllPackages()
 			packageCommands = []
 			for pkg, snippets of packages
 				for snippet in snippets
 					packageCommands.push snippet
-					commandNames.push snippet.caption.match(/\w+/)[0]
+					commandNames[snippet.caption.match(/\w+/)[0]] = true
 
 			doc = session.getValue()
 			parser = new Parser(doc, prefix)
 			commands = parser.parse()
 			completions = []
 			for command in commands
-				if command[0] not in commandNames
+				if not commandNames[command[0]]
 					caption = "\\#{command[0]}"
 					score = if caption == prefix then 99 else 50
 					snippet = caption
