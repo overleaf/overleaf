@@ -1,18 +1,13 @@
 _ = require('underscore')
+settings = require("settings-sharelatex")
 
 PersonalEmailLayout = require("./Layouts/PersonalEmailLayout")
 NotificationEmailLayout = require("./Layouts/NotificationEmailLayout")
-BaseWithHeaderEmailLayout = require("./Layouts/BaseWithHeaderEmailLayout") 
+BaseWithHeaderEmailLayout = require("./Layouts/" + settings.brandPrefix + "BaseWithHeaderEmailLayout")
 
-SingleCTAEmailBody = require("./Bodies/SingleCTAEmailBody")
-
-
-settings = require("settings-sharelatex")
-
-
+SingleCTAEmailBody = require("./Bodies/" + settings.brandPrefix + "SingleCTAEmailBody")
 
 templates = {}
-
 
 templates.registered =
 	subject:  _.template "Activate your #{settings.appName} Account"
