@@ -9,9 +9,12 @@ module.exports = _.template """
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<meta name="viewport" content="width=device-width">
-		<style>.avoid-auto-linking a,
+		<style>.button td {
+	border-radius: 9999px; }
+
+.avoid-auto-linking a,
 .avoid-auto-linking a[href] {
-	color: #a93529 !important;
+	color: #4F9C45 !important;
 	text-decoration: none !important;
 	-moz-hyphens: none;
 	-ms-hyphens: none;
@@ -19,14 +22,15 @@ module.exports = _.template """
 	hyphens: none; }
 	.avoid-auto-linking a:visited,
 	.avoid-auto-linking a[href]:visited {
-		color: #a93529; }
+		color: #4F9C45; }
 	.avoid-auto-linking a:hover,
 	.avoid-auto-linking a[href]:hover {
-		color: #80281f; }
+		color: #3d7935; }
 	.avoid-auto-linking a:active,
 	.avoid-auto-linking a[href]:active {
-		color: #80281f; }
-@media only screen {
+		color: #3d7935; }
+</style>
+		<style>@media only screen {
 	html {
 		min-height: 100%;
 		background: #f6f6f6;

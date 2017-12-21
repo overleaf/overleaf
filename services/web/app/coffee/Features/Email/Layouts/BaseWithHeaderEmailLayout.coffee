@@ -26,7 +26,8 @@ module.exports = _.template """
 	.avoid-auto-linking a:active,
 	.avoid-auto-linking a[href]:active {
 		color: #80281f; }
-@media only screen {
+</style>
+		<style>@media only screen {
 	html {
 		min-height: 100%;
 		background: #f6f6f6;
