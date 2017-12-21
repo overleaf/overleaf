@@ -1,0 +1,27 @@
+@v2-dash-pane-link-height: 130px;
+
+.project-list-sidebar {
+	height: calc(~"100% -" @v2-dash-pane-link-height);
+}
+
+.project-list-sidebar-v2-pane {
+	position: absolute;
+	bottom: 0;
+	height: @v2-dash-pane-link-height;
+	background-color: @v2-dash-pane-bg;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	color: white;
+	font-size: 13px;
+}
+
+	.project-list-sidebar-v2-pane a {
+		color: @v2-dash-pane-link-color;
+		text-decoration: underline;
+	}
+
+	.project-list-sidebar-v2-pane a:hover {
+		text-decoration: none;
+	}
