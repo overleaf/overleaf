@@ -23,11 +23,15 @@
 	position: absolute;
 	top: @header-height;
 	bottom: @footer-height;
-	padding-top: 0;
 	padding-bottom: 0;
 	width: 100%;
 	overflow-x: hidden;
 	overflow-y: auto;
+	// Specificity needed to override default `body > .content` values
+	body > .content& {
+		min-height: calc(~"100vh -" (@header-height + @footer-height));
+		padding-top: 0;
+	}
 }
 
 .project-list-content when (@is-overleaf) {
