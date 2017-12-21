@@ -149,14 +149,35 @@ module.exports = ProjectEntityHandler =
 		else
 			DocstoreManager.getDoc project_id, doc_id, options, callback
 
-	addDoc: (project_id, folder_id, docName, docLines, userId, callback = (error, doc, folder_id) ->)=>
-		ProjectGetter.getProjectWithOnlyFolders project_id, (err, project) ->
+	addDoc: (project_or_id, folder_id, docName, docLines, userId, callback = (error, doc, folder_id) ->)=>
+		ProjectEntityHandler.addDocWithoutUpdatingHistory project_or_id, folder_id, docName, docLines, userId, (error, doc, folder_id, path) ->
+			return callback(error) if error?
+			newDocs = [
+				doc: doc
+				path: path
+				docLines: docLines.join('\n')
+			]
+			project_id = project_or_id._id or project_or_id
+			DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newDocs}, (error) ->
+				return callback(error) if error?
+				callback null, doc, folder_id
+
+	addDocWithoutUpdatingHistory: (project_or_id, folder_id, docName, docLines, userId, callback = (error, doc, folder_id) ->)=>
+		# This method should never be called directly, except when importing a project
+		# from Overleaf. It skips sending updates to the project history, which will break
+		# the history unless you are making sure it is updated in some other way.
+		getProject = (cb) ->
+			if project_or_id._id? # project
+				return cb(null, project_or_id)
+			else # id
+				return ProjectGetter.getProjectWithOnlyFolders project_or_id, cb
+		getProject (error, project) ->
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add doc"
 				return callback(err)
-			ProjectEntityHandler.addDocWithProject project, folder_id, docName, docLines, userId, callback
+			ProjectEntityHandler._addDocWithProject project, folder_id, docName, docLines, userId, callback
 
-	addDocWithProject: (project, folder_id, docName, docLines, userId, callback = (error, doc, folder_id) ->)=>
+	_addDocWithProject: (project, folder_id, docName, docLines, userId, callback = (error, doc, folder_id, path) ->)=>
 		project_id = project._id
 		logger.log project_id: project_id, folder_id: folder_id, doc_name: docName, "adding doc to project with project"
 		confirmFolder project, folder_id, (folder_id)=>
@@ -176,14 +197,7 @@ module.exports = ProjectEntityHandler =
 						rev:          0
 					}, (err) ->
 						return callback(err) if err?
-						newDocs = [
-							doc: doc
-							path: result?.path?.fileSystem
-							docLines: docLines.join('\n')
-						]
-						DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newDocs}, (error) ->
-							return callback(error) if error?
-							callback null, doc, folder_id
+						callback(null, doc, folder_id, result?.path?.fileSystem)
 
 	restoreDoc: (project_id, doc_id, name, callback = (error, doc, folder_id) ->) ->
 		# getDoc will return the deleted doc's lines, but we don't actually remove
@@ -192,37 +206,37 @@ module.exports = ProjectEntityHandler =
 			return callback(error) if error?
 			ProjectEntityHandler.addDoc project_id, null, name, lines, callback
 
-	addFile: (project_id, folder_id, fileName, path, userId, callback = (error, fileRef, folder_id) ->)->
+	addFileWithoutUpdatingHistory: (project_id, folder_id, fileName, path, userId, callback = (error, fileRef, folder_id, path, fileStoreUrl) ->)->
 		ProjectGetter.getProjectWithOnlyFolders project_id, (err, project) ->
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add file"
 				return callback(err)
-			ProjectEntityHandler.addFileWithProject project, folder_id, fileName, path, userId, callback
-
-	addFileWithProject: (project, folder_id, fileName, path, userId, callback = (error, fileRef, folder_id) ->)->
-		project_id = project._id
-		logger.log project_id: project._id, folder_id: folder_id, file_name: fileName, path:path, "adding file"
-		return callback(err) if err?
-		confirmFolder project, folder_id, (folder_id)->
-			fileRef = new File name : fileName
-			FileStoreHandler.uploadFileFromDisk project._id, fileRef._id, path, (err, fileStoreUrl)->
-				if err?
-					logger.err err:err, project_id: project._id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error uploading image to s3"
-					return callback(err)
-				ProjectEntityHandler._putElement project, folder_id, fileRef, "file", (err, result)=>
+			logger.log project_id: project._id, folder_id: folder_id, file_name: fileName, path:path, "adding file"
+			return callback(err) if err?
+			confirmFolder project, folder_id, (folder_id)->
+				fileRef = new File name : fileName
+				FileStoreHandler.uploadFileFromDisk project._id, fileRef._id, path, (err, fileStoreUrl)->
 					if err?
-						logger.err err:err, project_id: project._id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error adding file with project"
+						logger.err err:err, project_id: project._id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error uploading image to s3"
 						return callback(err)
-					tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:result?.path?.fileSystem, project_name:project.name, rev:fileRef.rev}, (err) ->
-						return callback(err) if err?
-						newFiles = [
-							file: fileRef
-							path: result?.path?.fileSystem
-							url: fileStoreUrl
-						]
-						DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newFiles}, (error) ->
-							return callback(error) if error?
-							callback null, fileRef, folder_id
+					ProjectEntityHandler._putElement project, folder_id, fileRef, "file", (err, result)=>
+						if err?
+							logger.err err:err, project_id: project._id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error adding file with project"
+							return callback(err)
+						tpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:result?.path?.fileSystem, project_name:project.name, rev:fileRef.rev}, (err) ->
+							return callback(err) if err?
+							callback(null, fileRef, folder_id, result?.path?.fileSystem, fileStoreUrl)
+
+	addFile:  (project_id, folder_id, fileName, fsPath, userId, callback = (error, fileRef, folder_id) ->)->
+		ProjectEntityHandler.addFileWithoutUpdatingHistory project_id, folder_id, fileName, fsPath, userId, (error, fileRef, folder_id, path, fileStoreUrl) ->
+			newFiles = [
+				file: fileRef
+				path: path
+				url: fileStoreUrl
+			]
+			DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newFiles}, (error) ->
+				return callback(error) if error?
+				callback null, fileRef, folder_id
 
 	replaceFile: (project_id, file_id, fsPath, userId, callback)->
 		self = ProjectEntityHandler
@@ -412,7 +426,7 @@ module.exports = ProjectEntityHandler =
 				callback()
 
 
-	deleteEntity: (project_id, entity_id, entityType, callback = (error) ->)->
+	deleteEntity: (project_id, entity_id, entityType, userId, callback = (error) ->)->
 		self = @
 		logger.log entity_id:entity_id, entityType:entityType, project_id:project_id, "deleting project entity"
 		if !entityType?
@@ -423,7 +437,7 @@ module.exports = ProjectEntityHandler =
 			return callback(error) if error?
 			projectLocator.findElement {project: project, element_id: entity_id, type: entityType}, (error, entity, path)=>
 				return callback(error) if error?
-				ProjectEntityHandler._cleanUpEntity project, entity, entityType, (error) ->
+				ProjectEntityHandler._cleanUpEntity project, entity, entityType, path.fileSystem, userId, (error) ->
 					return callback(error) if error?
 					tpdsUpdateSender.deleteEntity project_id:project_id, path:path.fileSystem, project_name:project.name, (error) ->
 						return callback(error) if error?
@@ -456,17 +470,17 @@ module.exports = ProjectEntityHandler =
 							return callback(error) if error?
 							DocumentUpdaterHandler.updateProjectStructure project_id, userId, {oldDocs, newDocs, oldFiles, newFiles}, callback
 
-	_cleanUpEntity: (project, entity, entityType, callback = (error) ->) ->
+	_cleanUpEntity: (project, entity, entityType, path, userId, callback = (error) ->) ->
 		if(entityType.indexOf("file") != -1)
-			ProjectEntityHandler._cleanUpFile project, entity, callback
+			ProjectEntityHandler._cleanUpFile project, entity, path, userId, callback
 		else if (entityType.indexOf("doc") != -1)
-			ProjectEntityHandler._cleanUpDoc project, entity, callback
+			ProjectEntityHandler._cleanUpDoc project, entity, path, userId, callback
 		else if (entityType.indexOf("folder") != -1)
-			ProjectEntityHandler._cleanUpFolder project, entity, callback
+			ProjectEntityHandler._cleanUpFolder project, entity, path, userId, callback
 		else
 			callback()
 
-	_cleanUpDoc: (project, doc, callback = (error) ->) ->
+	_cleanUpDoc: (project, doc, path, userId, callback = (error) ->) ->
 		project_id = project._id.toString()
 		doc_id = doc._id.toString()
 		unsetRootDocIfRequired = (callback) =>
@@ -483,26 +497,33 @@ module.exports = ProjectEntityHandler =
 					return callback(error) if error?
 					DocstoreManager.deleteDoc project_id, doc_id, (error) ->
 						return callback(error) if error?
-						callback()
+						changes = oldDocs: [ {doc, path} ]
+						DocumentUpdaterHandler.updateProjectStructure project_id, userId, changes, callback
 
-	_cleanUpFile: (project, file, callback = (error) ->) ->
+	_cleanUpFile: (project, file, path, userId, callback = (error) ->) ->
 		project_id = project._id.toString()
 		file_id = file._id.toString()
-		FileStoreHandler.deleteFile project_id, file_id, callback
+		FileStoreHandler.deleteFile project_id, file_id, (error) ->
+			return callback(error) if error?
+			changes = oldFiles: [ {file, path} ]
+			DocumentUpdaterHandler.updateProjectStructure project_id, userId, changes, callback
 
-	_cleanUpFolder: (project, folder, callback = (error) ->) ->
+	_cleanUpFolder: (project, folder, folderPath, userId, callback = (error) ->) ->
 		jobs = []
 		for doc in folder.docs
 			do (doc) ->
-				jobs.push (callback) -> ProjectEntityHandler._cleanUpDoc project, doc, callback
+				docPath = path.join(folderPath, doc.name)
+				jobs.push (callback) -> ProjectEntityHandler._cleanUpDoc project, doc, docPath, userId, callback
 
 		for file in folder.fileRefs
 			do (file) ->
-				jobs.push (callback) -> ProjectEntityHandler._cleanUpFile project, file, callback
+				filePath = path.join(folderPath, file.name)
+				jobs.push (callback) -> ProjectEntityHandler._cleanUpFile project, file, filePath, userId, callback
 
 		for childFolder in folder.folders
 			do (childFolder) ->
-				jobs.push (callback) -> ProjectEntityHandler._cleanUpFolder project, childFolder, callback
+				folderPath = path.join(folderPath, childFolder.name)
+				jobs.push (callback) -> ProjectEntityHandler._cleanUpFolder project, childFolder, folderPath, userId, callback
 
 		async.series jobs, callback
 

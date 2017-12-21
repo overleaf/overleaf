@@ -36,7 +36,6 @@ getFileContent = (filePath)->
 		logger.log filePath:filePath, "file does not exist for hashing"
 		return ""
 
-logger.log "Generating file hashes..."
 pathList = [
 	"#{jsPath}libs/require.js"
 	"#{jsPath}ide.js"
@@ -46,23 +45,27 @@ pathList = [
 	"/stylesheets/ol-style.css"
 ]
 
-for path in pathList
-	content = getFileContent(path)
-	hash = crypto.createHash("md5").update(content).digest("hex")
-	
-	splitPath = path.split("/")
-	filenameSplit = splitPath.pop().split(".")
-	filenameSplit.splice(filenameSplit.length-1, 0, hash)
-	splitPath.push(filenameSplit.join("."))
+if !Settings.useMinifiedJs 
+	logger.log "not using minified JS, not hashing static files"
+else
+	logger.log "Generating file hashes..."
+	for path in pathList
+		content = getFileContent(path)
+		hash = crypto.createHash("md5").update(content).digest("hex")
+		
+		splitPath = path.split("/")
+		filenameSplit = splitPath.pop().split(".")
+		filenameSplit.splice(filenameSplit.length-1, 0, hash)
+		splitPath.push(filenameSplit.join("."))
 
-	hashPath = splitPath.join("/")
-	hashedFiles[path] = hashPath
+		hashPath = splitPath.join("/")
+		hashedFiles[path] = hashPath
 
-	fsHashPath = Path.join __dirname, "../../../", "public#{hashPath}"
-	fs.writeFileSync(fsHashPath, content)
+		fsHashPath = Path.join __dirname, "../../../", "public#{hashPath}"
+		fs.writeFileSync(fsHashPath, content)
 
 
-logger.log "Finished hashing static content"
+		logger.log "Finished hashing static content"
 
 cdnAvailable = Settings.cdn?.web?.host?
 darkCdnAvailable = Settings.cdn?.web?.darkHost?
@@ -121,7 +124,7 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 		res.locals.buildJsPath = (jsFile, opts = {})->
 			path = Path.join(jsPath, jsFile)
 
-			if opts.hashedPath
+			if opts.hashedPath && hashedFiles[path]?
 				path = hashedFiles[path]
 
 			if !opts.qs?
@@ -141,7 +144,7 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 
 		res.locals.buildCssPath = (cssFile, opts)->
 			path = Path.join("/stylesheets/", cssFile)
-			if opts?.hashedPath
+			if opts?.hashedPath && hashedFiles[path]?
 				hashedPath = hashedFiles[path]
 				return Url.resolve(staticFilesBase, hashedPath)
 			return Url.resolve(staticFilesBase, path)
@@ -294,10 +297,14 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 	webRouter.use (req, res, next) ->
 		isOl = (Settings.brandPrefix == 'ol-')
 		res.locals.uiConfig = 
-			defaultResizerSizeOpen   : if isOl then 2 else 24
-			defaultResizerSizeClosed : if isOl then 2 else 24
-			eastResizerCursor        : if isOl then "ew-resize" else null
-			westResizerCursor        : if isOl then "ew-resize" else null
-			chatResizerSizeOpen      : if isOl then 2 else 12
-			chatResizerSizeClosed    : 0
+			defaultResizerSizeOpen     : if isOl then 2 else 24
+			defaultResizerSizeClosed   : if isOl then 2 else 24
+			eastResizerCursor          : if isOl then "ew-resize" else null
+			westResizerCursor          : if isOl then "ew-resize" else null
+			chatResizerSizeOpen        : if isOl then 2 else 12
+			chatResizerSizeClosed      : 0
+			chatMessageBorderSaturation: if isOl then "85%" else "70%"
+			chatMessageBorderLightness : if isOl then "40%" else "70%"
+			chatMessageBgSaturation    : if isOl then "85%" else "60%"
+			chatMessageBgLightness     : if isOl then "40%" else "97%"
 		next()

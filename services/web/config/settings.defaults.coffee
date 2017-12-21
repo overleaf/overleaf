@@ -111,7 +111,8 @@ module.exports = settings =
 		trackchanges:
 			url : "http://localhost:3015"
 		project_history:
-			enabled: process.env.PROJECT_HISTORY_ENABLED == 'true' or false
+			sendProjectStructureOps: process.env.PROJECT_HISTORY_ENABLED == 'true' or false
+			initializeHistoryForNewProjects: process.env.PROJECT_HISTORY_ENABLED == 'true' or false
 			url : "http://localhost:3054"
 		docstore:
 			url : "http://#{process.env['DOCSTORE_HOST'] or 'localhost'}:3016"

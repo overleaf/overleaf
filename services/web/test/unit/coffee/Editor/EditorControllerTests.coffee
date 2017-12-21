@@ -376,58 +376,53 @@ describe "EditorController", ->
 				err.should.equal "timed out"
 				done()			
 
-
 	describe "deleteEntity", ->
-
 		beforeEach ->
 			@LockManager.getLock.callsArgWith(1)
 			@LockManager.releaseLock.callsArgWith(1)
-			@EditorController.deleteEntityWithoutLock = sinon.stub().callsArgWith(4)
+			@EditorController.deleteEntityWithoutLock = sinon.stub().callsArgWith(5)
 
 		it "should call deleteEntityWithoutLock", (done)->
-			@EditorController.deleteEntity @project_id, @entity_id, @type, @source,  =>
-				@EditorController.deleteEntityWithoutLock.calledWith(@project_id, @entity_id, @type, @source).should.equal true
+			@EditorController.deleteEntity @project_id, @entity_id, @type, @source, @user_id, =>
+				@EditorController.deleteEntityWithoutLock
+					.calledWith(@project_id, @entity_id, @type, @source, @user_id)
+					.should.equal true
 				done()
 
 		it "should take the lock", (done)->
-			@EditorController.deleteEntity @project_id, @entity_id, @type, @source,  =>
+			@EditorController.deleteEntity @project_id, @entity_id, @type, @source, @user_id, =>
 				@LockManager.getLock.calledWith(@project_id).should.equal true
 				done()
 
 		it "should release the lock", (done)->
-			@EditorController.deleteEntity @project_id, @entity_id, @type, @source, (error)=>
+			@EditorController.deleteEntity @project_id, @entity_id, @type, @source, @user_id, (error) =>
 				@LockManager.releaseLock.calledWith(@project_id).should.equal true
 				done()
 
 		it "should error if it can't cat the lock", (done)->
 			@LockManager.getLock = sinon.stub().callsArgWith(1, "timed out")
-			@EditorController.deleteEntity @project_id, @entity_id, @type, @source, (err)=>
-				expect(err).to.exist
-				err.should.equal "timed out"
-				done()			
-
-
+			@EditorController.deleteEntity @project_id, @entity_id, @type, @source, @user_id, (error) =>
+				expect(error).to.exist
+				error.should.equal "timed out"
+				done()
 
 	describe 'deleteEntityWithoutLock', ->
-		beforeEach ->
-			@ProjectEntityHandler.deleteEntity = (project_id, entity_id, type, callback)-> callback()
+		beforeEach (done) ->
 			@entity_id = "entity_id_here"
 			@type = "doc"
 			@EditorRealTimeController.emitToRoom = sinon.stub()
+			@ProjectEntityHandler.deleteEntity = sinon.stub().callsArg(4)
+			@EditorController.deleteEntityWithoutLock @project_id, @entity_id, @type, @source, @user_id, done
 
-		it 'should delete the folder using the project entity handler', (done)->
-			mock = sinon.mock(@ProjectEntityHandler).expects("deleteEntity").withArgs(@project_id, @entity_id, @type).callsArg(3)
+		it 'should delete the folder using the project entity handler', ->
+			@ProjectEntityHandler.deleteEntity
+				.calledWith(@project_id, @entity_id, @type, @user_id)
+				.should.equal.true
 
-			@EditorController.deleteEntityWithoutLock @project_id, @entity_id, @type, @source, ->
-				mock.verify()
-				done()
-
-		it 'notify users an entity has been deleted', (done)->
-			@EditorController.deleteEntityWithoutLock @project_id, @entity_id, @type, @source, =>
-				@EditorRealTimeController.emitToRoom
-					.calledWith(@project_id, "removeEntity", @entity_id, @source)
-					.should.equal true
-				done()
+		it 'notify users an entity has been deleted', ->
+			@EditorRealTimeController.emitToRoom
+				.calledWith(@project_id, "removeEntity", @entity_id, @source)
+				.should.equal true
 
 	describe "getting a list of project paths", ->
 

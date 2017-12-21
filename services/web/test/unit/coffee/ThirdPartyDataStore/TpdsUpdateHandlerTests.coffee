@@ -8,7 +8,7 @@ describe 'TpdsUpdateHandler', ->
 	beforeEach ->
 		@requestQueuer = {}
 		@updateMerger = 
-			deleteUpdate: (user_id, path, source, cb)->cb()
+			deleteUpdate: (user_id, project_id, path, source, cb)->cb()
 			mergeUpdate:(user_id, project_id, path, update, source, cb)->cb()
 		@editorController = {}
 		@project_id = "dsjajilknaksdn"
@@ -107,11 +107,13 @@ describe 'TpdsUpdateHandler', ->
 		it 'should call deleteEntity in the collaberation manager', (done)->
 			path = "/delete/this"
 			update = {}
-			@updateMerger.deleteUpdate = sinon.stub().callsArg(3)
+			@updateMerger.deleteUpdate = sinon.stub().callsArg(4)
 
 			@handler.deleteUpdate @user_id, @project.name, path, @source, =>
 				@projectDeleter.markAsDeletedByExternalSource.calledWith(@project._id).should.equal false
-				@updateMerger.deleteUpdate.calledWith(@project_id, path, @source).should.equal true
+				@updateMerger.deleteUpdate
+					.calledWith(@user_id, @project_id, path, @source)
+					.should.equal true
 				done()
 
 		it 'should mark the project as deleted by external source if path is a single slash', (done)->

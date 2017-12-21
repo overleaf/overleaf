@@ -145,13 +145,13 @@ describe 'UpdateMerger :', ->
 
 		it 'should get the element id', ->
 			@projectLocator.findElementByPath = sinon.spy()
-			@updateMerger.deleteUpdate @project_id, @path, @source, ->
+			@updateMerger.deleteUpdate @user_id, @project_id, @path, @source, ->
 			@projectLocator.findElementByPath.calledWith(@project_id, @path).should.equal true
 
 		it 'should delete the entity in the editor controller with the correct type', (done)->
 			@entity.lines = []
-			mock = sinon.mock(@editorController).expects("deleteEntity").withArgs(@project_id, @entity_id, @type, @source).callsArg(4)
-			@updateMerger.deleteUpdate @project_id, @path, @source, ->
+			mock = sinon.mock(@editorController).expects("deleteEntity").withArgs(@project_id, @entity_id, @type, @source, @user_id).callsArg(5)
+			@updateMerger.deleteUpdate @user_id, @project_id, @path, @source, ->
 				mock.verify()
 				done()
 

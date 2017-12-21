@@ -129,11 +129,11 @@
 }
 
 .toolbar-small-mixin() {
-	height: 32px;
+	height: @toolbar-small-height;
 }
 
 .toolbar-tall-mixin() {
-	height: 58px;
+	height: @toolbar-tall-height;
 	padding-top: 10px;
 }
 .toolbar-alt-mixin() {
@@ -143,7 +143,7 @@
 .toolbar-label {
 	display: none;
 	margin: 0 4px;
-	font-size: 12px;
+	font-size: @toolbar-font-size;
 	font-weight: 600;
 	margin-bottom: 2px;
 	vertical-align: middle;

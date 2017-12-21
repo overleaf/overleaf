@@ -90,7 +90,9 @@ define [
 				# to block auto compiles. It also causes problems where server-provided
 				# linting errors aren't cleared after typing
 				if (ide.$scope.settings.syntaxValidation and !ide.$scope.hasLintingError)
-					$scope.recompile(isAutoCompileOnChange: true)
+					$scope.recompile(isAutoCompileOnChange: true) # compile if no linting errors
+				else if !ide.$scope.settings.syntaxValidation
+					$scope.recompile(isAutoCompileOnChange: true) # always recompile
 			else
 				# Extend remainder of timeout
 				autoCompileTimeout = setTimeout () ->
@@ -532,14 +534,6 @@ define [
 			$scope.switchToFlatLayout() if pdfLayout == "flat"
 		else
 			$scope.switchToSideBySideLayout()
-
-		$scope.startFreeTrial = (source) ->
-			ga?('send', 'event', 'subscription-funnel', 'compile-timeout', source)
-
-			event_tracking.sendMB "subscription-start-trial", { source }
-
-			window.open("/user/subscription/new?planCode=#{$scope.startTrialPlanCode}")
-			$scope.startedFreeTrial = true
 
 	App.factory "synctex", ["ide", "$http", "$q", (ide, $http, $q) ->
 		# enable per-user containers by default

@@ -33,6 +33,9 @@ module.exports = MockDocUpdaterApi =
 			@addProjectStructureUpdates(project_id, userId, docUpdates, fileUpdates)
 			res.sendStatus 200
 
+		app.delete "/project/:project_id/doc/:doc_id", (req, res, next) =>
+			res.send 204
+
 		app.listen 3003, (error) ->
 			throw error if error?
 		.on "error", (error) ->
