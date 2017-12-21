@@ -39,6 +39,7 @@
     "csurf": "^1.8.3",
     "dateformat": "1.0.4-1.2.3",
     "express": "4.13.0",
+    "express-http-proxy": "^1.1.0",
     "express-session": "^1.14.2",
     "fs-extra": "^4.0.2",
     "heapdump": "^0.3.7",
