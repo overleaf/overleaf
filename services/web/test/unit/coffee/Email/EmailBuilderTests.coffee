@@ -13,7 +13,9 @@ describe "EmailBuilder", ->
 
 	beforeEach ->
 
-		@settings = appName: "testApp"
+		@settings =
+			appName: "testApp"
+			brandPrefix: ''
 		@EmailBuilder = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex": log:->
