@@ -165,7 +165,7 @@ div#history(ng-show="ui.view == 'history'")
 
 	.diff-panel.full-size(ng-controller="HistoryDiffController")
 		.diff(
-			ng-show="!!history.diff && !history.diff.loading && !history.diff.deleted && !history.diff.error"
+			ng-if="!!history.diff && !history.diff.loading && !history.diff.deleted && !history.diff.error && !history.diff.binary"
 		)
 			.toolbar.toolbar-alt
 				span.name
@@ -197,6 +197,13 @@ div#history(ng-show="ui.view == 'history'")
 				resize-on="layout:main:resize",
 				navigate-highlights="true"
 			)
+
+		.diff.diff-binary(ng-show="history.diff.binary")
+			.toolbar.toolbar-alt
+				span.name
+					strong {{history.diff.pathname}}
+			.alert.alert-info We're still working on showing image and binary changes, sorry. Stay tuned!
+
 		.diff-deleted.text-centered(
 			ng-show="history.diff.deleted && !history.diff.restoreDeletedSuccess"
 		)

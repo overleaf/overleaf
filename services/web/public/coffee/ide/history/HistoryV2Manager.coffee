@@ -111,7 +111,8 @@ define [
 				.then (response) =>
 					{ data } = response
 					diff.loading = false
-					{text, highlights} = @_parseDiff(data)
+					{text, highlights, binary} = @_parseDiff(data.diff)
+					diff.binary = binary
 					diff.text = text
 					diff.highlights = highlights
 				.catch () ->
@@ -119,11 +120,13 @@ define [
 					diff.error = true
 
 		_parseDiff: (diff) ->
+			if diff.binary
+				return { binary: true }
 			row    = 0
 			column = 0
 			highlights = []
 			text   = ""
-			for entry, i in diff.diff or []
+			for entry, i in diff or []
 				content = entry.u or entry.i or entry.d
 				content ||= ""
 				text += content
