@@ -456,14 +456,14 @@ module.exports = ProjectEntityHandler =
 			return callback(error) if error?
 			ProjectEntityHandler.getAllEntitiesFromProject project, (error, oldDocs, oldFiles) =>
 				return callback(error) if error?
-				projectLocator.findElement {project:project, element_id:entity_id, type:entityType}, (error, entity, path)=>
+				projectLocator.findElement {project:project, element_id:entity_id, type:entityType}, (error, entity, entPath)=>
 					return callback(error) if error?
-					endPath = path.fileSystem.replace(entity.name, newName)
+					endPath = path.join(path.dirname(entPath.fileSystem), newName)
 					conditions = {_id:project_id}
 					update = "$set":{}
-					namePath = path.mongo+".name"
+					namePath = entPath.mongo+".name"
 					update["$set"][namePath] = newName
-					tpdsUpdateSender.moveEntity({project_id:project_id, startPath:path.fileSystem, endPath:endPath, project_name:project.name, rev:entity.rev})
+					tpdsUpdateSender.moveEntity({project_id:project_id, startPath:entPath.fileSystem, endPath:endPath, project_name:project.name, rev:entity.rev})
 					Project.findOneAndUpdate conditions, update, { "new": true}, (error, newProject) ->
 						return callback(error) if error?
 						ProjectEntityHandler.getAllEntitiesFromProject newProject, (error, newDocs, newFiles) =>

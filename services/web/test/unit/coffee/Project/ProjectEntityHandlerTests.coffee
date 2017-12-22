@@ -1121,7 +1121,7 @@ describe 'ProjectEntityHandler', ->
 			@entity_id = "4eecaffcbffa66588e000009"
 			@entityType = "doc"
 			@newName = "new.tex"
-			@path = mongo: "mongo.path", fileSystem: "/file/system/old.tex"
+			@path = mongo: "mongo.path", fileSystem: "/oldnamepath/oldname"
 
 			@ProjectGetter.getProject.callsArgWith(2, null, @project)
 			@ProjectEntityHandler.getAllEntitiesFromProject = sinon.stub()
@@ -1132,7 +1132,7 @@ describe 'ProjectEntityHandler', ->
 				.onSecondCall()
 				.callsArgWith(1, null, @newDocs = ['new-doc'], @newFiles = ['new-file'])
 
-			@projectLocator.findElement = sinon.stub().callsArgWith(1, null, @entity = { _id: @entity_id, name:"old.tex", rev:4 }, @path)
+			@projectLocator.findElement = sinon.stub().callsArgWith(1, null, @entity = { _id: @entity_id, name:"oldname", rev:4 }, @path)
 			@tpdsUpdateSender.moveEntity = sinon.stub()
 			@ProjectModel.findOneAndUpdate = sinon.stub().callsArgWith(3, null, @project)
 			@documentUpdaterHandler.updateProjectStructure = sinon.stub().yields()
@@ -1151,7 +1151,7 @@ describe 'ProjectEntityHandler', ->
 
 		it "should send the update to the tpds", (done)->
 			@ProjectEntityHandler.renameEntity project_id, @entity_id, @entityType, @newName, userId, =>
-				@tpdsUpdateSender.moveEntity.calledWith({project_id:project_id, startPath:@path.fileSystem, endPath:"/file/system/new.tex", project_name:@project.name, rev:4}).should.equal true
+				@tpdsUpdateSender.moveEntity.calledWith({project_id:project_id, startPath:@path.fileSystem, endPath:"/oldnamepath/new.tex", project_name:@project.name, rev:4}).should.equal true
 				done()
 
 	describe "_insertDeletedDocReference", ->
@@ -1348,8 +1348,3 @@ describe 'ProjectEntityHandler', ->
 				@ProjectEntityHandler._countElements @project, (err, count)->
 					count.should.equal 23
 					done()
-
-
-
-
-
