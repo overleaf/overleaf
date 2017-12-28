@@ -1,25 +1,15 @@
 version: "2"
 
 volumes:
-  node_modules:
+  data:
 
 services:
-  npm:
-    extends:
-      file: docker-shared.yml
-      service: app
-    command: npm install
-
-  test_unit:
-    extends:
-      file: docker-shared.yml
-      service: app
-    command: npm run test:unit
-
   test_acceptance:
-    extends:
-      file: docker-shared.yml
-      service: app
+    image: node:6.9.5
+    volumes:
+      - .:/app:ro
+      - data:/app/data:rw
+    working_dir: /app
     environment:
       REDIS_HOST: redis
       MONGO_URL: "mongodb://mongo/sharelatex"
@@ -28,7 +18,7 @@ services:
     depends_on:
       - redis
       - mongo
-    command: npm run start
+    command: node app.js
 
   redis:
     image: redis

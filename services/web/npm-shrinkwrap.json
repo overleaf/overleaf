@@ -1292,6 +1292,15 @@
       "resolved": "https://registry.npmjs.org/double-ended-queue/-/double-ended-queue-2.1.0-0.tgz",
       "integrity": "sha1-ED01J/0xUo9AGIEwyEHv3XgmTlw="
     },
+    "dtrace-provider": {
+      "version": "0.6.0",
+      "resolved": "https://registry.npmjs.org/dtrace-provider/-/dtrace-provider-0.6.0.tgz",
+      "integrity": "sha1-CweNVReTfYcxAUUtkUZzdVe3XlE=",
+      "optional": true,
+      "requires": {
+        "nan": "2.3.5"
+      }
+    },
     "each-series": {
       "version": "1.0.0",
       "resolved": "https://registry.npmjs.org/each-series/-/each-series-1.0.0.tgz",
@@ -3605,15 +3614,6 @@
           "integrity": "sha512-+QeIQyN5ZuO+3Uk5DYh6/1eKO0m0YmJFGNmFHGACpf1ClL1nmlV/p4gNgbl2pJGxgXb4faqo6UE+M5ACEMyVcw==",
           "requires": {
             "type-detect": "4.0.5"
-          }
-        },
-        "dtrace-provider": {
-          "version": "0.6.0",
-          "resolved": "https://registry.npmjs.org/dtrace-provider/-/dtrace-provider-0.6.0.tgz",
-          "integrity": "sha1-CweNVReTfYcxAUUtkUZzdVe3XlE=",
-          "optional": true,
-          "requires": {
-            "nan": "2.3.5"
           }
         },
         "formatio": {

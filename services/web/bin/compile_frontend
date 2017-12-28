@@ -1,5 +1,0 @@
-#!/bin/bash
-set -e;
-COFFEE=node_modules/.bin/coffee
-echo Compiling public/coffee;
-$COFFEE -o public/js -c public/coffee;
