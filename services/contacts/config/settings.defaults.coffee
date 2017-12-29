@@ -5,7 +5,7 @@ module.exports =
 	internal:
 		contacts:
 			port: 3036
-			host: "localhost"
+			host: process.env["LISTEN_ADDRESS"] or "localhost"
 
 	mongo:
-		url: 'mongodb://127.0.0.1/sharelatex'
+		url: "mongodb://#{process.env["MONGO_HOST"] or "localhost"}/sharelatex"
