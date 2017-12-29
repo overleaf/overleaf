@@ -6,6 +6,10 @@
     "type": "git",
     "url": "https://github.com/sharelatex/filestore-sharelatex.git"
   },
+  "scripts": {
+    "compile:app": "coffee -o app/js -c app/coffee && coffee -c app.coffee",
+    "start": "npm run compile:app && node app.js"
+  },
   "dependencies": {
     "async": "~0.2.10",
     "aws-sdk": "^2.1.39",
