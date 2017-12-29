@@ -6,6 +6,10 @@
     "type": "git",
     "url": "https://github.com/sharelatex/clsi-sharelatex.git"
   },
+  "scripts": {
+    "compile:app": "coffee -o app/js -c app/coffee && coffee -c app.coffee",
+    "start": "npm run compile:app && node app.js"
+  },
   "author": "James Allen <james@sharelatex.com>",
   "dependencies": {
     "async": "0.2.9",
