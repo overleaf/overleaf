@@ -1,0 +1,51 @@
+# This file was auto-generated, do not edit it directly.
+# Instead run bin/update_build_scripts from
+# https://github.com/sharelatex/sharelatex-dev-environment
+# Version: 1.0.1
+
+version: "2"
+
+services:
+  test_unit:
+    image: node:6.9.5
+    volumes:
+      - .:/app
+    working_dir: /app
+    entrypoint: npm run test:unit
+
+  test_acceptance:
+    image: node:6.9.5
+    volumes:
+      - .:/app
+    environment:
+      REDIS_HOST: redis
+      MONGO_HOST: mongo
+      CLSI_HOST: clsi
+    depends_on:
+      - clsi
+      - redis
+      - mongo
+    working_dir: /app
+    entrypoint: npm run test:acceptance
+
+  redis:
+    image: redis
+
+  mongo:
+    image: mongo:3.4
+
+  clsi:
+    image: gcr.io/henry-terraform-admin/clsi
+    build: .
+    environment:
+      TEXLIVE_IMAGE: quay.io/sharelatex/texlive-small:latest
+      TEXLIVE_IMAGE_USER: root # Not ideal, but makes running in dev very simple
+      COMMAND_RUNNER: docker-runner-sharelatex
+      SHARELATEX_CONFIG: /app/config/settings.defaults.coffee
+      COMPILES_HOST_DIR: $PWD/compiles
+    volumes:
+      - .:/app:cached
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./docker-runner:/app/node_modules/docker-runner-sharelatex
+    ports:
+      - 3013:3013

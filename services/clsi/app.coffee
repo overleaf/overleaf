@@ -132,12 +132,17 @@ resCacher =
 if Settings.smokeTest
 	do runSmokeTest = ->
 		logger.log("running smoke tests")
+		console.log(__dirname, __filename)
 		smokeTest.run(require.resolve(__dirname + "/test/smoke/js/SmokeTests.js"))({}, resCacher)
 		setTimeout(runSmokeTest, 30 * 1000)
 
 app.get "/health_check", (req, res)->
 	res.contentType(resCacher?.setContentType)
 	res.status(resCacher?.code).send(resCacher?.body)
+
+app.get "/smoke_test_force", (req, res)->
+	smokeTest.run(require.resolve(__dirname + "/test/smoke/js/SmokeTests.js"))(req, res)
+
 
 profiler = require "v8-profiler"
 app.get "/profile", (req, res) ->

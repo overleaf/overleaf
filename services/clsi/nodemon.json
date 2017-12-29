@@ -1,0 +1,15 @@
+{
+  "ignore": [
+    ".git",
+    "node_modules/"
+  ],
+  "verbose": true,
+  "execMap": {
+    "js": "npm run start"
+  },
+  "watch": [
+    "app/coffee/",
+    "app.coffee"
+  ],
+  "ext": "coffee"
+}
