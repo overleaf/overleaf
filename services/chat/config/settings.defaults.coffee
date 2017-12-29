@@ -1,20 +1,20 @@
 module.exports =
 	internal:
 		chat:
-			host: "localhost"
+			host: process.env['LISTEN_ADDRESS'] or "localhost"
 			port: 3010
 	
 	apis:
 		web:
-			url: "http://localhost:3000"
+			url: "http://#{process.env['WEB_HOST'] || "localhost"}:3000"
 			user: "sharelatex"
 			pass: "password"
 			
 	mongo:
-		url : 'mongodb://127.0.0.1/sharelatex'
+		url : "mongodb://#{process.env['MONGO_HOST'] || "localhost"}/sharelatex"
 
 	redis:
 		web:
-			host: "localhost"
+			host: process.env['REDIS_HOST'] || "localhost"
 			port: "6379"
 			password: ""
