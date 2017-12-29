@@ -7,6 +7,10 @@
     "type": "git",
     "url": "https://github.com/sharelatex/docstore-sharelatex.git"
   },
+  "scripts": {
+    "compile:app": "coffee -o app/js -c app/coffee && coffee -c app.coffee",
+    "start": "npm run compile:app && node app.js"
+  },
   "dependencies": {
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.4.0",
