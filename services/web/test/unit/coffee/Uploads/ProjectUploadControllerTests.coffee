@@ -17,12 +17,16 @@ describe "ProjectUploadController", ->
 				done: sinon.stub()
 		@AuthenticationController =
 			getLoggedInUserId: sinon.stub().returns(@user_id)
+		@LockManager =
+			getLock : sinon.stub().yields()
+			releaseLock : sinon.stub().yields()
 		@ProjectUploadController = SandboxedModule.require modulePath, requires:
 			"./ProjectUploadManager" : @ProjectUploadManager = {}
 			"./FileSystemImportManager" : @FileSystemImportManager = {}
 			"logger-sharelatex" : @logger = {log: sinon.stub(), error: sinon.stub(), err:->}
 			"metrics-sharelatex": @metrics
 			'../Authentication/AuthenticationController': @AuthenticationController
+			"../../infrastructure/LockManager": @LockManager
 			"fs" : @fs = {}
 
 	describe "uploadProject", ->
@@ -125,10 +129,16 @@ describe "ProjectUploadController", ->
 				@FileSystemImportManager.addEntity = sinon.stub().callsArgWith(6, null, @entity)
 				@ProjectUploadController.uploadFile @req, @res
 
+			it "should take the lock", ->
+				@LockManager.getLock.calledWith(@project_id).should.equal true
+
 			it "should insert the file", ->
 				@FileSystemImportManager.addEntity
 					.calledWith(@user_id, @project_id, @folder_id, @name, @path)
 					.should.equal true
+
+			it "should release the lock", ->
+				@LockManager.releaseLock.calledWith(@project_id).should.equal true
 
 			it "should return a successful response to the FileUploader client", ->
 				expect(@res.body).to.deep.equal
