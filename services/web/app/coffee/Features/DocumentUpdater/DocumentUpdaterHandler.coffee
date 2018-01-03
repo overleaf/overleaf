@@ -224,7 +224,7 @@ module.exports = DocumentUpdaterHandler =
 				logger.error {error, url, project_id}, "error update project structure in doc updater"
 				callback(error)
 			else if res.statusCode >= 200 and res.statusCode < 300
-				logger.error {project_id}, "updated project structure in doc updater"
+				logger.log {project_id}, "updated project structure in doc updater"
 				callback(null)
 			else
 				logger.error {project_id, url}, "doc updater returned a non-success status code: #{res.statusCode}"
