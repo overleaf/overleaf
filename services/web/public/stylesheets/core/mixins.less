@@ -395,7 +395,7 @@
 // Dividers (basically an hr) within dropdowns and nav lists
 .nav-divider(@color: #e5e5e5) {
   height: 1px;
-  margin: ((@line-height-computed / 2) - 1) 0;
+  margin: @dropdown-divider-margin;
   overflow: hidden;
   background-color: @color;
 }
@@ -433,6 +433,16 @@
   }
   .alert-link {
     color: darken(@text-color, 10%);
+  }
+
+  .alert-link-as-btn when (@is-overleaf = true) {
+    display: inline-block;
+    font-weight: bold;
+    .button-variant(#FFF, shade(@background, 20%), transparent);
+    .button-size(@padding-xs-vertical; @padding-small-horizontal; @font-size-small; @line-height-small; @btn-border-radius-small);
+    &:hover {
+      text-decoration: none;
+    }
   }
 }
 

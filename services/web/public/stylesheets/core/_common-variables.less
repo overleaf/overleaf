@@ -824,6 +824,10 @@
 @navbar-subdued-hover-bg    : @gray-lightest;
 @navbar-subdued-hover-color : @gray-dark;
 
+@dropdown-divider-margin    :((@line-height-computed / 2) - 1) 0;
+@dropdown-item-padding      : 3px 20px;
+
+
 // Button colors and sizing
 @btn-border-radius-large : @border-radius-large;
 @btn-border-radius-base  : @border-radius-base;
@@ -884,24 +888,28 @@
 @footer-padding                : 2em;
 
 // Editor header
-@toolbar-header-bg-color        : transparent;
-@toolbar-header-shadow          : 0 0 2px #ccc;
-@toolbar-btn-color              : @link-color;
-@toolbar-btn-hover-color        : @link-hover-color;
-@toolbar-btn-hover-bg-color     : darken(white, 10%);
-@toolbar-btn-hover-text-shadow  : 0 1px 0 rgba(0, 0, 0, 0.15);
-@toolbar-btn-active-color       : white;
-@toolbar-btn-active-bg-color    : @link-color;
-@toolbar-btn-active-shadow      : inset 0 3px 5px rgba(0, 0, 0, 0.225);
-@toolbar-font-size              : 12px;
-@toolbar-alt-bg-color           : #fafafa;
-@toolbar-icon-btn-color         : @gray-light;
-@toolbar-icon-btn-hover-color   : @gray-dark;
-@toolbar-icon-btn-hover-shadow  : 0 1px 0 rgba(0, 0, 0, 0.25);
-@toolbar-icon-btn-hover-boxshadow : inset 0 3px 5px rgba(0, 0, 0, 0.225);
-@toolbar-border-bottom            : 1px solid @toolbar-border-color;
-@toolbar-small-height             : 32px;
-@toolbar-tall-height              : 58px;
+@toolbar-header-bg-color         : transparent;
+@toolbar-header-shadow           : 0 0 2px #ccc;
+@toolbar-btn-color               : @link-color;
+@toolbar-btn-hover-color         : @link-hover-color;
+@toolbar-btn-hover-bg-color      : darken(white, 10%);
+@toolbar-btn-hover-text-shadow   : 0 1px 0 rgba(0, 0, 0, 0.15);
+@toolbar-btn-active-color        : white;
+@toolbar-btn-active-bg-color     : @link-color;
+@toolbar-btn-active-shadow       : inset 0 3px 5px rgba(0, 0, 0, 0.225);
+@toolbar-font-size               : 12px;
+@toolbar-alt-bg-color            : #fafafa;
+@toolbar-icon-btn-color          : @gray-light;
+@toolbar-icon-btn-hover-color    : @gray-dark;
+@toolbar-icon-btn-hover-shadow   : 0 1px 0 rgba(0, 0, 0, 0.25);
+@toolbar-icon-btn-hover-boxshadow: inset 0 3px 5px rgba(0, 0, 0, 0.225);
+@toolbar-border-bottom           : 1px solid @toolbar-border-color;
+@toolbar-small-height            : 32px;
+@toolbar-tall-height             : 58px;
+@project-name-color              : @gray;
+@project-rename-link-color       : @gray-light;
+@project-rename-link-color-hover : @gray-dark;
+@global-alerts-padding           : (@line-height-computed / 4);
 
 // Editor file-tree
 @file-tree-bg                    : transparent;
@@ -950,3 +958,5 @@
 @tag-bg-color       : @label-default-bg;
 @tag-max-width      : 150px;
 @tag-bg-hover-color : darken(@label-default-bg, 10%);
+@tag-top-adjustment : -2px;
+@labels-font-size   : 75%;

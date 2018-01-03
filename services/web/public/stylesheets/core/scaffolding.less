@@ -32,10 +32,10 @@ body {
   background-color: @body-bg;
   min-height: 100%;
   position: relative;
-  padding-top: @header-height;
   padding-bottom: @footer-height;
   & > .content {
-    min-height: calc(~"100vh -" (@header-height + @footer-height));
+    min-height: calc(~"100vh -" @footer-height);
+    padding-top: @header-height + @content-margin-vertical;
   }
 }
 

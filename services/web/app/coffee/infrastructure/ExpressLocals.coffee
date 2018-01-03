@@ -307,4 +307,5 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 			chatMessageBorderLightness : if isOl then "40%" else "70%"
 			chatMessageBgSaturation    : if isOl then "85%" else "60%"
 			chatMessageBgLightness     : if isOl then "40%" else "97%"
+			renderAnnouncements        : !isOl
 		next()
