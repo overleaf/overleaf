@@ -28,6 +28,7 @@ describe "HistoryV2Manager", ->
 			selection: {
 				updates: []
 				pathname: null
+				docs: {}
 				range: {
 					fromV: null
 					toV: null
@@ -131,4 +132,33 @@ describe "HistoryV2Manager", ->
 
 			expect(result).to.deep.equal({
 				"main.tex": { fromV: 0, toV: 1 }
+			})
+
+		it "should track deletions", ->
+			result = @historyManager._perDocSummaryOfUpdates([{
+				pathnames: ["main.tex"]
+				fromV: 0, toV: 1
+			}, {
+				project_ops: [{
+					remove:
+						pathname: "main.tex"
+				}]
+				fromV: 1, toV: 2
+			}])
+
+			expect(result).to.deep.equal({
+				"main.tex": { fromV: 0, toV: 2, deleted: true }
+			})
+
+		it "should track single deletions", ->
+			result = @historyManager._perDocSummaryOfUpdates([{
+				project_ops: [{
+					remove:
+						pathname: "main.tex"
+				}]
+				fromV: 0, toV: 1
+			}])
+
+			expect(result).to.deep.equal({
+				"main.tex": { fromV: 0, toV: 1, deleted: true }
 			})

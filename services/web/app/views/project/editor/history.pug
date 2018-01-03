@@ -145,6 +145,9 @@ div#history(ng-show="ui.view == 'history'")
 							div(ng-if="project_op.add")
 								.action Created
 								.doc {{ project_op.add.pathname }}
+							div(ng-if="project_op.remove")
+								.action Deleted
+								.doc {{ project_op.remove.pathname }}
 						div.users
 							div.user(ng-repeat="update_user in update.meta.users")
 								.color-square(ng-if="update_user != null", ng-style="{'background-color': 'hsl({{ update_user.hue }}, 70%, 50%)'}")
@@ -175,11 +178,15 @@ div#history(ng-show="ui.view == 'history'")
 						}"
 					)
 					|  in <strong>{{history.diff.pathname}}</strong>
-				.toolbar-right(ng-if="!history.isV2")
+				.toolbar-right
 					a.btn.btn-danger.btn-sm(
 						href,
+						ng-if="!history.isV2"
 						ng-click="openRestoreDiffModal()"
 					) #{translate("restore_to_before_these_changes")}
+					.deleted-warning(
+						ng-show="history.selection.docs[history.selection.pathname].deleted"
+					) This file was deleted
 			.diff-editor.hide-ace-cursor(
 				ace-editor="history",
 				theme="settings.theme",
