@@ -5,10 +5,11 @@
 		tooltip-append-to-body="true"
 	)
 	span
-		a.projectName(
-			href=settings.overleaf.host + "/{{project.id}}"
-			target="_blank"
-		) {{project.name}}
+		if settings.overleaf && settings.overleaf.host
+			a.projectName(
+				href=settings.overleaf.host + "/{{project.id}}"
+				target="_blank"
+			) {{project.name}}
 		//- To re-enable the import dialog (may need style changing for padding/line-height):
 		//- button.btn.btn-link.projectName(
 		//- 	ng-click="openV1ImportModal(project)"
