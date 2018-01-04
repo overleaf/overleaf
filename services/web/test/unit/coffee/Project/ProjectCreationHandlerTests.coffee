@@ -49,6 +49,9 @@ describe 'ProjectCreationHandler', ->
 
 		@User = findById:sinon.stub().callsArgWith(2, null, @user)
 		@callback = sinon.stub()
+
+		@Settings = apis: { project_history: {} }
+
 		@handler = SandboxedModule.require modulePath, requires:
 			'../../models/User': User:@User
 			'../../models/Project':{Project:@ProjectModel}
@@ -56,7 +59,7 @@ describe 'ProjectCreationHandler', ->
 			'../History/HistoryManager': @HistoryManager
 			'./ProjectEntityHandler':@ProjectEntityHandler
 			"./ProjectDetailsHandler":@ProjectDetailsHandler
-			"settings-sharelatex": @Settings = {}
+			"settings-sharelatex": @Settings
 			'logger-sharelatex': {log:->}
 			"metrics-sharelatex": {
 				inc: ()->,
@@ -111,6 +114,18 @@ describe 'ProjectCreationHandler', ->
 				@Settings.currentImageName = null
 				@handler.createBlankProject ownerId, projectName, (err, project)=>
 					expect(project.imageName).to.not.exist
+					done()
+
+			it "should not set the overleaf.history.display if not configured in settings", (done) ->
+				@Settings.apis.project_history.displayHistoryForNewProjects = false
+				@handler.createBlankProject ownerId, projectName, (err, project)=>
+					expect(project.overleaf.history.display).to.not.exist
+					done()
+
+			it "should set the overleaf.history.display if configured in settings", (done) ->
+				@Settings.apis.project_history.displayHistoryForNewProjects = true
+				@handler.createBlankProject ownerId, projectName, (err, project)=>
+					expect(project.overleaf.history.display).to.equal true
 					done()
 
 		describe "with an error", ->

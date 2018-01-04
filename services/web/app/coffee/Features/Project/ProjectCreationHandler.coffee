@@ -37,6 +37,8 @@ module.exports = ProjectCreationHandler =
 			 owner_ref          : new ObjectId(owner_id)
 			 name               : projectName
 		project.overleaf.history.id = projectHistoryId
+		if Settings.apis?.project_history?.displayHistoryForNewProjects
+			project.overleaf.history.display = true
 		if Settings.currentImageName?
 			project.imageName = Settings.currentImageName
 		project.rootFolder[0] = rootFolder
