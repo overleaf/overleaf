@@ -98,14 +98,14 @@ block requirejs
 	script(type="text/javascript" src='/socket.io/socket.io.js')
 
 	//- don't use cdn for workers
-	- var aceWorkerPath = buildJsPath(lib('ace'), {cdn:false,fingerprint:false})
-	- var pdfWorkerPath = buildJsPath('/libs/' + lib('pdfjs') + '/pdf.worker', {cdn:false,fingerprint:false})
-	- var pdfCMapsPath = buildJsPath('/libs/' + lib('pdfjs') + '/bcmaps/', {cdn:false,fingerprint:false})
+	- var aceWorkerPath = buildJsPath(lib('ace'), {cdn:false})
+	- var pdfWorkerPath = buildJsPath('/libs/' + lib('pdfjs') + '/pdf.worker', {cdn:false})
+	- var pdfCMapsPath = buildJsPath('/libs/' + lib('pdfjs') + '/bcmaps/', {cdn:false})
 
 	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
 	//- and doesn't prematurely end the script tag.
 	script#data(type="application/json").
-		!{JSON.stringify({userSettings: userSettings, user: user, trackChangesState: trackChangesState}).replace(/\//g, '\\/')}
+		!{JSON.stringify({userSettings: userSettings, user: user, trackChangesState: trackChangesState, useV2History: useV2History}).replace(/\//g, '\\/')}
 
 	script(type="text/javascript").
 		window.data = JSON.parse($("#data").text());
@@ -126,14 +126,15 @@ block requirejs
 		window.wikiEnabled = #{!!(settings.apis.wiki && settings.apis.wiki.url)};
 		window.requirejs = {
 			"paths" : {
-				"mathjax": "#{buildJsPath('/libs/mathjax/MathJax.js', {cdn:false, fingerprint:false, qs:{config:'TeX-AMS_HTML'}})}",
+				"mathjax": "#{buildJsPath('/libs/mathjax/MathJax.js', {cdn:false, qs:{config:'TeX-AMS_HTML'}})}",
 				"moment": "libs/#{lib('moment')}",
 				"pdfjs-dist/build/pdf": "libs/#{lib('pdfjs')}/pdf",
 				"pdfjs-dist/build/pdf.worker": "#{pdfWorkerPath}",
 				"ace": "#{lib('ace')}",
-				"fineuploader": "libs/#{lib('fineuploader')}"
+				"fineuploader": "libs/#{lib('fineuploader')}",
+				"ide": "#{buildJsPath('ide.js', {hashedPath:settings.useMinifiedJs, removeExtension:true})}",
+				"libraries": "#{buildJsPath('libraries.js', {hashedPath:settings.useMinifiedJs, removeExtension:true})}",
 			},
-			"urlArgs" : "fingerprint=#{fingerprint(jsPath + 'ide.js')}-#{fingerprint(jsPath + 'libs.js')}",
 			"waitSeconds": 0,
 			"shim": {
 				"pdfjs-dist/build/pdf": {
@@ -155,14 +156,13 @@ block requirejs
 				}
 			}
 		};
-		window.aceFingerprint = "#{fingerprint(jsPath + lib('ace') + '/ace.js')}"
 		window.aceWorkerPath = "#{aceWorkerPath}";
 		window.pdfCMapsPath = "#{pdfCMapsPath}"
 		window.uiConfig = JSON.parse('!{JSON.stringify(uiConfig).replace(/\//g, "\\/")}');
 
 	script(
-		data-main=buildJsPath("ide.js", {fingerprint:false}),
+		data-main=buildJsPath("ide.js", {hashedPath:false}),
 		baseurl=fullJsPath,
-		data-ace-base=buildJsPath(lib('ace'), {fingerprint:false}),
-		src=buildJsPath('libs/require.js')
+		data-ace-base=buildJsPath(lib('ace')),
+		src=buildJsPath('libs/require.js', {hashedPath:true})
 	)

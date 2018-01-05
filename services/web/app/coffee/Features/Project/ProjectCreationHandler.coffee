@@ -7,7 +7,7 @@ Project = require('../../models/Project').Project
 Folder = require('../../models/Folder').Folder
 ProjectEntityHandler = require('./ProjectEntityHandler')
 ProjectDetailsHandler = require('./ProjectDetailsHandler')
-HistoryController = require('../History/HistoryController')
+HistoryManager = require('../History/HistoryManager')
 User = require('../../models/User').User
 fs = require('fs')
 Path = require "path"
@@ -27,7 +27,7 @@ module.exports = ProjectCreationHandler =
 			if projectHistoryId?
 				ProjectCreationHandler._createBlankProject owner_id, projectName, projectHistoryId, callback
 			else
-				HistoryController.initializeProject (error, history) ->
+				HistoryManager.initializeProject (error, history) ->
 					return callback(error) if error?
 					ProjectCreationHandler._createBlankProject owner_id, projectName, history?.overleaf_id, callback
 

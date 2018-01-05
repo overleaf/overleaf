@@ -2,6 +2,7 @@
 	input.select-item(
 		select-individual,
 		type="checkbox",
+		ng-disabled="shouldDisableCheckbox(project)",
 		ng-model="project.selected"
 		stop-propagation="click"
 		aria-label=translate('select_project') + " '{{ project.name }}'"

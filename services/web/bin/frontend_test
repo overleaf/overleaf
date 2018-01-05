@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e;
+MOCHA="node_modules/.bin/mocha --recursive --reporter spec"
+$MOCHA "$@" test/unit_frontend/js
+

@@ -9,7 +9,6 @@ define [
 	"libs/angular-cookie"
 	"libs/passfield"
 	"libs/sixpack"
-	"libs/groove"
 	"libs/angular-sixpack"
 	"libs/ng-tags-input-3.0.0"
 ], () ->

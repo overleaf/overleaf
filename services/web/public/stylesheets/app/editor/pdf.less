@@ -10,9 +10,13 @@
 	padding: 0 (@line-height-computed / 2);
 }
 
+.pdf {
+	background-color: @pdf-bg;
+}
+
 .pdf-viewer, .pdf-logs, .pdf-errors, .pdf-uncompiled {
 	.full-size;
-	top: 58px;
+	top: @pdf-top-offset;
 }
 
 .pdf-logs, .pdf-errors, .pdf-uncompiled, .pdf-validation-problems{
@@ -69,11 +73,11 @@
 	}
 	.pdfjs-viewer {
 		.full-size;
-		background-color: @gray-lighter;
+		background-color: @pdfjs-bg;
 		overflow: scroll;
 		canvas, div.pdf-canvas {
 			background: white;
-			box-shadow: black 0px 0px 10px;
+			box-shadow: @pdf-page-shadow-color 0px 0px 10px;
 		}
 		div.pdf-canvas.pdfng-empty {
 			background-color: white;
@@ -179,7 +183,7 @@
 		cursor: pointer;
 		.line-no {
 			float: right;
-			color: @gray;
+			color: @log-line-no-color;
 			font-weight: 700;
 
 			.fa {
@@ -203,16 +207,25 @@
 			}
 		}
 
-		&.alert-danger:hover {
-			background-color: darken(@alert-danger-bg, 5%);
+		&.alert-danger {
+			background-color: tint(@alert-danger-bg, 15%);
+			&:hover {
+				background-color: @alert-danger-bg;
+			}
 		}
 
-		&.alert-warning:hover {
-			background-color: darken(@alert-warning-bg, 5%);
+		&.alert-warning {
+			background-color: tint(@alert-warning-bg, 15%);
+			&:hover {
+				background-color: @alert-warning-bg;
+			}
 		}
 
-		&.alert-info:hover {
-			background-color: darken(@alert-info-bg, 5%);
+		&.alert-info {
+			background-color: tint(@alert-info-bg, 15%);
+			&:hover {
+				background-color: @alert-info-bg;
+			}
 		}
 
 	}
@@ -354,22 +367,22 @@
 		}
 
 		.alert-danger & {
-			color: @alert-danger-border;
+			color: @state-danger-border;
 		}
 
 		.alert-warning & {
-			color: @alert-warning-border;
+			color: @state-warning-border;
 		}
 
 		.alert-info & {
-			color: @alert-info-border;
+			color: @state-info-border;
 		}
 
 	}
 
 	&-text, 
 	&-feedback-label {
-		color: @gray-dark;
+		color: @log-hints-color;
 		font-size: 0.9rem;
 		margin-bottom: 20px;
 	}
@@ -394,25 +407,25 @@
 	&-actions a,
 	&-text a {
 		.alert-danger & {
-			color: @alert-danger-text;
+			color: @state-danger-text;
 		}
 
 		.alert-warning & {
-			color: @alert-warning-text;
+			color: @state-warning-text;
 		}
 
 		.alert-info & {
-			color: @alert-info-text;
+			color: @state-info-text;
 		}
 	}
 
 	&-feedback {
-		color: @gray-dark;
+		color: @log-hints-color;
 		float: right;
 	}
 
 	&-extra-feedback {
-		color: @gray-dark;
+		color: @log-hints-color;
 		font-size: 0.8rem;
 		margin-top: 10px;
 		padding-bottom: 5px;

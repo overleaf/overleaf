@@ -216,7 +216,7 @@ module.exports = ProjectController =
 			project: (cb)->
 				ProjectGetter.getProject(
 					project_id,
-					{ name: 1, lastUpdated: 1, track_changes: 1, owner_ref: 1 },
+					{ name: 1, lastUpdated: 1, track_changes: 1, owner_ref: 1, 'overleaf.history.display': 1 },
 					cb
 				)
 			user: (cb)->
@@ -253,7 +253,7 @@ module.exports = ProjectController =
 				# Extract data from user's ObjectId
 				timestamp = parseInt(user_id.toString().substring(0, 8), 16)
 
-				rolloutPercentage = 40 # Percentage of users to roll out to
+				rolloutPercentage = 60 # Percentage of users to roll out to
 				if !ProjectController._isInPercentageRollout('autocompile', user_id, rolloutPercentage)
 					# Don't show if user is not part of roll out
 					return cb(null, { enabled: false, showOnboarding: false })
@@ -351,6 +351,7 @@ module.exports = ProjectController =
 					themes: THEME_LIST
 					maxDocLength: Settings.max_doc_length
 					showLinkSharingOnboarding: !!results.couldShowLinkSharingOnboarding
+					useV2History: !!project.overleaf?.history?.display
 				timer.done()
 
 	_buildProjectList: (allProjects, v1Projects = [])->

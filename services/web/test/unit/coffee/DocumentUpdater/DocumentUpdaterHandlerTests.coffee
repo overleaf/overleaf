@@ -393,7 +393,7 @@ describe 'DocumentUpdaterHandler', ->
 
 		describe "with project history disabled", ->
 			beforeEach ->
-				@settings.apis.project_history.enabled = false
+				@settings.apis.project_history.sendProjectStructureOps = false
 				@request.post = sinon.stub()
 
 				@handler.updateProjectStructure @project_id, @user_id, {}, @callback
@@ -406,7 +406,7 @@ describe 'DocumentUpdaterHandler', ->
 
 		describe "with project history enabled", ->
 			beforeEach ->
-				@settings.apis.project_history.enabled = true
+				@settings.apis.project_history.sendProjectStructureOps = true
 				@url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}"
 				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
 
@@ -478,14 +478,22 @@ describe 'DocumentUpdaterHandler', ->
 							.should.equal true
 						done()
 
-			describe "when a doc has been deleted", ->
-				it 'should do nothing', (done) ->
+			describe "when an entity has been deleted", ->
+				it 'should end the structure update to the document updater', (done) ->
 					@docId = new ObjectId()
 					@changes = oldDocs: [
 						{ path: '/foo', docLines: 'a\nb', doc: _id: @docId }
 					]
 
+					docUpdates = [
+						id: @docId.toString(),
+						pathname: '/foo',
+						newPathname: ''
+					]
+
 					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>
-						@request.post.called.should.equal false
+						@request.post
+							.calledWith(url: @url, json: {docUpdates, fileUpdates: [], userId: @user_id})
+							.should.equal true
 						done()
 

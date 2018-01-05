@@ -60,7 +60,7 @@ pipeline {
         sh 'git config --global core.logallrefupdates false'
         sh 'mv app/views/external/robots.txt public/robots.txt'
         sh 'mv app/views/external/googlebdb0f8f7f4a17241.html public/googlebdb0f8f7f4a17241.html'
-        sh 'npm install'
+        sh 'npm --quiet install'
         sh 'npm rebuild'
         // It's too easy to end up shrinkwrapping to an outdated version of translations.
         // Ensure translations are always latest, regardless of shrinkwrap
@@ -71,16 +71,9 @@ pipeline {
       }
     }
     
-    stage('Unit Tests') {
+    stage('Test') {
       steps {
-        sh 'make clean install' // Removes js files, so do before compile
-        sh 'make test_unit MOCHA_ARGS="--reporter=tap"'
-      }
-    }
-    
-    stage('Acceptance Tests') {
-      steps {
-        sh 'make test_acceptance MOCHA_ARGS="--reporter=tap"'
+        sh 'make ci'
       }
     }
 
@@ -155,6 +148,10 @@ pipeline {
   }
   
   post {
+    always {
+      sh 'make ci_clean'
+    }
+
     failure {
       mail(from: "${EMAIL_ALERT_FROM}", 
            to: "${EMAIL_ALERT_TO}", 
