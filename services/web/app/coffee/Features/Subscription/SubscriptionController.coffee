@@ -97,7 +97,7 @@ module.exports = SubscriptionController =
 				logger.log user: user, "redirecting to plans"
 				res.redirect "/user/subscription/plans"
 			else
-				RecurlyWrapper.getSubscription subscription.recurlySubscription_id,
+				RecurlyWrapper.getSubscription subscription?.recurlySubscription_id,
 					includeAccount: true,
 					(err, usersSubscription)->
 						# always render the page, but skip the recurly link if
