@@ -18,8 +18,8 @@ describe "ProjectUploadController", ->
 		@AuthenticationController =
 			getLoggedInUserId: sinon.stub().returns(@user_id)
 		@LockManager =
-			getLock : sinon.stub().yields()
-			releaseLock : sinon.stub().yields()
+			runWithLock : sinon.spy((key, runner, callback) -> runner(callback))
+
 		@ProjectUploadController = SandboxedModule.require modulePath, requires:
 			"./ProjectUploadManager" : @ProjectUploadManager = {}
 			"./FileSystemImportManager" : @FileSystemImportManager = {}
@@ -130,15 +130,12 @@ describe "ProjectUploadController", ->
 				@ProjectUploadController.uploadFile @req, @res
 
 			it "should take the lock", ->
-				@LockManager.getLock.calledWith(@project_id).should.equal true
+				@LockManager.runWithLock.calledWith(@project_id).should.equal true
 
 			it "should insert the file", ->
 				@FileSystemImportManager.addEntity
 					.calledWith(@user_id, @project_id, @folder_id, @name, @path)
 					.should.equal true
-
-			it "should release the lock", ->
-				@LockManager.releaseLock.calledWith(@project_id).should.equal true
 
 			it "should return a successful response to the FileUploader client", ->
 				expect(@res.body).to.deep.equal

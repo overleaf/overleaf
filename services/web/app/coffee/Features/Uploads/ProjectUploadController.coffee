@@ -39,23 +39,20 @@ module.exports = ProjectUploadController =
 		logger.log folder_id:folder_id, project_id:project_id, "getting upload file request"
 		user_id = AuthenticationController.getLoggedInUserId(req)
 
-		LockManager.getLock project_id, (err)->
-			if err?
-				logger.err err:err, project_id:project_id, source:source,  "could not get lock to uploadFile"
-				return callback(err)
-			FileSystemImportManager.addEntity user_id, project_id, folder_id, name, path, true, (error, entity) ->
-				LockManager.releaseLock project_id, ->
-					fs.unlink path, ->
-					timer.done()
-					if error?
-						logger.error
-							err: error, project_id: project_id, file_path: path,
-							file_name: name, folder_id: folder_id,
-							"error uploading file"
-						res.send success: false
-					else
-						logger.log
-							project_id: project_id, file_path: path, file_name: name, folder_id: folder_id
-							"uploaded file"
-						res.send success: true, entity_id: entity?._id, entity_type: entity?.type
+		LockManager.runWithLock project_id,
+			(cb) -> FileSystemImportManager.addEntity user_id, project_id, folder_id, name, path, true, cb
+			(error, entity) ->
+				fs.unlink path, ->
+				timer.done()
+				if error?
+					logger.error
+						err: error, project_id: project_id, file_path: path,
+						file_name: name, folder_id: folder_id,
+						"error uploading file"
+					res.send success: false
+				else
+					logger.log
+						project_id: project_id, file_path: path, file_name: name, folder_id: folder_id
+						"uploaded file"
+					res.send success: true, entity_id: entity?._id, entity_type: entity?.type
 

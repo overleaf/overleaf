@@ -51,4 +51,11 @@ module.exports = LockManager =
 	releaseLock: (key, callback)->
 		rclient.del LockManager._blockingKey(key), callback
 
-	
+	runWithLock: (key, runner = ( (releaseLock = (error) ->) -> ), callback = ( (error) -> )) ->
+		LockManager.getLock key, (error) ->
+			return callback(error) if error?
+			runner (error1, values...) ->
+				LockManager.releaseLock key, (error2) ->
+					error = error1 or error2
+					return callback(error) if error?
+					callback null, values...
