@@ -1390,8 +1390,7 @@
     "es6-promise": {
       "version": "4.1.1",
       "resolved": "https://registry.npmjs.org/es6-promise/-/es6-promise-4.1.1.tgz",
-      "integrity": "sha1-iBHpCRXZoNujYnTwskLb2nj5ySo=",
-      "dev": true
+      "integrity": "sha1-iBHpCRXZoNujYnTwskLb2nj5ySo="
     },
     "escape-html": {
       "version": "1.0.2",
@@ -1517,6 +1516,26 @@
           "version": "2.4.2",
           "resolved": "https://registry.npmjs.org/qs/-/qs-2.4.2.tgz",
           "integrity": "sha1-9854jld33wtQENp/fE5zujJHD1o="
+        }
+      }
+    },
+    "express-http-proxy": {
+      "version": "1.1.0",
+      "resolved": "https://registry.npmjs.org/express-http-proxy/-/express-http-proxy-1.1.0.tgz",
+      "integrity": "sha1-tTOEKt0VtwIdeNJIyAtTV4p7a6A=",
+      "requires": {
+        "debug": "3.1.0",
+        "es6-promise": "4.1.1",
+        "raw-body": "2.3.1"
+      },
+      "dependencies": {
+        "debug": {
+          "version": "3.1.0",
+          "resolved": "https://registry.npmjs.org/debug/-/debug-3.1.0.tgz",
+          "integrity": "sha512-OX8XqP7/1a9cqkxYw2yXss15f26NKWBpDXQd0/uK/KPqdQhxbPa994hnzjcE2VqQpDslf55723cKPUOGSmMY3g==",
+          "requires": {
+            "ms": "2.0.0"
+          }
         }
       }
     },
@@ -3527,7 +3546,7 @@
         "raven": "1.2.1",
         "sandboxed-module": "2.0.3",
         "sinon": "4.1.3",
-        "timekeeper": "2.0.0"
+        "timekeeper": "1.0.0"
       },
       "dependencies": {
         "ansi-regex": {
@@ -3611,7 +3630,7 @@
           "integrity": "sha1-h9v8ATg6jdzn2dVJbzYIVkiJ8VY=",
           "requires": {
             "jsonfile": "1.1.1",
-            "mkdirp": "https://registry.npmjs.org/mkdirp/-/mkdirp-0.5.1.tgz",
+            "mkdirp": "0.5.1",
             "ncp": "0.5.1",
             "rimraf": "2.4.5"
           },
@@ -3747,6 +3766,14 @@
             "brace-expansion": "1.1.8"
           }
         },
+        "mkdirp": {
+          "version": "0.5.1",
+          "resolved": "https://registry.npmjs.org/mkdirp/-/mkdirp-0.5.1.tgz",
+          "integrity": "sha1-MAV0OOrGz3+MR2fzhkjWaX11yQM=",
+          "requires": {
+            "minimist": "0.0.8"
+          }
+        },
         "mocha": {
           "version": "1.20.1",
           "resolved": "https://registry.npmjs.org/mocha/-/mocha-1.20.1.tgz",
@@ -3793,7 +3820,7 @@
           "integrity": "sha1-rmzg1vbV4KT32JN5jQPB6pVZtqI=",
           "optional": true,
           "requires": {
-            "mkdirp": "https://registry.npmjs.org/mkdirp/-/mkdirp-0.5.1.tgz",
+            "mkdirp": "0.5.1",
             "ncp": "2.0.0",
             "rimraf": "2.4.5"
           }
@@ -3856,6 +3883,11 @@
           "version": "0.2.0",
           "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-0.2.0.tgz",
           "integrity": "sha1-2S3iaU6z9nMjlz1649i1W0wiGQo="
+        },
+        "timekeeper": {
+          "version": "1.0.0",
+          "resolved": "https://registry.npmjs.org/timekeeper/-/timekeeper-1.0.0.tgz",
+          "integrity": "sha1-Lziu4elLEd1m2FgP8aqdzGoroNg="
         },
         "type-detect": {
           "version": "4.0.5",
@@ -6665,7 +6697,7 @@
       }
     },
     "translations-sharelatex": {
-      "version": "git+https://github.com/sharelatex/translations-sharelatex.git#507b6b945bedc604f5db7185ad66386209f95c18",
+      "version": "git+https://github.com/sharelatex/translations-sharelatex.git#6c9d95a6072b4d40621dacbf0f35fefc3469b4b1",
       "dev": true,
       "requires": {
         "async": "2.6.0",
