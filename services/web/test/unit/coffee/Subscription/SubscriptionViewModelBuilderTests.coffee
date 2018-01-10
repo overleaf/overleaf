@@ -41,6 +41,7 @@ describe 'SubscriptionViewModelBuilder', ->
 			"./PlansLocator": @PlansLocator
 			"./SubscriptionLocator": @SubscriptionLocator
 			"./SubscriptionFormatters": @SubscriptionFormatters
+			"./LimitationsManager": {}
 			"logger-sharelatex":
 				log:->
 				warn:->
