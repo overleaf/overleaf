@@ -38,7 +38,7 @@ define [
 		($locationProvider) ->
 			try
 				$locationProvider.html5Mode({
-					enabled: false,
+					enabled: true,
 					requireBase: false,
 					rewriteLinks: false
 				})
