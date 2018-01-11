@@ -1,6 +1,7 @@
 define [
-	"base"
-], (App) ->
+	"base",
+	"ide/history/util/displayNameForUser"
+], (App, displayNameForUser) ->
 
 	App.controller "HistoryPremiumPopup", ($scope, ide, sixpack)->
 		$scope.$watch "ui.view", ->
@@ -114,18 +115,5 @@ define [
 			$scope.history.hoveringOverListSelectors = false
 			$scope.resetHoverState()
 
-		$scope.displayName = (user) ->
-			if user.name?
-				full_name = user.name
-			else
-				full_name = "#{user.first_name} #{user.last_name}"
-			fallback_name = "Unknown"
-			if !user?
-				fallback_name
-			else if full_name != " "
-				full_name
-			else if user.email
-				user.email
-			else
-				fallback_name
+		$scope.displayName = displayNameForUser
 	]

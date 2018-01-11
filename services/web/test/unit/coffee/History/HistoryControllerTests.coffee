@@ -14,6 +14,7 @@ describe "HistoryController", ->
 			"request" : @request = sinon.stub()
 			"settings-sharelatex": @settings = {}
 			"logger-sharelatex": @logger = {log: sinon.stub(), error: sinon.stub()}
+			"./HistoryManager": @HistoryManager = {}
 			"../Authentication/AuthenticationController": @AuthenticationController
 			"../Project/ProjectDetailsHandler": @ProjectDetailsHandler = {}
 		@settings.apis =
@@ -114,3 +115,70 @@ describe "HistoryController", ->
 
 			it "should pass the error up the call chain", ->
 				@next.calledWith(@error).should.equal true
+
+	describe "proxyToHistoryApiAndInjectUserDetails", ->
+		beforeEach ->
+			@req = { url: "/mock/url", method: "POST" }
+			@res =
+				json: sinon.stub()
+			@next = sinon.stub()
+			@request.yields(null, {}, @data = "mock-data")
+			@HistoryManager.injectUserDetails = sinon.stub().yields(null, @data_with_users = "mock-injected-data")
+
+		describe "for a project with the project history flag", ->
+			beforeEach ->
+				@req.useProjectHistory = true
+				@HistoryController.proxyToHistoryApiAndInjectUserDetails @req, @res, @next
+
+			it "should get the user id", ->
+				@AuthenticationController.getLoggedInUserId
+					.calledWith(@req)
+					.should.equal true
+
+			it "should call the project history api", ->
+				@request
+					.calledWith({
+						url: "#{@settings.apis.project_history.url}#{@req.url}"
+						method: @req.method
+						json: true
+						headers:
+							"X-User-Id": @user_id
+					})
+					.should.equal true
+
+			it "should inject the user data", ->
+				@HistoryManager.injectUserDetails
+					.calledWith(@data)
+					.should.equal true
+
+			it "should return the data with users to the client", ->
+				@res.json.calledWith(@data_with_users).should.equal true
+
+		describe "for a project without the project history flag", ->
+			beforeEach ->
+				@req.useProjectHistory = false
+				@HistoryController.proxyToHistoryApiAndInjectUserDetails @req, @res, @next
+
+			it "should get the user id", ->
+				@AuthenticationController.getLoggedInUserId
+					.calledWith(@req)
+					.should.equal true
+
+			it "should call the track changes api", ->
+				@request
+					.calledWith({
+						url: "#{@settings.apis.trackchanges.url}#{@req.url}"
+						method: @req.method
+						json: true
+						headers:
+							"X-User-Id": @user_id
+					})
+					.should.equal true
+
+			it "should inject the user data", ->
+				@HistoryManager.injectUserDetails
+					.calledWith(@data)
+					.should.equal true
+
+			it "should return the data with users to the client", ->
+				@res.json.calledWith(@data_with_users).should.equal true

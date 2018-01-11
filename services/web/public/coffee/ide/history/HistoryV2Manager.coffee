@@ -1,10 +1,11 @@
 define [
 	"moment"
 	"ide/colors/ColorManager"
+	"ide/history/util/displayNameForUser"
 	"ide/history/controllers/HistoryListController"
 	"ide/history/controllers/HistoryDiffController"
 	"ide/history/directives/infiniteScroll"
-], (moment, ColorManager) ->
+], (moment, ColorManager, displayNameForUser) ->
 	class HistoryManager
 		constructor: (@ide, @$scope) ->
 			@reset()
@@ -152,24 +153,20 @@ define [
 				}
 
 				if entry.i? or entry.d?
-					if entry.meta.user?
-						name = "#{entry.meta.user.first_name} #{entry.meta.user.last_name}"
-					else
-						name = "Anonymous"
-					if entry.meta.user?.id == @$scope.user.id
-						name = "you"
+					user = entry.meta.users?[0]
+					name = displayNameForUser(user)
 					date = moment(entry.meta.end_ts).format("Do MMM YYYY, h:mm a")
 					if entry.i?
 						highlights.push {
 							label: "Added by #{name} on #{date}"
 							highlight: range
-							hue: ColorManager.getHueForUserId(entry.meta.user?.id)
+							hue: ColorManager.getHueForUserId(user?.id)
 						}
 					else if entry.d?
 						highlights.push {
 							label: "Deleted by #{name} on #{date}"
 							strikeThrough: range
-							hue: ColorManager.getHueForUserId(entry.meta.user?.id)
+							hue: ColorManager.getHueForUserId(user?.id)
 						}
 
 			return {text, highlights}
