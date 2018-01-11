@@ -7,22 +7,39 @@ SubscriptionLocator = require("./SubscriptionLocator")
 logger = require('logger-sharelatex')
 _ = require("underscore")
 
-module.exports =
 
-	buildUsersSubscriptionViewModel: (user, callback = (error, subscription, memberSubscriptions) ->) ->
+buildBillingDetails = (recurlySubscription) ->
+	hostedLoginToken = recurlySubscription?.account?.hosted_login_token
+	recurlySubdomain = Settings?.apis?.recurly?.subdomain
+	if hostedLoginToken? && recurlySubdomain?
+		return [
+			"https://",
+			recurlySubdomain,
+			".recurly.com/account/billing_info/edit?ht=",
+			hostedLoginToken
+		].join("")
+
+module.exports =
+	buildUsersSubscriptionViewModel: (user, callback = (error, subscription, memberSubscriptions, billingDetailsLink) ->) ->
 		SubscriptionLocator.getUsersSubscription user, (err, subscription) ->
 			return callback(err) if err?
+
 			SubscriptionLocator.getMemberSubscriptions user, (err, memberSubscriptions = []) ->
 				return callback(err) if err?
+
 				if subscription?
 					return callback(error) if error?
+
 					plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
+
 					if !plan?
 						err = new Error("No plan found for planCode '#{subscription.planCode}'")
 						logger.error {user_id: user._id, err}, "error getting subscription plan for user"
 						return callback(err)
-					RecurlyWrapper.getSubscription subscription.recurlySubscription_id, (err, recurlySubscription)->
+
+					RecurlyWrapper.getSubscription subscription.recurlySubscription_id, includeAccount: true, (err, recurlySubscription)->
 						tax = recurlySubscription?.tax_in_cents || 0
+
 						callback null, {
 							admin_id:subscription.admin_id
 							name: plan.name
@@ -34,9 +51,10 @@ module.exports =
 							taxRate:parseFloat(recurlySubscription?.tax_rate?._)
 							groupPlan: subscription.groupPlan
 							trial_ends_at:recurlySubscription?.trial_ends_at
-						}, memberSubscriptions
+						}, memberSubscriptions, buildBillingDetails(recurlySubscription)
+
 				else
-					callback null, null, memberSubscriptions
+					callback null, null, memberSubscriptions, null
 
 	buildViewModel : ->
 		plans = Settings.plans

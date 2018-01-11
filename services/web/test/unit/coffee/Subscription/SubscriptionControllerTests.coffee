@@ -42,10 +42,6 @@ describe "SubscriptionController", ->
 			userHasSubscriptionOrIsGroupMember: sinon.stub()
 			userHasSubscription : sinon.stub()
 
-		@RecurlyWrapper =
-			sign: sinon.stub().callsArgWith(1, null, "somthing")
-			getSubscription: sinon.stub().callsArgWith(2, null, {})
-
 		@SubscriptionViewModelBuilder =
 			buildUsersSubscriptionViewModel:sinon.stub().callsArgWith(1, null, @activeRecurlySubscription)
 			buildViewModel: sinon.stub()
@@ -72,7 +68,6 @@ describe "SubscriptionController", ->
 			'./SubscriptionViewModelBuilder': @SubscriptionViewModelBuilder
 			"./LimitationsManager": @LimitationsManager
 			"../../infrastructure/GeoIpLookup":@GeoIpLookup
-			'./RecurlyWrapper': @RecurlyWrapper
 			"logger-sharelatex":
 				log:->
 				warn:->
@@ -182,7 +177,7 @@ describe "SubscriptionController", ->
 					opts.currency.should.equal @stubbedCurrencyCode
 					done()
 				@SubscriptionController.paymentPage @req, @res
-		
+
 		describe "with a recurly subscription already", ->
 			it "should redirect to the subscription dashboard", (done)->
 				@LimitationsManager.userHasSubscription.callsArgWith(1, null, false)
@@ -191,7 +186,7 @@ describe "SubscriptionController", ->
 					url.should.equal "/user/subscription"
 					done()
 				@SubscriptionController.paymentPage(@req, @res)
-			
+
 
 	describe "successful_subscription", ->
 		beforeEach (done) ->
@@ -230,8 +225,6 @@ describe "SubscriptionController", ->
 					@res.callback = done
 					@settings.apis.recurly.subdomain = 'test'
 					@userSub = {account: {hosted_login_token: 'abcd'}}
-					@RecurlyWrapper.getSubscription = sinon.stub()
-						.callsArgWith(2, null, @userSub)
 					@LimitationsManager.userHasSubscriptionOrIsGroupMember
 						.callsArgWith(1, null, true, {})
 					@SubscriptionController.userSubscriptionPage @req, @res
