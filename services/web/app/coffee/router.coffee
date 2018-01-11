@@ -76,7 +76,7 @@ module.exports = class Router
 		StaticPagesRouter.apply(webRouter, privateApiRouter)
 		RealTimeProxyRouter.apply(webRouter, privateApiRouter)
 		ContactRouter.apply(webRouter, privateApiRouter)
-		AnalyticsRouter.apply(webRouter, privateApiRouter)
+		AnalyticsRouter.apply(webRouter, privateApiRouter, publicApiRouter)
 
 		Modules.applyRouter(webRouter, privateApiRouter, publicApiRouter)
 

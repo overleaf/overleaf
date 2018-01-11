@@ -3,8 +3,8 @@ AnalyticsController = require('./AnalyticsController')
 AnalyticsProxy = require('./AnalyticsProxy')
 
 module.exports =
-	apply: (webRouter, privateApiRouter) ->
+	apply: (webRouter, privateApiRouter, publicApiRouter) ->
 		webRouter.post '/event/:event', AnalyticsController.recordEvent
-		privateApiRouter.use '/analytics/graphs',
+		publicApiRouter.use '/analytics/graphs',
 			AuthenticationController.httpAuth,
 			AnalyticsProxy.call('/graphs')
