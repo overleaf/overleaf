@@ -60,7 +60,7 @@ module.exports = HistoryManager =
 					user_ids.add user
 		user_ids = Array.from(user_ids)
 		UserGetter.getUsers user_ids, { first_name: 1, last_name: 1, email: 1 }, (error, users_array) ->
-			return next(error) if error?
+			return callback(error) if error?
 			users = {}
 			for user in users_array or []
 				users[user._id.toString()] = HistoryManager._userView(user)
