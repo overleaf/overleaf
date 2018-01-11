@@ -17,12 +17,16 @@ describe "ProjectUploadController", ->
 				done: sinon.stub()
 		@AuthenticationController =
 			getLoggedInUserId: sinon.stub().returns(@user_id)
+		@LockManager =
+			runWithLock : sinon.spy((key, runner, callback) -> runner(callback))
+
 		@ProjectUploadController = SandboxedModule.require modulePath, requires:
 			"./ProjectUploadManager" : @ProjectUploadManager = {}
 			"./FileSystemImportManager" : @FileSystemImportManager = {}
 			"logger-sharelatex" : @logger = {log: sinon.stub(), error: sinon.stub(), err:->}
 			"metrics-sharelatex": @metrics
 			'../Authentication/AuthenticationController': @AuthenticationController
+			"../../infrastructure/LockManager": @LockManager
 			"fs" : @fs = {}
 
 	describe "uploadProject", ->
@@ -124,6 +128,9 @@ describe "ProjectUploadController", ->
 					type: 'file'
 				@FileSystemImportManager.addEntity = sinon.stub().callsArgWith(6, null, @entity)
 				@ProjectUploadController.uploadFile @req, @res
+
+			it "should take the lock", ->
+				@LockManager.runWithLock.calledWith(@project_id).should.equal true
 
 			it "should insert the file", ->
 				@FileSystemImportManager.addEntity

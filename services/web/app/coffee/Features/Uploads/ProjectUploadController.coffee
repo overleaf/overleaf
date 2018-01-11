@@ -5,6 +5,7 @@ Path    = require "path"
 FileSystemImportManager = require "./FileSystemImportManager"
 ProjectUploadManager    = require "./ProjectUploadManager"
 AuthenticationController = require('../Authentication/AuthenticationController')
+LockManager = require("../../infrastructure/LockManager")
 
 module.exports = ProjectUploadController =
 	uploadProject: (req, res, next) ->
@@ -37,18 +38,21 @@ module.exports = ProjectUploadController =
 			return res.send success: false
 		logger.log folder_id:folder_id, project_id:project_id, "getting upload file request"
 		user_id = AuthenticationController.getLoggedInUserId(req)
-		FileSystemImportManager.addEntity user_id, project_id, folder_id, name, path, true, (error, entity) ->
-			fs.unlink path, ->
-			timer.done()
-			if error?
-				logger.error
-					err: error, project_id: project_id, file_path: path,
-					file_name: name, folder_id: folder_id,
-					"error uploading file"
-				res.send success: false
-			else
-				logger.log
-					project_id: project_id, file_path: path, file_name: name, folder_id: folder_id
-					"uploaded file"
-				res.send success: true, entity_id: entity?._id, entity_type: entity?.type
+
+		LockManager.runWithLock project_id,
+			(cb) -> FileSystemImportManager.addEntity user_id, project_id, folder_id, name, path, true, cb
+			(error, entity) ->
+				fs.unlink path, ->
+				timer.done()
+				if error?
+					logger.error
+						err: error, project_id: project_id, file_path: path,
+						file_name: name, folder_id: folder_id,
+						"error uploading file"
+					res.send success: false
+				else
+					logger.log
+						project_id: project_id, file_path: path, file_name: name, folder_id: folder_id
+						"uploaded file"
+					res.send success: true, entity_id: entity?._id, entity_type: entity?.type
 
