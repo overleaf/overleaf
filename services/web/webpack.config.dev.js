@@ -7,7 +7,7 @@ module.exports = merge(base, {
 	devtool: 'cheap-module-eval-source-map',
 
 	output: {
-		publicPath: '/public/js/frontend/'
+		publicPath: '/public/js/es/'
 	},
 
 	devServer: {
