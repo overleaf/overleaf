@@ -5,7 +5,6 @@ import org.eclipse.jgit.transport.UploadPack;
 import org.eclipse.jgit.transport.resolver.UploadPackFactory;
 import uk.ac.ic.wlgitbridge.git.servlet.WLGitServlet;
 import uk.ac.ic.wlgitbridge.util.Log;
-import uk.ac.ic.wlgitbridge.util.Util;
 
 import javax.servlet.http.HttpServletRequest;
 
