@@ -12,7 +12,6 @@ module.exports = {
 	// kept in memory for speed
 	output: {
 		path: path.join(__dirname, '/public/js/frontend'),
-		// publicPath: '/frontend/',
 
 		filename: '[name].js',
 

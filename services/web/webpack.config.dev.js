@@ -6,6 +6,10 @@ module.exports = merge(base, {
 	// Enable source maps for dev (fast compilation, slow runtime)
 	devtool: 'cheap-module-eval-source-map',
 
+	output: {
+		publicPath: '/public/js/frontend/'
+	},
+
 	devServer: {
 		// Disable webpack dev server auto-reload
 		inline: false,
