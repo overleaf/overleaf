@@ -3,6 +3,7 @@ package uk.ac.ic.wlgitbridge.git.servlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jgit.http.server.GitServlet;
 import uk.ac.ic.wlgitbridge.bridge.Bridge;
+import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
 import uk.ac.ic.wlgitbridge.git.handler.WLReceivePackFactory;
 import uk.ac.ic.wlgitbridge.git.handler.WLRepositoryResolver;
 import uk.ac.ic.wlgitbridge.git.handler.WLUploadPackFactory;
@@ -39,10 +40,11 @@ public class WLGitServlet extends GitServlet {
      */
     public WLGitServlet(
             ServletContextHandler ctxHandler,
+            RepoStore repoStore,
             Bridge bridge
     ) throws ServletException {
         setRepositoryResolver(new WLRepositoryResolver(bridge));
-        setReceivePackFactory(new WLReceivePackFactory(bridge));
+        setReceivePackFactory(new WLReceivePackFactory(repoStore, bridge));
         setUploadPackFactory(new WLUploadPackFactory());
         init(new WLGitServletConfig(ctxHandler));
     }

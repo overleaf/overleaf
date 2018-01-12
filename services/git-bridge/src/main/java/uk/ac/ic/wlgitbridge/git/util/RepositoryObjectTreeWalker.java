@@ -47,19 +47,7 @@ public class RepositoryObjectTreeWalker {
         this(repository, repository.resolve("HEAD~" + fromHead));
     }
 
-    public RawDirectory getDirectoryContents(
-    ) throws IOException, SizeLimitExceededException, InvalidGitRepository {
-        return getDirectoryContents(Optional.empty());
-    }
-
-    public RawDirectory getDirectoryContents(long maxFileSize)
-            throws InvalidGitRepository,
-                    SizeLimitExceededException,
-                    IOException {
-        return getDirectoryContents(Optional.of(maxFileSize));
-    }
-
-    private RawDirectory getDirectoryContents(Optional<Long> maxFileSize)
+    public RawDirectory getDirectoryContents(Optional<Long> maxFileSize)
             throws IOException,
                     SizeLimitExceededException,
                     InvalidGitRepository {

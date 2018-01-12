@@ -9,7 +9,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import uk.ac.ic.wlgitbridge.data.filestore.GitDirectoryContents;
-import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
+import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
 import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
 import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
 import uk.ac.ic.wlgitbridge.util.Log;
@@ -43,10 +43,19 @@ public class GitProjectRepo implements ProjectRepo {
     private final String projectName;
     private Optional<Repository> repository;
 
-    public GitProjectRepo(String projectName) {
+    public static GitProjectRepo fromJGitRepo(Repository repo) {
+        return new GitProjectRepo(
+                repo.getWorkTree().getName(), Optional.of(repo));
+    }
+
+    public static GitProjectRepo fromName(String projectName) {
+        return new GitProjectRepo(projectName, Optional.empty());
+    }
+
+    GitProjectRepo(String projectName, Optional<Repository> repository) {
         Preconditions.checkArgument(Project.isValidProjectName(projectName));
         this.projectName = projectName;
-        repository = Optional.empty();
+        this.repository = repository;
     }
 
     @Override
@@ -61,7 +70,10 @@ public class GitProjectRepo implements ProjectRepo {
         initRepositoryField(repoStore);
         Preconditions.checkState(repository.isPresent());
         Repository repo = this.repository.get();
-        Preconditions.checkState(!repo.getObjectDatabase().exists());
+        // TODO: assert that this is a fresh repo. At the moment, we can't be
+        // sure whether the repo to be init'd doesn't exist or is just fresh
+        // and we crashed / aborted while committing
+        if (repo.getObjectDatabase().exists()) return;
         repo.create();
     }
 
@@ -77,12 +89,12 @@ public class GitProjectRepo implements ProjectRepo {
     }
 
     @Override
-    public Map<String, RawFile> getFiles()
+    public RawDirectory getDirectory()
             throws IOException, GitUserException {
         Preconditions.checkState(repository.isPresent());
         return new RepositoryObjectTreeWalker(
                 repository.get()
-        ).getDirectoryContents().getFileTable();
+        ).getDirectoryContents(Optional.empty());
     }
 
     @Override

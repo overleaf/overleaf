@@ -2,6 +2,7 @@ package uk.ac.ic.wlgitbridge.bridge;
 
 import org.junit.Before;
 import org.junit.Test;
+import uk.ac.ic.wlgitbridge.application.config.Config;
 import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
 import uk.ac.ic.wlgitbridge.bridge.db.ProjectState;
 import uk.ac.ic.wlgitbridge.bridge.gc.GcJob;
@@ -50,6 +51,18 @@ public class BridgeTest {
         swapJob = mock(SwapJob.class);
         gcJob = mock(GcJob.class);
         bridge = new Bridge(
+                new Config(
+                        0,
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        null,
+                        null,
+                        null,
+                        null),
                 lock,
                 repoStore,
                 dbStore,

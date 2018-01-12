@@ -7,12 +7,12 @@ import org.eclipse.jgit.transport.ReceiveCommand;
 import org.eclipse.jgit.transport.ReceiveCommand.Result;
 import org.eclipse.jgit.transport.ReceivePack;
 import uk.ac.ic.wlgitbridge.bridge.Bridge;
+import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
 import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
 import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
 import uk.ac.ic.wlgitbridge.git.handler.WLReceivePackFactory;
 import uk.ac.ic.wlgitbridge.git.handler.hook.exception.ForcedPushException;
 import uk.ac.ic.wlgitbridge.git.handler.hook.exception.WrongBranchException;
-import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.InternalErrorException;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.OutOfDateException;
 import uk.ac.ic.wlgitbridge.snapshot.push.exception.SnapshotPostException;
@@ -33,6 +33,8 @@ import java.util.Optional;
  */
 public class WriteLatexPutHook implements PreReceiveHook {
 
+    private final RepoStore repoStore;
+
     private final Bridge bridge;
     private final String hostname;
     private final Optional<Credential> oauth2;
@@ -41,15 +43,18 @@ public class WriteLatexPutHook implements PreReceiveHook {
      * The constructor to use, which provides the hook with the {@link Bridge},
      * the hostname (used to construct a URL to give to Overleaf to postback),
      * and the oauth2 (used to authenticate with the Snapshot API).
+     * @param repoStore
      * @param bridge the {@link Bridge}
      * @param hostname the hostname used for postback from the Snapshot API
      * @param oauth2 used to authenticate with the snapshot API, or null
      */
     public WriteLatexPutHook(
+            RepoStore repoStore,
             Bridge bridge,
             String hostname,
             Optional<Credential> oauth2
     ) {
+        this.repoStore = repoStore;
         this.bridge = bridge;
         this.hostname = hostname;
         this.oauth2 = oauth2;
@@ -152,18 +157,17 @@ public class WriteLatexPutHook implements PreReceiveHook {
             Repository repository,
             ReceiveCommand receiveCommand
     ) throws IOException, GitUserException {
-        return new RepositoryObjectTreeWalker(
-                repository,
-                receiveCommand.getNewId()
-        ).getDirectoryContents();
+        return repoStore
+                .useJGitRepo(repository, receiveCommand.getNewId())
+                .getDirectory();
     }
 
     private RawDirectory getOldDirectoryContents(
             Repository repository
     ) throws IOException, GitUserException {
-        return new RepositoryObjectTreeWalker(
-                repository
-        ).getDirectoryContents();
+        return repoStore
+                .useJGitRepo(repository, repository.resolve("HEAD"))
+                .getDirectory();
     }
 
 }

@@ -95,7 +95,10 @@ public class ConfigTest {
                 "    \"oauth2ClientID\": \"<oauth2ClientID>\",\n" +
                 "    \"oauth2ClientSecret\": \"<oauth2ClientSecret>\",\n" +
                 "    \"oauth2Server\": \"https://www.overleaf.com\"\n" +
-                "  }\n" +
+                "  },\n" +
+                "  \"repoStore\": null,\n" +
+                "  \"swapStore\": null,\n" +
+                "  \"swapJob\": null\n" +
                 "}";
         assertEquals(
                 "sanitised config did not hide sensitive fields",

@@ -25,6 +25,11 @@ public class ServletFile extends RawFile {
         return file.getContents();
     }
 
+    @Override
+    public long size() {
+        return getContents().length;
+    }
+
     public boolean isChanged() {
         return changed;
     }

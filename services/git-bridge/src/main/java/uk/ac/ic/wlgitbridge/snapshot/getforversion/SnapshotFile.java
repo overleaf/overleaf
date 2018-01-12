@@ -44,6 +44,11 @@ public class SnapshotFile extends RawFile implements JSONSource {
         return contents;
     }
 
+    @Override
+    public long size() {
+        return contents.length;
+    }
+
     /* Mock server */
 
     public SnapshotFile(String contents, String path) {

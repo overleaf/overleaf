@@ -9,7 +9,6 @@ import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
 import uk.ac.ic.wlgitbridge.bridge.repo.FSGitRepoStore;
-import uk.ac.ic.wlgitbridge.bridge.repo.GitProjectRepo;
 import uk.ac.ic.wlgitbridge.bridge.repo.ProjectRepo;
 import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
 import uk.ac.ic.wlgitbridge.bridge.resource.ResourceCache;
@@ -20,6 +19,7 @@ import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockserver.model.HttpRequest.request;
@@ -67,12 +67,13 @@ public class ResourceFetcherTest {
         TemporaryFolder repositoryFolder = new TemporaryFolder();
         repositoryFolder.create();
         String repoStorePath = repositoryFolder.getRoot().getAbsolutePath();
-        RepoStore repoStore = new FSGitRepoStore(repoStorePath);
-        ProjectRepo repo = new GitProjectRepo("repo");
-        repo.initRepo(repoStore);
-        Map<String, RawFile> fileTable = repo.getFiles();
-        Map<String, byte[]> fetchedUrls = new HashMap<String, byte[]>();
-        resources.get(testProjectName, testUrl, newTestPath, fileTable, fetchedUrls);
+        RepoStore repoStore = new FSGitRepoStore(repoStorePath, Optional.empty());
+        ProjectRepo repo = repoStore.initRepo("repo");
+        Map<String, RawFile> fileTable = repo.getDirectory().getFileTable();
+        Map<String, byte[]> fetchedUrls = new HashMap<>();
+        resources.get(
+                testProjectName, testUrl, newTestPath,
+                fileTable, fetchedUrls, Optional.empty());
 
         // We don't bother caching in this case, at present.
         assertEquals(0, fetchedUrls.size());

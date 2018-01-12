@@ -45,6 +45,7 @@ public class SwapJobImplTest {
                         tmpFolder,
                         "repostore"
                 ).getAbsolutePath(),
+                100_000,
                 FileUtils::sizeOfDirectory
         );
         dbStore = new SqliteDBStore(tmpFolder.newFile());

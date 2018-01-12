@@ -11,6 +11,9 @@
         "oauth2ClientSecret": "asdf",
         "oauth2Server": "https://localhost"
     },
+    "repoStore": {
+        "maxFileSize": 52428800
+    },
     "swapStore": {
         "type": "s3",
         "awsAccessKey": "asdf",
