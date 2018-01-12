@@ -20,13 +20,13 @@ module.exports = EditorController =
 
 
 	addDoc: (project_id, folder_id, docName, docLines, source, user_id, callback = (error, doc)->)->
-		LockManager.getLock project_id, (err)->
-			if err?
-				logger.err err:err, project_id:project_id, source:source,  "could not get lock to addDoc"
-				return callback(err)
-			EditorController.addDocWithoutLock project_id, folder_id, docName, docLines, source, user_id, (error, doc)->
-				LockManager.releaseLock project_id, ->
-					callback(error, doc)
+		LockManager.runWithLock project_id,
+			(cb) -> EditorController.addDocWithoutLock project_id, folder_id, docName, docLines, source, user_id, cb
+			(err, doc) ->
+				if err?
+					logger.err err:err, project_id:project_id, source:source,  "could add doc"
+					return callback err
+				callback null, doc
 
 	addDocWithoutLock: (project_id, folder_id, docName, docLines, source, user_id, callback = (error, doc)->)->
 		docName = docName.trim()
@@ -40,13 +40,13 @@ module.exports = EditorController =
 			callback(err, doc)
 
 	addFile: (project_id, folder_id, fileName, path, source, user_id, callback = (error, file)->)->
-		LockManager.getLock project_id, (err)->
-			if err?
-				logger.err err:err, project_id:project_id, source:source,  "could not get lock to addFile"
-				return callback(err)
-			EditorController.addFileWithoutLock project_id, folder_id, fileName, path, source, user_id, (error, file)->
-				LockManager.releaseLock project_id, ->
-					callback(error, file)	
+		LockManager.runWithLock project_id,
+			(cb) -> EditorController.addFileWithoutLock project_id, folder_id, fileName, path, source, user_id, cb
+			(err, file) ->
+				if err?
+					logger.err err:err, project_id:project_id, source:source,  "could add file"
+					return callback(err)
+				callback null, file
 
 	addFileWithoutLock: (project_id, folder_id, fileName, path, source, user_id, callback = (error, file)->)->
 		fileName = fileName.trim()
@@ -63,13 +63,13 @@ module.exports = EditorController =
 		ProjectEntityHandler.replaceFile project_id, file_id, fsPath, user_id, callback
 
 	addFolder : (project_id, folder_id, folderName, source, callback = (error, folder)->)->
-		LockManager.getLock project_id, (err)->
-			if err?
-				logger.err err:err, project_id:project_id, source:source,  "could not get lock to addFolder"
-				return callback(err)
-			EditorController.addFolderWithoutLock project_id, folder_id, folderName, source, (error, folder)->
-				LockManager.releaseLock project_id, ->
-					callback(error, folder)	
+		LockManager.runWithLock project_id,
+			(cb) -> EditorController.addFolderWithoutLock project_id, folder_id, folderName, source, cb
+			(err, folder)->
+				if err?
+					logger.err err:err, project_id:project_id, source:source,  "could not add folder"
+					return callback(err)
+				callback null, folder
 
 	addFolderWithoutLock: (project_id, folder_id, folderName, source, callback = (error, folder)->)->
 		folderName = folderName.trim()
@@ -82,17 +82,16 @@ module.exports = EditorController =
 			@p.notifyProjectUsersOfNewFolder project_id, folder_id, folder, (error) ->
 				callback error, folder
 
+	mkdirp : (project_id, path, callback = (error, newFolders, lastFolder)->)->
+		LockManager.runWithLock project_id,
+			(cb) -> EditorController.mkdirpWithoutLock project_id, path, cb
+			(err, newFolders, lastFolder) ->
+				if err?
+					logger.err err:err, project_id:project_id, "could not mkdirp"
+					return callback(err)
+				callback err, newFolders, lastFolder
 
-	mkdirp : (project_id, path, callback)->
-		LockManager.getLock project_id, (err)->
-			if err?
-				logger.err err:err, project_id:project_id, "could not get lock to mkdirp"
-				return callback(err)
-			EditorController.mkdirpWithoutLock project_id, path, (err, newFolders, lastFolder)->
-				LockManager.releaseLock project_id, ->
-					callback(err, newFolders, lastFolder)	
-
-	mkdirpWithoutLock: (project_id, path, callback)->
+	mkdirpWithoutLock: (project_id, path, callback = (error, newFolders, lastFolder)->)->
 		logger.log project_id:project_id, path:path, "making directories if they don't exist"
 		ProjectEntityHandler.mkdirp project_id, path, (err, newFolders, lastFolder)=>
 			if err?
@@ -105,14 +104,13 @@ module.exports = EditorController =
 			async.series jobs, (err)->
 				callback err, newFolders, lastFolder
 
-	deleteEntity : (project_id, entity_id, entityType, source, userId, callback)->
-		LockManager.getLock project_id, (err)->
-			if err?
-				logger.err err:err, project_id:project_id, "could not get lock to deleteEntity"
-				return callback(err)
-			EditorController.deleteEntityWithoutLock project_id, entity_id, entityType, source, userId, (err)->
-				LockManager.releaseLock project_id, ()->
-					callback(err)
+	deleteEntity : (project_id, entity_id, entityType, source, userId, callback = (error)->)->
+		LockManager.runWithLock project_id,
+			(cb) -> EditorController.deleteEntityWithoutLock project_id, entity_id, entityType, source, userId, cb
+			(err)->
+				if err?
+					logger.err err:err, project_id:project_id, "could not delete entity"
+				callback(err)
 
 	deleteEntityWithoutLock: (project_id, entity_id, entityType, source, userId, callback)->
 		logger.log {project_id, entity_id, entityType, source}, "start delete process of entity"
@@ -144,36 +142,30 @@ module.exports = EditorController =
 		logger.log project_id:project_id, "recived message to delete project"
 		ProjectDeleter.deleteProject project_id, callback
 
-	renameEntity: (project_id, entity_id, entityType, newName, userId, callback)->
+	renameEntity: (project_id, entity_id, entityType, newName, userId, callback = (error) ->)->
 		newName = sanitize.escape(newName)
 		Metrics.inc "editor.rename-entity"
 		logger.log entity_id:entity_id, entity_id:entity_id, entity_id:entity_id, "reciving new name for entity for project"
-		LockManager.getLock project_id, (err)->
-			if err?
-				logger.err err:err, project_id:project_id, "could not get lock for rename entity"
-				return callback(err)
-			ProjectEntityHandler.renameEntity project_id, entity_id, entityType, newName, userId, (err) ->
+		LockManager.runWithLock project_id,
+			(cb) -> ProjectEntityHandler.renameEntity project_id, entity_id, entityType, newName, userId, cb
+			(err) ->
 				if err?
 					logger.err err:err, project_id:project_id, entity_id:entity_id, entityType:entityType, newName:newName, "error renaming entity"
 					return callback(err)
-				LockManager.releaseLock project_id, ->
-					if newName.length > 0
-						EditorRealTimeController.emitToRoom project_id, 'reciveEntityRename', entity_id, newName
-					callback?()
+				if newName.length > 0
+					EditorRealTimeController.emitToRoom project_id, 'reciveEntityRename', entity_id, newName
+				callback()
 
-	moveEntity: (project_id, entity_id, folder_id, entityType, userId, callback)->
+	moveEntity: (project_id, entity_id, folder_id, entityType, userId, callback = (error) ->)->
 		Metrics.inc "editor.move-entity"
-		LockManager.getLock project_id, (err)->
-			if err?
-				logger.err err:err, project_id:project_id, "could not get lock for move entity"
-				return callback(err)
-			ProjectEntityHandler.moveEntity project_id, entity_id, folder_id, entityType, userId, =>
+		LockManager.runWithLock project_id,
+			(cb) -> ProjectEntityHandler.moveEntity project_id, entity_id, folder_id, entityType, userId, cb
+			(err) ->
 				if err?
 					logger.err err:err, project_id:project_id, entity_id:entity_id, folder_id:folder_id, "error moving entity"
 					return callback(err)
-				LockManager.releaseLock project_id, ->
-					EditorRealTimeController.emitToRoom project_id, 'reciveEntityMove', entity_id, folder_id
-					callback?()
+				EditorRealTimeController.emitToRoom project_id, 'reciveEntityMove', entity_id, folder_id
+				callback()
 
 	renameProject: (project_id, newName, callback = (err) ->) ->
 		ProjectDetailsHandler.renameProject project_id, newName, (err) ->
@@ -223,10 +215,8 @@ module.exports = EditorController =
 			EditorRealTimeController.emitToRoom project_id, 'rootDocUpdated', newRootDocID
 			callback()
 
-			
 	p:
 		notifyProjectUsersOfNewFolder: (project_id, folder_id, folder, callback = (error)->)->
 			logger.log project_id:project_id, folder:folder, parentFolder_id:folder_id, "sending newly created folder out to users"
 			EditorRealTimeController.emitToRoom(project_id, "reciveNewFolder", folder_id, folder)
 			callback()
-

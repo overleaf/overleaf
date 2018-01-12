@@ -50,8 +50,7 @@ describe "EditorController", ->
 		@ProjectDeleter =
 			deleteProject: sinon.stub()
 		@LockManager =
-			getLock : sinon.stub()
-			releaseLock : sinon.stub()
+			runWithLock : sinon.spy((key, runner, callback) -> runner(callback))
 		@EditorController = SandboxedModule.require modulePath, requires:
 			"../../infrastructure/Server" : io : @io
 			'../Project/ProjectEntityHandler' : @ProjectEntityHandler
@@ -155,8 +154,6 @@ describe "EditorController", ->
 	describe "addDoc", ->
 
 		beforeEach ->
-			@LockManager.getLock.callsArgWith(1)
-			@LockManager.releaseLock.callsArgWith(1)
 			@EditorController.addDocWithoutLock = sinon.stub().callsArgWith(6)
 
 		it "should call addDocWithoutLock", (done)->
@@ -166,17 +163,12 @@ describe "EditorController", ->
 
 		it "should take the lock", (done)->
 			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, @user_id, =>
-				@LockManager.getLock.calledWith(@project_id).should.equal true
+				@LockManager.runWithLock.calledWith(@project_id).should.equal true
 				done()
 
-		it "should release the lock", (done)->
-			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, @user_id, =>
-				@LockManager.releaseLock.calledWith(@project_id).should.equal true
-				done()
-
-		it "should error if it can't cat the lock", (done)->
-			@LockManager.getLock = sinon.stub().callsArgWith(1, "timed out")
-			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, @user_id, (err)=>
+		it "should propogate up any errors", (done)->
+			@LockManager.runWithLock = sinon.stub().callsArgWith(2, "timed out")
+			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, @user_id, (err) =>
 				expect(err).to.exist
 				err.should.equal "timed out"
 				done()
@@ -217,8 +209,6 @@ describe "EditorController", ->
 	describe "addFile", ->
 
 		beforeEach ->
-			@LockManager.getLock.callsArgWith(1)
-			@LockManager.releaseLock.callsArgWith(1)
 			@EditorController.addFileWithoutLock = sinon.stub().callsArgWith(6)
 
 		it "should call addFileWithoutLock", (done)->
@@ -228,20 +218,15 @@ describe "EditorController", ->
 
 		it "should take the lock", (done)->
 			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, @user_id, (error, file) =>
-				@LockManager.getLock.calledWith(@project_id).should.equal true
+				@LockManager.runWithLock.calledWith(@project_id).should.equal true
 				done()
 
-		it "should release the lock", (done)->
-			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, @user_id, (error, file) =>
-				@LockManager.releaseLock.calledWith(@project_id).should.equal true
-				done()
-
-		it "should error if it can't cat the lock", (done)->
-			@LockManager.getLock = sinon.stub().callsArgWith(1, "timed out")
+		it "should propogate up any errors", (done)->
+			@LockManager.runWithLock = sinon.stub().callsArgWith(2, "timed out")
 			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, @user_id, (error, file) =>
 				expect(error).to.exist
 				error.should.equal "timed out"
-				done()			
+				done()
 
 	describe "replaceFileWithoutLock", ->
 		beforeEach ->
@@ -296,10 +281,7 @@ describe "EditorController", ->
 
 
 	describe "addFolder", ->
-
 		beforeEach ->
-			@LockManager.getLock.callsArgWith(1)
-			@LockManager.releaseLock.callsArgWith(1)
 			@EditorController.addFolderWithoutLock = sinon.stub().callsArgWith(4)
 
 		it "should call addFolderWithoutLock", (done)->
@@ -309,20 +291,15 @@ describe "EditorController", ->
 
 		it "should take the lock", (done)->
 			@EditorController.addFolder @project_id, @folder_id, @folderName, @source, (error, file) =>
-				@LockManager.getLock.calledWith(@project_id).should.equal true
+				@LockManager.runWithLock.calledWith(@project_id).should.equal true
 				done()
 
-		it "should release the lock", (done)->
-			@EditorController.addFolder @project_id, @folder_id, @folderName, @source, (error, file) =>
-				@LockManager.releaseLock.calledWith(@project_id).should.equal true
-				done()
-
-		it "should error if it can't cat the lock", (done)->
-			@LockManager.getLock = sinon.stub().callsArgWith(1, "timed out")
+		it "should propogate up any errors", (done)->
+			@LockManager.runWithLock = sinon.stub().callsArgWith(2, "timed out")
 			@EditorController.addFolder @project_id, @folder_id, @folderName, @source, (err, file) =>
 				expect(err).to.exist
 				err.should.equal "timed out"
-				done()			
+				done()
 
 
 	describe 'mkdirpWithoutLock :', ->
@@ -346,11 +323,8 @@ describe "EditorController", ->
 
 
 	describe "mkdirp", ->
-
 		beforeEach ->
 			@path = "folder1/folder2"
-			@LockManager.getLock.callsArgWith(1)
-			@LockManager.releaseLock.callsArgWith(1)
 			@EditorController.mkdirpWithoutLock = sinon.stub().callsArgWith(2)
 
 		it "should call mkdirpWithoutLock", (done)->
@@ -360,25 +334,18 @@ describe "EditorController", ->
 
 		it "should take the lock", (done)->
 			@EditorController.mkdirp @project_id, @path, (error, file) =>
-				@LockManager.getLock.calledWith(@project_id).should.equal true
+				@LockManager.runWithLock.calledWith(@project_id).should.equal true
 				done()
 
-		it "should release the lock", (done)->
-			@EditorController.mkdirp @project_id, @path, (error, file) =>
-				@LockManager.releaseLock.calledWith(@project_id).should.equal true
-				done()
-
-		it "should error if it can't cat the lock", (done)->
-			@LockManager.getLock = sinon.stub().callsArgWith(1, "timed out")
+		it "should propogate up any errors", (done)->
+			@LockManager.runWithLock = sinon.stub().callsArgWith(2, "timed out")
 			@EditorController.mkdirp @project_id, @path, (err, file) =>
 				expect(err).to.exist
 				err.should.equal "timed out"
-				done()			
+				done()
 
 	describe "deleteEntity", ->
 		beforeEach ->
-			@LockManager.getLock.callsArgWith(1)
-			@LockManager.releaseLock.callsArgWith(1)
 			@EditorController.deleteEntityWithoutLock = sinon.stub().callsArgWith(5)
 
 		it "should call deleteEntityWithoutLock", (done)->
@@ -390,16 +357,11 @@ describe "EditorController", ->
 
 		it "should take the lock", (done)->
 			@EditorController.deleteEntity @project_id, @entity_id, @type, @source, @user_id, =>
-				@LockManager.getLock.calledWith(@project_id).should.equal true
+				@LockManager.runWithLock.calledWith(@project_id).should.equal true
 				done()
 
-		it "should release the lock", (done)->
-			@EditorController.deleteEntity @project_id, @entity_id, @type, @source, @user_id, (error) =>
-				@LockManager.releaseLock.calledWith(@project_id).should.equal true
-				done()
-
-		it "should error if it can't cat the lock", (done)->
-			@LockManager.getLock = sinon.stub().callsArgWith(1, "timed out")
+		it "should propogate up any errors", (done)->
+			@LockManager.runWithLock = sinon.stub().callsArgWith(2, "timed out")
 			@EditorController.deleteEntity @project_id, @entity_id, @type, @source, @user_id, (error) =>
 				expect(error).to.exist
 				error.should.equal "timed out"
@@ -472,9 +434,6 @@ describe "EditorController", ->
 			@ProjectEntityHandler.renameEntity = sinon.stub().callsArg(5)
 			@EditorRealTimeController.emitToRoom = sinon.stub()
 
-			@LockManager.releaseLock.callsArgWith(1)
-			@LockManager.getLock.callsArgWith(1)
-
 			@EditorController.renameEntity @project_id, @entity_id, @entityType, @newName, @user_id, done
 
 		it "should call the project handler", ->
@@ -483,12 +442,7 @@ describe "EditorController", ->
 				.should.equal true
 
 		it "should take the lock", ->
-			@LockManager.getLock
-				.calledWith(@project_id)
-				.should.equal true
-
-		it "should release the lock", ->
-			@LockManager.releaseLock
+			@LockManager.runWithLock
 				.calledWith(@project_id)
 				.should.equal true
 
@@ -504,8 +458,6 @@ describe "EditorController", ->
 			@folder_id = "313dasd21dasdsa"
 			@ProjectEntityHandler.moveEntity = sinon.stub().callsArg(5)
 			@EditorRealTimeController.emitToRoom = sinon.stub()
-			@LockManager.releaseLock.callsArgWith(1)
-			@LockManager.getLock.callsArgWith(1)
 
 		it "should call the ProjectEntityHandler", (done)->
 			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, @user_id, =>
@@ -514,12 +466,14 @@ describe "EditorController", ->
 
 		it "should take the lock", (done)->
 			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, @user_id, =>
-				@LockManager.getLock.calledWith(@project_id).should.equal true
+				@LockManager.runWithLock.calledWith(@project_id).should.equal true
 				done()
 
-		it "should release the lock", (done)->
-			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, @user_id, =>
-				@LockManager.releaseLock.calledWith(@project_id).should.equal true
+		it "should propogate up any errors", (done)->
+			@LockManager.runWithLock = sinon.stub().callsArgWith(2, "timed out")
+			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, @user_id, (error) =>
+				expect(error).to.exist
+				error.should.equal "timed out"
 				done()
 
 		it "should emit the update to the room", (done)->
