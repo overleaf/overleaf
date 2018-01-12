@@ -11,6 +11,9 @@ module.exports =
 				proxyReqPathResolver: (req) ->
 					requestPath = URL.parse(req.url).path
 					"#{basePath}#{requestPath}"
+				proxyReqOptDecorator: (proxyReqOpts, srcReq) ->
+					proxyReqOpts.headers = {} # unset all headers
+					proxyReqOpts
 			)
 		else
 			(req, res, next) ->
