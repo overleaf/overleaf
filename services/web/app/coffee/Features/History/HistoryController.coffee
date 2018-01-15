@@ -3,6 +3,7 @@ request = require "request"
 settings = require "settings-sharelatex"
 AuthenticationController = require "../Authentication/AuthenticationController"
 ProjectDetailsHandler = require "../Project/ProjectDetailsHandler"
+HistoryManager = require "./HistoryManager"
 
 module.exports = HistoryController =
 	selectHistoryApi: (req, res, next = (error) ->) ->
@@ -32,6 +33,22 @@ module.exports = HistoryController =
 		getReq.on "error", (error) ->
 			logger.error url: url, err: error, "history API error"
 			next(error)
+
+	proxyToHistoryApiAndInjectUserDetails: (req, res, next = (error) ->) ->
+		user_id = AuthenticationController.getLoggedInUserId req
+		url = HistoryController.buildHistoryServiceUrl(req.useProjectHistory) + req.url
+		logger.log url: url, "proxying to history api"
+		request {
+			url: url
+			method: req.method
+			json: true
+			headers:
+				"X-User-Id": user_id
+		}, (error, response, body) ->
+			return next(error) if error?
+			HistoryManager.injectUserDetails body, (error, data) ->
+				return next(error) if error?
+				res.json data
 
 	buildHistoryServiceUrl: (useProjectHistory) ->
 		# choose a history service, either document-level (trackchanges)

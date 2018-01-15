@@ -1,10 +1,11 @@
 define [
 	"moment"
 	"ide/colors/ColorManager"
+	"ide/history/util/displayNameForUser"
 	"ide/history/controllers/HistoryListController"
 	"ide/history/controllers/HistoryDiffController"
 	"ide/history/directives/infiniteScroll"
-], (moment, ColorManager) ->
+], (moment, ColorManager, displayNameForUser) ->
 	class HistoryManager
 		constructor: (@ide, @$scope) ->
 			@reset()
@@ -165,12 +166,7 @@ define [
 				}
 
 				if entry.i? or entry.d?
-					if entry.meta.user?
-						name = "#{entry.meta.user.first_name} #{entry.meta.user.last_name}"
-					else
-						name = "Anonymous"
-					if entry.meta.user?.id == @$scope.user.id
-						name = "you"
+					name = displayNameForUser(entry.meta.user)
 					date = moment(entry.meta.end_ts).format("Do MMM YYYY, h:mm a")
 					if entry.i?
 						highlights.push {

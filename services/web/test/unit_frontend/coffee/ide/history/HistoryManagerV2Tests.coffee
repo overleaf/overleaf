@@ -1,6 +1,6 @@
 Path = require 'path'
 SandboxedModule = require "sandboxed-module"
-modulePath = Path.join __dirname, '../../../public/js/ide/history/HistoryV2Manager'
+modulePath = Path.join __dirname, '../../../../../public/js/ide/history/HistoryV2Manager'
 sinon = require("sinon")
 expect = require("chai").expect
 

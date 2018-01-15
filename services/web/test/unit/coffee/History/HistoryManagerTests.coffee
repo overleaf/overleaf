@@ -1,5 +1,6 @@
 chai = require('chai')
 chai.should()
+expect = chai.expect
 sinon = require("sinon")
 modulePath = "../../../../app/js/Features/History/HistoryManager"
 SandboxedModule = require('sandboxed-module')
@@ -13,6 +14,7 @@ describe "HistoryManager", ->
 		@HistoryManager = SandboxedModule.require modulePath, requires:
 			"request" : @request = sinon.stub()
 			"settings-sharelatex": @settings = {}
+			"../User/UserGetter": @UserGetter = {}
 		@settings.apis =
 			trackchanges:
 				enabled: false
@@ -84,3 +86,105 @@ describe "HistoryManager", ->
 
 			it "should return the callback", ->
 				@callback.calledWithExactly().should.equal true
+
+	describe "injectUserDetails", ->
+		beforeEach ->
+			@user1 = {
+				_id: @user_id1 = "123456"
+				first_name: "Jane",
+				last_name: "Doe"
+				email: "jane@example.com"
+			}
+			@user1_view = {
+				id: @user_id1
+				first_name: "Jane",
+				last_name: "Doe"
+				email: "jane@example.com"
+			}
+			@user2 = {
+				_id: @user_id2 = "abcdef"
+				first_name: "John",
+				last_name: "Doe"
+				email: "john@example.com"
+			}
+			@user2_view = {
+				id: @user_id2
+				first_name: "John",
+				last_name: "Doe"
+				email: "john@example.com"
+			}
+			@UserGetter.getUsers = sinon.stub().yields(null, [@user1, @user2])
+
+		describe "with a diff", ->
+			it "should turn user_ids into user objects", (done) ->
+				@HistoryManager.injectUserDetails {
+					diff: [{
+						i: "foo"
+						meta:
+							users: [@user_id1]
+					}, {
+						i: "bar"
+						meta:
+							users: [@user_id2]
+					}]
+				}, (error, diff) =>
+					expect(error).to.be.null
+					expect(diff.diff[0].meta.users).to.deep.equal [@user1_view]
+					expect(diff.diff[1].meta.users).to.deep.equal [@user2_view]
+					done()
+
+			it "should leave user objects", (done) ->
+				@HistoryManager.injectUserDetails {
+					diff: [{
+						i: "foo"
+						meta:
+							users: [@user1_view]
+					}, {
+						i: "bar"
+						meta:
+							users: [@user_id2]
+					}]
+				}, (error, diff) =>
+					expect(error).to.be.null
+					expect(diff.diff[0].meta.users).to.deep.equal [@user1_view]
+					expect(diff.diff[1].meta.users).to.deep.equal [@user2_view]
+					done()
+
+		describe "with a list of updates", ->
+			it "should turn user_ids into user objects", (done) ->
+				@HistoryManager.injectUserDetails {
+					updates: [{
+						fromV: 5
+						toV: 8
+						meta:
+							users: [@user_id1]
+					}, {
+						fromV: 4 
+						toV: 5
+						meta:
+							users: [@user_id2]
+					}]
+				}, (error, updates) =>
+					expect(error).to.be.null
+					expect(updates.updates[0].meta.users).to.deep.equal [@user1_view]
+					expect(updates.updates[1].meta.users).to.deep.equal [@user2_view]
+					done()
+
+			it "should leave user objects", (done) ->
+				@HistoryManager.injectUserDetails {
+					updates: [{
+						fromV: 5
+						toV: 8
+						meta:
+							users: [@user1_view]
+					}, {
+						fromV: 4 
+						toV: 5
+						meta:
+							users: [@user_id2]
+					}]
+				}, (error, updates) =>
+					expect(error).to.be.null
+					expect(updates.updates[0].meta.users).to.deep.equal [@user1_view]
+					expect(updates.updates[1].meta.users).to.deep.equal [@user2_view]
+					done()
