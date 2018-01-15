@@ -50,7 +50,7 @@ module.exports = FileSystemImportManager =
 							existingFile = fileRef
 							break
 					if existingFile?
-						EditorController.replaceFile project_id, existingFile._id, path, "upload", user_id, callback
+						EditorController.replaceFileWithoutLock project_id, existingFile._id, path, "upload", user_id, callback
 					else
 						EditorController.addFileWithoutLock project_id, folder_id, name, path, "upload", user_id, callback
 

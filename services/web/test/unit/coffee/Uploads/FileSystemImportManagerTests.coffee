@@ -126,12 +126,12 @@ describe "FileSystemImportManager", ->
 		beforeEach ->
 			@EditorController.addFileWithoutLock = sinon.stub()
 			@FileSystemImportManager._isSafeOnFileSystem = sinon.stub().callsArgWith(1, null, false)
-			@EditorController.replaceFile = sinon.stub()
+			@EditorController.replaceFileWithoutLock = sinon.stub()
 			@FileSystemImportManager.addFile @user_id, @project_id, @folder_id, @name, @path_on_disk, false, @callback
 
 		it "should node add the file", ->
 			@EditorController.addFileWithoutLock.called.should.equal false
-			@EditorController.replaceFile.called.should.equal false
+			@EditorController.replaceFileWithoutLock.called.should.equal false
 
 	describe "addFile with replace set to true", ->
 		describe "when the file doesn't exist", ->
@@ -169,7 +169,7 @@ describe "FileSystemImportManager", ->
 				}
 				@FileSystemImportManager._isSafeOnFileSystem = sinon.stub().callsArgWith(1, null, true)
 				@ProjectLocator.findElement = sinon.stub().callsArgWith(1, null, @folder)
-				@EditorController.replaceFile = sinon.stub().callsArg(5)
+				@EditorController.replaceFileWithoutLock = sinon.stub().callsArg(5)
 				@FileSystemImportManager.addFile @user_id, @project_id, @folder_id, @name, @path_on_disk, true, @callback
 
 			it "should look up the folder", ->
@@ -178,7 +178,8 @@ describe "FileSystemImportManager", ->
 					.should.equal true
 
 			it "should replace the file", ->
-				@EditorController.replaceFile.calledWith(@project_id, @file_id, @path_on_disk, "upload", @user_id)
+				@EditorController.replaceFileWithoutLock
+					.calledWith(@project_id, @file_id, @path_on_disk, "upload", @user_id)
 					.should.equal true
 
 	describe "addFolder", ->
