@@ -1354,6 +1354,11 @@
       "from": "code-point-at@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/code-point-at/-/code-point-at-1.1.0.tgz"
     },
+    "codemirror": {
+      "version": "5.33.0",
+      "from": "codemirror@latest",
+      "resolved": "https://registry.npmjs.org/codemirror/-/codemirror-5.33.0.tgz"
+    },
     "coffee-script": {
       "version": "1.12.4",
       "from": "coffee-script@1.12.4",
