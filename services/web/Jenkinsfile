@@ -14,37 +14,11 @@ pipeline {
   }
   
   stages {
-    stage('Set up') {
-      agent {
-        docker {
-          image 'node:6.9.5'
-          reuseNode true
+    stage('Install modules') {
+      steps {
+        sshagent (credentials: ['GIT_DEPLOY_KEY']) {
+          sh 'bin/install_modules'
         }
-      }
-      steps {
-        // we need to disable logallrefupdates, else git clones during the npm install will require git to lookup the user id
-        // which does not exist in the container's /etc/passwd file, causing the clone to fail.
-        sh 'git config --global core.logallrefupdates false'
-        
-        sh 'rm -rf node_modules/*'
-      }
-    }
-    
-    stage('Clone Dependencies') {
-      steps {
-        sh 'rm -rf public/brand modules'
-        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'public/brand'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/brand-sharelatex']]])
-        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'app/views/external'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/external-pages-sharelatex']]])
-        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/web-sharelatex-modules']]])
-        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/admin-panel'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/admin-panel']]])
-        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/groovehq'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@bitbucket.org:sharelatex/groovehq']]])
-        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/references-search'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@bitbucket.org:sharelatex/references-search.git']]])
-        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/tpr-webmodule'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/tpr-webmodule.git ']]])
-        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/learn-wiki'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@bitbucket.org:sharelatex/learn-wiki-web-module.git']]])
-        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/templates'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/templates-webmodule.git']]])
-        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/track-changes'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/track-changes-web-module.git']]])
-        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/overleaf-integration'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/overleaf-integration-web-module.git']]])
-        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'modules/overleaf-account-merge'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/overleaf-account-merge.git']]])
       }
     }
     
@@ -58,22 +32,12 @@ pipeline {
       }
       steps {
         sh 'git config --global core.logallrefupdates false'
-        sh 'mv app/views/external/robots.txt public/robots.txt'
-        sh 'mv app/views/external/googlebdb0f8f7f4a17241.html public/googlebdb0f8f7f4a17241.html'
-        sh 'npm --quiet install'
+        sh 'rm -rf node_modules/'
+        sh 'npm install --quiet'
         sh 'npm rebuild'
         // It's too easy to end up shrinkwrapping to an outdated version of translations.
         // Ensure translations are always latest, regardless of shrinkwrap
         sh 'npm install git+https://github.com/sharelatex/translations-sharelatex.git#master'
-        sh 'npm install --quiet grunt'
-        sh 'npm install --quiet grunt-cli'
-        sh 'ls -l node_modules/.bin'
-      }
-    }
-    
-    stage('Test') {
-      steps {
-        sh 'make ci'
       }
     }
 
@@ -85,13 +49,13 @@ pipeline {
         }
       }
       steps {
-        sh 'node_modules/.bin/grunt compile compile:tests  --verbose'
+        sh 'make compile_full'
         // replace the build number placeholder for sentry
         sh 'node_modules/.bin/grunt version'
       }
     }
-
-    stage('Smoke Test') {
+    
+    stage('Unit Test') {
       agent {
         docker {
           image 'node:6.9.5'
@@ -99,7 +63,14 @@ pipeline {
         }
       }
       steps {
-        sh 'node_modules/.bin/grunt compile:smoke_tests'
+        sh 'make --no-print-directory test_unit test_frontend MOCHA_ARGS="--reporter tap"'
+      }
+    }
+    
+    stage('Acceptance Test') {
+      steps {
+        // Spawns its own docker containers
+        sh 'make --no-print-directory test_acceptance MOCHA_ARGS="--reporter tap"'
       }
     }
 
@@ -111,7 +82,7 @@ pipeline {
         }
       }
       steps {
-        sh 'node_modules/.bin/grunt compile:minify'
+        sh 'make minify'
       }
     }
     
@@ -149,7 +120,7 @@ pipeline {
   
   post {
     always {
-      sh 'make ci_clean'
+      sh 'make clean_ci'
     }
 
     failure {

@@ -1,0 +1,13 @@
+{
+  "ignore": [
+    ".git",
+    "node_modules/"
+  ],
+  "verbose": true,
+  "exec": "make compile",
+  "watch": [
+    "public/coffee/",
+    "public/stylesheets/"
+  ],
+  "ext": "coffee less"
+}

@@ -24,7 +24,7 @@ define [
 
 			$(document).on "click", =>
 				@clearMultiSelectedEntities()
-				$scope.$digest()
+				@$scope.$digest()
 
 		_bindToSocketEvents: () ->
 			@ide.socket.on "reciveNewDoc", (parent_folder_id, doc) =>

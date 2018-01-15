@@ -35,7 +35,7 @@ module.exports = settings =
 	# Databases
 	# ---------
 	mongo:
-		url : process.env['MONGO_URL'] || "mongodb://127.0.0.1/sharelatex"
+		url : process.env['MONGO_URL'] || "mongodb://#{process.env['MONGO_HOST'] or '127.0.0.1'}/sharelatex"
 
 	redis:
 		web:
@@ -96,62 +96,61 @@ module.exports = settings =
 	# options incase you want to run some services on remote hosts.
 	apis:
 		web:
-			url: "http://localhost:#{webPort}"
+			url: "http://#{process.env['WEB_HOST'] or 'localhost'}:#{webPort}"
 			user: httpAuthUser
 			pass: httpAuthPass
 		documentupdater:
 			url : "http://#{process.env['DOCUPDATER_HOST'] or 'localhost'}:#{docUpdaterPort}"
 		thirdPartyDataStore:
-			url : "http://localhost:3002"
+			url : "http://#{process.env['TPDS_HOST'] or 'localhost'}:3002"
 			emptyProjectFlushDelayMiliseconds: 5 * seconds
 		tags:
-			url :"http://localhost:3012"
+			url :"http://#{process.env['TAGS_HOST'] or 'localhost'}:3012"
 		spelling:
-			url : "http://localhost:3005"
+			url : "http://#{process.env['SPELLING_HOST'] or 'localhost'}:3005"
 		trackchanges:
-			url : "http://localhost:3015"
+			url : "http://#{process.env['TRACK_CHANGES_HOST'] or 'localhost'}:3015"
 		project_history:
 			sendProjectStructureOps: process.env.PROJECT_HISTORY_ENABLED == 'true' or false
 			initializeHistoryForNewProjects: process.env.PROJECT_HISTORY_ENABLED == 'true' or false
 			displayHistoryForNewProjects: process.env.PROJECT_HISTORY_ENABLED == 'true' or false
-			url : "http://localhost:3054"
+			url : "http://#{process.env['PROJECT_HISTORY_HOST'] or 'localhost'}:3054"
 		docstore:
 			url : "http://#{process.env['DOCSTORE_HOST'] or 'localhost'}:3016"
-			pubUrl: "http://localhost:3016"
+			pubUrl: "http://#{process.env['DOCSTORE_HOST'] or 'localhost'}:3016"
 		chat:
-			url: "http://localhost:3010"
-			internal_url: "http://localhost:3010"
+			url: "http://#{process.env['CHAT_HOST'] or 'localhost'}:3010"
+			internal_url: "http://#{process.env['CHAT_HOST'] or 'localhost'}:3010"
 		blog:
 			port: 3008
 		university:
 			url: "http://localhost:3011"
 		filestore:
-			url: "http://localhost:3009"
+			url: "http://#{process.env['FILESTORE_HOST'] or 'localhost'}:3009"
 		clsi:
-			url: "http://localhost:3013"
+			url: "http://#{process.env['CLSI_HOST'] or 'localhost'}:3013"
 		templates:
-			url: "http://localhost:3007"
+			url: "http://#{process.env['TEMPLATES_HOST'] or 'localhost'}:3007"
 		githubSync:
-			url: "http://localhost:3022"
+			url: "http://#{process.env['GITHUB_SYNC_HOST'] or 'localhost'}:3022"
 		recurly:
 			privateKey: ""
 			apiKey: ""
 			subdomain: ""
 		geoIpLookup:
-			url: "http://localhost:8080/json"
+			url: "http://#{process.env['GEOIP_HOST'] or 'localhost'}:8080/json"
 		realTime:
-			url: "http://localhost:3026"
+			url: "http://#{process.env['REALTIME_HOST'] or 'localhost'}:3026"
 		contacts:
-			url: "http://localhost:3036"
+			url: "http://#{process.env['CONTACTS_HOST'] or 'localhost'}:3036"
 		sixpack:
 			url: ""
 		# references:
 		# 	url: "http://localhost:3040"
 		notifications:
-			url: "http://localhost:3042"
+			url: "http://#{process.env['NOTIFICATIONS_HOST'] or 'localhost'}:3042"
 		analytics:
-			url: "http://localhost:3050"
-
+			url: "http://#{process.env['ANALYTICS_HOST'] or 'localhost'}:3050"
 
 	templates:
 		user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"
@@ -165,13 +164,13 @@ module.exports = settings =
 
 	# Where your instance of ShareLaTeX can be found publically. Used in emails
 	# that are sent out, generated links, etc.
-	siteUrl : siteUrl = 'http://localhost:3000'
+	siteUrl : siteUrl = process.env['PUBLIC_URL'] or 'http://localhost:3000'
 
 	# cookie domain
 	# use full domain for cookies to only be accessible from that domain,
 	# replace subdomain with dot to have them accessible on all subdomains
 	# cookieDomain: ".sharelatex.dev"
-	cookieName:"sharelatex.sid"
+	cookieName: "sharelatex.sid"
 
 	# this is only used if cookies are used for clsi backend
 	#clsiCookieKey: "clsiserver"
@@ -293,7 +292,7 @@ module.exports = settings =
 	# Should javascript assets be served minified or not. Note that you will
 	# need to run `grunt compile:minify` within the web-sharelatex directory
 	# to generate these.
-	useMinifiedJs: false
+	useMinifiedJs: process.env['MINIFIED_JS'] == 'true' or false
 
 	# Should static assets be sent with a header to tell the browser to cache
 	# them.

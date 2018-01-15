@@ -80,3 +80,5 @@ app/views/external
 
 /modules/
 docker-shared.yml
+
+config/*.coffee
