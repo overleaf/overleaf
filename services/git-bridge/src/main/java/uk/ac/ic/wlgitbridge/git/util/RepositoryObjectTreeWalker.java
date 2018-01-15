@@ -1,19 +1,22 @@
 package uk.ac.ic.wlgitbridge.git.util;
 
-import org.eclipse.jgit.errors.LargeObjectException;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import uk.ac.ic.wlgitbridge.bridge.util.CastUtil;
 import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.data.filestore.RepositoryFile;
 import uk.ac.ic.wlgitbridge.git.exception.InvalidGitRepository;
 import uk.ac.ic.wlgitbridge.git.exception.SizeLimitExceededException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Created by Winston on 16/11/14.
@@ -46,7 +49,14 @@ public class RepositoryObjectTreeWalker {
 
     public RawDirectory getDirectoryContents(
     ) throws IOException, SizeLimitExceededException, InvalidGitRepository {
-        return new RawDirectory(walkGitObjectTree());
+        return getDirectoryContents(50 * 1024 * 1024);
+    }
+
+    private RawDirectory getDirectoryContents(long maxFileSize)
+            throws IOException,
+                    SizeLimitExceededException,
+                    InvalidGitRepository {
+        return new RawDirectory(walkGitObjectTree(maxFileSize));
     }
 
     private TreeWalk initTreeWalk(
@@ -63,8 +73,10 @@ public class RepositoryObjectTreeWalker {
         return treeWalk;
     }
 
-    private Map<String, RawFile> walkGitObjectTree(
-    ) throws IOException, SizeLimitExceededException, InvalidGitRepository {
+    private Map<String, RawFile> walkGitObjectTree(long maxFileSize)
+            throws IOException,
+                    SizeLimitExceededException,
+                    InvalidGitRepository {
         Map<String, RawFile> fileContentsTable = new HashMap<>();
         if (treeWalk == null) {
             return fileContentsTable;
@@ -76,14 +88,18 @@ public class RepositoryObjectTreeWalker {
             if (!repository.hasObject(objectId)) {
                 throw new InvalidGitRepository();
             }
-            try {
-                byte[] content = repository.open(
-                        objectId
-                ).getBytes();
-                fileContentsTable.put(path, new RepositoryFile(path, content));
-            } catch (LargeObjectException e) {
-                throw new SizeLimitExceededException(path);
+            ObjectLoader obj = repository.open(objectId);
+            long size = obj.getSize();
+            if (size > maxFileSize) {
+                throw new SizeLimitExceededException(
+                        Optional.ofNullable(path), size, maxFileSize);
             }
+            try (ByteArrayOutputStream o = new ByteArrayOutputStream(
+                    CastUtil.assumeInt(size))) {
+                obj.copyTo(o);
+                fileContentsTable.put(
+                        path, new RepositoryFile(path, o.toByteArray()));
+            };
         }
         return fileContentsTable;
     }

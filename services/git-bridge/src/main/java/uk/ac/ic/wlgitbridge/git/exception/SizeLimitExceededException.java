@@ -4,14 +4,21 @@ import uk.ac.ic.wlgitbridge.util.Util;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public class SizeLimitExceededException extends GitUserException {
 
-    private final String path;
+    private final Optional<String> path;
 
-    public SizeLimitExceededException(String path) {
-        super();
+    private final long actualSize;
+
+    private final long maxSize;
+
+    public SizeLimitExceededException(
+            Optional<String> path, long actualSize, long maxSize) {
         this.path = path;
+        this.actualSize = actualSize;
+        this.maxSize = maxSize;
     }
 
     @Override
@@ -22,7 +29,7 @@ public class SizeLimitExceededException extends GitUserException {
     @Override
     public List<String> getDescriptionLines() {
         String filename =
-                path != null ? "File '" + path + "' is" : "There's a file";
+                path.isPresent() ? "File '" + path.get() + "' is" : "There's a file";
         return Arrays.asList(
                 filename + " too large to push to "
                         + Util.getServiceName() + " via git",
