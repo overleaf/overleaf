@@ -71,7 +71,7 @@ public class Oauth2Filter implements Filter {
             );
             return;
         }
-        Log.info("[{}] Auth not needed");
+        Log.info("[{}] Auth not needed", project);
         filterChain.doFilter(servletRequest, servletResponse);
     }
 
