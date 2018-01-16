@@ -6,6 +6,10 @@
     "type": "git",
     "url": "https://github.com/sharelatex/chat-sharelatex.git"
   },
+  "scripts": {
+    "compile:app": "coffee -o app/js -c app/coffee && coffee -c app.coffee",
+    "start": "npm run compile:app && node app.js"
+  },
   "dependencies": {
     "async": "0.2.9",
     "coffee-script": "~1.7.1",
