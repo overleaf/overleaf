@@ -19,7 +19,7 @@ import java.util.concurrent.CompletionException;
 public interface SnapshotApi {
 
     CompletableFuture<GetDocResult> getDoc(
-            Optional<Credential> oath2, String projectName);
+            Optional<Credential> oauth2, String projectName);
 
     CompletableFuture<GetForVersionResult> getForVersion(
             Optional<Credential> oauth2, String projectName, int versionId);

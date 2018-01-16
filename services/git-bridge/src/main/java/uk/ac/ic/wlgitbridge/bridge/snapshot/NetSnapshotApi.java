@@ -21,8 +21,8 @@ public class NetSnapshotApi implements SnapshotApi {
 
     @Override
     public CompletableFuture<GetDocResult> getDoc(
-            Optional<Credential> oath2, String projectName) {
-        return new GetDocRequest(opt(oath2), projectName).request();
+            Optional<Credential> oauth2, String projectName) {
+        return new GetDocRequest(opt(oauth2), projectName).request();
     }
 
     @Override
@@ -48,8 +48,8 @@ public class NetSnapshotApi implements SnapshotApi {
                 opt(oauth2), candidateSnapshot, postbackKey).request();
     }
 
-    private static Credential opt(Optional<Credential> oath2) {
-        return oath2.orElse(null);
+    private static Credential opt(Optional<Credential> oauth2) {
+        return oauth2.orElse(null);
     }
 
 }
