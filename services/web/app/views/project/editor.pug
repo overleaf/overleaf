@@ -158,6 +158,12 @@ block requirejs
 		window.pdfCMapsPath = "#{pdfCMapsPath}"
 		window.uiConfig = JSON.parse('!{JSON.stringify(uiConfig).replace(/\//g, "\\/")}');
 
+	// TODO: inject based on environment
+	script(
+		src="http://localhost:3809/public/js/es/richText.js"
+		type="text/javascript"
+	)
+
 	script(
 		data-main=buildJsPath("ide.js", {hashedPath:false}),
 		baseurl=fullJsPath,
