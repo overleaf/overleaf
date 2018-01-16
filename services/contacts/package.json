@@ -7,16 +7,21 @@
     "type": "git",
     "url": "https://github.com/sharelatex/contacts-sharelatex.git"
   },
+  "scripts": {
+    "compile:app": "coffee -o app/js -c app/coffee && coffee -c app.coffee",
+    "start": "npm run compile:app && node app.js"
+  },
   "dependencies": {
-    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
+    "async": "~0.8.0",
+    "body-parser": "~1.0.2",
+    "coffee-script": "^1.7.1",
+    "express": "~4.1.1",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.1.0",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.7.1",
     "mongojs": "0.18.2",
-    "express": "~4.1.1",
-    "underscore": "~1.6.0",
-    "body-parser": "~1.0.2",
-    "async": "~0.8.0",
-    "request": "~2.34.0"
+    "request": "~2.34.0",
+    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
+    "underscore": "~1.6.0"
   },
   "devDependencies": {
     "bunyan": "~0.22.3",
