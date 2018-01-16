@@ -2,10 +2,10 @@ module.exports = Settings =
 	internal:
 		notifications:
 			port: 3042
-			host: "localhost"
+			host: process.env["LISTEN_ADDRESS"] or "localhost"
 
 	mongo:
-		url : 'mongodb://127.0.0.1/sharelatex'
+		url : "mongodb://#{process.env["MONGO_HOST"] or "localhost"}/sharelatex"
 
 	notifications:
 		healthCheck:
