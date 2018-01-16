@@ -5,23 +5,24 @@ http.globalAgent.maxSockets = 300
 module.exports =
 	internal:
 		documentupdater:
+			host: process.env["LISTEN_ADDRESS"] or "localhost"
 			port: 3003
 
 	apis:
 		web:
-			url: "http://localhost:3000"
+			url: "http://#{process.env["WEB_HOST"] or "localhost"}:3000"
 			user: "sharelatex"
 			pass: "password"
 		trackchanges:
-			url: "http://localhost:3015"
+			url: "http://#{process.env["TRACK_CHANGES_HOST"] or "localhost"}:3015"
 		project_history:
 			enabled: process.env.SHARELATEX_ENABLE_PROJECT_HISTORY == 'true'
-			url: "http://localhost:3054"
+			url: "http://#{process.env["PROJECT_HISTORY_HOST"] or "localhost"}:3054"
 
 	redis:
 		realtime:
-			port:"6379"
-			host:"localhost"
+			port: "6379"
+			host: process.env["REDIS_HOST"] or "localhost"
 			password:""
 			key_schema:
 				pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
@@ -33,7 +34,7 @@ module.exports =
 			# 	pendingUpdates: ({doc_id}) -> "PendingUpdates:{#{doc_id}}"
 		documentupdater:
 			port: "6379"
-			host: "localhost"
+			host: process.env["REDIS_HOST"] or "localhost"
 			password: ""
 			key_schema:
 				blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
@@ -62,8 +63,8 @@ module.exports =
 			# 	ranges: ({doc_id}) -> "Ranges:{#{doc_id}}"
 			# 	projectState: ({project_id}) -> "ProjectState:{#{project_id}}"
 		history:
-			port:"6379"
-			host:"localhost"
+			port: "6379"
+			host: process.env["REDIS_HOST"] or "localhost"
 			password:""
 			key_schema:
 				uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
@@ -80,8 +81,8 @@ module.exports =
 			# 	uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:{#{doc_id}}"
 			# 	docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:{#{project_id}}"
 		lock:
-			port:"6379"
-			host:"localhost"
+			port: "6379"
+			host: process.env["REDIS_HOST"] or "localhost"
 			password:""
 			key_schema:
 				blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
@@ -95,4 +96,4 @@ module.exports =
 	max_doc_length: 2 * 1024 * 1024 # 2mb
 
 	mongo:
-		url: 'mongodb://127.0.0.1/sharelatex'
+		url: "mongodb://#{process.env["MONGO_HOST"] or "localhost"}/sharelatex"

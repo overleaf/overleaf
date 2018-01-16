@@ -44,7 +44,7 @@ module.exports = RedisManager =
 		docLines = JSON.stringify(docLines)
 		if docLines.indexOf("\u0000") != -1
 			error = new Error("null bytes found in doc lines")
-			logger.error err: error, doc_id: doc_id, docLines: docLines, error.message
+			logger.error {err: error, doc_id: doc_id, docLines: docLines}, error.message
 			return callback(error)
 		docHash = RedisManager._computeHash(docLines)
 		logger.log project_id:project_id, doc_id:doc_id, version: version, hash:docHash, "putting doc in redis"
@@ -216,13 +216,13 @@ module.exports = RedisManager =
 			for op in jsonOps
 				if op.indexOf("\u0000") != -1
 					error = new Error("null bytes found in jsonOps")
-					logger.error err: error, doc_id: doc_id, jsonOps: jsonOps, error.message
+					logger.error {err: error, doc_id: doc_id, jsonOps: jsonOps}, error.message
 					return callback(error)
 
 			newDocLines = JSON.stringify(docLines)
 			if newDocLines.indexOf("\u0000") != -1
 				error = new Error("null bytes found in doc lines")
-				logger.error err: error, doc_id: doc_id, newDocLines: newDocLines, error.message
+				logger.error {err: error, doc_id: doc_id, newDocLines: newDocLines}, error.message
 				return callback(error)
 			newHash = RedisManager._computeHash(newDocLines)
 

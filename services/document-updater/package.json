@@ -6,9 +6,13 @@
     "type": "git",
     "url": "https://github.com/sharelatex/document-updater-sharelatex.git"
   },
+  "scripts": {
+    "compile:app": "coffee -o app/js -c app/coffee && coffee -c app.coffee",
+    "start": "npm run compile:app && node app.js"
+  },
   "dependencies": {
     "async": "^2.5.0",
-    "coffee-script": "1.4.0",
+    "coffee-script": "~1.7.0",
     "express": "3.3.4",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.6",
     "lynx": "0.0.11",
