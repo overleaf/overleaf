@@ -36,5 +36,5 @@ module.exports = RangeManager =
 	_safeObjectId: (data) ->
 		try
 			return ObjectId(data)
-		catch
+		catch error
 			return data
