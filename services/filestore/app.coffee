@@ -96,7 +96,7 @@ app.post "/shutdown", (req, res)->
 
 app.get '/status', (req, res)->
 	if appIsOk
-		res.send('filestore sharelatex up - v4')
+		res.send('filestore sharelatex up - v5')
 	else
 		logger.log "app is not ok - shutting down"
 		res.send("server is being shut down", 500)
