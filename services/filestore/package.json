@@ -6,6 +6,18 @@
     "type": "git",
     "url": "https://github.com/sharelatex/filestore-sharelatex.git"
   },
+  "scripts": {
+    "test:acceptance:run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
+    "test:acceptance": "npm run compile:app && npm run compile:acceptance_tests && npm run test:acceptance:run -- $@",
+    "test:unit:run": "mocha --recursive --reporter spec $@ test/unit/js",
+    "test:unit": "npm run compile:app && npm run compile:unit_tests && npm run test:unit:run -- $@",
+    "compile:unit_tests": "coffee -o test/unit/js -c test/unit/coffee",
+    "compile:acceptance_tests": "coffee -o test/acceptance/js -c test/acceptance/coffee",
+    "compile:app": "coffee -o app/js -c app/coffee && coffee -c app.coffee",
+    "compile:all": "npm run compile:app && npm run compile:unit_tests && npm run compile:acceptance_tests",
+    "start": "npm run compile:app && node app.js",
+    "nodemon": "nodemon --config nodemon.json"
+  },
   "dependencies": {
     "async": "~0.2.10",
     "aws-sdk": "^2.1.39",

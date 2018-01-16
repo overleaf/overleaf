@@ -96,7 +96,7 @@ app.post "/shutdown", (req, res)->
 
 app.get '/status', (req, res)->
 	if appIsOk
-		res.send('filestore sharelatex up')
+		res.send('filestore sharelatex up - v2')
 	else
 		logger.log "app is not ok - shutting down"
 		res.send("server is being shut down", 500)
@@ -112,7 +112,7 @@ app.get '*', (req, res)->
 
 server = require('http').createServer(app)
 port = settings.internal.filestore.port or 3009
-host = settings.internal.filestore.host or "localhost"
+host = "0.0.0.0"
 
 beginShutdown = () ->
 	if appIsOk
@@ -128,7 +128,7 @@ beginShutdown = () ->
 			process.disconnect?()
 		logger.log "server will stop accepting connections"
 
-server.listen port, host, ->
+server.listen port,  ->
 	logger.info "Filestore starting up, listening on #{host}:#{port}"
 
 process.on 'SIGTERM', () ->
