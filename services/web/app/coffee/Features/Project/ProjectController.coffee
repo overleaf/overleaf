@@ -241,23 +241,6 @@ module.exports = ProjectController =
 				if !user_id?
 					return cb()
 				CollaboratorsHandler.userIsTokenMember user_id, project_id, cb
-			couldShowLinkSharingOnboarding: (cb) ->
-				cb = underscore.once(cb)
-				if !user_id?
-					return cb()
-				# Extract data from user's ObjectId
-				timestamp = parseInt(user_id.toString().substring(0, 8), 16)
-				userSignupDate = new Date(timestamp * 1000)
-				if userSignupDate > new Date("2017-11-13")
-					# Don't show for users who registered after it was released
-					return cb(null, false)
-				timeout = setTimeout cb, 500
-				AnalyticsManager.getLastOccurance user_id, "shown-linksharing-onboarding", (error, event) ->
-					clearTimeout timeout
-					if error? || event?
-						return cb(null, false)
-					else
-						return cb(null, true)
 		}, (err, results)->
 			if err?
 				logger.err err:err, "error getting details for project page"
@@ -317,7 +300,6 @@ module.exports = ProjectController =
 					languages: Settings.languages
 					themes: THEME_LIST
 					maxDocLength: Settings.max_doc_length
-					showLinkSharingOnboarding: !!results.couldShowLinkSharingOnboarding
 					useV2History: !!project.overleaf?.history?.display
 				timer.done()
 

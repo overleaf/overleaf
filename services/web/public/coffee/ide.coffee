@@ -13,7 +13,6 @@ define [
 	"ide/metadata/MetadataManager"
 	"ide/review-panel/ReviewPanelManager"
 	"ide/SafariScrollPatcher"
-	"ide/LinkSharingOnboardingController",
 	"ide/settings/index"
 	"ide/share/index"
 	"ide/chat/index"
@@ -80,9 +79,6 @@ define [
 			miniReviewPanelVisible: false
 			chatResizerSizeOpen: window.uiConfig.chatResizerSizeOpen
 			chatResizerSizeClosed: window.uiConfig.chatResizerSizeClosed
-		}
-		$scope.onboarding = {
-			linkSharing: if window.showLinkSharingOnboarding then 'unseen' else 'dismissed'
 		}
 		$scope.user = window.user
 
