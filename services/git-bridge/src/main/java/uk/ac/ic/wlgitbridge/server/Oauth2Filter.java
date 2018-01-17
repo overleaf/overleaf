@@ -5,6 +5,7 @@ import com.google.api.client.http.GenericUrl;
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.jetty.server.Request;
 import uk.ac.ic.wlgitbridge.application.config.Oauth2;
+import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotApi;
 import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocRequest;
 import uk.ac.ic.wlgitbridge.util.Instance;
@@ -17,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.Optional;
 import java.util.StringTokenizer;
 
 /**
@@ -26,9 +28,12 @@ public class Oauth2Filter implements Filter {
 
     public static final String ATTRIBUTE_KEY = "oauth2";
 
+    private final SnapshotApi snapshotApi;
+
     private final Oauth2 oauth2;
 
-    public Oauth2Filter(Oauth2 oauth2) {
+    public Oauth2Filter(SnapshotApi snapshotApi, Oauth2 oauth2) {
+        this.snapshotApi = snapshotApi;
         this.oauth2 = oauth2;
     }
 
@@ -60,7 +65,8 @@ public class Oauth2Filter implements Filter {
         GetDocRequest doc = new GetDocRequest(project);
         doc.request();
         try {
-            doc.getResult();
+            SnapshotApi.getResult(
+                    snapshotApi.getDoc(Optional.empty(), project));
         } catch (ForbiddenException e) {
             Log.info("[{}] Auth needed", project);
             getAndInjectCredentials(

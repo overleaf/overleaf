@@ -199,6 +199,7 @@ public class GitProjectRepo implements ProjectRepo {
         }
     }
 
+    @Override
     public Repository getJGitRepository() {
         return repository.get();
     }

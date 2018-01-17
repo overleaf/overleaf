@@ -1,10 +1,10 @@
 package uk.ac.ic.wlgitbridge.bridge.gc;
 
-import com.google.api.client.auth.oauth2.Credential;
 import uk.ac.ic.wlgitbridge.bridge.Bridge;
 import uk.ac.ic.wlgitbridge.bridge.repo.ProjectRepo;
 import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -12,9 +12,9 @@ import java.util.concurrent.CompletableFuture;
  * GC which executes every hour or so.
  *
  * We don't queue it into a more immediate Executor because there is no way to
- * know if a call to {@link Bridge#updateProject(Credential, ProjectRepo)},
+ * know if a call to {@link Bridge#updateProject(Optional, ProjectRepo)},
  * which releases the lock, is going to call
- * {@link Bridge#push(Credential, String, RawDirectory, RawDirectory, String)}.
+ * {@link Bridge#push(Optional, String, RawDirectory, RawDirectory, String)}.
  *
  * We don't want the GC to run in between an update and a push.
  */

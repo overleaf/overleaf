@@ -49,10 +49,17 @@ public class RepositoryObjectTreeWalker {
 
     public RawDirectory getDirectoryContents(
     ) throws IOException, SizeLimitExceededException, InvalidGitRepository {
-        return getDirectoryContents(50 * 1024 * 1024);
+        return getDirectoryContents(Optional.empty());
     }
 
-    private RawDirectory getDirectoryContents(long maxFileSize)
+    public RawDirectory getDirectoryContents(long maxFileSize)
+            throws InvalidGitRepository,
+                    SizeLimitExceededException,
+                    IOException {
+        return getDirectoryContents(Optional.of(maxFileSize));
+    }
+
+    private RawDirectory getDirectoryContents(Optional<Long> maxFileSize)
             throws IOException,
                     SizeLimitExceededException,
                     InvalidGitRepository {
@@ -73,7 +80,7 @@ public class RepositoryObjectTreeWalker {
         return treeWalk;
     }
 
-    private Map<String, RawFile> walkGitObjectTree(long maxFileSize)
+    private Map<String, RawFile> walkGitObjectTree(Optional<Long> maxFileSize)
             throws IOException,
                     SizeLimitExceededException,
                     InvalidGitRepository {
@@ -90,9 +97,9 @@ public class RepositoryObjectTreeWalker {
             }
             ObjectLoader obj = repository.open(objectId);
             long size = obj.getSize();
-            if (size > maxFileSize) {
+            if (maxFileSize.isPresent() && size > maxFileSize.get()) {
                 throw new SizeLimitExceededException(
-                        Optional.ofNullable(path), size, maxFileSize);
+                        Optional.ofNullable(path), size, maxFileSize.get());
             }
             try (ByteArrayOutputStream o = new ByteArrayOutputStream(
                     CastUtil.assumeInt(size))) {

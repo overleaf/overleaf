@@ -9,14 +9,14 @@ import uk.ac.ic.wlgitbridge.bridge.lock.ProjectLock;
 import uk.ac.ic.wlgitbridge.bridge.repo.ProjectRepo;
 import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
 import uk.ac.ic.wlgitbridge.bridge.resource.ResourceCache;
-import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotAPI;
+import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotApiFacade;
 import uk.ac.ic.wlgitbridge.bridge.swap.job.SwapJob;
 import uk.ac.ic.wlgitbridge.bridge.swap.store.SwapStore;
-import uk.ac.ic.wlgitbridge.data.model.Snapshot;
 import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
+import java.util.Optional;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -34,7 +34,7 @@ public class BridgeTest {
     private RepoStore repoStore;
     private DBStore dbStore;
     private SwapStore swapStore;
-    private SnapshotAPI snapshotAPI;
+    private SnapshotApiFacade snapshotAPI;
     private ResourceCache resourceCache;
     private SwapJob swapJob;
     private GcJob gcJob;
@@ -45,7 +45,7 @@ public class BridgeTest {
         repoStore = mock(RepoStore.class);
         dbStore = mock(DBStore.class);
         swapStore = mock(SwapStore.class);
-        snapshotAPI = mock(SnapshotAPI.class);
+        snapshotAPI = mock(SnapshotApiFacade.class);
         resourceCache = mock(ResourceCache.class);
         swapJob = mock(SwapJob.class);
         gcJob = mock(GcJob.class);
@@ -75,16 +75,17 @@ public class BridgeTest {
     public void updatingRepositorySetsLastAccessedTime(
     ) throws IOException, GitUserException {
         ProjectRepo repo = mock(ProjectRepo.class);
-        when(repo.getProjectName()).thenReturn("asdf");
+        when(repoStore.getExistingRepo("asdf")).thenReturn(repo);
         when(dbStore.getProjectState("asdf")).thenReturn(ProjectState.PRESENT);
+        when(snapshotAPI.projectExists(Optional.empty(), "asdf")).thenReturn(true);
         when(
-                snapshotAPI.getSnapshotsForProjectAfterVersion(
+                snapshotAPI.getSnapshots(
                         any(),
                         any(),
                         anyInt()
                 )
-        ).thenReturn(new ArrayDeque<Snapshot>());
-        bridge.updateRepository(null, repo);
+        ).thenReturn(new ArrayDeque<>());
+        bridge.getUpdatedRepo(Optional.empty(), "asdf");
         verify(dbStore).setLastAccessedTime(eq("asdf"), any());
     }
 

@@ -1,7 +1,5 @@
 package uk.ac.ic.wlgitbridge.data.model;
 
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.junit.Rule;
@@ -10,11 +8,14 @@ import org.junit.rules.TemporaryFolder;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
+import uk.ac.ic.wlgitbridge.bridge.repo.FSGitRepoStore;
+import uk.ac.ic.wlgitbridge.bridge.repo.GitProjectRepo;
+import uk.ac.ic.wlgitbridge.bridge.repo.ProjectRepo;
+import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
 import uk.ac.ic.wlgitbridge.bridge.resource.ResourceCache;
 import uk.ac.ic.wlgitbridge.bridge.resource.UrlResourceCache;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
-import uk.ac.ic.wlgitbridge.git.util.RepositoryObjectTreeWalker;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -65,8 +66,11 @@ public class ResourceFetcherTest {
         ResourceCache resources = new UrlResourceCache(dbStore);
         TemporaryFolder repositoryFolder = new TemporaryFolder();
         repositoryFolder.create();
-        Repository repository = new FileRepositoryBuilder().setWorkTree(repositoryFolder.getRoot()).build();
-        Map<String, RawFile> fileTable = new RepositoryObjectTreeWalker(repository).getDirectoryContents().getFileTable();
+        String repoStorePath = repositoryFolder.getRoot().getAbsolutePath();
+        RepoStore repoStore = new FSGitRepoStore(repoStorePath);
+        ProjectRepo repo = new GitProjectRepo("repo");
+        repo.initRepo(repoStore);
+        Map<String, RawFile> fileTable = repo.getFiles();
         Map<String, byte[]> fetchedUrls = new HashMap<String, byte[]>();
         resources.get(testProjectName, testUrl, newTestPath, fileTable, fetchedUrls);
 
