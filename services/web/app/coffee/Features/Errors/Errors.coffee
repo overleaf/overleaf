@@ -33,6 +33,13 @@ UnsupportedFileTypeError = (message) ->
 	return error
 UnsupportedFileTypeError.prototype.__proto___ = Error.prototype
 
+UnsupportedProjectError = (message) ->
+	error = new Error(message)
+	error.name = "UnsupportedProjectError"
+	error.__proto__ = UnsupportedProjectError.prototype
+	return error
+UnsupportedProjectError.prototype.__proto___ = Error.prototype
+
 module.exports = Errors =
 	NotFoundError: NotFoundError
 	ServiceNotConfiguredError: ServiceNotConfiguredError
