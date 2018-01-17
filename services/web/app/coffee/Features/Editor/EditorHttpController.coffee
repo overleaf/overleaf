@@ -105,7 +105,7 @@ module.exports = EditorHttpController =
 			else if error?.message == 'invalid element name'
 				res.status(400).json(req.i18n.translate('invalid_file_name'))
 			else if error?
-				res.status(500).json(req.i18n.translate('generic_something_went_wrong'))
+				next(error)
 			else
 				res.json doc
 
