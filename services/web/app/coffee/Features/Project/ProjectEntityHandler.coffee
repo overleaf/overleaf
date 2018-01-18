@@ -457,16 +457,16 @@ module.exports = ProjectEntityHandler =
 			return callback(error) if error?
 			ProjectEntityHandler.getAllEntitiesFromProject project, (error, oldDocs, oldFiles) =>
 				return callback(error) if error?
-				projectLocator.findElement {project:project, element_id:entity_id, type:entityType}, (error, entity, entPath)=>
+				projectLocator.findElement {project:project, element_id:entity_id, type:entityType}, (error, entity, entPath, parentFolder)=>
 					return callback(error) if error?
-					ProjectEntityHandler.checkElementName entity, newName, (err) =>
-						return callback(err) if err?
+					# check if the new name already exists in the current folder
+					ProjectEntityHandler.checkElementName parentFolder, newName, (error) =>
+						return callback(error) if error?
 						endPath = path.join(path.dirname(entPath.fileSystem), newName)
 						conditions = {_id:project_id}
 						update = "$set":{}
 						namePath = entPath.mongo+".name"
 						update["$set"][namePath] = newName
-						# FIXME check if this would create a duplicate file!
 						tpdsUpdateSender.moveEntity({project_id:project_id, startPath:entPath.fileSystem, endPath:endPath, project_name:project.name, rev:entity.rev})
 						Project.findOneAndUpdate conditions, update, { "new": true}, (error, newProject) ->
 							return callback(error) if error?
