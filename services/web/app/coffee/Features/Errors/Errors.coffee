@@ -33,12 +33,12 @@ UnsupportedFileTypeError = (message) ->
 	return error
 UnsupportedFileTypeError.prototype.__proto___ = Error.prototype
 
-UnsupportedProjectError = (message) ->
+UnsupportedBrandError = (message) ->
 	error = new Error(message)
-	error.name = "UnsupportedProjectError"
-	error.__proto__ = UnsupportedProjectError.prototype
+	error.name = "UnsupportedBrandError"
+	error.__proto__ = UnsupportedBrandError.prototype
 	return error
-UnsupportedProjectError.prototype.__proto___ = Error.prototype
+UnsupportedBrandError.prototype.__proto___ = Error.prototype
 
 UnsupportedPublisherExportsError = (message) ->
 	error = new Error(message)
@@ -53,5 +53,5 @@ module.exports = Errors =
 	TooManyRequestsError: TooManyRequestsError
 	InvalidNameError: InvalidNameError
 	UnsupportedFileTypeError: UnsupportedFileTypeError
-	UnsupportedProjectError: UnsupportedProjectError
+	UnsupportedBrandError: UnsupportedBrandError
 	UnsupportedPublisherExportsError: UnsupportedPublisherExportsError
