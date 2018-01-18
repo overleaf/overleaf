@@ -395,7 +395,7 @@ module.exports = ProjectEntityHandler =
 			return callback(err) if err?
 			projectLocator.findElement {project, element_id: entity_id, type: entityType}, (err, entity, entityPath)->
 				return callback(err) if err?
-				self._checkValidMove project, entityType, entityPath, destFolderId, (error) ->
+				self._checkValidMove project, entityType, entity, entityPath, destFolderId, (error) ->
 					return callback(error) if error?
 					self.getAllEntitiesFromProject project, (error, oldDocs, oldFiles) =>
 						return callback(error) if error?
@@ -414,18 +414,19 @@ module.exports = ProjectEntityHandler =
 									return callback(error) if error?
 									DocumentUpdaterHandler.updateProjectStructure project_id, userId, {oldDocs, newDocs, oldFiles, newFiles}, callback
 
-	_checkValidMove: (project, entityType, entityPath, destFolderId, callback = (error) ->) ->
-		return callback() if !entityType.match(/folder/)
-
+	_checkValidMove: (project, entityType, entity, entityPath, destFolderId, callback = (error) ->) ->
 		projectLocator.findElement { project, element_id: destFolderId, type:"folder"}, (err, destEntity, destFolderPath) ->
 			return callback(err) if err?
-			logger.log destFolderPath: destFolderPath.fileSystem, folderPath: entityPath.fileSystem, "checking folder is not moving into child folder"
-			isNestedFolder = destFolderPath.fileSystem.slice(0, entityPath.fileSystem.length) == entityPath.fileSystem
-			if isNestedFolder
-				callback(new Error("destination folder is a child folder of me"))
-			else
+			# check if there is already a doc/file/folder with the same name
+			# in the destination folder
+			ProjectEntityHandler.checkElementName destEntity, entity.name, (err)->
+				return callback(err) if err?
+				if entityType.match(/folder/)
+					logger.log destFolderPath: destFolderPath.fileSystem, folderPath: entityPath.fileSystem, "checking folder is not moving into child folder"
+					isNestedFolder = destFolderPath.fileSystem.slice(0, entityPath.fileSystem.length) == entityPath.fileSystem
+					if isNestedFolder
+						return callback(new Error("destination folder is a child folder of me"))
 				callback()
-
 
 	deleteEntity: (project_id, entity_id, entityType, userId, callback = (error) ->)->
 		self = @
