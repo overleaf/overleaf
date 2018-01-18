@@ -29,15 +29,15 @@ define [
 
 		enable: () ->
 			@editor.setOptions({
-				enableBasicAutocompletion: true,
-				enableSnippets: true,
+				enableBasicAutocompletion: true
+				enableSnippets: true
 				enableLiveAutocompletion: false
 			})
 
 			commandCompleter = new CommandManager(@metadataManager)
 
 			SnippetCompleter = new EnvironmentManager()
-			PackageCompleter = new PackageManager(@metadataManager)
+			PackageCompleter = new PackageManager(@metadataManager, Helpers)
 
 			Graphics = @graphics
 			Preamble = @preamble
@@ -46,7 +46,7 @@ define [
 			GraphicsCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
 					context = Helpers.getContext(editor, pos)
-					{lineUpToCursor, commandFragment, lineBeyondCursor, needsClosingBrace} = context
+					{commandFragment, closingBrace} = context
 					if commandFragment
 						match = commandFragment.match(/^~?\\(includegraphics(?:\[.*])?){([^}]*, *)?(\w*)/)
 						if match
@@ -61,9 +61,9 @@ define [
 										path = path.slice(graphicsPath.length)
 										break
 								result.push {
-									caption: "\\#{commandName}{#{path}#{if needsClosingBrace then '}' else ''}",
-									value: "\\#{commandName}{#{path}#{if needsClosingBrace then '}' else ''}",
-									meta: "graphic",
+									caption: "\\#{commandName}{#{path}#{closingBrace}"
+									value: "\\#{commandName}{#{path}#{closingBrace}"
+									meta: "graphic"
 									score: 50
 								}
 							callback null, result
@@ -72,7 +72,7 @@ define [
 			FilesCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) =>
 					context = Helpers.getContext(editor, pos)
-					{lineUpToCursor, commandFragment, lineBeyondCursor, needsClosingBrace} = context
+					{commandFragment, closingBrace} = context
 					if commandFragment
 						match = commandFragment.match(/^\\(input|include){(\w*)/)
 						if match
@@ -83,9 +83,9 @@ define [
 								if file.id != @$scope.docId
 									path = file.path
 									result.push {
-										caption: "\\#{commandName}{#{path}#{if needsClosingBrace then '}' else ''}",
-										value: "\\#{commandName}{#{path}#{if needsClosingBrace then '}' else ''}",
-										meta: "file",
+										caption: "\\#{commandName}{#{path}#{closingBrace}"
+										value: "\\#{commandName}{#{path}#{closingBrace}"
+										meta: "file"
 										score: 50
 									}
 							callback null, result
@@ -93,7 +93,7 @@ define [
 			LabelsCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
 					context = Helpers.getContext(editor, pos)
-					{lineUpToCursor, commandFragment, lineBeyondCursor, needsClosingBrace} = context
+					{commandFragment, closingBrace} = context
 					if commandFragment
 						refMatch = commandFragment.match(/^~?\\([a-z]*ref){([^}]*, *)?(\w*)/)
 						if refMatch
@@ -102,16 +102,16 @@ define [
 							result = []
 							if commandName != 'ref' # ref is in top 100 commands
 								result.push {
-									caption: "\\#{commandName}{}",
-									snippet: "\\#{commandName}{}",
-									meta: "cross-reference",
+									caption: "\\#{commandName}{}"
+									snippet: "\\#{commandName}{}"
+									meta: "cross-reference"
 									score: 60
 								}
 							for label in metadataManager.getAllLabels()
 								result.push {
-									caption: "\\#{commandName}{#{label}#{if needsClosingBrace then '}' else ''}",
-									value: "\\#{commandName}{#{label}#{if needsClosingBrace then '}' else ''}",
-									meta: "cross-reference",
+									caption: "\\#{commandName}{#{label}#{closingBrace}"
+									value: "\\#{commandName}{#{label}#{closingBrace}"
+									meta: "cross-reference"
 									score: 50
 								}
 							callback null, result
@@ -120,7 +120,7 @@ define [
 			ReferencesCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
 					context = Helpers.getContext(editor, pos)
-					{lineUpToCursor, commandFragment, lineBeyondCursor, needsClosingBrace} = context
+					{commandFragment, closingBrace} = context
 					if commandFragment
 						citeMatch = commandFragment.match(
 							/^~?\\([a-z]*cite[a-z]*(?:\[.*])?){([^}]*, *)?(\w*)/
@@ -134,18 +134,18 @@ define [
 							previousArgsCaption = if previousArgs.length > 8 then "…," else previousArgs
 							result = []
 							result.push {
-								caption: "\\#{commandName}{}",
-								snippet: "\\#{commandName}{}",
-								meta: "reference",
+								caption: "\\#{commandName}{}"
+								snippet: "\\#{commandName}{}"
+								meta: "reference"
 								score: 60
 							}
 							if references.keys and references.keys.length > 0
 								references.keys.forEach (key) ->
 									if !(key in [null, undefined])
 										result.push({
-											caption: "\\#{commandName}{#{previousArgsCaption}#{key}#{if needsClosingBrace then '}' else ''}",
-											value: "\\#{commandName}{#{previousArgs}#{key}#{if needsClosingBrace then '}' else ''}",
-											meta: "reference",
+											caption: "\\#{commandName}{#{previousArgsCaption}#{key}#{closingBrace}"
+											value: "\\#{commandName}{#{previousArgs}#{key}#{closingBrace}"
+											meta: "reference"
 											score: 50
 										})
 								callback null, result
@@ -155,7 +155,7 @@ define [
 			@editor.completers = [
 				commandCompleter
 				SnippetCompleter
-                PackageCompleter
+				PackageCompleter
 				ReferencesCompleter
 				LabelsCompleter
 				GraphicsCompleter
@@ -172,7 +172,7 @@ define [
 			cursorPosition = @editor.getCursorPosition()
 			end = change.end
 			context = Helpers.getContext(@editor, end)
-			{lineUpToCursor, commandFragment, commandName, lineBeyondCursor, needsClosingBrace} = context
+			{lineUpToCursor, commandFragment} = context
 			if lineUpToCursor.match(/.*%.*/)
 				return
 			lastCharIsBackslash = lineUpToCursor.slice(-1) == "\\"
