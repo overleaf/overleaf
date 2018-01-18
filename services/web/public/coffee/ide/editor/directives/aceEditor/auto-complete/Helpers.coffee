@@ -40,7 +40,6 @@ define [
 				commandFragment,
 				commandName,
 				lineBeyondCursor,
-				needsClosingBrace,
 				closingBrace
 			}
 
