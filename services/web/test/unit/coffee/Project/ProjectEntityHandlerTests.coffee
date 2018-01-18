@@ -62,7 +62,7 @@ describe 'ProjectEntityHandler', ->
 		@ProjectGetter =
 			getProjectWithOnlyFolders : (project_id, callback)=> callback(null, @project)
 			getProjectWithoutDocLines : (project_id, callback)=> callback(null, @project)
-			getProject:sinon.stub()
+			getProject: sinon.stub().callsArgWith(2, null, @project)
 		@projectUpdater = markAsUpdated:sinon.stub()
 		@projectLocator =
 			findElement : sinon.stub()
@@ -287,6 +287,8 @@ describe 'ProjectEntityHandler', ->
 				@projectLocator.findElement = sinon.stub()
 				@projectLocator.findElement.withArgs({project: @project, element_id: @docId, type: 'docs'})
 					.callsArgWith(1, null, @doc, @path)
+				@projectLocator.findElement.withArgs({project: @project, element_id: folder_id, type:"folder"},)
+					.callsArgWith(1, null, @destFolder, @destFolderPath)
 				@ProjectEntityHandler.moveEntity project_id, @docId, folder_id, "docs", userId, done
 
 			it 'should find the doc to move', ->
@@ -314,6 +316,46 @@ describe 'ProjectEntityHandler', ->
 						rev: @doc.rev
 					})
 					.should.equal true
+
+		describe "moving a doc when another with the same name already exists", ->
+			beforeEach () ->
+				@docId = "4eecaffcbffa66588e000009"
+				@doc = { name: "another-doc.tex", lines:["1234","312343d"], rev: "1234"}
+				@path = {
+					mongo:"folders[0]"
+					fileSystem:"/old_folder/somewhere.txt"
+				}
+				@destFolder = { name: "folder", docs: [ {name:"another-doc.tex"} ] }
+				@destFolderPath = {
+					mongo:      "folders[0]"
+					fileSystem: "/dest_folder"
+				}
+				@projectLocator.findElement = sinon.stub()
+				@projectLocator.findElement.withArgs({project: @project, element_id: @docId, type: 'docs'})
+					.callsArgWith(1, null, @doc, @path)
+				@projectLocator.findElement.withArgs({project: @project, element_id: folder_id, type:"folder"},)
+					.callsArgWith(1, null, @destFolder, @destFolderPath)
+				@callback = sinon.stub()
+				@ProjectEntityHandler.moveEntity project_id, @docId, folder_id, "docs", userId, @callback
+
+			it 'should return an error', ->
+				@callback.calledWith(new Errors.InvalidNameError("file already exists")).should.equal true
+
+			it "should should not send the update to the doc updater", ->
+				@documentUpdaterHandler.updateProjectStructure
+					.called.should.equal false
+
+			it 'should not remove the element from its current position', ->
+				@ProjectEntityHandler._removeElementFromMongoArray
+					.called.should.equal false
+
+			it "should not put the element back in the new folder", ->
+				@ProjectEntityHandler._putElement.called.should.equal false
+
+			it 'should not tell the third party data store', ->
+				@tpdsUpdateSender.moveEntity
+					.called.should.equal false
+
 
 		describe "moving a folder", ->
 			beforeEach ->
@@ -379,10 +421,37 @@ describe 'ProjectEntityHandler', ->
 						})
 						.should.equal true
 
+			describe "when the destination folder contains a file with the same name", ->
+				beforeEach ->
+					@path.fileSystem = "/one/src_dir"
+					@pathToMoveTo.fileSystem = "/two/dest_dir"
+					@folder_to_move_to = { name: "folder to move to", fileRefs: [ {name: "folder"}] }
+					@projectLocator.findElement.withArgs({project: @project, element_id: @move_to_folder_id, type: 'folder'})
+						.callsArgWith(1, null, @folder_to_move_to, @pathToMoveTo)
+					@callback = sinon.stub()
+					@ProjectEntityHandler.moveEntity project_id, @folder_id, @move_to_folder_id, "folder", userId, @callback
+
+				it 'should find the folder we are moving to element', ->
+					@projectLocator.findElement
+						.calledWith({
+							element_id: @move_to_folder_id,
+							type: "folder",
+							project: @project
+						})
+						.should.equal true
+
+				it "should return an error", ->
+					@callback
+						.calledWith(new Errors.InvalidNameError("file already exists"))
+						.should.equal true
+
 			describe "when the destination folder is inside the moving folder", ->
 				beforeEach ->
 					@path.fileSystem = "/one/two"
 					@pathToMoveTo.fileSystem = "/one/two/three"
+
+					@projectLocator.findElement.withArgs({project: @project, element_id: @move_to_folder_id, type: 'folder'})
+						.callsArgWith(1, null, @folder_to_move_to, @pathToMoveTo)
 					@callback = sinon.stub()
 					@ProjectEntityHandler.moveEntity project_id, @folder_id, @move_to_folder_id, "folder", userId, @callback
 
@@ -472,6 +541,7 @@ describe 'ProjectEntityHandler', ->
 			@lines = ['1234','abc']
 			@path = "/path/to/doc"
 
+			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, @project)
 			@ProjectEntityHandler._putElement = sinon.stub().callsArgWith(4, null, {path:{fileSystem:@path}})
 			@callback = sinon.stub()
 			@tpdsUpdateSender.addDoc = sinon.stub().callsArg(1)
@@ -522,6 +592,7 @@ describe 'ProjectEntityHandler', ->
 			@lines = ['1234','abc']
 			@path = "/path/to/doc"
 
+			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, @project)
 			@ProjectEntityHandler._putElement = sinon.stub().callsArgWith(4, null, {path:{fileSystem:@path}})
 			@callback = sinon.stub()
 			@tpdsUpdateSender.addDoc = sinon.stub().callsArg(1)
@@ -1123,6 +1194,20 @@ describe 'ProjectEntityHandler', ->
 			@newName = "new.tex"
 			@path = mongo: "mongo.path", fileSystem: "/oldnamepath/oldname"
 
+			@project_id = project_id
+			@project =
+				_id: ObjectId(project_id)
+				rootFolder: [_id:ObjectId()]
+			@folder =
+				_id: ObjectId()
+				name: "someFolder"
+				docs: [ {name: "another-doc.tex"} ]
+				fileRefs: [ {name: "another-file.tex"} ]
+				folders: [ {name: "another-folder"} ]
+			@doc =
+				_id: ObjectId()
+				name: "new.tex"
+
 			@ProjectGetter.getProject.callsArgWith(2, null, @project)
 			@ProjectEntityHandler.getAllEntitiesFromProject = sinon.stub()
 			@ProjectEntityHandler.getAllEntitiesFromProject
@@ -1132,7 +1217,7 @@ describe 'ProjectEntityHandler', ->
 				.onSecondCall()
 				.callsArgWith(1, null, @newDocs = ['new-doc'], @newFiles = ['new-file'])
 
-			@projectLocator.findElement = sinon.stub().callsArgWith(1, null, @entity = { _id: @entity_id, name:"oldname", rev:4 }, @path)
+			@projectLocator.findElement = sinon.stub().callsArgWith(1, null, @entity = { _id: @entity_id, name:"oldname", rev:4 }, @path, @folder)
 			@tpdsUpdateSender.moveEntity = sinon.stub()
 			@ProjectModel.findOneAndUpdate = sinon.stub().callsArgWith(3, null, @project)
 			@documentUpdaterHandler.updateProjectStructure = sinon.stub().yields()
@@ -1153,6 +1238,27 @@ describe 'ProjectEntityHandler', ->
 			@ProjectEntityHandler.renameEntity project_id, @entity_id, @entityType, @newName, userId, =>
 				@tpdsUpdateSender.moveEntity.calledWith({project_id:project_id, startPath:@path.fileSystem, endPath:"/oldnamepath/new.tex", project_name:@project.name, rev:4}).should.equal true
 				done()
+
+		describe "when a document already exists with the same name", ->
+			beforeEach ->
+				@project =
+					_id: ObjectId(project_id)
+					rootFolder: [_id:ObjectId()]
+				@folder =
+					_id: ObjectId()
+					name: "someFolder"
+					docs: [ {name: "another-doc.tex"} ]
+					fileRefs: [ {name: "another-file.tex"} ]
+					folders: [ {name: "another-folder"} ]
+				@doc =
+					_id: ObjectId()
+					name: "new.tex"
+				@newName = "another-doc.tex"
+
+			it "should return an error", (done)->
+				@ProjectEntityHandler.renameEntity project_id, @entity_id, @entityType, @newName, userId, (err)=>
+					err.should.deep.equal new Errors.InvalidNameError("file already exists")
+					done()
 
 	describe "_insertDeletedDocReference", ->
 		beforeEach ->
@@ -1248,6 +1354,9 @@ describe 'ProjectEntityHandler', ->
 			@folder =
 				_id: ObjectId()
 				name: "someFolder"
+				docs: [ {name: "another-doc.tex"} ]
+				fileRefs: [ {name: "another-file.tex"} ]
+				folders: [ {name: "another-folder"} ]
 			@doc =
 				_id: ObjectId()
 				name: "new.tex"
@@ -1288,6 +1397,33 @@ describe 'ProjectEntityHandler', ->
 					name:"something"
 				@ProjectEntityHandler._putElement @project, @folder._id, doc, "doc", (err)=>
 					@ProjectModel.findOneAndUpdate.called.should.equal false
+					done()
+
+			it "should error if a document already exists with the same name", (done)->
+				doc =
+					_id: ObjectId()
+					name: "another-doc.tex"
+				@ProjectEntityHandler._putElement @project, @folder, doc, "doc", (err)=>
+					@ProjectModel.findOneAndUpdate.called.should.equal false
+					err.should.deep.equal new Errors.InvalidNameError("file already exists")
+					done()
+
+			it "should error if a file already exists with the same name", (done)->
+				doc =
+					_id: ObjectId()
+					name: "another-file.tex"
+				@ProjectEntityHandler._putElement @project, @folder, doc, "doc", (err)=>
+					@ProjectModel.findOneAndUpdate.called.should.equal false
+					err.should.deep.equal new Errors.InvalidNameError("file already exists")
+					done()
+
+			it "should error if a folder already exists with the same name", (done)->
+				doc =
+					_id: ObjectId()
+					name: "another-folder"
+				@ProjectEntityHandler._putElement @project, @folder, doc, "doc", (err)=>
+					@ProjectModel.findOneAndUpdate.called.should.equal false
+					err.should.deep.equal new Errors.InvalidNameError("file already exists")
 					done()
 
 		describe "_countElements", ->
