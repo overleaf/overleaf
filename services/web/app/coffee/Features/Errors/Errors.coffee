@@ -40,6 +40,13 @@ UnsupportedProjectError = (message) ->
 	return error
 UnsupportedProjectError.prototype.__proto___ = Error.prototype
 
+UnsupportedPublisherExportsError = (message) ->
+	error = new Error(message)
+	error.name = "UnsupportedPublisherExportsError"
+	error.__proto__ = UnsupportedPublisherExportsError.prototype
+	return error
+UnsupportedPublisherExportsError.prototype.__proto___ = Error.prototype
+
 module.exports = Errors =
 	NotFoundError: NotFoundError
 	ServiceNotConfiguredError: ServiceNotConfiguredError
@@ -47,3 +54,4 @@ module.exports = Errors =
 	InvalidNameError: InvalidNameError
 	UnsupportedFileTypeError: UnsupportedFileTypeError
 	UnsupportedProjectError: UnsupportedProjectError
+	UnsupportedPublisherExportsError: UnsupportedPublisherExportsError
