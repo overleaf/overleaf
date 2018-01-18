@@ -46,3 +46,4 @@ module.exports = Errors =
 	TooManyRequestsError: TooManyRequestsError
 	InvalidNameError: InvalidNameError
 	UnsupportedFileTypeError: UnsupportedFileTypeError
+	UnsupportedProjectError: UnsupportedProjectError
