@@ -40,12 +40,12 @@ UnsupportedBrandError = (message) ->
 	return error
 UnsupportedBrandError.prototype.__proto___ = Error.prototype
 
-UnsupportedPublisherExportsError = (message) ->
+UnsupportedExportRecordsError = (message) ->
 	error = new Error(message)
-	error.name = "UnsupportedPublisherExportsError"
-	error.__proto__ = UnsupportedPublisherExportsError.prototype
+	error.name = "UnsupportedExportRecordsError"
+	error.__proto__ = UnsupportedExportRecordsError.prototype
 	return error
-UnsupportedPublisherExportsError.prototype.__proto___ = Error.prototype
+UnsupportedExportRecordsError.prototype.__proto___ = Error.prototype
 
 module.exports = Errors =
 	NotFoundError: NotFoundError
@@ -54,4 +54,4 @@ module.exports = Errors =
 	InvalidNameError: InvalidNameError
 	UnsupportedFileTypeError: UnsupportedFileTypeError
 	UnsupportedBrandError: UnsupportedBrandError
-	UnsupportedPublisherExportsError: UnsupportedPublisherExportsError
+	UnsupportedExportRecordsError: UnsupportedExportRecordsError
