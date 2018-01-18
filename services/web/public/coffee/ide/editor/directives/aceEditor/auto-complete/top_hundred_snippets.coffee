@@ -1,32 +1,27 @@
 define -> [{
     "caption": "\\begin{}",
     "snippet": "\\begin{$1}",
-    "meta": "cmd",
+    "meta": "env",
     "score": 7.849662248028187
 }, {
     "caption": "\\begin{}[]",
     "snippet": "\\begin{$1}[$2]",
-    "meta": "cmd",
+    "meta": "env",
     "score": 7.849662248028187
 }, {
     "caption": "\\begin{}{}",
     "snippet": "\\begin{$1}{$2}",
-    "meta": "cmd",
+    "meta": "env",
     "score": 7.849662248028187
 }, {
     "caption": "\\end{}",
     "snippet": "\\end{$1}",
-    "meta": "cmd",
+    "meta": "env",
     "score": 7.847906405228455
-}, {
-    "caption": "\\usepackage{}",
-    "snippet": "\\usepackage{$1}",
-    "meta": "cmd",
-    "score": 5.427890758130527
 }, {
     "caption": "\\usepackage[]{}",
     "snippet": "\\usepackage[$1]{$2}",
-    "meta": "cmd",
+    "meta": "pkg",
     "score": 5.427890758130527
 }, {
     "caption": "\\item",
