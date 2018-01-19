@@ -341,12 +341,12 @@ define [
 
 		renameEntity: (entity, name, callback = (error) ->) ->
 			return if entity.name == name
-			if name.length < 150
-				entity.name = name
-			return @ide.$http.post "/project/#{@ide.project_id}/#{entity.type}/#{entity.id}/rename", {
-				name: entity.name,
+			return if name.length >= 150
+			@ide.$http.post("/project/#{@ide.project_id}/#{entity.type}/#{entity.id}/rename", {
+				name: name,
 				_csrf: window.csrfToken
-			}
+			}).then () ->
+				entity.name = name
 
 		deleteEntity: (entity, callback = (error) ->) ->
 			# We'll wait for the socket.io notification to
@@ -362,11 +362,11 @@ define [
 			# Abort move if the folder being moved (entity) has the parent_folder as child
 			# since that would break the tree structure.
 			return if @_isChildFolder(entity, parent_folder)
-			@_moveEntityInScope(entity, parent_folder)
-			return @ide.queuedHttp.post "/project/#{@ide.project_id}/#{entity.type}/#{entity.id}/move", {
+			@ide.queuedHttp.post("/project/#{@ide.project_id}/#{entity.type}/#{entity.id}/move", {
 				folder_id: parent_folder.id
 				_csrf: window.csrfToken
-			}
+			}).then () =>
+				@_moveEntityInScope(entity, parent_folder)
 
 		_isChildFolder: (parent_folder, child_folder) ->
 			parent_path = @getEntityPath(parent_folder) or "" # null if root folder
