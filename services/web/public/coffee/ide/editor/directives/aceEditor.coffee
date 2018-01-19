@@ -428,6 +428,9 @@ define [
 					if rendererData?
 						rendererData.lineHeight = editor.renderer.lineHeight
 
+				scope.$on '$destroy', () ->
+					detachFromAce(scope.sharejsDoc)
+
 			template: """
 				<div class="ace-editor-wrapper">
 					<div
