@@ -341,7 +341,7 @@ module.exports = ProjectEntityHandler =
 				callback(null, folders, lastFolder)
 
 	addFolder: (project_id, parentFolder_id, folderName, callback) ->
-		ProjectGetter.getProjectWithOnlyFolders project_id, (err, project)=>
+		ProjectGetter.getProject project_id, {}, (err, project)=>
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add folder"
 				return callback(err)
@@ -459,17 +459,20 @@ module.exports = ProjectEntityHandler =
 				return callback(error) if error?
 				projectLocator.findElement {project:project, element_id:entity_id, type:entityType}, (error, entity, entPath)=>
 					return callback(error) if error?
-					endPath = path.join(path.dirname(entPath.fileSystem), newName)
-					conditions = {_id:project_id}
-					update = "$set":{}
-					namePath = entPath.mongo+".name"
-					update["$set"][namePath] = newName
-					tpdsUpdateSender.moveEntity({project_id:project_id, startPath:entPath.fileSystem, endPath:endPath, project_name:project.name, rev:entity.rev})
-					Project.findOneAndUpdate conditions, update, { "new": true}, (error, newProject) ->
-						return callback(error) if error?
-						ProjectEntityHandler.getAllEntitiesFromProject newProject, (error, newDocs, newFiles) =>
+					ProjectEntityHandler.checkElementName entity, newName, (err) =>
+						return callback(err) if err?
+						endPath = path.join(path.dirname(entPath.fileSystem), newName)
+						conditions = {_id:project_id}
+						update = "$set":{}
+						namePath = entPath.mongo+".name"
+						update["$set"][namePath] = newName
+						# FIXME check if this would create a duplicate file!
+						tpdsUpdateSender.moveEntity({project_id:project_id, startPath:entPath.fileSystem, endPath:endPath, project_name:project.name, rev:entity.rev})
+						Project.findOneAndUpdate conditions, update, { "new": true}, (error, newProject) ->
 							return callback(error) if error?
-							DocumentUpdaterHandler.updateProjectStructure project_id, userId, {oldDocs, newDocs, oldFiles, newFiles}, callback
+							ProjectEntityHandler.getAllEntitiesFromProject newProject, (error, newDocs, newFiles) =>
+								return callback(error) if error?
+								DocumentUpdaterHandler.updateProjectStructure project_id, userId, {oldDocs, newDocs, oldFiles, newFiles}, callback
 
 	_cleanUpEntity: (project, entity, entityType, path, userId, callback = (error) ->) ->
 		if(entityType.indexOf("file") != -1)
