@@ -170,7 +170,8 @@ module.exports = ProjectEntityHandler =
 			if project_or_id._id? # project
 				return cb(null, project_or_id)
 			else # id
-				return ProjectGetter.getProjectWithOnlyFolders project_or_id, cb
+				# need to retrieve full project structure to check for duplicates
+				return ProjectGetter.getProject project_or_id, {}, cb
 		getProject (error, project) ->
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add doc"
@@ -207,7 +208,7 @@ module.exports = ProjectEntityHandler =
 			ProjectEntityHandler.addDoc project_id, null, name, lines, callback
 
 	addFileWithoutUpdatingHistory: (project_id, folder_id, fileName, path, userId, callback = (error, fileRef, folder_id, path, fileStoreUrl) ->)->
-		ProjectGetter.getProjectWithOnlyFolders project_id, (err, project) ->
+		ProjectGetter.getProject project_id, {}, (err, project) ->
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add file"
 				return callback(err)
@@ -606,19 +607,32 @@ module.exports = ProjectEntityHandler =
 				newPath =
 					fileSystem: "#{path.fileSystem}/#{element.name}"
 					mongo: path.mongo
-				id = element._id+''
-				element._id = require('mongoose').Types.ObjectId(id)
-				conditions = _id:project._id
-				mongopath = "#{path.mongo}.#{type}"
-				update = "$push":{}
-				update["$push"][mongopath] = element
-				logger.log project_id: project._id, element_id: element._id, fileType: type, folder_id: folder_id, mongopath:mongopath, "adding element to project"
-				Project.findOneAndUpdate conditions, update, {"new": true}, (err, project)->
-					if err?
-						logger.err err: err, project_id: project._id, 'error saving in putElement project'
-						return callback(err)
-					callback(err, {path:newPath}, project)
+				ProjectEntityHandler.checkElementName folder, element.name, (err) =>
+					return callback(err) if err?
+					id = element._id+''
+					element._id = require('mongoose').Types.ObjectId(id)
+					conditions = _id:project._id
+					mongopath = "#{path.mongo}.#{type}"
+					update = "$push":{}
+					update["$push"][mongopath] = element
+					logger.log project_id: project._id, element_id: element._id, fileType: type, folder_id: folder_id, mongopath:mongopath, "adding element to project"
+					Project.findOneAndUpdate conditions, update, {"new": true}, (err, project)->
+						if err?
+							logger.err err: err, project_id: project._id, 'error saving in putElement project'
+							return callback(err)
+						callback(err, {path:newPath}, project)
 
+	checkElementName: (folder, name, callback = (err) ->) ->
+		# check if the name is already taken by a doc, file or
+		# folder. If so, return an error "file already exists".
+		err = new Errors.InvalidNameError("file already exists")
+		for doc in folder?.docs or []
+			return callback(err) if doc.name is name
+		for file in folder?.fileRefs or []
+			return callback(err) if file.name is name
+		for folder in folder?.folders or []
+			return callback(err) if folder.name is name
+		callback()
 
 confirmFolder = (project, folder_id, callback)->
 	logger.log folder_id:folder_id, project_id:project._id, "confirming folder in project"
