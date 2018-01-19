@@ -188,7 +188,7 @@ test_acceptance: test_acceptance_app test_acceptance_modules
 test_acceptance_app: test_acceptance_app_start_service test_acceptance_app_run
 	$(MAKE) test_acceptance_app_stop_service
 
-test_acceptance_app_start_service: test_acceptance_app_stop_service
+test_acceptance_app_start_service: test_clean # stop service and clear dbs
 	$(MAKE) compile
 	docker-compose ${DOCKER_COMPOSE_FLAGS} up -d test_acceptance
 
@@ -211,6 +211,9 @@ test_acceptance_module: $(MODULE_MAKEFILES)
 	@if [ -e $(MODULE)/test/acceptance ]; then \
 		cd $(MODULE) && $(MAKE) test_acceptance; \
 	fi
+
+test_clean:
+	docker-compose ${DOCKER_COMPOSE_FLAGS} down
 
 ci:
 	MOCHA_ARGS="--reporter tap" \
