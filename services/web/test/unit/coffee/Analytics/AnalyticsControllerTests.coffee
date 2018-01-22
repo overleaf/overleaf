@@ -14,23 +14,38 @@ describe 'AnalyticsController', ->
 			getLoggedInUserId: sinon.stub()
 
 		@AnalyticsManager =
+			updateEditingSession: sinon.stub().callsArgWith(3)
 			recordEvent: sinon.stub().callsArgWith(3)
 
-		@req = 
-			params:
-				event:"i_did_something"
-			body:"stuff"
-			sessionID: "sessionIDHere"
-
-		@res =
-			send:->
 		@controller = SandboxedModule.require modulePath, requires:
 			"./AnalyticsManager":@AnalyticsManager
 			"../Authentication/AuthenticationController":@AuthenticationController
 			"logger-sharelatex":
 				log:->
 
+		@res =
+			send:->
+
+	describe "updateEditingSession", ->
+		beforeEach ->
+			@req =
+				params:
+					projectId: "a project id"
+
+		it "delegates to the AnalyticsManager", (done) ->
+			@AuthenticationController.getLoggedInUserId.returns("1234")
+			@controller.updateEditingSession @req, @res
+
+			@AnalyticsManager.updateEditingSession.calledWith("1234", "a project id", {}).should.equal true
+			done()
+
 	describe "recordEvent", ->
+		beforeEach ->
+			@req =
+				params:
+					event:"i_did_something"
+				body:"stuff"
+				sessionID: "sessionIDHere"
 
 		it "should use the user_id", (done)->
 			@AuthenticationController.getLoggedInUserId.returns("1234")
