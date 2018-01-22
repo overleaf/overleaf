@@ -103,7 +103,7 @@ describe 'TpdsController', ->
 			
 	describe 'deleteProjectContents', ->
 		beforeEach ->
-			@UpdateMerger.deleteUpdate = sinon.stub().callsArg(3)
+			@UpdateMerger.deleteUpdate = sinon.stub().callsArg(4)
 			@req =
 				params:
 					0: @path = "chapters/main.tex"
@@ -119,7 +119,7 @@ describe 'TpdsController', ->
 			
 		it "should delete the file", ->
 			@UpdateMerger.deleteUpdate
-				.calledWith(@project_id, "/" + @path, @source)
+				.calledWith(null, @project_id, "/" + @path, @source)
 				.should.equal true
 				
 		it "should return a success", ->
