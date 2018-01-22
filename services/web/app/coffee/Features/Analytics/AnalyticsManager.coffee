@@ -49,7 +49,7 @@ module.exports =
 			timeout:1000
 			url: "/user/#{user_id}/event/last_occurnace"
 		makeRequest opts, (err, response, body)->
-			if err? 
+			if err?
 				console.log response, opts
 				logger.err {user_id, err}, "error getting last occurance of event"
 				return callback err
