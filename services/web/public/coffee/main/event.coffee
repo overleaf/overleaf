@@ -35,9 +35,9 @@ define [
 			send: (category, action, label, value)->
 				ga('send', 'event', category, action, label, value)
 
-			editSessionHeartbeat: _.throttle( (projectId, segmentation = {}) ->
+			editingSessionHeartbeat: _.throttle( (projectId, segmentation = {}) ->
 				$http({
-					url: "/editSession/#{projectId}",
+					url: "/editingSession/#{projectId}",
 					method: "PUT",
 					data: segmentation,
 					headers: {

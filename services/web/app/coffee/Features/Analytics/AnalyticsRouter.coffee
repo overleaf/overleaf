@@ -5,7 +5,10 @@ AnalyticsProxy = require('./AnalyticsProxy')
 module.exports =
 	apply: (webRouter, privateApiRouter, publicApiRouter) ->
 		webRouter.post '/event/:event', AnalyticsController.recordEvent
-		webRouter.put  '/editSession/:projectId', AnalyticsController.updateEditSession
+
+		webRouter.put  '/editingSession/:projectId',
+			AnalyticsController.updateEditingSession
+
 		publicApiRouter.use '/analytics/graphs',
 			AuthenticationController.httpAuth,
 			AnalyticsProxy.call('/graphs')

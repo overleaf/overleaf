@@ -3,11 +3,11 @@ Errors = require "../Errors/Errors"
 AuthenticationController = require("../Authentication/AuthenticationController")
 
 module.exports = AnalyticsController =
-	updateEditSession: (req, res, next) ->
+	updateEditingSession: (req, res, next) ->
 		userId    = AuthenticationController.getLoggedInUserId(req) or req.sessionID
 		projectId = req.params.projectId
 
-		AnalyticsManager.updateEditSession userId, projectId, {}, (error) ->
+		AnalyticsManager.updateEditingSession userId, projectId, {}, (error) ->
 			if error instanceof Errors.ServiceNotConfiguredError
 				# ignore, no-op
 				return res.send(204)
