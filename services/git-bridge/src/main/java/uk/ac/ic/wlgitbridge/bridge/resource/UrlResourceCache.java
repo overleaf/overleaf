@@ -1,15 +1,15 @@
 package uk.ac.ic.wlgitbridge.bridge.resource;
 
-import com.ning.http.client.*;
+import com.ning.http.client.AsyncHttpClient;
 import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.data.filestore.RepositoryFile;
 import uk.ac.ic.wlgitbridge.git.exception.SizeLimitExceededException;
-import uk.ac.ic.wlgitbridge.snapshot.base.Request;
+import uk.ac.ic.wlgitbridge.io.http.ning.NingHttpClient;
+import uk.ac.ic.wlgitbridge.io.http.ning.NingHttpClientFacade;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.util.Log;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -23,8 +23,15 @@ public class UrlResourceCache implements ResourceCache {
 
     private final DBStore dbStore;
 
-    public UrlResourceCache(DBStore dbStore) {
+    private final NingHttpClientFacade http;
+
+    UrlResourceCache(DBStore dbStore, NingHttpClientFacade http) {
         this.dbStore = dbStore;
+        this.http = http;
+    }
+
+    public UrlResourceCache(DBStore dbStore) {
+        this(dbStore, new NingHttpClient(new AsyncHttpClient()));
     }
 
     @Override
@@ -74,71 +81,24 @@ public class UrlResourceCache implements ResourceCache {
         byte[] contents;
         Log.info("GET -> " + url);
         try {
-            contents = Request.httpClient.prepareGet(url).execute(
-                    new AsyncCompletionHandler<byte[]>() {
-
-                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-
-                @Override
-                public STATE onHeadersReceived(
-                        HttpResponseHeaders headers
-                ) throws SizeLimitExceededException {
-                    List<String> contentLengths
-                            = headers.getHeaders().get("Content-Length");
-                    if (!maxFileSize.isPresent()) {
-                        return STATE.CONTINUE;
-                    }
-                    if (contentLengths.isEmpty()) {
-                        return STATE.CONTINUE;
-                    }
-                    long contentLength = Long.parseLong(contentLengths.get(0));
-                    long maxFileSize_ = maxFileSize.get();
-                    if (contentLength <= maxFileSize_) {
-                        return STATE.CONTINUE;
-                    }
-                    throw new SizeLimitExceededException(
-                            Optional.of(path), contentLength, maxFileSize_
-                    );
+            contents = http.get(url, hs -> {
+                List<String> contentLengths
+                        = hs.getHeaders().get("Content-Length");
+                if (!maxFileSize.isPresent()) {
+                    return true;
                 }
-
-                @Override
-                public STATE onBodyPartReceived(
-                        HttpResponseBodyPart bodyPart
-                ) throws Exception {
-                    bytes.write(bodyPart.getBodyPartBytes());
-                    return STATE.CONTINUE;
+                if (contentLengths.isEmpty()) {
+                    return true;
                 }
-
-                @Override
-                public byte[] onCompleted(
-                        Response response
-                ) throws Exception {
-                    byte[] data = bytes.toByteArray();
-                    bytes.close();
-                    Log.info(
-                            response.getStatusCode()
-                                    + " "
-                                    + response.getStatusText()
-                                    + " ("
-                                    + data.length
-                                    + "B) -> "
-                                    + url
-                    );
-                    return data;
+                long contentLength = Long.parseLong(contentLengths.get(0));
+                long maxFileSize_ = maxFileSize.get();
+                if (contentLength <= maxFileSize_) {
+                    return true;
                 }
-
-            }).get();
-        } catch (InterruptedException e) {
-            Log.warn(
-                    "Interrupted when fetching project: "  +
-                            projectName  +
-                            ", url: " +
-                            url +
-                            ", path: " +
-                            path,
-                    e
-            );
-            throw new FailedConnectionException();
+                throw new SizeLimitExceededException(
+                        Optional.of(path), contentLength, maxFileSize_
+                );
+            });
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
             if (cause instanceof SizeLimitExceededException) {
