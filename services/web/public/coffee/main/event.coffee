@@ -3,6 +3,7 @@ define [
 	"modules/localStorage"
 ], (App) ->
 	CACHE_KEY = "mbEvents"
+	EDIT_SESSION_HEARTBEAT_INTERVAL = 5 * 60 * 1000 # 5min
 
 	send = (category, action, attributes = {})->
 		ga('send', 'event', category, action)
@@ -33,6 +34,18 @@ define [
 		return {
 			send: (category, action, label, value)->
 				ga('send', 'event', category, action, label, value)
+
+			editSessionHeartbeat: _.throttle( (projectId, segmentation = {}) ->
+				$http({
+					url: "/editSession/#{projectId}",
+					method: "PUT",
+					data: segmentation,
+					headers: {
+						"X-CSRF-Token": window.csrfToken
+					}
+				})
+			, EDIT_SESSION_HEARTBEAT_INTERVAL)
+
 
 			sendMB: (key, segmentation = {}) ->
 				$http {

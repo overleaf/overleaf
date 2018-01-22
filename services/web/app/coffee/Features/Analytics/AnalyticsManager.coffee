@@ -39,6 +39,18 @@ module.exports =
 			url: "/user/#{user_id}/event"
 		makeRequest opts, callback
 
+	updateEditSession: (userId, projectId, segmentation = {}, callback = (error) ->) ->
+		if userId+"" == settings.smokeTest?.userId+""
+			return callback()
+		opts =
+			body:
+				segmentation: segmentation
+			json: true
+			method: "PUT"
+			timeout: 1000
+			url: "/editSession?userId=#{userId}&projectId=#{projectId}"
+		makeRequest opts, callback
+
 
 	getLastOccurance: (user_id, event, callback = (error) ->) ->
 		opts =
