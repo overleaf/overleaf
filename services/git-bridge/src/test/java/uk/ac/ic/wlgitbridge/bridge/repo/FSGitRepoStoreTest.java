@@ -10,6 +10,7 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 
@@ -42,7 +43,7 @@ public class FSGitRepoStoreTest {
         File tmp = makeTempRepoDir(tmpFolder, "rootdir");
         original = tmpFolder.newFolder("original");
         FileUtils.copyDirectory(tmp, original);
-        repoStore = new FSGitRepoStore(tmp.getAbsolutePath());
+        repoStore = new FSGitRepoStore(tmp.getAbsolutePath(), Optional.empty());
     }
 
     @Test

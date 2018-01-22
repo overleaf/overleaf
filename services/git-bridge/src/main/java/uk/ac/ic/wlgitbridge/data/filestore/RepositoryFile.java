@@ -23,4 +23,9 @@ public class RepositoryFile extends RawFile {
         return contents;
     }
 
+    @Override
+    public long size() {
+        return contents.length;
+    }
+
 }

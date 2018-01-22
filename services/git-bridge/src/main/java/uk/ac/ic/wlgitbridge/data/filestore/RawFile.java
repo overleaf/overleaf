@@ -17,6 +17,8 @@ public abstract class RawFile {
 
     public abstract byte[] getContents();
 
+    public abstract long size();
+
     public final void writeToDisk(File directory) throws IOException {
         File file = new File(directory, getPath());
         file.getParentFile().mkdirs();

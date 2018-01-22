@@ -2,6 +2,7 @@ package uk.ac.ic.wlgitbridge.bridge;
 
 import com.google.api.client.auth.oauth2.Credential;
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
+import uk.ac.ic.wlgitbridge.application.config.Config;
 import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
 import uk.ac.ic.wlgitbridge.bridge.db.ProjectState;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.SqliteDBStore;
@@ -9,20 +10,16 @@ import uk.ac.ic.wlgitbridge.bridge.gc.GcJob;
 import uk.ac.ic.wlgitbridge.bridge.gc.GcJobImpl;
 import uk.ac.ic.wlgitbridge.bridge.lock.LockGuard;
 import uk.ac.ic.wlgitbridge.bridge.lock.ProjectLock;
-import uk.ac.ic.wlgitbridge.bridge.repo.FSGitRepoStore;
-import uk.ac.ic.wlgitbridge.bridge.repo.GitProjectRepo;
-import uk.ac.ic.wlgitbridge.bridge.repo.ProjectRepo;
-import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
+import uk.ac.ic.wlgitbridge.bridge.repo.*;
 import uk.ac.ic.wlgitbridge.bridge.resource.ResourceCache;
 import uk.ac.ic.wlgitbridge.bridge.resource.UrlResourceCache;
 import uk.ac.ic.wlgitbridge.bridge.snapshot.NetSnapshotApi;
 import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotApi;
+import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotApiFacade;
 import uk.ac.ic.wlgitbridge.bridge.swap.job.SwapJob;
-import uk.ac.ic.wlgitbridge.bridge.swap.job.SwapJobConfig;
 import uk.ac.ic.wlgitbridge.bridge.swap.job.SwapJobImpl;
 import uk.ac.ic.wlgitbridge.bridge.swap.store.S3SwapStore;
 import uk.ac.ic.wlgitbridge.bridge.swap.store.SwapStore;
-import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotApiFacade;
 import uk.ac.ic.wlgitbridge.data.CandidateSnapshot;
 import uk.ac.ic.wlgitbridge.data.ProjectLockImpl;
 import uk.ac.ic.wlgitbridge.data.filestore.GitDirectoryContents;
@@ -118,6 +115,7 @@ import java.util.*;
  *
  * 6. The Snapshot API, which provides data from the Overleaf app.
  *
+ *    @see SnapshotApiFacade - wraps a concrete instance of the Snapshot API.
  *    @see SnapshotApi - the interface for the Snapshot API.
  *    @see NetSnapshotApi - the default concrete implementation
  *
@@ -139,6 +137,8 @@ import java.util.*;
  */
 public class Bridge {
 
+    private final Config config;
+
     private final ProjectLock lock;
 
     private final RepoStore repoStore;
@@ -157,29 +157,31 @@ public class Bridge {
      * swap store, and the swap job config.
      *
      * This should be the method used to create a Bridge.
+     * @param config The config to use
      * @param repoStore The repo store to use
      * @param dbStore The db store to use
      * @param swapStore The swap store to use
-     * @param swapJobConfig The swap config to use, or empty for no-op
+     * @param snapshotApi The snapshot api to use
      * @return The constructed Bridge.
      */
     public static Bridge make(
+            Config config,
             RepoStore repoStore,
             DBStore dbStore,
             SwapStore swapStore,
-            Optional<SwapJobConfig> swapJobConfig,
             SnapshotApi snapshotApi
     ) {
         ProjectLock lock = new ProjectLockImpl((int threads) ->
                 Log.info("Waiting for " + threads + " projects...")
         );
         return new Bridge(
+                config,
                 lock,
                 repoStore,
                 dbStore,
                 swapStore,
                 SwapJob.fromConfig(
-                        swapJobConfig,
+                        config.getSwapJob(),
                         lock,
                         repoStore,
                         dbStore,
@@ -205,6 +207,7 @@ public class Bridge {
      * @param resourceCache the {@link ResourceCache} to use
      */
     Bridge(
+            Config config,
             ProjectLock lock,
             RepoStore repoStore,
             DBStore dbStore,
@@ -214,6 +217,7 @@ public class Bridge {
             SnapshotApiFacade snapshotAPI,
             ResourceCache resourceCache
     ) {
+        this.config = config;
         this.lock = lock;
         this.repoStore = repoStore;
         this.dbStore = dbStore;
@@ -621,6 +625,11 @@ public class Bridge {
 
         makeCommitsFromSnapshots(repo, snapshots);
 
+        // TODO: in case crashes around here, add an
+        // "updating_from_commit" column to the DB as a way to rollback the
+        // any failed partial updates before re-trying
+        // Also need to consider the empty state (a new git init'd repo being
+        // the rollback target)
         if (!snapshots.isEmpty()) {
             dbStore.setLatestVersionForProject(
                     projectName,
@@ -635,7 +644,7 @@ public class Bridge {
      * Performs the actual Git commits on the disk.
      *
      * Each commit adds files to the db store
-     * ({@link ResourceCache#get(String, String, String, Map, Map)},
+     * ({@link ResourceCache#get(String, String, String, Map, Map, Optional)},
      * and then removes any files that were deleted.
      * @param repo The repository to commit to
      * @param snapshots The snapshots to commit
@@ -647,10 +656,25 @@ public class Bridge {
             Collection<Snapshot> snapshots
     ) throws IOException, GitUserException {
         String name = repo.getProjectName();
+        Optional<Long> maxSize = config
+                .getRepoStore()
+                .flatMap(RepoStoreConfig::getMaxFileSize);
         for (Snapshot snapshot : snapshots) {
-            Map<String, RawFile> fileTable = repo.getFiles();
-            List<RawFile> files = new LinkedList<>();
+            RawDirectory directory = repo.getDirectory();
+            Map<String, RawFile> fileTable = directory.getFileTable();
+            List<RawFile> files = new ArrayList<>();
             files.addAll(snapshot.getSrcs());
+            for (RawFile file : files) {
+                long size = file.size();
+                /* Can't throw in ifPresent... */
+                if (maxSize.isPresent()) {
+                    long maxSize_ = maxSize.get();
+                    if (size >= maxSize_) {
+                        throw new SizeLimitExceededException(
+                                Optional.of(file.getPath()), size, maxSize_);
+                    }
+                }
+            }
             Map<String, byte[]> fetchedUrls = new HashMap<>();
             for (SnapshotAttachment snapshotAttachment : snapshot.getAtts()) {
                 files.add(
@@ -659,7 +683,8 @@ public class Bridge {
                                 snapshotAttachment.getUrl(),
                                 snapshotAttachment.getPath(),
                                 fileTable,
-                                fetchedUrls
+                                fetchedUrls,
+                                maxSize
                         )
                 );
             }

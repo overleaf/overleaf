@@ -5,6 +5,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.ReceivePack;
 import org.eclipse.jgit.transport.resolver.ReceivePackFactory;
 import uk.ac.ic.wlgitbridge.bridge.Bridge;
+import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
 import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotApi;
 import uk.ac.ic.wlgitbridge.git.handler.hook.WriteLatexPutHook;
 import uk.ac.ic.wlgitbridge.git.servlet.WLGitServlet;
@@ -28,9 +29,12 @@ import java.util.Optional;
 public class WLReceivePackFactory
         implements ReceivePackFactory<HttpServletRequest> {
 
+    private final RepoStore repoStore;
+
     private final Bridge bridge;
 
-    public WLReceivePackFactory(Bridge bridge) {
+    public WLReceivePackFactory(RepoStore repoStore, Bridge bridge) {
+        this.repoStore = repoStore;
         this.bridge = bridge;
     }
 
@@ -69,7 +73,7 @@ public class WLReceivePackFactory
             hostname = httpServletRequest.getLocalName();
         }
         receivePack.setPreReceiveHook(
-                new WriteLatexPutHook(bridge, hostname, oauth2)
+                new WriteLatexPutHook(repoStore, bridge, hostname, oauth2)
         );
         return receivePack;
     }

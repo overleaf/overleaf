@@ -56,7 +56,7 @@ public class GitProjectRepoTest {
     @Before
     public void setup() throws IOException {
         rootdir = makeTempRepoDir(tmpFolder, "rootdir");
-        repoStore = new FSGitRepoStore(rootdir.getAbsolutePath());
+        repoStore = new FSGitRepoStore(rootdir.getAbsolutePath(), Optional.empty());
         repo = fromExistingDir("repo");
         badGitignore = fromExistingDir("badgitignore");
         incoming = fromExistingDir("incoming");
@@ -64,7 +64,7 @@ public class GitProjectRepoTest {
     }
 
     private GitProjectRepo fromExistingDir(String dir) throws IOException {
-        GitProjectRepo ret = new GitProjectRepo(dir);
+        GitProjectRepo ret = GitProjectRepo.fromName(dir);
         ret.useExistingRepository(repoStore);
         return ret;
     }

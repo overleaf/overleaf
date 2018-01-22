@@ -13,6 +13,7 @@ import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.SqliteDBStore;
 import uk.ac.ic.wlgitbridge.bridge.repo.FSGitRepoStore;
 import uk.ac.ic.wlgitbridge.bridge.repo.RepoStore;
+import uk.ac.ic.wlgitbridge.bridge.repo.RepoStoreConfig;
 import uk.ac.ic.wlgitbridge.bridge.snapshot.NetSnapshotApi;
 import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotApi;
 import uk.ac.ic.wlgitbridge.bridge.swap.store.SwapStore;
@@ -52,7 +53,10 @@ public class GitBridgeServer {
         org.eclipse.jetty.util.log.Log.setLog(new NullLogger());
         this.port = config.getPort();
         this.rootGitDirectoryPath = config.getRootGitDirectory();
-        RepoStore repoStore = new FSGitRepoStore(rootGitDirectoryPath);
+        RepoStore repoStore = new FSGitRepoStore(
+                rootGitDirectoryPath,
+                config.getRepoStore().flatMap(RepoStoreConfig::getMaxFileSize)
+        );
         DBStore dbStore = new SqliteDBStore(
                 Paths.get(
                         repoStore.getRootDirectory().getAbsolutePath()
@@ -61,14 +65,14 @@ public class GitBridgeServer {
         SwapStore swapStore = SwapStore.fromConfig(config.getSwapStore());
         SnapshotApi snapshotApi = new NetSnapshotApi();
         bridge = Bridge.make(
+                config,
                 repoStore,
                 dbStore,
                 swapStore,
-                config.getSwapJob(),
                 snapshotApi
         );
         jettyServer = new Server(port);
-        configureJettyServer(config, snapshotApi);
+        configureJettyServer(config, repoStore, snapshotApi);
         SnapshotAPIRequest.setBasicAuth(
                 config.getUsername(),
                 config.getPassword()
@@ -110,11 +114,12 @@ public class GitBridgeServer {
 
     private void configureJettyServer(
             Config config,
+            RepoStore repoStore,
             SnapshotApi snapshotApi
     ) throws ServletException {
         HandlerCollection handlers = new HandlerList();
         handlers.addHandler(initApiHandler());
-        handlers.addHandler(initGitHandler(config, snapshotApi));
+        handlers.addHandler(initGitHandler(config, repoStore, snapshotApi));
         jettyServer.setHandler(handlers);
     }
 
@@ -136,6 +141,7 @@ public class GitBridgeServer {
 
     private Handler initGitHandler(
             Config config,
+            RepoStore repoStore,
             SnapshotApi snapshotApi
     ) throws ServletException {
         final ServletContextHandler servletContextHandler =
@@ -153,6 +159,7 @@ public class GitBridgeServer {
                 new ServletHolder(
                         new WLGitServlet(
                                 servletContextHandler,
+                                repoStore,
                                 bridge
                         )
                 ),

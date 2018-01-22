@@ -1,6 +1,9 @@
 package uk.ac.ic.wlgitbridge.data.filestore;
 
+import uk.ac.ic.wlgitbridge.git.exception.SizeLimitExceededException;
+
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Created by Winston on 16/11/14.

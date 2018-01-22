@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import uk.ac.ic.wlgitbridge.application.exception.ConfigFileException;
+import uk.ac.ic.wlgitbridge.bridge.repo.RepoStoreConfig;
 import uk.ac.ic.wlgitbridge.bridge.swap.job.SwapJobConfig;
 import uk.ac.ic.wlgitbridge.bridge.swap.store.SwapStoreConfig;
 import uk.ac.ic.wlgitbridge.snapshot.base.JSONSource;
@@ -30,6 +31,7 @@ public class Config implements JSONSource {
                 config.postbackURL,
                 config.serviceName,
                 Oauth2.asSanitised(config.oauth2),
+                config.repoStore,
                 SwapStoreConfig.sanitisedCopy(config.swapStore),
                 config.swapJob
         );
@@ -44,6 +46,8 @@ public class Config implements JSONSource {
     private String serviceName;
     @Nullable
     private Oauth2 oauth2;
+    @Nullable
+    private RepoStoreConfig repoStore;
     @Nullable
     private SwapStoreConfig swapStore;
     @Nullable
@@ -69,6 +73,7 @@ public class Config implements JSONSource {
             String postbackURL,
             String serviceName,
             Oauth2 oauth2,
+            RepoStoreConfig repoStore,
             SwapStoreConfig swapStore,
             SwapJobConfig swapJob
     ) {
@@ -80,6 +85,7 @@ public class Config implements JSONSource {
         this.postbackURL = postbackURL;
         this.serviceName = serviceName;
         this.oauth2 = oauth2;
+        this.repoStore = repoStore;
         this.swapStore = swapStore;
         this.swapJob = swapJob;
     }
@@ -108,6 +114,8 @@ public class Config implements JSONSource {
             postbackURL += "/";
         }
         oauth2 = new Gson().fromJson(configObject.get("oauth2"), Oauth2.class);
+        repoStore = new Gson().fromJson(
+                configObject.get("repoStore"), RepoStoreConfig.class);
         swapStore = new Gson().fromJson(
                 configObject.get("swapStore"),
                 SwapStoreConfig.class
@@ -159,6 +167,10 @@ public class Config implements JSONSource {
             throw new AssertionError("Getting oauth2 when not using it");
         }
         return oauth2;
+    }
+
+    public Optional<RepoStoreConfig> getRepoStore() {
+        return Optional.ofNullable(repoStore);
     }
 
     public Optional<SwapStoreConfig> getSwapStore() {

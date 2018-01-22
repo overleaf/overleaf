@@ -1,5 +1,8 @@
 package uk.ac.ic.wlgitbridge.bridge.repo;
 
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,6 +23,8 @@ public interface RepoStore {
     ProjectRepo initRepo(String project) throws IOException;
 
     ProjectRepo getExistingRepo(String project) throws IOException;
+
+    ProjectRepo useJGitRepo(Repository repo, ObjectId commitId);
 
     void purgeNonexistentProjects(
             Collection<String> existingProjectNames
