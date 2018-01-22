@@ -54,7 +54,7 @@ module.exports =
 		path = "/" + req.params[0] # UpdateMerger expects leading slash
 		source = req.headers["x-sl-update-source"] or "unknown"
 		logger.log project_id: project_id, path: path, source: source, "received project contents delete request"
-		UpdateMerger.deleteUpdate project_id, path, source, (error) ->
+		UpdateMerger.deleteUpdate null, project_id, path, source, (error) ->
 			return next(error) if error?
 			res.sendStatus(200)
 
