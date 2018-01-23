@@ -44,7 +44,7 @@ define [
 						"X-CSRF-Token": window.csrfToken
 					}
 				})
-			, EDIT_SESSION_HEARTBEAT_INTERVAL)
+			, EDIT_SESSION_HEARTBEAT_INTERVAL, trailing: false)
 
 
 			sendMB: (key, segmentation = {}) ->
