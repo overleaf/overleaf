@@ -34,12 +34,13 @@ define [
 			beyondCursorRange = new Range(pos.row, pos.column, pos.row, 99999)
 			lineBeyondCursor = editor.getSession().getTextRange(beyondCursorRange)
 			needsClosingBrace = !lineBeyondCursor.match(/^[^{]*}/)
+			closingBrace = if needsClosingBrace then '}' else ''
 			return {
 				lineUpToCursor,
 				commandFragment,
 				commandName,
 				lineBeyondCursor,
-				needsClosingBrace
+				closingBrace
 			}
 
 	return Helpers
