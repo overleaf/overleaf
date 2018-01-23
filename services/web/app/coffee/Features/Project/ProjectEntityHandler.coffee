@@ -171,7 +171,7 @@ module.exports = ProjectEntityHandler =
 				return cb(null, project_or_id)
 			else # id
 				# need to retrieve full project structure to check for duplicates
-				return ProjectGetter.getProject project_or_id, {}, cb
+				return ProjectGetter.getProject project_or_id, {rootFolder:true, name:true}, cb
 		getProject (error, project) ->
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add doc"
@@ -208,7 +208,7 @@ module.exports = ProjectEntityHandler =
 			ProjectEntityHandler.addDoc project_id, null, name, lines, callback
 
 	addFileWithoutUpdatingHistory: (project_id, folder_id, fileName, path, userId, callback = (error, fileRef, folder_id, path, fileStoreUrl) ->)->
-		ProjectGetter.getProject project_id, {}, (err, project) ->
+		ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (err, project) ->
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add file"
 				return callback(err)
@@ -341,7 +341,7 @@ module.exports = ProjectEntityHandler =
 				callback(null, folders, lastFolder)
 
 	addFolder: (project_id, parentFolder_id, folderName, callback) ->
-		ProjectGetter.getProject project_id, {}, (err, project)=>
+		ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (err, project)=>
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add folder"
 				return callback(err)
