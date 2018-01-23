@@ -48,7 +48,10 @@ module.exports =
 			json: true
 			method: "PUT"
 			timeout: 1000
-			url: "/editingSession?userId=#{userId}&projectId=#{projectId}"
+			url: "/editingSession"
+			qs:
+				userId: userId
+				projectId: projectId
 		makeRequest opts, callback
 
 
