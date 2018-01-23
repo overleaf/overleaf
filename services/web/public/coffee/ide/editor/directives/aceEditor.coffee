@@ -301,8 +301,7 @@ define [
 				onChange = () ->
 					updateCount++
 
-					projectId = _.last(location.pathname.split("/"))
-					event_tracking.editingSessionHeartbeat(projectId)
+					event_tracking.editingSessionHeartbeat()
 
 					if updateCount == 100
 						event_tracking.send 'editor-interaction', 'multi-doc-update'
