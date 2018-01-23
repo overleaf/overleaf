@@ -1,5 +1,6 @@
 RedisManager = require "./RedisManager"
 DocumentManager = require "./DocumentManager"
+HistoryManager = require "./HistoryManager"
 async = require "async"
 logger = require "logger-sharelatex"
 Metrics = require "./Metrics"
@@ -121,4 +122,10 @@ module.exports = ProjectManager =
 
 		async.each docUpdates, handleDocUpdate, (error) ->
 			return callback(error) if error?
-			async.each fileUpdates, handleFileUpdate, callback
+			async.each fileUpdates, handleFileUpdate, (error) ->
+				return callback(error) if error?
+				RedisManager.numQueuedProjectUpdates project_id, (error, length) ->
+					return callback(error) if error?
+					if length >= HistoryManager.FLUSH_PROJECT_EVERY_N_OPS
+						HistoryManager.flushProjectChanges project_id, length
+					callback()

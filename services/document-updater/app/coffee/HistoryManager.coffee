@@ -42,10 +42,7 @@ module.exports = HistoryManager =
 
 		if Settings.apis?.project_history?.enabled
 			if HistoryManager._shouldFlushHistoryOps(project_ops_length, ops, HistoryManager.FLUSH_PROJECT_EVERY_N_OPS)
-				# Do this in the background since it uses HTTP and so may be too
-				# slow to wait for when processing a doc update.
-				logger.log { project_ops_length, project_id }, "flushing project history api"
-				HistoryManager._flushProjectChangesAsync project_id
+				HistoryManager.flushProjectChanges project_id, project_ops_length
 
 		HistoryRedisManager.recordDocHasHistoryOps project_id, doc_id, ops, (error) ->
 			return callback(error) if error?
@@ -55,6 +52,12 @@ module.exports = HistoryManager =
 				logger.log { doc_ops_length, doc_id, project_id }, "flushing track changes api"
 				HistoryManager._flushDocChangesAsync project_id, doc_id
 			callback()
+
+	flushProjectChanges: (project_id, project_ops_length) ->
+		# Do this in the background since it uses HTTP and so may be too
+		# slow to wait for when processing a doc update.
+		logger.log { project_ops_length, project_id }, "flushing project history api"
+		HistoryManager._flushProjectChangesAsync project_id
 
 	_shouldFlushHistoryOps: (length, ops, threshold) ->
 		return false if !length # don't flush unless we know the length
