@@ -13,15 +13,15 @@ module.exports = ProjectGetter =
 	getProjectWithoutDocLines: (project_id, callback=(error, project) ->) ->
 		excludes = {}
 		for i in [1..ProjectGetter.EXCLUDE_DEPTH]
-			excludes["rootFolder#{Array(i).join(".folder")}.docs.lines"] = 0
+			excludes["rootFolder#{Array(i).join(".folders")}.docs.lines"] = 0
 		db.projects.find _id: ObjectId(project_id.toString()), excludes, (error, projects = []) ->
 			callback error, projects[0]
 
 	getProjectWithOnlyFolders: (project_id, callback=(error, project) ->) ->
 		excludes = {}
 		for i in [1..ProjectGetter.EXCLUDE_DEPTH]
-			excludes["rootFolder#{Array(i).join(".folder")}.docs"] = 0
-			excludes["rootFolder#{Array(i).join(".folder")}.fileRefs"] = 0
+			excludes["rootFolder#{Array(i).join(".folders")}.docs"] = 0
+			excludes["rootFolder#{Array(i).join(".folders")}.fileRefs"] = 0
 		db.projects.find _id: ObjectId(project_id.toString()), excludes, (error, projects = []) ->
 			callback error, projects[0]
 
