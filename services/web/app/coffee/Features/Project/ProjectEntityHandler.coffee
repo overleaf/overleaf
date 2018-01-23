@@ -419,7 +419,7 @@ module.exports = ProjectEntityHandler =
 			return callback(err) if err?
 			# check if there is already a doc/file/folder with the same name
 			# in the destination folder
-			ProjectEntityHandler.checkElementName destEntity, entity.name, (err)->
+			ProjectEntityHandler.checkValidElementName destEntity, entity.name, (err)->
 				return callback(err) if err?
 				if entityType.match(/folder/)
 					logger.log destFolderPath: destFolderPath.fileSystem, folderPath: entityPath.fileSystem, "checking folder is not moving into child folder"
@@ -461,7 +461,7 @@ module.exports = ProjectEntityHandler =
 				projectLocator.findElement {project:project, element_id:entity_id, type:entityType}, (error, entity, entPath, parentFolder)=>
 					return callback(error) if error?
 					# check if the new name already exists in the current folder
-					ProjectEntityHandler.checkElementName parentFolder, newName, (error) =>
+					ProjectEntityHandler.checkValidElementName parentFolder, newName, (error) =>
 						return callback(error) if error?
 						endPath = path.join(path.dirname(entPath.fileSystem), newName)
 						conditions = {_id:project_id}
@@ -611,7 +611,7 @@ module.exports = ProjectEntityHandler =
 				newPath =
 					fileSystem: "#{path.fileSystem}/#{element.name}"
 					mongo: path.mongo
-				ProjectEntityHandler.checkElementName folder, element.name, (err) =>
+				ProjectEntityHandler.checkValidElementName folder, element.name, (err) =>
 					return callback(err) if err?
 					id = element._id+''
 					element._id = require('mongoose').Types.ObjectId(id)
@@ -626,7 +626,7 @@ module.exports = ProjectEntityHandler =
 							return callback(err)
 						callback(err, {path:newPath}, project)
 
-	checkElementName: (folder, name, callback = (err) ->) ->
+	checkValidElementName: (folder, name, callback = (err) ->) ->
 		# check if the name is already taken by a doc, file or
 		# folder. If so, return an error "file already exists".
 		err = new Errors.InvalidNameError("file already exists")
