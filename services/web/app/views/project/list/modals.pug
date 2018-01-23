@@ -380,10 +380,10 @@ script(type="text/ng-template", id="v1ImportModalTemplate")
 				if settings.overleaf && settings.overleaf.host
 					a.btn.btn-primary.v1-import-btn(
 						ng-href=settings.overleaf.host + "/{{project.id}}"
-						ng-class="{disabled: v1ImportForm.inflight || v1ImportForm.success}"
+						ng-class="{disabled: v1ImportForm.inflight || v1ImportForm.response.success}"
 					) No thanks, open in v1
 				input.btn.btn-primary.v1-import-btn(
 					type="submit",
 					value="Yes, move project to v2"
-					ng-disabled="v1ImportForm.inflight || v1ImportForm.success"
+					ng-disabled="v1ImportForm.inflight || v1ImportForm.response.success"
 				)
