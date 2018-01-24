@@ -6,9 +6,9 @@ define [
 ], (moment, App) ->
 	CACHE_KEY = "mbEvents"
 
-	# Keep track of when the editing session started and when we should
-	# send the next heartbeat so we can space them properly
-	sessionStart  = new Date()
+	# keep track of how many heartbeats we've sent so we can calculate how
+	# long wait until the next one
+	heartbeatsSent = 0
 	nextHeartbeat = new Date()
 
 	send = (category, action, attributes = {})->
@@ -47,12 +47,16 @@ define [
 
 				@_sendEditingSessionHeartbeat(segmentation)
 
-				sessionDuration = (new Date().getTime() - sessionStart.getTime())/1000
+				heartbeatsSent++
 
-				backoffSecs = switch
-					when sessionDuration < 60  then 30
-					when sessionDuration < 300 then 60
-					else 300
+				# send two first heartbeats at 0 and 30s then increase the backoff time
+				# 1min per call until we reach 5 min
+				backoffSecs = if heartbeatsSent <= 2
+					30
+				else if heartbeatsSent <= 6
+					(heartbeatsSent - 2) * 60
+				else
+					300
 
 				nextHeartbeat = moment().add(backoffSecs, 'seconds').toDate()
 
