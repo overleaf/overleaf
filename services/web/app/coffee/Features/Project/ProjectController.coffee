@@ -157,7 +157,7 @@ module.exports = ProjectController =
 			hasSubscription: (cb)->
 				LimitationsManager.userHasSubscriptionOrIsGroupMember currentUser, cb
 			user: (cb) ->
-				User.findById user_id, "featureSwitches", cb
+				User.findById user_id, "featureSwitches overleaf", cb
 			}, (err, results)->
 				if err?
 					logger.err err:err, "error getting data for project list page"
