@@ -122,10 +122,9 @@ module.exports = ProjectManager =
 
 		async.each docUpdates, handleDocUpdate, (error) ->
 			return callback(error) if error?
-			async.each fileUpdates, handleFileUpdate, (error) ->
+			async.each fileUpdates, handleFileUpdate, (error, project_ops_length) ->
 				return callback(error) if error?
-				RedisManager.numQueuedProjectUpdates project_id, (error, length) ->
-					return callback(error) if error?
-					if length >= HistoryManager.FLUSH_PROJECT_EVERY_N_OPS
-						HistoryManager.flushProjectChanges project_id, length
-					callback()
+				if HistoryManager.shouldFlushHistoryOps(project_ops_length, docUpdates.length + fileUpdates.length, HistoryManager.FLUSH_PROJECT_EVERY_N_OPS)
+					logger.log { project_ops_length, project_id }, "flushing project history api"
+					HistoryManager.flushProjectChangesAsync project_id
+				callback()

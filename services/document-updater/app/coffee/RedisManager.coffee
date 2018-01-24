@@ -315,9 +315,6 @@ module.exports = RedisManager =
 
 		rclient.rpush projectHistoryKeys.projectHistoryOps({project_id}), jsonUpdate, callback
 
-	numQueuedProjectUpdates: (project_id, callback = (error, length) ->) ->
-		rclient.llen projectHistoryKeys.projectHistoryOps({project_id}), callback
-
 	clearUnflushedTime: (doc_id, callback = (error) ->) ->
 		rclient.del keys.unflushedTime(doc_id:doc_id), callback
 

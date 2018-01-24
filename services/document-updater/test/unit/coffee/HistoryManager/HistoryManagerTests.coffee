@@ -24,7 +24,7 @@ describe "HistoryManager", ->
 	describe "flushChangesAsync", ->
 		beforeEach ->
 			@HistoryManager._flushDocChangesAsync = sinon.stub()
-			@HistoryManager._flushProjectChangesAsync = sinon.stub()
+			@HistoryManager.flushProjectChangesAsync = sinon.stub()
 
 			@HistoryManager.flushChangesAsync(@project_id, @doc_id)
 
@@ -34,7 +34,7 @@ describe "HistoryManager", ->
 				.should.equal true
 
 		it "flushes project changes", ->
-			@HistoryManager._flushProjectChangesAsync
+			@HistoryManager.flushProjectChangesAsync
 				.calledWith(@project_id)
 				.should.equal true
 
@@ -49,11 +49,11 @@ describe "HistoryManager", ->
 				.calledWith("#{@Settings.apis.trackchanges.url}/project/#{@project_id}/doc/#{@doc_id}/flush")
 				.should.equal true
 
-	describe "_flushProjectChangesAsync", ->
+	describe "flushProjectChangesAsync", ->
 		beforeEach ->
 			@request.post = sinon.stub().callsArgWith(1, null, statusCode: 204)
 
-			@HistoryManager._flushProjectChangesAsync @project_id
+			@HistoryManager.flushProjectChangesAsync @project_id
 
 		it "should send a request to the project history api", ->
 			@request.post
@@ -66,7 +66,7 @@ describe "HistoryManager", ->
 			@project_ops_length = 10
 			@doc_ops_length = 5
 
-			@HistoryManager._flushProjectChangesAsync = sinon.stub()
+			@HistoryManager.flushProjectChangesAsync = sinon.stub()
 			@HistoryRedisManager.recordDocHasHistoryOps = sinon.stub().callsArg(3)
 			@HistoryManager._flushDocChangesAsync = sinon.stub()
 
@@ -77,7 +77,7 @@ describe "HistoryManager", ->
 				)
 
 			it "should not flush project changes", ->
-				@HistoryManager._flushProjectChangesAsync.called.should.equal false
+				@HistoryManager.flushProjectChangesAsync.called.should.equal false
 
 			it "should not record doc has history ops", ->
 				@HistoryRedisManager.recordDocHasHistoryOps.called.should.equal false
@@ -99,7 +99,7 @@ describe "HistoryManager", ->
 				)
 
 			it "should flush project changes", ->
-				@HistoryManager._flushProjectChangesAsync
+				@HistoryManager.flushProjectChangesAsync
 					.calledWith(@project_id)
 					.should.equal true
 
@@ -124,7 +124,7 @@ describe "HistoryManager", ->
 				)
 
 			it "should not flush project changes", ->
-				@HistoryManager._flushProjectChangesAsync.called.should.equal false
+				@HistoryManager.flushProjectChangesAsync.called.should.equal false
 
 			it "should record doc has history ops", ->
 				@HistoryRedisManager.recordDocHasHistoryOps
