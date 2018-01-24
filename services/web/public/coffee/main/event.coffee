@@ -5,8 +5,9 @@ define [
 
 ], (moment, App) ->
 	CACHE_KEY = "mbEvents"
-	EDIT_SESSION_HEARTBEAT_INTERVAL = 5 * 60 * 1000 # 5min
 
+	# Keep track of when the editing session started and when we should
+	# send the next heartbeat so we can space them properly
 	sessionStart  = new Date()
 	nextHeartbeat = new Date()
 
