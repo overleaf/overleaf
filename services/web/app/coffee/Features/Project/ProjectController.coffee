@@ -395,19 +395,27 @@ module.exports = ProjectController =
 		return model
 
 	_buildV1ProjectViewModel: (project) ->
-		{
+		projectViewModel = {
 			id: project.id
 			name: project.title
 			lastUpdated: new Date(project.updated_at * 1000) # Convert from epoch
-			accessLevel: if project.owner?.user_is_owner then "owner" else "readOnly"
 			archived: project.removed || project.archived
-			owner: {
-				# Unlisted V1 projects don't have an owner, so just show N/A
-				first_name: if project.owner then project.owner.name else 'N/A'
-				last_name: ''
-			}
 			isV1Project: true
 		}
+		if (project.owner? and project.owner.user_is_owner) or (project.creator? and project.creator.user_is_creator)
+			projectViewModel.accessLevel = "owner"
+		else
+			projectViewModel.accessLevel = "readOnly"
+		if project.owner?
+			projectViewModel.owner = {
+				first_name: project.owner.name
+			}
+		else if project.creator?
+			projectViewModel.owner = {
+				first_name: project.creator.name
+			}
+		return projectViewModel
+
 
 	_injectProjectOwners: (projects, callback = (error, projects) ->) ->
 		users = {}
