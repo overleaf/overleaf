@@ -1,9 +1,14 @@
 define [
+	"moment"
 	"base"
 	"modules/localStorage"
-], (App) ->
+
+], (moment, App) ->
 	CACHE_KEY = "mbEvents"
 	EDIT_SESSION_HEARTBEAT_INTERVAL = 5 * 60 * 1000 # 5min
+
+	sessionStart  = new Date()
+	nextHeartbeat = new Date()
 
 	send = (category, action, attributes = {})->
 		ga('send', 'event', category, action)
@@ -35,7 +40,22 @@ define [
 			send: (category, action, label, value)->
 				ga('send', 'event', category, action, label, value)
 
-			editingSessionHeartbeat: _.throttle( (segmentation = {}) ->
+
+			editingSessionHeartbeat: (segmentation = {}) ->
+				return unless nextHeartbeat <= new Date()
+
+				@_sendEditingSessionHeartbeat(segmentation)
+
+				sessionDuration = (new Date().getTime() - sessionStart.getTime())/1000
+
+				backoffSecs = switch
+					when sessionDuration < 60  then 30
+					when sessionDuration < 300 then 60
+					else 300
+
+				nextHeartbeat = moment().add(backoffSecs, 'seconds').toDate()
+
+			_sendEditingSessionHeartbeat: (segmentation) ->
 				$http({
 					url: "/editingSession/#{window.project_id}",
 					method: "PUT",
@@ -44,8 +64,6 @@ define [
 						"X-CSRF-Token": window.csrfToken
 					}
 				})
-			, EDIT_SESSION_HEARTBEAT_INTERVAL, trailing: false)
-
 
 			sendMB: (key, segmentation = {}) ->
 				$http {
