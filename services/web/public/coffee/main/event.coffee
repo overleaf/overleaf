@@ -37,6 +37,16 @@ define [
 
 			localStorage CACHE_KEY, curCache
 
+		_sendEditingSessionHeartbeat = (segmentation) ->
+			$http({
+				url: "/editingSession/#{window.project_id}",
+				method: "PUT",
+				data: segmentation,
+				headers: {
+					"X-CSRF-Token": window.csrfToken
+				}
+			})
+
 		return {
 			send: (category, action, label, value)->
 				ga('send', 'event', category, action, label, value)
@@ -45,7 +55,7 @@ define [
 			editingSessionHeartbeat: (segmentation = {}) ->
 				return unless nextHeartbeat <= new Date()
 
-				@_sendEditingSessionHeartbeat(segmentation)
+				_sendEditingSessionHeartbeat(segmentation)
 
 				heartbeatsSent++
 
@@ -59,16 +69,6 @@ define [
 					300
 
 				nextHeartbeat = moment().add(backoffSecs, 'seconds').toDate()
-
-			_sendEditingSessionHeartbeat: (segmentation) ->
-				$http({
-					url: "/editingSession/#{window.project_id}",
-					method: "PUT",
-					data: segmentation,
-					headers: {
-						"X-CSRF-Token": window.csrfToken
-					}
-				})
 
 			sendMB: (key, segmentation = {}) ->
 				$http {

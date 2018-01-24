@@ -301,8 +301,6 @@ define [
 				onChange = () ->
 					updateCount++
 
-					event_tracking.editingSessionHeartbeat()
-
 					if updateCount == 100
 						event_tracking.send 'editor-interaction', 'multi-doc-update'
 					scope.$emit "#{scope.name}:change"
