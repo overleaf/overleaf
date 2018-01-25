@@ -1,20 +1,22 @@
 .col-xs-6
-	span.v1-badge(
-		aria-label=translate("v1_badge")
-		tooltip-template="'v1ProjectTooltipTemplate'"
-		tooltip-append-to-body="true"
-	)
+	.select-item
+		span.v1-badge(
+			aria-label=translate("v1_badge")
+			tooltip-template="'v1ProjectTooltipTemplate'"
+			tooltip-append-to-body="true"
+		)
 	span
 		if settings.overleaf && settings.overleaf.host
+			button.btn.btn-link.projectName(
+				ng-click="openV1ImportModal(project)"
+				stop-propagation="click"
+				ng-show="project.accessLevel == 'owner'"
+			) {{project.name}}
 			a.projectName(
 				href=settings.overleaf.host + "/{{project.id}}"
 				target="_blank"
+				ng-hide="project.accessLevel == 'owner'"
 			) {{project.name}}
-		//- To re-enable the import dialog (may need style changing for padding/line-height):
-		//- button.btn.btn-link.projectName(
-		//- 	ng-click="openV1ImportModal(project)"
-		//- 	stop-propagation="click"
-		//- ) {{project.name}}
 
 .col-xs-2
 	span.owner {{ownerName()}}

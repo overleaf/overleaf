@@ -480,9 +480,9 @@ define [
 			if $scope.project.accessLevel == "owner"
 				return "You"
 			else if $scope.project.owner?
-				return "#{$scope.project.owner.first_name} #{$scope.project.owner.last_name}"
+				return [$scope.project.owner.first_name, $scope.project.owner.last_name].filter((n) -> n?).join(" ")
 			else
-				return "?"
+				return "None"
 
 		$scope.$watch "project.selected", (value) ->
 			if value?
