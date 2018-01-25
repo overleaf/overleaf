@@ -230,6 +230,7 @@ module.exports = ProjectEntityHandler =
 
 	addFile:  (project_id, folder_id, fileName, fsPath, userId, callback = (error, fileRef, folder_id) ->)->
 		ProjectEntityHandler.addFileWithoutUpdatingHistory project_id, folder_id, fileName, fsPath, userId, (error, fileRef, folder_id, path, fileStoreUrl) ->
+			return callback(error) if error?
 			newFiles = [
 				file: fileRef
 				path: path
