@@ -15,6 +15,7 @@ services:
             - redis
         volumes:
             - ~/sharelatex_data:/var/lib/sharelatex
+            - /var/run/docker.sock:/var/run/docker.sock
         environment:
             SHARELATEX_MONGO_URL: mongodb://mongo/sharelatex
             SHARELATEX_REDIS_HOST: redis
@@ -49,7 +50,10 @@ services:
             ## Server Pro ##
             ################
 
-            # SANDBOXED_COMPILES:true
+            # SANDBOXED_COMPILES: 'true'
+            
+            # SANDBOXED_COMPILES_SIBLING_CONTAINERS: 'true'
+            # SANDBOXED_COMPILES_HOST_DIR: '/var/clsi/compiles'
 
             # SHARELATEX_LDAP_HOST: 'ldap://ldap.forumsys.com' 
             # SHARELATEX_LDAP_DN: 'uid=:userKey,dc=example,dc=com' 
