@@ -376,6 +376,8 @@ define [
 					# deletes and then inserts document content
 					session.setAnnotations scope.annotations
 
+					session.on "changeScrollTop", event_tracking.editingSessionHeartbeat
+
 					if scope.eventsBridge?
 						session.on "changeScrollTop", onScroll
 
