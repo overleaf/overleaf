@@ -36,7 +36,7 @@ define [
 			url = ace.config._moduleUrl(args...)
 			return url
 
-	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory, metadata, graphics, preamble, files, $http, $q) ->
+	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory, metadata, graphics, preamble, files, $http, $q, $window) ->
 		monkeyPatchSearch($rootScope, $compile)
 
 		return  {
@@ -376,7 +376,15 @@ define [
 					# deletes and then inserts document content
 					session.setAnnotations scope.annotations
 
+
 					session.on "changeScrollTop", event_tracking.editingSessionHeartbeat
+
+					angular.element($window).on('click',
+						event_tracking.editingSessionHeartbeat)
+
+					scope.$on "$destroy", () ->
+						angular.element($window).off('click',
+							event_tracking.editingSessionHeartbeat)
 
 					if scope.eventsBridge?
 						session.on "changeScrollTop", onScroll
