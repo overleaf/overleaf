@@ -345,8 +345,9 @@ settings =
 		versioning: true
 		compileTimeout: 180
 		compileGroup: "standard"
-		references: true
+		trackChanges: true
 		templates: true
+		references: true
 
 ## OPTIONAL CONFIGERABLE SETTINGS
 
