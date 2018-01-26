@@ -4,6 +4,10 @@ chai.should()
 Settings = require('settings-sharelatex')
 rclient_history = require("redis-sharelatex").createClient(Settings.redis.history)
 ProjectHistoryKeys = Settings.redis.project_history.key_schema
+SandboxedModule = require('sandboxed-module')
+HistoryManagerModulePath = require('path').join __dirname, '../../../app/js/HistoryManager.js'
+ProjectManagerModulePath = require('path').join __dirname, '../../../app/js/ProjectManager.js'
+RedisManagerModulePath = require('path').join __dirname, '../../../app/js/RedisManager.js'
 
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
@@ -147,3 +151,40 @@ describe "Applying updates to a project's structure", ->
 
 				done()
 
+	describe "with enough updates to flush to the history service", ->
+		before (done) ->
+			@RedisManager = SandboxedModule.require RedisManagerModulePath, requires:
+				"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			@HistoryManager = SandboxedModule.require HistoryManagerModulePath, requires:
+				"request": {}
+				"settings-sharelatex": {}
+				"logger-sharelatex": @logger
+				"./HistoryRedisManager": {}
+			@HistoryManager.flushProjectChangesAsync = sinon.stub()
+			@ProjectManager = SandboxedModule.require ProjectManagerModulePath, requires:
+				'./HistoryManager': @HistoryManager
+				'logger-sharelatex' : @logger
+				'./Metrics': @Metrics = {}
+				'./RedisManager': @RedisManager
+			@Metrics.Timer = class Timer
+				done: sinon.stub()
+
+			@project_id = DocUpdaterClient.randomId()
+			@user_id = DocUpdaterClient.randomId()
+
+			updates = []
+			for v in [0..599] # Should flush after 500 ops
+				updates.push
+					id: DocUpdaterClient.randomId(),
+					pathname: '/file-' + v
+					docLines: 'a\nb'
+
+			# Send updates in chunks to causes multiple flushes
+			@ProjectManager.updateProjectWithLocks @project_id, @user_id, updates.slice(0, 250), [], (error) =>
+				throw error if error?
+				@ProjectManager.updateProjectWithLocks @project_id, @user_id, updates.slice(250), [], (error) =>
+					throw error if error?
+					setTimeout done, 2000
+
+		it "should flush project history", ->
+			@HistoryManager.flushProjectChangesAsync.calledWith(@project_id).should.equal true
