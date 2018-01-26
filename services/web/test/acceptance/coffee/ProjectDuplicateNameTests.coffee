@@ -284,5 +284,175 @@ describe "ProjectDuplicateNames", ->
 					expect(@res.statusCode).to.equal 400
 
 
+		describe "for an existing file", ->
+			describe "trying to rename a doc to the same name", ->
+				before (done) ->
+					@owner.request.post {
+						uri: "/project/#{@example_project_id}/doc/#{@refBibDoc._id}/rename"
+						json:
+							name: "universe.jpg"
+					}, (err, res, body) =>
+						@res = res
+						done()
+
+				it "should respond with 400 error status", ->
+					expect(@res.statusCode).to.equal 400
+
+			describe "trying to rename a folder to the same name", ->
+				before (done) ->
+					@owner.request.post {
+						uri: "/project/#{@example_project_id}/folder/#{@testFolderId}/rename"
+						json:
+							name: "universe.jpg"
+					}, (err, res, body) =>
+						@res = res
+						done()
+
+				it "should respond with 400 error status", ->
+					expect(@res.statusCode).to.equal 400
+
+			describe "trying to rename a file to the same name", ->
+				before (done) ->
+					@owner.request.post {
+						uri: "/project/#{@example_project_id}/file/#{@imageFile._id}/rename"
+						json:
+							name: "universe.jpg"
+					}, (err, res, body) =>
+						@res = res
+						done()
+
+				it "should respond with failure status", ->
+					expect(@res.statusCode).to.equal 400
+
+
+		describe "for an existing folder", ->
+			describe "trying to rename a doc to the same name", ->
+				before (done) ->
+					@owner.request.post {
+						uri: "/project/#{@example_project_id}/doc/#{@refBibDoc._id}/rename"
+						json:
+							name: "testfolder"
+					}, (err, res, body) =>
+						@res = res
+						done()
+
+				it "should respond with 400 error status", ->
+					expect(@res.statusCode).to.equal 400
+
+			describe "trying to rename a folder to the same name", ->
+				before (done) ->
+					@owner.request.post {
+						uri: "/project/#{@example_project_id}/folder/#{@testFolderId}/rename"
+						json:
+							name: "testfolder"
+					}, (err, res, body) =>
+						@res = res
+						done()
+
+				it "should respond with 400 error status", ->
+					expect(@res.statusCode).to.equal 400
+
+			describe "trying to rename a file to the same name", ->
+				before (done) ->
+					@owner.request.post {
+						uri: "/project/#{@example_project_id}/file/#{@imageFile._id}/rename"
+						json:
+							name: "testfolder"
+					}, (err, res, body) =>
+						@res = res
+						done()
+
+				it "should respond with failure status", ->
+					expect(@res.statusCode).to.equal 400
+
+
+		describe "for an existing folder with a file with the same name", ->
+			before (done) ->
+				@owner.request.post {
+					uri: "/project/#{@example_project_id}/doc"
+					json:
+						name: "main.tex"
+						parent_folder_id: @testFolderId
+				}, (err, res, body) =>
+					@owner.request.post {
+						uri: "/project/#{@example_project_id}/doc"
+						json:
+							name: "universe.jpg"
+							parent_folder_id: @testFolderId
+					}, (err, res, body) =>
+						@owner.request.post {
+							uri: "/project/#{@example_project_id}/folder"
+							json:
+								name: "otherFolder"
+								parent_folder_id: @testFolderId
+						}, (err, res, body) =>
+							@subFolderId = body._id
+							@owner.request.post {
+								uri: "/project/#{@example_project_id}/folder"
+								json:
+									name: "otherFolder"
+									parent_folder_id: @rootFolderId
+							}, (err, res, body) =>
+								@otherFolderId = body._id
+								done()
+
+			describe "trying to move a doc into the folder", ->
+				before (done) ->
+					@owner.request.post {
+						uri: "/project/#{@example_project_id}/doc/#{@mainTexDoc._id}/move"
+						json:
+							folder_id: @testFolderId
+					}, (err, res, body) =>
+						@res = res
+						done()
+
+				it "should respond with 400 error status", ->
+					expect(@res.statusCode).to.equal 400
+
+			describe "trying to move a file into the folder", ->
+				before (done) ->
+					@owner.request.post {
+						uri: "/project/#{@example_project_id}/file/#{@imageFile._id}/move"
+						json:
+							folder_id: @testFolderId
+					}, (err, res, body) =>
+						@res = res
+						done()
+
+				it "should respond with 400 error status", ->
+					expect(@res.statusCode).to.equal 400
+
+			describe "trying to move a folder into the folder", ->
+				before (done) ->
+					@owner.request.post {
+						uri: "/project/#{@example_project_id}/folder/#{@otherFolderId}/move"
+						json:
+							folder_id: @testFolderId
+					}, (err, res, body) =>
+						@res = res
+						done()
+
+				it "should respond with 400 error status", ->
+					expect(@res.statusCode).to.equal 400
+
+			describe "trying to move a folder into a subfolder of itself", ->
+				before (done) ->
+					@owner.request.post {
+						uri: "/project/#{@example_project_id}/folder/#{@testFolderId}/move"
+						json:
+							folder_id: @subFolderId
+					}, (err, res, body) =>
+						@res = res
+						done()
+
+				it "should respond with 400 error status", ->
+					expect(@res.statusCode).to.equal 400
+
+
+
+
+
+
+
 		# webRouter.post	 '/project/:Project_id/:entity_type/:entity_id/rename', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, EditorHttpController.renameEntity
 		# webRouter.post	 '/project/:Project_id/:entity_type/:entity_id/move', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, EditorHttpController.moveEntity
