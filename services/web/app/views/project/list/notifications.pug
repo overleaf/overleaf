@@ -1,3 +1,11 @@
+if (user.awareOfV2 && !settings.overleaf)
+	.alert.alert-info.small
+		a.pull-right.btn.btn-info.btn-sm(href="/user/login_to_ol_v2" style="margin-left: 12px") Click here to try Overleaf v2
+		p
+			| ShareLaTeX is joining Overleaf and will become <em>Overleaf v2</em> in late 2018 (<a href="https://www.overleaf.com/help/342-overleaf-v2-faq">read more</a>).
+			<br/>
+			| We’re beta testing Overleaf v2 now and you can try it out with your ShareLaTeX account.
+
 span(ng-controller="NotificationsController").userNotifications
 	ul.list-unstyled.notifications-list(
 		ng-if="notifications.length > 0",
