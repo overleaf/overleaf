@@ -8,7 +8,15 @@
   },
   "scripts": {
     "compile:app": "coffee -o app/js -c app/coffee && coffee -c app.coffee",
-    "start": "npm run compile:app && node app.js"
+    "start": "npm run compile:app && node app.js",
+    "test:acceptance:run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
+    "test:acceptance": "npm run compile:app && npm run compile:acceptance_tests && npm run test:acceptance:run -- $@",
+    "test:unit:run": "mocha --recursive --reporter spec $@ test/unit/js",
+    "test:unit": "npm run compile:app && npm run compile:unit_tests && npm run test:unit:run -- $@",
+    "compile:unit_tests": "[ -e test/unit ] && coffee -o test/unit/js -c test/unit/coffee || echo 'No unit tests to compile'",
+    "compile:acceptance_tests": "[ -e test/acceptance ] && coffee -o test/acceptance/js -c test/acceptance/coffee || echo 'No acceptance tests to compile'",
+    "compile:all": "npm run compile:app && npm run compile:unit_tests && npm run compile:acceptance_tests",
+    "nodemon": "nodemon --config nodemon.json"
   },
   "dependencies": {
     "async": "0.2.9",
@@ -37,6 +45,8 @@
     "grunt-nodemon": "~0.1.2",
     "grunt-notify": "~0.2.16",
     "grunt-plato": "~0.2.1",
+    "mocha": "^4.1.0",
+    "nodemon": "^1.14.11",
     "sandboxed-module": "",
     "sinon": "",
     "timekeeper": ""

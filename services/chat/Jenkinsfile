@@ -1,10 +1,11 @@
-pipeline {
+String cron_string = BRANCH_NAME == "master" ? "@daily" : ""
 
+pipeline {
   agent any
-  
+
   triggers {
     pollSCM('* * * * *')
-    cron('@daily')
+    cron(cron_string)
   }
 
   stages {
@@ -17,15 +18,17 @@ pipeline {
         }
       }
       steps {
-        // we need to disable logallrefupdates, else git clones during the npm install will require git to lookup the user id
-        // which does not exist in the container's /etc/passwd file, causing the clone to fail.
+        // we need to disable logallrefupdates, else git clones 
+        // during the npm install will require git to lookup the 
+        // user id which does not exist in the container's 
+        // /etc/passwd file, causing the clone to fail.
         sh 'git config --global core.logallrefupdates false'
-        sh 'rm -fr node_modules'
+        sh 'rm -rf node_modules'
         sh 'npm install && npm rebuild'
-        sh 'npm install --quiet grunt-cli'
       }
     }
-    stage('Compile and Test') {
+
+    stage('Compile') {
       agent {
         docker {
           image 'node:4.2.1'
@@ -33,28 +36,37 @@ pipeline {
         }
       }
       steps {
-        sh 'node_modules/.bin/grunt coffee'
-        sh 'node_modules/.bin/grunt compile:acceptance_tests'
-        sh 'NODE_ENV=development node_modules/.bin/grunt test:unit'
+        sh 'npm run compile:all'
       }
     }
+
+    stage('Unit Tests') {
+      steps {
+        sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_unit'
+      }
+    }
+
     stage('Acceptance Tests') {
       steps {
-        sh 'docker pull sharelatex/acceptance-test-runner'
-        sh 'docker run --rm -v $(pwd):/app sharelatex/acceptance-test-runner'
+        sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_acceptance'
       }
     }
-    stage('Package') {
+
+    stage('Package and publish build') {
       steps {
         sh 'echo ${BUILD_NUMBER} > build_number.txt'
         sh 'touch build.tar.gz' // Avoid tar warning about files changing during read
         sh 'tar -czf build.tar.gz --exclude=build.tar.gz --exclude-vcs .'
-      }
-    }
-    stage('Publish') {
-      steps {
         withAWS(credentials:'S3_CI_BUILDS_AWS_KEYS', region:"${S3_REGION_BUILD_ARTEFACTS}") {
             s3Upload(file:'build.tar.gz', bucket:"${S3_BUCKET_BUILD_ARTEFACTS}", path:"${JOB_NAME}/${BUILD_NUMBER}.tar.gz")
+        }
+      }
+    }
+
+    stage('Publish build number') {
+      steps {
+        sh 'echo ${BRANCH_NAME}-${BUILD_NUMBER} > build_number.txt'
+        withAWS(credentials:'S3_CI_BUILDS_AWS_KEYS', region:"${S3_REGION_BUILD_ARTEFACTS}") {
             // The deployment process uses this file to figure out the latest build
             s3Upload(file:'build_number.txt', bucket:"${S3_BUCKET_BUILD_ARTEFACTS}", path:"${JOB_NAME}/latest")
         }
@@ -63,6 +75,10 @@ pipeline {
   }
 
   post {
+    always {
+      sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_clean'
+    }
+
     failure {
       mail(from: "${EMAIL_ALERT_FROM}",
            to: "${EMAIL_ALERT_TO}",
