@@ -447,12 +447,3 @@ describe "ProjectDuplicateNames", ->
 
 				it "should respond with 400 error status", ->
 					expect(@res.statusCode).to.equal 400
-
-
-
-
-
-
-
-		# webRouter.post	 '/project/:Project_id/:entity_type/:entity_id/rename', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, EditorHttpController.renameEntity
-		# webRouter.post	 '/project/:Project_id/:entity_type/:entity_id/move', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, EditorHttpController.moveEntity
