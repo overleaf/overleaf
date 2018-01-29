@@ -321,7 +321,20 @@ define [
 
 			return null
 
+		existsInThisFolder: (folder, name) ->
+			for entity in folder?.children or []
+				return true if entity.name is name
+			return false
+
+		nameExistsError: (message = "already exists") ->
+			nameExists = @ide.$q.defer()
+			nameExists.reject({data: message})
+			return nameExists.promise
+
 		createDoc: (name, parent_folder = @getCurrentFolder()) ->
+			# check if a doc/file/folder already exists with this name
+			if @existsInThisFolder parent_folder, name
+				return @nameExistsError()
 			# We'll wait for the socket.io notification to actually
 			# add the doc for us.
 			@ide.$http.post "/project/#{@ide.project_id}/doc", {
@@ -331,6 +344,9 @@ define [
 			}
 
 		createFolder: (name, parent_folder = @getCurrentFolder()) ->
+			# check if a doc/file/folder already exists with this name
+			if @existsInThisFolder parent_folder, name
+				return @nameExistsError()
 			# We'll wait for the socket.io notification to actually
 			# add the folder for us.
 			return @ide.$http.post "/project/#{@ide.project_id}/folder", {
@@ -342,6 +358,12 @@ define [
 		renameEntity: (entity, name, callback = (error) ->) ->
 			return if entity.name == name
 			return if name.length >= 150
+			# check if a doc/file/folder already exists with this name
+			parent_folder = @getCurrentFolder()
+			if @existsInThisFolder parent_folder, name
+				return @nameExistsError()
+			# We'll wait for the socket.io notification to actually
+			# do the rename for us.
 			@ide.$http.post("/project/#{@ide.project_id}/#{entity.type}/#{entity.id}/rename", {
 				name: name,
 				_csrf: window.csrfToken
@@ -362,6 +384,10 @@ define [
 			# Abort move if the folder being moved (entity) has the parent_folder as child
 			# since that would break the tree structure.
 			return if @_isChildFolder(entity, parent_folder)
+			# check if a doc/file/folder already exists with this name
+			if @existsInThisFolder entity.name, parent_folder
+				return @nameExistsError()
+			# Wait for the http response before doing the move
 			@ide.queuedHttp.post("/project/#{@ide.project_id}/#{entity.type}/#{entity.id}/move", {
 				folder_id: parent_folder.id
 				_csrf: window.csrfToken
