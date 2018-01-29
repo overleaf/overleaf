@@ -14,6 +14,8 @@ describe 'UpdateMerger :', ->
 		@fs = 
 			unlink:sinon.stub().callsArgWith(1)
 		@FileTypeManager = {}
+		@LockManager =
+			runWithLock : sinon.spy((key, runner, callback) -> runner(callback))
 		@updateMerger = SandboxedModule.require modulePath, requires:
 			'../Editor/EditorController': @editorController
 			'../Project/ProjectLocator': @projectLocator
@@ -27,6 +29,7 @@ describe 'UpdateMerger :', ->
 			"metrics-sharelatex": 
 				Timer:->
 					done:->
+			"../../infrastructure/LockManager":@LockManager
 		@project_id = "project_id_here"
 		@user_id = "mock-user-id"
 		@source = "dropbox"
@@ -95,9 +98,9 @@ describe 'UpdateMerger :', ->
 			folder = {_id:"adslkjioj"}
 			docName = "main.tex"
 			path = "folder1/folder2/#{docName}"
-			@editorController.mkdirp = sinon.stub().withArgs(@project_id).callsArgWith(2, null, [folder], folder)
-			@editorController.addDoc = ->
-			mock = sinon.mock(@editorController).expects("addDoc").withArgs(@project_id, folder._id, docName, @splitDocLines, @source, @user_id).callsArg(6)
+			@editorController.mkdirpWithoutLock = sinon.stub().withArgs(@project_id).callsArgWith(2, null, [folder], folder)
+			@editorController.addDocWithoutLock = ->
+			mock = sinon.mock(@editorController).expects("addDocWithoutLock").withArgs(@project_id, folder._id, docName, @splitDocLines, @source, @user_id).callsArg(6)
 
 			@update.write(@docLines)
 			@update.end()
@@ -114,22 +117,22 @@ describe 'UpdateMerger :', ->
 			@folder = _id: @folder_id
 			@fileName = "file.png"
 			@fsPath = "fs/path.tex"
-			@editorController.addFile = sinon.stub().callsArg(6)
+			@editorController.addFileWithoutLock = sinon.stub().callsArg(6)
 			@editorController.replaceFileWithoutLock = sinon.stub().callsArg(5)
-			@editorController.deleteEntity = sinon.stub()
-			@editorController.mkdirp = sinon.stub().withArgs(@project_id).callsArgWith(2, null, [@folder], @folder)
+			@editorController.deleteEntityWithoutLock = sinon.stub()
+			@editorController.mkdirpWithoutLock = sinon.stub().withArgs(@project_id).callsArgWith(2, null, [@folder], @folder)
 			@updateMerger.p.writeStreamToDisk = sinon.stub().withArgs(@project_id, @file_id, @update).callsArgWith(3, null, @fsPath)
 
 		it 'should replace file if the file already exists', (done)->
 			@updateMerger.p.processFile @project_id, @file_id, @fsPath, @path, @source, @user_id, =>
-				@editorController.addFile.called.should.equal false
+				@editorController.addFileWithoutLock.called.should.equal false
 				@editorController.replaceFileWithoutLock.calledWith(@project_id, @file_id, @fsPath, @source, @user_id).should.equal true
 				done()
 
 		it 'should call add file if the file does not exist', (done)->
 			@updateMerger.p.processFile @project_id, undefined, @fsPath, @path, @source, @user_id, =>
-				@editorController.mkdirp.calledWith(@project_id, "folder/").should.equal true
-				@editorController.addFile.calledWith(@project_id, @folder_id, @fileName, @fsPath, @source, @user_id).should.equal true
+				@editorController.mkdirpWithoutLock.calledWith(@project_id, "folder/").should.equal true
+				@editorController.addFileWithoutLock.calledWith(@project_id, @folder_id, @fileName, @fsPath, @source, @user_id).should.equal true
 				@editorController.replaceFileWithoutLock.called.should.equal false
 				done()
 
@@ -138,7 +141,7 @@ describe 'UpdateMerger :', ->
 		beforeEach ->
 			@path = "folder/doc1"
 			@type = "mock-type"
-			@editorController.deleteEntity = ->
+			@editorController.deleteEntityWithoutLock = ->
 			@entity_id = "entity_id_here"
 			@entity = _id:@entity_id
 			@projectLocator.findElementByPath = (project_id, path, cb)=> cb(null, @entity, @type)
@@ -150,7 +153,7 @@ describe 'UpdateMerger :', ->
 
 		it 'should delete the entity in the editor controller with the correct type', (done)->
 			@entity.lines = []
-			mock = sinon.mock(@editorController).expects("deleteEntity").withArgs(@project_id, @entity_id, @type, @source, @user_id).callsArg(5)
+			mock = sinon.mock(@editorController).expects("deleteEntityWithoutLock").withArgs(@project_id, @entity_id, @type, @source, @user_id).callsArg(5)
 			@updateMerger.deleteUpdate @user_id, @project_id, @path, @source, ->
 				mock.verify()
 				done()
