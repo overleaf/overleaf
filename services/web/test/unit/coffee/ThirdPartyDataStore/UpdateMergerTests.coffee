@@ -43,37 +43,40 @@ describe 'UpdateMerger :', ->
 			@updateMerger.p.writeStreamToDisk = sinon.stub().callsArgWith(3, null, @fsPath)
 			@FileTypeManager.isBinary = sinon.stub()
 
-		it 'should get the element id', (done)->
-			@projectLocator.findElementByPath = sinon.spy()
-			@updateMerger.mergeUpdate @user_id, @project_id, @path, @update, @source, =>
-			@projectLocator.findElementByPath.calledWith(@project_id, @path).should.equal true
-			done()
+		describe "doc updates", () ->
+			beforeEach ->
+				@doc_id = "231312s"
+				@FileTypeManager.isBinary.callsArgWith(2, null, false)
+				@projectLocator.findElementByPath = sinon.stub().callsArgWith(2, null, _id: @doc_id)
+				@updateMerger.p.processDoc = sinon.stub().callsArgWith(6)
+				@filePath = "/folder/doc.tex"
 
-		it 'should process update as doc when it is a doc', (done)->
-			doc_id = "231312s"
-			@FileTypeManager.isBinary.callsArgWith(2, null, false)
-			@projectLocator.findElementByPath = (_, __, cb)->cb(null, {_id:doc_id})
-			@updateMerger.p.processDoc = sinon.stub().callsArgWith(6)
-			filePath = "/folder/doc.tex"
+			it 'should get the element id', (done)->
+				@updateMerger.mergeUpdate @user_id, @project_id, @path, @update, @source, =>
+					@projectLocator.findElementByPath.calledWith(@project_id, @path).should.equal true
+					done()
 
-			@updateMerger.mergeUpdate @user_id, @project_id, filePath, @update, @source, =>
-				@FileTypeManager.isBinary.calledWith(filePath, @fsPath).should.equal true
-				@updateMerger.p.processDoc.calledWith(@project_id, doc_id, @user_id, @fsPath, filePath, @source).should.equal true
-				@fs.unlink.calledWith(@fsPath).should.equal true
-				done()
+			it 'should process update as doc', (done)->
+				@updateMerger.mergeUpdate @user_id, @project_id, @filePath, @update, @source, =>
+					@FileTypeManager.isBinary.calledWith(@filePath, @fsPath).should.equal true
+					@updateMerger.p.processDoc.calledWith(@project_id, @doc_id, @user_id, @fsPath, @filePath, @source).should.equal true
+					@fs.unlink.calledWith(@fsPath).should.equal true
+					done()
 
-		it 'should process update as file when it is not a doc', (done)->
-			file_id = "1231"
-			@projectLocator.findElementByPath = (_, __, cb)->cb(null, {_id:file_id})
-			@FileTypeManager.isBinary.callsArgWith(2, null, true)
-			@updateMerger.p.processFile = sinon.stub().callsArgWith(6)
-			filePath = "/folder/file1.png"
+		describe "file updates", () ->
+			beforeEach ->
+				@file_id = "1231"
+				@projectLocator.findElementByPath = sinon.stub().callsArgWith(2, null, _id: @file_id)
+				@FileTypeManager.isBinary.callsArgWith(2, null, true)
+				@updateMerger.p.processFile = sinon.stub().callsArgWith(6)
+				@filePath = "/folder/file1.png"
 
-			@updateMerger.mergeUpdate @user_id, @project_id, filePath, @update, @source, =>
-				@updateMerger.p.processFile.calledWith(@project_id, file_id, @fsPath, filePath, @source, @user_id).should.equal true
-				@FileTypeManager.isBinary.calledWith(filePath, @fsPath).should.equal true
-				@fs.unlink.calledWith(@fsPath).should.equal true
-				done()
+			it 'should process update as file when it is not a doc', (done)->
+				@updateMerger.mergeUpdate @user_id, @project_id, @filePath, @update, @source, =>
+					@updateMerger.p.processFile.calledWith(@project_id, @file_id, @fsPath, @filePath, @source, @user_id).should.equal true
+					@FileTypeManager.isBinary.calledWith(@filePath, @fsPath).should.equal true
+					@fs.unlink.calledWith(@fsPath).should.equal true
+					done()
 
 	describe 'deleteUpdate', (done)->
 		beforeEach ->
@@ -82,13 +85,13 @@ describe 'UpdateMerger :', ->
 			@editorController.deleteEntityWithoutLock = ->
 			@entity_id = "entity_id_here"
 			@entity = _id:@entity_id
-			@projectLocator.findElementByPath = (project_id, path, cb)=> cb(null, @entity, @type)
+			@projectLocator.findElementByPath = sinon.stub().callsArgWith(2, null, @entity, @type)
 			@editorController.deleteEntityWithoutLock = sinon.stub().callsArg(5)
 
-		it 'should get the element id', ->
-			@projectLocator.findElementByPath = sinon.spy()
-			@updateMerger.deleteUpdate @user_id, @project_id, @path, @source, ->
-			@projectLocator.findElementByPath.calledWith(@project_id, @path).should.equal true
+		it 'should get the element id', (done)->
+			@updateMerger.deleteUpdate @user_id, @project_id, @path, @source, =>
+				@projectLocator.findElementByPath.calledWith(@project_id, @path).should.equal true
+				done()
 
 		it 'should delete the entity in the editor controller with the correct type', (done)->
 			@entity.lines = []
