@@ -11,31 +11,26 @@ LockManager = require("../../infrastructure/LockManager")
 module.exports = UpdateMerger =
 	mergeUpdate: (user_id, project_id, path, updateRequest, source, callback = (error) ->)->
 		logger.log project_id:project_id, path:path, "merging update from tpds"
-		LockManager.runWithLock project_id,
-			(cb) => UpdateMerger.mergeUpdateWithoutLock(user_id, project_id, path, updateRequest, source, cb)
-			callback
-
-	mergeUpdateWithoutLock: (user_id, project_id, path, updateRequest, source, callback = (error) ->)->
-		projectLocator.findElementByPath project_id, path, (err, element)=>
-			# Returns an error if the element is not found
-			#return callback(err) if err?
-			logger.log project_id:project_id, path:path, "found element by path for merging update from tpds"
-			elementId = undefined
-			if element?
-				elementId = element._id
-			UpdateMerger.p.writeStreamToDisk project_id, elementId, updateRequest, (err, fsPath)->
-				callback = _.wrap callback, (cb, arg) ->
-					fs.unlink fsPath, (err) ->
-						if err?
+		UpdateMerger.p.writeStreamToDisk project_id, updateRequest, (err, fsPath)->
+			return callback(err) if err?
+			LockManager.runWithLock project_id,
+				(cb) => UpdateMerger.mergeUpdateWithoutLock user_id, project_id, path, fsPath, source, cb
+				(mergeErr) ->
+					fs.unlink fsPath, (deleteErr) ->
+						if deleteErr?
 							logger.err project_id:project_id, fsPath:fsPath, "error deleting file"
-						cb(arg)
+						callback mergeErr
+
+	mergeUpdateWithoutLock: (user_id, project_id, path, fsPath, source, callback = (error) ->)->
+		projectLocator.findElementByPath project_id, path, (err, element)=>
+			logger.log {project_id, path, fsPath}, "found element by path for merging update from tpds"
+			elementId = element?._id
+			FileTypeManager.isBinary path, fsPath, (err, isFile)->
 				return callback(err) if err?
-				FileTypeManager.isBinary path, fsPath, (err, isFile)->
-					return callback(err) if err?
-					if isFile
-						UpdateMerger.p.processFile project_id, elementId, fsPath, path, source, user_id, callback
-					else
-						UpdateMerger.p.processDoc project_id, elementId, user_id, fsPath, path, source, callback
+				if isFile
+					UpdateMerger.p.processFile project_id, elementId, fsPath, path, source, user_id, callback
+				else
+					UpdateMerger.p.processDoc project_id, elementId, user_id, fsPath, path, source, callback
 
 	deleteUpdate: (user_id, project_id, path, source, callback)->
 		LockManager.runWithLock project_id,
@@ -83,27 +78,25 @@ module.exports = UpdateMerger =
 				else
 					editorController.addFileWithoutLock project_id, folder?._id, fileName, fsPath, source, user_id, finish
 
-		writeStreamToDisk: (project_id, file_id, stream, callback = (err, fsPath)->)->
-			if !file_id?
-				file_id = uuid.v4()
-			dumpPath = "#{Settings.path.dumpFolder}/#{project_id}_#{file_id}"
+		writeStreamToDisk: (project_id, stream, callback = (err, fsPath)->)->
+			dumpPath = "#{Settings.path.dumpFolder}/#{project_id}_#{uuid.v4()}"
 
 			writeStream = fs.createWriteStream(dumpPath)
 			stream.pipe(writeStream)
 
 			stream.on 'error', (err)->
-				logger.err err:err, project_id:project_id, file_id:file_id, dumpPath:dumpPath,
+				logger.err {err, project_id, dumpPath},
 					"something went wrong with incoming tpds update stream"
 			writeStream.on 'error', (err)->
-				logger.err err:err, project_id:project_id, file_id:file_id, dumpPath:dumpPath,
+				logger.err {err, project_id, dumpPath},
 					"something went wrong with writing tpds update to disk"
 
 			stream.on 'end', ->
-				logger.log project_id:project_id, file_id:file_id, dumpPath:dumpPath, "incoming tpds update stream ended"
+				logger.log {project_id, dumpPath}, "incoming tpds update stream ended"
 			writeStream.on "finish", ->
-				logger.log project_id:project_id, file_id:file_id, dumpPath:dumpPath, "tpds update write stream finished"
+				logger.log {project_id, dumpPath}, "tpds update write stream finished"
 				callback null, dumpPath
-				
+
 readFileIntoTextArray = (path, callback)->
 	fs.readFile path, "utf8", (error, content = "") ->
 		if error?

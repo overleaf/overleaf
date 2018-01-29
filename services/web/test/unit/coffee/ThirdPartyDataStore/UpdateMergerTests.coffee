@@ -40,7 +40,7 @@ describe 'UpdateMerger :', ->
 		beforeEach ->
 			@path = "/doc1"
 			@fsPath = "file/system/path.tex"
-			@updateMerger.p.writeStreamToDisk = sinon.stub().callsArgWith(3, null, @fsPath)
+			@updateMerger.p.writeStreamToDisk = sinon.stub().callsArgWith(2, null, @fsPath)
 			@FileTypeManager.isBinary = sinon.stub()
 
 		describe "doc updates", () ->
@@ -159,7 +159,6 @@ describe 'UpdateMerger :', ->
 				@editorController.replaceFileWithoutLock = sinon.stub().callsArg(5)
 				@editorController.deleteEntityWithoutLock = sinon.stub()
 				@editorController.mkdirpWithoutLock = sinon.stub().withArgs(@project_id).callsArgWith(2, null, [@folder], @folder)
-				@updateMerger.p.writeStreamToDisk = sinon.stub().withArgs(@project_id, @file_id, @update).callsArgWith(3, null, @fsPath)
 
 			it 'should replace file if the file already exists', (done)->
 				@updateMerger.p.processFile @project_id, @file_id, @fsPath, @path, @source, @user_id, =>
