@@ -2,9 +2,11 @@
 expect = require("chai").expect
 
 ChatClient = require "./helpers/ChatClient"
+ChatApp = require "./helpers/ChatApp"
 
 describe "Sending a message", ->
-	before ->
+	before (done) ->
+		ChatApp.ensureRunning done
 
 	describe "globally", ->
 		before (done) ->

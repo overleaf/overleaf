@@ -3,11 +3,13 @@ expect = require("chai").expect
 crypto = require "crypto"
 
 ChatClient = require "./helpers/ChatClient"
+ChatApp = require "./helpers/ChatApp"
 
 describe "Deleting a thread", ->
-	before ->
+	before (done) ->
 		@project_id = ObjectId().toString()
 		@user_id = ObjectId().toString()
+		ChatApp.ensureRunning done
 
 	describe "with a thread that is deleted", ->
 		before (done) ->

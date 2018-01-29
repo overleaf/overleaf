@@ -3,11 +3,14 @@ expect = require("chai").expect
 crypto = require "crypto"
 
 ChatClient = require "./helpers/ChatClient"
+ChatApp = require "./helpers/ChatApp"
 
 describe "Resolving a thread", ->
-	before ->
+	before (done) ->
 		@project_id = ObjectId().toString()
 		@user_id = ObjectId().toString()
+		ChatApp.ensureRunning done
+
 	describe "with a resolved thread", ->
 		before (done) ->
 			@thread_id = ObjectId().toString()
