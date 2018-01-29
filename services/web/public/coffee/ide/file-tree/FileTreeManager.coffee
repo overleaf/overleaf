@@ -385,7 +385,7 @@ define [
 			# since that would break the tree structure.
 			return if @_isChildFolder(entity, parent_folder)
 			# check if a doc/file/folder already exists with this name
-			if @existsInThisFolder entity.name, parent_folder
+			if @existsInThisFolder parent_folder, entity.name
 				return @nameExistsError()
 			# Wait for the http response before doing the move
 			@ide.queuedHttp.post("/project/#{@ide.project_id}/#{entity.type}/#{entity.id}/move", {
