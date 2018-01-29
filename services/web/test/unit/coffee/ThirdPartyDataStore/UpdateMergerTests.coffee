@@ -56,6 +56,11 @@ describe 'UpdateMerger :', ->
 					@projectLocator.findElementByPath.calledWith(@project_id, @path).should.equal true
 					done()
 
+			it 'should take a project lock', (done)->
+				@updateMerger.mergeUpdate @user_id, @project_id, @path, @update, @source, =>
+					@LockManager.runWithLock.calledWith(@project_id).should.equal true
+					done()
+
 			it 'should process update as doc', (done)->
 				@updateMerger.mergeUpdate @user_id, @project_id, @filePath, @update, @source, =>
 					@FileTypeManager.isBinary.calledWith(@filePath, @fsPath).should.equal true
@@ -91,6 +96,11 @@ describe 'UpdateMerger :', ->
 		it 'should get the element id', (done)->
 			@updateMerger.deleteUpdate @user_id, @project_id, @path, @source, =>
 				@projectLocator.findElementByPath.calledWith(@project_id, @path).should.equal true
+				done()
+
+		it 'should take a project lock', (done)->
+			@updateMerger.deleteUpdate @user_id, @project_id, @path, @source, =>
+				@LockManager.runWithLock.calledWith(@project_id).should.equal true
 				done()
 
 		it 'should delete the entity in the editor controller with the correct type', (done)->
