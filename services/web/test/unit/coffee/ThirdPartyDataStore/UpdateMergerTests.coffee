@@ -83,30 +83,32 @@ describe 'UpdateMerger :', ->
 			@splitDocLines = @docLines.split("\n")
 			@fs.readFile = sinon.stub().callsArgWith(2, null, @docLines)
 
-		it 'should set the doc text in the editor controller', (done)->
-			@editorController.setDoc = ->
-			mock = sinon.mock(@editorController).expects("setDoc").withArgs(@project_id, @doc_id, @user_id, @splitDocLines, @source).callsArg(5)
+			@editorController.setDoc = sinon.stub().callsArg(5)
 
 			@update.write(@docLines)
 			@update.end()
 
-			@updateMerger.p.processDoc @project_id, @doc_id, @user_id, @update, "path", @source, ->
-				mock.verify()
+		it 'should set the doc text in the editor controller', (done)->
+			@updateMerger.p.processDoc @project_id, @doc_id, @user_id, @update, "path", @source, =>
+				@editorController.setDoc
+					.calledWith(@project_id, @doc_id, @user_id, @splitDocLines, @source)
+					.should.equal true
 				done()
 
 		it 'should create a new doc when it doesnt exist', (done)->
 			folder = {_id:"adslkjioj"}
 			docName = "main.tex"
 			path = "folder1/folder2/#{docName}"
-			@editorController.mkdirpWithoutLock = sinon.stub().withArgs(@project_id).callsArgWith(2, null, [folder], folder)
-			@editorController.addDocWithoutLock = ->
-			mock = sinon.mock(@editorController).expects("addDocWithoutLock").withArgs(@project_id, folder._id, docName, @splitDocLines, @source, @user_id).callsArg(6)
+			@editorController.mkdirpWithoutLock = sinon.stub().callsArgWith(2, null, [folder], folder)
+			@editorController.addDocWithoutLock = sinon.stub().callsArg(6)
 
-			@update.write(@docLines)
-			@update.end()
-
-			@updateMerger.p.processDoc @project_id, undefined, @user_id, @update, path, @source, ->
-				mock.verify()
+			@updateMerger.p.processDoc @project_id, undefined, @user_id, @update, path, @source, =>
+				@editorController.mkdirpWithoutLock
+					.calledWith(@project_id)
+					.should.equal true
+				@editorController.addDocWithoutLock
+					.calledWith(@project_id, folder._id, docName, @splitDocLines, @source, @user_id)
+					.should.equal true
 				done()
 
 	describe 'processFile :', (done)->
@@ -137,7 +139,6 @@ describe 'UpdateMerger :', ->
 				done()
 
 	describe 'delete entity :', (done)->
-
 		beforeEach ->
 			@path = "folder/doc1"
 			@type = "mock-type"
@@ -145,6 +146,7 @@ describe 'UpdateMerger :', ->
 			@entity_id = "entity_id_here"
 			@entity = _id:@entity_id
 			@projectLocator.findElementByPath = (project_id, path, cb)=> cb(null, @entity, @type)
+			@editorController.deleteEntityWithoutLock = sinon.stub().callsArg(5)
 
 		it 'should get the element id', ->
 			@projectLocator.findElementByPath = sinon.spy()
@@ -153,9 +155,8 @@ describe 'UpdateMerger :', ->
 
 		it 'should delete the entity in the editor controller with the correct type', (done)->
 			@entity.lines = []
-			mock = sinon.mock(@editorController).expects("deleteEntityWithoutLock").withArgs(@project_id, @entity_id, @type, @source, @user_id).callsArg(5)
-			@updateMerger.deleteUpdate @user_id, @project_id, @path, @source, ->
-				mock.verify()
+			@updateMerger.deleteUpdate @user_id, @project_id, @path, @source, =>
+				@editorController.deleteEntityWithoutLock
+					.calledWith(@project_id, @entity_id, @type, @source, @user_id)
+					.should.equal true
 				done()
-
-	
