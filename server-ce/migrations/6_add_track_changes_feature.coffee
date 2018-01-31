@@ -4,7 +4,6 @@ mongojs = require("mongojs")
 ObjectId = mongojs.ObjectId
 db = mongojs(Settings.mongo.url, ['users'])
 _ = require("underscore")
-BSON = db.bson.BSON
 
 
 handleExit = () ->
