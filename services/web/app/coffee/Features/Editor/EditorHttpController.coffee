@@ -128,12 +128,8 @@ module.exports = EditorHttpController =
 		folder_id = req.body.folder_id
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		EditorController.moveEntity project_id, entity_id, folder_id, entity_type, user_id, (error) ->
-			if error?.message == 'destination folder is a child folder of me'
-				res.status(400).json(req.i18n.translate('invalid_file_name'))
-			else if error?
-				next(error)
-			else
-				res.sendStatus 204
+			return next(error) if error?
+			res.sendStatus 204
 
 	deleteDoc: (req, res, next)->
 		req.params.entity_type  = "doc"

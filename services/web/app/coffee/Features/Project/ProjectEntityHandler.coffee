@@ -426,7 +426,7 @@ module.exports = ProjectEntityHandler =
 					logger.log destFolderPath: destFolderPath.fileSystem, folderPath: entityPath.fileSystem, "checking folder is not moving into child folder"
 					isNestedFolder = destFolderPath.fileSystem.slice(0, entityPath.fileSystem.length) == entityPath.fileSystem
 					if isNestedFolder
-						return callback(new Error("destination folder is a child folder of me"))
+						return callback(new Errors.InvalidNameError("destination folder is a child folder of me"))
 				callback()
 
 	deleteEntity: (project_id, entity_id, entityType, userId, callback = (error) ->)->
