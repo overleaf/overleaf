@@ -86,6 +86,9 @@
   },
   "devDependencies": {
     "autoprefixer": "^6.6.1",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.1",
     "bunyan": "0.22.1",
     "chai": "3.5.0",
     "chai-spies": "",
@@ -118,6 +121,9 @@
     "sandboxed-module": "0.2.0",
     "sinon": "^1.17.0",
     "timekeeper": "",
-    "translations-sharelatex": "git+https://github.com/sharelatex/translations-sharelatex.git#master"
+    "translations-sharelatex": "git+https://github.com/sharelatex/translations-sharelatex.git#master",
+    "webpack": "^3.10.0",
+    "webpack-dev-server": "^2.11.1",
+    "webpack-merge": "^4.1.1"
   }
 }
