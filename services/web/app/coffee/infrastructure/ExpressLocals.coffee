@@ -93,6 +93,10 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 		req.externalAuthenticationSystemUsed = Features.externalAuthenticationSystemUsed
 		res.locals.externalAuthenticationSystemUsed = Features.externalAuthenticationSystemUsed
 		req.hasFeature = res.locals.hasFeature = Features.hasFeature
+		res.locals.userIsFromOLv1 = (user) ->
+			user.overleaf?.id?
+		res.locals.userIsFromSL = (user) ->
+			!user.overleaf?.id?
 		next()
 
 	webRouter.use (req, res, next)->

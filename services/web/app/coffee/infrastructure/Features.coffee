@@ -12,5 +12,7 @@ module.exports = Features =
 				return not Features.externalAuthenticationSystemUsed()
 			when 'github-sync'
 				return Settings.enableGithubSync
+			when 'v1-return-message'
+				return Settings.accountMerge? and Settings.overleaf?
 			else
 				throw new Error("unknown feature: #{feature}")

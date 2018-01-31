@@ -18,22 +18,27 @@ class User
 		})
 
 	login: (callback = (error) ->) ->
-		@getCsrfToken (error) =>
+		@ensureUserExists (error) =>
 			return callback(error) if error?
-			filter = {@email}
-			options = {upsert: true, new: true, setDefaultsOnInsert: true}
-			UserModel.findOneAndUpdate filter, {}, options, (error, user) =>
+			@getCsrfToken (error) =>
 				return callback(error) if error?
-				AuthenticationManager.setUserPassword user._id, @password, (error) =>
-					return callback(error) if error?
-					@id = user?._id?.toString()
-					@_id = user?._id?.toString()
-					@first_name = user?.first_name
-					@referal_id = user?.referal_id
-					@request.post {
-						url: "/login"
-						json: { @email, @password }
-					}, callback
+				@request.post {
+					url: "/login"
+					json: { @email, @password }
+				}, callback
+
+	ensureUserExists: (callback = (error) ->) ->
+		filter = {@email}
+		options = {upsert: true, new: true, setDefaultsOnInsert: true}
+		UserModel.findOneAndUpdate filter, {}, options, (error, user) =>
+			return callback(error) if error?
+			AuthenticationManager.setUserPassword user._id, @password, (error) =>
+				return callback(error) if error?
+				@id = user?._id?.toString()
+				@_id = user?._id?.toString()
+				@first_name = user?.first_name
+				@referal_id = user?.referal_id
+				callback(null, @password)
 
 	logout: (callback = (error) ->) ->
 		@getCsrfToken (error) =>
@@ -212,6 +217,14 @@ class User
 				return callback(error) if error?
 				callback(null, response.statusCode)
 
-
+	isLoggedIn: (callback = (error, loggedIn) ->) ->
+		@request.get "/user/personal_info", (error, response, body) ->
+			return callback(error) if error?
+			if response.statusCode == 200
+				return callback(null, true)
+			else if response.statusCode == 302
+				return callback(null, false)
+			else
+				return callback(new Error("unexpected status code from /user/personal_info: #{response.statusCode}"))
 
 module.exports = User
