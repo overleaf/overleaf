@@ -64,7 +64,7 @@ block content
 					aside.project-list-sidebar.col-md-2.col-xs-3
 						include ./list/side-bar
 
-					if settings.accountMerge && settings.overleaf
+					if hasFeature('v1-return-message')
 						.project-list-sidebar-v2-pane.col-md-2.col-xs-3
 							span Welcome to the Overleaf v2 alpha! #[a(href="https://www.overleaf.com/help/342-overleaf-v2-faq") Find out more].
 							if userIsFromOLv1(user)
