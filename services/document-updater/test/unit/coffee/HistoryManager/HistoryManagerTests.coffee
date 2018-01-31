@@ -90,9 +90,9 @@ describe "HistoryManager", ->
 
 		describe "with enough ops to flush project changes", ->
 			beforeEach ->
-				@HistoryManager._shouldFlushHistoryOps = sinon.stub()
-				@HistoryManager._shouldFlushHistoryOps.withArgs(@project_ops_length).returns(true)
-				@HistoryManager._shouldFlushHistoryOps.withArgs(@doc_ops_length).returns(false)
+				@HistoryManager.shouldFlushHistoryOps = sinon.stub()
+				@HistoryManager.shouldFlushHistoryOps.withArgs(@project_ops_length).returns(true)
+				@HistoryManager.shouldFlushHistoryOps.withArgs(@doc_ops_length).returns(false)
 
 				@HistoryManager.recordAndFlushHistoryOps(
 					@project_id, @doc_id, @ops, @doc_ops_length, @project_ops_length, @callback
@@ -115,9 +115,9 @@ describe "HistoryManager", ->
 
 		describe "with enough ops to flush doc changes", ->
 			beforeEach ->
-				@HistoryManager._shouldFlushHistoryOps = sinon.stub()
-				@HistoryManager._shouldFlushHistoryOps.withArgs(@project_ops_length).returns(false)
-				@HistoryManager._shouldFlushHistoryOps.withArgs(@doc_ops_length).returns(true)
+				@HistoryManager.shouldFlushHistoryOps = sinon.stub()
+				@HistoryManager.shouldFlushHistoryOps.withArgs(@project_ops_length).returns(false)
+				@HistoryManager.shouldFlushHistoryOps.withArgs(@doc_ops_length).returns(true)
 
 				@HistoryManager.recordAndFlushHistoryOps(
 					@project_id, @doc_id, @ops, @doc_ops_length, @project_ops_length, @callback
@@ -154,24 +154,24 @@ describe "HistoryManager", ->
 			it "should call the callback with the error", ->
 				@callback.calledWith(@error).should.equal true
 
-		describe "_shouldFlushHistoryOps", ->
+		describe "shouldFlushHistoryOps", ->
 			it "should return false if the number of ops is not known", ->
-				@HistoryManager._shouldFlushHistoryOps(null, ['a', 'b', 'c'], 1).should.equal false
+				@HistoryManager.shouldFlushHistoryOps(null, ['a', 'b', 'c'].length, 1).should.equal false
 
 			it "should return false if the updates didn't take us past the threshold", ->
 				# Currently there are 14 ops
 				# Previously we were on 11 ops
 				# We didn't pass over a multiple of 5
-				@HistoryManager._shouldFlushHistoryOps(14, ['a', 'b', 'c'], 5).should.equal false
+				@HistoryManager.shouldFlushHistoryOps(14, ['a', 'b', 'c'].length, 5).should.equal false
 
 		  it "should return true if the updates took to the threshold", ->
 				# Currently there are 15 ops
 				# Previously we were on 12 ops
 				# We've reached a new multiple of 5
-				@HistoryManager._shouldFlushHistoryOps(15, ['a', 'b', 'c'], 5).should.equal true
+				@HistoryManager.shouldFlushHistoryOps(15, ['a', 'b', 'c'].length, 5).should.equal true
 
 			it "should return true if the updates took past the threshold", ->
 				# Currently there are 19 ops
 				# Previously we were on 16 ops
 				# We didn't pass over a multiple of 5
-				@HistoryManager._shouldFlushHistoryOps(17, ['a', 'b', 'c'], 5).should.equal true
+				@HistoryManager.shouldFlushHistoryOps(17, ['a', 'b', 'c'].length, 5).should.equal true
