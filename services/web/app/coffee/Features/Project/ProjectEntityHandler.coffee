@@ -170,7 +170,8 @@ module.exports = ProjectEntityHandler =
 			if project_or_id._id? # project
 				return cb(null, project_or_id)
 			else # id
-				return ProjectGetter.getProjectWithOnlyFolders project_or_id, cb
+				# need to retrieve full project structure to check for duplicates
+				return ProjectGetter.getProject project_or_id, {rootFolder:true, name:true}, cb
 		getProject (error, project) ->
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add doc"
@@ -207,7 +208,7 @@ module.exports = ProjectEntityHandler =
 			ProjectEntityHandler.addDoc project_id, null, name, lines, callback
 
 	addFileWithoutUpdatingHistory: (project_id, folder_id, fileName, path, userId, callback = (error, fileRef, folder_id, path, fileStoreUrl) ->)->
-		ProjectGetter.getProjectWithOnlyFolders project_id, (err, project) ->
+		ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (err, project) ->
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add file"
 				return callback(err)
@@ -229,6 +230,7 @@ module.exports = ProjectEntityHandler =
 
 	addFile:  (project_id, folder_id, fileName, fsPath, userId, callback = (error, fileRef, folder_id) ->)->
 		ProjectEntityHandler.addFileWithoutUpdatingHistory project_id, folder_id, fileName, fsPath, userId, (error, fileRef, folder_id, path, fileStoreUrl) ->
+			return callback(error) if error?
 			newFiles = [
 				file: fileRef
 				path: path
@@ -340,7 +342,7 @@ module.exports = ProjectEntityHandler =
 				callback(null, folders, lastFolder)
 
 	addFolder: (project_id, parentFolder_id, folderName, callback) ->
-		ProjectGetter.getProjectWithOnlyFolders project_id, (err, project)=>
+		ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (err, project)=>
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add folder"
 				return callback(err)
@@ -394,7 +396,7 @@ module.exports = ProjectEntityHandler =
 			return callback(err) if err?
 			projectLocator.findElement {project, element_id: entity_id, type: entityType}, (err, entity, entityPath)->
 				return callback(err) if err?
-				self._checkValidMove project, entityType, entityPath, destFolderId, (error) ->
+				self._checkValidMove project, entityType, entity, entityPath, destFolderId, (error) ->
 					return callback(error) if error?
 					self.getAllEntitiesFromProject project, (error, oldDocs, oldFiles) =>
 						return callback(error) if error?
@@ -413,18 +415,19 @@ module.exports = ProjectEntityHandler =
 									return callback(error) if error?
 									DocumentUpdaterHandler.updateProjectStructure project_id, userId, {oldDocs, newDocs, oldFiles, newFiles}, callback
 
-	_checkValidMove: (project, entityType, entityPath, destFolderId, callback = (error) ->) ->
-		return callback() if !entityType.match(/folder/)
-
+	_checkValidMove: (project, entityType, entity, entityPath, destFolderId, callback = (error) ->) ->
 		projectLocator.findElement { project, element_id: destFolderId, type:"folder"}, (err, destEntity, destFolderPath) ->
 			return callback(err) if err?
-			logger.log destFolderPath: destFolderPath.fileSystem, folderPath: entityPath.fileSystem, "checking folder is not moving into child folder"
-			isNestedFolder = destFolderPath.fileSystem.slice(0, entityPath.fileSystem.length) == entityPath.fileSystem
-			if isNestedFolder
-				callback(new Error("destination folder is a child folder of me"))
-			else
+			# check if there is already a doc/file/folder with the same name
+			# in the destination folder
+			ProjectEntityHandler.checkValidElementName destEntity, entity.name, (err)->
+				return callback(err) if err?
+				if entityType.match(/folder/)
+					logger.log destFolderPath: destFolderPath.fileSystem, folderPath: entityPath.fileSystem, "checking folder is not moving into child folder"
+					isNestedFolder = destFolderPath.fileSystem.slice(0, entityPath.fileSystem.length) == entityPath.fileSystem
+					if isNestedFolder
+						return callback(new Errors.InvalidNameError("destination folder is a child folder of me"))
 				callback()
-
 
 	deleteEntity: (project_id, entity_id, entityType, userId, callback = (error) ->)->
 		self = @
@@ -456,19 +459,22 @@ module.exports = ProjectEntityHandler =
 			return callback(error) if error?
 			ProjectEntityHandler.getAllEntitiesFromProject project, (error, oldDocs, oldFiles) =>
 				return callback(error) if error?
-				projectLocator.findElement {project:project, element_id:entity_id, type:entityType}, (error, entity, entPath)=>
+				projectLocator.findElement {project:project, element_id:entity_id, type:entityType}, (error, entity, entPath, parentFolder)=>
 					return callback(error) if error?
-					endPath = path.join(path.dirname(entPath.fileSystem), newName)
-					conditions = {_id:project_id}
-					update = "$set":{}
-					namePath = entPath.mongo+".name"
-					update["$set"][namePath] = newName
-					tpdsUpdateSender.moveEntity({project_id:project_id, startPath:entPath.fileSystem, endPath:endPath, project_name:project.name, rev:entity.rev})
-					Project.findOneAndUpdate conditions, update, { "new": true}, (error, newProject) ->
+					# check if the new name already exists in the current folder
+					ProjectEntityHandler.checkValidElementName parentFolder, newName, (error) =>
 						return callback(error) if error?
-						ProjectEntityHandler.getAllEntitiesFromProject newProject, (error, newDocs, newFiles) =>
+						endPath = path.join(path.dirname(entPath.fileSystem), newName)
+						conditions = {_id:project_id}
+						update = "$set":{}
+						namePath = entPath.mongo+".name"
+						update["$set"][namePath] = newName
+						tpdsUpdateSender.moveEntity({project_id:project_id, startPath:entPath.fileSystem, endPath:endPath, project_name:project.name, rev:entity.rev})
+						Project.findOneAndUpdate conditions, update, { "new": true}, (error, newProject) ->
 							return callback(error) if error?
-							DocumentUpdaterHandler.updateProjectStructure project_id, userId, {oldDocs, newDocs, oldFiles, newFiles}, callback
+							ProjectEntityHandler.getAllEntitiesFromProject newProject, (error, newDocs, newFiles) =>
+								return callback(error) if error?
+								DocumentUpdaterHandler.updateProjectStructure project_id, userId, {oldDocs, newDocs, oldFiles, newFiles}, callback
 
 	_cleanUpEntity: (project, entity, entityType, path, userId, callback = (error) ->) ->
 		if(entityType.indexOf("file") != -1)
@@ -606,19 +612,32 @@ module.exports = ProjectEntityHandler =
 				newPath =
 					fileSystem: "#{path.fileSystem}/#{element.name}"
 					mongo: path.mongo
-				id = element._id+''
-				element._id = require('mongoose').Types.ObjectId(id)
-				conditions = _id:project._id
-				mongopath = "#{path.mongo}.#{type}"
-				update = "$push":{}
-				update["$push"][mongopath] = element
-				logger.log project_id: project._id, element_id: element._id, fileType: type, folder_id: folder_id, mongopath:mongopath, "adding element to project"
-				Project.findOneAndUpdate conditions, update, {"new": true}, (err, project)->
-					if err?
-						logger.err err: err, project_id: project._id, 'error saving in putElement project'
-						return callback(err)
-					callback(err, {path:newPath}, project)
+				ProjectEntityHandler.checkValidElementName folder, element.name, (err) =>
+					return callback(err) if err?
+					id = element._id+''
+					element._id = require('mongoose').Types.ObjectId(id)
+					conditions = _id:project._id
+					mongopath = "#{path.mongo}.#{type}"
+					update = "$push":{}
+					update["$push"][mongopath] = element
+					logger.log project_id: project._id, element_id: element._id, fileType: type, folder_id: folder_id, mongopath:mongopath, "adding element to project"
+					Project.findOneAndUpdate conditions, update, {"new": true}, (err, project)->
+						if err?
+							logger.err err: err, project_id: project._id, 'error saving in putElement project'
+							return callback(err)
+						callback(err, {path:newPath}, project)
 
+	checkValidElementName: (folder, name, callback = (err) ->) ->
+		# check if the name is already taken by a doc, file or
+		# folder. If so, return an error "file already exists".
+		err = new Errors.InvalidNameError("file already exists")
+		for doc in folder?.docs or []
+			return callback(err) if doc.name is name
+		for file in folder?.fileRefs or []
+			return callback(err) if file.name is name
+		for folder in folder?.folders or []
+			return callback(err) if folder.name is name
+		callback()
 
 confirmFolder = (project, folder_id, callback)->
 	logger.log folder_id:folder_id, project_id:project._id, "confirming folder in project"

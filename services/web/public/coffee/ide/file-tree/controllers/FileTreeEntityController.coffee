@@ -28,6 +28,9 @@ define [
 
 		invalidModalShowing = false
 		$scope.finishRenaming = () ->
+			# avoid double events when blur and on-enter fire together
+			return if !$scope.entity.renaming
+
 			name = $scope.inputs.name
 			
 			if !name.match(new RegExp(ide.validFileRegex))

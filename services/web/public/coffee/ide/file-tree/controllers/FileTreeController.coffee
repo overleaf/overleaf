@@ -69,6 +69,7 @@ define [
 					.catch (response)->
 						{ data } = response
 						$scope.error = data
+						$scope.state.inflight = false
 
 			$scope.cancel = () ->
 				$modalInstance.dismiss('cancel')
