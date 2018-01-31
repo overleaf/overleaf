@@ -362,13 +362,15 @@ define [
 			parent_folder = @getCurrentFolder()
 			if @existsInThisFolder parent_folder, name
 				return @nameExistsError()
-			# We'll wait for the socket.io notification to actually
-			# do the rename for us.
+			entity.renamingToName = name
 			@ide.$http.post("/project/#{@ide.project_id}/#{entity.type}/#{entity.id}/rename", {
 				name: name,
 				_csrf: window.csrfToken
-			}).then () ->
-				entity.name = name
+			})
+				.then () ->
+					entity.name = name
+				.finally () ->
+					entity.renamingToName = null
 
 		deleteEntity: (entity, callback = (error) ->) ->
 			# We'll wait for the socket.io notification to

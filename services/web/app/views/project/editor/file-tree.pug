@@ -110,7 +110,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 				i.fa.fa-fw(ng-if="entity.type != 'folder'", ng-class="'fa-' + iconTypeFromName(entity.name)")
 				span(
 					ng-hide="entity.renaming"
-				)  {{ entity.name }}
+				)  {{ entity.renamingToName || entity.name }}
 				span.rename-input
 					input(
 						ng-if="permissions.write",
@@ -198,7 +198,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 
 					span(
 						ng-hide="entity.renaming"
-					)  {{ entity.name }}
+					)  {{ entity.renamingToName || entity.name }}
 					span.rename-input
 						input(
 							ng-if="permissions.write",
