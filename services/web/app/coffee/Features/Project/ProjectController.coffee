@@ -241,53 +241,6 @@ module.exports = ProjectController =
 				if !user_id?
 					return cb()
 				CollaboratorsHandler.userIsTokenMember user_id, project_id, cb
-			showAutoCompileOnboarding: (cb) ->
-				cb = underscore.once(cb)
-				# Force autocompile rollout if query param set
-				if req.query?.ac == 't'
-					return cb(null, { enabled: true, showOnboarding: true })
-
-				if !user_id?
-					return cb()
-
-				# Extract data from user's ObjectId
-				timestamp = parseInt(user_id.toString().substring(0, 8), 16)
-
-				rolloutPercentage = 100 # Percentage of users to roll out to
-				if !ProjectController._isInPercentageRollout('autocompile', user_id, rolloutPercentage)
-					# Don't show if user is not part of roll out
-					return cb(null, { enabled: false, showOnboarding: false })
-				userSignupDate = new Date(timestamp * 1000)
-				if userSignupDate > new Date("2017-10-16")
-					# Don't show for users who registered after it was released
-					return cb(null, { enabled: true, showOnboarding: false })
-				timeout = setTimeout cb, 500
-				AnalyticsManager.getLastOccurance user_id, "shown-autocompile-onboarding-2", (error, event) ->
-					clearTimeout timeout
-					if error?
-						return cb(null, { enabled: true, showOnboarding: false })
-					else if event?
-						return cb(null, { enabled: true, showOnboarding: false })
-					else
-						logger.log { user_id, event }, "autocompile onboarding not shown yet to this user"
-						return cb(null, { enabled: true, showOnboarding: true })
-			couldShowLinkSharingOnboarding: (cb) ->
-				cb = underscore.once(cb)
-				if !user_id?
-					return cb()
-				# Extract data from user's ObjectId
-				timestamp = parseInt(user_id.toString().substring(0, 8), 16)
-				userSignupDate = new Date(timestamp * 1000)
-				if userSignupDate > new Date("2017-11-13")
-					# Don't show for users who registered after it was released
-					return cb(null, false)
-				timeout = setTimeout cb, 500
-				AnalyticsManager.getLastOccurance user_id, "shown-linksharing-onboarding", (error, event) ->
-					clearTimeout timeout
-					if error? || event?
-						return cb(null, false)
-					else
-						return cb(null, true)
 		}, (err, results)->
 			if err?
 				logger.err err:err, "error getting details for project page"
@@ -295,7 +248,6 @@ module.exports = ProjectController =
 			project = results.project
 			user = results.user
 			subscription = results.subscription
-			{ showAutoCompileOnboarding } = results
 
 			daysSinceLastUpdated =  (new Date() - project.lastUpdated) / 86400000
 			logger.log project_id:project_id, daysSinceLastUpdated:daysSinceLastUpdated, "got db results for loading editor"
@@ -340,8 +292,6 @@ module.exports = ProjectController =
 						syntaxValidation: user.ace.syntaxValidation
 					}
 					trackChangesState: project.track_changes
-					autoCompileEnabled: !!showAutoCompileOnboarding?.enabled
-					showAutoCompileOnboarding: !!showAutoCompileOnboarding?.showOnboarding
 					privilegeLevel: privilegeLevel
 					chatUrl: Settings.apis.chat.url
 					anonymous: anonymous
@@ -350,7 +300,6 @@ module.exports = ProjectController =
 					languages: Settings.languages
 					themes: THEME_LIST
 					maxDocLength: Settings.max_doc_length
-					showLinkSharingOnboarding: !!results.couldShowLinkSharingOnboarding
 					useV2History: !!project.overleaf?.history?.display
 				timer.done()
 

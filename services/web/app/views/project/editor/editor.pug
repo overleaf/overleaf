@@ -93,35 +93,3 @@ div.full-size(
 	ng-show="ui.view == 'pdf'"
 )
 	include ./pdf
-
-#onboarding-autocompile.onboarding-autocompile.popover(
-	ng-controller="AutoCompileOnboardingController"
-	ng-if="onboarding.autoCompile == 'show'"
-	ng-class="placement"
-)
-	.popover-inner
-		h3.popover-title #{translate("auto_compile")}
-		.popover-content
-			p #{translate("try_out_auto_compile_setting")}
-			img(src="/img/onboarding/autocompile/setting-dropdown.png" width="100%")
-			p #{translate("auto_compile_onboarding_description")}
-			button.btn.btn-default.btn-block(ng-click="dismiss()")
-				| #{translate("got_it")}
-
-#onboarding-linksharing.onboarding-linksharing.popover(
-	ng-controller="LinkSharingOnboardingController"
-	ng-if="permissions.admin && onboarding.linkSharing == 'unseen'"
-	ng-class="placement"
-)
-	.popover-inner
-		h3.popover-title #{translate("link_sharing")}
-		.popover-content
-			p #{translate("try_out_link_sharing")}
-			img(
-				src="/img/onboarding/linksharing/link-sharing.png"
-				alt="Link sharing demo"
-				width="100%"
-			)
-			p #{translate("try_link_sharing_description")}
-			button.btn.btn-default.btn-block(ng-click="dismiss()")
-				| #{translate("got_it")}

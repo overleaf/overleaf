@@ -115,7 +115,7 @@ define [
 				toggleAutoCompile(newValue)
 				event_tracking.sendMB "autocompile-setting-changed", { value: newValue }
 
-		if (window.user?.betaProgram or window.autoCompileEnabled) and $scope.autocompile_enabled
+		if $scope.autocompile_enabled
 			toggleAutoCompile(true)
 
 		# abort compile if syntax checks fail
@@ -425,9 +425,6 @@ define [
 
 		$scope.recompile = (options = {}) ->
 			return if $scope.pdf.compiling
-
-			if !options.isAutoCompileOnLoad and $scope.onboarding.autoCompile == 'unseen'
-				$scope.onboarding.autoCompile = 'show'
 
 			event_tracking.sendMBSampled "editor-recompile-sampled", options
 
