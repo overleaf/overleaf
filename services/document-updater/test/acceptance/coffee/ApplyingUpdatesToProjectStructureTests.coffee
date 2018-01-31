@@ -176,3 +176,32 @@ describe "Applying updates to a project's structure", ->
 
 		it "should flush project history", ->
 			MockProjectHistoryApi.flushProject.calledWith(@project_id).should.equal true
+
+	describe "with too few updates to flush to the history service", ->
+		before (done) ->
+			@project_id = DocUpdaterClient.randomId()
+			@user_id = DocUpdaterClient.randomId()
+
+			updates = []
+			for v in [0..42] # Should flush after 500 ops
+				updates.push
+					id: DocUpdaterClient.randomId(),
+					pathname: '/file-' + v
+					docLines: 'a\nb'
+
+			sinon.spy MockProjectHistoryApi, "flushProject"
+
+			# Send updates in chunks
+			projectId = @project_id
+			userId = @project_id
+			DocUpdaterClient.sendProjectUpdate projectId, userId, updates.slice(0, 10), [], (error) ->
+				throw error if error?
+				DocUpdaterClient.sendProjectUpdate projectId, userId, updates.slice(10), [], (error) ->
+					throw error if error?
+					setTimeout done, 2000
+
+		after ->
+			MockProjectHistoryApi.flushProject.restore()
+
+		it "should not flush project history", ->
+			MockProjectHistoryApi.flushProject.calledWith(@project_id).should.equal false
