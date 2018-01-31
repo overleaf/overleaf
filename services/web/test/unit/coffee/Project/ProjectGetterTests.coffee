@@ -41,13 +41,13 @@ describe "ProjectGetter", ->
 			it "should exclude the doc lines", ->
 				excludes =
 					"rootFolder.docs.lines": 0
-					"rootFolder.folder.docs.lines": 0
-					"rootFolder.folder.folder.docs.lines": 0
-					"rootFolder.folder.folder.folder.docs.lines": 0
-					"rootFolder.folder.folder.folder.folder.docs.lines": 0
-					"rootFolder.folder.folder.folder.folder.folder.docs.lines": 0
-					"rootFolder.folder.folder.folder.folder.folder.folder.docs.lines": 0
-					"rootFolder.folder.folder.folder.folder.folder.folder.folder.docs.lines": 0
+					"rootFolder.folders.docs.lines": 0
+					"rootFolder.folders.folders.docs.lines": 0
+					"rootFolder.folders.folders.folders.docs.lines": 0
+					"rootFolder.folders.folders.folders.folders.docs.lines": 0
+					"rootFolder.folders.folders.folders.folders.folders.docs.lines": 0
+					"rootFolder.folders.folders.folders.folders.folders.folders.docs.lines": 0
+					"rootFolder.folders.folders.folders.folders.folders.folders.folders.docs.lines": 0
 				@db.projects.find.calledWith(sinon.match.any, excludes)
 					.should.equal true
 
@@ -75,20 +75,20 @@ describe "ProjectGetter", ->
 				excludes =
 					"rootFolder.docs": 0
 					"rootFolder.fileRefs": 0
-					"rootFolder.folder.docs": 0
-					"rootFolder.folder.fileRefs": 0
-					"rootFolder.folder.folder.docs": 0
-					"rootFolder.folder.folder.fileRefs": 0
-					"rootFolder.folder.folder.folder.docs": 0
-					"rootFolder.folder.folder.folder.fileRefs": 0
-					"rootFolder.folder.folder.folder.folder.docs": 0
-					"rootFolder.folder.folder.folder.folder.fileRefs": 0
-					"rootFolder.folder.folder.folder.folder.folder.docs": 0
-					"rootFolder.folder.folder.folder.folder.folder.fileRefs": 0
-					"rootFolder.folder.folder.folder.folder.folder.folder.docs": 0
-					"rootFolder.folder.folder.folder.folder.folder.folder.fileRefs": 0
-					"rootFolder.folder.folder.folder.folder.folder.folder.folder.docs": 0
-					"rootFolder.folder.folder.folder.folder.folder.folder.folder.fileRefs": 0
+					"rootFolder.folders.docs": 0
+					"rootFolder.folders.fileRefs": 0
+					"rootFolder.folders.folders.docs": 0
+					"rootFolder.folders.folders.fileRefs": 0
+					"rootFolder.folders.folders.folders.docs": 0
+					"rootFolder.folders.folders.folders.fileRefs": 0
+					"rootFolder.folders.folders.folders.folders.docs": 0
+					"rootFolder.folders.folders.folders.folders.fileRefs": 0
+					"rootFolder.folders.folders.folders.folders.folders.docs": 0
+					"rootFolder.folders.folders.folders.folders.folders.fileRefs": 0
+					"rootFolder.folders.folders.folders.folders.folders.folders.docs": 0
+					"rootFolder.folders.folders.folders.folders.folders.folders.fileRefs": 0
+					"rootFolder.folders.folders.folders.folders.folders.folders.folders.docs": 0
+					"rootFolder.folders.folders.folders.folders.folders.folders.folders.fileRefs": 0
 				@db.projects.find.calledWith(sinon.match.any, excludes).should.equal true
 
 			it "should call the callback with the project", ->
@@ -115,20 +115,20 @@ describe "ProjectGetter", ->
 				excludes =
 					"rootFolder.docs": 0
 					"rootFolder.fileRefs": 0
-					"rootFolder.folder.docs": 0
-					"rootFolder.folder.fileRefs": 0
-					"rootFolder.folder.folder.docs": 0
-					"rootFolder.folder.folder.fileRefs": 0
-					"rootFolder.folder.folder.folder.docs": 0
-					"rootFolder.folder.folder.folder.fileRefs": 0
-					"rootFolder.folder.folder.folder.folder.docs": 0
-					"rootFolder.folder.folder.folder.folder.fileRefs": 0
-					"rootFolder.folder.folder.folder.folder.folder.docs": 0
-					"rootFolder.folder.folder.folder.folder.folder.fileRefs": 0
-					"rootFolder.folder.folder.folder.folder.folder.folder.docs": 0
-					"rootFolder.folder.folder.folder.folder.folder.folder.fileRefs": 0
-					"rootFolder.folder.folder.folder.folder.folder.folder.folder.docs": 0
-					"rootFolder.folder.folder.folder.folder.folder.folder.folder.fileRefs": 0
+					"rootFolder.folders.docs": 0
+					"rootFolder.folders.fileRefs": 0
+					"rootFolder.folders.folders.docs": 0
+					"rootFolder.folders.folders.fileRefs": 0
+					"rootFolder.folders.folders.folders.docs": 0
+					"rootFolder.folders.folders.folders.fileRefs": 0
+					"rootFolder.folders.folders.folders.folders.docs": 0
+					"rootFolder.folders.folders.folders.folders.fileRefs": 0
+					"rootFolder.folders.folders.folders.folders.folders.docs": 0
+					"rootFolder.folders.folders.folders.folders.folders.fileRefs": 0
+					"rootFolder.folders.folders.folders.folders.folders.folders.docs": 0
+					"rootFolder.folders.folders.folders.folders.folders.folders.fileRefs": 0
+					"rootFolder.folders.folders.folders.folders.folders.folders.folders.docs": 0
+					"rootFolder.folders.folders.folders.folders.folders.folders.folders.fileRefs": 0
 				@db.projects.find.calledWith(sinon.match.any, excludes).should.equal true
 
 			it "should call the callback with the project", ->
