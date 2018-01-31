@@ -4,13 +4,15 @@ async = require "async"
 crypto = require "crypto"
 
 ChatClient = require "./helpers/ChatClient"
+ChatApp = require "./helpers/ChatApp"
 
 describe "Getting messages", ->
-	before ->
+	before (done) ->
 		@user_id1 = ObjectId().toString()
 		@user_id2 = ObjectId().toString()
 		@content1 = "foo bar"
 		@content2 = "hello world"
+		ChatApp.ensureRunning done
 
 	describe "globally", ->
 		before (done) ->

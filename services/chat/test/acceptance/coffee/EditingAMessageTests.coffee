@@ -2,12 +2,14 @@
 expect = require("chai").expect
 
 ChatClient = require "./helpers/ChatClient"
+ChatApp = require "./helpers/ChatApp"
 
 describe "Editing a message", ->
-	before ->
+	before (done) ->
 		@project_id = ObjectId().toString()
 		@user_id = ObjectId().toString()
 		@thread_id = ObjectId().toString()
+		ChatApp.ensureRunning done
 
 	describe "in a thread", ->
 		before (done) ->
