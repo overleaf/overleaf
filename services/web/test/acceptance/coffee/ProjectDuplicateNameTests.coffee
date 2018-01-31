@@ -40,7 +40,6 @@ describe "ProjectDuplicateNames", ->
 								name: "testfolder"
 								parent_folder_id: @rootFolderId
 					}, (err, res, body) =>
-							console.log "GOT FOLDER", body
 							@testFolderId = body._id
 							done()
 
