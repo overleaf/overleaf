@@ -52,8 +52,9 @@ describe 'ProjectEntityUpdateHandler', ->
 			'../../models/File': File:@FileModel
 			'../FileStore/FileStoreHandler':@FileStoreHandler
 			"../../infrastructure/LockManager":@LockManager =
-				runWithLock:
-					sinon.spy((key, runner, callback) -> runner(callback))
+				sequentialProjectStructureUpdateLock:
+					runWithLock:
+						sinon.spy((key, runner, callback) -> runner(callback))
 			'../../models/Project': Project:@ProjectModel = {}
 			"./ProjectGetter": @ProjectGetter = {}
 			'./ProjectLocator': @ProjectLocator = {}

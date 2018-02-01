@@ -20,18 +20,18 @@ describe 'LockManager - getting the lock', ->
 	
 	describe "when the lock is not set", ->
 		beforeEach (done) ->
-			@LockManager.tryLock = sinon.stub().callsArgWith(1, null, true)
-			@LockManager.getLock @doc_id, (args...) =>
+			@LockManager._tryLock = sinon.stub().callsArgWith(1, null, true)
+			@LockManager._getLock @doc_id, (args...) =>
 				@callback(args...)
 				done()
 
 		it "should try to get the lock", ->
-			@LockManager.tryLock
+			@LockManager._tryLock
 				.calledWith(@doc_id)
 				.should.equal true
 
 		it "should only need to try once", ->
-			@LockManager.tryLock.callCount.should.equal 1
+			@LockManager._tryLock.callCount.should.equal 1
 
 		it "should return the callback", ->
 			@callback.calledWith(null).should.equal true
@@ -41,20 +41,20 @@ describe 'LockManager - getting the lock', ->
 			startTime = Date.now()
 			tries = 0
 			@LockManager.LOCK_TEST_INTERVAL = 5
-			@LockManager.tryLock = (doc_id, callback = (error, isFree) ->) ->
+			@LockManager._tryLock = (doc_id, callback = (error, isFree) ->) ->
 				if (Date.now() - startTime < 20) or (tries < 2)
 					tries = tries + 1
 					callback null, false
 				else
 					callback null, true
-			sinon.spy @LockManager, "tryLock"
+			sinon.spy @LockManager, "_tryLock"
 
-			@LockManager.getLock @doc_id, (args...) =>
+			@LockManager._getLock @doc_id, (args...) =>
 				@callback(args...)
 				done()
 
 		it "should call tryLock multiple times until free", ->
-			(@LockManager.tryLock.callCount > 1).should.equal true
+			(@LockManager._tryLock.callCount > 1).should.equal true
 
 		it "should return the callback", ->
 			@callback.calledWith(null).should.equal true
@@ -63,8 +63,8 @@ describe 'LockManager - getting the lock', ->
 		beforeEach (done) ->
 			time = Date.now()
 			@LockManager.MAX_LOCK_WAIT_TIME = 5
-			@LockManager.tryLock = sinon.stub().callsArgWith(1, null, false)
-			@LockManager.getLock @doc_id, (args...) =>
+			@LockManager._tryLock = sinon.stub().callsArgWith(1, null, false)
+			@LockManager._getLock @doc_id, (args...) =>
 				@callback(args...)
 				done()
 

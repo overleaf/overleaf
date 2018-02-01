@@ -35,11 +35,15 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 			}
 			"../Cooldown/CooldownManager": @CooldownManager = {}
 			'../../models/Folder': Folder:@FolderModel
+			"../../infrastructure/LockManager":@LockManager =
+				mongoTransactionLock:
+					runWithLock:
+						sinon.spy((key, runner, callback) -> runner(callback))
 			'../../models/Project': Project:@ProjectModel = {}
 			'./ProjectEntityHandler': @ProjectEntityHandler = {}
 			'./ProjectLocator': @ProjectLocator = {}
 			"./ProjectGetter": @ProjectGetter =
-				getProject: sinon.stub().yields(null, @project)
+				getProjectWithoutLock: sinon.stub().yields(null, @project)
 
 	afterEach ->
 		tk.reset()
@@ -53,7 +57,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 			@subject.addDoc project_id, folder_id, @doc, @callback
 
 		it 'gets the project', ->
-			@ProjectGetter.getProject
+			@ProjectGetter.getProjectWithoutLock
 				.calledWith(project_id, {rootFolder:true, name: true})
 				.should.equal true
 
@@ -76,7 +80,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 			@subject.addFile project_id, folder_id, @file, @callback
 
 		it 'gets the project', ->
-			@ProjectGetter.getProject
+			@ProjectGetter.getProjectWithoutLock
 				.calledWith(project_id, {rootFolder:true, name: true})
 				.should.equal true
 
@@ -100,7 +104,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 			@subject.replaceFile project_id, file_id, @callback
 
 		it 'gets the project', ->
-			@ProjectGetter.getProject
+			@ProjectGetter.getProjectWithoutLock
 				.calledWith(project_id, {rootFolder:true, name: true})
 				.should.equal true
 
@@ -141,8 +145,9 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 					cb "level1 is not the last foler "
 				else
 					cb null, @parentFolder
-			@subject.addFolder = (project_id, parentFolder_id, folderName, callback) =>
-				callback null, {name:folderName}, @parentFolder_id
+			@subject.addFolder =
+				withoutLock: (project_id, parentFolder_id, folderName, callback) =>
+					callback null, {name:folderName}, @parentFolder_id
 
 		it 'should return the root folder if the path is just a slash', (done)->
 			path = "/"
@@ -217,7 +222,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 			@subject.moveEntity project_id, doc_id, folder_id, "docs", @callback
 
 		it 'should get the project', ->
-			@ProjectGetter.getProject
+			@ProjectGetter.getProjectWithoutLock
 				.calledWith(project_id, {rootFolder:true, name:true})
 				.should.equal true
 
@@ -256,7 +261,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 			@subject.deleteEntity project_id, doc_id, 'doc', @callback
 
 		it "should get the project", ->
-			@ProjectGetter.getProject
+			@ProjectGetter.getProjectWithoutLock
 				.calledWith(project_id, {name:true, rootFolder:true})
 				.should.equal true
 
@@ -284,7 +289,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 			@doc = _id: doc_id, name: "old.tex", rev: 1
 			@folder = _id: folder_id
 
-			@ProjectGetter.getProject = sinon.stub().yields(null, @project)
+			@ProjectGetter.getProjectWithoutLock = sinon.stub().yields(null, @project)
 
 			@ProjectEntityHandler.getAllEntitiesFromProject = sinon.stub()
 			@ProjectEntityHandler.getAllEntitiesFromProject
@@ -301,7 +306,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 			@subject.renameEntity project_id, doc_id, 'doc', @newName, @callback
 
 		it 'should get the project', ->
-			@ProjectGetter.getProject
+			@ProjectGetter.getProjectWithoutLock
 				.calledWith(project_id, {rootFolder:true, name:true})
 				.should.equal true
 
@@ -339,7 +344,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 			@subject.addFolder project_id, folder_id, @folderName, @callback
 
 		it 'gets the project', ->
-			@ProjectGetter.getProject
+			@ProjectGetter.getProjectWithoutLock
 				.calledWith(project_id, {rootFolder:true, name: true})
 				.should.equal true
 

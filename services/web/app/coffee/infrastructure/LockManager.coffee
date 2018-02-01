@@ -9,10 +9,36 @@ module.exports = LockManager =
 	MAX_LOCK_WAIT_TIME: 10000 # 10s maximum time to spend trying to get the lock
 	REDIS_LOCK_EXPIRY: 30 # seconds. Time until lock auto expires in redis.
 
-	_blockingKey : (key)-> "lock:web:{#{key}}"
+	# This lock is used whenever we read or write to an existing project's
+	# structure. Some operations to project structure cannot be done atomically
+	# in mongo, this lock is used to prevent reading the structure between two
+	# parts of a staged update.
+	#
+	# This lock should only be called by ProjectEntityHandler and ProjectGetter
+	mongoTransactionLock:
+		runWithLock: (project_id, runner = ( (releaseLock = (error) ->) -> ), callback = ( (error) -> )) ->
+			LockManager._runWithLock "lock:web:mongoTransaction:{#{project_id}}", runner, callback
 
-	tryLock : (key, callback = (err, isFree)->)->
-		rclient.set LockManager._blockingKey(key), "locked", "EX", LockManager.REDIS_LOCK_EXPIRY, "NX", (err, gotLock)->
+	# This lock is used to make sure that the project structure updates are made
+	# sequentially. In particular the updates must be made in mongo and sent to
+	# the doc-updater in the same order.
+	#
+	# This lock is generally called at a high level.
+	sequentialProjectStructureUpdateLock:
+		runWithLock: (project_id, runner = ( (releaseLock = (error) ->) -> ), callback = ( (error) -> )) ->
+			LockManager._runWithLock "lock:web:sequentialProjectStructureUpdateLock:{#{project_id}}", runner, callback
+
+	_runWithLock: (key, runner = ( (releaseLock = (error) ->) -> ), callback = ( (error) -> )) ->
+		LockManager._getLock key, (error) ->
+			return callback(error) if error?
+			runner (error1, values...) ->
+				LockManager._releaseLock key, (error2) ->
+					error = error1 or error2
+					return callback(error) if error?
+					callback null, values...
+
+	_tryLock : (key, callback = (err, isFree)->)->
+		rclient.set key, "locked", "EX", LockManager.REDIS_LOCK_EXPIRY, "NX", (err, gotLock)->
 			return callback(err) if err?
 			if gotLock == "OK"
 				metrics.inc "lock-not-blocking"
@@ -22,22 +48,22 @@ module.exports = LockManager =
 				logger.log key: key, redis_response: gotLock, "lock is locked"
 				callback err, false
 
-	getLock: (key, callback = (error) ->) ->
+	_getLock: (key, callback = (error) ->) ->
 		startTime = Date.now()
 		do attempt = () ->
 			if Date.now() - startTime > LockManager.MAX_LOCK_WAIT_TIME
 				return callback(new Error("Timeout"))
 
-			LockManager.tryLock key, (error, gotLock) ->
+			LockManager._tryLock key, (error, gotLock) ->
 				return callback(error) if error?
 				if gotLock
 					callback(null)
 				else
 					setTimeout attempt, LockManager.LOCK_TEST_INTERVAL
 
-	checkLock: (key, callback = (err, isFree)->)->
+	_checkLock: (key, callback = (err, isFree)->)->
 		multi = rclient.multi()
-		multi.exists LockManager._blockingKey(key)
+		multi.exists key
 		multi.exec (err, replys)->
 			return callback(err) if err?
 			exists = parseInt replys[0]
@@ -48,14 +74,5 @@ module.exports = LockManager =
 				metrics.inc "lock-not-blocking"
 				callback err, true
 
-	releaseLock: (key, callback)->
-		rclient.del LockManager._blockingKey(key), callback
-
-	runWithLock: (key, runner = ( (releaseLock = (error) ->) -> ), callback = ( (error) -> )) ->
-		LockManager.getLock key, (error) ->
-			return callback(error) if error?
-			runner (error1, values...) ->
-				LockManager.releaseLock key, (error2) ->
-					error = error1 or error2
-					return callback(error) if error?
-					callback null, values...
+	_releaseLock: (key, callback)->
+		rclient.del key, callback

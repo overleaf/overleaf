@@ -20,7 +20,7 @@ TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 
 wrapWithLock = (methodWithoutLock) ->
 	methodWithLock = (project_id, args..., callback) ->
-		LockManager.runWithLock project_id,
+		LockManager.sequentialProjectStructureUpdateLock.runWithLock project_id,
 			(cb) -> methodWithoutLock project_id, args..., cb
 			callback
 	methodWithLock.withoutLock = methodWithoutLock

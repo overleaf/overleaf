@@ -5,6 +5,7 @@ ObjectId = mongojs.ObjectId
 async = require "async"
 Project = require("../../models/Project").Project
 logger = require("logger-sharelatex")
+LockManager = require("../../infrastructure/LockManager")
 
 module.exports = ProjectGetter =
 	EXCLUDE_DEPTH: 8
@@ -26,7 +27,15 @@ module.exports = ProjectGetter =
 			callback error, projects[0]
 
 
-	getProject: (query, projection, callback = (error, project) ->) ->
+	getProject: (project_id, projection, callback = (error, project) ->) ->
+		if projection?.rootFolder
+			LockManager.mongoTransactionLock.runWithLock project_id,
+				(cb) -> ProjectGetter.getProjectWithoutLock project_id, projection, cb
+				callback
+		else
+			ProjectGetter.getProjectWithoutLock project_id, projection, callback
+
+	getProjectWithoutLock: (query, projection, callback = (error, project) ->) ->
 		if !query?
 			return callback("no query provided")
 
@@ -44,7 +53,7 @@ module.exports = ProjectGetter =
 			logger.log query:query, err:err, type:typeof(query), "malformed get request"
 			return callback(err)
 
-		db.projects.find query, projection, (err, project)->
+		db.projects.find query, projection, (err, project) ->
 			if err?
 				logger.err err:err, query:query, projection:projection, "error getting project"
 				return callback(err)
