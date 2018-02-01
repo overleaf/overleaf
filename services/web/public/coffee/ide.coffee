@@ -170,6 +170,8 @@ define [
 			$scope.$broadcast('ide:loaded')
 			_loaded = true
 
+		$scope.$on 'cursor:editor:update', event_tracking.editingSessionHeartbeat
+
 		DARK_THEMES = [
 			"ambiance", "chaos", "clouds_midnight", "cobalt", "idle_fingers",
 			"merbivore", "merbivore_soft", "mono_industrial", "monokai",

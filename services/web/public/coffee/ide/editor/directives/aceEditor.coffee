@@ -36,7 +36,7 @@ define [
 			url = ace.config._moduleUrl(args...)
 			return url
 
-	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory, metadata, graphics, preamble, files, $http, $q) ->
+	App.directive "aceEditor", ($timeout, $compile, $rootScope, event_tracking, localStorage, $cacheFactory, metadata, graphics, preamble, files, $http, $q, $window) ->
 		monkeyPatchSearch($rootScope, $compile)
 
 		return  {
@@ -300,6 +300,7 @@ define [
 				updateCount = 0
 				onChange = () ->
 					updateCount++
+
 					if updateCount == 100
 						event_tracking.send 'editor-interaction', 'multi-doc-update'
 					scope.$emit "#{scope.name}:change"
@@ -374,6 +375,16 @@ define [
 					# need to set annotations after attaching because attaching
 					# deletes and then inserts document content
 					session.setAnnotations scope.annotations
+
+
+					session.on "changeScrollTop", event_tracking.editingSessionHeartbeat
+
+					angular.element($window).on('click',
+						event_tracking.editingSessionHeartbeat)
+
+					scope.$on "$destroy", () ->
+						angular.element($window).off('click',
+							event_tracking.editingSessionHeartbeat)
 
 					if scope.eventsBridge?
 						session.on "changeScrollTop", onScroll
