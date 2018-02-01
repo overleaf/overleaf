@@ -466,7 +466,7 @@ describe 'ProjectEntityHandler', ->
 
 				it "should return an error", ->
 					@callback
-						.calledWith(new Error("destination folder is a child folder of me"))
+						.calledWith(new Errors.InvalidNameError("destination folder is a child folder of me"))
 						.should.equal true
 
 	describe '_removeElementFromMongoArray ', ->
