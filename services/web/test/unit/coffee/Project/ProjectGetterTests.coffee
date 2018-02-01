@@ -19,6 +19,9 @@ describe "ProjectGetter", ->
 			"metrics-sharelatex": timeAsyncMethod: sinon.stub()
 			"../../models/Project": Project: @Project = {}
 			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler = {}
+			"../../infrastructure/LockManager": @LockManager =
+				mongoTransactionLock:
+					runWithLock : sinon.spy((key, runner, callback) -> runner(callback))
 			"logger-sharelatex":
 				err:->
 				log:->
@@ -61,7 +64,7 @@ describe "ProjectGetter", ->
 			@project =
 				_id: @project_id = "56d46b0a1d3422b87c5ebcb1"
 			@db.projects.find = sinon.stub().callsArgWith(2, null, [@project])
-	
+
 		describe "passing an id", ->
 			beforeEach ->
 				@ProjectGetter.getProjectWithOnlyFolders @project_id, @callback
@@ -101,7 +104,7 @@ describe "ProjectGetter", ->
 			@project =
 				_id: @project_id = "56d46b0a1d3422b87c5ebcb1"
 			@db.projects.find = sinon.stub().callsArgWith(2, null, [@project])
-	
+
 		describe "passing an id", ->
 			beforeEach ->
 				@ProjectGetter.getProjectWithOnlyFolders @project_id, @callback
@@ -159,7 +162,7 @@ describe "ProjectGetter", ->
 				}
 			)
 			@ProjectGetter.findAllUsersProjects @user_id, @fields, @callback
-		
+
 		it "should call the callback with all the projects", ->
 			@callback
 				.calledWith(null, {

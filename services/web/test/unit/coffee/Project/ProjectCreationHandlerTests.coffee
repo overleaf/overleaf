@@ -32,7 +32,7 @@ describe 'ProjectCreationHandler', ->
 		@FolderModel = class Folder
 			constructor:(options)->
 				{@name} = options
-		@ProjectEntityHandler =
+		@ProjectEntityUpdateHandler =
 			addDoc: sinon.stub().callsArgWith(5, null, {_id: docId})
 			addFile: sinon.stub().callsArg(5)
 			setRootDoc: sinon.stub().callsArg(2)
@@ -57,7 +57,7 @@ describe 'ProjectCreationHandler', ->
 			'../../models/Project':{Project:@ProjectModel}
 			'../../models/Folder':{Folder:@FolderModel}
 			'../History/HistoryManager': @HistoryManager
-			'./ProjectEntityHandler':@ProjectEntityHandler
+			'./ProjectEntityUpdateHandler':@ProjectEntityUpdateHandler
 			"./ProjectDetailsHandler":@ProjectDetailsHandler
 			"settings-sharelatex": @Settings
 			'logger-sharelatex': {log:->}
@@ -164,11 +164,11 @@ describe 'ProjectCreationHandler', ->
 				.should.equal true
 
 		it 'should insert main.tex', ->
-			@ProjectEntityHandler.addDoc.calledWith(project_id, rootFolderId, "main.tex", ["mainbasic.tex", "lines"], ownerId)
+			@ProjectEntityUpdateHandler.addDoc.calledWith(project_id, rootFolderId, "main.tex", ["mainbasic.tex", "lines"], ownerId)
 				.should.equal true
 
 		it 'should set the main doc id', ->
-			@ProjectEntityHandler.setRootDoc.calledWith(project_id, docId).should.equal true
+			@ProjectEntityUpdateHandler.setRootDoc.calledWith(project_id, docId).should.equal true
 
 		it 'should build the mainbasic.tex template', ->
 			@handler._buildTemplate
@@ -194,17 +194,17 @@ describe 'ProjectCreationHandler', ->
 				.should.equal true
 
 		it 'should insert main.tex', ->
-			@ProjectEntityHandler.addDoc
+			@ProjectEntityUpdateHandler.addDoc
 				.calledWith(project_id, rootFolderId, "main.tex", ["main.tex", "lines"], ownerId)
 				.should.equal true
 
 		it 'should insert references.bib', ->
-			@ProjectEntityHandler.addDoc
+			@ProjectEntityUpdateHandler.addDoc
 				.calledWith(project_id, rootFolderId, "references.bib", ["references.bib", "lines"], ownerId)
 				.should.equal true
 
 		it 'should insert universe.jpg', ->
-			@ProjectEntityHandler.addFile
+			@ProjectEntityUpdateHandler.addFile
 				.calledWith(
 					project_id, rootFolderId, "universe.jpg",
 					Path.resolve(__dirname + "/../../../../app/templates/project_files/universe.jpg"),
@@ -213,7 +213,7 @@ describe 'ProjectCreationHandler', ->
 				.should.equal true
 
 		it 'should set the main doc id', ->
-			@ProjectEntityHandler.setRootDoc.calledWith(project_id, docId).should.equal true
+			@ProjectEntityUpdateHandler.setRootDoc.calledWith(project_id, docId).should.equal true
 
 		it 'should build the main.tex template', ->
 			@handler._buildTemplate

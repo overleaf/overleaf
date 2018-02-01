@@ -1,4 +1,5 @@
 ProjectEntityHandler = require "./ProjectEntityHandler"
+ProjectEntityUpdateHandler = require "./ProjectEntityUpdateHandler"
 Path = require "path"
 async = require("async")
 _ = require("underscore")
@@ -27,7 +28,7 @@ module.exports = ProjectRootDocManager =
 
 			async.series jobs, (root_doc_id)->
 				if root_doc_id?
-					ProjectEntityHandler.setRootDoc project_id, root_doc_id, callback
+					ProjectEntityUpdateHandler.setRootDoc project_id, root_doc_id, callback
 				else
 					callback()
 

@@ -6,7 +6,7 @@ modulePath = require('path').join __dirname, '../../../../app/js/Features/Editor
 describe "EditorHttpController", ->
 	beforeEach ->
 		@EditorHttpController = SandboxedModule.require modulePath, requires:
-			'../Project/ProjectEntityHandler' : @ProjectEntityHandler = {}
+			'../Project/ProjectEntityUpdateHandler' : @ProjectEntityUpdateHandler = {}
 			'../Project/ProjectDeleter' : @ProjectDeleter = {}
 			'../Project/ProjectGetter' : @ProjectGetter = {}
 			'../User/UserGetter' : @UserGetter = {}
@@ -171,7 +171,7 @@ describe "EditorHttpController", ->
 				doc_id: @doc_id
 			@req.body =
 				name: @name = "doc-name"
-			@ProjectEntityHandler.restoreDoc = sinon.stub().callsArgWith(3, null,
+			@ProjectEntityUpdateHandler.restoreDoc = sinon.stub().callsArgWith(3, null,
 				@doc = { "mock": "doc", _id: @new_doc_id = "new-doc-id" }
 				@folder_id = "mock-folder-id"
 			)
@@ -179,7 +179,7 @@ describe "EditorHttpController", ->
 			@EditorHttpController.restoreDoc @req, @res
 
 		it "should restore the doc", ->
-			@ProjectEntityHandler.restoreDoc
+			@ProjectEntityUpdateHandler.restoreDoc
 				.calledWith(@project_id, @doc_id, @name)
 				.should.equal true
 

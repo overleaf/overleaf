@@ -1,5 +1,5 @@
 projectCreationHandler = require('./ProjectCreationHandler')
-projectEntityHandler = require('./ProjectEntityHandler')
+ProjectEntityUpdateHandler = require('./ProjectEntityUpdateHandler')
 projectLocator = require('./ProjectLocator')
 projectOptionsHandler = require('./ProjectOptionsHandler')
 DocumentUpdaterHandler = require("../DocumentUpdater/DocumentUpdaterHandler")
@@ -14,14 +14,14 @@ module.exports = ProjectDuplicator =
 
 	_copyDocs: (owner_id, newProject, originalRootDoc, originalFolder, desFolder, docContents, callback)->
 		setRootDoc = _.once (doc_id)->
-			projectEntityHandler.setRootDoc newProject._id, doc_id
+			ProjectEntityUpdateHandler.setRootDoc newProject._id, doc_id
 		docs = originalFolder.docs or []
 		jobs = docs.map (doc)->
 			return (cb)->
 				if !doc?._id?
 					return callback()
 				content = docContents[doc._id.toString()]
-				projectEntityHandler.addDoc newProject, desFolder._id, doc.name, content.lines, owner_id, (err, newDoc)->
+				ProjectEntityUpdateHandler.addDoc newProject._id, desFolder._id, doc.name, content.lines, owner_id, (err, newDoc)->
 					if err?
 						logger.err err:err, "error copying doc"
 						return callback(err)
@@ -35,7 +35,7 @@ module.exports = ProjectDuplicator =
 		fileRefs = originalFolder.fileRefs or []
 		jobs = fileRefs.map (file)->
 			return (cb)->
-				projectEntityHandler.copyFileFromExistingProjectWithProject newProject, desFolder._id, originalProject_id, file, owner_id, cb
+				ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject newProject, desFolder._id, originalProject_id, file, owner_id, cb
 		async.parallelLimit jobs, 5, callback
 
 
@@ -51,7 +51,7 @@ module.exports = ProjectDuplicator =
 				return (cb)->
 					if !childFolder?._id?
 						return cb()
-					projectEntityHandler.addFolderWithProject newProject, desFolder?._id, childFolder.name, (err, newFolder)->
+					ProjectEntityUpdateHandler.addFolder newProject._id, desFolder?._id, childFolder.name, (err, newFolder)->
 						return cb(err) if err?
 						ProjectDuplicator._copyFolderRecursivly owner_id, newProject_id, originalProject_id, originalRootDoc, childFolder, newFolder, docContents, cb
 

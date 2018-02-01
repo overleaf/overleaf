@@ -5,7 +5,7 @@ Settings = require('settings-sharelatex')
 ObjectId = require('mongoose').Types.ObjectId
 Project = require('../../models/Project').Project
 Folder = require('../../models/Folder').Folder
-ProjectEntityHandler = require('./ProjectEntityHandler')
+ProjectEntityUpdateHandler = require('./ProjectEntityUpdateHandler')
 ProjectDetailsHandler = require('./ProjectDetailsHandler')
 HistoryManager = require('../History/HistoryManager')
 User = require('../../models/User').User
@@ -54,11 +54,11 @@ module.exports = ProjectCreationHandler =
 			return callback(error) if error?
 			self._buildTemplate "mainbasic.tex", owner_id, projectName, (error, docLines)->
 				return callback(error) if error?
-				ProjectEntityHandler.addDoc project._id, project.rootFolder[0]._id, "main.tex", docLines, owner_id, (error, doc)->
+				ProjectEntityUpdateHandler.addDoc project._id, project.rootFolder[0]._id, "main.tex", docLines, owner_id, (error, doc)->
 					if error?
 						logger.err err:error, "error adding doc when creating basic project"
 						return callback(error)
-					ProjectEntityHandler.setRootDoc project._id, doc._id, (error) ->
+					ProjectEntityUpdateHandler.setRootDoc project._id, doc._id, (error) ->
 						callback(error, project)
 
 	createExampleProject: (owner_id, projectName, callback = (error, project) ->)->
@@ -69,17 +69,17 @@ module.exports = ProjectCreationHandler =
 				(callback) ->
 					self._buildTemplate "main.tex", owner_id, projectName, (error, docLines)->
 						return callback(error) if error?
-						ProjectEntityHandler.addDoc project._id, project.rootFolder[0]._id, "main.tex", docLines, owner_id, (error, doc)->
+						ProjectEntityUpdateHandler.addDoc project._id, project.rootFolder[0]._id, "main.tex", docLines, owner_id, (error, doc)->
 							return callback(error) if error?
-							ProjectEntityHandler.setRootDoc project._id, doc._id, callback
+							ProjectEntityUpdateHandler.setRootDoc project._id, doc._id, callback
 				(callback) ->
 					self._buildTemplate "references.bib", owner_id, projectName, (error, docLines)->
 						return callback(error) if error?
-						ProjectEntityHandler.addDoc project._id, project.rootFolder[0]._id, "references.bib", docLines, owner_id, (error, doc)->
+						ProjectEntityUpdateHandler.addDoc project._id, project.rootFolder[0]._id, "references.bib", docLines, owner_id, (error, doc)->
 							callback(error)
 				(callback) ->
 					universePath = Path.resolve(__dirname + "/../../../templates/project_files/universe.jpg")
-					ProjectEntityHandler.addFile project._id, project.rootFolder[0]._id, "universe.jpg", universePath, owner_id, callback
+					ProjectEntityUpdateHandler.addFile project._id, project.rootFolder[0]._id, "universe.jpg", universePath, owner_id, callback
 			], (error) ->
 				callback(error, project)
 

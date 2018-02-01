@@ -16,6 +16,7 @@ describe "DocumentController", ->
 				log:->
 				err:->
 			"../Project/ProjectEntityHandler": @ProjectEntityHandler = {}
+			"../Project/ProjectEntityUpdateHandler": @ProjectEntityUpdateHandler = {}
 		@res = new MockResponse()
 		@req = new MockRequest()
 		@next = sinon.stub()
@@ -68,7 +69,7 @@ describe "DocumentController", ->
 
 		describe "when the document exists", ->
 			beforeEach ->
-				@ProjectEntityHandler.updateDocLines = sinon.stub().yields()
+				@ProjectEntityUpdateHandler.updateDocLines = sinon.stub().yields()
 				@req.body =
 					lines: @doc_lines
 					version: @version
@@ -76,7 +77,7 @@ describe "DocumentController", ->
 				@DocumentController.setDocument(@req, @res, @next)
 
 			it "should update the document in Mongo", ->
-				@ProjectEntityHandler.updateDocLines
+				@ProjectEntityUpdateHandler.updateDocLines
 					.calledWith(@project_id, @doc_id, @doc_lines, @version, @ranges)
 					.should.equal true
 
@@ -85,7 +86,7 @@ describe "DocumentController", ->
 
 		describe "when the document doesn't exist", ->
 			beforeEach ->
-				@ProjectEntityHandler.updateDocLines = sinon.stub().yields(new Errors.NotFoundError("document does not exist"))
+				@ProjectEntityUpdateHandler.updateDocLines = sinon.stub().yields(new Errors.NotFoundError("document does not exist"))
 				@req.body =
 					lines: @doc_lines
 				@DocumentController.setDocument(@req, @res, @next)

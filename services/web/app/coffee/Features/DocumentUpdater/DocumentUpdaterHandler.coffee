@@ -6,7 +6,6 @@ async = require 'async'
 logger = require('logger-sharelatex')
 metrics = require('metrics-sharelatex')
 Project = require("../../models/Project").Project
-ProjectLocator = require('../../Features/Project/ProjectLocator')
 
 module.exports = DocumentUpdaterHandler =
 	flushProjectToMongo: (project_id, callback = (error) ->)->

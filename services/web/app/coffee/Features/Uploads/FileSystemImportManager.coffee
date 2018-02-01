@@ -3,7 +3,6 @@ fs    = require "fs"
 _     = require "underscore"
 FileTypeManager  = require "./FileTypeManager"
 EditorController = require "../Editor/EditorController"
-ProjectLocator   = require "../Project/ProjectLocator"
 logger = require("logger-sharelatex")
 
 module.exports = FileSystemImportManager =
@@ -17,20 +16,9 @@ module.exports = FileSystemImportManager =
 				content = content.replace(/\r/g, "")
 				lines = content.split("\n")
 				if replace
-					ProjectLocator.findElement project_id: project_id, element_id: folder_id, type: "folder", (error, folder) ->
-						return callback(error) if error?
-						return callback(new Error("Couldn't find folder")) if !folder?
-						existingDoc = null
-						for doc in folder.docs
-							if doc.name == name
-								existingDoc = doc
-								break
-						if existingDoc?
-							EditorController.setDoc project_id, existingDoc._id, user_id, lines, "upload", callback
-						else
-							EditorController.addDocWithoutLock project_id, folder_id, name, lines, "upload", user_id, callback
+					EditorController.upsertDoc project_id, folder_id, name, lines, "upload", user_id, callback
 				else
-					EditorController.addDocWithoutLock project_id, folder_id, name, lines, "upload", user_id, callback
+					EditorController.addDoc project_id, folder_id, name, lines, "upload", user_id, callback
 
 	addFile: (user_id, project_id, folder_id, name, path, replace, callback = (error, file)-> )->
 		FileSystemImportManager._isSafeOnFileSystem path, (err, isSafe)->
@@ -38,28 +26,17 @@ module.exports = FileSystemImportManager =
 				logger.log user_id:user_id, project_id:project_id, folder_id:folder_id, name:name, path:path, "add file is from symlink, stopping insert"
 				return callback("path is symlink")
 
-			if !replace
-				EditorController.addFileWithoutLock project_id, folder_id, name, path, "upload", user_id, callback
+			if replace
+				EditorController.upsertFile project_id, folder_id, name, path, "upload", user_id, callback
 			else
-				ProjectLocator.findElement project_id: project_id, element_id: folder_id, type: "folder", (error, folder) ->
-					return callback(error) if error?
-					return callback(new Error("Couldn't find folder")) if !folder?
-					existingFile = null
-					for fileRef in folder.fileRefs
-						if fileRef.name == name
-							existingFile = fileRef
-							break
-					if existingFile?
-						EditorController.replaceFileWithoutLock project_id, existingFile._id, path, "upload", user_id, callback
-					else
-						EditorController.addFileWithoutLock project_id, folder_id, name, path, "upload", user_id, callback
+				EditorController.addFile project_id, folder_id, name, path, "upload", user_id, callback
 
 	addFolder: (user_id, project_id, folder_id, name, path, replace, callback = (error)-> ) ->
 		FileSystemImportManager._isSafeOnFileSystem path, (err, isSafe)->
 			if !isSafe
 				logger.log user_id:user_id, project_id:project_id, folder_id:folder_id, path:path, "add folder is from symlink, stopping insert"
 				return callback("path is symlink")
-			EditorController.addFolderWithoutLock project_id, folder_id, name, "upload", (error, new_folder) =>
+			EditorController.addFolder project_id, folder_id, name, "upload", (error, new_folder) =>
 				return callback(error) if error?
 				FileSystemImportManager.addFolderContents user_id, project_id, new_folder._id, path, replace, (error) ->
 					return callback(error) if error?
