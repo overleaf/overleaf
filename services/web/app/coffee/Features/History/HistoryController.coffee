@@ -46,14 +46,9 @@ module.exports = HistoryController =
 				"X-User-Id": user_id
 		}, (error, response, body) ->
 			return next(error) if error?
-			if 200 <= res.statusCode < 300
-				HistoryManager.injectUserDetails body, (error, data) ->
-					return next(error) if error?
-					res.json data
-			else
-				error = new Error("history api responded with non-success code: #{res.statusCode}")
-				logger.error err: error, user_id: user_id, "error proxying request to history api"
-				next(error)
+			HistoryManager.injectUserDetails body, (error, data) ->
+				return next(error) if error?
+				res.json data
 
 	buildHistoryServiceUrl: (useProjectHistory) ->
 		# choose a history service, either document-level (trackchanges)
