@@ -13,7 +13,7 @@ define [], () ->
 				console.error "Socket.io javascript not loaded. Please check that the real-time service is running and accessible."
 				@ide.socket =
 					on: () ->
-				$scope.$apply () =>
+				@$scope.$apply () =>
 					@$scope.state.error = "Could not connect to websocket server :("
 				return
 
@@ -100,7 +100,7 @@ define [], () ->
 
 			@ide.socket.on "connect_failed", () =>
 				@connected = false
-				$scope.$apply () =>
+				@$scope.$apply () =>
 					@$scope.state.error = "Unable to connect, please view the <u><a href='/learn/Kb/Connection_problems'>connection problems guide</a></u> to fix the issue."
 
 			# We can get a "disconnect" event at any point after the
@@ -114,7 +114,7 @@ define [], () ->
 				@$scope.$apply () =>
 					@$scope.connection.reconnecting = false
 
-				if !$scope.connection.forced_disconnect and !@userIsInactive and !@gracefullyReconnecting
+				if !@$scope.connection.forced_disconnect and !@userIsInactive and !@gracefullyReconnecting
 					@startAutoReconnectCountdown()
 
 			# Site administrators can send the forceDisconnect event to all users
