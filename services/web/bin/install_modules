@@ -27,3 +27,4 @@ install_module git@github.com:sharelatex/overleaf-integration-web-module.git mod
 install_module git@github.com:sharelatex/overleaf-account-merge.git modules/overleaf-account-merge
 install_module git@github.com:sharelatex/references-search.git modules/references-search
 install_module git@github.com:sharelatex/learn-wiki-web-module.git modules/learn-wiki
+install_module git@github.com:sharelatex/metrics-web-module.git modules/metrics
