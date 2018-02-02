@@ -122,7 +122,7 @@ describe "HistoryController", ->
 			@res =
 				json: sinon.stub()
 			@next = sinon.stub()
-			@request.yields(null, {}, @data = "mock-data")
+			@request.yields(null, {statusCode: 200}, @data = "mock-data")
 			@HistoryManager.injectUserDetails = sinon.stub().yields(null, @data_with_users = "mock-injected-data")
 
 		describe "for a project with the project history flag", ->
