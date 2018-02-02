@@ -120,6 +120,9 @@ define [
 		attachToAce: (ace) -> @_doc.attach_ace(ace, false, window.maxDocLength)
 		detachFromAce: () -> @_doc.detach_ace?()
 
+		attachToCM: (cm) -> @_doc.attach_cm(cm, false)
+		detachFromCM: () -> @_doc.detach_cm?()
+
 		INFLIGHT_OP_TIMEOUT: 5000 # Retry sending ops after 5 seconds without an ack
 		WAIT_FOR_CONNECTION_TIMEOUT: 500 # If we're waiting for the project to join, try again in 0.5 seconds
 		_startInflightOpTimeout: (update) ->
