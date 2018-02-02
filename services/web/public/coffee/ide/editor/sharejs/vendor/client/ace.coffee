@@ -3,7 +3,7 @@
 Range = ace.require("ace/range").Range
 
 # Convert an ace delta into an op understood by share.js
-applyToShareJS = (editorDoc, delta, doc, fromUndo) ->
+applyAceToShareJS = (editorDoc, delta, doc, fromUndo) ->
   # Get the start position of the range, in no. of characters
   getStartOffsetPosition = (start) ->
     # This is quite inefficient - getLines makes a copy of the entire
@@ -81,7 +81,7 @@ window.sharejs.extendDoc 'attach_ace', (editor, keepEditorContents, maxDocLength
 
     fromUndo = !!(editor.getSession().$fromUndo or editor.getSession().$fromReject)
     
-    applyToShareJS editorDoc, change, doc, fromUndo
+    applyAceToShareJS editorDoc, change, doc, fromUndo
 
     check()
 

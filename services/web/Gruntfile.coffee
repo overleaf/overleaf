@@ -108,6 +108,7 @@ module.exports = (grunt) ->
 						"public/coffee/ide/editor/sharejs/vendor/client/microevent.coffee"
 						"public/coffee/ide/editor/sharejs/vendor/client/doc.coffee"
 						"public/coffee/ide/editor/sharejs/vendor/client/ace.coffee"
+						"public/coffee/ide/editor/sharejs/vendor/client/cm.coffee"
 					]
 
 			client:
