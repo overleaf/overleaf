@@ -97,7 +97,7 @@ define [
 				scope.name = attrs.aceEditor
 
 				if scope.spellCheck # only enable spellcheck when explicitly required
-					spellCheckCache =  $cacheFactory("spellCheck-#{scope.name}", {capacity: 1000})
+					spellCheckCache = $cacheFactory.get("spellCheck-#{scope.name}") || $cacheFactory("spellCheck-#{scope.name}", {capacity: 1000})
 					spellCheckManager = new SpellCheckManager(scope, editor, element, spellCheckCache, $http, $q)
 				undoManager           = new UndoManager(scope, editor, element)
 				highlightsManager     = new HighlightsManager(scope, editor, element)
@@ -105,7 +105,6 @@ define [
 				trackChangesManager   = new TrackChangesManager(scope, editor, element)
 				metadataManager = new MetadataManager(scope, editor, element, metadata)
 				autoCompleteManager = new AutoCompleteManager(scope, editor, element, metadataManager, graphics, preamble, files)
-
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				editor.commands.addCommand
