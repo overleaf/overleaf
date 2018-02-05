@@ -150,6 +150,8 @@ module.exports = (grunt) ->
 					sourceMap: true
 					sourceMapFilename: "public/stylesheets/style.css.map"
 					sourceMapBasepath: "public/stylesheets"
+					globalVars:
+						'is-overleaf': false
 				files:
 					"public/stylesheets/style.css": "public/stylesheets/style.less"
 			ol:
@@ -157,6 +159,8 @@ module.exports = (grunt) ->
 					sourceMap: true
 					sourceMapFilename: "public/stylesheets/ol-style.css.map"
 					sourceMapBasepath: "public/stylesheets"
+					globalVars:
+						'is-overleaf': true
 				files:
 					"public/stylesheets/ol-style.css": "public/stylesheets/ol-style.less"
 
