@@ -50,7 +50,7 @@ public abstract class Request<T extends Result> {
         return ret;
     }
 
-    private T getResult() throws FailedConnectionException, ForbiddenException {
+    private T getResult() throws DisabledRepositoryException, FailedConnectionException, ForbiddenException {
         try {
             HttpResponse response = future.get();
             Log.info(
@@ -68,12 +68,18 @@ public abstract class Request<T extends Result> {
             throw new FailedConnectionException();
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
-            if (cause instanceof HttpResponseException &&
-                    (((HttpResponseException) cause).getStatusCode() ==
-                            HttpServletResponse.SC_UNAUTHORIZED ||
-                    ((HttpResponseException) cause).getStatusCode() ==
-                            HttpServletResponse.SC_FORBIDDEN)) {
-                throw new ForbiddenException();
+            if (cause instanceof HttpResponseException) {
+                HttpResponseException httpCause = (HttpResponseException) cause;
+                switch (httpCause.getStatusCode()) {
+                    case HttpServletResponse.SC_UNAUTHORIZED:
+                    case HttpServletResponse.SC_FORBIDDEN:
+                        throw new ForbiddenException();
+                    case HttpServletResponse.SC_GONE:
+                        throw new DisabledRepositoryException();
+                    default:
+                        break;
+                }
+                throw new FailedConnectionException(cause);
             } else {
                 throw new FailedConnectionException(cause);
             }

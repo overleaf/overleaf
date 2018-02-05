@@ -6,6 +6,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.eclipse.jetty.server.Request;
 import uk.ac.ic.wlgitbridge.application.config.Oauth2;
 import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotApi;
+import uk.ac.ic.wlgitbridge.snapshot.base.DisabledRepositoryException;
 import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocRequest;
 import uk.ac.ic.wlgitbridge.util.Instance;
@@ -76,6 +77,9 @@ public class Oauth2Filter implements Filter {
                     filterChain
             );
             return;
+        } catch (DisabledRepositoryException e) {
+            Log.info("[{}] Git access disabled", project);
+            throw new ServletException(e);
         }
         Log.info("[{}] Auth not needed", project);
         filterChain.doFilter(servletRequest, servletResponse);
