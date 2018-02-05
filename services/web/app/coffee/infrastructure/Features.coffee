@@ -14,5 +14,7 @@ module.exports = Features =
 				return Settings.enableGithubSync
 			when 'v1-return-message'
 				return Settings.accountMerge? and Settings.overleaf?
+			when 'rich-text'
+				return Settings.showRichText
 			else
 				throw new Error("unknown feature: #{feature}")

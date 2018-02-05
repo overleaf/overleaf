@@ -192,4 +192,3 @@ define [
 
 		toggleRichText: () ->
 			@$scope.editor.richText = !@$scope.editor.richText
-

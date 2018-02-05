@@ -30,8 +30,9 @@ div.full-size(
 				i.fa.fa-arrow-left
 				| &nbsp;&nbsp;#{translate("open_a_file_on_the_left")}
 
-		.toolbar.toolbar-editor(ng-controller="EditorToolbarController")
-			button(ng-click="toggleRichText()") Rich Text
+		if hasFeature('rich-text')
+			.toolbar.toolbar-editor(ng-controller="EditorToolbarController")
+				button(ng-click="toggleRichText()") Rich Text
 
 		#editor(
 			ace-editor="editor",
@@ -66,11 +67,12 @@ div.full-size(
 			renderer-data="reviewPanel.rendererData"
 		)
 
-		#editor-rich-text(
-			cm-editor
-			ng-if="!editor.opening && editor.richText"
-			sharejs-doc="editor.sharejs_doc"
-		)
+		if hasFeature('rich-text')
+			#editor-rich-text(
+				cm-editor
+				ng-if="!editor.opening && editor.richText"
+				sharejs-doc="editor.sharejs_doc"
+			)
 
 		include ./review-panel
 
