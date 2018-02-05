@@ -119,6 +119,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 						ng-blur="finishRenaming()",
 						select-name-when="entity.renaming",
 						on-enter="finishRenaming()"
+						valid-file
 					)
 
 				span.dropdown.entity-menu-toggle(
@@ -207,6 +208,7 @@ script(type='text/ng-template', id='entityListItemTemplate')
 							ng-blur="finishRenaming()",
 							select-name-when="entity.renaming",
 							on-enter="finishRenaming()"
+							valid-file
 						)
 
 					span.dropdown.entity-menu-toggle(
@@ -316,10 +318,10 @@ script(type='text/ng-template', id='newDocModalTemplate')
 				ng-model="inputs.name",
 				on-enter="create()",
 				select-name-on="open",
-				ng-pattern="validFileRegex",
+				valid-file,
 				name="name"
 			)
-			.text-danger.row-spaced-small(ng-show="newDocForm.name.$error.pattern")
+			.text-danger.row-spaced-small(ng-show="newDocForm.name.$error.validFile")
 				| #{translate('files_cannot_include_invalid_characters')}
 	.modal-footer
 		button.btn.btn-default(
@@ -347,10 +349,10 @@ script(type='text/ng-template', id='newFolderModalTemplate')
 				ng-model="inputs.name",
 				on-enter="create()",
 				select-name-on="open",
-				ng-pattern="validFileRegex",
+				valid-file,
 				name="name"
 			)
-			.text-danger.row-spaced-small(ng-show="newFolderForm.name.$error.pattern")
+			.text-danger.row-spaced-small(ng-show="newFolderForm.name.$error.validFile")
 				| #{translate('files_cannot_include_invalid_characters')}
 	.modal-footer
 		button.btn.btn-default(

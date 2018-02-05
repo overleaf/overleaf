@@ -32,8 +32,9 @@ define [
 			return if !$scope.entity.renaming
 
 			name = $scope.inputs.name
-			
-			if !name.match(new RegExp(ide.validFileRegex))
+
+			# validator will set name to undefined for invalid filenames
+			if !name?
 				# Showing the modal blurs the rename box which calls us again
 				# so track this with the invalidModalShowing flag
 				return if invalidModalShowing
