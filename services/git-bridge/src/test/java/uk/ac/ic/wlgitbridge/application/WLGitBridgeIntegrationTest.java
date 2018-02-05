@@ -45,6 +45,9 @@ public class WLGitBridgeIntegrationTest {
         put("cannotCloneAProtectedProject", new HashMap<String, SnapshotAPIState>() {{
             put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/cannotCloneAProtectedProject/state/state.json")).build());
         }});
+        put("cannotCloneADisabledProject", new HashMap<String, SnapshotAPIState>() {{
+            put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/cannotCloneADisabledProject/state/state.json")).build());
+        }});
         put("canPullAModifiedTexFile", new HashMap<String, SnapshotAPIState>() {{
             put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedTexFile/base/state.json")).build());
             put("withModifiedTexFile", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedTexFile/withModifiedTexFile/state.json")).build());
@@ -725,6 +728,24 @@ public class WLGitBridgeIntegrationTest {
         assertEquals("{\"message\":\"HTTP error 500\"}", response.getResponseBody());
 
         wlgb.stop();
+    }
+
+    @Test
+    public void cannotCloneADisabledProject() throws IOException, GitAPIException, InterruptedException {
+        int gitBridgePort = 33879;
+        int mockServerPort = 3879;
+
+        MockSnapshotServer server = new MockSnapshotServer(mockServerPort, getResource("/cannotCloneADisabledProject").toFile());
+        server.start();
+        server.setState(states.get("cannotCloneADisabledProject").get("state"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+            makeConfigFile(gitBridgePort, mockServerPort)
+        });
+
+        wlgb.run();
+        Process gitProcess = runtime.exec("git clone http://127.0.0.1:" + gitBridgePort + "/testproj.git", null, dir);
+        wlgb.stop();
+        assertNotEquals(0, gitProcess.waitFor());
     }
 
     private String makeConfigFile(
