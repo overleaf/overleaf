@@ -122,7 +122,7 @@ describe "HistoryController", ->
 			@res =
 				json: sinon.stub()
 			@next = sinon.stub()
-			@request.yields(null, {}, @data = "mock-data")
+			@request.yields(null, {statusCode: 200}, @data = "mock-data")
 			@HistoryManager.injectUserDetails = sinon.stub().yields(null, @data_with_users = "mock-injected-data")
 
 		describe "for a project with the project history flag", ->
@@ -182,3 +182,20 @@ describe "HistoryController", ->
 
 			it "should return the data with users to the client", ->
 				@res.json.calledWith(@data_with_users).should.equal true
+
+	describe "proxyToHistoryApiAndInjectUserDetails (with the history API failing)", ->
+		beforeEach ->
+			@req = { url: "/mock/url", method: "POST", useProjectHistory: true }
+			@res = { json: sinon.stub() }
+			@next = sinon.stub()
+			@request.yields(null, {statusCode: 500}, @data = "mock-data")
+			@HistoryManager.injectUserDetails = sinon.stub().yields(null, @data_with_users = "mock-injected-data")
+			@HistoryController.proxyToHistoryApiAndInjectUserDetails @req, @res, @next
+
+		it "should not inject the user data", ->
+			@HistoryManager.injectUserDetails
+				.calledWith(@data)
+				.should.equal false
+
+		it "should not return the data with users to the client", ->
+			@res.json.calledWith(@data_with_users).should.equal false
