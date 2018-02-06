@@ -6,7 +6,7 @@ import uk.ac.ic.wlgitbridge.git.exception.SnapshotAPIException;
 import java.util.Arrays;
 import java.util.List;
 
-public class DisabledRepositoryException extends SnapshotAPIException {
+public class MissingRepositoryException extends SnapshotAPIException {
 
     @Override
     public void fromJSON(JsonElement json) {}

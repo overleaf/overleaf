@@ -35,7 +35,7 @@ import uk.ac.ic.wlgitbridge.git.handler.hook.WriteLatexPutHook;
 import uk.ac.ic.wlgitbridge.server.FileHandler;
 import uk.ac.ic.wlgitbridge.server.PostbackContents;
 import uk.ac.ic.wlgitbridge.server.PostbackHandler;
-import uk.ac.ic.wlgitbridge.snapshot.base.DisabledRepositoryException;
+import uk.ac.ic.wlgitbridge.snapshot.base.MissingRepositoryException;
 import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
 import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotAttachment;
 import uk.ac.ic.wlgitbridge.snapshot.push.PostbackManager;
@@ -384,7 +384,7 @@ public class Bridge {
      * @param hostname
      * @throws SnapshotPostException
      * @throws IOException
-     * @throws DisabledRepositoryException
+     * @throws MissingRepositoryException
      * @throws ForbiddenException
      */
     public void push(
@@ -393,7 +393,7 @@ public class Bridge {
             RawDirectory directoryContents,
             RawDirectory oldDirectoryContents,
             String hostname
-    ) throws SnapshotPostException, IOException, DisabledRepositoryException, ForbiddenException {
+    ) throws SnapshotPostException, IOException, MissingRepositoryException, ForbiddenException {
         try (LockGuard __ = lock.lockGuard(projectName)) {
             pushCritical(
                     oauth2,
@@ -462,7 +462,7 @@ public class Bridge {
      * @param directoryContents
      * @param oldDirectoryContents
      * @throws IOException
-     * @throws DisabledRepositoryException
+     * @throws MissingRepositoryException
      * @throws ForbiddenException
      * @throws SnapshotPostException
      */
@@ -471,7 +471,7 @@ public class Bridge {
             String projectName,
             RawDirectory directoryContents,
             RawDirectory oldDirectoryContents
-    ) throws IOException, DisabledRepositoryException, ForbiddenException, SnapshotPostException {
+    ) throws IOException, MissingRepositoryException, ForbiddenException, SnapshotPostException {
         Log.info("[{}] Pushing", projectName);
         String postbackKey = postbackManager.makeKeyForProject(projectName);
         Log.info(

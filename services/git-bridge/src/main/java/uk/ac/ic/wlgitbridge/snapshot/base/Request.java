@@ -50,7 +50,7 @@ public abstract class Request<T extends Result> {
         return ret;
     }
 
-    private T getResult() throws DisabledRepositoryException, FailedConnectionException, ForbiddenException {
+    private T getResult() throws MissingRepositoryException, FailedConnectionException, ForbiddenException {
         try {
             HttpResponse response = future.get();
             Log.info(
@@ -75,7 +75,7 @@ public abstract class Request<T extends Result> {
                     case HttpServletResponse.SC_FORBIDDEN:
                         throw new ForbiddenException();
                     case HttpServletResponse.SC_GONE:
-                        throw new DisabledRepositoryException();
+                        throw new MissingRepositoryException();
                     default:
                         break;
                 }
