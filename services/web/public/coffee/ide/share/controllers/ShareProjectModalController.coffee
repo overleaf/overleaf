@@ -189,17 +189,17 @@ define [
 			$scope.project.publicAccesLevel = "private"
 			settings.saveProjectAdminSettings({publicAccessLevel: "private"})
 
-		$scope.getReadAndWriteTokenLink = () ->
-			if $scope?.project?.tokens?.readAndWrite?
-				location.origin + "/" + $scope.project.tokens.readAndWrite
+		$scope.$watch "project.tokens.readAndWrite", (token) ->
+			if token?
+				$scope.readAndWriteTokenLink = "#{location.origin}/#{token}"
 			else
-				''
+				$scope.readAndWriteTokenLink = null
 
-		$scope.getReadOnlyTokenLink = () ->
-			if $scope?.project?.tokens?.readOnly?
-				location.origin + "/read/" + $scope.project.tokens.readOnly
+		$scope.$watch "project.tokens.readOnly", (token) ->
+			if token?
+				$scope.readOnlyTokenLink = "#{location.origin}/#{token}"
 			else
-				''
+				$scope.readOnlyTokenLink = null
 
 		$scope.done = () ->
 			$modalInstance.close()

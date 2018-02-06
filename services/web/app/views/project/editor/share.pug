@@ -49,10 +49,12 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 				.col-xs-12.access-token-display-area
 					div.access-token-wrapper
 						strong #{translate('anyone_with_link_can_edit')}
-						pre.access-token {{ getReadAndWriteTokenLink() }}
+						pre.access-token(ng-show="readAndWriteTokenLink") {{ readAndWriteTokenLink }}
+						pre.access-token(ng-hide="readAndWriteTokenLink") #{translate('loading')}...
 					div.access-token-wrapper
 						strong #{translate('anyone_with_link_can_view')}
-						pre.access-token {{ getReadOnlyTokenLink() }}
+						pre.access-token(ng-show="readOnlyTokenLink") {{ readOnlyTokenLink }}
+						pre.access-token(ng-hide="readOnlyTokenLink") #{translate('loading')}...
 
 			//- legacy public-access
 			.row.public-access-level(ng-show="project.publicAccesLevel == 'readAndWrite' || project.publicAccesLevel == 'readOnly'")
