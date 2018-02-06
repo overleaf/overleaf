@@ -49,7 +49,11 @@
 			li(ng-class="{active: (filter == 'v1')}", ng-click="filterProjects('v1')")
 				a(href) #{translate("v1_projects")}
 		li.separator
-			h2 #{translate("folders")}
+			h2 #{translate("tags_slash_folders")}
+		li.tag(ng-cloak)
+			a.tag-name(href, ng-click="openNewTagModal()")
+				i.fa.fa-fw.fa-plus
+				span.name #{translate("new_folder")}
 		li.tag(
 			ng-repeat="tag in tags | orderBy:'name'",
 			ng-class="{active: tag.selected}",
@@ -96,12 +100,9 @@
 			ng-class="{active: filter === 'untagged'}",
 		) 	
 			a.tag-name(href)
-				| #{translate("uncategorized")}
+				span.name
+					| #{translate("uncategorized")}
 				span.subdued  ({{ nUntagged }})
-		li(ng-cloak)
-			a.tag(href, ng-click="openNewTagModal()")
-				i.fa.fa-fw.fa-plus
-				span.name #{translate("new_folder")}
 
 .row-spaced(ng-if="projects.length == 0", ng-cloak)
 	.first-project

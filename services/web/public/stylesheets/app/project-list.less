@@ -203,17 +203,11 @@ ul.folders-menu {
 			}
 		}
 		&.untagged {
-			font-style: italic;
-			margin-bottom: @line-height-computed / 4;
-			a {
-				line-height: @folders-untagged-line-height;
-				&:hover,
-				&:focus {
-					text-decoration: none;
+			a.tag-name {
+				span.name {
+					font-style: italic;
+					padding-left: 0;
 				}
-			}
-			span.subdued {
-				font-style: normal;
 			}
 		}
 		&:hover {
