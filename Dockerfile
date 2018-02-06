@@ -34,7 +34,7 @@ RUN cd /var/www/sharelatex; \
 	npm install; \
 	npm install bcrypt; \
 	cd modules; \
-	git clone https://bitbucket.org/sharelatex/launchpad-webmodule.git launchpad; \
+	git clone https://github.com/sharelatex/launchpad-web-module.git launchpad; \
 	grunt compile;
 
 RUN cd /var/www && node git-revision > revisions.txt
