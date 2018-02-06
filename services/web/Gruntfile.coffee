@@ -1,5 +1,6 @@
 fs = require "fs"
 PackageVersions = require "./app/coffee/infrastructure/PackageVersions"
+Settings = require "settings-sharelatex"
 require('es6-promise').polyfill()
 
 module.exports = (grunt) ->
@@ -153,6 +154,7 @@ module.exports = (grunt) ->
 					sourceMapBasepath: "public/stylesheets"
 					globalVars:
 						'is-overleaf': false
+						'show-rich-text': Settings.showRichText
 				files:
 					"public/stylesheets/style.css": "public/stylesheets/style.less"
 			ol:
@@ -162,6 +164,7 @@ module.exports = (grunt) ->
 					sourceMapBasepath: "public/stylesheets"
 					globalVars:
 						'is-overleaf': true
+						'show-rich-text': Settings.showRichText
 				files:
 					"public/stylesheets/ol-style.css": "public/stylesheets/ol-style.less"
 
