@@ -73,9 +73,14 @@ public abstract class Request<T extends Result> {
                 int sc = httpCause.getStatusCode();
                 if (sc == HttpServletResponse.SC_UNAUTHORIZED || sc == HttpServletResponse.SC_FORBIDDEN) {
                     throw new ForbiddenException();
-                }
-                if (sc >= 400 && sc < 500) {
+                } else if (sc == HttpServletResponse.SC_NOT_FOUND) {
                     throw new MissingRepositoryException();
+                } else if (sc >= 400 && sc < 500) {
+                    throw new MissingRepositoryException(
+                        "This project is currently inaccessible over Git.\n" +
+                        "\n" +
+                        "If you think this is an error, contact support at support@overleaf.com."
+                    );
                 }
                 throw new FailedConnectionException(cause);
             } else {

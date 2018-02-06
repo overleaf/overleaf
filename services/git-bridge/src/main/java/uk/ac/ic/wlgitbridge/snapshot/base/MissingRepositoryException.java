@@ -8,12 +8,21 @@ import java.util.List;
 
 public class MissingRepositoryException extends SnapshotAPIException {
 
+    private String message = "";
+
+    public MissingRepositoryException() {
+    }
+
+    public MissingRepositoryException(String message) {
+        this.message = message;
+    }
+
     @Override
     public void fromJSON(JsonElement json) {}
 
     @Override
     public String getMessage() {
-        return "project not accessible over git";
+        return message;
     }
 
     @Override

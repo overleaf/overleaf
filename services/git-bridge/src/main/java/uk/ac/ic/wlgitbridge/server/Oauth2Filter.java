@@ -78,7 +78,7 @@ public class Oauth2Filter implements Filter {
             );
             return;
         } catch (MissingRepositoryException e) {
-            missing(project, (HttpServletResponse) servletResponse);
+            missing(project, e, (HttpServletResponse) servletResponse);
         }
         Log.info("[{}] Auth not needed", project);
         filterChain.doFilter(servletRequest, servletResponse);
@@ -205,6 +205,7 @@ public class Oauth2Filter implements Filter {
 
     private void missing(
             String projectName,
+            MissingRepositoryException e,
             HttpServletResponse response
     ) throws IOException {
         Log.info("[{}] Project missing.", projectName);
@@ -216,9 +217,9 @@ public class Oauth2Filter implements Filter {
         response.setStatus(404);
 
         PrintWriter w = response.getWriter();
-        w.println("This project is not accessible over Git.");
-        w.println();
-        w.println("If you think this is an error, contact support at support@overleaf.com.");
+        for (String line : e.getDescriptionLines()) {
+            w.println(line);
+        }
         w.close();
     }
 }
