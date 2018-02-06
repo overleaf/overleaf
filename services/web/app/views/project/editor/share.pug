@@ -198,64 +198,6 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 				ng-click="done()"
 			) #{translate("close")}
 
-script(type="text/ng-template", id="makeTokenBasedModalTemplate")
-	.modal-header
-		button.close(
-			type="button"
-			data-dismiss="modal"
-			ng-click="cancel()"
-		) &times;
-		h3 Enable link-sharing?
-	.modal-body.modal-body-share
-		p #{translate('turn_on_link_sharing_consequences')}
-		a(href="/learn/Kb/what_is_link_sharing" target="blank")
-			| #{translate('learn_more_about_link_sharing')}
-	.modal-footer
-		button.btn.btn-default(
-			ng-click="cancel()"
-		) #{translate("cancel")}
-		button.btn.btn-info(
-			ng-click="makeTokenBased()"
-		) #{translate('turn_on_link_sharing')}
-
-script(type="text/ng-template", id="makePrivateModalTemplate")
-	//- Token
-	div(ng-if="project.publicAccesLevel == 'tokenBased'")
-		.modal-header
-			button.close(
-				type="button"
-				data-dismiss="modal"
-				ng-click="cancel()"
-			) &times;
-			h3 #{translate("make_project_private")}?
-		.modal-body.modal-body-share
-			p #{translate('turn_off_link_sharing_consequences')}
-		.modal-footer
-			button.btn.btn-default(
-				ng-click="cancel()"
-			) #{translate("cancel")}
-			button.btn.btn-info(
-				ng-click="makePrivate()"
-			) #{translate("turn_off_link_sharing")}
-	//- Legacy public-access
-	div(ng-if="project.publicAccesLevel != 'tokenBased'")
-		.modal-header
-			button.close(
-				type="button"
-				data-dismiss="modal"
-				ng-click="cancel()"
-			) &times;
-			h3 #{translate("make_project_private")}?
-		.modal-body.modal-body-share
-			p #{translate("make_project_private_consequences")}
-		.modal-footer
-			button.btn.btn-default(
-				ng-click="cancel()"
-			) #{translate("cancel")}
-			button.btn.btn-info(
-				ng-click="makePrivate()"
-			) #{translate("make_private")}
-
 script(type="text/ng-template", id="shareTagTemplate")
 	.tag-template
 		span(ng-if="data.type")
