@@ -37,6 +37,8 @@ module.exports =
 			method:"POST"
 			timeout:1000
 			url: "/user/#{user_id}/event"
+		if settings.overleaf?
+			opts.qs = {fromV2: 1}
 		makeRequest opts, callback
 
 	updateEditingSession: (userId, projectId, segmentation = {}, callback = (error) ->) ->
@@ -52,6 +54,8 @@ module.exports =
 			qs:
 				userId: userId
 				projectId: projectId
+		if settings.overleaf?
+			opts.qs.fromV2 = 1
 		makeRequest opts, callback
 
 
