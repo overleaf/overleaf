@@ -16,7 +16,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 					| &nbsp;&nbsp;
 					a(
 						href
-						ng-click="openMakeTokenBasedModal()"
+						ng-click="makeTokenBased()"
 					) #{translate('turn_on_link_sharing')}
 					span &nbsp;&nbsp;
 					a(
@@ -35,7 +35,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						| &nbsp;&nbsp;
 					a(
 						href
-						ng-click="openMakePrivateModal()"
+						ng-click="makePrivate()"
 					) #{translate('turn_off_link_sharing')}
 					span &nbsp;&nbsp;
 					a(
@@ -62,7 +62,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 					| &nbsp;&nbsp;
 					a(
 						href
-						ng-click="openMakePrivateModal()"
+						ng-click="makePrivate()"
 					) #{translate("make_private")}
 
 			.row.project-member

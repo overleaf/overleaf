@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "ShareProjectModalController", ($scope, $modalInstance, $timeout, projectMembers, projectInvites, $modal, $http, ide, validateCaptcha) ->
+	App.controller "ShareProjectModalController", ($scope, $modalInstance, $timeout, projectMembers, projectInvites, $modal, $http, ide, validateCaptcha, settings, event_tracking) ->
 		$scope.inputs = {
 			privileges: "readAndWrite"
 			contacts: []
@@ -180,19 +180,14 @@ define [
 					$scope.state.error = "Sorry, something went wrong resending the invite :("
 					event.target.blur()
 
-		$scope.openMakePrivateModal = () ->
-			$modal.open {
-				templateUrl: "makePrivateModalTemplate"
-				controller:  "MakePrivateModalController"
-				scope: $scope
-			}
+		$scope.makeTokenBased = () ->
+			$scope.project.publicAccesLevel = "tokenBased"
+			settings.saveProjectAdminSettings({publicAccessLevel: "tokenBased"})
+			event_tracking.sendMB 'project-make-token-based'
 
-		$scope.openMakeTokenBasedModal = () ->
-			$modal.open {
-				templateUrl: "makeTokenBasedModalTemplate"
-				controller:  "MakeTokenBasedModalController"
-				scope: $scope
-			}
+		$scope.makePrivate = () ->
+			$scope.project.publicAccesLevel = "private"
+			settings.saveProjectAdminSettings({publicAccessLevel: "private"})
 
 		$scope.getReadAndWriteTokenLink = () ->
 			if $scope?.project?.tokens?.readAndWrite?
@@ -211,41 +206,3 @@ define [
 
 		$scope.cancel = () ->
 			$modalInstance.dismiss()
-
-
-
-	App.controller "MakePublicModalController", ["$scope", "$modalInstance", "settings", ($scope, $modalInstance, settings) ->
-		$scope.inputs = {
-			privileges: "readAndWrite"
-		}
-
-		$scope.makePublic = () ->
-			$scope.project.publicAccesLevel = $scope.inputs.privileges
-			settings.saveProjectAdminSettings({publicAccessLevel: $scope.inputs.privileges})
-			$modalInstance.close()
-
-		$scope.cancel = () ->
-			$modalInstance.dismiss()
-	]
-
-	App.controller "MakeTokenBasedModalController", ["$scope", "$modalInstance", "settings", "event_tracking", ($scope, $modalInstance, settings, event_tracking) ->
-
-		$scope.makeTokenBased = () ->
-			$scope.project.publicAccesLevel = "tokenBased"
-			settings.saveProjectAdminSettings({publicAccessLevel: "tokenBased"})
-			event_tracking.sendMB 'project-make-token-based'
-			$modalInstance.close()
-
-		$scope.cancel = () ->
-			$modalInstance.dismiss()
-	]
-
-	App.controller "MakePrivateModalController", ["$scope", "$modalInstance", "settings", ($scope, $modalInstance, settings) ->
-		$scope.makePrivate = () ->
-			$scope.project.publicAccesLevel = "private"
-			settings.saveProjectAdminSettings({publicAccessLevel: "private"})
-			$modalInstance.close()
-
-		$scope.cancel = () ->
-			$modalInstance.dismiss()
-	]
