@@ -70,14 +70,12 @@ public abstract class Request<T extends Result> {
             Throwable cause = e.getCause();
             if (cause instanceof HttpResponseException) {
                 HttpResponseException httpCause = (HttpResponseException) cause;
-                switch (httpCause.getStatusCode()) {
-                    case HttpServletResponse.SC_UNAUTHORIZED:
-                    case HttpServletResponse.SC_FORBIDDEN:
-                        throw new ForbiddenException();
-                    case HttpServletResponse.SC_GONE:
-                        throw new MissingRepositoryException();
-                    default:
-                        break;
+                int sc = httpCause.getStatusCode();
+                if (sc == HttpServletResponse.SC_UNAUTHORIZED || sc == HttpServletResponse.SC_FORBIDDEN) {
+                    throw new ForbiddenException();
+                }
+                if (sc >= 400 && sc < 500) {
+                    throw new MissingRepositoryException();
                 }
                 throw new FailedConnectionException(cause);
             } else {

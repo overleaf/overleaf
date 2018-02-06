@@ -48,6 +48,9 @@ public class WLGitBridgeIntegrationTest {
         put("cannotCloneADisabledProject", new HashMap<String, SnapshotAPIState>() {{
             put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/cannotCloneADisabledProject/state/state.json")).build());
         }});
+        put("cannotCloneAMissingProject", new HashMap<String, SnapshotAPIState>() {{
+            put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/cannotCloneAMissingProject/state/state.json")).build());
+        }});
         put("canPullAModifiedTexFile", new HashMap<String, SnapshotAPIState>() {{
             put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedTexFile/base/state.json")).build());
             put("withModifiedTexFile", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedTexFile/withModifiedTexFile/state.json")).build());
@@ -738,6 +741,24 @@ public class WLGitBridgeIntegrationTest {
         MockSnapshotServer server = new MockSnapshotServer(mockServerPort, getResource("/cannotCloneADisabledProject").toFile());
         server.start();
         server.setState(states.get("cannotCloneADisabledProject").get("state"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+            makeConfigFile(gitBridgePort, mockServerPort)
+        });
+
+        wlgb.run();
+        Process gitProcess = runtime.exec("git clone http://127.0.0.1:" + gitBridgePort + "/testproj.git", null, dir);
+        wlgb.stop();
+        assertNotEquals(0, gitProcess.waitFor());
+    }
+
+    @Test
+    public void cannotCloneAMissingProject() throws IOException, GitAPIException, InterruptedException {
+        int gitBridgePort = 33880;
+        int mockServerPort = 3880;
+
+        MockSnapshotServer server = new MockSnapshotServer(mockServerPort, getResource("/cannotCloneAMissingProject").toFile());
+        server.start();
+        server.setState(states.get("cannotCloneAMissingProject").get("state"));
         GitBridgeApp wlgb = new GitBridgeApp(new String[] {
             makeConfigFile(gitBridgePort, mockServerPort)
         });
