@@ -24,7 +24,7 @@ module.exports = AnnouncementsHandler =
 
 		async.parallel {
 			lastEvent: (cb)->
-				AnalyticsManager.getLastOccurance user._id, "announcement-alert-dismissed", cb
+				AnalyticsManager.getLastOccurrence user._id, "announcement-alert-dismissed", cb
 			announcements: (cb)->
 				BlogHandler.getLatestAnnouncements cb
 		}, (err, results)->

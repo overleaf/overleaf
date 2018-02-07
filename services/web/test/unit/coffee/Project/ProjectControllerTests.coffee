@@ -60,7 +60,7 @@ describe "ProjectController", ->
 			getSessionUser: sinon.stub().returns(@user)
 			isUserLoggedIn: sinon.stub().returns(true)
 		@AnalyticsManager =
-			getLastOccurance: sinon.stub()
+			getLastOccurrence: sinon.stub()
 		@TokenAccessHandler =
 			getRequestToken: sinon.stub().returns(@token)
 			protectTokens: sinon.stub()
@@ -445,7 +445,7 @@ describe "ProjectController", ->
 			@AuthorizationManager.getPrivilegeLevelForProject.callsArgWith 3, null, "owner"
 			@ProjectDeleter.unmarkAsDeletedByExternalSource = sinon.stub()
 			@InactiveProjectManager.reactivateProjectIfRequired.callsArgWith(1)
-			@AnalyticsManager.getLastOccurance.yields(null, {"mock": "event"})
+			@AnalyticsManager.getLastOccurrence.yields(null, {"mock": "event"})
 			@ProjectUpdateHandler.markAsOpened.callsArgWith(1)
 
 		it "should render the project/editor page", (done)->
