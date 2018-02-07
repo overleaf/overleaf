@@ -27,10 +27,6 @@ public class MissingRepositoryException extends SnapshotAPIException {
         descriptionLines = new ArrayList<String>();
     }
 
-    public MissingRepositoryException(String message) {
-        this.descriptionLines = Arrays.asList(message);
-    }
-
     public MissingRepositoryException(List<String> descriptionLines) {
         this.descriptionLines = descriptionLines;
     }
