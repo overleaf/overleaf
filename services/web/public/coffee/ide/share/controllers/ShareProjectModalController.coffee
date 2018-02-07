@@ -127,10 +127,14 @@ define [
 								# with new collaborator information.
 								addNextMember()
 							, 0
-						.catch (err) ->
+						.catch (httpResponse) ->
+							{data, status, headers, config } = httpResponse
 							$scope.state.inflight = false
 							$scope.state.error = true
-							if err.status? and err.status == 400
+
+							if data?.errorReason?
+								$scope.state.errorReason = data?.errorReason
+							else if status? and status == 400
 								$scope.state.errorReason = 'invalid_email'
 							else
 								$scope.state.errorReason = null

@@ -185,6 +185,8 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 				span(ng-switch="state.errorReason")
 					span(ng-switch-when="cannot_invite_non_user")
 						| #{translate("cannot_invite_non_user")}
+					span(ng-switch-when="cannot_verify_user_not_robot")
+						| #{translate("cannot_verify_user_not_robot")}
 					span(ng-switch-when="cannot_invite_self")
 						| #{translate("cannot_invite_self")}
 					span(ng-switch-when="invalid_email")
