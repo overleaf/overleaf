@@ -78,7 +78,7 @@ public class Oauth2Filter implements Filter {
             );
             return;
         } catch (MissingRepositoryException e) {
-            missing(project, e, (HttpServletResponse) servletResponse);
+            handleMissingRepository(project, e, (HttpServletResponse) servletResponse);
         }
         Log.info("[{}] Auth not needed", project);
         filterChain.doFilter(servletRequest, servletResponse);
@@ -133,7 +133,7 @@ public class Oauth2Filter implements Filter {
                                         )
                                 ).execute().getAccessToken();
                             } catch (TokenResponseException e) {
-                                unauthorized(projectName, capturedUsername, e.getStatusCode(), request, response);
+                                handleNeedAuthorization(projectName, capturedUsername, e.getStatusCode(), request, response);
                                 return;
                             }
                             final Credential cred = new Credential.Builder(
@@ -148,7 +148,7 @@ public class Oauth2Filter implements Filter {
                                     servletResponse
                             );
                         } else {
-                            unauthorized(projectName, capturedUsername, 0, request, response);
+                            handleNeedAuthorization(projectName, capturedUsername, 0, request, response);
                         }
                     } catch (UnsupportedEncodingException e) {
                         throw new Error("Couldn't retrieve authentication", e);
@@ -156,14 +156,14 @@ public class Oauth2Filter implements Filter {
                 }
             }
         } else {
-            unauthorized(projectName, capturedUsername, 0, request, response);
+            handleNeedAuthorization(projectName, capturedUsername, 0, request, response);
         }
     }
 
     @Override
     public void destroy() {}
 
-    private void unauthorized(
+    private void handleNeedAuthorization(
             String projectName,
             String userName,
             int statusCode,
@@ -203,7 +203,7 @@ public class Oauth2Filter implements Filter {
         w.close();
     }
 
-    private void missing(
+    private void handleMissingRepository(
             String projectName,
             MissingRepositoryException e,
             HttpServletResponse response
