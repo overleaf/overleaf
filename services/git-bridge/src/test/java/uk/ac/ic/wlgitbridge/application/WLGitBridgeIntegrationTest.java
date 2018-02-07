@@ -42,8 +42,8 @@ public class WLGitBridgeIntegrationTest {
         put("canCloneMultipleRepositories", new HashMap<String, SnapshotAPIState>() {{
             put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/canCloneMultipleRepositories/state/state.json")).build());
         }});
-        put("cannotCloneAProtectedProject", new HashMap<String, SnapshotAPIState>() {{
-            put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/cannotCloneAProtectedProject/state/state.json")).build());
+        put("cannotCloneAProtectedProjectWithoutAuthentication", new HashMap<String, SnapshotAPIState>() {{
+            put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/cannotCloneAProtectedProjectWithoutAuthentication/state/state.json")).build());
         }});
         put("cannotCloneADisabledProject", new HashMap<String, SnapshotAPIState>() {{
             put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/cannotCloneADisabledProject/state/state.json")).build());
@@ -734,13 +734,13 @@ public class WLGitBridgeIntegrationTest {
     }
 
     @Test
-    public void cannotCloneAProtectedProject() throws IOException, GitAPIException, InterruptedException {
+    public void cannotCloneAProtectedProjectWithoutAuthentication() throws IOException, GitAPIException, InterruptedException {
         int gitBridgePort = 33883;
         int mockServerPort = 3883;
 
-        MockSnapshotServer server = new MockSnapshotServer(mockServerPort, getResource("/cannotCloneAProtectedProject").toFile());
+        MockSnapshotServer server = new MockSnapshotServer(mockServerPort, getResource("/cannotCloneAProtectedProjectWithoutAuthentication").toFile());
         server.start();
-        server.setState(states.get("cannotCloneAProtectedProject").get("state"));
+        server.setState(states.get("cannotCloneAProtectedProjectWithoutAuthentication").get("state"));
         GitBridgeApp wlgb = new GitBridgeApp(new String[] {
             makeConfigFile(gitBridgePort, mockServerPort)
         });
