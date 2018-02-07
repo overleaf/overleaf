@@ -1,5 +1,3 @@
-Path = require('path')
-
 BADCHAR_RX = ///
 	[
 		\/ # no slashes
