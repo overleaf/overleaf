@@ -734,6 +734,24 @@ public class WLGitBridgeIntegrationTest {
     }
 
     @Test
+    public void cannotCloneAProtectedProject() throws IOException, GitAPIException, InterruptedException {
+        int gitBridgePort = 33883;
+        int mockServerPort = 3883;
+
+        MockSnapshotServer server = new MockSnapshotServer(mockServerPort, getResource("/cannotCloneAProtectedProject").toFile());
+        server.start();
+        server.setState(states.get("cannotCloneAProtectedProject").get("state"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+            makeConfigFile(gitBridgePort, mockServerPort)
+        });
+
+        wlgb.run();
+        Process gitProcess = runtime.exec("git clone http://127.0.0.1:" + gitBridgePort + "/testproj.git", null, dir);
+        wlgb.stop();
+        assertNotEquals(0, gitProcess.waitFor());
+    }
+
+    @Test
     public void cannotCloneADisabledProject() throws IOException, GitAPIException, InterruptedException {
         int gitBridgePort = 33879;
         int mockServerPort = 3879;
