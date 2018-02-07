@@ -36,7 +36,7 @@ public class MissingRepositoryException extends SnapshotAPIException {
 
     @Override
     public String getMessage() {
-        return String.join("\n", this.descriptionLines);
+        return "no git access";
     }
 
     @Override
