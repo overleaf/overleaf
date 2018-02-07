@@ -134,8 +134,6 @@ define [
 
 							if data?.errorReason?
 								$scope.state.errorReason = data?.errorReason
-							else if status? and status == 400
-								$scope.state.errorReason = 'invalid_email'
 							else
 								$scope.state.errorReason = null
 

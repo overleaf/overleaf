@@ -65,7 +65,7 @@ module.exports = CollaboratorsInviteController =
 			email = EmailHelper.parseEmail(email)
 			if !email? or email == ""
 				logger.log {projectId, email, sendingUserId}, "invalid email address"
-				return res.sendStatus(400)
+				return res.status(400).send({errorReason:"invalid_email"})
 			CollaboratorsInviteController._checkRateLimit sendingUserId, (error, underRateLimit) ->
 				return next(error) if error?
 				if !underRateLimit
