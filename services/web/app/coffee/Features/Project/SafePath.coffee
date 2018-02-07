@@ -22,6 +22,13 @@ MAX_PATH = 1024 # Maximum path length, in characters. This is fairly arbitrary.
 
 module.exports = SafePath =
 
+	clean: (filename) ->
+		filename = filename.replace BADCHAR_RX, '_'
+		# for BADFILE_RX replace any matches with an equal number of underscores
+		filename = filename.replace BADFILE_RX, (match) -> 
+			return new Array(match.length + 1).join("_")
+		return filename
+
 	isCleanFilename: (filename) ->
 		return SafePath.isAllowedLength(filename) &&
 			not filename.match(BADCHAR_RX) &&

@@ -87,3 +87,37 @@ describe 'SafePath', ->
 		it 'should not accept an empty path', ->
 			result = @SafePath.isAllowedLength ''
 			result.should.equal false
+	
+	describe 'clean', ->
+		it 'should not modify a valid filename', ->
+			result = @SafePath.clean 'main.tex'
+			result.should.equal 'main.tex'
+
+		it 'should replace invalid characters with _', ->
+			result = @SafePath.clean 'foo/bar*/main.tex'
+			result.should.equal 'foo_bar__main.tex'
+			
+		it 'should replace "." with "_"', ->
+			result = @SafePath.clean '.'
+			result.should.equal '_'
+
+		it 'should replace ".." with "__"', ->
+			result = @SafePath.clean '..'
+			result.should.equal '__'
+
+		it 'should replace a single trailing space with _', ->
+			result = @SafePath.clean 'foo '
+			result.should.equal 'foo_'
+
+		it 'should replace a multiple trailing spaces with ___', ->
+			result = @SafePath.clean 'foo  '
+			result.should.equal 'foo__'
+
+		it 'should replace a single leading space with _', ->
+			result = @SafePath.clean ' foo'
+			result.should.equal '_foo'
+
+		it 'should replace a multiple leading spaces with ___', ->
+			result = @SafePath.clean '  foo'
+			result.should.equal '__foo'		
+
