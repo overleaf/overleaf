@@ -2,6 +2,7 @@ package uk.ac.ic.wlgitbridge.bridge.snapshot;
 
 import com.google.api.client.auth.oauth2.Credential;
 import uk.ac.ic.wlgitbridge.data.CandidateSnapshot;
+import uk.ac.ic.wlgitbridge.snapshot.base.MissingRepositoryException;
 import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocResult;
@@ -33,13 +34,14 @@ public interface SnapshotApi {
             String postbackKey);
 
     static <T> T getResult(CompletableFuture<T> result)
-            throws FailedConnectionException, ForbiddenException {
+            throws MissingRepositoryException, FailedConnectionException, ForbiddenException {
         try {
             return result.join();
         } catch (CompletionException e) {
             try {
                 throw e.getCause();
-            } catch (FailedConnectionException
+            } catch (MissingRepositoryException
+                    | FailedConnectionException
                     | ForbiddenException
                     | RuntimeException r) {
                 throw r;

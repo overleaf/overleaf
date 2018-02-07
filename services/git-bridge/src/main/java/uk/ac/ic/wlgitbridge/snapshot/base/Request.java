@@ -2,6 +2,7 @@ package uk.ac.ic.wlgitbridge.snapshot.base;
 
 import com.google.api.client.http.*;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.ning.http.client.AsyncHttpClient;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.util.Instance;
@@ -50,7 +51,7 @@ public abstract class Request<T extends Result> {
         return ret;
     }
 
-    private T getResult() throws FailedConnectionException, ForbiddenException {
+    private T getResult() throws MissingRepositoryException, FailedConnectionException, ForbiddenException {
         try {
             HttpResponse response = future.get();
             Log.info(
@@ -68,12 +69,30 @@ public abstract class Request<T extends Result> {
             throw new FailedConnectionException();
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
-            if (cause instanceof HttpResponseException &&
-                    (((HttpResponseException) cause).getStatusCode() ==
-                            HttpServletResponse.SC_UNAUTHORIZED ||
-                    ((HttpResponseException) cause).getStatusCode() ==
-                            HttpServletResponse.SC_FORBIDDEN)) {
-                throw new ForbiddenException();
+            if (cause instanceof HttpResponseException) {
+                HttpResponseException httpCause = (HttpResponseException) cause;
+                int sc = httpCause.getStatusCode();
+                if (sc == HttpServletResponse.SC_UNAUTHORIZED || sc == HttpServletResponse.SC_FORBIDDEN) {
+                    throw new ForbiddenException();
+                } else if (sc == HttpServletResponse.SC_NOT_FOUND) {
+                    try {
+                        JsonObject json = Instance.gson.fromJson(httpCause.getContent(), JsonObject.class);
+                        String message = json.get("message").getAsString();
+
+                        if ("Exported to v2".equals(message)) {
+                            throw new MissingRepositoryException(MissingRepositoryException.EXPORTED_TO_V2);
+                        }
+                    } catch (IllegalStateException
+                            | ClassCastException
+                            | NullPointerException _) {
+                        // disregard any errors that arose while handling the JSON
+                    }
+
+                    throw new MissingRepositoryException();
+                } else if (sc >= 400 && sc < 500) {
+                    throw new MissingRepositoryException(MissingRepositoryException.GENERIC_REASON);
+                }
+                throw new FailedConnectionException(cause);
             } else {
                 throw new FailedConnectionException(cause);
             }

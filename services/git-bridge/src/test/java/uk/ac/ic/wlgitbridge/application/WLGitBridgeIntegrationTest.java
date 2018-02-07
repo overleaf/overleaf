@@ -42,8 +42,14 @@ public class WLGitBridgeIntegrationTest {
         put("canCloneMultipleRepositories", new HashMap<String, SnapshotAPIState>() {{
             put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/canCloneMultipleRepositories/state/state.json")).build());
         }});
-        put("cannotCloneAProtectedProject", new HashMap<String, SnapshotAPIState>() {{
-            put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/cannotCloneAProtectedProject/state/state.json")).build());
+        put("cannotCloneAProtectedProjectWithoutAuthentication", new HashMap<String, SnapshotAPIState>() {{
+            put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/cannotCloneAProtectedProjectWithoutAuthentication/state/state.json")).build());
+        }});
+        put("cannotCloneA4xxProject", new HashMap<String, SnapshotAPIState>() {{
+            put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/cannotCloneA4xxProject/state/state.json")).build());
+        }});
+        put("cannotCloneAMissingProject", new HashMap<String, SnapshotAPIState>() {{
+            put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/cannotCloneAMissingProject/state/state.json")).build());
         }});
         put("canPullAModifiedTexFile", new HashMap<String, SnapshotAPIState>() {{
             put("base", new SnapshotAPIStateBuilder(getResourceAsStream("/canPullAModifiedTexFile/base/state.json")).build());
@@ -725,6 +731,60 @@ public class WLGitBridgeIntegrationTest {
         assertEquals("{\"message\":\"HTTP error 500\"}", response.getResponseBody());
 
         wlgb.stop();
+    }
+
+    @Test
+    public void cannotCloneAProtectedProjectWithoutAuthentication() throws IOException, GitAPIException, InterruptedException {
+        int gitBridgePort = 33883;
+        int mockServerPort = 3883;
+
+        MockSnapshotServer server = new MockSnapshotServer(mockServerPort, getResource("/cannotCloneAProtectedProjectWithoutAuthentication").toFile());
+        server.start();
+        server.setState(states.get("cannotCloneAProtectedProjectWithoutAuthentication").get("state"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+            makeConfigFile(gitBridgePort, mockServerPort)
+        });
+
+        wlgb.run();
+        Process gitProcess = runtime.exec("git clone http://127.0.0.1:" + gitBridgePort + "/testproj.git", null, dir);
+        wlgb.stop();
+        assertNotEquals(0, gitProcess.waitFor());
+    }
+
+    @Test
+    public void cannotCloneA4xxProject() throws IOException, GitAPIException, InterruptedException {
+        int gitBridgePort = 33879;
+        int mockServerPort = 3879;
+
+        MockSnapshotServer server = new MockSnapshotServer(mockServerPort, getResource("/cannotCloneA4xxProject").toFile());
+        server.start();
+        server.setState(states.get("cannotCloneA4xxProject").get("state"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+            makeConfigFile(gitBridgePort, mockServerPort)
+        });
+
+        wlgb.run();
+        Process gitProcess = runtime.exec("git clone http://127.0.0.1:" + gitBridgePort + "/testproj.git", null, dir);
+        wlgb.stop();
+        assertNotEquals(0, gitProcess.waitFor());
+    }
+
+    @Test
+    public void cannotCloneAMissingProject() throws IOException, GitAPIException, InterruptedException {
+        int gitBridgePort = 33880;
+        int mockServerPort = 3880;
+
+        MockSnapshotServer server = new MockSnapshotServer(mockServerPort, getResource("/cannotCloneAMissingProject").toFile());
+        server.start();
+        server.setState(states.get("cannotCloneAMissingProject").get("state"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+            makeConfigFile(gitBridgePort, mockServerPort)
+        });
+
+        wlgb.run();
+        Process gitProcess = runtime.exec("git clone http://127.0.0.1:" + gitBridgePort + "/testproj.git", null, dir);
+        wlgb.stop();
+        assertNotEquals(0, gitProcess.waitFor());
     }
 
     private String makeConfigFile(

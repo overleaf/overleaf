@@ -6,6 +6,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.eclipse.jetty.server.Request;
 import uk.ac.ic.wlgitbridge.application.config.Oauth2;
 import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotApi;
+import uk.ac.ic.wlgitbridge.snapshot.base.MissingRepositoryException;
 import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocRequest;
 import uk.ac.ic.wlgitbridge.util.Instance;
@@ -76,6 +77,8 @@ public class Oauth2Filter implements Filter {
                     filterChain
             );
             return;
+        } catch (MissingRepositoryException e) {
+            handleMissingRepository(project, e, (HttpServletResponse) servletResponse);
         }
         Log.info("[{}] Auth not needed", project);
         filterChain.doFilter(servletRequest, servletResponse);
@@ -130,7 +133,7 @@ public class Oauth2Filter implements Filter {
                                         )
                                 ).execute().getAccessToken();
                             } catch (TokenResponseException e) {
-                                unauthorized(projectName, capturedUsername, e.getStatusCode(), request, response);
+                                handleNeedAuthorization(projectName, capturedUsername, e.getStatusCode(), request, response);
                                 return;
                             }
                             final Credential cred = new Credential.Builder(
@@ -145,7 +148,7 @@ public class Oauth2Filter implements Filter {
                                     servletResponse
                             );
                         } else {
-                            unauthorized(projectName, capturedUsername, 0, request, response);
+                            handleNeedAuthorization(projectName, capturedUsername, 0, request, response);
                         }
                     } catch (UnsupportedEncodingException e) {
                         throw new Error("Couldn't retrieve authentication", e);
@@ -153,14 +156,14 @@ public class Oauth2Filter implements Filter {
                 }
             }
         } else {
-            unauthorized(projectName, capturedUsername, 0, request, response);
+            handleNeedAuthorization(projectName, capturedUsername, 0, request, response);
         }
     }
 
     @Override
     public void destroy() {}
 
-    private void unauthorized(
+    private void handleNeedAuthorization(
             String projectName,
             String userName,
             int statusCode,
@@ -200,4 +203,23 @@ public class Oauth2Filter implements Filter {
         w.close();
     }
 
+    private void handleMissingRepository(
+            String projectName,
+            MissingRepositoryException e,
+            HttpServletResponse response
+    ) throws IOException {
+        Log.info("[{}] Project missing.", projectName);
+
+        response.setContentType("text/plain");
+
+        // git special-cases 404 to give "repository '%s' not found",
+        // rather than displaying the raw status code.
+        response.setStatus(404);
+
+        PrintWriter w = response.getWriter();
+        for (String line : e.getDescriptionLines()) {
+            w.println(line);
+        }
+        w.close();
+    }
 }

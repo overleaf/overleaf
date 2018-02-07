@@ -4,6 +4,7 @@ import com.google.api.client.auth.oauth2.Credential;
 import uk.ac.ic.wlgitbridge.data.CandidateSnapshot;
 import uk.ac.ic.wlgitbridge.data.model.Snapshot;
 import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
+import uk.ac.ic.wlgitbridge.snapshot.base.MissingRepositoryException;
 import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocResult;
@@ -65,7 +66,7 @@ public class SnapshotApiFacade {
             Optional<Credential> oauth2,
             CandidateSnapshot candidateSnapshot,
             String postbackKey
-    ) throws FailedConnectionException, ForbiddenException {
+    ) throws MissingRepositoryException, FailedConnectionException, ForbiddenException {
         return SnapshotApi.getResult(api.push(
                 oauth2, candidateSnapshot, postbackKey));
     }
