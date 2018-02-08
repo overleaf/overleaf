@@ -14,7 +14,7 @@ makeRequest = (opts, callback)->
 		_go = () ->
 			request opts, (err, response, data) ->
 				if err?
-					if iteration == retryTimings.length
+					if iteration == retryTimings.length or !opts.retryOnFail
 						logger.err {err, url: opts.url},
 							"Error in analytics request, retries failed"
 						return callback(err)
@@ -51,6 +51,7 @@ module.exports =
 			method:"POST"
 			timeout:1000
 			url: "/user/#{user_id}/event"
+			retryOnFail: true
 		if settings.overleaf?
 			opts.qs = {fromV2: 1}
 		makeRequest opts, callback
@@ -68,6 +69,7 @@ module.exports =
 			qs:
 				userId: userId
 				projectId: projectId
+			retryOnFail: true
 		if settings.overleaf?
 			opts.qs.fromV2 = 1
 		makeRequest opts, callback
