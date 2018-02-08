@@ -44,8 +44,6 @@ define [
 	App.controller "NewDocModalController", [
 		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder",
 		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->
-			$scope.validFileRegex = ide.validFileRegex
-			
 			$scope.inputs = 
 				name: "name.tex"
 			$scope.state =
@@ -78,8 +76,6 @@ define [
 	App.controller "NewFolderModalController", [
 		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder",
 		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->
-			$scope.validFileRegex = ide.validFileRegex
-
 			$scope.inputs = 
 				name: "name"
 			$scope.state =
