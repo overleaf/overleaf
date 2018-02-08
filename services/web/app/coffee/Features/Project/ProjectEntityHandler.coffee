@@ -17,6 +17,7 @@ DocstoreManager = require "../Docstore/DocstoreManager"
 ProjectGetter = require "./ProjectGetter"
 CooldownManager = require '../Cooldown/CooldownManager'
 DocumentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
+SafePath = require './SafePath'
 
 module.exports = ProjectEntityHandler =
 	getAllFolders: (project_id,  callback) ->
@@ -179,6 +180,9 @@ module.exports = ProjectEntityHandler =
 			ProjectEntityHandler._addDocWithProject project, folder_id, docName, docLines, userId, callback
 
 	_addDocWithProject: (project, folder_id, docName, docLines, userId, callback = (error, doc, folder_id, path) ->)=>
+		# check if docname is allowed
+		if not SafePath.isCleanFilename docName
+			return callback new Errors.InvalidNameError("invalid element name")
 		project_id = project._id
 		logger.log project_id: project_id, folder_id: folder_id, doc_name: docName, "adding doc to project with project"
 		confirmFolder project, folder_id, (folder_id)=>
@@ -201,6 +205,9 @@ module.exports = ProjectEntityHandler =
 						callback(null, doc, folder_id, result?.path?.fileSystem)
 
 	restoreDoc: (project_id, doc_id, name, callback = (error, doc, folder_id) ->) ->
+		# check if docname is allowed (passed in from client so we check it)
+		if not SafePath.isCleanFilename name
+			return callback new Errors.InvalidNameError("invalid element name")
 		# getDoc will return the deleted doc's lines, but we don't actually remove
 		# the deleted doc, just create a new one from its lines.
 		ProjectEntityHandler.getDoc project_id, doc_id, include_deleted: true, (error, lines) ->
@@ -208,6 +215,9 @@ module.exports = ProjectEntityHandler =
 			ProjectEntityHandler.addDoc project_id, null, name, lines, callback
 
 	addFileWithoutUpdatingHistory: (project_id, folder_id, fileName, path, userId, callback = (error, fileRef, folder_id, path, fileStoreUrl) ->)->
+		# check if file name is allowed
+		if not SafePath.isCleanFilename fileName
+			return callback new Errors.InvalidNameError("invalid element name")
 		ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (err, project) ->
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add file"
@@ -280,7 +290,8 @@ module.exports = ProjectEntityHandler =
 			if !origonalFileRef?
 				logger.err { project_id, folder_id, originalProject_id, origonalFileRef }, "file trying to copy is null"
 				return callback()
-			fileRef = new File name : origonalFileRef.name
+			# convert any invalid characters in original file to '_'
+			fileRef = new File name : SafePath.clean(origonalFileRef.name)
 			FileStoreHandler.copyFile originalProject_id, origonalFileRef._id, project._id, fileRef._id, (err, fileStoreUrl)->
 				if err?
 					logger.err { err, project_id, folder_id, originalProject_id, origonalFileRef }, "error coping file in s3"
@@ -349,6 +360,9 @@ module.exports = ProjectEntityHandler =
 			ProjectEntityHandler.addFolderWithProject project, parentFolder_id, folderName, callback
 
 	addFolderWithProject: (project, parentFolder_id, folderName, callback = (err, folder, parentFolder_id)->) ->
+		# check if folder name is allowed
+		if not SafePath.isCleanFilename folderName
+			return callback new Errors.InvalidNameError("invalid element name")
 		confirmFolder project, parentFolder_id, (parentFolder_id)=>
 			folder = new Folder name: folderName
 			logger.log project: project._id, parentFolder_id:parentFolder_id, folderName:folderName, "adding new folder"
@@ -450,6 +464,9 @@ module.exports = ProjectEntityHandler =
 
 
 	renameEntity: (project_id, entity_id, entityType, newName, userId, callback)->
+		# check if name is allowed
+		if not SafePath.isCleanFilename newName
+			return callback new Errors.InvalidNameError("invalid element name")
 		logger.log(entity_id: entity_id, project_id: project_id, ('renaming '+entityType))
 		if !entityType?
 			logger.err err: "No entityType set", project_id: project_id, entity_id: entity_id
@@ -593,8 +610,10 @@ module.exports = ProjectEntityHandler =
 			return callback(e)
 		type = sanitizeTypeOfElement type
 
-		if path.resolve("/", element.name) isnt "/#{element.name}" or element.name.match("/")
-			e = new Error("invalid element name")
+		# original check path.resolve("/", element.name) isnt "/#{element.name}" or element.name.match("/")
+		# check if name is allowed
+		if not SafePath.isCleanFilename element.name
+			e = new Errors.InvalidNameError("invalid element name")
 			logger.err project_id:project._id, folder_id:folder_id, element:element, type:type, "failed trying to insert element as name was invalid"
 			return callback(e)
 
@@ -627,7 +646,11 @@ module.exports = ProjectEntityHandler =
 							return callback(err)
 						callback(err, {path:newPath}, project)
 
+
 	checkValidElementName: (folder, name, callback = (err) ->) ->
+		# check if the path would be too long
+		if not SafePath.isAllowedLength "#{folder}/#{name}"
+			return callback new Error.InvalidNameError("path too long")
 		# check if the name is already taken by a doc, file or
 		# folder. If so, return an error "file already exists".
 		err = new Errors.InvalidNameError("file already exists")
