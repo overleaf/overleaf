@@ -25,7 +25,9 @@
 	.toolbar-right > a:not(.btn) {
 		display: inline-block;
 		color: @toolbar-icon-btn-color;
-		padding: 0 5px;
+		padding: 4px 2px;
+		line-height: 1;
+		height: 24px;
 		border-radius: @border-radius-small;
 		&.toolbar-header-back-projects {
 			padding: 5px 10px 4px;
@@ -47,6 +49,10 @@
 				color: white;
 			}
 		}
+	}
+
+	&.toolbar-pdf > a:not(.btn) {
+		margin-right: 3px;
 	}
 
 	.btn-full-height {

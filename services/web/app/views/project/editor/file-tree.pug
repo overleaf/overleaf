@@ -6,21 +6,21 @@ aside.file-tree(ng-controller="FileTreeController", ng-class="{ 'multi-selected'
 			tooltip-html="'"+translate('new_file').replace(' ', '<br>')+"'",
 			tooltip-placement="bottom"
 		)
-			i.fa.fa-file
+			i.fa.fa-fw.fa-file
 		a(
 			href,
 			ng-click="openNewFolderModal()",
 			tooltip-html="'"+translate('new_folder').replace(' ', '<br>')+"'",
 			tooltip-placement="bottom"
 		)
-			i.fa.fa-folder
+			i.fa.fa-fw.fa-folder
 		a(
 			href,
 			ng-click="openUploadFileModal()",
 			tooltip=translate('upload'),
 			tooltip-placement="bottom"
 		)
-			i.fa.fa-upload
+			i.fa.fa-fw.fa-upload
 
 		.toolbar-right
 			a(
@@ -30,7 +30,7 @@ aside.file-tree(ng-controller="FileTreeController", ng-class="{ 'multi-selected'
 				tooltip-placement="bottom",
 				ng-show="multiSelectedCount == 0"
 			)
-				i.fa.fa-pencil
+				i.fa.fa-fw.fa-pencil
 			a(
 				href,
 				ng-click="openDeleteModalForSelected()",
@@ -38,7 +38,7 @@ aside.file-tree(ng-controller="FileTreeController", ng-class="{ 'multi-selected'
 				tooltip-placement="bottom",
 				tooltip-append-to-body="true"
 			)
-				i.fa.fa-trash-o
+				i.fa.fa-fw.fa-trash-o
 
 
 	.file-tree-inner(

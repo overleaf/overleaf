@@ -65,7 +65,7 @@ div.full-size.pdf(ng-controller="PdfController")
 			tooltip=translate('stop_compile')
 			tooltip-placement="bottom"
 		)
-			i.fa.fa-stop()
+			i.fa.fa-fw.fa-stop()
 		a.log-btn(
 			href
 			ng-click="toggleLogs()"
@@ -73,7 +73,7 @@ div.full-size.pdf(ng-controller="PdfController")
 			tooltip=translate('logs_and_output_files')
 			tooltip-placement="bottom"
 		)
-			i.fa.fa-file-text-o
+			i.fa.fa-fw.fa-file-text-o
 			span.label(
 				ng-show="pdf.logEntries.warnings.length + pdf.logEntries.errors.length > 0"
 				ng-class="{\
@@ -89,7 +89,7 @@ div.full-size.pdf(ng-controller="PdfController")
 			tooltip=translate('download_pdf')
 			tooltip-placement="bottom"
 		)
-			i.fa.fa-download
+			i.fa.fa-fw.fa-download
 			
 		.toolbar-right
 			span.auto-compile-status.small(
