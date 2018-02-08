@@ -648,9 +648,9 @@ module.exports = ProjectEntityHandler =
 
 
 	checkValidElementName: (folder, name, callback = (err) ->) ->
-		# check if the path would be too long
-		if not SafePath.isAllowedLength "#{folder}/#{name}"
-			return callback new Error.InvalidNameError("path too long")
+		# # # check if the path would be too long
+		# # if not SafePath.isAllowedLength "#{folder}/#{name}"
+		# # 	return callback new Error.InvalidNameError("path too long")
 		# check if the name is already taken by a doc, file or
 		# folder. If so, return an error "file already exists".
 		err = new Errors.InvalidNameError("file already exists")
