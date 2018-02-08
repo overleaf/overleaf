@@ -122,6 +122,7 @@ module.exports = settings =
 			url: "http://#{process.env['CHAT_HOST'] or 'localhost'}:3010"
 			internal_url: "http://#{process.env['CHAT_HOST'] or 'localhost'}:3010"
 		blog:
+			url: "http://localhost:3008"
 			port: 3008
 		university:
 			url: "http://localhost:3011"
