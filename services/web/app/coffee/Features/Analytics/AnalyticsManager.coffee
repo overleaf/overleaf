@@ -6,10 +6,24 @@ Errors = require '../Errors/Errors'
 
 
 makeRequest = (opts, callback)->
+	retryTimings = [1, 2, 4, 8, 16, 32, 32, 32]
 	if settings.apis?.analytics?.url?
 		urlPath = opts.url
 		opts.url = "#{settings.apis.analytics.url}#{urlPath}"
-		request opts, callback
+		iteration = 0
+		_go = () ->
+			request opts, (err, response, data) ->
+				if err?
+					if iteration == retryTimings.length
+						logger.err {err, url: opts.url},
+							"Error in analytics request, retries failed"
+						return callback(err)
+					backoffSeconds = retryTimings[iteration]
+					iteration += 1
+					setTimeout(_go, backoffSeconds * 1000)
+				else
+					callback(null, response, data)
+		_go()
 	else
 		callback(new Errors.ServiceNotConfiguredError('Analytics service not configured'))
 
