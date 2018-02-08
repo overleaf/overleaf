@@ -93,6 +93,9 @@ define [
 					$scope.recompile(isAutoCompileOnChange: true) # compile if no linting errors
 				else if !ide.$scope.settings.syntaxValidation
 					$scope.recompile(isAutoCompileOnChange: true) # always recompile
+				else
+					$scope.$apply () ->
+						$scope.autoCompileLintingError = true
 			else
 				# Extend remainder of timeout
 				autoCompileTimeout = setTimeout () ->
@@ -100,13 +103,37 @@ define [
 					triggerAutoCompile()
 				, AUTO_COMPILE_TIMEOUT - timeSinceLastCompile
 
-		autoCompileListener = null
+		$scope.uncompiledChanges = false
+		recalculateUncompiledChanges = () ->
+			if $scope.docLastChanged > $scope.projectLastCompiled
+				$scope.uncompiledChanges = true
+			else
+				$scope.uncompiledChanges = false
+
+		onDocChanged = () ->
+			$scope.autoCompileLintingError = false
+			$scope.docLastChanged = Date.now()
+			recalculateUncompiledChanges()
+
+		onCompilingStateChanged = (compiling) ->
+			if compiling
+				$scope.projectLastCompiled = Date.now()
+				recalculateUncompiledChanges()
+
+		autoCompileListeners = []
 		toggleAutoCompile = (enabling) ->
 			if enabling
-				autoCompileListener = ide.$scope.$on "ide:opAcknowledged", _.debounce(triggerAutoCompile, OP_ACKNOWLEDGEMENT_TIMEOUT)
+				autoCompileListeners = [
+					ide.$scope.$on "doc:changed", onDocChanged
+					ide.$scope.$on "doc:saved", onDocChanged
+					$scope.$watch "pdf.compiling", onCompilingStateChanged
+					ide.$scope.$on "ide:opAcknowledged", _.debounce(triggerAutoCompile, OP_ACKNOWLEDGEMENT_TIMEOUT)
+				]
 			else
-				autoCompileListener() if autoCompileListener
-				autoCompileListener = null
+				for unbind in autoCompileListeners
+					unbind()
+				autoCompileListeners = []
+				$scope.autoCompileLintingError = false
 
 		$scope.autocompile_enabled = localStorage("autocompile_enabled:#{$scope.project_id}") or false
 		$scope.$watch "autocompile_enabled", (newValue, oldValue) ->

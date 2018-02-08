@@ -340,8 +340,13 @@ define [
 					v: version
 			@doc.on "change", (ops, oldSnapshot, msg) =>
 				@_applyOpsToRanges(ops, oldSnapshot, msg)
+				@ide.$scope.$emit "doc:changed",
+					doc_id: @doc_id
 			@doc.on "flipped_pending_to_inflight", () =>
 				@trigger "flipped_pending_to_inflight"
+			@doc.on "saved", () =>
+				@ide.$scope.$emit "doc:saved",
+					doc_id: @doc_id
 
 		_onError: (error, meta = {}) ->
 			meta.doc_id = @doc_id

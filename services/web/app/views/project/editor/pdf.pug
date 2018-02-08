@@ -1,5 +1,5 @@
 div.full-size.pdf(ng-controller="PdfController")
-	.toolbar.toolbar-pdf
+	.toolbar.toolbar-pdf(ng-class="{ 'uncompiled-changes': uncompiledChanges && !autoCompileLintingError }")
 		.btn-group.btn-recompile-group#recompile(
 			dropdown,
 			tooltip-html="'"+translate('recompile_pdf')+" <span class=\"keyboard-shortcut\">({{modifierKey}} + Enter)</span>'"
@@ -92,6 +92,18 @@ div.full-size.pdf(ng-controller="PdfController")
 			i.fa.fa-download
 			
 		.toolbar-right
+			span.auto-compile-status.small(
+				ng-show="uncompiledChanges && !compiling && !autoCompileLintingError"
+			) #{translate('uncompiled_changes')}
+			span.auto-compile-status.auto-compile-error.small(
+				ng-show="autoCompileLintingError"
+				tooltip-placement="bottom"
+				tooltip=translate("code_check_failed_explanation")
+				tooltip-append-to-body="true"
+			)
+				i.fa.fa-fw.fa-exclamation-triangle
+				|
+				| #{translate("code_check_failed")}
 			a(
 				href,
 				ng-click="switchToFlatLayout()"
