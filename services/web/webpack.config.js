@@ -4,7 +4,7 @@ module.exports = {
 	// Defines the "entry point(s)" for the application - i.e. the file which
 	// bootstraps the application
 	entry: {
-		'rich-text': './public/es/rich-text.js'
+		richText: './public/es/rich-text.js'
 	},
 
 	// Define where and how the bundle will be output to disk

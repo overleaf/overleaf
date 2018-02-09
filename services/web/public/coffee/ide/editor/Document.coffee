@@ -26,7 +26,8 @@ define [
 			@connected = @ide.socket.socket.connected
 			@joined = false
 			@wantToBeJoined = false
-			@_checkConsistency = _.bind(@_checkConsistency, @)
+			@_checkAceConsistency = _.bind(@_checkConsistency, @, @ace)
+			@_checkCMConsistency = _.bind(@_checkConsistency, @, @cm)
 			@inconsistentCount = 0
 			@_bindToEditorEvents()
 			@_bindToSocketEvents()
@@ -34,32 +35,43 @@ define [
 		attachToAce: (@ace) ->
 			@doc?.attachToAce(@ace)
 			editorDoc = @ace.getSession().getDocument()
-			editorDoc.on "change", @_checkConsistency
+			editorDoc.on "change", @_checkAceConsistency
 			@ide.$scope.$emit 'document:opened', @doc
 
 		detachFromAce: () ->
 			@doc?.detachFromAce()
 			editorDoc = @ace?.getSession().getDocument()
-			editorDoc?.off "change", @_checkConsistency
+			editorDoc?.off "change", @_checkAceConsistency
 			@ide.$scope.$emit 'document:closed', @doc
-		
+
+		attachToCM: (@cm) ->
+			@doc?.attachToCM(@cm)
+			@cm?.on "change", @_checkCMConsistency
+			@ide.$scope.$emit 'document:opened', @doc
+
+		detachFromCM: () ->
+			@doc?.detachFromCM()
+			@cm?.off "change", @_checkCMConsistency
+			@ide.$scope.$emit 'document:closed', @doc
+
 		submitOp: (args...) -> @doc?.submitOp(args...)
 
-		_checkConsistency: () ->
-			# We've been seeing a lot of errors when I think there shouldn't be
-			# any, which may be related to this check happening before the change is
-			# applied. If we use a timeout, hopefully we can reduce this.
-			setTimeout () =>
-				editorValue = @ace?.getValue()
-				sharejsValue = @doc?.getSnapshot()
-				if editorValue != sharejsValue
-					@inconsistentCount++
-				else
-					@inconsistentCount = 0
+		_checkConsistency: (editor) ->
+			return () =>
+				# We've been seeing a lot of errors when I think there shouldn't be
+				# any, which may be related to this check happening before the change is
+				# applied. If we use a timeout, hopefully we can reduce this.
+				setTimeout () =>
+					editorValue = editor?.getValue()
+					sharejsValue = @doc?.getSnapshot()
+					if editorValue != sharejsValue
+						@inconsistentCount++
+					else
+						@inconsistentCount = 0
 
-				if @inconsistentCount >= 3
-					@_onError new Error("Editor text does not match server text")
-			, 0
+					if @inconsistentCount >= 3
+						@_onError new Error("Editor text does not match server text")
+				, 0
 
 		getSnapshot: () ->
 			@doc?.getSnapshot()

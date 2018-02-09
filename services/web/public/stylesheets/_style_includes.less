@@ -80,6 +80,12 @@
 @import "app/error-pages.less";
 @import "app/v1-badge.less";
 
+// Vendor CSS
 @import	"../js/libs/pdfListView/TextLayer.css";
 @import	"../js/libs/pdfListView/AnnotationsLayer.css";
 @import	"../js/libs/pdfListView/HighlightsLayer.css";
+
+// CodeMirror
+& when (@show-rich-text) {
+  @import "vendor/codemirror.css";
+}

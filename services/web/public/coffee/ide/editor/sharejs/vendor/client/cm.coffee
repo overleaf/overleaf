@@ -3,7 +3,7 @@
 # It is heavily inspired from the Ace editor hook.
 
 # Convert a CodeMirror delta into an op understood by share.js
-applyToShareJS = (editorDoc, delta, doc) ->
+applyCMToShareJS = (editorDoc, delta, doc) ->
   # CodeMirror deltas give a text replacement.
   # I tuned this operation a little bit, for speed.
   startPos = 0  # Get character position from # of chars in each line.
@@ -26,7 +26,7 @@ applyToShareJS = (editorDoc, delta, doc) ->
     doc.del startPos, delLen
     doc.insert startPos, delta.text.join '\n' if delta.text
 
-  applyToShareJS editorDoc, delta.next, doc if delta.next
+  applyCMToShareJS editorDoc, delta.next, doc if delta.next
 
 # Attach a CodeMirror editor to the document. The editor's contents are replaced
 # with the document's contents unless keepEditorContents is true. (In which case
@@ -39,14 +39,14 @@ window.sharejs.extendDoc 'attach_cm', (editor, keepEditorContents) ->
   check = ->
     window.setTimeout ->
         editorText = editor.getValue()
-        otText = sharedoc.getValue()
+        otText = sharedoc.getText()
 
         if editorText != otText
           console.error "Text does not match!"
           console.error "editor: #{editorText}"
           console.error "ot:     #{otText}"
           # Replace the editor text with the doc snapshot.
-          editor.setValue sharedoc.getValue()
+          editor.setValue sharedoc.getText()
       , 0
 
   if keepEditorContents
@@ -64,11 +64,11 @@ window.sharejs.extendDoc 'attach_cm', (editor, keepEditorContents) ->
   # Listen for edits in CodeMirror.
   editorListener = (ed, change) ->
     return if suppress
-    applyToShareJS editor, change, sharedoc
+    applyCMToShareJS editor, change, sharedoc
 
     check()
 
-  editor.setOption 'onChange',  editorListener
+  editor.on 'change', editorListener
 
   @on 'insert', (pos, text) ->
     suppress = true
@@ -87,7 +87,7 @@ window.sharejs.extendDoc 'attach_cm', (editor, keepEditorContents) ->
 
   @detach_cm = ->
     # TODO: can we remove the insert and delete event callbacks?
-    editor.setOption 'onChange', null
+    editor.off 'onChange', editorListener
     delete @detach_cm
 
   return

@@ -75,8 +75,15 @@
 	top: 40px;
 }
 
-#editor {
+#editor, #editor-rich-text {
 	.full-size;
+}
+
+#editor when (@show-rich-text = true) {
+	top: 40px; // TODO: replace with toolbar height var
+}
+#editor-rich-text when (@show-rich-text = true) {
+	top: 40px; // TODO: replace with toolbar height var
 }
 
 .loading-screen {
@@ -187,6 +194,14 @@
 		a.rename {
 			visibility: visible;
 		}
+	}
+}
+
+.cm-editor-wrapper {
+	height: 100%;
+
+	.CodeMirror {
+		height: 100%;
 	}
 }
 

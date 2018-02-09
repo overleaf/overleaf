@@ -1,1 +1,5 @@
-console.log('hello from rich text')
+import CodeMirror from 'codemirror'
+
+export function init(rootEl) {
+  return CodeMirror(rootEl)
+}

@@ -30,9 +30,13 @@ div.full-size(
 				i.fa.fa-arrow-left
 				| &nbsp;&nbsp;#{translate("open_a_file_on_the_left")}
 
+		if hasFeature('rich-text')
+			.toolbar.toolbar-editor(ng-controller="EditorToolbarController")
+				button(ng-click="toggleRichText()") Rich Text
+
 		#editor(
 			ace-editor="editor",
-			ng-show="!!editor.sharejs_doc && !editor.opening"
+			ng-if="!!editor.sharejs_doc && !editor.opening && !editor.richText"
 			theme="settings.theme",
 			keybindings="settings.mode",
 			font-size="settings.fontSize",
@@ -62,6 +66,13 @@ div.full-size(
 			doc-id="editor.open_doc_id"
 			renderer-data="reviewPanel.rendererData"
 		)
+
+		if hasFeature('rich-text')
+			#editor-rich-text(
+				cm-editor
+				ng-if="!editor.opening && editor.richText"
+				sharejs-doc="editor.sharejs_doc"
+			)
 
 		include ./review-panel
 
