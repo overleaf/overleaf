@@ -136,7 +136,7 @@ define [
 		$scope.uncompiledChanges = false
 		recalculateUncompiledChanges = () ->
 			if $scope.ui.pdfHidden
-				# Don't both auto-compiling if pdf isn't visible
+				# Don't bother auto-compiling if pdf isn't visible
 				$scope.uncompiledChanges = false
 			else if !$scope.docLastChangedAt?
 				$scope.uncompiledChanges = false
