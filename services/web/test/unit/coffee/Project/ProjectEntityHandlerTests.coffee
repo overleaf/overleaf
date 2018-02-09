@@ -1399,6 +1399,28 @@ describe 'ProjectEntityHandler', ->
 					@ProjectModel.findOneAndUpdate.called.should.equal false
 					done()
 
+			it "should error if element name is too long", (done)->
+				doc =
+					_id: ObjectId()
+					name: new Array(200).join("long-") + "something"
+				@ProjectEntityHandler._putElement @project, @folder._id, doc, "doc", (err)=>
+					@ProjectModel.findOneAndUpdate.called.should.equal false
+					err.should.deep.equal new Errors.InvalidNameError("invalid element name")
+					done()
+
+			it "should error if the folder name is too long", (done)->
+				@path = 
+					mongo: "mongo.path", 
+					fileSystem: new Array(200).join("subdir/") + "foo"
+				@projectLocator.findElement.callsArgWith(1, null, @folder, @path)
+				doc =
+					_id: ObjectId()
+					name: "something"
+				@ProjectEntityHandler._putElement @project, @folder._id, doc, "doc", (err)=>
+					@ProjectModel.findOneAndUpdate.called.should.equal false
+					err.should.deep.equal new Errors.InvalidNameError("path too long")
+					done()
+
 			it "should error if a document already exists with the same name", (done)->
 				doc =
 					_id: ObjectId()
