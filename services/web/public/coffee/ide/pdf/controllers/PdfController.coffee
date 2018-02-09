@@ -514,8 +514,6 @@ define [
 
 			options.rootDocOverride_id = getRootDocOverride_id()
 
-			$scope.$apply()
-
 			sendCompileRequest(options)
 				.then (response) ->
 					{ data } = response
