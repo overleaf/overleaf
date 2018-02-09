@@ -1399,6 +1399,15 @@ describe 'ProjectEntityHandler', ->
 					@ProjectModel.findOneAndUpdate.called.should.equal false
 					done()
 
+			it "should error if element name contains invalid characters", (done)->
+				doc =
+					_id: ObjectId()
+					name: "something*bad"
+				@ProjectEntityHandler._putElement @project, @folder._id, doc, "doc", (err)=>
+					@ProjectModel.findOneAndUpdate.called.should.equal false
+					err.should.deep.equal new Errors.InvalidNameError("invalid element name")
+					done()
+
 			it "should error if element name is too long", (done)->
 				doc =
 					_id: ObjectId()
