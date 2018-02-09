@@ -1,6 +1,6 @@
 package uk.ac.ic.wlgitbridge.io.http.ning;
 
-import com.ning.http.client.HttpResponseHeaders;
+import io.netty.handler.codec.http.HttpHeaders;
 import uk.ac.ic.wlgitbridge.util.FunctionT;
 
 import java.util.concurrent.ExecutionException;
@@ -16,7 +16,7 @@ public interface NingHttpClientFacade {
      */
     <E extends Exception> byte[] get(
             String url,
-            FunctionT<HttpResponseHeaders, Boolean, E> handler
+            FunctionT<HttpHeaders, Boolean, E> handler
     ) throws ExecutionException;
 
 }

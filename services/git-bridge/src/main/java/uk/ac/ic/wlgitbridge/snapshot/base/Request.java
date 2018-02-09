@@ -3,7 +3,8 @@ package uk.ac.ic.wlgitbridge.snapshot.base;
 import com.google.api.client.http.*;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.ning.http.client.AsyncHttpClient;
+import org.asynchttpclient.AsyncHttpClient;
+import static org.asynchttpclient.Dsl.*;
 import uk.ac.ic.wlgitbridge.snapshot.exception.FailedConnectionException;
 import uk.ac.ic.wlgitbridge.util.Instance;
 import uk.ac.ic.wlgitbridge.util.Log;
@@ -17,7 +18,7 @@ import java.util.concurrent.*;
  */
 public abstract class Request<T extends Result> {
 
-    public static final AsyncHttpClient httpClient = new AsyncHttpClient();
+    public static final AsyncHttpClient httpClient = asyncHttpClient();
 
     private static final Executor executor = Executors.newCachedThreadPool();
 
