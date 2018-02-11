@@ -49,6 +49,8 @@ ProjectSchema = new Schema
 		}
 	tokenAccessReadOnly_refs         : [ type:ObjectId, ref:'User' ]
 	tokenAccessReadAndWrite_refs     : [ type:ObjectId, ref:'User' ]
+	templateId: { type: Number }
+	templateVersionId: { type: Number }
 	overleaf          :
 		id              : { type: Number }
 		imported_at_ver_id : { type: Number }
