@@ -33,12 +33,9 @@ project.rootDoc_id = rootDoc._id
 describe 'ProjectLocator', ->
 
 	beforeEach ->
-		Project.getProject = (project_id, fields, callback)=>
-			callback(null, project)
-
 		Project.findById = (project_id, callback)=>
 			callback(null, project)
-		@ProjectGetter = 
+		@ProjectGetter =
 			getProject: sinon.stub().callsArgWith(2, null, project)
 		@locator = SandboxedModule.require modulePath, requires:
 			'../../models/Project':{Project:Project}
@@ -162,14 +159,14 @@ describe 'ProjectLocator', ->
 				assert !err?
 				doc._id.should.equal rootDoc._id
 				done()
-		
+
 		it 'should return null when the project has no rootDoc', (done) ->
 			project.rootDoc_id = null
 			@locator.findRootDoc project, (err, doc)->
 				assert !err?
 				expect(doc).to.equal null
 				done()
-		
+
 		it 'should return null when the rootDoc_id no longer exists', (done) ->
 			project.rootDoc_id = "doesntexist"
 			@locator.findRootDoc project, (err, doc)->
@@ -181,68 +178,71 @@ describe 'ProjectLocator', ->
 
 		it 'should take a doc path and return the element for a root level document', (done)->
 			path = "#{doc1.name}"
-			@locator.findElementByPath project._id, path, (err, element, type)->
+			@locator.findElementByPath {project, path}, (err, element, type)->
 				element.should.deep.equal doc1
 				expect(type).to.equal "doc"
 				done()
 
 		it 'should take a doc path and return the element for a root level document with a starting slash', (done)->
 			path = "/#{doc1.name}"
-			@locator.findElementByPath project._id, path, (err, element, type)->
+			@locator.findElementByPath {project, path}, (err, element, type)->
 				element.should.deep.equal doc1
 				expect(type).to.equal "doc"
 				done()
-				
+
 		it 'should take a doc path and return the element for a nested document', (done)->
 			path = "#{subFolder.name}/#{secondSubFolder.name}/#{subSubDoc.name}"
-			@locator.findElementByPath project._id, path, (err, element, type)->
+			@locator.findElementByPath {project, path}, (err, element, type)->
 				element.should.deep.equal subSubDoc
 				expect(type).to.equal "doc"
 				done()
 
 		it 'should take a file path and return the element for a root level document', (done)->
 			path = "#{file1.name}"
-			@locator.findElementByPath project._id, path, (err, element, type)->
+			@locator.findElementByPath {project, path}, (err, element, type)->
 				element.should.deep.equal file1
 				expect(type).to.equal "file"
 				done()
 
 		it 'should take a file path and return the element for a nested document', (done)->
 			path = "#{subFolder.name}/#{secondSubFolder.name}/#{subSubFile.name}"
-			@locator.findElementByPath project._id, path, (err, element, type)->
+			@locator.findElementByPath {project, path}, (err, element, type)->
 				element.should.deep.equal subSubFile
 				expect(type).to.equal "file"
 				done()
 
 		it 'should take a file path and return the element for a nested document case insenstive', (done)->
 			path = "#{subFolder.name.toUpperCase()}/#{secondSubFolder.name.toUpperCase()}/#{subSubFile.name.toUpperCase()}"
-			@locator.findElementByPath project._id, path, (err, element, type)->
+			@locator.findElementByPath {project, path}, (err, element, type)->
 				element.should.deep.equal subSubFile
 				expect(type).to.equal "file"
 				done()
 
 		it 'should take a file path and return the element for a nested folder', (done)->
 			path = "#{subFolder.name}/#{secondSubFolder.name}"
-			@locator.findElementByPath project._id, path, (err, element, type)->
+			@locator.findElementByPath {project, path}, (err, element, type)->
 				element.should.deep.equal secondSubFolder
 				expect(type).to.equal "folder"
 				done()
 
 		it 'should take a file path and return the root folder', (done)->
-			@locator.findElementByPath project._id, "/", (err, element, type)->
+			path = "/"
+			@locator.findElementByPath {project, path}, (err, element, type)->
 				element.should.deep.equal rootFolder
 				expect(type).to.equal "folder"
 				done()
 
 		it 'should return an error if the file can not be found inside know folder', (done)->
-			@locator.findElementByPath project._id, "#{subFolder.name}/#{secondSubFolder.name}/exist.txt", (err, element, type)->
+			path = "#{subFolder.name}/#{secondSubFolder.name}/exist.txt"
+			@locator.findElementByPath {project, path}, (err, element, type)->
 				err.should.not.equal undefined
 				assert.equal element, undefined
 				expect(type).to.be.undefined
 				done()
 
 		it 'should return an error if the file can not be found inside unknown folder', (done)->
-			@locator.findElementByPath project._id, "this/does/not/exist.txt", (err, element, type)->
+			path = "this/does/not/exist.txt"
+			@locator.findElementByPath {project, path}, (err, element, type)->
 				err.should.not.equal undefined
 				assert.equal element, undefined
 				expect(type).to.be.undefined
@@ -250,7 +250,6 @@ describe 'ProjectLocator', ->
 
 
 		describe "where duplicate folder exists", ->
-
 			beforeEach ->
 				@duplicateFolder = {name:"duplicate1", _id:"1234", folders:[{
 					name: "1"
@@ -264,17 +263,15 @@ describe 'ProjectLocator', ->
 						fileRefs: []
 						docs: []
 					]
-				Project.getProject = sinon.stub()
-				Project.getProject.callsArgWith(2, null, @project)
-
 
 			it "should not call the callback more than once", (done)->
-				@locator.findElementByPath project._id, "#{@duplicateFolder.name}/#{@doc.name}", ->
+				path = "#{@duplicateFolder.name}/#{@doc.name}"
+				@locator.findElementByPath {@project, path}, ->
 					done() #mocha will throw exception if done called multiple times
 
-
 			it "should not call the callback more than once when the path is longer than 1 level below the duplicate level", (done)->
-				@locator.findElementByPath project._id, "#{@duplicateFolder.name}/1/main.tex", ->
+				path = "#{@duplicateFolder.name}/1/main.tex"
+				@locator.findElementByPath {@project, path}, ->
 					done() #mocha will throw exception if done called multiple times
 
 		describe "with a null doc", ->
@@ -285,33 +282,34 @@ describe 'ProjectLocator', ->
 						fileRefs: []
 						docs: [{name:"main.tex"}, null, {name:"other.tex"}]
 					]
-				Project.getProject = sinon.stub()
-				Project.getProject.callsArgWith(2, null, @project)
 
 			it "should not crash with a null", (done)->
-				callback = sinon.stub()
-				@locator.findElementByPath project._id, "/other.tex", (err, element)->
+				path = "/other.tex"
+				@locator.findElementByPath {@project, path}, (err, element)->
 					element.name.should.equal "other.tex"
 					done()
 
-
 		describe "with a null project", ->
 			beforeEach ->
-				@project =
-					rootFolder:[
-						folders: []
-						fileRefs: []
-						docs: [{name:"main.tex"}, null, {name:"other.tex"}]
-					]
-				Project.getProject = sinon.stub()
-				Project.getProject.callsArgWith(2, null)
+				@ProjectGetter =
+					getProject: sinon.stub().callsArg(2)
 
 			it "should not crash with a null", (done)->
-				callback = sinon.stub()
-				@locator.findElementByPath project._id, "/other.tex", (err, element)->
+				path = "/other.tex"
+				@locator.findElementByPath {project_id: @project._id, path}, (err, element)->
 					expect(err).to.exist
-					done()			
+					done()
 
+		describe "with a project_id", ->
+			it 'should take a doc path and return the element for a root level document', (done)->
+				path = "#{doc1.name}"
+				@locator.findElementByPath {project_id: project._id, path}, (err, element, type)=>
+					@ProjectGetter.getProject
+						.calledWith(project._id, {rootFolder:true, rootDoc_id: true})
+						.should.equal true
+					element.should.deep.equal doc1
+					expect(type).to.equal "doc"
+					done()
 
 	describe 'findUsersProjectByName finding a project by user_id and project name', ()->
 		it 'should return the project from an array case insenstive', (done)->

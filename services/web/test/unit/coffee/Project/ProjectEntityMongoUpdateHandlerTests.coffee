@@ -138,7 +138,8 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 			@project = _id: project_id, rootFolder: [@rootFolder]
 
 			@ProjectGetter.getProjectWithOnlyFolders = sinon.stub().yields(null, @project)
-			@ProjectLocator.findElementByPath = (project_id, path, cb) =>
+			@ProjectLocator.findElementByPath = (options, cb) =>
+				{path} = options
 				@parentFolder = {_id:"parentFolder_id_here"}
 				lastFolder = path.substring(path.lastIndexOf("/"))
 				if lastFolder.indexOf("level1") == -1

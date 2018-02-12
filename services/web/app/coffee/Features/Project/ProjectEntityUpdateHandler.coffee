@@ -267,7 +267,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 					callback null, entity_id
 
 	deleteEntityWithPath: wrapWithLock (project_id, path, userId, callback) ->
-		ProjectLocator.findElementByPath project_id, path, (err, element, type)->
+		ProjectLocator.findElementByPath project_id: project_id, path: path, (err, element, type)->
 			return callback(err) if err?
 			return callback(new Errors.NotFoundError("project not found")) if !element?
 			self.deleteEntity.withoutLock project_id, element._id, type, userId, callback
