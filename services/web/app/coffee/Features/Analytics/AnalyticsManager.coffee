@@ -1,29 +1,15 @@
 settings = require "settings-sharelatex"
 logger = require "logger-sharelatex"
 _ = require "underscore"
-request = require "request"
+request = require "requestretry"
 Errors = require '../Errors/Errors'
 
 
 makeRequest = (opts, callback)->
-	retryTimings = [1, 2, 4, 8, 16, 32, 32, 32]
 	if settings.apis?.analytics?.url?
 		urlPath = opts.url
 		opts.url = "#{settings.apis.analytics.url}#{urlPath}"
-		iteration = 0
-		_go = () ->
-			request opts, (err, response, data) ->
-				if err?
-					if iteration == retryTimings.length or !opts.retryOnFail
-						logger.err {err, url: opts.url},
-							"Error in analytics request, retries failed"
-						return callback(err)
-					backoffSeconds = retryTimings[iteration]
-					iteration += 1
-					setTimeout(_go, backoffSeconds * 1000)
-				else
-					callback(null, response, data)
-		_go()
+		request opts, callback
 	else
 		callback(new Errors.ServiceNotConfiguredError('Analytics service not configured'))
 
@@ -51,7 +37,8 @@ module.exports =
 			method:"POST"
 			timeout:1000
 			url: "/user/#{user_id}/event"
-			retryOnFail: true
+			maxAttempts: 20
+			retryDelay: 5000
 		if settings.overleaf?
 			opts.qs = {fromV2: 1}
 		makeRequest opts, callback
@@ -69,7 +56,8 @@ module.exports =
 			qs:
 				userId: userId
 				projectId: projectId
-			retryOnFail: true
+			maxAttempts: 20
+			retryDelay: 5000
 		if settings.overleaf?
 			opts.qs.fromV2 = 1
 		makeRequest opts, callback
