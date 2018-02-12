@@ -10,7 +10,19 @@ module.exports = function (config) {
       }
     },
     browsers: ['ChromeCustom'],
-    files: [],
+    files: [
+      'test/unit_frontend/js/bootstrap.js',
+      // Angular must be loaded before requirejs to set up angular global
+      'public/js/libs/angular-1.6.4.min.js',
+      'public/js/libs/angular-mocks.js',
+      'public/js/libs/jquery-1.11.1.min.js',
+      // Set up requirejs
+      'test/unit_frontend/js/test-main.js',
+      // Include source & test files, but don't "include" them as requirejs
+      // handles this for us
+      { pattern: 'public/js/**/*.js', included: false },
+      { pattern: 'test/unit_frontend/js/**/*.js', included: false }
+    ],
     frameworks: ['requirejs', 'mocha', 'chai-sinon'],
     plugins: [
       require('karma-requirejs'),
