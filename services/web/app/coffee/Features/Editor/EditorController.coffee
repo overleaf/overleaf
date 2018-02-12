@@ -71,7 +71,7 @@ module.exports = EditorController =
 		Metrics.inc "editor.add-folder"
 		ProjectEntityUpdateHandler.addFolder project_id, folder_id, folderName, (err, folder, folder_id)=>
 			if err?
-				logger.err err:err, project_id:project_id, source:source,  "could not add folder"
+				logger.err {err, project_id, folder_id, folderName, source}, "could not add folder"
 				return callback(err)
 			EditorController._notifyProjectUsersOfNewFolder project_id, folder_id, folder, (err) ->
 				return callback(err) if err?
@@ -81,7 +81,7 @@ module.exports = EditorController =
 		logger.log project_id:project_id, path:path, "making directories if they don't exist"
 		ProjectEntityUpdateHandler.mkdirp project_id, path, (err, newFolders, lastFolder)=>
 			if err?
-				logger.err err:err, project_id:project_id, "could not mkdirp"
+				logger.err err:err, project_id:project_id, path:path, "could not mkdirp"
 				return callback(err)
 
 			EditorController._notifyProjectUsersOfNewFolders project_id, newFolders, (err) ->
