@@ -49,7 +49,7 @@ pipeline {
         }
       }
       steps {
-        sh 'make compile_full'
+        sh 'make clean compile_full'
         // replace the build number placeholder for sentry
         sh 'node_modules/.bin/grunt version'
       }
