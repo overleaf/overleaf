@@ -631,6 +631,9 @@ module.exports = ProjectEntityHandler =
 				newPath =
 					fileSystem: "#{path.fileSystem}/#{element.name}"
 					mongo: path.mongo
+				# check if the path would be too long
+				if not SafePath.isAllowedLength newPath.fileSystem
+					return callback new Errors.InvalidNameError("path too long")
 				ProjectEntityHandler.checkValidElementName folder, element.name, (err) =>
 					return callback(err) if err?
 					id = element._id+''
@@ -648,9 +651,6 @@ module.exports = ProjectEntityHandler =
 
 
 	checkValidElementName: (folder, name, callback = (err) ->) ->
-		# # # check if the path would be too long
-		# # if not SafePath.isAllowedLength "#{folder}/#{name}"
-		# # 	return callback new Error.InvalidNameError("path too long")
 		# check if the name is already taken by a doc, file or
 		# folder. If so, return an error "file already exists".
 		err = new Errors.InvalidNameError("file already exists")
