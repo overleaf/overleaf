@@ -310,7 +310,10 @@ script(type='text/ng-template', id='newDocModalTemplate')
 		h3 #{translate("new_file")}
 	.modal-body
 		form(novalidate, name="newDocForm")
-			div.alert.alert-danger(ng-if="error") {{error}}
+			div.alert.alert-danger(ng-if="error")
+				div(ng-switch="error") 
+					span(ng-switch-when="already exists") #{translate("file_already_exists")}
+					span(ng-switch-default) {{error}}
 			input.form-control(
 				type="text",
 				placeholder="File Name",
@@ -340,7 +343,10 @@ script(type='text/ng-template', id='newFolderModalTemplate')
 	.modal-header
 		h3 #{translate("new_folder")}
 	.modal-body
-		div.alert.alert-danger(ng-if="error") {{error}}
+		div.alert.alert-danger(ng-if="error")
+			div(ng-switch="error") 
+				span(ng-switch-when="already exists") #{translate("file_already_exists")}
+				span(ng-switch-default) {{error}}
 		form(novalidate, name="newFolderForm")
 			input.form-control(
 				type="text",
