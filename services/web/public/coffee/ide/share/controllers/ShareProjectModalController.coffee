@@ -199,7 +199,7 @@ define [
 
 		$scope.$watch "project.tokens.readOnly", (token) ->
 			if token?
-				$scope.readOnlyTokenLink = "#{location.origin}/#{token}"
+				$scope.readOnlyTokenLink = "#{location.origin}/read/#{token}"
 			else
 				$scope.readOnlyTokenLink = null
 
