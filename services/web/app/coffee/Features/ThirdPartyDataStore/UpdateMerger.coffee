@@ -44,7 +44,7 @@ module.exports = UpdateMerger =
 
 		processFile: (project_id, fsPath, path, source, user_id, callback)->
 			logger.log project_id:project_id, "processing file update from tpds"
-			EditorController.upsertFileWithPath project_id, path, fsPath, source, user_id, callback, (err) ->
+			EditorController.upsertFileWithPath project_id, path, fsPath, source, user_id, (err) ->
 				logger.log project_id:project_id, "completed processing file update from tpds"
 				callback(err)
 
