@@ -14,7 +14,7 @@ describe 'AnnouncementsHandler', ->
 			_id:"3c6afe000000000000000000" #2002-02-14T00:00:00.000Z
 			email: "someone@gmail.com"
 		@AnalyticsManager =
-			getLastOccurance: sinon.stub()
+			getLastOccurrence: sinon.stub()
 		@BlogHandler =
 			getLatestAnnouncements:sinon.stub()
 		@settings = {}
@@ -46,7 +46,7 @@ describe 'AnnouncementsHandler', ->
 
 
 		it "should mark all announcements as read is false", (done)->
-			@AnalyticsManager.getLastOccurance.callsArgWith(2, null, [])
+			@AnalyticsManager.getLastOccurrence.callsArgWith(2, null, [])
 			@handler.getUnreadAnnouncements @user, (err, announcements)=>
 				announcements[0].read.should.equal false
 				announcements[1].read.should.equal false
@@ -55,7 +55,7 @@ describe 'AnnouncementsHandler', ->
 				done()
 
 		it "should should be sorted again to ensure correct order", (done)->
-			@AnalyticsManager.getLastOccurance.callsArgWith(2, null, [])
+			@AnalyticsManager.getLastOccurrence.callsArgWith(2, null, [])
 			@handler.getUnreadAnnouncements @user, (err, announcements)=>
 				announcements[3].should.equal @stubbedAnnouncements[2]
 				announcements[2].should.equal @stubbedAnnouncements[3]
@@ -64,7 +64,7 @@ describe 'AnnouncementsHandler', ->
 				done()
 
 		it "should return older ones marked as read as well", (done)->
-			@AnalyticsManager.getLastOccurance.callsArgWith(2, null, {segmentation:{blogPostId:"/2008/04/12/title-date-irrelivant"}})
+			@AnalyticsManager.getLastOccurrence.callsArgWith(2, null, {segmentation:{blogPostId:"/2008/04/12/title-date-irrelivant"}})
 			@handler.getUnreadAnnouncements @user, (err, announcements)=>
 				announcements[0].id.should.equal @stubbedAnnouncements[0].id
 				announcements[0].read.should.equal false
@@ -81,7 +81,7 @@ describe 'AnnouncementsHandler', ->
 				done()
 
 		it "should return all of them marked as read", (done)->
-			@AnalyticsManager.getLastOccurance.callsArgWith(2, null, {segmentation:{blogPostId:"/2016/11/01/introducting-latex-code-checker"}})
+			@AnalyticsManager.getLastOccurrence.callsArgWith(2, null, {segmentation:{blogPostId:"/2016/11/01/introducting-latex-code-checker"}})
 			@handler.getUnreadAnnouncements @user, (err, announcements)=>
 				announcements[0].read.should.equal true
 				announcements[1].read.should.equal true
@@ -94,7 +94,7 @@ describe 'AnnouncementsHandler', ->
 					date: new Date(978836800000),
 					id: '/2001/04/12/title-date-irrelivant'
 			})
-			@AnalyticsManager.getLastOccurance.callsArgWith(2, null, [])
+			@AnalyticsManager.getLastOccurrence.callsArgWith(2, null, [])
 			@handler.getUnreadAnnouncements @user, (err, announcements)=>
 				announcements[0].read.should.equal false
 				announcements[1].read.should.equal false
@@ -121,7 +121,7 @@ describe 'AnnouncementsHandler', ->
 				@handler._domainSpecificAnnouncements = sinon.stub().returns(@stubbedDomainSpecificAnn)
 
 			it "should insert the domain specific in the correct place", (done)->
-				@AnalyticsManager.getLastOccurance.callsArgWith(2, null, [])
+				@AnalyticsManager.getLastOccurrence.callsArgWith(2, null, [])
 				@handler.getUnreadAnnouncements @user, (err, announcements)=>
 					announcements[4].should.equal @stubbedAnnouncements[2]
 					announcements[3].should.equal @stubbedAnnouncements[3]

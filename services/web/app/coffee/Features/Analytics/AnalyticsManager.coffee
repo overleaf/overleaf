@@ -63,14 +63,14 @@ module.exports =
 		makeRequest opts, callback
 
 
-	getLastOccurance: (user_id, event, callback = (error) ->) ->
+	getLastOccurrence: (user_id, event, callback = (error) ->) ->
 		opts =
 			body:
 				event:event
 			json:true
 			method:"POST"
 			timeout:1000
-			url: "/user/#{user_id}/event/last_occurnace"
+			url: "/user/#{user_id}/event/last_occurrence"
 		makeRequest opts, (err, response, body)->
 			if err?
 				console.log response, opts
