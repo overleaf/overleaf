@@ -1,7 +1,7 @@
 settings = require "settings-sharelatex"
 logger = require "logger-sharelatex"
 _ = require "underscore"
-request = require "request"
+request = require "requestretry"
 Errors = require '../Errors/Errors'
 
 
@@ -37,6 +37,8 @@ module.exports =
 			method:"POST"
 			timeout:1000
 			url: "/user/#{user_id}/event"
+			maxAttempts: 20
+			retryDelay: 5000
 		if settings.overleaf?
 			opts.qs = {fromV2: 1}
 		makeRequest opts, callback
@@ -54,6 +56,8 @@ module.exports =
 			qs:
 				userId: userId
 				projectId: projectId
+			maxAttempts: 20
+			retryDelay: 5000
 		if settings.overleaf?
 			opts.qs.fromV2 = 1
 		makeRequest opts, callback

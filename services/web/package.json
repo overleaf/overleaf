@@ -72,6 +72,7 @@
     "pug": "^2.0.0-beta6",
     "redis-sharelatex": "git+https://github.com/sharelatex/redis-sharelatex.git#v1.0.4",
     "request": "^2.69.0",
+    "requestretry": "^1.13.0",
     "requests": "^0.1.7",
     "rimraf": "2.2.6",
     "rolling-rate-limiter": "git+https://github.com/ShaneKilkelly/rolling-rate-limiter.git#master",
