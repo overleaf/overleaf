@@ -20,6 +20,15 @@ services:
       - mongo
     command: node app.js
 
+  test_frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: npm run test:frontend
+
   redis:
     image: redis
 
