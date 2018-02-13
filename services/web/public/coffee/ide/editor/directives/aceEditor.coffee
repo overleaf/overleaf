@@ -428,7 +428,8 @@ define [
 						rendererData.lineHeight = editor.renderer.lineHeight
 
 				scope.$on '$destroy', () ->
-					detachFromAce(scope.sharejsDoc)
+					if scope.sharejsDoc?
+						detachFromAce(scope.sharejsDoc)
 
 				scope.$emit "#{scope.name}:inited", editor
 
