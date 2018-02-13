@@ -25,5 +25,10 @@ test_acceptance: test_clean # clear the database before each acceptance test run
 
 test_clean:
 	$(DOCKER_COMPOSE) down
+build:
+	docker build --pull --tag quay.io/sharelatex/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) .
+
+publish:
+	docker push quay.io/sharelatex/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 
 .PHONY: clean test test_unit test_acceptance test_clean build publish

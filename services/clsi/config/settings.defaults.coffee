@@ -40,4 +40,7 @@ if process.env["COMMAND_RUNNER"]
 			user: process.env["TEXLIVE_IMAGE_USER"] or "tex"
 		expireProjectAfterIdleMs: 24 * 60 * 60 * 1000
 		checkProjectsIntervalMs: 10 * 60 * 1000
+
 	module.exports.path.sandboxedCompilesHostDir = process.env["COMPILES_HOST_DIR"]
+	
+console.log module.exports

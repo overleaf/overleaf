@@ -41,6 +41,7 @@ module.exports = CompileManager =
 
 	doCompile: (request, callback = (error, outputFiles) ->) ->
 		compileDir = getCompileDir(request.project_id, request.user_id)
+		console.log("doCompile",compileDir )
 
 		timer = new Metrics.Timer("write-to-disk")
 		logger.log project_id: request.project_id, user_id: request.user_id, "syncing resources to disk"
@@ -206,9 +207,14 @@ module.exports = CompileManager =
 		file_path = base_dir + "/" + file_name
 		compileDir = getCompileDir(project_id, user_id)
 		synctex_path = Path.join(compileDir, "output.pdf")
-		CompileManager._runSynctex ["code", synctex_path, file_path, line, column], (error, stdout) ->
+		command = ["code", synctex_path, file_path, line, column]
+		CompileManager._runSynctex command, (error, stdout) ->
 			return callback(error) if error?
-			logger.log project_id: project_id, user_id:user_id, file_name: file_name, line: line, column: column, stdout: stdout, "synctex code output"
+			if stdout.toLowerCase().indexOf("warning") == -1
+				logType = "log"
+			else
+				logType = "err"
+			logger[logType] project_id: project_id, user_id:user_id, file_name: file_name, line: line, column: column, command:command, stdout: stdout, "synctex code output"
 			callback null, CompileManager._parseSynctexFromCodeOutput(stdout)
 
 	syncFromPdf: (project_id, user_id, page, h, v, callback = (error, filePositions) ->) ->
@@ -216,6 +222,7 @@ module.exports = CompileManager =
 		base_dir = Settings.path.synctexBaseDir(compileName)
 		compileDir = getCompileDir(project_id, user_id)
 		synctex_path = Path.join(compileDir, "output.pdf")
+		logger.log({base_dir, project_id, synctex_path}, "base diiir")
 		CompileManager._runSynctex ["pdf", synctex_path, page, h, v], (error, stdout) ->
 			return callback(error) if error?
 			logger.log project_id: project_id, user_id:user_id, page: page, h: h, v:v, stdout: stdout, "synctex pdf output"
@@ -243,6 +250,7 @@ module.exports = CompileManager =
 			return callback(error) if error?
 			if Settings.clsi?.synctexCommandWrapper?
 				[bin_path, args] = Settings.clsi?.synctexCommandWrapper bin_path, args
+			logger.log({bin_path, args}, "synctex being run")
 			child_process.execFile bin_path, args, timeout: 10 * seconds, (error, stdout, stderr) ->
 				if error?
 					logger.err err:error, args:args, "error running synctex"

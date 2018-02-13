@@ -2,16 +2,20 @@ FROM node:6.9.5
 
 RUN wget -qO- https://get.docker.com/ | sh
 
-# ---- Copy Files/Build ----
-WORKDIR /app
+run apt-get install poppler-utils vim ghostscript --yes
+
+# run git build-essential --yes
+# RUN git clone https://github.com/netblue30/firejail.git
+# RUN cd firejail && ./configure && make && make install-strip
+# run mkdir /data
+
 COPY ./ /app
-# Build react/vue/angular bundle static files
-# RUN npm run build
+
+WORKDIR /app
+
 RUN npm install
 
 RUN npm run compile
-
-EXPOSE 3013
 
 ENV SHARELATEX_CONFIG /app/config/settings.production.coffee
 ENV NODE_ENV production

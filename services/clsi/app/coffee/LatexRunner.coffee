@@ -8,6 +8,7 @@ ProcessTable = {}  # table of currently running jobs (pids or docker container n
 
 module.exports = LatexRunner =
 	runLatex: (project_id, options, callback = (error) ->) ->
+		console.log("LatexRunner", options.directory)
 		{directory, mainFile, compiler, timeout, image, environment} = options
 		compiler ||= "pdflatex"
 		timeout  ||= 60000 # milliseconds

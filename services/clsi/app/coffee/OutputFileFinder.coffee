@@ -10,8 +10,6 @@ module.exports = OutputFileFinder =
 		for resource in resources
 			incomingResources[resource.path] = true
 			
-		logger.log directory: directory, "getting output files"
-
 		OutputFileFinder._getAllFiles directory, (error, allFiles = []) ->
 			if error?
 				logger.err err:error, "error finding all output files"
