@@ -91,8 +91,8 @@ define [
 					else
 						editor.setOption('behavioursEnabled', false)
 
-				window.editors ||= []
-				window.editors.push editor
+				window._debug_editors ||= []
+				window._debug_editors.push editor
 
 				scope.name = attrs.aceEditor
 
@@ -428,7 +428,10 @@ define [
 						rendererData.lineHeight = editor.renderer.lineHeight
 
 				scope.$on '$destroy', () ->
-					detachFromAce(scope.sharejsDoc)
+					if scope.sharejsDoc?
+						detachFromAce(scope.sharejsDoc)
+
+				scope.$emit "#{scope.name}:inited", editor
 
 			template: """
 				<div class="ace-editor-wrapper">

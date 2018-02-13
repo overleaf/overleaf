@@ -224,7 +224,7 @@ define [
 					#   is likely to end up with `\href{}ref{}`
 					if !data?
 						completions = this.completions
-						popup = editor.completer.popup
+						popup = this.popup
 						data = popup.getData(popup.getRow())
 						data.completer =
 							insertMatch: (editor, matchData) ->
