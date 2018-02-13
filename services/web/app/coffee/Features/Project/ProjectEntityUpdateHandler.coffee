@@ -1,3 +1,4 @@
+_ = require 'lodash'
 async = require 'async'
 logger = require('logger-sharelatex')
 path = require('path')
@@ -63,21 +64,31 @@ module.exports = ProjectEntityUpdateHandler = self =
 			return callback(new Errors.NotFoundError("project not found")) if !project?
 			logger.log project_id: project_id, doc_id: doc_id, "updating doc lines"
 			ProjectLocator.findElement {project:project, element_id:doc_id, type:"docs"}, (err, doc, path)->
+				isDeletedDoc = false
 				if err?
-					logger.error err: err, doc_id: doc_id, project_id: project_id, lines: lines, "error finding doc while updating doc lines"
-					return callback err
-				if !doc?
-					error = new Errors.NotFoundError("doc not found")
-					logger.error err: error, doc_id: doc_id, project_id: project_id, lines: lines, "doc not found while updating doc lines"
-					return callback(error)
+					if err instanceof Errors.NotFoundError
+						# We need to be able to update the doclines of deleted docs. This is
+						# so the doc-updater can flush a doc's content to the doc-store after
+						# the doc is deleted.
+						isDeletedDoc = true
+						doc = _.find project.deletedDocs, (doc) ->
+							doc._id.toString() == doc_id.toString()
+					else
+						return callback(err)
 
-				logger.log project_id: project_id, doc_id: doc_id, "telling docstore manager to update doc"
+				if !doc?
+					# Do not allow an update to a doc which has never exist on this project
+					logger.error {doc_id, project_id, lines}, "doc not found while updating doc lines"
+					return callback(new Errors.NotFoundError('doc not found'))
+
+				logger.log {project_id, doc_id}, "telling docstore manager to update doc"
 				DocstoreManager.updateDoc project_id, doc_id, lines, version, ranges, (err, modified, rev) ->
 					if err?
-						logger.error err: err, doc_id: doc_id, project_id:project_id, lines: lines, "error sending doc to docstore"
+						logger.error {err, doc_id, project_id, lines}, "error sending doc to docstore"
 						return callback(err)
-					logger.log project_id: project_id, doc_id: doc_id, modified:modified, "finished updating doc lines"
-					if modified
+					logger.log {project_id, doc_id, modified}, "finished updating doc lines"
+					# path will only be present if the doc is not deleted
+					if modified && !isDeletedDoc
 						# Don't need to block for marking as updated
 						ProjectUpdateHandler.markAsUpdated project_id
 						TpdsUpdateSender.addDoc {project_id:project_id, path:path.fileSystem, doc_id:doc_id, project_name:project.name, rev:rev}, callback
@@ -315,9 +326,9 @@ module.exports = ProjectEntityUpdateHandler = self =
 
 		unsetRootDocIfRequired (error) ->
 			return callback(error) if error?
-			DocumentUpdaterHandler.deleteDoc project_id, doc_id, (error) ->
+			self._insertDeletedDocReference project._id, doc, (error) ->
 				return callback(error) if error?
-				self._insertDeletedDocReference project._id, doc, (error) ->
+				DocumentUpdaterHandler.deleteDoc project_id, doc_id, (error) ->
 					return callback(error) if error?
 					DocstoreManager.deleteDoc project_id, doc_id, (error) ->
 						return callback(error) if error?

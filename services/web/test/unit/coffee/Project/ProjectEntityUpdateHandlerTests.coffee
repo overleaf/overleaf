@@ -46,6 +46,7 @@ describe 'ProjectEntityUpdateHandler', ->
 			'logger-sharelatex': @logger = {log:sinon.stub(), error: sinon.stub(), err:->}
 			'../../models/Doc': Doc:@DocModel
 			'../Docstore/DocstoreManager': @DocstoreManager = {}
+			'../Errors/Errors': Errors
 			'../../Features/DocumentUpdater/DocumentUpdaterHandler':@DocumentUpdaterHandler =
 				updateProjectStructure: sinon.stub().yields()
 			'../../models/File': File:@FileModel
@@ -178,18 +179,32 @@ describe 'ProjectEntityUpdateHandler', ->
 			it "should call the callback", ->
 				@callback.called.should.equal true
 
-		describe "when the project is not found", ->
+		describe "when the doc has been deleted", ->
 			beforeEach ->
-				@ProjectGetter.getProjectWithoutDocLines = sinon.stub().yields()
-				@ProjectEntityUpdateHandler.updateDocLines project_id, doc_id, @docLines, @ranges, @version, @callback
+				@project.deletedDocs = [ _id: doc_id ]
+				@ProjectGetter.getProjectWithoutDocLines = sinon.stub().yields(null, @project)
+				@ProjectLocator.findElement = sinon.stub().yields(new Errors.NotFoundError)
+				@DocstoreManager.updateDoc = sinon.stub().yields()
+				@ProjectEntityUpdateHandler.updateDocLines project_id, doc_id, @docLines, @version, @ranges, @callback
 
-			it "should return a not found error", ->
-				@callback.calledWith(new Errors.NotFoundError()).should.equal true
+			it "should update the doc in the docstore", ->
+				@DocstoreManager.updateDoc
+					.calledWith(project_id, doc_id, @docLines, @version, @ranges)
+					.should.equal true
 
-		describe "when the doc is not found", ->
+			it "should not mark the project as updated", ->
+				@ProjectUpdater.markAsUpdated.called.should.equal false
+
+			it "should not send the doc the to the TPDS", ->
+				@TpdsUpdateSender.addDoc.called.should.equal false
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+		describe "when the doc is not related to the project", ->
 			beforeEach ->
 				@ProjectLocator.findElement = sinon.stub().yields()
-				@ProjectEntityUpdateHandler.updateDocLines project_id, doc_id, @docLines, @ranges, @version, @callback
+				@ProjectEntityUpdateHandler.updateDocLines project_id, doc_id, @docLines, @version, @ranges, @callback
 
 			it "should log out the error", ->
 				@logger.error
@@ -197,10 +212,17 @@ describe 'ProjectEntityUpdateHandler', ->
 						project_id: project_id
 						doc_id: doc_id
 						lines: @docLines
-						err: new Errors.NotFoundError("doc not found")
 						"doc not found while updating doc lines"
 					)
 					.should.equal true
+
+			it "should return a not found error", ->
+				@callback.calledWith(new Errors.NotFoundError()).should.equal true
+
+		describe "when the project is not found", ->
+			beforeEach ->
+				@ProjectGetter.getProjectWithoutDocLines = sinon.stub().yields()
+				@ProjectEntityUpdateHandler.updateDocLines project_id, doc_id, @docLines, @version, @ranges, @callback
 
 			it "should return a not found error", ->
 				@callback.calledWith(new Errors.NotFoundError()).should.equal true
