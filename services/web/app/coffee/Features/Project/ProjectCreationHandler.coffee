@@ -79,7 +79,7 @@ module.exports = ProjectCreationHandler =
 							callback(error)
 				(callback) ->
 					universePath = Path.resolve(__dirname + "/../../../templates/project_files/universe.jpg")
-					ProjectEntityUpdateHandler.addFile project._id, project.rootFolder[0]._id, "universe.jpg", universePath, owner_id, callback
+					ProjectEntityUpdateHandler.addFile project._id, project.rootFolder[0]._id, "universe.jpg", universePath, null, owner_id, callback
 			], (error) ->
 				callback(error, project)
 

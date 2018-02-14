@@ -27,9 +27,9 @@ module.exports = FileSystemImportManager =
 				return callback("path is symlink")
 
 			if replace
-				EditorController.upsertFile project_id, folder_id, name, path, "upload", user_id, callback
+				EditorController.upsertFile project_id, folder_id, name, path, null, "upload", user_id, callback
 			else
-				EditorController.addFile project_id, folder_id, name, path, "upload", user_id, callback
+				EditorController.addFile project_id, folder_id, name, path, null, "upload", user_id, callback
 
 	addFolder: (user_id, project_id, folder_id, name, path, replace, callback = (error)-> ) ->
 		FileSystemImportManager._isSafeOnFileSystem path, (err, isSafe)->

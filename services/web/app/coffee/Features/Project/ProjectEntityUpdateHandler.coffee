@@ -129,8 +129,8 @@ module.exports = ProjectEntityUpdateHandler = self =
 				return callback(error) if error?
 				callback null, doc, folder_id
 
-	addFile: wrapWithLock (project_id, folder_id, fileName, fsPath, userId, callback = (error, fileRef, folder_id) ->)->
-		self.addFileWithoutUpdatingHistory.withoutLock project_id, folder_id, fileName, fsPath, userId, (error, fileRef, folder_id, path, fileStoreUrl) ->
+	addFile: wrapWithLock (project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback = (error, fileRef, folder_id) ->)->
+		self.addFileWithoutUpdatingHistory.withoutLock project_id, folder_id, fileName, fsPath, linkedFileData, userId, (error, fileRef, folder_id, path, fileStoreUrl) ->
 			return callback(error) if error?
 			newFiles = [
 				file: fileRef
@@ -141,10 +141,10 @@ module.exports = ProjectEntityUpdateHandler = self =
 				return callback(error) if error?
 				callback null, fileRef, folder_id
 
-	replaceFile: wrapWithLock (project_id, file_id, fsPath, userId, callback)->
+	replaceFile: wrapWithLock (project_id, file_id, fsPath, linkedFileData, userId, callback)->
 		FileStoreHandler.uploadFileFromDisk project_id, file_id, fsPath, (err, fileStoreUrl)->
 			return callback(err) if err?
-			ProjectEntityMongoUpdateHandler.replaceFile project_id, file_id, (err, fileRef, project, path) ->
+			ProjectEntityMongoUpdateHandler.replaceFile project_id, file_id, linkedFileData, (err, fileRef, project, path) ->
 				return callback(err) if err?
 				newFiles = [
 					file: fileRef
@@ -180,7 +180,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 					return callback(err) if err?
 					callback(null, doc, folder_id, result?.path?.fileSystem)
 
-	addFileWithoutUpdatingHistory: wrapWithLock (project_id, folder_id, fileName, fsPath, userId, callback = (error, fileRef, folder_id, path, fileStoreUrl) ->)->
+	addFileWithoutUpdatingHistory: wrapWithLock (project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback = (error, fileRef, folder_id, path, fileStoreUrl) ->)->
 		# This method should never be called directly, except when importing a project
 		# from Overleaf. It skips sending updates to the project history, which will break
 		# the history unless you are making sure it is updated in some other way.
@@ -188,7 +188,10 @@ module.exports = ProjectEntityUpdateHandler = self =
 		if not SafePath.isCleanFilename fileName
 			return callback new Errors.InvalidNameError("invalid element name")
 
-		fileRef = new File name : fileName
+		fileRef = new File(
+			name: fileName
+			linkedFileData: linkedFileData
+		)
 		FileStoreHandler.uploadFileFromDisk project_id, fileRef._id, fsPath, (err, fileStoreUrl)->
 			if err?
 				logger.err err:err, project_id: project_id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error uploading image to s3"
@@ -221,7 +224,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 					return callback(err) if err?
 					callback null, doc, !existingDoc?
 
-	upsertFile: wrapWithLock (project_id, folder_id, fileName, fsPath, userId, callback = (err, file, isNewFile)->)->
+	upsertFile: wrapWithLock (project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback = (err, file, isNewFile)->)->
 		ProjectLocator.findElement project_id: project_id, element_id: folder_id, type: "folder", (error, folder) ->
 			return callback(error) if error?
 			return callback(new Error("Couldn't find folder")) if !folder?
@@ -231,11 +234,11 @@ module.exports = ProjectEntityUpdateHandler = self =
 					existingFile = fileRef
 					break
 			if existingFile?
-				self.replaceFile.withoutLock project_id, existingFile._id, fsPath, userId, (err) ->
+				self.replaceFile.withoutLock project_id, existingFile._id, fsPath, linkedFileData, userId, (err) ->
 					return callback(err) if err?
 					callback null, existingFile, !existingFile?
 			else
-				self.addFile.withoutLock project_id, folder_id, fileName, fsPath, userId, (err, file) ->
+				self.addFile.withoutLock project_id, folder_id, fileName, fsPath, linkedFileData, userId, (err, file) ->
 					return callback(err) if err?
 					callback null, file, !existingFile?
 
@@ -248,12 +251,12 @@ module.exports = ProjectEntityUpdateHandler = self =
 				return callback(err) if err?
 				callback null, doc, isNewDoc, newFolders, folder
 
-	upsertFileWithPath: wrapWithLock (project_id, elementPath, fsPath, userId, callback) ->
+	upsertFileWithPath: wrapWithLock (project_id, elementPath, fsPath, linkedFileData, userId, callback) ->
 		fileName = path.basename(elementPath)
 		folderPath = path.dirname(elementPath)
 		self.mkdirp.withoutLock project_id, folderPath, (err, newFolders, folder) ->
 			return callback(err) if err?
-			self.upsertFile.withoutLock project_id, folder._id, fileName, fsPath, userId, (err, file, isNewFile) ->
+			self.upsertFile.withoutLock project_id, folder._id, fileName, fsPath, linkedFileData, userId, (err, file, isNewFile) ->
 				return callback(err) if err?
 				callback null, file, isNewFile, newFolders, folder
 

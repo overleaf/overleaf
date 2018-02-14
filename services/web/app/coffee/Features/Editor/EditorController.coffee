@@ -23,11 +23,11 @@ module.exports = EditorController =
 			EditorRealTimeController.emitToRoom(project_id, 'reciveNewDoc', folder_id, doc, source)
 			callback(err, doc)
 
-	addFile: (project_id, folder_id, fileName, fsPath, source, user_id, callback = (error, file)->)->
+	addFile: (project_id, folder_id, fileName, fsPath, linkedFileData, source, user_id, callback = (error, file)->)->
 		fileName = fileName.trim()
-		logger.log {project_id, folder_id, fileName, fsPath}, "sending new file to project"
+		logger.log {project_id, folder_id, fileName, fsPath, linkedFileData, source, user_id}, "sending new file to project"
 		Metrics.inc "editor.add-file"
-		ProjectEntityUpdateHandler.addFile project_id, folder_id, fileName, fsPath, user_id, (err, fileRef, folder_id)=>
+		ProjectEntityUpdateHandler.addFile project_id, folder_id, fileName, fsPath, linkedFileData, user_id, (err, fileRef, folder_id)=>
 			if err?
 				logger.err err:err, project_id:project_id, folder_id:folder_id, fileName:fileName, "error adding file without lock"
 				return callback(err)
@@ -40,8 +40,8 @@ module.exports = EditorController =
 				EditorRealTimeController.emitToRoom(project_id, 'reciveNewDoc', folder_id, doc, source)
 			callback err, doc
 
-	upsertFile: (project_id, folder_id, fileName, fsPath, source, user_id, callback = (err, file) ->) ->
-		ProjectEntityUpdateHandler.upsertFile project_id, folder_id, fileName, fsPath, user_id, (err, file, didAddFile) ->
+	upsertFile: (project_id, folder_id, fileName, fsPath, linkedFileData, source, user_id, callback = (err, file) ->) ->
+		ProjectEntityUpdateHandler.upsertFile project_id, folder_id, fileName, fsPath, linkedFileData, user_id, (err, file, didAddFile) ->
 			return callback(err) if err?
 			if didAddFile
 				EditorRealTimeController.emitToRoom project_id, 'reciveNewFile', folder_id, file, source
@@ -56,8 +56,8 @@ module.exports = EditorController =
 					EditorRealTimeController.emitToRoom project_id, 'reciveNewDoc', lastFolder._id, doc, source
 				callback()
 
-	upsertFileWithPath: (project_id, elementPath, fsPath, source, user_id, callback) ->
-		ProjectEntityUpdateHandler.upsertFileWithPath project_id, elementPath, fsPath, user_id, (err, file, didAddFile, newFolders, lastFolder) ->
+	upsertFileWithPath: (project_id, elementPath, fsPath, linkedFileData, source, user_id, callback) ->
+		ProjectEntityUpdateHandler.upsertFileWithPath project_id, elementPath, fsPath, linkedFileData, user_id, (err, file, didAddFile, newFolders, lastFolder) ->
 			return callback(err) if err?
 			EditorController._notifyProjectUsersOfNewFolders project_id, newFolders, (err) ->
 				return callback(err) if err?
