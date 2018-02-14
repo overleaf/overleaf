@@ -11,6 +11,7 @@ describe 'ProjectRootDocManager', ->
 		@callback = sinon.stub()
 		@ProjectRootDocManager = SandboxedModule.require modulePath, requires:
 			"./ProjectEntityHandler" : @ProjectEntityHandler = {}
+			"./ProjectEntityUpdateHandler" : @ProjectEntityUpdateHandler = {}
 	
 	describe "setRootDocAutomatically", ->
 		describe "when there is a suitable root doc", ->
@@ -30,7 +31,7 @@ describe 'ProjectRootDocManager', ->
 						lines: ["Hello world"]
 
 				@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
-				@ProjectEntityHandler.setRootDoc = sinon.stub().callsArgWith(2)
+				@ProjectEntityUpdateHandler.setRootDoc = sinon.stub().callsArgWith(2)
 				@ProjectRootDocManager.setRootDocAutomatically @project_id, done
 
 			it "should check the docs of the project", ->
@@ -38,7 +39,7 @@ describe 'ProjectRootDocManager', ->
 					.should.equal true
 
 			it "should set the root doc to the doc containing a documentclass", ->
-				@ProjectEntityHandler.setRootDoc.calledWith(@project_id, "doc-id-2")
+				@ProjectEntityUpdateHandler.setRootDoc.calledWith(@project_id, "doc-id-2")
 					.should.equal true
 
 		describe "when the root doc is an Rtex file", ->
@@ -51,11 +52,11 @@ describe 'ProjectRootDocManager', ->
 						_id: "doc-id-2"
 						lines: ["\\documentclass{article}", "\\input{chapter1}"]
 				@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
-				@ProjectEntityHandler.setRootDoc = sinon.stub().callsArgWith(2)
+				@ProjectEntityUpdateHandler.setRootDoc = sinon.stub().callsArgWith(2)
 				@ProjectRootDocManager.setRootDocAutomatically @project_id, @callback
 
 			it "should set the root doc to the doc containing a documentclass", ->
-				@ProjectEntityHandler.setRootDoc.calledWith(@project_id, "doc-id-2")
+				@ProjectEntityUpdateHandler.setRootDoc.calledWith(@project_id, "doc-id-2")
 					.should.equal true
 
 		describe "when there is no suitable root doc", ->
@@ -68,9 +69,9 @@ describe 'ProjectRootDocManager', ->
 						_id: "doc-id-2"
 						lines: ["%Example: \\documentclass{article}"]
 				@ProjectEntityHandler.getAllDocs = sinon.stub().callsArgWith(1, null, @docs)
-				@ProjectEntityHandler.setRootDoc = sinon.stub().callsArgWith(2)
+				@ProjectEntityUpdateHandler.setRootDoc = sinon.stub().callsArgWith(2)
 				@ProjectRootDocManager.setRootDocAutomatically @project_id, done
 
 			it "should not set the root doc to the doc containing a documentclass", ->
-				@ProjectEntityHandler.setRootDoc.called.should.equal false
+				@ProjectEntityUpdateHandler.setRootDoc.called.should.equal false
 

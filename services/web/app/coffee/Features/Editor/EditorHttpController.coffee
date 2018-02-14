@@ -1,4 +1,4 @@
-ProjectEntityHandler = require "../Project/ProjectEntityHandler"
+ProjectEntityUpdateHandler = require "../Project/ProjectEntityUpdateHandler"
 ProjectDeleter = require "../Project/ProjectDeleter"
 logger = require "logger-sharelatex"
 EditorRealTimeController = require "./EditorRealTimeController"
@@ -66,7 +66,7 @@ module.exports = EditorHttpController =
 			return res.sendStatus 400 # Malformed request
 
 		logger.log project_id: project_id, doc_id: doc_id, "restoring doc"
-		ProjectEntityHandler.restoreDoc project_id, doc_id, name, (err, doc, folder_id) =>
+		ProjectEntityUpdateHandler.restoreDoc project_id, doc_id, name, (err, doc, folder_id) =>
 			return next(error) if error?
 			EditorRealTimeController.emitToRoom(project_id, 'reciveNewDoc', folder_id, doc)
 			res.json {

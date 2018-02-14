@@ -288,6 +288,74 @@ describe "ProjectStructureChanges", ->
 
 					done()
 
+	describe "renaming entities", ->
+		beforeEach () ->
+			MockDocUpdaterApi.clearProjectStructureUpdates()
+
+		it "should version renaming a doc", (done) ->
+			@owner.request.post {
+				uri: "project/#{@example_project_id}/Doc/#{@example_doc_id}/rename",
+				json:
+					name: 'new_renamed.tex'
+			}, (error, res, body) =>
+				throw error if error?
+				if res.statusCode < 200 || res.statusCode >= 300
+					throw new Error("failed to move doc #{res.statusCode}")
+
+				updates = MockDocUpdaterApi.getProjectStructureUpdates(@example_project_id).docUpdates
+				expect(updates.length).to.equal(1)
+				update = updates[0]
+				expect(update.userId).to.equal(@owner._id)
+				expect(update.pathname).to.equal("/bar/foo/new.tex")
+				expect(update.newPathname).to.equal("/bar/foo/new_renamed.tex")
+
+				done()
+
+		it "should version renaming a file", (done) ->
+			@owner.request.post {
+				uri: "project/#{@example_project_id}/File/#{@example_file_id}/rename",
+				json:
+					name: '1pixel_renamed.png'
+			}, (error, res, body) =>
+				throw error if error?
+				if res.statusCode < 200 || res.statusCode >= 300
+					throw new Error("failed to move file #{res.statusCode}")
+
+				updates = MockDocUpdaterApi.getProjectStructureUpdates(@example_project_id).fileUpdates
+				expect(updates.length).to.equal(1)
+				update = updates[0]
+				expect(update.userId).to.equal(@owner._id)
+				expect(update.pathname).to.equal("/bar/foo/1pixel.png")
+				expect(update.newPathname).to.equal("/bar/foo/1pixel_renamed.png")
+
+				done()
+
+		it "should version renaming a folder", (done) ->
+			@owner.request.post {
+				uri: "project/#{@example_project_id}/Folder/#{@example_folder_id_1}/rename",
+				json:
+					name: 'foo_renamed'
+			}, (error, res, body) =>
+				throw error if error?
+				if res.statusCode < 200 || res.statusCode >= 300
+					throw new Error("failed to move folder #{res.statusCode}")
+
+				updates = MockDocUpdaterApi.getProjectStructureUpdates(@example_project_id).docUpdates
+				expect(updates.length).to.equal(1)
+				update = updates[0]
+				expect(update.userId).to.equal(@owner._id)
+				expect(update.pathname).to.equal("/bar/foo/new_renamed.tex")
+				expect(update.newPathname).to.equal("/bar/foo_renamed/new_renamed.tex")
+
+				updates = MockDocUpdaterApi.getProjectStructureUpdates(@example_project_id).fileUpdates
+				expect(updates.length).to.equal(1)
+				update = updates[0]
+				expect(update.userId).to.equal(@owner._id)
+				expect(update.pathname).to.equal("/bar/foo/1pixel_renamed.png")
+				expect(update.newPathname).to.equal("/bar/foo_renamed/1pixel_renamed.png")
+
+				done()
+
 	describe "deleting entities", ->
 		beforeEach () ->
 			MockDocUpdaterApi.clearProjectStructureUpdates()
@@ -304,14 +372,14 @@ describe "ProjectStructureChanges", ->
 				expect(updates.length).to.equal(1)
 				update = updates[0]
 				expect(update.userId).to.equal(@owner._id)
-				expect(update.pathname).to.equal("/bar/foo/new.tex")
+				expect(update.pathname).to.equal("/bar/foo_renamed/new_renamed.tex")
 				expect(update.newPathname).to.equal("")
 
 				updates = MockDocUpdaterApi.getProjectStructureUpdates(@example_project_id).fileUpdates
 				expect(updates.length).to.equal(1)
 				update = updates[0]
 				expect(update.userId).to.equal(@owner._id)
-				expect(update.pathname).to.equal("/bar/foo/1pixel.png")
+				expect(update.pathname).to.equal("/bar/foo_renamed/1pixel_renamed.png")
 				expect(update.newPathname).to.equal("")
 
 				done()

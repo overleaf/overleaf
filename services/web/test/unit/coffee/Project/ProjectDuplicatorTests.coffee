@@ -63,11 +63,11 @@ describe 'ProjectDuplicator', ->
 
 		@projectOptionsHandler =
 			setCompiler : sinon.stub()								
-		@entityHandler =
+		@ProjectEntityUpdateHandler =
 			addDoc: sinon.stub().callsArgWith(5, null, {name:"somDoc"})
 			copyFileFromExistingProjectWithProject: sinon.stub().callsArgWith(5)
 			setRootDoc: sinon.stub()
-			addFolderWithProject: sinon.stub().callsArgWith(3, null, @newFolder)
+			addFolder: sinon.stub().callsArgWith(3, null, @newFolder)
 
 		@DocumentUpdaterHandler =
 			flushProjectToMongo: sinon.stub().callsArg(1)
@@ -85,7 +85,7 @@ describe 'ProjectDuplicator', ->
 			'../../models/Project':{Project:@Project}
 			"../DocumentUpdater/DocumentUpdaterHandler": @DocumentUpdaterHandler
 			'./ProjectCreationHandler': @creationHandler
-			'./ProjectEntityHandler': @entityHandler
+			'./ProjectEntityUpdateHandler': @ProjectEntityUpdateHandler
 			'./ProjectLocator': @locator
 			'./ProjectOptionsHandler': @projectOptionsHandler
 			"../Docstore/DocstoreManager": @DocstoreManager
@@ -112,15 +112,15 @@ describe 'ProjectDuplicator', ->
 			done()
 
 	it 'should use the same compiler', (done)->
-		@entityHandler.addDoc.callsArgWith(5, null, @rootFolder.docs[0], @owner._id)
+		@ProjectEntityUpdateHandler.addDoc.callsArgWith(5, null, @rootFolder.docs[0], @owner._id)
 		@duplicator.duplicate @owner, @old_project_id, "", (err, newProject)=>
 			@projectOptionsHandler.setCompiler.calledWith(@stubbedNewProject._id, @project.compiler).should.equal true
 			done()
 	
 	it 'should use the same root doc', (done)->
-		@entityHandler.addDoc.callsArgWith(5, null, @rootFolder.docs[0], @owner._id)
+		@ProjectEntityUpdateHandler.addDoc.callsArgWith(5, null, @rootFolder.docs[0], @owner._id)
 		@duplicator.duplicate @owner, @old_project_id, "", (err, newProject)=>
-			@entityHandler.setRootDoc.calledWith(@stubbedNewProject._id, @rootFolder.docs[0]._id).should.equal true
+			@ProjectEntityUpdateHandler.setRootDoc.calledWith(@stubbedNewProject._id, @rootFolder.docs[0]._id).should.equal true
 			done()
 
 	it 'should not copy the collaberators or read only refs', (done)->
@@ -131,34 +131,34 @@ describe 'ProjectDuplicator', ->
 
 	it 'should copy all the folders', (done)->
 		@duplicator.duplicate @owner, @old_project_id, "", (err, newProject)=>
-			@entityHandler.addFolderWithProject.calledWith(@stubbedNewProject, @stubbedNewProject.rootFolder[0]._id, @level1folder.name).should.equal true
-			@entityHandler.addFolderWithProject.calledWith(@stubbedNewProject, @newFolder._id, @level2folder.name).should.equal true
-			@entityHandler.addFolderWithProject.callCount.should.equal 2
+			@ProjectEntityUpdateHandler.addFolder.calledWith(@new_project_id, @stubbedNewProject.rootFolder[0]._id, @level1folder.name).should.equal true
+			@ProjectEntityUpdateHandler.addFolder.calledWith(@new_project_id, @newFolder._id, @level2folder.name).should.equal true
+			@ProjectEntityUpdateHandler.addFolder.callCount.should.equal 2
 			done()
 
 	it 'should copy all the docs', (done)->
 		@duplicator.duplicate @owner, @old_project_id, "", (err, newProject)=>
 			@DocstoreManager.getAllDocs.calledWith(@old_project_id).should.equal true
-			@entityHandler.addDoc
-				.calledWith(@stubbedNewProject, @stubbedNewProject.rootFolder[0]._id, @doc0.name, @doc0_lines, @owner._id)
+			@ProjectEntityUpdateHandler.addDoc
+				.calledWith(@new_project_id, @stubbedNewProject.rootFolder[0]._id, @doc0.name, @doc0_lines, @owner._id)
 				.should.equal true
-			@entityHandler.addDoc
-				.calledWith(@stubbedNewProject, @newFolder._id, @doc1.name, @doc1_lines, @owner._id)
+			@ProjectEntityUpdateHandler.addDoc
+				.calledWith(@new_project_id, @newFolder._id, @doc1.name, @doc1_lines, @owner._id)
 				.should.equal true
-			@entityHandler.addDoc
-				.calledWith(@stubbedNewProject, @newFolder._id, @doc2.name, @doc2_lines, @owner._id)
+			@ProjectEntityUpdateHandler.addDoc
+				.calledWith(@new_project_id, @newFolder._id, @doc2.name, @doc2_lines, @owner._id)
 				.should.equal true
 			done()
 
 	it 'should copy all the files', (done)->
 		@duplicator.duplicate @owner, @old_project_id, "", (err, newProject)=>
-			@entityHandler.copyFileFromExistingProjectWithProject
+			@ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject
 				.calledWith(@stubbedNewProject, @stubbedNewProject.rootFolder[0]._id, @project._id, @rootFolder.fileRefs[0], @owner._id)
 				.should.equal true
-			@entityHandler.copyFileFromExistingProjectWithProject
+			@ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject
 				.calledWith(@stubbedNewProject, @newFolder._id, @project._id, @level1folder.fileRefs[0], @owner._id)
 				.should.equal true
-			@entityHandler.copyFileFromExistingProjectWithProject
+			@ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject
 				.calledWith(@stubbedNewProject, @newFolder._id, @project._id, @level2folder.fileRefs[0], @owner._id)
 				.should.equal true
 			done()

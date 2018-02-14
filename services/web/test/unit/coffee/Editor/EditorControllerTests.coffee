@@ -10,374 +10,269 @@ assert = require('assert')
 describe "EditorController", ->
 	beforeEach ->
 		@project_id = "test-project-id"
-		@project =
-			_id: @project_id
-			owner_ref:{_id:"something"}
-
-
-		@doc_id = "test-doc-id"
 		@source = "dropbox"
 
-		@user =
-			_id: @user_id = "user-id"
-			projects: {}
+		@doc = _id: @doc_id = "test-doc-id"
+		@docName = "doc.tex"
+		@docLines = ["1234","dskl"]
+		@file = _id: @file_id ="dasdkjk"
+		@fileName = "file.png"
+		@fsPath = "/folder/file.png"
 
-		@rooms = {}
-		@io =
-			sockets :
-				clients : (room_id) =>
-					@rooms[room_id]
-		@DocumentUpdaterHandler = {}
-		@ProjectOptionsHandler =
-			setCompiler : sinon.spy()
-			setSpellCheckLanguage: sinon.spy()
-		@ProjectEntityHandler = 
-			flushProjectToThirdPartyDataStore:sinon.stub()
-		@Project =
-			findPopulatedById: sinon.stub().callsArgWith(1, null, @project)
-		@client = new MockClient()
+		@folder_id = "123ksajdn"
+		@folder = _id: @folder_id
+		@folderName = "folder"
 
-		@settings = 
-			apis:{thirdPartyDataStore:{emptyProjectFlushDelayMiliseconds:0.5}}
-			redis: web:{}
-		@dropboxProjectLinker = {}
 		@callback = sinon.stub()
-		@ProjectDetailsHandler = 
-			setProjectDescription:sinon.stub()
-		@CollaboratorsHandler = 
-			removeUserFromProject: sinon.stub().callsArgWith(2)
-			addUserToProject: sinon.stub().callsArgWith(3)
-		@ProjectDeleter =
-			deleteProject: sinon.stub()
-		@LockManager =
-			runWithLock : sinon.spy((key, runner, callback) -> runner(callback))
+
 		@EditorController = SandboxedModule.require modulePath, requires:
-			"../../infrastructure/Server" : io : @io
-			'../Project/ProjectEntityHandler' : @ProjectEntityHandler
-			'../Project/ProjectOptionsHandler' : @ProjectOptionsHandler
-			'../Project/ProjectDetailsHandler': @ProjectDetailsHandler
-			'../Project/ProjectDeleter' : @ProjectDeleter
-			'../Collaborators/CollaboratorsHandler': @CollaboratorsHandler
-			'../DocumentUpdater/DocumentUpdaterHandler' : @DocumentUpdaterHandler
-			'../../models/Project' : Project: @Project
-			"settings-sharelatex":@settings
-			'../Dropbox/DropboxProjectLinker':@dropboxProjectLinker
-			'./EditorRealTimeController':@EditorRealTimeController = {}
-			"metrics-sharelatex": @Metrics = { inc: sinon.stub() }
-			"../TrackChanges/TrackChangesManager": @TrackChangesManager = {}
-			"../../infrastructure/LockManager":@LockManager
-			'redis-sharelatex':createClient:-> auth:->
+			'../Project/ProjectEntityUpdateHandler' : @ProjectEntityUpdateHandler = {}
+			'../Project/ProjectOptionsHandler' : @ProjectOptionsHandler =
+				setCompiler: sinon.stub().yields()
+				setSpellCheckLanguage: sinon.stub().yields()
+			'../Project/ProjectDetailsHandler': @ProjectDetailsHandler =
+				setProjectDescription: sinon.stub().yields()
+				renameProject: sinon.stub().yields()
+				setPublicAccessLevel: sinon.stub().yields()
+			'../Project/ProjectDeleter' : @ProjectDeleter = {}
+			'../DocumentUpdater/DocumentUpdaterHandler' : @DocumentUpdaterHandler =
+				flushDocToMongo: sinon.stub().yields()
+				setDocument: sinon.stub().yields()
+			'./EditorRealTimeController':@EditorRealTimeController =
+				emitToRoom: sinon.stub()
+			"metrics-sharelatex": @Metrics = inc: sinon.stub()
 			"logger-sharelatex": @logger =
 				log: sinon.stub()
 				err: sinon.stub()
 
-	describe "updating compiler used for project", ->
-		it "should send the new compiler and project id to the project options handler", (done)->
-			compiler = "latex"
-			@EditorRealTimeController.emitToRoom = sinon.stub()
-			@EditorController.setCompiler @project_id, compiler, (err) =>
-				@ProjectOptionsHandler.setCompiler.calledWith(@project_id, compiler).should.equal true
-				@EditorRealTimeController.emitToRoom.calledWith(@project_id, "compilerUpdated", compiler).should.equal true
-				done()
-			@ProjectOptionsHandler.setCompiler.args[0][2]()
-
-
-	describe "updating language code used for project", ->
-		it "should send the new languageCode and project id to the project options handler", (done)->
-			languageCode = "fr"
-			@EditorRealTimeController.emitToRoom = sinon.stub()
-			@EditorController.setSpellCheckLanguage @project_id, languageCode, (err) =>
-				@ProjectOptionsHandler.setSpellCheckLanguage.calledWith(@project_id, languageCode).should.equal true
-				@EditorRealTimeController.emitToRoom.calledWith(@project_id, "spellCheckLanguageUpdated", languageCode).should.equal true
-				done()
-			@ProjectOptionsHandler.setSpellCheckLanguage.args[0][2]()
-
-
-	describe 'setDoc', ->
+	describe 'addDoc', ->
 		beforeEach ->
-			@docLines = ["foo", "bar"]
-			@DocumentUpdaterHandler.flushDocToMongo = sinon.stub().callsArg(2)
-			@DocumentUpdaterHandler.setDocument = sinon.stub().callsArg(5)
+			@ProjectEntityUpdateHandler.addDoc = sinon.stub().yields(null, @doc, @folder_id)
+			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, @user_id, @callback
 
-		it 'should send the document to the documentUpdaterHandler', (done)->
-			@DocumentUpdaterHandler.setDocument = sinon.stub().withArgs(@project_id, @doc_id, @user_id, @docLines, @source).callsArg(5)
-			@EditorController.setDoc @project_id, @doc_id, @user_id, @docLines, @source, (err)->
-				done()
+		it 'should add the doc using the project entity handler', ->
+			@ProjectEntityUpdateHandler.addDoc
+				.calledWith(@project_id, @folder_id, @docName, @docLines)
+				.should.equal true
 
-		it 'should send the new doc lines to the doucment updater', (done)->
-			@DocumentUpdaterHandler.setDocument = ->
-			mock = sinon.mock(@DocumentUpdaterHandler).expects("setDocument").withArgs(@project_id, @doc_id, @user_id, @docLines, @source).once().callsArg(5)
+		it 'should send the update out to the users in the project', ->
+			@EditorRealTimeController.emitToRoom
+				.calledWith(@project_id, "reciveNewDoc", @folder_id, @doc, @source)
+				.should.equal true
 
-			@EditorController.setDoc @project_id, @doc_id, @user_id, @docLines, @source, (err)=>
-				mock.verify()
-				done()
+		it 'calls the callback', ->
+			@callback.calledWith(null, @doc).should.equal true
 
-		it 'should flush the doc to mongo', (done)->
-			@EditorController.setDoc @project_id, @doc_id, @user_id, @docLines, @source, (err)=>
-				@DocumentUpdaterHandler.flushDocToMongo.calledWith(@project_id, @doc_id).should.equal true
-				done()
-
-
-	describe 'addDocWithoutLock', ->
+	describe 'addFile', ->
 		beforeEach ->
-			@ProjectEntityHandler.addDoc = ()->
-			@EditorRealTimeController.emitToRoom = sinon.stub()
-			@project_id = "12dsankj"
-			@folder_id = "213kjd"
-			@doc = {_id:"123ds"}
-			@folder_id = "123ksajdn"
-			@docName = "doc.tex"
-			@docLines = ["1234","dskl"]
+			@ProjectEntityUpdateHandler.addFile = sinon.stub().yields(null, @file, @folder_id)
+			@EditorController.addFile @project_id, @folder_id, @fileName, @fsPath, @source, @user_id, @callback
 
-		it 'should add the doc using the project entity handler', (done)->
-			mock = sinon.mock(@ProjectEntityHandler).expects("addDoc").withArgs(@project_id, @folder_id, @docName, @docLines).callsArg(5)
+		it 'should add the folder using the project entity handler', ->
+			@ProjectEntityUpdateHandler.addFile
+				.calledWith(@project_id, @folder_id, @fileName, @fsPath, @user_id)
+				.should.equal true
 
-			@EditorController.addDocWithoutLock @project_id, @folder_id, @docName, @docLines, @source, @user_id, ->
-				mock.verify()
-				done()
+		it 'should send the update of a new folder out to the users in the project', ->
+			@EditorRealTimeController.emitToRoom
+				.calledWith(@project_id, "reciveNewFile", @folder_id, @file, @source)
+				.should.equal true
 
-		it 'should send the update out to the users in the project', (done)->
-			@ProjectEntityHandler.addDoc = sinon.stub().callsArgWith(5, null, @doc, @folder_id)
+		it 'calls the callback', ->
+			@callback.calledWith(null, @file).should.equal true
 
-			@EditorController.addDocWithoutLock @project_id, @folder_id, @docName, @docLines, @source, @user_id, =>
+	describe 'upsertDoc', ->
+		beforeEach ->
+			@ProjectEntityUpdateHandler.upsertDoc = sinon.stub().yields(null, @doc, false)
+			@EditorController.upsertDoc @project_id, @folder_id, @docName, @docLines, @source, @user_id, @callback
+
+		it 'upserts the doc using the project entity handler', ->
+			@ProjectEntityUpdateHandler.upsertDoc
+				.calledWith(@project_id, @folder_id, @docName, @docLines, @source)
+				.should.equal true
+
+		it 'returns the doc', ->
+			@callback.calledWith(null, @doc).should.equal true
+
+		describe 'doc does not exist', ->
+			beforeEach ->
+				@ProjectEntityUpdateHandler.upsertDoc = sinon.stub().yields(null, @doc, true)
+				@EditorController.upsertDoc @project_id, @folder_id, @docName, @docLines, @source, @user_id, @callback
+
+			it 'sends an update out to users in the project', ->
 				@EditorRealTimeController.emitToRoom
 					.calledWith(@project_id, "reciveNewDoc", @folder_id, @doc, @source)
 					.should.equal true
-				done()
 
-		it 'should return the doc to the callback', (done) ->
-			@ProjectEntityHandler.addDoc = sinon.stub().callsArgWith(5, null, @doc, @folder_id)
-			@EditorController.addDocWithoutLock @project_id, @folder_id, @docName, @docLines, @source, @user_id, (error, doc) =>
-				doc.should.equal @doc
-				done()
-
-	describe "addDoc", ->
-
+	describe 'upsertFile', ->
 		beforeEach ->
-			@EditorController.addDocWithoutLock = sinon.stub().callsArgWith(6)
+			@ProjectEntityUpdateHandler.upsertFile = sinon.stub().yields(null, @file, false)
+			@EditorController.upsertFile @project_id, @folder_id, @fileName, @fsPath, @source, @user_id, @callback
 
-		it "should call addDocWithoutLock", (done)->
-			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, @user_id, =>
-				@EditorController.addDocWithoutLock.calledWith(@project_id, @folder_id, @docName, @docLines, @source, @user_id).should.equal true
-				done()
+		it 'upserts the file using the project entity handler', ->
+			@ProjectEntityUpdateHandler.upsertFile
+				.calledWith(@project_id, @folder_id, @fileName, @fsPath, @user_id)
+				.should.equal true
 
-		it "should take the lock", (done)->
-			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, @user_id, =>
-				@LockManager.runWithLock.calledWith(@project_id).should.equal true
-				done()
+		it 'returns the file', ->
+			@callback.calledWith(null, @file).should.equal true
 
-		it "should propogate up any errors", (done)->
-			@LockManager.runWithLock = sinon.stub().callsArgWith(2, "timed out")
-			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, @user_id, (err) =>
-				expect(err).to.exist
-				err.should.equal "timed out"
-				done()
+		describe 'file does not exist', ->
+			beforeEach ->
+				@ProjectEntityUpdateHandler.upsertFile = sinon.stub().yields(null, @file, true)
+				@EditorController.upsertFile @project_id, @folder_id, @fileName, @fsPath, @source, @user_id, @callback
 
-	describe 'addFileWithoutLock:', ->
-		beforeEach ->
-			@ProjectEntityHandler.addFile = ->
-			@EditorRealTimeController.emitToRoom = sinon.stub()
-			@project_id = "12dsankj"
-			@folder_id = "213kjd"
-			@fileName = "file.png"
-			@folder_id = "123ksajdn"
-			@file = {_id:"dasdkjk"}
-			@stream = new ArrayBuffer()
-
-		it 'should add the folder using the project entity handler', (done)->
-			@ProjectEntityHandler.addFile = sinon.stub().callsArgWith(5)
-			@EditorController.addFileWithoutLock @project_id, @folder_id, @fileName, @stream, @source, @user_id, =>
-				@ProjectEntityHandler.addFile.calledWith(@project_id, @folder_id, @fileName, @stream, @user_id).should.equal true
-				done()
-
-		it 'should send the update of a new folder out to the users in the project', (done)->
-			@ProjectEntityHandler.addFile = sinon.stub().callsArgWith(5, null, @file, @folder_id)
-
-			@EditorController.addFileWithoutLock @project_id, @folder_id, @fileName, @stream, @source, @user_id, =>
+			it 'should send the update out to users in the project', ->
 				@EditorRealTimeController.emitToRoom
 					.calledWith(@project_id, "reciveNewFile", @folder_id, @file, @source)
 					.should.equal true
-				done()
 
-		it "should return the file in the callback", (done) ->
-			@ProjectEntityHandler.addFile = sinon.stub().callsArgWith(5, null, @file, @folder_id)
-			@EditorController.addFileWithoutLock @project_id, @folder_id, @fileName, @stream, @source, @user_id, (error, file) =>
-				file.should.equal @file
-				done()
-
-
-	describe "addFile", ->
-
+	describe "upsertDocWithPath", ->
 		beforeEach ->
-			@EditorController.addFileWithoutLock = sinon.stub().callsArgWith(6)
+			@docPath = '/folder/doc'
 
-		it "should call addFileWithoutLock", (done)->
-			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, @user_id, (error, file) =>
-				@EditorController.addFileWithoutLock.calledWith(@project_id, @folder_id, @fileName, @stream, @source, @user_id).should.equal true
-				done()
+			@ProjectEntityUpdateHandler.upsertDocWithPath = sinon.stub().yields(null, @doc, false, [], @folder)
+			@EditorController.upsertDocWithPath @project_id, @docPath, @docLines, @source, @user_id, @callback
 
-		it "should take the lock", (done)->
-			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, @user_id, (error, file) =>
-				@LockManager.runWithLock.calledWith(@project_id).should.equal true
-				done()
+		it 'upserts the doc using the project entity handler', ->
+			@ProjectEntityUpdateHandler.upsertDocWithPath
+				.calledWith(@project_id, @docPath, @docLines, @source)
+				.should.equal true
 
-		it "should propogate up any errors", (done)->
-			@LockManager.runWithLock = sinon.stub().callsArgWith(2, "timed out")
-			@EditorController.addFile @project_id, @folder_id, @fileName, @stream, @source, @user_id, (error, file) =>
-				expect(error).to.exist
-				error.should.equal "timed out"
-				done()
+		describe 'doc does not exist', ->
+			beforeEach ->
+				@ProjectEntityUpdateHandler.upsertDocWithPath = sinon.stub().yields(null, @doc, true, [], @folder)
+				@EditorController.upsertDocWithPath @project_id, @docPath, @docLines, @source, @user_id, @callback
 
-	describe "replaceFileWithoutLock", ->
-		beforeEach ->
-			@project_id = "12dsankj"
-			@file_id = "file_id_here"
-			@fsPath = "/folder/file.png"
-
-		it 'should send the replace file message to the editor controller', (done)->
-			@ProjectEntityHandler.replaceFile = sinon.stub().callsArgWith(4)
-			@EditorController.replaceFileWithoutLock @project_id, @file_id, @fsPath, @source, @user_id, =>
-				@ProjectEntityHandler.replaceFile
-					.calledWith(@project_id, @file_id, @fsPath, @user_id)
-					.should.equal true
-				done()
-
-	describe 'addFolderWithoutLock :', ->
-		beforeEach ->
-			@ProjectEntityHandler.addFolder = ->
-			@EditorRealTimeController.emitToRoom = sinon.stub()
-			@project_id = "12dsankj"
-			@folder_id = "213kjd"
-			@folderName = "folder"
-			@folder = {_id:"123ds"}
-
-		it 'should add the folder using the project entity handler', (done)->
-			mock = sinon.mock(@ProjectEntityHandler).expects("addFolder").withArgs(@project_id, @folder_id, @folderName).callsArg(3)
-
-			@EditorController.addFolderWithoutLock @project_id, @folder_id, @folderName, @source, ->
-				mock.verify()
-				done()
-
-		it 'should notifyProjectUsersOfNewFolder', (done)->
-			@ProjectEntityHandler.addFolder = (project_id, folder_id, folderName, callback)=> callback(null, @folder, @folder_id)
-			mock = sinon.mock(@EditorController.p).expects('notifyProjectUsersOfNewFolder').withArgs(@project_id, @folder_id, @folder).callsArg(3)
-
-			@EditorController.addFolderWithoutLock @project_id, @folder_id, @folderName, @source, ->
-				mock.verify()
-				done()
-
-		it 'notifyProjectUsersOfNewFolder should send update out to all users', (done)->
-			@EditorController.p.notifyProjectUsersOfNewFolder @project_id, @folder_id, @folder, =>
+			it 'should send the update for the doc out to users in the project', ->
 				@EditorRealTimeController.emitToRoom
-					.calledWith(@project_id, "reciveNewFolder", @folder_id, @folder)
+					.calledWith(@project_id, "reciveNewDoc", @folder_id, @doc, @source)
 					.should.equal true
-				done()
-	
-		it 'should return the folder in the callback', (done) ->
-			@ProjectEntityHandler.addFolder = (project_id, folder_id, folderName, callback)=> callback(null, @folder, @folder_id)
-			@EditorController.addFolderWithoutLock @project_id, @folder_id, @folderName, @source, (error, folder) =>
-				folder.should.equal @folder
-				done()
 
+		describe 'folders required for doc do not exist', ->
+			beforeEach ->
+				folders = [
+					@folderA = { _id: 2, parentFolder_id: 1}
+					@folderB = { _id: 3, parentFolder_id: 2}
+				]
+				@ProjectEntityUpdateHandler.upsertDocWithPath = sinon.stub().yields(null, @doc, true, folders, @folderB)
+				@EditorController.upsertDocWithPath @project_id, @docPath, @docLines, @source, @user_id, @callback
 
-	describe "addFolder", ->
+			it 'should send the update for each folder to users in the project', ->
+				@EditorRealTimeController.emitToRoom
+					.calledWith(@project_id, "reciveNewFolder", @folderA.parentFolder_id, @folderA)
+					.should.equal true
+				@EditorRealTimeController.emitToRoom
+					.calledWith(@project_id, "reciveNewFolder", @folderB.parentFolder_id, @folderB)
+					.should.equal true
+
+	describe "upsertFileWithPath", ->
 		beforeEach ->
-			@EditorController.addFolderWithoutLock = sinon.stub().callsArgWith(4)
+			@filePath = '/folder/file'
 
-		it "should call addFolderWithoutLock", (done)->
-			@EditorController.addFolder @project_id, @folder_id, @folderName, @source, (error, file) =>
-				@EditorController.addFolderWithoutLock.calledWith(@project_id, @folder_id, @folderName, @source).should.equal true
-				done()
+			@ProjectEntityUpdateHandler.upsertFileWithPath = sinon.stub().yields(null, @file, false, [], @folder)
+			@EditorController.upsertFileWithPath @project_id, @filePath, @fsPath, @source, @user_id, @callback
 
-		it "should take the lock", (done)->
-			@EditorController.addFolder @project_id, @folder_id, @folderName, @source, (error, file) =>
-				@LockManager.runWithLock.calledWith(@project_id).should.equal true
-				done()
+		it 'upserts the file using the project entity handler', ->
+			@ProjectEntityUpdateHandler.upsertFileWithPath
+				.calledWith(@project_id, @filePath, @fsPath)
+				.should.equal true
 
-		it "should propogate up any errors", (done)->
-			@LockManager.runWithLock = sinon.stub().callsArgWith(2, "timed out")
-			@EditorController.addFolder @project_id, @folder_id, @folderName, @source, (err, file) =>
-				expect(err).to.exist
-				err.should.equal "timed out"
-				done()
+		describe 'file does not exist', ->
+			beforeEach ->
+				@ProjectEntityUpdateHandler.upsertFileWithPath = sinon.stub().yields(null, @file, true, [], @folder)
+				@EditorController.upsertFileWithPath @project_id, @filePath, @fsPath, @source, @user_id, @callback
 
+			it 'should send the update for the file out to users in the project', ->
+				@EditorRealTimeController.emitToRoom
+					.calledWith(@project_id, "reciveNewFile", @folder_id, @file, @source)
+					.should.equal true
 
-	describe 'mkdirpWithoutLock :', ->
+		describe 'folders required for file do not exist', ->
+			beforeEach ->
+				folders = [
+					@folderA = { _id: 2, parentFolder_id: 1}
+					@folderB = { _id: 3, parentFolder_id: 2}
+				]
+				@ProjectEntityUpdateHandler.upsertFileWithPath = sinon.stub().yields(null, @file, true, folders, @folderB)
+				@EditorController.upsertFileWithPath @project_id, @filePath, @fsPath, @source, @user_id, @callback
 
-		it 'should make the dirs and notifyProjectUsersOfNewFolder', (done)->
-			path = "folder1/folder2"
-			@folder1 = {_id:"folder_1_id_here"}
-			@folder2 = {_id:"folder_2_id_here", parentFolder_id:@folder1._id}
-			@folder3 = {_id:"folder_3_id_here", parentFolder_id:@folder2._id}
+			it 'should send the update for each folder to users in the project', ->
+				@EditorRealTimeController.emitToRoom
+					.calledWith(@project_id, "reciveNewFolder", @folderA.parentFolder_id, @folderA)
+					.should.equal true
+				@EditorRealTimeController.emitToRoom
+					.calledWith(@project_id, "reciveNewFolder", @folderB.parentFolder_id, @folderB)
+					.should.equal true
 
-			@ProjectEntityHandler.mkdirp = sinon.stub().withArgs(@project_id, path).callsArgWith(2, null, [@folder1, @folder2, @folder3], @folder3)
+	describe 'addFolder', ->
+		beforeEach ->
+			@EditorController._notifyProjectUsersOfNewFolder = sinon.stub().yields()
+			@ProjectEntityUpdateHandler.addFolder = sinon.stub().yields(null, @folder, @folder_id)
+			@EditorController.addFolder @project_id, @folder_id, @folderName, @source, @callback
 
-			@EditorController.p.notifyProjectUsersOfNewFolder = sinon.stub().callsArg(3)
+		it 'should add the folder using the project entity handler', ->
+			@ProjectEntityUpdateHandler.addFolder
+				.calledWith(@project_id, @folder_id, @folderName)
+				.should.equal true
 
-			@EditorController.mkdirpWithoutLock @project_id, path, (err, newFolders, lastFolder)=>
-				@EditorController.p.notifyProjectUsersOfNewFolder.calledWith(@project_id, @folder1._id, @folder2).should.equal true
-				@EditorController.p.notifyProjectUsersOfNewFolder.calledWith(@project_id, @folder2._id, @folder3).should.equal true
-				newFolders.should.deep.equal [@folder1, @folder2, @folder3]
-				lastFolder.should.equal @folder3
-				done()
+		it 'should notifyProjectUsersOfNewFolder', ->
+			@EditorController._notifyProjectUsersOfNewFolder
+				.calledWith(@project_id, @folder_id, @folder)
 
+		it 'should return the folder in the callback', ->
+			@callback.calledWith(null, @folder).should.equal true
 
-	describe "mkdirp", ->
+	describe 'mkdirp', ->
 		beforeEach ->
 			@path = "folder1/folder2"
-			@EditorController.mkdirpWithoutLock = sinon.stub().callsArgWith(2)
+			@folders = [
+				@folderA = { _id: 2, parentFolder_id: 1}
+				@folderB = { _id: 3, parentFolder_id: 2}
+			]
+			@EditorController._notifyProjectUsersOfNewFolders = sinon.stub().yields()
+			@ProjectEntityUpdateHandler.mkdirp = sinon.stub().yields(null, @folders, @folder)
+			@EditorController.mkdirp @project_id, @path, @callback
 
-		it "should call mkdirpWithoutLock", (done)->
-			@EditorController.mkdirp @project_id, @path, (error, file) =>
-				@EditorController.mkdirpWithoutLock.calledWith(@project_id, @path).should.equal true
-				done()
+		it 'should create the folder using the project entity handler', ->
+			@ProjectEntityUpdateHandler.mkdirp
+				.calledWith(@project_id, @path)
+				.should.equal true
 
-		it "should take the lock", (done)->
-			@EditorController.mkdirp @project_id, @path, (error, file) =>
-				@LockManager.runWithLock.calledWith(@project_id).should.equal true
-				done()
+		it 'should notifyProjectUsersOfNewFolder', ->
+			@EditorController._notifyProjectUsersOfNewFolders
+				.calledWith(@project_id, @folders)
 
-		it "should propogate up any errors", (done)->
-			@LockManager.runWithLock = sinon.stub().callsArgWith(2, "timed out")
-			@EditorController.mkdirp @project_id, @path, (err, file) =>
-				expect(err).to.exist
-				err.should.equal "timed out"
-				done()
+		it 'should return the folder in the callback', ->
+			@callback.calledWith(null, @folders, @folder).should.equal true
 
-	describe "deleteEntity", ->
+	describe 'deleteEntity', ->
 		beforeEach ->
-			@EditorController.deleteEntityWithoutLock = sinon.stub().callsArgWith(5)
-
-		it "should call deleteEntityWithoutLock", (done)->
-			@EditorController.deleteEntity @project_id, @entity_id, @type, @source, @user_id, =>
-				@EditorController.deleteEntityWithoutLock
-					.calledWith(@project_id, @entity_id, @type, @source, @user_id)
-					.should.equal true
-				done()
-
-		it "should take the lock", (done)->
-			@EditorController.deleteEntity @project_id, @entity_id, @type, @source, @user_id, =>
-				@LockManager.runWithLock.calledWith(@project_id).should.equal true
-				done()
-
-		it "should propogate up any errors", (done)->
-			@LockManager.runWithLock = sinon.stub().callsArgWith(2, "timed out")
-			@EditorController.deleteEntity @project_id, @entity_id, @type, @source, @user_id, (error) =>
-				expect(error).to.exist
-				error.should.equal "timed out"
-				done()
-
-	describe 'deleteEntityWithoutLock', ->
-		beforeEach (done) ->
 			@entity_id = "entity_id_here"
 			@type = "doc"
-			@EditorRealTimeController.emitToRoom = sinon.stub()
-			@ProjectEntityHandler.deleteEntity = sinon.stub().callsArg(4)
-			@EditorController.deleteEntityWithoutLock @project_id, @entity_id, @type, @source, @user_id, done
+			@ProjectEntityUpdateHandler.deleteEntity = sinon.stub().yields()
+			@EditorController.deleteEntity @project_id, @entity_id, @type, @source, @user_id, @callback
 
 		it 'should delete the folder using the project entity handler', ->
-			@ProjectEntityHandler.deleteEntity
+			@ProjectEntityUpdateHandler.deleteEntity
 				.calledWith(@project_id, @entity_id, @type, @user_id)
+				.should.equal.true
+
+		it 'notify users an entity has been deleted', ->
+			@EditorRealTimeController.emitToRoom
+				.calledWith(@project_id, "removeEntity", @entity_id, @source)
+				.should.equal true
+
+	describe "deleteEntityWithPath", ->
+		beforeEach () ->
+			@entity_id = "entity_id_here"
+			@ProjectEntityUpdateHandler.deleteEntityWithPath = sinon.stub().yields(null, @entity_id)
+			@path = "folder1/folder2"
+			@EditorController.deleteEntityWithPath @project_id, @path, @source, @user_id, @callback
+
+		it 'should delete the folder using the project entity handler', ->
+			@ProjectEntityUpdateHandler.deleteEntityWithPath
+				.calledWith(@project_id, @path, @user_id)
 				.should.equal.true
 
 		it 'notify users an entity has been deleted', ->
@@ -387,7 +282,6 @@ describe "EditorController", ->
 
 	describe "notifyUsersProjectHasBeenDeletedOrRenamed", ->
 		it 'should emmit a message to all users in a project', (done)->
-			@EditorRealTimeController.emitToRoom = sinon.stub()
 			@EditorController.notifyUsersProjectHasBeenDeletedOrRenamed @project_id, (err)=>
 				@EditorRealTimeController.emitToRoom
 					.calledWith(@project_id, "projectRenamedOrDeletedByExternalSource")
@@ -397,24 +291,15 @@ describe "EditorController", ->
 	describe "updateProjectDescription", ->
 		beforeEach ->
 			@description = "new description"
-			@EditorRealTimeController.emitToRoom = sinon.stub()
+			@EditorController.updateProjectDescription @project_id, @description, @callback
 
+		it "should send the new description to the project details handler", ->
+			@ProjectDetailsHandler.setProjectDescription.calledWith(@project_id, @description).should.equal true
 
-		it "should send the new description to the project details handler", (done)->
-			@ProjectDetailsHandler.setProjectDescription.callsArgWith(2)
-			@EditorController.updateProjectDescription @project_id, @description, =>
-				@ProjectDetailsHandler.setProjectDescription.calledWith(@project_id, @description).should.equal true
-				done()
-
-		it "should notify the other clients about the updated description", (done)->
-			@ProjectDetailsHandler.setProjectDescription.callsArgWith(2)
-			@EditorController.updateProjectDescription @project_id, @description, =>
-				@EditorRealTimeController.emitToRoom.calledWith(@project_id, "projectDescriptionUpdated", @description).should.equal true				
-				done()
-
+		it "should notify the other clients about the updated description", ->
+			@EditorRealTimeController.emitToRoom.calledWith(@project_id, "projectDescriptionUpdated", @description).should.equal true				
 
 	describe "deleteProject", ->
-
 		beforeEach ->
 			@err = "errro"
 			@ProjectDeleter.deleteProject = sinon.stub().callsArgWith(1, @err)
@@ -425,25 +310,18 @@ describe "EditorController", ->
 				@ProjectDeleter.deleteProject.calledWith(@project_id).should.equal true
 				done()
 
-
 	describe "renameEntity", ->
 		beforeEach (done) ->
 			@entity_id = "entity_id_here"
 			@entityType = "doc"
 			@newName = "bobsfile.tex"
-			@ProjectEntityHandler.renameEntity = sinon.stub().callsArg(5)
-			@EditorRealTimeController.emitToRoom = sinon.stub()
+			@ProjectEntityUpdateHandler.renameEntity = sinon.stub().yields()
 
 			@EditorController.renameEntity @project_id, @entity_id, @entityType, @newName, @user_id, done
 
 		it "should call the project handler", ->
-			@ProjectEntityHandler.renameEntity
+			@ProjectEntityUpdateHandler.renameEntity
 				.calledWith(@project_id, @entity_id, @entityType, @newName, @user_id)
-				.should.equal true
-
-		it "should take the lock", ->
-			@LockManager.runWithLock
-				.calledWith(@project_id)
 				.should.equal true
 
 		it "should emit the update to the room", ->
@@ -455,162 +333,126 @@ describe "EditorController", ->
 		beforeEach ->
 			@entity_id = "entity_id_here"
 			@entityType = "doc"
-			@folder_id = "313dasd21dasdsa"
-			@ProjectEntityHandler.moveEntity = sinon.stub().callsArg(5)
-			@EditorRealTimeController.emitToRoom = sinon.stub()
+			@ProjectEntityUpdateHandler.moveEntity = sinon.stub().yields()
+			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, @user_id, @callback
 
-		it "should call the ProjectEntityHandler", (done)->
-			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, @user_id, =>
-				@ProjectEntityHandler.moveEntity.calledWith(@project_id, @entity_id, @folder_id, @entityType, @user_id).should.equal true
-				done()
+		it "should call the ProjectEntityUpdateHandler", ->
+			@ProjectEntityUpdateHandler.moveEntity
+				.calledWith(@project_id, @entity_id, @folder_id, @entityType, @user_id)
+				.should.equal true
 
-		it "should take the lock", (done)->
-			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, @user_id, =>
-				@LockManager.runWithLock.calledWith(@project_id).should.equal true
-				done()
+		it "should emit the update to the room", ->
+			@EditorRealTimeController.emitToRoom
+				.calledWith(@project_id, 'reciveEntityMove', @entity_id, @folder_id)
+				.should.equal true
 
-		it "should propogate up any errors", (done)->
-			@LockManager.runWithLock = sinon.stub().callsArgWith(2, "timed out")
-			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, @user_id, (error) =>
-				expect(error).to.exist
-				error.should.equal "timed out"
-				done()
-
-		it "should emit the update to the room", (done)->
-			@EditorController.moveEntity @project_id, @entity_id, @folder_id, @entityType, @user_id, =>
-				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'reciveEntityMove', @entity_id, @folder_id).should.equal true				
-				done()
+		it "calls the callback", ->
+			@callback.called.should.equal true
 
 	describe "renameProject", ->
-
 		beforeEach ->
 			@err = "errro"
-			@window_id = "kdsjklj290jlk"
 			@newName = "new name here"
-			@ProjectDetailsHandler.renameProject = sinon.stub().callsArg(2)
-			@EditorRealTimeController.emitToRoom = sinon.stub()
+			@EditorController.renameProject @project_id, @newName, @callback
 
-		it "should call the EditorController", (done)->
-			@EditorController.renameProject @project_id, @newName, =>
-				@ProjectDetailsHandler.renameProject.calledWith(@project_id, @newName).should.equal true
-				done()
+		it "should call the EditorController", ->
+			@ProjectDetailsHandler.renameProject.calledWith(@project_id, @newName).should.equal true
 
+		it "should emit the update to the room", ->
+			@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'projectNameUpdated', @newName).should.equal true				
 
-		it "should emit the update to the room", (done)->
-			@EditorController.renameProject @project_id, @newName, =>
-				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'projectNameUpdated', @newName).should.equal true				
-				done()
+	describe "setCompiler", ->
+		beforeEach ->
+			@compiler = "latex"
+			@EditorController.setCompiler @project_id, @compiler, @callback
 
+		it "should send the new compiler and project id to the project options handler", ->
+			@ProjectOptionsHandler.setCompiler
+				.calledWith(@project_id, @compiler)
+				.should.equal true
+			@EditorRealTimeController.emitToRoom
+				.calledWith(@project_id, "compilerUpdated", @compiler)
+				.should.equal true
+
+	describe "setSpellCheckLanguage", ->
+		beforeEach ->
+			@languageCode = "fr"
+			@EditorController.setSpellCheckLanguage @project_id, @languageCode, @callback
+
+		it "should send the new languageCode and project id to the project options handler", ->
+			@ProjectOptionsHandler.setSpellCheckLanguage
+				.calledWith(@project_id, @languageCode)
+				.should.equal true
+			@EditorRealTimeController.emitToRoom
+				.calledWith(@project_id, "spellCheckLanguageUpdated", @languageCode)
+				.should.equal true
 
 	describe "setPublicAccessLevel", ->
-
 		describe 'when setting to private', ->
 			beforeEach ->
 				@newAccessLevel = 'private'
-				@ProjectDetailsHandler.setPublicAccessLevel = sinon.stub().callsArgWith(2, null)
-				@ProjectDetailsHandler.ensureTokensArePresent = sinon.stub()
-					.callsArgWith(1, null, @tokens)
-				@EditorRealTimeController.emitToRoom = sinon.stub()
+				@ProjectDetailsHandler.ensureTokensArePresent = sinon.stub().yields(null, @tokens)
+				@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, @callback
 
-			it 'should set the access level', (done) ->
-				@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
+			it 'should set the access level', ->
 					@ProjectDetailsHandler.setPublicAccessLevel
-						.calledWith(@project_id, @newAccessLevel).should.equal true
-					done()
+						.calledWith(@project_id, @newAccessLevel)
+						.should.equal true
 
-			it 'should broadcast the access level change', (done) ->
-				@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
-					@EditorRealTimeController.emitToRoom
-						.calledWith(@project_id, 'project:publicAccessLevel:changed').should.equal true
-					done()
+			it 'should broadcast the access level change', ->
+				@EditorRealTimeController.emitToRoom
+					.calledWith(@project_id, 'project:publicAccessLevel:changed')
+					.should.equal true
 
-			it 'should not ensure tokens are present for project', (done) ->
-				@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
-					@ProjectDetailsHandler.ensureTokensArePresent
-						.calledWith(@project_id).should.equal false
-					done()
+			it 'should not ensure tokens are present for project', ->
+				@ProjectDetailsHandler.ensureTokensArePresent
+					.calledWith(@project_id)
+					.should.equal false
 
-			it 'should not broadcast a token change', (done) ->
-				@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
-					@EditorRealTimeController.emitToRoom
-						.calledWith(@project_id, 'project:tokens:changed', {tokens: @tokens})
-							.should.equal false
-					done()
-
-			it 'should not produce an error', (done) ->
-				@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, (err) =>
-					expect(err).to.not.exist
-					done()
+			it 'should not broadcast a token change', ->
+				@EditorRealTimeController.emitToRoom
+					.calledWith(@project_id, 'project:tokens:changed', {tokens: @tokens})
+					.should.equal false
 
 		describe 'when setting to tokenBased', ->
 			beforeEach ->
 				@newAccessLevel = 'tokenBased'
 				@tokens = {readOnly: 'aaa', readAndWrite: '42bbb'}
-				@ProjectDetailsHandler.setPublicAccessLevel = sinon.stub()
-					.callsArgWith(2, null)
-				@ProjectDetailsHandler.ensureTokensArePresent = sinon.stub()
-					.callsArgWith(1, null, @tokens)
-				@EditorRealTimeController.emitToRoom = sinon.stub()
+				@ProjectDetailsHandler.ensureTokensArePresent = sinon.stub().yields(null, @tokens)
+				@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, @callback
 
-			it 'should set the access level', (done) ->
-				@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
-					@ProjectDetailsHandler.setPublicAccessLevel
-						.calledWith(@project_id, @newAccessLevel).should.equal true
-					done()
+			it 'should set the access level', ->
+				@ProjectDetailsHandler.setPublicAccessLevel
+					.calledWith(@project_id, @newAccessLevel)
+					.should.equal true
 
-			it 'should broadcast the access level change', (done) ->
-				@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
-					@EditorRealTimeController.emitToRoom
-						.calledWith(@project_id, 'project:publicAccessLevel:changed')
-							.should.equal true
-					done()
+			it 'should broadcast the access level change', ->
+				@EditorRealTimeController.emitToRoom
+					.calledWith(@project_id, 'project:publicAccessLevel:changed')
+					.should.equal true
 
-			it 'should ensure tokens are present for project', (done) ->
-				@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
-					@ProjectDetailsHandler.ensureTokensArePresent
-						.calledWith(@project_id).should.equal true
-					done()
+			it 'should ensure tokens are present for project', ->
+				@ProjectDetailsHandler.ensureTokensArePresent
+					.calledWith(@project_id)
+					.should.equal true
 
-			it 'should broadcast the token change too', (done) ->
-				@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
-					@EditorRealTimeController.emitToRoom
-						.calledWith(@project_id, 'project:tokens:changed', {tokens: @tokens})
-							.should.equal true
-					done()
-
-			it 'should not produce an error', (done) ->
-				@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, (err) =>
-					expect(err).to.not.exist
-					done()
-
-		# beforeEach ->
-		# 	@newAccessLevel = "public"
-		# 	@ProjectDetailsHandler.setPublicAccessLevel = sinon.stub().callsArgWith(2, null)
-		# 	@EditorRealTimeController.emitToRoom = sinon.stub()
-
-		# it "should call the EditorController", (done)->
-		# 	@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
-		# 		@ProjectDetailsHandler.setPublicAccessLevel.calledWith(@project_id, @newAccessLevel).should.equal true
-		# 		done()
-
-		# it "should emit the update to the room", (done)->
-		# 	@EditorController.setPublicAccessLevel @project_id, @newAccessLevel, =>
-		# 		@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'publicAccessLevelUpdated', @newAccessLevel).should.equal true				
-		# 		done()
+			it 'should broadcast the token change too', ->
+				@EditorRealTimeController.emitToRoom
+					.calledWith(@project_id, 'project:tokens:changed', {tokens: @tokens})
+					.should.equal true
 
 	describe "setRootDoc", ->
-
 		beforeEach ->
 			@newRootDocID = "21312321321"
-			@ProjectEntityHandler.setRootDoc = sinon.stub().callsArgWith(2, null)
-			@EditorRealTimeController.emitToRoom = sinon.stub()
+			@ProjectEntityUpdateHandler.setRootDoc = sinon.stub().yields()
+			@EditorController.setRootDoc @project_id, @newRootDocID, @callback
 
-		it "should call the ProjectEntityHandler", (done)->
-			@EditorController.setRootDoc @project_id, @newRootDocID, =>
-				@ProjectEntityHandler.setRootDoc.calledWith(@project_id, @newRootDocID).should.equal true
-				done()
+		it "should call the ProjectEntityUpdateHandler", ->
+			@ProjectEntityUpdateHandler.setRootDoc
+				.calledWith(@project_id, @newRootDocID)
+				.should.equal true
 
-		it "should emit the update to the room", (done)->
-			@EditorController.setRootDoc @project_id, @newRootDocID, =>
-				@EditorRealTimeController.emitToRoom.calledWith(@project_id, 'rootDocUpdated', @newRootDocID).should.equal true				
-				done()
+		it "should emit the update to the room", ->
+			@EditorRealTimeController.emitToRoom
+				.calledWith(@project_id, 'rootDocUpdated', @newRootDocID)
+				.should.equal true
