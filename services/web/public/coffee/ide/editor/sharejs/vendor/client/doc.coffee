@@ -164,6 +164,9 @@ class Doc
       @inflightOp = null
       @inflightSubmittedIds.length = 0
 
+      if @pendingOp == null # All ops are acked
+        @emit 'saved'
+
       error = msg.error
       if error
         # The server has rejected an op from the client for some reason.

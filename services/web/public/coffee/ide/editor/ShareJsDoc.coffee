@@ -46,6 +46,8 @@ define [
 				@trigger "remoteop", args...
 			@_doc.on "flipped_pending_to_inflight", () =>
 				@trigger "flipped_pending_to_inflight"
+			@_doc.on "saved", () =>
+				@trigger "saved"
 			@_doc.on "error", (e) =>
 				@_handleError(e)
 

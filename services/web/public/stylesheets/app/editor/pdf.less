@@ -1,13 +1,34 @@
+@stripe-width: 20px;
+@keyframes pdf-toolbar-stripes {
+  from  { background-position: 0 0; }
+  to    { background-position: @stripe-width 0; }
+}
+
 .pdf .toolbar.toolbar-pdf when (@is-overleaf = true) {
 	.toolbar-small-mixin;
 	.toolbar-alt-mixin;
 	border-bottom: 0;
 	padding-right: 5px;
+	&.uncompiled-changes {
+		#gradient > .striped(@color: rgba(255,255,255,.10), @angle: -45deg);
+		background-size: @stripe-width @stripe-width;
+		.animation(pdf-toolbar-stripes 2s linear infinite);
+	}
+	.auto-compile-status {
+		color: white;
+		margin-right: (@line-height-computed / 2);
+		i {
+			color: @brand-danger;
+		}
+	}
 }
 
 .pdf .toolbar.toolbar-pdf when (@is-overleaf = false) {
 	.toolbar-tall-mixin;
 	padding: 0 (@line-height-computed / 2);
+	.auto-compile-status {
+		display: none;
+	}
 }
 
 .pdf {
@@ -31,27 +52,28 @@
 
 .btn-recompile-group when (@is-overleaf = true) {
 	align-self: stretch;
-	margin-right: 5px;
+	margin-right: 6px;
+	.btn-recompile {
+		height: 100%;
+		.btn-primary;
+		padding-top: 3px;
+		padding-bottom: 3px;
+		&:first-child {
+			border-top-left-radius: 0;
+			border-bottom-left-radius: 0;
+		}
+		&[disabled] {
+			background-color: mix(@btn-primary-bg, @toolbar-alt-bg-color, 65%);
+			.opacity(1.0);
+		}
+	}
 }
 
 .btn-recompile-group when (@is-overleaf = false) {
 	margin-right: (@line-height-computed / 2);
-}
-
-
-.btn-recompile when (@is-overleaf = true) {
-	height: 100%;
-	.btn-primary;
-	padding-top: 3px;
-	padding-bottom: 3px;
-	&:first-child {
-		border-top-left-radius: 0;
-		border-bottom-left-radius: 0;
+	.btn-recompile {
+		.btn-info;
 	}
-}
-
-.btn-recompile when (@is-overleaf = false) {
-	.btn-info;
 }
 
 .btn-split-screen when (@is-overleaf = false) {
@@ -146,7 +168,6 @@
 				width: 16px;
 				height: 16px;
 				border: 1px solid @gray-light;
-				margin-top: 5px;
 			}
 
 			i.full-screen {

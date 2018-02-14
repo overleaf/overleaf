@@ -5,8 +5,12 @@ define [
 	"libs/bib-log-parser"
 	"services/log-hints-feedback"
 ], (App, Ace, HumanReadableLogs, BibLogParser) ->
-	AUTO_COMPILE_TIMEOUT = 5000
-	OP_ACKNOWLEDGEMENT_TIMEOUT = 1100
+	AUTO_COMPILE_MAX_WAIT = 5000
+	# We add a 1 second debounce to sending user changes to server if they aren't
+	# collaborating with anyone. This needs to be higher than that, and allow for
+	# client to server latency, otherwise we compile before the op reaches the server
+	# and then again on ack.
+	AUTO_COMPILE_DEBOUNCE = 2000
 
 	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, logHintsFeedback, localStorage) ->
 		# enable per-user containers by default
@@ -75,38 +79,102 @@ define [
 			$scope.pdf.view = 'errors'
 			$scope.pdf.renderingError = true
 
-		autoCompileTimeout = null
+		autoCompileInterval = null
+		autoCompileIfReady = () ->
+			if $scope.pdf.compiling
+				return
+
+			# Only checking linting if syntaxValidation is on and visible to the user
+			autoCompileLintingError = ide.$scope.hasLintingError and ide.$scope.settings.syntaxValidation
+			if $scope.autoCompileLintingError != autoCompileLintingError
+				$scope.$apply () ->
+					$scope.autoCompileLintingError = autoCompileLintingError
+					# We've likely been waiting a while until the user fixed the linting, but we
+					# don't want to compile as soon as it is fixed, so reset the timeout.
+					$scope.startedTryingAutoCompileAt = Date.now()
+					$scope.docLastChangedAt = Date.now()
+			if autoCompileLintingError
+				return
+
+			# If there's a longish compile, don't compile immediately after if user is still typing
+			startedTryingAt = Math.max($scope.startedTryingAutoCompileAt, $scope.lastFinishedCompileAt || 0)
+
+			timeSinceStartedTrying = Date.now() - startedTryingAt
+			timeSinceLastChange = Date.now() - $scope.docLastChangedAt
+
+			shouldCompile = false
+			if timeSinceLastChange > AUTO_COMPILE_DEBOUNCE # Don't compile in the middle of the user typing
+				shouldCompile = true
+			else if timeSinceStartedTrying > AUTO_COMPILE_MAX_WAIT # Unless they type for a long time
+				shouldCompile = true
+			else if timeSinceStartedTrying < 0 or timeSinceLastChange < 0
+				# If time is non-monotonic, assume that the user's system clock has been
+				# changed and continue with compile
+				shouldCompile = true
+
+			if shouldCompile
+				triggerAutoCompile()
+
 		triggerAutoCompile = () ->
-			return if autoCompileTimeout or $scope.ui.pdfHidden
+			$scope.recompile(isAutoCompileOnChange: true)
 
-			timeSinceLastCompile = Date.now() - $scope.recompiledAt
-			# If time is non-monotonic, assume that the user's system clock has been
-			# changed and continue with recompile
-			isTimeNonMonotonic = timeSinceLastCompile < 0
+		startTryingAutoCompile = () ->
+			return if autoCompileInterval?
+			$scope.startedTryingAutoCompileAt = Date.now()
+			autoCompileInterval = setInterval autoCompileIfReady, 200
 
-			if isTimeNonMonotonic || timeSinceLastCompile >= AUTO_COMPILE_TIMEOUT
-				# If user has code check disabled, it is likely because they have
-				# linting errors that they are ignoring. Therefore it doesn't make sense
-				# to block auto compiles. It also causes problems where server-provided
-				# linting errors aren't cleared after typing
-				if (ide.$scope.settings.syntaxValidation and !ide.$scope.hasLintingError)
-					$scope.recompile(isAutoCompileOnChange: true) # compile if no linting errors
-				else if !ide.$scope.settings.syntaxValidation
-					$scope.recompile(isAutoCompileOnChange: true) # always recompile
+		stopTryingAutoCompile = () ->
+			clearInterval autoCompileInterval
+			autoCompileInterval = null
+
+		$scope.$watch "uncompiledChanges", (uncompiledChanges) ->
+			if uncompiledChanges
+				startTryingAutoCompile()
 			else
-				# Extend remainder of timeout
-				autoCompileTimeout = setTimeout () ->
-					autoCompileTimeout = null
-					triggerAutoCompile()
-				, AUTO_COMPILE_TIMEOUT - timeSinceLastCompile
+				stopTryingAutoCompile()
 
-		autoCompileListener = null
+		$scope.uncompiledChanges = false
+		recalculateUncompiledChanges = () ->
+			if $scope.ui.pdfHidden
+				# Don't bother auto-compiling if pdf isn't visible
+				$scope.uncompiledChanges = false
+			else if !$scope.docLastChangedAt?
+				$scope.uncompiledChanges = false
+			else if !$scope.lastStartedCompileAt? or $scope.docLastChangedAt > $scope.lastStartedCompileAt
+				$scope.uncompiledChanges = true
+			else
+				$scope.uncompiledChanges = false
+
+		_updateDocLastChangedAt = () ->
+			$scope.docLastChangedAt = Date.now()
+			recalculateUncompiledChanges()
+
+		onDocChanged = () ->
+			$scope.autoCompileLintingError = false
+			_updateDocLastChangedAt()
+
+		onDocSaved = () ->
+			# We use the save as a trigger too, to account for the delay between the client
+			# and server. Otherwise, we might have compiled after the user made
+			# the change on the client, but before the server had it.
+			_updateDocLastChangedAt()
+
+		onCompilingStateChanged = (compiling) ->
+			recalculateUncompiledChanges()
+
+		autoCompileListeners = []
 		toggleAutoCompile = (enabling) ->
 			if enabling
-				autoCompileListener = ide.$scope.$on "ide:opAcknowledged", _.debounce(triggerAutoCompile, OP_ACKNOWLEDGEMENT_TIMEOUT)
+				autoCompileListeners = [
+					ide.$scope.$on "doc:changed", onDocChanged
+					ide.$scope.$on "doc:saved", onDocSaved
+					$scope.$watch "pdf.compiling", onCompilingStateChanged
+				]
 			else
-				autoCompileListener() if autoCompileListener
-				autoCompileListener = null
+				for unbind in autoCompileListeners
+					unbind()
+				autoCompileListeners = []
+				$scope.autoCompileLintingError = false
 
 		$scope.autocompile_enabled = localStorage("autocompile_enabled:#{$scope.project_id}") or false
 		$scope.$watch "autocompile_enabled", (newValue, oldValue) ->
@@ -428,6 +496,7 @@ define [
 
 			event_tracking.sendMBSampled "editor-recompile-sampled", options
 
+			$scope.lastStartedCompileAt = Date.now()
 			$scope.pdf.compiling = true
 			$scope.pdf.isAutoCompileOnLoad = options?.isAutoCompileOnLoad # initial autocompile
 
@@ -460,7 +529,7 @@ define [
 					$scope.pdf.error = true
 					$scope.pdf.view = 'errors'
 				.finally () ->
-					$scope.recompiledAt = Date.now()
+					$scope.lastFinishedCompileAt = Date.now()
 
 		# This needs to be public.
 		ide.$scope.recompile = $scope.recompile
