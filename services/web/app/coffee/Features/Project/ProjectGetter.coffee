@@ -24,6 +24,9 @@ module.exports = ProjectGetter =
 		ProjectGetter.getProject project_id, excludes, callback
 
 	getProject: (project_id, projection, callback = (error, project) ->) ->
+		if !project_id?
+			return callback("no project_id provided")
+
 		if projection?.rootFolder
 			LockManager.mongoTransactionLock.runWithLock project_id,
 				(cb) -> ProjectGetter.getProjectWithoutLock project_id, projection, cb
@@ -31,22 +34,19 @@ module.exports = ProjectGetter =
 		else
 			ProjectGetter.getProjectWithoutLock project_id, projection, callback
 
-	getProjectWithoutLock: (query, projection, callback = (error, project) ->) ->
-		if !query?
-			return callback("no query provided")
-
+	getProjectWithoutLock: (project_id, projection, callback = (error, project) ->) ->
 		if typeof(projection) == "function"
 			callback = projection
 
-		if typeof query == "string"
-			query = _id: ObjectId(query)
-		else if query instanceof ObjectId
-			query = _id: query
-		else if query?.toString().length == 24 # sometimes mongoose ids are hard to identify, this will catch them
-			query = _id:  ObjectId(query.toString())
+		if typeof project_id == "string"
+			query = _id: ObjectId(project_id)
+		else if project_id instanceof ObjectId
+			query = _id: project_id
+		else if project_id?.toString().length == 24 # sometimes mongoose ids are hard to identify, this will catch them
+			query = _id:  ObjectId(project_id.toString())
 		else
 			err = new Error("malformed get request")
-			logger.log query:query, err:err, type:typeof(query), "malformed get request"
+			logger.log project_id:project_id, err:err, type:typeof(project_id), "malformed get request"
 			return callback(err)
 
 		db.projects.find query, projection, (err, project) ->
