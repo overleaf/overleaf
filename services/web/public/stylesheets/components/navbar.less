@@ -95,6 +95,7 @@
     margin: 0;
   }
   .navbar-collapse {
+    // Use absolute positioning to build the hamburger menu.
     position: absolute;
     left: 0;
     width: 100%;
@@ -102,6 +103,16 @@
     background-color: @navbar-default-bg;
     border-bottom: solid 1px @navbar-default-border;
     padding: 0 @navbar-default-padding-h;
+
+    @media (min-width: @grid-float-breakpoint) {
+      // Get back to regular layout mode as soon as the menu items are 
+      // expanded (i.e. not contained within the hamburguer menu).
+      position: static;
+      background-color: transparent;
+      border-bottom: 0;
+      padding-right: @navbar-padding-horizontal;
+      padding-left:  @navbar-padding-horizontal;
+    }
   }
 }
 // Both navbar header and collapse
