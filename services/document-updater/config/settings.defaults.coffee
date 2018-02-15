@@ -16,7 +16,7 @@ module.exports =
 		trackchanges:
 			url: "http://#{process.env["TRACK_CHANGES_HOST"] or "localhost"}:3015"
 		project_history:
-			enabled: process.env.SHARELATEX_ENABLE_PROJECT_HISTORY == 'true'
+			enabled: true
 			url: "http://#{process.env["PROJECT_HISTORY_HOST"] or "localhost"}:3054"
 
 	redis:

@@ -7,6 +7,7 @@ ProjectHistoryKeys = Settings.redis.project_history.key_schema
 
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
+DocUpdaterApp = require "./helpers/DocUpdaterApp"
 
 describe "Applying updates to a project's structure", ->
 	before ->
@@ -20,9 +21,11 @@ describe "Applying updates to a project's structure", ->
 				pathname: '/file-path'
 				newPathname: '/new-file-path'
 			@fileUpdates = [ @fileUpdate ]
-			DocUpdaterClient.sendProjectUpdate @project_id, @user_id, [], @fileUpdates, (error) ->
+			DocUpdaterApp.ensureRunning (error) =>
 				throw error if error?
-				setTimeout done, 200
+				DocUpdaterClient.sendProjectUpdate @project_id, @user_id, [], @fileUpdates, (error) ->
+					throw error if error?
+					setTimeout done, 200
 
 		it "should push the applied file renames to the project history api", (done) ->
 			rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>

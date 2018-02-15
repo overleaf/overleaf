@@ -5,9 +5,10 @@ async = require "async"
 
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
+DocUpdaterApp = require "./helpers/DocUpdaterApp"
 
 describe "Flushing a project", ->
-	before ->
+	before (done) ->
 		@project_id = DocUpdaterClient.randomId()
 		@docs = [{
 			id: doc_id0 = DocUpdaterClient.randomId()
@@ -37,6 +38,7 @@ describe "Flushing a project", ->
 				lines: doc.lines
 				version: doc.update.v
 			}
+		DocUpdaterApp.ensureRunning(done)
 
 	describe "with documents which have been updated", ->
 		before (done) ->

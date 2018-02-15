@@ -5,12 +5,13 @@ expect = chai.expect
 
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
+DocUpdaterApp = require "./helpers/DocUpdaterApp"
 
 describe "Getting documents for project", ->
 	before (done) ->
 		@lines = ["one", "two", "three"]
 		@version = 42
-		setTimeout done, 200 # Give MockWebApi a chance to start
+		DocUpdaterApp.ensureRunning(done)
 
 	describe "when project state hash does not match", ->
 		before (done) ->

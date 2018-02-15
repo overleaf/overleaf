@@ -6,9 +6,10 @@ MockTrackChangesApi = require "./helpers/MockTrackChangesApi"
 MockProjectHistoryApi = require "./helpers/MockProjectHistoryApi"
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
+DocUpdaterApp = require "./helpers/DocUpdaterApp"
 
 describe "Deleting a document", ->
-	before ->
+	before (done) ->
 		@lines = ["one", "two", "three"]
 		@version = 42
 		@update =
@@ -22,6 +23,7 @@ describe "Deleting a document", ->
 
 		sinon.spy MockTrackChangesApi, "flushDoc"
 		sinon.spy MockProjectHistoryApi, "flushProject"
+		DocUpdaterApp.ensureRunning(done)
 
 	after ->
 		MockTrackChangesApi.flushDoc.restore()

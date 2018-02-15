@@ -103,8 +103,10 @@ shutdownCleanly = (signal) ->
 
 port = Settings.internal?.documentupdater?.port or Settings.apis?.documentupdater?.port or 3003
 host = Settings.internal.documentupdater.host or "localhost"
-app.listen port, host, ->
-	logger.info "Document-updater starting up, listening on #{host}:#{port}"
+if !module.parent # Called directly
+	app.listen port, host, ->
+		logger.info "Document-updater starting up, listening on #{host}:#{port}"
+module.exports = app
 
 for signal in ['SIGINT', 'SIGHUP', 'SIGQUIT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM', 'SIGABRT']
 	process.on signal, shutdownCleanly(signal)
