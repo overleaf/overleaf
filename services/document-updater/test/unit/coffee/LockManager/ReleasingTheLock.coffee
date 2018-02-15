@@ -31,6 +31,7 @@ describe 'LockManager - releasing the lock', ()->
 				end: sinon.stub()
 		@LockManager = SandboxedModule.require(modulePath, requires: mocks)
 		@lockValue = "lock-value-stub"
+		@callback = sinon.stub()
 
 	describe "when the lock is current", ->
 		beforeEach ->
