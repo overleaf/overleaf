@@ -23,11 +23,18 @@ module.exports = ProjectGetter =
 			excludes["rootFolder#{Array(i).join(".folders")}.fileRefs"] = 0
 		ProjectGetter.getProject project_id, excludes, callback
 
-	getProject: (project_id, projection, callback = (error, project) ->) ->
+	getProject: (project_id, projection, callback) ->
 		if !project_id?
-			return callback("no project_id provided")
+			return callback(new Error("no project_id provided"))
 
-		if projection?.rootFolder
+		if typeof(projection) == "function" && !callback?
+			callback = projection
+			projection = {}
+
+		if typeof(projection) != "object"
+			return callback(new Error("projection is not an object"))
+
+		if projection?.rootFolder || Object.keys(projection).length == 0
 			ProjectEntityMongoUpdateHandler = require './ProjectEntityMongoUpdateHandler'
 			lockKey = ProjectEntityMongoUpdateHandler.getProjectMongoLockKey project_id
 			LockManager.runWithLock lockKey,
@@ -36,9 +43,16 @@ module.exports = ProjectGetter =
 		else
 			ProjectGetter.getProjectWithoutLock project_id, projection, callback
 
-	getProjectWithoutLock: (project_id, projection, callback = (error, project) ->) ->
-		if typeof(projection) == "function"
+	getProjectWithoutLock: (project_id, projection, callback) ->
+		if !project_id?
+			return callback(new Error("no project_id provided"))
+
+		if typeof(projection) == "function" && !callback?
 			callback = projection
+			projection = {}
+
+		if typeof(projection) != "object"
+			return callback(new Error("projection is not an object"))
 
 		if typeof project_id == "string"
 			query = _id: ObjectId(project_id)

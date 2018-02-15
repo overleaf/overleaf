@@ -28,7 +28,7 @@ describe "TpdsUpdateTests", ->
 				done()
 
 		it "should have deleted the file", (done) ->
-			ProjectGetter.getProject @project_id, (error, [project]) ->
+			ProjectGetter.getProject @project_id, (error, project) ->
 				throw error if error?
 				projectFolder = project.rootFolder[0]
 				for doc in projectFolder.docs

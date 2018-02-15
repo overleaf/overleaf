@@ -80,13 +80,13 @@ describe "ProjectStructureChanges", ->
 		before (done) ->
 			MockDocUpdaterApi.clearProjectStructureUpdates()
 
-			ProjectGetter.getProject @example_project_id, (error, projects) =>
+			ProjectGetter.getProject @example_project_id, (error, project) =>
 				throw error if error?
 				@owner.request.post {
 					uri: "project/#{@example_project_id}/doc",
 					json:
 						name: 'new.tex'
-						parent_folder_id: projects[0].rootFolder[0]._id
+						parent_folder_id: project.rootFolder[0]._id
 				}, (error, res, body) =>
 					throw error if error?
 					if res.statusCode < 200 || res.statusCode >= 300
@@ -137,9 +137,9 @@ describe "ProjectStructureChanges", ->
 
 	describe "uploading a file", ->
 		before (done) ->
-			ProjectGetter.getProject @example_project_id, (error, projects) =>
+			ProjectGetter.getProject @example_project_id, (error, project) =>
 				throw error if error?
-				@root_folder_id = projects[0].rootFolder[0]._id.toString()
+				@root_folder_id = project.rootFolder[0]._id.toString()
 				done()
 
 		beforeEach () ->

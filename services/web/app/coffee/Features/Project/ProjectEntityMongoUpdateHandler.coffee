@@ -37,7 +37,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 				self._putElement project, folder_id, doc, "doc", callback
 
 	addFile: wrapWithLock (project_id, folder_id, fileRef, callback = (error, result, project) ->)->
-		ProjectGetter.getProjectWithoutLock  project_id, {rootFolder:true, name:true}, (err, project) ->
+		ProjectGetter.getProjectWithoutLock project_id, {rootFolder:true, name:true}, (err, project) ->
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add file"
 				return callback(err)
