@@ -11,6 +11,7 @@ describe "ProjectManager - getProjectDocsAndFlushIfOld", ->
 			"./RedisManager": @RedisManager = {}
 			"./DocumentManager": @DocumentManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			"./HistoryManager": @HistoryManager = {}
 			"./Metrics": @Metrics =
 				Timer: class Timer
 					done: sinon.stub()
