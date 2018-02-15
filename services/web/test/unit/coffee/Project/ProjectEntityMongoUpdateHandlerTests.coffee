@@ -36,9 +36,8 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 			"../Cooldown/CooldownManager": @CooldownManager = {}
 			'../../models/Folder': Folder:@FolderModel
 			"../../infrastructure/LockManager":@LockManager =
-				mongoTransactionLock:
-					runWithLock:
-						sinon.spy((key, runner, callback) -> runner(callback))
+				runWithLock:
+					sinon.spy((key, runner, callback) -> runner(callback))
 			'../../models/Project': Project:@ProjectModel = {}
 			'./ProjectEntityHandler': @ProjectEntityHandler = {}
 			'./ProjectLocator': @ProjectLocator = {}

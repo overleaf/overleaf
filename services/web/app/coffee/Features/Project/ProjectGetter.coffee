@@ -28,7 +28,9 @@ module.exports = ProjectGetter =
 			return callback("no project_id provided")
 
 		if projection?.rootFolder
-			LockManager.mongoTransactionLock.runWithLock project_id,
+			ProjectEntityMongoUpdateHandler = require './ProjectEntityMongoUpdateHandler'
+			lockKey = ProjectEntityMongoUpdateHandler.getProjectMongoLockKey project_id
+			LockManager.runWithLock lockKey,
 				(cb) -> ProjectGetter.getProjectWithoutLock project_id, projection, cb
 				callback
 		else

@@ -20,8 +20,9 @@ describe "ProjectGetter", ->
 			"../../models/Project": Project: @Project = {}
 			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler = {}
 			"../../infrastructure/LockManager": @LockManager =
-				mongoTransactionLock:
 					runWithLock : sinon.spy((key, runner, callback) -> runner(callback))
+			'./ProjectEntityMongoUpdateHandler':
+					lockKey: (project_id) -> project_id
 			"logger-sharelatex":
 				err:->
 				log:->

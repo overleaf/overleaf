@@ -9,26 +9,7 @@ module.exports = LockManager =
 	MAX_LOCK_WAIT_TIME: 10000 # 10s maximum time to spend trying to get the lock
 	REDIS_LOCK_EXPIRY: 30 # seconds. Time until lock auto expires in redis.
 
-	# This lock is used whenever we read or write to an existing project's
-	# structure. Some operations to project structure cannot be done atomically
-	# in mongo, this lock is used to prevent reading the structure between two
-	# parts of a staged update.
-	#
-	# This lock should only be called by ProjectEntityHandler and ProjectGetter
-	mongoTransactionLock:
-		runWithLock: (project_id, runner = ( (releaseLock = (error) ->) -> ), callback = ( (error) -> )) ->
-			LockManager._runWithLock "lock:web:mongoTransaction:{#{project_id}}", runner, callback
-
-	# This lock is used to make sure that the project structure updates are made
-	# sequentially. In particular the updates must be made in mongo and sent to
-	# the doc-updater in the same order.
-	#
-	# This lock is generally called at a high level.
-	sequentialProjectStructureUpdateLock:
-		runWithLock: (project_id, runner = ( (releaseLock = (error) ->) -> ), callback = ( (error) -> )) ->
-			LockManager._runWithLock "lock:web:sequentialProjectStructureUpdateLock:{#{project_id}}", runner, callback
-
-	_runWithLock: (key, runner = ( (releaseLock = (error) ->) -> ), callback = ( (error) -> )) ->
+	runWithLock: (key, runner = ( (releaseLock = (error) ->) -> ), callback = ( (error) -> )) ->
 		LockManager._getLock key, (error) ->
 			return callback(error) if error?
 			runner (error1, values...) ->

@@ -19,8 +19,12 @@ SafePath = require './SafePath'
 TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 
 wrapWithLock = (methodWithoutLock) ->
+	# This lock is used to make sure that the project structure updates are made
+	# sequentially. In particular the updates must be made in mongo and sent to
+	# the doc-updater in the same order.
 	methodWithLock = (project_id, args..., callback) ->
-		LockManager.sequentialProjectStructureUpdateLock.runWithLock project_id,
+		lockKey = "lock:web:sequentialProjectStructureUpdateLock:{#{project_id}}"
+		LockManager.runWithLock lockKey,
 			(cb) -> methodWithoutLock project_id, args..., cb
 			callback
 	methodWithLock.withoutLock = methodWithoutLock
