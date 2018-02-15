@@ -52,7 +52,6 @@
   overflow-x: visible;
   padding-right: @navbar-padding-horizontal;
   padding-left:  @navbar-padding-horizontal;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.1);
   &:extend(.clearfix all);
   -webkit-overflow-scrolling: touch;
 
@@ -568,4 +567,10 @@
     }
   }
 
+}
+
+.navbar-default when (@is-overleaf = true) {
+  @media (min-width: @grid-float-breakpoint) {
+    padding: @navbar-default-padding-v 0;
+  }
 }
