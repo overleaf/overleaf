@@ -95,7 +95,9 @@
 @labels-font-size        : 85%;
 
 // Navbar
-@navbar-default-padding           : (@grid-gutter-width / 2) 0;
+@navbar-default-padding-v         : (@grid-gutter-width / 2);
+@navbar-default-padding-h         : 0;
+@navbar-default-padding           : @navbar-default-padding-v @navbar-default-padding-h;
 @navbar-default-link-color        : #FFF;
 @navbar-default-link-hover-bg     : @ol-green;
 @navbar-default-link-active-bg    : @ol-green;
