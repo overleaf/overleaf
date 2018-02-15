@@ -75,15 +75,17 @@ describe 'ProjectDetailsHandler', ->
 	describe "getProjectDescription", ->
 
 		it "should make a call to mongo just for the description", (done)->
-			@ProjectModel.findOne.callsArgWith(2)
+			@ProjectGetter.getProject.callsArgWith(2)
 			@handler.getProjectDescription @project_id, (err, description)=>
-				@ProjectModel.findOne.calledWith({_id:@project_id}, "description").should.equal true
+				@ProjectGetter.getProject
+					.calledWith(@project_id, description: true)
+					.should.equal true
 				done()
 
 		it "should return what the mongo call returns", (done)->
 			err = "error"
 			description = "cool project"
-			@ProjectModel.findOne.callsArgWith(2, err, {description:description})
+			@ProjectGetter.getProject.callsArgWith(2, err, {description:description})
 			@handler.getProjectDescription @project_id, (returnedErr, returnedDescription)=>
 				err.should.equal returnedErr
 				description.should.equal returnedDescription

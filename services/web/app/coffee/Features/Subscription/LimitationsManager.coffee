@@ -1,5 +1,5 @@
 logger = require("logger-sharelatex")
-Project = require("../../models/Project").Project
+ProjectGetter = require('../Project/ProjectGetter')
 UserGetter = require("../User/UserGetter")
 SubscriptionLocator = require("./SubscriptionLocator")
 Settings = require("settings-sharelatex")
@@ -8,10 +8,10 @@ CollaboratorsInvitesHandler = require("../Collaborators/CollaboratorsInviteHandl
 
 module.exports =
 	allowedNumberOfCollaboratorsInProject: (project_id, callback) ->
-		Project.findById project_id, 'owner_ref', (error, project) =>
+		ProjectGetter.getProject project_id, owner_ref: true, (error, project) =>
 			return callback(error) if error?
 			@allowedNumberOfCollaboratorsForUser project.owner_ref, callback
-	
+
 	allowedNumberOfCollaboratorsForUser: (user_id, callback) ->
 		UserGetter.getUser user_id, {features: 1}, (error, user) ->
 			return callback(error) if error?

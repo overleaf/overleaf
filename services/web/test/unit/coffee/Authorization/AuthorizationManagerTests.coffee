@@ -10,7 +10,7 @@ describe "AuthorizationManager", ->
 	beforeEach ->
 		@AuthorizationManager = SandboxedModule.require modulePath, requires:
 			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler = {}
-			"../../models/Project": Project: @Project = {}
+			'../Project/ProjectGetter': @ProjectGetter = {}
 			"../../models/User": User: @User = {}
 			"../Errors/Errors": Errors
 			"../TokenAccess/TokenAccessHandler": @TokenAccessHandler = {
@@ -23,14 +23,14 @@ describe "AuthorizationManager", ->
 
 	describe "getPrivilegeLevelForProject", ->
 		beforeEach ->
-			@Project.findOne = sinon.stub()
+			@ProjectGetter.getProject = sinon.stub()
 			@AuthorizationManager.isUserSiteAdmin = sinon.stub()
 			@CollaboratorsHandler.getMemberIdPrivilegeLevel = sinon.stub()
 
 		describe 'with a token-based project', ->
 			beforeEach ->
-				@Project.findOne
-					.withArgs({ _id: @project_id }, { publicAccesLevel: 1 })
+				@ProjectGetter.getProject
+					.withArgs(@project_id, { publicAccesLevel: 1 })
 					.yields(null, { publicAccesLevel: "tokenBased" })
 
 			describe "with a user_id with a privilege level", ->
@@ -152,8 +152,8 @@ describe "AuthorizationManager", ->
 
 		describe "with a private project", ->
 			beforeEach ->
-				@Project.findOne
-					.withArgs({ _id: @project_id }, { publicAccesLevel: 1 })
+				@ProjectGetter.getProject
+					.withArgs(@project_id, { publicAccesLevel: 1 })
 					.yields(null, { publicAccesLevel: "private" })
 
 			describe "with a user_id with a privilege level", ->
@@ -204,8 +204,8 @@ describe "AuthorizationManager", ->
 
 		describe "with a public project", ->
 			beforeEach ->
-				@Project.findOne
-					.withArgs({ _id: @project_id }, { publicAccesLevel: 1 })
+				@ProjectGetter.getProject
+					.withArgs(@project_id, { publicAccesLevel: 1 })
 					.yields(null, { publicAccesLevel: "readAndWrite" })
 
 			describe "with a user_id with a privilege level", ->
@@ -256,8 +256,8 @@ describe "AuthorizationManager", ->
 
 		describe "when the project doesn't exist", ->
 			beforeEach ->
-				@Project.findOne
-					.withArgs({ _id: @project_id }, { publicAccesLevel: 1 })
+				@ProjectGetter.getProject
+					.withArgs(@project_id, { publicAccesLevel: 1 })
 					.yields(null, null)
 
 			it "should return a NotFoundError", ->
@@ -273,7 +273,7 @@ describe "AuthorizationManager", ->
 
 			it "should return a error", (done)->
 				@AuthorizationManager.getPrivilegeLevelForProject undefined, "not project id", @token, (err) =>
-					@Project.findOne.called.should.equal false
+					@ProjectGetter.getProject.called.should.equal false
 					expect(err).to.exist
 					done()
 

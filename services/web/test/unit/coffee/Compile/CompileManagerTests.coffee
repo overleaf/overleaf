@@ -18,7 +18,7 @@ describe "CompileManager", ->
 			"../../infrastructure/RedisWrapper":
 				client: () => @rclient = { auth: () -> }
 			"../Project/ProjectRootDocManager": @ProjectRootDocManager = {}
-			"../../models/Project": Project: @Project = {}
+			'../Project/ProjectGetter': @ProjectGetter = {}
 			"../User/UserGetter": @UserGetter = {}
 			"./ClsiManager": @ClsiManager = {}
 			"../../infrastructure/RateLimiter": @ratelimiter
@@ -103,12 +103,12 @@ describe "CompileManager", ->
 				compileTimeout:   @timeout = 42
 				compileGroup:     @group = "priority"
 			}
-			@Project.findById = sinon.stub().callsArgWith(2, null, @project = { owner_ref: @owner_id = "owner-id-123" })
+			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, @project = { owner_ref: @owner_id = "owner-id-123" })
 			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user = { features: @features })
 			@CompileManager.getProjectCompileLimits @project_id, @callback
 			
 		it "should look up the owner of the project", ->
-			@Project.findById
+			@ProjectGetter.getProject
 				.calledWith(@project_id, { owner_ref: 1 })
 				.should.equal true
 				
@@ -174,7 +174,7 @@ describe "CompileManager", ->
 	describe "_ensureRootDocumentIsSet", ->
 		beforeEach ->
 			@project = {}
-			@Project.findById = sinon.stub().callsArgWith(2, null, @project)
+			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, @project)
 			@ProjectRootDocManager.setRootDocAutomatically = sinon.stub().callsArgWith(1, null)
 			
 		describe "when the root doc is set", ->
@@ -183,8 +183,8 @@ describe "CompileManager", ->
 				@CompileManager._ensureRootDocumentIsSet(@project_id, @callback)
 
 			it "should find the project with only the rootDoc_id fiel", ->
-				@Project.findById
-					.calledWith(@project_id, "rootDoc_id")
+				@ProjectGetter.getProject
+					.calledWith(@project_id, rootDoc_id: 1)
 					.should.equal true
 
 			it "should not try to update the project rootDoc_id", ->
@@ -199,8 +199,8 @@ describe "CompileManager", ->
 				@CompileManager._ensureRootDocumentIsSet(@project_id, @callback)
 
 			it "should find the project with only the rootDoc_id fiel", ->
-				@Project.findById
-					.calledWith(@project_id, "rootDoc_id")
+				@ProjectGetter.getProject
+					.calledWith(@project_id, rootDoc_id: 1)
 					.should.equal true
 
 			it "should update the project rootDoc_id", ->
@@ -213,7 +213,7 @@ describe "CompileManager", ->
 		
 		describe "when the project does not exist", ->
 			beforeEach ->
-				@Project.findById = sinon.stub().callsArgWith(2, null, null)
+				@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, null)
 				@CompileManager._ensureRootDocumentIsSet(@project_id, @callback)
 
 			it "should call the callback with an error", ->

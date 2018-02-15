@@ -40,7 +40,7 @@ describe "CompileController", ->
 		@CompileController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings
 			"request": @request = sinon.stub()
-			"../../models/Project": Project: @Project = {}
+			'../Project/ProjectGetter': @ProjectGetter = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"metrics-sharelatex": @Metrics =  { inc: sinon.stub() }
 			"./CompileManager":@CompileManager
@@ -117,7 +117,7 @@ describe "CompileController", ->
 				getSafeProjectName: () => @safe_name = "safe-name"
 
 			@req.query = {pdfng:true}
-			@Project.findById = sinon.stub().callsArgWith(2, null, @project)
+			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, @project)
 
 		describe "when downloading for embedding", ->
 			beforeEach ->
@@ -126,7 +126,7 @@ describe "CompileController", ->
 				@CompileController.downloadPdf(@req, @res, @next)
 
 			it "should look up the project", ->
-				@Project.findById
+				@ProjectGetter.getProject
 					.calledWith(@project_id, {name: 1})
 					.should.equal true
 

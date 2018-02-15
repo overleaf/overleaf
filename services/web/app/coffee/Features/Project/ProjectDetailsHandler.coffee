@@ -30,7 +30,7 @@ module.exports = ProjectDetailsHandler =
 				callback(err, details)
 
 	getProjectDescription: (project_id, callback)->
-		Project.findOne _id:project_id, "description", (err, project)->
+		ProjectGetter.getProject project_id, description: true, (err, project)->
 			callback(err, project?.description)
 
 	setProjectDescription: (project_id, description, callback)->

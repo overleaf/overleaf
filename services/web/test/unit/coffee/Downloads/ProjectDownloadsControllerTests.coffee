@@ -16,7 +16,7 @@ describe "ProjectDownloadsController", ->
 		@DocumentUpdaterHandler = sinon.stub()
 		@ProjectDownloadsController = SandboxedModule.require modulePath, requires:
 			"./ProjectZipStreamManager"   : @ProjectZipStreamManager = {}
-			"../../models/Project"        : Project: @Project = {}
+			"../Project/ProjectGetter"    : @ProjectGetter = {}
 			"metrics-sharelatex": @metrics = {}
 			"logger-sharelatex"           : @logger = {log: sinon.stub()}
 			"../DocumentUpdater/DocumentUpdaterHandler": @DocumentUpdaterHandler
@@ -31,7 +31,7 @@ describe "ProjectDownloadsController", ->
 			@res.contentType = sinon.stub()
 			@res.header = sinon.stub()
 			@project_name = "project name with accênts"
-			@Project.findById = sinon.stub().callsArgWith(2, null, name: @project_name)
+			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, name: @project_name)
 			@DocumentUpdaterHandler.flushProjectToMongo = sinon.stub().callsArgWith(1)
 			@metrics.inc = sinon.stub()
 			@ProjectDownloadsController.downloadProject @req, @res, @next
@@ -56,7 +56,9 @@ describe "ProjectDownloadsController", ->
 				.should.equal true
 
 		it "should look up the project's name", ->
-			@Project.findById.calledWith(@project_id, "name").should.equal(true)
+			@ProjectGetter.getProject
+				.calledWith(@project_id, name: true)
+				.should.equal(true)
 
 		it "should name the downloaded file after the project", ->
 			@res.setContentDisposition

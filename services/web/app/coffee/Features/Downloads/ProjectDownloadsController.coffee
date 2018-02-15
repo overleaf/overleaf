@@ -1,6 +1,6 @@
 logger                  = require "logger-sharelatex"
 Metrics                 = require "metrics-sharelatex"
-Project                 = require("../../models/Project").Project
+ProjectGetter           = require('../Project/ProjectGetter')
 ProjectZipStreamManager = require "./ProjectZipStreamManager"
 DocumentUpdaterHandler  = require "../DocumentUpdater/DocumentUpdaterHandler"
 
@@ -11,7 +11,7 @@ module.exports = ProjectDownloadsController =
 		logger.log project_id: project_id, "downloading project"
 		DocumentUpdaterHandler.flushProjectToMongo project_id, (error)->
 			return next(error) if error?
-			Project.findById project_id, "name", (error, project) ->
+			ProjectGetter.getProject project_id, name: true, (error, project) ->
 				return next(error) if error?
 				ProjectZipStreamManager.createZipStreamForProject project_id, (error, stream) ->
 					return next(error) if error?

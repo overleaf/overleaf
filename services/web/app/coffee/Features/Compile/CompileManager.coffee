@@ -1,7 +1,7 @@
 Settings = require('settings-sharelatex')
 RedisWrapper = require("../../infrastructure/RedisWrapper")
 rclient = RedisWrapper.client("clsi_recently_compiled")
-Project = require("../../models/Project").Project
+ProjectGetter = require('../Project/ProjectGetter')
 ProjectRootDocManager = require "../Project/ProjectRootDocManager"
 UserGetter = require "../User/UserGetter"
 ClsiManager = require "./ClsiManager"
@@ -57,7 +57,7 @@ module.exports = CompileManager =
 			ClsiManager.deleteAuxFiles project_id, user_id, limits, callback
 
 	getProjectCompileLimits: (project_id, callback = (error, limits) ->) ->
-		Project.findById project_id, {owner_ref: 1}, (error, project) ->
+		ProjectGetter.getProject project_id, owner_ref: 1, (error, project) ->
 			return callback(error) if error?
 			UserGetter.getUser project.owner_ref, {"features":1}, (err, owner)->
 				return callback(error) if error?
@@ -103,7 +103,7 @@ module.exports = CompileManager =
 			callback err, canCompile
 
 	_ensureRootDocumentIsSet: (project_id, callback = (error) ->) ->
-		Project.findById project_id, 'rootDoc_id', (error, project)=>
+		ProjectGetter.getProject project_id, rootDoc_id: 1, (error, project) ->
 			return callback(error) if error?
 			if !project?
 				return callback new Error("project not found")
