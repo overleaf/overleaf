@@ -339,6 +339,52 @@ script(type='text/ng-template', id='newDocModalTemplate')
 			span(ng-show="state.inflight") #{translate("creating")}...
 
 
+script(type='text/ng-template', id='linkedFileModalTemplate')
+	.modal-header
+		h3 New file from URL
+	.modal-body
+		form(novalidate, name="newLinkedFileForm")
+			div.alert.alert-danger(ng-if="error")
+				div(ng-switch="error")
+					span(ng-switch-when="already exists") #{translate("file_already_exists")}
+					span(ng-switch-default) {{error}}
+			label(for="url") URL to fetch the file from
+			input.form-control(
+				type="text",
+				placeholder="www.example.com/my_file",
+				required,
+				ng-model="inputs.url",
+				focus-on="open",
+				on-enter="create()",
+				name="url"
+			)
+			.row-spaced
+				label(for="name") File name in this project
+				input.form-control(
+					type="text",
+					placeholder="my_file",
+					required,
+					ng-model="inputs.name",
+					ng-change="nameChangedByUser = true"
+					valid-file,
+					on-enter="create()",
+					name="name"
+				)
+				.text-danger.row-spaced-small(ng-show="newDocForm.name.$error.validFile")
+					| #{translate('files_cannot_include_invalid_characters')}
+	.modal-footer
+		button.btn.btn-default(
+			ng-disabled="state.inflight"
+			ng-click="cancel()"
+		) #{translate("cancel")}
+		button.btn.btn-primary(
+			ng-disabled="newLinkedFileForm.$invalid || state.inflight"
+			ng-click="create()"
+		)
+			span(ng-hide="state.inflight") #{translate("create")}
+			span(ng-show="state.inflight") #{translate("creating")}...
+
+
 script(type='text/ng-template', id='newFolderModalTemplate')
 	.modal-header
 		h3 #{translate("new_folder")}

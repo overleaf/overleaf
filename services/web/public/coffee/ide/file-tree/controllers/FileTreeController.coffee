@@ -30,6 +30,16 @@ define [
 				}
 			)
 
+		$scope.openLinkedFileModal = window.openLinkedFileModal = () ->
+			$modal.open(
+				templateUrl: "linkedFileModalTemplate"
+				controller:  "LinkedFileModalController"
+				scope: $scope
+				resolve: {
+					parent_folder: () -> ide.fileTreeManager.getCurrentFolder()
+				}
+			)
+
 		$scope.orderByFoldersFirst = (entity) ->
 			return '0' if entity?.type == "folder"
 			return '1'
@@ -183,6 +193,49 @@ define [
 
 			$scope.doUpload = () ->
 				$scope.control?.q?.uploadStoredFiles()
+
+			$scope.cancel = () ->
+				$modalInstance.dismiss('cancel')
+	]
+
+	App.controller "LinkedFileModalController", [
+		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder",
+		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->
+			$scope.inputs =
+				name: ""
+				url: ""
+			$scope.nameChangedByUser = false
+			$scope.state =
+				inflight: false
+
+			$modalInstance.opened.then () ->
+				$timeout () ->
+					$scope.$broadcast "open"
+				, 200
+
+			$scope.$watch "inputs.url", (url) ->
+				if url? and url != "" and !$scope.nameChangedByUser
+					url = url.replace("://", "") # Ignore http:// etc
+					parts = url.split("/").reverse()
+					if parts.length > 1 # Wait for at one /
+						$scope.inputs.name = parts[0]
+
+			$scope.create = () ->
+				{name, url} = $scope.inputs
+				if !name? or name.length == 0
+					return
+				if !url? or url.length == 0
+					return
+				$scope.state.inflight = true
+				ide.fileTreeManager
+					.createLinkedFile(name, parent_folder, 'url', {url})
+					.then () ->
+						$scope.state.inflight = false
+						$modalInstance.close()
+					.catch (response)->
+						{ data } = response
+						$scope.error = data
+						$scope.state.inflight = false
 
 			$scope.cancel = () ->
 				$modalInstance.dismiss('cancel')

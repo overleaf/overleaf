@@ -355,6 +355,20 @@ define [
 				_csrf: window.csrfToken
 			}
 
+		createLinkedFile: (name, parent_folder  = @getCurrentFolder(), provider, data) ->
+			# check if a doc/file/folder already exists with this name
+			if @existsInThisFolder parent_folder, name
+				return @nameExistsError()
+			# We'll wait for the socket.io notification to actually
+			# add the file for us.
+			return @ide.$http.post "/project/#{@ide.project_id}/linked_file", {
+				name: name,
+				parent_folder_id: parent_folder?.id
+				provider,
+				data,
+				_csrf: window.csrfToken
+			}
+
 		renameEntity: (entity, name, callback = (error) ->) ->
 			return if entity.name == name
 			return if name.length >= 150

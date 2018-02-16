@@ -4,6 +4,7 @@
     "node_modules/"
   ],
   "verbose": true,
+  "legacyWatch": true,
   "exec": "make compile",
   "watch": [
     "public/coffee/",
