@@ -23,6 +23,31 @@ load = () ->
 		| (\s+$)    # reject trailing space
 		///g
 
+	# Put a block on filenames which match javascript property names, as they
+	# can cause exceptions where the code puts filenames into a hash. This is a
+	# temporary workaround until the code in other places is made safe against
+	# property names.
+	#
+	# The list of property names is taken from
+	#   ['prototype'].concat(Object.getOwnPropertyNames(Object.prototype))
+	BLOCKEDFILE_RX = ///
+		^(
+			prototype
+			|constructor
+			|toString
+			|toLocaleString
+			|valueOf
+			|hasOwnProperty
+			|isPrototypeOf
+			|propertyIsEnumerable
+			|__defineGetter__
+			|__lookupGetter__
+			|__defineSetter__
+			|__lookupSetter__
+			|__proto__
+		)$
+	///
+
 	MAX_PATH = 1024 # Maximum path length, in characters. This is fairly arbitrary.
 
 	SafePath =
@@ -31,12 +56,15 @@ load = () ->
 			# for BADFILE_RX replace any matches with an equal number of underscores
 			filename = filename.replace BADFILE_RX, (match) -> 
 				return new Array(match.length + 1).join("_")
+			# replace blocked filenames 'prototype' with '@prototype'
+			filename = filename.replace BLOCKEDFILE_RX, "@$1"
 			return filename
 
 		isCleanFilename: (filename) ->
 			return SafePath.isAllowedLength(filename) &&
 				not filename.match(BADCHAR_RX) &&
-				not filename.match(BADFILE_RX)
+				not filename.match(BADFILE_RX) &&
+				not filename.match(BLOCKEDFILE_RX)
 
 		isAllowedLength: (pathname) ->
 			return pathname.length > 0 && pathname.length <= MAX_PATH

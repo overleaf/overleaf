@@ -63,7 +63,17 @@ describe 'SafePath', ->
 			result = @SafePath.isCleanFilename 'foo\uD800\uDFFFbar'
 			result.should.equal false
 
+		it 'should not accept javascript property names', ->
+			result = @SafePath.isCleanFilename 'prototype'
+			result.should.equal false
 
+		it 'should not accept javascript property names in the prototype', ->
+			result = @SafePath.isCleanFilename 'hasOwnProperty'
+			result.should.equal false
+
+		it 'should not accept javascript property names resulting from substitutions', ->
+			result = @SafePath.isCleanFilename '  proto  '
+			result.should.equal false
 
 		# it 'should not accept a trailing .', ->
 		# 	result = @SafePath.isCleanFilename 'hello.'
@@ -119,5 +129,12 @@ describe 'SafePath', ->
 
 		it 'should replace a multiple leading spaces with ___', ->
 			result = @SafePath.clean '  foo'
-			result.should.equal '__foo'		
+			result.should.equal '__foo'
 
+		it 'should prefix javascript property names with @', ->
+			result = @SafePath.clean 'prototype'
+			result.should.equal '@prototype'
+		
+		it 'should prefix javascript property names in the prototype with @', ->
+			result = @SafePath.clean 'hasOwnProperty'
+			result.should.equal '@hasOwnProperty'
