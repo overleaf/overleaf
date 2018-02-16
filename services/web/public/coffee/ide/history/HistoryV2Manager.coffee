@@ -197,10 +197,12 @@ define [
 
 		_perDocSummaryOfUpdates: (updates) ->
 			# Track current_pathname -> original_pathname
-			original_pathnames = {}
+			# create bare object for use as Map
+			# http://ryanmorr.com/true-hash-maps-in-javascript/
+			original_pathnames = Object.create(null)
 
 			# Map of original pathname -> doc summary
-			docs_summary = {}
+			docs_summary = Object.create(null)
 
 			updatePathnameWithUpdateVersions = (pathname, update, deleted) ->
 				# docs_summary is indexed by the original pathname the doc
