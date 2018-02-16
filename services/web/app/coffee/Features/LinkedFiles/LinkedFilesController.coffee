@@ -18,7 +18,8 @@ module.exports = LinkedFilesController = {
 		linkedFileData = Agent.sanitizeData(data)
 		linkedFileData.provider = provider
 		Agent.writeIncomingFileToDisk project_id, linkedFileData, user_id, (error, fsPath) ->
-			return next(error) if error?
+			if error?
+				return Agent.handleError(error, req, res, next)
 			EditorController.upsertFile project_id, parent_folder_id, name, fsPath, linkedFileData, "upload", user_id, (error) ->
 				return next(error) if error?
 				res.send(204) # created

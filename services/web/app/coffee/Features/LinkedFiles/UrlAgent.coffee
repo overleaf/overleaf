@@ -1,17 +1,62 @@
 request = require 'request'
 FileWriter = require('../../infrastructure/FileWriter')
+_ = require "underscore"
+urlValidator = require 'valid-url'
+
+UrlFetchFailedError = (message) ->
+	error = new Error(message)
+	error.name = 'UrlFetchFailedError'
+	error.__proto__ = UrlFetchFailedError.prototype
+	return error
+UrlFetchFailedError.prototype.__proto__ = Error.prototype
+
+InvalidUrlError = (message) ->
+	error = new Error(message)
+	error.name = 'InvalidUrlError'
+	error.__proto__ = InvalidUrlError.prototype
+	return error
+InvalidUrlError.prototype.__proto__ = Error.prototype
+
 
 module.exports = UrlAgent = {
+	UrlFetchFailedError: UrlFetchFailedError
+	InvalidUrlError: InvalidUrlError
+
 	sanitizeData: (data) ->
 		return {
 			url: data.url
 		}
 
+	_prependHttpIfNeeded: (url) ->
+		if !url.match('://')
+			url = 'http://' + url
+		return url
+
 	writeIncomingFileToDisk: (project_id, data, current_user_id, callback = (error, fsPath) ->) ->
-		# TODO: Check it's a valid URL
 		# TODO: Proxy through external API
-		# TODO: Error unless valid status code
-		url = data.url
+		callback = _.once(callback)
+		url = @._prependHttpIfNeeded(data.url)
+		if !urlValidator.isWebUri(url)
+			return callback(new InvalidUrlError())
 		readStream = request.get(url)
-		FileWriter.writeStreamToDisk project_id, readStream, callback
+		readStream.on "error", callback
+		readStream.on "response", (response) ->
+			if 200 <= response.statusCode < 300
+				FileWriter.writeStreamToDisk project_id, readStream, callback
+			else
+				error = new UrlFetchFailedError()
+				error.statusCode = response.statusCode
+				callback(error)
+
+	handleError: (error, req, res, next) ->
+		if error instanceof UrlFetchFailedError
+			res.status(422).send(
+				"Your URL could not be reached (#{error.statusCode} status code). Please check it and try again."
+			)
+		else if error instanceof InvalidUrlError
+			res.status(422).send(
+				"Your URL is not valid. Please check it and try again."
+			)
+		else
+			next(error)
 }
