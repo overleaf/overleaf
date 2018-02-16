@@ -3,7 +3,6 @@ Settings = require 'settings-sharelatex'
 _ = require('underscore')
 FolderSchema = require('./Folder.js').FolderSchema
 logger = require('logger-sharelatex')
-sanitize = require('sanitizer')
 concreteObjectId = require('mongoose').Types.ObjectId
 Errors  = require "../Features/Errors/Errors"
 
@@ -73,10 +72,6 @@ applyToAllFilesRecursivly = ProjectSchema.statics.applyToAllFilesRecursivly = (f
 		fun(file)
 	_.each folder.folders, (folder)->
 		applyToAllFilesRecursivly(folder, fun)
-
-ProjectSchema.methods.getSafeProjectName = ->
-	safeProjectName = this.name.replace(new RegExp("\\W", "g"), '_')
-	return sanitize.escape(safeProjectName)
 
 conn = mongoose.createConnection(Settings.mongo.url, {
 	server: {poolSize: Settings.mongo.poolSize || 10},
