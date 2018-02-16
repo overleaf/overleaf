@@ -1,5 +1,5 @@
 Metrics = require "metrics-sharelatex"
-Project = require("../../models/Project").Project
+ProjectGetter = require('../Project/ProjectGetter')
 CompileManager = require("./CompileManager")
 ClsiManager = require("./ClsiManager")
 logger  = require "logger-sharelatex"
@@ -83,7 +83,7 @@ module.exports = CompileController =
 					timeInterval : 60 * 60
 				RateLimiter.addCount rateLimitOpts, callback
 
-		Project.findById project_id, {name: 1}, (err, project)->
+		ProjectGetter.getProject project_id, name: 1, (err, project) ->
 			res.contentType("application/pdf")
 			if !!req.query.popupDownload
 				logger.log project_id: project_id, "download pdf as popup download"

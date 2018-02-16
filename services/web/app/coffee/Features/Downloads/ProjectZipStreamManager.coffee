@@ -2,8 +2,8 @@ archiver = require "archiver"
 async    = require "async"
 logger   = require "logger-sharelatex"
 ProjectEntityHandler = require "../Project/ProjectEntityHandler"
+ProjectGetter = require('../Project/ProjectGetter')
 FileStoreHandler = require("../FileStore/FileStoreHandler")
-Project = require("../../models/Project").Project
 
 module.exports = ProjectZipStreamManager =
 	createZipStreamForMultipleProjects: (project_ids, callback = (error, stream) ->) ->
@@ -20,7 +20,7 @@ module.exports = ProjectZipStreamManager =
 		for project_id in project_ids or []
 			do (project_id) ->
 				jobs.push (callback) ->
-					Project.findById project_id, "name", (error, project) ->
+					ProjectGetter.getProject project_id, name: true, (error, project) ->
 						return callback(error) if error?
 						logger.log project_id: project_id, name: project.name, "appending project to zip stream"
 						ProjectZipStreamManager.createZipStreamForProject project_id, (error, stream) ->

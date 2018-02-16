@@ -1,5 +1,5 @@
 CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
-Project = require("../../models/Project").Project
+ProjectGetter = require('../Project/ProjectGetter')
 User = require("../../models/User").User
 PrivilegeLevels = require("./PrivilegeLevels")
 PublicAccessLevels = require("./PublicAccessLevels")
@@ -14,7 +14,7 @@ module.exports = AuthorizationManager =
 		if !ObjectId.isValid(project_id)
 			return callback(new Error("invalid project id"))
 		# Note, the Project property in the DB is `publicAccesLevel`, without the second `s`
-		Project.findOne { _id: project_id }, { publicAccesLevel: 1 }, (error, project) ->
+		ProjectGetter.getProject project_id, publicAccesLevel: 1, (error, project) ->
 			return callback(error) if error?
 			if !project?
 				return callback new Errors.NotFoundError("no project found with id #{project_id}")

@@ -8,8 +8,8 @@ describe "LimitationsManager", ->
 	beforeEach ->
 		@project = { _id: @project_id = "project-id" }
 		@user = { _id: @user_id = "user-id", features:{} }
-		@Project =
-			findById: (project_id, fields, callback) =>
+		@ProjectGetter =
+			getProject: (project_id, fields, callback) =>
 				if project_id == @project_id
 					callback null, @project
 				else
@@ -25,7 +25,7 @@ describe "LimitationsManager", ->
 			getUsersSubscription: sinon.stub()
 
 		@LimitationsManager = SandboxedModule.require modulePath, requires:
-			'../../models/Project' : Project: @Project
+			'../Project/ProjectGetter': @ProjectGetter
 			'../User/UserGetter' : @UserGetter
 			'./SubscriptionLocator':@SubscriptionLocator
 			'settings-sharelatex' : @Settings = {}

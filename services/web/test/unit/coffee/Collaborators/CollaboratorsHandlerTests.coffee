@@ -17,6 +17,7 @@ describe "CollaboratorsHandler", ->
 			"../Contacts/ContactManager": @ContactManager = {}
 			"../../models/Project": Project: @Project = {}
 			"../Project/ProjectEntityHandler": @ProjectEntityHandler = {}
+			"../Project/ProjectGetter": @ProjectGetter = {}
 			"./CollaboratorsEmailHandler": @CollaboratorsEmailHandler = {}
 			"../Errors/Errors": Errors
 			"../Project/ProjectEditorHandler": @ProjectEditorHandler = {}
@@ -30,9 +31,9 @@ describe "CollaboratorsHandler", ->
 	describe "getMemberIdsWithPrivilegeLevels", ->
 		describe "with project", ->
 			beforeEach ->
-				@Project.findOne = sinon.stub()
-				@Project.findOne.withArgs(
-					{_id: @project_id},
+				@ProjectGetter.getProject = sinon.stub()
+				@ProjectGetter.getProject.withArgs(
+					@project_id,
 					{owner_ref: 1, collaberator_refs: 1, readOnly_refs: 1,
 					tokenAccessReadOnly_refs: 1, tokenAccessReadAndWrite_refs: 1, publicAccesLevel: 1}
 				).yields(null, @project = {
@@ -55,7 +56,7 @@ describe "CollaboratorsHandler", ->
 
 		describe "with a missing project", ->
 			beforeEach ->
-				@Project.findOne = sinon.stub().yields(null, null)
+				@ProjectGetter.getProject = sinon.stub().yields(null, null)
 
 			it "should return a NotFoundError", (done) ->
 				@CollaboratorHandler.getMemberIdsWithPrivilegeLevels @project_id, (error) ->
@@ -260,7 +261,7 @@ describe "CollaboratorsHandler", ->
 	describe "addUserToProject", ->
 		beforeEach ->
 			@Project.update = sinon.stub().callsArg(2)
-			@Project.findOne = sinon.stub().callsArgWith(2, null, @project = {})
+			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, @project = {})
 			@ProjectEntityHandler.flushProjectToThirdPartyDataStore = sinon.stub().callsArg(1)
 			@CollaboratorHandler.addEmailToProject = sinon.stub().callsArgWith(4, null, @user_id)
 			@ContactManager.addContact = sinon.stub()

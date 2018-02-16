@@ -134,7 +134,7 @@ describe "EditorHttpController", ->
 
 			it "should get the list of users in the project", ->
 				@CollaboratorsHandler.getInvitedMembersWithPrivilegeLevels
-					.calledWith(@project)
+					.calledWith(@project_id)
 					.should.equal true
 
 			it "should look up the user", ->

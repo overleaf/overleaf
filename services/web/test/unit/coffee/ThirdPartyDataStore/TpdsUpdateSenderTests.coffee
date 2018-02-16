@@ -24,7 +24,7 @@ describe 'TpdsUpdateSender', ->
 		member_ids = [collaberator_ref_1, read_only_ref_1, user_id]
 		@CollaboratorsHandler =
 			getInvitedMemberIds: sinon.stub().yields(null, member_ids)
-		@Project = findById:sinon.stub().callsArgWith(2, null, project)
+		@ProjectGetter = getProject: sinon.stub().callsArgWith(2, null, project)
 		@docstoreUrl = "docstore.sharelatex.env"
 		@request = sinon.stub().returns(pipe:->)
 		@settings = 
@@ -39,7 +39,7 @@ describe 'TpdsUpdateSender', ->
 		@updateSender = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings
 			"logger-sharelatex":{log:->}
-			'../../models/Project': Project:@Project
+			'../Project/ProjectGetter': @ProjectGetter
 			'request':@request
 			'../Collaborators/CollaboratorsHandler': @CollaboratorsHandler
 			"metrics-sharelatex":

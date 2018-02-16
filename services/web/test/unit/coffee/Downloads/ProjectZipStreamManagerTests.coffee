@@ -18,7 +18,7 @@ describe "ProjectZipStreamManager", ->
 			"logger-sharelatex": @logger = {error: sinon.stub(), log: sinon.stub()}
 			"../Project/ProjectEntityHandler" : @ProjectEntityHandler = {}
 			"../FileStore/FileStoreHandler": @FileStoreHandler = {}
-			"../../models/Project": Project: @Project = {}
+			'../Project/ProjectGetter': @ProjectGetter = {}
 
 
 	describe "createZipStreamForMultipleProjects", ->
@@ -40,9 +40,9 @@ describe "ProjectZipStreamManager", ->
 					0
 				sinon.spy @ProjectZipStreamManager, "createZipStreamForProject"
 
-				@Project.findById = (project_id, fields, callback) =>
+				@ProjectGetter.getProject = (project_id, fields, callback) =>
 					callback null, name: @project_names[project_id]
-				sinon.spy @Project, "findById"
+				sinon.spy @ProjectGetter, "getProject"
 
 				@ProjectZipStreamManager.createZipStreamForMultipleProjects @project_ids, (args...) =>
 					@callback args...
@@ -65,8 +65,8 @@ describe "ProjectZipStreamManager", ->
 
 			it "should get the names of each project", ->
 				for project_id in @project_ids
-					@Project.findById
-						.calledWith(project_id, "name")
+					@ProjectGetter.getProject
+						.calledWith(project_id, name: true)
 						.should.equal true
 
 			it "should add all of the projects to the zip", ->

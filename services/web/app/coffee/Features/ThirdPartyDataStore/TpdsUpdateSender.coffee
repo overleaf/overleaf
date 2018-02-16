@@ -1,7 +1,7 @@
 settings = require('settings-sharelatex')
 logger = require('logger-sharelatex')
 path = require('path')
-Project = require('../../models/Project').Project
+ProjectGetter = require('../Project/ProjectGetter')
 keys = require('../../infrastructure/Keys')
 metrics = require("metrics-sharelatex")
 request = require("request")
@@ -123,7 +123,7 @@ module.exports = TpdsUpdateSender =
 		TpdsUpdateSender._enqueue "poll-dropbox:#{user_id}", "standardHttpRequest", options, callback
 
 getProjectsUsersIds = (project_id, callback = (err, owner_id, allUserIds)->)->
-	Project.findById project_id, "_id owner_ref", (err, project) ->
+	ProjectGetter.getProject project_id, {_id: true, owner_ref: true}, (err, project) ->
 		return callback(err) if err?
 		CollaboratorsHandler.getInvitedMemberIds project_id, (err, member_ids) ->
 			return callback(err) if err?

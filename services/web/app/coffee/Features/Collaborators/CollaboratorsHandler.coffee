@@ -1,5 +1,6 @@
 UserCreator = require('../User/UserCreator')
 Project = require("../../models/Project").Project
+ProjectGetter = require('../Project/ProjectGetter')
 logger = require('logger-sharelatex')
 UserGetter = require "../User/UserGetter"
 ContactManager = require "../Contacts/ContactManager"
@@ -23,7 +24,7 @@ module.exports = CollaboratorsHandler =
 			tokenAccessReadOnly_refs: 1,
 			tokenAccessReadAndWrite_refs: 1
 			publicAccesLevel: 1
-		Project.findOne { _id: project_id }, projection, (error, project) ->
+		ProjectGetter.getProject project_id, projection, (error, project) ->
 			return callback(error) if error?
 			return callback new Errors.NotFoundError("no project found with id #{project_id}") if !project?
 			members = []
@@ -197,7 +198,7 @@ module.exports = CollaboratorsHandler =
 			async.series jobs, callback
 
 	addUserIdToProject: (project_id, adding_user_id, user_id, privilegeLevel, callback = (error) ->)->
-		Project.findOne { _id: project_id }, { collaberator_refs: 1, readOnly_refs: 1 }, (error, project) ->
+		ProjectGetter.getProject project_id, { collaberator_refs: 1, readOnly_refs: 1 }, (error, project) ->
 			return callback(error) if error?
 			existing_users = (project.collaberator_refs or [])
 			existing_users = existing_users.concat(project.readOnly_refs or [])
