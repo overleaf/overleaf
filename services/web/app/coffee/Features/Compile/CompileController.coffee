@@ -4,6 +4,7 @@ CompileManager = require("./CompileManager")
 ClsiManager = require("./ClsiManager")
 logger  = require "logger-sharelatex"
 request = require "request"
+sanitize = require('sanitizer')
 Settings = require "settings-sharelatex"
 AuthenticationController = require "../Authentication/AuthenticationController"
 UserGetter = require "../User/UserGetter"
@@ -85,12 +86,14 @@ module.exports = CompileController =
 
 		ProjectGetter.getProject project_id, name: 1, (err, project) ->
 			res.contentType("application/pdf")
+			filename = "#{CompileController._getSafeProjectName(project)}.pdf"
+
 			if !!req.query.popupDownload
 				logger.log project_id: project_id, "download pdf as popup download"
-				res.setContentDisposition('attachment', {filename: "#{project.getSafeProjectName()}.pdf"})
+				res.setContentDisposition('attachment', {filename})
 			else
 				logger.log project_id: project_id, "download pdf to embed in browser"
-				res.setContentDisposition('', {filename: "#{project.getSafeProjectName()}.pdf"})
+				res.setContentDisposition('', {filename})
 
 			rateLimit (err, canContinue)->
 				if err?
@@ -103,6 +106,10 @@ module.exports = CompileController =
 					CompileController._downloadAsUser req, (error, user_id) ->
 						url = CompileController._getFileUrl project_id, user_id, req.params.build_id, "output.pdf"
 						CompileController.proxyToClsi(project_id, url, req, res, next)
+
+	_getSafeProjectName: (project) ->
+		safeProjectName = project.name.replace(new RegExp("\\W", "g"), '_')
+		sanitize.escape(safeProjectName)
 
 	deleteAuxFiles: (req, res, next) ->
 		project_id = req.params.Project_id

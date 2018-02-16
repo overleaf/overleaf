@@ -113,10 +113,9 @@ describe "CompileController", ->
 		beforeEach ->
 			@req.params =
 				Project_id: @project_id
-			@project =
-				getSafeProjectName: () => @safe_name = "safe-name"
 
 			@req.query = {pdfng:true}
+			@project = name: "test namè"
 			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, @project)
 
 		describe "when downloading for embedding", ->
@@ -135,9 +134,10 @@ describe "CompileController", ->
 					.calledWith("application/pdf")
 					.should.equal true
 
-			it "should set the content-disposition header with the project name", ->
+			it "should set the content-disposition header with a safe version of the project name", ->
+				console.log @res.setContentDisposition.args[0]
 				@res.setContentDisposition
-					.calledWith('', {filename: "#{@safe_name}.pdf"})
+					.calledWith('', filename: "test_nam_.pdf")
 					.should.equal true
 
 			it "should increment the pdf-downloads metric", ->
