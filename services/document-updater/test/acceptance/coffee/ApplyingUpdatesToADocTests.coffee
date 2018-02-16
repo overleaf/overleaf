@@ -13,9 +13,10 @@ ProjectHistoryKeys = Settings.redis.project_history.key_schema
 MockTrackChangesApi = require "./helpers/MockTrackChangesApi"
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
+DocUpdaterApp = require "./helpers/DocUpdaterApp"
 
 describe "Applying updates to a doc", ->
-	before ->
+	before (done) ->
 		@lines = ["one", "two", "three"]
 		@version = 42
 		@update =
@@ -26,6 +27,7 @@ describe "Applying updates to a doc", ->
 			}]
 			v: @version
 		@result = ["one", "one and a half", "two", "three"]
+		DocUpdaterApp.ensureRunning(done)
 
 	describe "when the document is not loaded", ->
 		before (done) ->

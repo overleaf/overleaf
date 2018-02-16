@@ -5,12 +5,13 @@ expect = chai.expect
 
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
+DocUpdaterApp = require "./helpers/DocUpdaterApp"
 
 describe "Getting a document", ->
 	before (done) ->
 		@lines = ["one", "two", "three"]
 		@version = 42
-		setTimeout done, 200 # Give MockWebApi a chance to start
+		DocUpdaterApp.ensureRunning(done)
 
 	describe "when the document is not loaded", ->
 		before (done) ->

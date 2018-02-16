@@ -6,9 +6,10 @@ async = require "async"
 
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
+DocUpdaterApp = require "./helpers/DocUpdaterApp"
 
 describe "Flushing a doc to Mongo", ->
-	before ->
+	before (done) ->
 		@lines = ["one", "two", "three"]
 		@version = 42
 		@update =
@@ -19,6 +20,7 @@ describe "Flushing a doc to Mongo", ->
 			}]
 			v: @version
 		@result = ["one", "one and a half", "two", "three"]
+		DocUpdaterApp.ensureRunning(done)
 
 	describe "when the updated doc exists in the doc updater", ->
 		before (done) ->

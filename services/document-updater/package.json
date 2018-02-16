@@ -8,7 +8,15 @@
   },
   "scripts": {
     "compile:app": "coffee -o app/js -c app/coffee && coffee -c app.coffee",
-    "start": "npm run compile:app && node app.js"
+    "start": "npm run compile:app && node app.js",
+    "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
+    "test:acceptance": "npm run compile:app && npm run compile:acceptance_tests && npm run test:acceptance:_run -- $@",
+    "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js",
+    "test:unit": "npm run compile:app && npm run compile:unit_tests && npm run test:unit:_run -- $@",
+    "compile:unit_tests": "[ -e test/unit ] && coffee -o test/unit/js -c test/unit/coffee || echo 'No unit tests to compile'",
+    "compile:acceptance_tests": "[ -e test/acceptance ] && coffee -o test/acceptance/js -c test/acceptance/coffee || echo 'No acceptance tests to compile'",
+    "compile:all": "npm run compile:app && npm run compile:unit_tests && npm run compile:acceptance_tests",
+    "nodemon": "nodemon --config nodemon.json"
   },
   "dependencies": {
     "async": "^2.5.0",
@@ -30,15 +38,7 @@
     "chai": "^3.5.0",
     "chai-spies": "^0.7.1",
     "cluster-key-slot": "^1.0.5",
-    "grunt": "~0.4.2",
-    "grunt-available-tasks": "~0.4.1",
-    "grunt-bunyan": "~0.5.0",
-    "grunt-contrib-clean": "~0.5.0",
-    "grunt-contrib-coffee": "~0.10.0",
-    "grunt-execute": "~0.1.5",
-    "grunt-forever": "^0.4.7",
-    "grunt-mocha-test": "~0.9.0",
-    "grunt-shell": "^1.3.0",
+    "mocha": "^5.0.1",
     "timekeeper": "^2.0.0"
   }
 }

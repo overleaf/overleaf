@@ -6,6 +6,7 @@ async = require "async"
 
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
+DocUpdaterApp = require "./helpers/DocUpdaterApp"
 
 describe "Ranges", ->
 	describe "tracking changes from ops", ->
@@ -41,11 +42,14 @@ describe "Ranges", ->
 			for update in @updates
 				do (update) =>
 					jobs.push (callback) => DocUpdaterClient.sendUpdate @project_id, @doc.id, update, callback
-			DocUpdaterClient.preloadDoc @project_id, @doc.id, (error) =>
+			
+			DocUpdaterApp.ensureRunning (error) =>
 				throw error if error?
-				async.series jobs, (error) ->
+				DocUpdaterClient.preloadDoc @project_id, @doc.id, (error) =>
 					throw error if error?
-					setTimeout done, 200
+					async.series jobs, (error) ->
+						throw error if error?
+						done()
 		
 		it "should update the ranges", (done) ->
 			DocUpdaterClient.getDoc @project_id, @doc.id, (error, res, data) =>

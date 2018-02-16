@@ -16,11 +16,11 @@ describe "ProjectManager - getProjectDocsAndFlushIfOld", ->
 					done: sinon.stub()
 		@project_id = "project-id-123"
 		@callback = sinon.stub()
+		@doc_versions = [111, 222, 333]
 
 	describe "successfully", ->
 		beforeEach (done) ->
 			@doc_ids = ["doc-id-1", "doc-id-2", "doc-id-3"]
-			@doc_versions = [111, 222, 333]
 			@doc_lines = [["aaa","aaa"],["bbb","bbb"],["ccc","ccc"]]
 			@docs = [
 				{_id: @doc_ids[0], lines: @doc_lines[0], v: @doc_versions[0]}

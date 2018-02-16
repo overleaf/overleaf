@@ -7,9 +7,10 @@ MockTrackChangesApi = require "./helpers/MockTrackChangesApi"
 MockProjectHistoryApi = require "./helpers/MockProjectHistoryApi"
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
+DocUpdaterApp = require "./helpers/DocUpdaterApp"
 
 describe "Deleting a project", ->
-	before ->
+	before (done) ->
 		@project_id = DocUpdaterClient.randomId()
 		@docs = [{
 			id: doc_id0 = DocUpdaterClient.randomId()
@@ -42,6 +43,7 @@ describe "Deleting a project", ->
 
 		sinon.spy MockTrackChangesApi, "flushDoc"
 		sinon.spy MockProjectHistoryApi, "flushProject"
+		DocUpdaterApp.ensureRunning(done)
 
 	after ->
 		MockTrackChangesApi.flushDoc.restore()
