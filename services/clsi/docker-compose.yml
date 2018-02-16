@@ -1,13 +1,13 @@
 # This file was auto-generated, do not edit it directly.
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
-# Version: 1.0.1
+# Version: 1.0.3
 
 version: "2"
 
 services:
   test_unit:
-    image: node:6.9.5
+    image: node:6.13.0
     volumes:
       - .:/app
     working_dir: /app
@@ -15,16 +15,15 @@ services:
 
   test_acceptance:
     build: .
+    extends:
+      file: base.yml
+      service: base
     environment:
-      TEXLIVE_IMAGE: quay.io/sharelatex/texlive-full:2017.1
-      TEXLIVE_IMAGE_USER: root # Not ideal, but makes running in dev very simple
-      SHARELATEX_CONFIG: /app/config/settings.defaults.coffee
-      COMMAND_RUNNER: docker-runner-sharelatex
-      COMPILES_HOST_DIR: $PWD/compiles
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./docker-runner:/app/node_modules/docker-runner-sharelatex
-      - ./compiles:/app/compiles
+      REDIS_HOST: redis
+      MONGO_HOST: mongo
+    depends_on:
+      - redis
+      - mongo
     entrypoint: npm run test:acceptance
 
   redis:

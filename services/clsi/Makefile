@@ -1,13 +1,16 @@
 # This file was auto-generated, do not edit it directly.
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
-# Version: 1.0.1
+# Version: 1.0.3
 
 BUILD_NUMBER ?= local
 BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
 PROJECT_NAME = clsi
 DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
-DOCKER_COMPOSE := docker-compose ${DOCKER_COMPOSE_FLAGS}
+DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
+	BRANCH_NAME=$(BRANCH_NAME) \
+	PROJECT_NAME=$(PROJECT_NAME) \
+	docker-compose ${DOCKER_COMPOSE_FLAGS}
 
 clean:
 	rm -f app.js
@@ -24,7 +27,7 @@ test_acceptance: test_clean # clear the database before each acceptance test run
 	@[ -d test/acceptance ] && $(DOCKER_COMPOSE) run --rm test_acceptance -- ${MOCHA_ARGS} || echo "clsi has no acceptance tests"
 
 test_clean:
-	$(DOCKER_COMPOSE) down
+	$(DOCKER_COMPOSE) down -t 0
 build:
 	docker build --pull --tag quay.io/sharelatex/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) .
 

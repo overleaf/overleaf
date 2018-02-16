@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: clsi
+  namespace: default
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 3009
+    protocol: TCP
+    targetPort: 3009
+  selector:
+    run: clsi
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: clsi
+  namespace: default
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        run: clsi
+    spec:
+      containers:
+      - name: clsi
+        image: gcr.io/henry-terraform-admin/clsi:6e0c79688030117a9c27d0fc01d1271e6ac3dd3e
+        imagePullPolicy: Always
+        readinessProbe:
+          httpGet:
+            path: status
+            port: 3009
+          periodSeconds: 5
+          initialDelaySeconds: 0
+          failureThreshold: 3
+          successThreshold: 1
+
+
+
