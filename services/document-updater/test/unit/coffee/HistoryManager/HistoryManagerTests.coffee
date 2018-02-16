@@ -24,7 +24,7 @@ describe "HistoryManager", ->
 	describe "flushChangesAsync", ->
 		beforeEach ->
 			@HistoryManager._flushDocChangesAsync = sinon.stub()
-			@HistoryManager._flushProjectChangesAsync = sinon.stub()
+			@HistoryManager.flushProjectChangesAsync = sinon.stub()
 
 			@HistoryManager.flushChangesAsync(@project_id, @doc_id)
 
@@ -34,7 +34,7 @@ describe "HistoryManager", ->
 				.should.equal true
 
 		it "flushes project changes", ->
-			@HistoryManager._flushProjectChangesAsync
+			@HistoryManager.flushProjectChangesAsync
 				.calledWith(@project_id)
 				.should.equal true
 
@@ -49,11 +49,11 @@ describe "HistoryManager", ->
 				.calledWith("#{@Settings.apis.trackchanges.url}/project/#{@project_id}/doc/#{@doc_id}/flush")
 				.should.equal true
 
-	describe "_flushProjectChangesAsync", ->
+	describe "flushProjectChangesAsync", ->
 		beforeEach ->
 			@request.post = sinon.stub().callsArgWith(1, null, statusCode: 204)
 
-			@HistoryManager._flushProjectChangesAsync @project_id
+			@HistoryManager.flushProjectChangesAsync @project_id
 
 		it "should send a request to the project history api", ->
 			@request.post
@@ -66,7 +66,7 @@ describe "HistoryManager", ->
 			@project_ops_length = 10
 			@doc_ops_length = 5
 
-			@HistoryManager._flushProjectChangesAsync = sinon.stub()
+			@HistoryManager.flushProjectChangesAsync = sinon.stub()
 			@HistoryRedisManager.recordDocHasHistoryOps = sinon.stub().callsArg(3)
 			@HistoryManager._flushDocChangesAsync = sinon.stub()
 
@@ -77,7 +77,7 @@ describe "HistoryManager", ->
 				)
 
 			it "should not flush project changes", ->
-				@HistoryManager._flushProjectChangesAsync.called.should.equal false
+				@HistoryManager.flushProjectChangesAsync.called.should.equal false
 
 			it "should not record doc has history ops", ->
 				@HistoryRedisManager.recordDocHasHistoryOps.called.should.equal false
@@ -90,16 +90,16 @@ describe "HistoryManager", ->
 
 		describe "with enough ops to flush project changes", ->
 			beforeEach ->
-				@HistoryManager._shouldFlushHistoryOps = sinon.stub()
-				@HistoryManager._shouldFlushHistoryOps.withArgs(@project_ops_length).returns(true)
-				@HistoryManager._shouldFlushHistoryOps.withArgs(@doc_ops_length).returns(false)
+				@HistoryManager.shouldFlushHistoryOps = sinon.stub()
+				@HistoryManager.shouldFlushHistoryOps.withArgs(@project_ops_length).returns(true)
+				@HistoryManager.shouldFlushHistoryOps.withArgs(@doc_ops_length).returns(false)
 
 				@HistoryManager.recordAndFlushHistoryOps(
 					@project_id, @doc_id, @ops, @doc_ops_length, @project_ops_length, @callback
 				)
 
 			it "should flush project changes", ->
-				@HistoryManager._flushProjectChangesAsync
+				@HistoryManager.flushProjectChangesAsync
 					.calledWith(@project_id)
 					.should.equal true
 
@@ -115,16 +115,16 @@ describe "HistoryManager", ->
 
 		describe "with enough ops to flush doc changes", ->
 			beforeEach ->
-				@HistoryManager._shouldFlushHistoryOps = sinon.stub()
-				@HistoryManager._shouldFlushHistoryOps.withArgs(@project_ops_length).returns(false)
-				@HistoryManager._shouldFlushHistoryOps.withArgs(@doc_ops_length).returns(true)
+				@HistoryManager.shouldFlushHistoryOps = sinon.stub()
+				@HistoryManager.shouldFlushHistoryOps.withArgs(@project_ops_length).returns(false)
+				@HistoryManager.shouldFlushHistoryOps.withArgs(@doc_ops_length).returns(true)
 
 				@HistoryManager.recordAndFlushHistoryOps(
 					@project_id, @doc_id, @ops, @doc_ops_length, @project_ops_length, @callback
 				)
 
 			it "should not flush project changes", ->
-				@HistoryManager._flushProjectChangesAsync.called.should.equal false
+				@HistoryManager.flushProjectChangesAsync.called.should.equal false
 
 			it "should record doc has history ops", ->
 				@HistoryRedisManager.recordDocHasHistoryOps
@@ -154,24 +154,24 @@ describe "HistoryManager", ->
 			it "should call the callback with the error", ->
 				@callback.calledWith(@error).should.equal true
 
-		describe "_shouldFlushHistoryOps", ->
+		describe "shouldFlushHistoryOps", ->
 			it "should return false if the number of ops is not known", ->
-				@HistoryManager._shouldFlushHistoryOps(null, ['a', 'b', 'c'], 1).should.equal false
+				@HistoryManager.shouldFlushHistoryOps(null, ['a', 'b', 'c'].length, 1).should.equal false
 
 			it "should return false if the updates didn't take us past the threshold", ->
 				# Currently there are 14 ops
 				# Previously we were on 11 ops
 				# We didn't pass over a multiple of 5
-				@HistoryManager._shouldFlushHistoryOps(14, ['a', 'b', 'c'], 5).should.equal false
+				@HistoryManager.shouldFlushHistoryOps(14, ['a', 'b', 'c'].length, 5).should.equal false
 
 		  it "should return true if the updates took to the threshold", ->
 				# Currently there are 15 ops
 				# Previously we were on 12 ops
 				# We've reached a new multiple of 5
-				@HistoryManager._shouldFlushHistoryOps(15, ['a', 'b', 'c'], 5).should.equal true
+				@HistoryManager.shouldFlushHistoryOps(15, ['a', 'b', 'c'].length, 5).should.equal true
 
 			it "should return true if the updates took past the threshold", ->
 				# Currently there are 19 ops
 				# Previously we were on 16 ops
 				# We didn't pass over a multiple of 5
-				@HistoryManager._shouldFlushHistoryOps(17, ['a', 'b', 'c'], 5).should.equal true
+				@HistoryManager.shouldFlushHistoryOps(17, ['a', 'b', 'c'].length, 5).should.equal true

@@ -10,17 +10,21 @@ describe "ProjectManager", ->
 			"./RedisManager": @RedisManager = {}
 			"./DocumentManager": @DocumentManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			"./HistoryManager": @HistoryManager = {}
 			"./Metrics": @Metrics =
 				Timer: class Timer
 					done: sinon.stub()
 
 		@project_id = "project-id-123"
 		@user_id = "user-id-123"
+		@HistoryManager.shouldFlushHistoryOps = sinon.stub().returns(false)
+		@HistoryManager.flushProjectChangesAsync = sinon.stub()
 		@callback = sinon.stub()
 
 	describe "updateProjectWithLocks", ->
 		describe "rename operations", ->
 			beforeEach ->
+
 				@firstDocUpdate =
 					id: 1
 					pathname: 'foo'
@@ -55,6 +59,11 @@ describe "ProjectManager", ->
 						.calledWith(@project_id, @firstFileUpdate.id, @user_id, @firstFileUpdate)
 						.should.equal true
 
+				it "should not flush the history", ->
+					@HistoryManager.flushProjectChangesAsync
+						.calledWith(@project_id)
+						.should.equal false
+
 				it "should call the callback", ->
 					@callback.called.should.equal true
 
@@ -75,6 +84,16 @@ describe "ProjectManager", ->
 
 				it "should call the callback with the error", ->
 					@callback.calledWith(@error).should.equal true
+
+			describe "with enough ops to flush", ->
+				beforeEach ->
+					@HistoryManager.shouldFlushHistoryOps = sinon.stub().returns(true)
+					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @callback
+
+				it "should flush the history", ->
+					@HistoryManager.flushProjectChangesAsync
+						.calledWith(@project_id)
+						.should.equal true
 
 		describe "add operations", ->
 			beforeEach ->
@@ -108,6 +127,11 @@ describe "ProjectManager", ->
 						.calledWith(@project_id, 'file', @firstFileUpdate.id, @user_id, @firstFileUpdate)
 						.should.equal true
 
+				it "should not flush the history", ->
+					@HistoryManager.flushProjectChangesAsync
+						.calledWith(@project_id)
+						.should.equal false
+
 				it "should call the callback", ->
 					@callback.called.should.equal true
 
@@ -128,4 +152,14 @@ describe "ProjectManager", ->
 
 				it "should call the callback with the error", ->
 					@callback.calledWith(@error).should.equal true
+
+			describe "with enough ops to flush", ->
+				beforeEach ->
+					@HistoryManager.shouldFlushHistoryOps = sinon.stub().returns(true)
+					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @callback
+
+				it "should flush the history", ->
+					@HistoryManager.flushProjectChangesAsync
+						.calledWith(@project_id)
+						.should.equal true
 

@@ -1,5 +1,6 @@
 RedisManager = require "./RedisManager"
 DocumentManager = require "./DocumentManager"
+HistoryManager = require "./HistoryManager"
 async = require "async"
 logger = require "logger-sharelatex"
 Metrics = require "./Metrics"
@@ -105,20 +106,34 @@ module.exports = ProjectManager =
 			timer.done()
 			_callback(args...)
 
+		project_ops_length = 0
+
 		handleDocUpdate = (update, cb) ->
 			doc_id = update.id
 			if update.docLines?
-				RedisManager.addEntity project_id, 'doc', doc_id, user_id, update, cb
+				RedisManager.addEntity project_id, 'doc', doc_id, user_id, update, (error, count) =>
+					project_ops_length = count
+					cb(error)
 			else
-				DocumentManager.renameDocWithLock project_id, doc_id, user_id, update, cb
+				DocumentManager.renameDocWithLock project_id, doc_id, user_id, update, (error, count) =>
+					project_ops_length = count
+					cb(error)
 
 		handleFileUpdate = (update, cb) ->
 			file_id = update.id
 			if update.url?
-				RedisManager.addEntity project_id, 'file', file_id, user_id, update, cb
+				RedisManager.addEntity project_id, 'file', file_id, user_id, update, (error, count) =>
+					project_ops_length = count
+					cb(error)
 			else
-				RedisManager.renameFile project_id, file_id, user_id, update, cb
+				RedisManager.renameFile project_id, file_id, user_id, update, (error, count) =>
+					project_ops_length = count
+					cb(error)
 
 		async.each docUpdates, handleDocUpdate, (error) ->
 			return callback(error) if error?
-			async.each fileUpdates, handleFileUpdate, callback
+			async.each fileUpdates, handleFileUpdate, (error) ->
+				return callback(error) if error?
+				if HistoryManager.shouldFlushHistoryOps(project_ops_length, docUpdates.length + fileUpdates.length, HistoryManager.FLUSH_PROJECT_EVERY_N_OPS)
+					HistoryManager.flushProjectChangesAsync project_id
+				callback()
