@@ -3,6 +3,7 @@ request = require "request"
 require("chai").should()
 fs = require "fs"
 ChildProcess = require "child_process"
+ClsiApp = require "./helpers/ClsiApp"
 
 fixturePath = (path) -> __dirname + "/../fixtures/" + path
 
@@ -86,7 +87,9 @@ Client.runServer(4242, fixturePath("examples"))
 
 describe "Example Documents", ->
 	before (done) ->
-		ChildProcess.exec("rm test/acceptance/fixtures/tmp/*").on "exit", () -> done()
+		ChildProcess.exec("rm test/acceptance/fixtures/tmp/*").on "exit", () -> 
+			ClsiApp.ensureRunning done
+
 
 	for example_dir in fs.readdirSync fixturePath("examples")
 		do (example_dir) ->

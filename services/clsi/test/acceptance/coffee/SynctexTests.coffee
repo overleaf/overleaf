@@ -2,6 +2,7 @@ Client = require "./helpers/Client"
 request = require "request"
 require("chai").should()
 expect = require("chai").expect
+ClsiApp = require "./helpers/ClsiApp"
 
 describe "Syncing", ->
 	before (done) ->
@@ -16,7 +17,8 @@ describe "Syncing", ->
 				'''
 			]
 		@project_id = Client.randomId()
-		Client.compile @project_id, @request, (@error, @res, @body) => done()
+		ClsiApp.ensureRunning =>
+			Client.compile @project_id, @request, (@error, @res, @body) => done()
 
 	describe "from code to pdf", ->
 		it "should return the correct location", (done) ->

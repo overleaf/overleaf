@@ -14,16 +14,17 @@ services:
     entrypoint: npm run test:unit
 
   test_acceptance:
-    image: node:6.9.5
-    volumes:
-      - .:/app
+    build: .
     environment:
-      REDIS_HOST: redis
-      MONGO_HOST: mongo
-    depends_on:
-      - redis
-      - mongo
-    working_dir: /app
+      TEXLIVE_IMAGE: quay.io/sharelatex/texlive-full:2017.1
+      TEXLIVE_IMAGE_USER: root # Not ideal, but makes running in dev very simple
+      SHARELATEX_CONFIG: /app/config/settings.defaults.coffee
+      COMMAND_RUNNER: docker-runner-sharelatex
+      COMPILES_HOST_DIR: $PWD/compiles
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./docker-runner:/app/node_modules/docker-runner-sharelatex
+      - ./compiles:/app/compiles
     entrypoint: npm run test:acceptance
 
   redis:
@@ -31,19 +32,3 @@ services:
 
   mongo:
     image: mongo:3.4
-
-  app:
-    image: gcr.io/henry-terraform-admin/clsi
-    build: .
-    environment:
-      TEXLIVE_IMAGE: quay.io/sharelatex/texlive-full:2017.1
-      TEXLIVE_IMAGE_USER: root # Not ideal, but makes running in dev very simple
-      COMMAND_RUNNER: docker-runner-sharelatex
-      SHARELATEX_CONFIG: /app/config/settings.defaults.coffee
-      COMPILES_HOST_DIR: $PWD/compiles
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./docker-runner:/app/node_modules/docker-runner-sharelatex
-      - /Users/henry/Projects/sharelatex-dev-environment/clsi/compiles:/app/compiles
-    ports:
-      - 3013:3013

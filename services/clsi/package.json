@@ -43,7 +43,7 @@
     "sequelize": "^2.1.3",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
     "smoke-test-sharelatex": "git+https://github.com/sharelatex/smoke-test-sharelatex.git#v0.2.0",
-    "sqlite3": "~3.1.8",
+    "sqlite3": "^3.1.13",
     "underscore": "^1.8.2",
     "v8-profiler": "^5.2.4",
     "wrench": "~1.5.4"

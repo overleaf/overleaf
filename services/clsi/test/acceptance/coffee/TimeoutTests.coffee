@@ -1,6 +1,8 @@
 Client = require "./helpers/Client"
 request = require "request"
 require("chai").should()
+ClsiApp = require "./helpers/ClsiApp"
+
 
 describe "Timed out compile", ->
 	before (done) ->
@@ -18,7 +20,8 @@ describe "Timed out compile", ->
 				'''
 			]
 		@project_id = Client.randomId()
-		Client.compile @project_id, @request, (@error, @res, @body) => done()
+		ClsiApp.ensureRunning =>
+			Client.compile @project_id, @request, (@error, @res, @body) => done()
 
 	it "should return a timeout error", ->
 		@body.compile.error.should.equal "container timed out"
