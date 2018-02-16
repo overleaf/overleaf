@@ -1,7 +1,19 @@
 version: "2"
 
 services:
-  base:
+  dev:
+    environment:
+      TEXLIVE_IMAGE: quay.io/sharelatex/texlive-full:2017.1
+      TEXLIVE_IMAGE_USER: root
+      SHARELATEX_CONFIG: /app/config/settings.defaults.coffee
+      COMMAND_RUNNER: docker-runner-sharelatex
+      COMPILES_HOST_DIR: $PWD/compiles
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./docker-runner:/app/node_modules/docker-runner-sharelatex
+      - ./compiles:/app/compiles
+      
+  ci:
     environment:
       TEXLIVE_IMAGE: quay.io/sharelatex/texlive-full:2017.1
       TEXLIVE_IMAGE_USER: root
