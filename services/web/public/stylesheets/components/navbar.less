@@ -52,8 +52,6 @@
   overflow-x: visible;
   padding-right: @navbar-padding-horizontal;
   padding-left:  @navbar-padding-horizontal;
-  //border-top: 1px solid transparent;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.1);
   &:extend(.clearfix all);
   -webkit-overflow-scrolling: touch;
 
@@ -89,6 +87,33 @@
 }
 
 
+.navbar-main {
+  z-index: 1;
+  .container-fluid > .navbar-collapse {
+    // High specificity needed to override Bootstrap's default.
+    margin: 0;
+  }
+  .navbar-collapse {
+    // Use absolute positioning to build the hamburger menu.
+    position: absolute;
+    left: 0;
+    width: 100%;
+    margin: 0;
+    background-color: @navbar-default-bg;
+    border-bottom: solid 1px @navbar-default-border;
+    padding: 0 @navbar-default-padding-h;
+
+    @media (min-width: @grid-float-breakpoint) {
+      // Get back to regular layout mode as soon as the menu items are 
+      // expanded (i.e. not contained within the hamburguer menu).
+      position: static;
+      background-color: transparent;
+      border-bottom: 0;
+      padding-right: @navbar-padding-horizontal;
+      padding-left:  @navbar-padding-horizontal;
+    }
+  }
+}
 // Both navbar header and collapse
 //
 // When a container is present, change the behavior of the header and collapse.
@@ -542,4 +567,10 @@
     }
   }
 
+}
+
+.navbar-default when (@is-overleaf = true) {
+  @media (min-width: @grid-float-breakpoint) {
+    padding: @navbar-default-padding-v 0;
+  }
 }

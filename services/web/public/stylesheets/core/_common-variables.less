@@ -312,7 +312,7 @@
 @navbar-border-radius:             0;
 @navbar-padding-horizontal:        floor((@grid-gutter-width / 2));
 @navbar-padding-vertical:          ((@navbar-height - @line-height-computed) / 2);
-@navbar-collapse-max-height:       340px;
+@navbar-collapse-max-height:       380px;
 
 @navbar-default-color:             #777;
 @navbar-default-bg:                #fff;
@@ -811,7 +811,9 @@
 // Navbar
 @navbar-title-color         : #666;
 @navbar-title-color-hover   : #333;
-@navbar-default-padding     : 1rem 2rem;
+@navbar-default-padding-v   : 1rem;
+@navbar-default-padding-h   : 2rem;
+@navbar-default-padding     : @navbar-default-padding-v @navbar-default-padding-h;
 @navbar-brand-width         : 180px;
 @navbar-btn-font-size       : @font-size-base * 0.8;
 @navbar-btn-border-radius   : @border-radius-base;
