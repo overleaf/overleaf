@@ -91,7 +91,10 @@
   z-index: 1;
   .container-fluid > .navbar-collapse {
     // High specificity needed to override Bootstrap's default.
-    margin: 0;
+    margin: 10px 0 0;
+    @media (min-width: @grid-float-breakpoint) {
+      margin: 0;
+    }
   }
   .navbar-collapse {
     // Use absolute positioning to build the hamburger menu.
