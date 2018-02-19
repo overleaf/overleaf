@@ -36,8 +36,7 @@ module.exports = ProjectGetter =
 
 		if projection?.rootFolder || Object.keys(projection).length == 0
 			ProjectEntityMongoUpdateHandler = require './ProjectEntityMongoUpdateHandler'
-			lockKey = ProjectEntityMongoUpdateHandler.getProjectMongoLockKey project_id
-			LockManager.runWithLock lockKey,
+			LockManager.runWithLock ProjectEntityMongoUpdateHandler.LOCK_NAMESPACE, project_id,
 				(cb) -> ProjectGetter.getProjectWithoutLock project_id, projection, cb
 				callback
 		else

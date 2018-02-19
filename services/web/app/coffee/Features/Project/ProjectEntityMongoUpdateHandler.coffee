@@ -13,20 +13,23 @@ ProjectGetter = require('./ProjectGetter')
 ProjectLocator = require('./ProjectLocator')
 SafePath = require './SafePath'
 
+LOCK_NAMESPACE = "mongoTransaction"
+
 wrapWithLock = (methodWithoutLock) ->
 	# This lock is used whenever we read or write to an existing project's
 	# structure. Some operations to project structure cannot be done atomically
 	# in mongo, this lock is used to prevent reading the structure between two
 	# parts of a staged update.
 	methodWithLock = (project_id, args..., callback) ->
-		lockKey = ProjectEntityMongoUpdateHandler.getProjectMongoLockKey project_id
-		LockManager.runWithLock lockKey,
+		LockManager.runWithLock LOCK_NAMESPACE, project_id,
 			(cb) -> methodWithoutLock project_id, args..., cb
 			callback
 	methodWithLock.withoutLock = methodWithoutLock
 	methodWithLock
 
 module.exports = ProjectEntityMongoUpdateHandler = self =
+	LOCK_NAMESPACE: LOCK_NAMESPACE
+
 	addDoc: wrapWithLock (project_id, folder_id, doc, callback = (err, result) ->) ->
 		ProjectGetter.getProjectWithoutLock project_id, {rootFolder:true, name:true}, (err, project) ->
 			if err?
@@ -165,9 +168,6 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 						logger.err err:err, project_id:project._id, "error adding folder to project"
 						return callback(err)
 					callback null, folder, parentFolder_id
-
-	getProjectMongoLockKey: (project_id) ->
-		"lock:web:mongoTransaction:{#{project_id}}"
 
 	_removeElementFromMongoArray: (model, model_id, path, callback = (err, project) ->)->
 		conditions = {_id:model_id}

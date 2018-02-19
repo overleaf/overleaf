@@ -37,7 +37,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 			'../../models/Folder': Folder:@FolderModel
 			"../../infrastructure/LockManager":@LockManager =
 				runWithLock:
-					sinon.spy((key, runner, callback) -> runner(callback))
+					sinon.spy((namespace, id, runner, callback) -> runner(callback))
 			'../../models/Project': Project:@ProjectModel = {}
 			'./ProjectEntityHandler': @ProjectEntityHandler = {}
 			'./ProjectLocator': @ProjectLocator = {}

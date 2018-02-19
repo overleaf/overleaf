@@ -18,13 +18,14 @@ ProjectEntityMongoUpdateHandler = require('./ProjectEntityMongoUpdateHandler')
 SafePath = require './SafePath'
 TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 
+LOCK_NAMESPACE = "sequentialProjectStructureUpdateLock"
+
 wrapWithLock = (methodWithoutLock) ->
 	# This lock is used to make sure that the project structure updates are made
 	# sequentially. In particular the updates must be made in mongo and sent to
 	# the doc-updater in the same order.
 	methodWithLock = (project_id, args..., callback) ->
-		lockKey = "lock:web:sequentialProjectStructureUpdateLock:{#{project_id}}"
-		LockManager.runWithLock lockKey,
+		LockManager.runWithLock LOCK_NAMESPACE, project_id,
 			(cb) -> methodWithoutLock project_id, args..., cb
 			callback
 	methodWithLock.withoutLock = methodWithoutLock

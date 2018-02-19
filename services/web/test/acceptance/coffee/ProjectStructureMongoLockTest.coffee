@@ -31,12 +31,11 @@ describe "ProjectStructureMongoLock", ->
 				ProjectCreationHandler.createBlankProject user._id, 'locked-project', (err, project) =>
 					throw err if err?
 					@locked_project = project
-					lockKey = ProjectEntityMongoUpdateHandler.getProjectMongoLockKey @locked_project._id
-					LockManager._getLock lockKey, done
+					@lock_key = "lock:web:#{ProjectEntityMongoUpdateHandler.LOCK_NAMESPACE}:#{project._id}"
+					LockManager._getLock @lock_key, done
 
 		after (done) ->
-			lockKey = ProjectEntityMongoUpdateHandler.getProjectMongoLockKey @locked_project._id
-			LockManager._releaseLock lockKey, done
+			LockManager._releaseLock @lock_key, done
 
 		describe 'interacting with the locked project', ->
 			LOCKING_UPDATE_METHODS = ['addDoc', 'addFile', 'mkdirp', 'moveEntity', 'renameEntity', 'addFolder']

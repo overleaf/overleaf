@@ -7,13 +7,36 @@ logger = require "logger-sharelatex"
 module.exports = LockManager =
 	LOCK_TEST_INTERVAL: 50 # 50ms between each test of the lock
 	MAX_LOCK_WAIT_TIME: 10000 # 10s maximum time to spend trying to get the lock
-	REDIS_LOCK_EXPIRY: 30 # seconds. Time until lock auto expires in redis.
+	REDIS_LOCK_EXPIRY: 30 # seconds. Time until lock auto expires in redis
+	SLOW_EXECUTION_THRESHOLD: 5000 # 5s, if execution takes longer than this then log
 
-	runWithLock: (key, runner = ( (releaseLock = (error) ->) -> ), callback = ( (error) -> )) ->
+	runWithLock: (namespace, id, runner = ( (releaseLock = (error) ->) -> ), callback = ( (error) -> )) ->
+
+		# The lock can expire in redis but the process carry on. This setTimout call
+		# is designed to log if this happens.
+		#
+		# error is defined here so we get a useful stacktrace
+		lockReleased = false
+		slowExecutionError = new Error "slow execution during lock"
+		countIfExceededLockTimeout = () ->
+			if !lockReleased
+				metrics.inc "lock.#{namespace}.exceeded_lock_timeout"
+				logger.log "exceeded lock timeout", { namespace, id, slowExecutionError }
+
+		setTimeout countIfExceededLockTimeout, LockManager.REDIS_LOCK_EXPIRY
+
+		timer = new metrics.Timer("lock.#{namespace}")
+		key = "lock:web:#{namespace}:#{id}"
 		LockManager._getLock key, (error) ->
 			return callback(error) if error?
 			runner (error1, values...) ->
 				LockManager._releaseLock key, (error2) ->
+					lockReleased = true
+					timeTaken = new Date - timer.start
+					if timeTaken > LockManager.SLOW_EXECUTION_THRESHOLD
+						logger.log "slow execution during lock", { namespace, id, timeTaken, slowExecutionError }
+
+					timer.done()
 					error = error1 or error2
 					return callback(error) if error?
 					callback null, values...
