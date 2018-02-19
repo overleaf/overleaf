@@ -36,7 +36,8 @@ div.full-size(
 
 		#editor(
 			ace-editor="editor",
-			ng-if="!!editor.sharejs_doc && !editor.opening && !editor.richText"
+			ng-if="!editor.richText",
+			ng-show="!!editor.sharejs_doc && !editor.opening",
 			theme="settings.theme",
 			keybindings="settings.mode",
 			font-size="settings.fontSize",
@@ -69,8 +70,9 @@ div.full-size(
 
 		if hasFeature('rich-text')
 			#editor-rich-text(
-				cm-editor
-				ng-if="!editor.opening && editor.richText"
+				cm-editor,
+				ng-if="editor.richText"
+				ng-show="!!editor.sharejs_doc && !editor.opening"
 				sharejs-doc="editor.sharejs_doc"
 			)
 
