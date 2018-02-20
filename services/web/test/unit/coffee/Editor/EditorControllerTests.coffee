@@ -18,6 +18,7 @@ describe "EditorController", ->
 		@file = _id: @file_id ="dasdkjk"
 		@fileName = "file.png"
 		@fsPath = "/folder/file.png"
+		@linkedFileData = {provider: 'url'}
 
 		@folder_id = "123ksajdn"
 		@folder = _id: @folder_id
@@ -66,16 +67,16 @@ describe "EditorController", ->
 	describe 'addFile', ->
 		beforeEach ->
 			@ProjectEntityUpdateHandler.addFile = sinon.stub().yields(null, @file, @folder_id)
-			@EditorController.addFile @project_id, @folder_id, @fileName, @fsPath, @source, @user_id, @callback
+			@EditorController.addFile @project_id, @folder_id, @fileName, @fsPath, @linkedFileData, @source, @user_id, @callback
 
 		it 'should add the folder using the project entity handler', ->
 			@ProjectEntityUpdateHandler.addFile
-				.calledWith(@project_id, @folder_id, @fileName, @fsPath, @user_id)
+				.calledWith(@project_id, @folder_id, @fileName, @fsPath, @linkedFileData, @user_id)
 				.should.equal true
 
 		it 'should send the update of a new folder out to the users in the project', ->
 			@EditorRealTimeController.emitToRoom
-				.calledWith(@project_id, "reciveNewFile", @folder_id, @file, @source)
+				.calledWith(@project_id, "reciveNewFile", @folder_id, @file, @source, @linkedFileData)
 				.should.equal true
 
 		it 'calls the callback', ->
@@ -107,11 +108,11 @@ describe "EditorController", ->
 	describe 'upsertFile', ->
 		beforeEach ->
 			@ProjectEntityUpdateHandler.upsertFile = sinon.stub().yields(null, @file, false)
-			@EditorController.upsertFile @project_id, @folder_id, @fileName, @fsPath, @source, @user_id, @callback
+			@EditorController.upsertFile @project_id, @folder_id, @fileName, @fsPath, @linkedFileData, @source, @user_id, @callback
 
 		it 'upserts the file using the project entity handler', ->
 			@ProjectEntityUpdateHandler.upsertFile
-				.calledWith(@project_id, @folder_id, @fileName, @fsPath, @user_id)
+				.calledWith(@project_id, @folder_id, @fileName, @fsPath, @linkedFileData, @user_id)
 				.should.equal true
 
 		it 'returns the file', ->
@@ -120,11 +121,11 @@ describe "EditorController", ->
 		describe 'file does not exist', ->
 			beforeEach ->
 				@ProjectEntityUpdateHandler.upsertFile = sinon.stub().yields(null, @file, true)
-				@EditorController.upsertFile @project_id, @folder_id, @fileName, @fsPath, @source, @user_id, @callback
+				@EditorController.upsertFile @project_id, @folder_id, @fileName, @fsPath, @linkedFileData, @source, @user_id, @callback
 
 			it 'should send the update out to users in the project', ->
 				@EditorRealTimeController.emitToRoom
-					.calledWith(@project_id, "reciveNewFile", @folder_id, @file, @source)
+					.calledWith(@project_id, "reciveNewFile", @folder_id, @file, @source, @linkedFileData)
 					.should.equal true
 
 	describe "upsertDocWithPath", ->
@@ -171,21 +172,21 @@ describe "EditorController", ->
 			@filePath = '/folder/file'
 
 			@ProjectEntityUpdateHandler.upsertFileWithPath = sinon.stub().yields(null, @file, false, [], @folder)
-			@EditorController.upsertFileWithPath @project_id, @filePath, @fsPath, @source, @user_id, @callback
+			@EditorController.upsertFileWithPath @project_id, @filePath, @fsPath, @linkedFileData, @source, @user_id, @callback
 
 		it 'upserts the file using the project entity handler', ->
 			@ProjectEntityUpdateHandler.upsertFileWithPath
-				.calledWith(@project_id, @filePath, @fsPath)
+				.calledWith(@project_id, @filePath, @fsPath, @linkedFileData)
 				.should.equal true
 
 		describe 'file does not exist', ->
 			beforeEach ->
 				@ProjectEntityUpdateHandler.upsertFileWithPath = sinon.stub().yields(null, @file, true, [], @folder)
-				@EditorController.upsertFileWithPath @project_id, @filePath, @fsPath, @source, @user_id, @callback
+				@EditorController.upsertFileWithPath @project_id, @filePath, @fsPath, @linkedFileData, @source, @user_id, @callback
 
 			it 'should send the update for the file out to users in the project', ->
 				@EditorRealTimeController.emitToRoom
-					.calledWith(@project_id, "reciveNewFile", @folder_id, @file, @source)
+					.calledWith(@project_id, "reciveNewFile", @folder_id, @file, @source, @linkedFileData)
 					.should.equal true
 
 		describe 'folders required for file do not exist', ->
@@ -195,7 +196,7 @@ describe "EditorController", ->
 					@folderB = { _id: 3, parentFolder_id: 2}
 				]
 				@ProjectEntityUpdateHandler.upsertFileWithPath = sinon.stub().yields(null, @file, true, folders, @folderB)
-				@EditorController.upsertFileWithPath @project_id, @filePath, @fsPath, @source, @user_id, @callback
+				@EditorController.upsertFileWithPath @project_id, @filePath, @fsPath, @linkedFileData, @source, @user_id, @callback
 
 			it 'should send the update for each folder to users in the project', ->
 				@EditorRealTimeController.emitToRoom

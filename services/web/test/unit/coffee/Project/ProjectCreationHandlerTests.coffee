@@ -34,7 +34,7 @@ describe 'ProjectCreationHandler', ->
 				{@name} = options
 		@ProjectEntityUpdateHandler =
 			addDoc: sinon.stub().callsArgWith(5, null, {_id: docId})
-			addFile: sinon.stub().callsArg(5)
+			addFile: sinon.stub().callsArg(6)
 			setRootDoc: sinon.stub().callsArg(2)
 		@ProjectDetailsHandler =
 			validateProjectName: sinon.stub().yields()
@@ -208,6 +208,7 @@ describe 'ProjectCreationHandler', ->
 				.calledWith(
 					project_id, rootFolderId, "universe.jpg",
 					Path.resolve(__dirname + "/../../../../app/templates/project_files/universe.jpg"),
+					null,
 					ownerId
 				)
 				.should.equal true

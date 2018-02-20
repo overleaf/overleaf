@@ -15,18 +15,20 @@ describe 'UpdateMerger :', ->
 				err: ->
 			'../Editor/EditorController': @EditorController = {}
 			'../Uploads/FileTypeManager':@FileTypeManager = {}
+			'../../infrastructure/FileWriter': @FileWriter = {}
 			'settings-sharelatex':{path:{dumpPath:"dump_here"}}
 		@project_id = "project_id_here"
 		@user_id = "mock-user-id"
 
 		@docPath = "/folder/doc.tex"
 		@filePath = "/folder/file.png"
+		@linkedFileData = {provider: 'url'}
 
 		@fsPath = "/tmp/file/path"
 
 		@source = "dropbox"
 		@updateRequest = new BufferedStream()
-		@updateMerger.p.writeStreamToDisk = sinon.stub().yields(null, @fsPath)
+		@FileWriter.writeStreamToDisk = sinon.stub().yields(null, @fsPath)
 		@callback = sinon.stub()
 
 	describe 'mergeUpdate', ->
@@ -94,5 +96,5 @@ describe 'UpdateMerger :', ->
 
 			it 'should upsert the file in the editor controller', ->
 				@EditorController.upsertFileWithPath
-					.calledWith(@project_id, @filePath, @fsPath, @source, @user_id)
+					.calledWith(@project_id, @filePath, @fsPath, null, @source, @user_id)
 					.should.equal true

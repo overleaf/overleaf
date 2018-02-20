@@ -97,10 +97,11 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 		beforeEach ->
 			@file = _id: file_id
 			@path = mongo: 'file.png'
+			@linkedFileData = {provider: 'url'}
 			@ProjectLocator.findElement = sinon.stub().yields(null, @file, @path)
 			@ProjectModel.update = sinon.stub().yields()
 
-			@subject.replaceFile project_id, file_id, @callback
+			@subject.replaceFile project_id, file_id, @linkedFileData, @callback
 
 		it 'gets the project', ->
 			@ProjectGetter.getProjectWithoutLock
@@ -118,7 +119,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 					{ _id: project_id },
 					{
 						'$inc': { 'file.png.rev': 1, 'version': 1 }
-						'$set': { 'file.png.created': new Date() }
+						'$set': { 'file.png.created': new Date(), 'file.png.linkedFileData': @linkedFileData }
 					}
 					{}
 				)

@@ -74,6 +74,7 @@ describe "SubscriptionController", ->
 			"settings-sharelatex": @settings
 			"./SubscriptionDomainHandler":@SubscriptionDomainHandler
 			"../User/UserGetter": @UserGetter
+			"./RecurlyWrapper": @RecurlyWrapper = {}
 
 
 		@res = new MockResponse()
@@ -117,6 +118,7 @@ describe "SubscriptionController", ->
 	describe "paymentPage", ->
 		beforeEach ->
 			@req.headers = {}
+			@RecurlyWrapper.sign = sinon.stub().yields(null, @signature = "signature")
 			@SubscriptionHandler.validateNoSubscriptionInRecurly = sinon.stub().yields(null, true)
 			@GeoIpLookup.getCurrencyCode.callsArgWith(1, null, @stubbedCurrencyCode)
 

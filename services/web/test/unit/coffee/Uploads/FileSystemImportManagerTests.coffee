@@ -78,12 +78,12 @@ describe "FileSystemImportManager", ->
 
 	describe "addFile with replace set to false", ->
 		beforeEach ->
-			@EditorController.addFile = sinon.stub().callsArg(6)
+			@EditorController.addFile = sinon.stub().yields()
 			@FileSystemImportManager._isSafeOnFileSystem = sinon.stub().callsArgWith(1, null, true)
 			@FileSystemImportManager.addFile @user_id, @project_id, @folder_id, @name, @path_on_disk, false, @callback
 
 		it "should add the file", ->
-			@EditorController.addFile.calledWith(@project_id, @folder_id, @name, @path_on_disk, "upload", @user_id)
+			@EditorController.addFile.calledWith(@project_id, @folder_id, @name, @path_on_disk, null, "upload", @user_id)
 				.should.equal true
 
 	describe "addFile with symlink", ->
@@ -105,7 +105,7 @@ describe "FileSystemImportManager", ->
 
 		it "should add the file", ->
 			@EditorController.upsertFile
-				.calledWith(@project_id, @folder_id, @name, @path_on_disk, "upload", @user_id)
+				.calledWith(@project_id, @folder_id, @name, @path_on_disk, null, "upload", @user_id)
 				.should.equal true
 
 	describe "addFolder", ->

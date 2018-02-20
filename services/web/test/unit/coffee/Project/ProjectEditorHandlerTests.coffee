@@ -33,7 +33,7 @@ describe "ProjectEditorHandler", ->
 					fileRefs : [{
 						_id     : "file-id"
 						name    : "image.png"
-						created : new Date()
+						created : @created = new Date()
 						size    : 1234
 					}]
 					folders  : []
@@ -141,7 +141,7 @@ describe "ProjectEditorHandler", ->
 			it "should include files in the project", ->
 				@result.rootFolder[0].folders[0].fileRefs[0]._id.should.equal "file-id"
 				@result.rootFolder[0].folders[0].fileRefs[0].name.should.equal "image.png"
-				should.not.exist @result.rootFolder[0].folders[0].fileRefs[0].created
+				@result.rootFolder[0].folders[0].fileRefs[0].created.should.equal @created
 				should.not.exist @result.rootFolder[0].folders[0].fileRefs[0].size
 
 			it "should include docs in the project but not the lines", ->
