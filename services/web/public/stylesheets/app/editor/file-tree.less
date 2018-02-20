@@ -101,6 +101,18 @@
 			i.fa {
 				color: @file-tree-item-icon-color;
 				font-size: 14px;
+				&.linked-file-highlight {
+					&when (@is-overleaf = true) {
+						color: white;
+					}
+					&when (@is-overleaf = false) {
+						color: @blue;
+					}
+					position: relative;
+					top: 4px;
+					left: -8px;
+					font-size: 12px;
+				}
 			}
 
 			i.fa-folder-open, i.fa-folder {
@@ -128,6 +140,9 @@
 						> i.fa,
 						.entity-menu-toggle i.fa {
 							color: #FFF;
+						}
+						> i.fa i.linked-file-highlight {
+							color: @blue;
 						}
 						color: #FFF;
 						font-weight: bold;
@@ -190,6 +205,9 @@
 					> i.fa,
 					.entity-menu-toggle i.fa {
 						color: #FFF;
+					}
+					> i.fa i.linked-file-highlight {
+						color: @blue;
 					}
 					background-color: @file-tree-item-selected-bg;
 					font-weight: bold;

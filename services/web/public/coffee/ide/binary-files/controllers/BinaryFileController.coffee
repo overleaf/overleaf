@@ -1,15 +1,46 @@
 define [
 	"base"
-], (App) ->
-	App.controller "BinaryFileController", ["$scope", "$rootScope", "$http", "$timeout", ($scope, $rootScope, $http, $timeout) ->
+	"moment"
+], (App, moment) ->
+	App.controller "BinaryFileController", ["$scope", "$rootScope", "$http", "$timeout", "$element", ($scope, $rootScope, $http, $timeout, $element) ->
 
 		TWO_MEGABYTES = 2 * 1024 * 1024
 
-		$scope.bibtexPreview =
+		textExtensions = ['bib', 'tex', 'txt', 'cls', 'sty']
+		imageExtentions = ['png', 'jpg', 'jpeg', 'gif']
+		previewableExtensions = ['eps', 'pdf']
+
+		extension = (file) ->
+			return file.name.split(".").pop()?.toLowerCase()
+
+		$scope.isTextFile = () =>
+			textExtensions.indexOf(extension($scope.openFile)) > -1
+		$scope.isImageFile = () =>
+			imageExtentions.indexOf(extension($scope.openFile)) > -1
+		$scope.isPreviewableFile = () =>
+			previewableExtensions.indexOf(extension($scope.openFile)) > -1
+		$scope.isUnpreviewableFile = () ->
+			!$scope.isTextFile() and
+			!$scope.isImageFile() and
+			!$scope.isPreviewableFile()
+
+		$scope.textPreview =
 			loading: false
 			shouldShowDots: false
 			error: false
 			data: null
+
+		MAX_URL_LENGTH = 60
+		FRONT_OF_URL_LENGTH = 35
+		FILLER = '...'
+		TAIL_OF_URL_LENGTH = MAX_URL_LENGTH - FRONT_OF_URL_LENGTH - FILLER.length
+		$scope.displayUrl = (url) ->
+			if url.length > MAX_URL_LENGTH
+				front = url.slice(0, FRONT_OF_URL_LENGTH)
+				tail = url.slice(url.length - TAIL_OF_URL_LENGTH)
+				return front + FILLER + tail
+			else
+				return url
 
 		# Callback fired when the `img` tag fails to load,
 		# `failedLoad` used to show the "No Preview" message
@@ -25,47 +56,39 @@ define [
 			$scope.imgLoaded = true
 			$scope.$apply()
 
-		$scope.extension = (file) ->
-			return file.name.split(".").pop()?.toLowerCase()
-
-		$scope.loadBibtexFilePreview = () ->
+		loadTextFileFilePreview = () ->
 			url = "/project/#{project_id}/file/#{$scope.openFile.id}?range=0-#{TWO_MEGABYTES}"
-			$scope.bibtexPreview.loading = true
-			$scope.bibtexPreview.shouldShowDots = false
+			$scope.textPreview.loading = true
+			$scope.textPreview.shouldShowDots = false
 			$scope.$apply()
 			$http.get(url)
 				.then (response) ->
 					{ data } = response
-					$scope.bibtexPreview.loading = false
-					$scope.bibtexPreview.error = false
+					$scope.textPreview.error = false
 					# show dots when payload is closs to cutoff
 					if data.length >= (TWO_MEGABYTES - 200)
-						$scope.bibtexPreview.shouldShowDots = true
+						$scope.textPreview.shouldShowDots = true
 					try
 						# remove last partial line
 						data = data.replace(/\n.*$/, '')
 					finally
-						$scope.bibtexPreview.data = data
-					$timeout($scope.setHeight, 0)
+						$scope.textPreview.data = data
+					$timeout(setHeight, 0)
 				.catch () ->
-					$scope.bibtexPreview.error = true
-					$scope.bibtexPreview.loading = false
+					$scope.textPreview.error = true
+					$scope.textPreview.loading = false
 
-		$scope.setHeight = () ->
-			# Behold, a ghastly hack
-			guide = document.querySelector('.file-tree-inner')
-			table_wrap = document.querySelector('.bib-preview .scroll-container')
-			if table_wrap
-				desired_height = guide.offsetHeight - 44
-				if table_wrap.offsetHeight > desired_height
-					table_wrap.style.height = desired_height + 'px'
-					table_wrap.style['max-height'] = desired_height + 'px'
+		setHeight = () ->
+			$preview = $element.find('.text-preview .scroll-container')
+			$footer = $element.find('.binary-file-footer')
+			maxHeight = $element.height() - $footer.height() - 14 # borders + margin
+			$preview.css('max-height': maxHeight)
+			# Don't show the preview until we've set the height, otherwise we jump around
+			$scope.textPreview.loading = false
 
-		$scope.loadBibtexIfRequired = () ->
-			if $scope.extension($scope.openFile) == 'bib'
-				$scope.bibtexPreview.data = null
-				$scope.loadBibtexFilePreview()
-
-		$scope.loadBibtexIfRequired()
+		do loadTextFileIfRequired = () ->
+			if $scope.isTextFile()
+				$scope.textPreview.data = null
+				loadTextFileFilePreview()
 
 	]

@@ -252,6 +252,8 @@ define [
 					id:   file._id
 					type: "file"
 					selected: (file._id == @selected_entity_id)
+					linkedFileData: file.linkedFileData
+					created: file.created
 				}
 
 			for childFolder in rawFolder.folders or []

@@ -108,6 +108,9 @@ script(type='text/ng-template', id='entityListItemTemplate')
 				i.fa.fa-fw.toggle(ng-if="entity.type != 'folder'")
 
 				i.fa.fa-fw(ng-if="entity.type != 'folder'", ng-class="'fa-' + iconTypeFromName(entity.name)")
+					i.fa.fa-external-link-square.fa-rotate-180.linked-file-highlight(
+						ng-if="entity.linkedFileData.provider"
+					)
 				span(
 					ng-hide="entity.renaming"
 				)  {{ entity.renamingToName || entity.name }}
