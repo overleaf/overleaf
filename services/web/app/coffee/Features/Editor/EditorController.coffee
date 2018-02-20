@@ -31,7 +31,7 @@ module.exports = EditorController =
 			if err?
 				logger.err err:err, project_id:project_id, folder_id:folder_id, fileName:fileName, "error adding file without lock"
 				return callback(err)
-			EditorRealTimeController.emitToRoom(project_id, 'reciveNewFile', folder_id, fileRef, source)
+			EditorRealTimeController.emitToRoom(project_id, 'reciveNewFile', folder_id, fileRef, source, linkedFileData)
 			callback(err, fileRef)
 
 	upsertDoc: (project_id, folder_id, docName, docLines, source, user_id, callback = (err)->)->
@@ -44,7 +44,7 @@ module.exports = EditorController =
 		ProjectEntityUpdateHandler.upsertFile project_id, folder_id, fileName, fsPath, linkedFileData, user_id, (err, file, didAddFile) ->
 			return callback(err) if err?
 			if didAddFile
-				EditorRealTimeController.emitToRoom project_id, 'reciveNewFile', folder_id, file, source
+				EditorRealTimeController.emitToRoom project_id, 'reciveNewFile', folder_id, file, source, linkedFileData
 			callback null, file
 
 	upsertDocWithPath: (project_id, elementPath, docLines, source, user_id, callback) ->
@@ -62,7 +62,7 @@ module.exports = EditorController =
 			EditorController._notifyProjectUsersOfNewFolders project_id, newFolders, (err) ->
 				return callback(err) if err?
 				if didAddFile
-					EditorRealTimeController.emitToRoom project_id, 'reciveNewFile', lastFolder._id, file, source
+					EditorRealTimeController.emitToRoom project_id, 'reciveNewFile', lastFolder._id, file, source, linkedFileData
 				callback()
 
 	addFolder : (project_id, folder_id, folderName, source, callback = (error, folder)->)->

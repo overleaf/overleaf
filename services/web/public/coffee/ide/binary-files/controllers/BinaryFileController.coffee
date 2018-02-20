@@ -2,7 +2,7 @@ define [
 	"base"
 	"moment"
 ], (App, moment) ->
-	App.controller "BinaryFileController", ["$scope", "$rootScope", "$http", "$timeout", "$element", ($scope, $rootScope, $http, $timeout, $element) ->
+	App.controller "BinaryFileController", ["$scope", "$rootScope", "$http", "$timeout", "$element", "ide", ($scope, $rootScope, $http, $timeout, $element, ide) ->
 
 		TWO_MEGABYTES = 2 * 1024 * 1024
 
@@ -30,6 +30,8 @@ define [
 			error: false
 			data: null
 
+		$scope.refreshing = false
+
 		MAX_URL_LENGTH = 60
 		FRONT_OF_URL_LENGTH = 35
 		FILLER = '...'
@@ -41,6 +43,14 @@ define [
 				return front + FILLER + tail
 			else
 				return url
+
+		$scope.refreshFile = (file) ->
+			$scope.refreshing = true
+			ide.fileTreeManager.refreshLinkedFile(file)
+				.then () ->
+					loadTextFileFilePreview()
+				.finally () ->
+					$scope.refreshing = false
 
 		# Callback fired when the `img` tag fails to load,
 		# `failedLoad` used to show the "No Preview" message
@@ -56,12 +66,18 @@ define [
 			$scope.imgLoaded = true
 			$scope.$apply()
 
-		loadTextFileFilePreview = () ->
+		do loadTextFileFilePreview = () ->
+			return unless $scope.isTextFile()
 			url = "/project/#{project_id}/file/#{$scope.openFile.id}?range=0-#{TWO_MEGABYTES}"
+			$scope.textPreview.data = null
 			$scope.textPreview.loading = true
 			$scope.textPreview.shouldShowDots = false
 			$scope.$apply()
-			$http.get(url)
+			$http({
+				url: url,
+				method: 'GET',
+				transformResponse: null # Don't parse JSON
+			})
 				.then (response) ->
 					{ data } = response
 					$scope.textPreview.error = false
@@ -74,7 +90,8 @@ define [
 					finally
 						$scope.textPreview.data = data
 					$timeout(setHeight, 0)
-				.catch () ->
+				.catch (error) ->
+					console.error(error)
 					$scope.textPreview.error = true
 					$scope.textPreview.loading = false
 
@@ -85,10 +102,5 @@ define [
 			$preview.css('max-height': maxHeight)
 			# Don't show the preview until we've set the height, otherwise we jump around
 			$scope.textPreview.loading = false
-
-		do loadTextFileIfRequired = () ->
-			if $scope.isTextFile()
-				$scope.textPreview.data = null
-				loadTextFileFilePreview()
 
 	]

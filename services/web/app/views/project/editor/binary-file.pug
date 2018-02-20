@@ -35,7 +35,7 @@ div.binary-file.full-size(
 	
 	p.no-preview(
 		ng-if="failedLoad || textPreview.error || isUnpreviewableFile()"
-	) #{translate("no_preview_available")}
+	) #{translate("no_preview_available")} {{ failedLoad }} {{ textPreview.error }} {{ isUnpreviewableFile() }}
 
 	div.binary-file-footer
 		div(ng-show="openFile.linkedFileData.provider == 'url'")
@@ -48,12 +48,14 @@ div.binary-file.full-size(
 				| at {{ openFile.created | formatDate:'h:mm a' }} {{ openFile.created | relativeDate }}
 
 		span(ng-show="openFile.linkedFileData.provider == 'url'")
-			a.btn.btn-success(
-				href
+			button.btn.btn-success(
+				href, ng-click="refreshFile(openFile)",
+				ng-disabled="refreshing"
 			)
-				i.fa.fa-fw.fa-refresh
+				i.fa.fa-fw.fa-refresh(ng-class={'fa-spin': refreshing})
 				|
-				| Refresh
+				span(ng-show="!refreshing") Refresh
+				span(ng-show="refreshing") Refreshing...
 			| &nbsp;
 		a.btn.btn-info(
 			ng-href="/project/{{ project_id }}/file/{{ openFile.id }}"
