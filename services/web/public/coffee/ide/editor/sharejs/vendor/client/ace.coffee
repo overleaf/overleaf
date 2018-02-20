@@ -145,6 +145,7 @@ window.sharejs.extendDoc 'attach_ace', (editor, keepEditorContents, maxDocLength
     check()
 
   doc.detach_ace = ->
+    # TODO: can we remove the insert and delete event callbacks?
     editorDoc.removeListener 'change', editorListener
     delete doc.detach_ace
 
