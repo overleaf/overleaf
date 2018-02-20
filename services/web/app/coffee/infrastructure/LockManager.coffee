@@ -23,7 +23,7 @@ module.exports = LockManager =
 				metrics.inc "lock.#{namespace}.exceeded_lock_timeout"
 				logger.log "exceeded lock timeout", { namespace, id, slowExecutionError }
 
-		setTimeout countIfExceededLockTimeout, LockManager.REDIS_LOCK_EXPIRY
+		setTimeout countIfExceededLockTimeout, LockManager.REDIS_LOCK_EXPIRY * 1000
 
 		timer = new metrics.Timer("lock.#{namespace}")
 		key = "lock:web:#{namespace}:#{id}"
