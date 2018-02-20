@@ -11,27 +11,25 @@ module.exports = LockManager =
 	SLOW_EXECUTION_THRESHOLD: 5000 # 5s, if execution takes longer than this then log
 
 	runWithLock: (namespace, id, runner = ( (releaseLock = (error) ->) -> ), callback = ( (error) -> )) ->
-
-		# The lock can expire in redis but the process carry on. This setTimout call
-		# is designed to log if this happens.
-		#
-		# error is defined here so we get a useful stacktrace
-		lockReleased = false
+		# This error is defined here so we get a useful stacktrace
 		slowExecutionError = new Error "slow execution during lock"
-		countIfExceededLockTimeout = () ->
-			if !lockReleased
-				metrics.inc "lock.#{namespace}.exceeded_lock_timeout"
-				logger.log "exceeded lock timeout", { namespace, id, slowExecutionError }
-
-		setTimeout countIfExceededLockTimeout, LockManager.REDIS_LOCK_EXPIRY * 1000
 
 		timer = new metrics.Timer("lock.#{namespace}")
 		key = "lock:web:#{namespace}:#{id}"
 		LockManager._getLock key, namespace, (error) ->
 			return callback(error) if error?
+
+			# The lock can expire in redis but the process carry on. This setTimout call
+			# is designed to log if this happens.
+			countIfExceededLockTimeout = () ->
+				metrics.inc "lock.#{namespace}.exceeded_lock_timeout"
+				logger.log "exceeded lock timeout", { namespace, id, slowExecutionError }
+			exceededLockTimeout = setTimeout countIfExceededLockTimeout, LockManager.REDIS_LOCK_EXPIRY * 1000
+
 			runner (error1, values...) ->
 				LockManager._releaseLock key, (error2) ->
-					lockReleased = true
+					clearTimeout exceededLockTimeout
+
 					timeTaken = new Date - timer.start
 					if timeTaken > LockManager.SLOW_EXECUTION_THRESHOLD
 						logger.log "slow execution during lock", { namespace, id, timeTaken, slowExecutionError }
