@@ -17,7 +17,7 @@ define [
             attachToCM(sharejsDoc)
 
         attachToCM = (sharejsDoc) ->
-          setTimeout () ->
+          scope.$applyAsync () ->
             Frontend.richText.openDoc(cm, sharejsDoc.getSnapshot())
             sharejsDoc.attachToCM(cm)
 
