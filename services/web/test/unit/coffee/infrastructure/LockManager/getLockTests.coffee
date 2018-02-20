@@ -16,18 +16,19 @@ describe 'LockManager - getting the lock', ->
 			"metrics-sharelatex": inc:->
 
 		@callback = sinon.stub()
-		@doc_id = "doc-id-123"
-	
+		@key = "lock:web:lockName:project-id}"
+		@namespace = 'lockName'
+
 	describe "when the lock is not set", ->
 		beforeEach (done) ->
-			@LockManager._tryLock = sinon.stub().callsArgWith(1, null, true)
-			@LockManager._getLock @doc_id, (args...) =>
+			@LockManager._tryLock = sinon.stub().yields(null, true)
+			@LockManager._getLock @key, @namespace, (args...) =>
 				@callback(args...)
 				done()
 
 		it "should try to get the lock", ->
 			@LockManager._tryLock
-				.calledWith(@doc_id)
+				.calledWith(@key, @namespace)
 				.should.equal true
 
 		it "should only need to try once", ->
@@ -41,7 +42,7 @@ describe 'LockManager - getting the lock', ->
 			startTime = Date.now()
 			tries = 0
 			@LockManager.LOCK_TEST_INTERVAL = 5
-			@LockManager._tryLock = (doc_id, callback = (error, isFree) ->) ->
+			@LockManager._tryLock = (key, namespace, callback = (error, isFree) ->) ->
 				if (Date.now() - startTime < 20) or (tries < 2)
 					tries = tries + 1
 					callback null, false
@@ -49,7 +50,7 @@ describe 'LockManager - getting the lock', ->
 					callback null, true
 			sinon.spy @LockManager, "_tryLock"
 
-			@LockManager._getLock @doc_id, (args...) =>
+			@LockManager._getLock @key, @namespace, (args...) =>
 				@callback(args...)
 				done()
 
@@ -63,13 +64,10 @@ describe 'LockManager - getting the lock', ->
 		beforeEach (done) ->
 			time = Date.now()
 			@LockManager.MAX_LOCK_WAIT_TIME = 5
-			@LockManager._tryLock = sinon.stub().callsArgWith(1, null, false)
-			@LockManager._getLock @doc_id, (args...) =>
+			@LockManager._tryLock = sinon.stub().yields(null, false)
+			@LockManager._getLock @key, @namespace, (args...) =>
 				@callback(args...)
 				done()
 
 		it "should return the callback with an error", ->
 			@callback.calledWith(new Error("timeout")).should.equal true
-		
-
-

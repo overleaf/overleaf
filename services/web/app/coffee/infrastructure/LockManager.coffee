@@ -27,7 +27,7 @@ module.exports = LockManager =
 
 		timer = new metrics.Timer("lock.#{namespace}")
 		key = "lock:web:#{namespace}:#{id}"
-		LockManager._getLock key, (error) ->
+		LockManager._getLock key, namespace, (error) ->
 			return callback(error) if error?
 			runner (error1, values...) ->
 				LockManager._releaseLock key, (error2) ->
@@ -41,42 +41,33 @@ module.exports = LockManager =
 					return callback(error) if error?
 					callback null, values...
 
-	_tryLock : (key, callback = (err, isFree)->)->
+	_tryLock : (key, namespace, callback = (err, isFree)->)->
 		rclient.set key, "locked", "EX", LockManager.REDIS_LOCK_EXPIRY, "NX", (err, gotLock)->
 			return callback(err) if err?
 			if gotLock == "OK"
-				metrics.inc "lock-not-blocking"
+				metrics.inc "lock.#{namespace}.try.success"
 				callback err, true
 			else
-				metrics.inc "lock-blocking"
+				metrics.inc "lock.#{namespace}.try.failed"
 				logger.log key: key, redis_response: gotLock, "lock is locked"
 				callback err, false
 
-	_getLock: (key, callback = (error) ->) ->
+	_getLock: (key, namespace, callback = (error) ->) ->
 		startTime = Date.now()
+		attempts = 0
 		do attempt = () ->
 			if Date.now() - startTime > LockManager.MAX_LOCK_WAIT_TIME
+				metrics.inc "lock.#{namespace}.get.failed"
 				return callback(new Error("Timeout"))
 
-			LockManager._tryLock key, (error, gotLock) ->
+			attempts += 1
+			LockManager._tryLock key, namespace, (error, gotLock) ->
 				return callback(error) if error?
 				if gotLock
+					metrics.inc "lock.#{namespace}.get.success.tries", attempts
 					callback(null)
 				else
 					setTimeout attempt, LockManager.LOCK_TEST_INTERVAL
-
-	_checkLock: (key, callback = (err, isFree)->)->
-		multi = rclient.multi()
-		multi.exists key
-		multi.exec (err, replys)->
-			return callback(err) if err?
-			exists = parseInt replys[0]
-			if exists == 1
-				metrics.inc "lock-blocking"
-				callback err, false
-			else
-				metrics.inc "lock-not-blocking"
-				callback err, true
 
 	_releaseLock: (key, callback)->
 		rclient.del key, callback
