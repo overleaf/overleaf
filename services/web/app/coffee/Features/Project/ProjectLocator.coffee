@@ -4,7 +4,6 @@ Errors = require "../Errors/Errors"
 _ = require('underscore')
 logger = require('logger-sharelatex')
 async = require('async')
-ProjectGetter = require "./ProjectGetter"
 
 module.exports = ProjectLocator =
 	findElement: (options, _callback = (err, element, path, parentFolder)->)->
@@ -83,8 +82,19 @@ module.exports = ProjectLocator =
 				else
 					getRootDoc project
 
-	findElementByPath: (project_or_id, needlePath, callback = (err, foundEntity, type)->)->
+	findElementByPath: (options, callback = (err, foundEntity, type)->)->
+		{project, project_id, path} = options
+		if !path?
+			return new Error('no path provided for findElementByPath')
 
+		if project?
+			ProjectLocator._findElementByPathWithProject project, path, callback
+		else
+			ProjectGetter.getProject project_id, {rootFolder:true, rootDoc_id:true}, (err, project)->
+				return callback(err) if err?
+				ProjectLocator._findElementByPathWithProject project, path, callback
+
+	_findElementByPathWithProject: (project, needlePath, callback = (err, foundEntity, type)->)->
 		getParentFolder = (haystackFolder, foldersList, level, cb)->
 			if foldersList.length == 0
 				return cb null, haystackFolder
@@ -98,7 +108,7 @@ module.exports = ProjectLocator =
 					else
 						return getParentFolder(folder, foldersList, level+1, cb)
 			if !found
-				cb("not found project_or_id: #{project_or_id} search path: #{needlePath}, folder #{foldersList[level]} could not be found")
+				cb("not found project: #{project._id} search path: #{needlePath}, folder #{foldersList[level]} could not be found")
 
 		getEntity = (folder, entityName, cb)->
 			if !entityName?
@@ -119,35 +129,34 @@ module.exports = ProjectLocator =
 			if result?
 				cb null, result, type
 			else
-				cb("not found project_or_id: #{project_or_id} search path: #{needlePath}, entity #{entityName} could not be found")
+				cb("not found project: #{project._id} search path: #{needlePath}, entity #{entityName} could not be found")
 
 
-		Project.getProject project_or_id, "", (err, project)->
-			if err?
-				logger.err err:err, project_or_id:project_or_id, "error getting project for finding element"
-				return callback(err)
-			if !project?
-				return callback("project could not be found for finding a element #{project_or_id}")
-			if needlePath == '' || needlePath == '/'
-				return callback(null, project.rootFolder[0], "folder")
+		if err?
+			logger.err err:err, project_id:project._id, "error getting project for finding element"
+			return callback(err)
+		if !project?
+			return callback("project could not be found for finding a element #{project._id}")
+		if needlePath == '' || needlePath == '/'
+			return callback(null, project.rootFolder[0], "folder")
 
-			if needlePath.indexOf('/') == 0
-				needlePath = needlePath.substring(1)
-			foldersList = needlePath.split('/')
-			needleName = foldersList.pop()
-			rootFolder = project.rootFolder[0]
+		if needlePath.indexOf('/') == 0
+			needlePath = needlePath.substring(1)
+		foldersList = needlePath.split('/')
+		needleName = foldersList.pop()
+		rootFolder = project.rootFolder[0]
 
-			logger.log project_id:project._id, path:needlePath, foldersList:foldersList, "looking for element by path"
-			jobs = new Array()
-			jobs.push(
-				(cb)->
-					getParentFolder rootFolder, foldersList, 0, cb
-			)
-			jobs.push(
-				(folder, cb)->
-					getEntity folder, needleName, cb
-			)
-			async.waterfall jobs, callback
+		logger.log project_id:project._id, path:needlePath, foldersList:foldersList, "looking for element by path"
+		jobs = new Array()
+		jobs.push(
+			(cb)->
+				getParentFolder rootFolder, foldersList, 0, cb
+		)
+		jobs.push(
+			(folder, cb)->
+				getEntity folder, needleName, cb
+		)
+		async.waterfall jobs, callback
 
 	findUsersProjectByName: (user_id, projectName, callback)->
 		ProjectGetter.findAllUsersProjects user_id, 'name archived', (err, allProjects)->

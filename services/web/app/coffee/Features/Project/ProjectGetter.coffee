@@ -5,46 +5,66 @@ ObjectId = mongojs.ObjectId
 async = require "async"
 Project = require("../../models/Project").Project
 logger = require("logger-sharelatex")
+LockManager = require("../../infrastructure/LockManager")
 
 module.exports = ProjectGetter =
 	EXCLUDE_DEPTH: 8
-
 
 	getProjectWithoutDocLines: (project_id, callback=(error, project) ->) ->
 		excludes = {}
 		for i in [1..ProjectGetter.EXCLUDE_DEPTH]
 			excludes["rootFolder#{Array(i).join(".folders")}.docs.lines"] = 0
-		db.projects.find _id: ObjectId(project_id.toString()), excludes, (error, projects = []) ->
-			callback error, projects[0]
+		ProjectGetter.getProject project_id, excludes, callback
 
 	getProjectWithOnlyFolders: (project_id, callback=(error, project) ->) ->
 		excludes = {}
 		for i in [1..ProjectGetter.EXCLUDE_DEPTH]
 			excludes["rootFolder#{Array(i).join(".folders")}.docs"] = 0
 			excludes["rootFolder#{Array(i).join(".folders")}.fileRefs"] = 0
-		db.projects.find _id: ObjectId(project_id.toString()), excludes, (error, projects = []) ->
-			callback error, projects[0]
+		ProjectGetter.getProject project_id, excludes, callback
 
+	getProject: (project_id, projection, callback) ->
+		if !project_id?
+			return callback(new Error("no project_id provided"))
 
-	getProject: (query, projection, callback = (error, project) ->) ->
-		if !query?
-			return callback("no query provided")
-
-		if typeof(projection) == "function"
+		if typeof(projection) == "function" && !callback?
 			callback = projection
+			projection = {}
 
-		if typeof query == "string"
-			query = _id: ObjectId(query)
-		else if query instanceof ObjectId
-			query = _id: query
-		else if query?.toString().length == 24 # sometimes mongoose ids are hard to identify, this will catch them
-			query = _id:  ObjectId(query.toString())
+		if typeof(projection) != "object"
+			return callback(new Error("projection is not an object"))
+
+		if projection?.rootFolder || Object.keys(projection).length == 0
+			ProjectEntityMongoUpdateHandler = require './ProjectEntityMongoUpdateHandler'
+			LockManager.runWithLock ProjectEntityMongoUpdateHandler.LOCK_NAMESPACE, project_id,
+				(cb) -> ProjectGetter.getProjectWithoutLock project_id, projection, cb
+				callback
+		else
+			ProjectGetter.getProjectWithoutLock project_id, projection, callback
+
+	getProjectWithoutLock: (project_id, projection, callback) ->
+		if !project_id?
+			return callback(new Error("no project_id provided"))
+
+		if typeof(projection) == "function" && !callback?
+			callback = projection
+			projection = {}
+
+		if typeof(projection) != "object"
+			return callback(new Error("projection is not an object"))
+
+		if typeof project_id == "string"
+			query = _id: ObjectId(project_id)
+		else if project_id instanceof ObjectId
+			query = _id: project_id
+		else if project_id?.toString().length == 24 # sometimes mongoose ids are hard to identify, this will catch them
+			query = _id:  ObjectId(project_id.toString())
 		else
 			err = new Error("malformed get request")
-			logger.log query:query, err:err, type:typeof(query), "malformed get request"
+			logger.log project_id:project_id, err:err, type:typeof(project_id), "malformed get request"
 			return callback(err)
 
-		db.projects.find query, projection, (err, project)->
+		db.projects.find query, projection, (err, project) ->
 			if err?
 				logger.err err:err, query:query, projection:projection, "error getting project"
 				return callback(err)

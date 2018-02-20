@@ -6,15 +6,32 @@ settings = require('settings-sharelatex')
 CooldownManager = require '../Cooldown/CooldownManager'
 Errors = require '../Errors/Errors'
 Folder = require('../../models/Folder').Folder
+LockManager = require('../../infrastructure/LockManager')
 Project = require('../../models/Project').Project
 ProjectEntityHandler = require('./ProjectEntityHandler')
 ProjectGetter = require('./ProjectGetter')
 ProjectLocator = require('./ProjectLocator')
 SafePath = require './SafePath'
 
+LOCK_NAMESPACE = "mongoTransaction"
+
+wrapWithLock = (methodWithoutLock) ->
+	# This lock is used whenever we read or write to an existing project's
+	# structure. Some operations to project structure cannot be done atomically
+	# in mongo, this lock is used to prevent reading the structure between two
+	# parts of a staged update.
+	methodWithLock = (project_id, args..., callback) ->
+		LockManager.runWithLock LOCK_NAMESPACE, project_id,
+			(cb) -> methodWithoutLock project_id, args..., cb
+			callback
+	methodWithLock.withoutLock = methodWithoutLock
+	methodWithLock
+
 module.exports = ProjectEntityMongoUpdateHandler = self =
-	addDoc: (project_id, folder_id, doc, callback = (err, result) ->) ->
-		ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (err, project) ->
+	LOCK_NAMESPACE: LOCK_NAMESPACE
+
+	addDoc: wrapWithLock (project_id, folder_id, doc, callback = (err, result) ->) ->
+		ProjectGetter.getProjectWithoutLock project_id, {rootFolder:true, name:true}, (err, project) ->
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add doc"
 				return callback(err)
@@ -22,8 +39,8 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 			self._confirmFolder project, folder_id, (folder_id) =>
 				self._putElement project, folder_id, doc, "doc", callback
 
-	addFile: (project_id, folder_id, fileRef, callback = (error, result, project) ->)->
-		ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (err, project) ->
+	addFile: wrapWithLock (project_id, folder_id, fileRef, callback = (error, result, project) ->)->
+		ProjectGetter.getProjectWithoutLock project_id, {rootFolder:true, name:true}, (err, project) ->
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add file"
 				return callback(err)
@@ -31,8 +48,8 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 			self._confirmFolder project, folder_id, (folder_id)->
 				self._putElement project, folder_id, fileRef, "file", callback
 
-	replaceFile: (project_id, file_id, callback) ->
-		ProjectGetter.getProject project_id, {rootFolder: true, name:true}, (err, project) ->
+	replaceFile: wrapWithLock (project_id, file_id, callback) ->
+		ProjectGetter.getProjectWithoutLock project_id, {rootFolder: true, name:true}, (err, project) ->
 			return callback(err) if err?
 			ProjectLocator.findElement {project:project, element_id: file_id, type: 'file'}, (err, fileRef, path)=>
 				return callback(err) if err?
@@ -48,7 +65,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 					return callback(err) if err?
 					callback null, fileRef, project, path
 
-	mkdirp: (project_id, path, callback) ->
+	mkdirp: wrapWithLock (project_id, path, callback) ->
 		folders = path.split('/')
 		folders = _.select folders, (folder)->
 			return folder.length != 0
@@ -66,10 +83,10 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 				if parentFolder?
 					parentFolder_id = parentFolder._id
 				builtUpPath = "#{builtUpPath}/#{folderName}"
-				ProjectLocator.findElementByPath project, builtUpPath, (err, foundFolder)=>
+				ProjectLocator.findElementByPath project: project, path: builtUpPath, (err, foundFolder)=>
 					if !foundFolder?
 						logger.log path:path, project_id:project._id, folderName:folderName, "making folder from mkdirp"
-						self.addFolder project_id, parentFolder_id, folderName, (err, newFolder, parentFolder_id)->
+						self.addFolder.withoutLock project_id, parentFolder_id, folderName, (err, newFolder, parentFolder_id)->
 							return callback(err) if err?
 							newFolder.parentFolder_id = parentFolder_id
 							previousFolders.push newFolder
@@ -86,8 +103,8 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 					!folder.filterOut
 				callback null, folders, lastFolder
 
-	moveEntity: (project_id, entity_id, destFolderId, entityType, callback = (error) ->) ->
-		ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (err, project) ->
+	moveEntity: wrapWithLock (project_id, entity_id, destFolderId, entityType, callback = (error) ->) ->
+		ProjectGetter.getProjectWithoutLock project_id, {rootFolder:true, name:true}, (err, project) ->
 			return callback(err) if err?
 			ProjectLocator.findElement {project, element_id: entity_id, type: entityType}, (err, entity, entityPath)->
 				return callback(err) if err?
@@ -106,8 +123,8 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 									changes = {oldDocs, newDocs, oldFiles, newFiles}
 									callback null, project.name, startPath, endPath, entity.rev, changes, callback
 
-	deleteEntity: (project_id, entity_id, entityType, callback) ->
-		ProjectGetter.getProject project_id, {name:true, rootFolder:true}, (error, project) ->
+	deleteEntity: wrapWithLock (project_id, entity_id, entityType, callback) ->
+		ProjectGetter.getProjectWithoutLock project_id, {name:true, rootFolder:true}, (error, project) ->
 			return callback(error) if error?
 			ProjectLocator.findElement {project: project, element_id: entity_id, type: entityType}, (error, entity, path) ->
 				return callback(error) if error?
@@ -115,8 +132,8 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 					return callback(error) if error?
 					callback null, entity, path, project
 
-	renameEntity: (project_id, entity_id, entityType, newName, callback) ->
-		ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (error, project)=>
+	renameEntity: wrapWithLock (project_id, entity_id, entityType, newName, callback) ->
+		ProjectGetter.getProjectWithoutLock project_id, {rootFolder:true, name:true}, (error, project)=>
 			return callback(error) if error?
 			ProjectEntityHandler.getAllEntitiesFromProject project, (error, oldDocs, oldFiles) =>
 				return callback(error) if error?
@@ -138,8 +155,8 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 								changes = {oldDocs, newDocs, oldFiles, newFiles}
 								callback null, project.name, startPath, endPath, entity.rev, changes, callback
 
-	addFolder: (project_id, parentFolder_id, folderName, callback) ->
-		ProjectGetter.getProject project_id, {rootFolder:true, name:true}, (err, project) ->
+	addFolder: wrapWithLock (project_id, parentFolder_id, folderName, callback) ->
+		ProjectGetter.getProjectWithoutLock project_id, {rootFolder:true, name:true}, (err, project) ->
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add folder"
 				return callback(err)

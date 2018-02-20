@@ -53,7 +53,7 @@ describe 'ProjectEntityUpdateHandler', ->
 			'../FileStore/FileStoreHandler':@FileStoreHandler
 			"../../infrastructure/LockManager":@LockManager =
 				runWithLock:
-					sinon.spy((key, runner, callback) -> runner(callback))
+					sinon.spy((namespace, id, runner, callback) -> runner(callback))
 			'../../models/Project': Project:@ProjectModel = {}
 			"./ProjectGetter": @ProjectGetter = {}
 			'./ProjectLocator': @ProjectLocator = {}
@@ -642,7 +642,7 @@ describe 'ProjectEntityUpdateHandler', ->
 
 			it 'finds the entity', ->
 				@ProjectLocator.findElementByPath
-					.calledWith(project_id, @path)
+					.calledWith({project_id, @path})
 					.should.equal true
 
 			it 'deletes the entity', ->
