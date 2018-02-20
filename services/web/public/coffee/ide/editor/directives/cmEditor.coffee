@@ -17,8 +17,9 @@ define [
             attachToCM(sharejsDoc)
 
         attachToCM = (sharejsDoc) ->
-          cm.setValue(sharejsDoc.getSnapshot())
-          sharejsDoc.attachToCM(cm)
+          setTimeout () ->
+            Frontend.richText.openDoc(cm, sharejsDoc.getSnapshot())
+            sharejsDoc.attachToCM(cm)
 
         detachFromCM = (sharejsDoc) ->
           sharejsDoc.detachFromCM()
