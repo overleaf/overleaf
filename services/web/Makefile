@@ -159,6 +159,7 @@ clean_frontend:
 
 clean_tests:
 	rm -rf test/unit/js
+	rm -rf test/unit_frontend/js
 	rm -rf test/acceptance/js
 
 clean_modules:
