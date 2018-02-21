@@ -3,18 +3,23 @@ expect = require("chai").expect
 _ = require 'underscore'
 
 MockFileStoreApi = require './helpers/MockFileStoreApi'
-MockURLSource	= require './helpers/MockURLSource'
 request = require "./helpers/request"
 User = require "./helpers/User"
 
-MockURLSource.app.get "/foo", (req, res, next) =>
-	res.send('foo foo foo')
-MockURLSource.app.get "/bar", (req, res, next) =>
-	res.send('bar bar bar')
+
+express = require("express")
+LinkedUrlProxy = express()
+LinkedUrlProxy.get "/", (req, res, next) =>
+	if req.query.url == 'http://example.com/foo'
+		res.send('foo foo foo')
+	else if req.query.url == 'http://example.com/bar'
+		res.send('bar bar bar')
+	else
+		res.sendStatus(404)
 
 describe "LinkedFiles", ->
 	before (done) ->
-		MockURLSource.run (error) =>
+		LinkedUrlProxy.listen 6543, (error) =>
 			return done(error) if error?
 			@owner = new User() 
 			@owner.login done
@@ -36,7 +41,7 @@ describe "LinkedFiles", ->
 				json:
 					provider: 'url'
 					data: {
-						url: "http://localhost:6543/foo"
+						url: 'http://example.com/foo'
 					}
 					parent_folder_id: @root_folder_id
 					name: 'url-test-file-1'
@@ -48,7 +53,7 @@ describe "LinkedFiles", ->
 					file = project.rootFolder[0].fileRefs[0]
 					expect(file.linkedFileData).to.deep.equal({
 						provider: 'url'
-						url: "http://localhost:6543/foo"
+						url: 'http://example.com/foo'
 					})
 					@owner.request.get "/project/#{@project_id}/file/#{file._id}", (error, response, body) ->
 						throw error if error?
@@ -62,7 +67,7 @@ describe "LinkedFiles", ->
 				json:
 					provider: 'url'
 					data: {
-						url: "http://localhost:6543/foo"
+						url: 'http://example.com/foo'
 					}
 					parent_folder_id: @root_folder_id
 					name: 'url-test-file-2'
@@ -74,7 +79,7 @@ describe "LinkedFiles", ->
 					json:
 						provider: 'url'
 						data: {
-							url: "http://localhost:6543/bar"
+							url: 'http://example.com/bar'
 						}
 						parent_folder_id: @root_folder_id
 						name: 'url-test-file-2'
@@ -86,7 +91,7 @@ describe "LinkedFiles", ->
 						file = project.rootFolder[0].fileRefs[1]
 						expect(file.linkedFileData).to.deep.equal({
 							provider: 'url'
-							url: "http://localhost:6543/bar"
+							url: 'http://example.com/bar'
 						})
 						@owner.request.get "/project/#{@project_id}/file/#{file._id}", (error, response, body) ->
 							throw error if error?
@@ -100,7 +105,7 @@ describe "LinkedFiles", ->
 				json:
 					provider: 'url'
 					data: {
-						url: "http://localhost:6543/does-not-exist"
+						url: 'http://example.com/does-not-exist'
 					}
 					parent_folder_id: @root_folder_id
 					name: 'url-test-file-3'
@@ -154,7 +159,7 @@ describe "LinkedFiles", ->
 				json:
 					provider: 'url'
 					data: {
-						url: "http://localhost:6543/foo"
+						url: 'example.com/foo'
 					}
 					parent_folder_id: @root_folder_id
 					name: 'url-test-file-6'
@@ -167,7 +172,7 @@ describe "LinkedFiles", ->
 						file.name == 'url-test-file-6'
 					expect(file.linkedFileData).to.deep.equal({
 						provider: 'url'
-						url: "http://localhost:6543/foo"
+						url: 'http://example.com/foo'
 					})
 					@owner.request.get "/project/#{@project_id}/file/#{file._id}", (error, response, body) ->
 						throw error if error?

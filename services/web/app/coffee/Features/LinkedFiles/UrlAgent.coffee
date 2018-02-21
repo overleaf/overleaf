@@ -2,6 +2,7 @@ request = require 'request'
 FileWriter = require('../../infrastructure/FileWriter')
 _ = require "underscore"
 urlValidator = require 'valid-url'
+Settings = require 'settings-sharelatex'
 
 UrlFetchFailedError = (message) ->
 	error = new Error(message)
@@ -17,27 +18,21 @@ InvalidUrlError = (message) ->
 	return error
 InvalidUrlError.prototype.__proto__ = Error.prototype
 
-
 module.exports = UrlAgent = {
 	UrlFetchFailedError: UrlFetchFailedError
 	InvalidUrlError: InvalidUrlError
 
 	sanitizeData: (data) ->
 		return {
-			url: data.url
+			url: @._prependHttpIfNeeded(data.url)
 		}
 
-	_prependHttpIfNeeded: (url) ->
-		if !url.match('://')
-			url = 'http://' + url
-		return url
-
 	writeIncomingFileToDisk: (project_id, data, current_user_id, callback = (error, fsPath) ->) ->
-		# TODO: Proxy through external API
 		callback = _.once(callback)
-		url = @._prependHttpIfNeeded(data.url)
+		url = data.url
 		if !urlValidator.isWebUri(url)
 			return callback(new InvalidUrlError())
+		url = @._wrapWithProxy(url)
 		readStream = request.get(url)
 		readStream.on "error", callback
 		readStream.on "response", (response) ->
@@ -59,4 +54,15 @@ module.exports = UrlAgent = {
 			)
 		else
 			next(error)
+
+	_prependHttpIfNeeded: (url) ->
+		if !url.match('://')
+			url = 'http://' + url
+		return url
+
+	_wrapWithProxy: (url) ->
+		# TODO: Consider what to do for Community and Enterprise edition?
+		if !Settings.apis?.linkedUrlProxy?.url?
+			throw new Error('no linked url proxy configured')
+		return "#{Settings.apis.linkedUrlProxy.url}?url=#{encodeURIComponent(url)}"
 }
