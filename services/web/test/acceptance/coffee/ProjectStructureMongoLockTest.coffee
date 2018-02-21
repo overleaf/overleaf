@@ -31,8 +31,9 @@ describe "ProjectStructureMongoLock", ->
 				ProjectCreationHandler.createBlankProject user._id, 'locked-project', (err, project) =>
 					throw err if err?
 					@locked_project = project
-					@lock_key = "lock:web:#{ProjectEntityMongoUpdateHandler.LOCK_NAMESPACE}:#{project._id}"
-					LockManager._getLock @lock_key, done
+					namespace = ProjectEntityMongoUpdateHandler.LOCK_NAMESPACE
+					@lock_key = "lock:web:#{namespace}:#{project._id}"
+					LockManager._getLock @lock_key, namespace, done
 
 		after (done) ->
 			LockManager._releaseLock @lock_key, done

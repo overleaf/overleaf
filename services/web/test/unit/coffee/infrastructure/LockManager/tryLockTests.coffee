@@ -16,13 +16,13 @@ describe 'LockManager - trying the lock', ->
 			"settings-sharelatex":{redis:{}}
 			"metrics-sharelatex": inc:->
 		@callback = sinon.stub()
-		@doc_id = "doc-id-123"
-		@key = "lock:web:{#{@doc_id}}"
+		@key = "lock:web:lockName:project-id}"
+		@namespace = "lockName"
 
 	describe "when the lock is not set", ->
 		beforeEach ->
 			@set.callsArgWith(5, null, "OK")
-			@LockManager._tryLock @key, @callback
+			@LockManager._tryLock @key, @namespace, @callback
 
 		it "should set the lock key with an expiry if it is not set", ->
 			@set.calledWith(@key, "locked", "EX", 30, "NX")
@@ -34,7 +34,7 @@ describe 'LockManager - trying the lock', ->
 	describe "when the lock is already set", ->
 		beforeEach ->
 			@set.callsArgWith(5, null, null)
-			@LockManager._tryLock @key, @callback
+			@LockManager._tryLock @key, @namespace, @callback
 
 		it "should return the callback with false", ->
 			@callback.calledWith(null, false).should.equal true
