@@ -45,7 +45,9 @@ module.exports = {
 			use: [{
 				loader: 'babel-loader',
 				options: {
-					presets: ['env'],
+					presets: [
+						['env', { modules: false }]
+					],
 					// Configure babel-loader to cache compiled output so that subsequent
 					// compile runs are much faster
 					cacheDirectory: true
