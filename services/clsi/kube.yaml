@@ -6,9 +6,9 @@ metadata:
 spec:
   type: LoadBalancer
   ports:
-  - port: 3009
+  - port: 80
     protocol: TCP
-    targetPort: 3009
+    targetPort: 80
   selector:
     run: clsi
 ---
@@ -26,12 +26,12 @@ spec:
     spec:
       containers:
       - name: clsi
-        image: gcr.io/henry-terraform-admin/clsi:6e0c79688030117a9c27d0fc01d1271e6ac3dd3e
+        image: gcr.io/henry-terraform-admin/clsi
         imagePullPolicy: Always
         readinessProbe:
           httpGet:
             path: status
-            port: 3009
+            port: 80
           periodSeconds: 5
           initialDelaySeconds: 0
           failureThreshold: 3

@@ -1,7 +1,7 @@
 # This file was auto-generated, do not edit it directly.
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
-# Version: 1.0.3
+# Version: 1.1.0
 
 BUILD_NUMBER ?= local
 BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
@@ -28,10 +28,5 @@ test_acceptance: test_clean # clear the database before each acceptance test run
 
 test_clean:
 	$(DOCKER_COMPOSE) down -t 0
-build:
-	docker build --pull --tag quay.io/sharelatex/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) .
-
-publish:
-	docker push quay.io/sharelatex/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 
 .PHONY: clean test test_unit test_acceptance test_clean build publish

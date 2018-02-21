@@ -1,7 +1,7 @@
 # This file was auto-generated, do not edit it directly.
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
-# Version: 1.0.3
+# Version: 1.1.0
 
 version: "2"
 
@@ -14,12 +14,12 @@ services:
     entrypoint: npm run test:unit
 
   test_acceptance:
-    build: .
+    image: node:6.13.0
     volumes:
       - .:/app
     working_dir: /app
     extends:
-      file: docker-compose-overrides.yml
+      file: docker-compose-config.yml
       service: dev
     environment:
       REDIS_HOST: redis
