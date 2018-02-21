@@ -62,7 +62,7 @@ module.exports = LockManager =
 			LockManager._tryLock key, namespace, (error, gotLock) ->
 				return callback(error) if error?
 				if gotLock
-					metrics.inc "lock.#{namespace}.get.success.tries", attempts
+					metrics.gauge "lock.#{namespace}.get.success.tries", attempts
 					callback(null)
 				else
 					setTimeout attempt, LockManager.LOCK_TEST_INTERVAL

@@ -13,7 +13,9 @@ describe 'LockManager - getting the lock', ->
 				client: ()->
 					auth:->
 			"settings-sharelatex":{redis:{}}
-			"metrics-sharelatex": inc:->
+			"metrics-sharelatex":
+				inc:->
+				gauge:->
 
 		@callback = sinon.stub()
 		@key = "lock:web:lockName:project-id}"
