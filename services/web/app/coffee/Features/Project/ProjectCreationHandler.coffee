@@ -12,6 +12,7 @@ User = require('../../models/User').User
 fs = require('fs')
 Path = require "path"
 _ = require "underscore"
+AnalyticsManger = require("../Analytics/AnalyticsManager")
 
 module.exports = ProjectCreationHandler =
 
@@ -46,6 +47,9 @@ module.exports = ProjectCreationHandler =
 			project.spellCheckLanguage = user.ace.spellCheckLanguage
 			project.save (err)->
 				return callback(err) if err?
+				AnalyticsManger.recordEvent(
+					owner_id, 'project-created', { projectId: project._id }
+				)
 				callback err, project
 
 	createBasicProject :  (owner_id, projectName, callback = (error, project) ->)->

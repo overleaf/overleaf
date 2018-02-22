@@ -52,6 +52,8 @@ describe 'ProjectCreationHandler', ->
 
 		@Settings = apis: { project_history: {} }
 
+		@AnalyticsManger = recordEvent: sinon.stub()
+
 		@handler = SandboxedModule.require modulePath, requires:
 			'../../models/User': User:@User
 			'../../models/Project':{Project:@ProjectModel}
@@ -60,6 +62,7 @@ describe 'ProjectCreationHandler', ->
 			'./ProjectEntityUpdateHandler':@ProjectEntityUpdateHandler
 			"./ProjectDetailsHandler":@ProjectDetailsHandler
 			"settings-sharelatex": @Settings
+			"../Analytics/AnalyticsManager": @AnalyticsManger
 			'logger-sharelatex': {log:->}
 			"metrics-sharelatex": {
 				inc: ()->,
