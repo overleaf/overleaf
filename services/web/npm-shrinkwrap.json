@@ -5996,12 +5996,6 @@
       "resolved": "https://registry.npmjs.org/karma-requirejs/-/karma-requirejs-1.1.0.tgz",
       "dev": true
     },
-    "karma-tap-reporter": {
-      "version": "0.0.6",
-      "from": "karma-tap-reporter@latest",
-      "resolved": "https://registry.npmjs.org/karma-tap-reporter/-/karma-tap-reporter-0.0.6.tgz",
-      "dev": true
-    },
     "keygrip": {
       "version": "1.0.2",
       "from": "keygrip@>=1.0.2 <1.1.0",

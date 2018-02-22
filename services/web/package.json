@@ -125,7 +125,6 @@
     "karma-mocha": "^1.3.0",
     "karma-mocha-reporter": "^2.2.5",
     "karma-requirejs": "^1.1.0",
-    "karma-tap-reporter": "0.0.6",
     "mkdirp": "https://registry.npmjs.org/mkdirp/-/mkdirp-0.5.1.tgz",
     "nodemon": "^1.14.3",
     "requirejs": "^2.1.22",
