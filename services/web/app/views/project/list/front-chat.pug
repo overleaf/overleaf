@@ -1,4 +1,4 @@
-- if (settings.overleaf && settings.front && settings.front.chat_room_id != null)
+- if (settings.overleaf && settings.overleaf.front_chat_widget_room_id != null)
 	script.
-		window.FCSP = '#{settings.front.chat_room_id}';
+		window.FCSP = '#{settings.overleaf.front_chat_widget_room_id}';
 	script(src="https://chat-assets.frontapp.com/v1/chat.bundle.js")
