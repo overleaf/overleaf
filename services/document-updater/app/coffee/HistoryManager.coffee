@@ -5,9 +5,6 @@ HistoryRedisManager = require "./HistoryRedisManager"
 
 module.exports = HistoryManager =
 	flushDocChangesAsync: (project_id, doc_id) ->
-		HistoryManager._flushDocChangesAsync project_id, doc_id
-
-	_flushDocChangesAsync: (project_id, doc_id) ->
 		if !Settings.apis?.trackchanges?
 			logger.warn { doc_id }, "track changes API is not configured, so not flushing"
 			return
@@ -51,7 +48,7 @@ module.exports = HistoryManager =
 				# Do this in the background since it uses HTTP and so may be too
 				# slow to wait for when processing a doc update.
 				logger.log { doc_ops_length, doc_id, project_id }, "flushing track changes api"
-				HistoryManager._flushDocChangesAsync project_id, doc_id
+				HistoryManager.flushDocChangesAsync project_id, doc_id
 			callback()
 
 	shouldFlushHistoryOps: (length, ops_length, threshold) ->
