@@ -4,9 +4,11 @@ define ['ide/editor/directives/cmEditor'], () ->
 
     beforeEach () ->
       @richTextInit = sinon.stub()
+      @richTextOpenDoc = sinon.stub()
       window.Frontend = {
         richText: {
-          init: @richTextInit
+          init: @richTextInit,
+          openDoc: @richTextOpenDoc
         }
       }
 
@@ -17,8 +19,6 @@ define ['ide/editor/directives/cmEditor'], () ->
 
     it 'attaches to CM', () ->
       inject ($compile, $rootScope) ->
-        setValue = sinon.stub()
-        @richTextInit.returns({ setValue: setValue })
         getSnapshot = sinon.stub()
         detachFromCM = sinon.stub()
         attachToCM = sinon.stub()
@@ -30,10 +30,11 @@ define ['ide/editor/directives/cmEditor'], () ->
 
         $compile('<div cm-editor sharejs-doc="sharejsDoc"></div>')($rootScope)
         $rootScope.$digest()
+        $rootScope.$digest()
 
-        expect(getSnapshot).to.have.been.called
-        expect(setValue).to.have.been.called
         expect(detachFromCM).to.have.been.called
+        expect(getSnapshot).to.have.been.called
+        expect(@richTextOpenDoc).to.have.been.called
         expect(attachToCM).to.have.been.called
 
     it 'detaches from CM when destroyed', () ->
