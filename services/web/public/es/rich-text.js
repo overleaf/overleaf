@@ -1,9 +1,9 @@
 import CodeMirror, { Doc } from 'codemirror'
 
-import LatexParser from './ide/editor/codemirror/parser'
+import LatexMode from './ide/editor/codemirror/LatexMode'
 
 export function init (rootEl) {
-  CodeMirror.defineMode('latex', () => new LatexParser())
+  CodeMirror.defineMode('latex', () => new LatexMode())
   CodeMirror.defineMIME('application/x-tex', 'latex')
   CodeMirror.defineMIME('application/x-latex', 'latex')
 
