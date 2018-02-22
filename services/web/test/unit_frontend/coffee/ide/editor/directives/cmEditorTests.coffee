@@ -18,7 +18,7 @@ define ['ide/editor/directives/cmEditor'], () ->
         expect(@richTextInit).to.have.been.called
 
     it 'attaches to CM', () ->
-      inject ($compile, $rootScope) ->
+      inject ($compile, $rootScope, $browser) ->
         getSnapshot = sinon.stub()
         detachFromCM = sinon.stub()
         attachToCM = sinon.stub()
@@ -30,7 +30,9 @@ define ['ide/editor/directives/cmEditor'], () ->
 
         $compile('<div cm-editor sharejs-doc="sharejsDoc"></div>')($rootScope)
         $rootScope.$digest()
-        $rootScope.$digest()
+        # Trigger $applyAsync to evaluate the expression, normally done in the
+        # next tick
+        $browser.defer.flush()
 
         expect(detachFromCM).to.have.been.called
         expect(getSnapshot).to.have.been.called
