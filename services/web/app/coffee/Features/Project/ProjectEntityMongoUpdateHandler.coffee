@@ -56,6 +56,8 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 				conditions = _id:project._id
 				inc = {}
 				inc["#{path.mongo}.rev"] = 1
+				 # we need to increment the project version number for any structure change
+				inc['version'] = 1
 				set = {}
 				set["#{path.mongo}.created"] = new Date()
 				update =
@@ -144,9 +146,11 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 						return callback(error) if error?
 						endPath = path.join(path.dirname(entPath.fileSystem), newName)
 						conditions = {_id:project_id}
-						update = "$set":{}
+						update = "$set":{}, "$inc":{}
 						namePath = entPath.mongo+".name"
 						update["$set"][namePath] = newName
+						# we need to increment the project version number for any structure change
+						update["$inc"]["version"] = 1
 						Project.findOneAndUpdate conditions, update, { "new": true}, (error, newProject) ->
 							return callback(error) if error?
 							ProjectEntityHandler.getAllEntitiesFromProject newProject, (error, newDocs, newFiles) =>
@@ -174,9 +178,11 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 		update = {"$unset":{}}
 		update["$unset"][path] = 1
 		model.update conditions, update, {}, (err)->
-			pullUpdate = {"$pull":{}}
+			pullUpdate = {"$pull":{}, "$inc":{}}
 			nonArrayPath = path.slice(0, path.lastIndexOf("."))
 			pullUpdate["$pull"][nonArrayPath] = null
+			# we need to increment the project version number for any structure change
+			pullUpdate["$inc"]["version"] = 1
 			model.findOneAndUpdate conditions, pullUpdate, {"new": true}, callback
 
 	_countElements: (project)->
@@ -245,8 +251,10 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 				element._id = require('mongoose').Types.ObjectId(id)
 				conditions = _id:project._id
 				mongopath = "#{path.mongo}.#{type}"
-				update = "$push":{}
+				update = "$push":{}, "$inc":{}
 				update["$push"][mongopath] = element
+				# we need to increment the project version number for any structure change
+				update["$inc"]["version"] = 1# increment project version number
 				logger.log project_id: project._id, element_id: element._id, fileType: type, folder_id: folder_id, mongopath:mongopath, "adding element to project"
 				Project.findOneAndUpdate conditions, update, {"new": true}, (err, project)->
 					if err?
