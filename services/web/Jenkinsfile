@@ -63,7 +63,14 @@ pipeline {
         }
       }
       steps {
-        sh 'make --no-print-directory test_unit test_frontend MOCHA_ARGS="--reporter tap"'
+        sh 'make --no-print-directory test_unit MOCHA_ARGS="--reporter tap"'
+      }
+    }
+
+    stage('Frontend Unit Test') {
+      steps {
+        // Spawns its own docker containers
+        sh 'make --no-print-directory test_frontend'
       }
     }
     
