@@ -1,3 +1,5 @@
+const path = require('path')
+
 module.exports = function (config) {
   config.set({
     customLaunchers: {
@@ -21,14 +23,38 @@ module.exports = function (config) {
       // Include source & test files, but don't "include" them as requirejs
       // handles this for us
       { pattern: 'public/js/**/*.js', included: false },
-      { pattern: 'test/unit_frontend/js/**/*.js', included: false }
+      { pattern: 'test/unit_frontend/js/**/*.js', included: false },
+      // Include ES test files
+      'test/unit_frontend/es/**/*.js'
     ],
+    preprocessors: {
+      // Run ES test files through webpack (which will then include source
+      // files in bundle)
+      'test/unit_frontend/es/**/*.js': ['webpack']
+    },
     frameworks: ['requirejs', 'mocha', 'chai-sinon'],
+    reporters: ['tap'],
+    // Configure webpack in the tests
+    webpack: {
+      resolve: {
+        alias: {
+          // Alias Src in import pathnames to public/es
+          // Cuts down on the amount of ../../ etc
+          Src: path.join(__dirname, 'public/es/')
+        }
+      }
+    },
+    // Configure the webpack dev server used to serve test files
+    webpackMiddleware: {
+      // Disable noisy CLI output
+      stats: 'errors-only'
+    },
     plugins: [
+      require('karma-chrome-launcher'),
       require('karma-requirejs'),
       require('karma-mocha'),
       require('karma-chai-sinon'),
-      require('karma-chrome-launcher'),
+      require('karma-webpack'),
       require('karma-mocha-reporter')
     ],
     reporters: ['mocha']
