@@ -11,7 +11,9 @@ describe "DocumentManager", ->
 		@DocumentManager = SandboxedModule.require modulePath, requires:
 			"./RedisManager": @RedisManager = {}
 			"./PersistenceManager": @PersistenceManager = {}
-			"./HistoryManager": @HistoryManager = {}
+			"./HistoryManager": @HistoryManager =
+				flushDocChangesAsync: sinon.stub()
+				flushProjectChangesAsync: sinon.stub()
 			"logger-sharelatex": @logger = {log: sinon.stub()}
 			"./DocOpsManager": @DocOpsManager = {}
 			"./Metrics": @Metrics =
@@ -36,7 +38,6 @@ describe "DocumentManager", ->
 			beforeEach ->
 				@RedisManager.removeDocFromMemory = sinon.stub().callsArg(2)
 				@DocumentManager.flushDocIfLoaded = sinon.stub().callsArgWith(2)
-				@HistoryManager.flushChangesAsync = sinon.stub()
 				@DocumentManager.flushAndDeleteDoc @project_id, @doc_id, @callback
 
 			it "should flush the doc", ->
@@ -56,8 +57,8 @@ describe "DocumentManager", ->
 				@Metrics.Timer::done.called.should.equal true
 
 			it "should flush to the history api", ->
-				@HistoryManager.flushChangesAsync
-					.calledWith(@project_id, @doc_id)
+				@HistoryManager.flushDocChangesAsync
+					.calledWithExactly(@project_id, @doc_id)
 					.should.equal true
 
 	describe "flushDocIfLoaded", ->
@@ -243,6 +244,10 @@ describe "DocumentManager", ->
 						.calledWith(@project_id, @doc_id)
 						.should.equal true
 
+				it "should not flush the project history", ->
+					@HistoryManager.flushProjectChangesAsync
+						.called.should.equal false
+
 				it "should call the callback", ->
 					@callback.calledWith(null).should.equal true
 
@@ -257,6 +262,11 @@ describe "DocumentManager", ->
 				it "should flush and delete the doc from the doc updater", ->
 					@DocumentManager.flushAndDeleteDoc
 						.calledWith(@project_id, @doc_id)
+						.should.equal true
+
+				it "should not flush the project history", ->
+					@HistoryManager.flushProjectChangesAsync
+						.calledWithExactly(@project_id)
 						.should.equal true
 
 			describe "without new lines", ->

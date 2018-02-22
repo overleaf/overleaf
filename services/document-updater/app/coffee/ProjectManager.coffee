@@ -59,6 +59,12 @@ module.exports = ProjectManager =
 
 			logger.log project_id: project_id, doc_ids: doc_ids, "deleting docs"
 			async.series jobs, () ->
+				# Flush in the background since it requires a htpt request. If we
+				# flushed and deleted only some docs successfully then we should still
+				# flush project history. If no docs succeeded then there is still no
+				# harm flushing project history. So do this before checking errors.
+				HistoryManager.flushProjectChangesAsync project_id
+
 				if errors.length > 0
 					callback new Error("Errors deleting docs. See log for details")
 				else

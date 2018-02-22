@@ -1,4 +1,5 @@
 DocumentManager = require "./DocumentManager"
+HistoryManager = require "./HistoryManager"
 ProjectManager = require "./ProjectManager"
 Errors = require "./Errors"
 logger = require "logger-sharelatex"
@@ -106,6 +107,13 @@ module.exports = HttpController =
 		timer = new Metrics.Timer("http.deleteDoc")
 		DocumentManager.flushAndDeleteDocWithLock project_id, doc_id, (error) ->
 			timer.done()
+			# Flush in the background since it requires a http request. We
+			# want to flush project history if the previous call only failed
+			# to delete the doc from Redis. There is no harm in flushing
+			# project history if the previous call failed to flush at all. So
+			# do this before checking errors.
+			HistoryManager.flushProjectChangesAsync project_id
+
 			return next(error) if error?
 			logger.log project_id: project_id, doc_id: doc_id, "deleted doc via http"
 			res.send 204 # No Content

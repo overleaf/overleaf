@@ -4,10 +4,8 @@ logger = require "logger-sharelatex"
 HistoryRedisManager = require "./HistoryRedisManager"
 
 module.exports = HistoryManager =
-	flushChangesAsync: (project_id, doc_id) ->
+	flushDocChangesAsync: (project_id, doc_id) ->
 		HistoryManager._flushDocChangesAsync project_id, doc_id
-		if Settings.apis?.project_history?.enabled
-			HistoryManager.flushProjectChangesAsync project_id
 
 	_flushDocChangesAsync: (project_id, doc_id) ->
 		if !Settings.apis?.trackchanges?
@@ -23,7 +21,7 @@ module.exports = HistoryManager =
 				logger.error { doc_id, project_id }, "track changes api returned a failure status code: #{res.statusCode}"
 
 	flushProjectChangesAsync: (project_id) ->
-		return if !Settings.apis?.project_history?
+		return if !Settings.apis?.project_history?.enabled
 
 		url = "#{Settings.apis.project_history.url}/project/#{project_id}/flush"
 		logger.log { project_id, url }, "flushing doc in project history api"

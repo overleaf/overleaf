@@ -21,23 +21,6 @@ describe "HistoryManager", ->
 		@doc_id = "mock-doc-id"
 		@callback = sinon.stub()
 
-	describe "flushChangesAsync", ->
-		beforeEach ->
-			@HistoryManager._flushDocChangesAsync = sinon.stub()
-			@HistoryManager.flushProjectChangesAsync = sinon.stub()
-
-			@HistoryManager.flushChangesAsync(@project_id, @doc_id)
-
-		it "flushes doc changes", ->
-			@HistoryManager._flushDocChangesAsync
-				.calledWith(@project_id, @doc_id)
-				.should.equal true
-
-		it "flushes project changes", ->
-			@HistoryManager.flushProjectChangesAsync
-				.calledWith(@project_id)
-				.should.equal true
-
 	describe "_flushDocChangesAsync", ->
 		beforeEach ->
 			@request.post = sinon.stub().callsArgWith(1, null, statusCode: 204)
