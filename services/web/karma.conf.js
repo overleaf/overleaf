@@ -29,8 +29,8 @@ module.exports = function (config) {
       require('karma-mocha'),
       require('karma-chai-sinon'),
       require('karma-chrome-launcher'),
-      require('karma-tap-reporter')
+      require('karma-mocha-reporter')
     ],
-    reporters: ['tap']
+    reporters: ['mocha']
   });
 }
