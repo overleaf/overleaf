@@ -36,6 +36,8 @@ window.sharejs.extendDoc 'attach_cm', (editor, keepEditorContents) ->
     throw new Error 'Only text documents can be attached to CodeMirror2'
 
   sharedoc = @
+  editorDoc = editor.getDoc()
+
   check = ->
     window.setTimeout ->
         editorText = editor.getValue()
@@ -64,11 +66,10 @@ window.sharejs.extendDoc 'attach_cm', (editor, keepEditorContents) ->
   # Listen for edits in CodeMirror.
   editorListener = (ed, change) ->
     return if suppress
-    applyCMToShareJS editor, change, sharedoc
-
+    applyCMToShareJS editorDoc, change, sharedoc
     check()
 
-  editor.on 'change', editorListener
+  editorDoc.on 'change', editorListener
 
   @on 'insert', (pos, text) ->
     suppress = true
@@ -87,7 +88,7 @@ window.sharejs.extendDoc 'attach_cm', (editor, keepEditorContents) ->
 
   @detach_cm = ->
     # TODO: can we remove the insert and delete event callbacks?
-    editor.off 'onChange', editorListener
+    editorDoc.off 'change', editorListener
     delete @detach_cm
 
   return
