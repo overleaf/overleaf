@@ -10,7 +10,8 @@ describe "ProjectManager - flushAndDeleteProject", ->
 			"./RedisManager": @RedisManager = {}
 			"./DocumentManager": @DocumentManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
-			"./HistoryManager": @HistoryManager = {}
+			"./HistoryManager": @HistoryManager =
+				flushProjectChangesAsync: sinon.stub()
 			"./Metrics": @Metrics =
 				Timer: class Timer
 					done: sinon.stub()
@@ -30,12 +31,17 @@ describe "ProjectManager - flushAndDeleteProject", ->
 			@RedisManager.getDocIdsInProject
 				.calledWith(@project_id)
 				.should.equal true
-		
+
 		it "should delete each doc in the project", ->
 			for doc_id in @doc_ids
 				@DocumentManager.flushAndDeleteDocWithLock
 					.calledWith(@project_id, doc_id)
 					.should.equal true
+
+		it "should flush project history", ->
+			@HistoryManager.flushProjectChangesAsync
+				.calledWithExactly(@project_id)
+				.should.equal true
 
 		it "should call the callback without error", ->
 			@callback.calledWith(null).should.equal true
@@ -55,12 +61,17 @@ describe "ProjectManager - flushAndDeleteProject", ->
 			@ProjectManager.flushAndDeleteProjectWithLocks @project_id, (error) =>
 				@callback(error)
 				done()
-			
+
 		it "should still flush each doc in the project", ->
 			for doc_id in @doc_ids
 				@DocumentManager.flushAndDeleteDocWithLock
 					.calledWith(@project_id, doc_id)
 					.should.equal true
+
+		it "should still flush project history", ->
+			@HistoryManager.flushProjectChangesAsync
+				.calledWithExactly(@project_id)
+				.should.equal true
 
 		it "should record the error", ->
 			@logger.error
@@ -72,5 +83,3 @@ describe "ProjectManager - flushAndDeleteProject", ->
 
 		it "should time the execution", ->
 			@Metrics.Timer::done.called.should.equal true
-
-

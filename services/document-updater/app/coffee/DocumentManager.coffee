@@ -89,6 +89,10 @@ module.exports = DocumentManager =
 							callback null
 					else
 						DocumentManager.flushAndDeleteDoc project_id, doc_id, (error) ->
+							# There is no harm in flushing project history if the previous
+							# call failed and sometimes it is required
+							HistoryManager.flushProjectChangesAsync project_id
+
 							return callback(error) if error?
 							callback null
 
@@ -118,7 +122,7 @@ module.exports = DocumentManager =
 			return callback(error) if error?
 
 			# Flush in the background since it requires a http request
-			HistoryManager.flushChangesAsync project_id, doc_id
+			HistoryManager.flushDocChangesAsync project_id, doc_id
 
 			RedisManager.removeDocFromMemory project_id, doc_id, (error) ->
 				return callback(error) if error?

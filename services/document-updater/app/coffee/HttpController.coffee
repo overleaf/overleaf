@@ -1,4 +1,5 @@
 DocumentManager = require "./DocumentManager"
+HistoryManager = require "./HistoryManager"
 ProjectManager = require "./ProjectManager"
 Errors = require "./Errors"
 logger = require "logger-sharelatex"
@@ -106,6 +107,10 @@ module.exports = HttpController =
 		timer = new Metrics.Timer("http.deleteDoc")
 		DocumentManager.flushAndDeleteDocWithLock project_id, doc_id, (error) ->
 			timer.done()
+			# There is no harm in flushing project history if the previous call
+			# failed and sometimes it is required
+			HistoryManager.flushProjectChangesAsync project_id
+
 			return next(error) if error?
 			logger.log project_id: project_id, doc_id: doc_id, "deleted doc via http"
 			res.send 204 # No Content

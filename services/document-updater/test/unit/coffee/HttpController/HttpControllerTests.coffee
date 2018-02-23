@@ -9,6 +9,8 @@ describe "HttpController", ->
 	beforeEach ->
 		@HttpController = SandboxedModule.require modulePath, requires:
 			"./DocumentManager": @DocumentManager = {}
+			"./HistoryManager": @HistoryManager =
+				flushProjectChangesAsync: sinon.stub()
 			"./ProjectManager": @ProjectManager = {}
 			"logger-sharelatex" : @logger = { log: sinon.stub() }
 			"./Metrics": @Metrics = {}
@@ -275,6 +277,11 @@ describe "HttpController", ->
 					.calledWith(@project_id, @doc_id)
 					.should.equal true
 
+			it "should flush project history", ->
+				@HistoryManager.flushProjectChangesAsync
+					.calledWithExactly(@project_id)
+					.should.equal true
+
 			it "should return a successful No Content response", ->
 				@res.send
 					.calledWith(204)
@@ -292,6 +299,11 @@ describe "HttpController", ->
 			beforeEach ->
 				@DocumentManager.flushAndDeleteDocWithLock = sinon.stub().callsArgWith(2, new Error("oops"))
 				@HttpController.flushAndDeleteDoc(@req, @res, @next)
+
+			it "should flush project history", ->
+				@HistoryManager.flushProjectChangesAsync
+					.calledWithExactly(@project_id)
+					.should.equal true
 
 			it "should call next with the error", ->
 				@next

@@ -21,28 +21,11 @@ describe "HistoryManager", ->
 		@doc_id = "mock-doc-id"
 		@callback = sinon.stub()
 
-	describe "flushChangesAsync", ->
-		beforeEach ->
-			@HistoryManager._flushDocChangesAsync = sinon.stub()
-			@HistoryManager.flushProjectChangesAsync = sinon.stub()
-
-			@HistoryManager.flushChangesAsync(@project_id, @doc_id)
-
-		it "flushes doc changes", ->
-			@HistoryManager._flushDocChangesAsync
-				.calledWith(@project_id, @doc_id)
-				.should.equal true
-
-		it "flushes project changes", ->
-			@HistoryManager.flushProjectChangesAsync
-				.calledWith(@project_id)
-				.should.equal true
-
-	describe "_flushDocChangesAsync", ->
+	describe "flushDocChangesAsync", ->
 		beforeEach ->
 			@request.post = sinon.stub().callsArgWith(1, null, statusCode: 204)
 
-			@HistoryManager._flushDocChangesAsync @project_id, @doc_id
+			@HistoryManager.flushDocChangesAsync @project_id, @doc_id
 
 		it "should send a request to the track changes api", ->
 			@request.post
@@ -68,7 +51,7 @@ describe "HistoryManager", ->
 
 			@HistoryManager.flushProjectChangesAsync = sinon.stub()
 			@HistoryRedisManager.recordDocHasHistoryOps = sinon.stub().callsArg(3)
-			@HistoryManager._flushDocChangesAsync = sinon.stub()
+			@HistoryManager.flushDocChangesAsync = sinon.stub()
 
 		describe "with no ops", ->
 			beforeEach ->
@@ -83,7 +66,7 @@ describe "HistoryManager", ->
 				@HistoryRedisManager.recordDocHasHistoryOps.called.should.equal false
 
 			it "should not flush doc changes", ->
-				@HistoryManager._flushDocChangesAsync.called.should.equal false
+				@HistoryManager.flushDocChangesAsync.called.should.equal false
 
 			it "should call the callback", ->
 				@callback.called.should.equal true
@@ -108,7 +91,7 @@ describe "HistoryManager", ->
 					.calledWith(@project_id, @doc_id, @ops)
 
 			it "should not flush doc changes", ->
-				@HistoryManager._flushDocChangesAsync.called.should.equal false
+				@HistoryManager.flushDocChangesAsync.called.should.equal false
 
 			it "should call the callback", ->
 				@callback.called.should.equal true
@@ -131,7 +114,7 @@ describe "HistoryManager", ->
 					.calledWith(@project_id, @doc_id, @ops)
 
 			it "should flush doc changes", ->
-				@HistoryManager._flushDocChangesAsync
+				@HistoryManager.flushDocChangesAsync
 					.calledWith(@project_id, @doc_id)
 					.should.equal true
 
@@ -149,7 +132,7 @@ describe "HistoryManager", ->
 				)
 
 			it "should not flush doc changes", ->
-				@HistoryManager._flushDocChangesAsync.called.should.equal false
+				@HistoryManager.flushDocChangesAsync.called.should.equal false
 
 			it "should call the callback with the error", ->
 				@callback.calledWith(@error).should.equal true

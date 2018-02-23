@@ -4,12 +4,7 @@ logger = require "logger-sharelatex"
 HistoryRedisManager = require "./HistoryRedisManager"
 
 module.exports = HistoryManager =
-	flushChangesAsync: (project_id, doc_id) ->
-		HistoryManager._flushDocChangesAsync project_id, doc_id
-		if Settings.apis?.project_history?.enabled
-			HistoryManager.flushProjectChangesAsync project_id
-
-	_flushDocChangesAsync: (project_id, doc_id) ->
+	flushDocChangesAsync: (project_id, doc_id) ->
 		if !Settings.apis?.trackchanges?
 			logger.warn { doc_id }, "track changes API is not configured, so not flushing"
 			return
@@ -23,7 +18,7 @@ module.exports = HistoryManager =
 				logger.error { doc_id, project_id }, "track changes api returned a failure status code: #{res.statusCode}"
 
 	flushProjectChangesAsync: (project_id) ->
-		return if !Settings.apis?.project_history?
+		return if !Settings.apis?.project_history?.enabled
 
 		url = "#{Settings.apis.project_history.url}/project/#{project_id}/flush"
 		logger.log { project_id, url }, "flushing doc in project history api"
@@ -53,7 +48,7 @@ module.exports = HistoryManager =
 				# Do this in the background since it uses HTTP and so may be too
 				# slow to wait for when processing a doc update.
 				logger.log { doc_ops_length, doc_id, project_id }, "flushing track changes api"
-				HistoryManager._flushDocChangesAsync project_id, doc_id
+				HistoryManager.flushDocChangesAsync project_id, doc_id
 			callback()
 
 	shouldFlushHistoryOps: (length, ops_length, threshold) ->

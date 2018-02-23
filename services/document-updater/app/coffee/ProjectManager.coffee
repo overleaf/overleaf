@@ -59,6 +59,10 @@ module.exports = ProjectManager =
 
 			logger.log project_id: project_id, doc_ids: doc_ids, "deleting docs"
 			async.series jobs, () ->
+				# There is no harm in flushing project history if the previous call
+				# failed and sometimes it is required
+				HistoryManager.flushProjectChangesAsync project_id
+
 				if errors.length > 0
 					callback new Error("Errors deleting docs. See log for details")
 				else
