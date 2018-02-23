@@ -63,7 +63,7 @@ public/js/utils/
 public/stylesheets/style.css
 public/stylesheets/ol-style.css
 public/stylesheets/*.map
-public/brand/plans.css
+public/brand/
 public/minjs/
 
 Gemfile.lock
