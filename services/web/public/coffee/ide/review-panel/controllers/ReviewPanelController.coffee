@@ -7,6 +7,24 @@ define [
 	App.controller "ReviewPanelController", ($scope, $element, ide, $timeout, $http, $modal, event_tracking, localStorage) ->
 		$reviewPanelEl = $element.find "#review-panel"
 
+		UserTypes =
+			MEMBER:    'member'    # Invited, listed in project.members
+			GUEST:     'guest'     # Not invited, but logged in so has a user_id
+			ANONYMOUS: 'anonymous' # No user_id
+
+		currentUserType = () ->
+			if !ide.$scope.user?.id?
+				return UserTypes.ANONYMOUS
+			else
+				user_id = ide.$scope.user.id
+				project = ide.$scope.project
+				if project.owner?.id == user_id
+					return UserTypes.MEMBER
+				for member in project.members
+					if member._id == user_id
+						return UserTypes.MEMBER
+				return UserTypes.GUEST
+
 		$scope.SubViews =
 			CUR_FILE : "cur_file"
 			OVERVIEW : "overview"
@@ -19,7 +37,6 @@ define [
 			trackChangesState: {}
 			trackChangesOnForEveryone: false
 			trackChangesOnForGuests: false
-			trackChangesOnForThisGuestClient: false
 			trackChangesForGuestsAvailable: false
 			entries: {}
 			resolvedComments: {}
@@ -78,13 +95,6 @@ define [
 				for member in members
 					if member.privileges == "readAndWrite"
 						$scope.reviewPanel.formattedProjectMembers[member._id] = formatUser(member)
-
-		$scope.$watch 'project.publicAccesLevel', (level) ->
-			if level?
-				$scope.reviewPanel.trackChangesForGuestsAvailable = level == 'tokenBased'
-				if !$scope.reviewPanel.trackChangesForGuestsAvailable
-					$scope.trackChangesOnForThisGuestClient = false
-					$scope.toggleTrackChangesForGuests false
 
 		$scope.commentState =
 			adding: false
@@ -626,39 +636,20 @@ define [
 			_setUserTCState(project.owner._id, newValue, isLocal)
 
 		_setGuestsTCState = (newValue, isLocal = false) ->
-			if $scope.reviewPanel.trackChangesForGuestsAvailable
-				$scope.reviewPanel.trackChangesOnForGuests = newValue
-				if (
-					ide.$scope.project.publicAccesLevel == 'tokenBased' &&
-					ide.$scope.isTokenMember &&
-					ide.$scope?.user?.id?
-				)
-					$scope.trackChangesOnForThisGuestClient = newValue
-					_setUserTCState(ide.$scope.user.id, newValue, isLocal)
-			else
-				$scope.reviewPanel.trackChangesOnForGuests = false
-				if (
-					$scope.isTokenMember &&
-					$scope.user?.id? &&
-					!_.any($scope.project.members, (m) -> m._id == $scope.user.id)
-				)
-					$scope.trackChangesOnForThisGuestClient = false
-					_setUserTCState(ide.$scope.user.id, false, isLocal)
+			$scope.reviewPanel.trackChangesOnForGuests = newValue
+			if currentUserType() == UserTypes.GUEST or currentUserType() == UserTypes.ANONYMOUS
+				$scope.editor.wantTrackChanges = newValue
 
 		applyClientTrackChangesStateToServer = () ->
 			data = {}
-			if $scope.reviewPanel.trackChangesOnForGuests
-				data.on_for_guests = true
 			if $scope.reviewPanel.trackChangesOnForEveryone
 				data.on = true
 			else
 				data.on_for = {}
 				for userId, userState of $scope.reviewPanel.trackChangesState
-					if !(
-						$scope.reviewPanel.trackChangesOnForGuests &&
-						$scope.reviewPanel.trackChangesOnForThisGuestClient
-					)
-						data.on_for[userId] = userState.value
+					data.on_for[userId] = userState.value
+				if $scope.reviewPanel.trackChangesOnForGuests
+					data.on_for_guests = true
 			data._csrf = window.csrfToken
 			$http.post "/project/#{$scope.project_id}/track_changes", data
 
@@ -696,6 +687,22 @@ define [
 				return
 			$scope.toggleTrackChangesForUser !$scope.reviewPanel.trackChangesState[ide.$scope.user.id].value, ide.$scope.user.id
 
+		setGuestFeatureBasedOnProjectAccessLevel = (projectPublicAccessLevel) ->
+			$scope.reviewPanel.trackChangesForGuestsAvailable = (projectPublicAccessLevel == 'tokenBased')
+
+		onToggleTrackChangesForGuestsAvailability = (available) ->
+			# If the feature is no longer available we need to turn off the guest flag
+			return if available
+			return if !$scope.reviewPanel.trackChangesOnForGuests # Already turned off
+			return if $scope.reviewPanel.trackChangesOnForEveryone # Overrides guest setting
+			$scope.toggleTrackChangesForGuests(false)
+
+		$scope.$watch 'project.publicAccesLevel', setGuestFeatureBasedOnProjectAccessLevel
+
+		$scope.$watch 'reviewPanel.trackChangesForGuestsAvailable', (available) ->
+			if available?
+				onToggleTrackChangesForGuestsAvailability(available)
+
 		_inited = false
 		ide.$scope.$on "project:joined", () ->
 			return if _inited
@@ -705,6 +712,7 @@ define [
 				applyTrackChangesStateToClient(window.trackChangesState)
 			else
 				applyTrackChangesStateToClient(false)
+			setGuestFeatureBasedOnProjectAccessLevel(project.publicAccesLevel)
 			_inited = true
 
 		_refreshingRangeUsers = false
