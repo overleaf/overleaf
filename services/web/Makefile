@@ -26,31 +26,32 @@ SHAREJS_COFFEE_FILES := \
 LESS_FILES := $(shell find public/stylesheets -name '*.less')
 CSS_FILES := public/stylesheets/style.css public/stylesheets/ol-style.css
 
+# The automatic variable $(@D) is the target directory name
 app.js: app.coffee
 	$(COFFEE) $(COFFEE_OPTIONS) --compile -o $(@D) $< 
 
 app/js/%.js: app/coffee/%.coffee
-	@mkdir -p $(dir $@)
+	@mkdir -p $(@D)
 	$(COFFEE) $(COFFEE_OPTIONS) --compile -o $(@D) $<
 
 public/js/%.js: public/coffee/%.coffee
-	@mkdir -p $(dir $@)
-	$(COFFEE) $(COFFEE_OPTIONS) --output $(dir $@) --map --compile $<
+	@mkdir -p $(@D)
+	$(COFFEE) $(COFFEE_OPTIONS) --output $(@D) --map --compile $<
 
 test/unit/js/%.js: test/unit/coffee/%.coffee
-	@mkdir -p $(dir $@)
+	@mkdir -p $(@D)
 	$(COFFEE) $(COFFEE_OPTIONS) --compile -o $(@D) $<
 
 test/acceptance/js/%.js: test/acceptance/coffee/%.coffee
-	@mkdir -p $(dir $@)
+	@mkdir -p $(@D)
 	$(COFFEE) $(COFFEE_OPTIONS) --compile -o $(@D) $<
 
 test/unit_frontend/js/%.js: test/unit_frontend/coffee/%.coffee
-	@mkdir -p $(dir $@)
+	@mkdir -p $(@D)
 	$(COFFEE) $(COFFEE_OPTIONS) --compile -o $(@D) $< 
 
 test/smoke/js/%.js: test/smoke/coffee/%.coffee
-	@mkdir -p $(dir $@)
+	@mkdir -p $(@D)
 	$(COFFEE) $(COFFEE_OPTIONS) --compile -o $(@D) $<
 
 public/js/libs/sharejs.js: $(SHAREJS_COFFEE_FILES)
@@ -95,7 +96,6 @@ $(CSS_FILES): $(LESS_FILES)
 
 minify: $(CSS_FILES) $(JS_FILES)
 	$(GRUNT) compile:minify
-
 css: $(CSS_FILES)
 
 compile: $(JS_FILES) css public/js/libs/sharejs.js public/js/main.js public/js/ide.js
