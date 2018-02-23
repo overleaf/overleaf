@@ -27,31 +27,31 @@ LESS_FILES := $(shell find public/stylesheets -name '*.less')
 CSS_FILES := public/stylesheets/style.css public/stylesheets/ol-style.css
 
 app.js: app.coffee
-	$(COFFEE) --compile --print $< > $@
+	$(COFFEE) $(COFFEE_OPTIONS) --compile -o $(@D) $< 
 
 app/js/%.js: app/coffee/%.coffee
 	@mkdir -p $(dir $@)
-	$(COFFEE) --compile --print $< > $@
+	$(COFFEE) $(COFFEE_OPTIONS) --compile -o $(@D) $<
 
 public/js/%.js: public/coffee/%.coffee
 	@mkdir -p $(dir $@)
-	$(COFFEE) --output $(dir $@) --map --compile $<
+	$(COFFEE) $(COFFEE_OPTIONS) --output $(dir $@) --map --compile $<
 
 test/unit/js/%.js: test/unit/coffee/%.coffee
 	@mkdir -p $(dir $@)
-	$(COFFEE) --compile --print $< > $@
+	$(COFFEE) $(COFFEE_OPTIONS) --compile -o $(@D) $<
 
 test/acceptance/js/%.js: test/acceptance/coffee/%.coffee
 	@mkdir -p $(dir $@)
-	$(COFFEE) --compile --print $< > $@
+	$(COFFEE) $(COFFEE_OPTIONS) --compile -o $(@D) $<
 
 test/unit_frontend/js/%.js: test/unit_frontend/coffee/%.coffee
 	@mkdir -p $(dir $@)
-	$(COFFEE) --compile --print $< > $@
+	$(COFFEE) $(COFFEE_OPTIONS) --compile -o $(@D) $< 
 
 test/smoke/js/%.js: test/smoke/coffee/%.coffee
 	@mkdir -p $(dir $@)
-	$(COFFEE) --compile --print $< > $@
+	$(COFFEE) $(COFFEE_OPTIONS) --compile -o $(@D) $<
 
 public/js/libs/sharejs.js: $(SHAREJS_COFFEE_FILES)
 	@echo "Compiling public/js/libs/sharejs.js"
@@ -102,13 +102,13 @@ compile: $(JS_FILES) css public/js/libs/sharejs.js public/js/main.js public/js/i
 	@$(MAKE) compile_modules
 
 compile_full:
-	$(COFFEE) -c -p app.coffee > app.js
-	$(COFFEE) -o app/js -c app/coffee
-	$(COFFEE) -o public/js -c public/coffee
-	$(COFFEE) -o test/acceptance/js -c test/acceptance/coffee
-	$(COFFEE) -o test/smoke/js -c test/smoke/coffee
-	$(COFFEE) -o test/unit/js -c test/unit/coffee
-	$(COFFEE) -o test/unit_frontend/js -c test/unit_frontend/coffee
+	$(COFFEE) $(COFFEE_OPTIONS) -c -p app.coffee > app.js
+	$(COFFEE) $(COFFEE_OPTIONS) -o app/js -c app/coffee
+	$(COFFEE) $(COFFEE_OPTIONS) -o public/js -c public/coffee
+	$(COFFEE) $(COFFEE_OPTIONS) -o test/acceptance/js -c test/acceptance/coffee
+	$(COFFEE) $(COFFEE_OPTIONS) -o test/smoke/js -c test/smoke/coffee
+	$(COFFEE) $(COFFEE_OPTIONS) -o test/unit/js -c test/unit/coffee
+	$(COFFEE) $(COFFEE_OPTIONS) -o test/unit_frontend/js -c test/unit_frontend/coffee
 	rm -f public/js/ide.js public/js/main.js # We need to generate ide.js, main.js manually later
 	$(MAKE) $(CSS_FILES)
 	$(MAKE) compile_modules_full
@@ -149,13 +149,13 @@ $(MODULE_MAKEFILES): Makefile.module
 clean: clean_app clean_frontend clean_css clean_tests clean_modules
 
 clean_app:
-	rm -f app.js
+	rm -f app.js app.js.map
 	rm -rf app/js
 
 clean_frontend:
 	rm -rf public/js/{analytics,directives,filters,ide,main,modules,services,utils}
-	rm -f public/js/*.js
-	rm -f public/js/libs/sharejs.js
+	rm -f public/js/*.{js,map}
+	rm -f public/js/libs/sharejs.{js,map}
 
 clean_tests:
 	rm -rf test/unit/js

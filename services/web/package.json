@@ -17,7 +17,7 @@
     "test:unit": "npm -q run compile && bin/unit_test $@",
     "test:frontend": "karma start --single-run",
     "compile": "make compile",
-    "start": "npm -q run compile && node app.js",
+    "start": "npm -q run compile && node $NODE_APP_OPTIONS app.js",
     "nodemon": "nodemon --config nodemon.json",
     "nodemon:frontend": "nodemon --config nodemon.frontend.json",
     "webpack": "webpack-dev-server --config webpack.config.dev.js"
