@@ -12,6 +12,8 @@ define ['ide/editor/directives/cmEditor'], () ->
         }
       }
 
+    afterEach () -> window.Frontend = null
+
     it 'inits Rich Text', () ->
       inject ($compile, $rootScope) =>
         $compile('<div cm-editor></div>')($rootScope)
