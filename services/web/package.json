@@ -20,7 +20,8 @@
     "start": "npm -q run compile && node app.js",
     "nodemon": "nodemon --config nodemon.json",
     "nodemon:frontend": "nodemon --config nodemon.frontend.json",
-    "webpack": "webpack-dev-server --config webpack.config.dev.js"
+    "webpack": "webpack-dev-server --config webpack.config.dev.js",
+    "lint": "eslint -f unix ."
   },
   "dependencies": {
     "archiver": "0.9.0",

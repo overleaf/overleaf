@@ -222,6 +222,9 @@ ci:
 	MOCHA_ARGS="--reporter tap" \
 	$(MAKE) test
 
+lint:
+	npm -q run lint
+
 .PHONY:
 	all add install update test test_unit test_frontend test_acceptance \
 	test_acceptance_start_service test_acceptance_stop_service \
