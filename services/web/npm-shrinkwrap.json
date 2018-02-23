@@ -5996,6 +5996,44 @@
       "resolved": "https://registry.npmjs.org/karma-requirejs/-/karma-requirejs-1.1.0.tgz",
       "dev": true
     },
+    "karma-webpack": {
+      "version": "2.0.9",
+      "from": "karma-webpack@>=2.0.9 <3.0.0",
+      "resolved": "https://registry.npmjs.org/karma-webpack/-/karma-webpack-2.0.9.tgz",
+      "dev": true,
+      "dependencies": {
+        "async": {
+          "version": "0.9.2",
+          "from": "async@>=0.9.0 <0.10.0",
+          "resolved": "https://registry.npmjs.org/async/-/async-0.9.2.tgz",
+          "dev": true
+        },
+        "json5": {
+          "version": "0.5.1",
+          "from": "json5@>=0.5.0 <0.6.0",
+          "resolved": "https://registry.npmjs.org/json5/-/json5-0.5.1.tgz",
+          "dev": true
+        },
+        "loader-utils": {
+          "version": "0.2.17",
+          "from": "loader-utils@>=0.2.5 <0.3.0",
+          "resolved": "https://registry.npmjs.org/loader-utils/-/loader-utils-0.2.17.tgz",
+          "dev": true
+        },
+        "lodash": {
+          "version": "3.10.1",
+          "from": "lodash@>=3.8.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-3.10.1.tgz",
+          "dev": true
+        },
+        "source-map": {
+          "version": "0.5.7",
+          "from": "source-map@>=0.5.6 <0.6.0",
+          "resolved": "https://registry.npmjs.org/source-map/-/source-map-0.5.7.tgz",
+          "dev": true
+        }
+      }
+    },
     "keygrip": {
       "version": "1.0.2",
       "from": "keygrip@>=1.0.2 <1.1.0",
