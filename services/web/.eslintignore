@@ -3,3 +3,6 @@ modules
 public/js
 public/minjs
 test/**/js
+app.js
+webpack.config.*
+karma.conf.js
