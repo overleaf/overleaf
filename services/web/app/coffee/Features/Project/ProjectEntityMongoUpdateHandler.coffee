@@ -254,13 +254,13 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 				update = "$push":{}, "$inc":{}
 				update["$push"][mongopath] = element
 				# we need to increment the project version number for any structure change
-				update["$inc"]["version"] = 1# increment project version number
-				logger.log project_id: project._id, element_id: element._id, fileType: type, folder_id: folder_id, mongopath:mongopath, "adding element to project"
-				Project.findOneAndUpdate conditions, update, {"new": true}, (err, project)->
+				update["$inc"]["version"] = 1 # increment project version number
+				logger.log project_id: project._id, element_id: element._id, fileType: type, folder_id: folder_id, mongopath:mongopath, update: update, "adding element to project"
+				Project.findOneAndUpdate conditions, update, {"new": true}, (err, newProject)->
 					if err?
 						logger.err err: err, project_id: project._id, 'error saving in putElement project'
 						return callback(err)
-					callback(err, {path:newPath}, project)
+					callback(err, {path:newPath}, newProject)
 
 	_checkValidElementName: (folder, name, callback = (err) ->) ->
 		# check if the name is already taken by a doc, file or
