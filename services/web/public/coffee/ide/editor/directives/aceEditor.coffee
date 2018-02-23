@@ -430,6 +430,8 @@ define [
 				scope.$on '$destroy', () ->
 					if scope.sharejsDoc?
 						detachFromAce(scope.sharejsDoc)
+						session = editor.getSession()
+						session?.destroy()
 
 				scope.$emit "#{scope.name}:inited", editor
 
