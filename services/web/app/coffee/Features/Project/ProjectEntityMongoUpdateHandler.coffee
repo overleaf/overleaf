@@ -255,7 +255,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 				update["$push"][mongopath] = element
 				# we need to increment the project version number for any structure change
 				update["$inc"]["version"] = 1 # increment project version number
-				logger.log project_id: project._id, element_id: element._id, fileType: type, folder_id: folder_id, mongopath:mongopath, update: update, "adding element to project"
+				logger.log project_id: project._id, element_id: element._id, fileType: type, folder_id: folder_id, mongopath:mongopath, "adding element to project"
 				Project.findOneAndUpdate conditions, update, {"new": true}, (err, newProject)->
 					if err?
 						logger.err err: err, project_id: project._id, 'error saving in putElement project'

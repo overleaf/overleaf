@@ -22,6 +22,7 @@ ProjectSchema = new Schema
 	readOnly_refs     :   [ type:ObjectId, ref:'User' ]
 	rootDoc_id        :   {type: ObjectId}
 	rootFolder        :   [FolderSchema]
+	version           :   {type: Number}
 	publicAccesLevel  :   {type: String, default: 'private'}
 	compiler          :   {type:String, default:'pdflatex'}
 	spellCheckLanguage :   {type:String, default:'en'}

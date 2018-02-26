@@ -117,7 +117,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 				.calledWith(
 					{ _id: project_id },
 					{
-						'$inc': { 'file.png.rev': 1 }
+						'$inc': { 'file.png.rev': 1, 'version': 1 }
 						'$set': { 'file.png.created': new Date() }
 					}
 					{}
@@ -324,7 +324,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 			@ProjectModel.findOneAndUpdate
 				.calledWith(
 					{ _id: project_id },
-					{ $set: { "mongo.path.name": @newName } },
+					{ $set: { "mongo.path.name": @newName }, $inc: {"version": 1} },
 					{ new: true }
 				).should.equal true
 
@@ -384,7 +384,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it 'should pull', ->
 			@ProjectModel.findOneAndUpdate
-				.calledWith({ _id: @id }, { '$pull': { 'folders[0]': null } }, {'new': true})
+				.calledWith({ _id: @id }, { '$pull': { 'folders[0]': null }, '$inc': {'version': 1} }, {'new': true})
 				.should.equal true
 
 		it 'should call the callback', ->
