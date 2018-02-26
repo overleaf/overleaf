@@ -7,17 +7,11 @@ version: "2"
 
 services:
   test_unit:
-    image: node:6.13.0
-    volumes:
-      - .:/app
-    working_dir: /app
+    image: quay.io/sharelatex/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     entrypoint: npm run test:unit:_run
 
   test_acceptance:
-    image: node:6.13.0
-    volumes:
-      - .:/app
-    working_dir: /app
+    image: quay.io/sharelatex/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     environment:
       REDIS_HOST: redis
       MONGO_HOST: mongo

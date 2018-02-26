@@ -14,7 +14,7 @@ services:
     entrypoint: npm run test:unit
 
   test_acceptance:
-    image: node:6.13.0
+    build: .
     volumes:
       - .:/app
     working_dir: /app
