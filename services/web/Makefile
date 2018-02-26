@@ -5,7 +5,7 @@ PROJECT_NAME = web
 
 MODULE_DIRS := $(shell find modules -mindepth 1 -maxdepth 1 -type d -not -name '.git' )
 MODULE_MAKEFILES := $(MODULE_DIRS:=/Makefile)
-COFFEE := node_modules/.bin/coffee
+COFFEE := node_modules/.bin/coffee $(COFFEE_OPTIONS)
 GRUNT := node_modules/.bin/grunt
 APP_COFFEE_FILES := $(shell find app/coffee -name '*.coffee')
 FRONT_END_COFFEE_FILES := $(shell find public/coffee -name '*.coffee')
@@ -28,31 +28,31 @@ CSS_FILES := public/stylesheets/style.css public/stylesheets/ol-style.css
 
 # The automatic variable $(@D) is the target directory name
 app.js: app.coffee
-	$(COFFEE) $(COFFEE_OPTIONS) --compile -o $(@D) $< 
+	$(COFFEE) --compile -o $(@D) $< 
 
 app/js/%.js: app/coffee/%.coffee
 	@mkdir -p $(@D)
-	$(COFFEE) $(COFFEE_OPTIONS) --compile -o $(@D) $<
+	$(COFFEE) --compile -o $(@D) $<
 
 public/js/%.js: public/coffee/%.coffee
 	@mkdir -p $(@D)
-	$(COFFEE) $(COFFEE_OPTIONS) --output $(@D) --map --compile $<
+	$(COFFEE) --output $(@D) --map --compile $<
 
 test/unit/js/%.js: test/unit/coffee/%.coffee
 	@mkdir -p $(@D)
-	$(COFFEE) $(COFFEE_OPTIONS) --compile -o $(@D) $<
+	$(COFFEE) --compile -o $(@D) $<
 
 test/acceptance/js/%.js: test/acceptance/coffee/%.coffee
 	@mkdir -p $(@D)
-	$(COFFEE) $(COFFEE_OPTIONS) --compile -o $(@D) $<
+	$(COFFEE) --compile -o $(@D) $<
 
 test/unit_frontend/js/%.js: test/unit_frontend/coffee/%.coffee
 	@mkdir -p $(@D)
-	$(COFFEE) $(COFFEE_OPTIONS) --compile -o $(@D) $< 
+	$(COFFEE) --compile -o $(@D) $< 
 
 test/smoke/js/%.js: test/smoke/coffee/%.coffee
 	@mkdir -p $(@D)
-	$(COFFEE) $(COFFEE_OPTIONS) --compile -o $(@D) $<
+	$(COFFEE) --compile -o $(@D) $<
 
 public/js/libs/sharejs.js: $(SHAREJS_COFFEE_FILES)
 	@echo "Compiling public/js/libs/sharejs.js"
@@ -102,13 +102,13 @@ compile: $(JS_FILES) css public/js/libs/sharejs.js public/js/main.js public/js/i
 	@$(MAKE) compile_modules
 
 compile_full:
-	$(COFFEE) $(COFFEE_OPTIONS) -c -p app.coffee > app.js
-	$(COFFEE) $(COFFEE_OPTIONS) -o app/js -c app/coffee
-	$(COFFEE) $(COFFEE_OPTIONS) -o public/js -c public/coffee
-	$(COFFEE) $(COFFEE_OPTIONS) -o test/acceptance/js -c test/acceptance/coffee
-	$(COFFEE) $(COFFEE_OPTIONS) -o test/smoke/js -c test/smoke/coffee
-	$(COFFEE) $(COFFEE_OPTIONS) -o test/unit/js -c test/unit/coffee
-	$(COFFEE) $(COFFEE_OPTIONS) -o test/unit_frontend/js -c test/unit_frontend/coffee
+	$(COFFEE) -c -p app.coffee > app.js
+	$(COFFEE) -o app/js -c app/coffee
+	$(COFFEE) -o public/js -c public/coffee
+	$(COFFEE) -o test/acceptance/js -c test/acceptance/coffee
+	$(COFFEE) -o test/smoke/js -c test/smoke/coffee
+	$(COFFEE) -o test/unit/js -c test/unit/coffee
+	$(COFFEE) -o test/unit_frontend/js -c test/unit_frontend/coffee
 	rm -f public/js/ide.js public/js/main.js # We need to generate ide.js, main.js manually later
 	$(MAKE) $(CSS_FILES)
 	$(MAKE) compile_modules_full
