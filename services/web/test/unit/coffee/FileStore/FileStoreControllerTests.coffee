@@ -74,11 +74,10 @@ describe "FileStoreController", ->
 			describe "with a '#{extension}' file extension", ->
 
 				beforeEach ->
-					@user_agent = 'A generic browser'
 					@file.name = "bad#{extension}"
 					@req.get = (key) =>
 						if key == 'User-Agent'
-							@user_agent
+							return 'A generic browser'
 
 				describe "from a non-ios browser", ->
 
@@ -91,7 +90,9 @@ describe "FileStoreController", ->
 				describe "from an iPhone", ->
 
 					beforeEach ->
-						@user_agent = "An iPhone browser"
+						@req.get = (key) =>
+							if key == 'User-Agent'
+								return "An iPhone browser"
 
 					it "should set Content-Type to 'text/plain'", (done) ->
 						@stream.pipe = (des) =>
@@ -102,7 +103,9 @@ describe "FileStoreController", ->
 				describe "from an iPad", ->
 
 					beforeEach ->
-						@user_agent = "An iPad browser"
+						@req.get = (key) =>
+							if key == 'User-Agent'
+								return "An iPad browser"
 
 					it "should set Content-Type to 'text/plain'", (done) ->
 						@stream.pipe = (des) =>
