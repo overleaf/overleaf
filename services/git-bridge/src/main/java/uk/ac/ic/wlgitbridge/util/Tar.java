@@ -68,7 +68,7 @@ public class Tar {
         tmp.deleteOnExit();
         try (FileOutputStream target = new FileOutputStream(tmp)) {
             tarTo(fileOrDir, target);
-            return new FileInputStream(tmp);
+            return new DeletingFileInputStream(tmp);
         }
     }
 
