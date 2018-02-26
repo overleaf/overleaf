@@ -38,4 +38,23 @@ public class DeletingFileInputStream extends FileInputStream {
             }
         }
     }
+
+    /**
+     * We shouldn't rely on this for correctness!
+     */
+    @Override
+    protected void finalize() throws IOException {
+        try {
+            super.finalize();
+        } finally {
+            if(file != null) {
+                Log.warn("File open at finalization time: {}", file.getCanonicalPath());
+                try {
+                    close();
+                } catch (IOException e) {
+                    Log.error("Failed to delete file", e);
+                }
+            }
+        }
+    }
 }
