@@ -13,12 +13,12 @@ define ['ide/editor/directives/cmEditor'], () ->
       }
 
     it 'inits Rich Text', () ->
-      inject ($compile, $rootScope) ->
+      inject ($compile, $rootScope) =>
         $compile('<div cm-editor></div>')($rootScope)
         expect(@richTextInit).to.have.been.called
 
     it 'attaches to CM', () ->
-      inject ($compile, $rootScope, $browser) ->
+      inject ($compile, $rootScope, $browser) =>
         getSnapshot = sinon.stub()
         detachFromCM = sinon.stub()
         attachToCM = sinon.stub()
@@ -40,7 +40,7 @@ define ['ide/editor/directives/cmEditor'], () ->
         expect(attachToCM).to.have.been.called
 
     it 'detaches from CM when destroyed', () ->
-      inject ($compile, $rootScope) ->
+      inject ($compile, $rootScope) =>
         @richTextInit.returns({ setValue: sinon.stub() })
         detachFromCM = sinon.stub()
         $rootScope.sharejsDoc = {
