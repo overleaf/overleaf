@@ -78,19 +78,16 @@ describe "LimitationsManager", ->
 				@callback.calledWith(null, @user.features.collaborators).should.equal true
 
 	describe "canAddXCollaborators", ->
-		beforeEach ->
-			@CollaboratorsHandler.getInvitedCollaboratorCount = (project_id, callback) => callback(null, @current_number)
-			@CollaboratorsInviteHandler.getInviteCount = (project_id, callback) => callback(null, @invite_count)
-			sinon.stub @LimitationsManager,
-					   "allowedNumberOfCollaboratorsInProject",
-					   (project_id, callback) => callback(null, @allowed_number)
-			@callback = sinon.stub()
-
 		describe "when the project has fewer collaborators than allowed", ->
 			beforeEach ->
 				@current_number = 1
 				@allowed_number = 2
 				@invite_count = 0
+				@CollaboratorsHandler.getInvitedCollaboratorCount = (project_id, callback) => callback(null, @current_number)
+				@CollaboratorsInviteHandler.getInviteCount = (project_id, callback) => callback(null, @invite_count)
+				sinon.stub @LimitationsManager, "allowedNumberOfCollaboratorsInProject", (project_id, callback) =>
+					callback(null, @allowed_number)
+				@callback = sinon.stub()
 				@LimitationsManager.canAddXCollaborators(@project_id, 1, @callback)
 
 			it "should return true", ->
@@ -101,6 +98,11 @@ describe "LimitationsManager", ->
 				@current_number = 1
 				@allowed_number = 4
 				@invite_count = 1
+				@CollaboratorsHandler.getInvitedCollaboratorCount = (project_id, callback) => callback(null, @current_number)
+				@CollaboratorsInviteHandler.getInviteCount = (project_id, callback) => callback(null, @invite_count)
+				sinon.stub @LimitationsManager, "allowedNumberOfCollaboratorsInProject", (project_id, callback) =>
+					callback(null, @allowed_number)
+				@callback = sinon.stub()
 				@LimitationsManager.canAddXCollaborators(@project_id, 1, @callback)
 
 			it "should return true", ->
@@ -111,6 +113,11 @@ describe "LimitationsManager", ->
 				@current_number = 1
 				@allowed_number = 2
 				@invite_count = 0
+				@CollaboratorsHandler.getInvitedCollaboratorCount = (project_id, callback) => callback(null, @current_number)
+				@CollaboratorsInviteHandler.getInviteCount = (project_id, callback) => callback(null, @invite_count)
+				sinon.stub @LimitationsManager, "allowedNumberOfCollaboratorsInProject", (project_id, callback) =>
+					callback(null, @allowed_number)
+				@callback = sinon.stub()
 				@LimitationsManager.canAddXCollaborators(@project_id, 2, @callback)
 
 			it "should return false", ->
@@ -121,6 +128,11 @@ describe "LimitationsManager", ->
 				@current_number = 3
 				@allowed_number = 2
 				@invite_count = 0
+				@CollaboratorsHandler.getInvitedCollaboratorCount = (project_id, callback) => callback(null, @current_number)
+				@CollaboratorsInviteHandler.getInviteCount = (project_id, callback) => callback(null, @invite_count)
+				sinon.stub @LimitationsManager, "allowedNumberOfCollaboratorsInProject", (project_id, callback) =>
+					callback(null, @allowed_number)
+				@callback = sinon.stub()
 				@LimitationsManager.canAddXCollaborators(@project_id, 1, @callback)
 
 			it "should return false", ->
@@ -131,6 +143,11 @@ describe "LimitationsManager", ->
 				@current_number = 100
 				@allowed_number = -1
 				@invite_count = 0
+				@CollaboratorsHandler.getInvitedCollaboratorCount = (project_id, callback) => callback(null, @current_number)
+				@CollaboratorsInviteHandler.getInviteCount = (project_id, callback) => callback(null, @invite_count)
+				sinon.stub @LimitationsManager, "allowedNumberOfCollaboratorsInProject", (project_id, callback) =>
+					callback(null, @allowed_number)
+				@callback = sinon.stub()
 				@LimitationsManager.canAddXCollaborators(@project_id, 1, @callback)
 
 			it "should return true", ->
@@ -141,6 +158,11 @@ describe "LimitationsManager", ->
 				@current_number = 0
 				@allowed_number = 2
 				@invite_count = 2
+				@CollaboratorsHandler.getInvitedCollaboratorCount = (project_id, callback) => callback(null, @current_number)
+				@CollaboratorsInviteHandler.getInviteCount = (project_id, callback) => callback(null, @invite_count)
+				sinon.stub @LimitationsManager, "allowedNumberOfCollaboratorsInProject", (project_id, callback) =>
+					callback(null, @allowed_number)
+				@callback = sinon.stub()
 				@LimitationsManager.canAddXCollaborators(@project_id, 1, @callback)
 
 			it "should return false", ->
@@ -151,6 +173,11 @@ describe "LimitationsManager", ->
 				@current_number = 1
 				@allowed_number = 2
 				@invite_count = 1
+				@CollaboratorsHandler.getInvitedCollaboratorCount = (project_id, callback) => callback(null, @current_number)
+				@CollaboratorsInviteHandler.getInviteCount = (project_id, callback) => callback(null, @invite_count)
+				sinon.stub @LimitationsManager, "allowedNumberOfCollaboratorsInProject", (project_id, callback) =>
+					callback(null, @allowed_number)
+				@callback = sinon.stub()
 				@LimitationsManager.canAddXCollaborators(@project_id, 1, @callback)
 
 			it "should return false", ->
