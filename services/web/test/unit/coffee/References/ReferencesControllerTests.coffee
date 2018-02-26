@@ -142,13 +142,15 @@ describe "ReferencesController", ->
 
 	describe 'index', ->
 
+		beforeEach ->
+			@call = (callback) =>
+				@controller.index @req, @res
+				callback()
+
 		describe 'with docIds as an array and shouldBroadcast as false', ->
 
 			beforeEach ->
 				@ReferencesHandler.index.callsArgWith(2, null, @fakeResponseData)
-				@call = (callback) =>
-					@controller.index @req, @res
-					callback()
 
 			it 'should call ReferencesHandler.index', (done) ->
 				@call () =>
