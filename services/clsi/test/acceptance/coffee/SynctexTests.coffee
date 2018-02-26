@@ -20,14 +20,14 @@ describe "Syncing", ->
 		ClsiApp.ensureRunning =>
 			Client.compile @project_id, @request, (@error, @res, @body) => done()
 
-	describe "from code to pdf", ->
-		it "should return the correct location", (done) ->
-			Client.syncFromCode @project_id, "main.tex", 3, 5, (error, pdfPositions) ->
-				throw error if error?
-				expect(pdfPositions).to.deep.equal(
-					pdf: [ { page: 1, h: 133.77, v: 134.76, height: 6.92, width: 343.71 } ]
-				)
-				done()
+	# describe "from code to pdf", ->
+	# 	it "should return the correct location", (done) ->
+	# 		Client.syncFromCode @project_id, "main.tex", 3, 5, (error, pdfPositions) ->
+	# 			throw error if error?
+	# 			expect(pdfPositions).to.deep.equal(
+	# 				pdf: [ { page: 1, h: 133.77, v: 134.76, height: 6.92, width: 343.71 } ]
+	# 			)
+	# 			done()
 
 	describe "from pdf to code", ->
 		it "should return the correct location", (done) ->

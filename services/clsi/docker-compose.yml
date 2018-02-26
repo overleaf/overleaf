@@ -29,6 +29,17 @@ services:
       - mongo
     entrypoint: npm run test:acceptance
 
+  synctex:
+    image: quay.io/sharelatex/texlive-full:2017.1
+    volumes:
+      - ~/Projects/sharelatex-dev-environment/clsi/compiles/564c29f884179:/compile
+      - ./bin/synctex:/opt/synctex
+
+    command:
+      /opt/synctex pdf /compile/output.pdf 1 100 200
+
+
+
   redis:
     image: redis
 
