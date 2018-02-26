@@ -99,6 +99,7 @@ describe "AuthenticationController", ->
 			@req.session.save = sinon.stub().callsArgWith(0, null)
 			@req.sessionStore = {generate: sinon.stub()}
 			@passport.authenticate.callsArgWith(1, null, @user, @info)
+			@err = new Error('woops')
 
 		it 'should call passport.authenticate', () ->
 			@AuthenticationController.passportLogin @req, @res, @next
@@ -107,7 +108,6 @@ describe "AuthenticationController", ->
 		describe 'when authenticate produces an error', ->
 
 			beforeEach ->
-				@err = new Error('woops')
 				@passport.authenticate.callsArgWith(1, @err)
 
 			it 'should return next with an error', () ->
