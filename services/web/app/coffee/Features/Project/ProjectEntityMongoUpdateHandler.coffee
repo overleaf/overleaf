@@ -56,7 +56,10 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 				conditions = _id:project._id
 				inc = {}
 				inc["#{path.mongo}.rev"] = 1
-				 # we need to increment the project version number for any structure change
+				# currently we do not need to increment the project version number for changes that are replacements
+				# but when we make switch to having immutable files the replace operation will add a new file, and
+				# this will require a version increase.  We will start incrementing the project version now as it does
+				# no harm and will help to test it.
 				inc['version'] = 1
 				set = {}
 				set["#{path.mongo}.created"] = new Date()
