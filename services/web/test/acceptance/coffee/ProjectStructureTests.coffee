@@ -89,6 +89,7 @@ describe "ProjectStructureChanges", ->
 
 			ProjectGetter.getProject example_project_id, (error, project) =>
 				throw error if error?
+				@project_0 = project
 				@owner.request.post {
 					uri: "project/#{example_project_id}/doc",
 					json:
@@ -99,7 +100,10 @@ describe "ProjectStructureChanges", ->
 					if res.statusCode < 200 || res.statusCode >= 300
 						throw new Error("failed to add doc #{res.statusCode}")
 					example_doc_id = body._id
-					done()
+					ProjectGetter.getProject @example_project_id, (error, newProject) =>
+						throw error if error?
+						@project_1 = newProject
+						done()
 
 		it "should version the doc added", ->
 			updates = MockDocUpdaterApi.getProjectStructureUpdates(example_project_id).docUpdates
@@ -108,6 +112,9 @@ describe "ProjectStructureChanges", ->
 			expect(update.userId).to.equal(@owner._id)
 			expect(update.pathname).to.equal("/new.tex")
 			expect(update.docLines).to.be.a('string');
+
+		it "should increment the project structure version number", ->
+			expect(@project_1.version).to.equal(@project_0.version + 1)
 
 	describe "uploading a project", ->
 		before (done) ->
@@ -143,15 +150,14 @@ describe "ProjectStructureChanges", ->
 			expect(update.url).to.be.a('string');
 
 	describe "uploading a file", ->
-		before (done) ->
+		beforeEach (done) ->
+			MockDocUpdaterApi.clearProjectStructureUpdates()
 			ProjectGetter.getProject example_project_id, (error, project) =>
 				throw error if error?
 				@root_folder_id = project.rootFolder[0]._id.toString()
+				@project_0 = project
 				done()
-
-		beforeEach () ->
-			MockDocUpdaterApi.clearProjectStructureUpdates()
-
+				
 		it "should version a newly uploaded file", (done) ->
 			image_file = fs.createReadStream(Path.resolve(__dirname + '/../files/1pixel.png'))
 
@@ -180,7 +186,12 @@ describe "ProjectStructureChanges", ->
 				expect(update.url).to.be.a('string');
 				@original_file_url = update.url
 
-				done()
+				ProjectGetter.getProject @example_project_id, (error, newProject) =>
+					throw error if error?
+					@project_1 = newProject
+					# uploading a new file does change the project structure
+					expect(@project_1.version).to.equal(@project_0.version + 1)
+					done()
 
 		it "should version a replacement file", (done) ->
 			image_file = fs.createReadStream(Path.resolve(__dirname + '/../files/2pixel.png'))
@@ -207,7 +218,12 @@ describe "ProjectStructureChanges", ->
 				expect(update.pathname).to.equal("/1pixel.png")
 				expect(update.url).to.be.a('string');
 
-				done()
+				ProjectGetter.getProject @example_project_id, (error, newProject) =>
+					throw error if error?
+					@project_1 = newProject
+					# replacing a file should update the project structure
+					expect(@project_1.version).to.equal(@project_0.version + 1)
+					done()
 
 	describe "moving entities", ->
 		before (done) ->
@@ -220,8 +236,13 @@ describe "ProjectStructureChanges", ->
 				example_folder_id_1 = JSON.parse(body)._id
 				done()
 
-		beforeEach () ->
+		beforeEach (done) ->
 			MockDocUpdaterApi.clearProjectStructureUpdates()
+			ProjectGetter.getProject @example_project_id, (error, project) =>
+				throw error if error?
+				@root_folder_id = project.rootFolder[0]._id.toString()
+				@project_0 = project
+				done()
 
 		it "should version moving a doc", (done) ->
 			@owner.request.post {
@@ -240,7 +261,12 @@ describe "ProjectStructureChanges", ->
 				expect(update.pathname).to.equal("/new.tex")
 				expect(update.newPathname).to.equal("/foo/new.tex")
 
-				done()
+				ProjectGetter.getProject @example_project_id, (error, newProject) =>
+					throw error if error?
+					@project_1 = newProject
+					# replacing a file should update the project structure
+					expect(@project_1.version).to.equal(@project_0.version + 2)  # 2 because it's a delete and then add
+					done()
 
 		it "should version moving a file", (done) ->
 			@owner.request.post {
@@ -258,8 +284,12 @@ describe "ProjectStructureChanges", ->
 				expect(update.userId).to.equal(@owner._id)
 				expect(update.pathname).to.equal("/1pixel.png")
 				expect(update.newPathname).to.equal("/foo/1pixel.png")
-
-				done()
+				ProjectGetter.getProject @example_project_id, (error, newProject) =>
+					throw error if error?
+					@project_1 = newProject
+					# replacing a file should update the project structure
+					expect(@project_1.version).to.equal(@project_0.version + 2) # 2 because it's a delete and then add
+					done()
 
 		it "should version moving a folder", (done) ->
 			@owner.request.post {
@@ -292,12 +322,21 @@ describe "ProjectStructureChanges", ->
 					expect(update.userId).to.equal(@owner._id)
 					expect(update.pathname).to.equal("/foo/1pixel.png")
 					expect(update.newPathname).to.equal("/bar/foo/1pixel.png")
-
-					done()
+					ProjectGetter.getProject @example_project_id, (error, newProject) =>
+						throw error if error?
+						@project_1 = newProject
+						# replacing a file should update the project structure
+						expect(@project_1.version).to.equal(@project_0.version + 3) # because folder and 2 files move
+						done()
 
 	describe "renaming entities", ->
-		beforeEach () ->
+		beforeEach (done) ->
 			MockDocUpdaterApi.clearProjectStructureUpdates()
+			ProjectGetter.getProject @example_project_id, (error, project) =>
+				throw error if error?
+				@root_folder_id = project.rootFolder[0]._id.toString()
+				@project_0 = project
+				done()
 
 		it "should version renaming a doc", (done) ->
 			@owner.request.post {
@@ -316,7 +355,12 @@ describe "ProjectStructureChanges", ->
 				expect(update.pathname).to.equal("/bar/foo/new.tex")
 				expect(update.newPathname).to.equal("/bar/foo/new_renamed.tex")
 
-				done()
+				ProjectGetter.getProject @example_project_id, (error, newProject) =>
+					throw error if error?
+					@project_1 = newProject
+					# replacing a file should update the project structure
+					expect(@project_1.version).to.equal(@project_0.version + 1)
+					done()
 
 		it "should version renaming a file", (done) ->
 			@owner.request.post {
@@ -335,7 +379,12 @@ describe "ProjectStructureChanges", ->
 				expect(update.pathname).to.equal("/bar/foo/1pixel.png")
 				expect(update.newPathname).to.equal("/bar/foo/1pixel_renamed.png")
 
-				done()
+				ProjectGetter.getProject @example_project_id, (error, newProject) =>
+					throw error if error?
+					@project_1 = newProject
+					# replacing a file should update the project structure
+					expect(@project_1.version).to.equal(@project_0.version + 1)
+					done()
 
 		it "should version renaming a folder", (done) ->
 			@owner.request.post {
@@ -361,11 +410,22 @@ describe "ProjectStructureChanges", ->
 				expect(update.pathname).to.equal("/bar/foo/1pixel_renamed.png")
 				expect(update.newPathname).to.equal("/bar/foo_renamed/1pixel_renamed.png")
 
-				done()
+				ProjectGetter.getProject @example_project_id, (error, newProject) =>
+					throw error if error?
+					@project_1 = newProject
+					# replacing a file should update the project structure
+					expect(@project_1.version).to.equal(@project_0.version + 1)
+					done()
+
 
 	describe "deleting entities", ->
-		beforeEach () ->
+		beforeEach (done) ->
 			MockDocUpdaterApi.clearProjectStructureUpdates()
+			ProjectGetter.getProject @example_project_id, (error, project) =>
+				throw error if error?
+				@root_folder_id = project.rootFolder[0]._id.toString()
+				@project_0 = project
+				done()
 
 		it "should version deleting a folder", (done) ->
 			@owner.request.delete {
@@ -389,7 +449,12 @@ describe "ProjectStructureChanges", ->
 				expect(update.pathname).to.equal("/bar/foo_renamed/1pixel_renamed.png")
 				expect(update.newPathname).to.equal("")
 
-				done()
+				ProjectGetter.getProject @example_project_id, (error, newProject) =>
+					throw error if error?
+					@project_1 = newProject
+					# replacing a file should update the project structure
+					expect(@project_1.version).to.equal(@project_0.version + 1)
+					done()
 
 	describe "tpds", ->
 		before (done) ->
@@ -399,8 +464,13 @@ describe "ProjectStructureChanges", ->
 				@tpds_project_id = project_id
 				mkdirp Settings.path.dumpFolder, done
 
-		beforeEach () ->
+		beforeEach (done) ->
 			MockDocUpdaterApi.clearProjectStructureUpdates()
+			ProjectGetter.getProject @tpds_project_id, (error, project) =>
+				throw error if error?
+				@root_folder_id = project.rootFolder[0]._id.toString()
+				@project_0 = project
+				done()
 
 		it "should version adding a doc", (done) ->
 			tex_file = fs.createReadStream(Path.resolve(__dirname + '/../files/test.tex'))
@@ -430,7 +500,12 @@ describe "ProjectStructureChanges", ->
 				expect(update.pathname).to.equal("/test.tex")
 				expect(update.docLines).to.equal("Test")
 
-				done()
+				ProjectGetter.getProject @tpds_project_id, (error, newProject) =>
+					throw error if error?
+					@project_1 = newProject
+					# replacing a file should update the project structure
+					expect(@project_1.version).to.equal(@project_0.version + 1)
+					done()
 
 			tex_file.pipe(req)
 
@@ -462,7 +537,12 @@ describe "ProjectStructureChanges", ->
 				expect(update.pathname).to.equal("/1pixel.png")
 				expect(update.url).to.be.a('string');
 
-				done()
+				ProjectGetter.getProject @tpds_project_id, (error, newProject) =>
+					throw error if error?
+					@project_1 = newProject
+					# replacing a file should update the project structure
+					expect(@project_1.version).to.equal(@project_0.version + 1)
+					done()
 
 			image_file.pipe(req)
 
@@ -494,7 +574,12 @@ describe "ProjectStructureChanges", ->
 				expect(update.pathname).to.equal("/1pixel.png")
 				expect(update.url).to.be.a('string');
 
-				done()
+				ProjectGetter.getProject @tpds_project_id, (error, newProject) =>
+					throw error if error?
+					@project_1 = newProject
+					# replacing a file should update the project structure
+					expect(@project_1.version).to.equal(@project_0.version + 1)
+					done()
 
 			image_file.pipe(req)
 
@@ -517,5 +602,10 @@ describe "ProjectStructureChanges", ->
 				expect(update.pathname).to.equal("/test.tex")
 				expect(update.newPathname).to.equal("")
 
-				done()
+				ProjectGetter.getProject @tpds_project_id, (error, newProject) =>
+					throw error if error?
+					@project_1 = newProject
+					# replacing a file should update the project structure
+					expect(@project_1.version).to.equal(@project_0.version + 1)
+					done()
 
