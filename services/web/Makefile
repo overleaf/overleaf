@@ -5,7 +5,7 @@ PROJECT_NAME = web
 
 MODULE_DIRS := $(shell find modules -mindepth 1 -maxdepth 1 -type d -not -name '.git' )
 MODULE_MAKEFILES := $(MODULE_DIRS:=/Makefile)
-COFFEE := node_modules/.bin/coffee
+COFFEE := node_modules/.bin/coffee $(COFFEE_OPTIONS)
 GRUNT := node_modules/.bin/grunt
 APP_COFFEE_FILES := $(shell find app/coffee -name '*.coffee')
 FRONT_END_COFFEE_FILES := $(shell find public/coffee -name '*.coffee')
@@ -26,32 +26,33 @@ SHAREJS_COFFEE_FILES := \
 LESS_FILES := $(shell find public/stylesheets -name '*.less')
 CSS_FILES := public/stylesheets/style.css public/stylesheets/ol-style.css
 
+# The automatic variable $(@D) is the target directory name
 app.js: app.coffee
-	$(COFFEE) --compile --print $< > $@
+	$(COFFEE) --compile -o $(@D) $< 
 
 app/js/%.js: app/coffee/%.coffee
-	@mkdir -p $(dir $@)
-	$(COFFEE) --compile --print $< > $@
+	@mkdir -p $(@D)
+	$(COFFEE) --compile -o $(@D) $<
 
 public/js/%.js: public/coffee/%.coffee
-	@mkdir -p $(dir $@)
-	$(COFFEE) --output $(dir $@) --map --compile $<
+	@mkdir -p $(@D)
+	$(COFFEE) --output $(@D) --map --compile $<
 
 test/unit/js/%.js: test/unit/coffee/%.coffee
-	@mkdir -p $(dir $@)
-	$(COFFEE) --compile --print $< > $@
+	@mkdir -p $(@D)
+	$(COFFEE) --compile -o $(@D) $<
 
 test/acceptance/js/%.js: test/acceptance/coffee/%.coffee
-	@mkdir -p $(dir $@)
-	$(COFFEE) --compile --print $< > $@
+	@mkdir -p $(@D)
+	$(COFFEE) --compile -o $(@D) $<
 
 test/unit_frontend/js/%.js: test/unit_frontend/coffee/%.coffee
-	@mkdir -p $(dir $@)
-	$(COFFEE) --compile --print $< > $@
+	@mkdir -p $(@D)
+	$(COFFEE) --compile -o $(@D) $< 
 
 test/smoke/js/%.js: test/smoke/coffee/%.coffee
-	@mkdir -p $(dir $@)
-	$(COFFEE) --compile --print $< > $@
+	@mkdir -p $(@D)
+	$(COFFEE) --compile -o $(@D) $<
 
 public/js/libs/sharejs.js: $(SHAREJS_COFFEE_FILES)
 	@echo "Compiling public/js/libs/sharejs.js"
@@ -95,7 +96,6 @@ $(CSS_FILES): $(LESS_FILES)
 
 minify: $(CSS_FILES) $(JS_FILES)
 	$(GRUNT) compile:minify
-
 css: $(CSS_FILES)
 
 compile: $(JS_FILES) css public/js/libs/sharejs.js public/js/main.js public/js/ide.js
@@ -149,13 +149,13 @@ $(MODULE_MAKEFILES): Makefile.module
 clean: clean_app clean_frontend clean_css clean_tests clean_modules
 
 clean_app:
-	rm -f app.js
+	rm -f app.js app.js.map
 	rm -rf app/js
 
 clean_frontend:
 	rm -rf public/js/{analytics,directives,filters,ide,main,modules,services,utils}
-	rm -f public/js/*.js
-	rm -f public/js/libs/sharejs.js
+	rm -f public/js/*.{js,map}
+	rm -f public/js/libs/sharejs.{js,map}
 
 clean_tests:
 	rm -rf test/unit/js
