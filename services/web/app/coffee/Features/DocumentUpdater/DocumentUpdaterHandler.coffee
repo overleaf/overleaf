@@ -205,29 +205,32 @@ module.exports = DocumentUpdaterHandler =
 
 	updateProjectStructure : (project_id, userId, changes, callback = (error) ->)->
 		return callback() if !settings.apis.project_history?.sendProjectStructureOps
+		Project.findOne {_id: project_id}, {version:true}, (err, currentProject) ->
+			return callback(err) if err?
+			return callback new Error("project not found") if !currentProject?
 
-		docUpdates = DocumentUpdaterHandler._getUpdates('doc', changes.oldDocs, changes.newDocs)
-		fileUpdates = DocumentUpdaterHandler._getUpdates('file', changes.oldFiles, changes.newFiles)
+			docUpdates = DocumentUpdaterHandler._getUpdates('doc', changes.oldDocs, changes.newDocs)
+			fileUpdates = DocumentUpdaterHandler._getUpdates('file', changes.oldFiles, changes.newFiles)
 
-		timer = new metrics.Timer("set-document")
-		url = "#{settings.apis.documentupdater.url}/project/#{project_id}"
-		body =
-			url: url
-			json: { docUpdates, fileUpdates, userId }
+			timer = new metrics.Timer("set-document")
+			url = "#{settings.apis.documentupdater.url}/project/#{project_id}"
+			body =
+				url: url
+				json: { docUpdates, fileUpdates, userId, version: currentProject.version }
 
-		return callback() if (docUpdates.length + fileUpdates.length) < 1
+			return callback() if (docUpdates.length + fileUpdates.length) < 1
 
-		request.post body, (error, res, body)->
-			timer.done()
-			if error?
-				logger.error {error, url, project_id}, "error update project structure in doc updater"
-				callback(error)
-			else if res.statusCode >= 200 and res.statusCode < 300
-				logger.log {project_id}, "updated project structure in doc updater"
-				callback(null)
-			else
-				logger.error {project_id, url}, "doc updater returned a non-success status code: #{res.statusCode}"
-				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
+			request.post body, (error, res, body)->
+				timer.done()
+				if error?
+					logger.error {error, url, project_id}, "error update project structure in doc updater"
+					callback(error)
+				else if res.statusCode >= 200 and res.statusCode < 300
+					logger.log {project_id}, "updated project structure in doc updater"
+					callback(null)
+				else
+					logger.error {project_id, url}, "doc updater returned a non-success status code: #{res.statusCode}"
+					callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
 	_getUpdates: (entityType, oldEntities, newEntities) ->
 		oldEntities ||= []
