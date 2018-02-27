@@ -3,7 +3,7 @@
 tests = []
 for file of window.__karma__.files
   if window.__karma__.files.hasOwnProperty(file)
-    if /Tests\.js$/.test(file)
+    if /test\/unit_frontend\/js.+Tests.js$/.test(file)
       tests.push(file)
 
 requirejs.config

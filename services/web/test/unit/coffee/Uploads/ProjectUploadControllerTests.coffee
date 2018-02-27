@@ -102,7 +102,7 @@ describe "ProjectUploadController", ->
 			@project_id = "project-id-123"
 			@folder_id = "folder-id-123"
 			@path = "/path/to/file/on/disk.png"
-			@filename = "filename.png"
+			@name = "filename.png"
 			@req.files =
 				qqfile:
 					path: @path

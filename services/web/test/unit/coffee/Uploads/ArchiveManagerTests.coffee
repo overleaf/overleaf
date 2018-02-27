@@ -26,12 +26,12 @@ describe "ArchiveManager", ->
 			"metrics-sharelatex": @metrics
 			"fs": @fs = {}
 			"fs-extra": @fse = {}
+		@callback = sinon.stub()
 	
 	describe "extractZipArchive", ->
 		beforeEach ->
 			@source = "/path/to/zip/source.zip"
 			@destination = "/path/to/zip/destination"
-			@callback = sinon.stub()
 			@ArchiveManager._isZipTooLarge = sinon.stub().callsArgWith(1, null, false)
 
 		describe "successfully", ->

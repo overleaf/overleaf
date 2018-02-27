@@ -24,20 +24,15 @@ describe "RateLimiter", ->
 		@RedisWrapper =
 			client: sinon.stub().returns(@rclient)
 
-		@limiterFn = sinon.stub()
-		@RollingRateLimiter = (opts) =>
-			return @limiterFn
-
-		@limiter = SandboxedModule.require modulePath, requires:
-			"rolling-rate-limiter": @RollingRateLimiter
-			"settings-sharelatex":@settings
-			"logger-sharelatex" : @logger = {log:sinon.stub(), err:sinon.stub()}
-			"./RedisWrapper": @RedisWrapper
-
 		@endpointName = "compiles"
 		@subject = "some-project-id"
 		@timeInterval = 20
 		@throttleLimit = 5
+
+		@requires =
+			"settings-sharelatex":@settings
+			"logger-sharelatex" : @logger = {log:sinon.stub(), err:sinon.stub()}
+			"./RedisWrapper": @RedisWrapper
 
 		@details = 
 			endpointName: @endpointName
@@ -52,7 +47,9 @@ describe "RateLimiter", ->
 	describe 'when action is permitted', ->
 
 		beforeEach ->
-			@limiterFn = sinon.stub().callsArgWith(1, null, 0, 22)
+			@requires["rolling-rate-limiter"] = (opts) =>
+				return sinon.stub().callsArgWith(1, null, 0, 22)
+			@limiter = SandboxedModule.require modulePath, requires: @requires
 
 		it 'should not produce and error', (done) ->
 			@limiter.addCount {}, (err, should) ->
@@ -67,7 +64,9 @@ describe "RateLimiter", ->
 	describe 'when action is not permitted', ->
 
 		beforeEach ->
-			@limiterFn = sinon.stub().callsArgWith(1, null, 4000, 0)
+			@requires["rolling-rate-limiter"] = (opts) =>
+				return sinon.stub().callsArgWith(1, null, 4000, 0)
+			@limiter = SandboxedModule.require modulePath, requires: @requires
 
 		it 'should not produce and error', (done) ->
 			@limiter.addCount {}, (err, should) ->
@@ -82,7 +81,9 @@ describe "RateLimiter", ->
 	describe 'when limiter produces an error', ->
 
 		beforeEach ->
-			@limiterFn = sinon.stub().callsArgWith(1, new Error('woops'))
+			@requires["rolling-rate-limiter"] = (opts) =>
+				return sinon.stub().callsArgWith(1, new Error('woops'))
+			@limiter = SandboxedModule.require modulePath, requires: @requires
 
 		it 'should produce and error', (done) ->
 			@limiter.addCount {}, (err, should) ->

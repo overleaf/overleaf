@@ -1160,6 +1160,11 @@
         }
       }
     },
+    "browser-stdout": {
+      "version": "1.3.0",
+      "from": "browser-stdout@1.3.0",
+      "resolved": "https://registry.npmjs.org/browser-stdout/-/browser-stdout-1.3.0.tgz"
+    },
     "browserify": {
       "version": "14.5.0",
       "from": "browserify@>=14.5.0 <15.0.0",
@@ -5081,7 +5086,59 @@
       "version": "0.9.0",
       "from": "grunt-mocha-test@0.9.0",
       "resolved": "https://registry.npmjs.org/grunt-mocha-test/-/grunt-mocha-test-0.9.0.tgz",
-      "dev": true
+      "dev": true,
+      "dependencies": {
+        "commander": {
+          "version": "2.0.0",
+          "from": "commander@2.0.0",
+          "resolved": "https://registry.npmjs.org/commander/-/commander-2.0.0.tgz",
+          "dev": true
+        },
+        "glob": {
+          "version": "3.2.3",
+          "from": "glob@3.2.3",
+          "resolved": "https://registry.npmjs.org/glob/-/glob-3.2.3.tgz",
+          "dev": true
+        },
+        "graceful-fs": {
+          "version": "2.0.3",
+          "from": "graceful-fs@>=2.0.0 <2.1.0",
+          "resolved": "https://registry.npmjs.org/graceful-fs/-/graceful-fs-2.0.3.tgz",
+          "dev": true
+        },
+        "jade": {
+          "version": "0.26.3",
+          "from": "jade@0.26.3",
+          "resolved": "https://registry.npmjs.org/jade/-/jade-0.26.3.tgz",
+          "dev": true,
+          "dependencies": {
+            "commander": {
+              "version": "0.6.1",
+              "from": "commander@0.6.1",
+              "resolved": "https://registry.npmjs.org/commander/-/commander-0.6.1.tgz",
+              "dev": true
+            },
+            "mkdirp": {
+              "version": "0.3.0",
+              "from": "mkdirp@0.3.0",
+              "resolved": "https://registry.npmjs.org/mkdirp/-/mkdirp-0.3.0.tgz",
+              "dev": true
+            }
+          }
+        },
+        "mkdirp": {
+          "version": "0.3.5",
+          "from": "mkdirp@0.3.5",
+          "resolved": "https://registry.npmjs.org/mkdirp/-/mkdirp-0.3.5.tgz",
+          "dev": true
+        },
+        "mocha": {
+          "version": "1.17.1",
+          "from": "mocha@>=1.17.1 <1.18.0",
+          "resolved": "https://registry.npmjs.org/mocha/-/mocha-1.17.1.tgz",
+          "dev": true
+        }
+      }
     },
     "grunt-newer": {
       "version": "1.3.0",
@@ -5260,6 +5317,11 @@
       "version": "6.0.2",
       "from": "hawk@>=6.0.2 <6.1.0",
       "resolved": "https://registry.npmjs.org/hawk/-/hawk-6.0.2.tgz"
+    },
+    "he": {
+      "version": "1.1.1",
+      "from": "he@1.1.1",
+      "resolved": "https://registry.npmjs.org/he/-/he-1.1.1.tgz"
     },
     "heapdump": {
       "version": "0.3.9",
@@ -7998,46 +8060,49 @@
       "resolved": "https://registry.npmjs.org/mkdirp/-/mkdirp-0.5.1.tgz"
     },
     "mocha": {
-      "version": "1.17.1",
-      "from": "https://registry.npmjs.org/mocha/-/mocha-1.17.1.tgz",
-      "resolved": "https://registry.npmjs.org/mocha/-/mocha-1.17.1.tgz",
+      "version": "5.0.1",
+      "from": "mocha@5.0.1",
+      "resolved": "https://registry.npmjs.org/mocha/-/mocha-5.0.1.tgz",
       "dependencies": {
         "commander": {
-          "version": "2.0.0",
-          "from": "commander@2.0.0",
-          "resolved": "https://registry.npmjs.org/commander/-/commander-2.0.0.tgz"
+          "version": "2.11.0",
+          "from": "commander@2.11.0",
+          "resolved": "https://registry.npmjs.org/commander/-/commander-2.11.0.tgz"
+        },
+        "debug": {
+          "version": "3.1.0",
+          "from": "debug@3.1.0",
+          "resolved": "https://registry.npmjs.org/debug/-/debug-3.1.0.tgz"
+        },
+        "diff": {
+          "version": "3.3.1",
+          "from": "diff@3.3.1",
+          "resolved": "https://registry.npmjs.org/diff/-/diff-3.3.1.tgz"
         },
         "glob": {
-          "version": "3.2.3",
-          "from": "glob@3.2.3",
-          "resolved": "https://registry.npmjs.org/glob/-/glob-3.2.3.tgz"
+          "version": "7.1.2",
+          "from": "glob@7.1.2",
+          "resolved": "https://registry.npmjs.org/glob/-/glob-7.1.2.tgz"
         },
-        "graceful-fs": {
-          "version": "2.0.3",
-          "from": "graceful-fs@>=2.0.0 <2.1.0",
-          "resolved": "https://registry.npmjs.org/graceful-fs/-/graceful-fs-2.0.3.tgz"
+        "growl": {
+          "version": "1.10.3",
+          "from": "growl@1.10.3",
+          "resolved": "https://registry.npmjs.org/growl/-/growl-1.10.3.tgz"
         },
-        "jade": {
-          "version": "0.26.3",
-          "from": "jade@0.26.3",
-          "resolved": "https://registry.npmjs.org/jade/-/jade-0.26.3.tgz",
-          "dependencies": {
-            "commander": {
-              "version": "0.6.1",
-              "from": "commander@0.6.1",
-              "resolved": "https://registry.npmjs.org/commander/-/commander-0.6.1.tgz"
-            },
-            "mkdirp": {
-              "version": "0.3.0",
-              "from": "mkdirp@0.3.0",
-              "resolved": "https://registry.npmjs.org/mkdirp/-/mkdirp-0.3.0.tgz"
-            }
-          }
+        "has-flag": {
+          "version": "2.0.0",
+          "from": "has-flag@>=2.0.0 <3.0.0",
+          "resolved": "https://registry.npmjs.org/has-flag/-/has-flag-2.0.0.tgz"
         },
-        "mkdirp": {
-          "version": "0.3.5",
-          "from": "mkdirp@0.3.5",
-          "resolved": "https://registry.npmjs.org/mkdirp/-/mkdirp-0.3.5.tgz"
+        "minimatch": {
+          "version": "3.0.4",
+          "from": "minimatch@>=3.0.4 <4.0.0",
+          "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-3.0.4.tgz"
+        },
+        "supports-color": {
+          "version": "4.4.0",
+          "from": "supports-color@4.4.0",
+          "resolved": "https://registry.npmjs.org/supports-color/-/supports-color-4.4.0.tgz"
         }
       }
     },

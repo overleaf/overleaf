@@ -34,6 +34,7 @@ describe "ProjectStructureMongoLock", ->
 					namespace = ProjectEntityMongoUpdateHandler.LOCK_NAMESPACE
 					@lock_key = "lock:web:#{namespace}:#{project._id}"
 					LockManager._getLock @lock_key, namespace, done
+			return
 
 		after (done) ->
 			LockManager._releaseLock @lock_key, done
