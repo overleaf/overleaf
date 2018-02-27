@@ -42,6 +42,9 @@ public class Tar {
             /* Closes target */
             try (OutputStream bzip2 = new BZip2CompressorOutputStream(target)) {
                 tarTo(fileOrDir, bzip2);
+            } catch (IOException e) {
+                tmp.delete();
+                throw e;
             }
             if (sizePtr != null) {
                 sizePtr[0] = tmp.length();
@@ -68,7 +71,10 @@ public class Tar {
         tmp.deleteOnExit();
         try (FileOutputStream target = new FileOutputStream(tmp)) {
             tarTo(fileOrDir, target);
-            return new FileInputStream(tmp);
+            return new DeletingFileInputStream(tmp);
+        } catch (IOException e) {
+            tmp.delete();
+            throw e;
         }
     }
 
