@@ -1,6 +1,7 @@
 package uk.ac.ic.wlgitbridge.io.http.ning;
 
-import com.ning.http.client.*;
+import io.netty.handler.codec.http.HttpHeaders;
+import org.asynchttpclient.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.ic.wlgitbridge.util.FunctionT;
@@ -23,7 +24,7 @@ public class NingHttpClient implements NingHttpClientFacade {
     @Override
     public <E extends Exception> byte[] get(
             String url,
-            FunctionT<HttpResponseHeaders, Boolean, E> handler
+            FunctionT<HttpHeaders, Boolean, E> handler
     ) throws ExecutionException {
         try {
             return http
@@ -33,19 +34,19 @@ public class NingHttpClient implements NingHttpClientFacade {
                 ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 
                 @Override
-                public STATE onHeadersReceived(
-                        HttpResponseHeaders headers
+                public State onHeadersReceived(
+                        HttpHeaders headers
                 ) throws E {
                     return handler.apply(headers)
-                            ? STATE.CONTINUE : STATE.ABORT;
+                            ? State.CONTINUE : State.ABORT;
                 }
 
                 @Override
-                public STATE onBodyPartReceived(
+                public State onBodyPartReceived(
                         HttpResponseBodyPart content
                 ) throws IOException {
                     bytes.write(content.getBodyPartBytes());
-                    return STATE.CONTINUE;
+                    return State.CONTINUE;
                 }
 
                 @Override
