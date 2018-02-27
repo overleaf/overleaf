@@ -1,9 +1,8 @@
 package uk.ac.ic.wlgitbridge.bridge.swap.store;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.*;
 
 import java.io.InputStream;
@@ -30,7 +29,7 @@ public class S3SwapStore implements SwapStore {
             String secret,
             String bucketName
     ) {
-        s3 = AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secret))).build();
+        s3 = new AmazonS3Client(new BasicAWSCredentials(accessKey, secret));
         this.bucketName = bucketName;
     }
 

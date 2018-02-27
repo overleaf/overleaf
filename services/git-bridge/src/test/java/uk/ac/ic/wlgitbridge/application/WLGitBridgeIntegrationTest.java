@@ -1,9 +1,9 @@
 package uk.ac.ic.wlgitbridge.application;
 
+import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.Response;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import static org.asynchttpclient.Dsl.*;
-import org.asynchttpclient.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Before;
 import org.junit.Rule;
@@ -613,22 +613,22 @@ public class WLGitBridgeIntegrationTest {
 
         // With no key, we should get a 404.
         String url = "http://127.0.0.1:" + gitBridgePort + "/api/testproj/push.tex";
-        Response response = asyncHttpClient().prepareGet(url).execute().get();
+        Response response = new AsyncHttpClient().prepareGet(url).execute().get();
         assertEquals(404, response.getStatusCode());
 
         // With an invalid project and no key, we should get a 404.
         url = "http://127.0.0.1:" + gitBridgePort + "/api/notavalidproject/push.tex";
-        response = asyncHttpClient().prepareGet(url).execute().get();
+        response = new AsyncHttpClient().prepareGet(url).execute().get();
         assertEquals(404, response.getStatusCode());
 
         // With a bad key for a valid project, we should get a 404.
         url = "http://127.0.0.1:" + gitBridgePort + "/api/testproj/push.tex?key=notavalidkey";
-        response = asyncHttpClient().prepareGet(url).execute().get();
+        response = new AsyncHttpClient().prepareGet(url).execute().get();
         assertEquals(404, response.getStatusCode());
 
         // With a bad key for an invalid project, we should get a 404.
         url = "http://127.0.0.1:" + gitBridgePort + "/api/notavalidproject/push.tex?key=notavalidkey";
-        response = asyncHttpClient().prepareGet(url).execute().get();
+        response = new AsyncHttpClient().prepareGet(url).execute().get();
         assertEquals(404, response.getStatusCode());
 
         wlgb.stop();
@@ -719,14 +719,14 @@ public class WLGitBridgeIntegrationTest {
         // With an invalid project and no key, we should get a 404,
         // which is rendered by our custom error handler.
         String url = "http://127.0.0.1:" + gitBridgePort + "/api/notavalidproject/main.tex";
-        Response response = asyncHttpClient().prepareGet(url).execute().get();
+        Response response = new AsyncHttpClient().prepareGet(url).execute().get();
         assertEquals(404, response.getStatusCode());
         assertEquals("{\"message\":\"HTTP error 404\"}", response.getResponseBody());
 
         // With an unsupported URL outside the api, we should get a 500,
         // which is rendered by our custom error handler.
         url = "http://127.0.0.1:" + gitBridgePort + "/foo";
-        response = asyncHttpClient().prepareGet(url).execute().get();
+        response = new AsyncHttpClient().prepareGet(url).execute().get();
         assertEquals(500, response.getStatusCode());
         assertEquals("{\"message\":\"HTTP error 500\"}", response.getResponseBody());
 

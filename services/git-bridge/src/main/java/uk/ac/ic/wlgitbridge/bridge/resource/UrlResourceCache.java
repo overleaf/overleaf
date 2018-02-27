@@ -1,6 +1,6 @@
 package uk.ac.ic.wlgitbridge.bridge.resource;
 
-import static org.asynchttpclient.Dsl.*;
+import com.ning.http.client.AsyncHttpClient;
 import uk.ac.ic.wlgitbridge.bridge.db.DBStore;
 import uk.ac.ic.wlgitbridge.data.filestore.RawFile;
 import uk.ac.ic.wlgitbridge.data.filestore.RepositoryFile;
@@ -31,7 +31,7 @@ public class UrlResourceCache implements ResourceCache {
     }
 
     public UrlResourceCache(DBStore dbStore) {
-        this(dbStore, new NingHttpClient(asyncHttpClient()));
+        this(dbStore, new NingHttpClient(new AsyncHttpClient()));
     }
 
     @Override
@@ -82,7 +82,8 @@ public class UrlResourceCache implements ResourceCache {
         Log.info("GET -> " + url);
         try {
             contents = http.get(url, hs -> {
-                List<String> contentLengths = hs.getAll("Content-Length");
+                List<String> contentLengths
+                        = hs.getHeaders().get("Content-Length");
                 if (!maxFileSize.isPresent()) {
                     return true;
                 }
