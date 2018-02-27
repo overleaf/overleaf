@@ -2,7 +2,7 @@ package uk.ac.ic.wlgitbridge.snapshot.servermock.server;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.ning.http.client.AsyncHttpClient;
+import static org.asynchttpclient.Dsl.*;
 import uk.ac.ic.wlgitbridge.util.Log;
 
 import java.io.IOException;
@@ -30,17 +30,9 @@ public class PostbackThread extends Thread {
     @Override
     public void run() {
         try {
-            new AsyncHttpClient().preparePost(
+            asyncHttpClient().preparePost(
                     url
             ).setBody(postback).execute().get().getResponseBody();
-        } catch (IOException e) {
-            Log.warn(
-                    "IOException on postback, url: " +
-                            url +
-                            ", postback: " +
-                            postback,
-                    e
-            );
         } catch (InterruptedException e) {
             Log.warn(
                     "Interrupted on postback, url: " +

@@ -1,12 +1,12 @@
 package uk.ac.ic.wlgitbridge.bridge.resource;
 
-import com.ning.http.client.HttpResponseHeaders;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
 import org.junit.Test;
 import uk.ac.ic.wlgitbridge.bridge.db.noop.NoopDbStore;
 import uk.ac.ic.wlgitbridge.bridge.util.CastUtil;
 import uk.ac.ic.wlgitbridge.git.exception.SizeLimitExceededException;
 import uk.ac.ic.wlgitbridge.io.http.ning.NingHttpClientFacade;
-import uk.ac.ic.wlgitbridge.io.http.ning.NingHttpHeaders;
 import uk.ac.ic.wlgitbridge.util.FunctionT;
 
 import java.io.IOException;
@@ -31,11 +31,8 @@ public class UrlResourceCacheTest {
     private final UrlResourceCache cache
             = new UrlResourceCache(new NoopDbStore(), http);
 
-    private static HttpResponseHeaders withContentLength(long cl) {
-        return NingHttpHeaders
-                .builder()
-                .addHeader("Content-Length", String.valueOf(cl))
-                .build();
+    private static HttpHeaders withContentLength(long cl) {
+        return new DefaultHttpHeaders().add("Content-Length", String.valueOf(cl));
     }
 
     private void respondWithContentLength(long cl, long actual)
@@ -44,7 +41,7 @@ public class UrlResourceCacheTest {
             Object[] args = invoc.getArguments();
             //noinspection unchecked
             ((FunctionT<
-                    HttpResponseHeaders, Boolean, SizeLimitExceededException
+                    HttpHeaders, Boolean, SizeLimitExceededException
             >) args[1]).apply(withContentLength(cl));
             return new byte[CastUtil.assumeInt(actual)];
         });
