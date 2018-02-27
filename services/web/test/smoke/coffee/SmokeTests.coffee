@@ -51,6 +51,7 @@ describe "Opening", ->
 							return done(err) if err?
 							logger.log "smoke test: finishing setup"
 							convertCookieFile done
+		return
 
 	after (done)->
 		logger.log "smoke test: cleaning up"
@@ -61,6 +62,7 @@ describe "Opening", ->
 			if err?
 				return done(err)
 			fs.unlink cookeFilePath, done
+		return
 
 	it "a project", (done) ->
 		logger.log "smoke test: Checking can load a project"
