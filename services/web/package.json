@@ -54,7 +54,7 @@
     "method-override": "^2.3.3",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.7.1",
     "mimelib": "0.2.14",
-    "mocha": "^5.0.1",
+    "mocha": "1.17.1",
     "mongojs": "2.4.0",
     "mongoose": "4.11.4",
     "multer": "^0.1.8",
