@@ -21,7 +21,7 @@ services:
             SHARELATEX_REDIS_HOST: redis
             SHARELATEX_APP_NAME: Our ShareLaTeX
             
-            #Set for SSL via nginx-proxy
+            ## Set for SSL via nginx-proxy
             #VIRTUAL_HOST: 103.112.212.22
 
             # SHARELATEX_SITE_URL: http://sharelatex.mydomain.com
@@ -55,20 +55,16 @@ services:
             # SANDBOXED_COMPILES_SIBLING_CONTAINERS: 'true'
             # SANDBOXED_COMPILES_HOST_DIR: '/var/clsi/compiles'
 
-            # SHARELATEX_LDAP_HOST: 'ldap://ldap.forumsys.com' 
-            # SHARELATEX_LDAP_DN: 'uid=:userKey,dc=example,dc=com' 
-            # SHARELATEX_LDAP_BASE_SEARCH: 'dc=example,dc=com'
-            # SHARELATEX_LDAP_FILTER: '(uid=:userKey)'
-            # SHARELATEX_LDAP_ADMIN_DN: 'cn=read-only-admin,dc=example,dc=com' 
-            # SHARELATEX_LDAP_ADMIN_PW: password'
-            # SHARELATEX_LDAP_ANONYMOUS: "false"
-            # SHARELATEX_LDAP_EMAIL_ATT: "mail"
-            # SHARELATEX_LDAP_NAME_ATT: "name"
-            # SHARELATEX_LDAP_LAST_NAME_ATT: "secondname"
-            # SHARELATEX_LDAP_PLACEHOLDER: "Username"
-            # SHARELATEX_LDAP_TLS: "true"
-            # SHARELATEX_LDAP_TLS_OPTS_REJECT_UNAUTH:
-            # SHARELATEX_LDAP_TLS_OPTS_CA_PATH: '["/var/one.pem", "/var/two.pem"]'
+            ## Works with test LDAP server shown at bottom of docker compose
+            # SHARELATEX_LDAP_URL: 'ldap://ldap:389'
+            # SHARELATEX_LDAP_SEARCH_BASE: 'ou=people,dc=planetexpress,dc=com'
+            # SHARELATEX_LDAP_SEARCH_FILTER: '(uid={{username}})'
+            # SHARELATEX_LDAP_BIND_DN: 'cn=admin,dc=planetexpress,dc=com'
+            # SHARELATEX_LDAP_BIND_CREDENTIALS: 'GoodNewsEveryone'
+            # SHARELATEX_LDAP_EMAIL_ATT: 'mail'
+            # SHARELATEX_LDAP_NAME_ATT: 'cn'
+            # SHARELATEX_LDAP_LAST_NAME_ATT: 'sn'
+            # SHARELATEX_LDAP_UPDATE_USER_DETAILS_ON_LOGIN: 'true'
 
             # SHARELATEX_TEMPLATES_USER_ID: "578773160210479700917ee5"
 
@@ -91,7 +87,13 @@ services:
             - 6379
         volumes:
             - ~/redis_data:/data
-            
+
+    # ldap:
+    #    restart: always
+    #    image: rroemhild/test-openldap
+    #    container_name: ldap
+    #    expose:
+    #        - 389
 # nginx-proxy:
 #     image: jwilder/nginx-proxy
 #     container_name: nginx-proxy
