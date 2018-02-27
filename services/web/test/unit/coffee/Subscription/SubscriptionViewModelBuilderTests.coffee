@@ -38,8 +38,8 @@ describe 'SubscriptionViewModelBuilder', ->
 		@builder = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": { apis: { recurly: { subdomain: "example.com" }}}
 			"./RecurlyWrapper": @RecurlyWrapper
-			"./PlansLocator": @PlansLocator
-			"./SubscriptionLocator": @SubscriptionLocator
+			"./PlansLocator": @PlansLocator = {}
+			"./SubscriptionLocator": @SubscriptionLocator = {}
 			"./SubscriptionFormatters": @SubscriptionFormatters
 			"./LimitationsManager": {}
 			"logger-sharelatex":
