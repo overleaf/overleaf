@@ -12,7 +12,7 @@ module.exports = MockDocUpdaterApi =
 	getProjectStructureUpdates: (project_id) ->
 		@updates[project_id] || { docUpdates: [], fileUpdates: [] }
 
-	addProjectStructureUpdates: (project_id, userId, docUpdates, fileUpdates) ->
+	addProjectStructureUpdates: (project_id, userId, docUpdates, fileUpdates, version) ->
 		@updates[project_id] ||= { docUpdates: [], fileUpdates: [] }
 
 		for update in docUpdates
@@ -22,6 +22,8 @@ module.exports = MockDocUpdaterApi =
 		for update in fileUpdates
 			update.userId = userId
 			@updates[project_id].fileUpdates.push(update)
+		
+		@updates[project_id].version = version
 
 	run: () ->
 		app.post "/project/:project_id/flush", (req, res, next) =>
@@ -29,8 +31,8 @@ module.exports = MockDocUpdaterApi =
 
 		app.post "/project/:project_id", jsonParser, (req, res, next) =>
 			project_id = req.params.project_id
-			{userId, docUpdates, fileUpdates} = req.body
-			@addProjectStructureUpdates(project_id, userId, docUpdates, fileUpdates)
+			{userId, docUpdates, fileUpdates, version} = req.body
+			@addProjectStructureUpdates(project_id, userId, docUpdates, fileUpdates, version)
 			res.sendStatus 200
 
 		app.delete "/project/:project_id/doc/:doc_id", (req, res, next) =>
