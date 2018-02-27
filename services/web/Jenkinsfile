@@ -54,6 +54,18 @@ pipeline {
         sh 'node_modules/.bin/grunt version'
       }
     }
+
+    stage('Lint') {
+      agent {
+        docker {
+          image 'node:6.9.5'
+          reuseNode true
+        }
+      }
+      steps {
+        sh 'make --no-print-directory lint'
+      }
+    }
     
     stage('Unit Test') {
       agent {
