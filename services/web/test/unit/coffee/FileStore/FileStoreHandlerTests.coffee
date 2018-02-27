@@ -11,7 +11,7 @@ describe "FileStoreHandler", ->
 		@fs =
 			createReadStream : sinon.stub()
 			lstat: sinon.stub().callsArgWith(1, null, {
-				isFile:=> true
+				isFile:=> @isSafeOnFileSystem
 				isDirectory:-> return false
 			})
 		@writeStream =
@@ -35,6 +35,7 @@ describe "FileStoreHandler", ->
 	describe "uploadFileFromDisk", ->
 		beforeEach ->
 			@request.returns(@writeStream)
+			@isSafeOnFileSystem = true
 
 		it "should create read stream", (done)->
 			@fs.createReadStream.returns
@@ -90,13 +91,8 @@ describe "FileStoreHandler", ->
 				done()
 
 		describe "symlink", ->
-			beforeEach ->
-				@fs.lstat = sinon.stub().callsArgWith(1, null, {
-					isFile:=> false
-					isDirectory:-> return false
-				})
-
 			it "should not read file if it is symlink", (done)->
+				@isSafeOnFileSystem = false
 				@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, =>
 					@fs.createReadStream.called.should.equal false
 					done()

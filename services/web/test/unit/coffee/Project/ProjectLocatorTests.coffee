@@ -296,7 +296,7 @@ describe 'ProjectLocator', ->
 
 			it "should not crash with a null", (done)->
 				path = "/other.tex"
-				@locator.findElementByPath {project_id: project._id, path}, (err, element)->
+				@locator.findElementByPath {project_id: @project._id, path}, (err, element)->
 					expect(err).to.exist
 					done()
 

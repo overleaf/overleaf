@@ -105,12 +105,6 @@ describe 'SudoModeMiddlewear', ->
 		describe 'when external auth is being used', ->
 			beforeEach ->
 				@externalAuth = true
-				@call = (cb) =>
-					@req = {externalAuthenticationSystemUsed: sinon.stub().returns(@externalAuth)}
-					@res = {redirect: sinon.stub()}
-					@next = sinon.stub()
-					@SudoModeMiddlewear.protectPage @req, @res, @next
-					cb()
 
 			it 'should immediately return next with no args', (done) ->
 				@call () =>
