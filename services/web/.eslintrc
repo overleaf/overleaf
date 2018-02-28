@@ -1,9 +1,21 @@
 {
   "extends": ["standard"],
+  "plugins": [
+    "chai-expect",
+    "chai-friendly"
+  ],
   "env": {
     "mocha": true
   },
   "globals": {
     "expect": true
+  },
+  "rules": {
+    // Add some chai specific rules
+    "chai-expect/missing-assertion": "error",
+    "chai-expect/terminating-properties": "error",
+    // Swap the no-unused-expressions rule with a more chai-friendly one
+    "no-unused-expressions": 0,
+    "chai-friendly/no-unused-expressions": "error"
   }
 }
