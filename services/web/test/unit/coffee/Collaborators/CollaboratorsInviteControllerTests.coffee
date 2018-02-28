@@ -108,6 +108,7 @@ describe "CollaboratorsInviteController", ->
 			}
 			@LimitationsManager.canAddXCollaborators = sinon.stub().callsArgWith(2, null, true)
 			@CollaboratorsInviteHandler.inviteToProject = sinon.stub().callsArgWith(4, null, @invite)
+			@err = new Error('woops')
 			@callback = sinon.stub()
 			@next = sinon.stub()
 
@@ -163,7 +164,6 @@ describe "CollaboratorsInviteController", ->
 			beforeEach ->
 				@CollaboratorsInviteController._checkShouldInviteEmail = sinon.stub().callsArgWith(1, null, true)
 				@CollaboratorsInviteController._checkRateLimit = sinon.stub().yields(null, true)
-				@err = new Error('woops')
 				@LimitationsManager.canAddXCollaborators = sinon.stub().callsArgWith(2, @err)
 				@CollaboratorsInviteController.inviteToProject @req, @res, @next
 
