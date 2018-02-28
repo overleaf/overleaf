@@ -11,6 +11,8 @@
     "expect": true
   },
   "rules": {
+    "max-len": "error",
+
     // Add some chai specific rules
     "chai-expect/missing-assertion": "error",
     "chai-expect/terminating-properties": "error",
