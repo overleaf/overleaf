@@ -169,3 +169,11 @@ module.exports = HttpController =
 			return next(error) if error?
 			logger.log project_id: project_id, "updated project via http"
 			res.send 204 # No Content
+
+	resyncProject: (req, res, next = (error) ->) ->
+		project_id = req.params.project_id
+		{docs, files} = req.body
+
+		HistoryManager.resyncProject project_id, docs, files, (error) ->
+			return next(error) if error?
+			res.send 204

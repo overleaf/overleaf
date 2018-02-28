@@ -321,6 +321,14 @@ module.exports = RedisManager =
 	getDocIdsInProject: (project_id, callback = (error, doc_ids) ->) ->
 		rclient.smembers keys.docsInProject(project_id: project_id), callback
 
+	resyncProjectStructure: (project_id, docs, files, callback) ->
+		update =
+			projectStructure: { docs, files }
+			meta:
+				ts: new Date()
+		jsonUpdate = JSON.stringify update
+		rclient.rpush projectHistoryKeys.projectHistoryOps({project_id}), jsonUpdate, callback
+
 	_serializeRanges: (ranges, callback = (error, serializedRanges) ->) ->
 		jsonRanges = JSON.stringify(ranges)
 		if jsonRanges? and jsonRanges.length > MAX_RANGES_SIZE

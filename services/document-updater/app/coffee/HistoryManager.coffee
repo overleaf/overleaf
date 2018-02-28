@@ -2,6 +2,7 @@ Settings = require "settings-sharelatex"
 request  = require "request"
 logger = require "logger-sharelatex"
 HistoryRedisManager = require "./HistoryRedisManager"
+RedisManager = require "./RedisManager"
 
 module.exports = HistoryManager =
 	flushDocChangesAsync: (project_id, doc_id) ->
@@ -61,3 +62,14 @@ module.exports = HistoryManager =
 		prevBlock = Math.floor(previousLength / threshold)
 		newBlock  = Math.floor(length / threshold)
 		return newBlock != prevBlock
+
+	resyncProject: (project_id, docs, files, callback) ->
+		RedisManager.resyncProjectStructure project_id, docs, files, (error) ->
+			return callback(error) if error?
+			callback null
+
+			#jobs = _.union
+				#_.map docs, (doc) -> RedisManager.resyncDoc project_id, doc
+				#_.map files, (files) -> RedisManager.resyncFile project_id, file
+
+			#async.series jobs, callback
