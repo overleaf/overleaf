@@ -40,4 +40,9 @@ if process.env["COMMAND_RUNNER"]
 		expireProjectAfterIdleMs: 24 * 60 * 60 * 1000
 		checkProjectsIntervalMs: 10 * 60 * 1000
 
+	module.exports.path.synctexBaseDir = -> "/compile"	
+	
 	module.exports.path.sandboxedCompilesHostDir = process.env["COMPILES_HOST_DIR"]
+
+	#TODO this can be deleted once module is merged in
+	module.exports.path.synctexBinHostPath = process.env["SYNCTEX_BIN_HOST_PATH"]

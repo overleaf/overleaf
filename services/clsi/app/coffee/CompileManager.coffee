@@ -41,8 +41,6 @@ module.exports = CompileManager =
 
 	doCompile: (request, callback = (error, outputFiles) ->) ->
 		compileDir = getCompileDir(request.project_id, request.user_id)
-		# console.log("doCompile", compileDir)
-
 		timer = new Metrics.Timer("write-to-disk")
 		logger.log project_id: request.project_id, user_id: request.user_id, "syncing resources to disk"
 		ResourceWriter.syncResourcesToDisk request, compileDir, (error, resourceList) ->
@@ -206,7 +204,7 @@ module.exports = CompileManager =
 		base_dir = Settings.path.synctexBaseDir(compileName)
 		file_path = base_dir + "/" + file_name
 		compileDir = getCompileDir(project_id, user_id)
-		synctex_path =  "$COMPILE_DIR/output.pdf"
+		synctex_path =  "#{base_dir}/output.pdf"
 		command = ["code", synctex_path, file_path, line, column]
 		CompileManager._runSynctex project_id, user_id, command, (error, stdout) ->
 			return callback(error) if error?
@@ -219,9 +217,9 @@ module.exports = CompileManager =
 
 	syncFromPdf: (project_id, user_id, page, h, v, callback = (error, filePositions) ->) ->
 		compileName = getCompileName(project_id, user_id)
-		base_dir = Settings.path.synctexBaseDir(compileName)
 		compileDir = getCompileDir(project_id, user_id)
-		synctex_path =  "$COMPILE_DIR/output.pdf"
+		base_dir = Settings.path.synctexBaseDir(compileName)
+		synctex_path =  "#{base_dir}/output.pdf"
 		command = ["pdf", synctex_path, page, h, v]
 		CompileManager._runSynctex  project_id, user_id, command, (error, stdout) ->
 			return callback(error) if error?
@@ -245,19 +243,16 @@ module.exports = CompileManager =
 	_runSynctex: (project_id, user_id, command, callback = (error, stdout) ->) ->
 		seconds = 1000
 
-		#this is a hack, only works for docker runner
 		command.unshift("/opt/synctex")
+
 		directory = getCompileDir(project_id, user_id)
 		timeout = 10 * 1000
 		compileName = getCompileName(project_id, user_id)
-		console.log command, "_runSynctex"
-
-		CommandRunner.run compileName, command, directory, Settings.clsi.docker.image, timeout, {}, (error, stdout) ->
-			console.log("synctex run", stdout)
+		CommandRunner.run compileName, command, directory, Settings.clsi.docker.image, timeout, {}, (error, output) ->
 			if error?
 				logger.err err:error, command:command, "error running synctex"
 				return callback(error)
-			callback(null, stdout)
+			callback(null, output.stdout)
 
 	_parseSynctexFromCodeOutput: (output) ->
 		results = []

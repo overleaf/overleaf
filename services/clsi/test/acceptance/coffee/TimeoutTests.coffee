@@ -15,7 +15,6 @@
 # 					\\documentclass{article}
 # 					\\begin{document}
 # 					Hello world
-# 					\\input{|"sleep 10"}
 # 					\\end{document}
 # 				'''
 # 			]

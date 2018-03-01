@@ -109,7 +109,6 @@ module.exports = ResourceWriter =
 				callback()
 
 	_writeResourceToDisk: (project_id, resource, basePath, callback = (error) ->) ->
-		console.log("_writeResourceToDisk", basePath, resource.path)
 		ResourceWriter.checkPath basePath, resource.path, (error, path) ->
 			return callback(error) if error?
 			mkdirp Path.dirname(path), (error) ->
