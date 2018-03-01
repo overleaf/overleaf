@@ -7,7 +7,8 @@
 load = () ->
 	BADCHAR_RX = ///
 		[
-			\/ # no slashes
+			\/ # no forward slashes
+			\\ # no back slashes
 			\* # no asterisk
 			\u0000-\u001F # no control characters (0-31)
 			\u007F        # no delete
