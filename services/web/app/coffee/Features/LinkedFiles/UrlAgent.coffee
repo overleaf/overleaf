@@ -31,15 +31,15 @@ module.exports = UrlAgent = {
 		callback = _.once(callback)
 		url = data.url
 		if !urlValidator.isWebUri(url)
-			return callback(new InvalidUrlError())
-		url = @._wrapWithProxy(url)
+			return callback(new InvalidUrlError("invalid url: #{url}"))
+		url = UrlAgent._wrapWithProxy(url)
 		readStream = request.get(url)
 		readStream.on "error", callback
 		readStream.on "response", (response) ->
 			if 200 <= response.statusCode < 300
 				FileWriter.writeStreamToDisk project_id, readStream, callback
 			else
-				error = new UrlFetchFailedError()
+				error = new UrlFetchFailedError("url fetch failed: #{url}")
 				error.statusCode = response.statusCode
 				callback(error)
 
