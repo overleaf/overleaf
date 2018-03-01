@@ -42,6 +42,7 @@ describe "ProjectStructureChanges", ->
 				expect(update.docLines).to.be.a('string')
 			expect(_.where(updates, pathname: "/main.tex").length).to.equal 1
 			expect(_.where(updates, pathname: "/references.bib").length).to.equal 1
+			expect(version).to.equal(3)
 
 		it "should version creating a file", ->
 			{fileUpdates: updates, version} = MockDocUpdaterApi.getProjectStructureUpdates(example_project_id)
@@ -50,6 +51,7 @@ describe "ProjectStructureChanges", ->
 			expect(update.userId).to.equal(@owner._id)
 			expect(update.pathname).to.equal("/universe.jpg")
 			expect(update.url).to.be.a('string');
+			expect(version).to.equal(3)
 
 	describe "duplicating a project", ->
 		before (done) ->
@@ -74,6 +76,7 @@ describe "ProjectStructureChanges", ->
 				expect(update.docLines).to.be.a('string')
 			expect(_.where(updates, pathname: "/main.tex").length).to.equal(1)
 			expect(_.where(updates, pathname: "/references.bib").length).to.equal(1)
+			expect(version).to.equal(3)
 
 		it "should version the files created", ->
 			{fileUpdates: updates, version} = MockDocUpdaterApi.getProjectStructureUpdates(@dup_project_id)
@@ -82,6 +85,7 @@ describe "ProjectStructureChanges", ->
 			expect(update.userId).to.equal(@owner._id)
 			expect(update.pathname).to.equal("/universe.jpg")
 			expect(update.url).to.be.a('string');
+			expect(version).to.equal(3)
 
 	describe "adding a doc", ->
 		before (done) ->
@@ -112,6 +116,7 @@ describe "ProjectStructureChanges", ->
 			expect(update.userId).to.equal(@owner._id)
 			expect(update.pathname).to.equal("/new.tex")
 			expect(update.docLines).to.be.a('string');
+			expect(version).to.equal(@project_0.version + 1)
 
 		it "should increment the project structure version number", ->
 			expect(@project_1.version).to.equal(@project_0.version + 1)
@@ -140,6 +145,7 @@ describe "ProjectStructureChanges", ->
 			expect(update.userId).to.equal(@owner._id)
 			expect(update.pathname).to.equal("/main.tex")
 			expect(update.docLines).to.equal("Test")
+			expect(version).to.equal(2)
 
 		it "should version the files created", ->
 			{fileUpdates: updates, version} = MockDocUpdaterApi.getProjectStructureUpdates(@uploaded_project_id)
@@ -148,6 +154,7 @@ describe "ProjectStructureChanges", ->
 			expect(update.userId).to.equal(@owner._id)
 			expect(update.pathname).to.equal("/1pixel.png")
 			expect(update.url).to.be.a('string');
+			expect(version).to.equal(2)
 
 	describe "uploading a file", ->
 		beforeEach (done) ->
@@ -185,6 +192,7 @@ describe "ProjectStructureChanges", ->
 				expect(update.pathname).to.equal("/1pixel.png")
 				expect(update.url).to.be.a('string');
 				@original_file_url = update.url
+				expect(version).to.equal(@project_0.version + 1)
 
 				ProjectGetter.getProject example_project_id, (error, newProject) =>
 					throw error if error?
@@ -217,6 +225,7 @@ describe "ProjectStructureChanges", ->
 				expect(update.userId).to.equal(@owner._id)
 				expect(update.pathname).to.equal("/1pixel.png")
 				expect(update.url).to.be.a('string');
+				expect(version).to.equal(@project_0.version + 1)
 
 				ProjectGetter.getProject example_project_id, (error, newProject) =>
 					throw error if error?
@@ -260,6 +269,7 @@ describe "ProjectStructureChanges", ->
 				expect(update.userId).to.equal(@owner._id)
 				expect(update.pathname).to.equal("/new.tex")
 				expect(update.newPathname).to.equal("/foo/new.tex")
+				expect(version).to.equal(@project_0.version + 2)
 
 				ProjectGetter.getProject example_project_id, (error, newProject) =>
 					throw error if error?
@@ -284,6 +294,8 @@ describe "ProjectStructureChanges", ->
 				expect(update.userId).to.equal(@owner._id)
 				expect(update.pathname).to.equal("/1pixel.png")
 				expect(update.newPathname).to.equal("/foo/1pixel.png")
+				expect(version).to.equal(@project_0.version + 2)
+
 				ProjectGetter.getProject example_project_id, (error, newProject) =>
 					throw error if error?
 					@project_1 = newProject
@@ -315,6 +327,7 @@ describe "ProjectStructureChanges", ->
 					expect(update.userId).to.equal(@owner._id)
 					expect(update.pathname).to.equal("/foo/new.tex")
 					expect(update.newPathname).to.equal("/bar/foo/new.tex")
+					expect(version).to.equal(@project_0.version + 3)
 
 					{fileUpdates:updates, version} = MockDocUpdaterApi.getProjectStructureUpdates(example_project_id)
 					expect(updates.length).to.equal(1)
@@ -322,6 +335,8 @@ describe "ProjectStructureChanges", ->
 					expect(update.userId).to.equal(@owner._id)
 					expect(update.pathname).to.equal("/foo/1pixel.png")
 					expect(update.newPathname).to.equal("/bar/foo/1pixel.png")
+					expect(version).to.equal(@project_0.version + 3)
+
 					ProjectGetter.getProject example_project_id, (error, newProject) =>
 						throw error if error?
 						@project_1 = newProject
@@ -354,6 +369,7 @@ describe "ProjectStructureChanges", ->
 				expect(update.userId).to.equal(@owner._id)
 				expect(update.pathname).to.equal("/bar/foo/new.tex")
 				expect(update.newPathname).to.equal("/bar/foo/new_renamed.tex")
+				expect(version).to.equal(@project_0.version + 1)
 
 				ProjectGetter.getProject example_project_id, (error, newProject) =>
 					throw error if error?
@@ -378,6 +394,7 @@ describe "ProjectStructureChanges", ->
 				expect(update.userId).to.equal(@owner._id)
 				expect(update.pathname).to.equal("/bar/foo/1pixel.png")
 				expect(update.newPathname).to.equal("/bar/foo/1pixel_renamed.png")
+				expect(version).to.equal(@project_0.version + 1)
 
 				ProjectGetter.getProject example_project_id, (error, newProject) =>
 					throw error if error?
@@ -402,6 +419,7 @@ describe "ProjectStructureChanges", ->
 				expect(update.userId).to.equal(@owner._id)
 				expect(update.pathname).to.equal("/bar/foo/new_renamed.tex")
 				expect(update.newPathname).to.equal("/bar/foo_renamed/new_renamed.tex")
+				expect(version).to.equal(@project_0.version + 1)
 
 				{fileUpdates:updates, version} = MockDocUpdaterApi.getProjectStructureUpdates(example_project_id)
 				expect(updates.length).to.equal(1)
@@ -409,6 +427,7 @@ describe "ProjectStructureChanges", ->
 				expect(update.userId).to.equal(@owner._id)
 				expect(update.pathname).to.equal("/bar/foo/1pixel_renamed.png")
 				expect(update.newPathname).to.equal("/bar/foo_renamed/1pixel_renamed.png")
+				expect(version).to.equal(@project_0.version + 1)
 
 				ProjectGetter.getProject example_project_id, (error, newProject) =>
 					throw error if error?
@@ -441,6 +460,7 @@ describe "ProjectStructureChanges", ->
 				expect(update.userId).to.equal(@owner._id)
 				expect(update.pathname).to.equal("/bar/foo_renamed/new_renamed.tex")
 				expect(update.newPathname).to.equal("")
+				expect(version).to.equal(@project_0.version + 1)
 
 				{fileUpdates:updates, version} = MockDocUpdaterApi.getProjectStructureUpdates(example_project_id)
 				expect(updates.length).to.equal(1)
@@ -448,6 +468,7 @@ describe "ProjectStructureChanges", ->
 				expect(update.userId).to.equal(@owner._id)
 				expect(update.pathname).to.equal("/bar/foo_renamed/1pixel_renamed.png")
 				expect(update.newPathname).to.equal("")
+				expect(version).to.equal(@project_0.version + 1)
 
 				ProjectGetter.getProject example_project_id, (error, newProject) =>
 					throw error if error?
@@ -499,6 +520,7 @@ describe "ProjectStructureChanges", ->
 				expect(update.userId).to.equal(@owner._id)
 				expect(update.pathname).to.equal("/test.tex")
 				expect(update.docLines).to.equal("Test")
+				expect(version).to.equal(@project_0.version + 1)
 
 				ProjectGetter.getProject @tpds_project_id, (error, newProject) =>
 					throw error if error?
@@ -536,6 +558,7 @@ describe "ProjectStructureChanges", ->
 				expect(update.userId).to.equal(@owner._id)
 				expect(update.pathname).to.equal("/1pixel.png")
 				expect(update.url).to.be.a('string');
+				expect(version).to.equal(@project_0.version + 1)
 
 				ProjectGetter.getProject @tpds_project_id, (error, newProject) =>
 					throw error if error?
@@ -573,6 +596,7 @@ describe "ProjectStructureChanges", ->
 				expect(update.userId).to.equal(@owner._id)
 				expect(update.pathname).to.equal("/1pixel.png")
 				expect(update.url).to.be.a('string');
+				expect(version).to.equal(@project_0.version + 1)
 
 				ProjectGetter.getProject @tpds_project_id, (error, newProject) =>
 					throw error if error?
@@ -601,7 +625,8 @@ describe "ProjectStructureChanges", ->
 				expect(update.userId).to.equal(@owner._id)
 				expect(update.pathname).to.equal("/test.tex")
 				expect(update.newPathname).to.equal("")
-
+				expect(version).to.equal(@project_0.version + 1)
+				
 				ProjectGetter.getProject @tpds_project_id, (error, newProject) =>
 					throw error if error?
 					@project_1 = newProject
