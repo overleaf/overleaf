@@ -2981,6 +2981,18 @@
         }
       }
     },
+    "eslint-plugin-chai-expect": {
+      "version": "1.1.1",
+      "from": "eslint-plugin-chai-expect@latest",
+      "resolved": "https://registry.npmjs.org/eslint-plugin-chai-expect/-/eslint-plugin-chai-expect-1.1.1.tgz",
+      "dev": true
+    },
+    "eslint-plugin-chai-friendly": {
+      "version": "0.4.1",
+      "from": "eslint-plugin-chai-friendly@latest",
+      "resolved": "https://registry.npmjs.org/eslint-plugin-chai-friendly/-/eslint-plugin-chai-friendly-0.4.1.tgz",
+      "dev": true
+    },
     "eslint-plugin-import": {
       "version": "2.9.0",
       "from": "eslint-plugin-import@>=2.9.0 <3.0.0",
