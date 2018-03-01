@@ -31,6 +31,9 @@ define [
 			)
 
 		$scope.openLinkedFileModal = window.openLinkedFileModal = () ->
+			unless 'url' in window.data.enabledLinkedFileTypes
+				console.warn("Url linked files are not enabled")
+				return
 			$modal.open(
 				templateUrl: "linkedFileModalTemplate"
 				controller:  "LinkedFileModalController"

@@ -1,5 +1,7 @@
 AuthenticationController = require '../Authentication/AuthenticationController'
 EditorController = require '../Editor/EditorController'
+Settings = require 'settings-sharelatex'
+logger = require 'logger-sharelatex'
 
 module.exports = LinkedFilesController = {
 	Agents: {
@@ -10,8 +12,11 @@ module.exports = LinkedFilesController = {
 		{project_id} = req.params
 		{name, provider, data, parent_folder_id} = req.body
 		user_id = AuthenticationController.getLoggedInUserId(req)
+		logger.log {project_id, name, provider, data, parent_folder_id, user_id}, 'create linked file request'
 
 		if !LinkedFilesController.Agents.hasOwnProperty(provider)
+			return res.send(400)
+		unless provider in Settings.enabledLinkedFileTypes
 			return res.send(400)
 		Agent = LinkedFilesController.Agents[provider]
 

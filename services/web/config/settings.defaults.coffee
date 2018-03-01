@@ -216,6 +216,8 @@ module.exports = settings =
 
 	enableSubscriptions:false
 
+	enabledLinkedFileTypes: (process.env['ENABLED_LINKED_FILE_TYPES'] or '').split(',')
+
 	# i18n
 	# ------
 	#
