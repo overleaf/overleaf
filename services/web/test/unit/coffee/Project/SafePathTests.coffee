@@ -79,10 +79,9 @@ describe 'SafePath', ->
 		# 	result = @SafePath.isCleanFilename 'hello.'
 		# 	result.should.equal false
 
-
-		# it 'should not accept \\', ->
-		# 	result = @SafePath.isCleanFilename 'foo\\bar'
-		# 	result.should.equal false
+		it 'should not accept \\', ->
+			result = @SafePath.isCleanFilename 'foo\\bar'
+			result.should.equal false
 
 	describe 'isAllowedLength', ->
 		it 'should accept a valid path "main.tex"', ->
