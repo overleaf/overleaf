@@ -11,7 +11,10 @@
     "expect": true
   },
   "rules": {
-    "max-len": "error",
+    "max-len": ["error", {
+      // Ignore long describe/it test blocks
+      "ignorePattern": "^\\s*(it|describe)\\s*\\(['\"]"
+    }],
 
     // Add some chai specific rules
     "chai-expect/missing-assertion": "error",
