@@ -19,7 +19,8 @@ module.exports =
 	internal:
 		clsi:
 			port: 3013
-			host: process.env["LISTEN_ADDRESS"] or "0.0.0.0"
+			host: process.env["LISTEN_ADDRESS"] or "localhost"
+
 	apis:
 		clsi:
 			url: "http://#{process.env['CLSI_HOST'] or 'localhost'}:3013"

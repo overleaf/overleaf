@@ -42,6 +42,10 @@ module.exports = CompileController =
 								status = "success"
 						if status == "failure"
 							logger.err project_id: request.project_id, outputFiles:outputFiles, "project failed to compile successfully, no output.pdf generated"
+						# log an error if any core files are found
+						for file in outputFiles
+							if file.path is "core"
+								logger.error project_id:request.project_id, req:req, outputFiles:outputFiles, "core file found in output"
 
 					timer.done()
 					res.status(code or 200).send {
