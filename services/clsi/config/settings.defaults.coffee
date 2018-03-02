@@ -19,7 +19,8 @@ module.exports =
 	internal:
 		clsi:
 			port: 3013
-			host: process.env["LISTEN_ADDRESS"] or "0.0.0.0"
+			host: process.env["LISTEN_ADDRESS"] or "localhost"
+
 	apis:
 		clsi:
 			url: "http://#{process.env['CLSI_HOST'] or 'localhost'}:3013"
@@ -44,5 +45,4 @@ if process.env["COMMAND_RUNNER"]
 	
 	module.exports.path.sandboxedCompilesHostDir = process.env["COMPILES_HOST_DIR"]
 
-	#TODO this can be deleted once module is merged in
 	module.exports.path.synctexBinHostPath = process.env["SYNCTEX_BIN_HOST_PATH"]
