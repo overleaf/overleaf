@@ -33,7 +33,6 @@ module.exports = function (config) {
       'test/unit_frontend/es/**/*.js': ['webpack']
     },
     frameworks: ['requirejs', 'mocha', 'chai-sinon'],
-    reporters: ['tap'],
     // Configure webpack in the tests
     webpack: {
       resolve: {
