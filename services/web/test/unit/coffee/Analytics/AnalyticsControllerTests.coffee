@@ -14,7 +14,7 @@ describe 'AnalyticsController', ->
 			getLoggedInUserId: sinon.stub()
 
 		@AnalyticsManager =
-			updateEditingSession: sinon.stub().callsArgWith(3)
+			updateEditingSession: sinon.stub().callsArgWith(4)
 			recordEvent: sinon.stub().callsArgWith(3)
 
 		@controller = SandboxedModule.require modulePath, requires:
@@ -31,12 +31,18 @@ describe 'AnalyticsController', ->
 			@req =
 				params:
 					projectId: "a project id"
+				session: {countryCode: 'US'}
 
 		it "delegates to the AnalyticsManager", (done) ->
 			@AuthenticationController.getLoggedInUserId.returns("1234")
 			@controller.updateEditingSession @req, @res
 
-			@AnalyticsManager.updateEditingSession.calledWith("1234", "a project id", {}).should.equal true
+			@AnalyticsManager.updateEditingSession.calledWith(
+				"1234",
+				"a project id",
+				'US',
+				{}
+			).should.equal true
 			done()
 
 	describe "recordEvent", ->
@@ -46,6 +52,7 @@ describe 'AnalyticsController', ->
 					event:"i_did_something"
 				body:"stuff"
 				sessionID: "sessionIDHere"
+				session: {}
 
 		it "should use the user_id", (done)->
 			@AuthenticationController.getLoggedInUserId.returns("1234")

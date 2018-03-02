@@ -43,7 +43,7 @@ module.exports =
 			opts.qs = {fromV2: 1}
 		makeRequest opts, callback
 
-	updateEditingSession: (userId, projectId, segmentation = {}, callback = (error) ->) ->
+	updateEditingSession: (userId, projectId, countryCode, segmentation = {}, callback = (error) ->) ->
 		if userId+"" == settings.smokeTest?.userId+""
 			return callback()
 		opts =
@@ -56,6 +56,7 @@ module.exports =
 			qs:
 				userId: userId
 				projectId: projectId
+				countryCode: countryCode || undefined
 			maxAttempts: 20
 			retryDelay: 5000
 		if settings.overleaf?

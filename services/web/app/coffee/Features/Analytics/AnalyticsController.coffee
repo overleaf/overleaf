@@ -6,9 +6,10 @@ module.exports = AnalyticsController =
 	updateEditingSession: (req, res, next) ->
 		userId    = AuthenticationController.getLoggedInUserId(req)
 		projectId = req.params.projectId
+		countryCode = req.session.countryCode || null
 
 		if userId?
-			AnalyticsManager.updateEditingSession userId, projectId, {}, (error) ->
+			AnalyticsManager.updateEditingSession userId, projectId, countryCode,  {}, (error) ->
 				respondWith(error, res, next)
 		else
 			res.send 204

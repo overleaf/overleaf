@@ -12,6 +12,7 @@ UserHandler = require("../User/UserHandler")
 UserSessionsManager = require("../User/UserSessionsManager")
 Analytics = require "../Analytics/AnalyticsManager"
 passport = require 'passport'
+GeoIpLookup = require '../../infrastructure/GeoIpLookup'
 
 module.exports = AuthenticationController =
 
@@ -47,12 +48,17 @@ module.exports = AuthenticationController =
 					req.session[key] = value
 				# copy to the old `session.user` location, for backward-comptability
 				req.session.user = req.session.passport.user
-				req.session.save (err) ->
+				# try to geolocate the user to a country-code
+				GeoIpLookup.getDetails req.ip, (err, geoDetails) ->
 					if err?
-						logger.err {user_id: user._id}, "error saving regenerated session after login"
-						return callback(err)
-					UserSessionsManager.trackSession(user, req.sessionID, () ->)
-					callback(null)
+						logger.err {err, ip: req.ip}, "error geolocating session, continuing"
+					req.session.countryCode = geoDetails?.country_code || null
+					req.session.save (err) ->
+						if err?
+							logger.err {user_id: user._id}, "error saving regenerated session after login"
+							return callback(err)
+						UserSessionsManager.trackSession(user, req.sessionID, () ->)
+						callback(err)
 
 	passportLogin: (req, res, next) ->
 		# This function is middleware which wraps the passport.authenticate middleware,
