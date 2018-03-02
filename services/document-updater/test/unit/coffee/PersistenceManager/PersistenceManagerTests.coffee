@@ -30,15 +30,17 @@ describe "PersistenceManager", ->
 				pass: @pass = "password"
 
 	describe "getDoc", ->
+		beforeEach ->
+			@webResponse = {
+				lines: @lines,
+				version: @version,
+				ranges: @ranges
+				pathname: @pathname,
+			}
 
 		describe "with a successful response from the web api", ->
 			beforeEach ->
-				@request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify({
-					lines: @lines,
-					version: @version,
-					ranges: @ranges
-					pathname: @pathname,
-				}))
+				@request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify(@webResponse))
 				@PersistenceManager.getDoc(@project_id, @doc_id, @callback)
 
 			it "should call the web api", ->
@@ -98,7 +100,8 @@ describe "PersistenceManager", ->
 
 		describe "when request returns an doc without lines", ->
 			beforeEach ->
-				@request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify(version: @version))
+				delete @webResponse.lines
+				@request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify(@webResponse))
 				@PersistenceManager.getDoc(@project_id, @doc_id, @callback)
 
 			it "should return and error", ->
@@ -106,11 +109,21 @@ describe "PersistenceManager", ->
 
 		describe "when request returns an doc without a version", ->
 			beforeEach ->
-				@request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify(lines: @lines))
+				delete @webResponse.version
+				@request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify(@webResponse))
 				@PersistenceManager.getDoc(@project_id, @doc_id, @callback)
 
 			it "should return and error", ->
 				@callback.calledWith(new Error("web API response had no valid doc version")).should.equal true
+
+		describe "when request returns an doc without a pathname", ->
+			beforeEach ->
+				delete @webResponse.pathname
+				@request.callsArgWith(1, null, {statusCode: 200}, JSON.stringify(@webResponse))
+				@PersistenceManager.getDoc(@project_id, @doc_id, @callback)
+
+			it "should return and error", ->
+				@callback.calledWith(new Error("web API response had no valid doc pathname")).should.equal true
 
 	describe "setDoc", ->
 		describe "with a successful response from the web api", ->
