@@ -2923,32 +2923,6 @@
         }
       }
     },
-    "eslint-loader": {
-      "version": "1.9.0",
-      "from": "eslint-loader@>=1.9.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/eslint-loader/-/eslint-loader-1.9.0.tgz",
-      "dev": true,
-      "dependencies": {
-        "glob": {
-          "version": "7.1.2",
-          "from": "glob@^7.0.5",
-          "resolved": "https://registry.npmjs.org/glob/-/glob-7.1.2.tgz",
-          "dev": true
-        },
-        "minimatch": {
-          "version": "3.0.4",
-          "from": "minimatch@^3.0.4",
-          "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-3.0.4.tgz",
-          "dev": true
-        },
-        "rimraf": {
-          "version": "2.6.2",
-          "from": "rimraf@^2.6.1",
-          "resolved": "https://registry.npmjs.org/rimraf/-/rimraf-2.6.2.tgz",
-          "dev": true
-        }
-      }
-    },
     "eslint-module-utils": {
       "version": "2.1.1",
       "from": "eslint-module-utils@>=2.1.1 <3.0.0",
@@ -6950,38 +6924,6 @@
         }
       }
     },
-    "loader-fs-cache": {
-      "version": "1.0.1",
-      "from": "loader-fs-cache@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/loader-fs-cache/-/loader-fs-cache-1.0.1.tgz",
-      "dev": true,
-      "dependencies": {
-        "find-cache-dir": {
-          "version": "0.1.1",
-          "from": "find-cache-dir@>=0.1.1 <0.2.0",
-          "resolved": "https://registry.npmjs.org/find-cache-dir/-/find-cache-dir-0.1.1.tgz",
-          "dev": true
-        },
-        "find-up": {
-          "version": "1.1.2",
-          "from": "find-up@>=1.0.0 <2.0.0",
-          "resolved": "https://registry.npmjs.org/find-up/-/find-up-1.1.2.tgz",
-          "dev": true
-        },
-        "path-exists": {
-          "version": "2.1.0",
-          "from": "path-exists@>=2.0.0 <3.0.0",
-          "resolved": "https://registry.npmjs.org/path-exists/-/path-exists-2.1.0.tgz",
-          "dev": true
-        },
-        "pkg-dir": {
-          "version": "1.0.0",
-          "from": "pkg-dir@>=1.0.0 <2.0.0",
-          "resolved": "https://registry.npmjs.org/pkg-dir/-/pkg-dir-1.0.0.tgz",
-          "dev": true
-        }
-      }
-    },
     "loader-runner": {
       "version": "2.3.0",
       "from": "loader-runner@>=2.3.0 <3.0.0",
@@ -8744,12 +8686,6 @@
           }
         }
       }
-    },
-    "object-hash": {
-      "version": "1.2.0",
-      "from": "object-hash@>=1.1.4 <2.0.0",
-      "resolved": "https://registry.npmjs.org/object-hash/-/object-hash-1.2.0.tgz",
-      "dev": true
     },
     "object-keys": {
       "version": "1.0.11",

@@ -31,13 +31,6 @@ module.exports = {
 	// Define how file types are handled by webpack
 	module: {
 		rules: [{
-			// Ensure eslint is run before compilation with babel
-			enforce: 'pre',
-			test: /\.js$/,
-			// Only compile application files (dependencies are in ES5 already)
-			exclude: /node_modules/,
-			loader: 'eslint-loader'
-		}, {
 			// Pass application JS files through babel-loader, compiling to ES5
 			test: /\.js$/,
 			// Only compile application files (dependencies are in ES5 already)
