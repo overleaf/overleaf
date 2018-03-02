@@ -31,7 +31,6 @@ module.exports = GeoIpLookup =
 			e = new Error("no ip passed")
 			return callback(e)
 		ip = ip.trim().split(" ")[0]
-		console.log ">> ", URL.resolve(settings.apis.geoIpLookup.url,ip)
 		opts = 
 			url: URL.resolve(settings.apis.geoIpLookup.url,ip)
 			timeout: 1000
