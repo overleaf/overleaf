@@ -40,8 +40,10 @@ module.exports = CompileController =
 						for file in outputFiles
 							if file.path?.match(/output\.pdf$/)
 								status = "success"
+								
 						if status == "failure"
 							logger.err project_id: request.project_id, outputFiles:outputFiles, "project failed to compile successfully, no output.pdf generated"
+
 						# log an error if any core files are found
 						for file in outputFiles
 							if file.path is "core"
