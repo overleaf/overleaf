@@ -1,6 +1,7 @@
-Settings = require "settings-sharelatex"
-request  = require "request"
+async = require "async"
 logger = require "logger-sharelatex"
+request  = require "request"
+Settings = require "settings-sharelatex"
 HistoryRedisManager = require "./HistoryRedisManager"
 RedisManager = require "./RedisManager"
 
@@ -64,12 +65,9 @@ module.exports = HistoryManager =
 		return newBlock != prevBlock
 
 	resyncProject: (project_id, docs, files, callback) ->
-		RedisManager.resyncProjectStructure project_id, docs, files, (error) ->
+		RedisManager.queueResyncProjectStructure project_id, docs, files, (error) ->
 			return callback(error) if error?
-			callback null
-
-			#jobs = _.union
-				#_.map docs, (doc) -> RedisManager.resyncDoc project_id, doc
-				#_.map files, (files) -> RedisManager.resyncFile project_id, file
-
-			#async.series jobs, callback
+			DocumentManager = require "./DocumentManager"
+			resyncDoc = (doc, cb) ->
+				DocumentManager.resyncDocContentsWithLock project_id, doc.doc, cb
+			async.each docs, resyncDoc, callback
