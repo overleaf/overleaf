@@ -21,6 +21,7 @@ services:
       SHARELATEX_CONFIG: /app/config/settings.defaults.coffee
       COMMAND_RUNNER: docker-runner-sharelatex
       COMPILES_HOST_DIR: $PWD/compiles
+      SYNCTEX_BIN_HOST_PATH: $PWD/bin/synctex
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw
       - ./docker-runner:/app/node_modules/docker-runner-sharelatex
