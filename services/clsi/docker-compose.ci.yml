@@ -11,7 +11,11 @@ services:
     entrypoint: npm run test:unit:_run
 
   test_acceptance:
+    build: .
     image: quay.io/sharelatex/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    extends:
+      file: docker-compose-config.yml
+      service: dev
     environment:
       REDIS_HOST: redis
       MONGO_HOST: mongo
