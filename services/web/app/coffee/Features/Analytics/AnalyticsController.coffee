@@ -11,7 +11,7 @@ module.exports = AnalyticsController =
 		if userId?
 			GeoIpLookup.getDetails req.ip, (err, geoDetails) ->
 				countryCode = geoDetails?.country_code || null
-				AnalyticsManager.updateEditingSession userId, projectId, countryCode,  {}, (error) ->
+				AnalyticsManager.updateEditingSession userId, projectId, countryCode, (error) ->
 					respondWith(error, res, next)
 		else
 			res.send 204

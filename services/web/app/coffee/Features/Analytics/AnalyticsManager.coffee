@@ -43,7 +43,7 @@ module.exports =
 			opts.qs = {fromV2: 1}
 		makeRequest opts, callback
 
-	updateEditingSession: (userId, projectId, countryCode, segmentation = {}, callback = (error) ->) ->
+	updateEditingSession: (userId, projectId, countryCode, callback = (error) ->) ->
 		if userId+"" == settings.smokeTest?.userId+""
 			return callback()
 		query =
@@ -52,9 +52,6 @@ module.exports =
 		if countryCode
 			query.countryCode = countryCode
 		opts =
-			body:
-				segmentation: segmentation
-			json: true
 			method: "PUT"
 			timeout: 1000
 			url: "/editingSession"

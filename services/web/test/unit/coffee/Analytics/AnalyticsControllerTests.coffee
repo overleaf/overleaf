@@ -14,7 +14,7 @@ describe 'AnalyticsController', ->
 			getLoggedInUserId: sinon.stub()
 
 		@AnalyticsManager =
-			updateEditingSession: sinon.stub().callsArgWith(4)
+			updateEditingSession: sinon.stub().callsArgWith(3)
 			recordEvent: sinon.stub().callsArgWith(3)
 
 		@controller = SandboxedModule.require modulePath, requires:
@@ -43,8 +43,7 @@ describe 'AnalyticsController', ->
 			@AnalyticsManager.updateEditingSession.calledWith(
 				"1234",
 				"a project id",
-				'XY',
-				{}
+				'XY'
 			).should.equal true
 			done()
 
