@@ -6,7 +6,7 @@ div.binary-file.full-size(
 	img(
 		ng-show="!failedLoad"
 		ng-src="/project/{{ project_id }}/file/{{ openFile.id }}"
-		ng-if="['png', 'jpg', 'jpeg', 'gif'].indexOf(extension(openFile)) > -1"
+		ng-if="isImageFile()"
 		ng-class="{'img-preview': !imgLoaded}"
 		onerror="sl_binaryFilePreviewError()"
 		onabort="sl_binaryFilePreviewError()"
@@ -16,29 +16,50 @@ div.binary-file.full-size(
 	img(
 		ng-show="!failedLoad"
 		ng-src="/project/{{ project_id }}/file/{{ openFile.id }}?format=png"
-		ng-if="['pdf', 'eps'].indexOf(extension(openFile)) > -1"
+		ng-if="isPreviewableFile()"
 		ng-class="{'img-preview': !imgLoaded}"
 		onerror="sl_binaryFilePreviewError()"
 		onabort="sl_binaryFilePreviewError()"
 		onload="sl_binaryFilePreviewLoaded()"
 	)
 	
-	div(ng-if="(['bib'].indexOf(extension(openFile)) > -1) && !bibtexPreview.error")
-
-		div.bib-loading(ng-show="bibtexPreview.loading && !bibtexPreview.error")
+	div(ng-if="isTextFile() && !textPreview.error")
+		div.text-loading(ng-show="textPreview.loading && !textPreview.error")
 			| #{translate('loading')}...
-
-		div.bib-preview(ng-show="bibtexPreview.data && !bibtexPreview.loading && !bibtexPreview.error")
+		div.text-preview(ng-show="textPreview.data && !textPreview.loading && !textPreview.error")
 			div.scroll-container
 				p
-					| {{ bibtexPreview.data }}
-				p(ng-show="bibtexPreview.shouldShowDots")
+					| {{ textPreview.data }}
+				p(ng-show="textPreview.shouldShowDots")
 					| ...
 	
 	p.no-preview(
-		ng-if="failedLoad || bibtexPreview.error || ['bib', 'png', 'jpg', 'jpeg', 'gif', 'pdf', 'eps'].indexOf(extension(openFile)) == -1"
-	) #{translate("no_preview_available")}
+		ng-if="failedLoad || textPreview.error || isUnpreviewableFile()"
+	) #{translate("no_preview_available")} {{ failedLoad }} {{ textPreview.error }} {{ isUnpreviewableFile() }}
 
-	a.btn.btn-info(
-		ng-href="/project/{{ project_id }}/file/{{ openFile.id }}"
-	) #{translate("download")} {{ openFile.name }}
+	div.binary-file-footer
+		div(ng-show="openFile.linkedFileData.provider == 'url'")
+			p
+				i.fa.fa-fw.fa-external-link-square.fa-rotate-180.linked-file-icon
+				| Imported from
+				|
+				a(ng-href='{{openFile.linkedFileData.url}}') {{ displayUrl(openFile.linkedFileData.url) }}
+				|
+				| at {{ openFile.created | formatDate:'h:mm a' }} {{ openFile.created | relativeDate }}
+
+		span(ng-show="openFile.linkedFileData.provider == 'url'")
+			button.btn.btn-success(
+				href, ng-click="refreshFile(openFile)",
+				ng-disabled="refreshing"
+			)
+				i.fa.fa-fw.fa-refresh(ng-class={'fa-spin': refreshing})
+				|
+				span(ng-show="!refreshing") Refresh
+				span(ng-show="refreshing") Refreshing...
+			| &nbsp;
+		a.btn.btn-info(
+			ng-href="/project/{{ project_id }}/file/{{ openFile.id }}"
+		)
+			i.fa.fa-fw.fa-download
+			|
+			| #{translate("download")}

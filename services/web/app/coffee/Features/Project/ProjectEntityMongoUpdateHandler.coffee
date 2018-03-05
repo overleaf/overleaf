@@ -48,7 +48,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 			self._confirmFolder project, folder_id, (folder_id)->
 				self._putElement project, folder_id, fileRef, "file", callback
 
-	replaceFile: wrapWithLock (project_id, file_id, callback) ->
+	replaceFile: wrapWithLock (project_id, file_id, linkedFileData, callback) ->
 		ProjectGetter.getProjectWithoutLock project_id, {rootFolder: true, name:true}, (err, project) ->
 			return callback(err) if err?
 			ProjectLocator.findElement {project:project, element_id: file_id, type: 'file'}, (err, fileRef, path)=>
@@ -63,6 +63,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 				inc['version'] = 1
 				set = {}
 				set["#{path.mongo}.created"] = new Date()
+				set["#{path.mongo}.linkedFileData"] = linkedFileData
 				update =
 					"$inc": inc
 					"$set": set

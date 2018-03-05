@@ -76,6 +76,8 @@ module.exports = ProjectEditorHandler =
 	buildFileModelView: (file) ->
 		_id  : file._id
 		name : file.name
+		linkedFileData: file.linkedFileData
+		created: file.created
 
 	buildDocModelView: (doc) ->
 		_id   : doc._id

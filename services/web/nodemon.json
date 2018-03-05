@@ -4,6 +4,7 @@
     "node_modules/"
   ],
   "verbose": true,
+  "legacyWatch": true,
   "execMap": {
     "js": "npm run start"
   },

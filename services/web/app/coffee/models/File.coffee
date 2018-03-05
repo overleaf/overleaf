@@ -8,6 +8,7 @@ FileSchema = new Schema
 	name            :     type:String, default:''
 	created     	:     type:Date, default: () -> new Date()
 	rev 			:	  {type:Number, default:0}
+	linkedFileData: { type: Schema.Types.Mixed }
 
 mongoose.model 'File', FileSchema
 exports.File = mongoose.model 'File'

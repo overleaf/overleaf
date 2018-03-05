@@ -40,6 +40,8 @@ describe 'ProjectEntityUpdateHandler', ->
 		@fileName = "something.jpg"
 		@fileSystemPath = "somehintg"
 
+		@linkedFileData = {provider: 'url'}
+
 		@source = 'editor'
 		@callback = sinon.stub()
 		@ProjectEntityUpdateHandler = SandboxedModule.require modulePath, requires:
@@ -296,11 +298,11 @@ describe 'ProjectEntityUpdateHandler', ->
 			@newFile = _id: file_id
 			@ProjectEntityUpdateHandler.addFileWithoutUpdatingHistory =
 				withoutLock: sinon.stub().yields(null, @newFile, folder_id, @path, @fileUrl)
-			@ProjectEntityUpdateHandler.addFile project_id, folder_id, @docName, @fileSystemPath, userId, @callback
+			@ProjectEntityUpdateHandler.addFile project_id, folder_id, @docName, @fileSystemPath, @linkedFileData, userId, @callback
 
 		it "creates the doc without history", () ->
 			@ProjectEntityUpdateHandler.addFileWithoutUpdatingHistory.withoutLock
-				.calledWith(project_id, folder_id, @docName, @fileSystemPath, userId)
+				.calledWith(project_id, folder_id, @docName, @fileSystemPath, @linkedFileData, userId)
 				.should.equal true
 
 		it "sends the change in project structure to the doc updater", () ->
@@ -320,7 +322,7 @@ describe 'ProjectEntityUpdateHandler', ->
 			@project = _id: project_id, name: 'some project'
 			@ProjectEntityMongoUpdateHandler.replaceFile = sinon.stub().yields(null, @newFile, @project, fileSystem: @path)
 
-			@ProjectEntityUpdateHandler.replaceFile project_id, file_id, @fileSystemPath, userId, @callback
+			@ProjectEntityUpdateHandler.replaceFile project_id, file_id, @fileSystemPath, @linkedFileData, userId, @callback
 
 		it 'uploads a new version of the file', ->
 			@FileStoreHandler.uploadFileFromDisk
@@ -329,7 +331,7 @@ describe 'ProjectEntityUpdateHandler', ->
 
 		it 'replaces the file in mongo', ->
 			@ProjectEntityMongoUpdateHandler.replaceFile
-				.calledWith(project_id, file_id)
+				.calledWith(project_id, file_id, @linkedFileData)
 				.should.equal true
 
 		it 'notifies the tpds', ->
@@ -497,7 +499,7 @@ describe 'ProjectEntityUpdateHandler', ->
 		describe 'upserting into an invalid folder', ->
 			beforeEach ->
 				@ProjectLocator.findElement = sinon.stub().yields()
-				@ProjectEntityUpdateHandler.upsertFile project_id, folder_id, @fileName, @fileSystemPath, userId, @callback
+				@ProjectEntityUpdateHandler.upsertFile project_id, folder_id, @fileName, @fileSystemPath, @linkedFileData, userId, @callback
 
 			it 'returns an error', ->
 				errorMatcher = sinon.match.instanceOf(Error)
@@ -511,11 +513,11 @@ describe 'ProjectEntityUpdateHandler', ->
 				@ProjectLocator.findElement = sinon.stub().yields(null, @folder)
 				@ProjectEntityUpdateHandler.replaceFile = withoutLock: sinon.stub().yields(null, @newFile)
 
-				@ProjectEntityUpdateHandler.upsertFile project_id, folder_id, @fileName, @fileSystemPath, userId, @callback
+				@ProjectEntityUpdateHandler.upsertFile project_id, folder_id, @fileName, @fileSystemPath, @linkedFileData, userId, @callback
 
 			it 'replaces the file', ->
 				@ProjectEntityUpdateHandler.replaceFile.withoutLock
-					.calledWith(project_id, file_id, @fileSystemPath, userId)
+					.calledWith(project_id, file_id, @fileSystemPath, @linkedFileData, userId)
 					.should.equal true
 
 			it 'returns the file', ->
@@ -528,7 +530,7 @@ describe 'ProjectEntityUpdateHandler', ->
 				@ProjectLocator.findElement = sinon.stub().yields(null, @folder)
 				@ProjectEntityUpdateHandler.addFile = withoutLock: sinon.stub().yields(null, @newFile)
 
-				@ProjectEntityUpdateHandler.upsertFile project_id, folder_id, @fileName, @fileSystemPath, userId, @callback
+				@ProjectEntityUpdateHandler.upsertFile project_id, folder_id, @fileName, @fileSystemPath, @linkedFileData, userId, @callback
 
 			it 'tries to find the folder', ->
 				@ProjectLocator.findElement
@@ -537,7 +539,7 @@ describe 'ProjectEntityUpdateHandler', ->
 
 			it 'adds the file', ->
 				@ProjectEntityUpdateHandler.addFile.withoutLock
-					.calledWith(project_id, folder_id, @fileName, @fileSystemPath, userId)
+					.calledWith(project_id, folder_id, @fileName, @fileSystemPath, @linkedFileData, userId)
 					.should.equal true
 
 			it 'returns the file', ->
@@ -584,7 +586,7 @@ describe 'ProjectEntityUpdateHandler', ->
 			@ProjectEntityUpdateHandler.upsertFile =
 				withoutLock: sinon.stub().yields(null, @file, @isNewFile)
 
-			@ProjectEntityUpdateHandler.upsertFileWithPath project_id, @path, @fileSystemPath, userId, @callback
+			@ProjectEntityUpdateHandler.upsertFileWithPath project_id, @path, @fileSystemPath, @linkedFileData, userId, @callback
 
 		it 'creates any necessary folders', ->
 			@ProjectEntityUpdateHandler.mkdirp.withoutLock
@@ -593,7 +595,7 @@ describe 'ProjectEntityUpdateHandler', ->
 
 		it 'upserts the file', ->
 			@ProjectEntityUpdateHandler.upsertFile.withoutLock
-				.calledWith(project_id, @folder._id, 'file.png', @fileSystemPath, userId)
+				.calledWith(project_id, @folder._id, 'file.png', @fileSystemPath, @linkedFileData, userId)
 				.should.equal true
 
 		it 'calls the callback', ->

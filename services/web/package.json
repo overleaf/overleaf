@@ -85,6 +85,7 @@
     "underscore": "1.6.0",
     "uuid": "^3.0.1",
     "v8-profiler": "^5.2.3",
+    "valid-url": "^1.0.9",
     "xml2js": "0.2.0",
     "yauzl": "^2.8.0"
   },

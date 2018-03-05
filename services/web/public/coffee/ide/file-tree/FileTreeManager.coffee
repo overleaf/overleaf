@@ -37,13 +37,14 @@ define [
 					}
 					@recalculateDocList()
 
-			@ide.socket.on "reciveNewFile", (parent_folder_id, file) =>
+			@ide.socket.on "reciveNewFile", (parent_folder_id, file, source, linkedFileData) =>
 				parent_folder = @findEntityById(parent_folder_id) or @$scope.rootFolder
 				@$scope.$apply () =>
 					parent_folder.children.push {
 						name: file.name
 						id:   file._id
-						type: "file"
+						type: "file",
+						linkedFileData: linkedFileData
 					}
 					@recalculateDocList()
 
@@ -175,6 +176,9 @@ define [
 		_findEntityByPathInFolder: (folder, path) ->
 			if !path? or !folder?
 				return null
+			if path == ""
+				return folder
+
 			parts = path.split("/")
 			name = parts.shift()
 			rest = parts.join("/")
@@ -222,9 +226,18 @@ define [
 		getRootDocDirname: () ->
 			rootDoc = @findEntityById @$scope.project.rootDoc_id
 			return if !rootDoc?
-			path = @getEntityPath(rootDoc)
+			return @_getEntityDirname(rootDoc)
+
+		_getEntityDirname: (entity) ->
+			path = @getEntityPath(entity)
 			return if !path?
 			return path.split("/").slice(0, -1).join("/")
+
+		_findParentFolder: (entity) ->
+			dirname = @_getEntityDirname(entity)
+			console.log('dirname', dirname)
+			return if !dirname?
+			return @findEntityByPath(dirname)
 
 		loadRootFolder: () ->
 			@$scope.rootFolder = @_parseFolder(@$scope?.project?.rootFolder[0])
@@ -252,6 +265,8 @@ define [
 					id:   file._id
 					type: "file"
 					selected: (file._id == @selected_entity_id)
+					linkedFileData: file.linkedFileData
+					created: file.created
 				}
 
 			for childFolder in rawFolder.folders or []
@@ -352,6 +367,34 @@ define [
 			return @ide.$http.post "/project/#{@ide.project_id}/folder", {
 				name: name,
 				parent_folder_id: parent_folder?.id
+				_csrf: window.csrfToken
+			}
+
+		createLinkedFile: (name, parent_folder = @getCurrentFolder(), provider, data) ->
+			# check if a doc/file/folder already exists with this name
+			if @existsInThisFolder parent_folder, name
+				return @nameExistsError()
+			# We'll wait for the socket.io notification to actually
+			# add the file for us.
+			return @ide.$http.post "/project/#{@ide.project_id}/linked_file", {
+				name: name,
+				parent_folder_id: parent_folder?.id
+				provider,
+				data,
+				_csrf: window.csrfToken
+			}
+
+		refreshLinkedFile: (file) ->
+			parent_folder = @_findParentFolder(file)
+			data = file.linkedFileData
+			provider = data?.provider
+			return if !provider?
+			console.log 'refreshLinkedFile', {parent_folder, provider, data}
+			return @ide.$http.post "/project/#{@ide.project_id}/linked_file", {
+				name: file.name,
+				parent_folder_id: parent_folder?.id
+				provider,
+				data,
 				_csrf: window.csrfToken
 			}
 

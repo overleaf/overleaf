@@ -152,6 +152,8 @@ module.exports = settings =
 			url: "http://#{process.env['NOTIFICATIONS_HOST'] or 'localhost'}:3042"
 		analytics:
 			url: "http://#{process.env['ANALYTICS_HOST'] or 'localhost'}:3050"
+		linkedUrlProxy:
+			url: process.env['LINKED_URL_PROXY']
 
 	templates:
 		user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"
@@ -213,6 +215,8 @@ module.exports = settings =
 	}]
 
 	enableSubscriptions:false
+
+	enabledLinkedFileTypes: (process.env['ENABLED_LINKED_FILE_TYPES'] or '').split(',')
 
 	# i18n
 	# ------
