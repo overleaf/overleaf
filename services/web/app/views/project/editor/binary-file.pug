@@ -38,7 +38,7 @@ div.binary-file.full-size(
 	) #{translate("no_preview_available")} {{ failedLoad }} {{ textPreview.error }} {{ isUnpreviewableFile() }}
 
 	div.binary-file-footer
-		div(ng-show="openFile.linkedFileData.provider == 'url'")
+		div(ng-if="openFile.linkedFileData.provider == 'url'")
 			p
 				i.fa.fa-fw.fa-external-link-square.fa-rotate-180.linked-file-icon
 				| Imported from
@@ -47,7 +47,7 @@ div.binary-file.full-size(
 				|
 				| at {{ openFile.created | formatDate:'h:mm a' }} {{ openFile.created | relativeDate }}
 
-		span(ng-show="openFile.linkedFileData.provider == 'url'")
+		span(ng-if="openFile.linkedFileData.provider == 'url'")
 			button.btn.btn-success(
 				href, ng-click="refreshFile(openFile)",
 				ng-disabled="refreshing"

@@ -37,6 +37,8 @@ define [
 		FILLER = '...'
 		TAIL_OF_URL_LENGTH = MAX_URL_LENGTH - FRONT_OF_URL_LENGTH - FILLER.length
 		$scope.displayUrl = (url) ->
+			if !url?
+				return
 			if url.length > MAX_URL_LENGTH
 				front = url.slice(0, FRONT_OF_URL_LENGTH)
 				tail = url.slice(url.length - TAIL_OF_URL_LENGTH)
