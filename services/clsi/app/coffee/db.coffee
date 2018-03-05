@@ -1,6 +1,7 @@
 Sequelize = require("sequelize")
 Settings = require("settings-sharelatex")
 _ = require("underscore")
+logger = require "logger-sharelatex"
 
 options = _.extend {logging:false}, Settings.mysql.clsi
 
@@ -32,5 +33,7 @@ module.exports =
 		]
 	})
 
-	sync: () -> sequelize.sync()
+	sync: () -> 
+		logger.log dbPath:Settings.mysql.clsi.storage, "syncing db schema"
+		sequelize.sync()
 	
