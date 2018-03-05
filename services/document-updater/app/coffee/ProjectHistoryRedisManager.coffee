@@ -14,6 +14,7 @@ module.exports = ProjectHistoryRedisManager =
 			meta:
 				user_id: user_id
 				ts: new Date()
+			version: update.version
 		update[entity_type] = entity_id
 
 		logger.log {project_id, update}, "queue rename operation to project-history"
@@ -29,6 +30,7 @@ module.exports = ProjectHistoryRedisManager =
 			meta:
 				user_id: user_id
 				ts: new Date()
+			version: update.version
 		update[entity_type] = entitiy_id
 
 		logger.log {project_id, update}, "queue add operation to project-history"

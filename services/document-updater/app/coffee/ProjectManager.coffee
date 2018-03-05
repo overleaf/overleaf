@@ -105,16 +105,20 @@ module.exports = ProjectManager =
 	clearProjectState: (project_id, callback = (error) ->) ->
 		RedisManager.clearProjectState project_id, callback
 
-	updateProjectWithLocks: (project_id, user_id, docUpdates, fileUpdates, _callback = (error) ->) ->
+	updateProjectWithLocks: (project_id, user_id, docUpdates, fileUpdates, version, _callback = (error) ->) ->
 		timer = new Metrics.Timer("projectManager.updateProject")
 		callback = (args...) ->
 			timer.done()
 			_callback(args...)
 
+		project_version = version 
+		project_subversion = 0 		# project versions can have multiple operations
+
 		project_ops_length = 0
 
 		handleDocUpdate = (update, cb) ->
 			doc_id = update.id
+			update.version = "#{project_version}.#{project_subversion++}"
 			if update.docLines?
 				ProjectHistoryRedisManager.queueAddEntity project_id, 'doc', doc_id, user_id, update, (error, count) ->
 					project_ops_length = count
@@ -126,6 +130,7 @@ module.exports = ProjectManager =
 
 		handleFileUpdate = (update, cb) ->
 			file_id = update.id
+			update.version = "#{project_version}.#{project_subversion++}"
 			if update.url?
 				ProjectHistoryRedisManager.queueAddEntity project_id, 'file', file_id, user_id, update, (error, count) ->
 					project_ops_length = count

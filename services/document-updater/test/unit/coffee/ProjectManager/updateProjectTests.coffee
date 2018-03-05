@@ -18,6 +18,7 @@ describe "ProjectManager", ->
 
 		@project_id = "project-id-123"
 		@user_id = "user-id-123"
+		@version = 1234567
 		@HistoryManager.shouldFlushHistoryOps = sinon.stub().returns(false)
 		@HistoryManager.flushProjectChangesAsync = sinon.stub()
 		@callback = sinon.stub()
@@ -45,7 +46,7 @@ describe "ProjectManager", ->
 
 			describe "successfully", ->
 				beforeEach ->
-					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @callback
+					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @version, @callback
 
 				it "should rename the docs in the updates", ->
 					@DocumentManager.renameDocWithLock
@@ -72,7 +73,7 @@ describe "ProjectManager", ->
 				beforeEach ->
 					@error = new Error('error')
 					@DocumentManager.renameDocWithLock = sinon.stub().yields(@error)
-					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @callback
+					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @version, @callback
 
 				it "should call the callback with the error", ->
 					@callback.calledWith(@error).should.equal true
@@ -81,7 +82,7 @@ describe "ProjectManager", ->
 				beforeEach ->
 					@error = new Error('error')
 					@ProjectHistoryRedisManager.queueRenameEntity = sinon.stub().yields(@error)
-					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @callback
+					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @version, @callback
 
 				it "should call the callback with the error", ->
 					@callback.calledWith(@error).should.equal true
@@ -89,7 +90,7 @@ describe "ProjectManager", ->
 			describe "with enough ops to flush", ->
 				beforeEach ->
 					@HistoryManager.shouldFlushHistoryOps = sinon.stub().returns(true)
-					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @callback
+					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @version, @callback
 
 				it "should flush the history", ->
 					@HistoryManager.flushProjectChangesAsync
@@ -113,7 +114,7 @@ describe "ProjectManager", ->
 
 			describe "successfully", ->
 				beforeEach ->
-					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @callback
+					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @version, @callback
 
 				it "should add the docs in the updates", ->
 					@ProjectHistoryRedisManager.queueAddEntity
@@ -140,7 +141,7 @@ describe "ProjectManager", ->
 				beforeEach ->
 					@error = new Error('error')
 					@ProjectHistoryRedisManager.queueAddEntity = sinon.stub().yields(@error)
-					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @callback
+					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @version, @callback
 
 				it "should call the callback with the error", ->
 					@callback.calledWith(@error).should.equal true
@@ -149,7 +150,7 @@ describe "ProjectManager", ->
 				beforeEach ->
 					@error = new Error('error')
 					@ProjectHistoryRedisManager.queueAddEntity = sinon.stub().yields(@error)
-					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @callback
+					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @version, @callback
 
 				it "should call the callback with the error", ->
 					@callback.calledWith(@error).should.equal true
@@ -157,7 +158,7 @@ describe "ProjectManager", ->
 			describe "with enough ops to flush", ->
 				beforeEach ->
 					@HistoryManager.shouldFlushHistoryOps = sinon.stub().returns(true)
-					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @callback
+					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @version, @callback
 
 				it "should flush the history", ->
 					@HistoryManager.flushProjectChangesAsync
