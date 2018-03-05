@@ -52,7 +52,7 @@ module.exports = AuthenticationController =
 						logger.err {user_id: user._id}, "error saving regenerated session after login"
 						return callback(err)
 					UserSessionsManager.trackSession(user, req.sessionID, () ->)
-					callback(err)
+					callback(null)
 
 	passportLogin: (req, res, next) ->
 		# This function is middleware which wraps the passport.authenticate middleware,
