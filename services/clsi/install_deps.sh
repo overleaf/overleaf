@@ -7,4 +7,5 @@ usermod -aG docker app
 touch /var/run/docker.sock
 chown root:docker /var/run/docker.sock
 
+mkdir -p /app/cache
 chown -R app:app /app/cache
