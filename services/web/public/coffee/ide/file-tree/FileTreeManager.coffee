@@ -235,7 +235,6 @@ define [
 
 		_findParentFolder: (entity) ->
 			dirname = @_getEntityDirname(entity)
-			console.log('dirname', dirname)
 			return if !dirname?
 			return @findEntityByPath(dirname)
 
@@ -389,7 +388,6 @@ define [
 			data = file.linkedFileData
 			provider = data?.provider
 			return if !provider?
-			console.log 'refreshLinkedFile', {parent_folder, provider, data}
 			return @ide.$http.post "/project/#{@ide.project_id}/linked_file", {
 				name: file.name,
 				parent_folder_id: parent_folder?.id
