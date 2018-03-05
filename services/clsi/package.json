@@ -7,16 +7,13 @@
     "url": "https://github.com/sharelatex/clsi-sharelatex.git"
   }, 
   "scripts": {
-    "test:acceptance:wait_for_app": "echo 'Waiting for app to be accessible' && while (! curl -s -o /dev/null localhost:3013/status) do sleep 1; done", 
-    "test:acceptance:run": "mocha --recursive --reporter spec --timeout 15000", 
-    "test:acceptance:dir": "npm -q run test:acceptance:wait_for_app && npm -q run test:acceptance:run -- $@", 
-    "test:acceptance": "npm run compile:app && npm run compile:acceptance_tests && npm run test:acceptance:_run -- $@", 
     "compile:test:acceptance": "coffee -o test/acceptance/js -c test/acceptance/coffee", 
     "compile:test:smoke": "coffee -o test/smoke/js -c test/smoke/coffee", 
     "compile:app": "coffee -o app/js -c app/coffee && coffee -c app.coffee", 
     "compile": "npm run compile:app && npm run compile:test:acceptance && npm run compile:test:smoke", 
     "start": "npm run compile:app && node app.js", 
     "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js", 
+    "test:acceptance": "npm run compile:app && npm run compile:acceptance_tests && npm run test:acceptance:_run -- $@", 
     "test:unit:_run": "mocha --recursive --exit --reporter spec $@ test/unit/js", 
     "test:unit": "npm run compile:app && npm run compile:unit_tests && npm run test:unit:_run -- $@", 
     "compile:unit_tests": "[ -e test/unit ] && coffee -o test/unit/js -c test/unit/coffee || echo 'No unit tests to compile'", 
