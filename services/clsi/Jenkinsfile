@@ -23,7 +23,7 @@ pipeline {
 
     stage('Acceptance Tests') {
       steps {
-        sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" test_acceptance'
+        sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" up --build test_acceptance'
       }
     }
 
