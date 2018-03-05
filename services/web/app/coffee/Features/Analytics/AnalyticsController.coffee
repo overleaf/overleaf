@@ -1,16 +1,18 @@
 AnalyticsManager = require "./AnalyticsManager"
 Errors = require "../Errors/Errors"
 AuthenticationController = require("../Authentication/AuthenticationController")
+GeoIpLookup = require '../../infrastructure/GeoIpLookup'
 
 module.exports = AnalyticsController =
 	updateEditingSession: (req, res, next) ->
 		userId    = AuthenticationController.getLoggedInUserId(req)
 		projectId = req.params.projectId
-		countryCode = req.session.countryCode || null
 
 		if userId?
-			AnalyticsManager.updateEditingSession userId, projectId, countryCode,  {}, (error) ->
-				respondWith(error, res, next)
+			GeoIpLookup.getDetails req.ip, (err, geoDetails) ->
+				countryCode = geoDetails?.country_code || null
+				AnalyticsManager.updateEditingSession userId, projectId, countryCode,  {}, (error) ->
+					respondWith(error, res, next)
 		else
 			res.send 204
 

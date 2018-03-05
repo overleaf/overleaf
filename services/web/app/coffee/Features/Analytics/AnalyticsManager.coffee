@@ -46,6 +46,11 @@ module.exports =
 	updateEditingSession: (userId, projectId, countryCode, segmentation = {}, callback = (error) ->) ->
 		if userId+"" == settings.smokeTest?.userId+""
 			return callback()
+		query =
+			userId: userId
+			projectId: projectId
+		if countryCode
+			query.countryCode = countryCode
 		opts =
 			body:
 				segmentation: segmentation
@@ -53,10 +58,7 @@ module.exports =
 			method: "PUT"
 			timeout: 1000
 			url: "/editingSession"
-			qs:
-				userId: userId
-				projectId: projectId
-				countryCode: countryCode || undefined
+			qs: query
 			maxAttempts: 20
 			retryDelay: 5000
 		if settings.overleaf?

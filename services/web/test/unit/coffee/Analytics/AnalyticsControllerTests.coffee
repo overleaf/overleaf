@@ -22,6 +22,8 @@ describe 'AnalyticsController', ->
 			"../Authentication/AuthenticationController":@AuthenticationController
 			"logger-sharelatex":
 				log:->
+			'../../infrastructure/GeoIpLookup': @GeoIpLookup =
+				getDetails: sinon.stub()
 
 		@res =
 			send:->
@@ -31,7 +33,8 @@ describe 'AnalyticsController', ->
 			@req =
 				params:
 					projectId: "a project id"
-				session: {countryCode: 'US'}
+			@GeoIpLookup.getDetails = sinon.stub()
+				.callsArgWith(1, null, {country_code: 'XY'})
 
 		it "delegates to the AnalyticsManager", (done) ->
 			@AuthenticationController.getLoggedInUserId.returns("1234")
@@ -40,7 +43,7 @@ describe 'AnalyticsController', ->
 			@AnalyticsManager.updateEditingSession.calledWith(
 				"1234",
 				"a project id",
-				'US',
+				'XY',
 				{}
 			).should.equal true
 			done()

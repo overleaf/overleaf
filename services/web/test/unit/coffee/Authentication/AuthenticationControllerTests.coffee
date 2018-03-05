@@ -28,8 +28,6 @@ describe "AuthenticationController", ->
 				trackSession: sinon.stub()
 				untrackSession: sinon.stub()
 				revokeAllUserSessions: sinon.stub().callsArgWith(1, null)
-			"../../infrastructure/GeoIpLookup": @GeoIpLookup =
-				getDetails: sinon.stub().callsArgWith(1, null, {})
 		@user =
 			_id: ObjectId()
 			email: @email = "USER@example.com"
@@ -174,8 +172,6 @@ describe "AuthenticationController", ->
 			@req.session.save = sinon.stub().callsArgWith(0, null)
 			@req.sessionStore = {generate: sinon.stub()}
 			@UserSessionsManager.trackSession = sinon.stub()
-			@GeoIpLookup.getDetails = sinon.stub()
-				.callsArgWith(1, null, @geoDetails = {country_code: 'US'})
 			@call = (callback) =>
 				@AuthenticationController.afterLoginSessionSetup @req, @user, callback
 
@@ -192,13 +188,6 @@ describe "AuthenticationController", ->
 		it 'should call UserSessionsManager.trackSession', (done) ->
 			@call (err) =>
 				@UserSessionsManager.trackSession.callCount.should.equal 1
-				done()
-
-		it 'should call GeoIpLookup.getDetails', (done) ->
-			@call (err) =>
-				@GeoIpLookup.getDetails.callCount.should.equal 1
-				@req.session.countryCode.should.exist
-				@req.session.countryCode.should.equal @geoDetails.country_code
 				done()
 
 		it 'should call req.session.save', (done) ->
@@ -221,39 +210,6 @@ describe "AuthenticationController", ->
 				@call (err) =>
 					@UserSessionsManager.trackSession.callCount.should.equal 0
 					done()
-
-		describe 'when GeoIpLookup produces an error', ->
-			beforeEach ->
-				@GeoIpLookup.getDetails = sinon.stub()
-					.callsArgWith(1, new Error('woops'))
-
-			it 'should not produce an error', (done) ->
-				@call (err) =>
-					expect(err).to.not.exist
-					done()
-
-			it 'should still call req.session.save', (done) ->
-				@call (err) =>
-					@req.session.save.callCount.should.equal 1
-					expect(@req.session.countryCode).to.equal null
-					done()
-
-		describe 'when GeoIpLookup produces no data', ->
-			beforeEach ->
-				@GeoIpLookup.getDetails = sinon.stub()
-					.callsArgWith(1, null, undefined)
-
-			it 'should not produce an error', (done) ->
-				@call (err) =>
-					expect(err).to.not.exist
-					done()
-
-			it 'should still call req.session.save', (done) ->
-				@call (err) =>
-					@req.session.save.callCount.should.equal 1
-					expect(@req.session.countryCode).to.equal null
-					done()
-
 
 	describe 'getSessionUser', ->
 
