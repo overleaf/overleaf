@@ -9,7 +9,7 @@ module.exports =
 			username: "clsi"
 			password: null
 			dialect: "sqlite"
-			storage: Path.resolve(__dirname + "/../db.sqlite")
+			storage: process.env["SQLITE_PATH"] or Path.resolve(__dirname + "/../db.sqlite")
 
 	path:
 		compilesDir:  Path.resolve(__dirname + "/../compiles")

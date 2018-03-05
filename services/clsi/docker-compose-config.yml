@@ -21,6 +21,7 @@ services:
       DOCKER_RUNNER: "true"
       COMPILES_HOST_DIR: $PWD/compiles
       SYNCTEX_BIN_HOST_PATH: $PWD/bin/synctex
+      SQLITE_PATH: /app/compiles/db.sqlite
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw
       - ./compiles:/app/compiles

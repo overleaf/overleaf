@@ -15,7 +15,7 @@ services:
     image: quay.io/sharelatex/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     extends:
       file: docker-compose-config.yml
-      service: dev
+      service: ci
     environment:
       REDIS_HOST: redis
       MONGO_HOST: mongo
