@@ -21,7 +21,6 @@ describe "Simple LaTeX file", ->
 
 	it "should return the PDF", ->
 		pdf = Client.getOutputFile(@body, "pdf")
-		console.log @body
 		pdf.type.should.equal "pdf"
 		
 	it "should return the log", ->

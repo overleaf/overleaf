@@ -293,8 +293,6 @@ describe "CompileManager", ->
 			# 		.should.equal true
 
 			it "should call the callback with the parsed output", ->
-				console.log(@file_name, @line, @column)
-				console.log @callback.args[0]
 				@callback
 					.calledWith(null, [{
 						file: @file_name

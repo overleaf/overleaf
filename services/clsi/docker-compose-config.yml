@@ -6,12 +6,11 @@ services:
       TEXLIVE_IMAGE: quay.io/sharelatex/texlive-full:2017.1
       TEXLIVE_IMAGE_USER: root
       SHARELATEX_CONFIG: /app/config/settings.defaults.coffee
-      COMMAND_RUNNER: docker-runner-sharelatex
+      DOCKER_RUNNER: "true"
       COMPILES_HOST_DIR: $PWD/compiles
       SYNCTEX_BIN_HOST_PATH: $PWD/bin/synctex
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./docker-runner:/app/node_modules/docker-runner-sharelatex
       - ./compiles:/app/compiles
       
   ci:
@@ -19,10 +18,9 @@ services:
       TEXLIVE_IMAGE: quay.io/sharelatex/texlive-full:2017.1
       TEXLIVE_IMAGE_USER: root
       SHARELATEX_CONFIG: /app/config/settings.defaults.coffee
-      COMMAND_RUNNER: docker-runner-sharelatex
+      DOCKER_RUNNER: "true"
       COMPILES_HOST_DIR: $PWD/compiles
       SYNCTEX_BIN_HOST_PATH: $PWD/bin/synctex
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw
-      - ./docker-runner:/app/node_modules/docker-runner-sharelatex
       - ./compiles:/app/compiles

@@ -23,7 +23,6 @@ describe "Timed out compile", ->
 			Client.compile @project_id, @request, (@error, @res, @body) => done()
 
 	it "should return a timeout error", ->
-		console.log @body.compile, "!!!1111"
 		@body.compile.error.should.equal "container timed out"
 
 	it "should return a timedout status", ->

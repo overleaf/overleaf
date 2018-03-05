@@ -15,10 +15,7 @@ fse = require "fs-extra"
 os = require("os")
 async = require "async"
 Errors = require './Errors'
-
-commandRunner = Settings.clsi?.commandRunner or "./CommandRunner"
-logger.info commandRunner:commandRunner, "selecting command runner for clsi"
-CommandRunner = require(commandRunner)
+CommandRunner = require "./CommandRunner"
 
 getCompileName = (project_id, user_id) ->
 	if user_id? then "#{project_id}-#{user_id}" else project_id

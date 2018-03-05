@@ -29,9 +29,9 @@ module.exports =
 	project_cache_length_ms: 1000 * 60 * 60 * 24
 	parallelFileDownloads:1
 
-if process.env["COMMAND_RUNNER"]
+if process.env["DOCKER_RUNNER"]
 	module.exports.clsi =
-		commandRunner: process.env["COMMAND_RUNNER"]
+		dockerRunner: process.env["DOCKER_RUNNER"] == "true"
 		docker:
 			image: process.env["TEXLIVE_IMAGE"] or "quay.io/sharelatex/texlive-full:2017.1"
 			env:

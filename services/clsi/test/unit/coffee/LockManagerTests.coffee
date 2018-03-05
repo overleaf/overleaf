@@ -5,7 +5,7 @@ modulePath = require('path').join __dirname, '../../../app/js/LockManager'
 Path = require "path"
 Errors = require "../../../app/js/Errors"
 
-describe "LockManager", ->
+describe "DockerLockManager", ->
 	beforeEach ->
 		@LockManager = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": {}

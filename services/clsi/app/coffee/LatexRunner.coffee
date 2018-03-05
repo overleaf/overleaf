@@ -2,7 +2,7 @@ Path = require "path"
 Settings = require "settings-sharelatex"
 logger = require "logger-sharelatex"
 Metrics = require "./Metrics"
-CommandRunner = require(Settings.clsi?.commandRunner or "./CommandRunner")
+CommandRunner = require "./CommandRunner"
 
 ProcessTable = {}  # table of currently running jobs (pids or docker container names)
 

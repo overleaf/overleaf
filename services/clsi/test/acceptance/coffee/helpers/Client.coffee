@@ -11,7 +11,6 @@ module.exports = Client =
 		Math.random().toString(16).slice(2)
 
 	compile: (project_id, data, callback = (error, res, body) ->) ->
-		console.log("#{@host}/project/#{project_id}/compile")
 		request.post {
 			url: "#{@host}/project/#{project_id}/compile"
 			json:
