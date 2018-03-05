@@ -17,8 +17,8 @@ describe "UrlFetcher", ->
 		@defaults.calledWith(jar: false)
 			.should.equal true
 		
-	describe "_pipeUrlToFile", ->
-		beforeEach ->
+	describe "pipeUrlToFile", ->
+		beforeEach (done)->
 			@path = "/path/to/file/on/disk"
 			@request.get = sinon.stub().returns(@urlStream = new EventEmitter)
 			@urlStream.pipe = sinon.stub()
@@ -26,20 +26,23 @@ describe "UrlFetcher", ->
 			@urlStream.resume = sinon.stub()
 			@fs.createWriteStream = sinon.stub().returns(@fileStream = new EventEmitter)
 			@fs.unlink = (file, callback) -> callback()
-			@UrlFetcher.pipeUrlToFile(@url, @path, @callback)
-
-		it "should request the URL", ->
-			@request.get
-				.calledWith(sinon.match {"url": @url})
-				.should.equal true
-
+			done()
 
 		describe "successfully", ->
-			beforeEach ->
+			beforeEach (done)->
+				@UrlFetcher.pipeUrlToFile @url, @path, =>
+					@callback()
+					done()
 				@res = statusCode: 200
 				@urlStream.emit "response", @res
 				@urlStream.emit "end"
 				@fileStream.emit "finish"
+
+
+			it "should request the URL", ->
+				@request.get
+					.calledWith(sinon.match {"url": @url})
+					.should.equal true
 
 			it "should open the file for writing", ->
 				@fs.createWriteStream
@@ -55,7 +58,10 @@ describe "UrlFetcher", ->
 				@callback.called.should.equal true
 
 		describe "with non success status code", ->
-			beforeEach ->
+			beforeEach (done)->
+				@UrlFetcher.pipeUrlToFile @url, @path, (err)=>
+					@callback(err)
+					done()	
 				@res = statusCode: 404
 				@urlStream.emit "response", @res
 				@urlStream.emit "end"
@@ -66,7 +72,10 @@ describe "UrlFetcher", ->
 					.should.equal true
 
 		describe "with error", ->
-			beforeEach ->
+			beforeEach (done)->
+				@UrlFetcher.pipeUrlToFile @url, @path, (err)=>
+					@callback(err)
+					done()
 				@urlStream.emit "error", @error = new Error("something went wrong")
 
 			it "should call the callback with the error", ->
