@@ -390,6 +390,8 @@ describe 'DocumentUpdaterHandler', ->
 	describe "updateProjectStructure ", ->
 		beforeEach ->
 			@user_id = 1234
+			@version = 999
+			@Project.findOne = sinon.stub().callsArgWith(2,null, {_id: @project_id, version:@version})
 
 		describe "with project history disabled", ->
 			beforeEach ->
@@ -434,7 +436,7 @@ describe 'DocumentUpdaterHandler', ->
 
 					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>
 						@request.post
-							.calledWith(url: @url, json: {docUpdates, fileUpdates: [], userId: @user_id})
+							.calledWith(url: @url, json: {docUpdates, fileUpdates: [], userId: @user_id, version:@version})
 							.should.equal true
 						done()
 
@@ -454,7 +456,7 @@ describe 'DocumentUpdaterHandler', ->
 
 					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>
 						@request.post
-							.calledWith(url: @url, json: {docUpdates, fileUpdates: [], userId: @user_id})
+							.calledWith(url: @url, json: {docUpdates, fileUpdates: [], userId: @user_id, version:@version})
 							.should.equal true
 						done()
 
@@ -474,7 +476,7 @@ describe 'DocumentUpdaterHandler', ->
 
 					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>
 						@request.post
-							.calledWith(url: @url, json: {docUpdates: [], fileUpdates, userId: @user_id})
+							.calledWith(url: @url, json: {docUpdates: [], fileUpdates, userId: @user_id, version:@version})
 							.should.equal true
 						done()
 
@@ -493,7 +495,7 @@ describe 'DocumentUpdaterHandler', ->
 
 					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>
 						@request.post
-							.calledWith(url: @url, json: {docUpdates, fileUpdates: [], userId: @user_id})
+							.calledWith(url: @url, json: {docUpdates, fileUpdates: [], userId: @user_id, version:@version})
 							.should.equal true
 						done()
 
