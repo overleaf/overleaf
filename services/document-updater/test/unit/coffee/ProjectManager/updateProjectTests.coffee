@@ -3,6 +3,7 @@ chai = require('chai')
 should = chai.should()
 modulePath = "../../../../app/js/ProjectManager.js"
 SandboxedModule = require('sandboxed-module')
+_ = require('underscore')
 
 describe "ProjectManager", ->
 	beforeEach ->
@@ -49,16 +50,19 @@ describe "ProjectManager", ->
 					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @version, @callback
 
 				it "should rename the docs in the updates", ->
+					firstDocUpdateWithVersion = _.extend({}, @firstDocUpdate, {version: "#{@version}.0"})
+					secondDocUpdateWithVersion = _.extend({}, @secondDocUpdate, {version: "#{@version}.1"})
 					@DocumentManager.renameDocWithLock
-						.calledWith(@project_id, @firstDocUpdate.id, @user_id, @firstDocUpdate)
+						.calledWith(@project_id, @firstDocUpdate.id, @user_id, firstDocUpdateWithVersion)
 						.should.equal true
 					@DocumentManager.renameDocWithLock
-						.calledWith(@project_id, @secondDocUpdate.id, @user_id, @secondDocUpdate)
+						.calledWith(@project_id, @secondDocUpdate.id, @user_id, secondDocUpdateWithVersion)
 						.should.equal true
 
 				it "should rename the files in the updates", ->
+					firstFileUpdateWithVersion = _.extend({}, @firstFileUpdate, {version: "#{@version}.2"})
 					@ProjectHistoryRedisManager.queueRenameEntity
-						.calledWith(@project_id, 'file', @firstFileUpdate.id, @user_id, @firstFileUpdate)
+						.calledWith(@project_id, 'file', @firstFileUpdate.id, @user_id, firstFileUpdateWithVersion)
 						.should.equal true
 
 				it "should not flush the history", ->
@@ -117,16 +121,19 @@ describe "ProjectManager", ->
 					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @version, @callback
 
 				it "should add the docs in the updates", ->
+					firstDocUpdateWithVersion = _.extend({}, @firstDocUpdate, {version: "#{@version}.0"})
+					secondDocUpdateWithVersion = _.extend({}, @secondDocUpdate, {version: "#{@version}.1"})
 					@ProjectHistoryRedisManager.queueAddEntity
-						.calledWith(@project_id, 'doc', @firstDocUpdate.id, @user_id, @firstDocUpdate)
+						.calledWith(@project_id, 'doc', @firstDocUpdate.id, @user_id, firstDocUpdateWithVersion)
 						.should.equal true
 					@ProjectHistoryRedisManager.queueAddEntity
-						.calledWith(@project_id, 'doc', @secondDocUpdate.id, @user_id, @secondDocUpdate)
+						.calledWith(@project_id, 'doc', @secondDocUpdate.id, @user_id, secondDocUpdateWithVersion)
 						.should.equal true
 
 				it "should add the files in the updates", ->
+					firstFileUpdateWithVersion = _.extend({}, @firstFileUpdate, {version: "#{@version}.2"})
 					@ProjectHistoryRedisManager.queueAddEntity
-						.calledWith(@project_id, 'file', @firstFileUpdate.id, @user_id, @firstFileUpdate)
+						.calledWith(@project_id, 'file', @firstFileUpdate.id, @user_id, firstFileUpdateWithVersion)
 						.should.equal true
 
 				it "should not flush the history", ->
