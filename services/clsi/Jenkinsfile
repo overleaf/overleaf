@@ -9,27 +9,9 @@ pipeline {
   }
 
   stages {
-    stage('Build') {
+    stage('CI') {
       steps {
-        sh 'make build'
-      }
-    }
-
-    stage('Unit Tests') {
-      steps {
-        sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_unit'
-      }
-    }
-
-    stage('Acceptance Tests') {
-      steps {
-        sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" up --build test_acceptance'
-      }
-    }
-
-    stage('Package and publish build') {
-      steps {
-        sh 'make publish'
+        sh 'make ci'
       }
     }
 
