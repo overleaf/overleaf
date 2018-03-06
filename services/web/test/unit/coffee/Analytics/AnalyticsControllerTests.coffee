@@ -22,6 +22,8 @@ describe 'AnalyticsController', ->
 			"../Authentication/AuthenticationController":@AuthenticationController
 			"logger-sharelatex":
 				log:->
+			'../../infrastructure/GeoIpLookup': @GeoIpLookup =
+				getDetails: sinon.stub()
 
 		@res =
 			send:->
@@ -31,12 +33,18 @@ describe 'AnalyticsController', ->
 			@req =
 				params:
 					projectId: "a project id"
+			@GeoIpLookup.getDetails = sinon.stub()
+				.callsArgWith(1, null, {country_code: 'XY'})
 
 		it "delegates to the AnalyticsManager", (done) ->
 			@AuthenticationController.getLoggedInUserId.returns("1234")
 			@controller.updateEditingSession @req, @res
 
-			@AnalyticsManager.updateEditingSession.calledWith("1234", "a project id", {}).should.equal true
+			@AnalyticsManager.updateEditingSession.calledWith(
+				"1234",
+				"a project id",
+				'XY'
+			).should.equal true
 			done()
 
 	describe "recordEvent", ->
@@ -46,6 +54,7 @@ describe 'AnalyticsController', ->
 					event:"i_did_something"
 				body:"stuff"
 				sessionID: "sessionIDHere"
+				session: {}
 
 		it "should use the user_id", (done)->
 			@AuthenticationController.getLoggedInUserId.returns("1234")

@@ -139,7 +139,7 @@ module.exports = settings =
 			apiKey: ""
 			subdomain: ""
 		geoIpLookup:
-			url: "http://#{process.env['GEOIP_HOST'] or 'localhost'}:8080/json"
+			url: "http://#{process.env['GEOIP_HOST'] or 'localhost'}:8080/json/"
 		realTime:
 			url: "http://#{process.env['REALTIME_HOST'] or 'localhost'}:3026"
 		contacts:
