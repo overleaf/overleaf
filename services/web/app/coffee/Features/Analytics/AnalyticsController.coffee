@@ -7,10 +7,12 @@ module.exports = AnalyticsController =
 	updateEditingSession: (req, res, next) ->
 		userId    = AuthenticationController.getLoggedInUserId(req)
 		projectId = req.params.projectId
+		countryCode = null
 
 		if userId?
 			GeoIpLookup.getDetails req.ip, (err, geoDetails) ->
-				countryCode = geoDetails?.country_code || null
+				if geoDetails?.country_code? and geoDetails.country_code != ""
+					countryCode = geoDetails.country_code
 				AnalyticsManager.updateEditingSession userId, projectId, countryCode, (error) ->
 					respondWith(error, res, next)
 		else
