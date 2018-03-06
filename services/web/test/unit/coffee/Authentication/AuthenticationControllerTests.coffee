@@ -185,14 +185,14 @@ describe "AuthenticationController", ->
 				@req.login.callCount.should.equal 1
 				done()
 
-		it 'should call UserSessionsManager.trackSession', (done) ->
-			@call (err) =>
-				@UserSessionsManager.trackSession.callCount.should.equal 1
-				done()
-
 		it 'should call req.session.save', (done) ->
 			@call (err) =>
 				@req.session.save.callCount.should.equal 1
+				done()
+
+		it 'should call UserSessionsManager.trackSession', (done) ->
+			@call (err) =>
+				@UserSessionsManager.trackSession.callCount.should.equal 1
 				done()
 
 		describe 'when req.session.save produces an error', ->
