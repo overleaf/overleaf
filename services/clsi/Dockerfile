@@ -23,5 +23,4 @@ RUN useradd --user-group --create-home --home-dir /app --shell /bin/false app
 
 RUN [ -e ./install_deps.sh ] && ./install_deps.sh
 
-# USER app
-CMD ["node","app.js"]
+ENTRYPOINT ["/bin/sh", "entrypoint.sh"]

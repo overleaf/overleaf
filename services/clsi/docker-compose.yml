@@ -21,7 +21,7 @@ services:
     extends:
       file: docker-compose-config.yml
       service: dev
-    entrypoint: npm run test:acceptance
+    command: npm run test:acceptance
 
   redis:
     image: redis
