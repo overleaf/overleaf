@@ -9,11 +9,30 @@ pipeline {
   }
 
   stages {
-    stage('CI') {
+    stage('Build') {
       steps {
-        sh 'make ci'
+        sh 'make build'
       }
     }
+
+    stage('Unit Tests') {
+      steps {
+        sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_unit'
+      }
+    }
+
+    stage('Acceptance Tests') {
+      steps {
+        sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_acceptance'
+      }
+    }
+
+    stage('Package and publish build') {
+      steps {
+        sh 'make publish'
+      }
+    }
+
     stage('Publish build number') {
       steps {
         sh 'echo ${BRANCH_NAME}-${BUILD_NUMBER} > build_number.txt'

@@ -9,9 +9,9 @@
   "scripts": {
     "compile:test:acceptance": "coffee -o test/acceptance/js -c test/acceptance/coffee", 
     "compile:test:smoke": "coffee -o test/smoke/js -c test/smoke/coffee", 
-    "compile:app": "coffee -o app/js -c app/coffee && coffee -c app.coffee", 
+    "compile:app": "coffee $COFFEE_OPTIONS -o app/js -c app/coffee && coffee $COFFEE_OPTIONS -c app.coffee", 
     "compile": "npm run compile:app && npm run compile:test:acceptance && npm run compile:test:smoke", 
-    "start": "npm run compile:app && node app.js", 
+    "start": "npm run compile:app && node $NODE_APP_OPTIONS app.js", 
     "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js", 
     "test:acceptance": "npm run compile:app && npm run compile:acceptance_tests && npm run test:acceptance:_run -- $@", 
     "test:unit:_run": "mocha --recursive --exit --reporter spec $@ test/unit/js", 

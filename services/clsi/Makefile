@@ -33,16 +33,6 @@ build:
 
 publish:
 	docker push quay.io/sharelatex/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
-	
-ci:
-	# On the CI server, we want to run our tests in the image that we
-	# have built for deployment, which is what the docker-compose.ci.yml
-	# override does.
-	PROJECT_NAME=$(PROJECT_NAME) \
-	BRANCH_NAME=$(BRANCH_NAME) \
-	BUILD_NUMBER=$(BUILD_NUMBER) \
-	DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" \
-	$(MAKE) build test publish
 
 
 .PHONY: clean test test_unit test_acceptance test_clean build publish
