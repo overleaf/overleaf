@@ -26,11 +26,21 @@ module.exports = ProjectCreationHandler =
 			return callback(error) if error?
 			logger.log owner_id:owner_id, projectName:projectName, "creating blank project"
 			if projectHistoryId?
-				ProjectCreationHandler._createBlankProject owner_id, projectName, projectHistoryId, callback
+				ProjectCreationHandler._createBlankProject owner_id, projectName, projectHistoryId, (error, project) ->
+					return callback(error) if error?
+					AnalyticsManger.recordEvent(
+						owner_id, 'project-imported', { projectId: project._id, projectHistoryId: projectHistoryId }
+					)
+					callback(error, project)
 			else
 				HistoryManager.initializeProject (error, history) ->
 					return callback(error) if error?
-					ProjectCreationHandler._createBlankProject owner_id, projectName, history?.overleaf_id, callback
+					ProjectCreationHandler._createBlankProject owner_id, projectName, history?.overleaf_id, (error, project) ->
+						return callback(error) if error?
+						AnalyticsManger.recordEvent(
+							owner_id, 'project-created', { projectId: project._id }
+						)
+						callback(error, project)
 
 	_createBlankProject : (owner_id, projectName, projectHistoryId, callback = (error, project) ->)->
 		rootFolder = new Folder {'name':'rootFolder'}
@@ -47,9 +57,6 @@ module.exports = ProjectCreationHandler =
 			project.spellCheckLanguage = user.ace.spellCheckLanguage
 			project.save (err)->
 				return callback(err) if err?
-				AnalyticsManger.recordEvent(
-					owner_id, 'project-created', { projectId: project._id }
-				)
 				callback err, project
 
 	createBasicProject :  (owner_id, projectName, callback = (error, project) ->)->
