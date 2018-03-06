@@ -42,6 +42,8 @@ module.exports = PersistenceManager =
 					return callback(new Error("web API response had no doc lines"))
 				if !body.version? or not body.version instanceof Number
 					return callback(new Error("web API response had no valid doc version"))
+				if !body.pathname?
+					return callback(new Error("web API response had no valid doc pathname"))
 				return callback null, body.lines, body.version, body.ranges, body.pathname
 			else if res.statusCode == 404
 				return callback(new Errors.NotFoundError("doc not not found: #{url}"))
