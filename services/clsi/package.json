@@ -21,7 +21,7 @@
     "compile:all": "npm run compile:app && npm run compile:unit_tests && npm run compile:acceptance_tests", 
     "nodemon": "nodemon --config nodemon.json"
   }, 
-  "author": "James Allen <james@sharelatex.com>",
+  "author": "James Allen <james@sharelatex.com>", 
   "dependencies": {
     "async": "0.2.9", 
     "body-parser": "^1.2.0", 

@@ -21,7 +21,13 @@ services:
     extends:
       file: docker-compose-config.yml
       service: dev
-    command: npm run test:acceptance
+    environment:
+      REDIS_HOST: redis
+      MONGO_HOST: mongo
+    depends_on:
+      - redis
+      - mongo
+    entrypoint: npm run test:acceptance
 
   redis:
     image: redis

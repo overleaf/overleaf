@@ -14,7 +14,6 @@ pipeline {
         sh 'make ci'
       }
     }
-
     stage('Publish build number') {
       steps {
         sh 'echo ${BRANCH_NAME}-${BUILD_NUMBER} > build_number.txt'

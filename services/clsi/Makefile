@@ -28,13 +28,12 @@ test_acceptance: test_clean # clear the database before each acceptance test run
 
 test_clean:
 	$(DOCKER_COMPOSE) down -t 0
-
 build:
 	docker build --pull --tag quay.io/sharelatex/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) .
 
 publish:
 	docker push quay.io/sharelatex/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
-
+	
 ci:
 	# On the CI server, we want to run our tests in the image that we
 	# have built for deployment, which is what the docker-compose.ci.yml
@@ -43,7 +42,7 @@ ci:
 	BRANCH_NAME=$(BRANCH_NAME) \
 	BUILD_NUMBER=$(BUILD_NUMBER) \
 	DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" \
-	$(MAKE) build test
+	$(MAKE) build test publish
 
 
 .PHONY: clean test test_unit test_acceptance test_clean build publish
