@@ -87,9 +87,9 @@ module.exports = DocUpdaterClient =
 				body = JSON.parse(body)
 			callback error, res, body
 
-	sendProjectUpdate: (project_id, userId, docUpdates, fileUpdates, callback = (error) ->) ->
+	sendProjectUpdate: (project_id, userId, docUpdates, fileUpdates, version, callback = (error) ->) ->
 		request.post {
 			url: "http://localhost:3003/project/#{project_id}"
-			json: { userId, docUpdates, fileUpdates }
+			json: { userId, docUpdates, fileUpdates, version }
 		}, (error, res, body) ->
 			callback error, res, body
