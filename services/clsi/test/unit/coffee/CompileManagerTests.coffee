@@ -259,13 +259,19 @@ describe "CompileManager", ->
 				@CommandRunner.run = sinon.stub().callsArgWith(6, null, {stdout:@stdout})
 				@CompileManager.syncFromCode @project_id, @user_id, @file_name, @line, @column, @callback
 
-			# it "should execute the synctex binary", ->
-			# 	bin_path = Path.resolve(__dirname + "/../../../bin/synctex")
-			# 	synctex_path = "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}/output.pdf"
-			# 	file_path = "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}/#{@file_name}"
-			# 	@child_process.execFile
-			# 		.calledWith(bin_path, ["code", synctex_path, file_path, @line, @column], timeout: 10000)
-			# 		.should.equal true
+			it "should execute the synctex binary", ->
+				bin_path = Path.resolve(__dirname + "/../../../bin/synctex")
+				synctex_path = "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}/output.pdf"
+				file_path = "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}/#{@file_name}"
+				@CommandRunner.run
+					.calledWith(
+						"#{@project_id}-#{@user_id}",
+						['/opt/synctex', 'code', synctex_path, file_path, @line, @column],
+						"#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}",
+						@Settings.clsi.docker.image,
+						10000,
+						{}
+						).should.equal true
 
 			it "should call the callback with the parsed output", ->
 				@callback
@@ -285,12 +291,17 @@ describe "CompileManager", ->
 				@CommandRunner.run = sinon.stub().callsArgWith(6, null, {stdout:@stdout})
 				@CompileManager.syncFromPdf @project_id, @user_id, @page, @h, @v, @callback
 
-			# it "should execute the synctex binary", ->
-			# 	bin_path = Path.resolve(__dirname + "/../../../bin/synctex")
-			# 	synctex_path = "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}/output.pdf"
-			# 	@CommandRunner.run
-			# 		.calledWith(bin_path, ["pdf", synctex_path, @page, @h, @v], timeout: 10000)
-			# 		.should.equal true
+			it "should execute the synctex binary", ->
+				bin_path = Path.resolve(__dirname + "/../../../bin/synctex")
+				synctex_path = "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}/output.pdf"
+				@CommandRunner.run
+					.calledWith(
+						"#{@project_id}-#{@user_id}",
+						['/opt/synctex', "pdf", synctex_path, @page, @h, @v],				
+						"#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}",
+						@Settings.clsi.docker.image,
+						10000,
+						{}).should.equal true
 
 			it "should call the callback with the parsed output", ->
 				@callback
