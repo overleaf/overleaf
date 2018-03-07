@@ -322,6 +322,7 @@ module.exports = RedisManager =
 		rclient.smembers keys.docsInProject(project_id: project_id), callback
 
 	queueResyncProjectStructure: (project_id, docs, files, callback) ->
+		logger.log {project_id, docs, files}, "queue project structure resync"
 		update =
 			resyncProjectStructure: { docs, files }
 			meta:
@@ -330,6 +331,7 @@ module.exports = RedisManager =
 		rclient.rpush projectHistoryKeys.projectHistoryOps({project_id}), jsonUpdate, callback
 
 	queueResyncDocContents: (project_id, doc_id, lines, version, pathname, callback) ->
+		logger.log {project_id, doc_id, pathname}, "queue doc content resync"
 		update =
 			resyncDocContents:
 				content: lines.join("\n"),
