@@ -2,8 +2,8 @@ logger = require "logger-sharelatex"
 request = require "request"
 settings = require "settings-sharelatex"
 AuthenticationController = require "../Authentication/AuthenticationController"
-DocumentUpdaterHandler = require "../DocumentUpdater/DocumentUpdaterHandler"
 ProjectDetailsHandler = require "../Project/ProjectDetailsHandler"
+ProjectEntityUpdateHandler = require "../Project/ProjectEntityUpdateHandler"
 HistoryManager = require "./HistoryManager"
 
 module.exports = HistoryController =
@@ -66,6 +66,6 @@ module.exports = HistoryController =
 
 	resyncProject: (req, res, next = (error) ->) ->
 		project_id = req.params.Project_id
-		DocumentUpdaterHandler.resyncProject project_id, (error) ->
+		ProjectEntityUpdateHandler.resyncProject project_id, (error) ->
 			return next(error) if error?
 			res.sendStatus 204

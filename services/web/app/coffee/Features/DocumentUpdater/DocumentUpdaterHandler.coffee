@@ -205,32 +205,17 @@ module.exports = DocumentUpdaterHandler =
 				logger.error {project_id, doc_id, thread_id}, "doc updater returned a non-success status code: #{res.statusCode}"
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
-	resyncProject: (project_id, callback) ->
-		ProjectEntityHandler = require "../Project/ProjectEntityHandler"
-		ProjectGetter.getProject project_id, rootFolder: true, (error, project) ->
-			return callback(error) if error?
-			ProjectEntityHandler.getAllEntitiesFromProject project, (error, docs, files) ->
-				return callback(error) if error?
-
-				docs = _.map docs, (doc) ->
-					doc: doc.doc._id
-					path: doc.path
-
-				files = _.map files, (file) ->
-					file: file.file._id
-					path: file.path
-					url: FileStoreHandler._buildUrl(project_id, file.file._id)
-
-				request.post
-					url: "#{settings.apis.documentupdater.url}/project/#{project_id}/resync"
-					json: { docs, files }
-				, (error, res, body) ->
-					if error?
-						logger.error {error, project_id}, "error resyncing project in doc updater"
-						callback(error)
-					else if res.statusCode >= 200 and res.statusCode < 300
-						logger.log {project_id}, "resynced project in doc updater"
-						callback()
+	resyncProject: (project_id, docs, files, callback) ->
+		request.post
+			url: "#{settings.apis.documentupdater.url}/project/#{project_id}/resync"
+			json: { docs, files }
+		, (error, res, body) ->
+			if error?
+				logger.error {error, project_id}, "error resyncing project in doc updater"
+				callback(error)
+			else if res.statusCode >= 200 and res.statusCode < 300
+				logger.log {project_id}, "resynced project in doc updater"
+				callback()
 
 	updateProjectStructure : (project_id, userId, changes, callback = (error) ->)->
 		return callback() if !settings.apis.project_history?.sendProjectStructureOps
