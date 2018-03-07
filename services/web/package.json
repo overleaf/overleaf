@@ -15,7 +15,7 @@
     "test:acceptance:dir": "npm -q run test:acceptance:wait_for_app && npm -q run test:acceptance:run -- $@",
     "test:acceptance": "npm -q run test:acceptance:dir -- $@ test/acceptance/js",
     "test:unit": "npm -q run compile && bin/unit_test $@",
-    "test:frontend": "karma start --single-run",
+    "test:frontend": "karma start",
     "compile": "make compile",
     "start": "npm -q run compile && node $NODE_APP_OPTIONS app.js",
     "nodemon": "nodemon --config nodemon.json",
