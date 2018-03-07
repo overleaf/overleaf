@@ -170,10 +170,10 @@ module.exports = HttpController =
 			logger.log project_id: project_id, "updated project via http"
 			res.send 204 # No Content
 
-	resyncProject: (req, res, next = (error) ->) ->
+	resyncProjectHistory: (req, res, next = (error) ->) ->
 		project_id = req.params.project_id
 		{docs, files} = req.body
 
-		HistoryManager.resyncProject project_id, docs, files, (error) ->
+		HistoryManager.resyncProjectHistory project_id, docs, files, (error) ->
 			return next(error) if error?
 			res.send 204

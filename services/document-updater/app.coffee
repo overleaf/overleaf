@@ -48,7 +48,7 @@ app.post   '/project/:project_id/doc/:doc_id/flush',                    HttpCont
 app.delete '/project/:project_id/doc/:doc_id',                          HttpController.flushAndDeleteDoc
 app.delete '/project/:project_id',                                      HttpController.deleteProject
 app.post   '/project/:project_id',                                      HttpController.updateProject
-app.post   '/project/:project_id/history/resync',                       HttpController.resyncProject
+app.post   '/project/:project_id/history/resync',                       HttpController.resyncProjectHistory
 app.post   '/project/:project_id/flush',                                HttpController.flushProject
 app.post   '/project/:project_id/doc/:doc_id/change/:change_id/accept', HttpController.acceptChanges
 app.post   '/project/:project_id/doc/:doc_id/change/accept',            HttpController.acceptChanges
