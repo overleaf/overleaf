@@ -4,8 +4,6 @@ COPY ./ /app
 
 WORKDIR /app
 
-RUN rm -rf node_modules/* && make clean
-
 RUN npm install
 
 
