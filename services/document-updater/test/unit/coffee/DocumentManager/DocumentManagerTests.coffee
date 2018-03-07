@@ -467,3 +467,42 @@ describe "DocumentManager", ->
 
 			it "should call the callback", ->
 				@callback.called.should.equal true
+
+	describe "resyncDocContents", ->
+		describe "when doc is loaded in redis", ->
+			beforeEach ->
+				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname)
+				@RedisManager.queueResyncDocContents = sinon.stub()
+				@DocumentManager.resyncDocContents @project_id, @doc_id, @callback
+
+			it "gets the doc contents from redis", ->
+				@RedisManager.getDoc
+					.calledWith(@project_id, @doc_id)
+					.should.equal true
+
+			it "queues a resync doc content update", ->
+				@RedisManager.queueResyncDocContents
+					.calledWith(@project_id, @doc_id, @lines, @version, @pathname, @callback)
+					.should.equal true
+
+		describe "when doc is not loaded in redis", ->
+			beforeEach ->
+				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null)
+				@PersistenceManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname)
+				@RedisManager.queueResyncDocContents = sinon.stub()
+				@DocumentManager.resyncDocContents @project_id, @doc_id, @callback
+
+			it "tries to get the doc contents from redis", ->
+				@RedisManager.getDoc
+					.calledWith(@project_id, @doc_id)
+					.should.equal true
+
+			it "gets the doc contents from web", ->
+				@PersistenceManager.getDoc
+					.calledWith(@project_id, @doc_id)
+					.should.equal true
+
+			it "queues a resync doc content update", ->
+				@RedisManager.queueResyncDocContents
+					.calledWith(@project_id, @doc_id, @lines, @version, @pathname, @callback)
+					.should.equal true

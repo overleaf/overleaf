@@ -544,3 +544,39 @@ describe "HttpController", ->
 				@next
 					.calledWith(new Error("oops"))
 					.should.equal true
+
+	describe "resyncProjectHistory", ->
+		beforeEach ->
+			@docs = sinon.stub()
+			@files = sinon.stub()
+			@fileUpdates = sinon.stub()
+			@req =
+				body:
+					{@docs, @files}
+				params:
+					project_id: @project_id
+
+		describe "successfully", ->
+			beforeEach ->
+				@HistoryManager.resyncProjectHistory = sinon.stub().callsArg(3)
+				@HttpController.resyncProjectHistory(@req, @res, @next)
+
+			it "should accept the change", ->
+				@HistoryManager.resyncProjectHistory
+					.calledWith(@project_id, @docs, @files)
+					.should.equal true
+
+			it "should return a successful No Content response", ->
+				@res.send
+					.calledWith(204)
+					.should.equal true
+
+		describe "when an errors occurs", ->
+			beforeEach ->
+				@HistoryManager.resyncProjectHistory = sinon.stub().callsArgWith(3, new Error("oops"))
+				@HttpController.resyncProjectHistory(@req, @res, @next)
+
+			it "should call next with the error", ->
+				@next
+					.calledWith(new Error("oops"))
+					.should.equal true
