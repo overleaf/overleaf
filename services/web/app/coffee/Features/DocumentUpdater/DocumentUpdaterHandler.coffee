@@ -206,6 +206,7 @@ module.exports = DocumentUpdaterHandler =
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
 	resyncProjectHistory: (project_id, docs, files, callback) ->
+		logger.info {project_id}, "resyncing project in doc updater"
 		request.post
 			url: "#{settings.apis.documentupdater.url}/project/#{project_id}/history/resync"
 			json: { docs, files }
@@ -216,6 +217,9 @@ module.exports = DocumentUpdaterHandler =
 			else if res.statusCode >= 200 and res.statusCode < 300
 				logger.log {project_id}, "resynced project in doc updater"
 				callback()
+			else
+				logger.error {project_id, doc_id}, "doc updater returned a non-success status code: #{res.statusCode}"
+				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
 	updateProjectStructure : (project_id, userId, changes, callback = (error) ->)->
 		return callback() if !settings.apis.project_history?.sendProjectStructureOps
