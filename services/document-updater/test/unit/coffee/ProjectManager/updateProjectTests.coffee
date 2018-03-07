@@ -111,9 +111,12 @@ describe "ProjectManager", ->
 					docLines: "a\nb"
 				@docUpdates = [ @firstDocUpdate, @secondDocUpdate ]
 				@firstFileUpdate =
-					id: 2
+					id: 3
 					url: 'filestore.example.com/2'
-				@fileUpdates = [ @firstFileUpdate ]
+				@secondFileUpdate =
+					id: 4
+					url: 'filestore.example.com/3'
+				@fileUpdates = [ @firstFileUpdate, @secondFileUpdate ]
 				@ProjectHistoryRedisManager.queueAddEntity = sinon.stub().yields()
 
 			describe "successfully", ->
@@ -123,17 +126,21 @@ describe "ProjectManager", ->
 				it "should add the docs in the updates", ->
 					firstDocUpdateWithVersion = _.extend({}, @firstDocUpdate, {version: "#{@version}.0"})
 					secondDocUpdateWithVersion = _.extend({}, @secondDocUpdate, {version: "#{@version}.1"})
-					@ProjectHistoryRedisManager.queueAddEntity
+					@ProjectHistoryRedisManager.queueAddEntity.getCall(0)
 						.calledWith(@project_id, 'doc', @firstDocUpdate.id, @user_id, firstDocUpdateWithVersion)
 						.should.equal true
-					@ProjectHistoryRedisManager.queueAddEntity
+					@ProjectHistoryRedisManager.queueAddEntity.getCall(1)
 						.calledWith(@project_id, 'doc', @secondDocUpdate.id, @user_id, secondDocUpdateWithVersion)
 						.should.equal true
 
 				it "should add the files in the updates", ->
 					firstFileUpdateWithVersion = _.extend({}, @firstFileUpdate, {version: "#{@version}.2"})
-					@ProjectHistoryRedisManager.queueAddEntity
+					secondFileUpdateWithVersion = _.extend({}, @secondFileUpdate, {version: "#{@version}.3"})
+					@ProjectHistoryRedisManager.queueAddEntity.getCall(2)
 						.calledWith(@project_id, 'file', @firstFileUpdate.id, @user_id, firstFileUpdateWithVersion)
+						.should.equal true
+					@ProjectHistoryRedisManager.queueAddEntity.getCall(3)
+						.calledWith(@project_id, 'file', @secondFileUpdate.id, @user_id, secondFileUpdateWithVersion)
 						.should.equal true
 
 				it "should not flush the history", ->

@@ -140,9 +140,9 @@ module.exports = ProjectManager =
 					project_ops_length = count
 					cb(error)
 
-		async.each docUpdates, handleDocUpdate, (error) ->
+		async.eachSeries docUpdates, handleDocUpdate, (error) ->
 			return callback(error) if error?
-			async.each fileUpdates, handleFileUpdate, (error) ->
+			async.eachSeries fileUpdates, handleFileUpdate, (error) ->
 				return callback(error) if error?
 				if HistoryManager.shouldFlushHistoryOps(project_ops_length, docUpdates.length + fileUpdates.length, HistoryManager.FLUSH_PROJECT_EVERY_N_OPS)
 					HistoryManager.flushProjectChangesAsync project_id
