@@ -1,6 +1,7 @@
 class Fixture {
   constructor () {
     this.el = document.createElement('div')
+    document.body.appendChild(this.el)
   }
 
   load (html) {
