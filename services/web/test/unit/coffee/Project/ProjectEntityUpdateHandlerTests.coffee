@@ -745,6 +745,51 @@ describe 'ProjectEntityUpdateHandler', ->
 				.calledWith(project_id, userId, @changes, @callback)
 				.should.equal true
 
+	describe "resyncProject", ->
+		beforeEach ->
+			@ProjectGetter.getProject = sinon.stub().yields(null, @project)
+			docs = [
+				doc: _id: doc_id
+				path: 'main.tex'
+			]
+			files = [
+				file: _id: file_id
+				path: 'universe.png'
+			]
+			@ProjectEntityHandler.getAllEntitiesFromProject = sinon.stub().yields(null, docs, files)
+			@FileStoreHandler._buildUrl = (project_id, file_id) ->
+				"www.filestore.test/#{project_id}/#{file_id}"
+			@DocumentUpdaterHandler.resyncProject = sinon.stub().yields()
+
+			@ProjectEntityUpdateHandler.resyncProject project_id, @callback
+
+		it 'gets the project', ->
+			@ProjectGetter.getProject
+				.calledWith(project_id)
+				.should.equal true
+
+		it 'gets the entities for the project', ->
+			@ProjectEntityHandler.getAllEntitiesFromProject
+				.calledWith(@project)
+				.should.equal true
+
+		it 'tells the doc updater to sync the project', ->
+			docs = [
+				doc: doc_id
+				path: 'main.tex'
+			]
+			files = [
+				file: file_id
+				path: 'universe.png'
+				url: "www.filestore.test/#{project_id}/#{file_id}"
+			]
+			@DocumentUpdaterHandler.resyncProject
+				.calledWith(project_id, docs, files)
+				.should.equal true
+
+		it 'calls the callback', ->
+			@callback.called.should.equal true
+
 	describe "_cleanUpEntity", ->
 		beforeEach ->
 			@entity_id = "4eecaffcbffa66588e000009"
