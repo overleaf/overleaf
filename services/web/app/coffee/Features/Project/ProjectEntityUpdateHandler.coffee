@@ -315,7 +315,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 
 	# This doesn't directly update project structure but we need to take the lock
 	# to prevent anything else being queued before the resync update
-	resyncProject: wrapWithLock (project_id, callback) ->
+	resyncProjectHistory: wrapWithLock (project_id, callback) ->
 		ProjectGetter.getProject project_id, rootFolder: true, (error, project) ->
 			return callback(error) if error?
 			ProjectEntityHandler.getAllEntitiesFromProject project, (error, docs, files) ->
@@ -330,7 +330,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 					path: file.path
 					url: FileStoreHandler._buildUrl(project_id, file.file._id)
 
-				DocumentUpdaterHandler.resyncProject project_id, docs, files, callback
+				DocumentUpdaterHandler.resyncProjectHistory project_id, docs, files, callback
 
 	_cleanUpEntity: (project, entity, entityType, path, userId, callback = (error) ->) ->
 		if(entityType.indexOf("file") != -1)

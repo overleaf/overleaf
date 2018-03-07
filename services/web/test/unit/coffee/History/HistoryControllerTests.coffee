@@ -201,19 +201,19 @@ describe "HistoryController", ->
 		it "should not return the data with users to the client", ->
 			@res.json.calledWith(@data_with_users).should.equal false
 
-	describe "resyncProject", ->
+	describe "resyncProjectHistory", ->
 		beforeEach ->
 			@project_id = 'mock-project-id'
 			@req = params: Project_id: @project_id
 			@res = sendStatus: sinon.stub()
 			@next = sinon.stub()
 
-			@ProjectEntityUpdateHandler.resyncProject = sinon.stub().yields()
+			@ProjectEntityUpdateHandler.resyncProjectHistory = sinon.stub().yields()
 
-			@HistoryController.resyncProject @req, @res, @next
+			@HistoryController.resyncProjectHistory @req, @res, @next
 
 		it "resyncs the project", ->
-			@ProjectEntityUpdateHandler.resyncProject
+			@ProjectEntityUpdateHandler.resyncProjectHistory
 				.calledWith(@project_id)
 				.should.equal true
 

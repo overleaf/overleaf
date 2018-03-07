@@ -64,8 +64,8 @@ module.exports = HistoryController =
 		else
 			return settings.apis.trackchanges.url
 
-	resyncProject: (req, res, next = (error) ->) ->
+	resyncProjectHistory: (req, res, next = (error) ->) ->
 		project_id = req.params.Project_id
-		ProjectEntityUpdateHandler.resyncProject project_id, (error) ->
+		ProjectEntityUpdateHandler.resyncProjectHistory project_id, (error) ->
 			return next(error) if error?
 			res.sendStatus 204

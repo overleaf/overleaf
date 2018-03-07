@@ -205,7 +205,7 @@ module.exports = DocumentUpdaterHandler =
 				logger.error {project_id, doc_id, thread_id}, "doc updater returned a non-success status code: #{res.statusCode}"
 				callback new Error("doc updater returned a non-success status code: #{res.statusCode}")
 
-	resyncProject: (project_id, docs, files, callback) ->
+	resyncProjectHistory: (project_id, docs, files, callback) ->
 		request.post
 			url: "#{settings.apis.documentupdater.url}/project/#{project_id}/resync"
 			json: { docs, files }

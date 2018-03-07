@@ -745,7 +745,7 @@ describe 'ProjectEntityUpdateHandler', ->
 				.calledWith(project_id, userId, @changes, @callback)
 				.should.equal true
 
-	describe "resyncProject", ->
+	describe "resyncProjectHistory", ->
 		beforeEach ->
 			@ProjectGetter.getProject = sinon.stub().yields(null, @project)
 			docs = [
@@ -759,9 +759,9 @@ describe 'ProjectEntityUpdateHandler', ->
 			@ProjectEntityHandler.getAllEntitiesFromProject = sinon.stub().yields(null, docs, files)
 			@FileStoreHandler._buildUrl = (project_id, file_id) ->
 				"www.filestore.test/#{project_id}/#{file_id}"
-			@DocumentUpdaterHandler.resyncProject = sinon.stub().yields()
+			@DocumentUpdaterHandler.resyncProjectHistory = sinon.stub().yields()
 
-			@ProjectEntityUpdateHandler.resyncProject project_id, @callback
+			@ProjectEntityUpdateHandler.resyncProjectHistory project_id, @callback
 
 		it 'gets the project', ->
 			@ProjectGetter.getProject
@@ -783,7 +783,7 @@ describe 'ProjectEntityUpdateHandler', ->
 				path: 'universe.png'
 				url: "www.filestore.test/#{project_id}/#{file_id}"
 			]
-			@DocumentUpdaterHandler.resyncProject
+			@DocumentUpdaterHandler.resyncProjectHistory
 				.calledWith(project_id, docs, files)
 				.should.equal true
 
