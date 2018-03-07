@@ -1,0 +1,16 @@
+{
+  "name": "overleaf-error-type",
+  "version": "1.0.0",
+  "description": "Utility for creating custom error types.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --require test/support"
+  },
+  "author": "team@overleaf.com",
+  "license": "Proprietary",
+  "private": true,
+  "devDependencies": {
+    "chai": "^3.3.0",
+    "mocha": "^2.3.3"
+  }
+}
