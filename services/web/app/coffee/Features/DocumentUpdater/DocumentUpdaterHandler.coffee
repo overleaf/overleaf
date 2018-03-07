@@ -207,7 +207,7 @@ module.exports = DocumentUpdaterHandler =
 
 	resyncProjectHistory: (project_id, docs, files, callback) ->
 		request.post
-			url: "#{settings.apis.documentupdater.url}/project/#{project_id}/resync"
+			url: "#{settings.apis.documentupdater.url}/project/#{project_id}/history/resync"
 			json: { docs, files }
 		, (error, res, body) ->
 			if error?
