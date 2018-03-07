@@ -8,7 +8,7 @@ version: "2"
 services:
   test_unit:
     image: quay.io/sharelatex/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
-    entrypoint: npm run test:unit:_run
+    command: npm run test:unit:_run
 
   test_acceptance:
     build: .
@@ -22,7 +22,7 @@ services:
     depends_on:
       - redis
       - mongo
-    entrypoint: npm run test:acceptance:_run
+    command: npm run test:acceptance:_run
 
   redis:
     image: redis
