@@ -3,8 +3,9 @@ logger = require 'logger-sharelatex'
 uuid = require 'uuid'
 _ = require 'underscore'
 Settings = require 'settings-sharelatex'
+request = require 'request'
 
-module.exports = 
+module.exports = FileWriter =
 	writeStreamToDisk: (identifier, stream, callback = (error, fsPath) ->) ->
 		callback = _.once(callback)
 		fsPath = "#{Settings.path.dumpFolder}/#{identifier}_#{uuid.v4()}"
@@ -21,3 +22,14 @@ module.exports =
 		writeStream.on "finish", ->
 			logger.log {identifier, fsPath}, "[writeStreamToDisk] write stream finished"
 			callback null, fsPath
+
+	writeUrlToDisk: (identifier, url, callback = (error, fsPath) ->) ->
+		callback = _.once(callback)
+		stream = request.get(url)
+		stream.on 'response', (response) ->
+			if 200 <= response.statusCode < 300
+				FileWriter.writeStreamToDisk identifier, stream, callback
+			else
+				err = new Error("bad response from url: #{response.statusCode}")
+				logger.err {err, identifier, url}, err.message
+				callback(err)

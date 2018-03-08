@@ -6,6 +6,7 @@ Errors = require "../Errors/Errors"
 HistoryManager = require "./HistoryManager"
 ProjectDetailsHandler = require "../Project/ProjectDetailsHandler"
 ProjectEntityUpdateHandler = require "../Project/ProjectEntityUpdateHandler"
+RestoreManager = require "./RestoreManager"
 
 module.exports = HistoryController =
 	selectHistoryApi: (req, res, next = (error) ->) ->
@@ -71,3 +72,11 @@ module.exports = HistoryController =
 			return res.sendStatus(404) if error instanceof Errors.ProjectHistoryDisabledError
 			return next(error) if error?
 			res.sendStatus 204
+
+	restoreFile: (req, res, next) ->
+		{project_id} = req.params
+		{version, pathname} = req.body
+		user_id = AuthenticationController.getLoggedInUserId req
+		RestoreManager.restoreFile user_id, project_id, version, pathname, (error) ->
+			return next(error) if error?
+			res.send 204
