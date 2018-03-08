@@ -105,6 +105,73 @@ describe "Applying updates to a project's structure", ->
 
 					done()
 
+	describe "renaming multiple documents and files", ->
+		before ->
+			@docUpdate0 =
+				id: DocUpdaterClient.randomId()
+				pathname: '/doc-path0'
+				newPathname: '/new-doc-path0'
+			@docUpdate1 =
+				id: DocUpdaterClient.randomId()
+				pathname: '/doc-path1'
+				newPathname: '/new-doc-path1'
+			@docUpdates = [ @docUpdate0, @docUpdate1 ]
+			@fileUpdate0 =
+				id: DocUpdaterClient.randomId()
+				pathname: '/file-path0'
+				newPathname: '/new-file-path0'
+			@fileUpdate1 =
+				id: DocUpdaterClient.randomId()
+				pathname: '/file-path1'
+				newPathname: '/new-file-path1'
+			@fileUpdates = [ @fileUpdate0, @fileUpdate1 ]
+
+		describe "when the documents are not loaded", ->
+			before (done) ->
+				@project_id = DocUpdaterClient.randomId()
+				DocUpdaterClient.sendProjectUpdate @project_id, @user_id, @docUpdates, @fileUpdates, @version, (error) ->
+					throw error if error?
+					setTimeout done, 200
+
+			it "should push the applied doc renames to the project history api", (done) ->
+				rclient_history.lrange ProjectHistoryKeys.projectHistoryOps({@project_id}), 0, -1, (error, updates) =>
+					throw error if error?
+
+					update = JSON.parse(updates[0])
+					update.doc.should.equal @docUpdate0.id
+					update.pathname.should.equal '/doc-path0'
+					update.new_pathname.should.equal '/new-doc-path0'
+					update.meta.user_id.should.equal @user_id
+					update.meta.ts.should.be.a('string')
+					update.version.should.equal "#{@version}.0"
+
+					update = JSON.parse(updates[1])
+					update.doc.should.equal @docUpdate1.id
+					update.pathname.should.equal '/doc-path1'
+					update.new_pathname.should.equal '/new-doc-path1'
+					update.meta.user_id.should.equal @user_id
+					update.meta.ts.should.be.a('string')
+					update.version.should.equal "#{@version}.1"
+
+					update = JSON.parse(updates[2])
+					update.file.should.equal @fileUpdate0.id
+					update.pathname.should.equal '/file-path0'
+					update.new_pathname.should.equal '/new-file-path0'
+					update.meta.user_id.should.equal @user_id
+					update.meta.ts.should.be.a('string')
+					update.version.should.equal "#{@version}.2"
+
+					update = JSON.parse(updates[3])
+					update.file.should.equal @fileUpdate1.id
+					update.pathname.should.equal '/file-path1'
+					update.new_pathname.should.equal '/new-file-path1'
+					update.meta.user_id.should.equal @user_id
+					update.meta.ts.should.be.a('string')
+					update.version.should.equal "#{@version}.3"
+
+					done()
+
+
 	describe "adding a file", ->
 		before (done) ->
 			@project_id = DocUpdaterClient.randomId()
