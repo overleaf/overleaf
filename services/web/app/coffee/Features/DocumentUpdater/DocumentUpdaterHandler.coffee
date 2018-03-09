@@ -122,7 +122,7 @@ module.exports = DocumentUpdaterHandler =
 		}, project_id, "delete-thread", callback
 
 	resyncProjectHistory: (project_id, docs, files, callback) ->
-		logger.info {project_id}, "resyncing project in doc updater"
+		logger.info {project_id, docs, files}, "resyncing project history in doc updater"
 		DocumentUpdaterHandler._makeRequest {
 			path: "/project/#{project_id}/history/resync"
 			json: { docs, files }
@@ -141,6 +141,7 @@ module.exports = DocumentUpdaterHandler =
 
 			return callback() if (docUpdates.length + fileUpdates.length) < 1
 
+			logger.log {project_id}, "updating project structure in doc updater"
 			DocumentUpdaterHandler._makeRequest {
 				path: "/project/#{project_id}"
 				json: { docUpdates, fileUpdates, userId, version: currentProject.version }
