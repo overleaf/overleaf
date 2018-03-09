@@ -1,4 +1,5 @@
 RedisManager = require "./RedisManager"
+ProjectHistoryRedisManager = require "./ProjectHistoryRedisManager"
 PersistenceManager = require "./PersistenceManager"
 DiffCodec = require "./DiffCodec"
 logger = require "logger-sharelatex"
@@ -186,9 +187,9 @@ module.exports = DocumentManager =
 			if !lines? or !version?
 				PersistenceManager.getDoc project_id, doc_id, (error, lines, version, ranges, pathname) ->
 					return callback(error) if error?
-					RedisManager.queueResyncDocContent project_id, doc_id, lines, version, pathname, callback
+					ProjectHistoryRedisManager.queueResyncDocContent project_id, doc_id, lines, version, pathname, callback
 			else
-				RedisManager.queueResyncDocContent project_id, doc_id, lines, version, pathname, callback
+				ProjectHistoryRedisManager.queueResyncDocContent project_id, doc_id, lines, version, pathname, callback
 
 	getDocWithLock: (project_id, doc_id, callback = (error, lines, version) ->) ->
 		UpdateManager = require "./UpdateManager"

@@ -3,6 +3,7 @@ logger = require "logger-sharelatex"
 request  = require "request"
 Settings = require "settings-sharelatex"
 HistoryRedisManager = require "./HistoryRedisManager"
+ProjectHistoryRedisManager = require "./ProjectHistoryRedisManager"
 RedisManager = require "./RedisManager"
 
 module.exports = HistoryManager =
@@ -65,7 +66,7 @@ module.exports = HistoryManager =
 		return newBlock != prevBlock
 
 	resyncProjectHistory: (project_id, docs, files, callback) ->
-		RedisManager.queueResyncProjectStructure project_id, docs, files, (error) ->
+		ProjectHistoryRedisManager.queueResyncProjectStructure project_id, docs, files, (error) ->
 			return callback(error) if error?
 			DocumentManager = require "./DocumentManager"
 			resyncDoc = (doc, cb) ->

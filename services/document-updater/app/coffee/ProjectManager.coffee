@@ -1,4 +1,5 @@
 RedisManager = require "./RedisManager"
+ProjectHistoryRedisManager = require "./ProjectHistoryRedisManager"
 DocumentManager = require "./DocumentManager"
 HistoryManager = require "./HistoryManager"
 async = require "async"
@@ -115,22 +116,22 @@ module.exports = ProjectManager =
 		handleDocUpdate = (update, cb) ->
 			doc_id = update.id
 			if update.docLines?
-				RedisManager.addEntity project_id, 'doc', doc_id, user_id, update, (error, count) =>
+				ProjectHistoryRedisManager.queueAddEntity project_id, 'doc', doc_id, user_id, update, (error, count) ->
 					project_ops_length = count
 					cb(error)
 			else
-				DocumentManager.renameDocWithLock project_id, doc_id, user_id, update, (error, count) =>
+				DocumentManager.renameDocWithLock project_id, doc_id, user_id, update, (error, count) ->
 					project_ops_length = count
 					cb(error)
 
 		handleFileUpdate = (update, cb) ->
 			file_id = update.id
 			if update.url?
-				RedisManager.addEntity project_id, 'file', file_id, user_id, update, (error, count) =>
+				ProjectHistoryRedisManager.queueAddEntity project_id, 'file', file_id, user_id, update, (error, count) ->
 					project_ops_length = count
 					cb(error)
 			else
-				RedisManager.renameFile project_id, file_id, user_id, update, (error, count) =>
+				ProjectHistoryRedisManager.queueRenameEntity project_id, 'file', file_id, user_id, update, (error, count) ->
 					project_ops_length = count
 					cb(error)
 

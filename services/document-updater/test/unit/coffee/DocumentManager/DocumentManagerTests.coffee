@@ -10,6 +10,7 @@ describe "DocumentManager", ->
 	beforeEach ->
 		@DocumentManager = SandboxedModule.require modulePath, requires:
 			"./RedisManager": @RedisManager = {}
+			"./ProjectHistoryRedisManager": @ProjectHistoryRedisManager = {}
 			"./PersistenceManager": @PersistenceManager = {}
 			"./HistoryManager": @HistoryManager =
 				flushDocChangesAsync: sinon.stub()
@@ -472,7 +473,7 @@ describe "DocumentManager", ->
 		describe "when doc is loaded in redis", ->
 			beforeEach ->
 				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname)
-				@RedisManager.queueResyncDocContents = sinon.stub()
+				@ProjectHistoryRedisManager.queueResyncDocContent = sinon.stub()
 				@DocumentManager.resyncDocContents @project_id, @doc_id, @callback
 
 			it "gets the doc contents from redis", ->
@@ -481,7 +482,7 @@ describe "DocumentManager", ->
 					.should.equal true
 
 			it "queues a resync doc content update", ->
-				@RedisManager.queueResyncDocContents
+				@ProjectHistoryRedisManager.queueResyncDocContent
 					.calledWith(@project_id, @doc_id, @lines, @version, @pathname, @callback)
 					.should.equal true
 
@@ -489,7 +490,7 @@ describe "DocumentManager", ->
 			beforeEach ->
 				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null)
 				@PersistenceManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname)
-				@RedisManager.queueResyncDocContents = sinon.stub()
+				@ProjectHistoryRedisManager.queueResyncDocContent = sinon.stub()
 				@DocumentManager.resyncDocContents @project_id, @doc_id, @callback
 
 			it "tries to get the doc contents from redis", ->
@@ -503,6 +504,6 @@ describe "DocumentManager", ->
 					.should.equal true
 
 			it "queues a resync doc content update", ->
-				@RedisManager.queueResyncDocContents
+				@ProjectHistoryRedisManager.queueResyncDocContent
 					.calledWith(@project_id, @doc_id, @lines, @version, @pathname, @callback)
 					.should.equal true

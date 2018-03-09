@@ -15,6 +15,7 @@ describe "RedisManager", ->
 		@RedisManager = SandboxedModule.require modulePath,
 			requires:
 				"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }
+				"./ProjectHistoryRedisManager": @ProjectHistoryRedisManager = {}
 				"settings-sharelatex": @settings = {
 					documentupdater: {logHashErrors: {write:true, read:true}}
 					apis:
@@ -38,9 +39,6 @@ describe "RedisManager", ->
 							key_schema:
 								uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
 								docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:#{project_id}"
-						project_history:
-							key_schema:
-								projectHistoryOps: ({project_id}) -> "ProjectHistory:Ops:#{project_id}"
 				}
 				"redis-sharelatex":
 					createClient: () => @rclient
@@ -337,7 +335,9 @@ describe "RedisManager", ->
 			@multi.exec = sinon.stub().callsArgWith(0, null,
 				[@hash, null, null, null, null, null, null, @doc_update_list_length]
 			)
-			@rclient.rpush = sinon.stub().callsArgWith(@ops.length + 1, null, @project_update_list_length)
+			@ProjectHistoryRedisManager.queueOps = sinon.stub().callsArgWith(
+				@ops.length + 1, null, @project_update_list_length
+			)
 
 		describe "with a consistent version", ->
 			beforeEach ->
@@ -399,8 +399,8 @@ describe "RedisManager", ->
 						.should.equal true
 
 				it "should push the updates into the project history ops list", ->
-					@rclient.rpush
-						.calledWith("ProjectHistory:Ops:#{@project_id}", JSON.stringify(@ops[0]), JSON.stringify(@ops[1]))
+					@ProjectHistoryRedisManager.queueOps
+						.calledWith(@project_id, JSON.stringify(@ops[0]))
 						.should.equal true
 
 				it "should call the callback", ->
@@ -686,6 +686,7 @@ describe "RedisManager", ->
 		describe "the document is cached in redis", ->
 			beforeEach ->
 				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, 'lines', 'version')
+				@ProjectHistoryRedisManager.queueRenameEntity = sinon.stub().yields()
 				@RedisManager.renameDoc @project_id, @doc_id, @userId, @update, @callback
 
 			it "update the cached pathname", ->
@@ -694,75 +695,20 @@ describe "RedisManager", ->
 					.should.equal true
 
 			it "should queue an update", ->
-				update =
-					pathname: @pathname
-					new_pathname: @newPathname
-					meta:
-						user_id: @userId
-						ts: new Date()
-					doc: @doc_id
-				@rclient.rpush
-					.calledWith("ProjectHistory:Ops:#{@project_id}", JSON.stringify(update))
+				@ProjectHistoryRedisManager.queueRenameEntity
+					.calledWithExactly(@project_id, 'doc', @doc_id, @userId, @update, @callback)
 					.should.equal true
-
-			it "should call the callback", ->
-				@callback.calledWith().should.equal true
 
 		describe "the document is not cached in redis", ->
 			beforeEach ->
 				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, null, null)
+				@ProjectHistoryRedisManager.queueRenameEntity = sinon.stub().yields()
 				@RedisManager.renameDoc @project_id, @doc_id, @userId, @update, @callback
 
 			it "does not update the cached pathname", ->
 				@rclient.set.called.should.equal false
 
-	describe "renameFile", ->
-		beforeEach () ->
-			@rclient.rpush = sinon.stub().yields()
-			@file_id = 1234
-
-			@update =
-				pathname: @pathname = '/old'
-				newPathname: @newPathname = '/new'
-
-			@RedisManager.renameFile @project_id, @file_id, @userId, @update
-
-		it "should queue an update", ->
-			update =
-				pathname: @pathname
-				new_pathname: @newPathname
-				meta:
-					user_id: @userId
-					ts: new Date()
-				file: @file_id
-
-			@rclient.rpush
-				.calledWith("ProjectHistory:Ops:#{@project_id}", JSON.stringify(update))
-				.should.equal true
-
-	describe "addEntity", ->
-		beforeEach (done) ->
-			@rclient.rpush = sinon.stub().yields()
-			@entity_id = 1234
-			@entity_type = 'type'
-
-			@update =
-				pathname: @pathname = '/old'
-				docLines: @docLines = 'a\nb'
-				url: @url = 'filestore.example.com'
-
-			@RedisManager.addEntity @project_id, @entity_type, @entity_id, @userId, @update, done
-
-		it "should queue an update", ->
-			update =
-				pathname: @pathname
-				docLines: @docLines
-				url: @url
-				meta:
-					user_id: @user_id
-					ts: new Date()
-			update[@entity_type] = @entity_id
-
-			@rclient.rpush
-				.calledWith("ProjectHistory:Ops:#{@project_id}", JSON.stringify(update))
-				.should.equal true
+			it "should queue an update", ->
+				@ProjectHistoryRedisManager.queueRenameEntity
+					.calledWithExactly(@project_id, 'doc', @doc_id, @userId, @update, @callback)
+					.should.equal true

@@ -19,6 +19,7 @@ describe "HistoryManager", ->
 			"./DocumentManager": @DocumentManager = {}
 			"./HistoryRedisManager": @HistoryRedisManager = {}
 			"./RedisManager": @RedisManager = {}
+			"./ProjectHistoryRedisManager": @ProjectHistoryRedisManager = {}
 		@project_id = "mock-project-id"
 		@doc_id = "mock-doc-id"
 		@callback = sinon.stub()
@@ -172,12 +173,12 @@ describe "HistoryManager", ->
 				path: 'universe.png'
 				url: "www.filestore.test/#{@project_id}/mock-file-id"
 			]
-			@RedisManager.queueResyncProjectStructure = sinon.stub().yields()
+			@ProjectHistoryRedisManager.queueResyncProjectStructure = sinon.stub().yields()
 			@DocumentManager.resyncDocContentsWithLock = sinon.stub().yields()
 			@HistoryManager.resyncProjectHistory @project_id, @docs, @files, @callback
 
 		it "should queue a project structure reync", ->
-			@RedisManager.queueResyncProjectStructure
+			@ProjectHistoryRedisManager.queueResyncProjectStructure
 				.calledWith(@project_id, @docs, @files)
 				.should.equal true
 
