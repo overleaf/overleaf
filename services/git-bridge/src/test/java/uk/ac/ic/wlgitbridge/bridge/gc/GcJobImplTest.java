@@ -1,5 +1,7 @@
 package uk.ac.ic.wlgitbridge.bridge.gc;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.stubbing.OngoingStubbing;
 import uk.ac.ic.wlgitbridge.bridge.lock.LockGuard;
@@ -24,9 +26,20 @@ public class GcJobImplTest {
 
     RepoStore repoStore = mock(RepoStore.class);
 
-    ProjectLock locks = new ProjectLockImpl();
+    ProjectLock locks;
 
-    GcJobImpl gcJob = new GcJobImpl(repoStore, locks, 5);
+    GcJobImpl gcJob;
+
+    @Before
+    public void setup() {
+        locks = new ProjectLockImpl();
+        gcJob = new GcJobImpl(repoStore, locks, 5);
+    }
+
+    @After
+    public void teardown() {
+        gcJob.stop();
+    }
 
     @Test
     public void addedProjectsAreAllEventuallyGcedOnce() throws Exception {
