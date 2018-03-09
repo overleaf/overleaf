@@ -33,7 +33,6 @@ module.exports = RestoreManager =
 	_addEntityWithUniqueName: (user_id, project_id, parent_folder_id, basename, fsPath, callback = (error) ->) ->
 		FileSystemImportManager.addEntity user_id, project_id, parent_folder_id, basename, fsPath, false, (error, entity) ->
 			if error?
-				console.log "ERROR", error, error instanceof Errors.InvalidNameError
 				if error instanceof Errors.InvalidNameError
 					# likely a duplicate name, so try with a prefix
 					date = moment(new Date()).format('Do MMM YY H:mm:ss')
