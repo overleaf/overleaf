@@ -174,7 +174,7 @@ module.exports = HttpController =
 		project_id = req.params.project_id
 		{docs, files} = req.body
 
-		logger.log {project_id}, "queuing project history resync via http"
+		logger.log {project_id, docs, files}, "queuing project history resync via http"
 		HistoryManager.resyncProjectHistory project_id, docs, files, (error) ->
 			return next(error) if error?
 			logger.log {project_id}, "queued project history resync via http"

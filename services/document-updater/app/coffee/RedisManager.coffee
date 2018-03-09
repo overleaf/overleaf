@@ -331,7 +331,7 @@ module.exports = RedisManager =
 		rclient.rpush projectHistoryKeys.projectHistoryOps({project_id}), jsonUpdate, callback
 
 	queueResyncDocContent: (project_id, doc_id, lines, version, pathname, callback) ->
-		logger.log {project_id, doc_id, pathname}, "queue doc content resync"
+		logger.log {project_id, doc_id, lines, version, pathname}, "queue doc content resync"
 		update =
 			resyncDocContent:
 				content: lines.join("\n"),
