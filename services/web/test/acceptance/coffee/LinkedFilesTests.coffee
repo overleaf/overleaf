@@ -21,7 +21,7 @@ describe "LinkedFiles", ->
 	before (done) ->
 		LinkedUrlProxy.listen 6543, (error) =>
 			return done(error) if error?
-			@owner = new User() 
+			@owner = new User()
 			@owner.login done
 
 	describe "creating a URL based linked file", ->

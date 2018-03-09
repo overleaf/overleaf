@@ -1,11 +1,13 @@
 async = require "async"
 expect = require("chai").expect
+_ = require 'underscore'
 
 ProjectGetter = require "../../../app/js/Features/Project/ProjectGetter.js"
 
 User = require "./helpers/User"
 MockProjectHistoryApi = require "./helpers/MockProjectHistoryApi"
 MockDocstoreApi = require "./helpers/MockDocstoreApi"
+MockFileStoreApi = require "./helpers/MockFileStoreApi"
 
 describe "RestoringFiles", ->
 	before (done) ->
@@ -30,7 +32,7 @@ describe "RestoringFiles", ->
 				expect(response.statusCode).to.equal 204
 				done()
 
-		it "should have created a doc", ->
+		it "should have created a doc", (done) ->
 			@owner.getProject @project_id, (error, project) =>
 				throw error if error?
 				doc = _.find project.rootFolder[0].docs, (doc) ->
@@ -42,10 +44,111 @@ describe "RestoringFiles", ->
 				done()
 
 	describe "restoring a binary file", ->
-		it "should have created a file"
+		beforeEach (done) ->
+			MockProjectHistoryApi.addOldFile(@project_id, 42, "image.png", "Mock image.png content")
+			@owner.request {
+				method: "POST",
+				url: "/project/#{@project_id}/restore_file",
+				json:
+					pathname: "image.png"
+					version: 42
+			}, (error, response, body) ->
+				throw error if error?
+				expect(response.statusCode).to.equal 204
+				done()
+
+		it "should have created a file", (done) ->
+			@owner.getProject @project_id, (error, project) =>
+				throw error if error?
+				file = _.find project.rootFolder[0].fileRefs, (file) ->
+					file.name == 'image.png'
+				file = MockFileStoreApi.files[@project_id][file._id]
+				expect(file.content).to.equal "Mock image.png content"
+				done()
+
+	describe "restoring to a directory that exists", ->
+		beforeEach (done) ->
+			MockProjectHistoryApi.addOldFile(@project_id, 42, "foldername/foo2.tex", "hello world, this is foo-2.tex!")
+			@owner.request.post {
+				uri: "project/#{@project_id}/folder",
+				json:
+					name: 'foldername'
+			}, (error, response, body) =>
+				throw error if error?
+				expect(response.statusCode).to.equal 200
+				@owner.request {
+					method: "POST",
+					url: "/project/#{@project_id}/restore_file",
+					json:
+						pathname: "foldername/foo2.tex"
+						version: 42
+				}, (error, response, body) ->
+					throw error if error?
+					expect(response.statusCode).to.equal 204
+					done()
+
+		it "should have created the doc in the named folder", (done) ->
+			@owner.getProject @project_id, (error, project) =>
+				throw error if error?
+				folder = _.find project.rootFolder[0].folders, (folder) ->
+					folder.name == 'foldername'
+				doc = _.find folder.docs, (doc) ->
+					doc.name == 'foo2.tex'
+				doc = MockDocstoreApi.docs[@project_id][doc._id]
+				expect(doc.lines).to.deep.equal [
+					"hello world, this is foo-2.tex!"
+				]
+				done()
 
 	describe "restoring to a directory that no longer exists", ->
-		it "should have created the file in the root folder"
+		beforeEach (done) ->
+			MockProjectHistoryApi.addOldFile(@project_id, 42, "nothere/foo3.tex", "hello world, this is foo-3.tex!")
+			@owner.request {
+				method: "POST",
+				url: "/project/#{@project_id}/restore_file",
+				json:
+					pathname: "nothere/foo3.tex"
+					version: 42
+			}, (error, response, body) ->
+				throw error if error?
+				expect(response.statusCode).to.equal 204
+				done()
+
+		it "should have created the doc in the root folder", (done) ->
+			@owner.getProject @project_id, (error, project) =>
+				throw error if error?
+				doc = _.find project.rootFolder[0].docs, (doc) ->
+					doc.name == 'foo3.tex'
+				doc = MockDocstoreApi.docs[@project_id][doc._id]
+				expect(doc.lines).to.deep.equal [
+					"hello world, this is foo-3.tex!"
+				]
+				done()
 
 	describe "restoring to a filename that already exists", ->
-		it "should have created the file with a timestamp appended"
+		it "should have created the file with a timestamp appended", ->
+		beforeEach (done) ->
+			MockProjectHistoryApi.addOldFile(@project_id, 42, "main.tex", "hello world, this is main.tex!")
+			@owner.request {
+				method: "POST",
+				url: "/project/#{@project_id}/restore_file",
+				json:
+					pathname: "main.tex"
+					version: 42
+			}, (error, response, body) ->
+				throw error if error?
+				expect(response.statusCode).to.equal 204
+				done()
+
+		it "should have created the doc in the root folder", (done) ->
+			@owner.getProject @project_id, (error, project) =>
+				throw error if error?
+				doc = _.find project.rootFolder[0].docs, (doc) ->
+					doc.name.match(/main \(Restored on/)
+				expect(doc).to.exist
+				doc = MockDocstoreApi.docs[@project_id][doc._id]
+				expect(doc.lines).to.deep.equal [
+					"hello world, this is main.tex!"
+				]
+				done()
+

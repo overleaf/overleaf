@@ -16,7 +16,6 @@ module.exports = MockProjectHistoryApi =
 		app.get "/project/:project_id/version/:version/:pathname", (req, res, next) =>
 			{project_id, version, pathname} = req.params
 			key = "#{project_id}:#{version}:#{pathname}"
-			console.log key, @oldFiles, @oldFiles[key]
 			if @oldFiles[key]?
 				res.send @oldFiles[key]
 			else
