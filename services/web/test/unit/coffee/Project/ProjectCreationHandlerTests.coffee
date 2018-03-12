@@ -52,7 +52,7 @@ describe 'ProjectCreationHandler', ->
 
 		@Settings = apis: { project_history: {} }
 
-		@AnalyticsManger = recordEvent: sinon.stub()
+		@AnalyticsManager = recordEvent: sinon.stub()
 
 		@handler = SandboxedModule.require modulePath, requires:
 			'../../models/User': User:@User
@@ -62,7 +62,7 @@ describe 'ProjectCreationHandler', ->
 			'./ProjectEntityUpdateHandler':@ProjectEntityUpdateHandler
 			"./ProjectDetailsHandler":@ProjectDetailsHandler
 			"settings-sharelatex": @Settings
-			"../Analytics/AnalyticsManager": @AnalyticsManger
+			"../Analytics/AnalyticsManager": @AnalyticsManager
 			'logger-sharelatex': {log:->}
 			"metrics-sharelatex": {
 				inc: ()->,
@@ -130,6 +130,23 @@ describe 'ProjectCreationHandler', ->
 				@handler.createBlankProject ownerId, projectName, (err, project)=>
 					expect(project.overleaf.history.display).to.equal true
 					done()
+
+			it "should send a project-created event to analytics", (done) ->
+				@handler.createBlankProject ownerId, projectName, (err, project) =>
+					expect(@AnalyticsManager.recordEvent.callCount).to.equal 1
+					expect(
+						@AnalyticsManager.recordEvent.calledWith(ownerId, 'project-created')
+					).to.equal true
+					done()
+
+			it "should send a project-imported event when importing a project", (done) ->
+				@handler.createBlankProject ownerId, projectName, 1234, (err, project) =>
+					expect(@AnalyticsManager.recordEvent.callCount).to.equal 1
+					expect(
+						@AnalyticsManager.recordEvent.calledWith(ownerId, 'project-imported')
+					).to.equal true
+					done()
+
 
 		describe "with an error", ->
 			beforeEach ->
