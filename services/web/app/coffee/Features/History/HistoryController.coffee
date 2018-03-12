@@ -77,6 +77,9 @@ module.exports = HistoryController =
 		{project_id} = req.params
 		{version, pathname} = req.body
 		user_id = AuthenticationController.getLoggedInUserId req
-		RestoreManager.restoreFile user_id, project_id, version, pathname, (error) ->
+		RestoreManager.restoreFile user_id, project_id, version, pathname, (error, entity) ->
 			return next(error) if error?
-			res.send 204
+			res.json {
+				type: entity.type,
+				id: entity._id
+			}

@@ -1,0 +1,58 @@
+.diff-panel.full-size(ng-if="history.isV2", ng-controller="HistoryDiffController")
+	.diff(
+		ng-if="!!history.diff && !history.diff.loading && !history.diff.deleted && !history.diff.error && !history.diff.binary"
+	)
+		.toolbar.toolbar-alt
+			span.name
+				| <strong>{{history.diff.highlights.length}} </strong>
+				ng-pluralize(
+					count="history.diff.highlights.length",
+					when="{\
+						'one': 'change',\
+						'other': 'changes'\
+					}"
+				)
+				|  in <strong>{{history.diff.pathname}}</strong>
+			.toolbar-right
+				a.btn.btn-danger.btn-sm(
+					href,
+					ng-click="openRestoreDiffModal()"
+				) #{translate("restore_to_before_these_changes")}
+		.diff-editor.hide-ace-cursor(
+			ace-editor="history",
+			theme="settings.theme",
+			font-size="settings.fontSize",
+			text="history.diff.text",
+			highlights="history.diff.highlights",
+			read-only="true",
+			resize-on="layout:main:resize",
+			navigate-highlights="true"
+		)
+
+	.diff-deleted.text-centered(
+		ng-show="history.diff.deleted && !history.diff.restoreDeletedSuccess"
+	)
+		p.text-serif #{translate("file_has_been_deleted", {filename:"{{ history.diff.doc.name }} "})}
+		p
+			a.btn.btn-primary.btn-lg(
+				href,
+				ng-click="restoreDeletedDoc()",
+				ng-disabled="history.diff.restoreInProgress"
+			) #{translate("restore")}
+
+	.diff-deleted.text-centered(
+		ng-show="history.diff.deleted && history.diff.restoreDeletedSuccess"
+	)
+		p.text-serif  #{translate("file_restored", {filename:"{{ history.diff.doc.name }} "})}
+		p.text-serif  #{translate("file_restored_back_to_editor")}
+		p
+			a.btn.btn-default(
+				href,
+				ng-click="backToEditorAfterRestore()",
+			) #{translate("file_restored_back_to_editor_btn")}
+
+	.loading-panel(ng-show="history.diff.loading")
+		i.fa.fa-spin.fa-refresh
+		| &nbsp;&nbsp;#{translate("loading")}...
+	.error-panel(ng-show="history.diff.error")
+		.alert.alert-danger #{translate("generic_something_went_wrong")}

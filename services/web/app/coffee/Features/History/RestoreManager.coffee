@@ -7,7 +7,7 @@ Errors = require '../Errors/Errors'
 moment = require 'moment'
 
 module.exports = RestoreManager =
-	restoreFile: (user_id, project_id, version, pathname, callback = (error) ->) ->
+	restoreFile: (user_id, project_id, version, pathname, callback = (error, entity) ->) ->
 		RestoreManager._writeFileVersionToDisk project_id, version, pathname, (error, fsPath) ->
 			return callback(error) if error?
 			basename = Path.basename(pathname)
@@ -17,6 +17,7 @@ module.exports = RestoreManager =
 			RestoreManager._findFolderOrRootFolderId project_id, dirname, (error, parent_folder_id) ->
 				return callback(error) if error?
 				RestoreManager._addEntityWithUniqueName user_id, project_id, parent_folder_id, basename, fsPath, callback
+
 
 	_findFolderOrRootFolderId: (project_id, dirname, callback = (error, folder_id) ->) ->
 		# We're going to try to recover the file into the folder it was in previously,
@@ -46,7 +47,7 @@ module.exports = RestoreManager =
 				else
 					callback(error)
 			else
-				callback()
+				callback(null, entity)
 
 	_writeFileVersionToDisk: (project_id, version, pathname, callback = (error, fsPath) ->) ->
 		url = "#{Settings.apis.project_history.url}/project/#{project_id}/version/#{version}/#{encodeURIComponent(pathname)}"

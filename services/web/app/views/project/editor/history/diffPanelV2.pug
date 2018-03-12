@@ -1,0 +1,50 @@
+.diff-panel.full-size(ng-if="history.isV2", ng-controller="HistoryV2DiffController")
+	.diff(
+		ng-if="!!history.diff && !history.diff.loading && !history.diff.error && !history.diff.binary"
+	)
+		.toolbar.toolbar-alt
+			span.name
+				| <strong>{{history.diff.highlights.length}} </strong>
+				ng-pluralize(
+					count="history.diff.highlights.length",
+					when="{\
+						'one': 'change',\
+						'other': 'changes'\
+					}"
+				)
+				|  in <strong>{{history.diff.pathname}}</strong>
+			.toolbar-right(ng-if="history.selection.docs[history.selection.pathname].deletedAtV")
+				button.btn.btn-danger.btn-sm(
+					ng-click="restoreDeletedFile()"
+					ng-show="!restoreState.error"
+					ng-disabled="restoreState.inflight"
+				)
+					i.fa.fa-fw.fa-step-backward
+					span(ng-show="!restoreState.inflight")
+						| Restore this deleted file
+					span(ng-show="restoreState.inflight")
+						| Restoring...
+				span.text-danger(ng-show="restoreState.error")
+					| Error restoring, sorry
+		.diff-editor.hide-ace-cursor(
+			ace-editor="history",
+			theme="settings.theme",
+			font-size="settings.fontSize",
+			text="history.diff.text",
+			highlights="history.diff.highlights",
+			read-only="true",
+			resize-on="layout:main:resize",
+			navigate-highlights="true"
+		)
+
+	.diff.diff-binary(ng-show="history.diff.binary")
+		.toolbar.toolbar-alt
+			span.name
+				strong {{history.diff.pathname}}
+		.alert.alert-info We're still working on showing image and binary changes, sorry. Stay tuned!
+
+	.loading-panel(ng-show="history.diff.loading")
+		i.fa.fa-spin.fa-refresh
+		| &nbsp;&nbsp;#{translate("loading")}...
+	.error-panel(ng-show="history.diff.error")
+		.alert.alert-danger #{translate("generic_something_went_wrong")}

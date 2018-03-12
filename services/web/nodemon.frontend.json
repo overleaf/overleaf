@@ -5,7 +5,7 @@
   ],
   "verbose": true,
   "legacyWatch": true,
-  "exec": "make compile",
+  "exec": "make compile || exit 1",
   "watch": [
     "public/coffee/",
     "public/stylesheets/"
