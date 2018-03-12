@@ -1,6 +1,7 @@
 package uk.ac.ic.wlgitbridge.bridge.swap.job;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -72,6 +73,13 @@ public class SwapJobImplTest {
                 dbStore,
                 swapStore
         );
+    }
+
+    @After
+    public void teardown() {
+        if(swapJob != null) {
+            swapJob.stop();
+        }
     }
 
     @Test

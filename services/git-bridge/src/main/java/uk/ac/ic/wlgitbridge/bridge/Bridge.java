@@ -419,6 +419,8 @@ public class Bridge {
             Log.warn("[{}] IOException on put", projectName);
             throw e;
         }
+
+        gcJob.queueForGc(projectName);
     }
 
     /**
