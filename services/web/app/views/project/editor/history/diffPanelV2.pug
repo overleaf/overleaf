@@ -1,9 +1,12 @@
 .diff-panel.full-size(ng-if="history.isV2", ng-controller="HistoryV2DiffController")
 	.diff(
-		ng-if="!!history.diff && !history.diff.loading && !history.diff.error && !history.diff.binary"
+		ng-if="!!history.diff && !history.diff.loading && !history.diff.error",
+		ng-class="{ 'diff-binary': history.diff.binary }"
 	)
 		.toolbar.toolbar-alt
-			span.name
+			span.name(ng-if="history.diff.binary")
+				strong {{history.diff.pathname}}
+			span.name(ng-if="!history.diff.binary")
 				| <strong>{{history.diff.highlights.length}} </strong>
 				ng-pluralize(
 					count="history.diff.highlights.length",
@@ -27,6 +30,7 @@
 				span.text-danger(ng-show="restoreState.error")
 					| Error restoring, sorry
 		.diff-editor.hide-ace-cursor(
+			ng-if="!history.diff.binary"
 			ace-editor="history",
 			theme="settings.theme",
 			font-size="settings.fontSize",
@@ -36,12 +40,8 @@
 			resize-on="layout:main:resize",
 			navigate-highlights="true"
 		)
-
-	.diff.diff-binary(ng-show="history.diff.binary")
-		.toolbar.toolbar-alt
-			span.name
-				strong {{history.diff.pathname}}
-		.alert.alert-info We're still working on showing image and binary changes, sorry. Stay tuned!
+		.alert.alert-info(ng-if="history.diff.binary")
+			| We're still working on showing image and binary changes, sorry. Stay tuned!
 
 	.loading-panel(ng-show="history.diff.loading")
 		i.fa.fa-spin.fa-refresh

@@ -2,8 +2,6 @@ define [
 	"base"
 ], (App) ->
 	App.controller "HistoryV2DiffController", ($scope, ide, event_tracking) ->
-		console.log "HistoryV2DiffController!"
-
 		$scope.restoreState =
 			inflight: false
 			error: false
@@ -15,25 +13,27 @@ define [
 			return if !version?
 			event_tracking.sendMB "history-v2-restore-deleted"
 			$scope.restoreState.inflight = true
-			$scope.restoreState.error = false
 			ide.historyManager
 				.restoreFile(version, pathname)
 				.then (response) ->
 					{ data } = response
-					$scope.restoreState.inflight = false
-					if data.type == 'doc'
-						openDoc(data.id)
+					openEntity(data)
 				.catch () ->
-					$scope.restoreState.error = true
+					ide.showGenericMessageModal('Sorry, something went wrong with the restore')
+				.finally () ->
+					$scope.restoreState.inflight = false
 
-		openDoc = (id) ->
+		openEntity = (data) ->
 			iterations = 0
+			{id, type} = data
 			do tryOpen = () ->
 				if iterations > 5
 					return
-				doc = ide.fileTreeManager.findEntityById(id)
-				if doc?
-					ide.editorManager.openDoc(doc)
+				entity = ide.fileTreeManager.findEntityById(id)
+				if entity? and type == 'doc'
+					ide.editorManager.openDoc(entity)
+				if entity? and type == 'file'
+					ide.binaryFilesManager.openFile(entity)
 				else
 					setTimeout(tryOpen, 500)
 			
