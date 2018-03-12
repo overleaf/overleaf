@@ -27,6 +27,7 @@ module.exports = function (config) {
       // Include ES test files
       'test/unit_frontend/es/**/*.js'
     ],
+    middleware: ['fake-img'],
     preprocessors: {
       // Run ES test files through webpack (which will then include source
       // files in bundle)
@@ -54,8 +55,21 @@ module.exports = function (config) {
       require('karma-mocha'),
       require('karma-chai-sinon'),
       require('karma-webpack'),
-      require('karma-mocha-reporter')
+      require('karma-mocha-reporter'),
+      { 'middleware:fake-img': ['factory', fakeImgMiddlewareFactory] }
     ],
     reporters: ['mocha']
   });
+}
+
+/**
+ * Handle fake images
+ */
+function fakeImgMiddlewareFactory () {
+  return function (req, res, next) {
+    if (req.originalUrl.startsWith('/fake/')) {
+      return res.end('fake img response')
+    }
+    next()
+  }
 }
