@@ -12,21 +12,10 @@ applyCMToShareJS = (editorDoc, delta, doc) ->
   while i < delta.from.line
     startPos += editorDoc.lineInfo(i).text.length + 1   # Add 1 for '\n'
     i++
-
   startPos += delta.from.ch
 
-  if delta.to.line == delta.from.line &&
-     delta.to.ch == delta.from.ch # Then nothing was removed.
-    doc.insert startPos, delta.text.join '\n'
-  else
-    delLen = delta.to.ch - delta.from.ch
-    while i < delta.to.line
-      delLen += editorDoc.lineInfo(i).text.length + 1   # Add 1 for '\n'
-      i++
-    doc.del startPos, delLen
-    doc.insert startPos, delta.text.join '\n' if delta.text
-
-  applyCMToShareJS editorDoc, delta.next, doc if delta.next
+  doc.del startPos, delta.removed.join('\n').length if delta.removed
+  doc.insert startPos, delta.text.join('\n') if delta.text
 
 # Attach a CodeMirror editor to the document. The editor's contents are replaced
 # with the document's contents unless keepEditorContents is true. (In which case
