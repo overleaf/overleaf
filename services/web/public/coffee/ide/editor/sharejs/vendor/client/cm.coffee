@@ -36,8 +36,9 @@ window.sharejs.extendDoc 'attach_cm', (editor, keepEditorContents) ->
           console.error "Text does not match!"
           console.error "editor: #{editorText}"
           console.error "ot:     #{otText}"
-          # Replace the editor text with the doc snapshot.
-          editor.setValue sharedoc.getText()
+          # Removed editor.setValue here as it would cause recursive loops if
+          # consistency check failed - because setting the value would trigger
+          # the change event
       , 0
 
   if keepEditorContents
