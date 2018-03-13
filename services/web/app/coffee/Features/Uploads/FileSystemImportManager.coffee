@@ -49,15 +49,17 @@ module.exports = FileSystemImportManager =
 				return callback("path is symlink")
 			fs.readdir folderPath, (error, entries = []) =>
 				return callback(error) if error?
-				jobs = _.map entries, (entry) =>
-					(callback) =>
+				async.eachSeries(
+					entries,
+					(entry, callback) =>
 						FileTypeManager.shouldIgnore entry, (error, ignore) =>
 							return callback(error) if error?
 							if !ignore
 								FileSystemImportManager.addEntity user_id, project_id, parent_folder_id, entry, "#{folderPath}/#{entry}", replace, callback
 							else
 								callback()
-				async.parallelLimit jobs, 5, callback
+					callback
+				)
 
 	addEntity: (user_id, project_id, folder_id, name, path, replace, callback = (error, entity)-> ) ->
 		FileSystemImportManager._isSafeOnFileSystem path, (err, isSafe)->
