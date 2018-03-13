@@ -1,3 +1,4 @@
+const path = require('path')
 const webpack = require('webpack')
 const merge = require('webpack-merge')
 
@@ -6,6 +7,11 @@ const base = require('./webpack.config')
 module.exports = merge(base, {
   // Enable a full source map.
   devtool: 'source-map',
+
+  output: {
+    // Override output path to minjs dir
+    path: path.join(__dirname, '/public/minjs/es'),
+  },
 
   plugins: [
     // Use UglifyJS to minimise output
