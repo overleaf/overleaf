@@ -57,7 +57,7 @@ module.exports = FileSystemImportManager =
 								FileSystemImportManager.addEntity user_id, project_id, parent_folder_id, entry, "#{folderPath}/#{entry}", replace, callback
 							else
 								callback()
-				async.parallelLimit jobs, 5, callback
+				async.series jobs, callback
 
 	addEntity: (user_id, project_id, folder_id, name, path, replace, callback = (error, entity)-> ) ->
 		FileSystemImportManager._isSafeOnFileSystem path, (err, isSafe)->
