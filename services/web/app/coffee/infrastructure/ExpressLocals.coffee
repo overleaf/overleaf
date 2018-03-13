@@ -41,6 +41,7 @@ pathList = [
 	"#{jsPath}ide.js"
 	"#{jsPath}main.js"
 	"#{jsPath}libraries.js"
+	"#{jsPath}es/richText.js"
 	"/stylesheets/style.css"
 	"/stylesheets/ol-style.css"
 ]
@@ -145,6 +146,13 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 			if qs? and qs.length > 0
 				path = path + "?" + qs
 			return path
+
+		res.locals.buildWebpackPath = (jsFile, opts = {}) ->
+			if Settings.webpack? and !Settings.useMinifiedJs
+				path = Path.join(jsPath, jsFile)
+				return "#{Settings.webpack.host}:#{Settings.webpack.port}/public#{path}"
+			else
+				return res.locals.buildJsPath(jsFile)
 
 		res.locals.buildCssPath = (cssFile, opts)->
 			path = Path.join("/stylesheets/", cssFile)

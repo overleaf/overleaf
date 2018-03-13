@@ -7,13 +7,6 @@ module.exports = merge(base, {
   // Enable a full source map.
   devtool: 'source-map',
 
-  output: {
-    // Overwrite the default filename to include the chunkhash. This versions
-    // the output files so that they can be cached (and cache-busted when they
-    // change)
-    filename: '[name]-[chunkhash].js'
-  },
-
   plugins: [
     // Use UglifyJS to minimise output
     new webpack.optimize.UglifyJsPlugin({
