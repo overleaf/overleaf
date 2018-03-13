@@ -21,6 +21,7 @@
     "nodemon": "nodemon --config nodemon.json",
     "nodemon:frontend": "nodemon --config nodemon.frontend.json",
     "webpack": "webpack-dev-server --config webpack.config.dev.js",
+    "webpack:production": "webpack --config webpack.config.prod.js",
     "lint": "eslint -f unix ."
   },
   "dependencies": {

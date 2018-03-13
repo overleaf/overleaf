@@ -101,6 +101,9 @@ css: $(CSS_FILES)
 compile: $(JS_FILES) css public/js/libs/sharejs.js public/js/main.js public/js/ide.js
 	@$(MAKE) compile_modules
 
+compile_es:
+	npm -q run webpack:production
+
 compile_full:
 	$(COFFEE) -c -p app.coffee > app.js
 	$(COFFEE) -o app/js -c app/coffee
@@ -113,6 +116,7 @@ compile_full:
 	$(MAKE) $(CSS_FILES)
 	$(MAKE) compile_modules_full
 	$(MAKE) compile # ide.js, main.js, share.js, and anything missed
+	$(MAKE) compile_es
 
 compile_modules: $(MODULE_MAKEFILES)
 	@set -e; \
@@ -153,7 +157,7 @@ clean_app:
 	rm -rf app/js
 
 clean_frontend:
-	rm -rf public/js/{analytics,directives,filters,ide,main,modules,services,utils}
+	rm -rf public/js/{analytics,directives,es,filters,ide,main,modules,services,utils}
 	rm -f public/js/*.{js,map}
 	rm -f public/js/libs/sharejs.{js,map}
 
