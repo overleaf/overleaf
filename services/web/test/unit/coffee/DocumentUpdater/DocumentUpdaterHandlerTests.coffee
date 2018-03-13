@@ -19,7 +19,7 @@ describe 'DocumentUpdaterHandler', ->
 		@project =
 			_id: @project_id
 
-		@request = {}
+		@request = sinon.stub()
 		@projectEntityHandler = {}
 		@settings =
 			apis:
@@ -43,19 +43,21 @@ describe 'DocumentUpdaterHandler', ->
 	describe 'flushProjectToMongo', ->
 		describe "successfully", ->
 			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
+				@request.callsArgWith(1, null, {statusCode: 204}, "")
 				@handler.flushProjectToMongo @project_id, @callback
 
 			it 'should flush the document from the document updater', ->
-				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}/flush"
-				@request.post.calledWith(url).should.equal true
+				@request.calledWithMatch(
+					url: "#{@settings.apis.documentupdater.url}/project/#{@project_id}/flush"
+					method: "POST"
+				).should.equal true
 
 			it "should call the callback with no error", ->
 				@callback.calledWith(null).should.equal true
 
 		describe "when the document updater API returns an error", ->
 			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, @error = new Error("something went wrong"), null, null)
+				@request.callsArgWith(1, @error = new Error("something went wrong"), null, null)
 				@handler.flushProjectToMongo @project_id, @callback
 
 			it "should return an error to the callback", ->
@@ -63,7 +65,7 @@ describe 'DocumentUpdaterHandler', ->
 
 		describe "when the document updater returns a failure error code", ->
 			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, null, { statusCode: 500 }, "")
+				@request.callsArgWith(1, null, { statusCode: 500 }, "")
 				@handler.flushProjectToMongo @project_id, @callback
 
 			it "should return the callback with an error", ->
@@ -74,19 +76,21 @@ describe 'DocumentUpdaterHandler', ->
 	describe 'flushProjectToMongoAndDelete', ->
 		describe "successfully", ->
 			beforeEach ->
-				@request.del = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
+				@request.callsArgWith(1, null, {statusCode: 204}, "")
 				@handler.flushProjectToMongoAndDelete @project_id, @callback
 
 			it 'should delete the project from the document updater', ->
-				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}"
-				@request.del.calledWith(url).should.equal true
+				@request.calledWithMatch(
+					url: "#{@settings.apis.documentupdater.url}/project/#{@project_id}"
+					method: "DELETE"
+				).should.equal true
 
 			it "should call the callback with no error", ->
 				@callback.calledWith(null).should.equal true
 
 		describe "when the document updater API returns an error", ->
 			beforeEach ->
-				@request.del = sinon.stub().callsArgWith(1, @error = new Error("something went wrong"), null, null)
+				@request.callsArgWith(1, @error = new Error("something went wrong"), null, null)
 				@handler.flushProjectToMongoAndDelete @project_id, @callback
 
 			it "should return an error to the callback", ->
@@ -94,7 +98,7 @@ describe 'DocumentUpdaterHandler', ->
 
 		describe "when the document updater returns a failure error code", ->
 			beforeEach ->
-				@request.del = sinon.stub().callsArgWith(1, null, { statusCode: 500 }, "")
+				@request.callsArgWith(1, null, { statusCode: 500 }, "")
 				@handler.flushProjectToMongoAndDelete @project_id, @callback
 
 			it "should return the callback with an error", ->
@@ -105,19 +109,21 @@ describe 'DocumentUpdaterHandler', ->
 	describe 'flushDocToMongo', ->
 		describe "successfully", ->
 			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
+				@request.callsArgWith(1, null, {statusCode: 204}, "")
 				@handler.flushDocToMongo @project_id, @doc_id, @callback
 
 			it 'should flush the document from the document updater', ->
-				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}/doc/#{@doc_id}/flush"
-				@request.post.calledWith(url).should.equal true
+				@request.calledWithMatch(
+					url: "#{@settings.apis.documentupdater.url}/project/#{@project_id}/doc/#{@doc_id}/flush"
+					method: "POST"
+				).should.equal true
 
 			it "should call the callback with no error", ->
 				@callback.calledWith(null).should.equal true
 
 		describe "when the document updater API returns an error", ->
 			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, @error = new Error("something went wrong"), null, null)
+				@request.callsArgWith(1, @error = new Error("something went wrong"), null, null)
 				@handler.flushDocToMongo @project_id, @doc_id, @callback
 
 			it "should return an error to the callback", ->
@@ -125,7 +131,7 @@ describe 'DocumentUpdaterHandler', ->
 
 		describe "when the document updater returns a failure error code", ->
 			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, null, { statusCode: 500 }, "")
+				@request.callsArgWith(1, null, { statusCode: 500 }, "")
 				@handler.flushDocToMongo @project_id, @doc_id, @callback
 
 			it "should return the callback with an error", ->
@@ -136,19 +142,21 @@ describe 'DocumentUpdaterHandler', ->
 	describe "deleteDoc", ->
 		describe "successfully", ->
 			beforeEach ->
-				@request.del = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
+				@request.callsArgWith(1, null, {statusCode: 204}, "")
 				@handler.deleteDoc @project_id, @doc_id, @callback
 
 			it 'should delete the document from the document updater', ->
-				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}/doc/#{@doc_id}"
-				@request.del.calledWith(url).should.equal true
+				@request.calledWithMatch(
+					url: "#{@settings.apis.documentupdater.url}/project/#{@project_id}/doc/#{@doc_id}"
+					method: "DELETE"
+				).should.equal true
 
 			it "should call the callback with no error", ->
 				@callback.calledWith(null).should.equal true
 
 		describe "when the document updater API returns an error", ->
 			beforeEach ->
-				@request.del = sinon.stub().callsArgWith(1, @error = new Error("something went wrong"), null, null)
+				@request.callsArgWith(1, @error = new Error("something went wrong"), null, null)
 				@handler.deleteDoc @project_id, @doc_id, @callback
 
 			it "should return an error to the callback", ->
@@ -156,7 +164,7 @@ describe 'DocumentUpdaterHandler', ->
 
 		describe "when the document updater returns a failure error code", ->
 			beforeEach ->
-				@request.del = sinon.stub().callsArgWith(1, null, { statusCode: 500 }, "")
+				@request.callsArgWith(1, null, { statusCode: 500 }, "")
 				@handler.deleteDoc @project_id, @doc_id, @callback
 
 			it "should return the callback with an error", ->
@@ -170,27 +178,25 @@ describe 'DocumentUpdaterHandler', ->
 
 		describe "successfully", ->
 			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
+				@request.callsArgWith(1, null, {statusCode: 204}, "")
 				@handler.setDocument @project_id, @doc_id, @user_id, @lines, @source, @callback
 
 			it 'should set the document in the document updater', ->
-				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}/doc/#{@doc_id}"
-				@request.post
-					.calledWith({
-						url: url
-						json:
-							lines: @lines
-							source: @source
-							user_id: @user_id
-					})
-					.should.equal true
+				@request.calledWith(
+					url: "#{@settings.apis.documentupdater.url}/project/#{@project_id}/doc/#{@doc_id}"
+					json:
+						lines: @lines
+						source: @source
+						user_id: @user_id
+					method: "POST"
+				).should.equal true
 
 			it "should call the callback with no error", ->
 				@callback.calledWith(null).should.equal true
 
 		describe "when the document updater API returns an error", ->
 			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, @error = new Error("something went wrong"), null, null)
+				@request.callsArgWith(1, @error = new Error("something went wrong"), null, null)
 				@handler.setDocument @project_id, @doc_id, @user_id, @lines, @source, @callback
 
 			it "should return an error to the callback", ->
@@ -198,7 +204,7 @@ describe 'DocumentUpdaterHandler', ->
 
 		describe "when the document updater returns a failure error code", ->
 			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, null, { statusCode: 500 }, "")
+				@request.callsArgWith(1, null, { statusCode: 500 }, "")
 				@handler.setDocument @project_id, @doc_id, @user_id, @lines, @source, @callback
 
 			it "should return the callback with an error", ->
@@ -209,25 +215,28 @@ describe 'DocumentUpdaterHandler', ->
 	describe "getDocument", ->
 		describe "successfully", ->
 			beforeEach ->
-				@body = JSON.stringify
+				@body =
 					lines: @lines
 					version: @version
 					ops: @ops = ["mock-op-1", "mock-op-2"]
 					ranges: @ranges = {"mock":"ranges"}
 				@fromVersion = 2
-				@request.get = sinon.stub().callsArgWith(1, null, {statusCode: 200}, @body)
+				@request.callsArgWith(1, null, {statusCode: 200}, @body)
 				@handler.getDocument @project_id, @doc_id, @fromVersion, @callback
 
 			it 'should get the document from the document updater', ->
-				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}/doc/#{@doc_id}?fromVersion=#{@fromVersion}"
-				@request.get.calledWith(url).should.equal true
+				@request.calledWith(
+					url: "#{@settings.apis.documentupdater.url}/project/#{@project_id}/doc/#{@doc_id}?fromVersion=#{@fromVersion}"
+					method: "GET"
+					json: true
+				).should.equal true
 
 			it "should call the callback with the lines and version", ->
 				@callback.calledWith(null, @lines, @version, @ranges, @ops).should.equal true
 
 		describe "when the document updater API returns an error", ->
 			beforeEach ->
-				@request.get = sinon.stub().callsArgWith(1, @error = new Error("something went wrong"), null, null)
+				@request.callsArgWith(1, @error = new Error("something went wrong"), null, null)
 				@handler.getDocument @project_id, @doc_id, @fromVersion, @callback
 
 			it "should return an error to the callback", ->
@@ -235,7 +244,7 @@ describe 'DocumentUpdaterHandler', ->
 
 		describe "when the document updater returns a failure error code", ->
 			beforeEach ->
-				@request.get = sinon.stub().callsArgWith(1, null, { statusCode: 500 }, "")
+				@request.callsArgWith(1, null, { statusCode: 500 }, "")
 				@handler.getDocument @project_id, @doc_id, @fromVersion, @callback
 
 			it "should return the callback with an error", ->
@@ -258,7 +267,7 @@ describe 'DocumentUpdaterHandler', ->
 				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 200}, @body)
 				@handler.getProjectDocsIfMatch @project_id, @project_state_hash, @callback
 
-			it 'should get the documenst from the document updater', ->
+			it 'should get the documents from the document updater', ->
 				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}/get_and_flush_if_old?state=#{@project_state_hash}"
 				@request.post.calledWith(url).should.equal true
 
@@ -283,36 +292,37 @@ describe 'DocumentUpdaterHandler', ->
 					.alwaysCalledWithExactly()
 					.should.equal true
 
-
 	describe "clearProjectState", ->
 		describe "successfully", ->
 			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 200})
+				@request.callsArgWith(1, null, {statusCode: 200})
 				@handler.clearProjectState @project_id, @callback
 
 			it 'should clear the project state from the document updater', ->
-				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}/clearState"
-				@request.post.calledWith(url).should.equal true
+				@request.calledWithMatch(
+					url: "#{@settings.apis.documentupdater.url}/project/#{@project_id}/clearState"
+					method: "POST"
+				).should.equal true
 
 			it "should call the callback", ->
-				@callback.calledWithExactly().should.equal true
+				@callback.calledWith(null).should.equal true
 
 		describe "when the document updater API returns an error", ->
 			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, @error = new Error("something went wrong"), null, null)
-				@handler.getProjectDocsIfMatch @project_id, @project_state_hash, @callback
+				@request.callsArgWith(1, @error = new Error("something went wrong"), null, null)
+				@handler.clearProjectState @project_id, @callback
 
 			it "should return an error to the callback", ->
 				@callback.calledWith(@error).should.equal true
 
-		describe "when the document updater returns a conflict error code", ->
+		describe "when the document updater returns an error code", ->
 			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, null, { statusCode: 409 }, "Conflict")
-				@handler.getProjectDocsIfMatch @project_id, @project_state_hash, @callback
+				@request.callsArgWith(1, null, { statusCode: 500 }, null)
+				@handler.clearProjectState @project_id, @callback
 
 			it "should return the callback with no documents", ->
 				@callback
-					.alwaysCalledWithExactly()
+					.calledWith(new Error("doc updater returned failure status code: 500"))
 					.should.equal true
 
 
@@ -322,22 +332,23 @@ describe 'DocumentUpdaterHandler', ->
 
 		describe "successfully", ->
 			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 200}, @body)
+				@request.callsArgWith(1, null, {statusCode: 200}, @body)
 				@handler.acceptChanges @project_id, @doc_id, [ @change_id ], @callback
 
 			it 'should accept the change in the document updater', ->
-				req =
+				@request.calledWith(
 					url: "#{@settings.apis.documentupdater.url}/project/#{@project_id}/doc/#{@doc_id}/change/accept"
 					json:
 						change_ids: [ @change_id ]
-				@request.post.calledWith(req).should.equal true
+					method: "POST"
+				).should.equal true
 
 			it "should call the callback", ->
 				@callback.calledWith(null).should.equal true
 
 		describe "when the document updater API returns an error", ->
 			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, @error = new Error("something went wrong"), null, null)
+				@request.callsArgWith(1, @error = new Error("something went wrong"), null, null)
 				@handler.acceptChanges @project_id, @doc_id, [ @change_id ], @callback
 
 			it "should return an error to the callback", ->
@@ -345,7 +356,7 @@ describe 'DocumentUpdaterHandler', ->
 
 		describe "when the document updater returns a failure error code", ->
 			beforeEach ->
-				@request.post = sinon.stub().callsArgWith(1, null, { statusCode: 500 }, "")
+				@request.callsArgWith(1, null, { statusCode: 500 }, "")
 				@handler.acceptChanges @project_id, @doc_id, [ @change_id ], @callback
 
 			it "should return the callback with an error", ->
@@ -359,19 +370,21 @@ describe 'DocumentUpdaterHandler', ->
 
 		describe "successfully", ->
 			beforeEach ->
-				@request.del = sinon.stub().callsArgWith(1, null, {statusCode: 200}, @body)
+				@request.callsArgWith(1, null, {statusCode: 200}, @body)
 				@handler.deleteThread @project_id, @doc_id, @thread_id, @callback
 
 			it 'should delete the thread in the document updater', ->
-				url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}/doc/#{@doc_id}/comment/#{@thread_id}"
-				@request.del.calledWith(url).should.equal true
+				@request.calledWithMatch(
+					url: "#{@settings.apis.documentupdater.url}/project/#{@project_id}/doc/#{@doc_id}/comment/#{@thread_id}"
+					method: "DELETE"
+				).should.equal true
 
 			it "should call the callback", ->
 				@callback.calledWith(null).should.equal true
 
 		describe "when the document updater API returns an error", ->
 			beforeEach ->
-				@request.del = sinon.stub().callsArgWith(1, @error = new Error("something went wrong"), null, null)
+				@request.callsArgWith(1, @error = new Error("something went wrong"), null, null)
 				@handler.deleteThread @project_id, @doc_id, @thread_id, @callback
 
 			it "should return an error to the callback", ->
@@ -379,7 +392,7 @@ describe 'DocumentUpdaterHandler', ->
 
 		describe "when the document updater returns a failure error code", ->
 			beforeEach ->
-				@request.del = sinon.stub().callsArgWith(1, null, { statusCode: 500 }, "")
+				@request.callsArgWith(1, null, { statusCode: 500 }, "")
 				@handler.deleteThread @project_id, @doc_id, @thread_id, @callback
 
 			it "should return the callback with an error", ->
@@ -396,12 +409,10 @@ describe 'DocumentUpdaterHandler', ->
 		describe "with project history disabled", ->
 			beforeEach ->
 				@settings.apis.project_history.sendProjectStructureOps = false
-				@request.post = sinon.stub()
-
 				@handler.updateProjectStructure @project_id, @user_id, {}, @callback
 
 			it 'does not make a web request', ->
-				@request.post.called.should.equal false
+				@request.called.should.equal false
 
 			it 'calls the callback', ->
 				@callback.called.should.equal true
@@ -410,7 +421,7 @@ describe 'DocumentUpdaterHandler', ->
 			beforeEach ->
 				@settings.apis.project_history.sendProjectStructureOps = true
 				@url = "#{@settings.apis.documentupdater.url}/project/#{@project_id}"
-				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
+				@request.callsArgWith(1, null, {statusCode: 204}, "")
 
 			describe "when an entity has changed name", ->
 				it 'should send the structure update to the document updater', (done) ->
@@ -435,9 +446,12 @@ describe 'DocumentUpdaterHandler', ->
 					]
 
 					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>
-						@request.post
-							.calledWith(url: @url, json: {docUpdates, fileUpdates: [], userId: @user_id, version:@version})
-							.should.equal true
+						@request.calledWith(
+							url: @url,
+							method: "POST"
+							json: {docUpdates, fileUpdates: [], userId: @user_id, @version}
+						)
+						.should.equal true
 						done()
 
 			describe "when a doc has been added", ->
@@ -455,9 +469,11 @@ describe 'DocumentUpdaterHandler', ->
 					]
 
 					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>
-						@request.post
-							.calledWith(url: @url, json: {docUpdates, fileUpdates: [], userId: @user_id, version:@version})
-							.should.equal true
+						@request.calledWith(
+							url: @url
+							method: "POST"
+							json: {docUpdates, fileUpdates: [], userId: @user_id, @version}
+						).should.equal true
 						done()
 
 			describe "when a file has been added", ->
@@ -475,9 +491,11 @@ describe 'DocumentUpdaterHandler', ->
 					]
 
 					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>
-						@request.post
-							.calledWith(url: @url, json: {docUpdates: [], fileUpdates, userId: @user_id, version:@version})
-							.should.equal true
+						@request.calledWith(
+							url: @url
+							method: "POST"
+							json: {docUpdates: [], fileUpdates, userId: @user_id, @version}
+						).should.equal true
 						done()
 
 			describe "when an entity has been deleted", ->
@@ -494,8 +512,9 @@ describe 'DocumentUpdaterHandler', ->
 					]
 
 					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>
-						@request.post
-							.calledWith(url: @url, json: {docUpdates, fileUpdates: [], userId: @user_id, version:@version})
-							.should.equal true
+						@request.calledWith(
+							url: @url
+							method: "POST"
+							json: {docUpdates, fileUpdates: [], userId: @user_id, @version}
+						).should.equal true
 						done()
-

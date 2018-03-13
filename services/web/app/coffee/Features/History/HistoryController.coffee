@@ -3,6 +3,7 @@ request = require "request"
 settings = require "settings-sharelatex"
 AuthenticationController = require "../Authentication/AuthenticationController"
 ProjectDetailsHandler = require "../Project/ProjectDetailsHandler"
+ProjectEntityUpdateHandler = require "../Project/ProjectEntityUpdateHandler"
 HistoryManager = require "./HistoryManager"
 
 module.exports = HistoryController =
@@ -62,3 +63,9 @@ module.exports = HistoryController =
 			return settings.apis.project_history.url
 		else
 			return settings.apis.trackchanges.url
+
+	resyncProjectHistory: (req, res, next = (error) ->) ->
+		project_id = req.params.Project_id
+		ProjectEntityUpdateHandler.resyncProjectHistory project_id, (error) ->
+			return next(error) if error?
+			res.sendStatus 204

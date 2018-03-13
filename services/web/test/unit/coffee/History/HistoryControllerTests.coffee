@@ -17,6 +17,7 @@ describe "HistoryController", ->
 			"./HistoryManager": @HistoryManager = {}
 			"../Authentication/AuthenticationController": @AuthenticationController
 			"../Project/ProjectDetailsHandler": @ProjectDetailsHandler = {}
+			"../Project/ProjectEntityUpdateHandler": @ProjectEntityUpdateHandler = {}
 		@settings.apis =
 			trackchanges:
 				enabled: false
@@ -199,3 +200,24 @@ describe "HistoryController", ->
 
 		it "should not return the data with users to the client", ->
 			@res.json.calledWith(@data_with_users).should.equal false
+
+	describe "resyncProjectHistory", ->
+		beforeEach ->
+			@project_id = 'mock-project-id'
+			@req = params: Project_id: @project_id
+			@res = sendStatus: sinon.stub()
+			@next = sinon.stub()
+
+			@ProjectEntityUpdateHandler.resyncProjectHistory = sinon.stub().yields()
+
+			@HistoryController.resyncProjectHistory @req, @res, @next
+
+		it "resyncs the project", ->
+			@ProjectEntityUpdateHandler.resyncProjectHistory
+				.calledWith(@project_id)
+				.should.equal true
+
+		it "responds with a 204", ->
+			@res.sendStatus
+				.calledWith(204)
+				.should.equal true

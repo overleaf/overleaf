@@ -52,7 +52,7 @@ module.exports = ProjectEntityHandler = self =
 			callback null, files
 
 	getAllEntitiesFromProject: (project, callback) ->
-		logger.log project:project, "getting all files for project"
+		logger.log project:project, "getting all entities for project"
 		self._getAllFoldersFromProject project, (err, folders = {}) ->
 			return callback(err) if err?
 			docs = []

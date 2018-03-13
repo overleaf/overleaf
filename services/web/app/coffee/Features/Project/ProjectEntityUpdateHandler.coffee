@@ -313,6 +313,25 @@ module.exports = ProjectEntityUpdateHandler = self =
 			TpdsUpdateSender.moveEntity({project_id, startPath, endPath, project_name, rev})
 			DocumentUpdaterHandler.updateProjectStructure project_id, userId, changes, callback
 
+	# This doesn't directly update project structure but we need to take the lock
+	# to prevent anything else being queued before the resync update
+	resyncProjectHistory: wrapWithLock (project_id, callback) ->
+		ProjectGetter.getProject project_id, rootFolder: true, (error, project) ->
+			return callback(error) if error?
+			ProjectEntityHandler.getAllEntitiesFromProject project, (error, docs, files) ->
+				return callback(error) if error?
+
+				docs = _.map docs, (doc) ->
+					doc: doc.doc._id
+					path: doc.path
+
+				files = _.map files, (file) ->
+					file: file.file._id
+					path: file.path
+					url: FileStoreHandler._buildUrl(project_id, file.file._id)
+
+				DocumentUpdaterHandler.resyncProjectHistory project_id, docs, files, callback
+
 	_cleanUpEntity: (project, entity, entityType, path, userId, callback = (error) ->) ->
 		if(entityType.indexOf("file") != -1)
 			self._cleanUpFile project, entity, path, userId, callback
