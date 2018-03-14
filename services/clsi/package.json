@@ -7,8 +7,6 @@
     "url": "https://github.com/sharelatex/clsi-sharelatex.git"
   }, 
   "scripts": {
-    "compile:test:acceptance": "coffee -o test/acceptance/js -c test/acceptance/coffee", 
-    "compile:test:smoke": "coffee -o test/smoke/js -c test/smoke/coffee", 
     "compile:app": "coffee $COFFEE_OPTIONS -o app/js -c app/coffee && coffee $COFFEE_OPTIONS -c app.coffee", 
     "compile": "npm run compile:app && npm run compile:test:acceptance && npm run compile:test:smoke", 
     "start": "npm run compile:app && node $NODE_APP_OPTIONS app.js", 
@@ -16,10 +14,11 @@
     "test:acceptance": "npm run compile:app && npm run compile:acceptance_tests && npm run test:acceptance:_run -- $@", 
     "test:unit:_run": "mocha --recursive --exit --reporter spec $@ test/unit/js", 
     "test:unit": "npm run compile:app && npm run compile:unit_tests && npm run test:unit:_run -- $@", 
-    "compile:unit_tests": "[ -e test/unit ] && coffee -o test/unit/js -c test/unit/coffee || echo 'No unit tests to compile'", 
-    "compile:acceptance_tests": "[ -e test/acceptance ] && coffee -o test/acceptance/js -c test/acceptance/coffee || echo 'No acceptance tests to compile'", 
-    "compile:all": "npm run compile:app && npm run compile:unit_tests && npm run compile:acceptance_tests", 
-    "nodemon": "nodemon --config nodemon.json"
+    "compile:unit_tests": "[ -e test/unit ] && coffee -o test/unit/js -c test/unit/coffee || echo 'No unit tests to compile, skipping'", 
+    "compile:acceptance_tests": "[ -e test/acceptance ] && coffee -o test/acceptance/js -c test/acceptance/coffee || echo 'No acceptance tests to compile, skipping'", 
+    "compile:all": "npm run compile:app && npm run compile:unit_tests && npm run compile:acceptance_tests && npm run compile:smoke_tests", 
+    "nodemon": "nodemon --config nodemon.json", 
+    "compile:smoke_tests": "[ -e test/smoke ] && coffee -o test/smoke/js -c test/smoke/coffee || echo 'No smoke tests to compile, skipping'"
   }, 
   "author": "James Allen <james@sharelatex.com>", 
   "dependencies": {
