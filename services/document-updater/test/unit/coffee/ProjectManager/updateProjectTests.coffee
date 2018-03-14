@@ -8,6 +8,7 @@ describe "ProjectManager", ->
 	beforeEach ->
 		@ProjectManager = SandboxedModule.require modulePath, requires:
 			"./RedisManager": @RedisManager = {}
+			"./ProjectHistoryRedisManager": @ProjectHistoryRedisManager = {}
 			"./DocumentManager": @DocumentManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"./HistoryManager": @HistoryManager = {}
@@ -40,7 +41,7 @@ describe "ProjectManager", ->
 					newPathname: 'bar2'
 				@fileUpdates = [ @firstFileUpdate ]
 				@DocumentManager.renameDocWithLock = sinon.stub().yields()
-				@RedisManager.renameFile = sinon.stub().yields()
+				@ProjectHistoryRedisManager.queueRenameEntity = sinon.stub().yields()
 
 			describe "successfully", ->
 				beforeEach ->
@@ -55,8 +56,8 @@ describe "ProjectManager", ->
 						.should.equal true
 
 				it "should rename the files in the updates", ->
-					@RedisManager.renameFile
-						.calledWith(@project_id, @firstFileUpdate.id, @user_id, @firstFileUpdate)
+					@ProjectHistoryRedisManager.queueRenameEntity
+						.calledWith(@project_id, 'file', @firstFileUpdate.id, @user_id, @firstFileUpdate)
 						.should.equal true
 
 				it "should not flush the history", ->
@@ -79,7 +80,7 @@ describe "ProjectManager", ->
 			describe "when renaming a file fails", ->
 				beforeEach ->
 					@error = new Error('error')
-					@RedisManager.renameFile = sinon.stub().yields(@error)
+					@ProjectHistoryRedisManager.queueRenameEntity = sinon.stub().yields(@error)
 					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @callback
 
 				it "should call the callback with the error", ->
@@ -108,22 +109,22 @@ describe "ProjectManager", ->
 					id: 2
 					url: 'filestore.example.com/2'
 				@fileUpdates = [ @firstFileUpdate ]
-				@RedisManager.addEntity = sinon.stub().yields()
+				@ProjectHistoryRedisManager.queueAddEntity = sinon.stub().yields()
 
 			describe "successfully", ->
 				beforeEach ->
 					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @callback
 
 				it "should add the docs in the updates", ->
-					@RedisManager.addEntity
+					@ProjectHistoryRedisManager.queueAddEntity
 						.calledWith(@project_id, 'doc', @firstDocUpdate.id, @user_id, @firstDocUpdate)
 						.should.equal true
-					@RedisManager.addEntity
+					@ProjectHistoryRedisManager.queueAddEntity
 						.calledWith(@project_id, 'doc', @secondDocUpdate.id, @user_id, @secondDocUpdate)
 						.should.equal true
 
 				it "should add the files in the updates", ->
-					@RedisManager.addEntity
+					@ProjectHistoryRedisManager.queueAddEntity
 						.calledWith(@project_id, 'file', @firstFileUpdate.id, @user_id, @firstFileUpdate)
 						.should.equal true
 
@@ -138,7 +139,7 @@ describe "ProjectManager", ->
 			describe "when adding a doc fails", ->
 				beforeEach ->
 					@error = new Error('error')
-					@RedisManager.addEntity = sinon.stub().yields(@error)
+					@ProjectHistoryRedisManager.queueAddEntity = sinon.stub().yields(@error)
 					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @callback
 
 				it "should call the callback with the error", ->
@@ -147,7 +148,7 @@ describe "ProjectManager", ->
 			describe "when adding a file fails", ->
 				beforeEach ->
 					@error = new Error('error')
-					@RedisManager.addEntity = sinon.stub().yields(@error)
+					@ProjectHistoryRedisManager.queueAddEntity = sinon.stub().yields(@error)
 					@ProjectManager.updateProjectWithLocks @project_id, @user_id, @docUpdates, @fileUpdates, @callback
 
 				it "should call the callback with the error", ->
@@ -162,4 +163,3 @@ describe "ProjectManager", ->
 					@HistoryManager.flushProjectChangesAsync
 						.calledWith(@project_id)
 						.should.equal true
-

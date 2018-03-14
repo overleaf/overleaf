@@ -16,7 +16,10 @@ describe "HistoryManager", ->
 						url: "http://trackchanges.example.com"
 			}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			"./DocumentManager": @DocumentManager = {}
 			"./HistoryRedisManager": @HistoryRedisManager = {}
+			"./RedisManager": @RedisManager = {}
+			"./ProjectHistoryRedisManager": @ProjectHistoryRedisManager = {}
 		@project_id = "mock-project-id"
 		@doc_id = "mock-doc-id"
 		@callback = sinon.stub()
@@ -158,3 +161,32 @@ describe "HistoryManager", ->
 				# Previously we were on 16 ops
 				# We didn't pass over a multiple of 5
 				@HistoryManager.shouldFlushHistoryOps(17, ['a', 'b', 'c'].length, 5).should.equal true
+
+	describe "resyncProjectHistory", ->
+		beforeEach ->
+			@docs = [
+				doc: @doc_id
+				path: 'main.tex'
+			]
+			@files = [
+				file: 'mock-file-id'
+				path: 'universe.png'
+				url: "www.filestore.test/#{@project_id}/mock-file-id"
+			]
+			@ProjectHistoryRedisManager.queueResyncProjectStructure = sinon.stub().yields()
+			@DocumentManager.resyncDocContentsWithLock = sinon.stub().yields()
+			@HistoryManager.resyncProjectHistory @project_id, @docs, @files, @callback
+
+		it "should queue a project structure reync", ->
+			@ProjectHistoryRedisManager.queueResyncProjectStructure
+				.calledWith(@project_id, @docs, @files)
+				.should.equal true
+
+		it "should queue doc content reyncs", ->
+			@DocumentManager
+				.resyncDocContentsWithLock
+				.calledWith(@project_id, @doc_id)
+				.should.equal true
+
+		it "should call the callback", ->
+			@callback.called.should.equal true

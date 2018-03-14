@@ -9,6 +9,7 @@ describe "ProjectManager - getProjectDocsAndFlushIfOld", ->
 	beforeEach ->
 		@ProjectManager = SandboxedModule.require modulePath, requires:
 			"./RedisManager": @RedisManager = {}
+			"./ProjectHistoryRedisManager": @ProjectHistoryRedisManager = {}
 			"./DocumentManager": @DocumentManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"./HistoryManager": @HistoryManager = {}

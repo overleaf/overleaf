@@ -5,6 +5,7 @@ logger = require('logger-sharelatex')
 metrics = require('./Metrics')
 Errors = require "./Errors"
 crypto = require "crypto"
+ProjectHistoryRedisManager = require "./ProjectHistoryRedisManager"
 
 # Sometimes Redis calls take an unexpectedly long time.  We have to be
 # quick with Redis calls because we're holding a lock that expires
@@ -31,7 +32,6 @@ MAX_RANGES_SIZE = 3 * MEGABYTES
 
 keys = Settings.redis.documentupdater.key_schema
 historyKeys = Settings.redis.history.key_schema
-projectHistoryKeys = Settings.redis?.project_history?.key_schema
 
 module.exports = RedisManager =
 	rclient: rclient
@@ -267,7 +267,7 @@ module.exports = RedisManager =
 						docUpdateCount = result[7]
 
 						if jsonOps.length > 0 && Settings.apis?.project_history?.enabled
-							rclient.rpush projectHistoryKeys.projectHistoryOps({project_id}), jsonOps..., (error, projectUpdateCount) ->
+							ProjectHistoryRedisManager.queueOps project_id, jsonOps..., (error, projectUpdateCount) ->
 								callback null, docUpdateCount, projectUpdateCount
 						else
 							callback null, docUpdateCount
@@ -279,41 +279,9 @@ module.exports = RedisManager =
 			if lines? and version?
 				rclient.set keys.pathname(doc_id:doc_id), update.newPathname, (error) ->
 					return callback(error) if error?
-					RedisManager._renameEntity project_id, 'doc', doc_id, user_id, update, callback
+					ProjectHistoryRedisManager.queueRenameEntity project_id, 'doc', doc_id, user_id, update, callback
 			else
-				RedisManager._renameEntity project_id, 'doc', doc_id, user_id, update, callback
-
-	renameFile: (project_id, file_id, user_id, update, callback = (error) ->) ->
-		RedisManager._renameEntity project_id, 'file', file_id, user_id, update, callback
-
-	_renameEntity: (project_id, entity_type, entity_id, user_id, update, callback = (error) ->) ->
-		update =
-			pathname: update.pathname
-			new_pathname: update.newPathname
-			meta:
-				user_id: user_id
-				ts: new Date()
-		update[entity_type] = entity_id
-
-		logger.log {project_id, update}, "queue rename operation to project-history"
-		jsonUpdate = JSON.stringify(update)
-
-		rclient.rpush projectHistoryKeys.projectHistoryOps({project_id}), jsonUpdate, callback
-
-	addEntity: (project_id, entity_type, entitiy_id, user_id, update, callback = (error) ->) ->
-		update =
-			pathname: update.pathname
-			docLines: update.docLines
-			url: update.url
-			meta:
-				user_id: user_id
-				ts: new Date()
-		update[entity_type] = entitiy_id
-
-		logger.log {project_id, update}, "queue add operation to project-history"
-		jsonUpdate = JSON.stringify(update)
-
-		rclient.rpush projectHistoryKeys.projectHistoryOps({project_id}), jsonUpdate, callback
+				ProjectHistoryRedisManager.queueRenameEntity project_id, 'doc', doc_id, user_id, update, callback
 
 	clearUnflushedTime: (doc_id, callback = (error) ->) ->
 		rclient.del keys.unflushedTime(doc_id:doc_id), callback

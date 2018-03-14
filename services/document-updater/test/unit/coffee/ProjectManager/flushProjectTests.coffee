@@ -8,6 +8,7 @@ describe "ProjectManager - flushProject", ->
 	beforeEach ->
 		@ProjectManager = SandboxedModule.require modulePath, requires:
 			"./RedisManager": @RedisManager = {}
+			"./ProjectHistoryRedisManager": @ProjectHistoryRedisManager = {}
 			"./DocumentManager": @DocumentManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"./HistoryManager": @HistoryManager = {}
@@ -72,5 +73,3 @@ describe "ProjectManager - flushProject", ->
 
 		it "should time the execution", ->
 			@Metrics.Timer::done.called.should.equal true
-
-

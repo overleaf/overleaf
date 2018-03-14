@@ -1,4 +1,5 @@
 RedisManager = require "./RedisManager"
+ProjectHistoryRedisManager = require "./ProjectHistoryRedisManager"
 PersistenceManager = require "./PersistenceManager"
 DiffCodec = require "./DiffCodec"
 logger = require "logger-sharelatex"
@@ -179,6 +180,17 @@ module.exports = DocumentManager =
 			else
 				callback(null, lines, version)
 
+	resyncDocContents: (project_id, doc_id, callback) ->
+		RedisManager.getDoc project_id, doc_id, (error, lines, version, ranges, pathname) ->
+			return callback(error) if error?
+
+			if !lines? or !version?
+				PersistenceManager.getDoc project_id, doc_id, (error, lines, version, ranges, pathname) ->
+					return callback(error) if error?
+					ProjectHistoryRedisManager.queueResyncDocContent project_id, doc_id, lines, version, pathname, callback
+			else
+				ProjectHistoryRedisManager.queueResyncDocContent project_id, doc_id, lines, version, pathname, callback
+
 	getDocWithLock: (project_id, doc_id, callback = (error, lines, version) ->) ->
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.getDoc, project_id, doc_id, callback
@@ -214,3 +226,7 @@ module.exports = DocumentManager =
 	renameDocWithLock: (project_id, doc_id, user_id, update, callback = (error) ->) ->
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.renameDoc, project_id, doc_id, user_id, update, callback
+
+	resyncDocContentsWithLock: (project_id, doc_id, callback = (error) ->) ->
+		UpdateManager = require "./UpdateManager"
+		UpdateManager.lockUpdatesAndDo DocumentManager.resyncDocContents, project_id, doc_id, callback

@@ -3,6 +3,8 @@ http = require("http")
 Settings = require('settings-sharelatex')
 logger = require('logger-sharelatex')
 logger.initialize("documentupdater")
+logger.logger.serializers.docs = require("./app/js/LoggerSerializers").docs
+logger.logger.serializers.files = require("./app/js/LoggerSerializers").files
 if Settings.sentry?.dsn?
 	logger.initializeErrorReporting(Settings.sentry.dsn)
 
@@ -47,7 +49,8 @@ app.post   '/project/:project_id/doc/:doc_id',                          HttpCont
 app.post   '/project/:project_id/doc/:doc_id/flush',                    HttpController.flushDocIfLoaded
 app.delete '/project/:project_id/doc/:doc_id',                          HttpController.flushAndDeleteDoc
 app.delete '/project/:project_id',                                      HttpController.deleteProject
-app.post   '/project/:project_id',                   										HttpController.updateProject
+app.post   '/project/:project_id',                                      HttpController.updateProject
+app.post   '/project/:project_id/history/resync',                       HttpController.resyncProjectHistory
 app.post   '/project/:project_id/flush',                                HttpController.flushProject
 app.post   '/project/:project_id/doc/:doc_id/change/:change_id/accept', HttpController.acceptChanges
 app.post   '/project/:project_id/doc/:doc_id/change/accept',            HttpController.acceptChanges
