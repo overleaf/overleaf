@@ -152,7 +152,7 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 				path = Path.join(jsPath, jsFile)
 				return "#{Settings.webpack.host}:#{Settings.webpack.port}/public#{path}"
 			else
-				return res.locals.buildJsPath(jsFile)
+				return res.locals.buildJsPath(jsFile, opts)
 
 		res.locals.buildCssPath = (cssFile, opts)->
 			path = Path.join("/stylesheets/", cssFile)
