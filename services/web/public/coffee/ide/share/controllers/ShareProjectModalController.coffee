@@ -96,50 +96,50 @@ define [
 					if email in currentMemberEmails
 						# Skip this existing member
 						return addNextMember()
+					validateCaptcha (response) ->
+						$scope.grecaptchaResponse = response	
+						if email in currentInviteEmails and inviteId = _.find(($scope.project.invites || []), (invite) -> invite.email == email)?._id
+							request = projectInvites.resendInvite(inviteId)
+						else
+							request = projectInvites.sendInvite(email, $scope.inputs.privileges, $scope.grecaptchaResponse)
 
-					if email in currentInviteEmails and inviteId = _.find(($scope.project.invites || []), (invite) -> invite.email == email)?._id
-						request = projectInvites.resendInvite(inviteId)
-					else
-						request = projectInvites.sendInvite(email, $scope.inputs.privileges, $scope.grecaptchaResponse)
-
-					request
-						.then (response) ->
-							{ data } = response
-							if data.error
-								$scope.state.error = true
-								$scope.state.errorReason = "#{data.error}"
-								$scope.state.inflight = false
-							else
-								if data.invite
-									invite = data.invite
-									$scope.project.invites.push invite
+						request
+							.then (response) ->
+								{ data } = response
+								if data.error
+									$scope.state.error = true
+									$scope.state.errorReason = "#{data.error}"
+									$scope.state.inflight = false
 								else
-									if data.users?
-										users = data.users
-									else if data.user?
-										users = [data.user]
+									if data.invite
+										invite = data.invite
+										$scope.project.invites.push invite
 									else
-										users = []
-									$scope.project.members.push users...
+										if data.users?
+											users = data.users
+										else if data.user?
+											users = [data.user]
+										else
+											users = []
+										$scope.project.members.push users...
 
-							setTimeout () ->
-								# Give $scope a chance to update $scope.canAddCollaborators
-								# with new collaborator information.
-								addNextMember()
-							, 0
-						.catch (httpResponse) ->
-							{data, status, headers, config } = httpResponse
-							$scope.state.inflight = false
-							$scope.state.error = true
+								setTimeout () ->
+									# Give $scope a chance to update $scope.canAddCollaborators
+									# with new collaborator information.
+									addNextMember()
+								, 0
+							.catch (httpResponse) ->
+								{data, status, headers, config } = httpResponse
+								$scope.state.inflight = false
+								$scope.state.error = true
 
-							if data?.errorReason?
-								$scope.state.errorReason = data?.errorReason
-							else
-								$scope.state.errorReason = null
+								if data?.errorReason?
+									$scope.state.errorReason = data?.errorReason
+								else
+									$scope.state.errorReason = null
 
-			validateCaptcha (response) ->
-				$scope.grecaptchaResponse = response
-				$timeout addMembers, 50 # Give email list a chance to update
+
+			$timeout addMembers, 50 # Give email list a chance to update
 
 		$scope.removeMember = (member) ->
 			$scope.state.error = null
