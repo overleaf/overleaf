@@ -103,5 +103,6 @@ define [
 
 			request.then (response)->
 				$scope.sent = true
+				event_tracking.send 'subscription-funnel', 'plans-page', 'group-inquiry-sent'
 				$scope.error = (response.status != 200)
 				$scope.$apply()
