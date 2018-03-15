@@ -9,9 +9,28 @@ makeRequest = (opts, callback)->
 	if settings.apis?.analytics?.url?
 		urlPath = opts.url
 		opts.url = "#{settings.apis.analytics.url}#{urlPath}"
-		request opts, callback
+		request(opts)
+		callback() # Do not wait for all the attempts
 	else
 		callback(new Errors.ServiceNotConfiguredError('Analytics service not configured'))
+
+
+# Set an exponential backoff to retry calls to analytics. First retry will
+# happen after 4s, then 8, 16, 32, 64...
+exponentialBackoffStrategy = () ->
+	attempts = 1 # This won't be called until there has been 1 failure
+
+	() ->
+		attempts += 1
+		exponentialBackoffDelay(attempts)
+
+exponentialBackoffDelay = (attempts) ->
+	delay = 2 ** attempts * 1000
+
+	logger.warn "Error comunicating with the analytics service. " +
+		"Will try again attempt #{attempts} in #{delay}ms"
+
+	delay
 
 
 module.exports =
@@ -37,8 +56,8 @@ module.exports =
 			method:"POST"
 			timeout:1000
 			url: "/user/#{user_id}/event"
-			maxAttempts: 20
-			retryDelay: 5000
+			delayStrategy: exponentialBackoffStrategy()
+			maxAttempts: 7 # Give up after ~ 8min
 		if settings.overleaf?
 			opts.qs = {fromV2: 1}
 		makeRequest opts, callback
@@ -56,8 +75,8 @@ module.exports =
 			timeout: 1000
 			url: "/editingSession"
 			qs: query
-			maxAttempts: 20
-			retryDelay: 5000
+			maxAttempts: 6 # Give up after ~ 4min
+			delayStrategy: exponentialBackoffStrategy()
 		if settings.overleaf?
 			opts.qs.fromV2 = 1
 		makeRequest opts, callback
