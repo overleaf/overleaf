@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "AccountSettingsController", ["$scope", "$http", "$modal", ($scope, $http, $modal) ->
+	App.controller "AccountSettingsController", ["$scope", "$http", "$modal", "event_tracking", ($scope, $http, $modal, event_tracking) ->
 		$scope.subscribed = true
 
 		$scope.unsubscribe = () ->
@@ -24,6 +24,9 @@ define [
 				controller: "DeleteAccountModalController",
 				scope: $scope
 			)
+
+		$scope.upgradeIntegration = (service) ->
+			event_tracking.send 'subscription-funnel', 'settings-page', service
 	]
 
 	App.controller "DeleteAccountModalController", [
