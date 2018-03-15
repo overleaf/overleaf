@@ -54,6 +54,7 @@ public/js/*.map
 public/js/libs/sharejs.js
 public/js/analytics/
 public/js/directives/
+public/js/es/
 public/js/filters/
 public/js/ide/
 public/js/main/

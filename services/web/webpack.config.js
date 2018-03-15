@@ -22,12 +22,6 @@ module.exports = {
 		library: ['Frontend', '[name]']
 	},
 
-	// TODO??
-	// Defines the external modules which will be stripped out when bundling for
-	// the main app. These modules are already loaded in the main app environment,
-	// so we strip them out to prevent conflicts.
-	// externals: {},
-
 	// Define how file types are handled by webpack
 	module: {
 		rules: [{

@@ -96,6 +96,11 @@ $(CSS_FILES): $(LESS_FILES)
 
 minify: $(CSS_FILES) $(JS_FILES)
 	$(GRUNT) compile:minify
+	$(MAKE) minify_es
+
+minify_es:
+	npm -q run webpack:production
+
 css: $(CSS_FILES)
 
 compile: $(JS_FILES) css public/js/libs/sharejs.js public/js/main.js public/js/ide.js
@@ -153,7 +158,7 @@ clean_app:
 	rm -rf app/js
 
 clean_frontend:
-	rm -rf public/js/{analytics,directives,filters,ide,main,modules,services,utils}
+	rm -rf public/js/{analytics,directives,es,filters,ide,main,modules,services,utils}
 	rm -f public/js/*.{js,map}
 	rm -f public/js/libs/sharejs.{js,map}
 
