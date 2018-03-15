@@ -16,3 +16,7 @@ module.exports =
 		publicApiRouter.use '/analytics/recentTeamActivity',
 			AuthenticationController.httpAuth,
 			AnalyticsProxy.call('/recentTeamActivity')
+
+		publicApiRouter.use '/analytics/uniExternalCollaboration',
+			AuthenticationController.httpAuth,
+			AnalyticsProxy.call('/uniExternalCollaboration')
