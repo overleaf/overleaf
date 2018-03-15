@@ -96,13 +96,15 @@ $(CSS_FILES): $(LESS_FILES)
 
 minify: $(CSS_FILES) $(JS_FILES)
 	$(GRUNT) compile:minify
+	$(MAKE) minify_es
+
+minify_es:
+	npm -q run webpack:production
+
 css: $(CSS_FILES)
 
 compile: $(JS_FILES) css public/js/libs/sharejs.js public/js/main.js public/js/ide.js
 	@$(MAKE) compile_modules
-
-compile_es:
-	npm -q run webpack:production
 
 compile_full:
 	$(COFFEE) -c -p app.coffee > app.js
@@ -116,7 +118,6 @@ compile_full:
 	$(MAKE) $(CSS_FILES)
 	$(MAKE) compile_modules_full
 	$(MAKE) compile # ide.js, main.js, share.js, and anything missed
-	$(MAKE) compile_es
 
 compile_modules: $(MODULE_MAKEFILES)
 	@set -e; \
