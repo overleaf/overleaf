@@ -18,7 +18,6 @@ module.exports = RestoreManager =
 				return callback(error) if error?
 				RestoreManager._addEntityWithUniqueName user_id, project_id, parent_folder_id, basename, fsPath, callback
 
-
 	_findFolderOrRootFolderId: (project_id, dirname, callback = (error, folder_id) ->) ->
 		# We're going to try to recover the file into the folder it was in previously,
 		# but this is historical, so the folder may not exist anymore. Fallback to the 
