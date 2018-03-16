@@ -6,3 +6,6 @@ usermod -aG docker app
 
 mkdir -p /app/cache
 chown -R app:app /app/cache
+
+mkdir -p /app/compiles
+chown -R app:app /app/compiles
