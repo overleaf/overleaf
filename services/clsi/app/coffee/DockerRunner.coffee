@@ -146,6 +146,7 @@ module.exports = DockerRunner =
 				"SecurityOpt": ["no-new-privileges"]
 		if Settings.clsi.docker.seccomp_profile?
 			options.HostConfig.SecurityOpt.push "seccomp=#{Settings.clsi.docker.seccomp_profile}"
+		logger.log options:options, "options for running docker container"
 		return options
 
 	_fingerprintContainer: (containerOptions) ->
