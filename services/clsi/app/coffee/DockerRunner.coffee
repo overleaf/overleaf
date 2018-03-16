@@ -108,16 +108,12 @@ module.exports = DockerRunner =
 	_getContainerOptions: (command, image, volumes, timeout, environment) ->
 		timeoutInSeconds = timeout / 1000
 		
-		if Settings.path?.synctexBinHostPath?
-			volumes[Settings.path.synctexBinHostPath] = "/opt/synctex:ro"
-
 		dockerVolumes = {}
 		for hostVol, dockerVol of volumes
 			dockerVolumes[dockerVol] = {}
 
 			if volumes[hostVol].slice(-3).indexOf(":r") == -1
 				volumes[hostVol] = "#{dockerVol}:rw"
-
 
 		# merge settings and environment parameter
 		env = {}
@@ -144,8 +140,13 @@ module.exports = DockerRunner =
 				"Ulimits": [{'Name': 'cpu', 'Soft': timeoutInSeconds+5, 'Hard': timeoutInSeconds+10}]
 				"CapDrop": "ALL"
 				"SecurityOpt": ["no-new-privileges"]
+				
 		if Settings.clsi.docker.seccomp_profile?
 			options.HostConfig.SecurityOpt.push "seccomp=#{Settings.clsi.docker.seccomp_profile}"
+
+		if Settings.path?.synctexBinHostPath?
+			options["HostConfig"]["Binds"].push("#{Settings.path.synctexBinHostPath}:/opt/synctex:ro")
+
 		logger.log options:options, "options for running docker container"
 		return options
 
