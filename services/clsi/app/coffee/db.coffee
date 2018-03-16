@@ -5,6 +5,8 @@ logger = require "logger-sharelatex"
 
 options = _.extend {logging:false}, Settings.mysql.clsi
 
+logger.log dbPath:Settings.mysql.clsi.storage, "connecting to db"
+
 sequelize = new Sequelize(
 	Settings.mysql.clsi.database,
 	Settings.mysql.clsi.username,
