@@ -116,27 +116,27 @@ module.exports = ProjectManager =
 
 		project_ops_length = 0
 
-		handleDocUpdate = (update, cb) ->
-			doc_id = update.id
-			update.version = "#{project_version}.#{project_subversion++}"
-			if update.docLines?
-				ProjectHistoryRedisManager.queueAddEntity project_id, 'doc', doc_id, user_id, update, (error, count) ->
+		handleDocUpdate = (projectUpdate, cb) ->
+			doc_id = projectUpdate.id
+			projectUpdate.version = "#{project_version}.#{project_subversion++}"
+			if projectUpdate.docLines?
+				ProjectHistoryRedisManager.queueAddEntity project_id, 'doc', doc_id, user_id, projectUpdate, (error, count) ->
 					project_ops_length = count
 					cb(error)
 			else
-				DocumentManager.renameDocWithLock project_id, doc_id, user_id, update, (error, count) ->
+				DocumentManager.renameDocWithLock project_id, doc_id, user_id, projectUpdate, (error, count) ->
 					project_ops_length = count
 					cb(error)
 
-		handleFileUpdate = (update, cb) ->
-			file_id = update.id
-			update.version = "#{project_version}.#{project_subversion++}"
-			if update.url?
-				ProjectHistoryRedisManager.queueAddEntity project_id, 'file', file_id, user_id, update, (error, count) ->
+		handleFileUpdate = (projectUpdate, cb) ->
+			file_id = projectUpdate.id
+			projectUpdate.version = "#{project_version}.#{project_subversion++}"
+			if projectUpdate.url?
+				ProjectHistoryRedisManager.queueAddEntity project_id, 'file', file_id, user_id, projectUpdate, (error, count) ->
 					project_ops_length = count
 					cb(error)
 			else
-				ProjectHistoryRedisManager.queueRenameEntity project_id, 'file', file_id, user_id, update, (error, count) ->
+				ProjectHistoryRedisManager.queueRenameEntity project_id, 'file', file_id, user_id, projectUpdate, (error, count) ->
 					project_ops_length = count
 					cb(error)
 
