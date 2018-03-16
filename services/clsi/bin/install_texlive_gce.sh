@@ -8,6 +8,7 @@ if [ -z "$ACCESS_TOKEN" ]; then
 fi
 docker login -u '_token' -p $ACCESS_TOKEN https://gcr.io
 docker pull --all-tags gcr.io/henry-terraform-admin/texlive-full #TODO NEED TO MAKE THIS AN ENV VAR
+cp /app/bin/synctex /app/bin/synctex-mount/synctex
 echo "Finished downloading texlive-full images"
 
 
