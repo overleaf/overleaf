@@ -108,8 +108,8 @@ module.exports = DockerRunner =
 	_getContainerOptions: (command, image, volumes, timeout, environment) ->
 		timeoutInSeconds = timeout / 1000
 		
-		# if Settings.path?.synctexBinHostPath?
-		# 	volumes[Settings.path.synctexBinHostPath] = "/opt/synctex:ro"
+		if Settings.path?.synctexBinHostPath?
+			volumes[Settings.path.synctexBinHostPath] = "/opt/synctex:ro"
 
 		dockerVolumes = {}
 		for hostVol, dockerVol of volumes
