@@ -4,8 +4,5 @@ apt-get install poppler-utils vim ghostscript --yes
 npm rebuild
 usermod -aG docker app
 
-mkdir -p /app/cache
-chown -R app:app /app/cache
+cp /app/bin/synctex /app/bin/synctex-mount/synctex
 
-mkdir -p /app/compiles
-chown -R app:app /app/compiles
