@@ -1,6 +1,9 @@
 chai = require('chai')
 chai.should()
 sinon = require("sinon")
+
+Errors = require "../../../../app/js/Features/Errors/Errors"
+
 modulePath = "../../../../app/js/Features/History/HistoryController"
 SandboxedModule = require('sandboxed-module')
 
@@ -14,8 +17,9 @@ describe "HistoryController", ->
 			"request" : @request = sinon.stub()
 			"settings-sharelatex": @settings = {}
 			"logger-sharelatex": @logger = {log: sinon.stub(), error: sinon.stub()}
-			"./HistoryManager": @HistoryManager = {}
 			"../Authentication/AuthenticationController": @AuthenticationController
+			"../Errors/Errors": Errors
+			"./HistoryManager": @HistoryManager = {}
 			"../Project/ProjectDetailsHandler": @ProjectDetailsHandler = {}
 			"../Project/ProjectEntityUpdateHandler": @ProjectEntityUpdateHandler = {}
 		@settings.apis =
@@ -202,22 +206,40 @@ describe "HistoryController", ->
 			@res.json.calledWith(@data_with_users).should.equal false
 
 	describe "resyncProjectHistory", ->
-		beforeEach ->
-			@project_id = 'mock-project-id'
-			@req = params: Project_id: @project_id
-			@res = sendStatus: sinon.stub()
-			@next = sinon.stub()
+		describe "for a project without project-history enabled", ->
+			beforeEach ->
+				@project_id = 'mock-project-id'
+				@req = params: Project_id: @project_id
+				@res = sendStatus: sinon.stub()
+				@next = sinon.stub()
 
-			@ProjectEntityUpdateHandler.resyncProjectHistory = sinon.stub().yields()
+				@error = new Errors.ProjectHistoryDisabledError()
+				@ProjectEntityUpdateHandler.resyncProjectHistory = sinon.stub().yields(@error)
 
-			@HistoryController.resyncProjectHistory @req, @res, @next
+				@HistoryController.resyncProjectHistory @req, @res, @next
 
-		it "resyncs the project", ->
-			@ProjectEntityUpdateHandler.resyncProjectHistory
-				.calledWith(@project_id)
-				.should.equal true
+			it "response with a 404", ->
+				@res.sendStatus
+					.calledWith(404)
+					.should.equal true
 
-		it "responds with a 204", ->
-			@res.sendStatus
-				.calledWith(204)
-				.should.equal true
+		describe "for a project with project-history enabled", ->
+			beforeEach ->
+				@project_id = 'mock-project-id'
+				@req = params: Project_id: @project_id
+				@res = sendStatus: sinon.stub()
+				@next = sinon.stub()
+
+				@ProjectEntityUpdateHandler.resyncProjectHistory = sinon.stub().yields()
+
+				@HistoryController.resyncProjectHistory @req, @res, @next
+
+			it "resyncs the project", ->
+				@ProjectEntityUpdateHandler.resyncProjectHistory
+					.calledWith(@project_id)
+					.should.equal true
+
+			it "responds with a 204", ->
+				@res.sendStatus
+					.calledWith(204)
+					.should.equal true

@@ -746,49 +746,62 @@ describe 'ProjectEntityUpdateHandler', ->
 				.should.equal true
 
 	describe "resyncProjectHistory", ->
-		beforeEach ->
-			@ProjectGetter.getProject = sinon.stub().yields(null, @project)
-			docs = [
-				doc: _id: doc_id
-				path: 'main.tex'
-			]
-			files = [
-				file: _id: file_id
-				path: 'universe.png'
-			]
-			@ProjectEntityHandler.getAllEntitiesFromProject = sinon.stub().yields(null, docs, files)
-			@FileStoreHandler._buildUrl = (project_id, file_id) ->
-				"www.filestore.test/#{project_id}/#{file_id}"
-			@DocumentUpdaterHandler.resyncProjectHistory = sinon.stub().yields()
+		describe "a project without project-history enabled", ->
+			beforeEach ->
+				@project.ovreleaf = {}
+				@ProjectGetter.getProject = sinon.stub().yields(null, @project)
 
-			@ProjectEntityUpdateHandler.resyncProjectHistory project_id, @callback
+				@ProjectEntityUpdateHandler.resyncProjectHistory project_id, @callback
 
-		it 'gets the project', ->
-			@ProjectGetter.getProject
-				.calledWith(project_id)
-				.should.equal true
+			it "should return an error", ->
+				error = new Errors.ProjectHistoryDisabledError("project history not enabled for #{project_id}")
+				@callback.calledWith(error).should.equal true
 
-		it 'gets the entities for the project', ->
-			@ProjectEntityHandler.getAllEntitiesFromProject
-				.calledWith(@project)
-				.should.equal true
+		describe "a project with project-history enabled", ->
+			beforeEach ->
+				@project.overleaf = history: id: 4
+				@ProjectGetter.getProject = sinon.stub().yields(null, @project)
+				docs = [
+					doc: _id: doc_id
+					path: 'main.tex'
+				]
+				files = [
+					file: _id: file_id
+					path: 'universe.png'
+				]
+				@ProjectEntityHandler.getAllEntitiesFromProject = sinon.stub().yields(null, docs, files)
+				@FileStoreHandler._buildUrl = (project_id, file_id) ->
+					"www.filestore.test/#{project_id}/#{file_id}"
+				@DocumentUpdaterHandler.resyncProjectHistory = sinon.stub().yields()
 
-		it 'tells the doc updater to sync the project', ->
-			docs = [
-				doc: doc_id
-				path: 'main.tex'
-			]
-			files = [
-				file: file_id
-				path: 'universe.png'
-				url: "www.filestore.test/#{project_id}/#{file_id}"
-			]
-			@DocumentUpdaterHandler.resyncProjectHistory
-				.calledWith(project_id, docs, files)
-				.should.equal true
+				@ProjectEntityUpdateHandler.resyncProjectHistory project_id, @callback
 
-		it 'calls the callback', ->
-			@callback.called.should.equal true
+			it 'gets the project', ->
+				@ProjectGetter.getProject
+					.calledWith(project_id)
+					.should.equal true
+
+			it 'gets the entities for the project', ->
+				@ProjectEntityHandler.getAllEntitiesFromProject
+					.calledWith(@project)
+					.should.equal true
+
+			it 'tells the doc updater to sync the project', ->
+				docs = [
+					doc: doc_id
+					path: 'main.tex'
+				]
+				files = [
+					file: file_id
+					path: 'universe.png'
+					url: "www.filestore.test/#{project_id}/#{file_id}"
+				]
+				@DocumentUpdaterHandler.resyncProjectHistory
+					.calledWith(project_id, docs, files)
+					.should.equal true
+
+			it 'calls the callback', ->
+				@callback.called.should.equal true
 
 	describe "_cleanUpEntity", ->
 		beforeEach ->

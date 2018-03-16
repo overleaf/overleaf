@@ -316,8 +316,13 @@ module.exports = ProjectEntityUpdateHandler = self =
 	# This doesn't directly update project structure but we need to take the lock
 	# to prevent anything else being queued before the resync update
 	resyncProjectHistory: wrapWithLock (project_id, callback) ->
-		ProjectGetter.getProject project_id, rootFolder: true, (error, project) ->
+		ProjectGetter.getProject project_id, rootFolder: true, overleaf: true, (error, project) ->
 			return callback(error) if error?
+
+			if !project.overleaf?.history?.id?
+				error = new Errors.ProjectHistoryDisabledError("project history not enabled for #{project_id}")
+				return callback(error)
+
 			ProjectEntityHandler.getAllEntitiesFromProject project, (error, docs, files) ->
 				return callback(error) if error?
 
