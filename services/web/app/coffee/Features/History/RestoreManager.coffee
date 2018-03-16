@@ -2,12 +2,23 @@ Settings = require 'settings-sharelatex'
 Path = require 'path'
 FileWriter = require '../../infrastructure/FileWriter'
 FileSystemImportManager = require '../Uploads/FileSystemImportManager'
+ProjectEntityHandler = require '../Project/ProjectEntityHandler'
 ProjectLocator = require '../Project/ProjectLocator'
+EditorController = require '../Editor/EditorController'
 Errors = require '../Errors/Errors'
 moment = require 'moment'
 
 module.exports = RestoreManager =
-	restoreFile: (user_id, project_id, version, pathname, callback = (error, entity) ->) ->
+	restoreDocFromDeletedDoc: (user_id, project_id, doc_id, name, callback = (error, doc, folder_id) ->) ->
+		# getDoc will return the deleted doc's lines, but we don't actually remove
+		# the deleted doc, just create a new one from its lines.
+		ProjectEntityHandler.getDoc project_id, doc_id, include_deleted: true, (error, lines) ->
+			return callback(error) if error?
+			addDocWithName = (name, callback) ->
+				EditorController.addDoc project_id, null, name, lines, 'restore', user_id, callback
+			RestoreManager._addEntityWithUniqueName addDocWithName, name, callback
+
+	restoreFileFromV2: (user_id, project_id, version, pathname, callback = (error, entity) ->) ->
 		RestoreManager._writeFileVersionToDisk project_id, version, pathname, (error, fsPath) ->
 			return callback(error) if error?
 			basename = Path.basename(pathname)
@@ -16,7 +27,9 @@ module.exports = RestoreManager =
 				dirname = ''
 			RestoreManager._findFolderOrRootFolderId project_id, dirname, (error, parent_folder_id) ->
 				return callback(error) if error?
-				RestoreManager._addEntityWithUniqueName user_id, project_id, parent_folder_id, basename, fsPath, callback
+				addEntityWithName = (name, callback) ->
+					FileSystemImportManager.addEntity user_id, project_id, parent_folder_id, name, fsPath, false, callback
+				RestoreManager._addEntityWithUniqueName addEntityWithName, basename, callback
 
 	_findFolderOrRootFolderId: (project_id, dirname, callback = (error, folder_id) ->) ->
 		# We're going to try to recover the file into the folder it was in previously,
@@ -30,8 +43,8 @@ module.exports = RestoreManager =
 			else
 				return callback(null, null)
 
-	_addEntityWithUniqueName: (user_id, project_id, parent_folder_id, basename, fsPath, callback = (error) ->) ->
-		FileSystemImportManager.addEntity user_id, project_id, parent_folder_id, basename, fsPath, false, (error, entity) ->
+	_addEntityWithUniqueName: (addEntityWithName, basename, callback = (error) ->) ->
+		addEntityWithName basename, (error, entity) ->
 			if error?
 				if error instanceof Errors.InvalidNameError
 					# likely a duplicate name, so try with a prefix
@@ -42,7 +55,7 @@ module.exports = RestoreManager =
 					basename = "#{basename} (Restored on #{date})"
 					if extension != ''
 						basename = "#{basename}#{extension}"
-					FileSystemImportManager.addEntity user_id, project_id, parent_folder_id, basename, fsPath, false, callback
+					addEntityWithName basename, callback
 				else
 					callback(error)
 			else

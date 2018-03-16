@@ -1,4 +1,4 @@
-.diff-panel.full-size(ng-if="history.isV2", ng-controller="HistoryDiffController")
+.diff-panel.full-size(ng-if="!history.isV2", ng-controller="HistoryDiffController")
 	.diff(
 		ng-if="!!history.diff && !history.diff.loading && !history.diff.deleted && !history.diff.error && !history.diff.binary"
 	)

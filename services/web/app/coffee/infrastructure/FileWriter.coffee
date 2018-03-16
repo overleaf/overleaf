@@ -10,18 +10,25 @@ module.exports = FileWriter =
 		callback = _.once(callback)
 		fsPath = "#{Settings.path.dumpFolder}/#{identifier}_#{uuid.v4()}"
 
-		writeStream = fs.createWriteStream(fsPath)
-		stream.pipe(writeStream)
+		stream.pause()
+		fs.mkdir Settings.path.dumpFolder, (error) ->
+			stream.resume()
+			if error? and error.code != 'EEXIST'
+				# Ignore error about already existing
+				return callback(error)
 
-		stream.on 'error', (err)->
-			logger.err {err, identifier, fsPath},	"[writeStreamToDisk] something went wrong with incoming stream"
-			callback(err)
-		writeStream.on 'error', (err)->
-			logger.err {err, identifier, fsPath},	"[writeStreamToDisk] something went wrong with writing to disk"
-			callback(err)
-		writeStream.on "finish", ->
-			logger.log {identifier, fsPath}, "[writeStreamToDisk] write stream finished"
-			callback null, fsPath
+			writeStream = fs.createWriteStream(fsPath)
+			stream.pipe(writeStream)
+
+			stream.on 'error', (err)->
+				logger.err {err, identifier, fsPath},	"[writeStreamToDisk] something went wrong with incoming stream"
+				callback(err)
+			writeStream.on 'error', (err)->
+				logger.err {err, identifier, fsPath},	"[writeStreamToDisk] something went wrong with writing to disk"
+				callback(err)
+			writeStream.on "finish", ->
+				logger.log {identifier, fsPath}, "[writeStreamToDisk] write stream finished"
+				callback null, fsPath
 
 	writeUrlToDisk: (identifier, url, callback = (error, fsPath) ->) ->
 		callback = _.once(callback)

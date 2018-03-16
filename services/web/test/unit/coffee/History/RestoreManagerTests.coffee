@@ -15,6 +15,8 @@ describe 'RestoreManager', ->
 			'../Uploads/FileSystemImportManager': @FileSystemImportManager = {}
 			'../Project/ProjectLocator': @ProjectLocator = {}
 			'../Errors/Errors': Errors
+			'../Project/ProjectEntityHandler': @ProjectEntityHandler = {}
+			'../Editor/EditorController': @EditorController = {}
 			'logger-sharelatex': @logger = {log: sinon.stub(), err: sinon.stub()}
 		@user_id = 'mock-user-id'
 		@project_id = 'mock-project-id'
@@ -25,16 +27,16 @@ describe 'RestoreManager', ->
 	afterEach ->
 		tk.reset()
 
-	describe 'restoreFile', ->
+	describe 'restoreFileFromV2', ->
 		beforeEach ->
 			@RestoreManager._writeFileVersionToDisk = sinon.stub().yields(null, @fsPath = "/tmp/path/on/disk")
 			@RestoreManager._findFolderOrRootFolderId = sinon.stub().yields(null, @folder_id = 'mock-folder-id')
-			@RestoreManager._addEntityWithUniqueName = sinon.stub().yields(null, @entity = 'mock-entity')
+			@FileSystemImportManager.addEntity = sinon.stub().yields(null, @entity = 'mock-entity')
 
 		describe "with a file not in a folder", ->
 			beforeEach ->
 				@pathname = 'foo.tex'
-				@RestoreManager.restoreFile @user_id, @project_id, @version, @pathname, @callback
+				@RestoreManager.restoreFileFromV2 @user_id, @project_id, @version, @pathname, @callback
 
 			it 'should write the file version to disk', ->
 				@RestoreManager._writeFileVersionToDisk
@@ -47,18 +49,17 @@ describe 'RestoreManager', ->
 					.should.equal true
 
 			it 'should add the entity', ->
-				@RestoreManager._addEntityWithUniqueName
-					.calledWith(@user_id, @project_id, @folder_id, 'foo.tex', @fsPath)
+				@FileSystemImportManager.addEntity
+					.calledWith(@user_id, @project_id, @folder_id, 'foo.tex', @fsPath, false)
 					.should.equal true
 
 			it 'should call the callback with the entity', ->
 				@callback.calledWith(null, @entity).should.equal true
 
-
 		describe "with a file in a folder", ->
 			beforeEach ->
 				@pathname = 'foo/bar.tex'
-				@RestoreManager.restoreFile @user_id, @project_id, @version, @pathname, @callback
+				@RestoreManager.restoreFileFromV2 @user_id, @project_id, @version, @pathname, @callback
 
 			it 'should find the folder', ->
 				@RestoreManager._findFolderOrRootFolderId
@@ -66,8 +67,8 @@ describe 'RestoreManager', ->
 					.should.equal true
 
 			it 'should add the entity by its basename', ->
-				@RestoreManager._addEntityWithUniqueName
-					.calledWith(@user_id, @project_id, @folder_id, 'bar.tex', @fsPath)
+				@FileSystemImportManager.addEntity
+					.calledWith(@user_id, @project_id, @folder_id, 'bar.tex', @fsPath, false)
 					.should.equal true
 
 	describe '_findFolderOrRootFolderId', ->
@@ -94,40 +95,32 @@ describe 'RestoreManager', ->
 
 	describe '_addEntityWithUniqueName', ->
 		beforeEach ->
-			@parent_folder_id = 'mock-folder-id'
-			@fsPath = '/tmp/file/on/disk'
+			@addEntityWithName = sinon.stub()
 			@name = 'foo.tex'
 
 		describe 'with a valid name', ->
 			beforeEach ->
-				@FileSystemImportManager.addEntity = sinon.stub().yields(null, @entity = 'mock-entity')
-				@RestoreManager._addEntityWithUniqueName @user_id, @project_id, @parent_folder_id, @name, @fsPath, @callback
+				@addEntityWithName.yields(null, @entity = 'mock-entity')
+				@RestoreManager._addEntityWithUniqueName @addEntityWithName, @name, @callback
 
 			it 'should add the entity', ->
-				@FileSystemImportManager.addEntity
-					.calledWith(@user_id, @project_id, @parent_folder_id, @name, @fsPath, false)
-					.should.equal true
+				@addEntityWithName.calledWith(@name).should.equal true
 
 			it 'should return the entity', ->
 				@callback.calledWith(null, @entity).should.equal true
 
 		describe "with an invalid name", ->
 			beforeEach ->
-				@FileSystemImportManager.addEntity = sinon.stub()
-				@FileSystemImportManager.addEntity.onFirstCall().yields(new Errors.InvalidNameError())
-				@FileSystemImportManager.addEntity.onSecondCall().yields(null, @entity = 'mock-entity')
-				@RestoreManager._addEntityWithUniqueName @user_id, @project_id, @parent_folder_id, @name, @fsPath, @callback
+				@addEntityWithName.onFirstCall().yields(new Errors.InvalidNameError())
+				@addEntityWithName.onSecondCall().yields(null, @entity = 'mock-entity')
+				@RestoreManager._addEntityWithUniqueName @addEntityWithName, @name, @callback
 
 			it 'should try to add the entity with its original name', ->
-				@FileSystemImportManager.addEntity
-					.calledWith(@user_id, @project_id, @parent_folder_id, 'foo.tex', @fsPath, false)
-					.should.equal true
+				@addEntityWithName.calledWith('foo.tex').should.equal true
 
 			it 'should try to add the entity with a unique name', ->
 				date = moment(new Date()).format('Do MMM YY H:mm:ss')
-				@FileSystemImportManager.addEntity
-					.calledWith(@user_id, @project_id, @parent_folder_id, "foo (Restored on #{date}).tex", @fsPath, false)
-					.should.equal true
+				@addEntityWithName.calledWith("foo (Restored on #{date}).tex").should.equal true
 
 			it 'should return the entity', ->
 				@callback.calledWith(null, @entity).should.equal true

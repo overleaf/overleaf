@@ -108,15 +108,6 @@ module.exports = ProjectEntityUpdateHandler = self =
 		logger.log project_id: project_id, "removing root doc"
 		Project.update {_id:project_id}, {$unset: {rootDoc_id: true}}, {}, callback
 
-	restoreDoc: (project_id, doc_id, name, callback = (error, doc, folder_id) ->) ->
-		if not SafePath.isCleanFilename name
-			return callback new Errors.InvalidNameError("invalid element name")
-		# getDoc will return the deleted doc's lines, but we don't actually remove
-		# the deleted doc, just create a new one from its lines.
-		ProjectEntityHandler.getDoc project_id, doc_id, include_deleted: true, (error, lines) ->
-			return callback(error) if error?
-			self.addDoc project_id, null, name, lines, callback
-
 	addDoc: wrapWithLock (project_id, folder_id, docName, docLines, userId, callback = (error, doc, folder_id) ->)=>
 		self.addDocWithoutUpdatingHistory.withoutLock project_id, folder_id, docName, docLines, userId, (error, doc, folder_id, path) ->
 			return callback(error) if error?

@@ -73,13 +73,28 @@ module.exports = HistoryController =
 			return next(error) if error?
 			res.sendStatus 204
 
-	restoreFile: (req, res, next) ->
+	restoreFileFromV2: (req, res, next) ->
 		{project_id} = req.params
 		{version, pathname} = req.body
 		user_id = AuthenticationController.getLoggedInUserId req
-		RestoreManager.restoreFile user_id, project_id, version, pathname, (error, entity) ->
+		logger.log {project_id, version, pathname}, "restoring file from v2"
+		RestoreManager.restoreFileFromV2 user_id, project_id, version, pathname, (error, entity) ->
 			return next(error) if error?
 			res.json {
 				type: entity.type,
 				id: entity._id
 			}
+
+	restoreDocFromDeletedDoc: (req, res, next) ->
+		{project_id, doc_id} = req.params
+		{name} = req.body
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		if !name?
+			return res.sendStatus 400 # Malformed request
+		logger.log {project_id, doc_id, user_id}, "restoring doc from v1 deleted doc"
+		RestoreManager.restoreDocFromDeletedDoc user_id, project_id, doc_id, name, (err, doc) =>
+			return next(error) if error?
+			res.json {
+				doc_id: doc._id
+			}
+
