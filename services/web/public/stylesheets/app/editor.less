@@ -14,7 +14,7 @@
 @import "./editor/review-panel.less";
 
 @ui-layout-toggler-def-height: 50px;
-@ui-resizer-extra-hit-area: 8px;
+@ui-resizer-extra-hit-area: 6px;
 
 @keyframes blink {
 	0% { 
@@ -312,8 +312,8 @@
 		transparent,
 		transparent (@ui-resizer-extra-hit-area - 1px),
 		@editor-resizer-bg-color (@ui-resizer-extra-hit-area - 1px),
-		@editor-resizer-bg-color (@ui-resizer-extra-hit-area + 1px),
-		transparent (@ui-resizer-extra-hit-area + 1px),
+		@editor-resizer-bg-color (@ui-resizer-extra-hit-area + 2px),
+		transparent (@ui-resizer-extra-hit-area + 2px),
 		transparent);
 
 	.ui-layout-toggler {
@@ -322,8 +322,8 @@
 			transparent,
 			transparent (@ui-resizer-extra-hit-area - 1px),
 			@editor-toggler-bg-color (@ui-resizer-extra-hit-area - 1px),
-			@editor-toggler-bg-color (@ui-resizer-extra-hit-area + 1px),
-			transparent (@ui-resizer-extra-hit-area + 1px),
+			@editor-toggler-bg-color (@ui-resizer-extra-hit-area + 2px),
+			transparent (@ui-resizer-extra-hit-area + 2px),
 			transparent);
 
 		&:hover {
@@ -331,8 +331,8 @@
 				transparent,
 				transparent (@ui-resizer-extra-hit-area - 2px),
 				@editor-toggler-hover-bg-color (@ui-resizer-extra-hit-area - 2px),
-				@editor-toggler-hover-bg-color (@ui-resizer-extra-hit-area + 2px),
-				transparent (@ui-resizer-extra-hit-area + 2px),
+				@editor-toggler-hover-bg-color (@ui-resizer-extra-hit-area + 3px),
+				transparent (@ui-resizer-extra-hit-area + 3px),
 				transparent);
 		}
 	}
