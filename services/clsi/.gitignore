@@ -13,5 +13,4 @@ cache
 .vagrant
 db.sqlite
 config/*
-bin/synctex
 npm-debug.log
