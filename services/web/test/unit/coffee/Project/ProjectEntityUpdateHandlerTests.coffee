@@ -746,6 +746,16 @@ describe 'ProjectEntityUpdateHandler', ->
 				.should.equal true
 
 	describe "resyncProjectHistory", ->
+		describe "a deleted project", ->
+			beforeEach ->
+				@ProjectGetter.getProject = sinon.stub().yields()
+
+				@ProjectEntityUpdateHandler.resyncProjectHistory project_id, @callback
+
+			it "should return an error", ->
+				error = new Errors.ProjectHistoryDisabledError("project history not enabled for #{project_id}")
+				@callback.calledWith(error).should.equal true
+
 		describe "a project without project-history enabled", ->
 			beforeEach ->
 				@project.ovreleaf = {}
