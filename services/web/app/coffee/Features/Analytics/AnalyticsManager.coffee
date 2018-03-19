@@ -5,6 +5,20 @@ request = require "requestretry"
 Errors = require '../Errors/Errors'
 
 
+makeFaultTolerantRequest = (userId, options, callback) ->
+	if userId+"" == settings.smokeTest?.userId+""
+		return callback()
+
+	options = Object.assign(options, {
+		delayStrategy: exponentialBackoffStrategy()
+		timeout: 1000
+	})
+
+	if settings.overleaf?
+		options.qs = Object.assign({}, options.qs, { fromV2: 1 })
+
+	makeRequest(options, callback)
+
 makeRequest = (opts, callback)->
 	if settings.apis?.analytics?.url?
 		urlPath = opts.url
@@ -49,40 +63,33 @@ module.exports =
 		makeRequest opts, callback
 
 	recordEvent: (user_id, event, segmentation = {}, callback = (error) ->) ->
-		if user_id+"" == settings.smokeTest?.userId+""
-			return callback()
 		opts =
 			body:
 				event:event
 				segmentation:segmentation
 			json:true
 			method:"POST"
-			timeout:1000
 			url: "/user/#{user_id}/event"
-			delayStrategy: exponentialBackoffStrategy()
 			maxAttempts: 7 # Give up after ~ 8min
-		if settings.overleaf?
-			opts.qs = {fromV2: 1}
-		makeRequest opts, callback
+
+		makeFaultTolerantRequest user_id, opts, callback
+
 
 	updateEditingSession: (userId, projectId, countryCode, callback = (error) ->) ->
-		if userId+"" == settings.smokeTest?.userId+""
-			return callback()
 		query =
 			userId: userId
 			projectId: projectId
+
 		if countryCode
 			query.countryCode = countryCode
+
 		opts =
 			method: "PUT"
-			timeout: 1000
 			url: "/editingSession"
 			qs: query
 			maxAttempts: 6 # Give up after ~ 4min
-			delayStrategy: exponentialBackoffStrategy()
-		if settings.overleaf?
-			opts.qs.fromV2 = 1
-		makeRequest opts, callback
+
+		makeFaultTolerantRequest userId, opts, callback
 
 
 	getLastOccurrence: (user_id, event, callback = (error) ->) ->
