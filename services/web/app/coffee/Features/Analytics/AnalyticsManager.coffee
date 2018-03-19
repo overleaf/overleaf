@@ -9,7 +9,10 @@ makeRequest = (opts, callback)->
 	if settings.apis?.analytics?.url?
 		urlPath = opts.url
 		opts.url = "#{settings.apis.analytics.url}#{urlPath}"
-		request(opts)
+		request opts, (err) ->
+			if err?
+				logger.err { err: err }, 'Request to analytics failed'
+
 		callback() # Do not wait for all the attempts
 	else
 		callback(new Errors.ServiceNotConfiguredError('Analytics service not configured'))
