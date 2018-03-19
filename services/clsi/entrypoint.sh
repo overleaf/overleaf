@@ -9,6 +9,7 @@ chown -R app:app /app/cache
 
 mkdir -p /app/compiles
 chown -R app:app /app/compiles
+chmod -R 777 /app/compiles #TODO why do I need this?
 
 ./bin/install_texlive_gce.sh
-exec "$@"
+exec runuser -u app "$@"
