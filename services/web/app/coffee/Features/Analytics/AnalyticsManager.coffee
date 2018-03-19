@@ -11,7 +11,7 @@ makeFaultTolerantRequest = (userId, options, callback) ->
 
 	options = Object.assign(options, {
 		delayStrategy: exponentialBackoffStrategy()
-		timeout: 1000
+		timeout: 30000
 	})
 
 	if settings.overleaf?
