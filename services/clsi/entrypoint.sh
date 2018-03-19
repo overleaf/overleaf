@@ -11,4 +11,4 @@ mkdir -p /app/compiles
 chown -R app:app /app/compiles
 
 ./bin/install_texlive_gce.sh
-exec runuser -u app "$@"
+exec "$@"
