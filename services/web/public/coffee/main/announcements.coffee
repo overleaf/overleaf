@@ -29,4 +29,3 @@ define [
 
 		$scope.showAll = -> 
 			$scope.ui.newItems = 0
-

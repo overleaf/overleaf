@@ -36,3 +36,10 @@ define [
 				.catch () ->
 					$scope.notification.inflight = false
 					$scope.notification.error = true
+
+	App.controller "OverleafNotificationController", ($scope, localStorage) ->
+		$scope.visible = !localStorage('overleaf_notification_hidden_at')
+
+		$scope.dismiss = () ->
+			$scope.visible = false
+			localStorage('overleaf_notification_hidden_at', Date.now())

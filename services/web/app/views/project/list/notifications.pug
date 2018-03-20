@@ -1,10 +1,20 @@
 if (user.awareOfV2 && !settings.overleaf)
-	.alert.alert-info.small
-		a.pull-right.btn.btn-info.btn-sm(href="/user/login_to_ol_v2" style="margin-left: 12px") Click here to try Overleaf v2
-		p
-			| ShareLaTeX is joining Overleaf and will become <em>Overleaf v2</em> in late 2018 (<a href="https://www.overleaf.com/help/342-overleaf-v2-faq">read more</a>).
-			<br/>
-			| We’re beta testing Overleaf v2 now and you can try it out with your ShareLaTeX account.
+	.userNotifications
+		ul.list-unstyled.notifications-list(ng-controller="OverleafNotificationController", ng-show="visible")
+			li.notification_entry
+				.row
+					.col-xs-12
+						.alert.alert-info
+							.notification_inner
+								.notification_body
+									a.btn.btn-info.btn-sm.pull-right(href="/user/login_to_ol_v2") Try Overleaf v2
+									| ShareLaTeX is joining Overleaf and will become <em>Overleaf v2</em> in late 2018 (<a href="https://www.overleaf.com/help/342-overleaf-v2-faq">read more</a>).
+									<br/>
+									| We’re beta testing Overleaf v2 now and you can try it out with your ShareLaTeX account.
+								.notification_close
+									button(ng-click="dismiss()").close.pull-right
+										span(aria-hidden="true") &times;
+										span.sr-only #{translate("close")}
 
 span(ng-controller="NotificationsController").userNotifications
 	ul.list-unstyled.notifications-list(
