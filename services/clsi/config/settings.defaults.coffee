@@ -25,7 +25,7 @@ module.exports =
 		clsi:
 			url: "http://#{process.env['CLSI_HOST'] or 'localhost'}:3013"
 			
-	smokeTest: false
+	smokeTest: process.env["SMOKE_TEST"] or false
 	project_cache_length_ms: 1000 * 60 * 60 * 24
 	parallelFileDownloads:1
 
