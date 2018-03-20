@@ -8,6 +8,9 @@ div.full-size(
 	initial-size-east="'50%'"
 	minimum-restore-size-east="300"
 	allow-overflow-on="'center'"
+	custom-toggler-pane="'east'"
+	custom-toggler-tooltip-open="'Click to open the PDF'"
+	custom-toggler-tooltip-close="'Click to close the PDF'"
 )
 	.ui-layout-center(
 		ng-controller="ReviewPanelController",
@@ -100,7 +103,6 @@ div.full-size(
 			ng-click="syncToCode()"
 		)
 			i.synctex-control-icon
-			
 div.full-size(
 	ng-if="ui.pdfLayout == 'flat'"
 	ng-show="ui.view == 'pdf'"
