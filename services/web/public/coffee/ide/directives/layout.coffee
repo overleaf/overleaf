@@ -2,11 +2,16 @@ define [
 	"base"
 	"libs/jquery-layout"
 ], (App) ->
-	App.directive "layout", ["$parse", "ide", ($parse, ide) ->
+	App.directive "layout", ["$parse", "$compile", "ide", ($parse, $compile, ide) ->
 		return {
 			compile: () ->
 				pre: (scope, element, attrs) ->
 					name = attrs.layout
+
+					customTogglerPane = scope.$eval(attrs.customTogglerPane)
+					customTogglerTooltipOpen = scope.$eval(attrs.customTogglerTooltipOpen)
+					customTogglerTooltipClose = scope.$eval(attrs.customTogglerTooltipClose)
+					hasCustomToggler = customTogglerPane? and customTogglerTooltipOpen? and customTogglerTooltipClose?
 
 					if attrs.spacingOpen?
 						spacingOpen = parseInt(attrs.spacingOpen, 10)
@@ -62,6 +67,21 @@ define [
 									right: state.east.size
 								})
 
+					repositionCustomToggler = () ->
+						if !customTogglerEl?
+							return
+						state = element.layout().readState()
+						if customTogglerPane == "east"
+							if state.east?
+								customTogglerEl.css({
+									right: if state.east.initClosed then 0 else state.east.size
+								})
+						else if customTogglerPane == "west"
+							if state.west?
+								customTogglerEl.css({
+									left: if state.west.initClosed then 0 else state.west.size
+								})
+
 					resetOpenStates = () ->
 						state = element.layout().readState()
 						if attrs.openEast? and state.east?
@@ -73,6 +93,8 @@ define [
 						state = element.layout().readState()
 						scope.$broadcast "layout:#{name}:resize", state
 						repositionControls()
+						if hasCustomToggler
+							repositionCustomToggler()
 						resetOpenStates()
 						
 					oldWidth = element.width()
@@ -94,6 +116,24 @@ define [
 					if attrs.resizeOn?
 						scope.$on attrs.resizeOn, () -> onExternalResize()
 
+					if hasCustomToggler
+						state = element.layout().readState()
+						customTogglerScope = scope.$new()
+						if state.east?.initClosed
+							customTogglerScope.customTogglerTooltip = customTogglerTooltipOpen
+						else 
+							customTogglerScope.customTogglerTooltip = customTogglerTooltipClose
+						customTogglerEl = $compile("
+							<a href 
+							   class=\"custom-toggler\"
+							   tooltip=\"{{ customTogglerTooltip }}\"
+							   tooltip-placement=\"#{ if customTogglerPane == "east" then "left" else "right" }\">
+						")(customTogglerScope)
+						element.append(customTogglerEl)
+					# if hasCustomToggler
+					# 	element.find("> .custom-toggler").on "click", () ->
+					# 		element.layout().toggle("east")
+					# 		repositionCustomToggler()
 					# Save state when exiting
 					$(window).unload () ->
 						ide.localStorage("layout.#{name}", element.layout().readState())
