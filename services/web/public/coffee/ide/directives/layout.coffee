@@ -28,6 +28,10 @@ define [
 						spacing_closed: spacingClosed
 						slidable: false
 						enableCursorHotkey: false
+						onopen: (pane) => 
+							onPaneOpen(pane)
+						onclose: (pane) => 
+							onPaneClose(pane)
 						onresize: () =>
 							onInternalResize()
 						maskIframesOnResize: scope.$eval(
@@ -71,17 +75,11 @@ define [
 						if !customTogglerEl?
 							return
 						state = element.layout().readState()
-						if customTogglerPane == "east"
-							if state.east?
-								customTogglerEl.css({
-									right: if state.east.initClosed then 0 else state.east.size
-								})
-						else if customTogglerPane == "west"
-							if state.west?
-								customTogglerEl.css({
-									left: if state.west.initClosed then 0 else state.west.size
-								})
-
+						positionAnchor = if customTogglerPane == "east" then "right" else "left"
+						paneState = state[customTogglerPane]
+						if paneState?
+							customTogglerEl.css(positionAnchor, if paneState.initClosed then 0 else paneState.size)
+	
 					resetOpenStates = () ->
 						state = element.layout().readState()
 						if attrs.openEast? and state.east?
@@ -119,21 +117,42 @@ define [
 					if hasCustomToggler
 						state = element.layout().readState()
 						customTogglerScope = scope.$new()
-						if state.east?.initClosed
-							customTogglerScope.customTogglerTooltip = customTogglerTooltipOpen
-						else 
-							customTogglerScope.customTogglerTooltip = customTogglerTooltipClose
+
+						customTogglerScope.isOpen = true
+
+						if state[customTogglerPane]?.initClosed == true
+							customTogglerScope.isOpen = false
+
+						console.log customTogglerScope.isOpen
+						customTogglerScope.tooltipMsgOpen = customTogglerTooltipOpen
+						customTogglerScope.tooltipMsgClose = customTogglerTooltipClose
+							
+						customTogglerScope.tooltipPlacement = if customTogglerPane == "east" then "left" else "right"
+						customTogglerScope.handleClick = () ->
+							element.layout().toggle(customTogglerPane)
+							repositionCustomToggler()
 						customTogglerEl = $compile("
 							<a href 
-							   class=\"custom-toggler\"
-							   tooltip=\"{{ customTogglerTooltip }}\"
-							   tooltip-placement=\"#{ if customTogglerPane == "east" then "left" else "right" }\">
+							   class=\"custom-toggler #{ 'custom-toggler-' + customTogglerPane }\"
+							   ng-class=\"isOpen ? 'custom-toggler-open' : 'custom-toggler-closed'\"
+							   tooltip=\"{{ isOpen ? tooltipMsgClose : tooltipMsgOpen }}\"
+							   tooltip-placement=\"{{ tooltipPlacement }}\"
+							   ng-click=\"handleClick()\">
 						")(customTogglerScope)
 						element.append(customTogglerEl)
-					# if hasCustomToggler
-					# 	element.find("> .custom-toggler").on "click", () ->
-					# 		element.layout().toggle("east")
-					# 		repositionCustomToggler()
+
+					onPaneOpen = (pane) ->
+						if !hasCustomToggler and pane != customTogglerPane
+							return
+						customTogglerEl.scope().$applyAsync () -> 
+							customTogglerEl.scope().isOpen = true
+
+					onPaneClose = (pane) ->
+						if !hasCustomToggler and pane != customTogglerPane
+							return
+						customTogglerEl.scope().$applyAsync () -> 
+							customTogglerEl.scope().isOpen = false
+
 					# Save state when exiting
 					$(window).unload () ->
 						ide.localStorage("layout.#{name}", element.layout().readState())

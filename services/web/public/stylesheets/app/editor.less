@@ -316,26 +316,26 @@
 		transparent (@ui-resizer-extra-hit-area + 2px),
 		transparent);
 
-	.ui-layout-toggler {
-		padding: 0 @ui-resizer-extra-hit-area !important;
-		background-image: linear-gradient(90deg, 
-			transparent,
-			transparent (@ui-resizer-extra-hit-area - 1px),
-			@editor-toggler-bg-color (@ui-resizer-extra-hit-area - 1px),
-			@editor-toggler-bg-color (@ui-resizer-extra-hit-area + 2px),
-			transparent (@ui-resizer-extra-hit-area + 2px),
-			transparent);
+	// .ui-layout-toggler {
+	// 	padding: 0 @ui-resizer-extra-hit-area !important;
+	// 	background-image: linear-gradient(90deg, 
+	// 		transparent,
+	// 		transparent (@ui-resizer-extra-hit-area - 1px),
+	// 		@editor-toggler-bg-color (@ui-resizer-extra-hit-area - 1px),
+	// 		@editor-toggler-bg-color (@ui-resizer-extra-hit-area + 2px),
+	// 		transparent (@ui-resizer-extra-hit-area + 2px),
+	// 		transparent);
 
-		&:hover {
-			background-image: linear-gradient(90deg, 
-				transparent,
-				transparent (@ui-resizer-extra-hit-area - 2px),
-				@editor-toggler-hover-bg-color (@ui-resizer-extra-hit-area - 2px),
-				@editor-toggler-hover-bg-color (@ui-resizer-extra-hit-area + 3px),
-				transparent (@ui-resizer-extra-hit-area + 3px),
-				transparent);
-		}
-	}
+	// 	&:hover {
+	// 		background-image: linear-gradient(90deg, 
+	// 			transparent,
+	// 			transparent (@ui-resizer-extra-hit-area - 2px),
+	// 			@editor-toggler-hover-bg-color (@ui-resizer-extra-hit-area - 2px),
+	// 			@editor-toggler-hover-bg-color (@ui-resizer-extra-hit-area + 3px),
+	// 			transparent (@ui-resizer-extra-hit-area + 3px),
+	// 			transparent);
+	// 	}
+	// }
 }
 
 .ui-layout-resizer-west.ui-layout-resizer-open, .ui-layout-resizer-east.ui-layout-resizer-closed {
@@ -353,54 +353,69 @@
 	}
 }
 
-.ui-layout-toggler.ui-layout-toggler-closed when (@is-overleaf = true) {
-	background-color: @editor-resizer-bg-color;
-	background-image: none;
-	line-height: @ui-layout-toggler-def-height;
+.ui-layout-toggler when (@is-overleaf = true) {
+	display: none !important;
+}
+
+.custom-toggler {
+	position: absolute;
+	width: 8px;	
+	height: 50px;
+	margin-top: -25px;
+	top: 50%;
+	background: red;
+	z-index: 6;
+	margin-right: -3px;
+}
+
+// .ui-layout-toggler.ui-layout-toggler-closed when (@is-overleaf = true) {
+// 	background-color: @editor-resizer-bg-color;
+// 	background-image: none;
+// 	line-height: @ui-layout-toggler-def-height;
 	
-	&::before {
-		content: "\22EE"; // Vertical ellipsis
-		display: block;
-		color: #FFF;
-		font-weight: 700;
-		font-size: @font-size-h2;
-		width: @ui-resizer-extra-hit-area / 2;
-	}
-	&:hover {
-		background-color: @editor-toggler-hover-bg-color;
-		background-image: none;
-	}
-	.ui-layout-resizer-west > & {
-		border-radius: 0 @border-radius-base @border-radius-base 0;
-		&::before {
-			margin-left: -2px;
-		}
-	}
-	.ui-layout-resizer-east > & {
-		border-radius: @border-radius-base 0 0 @border-radius-base;
-		&::before {
-			margin-left: (-1 - @ui-resizer-extra-hit-area);
-		}
-	}
-}
+// 	&::before {
+// 		content: "\22EE"; // Vertical ellipsis
+// 		display: block;
+// 		color: #FFF;
+// 		font-weight: 700;
+// 		font-size: @font-size-h2;
+// 		width: @ui-resizer-extra-hit-area / 2;
+// 	}
+// 	&:hover {
+// 		background-color: @editor-toggler-hover-bg-color;
+// 		background-image: none;
+// 	}
+// 	.ui-layout-resizer-west > & {
+// 		border-radius: 0 @border-radius-base @border-radius-base 0;
+// 		&::before {
+// 			margin-left: -2px;
+// 		}
+// 	}
+// 	.ui-layout-resizer-east > & {
+// 		border-radius: @border-radius-base 0 0 @border-radius-base;
+// 		&::before {
+// 			margin-left: (-1 - @ui-resizer-extra-hit-area);
+// 		}
+// 	}
+// }
 
-.ui-layout-toggler-east when (@is-overleaf = true) {
-	&.ui-layout-toggler-open {
-		cursor: e-resize !important
-	}
-	&.ui-layout-toggler-closed {
-		cursor: w-resize !important
-	}
-}
+// .ui-layout-toggler-east when (@is-overleaf = true) {
+// 	&.ui-layout-toggler-open {
+// 		cursor: e-resize !important
+// 	}
+// 	&.ui-layout-toggler-closed {
+// 		cursor: w-resize !important
+// 	}
+// }
 
-.ui-layout-toggler-west when (@is-overleaf = true) {
-	&.ui-layout-toggler-open {
-		cursor: w-resize !important
-	}
-	&.ui-layout-toggler-closed {
-		cursor: e-resize !important
-	}
-}
+// .ui-layout-toggler-west when (@is-overleaf = true) {
+// 	&.ui-layout-toggler-open {
+// 		cursor: w-resize !important
+// 	}
+// 	&.ui-layout-toggler-closed {
+// 		cursor: e-resize !important
+// 	}
+// }
 
 .ui-layout-resizer-dragging {
 	background-color: @editor-resizer-bg-color-dragging;
@@ -624,4 +639,3 @@
 	height: auto;
 	border-bottom: 1px solid @modal-header-border-color;
 }
-
