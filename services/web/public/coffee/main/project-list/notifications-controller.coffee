@@ -37,9 +37,20 @@ define [
 					$scope.notification.inflight = false
 					$scope.notification.error = true
 
-	App.controller "OverleafNotificationController", ($scope, localStorage) ->
-		$scope.visible = !localStorage('overleaf_notification_hidden_at')
+	App.controller "OverleafV2NotificationController", ($scope, localStorage) ->
+		$scope.visible = !localStorage('overleaf_v2_notification_hidden_at')
 
 		$scope.dismiss = () ->
 			$scope.visible = false
-			localStorage('overleaf_notification_hidden_at', Date.now())
+			localStorage('overleaf_v2_notification_hidden_at', Date.now())
+
+	App.controller "OverleafV1NotificationController", ($scope, localStorage) ->
+		$scope.visible = !localStorage('overleaf_v1_notification_hidden_at')
+
+		$scope.toggle = () ->
+			console.log('toggle!', $scope.visible)
+			$scope.visible = !$scope.visible
+			if !$scope.visible
+				localStorage('overleaf_v1_notification_hidden_at', Date.now())
+			else
+				localStorage('overleaf_v1_notification_hidden_at', null)

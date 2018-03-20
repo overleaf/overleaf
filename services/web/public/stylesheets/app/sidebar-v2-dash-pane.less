@@ -16,10 +16,7 @@
 	flex-grow: 0;
 	flex-shrink: 0;
 	text-align: center;
-	display: flex;
 	background-color: @v2-dash-pane-bg;
-	flex-direction: column;
-	justify-content: center;
 	color: white;
 	font-size: 13px;
 	padding: @line-height-computed / 2;
@@ -33,3 +30,12 @@
 	.project-list-sidebar-v2-pane a:hover {
 		text-decoration: none;
 	}
+
+		.project-list-sidebar-v2-pane-toggle {
+			color: white;
+			padding: 0;
+			line-height: 1;
+			&:hover, &:active {
+				color: white;
+			}
+		}
