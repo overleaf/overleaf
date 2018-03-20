@@ -1,20 +1,28 @@
-@v2-dash-pane-link-height: 130px;
+.project-list-sidebar-wrapper {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	margin: 0 -15px;
+}
 
 .project-list-sidebar {
-	height: calc(~"100% -" @v2-dash-pane-link-height);
+	flex-grow: 1;
+	height: 100%;
+	padding-left: @line-height-computed / 2;
+	padding-right: @line-height-computed / 2;
 }
 
 .project-list-sidebar-v2-pane {
-	position: absolute;
-	bottom: 0;
-	height: @v2-dash-pane-link-height;
-	background-color: @v2-dash-pane-bg;
+	flex-grow: 0;
+	flex-shrink: 0;
 	text-align: center;
 	display: flex;
+	background-color: @v2-dash-pane-bg;
 	flex-direction: column;
 	justify-content: center;
 	color: white;
 	font-size: 13px;
+	padding: @line-height-computed / 2;
 }
 
 	.project-list-sidebar-v2-pane a {
