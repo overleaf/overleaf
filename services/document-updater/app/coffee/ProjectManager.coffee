@@ -105,39 +105,44 @@ module.exports = ProjectManager =
 	clearProjectState: (project_id, callback = (error) ->) ->
 		RedisManager.clearProjectState project_id, callback
 
-	updateProjectWithLocks: (project_id, user_id, docUpdates, fileUpdates, _callback = (error) ->) ->
+	updateProjectWithLocks: (project_id, user_id, docUpdates, fileUpdates, version, _callback = (error) ->) ->
 		timer = new Metrics.Timer("projectManager.updateProject")
 		callback = (args...) ->
 			timer.done()
 			_callback(args...)
 
+		project_version = version 
+		project_subversion = 0 		# project versions can have multiple operations
+
 		project_ops_length = 0
 
-		handleDocUpdate = (update, cb) ->
-			doc_id = update.id
-			if update.docLines?
-				ProjectHistoryRedisManager.queueAddEntity project_id, 'doc', doc_id, user_id, update, (error, count) ->
+		handleDocUpdate = (projectUpdate, cb) ->
+			doc_id = projectUpdate.id
+			projectUpdate.version = "#{project_version}.#{project_subversion++}"
+			if projectUpdate.docLines?
+				ProjectHistoryRedisManager.queueAddEntity project_id, 'doc', doc_id, user_id, projectUpdate, (error, count) ->
 					project_ops_length = count
 					cb(error)
 			else
-				DocumentManager.renameDocWithLock project_id, doc_id, user_id, update, (error, count) ->
+				DocumentManager.renameDocWithLock project_id, doc_id, user_id, projectUpdate, (error, count) ->
 					project_ops_length = count
 					cb(error)
 
-		handleFileUpdate = (update, cb) ->
-			file_id = update.id
-			if update.url?
-				ProjectHistoryRedisManager.queueAddEntity project_id, 'file', file_id, user_id, update, (error, count) ->
+		handleFileUpdate = (projectUpdate, cb) ->
+			file_id = projectUpdate.id
+			projectUpdate.version = "#{project_version}.#{project_subversion++}"
+			if projectUpdate.url?
+				ProjectHistoryRedisManager.queueAddEntity project_id, 'file', file_id, user_id, projectUpdate, (error, count) ->
 					project_ops_length = count
 					cb(error)
 			else
-				ProjectHistoryRedisManager.queueRenameEntity project_id, 'file', file_id, user_id, update, (error, count) ->
+				ProjectHistoryRedisManager.queueRenameEntity project_id, 'file', file_id, user_id, projectUpdate, (error, count) ->
 					project_ops_length = count
 					cb(error)
 
-		async.each docUpdates, handleDocUpdate, (error) ->
+		async.eachSeries docUpdates, handleDocUpdate, (error) ->
 			return callback(error) if error?
-			async.each fileUpdates, handleFileUpdate, (error) ->
+			async.eachSeries fileUpdates, handleFileUpdate, (error) ->
 				return callback(error) if error?
 				if HistoryManager.shouldFlushHistoryOps(project_ops_length, docUpdates.length + fileUpdates.length, HistoryManager.FLUSH_PROJECT_EVERY_N_OPS)
 					HistoryManager.flushProjectChangesAsync project_id
