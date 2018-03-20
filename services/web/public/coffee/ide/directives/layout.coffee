@@ -9,9 +9,9 @@ define [
 					name = attrs.layout
 
 					customTogglerPane = scope.$eval(attrs.customTogglerPane)
-					customTogglerTooltipOpen = scope.$eval(attrs.customTogglerTooltipOpen)
-					customTogglerTooltipClose = scope.$eval(attrs.customTogglerTooltipClose)
-					hasCustomToggler = customTogglerPane? and customTogglerTooltipOpen? and customTogglerTooltipClose?
+					customTogglerMsgWhenOpen = scope.$eval(attrs.customTogglerMsgWhenOpen)
+					customTogglerMsgWhenClosed = scope.$eval(attrs.customTogglerMsgWhenClosed)
+					hasCustomToggler = customTogglerPane? and customTogglerMsgWhenOpen? and customTogglerMsgWhenClosed?
 
 					if attrs.spacingOpen?
 						spacingOpen = parseInt(attrs.spacingOpen, 10)
@@ -124,8 +124,8 @@ define [
 							customTogglerScope.isOpen = false
 
 						console.log customTogglerScope.isOpen
-						customTogglerScope.tooltipMsgOpen = customTogglerTooltipOpen
-						customTogglerScope.tooltipMsgClose = customTogglerTooltipClose
+						customTogglerScope.tooltipMsgWhenOpen = customTogglerMsgWhenOpen
+						customTogglerScope.tooltipMsgWhenClosed = customTogglerMsgWhenClosed
 							
 						customTogglerScope.tooltipPlacement = if customTogglerPane == "east" then "left" else "right"
 						customTogglerScope.handleClick = () ->
@@ -135,7 +135,7 @@ define [
 							<a href 
 							   class=\"custom-toggler #{ 'custom-toggler-' + customTogglerPane }\"
 							   ng-class=\"isOpen ? 'custom-toggler-open' : 'custom-toggler-closed'\"
-							   tooltip=\"{{ isOpen ? tooltipMsgClose : tooltipMsgOpen }}\"
+							   tooltip=\"{{ isOpen ? tooltipMsgWhenOpen : tooltipMsgWhenClosed }}\"
 							   tooltip-placement=\"{{ tooltipPlacement }}\"
 							   ng-click=\"handleClick()\">
 						")(customTogglerScope)
