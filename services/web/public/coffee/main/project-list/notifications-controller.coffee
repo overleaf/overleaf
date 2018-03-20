@@ -48,7 +48,6 @@ define [
 		$scope.visible = !localStorage('overleaf_v1_notification_hidden_at')
 
 		$scope.toggle = () ->
-			console.log('toggle!', $scope.visible)
 			$scope.visible = !$scope.visible
 			if !$scope.visible
 				localStorage('overleaf_v1_notification_hidden_at', Date.now())
