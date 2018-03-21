@@ -1,9 +1,7 @@
 define [
 	"ide/editor/Document"
 	"ide/editor/directives/aceEditor"
-	"ide/editor/directives/cmEditor"
 	"ide/editor/controllers/SavingNotificationController"
-	"ide/editor/controllers/EditorToolbarController"
 ], (Document) ->
 	class EditorManager
 		constructor: (@ide, @$scope) ->
