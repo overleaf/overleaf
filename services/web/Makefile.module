@@ -1,7 +1,7 @@
 MODULE_NAME := $(notdir $(shell pwd))
 MODULE_DIR := modules/$(MODULE_NAME)
 COFFEE := ../../node_modules/.bin/coffee
-APP_COFFEE_FILES := $(shell find app/coffee -name '*.coffee') \
+APP_COFFEE_FILES := $(shell [ -e app/coffee ] && find app/coffee -name '*.coffee') \
 	$(shell [ -e test/unit/coffee ] && find test/unit/coffee -name '*.coffee') \
 	$(shell [ -e test/acceptance/coffee ] && find test/acceptance/coffee -name '*.coffee')
 APP_JS_FILES := $(subst coffee,js,$(APP_COFFEE_FILES))
