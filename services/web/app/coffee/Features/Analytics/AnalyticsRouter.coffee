@@ -20,3 +20,7 @@ module.exports =
 		publicApiRouter.use '/analytics/recentV1TemplateIdsActivity',
 			AuthenticationController.httpAuth,
 			AnalyticsProxy.call('/recentV1TemplateIdsActivity')
+
+		publicApiRouter.use '/analytics/uniExternalCollaboration',
+			AuthenticationController.httpAuth,
+			AnalyticsProxy.call('/uniExternalCollaboration')
