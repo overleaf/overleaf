@@ -11,7 +11,8 @@
   "watch": [
     "app/coffee/",
     "app.coffee",
-    "modules/*/app/coffee/"
+    "modules/*/app/coffee/",
+    "config/"
   ],
   "ext": "coffee"
 }
