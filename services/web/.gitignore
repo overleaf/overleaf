@@ -49,6 +49,8 @@ TpdsWorker.js
 BackgroundJobsWorker.js
 UserAndProjectPopulator.coffee
 
+public/es/modules
+
 public/js/*.js
 public/js/*.map
 public/js/libs/sharejs.js

@@ -6,7 +6,7 @@ define ['ide/editor/directives/cmEditor'], () ->
       @richTextInit = sinon.stub()
       @richTextOpenDoc = sinon.stub()
       window.Frontend = {
-        richText: {
+        'rich-text': {
           init: @richTextInit,
           openDoc: @richTextOpenDoc
         }
