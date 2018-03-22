@@ -106,7 +106,7 @@ window.sharejs.extendDoc 'attach_ace', (editor, keepEditorContents, maxDocLength
   # the work of editorDoc.insert and editorDoc.remove manually. These methods are
   # copied from ace.js doc#insert and #remove, and then inject the remote:true
   # flag into the delta.
-  doc.on 'insert', (pos, text) ->
+  onInsert = (pos, text) ->
     if (editorDoc.getLength() <= 1)
         editorDoc.$detectNewLine(text)
 
@@ -129,7 +129,7 @@ window.sharejs.extendDoc 'attach_ace', (editor, keepEditorContents, maxDocLength
     suppress = false
     check()
 
-  doc.on 'delete', (pos, text) ->
+  onDelete = (pos, text) ->
     range = Range.fromPoints offsetToPos(pos), offsetToPos(pos + text.length)
     start = editorDoc.clippedPos(range.start.row, range.start.column)
     end = editorDoc.clippedPos(range.end.row, range.end.column)
@@ -144,8 +144,12 @@ window.sharejs.extendDoc 'attach_ace', (editor, keepEditorContents, maxDocLength
     suppress = false
     check()
 
+  doc.on 'insert', onInsert
+  doc.on 'delete', onDelete
+
   doc.detach_ace = ->
-    # TODO: can we remove the insert and delete event callbacks?
+    doc.removeListener 'insert', onInsert
+    doc.removeListener 'delete', onDelete
     editorDoc.removeListener 'change', editorListener
     delete doc.detach_ace
 
