@@ -159,11 +159,7 @@ block requirejs
 		window.pdfCMapsPath = "#{pdfCMapsPath}"
 		window.uiConfig = JSON.parse('!{JSON.stringify(uiConfig).replace(/\//g, "\\/")}');
 
-	if hasFeature('rich-text')
-		script(
-			src=buildWebpackPath('es/rich-text.js', {hashedPath:settings.useMinifiedJs})
-			type="text/javascript"
-		)
+	!= moduleIncludes("editor:script", locals)
 
 	script(
 		data-main=buildJsPath("ide.js", {hashedPath:false}),
