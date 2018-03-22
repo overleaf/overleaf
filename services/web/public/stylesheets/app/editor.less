@@ -315,27 +315,6 @@
 		@editor-resizer-bg-color (@ui-resizer-extra-hit-area + 2px),
 		transparent (@ui-resizer-extra-hit-area + 2px),
 		transparent);
-
-	// .ui-layout-toggler {
-	// 	padding: 0 @ui-resizer-extra-hit-area !important;
-	// 	background-image: linear-gradient(90deg, 
-	// 		transparent,
-	// 		transparent (@ui-resizer-extra-hit-area - 1px),
-	// 		@editor-toggler-bg-color (@ui-resizer-extra-hit-area - 1px),
-	// 		@editor-toggler-bg-color (@ui-resizer-extra-hit-area + 2px),
-	// 		transparent (@ui-resizer-extra-hit-area + 2px),
-	// 		transparent);
-
-	// 	&:hover {
-	// 		background-image: linear-gradient(90deg, 
-	// 			transparent,
-	// 			transparent (@ui-resizer-extra-hit-area - 2px),
-	// 			@editor-toggler-hover-bg-color (@ui-resizer-extra-hit-area - 2px),
-	// 			@editor-toggler-hover-bg-color (@ui-resizer-extra-hit-area + 3px),
-	// 			transparent (@ui-resizer-extra-hit-area + 3px),
-	// 			transparent);
-	// 	}
-	// }
 }
 
 .ui-layout-resizer-west.ui-layout-resizer-open, .ui-layout-resizer-east.ui-layout-resizer-closed {
@@ -357,16 +336,55 @@
 	display: none !important;
 }
 
-.custom-toggler {
+.custom-toggler when (@is-overleaf = true) {
 	position: absolute;
-	width: 8px;	
+	width: 9px;	
 	height: 50px;
 	margin-top: -25px;
 	top: 50%;
-	background: red;
 	z-index: 6;
-	margin-right: -3px;
+	background-color: @editor-toggler-bg-color;
+	border-radius: 4px;
+
+	// Increase hit area
+	&::before {
+		content: '';
+		display: block;
+		position: absolute;
+		top: 0;
+		right: -3px;
+		bottom: 0;
+		left: -3px;
+	}
+
+	&:hover {
+		background-color: @editor-toggler-hover-bg-color;
+	}
 }
+	.custom-toggler-east {
+		margin-right: -4px;
+	}
+	.custom-toggler-west {
+		margin-left: -4px;
+	}
+
+	.custom-toggler-closed {
+		width: 12px;
+		&.custom-toggler-east {
+			margin-right: -6px;
+		}
+		.custom-toggler-west {
+			margin-left: -6px;
+		}
+		&::before {
+			content: "\22EE"; // Vertical ellipsis
+			color: #FFF;
+			font-weight: 700;
+			font-size: @font-size-h2;
+			width: @ui-resizer-extra-hit-area / 2;
+		}
+	}
+
 
 // .ui-layout-toggler.ui-layout-toggler-closed when (@is-overleaf = true) {
 // 	background-color: @editor-resizer-bg-color;
