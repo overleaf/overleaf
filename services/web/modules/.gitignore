@@ -1,6 +1,0 @@
-# Ignore all modules except for a whitelist
-*
-!dropbox
-!github-sync
-!public-registration
-!.gitignore
