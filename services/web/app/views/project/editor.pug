@@ -62,9 +62,9 @@ block content
 					ng-hide="state.loading",
 					resize-on="layout:chat:resize",
 					minimum-restore-size-west="130"
-					custom-toggler-pane="'west'"
-					custom-toggler-msg-when-open="'" + translate("tooltip_hide_filetree") + "'"
-					custom-toggler-msg-when-closed="'" + translate("tooltip_show_filetree") + "'"
+					custom-toggler-pane=hasFeature('custom-togglers') ? "'west'" : "false"
+					custom-toggler-msg-when-open=hasFeature('custom-togglers') ? "'" + translate("tooltip_hide_filetree") + "'" : "false"
+					custom-toggler-msg-when-closed=hasFeature('custom-togglers') ? "'" + translate("tooltip_show_filetree") + "'" : "false"
 				)
 					.ui-layout-west
 						include ./editor/file-tree
