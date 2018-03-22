@@ -295,14 +295,33 @@ describe 'ProjectEntityUpdateHandler', ->
 		beforeEach ->
 			@path = "/path/to/file"
 
-			@newFile = _id: file_id
-			@ProjectEntityUpdateHandler.addFileWithoutUpdatingHistory =
-				withoutLock: sinon.stub().yields(null, @newFile, folder_id, @path, @fileUrl)
-			@ProjectEntityUpdateHandler.addFile project_id, folder_id, @docName, @fileSystemPath, @linkedFileData, userId, @callback
+			@newFile = {_id: file_id, rev: 0, name: @fileName}
+			@TpdsUpdateSender.addFile = sinon.stub().yields()
+			@ProjectEntityMongoUpdateHandler.addFile = sinon.stub().yields(null, {path: fileSystem: @path}, @project)
+			@ProjectEntityUpdateHandler.addFile project_id, folder_id, @fileName, @fileSystemPath, @linkedFileData, userId, @callback
 
-		it "creates the doc without history", () ->
-			@ProjectEntityUpdateHandler.addFileWithoutUpdatingHistory.withoutLock
-				.calledWith(project_id, folder_id, @docName, @fileSystemPath, @linkedFileData, userId)
+		it "updates the file in the filestore", () ->
+			@FileStoreHandler.uploadFileFromDisk
+				.calledWith(project_id, file_id, @fileSystemPath)
+				.should.equal true
+
+		it "updates the file in mongo", () ->
+			fileMatcher = sinon.match (file) =>
+				file.name == @fileName
+
+			@ProjectEntityMongoUpdateHandler.addFile
+				.calledWithMatch(project_id, folder_id, fileMatcher)
+				.should.equal true
+
+		it "notifies the tpds", () ->
+			@TpdsUpdateSender.addFile
+				.calledWith({
+					project_id: project_id
+					project_name: @project.name
+					file_id: file_id
+					rev: 0
+					path: @path
+				})
 				.should.equal true
 
 		it "sends the change in project structure to the doc updater", () ->

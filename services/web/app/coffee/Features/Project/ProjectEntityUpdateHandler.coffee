@@ -24,12 +24,23 @@ wrapWithLock = (methodWithoutLock) ->
 	# This lock is used to make sure that the project structure updates are made
 	# sequentially. In particular the updates must be made in mongo and sent to
 	# the doc-updater in the same order.
-	methodWithLock = (project_id, args..., callback) ->
-		LockManager.runWithLock LOCK_NAMESPACE, project_id,
-			(cb) -> methodWithoutLock project_id, args..., cb
-			callback
-	methodWithLock.withoutLock = methodWithoutLock
-	methodWithLock
+	if typeof methodWithoutLock is 'function'
+		methodWithLock = (project_id, args..., callback) ->
+			LockManager.runWithLock LOCK_NAMESPACE, project_id,
+				(cb) -> methodWithoutLock project_id, args..., cb
+				callback
+		methodWithLock.withoutLock = methodWithoutLock
+		methodWithLock
+	else
+		# handle case with separate setup and locked stages		
+		wrapWithSetup = methodWithoutLock.beforeLock  # a function to set things up before the lock
+		mainTask = methodWithoutLock.withLock # function to execute inside the lock
+		methodWithLock = wrapWithSetup (project_id, args..., callback) ->
+			LockManager.runWithLock(LOCK_NAMESPACE, project_id, (cb) -> 
+				mainTask(project_id, args..., cb)
+			callback)
+		methodWithLock.withoutLock = wrapWithSetup mainTask
+		methodWithLock
 
 module.exports = ProjectEntityUpdateHandler = self =
 	# this doesn't need any locking because it's only called by ProjectDuplicator
@@ -129,21 +140,43 @@ module.exports = ProjectEntityUpdateHandler = self =
 				return callback(error) if error?
 				callback null, doc, folder_id
 
-	addFile: wrapWithLock (project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback = (error, fileRef, folder_id) ->)->
-		self.addFileWithoutUpdatingHistory.withoutLock project_id, folder_id, fileName, fsPath, linkedFileData, userId, (error, fileRef, folder_id, path, fileStoreUrl) ->
-			return callback(error) if error?
-			newFiles = [
-				file: fileRef
-				path: path
-				url: fileStoreUrl
-			]
-			DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newFiles}, (error) ->
-				return callback(error) if error?
-				callback null, fileRef, folder_id
+	addFile: wrapWithLock 
+		beforeLock: (next) ->
+			(project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback = (error, fileRef, folder_id) ->)->
+				if not SafePath.isCleanFilename fileName
+					return callback new Errors.InvalidNameError("invalid element name")
+				fileRef = new File(
+					name: fileName
+					linkedFileData: linkedFileData
+				)
+				FileStoreHandler.uploadFileFromDisk project_id, fileRef._id, fsPath, (err, fileStoreUrl)->
+					if err?
+						logger.err err:err, project_id: project_id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error uploading image to s3"
+						return callback(err)
+					next(project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback)
+		withLock: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback = (error, fileRef, folder_id) ->)->
+			ProjectEntityMongoUpdateHandler.addFile project_id, folder_id, fileRef, (err, result, project) ->
+				if err?
+					logger.err err:err, project_id: project_id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error adding file with project"
+					return callback(err)
+				TpdsUpdateSender.addFile {project_id:project_id, file_id:fileRef._id, path:result?.path?.fileSystem, project_name:project.name, rev:fileRef.rev}, (err) ->
+					return callback(err) if err?
+					newFiles = [
+						file: fileRef
+						path: result?.path?.fileSystem
+						url: fileStoreUrl
+					]
+					DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newFiles}, (error) ->
+						return callback(error) if error?
+						callback(null, fileRef, folder_id, result?.path?.fileSystem, fileStoreUrl) 
 
-	replaceFile: wrapWithLock (project_id, file_id, fsPath, linkedFileData, userId, callback)->
-		FileStoreHandler.uploadFileFromDisk project_id, file_id, fsPath, (err, fileStoreUrl)->
-			return callback(err) if err?
+	replaceFile: wrapWithLock
+		beforeLock: (next) ->
+			(project_id, file_id, fsPath, linkedFileData, userId, callback)->
+				FileStoreHandler.uploadFileFromDisk project_id, file_id, fsPath, (err, fileStoreUrl)->
+					return callback(err) if err?
+					next project_id, file_id, fsPath, linkedFileData, userId, fileStoreUrl, callback
+		withLock: (project_id, file_id, fsPath, linkedFileData, userId, fileStoreUrl, callback)->
 			ProjectEntityMongoUpdateHandler.replaceFile project_id, file_id, linkedFileData, (err, fileRef, project, path) ->
 				return callback(err) if err?
 				newFiles = [
@@ -180,22 +213,26 @@ module.exports = ProjectEntityUpdateHandler = self =
 					return callback(err) if err?
 					callback(null, doc, folder_id, result?.path?.fileSystem)
 
-	addFileWithoutUpdatingHistory: wrapWithLock (project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback = (error, fileRef, folder_id, path, fileStoreUrl) ->)->
-		# This method should never be called directly, except when importing a project
-		# from Overleaf. It skips sending updates to the project history, which will break
-		# the history unless you are making sure it is updated in some other way.
+	addFileWithoutUpdatingHistory: wrapWithLock 
+		beforeLock: (next) ->
+			(project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback = (error, fileRef, folder_id, path, fileStoreUrl) ->)->
+				# This method should never be called directly, except when importing a project
+				# from Overleaf. It skips sending updates to the project history, which will break
+				# the history unless you are making sure it is updated in some other way.
 
-		if not SafePath.isCleanFilename fileName
-			return callback new Errors.InvalidNameError("invalid element name")
+				if not SafePath.isCleanFilename fileName
+					return callback new Errors.InvalidNameError("invalid element name")
 
-		fileRef = new File(
-			name: fileName
-			linkedFileData: linkedFileData
-		)
-		FileStoreHandler.uploadFileFromDisk project_id, fileRef._id, fsPath, (err, fileStoreUrl)->
-			if err?
-				logger.err err:err, project_id: project_id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error uploading image to s3"
-				return callback(err)
+				fileRef = new File(
+					name: fileName
+					linkedFileData: linkedFileData
+				)
+				FileStoreHandler.uploadFileFromDisk project_id, fileRef._id, fsPath, (err, fileStoreUrl)->
+					if err?
+						logger.err err:err, project_id: project_id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error uploading image to s3"
+						return callback(err)
+					next(project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback)
+		withLock: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback = (error, fileRef, folder_id, path, fileStoreUrl) ->)->
 			ProjectEntityMongoUpdateHandler.addFile project_id, folder_id, fileRef, (err, result, project) ->
 				if err?
 					logger.err err:err, project_id: project_id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error adding file with project"
