@@ -123,7 +123,6 @@ define [
 						if state[customTogglerPane]?.initClosed == true
 							customTogglerScope.isOpen = false
 
-						console.log customTogglerScope.isOpen
 						customTogglerScope.tooltipMsgWhenOpen = customTogglerMsgWhenOpen
 						customTogglerScope.tooltipMsgWhenClosed = customTogglerMsgWhenClosed
 							
