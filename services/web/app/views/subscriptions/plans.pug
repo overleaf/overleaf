@@ -167,7 +167,7 @@ block content
 													br
 													a.btn.btn-info(
 														ng-href="/user/subscription/new?planCode=student{{ plansVariant == 'default' ? planQueryString : '_'+plansVariant }}&currency={{currencyCode}}",
-														ng-click="signUpNowClicked('student')"
+														ng-click="signUpNowClicked('student-monthly')"
 													) #{translate("start_free_trial")}
 
 									.col-md-4
@@ -190,7 +190,7 @@ block content
 													br
 													a.btn.btn-info(
 														ng-href="/user/subscription/new?planCode=student-annual{{ plansVariant == 'default' ? '' : '_'+plansVariant }}&currency={{currencyCode}}",
-														ng-click="signUpNowClicked('student')"
+														ng-click="signUpNowClicked('student-annual')"
 													) #{translate("buy_now")}
 
 

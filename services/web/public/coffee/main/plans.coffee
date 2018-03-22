@@ -369,9 +369,10 @@ define [
 
 		$scope.switchToAnnual = ->
 			$scope.ui.view = "annual"
-			event_tracking.send 'subscription-funnel', 'plans-page', 'student-prices'
+			event_tracking.send 'subscription-funnel', 'plans-page', 'annual-prices'
 
 		$scope.openGroupPlanModal = () ->
 			$modal.open {
 				templateUrl: "groupPlanModalTemplate"
 			}
+			event_tracking.send 'subscription-funnel', 'plans-page', 'group-inquiry-potential'
