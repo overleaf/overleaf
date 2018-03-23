@@ -107,7 +107,7 @@
 			height: 0;
 			background: @editor-loading-logo-background-url no-repeat bottom / 100%;
 
-    		&::after {
+			&::after {
 				content: '';
 				position: absolute;
 				height: inherit;
@@ -116,7 +116,7 @@
 				left: 0;
 				background: @editor-loading-logo-foreground-url no-repeat bottom / 100%;
 				transition: height .5s;
-    		}
+			}
 		}
 		.loading-screen-label {
 			margin: 0;
@@ -310,11 +310,34 @@
 	box-sizing: content-box;
 	background-image: linear-gradient(90deg, 
 		transparent,
-		transparent (@ui-resizer-extra-hit-area - 1px),
-		@editor-resizer-bg-color (@ui-resizer-extra-hit-area - 1px),
-		@editor-resizer-bg-color (@ui-resizer-extra-hit-area + 2px),
-		transparent (@ui-resizer-extra-hit-area + 2px),
+		transparent @ui-resizer-extra-hit-area - 3px,
+		@editor-resizer-bg-color @ui-resizer-extra-hit-area - 3px,
+		@editor-resizer-bg-color @ui-resizer-extra-hit-area + 4px,
+		transparent @ui-resizer-extra-hit-area + 4px,
 		transparent);
+
+	&.ui-layout-resizer-closed {
+		background-image: linear-gradient(90deg, 
+			@editor-resizer-bg-color,
+			@editor-resizer-bg-color);
+	}
+
+	&::before,
+	&::after {
+		content: '\2847';
+		display: block;
+		position: absolute;
+		text-align: center;
+		left: 1px;
+		-webkit-font-smoothing: antialiased;
+		width: 100%;
+		font-size: 24px;
+		top: 25%;
+		color: @ol-blue-gray-2;
+	}
+	&::after {
+		top: 75%;
+	}
 }
 
 .ui-layout-resizer-west.ui-layout-resizer-open, .ui-layout-resizer-east.ui-layout-resizer-closed {
@@ -340,16 +363,17 @@
 	position: absolute;
 	display: flex;
 	align-items: center;
-	width: 9px;	
+	justify-content: center;
+	width: 7px;	
 	height: 50px;
 	margin-top: -25px;
 	top: 50%;
 	z-index: 6;
 	background-color: @editor-toggler-bg-color;
-	border-radius: 4px;
-
+	
 	&:hover,
 	&:focus {
+		outline: none;
 		text-decoration: none;
 	}
 	// Increase hit area
@@ -363,38 +387,48 @@
 		left: -3px;
 	}
 
+	&::after {
+    	font-family: FontAwesome;
+    	-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+    	font-size: 75%;
+    	font-weight: bold;
+		color: #FFF;
+		user-select: none;
+		pointer-events: none;
+	}
+
 	&:hover {
 		background-color: @editor-toggler-hover-bg-color;
 	}
 }
 	.custom-toggler-east {
-		margin-right: -4px;
+		margin-right: -3px;
+		&::after {
+			content: '\f105';
+		}
+
 	}
 	.custom-toggler-west {
-		margin-left: -4px;
+		margin-left: -3px;
+		&::after {
+			content: '\f104';
+		}
+
 	}
 
 	.custom-toggler-closed {
-		width: 12px;
 		&.custom-toggler-east {
-			margin-right: -6px;
+			margin-right: 0;
 			&::after {
-				margin-left: -2px;
+				content: '\f104';
 			}
 		}
 		&.custom-toggler-west {
-			margin-left: -6px;
+			margin-left: 0;
 			&::after {
-				margin-left: 3px;
+				content: '\f105';
 			}
-		}
-		&::after {
-			content: "\22EE"; // Vertical ellipsis
-			color: #FFF;
-			font-weight: 700;
-			font-size: @font-size-h2;
-			user-select: none;
-			pointer-events: none;
 		}
 	}
 
