@@ -9,3 +9,5 @@ cd /tmp/ghostscript-9.15 && ./configure && make && make install
 
 npm rebuild
 chown -R node:node /app/uploads
+
+echo gs --version
