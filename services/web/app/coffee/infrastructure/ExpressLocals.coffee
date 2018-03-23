@@ -150,6 +150,8 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 		res.locals.buildWebpackPath = (jsFile, opts = {}) ->
 			if Settings.webpack? and !Settings.useMinifiedJs
 				path = Path.join(jsPath, jsFile)
+				if opts.removeExtension == true
+					path = path.slice(0,-3)
 				return "#{Settings.webpack.url}/public#{path}"
 			else
 				return res.locals.buildJsPath(jsFile, opts)
