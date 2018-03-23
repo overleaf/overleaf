@@ -13,6 +13,7 @@ RUN npm run compile:all
 FROM node:8.9.1
 
 COPY --from=0 /app /app
+RUN chown app uploads
 # All app and node_modules will be owned by root.
 # The app will run as the 'app' user, and so not have write permissions
 # on any files it doesn't need.
