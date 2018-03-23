@@ -19,6 +19,6 @@ WORKDIR /app
 # on any files it doesn't need.
 RUN ./install_deps.sh
 
-# USER node
+USER node
 
 CMD ["node","app.js"]
