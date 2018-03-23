@@ -17,17 +17,17 @@ makeFaultTolerantRequest = (userId, options, callback) ->
 	if settings.overleaf?
 		options.qs = Object.assign({}, options.qs, { fromV2: 1 })
 
-	makeRequest(options, callback)
+	makeRequest options, (err) ->
+		if err?
+			logger.err { err: err }, 'Request to analytics failed'
+
+	callback() # Do not wait for all the attempts
 
 makeRequest = (opts, callback)->
 	if settings.apis?.analytics?.url?
 		urlPath = opts.url
 		opts.url = "#{settings.apis.analytics.url}#{urlPath}"
-		request opts, (err) ->
-			if err?
-				logger.err { err: err }, 'Request to analytics failed'
-
-		callback() # Do not wait for all the attempts
+		request opts, callback
 	else
 		callback(new Errors.ServiceNotConfiguredError('Analytics service not configured'))
 
