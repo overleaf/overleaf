@@ -4,7 +4,7 @@ settings =
 	internal:
 		filestore:
 			port: 3009
-			host: "localhost"
+			host: process.env['LISTEN_ADDRESS'] or "localhost"
 
 	filestore:
 		# Which backend persistor to use.

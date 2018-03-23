@@ -6,10 +6,8 @@ COPY package.json /app/
 
 RUN npm install --quiet
 
-COPY config /app/config
-COPY test /app/test
-COPY app /app/app
-COPY app.coffee /app
+
+COPY . /app
 RUN npm run compile:all
 
 FROM node:8.9.1
