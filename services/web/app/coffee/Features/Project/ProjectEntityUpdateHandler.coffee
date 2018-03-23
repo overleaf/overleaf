@@ -261,6 +261,11 @@ module.exports = ProjectEntityUpdateHandler = self =
 					return callback(err) if err?
 					callback null, doc, !existingDoc?
 
+	# FIXME: this method needs to be changed, currently it needs a lock around an upload to S3 because
+	# there is no way to know in advance if the file is a replace or an insert (at least you have to 
+	# take the lock to find that out and do any operation in that lock).  In the new scheme any upsert
+	# should always create the new file (outside the lock) in S3 first and then make the changes to the 
+	# project in a lock, marking the old file as deleted if it exists.
 	upsertFile: wrapWithLock (project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback = (err, file, isNewFile)->)->
 		ProjectLocator.findElement project_id: project_id, element_id: folder_id, type: "folder", (error, folder) ->
 			return callback(error) if error?
