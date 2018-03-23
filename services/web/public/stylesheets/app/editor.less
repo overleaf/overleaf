@@ -14,7 +14,7 @@
 @import "./editor/review-panel.less";
 
 @ui-layout-toggler-def-height: 50px;
-@ui-resizer-extra-hit-area: 6px;
+@ui-resizer-size: 7px;
 
 @keyframes blink {
 	0% { 
@@ -302,24 +302,11 @@
 }
 
 .ui-layout-resizer when (@is-overleaf = true) {
-	margin-left: -(@ui-resizer-extra-hit-area) !important;
-	margin-right: -(@ui-resizer-extra-hit-area - 1px) !important;
-	padding-left: @ui-resizer-extra-hit-area !important;
-	padding-right: @ui-resizer-extra-hit-area !important;
 	z-index: 5 !important;
-	box-sizing: content-box;
-	background-image: linear-gradient(90deg, 
-		transparent,
-		transparent @ui-resizer-extra-hit-area - 3px,
-		@editor-resizer-bg-color @ui-resizer-extra-hit-area - 3px,
-		@editor-resizer-bg-color @ui-resizer-extra-hit-area + 4px,
-		transparent @ui-resizer-extra-hit-area + 4px,
-		transparent);
-
+	width: @ui-resizer-size !important;
+	background-color: @editor-resizer-bg-color;
 	&.ui-layout-resizer-closed {
-		background-image: linear-gradient(90deg, 
-			@editor-resizer-bg-color,
-			@editor-resizer-bg-color);
+		&::before,
 		&::after {
 			content: none;
 		}
@@ -331,7 +318,7 @@
 		display: block;
 		position: absolute;
 		text-align: center;
-		left: 1px;
+		left: -2px;
 		-webkit-font-smoothing: antialiased;
 		width: 100%;
 		font-size: 24px;
@@ -367,7 +354,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 7px;	
+	width: @ui-resizer-size !important;;	
 	height: 50px;
 	margin-top: -25px;
 	top: 50%;
@@ -405,34 +392,18 @@
 		background-color: @editor-toggler-hover-bg-color;
 	}
 }
-	.custom-toggler-east {
-		margin-right: -3px;
-		&::after {
-			content: '\f105';
-		}
-
+	.custom-toggler-east::after {
+		content: '\f105';
 	}
-	.custom-toggler-west {
-		margin-left: -3px;
-		&::after {
-			content: '\f104';
-		}
-
+	.custom-toggler-west::after {
+		content: '\f104';
 	}
 
-	.custom-toggler-closed {
-		&.custom-toggler-east {
-			margin-right: 0;
-			&::after {
-				content: '\f104';
-			}
-		}
-		&.custom-toggler-west {
-			margin-left: 0;
-			&::after {
-				content: '\f105';
-			}
-		}
+	.custom-toggler-closed.custom-toggler-east::after {
+		content: '\f104';
+	}
+	.custom-toggler-closed.custom-toggler-west::after {
+		content: '\f105';
 	}
 
 .ui-layout-resizer-dragging {
