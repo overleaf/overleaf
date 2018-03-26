@@ -32,7 +32,8 @@ module.exports = function (config) {
     preprocessors: {
       // Run ES test files through webpack (which will then include source
       // files in bundle)
-      'test/unit_frontend/es/**/*.js': ['webpack']
+      'test/unit_frontend/es/**/*.js': ['webpack'],
+      'modules/**/test/unit_frontend/es/**/*.js': ['webpack']
     },
     frameworks: ['requirejs', 'mocha', 'chai-sinon'],
     // Configure webpack in the tests
