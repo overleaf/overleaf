@@ -48,7 +48,7 @@ compile: $(APP_JS_FILES) $(IDE_JS_FILES) $(MAIN_JS_FILES) $(IDE_TEST_JS_FILES) i
 	@echo > /dev/null
 
 compile_full:
-	$(COFFEE) -o app/js -c app/coffee
+	if [ -e app/coffee ]; then $(COFFEE) -o app/js -c app/coffee; fi
 	if [ -e test/unit/coffee ]; then $(COFFEE) -o test/unit/js -c test/unit/coffee; fi
 	if [ -e test/acceptance/coffee ]; then $(COFFEE) -o test/acceptance/js -c test/acceptance/coffee; fi
 	if [ -e public/coffee/ide/ ]; then $(COFFEE) -o ../../public/js/ide/$(MODULE_NAME) -c public/coffee/ide/; fi
