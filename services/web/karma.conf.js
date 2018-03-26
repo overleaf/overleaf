@@ -25,13 +25,15 @@ module.exports = function (config) {
       { pattern: 'public/js/**/*.js', included: false },
       { pattern: 'test/unit_frontend/js/**/*.js', included: false },
       // Include ES test files
-      'test/unit_frontend/es/**/*.js'
+      'test/unit_frontend/es/**/*.js',
+      'modules/**/test/unit_frontend/es/**/*.js'
     ],
     middleware: ['fake-img'],
     preprocessors: {
       // Run ES test files through webpack (which will then include source
       // files in bundle)
-      'test/unit_frontend/es/**/*.js': ['webpack']
+      'test/unit_frontend/es/**/*.js': ['webpack'],
+      'modules/**/test/unit_frontend/es/**/*.js': ['webpack']
     },
     frameworks: ['requirejs', 'mocha', 'chai-sinon'],
     // Configure webpack in the tests

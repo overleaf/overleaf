@@ -133,6 +133,7 @@ block requirejs
 				"fineuploader": "libs/#{lib('fineuploader')}",
 				"ide": "#{buildJsPath('ide.js', {hashedPath:settings.useMinifiedJs, removeExtension:true})}",
 				"libraries": "#{buildJsPath('libraries.js', {hashedPath:settings.useMinifiedJs, removeExtension:true})}",
+				!{moduleIncludes("editor:script", locals)}
 			},
 			"waitSeconds": 0,
 			"shim": {
@@ -158,12 +159,6 @@ block requirejs
 		window.aceWorkerPath = "#{aceWorkerPath}";
 		window.pdfCMapsPath = "#{pdfCMapsPath}"
 		window.uiConfig = JSON.parse('!{JSON.stringify(uiConfig).replace(/\//g, "\\/")}');
-
-	if hasFeature('rich-text')
-		script(
-			src=buildWebpackPath('es/richText.js', {hashedPath:settings.useMinifiedJs})
-			type="text/javascript"
-		)
 
 	script(
 		data-main=buildJsPath("ide.js", {hashedPath:false}),
