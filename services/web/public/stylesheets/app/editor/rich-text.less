@@ -1,0 +1,222 @@
+@rt-font-family: 'Source Sans Pro', 'Helvetica', 'Arial', sans-serif;
+// @rt-font-family-serif: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+
+.rich-text {
+  font-family: @rt-font-family;
+  font-size: 1.15em;
+}
+
+.rich-text pre, .rich-text .CodeMirror-linewidget {
+  font-family: @rt-font-family;
+}
+
+// TODO: Prefix? not wl- ?
+
+/****************************************************************************/
+
+.preamble h1 {
+  text-align: center;
+  font-size: 2em;
+  color: @text-color;
+}
+
+.preamble ul.authors {
+  margin-left: 0;
+  padding-left: 0;
+  list-style: none;
+  text-align: center;
+}
+
+.preamble ul.authors li {
+  padding-bottom: 5px;
+}
+
+/****************************************************************************/
+
+.wl-indent-0 {
+  padding-left: 2.5em !important;
+}
+
+.wl-indent-1 {
+  padding-left: 3.5em !important;
+}
+
+.wl-indent-2 {
+  padding-left: 4.5em !important;
+}
+
+.wl-indent-3 {
+  padding-left: 5.5em !important;
+}
+
+.wl-indent-4 {
+  padding-left: 6.5em !important;
+}
+
+.wl-indent-env-0 {
+  padding-left: 4px !important;
+}
+
+.wl-indent-env-1 {
+  padding-left: 1.5em !important;
+}
+
+.wl-indent-env-2 {
+  padding-left: 2.5em !important;
+}
+
+.wl-indent-env-3 {
+  padding-left: 3.5em !important;
+}
+
+.wl-indent-env-4 {
+  padding-left: 4.5em !important;
+}
+
+.wl-enumerate-item-open {
+  text-align: right;
+  width: 1.5em;
+  display: inline-block;
+  padding-right: 0.2em;
+}
+
+.wl-item-open {
+  text-align: right;
+  width: 1.5em;
+  display: inline-block;
+  padding-right: 0.2em;
+}
+
+.wl-input {
+  font-style: oblique;
+}
+
+/****************************************************************************/
+
+.wl-abstract-open, .wl-abstract-close {
+  border-top: 1px solid #999;
+  font-size: large;
+  font-weight: bold;
+  width: 100%;
+}
+
+.wl-figure {
+  max-height: 120px;
+  width: auto;
+  margin: 0 auto;
+}
+
+.wl-figure-wrap {
+  padding: 10px 0;
+  background-color: #f5f5f5;
+  box-shadow: 2px 2px 2px #DFDFDF;
+  width: 96%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.wl-figure-caption {
+  padding: 3px 0 4px;
+  font-size: small;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/****************************************************************************/
+
+.wl-chapter, .wl-chapter-open, .wl-chapter-close {
+  font-size: 2.2em;
+  font-weight: bold;
+}
+
+.wl-chapter-open, .wl-chapter-close {
+  color: #999;
+}
+
+/****************************************************************************/
+
+.wl-section, .wl-section-open, .wl-section-close {
+  font-size: 1.8em;
+  font-weight: bold;
+}
+
+.wl-section-open, .wl-section-close {
+  color: #999;
+}
+
+/****************************************************************************/
+.wl-subsection, .wl-subsection-open, .wl-subsection-close {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+.wl-subsection-open, .wl-subsection-close {
+  color: #999;
+}
+
+/****************************************************************************/
+.wl-subsubsection, .wl-subsubsection-open, .wl-subsubsection-close {
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+.wl-subsubsection-open, .wl-subsubsection-close {
+  color: #999;
+}
+
+/****************************************************************************/
+.wl-textbf {
+  font-weight: bold;
+}
+
+.wl-textbf-open {
+  font-weight: bold;
+  color: #999;
+}
+
+.wl-textbf-close {
+  font-weight: bold;
+  color: #999;
+}
+
+.wl-label-bracket {
+  font-weight: bold;
+  color: #999;
+}
+
+.wl-label-open,
+.wl-input-link {
+  .wl-icon {
+    padding-left: 5px;
+    padding-right: 2px;
+    vertical-align: middle;
+    // @include wl-icon-size(inherit);
+  }
+}
+
+.wl-img-default {
+  width: 0.9em ;
+  padding: 0 1px 1px;
+}
+
+.wl-label-close {
+  background-color: #f7f7f9;
+  border: 1px solid #e1e1e8;
+  border-radius: 4px;
+  font-size: small;
+}
+
+/****************************************************************************/
+.wl-textit {
+  font-style: italic;
+}
+
+.wl-textit-open {
+  font-style: italic;
+  color: #999;
+}
+
+.wl-textit-close {
+  font-style: italic;
+  color: #999;
+}

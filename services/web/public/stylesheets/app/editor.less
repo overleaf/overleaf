@@ -12,6 +12,9 @@
 @import "./editor/online-users.less";
 @import "./editor/hotkeys.less";
 @import "./editor/review-panel.less";
+& when (@show-rich-text) {
+	@import "./editor/rich-text.less";
+}
 
 @ui-layout-toggler-def-height: 50px;
 @ui-resizer-size: 7px;
