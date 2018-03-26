@@ -141,17 +141,17 @@ module.exports = ProjectEntityUpdateHandler = self =
 				callback null, doc, folder_id
 
 	uploadFile: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback = (error, fileRef, fileStoreUrl) ->)->
-			if not SafePath.isCleanFilename fileName
-				return callback new Errors.InvalidNameError("invalid element name")
-			fileRef = new File(
-				name: fileName
-				linkedFileData: linkedFileData
-			)
-			FileStoreHandler.uploadFileFromDisk project_id, fileRef._id, fsPath, (err, fileStoreUrl)->
-				if err?
-					logger.err err:err, project_id: project_id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error uploading image to s3"
-					return callback(err)
-				callback(null, fileRef, fileStoreUrl)
+		if not SafePath.isCleanFilename fileName
+			return callback new Errors.InvalidNameError("invalid element name")
+		fileRef = new File(
+			name: fileName
+			linkedFileData: linkedFileData
+		)
+		FileStoreHandler.uploadFileFromDisk project_id, fileRef._id, fsPath, (err, fileStoreUrl)->
+			if err?
+				logger.err err:err, project_id: project_id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error uploading image to s3"
+				return callback(err)
+			callback(null, fileRef, fileStoreUrl)
 
 	_addFileAndSendToTpds: (project_id, folder_id, fileName, fileRef, callback = (error) ->)->
 		ProjectEntityMongoUpdateHandler.addFile project_id, folder_id, fileRef, (err, result, project) ->
@@ -234,8 +234,8 @@ module.exports = ProjectEntityUpdateHandler = self =
 					next(project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback)
 		withLock: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback = (error, fileRef, folder_id, path, fileStoreUrl) ->)->
 			ProjectEntityUpdateHandler._addFileAndSendToTpds project_id, folder_id, fileName, fileRef, (err, result, project) ->
-					return callback(err) if err?
-					callback(null, fileRef, folder_id, result?.path?.fileSystem, fileStoreUrl)
+				return callback(err) if err?
+				callback(null, fileRef, folder_id, result?.path?.fileSystem, fileStoreUrl)
 
 	upsertDoc: wrapWithLock (project_id, folder_id, docName, docLines, source, userId, callback = (err, doc, folder_id, isNewDoc)->)->
 		ProjectLocator.findElement project_id: project_id, element_id: folder_id, type: "folder", (error, folder) ->
