@@ -140,19 +140,24 @@ module.exports = ProjectEntityUpdateHandler = self =
 				return callback(error) if error?
 				callback null, doc, folder_id
 
+	uploadFile: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback = (error, fileRef, fileStoreUrl) ->)->
+			if not SafePath.isCleanFilename fileName
+				return callback new Errors.InvalidNameError("invalid element name")
+			fileRef = new File(
+				name: fileName
+				linkedFileData: linkedFileData
+			)
+			FileStoreHandler.uploadFileFromDisk project_id, fileRef._id, fsPath, (err, fileStoreUrl)->
+				if err?
+					logger.err err:err, project_id: project_id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error uploading image to s3"
+					return callback(err)
+				callback(null, fileRef, fileStoreUrl)
+
 	addFile: wrapWithLock 
 		beforeLock: (next) ->
-			(project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback = (error, fileRef, folder_id) ->)->
-				if not SafePath.isCleanFilename fileName
-					return callback new Errors.InvalidNameError("invalid element name")
-				fileRef = new File(
-					name: fileName
-					linkedFileData: linkedFileData
-				)
-				FileStoreHandler.uploadFileFromDisk project_id, fileRef._id, fsPath, (err, fileStoreUrl)->
-					if err?
-						logger.err err:err, project_id: project_id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error uploading image to s3"
-						return callback(err)
+			(project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback) ->
+				ProjectEntityUpdateHandler.uploadFile project_id, folder_id, fileName, fsPath, linkedFileData, userId, (error, fileRef, fileStoreUrl) ->
+					return callback(error) if error?
 					next(project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback)
 		withLock: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback = (error, fileRef, folder_id) ->)->
 			ProjectEntityMongoUpdateHandler.addFile project_id, folder_id, fileRef, (err, result, project) ->
@@ -213,24 +218,14 @@ module.exports = ProjectEntityUpdateHandler = self =
 					return callback(err) if err?
 					callback(null, doc, folder_id, result?.path?.fileSystem)
 
-	addFileWithoutUpdatingHistory: wrapWithLock 
+	addFileWithoutUpdatingHistory: wrapWithLock
+	# This method should never be called directly, except when importing a project
+	# from Overleaf. It skips sending updates to the project history, which will break
+	# the history unless you are making sure it is updated in some other way.
 		beforeLock: (next) ->
-			(project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback = (error, fileRef, folder_id, path, fileStoreUrl) ->)->
-				# This method should never be called directly, except when importing a project
-				# from Overleaf. It skips sending updates to the project history, which will break
-				# the history unless you are making sure it is updated in some other way.
-
-				if not SafePath.isCleanFilename fileName
-					return callback new Errors.InvalidNameError("invalid element name")
-
-				fileRef = new File(
-					name: fileName
-					linkedFileData: linkedFileData
-				)
-				FileStoreHandler.uploadFileFromDisk project_id, fileRef._id, fsPath, (err, fileStoreUrl)->
-					if err?
-						logger.err err:err, project_id: project_id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error uploading image to s3"
-						return callback(err)
+			(project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback) ->
+				ProjectEntityUpdateHandler.uploadFile project_id, folder_id, fileName, fsPath, linkedFileData, userId, (error, fileRef, fileStoreUrl) ->
+					return callback(error) if error?
 					next(project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback)
 		withLock: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback = (error, fileRef, folder_id, path, fileStoreUrl) ->)->
 			ProjectEntityMongoUpdateHandler.addFile project_id, folder_id, fileRef, (err, result, project) ->
