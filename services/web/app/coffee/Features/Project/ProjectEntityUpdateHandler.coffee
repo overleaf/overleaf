@@ -153,6 +153,15 @@ module.exports = ProjectEntityUpdateHandler = self =
 					return callback(err)
 				callback(null, fileRef, fileStoreUrl)
 
+	_addFileAndSendToTpds: (project_id, folder_id, fileName, fileRef, callback = (error) ->)->
+		ProjectEntityMongoUpdateHandler.addFile project_id, folder_id, fileRef, (err, result, project) ->
+			if err?
+				logger.err err:err, project_id: project_id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error adding file with project"
+				return callback(err)
+			TpdsUpdateSender.addFile {project_id:project_id, file_id:fileRef._id, path:result?.path?.fileSystem, project_name:project.name, rev:fileRef.rev}, (err) ->
+				return callback(err) if err?
+				callback(null, result, project) 
+
 	addFile: wrapWithLock 
 		beforeLock: (next) ->
 			(project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback) ->
@@ -160,20 +169,16 @@ module.exports = ProjectEntityUpdateHandler = self =
 					return callback(error) if error?
 					next(project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback)
 		withLock: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback = (error, fileRef, folder_id) ->)->
-			ProjectEntityMongoUpdateHandler.addFile project_id, folder_id, fileRef, (err, result, project) ->
-				if err?
-					logger.err err:err, project_id: project_id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error adding file with project"
-					return callback(err)
-				TpdsUpdateSender.addFile {project_id:project_id, file_id:fileRef._id, path:result?.path?.fileSystem, project_name:project.name, rev:fileRef.rev}, (err) ->
-					return callback(err) if err?
-					newFiles = [
-						file: fileRef
-						path: result?.path?.fileSystem
-						url: fileStoreUrl
-					]
-					DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newFiles}, (error) ->
-						return callback(error) if error?
-						callback(null, fileRef, folder_id, result?.path?.fileSystem, fileStoreUrl) 
+			ProjectEntityUpdateHandler._addFileAndSendToTpds project_id, folder_id, fileName, fileRef, (err, result, project) ->
+				return callback(err) if err?
+				newFiles = [
+					file: fileRef
+					path: result?.path?.fileSystem
+					url: fileStoreUrl
+				]
+				DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newFiles}, (error) ->
+					return callback(error) if error?
+					callback(null, fileRef, folder_id, result?.path?.fileSystem, fileStoreUrl) 
 
 	replaceFile: wrapWithLock
 		beforeLock: (next) ->
@@ -228,11 +233,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 					return callback(error) if error?
 					next(project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback)
 		withLock: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback = (error, fileRef, folder_id, path, fileStoreUrl) ->)->
-			ProjectEntityMongoUpdateHandler.addFile project_id, folder_id, fileRef, (err, result, project) ->
-				if err?
-					logger.err err:err, project_id: project_id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error adding file with project"
-					return callback(err)
-				TpdsUpdateSender.addFile {project_id:project_id, file_id:fileRef._id, path:result?.path?.fileSystem, project_name:project.name, rev:fileRef.rev}, (err) ->
+			ProjectEntityUpdateHandler._addFileAndSendToTpds project_id, folder_id, fileName, fileRef, (err, result, project) ->
 					return callback(err) if err?
 					callback(null, fileRef, folder_id, result?.path?.fileSystem, fileStoreUrl)
 
