@@ -224,9 +224,9 @@ module.exports = ProjectEntityUpdateHandler = self =
 					callback(null, doc, folder_id, result?.path?.fileSystem)
 
 	addFileWithoutUpdatingHistory: wrapWithLock
-	# This method should never be called directly, except when importing a project
-	# from Overleaf. It skips sending updates to the project history, which will break
-	# the history unless you are making sure it is updated in some other way.
+		# This method should never be called directly, except when importing a project
+		# from Overleaf. It skips sending updates to the project history, which will break
+		# the history unless you are making sure it is updated in some other way.
 		beforeLock: (next) ->
 			(project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback) ->
 				ProjectEntityUpdateHandler.uploadFile project_id, folder_id, fileName, fsPath, linkedFileData, userId, (error, fileRef, fileStoreUrl) ->
