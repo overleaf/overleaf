@@ -178,7 +178,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 				]
 				DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newFiles}, (error) ->
 					return callback(error) if error?
-					callback(null, fileRef, folder_id, result?.path?.fileSystem, fileStoreUrl) 
+					callback(null, fileRef, folder_id) 
 
 	replaceFile: wrapWithLock
 		beforeLock: (next) ->
