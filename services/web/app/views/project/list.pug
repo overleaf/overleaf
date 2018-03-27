@@ -77,6 +77,7 @@ block content
 								if userIsFromOLv1(user)
 									div(ng-show="visible")
 										| To tag or rename your v1 projects, please go back to Overleaf v1.
+									div(ng-show="visible")
 										a.project-list-sidebar-v1-link(
 											href=settings.overleaf.host + "/dash?prefer-v1-dash=1"
 										) Go back to v1
