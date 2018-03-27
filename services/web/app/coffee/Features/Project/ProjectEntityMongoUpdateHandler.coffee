@@ -48,28 +48,28 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 			self._confirmFolder project, folder_id, (folder_id)->
 				self._putElement project, folder_id, fileRef, "file", callback
 
-	replaceFile: wrapWithLock (project_id, file_id, linkedFileData, callback) ->
+	replaceFileWithNew: wrapWithLock (project_id, file_id, newFileRef, callback) ->
 		ProjectGetter.getProjectWithoutLock project_id, {rootFolder: true, name:true}, (err, project) ->
 			return callback(err) if err?
 			ProjectLocator.findElement {project:project, element_id: file_id, type: 'file'}, (err, fileRef, path)=>
 				return callback(err) if err?
-				conditions = _id:project._id
-				inc = {}
-				inc["#{path.mongo}.rev"] = 1
-				# currently we do not need to increment the project version number for changes that are replacements
-				# but when we make switch to having immutable files the replace operation will add a new file, and
-				# this will require a version increase.  We will start incrementing the project version now as it does
-				# no harm and will help to test it.
-				inc['version'] = 1
-				set = {}
-				set["#{path.mongo}.created"] = new Date()
-				set["#{path.mongo}.linkedFileData"] = linkedFileData
-				update =
-					"$inc": inc
-					"$set": set
-				Project.update conditions, update, {}, (err) ->
+				ProjectEntityMongoUpdateHandler._insertDeletedFileReference project_id, fileRef, (err) ->
 					return callback(err) if err?
-					callback null, fileRef, project, path
+					conditions = _id:project._id
+					inc = {}
+					# increment the project structure version as we are adding a new file here
+					inc['version'] = 1
+					set = {}
+					set["#{path.mongo}._id"] = newFileRef._id
+					set["#{path.mongo}.created"] = new Date()
+					set["#{path.mongo}.linkedFileData"] = newFileRef.linkedFileData
+					set["#{path.mongo}.rev"] = 1
+					update =
+						"$inc": inc
+						"$set": set
+					Project.update conditions, update, {}, (err) ->
+						return callback(err) if err?
+						callback null, fileRef, project, path
 
 	mkdirp: wrapWithLock (project_id, path, callback) ->
 		folders = path.split('/')
@@ -300,3 +300,29 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 					if isNestedFolder
 						return callback(new Errors.InvalidNameError("destination folder is a child folder of me"))
 				callback()
+
+	_insertDeletedDocReference: (project_id, doc, callback = (error) ->) ->
+		Project.update {
+			_id: project_id
+		}, {
+			$push: {
+				deletedDocs: {
+					_id:  doc._id
+					name: doc.name
+				}
+			}
+		}, {}, callback
+
+	_insertDeletedFileReference: (project_id, fileRef, callback = (error) ->) ->
+		Project.update {
+			_id: project_id
+		}, {
+			$push: {
+				deletedFiles: {
+					_id:  fileRef._id
+					name: fileRef.name
+					linkedFileData: fileRef.linkedFileData
+					deletedAt: new Date()
+				}
+			}
+		}, {}, callback

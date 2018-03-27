@@ -186,10 +186,13 @@ describe "ProjectDuplicateNames", ->
 									contentType: 'image/jpeg'
 					, (err, res, body) =>
 						@body = body
+						# update the image id because we have replaced the file
+						@imageFile._id = @body.entity_id
 						done()
 
 				it "should succeed (overwriting the file)", ->
 					expect(@body.success).to.equal true
+				# at this point the @imageFile._id has changed
 
 		describe "for an existing folder", ->
 			describe "trying to add a doc with the same name", ->

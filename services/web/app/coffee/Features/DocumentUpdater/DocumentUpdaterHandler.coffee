@@ -174,6 +174,23 @@ module.exports = DocumentUpdaterHandler =
 		oldEntitiesHash = _.indexBy oldEntities, (entity) -> entity[entityType]._id.toString()
 		newEntitiesHash = _.indexBy newEntities, (entity) -> entity[entityType]._id.toString()
 
+		# Send deletes before adds (and renames) to keep a 1:1 mapping between
+		# paths and ids
+		#
+		# When a file is replaced, we first delete the old file and then add the
+		# new file. If the 'add' operation is sent to project history before the
+		# 'delete' then we would have two files with the same path at that point
+		# in time.
+		for id, oldEntity of oldEntitiesHash
+			newEntity = newEntitiesHash[id]
+
+			if !newEntity?
+				# entity deleted
+				updates.push
+					id: id
+					pathname: oldEntity.path
+					newPathname: ''
+
 		for id, newEntity of newEntitiesHash
 			oldEntity = oldEntitiesHash[id]
 
@@ -190,16 +207,6 @@ module.exports = DocumentUpdaterHandler =
 					id: id
 					pathname: oldEntity.path
 					newPathname: newEntity.path
-
-		for id, oldEntity of oldEntitiesHash
-			newEntity = newEntitiesHash[id]
-
-			if !newEntity?
-				# entity deleted
-				updates.push
-					id: id
-					pathname: oldEntity.path
-					newPathname: ''
 
 		updates
 
