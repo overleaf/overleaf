@@ -22,14 +22,18 @@ module.exports =
 		}
 
 	docs: (docs) ->
-		docs.map (doc) ->
+		if !docs?.map?
+			return
+		docs?.map (doc) ->
 			{
 				path: doc.path
 				id: doc.doc
 			}
 
 	files: (files) ->
-		files.map (file) ->
+		if !files?.map?
+			return
+		files?.map (file) ->
 			{
 				path: file.path
 				id: file.file
