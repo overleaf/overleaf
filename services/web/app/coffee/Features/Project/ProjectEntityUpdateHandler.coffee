@@ -32,11 +32,11 @@ wrapWithLock = (methodWithoutLock) ->
 		methodWithLock.withoutLock = methodWithoutLock
 		methodWithLock
 	else
-		# handle case with separate setup and locked stages		
+		# handle case with separate setup and locked stages
 		wrapWithSetup = methodWithoutLock.beforeLock  # a function to set things up before the lock
 		mainTask = methodWithoutLock.withLock # function to execute inside the lock
 		methodWithLock = wrapWithSetup (project_id, args..., callback) ->
-			LockManager.runWithLock(LOCK_NAMESPACE, project_id, (cb) -> 
+			LockManager.runWithLock(LOCK_NAMESPACE, project_id, (cb) ->
 				mainTask(project_id, args..., cb)
 			callback)
 		methodWithLock.withoutLock = wrapWithSetup mainTask
@@ -160,9 +160,9 @@ module.exports = ProjectEntityUpdateHandler = self =
 				return callback(err)
 			TpdsUpdateSender.addFile {project_id:project_id, file_id:fileRef._id, path:result?.path?.fileSystem, project_name:project.name, rev:fileRef.rev}, (err) ->
 				return callback(err) if err?
-				callback(null, result, project) 
+				callback(null, result, project)
 
-	addFile: wrapWithLock 
+	addFile: wrapWithLock
 		beforeLock: (next) ->
 			(project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback) ->
 				ProjectEntityUpdateHandler.uploadFile project_id, folder_id, fileName, fsPath, linkedFileData, userId, (error, fileRef, fileStoreUrl) ->
@@ -178,7 +178,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 				]
 				DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newFiles}, (error) ->
 					return callback(error) if error?
-					callback(null, fileRef, folder_id) 
+					callback(null, fileRef, folder_id)
 
 	replaceFile: wrapWithLock
 		beforeLock: (next) ->
@@ -258,9 +258,9 @@ module.exports = ProjectEntityUpdateHandler = self =
 					callback null, doc, !existingDoc?
 
 	# FIXME: this method needs to be changed, currently it needs a lock around an upload to S3 because
-	# there is no way to know in advance if the file is a replace or an insert (at least you have to 
+	# there is no way to know in advance if the file is a replace or an insert (at least you have to
 	# take the lock to find that out and do any operation in that lock).  In the new scheme any upsert
-	# should always create the new file (outside the lock) in S3 first and then make the changes to the 
+	# should always create the new file (outside the lock) in S3 first and then make the changes to the
 	# project in a lock, marking the old file as deleted if it exists.
 	upsertFile: wrapWithLock (project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback = (err, file, isNewFile)->)->
 		ProjectLocator.findElement project_id: project_id, element_id: folder_id, type: "folder", (error, folder) ->
@@ -373,7 +373,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 					path: file.path
 					url: FileStoreHandler._buildUrl(project_id, file.file._id)
 
-				DocumentUpdaterHandler.resyncProjectHistory project_id, docs, files, callback 
+				DocumentUpdaterHandler.resyncProjectHistory project_id, docs, files, callback
 	_cleanUpEntity: (project, entity, entityType, path, userId, callback = (error) ->) ->
 		if(entityType.indexOf("file") != -1)
 			self._cleanUpFile project, entity, path, userId, callback
