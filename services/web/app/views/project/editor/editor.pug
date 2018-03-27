@@ -33,8 +33,6 @@ div.full-size(
 				i.fa.fa-arrow-left
 				| &nbsp;&nbsp;#{translate("open_a_file_on_the_left")}
 
-		!= moduleIncludes('editor:toolbar', locals)
-
 		#editor(
 			ace-editor="editor",
 			ng-if="!editor.richText",
