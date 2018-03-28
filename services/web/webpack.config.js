@@ -15,6 +15,12 @@ if (fs.existsSync(MODULES_PATH)) {
 	}, entryPoints)
 }
 
+// If no entry points are found, silently exit
+if (!Object.keys(entryPoints).length) {
+	console.warn('No entry points found, exiting')
+	process.exit(0)
+}
+
 module.exports = {
 	// Defines the "entry point(s)" for the application - i.e. the file which
 	// bootstraps the application
