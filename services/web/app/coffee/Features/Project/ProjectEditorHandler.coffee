@@ -34,14 +34,10 @@ module.exports = ProjectEditorHandler =
 			compileTimeout: 60
 			compileGroup:"standard"
 			templates: false
+			references: false
 			trackChanges: false
 			trackChangesVisible: ProjectEditorHandler.trackChangesAvailable
 		})
-
-		if !result.features.mendeley?
-			result.features.mendeley = !!result.features.references
-		if !result.features.referencesSearch?
-			result.features.referencesSearch = !!result.features.references
 
 		return result
 
