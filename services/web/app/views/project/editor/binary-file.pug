@@ -35,7 +35,7 @@ div.binary-file.full-size(
 	
 	p.no-preview(
 		ng-if="failedLoad || textPreview.error || isUnpreviewableFile()"
-	) #{translate("no_preview_available")} {{ failedLoad }} {{ textPreview.error }} {{ isUnpreviewableFile() }}
+	) #{translate("no_preview_available")}
 
 	div.binary-file-footer
 		div(ng-if="openFile.linkedFileData.provider == 'url'")
