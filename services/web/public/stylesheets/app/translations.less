@@ -1,14 +1,23 @@
-
 .translations-message {
-    padding: (@line-height-computed / 4) (@line-height-computed / 2);
-    background-color: @state-warning-bg;
-    color: #333;
-    border-bottom: 1px solid @common-border-color;
+    .system-message;
 	text-align:center;
-    
     img {
     	vertical-align: text-bottom;
         margin-bottom: -1px;
     }
+}
 
+.translations-message when (@is-overleaf = true) {
+	.close {
+		color: #FFF;
+		opacity: 1;
+		text-shadow: none;
+	}
+	a {
+		color: #FFF;
+		&:hover,
+		&:focus {
+			color: #FFF;
+		}
+	}
 }

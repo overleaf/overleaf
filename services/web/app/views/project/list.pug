@@ -57,8 +57,24 @@ block content
 							ng-click="showAll();"
 						) Show all
 	.content.content-alt.project-list-page(ng-controller="ProjectPageController")
-		.project-list-content
+		- if(typeof(suppressSystemMessages) == "undefined")
+			.system-messages(
+				ng-cloak
+				ng-controller="SystemMessagesController"
+			)
+				.system-message(
+					ng-repeat="message in messages"
+					ng-controller="SystemMessageController"
+					ng-hide="hidden"
+				)
+					button(ng-click="hide()").close.pull-right
+						span(aria-hidden="true") &times;
+						span.sr-only #{translate("close")}
+					.system-message-content(ng-bind-html="htmlContent")
+			
+			include ../translations/translation_message
 
+		.project-list-content
 			.row.project-list-row(ng-cloak)
 				.project-list-container(ng-if="projects.length > 0")
 					.project-list-sidebar-wrapper.col-md-2.col-xs-3

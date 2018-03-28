@@ -1,8 +1,14 @@
 .system-message {
-    padding: (@line-height-computed / 4) (@line-height-computed / 2);
-    background-color: @state-warning-bg;
-    color: #333;
-    border-bottom: 1px solid @common-border-color;
+  padding: (@line-height-computed / 4) (@line-height-computed / 2);
+  background-color: @sys-msg-background;
+  color: @sys-msg-color;
+  border-bottom: @sys-msg-border;
+}
+
+.system-message .close when (@is-overleaf = true) {
+  color: #FFF;
+  opacity: 1;
+  text-shadow: none;
 }
 
 .clickable {
