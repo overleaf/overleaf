@@ -112,18 +112,6 @@ html(itemscope, itemtype='http://schema.org/Product')
 			)
 
 		- if(typeof(suppressSystemMessages) == "undefined")
-			.system-messages(
-				ng-cloak
-				ng-controller="SystemMessagesController"
-			)
-				.system-message(
-					ng-repeat="message in messages"
-					ng-controller="SystemMessageController"
-					ng-hide="hidden"
-				)
-					a(href, ng-click="hide()").pull-right &times;
-					.system-message-content(ng-bind-html="htmlContent")
-	
 			include translations/translation_message
 
 
