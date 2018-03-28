@@ -67,8 +67,13 @@ block content
 					ng-controller="SystemMessageController"
 					ng-hide="hidden"
 				)
-					a(href, ng-click="hide()").pull-right &times;
+					button(ng-click="hide()").close.pull-right
+						span(aria-hidden="true") &times;
+						span.sr-only #{translate("close")}
 					.system-message-content(ng-bind-html="htmlContent")
+			
+			include ../translations/translation_message
+
 		.project-list-content
 			.row.project-list-row(ng-cloak)
 				.project-list-container(ng-if="projects.length > 0")
