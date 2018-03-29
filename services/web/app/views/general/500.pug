@@ -4,33 +4,19 @@ html.full-height(itemscope, itemtype='http://schema.org/Product')
 		title Something went wrong
 		link(rel="icon", href="/favicon.ico")
 		if buildCssPath
-			link(rel='stylesheet', href=buildCssPath('/style.css'))
+			link(rel="stylesheet", href=buildCssPath("/" + settings.brandPrefix + "style.css"))
 		link(href="//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css",rel="stylesheet")
 	body.full-height
 		.content.full-height
 			.container.full-height
 				.error-container.full-height
-					.error-figure.error-figure-500
-						img.error-img(
-							src="/img/brand/500-visual-socket.svg"
-							alt="Error"
-						)
+					if (settings.brandPrefix !== 'ol-')
+						.error-figure.error-figure-500
+							img.error-img(
+								src="/img/brand/500-visual-socket.svg"
+								alt="Error"
+							)
 					.error-details
 						p.error-status Something went wrong, sorry.
 						p.error-description Our staff are probably looking into this, but if it continues, please contact us at #{settings.adminEmail}
 						a.error-btn(href="/") Home
-		//- .content
-		//- 	.container
-		//- 		.row
-		//- 			.col-md-8.col-md-offset-2.text-center
-		//- 				.page-header
-		//- 					h2 Oh dear, something went wrong.
-		//- 				if buildImgPath
-		//- 					p
-		//- 						img(src=buildImgPath("lion-sad-128.png"), alt="Sad Lion")
-		//- 				p
-		//- 					| Something went wrong with your request, sorry. Our staff are probably looking into this, but if it continues, please contact us at #{settings.adminEmail}
-		//- 				p
-		//- 					a(href="/")
-		//- 						i.fa.fa-arrow-circle-o-left
-		//- 						|  Take me home
