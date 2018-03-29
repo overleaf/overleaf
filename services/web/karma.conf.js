@@ -26,7 +26,10 @@ module.exports = function (config) {
       { pattern: 'test/unit_frontend/js/**/*.js', included: false },
       // Include ES test files
       'test/unit_frontend/es/**/*.js',
-      'modules/**/test/unit_frontend/es/**/*.js'
+      'modules/**/test/unit_frontend/es/**/*.js',
+      // Include CSS (there is some in js/libs dir)
+      'public/stylesheets/**/*.css',
+      'public/js/libs/**/*.css'
     ],
     middleware: ['fake-img'],
     preprocessors: {
