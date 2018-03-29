@@ -11,4 +11,6 @@ mkdir -p /app/compiles
 chown -R node:node /app/compiles
 
 ./bin/install_texlive_gce.sh
+echo "HELOOOo"
+echo "$@"
 exec runuser -u node "$@"

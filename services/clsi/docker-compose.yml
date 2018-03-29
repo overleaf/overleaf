@@ -11,7 +11,8 @@ services:
     volumes:
       - .:/app
     working_dir: /app
-    command: npm run test:unit
+    user: node
+    entrypoint: npm run test:unit
 
   test_acceptance:
     build: .
@@ -24,10 +25,11 @@ services:
     environment:
       REDIS_HOST: redis
       MONGO_HOST: mongo
+    user: node
     depends_on:
       - redis
       - mongo
-    command: npm run test:acceptance
+    entrypoint: npm run test:acceptance
 
   redis:
     image: redis

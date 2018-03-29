@@ -169,13 +169,54 @@ app.use (error, req, res, next) ->
 		logger.error {err: error, url: req.url}, "server error"
 		res.sendStatus(error?.statusCode || 500)
 
+net = require "net"
+os = require "os"
+
+STATE = "up"
+
+server = net.createServer (socket) ->
+	socket.on "error", (err)->
+		if err.code == "ECONNRESET"
+			# this always comes up, we don't know why
+			return
+		logger.err err:err, "error with socket on load check"
+		socket.destroy()
+	
+	if STATE == "up" and settings.load_balancer_agent.report_load
+		currentLoad = os.loadavg()[0]
+
+		# staging clis's have 1 cpu core only
+		if os.cpus().length == 1
+			availableWorkingCpus = 1
+		else
+			availableWorkingCpus = os.cpus().length - 1
+
+		freeLoad = availableWorkingCpus - currentLoad
+		freeLoadPercentage = Math.round((freeLoad / availableWorkingCpus) * 100)
+		if freeLoadPercentage <= 0
+			freeLoadPercentage = 1 # when its 0 the server is set to drain and will move projects to different servers
+		socket.write("up, #{freeLoadPercentage}%\n", "ASCII")
+		socket.end()
+	else
+		socket.write("#{STATE}\n", "ASCII")
+		socket.end()
+
+
+
+
 port = (Settings.internal?.clsi?.port or 3013)
 host = (Settings.internal?.clsi?.host or "localhost")
+load_port = settings.internal.clsi.load_port or 3048
+
+
 
 if !module.parent # Called directly
 	app.listen port, host, (error) ->
 		logger.info "CLSI starting up, listening on #{host}:#{port}"
 
+	server.listen load_port, host, (error) ->
+		throw error if error?
+		logger.info "Load agent listening on load port #{load_port}"
 module.exports = app
 
 

@@ -21,13 +21,13 @@ clean:
 test: test_unit test_acceptance
 
 test_unit:
-	@[ -d test/unit ] && $(DOCKER_COMPOSE) run --rm test_unit -- ${MOCHA_ARGS} || echo "clsi has no unit tests"
+	@[ ! -d test/unit ] && echo "clsi has no unit tests" || $(DOCKER_COMPOSE) run --rm test_unit -- ${MOCHA_ARGS}
 
 test_acceptance: test_clean # clear the database before each acceptance test run
-	@[ -d test/acceptance ] && $(DOCKER_COMPOSE) run --rm test_acceptance -- ${MOCHA_ARGS} || echo "clsi has no acceptance tests"
+	@[ ! -d test/acceptance ] && echo "clsi has no acceptance tests" || $(DOCKER_COMPOSE) run --rm test_acceptance -- ${MOCHA_ARGS}
 
 test_clean:
-	$(DOCKER_COMPOSE) down -t 0
+	$(DOCKER_COMPOSE) down -t -v 0
 
 build:
 	docker build --pull --tag quay.io/sharelatex/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) .
