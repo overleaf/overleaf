@@ -10,6 +10,7 @@ DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
 DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 	BRANCH_NAME=$(BRANCH_NAME) \
 	PROJECT_NAME=$(PROJECT_NAME) \
+	MOCHA_GREP=${MOCHA_GREP} \
 	docker-compose ${DOCKER_COMPOSE_FLAGS}
 
 clean:
@@ -21,13 +22,13 @@ clean:
 test: test_unit test_acceptance
 
 test_unit:
-	@[ ! -d test/unit ] && echo "clsi has no unit tests" || $(DOCKER_COMPOSE) run --rm test_unit -- ${MOCHA_ARGS}
+	@[ ! -d test/unit ] && echo "clsi has no unit tests" || $(DOCKER_COMPOSE) run --rm test_unit
 
 test_acceptance: test_clean # clear the database before each acceptance test run
-	@[ ! -d test/acceptance ] && echo "clsi has no acceptance tests" || $(DOCKER_COMPOSE) run --rm test_acceptance -- ${MOCHA_ARGS}
+	@[ ! -d test/acceptance ] && echo "clsi has no acceptance tests" || $(DOCKER_COMPOSE) run --rm test_acceptance
 
 test_clean:
-	$(DOCKER_COMPOSE) down -t -v 0
+	$(DOCKER_COMPOSE) down -v -t 0
 
 build:
 	docker build --pull --tag quay.io/sharelatex/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) .

@@ -182,7 +182,7 @@ server = net.createServer (socket) ->
 		logger.err err:err, "error with socket on load check"
 		socket.destroy()
 	
-	if STATE == "up" and settings.load_balancer_agent.report_load
+	if STATE == "up" and Settings.load_balancer_agent.report_load
 		currentLoad = os.loadavg()[0]
 
 		# staging clis's have 1 cpu core only
@@ -206,7 +206,7 @@ server = net.createServer (socket) ->
 
 port = (Settings.internal?.clsi?.port or 3013)
 host = (Settings.internal?.clsi?.host or "localhost")
-load_port = settings.internal.clsi.load_port or 3048
+load_port = Settings.internal.clsi.load_port or 3048
 
 
 
