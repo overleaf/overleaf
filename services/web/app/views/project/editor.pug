@@ -55,6 +55,7 @@ block content
 				include ./editor/header
 
 				include ./editor/share
+				include ./editor/publish
 
 				#ide-body(
 					ng-cloak,
@@ -136,7 +137,8 @@ block requirejs
 				"fineuploader": "libs/#{lib('fineuploader')}",
 				"ide": "#{buildJsPath('ide.js', {hashedPath:settings.useMinifiedJs, removeExtension:true})}",
 				"libraries": "#{buildJsPath('libraries.js', {hashedPath:settings.useMinifiedJs, removeExtension:true})}",
-				!{moduleIncludes("editor:script", locals)}
+				!{moduleIncludes("editor:script", locals)},
+				!{moduleIncludes("publish:script", locals)}
 			},
 			"waitSeconds": 0,
 			"shim": {

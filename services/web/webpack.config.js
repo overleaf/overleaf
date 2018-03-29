@@ -59,9 +59,17 @@ module.exports = {
 					cacheDirectory: true
 				}
 			}]
+		}, {
+			// Export React as a global variable from the bundle
+			test: require.resolve('react'),
+			use: [{
+				loader: 'expose-loader',
+				options: 'React'
+			}]
 		}]
 	},
 
 	// TODO
 	// plugins: {}
 }
+

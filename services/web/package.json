@@ -72,6 +72,7 @@
     "passport-oauth2-refresh": "^1.0.0",
     "passport-saml": "^0.15.0",
     "pug": "^2.0.0-beta6",
+    "react": "^15.4.2",
     "redis-sharelatex": "git+https://github.com/sharelatex/redis-sharelatex.git#v1.0.4",
     "request": "^2.69.0",
     "requestretry": "^1.13.0",
