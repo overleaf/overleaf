@@ -140,7 +140,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 				return callback(error) if error?
 				callback null, doc, folder_id
 
-	uploadFile: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback = (error, fileRef, fileStoreUrl) ->)->
+	_uploadFile: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback = (error, fileRef, fileStoreUrl) ->)->
 		if not SafePath.isCleanFilename fileName
 			return callback new Errors.InvalidNameError("invalid element name")
 		fileRef = new File(
@@ -165,7 +165,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 	addFile: wrapWithLock
 		beforeLock: (next) ->
 			(project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback) ->
-				ProjectEntityUpdateHandler.uploadFile project_id, folder_id, fileName, fsPath, linkedFileData, userId, (error, fileRef, fileStoreUrl) ->
+				ProjectEntityUpdateHandler._uploadFile project_id, folder_id, fileName, fsPath, linkedFileData, userId, (error, fileRef, fileStoreUrl) ->
 					return callback(error) if error?
 					next(project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback)
 		withLock: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback = (error, fileRef, folder_id) ->)->
@@ -229,7 +229,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 		# the history unless you are making sure it is updated in some other way.
 		beforeLock: (next) ->
 			(project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback) ->
-				ProjectEntityUpdateHandler.uploadFile project_id, folder_id, fileName, fsPath, linkedFileData, userId, (error, fileRef, fileStoreUrl) ->
+				ProjectEntityUpdateHandler._uploadFile project_id, folder_id, fileName, fsPath, linkedFileData, userId, (error, fileRef, fileStoreUrl) ->
 					return callback(error) if error?
 					next(project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback)
 		withLock: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback = (error, fileRef, folder_id, path, fileStoreUrl) ->)->
