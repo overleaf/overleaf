@@ -342,17 +342,20 @@ script(type="text/ng-template", id="v1ImportModalTemplate")
 		.v1-import-step-2(ng-show="step === 2")
 			.v1-import-row
 				.v1-import-warning.v1-import-col(aria-label="Warning symbol.")
-					i.fa.fa-exclamation-triangle
+					i.fa.fa-flask
 				.v1-import-col
 					h2.v1-import-title #[strong Warning:] Overleaf v2 is Experimental
-					p We are still working hard to bring some Overleaf v1 features to the v2 editor. If you move this project to v2 now, you will:
+					p We are still working hard to bring some Overleaf v1 features to the v2 editor. In v2 there is:
 					ul
-						li Lose access your project via git
-						li Not be able to use the Journals and Services menu to submit directly to our partners
-						li Not be able to use the Rich Text (WYSIWYG) mode
-						li Not be able to use linked files (to URLs or to files in other Overleaf projects)
-						li Not be able to use some bibliography integrations (Zotero, CiteULike)
-						li Lose access to your labelled versions and not be able to create new labelled versions
+						li <strong>No Journals and Services</strong> menu to submit directly to our partners yet
+						li <strong>No Rich Text (WYSIWYG)</strong> mode yet
+						li <strong>No linked files</strong> (to URLs or to files in other Overleaf projects) yet
+						li <strong>No Zotero and CiteULike</strong> integrations yet
+						li <strong>No labelled versions</strong> yet
+					p.row-spaced-small
+						| If you currently use the <strong>Overleaf Git bridge</strong> with your v1 project, you can migrate your project to the Overleaf v2 GitHub integration.
+						|
+						a(href='', target='_blank') Read More.
 			.v1-import-cta
 				p
 					strong Please note: you cannot move this project back to v1 once you have moved it to v2. If this is an important project, please consider making a clone in v1 before you move the project to v2.
