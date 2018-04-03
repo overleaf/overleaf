@@ -74,7 +74,7 @@ block content
 			
 			include ../translations/translation_message
 
-		.project-list-content
+		.project-list-content(event-tracking=settings.overleaf ? "loads_v2_dash" : "", onboard=settings.overleaf ? "true" : "", event-tracking-trigger=settings.overleaf ? "load" : "", event-tracking-mb="true", event-segmentation="{location: 'dash', v2_onboard: true}")
 			.row.project-list-row(ng-cloak)
 				.project-list-container(ng-if="projects.length > 0")
 					.project-list-sidebar-wrapper.col-md-2.col-xs-3
