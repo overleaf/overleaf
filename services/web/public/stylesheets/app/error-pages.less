@@ -20,6 +20,11 @@
 			display: block;
 		}
 	}
+
+	.error-figure when (@is-overleaf = true) {
+		display: none;
+	}
+
 	.error-figure-500 {
 		&::before {
 			content: '';
