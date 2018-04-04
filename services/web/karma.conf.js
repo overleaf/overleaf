@@ -18,6 +18,7 @@ module.exports = function (config) {
       'public/js/libs/angular-1.6.4.min.js',
       'public/js/libs/angular-mocks.js',
       'public/js/libs/jquery-1.11.1.min.js',
+      'public/js/libs/underscore-1.3.3.js',
       // Set up requirejs
       'test/unit_frontend/js/test-main.js',
       // Include source & test files, but don't "include" them as requirejs
