@@ -152,10 +152,13 @@ describe "RestoringFiles", ->
 					expect(response.statusCode).to.equal 200
 					done()
 
-			it "should have created the doc in the root folder", (done) ->
+			it "should have created the folder and restored the doc to it", (done) ->
 				@owner.getProject @project_id, (error, project) =>
 					throw error if error?
-					doc = _.find project.rootFolder[0].docs, (doc) ->
+					folder = _.find project.rootFolder[0].folders, (folder) ->
+						folder.name == 'nothere'
+					expect(folder).to.exist
+					doc = _.find folder.docs, (doc) ->
 						doc.name == 'foo3.tex'
 					doc = MockDocstoreApi.docs[@project_id][doc._id]
 					expect(doc.lines).to.deep.equal [

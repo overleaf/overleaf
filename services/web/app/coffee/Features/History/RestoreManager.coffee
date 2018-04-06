@@ -10,8 +10,9 @@ moment = require 'moment'
 
 module.exports = RestoreManager =
 	restoreDocFromDeletedDoc: (user_id, project_id, doc_id, name, callback = (error, doc, folder_id) ->) ->
-		# getDoc will return the deleted doc's lines, but we don't actually remove
-		# the deleted doc, just create a new one from its lines.
+		# This is the legacy method for restoring a doc from the SL track-changes/deletedDocs system.
+		# It looks up the deleted doc's contents, and then creates a new doc with the same content.
+		# We don't actually remove the deleted doc entry, just create a new one from its lines.
 		ProjectEntityHandler.getDoc project_id, doc_id, include_deleted: true, (error, lines) ->
 			return callback(error) if error?
 			addDocWithName = (name, callback) ->
@@ -25,23 +26,16 @@ module.exports = RestoreManager =
 			dirname = Path.dirname(pathname)
 			if dirname == '.' # no directory
 				dirname = ''
-			RestoreManager._findFolderOrRootFolderId project_id, dirname, (error, parent_folder_id) ->
+			RestoreManager._findOrCreateFolder project_id, dirname, (error, parent_folder_id) ->
 				return callback(error) if error?
 				addEntityWithName = (name, callback) ->
 					FileSystemImportManager.addEntity user_id, project_id, parent_folder_id, name, fsPath, false, callback
 				RestoreManager._addEntityWithUniqueName addEntityWithName, basename, callback
 
-	_findFolderOrRootFolderId: (project_id, dirname, callback = (error, folder_id) ->) ->
-		# We're going to try to recover the file into the folder it was in previously,
-		# but this is historical, so the folder may not exist anymore. Fallback to the 
-		# root folder if not (folder_id == null)
-		ProjectLocator.findElementByPath {project_id, path: dirname}, (error, element, type) ->
-			if error? and not error instanceof Errors.NotFoundError
-				return callback(error)
-			if type == 'folder' and element?
-				return callback(null, element._id)
-			else
-				return callback(null, null)
+	_findOrCreateFolder: (project_id, dirname, callback = (error, folder_id) ->) ->
+		EditorController.mkdirp project_id, dirname, (error, newFolders, lastFolder) ->
+			return callback(error) if error?
+			return callback(null, lastFolder?._id)
 
 	_addEntityWithUniqueName: (addEntityWithName, basename, callback = (error) ->) ->
 		addEntityWithName basename, (error, entity) ->
