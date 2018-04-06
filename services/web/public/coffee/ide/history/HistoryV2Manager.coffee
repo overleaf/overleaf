@@ -248,7 +248,7 @@ define [
 						updatePathnameWithUpdateVersions(add.pathname, update)
 					if project_op.remove?
 						remove = project_op.remove
-						updatePathnameWithUpdateVersions(remove.pathname, update, remove.atV)
+						updatePathnameWithUpdateVersions(remove.pathname, update, project_op.atV)
 
 			return docs_summary
 
