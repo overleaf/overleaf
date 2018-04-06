@@ -15,6 +15,7 @@ describe "DocumentController", ->
 			"logger-sharelatex":
 				log:->
 				err:->
+			"../Project/ProjectLocator": @ProjectLocator = {}
 			"../Project/ProjectEntityHandler": @ProjectEntityHandler = {}
 			"../Project/ProjectEntityUpdateHandler": @ProjectEntityUpdateHandler = {}
 		@res = new MockResponse()
@@ -36,12 +37,19 @@ describe "DocumentController", ->
 
 		describe "when the document exists", ->
 			beforeEach ->
-				@ProjectEntityHandler.getDoc = sinon.stub().callsArgWith(3, null, @doc_lines, @rev, @version, @ranges, @pathname)
+				@doc = _id: @doc_id
+				@ProjectLocator.findElement = sinon.stub().callsArgWith(1, null, @doc, fileSystem: @pathname)
+				@ProjectEntityHandler.getDoc = sinon.stub().callsArgWith(2, null, @doc_lines, @rev, @version, @ranges)
 				@DocumentController.getDocument(@req, @res, @next)
 
-			it "should get the document from Mongo", ->
+			it "should get the pathname of the document", ->
+				@ProjectLocator.findElement
+					.calledWith({project_id: @project_id, element_id: @doc_id, type: 'doc'})
+					.should.equal true
+
+			it "should get the document content", ->
 				@ProjectEntityHandler.getDoc
-					.calledWith(@project_id, @doc_id, pathname: true)
+					.calledWith(@project_id, @doc_id)
 					.should.equal true
 
 			it "should return the document data to the client as JSON", ->
@@ -54,7 +62,7 @@ describe "DocumentController", ->
 
 		describe "when the document doesn't exist", ->
 			beforeEach ->
-				@ProjectEntityHandler.getDoc = sinon.stub().callsArgWith(3, new Errors.NotFoundError("not found"), null)
+				@ProjectLocator.findElement = sinon.stub().callsArgWith(1, new Errors.NotFoundError("not found"))
 				@DocumentController.getDocument(@req, @res, @next)
 
 			it "should call next with the NotFoundError", ->
@@ -94,7 +102,3 @@ describe "DocumentController", ->
 			it "should call next with the NotFoundError", ->
 				@next.calledWith(new Errors.NotFoundError("not found"))
 					.should.equal true
-
-					
-					
-

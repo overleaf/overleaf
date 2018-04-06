@@ -241,35 +241,12 @@ describe 'ProjectEntityHandler', ->
 			@ranges = {"mock": "ranges"}
 
 			@DocstoreManager.getDoc = sinon.stub().callsArgWith(3, null, @lines, @rev, @version, @ranges)
+			@ProjectEntityHandler.getDoc project_id, doc_id, @callback
 
-		describe 'without pathname option', ->
-			beforeEach ->
-				@ProjectEntityHandler.getDoc project_id, doc_id, @callback
+		it "should call the docstore", ->
+			@DocstoreManager.getDoc
+				.calledWith(project_id, doc_id)
+				.should.equal true
 
-			it "should call the docstore", ->
-				@DocstoreManager.getDoc
-					.calledWith(project_id, doc_id)
-					.should.equal true
-
-			it "should call the callback with the lines, version and rev", ->
-				@callback.calledWith(null, @lines, @rev, @version, @ranges).should.equal true
-
-		describe 'with pathname option', ->
-			beforeEach ->
-				@project = 'a project'
-				@path = mongo: "mongo.path", fileSystem: "/file/system/path"
-				@ProjectLocator.findElement = sinon.stub().callsArgWith(1, null, {}, @path)
-				@ProjectEntityHandler.getDoc project_id, doc_id, {pathname: true}, @callback
-
-			it "should call the project locator", ->
-				@ProjectLocator.findElement
-					.calledWith({project_id: project_id, element_id: doc_id, type: 'doc'})
-					.should.equal true
-
-			it "should call the docstore", ->
-				@DocstoreManager.getDoc
-					.calledWith(project_id, doc_id)
-					.should.equal true
-
-			it "should return the pathname if option given", ->
-				@callback.calledWith(null, @lines, @rev, @version, @ranges, @path.fileSystem).should.equal true
+		it "should call the callback with the lines, version and rev", ->
+			@callback.calledWith(null, @lines, @rev, @version, @ranges).should.equal true
