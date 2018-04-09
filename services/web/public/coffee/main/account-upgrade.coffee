@@ -24,10 +24,6 @@ define [
 						sixpack.participate 'teaser-dropbox-text', ['default', 'dropbox-focused'], (variant) ->
 							event_tracking.sendMB "subscription-start-trial", { source, plan, variant }
 
-					when "history"
-						sixpack.participate 'teaser-history', ['default', 'focused'], (variant) ->
-							event_tracking.sendMB "subscription-start-trial", { source, plan, variant }
-
 					else
 						event_tracking.sendMB "subscription-start-trial", { source, plan }
 
