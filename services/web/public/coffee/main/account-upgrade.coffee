@@ -33,10 +33,4 @@ define [
 
 				w.location = url
 
-			if $scope.shouldABTestPlans
-				sixpack.participate 'plans-1610', ['default', 'heron', 'ibis'], (chosenVariation, rawResponse)->
-					if chosenVariation in ['heron', 'ibis']
-						plan = "collaborator_#{chosenVariation}"
-					go()
-			else
-				go()
+			go()
