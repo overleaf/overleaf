@@ -26,7 +26,6 @@ services:
     environment:
       REDIS_HOST: redis
       MONGO_HOST: mongo
-    environment:
       MOCHA_GREP: ${MOCHA_GREP}
     depends_on:
       - redis
