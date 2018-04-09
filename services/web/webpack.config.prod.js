@@ -5,8 +5,7 @@ const merge = require('webpack-merge')
 const base = require('./webpack.config')
 
 module.exports = merge(base, {
-  // Enable a full source map.
-  devtool: 'source-map',
+  devtool: false,
 
   output: {
     // Override output path to minjs dir
