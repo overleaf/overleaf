@@ -52,20 +52,13 @@ module.exports = {
 				loader: 'babel-loader',
 				options: {
 					presets: [
-            'react',
+						'react',
 						['env', { modules: false }]
 					],
 					// Configure babel-loader to cache compiled output so that subsequent
 					// compile runs are much faster
 					cacheDirectory: true
 				}
-			}]
-		}, {
-			// Export React as a global variable from the bundle
-			test: require.resolve('react'),
-			use: [{
-				loader: 'expose-loader',
-				options: 'React'
 			}]
 		}]
 	},

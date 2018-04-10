@@ -55,7 +55,7 @@ block content
 				include ./editor/header
 
 				include ./editor/share
-				include ./editor/publish
+				!= moduleIncludes("publish:body", locals)
 
 				#ide-body(
 					ng-cloak,
