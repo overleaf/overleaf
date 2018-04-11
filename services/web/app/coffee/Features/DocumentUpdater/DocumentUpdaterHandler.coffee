@@ -121,11 +121,11 @@ module.exports = DocumentUpdaterHandler =
 			method: "DELETE"
 		}, project_id, "delete-thread", callback
 
-	resyncProjectHistory: (project_id, docs, files, callback) ->
+	resyncProjectHistory: (project_id, projectHistoryId, docs, files, callback) ->
 		logger.info {project_id, docs, files}, "resyncing project history in doc updater"
 		DocumentUpdaterHandler._makeRequest {
 			path: "/project/#{project_id}/history/resync"
-			json: { docs, files }
+			json: { docs, files, projectHistoryId }
 			method: "POST"
 		}, project_id, "resync-project-history", callback
 

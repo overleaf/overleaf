@@ -394,7 +394,8 @@ module.exports = ProjectEntityUpdateHandler = self =
 		ProjectGetter.getProject project_id, rootFolder: true, overleaf: true, (error, project) ->
 			return callback(error) if error?
 
-			if !project?.overleaf?.history?.id?
+			projectHistoryId = project?.overleaf?.history?.id
+			if !projectHistoryId?
 				error = new Errors.ProjectHistoryDisabledError("project history not enabled for #{project_id}")
 				return callback(error)
 
@@ -410,7 +411,8 @@ module.exports = ProjectEntityUpdateHandler = self =
 					path: file.path
 					url: FileStoreHandler._buildUrl(project_id, file.file._id)
 
-				DocumentUpdaterHandler.resyncProjectHistory project_id, docs, files, callback
+				DocumentUpdaterHandler.resyncProjectHistory project_id, projectHistoryId, docs, files, callback
+
 	_cleanUpEntity: (project, entity, entityType, path, userId, callback = (error) ->) ->
 		if(entityType.indexOf("file") != -1)
 			self._cleanUpFile project, entity, path, userId, callback
