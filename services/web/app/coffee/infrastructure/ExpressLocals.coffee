@@ -15,6 +15,7 @@ htmlEncoder = new require("node-html-encoder").Encoder("numerical")
 hashedFiles = {}
 Path = require 'path'
 Features = require "./Features"
+Modules = require "./Modules"
 
 jsPath =
 	if Settings.useMinifiedJs
@@ -41,10 +42,9 @@ pathList = [
 	"#{jsPath}ide.js"
 	"#{jsPath}main.js"
 	"#{jsPath}libraries.js"
-	"#{jsPath}es/rich-text.js"
 	"/stylesheets/style.css"
 	"/stylesheets/ol-style.css"
-]
+].concat(Modules.moduleAssetFiles(jsPath))
 
 if !Settings.useMinifiedJs 
 	logger.log "not using minified JS, not hashing static files"
