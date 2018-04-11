@@ -111,7 +111,7 @@ describe "DocumentManager", ->
 	describe "getDocAndRecentOps", ->
 		describe "with a previous version specified", ->
 			beforeEach ->
-				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname)
+				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname, @projectHistoryId)
 				@RedisManager.getPreviousDocOps = sinon.stub().callsArgWith(3, null, @ops)
 				@DocumentManager.getDocAndRecentOps @project_id, @doc_id, @fromVersion, @callback
 
@@ -126,14 +126,14 @@ describe "DocumentManager", ->
 					.should.equal true
 
 			it "should call the callback with the doc info", ->
-				@callback.calledWith(null, @lines, @version, @ops, @ranges, @pathname).should.equal true
+				@callback.calledWith(null, @lines, @version, @ops, @ranges, @pathname, @projectHistoryId).should.equal true
 
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
 
 		describe "with no previous version specified", ->
 			beforeEach ->
-				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname)
+				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname, @projectHistoryId)
 				@RedisManager.getPreviousDocOps = sinon.stub().callsArgWith(3, null, @ops)
 				@DocumentManager.getDocAndRecentOps @project_id, @doc_id, -1, @callback
 
@@ -146,7 +146,7 @@ describe "DocumentManager", ->
 				@RedisManager.getPreviousDocOps.called.should.equal false
 
 			it "should call the callback with the doc info", ->
-				@callback.calledWith(null, @lines, @version, [], @ranges, @pathname).should.equal true
+				@callback.calledWith(null, @lines, @version, [], @ranges, @pathname, @projectHistoryId).should.equal true
 
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
@@ -154,7 +154,7 @@ describe "DocumentManager", ->
 	describe "getDoc", ->
 		describe "when the doc exists in Redis", ->
 			beforeEach ->
-				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname, @unflushedTime)
+				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname, @projectHistoryId, @unflushedTime)
 				@DocumentManager.getDoc @project_id, @doc_id, @callback
 
 			it "should get the doc from Redis", ->
@@ -163,7 +163,7 @@ describe "DocumentManager", ->
 					.should.equal true
 
 			it "should call the callback with the doc info", ->
-				@callback.calledWith(null, @lines, @version, @ranges, @pathname, @unflushedTime, true).should.equal true
+				@callback.calledWith(null, @lines, @version, @ranges, @pathname, @projectHistoryId, @unflushedTime, true).should.equal true
 
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
@@ -171,7 +171,7 @@ describe "DocumentManager", ->
 		describe "when the doc does not exist in Redis", ->
 			beforeEach ->
 				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, null, null, null, null, null)
-				@PersistenceManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname)
+				@PersistenceManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname, @projectHistoryId)
 				@RedisManager.putDocInMemory = sinon.stub().yields()
 				@DocumentManager.getDoc @project_id, @doc_id, @callback
 
@@ -187,11 +187,11 @@ describe "DocumentManager", ->
 
 			it "should set the doc in Redis", ->
 				@RedisManager.putDocInMemory
-					.calledWith(@project_id, @doc_id, @lines, @version, @ranges, @pathname)
+					.calledWith(@project_id, @doc_id, @lines, @version, @ranges, @pathname, @projectHistoryId)
 					.should.equal true
 
 			it "should call the callback with the doc info", ->
-				@callback.calledWith(null, @lines, @version, @ranges, @pathname, null, false).should.equal true
+				@callback.calledWith(null, @lines, @version, @ranges, @pathname, @projectHistoryId, null, false).should.equal true
 
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
@@ -202,7 +202,7 @@ describe "DocumentManager", ->
 				@beforeLines = ["before", "lines"]
 				@afterLines = ["after", "lines"]
 				@ops = [{ i: "foo", p: 4 }, { d: "bar", p: 42 }]
-				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @beforeLines, @version, @ranges, @pathname, @unflushedTime, true)
+				@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @beforeLines, @version, @ranges, @pathname, @projectHistoryId, @unflushedTime, true)
 				@DiffCodec.diffAsShareJsOp = sinon.stub().callsArgWith(2, null, @ops)
 				@UpdateManager.applyUpdate = sinon.stub().callsArgWith(3, null)
 				@DocumentManager.flushDocIfLoaded = sinon.stub().callsArg(2)
@@ -402,7 +402,7 @@ describe "DocumentManager", ->
 		describe "when the doc is in Redis", ->
 			describe "and has changes to be flushed", ->
 				beforeEach ->
-					@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname, Date.now() - 1e9, true)
+					@DocumentManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @projectHistoryId, @pathname, Date.now() - 1e9, true)
 					@DocumentManager.getDocAndFlushIfOld @project_id, @doc_id, @callback
 
 				it "should get the doc", ->
