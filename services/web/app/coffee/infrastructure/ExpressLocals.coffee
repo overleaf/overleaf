@@ -41,7 +41,7 @@ pathList = [
 	"#{jsPath}ide.js"
 	"#{jsPath}main.js"
 	"#{jsPath}libraries.js"
-	"#{jsPath}es/richText.js"
+	"#{jsPath}es/rich-text.js"
 	"/stylesheets/style.css"
 	"/stylesheets/ol-style.css"
 ]
