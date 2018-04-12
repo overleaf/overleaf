@@ -1,5 +1,5 @@
 div#history(ng-show="ui.view == 'history'")
-	span(ng-controller="HistoryPremiumPopup")
+	span
 		.upgrade-prompt(ng-if="project.features.versioning === false && ui.view === 'history'")
 			.message(ng-if="project.owner._id == user.id")
 				p.text-center: strong #{translate("upgrade_to_get_feature", {feature:"full Project History"})}
