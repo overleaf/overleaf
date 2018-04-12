@@ -76,7 +76,7 @@ block content
 													br
 													a.btn.btn-info(
 														href="/register"
-														style=(getLoggedInUserId() === null ? "" : "visibility: hidden")
+														style=(getLoggedInUserId() === undefined ? "" : "visibility: hidden")
 													) #{translate("sign_up_now")}
 									.col-md-4
 										.card.card-highlighted
@@ -90,8 +90,10 @@ block content
 													| {{plans[currencyCode]['collaborator']['annual']}}
 													span.small /yr
 											ul.list-unstyled
-												li
-													strong #{translate("collabs_per_proj", {collabcount:10})}
+												li 
+													strong(ng-show="plansVariant == 'default'") #{translate("collabs_per_proj", {collabcount:10})}
+													strong(ng-show="plansVariant == 'heron'") #{translate("collabs_per_proj", {collabcount:8})}
+													strong(ng-show="plansVariant == 'ibis'") #{translate("collabs_per_proj", {collabcount:12})}
 												li #{translate("full_doc_history")}
 												li #{translate("sync_to_dropbox")}
 												li #{translate("sync_to_github")}
@@ -142,7 +144,7 @@ block content
 													br
 													a.btn.btn-info(
 														href="/register"
-														style=(getLoggedInUserId() === null ? "" : "visibility: hidden")
+														style=(getLoggedInUserId() === undefined ? "" : "visibility: hidden")
 													) #{translate("sign_up_now")}
 
 									.col-md-4
@@ -155,7 +157,9 @@ block content
 													span.small /mo
 											ul.list-unstyled
 												li
-													strong #{translate("collabs_per_proj", {collabcount:6})}
+													strong(ng-show="plansVariant == 'default'") #{translate("collabs_per_proj", {collabcount:6})}
+													strong(ng-show="plansVariant == 'heron'") #{translate("collabs_per_proj", {collabcount:4})}
+													strong(ng-show="plansVariant == 'ibis'") #{translate("collabs_per_proj", {collabcount:8})}
 												li #{translate("full_doc_history")}
 												li #{translate("sync_to_dropbox")}
 												li #{translate("sync_to_github")}
@@ -176,7 +180,9 @@ block content
 													span.small /yr
 											ul.list-unstyled
 												li
-													strong #{translate("collabs_per_proj", {collabcount:6})}
+													strong(ng-show="plansVariant == 'default'") #{translate("collabs_per_proj", {collabcount:6})}
+													strong(ng-show="plansVariant == 'heron'") #{translate("collabs_per_proj", {collabcount:4})}
+													strong(ng-show="plansVariant == 'ibis'") #{translate("collabs_per_proj", {collabcount:8})}
 												li #{translate("full_doc_history")}
 												li #{translate("sync_to_dropbox")}
 												li #{translate("sync_to_github")}

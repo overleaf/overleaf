@@ -10,16 +10,19 @@
 		li
 			a(
 				href,
+				sixpack-convert="first_sign_up",
 				ng-click="openCreateProjectModal()"
 			) #{translate("blank_project")}
 		li
 			a(
 				href,
+				sixpack-convert="first_sign_up",
 				ng-click="openCreateProjectModal('example')"
 			) #{translate("example_project")}
 		li
 			a(
 				href,
+				sixpack-convert="first_sign_up",
 				ng-click="openUploadProjectModal()"
 			) #{translate("upload_project")}
 		!= moduleIncludes("newProjectMenu", locals)
@@ -28,7 +31,7 @@
 			li.dropdown-header #{translate("templates")}
 			each item in templates
 				li
-					a.menu-indent(href=item.url) #{translate(item.name)}
+					a.menu-indent(href=item.url, sixpack-convert="first_sign_up") #{translate(item.name)}
 
 .row-spaced(ng-if="projects.length > 0", ng-cloak)
 	ul.list-unstyled.folders-menu(
@@ -130,7 +133,7 @@
 			hr
 			p.small #{translate("on_free_sl")}
 			p
-				a(href="/user/subscription/plans").btn.btn-primary #{translate("upgrade")}
+				a(href="/user/subscription/plans", sixpack-convert="left-menu-upgraed-rotation").btn.btn-primary #{translate("upgrade")}
 			p.small.text-centered
 				| #{translate("or_unlock_features_bonus")} 
 				a(href="/user/bonus") #{translate("sharing_sl")} .
