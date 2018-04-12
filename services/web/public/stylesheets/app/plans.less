@@ -32,7 +32,7 @@
 			padding-bottom: @line-height-computed * 2;
 		}
 	}
-	
+
 	.circle {
 		font-size: 1.5rem;
 		font-weight: 700;
@@ -63,6 +63,12 @@
 	}
 
 	.card .btn { white-space:normal; }
+
+	.top-switch {
+		.currency-dropdown {
+			margin-right: -15px;
+		}
+	}
 }
 
 #changePlanSection {
@@ -127,4 +133,261 @@ input.paymentTypeOption.ng-valid {
 	text-align: right;
 }
 
+/**
+	Plans Test
+*/
+@best-val-height: 35px;
+@highlight-border: 3px;
+@highlight-color: #d3584b;
+@gray-med: #6d6d6d;
+@white-med: #fdfdfd;
+.more-details {
+	.best-value {
+		color: @red;
+		line-height: @line-height-computed;
+	}
+	blockquote {
+		footer{
+			/* accessibility fix */
+			color: @gray-med;
+		}
+	}
+	.btn-header {
+		font-family: @font-family-sans-serif;
+		margin-left: 10px;
+		margin-top: -10px;
+		text-shadow: 0 0 0;
+	}
+	.card-first, .card-last {
+		background: @white-med;
+	}
+	.card-highlighted {
+		border: @highlight-border solid @gray-lighter;
+		padding-top: 10px!important;
+		.best-value {
+			margin-bottom: 15px;
+		}
+		.card-header {
+			padding-bottom: 22px; /* align hr with other plans */
+		}
+	}
+	.card-header {
+		margin-bottom: 15px;
+	}
+	.circle {
+		/* accessibility fix */
+		span.small {
+			color: rgba(255, 255, 255, 0.85)
+		}
+	}
+	.circle-img {
+		border-radius: 50%;
+		float: right;
+		height: 100px;
+		overflow: hidden;
+		position: relative;
+		width: 100px;
+		img {
+			display: inline;
+			margin: 0 auto;
+			width: 100%;
+		}
+	}
+	.faq:last-child {
+		p {
+			margin-bottom: 0;
+		}
+	}
+	.questions-header {
+		color: @red;
+		line-height: 37px;
+		margin: 0;
+		text-align: right;
+	}
+	.tagline {
+		margin-bottom: 20px;
+	}
+	/* Media Queries */
+	@media (max-width: @screen-md-min) {
+		.card-highlighted {
+			/*override style in cards.less */
+			margin-top: @line-height-computed!important;
+		}
+		.circle-img {
+			float: left;
+			margin: 0 15px;
+		}
+	}
+	@media (min-width: @screen-md-min) {
+		blockquote {
+			margin-bottom: 0;
+		}
+		.faq {
+			.row:nth-child(2) {
+				h3 {
+					margin-top: 0;
+				}
+			}
+		}
+	}
+}
 
+.student-disclaimer {
+	font-size: 14px; /* match .paymentPageFeatures p */
+	color: @gray; /* match .paymentPageFeatures p */
+	margin: 12.5px 0 0 0;
+}
+
+/**
+	Plans Table
+*/
+.plans-table {
+	border: 1px solid @gray-lighter;
+	background-color: @white-med;
+	margin: @best-val-height 0 15px 0;
+	table-layout: fixed;
+	width: 100%;
+
+	th, td {
+		-moz-background-clip: padding;
+		-webkit-background-clip: padding;
+		background-clip: padding-box; /* needed for firefox when there is bg color */
+		border: 1px solid @gray-lighter;
+		padding: 6px;
+		text-align: center;
+		vertical-align: middle;
+	}
+
+	td {
+		font-weight: bold;
+	}
+
+	th {
+		border-top: 0;
+		font-family: @headings-font-family;
+		font-size: @font-size-h2;
+	  font-weight: @headings-font-weight;
+	  line-height: @headings-line-height;
+		padding: 18px;
+	}
+
+	th:first-child, td:first-child {
+		border-left: 0;
+	}
+
+	th:last-child, td:last-child {
+		border-right: 0;
+	}
+
+	td:first-child {
+		font-weight: bold;
+		padding-left: 18px;
+		text-align: left;
+	}
+
+	tr:first-child {
+		th {
+			position: relative;
+			/* keep here position here, otherwise messes up border on safari */
+		}
+	}
+
+	tr:last-child {
+		td {
+			border-bottom: 0;
+			padding: 18px;
+		}
+			/* highlighted column */
+		td:nth-child(3) {
+			position: relative;
+			/* keep here position here, otherwise messes up border on safari when there is a bg color */
+			&:before {
+				/* needed for safafi */
+				border-top: 1px solid @gray-lighter;
+				content: '';
+				left: 0;
+				position: absolute;
+				top: -1px;
+				width: 100%;
+			}
+		}
+		td:first-child {
+			border: 0;
+		}
+	}
+
+	.fa-check {
+		color: @green;
+	}
+
+	/* accessibility fixes */
+	.small {
+		color: @gray-med;
+	}
+
+	/* highlighted column */
+	td:nth-child(3), th:nth-child(3) {
+		background-color: white;
+		border-left: @highlight-border solid @gray-lighter;
+		border-right: @highlight-border solid @gray-lighter;
+	}
+	.outer {
+		left: -@highlight-border;
+		right: -@highlight-border;
+		position: absolute;
+
+		.outer-content {
+			background: white;
+			border: @highlight-border solid @gray-lighter;
+			border-radius: @border-radius-base;
+			font-size: @font-size-base;
+			font-family: @font-family-sans-serif;
+			font-weight: bold;
+			height: @best-val-height;
+			padding-top: 10px;
+		}
+	}
+	.outer.outer-top {
+		top: -@best-val-height;
+		.outer-content {
+			border-bottom-left-radius: 0;
+			border-bottom-right-radius: 0;
+			border-bottom: 0;
+		}
+	}
+	.outer.outer-btm {
+		bottom: -@best-val-height/2;
+		.outer-content {
+			border-top-left-radius: 0;
+			border-top-right-radius: 0;
+			border-top: 0;
+			height: @best-val-height/2;
+		}
+	}
+
+	/* highlight rows on hover */
+	tr:hover {
+		td {
+			background-color: @gray-lightest;
+		}
+	}
+	tr:first-child:hover {
+		background-color: transparent;
+	}
+	tr:last-child:hover {
+		background-color: transparent;
+		td {
+			background-color: transparent;
+		}
+	}
+
+	/* tooltip */
+	sup {
+		color: @red;
+		cursor: pointer;
+		margin-left: 5px;
+	}
+	.tooltip.in {
+		min-width: 200px
+	}
+}

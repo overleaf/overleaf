@@ -10,6 +10,7 @@ GeoIpLookup = require("../../infrastructure/GeoIpLookup")
 SubscriptionDomainHandler = require("./SubscriptionDomainHandler")
 UserGetter = require "../User/UserGetter"
 FeaturesUpdater = require './FeaturesUpdater'
+planFeatures = require './planFeatures'
 
 module.exports = SubscriptionController =
 
@@ -20,6 +21,7 @@ module.exports = SubscriptionController =
 			viewName = "#{viewName}_#{req.query.v}"
 		logger.log viewName:viewName, "showing plans page"
 		currentUser = null
+
 		GeoIpLookup.getCurrencyCode req.query?.ip || req.ip, (err, recomendedCurrency)->
 			return next(err) if err?
 			render = () ->
@@ -29,6 +31,7 @@ module.exports = SubscriptionController =
 					gaExperiments: Settings.gaExperiments.plansPage
 					recomendedCurrency:recomendedCurrency
 					shouldABTestPlans: currentUser == null or (currentUser?.signUpDate? and currentUser.signUpDate >= (new Date('2016-10-27')))
+					planFeatures: planFeatures
 			user_id = AuthenticationController.getLoggedInUserId(req)
 			if user_id?
 				UserGetter.getUser user_id, {signUpDate: 1}, (err, user) ->

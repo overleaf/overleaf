@@ -9,6 +9,7 @@ define [
 
 		$scope.currencyCode = MultiCurrencyPricing.currencyCode
 		$scope.plans = MultiCurrencyPricing.plans
+		$scope.planCode = window.plan_code
 
 		$scope.switchToStudent = ()->
 			currentPlanCode = window.plan_code
@@ -234,3 +235,6 @@ define [
 			{code:'WK',name:'Wake Island'},{code:'WF',name:'Wallis and Futuna'},{code:'EH',name:'Western Sahara'},{code:'YE',name:'Yemen'},
 			{code:'ZM',name:'Zambia'},{code:'AX',name:'&angst;land Islandscode:'}
 		]
+
+		sixpack.participate 'plans', ['default', 'more-details'], (chosenVariation, rawResponse)->
+			$scope.plansVariant = chosenVariation
