@@ -56,7 +56,6 @@ describe "ProjectStructureChanges", ->
 	describe "duplicating a project", ->
 		before (done) ->
 			MockDocUpdaterApi.clearProjectStructureUpdates()
-			console.log(example_project_id)
 			@owner.request.post {
 				uri: "/Project/#{example_project_id}/clone",
 				json:
@@ -219,9 +218,15 @@ describe "ProjectStructureChanges", ->
 				if res.statusCode < 200 || res.statusCode >= 300
 					throw new Error("failed to upload file #{res.statusCode}")
 
+				example_file_id = JSON.parse(body).entity_id
+
 				{fileUpdates:updates, version} = MockDocUpdaterApi.getProjectStructureUpdates(example_project_id)
-				expect(updates.length).to.equal(1)
+				expect(updates.length).to.equal(2)
 				update = updates[0]
+				expect(update.userId).to.equal(@owner._id)
+				expect(update.pathname).to.equal("/1pixel.png")
+				#expect(update.url).to.be.a('string');
+				update = updates[1]
 				expect(update.userId).to.equal(@owner._id)
 				expect(update.pathname).to.equal("/1pixel.png")
 				expect(update.url).to.be.a('string');
@@ -591,8 +596,12 @@ describe "ProjectStructureChanges", ->
 					throw new Error("failed to upload file #{res.statusCode}")
 
 				{fileUpdates:updates, version} = MockDocUpdaterApi.getProjectStructureUpdates(@tpds_project_id)
-				expect(updates.length).to.equal(1)
+				expect(updates.length).to.equal(2)
 				update = updates[0]
+				expect(update.userId).to.equal(@owner._id)
+				expect(update.pathname).to.equal("/1pixel.png")
+				#expect(update.url).to.be.a('string');
+				update = updates[1]
 				expect(update.userId).to.equal(@owner._id)
 				expect(update.pathname).to.equal("/1pixel.png")
 				expect(update.url).to.be.a('string');

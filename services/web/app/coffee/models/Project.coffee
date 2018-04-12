@@ -12,6 +12,10 @@ ObjectId = Schema.ObjectId
 DeletedDocSchema = new Schema
 	name: String
 
+DeletedFileSchema = new Schema
+	name: String
+	deletedAt: {type: Date}
+
 ProjectSchema = new Schema
 	name              :   {type:String, default:'new project'}
 	lastUpdated       :   {type:Date, default: () -> new Date()}
@@ -30,6 +34,7 @@ ProjectSchema = new Schema
 	description : {type:String, default:''}
 	archived          : { type: Boolean }
 	deletedDocs       : [DeletedDocSchema]
+	deletedFiles      : [DeletedFileSchema]
 	imageName         : { type: String }
 	track_changes     : { type: Object }
 	tokens            :

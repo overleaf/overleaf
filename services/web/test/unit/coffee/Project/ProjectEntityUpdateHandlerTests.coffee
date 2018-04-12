@@ -14,6 +14,7 @@ describe 'ProjectEntityUpdateHandler', ->
 	file_id = "4eecaffcbffa66588e000009"
 	folder_id = "4eecaffcbffa66588e000008"
 	rootFolderId = "4eecaffcbffa66588e000007"
+	new_file_id = "4eecaffcbffa66588e000099"
 	userId = 1234
 
 	beforeEach ->
@@ -31,7 +32,11 @@ describe 'ProjectEntityUpdateHandler', ->
 		@FileModel = class File
 			constructor:(options)->
 				{@name} = options
-				@._id = file_id
+				# use a new id for replacement files
+				if @name is 'dummy-upload-filename'
+					@._id = new_file_id
+				else
+					@._id = file_id
 				@rev = 0
 
 		@docName = "doc-name"
@@ -295,14 +300,33 @@ describe 'ProjectEntityUpdateHandler', ->
 		beforeEach ->
 			@path = "/path/to/file"
 
-			@newFile = _id: file_id
-			@ProjectEntityUpdateHandler.addFileWithoutUpdatingHistory =
-				withoutLock: sinon.stub().yields(null, @newFile, folder_id, @path, @fileUrl)
-			@ProjectEntityUpdateHandler.addFile project_id, folder_id, @docName, @fileSystemPath, @linkedFileData, userId, @callback
+			@newFile = {_id: file_id, rev: 0, name: @fileName}
+			@TpdsUpdateSender.addFile = sinon.stub().yields()
+			@ProjectEntityMongoUpdateHandler.addFile = sinon.stub().yields(null, {path: fileSystem: @path}, @project)
+			@ProjectEntityUpdateHandler.addFile project_id, folder_id, @fileName, @fileSystemPath, @linkedFileData, userId, @callback
 
-		it "creates the doc without history", () ->
-			@ProjectEntityUpdateHandler.addFileWithoutUpdatingHistory.withoutLock
-				.calledWith(project_id, folder_id, @docName, @fileSystemPath, @linkedFileData, userId)
+		it "updates the file in the filestore", () ->
+			@FileStoreHandler.uploadFileFromDisk
+				.calledWith(project_id, file_id, @fileSystemPath)
+				.should.equal true
+
+		it "updates the file in mongo", () ->
+			fileMatcher = sinon.match (file) =>
+				file.name == @fileName
+
+			@ProjectEntityMongoUpdateHandler.addFile
+				.calledWithMatch(project_id, folder_id, fileMatcher)
+				.should.equal true
+
+		it "notifies the tpds", () ->
+			@TpdsUpdateSender.addFile
+				.calledWith({
+					project_id: project_id
+					project_name: @project.name
+					file_id: file_id
+					rev: 0
+					path: @path
+				})
 				.should.equal true
 
 		it "sends the change in project structure to the doc updater", () ->
@@ -317,21 +341,26 @@ describe 'ProjectEntityUpdateHandler', ->
 
 	describe 'replaceFile', ->
 		beforeEach ->
-			@newFile = _id: file_id, rev: 0
+			# replacement file now creates a new file object
+			@newFileUrl = "new-file-url"
+			@FileStoreHandler.uploadFileFromDisk = sinon.stub().yields(null, @newFileUrl)
+
+			@newFile = _id: new_file_id, name: "dummy-upload-filename", rev: 0
+			@oldFile = _id: file_id
 			@path = "/path/to/file"
 			@project = _id: project_id, name: 'some project'
-			@ProjectEntityMongoUpdateHandler.replaceFile = sinon.stub().yields(null, @newFile, @project, fileSystem: @path)
-
+			@ProjectEntityMongoUpdateHandler._insertDeletedFileReference = sinon.stub().yields()
+			@ProjectEntityMongoUpdateHandler.replaceFileWithNew = sinon.stub().yields(null, @oldFile, @project, fileSystem: @path)
 			@ProjectEntityUpdateHandler.replaceFile project_id, file_id, @fileSystemPath, @linkedFileData, userId, @callback
 
 		it 'uploads a new version of the file', ->
 			@FileStoreHandler.uploadFileFromDisk
-				.calledWith(project_id, file_id, @fileSystemPath)
+				.calledWith(project_id, new_file_id, @fileSystemPath)
 				.should.equal true
 
 		it 'replaces the file in mongo', ->
-			@ProjectEntityMongoUpdateHandler.replaceFile
-				.calledWith(project_id, file_id, @linkedFileData)
+			@ProjectEntityMongoUpdateHandler.replaceFileWithNew
+				.calledWith(project_id, file_id, @newFile)
 				.should.equal true
 
 		it 'notifies the tpds', ->
@@ -339,20 +368,24 @@ describe 'ProjectEntityUpdateHandler', ->
 				.calledWith({
 					project_id: project_id
 					project_name: @project.name
-					file_id: file_id
+					file_id: new_file_id
 					rev: @newFile.rev + 1
 					path: @path
 				})
 				.should.equal true
 
 		it 'updates the project structure in the doc updater', ->
+			oldFiles = [
+				file: @oldFile
+				path: @path
+			]
 			newFiles = [
 				file: @newFile
 				path: @path
-				url: @fileUrl
+				url: @newFileUrl
 			]
 			@DocumentUpdaterHandler.updateProjectStructure
-				.calledWith(project_id, userId, {newFiles})
+				.calledWith(project_id, userId, {oldFiles, newFiles})
 				.should.equal true
 
 	describe 'addDocWithoutUpdatingHistory', ->
@@ -511,12 +544,12 @@ describe 'ProjectEntityUpdateHandler', ->
 				@existingFile = _id: file_id, name: @fileName
 				@folder = _id: folder_id, fileRefs: [@existingFile]
 				@ProjectLocator.findElement = sinon.stub().yields(null, @folder)
-				@ProjectEntityUpdateHandler.replaceFile = withoutLock: sinon.stub().yields(null, @newFile)
+				@ProjectEntityUpdateHandler.replaceFile = mainTask: sinon.stub().yields(null, @newFile)
 
 				@ProjectEntityUpdateHandler.upsertFile project_id, folder_id, @fileName, @fileSystemPath, @linkedFileData, userId, @callback
 
 			it 'replaces the file', ->
-				@ProjectEntityUpdateHandler.replaceFile.withoutLock
+				@ProjectEntityUpdateHandler.replaceFile.mainTask
 					.calledWith(project_id, file_id, @fileSystemPath, @linkedFileData, userId)
 					.should.equal true
 
@@ -528,7 +561,7 @@ describe 'ProjectEntityUpdateHandler', ->
 				@folder = _id: folder_id, fileRefs: []
 				@newFile = _id: file_id
 				@ProjectLocator.findElement = sinon.stub().yields(null, @folder)
-				@ProjectEntityUpdateHandler.addFile = withoutLock: sinon.stub().yields(null, @newFile)
+				@ProjectEntityUpdateHandler.addFile = mainTask: sinon.stub().yields(null, @newFile)
 
 				@ProjectEntityUpdateHandler.upsertFile project_id, folder_id, @fileName, @fileSystemPath, @linkedFileData, userId, @callback
 
@@ -538,7 +571,7 @@ describe 'ProjectEntityUpdateHandler', ->
 					.should.equal true
 
 			it 'adds the file', ->
-				@ProjectEntityUpdateHandler.addFile.withoutLock
+				@ProjectEntityUpdateHandler.addFile.mainTask
 					.calledWith(project_id, folder_id, @fileName, @fileSystemPath, @linkedFileData, userId)
 					.should.equal true
 
@@ -584,7 +617,7 @@ describe 'ProjectEntityUpdateHandler', ->
 			@ProjectEntityUpdateHandler.mkdirp =
 				withoutLock: sinon.stub().yields(null, @newFolders, @folder)
 			@ProjectEntityUpdateHandler.upsertFile =
-				withoutLock: sinon.stub().yields(null, @file, @isNewFile)
+				mainTask: sinon.stub().yields(null, @file, @isNewFile)
 
 			@ProjectEntityUpdateHandler.upsertFileWithPath project_id, @path, @fileSystemPath, @linkedFileData, userId, @callback
 
@@ -594,13 +627,13 @@ describe 'ProjectEntityUpdateHandler', ->
 				.should.equal true
 
 		it 'upserts the file', ->
-			@ProjectEntityUpdateHandler.upsertFile.withoutLock
+			@ProjectEntityUpdateHandler.upsertFile.mainTask
 				.calledWith(project_id, @folder._id, 'file.png', @fileSystemPath, @linkedFileData, userId)
 				.should.equal true
 
 		it 'calls the callback', ->
 			@callback
-				.calledWith(null, @file, @isNewFile, @newFolders, @folder)
+				.calledWith(null, @file, @isNewFile, undefined, @newFolders, @folder)
 				.should.equal true
 
 	describe 'deleteEntity', ->
@@ -819,6 +852,7 @@ describe 'ProjectEntityUpdateHandler', ->
 			@FileStoreHandler.deleteFile = sinon.stub().yields()
 			@DocumentUpdaterHandler.deleteDoc = sinon.stub().yields()
 			@ProjectEntityUpdateHandler.unsetRootDoc = sinon.stub().yields()
+			@ProjectEntityMongoUpdateHandler._insertDeletedFileReference = sinon.stub().yields()
 
 		describe "a file", ->
 			beforeEach (done) ->
@@ -826,8 +860,13 @@ describe 'ProjectEntityUpdateHandler', ->
 				@entity = _id: @entity_id
 				@ProjectEntityUpdateHandler._cleanUpEntity @project, @entity, 'file', @path, userId, done
 
-			it "should delete the file from FileStoreHandler", ->
-				@FileStoreHandler.deleteFile.calledWith(project_id, @entity_id).should.equal true
+			it "should insert the file into the deletedFiles array", ->
+				@ProjectEntityMongoUpdateHandler._insertDeletedFileReference
+					.calledWith(@project._id, @entity)
+					.should.equal true
+
+			it "should not delete the file from FileStoreHandler", ->
+				@FileStoreHandler.deleteFile.calledWith(project_id, @entity_id).should.equal false
 
 			it "should not attempt to delete from the document updater", ->
 				@DocumentUpdaterHandler.deleteDoc.called.should.equal false
@@ -892,7 +931,7 @@ describe 'ProjectEntityUpdateHandler', ->
 				name: "test.tex"
 			@path = "/path/to/doc"
 			@ProjectEntityUpdateHandler.unsetRootDoc = sinon.stub().yields()
-			@ProjectEntityUpdateHandler._insertDeletedDocReference = sinon.stub().yields()
+			@ProjectEntityMongoUpdateHandler._insertDeletedDocReference = sinon.stub().yields()
 			@DocumentUpdaterHandler.deleteDoc = sinon.stub().yields()
 			@DocstoreManager.deleteDoc = sinon.stub().yields()
 			@callback = sinon.stub()
@@ -912,7 +951,7 @@ describe 'ProjectEntityUpdateHandler', ->
 					.calledWith(project_id, @doc._id.toString())
 
 			it "should insert the doc into the deletedDocs array", ->
-				@ProjectEntityUpdateHandler._insertDeletedDocReference
+				@ProjectEntityMongoUpdateHandler._insertDeletedDocReference
 					.calledWith(@project._id, @doc)
 					.should.equal true
 
@@ -941,28 +980,4 @@ describe 'ProjectEntityUpdateHandler', ->
 			it "should call the callback", ->
 				@callback.called.should.equal true
 
-	describe "_insertDeletedDocReference", ->
-		beforeEach ->
-			@doc =
-				_id: ObjectId()
-				name: "test.tex"
-			@callback = sinon.stub()
-			@ProjectModel.update = sinon.stub().yields()
-			@ProjectEntityUpdateHandler._insertDeletedDocReference project_id, @doc, @callback
-
-		it "should insert the doc into deletedDocs", ->
-			@ProjectModel.update
-				.calledWith({
-					_id: project_id
-				}, {
-					$push: {
-						deletedDocs: {
-							_id: @doc._id
-							name: @doc.name
-						}
-					}
-				})
-				.should.equal true
-
-		it "should call the callback", ->
-			@callback.called.should.equal true
+	
