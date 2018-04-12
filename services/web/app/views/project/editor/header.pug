@@ -107,6 +107,9 @@ header.toolbar.toolbar-header.toolbar-with-labels(
 		)
 			i.fa.fa-fw.fa-group
 			p.toolbar-label #{translate("share")}
+
+		!= moduleIncludes('publish:button', locals)
+
 		a.btn.btn-full-height(
 			href,
 			ng-click="toggleHistory();",
