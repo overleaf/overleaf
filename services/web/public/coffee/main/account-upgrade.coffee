@@ -19,24 +19,8 @@ define [
 						url = "#{url}&cc=#{couponCode}"
 				$scope.startedFreeTrial = true
 
-				switch source
-					when "dropbox"
-						sixpack.participate 'teaser-dropbox-text', ['default', 'dropbox-focused'], (variant) ->
-							event_tracking.sendMB "subscription-start-trial", { source, plan, variant }
-
-					when "history"
-						sixpack.participate 'teaser-history', ['default', 'focused'], (variant) ->
-							event_tracking.sendMB "subscription-start-trial", { source, plan, variant }
-
-					else
-						event_tracking.sendMB "subscription-start-trial", { source, plan }
+				event_tracking.sendMB "subscription-start-trial", { source, plan }
 
 				w.location = url
 
-			if $scope.shouldABTestPlans
-				sixpack.participate 'plans-1610', ['default', 'heron', 'ibis'], (chosenVariation, rawResponse)->
-					if chosenVariation in ['heron', 'ibis']
-						plan = "collaborator_#{chosenVariation}"
-					go()
-			else
-				go()
+			go()

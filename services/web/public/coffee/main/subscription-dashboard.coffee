@@ -3,8 +3,6 @@ define [
 ], (App)->
 
 	App.controller 'SuccessfulSubscriptionController', ($scope, sixpack) ->
-		sixpack.convert 'plans-1610', () ->
-
 
 	SUBSCRIPTION_URL = "/user/subscription/update"
 
