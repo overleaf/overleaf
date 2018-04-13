@@ -76,7 +76,7 @@ block content
 										.alert.alert-warning.small(ng-show="genericError")
 											strong {{genericError}}
 
-										div()
+										div(ng-show="paymentMethod.value === 'credit_card'")
 											.row
 												.col-xs-6
 													.form-group(ng-class="validation.errorFields.first_name || inputHasError(simpleCCForm.firstName) ? 'has-error' : ''")
