@@ -194,7 +194,9 @@ block content
 													span(ng-show="processing") 
 														i.fa.fa-spinner.fa-spin
 														| &nbsp;
-													| {{ paymentMethod.value === 'credit_card' ? '#{translate("upgrade_cc_btn")}' : '#{translate("upgrade_paypal_btn")}' }}
+													span(ng-if="paymentMethod.value === 'credit_card'")
+														| {{ monthlyBilling ? '#{translate("upgrade_cc_btn")}' : '#{translate("upgrade_now")}'}}
+													span(ng-if="paymentMethod.value !== 'credit_card'") #{translate("upgrade_paypal_btn")}
 
 
 				.col-md-3.col-md-pull-4
