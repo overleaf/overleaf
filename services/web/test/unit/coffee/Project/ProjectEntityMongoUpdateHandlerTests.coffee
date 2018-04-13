@@ -267,7 +267,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 		it "calls the callback", ->
 			changes = { @oldDocs, @newDocs, @oldFiles, @newFiles }
 			@callback.calledWith(
-				null, @project.name, @path.fileSystem, @pathAfterMove.fileSystem, @doc.rev, changes
+				null, @project, @path.fileSystem, @pathAfterMove.fileSystem, @doc.rev, changes
 			).should.equal true
 
 	describe 'deleteEntity', ->
@@ -349,7 +349,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 		it 'calls the callback', ->
 			changes = { @oldDocs, @newDocs, @oldFiles, @newFiles }
 			@callback.calledWith(
-				null, @project.name, '/old.tex', '/new.tex', @doc.rev, changes
+				null, @project, '/old.tex', '/new.tex', @doc.rev, changes
 			).should.equal true
 
 	describe 'addFolder', ->

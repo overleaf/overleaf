@@ -10,6 +10,7 @@ ObjectId = require("mongoose").Types.ObjectId
 
 describe 'ProjectEntityUpdateHandler', ->
 	project_id = '4eecb1c1bffa66588e0000a1'
+	projectHistoryId = '123456'
 	doc_id = '4eecb1c1bffa66588e0000a2'
 	file_id = "4eecaffcbffa66588e000009"
 	folder_id = "4eecaffcbffa66588e000008"
@@ -18,7 +19,12 @@ describe 'ProjectEntityUpdateHandler', ->
 	userId = 1234
 
 	beforeEach ->
-		@project = _id: project_id, name: 'project name'
+		@project =
+			_id: project_id,
+			name: 'project name'
+			overleaf:
+				history:
+					id: projectHistoryId
 		@fileUrl = 'filestore.example.com/file'
 		@FileStoreHandler =
 			uploadFileFromDisk: sinon.stub().yields(null, @fileUrl)
@@ -112,7 +118,7 @@ describe 'ProjectEntityUpdateHandler', ->
 				newFile.url == @fileUrl
 
 			@DocumentUpdaterHandler.updateProjectStructure
-				.calledWithMatch(project_id, userId, changesMatcher)
+				.calledWithMatch(project_id, projectHistoryId, userId, changesMatcher)
 				.should.equal true
 
 	describe 'updateDocLines', ->
@@ -278,7 +284,7 @@ describe 'ProjectEntityUpdateHandler', ->
 
 			@newDoc = _id: doc_id
 			@ProjectEntityUpdateHandler.addDocWithoutUpdatingHistory =
-				withoutLock: sinon.stub().yields(null, @newDoc, folder_id, @path)
+				withoutLock: sinon.stub().yields(null, @newDoc, folder_id, @path, @project)
 			@ProjectEntityUpdateHandler.addDoc project_id, folder_id, @docName, @docLines, userId, @callback
 
 		it "creates the doc without history", () ->
@@ -293,7 +299,7 @@ describe 'ProjectEntityUpdateHandler', ->
 				docLines: @docLines.join('\n')
 			]
 			@DocumentUpdaterHandler.updateProjectStructure
-				.calledWith(project_id, userId, {newDocs})
+				.calledWith(project_id, projectHistoryId, userId, {newDocs})
 				.should.equal true
 
 	describe 'addFile', ->
@@ -336,7 +342,7 @@ describe 'ProjectEntityUpdateHandler', ->
 				url: @fileUrl
 			]
 			@DocumentUpdaterHandler.updateProjectStructure
-				.calledWith(project_id, userId, {newFiles})
+				.calledWith(project_id, projectHistoryId, userId, {newFiles})
 				.should.equal true
 
 	describe 'replaceFile', ->
@@ -348,7 +354,6 @@ describe 'ProjectEntityUpdateHandler', ->
 			@newFile = _id: new_file_id, name: "dummy-upload-filename", rev: 0
 			@oldFile = _id: file_id
 			@path = "/path/to/file"
-			@project = _id: project_id, name: 'some project'
 			@ProjectEntityMongoUpdateHandler._insertDeletedFileReference = sinon.stub().yields()
 			@ProjectEntityMongoUpdateHandler.replaceFileWithNew = sinon.stub().yields(null, @oldFile, @project, fileSystem: @path)
 			@ProjectEntityUpdateHandler.replaceFile project_id, file_id, @fileSystemPath, @linkedFileData, userId, @callback
@@ -385,7 +390,7 @@ describe 'ProjectEntityUpdateHandler', ->
 				url: @newFileUrl
 			]
 			@DocumentUpdaterHandler.updateProjectStructure
-				.calledWith(project_id, userId, {oldFiles, newFiles})
+				.calledWith(project_id, projectHistoryId, userId, {oldFiles, newFiles})
 				.should.equal true
 
 	describe 'addDocWithoutUpdatingHistory', ->
@@ -725,7 +730,7 @@ describe 'ProjectEntityUpdateHandler', ->
 			@rev = 2
 			@changes = newDocs: ['old-doc'], newFiles: ['old-file']
 			@ProjectEntityMongoUpdateHandler.moveEntity = sinon.stub().yields(
-				null, @project_name, @startPath, @endPath, @rev, @changes
+				null, @project, @startPath, @endPath, @rev, @changes
 			)
 			@TpdsUpdateSender.moveEntity = sinon.stub()
 			@DocumentUpdaterHandler.updateProjectStructure = sinon.stub()
@@ -744,7 +749,7 @@ describe 'ProjectEntityUpdateHandler', ->
 
 		it 'sends the changes in project structure to the doc updater',  ->
 			@DocumentUpdaterHandler.updateProjectStructure
-				.calledWith(project_id, userId, @changes, @callback)
+				.calledWith(project_id, projectHistoryId, userId, @changes, @callback)
 				.should.equal true
 
 	describe "renameEntity", ->
@@ -756,7 +761,7 @@ describe 'ProjectEntityUpdateHandler', ->
 			@changes = newDocs: ['old-doc'], newFiles: ['old-file']
 			@newDocName = 'b.tex'
 			@ProjectEntityMongoUpdateHandler.renameEntity = sinon.stub().yields(
-				null, @project_name, @startPath, @endPath, @rev, @changes
+				null, @project, @startPath, @endPath, @rev, @changes
 			)
 			@TpdsUpdateSender.moveEntity = sinon.stub()
 			@DocumentUpdaterHandler.updateProjectStructure = sinon.stub()
@@ -775,7 +780,7 @@ describe 'ProjectEntityUpdateHandler', ->
 
 		it 'sends the changes in project structure to the doc updater',  ->
 			@DocumentUpdaterHandler.updateProjectStructure
-				.calledWith(project_id, userId, @changes, @callback)
+				.calledWith(project_id, projectHistoryId, userId, @changes, @callback)
 				.should.equal true
 
 	describe "resyncProjectHistory", ->
@@ -791,7 +796,7 @@ describe 'ProjectEntityUpdateHandler', ->
 
 		describe "a project without project-history enabled", ->
 			beforeEach ->
-				@project.ovreleaf = {}
+				@project.overleaf = {}
 				@ProjectGetter.getProject = sinon.stub().yields(null, @project)
 
 				@ProjectEntityUpdateHandler.resyncProjectHistory project_id, @callback
@@ -802,7 +807,6 @@ describe 'ProjectEntityUpdateHandler', ->
 
 		describe "a project with project-history enabled", ->
 			beforeEach ->
-				@project.overleaf = history: id: 4
 				@ProjectGetter.getProject = sinon.stub().yields(null, @project)
 				docs = [
 					doc: _id: doc_id
@@ -840,7 +844,7 @@ describe 'ProjectEntityUpdateHandler', ->
 					url: "www.filestore.test/#{project_id}/#{file_id}"
 				]
 				@DocumentUpdaterHandler.resyncProjectHistory
-					.calledWith(project_id, docs, files)
+					.calledWith(project_id, projectHistoryId, docs, files)
 					.should.equal true
 
 			it 'calls the callback', ->
@@ -874,7 +878,7 @@ describe 'ProjectEntityUpdateHandler', ->
 			it "should should send the update to the doc updater", ->
 				oldFiles = [ file: @entity, path: @path ]
 				@DocumentUpdaterHandler.updateProjectStructure
-					.calledWith(project_id, userId, {oldFiles})
+					.calledWith(project_id, projectHistoryId, userId, {oldFiles})
 					.should.equal true
 
 		describe "a doc", ->
@@ -924,8 +928,6 @@ describe 'ProjectEntityUpdateHandler', ->
 
 	describe "_cleanUpDoc", ->
 		beforeEach ->
-			@project =
-				_id: ObjectId(project_id)
 			@doc =
 				_id: ObjectId()
 				name: "test.tex"
@@ -963,7 +965,7 @@ describe 'ProjectEntityUpdateHandler', ->
 			it "should should send the update to the doc updater", ->
 				oldDocs = [ doc: @doc, path: @path ]
 				@DocumentUpdaterHandler.updateProjectStructure
-					.calledWith(project_id, userId, {oldDocs})
+					.calledWith(project_id, projectHistoryId, userId, {oldDocs})
 					.should.equal true
 
 			it "should call the callback", ->
