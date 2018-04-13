@@ -43,7 +43,7 @@ define [
 
 		$scope.processing = false
 
-		recurly.configure window.recurlyApiKey
+		recurly.configure publicKey:window.recurlyApiKey
 
 		pricing = recurly.Pricing()
 		window.pricing = pricing
@@ -72,6 +72,8 @@ define [
 				if pricing.price?.taxes[0]?.rate?
 					$scope.normalPrice += (basePrice * pricing.price.taxes[0].rate)
 			$scope.$apply()
+
+
 
 		$scope.applyCoupon = ->
 			pricing.coupon($scope.data.coupon).done()
