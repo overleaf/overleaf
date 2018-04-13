@@ -25,6 +25,7 @@ describe "DocumentManager", ->
 			"./UpdateManager": @UpdateManager = {}
 			"./RangesManager": @RangesManager = {}
 		@project_id = "project-id-123"
+		@projectHistoryId = "history-id-123"
 		@doc_id = "doc-id-123"
 		@user_id = 1234
 		@callback = sinon.stub()
@@ -459,11 +460,11 @@ describe "DocumentManager", ->
 
 		describe "successfully", ->
 			beforeEach ->
-				@DocumentManager.renameDoc @project_id, @doc_id, @user_id, @update, @callback
+				@DocumentManager.renameDoc @project_id, @doc_id, @user_id, @update, @projectHistoryId, @callback
 
 			it "should rename the document", ->
 				@RedisManager.renameDoc
-					.calledWith(@project_id, @doc_id, @user_id, @update)
+					.calledWith(@project_id, @doc_id, @user_id, @update, @projectHistoryId)
 					.should.equal true
 
 			it "should call the callback", ->

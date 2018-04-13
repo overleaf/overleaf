@@ -161,10 +161,10 @@ module.exports = HttpController =
 	updateProject: (req, res, next = (error) ->) ->
 		timer = new Metrics.Timer("http.updateProject")
 		project_id = req.params.project_id
-		{userId, docUpdates, fileUpdates, version} = req.body
+		{projectHistoryId, userId, docUpdates, fileUpdates, version} = req.body
 		logger.log {project_id, docUpdates, fileUpdates, version}, "updating project via http"
 
-		ProjectManager.updateProjectWithLocks project_id, userId, docUpdates, fileUpdates, version, (error) ->
+		ProjectManager.updateProjectWithLocks project_id, projectHistoryId, userId, docUpdates, fileUpdates, version, (error) ->
 			timer.done()
 			return next(error) if error?
 			logger.log project_id: project_id, "updated project via http"

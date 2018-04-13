@@ -161,13 +161,13 @@ module.exports = DocumentManager =
 					return callback(error) if error?
 					callback()
 
-	renameDoc: (project_id, doc_id, user_id, update, _callback = (error) ->) ->
+	renameDoc: (project_id, doc_id, user_id, update, projectHistoryId, _callback = (error) ->) ->
 		timer = new Metrics.Timer("docManager.updateProject")
 		callback = (args...) ->
 			timer.done()
 			_callback(args...)
 
-		RedisManager.renameDoc project_id, doc_id, user_id, update, callback
+		RedisManager.renameDoc project_id, doc_id, user_id, update, projectHistoryId, callback
 
 	getDocAndFlushIfOld: (project_id, doc_id, callback = (error, doc) ->) ->
 		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges, pathname, projectHistoryId, unflushedTime, alreadyLoaded) ->
@@ -223,9 +223,9 @@ module.exports = DocumentManager =
 		UpdateManager = require "./UpdateManager"
 		UpdateManager.lockUpdatesAndDo DocumentManager.deleteComment, project_id, doc_id, thread_id, callback
 
-	renameDocWithLock: (project_id, doc_id, user_id, update, callback = (error) ->) ->
+	renameDocWithLock: (project_id, doc_id, user_id, update, projectHistoryId, callback = (error) ->) ->
 		UpdateManager = require "./UpdateManager"
-		UpdateManager.lockUpdatesAndDo DocumentManager.renameDoc, project_id, doc_id, user_id, update, callback
+		UpdateManager.lockUpdatesAndDo DocumentManager.renameDoc, project_id, doc_id, user_id, update, projectHistoryId, callback
 
 	resyncDocContentsWithLock: (project_id, doc_id, callback = (error) ->) ->
 		UpdateManager = require "./UpdateManager"

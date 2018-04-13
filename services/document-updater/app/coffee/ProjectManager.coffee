@@ -105,7 +105,7 @@ module.exports = ProjectManager =
 	clearProjectState: (project_id, callback = (error) ->) ->
 		RedisManager.clearProjectState project_id, callback
 
-	updateProjectWithLocks: (project_id, user_id, docUpdates, fileUpdates, version, _callback = (error) ->) ->
+	updateProjectWithLocks: (project_id, projectHistoryId, user_id, docUpdates, fileUpdates, version, _callback = (error) ->) ->
 		timer = new Metrics.Timer("projectManager.updateProject")
 		callback = (args...) ->
 			timer.done()
@@ -120,11 +120,11 @@ module.exports = ProjectManager =
 			doc_id = projectUpdate.id
 			projectUpdate.version = "#{project_version}.#{project_subversion++}"
 			if projectUpdate.docLines?
-				ProjectHistoryRedisManager.queueAddEntity project_id, 'doc', doc_id, user_id, projectUpdate, (error, count) ->
+				ProjectHistoryRedisManager.queueAddEntity project_id, projectHistoryId, 'doc', doc_id, user_id, projectUpdate, (error, count) ->
 					project_ops_length = count
 					cb(error)
 			else
-				DocumentManager.renameDocWithLock project_id, doc_id, user_id, projectUpdate, (error, count) ->
+				DocumentManager.renameDocWithLock project_id, doc_id, user_id, projectUpdate, projectHistoryId, (error, count) ->
 					project_ops_length = count
 					cb(error)
 
@@ -132,11 +132,11 @@ module.exports = ProjectManager =
 			file_id = projectUpdate.id
 			projectUpdate.version = "#{project_version}.#{project_subversion++}"
 			if projectUpdate.url?
-				ProjectHistoryRedisManager.queueAddEntity project_id, 'file', file_id, user_id, projectUpdate, (error, count) ->
+				ProjectHistoryRedisManager.queueAddEntity project_id, projectHistoryId, 'file', file_id, user_id, projectUpdate, (error, count) ->
 					project_ops_length = count
 					cb(error)
 			else
-				ProjectHistoryRedisManager.queueRenameEntity project_id, 'file', file_id, user_id, projectUpdate, (error, count) ->
+				ProjectHistoryRedisManager.queueRenameEntity project_id, projectHistoryId, 'file', file_id, user_id, projectUpdate, (error, count) ->
 					project_ops_length = count
 					cb(error)
 

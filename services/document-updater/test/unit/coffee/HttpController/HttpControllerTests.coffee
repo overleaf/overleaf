@@ -509,23 +509,24 @@ describe "HttpController", ->
 
 	describe "updateProject", ->
 		beforeEach ->
+			@projectHistoryId = "history-id-123"
 			@userId = "user-id-123"
 			@docUpdates = sinon.stub()
 			@fileUpdates = sinon.stub()
 			@version = 1234567
 			@req =
-				body: {@userId, @docUpdates, @fileUpdates, @version}
+				body: {@projectHistoryId, @userId, @docUpdates, @fileUpdates, @version}
 				params:
 					project_id: @project_id
 
 		describe "successfully", ->
 			beforeEach ->
-				@ProjectManager.updateProjectWithLocks = sinon.stub().callsArgWith(5)
+				@ProjectManager.updateProjectWithLocks = sinon.stub().callsArgWith(6)
 				@HttpController.updateProject(@req, @res, @next)
 
 			it "should accept the change", ->
 				@ProjectManager.updateProjectWithLocks
-					.calledWith(@project_id, @userId, @docUpdates, @fileUpdates, @version)
+					.calledWith(@project_id, @projectHistoryId, @userId, @docUpdates, @fileUpdates, @version)
 					.should.equal true
 
 			it "should return a successful No Content response", ->
@@ -538,7 +539,7 @@ describe "HttpController", ->
 
 		describe "when an errors occurs", ->
 			beforeEach ->
-				@ProjectManager.updateProjectWithLocks = sinon.stub().callsArgWith(5, new Error("oops"))
+				@ProjectManager.updateProjectWithLocks = sinon.stub().callsArgWith(6, new Error("oops"))
 				@HttpController.updateProject(@req, @res, @next)
 
 			it "should call next with the error", ->

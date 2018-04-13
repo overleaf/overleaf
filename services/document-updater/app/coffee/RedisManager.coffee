@@ -275,16 +275,16 @@ module.exports = RedisManager =
 						else
 							callback null, docUpdateCount
 
-	renameDoc: (project_id, doc_id, user_id, update, callback = (error) ->) ->
+	renameDoc: (project_id, doc_id, user_id, update, projectHistoryId, callback = (error) ->) ->
 		RedisManager.getDoc project_id, doc_id, (error, lines, version) ->
 			return callback(error) if error?
 
 			if lines? and version?
 				rclient.set keys.pathname(doc_id:doc_id), update.newPathname, (error) ->
 					return callback(error) if error?
-					ProjectHistoryRedisManager.queueRenameEntity project_id, 'doc', doc_id, user_id, update, callback
+					ProjectHistoryRedisManager.queueRenameEntity project_id, projectHistoryId, 'doc', doc_id, user_id, update, callback
 			else
-				ProjectHistoryRedisManager.queueRenameEntity project_id, 'doc', doc_id, user_id, update, callback
+				ProjectHistoryRedisManager.queueRenameEntity project_id, projectHistoryId, 'doc', doc_id, user_id, update, callback
 
 	clearUnflushedTime: (doc_id, callback = (error) ->) ->
 		rclient.del keys.unflushedTime(doc_id:doc_id), callback

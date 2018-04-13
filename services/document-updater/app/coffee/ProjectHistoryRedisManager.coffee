@@ -7,7 +7,7 @@ module.exports = ProjectHistoryRedisManager =
 	queueOps: (project_id, ops..., callback) ->
 		rclient.rpush projectHistoryKeys.projectHistoryOps({project_id}), ops..., callback
 
-	queueRenameEntity: (project_id, entity_type, entity_id, user_id, projectUpdate, callback) ->
+	queueRenameEntity: (project_id, projectHistoryId, entity_type, entity_id, user_id, projectUpdate, callback) ->
 		projectUpdate =
 			pathname: projectUpdate.pathname
 			new_pathname: projectUpdate.newPathname
@@ -15,6 +15,7 @@ module.exports = ProjectHistoryRedisManager =
 				user_id: user_id
 				ts: new Date()
 			version: projectUpdate.version
+			projectHistoryId: projectHistoryId
 		projectUpdate[entity_type] = entity_id
 
 		logger.log {project_id, projectUpdate}, "queue rename operation to project-history"
@@ -22,7 +23,7 @@ module.exports = ProjectHistoryRedisManager =
 
 		ProjectHistoryRedisManager.queueOps project_id, jsonUpdate, callback
 
-	queueAddEntity: (project_id, entity_type, entitiy_id, user_id, projectUpdate, callback = (error) ->) ->
+	queueAddEntity: (project_id, projectHistoryId, entity_type, entitiy_id, user_id, projectUpdate, callback = (error) ->) ->
 		projectUpdate =
 			pathname: projectUpdate.pathname
 			docLines: projectUpdate.docLines
@@ -31,6 +32,7 @@ module.exports = ProjectHistoryRedisManager =
 				user_id: user_id
 				ts: new Date()
 			version: projectUpdate.version
+			projectHistoryId: projectHistoryId
 		projectUpdate[entity_type] = entitiy_id
 
 		logger.log {project_id, projectUpdate}, "queue add operation to project-history"

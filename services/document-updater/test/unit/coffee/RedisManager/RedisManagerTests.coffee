@@ -60,6 +60,7 @@ describe "RedisManager", ->
 
 		@doc_id = "doc-id-123"
 		@project_id = "project-id-123"
+		@projectHistoryId = "history-id-123"
 		@callback = sinon.stub()
 
 	describe "getDoc", ->
@@ -703,7 +704,7 @@ describe "RedisManager", ->
 			beforeEach ->
 				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, 'lines', 'version')
 				@ProjectHistoryRedisManager.queueRenameEntity = sinon.stub().yields()
-				@RedisManager.renameDoc @project_id, @doc_id, @userId, @update, @callback
+				@RedisManager.renameDoc @project_id, @doc_id, @userId, @update, @projectHistoryId, @callback
 
 			it "update the cached pathname", ->
 				@rclient.set
@@ -712,19 +713,19 @@ describe "RedisManager", ->
 
 			it "should queue an update", ->
 				@ProjectHistoryRedisManager.queueRenameEntity
-					.calledWithExactly(@project_id, 'doc', @doc_id, @userId, @update, @callback)
+					.calledWithExactly(@project_id, @projectHistoryId, 'doc', @doc_id, @userId, @update, @callback)
 					.should.equal true
 
 		describe "the document is not cached in redis", ->
 			beforeEach ->
 				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, null, null)
 				@ProjectHistoryRedisManager.queueRenameEntity = sinon.stub().yields()
-				@RedisManager.renameDoc @project_id, @doc_id, @userId, @update, @callback
+				@RedisManager.renameDoc @project_id, @doc_id, @userId, @update, @projectHistoryId, @callback
 
 			it "does not update the cached pathname", ->
 				@rclient.set.called.should.equal false
 
 			it "should queue an update", ->
 				@ProjectHistoryRedisManager.queueRenameEntity
-					.calledWithExactly(@project_id, 'doc', @doc_id, @userId, @update, @callback)
+					.calledWithExactly(@project_id, @projectHistoryId, 'doc', @doc_id, @userId, @update, @callback)
 					.should.equal true
