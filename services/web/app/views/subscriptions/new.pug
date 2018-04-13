@@ -105,7 +105,7 @@ block content
 
 											.form-group(ng-class="validation.correctCardNumber == false || validation.errorFields.number || inputHasError(simpleCCForm.ccNumber) ? 'has-error' : ''")
 												label(for="card-no") #{translate("credit_card_number")}
-												div#card-no.form-control(
+												div#card-no(
 													type="text"
 													name="ccNumber"
 													data-recurly='number'
@@ -119,7 +119,7 @@ block content
 												.col-xs-3
 													.form-group.has-feedback(ng-class="validation.correctExpiry == false || validation.errorFields.expiry || inputHasError(simpleCCForm.expiry) ? 'has-error' : ''")
 														label(for="month") #{translate("month")}
-														div.form-control(
+														div(
 															type="text"
 															name="month"
 															ng-focus="validation.correctExpiry = true; validation.errorFields.expiry = false;"
@@ -131,7 +131,7 @@ block content
 												.col-xs-3
 													.form-group.has-feedback(ng-class="validation.correctExpiry == false || validation.errorFields.expiry || inputHasError(simpleCCForm.expiry) ? 'has-error' : ''")
 														label(for="year") #{translate("year")}
-														div.form-control(
+														div(
 															type="text"
 															name="year"
 															data-recurly="year"
@@ -146,7 +146,7 @@ block content
 												.col-xs-6
 													.form-group.has-feedback(ng-class="validation.correctCvv == false || validation.errorFields.cvv || inputHasError(simpleCCForm.cvv) ? 'has-error' : ''")
 														label #{translate("security_code")}
-														div.form-control(
+														div(
 															type="text"
 															ng-model="data.cvv"
 															ng-focus="validation.correctCvv = true; validation.errorFields.cvv = false;"
