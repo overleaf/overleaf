@@ -47,12 +47,8 @@ define [
 			publicKey: window.recurlyApiKey
 			style: 
 				all: 
-					fontFamily: 'Open Sans',
-					fontSize: '1rem',
-					fontWeight: 'bold',
-					fontColor: '#2c0730'
-				number: 
-					placeholder: 'Card number'
+					fontFamily: '"Open Sans", sans-serif',
+					fontSize: '16px',
 				month: 
 					placeholder: 'mm'
 				year: 
