@@ -57,7 +57,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it 'gets the project', ->
 			@ProjectGetter.getProjectWithoutLock
-				.calledWith(project_id, {rootFolder:true, name: true})
+				.calledWith(project_id, {rootFolder:true, name:true, overleaf:true})
 				.should.equal true
 
 		it 'checks the folder exists', ->
@@ -80,7 +80,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it 'gets the project', ->
 			@ProjectGetter.getProjectWithoutLock
-				.calledWith(project_id, {rootFolder:true, name: true})
+				.calledWith(project_id, {rootFolder:true, name:true, overleaf:true})
 				.should.equal true
 
 		it 'checks the folder exists', ->
@@ -106,7 +106,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it 'gets the project', ->
 			@ProjectGetter.getProjectWithoutLock
-				.calledWith(project_id, {rootFolder:true, name: true})
+				.calledWith(project_id, {rootFolder:true, name:true, overleaf:true})
 				.should.equal true
 
 		it 'finds the existing element', ->
@@ -241,7 +241,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it 'should get the project', ->
 			@ProjectGetter.getProjectWithoutLock
-				.calledWith(project_id, {rootFolder:true, name:true})
+				.calledWith(project_id, {rootFolder:true, name:true, overleaf:true})
 				.should.equal true
 
 		it 'should find the doc to move', ->
@@ -280,7 +280,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it "should get the project", ->
 			@ProjectGetter.getProjectWithoutLock
-				.calledWith(project_id, {name:true, rootFolder:true})
+				.calledWith(project_id, {rootFolder:true, name:true, overleaf:true})
 				.should.equal true
 
 		it "should find the element", ->
@@ -325,7 +325,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it 'should get the project', ->
 			@ProjectGetter.getProjectWithoutLock
-				.calledWith(project_id, {rootFolder:true, name:true})
+				.calledWith(project_id, {rootFolder:true, name:true, overleaf:true})
 				.should.equal true
 
 		it 'should find the doc', ->
@@ -363,7 +363,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it 'gets the project', ->
 			@ProjectGetter.getProjectWithoutLock
-				.calledWith(project_id, {rootFolder:true, name: true})
+				.calledWith(project_id, {rootFolder:true, name:true, overleaf:true})
 				.should.equal true
 
 		it 'checks the parent folder exists', ->

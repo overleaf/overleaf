@@ -31,7 +31,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 	LOCK_NAMESPACE: LOCK_NAMESPACE
 
 	addDoc: wrapWithLock (project_id, folder_id, doc, callback = (err, result) ->) ->
-		ProjectGetter.getProjectWithoutLock project_id, {rootFolder:true, name:true}, (err, project) ->
+		ProjectGetter.getProjectWithoutLock project_id, {rootFolder:true, name:true, overleaf:true}, (err, project) ->
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add doc"
 				return callback(err)
@@ -40,7 +40,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 				self._putElement project, folder_id, doc, "doc", callback
 
 	addFile: wrapWithLock (project_id, folder_id, fileRef, callback = (error, result, project) ->)->
-		ProjectGetter.getProjectWithoutLock project_id, {rootFolder:true, name:true}, (err, project) ->
+		ProjectGetter.getProjectWithoutLock project_id, {rootFolder:true, name:true, overleaf:true}, (err, project) ->
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add file"
 				return callback(err)
@@ -49,7 +49,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 				self._putElement project, folder_id, fileRef, "file", callback
 
 	replaceFileWithNew: wrapWithLock (project_id, file_id, newFileRef, callback) ->
-		ProjectGetter.getProjectWithoutLock project_id, {rootFolder: true, name:true}, (err, project) ->
+		ProjectGetter.getProjectWithoutLock project_id, {rootFolder:true, name:true, overleaf:true}, (err, project) ->
 			return callback(err) if err?
 			ProjectLocator.findElement {project:project, element_id: file_id, type: 'file'}, (err, fileRef, path)=>
 				return callback(err) if err?
@@ -110,7 +110,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 				callback null, folders, lastFolder
 
 	moveEntity: wrapWithLock (project_id, entity_id, destFolderId, entityType, callback = (error) ->) ->
-		ProjectGetter.getProjectWithoutLock project_id, {rootFolder:true, name:true}, (err, project) ->
+		ProjectGetter.getProjectWithoutLock project_id, {rootFolder:true, name:true, overleaf:true}, (err, project) ->
 			return callback(err) if err?
 			ProjectLocator.findElement {project, element_id: entity_id, type: entityType}, (err, entity, entityPath)->
 				return callback(err) if err?
@@ -127,10 +127,10 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 									startPath = entityPath.fileSystem
 									endPath = result.path.fileSystem
 									changes = {oldDocs, newDocs, oldFiles, newFiles}
-									callback null, project.name, startPath, endPath, entity.rev, changes, callback
+									callback null, project, startPath, endPath, entity.rev, changes, callback
 
 	deleteEntity: wrapWithLock (project_id, entity_id, entityType, callback) ->
-		ProjectGetter.getProjectWithoutLock project_id, {name:true, rootFolder:true}, (error, project) ->
+		ProjectGetter.getProjectWithoutLock project_id, {name:true, rootFolder:true, overleaf:true}, (error, project) ->
 			return callback(error) if error?
 			ProjectLocator.findElement {project: project, element_id: entity_id, type: entityType}, (error, entity, path) ->
 				return callback(error) if error?
@@ -139,7 +139,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 					callback null, entity, path, project
 
 	renameEntity: wrapWithLock (project_id, entity_id, entityType, newName, callback) ->
-		ProjectGetter.getProjectWithoutLock project_id, {rootFolder:true, name:true}, (error, project)=>
+		ProjectGetter.getProjectWithoutLock project_id, {rootFolder:true, name:true, overleaf:true}, (error, project)=>
 			return callback(error) if error?
 			ProjectEntityHandler.getAllEntitiesFromProject project, (error, oldDocs, oldFiles) =>
 				return callback(error) if error?
@@ -161,10 +161,10 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 								return callback(error) if error?
 								startPath = entPath.fileSystem
 								changes = {oldDocs, newDocs, oldFiles, newFiles}
-								callback null, project.name, startPath, endPath, entity.rev, changes, callback
+								callback null, project, startPath, endPath, entity.rev, changes, callback
 
 	addFolder: wrapWithLock (project_id, parentFolder_id, folderName, callback) ->
-		ProjectGetter.getProjectWithoutLock project_id, {rootFolder:true, name:true}, (err, project) ->
+		ProjectGetter.getProjectWithoutLock project_id, {rootFolder:true, name:true, overleaf:true}, (err, project) ->
 			if err?
 				logger.err project_id:project_id, err:err, "error getting project for add folder"
 				return callback(err)
