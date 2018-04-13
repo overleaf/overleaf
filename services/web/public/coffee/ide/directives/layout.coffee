@@ -119,6 +119,7 @@ define [
 						customTogglerScope = scope.$new()
 
 						customTogglerScope.isOpen = true
+						customTogglerScope.isVisible = true
 
 						if state[customTogglerPane]?.initClosed == true
 							customTogglerScope.isOpen = false
@@ -132,6 +133,7 @@ define [
 							repositionCustomToggler()
 						customTogglerEl = $compile("
 							<a href 
+							   ng-show=\"isVisible\"
 							   class=\"custom-toggler #{ 'custom-toggler-' + customTogglerPane }\"
 							   ng-class=\"isOpen ? 'custom-toggler-open' : 'custom-toggler-closed'\"
 							   tooltip=\"{{ isOpen ? tooltipMsgWhenOpen : tooltipMsgWhenClosed }}\"
@@ -186,6 +188,11 @@ define [
 								element.layout().hide("east")
 							else
 								element.layout().show("east")
+							if hasCustomToggler
+								customTogglerEl.scope().$applyAsync () ->
+									customTogglerEl.scope().isOpen = !value
+									customTogglerEl.scope().isVisible = !value
+
 
 				post: (scope, element, attrs) ->
 					name = attrs.layout
