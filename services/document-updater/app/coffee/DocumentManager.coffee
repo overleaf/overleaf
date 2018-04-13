@@ -181,15 +181,15 @@ module.exports = DocumentManager =
 				callback(null, lines, version)
 
 	resyncDocContents: (project_id, doc_id, callback) ->
-		RedisManager.getDoc project_id, doc_id, (error, lines, version, ranges, pathname) ->
+		RedisManager.getDoc project_id, doc_id, (error, lines, version, ranges, pathname, projectHistoryId) ->
 			return callback(error) if error?
 
 			if !lines? or !version?
-				PersistenceManager.getDoc project_id, doc_id, (error, lines, version, ranges, pathname) ->
+				PersistenceManager.getDoc project_id, doc_id, (error, lines, version, ranges, pathname, projectHistoryId) ->
 					return callback(error) if error?
-					ProjectHistoryRedisManager.queueResyncDocContent project_id, doc_id, lines, version, pathname, callback
+					ProjectHistoryRedisManager.queueResyncDocContent project_id, projectHistoryId, doc_id, lines, version, pathname, callback
 			else
-				ProjectHistoryRedisManager.queueResyncDocContent project_id, doc_id, lines, version, pathname, callback
+				ProjectHistoryRedisManager.queueResyncDocContent project_id, projectHistoryId, doc_id, lines, version, pathname, callback
 
 	getDocWithLock: (project_id, doc_id, callback = (error, lines, version) ->) ->
 		UpdateManager = require "./UpdateManager"

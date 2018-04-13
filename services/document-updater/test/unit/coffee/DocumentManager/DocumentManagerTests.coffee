@@ -472,7 +472,7 @@ describe "DocumentManager", ->
 	describe "resyncDocContents", ->
 		describe "when doc is loaded in redis", ->
 			beforeEach ->
-				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname)
+				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname, @projectHistoryId)
 				@ProjectHistoryRedisManager.queueResyncDocContent = sinon.stub()
 				@DocumentManager.resyncDocContents @project_id, @doc_id, @callback
 
@@ -483,13 +483,13 @@ describe "DocumentManager", ->
 
 			it "queues a resync doc content update", ->
 				@ProjectHistoryRedisManager.queueResyncDocContent
-					.calledWith(@project_id, @doc_id, @lines, @version, @pathname, @callback)
+					.calledWith(@project_id, @projectHistoryId, @doc_id, @lines, @version, @pathname, @callback)
 					.should.equal true
 
 		describe "when doc is not loaded in redis", ->
 			beforeEach ->
 				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null)
-				@PersistenceManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname)
+				@PersistenceManager.getDoc = sinon.stub().callsArgWith(2, null, @lines, @version, @ranges, @pathname, @projectHistoryId)
 				@ProjectHistoryRedisManager.queueResyncDocContent = sinon.stub()
 				@DocumentManager.resyncDocContents @project_id, @doc_id, @callback
 
@@ -505,5 +505,5 @@ describe "DocumentManager", ->
 
 			it "queues a resync doc content update", ->
 				@ProjectHistoryRedisManager.queueResyncDocContent
-					.calledWith(@project_id, @doc_id, @lines, @version, @pathname, @callback)
+					.calledWith(@project_id, @projectHistoryId, @doc_id, @lines, @version, @pathname, @callback)
 					.should.equal true

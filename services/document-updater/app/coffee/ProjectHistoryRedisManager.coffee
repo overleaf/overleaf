@@ -38,21 +38,23 @@ module.exports = ProjectHistoryRedisManager =
 
 		ProjectHistoryRedisManager.queueOps project_id, jsonUpdate, callback
 
-	queueResyncProjectStructure: (project_id, docs, files, callback) ->
+	queueResyncProjectStructure: (project_id, projectHistoryId, docs, files, callback) ->
 		logger.log {project_id, docs, files}, "queue project structure resync"
 		projectUpdate =
 			resyncProjectStructure: { docs, files }
+			projectHistoryId: projectHistoryId
 			meta:
 				ts: new Date()
 		jsonUpdate = JSON.stringify projectUpdate
 		ProjectHistoryRedisManager.queueOps project_id, jsonUpdate, callback
 
-	queueResyncDocContent: (project_id, doc_id, lines, version, pathname, callback) ->
+	queueResyncDocContent: (project_id, projectHistoryId, doc_id, lines, version, pathname, callback) ->
 		logger.log {project_id, doc_id, lines, version, pathname}, "queue doc content resync"
 		projectUpdate =
 			resyncDocContent:
 				content: lines.join("\n"),
 				version: version
+			projectHistoryId: projectHistoryId
 			path: pathname
 			doc: doc_id
 			meta:
