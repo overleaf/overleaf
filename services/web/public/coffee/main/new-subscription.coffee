@@ -43,7 +43,23 @@ define [
 
 		$scope.processing = false
 
-		recurly.configure publicKey:window.recurlyApiKey
+		recurly.configure 
+			publicKey: window.recurlyApiKey
+			style: 
+				all: 
+					fontFamily: 'Open Sans',
+					fontSize: '1rem',
+					fontWeight: 'bold',
+					fontColor: '#2c0730'
+				number: 
+					placeholder: 'Card number'
+				month: 
+					placeholder: 'mm'
+				year: 
+					placeholder: 'yy'
+				cvv:
+					placeholder: 'cvv'
+				
 
 		pricing = recurly.Pricing()
 		window.pricing = pricing

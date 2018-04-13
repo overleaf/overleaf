@@ -49,17 +49,218 @@ block content
 						.row
 							div()
 								.col-md-12()
-									form(method='post', action='/api/subscriptions/new')
-										label(for='number') Card Number
-										#number(data-recurly='number')
-										label(for='month') Month
-										#month(data-recurly='month')
-										label(for='year') Year
-										#year(data-recurly='year')
-										button#subscribe Subscribe
+									form(
+										name="simpleCCForm"
+										novalidate
+									)
+
+										
+										div.payment-method-toggle
+											a.payment-method-toggle-switch(
+												href
+												ng-click="setPaymentMethod('credit_card');"
+												ng-class="paymentMethod.value === 'credit_card' ? 'payment-method-toggle-switch-selected' : ''"
+											)
+												i.fa.fa-cc-mastercard.fa-2x
+												span &nbsp;
+												i.fa.fa-cc-visa.fa-2x
+												span &nbsp;
+												i.fa.fa-cc-amex.fa-2x
+											a.payment-method-toggle-switch(
+												href
+												ng-click="setPaymentMethod('paypal');"
+												ng-class="paymentMethod.value === 'paypal' ? 'payment-method-toggle-switch-selected' : ''"
+											)
+												i.fa.fa-cc-paypal.fa-2x
+										
+										.alert.alert-warning.small(ng-show="genericError")
+											strong {{genericError}}
+
+										div()
+											.row
+												.col-xs-6
+													.form-group(ng-class="validation.errorFields.first_name || inputHasError(simpleCCForm.firstName) ? 'has-error' : ''")
+														label(for="first-name") #{translate('first_name')}
+														input#first-name.form-control(
+															type="text"
+															maxlength='255'
+															data-recurly="first_name"
+															name="firstName"
+															ng-model="data.first_name"
+															required
+														)
+														span.input-feedback-message  {{ simpleCCForm.firstName.$error.required ? 'This field is required' : '' }}
+												.col-xs-6
+													.form-group(for="last-name",ng-class="validation.errorFields.last_name || inputHasError(simpleCCForm.lastName)? 'has-error' : ''")
+														label(for="last-name") #{translate('last_name')}
+														input#last-name.form-control(
+															type="text"
+															maxlength='255'
+															data-recurly="last_name"
+															name="lastName"
+															ng-model="data.last_name"
+															required
+														)
+														span.input-feedback-message {{ simpleCCForm.lastName.$error.required ? 'This field is required' : '' }}
+
+											.form-group(ng-class="validation.correctCardNumber == false || validation.errorFields.number || inputHasError(simpleCCForm.ccNumber) ? 'has-error' : ''")
+												label(for="card-no") #{translate("credit_card_number")}
+												div#card-no.form-control(
+													type="text"
+													name="ccNumber"
+													data-recurly='number'
+													ng-focus="validation.correctCardNumber = true; validation.errorFields.number = false;"
+													ng-blur="validateCardNumber();"
+													required
+												)
+												span.input-feedback-message {{ simpleCCForm.ccNumber.$error.required ? 'This field is required' : 'Please re-check the card number' }}
+
+											.row
+												.col-xs-3
+													.form-group.has-feedback(ng-class="validation.correctExpiry == false || validation.errorFields.expiry || inputHasError(simpleCCForm.expiry) ? 'has-error' : ''")
+														label(for="month") #{translate("month")}
+														div.form-control(
+															type="text"
+															name="month"
+															ng-focus="validation.correctExpiry = true; validation.errorFields.expiry = false;"
+															ng-blur="updateExpiry(); validateExpiry()"
+															data-recurly="month"
+															required
+														)
+														span.input-feedback-message {{ simpleCCForm.expiry.$error.required ? 'This field is required' : 'Please re-check the expiry date' }}
+												.col-xs-3
+													.form-group.has-feedback(ng-class="validation.correctExpiry == false || validation.errorFields.expiry || inputHasError(simpleCCForm.expiry) ? 'has-error' : ''")
+														label(for="year") #{translate("year")}
+														div.form-control(
+															type="text"
+															name="year"
+															data-recurly="year"
+															ng-focus="validation.correctExpiry = true; validation.errorFields.expiry = false;"
+															ng-blur="updateExpiry(); validateExpiry()"
+															required
+														)
+														span.input-feedback-message {{ simpleCCForm.expiry.$error.required ? 'This field is required' : 'Please re-check the expiry date' }}
+							
 
 
-				
+												.col-xs-6
+													.form-group.has-feedback(ng-class="validation.correctCvv == false || validation.errorFields.cvv || inputHasError(simpleCCForm.cvv) ? 'has-error' : ''")
+														label #{translate("security_code")}
+														div.form-control(
+															type="text"
+															ng-model="data.cvv"
+															ng-focus="validation.correctCvv = true; validation.errorFields.cvv = false;"
+															ng-blur="validateCvv()"
+															data-recurly="cvv"
+															name="cvv"
+															required
+															cc-format-sec-code
+														)
+														.form-control-feedback
+															a.form-helper(
+																href
+																tabindex="-1"
+																tooltip-template="'cvv-tooltip-tpl.html'"
+																tooltip-trigger="mouseenter"
+																tooltip-append-to-body="true"
+															) ?
+														span.input-feedback-message {{ simpleCCForm.cvv.$error.required ? 'This field is required' : 'Please re-check the security code' }}
+
+										
+										div
+											.form-group(ng-class="validation.errorFields.country || inputHasError(simpleCCForm.country) ? 'has-error' : ''")
+												label(for="country") #{translate('country')}
+												select#country.form-control(
+													data-recurly="country"
+													ng-model="data.country"
+													name="country"
+													ng-change="updateCountry()"
+													required
+												)
+													+countries_options()
+												span.input-feedback-message {{ simpleCCForm.country.$error.required ? 'This field is required' : '' }}
+
+											if (showVatField)
+												.form-group
+													label(for="vat-no") #{translate('vat_number')}
+													input#vat-no.form-control(
+														type="text"
+														ng-blur="applyVatNumber()"
+														ng-model="data.vat_number"
+													)
+											if (showCouponField)
+												.form-group
+													label(for="coupon-code") #{translate('coupon_code')}
+													input#coupon-code.form-control(
+														type="text"
+														ng-blur="applyCoupon()"
+														ng-model="data.coupon"
+													)
+											
+											p(ng-if="paymentMethod.value === 'paypal'") #{translate("paypal_upgrade")}
+											
+											div.price-breakdown(ng-if="price.next.tax !== '0.00'")
+												hr.thin
+												span Total: 
+												strong {{price.currency.symbol}}{{price.next.total}} 
+												span ({{price.currency.symbol}}{{price.next.subtotal}} + {{price.currency.symbol}}{{price.next.tax}} tax) 
+												span(ng-if="monthlyBilling") #{translate("every")} #{translate("month")}
+												span(ng-if="!monthlyBilling") #{translate("every")} #{translate("year")}
+												hr.thin
+
+											div.payment-submit
+												button.btn.btn-success.btn-block(
+													ng-click="submit()"
+													ng-disabled="processing" 
+												) 
+													span(ng-show="processing") 
+														i.fa.fa-spinner.fa-spin
+														| &nbsp;
+													| {{ paymentMethod.value === 'credit_card' ? '#{translate("upgrade_cc_btn")}' : '#{translate("upgrade_paypal_btn")}' }}
+
+
+				.col-md-3.col-md-pull-4
+					if showStudentPlan == 'true'
+						a.btn-primary.btn.plansPageStudentLink(
+							href,
+							ng-click="switchToStudent()"
+						) #{translate("half_price_student")} 
+
+					.card.card-first
+						.paymentPageFeatures
+							h3 #{translate("unlimited_projects")}
+							p #{translate("create_unlimited_projects")}
+						
+							h3
+								if plan.features.collaborators == -1
+									- var collaboratorCount = 'Unlimited'
+								else
+									- var collaboratorCount = plan.features.collaborators
+								| #{translate("collabs_per_proj", {collabcount:collaboratorCount})}
+							p #{translate("work_on_single_version")}. #{translate("view_collab_edits")} in real time.
+							
+							h3 #{translate("full_doc_history")}
+							p #{translate("see_what_has_been")} 
+								span.added #{translate("added")} 
+								| #{translate("and")} 
+								span.removed #{translate("removed")}. 
+								| #{translate("restore_to_any_older_version")}.
+							
+							h3 #{translate("sync_to_dropbox")}
+							p
+								| #{translate("acces_work_from_anywhere")}. 
+								| #{translate("work_offline_and_sync_with_dropbox")}.
+								
+							hr
+								
+							p.small.text-center We're confident that you'll love ShareLaTeX, but if not you can cancel anytime. We'll give you your money back, no questions asked, if you let us know within 30 days.
+							hr
+							span &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;
+							a(href="https://www.positivessl.com" style="font-family: arial; font-size: 10px; color: #212121; text-decoration: none;")
+								img(src="https://www.positivessl.com/images-new/PositiveSSL_tl_trans.png" alt="SSL Certificate" title="SSL Certificate" border="0")
+								div(style="font-family: arial;font-weight:bold;font-size:15px;color:#86BEE0;")
+									a(href="https://www.positivessl.com" style="color:#86BEE0; text-decoration: none;")
+
 
 	script(type="text/javascript").
 		ga('send', 'event', 'pageview', 'payment_form', "#{plan_code}")
