@@ -30,7 +30,7 @@ describe 'RestoreManager', ->
 	describe 'restoreFileFromV2', ->
 		beforeEach ->
 			@RestoreManager._writeFileVersionToDisk = sinon.stub().yields(null, @fsPath = "/tmp/path/on/disk")
-			@RestoreManager._findFolderOrRootFolderId = sinon.stub().yields(null, @folder_id = 'mock-folder-id')
+			@RestoreManager._findOrCreateFolder = sinon.stub().yields(null, @folder_id = 'mock-folder-id')
 			@FileSystemImportManager.addEntity = sinon.stub().yields(null, @entity = 'mock-entity')
 
 		describe "with a file not in a folder", ->
@@ -44,7 +44,7 @@ describe 'RestoreManager', ->
 					.should.equal true
 
 			it 'should find the root folder', ->
-				@RestoreManager._findFolderOrRootFolderId
+				@RestoreManager._findOrCreateFolder
 					.calledWith(@project_id, "")
 					.should.equal true
 
@@ -62,7 +62,7 @@ describe 'RestoreManager', ->
 				@RestoreManager.restoreFileFromV2 @user_id, @project_id, @version, @pathname, @callback
 
 			it 'should find the folder', ->
-				@RestoreManager._findFolderOrRootFolderId
+				@RestoreManager._findOrCreateFolder
 					.calledWith(@project_id, "foo")
 					.should.equal true
 
@@ -71,27 +71,19 @@ describe 'RestoreManager', ->
 					.calledWith(@user_id, @project_id, @folder_id, 'bar.tex', @fsPath, false)
 					.should.equal true
 
-	describe '_findFolderOrRootFolderId', ->
-		describe 'with a folder that exists', ->
-			beforeEach ->
-				@ProjectLocator.findElementByPath = sinon.stub().yields(null, {_id: @folder_id = 'mock-folder-id'}, 'folder')
-				@RestoreManager._findFolderOrRootFolderId @project_id, 'folder_name', @callback
+	describe '_findOrCreateFolder', ->
+		beforeEach ->
+			@EditorController.mkdirp = sinon.stub().yields(null, [], {_id: @folder_id = 'mock-folder-id'})
+			@RestoreManager._findOrCreateFolder @project_id, 'folder/name', @callback
 
-			it 'should look up the folder', ->
-				@ProjectLocator.findElementByPath
-					.calledWith({project_id: @project_id, path: 'folder_name'})
-					.should.equal true
+		it 'should look up or create the folder', ->
+			@EditorController.mkdirp
+				.calledWith(@project_id, 'folder/name')
+				.should.equal true
 
-			it 'should return the folder_id', ->
-				@callback.calledWith(null, @folder_id).should.equal true
+		it 'should return the folder_id', ->
+			@callback.calledWith(null, @folder_id).should.equal true
 
-		describe "with a folder that doesn't exist", ->
-			beforeEach ->
-				@ProjectLocator.findElementByPath = sinon.stub().yields(new Errors.NotFoundError())
-				@RestoreManager._findFolderOrRootFolderId @project_id, 'folder_name', @callback
-
-			it 'should return null', ->
-				@callback.calledWith(null, null).should.equal true
 
 	describe '_addEntityWithUniqueName', ->
 		beforeEach ->
