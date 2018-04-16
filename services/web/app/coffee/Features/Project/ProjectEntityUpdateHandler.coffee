@@ -24,12 +24,25 @@ wrapWithLock = (methodWithoutLock) ->
 	# This lock is used to make sure that the project structure updates are made
 	# sequentially. In particular the updates must be made in mongo and sent to
 	# the doc-updater in the same order.
-	methodWithLock = (project_id, args..., callback) ->
-		LockManager.runWithLock LOCK_NAMESPACE, project_id,
-			(cb) -> methodWithoutLock project_id, args..., cb
-			callback
-	methodWithLock.withoutLock = methodWithoutLock
-	methodWithLock
+	if typeof methodWithoutLock is 'function'
+		methodWithLock = (project_id, args..., callback) ->
+			LockManager.runWithLock LOCK_NAMESPACE, project_id,
+				(cb) -> methodWithoutLock project_id, args..., cb
+				callback
+		methodWithLock.withoutLock = methodWithoutLock
+		methodWithLock
+	else
+		# handle case with separate setup and locked stages
+		wrapWithSetup = methodWithoutLock.beforeLock  # a function to set things up before the lock
+		mainTask = methodWithoutLock.withLock # function to execute inside the lock
+		methodWithLock = wrapWithSetup (project_id, args..., callback) ->
+			LockManager.runWithLock(LOCK_NAMESPACE, project_id, (cb) ->
+				mainTask(project_id, args..., cb)
+			callback)
+		methodWithLock.withoutLock = wrapWithSetup mainTask
+		methodWithLock.beforeLock = methodWithoutLock.beforeLock
+		methodWithLock.mainTask = methodWithoutLock.withLock
+		methodWithLock
 
 module.exports = ProjectEntityUpdateHandler = self =
 	# this doesn't need any locking because it's only called by ProjectDuplicator
@@ -120,31 +133,72 @@ module.exports = ProjectEntityUpdateHandler = self =
 				return callback(error) if error?
 				callback null, doc, folder_id
 
-	addFile: wrapWithLock (project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback = (error, fileRef, folder_id) ->)->
-		self.addFileWithoutUpdatingHistory.withoutLock project_id, folder_id, fileName, fsPath, linkedFileData, userId, (error, fileRef, folder_id, path, fileStoreUrl) ->
-			return callback(error) if error?
-			newFiles = [
-				file: fileRef
-				path: path
-				url: fileStoreUrl
-			]
-			DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newFiles}, (error) ->
-				return callback(error) if error?
-				callback null, fileRef, folder_id
+	_uploadFile: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback = (error, fileRef, fileStoreUrl) ->)->
+		if not SafePath.isCleanFilename fileName
+			return callback new Errors.InvalidNameError("invalid element name")
+		fileRef = new File(
+			name: fileName
+			linkedFileData: linkedFileData
+		)
+		FileStoreHandler.uploadFileFromDisk project_id, fileRef._id, fsPath, (err, fileStoreUrl)->
+			if err?
+				logger.err err:err, project_id: project_id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error uploading image to s3"
+				return callback(err)
+			callback(null, fileRef, fileStoreUrl)
 
-	replaceFile: wrapWithLock (project_id, file_id, fsPath, linkedFileData, userId, callback)->
-		FileStoreHandler.uploadFileFromDisk project_id, file_id, fsPath, (err, fileStoreUrl)->
-			return callback(err) if err?
-			ProjectEntityMongoUpdateHandler.replaceFile project_id, file_id, linkedFileData, (err, fileRef, project, path) ->
+	_addFileAndSendToTpds: (project_id, folder_id, fileName, fileRef, callback = (error) ->)->
+		ProjectEntityMongoUpdateHandler.addFile project_id, folder_id, fileRef, (err, result, project) ->
+			if err?
+				logger.err err:err, project_id: project_id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error adding file with project"
+				return callback(err)
+			TpdsUpdateSender.addFile {project_id:project_id, file_id:fileRef._id, path:result?.path?.fileSystem, project_name:project.name, rev:fileRef.rev}, (err) ->
+				return callback(err) if err?
+				callback(null, result, project)
+
+	addFile: wrapWithLock
+		beforeLock: (next) ->
+			(project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback) ->
+				ProjectEntityUpdateHandler._uploadFile project_id, folder_id, fileName, fsPath, linkedFileData, userId, (error, fileRef, fileStoreUrl) ->
+					return callback(error) if error?
+					next(project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback)
+		withLock: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback = (error, fileRef, folder_id) ->)->
+			ProjectEntityUpdateHandler._addFileAndSendToTpds project_id, folder_id, fileName, fileRef, (err, result, project) ->
 				return callback(err) if err?
 				newFiles = [
 					file: fileRef
+					path: result?.path?.fileSystem
+					url: fileStoreUrl
+				]
+				DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newFiles}, (error) ->
+					return callback(error) if error?
+					callback(null, fileRef, folder_id)
+
+	replaceFile: wrapWithLock
+		beforeLock: (next) ->
+			(project_id, file_id, fsPath, linkedFileData, userId, callback)->
+				# create a new file
+				fileRef = new File(
+					name: "dummy-upload-filename"
+					linkedFileData: linkedFileData
+				)
+				FileStoreHandler.uploadFileFromDisk project_id, fileRef._id, fsPath, (err, fileStoreUrl)->
+					return callback(err) if err?
+					next project_id, file_id, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback
+		withLock: (project_id, file_id, fsPath, linkedFileData, userId, newFileRef, fileStoreUrl, callback)->
+			ProjectEntityMongoUpdateHandler.replaceFileWithNew project_id, file_id, newFileRef, (err, oldFileRef, project, path) ->
+				return callback(err) if err?
+				oldFiles = [
+					file: oldFileRef
+					path: path.fileSystem
+				]
+				newFiles = [
+					file: newFileRef
 					path: path.fileSystem
 					url: fileStoreUrl
 				]
-				TpdsUpdateSender.addFile {project_id:project._id, file_id:fileRef._id, path:path.fileSystem, rev:fileRef.rev+1, project_name:project.name}, (err) ->
+				TpdsUpdateSender.addFile {project_id:project._id, file_id:newFileRef._id, path:path.fileSystem, rev:newFileRef.rev+1, project_name:project.name}, (err) ->
 					return callback(err) if err?
-					DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newFiles}, callback
+					DocumentUpdaterHandler.updateProjectStructure project_id, userId, {oldFiles, newFiles}, callback
 
 	addDocWithoutUpdatingHistory: wrapWithLock (project_id, folder_id, docName, docLines, userId, callback = (error, doc, folder_id) ->)=>
 		# This method should never be called directly, except when importing a project
@@ -171,29 +225,19 @@ module.exports = ProjectEntityUpdateHandler = self =
 					return callback(err) if err?
 					callback(null, doc, folder_id, result?.path?.fileSystem)
 
-	addFileWithoutUpdatingHistory: wrapWithLock (project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback = (error, fileRef, folder_id, path, fileStoreUrl) ->)->
+	addFileWithoutUpdatingHistory: wrapWithLock
 		# This method should never be called directly, except when importing a project
 		# from Overleaf. It skips sending updates to the project history, which will break
 		# the history unless you are making sure it is updated in some other way.
-
-		if not SafePath.isCleanFilename fileName
-			return callback new Errors.InvalidNameError("invalid element name")
-
-		fileRef = new File(
-			name: fileName
-			linkedFileData: linkedFileData
-		)
-		FileStoreHandler.uploadFileFromDisk project_id, fileRef._id, fsPath, (err, fileStoreUrl)->
-			if err?
-				logger.err err:err, project_id: project_id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error uploading image to s3"
-				return callback(err)
-			ProjectEntityMongoUpdateHandler.addFile project_id, folder_id, fileRef, (err, result, project) ->
-				if err?
-					logger.err err:err, project_id: project_id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error adding file with project"
-					return callback(err)
-				TpdsUpdateSender.addFile {project_id:project_id, file_id:fileRef._id, path:result?.path?.fileSystem, project_name:project.name, rev:fileRef.rev}, (err) ->
-					return callback(err) if err?
-					callback(null, fileRef, folder_id, result?.path?.fileSystem, fileStoreUrl)
+		beforeLock: (next) ->
+			(project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback) ->
+				ProjectEntityUpdateHandler._uploadFile project_id, folder_id, fileName, fsPath, linkedFileData, userId, (error, fileRef, fileStoreUrl) ->
+					return callback(error) if error?
+					next(project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback)
+		withLock: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback = (error, fileRef, folder_id, path, fileStoreUrl) ->)->
+			ProjectEntityUpdateHandler._addFileAndSendToTpds project_id, folder_id, fileName, fileRef, (err, result, project) ->
+				return callback(err) if err?
+				callback(null, fileRef, folder_id, result?.path?.fileSystem, fileStoreUrl)
 
 	upsertDoc: wrapWithLock (project_id, folder_id, docName, docLines, source, userId, callback = (err, doc, folder_id, isNewDoc)->)->
 		ProjectLocator.findElement project_id: project_id, element_id: folder_id, type: "folder", (error, folder) ->
@@ -215,23 +259,36 @@ module.exports = ProjectEntityUpdateHandler = self =
 					return callback(err) if err?
 					callback null, doc, !existingDoc?
 
-	upsertFile: wrapWithLock (project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback = (err, file, isNewFile)->)->
-		ProjectLocator.findElement project_id: project_id, element_id: folder_id, type: "folder", (error, folder) ->
-			return callback(error) if error?
-			return callback(new Error("Couldn't find folder")) if !folder?
-			existingFile = null
-			for fileRef in folder.fileRefs
-				if fileRef.name == fileName
-					existingFile = fileRef
-					break
-			if existingFile?
-				self.replaceFile.withoutLock project_id, existingFile._id, fsPath, linkedFileData, userId, (err) ->
+	upsertFile: wrapWithLock
+		beforeLock: (next) ->
+			(project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback)->
+				# create a new file
+				fileRef = new File(
+					name: fileName
+					linkedFileData: linkedFileData
+				)
+				FileStoreHandler.uploadFileFromDisk project_id, fileRef._id, fsPath, (err, fileStoreUrl)->
 					return callback(err) if err?
-					callback null, existingFile, !existingFile?
-			else
-				self.addFile.withoutLock project_id, folder_id, fileName, fsPath, linkedFileData, userId, (err, file) ->
-					return callback(err) if err?
-					callback null, file, !existingFile?
+					next(project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback)
+		withLock: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, newFileRef, fileStoreUrl, callback = (err, file, isNewFile, existingFile)->)->
+			ProjectLocator.findElement project_id: project_id, element_id: folder_id, type: "folder", (error, folder) ->
+				return callback(error) if error?
+				return callback(new Error("Couldn't find folder")) if !folder?
+				existingFile = null
+				for fileRef in folder.fileRefs
+					if fileRef.name == fileName
+						existingFile = fileRef
+						break
+				if existingFile?
+					# this calls directly into the replaceFile main task (without the beforeLock part)
+					self.replaceFile.mainTask project_id, existingFile._id, fsPath, linkedFileData, userId, newFileRef, fileStoreUrl, (err) ->
+						return callback(err) if err?
+						callback null, newFileRef, !existingFile?, existingFile
+				else
+					# this calls directly into the addFile main task (without the beforeLock part)
+					self.addFile.mainTask project_id, folder_id, fileName, fsPath, linkedFileData, userId, newFileRef, fileStoreUrl, (err) ->
+						return callback(err) if err?
+						callback null, newFileRef, !existingFile?, existingFile
 
 	upsertDocWithPath: wrapWithLock (project_id, elementPath, docLines, source, userId, callback) ->
 		docName = path.basename(elementPath)
@@ -242,14 +299,26 @@ module.exports = ProjectEntityUpdateHandler = self =
 				return callback(err) if err?
 				callback null, doc, isNewDoc, newFolders, folder
 
-	upsertFileWithPath: wrapWithLock (project_id, elementPath, fsPath, linkedFileData, userId, callback) ->
-		fileName = path.basename(elementPath)
-		folderPath = path.dirname(elementPath)
-		self.mkdirp.withoutLock project_id, folderPath, (err, newFolders, folder) ->
-			return callback(err) if err?
-			self.upsertFile.withoutLock project_id, folder._id, fileName, fsPath, linkedFileData, userId, (err, file, isNewFile) ->
+	upsertFileWithPath: wrapWithLock
+		beforeLock: (next) ->
+			(project_id, elementPath, fsPath, linkedFileData, userId, callback)->
+				fileName = path.basename(elementPath)
+				folderPath = path.dirname(elementPath)
+				# create a new file
+				fileRef = new File(
+					name: fileName
+					linkedFileData: linkedFileData
+				)
+				FileStoreHandler.uploadFileFromDisk project_id, fileRef._id, fsPath, (err, fileStoreUrl)->
+					return callback(err) if err?
+					next project_id, folderPath, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback
+		withLock: (project_id, folderPath, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback) ->
+			self.mkdirp.withoutLock project_id, folderPath, (err, newFolders, folder) ->
 				return callback(err) if err?
-				callback null, file, isNewFile, newFolders, folder
+				# this calls directly into the upsertFile main task (without the beforeLock part)
+				self.upsertFile.mainTask project_id, folder._id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, (err, newFile, isNewFile, existingFile) ->
+					return callback(err) if err?
+					callback null, newFile, isNewFile, existingFile, newFolders, folder
 
 	deleteEntity: wrapWithLock (project_id, entity_id, entityType, userId, callback = (error) ->)->
 		logger.log entity_id:entity_id, entityType:entityType, project_id:project_id, "deleting project entity"
@@ -326,7 +395,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 					path: file.path
 					url: FileStoreHandler._buildUrl(project_id, file.file._id)
 
-				DocumentUpdaterHandler.resyncProjectHistory project_id, docs, files, callback 
+				DocumentUpdaterHandler.resyncProjectHistory project_id, docs, files, callback
 	_cleanUpEntity: (project, entity, entityType, path, userId, callback = (error) ->) ->
 		if(entityType.indexOf("file") != -1)
 			self._cleanUpFile project, entity, path, userId, callback
@@ -348,7 +417,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 
 		unsetRootDocIfRequired (error) ->
 			return callback(error) if error?
-			self._insertDeletedDocReference project._id, doc, (error) ->
+			ProjectEntityMongoUpdateHandler._insertDeletedDocReference project._id, doc, (error) ->
 				return callback(error) if error?
 				DocumentUpdaterHandler.deleteDoc project_id, doc_id, (error) ->
 					return callback(error) if error?
@@ -358,11 +427,12 @@ module.exports = ProjectEntityUpdateHandler = self =
 						DocumentUpdaterHandler.updateProjectStructure project_id, userId, changes, callback
 
 	_cleanUpFile: (project, file, path, userId, callback = (error) ->) ->
-		project_id = project._id.toString()
-		file_id = file._id.toString()
-		FileStoreHandler.deleteFile project_id, file_id, (error) ->
+		ProjectEntityMongoUpdateHandler._insertDeletedFileReference project._id, file, (error) ->
 			return callback(error) if error?
+			project_id = project._id.toString()
 			changes = oldFiles: [ {file, path} ]
+			# we are now keeping a copy of every file versio so we no longer delete
+			# the file from the filestore
 			DocumentUpdaterHandler.updateProjectStructure project_id, userId, changes, callback
 
 	_cleanUpFolder: (project, folder, folderPath, userId, callback = (error) ->) ->
@@ -383,15 +453,3 @@ module.exports = ProjectEntityUpdateHandler = self =
 				jobs.push (callback) -> self._cleanUpFolder project, childFolder, folderPath, userId, callback
 
 		async.series jobs, callback
-
-	_insertDeletedDocReference: (project_id, doc, callback = (error) ->) ->
-		Project.update {
-			_id: project_id
-		}, {
-			$push: {
-				deletedDocs: {
-					_id:  doc._id
-					name: doc.name
-				}
-			}
-		}, {}, callback

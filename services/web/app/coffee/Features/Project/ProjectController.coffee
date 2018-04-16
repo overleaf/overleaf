@@ -301,6 +301,7 @@ module.exports = ProjectController =
 					themes: THEME_LIST
 					maxDocLength: Settings.max_doc_length
 					useV2History: !!project.overleaf?.history?.display
+					showRichText: req.query?.rt == 'true'
 				timer.done()
 
 	_buildProjectList: (allProjects, v1Projects = [])->

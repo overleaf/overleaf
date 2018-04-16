@@ -3,15 +3,6 @@ define [
 	"ide/history/util/displayNameForUser"
 ], (App, displayNameForUser) ->
 
-	App.controller "HistoryPremiumPopup", ($scope, ide, sixpack)->
-		$scope.$watch "ui.view", ->
-			if $scope.ui.view == "history"
-				if $scope.project?.features?.versioning
-					$scope.versioningPopupType = "default"
-				else if $scope.ui.view == "history"
-					sixpack.participate 'history-discount', ['default', 'discount'], (chosenVariation, rawResponse)->
-						$scope.versioningPopupType = chosenVariation
-
 	App.controller "HistoryListController", ["$scope", "ide", ($scope, ide) ->
 		$scope.hoveringOverListSelectors = false
 

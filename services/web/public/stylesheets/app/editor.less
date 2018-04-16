@@ -12,9 +12,7 @@
 @import "./editor/online-users.less";
 @import "./editor/hotkeys.less";
 @import "./editor/review-panel.less";
-& when (@show-rich-text) {
-	@import "./editor/rich-text.less";
-}
+@import "./editor/rich-text.less";
 
 @ui-layout-toggler-def-height: 50px;
 @ui-resizer-size: 7px;
@@ -82,10 +80,7 @@
 	.full-size;
 }
 
-#editor when (@show-rich-text = true) {
-	top: 40px; // TODO: replace with toolbar height var
-}
-#editor-rich-text when (@show-rich-text = true) {
+#editor-rich-text {
 	top: 40px; // TODO: replace with toolbar height var
 }
 
@@ -305,7 +300,6 @@
 }
 
 .ui-layout-resizer when (@is-overleaf = true) {
-	z-index: 5 !important;
 	width: @ui-resizer-size !important;
 	background-color: @editor-resizer-bg-color;
 	&.ui-layout-resizer-closed {

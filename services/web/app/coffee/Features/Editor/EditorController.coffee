@@ -41,11 +41,13 @@ module.exports = EditorController =
 			callback err, doc
 
 	upsertFile: (project_id, folder_id, fileName, fsPath, linkedFileData, source, user_id, callback = (err, file) ->) ->
-		ProjectEntityUpdateHandler.upsertFile project_id, folder_id, fileName, fsPath, linkedFileData, user_id, (err, file, didAddFile) ->
+		ProjectEntityUpdateHandler.upsertFile project_id, folder_id, fileName, fsPath, linkedFileData, user_id, (err, newFile, didAddFile, existingFile) ->
 			return callback(err) if err?
-			if didAddFile
-				EditorRealTimeController.emitToRoom project_id, 'reciveNewFile', folder_id, file, source, linkedFileData
-			callback null, file
+			if not didAddFile # replacement, so remove the existing file from the client
+				EditorRealTimeController.emitToRoom project_id, 'removeEntity', existingFile._id, source
+			# now add the new file on the client
+			EditorRealTimeController.emitToRoom project_id, 'reciveNewFile', folder_id, newFile, source, linkedFileData
+			callback null, newFile
 
 	upsertDocWithPath: (project_id, elementPath, docLines, source, user_id, callback) ->
 		ProjectEntityUpdateHandler.upsertDocWithPath project_id, elementPath, docLines, source, user_id, (err, doc, didAddNewDoc, newFolders, lastFolder) ->
@@ -57,12 +59,14 @@ module.exports = EditorController =
 				callback()
 
 	upsertFileWithPath: (project_id, elementPath, fsPath, linkedFileData, source, user_id, callback) ->
-		ProjectEntityUpdateHandler.upsertFileWithPath project_id, elementPath, fsPath, linkedFileData, user_id, (err, file, didAddFile, newFolders, lastFolder) ->
+		ProjectEntityUpdateHandler.upsertFileWithPath project_id, elementPath, fsPath, linkedFileData, user_id, (err, newFile, didAddFile, existingFile, newFolders, lastFolder) ->
 			return callback(err) if err?
 			EditorController._notifyProjectUsersOfNewFolders project_id, newFolders, (err) ->
 				return callback(err) if err?
-				if didAddFile
-					EditorRealTimeController.emitToRoom project_id, 'reciveNewFile', lastFolder._id, file, source, linkedFileData
+				if not didAddFile # replacement, so remove the existing file from the client
+					EditorRealTimeController.emitToRoom project_id, 'removeEntity', existingFile._id, source
+				# now add the new file on the client
+				EditorRealTimeController.emitToRoom project_id, 'reciveNewFile', lastFolder._id, newFile, source, linkedFileData
 				callback()
 
 	addFolder : (project_id, folder_id, folderName, source, callback = (error, folder)->)->

@@ -1,7 +1,9 @@
 async = require "async"
 expect = require("chai").expect
 _ = require 'underscore'
+mkdirp = require "mkdirp"
 
+Settings = require "settings-sharelatex"
 MockFileStoreApi = require './helpers/MockFileStoreApi'
 request = require "./helpers/request"
 User = require "./helpers/User"
@@ -22,7 +24,8 @@ describe "LinkedFiles", ->
 		LinkedUrlProxy.listen 6543, (error) =>
 			return done(error) if error?
 			@owner = new User()
-			@owner.login done
+			@owner.login ->
+				mkdirp Settings.path.dumpFolder, done
 
 	describe "creating a URL based linked file", ->
 		before (done) ->
