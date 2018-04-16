@@ -22,6 +22,7 @@ describe "HistoryController", ->
 			"./HistoryManager": @HistoryManager = {}
 			"../Project/ProjectDetailsHandler": @ProjectDetailsHandler = {}
 			"../Project/ProjectEntityUpdateHandler": @ProjectEntityUpdateHandler = {}
+			"./RestoreManager": @RestoreManager = {}
 		@settings.apis =
 			trackchanges:
 				enabled: false

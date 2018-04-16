@@ -251,27 +251,6 @@ describe 'ProjectEntityUpdateHandler', ->
 				.calledWith({_id : project_id}, {$unset : {rootDoc_id: true}})
 				.should.equal true
 
-	describe "restoreDoc", ->
-		beforeEach ->
-			@doc = { "mock": "doc" }
-			@ProjectEntityHandler.getDoc = sinon.stub().yields(null, @docLines)
-			@ProjectEntityUpdateHandler.addDoc = sinon.stub().yields(null, @doc, folder_id)
-
-			@ProjectEntityUpdateHandler.restoreDoc project_id, doc_id, @docName, @callback
-
-		it 'should get the doc lines', ->
-			@ProjectEntityHandler.getDoc
-				.calledWith(project_id, doc_id, include_deleted: true)
-				.should.equal true
-
-		it "should add a new doc with these doc lines", ->
-			@ProjectEntityUpdateHandler.addDoc
-				.calledWith(project_id, null, @docName, @docLines)
-				.should.equal true
-
-		it "should call the callback with the new folder and doc", ->
-			@callback.calledWith(null, @doc, folder_id).should.equal true
-
 	describe 'addDoc', ->
 		beforeEach ->
 			@path = "/path/to/doc"

@@ -180,7 +180,7 @@ clean_css:
 	rm -f public/stylesheets/*.css*
 
 clean_ci:
-	docker-compose down
+	docker-compose down -v
 
 test: test_unit test_frontend test_acceptance
 
@@ -221,7 +221,7 @@ test_acceptance_module: $(MODULE_MAKEFILES)
 	fi
 
 test_clean:
-	docker-compose ${DOCKER_COMPOSE_FLAGS} down
+	docker-compose ${DOCKER_COMPOSE_FLAGS} down -v
 
 ci:
 	MOCHA_ARGS="--reporter tap" \

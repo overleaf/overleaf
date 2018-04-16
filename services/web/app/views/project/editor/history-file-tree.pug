@@ -11,7 +11,7 @@ aside.file-tree.file-tree-history(ng-controller="FileTreeController", ng-class="
 				.entity
 					.entity-name.entity-name-history(
 						ng-click="history.selection.pathname = pathname",
-						ng-class="{ 'deleted': doc.deleted }"
+						ng-class="{ 'deleted': !!doc.deletedAtV }"
 					)
 						i.fa.fa-fw.fa-pencil
 						span  {{ pathname }}
