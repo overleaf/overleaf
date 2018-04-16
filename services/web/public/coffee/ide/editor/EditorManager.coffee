@@ -1,6 +1,7 @@
 define [
 	"ide/editor/Document"
 	"ide/editor/directives/aceEditor"
+	"ide/editor/directives/toggleSwitch"
 	"ide/editor/controllers/SavingNotificationController"
 ], (Document) ->
 	class EditorManager
