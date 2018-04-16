@@ -56,7 +56,10 @@ block content
 							href
 							ng-click="showAll();"
 						) Show all
-	.content.content-alt.project-list-page(ng-controller="ProjectPageController")
+	main.content.content-alt.project-list-page(
+		ng-controller="ProjectPageController"
+		role="main"
+	)
 		- if(typeof(suppressSystemMessages) == "undefined")
 			.system-messages(
 				ng-cloak
