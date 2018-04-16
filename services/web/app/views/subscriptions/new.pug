@@ -101,9 +101,8 @@ block content
 															ng-model="data.last_name"
 															required
 														)
-														span.input-feedback-message {{ simpleCCForm.lastName.$error.required ? 'This field is required' : '' }}
 
-											.form-group(ng-class="validation.correctCardNumber == false || validation.errorFields.number || inputHasError(simpleCCForm.ccNumber) ? 'has-error' : ''")
+											.form-group()
 												label(for="card-no") #{translate("credit_card_number")}
 												div#card-no(
 													type="text"
@@ -113,41 +112,36 @@ block content
 													ng-blur="validateCardNumber();"
 													required
 												)
-												span.input-feedback-message {{ simpleCCForm.ccNumber.$error.required ? 'This field is required' : 'Please re-check the card number' }}
 
 											.row
 												.col-xs-3
-													.form-group.has-feedback(ng-class="validation.correctExpiry == false || validation.errorFields.expiry || inputHasError(simpleCCForm.expiry) ? 'has-error' : ''")
+													.form-group.has-feedback()
 														label(for="month") #{translate("month")}
 														div(
-															type="text"
+															type="number"
 															name="month"
 															ng-focus="validation.correctExpiry = true; validation.errorFields.expiry = false;"
 															ng-blur="updateExpiry(); validateExpiry()"
 															data-recurly="month"
 															required
 														)
-														span.input-feedback-message {{ simpleCCForm.expiry.$error.required ? 'This field is required' : 'Please re-check the expiry date' }}
 												.col-xs-3
-													.form-group.has-feedback(ng-class="validation.correctExpiry == false || validation.errorFields.expiry || inputHasError(simpleCCForm.expiry) ? 'has-error' : ''")
+													.form-group.has-feedback()
 														label(for="year") #{translate("year")}
 														div(
-															type="text"
+															type="number"
 															name="year"
 															data-recurly="year"
 															ng-focus="validation.correctExpiry = true; validation.errorFields.expiry = false;"
 															ng-blur="updateExpiry(); validateExpiry()"
 															required
 														)
-														span.input-feedback-message {{ simpleCCForm.expiry.$error.required ? 'This field is required' : 'Please re-check the expiry date' }}
 							
-
-
 												.col-xs-6
-													.form-group.has-feedback(ng-class="validation.correctCvv == false || validation.errorFields.cvv || inputHasError(simpleCCForm.cvv) ? 'has-error' : ''")
+													.form-group.has-feedback()
 														label #{translate("security_code")}
 														div(
-															type="text"
+															type="number"
 															ng-model="data.cvv"
 															ng-focus="validation.correctCvv = true; validation.errorFields.cvv = false;"
 															ng-blur="validateCvv()"
@@ -164,9 +158,7 @@ block content
 																tooltip-trigger="mouseenter"
 																tooltip-append-to-body="true"
 															) ?
-														span.input-feedback-message {{ simpleCCForm.cvv.$error.required ? 'This field is required' : 'Please re-check the security code' }}
 
-										
 										div
 											.form-group(ng-class="validation.errorFields.country || inputHasError(simpleCCForm.country) ? 'has-error' : ''")
 												label(for="country") #{translate('country')}
