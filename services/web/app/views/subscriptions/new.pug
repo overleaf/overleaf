@@ -19,7 +19,7 @@ block content
 						.page-header
 							.row
 								.col-xs-9
-									h2 {{planName}}
+									h2 {{planName}} {{validation.errorFields}} {{validation.errorFields.number}}
 								.col-xs-3
 									div.dropdown.changePlanButton.pull-right(ng-cloak, dropdown)
 										a.btn.btn-default.dropdown-toggle(
@@ -102,13 +102,12 @@ block content
 															required
 														)
 
-											.form-group()
+											.form-group(ng-class="validation.errorFields.number ? 'has-error' : ''")
 												label(for="card-no") #{translate("credit_card_number")}
 												div#card-no(
 													type="text"
 													name="ccNumber"
 													data-recurly='number'
-													ng-focus="validation.correctCardNumber = true; validation.errorFields.number = false;"
 													ng-blur="validateCardNumber();"
 													required
 												)
@@ -120,7 +119,6 @@ block content
 														div(
 															type="number"
 															name="month"
-															ng-focus="validation.correctExpiry = true; validation.errorFields.expiry = false;"
 															ng-blur="updateExpiry(); validateExpiry()"
 															data-recurly="month"
 															required
@@ -132,7 +130,6 @@ block content
 															type="number"
 															name="year"
 															data-recurly="year"
-															ng-focus="validation.correctExpiry = true; validation.errorFields.expiry = false;"
 															ng-blur="updateExpiry(); validateExpiry()"
 															required
 														)
@@ -143,7 +140,6 @@ block content
 														div(
 															type="number"
 															ng-model="data.cvv"
-															ng-focus="validation.correctCvv = true; validation.errorFields.cvv = false;"
 															ng-blur="validateCvv()"
 															data-recurly="cvv"
 															name="cvv"
