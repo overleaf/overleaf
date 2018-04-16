@@ -1,6 +1,7 @@
 define [
 	"base",
 	"directives/creditCards"
+	"libs/recurly-4.8.5"
 ], (App)->
 
 	App.controller "NewSubscriptionController", ($scope, MultiCurrencyPricing, abTestManager, $http, sixpack, event_tracking, ccUtils)->
