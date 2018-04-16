@@ -19,7 +19,7 @@ block content
 						.page-header
 							.row
 								.col-xs-9
-									h2 {{planName}} {{validation.errorFields}} {{validation.errorFields.number}}
+									h2 {{planName}}
 								.col-xs-3
 									div.dropdown.changePlanButton.pull-right(ng-cloak, dropdown)
 										a.btn.btn-default.dropdown-toggle(
@@ -79,7 +79,7 @@ block content
 										div(ng-show="paymentMethod.value === 'credit_card'")
 											.row
 												.col-xs-6
-													.form-group(ng-class="validation.errorFields.first_name || inputHasError(simpleCCForm.firstName) ? 'has-error' : ''")
+													.form-group(ng-class="validation.errorFields.first_name || inputHasError(simpleCCForm.firstName) ? 'has-external-error' : ''")
 														label(for="first-name") #{translate('first_name')}
 														input#first-name.form-control(
 															type="text"
@@ -91,7 +91,7 @@ block content
 														)
 														span.input-feedback-message  {{ simpleCCForm.firstName.$error.required ? 'This field is required' : '' }}
 												.col-xs-6
-													.form-group(for="last-name",ng-class="validation.errorFields.last_name || inputHasError(simpleCCForm.lastName)? 'has-error' : ''")
+													.form-group(for="last-name",ng-class="validation.errorFields.last_name || inputHasError(simpleCCForm.lastName)? 'has-external-error' : ''")
 														label(for="last-name") #{translate('last_name')}
 														input#last-name.form-control(
 															type="text"
@@ -102,7 +102,7 @@ block content
 															required
 														)
 
-											.form-group(ng-class="validation.errorFields.number ? 'has-error' : ''")
+											.form-group(ng-class="validation.errorFields.number ? 'has-external-error' : ''")
 												label(for="card-no") #{translate("credit_card_number")}
 												div#card-no(
 													type="text"
@@ -114,7 +114,7 @@ block content
 
 											.row
 												.col-xs-3
-													.form-group.has-feedback()
+													.form-group.has-feedback(ng-class="validation.errorFields.month ? 'has-external-error' : ''")
 														label(for="month") #{translate("month")}
 														div(
 															type="number"
@@ -124,7 +124,7 @@ block content
 															required
 														)
 												.col-xs-3
-													.form-group.has-feedback()
+													.form-group.has-feedback(ng-class="validation.errorFields.year ? 'has-external-error' : ''")
 														label(for="year") #{translate("year")}
 														div(
 															type="number"
@@ -135,7 +135,7 @@ block content
 														)
 							
 												.col-xs-6
-													.form-group.has-feedback()
+													.form-group.has-feedback(ng-class="validation.errorFields.cvv ? 'has-external-error' : ''")
 														label #{translate("security_code")}
 														div(
 															type="number"
@@ -156,7 +156,7 @@ block content
 															) ?
 
 										div
-											.form-group(ng-class="validation.errorFields.country || inputHasError(simpleCCForm.country) ? 'has-error' : ''")
+											.form-group(ng-class="validation.errorFields.country || inputHasError(simpleCCForm.country) ? 'has-external-error' : ''")
 												label(for="country") #{translate('country')}
 												select#country.form-control(
 													data-recurly="country"
