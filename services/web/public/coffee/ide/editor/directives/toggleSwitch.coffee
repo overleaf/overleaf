@@ -32,6 +32,6 @@ define [
     >
     <label for="toggle-switch-true-{{$id}}" class="toggle-switch-label">{{labelTrue}}</label>
 
-    <span class="toggle-switch-selection"></span>
+    <span class="toggle-switch-selection" aria-hidden="true"></span>
   </fieldset>
 """
