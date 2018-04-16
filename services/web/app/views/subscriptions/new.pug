@@ -106,8 +106,6 @@ block content
 													type="text"
 													name="ccNumber"
 													data-recurly='number'
-													ng-blur="validateCardNumber();"
-													required
 												)
 
 											.row
@@ -117,9 +115,7 @@ block content
 														div(
 															type="number"
 															name="month"
-															ng-blur="updateExpiry(); validateExpiry()"
 															data-recurly="month"
-															required
 														)
 												.col-xs-3
 													.form-group.has-feedback(ng-class="validation.errorFields.year ? 'has-external-error' : ''")
@@ -128,8 +124,6 @@ block content
 															type="number"
 															name="year"
 															data-recurly="year"
-															ng-blur="updateExpiry(); validateExpiry()"
-															required
 														)
 							
 												.col-xs-6
@@ -138,10 +132,8 @@ block content
 														div(
 															type="number"
 															ng-model="data.cvv"
-															ng-blur="validateCvv()"
 															data-recurly="cvv"
 															name="cvv"
-															required
 															cc-format-sec-code
 														)
 														.form-control-feedback
@@ -197,7 +189,7 @@ block content
 											div.payment-submit
 												button.btn.btn-success.btn-block(
 													ng-click="submit()"
-													ng-disabled="processing" 
+													ng-disabled="processing  || !isFormValid(simpleCCForm);" 
 												) 
 													span(ng-show="processing") 
 														i.fa.fa-spinner.fa-spin
