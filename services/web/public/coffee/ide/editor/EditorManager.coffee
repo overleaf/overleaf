@@ -188,6 +188,3 @@ define [
 						@$scope.editor.trackChanges = want
 				else
 					@_syncTimeout = setTimeout tryToggle, 100
-
-		toggleRichText: () ->
-			@$scope.editor.richText = !@$scope.editor.richText
