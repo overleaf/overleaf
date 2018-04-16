@@ -39,11 +39,11 @@ block content
 										span !{translate("first_few_days_free", {trialLen:'{{trialLength}}'})}
 										span(ng-if="discountMonths && discountRate") &nbsp; -  {{discountMonths}} #{translate("month")}s {{discountRate}}% Off
 									div(ng-if="price")
-										strong {{price.currency.symbol}}{{price.next.total}} 
+										strong {{plans[currencyCode]['symbol']}}{{price.next.total}} 
 										span(ng-if="monthlyBilling")  #{translate("every")} #{translate("month")}
 										span(ng-if="!monthlyBilling")  #{translate("every")} #{translate("year")}
 									div(ng-if="normalPrice")
-										span.small Normally {{price.currency.symbol}}{{normalPrice}}
+										span.small Normally {{plans[currencyCode]['symbol']}}{{normalPrice}}
 						.row
 							div()
 								.col-md-12()
@@ -180,8 +180,8 @@ block content
 											div.price-breakdown(ng-if="price.next.tax !== '0.00'")
 												hr.thin
 												span Total: 
-												strong {{price.currency.symbol}}{{price.next.total}} 
-												span ({{price.currency.symbol}}{{price.next.subtotal}} + {{price.currency.symbol}}{{price.next.tax}} tax) 
+												strong {{plans[currencyCode]['symbol']}}{{price.next.total}} 
+												span ({{plans[currencyCode]['symbol']}}{{price.next.subtotal}} + {{plans[currencyCode]['symbol']}}{{price.next.tax}} tax) 
 												span(ng-if="monthlyBilling") #{translate("every")} #{translate("month")}
 												span(ng-if="!monthlyBilling") #{translate("every")} #{translate("year")}
 												hr.thin
