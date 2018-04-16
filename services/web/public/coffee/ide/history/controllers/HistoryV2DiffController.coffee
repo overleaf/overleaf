@@ -29,10 +29,11 @@ define [
 			do tryOpen = () ->
 				if iterations > 5
 					return
+				iterations += 1
 				entity = ide.fileTreeManager.findEntityById(id)
 				if entity? and type == 'doc'
 					ide.editorManager.openDoc(entity)
-				if entity? and type == 'file'
+				else if entity? and type == 'file'
 					ide.binaryFilesManager.openFile(entity)
 				else
 					setTimeout(tryOpen, 500)
