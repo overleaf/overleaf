@@ -73,7 +73,7 @@
 						tooltip-template="'v1TagTooltipTemplate'"
 						tooltip-append-to-body="true"
 					)
-			span.dropdown.tag-menu(dropdown)
+			span.dropdown.tag-menu(dropdown)(ng-if="!tag.isV1")
 				a.dropdown-toggle(
 					href="#",
 					data-toggle="dropdown",
