@@ -309,8 +309,9 @@ input[type="checkbox"],
 .has-warning {
   .form-control-validation(@state-warning-text; @state-warning-text; @state-warning-bg);
 }
-.has-error {
+.has-external-error {
   .form-control-validation(@state-danger-text; @state-danger-text; @state-danger-bg);
+  color:@red;
 }
 
 .form-control.ng-dirty.ng-invalid:not(:focus) {

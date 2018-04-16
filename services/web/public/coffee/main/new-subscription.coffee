@@ -1,6 +1,7 @@
 define [
 	"base",
 	"directives/creditCards"
+	"libs/recurly-4.8.5"
 ], (App)->
 
 	App.controller "NewSubscriptionController", ($scope, MultiCurrencyPricing, abTestManager, $http, sixpack, event_tracking, ccUtils)->
@@ -21,10 +22,6 @@ define [
 			value: "credit_card"
 
 		$scope.data =
-			number: ""
-			month: ""
-			year: ""
-			cvv: ""
 			first_name: ""
 			last_name: ""
 			postal_code: ""
@@ -34,16 +31,25 @@ define [
 			city:""
 			country:window.countryCode
 			coupon: window.couponCode
-			mmYY: ""
-
-		$scope.validation =
-			correctCardNumber : true
-			correctExpiry: true
-			correctCvv: true
+			
+		$scope.validation = {}
 
 		$scope.processing = false
 
-		recurly.configure window.recurlyApiKey
+		recurly.configure 
+			publicKey: window.recurlyApiKey
+			style: 
+				all: 
+					fontFamily: '"Open Sans", sans-serif',
+					fontSize: '16px',
+					fontColor: '#7a7a7a'
+				month: 
+					placeholder: 'MM'
+				year: 
+					placeholder: 'YY'
+				cvv:
+					placeholder: 'CVV'
+
 
 		pricing = recurly.Pricing()
 		window.pricing = pricing
@@ -73,6 +79,8 @@ define [
 					$scope.normalPrice += (basePrice * pricing.price.taxes[0].rate)
 			$scope.$apply()
 
+
+
 		$scope.applyCoupon = ->
 			pricing.coupon($scope.data.coupon).done()
 
@@ -83,26 +91,6 @@ define [
 			$scope.currencyCode = newCurrency
 			pricing.currency(newCurrency).done()
 
-		$scope.updateExpiry = () ->
-			parsedDateObj = ccUtils.parseExpiry $scope.data.mmYY
-			if parsedDateObj?
-				$scope.data.month = parsedDateObj.month
-				$scope.data.year = parsedDateObj.year
-
-		$scope.validateCardNumber = validateCardNumber = ->
-			$scope.validation.errorFields = {}
-			if $scope.data.number?.length != 0
-				$scope.validation.correctCardNumber = recurly.validate.cardNumber($scope.data.number)
-
-		$scope.validateExpiry = validateExpiry = ->
-			$scope.validation.errorFields = {}
-			if $scope.data.month?.length != 0 and $scope.data.year?.length != 0
-				$scope.validation.correctExpiry = recurly.validate.expiry($scope.data.month, $scope.data.year)
-
-		$scope.validateCvv = validateCvv = ->
-			$scope.validation.errorFields = {}
-			if $scope.data.cvv?.length != 0
-				$scope.validation.correctCvv = recurly.validate.cvv($scope.data.cvv)
 
 		$scope.inputHasError = inputHasError = (formItem) ->
 			if !formItem?
@@ -114,10 +102,7 @@ define [
 			if $scope.paymentMethod.value == 'paypal' 
 				return $scope.data.country != ""
 			else 
-				return (form.$valid and 
-						$scope.validation.correctCardNumber and
-						$scope.validation.correctExpiry and
-						$scope.validation.correctCvv)
+				return form.$valid
 
 		$scope.updateCountry = ->
 			pricing.address({country:$scope.data.country}).done()

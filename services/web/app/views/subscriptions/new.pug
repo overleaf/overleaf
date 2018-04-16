@@ -1,8 +1,6 @@
 extends ../layout
 
 block scripts
-	script(src="https://js.recurly.com/v3/recurly.js")
-
 	script(type='text/javascript').
 		window.countryCode = '#{countryCode}'
 		window.plan_code = '#{plan_code}'
@@ -50,10 +48,11 @@ block content
 							div()
 								.col-md-12()
 									form(
-										ng-if="planName"
 										name="simpleCCForm"
 										novalidate
 									)
+
+										
 										div.payment-method-toggle
 											a.payment-method-toggle-switch(
 												href
@@ -75,10 +74,10 @@ block content
 										.alert.alert-warning.small(ng-show="genericError")
 											strong {{genericError}}
 
-										div(ng-if="paymentMethod.value === 'credit_card'")
+										div(ng-show="paymentMethod.value === 'credit_card'")
 											.row
 												.col-xs-6
-													.form-group(ng-class="validation.errorFields.first_name || inputHasError(simpleCCForm.firstName) ? 'has-error' : ''")
+													.form-group(ng-class="validation.errorFields.first_name || inputHasError(simpleCCForm.firstName) ? 'has-external-error' : ''")
 														label(for="first-name") #{translate('first_name')}
 														input#first-name.form-control(
 															type="text"
@@ -90,7 +89,7 @@ block content
 														)
 														span.input-feedback-message  {{ simpleCCForm.firstName.$error.required ? 'This field is required' : '' }}
 												.col-xs-6
-													.form-group(for="last-name",ng-class="validation.errorFields.last_name || inputHasError(simpleCCForm.lastName)? 'has-error' : ''")
+													.form-group(for="last-name",ng-class="validation.errorFields.last_name || inputHasError(simpleCCForm.lastName)? 'has-external-error' : ''")
 														label(for="last-name") #{translate('last_name')}
 														input#last-name.form-control(
 															type="text"
@@ -100,47 +99,41 @@ block content
 															ng-model="data.last_name"
 															required
 														)
-														span.input-feedback-message {{ simpleCCForm.lastName.$error.required ? 'This field is required' : '' }}
 
-											.form-group(ng-class="validation.correctCardNumber == false || validation.errorFields.number || inputHasError(simpleCCForm.ccNumber) ? 'has-error' : ''")
+											.form-group(ng-class="validation.errorFields.number ? 'has-external-error' : ''")
 												label(for="card-no") #{translate("credit_card_number")}
-												input#card-no.form-control(
+												div#card-no(
 													type="text"
-													ng-model="data.number"
 													name="ccNumber"
-													ng-focus="validation.correctCardNumber = true; validation.errorFields.number = false;"
-													ng-blur="validateCardNumber();"
-													required
-													cc-format-card-number
+													data-recurly='number'
 												)
-												span.input-feedback-message {{ simpleCCForm.ccNumber.$error.required ? 'This field is required' : 'Please re-check the card number' }}
 
 											.row
-												.col-xs-6
-													.form-group.has-feedback(ng-class="validation.correctExpiry == false || validation.errorFields.expiry || inputHasError(simpleCCForm.expiry) ? 'has-error' : ''")
-														label #{translate("expiry")}
-														input.form-control(
-															type="text"
-															ng-model="data.mmYY"
-															name="expiry"
-															placeholder="MM / YY"
-															ng-focus="validation.correctExpiry = true; validation.errorFields.expiry = false;"
-															ng-blur="updateExpiry(); validateExpiry()"
-															required
-															cc-format-expiry
+												.col-xs-3
+													.form-group.has-feedback(ng-class="validation.errorFields.month ? 'has-external-error' : ''")
+														label(for="month") #{translate("month")}
+														div(
+															type="number"
+															name="month"
+															data-recurly="month"
 														)
-														span.input-feedback-message {{ simpleCCForm.expiry.$error.required ? 'This field is required' : 'Please re-check the expiry date' }}
-
+												.col-xs-3
+													.form-group.has-feedback(ng-class="validation.errorFields.year ? 'has-external-error' : ''")
+														label(for="year") #{translate("year")}
+														div(
+															type="number"
+															name="year"
+															data-recurly="year"
+														)
+							
 												.col-xs-6
-													.form-group.has-feedback(ng-class="validation.correctCvv == false || validation.errorFields.cvv || inputHasError(simpleCCForm.cvv) ? 'has-error' : ''")
+													.form-group.has-feedback(ng-class="validation.errorFields.cvv ? 'has-external-error' : ''")
 														label #{translate("security_code")}
-														input.form-control(
-															type="text"
+														div(
+															type="number"
 															ng-model="data.cvv"
-															ng-focus="validation.correctCvv = true; validation.errorFields.cvv = false;"
-															ng-blur="validateCvv()"
+															data-recurly="cvv"
 															name="cvv"
-															required
 															cc-format-sec-code
 														)
 														.form-control-feedback
@@ -151,11 +144,9 @@ block content
 																tooltip-trigger="mouseenter"
 																tooltip-append-to-body="true"
 															) ?
-														span.input-feedback-message {{ simpleCCForm.cvv.$error.required ? 'This field is required' : 'Please re-check the security code' }}
 
-										
 										div
-											.form-group(ng-class="validation.errorFields.country || inputHasError(simpleCCForm.country) ? 'has-error' : ''")
+											.form-group(ng-class="validation.errorFields.country || inputHasError(simpleCCForm.country) ? 'has-external-error' : ''")
 												label(for="country") #{translate('country')}
 												select#country.form-control(
 													data-recurly="country"
@@ -198,7 +189,7 @@ block content
 											div.payment-submit
 												button.btn.btn-success.btn-block(
 													ng-click="submit()"
-													ng-disabled="processing || !isFormValid(simpleCCForm);"
+													ng-disabled="processing  || !isFormValid(simpleCCForm);" 
 												) 
 													span(ng-show="processing") 
 														i.fa.fa-spinner.fa-spin

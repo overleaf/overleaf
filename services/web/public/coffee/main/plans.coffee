@@ -1,6 +1,6 @@
 define [
 	"base"
-	"libs/recurly-3.0.5"
+	"libs/recurly-4.8.5"
 ], (App, recurly) ->
 
 
