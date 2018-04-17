@@ -130,7 +130,7 @@ define ['ide/history/HistoryV2Manager'], (HistoryV2Manager) ->
 					project_ops: [{
 						remove:
 							pathname: "main.tex"
-							atV: 2
+						atV: 2
 					}]
 					fromV: 1, toV: 2
 				}])
@@ -144,7 +144,7 @@ define ['ide/history/HistoryV2Manager'], (HistoryV2Manager) ->
 					project_ops: [{
 						remove:
 							pathname: "main.tex"
-							atV: 1
+						atV: 1
 					}]
 					fromV: 0, toV: 1
 				}])
