@@ -59,24 +59,29 @@ block content
 										.col-md-12.text-centered
 											small #{translate("no_members")}
 
+						hr
 						div(ng-if="users.length < groupSize", ng-cloak)
-							hr
-							p
-								.small #{translate("add_more_members")}
-								form.form
-									.row
-										.col-xs-6
-											input.form-control(
-												name="email",
-												type="text",
-												placeholder="jane@example.com, joe@example.com",
-												ng-model="inputs.emails",
-												on-enter="addMembers()"
-											)
-										.col-xs-4
-											button.btn.btn-primary(ng-click="addMembers()") #{translate("add")}
-										.col-xs-2
-											a(href="/subscription/group/export") Export CSV
+							p.small #{translate("add_more_members")}
+							form.form
+								.row
+									.col-xs-6
+										input.form-control(
+											name="email",
+											type="text",
+											placeholder="jane@example.com, joe@example.com",
+											ng-model="inputs.emails",
+											on-enter="addMembers()"
+										)
+									.col-xs-4
+										button.btn.btn-primary(ng-click="addMembers()") #{translate("add")}
+									.col-xs-2
+										a(href="/subscription/group/export") Export CSV
+											
+						div(ng-if="users.length >= groupSize && users.length > 0", ng-cloak)
+							.row
+								.col-xs-2.col-xs-offset-10
+									a(href="/subscription/group/export") Export CSV
+									
 
 	script(type="text/javascript").
 		window.users = !{JSON.stringify(users)};
@@ -84,5 +89,3 @@ block content
 
 
 		
-
-
