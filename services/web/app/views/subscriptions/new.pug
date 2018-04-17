@@ -111,7 +111,7 @@ block content
 											.row
 												.col-xs-3
 													.form-group.has-feedback(ng-class="validation.errorFields.month ? 'has-external-error' : ''")
-														label(for="month") #{translate("month_capitalised")}
+														label(for="month").capitalised #{translate("month")}
 														div(
 															type="number"
 															name="month"
@@ -119,7 +119,7 @@ block content
 														)
 												.col-xs-3
 													.form-group.has-feedback(ng-class="validation.errorFields.year ? 'has-external-error' : ''")
-														label(for="year") #{translate("year_capitalised")}
+														label(for="year").capitalised #{translate("year")}
 														div(
 															type="number"
 															name="year"
