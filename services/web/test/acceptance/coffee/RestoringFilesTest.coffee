@@ -167,7 +167,6 @@ describe "RestoringFiles", ->
 					done()
 
 		describe "restoring to a filename that already exists", ->
-			it "should have created the file with a timestamp appended", ->
 			beforeEach (done) ->
 				MockProjectHistoryApi.addOldFile(@project_id, 42, "main.tex", "hello world, this is main.tex!")
 				@owner.request {
