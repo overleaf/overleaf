@@ -61,6 +61,7 @@
 						li(
 							ng-repeat="tag in tags | orderBy:'name'",
 							ng-controller="TagDropdownItemController"
+							ng-if="!tag.isV1"
 						)
 							a(href="#", ng-click="addOrRemoveProjectsFromTag()", stop-propagation="click")
 								i.fa(
