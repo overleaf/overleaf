@@ -60,7 +60,7 @@ describe "RedisManager", ->
 
 		@doc_id = "doc-id-123"
 		@project_id = "project-id-123"
-		@projectHistoryId = "history-id-123"
+		@projectHistoryId = 123
 		@callback = sinon.stub()
 
 	describe "getDoc", ->
@@ -74,7 +74,7 @@ describe "RedisManager", ->
 			@unflushed_time = 12345
 			@pathname = '/a/b/c.tex'
 			@multi.get = sinon.stub()
-			@multi.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version, @hash, @project_id, @json_ranges, @pathname, @projectHistoryId, @unflushed_time])
+			@multi.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version, @hash, @project_id, @json_ranges, @pathname, @projectHistoryId.toString(), @unflushed_time])
 			@rclient.sadd = sinon.stub().yields(null, 0)
 
 		describe "successfully", ->
@@ -111,7 +111,7 @@ describe "RedisManager", ->
 					.calledWith("Pathname:#{@doc_id}")
 					.should.equal true
 
-			it "should get the projectHistoryId", ->
+			it "should get the projectHistoryId as an integer", ->
 				@multi.get
 					.calledWith("ProjectHistoryId:#{@doc_id}")
 					.should.equal true

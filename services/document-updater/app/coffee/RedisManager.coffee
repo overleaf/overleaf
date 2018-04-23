@@ -148,6 +148,9 @@ module.exports = RedisManager =
 				logger.error project_id: project_id, doc_id: doc_id, doc_project_id: doc_project_id, "doc not in project"
 				return callback(new Errors.NotFoundError("document not found"))
 
+			if projectHistoryId?
+				projectHistoryId = parseInt(projectHistoryId)
+
 			# doc is not in redis, bail out
 			if !docLines?
 				return callback null, docLines, version, ranges, pathname, projectHistoryId, unflushedTime
