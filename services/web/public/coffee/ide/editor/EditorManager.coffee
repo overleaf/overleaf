@@ -1,6 +1,7 @@
 define [
 	"ide/editor/Document"
 	"ide/editor/directives/aceEditor"
+	"ide/editor/directives/toggleSwitch"
 	"ide/editor/controllers/SavingNotificationController"
 ], (Document) ->
 	class EditorManager
@@ -187,6 +188,3 @@ define [
 						@$scope.editor.trackChanges = want
 				else
 					@_syncTimeout = setTimeout tryToggle, 100
-
-		toggleRichText: () ->
-			@$scope.editor.richText = !@$scope.editor.richText

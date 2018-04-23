@@ -81,7 +81,12 @@
 }
 
 #editor-rich-text {
-	top: 40px; // TODO: replace with toolbar height var
+	top: @editor-toolbar-height;
+}
+
+.toolbar-editor {
+	height: @editor-toolbar-height;
+	background-color: @editor-toolbar-bg;
 }
 
 .loading-screen {
