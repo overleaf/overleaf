@@ -8,7 +8,6 @@ tk = require "timekeeper"
 describe "ProjectHistoryRedisManager", ->
 	beforeEach ->
 		@project_id = "project-id-123"
-		@projectHistoryId = "history-id-123"
 		@user_id = "user-id-123"
 		@callback = sinon.stub()
 		@rclient = {}
@@ -51,10 +50,9 @@ describe "ProjectHistoryRedisManager", ->
 			@rawUpdate =
 				pathname: @pathname = '/old'
 				newPathname: @newPathname = '/new'
-				version: @version = 2
 
 			@ProjectHistoryRedisManager.queueOps = sinon.stub()
-			@ProjectHistoryRedisManager.queueRenameEntity @project_id, @projectHistoryId, 'file', @file_id, @user_id, @rawUpdate, @callback
+			@ProjectHistoryRedisManager.queueRenameEntity @project_id, 'file', @file_id, @user_id, @rawUpdate, @callback
 
 		it "should queue an update", ->
 			update =
@@ -63,8 +61,6 @@ describe "ProjectHistoryRedisManager", ->
 				meta:
 					user_id: @user_id
 					ts: new Date()
-				version: @version
-				projectHistoryId: @projectHistoryId
 				file: @file_id
 
 			@ProjectHistoryRedisManager.queueOps
@@ -79,11 +75,10 @@ describe "ProjectHistoryRedisManager", ->
 			@rawUpdate =
 				pathname: @pathname = '/old'
 				docLines: @docLines = 'a\nb'
-				version: @version = 2
 				url: @url = 'filestore.example.com'
 
 			@ProjectHistoryRedisManager.queueOps = sinon.stub()
-			@ProjectHistoryRedisManager.queueAddEntity @project_id, @projectHistoryId, 'doc', @doc_id, @user_id, @rawUpdate, @callback
+			@ProjectHistoryRedisManager.queueAddEntity @project_id, 'doc', @doc_id, @user_id, @rawUpdate, @callback
 
 		it "should queue an update", ->
 			update =
@@ -93,8 +88,6 @@ describe "ProjectHistoryRedisManager", ->
 				meta:
 					user_id: @user_id
 					ts: new Date()
-				version: @version
-				projectHistoryId: @projectHistoryId
 				doc: @doc_id
 
 			@ProjectHistoryRedisManager.queueOps

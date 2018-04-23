@@ -36,7 +36,7 @@ historyKeys = Settings.redis.history.key_schema
 module.exports = RedisManager =
 	rclient: rclient
 
-	putDocInMemory : (project_id, doc_id, docLines, version, ranges, pathname, projectHistoryId, _callback)->
+	putDocInMemory : (project_id, doc_id, docLines, version, ranges, pathname, _callback)->
 		timer = new metrics.Timer("redis.put-doc")
 		callback = (error) ->
 			timer.done()
@@ -47,7 +47,7 @@ module.exports = RedisManager =
 			logger.error {err: error, doc_id: doc_id, docLines: docLines}, error.message
 			return callback(error)
 		docHash = RedisManager._computeHash(docLines)
-		logger.log {project_id, doc_id, version, docHash, pathname, projectHistoryId}, "putting doc in redis"
+		logger.log {project_id, doc_id, version, docHash, pathname}, "putting doc in redis"
 		RedisManager._serializeRanges ranges, (error, ranges) ->
 			if error?
 				logger.error {err: error, doc_id, project_id}, error.message
@@ -62,7 +62,6 @@ module.exports = RedisManager =
 			else
 				multi.del keys.ranges(doc_id:doc_id)
 			multi.set keys.pathname(doc_id:doc_id), pathname
-			multi.set keys.projectHistoryId(doc_id:doc_id), projectHistoryId
 			multi.exec (error, result) ->
 				return callback(error) if error?
 				# check the hash computed on the redis server
@@ -89,7 +88,6 @@ module.exports = RedisManager =
 		multi.del keys.docHash(doc_id:doc_id)
 		multi.del keys.ranges(doc_id:doc_id)
 		multi.del keys.pathname(doc_id:doc_id)
-		multi.del keys.projectHistoryId(doc_id:doc_id)
 		multi.del keys.unflushedTime(doc_id:doc_id)
 		multi.exec (error) ->
 			return callback(error) if error?
@@ -110,7 +108,7 @@ module.exports = RedisManager =
 	clearProjectState: (project_id, callback = (error) ->) ->
 		rclient.del keys.projectState(project_id:project_id), callback
 
-	getDoc : (project_id, doc_id, callback = (error, lines, version, ranges, pathname, projectHistoryId, unflushedTime) ->)->
+	getDoc : (project_id, doc_id, callback = (error, lines, version, ranges, pathname, unflushedTime) ->)->
 		timer = new metrics.Timer("redis.get-doc")
 		multi = rclient.multi()
 		multi.get keys.docLines(doc_id:doc_id)
@@ -119,9 +117,8 @@ module.exports = RedisManager =
 		multi.get keys.projectKey(doc_id:doc_id)
 		multi.get keys.ranges(doc_id:doc_id)
 		multi.get keys.pathname(doc_id:doc_id)
-		multi.get keys.projectHistoryId(doc_id:doc_id)
 		multi.get keys.unflushedTime(doc_id:doc_id)
-		multi.exec (error, [docLines, version, storedHash, doc_project_id, ranges, pathname, projectHistoryId, unflushedTime])->
+		multi.exec (error, [docLines, version, storedHash, doc_project_id, ranges, pathname, unflushedTime])->
 			timeSpan = timer.done()
 			return callback(error) if error?
 			# check if request took too long and bail out.  only do this for
@@ -150,14 +147,14 @@ module.exports = RedisManager =
 
 			# doc is not in redis, bail out
 			if !docLines?
-				return callback null, docLines, version, ranges, pathname, projectHistoryId, unflushedTime
+				return callback null, docLines, version, ranges, pathname, unflushedTime
 
 			# doc should be in project set, check if missing (workaround for missing docs from putDoc)
 			rclient.sadd keys.docsInProject(project_id:project_id), doc_id, (error, result) ->
 				return callback(error) if error?
 				if result isnt 0 # doc should already be in set
 					logger.error project_id: project_id, doc_id: doc_id, doc_project_id: doc_project_id, "doc missing from docsInProject set"
-				callback null, docLines, version, ranges, pathname, projectHistoryId, unflushedTime
+				callback null, docLines, version, ranges, pathname, unflushedTime
 
 	getDocVersion: (doc_id, callback = (error, version) ->) ->
 		rclient.get keys.docVersion(doc_id: doc_id), (error, version) ->
@@ -275,16 +272,16 @@ module.exports = RedisManager =
 						else
 							callback null, docUpdateCount
 
-	renameDoc: (project_id, doc_id, user_id, update, projectHistoryId, callback = (error) ->) ->
+	renameDoc: (project_id, doc_id, user_id, update, callback = (error) ->) ->
 		RedisManager.getDoc project_id, doc_id, (error, lines, version) ->
 			return callback(error) if error?
 
 			if lines? and version?
 				rclient.set keys.pathname(doc_id:doc_id), update.newPathname, (error) ->
 					return callback(error) if error?
-					ProjectHistoryRedisManager.queueRenameEntity project_id, projectHistoryId, 'doc', doc_id, user_id, update, callback
+					ProjectHistoryRedisManager.queueRenameEntity project_id, 'doc', doc_id, user_id, update, callback
 			else
-				ProjectHistoryRedisManager.queueRenameEntity project_id, projectHistoryId, 'doc', doc_id, user_id, update, callback
+				ProjectHistoryRedisManager.queueRenameEntity project_id, 'doc', doc_id, user_id, update, callback
 
 	clearUnflushedTime: (doc_id, callback = (error) ->) ->
 		rclient.del keys.unflushedTime(doc_id:doc_id), callback
