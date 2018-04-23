@@ -71,7 +71,7 @@ module.exports = UpdateManager =
 		profile = new Profiler("applyUpdate", {project_id, doc_id})
 		UpdateManager._sanitizeUpdate update
 		profile.log("sanitizeUpdate")
-		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges, pathname) ->
+		DocumentManager.getDoc project_id, doc_id, (error, lines, version, ranges, pathname, projectHistoryId) ->
 			profile.log("getDoc")
 			return callback(error) if error?
 			if !lines? or !version?
@@ -80,7 +80,7 @@ module.exports = UpdateManager =
 				profile.log("sharejs.applyUpdate")
 				return callback(error) if error?
 				RangesManager.applyUpdate project_id, doc_id, ranges, appliedOps, updatedDocLines, (error, new_ranges) ->
-					UpdateManager._addProjectHistoryMetadataToOps(appliedOps, pathname, lines)
+					UpdateManager._addProjectHistoryMetadataToOps(appliedOps, pathname, projectHistoryId, lines)
 					profile.log("RangesManager.applyUpdate")
 					return callback(error) if error?
 					RedisManager.updateDocument project_id, doc_id, updatedDocLines, version, appliedOps, new_ranges, (error, doc_ops_length, project_ops_length) ->
@@ -130,12 +130,13 @@ module.exports = UpdateManager =
 				op.i = op.i.replace(/[\uD800-\uDFFF]/g, "\uFFFD")
 		return update
 
-	_addProjectHistoryMetadataToOps: (updates, pathname, lines) ->
+	_addProjectHistoryMetadataToOps: (updates, pathname, projectHistoryId, lines) ->
 		doc_length = _.reduce lines,
 			(chars, line) -> chars + line.length,
 			0
 		doc_length += lines.length - 1  # count newline characters
 		updates.forEach (update) ->
+			update.projectHistoryId = projectHistoryId
 			update.meta ||= {}
 			update.meta.pathname = pathname
 			update.meta.doc_length = doc_length

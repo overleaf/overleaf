@@ -17,6 +17,7 @@ describe "PersistenceManager", ->
 					done: sinon.stub()
 			"logger-sharelatex": @logger = {log: sinon.stub(), err: sinon.stub()}
 		@project_id = "project-id-123"
+		@projectHistoryId = "history-id-123"
 		@doc_id = "doc-id-123"
 		@lines = ["one", "two", "three"]
 		@version = 42
@@ -36,6 +37,7 @@ describe "PersistenceManager", ->
 				version: @version,
 				ranges: @ranges
 				pathname: @pathname,
+				projectHistoryId: @projectHistoryId
 			}
 
 		describe "with a successful response from the web api", ->
@@ -60,7 +62,9 @@ describe "PersistenceManager", ->
 					.should.equal true
 
 			it "should call the callback with the doc lines, version and ranges", ->
-				@callback.calledWith(null, @lines, @version, @ranges, @pathname).should.equal true
+				@callback
+					.calledWith(null, @lines, @version, @ranges, @pathname, @projectHistoryId)
+					.should.equal true
 
 			it "should time the execution", ->
 				@Metrics.Timer::done.called.should.equal true
