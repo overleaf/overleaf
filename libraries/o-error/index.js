@@ -3,15 +3,8 @@
 var util = require('util')
 
 /**
- * Make custom error types. There are many, many modules for this, but they all
- * seem a bit weird. This approach is based on
- * https://gist.github.com/justmoon/15511f92e5216fa2624b
- * which seems sensible. This module mainly tries to DRY it up a bit. It also
- * incorporates some ideas from the verror package. Maybe it can become its own
- * package one day.
- *
- * TODO: Will this work under browserify?
- *
+ * Make custom error types that pass `instanceof` checks, have stack traces and
+ * support custom messages and properties.
  * @module
  */
 
