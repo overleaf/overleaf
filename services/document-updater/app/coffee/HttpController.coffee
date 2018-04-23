@@ -161,10 +161,10 @@ module.exports = HttpController =
 	updateProject: (req, res, next = (error) ->) ->
 		timer = new Metrics.Timer("http.updateProject")
 		project_id = req.params.project_id
-		{projectHistoryId, userId, docUpdates, fileUpdates, version} = req.body
+		{userId, docUpdates, fileUpdates, version} = req.body
 		logger.log {project_id, docUpdates, fileUpdates, version}, "updating project via http"
 
-		ProjectManager.updateProjectWithLocks project_id, projectHistoryId, userId, docUpdates, fileUpdates, version, (error) ->
+		ProjectManager.updateProjectWithLocks project_id, userId, docUpdates, fileUpdates, version, (error) ->
 			timer.done()
 			return next(error) if error?
 			logger.log project_id: project_id, "updated project via http"
@@ -172,10 +172,10 @@ module.exports = HttpController =
 
 	resyncProjectHistory: (req, res, next = (error) ->) ->
 		project_id = req.params.project_id
-		{projectHistoryId, docs, files} = req.body
+		{docs, files} = req.body
 
 		logger.log {project_id, docs, files}, "queuing project history resync via http"
-		HistoryManager.resyncProjectHistory project_id, projectHistoryId, docs, files, (error) ->
+		HistoryManager.resyncProjectHistory project_id, docs, files, (error) ->
 			return next(error) if error?
 			logger.log {project_id}, "queued project history resync via http"
 			res.send 204
