@@ -12,6 +12,7 @@ modulePath = path.join __dirname, '../../../../app/js/Features/DocumentUpdater/D
 describe 'DocumentUpdaterHandler', ->
 	beforeEach ->
 		@project_id = "project-id-923"
+		@projectHistoryId = "ol-project-id-1"
 		@doc_id = "doc-id-394"
 		@lines = ["one", "two", "three"]
 		@version = 42
@@ -409,7 +410,7 @@ describe 'DocumentUpdaterHandler', ->
 		describe "with project history disabled", ->
 			beforeEach ->
 				@settings.apis.project_history.sendProjectStructureOps = false
-				@handler.updateProjectStructure @project_id, @user_id, {}, @callback
+				@handler.updateProjectStructure @project_id, @projectHistoryId, @user_id, {}, @callback
 
 			it 'does not make a web request', ->
 				@request.called.should.equal false
@@ -445,11 +446,11 @@ describe 'DocumentUpdaterHandler', ->
 						newPathname: "/new_b"
 					]
 
-					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>
+					@handler.updateProjectStructure @project_id, @projectHistoryId, @user_id, @changes, () =>
 						@request.calledWith(
 							url: @url,
 							method: "POST"
-							json: {docUpdates, fileUpdates: [], userId: @user_id, @version}
+							json: {docUpdates, fileUpdates: [], userId: @user_id, @version, @projectHistoryId}
 						)
 						.should.equal true
 						done()
@@ -468,11 +469,11 @@ describe 'DocumentUpdaterHandler', ->
 						url: undefined
 					]
 
-					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>
+					@handler.updateProjectStructure @project_id, @projectHistoryId, @user_id, @changes, () =>
 						@request.calledWith(
 							url: @url
 							method: "POST"
-							json: {docUpdates, fileUpdates: [], userId: @user_id, @version}
+							json: {docUpdates, fileUpdates: [], userId: @user_id, @version, @projectHistoryId}
 						).should.equal true
 						done()
 
@@ -490,11 +491,11 @@ describe 'DocumentUpdaterHandler', ->
 						docLines: undefined
 					]
 
-					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>
+					@handler.updateProjectStructure @project_id, @projectHistoryId, @user_id, @changes, () =>
 						@request.calledWith(
 							url: @url
 							method: "POST"
-							json: {docUpdates: [], fileUpdates, userId: @user_id, @version}
+							json: {docUpdates: [], fileUpdates, userId: @user_id, @version, @projectHistoryId}
 						).should.equal true
 						done()
 
@@ -511,10 +512,10 @@ describe 'DocumentUpdaterHandler', ->
 						newPathname: ''
 					]
 
-					@handler.updateProjectStructure @project_id, @user_id, @changes, () =>
+					@handler.updateProjectStructure @project_id, @projectHistoryId, @user_id, @changes, () =>
 						@request.calledWith(
 							url: @url
 							method: "POST"
-							json: {docUpdates, fileUpdates: [], userId: @user_id, @version}
+							json: {docUpdates, fileUpdates: [], userId: @user_id, @version, @projectHistoryId}
 						).should.equal true
 						done()

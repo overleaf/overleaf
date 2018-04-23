@@ -121,15 +121,15 @@ module.exports = DocumentUpdaterHandler =
 			method: "DELETE"
 		}, project_id, "delete-thread", callback
 
-	resyncProjectHistory: (project_id, docs, files, callback) ->
+	resyncProjectHistory: (project_id, projectHistoryId, docs, files, callback) ->
 		logger.info {project_id, docs, files}, "resyncing project history in doc updater"
 		DocumentUpdaterHandler._makeRequest {
 			path: "/project/#{project_id}/history/resync"
-			json: { docs, files }
+			json: { docs, files, projectHistoryId }
 			method: "POST"
 		}, project_id, "resync-project-history", callback
 
-	updateProjectStructure : (project_id, userId, changes, callback = (error) ->)->
+	updateProjectStructure: (project_id, projectHistoryId, userId, changes, callback = (error) ->)->
 		return callback() if !settings.apis.project_history?.sendProjectStructureOps
 
 		Project.findOne {_id: project_id}, {version:true}, (err, currentProject) ->
@@ -144,7 +144,13 @@ module.exports = DocumentUpdaterHandler =
 			logger.log {project_id}, "updating project structure in doc updater"
 			DocumentUpdaterHandler._makeRequest {
 				path: "/project/#{project_id}"
-				json: { docUpdates, fileUpdates, userId, version: currentProject.version }
+				json: {
+					docUpdates,
+					fileUpdates,
+					userId,
+					version: currentProject.version
+					projectHistoryId
+				}
 				method: "POST"
 			}, project_id, "update-project-structure", callback
 

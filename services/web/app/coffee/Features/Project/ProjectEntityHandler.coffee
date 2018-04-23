@@ -6,7 +6,6 @@ DocstoreManager = require "../Docstore/DocstoreManager"
 DocumentUpdaterHandler = require('../../Features/DocumentUpdater/DocumentUpdaterHandler')
 Errors = require '../Errors/Errors'
 Project = require('../../models/Project').Project
-ProjectLocator = require('./ProjectLocator')
 ProjectGetter = require "./ProjectGetter"
 TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 
@@ -105,14 +104,7 @@ module.exports = ProjectEntityHandler = self =
 			callback = options
 			options = {}
 
-		if options["pathname"]
-			delete options["pathname"]
-			ProjectLocator.findElement {project_id: project_id, element_id: doc_id, type: 'doc'}, (error, doc, path) =>
-				return callback(error) if error?
-				DocstoreManager.getDoc project_id, doc_id, options, (error, lines, rev, version, ranges) =>
-					callback(error, lines, rev, version, ranges, path.fileSystem)
-		else
-			DocstoreManager.getDoc project_id, doc_id, options, callback
+		DocstoreManager.getDoc project_id, doc_id, options, callback
 
 	_getAllFolders: (project_id,  callback) ->
 		logger.log project_id:project_id, "getting all folders for project"

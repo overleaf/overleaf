@@ -48,6 +48,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 	# this doesn't need any locking because it's only called by ProjectDuplicator
 	copyFileFromExistingProjectWithProject: (project, folder_id, originalProject_id, origonalFileRef, userId, callback = (error, fileRef, folder_id) ->)->
 		project_id = project._id
+		projectHistoryId = project.overleaf?.history?.id
 		logger.log { project_id, folder_id, originalProject_id, origonalFileRef }, "copying file in s3 with project"
 		return callback(err) if err?
 		ProjectEntityMongoUpdateHandler._confirmFolder project, folder_id, (folder_id)=>
@@ -72,7 +73,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 							path: result?.path?.fileSystem
 							url: fileStoreUrl
 						]
-						DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newFiles}, (error) ->
+						DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, {newFiles}, (error) ->
 							return callback(error) if error?
 							callback null, fileRef, folder_id
 
@@ -122,14 +123,15 @@ module.exports = ProjectEntityUpdateHandler = self =
 		Project.update {_id:project_id}, {$unset: {rootDoc_id: true}}, {}, callback
 
 	addDoc: wrapWithLock (project_id, folder_id, docName, docLines, userId, callback = (error, doc, folder_id) ->)=>
-		self.addDocWithoutUpdatingHistory.withoutLock project_id, folder_id, docName, docLines, userId, (error, doc, folder_id, path) ->
+		self.addDocWithoutUpdatingHistory.withoutLock project_id, folder_id, docName, docLines, userId, (error, doc, folder_id, path, project) ->
 			return callback(error) if error?
+			projectHistoryId = project.overleaf?.history?.id
 			newDocs = [
 				doc: doc
 				path: path
 				docLines: docLines.join('\n')
 			]
-			DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newDocs}, (error) ->
+			DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, {newDocs}, (error) ->
 				return callback(error) if error?
 				callback null, doc, folder_id
 
@@ -164,12 +166,13 @@ module.exports = ProjectEntityUpdateHandler = self =
 		withLock: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback = (error, fileRef, folder_id) ->)->
 			ProjectEntityUpdateHandler._addFileAndSendToTpds project_id, folder_id, fileName, fileRef, (err, result, project) ->
 				return callback(err) if err?
+				projectHistoryId = project.overleaf?.history?.id
 				newFiles = [
 					file: fileRef
 					path: result?.path?.fileSystem
 					url: fileStoreUrl
 				]
-				DocumentUpdaterHandler.updateProjectStructure project_id, userId, {newFiles}, (error) ->
+				DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, {newFiles}, (error) ->
 					return callback(error) if error?
 					callback(null, fileRef, folder_id)
 
@@ -196,9 +199,10 @@ module.exports = ProjectEntityUpdateHandler = self =
 					path: path.fileSystem
 					url: fileStoreUrl
 				]
+				projectHistoryId = project.overleaf?.history?.id
 				TpdsUpdateSender.addFile {project_id:project._id, file_id:newFileRef._id, path:path.fileSystem, rev:newFileRef.rev+1, project_name:project.name}, (err) ->
 					return callback(err) if err?
-					DocumentUpdaterHandler.updateProjectStructure project_id, userId, {oldFiles, newFiles}, callback
+					DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, {oldFiles, newFiles}, callback
 
 	addDocWithoutUpdatingHistory: wrapWithLock (project_id, folder_id, docName, docLines, userId, callback = (error, doc, folder_id) ->)=>
 		# This method should never be called directly, except when importing a project
@@ -223,7 +227,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 					rev:          0
 				}, (err) ->
 					return callback(err) if err?
-					callback(null, doc, folder_id, result?.path?.fileSystem)
+					callback(null, doc, folder_id, result?.path?.fileSystem, project)
 
 	addFileWithoutUpdatingHistory: wrapWithLock
 		# This method should never be called directly, except when importing a project
@@ -354,10 +358,11 @@ module.exports = ProjectEntityUpdateHandler = self =
 			logger.err {err: "No entityType set", project_id, entity_id}
 			return callback("No entityType set")
 		entityType = entityType.toLowerCase()
-		ProjectEntityMongoUpdateHandler.moveEntity project_id, entity_id, destFolderId, entityType, (err, project_name, startPath, endPath, rev, changes) ->
+		ProjectEntityMongoUpdateHandler.moveEntity project_id, entity_id, destFolderId, entityType, (err, project, startPath, endPath, rev, changes) ->
 			return callback(err) if err?
-			TpdsUpdateSender.moveEntity { project_id, project_name, startPath, endPath, rev }
-			DocumentUpdaterHandler.updateProjectStructure project_id, userId, changes, callback
+			projectHistoryId = project.overleaf?.history?.id
+			TpdsUpdateSender.moveEntity { project_id, project_name: project.name, startPath, endPath, rev }
+			DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, changes, callback
 
 	renameEntity: wrapWithLock (project_id, entity_id, entityType, newName, userId, callback)->
 		if not SafePath.isCleanFilename newName
@@ -368,10 +373,11 @@ module.exports = ProjectEntityUpdateHandler = self =
 			return callback("No entityType set")
 		entityType = entityType.toLowerCase()
 
-		ProjectEntityMongoUpdateHandler.renameEntity project_id, entity_id, entityType, newName, (err, project_name, startPath, endPath, rev, changes) ->
+		ProjectEntityMongoUpdateHandler.renameEntity project_id, entity_id, entityType, newName, (err, project, startPath, endPath, rev, changes) ->
 			return callback(err) if err?
-			TpdsUpdateSender.moveEntity({project_id, startPath, endPath, project_name, rev})
-			DocumentUpdaterHandler.updateProjectStructure project_id, userId, changes, callback
+			projectHistoryId = project.overleaf?.history?.id
+			TpdsUpdateSender.moveEntity { project_id, project_name: project.name, startPath, endPath, rev }
+			DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, changes, callback
 
 	# This doesn't directly update project structure but we need to take the lock
 	# to prevent anything else being queued before the resync update
@@ -379,7 +385,8 @@ module.exports = ProjectEntityUpdateHandler = self =
 		ProjectGetter.getProject project_id, rootFolder: true, overleaf: true, (error, project) ->
 			return callback(error) if error?
 
-			if !project?.overleaf?.history?.id?
+			projectHistoryId = project?.overleaf?.history?.id
+			if !projectHistoryId?
 				error = new Errors.ProjectHistoryDisabledError("project history not enabled for #{project_id}")
 				return callback(error)
 
@@ -395,7 +402,8 @@ module.exports = ProjectEntityUpdateHandler = self =
 					path: file.path
 					url: FileStoreHandler._buildUrl(project_id, file.file._id)
 
-				DocumentUpdaterHandler.resyncProjectHistory project_id, docs, files, callback
+				DocumentUpdaterHandler.resyncProjectHistory project_id, projectHistoryId, docs, files, callback
+
 	_cleanUpEntity: (project, entity, entityType, path, userId, callback = (error) ->) ->
 		if(entityType.indexOf("file") != -1)
 			self._cleanUpFile project, entity, path, userId, callback
@@ -424,16 +432,18 @@ module.exports = ProjectEntityUpdateHandler = self =
 					DocstoreManager.deleteDoc project_id, doc_id, (error) ->
 						return callback(error) if error?
 						changes = oldDocs: [ {doc, path} ]
-						DocumentUpdaterHandler.updateProjectStructure project_id, userId, changes, callback
+						projectHistoryId = project.overleaf?.history?.id
+						DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, changes, callback
 
 	_cleanUpFile: (project, file, path, userId, callback = (error) ->) ->
 		ProjectEntityMongoUpdateHandler._insertDeletedFileReference project._id, file, (error) ->
 			return callback(error) if error?
 			project_id = project._id.toString()
+			projectHistoryId = project.overleaf?.history?.id
 			changes = oldFiles: [ {file, path} ]
 			# we are now keeping a copy of every file versio so we no longer delete
 			# the file from the filestore
-			DocumentUpdaterHandler.updateProjectStructure project_id, userId, changes, callback
+			DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, changes, callback
 
 	_cleanUpFolder: (project, folder, folderPath, userId, callback = (error) ->) ->
 		jobs = []

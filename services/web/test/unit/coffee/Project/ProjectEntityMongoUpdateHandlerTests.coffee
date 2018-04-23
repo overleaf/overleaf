@@ -57,7 +57,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it 'gets the project', ->
 			@ProjectGetter.getProjectWithoutLock
-				.calledWith(project_id, {rootFolder:true, name: true})
+				.calledWith(project_id, {rootFolder:true, name:true, overleaf:true})
 				.should.equal true
 
 		it 'checks the folder exists', ->
@@ -80,7 +80,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it 'gets the project', ->
 			@ProjectGetter.getProjectWithoutLock
-				.calledWith(project_id, {rootFolder:true, name: true})
+				.calledWith(project_id, {rootFolder:true, name:true, overleaf:true})
 				.should.equal true
 
 		it 'checks the folder exists', ->
@@ -106,7 +106,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it 'gets the project', ->
 			@ProjectGetter.getProjectWithoutLock
-				.calledWith(project_id, {rootFolder:true, name: true})
+				.calledWith(project_id, {rootFolder:true, name:true, overleaf:true})
 				.should.equal true
 
 		it 'finds the existing element', ->
@@ -241,7 +241,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it 'should get the project', ->
 			@ProjectGetter.getProjectWithoutLock
-				.calledWith(project_id, {rootFolder:true, name:true})
+				.calledWith(project_id, {rootFolder:true, name:true, overleaf:true})
 				.should.equal true
 
 		it 'should find the doc to move', ->
@@ -267,7 +267,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 		it "calls the callback", ->
 			changes = { @oldDocs, @newDocs, @oldFiles, @newFiles }
 			@callback.calledWith(
-				null, @project.name, @path.fileSystem, @pathAfterMove.fileSystem, @doc.rev, changes
+				null, @project, @path.fileSystem, @pathAfterMove.fileSystem, @doc.rev, changes
 			).should.equal true
 
 	describe 'deleteEntity', ->
@@ -280,7 +280,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it "should get the project", ->
 			@ProjectGetter.getProjectWithoutLock
-				.calledWith(project_id, {name:true, rootFolder:true})
+				.calledWith(project_id, {rootFolder:true, name:true, overleaf:true})
 				.should.equal true
 
 		it "should find the element", ->
@@ -325,7 +325,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it 'should get the project', ->
 			@ProjectGetter.getProjectWithoutLock
-				.calledWith(project_id, {rootFolder:true, name:true})
+				.calledWith(project_id, {rootFolder:true, name:true, overleaf:true})
 				.should.equal true
 
 		it 'should find the doc', ->
@@ -349,7 +349,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 		it 'calls the callback', ->
 			changes = { @oldDocs, @newDocs, @oldFiles, @newFiles }
 			@callback.calledWith(
-				null, @project.name, '/old.tex', '/new.tex', @doc.rev, changes
+				null, @project, '/old.tex', '/new.tex', @doc.rev, changes
 			).should.equal true
 
 	describe 'addFolder', ->
@@ -363,7 +363,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it 'gets the project', ->
 			@ProjectGetter.getProjectWithoutLock
-				.calledWith(project_id, {rootFolder:true, name: true})
+				.calledWith(project_id, {rootFolder:true, name:true, overleaf:true})
 				.should.equal true
 
 		it 'checks the parent folder exists', ->
