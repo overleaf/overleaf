@@ -33,6 +33,7 @@ describe "RedisManager", ->
 								docsInProject: ({project_id}) -> "DocsIn:#{project_id}"
 								ranges: ({doc_id}) -> "Ranges:#{doc_id}"
 								pathname: ({doc_id}) -> "Pathname:#{doc_id}"
+								projectHistoryId: ({doc_id}) -> "ProjectHistoryId:#{doc_id}"
 								projectState: ({project_id}) -> "ProjectState:#{project_id}"
 								unflushedTime: ({doc_id}) -> "UnflushedTime:#{doc_id}"
 						history:
@@ -59,6 +60,7 @@ describe "RedisManager", ->
 
 		@doc_id = "doc-id-123"
 		@project_id = "project-id-123"
+		@projectHistoryId = "history-id-123"
 		@callback = sinon.stub()
 
 	describe "getDoc", ->
@@ -72,7 +74,7 @@ describe "RedisManager", ->
 			@unflushed_time = 12345
 			@pathname = '/a/b/c.tex'
 			@multi.get = sinon.stub()
-			@multi.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version, @hash, @project_id, @json_ranges, @pathname, @unflushed_time])
+			@multi.exec = sinon.stub().callsArgWith(0, null, [@jsonlines, @version, @hash, @project_id, @json_ranges, @pathname, @projectHistoryId, @unflushed_time])
 			@rclient.sadd = sinon.stub().yields(null, 0)
 
 		describe "successfully", ->
@@ -109,6 +111,11 @@ describe "RedisManager", ->
 					.calledWith("Pathname:#{@doc_id}")
 					.should.equal true
 
+			it "should get the projectHistoryId", ->
+				@multi.get
+					.calledWith("ProjectHistoryId:#{@doc_id}")
+					.should.equal true
+
 			it "should check if the document is in the DocsIn set", ->
 				@rclient.sadd
 					.calledWith("DocsIn:#{@project_id}")
@@ -116,7 +123,7 @@ describe "RedisManager", ->
 
 			it 'should return the document', ->
 				@callback
-					.calledWithExactly(null, @lines, @version, @ranges, @pathname, @unflushed_time)
+					.calledWithExactly(null, @lines, @version, @ranges, @pathname, @projectHistoryId, @unflushed_time)
 					.should.equal true
 
 			it 'should not log any errors', ->
@@ -125,7 +132,7 @@ describe "RedisManager", ->
 
 		describe "when the document is not present", ->
 			beforeEach ->
-				@multi.exec = sinon.stub().callsArgWith(0, null, [null, null, null, null, null, null, null])
+				@multi.exec = sinon.stub().callsArgWith(0, null, [null, null, null, null, null, null, null, null])
 				@rclient.sadd = sinon.stub().yields()
 				@RedisManager.getDoc @project_id, @doc_id, @callback
 
@@ -136,7 +143,7 @@ describe "RedisManager", ->
 
 			it 'should return an empty result', ->
 				@callback
-					.calledWithExactly(null, null, 0, {}, null, null)
+					.calledWithExactly(null, null, 0, {}, null, null, null)
 					.should.equal true
 
 			it 'should not log any errors', ->
@@ -154,7 +161,7 @@ describe "RedisManager", ->
 
 			it 'should return the document', ->
 				@callback
-					.calledWithExactly(null, @lines, @version, @ranges, @pathname, @unflushed_time)
+					.calledWithExactly(null, @lines, @version, @ranges, @pathname, @projectHistoryId, @unflushed_time)
 					.should.equal true
 
 		describe "with a corrupted document", ->
@@ -532,7 +539,7 @@ describe "RedisManager", ->
 
 		describe "with non-empty ranges", ->
 			beforeEach (done) ->
-				@RedisManager.putDocInMemory @project_id, @doc_id, @lines, @version, @ranges, @pathname, done
+				@RedisManager.putDocInMemory @project_id, @doc_id, @lines, @version, @ranges, @pathname, @projectHistoryId, done
 
 			it "should set the lines", ->
 				@multi.eval
@@ -564,6 +571,11 @@ describe "RedisManager", ->
 					.calledWith("Pathname:#{@doc_id}", @pathname)
 					.should.equal true
 
+			it "should set the projectHistoryId for the doc", ->
+				@multi.set
+					.calledWith("ProjectHistoryId:#{@doc_id}", @projectHistoryId)
+					.should.equal true
+
 			it "should add the doc_id to the project set", ->
 				@rclient.sadd
 					.calledWith("DocsIn:#{@project_id}", @doc_id)
@@ -575,7 +587,7 @@ describe "RedisManager", ->
 
 		describe "with empty ranges", ->
 			beforeEach (done) ->
-				@RedisManager.putDocInMemory @project_id, @doc_id, @lines, @version, {}, @pathname, done
+				@RedisManager.putDocInMemory @project_id, @doc_id, @lines, @version, {}, @pathname, @projectHistoryId, done
 
 			it "should delete the ranges key", ->
 				@multi.del
@@ -590,7 +602,7 @@ describe "RedisManager", ->
 		describe "with a corrupted write", ->
 			beforeEach (done) ->
 				@multi.exec = sinon.stub().callsArgWith(0, null, ["INVALID-HASH-VALUE"])
-				@RedisManager.putDocInMemory @project_id, @doc_id, @lines, @version, @ranges, @pathname, done
+				@RedisManager.putDocInMemory @project_id, @doc_id, @lines, @version, @ranges, @pathname, @projectHistoryId, done
 
 			it 'should log a hash error', ->
 				@logger.error.calledWith()
@@ -600,7 +612,7 @@ describe "RedisManager", ->
 			beforeEach ->
 				@_stringify = JSON.stringify
 				@JSON.stringify = () -> return '["bad bytes! \u0000 <- here"]'
-				@RedisManager.putDocInMemory @project_id, @doc_id, @lines, @version, @ranges, @pathname, @callback
+				@RedisManager.putDocInMemory @project_id, @doc_id, @lines, @version, @ranges, @pathname, @projectHistoryId, @callback
 
 			afterEach ->
 				@JSON.stringify = @_stringify
@@ -614,7 +626,7 @@ describe "RedisManager", ->
 		describe "with ranges that are too big", ->
 			beforeEach ->
 				@RedisManager._serializeRanges = sinon.stub().yields(new Error("ranges are too large"))
-				@RedisManager.putDocInMemory @project_id, @doc_id, @lines, @version, @ranges, @pathname, @callback
+				@RedisManager.putDocInMemory @project_id, @doc_id, @lines, @version, @ranges, @pathname, @projectHistoryId, @callback
 
 			it 'should log an error', ->
 				@logger.error.called.should.equal true
@@ -664,6 +676,11 @@ describe "RedisManager", ->
 				.calledWith("Pathname:#{@doc_id}")
 				.should.equal true
 
+		it "should delete the pathname for the doc", ->
+			@multi.del
+				.calledWith("ProjectHistoryId:#{@doc_id}")
+				.should.equal true
+
 	describe "clearProjectState", ->
 		beforeEach (done) ->
 			@rclient.del = sinon.stub().callsArg(1)
@@ -687,7 +704,7 @@ describe "RedisManager", ->
 			beforeEach ->
 				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, 'lines', 'version')
 				@ProjectHistoryRedisManager.queueRenameEntity = sinon.stub().yields()
-				@RedisManager.renameDoc @project_id, @doc_id, @userId, @update, @callback
+				@RedisManager.renameDoc @project_id, @doc_id, @userId, @update, @projectHistoryId, @callback
 
 			it "update the cached pathname", ->
 				@rclient.set
@@ -696,19 +713,19 @@ describe "RedisManager", ->
 
 			it "should queue an update", ->
 				@ProjectHistoryRedisManager.queueRenameEntity
-					.calledWithExactly(@project_id, 'doc', @doc_id, @userId, @update, @callback)
+					.calledWithExactly(@project_id, @projectHistoryId, 'doc', @doc_id, @userId, @update, @callback)
 					.should.equal true
 
 		describe "the document is not cached in redis", ->
 			beforeEach ->
 				@RedisManager.getDoc = sinon.stub().callsArgWith(2, null, null, null)
 				@ProjectHistoryRedisManager.queueRenameEntity = sinon.stub().yields()
-				@RedisManager.renameDoc @project_id, @doc_id, @userId, @update, @callback
+				@RedisManager.renameDoc @project_id, @doc_id, @userId, @update, @projectHistoryId, @callback
 
 			it "does not update the cached pathname", ->
 				@rclient.set.called.should.equal false
 
 			it "should queue an update", ->
 				@ProjectHistoryRedisManager.queueRenameEntity
-					.calledWithExactly(@project_id, 'doc', @doc_id, @userId, @update, @callback)
+					.calledWithExactly(@project_id, @projectHistoryId, 'doc', @doc_id, @userId, @update, @callback)
 					.should.equal true

@@ -65,8 +65,8 @@ module.exports = HistoryManager =
 		newBlock  = Math.floor(length / threshold)
 		return newBlock != prevBlock
 
-	resyncProjectHistory: (project_id, docs, files, callback) ->
-		ProjectHistoryRedisManager.queueResyncProjectStructure project_id, docs, files, (error) ->
+	resyncProjectHistory: (project_id, projectHistoryId, docs, files, callback) ->
+		ProjectHistoryRedisManager.queueResyncProjectStructure project_id, projectHistoryId, docs, files, (error) ->
 			return callback(error) if error?
 			DocumentManager = require "./DocumentManager"
 			resyncDoc = (doc, cb) ->

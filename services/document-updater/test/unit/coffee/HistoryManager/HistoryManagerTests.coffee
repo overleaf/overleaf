@@ -164,6 +164,7 @@ describe "HistoryManager", ->
 
 	describe "resyncProjectHistory", ->
 		beforeEach ->
+			@projectHistoryId = 'history-id-1234'
 			@docs = [
 				doc: @doc_id
 				path: 'main.tex'
@@ -175,11 +176,11 @@ describe "HistoryManager", ->
 			]
 			@ProjectHistoryRedisManager.queueResyncProjectStructure = sinon.stub().yields()
 			@DocumentManager.resyncDocContentsWithLock = sinon.stub().yields()
-			@HistoryManager.resyncProjectHistory @project_id, @docs, @files, @callback
+			@HistoryManager.resyncProjectHistory @project_id, @projectHistoryId, @docs, @files, @callback
 
 		it "should queue a project structure reync", ->
 			@ProjectHistoryRedisManager.queueResyncProjectStructure
-				.calledWith(@project_id, @docs, @files)
+				.calledWith(@project_id, @projectHistoryId, @docs, @files)
 				.should.equal true
 
 		it "should queue doc content reyncs", ->
