@@ -1,0 +1,91 @@
+@import "core/ol-variables.less";
+
+.modal-body-publish {
+		#search-input-container {
+				overflow: hidden;
+				margin: 5px 0 10px;
+		}
+		.table-content-name {
+				width: 100%;
+				margin-bottom: 10px;
+				font-weight: 300;
+		}
+		.table-content-category {
+				font-weight: 300;
+				text-align: right;
+				font-style: italic;
+				width: 30%;
+				float: right;
+				text-transform: capitalize
+		}
+		.table-content-category ~ .table-content-name {
+				width: 70%;
+				display: inline-block;
+		}
+		.wl-icon:before{
+				font-size: 14px;
+		}
+		.button-as-link{
+         color: @ol-green;
+         text-transform: none;
+         background: none;
+         padding: 0;
+         border: none;
+         border-radius: 0;
+         font-size: 14px;
+         @extend a;
+         &:hover,
+         &:active,
+         &:focus {
+             color: @ol-dark-green;
+             background: none;
+         }
+	       text-align: left;
+		}
+    .affix-content-title {
+      color: @gray-light;
+      font-size: 1.2em;
+      padding-left: 10px;
+    }
+
+    .affix-subcontent {
+      margin: 5px 0 50px;
+    }
+    .overbox {
+        padding: @line-height-computed / 2;
+	      background-color: white;
+	      margin-top: @line-height-computed / 2;
+        border: 1px solid @gray-lighter;
+    }
+    .content-as-table {
+	      .table-content,
+	      .table-content > * {
+		        display: table;
+	      }
+	      .table-content-icon {
+		        float: left;
+		        height: 80px;
+		        width: 106px;
+            border: 1px solid @gray-lightest;
+		        display: flex;
+		        align-items: center;
+		        overflow: hidden;
+		        * {
+			          width: 100%;
+		        }
+	      }
+	      .table-content-text {
+		        float: right;
+		        width: calc(~'100% - 106px');
+		        vertical-align: top;
+		        padding-left: 15px;
+	      }
+	      .table-content-slogan {
+		        height: 80px;
+		        overflow: hidden;
+	      }
+	      .table-content-link {
+		        padding-top: 10px;
+	      }
+    }
+}
