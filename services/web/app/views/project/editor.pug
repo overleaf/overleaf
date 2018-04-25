@@ -57,8 +57,9 @@ block content
 				include ./editor/share
 				!= moduleIncludes("publish:body", locals)
 
-				#ide-body(
+				main#ide-body(
 					ng-cloak,
+					role="main",
 					layout="main",
 					ng-hide="state.loading",
 					resize-on="layout:chat:resize",
