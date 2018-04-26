@@ -7,6 +7,7 @@ SandboxedModule = require('sandboxed-module')
 describe "UpdateManager", ->
 	beforeEach ->
 		@project_id = "project-id-123"
+		@projectHistoryId = "history-id-123"
 		@doc_id = "document-id-123"
 		@callback = sinon.stub()
 		@UpdateManager = SandboxedModule.require modulePath, requires:
@@ -167,7 +168,7 @@ describe "UpdateManager", ->
 			@doc_ops_length = sinon.stub()
 			@project_ops_length = sinon.stub()
 			@pathname = '/a/b/c.tex'
-			@DocumentManager.getDoc = sinon.stub().yields(null, @lines, @version, @ranges, @pathname)
+			@DocumentManager.getDoc = sinon.stub().yields(null, @lines, @version, @ranges, @pathname, @projectHistoryId)
 			@RangesManager.applyUpdate = sinon.stub().yields(null, @updated_ranges)
 			@ShareJsUpdateManager.applyUpdate = sinon.stub().yields(null, @updatedDocLines, @version, @appliedOps)
 			@RedisManager.updateDocument = sinon.stub().yields(null, @doc_ops_length, @project_ops_length)
@@ -196,7 +197,7 @@ describe "UpdateManager", ->
 
 			it "should add metadata to the ops" , ->
 				@UpdateManager._addProjectHistoryMetadataToOps
-					.calledWith(@appliedOps, @pathname, @lines)
+					.calledWith(@appliedOps, @pathname, @projectHistoryId, @lines)
 					.should.equal true
 
 			it "should push the applied ops into the history queue", ->
@@ -239,7 +240,7 @@ describe "UpdateManager", ->
 				@callback.calledWith(@error).should.equal true
 
 	describe "_addProjectHistoryMetadataToOps", ->
-		it "should add pathname and doc_length metadata to the ops", ->
+		it "should add projectHistoryId, pathname and doc_length metadata to the ops", ->
 			lines = [
 				'some'
 				'test'
@@ -250,20 +251,23 @@ describe "UpdateManager", ->
 				{ v: 45, op: [{d: "qux", p: 4}, { i: "bazbaz", p: 14 }] },
 				{ v: 49, op: [{i: "penguin", p: 18}] }
 			]
-			@UpdateManager._addProjectHistoryMetadataToOps(appliedOps, @pathname, lines)
+			@UpdateManager._addProjectHistoryMetadataToOps(appliedOps, @pathname, @projectHistoryId, lines)
 			appliedOps.should.deep.equal [{
+				projectHistoryId: @projectHistoryId
 				v: 42
 				op: [{i: "foo", p: 4}, { i: "bar", p: 6 }]
 				meta:
 					pathname: @pathname
 					doc_length: 14
 			}, {
+				projectHistoryId: @projectHistoryId
 				v: 45
 				op: [{d: "qux", p: 4}, { i: "bazbaz", p: 14 }]
 				meta:
 					pathname: @pathname
 					doc_length: 20 # 14 + 'foo' + 'bar'
 			}, {
+				projectHistoryId: @projectHistoryId
 				v: 49
 				op: [{i: "penguin", p: 18}]
 				meta:
