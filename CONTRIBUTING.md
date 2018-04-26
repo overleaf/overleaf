@@ -30,10 +30,6 @@ We love pull requests, so be bold with them! Don't be afraid of going ahead
 and changing something, or adding a new feature. We're very happy to work with you
 to get your changes merged into ShareLaTeX.
 
-If you've got an idea for a change then please discuss it in the open first, 
-either by opening an issue, or by joining us in our
-[development chat room](http://www.hipchat.com/g1nJMcj7b).
-
 If you're looking for something to work on, then take a look at our [development roadmap](https://github.com/sharelatex/sharelatex/wiki/Development-Roadmap), or have a look at the open issues in any of the repositories listed [here](https://github.com/sharelatex/sharelatex/blob/master/README.md#other-repositories).
 
 Developer Chat Room
