@@ -12,7 +12,7 @@ pipeline {
     stage('Install') {
       agent {
         docker {
-          image 'node:8.11.1'
+          image 'node:6.14.1'
           args "-v /var/lib/jenkins/.npm:/tmp/.npm -e HOME=/tmp"
           reuseNode true
         }
@@ -31,7 +31,7 @@ pipeline {
     stage('Compile') {
       agent {
         docker {
-          image 'node:8.11.1'
+          image 'node:6.14.1'
           reuseNode true
         }
       }

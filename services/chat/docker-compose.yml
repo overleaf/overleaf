@@ -7,14 +7,14 @@ version: "2"
 
 services:
   test_unit:
-    image: node:8.11.1
+    image: node:6.14.1
     volumes:
       - .:/app
     working_dir: /app
     entrypoint: npm run test:unit
 
   test_acceptance:
-    image: node:8.11.1
+    image: node:6.14.1
     volumes:
       - .:/app
     environment:
