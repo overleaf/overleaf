@@ -5,6 +5,8 @@ define [
 	"ide/history/controllers/HistoryListController"
 	"ide/history/controllers/HistoryDiffController"
 	"ide/history/directives/infiniteScroll"
+	"ide/history/components/historyEntriesList"
+	"ide/history/components/historyEntry"
 ], (moment, ColorManager, displayNameForUser) ->
 	class HistoryManager
 		constructor: (@ide, @$scope) ->

@@ -3,6 +3,7 @@ define [
 	"ide/colors/ColorManager"
 	"ide/history/util/displayNameForUser"
 	"ide/history/controllers/HistoryListController"
+	"ide/history/controllers/HistoryV2ListController"
 	"ide/history/controllers/HistoryDiffController"
 	"ide/history/controllers/HistoryV2DiffController"
 	"ide/history/directives/infiniteScroll"
