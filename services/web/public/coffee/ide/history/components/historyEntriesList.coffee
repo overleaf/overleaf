@@ -12,6 +12,7 @@ define [
 			loadDisabled: "<"
 			loadInitialize: "<"
 			isLoading: "<"
+			currentUser: "<"
 		controller: historyEntriesListController
 		templateUrl: "historyEntriesListTpl"
 	}

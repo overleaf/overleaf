@@ -4,6 +4,7 @@ aside.change-list(
 )
 	history-entries-list(
 		entries="history.updates"
+		current-user="user"
 		load-entries="loadMore()"
 		load-disabled="history.loading || history.atEnd"
 		load-initialize="ui.view == 'history'"
@@ -12,7 +13,7 @@ aside.change-list(
 
 
 script(type="text/ng-template", id="historyEntriesListTpl")
-	div(
+	.history-entries(
 		infinite-scroll="$ctrl.loadEntries()"
 		infinite-scroll-disabled="$ctrl.loadDisabled"
 		infinite-scroll-initialize="$ctrl.loadInitialize"
@@ -21,13 +22,14 @@ script(type="text/ng-template", id="historyEntriesListTpl")
 			history-entry(
 				ng-repeat="entry in $ctrl.entries"
 				entry="entry"
+				current-user="$ctrl.currentUser"
 			)
 			.loading(ng-show="history.loading")
 				i.fa.fa-spin.fa-refresh
 				| &nbsp;&nbsp; #{translate("loading")}...
 
 script(type="text/ng-template", id="historyEntryTpl")
-	.change(
+	.history-entry(
 		ng-class="{\
 			'first-in-day': $ctrl.entry.meta.first_in_day,\
 			'selected': $ctrl.entry.inSelection,\
@@ -39,7 +41,7 @@ script(type="text/ng-template", id="historyEntryTpl")
 		}"
 	)
 
-		div.day(ng-show="$ctrl.entry.meta.first_in_day") {{ $ctrl.entry.meta.end_ts | relativeDate }}
+		time.history-entry-day(ng-if="::$ctrl.entry.meta.first_in_day") {{ ::$ctrl.entry.meta.end_ts | relativeDate }}
 
 		//- div.selectors
 		//- 	div.range
@@ -64,31 +66,36 @@ script(type="text/ng-template", id="historyEntryTpl")
 		//- 			ng-show="$ctrl.entry.beforeSelection || $ctrl.entry.inSelection"
 				)
 
-		div.description(ng-click="select()")
-			div.time {{ $ctrl.entry.meta.end_ts | formatDate:'h:mm a' }}
-			div.action.action-edited(ng-if="history.isV2 && $ctrl.entry.pathnames.length > 0")
-				| Edited
-			div.docs(ng-repeat="pathname in $ctrl.entry.pathnames")
-				div 
-					.action Edited
-					.doc {{ pathname }}
-			div.docs(ng-repeat="project_op in $ctrl.entry.project_ops")
-				div(ng-if="project_op.rename")
-					.action Renamed
-					.doc {{ project_op.rename.pathname }} &rarr; {{ project_op.rename.newPathname }}
-				div(ng-if="project_op.add")
-					.action Created
-					.doc {{ project_op.add.pathname }}
-				div(ng-if="project_op.remove")
-					.action Deleted
-					.doc {{ project_op.remove.pathname }}
-			div.users
-				div.user(ng-repeat="update_user in $ctrl.entry.meta.users")
-					.color-square(ng-if="update_user != null", ng-style="{'background-color': 'hsl({{ update_user.hue }}, 70%, 50%)'}")
-					.color-square(ng-if="update_user == null", ng-style="{'background-color': 'hsl(100, 70%, 50%)'}")
-					.name(ng-if="update_user && update_user.id != user.id" ng-bind="$ctrl.displayName(update_user)") 
-					.name(ng-if="update_user && update_user.id == user.id") You
-					.name(ng-if="update_user == null") #{translate("anonymous")}
-				div.user(ng-if="$ctrl.entry.meta.users.length == 0")
-					.color-square(style="background-color: hsl(100, 100%, 50%)")
-					span #{translate("anonymous")}
+		.history-entry-details(ng-click="select()")
+			ol.history-entry-changes
+				li.history-entry-change(
+					ng-repeat="pathname in ::$ctrl.entry.pathnames"
+				)
+					span.history-entry-change-action Edited
+					span.history-entry-change-doc {{ ::pathname }}
+				li.history-entry-change(
+					ng-repeat="project_op in ::$ctrl.entry.project_ops"
+				)
+					span.history-entry-change-action {{ ::$ctrl.getProjectOpAction(project_op) }}
+					span.history-entry-change-doc {{ ::$ctrl.getProjectOpDoc(project_op) }}
+			.history-entry-metadata
+				time.history-entry-metadata-time {{ ::$ctrl.entry.meta.end_ts | formatDate:'h:mm a' }}
+				span &nbsp;&bull;&nbsp;
+				ol.history-entry-metadata-users
+					li.history-entry-metadata-user(ng-repeat="update_user in ::$ctrl.entry.meta.users")
+						span.name(
+							ng-if="::update_user && update_user.id != $ctrl.currentUser.id"
+							ng-style="::{'color': 'hsl({{ update_user.hue }}, 70%, 50%)'}"
+						) {{ ::$ctrl.displayName(update_user) }} 
+						span.name(
+							ng-if="::update_user && update_user.id == $ctrl.currentUser.id"
+							ng-style="::{'color': 'hsl({{ update_user.hue }}, 70%, 50%)'}"
+						) You
+						span.name(
+							ng-if="::update_user == null"
+							ng-style="::{'color': 'hsl(100, 70%, 50%)'}"
+						) #{translate("anonymous")}
+					li.history-entry-metadata-user(ng-if="::$ctrl.entry.meta.users.length == 0")
+						span.name(
+							ng-style="::{'color': 'hsl(100, 70%, 50%)'}"
+						) #{translate("anonymous")}
