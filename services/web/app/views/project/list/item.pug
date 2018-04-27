@@ -38,4 +38,7 @@
 			tooltip-append-to-body="true"
 		)
 .col-xs-4
-	span.last-modified {{project.lastUpdated | formatDate}}
+	if settings.overleaf
+		span.last-modified(tooltip="{{project.lastUpdated | formatDate}}") {{project.lastUpdated | fromNowDate}}
+	else
+		span.last-modified {{project.lastUpdated | formatDate}}
