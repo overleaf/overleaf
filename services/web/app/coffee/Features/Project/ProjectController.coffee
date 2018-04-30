@@ -157,7 +157,7 @@ module.exports = ProjectController =
 			hasSubscription: (cb)->
 				LimitationsManager.userHasSubscriptionOrIsGroupMember currentUser, cb
 			user: (cb) ->
-				User.findById user_id, "featureSwitches overleaf awareOfV2", cb
+				User.findById user_id, "featureSwitches overleaf awareOfV2 features", cb
 			}, (err, results)->
 				if err?
 					logger.err err:err, "error getting data for project list page"
@@ -171,6 +171,7 @@ module.exports = ProjectController =
 				projects = ProjectController._buildProjectList results.projects, results.v1Projects?.projects
 				user = results.user
 				warnings = ProjectController._buildWarningsList results.v1Projects
+
 
 				ProjectController._injectProjectOwners projects, (error, projects) ->
 					return next(error) if error?
@@ -192,6 +193,14 @@ module.exports = ProjectController =
 						viewModel.algolia_app_id = Settings.algolia.app_id
 					else
 						viewModel.showUserDetailsArea = false
+
+					paidUser = user.features?.github # use a heuristic for paid account
+					freeUserProportion = 0.85
+					sampleFreeUser = parseInt(user._id.toString().slice(-2), 16) < freeUserProportion * 255
+					showFrontWidget = paidUser or sampleFreeUser
+					logger.log {paidUser, sampleFreeUser, showFrontWidget}, 'deciding whether to show front widget'
+					if showFrontWidget
+						viewModel.frontChatWidgetRoomId = Settings.overleaf?.front_chat_widget_room_id
 
 					res.render 'project/list', viewModel
 					timer.done()
