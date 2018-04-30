@@ -7,6 +7,7 @@ define [
 	"ide/editor/directives/aceEditor/undo/UndoManager"
 	"ide/editor/directives/aceEditor/auto-complete/AutoCompleteManager"
 	"ide/editor/directives/aceEditor/spell-check/SpellCheckManager"
+	"ide/editor/directives/aceEditor/spell-check/HighlightedWordManager"
 	"ide/editor/directives/aceEditor/highlights/HighlightsManager"
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
 	"ide/editor/directives/aceEditor/track-changes/TrackChangesManager"
@@ -15,7 +16,7 @@ define [
 	"ide/graphics/services/graphics"
 	"ide/preamble/services/preamble"
     "ide/files/services/files"
-], (App, Ace, SearchBox, Vim, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager, MetadataManager) ->
+], (App, Ace, SearchBox, Vim, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightedWordManager, HighlightsManager, CursorPositionManager, TrackChangesManager, MetadataManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
 	ModeList = ace.require('ace/ext/modelist')
 	Vim = ace.require('ace/keyboard/vim').Vim
@@ -103,7 +104,8 @@ define [
 
 				if scope.spellCheck # only enable spellcheck when explicitly required
 					spellCheckCache = $cacheFactory.get("spellCheck-#{scope.name}") || $cacheFactory("spellCheck-#{scope.name}", {capacity: 1000})
-					spellCheckManager = new SpellCheckManager(scope, editor, element, spellCheckCache, $http, $q)
+					spellCheckManager = new SpellCheckManager(scope, spellCheckCache, $http, $q, new SpellCheckAdapter(editor))
+
 				undoManager           = new UndoManager(scope, editor, element)
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
@@ -361,6 +363,19 @@ define [
 						session.setScrollTop(session.getScrollTop() + 1)
 						session.setScrollTop(session.getScrollTop() - 1)
 
+				onSessionChange = (e) ->
+					spellCheckManager.onSessionChange()
+					e.oldSession?.getDocument().off "change", spellCheckManager.onChange
+					e.session.getDocument().on "change", spellCheckManager.onChange
+
+				attachToSpellCheck = () ->
+					spellCheckManager.init()
+					editor.on 'changeSession', onSessionChange
+					onSessionChange({ session: editor.getSession() }) # Force initial setup
+
+				detachFromSpellCheck = () ->
+					editor.off 'changeSession', onSessionChange
+
 				attachToAce = (sharejs_doc) ->
 					lines = sharejs_doc.getSnapshot().split("\n")
 					session = editor.getSession()
@@ -406,6 +421,7 @@ define [
 					editor.initing = false
 					# now ready to edit document
 					editor.setReadOnly(scope.readOnly) # respect the readOnly setting, normally false
+					attachToSpellCheck()
 
 					resetScrollMargins()
 
@@ -467,6 +483,7 @@ define [
 
 				scope.$on '$destroy', () ->
 					if scope.sharejsDoc?
+						detachFromSpellCheck()
 						detachFromAce(scope.sharejsDoc)
 						session = editor.getSession()
 						session?.destroy()
@@ -585,3 +602,9 @@ define [
 		SearchBox::$init = () ->
 			@element = $compile(searchHtml)($rootScope.$new())[0];
 			$init.apply(@)
+
+	class SpellCheckAdapter
+		constructor: (@editor) ->
+			@wordManager = new HighlightedWordManager(@editor)
+		getLines: () -> @editor.getValue().split('\n')
+		normalizeChangeEvent: (e) -> e
