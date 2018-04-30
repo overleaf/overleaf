@@ -2,6 +2,7 @@ Settings = require('settings-sharelatex')
 logger = require('logger-sharelatex')
 Keys = require('./UpdateKeys')
 redis = require("redis-sharelatex")
+Errors = require("./Errors")
 
 UpdateManager = require('./UpdateManager')
 Metrics = require('./Metrics')
@@ -23,7 +24,14 @@ module.exports = DispatchManager =
 					# Dispatch this in the background
 					backgroundTask = (cb) ->
 						UpdateManager.processOutstandingUpdatesWithLock project_id, doc_id, (error) ->
-							logger.error err: error, project_id: project_id, doc_id: doc_id, "error processing update" if error?
+							# log everything except OpRangeNotAvailable errors, these are normal
+							if error? 
+								# downgrade OpRangeNotAvailable and "Delete component" errors so they are not sent to sentry
+								logAsWarning = (error instanceof Errors.OpRangeNotAvailableError) || error.message?.match(/^Delete component/)
+								if logAsWarning
+									logger.warn err: error, project_id: project_id, doc_id: doc_id, "error processing update"
+								else
+									logger.error err: error, project_id: project_id, doc_id: doc_id, "error processing update"
 							cb()
 					RateLimiter.run backgroundTask, callback
 						
