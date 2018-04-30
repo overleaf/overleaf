@@ -195,7 +195,7 @@ module.exports = ProjectController =
 						viewModel.showUserDetailsArea = false
 
 					paidUser = user.features?.github # use a heuristic for paid account
-					freeUserProportion = 0.85
+					freeUserProportion = 0.10
 					sampleFreeUser = parseInt(user._id.toString().slice(-2), 16) < freeUserProportion * 255
 					showFrontWidget = paidUser or sampleFreeUser
 					logger.log {paidUser, sampleFreeUser, showFrontWidget}, 'deciding whether to show front widget'
