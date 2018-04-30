@@ -27,7 +27,7 @@ module.exports = DispatchManager =
 							# log everything except OpRangeNotAvailable errors, these are normal
 							if error? 
 								# downgrade OpRangeNotAvailable and "Delete component" errors so they are not sent to sentry
-								logAsWarning = (error instanceof Errors.OpRangeNotAvailableError) || error.message?.match(/^Delete component/)
+								logAsWarning = (error instanceof Errors.OpRangeNotAvailableError) || ((typeof error is' string') && error.match(/^Delete component/))
 								if logAsWarning
 									logger.warn err: error, project_id: project_id, doc_id: doc_id, "error processing update"
 								else
