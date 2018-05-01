@@ -22,4 +22,4 @@
 	span.owner {{ownerName()}}
 
 .col-xs-4
-	span.last-modified {{project.lastUpdated | formatDate}}
+	span.last-modified(tooltip="{{project.lastUpdated | formatDate}}") {{project.lastUpdated | fromNowDate}}
