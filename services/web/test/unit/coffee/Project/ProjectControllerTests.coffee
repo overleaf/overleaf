@@ -314,7 +314,7 @@ describe "ProjectController", ->
 				@ProjectController.projectListPage @req, @res
 
 			it 'should show for sample users', (done) ->
-				@user._id = '588f3ddae8ebc1bac07c9faa' # last two digits
+				@user._id = '588f3ddae8ebc1bac07c9f00' # last two digits
 				@res.render = (pageName, opts)=>
 					opts.frontChatWidgetRoomId.should.equal @settings.overleaf.front_chat_widget_room_id
 					done()
