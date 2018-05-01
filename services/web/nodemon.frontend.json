@@ -8,7 +8,8 @@
   "exec": "make compile || exit 1",
   "watch": [
     "public/coffee/",
-    "public/stylesheets/"
+    "public/stylesheets/",
+    "modules/**/public/coffee/"
   ],
   "ext": "coffee less"
 }
