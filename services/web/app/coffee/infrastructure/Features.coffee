@@ -18,5 +18,7 @@ module.exports = Features =
 				return Settings.showPublishModal
 			when 'custom-togglers'
 				return Settings.overleaf?
+			when 'templates'
+				return !Settings.overleaf?
 			else
 				throw new Error("unknown feature: #{feature}")
