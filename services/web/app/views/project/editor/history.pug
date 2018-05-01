@@ -1,80 +1,39 @@
 div#history(ng-show="ui.view == 'history'")
-	span(ng-controller="HistoryPremiumPopup")
+	span
 		.upgrade-prompt(ng-if="project.features.versioning === false && ui.view === 'history'")
-			
-			div(ng-if="project.owner._id == user.id")
-				div(sixpack-switch="teaser-history")
-					.message(sixpack-default)
-						p.text-center: strong #{translate("upgrade_to_get_feature", {feature:"full Project History"})}
-						p.text-center.small(ng-show="startedFreeTrial") #{translate("refresh_page_after_starting_free_trial")}
-						ul.list-unstyled
-							li 
-								i.fa.fa-check &nbsp;
-								| #{translate("unlimited_projects")}
-							
-							li
-								i.fa.fa-check &nbsp;
-								| #{translate("collabs_per_proj", {collabcount:'Multiple'})}
-							
-							li 
-								i.fa.fa-check &nbsp;
-								| #{translate("full_doc_history")}
-							
-							li 
-								i.fa.fa-check &nbsp;
-								| #{translate("sync_to_dropbox")}
+			.message(ng-if="project.owner._id == user.id")
+				p.text-center: strong #{translate("upgrade_to_get_feature", {feature:"full Project History"})}
+				p.text-center.small(ng-show="startedFreeTrial") #{translate("refresh_page_after_starting_free_trial")}
+				ul.list-unstyled
+					li 
+						i.fa.fa-check &nbsp;
+						| #{translate("unlimited_projects")}
+					
+					li
+						i.fa.fa-check &nbsp;
+						| #{translate("collabs_per_proj", {collabcount:'Multiple'})}
+					
+					li 
+						i.fa.fa-check &nbsp;
+						| #{translate("full_doc_history")}
+					
+					li 
+						i.fa.fa-check &nbsp;
+						| #{translate("sync_to_dropbox")}
 
-							li 
-								i.fa.fa-check &nbsp;
-								| #{translate("sync_to_github")}
+					li 
+						i.fa.fa-check &nbsp;
+						| #{translate("sync_to_github")}
 
-							li  
-								i.fa.fa-check &nbsp;
-								|#{translate("compile_larger_projects")}
-						p.text-center(ng-controller="FreeTrialModalController")
-							a.btn.btn-success(
-								href
-								ng-class="buttonClass"
-								ng-click="startFreeTrial('history')"
-								sixpack-convert="teaser-history"
-							) #{translate("start_free_trial")}
-
-					.message.message-wider(sixpack-when="focused")
-						header.message-header
-							h3 History
-
-						.message-body
-							h4.teaser-title See who changed what. Go back to previous versions.
-							img.teaser-img(
-								src="/img/teasers/history/teaser-history.png"
-								alt="History"
-							)
-							p.text-center.small(ng-show="startedFreeTrial") #{translate("refresh_page_after_starting_free_trial")}
-							.row
-								.col-md-8.col-md-offset-2
-									ul.list-unstyled
-										li 
-											i.fa.fa-check &nbsp;
-											| Catch up with your collaborators changes
-										
-										li
-											i.fa.fa-check &nbsp;
-											| See changes over any time period
-										
-										li 
-											i.fa.fa-check &nbsp;
-											| Revert your documents to previous versions
-										
-										li 
-											i.fa.fa-check &nbsp;
-											| Restore deleted files
-							p.text-center(ng-controller="FreeTrialModalController")
-								a.btn.btn-success(
-									href
-									ng-class="buttonClass"
-									ng-click="startFreeTrial('history')"
-									sixpack-convert="teaser-history"
-								) Try it for free
+					li  
+						i.fa.fa-check &nbsp;
+						|#{translate("compile_larger_projects")}
+				p.text-center(ng-controller="FreeTrialModalController")
+					a.btn.btn-success(
+						href
+						ng-class="buttonClass"
+						ng-click="startFreeTrial('history')"
+					) #{translate("start_free_trial")}
 
 			.message(ng-show="project.owner._id != user.id")
 				p #{translate("ask_proj_owner_to_upgrade_for_history")}
@@ -163,74 +122,8 @@ div#history(ng-show="ui.view == 'history'")
 				i.fa.fa-spin.fa-refresh
 				| &nbsp;&nbsp; #{translate("loading")}...
 
-	.diff-panel.full-size(ng-controller="HistoryDiffController")
-		.diff(
-			ng-if="!!history.diff && !history.diff.loading && !history.diff.deleted && !history.diff.error && !history.diff.binary"
-		)
-			.toolbar.toolbar-alt
-				span.name
-					| <strong>{{history.diff.highlights.length}} </strong>
-					ng-pluralize(
-						count="history.diff.highlights.length",
-						when="{\
-							'one': 'change',\
-							'other': 'changes'\
-						}"
-					)
-					|  in <strong>{{history.diff.pathname}}</strong>
-				.toolbar-right
-					a.btn.btn-danger.btn-sm(
-						href,
-						ng-if="!history.isV2"
-						ng-click="openRestoreDiffModal()"
-					) #{translate("restore_to_before_these_changes")}
-					.deleted-warning(
-						ng-show="history.selection.docs[history.selection.pathname].deleted"
-					) This file was deleted
-			.diff-editor.hide-ace-cursor(
-				ace-editor="history",
-				theme="settings.theme",
-				font-size="settings.fontSize",
-				text="history.diff.text",
-				highlights="history.diff.highlights",
-				read-only="true",
-				resize-on="layout:main:resize",
-				navigate-highlights="true"
-			)
-
-		.diff.diff-binary(ng-show="history.diff.binary")
-			.toolbar.toolbar-alt
-				span.name
-					strong {{history.diff.pathname}}
-			.alert.alert-info We're still working on showing image and binary changes, sorry. Stay tuned!
-
-		.diff-deleted.text-centered(
-			ng-show="history.diff.deleted && !history.diff.restoreDeletedSuccess"
-		)
-			p.text-serif #{translate("file_has_been_deleted", {filename:"{{ history.diff.doc.name }} "})}
-			p
-				a.btn.btn-primary.btn-lg(
-					href,
-					ng-click="restoreDeletedDoc()",
-					ng-disabled="history.diff.restoreInProgress"
-				) #{translate("restore")}
-
-		.diff-deleted.text-centered(
-			ng-show="history.diff.deleted && history.diff.restoreDeletedSuccess"
-		)
-			p.text-serif  #{translate("file_restored", {filename:"{{ history.diff.doc.name }} "})}
-			p.text-serif  #{translate("file_restored_back_to_editor")}
-			p
-				a.btn.btn-default(
-					href,
-					ng-click="backToEditorAfterRestore()",
-				) #{translate("file_restored_back_to_editor_btn")}
-
-		.loading-panel(ng-show="history.diff.loading")
-			i.fa.fa-spin.fa-refresh
-			| &nbsp;&nbsp;#{translate("loading")}...
-		.error-panel(ng-show="history.diff.error")
-			.alert.alert-danger #{translate("generic_something_went_wrong")}
+	include ./history/diffPanelV1
+	include ./history/diffPanelV2
 
 script(type="text/ng-template", id="historyRestoreDiffModalTemplate")
 	.modal-header

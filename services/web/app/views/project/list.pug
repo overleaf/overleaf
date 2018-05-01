@@ -56,9 +56,28 @@ block content
 							href
 							ng-click="showAll();"
 						) Show all
-	.content.content-alt.project-list-page(ng-controller="ProjectPageController")
-		.project-list-content
+	main.content.content-alt.project-list-page(
+		ng-controller="ProjectPageController"
+		role="main"
+	)
+		- if(typeof(suppressSystemMessages) == "undefined")
+			.system-messages(
+				ng-cloak
+				ng-controller="SystemMessagesController"
+			)
+				.system-message(
+					ng-repeat="message in messages"
+					ng-controller="SystemMessageController"
+					ng-hide="hidden"
+				)
+					button(ng-click="hide()").close.pull-right
+						span(aria-hidden="true") &times;
+						span.sr-only #{translate("close")}
+					.system-message-content(ng-bind-html="htmlContent")
+			
+			include ../translations/translation_message
 
+		.project-list-content(event-tracking=settings.overleaf ? "loads_v2_dash" : "", onboard=settings.overleaf ? "true" : "", event-tracking-trigger=settings.overleaf ? "load" : "", event-tracking-mb="true", event-segmentation="{location: 'dash', v2_onboard: true}")
 			.row.project-list-row(ng-cloak)
 				.project-list-container(ng-if="projects.length > 0")
 					.project-list-sidebar-wrapper.col-md-2.col-xs-3
@@ -77,6 +96,7 @@ block content
 								if userIsFromOLv1(user)
 									div(ng-show="visible")
 										| To tag or rename your v1 projects, please go back to Overleaf v1.
+									div(ng-show="visible")
 										a.project-list-sidebar-v1-link(
 											href=settings.overleaf.host + "/dash?prefer-v1-dash=1"
 										) Go back to v1

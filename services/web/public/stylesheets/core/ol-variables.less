@@ -227,13 +227,22 @@
 @file-tree-droppable-bg-color   : tint(@ol-green, 5%);
 
 // Editor resizers
-@editor-resizer-bg-color          : @ol-blue-gray-6;
-@editor-resizer-bg-color-dragging : transparent;
-@editor-toggler-bg-color          : @ol-blue-gray-2;
+@editor-resizer-bg-color          : @ol-blue-gray-5;
+@editor-resizer-bg-color-dragging : @ol-blue-gray-5;
+@editor-toggler-bg-color          : darken(@ol-blue-gray-2, 15%);
 @editor-toggler-hover-bg-color    : @ol-green;
 @synctex-controls-z-index         : 6;
 @synctex-controls-padding         : 0;
 @editor-border-color              : @ol-blue-gray-5;
+
+// Editor toolbar
+@editor-toolbar-bg                : @ol-blue-gray-5;
+
+// Toggle switch
+@toggle-switch-bg                  : @ol-blue-gray-1;
+@toggle-switch-highlight-color     : @ol-green;
+@toggle-switch-radius-left         : @btn-border-radius-base 0 0 @btn-border-radius-base;
+@toggle-switch-radius-right        : 0 @btn-border-radius-base @btn-border-radius-base 0;
 
 // Chat
 @chat-bg                          : @ol-blue-gray-5;
@@ -255,6 +264,11 @@
 @pdf-page-shadow-color          : rgba(0, 0, 0, 0.5);
 @log-line-no-color              : #FFF;
 @log-hints-color                : @ol-blue-gray-4;
+
+// System messages
+@sys-msg-background             : @ol-blue;
+@sys-msg-color                  : #FFF;
+@sys-msg-border                 : solid 1px lighten(@ol-blue, 10%);
 
 //== Colors
 //

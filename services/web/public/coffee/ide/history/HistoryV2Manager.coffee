@@ -49,6 +49,13 @@ define [
 				diff: null
 			}
 
+		restoreFile: (version, pathname) ->
+			url = "/project/#{@$scope.project_id}/restore_file"
+			@ide.$http.post(url, {
+				version, pathname,
+				_csrf: window.csrfToken
+			})
+
 		MAX_RECENT_UPDATES_TO_SELECT: 5
 		autoSelectRecentUpdates: () ->
 			return if @$scope.history.updates.length == 0
@@ -204,7 +211,7 @@ define [
 			# Map of original pathname -> doc summary
 			docs_summary = Object.create(null)
 
-			updatePathnameWithUpdateVersions = (pathname, update, deleted) ->
+			updatePathnameWithUpdateVersions = (pathname, update, deletedAtV) ->
 				# docs_summary is indexed by the original pathname the doc
 				# had at the start, so we have to look this up from the current
 				# pathname via original_pathname first
@@ -222,8 +229,8 @@ define [
 					doc_summary.toV,
 					update.toV
 				)
-				if deleted?
-					doc_summary.deleted = true
+				if deletedAtV?
+					doc_summary.deletedAtV = deletedAtV
 
 			# Put updates in ascending chronological order
 			updates = updates.slice().reverse()
@@ -241,7 +248,7 @@ define [
 						updatePathnameWithUpdateVersions(add.pathname, update)
 					if project_op.remove?
 						remove = project_op.remove
-						updatePathnameWithUpdateVersions(remove.pathname, update, true)
+						updatePathnameWithUpdateVersions(remove.pathname, update, project_op.atV)
 
 			return docs_summary
 

@@ -23,15 +23,23 @@ module.exports = MockDocStoreApi =
 			docs = (doc for doc_id, doc of @docs[req.params.project_id])
 			res.send JSON.stringify docs
 
+		app.get "/project/:project_id/doc/:doc_id", (req, res, next) =>
+			{project_id, doc_id} = req.params
+			doc = @docs[project_id][doc_id]
+			if doc.deleted and !req.query.include_deleted
+				res.sendStatus 404
+			else
+				res.send JSON.stringify doc
+
 		app.delete "/project/:project_id/doc/:doc_id", (req, res, next) =>
 			{project_id, doc_id} = req.params
 			if !@docs[project_id]?
-				res.send 404
+				res.sendStatus 404
 			else if !@docs[project_id][doc_id]?
-				res.send 404
+				res.sendStatus 404
 			else
-				@docs[project_id][doc_id] = undefined
-				res.send 204
+				@docs[project_id][doc_id].deleted = true
+				res.sendStatus 204
 
 		app.listen 3016, (error) ->
 			throw error if error?

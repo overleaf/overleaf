@@ -8,6 +8,7 @@ define [
 					@openFile(entity)
 
 		openFile: (file) ->
+			@ide.fileTreeManager.selectEntity(file)
 			@$scope.ui.view = "file"
 			@$scope.openFile = null
 			@$scope.$apply()

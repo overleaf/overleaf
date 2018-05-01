@@ -36,7 +36,7 @@ module.exports = MockDocUpdaterApi =
 			res.sendStatus 200
 
 		app.delete "/project/:project_id/doc/:doc_id", (req, res, next) =>
-			res.send 204
+			res.sendStatus 204
 
 		app.listen 3003, (error) ->
 			throw error if error?

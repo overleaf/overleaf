@@ -17,3 +17,7 @@ define [
 	App.filter "relativeDate", () ->
 		(date) ->
 			moment(date).calendar()
+
+	App.filter "fromNowDate", () ->
+		(date) ->
+			moment(date).fromNow()

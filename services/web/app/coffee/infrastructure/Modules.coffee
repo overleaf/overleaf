@@ -43,6 +43,13 @@ module.exports = Modules =
 	moduleIncludesAvailable: (view) ->
 		return (Modules.viewIncludes[view] or []).length > 0
 	
+	moduleAssetFiles: (pathPrefix) ->
+		assetFiles = []
+		for module in @modules
+			for assetFile in module.assetFiles or []
+				assetFiles.push "#{pathPrefix}#{assetFile}"
+		return assetFiles
+
 	attachHooks: () ->
 		for module in @modules
 			if module.hooks?

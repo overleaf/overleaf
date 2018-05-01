@@ -1,11 +1,30 @@
+const fs = require('fs')
 const path = require('path')
+
+const MODULES_PATH = path.join(__dirname, '/modules')
+
+// Generate a hash of entry points, including modules
+const entryPoints = {}
+if (fs.existsSync(MODULES_PATH)) {
+	fs.readdirSync(MODULES_PATH).reduce((acc, module) => {
+		const entryPath = path.join(MODULES_PATH, module, '/public/es/index.js')
+		if (fs.existsSync(entryPath)) {
+			acc[module] = entryPath
+		}
+		return acc
+	}, entryPoints)
+}
+
+// If no entry points are found, silently exit
+if (!Object.keys(entryPoints).length) {
+	console.warn('No entry points found, exiting')
+	process.exit(0)
+}
 
 module.exports = {
 	// Defines the "entry point(s)" for the application - i.e. the file which
 	// bootstraps the application
-	entry: {
-		richText: './public/es/rich-text.js'
-	},
+	entry: entryPoints,
 
 	// Define where and how the bundle will be output to disk
 	// Note: webpack-dev-server does not write the bundle to disk, instead it is
@@ -33,6 +52,7 @@ module.exports = {
 				loader: 'babel-loader',
 				options: {
 					presets: [
+						'react',
 						['env', { modules: false }]
 					],
 					// Configure babel-loader to cache compiled output so that subsequent
@@ -46,3 +66,4 @@ module.exports = {
 	// TODO
 	// plugins: {}
 }
+

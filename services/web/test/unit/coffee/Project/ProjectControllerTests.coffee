@@ -15,6 +15,7 @@ describe "ProjectController", ->
 		@user =
 			_id:"588f3ddae8ebc1bac07c9fa4"
 			first_name: "bjkdsjfk"
+			features: {}
 		@settings =
 			apis:
 				chat:
@@ -299,6 +300,32 @@ describe "ProjectController", ->
 				opts.projects[1].owner.should.equal (@users[@projects[1].owner_ref])
 				done()
 			@ProjectController.projectListPage @req, @res
+
+		describe 'front widget', (done) ->
+			beforeEach ->
+				@settings.overleaf =
+					front_chat_widget_room_id: 'chat-room-id'
+
+			it 'should show for paid users', (done) ->
+				@user.features.github = true
+				@res.render = (pageName, opts)=>
+					opts.frontChatWidgetRoomId.should.equal @settings.overleaf.front_chat_widget_room_id
+					done()
+				@ProjectController.projectListPage @req, @res
+
+			it 'should show for sample users', (done) ->
+				@user._id = '588f3ddae8ebc1bac07c9f00' # last two digits
+				@res.render = (pageName, opts)=>
+					opts.frontChatWidgetRoomId.should.equal @settings.overleaf.front_chat_widget_room_id
+					done()
+				@ProjectController.projectListPage @req, @res
+
+			it 'should not show for non sample users', (done) ->
+				@user._id = '588f3ddae8ebc1bac07c9fff' # last two digits
+				@res.render = (pageName, opts)=>
+					expect(opts.frontChatWidgetRoomId).to.equal undefined
+					done()
+				@ProjectController.projectListPage @req, @res
 
 		describe 'with overleaf-integration-web-module hook', ->
 			beforeEach ->

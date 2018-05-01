@@ -24,6 +24,7 @@ define [
 	"directives/stopPropagation"
 	"directives/focus"
 	"directives/equals"
+	"directives/eventTracking"
 	"directives/fineUpload"
 	"directives/onEnter"
 	"directives/selectAll"

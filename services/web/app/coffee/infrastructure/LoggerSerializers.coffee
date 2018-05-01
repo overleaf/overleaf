@@ -22,6 +22,8 @@ module.exports =
 		}
 
 	docs: (docs) ->
+		if !docs?.map?
+			return
 		docs.map (doc) ->
 			{
 				path: doc.path
@@ -29,6 +31,8 @@ module.exports =
 			}
 
 	files: (files) ->
+		if !files?.map?
+			return
 		files.map (file) ->
 			{
 				path: file.path

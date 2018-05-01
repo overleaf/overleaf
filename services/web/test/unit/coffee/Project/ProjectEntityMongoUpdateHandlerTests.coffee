@@ -57,7 +57,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it 'gets the project', ->
 			@ProjectGetter.getProjectWithoutLock
-				.calledWith(project_id, {rootFolder:true, name: true})
+				.calledWith(project_id, {rootFolder:true, name:true, overleaf:true})
 				.should.equal true
 
 		it 'checks the folder exists', ->
@@ -80,7 +80,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it 'gets the project', ->
 			@ProjectGetter.getProjectWithoutLock
-				.calledWith(project_id, {rootFolder:true, name: true})
+				.calledWith(project_id, {rootFolder:true, name:true, overleaf:true})
 				.should.equal true
 
 		it 'checks the folder exists', ->
@@ -93,33 +93,50 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 				.calledWith(@project, folder_id, @file, 'file', @callback)
 				.should.equal true
 
-	describe 'replaceFile', ->
+	describe 'replaceFileWithNew', ->
 		beforeEach ->
 			@file = _id: file_id
 			@path = mongo: 'file.png'
-			@linkedFileData = {provider: 'url'}
+			@newFile = _id: 'new-file-id'
+			@newFile.linkedFileData = @linkedFileData = {provider: 'url'}
 			@ProjectLocator.findElement = sinon.stub().yields(null, @file, @path)
 			@ProjectModel.update = sinon.stub().yields()
 
-			@subject.replaceFile project_id, file_id, @linkedFileData, @callback
+			@subject.replaceFileWithNew project_id, file_id, @newFile, @callback
 
 		it 'gets the project', ->
 			@ProjectGetter.getProjectWithoutLock
-				.calledWith(project_id, {rootFolder:true, name: true})
+				.calledWith(project_id, {rootFolder:true, name:true, overleaf:true})
 				.should.equal true
 
-		it 'finds the element', ->
+		it 'finds the existing element', ->
 			@ProjectLocator.findElement
 				.calledWith({ @project, element_id: file_id, type: 'file' })
 				.should.equal true
 
-		it 'increments the rev and sets the created_at', ->
+		it 'inserts a deletedFile reference for the old file', ->
+			@ProjectModel.update
+				.calledWith({ _id: project_id },
+					{
+						$push: {
+							deletedFiles: {
+								_id:  file_id
+								name: @file.name
+								linkedFileData: @file.linkedFileData
+								deletedAt: new Date()
+							}
+						}
+					}
+				)
+				.should.equal true
+
+		it 'increments the project version and sets the rev and created_at', ->
 			@ProjectModel.update
 				.calledWith(
 					{ _id: project_id },
 					{
-						'$inc': { 'file.png.rev': 1, 'version': 1 }
-						'$set': { 'file.png.created': new Date(), 'file.png.linkedFileData': @linkedFileData }
+						'$inc': { 'version': 1 }
+						'$set': { 'file.png._id': @newFile._id, 'file.png.created': new Date(), 'file.png.linkedFileData': @linkedFileData, 'file.png.rev': 1 }
 					}
 					{}
 				)
@@ -224,7 +241,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it 'should get the project', ->
 			@ProjectGetter.getProjectWithoutLock
-				.calledWith(project_id, {rootFolder:true, name:true})
+				.calledWith(project_id, {rootFolder:true, name:true, overleaf:true})
 				.should.equal true
 
 		it 'should find the doc to move', ->
@@ -250,7 +267,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 		it "calls the callback", ->
 			changes = { @oldDocs, @newDocs, @oldFiles, @newFiles }
 			@callback.calledWith(
-				null, @project.name, @path.fileSystem, @pathAfterMove.fileSystem, @doc.rev, changes
+				null, @project, @path.fileSystem, @pathAfterMove.fileSystem, @doc.rev, changes
 			).should.equal true
 
 	describe 'deleteEntity', ->
@@ -263,7 +280,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it "should get the project", ->
 			@ProjectGetter.getProjectWithoutLock
-				.calledWith(project_id, {name:true, rootFolder:true})
+				.calledWith(project_id, {rootFolder:true, name:true, overleaf:true})
 				.should.equal true
 
 		it "should find the element", ->
@@ -308,7 +325,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it 'should get the project', ->
 			@ProjectGetter.getProjectWithoutLock
-				.calledWith(project_id, {rootFolder:true, name:true})
+				.calledWith(project_id, {rootFolder:true, name:true, overleaf:true})
 				.should.equal true
 
 		it 'should find the doc', ->
@@ -332,7 +349,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 		it 'calls the callback', ->
 			changes = { @oldDocs, @newDocs, @oldFiles, @newFiles }
 			@callback.calledWith(
-				null, @project.name, '/old.tex', '/new.tex', @doc.rev, changes
+				null, @project, '/old.tex', '/new.tex', @doc.rev, changes
 			).should.equal true
 
 	describe 'addFolder', ->
@@ -346,7 +363,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it 'gets the project', ->
 			@ProjectGetter.getProjectWithoutLock
-				.calledWith(project_id, {rootFolder:true, name: true})
+				.calledWith(project_id, {rootFolder:true, name:true, overleaf:true})
 				.should.equal true
 
 		it 'checks the parent folder exists', ->
@@ -596,3 +613,29 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 			folder = name: 'folder_name'
 			@subject._checkValidMove @project, 'folder', folder, fileSystem: '/foo', @destFolder._id, (err) =>
 				expect(err).to.deep.equal new Errors.InvalidNameError("destination folder is a child folder of me")
+
+	describe "_insertDeletedDocReference", ->
+		beforeEach ->
+			@doc =
+				_id: ObjectId()
+				name: "test.tex"
+			@callback = sinon.stub()
+			@ProjectModel.update = sinon.stub().yields()
+			@subject._insertDeletedDocReference project_id, @doc, @callback
+
+		it "should insert the doc into deletedDocs", ->
+			@ProjectModel.update
+				.calledWith({
+					_id: project_id
+				}, {
+					$push: {
+						deletedDocs: {
+							_id: @doc._id
+							name: @doc.name
+						}
+					}
+				})
+				.should.equal true
+
+		it "should call the callback", ->
+			@callback.called.should.equal true

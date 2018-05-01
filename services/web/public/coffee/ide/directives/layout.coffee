@@ -2,11 +2,16 @@ define [
 	"base"
 	"libs/jquery-layout"
 ], (App) ->
-	App.directive "layout", ["$parse", "ide", ($parse, ide) ->
+	App.directive "layout", ["$parse", "$compile", "ide", ($parse, $compile, ide) ->
 		return {
 			compile: () ->
 				pre: (scope, element, attrs) ->
 					name = attrs.layout
+
+					customTogglerPane = scope.$eval(attrs.customTogglerPane or "false")
+					customTogglerMsgWhenOpen = scope.$eval(attrs.customTogglerMsgWhenOpen or "false")
+					customTogglerMsgWhenClosed = scope.$eval(attrs.customTogglerMsgWhenClosed or "false")
+					hasCustomToggler = customTogglerPane != false and customTogglerMsgWhenOpen != false and customTogglerMsgWhenClosed != false
 
 					if attrs.spacingOpen?
 						spacingOpen = parseInt(attrs.spacingOpen, 10)
@@ -23,6 +28,10 @@ define [
 						spacing_closed: spacingClosed
 						slidable: false
 						enableCursorHotkey: false
+						onopen: (pane) => 
+							onPaneOpen(pane)
+						onclose: (pane) => 
+							onPaneClose(pane)
 						onresize: () =>
 							onInternalResize()
 						maskIframesOnResize: scope.$eval(
@@ -62,6 +71,15 @@ define [
 									right: state.east.size
 								})
 
+					repositionCustomToggler = () ->
+						if !customTogglerEl?
+							return
+						state = element.layout().readState()
+						positionAnchor = if customTogglerPane == "east" then "right" else "left"
+						paneState = state[customTogglerPane]
+						if paneState?
+							customTogglerEl.css(positionAnchor, if paneState.initClosed then 0 else paneState.size)
+	
 					resetOpenStates = () ->
 						state = element.layout().readState()
 						if attrs.openEast? and state.east?
@@ -73,6 +91,8 @@ define [
 						state = element.layout().readState()
 						scope.$broadcast "layout:#{name}:resize", state
 						repositionControls()
+						if hasCustomToggler
+							repositionCustomToggler()
 						resetOpenStates()
 						
 					oldWidth = element.width()
@@ -93,6 +113,46 @@ define [
 
 					if attrs.resizeOn?
 						scope.$on attrs.resizeOn, () -> onExternalResize()
+
+					if hasCustomToggler
+						state = element.layout().readState()
+						customTogglerScope = scope.$new()
+
+						customTogglerScope.isOpen = true
+						customTogglerScope.isVisible = true
+
+						if state[customTogglerPane]?.initClosed == true
+							customTogglerScope.isOpen = false
+
+						customTogglerScope.tooltipMsgWhenOpen = customTogglerMsgWhenOpen
+						customTogglerScope.tooltipMsgWhenClosed = customTogglerMsgWhenClosed
+							
+						customTogglerScope.tooltipPlacement = if customTogglerPane == "east" then "left" else "right"
+						customTogglerScope.handleClick = () ->
+							element.layout().toggle(customTogglerPane)
+							repositionCustomToggler()
+						customTogglerEl = $compile("
+							<a href 
+							   ng-show=\"isVisible\"
+							   class=\"custom-toggler #{ 'custom-toggler-' + customTogglerPane }\"
+							   ng-class=\"isOpen ? 'custom-toggler-open' : 'custom-toggler-closed'\"
+							   tooltip=\"{{ isOpen ? tooltipMsgWhenOpen : tooltipMsgWhenClosed }}\"
+							   tooltip-placement=\"{{ tooltipPlacement }}\"
+							   ng-click=\"handleClick()\">
+						")(customTogglerScope)
+						element.append(customTogglerEl)
+
+					onPaneOpen = (pane) ->
+						if !hasCustomToggler and pane != customTogglerPane
+							return
+						customTogglerEl.scope().$applyAsync () -> 
+							customTogglerEl.scope().isOpen = true
+
+					onPaneClose = (pane) ->
+						if !hasCustomToggler and pane != customTogglerPane
+							return
+						customTogglerEl.scope().$applyAsync () -> 
+							customTogglerEl.scope().isOpen = false
 
 					# Save state when exiting
 					$(window).unload () ->
@@ -128,6 +188,11 @@ define [
 								element.layout().hide("east")
 							else
 								element.layout().show("east")
+							if hasCustomToggler
+								customTogglerEl.scope().$applyAsync () ->
+									customTogglerEl.scope().isOpen = !value
+									customTogglerEl.scope().isVisible = !value
+
 
 				post: (scope, element, attrs) ->
 					name = attrs.layout

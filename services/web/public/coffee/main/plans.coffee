@@ -1,6 +1,6 @@
 define [
 	"base"
-	"libs/recurly-3.0.5"
+	"libs/recurly-4.8.5"
 ], (App, recurly) ->
 
 
@@ -10,164 +10,6 @@ define [
 
 		return {
 			currencyCode:currencyCode
-
-			heron:
-				USD:
-					student:
-						monthly: "$6"
-						annual: "$60"
-					collaborator:
-						monthly: "$12"
-						annual: "$144"
-				EUR:
-					student:
-						monthly: "€5"
-						annual: "€50"
-					collaborator:
-						monthly: "€11"
-						annual: "€132"
-				GBP:
-					student:
-						monthly: "£5"
-						annual: "£50"
-					collaborator:
-						monthly: "£10"
-						annual: "£120"
-				SEK:
-					student:
-						monthly: "45 kr"
-						annual: "450 kr"
-					collaborator:
-						monthly: "90 kr"
-						annual: "1080 kr"
-				CAD:
-					student:
-						monthly: "$7"
-						annual: "$70"
-					collaborator:
-						monthly: "$14"
-						annual: "$168"
-				NOK:
-					student:
-						monthly: "45 kr"
-						annual: "450 kr"
-					collaborator:
-						monthly: "90 kr"
-						annual: "1080 kr"
-				DKK:
-					student:
-						monthly: "40 kr"
-						annual: "400 kr"
-					collaborator:
-						monthly: "70 kr"
-						annual: "840 kr"
-				AUD:
-					student:
-						monthly: "$8"
-						annual: "$80"
-					collaborator:
-						monthly: "$15"
-						annual: "$180"
-				NZD:
-					student:
-						monthly: "$8"
-						annual: "$80"
-					collaborator:
-						monthly: "$15"
-						annual: "$180"
-				CHF:
-					student:
-						monthly: "Fr 6"
-						annual: "Fr 60"
-					collaborator:
-						monthly: "Fr 12"
-						annual: "Fr 144"
-				SGD:
-					student:
-						monthly: "$8"
-						annual: "$80"
-					collaborator:
-						monthly: "$16"
-						annual: "$192"
-
-			ibis:
-				USD:
-					student:
-						monthly: "$10"
-						annual: "$100"
-					collaborator:
-						monthly: "$18"
-						annual: "$216"
-				EUR:
-					student:
-						monthly: "€9"
-						annual: "€90"
-					collaborator:
-						monthly: "€17"
-						annual: "€204"
-				GBP:
-					student:
-						monthly: "£7"
-						annual: "£70"
-					collaborator:
-						monthly: "£14"
-						annual: "£168"
-				SEK:
-					student:
-						monthly: "75 kr"
-						annual: "750 kr"
-					collaborator:
-						monthly: "140 kr"
-						annual: "1680 kr"
-				CAD:
-					student:
-						monthly: "$12"
-						annual: "$120"
-					collaborator:
-						monthly: "$22"
-						annual: "$264"
-				NOK:
-					student:
-						monthly: "75 kr"
-						annual: "750 kr"
-					collaborator:
-						monthly: "140 kr"
-						annual: "1680 kr"
-				DKK:
-					student:
-						monthly: "68 kr"
-						annual: "680 kr"
-					collaborator:
-						monthly: "110 kr"
-						annual: "1320 kr"
-				AUD:
-					student:
-						monthly: "$13"
-						annual: "$130"
-					collaborator:
-						monthly: "$22"
-						annual: "$264"
-				NZD:
-					student:
-						monthly: "$14"
-						annual: "$140"
-					collaborator:
-						monthly: "$22"
-						annual: "$264"
-				CHF:
-					student:
-						monthly: "Fr 10"
-						annual: "Fr 100"
-					collaborator:
-						monthly: "Fr 18"
-						annual: "Fr 216"
-				SGD:
-					student:
-						monthly: "$14"
-						annual: "$140"
-					collaborator:
-						monthly: "$25"
-						annual: "$300"
 
 			plans:
 				USD:
@@ -312,14 +154,6 @@ define [
 		$scope.shouldABTestPlans = window.shouldABTestPlans
 
 		if $scope.shouldABTestPlans
-			sixpack.participate 'plans-1610', ['default', 'heron', 'ibis'], (chosenVariation, rawResponse)->
-				$scope.plansVariant = chosenVariation
-				event_tracking.sendMB 'plans-page', {plans_variant: chosenVariation}
-				if chosenVariation in ['heron', 'ibis']
-					# overwrite student plans with alternative
-					for currency, _v of $scope.plans
-						$scope.plans[currency]['student'] = MultiCurrencyPricing[chosenVariation][currency]['student']
-						$scope.plans[currency]['collaborator'] = MultiCurrencyPricing[chosenVariation][currency]['collaborator']
 				$scope.showPlans = true
 		else
 			$scope.showPlans = true

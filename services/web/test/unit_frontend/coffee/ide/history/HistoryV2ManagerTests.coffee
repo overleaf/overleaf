@@ -130,12 +130,13 @@ define ['ide/history/HistoryV2Manager'], (HistoryV2Manager) ->
 					project_ops: [{
 						remove:
 							pathname: "main.tex"
+						atV: 2
 					}]
 					fromV: 1, toV: 2
 				}])
 
 				expect(result).to.deep.equal({
-					"main.tex": { fromV: 0, toV: 2, deleted: true }
+					"main.tex": { fromV: 0, toV: 2, deletedAtV: 2 }
 				})
 
 			it "should track single deletions", ->
@@ -143,10 +144,11 @@ define ['ide/history/HistoryV2Manager'], (HistoryV2Manager) ->
 					project_ops: [{
 						remove:
 							pathname: "main.tex"
+						atV: 1
 					}]
 					fromV: 0, toV: 1
 				}])
 
 				expect(result).to.deep.equal({
-					"main.tex": { fromV: 0, toV: 1, deleted: true }
+					"main.tex": { fromV: 0, toV: 1, deletedAtV: 1 }
 				})

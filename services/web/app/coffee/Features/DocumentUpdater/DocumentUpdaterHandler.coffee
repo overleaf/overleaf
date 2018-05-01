@@ -121,15 +121,15 @@ module.exports = DocumentUpdaterHandler =
 			method: "DELETE"
 		}, project_id, "delete-thread", callback
 
-	resyncProjectHistory: (project_id, docs, files, callback) ->
+	resyncProjectHistory: (project_id, projectHistoryId, docs, files, callback) ->
 		logger.info {project_id, docs, files}, "resyncing project history in doc updater"
 		DocumentUpdaterHandler._makeRequest {
 			path: "/project/#{project_id}/history/resync"
-			json: { docs, files }
+			json: { docs, files, projectHistoryId }
 			method: "POST"
 		}, project_id, "resync-project-history", callback
 
-	updateProjectStructure : (project_id, userId, changes, callback = (error) ->)->
+	updateProjectStructure: (project_id, projectHistoryId, userId, changes, callback = (error) ->)->
 		return callback() if !settings.apis.project_history?.sendProjectStructureOps
 
 		Project.findOne {_id: project_id}, {version:true}, (err, currentProject) ->
@@ -144,7 +144,13 @@ module.exports = DocumentUpdaterHandler =
 			logger.log {project_id}, "updating project structure in doc updater"
 			DocumentUpdaterHandler._makeRequest {
 				path: "/project/#{project_id}"
-				json: { docUpdates, fileUpdates, userId, version: currentProject.version }
+				json: {
+					docUpdates,
+					fileUpdates,
+					userId,
+					version: currentProject.version
+					projectHistoryId
+				}
 				method: "POST"
 			}, project_id, "update-project-structure", callback
 
@@ -174,6 +180,23 @@ module.exports = DocumentUpdaterHandler =
 		oldEntitiesHash = _.indexBy oldEntities, (entity) -> entity[entityType]._id.toString()
 		newEntitiesHash = _.indexBy newEntities, (entity) -> entity[entityType]._id.toString()
 
+		# Send deletes before adds (and renames) to keep a 1:1 mapping between
+		# paths and ids
+		#
+		# When a file is replaced, we first delete the old file and then add the
+		# new file. If the 'add' operation is sent to project history before the
+		# 'delete' then we would have two files with the same path at that point
+		# in time.
+		for id, oldEntity of oldEntitiesHash
+			newEntity = newEntitiesHash[id]
+
+			if !newEntity?
+				# entity deleted
+				updates.push
+					id: id
+					pathname: oldEntity.path
+					newPathname: ''
+
 		for id, newEntity of newEntitiesHash
 			oldEntity = oldEntitiesHash[id]
 
@@ -190,16 +213,6 @@ module.exports = DocumentUpdaterHandler =
 					id: id
 					pathname: oldEntity.path
 					newPathname: newEntity.path
-
-		for id, oldEntity of oldEntitiesHash
-			newEntity = newEntitiesHash[id]
-
-			if !newEntity?
-				# entity deleted
-				updates.push
-					id: id
-					pathname: oldEntity.path
-					newPathname: ''
 
 		updates
 

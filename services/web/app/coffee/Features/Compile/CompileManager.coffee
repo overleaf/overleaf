@@ -18,15 +18,16 @@ module.exports = CompileManager =
 			timer.done()
 			_callback(args...)
 
-		@_checkIfAutoCompileLimitHasBeenHit options.isAutoCompile, "everyone", (err, canCompile)->
-			if !canCompile
-				return callback null, "autocompile-backoff", []
-			logger.log project_id: project_id, user_id: user_id, "compiling project"
-			CompileManager._checkIfRecentlyCompiled project_id, user_id, (error, recentlyCompiled) ->
-				return callback(error) if error?
-				if recentlyCompiled
-					logger.warn {project_id, user_id}, "project was recently compiled so not continuing"
-					return callback null, "too-recently-compiled", []
+		logger.log project_id: project_id, user_id: user_id, "compiling project"
+		CompileManager._checkIfRecentlyCompiled project_id, user_id, (error, recentlyCompiled) ->
+			return callback(error) if error?
+			if recentlyCompiled
+				logger.warn {project_id, user_id}, "project was recently compiled so not continuing"
+				return callback null, "too-recently-compiled", []
+
+			CompileManager._checkIfAutoCompileLimitHasBeenHit options.isAutoCompile, "everyone", (err, canCompile)->
+				if !canCompile
+					return callback null, "autocompile-backoff", []
 				
 				CompileManager._ensureRootDocumentIsSet project_id, (error) ->
 					return callback(error) if error?

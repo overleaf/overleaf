@@ -21,7 +21,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 		link(rel="icon", href="/" + settings.brandPrefix + "favicon.ico")
 		link(rel="icon", sizes="192x192", href="/" + settings.brandPrefix + "touch-icon-192x192.png")
 		link(rel="apple-touch-icon-precomposed", href="/" + settings.brandPrefix + "apple-touch-icon-precomposed.png")
-		link(rel="mask-icon", href="/" + settings.brandPrefix + "mask-favicon.svg", color="#a93529")
+		link(rel="mask-icon", href="/" + settings.brandPrefix + "mask-favicon.svg", color=settings.brandPrefix === 'ol-' ? "#4f9c45" : "#a93529")
 			
 		link(rel='stylesheet', href=buildCssPath("/" + settings.brandPrefix + "style.css", {hashedPath:true}))
 
@@ -48,7 +48,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 				(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
 				m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 				})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-				ga('create', '#{gaToken}', 'sharelatex.com');
+				ga('create', '#{gaToken}', '#{settings.cookieDomain.replace(/^\./, "")}');
 				ga('send', 'pageview');
 		- else
 			script(type='text/javascript').
@@ -110,22 +110,6 @@ html(itemscope, itemtype='http://schema.org/Product')
 				data-size="invisible"
 				data-badge="inline"
 			)
-
-		- if(typeof(suppressSystemMessages) == "undefined")
-			.system-messages(
-				ng-cloak
-				ng-controller="SystemMessagesController"
-			)
-				.system-message(
-					ng-repeat="message in messages"
-					ng-controller="SystemMessageController"
-					ng-hide="hidden"
-				)
-					a(href, ng-click="hide()").pull-right &times;
-					.system-message-content(ng-bind-html="htmlContent")
-	
-			include translations/translation_message
-
 
 		- if(typeof(suppressNavbar) == "undefined")
 			include layout/navbar
