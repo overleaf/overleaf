@@ -2,12 +2,13 @@ define [
 	"moment"
 	"ide/colors/ColorManager"
 	"ide/history/util/displayNameForUser"
+	"ide/history/util/HistoryViewModes"
 	"ide/history/controllers/HistoryListController"
 	"ide/history/controllers/HistoryDiffController"
 	"ide/history/directives/infiniteScroll"
 	"ide/history/components/historyEntriesList"
 	"ide/history/components/historyEntry"
-], (moment, ColorManager, displayNameForUser) ->
+], (moment, ColorManager, displayNameForUser, HistoryViewModes) ->
 	class HistoryManager
 		constructor: (@ide, @$scope) ->
 			@reset()
@@ -18,13 +19,13 @@ define [
 				else
 					@show()
 
-			@$scope.$watch "history.selection.updates", (updates) =>
-				if updates? and updates.length > 0
-					@_selectDocFromUpdates()
-					@reloadDiff()
+			# @$scope.$watch "history.selection.updates", (updates) =>
+			# 	if updates? and updates.length > 0
+			# 		@_selectDocFromUpdates()
+			# 		@reloadDiff()
 
-			@$scope.$watch "history.selection.pathname", () =>
-				@reloadDiff()
+			# @$scope.$watch "history.selection.pathname", () =>
+			# 	@reloadDiff()
 
 		show: () ->
 			@$scope.ui.view = "history"
@@ -37,6 +38,7 @@ define [
 			@$scope.history = {
 				isV2: true
 				updates: []
+				viewMode: HistoryViewModes.POINT_IN_TIME
 				nextBeforeTimestamp: null
 				atEnd: false
 				selection: {
@@ -71,6 +73,21 @@ define [
 				indexOfLastUpdateNotByMe = i
 
 			@$scope.history.updates[indexOfLastUpdateNotByMe].selectedFrom = true
+
+		autoSelectLastUpdate: () ->
+			return if @$scope.history.updates.length == 0
+			@$scope.history.updates[0].selectedTo = true
+			@$scope.history.updates[0].selectedFrom = true
+
+		selectUpdate: (update) ->
+			selectedUpdateIndex = @$scope.history.updates.indexOf update
+			if selectedUpdateIndex == -1
+				selectedUpdateIndex = 0
+			for update in @$scope.history.updates
+				update.selectedTo = false
+				update.selectedFrom = false
+			@$scope.history.updates[selectedUpdateIndex].selectedTo = true
+			@$scope.history.updates[selectedUpdateIndex].selectedFrom = true
 
 		BATCH_SIZE: 10
 		fetchNextBatchOfUpdates: () ->
@@ -202,7 +219,11 @@ define [
 			@$scope.history.updates =
 				@$scope.history.updates.concat(updates)
 
-			@autoSelectRecentUpdates() if firstLoad
+			if firstLoad 
+				if @$scope.history.viewMode == HistoryViewModes.COMPARE
+					@autoSelectRecentUpdates()
+				else 
+					@autoSelectLastUpdate()
 
 		_perDocSummaryOfUpdates: (updates) ->
 			# Track current_pathname -> original_pathname

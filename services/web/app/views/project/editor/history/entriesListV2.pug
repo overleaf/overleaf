@@ -9,6 +9,7 @@ aside.change-list(
 		load-disabled="history.loading || history.atEnd"
 		load-initialize="ui.view == 'history'"
 		is-loading="history.loading"
+		on-entry-select="handleEntrySelect(selectedEntry)"
 	)
 
 
@@ -23,6 +24,7 @@ script(type="text/ng-template", id="historyEntriesListTpl")
 				ng-repeat="entry in $ctrl.entries"
 				entry="entry"
 				current-user="$ctrl.currentUser"
+				on-select="$ctrl.onEntrySelect({ selectedEntry: selectedEntry })"
 			)
 			.loading(ng-show="history.loading")
 				i.fa.fa-spin.fa-refresh
@@ -31,13 +33,13 @@ script(type="text/ng-template", id="historyEntriesListTpl")
 script(type="text/ng-template", id="historyEntryTpl")
 	.history-entry(
 		ng-class="{\
-			'first-in-day': $ctrl.entry.meta.first_in_day,\
-			'selected': $ctrl.entry.inSelection,\
-			'selected-to': $ctrl.entry.selectedTo,\
-			'selected-from': $ctrl.entry.selectedFrom,\
-			'hover-selected': $ctrl.entry.inHoverSelection,\
-			'hover-selected-to': $ctrl.entry.hoverSelectedTo,\
-			'hover-selected-from': $ctrl.entry.hoverSelectedFrom,\
+			'history-entry-first-in-day': $ctrl.entry.meta.first_in_day,\
+			'history-entry-selected': $ctrl.entry.inSelection,\
+			'history-entry-selected-to': $ctrl.entry.selectedTo,\
+			'history-entry-selected-from': $ctrl.entry.selectedFrom,\
+			'history-entry-hover-selected': $ctrl.entry.inHoverSelection,\
+			'history-entry-hover-selected-to': $ctrl.entry.hoverSelectedTo,\
+			'history-entry-hover-selected-from': $ctrl.entry.hoverSelectedFrom,\
 		}"
 	)
 
@@ -66,7 +68,7 @@ script(type="text/ng-template", id="historyEntryTpl")
 		//- 			ng-show="$ctrl.entry.beforeSelection || $ctrl.entry.inSelection"
 				)
 
-		.history-entry-details(ng-click="select()")
+		.history-entry-details(ng-click="$ctrl.onSelect({ selectedEntry: $ctrl.entry })")
 			ol.history-entry-changes
 				li.history-entry-change(
 					ng-repeat="pathname in ::$ctrl.entry.pathnames"

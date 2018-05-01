@@ -19,6 +19,7 @@ define [
 		bindings:
 			entry: "<"
 			currentUser: "<"
+			onSelect: "&"
 		controller: historyEntryController
 		templateUrl: "historyEntryTpl"
 	}

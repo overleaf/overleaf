@@ -9,6 +9,11 @@ define [
 		$scope.loadMore = () =>
 			ide.historyManager.fetchNextBatchOfUpdates()
 
+		$scope.handleEntrySelect = (entry) ->
+			# $scope.$applyAsync () ->
+			ide.historyManager.selectUpdate(entry)
+			$scope.recalculateSelectedUpdates()
+
 		$scope.recalculateSelectedUpdates = () ->
 			beforeSelection = true
 			afterSelection = false
@@ -70,41 +75,41 @@ define [
 			$scope.recalculateSelectedUpdates()
 	]
 
-	App.controller "HistoryListItemController", ["$scope", "event_tracking", ($scope, event_tracking) ->
-		$scope.$watch "update.selectedFrom", (selectedFrom, oldSelectedFrom) ->
-			if selectedFrom
-				for update in $scope.history.updates
-					update.selectedFrom = false unless update == $scope.update
-				$scope.recalculateSelectedUpdates()		
+	# App.controller "HistoryListItemController", ["$scope", "event_tracking", ($scope, event_tracking) ->
+	# 	$scope.$watch "update.selectedFrom", (selectedFrom, oldSelectedFrom) ->
+	# 		if selectedFrom
+	# 			for update in $scope.history.updates
+	# 				update.selectedFrom = false unless update == $scope.update
+	# 			$scope.recalculateSelectedUpdates()		
 
-		$scope.$watch "update.selectedTo", (selectedTo, oldSelectedTo) ->
-			if selectedTo
-				for update in $scope.history.updates
-					update.selectedTo = false unless update == $scope.update
-				$scope.recalculateSelectedUpdates()
+	# 	$scope.$watch "update.selectedTo", (selectedTo, oldSelectedTo) ->
+	# 		if selectedTo
+	# 			for update in $scope.history.updates
+	# 				update.selectedTo = false unless update == $scope.update
+	# 			$scope.recalculateSelectedUpdates()
 
-		$scope.select = () ->
-			event_tracking.sendMB "history-view-change"
-			$scope.update.selectedTo = true
-			$scope.update.selectedFrom = true
+	# 	$scope.select = () ->
+	# 		event_tracking.sendMB "history-view-change"
+	# 		$scope.update.selectedTo = true
+	# 		$scope.update.selectedFrom = true
 
-		$scope.mouseOverSelectedFrom = () ->
-			$scope.history.hoveringOverListSelectors = true
-			$scope.update.hoverSelectedFrom = true
-			$scope.recalculateHoveredUpdates()
+	# 	$scope.mouseOverSelectedFrom = () ->
+	# 		$scope.history.hoveringOverListSelectors = true
+	# 		$scope.update.hoverSelectedFrom = true
+	# 		$scope.recalculateHoveredUpdates()
 
-		$scope.mouseOutSelectedFrom = () ->
-			$scope.history.hoveringOverListSelectors = false
-			$scope.resetHoverState()
+	# 	$scope.mouseOutSelectedFrom = () ->
+	# 		$scope.history.hoveringOverListSelectors = false
+	# 		$scope.resetHoverState()
 
-		$scope.mouseOverSelectedTo = () ->
-			$scope.history.hoveringOverListSelectors = true
-			$scope.update.hoverSelectedTo = true
-			$scope.recalculateHoveredUpdates()
+	# 	$scope.mouseOverSelectedTo = () ->
+	# 		$scope.history.hoveringOverListSelectors = true
+	# 		$scope.update.hoverSelectedTo = true
+	# 		$scope.recalculateHoveredUpdates()
 
-		$scope.mouseOutSelectedTo = () ->
-			$scope.history.hoveringOverListSelectors = false
-			$scope.resetHoverState()
+	# 	$scope.mouseOutSelectedTo = () ->
+	# 		$scope.history.hoveringOverListSelectors = false
+	# 		$scope.resetHoverState()
 
-		$scope.displayName = displayNameForUser
-	]
+	# 	$scope.displayName = displayNameForUser
+	# ]

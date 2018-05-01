@@ -2,7 +2,7 @@ define [
 	"base"
 ], (App) ->
 	historyEntriesListController = ($scope, $element, $attrs) ->
-		ctrl = @
+		ctrl = @ 
 		return
 
 	App.component "historyEntriesList", {
@@ -13,6 +13,7 @@ define [
 			loadInitialize: "<"
 			isLoading: "<"
 			currentUser: "<"
+			onEntrySelect: "&"
 		controller: historyEntriesListController
 		templateUrl: "historyEntriesListTpl"
 	}

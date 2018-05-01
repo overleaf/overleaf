@@ -17,6 +17,12 @@
 	background-color: #FFF;
 	margin-bottom: 2px;
 	padding: 5px 10px;
+	cursor: pointer;
+
+	.history-entry-selected & {
+		background-color: @history-entry-selected-bg;
+		color: #FFF;
+	}
 }
 	.history-entry-changes {
 		.list-unstyled;
@@ -33,6 +39,9 @@
 				color: @history-highlight-color;
 				font-weight: bold;
 				word-break: break-all;
+				.history-entry-selected & {
+					color: #FFF;
+				}
 			}
 	.history-entry-metadata {
 
