@@ -47,6 +47,13 @@ UnsupportedExportRecordsError = (message) ->
 	return error
 UnsupportedExportRecordsError.prototype.__proto___ = Error.prototype
 
+V1HistoryNotSyncedError = (message) ->
+	error = new Error(message)
+	error.name = "V1HistoryNotSyncedError"
+	error.__proto__ = V1HistoryNotSyncedError.prototype
+	return error
+V1HistoryNotSyncedError.prototype.__proto___ = Error.prototype
+
 ProjectHistoryDisabledError = (message) ->
 	error = new Error(message)
 	error.name = "ProjectHistoryDisabledError "
@@ -62,4 +69,5 @@ module.exports = Errors =
 	UnsupportedFileTypeError: UnsupportedFileTypeError
 	UnsupportedBrandError: UnsupportedBrandError
 	UnsupportedExportRecordsError: UnsupportedExportRecordsError
+	V1HistoryNotSyncedError: V1HistoryNotSyncedError
 	ProjectHistoryDisabledError: ProjectHistoryDisabledError
