@@ -16,6 +16,7 @@ services:
         volumes:
             - ~/sharelatex_data:/var/lib/sharelatex
             - /var/run/docker.sock:/var/run/docker.sock
+            #- /var/clsi/compiles:/var/www/sharelatex/clsi/compiles
         environment:
             SHARELATEX_MONGO_URL: mongodb://mongo/sharelatex
             SHARELATEX_REDIS_HOST: redis
