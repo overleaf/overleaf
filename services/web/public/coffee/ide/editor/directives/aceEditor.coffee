@@ -112,13 +112,21 @@ define [
 				# Prevert Ctrl|Cmd-S from triggering save dialog
 				scope.$watch "onSave", (callback) ->
 					if callback?
+						Vim.defineEx 'write', 'w', callback
 						editor.commands.addCommand
 							name: "save",
 							bindKey: win: "Ctrl-S", mac: "Command-S"
 							exec: () ->
 								callback()
 							readOnly: true
-						Vim.defineEx 'write', 'w', callback
+						# Not technically 'save', but Ctrl-. recompiles in OL v1
+						# so maintain compatibility
+						editor.commands.addCommand
+							name: "recompile_v1",
+							bindKey: win: "Ctrl-.", mac: "Ctrl-."
+							exec: () ->
+								callback()
+							readOnly: true
 				editor.commands.removeCommand "transposeletters"
 				editor.commands.removeCommand "showSettingsMenu"
 				editor.commands.removeCommand "foldall"
