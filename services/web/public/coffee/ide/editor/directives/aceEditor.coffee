@@ -81,6 +81,9 @@ define [
 				editor = ace.edit(element.find(".ace-editor-body")[0])
 				editor.$blockScrolling = Infinity
 
+				editor.container.style.lineHeight = 1.6
+				editor.setOption('fontFamily', '"Lucida Console", monospace')
+
 				# auto-insertion of braces, brackets, dollars
 				editor.setOption('behavioursEnabled', scope.autoPairDelimiters || false)
 				editor.setOption('wrapBehavioursEnabled', false)
