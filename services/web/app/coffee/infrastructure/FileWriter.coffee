@@ -6,6 +6,18 @@ Settings = require 'settings-sharelatex'
 request = require 'request'
 
 module.exports = FileWriter =
+
+	writeLinesToDisk: (identifier, lines, callback = (error, fsPath)->) ->
+		callback = _.once(callback)
+		fsPath = "#{Settings.path.dumpFolder}/#{identifier}_#{uuid.v4()}"
+		fs.mkdir Settings.path.dumpFolder, (error) ->
+			if error? and error.code != 'EEXIST'
+				# Ignore error about already existing
+				return callback(error)
+			fs.writeFile fsPath, lines.join('\n'), (error) ->
+				return callback(error) if error?
+				callback(null, fsPath)
+
 	writeStreamToDisk: (identifier, stream, callback = (error, fsPath) ->) ->
 		callback = _.once(callback)
 		fsPath = "#{Settings.path.dumpFolder}/#{identifier}_#{uuid.v4()}"

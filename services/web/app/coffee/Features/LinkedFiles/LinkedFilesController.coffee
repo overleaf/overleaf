@@ -5,7 +5,8 @@ logger = require 'logger-sharelatex'
 
 module.exports = LinkedFilesController = {
 	Agents: {
-		url: require('./UrlAgent')
+		url: require('./UrlAgent'),
+		project_file: require('./ProjectFileAgent')
 	}
 
 	createLinkedFile: (req, res, next) ->

@@ -25,6 +25,18 @@ define [
 			$(document).on "click", =>
 				@clearMultiSelectedEntities()
 				@$scope.$digest()
+			window.doLinkedFileImportFromProject = (project, path, name) =>
+				parent_folder = @getCurrentFolder()
+				@ide.$http.post "/project/#{@ide.project_id}/linked_file", {
+					name: name,
+					parent_folder_id: parent_folder?.id
+					provider: 'project_file',
+					data: {
+						source_project_id: project,
+						source_entity_path: path
+					},
+					_csrf: window.csrfToken
+				}
 
 		_bindToSocketEvents: () ->
 			@ide.socket.on "reciveNewDoc", (parent_folder_id, doc) =>
