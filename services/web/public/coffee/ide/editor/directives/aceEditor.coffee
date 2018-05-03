@@ -3,6 +3,7 @@ define [
 	"ace/ace"
 	"ace/ext-searchbox"
 	"ace/ext-modelist"
+	"ace/keybinding-vim"
 	"ide/editor/directives/aceEditor/undo/UndoManager"
 	"ide/editor/directives/aceEditor/auto-complete/AutoCompleteManager"
 	"ide/editor/directives/aceEditor/spell-check/SpellCheckManager"
@@ -14,9 +15,10 @@ define [
 	"ide/graphics/services/graphics"
 	"ide/preamble/services/preamble"
     "ide/files/services/files"
-], (App, Ace, SearchBox, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager, MetadataManager) ->
+], (App, Ace, SearchBox, Vim, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager, MetadataManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
 	ModeList = ace.require('ace/ext/modelist')
+	Vim = ace.require('ace/keyboard/vim').Vim
 
 	# set the path for ace workers if using a CDN (from editor.pug)
 	if window.aceWorkerPath != ""
@@ -60,6 +62,7 @@ define [
 				onCtrlJ: "="       # Toggle the review panel
 				onCtrlShiftC: "="  # Add a new comment
 				onCtrlShiftA: "="  # Toggle track-changes on/off
+				onSave: "="        # Cmd/Ctrl-S or :w in Vim
 				syntaxValidation: "="
 				reviewPanel: "="
 				eventsBridge: "="
@@ -107,14 +110,19 @@ define [
 				autoCompleteManager = new AutoCompleteManager(scope, editor, element, metadataManager, graphics, preamble, files)
 
 				# Prevert Ctrl|Cmd-S from triggering save dialog
-				editor.commands.addCommand
-					name: "save",
-					bindKey: win: "Ctrl-S", mac: "Command-S"
-					exec: () ->
-					readOnly: true
+				scope.$watch "onSave", (callback) ->
+					if callback?
+						editor.commands.addCommand
+							name: "save",
+							bindKey: win: "Ctrl-S", mac: "Command-S"
+							exec: () ->
+								callback()
+							readOnly: true
+						Vim.defineEx 'write', 'w', callback
 				editor.commands.removeCommand "transposeletters"
 				editor.commands.removeCommand "showSettingsMenu"
 				editor.commands.removeCommand "foldall"
+
 
 				# For European keyboards, the / is above 7 so needs Shift pressing.
 				# This comes through as Command-Shift-/ on OS X, which is mapped to
