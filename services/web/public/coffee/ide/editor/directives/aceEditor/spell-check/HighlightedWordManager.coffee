@@ -51,3 +51,20 @@ define [
 			row = @highlights.rows[row]
 			for highlight in (row || []).slice()
 				@removeHighlight highlight
+
+		findHighlightWithinRange: (range) ->
+			rows = @highlights.rows.slice(range.start.row, range.end.row + 1)
+			for row in rows
+				for highlight in (row || [])
+					if @_doesHighlightOverlapRange(highlight, range.start, range.end)
+						return highlight
+			return null
+
+		_doesHighlightOverlapRange: (highlight, start, end) ->
+			highlightIsAllBeforeRange =
+				highlight.row < start.row or
+				(highlight.row == start.row and highlight.column + highlight.word.length <= start.column)
+			highlightIsAllAfterRange =
+				highlight.row > end.row or
+				(highlight.row == end.row and highlight.column >= end.column)
+			!(highlightIsAllBeforeRange or highlightIsAllAfterRange)

@@ -20,6 +20,7 @@ define [
 	EditSession = ace.require('ace/edit_session').EditSession
 	ModeList = ace.require('ace/ext/modelist')
 	Vim = ace.require('ace/keyboard/vim').Vim
+	Range = ace.require('ace/range').Range
 
 	# set the path for ace workers if using a CDN (from editor.pug)
 	if window.aceWorkerPath != ""
@@ -363,18 +364,22 @@ define [
 						session.setScrollTop(session.getScrollTop() + 1)
 						session.setScrollTop(session.getScrollTop() - 1)
 
-				onSessionChange = (e) ->
+				onSessionChangeForSpellCheck = (e) ->
 					spellCheckManager.onSessionChange()
 					e.oldSession?.getDocument().off "change", spellCheckManager.onChange
 					e.session.getDocument().on "change", spellCheckManager.onChange
+					e.oldSession?.off "changeScrollTop", spellCheckManager.onScroll
+					e.session.on "changeScrollTop", spellCheckManager.onScroll
 
-				attachToSpellCheck = () ->
+				initSpellCheck = () ->
 					spellCheckManager.init()
-					editor.on 'changeSession', onSessionChange
-					onSessionChange({ session: editor.getSession() }) # Force initial setup
+					editor.on 'changeSession', onSessionChangeForSpellCheck
+					onSessionChangeForSpellCheck({ session: editor.getSession() }) # Force initial setup
+					editor.on 'nativecontextmenu', spellCheckManager.onContextMenu
 
-				detachFromSpellCheck = () ->
-					editor.off 'changeSession', onSessionChange
+				tearDownSpellCheck = () ->
+					editor.off 'changeSession', onSessionChangeForSpellCheck
+					editor.off 'nativecontextmenu', spellCheckManager.onContextMenu
 
 				attachToAce = (sharejs_doc) ->
 					lines = sharejs_doc.getSnapshot().split("\n")
@@ -421,7 +426,7 @@ define [
 					editor.initing = false
 					# now ready to edit document
 					editor.setReadOnly(scope.readOnly) # respect the readOnly setting, normally false
-					attachToSpellCheck()
+					initSpellCheck()
 
 					resetScrollMargins()
 
@@ -483,7 +488,7 @@ define [
 
 				scope.$on '$destroy', () ->
 					if scope.sharejsDoc?
-						detachFromSpellCheck()
+						tearDownSpellCheck()
 						detachFromAce(scope.sharejsDoc)
 						session = editor.getSession()
 						session?.destroy()
@@ -608,3 +613,24 @@ define [
 			@wordManager = new HighlightedWordManager(@editor)
 		getLines: () -> @editor.getValue().split('\n')
 		normalizeChangeEvent: (e) -> e
+		getCoordsFromContextMenuEvent: (e) ->
+			e.domEvent.stopPropagation()
+			return {
+				x: e.domEvent.clientX,
+				y: e.domEvent.clientY
+			}
+		preventContextMenuEventDefault: (e) ->
+			e.domEvent.preventDefault()
+		getHighlightFromCoords: (coords) ->
+			position = @editor.renderer.screenToTextCoordinates(coords.x, coords.y)
+			@wordManager.findHighlightWithinRange({
+				start: position
+				end: position
+			})
+		selectHighlightedWord: (highlight) ->
+			@editor.getSession().getSelection().setSelectionRange(
+				new Range(
+					highlight.row, highlight.column,
+					highlight.row, highlight.column + highlight.word.length
+				)
+			)

@@ -1,6 +1,12 @@
 define [], () ->
 	class SpellCheckManager
 		constructor: (@$scope, @cache, @$http, @$q, @adapter) ->
+			@$scope.spellMenu = {
+				open: false
+				top: '0px'
+				left: '0px'
+				suggestions: []
+			}
 			@inProgressRequest = null
 			@updatedLines = []
 
@@ -29,6 +35,40 @@ define [], () ->
 			@inProgressRequest.abort() if @inProgressRequest?
 
 			@runSpellCheckSoon(200) if @isSpellCheckEnabled()
+
+		onContextMenu: (e) =>
+			@closeContextMenu()
+			@openContextMenu(e)
+
+		onScroll: () => @closeContextMenu()
+
+		openContextMenu: (e) ->
+			coords = @adapter.getCoordsFromContextMenuEvent(e)
+			highlight = @adapter.getHighlightFromCoords(coords)
+			if highlight
+				@adapter.preventContextMenuEventDefault(e)
+				@adapter.selectHighlightedWord(highlight)
+				@$scope.$apply () =>
+					@$scope.spellMenu = {
+						open: true
+						top: coords.y + 'px'
+						left: coords.x + 'px'
+						suggestions: highlight.suggestions
+					}
+				@setUpClickOffContextMenuListener()
+				return false
+
+		setUpClickOffContextMenuListener: () ->
+			$(document).one 'click', (e) =>
+				@closeContextMenu() if e.which != 3 # Ignore if right click
+				return true
+
+		closeContextMenu: () ->
+			# This is triggered on scroll, so for performance only apply setting when
+			# it changes
+			if @$scope?.spellMenu and @$scope.spellMenu.open != false
+				@$scope.$apply () =>
+					@$scope.spellMenu.open = false
 
 		runFullCheck: () ->
 			@adapter.wordManager.reset()
