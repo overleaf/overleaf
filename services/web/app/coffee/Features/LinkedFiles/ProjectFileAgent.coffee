@@ -52,7 +52,7 @@ module.exports = ProjectFileAgent =
 				return callback(err) if err?
 				FileWriter.writeLinesToDisk entity_id, lines, callback
 		else if type == 'file'
-			FileStoreHandler.getFileStream project_id, entity_id, (err, fileStream) ->
+			FileStoreHandler.getFileStream project_id, entity_id, null, (err, fileStream) ->
 				return callback(err) if err?
 				FileWriter.writeStreamToDisk entity_id, fileStream, callback
 		else
