@@ -510,22 +510,12 @@ define [
 						>Dismiss</a>
 					</div>
 					<div class="ace-editor-body"></div>
-					<div
-						class="dropdown context-menu spell-check-menu"
-						ng-show="spellingMenu.open"
-						ng-style="{top: spellingMenu.top, left: spellingMenu.left}"
-						ng-class="{open: spellingMenu.open}"
-					>
-						<ul class="dropdown-menu">
-							<li ng-repeat="suggestion in spellingMenu.highlight.suggestions | limitTo:8">
-								<a href ng-click="replaceWord(spellingMenu.highlight, suggestion)">{{ suggestion }}</a>
-							</li>
-							<li class="divider"></li>
-							<li>
-								<a href ng-click="learnWord(spellingMenu.highlight)">Add to Dictionary</a>
-							</li>
-						</ul>
-					</div>
+					<spell-menu
+						open="spellMenu.open"
+						top="spellMenu.top"
+						left="spellMenu.left"
+						suggestions="spellMenu.suggestions"
+					></spell-menu>
 					<div
 						class="annotation-label"
 						ng-show="annotationLabel.show"
