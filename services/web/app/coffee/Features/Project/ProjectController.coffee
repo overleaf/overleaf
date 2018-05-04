@@ -167,7 +167,7 @@ module.exports = ProjectController =
 								path: e.path,
 								type: if e.doc? then 'doc' else 'file'
 							}
-						res.json({entities: entities})
+						res.json({project_id: project_id, entities: entities})
 
 	projectListPage: (req, res, next)->
 		timer = new metrics.Timer("project-list")
