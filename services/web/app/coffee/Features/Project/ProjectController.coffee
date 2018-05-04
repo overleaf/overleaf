@@ -163,6 +163,7 @@ module.exports = ProjectController =
 					ProjectEntityHandler.getAllEntitiesFromProject project, (err, docs, files) ->
 						return next(err) if err?
 						entities = docs.concat(files)
+							.sort (a, b) -> a.path > b.path  # Sort by path ascending
 							.map (e) -> {
 								path: e.path,
 								type: if e.doc? then 'doc' else 'file'
