@@ -4,7 +4,7 @@ define ["base"], (App) ->
       open: "<"
       top: "<"
       left: "<"
-      suggestions: "<"
+      highlight: "<"
       replaceWord: "&"
       learnWord: "&"
     }
@@ -16,12 +16,17 @@ define ["base"], (App) ->
     ng-class="{open: $ctrl.open}"
   >
     <ul class="dropdown-menu">
-      <li ng-repeat="suggestion in $ctrl.suggestions | limitTo:8">
-        <a href ng-click="$ctrl.replaceWord(suggestion)">{{ suggestion }}</a>
+      <li ng-repeat="suggestion in $ctrl.highlight.suggestions | limitTo:8">
+        <a
+          href
+          ng-click="$ctrl.replaceWord({ highlight: $ctrl.highlight, suggestion: suggestion })"
+        >
+          {{ suggestion }}
+        </a>
       </li>
       <li class="divider"></li>
       <li>
-        <a href ng-click="$ctrl.learnWord(suggestion)">Add to Dictionary</a>
+        <a href ng-click="$ctrl.learnWord({ highlight: $ctrl.highlight })">Add to Dictionary</a>
       </li>
     </ul>
   </div>

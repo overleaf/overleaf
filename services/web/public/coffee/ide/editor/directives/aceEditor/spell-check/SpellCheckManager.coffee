@@ -14,6 +14,9 @@ define [], () ->
 				if language != oldLanguage and oldLanguage?
 					@runFullCheck()
 
+			@$scope.replaceWord = @adapter.replaceWord
+			@$scope.learnWord = @learnWord
+
 		init: () ->
 			@updatedLines = Array(@adapter.getLines().length).fill(true)
 			@runSpellCheckSoon(200) if @isSpellCheckEnabled()
@@ -53,7 +56,7 @@ define [], () ->
 						open: true
 						top: coords.y + 'px'
 						left: coords.x + 'px'
-						suggestions: highlight.suggestions
+						highlight: highlight
 					}
 				@setUpClickOffContextMenuListener()
 				return false
@@ -69,6 +72,12 @@ define [], () ->
 			if @$scope?.spellMenu and @$scope.spellMenu.open != false
 				@$scope.$apply () =>
 					@$scope.spellMenu.open = false
+
+		learnWord: (highlight) =>
+			@apiRequest "/learn", word: highlight.word
+			@adapter.wordManager.removeHighlight highlight
+			language = @$scope.spellCheckLanguage
+			@cache?.put("#{language}:#{highlight.word}", true)
 
 		runFullCheck: () ->
 			@adapter.wordManager.reset()

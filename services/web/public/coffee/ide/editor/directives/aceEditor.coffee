@@ -514,7 +514,9 @@ define [
 						open="spellMenu.open"
 						top="spellMenu.top"
 						left="spellMenu.left"
-						suggestions="spellMenu.suggestions"
+						highlight="spellMenu.highlight"
+						replace-word="replaceWord(highlight, suggestion)"
+						learn-word="learnWord(highlight)"
 					></spell-menu>
 					<div
 						class="annotation-label"
@@ -624,3 +626,8 @@ define [
 					highlight.row, highlight.column + highlight.word.length
 				)
 			)
+		replaceWord: (highlight, newWord) =>
+			@editor.getSession().replace(new Range(
+				highlight.row, highlight.column,
+				highlight.row, highlight.column + highlight.word.length
+			), newWord)
