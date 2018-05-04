@@ -25,7 +25,9 @@ define [
 			$(document).on "click", =>
 				@clearMultiSelectedEntities()
 				@$scope.$digest()
-			window.doLinkedFileImportFromProject = (project, path, name) =>
+
+			# TODO: remove
+			window._doLinkedFileImportFromProject = (project, path, name) =>
 				parent_folder = @getCurrentFolder()
 				@ide.$http.post "/project/#{@ide.project_id}/linked_file", {
 					name: name,
@@ -35,6 +37,12 @@ define [
 						source_project_id: project,
 						source_entity_path: path
 					},
+					_csrf: window.csrfToken
+				}
+
+			# TODO: remove
+			window._getProjects = () =>
+				@ide.$http.get "/user/projects", {
 					_csrf: window.csrfToken
 				}
 

@@ -138,6 +138,19 @@ module.exports = ProjectController =
 			return next(err) if err?
 			res.sendStatus 200
 
+	projectsJson: (req, res, next) ->
+		user_id = AuthenticationController.getLoggedInUserId(req)
+
+		ProjectGetter.findAllUsersProjects user_id,
+			'name lastUpdated publicAccesLevel archived owner_ref tokens', (err, projects) ->
+				return next(err) if err?
+				projects = ProjectController._buildProjectList(projects)
+					.filter((p) -> !p.archived)
+					.filter((p) -> !p.isV1Project)
+					.map((p) -> {_id: p.id, name: p.name, accessLevel: p.accessLevel})
+
+				res.json({projects: projects})
+
 	projectListPage: (req, res, next)->
 		timer = new metrics.Timer("project-list")
 		user_id = AuthenticationController.getLoggedInUserId(req)

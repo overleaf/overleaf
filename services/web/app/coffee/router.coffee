@@ -118,6 +118,7 @@ module.exports = class Router
 		webRouter.get  '/user/personal_info', AuthenticationController.requireLogin(), UserInfoController.getLoggedInUsersPersonalInfo
 		privateApiRouter.get  '/user/:user_id/personal_info', AuthenticationController.httpAuth, UserInfoController.getPersonalInfo
 
+		webRouter.get  '/user/projects', AuthenticationController.requireLogin(), ProjectController.projectsJson
 		webRouter.get  '/project', AuthenticationController.requireLogin(), ProjectController.projectListPage
 		webRouter.post '/project/new', AuthenticationController.requireLogin(), ProjectController.newProject
 
