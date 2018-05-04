@@ -80,6 +80,8 @@ define [
 			miniReviewPanelVisible: false
 			chatResizerSizeOpen: window.uiConfig.chatResizerSizeOpen
 			chatResizerSizeClosed: window.uiConfig.chatResizerSizeClosed
+			editorFontFamily: window.uiConfig.editorFontFamily
+			editorLineHeight: window.uiConfig.editorLineHeight
 		}
 		$scope.user = window.user
 

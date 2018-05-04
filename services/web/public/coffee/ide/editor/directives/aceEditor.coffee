@@ -67,6 +67,8 @@ define [
 				trackChangesEnabled: "="
 				docId: "="
 				rendererData: "="
+				lineHeight: "="
+				fontFamily: "="
 			}
 			link: (scope, element, attrs) ->
 				# Don't freak out if we're already in an apply callback
@@ -80,9 +82,6 @@ define [
 
 				editor = ace.edit(element.find(".ace-editor-body")[0])
 				editor.$blockScrolling = Infinity
-
-				editor.container.style.lineHeight = 1.6
-				editor.setOption('fontFamily', '"Lucida Console", monospace')
 
 				# auto-insertion of braces, brackets, dollars
 				editor.setOption('behavioursEnabled', scope.autoPairDelimiters || false)
@@ -268,6 +267,14 @@ define [
 					element.find(".ace_editor, .ace_content").css({
 						"font-size": value + "px"
 					})
+
+				scope.$watch "fontFamily", (value) ->
+					if value?
+						editor.setOption('fontFamily', value)
+
+				scope.$watch "lineHeight", (value) ->
+					if value?
+						editor.container.style.lineHeight = value
 
 				scope.$watch "sharejsDoc", (sharejs_doc, old_sharejs_doc) ->
 					if old_sharejs_doc?
