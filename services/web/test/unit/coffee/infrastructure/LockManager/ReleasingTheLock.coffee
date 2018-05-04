@@ -17,7 +17,6 @@ describe 'LockManager - releasing the lock', ()->
 				auth:->
 				eval:deleteStub
 
-	
 	LockManager = SandboxedModule.require(modulePath, requires: mocks)
 	LockManager.unlockScript = "this is the unlock script"
 	

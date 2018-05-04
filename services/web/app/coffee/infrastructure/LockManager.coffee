@@ -13,6 +13,7 @@ COUNT = 0
 
 module.exports = LockManager =
 	LOCK_TEST_INTERVAL: 50 # 50ms between each test of the lock
+	MAX_TEST_INTERVAL: 1000 # back off to 1s between each test of the lock
 	MAX_LOCK_WAIT_TIME: 10000 # 10s maximum time to spend trying to get the lock
 	REDIS_LOCK_EXPIRY: 30 # seconds. Time until lock auto expires in redis
 	SLOW_EXECUTION_THRESHOLD: 5000 # 5s, if execution takes longer than this then log
@@ -69,6 +70,7 @@ module.exports = LockManager =
 
 	_getLock: (key, namespace, callback = (error, lockValue) ->) ->
 		startTime = Date.now()
+		testInterval = LockManager.LOCK_TEST_INTERVAL
 		attempts = 0
 		do attempt = () ->
 			if Date.now() - startTime > LockManager.MAX_LOCK_WAIT_TIME
@@ -82,7 +84,9 @@ module.exports = LockManager =
 					metrics.gauge "lock.#{namespace}.get.success.tries", attempts
 					callback(null, lockValue)
 				else
-					setTimeout attempt, LockManager.LOCK_TEST_INTERVAL
+					setTimeout attempt, testInterval
+					# back off when the lock is taken to avoid overloading
+					testInterval = Math.min(testInterval * 2, LockManager.MAX_TEST_INTERVAL)
 
 	_releaseLock: (key, lockValue, callback)->
 		rclient.eval LockManager.unlockScript, 1, key, lockValue, (err, result) ->
