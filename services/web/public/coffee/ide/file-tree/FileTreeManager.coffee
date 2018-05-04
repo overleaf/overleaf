@@ -46,6 +46,11 @@ define [
 					_csrf: window.csrfToken
 				}
 
+			window._getProjectEntities = (project_id) =>
+				@ide.$http.get "/project/#{project_id}/entities", {
+					_csrf: window.csrfToken
+				}
+
 		_bindToSocketEvents: () ->
 			@ide.socket.on "reciveNewDoc", (parent_folder_id, doc) =>
 				parent_folder = @findEntityById(parent_folder_id) or @$scope.rootFolder
