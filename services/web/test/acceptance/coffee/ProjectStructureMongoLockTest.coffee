@@ -22,6 +22,7 @@ describe "ProjectStructureMongoLock", ->
 		before (done) ->
 			# We want to instantly fail if the lock is taken
 			LockManager.MAX_LOCK_WAIT_TIME = 1
+			@lockValue = "lock-value"
 			userDetails =
 				holdingAccount:false,
 				email: 'test@example.com'
@@ -33,11 +34,13 @@ describe "ProjectStructureMongoLock", ->
 					@locked_project = project
 					namespace = ProjectEntityMongoUpdateHandler.LOCK_NAMESPACE
 					@lock_key = "lock:web:#{namespace}:#{project._id}"
-					LockManager._getLock @lock_key, namespace, done
+					LockManager._getLock @lock_key, namespace, (err, lockValue) =>
+						@lockValue = lockValue
+						done()
 			return
 
 		after (done) ->
-			LockManager._releaseLock @lock_key, done
+			LockManager._releaseLock @lock_key, @lockValue, done
 
 		describe 'interacting with the locked project', ->
 			LOCKING_UPDATE_METHODS = ['addDoc', 'addFile', 'mkdirp', 'moveEntity', 'renameEntity', 'addFolder']

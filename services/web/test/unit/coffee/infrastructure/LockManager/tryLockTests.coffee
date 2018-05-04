@@ -22,10 +22,11 @@ describe 'LockManager - trying the lock', ->
 	describe "when the lock is not set", ->
 		beforeEach ->
 			@set.callsArgWith(5, null, "OK")
+			@LockManager.randomLock = sinon.stub().returns("random-lock-value")
 			@LockManager._tryLock @key, @namespace, @callback
 
 		it "should set the lock key with an expiry if it is not set", ->
-			@set.calledWith(@key, "locked", "EX", 30, "NX")
+			@set.calledWith(@key, "random-lock-value", "EX", 30, "NX")
 				.should.equal true
 
 		it "should return the callback with true", ->
