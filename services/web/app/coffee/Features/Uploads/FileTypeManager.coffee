@@ -3,7 +3,7 @@ Path = require("path")
 
 module.exports = FileTypeManager =
 	TEXT_EXTENSIONS : [
-		"tex", "latex", "sty", "cls", "bst", "bib", "bibtex", "txt", "tikz", "rtex", "md", "asy"
+		"tex", "latex", "sty", "cls", "bst", "bib", "bibtex", "txt", "tikz", "rtex", "md", "asy", "latexmkrc"
 	]
 
 	IGNORE_EXTENSIONS : [
@@ -34,7 +34,7 @@ module.exports = FileTypeManager =
 		extension = parts.slice(-1)[0]
 		if extension?
 			extension = extension.toLowerCase()
-		binaryFile = (@TEXT_EXTENSIONS.indexOf(extension) == -1 or parts.length <= 1)
+		binaryFile = (@TEXT_EXTENSIONS.indexOf(extension) == -1 or parts.length <= 1) and parts[0] != 'latexmkrc'
 		
 		if binaryFile
 			return callback null, true
@@ -52,13 +52,10 @@ module.exports = FileTypeManager =
 		if extension?
 			extension = extension.toLowerCase()
 		ignore = false
-		if name[0] == "."
+		if name[0] == "." and extension != 'latexmkrc'
 			ignore = true
 		if @IGNORE_EXTENSIONS.indexOf(extension) != -1
 			ignore = true
 		if @IGNORE_FILENAMES.indexOf(name) != -1
 			ignore = true
 		callback null, ignore
-
-
-
