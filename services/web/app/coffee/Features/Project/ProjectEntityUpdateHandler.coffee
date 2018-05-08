@@ -416,6 +416,10 @@ module.exports = ProjectEntityUpdateHandler = self =
 			else
 				callback()
 
+	# Note: the _cleanUpEntity code and _updateProjectStructureWithDeletedEntity
+	# methods both need to recursively iterate over the entities in folder.
+	# These are currently using separate implementations of the recursion. In
+	# future, these could be simplified using a common project entity iterator.
 	_updateProjectStructureWithDeletedEntity: (project, entity, entityType, entityPath, userId, callback = (error) ->) ->
 		# compute the changes to the project structure
 		if(entityType.indexOf("file") != -1)
