@@ -405,7 +405,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 				DocumentUpdaterHandler.resyncProjectHistory project_id, projectHistoryId, docs, files, callback
 
 	_cleanUpEntity: (project, entity, entityType, path, userId, callback = (error) ->) ->
-		self._updateProjectStructure project, entity, entityType, path, userId, (error) ->
+		self._updateProjectStructureWithDeletedEntity project, entity, entityType, path, userId, (error) ->
 			return callback(error) if error?
 			if(entityType.indexOf("file") != -1)
 				self._cleanUpFile project, entity, path, userId, callback
@@ -416,7 +416,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 			else
 				callback()
 
-	_updateProjectStructure: (project, entity, entityType, entityPath, userId, callback = (error) ->) ->
+	_updateProjectStructureWithDeletedEntity: (project, entity, entityType, entityPath, userId, callback = (error) ->) ->
 		# compute the changes to the project structure
 		if(entityType.indexOf("file") != -1)
 			changes = oldFiles: [ {file: entity, path: entityPath} ]
