@@ -405,14 +405,41 @@ module.exports = ProjectEntityUpdateHandler = self =
 				DocumentUpdaterHandler.resyncProjectHistory project_id, projectHistoryId, docs, files, callback
 
 	_cleanUpEntity: (project, entity, entityType, path, userId, callback = (error) ->) ->
+		self._updateProjectStructureWithDeletedEntity project, entity, entityType, path, userId, (error) ->
+			return callback(error) if error?
+			if(entityType.indexOf("file") != -1)
+				self._cleanUpFile project, entity, path, userId, callback
+			else if (entityType.indexOf("doc") != -1)
+				self._cleanUpDoc project, entity, path, userId, callback
+			else if (entityType.indexOf("folder") != -1)
+				self._cleanUpFolder project, entity, path, userId, callback
+			else
+				callback()
+
+	# Note: the _cleanUpEntity code and _updateProjectStructureWithDeletedEntity
+	# methods both need to recursively iterate over the entities in folder.
+	# These are currently using separate implementations of the recursion. In
+	# future, these could be simplified using a common project entity iterator.
+	_updateProjectStructureWithDeletedEntity: (project, entity, entityType, entityPath, userId, callback = (error) ->) ->
+		# compute the changes to the project structure
 		if(entityType.indexOf("file") != -1)
-			self._cleanUpFile project, entity, path, userId, callback
+			changes = oldFiles: [ {file: entity, path: entityPath} ]
 		else if (entityType.indexOf("doc") != -1)
-			self._cleanUpDoc project, entity, path, userId, callback
+			changes = oldDocs: [ {doc: entity, path: entityPath} ]
 		else if (entityType.indexOf("folder") != -1)
-			self._cleanUpFolder project, entity, path, userId, callback
-		else
-			callback()
+			changes = {oldDocs: [], oldFiles: []}
+			_recurseFolder = (folder, folderPath) ->
+				for doc in folder.docs
+					changes.oldDocs.push {doc, path: path.join(folderPath, doc.name)}
+				for file in folder.fileRefs
+					changes.oldFiles.push {file, path: path.join(folderPath, file.name)}
+				for childFolder in folder.folders
+					_recurseFolder(childFolder, path.join(folderPath, childFolder.name))
+			_recurseFolder entity, entityPath
+		# now send the project structure changes to the docupdater
+		project_id = project._id.toString()
+		projectHistoryId = project.overleaf?.history?.id
+		DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, changes, callback
 
 	_cleanUpDoc: (project, doc, path, userId, callback = (error) ->) ->
 		project_id = project._id.toString()
@@ -429,21 +456,10 @@ module.exports = ProjectEntityUpdateHandler = self =
 				return callback(error) if error?
 				DocumentUpdaterHandler.deleteDoc project_id, doc_id, (error) ->
 					return callback(error) if error?
-					DocstoreManager.deleteDoc project_id, doc_id, (error) ->
-						return callback(error) if error?
-						changes = oldDocs: [ {doc, path} ]
-						projectHistoryId = project.overleaf?.history?.id
-						DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, changes, callback
+					DocstoreManager.deleteDoc project_id, doc_id, callback
 
 	_cleanUpFile: (project, file, path, userId, callback = (error) ->) ->
-		ProjectEntityMongoUpdateHandler._insertDeletedFileReference project._id, file, (error) ->
-			return callback(error) if error?
-			project_id = project._id.toString()
-			projectHistoryId = project.overleaf?.history?.id
-			changes = oldFiles: [ {file, path} ]
-			# we are now keeping a copy of every file versio so we no longer delete
-			# the file from the filestore
-			DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, changes, callback
+		ProjectEntityMongoUpdateHandler._insertDeletedFileReference project._id, file, callback
 
 	_cleanUpFolder: (project, folder, folderPath, userId, callback = (error) ->) ->
 		jobs = []
