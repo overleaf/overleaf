@@ -311,6 +311,7 @@ module.exports = ProjectController =
 					maxDocLength: Settings.max_doc_length
 					useV2History: !!project.overleaf?.history?.display
 					showRichText: req.query?.rt == 'true'
+					showPublishModal: req.query?.pm == 'true'
 				timer.done()
 
 	_buildProjectList: (allProjects, v1Projects = [])->
