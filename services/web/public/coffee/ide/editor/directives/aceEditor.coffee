@@ -70,6 +70,8 @@ define [
 				trackChangesEnabled: "="
 				docId: "="
 				rendererData: "="
+				lineHeight: "="
+				fontFamily: "="
 			}
 			link: (scope, element, attrs) ->
 				# Don't freak out if we're already in an apply callback
@@ -278,6 +280,14 @@ define [
 					element.find(".ace_editor, .ace_content").css({
 						"font-size": value + "px"
 					})
+
+				scope.$watch "fontFamily", (value) ->
+					if value?
+						editor.setOption('fontFamily', value)
+
+				scope.$watch "lineHeight", (value) ->
+					if value?
+						editor.container.style.lineHeight = value
 
 				scope.$watch "sharejsDoc", (sharejs_doc, old_sharejs_doc) ->
 					if old_sharejs_doc?

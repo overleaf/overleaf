@@ -321,5 +321,7 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 			chatMessageBorderLightness : if isOl then "40%" else "70%"
 			chatMessageBgSaturation    : if isOl then "85%" else "60%"
 			chatMessageBgLightness     : if isOl then "40%" else "97%"
+			editorFontFamily           : if isOl then '\\"Lucida Console\\", monospace' else null
+			editorLineHeight           : if isOl then 1.6 else null
 			renderAnnouncements        : !isOl
 		next()
