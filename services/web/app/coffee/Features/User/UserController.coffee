@@ -81,6 +81,11 @@ module.exports = UserController =
 				user.ace.pdfViewer = req.body.pdfViewer
 			if req.body.syntaxValidation?
 				user.ace.syntaxValidation = req.body.syntaxValidation
+			if req.body.fontFamily?
+				user.ace.fontFamily = req.body.fontFamily
+			if req.body.lineHeight?
+				user.ace.lineHeight = req.body.lineHeight
+
 			user.save (err)->
 				newEmail = req.body.email?.trim().toLowerCase()
 				if !newEmail? or newEmail == user.email or req.externalAuthenticationSystemUsed()

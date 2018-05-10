@@ -69,8 +69,8 @@ div.full-size(
 			track-changes= "editor.trackChanges",
 			doc-id="editor.open_doc_id"
 			renderer-data="reviewPanel.rendererData"
-			font-family="ui.editorFontFamily"
-			line-height="ui.editorLineHeight"
+			font-family="settings.fontFamily || ui.defaultFontFamily"
+			line-height="settings.lineHeight || ui.defaultLineHeight"
 		)
 
 		!= moduleIncludes('editor:body', locals)

@@ -283,11 +283,26 @@ define [
 
 				scope.$watch "fontFamily", (value) ->
 					if value?
-						editor.setOption('fontFamily', value)
+						switch value
+							when 'monaco'
+								editor.setOption('fontFamily', '"Monaco", "Menlo", "Ubuntu Mono", "Consolas", "source-code-pro", monospace')
+							when 'lucida'
+								editor.setOption('fontFamily', '"Lucida Console", monospace')
+							else
+								editor.setOption('fontFamily', null)
 
 				scope.$watch "lineHeight", (value) ->
 					if value?
-						editor.container.style.lineHeight = value
+						switch value
+							when 'compact'
+								editor.container.style.lineHeight = 1.33
+							when 'normal'
+								editor.container.style.lineHeight = 1.6
+							when 'wide'
+								editor.container.style.lineHeight = 2
+							else
+								editor.container.style.lineHeight = 1.6
+						editor.renderer.updateFontSize()
 
 				scope.$watch "sharejsDoc", (sharejs_doc, old_sharejs_doc) ->
 					if old_sharejs_doc?
