@@ -1,6 +1,6 @@
 {
   "name": "metrics-sharelatex",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "description": "A drop-in metrics and monitoring module for node.js apps",
   "repository": {
     "type": "git",
