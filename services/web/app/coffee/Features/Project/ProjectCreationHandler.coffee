@@ -16,38 +16,42 @@ AnalyticsManger = require("../Analytics/AnalyticsManager")
 
 module.exports = ProjectCreationHandler =
 
-	createBlankProject : (owner_id, projectName, projectHistoryId, callback = (error, project) ->)->
+	createBlankProject : (owner_id, projectName, attributes, callback = (error, project) ->)->
 		metrics.inc("project-creation")
 		if arguments.length == 3
-			callback = projectHistoryId
-			projectHistoryId = null
+			callback = attributes
+			attributes = null
 
 		ProjectDetailsHandler.validateProjectName projectName, (error) ->
 			return callback(error) if error?
 			logger.log owner_id:owner_id, projectName:projectName, "creating blank project"
-			if projectHistoryId?
-				ProjectCreationHandler._createBlankProject owner_id, projectName, projectHistoryId, (error, project) ->
+			if attributes?
+				ProjectCreationHandler._createBlankProject owner_id, projectName, attributes, (error, project) ->
 					return callback(error) if error?
 					AnalyticsManger.recordEvent(
-						owner_id, 'project-imported', { projectId: project._id, projectHistoryId: projectHistoryId }
+						owner_id, 'project-imported', { projectId: project._id, attributes: attributes }
 					)
 					callback(error, project)
 			else
 				HistoryManager.initializeProject (error, history) ->
 					return callback(error) if error?
-					ProjectCreationHandler._createBlankProject owner_id, projectName, history?.overleaf_id, (error, project) ->
+					attributes = overleaf: history: id: history?.overleaf_id
+					ProjectCreationHandler._createBlankProject owner_id, projectName, attributes, (error, project) ->
 						return callback(error) if error?
 						AnalyticsManger.recordEvent(
 							owner_id, 'project-created', { projectId: project._id }
 						)
 						callback(error, project)
 
-	_createBlankProject : (owner_id, projectName, projectHistoryId, callback = (error, project) ->)->
+	_createBlankProject : (owner_id, projectName, attributes, callback = (error, project) ->)->
 		rootFolder = new Folder {'name':'rootFolder'}
-		project = new Project
-			 owner_ref          : new ObjectId(owner_id)
-			 name               : projectName
-		project.overleaf.history.id = projectHistoryId
+
+		attributes.owner_ref = new ObjectId(owner_id)
+		attributes.name = projectName
+		project = new Project attributes
+
+		Object.assign(project, attributes)
+
 		if Settings.apis?.project_history?.displayHistoryForNewProjects
 			project.overleaf.history.display = true
 		if Settings.currentImageName?
