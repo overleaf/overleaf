@@ -32,14 +32,16 @@
 						ng-click="downloadSelectedProjects()"
 					)
 						i.fa.fa-cloud-download
+					- var archiveButtonString = settings.overleaf ? translate("archive") : translate("delete")
+					- var archiveButtonIcon = settings.overleaf ? "fa-inbox" : "fa-trash-o"
 					a.btn.btn-default(
 						href,
-						tooltip=translate('delete'),
+						tooltip=`{{ isArchiveableProjectSelected ? '${archiveButtonString}' : '${translate("leave")}' }}`,
 						tooltip-placement="bottom",
 						tooltip-append-to-body="true",
 						ng-click="openArchiveProjectsModal()"
 					)
-						i.fa.fa-trash-o
+						i.fa(ng-class=`isArchiveableProjectSelected ? '${archiveButtonIcon}' : 'fa-sign-out'`)
 
 				.btn-group.dropdown(ng-hide="selectedProjects.length < 1", dropdown)
 					a.btn.btn-default.dropdown-toggle(
