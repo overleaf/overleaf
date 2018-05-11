@@ -1,0 +1,177 @@
+#metrics {
+  max-width: none;
+  padding: 0 30px;
+  width: auto;
+
+  svg.nvd3-svg {
+    width: 100%;
+  }
+
+  .overbox {
+    margin: 0;
+    padding: 40px 20px;
+    background: #fff;
+    border: 1px solid #DFDFDF;
+    .box {
+      padding-bottom: 30px;
+      overflow: hidden;
+      margin-bottom: 40px;
+      border-bottom: 1px solid rgb(216, 216, 216);
+
+      .header {
+        margin-bottom: 20px;
+
+        h4 {
+          font-size: 19px;
+          margin: 0;
+        }
+      }
+    }
+  }
+
+  .print-button {
+    margin-right: 10px;
+    font-size: 20px;
+  }
+
+  .title-button {
+    margin-right: 5px;
+    font-size: 20px;
+  }
+
+  .metric-col {
+    padding: 15px;
+  }
+
+  .metric-header-container {
+    h4 {
+      margin-bottom: 0;
+    }
+  }
+
+  svg {
+    display: block;
+    height: 250px;
+    text {
+      font-family: "Open Sans", sans-serif;
+    }
+    &:not(:root) {
+      overflow: visible
+    }
+
+    &.hidden-legend-margin-fix {
+      margin-top: 15px;
+      height: 235px;
+    }
+
+    &.no-fill-opacity {
+      .nvd3 {
+        .nv-area {
+          fill-opacity: 1;
+        }
+      }
+    }
+  }
+
+  .nvtooltip {
+    z-index: 10;
+  }
+
+  .tooltip {
+    width: 150px;
+  }
+
+  // BEGIN: Metrics header
+  .metric-header-container {
+    > h4 {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+  }
+  // END: Metrics header
+
+  // BEGIN: Metrics footer
+  .metric-footer-container {
+    text-align: center;
+  }
+  // END: Metrics footer
+
+  // BEGIN: Metrics overlays
+  .metric-overlay-loading,
+  .metric-overlay-error,
+  .metric-overlay-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    padding: 16px; /* 15px of .metric-col padding + 1px border */
+    padding-top: 56px; /* Same as above + 30px for title + 10px overbox padding*/
+  }
+
+  .metric-overlay-loading {
+    padding: 175px 20%;
+  }
+
+  .metric-overlay-error {
+    display: none;
+    text-align: center;
+    padding-top: 175px;
+  }
+
+  .metric-overlay-backdrop {
+    opacity: 0.5;
+  }
+
+  .metric-overlay-backdrop-inner {
+    background-color: #fff;
+    width: 100%;
+    height: 100%;
+  }
+  // END: Metrics overlays
+}
+
+#metrics-header {
+  @media (min-width: 1200px) {
+    margin-bottom: 30px;
+  }
+
+  .section_header {
+    margin-bottom: 0;
+  }
+
+  #filters-container {
+    text-align: right;
+
+    .by {
+      color: #989898;
+      font-style: italic;
+    }
+  }
+
+  #lags-container {
+    .dropdown-menu {
+      min-width: 0;
+    }
+  }
+
+  #dates-container {
+    display: inline-block;
+    .daterangepicker {
+      margin-right: 15px;
+    }
+  }
+}
+
+#metrics-footer {
+  margin-top: 30px;
+  text-align: center;
+}
+
+body.print-loading {
+  #metrics {
+    .metric-col {
+      opacity: 0.5;
+    }
+  }
+}
