@@ -14,13 +14,8 @@ define [
 
 			@editor.on "changeSession", (e) =>
 				@reset()
-				# @session = e.session
+				@session = e.session
 				e.session.setUndoManager(@)
-
-		addSession: (session) ->
-			@session = session
-
-		addSelection: () ->
 
 		showUndoConflictWarning: () ->
 			@$scope.$apply () =>
@@ -36,8 +31,7 @@ define [
 			@undoStack = []
 			@redoStack = []
 
-		add: (delta, allowMerge, session) ->
-			return
+		execute: (options) ->
 			if @firstUpdate
 				# The first update we receive is Ace setting the document, which we should
 				# ignore
