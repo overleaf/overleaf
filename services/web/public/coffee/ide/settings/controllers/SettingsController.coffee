@@ -8,6 +8,12 @@ define [
 		if $scope.settings.pdfViewer not in ["pdfjs", "native"]
 			$scope.settings.pdfViewer = "pdfjs"
 
+		if $scope.settings.fontFamily? and $scope.settings.fontFamily not in ["monaco", "lucida"]
+			delete $scope.settings.fontFamily
+
+		if $scope.settings.lineHeight? and $scope.settings.lineHeight not in ["compact", "normal", "wide"]
+			delete $scope.settings.lineHeight
+
 		$scope.fontSizeAsStr = (newVal) ->
 			if newVal?
 				$scope.settings.fontSize = newVal
@@ -40,6 +46,14 @@ define [
 		$scope.$watch "settings.syntaxValidation", (syntaxValidation, oldSyntaxValidation) =>
 			if syntaxValidation != oldSyntaxValidation
 				settings.saveSettings({syntaxValidation: syntaxValidation})
+
+		$scope.$watch "settings.fontFamily", (fontFamily, oldFontFamily) =>
+			if fontFamily != oldFontFamily
+				settings.saveSettings({fontFamily: fontFamily})
+
+		$scope.$watch "settings.lineHeight", (lineHeight, oldLineHeight) =>
+			if lineHeight != oldLineHeight
+				settings.saveSettings({lineHeight: lineHeight})
 
 		$scope.$watch "project.spellCheckLanguage", (language, oldLanguage) =>
 			return if @ignoreUpdates

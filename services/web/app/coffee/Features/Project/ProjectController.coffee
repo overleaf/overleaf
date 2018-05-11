@@ -299,6 +299,8 @@ module.exports = ProjectController =
 						autoPairDelimiters: user.ace.autoPairDelimiters
 						pdfViewer : user.ace.pdfViewer
 						syntaxValidation: user.ace.syntaxValidation
+						fontFamily: user.ace.fontFamily
+						lineHeight: user.ace.lineHeight
 					}
 					trackChangesState: project.track_changes
 					privilegeLevel: privilegeLevel
