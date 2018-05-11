@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const webpack = require('webpack')
 
 const MODULES_PATH = path.join(__dirname, '/modules')
 
@@ -60,10 +61,23 @@ module.exports = {
 					cacheDirectory: true
 				}
 			}]
+		},
+		{
+			test: /\.handlebars$/,
+			loader: "handlebars-loader",
+			options: {
+				compat: true,
+				knownHelpersOnly: false,
+				runtimePath: 'handlebars/runtime',
+			}
 		}]
 	},
-
+	resolve: {
+		alias: {
+			handlebars: 'handlebars/dist/handlebars.min.js',
+			jquery: path.join(__dirname, 'node_modules/jquery/dist/jquery'),
+		}
+	},
 	// TODO
 	// plugins: {}
 }
-
