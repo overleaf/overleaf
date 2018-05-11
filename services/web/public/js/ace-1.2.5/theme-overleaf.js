@@ -28,8 +28,7 @@ box-shadow: 0 0 3px 0px white;\
 background: rgb(252, 255, 0);\
 }\
 .ace-overleaf .ace_marker-layer .ace_bracket {\
-margin: -1px 0 0 -1px;\
-border: 1px solid #cc7;\
+border: 1px solid #5A5CAD;\
 }\
 .ace-overleaf .ace_marker-layer .ace_active-line {\
 background: rgba(0, 0, 0, 0.07);\
