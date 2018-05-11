@@ -17,6 +17,10 @@ define [], () ->
 			@$scope.replaceWord = @adapter.replaceWord
 			@$scope.learnWord = @learnWord
 
+			$(document).on 'click', (e) =>
+				@closeContextMenu() if e.which != 3 # Ignore if right click
+				return true
+
 		init: () ->
 			@updatedLines = Array(@adapter.getLines().length).fill(true)
 			@runSpellCheckSoon(200) if @isSpellCheckEnabled()
@@ -58,13 +62,7 @@ define [], () ->
 						left: coords.x + 'px'
 						highlight: highlight
 					}
-				@setUpClickOffContextMenuListener()
 				return false
-
-		setUpClickOffContextMenuListener: () ->
-			$(document).one 'click', (e) =>
-				@closeContextMenu() if e.which != 3 # Ignore if right click
-				return true
 
 		closeContextMenu: () ->
 			# This is triggered on scroll, so for performance only apply setting when
