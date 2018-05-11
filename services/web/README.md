@@ -43,7 +43,6 @@ Unit tests can be run in the `test_unit` container defined in `docker-compose.te
 The makefile contains a short cut to run these:
 
 ```
-make install # Only needs running once, or when npm packages are updated
 make unit_test
 ```
 
