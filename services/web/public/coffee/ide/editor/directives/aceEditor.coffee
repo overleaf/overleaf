@@ -7,7 +7,7 @@ define [
 	"ide/editor/directives/aceEditor/undo/UndoManager"
 	"ide/editor/directives/aceEditor/auto-complete/AutoCompleteManager"
 	"ide/editor/directives/aceEditor/spell-check/SpellCheckManager"
-	"ide/editor/directives/aceEditor/spell-check/HighlightedWordManager"
+	"ide/editor/directives/aceEditor/spell-check/SpellCheckAdapter"
 	"ide/editor/directives/aceEditor/highlights/HighlightsManager"
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
 	"ide/editor/directives/aceEditor/track-changes/TrackChangesManager"
@@ -16,11 +16,10 @@ define [
 	"ide/graphics/services/graphics"
 	"ide/preamble/services/preamble"
     "ide/files/services/files"
-], (App, Ace, SearchBox, Vim, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightedWordManager, HighlightsManager, CursorPositionManager, TrackChangesManager, MetadataManager) ->
+], (App, Ace, SearchBox, Vim, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, SpellCheckAdapter, HighlightsManager, CursorPositionManager, TrackChangesManager, MetadataManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
 	ModeList = ace.require('ace/ext/modelist')
 	Vim = ace.require('ace/keyboard/vim').Vim
-	Range = ace.require('ace/range').Range
 
 	# set the path for ace workers if using a CDN (from editor.pug)
 	if window.aceWorkerPath != ""
@@ -599,35 +598,3 @@ define [
 		SearchBox::$init = () ->
 			@element = $compile(searchHtml)($rootScope.$new())[0];
 			$init.apply(@)
-
-	class SpellCheckAdapter
-		constructor: (@editor) ->
-			@wordManager = new HighlightedWordManager(@editor)
-		getLines: () -> @editor.getValue().split('\n')
-		normalizeChangeEvent: (e) -> e
-		getCoordsFromContextMenuEvent: (e) ->
-			e.domEvent.stopPropagation()
-			return {
-				x: e.domEvent.clientX,
-				y: e.domEvent.clientY
-			}
-		preventContextMenuEventDefault: (e) ->
-			e.domEvent.preventDefault()
-		getHighlightFromCoords: (coords) ->
-			position = @editor.renderer.screenToTextCoordinates(coords.x, coords.y)
-			@wordManager.findHighlightWithinRange({
-				start: position
-				end: position
-			})
-		selectHighlightedWord: (highlight) ->
-			@editor.getSession().getSelection().setSelectionRange(
-				new Range(
-					highlight.row, highlight.column,
-					highlight.row, highlight.column + highlight.word.length
-				)
-			)
-		replaceWord: (highlight, newWord) =>
-			@editor.getSession().replace(new Range(
-				highlight.row, highlight.column,
-				highlight.row, highlight.column + highlight.word.length
-			), newWord)
