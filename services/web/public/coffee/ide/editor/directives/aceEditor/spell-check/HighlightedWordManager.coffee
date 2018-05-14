@@ -31,6 +31,10 @@ define [
 				row: options.row,
 				column: options.column + options.word.length
 			})
+			# Prevent range from adding newly typed characters to the end of the word.
+			# This makes it appear as if the spelling error continues to the next word
+			# even after a space
+			range.end.$insertRight = true
 
 			markerId = session.addMarker range, "spelling-highlight", 'text', false
 
