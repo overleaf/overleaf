@@ -46,7 +46,8 @@ module.exports = ReferencesHandler =
 	_isFullIndex: (project, callback = (err, result) ->) ->
 		UserGetter.getUser project.owner_ref, { features: true }, (err, owner) ->
 			return callback(err) if err?
-			callback(null, owner?.features?.references == true)
+			features = owner?.features
+			callback(null, features?.references == true || features?.referencesSearch == true)
 
 	indexAll: (projectId, callback=(err, data)->) ->
 		ProjectGetter.getProject projectId, {rootFolder: true, owner_ref: 1}, (err, project) ->
