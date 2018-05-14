@@ -31,15 +31,23 @@ define [
 			})
 
 		selectHighlightedWord: (highlight) ->
+			row = highlight.range.start.row
+			startColumn = highlight.range.start.column
+			endColumn = highlight.range.end.column
+
 			@editor.getSession().getSelection().setSelectionRange(
 				new Range(
-					highlight.row, highlight.column,
-					highlight.row, highlight.column + highlight.word.length
+					row, startColumn,
+					row, endColumn
 				)
 			)
 
 		replaceWord: (highlight, newWord) =>
+			row = highlight.range.start.row
+			startColumn = highlight.range.start.column
+			endColumn = highlight.range.end.column
+
 			@editor.getSession().replace(new Range(
-				highlight.row, highlight.column,
-				highlight.row, highlight.column + highlight.word.length
+				row, startColumn,
+				row, endColumn
 			), newWord)
