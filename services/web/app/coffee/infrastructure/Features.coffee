@@ -16,5 +16,7 @@ module.exports = Features =
 				return Settings.accountMerge? and Settings.overleaf?
 			when 'custom-togglers'
 				return Settings.overleaf?
+			when 'templates'
+				return !Settings.overleaf?
 			else
 				throw new Error("unknown feature: #{feature}")
