@@ -1557,9 +1557,9 @@
       "resolved": "https://registry.npmjs.org/jmespath/-/jmespath-0.15.0.tgz"
     },
     "jquery": {
-      "version": "3.3.1",
-      "from": "jquery@latest",
-      "resolved": "https://registry.npmjs.org/jquery/-/jquery-3.3.1.tgz"
+      "version": "1.11.1",
+      "from": "jquery@1.11.1",
+      "resolved": "https://registry.npmjs.org/jquery/-/jquery-1.11.1.tgz"
     },
     "js-stringify": {
       "version": "1.0.2",
