@@ -3,6 +3,7 @@ define [
 	"ace/ace"
 	"ace/ext-searchbox"
 	"ace/ext-modelist"
+	"ace/keybinding-vim"
 	"ide/editor/directives/aceEditor/undo/UndoManager"
 	"ide/editor/directives/aceEditor/auto-complete/AutoCompleteManager"
 	"ide/editor/directives/aceEditor/spell-check/SpellCheckManager"
@@ -14,9 +15,10 @@ define [
 	"ide/graphics/services/graphics"
 	"ide/preamble/services/preamble"
     "ide/files/services/files"
-], (App, Ace, SearchBox, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager, MetadataManager) ->
+], (App, Ace, SearchBox, Vim, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager, MetadataManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
 	ModeList = ace.require('ace/ext/modelist')
+	Vim = ace.require('ace/keyboard/vim').Vim
 
 	# set the path for ace workers if using a CDN (from editor.pug)
 	if window.aceWorkerPath != ""
@@ -60,6 +62,7 @@ define [
 				onCtrlJ: "="       # Toggle the review panel
 				onCtrlShiftC: "="  # Add a new comment
 				onCtrlShiftA: "="  # Toggle track-changes on/off
+				onSave: "="        # Cmd/Ctrl-S or :w in Vim
 				syntaxValidation: "="
 				reviewPanel: "="
 				eventsBridge: "="
@@ -67,6 +70,8 @@ define [
 				trackChangesEnabled: "="
 				docId: "="
 				rendererData: "="
+				lineHeight: "="
+				fontFamily: "="
 			}
 			link: (scope, element, attrs) ->
 				# Don't freak out if we're already in an apply callback
@@ -106,15 +111,25 @@ define [
 				metadataManager = new MetadataManager(scope, editor, element, metadata)
 				autoCompleteManager = new AutoCompleteManager(scope, editor, element, metadataManager, graphics, preamble, files)
 
-				# Prevert Ctrl|Cmd-S from triggering save dialog
-				editor.commands.addCommand
-					name: "save",
-					bindKey: win: "Ctrl-S", mac: "Command-S"
-					exec: () ->
-					readOnly: true
+				scope.$watch "onSave", (callback) ->
+					if callback?
+						Vim.defineEx 'write', 'w', callback
+						editor.commands.addCommand
+							name: "save",
+							bindKey: win: "Ctrl-S", mac: "Command-S"
+							exec: callback
+							readOnly: true
+						# Not technically 'save', but Ctrl-. recompiles in OL v1
+						# so maintain compatibility
+						editor.commands.addCommand
+							name: "recompile_v1",
+							bindKey: win: "Ctrl-.", mac: "Ctrl-."
+							exec: callback
+							readOnly: true
 				editor.commands.removeCommand "transposeletters"
 				editor.commands.removeCommand "showSettingsMenu"
 				editor.commands.removeCommand "foldall"
+
 
 				# For European keyboards, the / is above 7 so needs Shift pressing.
 				# This comes through as Command-Shift-/ on OS X, which is mapped to
@@ -265,6 +280,29 @@ define [
 					element.find(".ace_editor, .ace_content").css({
 						"font-size": value + "px"
 					})
+
+				scope.$watch "fontFamily", (value) ->
+					if value?
+						switch value
+							when 'monaco'
+								editor.setOption('fontFamily', '"Monaco", "Menlo", "Ubuntu Mono", "Consolas", "source-code-pro", monospace')
+							when 'lucida'
+								editor.setOption('fontFamily', '"Lucida Console", monospace')
+							else
+								editor.setOption('fontFamily', null)
+
+				scope.$watch "lineHeight", (value) ->
+					if value?
+						switch value
+							when 'compact'
+								editor.container.style.lineHeight = 1.33
+							when 'normal'
+								editor.container.style.lineHeight = 1.6
+							when 'wide'
+								editor.container.style.lineHeight = 2
+							else
+								editor.container.style.lineHeight = 1.6
+						editor.renderer.updateFontSize()
 
 				scope.$watch "sharejsDoc", (sharejs_doc, old_sharejs_doc) ->
 					if old_sharejs_doc?

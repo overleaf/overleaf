@@ -98,7 +98,11 @@ describe 'ProjectCreationHandler', ->
 
 			it "should set the overleaf id if overleaf id provided", (done)->
 				overleaf_id = 2345
-				@handler.createBlankProject ownerId, projectName, overleaf_id, (err, project)->
+				attributes =
+					overleaf:
+						history:
+							id: overleaf_id
+				@handler.createBlankProject ownerId, projectName, attributes, (err, project)->
 					project.overleaf.history.id.should.equal overleaf_id
 					done()
 

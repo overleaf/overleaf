@@ -183,6 +183,9 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 		# Don't include the query string parameters, otherwise Google
 		# treats ?nocdn=true as the canonical version
 		res.locals.currentUrl = Url.parse(req.originalUrl).pathname
+		res.locals.capitalize = (string) ->
+			return "" if string.length == 0
+			return string.charAt(0).toUpperCase() + string.slice(1)
 		next()
 
 	webRouter.use (req, res, next)->
@@ -321,5 +324,7 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 			chatMessageBorderLightness : if isOl then "40%" else "70%"
 			chatMessageBgSaturation    : if isOl then "85%" else "60%"
 			chatMessageBgLightness     : if isOl then "40%" else "97%"
+			defaultFontFamily          : if isOl then 'lucida' else 'monaco'
+			defaultLineHeight          : if isOl then 'normal' else 'compact'
 			renderAnnouncements        : !isOl
 		next()
