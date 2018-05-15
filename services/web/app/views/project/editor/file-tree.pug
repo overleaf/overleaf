@@ -342,6 +342,60 @@ script(type='text/ng-template', id='newDocModalTemplate')
 			span(ng-show="state.inflight") #{translate("creating")}...
 
 
+// Project Linked Files Modal
+script(type='text/ng-template', id='projectLinkedFileModalTemplate')
+	.modal-header
+		h3 New file from Project
+
+	.modal-body
+		div
+			div.alert.alert-danger(ng-if="state.error") Error
+		div
+			form
+				.form-controls
+					label(for="project-select") Select a Project
+					select.form-control(
+						name="project-select"
+						ng-model="data.selectedProject"
+						ng-disabled="!shouldEnableProjectSelect()"
+					)
+						option(value="") --
+						option(
+							ng-repeat="project in data.projects"
+							value="{{ project._id }}"
+						) {{ project.name }}
+
+				br
+				.form-controls
+					label(for="project-entity-select") Select a File
+					select.form-control(
+						name="project-entity-select"
+						ng-model="data.selectedProjectEntity"
+						ng-disabled="!shouldEnableProjectEntitySelect()"
+					)
+						option(value="") --
+						option(
+							ng-repeat="projectEntity in data.projectEntities"
+							value="{{ projectEntity.path }}"
+						) {{ projectEntity.path }}
+				br
+
+	.modal-footer
+		span(ng-show="state.inFlight")
+			i.fa.fa-spinner.fa-spin
+			| &nbsp;
+		button.btn.btn-default(
+			ng-disabled="state.inflight"
+			ng-click="cancel()"
+		) #{translate("cancel")}
+		button.btn.btn-primary(
+			ng-disabled="!shouldEnableCreateButton()"
+			ng-click="create()"
+		)
+			span(ng-hide="state.inflight") #{translate("create")}
+			span(ng-show="state.inflight") #{translate("creating")}...
+
+
 script(type='text/ng-template', id='linkedFileModalTemplate')
 	.modal-header
 		h3 New file from URL

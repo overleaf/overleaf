@@ -43,6 +43,19 @@ define [
 				}
 			)
 
+		$scope.openProjectLinkedFileModal = window.openProjectLinkedFileModal = () ->
+			unless 'url' in window.data.enabledLinkedFileTypes
+				console.warn("Project linked files are not enabled")
+				return
+			$modal.open(
+				templateUrl: "projectLinkedFileModalTemplate"
+				controller:  "ProjectLinkedFileModalController"
+				scope: $scope
+				resolve: {
+					parent_folder: () -> ide.fileTreeManager.getCurrentFolder()
+				}
+			)
+
 		$scope.orderByFoldersFirst = (entity) ->
 			return '0' if entity?.type == "folder"
 			return '1'
@@ -201,6 +214,91 @@ define [
 				$modalInstance.dismiss('cancel')
 	]
 
+	App.controller "ProjectLinkedFileModalController", [
+		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder",
+		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->
+			$scope.data =
+				projects: null # or []
+				selectedProject: null
+				projectEntities: null # or []
+				selectedProjectEntity: null
+			$scope.state =
+				inFlight: false
+				error: false
+
+			$scope.$watch 'data.selectedProject', (newVal, oldVal) ->
+				return if !newVal
+				$scope.data.selectedProjectEntity = null
+				$scope.getProjectEntities($scope.data.selectedProject)
+
+			$scope._reset = () ->
+				$scope.state.inFlight = false
+				$scope.state.error = false
+
+			$scope._resetAfterResponse = (opts) ->
+				isError = !!opts.err
+				$scope.state.inFlight = false
+				$scope.state.error = isError
+
+			$scope.shouldEnableProjectSelect = () ->
+				state = $scope.state
+				data = $scope.data
+				return !state.inFlight && data.projects
+
+			$scope.shouldEnableProjectEntitySelect = () ->
+				state = $scope.state
+				data = $scope.data
+				return !state.inFlight && data.projects && data.selectedProject
+
+			$scope.shouldEnableCreateButton = () ->
+				state = $scope.state
+				data = $scope.data
+				return !state.inFlight &&
+					data.projects &&
+					data.selectedProject &&
+					data.projectEntities &&
+					data.selectedProjectEntity
+
+			$scope.getUserProjects = () ->
+				$scope.state.inFlight = true
+				ide.$http.get("/user/projects", {
+					_csrf: window.csrfToken
+				})
+				.then (resp) ->
+					$scope.data.projectEntities = null
+					$scope.data.projects = resp.data.projects
+					$scope._resetAfterResponse(err: false)
+				.catch (err) ->
+					$scope._resetAfterResponse(err: true)
+
+			$scope.getProjectEntities = (project_id) =>
+				$scope.state.inFlight = true
+				ide.$http.get("/project/#{project_id}/entities", {
+					_csrf: window.csrfToken
+				})
+				.then (resp) ->
+					if $scope.data.selectedProject == resp.data.project_id
+						$scope.data.projectEntities = resp.data.entities
+						$scope._resetAfterResponse(err: false)
+				.catch (err) ->
+					$scope._resetAfterResponse(err: true)
+
+			# TODO: remove
+			window._S = $scope
+
+			$scope.init = () ->
+				$scope.getUserProjects()
+			$timeout($scope.init, 100)
+
+			$scope.create = () ->
+				console.log ">> create"
+
+			$scope.cancel = () ->
+				$modalInstance.dismiss('cancel')
+
+	]
+
+	# TODO: rename all this to UrlLinkedFilModalController
 	App.controller "LinkedFileModalController", [
 		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder",
 		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->

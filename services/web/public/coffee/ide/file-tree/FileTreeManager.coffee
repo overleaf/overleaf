@@ -42,14 +42,14 @@ define [
 
 			# TODO: remove
 			window._getProjects = () =>
-				@ide.$http.get "/user/projects", {
+				@ide.$http.get("/user/projects", {
 					_csrf: window.csrfToken
-				}
+				}).then (resp) -> console.log(resp.status, resp.data)
 
 			window._getProjectEntities = (project_id) =>
-				@ide.$http.get "/project/#{project_id}/entities", {
+				@ide.$http.get("/project/#{project_id}/entities", {
 					_csrf: window.csrfToken
-				}
+				}).then (resp) -> console.log(resp.status, resp.data)
 
 		_bindToSocketEvents: () ->
 			@ide.socket.on "reciveNewDoc", (parent_folder_id, doc) =>
