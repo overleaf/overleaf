@@ -67,3 +67,24 @@ define [
 				highlightRow > end.row or
 				(highlightRow == end.row and highlightStartColumn >= end.column)
 			!(highlightIsAllBeforeRange or highlightIsAllAfterRange)
+
+		clearHighlightTouchingRange: (range) ->
+			highlight = @highlights.find (hl) =>
+				@_doesHighlightTouchRange hl, range.start, range.end
+			if highlight
+				@removeHighlight highlight
+
+		_doesHighlightTouchRange: (highlight, start, end) ->
+			highlightRow = highlight.range.start.row
+			highlightStartColumn = highlight.range.start.column
+			highlightEndColumn = highlight.range.end.column
+
+			rangeStartIsWithinHighlight =
+				highlightStartColumn <= start.column and
+				highlightEndColumn >= start.column
+			rangeEndIsWithinHighlight =
+				highlightStartColumn <= end.column and
+				highlightEndColumn >= end.column
+
+			highlightRow == start.row and
+				(rangeStartIsWithinHighlight or rangeEndIsWithinHighlight)

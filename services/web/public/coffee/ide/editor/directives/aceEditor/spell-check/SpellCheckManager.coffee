@@ -35,6 +35,9 @@ define [], () ->
 		onChange: (e) =>
 			if @isSpellCheckEnabled()
 				@markLinesAsUpdated(@adapter.normalizeChangeEvent(e))
+
+				@adapter.wordManager.clearHighlightTouchingRange(e)
+
 				@runSpellCheckSoon()
 
 		onSessionChange: () =>
