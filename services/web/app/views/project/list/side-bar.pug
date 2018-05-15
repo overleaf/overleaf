@@ -41,7 +41,7 @@
 		li(ng-class="{active: (filter == 'shared')}", ng-click="filterProjects('shared')")
 			a(href) #{translate("shared_with_you")}
 		li(ng-class="{active: (filter == 'archived')}", ng-click="filterProjects('archived')")
-			a(href) #{translate("deleted_projects")}
+			a(href) #{settings.overleaf ? translate("archived_projects") : translate("deleted_projects")}
 		if isShowingV1Projects
 			li(ng-class="{active: (filter == 'v1')}", ng-click="filterProjects('v1')")
 				a(href) #{translate("v1_projects")}

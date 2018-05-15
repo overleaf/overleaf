@@ -331,6 +331,8 @@ module.exports = ProjectController =
 						autoPairDelimiters: user.ace.autoPairDelimiters
 						pdfViewer : user.ace.pdfViewer
 						syntaxValidation: user.ace.syntaxValidation
+						fontFamily: user.ace.fontFamily
+						lineHeight: user.ace.lineHeight
 					}
 					trackChangesState: project.track_changes
 					privilegeLevel: privilegeLevel
@@ -343,6 +345,7 @@ module.exports = ProjectController =
 					maxDocLength: Settings.max_doc_length
 					useV2History: !!project.overleaf?.history?.display
 					showRichText: req.query?.rt == 'true'
+					showPublishModal: req.query?.pm == 'true'
 				timer.done()
 
 	_buildProjectList: (allProjects, v1Projects = [])->
