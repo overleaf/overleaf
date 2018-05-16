@@ -20,7 +20,7 @@ module.exports = V1SubscriptionManager =
 				return callback(null, null)
 			V1SubscriptionManager._v1PlanRequest v1Id, (err, body) ->
 				return callback(err) if err?
-				planName = body.plan_name
+				planName = body?.plan_name
 				logger.log {userId, planName, body}, "[V1SubscriptionManager] fetched v1 plan for user"
 				if planName in ['pro', 'pro_plus', 'student', 'free']
 					planName = "v1_#{planName}"
@@ -30,6 +30,8 @@ module.exports = V1SubscriptionManager =
 				return callback(null, planName)
 
 	_v1PlanRequest: (v1Id, callback=(err, body)->) ->
+		if !settings?.apis?.v1
+			return callback null, null
 		request {
 			method: 'GET',
 			url: settings.apis.v1.url +
