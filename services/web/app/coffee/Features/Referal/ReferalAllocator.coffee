@@ -31,7 +31,7 @@ module.exports = ReferalAllocator =
 
 
 
-	assignBonus: (user_id, callback = (error) ->) ->
+	getBonusFeatures: (user_id, callback = (error) ->) ->
 		query = _id: user_id
 		User.findOne query, (error, user) ->
 			return callback(error) if error
@@ -39,9 +39,7 @@ module.exports = ReferalAllocator =
 			logger.log user_id: user_id, refered_user_count: user.refered_user_count, "assigning bonus"
 			if user.refered_user_count? and user.refered_user_count > 0
 				newFeatures = ReferalAllocator._calculateFeatures(user)
-				if _.isEqual newFeatures, user.features
-					return callback()
-				User.update query, { $set: features: newFeatures }, callback
+				callback null, newFeatures
 			else
 				callback()
 

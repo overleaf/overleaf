@@ -46,4 +46,6 @@ module.exports =
 		webRouter.get "/user/subscription/upgrade-annual",  AuthenticationController.requireLogin(), SubscriptionController.renderUpgradeToAnnualPlanPage
 		webRouter.post "/user/subscription/upgrade-annual",  AuthenticationController.requireLogin(), SubscriptionController.processUpgradeToAnnualPlan
 
+		# Currently used in acceptance tests only, as a way to trigger the syncing logic
+		publicApiRouter.post "/user/:user_id/subscription/sync", AuthenticationController.httpAuth, SubscriptionController.refreshUserSubscription
 
