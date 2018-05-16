@@ -232,6 +232,13 @@ define [
 				$scope.data.selectedProjectEntity = null
 				$scope.getProjectEntities($scope.data.selectedProject)
 
+			# auto-set filename based on selected file
+			$scope.$watch 'data.selectedProjectEntity', (newVal, oldVal) ->
+				return if !newVal
+				fileName = newVal.split('/').reverse()[0]
+				if fileName
+					$scope.data.name = fileName
+
 			$scope._resetAfterResponse = (opts) ->
 				isError = opts.err == true
 				$scope.state.inFlight = false
