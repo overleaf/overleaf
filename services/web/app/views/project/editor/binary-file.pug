@@ -54,7 +54,7 @@ div.binary-file.full-size(
 				|
 				a(ng-href='/project/{{openFile.linkedFileData.source_project_id}}' target="_blank")
 					| {{ openFile.linkedFileData.source_project_display_name }}
-				| &nbsp;{{ openFile.linkedFileData.source_entity_path.slice(1) }},
+				| /{{ openFile.linkedFileData.source_entity_path.slice(1) }},
 				|
 				| at {{ openFile.created | formatDate:'h:mm a' }} {{ openFile.created | relativeDate }}
 
