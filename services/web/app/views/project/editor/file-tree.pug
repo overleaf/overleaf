@@ -377,7 +377,7 @@ script(type='text/ng-template', id='projectLinkedFileModalTemplate')
 						option(
 							ng-repeat="projectEntity in data.projectEntities"
 							value="{{ projectEntity.path }}"
-						) {{ projectEntity.path }}
+						) {{ projectEntity.path.slice(1) }}
 				br
 
 				.form-controls
