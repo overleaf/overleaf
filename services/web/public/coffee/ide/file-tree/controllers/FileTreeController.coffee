@@ -219,7 +219,7 @@ define [
 		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->
 			$scope.data =
 				projects: null # or []
-				selectedProject: null
+				selectedProjectId: null
 				projectEntities: null # or []
 				selectedProjectEntity: null
 				name: null
@@ -230,10 +230,10 @@ define [
 					create: false
 				error: false
 
-			$scope.$watch 'data.selectedProject', (newVal, oldVal) ->
+			$scope.$watch 'data.selectedProjectId', (newVal, oldVal) ->
 				return if !newVal
 				$scope.data.selectedProjectEntity = null
-				$scope.getProjectEntities($scope.data.selectedProject)
+				$scope.getProjectEntities($scope.data.selectedProjectId)
 
 			# auto-set filename based on selected file
 			$scope.$watch 'data.selectedProjectEntity', (newVal, oldVal) ->
@@ -242,7 +242,10 @@ define [
 				if fileName
 					$scope.data.name = fileName
 
-			$scope._resetAfterResponse = (opts) ->
+			$scope._setInFlight = (type) ->
+				$scope.state.inFlight[type] = true
+
+			$scope._reset = (opts) ->
 				isError = opts.err == true
 				inFlight = $scope.state.inFlight
 				inFlight.projects = inFlight.entities = inFlight.create = false
@@ -256,7 +259,7 @@ define [
 			$scope.shouldEnableProjectEntitySelect = () ->
 				state = $scope.state
 				data = $scope.data
-				return !state.inFlight.projects && !state.inFlight.entities && data.projects && data.selectedProject
+				return !state.inFlight.projects && !state.inFlight.entities && data.projects && data.selectedProjectId
 
 			$scope.shouldEnableCreateButton = () ->
 				state = $scope.state
@@ -264,13 +267,13 @@ define [
 				return !state.inFlight.projects &&
 					!state.inFlight.entities &&
 					data.projects &&
-					data.selectedProject &&
+					data.selectedProjectId &&
 					data.projectEntities &&
 					data.selectedProjectEntity &&
 					data.name
 
 			$scope.getUserProjects = () ->
-				$scope.state.inFlight.projects = true
+				$scope._setInFlight('projects')
 				ide.$http.get("/user/projects", {
 					_csrf: window.csrfToken
 				})
@@ -278,45 +281,45 @@ define [
 					$scope.data.projectEntities = null
 					$scope.data.projects = resp.data.projects.filter (p) ->
 						p._id != ide.project_id
-					$scope._resetAfterResponse(err: false)
+					$scope._reset(err: false)
 				.catch (err) ->
-					$scope._resetAfterResponse(err: true)
+					$scope._reset(err: true)
 
 			$scope.getProjectEntities = (project_id) =>
-				$scope.state.inFlight.entities = true
+				$scope._setInFlight('entities')
 				ide.$http.get("/project/#{project_id}/entities", {
 					_csrf: window.csrfToken
 				})
 				.then (resp) ->
-					if $scope.data.selectedProject == resp.data.project_id
+					if $scope.data.selectedProjectId == resp.data.project_id
 						$scope.data.projectEntities = resp.data.entities
-						$scope._resetAfterResponse(err: false)
+						$scope._reset(err: false)
 				.catch (err) ->
-					$scope._resetAfterResponse(err: true)
-
-			# TODO: remove
-			window._S = $scope
+					$scope._reset(err: true)
 
 			$scope.init = () ->
 				$scope.getUserProjects()
 			$timeout($scope.init, 100)
 
 			$scope.create = () ->
-				project = $scope.data.selectedProject
+				project = $scope.data.selectedProjectId
 				path = $scope.data.selectedProjectEntity
 				name = $scope.data.name
-				$scope.state.inFlight.create = true
+				if !name || !path || !project
+					$scope._reset(err: true)
+					return
+				$scope._setInFlight('create')
 				ide.fileTreeManager
 					.createLinkedFile(name, parent_folder, 'project_file', {
 						source_project_id: project,
 						source_entity_path: path
 					})
 					.then () ->
-						$scope._resetAfterResponse(err: false)
+						$scope._reset(err: false)
 						$modalInstance.close()
 					.catch (response)->
 						{ data } = response
-						$scope._resetAfterResponse(err: true)
+						$scope._reset(err: true)
 
 			$scope.cancel = () ->
 				$modalInstance.dismiss('cancel')

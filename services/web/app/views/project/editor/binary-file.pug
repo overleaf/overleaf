@@ -52,9 +52,9 @@ div.binary-file.full-size(
 				i.fa.fa-fw.fa-external-link-square.fa-rotate-180.linked-file-icon
 				| Imported from
 				|
-				// TODO: Show the project name instead
 				a(ng-href='/project/{{openFile.linkedFileData.source_project_id}}')
 					| {{ displayUrl(openFile.linkedFileData.source_project_id) }}
+				| &nbsp;/ {{ openFile.linkedFileData.source_entity_path.slice(1) }},
 				|
 				| at {{ openFile.created | formatDate:'h:mm a' }} {{ openFile.created | relativeDate }}
 
