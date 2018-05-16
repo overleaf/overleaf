@@ -349,17 +349,20 @@ script(type='text/ng-template', id='projectLinkedFileModalTemplate')
 
 	.modal-body
 		div
-			div.alert.alert-danger(ng-if="state.error") Error
+			div.alert.alert-danger(ng-if="state.error") Error, something went wrong!
 		div
 			form
 				.form-controls
 					label(for="project-select") Select a Project
+					span(ng-show="state.inFlight.projects")
+						| &nbsp;
+						i.fa.fa-spinner.fa-spin
 					select.form-control(
 						name="project-select"
 						ng-model="data.selectedProject"
 						ng-disabled="!shouldEnableProjectSelect()"
 					)
-						option(value="") No Project Selected
+						option(value="") - No Project Selected
 						option(
 							ng-repeat="project in data.projects"
 							value="{{ project._id }}"
@@ -368,12 +371,15 @@ script(type='text/ng-template', id='projectLinkedFileModalTemplate')
 				br
 				.form-controls
 					label(for="project-entity-select") Select a File
+					span(ng-show="state.inFlight.entities")
+						| &nbsp;
+						i.fa.fa-spinner.fa-spin
 					select.form-control(
 						name="project-entity-select"
 						ng-model="data.selectedProjectEntity"
 						ng-disabled="!shouldEnableProjectEntitySelect()"
 					)
-						option(value="") No File Selected
+						option(value="") - No File Selected
 						option(
 							ng-repeat="projectEntity in data.projectEntities"
 							value="{{ projectEntity.path }}"
@@ -392,7 +398,7 @@ script(type='text/ng-template', id='projectLinkedFileModalTemplate')
 				br
 
 	.modal-footer
-		span(ng-show="state.inFlight")
+		span(ng-show="state.inFlight.create")
 			i.fa.fa-spinner.fa-spin
 			| &nbsp;
 		button.btn.btn-default(

@@ -224,7 +224,10 @@ define [
 				selectedProjectEntity: null
 				name: null
 			$scope.state =
-				inFlight: false
+				inFlight:
+					projects: false
+					entities: false
+					create: false
 				error: false
 
 			$scope.$watch 'data.selectedProject', (newVal, oldVal) ->
@@ -241,23 +244,25 @@ define [
 
 			$scope._resetAfterResponse = (opts) ->
 				isError = opts.err == true
-				$scope.state.inFlight = false
+				inFlight = $scope.state.inFlight
+				inFlight.projects = inFlight.entities = inFlight.create = false
 				$scope.state.error = isError
 
 			$scope.shouldEnableProjectSelect = () ->
 				state = $scope.state
 				data = $scope.data
-				return !state.inFlight && data.projects
+				return !state.inFlight.projects && data.projects
 
 			$scope.shouldEnableProjectEntitySelect = () ->
 				state = $scope.state
 				data = $scope.data
-				return !state.inFlight && data.projects && data.selectedProject
+				return !state.inFlight.projects && !state.inFlight.entities && data.projects && data.selectedProject
 
 			$scope.shouldEnableCreateButton = () ->
 				state = $scope.state
 				data = $scope.data
-				return !state.inFlight &&
+				return !state.inFlight.projects &&
+					!state.inFlight.entities &&
 					data.projects &&
 					data.selectedProject &&
 					data.projectEntities &&
@@ -265,7 +270,7 @@ define [
 					data.name
 
 			$scope.getUserProjects = () ->
-				$scope.state.inFlight = true
+				$scope.state.inFlight.projects = true
 				ide.$http.get("/user/projects", {
 					_csrf: window.csrfToken
 				})
@@ -278,7 +283,7 @@ define [
 					$scope._resetAfterResponse(err: true)
 
 			$scope.getProjectEntities = (project_id) =>
-				$scope.state.inFlight = true
+				$scope.state.inFlight.entities = true
 				ide.$http.get("/project/#{project_id}/entities", {
 					_csrf: window.csrfToken
 				})
@@ -300,7 +305,7 @@ define [
 				project = $scope.data.selectedProject
 				path = $scope.data.selectedProjectEntity
 				name = $scope.data.name
-				$scope.state.inFlight = true
+				$scope.state.inFlight.create = true
 				ide.fileTreeManager
 					.createLinkedFile(name, parent_folder, 'project_file', {
 						source_project_id: project,
