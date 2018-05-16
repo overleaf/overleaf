@@ -131,7 +131,7 @@
 			)
 				li.container-fluid
 					.row
-						.col-xs-6
+						.col-xs-6.col-sm-4.col-md-6
 							input.select-all(
 								select-all,
 								type="checkbox"
@@ -142,9 +142,11 @@
 						.col-xs-2
 							span.header.clickable(ng-click="changePredicate('accessLevel')") #{translate("owner")}
 								i.tablesort.fa(ng-class="getSortIconClass('accessLevel')")
-						.col-xs-4
+						.col-xs-4.col-sm-3.col-md-2
 							span.header.clickable(ng-click="changePredicate('lastUpdated')") #{translate("last_modified")}
 								i.tablesort.fa(ng-class="getSortIconClass('lastUpdated')")
+						.hidden-xs.col-sm-3.col-md-2
+							span.header #{translate("actions")}
 				li.project_entry.container-fluid(
 					ng-repeat="project in visibleProjects | orderBy:predicate:reverse",
 					ng-controller="ProjectListItemController"

@@ -1,4 +1,4 @@
-.col-xs-6
+.col-xs-6.col-sm-4.col-md-6
 	input.select-item(
 		select-individual,
 		type="checkbox",
@@ -37,8 +37,27 @@
 			tooltip-placement="right"
 			tooltip-append-to-body="true"
 		)
-.col-xs-4
+.col-xs-4.col-sm-3.col-md-2
 	if settings.overleaf
 		span.last-modified(tooltip="{{project.lastUpdated | formatDate}}") {{project.lastUpdated | fromNowDate}}
 	else
 		span.last-modified {{project.lastUpdated | formatDate}}
+.hidden-xs.col-sm-3.col-md-2
+	button.btn.btn-link.action-btn(
+		tooltip=translate('copy'),
+		tooltip-placement="top",
+		tooltip-append-to-body="true",
+	)
+		i.icon.fa.fa-files-o
+	button.btn.btn-link.action-btn(
+		tooltip=translate('download'),
+		tooltip-placement="top",
+		tooltip-append-to-body="true",
+	)
+		i.icon.fa.fa-cloud-download
+	button.btn.btn-link.action-btn(
+		tooltip=translate('archive'),
+		tooltip-placement="top",
+		tooltip-append-to-body="true",
+	)
+		i.icon.fa.fa-inbox
