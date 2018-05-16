@@ -359,7 +359,7 @@ script(type='text/ng-template', id='projectLinkedFileModalTemplate')
 						ng-model="data.selectedProject"
 						ng-disabled="!shouldEnableProjectSelect()"
 					)
-						option(value="") --
+						option(value="") No Project Selected
 						option(
 							ng-repeat="project in data.projects"
 							value="{{ project._id }}"
@@ -373,11 +373,22 @@ script(type='text/ng-template', id='projectLinkedFileModalTemplate')
 						ng-model="data.selectedProjectEntity"
 						ng-disabled="!shouldEnableProjectEntitySelect()"
 					)
-						option(value="") --
+						option(value="") No File Selected
 						option(
 							ng-repeat="projectEntity in data.projectEntities"
 							value="{{ projectEntity.path }}"
 						) {{ projectEntity.path }}
+				br
+
+				.form-controls
+					label(for="name") File Name In This Project
+					input.form-control(
+						type="text"
+						placeholder="example.tex"
+						required
+						ng-model="data.name"
+						name="name"
+					)
 				br
 
 	.modal-footer

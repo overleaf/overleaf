@@ -222,6 +222,7 @@ define [
 				selectedProject: null
 				projectEntities: null # or []
 				selectedProjectEntity: null
+				name: null
 			$scope.state =
 				inFlight: false
 				error: false
@@ -231,12 +232,8 @@ define [
 				$scope.data.selectedProjectEntity = null
 				$scope.getProjectEntities($scope.data.selectedProject)
 
-			$scope._reset = () ->
-				$scope.state.inFlight = false
-				$scope.state.error = false
-
 			$scope._resetAfterResponse = (opts) ->
-				isError = !!opts.err
+				isError = opts.err == true
 				$scope.state.inFlight = false
 				$scope.state.error = isError
 
@@ -257,7 +254,8 @@ define [
 					data.projects &&
 					data.selectedProject &&
 					data.projectEntities &&
-					data.selectedProjectEntity
+					data.selectedProjectEntity &&
+					data.name
 
 			$scope.getUserProjects = () ->
 				$scope.state.inFlight = true
@@ -266,7 +264,8 @@ define [
 				})
 				.then (resp) ->
 					$scope.data.projectEntities = null
-					$scope.data.projects = resp.data.projects
+					$scope.data.projects = resp.data.projects.filter (p) ->
+						p._id != ide.project_id
 					$scope._resetAfterResponse(err: false)
 				.catch (err) ->
 					$scope._resetAfterResponse(err: true)
@@ -291,7 +290,21 @@ define [
 			$timeout($scope.init, 100)
 
 			$scope.create = () ->
-				console.log ">> create"
+				project = $scope.data.selectedProject
+				path = $scope.data.selectedProjectEntity
+				name = $scope.data.name
+				$scope.state.inFlight = true
+				ide.fileTreeManager
+					.createLinkedFile(name, parent_folder, 'project_file', {
+						source_project_id: project,
+						source_entity_path: path
+					})
+					.then () ->
+						$scope._resetAfterResponse(err: false)
+						$modalInstance.close()
+					.catch (response)->
+						{ data } = response
+						$scope._resetAfterResponse(err: true)
 
 			$scope.cancel = () ->
 				$modalInstance.dismiss('cancel')
