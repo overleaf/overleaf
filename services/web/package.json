@@ -155,7 +155,7 @@
     "sinon": "^1.17.0",
     "sinon-chai": "^2.14.0",
     "timekeeper": "",
-    "translations-sharelatex": "git+https://github.com/sharelatex/translations-sharelatex.git#e219c18a5f305d7724946908b67fb32218fac577",
+    "translations-sharelatex": "git+https://github.com/sharelatex/translations-sharelatex.git#master",
     "webpack": "^3.10.0",
     "webpack-dev-server": "^2.11.1",
     "webpack-merge": "^4.1.1"

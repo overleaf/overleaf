@@ -10610,8 +10610,8 @@
     },
     "translations-sharelatex": {
       "version": "0.1.4",
-      "from": "git+https://github.com/sharelatex/translations-sharelatex.git#e219c18a5f305d7724946908b67fb32218fac577",
-      "resolved": "git+https://github.com/sharelatex/translations-sharelatex.git#e219c18a5f305d7724946908b67fb32218fac577",
+      "from": "git+https://github.com/sharelatex/translations-sharelatex.git#master",
+      "resolved": "git+https://github.com/sharelatex/translations-sharelatex.git#c3dbe7869c594cb91cd366020f8b69e50a9405c9",
       "dev": true,
       "dependencies": {
         "async": {
