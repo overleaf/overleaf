@@ -302,17 +302,19 @@ define [
 			$timeout($scope.init, 100)
 
 			$scope.create = () ->
-				project = $scope.data.selectedProjectId
+				projectId = $scope.data.selectedProjectId
+				projectDisplayName = _.find($scope.data.projects, (p) -> p._id == projectId).name
 				path = $scope.data.selectedProjectEntity
 				name = $scope.data.name
-				if !name || !path || !project
+				if !name || !path || !projectId || !projectDisplayName
 					$scope._reset(err: true)
 					return
 				$scope._setInFlight('create')
 				ide.fileTreeManager
 					.createLinkedFile(name, parent_folder, 'project_file', {
-						source_project_id: project,
-						source_entity_path: path
+						source_project_id: projectId,
+						source_entity_path: path,
+						source_project_display_name: projectDisplayName
 					})
 					.then () ->
 						$scope._reset(err: false)
