@@ -1,4 +1,4 @@
-if (user.awareOfV2 && !settings.overleaf)
+if hasFeature('v2-banner')
 	.userNotifications
 		ul.list-unstyled.notifications-list(ng-controller="OverleafV2NotificationController", ng-show="visible")
 			li.notification_entry
