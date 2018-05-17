@@ -493,6 +493,10 @@ define [
 			if value?
 				$scope.updateSelectedProjects()
 
+		$scope.clone = (e) ->
+			e.stopPropagation()
+			$scope.cloneProject($scope.project, "#{$scope.project.name} (Copy)")
+
 		$scope.download = (e) ->
 			e.stopPropagation()
 			$scope.downloadProjectsById([$scope.project.id])
