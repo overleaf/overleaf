@@ -149,7 +149,7 @@
 							span.header.clickable(ng-click="changePredicate('lastUpdated')") #{translate("last_modified")}
 								i.tablesort.fa(ng-class="getSortIconClass('lastUpdated')")
 						if settings.overleaf
-							.hidden-xs.col-sm-3.col-md-2
+							.hidden-xs.col-sm-3.col-md-2.action-btn-row-header
 								span.header #{translate("actions")}
 				li.project_entry.container-fluid(
 					ng-repeat="project in visibleProjects | orderBy:predicate:reverse",
