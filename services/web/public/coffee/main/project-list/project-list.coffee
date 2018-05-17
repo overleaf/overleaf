@@ -350,14 +350,15 @@ define [
 				$scope.archiveOrLeaveSelectedProjects()
 
 		$scope.archiveOrLeaveSelectedProjects = () ->
-			selected_projects = $scope.getSelectedProjects()
-			selected_project_ids = $scope.getSelectedProjectIds()
+			$scope.archiveOrLeaveProjects($scope.getSelectedProjects())
 
+		$scope.archiveOrLeaveProjects = (projects) ->
+			projectIds = projects.map (p) -> p.id
 			# Remove project from any tags
 			for tag in $scope.tags
-				$scope._removeProjectIdsFromTagArray(tag, selected_project_ids)
+				$scope._removeProjectIdsFromTagArray(tag, projectIds)
 
-			for project in selected_projects
+			for project in projects
 				project.tags = []
 				if project.accessLevel == "owner"
 					project.archived = true
@@ -490,3 +491,7 @@ define [
 		$scope.$watch "project.selected", (value) ->
 			if value?
 				$scope.updateSelectedProjects()
+
+		$scope.archive = (e) ->
+			e.stopPropagation()
+			$scope.archiveOrLeaveProjects([$scope.project])
