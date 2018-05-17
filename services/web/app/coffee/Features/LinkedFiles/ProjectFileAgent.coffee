@@ -15,6 +15,7 @@ AccessDeniedError = (message) ->
 	return error
 AccessDeniedError.prototype.__proto__ = Error.prototype
 
+
 BadEntityTypeError = (message) ->
 	error = new Error(message)
 	error.name = 'BadEntityType'
@@ -23,16 +24,31 @@ BadEntityTypeError = (message) ->
 BadEntityTypeError.prototype.__proto__ = Error.prototype
 
 
+BadDataError = (message) ->
+	error = new Error(message)
+	error.name = 'BadData'
+	error.__proto__ = BadDataError.prototype
+	return error
+BadDataError.prototype.__proto__ = Error.prototype
+
+
 module.exports = ProjectFileAgent =
 
 	sanitizeData: (data) ->
-		# TODO:
-		#   - Nothing?
 		return data
+
+	_validate: (data) ->
+		return (
+			!!data.source_project_id &&
+			!!data.source_entity_path &&
+			!!data.source_project_display_name
+		)
 
 	writeIncomingFileToDisk:
 		(project_id, data, current_user_id, callback = (error, fsPath) ->) ->
 			callback = _.once(callback)
+			if !ProjectFileAgent._validate(data)
+				return callback(new BadDataError())
 			{source_project_id, source_entity_path} = data
 			AuthorizationManager.canUserReadProject current_user_id, source_project_id,
 				null, (err, canRead) ->
@@ -61,10 +77,10 @@ module.exports = ProjectFileAgent =
 	handleError: (error, req, res, next) ->
 		if error instanceof AccessDeniedError
 			res.status(403).send("You do not have access to this project")
-		else if error instanceof FileNotFoundError
-			res.status(404).send("The file does not exist")
+		else if error instanceof BadDataError
+			res.status(400).send("The submitted data is not valid")
 		else if error instanceof BadEntityTypeError
-			res.status(404).send("The file is the wrong type")  # TODO: better error message
+			res.status(404).send("The file is the wrong type")
 		else
 			next(error)
 		next()
