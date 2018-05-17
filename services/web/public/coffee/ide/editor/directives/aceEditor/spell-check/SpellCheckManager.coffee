@@ -36,12 +36,12 @@ define [], () ->
 			if @isSpellCheckEnabled()
 				@markLinesAsUpdated(@adapter.normalizeChangeEvent(e))
 
-				@adapter.wordManager.clearHighlightTouchingRange(e)
+				@adapter.highlightedWordManager.clearHighlightTouchingRange(e)
 
 				@runSpellCheckSoon()
 
 		onSessionChange: () =>
-			@adapter.wordManager.reset()
+			@adapter.highlightedWordManager.reset()
 			@inProgressRequest.abort() if @inProgressRequest?
 
 			@runSpellCheckSoon(200) if @isSpellCheckEnabled()
@@ -76,12 +76,12 @@ define [], () ->
 
 		learnWord: (highlight) =>
 			@apiRequest "/learn", word: highlight.word
-			@adapter.wordManager.removeHighlight highlight
+			@adapter.highlightedWordManager.removeHighlight highlight
 			language = @$scope.spellCheckLanguage
 			@cache?.put("#{language}:#{highlight.word}", true)
 
 		runFullCheck: () ->
-			@adapter.wordManager.reset()
+			@adapter.highlightedWordManager.reset()
 			@runSpellCheck() if @isSpellCheckEnabled()
 
 		markLinesAsUpdated: (change) ->
@@ -146,11 +146,11 @@ define [], () ->
 			displayResult = (highlights) =>
 				if linesToProcess?
 					for shouldProcess, row in linesToProcess
-						@adapter.wordManager.clearRow(row) if shouldProcess
+						@adapter.highlightedWordManager.clearRow(row) if shouldProcess
 				else
-					@adapter.wordManager.reset()
+					@adapter.highlightedWordManager.reset()
 				for highlight in highlights
-					@adapter.wordManager.addHighlight highlight
+					@adapter.highlightedWordManager.addHighlight highlight
 
 			if not words.length
 				displayResult highlights

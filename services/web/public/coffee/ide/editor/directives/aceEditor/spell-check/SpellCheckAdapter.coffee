@@ -6,7 +6,7 @@ define [
 
 	class SpellCheckAdapter
 		constructor: (@editor) ->
-			@wordManager = new HighlightedWordManager(@editor)
+			@highlightedWordManager = new HighlightedWordManager(@editor)
 
 		getLines: () ->
 			@editor.getValue().split('\n')
@@ -25,7 +25,7 @@ define [
 
 		getHighlightFromCoords: (coords) ->
 			position = @editor.renderer.screenToTextCoordinates(coords.x, coords.y)
-			@wordManager.findHighlightWithinRange({
+			@highlightedWordManager.findHighlightWithinRange({
 				start: position
 				end: position
 			})

@@ -12,14 +12,14 @@ define [
         spellCheck: true
         spellCheckLanguage: 'en'
       }
-      @wordManager = {
+      @highlightedWordManager = {
         reset: sinon.stub()
         clearRow: sinon.stub()
         addHighlight: sinon.stub()
       }
       @adapter = {
         getLines: sinon.stub()
-        wordManager: @wordManager
+        highlightedWordManager: @highlightedWordManager
       }
       inject ($q, $http, $httpBackend, $cacheFactory) =>
         @$http = $http
@@ -43,4 +43,4 @@ define [
       @spellCheckManager.init()
       @timelord.tick(200)
       @$httpBackend.flush()
-      expect(@wordManager.addHighlight).to.have.been.called
+      expect(@highlightedWordManager.addHighlight).to.have.been.called
