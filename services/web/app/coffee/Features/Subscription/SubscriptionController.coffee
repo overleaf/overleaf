@@ -239,8 +239,8 @@ module.exports = SubscriptionController =
 				req.body = body
 				next()
 
-	refreshUserSubscription: (req, res, next) ->
+	refreshUserFeatures: (req, res, next) ->
 		{user_id} = req.params
-		SubscriptionUpdater.refreshSubscription user_id, (error) ->
+		SubscriptionUpdater.refreshFeatures user_id, (error) ->
 			return next(error) if error?
 			res.sendStatus 200

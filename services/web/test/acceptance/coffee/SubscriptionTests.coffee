@@ -12,7 +12,7 @@ MockV1Api = require "./helpers/MockV1Api"
 syncUserAndGetFeatures = (user, callback = (error, features) ->) ->
 	request {
 		method: 'POST',
-		url: "/user/#{user._id}/subscription/sync",
+		url: "/user/#{user._id}/features/sync",
 		auth:
 			user: 'sharelatex'
 			pass: 'password'

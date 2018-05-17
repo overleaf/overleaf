@@ -75,6 +75,7 @@ describe "SubscriptionController", ->
 			"./SubscriptionDomainHandler":@SubscriptionDomainHandler
 			"../User/UserGetter": @UserGetter
 			"./RecurlyWrapper": @RecurlyWrapper = {}
+			"./SubscriptionUpdater": @SubscriptionUpdater = {}
 
 
 		@res = new MockResponse()

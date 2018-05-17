@@ -1,9 +1,7 @@
 logger = require("logger-sharelatex")
 User = require('../../models/User').User
-PlansLocator = require("./PlansLocator")
 
 module.exports =
-	
 	updateFeatures: (user_id, features, callback = (err, features)->)->
 		conditions = _id:user_id
 		update = {}
