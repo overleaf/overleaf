@@ -64,9 +64,18 @@ if settings.overleaf
 		)
 			i.icon.fa.fa-cloud-download
 		button.btn.btn-link.action-btn(
+			ng-if="!project.archived"
 			tooltip=translate('archive'),
 			tooltip-placement="top",
 			tooltip-append-to-body="true",
 			ng-click="archive($event)"
 		)
 			i.icon.fa.fa-inbox
+		button.btn.btn-link.action-btn(
+			ng-if="project.archived"
+			tooltip=translate('unarchive'),
+			tooltip-placement="top",
+			tooltip-append-to-body="true",
+			ng-click="restore($event)"
+		)
+			i.icon.fa.fa-reply

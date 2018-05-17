@@ -415,13 +415,14 @@ define [
 			$scope.updateVisibleProjects()
 
 		$scope.restoreSelectedProjects = () ->
-			selected_projects = $scope.getSelectedProjects()
-			selected_project_ids = $scope.getSelectedProjectIds()
+			$scope.restoreProjects($scope.getSelectedProjects())
 
-			for project in selected_projects
+		$scope.restoreProjects = (projects) ->
+			projectIds = projects.map (p) -> p.id
+			for project in projects
 				project.archived = false
 
-			for project_id in selected_project_ids
+			for projectId in projectIds
 				queuedHttp {
 					method: "POST"
 					url: "/project/#{project_id}/restore"
@@ -504,3 +505,7 @@ define [
 		$scope.archive = (e) ->
 			e.stopPropagation()
 			$scope.archiveOrLeaveProjects([$scope.project])
+
+		$scope.restore = (e) ->
+			e.stopPropagation()
+			$scope.restoreProjects([$scope.project])
