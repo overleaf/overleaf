@@ -34,10 +34,10 @@ test_acceptance: ci_clean # clear the database before each acceptance test run
 	$(DOCKER_COMPOSE) run --rm test_acceptance -- ${MOCHA_ARGS}
 
 build:
-	docker build --pull --tag quay.io/sharelatex/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) .
+	docker build --pull --tag gcr.io/csh-gcdm-test/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) .
 
 publish:
-	docker push quay.io/sharelatex/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
+	docker push gcr.io/csh-gcdm-test/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 
 ci:
 	# On the CI server, we want to run our tests in the image that we
