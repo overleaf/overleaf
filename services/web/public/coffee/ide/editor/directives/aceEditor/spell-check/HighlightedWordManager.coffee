@@ -45,6 +45,12 @@ define [
 			@highlights = @highlights.filter (hl) ->
 				hl != highlight
 
+		removeWord: (word) ->
+			@highlights.filter (highlight) ->
+				highlight.word == word
+			.forEach (highlight) =>
+				@removeHighlight(highlight)
+
 		clearRow: (row) ->
 			@highlights.filter (highlight) ->
 				highlight.range.start.row == row

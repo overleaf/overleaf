@@ -76,7 +76,7 @@ define [], () ->
 
 		learnWord: (highlight) =>
 			@apiRequest "/learn", word: highlight.word
-			@adapter.highlightedWordManager.removeHighlight highlight
+			@adapter.highlightedWordManager.removeWord highlight.word
 			language = @$scope.spellCheckLanguage
 			@cache?.put("#{language}:#{highlight.word}", true)
 
