@@ -92,11 +92,9 @@ define [
 					# show dots when payload is closs to cutoff
 					if data.length >= (TWO_MEGABYTES - 200)
 						$scope.textPreview.shouldShowDots = true
-					try
 						# remove last partial line
 						data = data.replace(/\n.*$/, '')
-					finally
-						$scope.textPreview.data = data
+					$scope.textPreview.data = data
 					$timeout(setHeight, 0)
 				.catch (error) ->
 					console.error(error)
