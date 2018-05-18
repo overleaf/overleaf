@@ -7,7 +7,7 @@
     "url": "https://github.com/sharelatex/filestore-sharelatex.git"
   },
   "scripts": {
-    "test:acceptance:run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
+    "test:acceptance:run": "mocha --recursive --reporter spec --timeout 15000  $@ test/acceptance/js",
     "test:acceptance": "npm run compile:app && npm run compile:acceptance_tests && npm run test:acceptance:_run -- $@",
     "test:unit:run": "mocha --recursive --reporter spec $@ test/unit/js",
     "test:unit": "npm run compile:app && npm run compile:unit_tests && npm run test:unit:_run -- $@",
@@ -17,7 +17,7 @@
     "compile:all": "npm run compile:app && npm run compile:unit_tests && npm run compile:acceptance_tests",
     "start": "npm run compile:app && node $NODE_APP_OPTIONS app.js",
     "nodemon": "nodemon --config nodemon.json",
-    "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
+    "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000  $@ test/acceptance/js",
     "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js"
   },
   "dependencies": {
