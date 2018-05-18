@@ -51,7 +51,7 @@ define [
 			ide.fileTreeManager.refreshLinkedFile(file)
 				.then (response) ->
 					{ data } = response
-					new_file_id = data.new_file_id
+					{ new_file_id } = data
 					$timeout(
 						() ->
 							ide.binaryFilesManager.openFileById(new_file_id)
