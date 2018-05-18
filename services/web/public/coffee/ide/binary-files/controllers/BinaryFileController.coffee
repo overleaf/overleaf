@@ -57,7 +57,6 @@ define [
 							ide.binaryFilesManager.openFileById(new_file_id)
 						, 1000
 					)
-					# loadTextFileFilePreview()
 				.finally () ->
 					$scope.refreshing = false
 
