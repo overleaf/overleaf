@@ -7,13 +7,13 @@ version: "2"
 
 services:
   test_unit:
-    # image: quay.io/sharelatex/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    image: gcr.io/csh-gcdm-test/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     user: node
     command: npm run test:unit:_run
 
   test_acceptance:
     build: .
-    # image: quay.io/sharelatex/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    image: gcr.io/csh-gcdm-test/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     environment:
       REDIS_HOST: redis
       MONGO_HOST: mongo
