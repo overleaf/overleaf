@@ -52,7 +52,7 @@ define [
 				@removeHighlight(highlight)
 
 		findHighlightWithinRange: (range) ->
-			@highlights.find (highlight) =>
+			_.find @highlights, (highlight) =>
 				@_doesHighlightOverlapRange highlight, range.start, range.end
 
 		_doesHighlightOverlapRange: (highlight, start, end) ->
@@ -69,7 +69,7 @@ define [
 			!(highlightIsAllBeforeRange or highlightIsAllAfterRange)
 
 		clearHighlightTouchingRange: (range) ->
-			highlight = @highlights.find (hl) =>
+			highlight = _.find @highlights, (hl) =>
 				@_doesHighlightTouchRange hl, range.start, range.end
 			if highlight
 				@removeHighlight highlight
