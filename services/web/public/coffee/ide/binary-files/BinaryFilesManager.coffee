@@ -19,3 +19,17 @@ define [
 				, 0
 				, this
 			)
+
+		openFileById: (id) ->
+			file = @ide.fileTreeManager.selectEntityById(id)
+			@$scope.ui.view = "file"
+			@$scope.openFile = null
+			@$scope.$apply()
+			window.setTimeout(
+				() =>
+					@$scope.openFile = file
+					@$scope.$apply()
+					@$scope.$digest()
+				, 0
+				, this
+			)

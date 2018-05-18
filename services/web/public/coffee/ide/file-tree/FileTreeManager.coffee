@@ -112,6 +112,15 @@ define [
 				entity.selected = false
 			entity.selected = true
 
+		selectEntityById: (entity_id) ->
+			@selected_entity_id = entity_id # For reselecting after a reconnect
+			selected_entity = null
+			@ide.fileTreeManager.forEachEntity (entity) ->
+				if entity.id == entity_id
+					selected_entity = entity
+					entity.selected = true
+			return selected_entity
+
 		toggleMultiSelectEntity: (entity) ->
 			entity.multiSelected = !entity.multiSelected
 			@$scope.multiSelectedCount = @multiSelectedCount()

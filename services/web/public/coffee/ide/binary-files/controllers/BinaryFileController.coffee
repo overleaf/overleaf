@@ -49,8 +49,15 @@ define [
 		$scope.refreshFile = (file) ->
 			$scope.refreshing = true
 			ide.fileTreeManager.refreshLinkedFile(file)
-				.then () ->
-					loadTextFileFilePreview()
+				.then (response) ->
+					{ data } = response
+					new_file_id = data.new_file_id
+					$timeout(
+						() ->
+							ide.binaryFilesManager.openFileById(new_file_id)
+						, 1000
+					)
+					# loadTextFileFilePreview()
 				.finally () ->
 					$scope.refreshing = false
 
