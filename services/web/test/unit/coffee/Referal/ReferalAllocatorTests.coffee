@@ -9,7 +9,7 @@ describe 'ReferalAllocator', ->
 	beforeEach ->
 		@ReferalAllocator = SandboxedModule.require modulePath, requires:
 			'../../models/User': User: @User = {}
-			"../Subscription/SubscriptionUpdater": @SubscriptionUpdater = {}
+			"../Subscription/FeaturesUpdater": @FeaturesUpdater = {}
 			"settings-sharelatex": @Settings = {}
 			'logger-sharelatex':
 				log:->
@@ -26,7 +26,7 @@ describe 'ReferalAllocator', ->
 				@referal_source = "bonus"
 				@User.update = sinon.stub().callsArgWith 3, null
 				@User.findOne = sinon.stub().callsArgWith 1, null, { _id: @user_id }
-				@SubscriptionUpdater.refreshFeatures = sinon.stub().yields()
+				@FeaturesUpdater.refreshFeatures = sinon.stub().yields()
 				@ReferalAllocator.allocate @referal_id, @new_user_id, @referal_source, @referal_medium, @callback
 
 			it 'should update the referring user with the refered users id', ->
@@ -45,7 +45,7 @@ describe 'ReferalAllocator', ->
 					.should.equal true
 			
 			it "should refresh the user's subscription", ->
-				@SubscriptionUpdater.refreshFeatures
+				@FeaturesUpdater.refreshFeatures
 					.calledWith(@user_id)
 					.should.equal true
 
@@ -57,7 +57,7 @@ describe 'ReferalAllocator', ->
 				@referal_source = "public_share"
 				@User.update = sinon.stub().callsArgWith 3, null
 				@User.findOne = sinon.stub().callsArgWith 1, null, { _id: @user_id }
-				@SubscriptionUpdater.refreshFeatures = sinon.stub().yields()
+				@FeaturesUpdater.refreshFeatures = sinon.stub().yields()
 				@ReferalAllocator.allocate @referal_id, @new_user_id, @referal_source, @referal_medium, @callback
 
 			it 'should not update the referring user with the refered users id', ->
@@ -69,7 +69,7 @@ describe 'ReferalAllocator', ->
 					.should.equal true
 			
 			it "should not assign the user a bonus", ->
-				@SubscriptionUpdater.refreshFeatures.called.should.equal false
+				@FeaturesUpdater.refreshFeatures.called.should.equal false
 
 			it "should call the callback", ->
 				@callback.called.should.equal true

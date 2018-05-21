@@ -2,7 +2,7 @@ _ = require("underscore")
 logger = require('logger-sharelatex')
 User = require('../../models/User').User
 Settings = require "settings-sharelatex"
-SubscriptionUpdater = require "../Subscription/SubscriptionUpdater"
+FeaturesUpdater = require "../Subscription/FeaturesUpdater"
 
 module.exports = ReferalAllocator =
 	allocate: (referal_id, new_user_id, referal_source, referal_medium, callback = ->)->
@@ -25,6 +25,6 @@ module.exports = ReferalAllocator =
 					if err?
 						logger.err err:err, referal_id:referal_id, new_user_id:new_user_id, "something went wrong allocating referal"
 						return callback(err)
-					SubscriptionUpdater.refreshFeatures user._id, callback
+					FeaturesUpdater.refreshFeatures user._id, callback
 			else
 				callback()
