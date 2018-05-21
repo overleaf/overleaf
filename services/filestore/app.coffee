@@ -16,16 +16,7 @@ Metrics.open_sockets.monitor(logger)
 Metrics.event_loop?.monitor(logger)
 Metrics.memory.monitor(logger)
 
-app.configure ->
-	app.use Metrics.http.monitor(logger)
-	
-app.configure 'development', ->
-	console.log "Development Enviroment"
-	app.use express.errorHandler({ dumpExceptions: true, showStack: true })
-
-app.configure 'production', ->
-	console.log "Production Enviroment"
-	app.use express.errorHandler()
+app.use Metrics.http.monitor(logger)
 
 Metrics.inc "startup"
 
