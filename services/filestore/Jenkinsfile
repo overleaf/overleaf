@@ -22,9 +22,9 @@ pipeline {
     }
 
     stage('Acceptance Tests') {
-      steps { 
-        sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_acceptance' 
-      } 
+      steps {
+        sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_acceptance'
+      }
     }
 
     stage('Package and publish build') {

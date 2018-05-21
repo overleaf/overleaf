@@ -20,13 +20,13 @@ clean:
 	rm -rf test/unit/js
 	rm -rf test/acceptance/js
 
-test:  test_unit test_acceptance
+test: test_unit test_acceptance
 
-test_unit:
-	@[ ! -d test/unit ] && echo "filestore has no unit tests" || $(DOCKER_COMPOSE) run --rm test_unit
+test_unit: 
+	@[ ! -d test/unit ] && echo "filestore has no unit tests" || $(DOCKER_COMPOSE) run --rm test_unit npm run test:unit -- ${MOCHA_ARGS}
 
-test_acceptance: test_clean test_acceptance_pre_run # clear the database before each acceptance test run
-	@[ ! -d test/acceptance ] && echo "filestore has no acceptance tests" || $(DOCKER_COMPOSE) run --rm test_acceptance
+test_acceptance:  test_clean test_acceptance_pre_run # clear the database before each acceptance test run
+	@[ ! -d test/acceptance ] && echo "filestore has no acceptance tests" || $(DOCKER_COMPOSE) run --rm test_acceptance npm run test:acceptance -- ${MOCHA_ARGS}
 
 test_clean:
 	$(DOCKER_COMPOSE) down -v -t 0

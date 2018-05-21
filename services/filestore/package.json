@@ -17,14 +17,14 @@
     "compile:all": "npm run compile:app && npm run compile:unit_tests && npm run compile:acceptance_tests",
     "start": "npm run compile:app && node $NODE_APP_OPTIONS app.js",
     "nodemon": "nodemon --config nodemon.json",
-    "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js", 
-    "test:unit:_run": "mocha --recursive --exit --reporter spec $@ test/unit/js"
+    "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
+    "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js"
   },
   "dependencies": {
     "async": "~0.2.10",
     "aws-sdk": "^2.1.39",
     "coffee-script": "~1.7.1",
-    "express": "^4.2.0", 
+    "express": "^4.2.0",
     "fs-extra": "^1.0.0",
     "heapdump": "^0.3.2",
     "knox": "~0.9.1",
