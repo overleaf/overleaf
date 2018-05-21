@@ -49,5 +49,3 @@ if process.env['HEALTH_CHECK_PROJECT_ID']? and process.env['HEALTH_CHECK_FILE_ID
 		file_id: process.env['HEALTH_CHECK_FILE_ID']
 
 module.exports = settings
-
-console.log module.exports
