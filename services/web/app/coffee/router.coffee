@@ -200,6 +200,7 @@ module.exports = class Router
 		webRouter.get  "/project/:Project_id/updates", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApiAndInjectUserDetails
 		webRouter.get  "/project/:Project_id/doc/:doc_id/diff", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApi
 		webRouter.get  "/project/:Project_id/diff", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApiAndInjectUserDetails
+		webRouter.get  "/project/:Project_id/filetree/diff", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApi
 		webRouter.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApi
 		webRouter.post '/project/:project_id/doc/:doc_id/restore', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, HistoryController.restoreDocFromDeletedDoc
 		webRouter.post "/project/:project_id/restore_file", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, HistoryController.restoreFileFromV2
