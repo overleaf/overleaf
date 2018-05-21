@@ -66,7 +66,6 @@ module.exports = ProjectFileAgent =
 						project_id: source_project_id,
 						path: source_entity_path
 					}, (err, entity, type) ->
-						# return callback(err) if err?  # also applies when file not found
 						if err?
 							if err.toString().match(/^not found.*/)
 								err = new FileNotFoundError()
