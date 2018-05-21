@@ -64,6 +64,55 @@
 				}
 			}
 
+.history-file-tree {
+}
+	.history-file-entity-wrapper {
+		color: #FFF;
+		margin-left: (@line-height-computed / 2);
+	}
+		.history-file-entity-link {
+			display: block;
+			position: relative;
+			color: @file-tree-item-color;
+			line-height: @file-tree-line-height;
+			&:hover {
+				background-color: @file-tree-item-hover-bg;
+				color: @file-tree-item-color;
+				text-decoration: none;
+			}
+			&:focus {
+				color: @file-tree-item-color;
+				outline: none;
+				text-decoration: none;
+			}
+			&:hover when (@is-overleaf = true) {
+				.fake-full-width-bg(@file-tree-item-hover-bg);
+			}
+		}
+		.history-file-entity-link-selected {
+			background-color: @file-tree-item-selected-bg;
+			font-weight: bold;
+			padding-right: 32px;
+			.fake-full-width-bg(@file-tree-item-selected-bg);
+			&:hover {
+				background-color: @file-tree-item-hover-bg;
+			}
+		}
+			.history-file-entity-icon {
+				color: @file-tree-item-icon-color;
+				font-size: 14px;
+				margin-right: .5em;
+				.history-file-entity-link-selected & {
+					color: #FFF;
+				}
+			}
+			.history-file-entity-name {
+				display: block;
+				max-width: 100%;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
 // @changesListWidth:   250px;
 // @changesListPadding: @line-height-computed / 2;
 
