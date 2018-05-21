@@ -56,6 +56,7 @@ public/minjs/
 test/unit/js/
 test/acceptence/js
 cluster.js
+test/acceptance/js/
 
 user_files/*
 template_files/*
