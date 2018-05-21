@@ -51,3 +51,6 @@ define [
 				row, startColumn,
 				row, endColumn
 			), newWord)
+
+			# Bring editor back into focus after clicking on suggestion
+			@editor.focus()
