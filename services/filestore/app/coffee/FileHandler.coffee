@@ -76,6 +76,8 @@ module.exports =
 				LocalFileWriter.deleteFile originalFsPath, ->
 				callback(err, destPath, originalFsPath)
 
+			logger.log opts:opts, "converting file depending on opts"
+			
 			if opts.format?
 				FileConverter.convert originalFsPath, opts.format, done
 			else if opts.style == "thumbnail"

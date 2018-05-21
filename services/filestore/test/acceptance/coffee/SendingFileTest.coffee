@@ -136,18 +136,18 @@ describe "Filestore", ->
 		describe "getting the preview image", ->
 
 			beforeEach ->
-				@fileUrl = @fileUrl + '?style=preview'
+				@previewFileUrl = "#{@fileUrl}?style=preview"
 
 			it "should not time out", (done) ->
 				@timeout(1000 * 20)
-				request.get @fileUrl, (err, response, body) =>
+				request.get @previewFileUrl, (err, response, body) =>
 					expect(response).to.not.equal null
 					done()
 
 			it "should respond with image data", (done) ->
 				# note: this test relies of the imagemagick conversion working
 				@timeout(1000 * 20)
-				request.get @fileUrl, (err, response, body) =>
+				request.get @previewFileUrl, (err, response, body) =>
 					expect(response.statusCode).to.equal 200
 					expect(body.length).to.be.greaterThan 400
 					done()
