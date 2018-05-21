@@ -40,7 +40,8 @@
     "rimraf": "2.2.8",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
     "stream-buffers": "~0.2.5",
-    "underscore": "~1.5.2"
+    "underscore": "~1.5.2",
+    "mocha": "^4.0.1"
   },
   "devDependencies": {
     "sinon": "",
