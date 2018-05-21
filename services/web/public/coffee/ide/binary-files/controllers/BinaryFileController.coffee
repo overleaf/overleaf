@@ -31,6 +31,7 @@ define [
 			data: null
 
 		$scope.refreshing = false
+		$scope.refreshError = null
 
 		MAX_URL_LENGTH = 60
 		FRONT_OF_URL_LENGTH = 35
@@ -48,6 +49,7 @@ define [
 
 		$scope.refreshFile = (file) ->
 			$scope.refreshing = true
+			$scope.refreshError = null
 			ide.fileTreeManager.refreshLinkedFile(file)
 				.then (response) ->
 					{ data } = response
@@ -57,6 +59,9 @@ define [
 							ide.binaryFilesManager.openFileById(new_file_id)
 						, 1000
 					)
+					$scope.refreshError = null
+				.catch (response) ->
+					$scope.refreshError = response.data
 				.finally () ->
 					$scope.refreshing = false
 

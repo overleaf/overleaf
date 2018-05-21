@@ -74,3 +74,7 @@ div.binary-file.full-size(
 			i.fa.fa-fw.fa-download
 			|
 			| #{translate("download")}
+		div(ng-if="refreshError")
+			br
+			.alert.alert-danger.col-md-6.col-md-offset-3
+				| Error: {{ refreshError}}
