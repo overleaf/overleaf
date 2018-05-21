@@ -5,6 +5,7 @@ name = "unknown"
 hostname = require('os').hostname()
 
 buildKey = (key)-> "#{name}.#{hostname}.#{key}"
+buildGlobalKey = (key)-> "#{name}.global.#{key}"
 
 destructors = []
 
@@ -41,6 +42,9 @@ module.exports = Metrics =
 
 	gauge : (key, value, sampleRate = 1)->
 		statsd.gauge buildKey(key), value, sampleRate
+
+	globalGauge: (key, value, sampleRate = 1)->
+		statsd.gauge buildGlobalKey(key), value, sampleRate
 
 	mongodb: require "./mongodb"
 	http: require "./http"
