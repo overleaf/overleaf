@@ -11,18 +11,25 @@ html(itemscope, itemtype='http://schema.org/Product')
 
 		-if (typeof(gaExperiments) != "undefined")
 			|!{gaExperiments}
-		
 
+		//- Title
 		-if (typeof(title) == "undefined")
-			title= settings.appName + ', '+ translate("online_latex_editor") 
+			title= settings.appName + ', '+ translate("online_latex_editor")
+			meta(name="twitter:title", content=settings.appName + ', '+ translate("online_latex_editor"))
+			meta(name="og:title", content=settings.appName + ', '+ translate("online_latex_editor"))
 		-else
-			title= translate(title) + ' - ' + settings.appName + ', ' + translate("online_latex_editor") 
+			title= translate(title) + ' - ' + settings.appName + ', ' + translate("online_latex_editor")
+			//- to do - not translate?
+			meta(name="twitter:title", content=translate(title))
+			meta(name="og:title", content=translate(title))
 
+		//- Icons
 		link(rel="icon", href="/" + settings.brandPrefix + "favicon.ico")
 		link(rel="icon", sizes="192x192", href="/" + settings.brandPrefix + "touch-icon-192x192.png")
 		link(rel="apple-touch-icon-precomposed", href="/" + settings.brandPrefix + "apple-touch-icon-precomposed.png")
 		link(rel="mask-icon", href="/" + settings.brandPrefix + "mask-favicon.svg", color=settings.brandPrefix === 'ol-' ? "#4f9c45" : "#a93529")
-			
+
+		//- Stylesheet
 		link(rel='stylesheet', href=buildCssPath("/" + settings.brandPrefix + "style.css", {hashedPath:true}))
 
 		block _headLinks
@@ -34,14 +41,46 @@ html(itemscope, itemtype='http://schema.org/Product')
 
 
 		meta(itemprop="name", content=settings.appName + ", the Online LaTeX Editor")
-		
+
+		//- Description
 		-if (typeof(meta) == "undefined")
 			meta(itemprop="description", name="description", content=translate("site_description"))
 		-else
 			meta(itemprop="description", name="description" , content=meta)
-		
-		meta(itemprop="image", name="image", content="/" + settings.brandPrefix + "favicon.ico")
 
+		-if (typeof(metaImage) == "undefined")
+			meta(itemprop="image", name="image", content="/" + settings.brandPrefix + "favicon.ico")
+		-else
+			meta(itemprop="image", name="image", content=metaImage.fields.file.url)
+
+		//-	Meta Tags: Twitter
+		-if (typeof(settings.social.twitter.handle) != "undefined")
+			meta(name="twitter:site", content=settings.social.twitter.handle)
+			meta(name="twitter:card", content=metaTwitterCard ? metaTwitterCard : 'summary')
+		-if (typeof(metaTwitterDescription) != "undefined")
+				meta(itemprop="twitter:description", content=metaTwitterDescription)
+		-if (typeof(metaTwitterImage) != "undefined")
+			meta(itemprop="image", name="image", content=metaTwitterImage.fields.file.url)
+		-else if (typeof(metaImage) != "undefined")
+			meta(itemprop="image", name="image", content=metaImage.fields.file.url)
+
+		//-	Meta Tags: Open Graph
+		-if (typeof(settings.social.facebook.appId) != "undefined")
+			meta(name="fb:app_id", content=settings.social.facebook.appId)
+		-if (typeof(metaOpenGraphDescription) != "undefined")
+				meta(itemprop="og:description", content=metaOpenGraphDescription)
+		-if (typeof(metaOpenGraphImage) != "undefined")
+			meta(itemprop="image", name="image", content=metaOpenGraphImage.fields.file.url)
+		-else if (typeof(metaImage) != "undefined")
+			meta(itemprop="image", name="image", content=metaImage.fields.file.url)
+		-if (typeof(metaOgType) != "undefined")
+			meta(name="og:type", metaOgType)
+		-else
+			meta(name="og:type", content="website")
+
+		//- Scripts
+
+		//- Google Analytics
 		- if (typeof(gaToken) != "undefined")
 			script(type='text/javascript').
 				(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -53,10 +92,10 @@ html(itemscope, itemtype='http://schema.org/Product')
 		- else
 			script(type='text/javascript').
 				window.ga = function() { console.log("would send to GA", arguments) };
-				
+
 		script(type="text/javascript").
 			window.csrfToken = "#{csrfToken}";
-			
+
 		script(src=buildJsPath("libs/jquery-1.11.1.min.js"))
 		script(type="text/javascript").
 			var noCdnKey = "nocdn=true"
@@ -151,5 +190,4 @@ html(itemscope, itemtype='http://schema.org/Product')
 		include v1-tooltip
 		include sentry
 		
-
 
