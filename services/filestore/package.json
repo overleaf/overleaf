@@ -17,8 +17,8 @@
     "compile:all": "npm run compile:app && npm run compile:unit_tests && npm run compile:acceptance_tests",
     "start": "npm run compile:app && node $NODE_APP_OPTIONS app.js",
     "nodemon": "nodemon --config nodemon.json",
-    "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000  $@ test/acceptance/js",
-    "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js"
+    "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js", 
+    "test:unit:_run": "mocha --recursive --exit --reporter spec $@ test/unit/js"
   },
   "dependencies": {
     "async": "~0.2.10",
@@ -41,7 +41,7 @@
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
     "stream-buffers": "~0.2.5",
     "underscore": "~1.5.2",
-    "mocha": "^4.0.1",
+    "mocha": "5.2.0",
     "body-parser": "^1.2.0"
   },
   "devDependencies": {
