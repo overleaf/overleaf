@@ -34,11 +34,11 @@ module.exports =
 			callback(err, destPath)
 
 	thumbnail: (sourcePath, callback)->
-		logger.log sourcePath:sourcePath, "thumbnail convert file"
 		destPath = "#{sourcePath}.png"
 		sourcePath = "#{sourcePath}[0]"
 		width = "260x"
 		command = ["convert", "-flatten", "-background", "white", "-density", "300", "-define", "pdf:fit-page=#{width}", sourcePath, "-resize", width, destPath]
+		logger.log sourcePath:sourcePath, destPath:destPath,  command:command, "thumbnail convert file"
 		command = Settings.commands.convertCommandPrefix.concat(command)
 		safe_exec command, childProcessOpts, (err, stdout, stderr)->
 			if err?

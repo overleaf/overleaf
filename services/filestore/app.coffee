@@ -110,9 +110,8 @@ app.get "/health_check", healthCheckController.check
 app.get '*', (req, res)->
 	res.send 404
 
-server = require('http').createServer(app)
-port = settings.internal.filestore.port or 3009
-host = "0.0.0.0"
+
+
 
 beginShutdown = () ->
 	if appIsOk
@@ -122,14 +121,22 @@ beginShutdown = () ->
 			process.exit 1
 		, 120*1000
 		killTimer.unref?() # prevent timer from keeping process alive
-		server.close () ->
+		app.close () ->
 			logger.log "closed all connections"
 			Metrics.close()
 			process.disconnect?()
 		logger.log "server will stop accepting connections"
 
-server.listen port,  ->
-	logger.info "Filestore starting up, listening on #{host}:#{port}"
+
+port = settings.internal.filestore.port or 3009
+host = "0.0.0.0"
+
+if !module.parent # Called directly
+	app.listen port, host, (error) ->
+		logger.info "Filestore starting up, listening on #{host}:#{port}"
+
+
+module.exports = app
 
 process.on 'SIGTERM', () ->
 	logger.log("filestore got SIGTERM, shutting down gracefully")

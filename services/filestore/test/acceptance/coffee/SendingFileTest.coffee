@@ -1,4 +1,3 @@
-
 assert = require("chai").assert
 sinon = require('sinon')
 chai = require('chai')
@@ -9,6 +8,7 @@ SandboxedModule = require('sandboxed-module')
 fs = require("fs")
 request = require("request")
 settings = require("settings-sharelatex")
+FilestoreApp = require "./FilestoreApp"
 
 describe "Filestore", ->
 
@@ -26,8 +26,9 @@ describe "Filestore", ->
 		@filestoreUrl = "http://localhost:#{settings.internal.filestore.port}"
 
 	beforeEach (done)->
-		fs.unlink @localFileWritePath, =>
-			done()
+		FilestoreApp.ensureRunning =>
+			fs.unlink @localFileWritePath, ->
+				done()
 
 
 

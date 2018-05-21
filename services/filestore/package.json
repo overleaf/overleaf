@@ -24,7 +24,7 @@
     "async": "~0.2.10",
     "aws-sdk": "^2.1.39",
     "coffee-script": "~1.7.1",
-    "express": "~3.4.8",
+    "express": "^4.2.0", 
     "fs-extra": "^1.0.0",
     "heapdump": "^0.3.2",
     "knox": "~0.9.1",
