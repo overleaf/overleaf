@@ -1,6 +1,7 @@
 define [
 	"base"
-], (App) ->
+	"ide/file-tree/util/iconTypeFromName"
+], (App, iconTypeFromName) ->
 	App.controller "FileTreeEntityController", ["$scope", "ide", "$modal", ($scope, ide, $modal) ->
 		$scope.select = (e) ->
 			if e.ctrlKey or e.metaKey
@@ -70,18 +71,7 @@ define [
 		$scope.$on "delete:selected", () ->
 			$scope.openDeleteModal() if $scope.entity.selected
 
-		$scope.iconTypeFromName = (name) ->
-			ext = name.split(".").pop()?.toLowerCase()
-			if ext in ["png", "pdf", "jpg", "jpeg", "gif"]
-				return "image"
-			else if ext in ["csv", "xls", "xlsx"]
-				return "table"
-			else if ext in ["py", "r"]
-				return "file-text"
-			else if ext in ['bib']
-				return 'book'
-			else
-				return "file"
+		$scope.iconTypeFromName = iconTypeFromName
 	]
 
 	App.controller "DeleteEntityModalController", [

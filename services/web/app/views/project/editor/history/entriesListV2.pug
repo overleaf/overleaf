@@ -12,7 +12,6 @@ aside.change-list(
 		on-entry-select="handleEntrySelect(selectedEntry)"
 	)
 
-
 script(type="text/ng-template", id="historyEntriesListTpl")
 	.history-entries(
 		infinite-scroll="$ctrl.loadEntries()"
@@ -87,17 +86,17 @@ script(type="text/ng-template", id="historyEntryTpl")
 					li.history-entry-metadata-user(ng-repeat="update_user in ::$ctrl.entry.meta.users")
 						span.name(
 							ng-if="::update_user && update_user.id != $ctrl.currentUser.id"
-							ng-style="::{'color': 'hsl({{ update_user.hue }}, 70%, 50%)'}"
+							ng-style="$ctrl.getUserCSSStyle(update_user);"
 						) {{ ::$ctrl.displayName(update_user) }} 
 						span.name(
 							ng-if="::update_user && update_user.id == $ctrl.currentUser.id"
-							ng-style="::{'color': 'hsl({{ update_user.hue }}, 70%, 50%)'}"
+							ng-style="$ctrl.getUserCSSStyle(update_user);"
 						) You
 						span.name(
 							ng-if="::update_user == null"
-							ng-style="::{'color': 'hsl(100, 70%, 50%)'}"
+							ng-style="$ctrl.getUserCSSStyle(update_user);"
 						) #{translate("anonymous")}
 					li.history-entry-metadata-user(ng-if="::$ctrl.entry.meta.users.length == 0")
 						span.name(
-							ng-style="::{'color': 'hsl(100, 70%, 50%)'}"
+							ng-style="$ctrl.getUserCSSStyle();"
 						) #{translate("anonymous")}

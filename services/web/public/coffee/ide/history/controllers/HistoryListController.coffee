@@ -5,7 +5,7 @@ define [
 
 	App.controller "HistoryListController", ["$scope", "ide", ($scope, ide) ->
 		$scope.hoveringOverListSelectors = false
-
+		
 		$scope.loadMore = () =>
 			ide.historyManager.fetchNextBatchOfUpdates()
 

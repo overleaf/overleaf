@@ -3,16 +3,19 @@ define [
 	"ide/colors/ColorManager"
 	"ide/history/util/displayNameForUser"
 	"ide/history/util/HistoryViewModes"
-	"ide/history/controllers/HistoryListController"
-	"ide/history/controllers/HistoryDiffController"
+	"ide/history/controllers/HistoryV2ListController"
+	"ide/history/controllers/HistoryV2DiffController"
+	"ide/history/controllers/HistoryV2FileTreeController"
 	"ide/history/directives/infiniteScroll"
 	"ide/history/components/historyEntriesList"
 	"ide/history/components/historyEntry"
+	"ide/history/components/historyFileTree"
+	"ide/history/components/historyFileEntity"
 ], (moment, ColorManager, displayNameForUser, HistoryViewModes) ->
 	class HistoryManager
 		constructor: (@ide, @$scope) ->
 			@reset()
-
+			
 			@$scope.toggleHistory = () =>
 				if @$scope.ui.view == "history"
 					@hide()
@@ -26,6 +29,9 @@ define [
 
 			# @$scope.$watch "history.selection.pathname", () =>
 			# 	@reloadDiff()
+			@$scope.$watch "history.selection.pathname", (pathname) =>
+				if pathname?
+					@loadFileAtPointInTime()
 
 		show: () ->
 			@$scope.ui.view = "history"
@@ -50,15 +56,27 @@ define [
 						toV: null
 					}
 				}
+				files: []
 				diff: null
 			}
 
 		restoreFile: (version, pathname) ->
 			url = "/project/#{@$scope.project_id}/restore_file"
+
 			@ide.$http.post(url, {
 				version, pathname,
 				_csrf: window.csrfToken
 			})
+
+		loadFileTreeForUpdate: (update) ->
+			{fromV, toV} = update
+			url = "/project/#{@$scope.project_id}/filetree/diff"
+			query = [ "from=#{toV}", "to=#{toV}" ]
+			url += "?" + query.join("&")
+			@ide.$http
+				.get(url)
+				.then (response) =>
+					@$scope.history.files = response.data.diff
 
 		MAX_RECENT_UPDATES_TO_SELECT: 5
 		autoSelectRecentUpdates: () ->
@@ -76,8 +94,7 @@ define [
 
 		autoSelectLastUpdate: () ->
 			return if @$scope.history.updates.length == 0
-			@$scope.history.updates[0].selectedTo = true
-			@$scope.history.updates[0].selectedFrom = true
+			@selectUpdate @$scope.history.updates[0]
 
 		selectUpdate: (update) ->
 			selectedUpdateIndex = @$scope.history.updates.indexOf update
@@ -88,6 +105,7 @@ define [
 				update.selectedFrom = false
 			@$scope.history.updates[selectedUpdateIndex].selectedTo = true
 			@$scope.history.updates[selectedUpdateIndex].selectedFrom = true
+			@loadFileTreeForUpdate @$scope.history.updates[selectedUpdateIndex]
 
 		BATCH_SIZE: 10
 		fetchNextBatchOfUpdates: () ->
@@ -104,6 +122,18 @@ define [
 					if !data.nextBeforeTimestamp?
 						@$scope.history.atEnd = true
 					@$scope.history.loading = false
+
+		loadFileAtPointInTime: () ->
+			pathname = @$scope.history.selection.pathname
+			toV =  @$scope.history.selection.updates[0].toV
+			url = "/project/#{@$scope.project_id}/diff"
+			query = ["pathname=#{encodeURIComponent(pathname)}", "from=#{toV}", "to=#{toV}"]
+			url += "?" + query.join("&")
+			@ide.$http
+				.get(url)
+				.then (response) =>
+					{ data } = response
+				.catch () ->
 
 		reloadDiff: () ->
 			diff = @$scope.history.diff
