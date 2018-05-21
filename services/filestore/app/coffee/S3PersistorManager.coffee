@@ -77,7 +77,7 @@ module.exports =
 			if res.statusCode == 404
 				logger.log bucketName:bucketName, key:key, "file not found in s3"
 				return callback new Errors.NotFoundError("File not found in S3: #{bucketName}:#{key}"), null
-			if res.statusCode not in [200, 206]
+			else if res.statusCode not in [200, 206]
 				logger.log bucketName:bucketName, key:key, "error getting file from s3: #{res.statusCode}"
 				return callback new Error("Got non-200 response from S3: #{res.statusCode}"), null
 			callback null, res

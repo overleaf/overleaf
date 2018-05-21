@@ -33,8 +33,6 @@ describe "FSPersistorManagerTests", ->
         err:->
       "response":response
       "rimraf":@Rimraf
-      "./Errors": @Errors =
-        NotFoundError: sinon.stub()
     @location = "/tmp"
     @name1 = "530f2407e7ef165704000007/530f838b46d9a9e859000008"
     @name1Filtered ="530f2407e7ef165704000007_530f838b46d9a9e859000008"
@@ -102,6 +100,7 @@ describe "FSPersistorManagerTests", ->
         @Fs.createReadStream.returns(
           on: (key, callback) =>
             err = new Error()
+            err.message = "this is from a test"
             err.code = @fakeCode
             callback(err, null)
         )
@@ -115,7 +114,7 @@ describe "FSPersistorManagerTests", ->
           @FSPersistorManager.getFileStream @location, @name1, @opts, (err,res)=>
             expect(res).to.equal null
             expect(err).to.not.equal null
-            expect(err instanceof @Errors.NotFoundError).to.equal true
+            expect(err.name == "NotFoundError").to.equal true
             done()
 
       describe "when some other error happens", ->
