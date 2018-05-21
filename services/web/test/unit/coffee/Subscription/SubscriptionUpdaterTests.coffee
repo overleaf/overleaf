@@ -67,9 +67,7 @@ describe "SubscriptionUpdater", ->
 			'./PlansLocator': @PlansLocator
 			"logger-sharelatex": log:->
 			'settings-sharelatex': @Settings
-			"../Referal/ReferalFeatures" : @ReferalFeatures
-			'../../infrastructure/Modules': @Modules
-			"./V1SubscriptionManager": @V1SubscriptionManager = {}
+			"./FeaturesUpdater": @FeaturesUpdater = {}
 
 
 	describe "syncSubscription", ->
@@ -100,7 +98,7 @@ describe "SubscriptionUpdater", ->
 
 	describe "_updateSubscriptionFromRecurly", ->
 		beforeEach ->
-			@SubscriptionUpdater.refreshFeatures = sinon.stub().callsArgWith(1)
+			@FeaturesUpdater.refreshFeatures = sinon.stub().callsArgWith(1)
 			
 		it "should update the subscription with token etc when not expired", (done)->
 			@SubscriptionUpdater._updateSubscriptionFromRecurly @recurlySubscription, @subscription, (err)=>
@@ -111,7 +109,7 @@ describe "SubscriptionUpdater", ->
 				assert.equal(@subscription.freeTrial.expiresAt, undefined)
 				assert.equal(@subscription.freeTrial.planCode, undefined)
 				@subscription.save.called.should.equal true
-				@SubscriptionUpdater.refreshFeatures.calledWith(@adminUser._id).should.equal true
+				@FeaturesUpdater.refreshFeatures.calledWith(@adminUser._id).should.equal true
 				done()
 
 		it "should remove the recurlySubscription_id when expired", (done)->
@@ -120,15 +118,15 @@ describe "SubscriptionUpdater", ->
 			@SubscriptionUpdater._updateSubscriptionFromRecurly @recurlySubscription, @subscription, (err)=>
 				assert.equal(@subscription.recurlySubscription_id, undefined)
 				@subscription.save.called.should.equal true
-				@SubscriptionUpdater.refreshFeatures.calledWith(@adminUser._id).should.equal true
+				@FeaturesUpdater.refreshFeatures.calledWith(@adminUser._id).should.equal true
 				done()
 
 		it "should update all the users features", (done)->
 			@SubscriptionUpdater._updateSubscriptionFromRecurly @recurlySubscription, @subscription, (err)=>
-				@SubscriptionUpdater.refreshFeatures.calledWith(@adminUser._id).should.equal true
-				@SubscriptionUpdater.refreshFeatures.calledWith(@allUserIds[0]).should.equal true
-				@SubscriptionUpdater.refreshFeatures.calledWith(@allUserIds[1]).should.equal true
-				@SubscriptionUpdater.refreshFeatures.calledWith(@allUserIds[2]).should.equal true
+				@FeaturesUpdater.refreshFeatures.calledWith(@adminUser._id).should.equal true
+				@FeaturesUpdater.refreshFeatures.calledWith(@allUserIds[0]).should.equal true
+				@FeaturesUpdater.refreshFeatures.calledWith(@allUserIds[1]).should.equal true
+				@FeaturesUpdater.refreshFeatures.calledWith(@allUserIds[2]).should.equal true
 				done()
 
 		it "should set group to true and save how many members can be added to group", (done)->
@@ -155,6 +153,9 @@ describe "SubscriptionUpdater", ->
 				done()
 
 	describe "addUserToGroup", ->
+		beforeEach ->
+			@FeaturesUpdater.refreshFeatures = sinon.stub().callsArgWith(1)
+
 		it "should add the users id to the group as a set", (done)->
 			@SubscriptionUpdater.addUserToGroup @adminUser._id, @otherUserId, =>
 				searchOps = 
@@ -166,12 +167,12 @@ describe "SubscriptionUpdater", ->
 
 		it "should update the users features", (done)->
 			@SubscriptionUpdater.addUserToGroup @adminUser._id, @otherUserId, =>
-				@UserFeaturesUpdater.updateFeatures.calledWith(@otherUserId, @subscription.planCode).should.equal true
+				@FeaturesUpdater.refreshFeatures.calledWith(@otherUserId).should.equal true
 				done()
 
 	describe "removeUserFromGroup", ->
 		beforeEach ->
-			@SubscriptionUpdater.refreshFeatures = sinon.stub().callsArgWith(1)
+			@FeaturesUpdater.refreshFeatures = sinon.stub().callsArgWith(1)
 
 		it "should pull the users id from the group", (done)->
 			@SubscriptionUpdater.removeUserFromGroup @adminUser._id, @otherUserId, =>
@@ -184,159 +185,8 @@ describe "SubscriptionUpdater", ->
 
 		it "should update the users features", (done)->
 			@SubscriptionUpdater.removeUserFromGroup @adminUser._id, @otherUserId, =>
-				@SubscriptionUpdater.refreshFeatures.calledWith(@otherUserId).should.equal true
+				@FeaturesUpdater.refreshFeatures.calledWith(@otherUserId).should.equal true
 				done()
-
-	describe "refreshFeatures", ->
-		beforeEach ->
-			@SubscriptionUpdater._getIndividualFeatures = sinon.stub().yields(null, { 'individual': 'features' })
-			@SubscriptionUpdater._getGroupFeatureSets = sinon.stub().yields(null, [{ 'group': 'features' }, { 'group': 'features2' }])
-			@SubscriptionUpdater._getV1Features = sinon.stub().yields(null, { 'v1': 'features' })
-			@ReferalFeatures.getBonusFeatures = sinon.stub().yields(null, { 'bonus': 'features' })
-			@SubscriptionUpdater._mergeFeatures = sinon.stub().returns({'merged': 'features'})
-			@callback = sinon.stub()
-			@SubscriptionUpdater.refreshFeatures @user_id, @callback
-
-		it "should get the individual features", ->
-			@SubscriptionUpdater._getIndividualFeatures
-				.calledWith(@user_id)
-				.should.equal true
-
-		it "should get the group features", ->
-			@SubscriptionUpdater._getGroupFeatureSets
-				.calledWith(@user_id)
-				.should.equal true
-
-		it "should get the v1 features", ->
-			@SubscriptionUpdater._getV1Features
-				.calledWith(@user_id)
-				.should.equal true
-
-		it "should get the bonus features", ->
-			@ReferalFeatures.getBonusFeatures
-				.calledWith(@user_id)
-				.should.equal true
-
-		it "should merge from the default features", ->
-			@SubscriptionUpdater._mergeFeatures.calledWith(@Settings.defaultFeatures).should.equal true
-
-		it "should merge the individual features", ->
-			@SubscriptionUpdater._mergeFeatures.calledWith(sinon.match.any, { 'individual': 'features' }).should.equal true
-
-		it "should merge the group features", ->
-			@SubscriptionUpdater._mergeFeatures.calledWith(sinon.match.any, { 'group': 'features' }).should.equal true
-			@SubscriptionUpdater._mergeFeatures.calledWith(sinon.match.any, { 'group': 'features2' }).should.equal true
-
-		it "should merge the v1 features", ->
-			@SubscriptionUpdater._mergeFeatures.calledWith(sinon.match.any, { 'v1': 'features' }).should.equal true
-
-		it "should merge the bonus features", ->
-			@SubscriptionUpdater._mergeFeatures.calledWith(sinon.match.any, { 'bonus': 'features' }).should.equal true
-
-		it "should update the user with the merged features", ->
-			@UserFeaturesUpdater.updateFeatures
-				.calledWith(@user_id, {'merged': 'features'})
-				.should.equal true
-
-	describe "_mergeFeatures", ->
-		it "should prefer priority over standard for compileGroup", ->
-			expect(@SubscriptionUpdater._mergeFeatures({
-				compileGroup: 'priority'
-			}, {
-				compileGroup: 'standard'
-			})).to.deep.equal({
-				compileGroup: 'priority'
-			})
-			expect(@SubscriptionUpdater._mergeFeatures({
-				compileGroup: 'standard'
-			}, {
-				compileGroup: 'priority'
-			})).to.deep.equal({
-				compileGroup: 'priority'
-			})
-			expect(@SubscriptionUpdater._mergeFeatures({
-				compileGroup: 'priority'
-			}, {
-				compileGroup: 'priority'
-			})).to.deep.equal({
-				compileGroup: 'priority'
-			})
-			expect(@SubscriptionUpdater._mergeFeatures({
-				compileGroup: 'standard'
-			}, {
-				compileGroup: 'standard'
-			})).to.deep.equal({
-				compileGroup: 'standard'
-			})
-
-		it "should prefer -1 over any other for collaborators", ->
-			expect(@SubscriptionUpdater._mergeFeatures({
-				collaborators: -1
-			}, {
-				collaborators: 10
-			})).to.deep.equal({
-				collaborators: -1
-			})
-			expect(@SubscriptionUpdater._mergeFeatures({
-				collaborators: 10
-			}, {
-				collaborators: -1
-			})).to.deep.equal({
-				collaborators: -1
-			})
-			expect(@SubscriptionUpdater._mergeFeatures({
-				collaborators: 4
-			}, {
-				collaborators: 10
-			})).to.deep.equal({
-				collaborators: 10
-			})
-
-		it "should prefer the higher of compileTimeout", ->
-			expect(@SubscriptionUpdater._mergeFeatures({
-				compileTimeout: 20
-			}, {
-				compileTimeout: 10
-			})).to.deep.equal({
-				compileTimeout: 20
-			})
-			expect(@SubscriptionUpdater._mergeFeatures({
-				compileTimeout: 10
-			}, {
-				compileTimeout: 20
-			})).to.deep.equal({
-				compileTimeout: 20
-			})
-
-		it "should prefer the true over false for other keys", ->
-			expect(@SubscriptionUpdater._mergeFeatures({
-				github: true
-			}, {
-				github: false
-			})).to.deep.equal({
-				github: true
-			})
-			expect(@SubscriptionUpdater._mergeFeatures({
-				github: false
-			}, {
-				github: true
-			})).to.deep.equal({
-				github: true
-			})
-			expect(@SubscriptionUpdater._mergeFeatures({
-				github: true
-			}, {
-				github: true
-			})).to.deep.equal({
-				github: true
-			})
-			expect(@SubscriptionUpdater._mergeFeatures({
-				github: false
-			}, {
-				github: false
-			})).to.deep.equal({
-				github: false
-			})
 
 	describe "deleteSubscription", ->
 		beforeEach (done) ->
@@ -347,7 +197,7 @@ describe "SubscriptionUpdater", ->
 				member_ids: [ ObjectId(), ObjectId(), ObjectId() ]
 			}
 			@SubscriptionLocator.getSubscription = sinon.stub().yields(null, @subscription)
-			@SubscriptionUpdater.refreshFeatures = sinon.stub().yields()
+			@FeaturesUpdater.refreshFeatures = sinon.stub().yields()
 			@SubscriptionUpdater.deleteSubscription @subscription_id, done
 			
 		it "should look up the subscription", ->
@@ -361,12 +211,12 @@ describe "SubscriptionUpdater", ->
 				.should.equal true
 		
 		it "should downgrade the admin_id", ->
-			@SubscriptionUpdater.refreshFeatures
+			@FeaturesUpdater.refreshFeatures
 				.calledWith(@subscription.admin_id)
 				.should.equal true
 		
 		it "should downgrade all of the members", ->
 			for user_id in @subscription.member_ids
-				@SubscriptionUpdater.refreshFeatures
+				@FeaturesUpdater.refreshFeatures
 					.calledWith(user_id)
 					.should.equal true

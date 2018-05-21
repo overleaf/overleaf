@@ -1,10 +1,4 @@
 module.exports =
-	apis:
-		v1:
-			url: "http://localhost:5000"
-			user: 'overleaf'
-			pass: 'password'
-
 	enableSubscriptions: true
 
 	features: features =

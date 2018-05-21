@@ -2,27 +2,26 @@ async = require("async")
 _ = require("underscore")
 Subscription = require('../../models/Subscription').Subscription
 SubscriptionLocator = require("./SubscriptionLocator")
-UserFeaturesUpdater = require("./UserFeaturesUpdater")
 PlansLocator = require("./PlansLocator")
 Settings = require("settings-sharelatex")
 logger = require("logger-sharelatex")
-ObjectId = require('mongoose').Types.ObjectId	
-ReferalFeatures = require("../Referal/ReferalFeatures")
-V1SubscriptionManager = require("./V1SubscriptionManager")
+ObjectId = require('mongoose').Types.ObjectId
+FeaturesUpdater = require('./FeaturesUpdater')
 
 oneMonthInSeconds = 60 * 60 * 24 * 30
 
 module.exports = SubscriptionUpdater =
-
 	syncSubscription: (recurlySubscription, adminUser_id, callback) ->
 		logger.log adminUser_id:adminUser_id, recurlySubscription:recurlySubscription, "syncSubscription, creating new if subscription does not exist"
 		SubscriptionLocator.getUsersSubscription adminUser_id, (err, subscription)->
+			return callback(err) if err?
 			if subscription?
 				logger.log  adminUser_id:adminUser_id, recurlySubscription:recurlySubscription, "subscription does exist"
 				SubscriptionUpdater._updateSubscriptionFromRecurly recurlySubscription, subscription, callback
 			else
 				logger.log  adminUser_id:adminUser_id, recurlySubscription:recurlySubscription, "subscription does not exist, creating a new one"
 				SubscriptionUpdater._createNewSubscription adminUser_id, (err, subscription)->
+					return callback(err) if err?
 					SubscriptionUpdater._updateSubscriptionFromRecurly recurlySubscription, subscription, callback
 
 	addUserToGroup: (adminUser_id, user_id, callback)->
@@ -35,7 +34,7 @@ module.exports = SubscriptionUpdater =
 			if err?
 				logger.err err:err, searchOps:searchOps, insertOperation:insertOperation, "error findy and modify add user to group"
 				return callback(err)
-			UserFeaturesUpdater.updateFeatures user_id, subscription.planCode, callback
+			FeaturesUpdater.refreshFeatures user_id, callback
 	
 	addEmailInviteToGroup: (adminUser_id, email, callback) ->
 		logger.log {adminUser_id, email}, "adding email into mongo subscription"
@@ -54,7 +53,7 @@ module.exports = SubscriptionUpdater =
 			if err?
 				logger.err err:err, searchOps:searchOps, removeOperation:removeOperation, "error removing user from group"
 				return callback(err)
-			SubscriptionUpdater.refreshFeatures user_id, callback
+			FeaturesUpdater.refreshFeatures user_id, callback
 
 	removeEmailInviteFromGroup: (adminUser_id, email, callback)->
 		Subscription.update {
@@ -70,7 +69,7 @@ module.exports = SubscriptionUpdater =
 			logger.log {subscription_id, affected_user_ids}, "deleting subscription and downgrading users"
 			Subscription.remove {_id: ObjectId(subscription_id)}, (err) ->
 				return callback(err) if err?
-				async.mapSeries affected_user_ids, SubscriptionUpdater.refreshFeatures, callback
+				async.mapSeries affected_user_ids, FeaturesUpdater.refreshFeatures, callback
 
 	_createNewSubscription: (adminUser_id, callback)->
 		logger.log adminUser_id:adminUser_id, "creating new subscription"
@@ -98,76 +97,5 @@ module.exports = SubscriptionUpdater =
 			allIds = _.union subscription.member_ids, [subscription.admin_id]
 			jobs = allIds.map (user_id)->
 				return (cb)->
-					SubscriptionUpdater.refreshFeatures user_id, cb
+					FeaturesUpdater.refreshFeatures user_id, cb
 			async.series jobs, callback
-
-	refreshFeatures: (user_id, callback)->
-		jobs =
-			individualFeatures: (cb) -> SubscriptionUpdater._getIndividualFeatures user_id, cb
-			groupFeatureSets:   (cb) -> SubscriptionUpdater._getGroupFeatureSets user_id, cb
-			v1Features:         (cb) -> SubscriptionUpdater._getV1Features user_id, cb
-			bonusFeatures:      (cb) -> ReferalFeatures.getBonusFeatures user_id, cb
-		async.series jobs, (err, results)->
-			if err?
-				logger.err err:err, user_id:user_id,
-					"error getting subscription or group for refreshFeatures"
-				return callback(err)
-
-			{individualFeatures, groupFeatureSets, v1Features, bonusFeatures} = results
-			logger.log {user_id, individualFeatures, groupFeatureSets, v1Features, bonusFeatures}, 'merging user features'
-			featureSets = groupFeatureSets.concat [individualFeatures, v1Features, bonusFeatures]
-			features = _.reduce(featureSets, SubscriptionUpdater._mergeFeatures, Settings.defaultFeatures)
-
-			logger.log {user_id, features}, 'updating user features'
-			UserFeaturesUpdater.updateFeatures user_id, features, callback
-
-	_getIndividualFeatures: (user_id, callback = (error, features = {}) ->) ->
-		SubscriptionLocator.getUsersSubscription user_id, (err, sub)->
-			callback err, SubscriptionUpdater._subscriptionToFeatures(sub)
-
-	_getGroupFeatureSets: (user_id, callback = (error, featureSets = []) ->) ->
-		SubscriptionLocator.getGroupSubscriptionsMemberOf user_id, (err, subs) ->
-			callback err, (subs or []).map SubscriptionUpdater._subscriptionToFeatures
-
-	_getV1Features: (user_id, callback = (error, features = {}) ->) ->
-		V1SubscriptionManager.getPlanCodeFromV1 user_id, (err, planCode) ->
-			callback err, SubscriptionUpdater._planCodeToFeatures(planCode)
-
-	_mergeFeatures: (featuresA, featuresB) ->
-		features = Object.assign({}, featuresA)
-		for key, value of featuresB
-			# Special merging logic for non-boolean features
-			if key == 'compileGroup'
-				if features['compileGroup'] == 'priority' or featuresB['compileGroup'] == 'priority'
-					features['compileGroup'] = 'priority'
-				else
-					features['compileGroup'] = 'standard'
-			else if key == 'collaborators'
-				if features['collaborators'] == -1 or featuresB['collaborators'] == -1
-					features['collaborators'] = -1
-				else
-					features['collaborators'] = Math.max(
-						features['collaborators'] or 0,
-						featuresB['collaborators'] or 0
-					)
-			else if key == 'compileTimeout'
-				features['compileTimeout'] = Math.max(
-					features['compileTimeout'] or 0,
-					featuresB['compileTimeout'] or 0
-				)
-			else
-				# Boolean keys, true is better
-				features[key] = features[key] or featuresB[key]
-		return features
-
-	_subscriptionToFeatures: (subscription) ->
-		SubscriptionUpdater._planCodeToFeatures(subscription?.planCode)
-
-	_planCodeToFeatures: (planCode) ->
-		if !planCode?
-			return {}
-		plan = PlansLocator.findLocalPlanInSettings planCode
-		if !plan?
-			return {}
-		else
-			return plan.features
