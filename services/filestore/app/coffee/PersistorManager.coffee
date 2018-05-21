@@ -2,7 +2,7 @@ settings = require("settings-sharelatex")
 logger = require("logger-sharelatex")
 
 # assume s3 if none specified
-settings.filestore.backend ||= "s3"
+settings?.filestore?.backend ||= "s3"
 
 
 logger.log backend:settings.filestore.backend, "Loading backend"

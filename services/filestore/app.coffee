@@ -1,4 +1,5 @@
 express = require('express')
+bodyParser = require "body-parser"
 logger = require('logger-sharelatex')
 logger.initialize("filestore")
 settings = require("settings-sharelatex")
@@ -61,7 +62,7 @@ app.use (req, res, next) ->
 app.get  "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.getFile
 app.post "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.insertFile
 
-app.put "/project/:project_id/file/:file_id", keyBuilder.userFileKey, express.bodyParser(), fileController.copyFile
+app.put "/project/:project_id/file/:file_id", keyBuilder.userFileKey, bodyParser.json(), fileController.copyFile
 app.del "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.deleteFile
 
 app.get  "/template/:template_id/v/:version/:format", keyBuilder.templateFileKey, fileController.getFile
@@ -72,7 +73,7 @@ app.post "/template/:template_id/v/:version/:format", keyBuilder.templateFileKey
 app.get  "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.getFile
 app.post "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.insertFile
 
-app.put "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, express.bodyParser(), fileController.copyFile
+app.put "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, bodyParser.json(), fileController.copyFile
 app.del "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.deleteFile
 
 app.get "/project/:project_id/size", keyBuilder.publicProjectKey, fileController.directorySize
