@@ -2,26 +2,26 @@ async = require("async")
 _ = require("underscore")
 Subscription = require('../../models/Subscription').Subscription
 SubscriptionLocator = require("./SubscriptionLocator")
-UserFeaturesUpdater = require("./UserFeaturesUpdater")
 PlansLocator = require("./PlansLocator")
 Settings = require("settings-sharelatex")
 logger = require("logger-sharelatex")
-ObjectId = require('mongoose').Types.ObjectId	
-ReferalAllocator = require("../Referal/ReferalAllocator")
+ObjectId = require('mongoose').Types.ObjectId
+FeaturesUpdater = require('./FeaturesUpdater')
 
 oneMonthInSeconds = 60 * 60 * 24 * 30
 
 module.exports = SubscriptionUpdater =
-
 	syncSubscription: (recurlySubscription, adminUser_id, callback) ->
 		logger.log adminUser_id:adminUser_id, recurlySubscription:recurlySubscription, "syncSubscription, creating new if subscription does not exist"
 		SubscriptionLocator.getUsersSubscription adminUser_id, (err, subscription)->
+			return callback(err) if err?
 			if subscription?
 				logger.log  adminUser_id:adminUser_id, recurlySubscription:recurlySubscription, "subscription does exist"
 				SubscriptionUpdater._updateSubscriptionFromRecurly recurlySubscription, subscription, callback
 			else
 				logger.log  adminUser_id:adminUser_id, recurlySubscription:recurlySubscription, "subscription does not exist, creating a new one"
 				SubscriptionUpdater._createNewSubscription adminUser_id, (err, subscription)->
+					return callback(err) if err?
 					SubscriptionUpdater._updateSubscriptionFromRecurly recurlySubscription, subscription, callback
 
 	addUserToGroup: (adminUser_id, user_id, callback)->
@@ -34,7 +34,7 @@ module.exports = SubscriptionUpdater =
 			if err?
 				logger.err err:err, searchOps:searchOps, insertOperation:insertOperation, "error findy and modify add user to group"
 				return callback(err)
-			UserFeaturesUpdater.updateFeatures user_id, subscription.planCode, callback
+			FeaturesUpdater.refreshFeatures user_id, callback
 	
 	addEmailInviteToGroup: (adminUser_id, email, callback) ->
 		logger.log {adminUser_id, email}, "adding email into mongo subscription"
@@ -53,7 +53,7 @@ module.exports = SubscriptionUpdater =
 			if err?
 				logger.err err:err, searchOps:searchOps, removeOperation:removeOperation, "error removing user from group"
 				return callback(err)
-			SubscriptionUpdater._setUsersMinimumFeatures user_id, callback
+			FeaturesUpdater.refreshFeatures user_id, callback
 
 	removeEmailInviteFromGroup: (adminUser_id, email, callback)->
 		Subscription.update {
@@ -62,9 +62,6 @@ module.exports = SubscriptionUpdater =
 			invited_emails: email
 		}, callback
 
-	refreshSubscription: (user_id, callback=(err)->) ->
-		SubscriptionUpdater._setUsersMinimumFeatures user_id, callback
-
 	deleteSubscription: (subscription_id, callback = (error) ->) ->
 		SubscriptionLocator.getSubscription subscription_id, (err, subscription) ->
 			return callback(err) if err?
@@ -72,7 +69,7 @@ module.exports = SubscriptionUpdater =
 			logger.log {subscription_id, affected_user_ids}, "deleting subscription and downgrading users"
 			Subscription.remove {_id: ObjectId(subscription_id)}, (err) ->
 				return callback(err) if err?
-				async.mapSeries affected_user_ids, SubscriptionUpdater._setUsersMinimumFeatures, callback
+				async.mapSeries affected_user_ids, FeaturesUpdater.refreshFeatures, callback
 
 	_createNewSubscription: (adminUser_id, callback)->
 		logger.log adminUser_id:adminUser_id, "creating new subscription"
@@ -100,43 +97,5 @@ module.exports = SubscriptionUpdater =
 			allIds = _.union subscription.member_ids, [subscription.admin_id]
 			jobs = allIds.map (user_id)->
 				return (cb)->
-					SubscriptionUpdater._setUsersMinimumFeatures user_id, cb
+					FeaturesUpdater.refreshFeatures user_id, cb
 			async.series jobs, callback
-
-	_setUsersMinimumFeatures: (user_id, callback)->
-		jobs =
-			subscription: (cb)->
-				SubscriptionLocator.getUsersSubscription user_id, cb
-			groupSubscription: (cb)->
-				SubscriptionLocator.getGroupSubscriptionMemberOf user_id, cb
-			v1PlanCode: (cb) ->
-				Modules = require '../../infrastructure/Modules'
-				Modules.hooks.fire 'getV1PlanCode', user_id, (err, results) ->
-					cb(err, results?[0] || null)
-		async.series jobs, (err, results)->
-			if err?
-				logger.err err:err, user_id:user_id,
-					"error getting subscription or group for _setUsersMinimumFeatures"
-				return callback(err)
-			{subscription, groupSubscription, v1PlanCode} = results
-			# Group Subscription
-			if groupSubscription? and groupSubscription.planCode?
-				logger.log user_id:user_id, "using group which user is memor of for features"
-				UserFeaturesUpdater.updateFeatures user_id, groupSubscription.planCode, callback
-			# Personal Subscription
-			else if subscription? and subscription.planCode? and subscription.planCode != Settings.defaultPlanCode
-				logger.log user_id:user_id, "using users subscription plan code for features"
-				UserFeaturesUpdater.updateFeatures user_id, subscription.planCode, callback
-			# V1 Subscription
-			else if v1PlanCode?
-				logger.log user_id: user_id, "using the V1 plan for features"
-				UserFeaturesUpdater.updateFeatures user_id, v1PlanCode, callback
-			# Default
-			else
-				logger.log user_id:user_id, "using default features for user with no subscription or group"
-				UserFeaturesUpdater.updateFeatures user_id, Settings.defaultPlanCode, (err)->
-					if err?
-						logger.err err:err, user_id:user_id, "Error setting minimum user feature"
-						return callback(err)
-					ReferalAllocator.assignBonus user_id, callback
-
