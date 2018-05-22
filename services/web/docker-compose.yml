@@ -17,6 +17,7 @@ services:
       PROJECT_HISTORY_ENABLED: 'true'
       ENABLED_LINKED_FILE_TYPES: 'url'
       LINKED_URL_PROXY: 'http://localhost:6543'
+      ENABLED_LINKED_FILE_TYPES: 'url,project_file'
     depends_on:
       - redis
       - mongo

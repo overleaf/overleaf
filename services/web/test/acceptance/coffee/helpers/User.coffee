@@ -137,6 +137,18 @@ class User
 				return callback(err)
 			callback(null)
 
+	createDocInProject: (project_id, parent_folder_id, name, callback=(error, doc_id)->) ->
+		@getCsrfToken (error) =>
+			return callback(error) if error?
+			@request.post {
+				url: "/project/#{project_id}/doc",
+				json: {
+					name: name,
+					parent_folder_id: parent_folder_id
+				}
+			}, (error, response, body) =>
+				callback(null, body._id)
+
 	addUserToProject: (project_id, user, privileges, callback = (error, user) ->) ->
 		if privileges == 'readAndWrite'
 			updateOp = {$addToSet: {collaberator_refs: user._id.toString()}}
