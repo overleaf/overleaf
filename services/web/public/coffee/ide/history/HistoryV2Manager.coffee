@@ -15,7 +15,8 @@ define [
 	class HistoryManager
 		constructor: (@ide, @$scope) ->
 			@reset()
-			
+			@$scope.HistoryViewModes = HistoryViewModes
+
 			@$scope.toggleHistory = () =>
 				if @$scope.ui.view == "history"
 					@hide()
@@ -57,7 +58,8 @@ define [
 					}
 				}
 				files: []
-				diff: null
+				diff: null # When history.viewMode == HistoryViewModes.COMPARE
+				selectedFile: null # When history.viewMode == HistoryViewModes.POINT_IN_TIME
 			}
 
 		restoreFile: (version, pathname) ->
@@ -132,7 +134,8 @@ define [
 			@ide.$http
 				.get(url)
 				.then (response) =>
-					{ data } = response
+					@$scope.history.selectedFile =
+						text : response.data.diff[0].u
 				.catch () ->
 
 		reloadDiff: () ->

@@ -1,4 +1,7 @@
-.diff-panel.full-size(ng-if="history.isV2", ng-controller="HistoryV2DiffController")
+.diff-panel.full-size(
+	ng-if="history.isV2 && history.viewMode === HistoryViewModes.COMPARE"
+	ng-controller="HistoryV2DiffController"
+)
 	.diff(
 		ng-if="!!history.diff && !history.diff.loading && !history.diff.error",
 		ng-class="{ 'diff-binary': history.diff.binary }"
@@ -48,3 +51,18 @@
 		| &nbsp;&nbsp;#{translate("loading")}...
 	.error-panel(ng-show="history.diff.error")
 		.alert.alert-danger #{translate("generic_something_went_wrong")}
+
+.point-in-time-panel.full-size(
+	ng-if="history.isV2 && history.viewMode === HistoryViewModes.POINT_IN_TIME"
+)
+	.point-in-time-editor-container(
+		ng-if="!!history.selectedFile"
+	)
+		.hide-ace-cursor(
+			ace-editor="history-pointintime",
+			theme="settings.theme",
+			font-size="settings.fontSize",
+			text="history.selectedFile.text",
+			read-only="true",
+			resize-on="layout:main:resize",
+		)

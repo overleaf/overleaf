@@ -1,3 +1,17 @@
+.history-toolbar {
+	position: absolute;
+	width: 100%;
+	top: @ide-body-top-offset;
+	height: @editor-toolbar-height;
+	line-height: @editor-toolbar-height;
+	background-color: @editor-toolbar-bg;
+	z-index: 1;
+	color: #FFF;
+	padding-left: (@line-height-computed / 2);
+}
+	.history-toolbar-time {
+		font-weight: bold;
+	}
 .history-entries {
 	font-size: @history-base-font-size;
 	color: @history-base-color;
@@ -64,7 +78,10 @@
 				}
 			}
 
-.history-file-tree {
+.history-file-tree-inner {
+	.full-size;
+	overflow-y: auto;
+	background-color: @file-tree-bg;
 }
 	.history-file-entity-wrapper {
 		color: #FFF;

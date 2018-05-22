@@ -57,9 +57,12 @@ block content
 				include ./editor/share
 				!= moduleIncludes("publish:body", locals)
 
+				include ./editor/history/toolbarV2.pug
+
 				main#ide-body(
 					ng-cloak,
 					role="main",
+					ng-class="{ 'ide-history-open' : (ui.view == 'history' && history.isV2) }",
 					layout="main",
 					ng-hide="state.loading",
 					resize-on="layout:chat:resize",

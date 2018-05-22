@@ -40,7 +40,8 @@
 			}
 	}
 
-	.diff-panel {
+	.diff-panel,
+	.point-in-time-panel {
 		.full-size;
 		margin-right: @changesListWidth;
 	}
@@ -59,11 +60,7 @@
 			.full-size;
 			top: 40px;
 		}
-		.hide-ace-cursor {
-			.ace_active-line, .ace_cursor-layer, .ace_gutter-active-line {
-				display: none;
-			}
-		}
+
 		.diff-deleted {
 			padding: @line-height-computed;
 		}
@@ -303,6 +300,12 @@
 
 .diff-deleted {
 	padding-top: 15px;
+}
+
+.hide-ace-cursor {
+	.ace_active-line, .ace_cursor-layer, .ace_gutter-active-line {
+		display: none;
+	}
 }
 
 .editor-dark {

@@ -1,11 +1,8 @@
-aside.file-tree.file-tree-history.full-size(
+aside.file-tree.full-size(
 	ng-controller="HistoryV2FileTreeController"
 	ng-if="ui.view == 'history' && history.isV2"
 )
-	.toolbar.toolbar-filetree
-		span Modified files
-
-	.file-tree-inner
+	.history-file-tree-inner
 		history-file-tree(
 			file-tree="currentFileTree"
 			selected-pathname="history.selection.pathname"
