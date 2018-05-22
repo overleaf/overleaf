@@ -67,6 +67,7 @@ describe "ProjectController", ->
 			protectTokens: sinon.stub()
 		@CollaboratorsHandler =
 			userIsTokenMember: sinon.stub().callsArgWith(2, null, false)
+		@ProjectEntityHandler = {}
 		@Modules =
 			hooks:
 				fire: sinon.stub()
@@ -98,6 +99,7 @@ describe "ProjectController", ->
 			"../TokenAccess/TokenAccessHandler": @TokenAccessHandler
 			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler
 			"../../infrastructure/Modules": @Modules
+			"./ProjectEntityHandler": @ProjectEntityHandler
 
 		@projectName = "£12321jkj9ujkljds"
 		@req =
