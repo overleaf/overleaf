@@ -1,7 +1,7 @@
 # This file was auto-generated, do not edit it directly.
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
-# Version: 1.1.1
+# Version: 1.1.3
 
 BUILD_NUMBER ?= local
 BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
@@ -22,11 +22,11 @@ clean:
 
 test: test_unit test_acceptance
 
-test_unit: 
-	@[ ! -d test/unit ] && echo "filestore has no unit tests" || $(DOCKER_COMPOSE) run --rm test_unit npm run test:unit -- ${MOCHA_ARGS}
+test_unit:
+	@[ ! -d test/unit ] && echo "filestore has no unit tests" || $(DOCKER_COMPOSE) run --rm test_unit
 
-test_acceptance:  test_clean test_acceptance_pre_run # clear the database before each acceptance test run
-	@[ ! -d test/acceptance ] && echo "filestore has no acceptance tests" || $(DOCKER_COMPOSE) run --rm test_acceptance npm run test:acceptance -- ${MOCHA_ARGS}
+test_acceptance: test_clean test_acceptance_pre_run # clear the database before each acceptance test run
+	@[ ! -d test/acceptance ] && echo "filestore has no acceptance tests" || $(DOCKER_COMPOSE) run --rm test_acceptance
 
 test_clean:
 	$(DOCKER_COMPOSE) down -v -t 0

@@ -2,7 +2,8 @@ FROM node:6.9.5 as app
 
 WORKDIR /app
 
-COPY package.json package-lock.json /app/
+#wildcard as some files may not be in all repos
+COPY package*.json npm-shrink*.json /app/
 
 RUN npm install --quiet
 
@@ -15,7 +16,7 @@ FROM node:6.9.5
 COPY --from=app /app /app
 
 WORKDIR /app
-RUN ./install_deps.sh
+RUN chmod 0755 ./install_deps.sh && ./install_deps.sh
 USER node
 
 CMD ["node","app.js"]
