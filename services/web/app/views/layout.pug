@@ -98,7 +98,8 @@ html(itemscope, itemtype='http://schema.org/Product')
 
 		- if (settings.overleaf && settings.overleaf.useOLFreeTrial)
 			script.
-				window.redirectToOLFreeTrialUrl = '!{settings.overleaf.host}/users/trial'
+				window.useV2TrialUrl = true
+
 
 	body
 		if(settings.recaptcha)
