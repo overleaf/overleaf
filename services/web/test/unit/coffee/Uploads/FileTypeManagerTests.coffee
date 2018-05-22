@@ -39,7 +39,7 @@ describe "FileTypeManager", ->
 		beforeEach ->
 			@stat = { size: 100 }
 			@fs.stat = sinon.stub().callsArgWith(1, null, @stat)
-			
+
 		it "should return .tex files as not binary", ->
 			@FileTypeManager.isBinary "file.tex", "/path/on/disk", (error, binary) ->
 				binary.should.equal false
@@ -80,10 +80,18 @@ describe "FileTypeManager", ->
 			@FileTypeManager.isBinary "tex", "/path/on/disk", (error, binary) ->
 				binary.should.equal true
 
+		it "should return .latexmkrc file as not binary", ->
+			@FileTypeManager.isBinary ".latexmkrc", "/path/on/disk", (error, binary) ->
+				binary.should.equal false
+
+		it "should return latexmkrc file as not binary", ->
+			@FileTypeManager.isBinary "latexmkrc", "/path/on/disk", (error, binary) ->
+				binary.should.equal false
+
 		it "should ignore the case of an extension", ->
 			@FileTypeManager.isBinary "file.TEX", "/path/on/disk", (error, binary) ->
 				binary.should.equal false
-		
+
 		it "should return large text files as binary", ->
 			@stat.size = 2 * 1024 * 1024 # 2Mb
 			@FileTypeManager.isBinary "file.tex", "/path/on/disk", (error, binary) ->
@@ -98,6 +106,10 @@ describe "FileTypeManager", ->
 			@FileTypeManager.shouldIgnore "path/.git", (error, ignore) ->
 				ignore.should.equal true
 
+		it "should not ignore .latexmkrc dotfile", ->
+			@FileTypeManager.shouldIgnore "path/.latexmkrc", (error, ignore) ->
+				ignore.should.equal false
+
 		it "should ignore __MACOSX", ->
 			@FileTypeManager.shouldIgnore "path/__MACOSX", (error, ignore) ->
 				ignore.should.equal true
@@ -109,5 +121,3 @@ describe "FileTypeManager", ->
 		it "should ignore the case of the extension", ->
 			@FileTypeManager.shouldIgnore "file.AUX", (error, ignore) ->
 				ignore.should.equal true
-			
-

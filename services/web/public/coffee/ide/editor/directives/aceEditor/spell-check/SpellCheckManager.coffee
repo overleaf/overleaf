@@ -1,129 +1,88 @@
-define [
-	"ide/editor/directives/aceEditor/spell-check/HighlightedWordManager"
-	"ace/ace"
-], (HighlightedWordManager) ->
-	Range = ace.require("ace/range").Range
-
+define [], () ->
 	class SpellCheckManager
-		constructor: (@$scope, @editor, @element, @cache, @$http, @$q) ->
-			$(document.body).append @element.find(".spell-check-menu")
+		constructor: (@$scope, @cache, @$http, @$q, @adapter) ->
+			@$scope.spellMenu = {
+				open: false
+				top: '0px'
+				left: '0px'
+				suggestions: []
+			}
 			@inProgressRequest = null
 			@updatedLines = []
-			@highlightedWordManager = new HighlightedWordManager(@editor)
 
-			@$scope.$watch "spellCheckLanguage", (language, oldLanguage) =>
+			@$scope.$watch 'spellCheckLanguage', (language, oldLanguage) =>
 				if language != oldLanguage and oldLanguage?
 					@runFullCheck()
 
-			onChange = (e) =>
-				@runCheckOnChange(e)
-				
-			onScroll = () =>
-				@closeContextMenu()
+			@$scope.replaceWord = @adapter.replaceWord
+			@$scope.learnWord = @learnWord
 
-			@editor.on "changeSession", (e) =>
-				@highlightedWordManager.reset()
-				if @inProgressRequest?
-					@inProgressRequest.abort()
-
-				if @$scope.spellCheckEnabled and @$scope.spellCheckLanguage and @$scope.spellCheckLanguage != ""
-					@runSpellCheckSoon(200)
-
-				e.oldSession?.getDocument().off "change", onChange
-				e.session.getDocument().on "change", onChange
-				
-				e.oldSession?.off "changeScrollTop", onScroll
-				e.session.on "changeScrollTop", onScroll
-
-			@$scope.spellingMenu = {left: '0px', top: '0px'}
-
-			@editor.on "nativecontextmenu", (e) =>
-				e.domEvent.stopPropagation();
-				@closeContextMenu(e.domEvent)
-				@openContextMenu(e.domEvent)
-
-			$(document).on "click", (e) =>
-				if e.which != 3 # Ignore if this was a right click
-					@closeContextMenu(e)
+			$(document).on 'click', (e) =>
+				@closeContextMenu() if e.which != 3 # Ignore if right click
 				return true
 
-			@$scope.replaceWord = (highlight, suggestion) =>
-				@replaceWord(highlight, suggestion)
+		init: () ->
+			@updatedLines = Array(@adapter.getLines().length).fill(true)
+			@runSpellCheckSoon(200) if @isSpellCheckEnabled()
 
-			@$scope.learnWord = (highlight) =>
-				@learnWord(highlight)
+		isSpellCheckEnabled: () ->
+			return !!(
+				@$scope.spellCheck and
+				@$scope.spellCheckLanguage and
+				@$scope.spellCheckLanguage != ''
+			)
 
-		runFullCheck: () ->
-			@highlightedWordManager.clearRows()
-			if @$scope.spellCheckLanguage and @$scope.spellCheckLanguage != ""
-				@runSpellCheck()
+		onChange: (e) =>
+			if @isSpellCheckEnabled()
+				@markLinesAsUpdated(@adapter.normalizeChangeEvent(e))
 
-		runCheckOnChange: (e) ->
-			if @$scope.spellCheckLanguage and @$scope.spellCheckLanguage != ""
-				@highlightedWordManager.applyChange(e)
-				@markLinesAsUpdated(e)
+				@adapter.highlightedWordManager.clearHighlightTouchingRange(e)
+
 				@runSpellCheckSoon()
 
+		onSessionChange: () =>
+			@adapter.highlightedWordManager.reset()
+			@inProgressRequest.abort() if @inProgressRequest?
+
+			@runSpellCheckSoon(200) if @isSpellCheckEnabled()
+
+		onContextMenu: (e) =>
+			@closeContextMenu()
+			@openContextMenu(e)
+
+		onScroll: () => @closeContextMenu()
+
 		openContextMenu: (e) ->
-			position = @editor.renderer.screenToTextCoordinates(e.clientX, e.clientY)
-			highlight = @highlightedWordManager.findHighlightWithinRange
-				start: position
-				end:   position
-
-			@$scope.$apply () =>
-				@$scope.spellingMenu.highlight = highlight
-
+			coords = @adapter.getCoordsFromContextMenuEvent(e)
+			highlight = @adapter.getHighlightFromCoords(coords)
 			if highlight
-				e.stopPropagation()
-				e.preventDefault()
-
-				@editor.getSession().getSelection().setSelectionRange(
-					new Range(
-						highlight.row, highlight.column
-						highlight.row, highlight.column + highlight.word.length
-					)
-				)
-
+				@adapter.preventContextMenuEventDefault(e)
+				@adapter.selectHighlightedWord(highlight)
 				@$scope.$apply () =>
-					@$scope.spellingMenu.open = true
-					@$scope.spellingMenu.left = e.clientX + 'px'
-					@$scope.spellingMenu.top = e.clientY + 'px'
+					@$scope.spellMenu = {
+						open: true
+						top: coords.y + 'px'
+						left: coords.x + 'px'
+						highlight: highlight
+					}
 				return false
 
-		closeContextMenu: (e) ->
-			# this is triggered on scroll, so for performance only apply
-			# setting when it changes
-			if @$scope?.spellingMenu?.open != false
+		closeContextMenu: () ->
+			# This is triggered on scroll, so for performance only apply setting when
+			# it changes
+			if @$scope?.spellMenu and @$scope.spellMenu.open != false
 				@$scope.$apply () =>
-					@$scope.spellingMenu.open = false
+					@$scope.spellMenu.open = false
 
-		replaceWord: (highlight, text) ->
-			@editor.getSession().replace(new Range(
-				highlight.row, highlight.column,
-				highlight.row, highlight.column + highlight.word.length
-			), text)
-
-		learnWord: (highlight) ->
+		learnWord: (highlight) =>
 			@apiRequest "/learn", word: highlight.word
-			@highlightedWordManager.removeWord highlight.word
+			@adapter.highlightedWordManager.removeWord highlight.word
 			language = @$scope.spellCheckLanguage
 			@cache?.put("#{language}:#{highlight.word}", true)
 
-		getHighlightedWordAtCursor: () ->
-			cursor = @editor.getCursorPosition()
-			highlight = @highlightedWordManager.findHighlightWithinRange
-				start: cursor
-				end: cursor
-			return highlight
-
-		runSpellCheckSoon: (delay = 1000) ->
-			run = () =>
-				delete @timeoutId
-				@runSpellCheck(@updatedLines)
-				@updatedLines = []
-			if @timeoutId?
-				clearTimeout @timeoutId
-			@timeoutId = setTimeout run, delay
+		runFullCheck: () ->
+			@adapter.highlightedWordManager.reset()
+			@runSpellCheck() if @isSpellCheckEnabled()
 
 		markLinesAsUpdated: (change) ->
 			start = change.start
@@ -145,6 +104,15 @@ define [
 			else if change.action == "remove"
 				@updatedLines[start.row] = true
 				removeLines()
+
+		runSpellCheckSoon: (delay = 1000) ->
+			run = () =>
+				delete @timeoutId
+				@runSpellCheck(@updatedLines)
+				@updatedLines = []
+			if @timeoutId?
+				clearTimeout @timeoutId
+			@timeoutId = setTimeout run, delay
 
 		runSpellCheck: (linesToProcess) ->
 			{words, positions} = @getWords(linesToProcess)
@@ -178,11 +146,11 @@ define [
 			displayResult = (highlights) =>
 				if linesToProcess?
 					for shouldProcess, row in linesToProcess
-						@highlightedWordManager.clearRows(row, row) if shouldProcess
+						@adapter.highlightedWordManager.clearRow(row) if shouldProcess
 				else
-					@highlightedWordManager.clearRows()
+					@adapter.highlightedWordManager.reset()
 				for highlight in highlights
-					@highlightedWordManager.addHighlight highlight
+					@adapter.highlightedWordManager.addHighlight highlight
 
 			if not words.length
 				displayResult highlights
@@ -212,8 +180,24 @@ define [
 							seen[key] = true
 					displayResult highlights
 
+		apiRequest: (endpoint, data, callback = (error, result) ->)->
+			data.token = window.user.id
+			data._csrf = window.csrfToken
+			# use angular timeout option to cancel request if doc is changed
+			requestHandler = @$q.defer()
+			options = {timeout: requestHandler.promise}
+			httpRequest = @$http.post("/spelling" + endpoint, data, options)
+			.then (response) =>
+				callback(null, response.data)
+			.catch (response) =>
+				callback(new Error('api failure'))
+			# provide a method to cancel the request
+			abortRequest = () ->
+				requestHandler.resolve()
+			return { abort: abortRequest }
+
 		getWords: (linesToProcess) ->
-			lines = @editor.getValue().split("\n")
+			lines = @adapter.getLines()
 			words = []
 			positions = []
 			for line, row in lines
@@ -231,22 +215,6 @@ define [
 						positions.push row: row, column: result.index
 						words.push(word)
 			return words: words, positions: positions
-
-		apiRequest: (endpoint, data, callback = (error, result) ->)->
-			data.token = window.user.id
-			data._csrf = window.csrfToken
-			# use angular timeout option to cancel request if doc is changed
-			requestHandler = @$q.defer()
-			options = {timeout: requestHandler.promise}
-			httpRequest = @$http.post("/spelling" + endpoint, data, options)
-			.then (response) =>
-				callback(null, response.data)
-			.catch (response) =>
-				callback(new Error('api failure'))
-			# provide a method to cancel the request
-			abortRequest = () ->
-				requestHandler.resolve()
-			return { abort: abortRequest }
 
 		blacklistedCommandRegex: ///
 			\\                    # initial backslash

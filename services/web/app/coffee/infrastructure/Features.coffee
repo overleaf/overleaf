@@ -14,6 +14,8 @@ module.exports = Features =
 				return Settings.enableGithubSync
 			when 'v1-return-message'
 				return Settings.accountMerge? and Settings.overleaf?
+			when 'v2-banner'
+				return Settings.showV2Banner
 			when 'custom-togglers'
 				return Settings.overleaf?
 			when 'templates'

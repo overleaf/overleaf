@@ -40,6 +40,12 @@ class User
 				@referal_id = user?.referal_id
 				callback(null, @password)
 
+	setFeatures: (features, callback = (error) ->) ->
+		update = {}
+		for key, value of features
+			update["features.#{key}"] = value
+		UserModel.update { _id: @id }, update, callback
+
 	logout: (callback = (error) ->) ->
 		@getCsrfToken (error) =>
 			return callback(error) if error?
