@@ -521,7 +521,32 @@ describe "ProjectController", ->
 				@ProjectUpdateHandler.markAsOpened.calledWith(@project_id).should.equal true
 				done()
 			@ProjectController.loadEditor @req, @res
-		
+
+	describe 'userProjectsJson', ->
+		beforeEach (done) ->
+			projects = [
+				{archived: true,  id: 'a', name: 'A', accessLevel: 'a', somethingElse: 1}
+				{archived: false, id: 'b', name: 'B', accessLevel: 'b', somethingElse: 1}
+				{archived: false, id: 'c', name: 'C', accessLevel: 'c', somethingElse: 1}
+				{archived: false, id: 'd', name: 'D', accessLevel: 'd', somethingElse: 1}
+			]
+			@ProjectGetter.findAllUsersProjects = sinon.stub().callsArgWith(2, null, [])
+			@ProjectController._buildProjectList = sinon.stub().returns(projects)
+			@AuthenticationController.getLoggedInUserId = sinon.stub().returns 'abc'
+			done()
+
+		it 'should produce a list of projects', (done) ->
+			@res.json = (data) =>
+				expect(data).to.deep.equal {
+					projects: [
+						{_id: 'b', name: 'B', accessLevel: 'b'},
+						{_id: 'c', name: 'C', accessLevel: 'c'},
+						{_id: 'd', name: 'D', accessLevel: 'd'}
+					]
+				}
+				done()
+			@ProjectController.userProjectsJson @req, @res, @next
+
 	describe '_isInPercentageRollout', ->
 		before ->
 			@ids = [
