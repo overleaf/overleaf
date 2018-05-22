@@ -32,12 +32,12 @@ BadDataError = (message) ->
 BadDataError.prototype.__proto__ = Error.prototype
 
 
-FileNotFoundError = (message) ->
+SourceFileNotFoundError = (message) ->
 	error = new Error(message)
 	error.name = 'BadData'
-	error.__proto__ = FileNotFoundError.prototype
+	error.__proto__ = SourceFileNotFoundError.prototype
 	return error
-FileNotFoundError.prototype.__proto__ = Error.prototype
+SourceFileNotFoundError.prototype.__proto__ = Error.prototype
 
 
 module.exports = ProjectFileAgent =
@@ -68,7 +68,7 @@ module.exports = ProjectFileAgent =
 					}, (err, entity, type) ->
 						if err?
 							if err.toString().match(/^not found.*/)
-								err = new FileNotFoundError()
+								err = new SourceFileNotFoundError()
 							return callback(err)
 						ProjectFileAgent._writeEntityToDisk source_project_id, entity._id, type, callback
 
@@ -92,8 +92,8 @@ module.exports = ProjectFileAgent =
 			res.status(400).send("The submitted data is not valid")
 		else if error instanceof BadEntityTypeError
 			res.status(400).send("The file is the wrong type")
-		else if error instanceof FileNotFoundError
-			res.status(404).send("File not found")
+		else if error instanceof SourceFileNotFoundError
+			res.status(404).send("Source file not found")
 		else
 			next(error)
 		next()
