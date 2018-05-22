@@ -154,21 +154,20 @@ module.exports = ProjectController =
 	projectEntitiesJson: (req, res, next) ->
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		project_id = req.params.Project_id
-		AuthorizationManager.canUserReadProject user_id, project_id,
-			null, (err, canRead) ->
+		AuthorizationManager.canUserReadProject user_id, project_id, null, (err, canRead) ->
+			return next(err) if err?
+			return res.sendStatus(403) if !canRead
+			ProjectGetter.getProject project_id, (err, project) ->
 				return next(err) if err?
-				return res.status(403) if !canRead
-				ProjectGetter.getProject project_id, (err, project) ->
+				ProjectEntityHandler.getAllEntitiesFromProject project, (err, docs, files) ->
 					return next(err) if err?
-					ProjectEntityHandler.getAllEntitiesFromProject project, (err, docs, files) ->
-						return next(err) if err?
-						entities = docs.concat(files)
-							.sort (a, b) -> a.path > b.path  # Sort by path ascending
-							.map (e) -> {
-								path: e.path,
-								type: if e.doc? then 'doc' else 'file'
-							}
-						res.json({project_id: project_id, entities: entities})
+					entities = docs.concat(files)
+						.sort (a, b) -> a.path > b.path  # Sort by path ascending
+						.map (e) -> {
+							path: e.path,
+							type: if e.doc? then 'doc' else 'file'
+						}
+					res.json({project_id: project_id, entities: entities})
 
 	projectListPage: (req, res, next)->
 		timer = new metrics.Timer("project-list")
