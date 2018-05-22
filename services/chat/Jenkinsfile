@@ -9,34 +9,9 @@ pipeline {
   }
 
   stages {
-    stage('Install') {
-      agent {
-        docker {
-          image 'node:6.14.1'
-          args "-v /var/lib/jenkins/.npm:/tmp/.npm -e HOME=/tmp"
-          reuseNode true
-        }
-      }
+    stage('Build') {
       steps {
-        // we need to disable logallrefupdates, else git clones 
-        // during the npm install will require git to lookup the 
-        // user id which does not exist in the container's 
-        // /etc/passwd file, causing the clone to fail.
-        sh 'git config --global core.logallrefupdates false'
-        sh 'rm -rf node_modules'
-        sh 'npm install && npm rebuild'
-      }
-    }
-
-    stage('Compile') {
-      agent {
-        docker {
-          image 'node:6.14.1'
-          reuseNode true
-        }
-      }
-      steps {
-        sh 'npm run compile:all'
+        sh 'make build'
       }
     }
 
@@ -54,12 +29,7 @@ pipeline {
 
     stage('Package and publish build') {
       steps {
-        sh 'echo ${BUILD_NUMBER} > build_number.txt'
-        sh 'touch build.tar.gz' // Avoid tar warning about files changing during read
-        sh 'tar -czf build.tar.gz --exclude=build.tar.gz --exclude-vcs .'
-        withAWS(credentials:'S3_CI_BUILDS_AWS_KEYS', region:"${S3_REGION_BUILD_ARTEFACTS}") {
-            s3Upload(file:'build.tar.gz', bucket:"${S3_BUCKET_BUILD_ARTEFACTS}", path:"${JOB_NAME}/${BUILD_NUMBER}.tar.gz")
-        }
+        sh 'make publish'
       }
     }
 
