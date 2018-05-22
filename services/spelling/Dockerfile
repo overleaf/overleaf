@@ -1,4 +1,22 @@
+FROM node:6.9.5 as app
+
+WORKDIR /app
+
+#wildcard as some files may not be in all repos
+COPY package*.json npm-shrink*.json /app/
+
+RUN npm install --quiet
+
+COPY . /app
+
+RUN npm run compile:all
+
 FROM node:6.9.5
 
-RUN apt-get update
-RUN apt-get install -y aspell aspell-en aspell-am aspell-ar aspell-ar-large aspell-bg aspell-bn aspell-br aspell-ca aspell-cs aspell-cy aspell-da aspell-de aspell-de-alt aspell-el aspell-eo aspell-es aspell-et aspell-eu-es aspell-fa aspell-fo aspell-fr aspell-ga aspell-gl-minimos aspell-gu aspell-he aspell-hi aspell-hr aspell-hsb aspell-hu aspell-hy aspell-is aspell-it aspell-kk aspell-kn aspell-ku aspell-lt aspell-lv aspell-ml aspell-mr aspell-nl aspell-no aspell-or aspell-pa aspell-pl aspell-pt-br aspell-ro aspell-ru aspell-sk aspell-sl aspell-sv aspell-ta aspell-te aspell-tl aspell-uk aspell-uz
+COPY --from=app /app /app
+
+WORKDIR /app
+RUN chmod 0755 ./install_deps.sh && ./install_deps.sh
+USER node
+
+CMD ["node","app.js"]
