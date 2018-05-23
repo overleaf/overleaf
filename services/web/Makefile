@@ -187,6 +187,9 @@ test: test_unit test_frontend test_acceptance
 test_unit:
 	npm -q run test:unit -- ${MOCHA_ARGS}
 
+test_unit_app:
+	npm -q run test:unit:app -- ${MOCHA_ARGS}
+
 test_frontend: test_clean # stop service
 	$(MAKE) compile
 	docker-compose ${DOCKER_COMPOSE_FLAGS} up test_frontend
