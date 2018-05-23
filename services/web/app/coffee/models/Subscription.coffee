@@ -18,6 +18,8 @@ SubscriptionSchema = new Schema
 		downgraded: Boolean
 		planCode: String
 		allowed: {type: Boolean, default: true}
+	overleaf:
+		id: { type: Number }
 
 
 SubscriptionSchema.statics.findAndModify = (query, update, callback)->
