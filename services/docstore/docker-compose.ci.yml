@@ -18,6 +18,9 @@ services:
       REDIS_HOST: redis
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_BUCKET: ${AWS_BUCKET}
+      MOCHA_GREP: ${MOCHA_GREP}
     depends_on:
       - mongo
       - redis
