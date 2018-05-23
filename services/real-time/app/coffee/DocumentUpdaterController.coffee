@@ -4,6 +4,8 @@ redis = require("redis-sharelatex")
 rclient = redis.createClient(settings.redis.documentupdater)
 SafeJsonParse = require "./SafeJsonParse"
 
+console.log "REDIS", settings.redis
+
 MESSAGE_SIZE_LOG_LIMIT = 1024 * 1024 # 1Mb
 
 module.exports = DocumentUpdaterController =

@@ -4,7 +4,7 @@ io = require("socket.io-client")
 request = require "request"
 Settings = require "settings-sharelatex"
 redis = require "redis-sharelatex"
-rclient = redis.createClient(Settings.redis.web)
+rclient = redis.createClient(Settings.redis.websessions)
 
 uid = require('uid-safe').sync
 signature = require("cookie-signature")

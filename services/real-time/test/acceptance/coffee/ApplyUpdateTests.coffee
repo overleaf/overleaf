@@ -8,7 +8,7 @@ FixturesManager = require "./helpers/FixturesManager"
 
 settings = require "settings-sharelatex"
 redis = require "redis-sharelatex"
-rclient = redis.createClient(settings.redis.web)
+rclient = redis.createClient(settings.redis.websessions)
 
 describe "applyOtUpdate", ->
 	before ->
