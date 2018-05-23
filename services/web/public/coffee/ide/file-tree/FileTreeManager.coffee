@@ -26,31 +26,6 @@ define [
 				@clearMultiSelectedEntities()
 				@$scope.$digest()
 
-			# TODO: remove
-			window._doLinkedFileImportFromProject = (project, path, name) =>
-				parent_folder = @getCurrentFolder()
-				@ide.$http.post "/project/#{@ide.project_id}/linked_file", {
-					name: name,
-					parent_folder_id: parent_folder?.id
-					provider: 'project_file',
-					data: {
-						source_project_id: project,
-						source_entity_path: path
-					},
-					_csrf: window.csrfToken
-				}
-
-			# TODO: remove
-			window._getProjects = () =>
-				@ide.$http.get("/user/projects", {
-					_csrf: window.csrfToken
-				}).then (resp) -> console.log(resp.status, resp.data)
-
-			window._getProjectEntities = (project_id) =>
-				@ide.$http.get("/project/#{project_id}/entities", {
-					_csrf: window.csrfToken
-				}).then (resp) -> console.log(resp.status, resp.data)
-
 		_bindToSocketEvents: () ->
 			@ide.socket.on "reciveNewDoc", (parent_folder_id, doc) =>
 				parent_folder = @findEntityById(parent_folder_id) or @$scope.rootFolder
