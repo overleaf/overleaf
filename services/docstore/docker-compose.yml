@@ -25,6 +25,9 @@ services:
       REDIS_HOST: redis
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_BUCKET: ${AWS_BUCKET}
       MOCHA_GREP: ${MOCHA_GREP}
     user: node
     depends_on:
