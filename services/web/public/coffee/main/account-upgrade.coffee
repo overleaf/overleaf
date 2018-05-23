@@ -11,8 +11,8 @@ define [
 			w = window.open()
 			go = () ->
 				ga?('send', 'event', 'subscription-funnel', 'upgraded-free-trial', source)
-				if window.redirectToOLFreeTrialUrl?
-					url = window.redirectToOLFreeTrialUrl
+				if window.useV2TrialUrl
+					url = "/user/trial"
 				else
 					url = "/user/subscription/new?planCode=#{plan}&ssp=true"
 					if couponCode?
