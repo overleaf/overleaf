@@ -56,9 +56,10 @@
 	ng-if="history.isV2 && history.viewMode === HistoryViewModes.POINT_IN_TIME"
 )
 	.point-in-time-editor-container(
-		ng-if="!!history.selectedFile"
+		ng-if="!!history.selectedFile && !history.selectedFile.loading && !history.selectedFile.error"
 	)
 		.hide-ace-cursor(
+			ng-if="!history.selectedFile.binary"
 			ace-editor="history-pointintime",
 			theme="settings.theme",
 			font-size="settings.fontSize",
@@ -66,3 +67,10 @@
 			read-only="true",
 			resize-on="layout:main:resize",
 		)
+		.alert.alert-info(ng-if="history.selectedFile.binary")
+			| We're still working on showing image and binary changes, sorry. Stay tuned!
+	.loading-panel(ng-show="history.selectedFile.loading")
+		i.fa.fa-spin.fa-refresh
+		| &nbsp;&nbsp;#{translate("loading")}...
+	.error-panel(ng-show="history.selectedFile.error")
+		.alert.alert-danger #{translate("generic_something_went_wrong")}

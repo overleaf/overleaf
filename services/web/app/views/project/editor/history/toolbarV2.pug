@@ -1,4 +1,5 @@
 .history-toolbar(
 	ng-if="ui.view == 'history' && history.isV2"
-) Browsing project as of&nbsp;
-	time.history-toolbar-time {{ history.selection.updates[0].meta.end_ts | formatDate:'Do MMM YYYY, h:mm a' }}
+)
+	span(ng-show="!history.loadingFileTree") Browsing project as of&nbsp;
+		time.history-toolbar-time {{ history.selection.updates[0].meta.end_ts | formatDate:'Do MMM YYYY, h:mm a' }}

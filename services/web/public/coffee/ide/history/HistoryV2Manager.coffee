@@ -30,6 +30,7 @@ define [
 
 			# @$scope.$watch "history.selection.pathname", () =>
 			# 	@reloadDiff()
+			
 			@$scope.$watch "history.selection.pathname", (pathname) =>
 				if pathname?
 					@loadFileAtPointInTime()
@@ -75,10 +76,14 @@ define [
 			url = "/project/#{@$scope.project_id}/filetree/diff"
 			query = [ "from=#{toV}", "to=#{toV}" ]
 			url += "?" + query.join("&")
+			@$scope.history.loadingFileTree = true
+			@$scope.history.selectedFile = null
+			@$scope.history.selection.pathname = null
 			@ide.$http
 				.get(url)
 				.then (response) =>
 					@$scope.history.files = response.data.diff
+					@$scope.history.loadingFileTree = false
 
 		MAX_RECENT_UPDATES_TO_SELECT: 5
 		autoSelectRecentUpdates: () ->
@@ -115,6 +120,7 @@ define [
 			if @$scope.history.nextBeforeTimestamp?
 				url += "&before=#{@$scope.history.nextBeforeTimestamp}"
 			@$scope.history.loading = true
+			@$scope.history.loadingFileTree = true
 			@ide.$http
 				.get(url)
 				.then (response) =>
@@ -131,11 +137,16 @@ define [
 			url = "/project/#{@$scope.project_id}/diff"
 			query = ["pathname=#{encodeURIComponent(pathname)}", "from=#{toV}", "to=#{toV}"]
 			url += "?" + query.join("&")
+			@$scope.history.selectedFile =
+				loading: true
 			@ide.$http
 				.get(url)
 				.then (response) =>
-					@$scope.history.selectedFile =
-						text : response.data.diff[0].u
+					{text, binary} = @_parseDiff(response.data.diff)
+					@$scope.history.selectedFile.binary = binary
+					@$scope.history.selectedFile.text = text
+					@$scope.history.selectedFile.loading = false
+					console.log @$scope.history.selectedFile
 				.catch () ->
 
 		reloadDiff: () ->

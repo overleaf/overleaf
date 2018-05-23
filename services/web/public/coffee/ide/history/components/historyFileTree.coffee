@@ -12,6 +12,7 @@ define [
 			fileTree: "<"
 			selectedPathname: "<"
 			onSelectedFileChange: "&"
+			isLoading: "<"
 		controller: historyFileTreeController
 		templateUrl: "historyFileTreeTpl"
 	}

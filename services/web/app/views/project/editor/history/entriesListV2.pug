@@ -24,8 +24,9 @@ script(type="text/ng-template", id="historyEntriesListTpl")
 				entry="entry"
 				current-user="$ctrl.currentUser"
 				on-select="$ctrl.onEntrySelect({ selectedEntry: selectedEntry })"
+				ng-show="!$ctrl.isLoading"
 			)
-			.loading(ng-show="history.loading")
+			.loading(ng-show="$ctrl.isLoading")
 				i.fa.fa-spin.fa-refresh
 				| &nbsp;&nbsp; #{translate("loading")}...
 

@@ -3,24 +3,33 @@ define [
 ], (App) ->
 
 	App.controller "HistoryV2FileTreeController", ["$scope", "ide", "_", ($scope, ide, _) ->
+		_previouslySelectedPathname = null
 		$scope.currentFileTree = []
-		_selectedDefaultPathname = (files) ->
-			# TODO: Improve heuristic to determine the default pathname to show.
-			if files? and files.length > 0
-				mainFile = files.find (file) -> /main\.tex$/.test file.pathname
+
+		_pathnameExistsInFiles = (pathname, files) -> 
+			_.any files, (file) -> file.pathname == pathname
+
+		_getSelectedDefaultPathname = (files) ->
+			selectedPathname = null
+			if _previouslySelectedPathname? and _pathnameExistsInFiles _previouslySelectedPathname, files
+				selectedPathname = _previouslySelectedPathname
+			else 
+				mainFile = _.find files, (file) -> /main\.tex$/.test file.pathname
 				if mainFile?
-					mainFile.pathname
+					selectedPathname = _previouslySelectedPathname = mainFile.pathname
 				else
-					files[0].pathname
+					selectedPathname = _previouslySelectedPathname = files[0].pathname
+			return selectedPathname
 
 		$scope.handleFileSelection = (file) ->
-			$scope.history.selection.pathname = file.pathname
+			$scope.history.selection.pathname = _previouslySelectedPathname = file.pathname
 
 		$scope.$watch 'history.files', (files) ->
-			$scope.currentFileTree = _.reduce files, reducePathsToTree, []
-			$scope.history.selection.pathname = _selectedDefaultPathname(files)
+			if files? and files.length > 0
+				$scope.currentFileTree = _.reduce files, _reducePathsToTree, []
+				$scope.history.selection.pathname = _getSelectedDefaultPathname(files)
 
-		reducePathsToTree = (currentFileTree, fileObject) ->
+		_reducePathsToTree = (currentFileTree, fileObject) ->
 			filePathParts = fileObject.pathname.split "/"
 			currentFileTreeLocation = currentFileTree
 			for pathPart, index in filePathParts

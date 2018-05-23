@@ -7,6 +7,7 @@ aside.file-tree.full-size(
 			file-tree="currentFileTree"
 			selected-pathname="history.selection.pathname"
 			on-selected-file-change="handleFileSelection(file)"
+			is-loading="history.loadingFileTree"
 		)
 
 script(type="text/ng-template", id="historyFileTreeTpl")
@@ -14,7 +15,11 @@ script(type="text/ng-template", id="historyFileTreeTpl")
 		history-file-entity(
 			ng-repeat="fileEntity in $ctrl.fileTree"
 			file-entity="fileEntity"
+			ng-show="!$ctrl.isLoading"
 		)
+		.loading(ng-show="$ctrl.isLoading")
+			i.fa.fa-spin.fa-refresh
+			| &nbsp;&nbsp; #{translate("loading")}...
 
 script(type="text/ng-template", id="historyFileEntityTpl")
 	.history-file-entity-wrapper
