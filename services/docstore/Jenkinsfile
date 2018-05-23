@@ -1,62 +1,42 @@
-pipeline {
+String cron_string = BRANCH_NAME == "master" ? "@daily" : ""
 
+pipeline {
   agent any
-  
+
   triggers {
     pollSCM('* * * * *')
-    cron('@daily')
+    cron(cron_string)
   }
 
   stages {
-    stage('Install') {
-      agent {
-        docker {
-          image 'node:6.14.1'
-          args "-v /var/lib/jenkins/.npm:/tmp/.npm -e HOME=/tmp"
-          reuseNode true
-        }
-      }
+    stage('Build') {
       steps {
-        // we need to disable logallrefupdates, else git clones during the npm install will require git to lookup the user id
-        // which does not exist in the container's /etc/passwd file, causing the clone to fail.
-        sh 'git config --global core.logallrefupdates false'
-        sh 'rm -fr node_modules'
-        sh 'npm install && npm rebuild'
-        sh 'npm install --quiet grunt-cli'
+        sh 'make build'
       }
     }
-    stage('Compile and Test') {
-      agent {
-        docker {
-          image 'node:6.14.1'
-          reuseNode true
-        }
-      }
+
+    stage('Unit Tests') {
       steps {
-        sh 'node_modules/.bin/grunt install'
-        sh 'node_modules/.bin/grunt compile:acceptance_tests'
-        sh 'NODE_ENV=development node_modules/.bin/grunt test:unit'
+        sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_unit'
       }
     }
+
     stage('Acceptance Tests') {
       steps {
-        sh 'docker pull sharelatex/acceptance-test-runner'
-        withCredentials([usernamePassword(credentialsId: 'S3_DOCSTORE_TEST_AWS_KEYS', passwordVariable: 'AWS_SECRET', usernameVariable: 'AWS_ID')]) {
-          sh 'docker run --rm -e AWS_BUCKET="sl-doc-archive-testing" -e AWS_ACCESS_KEY_ID=$AWS_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET -v $(pwd):/app sharelatex/acceptance-test-runner'
-        }
+        sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_acceptance'
       }
     }
-    stage('Package') {
+
+    stage('Package and publish build') {
       steps {
-        sh 'echo ${BUILD_NUMBER} > build_number.txt'
-        sh 'touch build.tar.gz' // Avoid tar warning about files changing during read
-        sh 'tar -czf build.tar.gz --exclude=build.tar.gz --exclude-vcs .'
+        sh 'make publish'
       }
     }
-    stage('Publish') {
+
+    stage('Publish build number') {
       steps {
+        sh 'echo ${BRANCH_NAME}-${BUILD_NUMBER} > build_number.txt'
         withAWS(credentials:'S3_CI_BUILDS_AWS_KEYS', region:"${S3_REGION_BUILD_ARTEFACTS}") {
-            s3Upload(file:'build.tar.gz', bucket:"${S3_BUCKET_BUILD_ARTEFACTS}", path:"${JOB_NAME}/${BUILD_NUMBER}.tar.gz")
             // The deployment process uses this file to figure out the latest build
             s3Upload(file:'build_number.txt', bucket:"${S3_BUCKET_BUILD_ARTEFACTS}", path:"${JOB_NAME}/latest")
         }
@@ -65,6 +45,10 @@ pipeline {
   }
 
   post {
+    always {
+      sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_clean'
+    }
+
     failure {
       mail(from: "${EMAIL_ALERT_FROM}",
            to: "${EMAIL_ALERT_TO}",

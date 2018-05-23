@@ -6,11 +6,15 @@ async = require "async"
 Settings = require("settings-sharelatex")
 DocArchiveManager = require("../../../app/js/DocArchiveManager.js")
 request = require "request"
-
+DocstoreApp = require "./helpers/DocstoreApp"
 DocstoreClient = require "./helpers/DocstoreClient"
 
 
 describe "Archiving", ->
+
+	before (done)->
+		DocstoreApp.ensureRunning(done)
+
 	describe "multiple docs in a project", ->
 		before (done) ->
 			@project_id = ObjectId()
@@ -29,6 +33,7 @@ describe "Archiving", ->
 				do (doc) =>
 					(callback) =>
 						DocstoreClient.createDoc @project_id, doc._id, doc.lines, doc.version, doc.ranges, callback
+
 			async.series jobs, (error) =>
 				throw error if error?
 				DocstoreClient.archiveAllDoc @project_id, (error, @res) =>

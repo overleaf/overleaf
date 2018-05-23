@@ -3,6 +3,7 @@ chai = require("chai")
 chai.should()
 {ObjectId} = require "mongojs"
 async = require "async"
+DocstoreApp = require "./helpers/DocstoreApp"
 
 DocstoreClient = require "./helpers/DocstoreClient"
 
@@ -39,6 +40,8 @@ describe "Getting all docs", ->
 		jobs.push (cb) =>
 			DocstoreClient.createDoc @project_id, @deleted_doc._id, @deleted_doc.lines, version, @deleted_doc.ranges, (err)=>
 					DocstoreClient.deleteDoc @project_id, @deleted_doc._id, cb
+		jobs.unshift (cb)->
+			DocstoreApp.ensureRunning cb
 		async.series jobs, done 
 
 	it "getAllDocs should return all the (non-deleted) docs", (done) ->

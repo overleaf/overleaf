@@ -52,6 +52,10 @@ app.use (error, req, res, next) ->
 
 port = Settings.internal.docstore.port
 host = Settings.internal.docstore.host
-app.listen port, host, (error) ->
-	throw error if error?
-	logger.info "Docstore starting up, listening on #{host}:#{port}"
+
+if !module.parent # Called directly
+	app.listen port, host, (error) ->
+		throw error if error?
+		logger.info "Docstore starting up, listening on #{host}:#{port}"
+
+module.exports = app

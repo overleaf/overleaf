@@ -2,6 +2,7 @@ sinon = require "sinon"
 chai = require("chai")
 chai.should()
 {ObjectId} = require "mongojs"
+DocstoreApp = require "./helpers/DocstoreApp"
 
 DocstoreClient = require "./helpers/DocstoreClient"
 
@@ -20,9 +21,10 @@ describe "Getting a doc", ->
 					ts: new Date().toString()
 			}]
 		}
-		DocstoreClient.createDoc @project_id, @doc_id, @lines, @version, @ranges, (error) =>
-			throw error if error?
-			done()
+		DocstoreApp.ensureRunning =>
+			DocstoreClient.createDoc @project_id, @doc_id, @lines, @version, @ranges, (error) =>
+				throw error if error?
+				done()
 
 	describe "when the doc exists", ->
 		it "should get the doc lines and version", (done) ->
