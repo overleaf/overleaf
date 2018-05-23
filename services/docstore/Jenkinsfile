@@ -24,7 +24,8 @@ pipeline {
     stage('Acceptance Tests') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'S3_DOCSTORE_TEST_AWS_KEYS', passwordVariable: 'AWS_SECRET', usernameVariable: 'AWS_ID')]) {
-          sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" AWS_BUCKET="sl-doc-archive-testing" AWS_ACCESS_KEY_ID=$AWS_ID AWS_SECRET_ACCESS_KEY=$AWS_SECRET make test_acceptance'
+          sh 'echo $AWS_ID | wc'
+          sh 'AWS_BUCKET="sl-doc-archive-testing" AWS_ACCESS_KEY_ID=$AWS_ID AWS_SECRET_ACCESS_KEY=$AWS_SECRET DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_acceptance'
         }
       }
     }
