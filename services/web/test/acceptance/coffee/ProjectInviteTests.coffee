@@ -16,6 +16,7 @@ createInvite = (sendingUser, projectId, email, callback=(err, invite)->) ->
 				privileges: 'readAndWrite'
 		}, (err, response, body) ->
 			return callback(err) if err
+			expect(response.statusCode).to.equal 200
 			callback(null, body.invite)
 
 createProject = (owner, projectName, callback=(err, projectId, project)->) ->
@@ -207,9 +208,9 @@ describe "ProjectInviteTests", ->
 		@email = 'smoketestuser@example.com'
 		@projectName = 'sharing test'
 		Async.series [
-			(cb) => @user.login cb
-			(cb) => @user.logout cb
+			(cb) => @user.ensureUserExists cb
 			(cb) => @sendingUser.login cb
+			(cb) => @sendingUser.setFeatures { collaborators: 10 }, cb
 		], done
 
 	describe 'creating invites', ->
@@ -266,7 +267,7 @@ describe "ProjectInviteTests", ->
 					(cb) => expectInvitesInJoinProjectCount @sendingUser, @projectId, 0, cb
 				], done
 
-			it 'should allow the project owner to many invites at once', (done) ->
+			it 'should allow the project owner to create many invites at once', (done) ->
 				@inviteOne = null
 				@inviteTwo = null
 				Async.series [

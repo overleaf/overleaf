@@ -1,5 +1,6 @@
 define [
 	"ide/editor/Document"
+	"ide/editor/components/spellMenu"
 	"ide/editor/directives/aceEditor"
 	"ide/editor/directives/toggleSwitch"
 	"ide/editor/controllers/SavingNotificationController"

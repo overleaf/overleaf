@@ -101,7 +101,7 @@ pipeline {
         }
       }
       steps {
-        sh 'make minify'
+        sh 'WEBPACK_ENV=production make minify'
       }
     }
     

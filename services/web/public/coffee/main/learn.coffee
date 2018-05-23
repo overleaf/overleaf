@@ -55,32 +55,4 @@ define [
 					hits = _.map response.hits, buildHitViewModel
 					updateHits hits
 
-		$scope.showMissingTemplateModal = () ->
-			modalInstance = $modal.open(
-				templateUrl: "missingWikiPageModal"
-				controller: "MissingWikiPageController"
-			)
 
-
-	App.controller 'MissingWikiPageController', ($scope, $modalInstance) ->
-		$scope.form = {}
-		$scope.sent = false
-		$scope.sending = false
-		$scope.contactUs = ->
-			if !$scope.form.message?
-				console.log "message not set"
-				return
-			$scope.sending = true
-			ticketNumber = Math.floor((1 + Math.random()) * 0x10000).toString(32)
-			params =
-				email: $scope.form.email or "support@sharelatex.com"
-				message: $scope.form.message or ""
-				subject: "new wiki page sujection - [#{ticketNumber}]"
-				labels: "support wiki"
-
-			Groove.createTicket params, (err, json)->
-				$scope.sent = true
-				$scope.$apply()
-
-		$scope.close = () ->
-			$modalInstance.close()

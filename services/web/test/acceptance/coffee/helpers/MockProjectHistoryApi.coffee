@@ -6,8 +6,13 @@ module.exports = MockProjectHistoryApi =
 
 	oldFiles: {}
 
+	projectVersions: {}
+
 	addOldFile: (project_id, version, pathname, content) ->
 		@oldFiles["#{project_id}:#{version}:#{pathname}"] = content
+
+	setProjectVersion: (project_id, version) ->
+		@projectVersions[project_id] = version
 
 	run: () ->
 		app.post "/project", (req, res, next) =>
@@ -18,6 +23,13 @@ module.exports = MockProjectHistoryApi =
 			key = "#{project_id}:#{version}:#{pathname}"
 			if @oldFiles[key]?
 				res.send @oldFiles[key]
+			else
+				res.send 404
+
+		app.get "/project/:project_id/version", (req, res, next) =>
+			{project_id} = req.params
+			if @projectVersions[project_id]?
+				res.json version: @projectVersions[project_id]
 			else
 				res.send 404
 

@@ -7,6 +7,7 @@ define [
 	"ide/editor/directives/aceEditor/undo/UndoManager"
 	"ide/editor/directives/aceEditor/auto-complete/AutoCompleteManager"
 	"ide/editor/directives/aceEditor/spell-check/SpellCheckManager"
+	"ide/editor/directives/aceEditor/spell-check/SpellCheckAdapter"
 	"ide/editor/directives/aceEditor/highlights/HighlightsManager"
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
 	"ide/editor/directives/aceEditor/track-changes/TrackChangesManager"
@@ -15,7 +16,7 @@ define [
 	"ide/graphics/services/graphics"
 	"ide/preamble/services/preamble"
     "ide/files/services/files"
-], (App, Ace, SearchBox, Vim, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager, MetadataManager) ->
+], (App, Ace, SearchBox, Vim, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, SpellCheckAdapter, HighlightsManager, CursorPositionManager, TrackChangesManager, MetadataManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
 	ModeList = ace.require('ace/ext/modelist')
 	Vim = ace.require('ace/keyboard/vim').Vim
@@ -103,7 +104,8 @@ define [
 
 				if scope.spellCheck # only enable spellcheck when explicitly required
 					spellCheckCache = $cacheFactory.get("spellCheck-#{scope.name}") || $cacheFactory("spellCheck-#{scope.name}", {capacity: 1000})
-					spellCheckManager = new SpellCheckManager(scope, editor, element, spellCheckCache, $http, $q)
+					spellCheckManager = new SpellCheckManager(scope, spellCheckCache, $http, $q, new SpellCheckAdapter(editor))
+
 				undoManager           = new UndoManager(scope, editor, element)
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
@@ -361,6 +363,23 @@ define [
 						session.setScrollTop(session.getScrollTop() + 1)
 						session.setScrollTop(session.getScrollTop() - 1)
 
+				onSessionChangeForSpellCheck = (e) ->
+					spellCheckManager.onSessionChange()
+					e.oldSession?.getDocument().off "change", spellCheckManager.onChange
+					e.session.getDocument().on "change", spellCheckManager.onChange
+					e.oldSession?.off "changeScrollTop", spellCheckManager.onScroll
+					e.session.on "changeScrollTop", spellCheckManager.onScroll
+
+				initSpellCheck = () ->
+					spellCheckManager.init()
+					editor.on 'changeSession', onSessionChangeForSpellCheck
+					onSessionChangeForSpellCheck({ session: editor.getSession() }) # Force initial setup
+					editor.on 'nativecontextmenu', spellCheckManager.onContextMenu
+
+				tearDownSpellCheck = () ->
+					editor.off 'changeSession', onSessionChangeForSpellCheck
+					editor.off 'nativecontextmenu', spellCheckManager.onContextMenu
+
 				attachToAce = (sharejs_doc) ->
 					lines = sharejs_doc.getSnapshot().split("\n")
 					session = editor.getSession()
@@ -406,6 +425,7 @@ define [
 					editor.initing = false
 					# now ready to edit document
 					editor.setReadOnly(scope.readOnly) # respect the readOnly setting, normally false
+					initSpellCheck()
 
 					resetScrollMargins()
 
@@ -467,6 +487,7 @@ define [
 
 				scope.$on '$destroy', () ->
 					if scope.sharejsDoc?
+						tearDownSpellCheck()
 						detachFromAce(scope.sharejsDoc)
 						session = editor.getSession()
 						session?.destroy()
@@ -488,22 +509,14 @@ define [
 						>Dismiss</a>
 					</div>
 					<div class="ace-editor-body"></div>
-					<div
-						class="dropdown context-menu spell-check-menu"
-						ng-show="spellingMenu.open"
-						ng-style="{top: spellingMenu.top, left: spellingMenu.left}"
-						ng-class="{open: spellingMenu.open}"
-					>
-						<ul class="dropdown-menu">
-							<li ng-repeat="suggestion in spellingMenu.highlight.suggestions | limitTo:8">
-								<a href ng-click="replaceWord(spellingMenu.highlight, suggestion)">{{ suggestion }}</a>
-							</li>
-							<li class="divider"></li>
-							<li>
-								<a href ng-click="learnWord(spellingMenu.highlight)">Add to Dictionary</a>
-							</li>
-						</ul>
-					</div>
+					<spell-menu
+						open="spellMenu.open"
+						top="spellMenu.top"
+						left="spellMenu.left"
+						highlight="spellMenu.highlight"
+						replace-word="replaceWord(highlight, suggestion)"
+						learn-word="learnWord(highlight)"
+					></spell-menu>
 					<div
 						class="annotation-label"
 						ng-show="annotationLabel.show"

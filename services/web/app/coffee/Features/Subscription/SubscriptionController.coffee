@@ -9,6 +9,7 @@ logger     = require('logger-sharelatex')
 GeoIpLookup = require("../../infrastructure/GeoIpLookup")
 SubscriptionDomainHandler = require("./SubscriptionDomainHandler")
 UserGetter = require "../User/UserGetter"
+FeaturesUpdater = require './FeaturesUpdater'
 
 module.exports = SubscriptionController =
 
@@ -237,3 +238,9 @@ module.exports = SubscriptionController =
 				return next(error) if error?
 				req.body = body
 				next()
+
+	refreshUserFeatures: (req, res, next) ->
+		{user_id} = req.params
+		FeaturesUpdater.refreshFeatures user_id, (error) ->
+			return next(error) if error?
+			res.sendStatus 200

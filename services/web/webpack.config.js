@@ -1,7 +1,9 @@
 const fs = require('fs')
 const path = require('path')
+const webpack = require('webpack')
 
 const MODULES_PATH = path.join(__dirname, '/modules')
+const webpackENV = process.env.WEBPACK_ENV || 'development'
 
 // Generate a hash of entry points, including modules
 const entryPoints = {}
@@ -80,6 +82,15 @@ module.exports = {
 			jquery: path.join(__dirname, 'node_modules/jquery/dist/jquery'),
 		}
 	},
-	// TODO
-	// plugins: {}
+	plugins: [
+		new webpack.DefinePlugin({
+			// Swaps out checks for NODE_ENV with the env. This is used by various
+			// libs to enable dev-only features. These checks then become something
+			// like `if ('production' == 'production')`. Minification will then strip
+			// the dev-only code from the bundle
+			'process.env': {
+				NODE_ENV: JSON.stringify(webpackENV)
+			},
+		})
+	]
 }
