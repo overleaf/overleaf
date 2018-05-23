@@ -30,6 +30,11 @@ app.use (error, req, res, next) ->
 
 port = Settings.internal.contacts.port
 host = Settings.internal.contacts.host
-app.listen port, host, (error) ->
-	throw error if error?
-	logger.info "contacts starting up, listening on #{host}:#{port}"
+
+
+if !module.parent # Called directly
+	app.listen port, host, (error) ->
+		throw error if error?
+		logger.info "contacts starting up, listening on #{host}:#{port}"
+
+module.exports = app

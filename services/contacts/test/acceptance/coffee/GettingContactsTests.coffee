@@ -5,13 +5,14 @@ expect = chai.expect
 ObjectId = require("mongojs").ObjectId
 request = require "request"
 async = require "async"
-
+ContactsApp = require "./ContactsApp"
 HOST = "http://localhost:3036"
 
 describe "Getting Contacts", ->
 	describe "with no contacts", ->
-		beforeEach ->
+		beforeEach (done)->
 			@user_id = ObjectId().toString()
+			ContactsApp.ensureRunning done
 		
 		it "should return an empty array", (done) ->
 			request {
@@ -41,6 +42,7 @@ describe "Getting Contacts", ->
 			
 			async.series [
 				# 2 is preferred since touched twice, then 3 since most recent, then 1
+				(cb) => ContactsApp.ensureRunning cb
 				(cb) => touchContact @user_id, @contact_id_1, cb
 				(cb) => touchContact @user_id, @contact_id_2, cb
 				(cb) => touchContact @user_id, @contact_id_2, cb
