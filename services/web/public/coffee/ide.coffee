@@ -18,6 +18,7 @@ define [
 	"ide/chat/index"
 	"ide/clone/index"
 	"ide/hotkeys/index"
+	"ide/test-controls/index"
 	"ide/wordcount/index"
 	"ide/directives/layout"
 	"ide/directives/validFile"
