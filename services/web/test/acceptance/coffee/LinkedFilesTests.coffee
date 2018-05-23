@@ -56,7 +56,44 @@ describe "LinkedFiles", ->
 						(error, doc_id) =>
 							@source_doc_id = doc_id
 							cb(error)
+				(cb) =>
+					@owner.createDocInProject @project_two_id,
+						@project_two_root_folder_id,
+						'some-harmless-doc.txt',
+						(error, doc_id) =>
+							cb(error)
 			], done
+
+		it 'should produce a list of the users projects', (done) ->
+			@owner.request.get {
+				url: "/user/projects",
+				json: true
+			}, (err, response, body) =>
+				expect(err).to.not.exist
+				expect(body).to.deep.equal {
+					projects: [
+						{ _id: @project_one_id, name: 'plf-test-one', accessLevel: 'owner' },
+						{ _id: @project_two_id, name: 'plf-test-two', accessLevel: 'owner' }
+					]
+				}
+				done()
+
+		it 'should produce a list of entities in the project', (done) ->
+			@owner.request.get {
+				url: "/project/#{@project_two_id}/entities",
+				json: true
+			}, (err, response, body) =>
+				expect(err).to.not.exist
+				expect(body).to.deep.equal {
+					project_id: @project_two_id,
+					entities: [
+						{ path: '/main.tex',              type: 'doc' },
+						{ path: '/some-harmless-doc.txt', type: 'doc' },
+						{ path: '/test.txt',              type: 'doc' }
+					]
+				}
+				done()
+
 
 		it 'should import a file from the source project', (done) ->
 			@owner.request.post {
