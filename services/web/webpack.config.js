@@ -62,9 +62,26 @@ module.exports = {
 					cacheDirectory: true
 				}
 			}]
+		},
+		{
+			// These options are necesary for handlebars to have access to helper
+			// methods
+			test: /\.handlebars$/,
+			loader: "handlebars-loader",
+			options: {
+				compat: true,
+				knownHelpersOnly: false,
+				runtimePath: 'handlebars/runtime',
+			}
 		}]
 	},
-
+	resolve: {
+		alias: {
+			// makes handlerbars globally accessible to backbone
+			handlebars: 'handlebars/dist/handlebars.min.js',
+			jquery: path.join(__dirname, 'node_modules/jquery/dist/jquery'),
+		}
+	},
 	plugins: [
 		new webpack.DefinePlugin({
 			// Swaps out checks for NODE_ENV with the env. This is used by various
@@ -77,4 +94,3 @@ module.exports = {
 		})
 	]
 }
-
