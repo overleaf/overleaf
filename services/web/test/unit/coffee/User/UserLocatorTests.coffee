@@ -7,33 +7,25 @@ SandboxedModule = require('sandboxed-module')
 describe "UserLocator", ->
 
 	beforeEach ->
-		@user = {_id:"12390i"}
+		@fakeUser = {_id:"12390i"}
+		@findOne = sinon.stub().callsArgWith(1, null, @fakeUser)
+		@Mongo =
+			db: users: findOne: @findOne
+			ObjectId: (id) -> return id
+
 		@UserLocator = SandboxedModule.require modulePath, requires:
-			"../../infrastructure/mongojs": db: @db =  { users: {} }
+			"../../infrastructure/mongojs": @Mongo
 			"metrics-sharelatex": timeAsyncMethod: sinon.stub()
 			'logger-sharelatex' : { log: sinon.stub() }
-		@db.users =
-			findOne : sinon.stub().callsArgWith(1, null, @user)
 
-		@email = "bob.oswald@gmail.com"
-
-
-	describe "findByEmail", ->
-
-		it "should try and find a user with that email address", (done)->
-			@UserLocator.findByEmail @email, (err, user)=>
-				@db.users.findOne.calledWith(email:@email).should.equal true
-				done()
-
-		it "should trim white space", (done)->
-			@UserLocator.findByEmail "#{@email}   ", (err, user)=>
-				@db.users.findOne.calledWith(email:@email).should.equal true
+	describe "findById", ->
+		it "should try and find a user with that id", (done)->
+			_id = '123e'
+			@UserLocator.findById _id, (err, user)=>
+				@findOne.calledWith(_id: _id).should.equal true
 				done()
 
 		it "should return the user if found", (done)->
-			@UserLocator.findByEmail @email, (err, user)=>
-				user.should.deep.equal @user
+			@UserLocator.findById '123e', (err, user)=>
+				user.should.deep.equal @fakeUser
 				done()
-
-
-

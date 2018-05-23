@@ -15,11 +15,11 @@ describe "UserCreator", ->
 			constructor: ->
 				return self.user
 
-		@UserLocator = 
-			findByEmail: sinon.stub()
+		@UserGetter =
+			getUserByMainEmail: sinon.stub()
 		@UserCreator = SandboxedModule.require modulePath, requires:
 			"../../models/User": User:@UserModel
-			"./UserLocator":@UserLocator
+			"./UserGetter":@UserGetter
 			"logger-sharelatex":{log:->}
 			'metrics-sharelatex': {timeAsyncMethod: ()->}
 

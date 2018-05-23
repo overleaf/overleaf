@@ -24,11 +24,14 @@ describe "CollaboratorsInviteController", ->
 			addCount: sinon.stub
 
 		@LimitationsManager = {}
+		@UserGetter =
+			getUserByMainEmail: sinon.stub()
+			getUser: sinon.stub()
 
 		@CollaboratorsInviteController = SandboxedModule.require modulePath, requires:
 			"../Project/ProjectGetter": @ProjectGetter = {}
 			'../Subscription/LimitationsManager' : @LimitationsManager
-			'../User/UserGetter': @UserGetter = {getUser: sinon.stub()}
+			'../User/UserGetter': @UserGetter
 			"./CollaboratorsHandler": @CollaboratorsHandler = {}
 			"./CollaboratorsInviteHandler": @CollaboratorsInviteHandler = {}
 			'logger-sharelatex': @logger = {err: sinon.stub(), error: sinon.stub(), log: sinon.stub()}
@@ -713,7 +716,7 @@ describe "CollaboratorsInviteController", ->
 
 				beforeEach ->
 					@user = {_id: ObjectId().toString()}
-					@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user)
+					@UserGetter.getUserByMainEmail = sinon.stub().callsArgWith(2, null, @user)
 
 				it 'should callback with `true`', (done) ->
 					@call (err, shouldAllow) =>
@@ -725,7 +728,7 @@ describe "CollaboratorsInviteController", ->
 
 				beforeEach ->
 					@user = null
-					@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user)
+					@UserGetter.getUserByMainEmail = sinon.stub().callsArgWith(2, null, @user)
 
 				it 'should callback with `false`', (done) ->
 					@call (err, shouldAllow) =>
@@ -735,15 +738,15 @@ describe "CollaboratorsInviteController", ->
 
 				it 'should have called getUser', (done) ->
 					@call (err, shouldAllow) =>
-						@UserGetter.getUser.callCount.should.equal 1
-						@UserGetter.getUser.calledWith({email: @email}, {_id: 1}).should.equal true
+						@UserGetter.getUserByMainEmail.callCount.should.equal 1
+						@UserGetter.getUserByMainEmail.calledWith(@email, {_id: 1}).should.equal true
 						done()
 
 			describe 'when getUser produces an error', ->
 
 				beforeEach ->
 					@user = null
-					@UserGetter.getUser = sinon.stub().callsArgWith(2, new Error('woops'))
+					@UserGetter.getUserByMainEmail = sinon.stub().callsArgWith(2, new Error('woops'))
 
 				it 'should callback with an error', (done) ->
 					@call (err, shouldAllow) =>
