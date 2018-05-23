@@ -2,6 +2,8 @@ String cron_string = BRANCH_NAME == "master" ? "@daily" : ""
 
 pipeline {
   agent any
+  
+  environment {}
 
   triggers {
     pollSCM('* * * * *')
