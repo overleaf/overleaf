@@ -44,7 +44,7 @@ define [
 			)
 
 		$scope.openProjectLinkedFileModal = window.openProjectLinkedFileModal = () ->
-			unless 'url' in window.data.enabledLinkedFileTypes
+			unless 'project_file' in window.data.enabledLinkedFileTypes
 				console.warn("Project linked files are not enabled")
 				return
 			$modal.open(
