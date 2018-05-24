@@ -562,38 +562,20 @@ describe "ProjectController", ->
 			@ProjectGetter.getProject = sinon.stub().callsArgWith(1, null, @project)
 			@ProjectEntityHandler.getAllEntitiesFromProject = sinon.stub().callsArgWith(1, null, @docs, @files)
 
-		describe 'when the user can access the project', ->
-			beforeEach () ->
-				@AuthorizationManager.canUserReadProject = sinon.stub().callsArgWith(3, null, true)
-
-			it 'should produce a list of entities', (done) ->
-				@res.json = (data) =>
-					expect(data).to.deep.equal {
-						project_id: 'abcd',
-						entities: [
-							{path: '/main.tex',     type: 'doc'},
-							{path: '/things/a.txt', type: 'file'},
-							{path: '/things/b.txt', type: 'doc'}
-						]
-					}
-					expect(@ProjectGetter.getProject.callCount).to.equal 1
-					expect(@ProjectEntityHandler.getAllEntitiesFromProject.callCount).to.equal 1
-					done()
-				@ProjectController.projectEntitiesJson @req, @res, @next
-
-		describe 'when the user cannot access the project', ->
-			beforeEach () ->
-				@AuthorizationManager.canUserReadProject = sinon.stub().callsArgWith(3, null, false)
-
-			it 'should send a 403 response', (done) ->
-				@res.json = sinon.stub()
-				@res.sendStatus = (code) =>
-					expect(code).to.equal 403
-					expect(@ProjectGetter.getProject.callCount).to.equal 0
-					expect(@ProjectEntityHandler.getAllEntitiesFromProject.callCount).to.equal 0
-					expect(@res.json.callCount).to.equal 0
-					done()
-				@ProjectController.projectEntitiesJson @req, @res, @next
+		it 'should produce a list of entities', (done) ->
+			@res.json = (data) =>
+				expect(data).to.deep.equal {
+					project_id: 'abcd',
+					entities: [
+						{path: '/main.tex',     type: 'doc'},
+						{path: '/things/a.txt', type: 'file'},
+						{path: '/things/b.txt', type: 'doc'}
+					]
+				}
+				expect(@ProjectGetter.getProject.callCount).to.equal 1
+				expect(@ProjectEntityHandler.getAllEntitiesFromProject.callCount).to.equal 1
+				done()
+			@ProjectController.projectEntitiesJson @req, @res, @next
 
 	describe '_isInPercentageRollout', ->
 		before ->
