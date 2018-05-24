@@ -1,27 +1,28 @@
 # This file was auto-generated, do not edit it directly.
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
-# Version: 1.1.0
+# Version: 1.1.3
 
 version: "2"
 
 services:
   test_unit:
-    image: quay.io/sharelatex/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    image: gcr.io/csh-gcdm-test/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     command: npm run test:unit:_run
 
   test_acceptance:
     build: .
-    image: quay.io/sharelatex/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    image: gcr.io/csh-gcdm-test/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     extends:
       file: docker-compose-config.yml
       service: ci
     environment:
       REDIS_HOST: redis
       MONGO_HOST: mongo
+      POSTGRES_HOST: postgres
     depends_on:
-      - redis
       - mongo
+      - redis
     command: npm run test:acceptance:_run
 
   redis:
@@ -29,3 +30,4 @@ services:
 
   mongo:
     image: mongo:3.4
+
