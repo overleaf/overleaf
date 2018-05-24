@@ -30,10 +30,8 @@ describe "SubscriptionGroupHandler", ->
 			addEmailInviteToGroup: sinon.stub().callsArgWith(2)
 			removeEmailInviteFromGroup: sinon.stub().callsArgWith(2)
 
-		@UserLocator =
-			findById: sinon.stub()
-
 		@UserGetter =
+			getUser: sinon.stub()
 			getUserByMainEmail: sinon.stub()
 
 		@LimitationsManager =
@@ -58,7 +56,6 @@ describe "SubscriptionGroupHandler", ->
 			"../User/UserCreator": @UserCreator
 			"./SubscriptionUpdater": @SubscriptionUpdater
 			"./SubscriptionLocator": @SubscriptionLocator
-			"../User/UserLocator": @UserLocator
 			"../User/UserGetter": @UserGetter
 			"./LimitationsManager": @LimitationsManager
 			"../Security/OneTimeTokenHandler":@OneTimeTokenHandler
@@ -122,26 +119,26 @@ describe "SubscriptionGroupHandler", ->
 		beforeEach ->
 			@subscription = {}
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @subscription)
-			@UserLocator.findById.callsArgWith(1, null, {_id:"31232"})
+			@UserGetter.getUser.callsArgWith(1, null, {_id:"31232"})
 
 		it "should locate the subscription", (done)->
-			@UserLocator.findById.callsArgWith(1, null, {_id:"31232"})
+			@UserGetter.getUser.callsArgWith(1, null, {_id:"31232"})
 			@Handler.getPopulatedListOfMembers @adminUser_id, (err, users)=>
 				@SubscriptionLocator.getUsersSubscription.calledWith(@adminUser_id).should.equal true
 				done()
 
 		it "should get the users by id", (done)->
-			@UserLocator.findById.callsArgWith(1, null, {_id:"31232"})
+			@UserGetter.getUser.callsArgWith(1, null, {_id:"31232"})
 			@subscription.member_ids = ["1234", "342432", "312312"]
 			@Handler.getPopulatedListOfMembers @adminUser_id, (err, users)=>
-				@UserLocator.findById.calledWith(@subscription.member_ids[0]).should.equal true
-				@UserLocator.findById.calledWith(@subscription.member_ids[1]).should.equal true
-				@UserLocator.findById.calledWith(@subscription.member_ids[2]).should.equal true
+				@UserGetter.getUser.calledWith(@subscription.member_ids[0]).should.equal true
+				@UserGetter.getUser.calledWith(@subscription.member_ids[1]).should.equal true
+				@UserGetter.getUser.calledWith(@subscription.member_ids[2]).should.equal true
 				users.length.should.equal @subscription.member_ids.length
 				done()
 
 		it "should just return the id if the user can not be found as they may have deleted their account", (done)->
-			@UserLocator.findById.callsArgWith(1)
+			@UserGetter.getUser.callsArgWith(1)
 			@subscription.member_ids = ["1234", "342432", "312312"]
 			@Handler.getPopulatedListOfMembers @adminUser_id, (err, users)=>
 				assert.deepEqual users[0], {_id:@subscription.member_ids[0]}

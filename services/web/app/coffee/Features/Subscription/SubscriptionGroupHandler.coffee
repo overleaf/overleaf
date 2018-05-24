@@ -2,7 +2,6 @@ async = require("async")
 _ = require("underscore")
 SubscriptionUpdater = require("./SubscriptionUpdater")
 SubscriptionLocator = require("./SubscriptionLocator")
-UserLocator = require("../User/UserLocator")
 UserGetter = require("../User/UserGetter")
 LimitationsManager = require("./LimitationsManager")
 logger = require("logger-sharelatex")
@@ -51,7 +50,7 @@ module.exports = SubscriptionGroupHandler =
 				users.push buildEmailInviteViewModel(email)
 			jobs = _.map subscription.member_ids, (user_id)->
 				return (cb)->
-					UserLocator.findById user_id, (err, user)->
+					UserGetter.getUser user_id, (err, user)->
 						if err? or !user?
 							users.push _id:user_id
 							return cb()
