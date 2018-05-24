@@ -308,6 +308,7 @@ describe "ProjectController", ->
 
 			it 'should show for paid users', (done) ->
 				@user.features.github = true
+				@user.features.dropbox = true
 				@res.render = (pageName, opts)=>
 					opts.frontChatWidgetRoomId.should.equal @settings.overleaf.front_chat_widget_room_id
 					done()
