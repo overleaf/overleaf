@@ -110,7 +110,7 @@ define [
 					if data.length >= (TWO_MEGABYTES - 200)
 						$scope.textPreview.shouldShowDots = true
 						# remove last partial line
-						data = data.replace(/\n.*$/, '')
+						data = data?.replace?(/\n.*$/, '')
 					$scope.textPreview.data = data
 					$timeout(setHeight, 0)
 				.catch (error) ->
