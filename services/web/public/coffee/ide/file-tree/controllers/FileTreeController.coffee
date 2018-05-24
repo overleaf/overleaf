@@ -242,10 +242,10 @@ define [
 				if fileName
 					$scope.data.name = fileName
 
-			$scope._setInFlight = (type) ->
+			_setInFlight = (type) ->
 				$scope.state.inFlight[type] = true
 
-			$scope._reset = (opts) ->
+			_reset = (opts) ->
 				isError = opts.err == true
 				inFlight = $scope.state.inFlight
 				inFlight.projects = inFlight.entities = inFlight.create = false
@@ -273,7 +273,7 @@ define [
 					data.name
 
 			$scope.getUserProjects = () ->
-				$scope._setInFlight('projects')
+				_setInFlight('projects')
 				ide.$http.get("/user/projects", {
 					_csrf: window.csrfToken
 				})
@@ -281,25 +281,25 @@ define [
 					$scope.data.projectEntities = null
 					$scope.data.projects = resp.data.projects.filter (p) ->
 						p._id != ide.project_id
-					$scope._reset(err: false)
+					_reset(err: false)
 				.catch (err) ->
-					$scope._reset(err: true)
+					_reset(err: true)
 
 			$scope.getProjectEntities = (project_id) =>
-				$scope._setInFlight('entities')
+				_setInFlight('entities')
 				ide.$http.get("/project/#{project_id}/entities", {
 					_csrf: window.csrfToken
 				})
 				.then (resp) ->
 					if $scope.data.selectedProjectId == resp.data.project_id
 						$scope.data.projectEntities = resp.data.entities
-						$scope._reset(err: false)
+						_reset(err: false)
 				.catch (err) ->
-					$scope._reset(err: true)
+					_reset(err: true)
 
 			$scope.init = () ->
 				$scope.getUserProjects()
-			$timeout($scope.init, 100)
+			$timeout($scope.init, 0)
 
 			$scope.create = () ->
 				projectId = $scope.data.selectedProjectId
@@ -307,9 +307,9 @@ define [
 				path = $scope.data.selectedProjectEntity
 				name = $scope.data.name
 				if !name || !path || !projectId || !projectDisplayName
-					$scope._reset(err: true)
+					_reset(err: true)
 					return
-				$scope._setInFlight('create')
+				_setInFlight('create')
 				ide.fileTreeManager
 					.createLinkedFile(name, parent_folder, 'project_file', {
 						source_project_id: projectId,
@@ -317,11 +317,11 @@ define [
 						source_project_display_name: projectDisplayName
 					})
 					.then () ->
-						$scope._reset(err: false)
+						_reset(err: false)
 						$modalInstance.close()
 					.catch (response)->
 						{ data } = response
-						$scope._reset(err: true)
+						_reset(err: true)
 
 			$scope.cancel = () ->
 				$modalInstance.dismiss('cancel')
