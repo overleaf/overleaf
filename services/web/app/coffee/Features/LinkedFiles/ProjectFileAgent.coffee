@@ -43,13 +43,18 @@ SourceFileNotFoundError.prototype.__proto__ = Error.prototype
 module.exports = ProjectFileAgent =
 
 	sanitizeData: (data) ->
-		return data
+		return _.pick(
+			data,
+			'source_project_id',
+			'source_entity_path',
+			'source_project_display_name'
+		)
 
 	_validate: (data) ->
 		return (
-			!!data.source_project_id &&
-			!!data.source_entity_path &&
-			!!data.source_project_display_name
+			data.source_project_id? &&
+			data.source_entity_path? &&
+			data.source_project_display_name?
 		)
 
 	checkAuth: (project_id, data, current_user_id, callback = (error, allowed)->) ->
