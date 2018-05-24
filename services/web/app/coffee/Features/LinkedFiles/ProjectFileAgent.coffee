@@ -52,25 +52,30 @@ module.exports = ProjectFileAgent =
 			!!data.source_project_display_name
 		)
 
+	checkAuth: (project_id, data, current_user_id, callback = (error, allowed)->) ->
+		callback = _.once(callback)
+		if !ProjectFileAgent._validate(data)
+			return callback(new BadDataError())
+		{source_project_id, source_entity_path} = data
+		AuthorizationManager.canUserReadProject current_user_id, source_project_id, null, (err, canRead) ->
+			return callback(err) if err?
+			callback(null, canRead)
+
 	writeIncomingFileToDisk:
 		(project_id, data, current_user_id, callback = (error, fsPath) ->) ->
 			callback = _.once(callback)
 			if !ProjectFileAgent._validate(data)
 				return callback(new BadDataError())
 			{source_project_id, source_entity_path} = data
-			AuthorizationManager.canUserReadProject current_user_id, source_project_id,
-				null, (err, canRead) ->
-					return callback(err) if err?
-					return callback(new AccessDeniedError()) if !canRead
-					ProjectLocator.findElementByPath {
-						project_id: source_project_id,
-						path: source_entity_path
-					}, (err, entity, type) ->
-						if err?
-							if err.toString().match(/^not found.*/)
-								err = new SourceFileNotFoundError()
-							return callback(err)
-						ProjectFileAgent._writeEntityToDisk source_project_id, entity._id, type, callback
+			ProjectLocator.findElementByPath {
+				project_id: source_project_id,
+				path: source_entity_path
+			}, (err, entity, type) ->
+				if err?
+					if err.toString().match(/^not found.*/)
+						err = new SourceFileNotFoundError()
+					return callback(err)
+				ProjectFileAgent._writeEntityToDisk source_project_id, entity._id, type, callback
 
 	_writeEntityToDisk: (project_id, entity_id, type, callback=(err, location)->) ->
 		callback = _.once(callback)

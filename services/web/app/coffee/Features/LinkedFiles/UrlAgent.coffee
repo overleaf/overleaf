@@ -27,6 +27,9 @@ module.exports = UrlAgent = {
 			url: @._prependHttpIfNeeded(data.url)
 		}
 
+	checkAuth: (project_id, data, current_user_id, callback = (error, allowed)->) ->
+		callback(null, true)
+
 	writeIncomingFileToDisk: (project_id, data, current_user_id, callback = (error, fsPath) ->) ->
 		callback = _.once(callback)
 		url = data.url
