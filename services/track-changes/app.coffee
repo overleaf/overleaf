@@ -92,9 +92,13 @@ app.use (error, req, res, next) ->
 
 port = Settings.internal?.trackchanges?.port or 3015
 host = Settings.internal?.trackchanges?.host or "localhost"
-app.listen port, host, (error) ->
-	if error?
-		logger.error err: error, "could not start track-changes server"
-	else
-		logger.info "trackchanges starting up, listening on #{host}:#{port}"
+
+if !module.parent # Called directly
+	app.listen port, host, (error) ->
+		if error?
+			logger.error err: error, "could not start track-changes server"
+		else
+			logger.info "trackchanges starting up, listening on #{host}:#{port}"
+
+module.exports = app
 

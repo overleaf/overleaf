@@ -35,11 +35,10 @@ module.exports =
 
 	trackchanges:
 		s3:
-			key: ""
-			secret: ""
+			key: process.env['AWS_ACCESS_KEY_ID']
+			secret: process.env['AWS_SECRET_ACCESS_KEY']
 		stores:
-			doc_history: ""
-
-
+			doc_history: process.env['AWS_BUCKET']
+			
 	path:
 		dumpFolder:   Path.join(TMP_DIR, "dumpFolder")

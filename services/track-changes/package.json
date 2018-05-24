@@ -7,8 +7,16 @@
     "url": "https://github.com/sharelatex/track-changes-sharelatex.git"
   },
   "scripts": {
-    "compile:app": "coffee -o app/js -c app/coffee && coffee -c app.coffee",
-    "start": "npm run compile:app && node app.js"
+    "compile:app": "([ -e app/coffee ] && coffee $COFFEE_OPTIONS -o app/js -c app/coffee || echo 'No CoffeeScript folder to compile') && ( [ -e app.coffee ] && coffee $COFFEE_OPTIONS -c app.coffee || echo 'No CoffeeScript app to compile')",
+    "start": "npm run compile:app && node $NODE_APP_OPTIONS app.js",
+    "test:acceptance:_run": "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY AWS_BUCKET=$AWS_BUCKET AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
+    "test:acceptance": "npm run compile:app && npm run compile:acceptance_tests && npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
+    "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js",
+    "test:unit": "npm run compile:app && npm run compile:unit_tests && npm run test:unit:_run -- --grep=$MOCHA_GREP",
+    "compile:unit_tests": "[ ! -e test/unit/coffee ] &&  echo 'No unit tests to compile' || coffee -o test/unit/js -c test/unit/coffee",
+    "compile:acceptance_tests": "[ ! -e test/acceptance/coffee ] && echo 'No acceptance tests to compile' || coffee -o test/acceptance/js -c test/acceptance/coffee",
+    "compile:all": "npm run compile:app && npm run compile:unit_tests && npm run compile:acceptance_tests",
+    "nodemon": "nodemon --config nodemon.json"
   },
   "dependencies": {
     "JSONStream": "^1.0.4",
@@ -44,6 +52,7 @@
     "grunt-available-tasks": "~0.4.2",
     "grunt-contrib-coffee": "~0.10.1",
     "bunyan": "~2.0.2",
+    "mocha": "^4.0.1",
     "grunt-bunyan": "~0.5.0",
     "grunt-forever": "~0.4.2",
     "timekeeper": "0.0.4",
