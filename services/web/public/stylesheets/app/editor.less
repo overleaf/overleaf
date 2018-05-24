@@ -201,13 +201,9 @@
 	}
 }
 
-.cm-editor-wrapper {
-	height: 100%;
-
-	.CodeMirror {
-		height: 100%;
-	}
-}
+/**************************************
+Ace
+***************************************/
 
 // The internal components of the aceEditor directive
 .ace-editor-wrapper {
@@ -280,6 +276,23 @@
 	.ace_dark & {
 		background-color: #000;
 	}
+}
+
+/**************************************
+CodeMirror
+***************************************/
+.cm-editor-wrapper {
+	position: relative;
+	height: 100%;
+}
+
+.cm-editor-body {
+	height: 100%;
+}
+
+// CM (for some reason) has height set to 300px in it's stylesheet
+.CodeMirror {
+	height: 100%;
 }
 
 .ui-layout-resizer when (@is-overleaf = false) {
