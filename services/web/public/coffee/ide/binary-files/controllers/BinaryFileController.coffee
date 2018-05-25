@@ -2,7 +2,7 @@ define [
 	"base"
 	"moment"
 ], (App, moment) ->
-	App.controller "BinaryFileController", ["$scope", "$rootScope", "$http", "$timeout", "$element", "ide", ($scope, $rootScope, $http, $timeout, $element, ide) ->
+	App.controller "BinaryFileController", ["$scope", "$rootScope", "$http", "$timeout", "$element", "ide", "waitFor", ($scope, $rootScope, $http, $timeout, $element, ide, waitFor) ->
 
 		TWO_MEGABYTES = 2 * 1024 * 1024
 
@@ -56,7 +56,7 @@ define [
 					{ new_file_id } = data
 					$timeout(
 						() ->
-							ide.waitFor(
+							waitFor(
 								() ->
 									ide.fileTreeManager.findEntityById(new_file_id)
 								5000

@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "HistoryV2DiffController", ($scope, ide, event_tracking) ->
+	App.controller "HistoryV2DiffController", ($scope, ide, event_tracking, waitFor) ->
 		$scope.restoreState =
 			inflight: false
 			error: false
@@ -25,7 +25,7 @@ define [
 
 		openEntity = (data) ->
 			{id, type} = data
-			ide.waitFor(
+			waitFor(
 				() ->
 					ide.fileTreeManager.findEntityById(id)
 				3000

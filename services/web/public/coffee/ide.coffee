@@ -35,6 +35,7 @@ define [
 	"directives/videoPlayState"
 	"services/queued-http"
 	"services/validateCaptcha"
+	"services/wait-for"
 	"filters/formatDate"
 	"main/event"
 	"main/account-upgrade"
@@ -228,21 +229,5 @@ define [
 			if data.newAccessLevel?
 				ide.$scope.project.publicAccesLevel = data.newAccessLevel
 				$scope.$digest()
-
-		ide.waitFor = (testFunction, timeout, pollInterval=500) ->
-			iterationLimit = Math.floor(timeout / pollInterval)
-			iterations = 0
-			$q(
-				(resolve, reject) ->
-					do tryIteration = () ->
-						if iterations > iterationLimit
-							return reject(new Error("waiting too long, #{JSON.stringify({timeout, pollInterval})}"))
-						iterations += 1
-						result = testFunction()
-						if result?
-							resolve(result)
-						else
-							setTimeout(tryIteration, pollInterval)
-			)
 
 	angular.bootstrap(document.body, ["SharelatexApp"])
