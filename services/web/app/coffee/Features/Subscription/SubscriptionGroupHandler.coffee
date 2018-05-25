@@ -39,12 +39,27 @@ module.exports = SubscriptionGroupHandler =
 
 	removeUserFromGroup: (adminUser_id, userToRemove_id, callback)->
 		SubscriptionUpdater.removeUserFromGroup adminUser_id, userToRemove_id, callback
-	
+
 	removeEmailInviteFromGroup: (adminUser_id, email, callback) ->
 		SubscriptionUpdater.removeEmailInviteFromGroup adminUser_id, email, callback
 
+
+	replaceUserReferencesInGroups: (oldId, newId, callback) ->
+		Subscription.update {admin_id: userStubId}, {admin_id: slUserId}, (error) ->
+			callback(error) if error?
+
+			# Mongo won't let us pull and addToSet in the same query, so do it in
+			# two. Note we need to add first, since the query is based on the old user.
+			query = {member_ids: userStubId}
+			addNewUserUpdate = $addToSet: {member_ids: slUserId}
+			removeOldUserUpdate = $pull: {member_ids: userStubId}
+
+			Subscription.update query, addNewUserUpdate, { multi: true }, (error) ->
+				return callback(error) if error?
+				Subscription.update query, removeOldUserUpdate, { multi: true }, callback
+
 	getPopulatedListOfMembers: (adminUser_id, callback)->
-		SubscriptionLocator.getUsersSubscription adminUser_id, (err, subscription)-> 
+		SubscriptionLocator.getUsersSubscription adminUser_id, (err, subscription)->
 			users = []
 			for email in subscription.invited_emails or []
 				users.push buildEmailInviteViewModel(email)
@@ -111,7 +126,7 @@ module.exports = SubscriptionGroupHandler =
 			async.series jobs, callback
 
 buildUserViewModel = (user)->
-	u = 
+	u =
 		email: user.email
 		first_name: user.first_name
 		last_name: user.last_name
