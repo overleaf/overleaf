@@ -13,6 +13,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./compiles:/app/compiles
       - ./cache:/app/cache
+      - ./bin/synctex:/app/bin/synctex
 
       
   ci:
@@ -26,5 +27,6 @@ services:
       SQLITE_PATH: /app/compiles/db.sqlite
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw
-      - ./cache:/app/cache
       - ./compiles:/app/compiles
+      - ./cache:/app/cache
+      - ./bin/synctex:/app/bin/synctex
