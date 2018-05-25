@@ -229,4 +229,18 @@ define [
 				ide.$scope.project.publicAccesLevel = data.newAccessLevel
 				$scope.$digest()
 
+		ide.waitFor = (fn, callback, timeout) ->
+			sleepTime = 500
+			iterationLimit = Math.floor(timeout / sleepTime)
+			iterations = 0
+			do tryIteration = () ->
+				if iterations > iterationLimit
+					return
+				iterations += 1
+				result = fn()
+				if result?
+					callback(result)
+				else
+					setTimeout(tryIteration, sleepTime)
+
 	angular.bootstrap(document.body, ["SharelatexApp"])
