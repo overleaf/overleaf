@@ -59,10 +59,12 @@ define [
 							ide.waitFor(
 								() ->
 									ide.fileTreeManager.findEntityById(new_file_id)
-								(newFile) ->
-									ide.binaryFilesManager.openFile(newFile)
 								5000
 							)
+								.then (newFile) ->
+									ide.binaryFilesManager.openFile(newFile)
+								.catch (err) ->
+									console.warn(err)
 						, 0
 					)
 					$scope.refreshError = null

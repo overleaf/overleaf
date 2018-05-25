@@ -28,10 +28,12 @@ define [
 			ide.waitFor(
 				() ->
 					ide.fileTreeManager.findEntityById(id)
-				(entity) ->
+				3000
+			)
+				.then (entity) ->
 					if type == 'doc'
 						ide.editorManager.openDoc(entity)
 					else if type == 'file'
 						ide.binaryFilesManager.openFile(entity)
-				3000
-			)
+				.catch (err) ->
+					console.warn(err)

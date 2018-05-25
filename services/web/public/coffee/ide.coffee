@@ -55,7 +55,7 @@ define [
 	SafariScrollPatcher
 ) ->
 
-	App.controller "IdeController", ($scope, $timeout, ide, localStorage, sixpack, event_tracking, metadata) ->
+	App.controller "IdeController", ($scope, $timeout, ide, localStorage, sixpack, event_tracking, metadata, $q) ->
 		# Don't freak out if we're already in an apply callback
 		$scope.$originalApply = $scope.$apply
 		$scope.$apply = (fn = () ->) ->
@@ -229,17 +229,20 @@ define [
 				ide.$scope.project.publicAccesLevel = data.newAccessLevel
 				$scope.$digest()
 
-		ide.waitFor = (testFunction, callback, timeout, pollInterval=500) ->
+		ide.waitFor = (testFunction, timeout, pollInterval=500) ->
 			iterationLimit = Math.floor(timeout / pollInterval)
 			iterations = 0
-			do tryIteration = () ->
-				if iterations > iterationLimit
-					return
-				iterations += 1
-				result = testFunction()
-				if result?
-					callback(result)
-				else
-					setTimeout(tryIteration, pollInterval)
+			$q(
+				(resolve, reject) ->
+					do tryIteration = () ->
+						if iterations > iterationLimit
+							return reject(new Error("waiting too long, #{JSON.stringify({timeout, pollInterval})}"))
+						iterations += 1
+						result = testFunction()
+						if result?
+							resolve(result)
+						else
+							setTimeout(tryIteration, pollInterval)
+			)
 
 	angular.bootstrap(document.body, ["SharelatexApp"])
