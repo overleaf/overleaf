@@ -121,7 +121,7 @@ module.exports = class Router
 
 		webRouter.get  '/user/projects', AuthenticationController.requireLogin(), ProjectController.userProjectsJson
 		webRouter.get  '/project/:Project_id/entities', AuthenticationController.requireLogin(),
-			AuthorizationMiddlewear.ensureUserCanReadProject
+			AuthorizationMiddlewear.ensureUserCanReadProject,
 			ProjectController.projectEntitiesJson
 
 		webRouter.get  '/project', AuthenticationController.requireLogin(), ProjectController.projectListPage
