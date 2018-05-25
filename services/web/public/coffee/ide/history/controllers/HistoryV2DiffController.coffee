@@ -31,7 +31,7 @@ define [
 				(entity) ->
 					if type == 'doc'
 						ide.editorManager.openDoc(entity)
-					else type == 'file'
+					else if type == 'file'
 						ide.binaryFilesManager.openFile(entity)
 				3000
 			)
