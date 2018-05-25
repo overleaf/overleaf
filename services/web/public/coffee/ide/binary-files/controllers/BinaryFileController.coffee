@@ -47,18 +47,6 @@ define [
 			else
 				return url
 
-		_tryOpenFile = (new_file_id) ->
-			iterations = 0
-			do tryOpen = () ->
-				if iterations > 10
-					return
-				iterations += 1
-				newFile = ide.fileTreeManager.findEntityById(new_file_id)
-				if newFile?
-					ide.binaryFilesManager.openFile(newFile)
-				else
-					setTimeout(tryOpen, 500)
-
 		$scope.refreshFile = (file) ->
 			$scope.refreshing = true
 			$scope.refreshError = null
@@ -68,7 +56,13 @@ define [
 					{ new_file_id } = data
 					$timeout(
 						() ->
-							_tryOpenFile(new_file_id)
+							ide.waitFor(
+								() ->
+									ide.fileTreeManager.findEntityById(new_file_id)
+								(newFile) ->
+									ide.binaryFilesManager.openFile(newFile)
+								5000
+							)
 						, 0
 					)
 					$scope.refreshError = null
