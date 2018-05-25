@@ -145,9 +145,10 @@ output {
     opacity: 1; // iOS fix for unreadable disabled content
   }
 
-  // Reset height for `textarea`s
+  // Reset height for `textarea`s, and smaller border-radius
   textarea& {
     height: auto;
+    border-radius: @border-radius-base;
   }
 	// Smaller border-radius for `select` inputs
 	select& {
