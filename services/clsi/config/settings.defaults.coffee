@@ -46,4 +46,5 @@ if process.env["DOCKER_RUNNER"]
 	module.exports.path.sandboxedCompilesHostDir = process.env["COMPILES_HOST_DIR"]
 
 	module.exports.path.synctexBinHostPath = process.env["SYNCTEX_BIN_HOST_PATH"]
+console.log "configggggg"
 console.log module.exports
