@@ -24,8 +24,8 @@ module.exports = LinkedFilesController = {
 		linkedFileData = Agent.sanitizeData(data)
 		linkedFileData.provider = provider
 		Agent.checkAuth project_id, data, user_id, (err, allowed) ->
-			return next(err) if err?
-			return ses.sendStatus(403) if !allowed
+			return Agent.handleError(err, req, res, next) if err?
+			return res.sendStatus(403) if !allowed
 			Agent.writeIncomingFileToDisk project_id, linkedFileData, user_id, (error, fsPath) ->
 				if error?
 					logger.error {err: error, project_id, name, linkedFileData, parent_folder_id, user_id}, 'error writing linked file to disk'
