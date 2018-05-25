@@ -24,17 +24,14 @@ define [
 					$scope.restoreState.inflight = false
 
 		openEntity = (data) ->
-			iterations = 0
 			{id, type} = data
-			do tryOpen = () ->
-				if iterations > 5
-					return
-				iterations += 1
-				entity = ide.fileTreeManager.findEntityById(id)
-				if entity? and type == 'doc'
-					ide.editorManager.openDoc(entity)
-				else if entity? and type == 'file'
-					ide.binaryFilesManager.openFile(entity)
-				else
-					setTimeout(tryOpen, 500)
-			
+			ide.waitFor(
+				() ->
+					ide.fileTreeManager.findEntityById(id)
+				(entity) ->
+					if type == 'doc'
+						ide.editorManager.openDoc(entity)
+					else type == 'file'
+						ide.binaryFilesManager.openFile(entity)
+				3000
+			)
