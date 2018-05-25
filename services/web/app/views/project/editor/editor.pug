@@ -33,7 +33,7 @@ div.full-size(
 				i.fa.fa-arrow-left
 				| &nbsp;&nbsp;#{translate("open_a_file_on_the_left")}
 
-		!= moduleIncludes('editor:toolbar', locals)
+		!= moduleIncludes('editor:main', locals)
 
 		#editor(
 			ace-editor="editor",
@@ -72,8 +72,6 @@ div.full-size(
 			font-family="settings.fontFamily || ui.defaultFontFamily"
 			line-height="settings.lineHeight || ui.defaultLineHeight"
 		)
-
-		!= moduleIncludes('editor:body', locals)
 
 		include ./review-panel
 
