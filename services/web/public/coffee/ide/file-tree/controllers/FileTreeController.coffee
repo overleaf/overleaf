@@ -252,13 +252,11 @@ define [
 				$scope.state.error = isError
 
 			$scope.shouldEnableProjectSelect = () ->
-				state = $scope.state
-				data = $scope.data
+				{ state, data } = $scope
 				return !state.inFlight.projects && data.projects
 
 			$scope.shouldEnableProjectEntitySelect = () ->
-				state = $scope.state
-				data = $scope.data
+				{ state, data } = $scope
 				return !state.inFlight.projects && !state.inFlight.entities && data.projects && data.selectedProjectId
 
 			$scope.shouldEnableCreateButton = () ->
