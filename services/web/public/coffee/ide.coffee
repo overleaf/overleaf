@@ -35,6 +35,7 @@ define [
 	"directives/videoPlayState"
 	"services/queued-http"
 	"services/validateCaptcha"
+	"services/wait-for"
 	"filters/formatDate"
 	"main/event"
 	"main/account-upgrade"
@@ -55,7 +56,7 @@ define [
 	SafariScrollPatcher
 ) ->
 
-	App.controller "IdeController", ($scope, $timeout, ide, localStorage, sixpack, event_tracking, metadata) ->
+	App.controller "IdeController", ($scope, $timeout, ide, localStorage, sixpack, event_tracking, metadata, $q) ->
 		# Don't freak out if we're already in an apply callback
 		$scope.$originalApply = $scope.$apply
 		$scope.$apply = (fn = () ->) ->

@@ -2,7 +2,7 @@ define [
 	"base"
 	"moment"
 ], (App, moment) ->
-	App.controller "BinaryFileController", ["$scope", "$rootScope", "$http", "$timeout", "$element", "ide", ($scope, $rootScope, $http, $timeout, $element, ide) ->
+	App.controller "BinaryFileController", ["$scope", "$rootScope", "$http", "$timeout", "$element", "ide", "waitFor", ($scope, $rootScope, $http, $timeout, $element, ide, waitFor) ->
 
 		TWO_MEGABYTES = 2 * 1024 * 1024
 
@@ -47,18 +47,6 @@ define [
 			else
 				return url
 
-		_tryOpenFile = (new_file_id) ->
-			iterations = 0
-			do tryOpen = () ->
-				if iterations > 10
-					return
-				iterations += 1
-				newFile = ide.fileTreeManager.findEntityById(new_file_id)
-				if newFile?
-					ide.binaryFilesManager.openFile(newFile)
-				else
-					setTimeout(tryOpen, 500)
-
 		$scope.refreshFile = (file) ->
 			$scope.refreshing = true
 			$scope.refreshError = null
@@ -68,7 +56,15 @@ define [
 					{ new_file_id } = data
 					$timeout(
 						() ->
-							_tryOpenFile(new_file_id)
+							waitFor(
+								() ->
+									ide.fileTreeManager.findEntityById(new_file_id)
+								5000
+							)
+								.then (newFile) ->
+									ide.binaryFilesManager.openFile(newFile)
+								.catch (err) ->
+									console.warn(err)
 						, 0
 					)
 					$scope.refreshError = null
