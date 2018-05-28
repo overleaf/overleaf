@@ -27,7 +27,7 @@ module.exports = CollaboratorsInviteController =
 	_checkShouldInviteEmail: (email, callback=(err, shouldAllowInvite)->) ->
 		if Settings.restrictInvitesToExistingAccounts == true
 			logger.log {email}, "checking if user exists with this email"
-			UserGetter.getUserByMainEmail email, {_id: 1}, (err, user) ->
+			UserGetter.getUserByAnyEmail email, {_id: 1}, (err, user) ->
 				return callback(err) if err?
 				userExists = user? and user?._id?
 				callback(null, userExists)

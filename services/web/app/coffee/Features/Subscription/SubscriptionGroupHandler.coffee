@@ -22,7 +22,7 @@ module.exports = SubscriptionGroupHandler =
 			if limitReached
 				logger.err adminUserId:adminUserId, newEmail:newEmail, "group subscription limit reached not adding user to group"
 				return callback(limitReached:limitReached)
-			UserGetter.getUserByMainEmail newEmail, (err, user)->
+			UserGetter.getUserByAnyEmail newEmail, (err, user)->
 				return callback(err) if err?
 				if user?
 					SubscriptionUpdater.addUserToGroup adminUserId, user._id, (err)->
