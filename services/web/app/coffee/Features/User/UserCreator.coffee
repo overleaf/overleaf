@@ -18,6 +18,10 @@ module.exports = UserCreator =
 			
 		user.ace.syntaxValidation = true
 		user.featureSwitches?.pdfng = true
+		user.emails = [
+			email: user.email
+			createdAt: new Date()
+		]
 
 		user.save (err)->
 			callback(err, user)
