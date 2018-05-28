@@ -74,3 +74,20 @@ describe "UserGetter", ->
 				@findOne.calledTwice.should.equal true
 				@findOne.calledWith(email: email, projection).should.equal true
 				done()
+
+	describe 'ensureUniqueEmailAddress', ->
+		beforeEach ->
+			@UserGetter.getUserByAnyEmail = sinon.stub()
+
+		it 'should return error if existing user is found', (done)->
+			@UserGetter.getUserByAnyEmail.callsArgWith(1, null, @fakeUser)
+			@UserGetter.ensureUniqueEmailAddress @newEmail, (err)=>
+				should.exist(err)
+				err.message.should.equal 'alread_exists'
+				done()
+
+		it 'should return null if no user is found', (done)->
+			@UserGetter.getUserByAnyEmail.callsArgWith(1)
+			@UserGetter.ensureUniqueEmailAddress @newEmail, (err)=>
+				should.not.exist(err)
+				done()

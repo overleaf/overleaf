@@ -62,12 +62,19 @@ module.exports = UserGetter =
 			return callback(null, user) if user?
 			db.userstubs.findOne query, projection, callback
 
+	# check for duplicate email address. This is also enforced at the DB level
+	ensureUniqueEmailAddress: (newEmail, callback) ->
+		@getUserByAnyEmail newEmail, (error, user) ->
+			return callback(message: 'alread_exists') if user?
+			callback(error)
+
 [
 	'getUser',
 	'getUserEmail',
 	'getUserByMainEmail',
 	'getUserByAnyEmail',
 	'getUsers',
-	'getUserOrUserStubById'
+	'getUserOrUserStubById',
+	'ensureUniqueEmailAddress',
 ].map (method) ->
 	metrics.timeAsyncMethod UserGetter, method, 'mongo.UserGetter', logger
