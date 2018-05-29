@@ -11,4 +11,6 @@ define [
 			window.openLinkedFileModal()
 
 		$scope.richText = () ->
-			window.location.href = window.location.toString() + '&rt=true'
+			current = window.location.toString()
+			target = "#{current}#{if window.location.search then '&' else '?'}rt=true"
+			window.location.href = target
