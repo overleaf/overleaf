@@ -22,6 +22,7 @@ describe "FeaturesUpdater", ->
 
 	describe "refreshFeatures", ->
 		beforeEach ->
+			@V1SubscriptionManager.notifyV1OfFeaturesChange = sinon.stub().yields()
 			@UserFeaturesUpdater.updateFeatures = sinon.stub().yields()
 			@FeaturesUpdater._getIndividualFeatures = sinon.stub().yields(null, { 'individual': 'features' })
 			@FeaturesUpdater._getGroupFeatureSets = sinon.stub().yields(null, [{ 'group': 'features' }, { 'group': 'features2' }])
@@ -29,48 +30,63 @@ describe "FeaturesUpdater", ->
 			@ReferalFeatures.getBonusFeatures = sinon.stub().yields(null, { 'bonus': 'features' })
 			@FeaturesUpdater._mergeFeatures = sinon.stub().returns({'merged': 'features'})
 			@callback = sinon.stub()
-			@FeaturesUpdater.refreshFeatures @user_id, @callback
 
-		it "should get the individual features", ->
-			@FeaturesUpdater._getIndividualFeatures
-				.calledWith(@user_id)
-				.should.equal true
+		describe "normally", ->
+			beforeEach ->
+				@FeaturesUpdater.refreshFeatures @user_id, @callback
 
-		it "should get the group features", ->
-			@FeaturesUpdater._getGroupFeatureSets
-				.calledWith(@user_id)
-				.should.equal true
+			it "should get the individual features", ->
+				@FeaturesUpdater._getIndividualFeatures
+					.calledWith(@user_id)
+					.should.equal true
 
-		it "should get the v1 features", ->
-			@FeaturesUpdater._getV1Features
-				.calledWith(@user_id)
-				.should.equal true
+			it "should get the group features", ->
+				@FeaturesUpdater._getGroupFeatureSets
+					.calledWith(@user_id)
+					.should.equal true
 
-		it "should get the bonus features", ->
-			@ReferalFeatures.getBonusFeatures
-				.calledWith(@user_id)
-				.should.equal true
+			it "should get the v1 features", ->
+				@FeaturesUpdater._getV1Features
+					.calledWith(@user_id)
+					.should.equal true
 
-		it "should merge from the default features", ->
-			@FeaturesUpdater._mergeFeatures.calledWith(@Settings.defaultFeatures).should.equal true
+			it "should get the bonus features", ->
+				@ReferalFeatures.getBonusFeatures
+					.calledWith(@user_id)
+					.should.equal true
 
-		it "should merge the individual features", ->
-			@FeaturesUpdater._mergeFeatures.calledWith(sinon.match.any, { 'individual': 'features' }).should.equal true
+			it "should merge from the default features", ->
+				@FeaturesUpdater._mergeFeatures.calledWith(@Settings.defaultFeatures).should.equal true
 
-		it "should merge the group features", ->
-			@FeaturesUpdater._mergeFeatures.calledWith(sinon.match.any, { 'group': 'features' }).should.equal true
-			@FeaturesUpdater._mergeFeatures.calledWith(sinon.match.any, { 'group': 'features2' }).should.equal true
+			it "should merge the individual features", ->
+				@FeaturesUpdater._mergeFeatures.calledWith(sinon.match.any, { 'individual': 'features' }).should.equal true
 
-		it "should merge the v1 features", ->
-			@FeaturesUpdater._mergeFeatures.calledWith(sinon.match.any, { 'v1': 'features' }).should.equal true
+			it "should merge the group features", ->
+				@FeaturesUpdater._mergeFeatures.calledWith(sinon.match.any, { 'group': 'features' }).should.equal true
+				@FeaturesUpdater._mergeFeatures.calledWith(sinon.match.any, { 'group': 'features2' }).should.equal true
 
-		it "should merge the bonus features", ->
-			@FeaturesUpdater._mergeFeatures.calledWith(sinon.match.any, { 'bonus': 'features' }).should.equal true
+			it "should merge the v1 features", ->
+				@FeaturesUpdater._mergeFeatures.calledWith(sinon.match.any, { 'v1': 'features' }).should.equal true
 
-		it "should update the user with the merged features", ->
-			@UserFeaturesUpdater.updateFeatures
-				.calledWith(@user_id, {'merged': 'features'})
-				.should.equal true
+			it "should merge the bonus features", ->
+				@FeaturesUpdater._mergeFeatures.calledWith(sinon.match.any, { 'bonus': 'features' }).should.equal true
+
+			it "should update the user with the merged features", ->
+				@UserFeaturesUpdater.updateFeatures
+					.calledWith(@user_id, {'merged': 'features'})
+					.should.equal true
+
+			it "should notify v1", ->
+				@V1SubscriptionManager.notifyV1OfFeaturesChange
+					.called.should.equal true
+
+		describe "with notifyV1 == false", ->
+			beforeEach ->
+				@FeaturesUpdater.refreshFeatures @user_id, false, @callback
+
+			it "should not notify v1", ->
+				@V1SubscriptionManager.notifyV1OfFeaturesChange
+					.called.should.equal false
 
 	describe "_mergeFeatures", ->
 		it "should prefer priority over standard for compileGroup", ->

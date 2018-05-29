@@ -13,7 +13,7 @@ logger = require "logger-sharelatex"
 logger.logger.level("error")
 
 syncUserAndGetFeatures = (user, callback = (error, features) ->) ->
-	FeaturesUpdater.refreshFeatures user._id, (error) ->
+	FeaturesUpdater.refreshFeatures user._id, false, (error) ->
 		return callback(error) if error?
 		User.findById user._id, (error, user) ->
 			return callback(error) if error?

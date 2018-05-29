@@ -14,7 +14,7 @@ module.exports = FeaturesUpdater =
 	refreshFeatures: (user_id, notifyV1, callback)->
 		if !callback?
 			callback = notifyV1
-			notifyV1 = false
+			notifyV1 = true
 
 		if notifyV1
 			V1SubscriptionManager.notifyV1OfFeaturesChange user_id, (error) ->
