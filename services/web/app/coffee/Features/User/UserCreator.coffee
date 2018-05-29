@@ -1,18 +1,9 @@
 User = require("../../models/User").User
-UserLocator = require("./UserLocator")
 logger = require("logger-sharelatex")
 metrics = require('metrics-sharelatex')
 
 
 module.exports = UserCreator =
-
-	getUserOrCreateHoldingAccount: (email, callback = (err, user)->)->
-		self = @
-		UserLocator.findByEmail email, (err, user)->
-			if user?
-				callback(err, user)
-			else
-				self.createNewUser email:email, holdingAccount:true, callback
 
 	createNewUser: (opts, callback)->
 		logger.log opts:opts, "creating new user"

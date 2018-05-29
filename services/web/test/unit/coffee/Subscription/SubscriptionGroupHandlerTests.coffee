@@ -24,9 +24,6 @@ describe "SubscriptionGroupHandler", ->
 			getSubscriptionByMemberIdAndId: sinon.stub()
 			getSubscription: sinon.stub()
 
-		@UserCreator = 
-			getUserOrCreateHoldingAccount: sinon.stub().callsArgWith(1, null, @user)
-
 		@SubscriptionUpdater =
 			addUserToGroup: sinon.stub().callsArgWith(2)
 			removeUserFromGroup: sinon.stub().callsArgWith(2)
