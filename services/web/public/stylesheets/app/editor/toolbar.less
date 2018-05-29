@@ -184,8 +184,12 @@
 	}
 }
 
+/**************************************
+	Toggle Switch
+***************************************/
+
 .toggle-wrapper {
-	width: 200px;
+	min-width: 200px;
 	height: 24px;
 }
 
@@ -240,4 +244,23 @@
 .toggle-switch-input:checked:nth-child(4) ~ .toggle-switch-selection {
   transform: translate(100%);
   border-radius: 0 @btn-border-radius-base @btn-border-radius-base 0;
+}
+
+/**************************************
+	Formatting buttons
+***************************************/
+.formatting-btn {
+	padding: 0;
+	min-width: 32px;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: none;
+	border: none;
+	border-left: 1px solid #ccc;
+
+	&:last-child {
+		border-right: 1px solid #ccc;
+	}
 }
