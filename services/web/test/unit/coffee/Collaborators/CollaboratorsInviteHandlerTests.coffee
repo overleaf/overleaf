@@ -605,7 +605,7 @@ describe "CollaboratorsInviteHandler", ->
 				_id: ObjectId()
 				first_name: "jim"
 			@existingUser = {_id: ObjectId()}
-			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @existingUser)
+			@UserGetter.getUserByMainEmail = sinon.stub().callsArgWith(2, null, @existingUser)
 			@fakeProject =
 				_id: @project_id
 				name: "some project"
@@ -626,8 +626,8 @@ describe "CollaboratorsInviteHandler", ->
 
 			it 'should call getUser', (done) ->
 				@call (err) =>
-					@UserGetter.getUser.callCount.should.equal 1
-					@UserGetter.getUser.calledWith({email: @invite.email}).should.equal true
+					@UserGetter.getUserByMainEmail.callCount.should.equal 1
+					@UserGetter.getUserByMainEmail.calledWith(@invite.email).should.equal true
 					done()
 
 			it 'should call getProject', (done) ->
@@ -671,7 +671,7 @@ describe "CollaboratorsInviteHandler", ->
 		describe 'when the user does not exist', ->
 
 			beforeEach ->
-				@UserGetter.getUser = sinon.stub().callsArgWith(2, null, null)
+				@UserGetter.getUserByMainEmail = sinon.stub().callsArgWith(2, null, null)
 
 			it 'should not produce an error', (done) ->
 				@call (err) =>
@@ -680,8 +680,8 @@ describe "CollaboratorsInviteHandler", ->
 
 			it 'should call getUser', (done) ->
 				@call (err) =>
-					@UserGetter.getUser.callCount.should.equal 1
-					@UserGetter.getUser.calledWith({email: @invite.email}).should.equal true
+					@UserGetter.getUserByMainEmail.callCount.should.equal 1
+					@UserGetter.getUserByMainEmail.calledWith(@invite.email).should.equal true
 					done()
 
 			it 'should not call getProject', (done) ->
@@ -698,7 +698,7 @@ describe "CollaboratorsInviteHandler", ->
 		describe 'when the getUser produces an error', ->
 
 			beforeEach ->
-				@UserGetter.getUser = sinon.stub().callsArgWith(2, new Error('woops'))
+				@UserGetter.getUserByMainEmail = sinon.stub().callsArgWith(2, new Error('woops'))
 
 			it 'should produce an error', (done) ->
 				@call (err) =>
@@ -707,8 +707,8 @@ describe "CollaboratorsInviteHandler", ->
 
 			it 'should call getUser', (done) ->
 				@call (err) =>
-					@UserGetter.getUser.callCount.should.equal 1
-					@UserGetter.getUser.calledWith({email: @invite.email}).should.equal true
+					@UserGetter.getUserByMainEmail.callCount.should.equal 1
+					@UserGetter.getUserByMainEmail.calledWith(@invite.email).should.equal true
 					done()
 
 			it 'should not call getProject', (done) ->

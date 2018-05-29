@@ -3,7 +3,7 @@ mongojs = require("../../infrastructure/mongojs")
 metrics = require("metrics-sharelatex")
 db = mongojs.db
 ObjectId = mongojs.ObjectId
-UserLocator = require("./UserLocator")
+UserGetter = require("./UserGetter")
 
 module.exports = UserUpdater =
 	updateUser: (query, update, callback = (error) ->) ->
@@ -18,7 +18,7 @@ module.exports = UserUpdater =
 	changeEmailAddress: (user_id, newEmail, callback)->
 		self = @
 		logger.log user_id:user_id, newEmail:newEmail, "updaing email address of user"
-		UserLocator.findByEmail newEmail, (error, user) ->
+		UserGetter.getUserByMainEmail newEmail, (error, user) ->
 			if user?
 				return callback({message:"alread_exists"})
 			self.updateUser user_id.toString(), {
