@@ -249,9 +249,14 @@
 /**************************************
 	Formatting buttons
 ***************************************/
+.button-measurer-wrapper {
+	display: flex;
+}
+
 .formatting-btn {
 	padding: 0;
 	min-width: 32px;
+	width: 32px;
 	height: 100%;
 	display: flex;
 	align-items: center;
@@ -259,8 +264,14 @@
 	box-shadow: none;
 	border: none;
 	border-left: 1px solid #ccc;
+	border-radius: 0;
 
 	&:last-child {
 		border-right: 1px solid #ccc;
 	}
+}
+
+.formatting-btn-icon {
+	font-style: normal;
+	line-height: 1.5;
 }
