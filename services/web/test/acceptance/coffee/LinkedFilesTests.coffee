@@ -105,7 +105,6 @@ describe "LinkedFiles", ->
 					data:
 						source_project_id: @project_two_id,
 						source_entity_path: "/#{@source_doc_name}",
-						source_project_display_name: "Project Two"
 			}, (error, response, body) =>
 				new_file_id = body.new_file_id
 				@existing_file_id = new_file_id
@@ -114,6 +113,12 @@ describe "LinkedFiles", ->
 					return done(error) if error?
 					firstFile = project.rootFolder[0].fileRefs[0]
 					expect(firstFile._id.toString()).to.equal(new_file_id.toString())
+					expect(firstFile.linkedFileData).to.deep.equal {
+						provider: 'project_file',
+						source_project_id: @project_two_id,
+						source_entity_path: "/#{@source_doc_name}",
+						source_project_display_name: "plf-test-two"
+					}
 					expect(firstFile.name).to.equal('test-link.txt')
 					done()
 
@@ -127,7 +132,6 @@ describe "LinkedFiles", ->
 					data:
 						source_project_id: @project_two_id,
 						source_entity_path: "/#{@source_doc_name}",
-						source_project_display_name: "Project Two"
 			}, (error, response, body) =>
 				new_file_id = body.new_file_id
 				expect(new_file_id).to.exist
