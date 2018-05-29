@@ -2,6 +2,7 @@ async = require("async")
 _ = require("underscore")
 SubscriptionUpdater = require("./SubscriptionUpdater")
 SubscriptionLocator = require("./SubscriptionLocator")
+Subscription = require("../../models/Subscription").Subscription
 UserLocator = require("../User/UserLocator")
 LimitationsManager = require("./LimitationsManager")
 logger = require("logger-sharelatex")
@@ -45,14 +46,14 @@ module.exports = SubscriptionGroupHandler =
 
 
 	replaceUserReferencesInGroups: (oldId, newId, callback) ->
-		Subscription.update {admin_id: userStubId}, {admin_id: slUserId}, (error) ->
+		Subscription.update {admin_id: oldId}, {admin_id: newId}, (error) ->
 			callback(error) if error?
 
 			# Mongo won't let us pull and addToSet in the same query, so do it in
 			# two. Note we need to add first, since the query is based on the old user.
-			query = {member_ids: userStubId}
-			addNewUserUpdate = $addToSet: {member_ids: slUserId}
-			removeOldUserUpdate = $pull: {member_ids: userStubId}
+			query = { member_ids: oldId }
+			addNewUserUpdate = $addToSet: { member_ids: newId }
+			removeOldUserUpdate =  $pull: { member_ids: oldId }
 
 			Subscription.update query, addNewUserUpdate, { multi: true }, (error) ->
 				return callback(error) if error?
