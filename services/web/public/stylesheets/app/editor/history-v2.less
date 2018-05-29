@@ -1,16 +1,30 @@
 .history-toolbar {
+	display: flex;
+	align-items: center;
 	position: absolute;
 	width: 100%;
 	top: @ide-body-top-offset;
 	height: @editor-toolbar-height;
-	line-height: @editor-toolbar-height;
-	background-color: @editor-toolbar-bg;
+	line-height: 1;
+	font-size: @font-size-small;
+	background-color: @history-toolbar-bg-color;
 	z-index: 1;
-	color: #FFF;
+	color: @history-toolbar-color;
 	padding-left: (@line-height-computed / 2);
+}
+.history-toolbar when (@is-overleaf = false) {
+	border-bottom: @toolbar-border-bottom;
 }
 	.history-toolbar-time {
 		font-weight: bold;
+	}
+	.history-toolbar-btn {
+		.btn;
+		.btn-info;
+		.btn-xs;
+		padding-left: @padding-small-horizontal;
+		padding-right: @padding-small-horizontal;
+		margin-left: (@line-height-computed / 2);
 	}
 
 .history-entries {

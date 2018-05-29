@@ -1,6 +1,6 @@
 aside.file-tree.full-size(
 	ng-controller="HistoryV2FileTreeController"
-	ng-if="ui.view == 'history' && history.isV2"
+	ng-if="ui.view == 'history' && history.isV2 && history.viewMode === HistoryViewModes.POINT_IN_TIME"
 )
 	.history-file-tree-inner
 		history-file-tree(
@@ -10,6 +10,32 @@ aside.file-tree.full-size(
 			is-loading="history.loadingFileTree"
 		)
 
+
+
+aside.file-tree.file-tree-history.full-size(
+	ng-controller="FileTreeController"
+	ng-class="{ 'multi-selected': multiSelectedCount > 0 }"
+	ng-show="ui.view == 'history' && history.isV2 && history.viewMode === HistoryViewModes.COMPARE")
+	.toolbar.toolbar-filetree
+		span Modified files
+
+	.file-tree-inner
+		ul.list-unstyled.file-tree-list
+			li(
+				ng-repeat="(pathname, doc) in history.selection.docs"
+				ng-class="{ 'selected': history.selection.pathname == pathname }"
+			)
+				.entity
+					.entity-name.entity-name-history(
+						ng-click="history.selection.pathname = pathname",
+						ng-class="{ 'deleted': !!doc.deletedAtV }"
+					)
+						i.fa.fa-fw.fa-pencil
+						span  {{ pathname }}
+
+
+
+
 script(type="text/ng-template", id="historyFileTreeTpl")
 	.history-file-tree
 		history-file-entity(
@@ -17,9 +43,7 @@ script(type="text/ng-template", id="historyFileTreeTpl")
 			file-entity="fileEntity"
 			ng-show="!$ctrl.isLoading"
 		)
-		.loading(ng-show="$ctrl.isLoading")
-			i.fa.fa-spin.fa-refresh
-			| &nbsp;&nbsp; #{translate("loading")}...
+
 
 script(type="text/ng-template", id="historyFileEntityTpl")
 	.history-file-entity-wrapper

@@ -19,8 +19,13 @@
 					}"
 				)
 				|  in <strong>{{history.diff.pathname}}</strong>
+			.btn.btn-info.btn-xs(
+				ng-click="toggleHistoryViewMode();"
+			) 
+				i.fa
+				| Enter "Point-in-time" mode
 			.toolbar-right(ng-if="history.selection.docs[history.selection.pathname].deletedAtV")
-				button.btn.btn-danger.btn-sm(
+				button.btn.btn-danger.btn-xs(
 					ng-click="restoreDeletedFile()"
 					ng-show="!restoreState.error"
 					ng-disabled="restoreState.inflight"

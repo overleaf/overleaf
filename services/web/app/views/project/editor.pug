@@ -62,7 +62,7 @@ block content
 				main#ide-body(
 					ng-cloak,
 					role="main",
-					ng-class="{ 'ide-history-open' : (ui.view == 'history' && history.isV2) }",
+					ng-class="{ 'ide-history-open' : (ui.view == 'history' && history.isV2 && history.viewMode === HistoryViewModes.POINT_IN_TIME) }",
 					layout="main",
 					ng-hide="state.loading",
 					resize-on="layout:chat:resize",

@@ -23,21 +23,31 @@ define [
 				else
 					@show()
 
-			# @$scope.$watch "history.selection.updates", (updates) =>
-			# 	if updates? and updates.length > 0
-			# 		@_selectDocFromUpdates()
-			# 		@reloadDiff()
+			@$scope.toggleHistoryViewMode = () =>
+				if @$scope.history.viewMode == HistoryViewModes.COMPARE
+					@reset()
+					@$scope.history.viewMode = HistoryViewModes.POINT_IN_TIME
+				else
+					@reset()
+					@$scope.history.viewMode = HistoryViewModes.COMPARE
 
-			# @$scope.$watch "history.selection.pathname", () =>
-			# 	@reloadDiff()
+			@$scope.$watch "history.selection.updates", (updates) =>
+				if @$scope.history.viewMode == HistoryViewModes.COMPARE
+					if updates? and updates.length > 0
+						@_selectDocFromUpdates()
+						@reloadDiff()
 			
 			@$scope.$watch "history.selection.pathname", (pathname) =>
-				if pathname?
-					@loadFileAtPointInTime()
+				if @$scope.history.viewMode == HistoryViewModes.POINT_IN_TIME
+					if pathname?
+						@loadFileAtPointInTime()
+				else 
+					@reloadDiff()
 
 		show: () ->
 			@$scope.ui.view = "history"
 			@reset()
+			@$scope.history.viewMode = HistoryViewModes.POINT_IN_TIME
 
 		hide: () ->
 			@$scope.ui.view = "editor"
@@ -46,7 +56,7 @@ define [
 			@$scope.history = {
 				isV2: true
 				updates: []
-				viewMode: HistoryViewModes.POINT_IN_TIME
+				viewMode: null
 				nextBeforeTimestamp: null
 				atEnd: false
 				selection: {
@@ -146,7 +156,6 @@ define [
 					@$scope.history.selectedFile.binary = binary
 					@$scope.history.selectedFile.text = text
 					@$scope.history.selectedFile.loading = false
-					console.log @$scope.history.selectedFile
 				.catch () ->
 
 		reloadDiff: () ->
