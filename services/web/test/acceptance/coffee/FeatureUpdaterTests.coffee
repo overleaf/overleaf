@@ -6,27 +6,22 @@ settings = require "settings-sharelatex"
 {ObjectId} = require("../../../app/js/infrastructure/mongojs")
 Subscription = require("../../../app/js/models/Subscription").Subscription
 User = require("../../../app/js/models/User").User
+FeaturesUpdater = require("../../../app/js/Features/Subscription/FeaturesUpdater")
 
 MockV1Api = require "./helpers/MockV1Api"
+logger = require "logger-sharelatex"
+logger.logger.level("error")
 
 syncUserAndGetFeatures = (user, callback = (error, features) ->) ->
-	request {
-		method: 'POST',
-		url: "/user/#{user._id}/features/sync",
-		auth:
-			user: 'sharelatex'
-			pass: 'password'
-			sendImmediately: true
-	}, (error, response, body) ->
-		throw error if error?
-		expect(response.statusCode).to.equal 200
+	FeaturesUpdater.refreshFeatures user._id, (error) ->
+		return callback(error) if error?
 		User.findById user._id, (error, user) ->
 			return callback(error) if error?
 			features = user.toObject().features
 			delete features.$init # mongoose internals
 			return callback null, features
 
-describe "Subscriptions", ->
+describe "FeatureUpdater.refreshFeatures", ->
 	beforeEach (done) ->
 		@user = new UserClient()
 		@user.ensureUserExists (error) ->
@@ -149,3 +144,21 @@ describe "Subscriptions", ->
 				plan = settings.plans.find (plan) -> plan.planCode == 'professional'
 				expect(features).to.deep.equal(plan.features)
 				done()
+
+	describe "when the notifyV1Flag is passed", ->
+		beforeEach ->
+			User.update {
+				_id: @user._id
+			}, {
+				overleaf:
+					id: 42
+			} # returns a promise
+
+		it "should ping the v1 API end point to sync", (done) ->
+			FeaturesUpdater.refreshFeatures @user._id, true, (error) =>
+				setTimeout () =>
+					expect(
+						MockV1Api.syncUserFeatures.calledWith('42')
+					).to.equal true
+					done()
+				, 500
