@@ -1,6 +1,7 @@
 FileWriter = require('../../infrastructure/FileWriter')
 AuthorizationManager = require('../Authorization/AuthorizationManager')
 ProjectLocator = require('../Project/ProjectLocator')
+ProjectGetter = require('../Project/ProjectGetter')
 DocstoreManager = require('../Docstore/DocstoreManager')
 FileStoreHandler = require('../FileStore/FileStoreHandler')
 FileWriter = require('../../infrastructure/FileWriter')
@@ -32,6 +33,14 @@ BadDataError = (message) ->
 BadDataError.prototype.__proto__ = Error.prototype
 
 
+ProjectNotFoundError = (message) ->
+	error = new Error(message)
+	error.name = 'ProjectNotFound'
+	error.__proto__ = ProjectNotFoundError.prototype
+	return error
+ProjectNotFoundError.prototype.__proto__ = Error.prototype
+
+
 SourceFileNotFoundError = (message) ->
 	error = new Error(message)
 	error.name = 'BadData'
@@ -46,16 +55,23 @@ module.exports = ProjectFileAgent =
 		return _.pick(
 			data,
 			'source_project_id',
-			'source_entity_path',
-			'source_project_display_name'
+			'source_entity_path'
 		)
 
 	_validate: (data) ->
 		return (
 			data.source_project_id? &&
-			data.source_entity_path? &&
-			data.source_project_display_name?
+			data.source_entity_path?
 		)
+
+	decorateLinkedFileData: (data, callback = (err, newData) ->) ->
+		callback = _.once(callback)
+		{ source_project_id } = data
+		return callback(new BadDataError()) if !source_project_id?
+		ProjectGetter.getProject source_project_id, (err, project) ->
+			return callback(err) if err?
+			return callback(new ProjectNotFoundError()) if !project?
+			callback(err, _.extend(data, {source_project_display_name: project.name}))
 
 	checkAuth: (project_id, data, current_user_id, callback = (error, allowed)->) ->
 		callback = _.once(callback)
@@ -104,6 +120,8 @@ module.exports = ProjectFileAgent =
 			res.status(400).send("The file is the wrong type")
 		else if error instanceof SourceFileNotFoundError
 			res.status(404).send("Source file not found")
+		else if error instanceof ProjectNotFoundError
+			res.status(404).send("Project not found")
 		else
 			next(error)
 		next()

@@ -26,11 +26,14 @@ module.exports = LinkedFilesController = {
 		Agent.checkAuth project_id, linkedFileData, user_id, (err, allowed) ->
 			return Agent.handleError(err, req, res, next) if err?
 			return res.sendStatus(403) if !allowed
-			Agent.writeIncomingFileToDisk project_id, linkedFileData, user_id, (error, fsPath) ->
-				if error?
-					logger.error {err: error, project_id, name, linkedFileData, parent_folder_id, user_id}, 'error writing linked file to disk'
-					return Agent.handleError(error, req, res, next)
-				EditorController.upsertFile project_id, parent_folder_id, name, fsPath, linkedFileData, "upload", user_id, (error, file) ->
-					return next(error) if error?
-					res.json(new_file_id: file._id) # created
-}
+			Agent.decorateLinkedFileData linkedFileData, (err, newLinkedFileData) ->
+				return Agent.handleError(err) if err?
+				linkedFileData = newLinkedFileData
+				Agent.writeIncomingFileToDisk project_id, linkedFileData, user_id, (error, fsPath) ->
+					if error?
+						logger.error {err: error, project_id, name, linkedFileData, parent_folder_id, user_id}, 'error writing linked file to disk'
+						return Agent.handleError(error, req, res, next)
+					EditorController.upsertFile project_id, parent_folder_id, name, fsPath, linkedFileData, "upload", user_id, (error, file) ->
+						return next(error) if error?
+						res.json(new_file_id: file._id) # created
+	}

@@ -301,18 +301,16 @@ define [
 
 			$scope.create = () ->
 				projectId = $scope.data.selectedProjectId
-				projectDisplayName = _.find($scope.data.projects, (p) -> p._id == projectId).name
 				path = $scope.data.selectedProjectEntity
 				name = $scope.data.name
-				if !name || !path || !projectId || !projectDisplayName
+				if !name || !path || !projectId
 					_reset(err: true)
 					return
 				_setInFlight('create')
 				ide.fileTreeManager
 					.createLinkedFile(name, parent_folder, 'project_file', {
 						source_project_id: projectId,
-						source_entity_path: path,
-						source_project_display_name: projectDisplayName
+						source_entity_path: path
 					})
 					.then () ->
 						_reset(err: false)
