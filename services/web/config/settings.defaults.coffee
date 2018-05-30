@@ -146,8 +146,8 @@ module.exports = settings =
 			url: "http://#{process.env['CONTACTS_HOST'] or 'localhost'}:3036"
 		sixpack:
 			url: ""
-		# references:
-		# 	url: "http://localhost:3040"
+		references:
+			url: "http://#{process.env['REFERENCES_HOST'] or 'localhost'}:3040"
 		notifications:
 			url: "http://#{process.env['NOTIFICATIONS_HOST'] or 'localhost'}:3042"
 		analytics:
