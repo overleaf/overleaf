@@ -23,7 +23,7 @@
 				ng-click="toggleHistoryViewMode();"
 			) 
 				i.fa
-				| Enter "Point-in-time" mode
+				| Browse project versions
 			.toolbar-right(ng-if="history.selection.docs[history.selection.pathname].deletedAtV")
 				button.btn.btn-danger.btn-xs(
 					ng-click="restoreDeletedFile()"
