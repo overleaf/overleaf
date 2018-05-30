@@ -6,6 +6,7 @@ UserLocator = require("../User/UserLocator")
 LimitationsManager = require("./LimitationsManager")
 logger = require("logger-sharelatex")
 OneTimeTokenHandler = require("../Security/OneTimeTokenHandler")
+TeamInvitesHandler = require("./TeamInvitesHandler")
 EmailHandler = require("../Email/EmailHandler")
 settings = require("settings-sharelatex")
 NotificationsBuilder = require("../Notifications/NotificationsBuilder")
@@ -39,15 +40,24 @@ module.exports = SubscriptionGroupHandler =
 
 	removeUserFromGroup: (adminUser_id, userToRemove_id, callback)->
 		SubscriptionUpdater.removeUserFromGroup adminUser_id, userToRemove_id, callback
-	
+
 	removeEmailInviteFromGroup: (adminUser_id, email, callback) ->
 		SubscriptionUpdater.removeEmailInviteFromGroup adminUser_id, email, callback
 
 	getPopulatedListOfMembers: (adminUser_id, callback)->
-		SubscriptionLocator.getUsersSubscription adminUser_id, (err, subscription)-> 
+		SubscriptionLocator.getUsersSubscription adminUser_id, (err, subscription)->
+			return callback(err) if err?
+
 			users = []
 			for email in subscription.invited_emails or []
 				users.push buildEmailInviteViewModel(email)
+
+			TeamInvitesHandler.getInvites subscription.id, (err, invites) ->
+				return callback(err) if err?
+
+				for invite in invites or []
+					users.push buildEmailInviteViewModel(invite.email)
+
 			jobs = _.map subscription.member_ids, (user_id)->
 				return (cb)->
 					UserLocator.findById user_id, (err, user)->
@@ -111,7 +121,7 @@ module.exports = SubscriptionGroupHandler =
 			async.series jobs, callback
 
 buildUserViewModel = (user)->
-	u = 
+	u =
 		email: user.email
 		first_name: user.first_name
 		last_name: user.last_name

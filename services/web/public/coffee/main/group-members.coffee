@@ -22,7 +22,7 @@ define [
 			emails = parseEmails($scope.inputs.emails)
 			for email in emails
 				queuedHttp
-					.post("/subscription/group/user", {
+					.post("/subscription/invites", {
 						email: email,
 						_csrf: window.csrfToken
 					})

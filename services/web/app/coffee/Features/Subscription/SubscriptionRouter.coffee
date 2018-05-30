@@ -1,6 +1,7 @@
 AuthenticationController = require('../Authentication/AuthenticationController')
 SubscriptionController = require('./SubscriptionController')
 SubscriptionGroupController = require './SubscriptionGroupController'
+TeamInvitesController = require './TeamInvitesController'
 Settings = require "settings-sharelatex"
 
 module.exports =
@@ -13,8 +14,7 @@ module.exports =
 
 		webRouter.get  '/user/subscription/custom_account', AuthenticationController.requireLogin(), SubscriptionController.userCustomSubscriptionPage
 
-		
-		webRouter.get  '/user/subscription/new',        AuthenticationController.requireLogin(), SubscriptionController.paymentPage 
+		webRouter.get  '/user/subscription/new',        AuthenticationController.requireLogin(), SubscriptionController.paymentPage
 
 		webRouter.get  '/user/subscription/thank-you', AuthenticationController.requireLogin(), SubscriptionController.successful_subscription
 
@@ -26,6 +26,15 @@ module.exports =
 		webRouter.delete '/subscription/group/email/:email', AuthenticationController.requireLogin(), SubscriptionGroupController.removeEmailInviteFromGroup
 		webRouter.delete '/subscription/group/user', AuthenticationController.requireLogin(), SubscriptionGroupController.removeSelfFromGroup
 
+		# Team invites
+		webRouter.post '/subscription/invites',  AuthenticationController.requireLogin(),
+			TeamInvitesController.createInvite
+		webRouter.get '/subscription/invites/:token/',  AuthenticationController.requireLogin(),
+			TeamInvitesController.viewInvite
+		webRouter.put '/subscription/invites/:token/',  AuthenticationController.requireLogin(),
+			TeamInvitesController.acceptInvite
+		webRouter.delete '/subscription/invites/:token/',  AuthenticationController.requireLogin(),
+			TeamInvitesController.revokeInvite
 
 		webRouter.get '/user/subscription/:subscription_id/group/invited', AuthenticationController.requireLogin(), SubscriptionGroupController.renderGroupInvitePage
 		webRouter.post '/user/subscription/:subscription_id/group/begin-join', AuthenticationController.requireLogin(), SubscriptionGroupController.beginJoinGroup
@@ -48,4 +57,3 @@ module.exports =
 
 		# Currently used in acceptance tests only, as a way to trigger the syncing logic
 		publicApiRouter.post "/user/:user_id/features/sync", AuthenticationController.httpAuth, SubscriptionController.refreshUserFeatures
-

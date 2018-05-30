@@ -79,7 +79,7 @@ Thank you
 
 #{settings.appName} - <%= siteUrl %>
 """
-	compiledTemplate: (opts) -> 
+	compiledTemplate: (opts) ->
 		SingleCTAEmailBody({
 			title: "Password Reset"
 			greeting: "Hi,"
@@ -104,7 +104,7 @@ Thank you
 
 #{settings.appName} - <%= siteUrl %>
 """
-	compiledTemplate: (opts) -> 
+	compiledTemplate: (opts) ->
 		SingleCTAEmailBody({
 			title: "#{ opts.project.name } &ndash; shared by #{ opts.owner.email }"
 			greeting: "Hi,"
@@ -112,10 +112,36 @@ Thank you
 			secondaryMessage: null
 			ctaText: "View project"
 			ctaURL: opts.inviteUrl
-			gmailGoToAction: 
+			gmailGoToAction:
 				target: opts.inviteUrl
 				name: "View project"
 				description: "Join #{ opts.project.name } at ShareLaTeX"
+		})
+
+
+templates.verifyEmailToJoinTeam =
+	subject: _.template "<%= inviterName %> has invited you to join a #{settings.appName} team"
+	layout: BaseWithHeaderEmailLayout
+	type:"notification"
+	plainTextTemplate: _.template """
+
+Hi, please verify your email to join the team and get your free premium account.
+
+Click this link to verify now: <%= acceptInviteUrl %>
+
+Thank You
+
+#{settings.appName} - <%= siteUrl %>
+"""
+	compiledTemplate: (opts) ->
+		SingleCTAEmailBody({
+			title: "#{opts.inviterName} has invited you to join a #{settings.appName} team"
+			greeting: "Hi,"
+			message: "please verify your email to join the team and get your free premium account"
+			secondaryMessage: null
+			ctaText: "Verify now"
+			ctaURL: opts.acceptInviteUrl
+			gmailGoToAction: null
 		})
 
 templates.completeJoinGroupAccount =
@@ -131,7 +157,7 @@ Thank You
 
 #{settings.appName} - <%= siteUrl %>
 """
-	compiledTemplate: (opts) -> 
+	compiledTemplate: (opts) ->
 		SingleCTAEmailBody({
 			title: "Verify Email to join #{ opts.group_name } group"
 			greeting: "Hi,"
@@ -154,7 +180,7 @@ This is a test email sent from ShareLaTeX.
 
 #{settings.appName} - <%= siteUrl %>
 """
-	compiledTemplate: (opts) -> 
+	compiledTemplate: (opts) ->
 		SingleCTAEmailBody({
 			title: "A Test Email from ShareLaTeX"
 			greeting: "Hi,"
