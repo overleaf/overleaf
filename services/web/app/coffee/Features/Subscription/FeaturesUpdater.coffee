@@ -11,8 +11,8 @@ V1SubscriptionManager = require("./V1SubscriptionManager")
 oneMonthInSeconds = 60 * 60 * 24 * 30
 
 module.exports = FeaturesUpdater =
-	refreshFeatures: (user_id, notifyV1, callback)->
-		if !callback?
+	refreshFeatures: (user_id, notifyV1 = true, callback = () ->)->
+		if typeof notifyV1 == 'function'
 			callback = notifyV1
 			notifyV1 = true
 
