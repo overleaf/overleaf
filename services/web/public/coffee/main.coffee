@@ -17,6 +17,7 @@ define [
 	"main/announcements"
 	"main/register-users"
 	"main/subscription/group-subscription-invite-controller"
+	"main/subscription/team-invite-controller"
 	"main/contact-us"
 	"main/learn"
 	"analytics/AbTestingManager"

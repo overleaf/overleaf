@@ -19,7 +19,7 @@ module.exports = TeamInvitesHandler =
 			SubscriptionLocator.getUsersSubscription adminUserId, (error, subscription) ->
 				return callback(error) if error?
 
-				inviterName = "#{groupAdmin.first_name} #{groupAdmin.last_name}"
+				inviterName = TeamInvitesHandler.inviterName(groupAdmin)
 				token = crypto.randomBytes(32).toString("hex")
 
 				TeamInvite.create {
@@ -37,8 +37,35 @@ module.exports = TeamInvitesHandler =
 						return callback(error, invite)
 
 	getInvite: (token, callback) ->
-
+		TeamInvite.findOne(token: token, callback)
 
 	acceptInvite: (userId, token, callback) ->
 
 	revokeInvite: (token, callback) ->
+
+	getInviteDetails: (token, userId, callback) ->
+		TeamInvitesHandler.getInvite token, (err, invite) ->
+			callback(err) if err?
+
+			SubscriptionLocator.getUsersSubscription userId, (err, personalSubscription) ->
+				callback(err) if err?
+
+				SubscriptionLocator.getSubscription invite.subscriptionId, (err, teamSubscription) ->
+					callback(err) if err?
+
+					UserLocator.findById teamSubscription.admin_id, (err, teamAdmin) ->
+						callback(err) if err?
+
+						callback(null , {
+							invite: invite,
+							personalSubscription: personalSubscription,
+							team: teamSubscription,
+							inviterName: TeamInvitesHandler.inviterName(teamAdmin),
+							teamAdmin: teamAdmin
+						})
+
+	inviterName: (groupAdmin) ->
+		if groupAdmin.first_name and groupAdmin.last_name
+			"#{groupAdmin.first_name} #{groupAdmin.last_name} (#{groupAdmin.email})"
+		else
+			groupAdmin.email

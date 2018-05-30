@@ -1,6 +1,7 @@
 logger = require("logger-sharelatex")
 TeamInvitesHandler = require('./TeamInvitesHandler')
 AuthenticationController = require("../Authentication/AuthenticationController")
+ErrorController = require("../Errors/ErrorController")
 
 module.exports =
 	createInvite: (req, res, next) ->
@@ -14,16 +15,23 @@ module.exports =
 			}
 			res.json inviteView
 
-	viewInvite: (req, res) ->
-		token = request.params.token
+	viewInvite: (req, res, next) ->
+		token = req.params.token
+		userId = AuthenticationController.getLoggedInUserId(req)
 
-		TeamInvitesHandler.getInvite token, (err, invite) ->
+		TeamInvitesHandler.getInviteDetails token, userId, (err, results) ->
 			next(err) if err?
 
-			res.render "referal/bonus",
-				title: "bonus_please_recommend_us"
-				refered_users: refered_users
-				refered_user_count: (refered_users or []).length
+			{ invite, personalSubscription, inviterName } = results
+
+			unless invite?
+				return ErrorController.notFound(req, res, next)
+
+			res.render "subscriptions/group/team_invite",
+				inviterName: inviterName
+				inviteToken: invite.token
+				hasPersonalSubscription: personalSubscription?
+
 
 	acceptInvite: (req, res) ->
 
