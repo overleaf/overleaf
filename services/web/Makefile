@@ -9,7 +9,7 @@ COFFEE := node_modules/.bin/coffee $(COFFEE_OPTIONS)
 GRUNT := node_modules/.bin/grunt
 APP_COFFEE_FILES := $(shell find app/coffee -name '*.coffee')
 FRONT_END_COFFEE_FILES := $(shell find public/coffee -name '*.coffee')
-TEST_COFFEE_FILES := $(shell find test -name '*.coffee')
+TEST_COFFEE_FILES := $(shell find test/*/coffee -name '*.coffee')
 MODULE_MAIN_COFFEE_FILES := $(shell find modules -type f -wholename '*main/index.coffee')
 MODULE_IDE_COFFEE_FILES := $(shell find modules -type f -wholename '*ide/index.coffee')
 COFFEE_FILES := app.coffee $(APP_COFFEE_FILES) $(FRONT_END_COFFEE_FILES) $(TEST_COFFEE_FILES)
@@ -186,6 +186,9 @@ test: test_unit test_frontend test_acceptance
 
 test_unit:
 	npm -q run test:unit -- ${MOCHA_ARGS}
+
+test_unit_app:
+	npm -q run test:unit:app -- ${MOCHA_ARGS}
 
 test_frontend: test_clean # stop service
 	$(MAKE) compile

@@ -98,7 +98,8 @@ html(itemscope, itemtype='http://schema.org/Product')
 
 		- if (settings.overleaf && settings.overleaf.useOLFreeTrial)
 			script.
-				window.redirectToOLFreeTrialUrl = '!{settings.overleaf.host}/users/trial'
+				window.useV2TrialUrl = true
+
 
 	body
 		if(settings.recaptcha)
@@ -146,7 +147,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 				src=buildJsPath('libs/require.js', {hashedPath:true})
 			)
 
-		include contact-us-modal
+		!= moduleIncludes("contactModal", locals)
 		include v1-tooltip
 		include sentry
 		

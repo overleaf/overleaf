@@ -20,14 +20,16 @@ UserSchema = new Schema
 	loginCount        : {type : Number, default: 0}
 	holdingAccount    : {type : Boolean, default: false}
 	ace               : {
-		mode        :   {type : String, default: 'none'}
-		theme       :   {type : String, default: 'textmate'}
-		fontSize    :   {type : Number, default:'12'}
-		autoComplete:   {type : Boolean, default: true}
-		autoPairDelimiters: {type : Boolean, default: true}
-		spellCheckLanguage :   {type : String, default: "en"}
-		pdfViewer   :   {type : String, default: "pdfjs"}
-		syntaxValidation   :   {type : Boolean}
+		mode               : {type : String, default: 'none'}
+		theme              : {type : String, default: 'textmate'}
+		fontSize           : {type : Number, default:'12'}
+		autoComplete       : {type : Boolean, default: true}
+		autoPairDelimiters : {type : Boolean, default: true}
+		spellCheckLanguage : {type : String, default: "en"}
+		pdfViewer          : {type : String, default: "pdfjs"}
+		syntaxValidation   : {type : Boolean}
+		fontFamily         : {type : String}
+		lineHeight         : {type : String}
 	}
 	features		  : {
 		collaborators:    { type:Number,  default: Settings.defaultFeatures.collaborators }

@@ -385,3 +385,13 @@ describe 'ReferencesHandler', ->
 				@call (err, isFullIndex) =>
 					expect(err).to.equal null
 					expect(isFullIndex).to.equal false
+
+		describe 'with referencesSearch', ->
+
+			beforeEach ->
+				@owner.features = {referencesSearch: true, references: false}
+
+			it 'should return true', ->
+				@call (err, isFullIndex) =>
+					expect(err).to.equal null
+					expect(isFullIndex).to.equal true

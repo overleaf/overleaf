@@ -16,7 +16,7 @@ describe "PasswordResetHandler", ->
 			getNewToken:sinon.stub()
 			getValueFromTokenAndExpire:sinon.stub()
 		@UserGetter =
-			getUser:sinon.stub()
+			getUserByMainEmail:sinon.stub()
 		@EmailHandler = 
 			sendEmail:sinon.stub()
 		@AuthenticationManager =
@@ -40,7 +40,7 @@ describe "PasswordResetHandler", ->
 	describe "generateAndEmailResetToken", ->
 
 		it "should check the user exists", (done)->
-			@UserGetter.getUser.callsArgWith(1)
+			@UserGetter.getUserByMainEmail.callsArgWith(1)
 			@OneTimeTokenHandler.getNewToken.callsArgWith(1)
 			@PasswordResetHandler.generateAndEmailResetToken @user.email, (err, exists)=>
 				exists.should.equal false
@@ -49,7 +49,7 @@ describe "PasswordResetHandler", ->
 
 		it "should send the email with the token", (done)->
 
-			@UserGetter.getUser.callsArgWith(1, null, @user)
+			@UserGetter.getUserByMainEmail.callsArgWith(1, null, @user)
 			@OneTimeTokenHandler.getNewToken.callsArgWith(1, null, @token)
 			@EmailHandler.sendEmail.callsArgWith(2)
 			@PasswordResetHandler.generateAndEmailResetToken @user.email, (err, exists)=>
@@ -62,7 +62,7 @@ describe "PasswordResetHandler", ->
 
 		it "should return exists = false for a holdingAccount", (done) ->
 			@user.holdingAccount = true
-			@UserGetter.getUser.callsArgWith(1, null, @user)
+			@UserGetter.getUserByMainEmail.callsArgWith(1, null, @user)
 			@OneTimeTokenHandler.getNewToken.callsArgWith(1)
 			@PasswordResetHandler.generateAndEmailResetToken @user.email, (err, exists)=>
 				exists.should.equal false

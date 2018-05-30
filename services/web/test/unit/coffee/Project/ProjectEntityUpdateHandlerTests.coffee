@@ -872,6 +872,12 @@ describe 'ProjectEntityUpdateHandler', ->
 					.calledWith(@project, @entity, @path, userId)
 					.should.equal true
 
+			it "should should send the update to the doc updater", ->
+				oldDocs = [ doc: @entity, path: @path ]
+				@DocumentUpdaterHandler.updateProjectStructure
+					.calledWith(project_id, projectHistoryId, userId, {oldDocs})
+					.should.equal true
+
 		describe "a folder", ->
 			beforeEach (done) ->
 				@folder =
@@ -903,6 +909,13 @@ describe 'ProjectEntityUpdateHandler', ->
 					.should.equal true
 				@ProjectEntityUpdateHandler._cleanUpDoc
 					.calledWith(@project, @doc2, "/folder/doc-name-2", userId)
+					.should.equal true
+
+			it "should should send one update to the doc updater for all docs and files", ->
+				oldFiles = [ {file: @file2, path: "/folder/file-name-2"}, {file: @file1, path: "/folder/subfolder/file-name-1"} ]
+				oldDocs = [ {doc: @doc2, path: "/folder/doc-name-2"}, { doc: @doc1, path: "/folder/subfolder/doc-name-1"} ]
+				@DocumentUpdaterHandler.updateProjectStructure
+					.calledWith(project_id, projectHistoryId, userId, {oldFiles, oldDocs})
 					.should.equal true
 
 	describe "_cleanUpDoc", ->
@@ -939,12 +952,6 @@ describe 'ProjectEntityUpdateHandler', ->
 			it "should delete the doc in the doc store", ->
 				@DocstoreManager.deleteDoc
 					.calledWith(project_id, @doc._id.toString())
-					.should.equal true
-
-			it "should should send the update to the doc updater", ->
-				oldDocs = [ doc: @doc, path: @path ]
-				@DocumentUpdaterHandler.updateProjectStructure
-					.calledWith(project_id, projectHistoryId, userId, {oldDocs})
 					.should.equal true
 
 			it "should call the callback", ->

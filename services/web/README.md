@@ -3,11 +3,11 @@ web-sharelatex
 
 web-sharelatex is the front-end web service of the open-source web-based collaborative LaTeX editor,
 [ShareLaTeX](https://www.sharelatex.com).
-It serves all the HTML pages, CSS and javascript to the client. web-sharelatex also contains 
+It serves all the HTML pages, CSS and javascript to the client. web-sharelatex also contains
 a lot of logic around creating and editing projects, and account management.
 
 
-The rest of the ShareLaTeX stack, along with information about contributing can be found in the 
+The rest of the ShareLaTeX stack, along with information about contributing can be found in the
 [sharelatex/sharelatex](https://github.com/sharelatex/sharelatex) repository.
 
 Build process
@@ -20,7 +20,7 @@ Image processing tasks are commented out in the gruntfile and the needed package
 New Docker-based build process
 ------------------------------
 
-Note that the Grunt workflow from above should still work, but we are transitioning to a 
+Note that the Grunt workflow from above should still work, but we are transitioning to a
 Docker based testing workflow, which is documented below:
 
 ### Running the app
@@ -43,7 +43,6 @@ Unit tests can be run in the `test_unit` container defined in `docker-compose.te
 The makefile contains a short cut to run these:
 
 ```
-make install # Only needs running once, or when npm packages are updated
 make unit_test
 ```
 
@@ -60,19 +59,18 @@ Acceptance tests are run against a live service, which runs in the `acceptance_t
 To run the tests out-of-the-box, the makefile defines:
 
 ```
-make install # Only needs running once, or when npm packages are updated
-make acceptance_test
+make test_acceptance
 ```
 
 However, during development it is often useful to leave the service running for rapid iteration on the acceptance tests. This can be done with:
 
 ```
-make acceptance_test_start_service
-make acceptance_test_run # Run as many times as needed during development
-make acceptance_test_stop_service
+make test_acceptance_app_start_service
+make test_acceptance_app_run # Run as many times as needed during development
+make test_acceptance_app_stop_service
 ```
 
-`make acceptance_test` just runs these three commands in sequence.
+`make test_acceptance` just runs these three commands in sequence and then runs `make test_acceptance_modules` which performs the tests for each module in the `modules` directory. (Note that there is not currently an equivalent to the `-start` / `-run` x _n_ / `-stop` series for modules.)
 
 During development it is often useful to only run a subset of tests, which can be configured with arguments to the mocha CLI:
 
@@ -112,12 +110,3 @@ We gratefully acknowledge [IconShock](http://www.iconshock.com) for use of the i
 in the `public/img/iconshock` directory found via
 [findicons.com](http://findicons.com/icon/498089/height?id=526085#)
 
-
-## Acceptance Tests
-
-To run the Acceptance tests:
-
-- set `allowPublicAccess` to true, either in the configuration file,
-  or by setting the environment variable `SHARELATEX_ALLOW_PUBLIC_ACCESS` to `true`
-- start the server (`grunt`)
-- in a separate terminal, run `grunt test:acceptance`

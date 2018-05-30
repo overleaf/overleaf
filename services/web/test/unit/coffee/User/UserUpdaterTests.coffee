@@ -14,12 +14,12 @@ describe "UserUpdater", ->
 		@mongojs = 
 			db:{}
 			ObjectId:(id)-> return id
-		@UserLocator =
-			findByEmail:sinon.stub()
+		@UserGetter =
+			getUserByMainEmail: sinon.stub()
 		@UserUpdater = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex": log:->
-			"./UserLocator":@UserLocator
+			"./UserGetter": @UserGetter
 			"../../infrastructure/mongojs":@mongojs
 			"metrics-sharelatex": timeAsyncMethod: sinon.stub()
 
@@ -34,7 +34,7 @@ describe "UserUpdater", ->
 			@UserUpdater.updateUser = sinon.stub().callsArgWith(2)
 
 		it "should check if the new email already has an account", (done)->
-			@UserLocator.findByEmail.callsArgWith(1, null, @stubbedUser)
+			@UserGetter.getUserByMainEmail.callsArgWith(1, null, @stubbedUser)
 			@UserUpdater.changeEmailAddress @user_id, @stubbedUser.email, (err)=>
 				@UserUpdater.updateUser.called.should.equal false
 				should.exist(err)
@@ -42,7 +42,7 @@ describe "UserUpdater", ->
 
 
 		it "should set the users password", (done)->
-			@UserLocator.findByEmail.callsArgWith(1, null)
+			@UserGetter.getUserByMainEmail.callsArgWith(1, null)
 			@UserUpdater.changeEmailAddress @user_id, @newEmail, (err)=>
 				@UserUpdater.updateUser.calledWith(@user_id, $set: { "email": @newEmail}).should.equal true
 				done()

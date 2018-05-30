@@ -3,9 +3,11 @@ define [
 	"ace/ace"
 	"ace/ext-searchbox"
 	"ace/ext-modelist"
+	"ace/keybinding-vim"
 	"ide/editor/directives/aceEditor/undo/UndoManager"
 	"ide/editor/directives/aceEditor/auto-complete/AutoCompleteManager"
 	"ide/editor/directives/aceEditor/spell-check/SpellCheckManager"
+	"ide/editor/directives/aceEditor/spell-check/SpellCheckAdapter"
 	"ide/editor/directives/aceEditor/highlights/HighlightsManager"
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
 	"ide/editor/directives/aceEditor/track-changes/TrackChangesManager"
@@ -14,9 +16,10 @@ define [
 	"ide/graphics/services/graphics"
 	"ide/preamble/services/preamble"
     "ide/files/services/files"
-], (App, Ace, SearchBox, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, HighlightsManager, CursorPositionManager, TrackChangesManager, MetadataManager) ->
+], (App, Ace, SearchBox, Vim, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, SpellCheckAdapter, HighlightsManager, CursorPositionManager, TrackChangesManager, MetadataManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
 	ModeList = ace.require('ace/ext/modelist')
+	Vim = ace.require('ace/keyboard/vim').Vim
 
 	# set the path for ace workers if using a CDN (from editor.pug)
 	if window.aceWorkerPath != ""
@@ -60,6 +63,7 @@ define [
 				onCtrlJ: "="       # Toggle the review panel
 				onCtrlShiftC: "="  # Add a new comment
 				onCtrlShiftA: "="  # Toggle track-changes on/off
+				onSave: "="        # Cmd/Ctrl-S or :w in Vim
 				syntaxValidation: "="
 				reviewPanel: "="
 				eventsBridge: "="
@@ -67,6 +71,8 @@ define [
 				trackChangesEnabled: "="
 				docId: "="
 				rendererData: "="
+				lineHeight: "="
+				fontFamily: "="
 			}
 			link: (scope, element, attrs) ->
 				# Don't freak out if we're already in an apply callback
@@ -98,7 +104,8 @@ define [
 
 				if scope.spellCheck # only enable spellcheck when explicitly required
 					spellCheckCache = $cacheFactory.get("spellCheck-#{scope.name}") || $cacheFactory("spellCheck-#{scope.name}", {capacity: 1000})
-					spellCheckManager = new SpellCheckManager(scope, editor, element, spellCheckCache, $http, $q)
+					spellCheckManager = new SpellCheckManager(scope, spellCheckCache, $http, $q, new SpellCheckAdapter(editor))
+
 				undoManager           = new UndoManager(scope, editor, element)
 				highlightsManager     = new HighlightsManager(scope, editor, element)
 				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
@@ -106,15 +113,25 @@ define [
 				metadataManager = new MetadataManager(scope, editor, element, metadata)
 				autoCompleteManager = new AutoCompleteManager(scope, editor, element, metadataManager, graphics, preamble, files)
 
-				# Prevert Ctrl|Cmd-S from triggering save dialog
-				editor.commands.addCommand
-					name: "save",
-					bindKey: win: "Ctrl-S", mac: "Command-S"
-					exec: () ->
-					readOnly: true
+				scope.$watch "onSave", (callback) ->
+					if callback?
+						Vim.defineEx 'write', 'w', callback
+						editor.commands.addCommand
+							name: "save",
+							bindKey: win: "Ctrl-S", mac: "Command-S"
+							exec: callback
+							readOnly: true
+						# Not technically 'save', but Ctrl-. recompiles in OL v1
+						# so maintain compatibility
+						editor.commands.addCommand
+							name: "recompile_v1",
+							bindKey: win: "Ctrl-.", mac: "Ctrl-."
+							exec: callback
+							readOnly: true
 				editor.commands.removeCommand "transposeletters"
 				editor.commands.removeCommand "showSettingsMenu"
 				editor.commands.removeCommand "foldall"
+
 
 				# For European keyboards, the / is above 7 so needs Shift pressing.
 				# This comes through as Command-Shift-/ on OS X, which is mapped to
@@ -266,6 +283,29 @@ define [
 						"font-size": value + "px"
 					})
 
+				scope.$watch "fontFamily", (value) ->
+					if value?
+						switch value
+							when 'monaco'
+								editor.setOption('fontFamily', '"Monaco", "Menlo", "Ubuntu Mono", "Consolas", "source-code-pro", monospace')
+							when 'lucida'
+								editor.setOption('fontFamily', '"Lucida Console", monospace')
+							else
+								editor.setOption('fontFamily', null)
+
+				scope.$watch "lineHeight", (value) ->
+					if value?
+						switch value
+							when 'compact'
+								editor.container.style.lineHeight = 1.33
+							when 'normal'
+								editor.container.style.lineHeight = 1.6
+							when 'wide'
+								editor.container.style.lineHeight = 2
+							else
+								editor.container.style.lineHeight = 1.6
+						editor.renderer.updateFontSize()
+
 				scope.$watch "sharejsDoc", (sharejs_doc, old_sharejs_doc) ->
 					if old_sharejs_doc?
 						detachFromAce(old_sharejs_doc)
@@ -323,6 +363,23 @@ define [
 						session.setScrollTop(session.getScrollTop() + 1)
 						session.setScrollTop(session.getScrollTop() - 1)
 
+				onSessionChangeForSpellCheck = (e) ->
+					spellCheckManager.onSessionChange()
+					e.oldSession?.getDocument().off "change", spellCheckManager.onChange
+					e.session.getDocument().on "change", spellCheckManager.onChange
+					e.oldSession?.off "changeScrollTop", spellCheckManager.onScroll
+					e.session.on "changeScrollTop", spellCheckManager.onScroll
+
+				initSpellCheck = () ->
+					spellCheckManager.init()
+					editor.on 'changeSession', onSessionChangeForSpellCheck
+					onSessionChangeForSpellCheck({ session: editor.getSession() }) # Force initial setup
+					editor.on 'nativecontextmenu', spellCheckManager.onContextMenu
+
+				tearDownSpellCheck = () ->
+					editor.off 'changeSession', onSessionChangeForSpellCheck
+					editor.off 'nativecontextmenu', spellCheckManager.onContextMenu
+
 				attachToAce = (sharejs_doc) ->
 					lines = sharejs_doc.getSnapshot().split("\n")
 					session = editor.getSession()
@@ -368,6 +425,7 @@ define [
 					editor.initing = false
 					# now ready to edit document
 					editor.setReadOnly(scope.readOnly) # respect the readOnly setting, normally false
+					initSpellCheck()
 
 					resetScrollMargins()
 
@@ -429,6 +487,7 @@ define [
 
 				scope.$on '$destroy', () ->
 					if scope.sharejsDoc?
+						tearDownSpellCheck()
 						detachFromAce(scope.sharejsDoc)
 						session = editor.getSession()
 						session?.destroy()
@@ -450,22 +509,14 @@ define [
 						>Dismiss</a>
 					</div>
 					<div class="ace-editor-body"></div>
-					<div
-						class="dropdown context-menu spell-check-menu"
-						ng-show="spellingMenu.open"
-						ng-style="{top: spellingMenu.top, left: spellingMenu.left}"
-						ng-class="{open: spellingMenu.open}"
-					>
-						<ul class="dropdown-menu">
-							<li ng-repeat="suggestion in spellingMenu.highlight.suggestions | limitTo:8">
-								<a href ng-click="replaceWord(spellingMenu.highlight, suggestion)">{{ suggestion }}</a>
-							</li>
-							<li class="divider"></li>
-							<li>
-								<a href ng-click="learnWord(spellingMenu.highlight)">Add to Dictionary</a>
-							</li>
-						</ul>
-					</div>
+					<spell-menu
+						open="spellMenu.open"
+						top="spellMenu.top"
+						left="spellMenu.left"
+						highlight="spellMenu.highlight"
+						replace-word="replaceWord(highlight, suggestion)"
+						learn-word="learnWord(highlight)"
+					></spell-menu>
 					<div
 						class="annotation-label"
 						ng-show="annotationLabel.show"

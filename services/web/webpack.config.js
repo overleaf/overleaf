@@ -1,7 +1,9 @@
 const fs = require('fs')
 const path = require('path')
+const webpack = require('webpack')
 
 const MODULES_PATH = path.join(__dirname, '/modules')
+const webpackENV = process.env.WEBPACK_ENV || 'development'
 
 // Generate a hash of entry points, including modules
 const entryPoints = {}
@@ -60,10 +62,35 @@ module.exports = {
 					cacheDirectory: true
 				}
 			}]
+		},
+		{
+			// These options are necesary for handlebars to have access to helper
+			// methods
+			test: /\.handlebars$/,
+			loader: "handlebars-loader",
+			options: {
+				compat: true,
+				knownHelpersOnly: false,
+				runtimePath: 'handlebars/runtime',
+			}
 		}]
 	},
-
-	// TODO
-	// plugins: {}
+	resolve: {
+		alias: {
+			// makes handlerbars globally accessible to backbone
+			handlebars: 'handlebars/dist/handlebars.min.js',
+			jquery: path.join(__dirname, 'node_modules/jquery/dist/jquery'),
+		}
+	},
+	plugins: [
+		new webpack.DefinePlugin({
+			// Swaps out checks for NODE_ENV with the env. This is used by various
+			// libs to enable dev-only features. These checks then become something
+			// like `if ('production' == 'production')`. Minification will then strip
+			// the dev-only code from the bundle
+			'process.env': {
+				NODE_ENV: JSON.stringify(webpackENV)
+			},
+		})
+	]
 }
-

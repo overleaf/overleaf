@@ -8,6 +8,7 @@ define [
 		$scope.notifications = window.data.notifications
 		$scope.allSelected = false
 		$scope.selectedProjects = []
+		$scope.isArchiveableProjectSelected = false
 		$scope.filter = "all"
 		$scope.predicate = "lastUpdated"
 		$scope.nUntagged = 0
@@ -85,6 +86,8 @@ define [
 
 		$scope.updateSelectedProjects = () ->
 			$scope.selectedProjects = $scope.projects.filter (project) -> project.selected
+			$scope.isArchiveableProjectSelected = $scope.selectedProjects.some (project) ->
+				window.user_id == project.owner._id
 
 		$scope.getSelectedProjects = () ->
 			$scope.selectedProjects

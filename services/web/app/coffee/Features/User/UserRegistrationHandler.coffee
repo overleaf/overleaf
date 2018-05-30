@@ -1,6 +1,7 @@
 sanitize = require('sanitizer')
 User = require("../../models/User").User
 UserCreator = require("./UserCreator")
+UserGetter = require("./UserGetter")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
 NewsLetterManager = require("../Newsletter/NewsletterManager")
 async = require("async")
@@ -47,7 +48,7 @@ module.exports = UserRegistrationHandler =
 		if !requestIsValid
 			return callback(new Error("request is not valid"))
 		userDetails.email = userDetails.email?.trim()?.toLowerCase()
-		User.findOne email:userDetails.email, (err, user)->
+		UserGetter.getUserByMainEmail userDetails.email, (err, user) =>
 			if err?
 				return callback err
 			if user?.holdingAccount == false
