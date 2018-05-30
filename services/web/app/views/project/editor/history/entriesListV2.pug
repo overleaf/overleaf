@@ -142,7 +142,10 @@ script(type="text/ng-template", id="historyEntryTpl")
 					span.history-entry-change-doc {{ ::$ctrl.getProjectOpDoc(project_op) }}
 			.history-entry-metadata
 				time.history-entry-metadata-time {{ ::$ctrl.entry.meta.end_ts | formatDate:'h:mm a' }}
-				span &nbsp;&bull;&nbsp;
+				span
+					|
+					| &bull;
+					|
 				ol.history-entry-metadata-users
 					li.history-entry-metadata-user(ng-repeat="update_user in ::$ctrl.entry.meta.users")
 						span.name(
