@@ -105,6 +105,11 @@
 		font-family: @font-family-serif;
 	}
 }
+
+.history-file-tree-inner when (@is-overleaf = false) {
+	font-size: 0.8rem;
+}
+
 	.history-file-entity-wrapper {
 		color: #FFF;
 		margin-left: (@line-height-computed / 2);
@@ -132,6 +137,7 @@
 			background-color: @file-tree-item-selected-bg;
 			font-weight: bold;
 			padding-right: 32px;
+			color: #FFF;
 			.fake-full-width-bg(@file-tree-item-selected-bg);
 			&:hover {
 				background-color: @file-tree-item-hover-bg;
@@ -152,6 +158,17 @@
 				overflow: hidden;
 				text-overflow: ellipsis;
 			}
+
+		.history-file-entity-link-selected when (@is-overleaf = false) {
+			color: @brand-primary;
+			&:hover,
+			&:focus {
+				color: @brand-primary;
+			}
+			.history-file-entity-icon {
+				color: @brand-primary;
+			}
+		}
 // @changesListWidth:   250px;
 // @changesListPadding: @line-height-computed / 2;
 
