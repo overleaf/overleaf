@@ -19,7 +19,6 @@ module.exports =
 				callback null, user.features.collaborators
 			else
 				callback null, Settings.defaultPlanCode.collaborators
-		
 
 	canAddXCollaborators: (project_id, x_collaborators, callback = (error, allowed)->) ->
 		@allowedNumberOfCollaboratorsInProject project_id, (error, allowed_number) =>
@@ -56,6 +55,10 @@ module.exports =
 			return callback(err) if err?
 			callback err, subscriptions.length > 0, subscriptions
 
+	teamHasReachedMemberLimit: (subscription) ->
+		currentTotal = (subscription.member_ids or []).length + (subscription.team_invites or []).length
+		return currentTotal >= subscription.membersLimit
+
 	hasGroupMembersLimitReached: (user_id, callback = (err, limitReached, subscription)->)->
 		SubscriptionLocator.getUsersSubscription user_id, (err, subscription)->
 			if err?
@@ -68,5 +71,3 @@ module.exports =
 			limitReached = currentTotal >= subscription.membersLimit
 			logger.log user_id:user_id, limitReached:limitReached, currentTotal: currentTotal, membersLimit: subscription.membersLimit, "checking if subscription members limit has been reached"
 			callback(err, limitReached, subscription)
-
-getOwnerIdOfProject = (project_id, callback)->

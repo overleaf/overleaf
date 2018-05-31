@@ -52,11 +52,8 @@ module.exports = SubscriptionGroupHandler =
 			for email in subscription.invited_emails or []
 				users.push buildEmailInviteViewModel(email)
 
-			TeamInvitesHandler.getInvites subscription.id, (err, invites) ->
-				return callback(err) if err?
-
-				for invite in invites or []
-					users.push buildEmailInviteViewModel(invite.email)
+			for teamInvite in subscription.teamInvites or []
+				users.push buildEmailInviteViewModel(teamInvite.email)
 
 			jobs = _.map subscription.member_ids, (user_id)->
 				return (cb)->

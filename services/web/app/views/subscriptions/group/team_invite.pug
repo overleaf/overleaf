@@ -20,7 +20,7 @@ block content
 				.col-md-8.col-md-offset-2(ng-cloak)
 					.card(ng-controller="TeamInviteController")
 						.page-header
-							h1.text-centered #{translate("invited_to_group", {inviterName: inviterName})}
+							h1.text-centered #{translate("invited_to_group", {inviterName: inviterName, appName: appName})}
 
 						div(ng-show="view =='personalSubscription'").row.text-centered.message
 							p #{translate("cancel_personal_subscription_first")}
@@ -31,10 +31,19 @@ block content
 									a.btn.btn.btn-primary(ng-click="cancelPersonalSubscription()", ng-disabled="inflight") #{translate("cancel_your_subscription")}
 
 						div(ng-show="view =='teamInvite'").row.text-centered.message
-							p #{translate("accept_invite_to_join_team", {inviterName: inviterName})}
+							p #{translate("accept_invitation_gives_premium_account")}
 							.row 
 								.col-md-12
 									.text-center
 										a.btn.btn-default(href="/project") #{translate("not_now")}
 										span &nbsp;
-										a.btn.btn.btn-primary(ng-click="joinTeam()", ng-disabled="inflight") #{translate("join_team")}  
+										a.btn.btn.btn-primary(ng-click="joinTeam()", ng-disabled="inflight") #{translate("accept_invitation")} 
+
+						div(ng-show="view =='inviteAccepted'").row.text-centered.text-center
+							.row
+								.col-md-12 You have joined the team managed by John Smith
+							.row
+								.col-md-12 &nbsp;
+							.row
+								.col-md-12
+									a.btn.btn.btn-primary(href="/project") #{translate("done")}

@@ -5,11 +5,9 @@ Schema = mongoose.Schema
 ObjectId = Schema.ObjectId
 
 TeamInviteSchema = new Schema
-	subscriptionId :     { type: ObjectId, ref: 'Subscription', required: true  }
 	email          :     { type: String, required: true }
-	token          :     { type: String, required: true }
-	sentAt         :     { type: Date, required: true }
-
+	token          :     { type: String }
+	sentAt         :     { type: Date }
 
 mongoose.model 'TeamInvite', TeamInviteSchema
 exports.TeamInvite = mongoose.model 'TeamInvite'

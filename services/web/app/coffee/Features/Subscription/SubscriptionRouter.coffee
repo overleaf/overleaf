@@ -33,7 +33,7 @@ module.exports =
 			TeamInvitesController.viewInvite
 		webRouter.put '/subscription/invites/:token/',  AuthenticationController.requireLogin(),
 			TeamInvitesController.acceptInvite
-		webRouter.delete '/subscription/invites/:token/',  AuthenticationController.requireLogin(),
+		webRouter.delete '/subscription/invites/:email/',  AuthenticationController.requireLogin(),
 			TeamInvitesController.revokeInvite
 
 		webRouter.get '/user/subscription/:subscription_id/group/invited', AuthenticationController.requireLogin(), SubscriptionGroupController.renderGroupInvitePage
