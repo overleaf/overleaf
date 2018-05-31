@@ -1,31 +1,31 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "GroupSubscriptionInviteController", ($scope, $http) ->
+	App.controller "DomainSubscriptionJoinController", ($scope, $http) ->
 
 		$scope.inflight = false
 
 		if has_personal_subscription
 			$scope.view = "personalSubscription"
-		else 
-			$scope.view = "groupSubscriptionInvite"
+		else
+			$scope.view = "domainSubscriptionJoin"
 
 		$scope.keepPersonalSubscription = ->
-			$scope.view = "groupSubscriptionInvite"
+			$scope.view = "domainSubscriptionJoin"
 
 		$scope.cancelSubscription = ->
 			$scope.inflight = true
 			request = $http.post "/user/subscription/cancel", {_csrf:window.csrfToken}
 			request.then ()->
 				$scope.inflight = false
-				$scope.view = "groupSubscriptionInvite"
+				$scope.view = "domainSubscriptionJoin"
 			request.catch ()->
-				console.log "the request failed"					
+				console.log "the request failed"
 
 		$scope.joinGroup = ->
 			$scope.view = "requestSent"
 			$scope.inflight = true
-			request = $http.post "/user/subscription/#{group_subscription_id}/group/begin-join", {_csrf:window.csrfToken}
+			request = $http.post "/user/subscription/#{group_subscription_id}/group/join", {_csrf:window.csrfToken}
 			request.then (response)->
 				{ status } = response
 				$scope.inflight = false

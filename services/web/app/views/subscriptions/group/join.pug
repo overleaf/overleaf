@@ -17,7 +17,7 @@ block content
 				div &nbsp;
 			.row
 				.col-md-8.col-md-offset-2(ng-cloak)
-					.card(ng-controller="GroupSubscriptionInviteController")
+					.card(ng-controller="DomainSubscriptionJoinController")
 						.page-header
 							h1.text-centered #{translate("you_are_invited_to_group", {groupName:licenceName})}
 
@@ -31,7 +31,7 @@ block content
 									span &nbsp;
 									a.btn.btn.btn-primary(ng-click="cancelSubscription()", ng-disabled="inflight") #{translate("cancel_your_subscription")}
 
-						div(ng-show="view =='groupSubscriptionInvite'").row.text-centered
+						div(ng-show="view =='domainSubscriptionJoin'").row.text-centered
 							.row
 								.col-md-12 #{translate("group_provides_you_with_premium_account", {groupName:licenceName})}
 							.row

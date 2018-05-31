@@ -1,6 +1,7 @@
 AuthenticationController = require('../Authentication/AuthenticationController')
 SubscriptionController = require('./SubscriptionController')
 SubscriptionGroupController = require './SubscriptionGroupController'
+DomainSubscriptionController = require './DomainSubscriptionController'
 TeamInvitesController = require './TeamInvitesController'
 Settings = require "settings-sharelatex"
 
@@ -36,10 +37,9 @@ module.exports =
 		webRouter.delete '/subscription/invites/:email/',  AuthenticationController.requireLogin(),
 			TeamInvitesController.revokeInvite
 
-		webRouter.get '/user/subscription/:subscription_id/group/invited', AuthenticationController.requireLogin(), SubscriptionGroupController.renderGroupInvitePage
-		webRouter.post '/user/subscription/:subscription_id/group/begin-join', AuthenticationController.requireLogin(), SubscriptionGroupController.beginJoinGroup
-		webRouter.get '/user/subscription/:subscription_id/group/complete-join', AuthenticationController.requireLogin(), SubscriptionGroupController.completeJoin
-		webRouter.get '/user/subscription/:subscription_id/group/successful-join', AuthenticationController.requireLogin(), SubscriptionGroupController.renderSuccessfulJoinPage
+		# Routes to join a domain licence team
+		webRouter.get '/user/subscription/:subscription_id/group/join', AuthenticationController.requireLogin(), DomainSubscriptionController.newInvite
+		webRouter.post '/user/subscription/:subscription_id/group/join', AuthenticationController.requireLogin(), DomainSubscriptionController.createInvite
 
 		#recurly callback
 		publicApiRouter.post '/user/subscription/callback',   SubscriptionController.recurlyNotificationParser, SubscriptionController.recurlyCallback
