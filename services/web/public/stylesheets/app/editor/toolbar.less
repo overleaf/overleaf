@@ -249,14 +249,15 @@
 /**************************************
 	Formatting buttons
 ***************************************/
-.button-measurer-wrapper {
+formatting-buttons {
 	display: flex;
+	width: 100%;
+	overflow: hidden;
 }
 
 .formatting-btn {
 	padding: 0;
-	min-width: 32px;
-	width: 32px;
+	margin: 3px 0;
 	height: 100%;
 	display: flex;
 	align-items: center;
@@ -265,10 +266,21 @@
 	border: none;
 	border-left: 1px solid #ccc;
 	border-radius: 0;
+}
 
-	&:last-child {
+.formatting-btn-with-icon {
+	min-width: 32px;
+	width: 32px;
+
+	&:nth-child(-1) {
 		border-right: 1px solid #ccc;
 	}
+}
+
+.formatting-btn-overflowed {
+	margin-left: auto;
+	padding-left: 5px;
+	padding-right: 5px;
 }
 
 .formatting-btn-icon {
