@@ -292,8 +292,13 @@ formatting-buttons {
 
 .formatting-menu {
 	min-width: auto;
+	max-width: 130px;
 
 	.formatting-menu-item {
 		float: left;
+
+		&:nth-of-type(4n + 1) .formatting-btn {
+			border-left: none;
+		}
 	}
 }
