@@ -67,6 +67,7 @@ describe "ProjectController", ->
 			protectTokens: sinon.stub()
 		@CollaboratorsHandler =
 			userIsTokenMember: sinon.stub().callsArgWith(2, null, false)
+		@ProjectEntityHandler = {}
 		@Modules =
 			hooks:
 				fire: sinon.stub()
@@ -98,6 +99,7 @@ describe "ProjectController", ->
 			"../TokenAccess/TokenAccessHandler": @TokenAccessHandler
 			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler
 			"../../infrastructure/Modules": @Modules
+			"./ProjectEntityHandler": @ProjectEntityHandler
 
 		@projectName = "£12321jkj9ujkljds"
 		@req =
@@ -520,7 +522,62 @@ describe "ProjectController", ->
 				@ProjectUpdateHandler.markAsOpened.calledWith(@project_id).should.equal true
 				done()
 			@ProjectController.loadEditor @req, @res
-		
+
+	describe 'userProjectsJson', ->
+		beforeEach (done) ->
+			projects = [
+				{archived: true,  id: 'a', name: 'A', accessLevel: 'a', somethingElse: 1}
+				{archived: false, id: 'b', name: 'B', accessLevel: 'b', somethingElse: 1}
+				{archived: false, id: 'c', name: 'C', accessLevel: 'c', somethingElse: 1}
+				{archived: false, id: 'd', name: 'D', accessLevel: 'd', somethingElse: 1}
+			]
+			@ProjectGetter.findAllUsersProjects = sinon.stub().callsArgWith(2, null, [])
+			@ProjectController._buildProjectList = sinon.stub().returns(projects)
+			@AuthenticationController.getLoggedInUserId = sinon.stub().returns 'abc'
+			done()
+
+		it 'should produce a list of projects', (done) ->
+			@res.json = (data) =>
+				expect(data).to.deep.equal {
+					projects: [
+						{_id: 'b', name: 'B', accessLevel: 'b'},
+						{_id: 'c', name: 'C', accessLevel: 'c'},
+						{_id: 'd', name: 'D', accessLevel: 'd'}
+					]
+				}
+				done()
+			@ProjectController.userProjectsJson @req, @res, @next
+
+	describe 'projectEntitiesJson', ->
+		beforeEach () ->
+			@AuthenticationController.getLoggedInUserId = sinon.stub().returns 'abc'
+			@req.params = {Project_id: 'abcd'}
+			@project = { _id: 'abcd' }
+			@docs = [
+				{path: '/things/b.txt', doc: true},
+				{path: '/main.tex', doc: true}
+			]
+			@files = [
+				{path: '/things/a.txt'}
+			]
+			@ProjectGetter.getProject = sinon.stub().callsArgWith(1, null, @project)
+			@ProjectEntityHandler.getAllEntitiesFromProject = sinon.stub().callsArgWith(1, null, @docs, @files)
+
+		it 'should produce a list of entities', (done) ->
+			@res.json = (data) =>
+				expect(data).to.deep.equal {
+					project_id: 'abcd',
+					entities: [
+						{path: '/main.tex',     type: 'doc'},
+						{path: '/things/a.txt', type: 'file'},
+						{path: '/things/b.txt', type: 'doc'}
+					]
+				}
+				expect(@ProjectGetter.getProject.callCount).to.equal 1
+				expect(@ProjectEntityHandler.getAllEntitiesFromProject.callCount).to.equal 1
+				done()
+			@ProjectController.projectEntitiesJson @req, @res, @next
+
 	describe '_isInPercentageRollout', ->
 		before ->
 			@ids = [

@@ -43,6 +43,19 @@ define [
 				}
 			)
 
+		$scope.openProjectLinkedFileModal = window.openProjectLinkedFileModal = () ->
+			unless 'project_file' in window.data.enabledLinkedFileTypes
+				console.warn("Project linked files are not enabled")
+				return
+			$modal.open(
+				templateUrl: "projectLinkedFileModalTemplate"
+				controller:  "ProjectLinkedFileModalController"
+				scope: $scope
+				resolve: {
+					parent_folder: () -> ide.fileTreeManager.getCurrentFolder()
+				}
+			)
+
 		$scope.orderByFoldersFirst = (entity) ->
 			return '0' if entity?.type == "folder"
 			return '1'
@@ -201,6 +214,117 @@ define [
 				$modalInstance.dismiss('cancel')
 	]
 
+	App.controller "ProjectLinkedFileModalController", [
+		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder",
+		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->
+			$scope.data =
+				projects: null # or []
+				selectedProjectId: null
+				projectEntities: null # or []
+				selectedProjectEntity: null
+				name: null
+			$scope.state =
+				inFlight:
+					projects: false
+					entities: false
+					create: false
+				error: false
+
+			$scope.$watch 'data.selectedProjectId', (newVal, oldVal) ->
+				return if !newVal
+				$scope.data.selectedProjectEntity = null
+				$scope.getProjectEntities($scope.data.selectedProjectId)
+
+			# auto-set filename based on selected file
+			$scope.$watch 'data.selectedProjectEntity', (newVal, oldVal) ->
+				return if !newVal
+				fileName = newVal.split('/').reverse()[0]
+				if fileName
+					$scope.data.name = fileName
+
+			_setInFlight = (type) ->
+				$scope.state.inFlight[type] = true
+
+			_reset = (opts) ->
+				isError = opts.err == true
+				inFlight = $scope.state.inFlight
+				inFlight.projects = inFlight.entities = inFlight.create = false
+				$scope.state.error = isError
+
+			$scope.shouldEnableProjectSelect = () ->
+				{ state, data } = $scope
+				return !state.inFlight.projects && data.projects
+
+			$scope.shouldEnableProjectEntitySelect = () ->
+				{ state, data } = $scope
+				return !state.inFlight.projects && !state.inFlight.entities && data.projects && data.selectedProjectId
+
+			$scope.shouldEnableCreateButton = () ->
+				state = $scope.state
+				data = $scope.data
+				return !state.inFlight.projects &&
+					!state.inFlight.entities &&
+					data.projects &&
+					data.selectedProjectId &&
+					data.projectEntities &&
+					data.selectedProjectEntity &&
+					data.name
+
+			$scope.getUserProjects = () ->
+				_setInFlight('projects')
+				ide.$http.get("/user/projects", {
+					_csrf: window.csrfToken
+				})
+				.then (resp) ->
+					$scope.data.projectEntities = null
+					$scope.data.projects = resp.data.projects.filter (p) ->
+						p._id != ide.project_id
+					_reset(err: false)
+				.catch (err) ->
+					_reset(err: true)
+
+			$scope.getProjectEntities = (project_id) =>
+				_setInFlight('entities')
+				ide.$http.get("/project/#{project_id}/entities", {
+					_csrf: window.csrfToken
+				})
+				.then (resp) ->
+					if $scope.data.selectedProjectId == resp.data.project_id
+						$scope.data.projectEntities = resp.data.entities
+						_reset(err: false)
+				.catch (err) ->
+					_reset(err: true)
+
+			$scope.init = () ->
+				$scope.getUserProjects()
+			$timeout($scope.init, 0)
+
+			$scope.create = () ->
+				projectId = $scope.data.selectedProjectId
+				path = $scope.data.selectedProjectEntity
+				name = $scope.data.name
+				if !name || !path || !projectId
+					_reset(err: true)
+					return
+				_setInFlight('create')
+				ide.fileTreeManager
+					.createLinkedFile(name, parent_folder, 'project_file', {
+						source_project_id: projectId,
+						source_entity_path: path
+					})
+					.then () ->
+						_reset(err: false)
+						$modalInstance.close()
+					.catch (response)->
+						{ data } = response
+						_reset(err: true)
+
+			$scope.cancel = () ->
+				$modalInstance.dismiss('cancel')
+
+	]
+
+	# TODO: rename all this to UrlLinkedFilModalController
 	App.controller "LinkedFileModalController", [
 		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder",
 		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->

@@ -18,6 +18,7 @@ define [
 	"ide/chat/index"
 	"ide/clone/index"
 	"ide/hotkeys/index"
+	"ide/test-controls/index"
 	"ide/wordcount/index"
 	"ide/directives/layout"
 	"ide/directives/validFile"
@@ -34,6 +35,7 @@ define [
 	"directives/videoPlayState"
 	"services/queued-http"
 	"services/validateCaptcha"
+	"services/wait-for"
 	"filters/formatDate"
 	"main/event"
 	"main/account-upgrade"
@@ -54,7 +56,7 @@ define [
 	SafariScrollPatcher
 ) ->
 
-	App.controller "IdeController", ($scope, $timeout, ide, localStorage, sixpack, event_tracking, metadata) ->
+	App.controller "IdeController", ($scope, $timeout, ide, localStorage, sixpack, event_tracking, metadata, $q) ->
 		# Don't freak out if we're already in an apply callback
 		$scope.$originalApply = $scope.$apply
 		$scope.$apply = (fn = () ->) ->
