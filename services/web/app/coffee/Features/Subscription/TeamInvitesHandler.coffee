@@ -19,47 +19,39 @@ module.exports = TeamInvitesHandler =
 	getInvites: (subscriptionId, callback) ->
 		TeamInvite.find(subscriptionId: subscriptionId, callback)
 
-	createInvite: (teamManagerId, email, callback) ->
+	getInvite: (token, callback) ->
+		Subscription.findOne 'teamInvites.token': token, (err, subscription) ->
+			return callback(err, subscription) if err?
+			return callback(teamNotFound: true) unless subscription?
+
+			invite = subscription.teamInvites.find (i) -> i.token == token
+			return callback(null, invite, subscription)
+
+	createManagerInvite: (teamManagerId, email, callback) ->
 		UserLocator.findById teamManagerId, (error, teamManager) ->
+			return callback(error) if error?
+
 			SubscriptionLocator.getUsersSubscription teamManagerId, (error, subscription) ->
 				return callback(error) if error?
 
-				if LimitationsManager.teamHasReachedMemberLimit(subscription)
-					return callback(limitReached: true)
+				if teamManager.first_name and teamManager.last_name
+					inviterName = "#{teamManager.first_name} #{teamManager.last_name} (#{teamManager.email})"
+				else
+					inviterName = teamManager.email
 
-				existingInvite = subscription.teamInvites.find (invite) -> invite.email == email
+				TeamInvitesHandler.createInvite(subscription, email, inviterName, callback)
 
-				if existingInvite
-					return callback(alreadyInvited: true)
-
-				inviterName = TeamInvitesHandler.inviterName(teamManager)
-				token = crypto.randomBytes(32).toString("hex")
-
-				invite = {
-					email: email,
-					token: token,
-					sentAt: new Date(),
-				}
-
-				subscription.teamInvites.push(invite)
-
-				subscription.save (error) ->
-					return callback(error) if error?
-
-					# TODO: use standard way to canonalise email addresses
-					opts =
-						to: email.trim().toLowerCase()
-						inviterName: inviterName
-						acceptInviteUrl: "#{settings.siteUrl}/subscription/invites/#{token}/"
-					EmailHandler.sendEmail "verifyEmailToJoinTeam", opts, (error) ->
-						return callback(error, invite)
+	createDomainInvite: (user, licence, callback) ->
+		SubscriptionLocator.getSubscription licence.subscription_id, (error, subscription) ->
+			return callback(error) if error?
+			TeamInvitesHandler.createInvite(subscription, user.email, licence.name, callback)
 
 	acceptInvite: (token, userId, callback) ->
-		TeamInvitesHandler.getInviteAndManager token, (err, invite, subscription, teamManager) ->
+		TeamInvitesHandler.getInvite token, (err, invite, subscription) ->
 			return callback(err) if err?
-			return callback(inviteNoLongerValid: true) unless invite? and teamManager?
+			return callback(inviteNoLongerValid: true) unless invite?
 
-			SubscriptionUpdater.addUserToGroup teamManager, userId, (err) ->
+			SubscriptionUpdater.addUserToGroup subscription.admin_id, userId, (err) ->
 				return callback(err) if err?
 
 				TeamInvitesHandler.removeInviteFromTeam(subscription.id, invite.email, callback)
@@ -70,45 +62,39 @@ module.exports = TeamInvitesHandler =
 
 			TeamInvitesHandler.removeInviteFromTeam(teamSubscription.id, email, callback)
 
-	getInviteDetails: (token, userId, callback) ->
-		TeamInvitesHandler.getInviteAndManager token, (err, invite, teamSubscription, teamManager) ->
-			return callback(err) if err?
+	createInvite: (subscription, email, inviterName, callback) ->
+		if LimitationsManager.teamHasReachedMemberLimit(subscription)
+			return callback(limitReached: true)
 
-			SubscriptionLocator.getUsersSubscription userId, (err, personalSubscription) ->
-				return callback(err) if err?
+		existingInvite = subscription.teamInvites.find (invite) -> invite.email == email
 
-				return callback(null , {
-					invite: invite,
-					personalSubscription: personalSubscription,
-					team: teamSubscription,
-					inviterName: TeamInvitesHandler.inviterName(teamManager),
-					teamManager: teamManager
-				})
+		if existingInvite
+			return callback(alreadyInvited: true)
 
-	getInviteAndManager: (token, callback) ->
-		TeamInvitesHandler.getInvite token, (err, invite, teamSubscription) ->
-			return callback(err) if err?
+		token = crypto.randomBytes(32).toString("hex")
 
-			UserLocator.findById teamSubscription.admin_id, (err, teamManager) ->
-				return callback(err, invite, teamSubscription, teamManager)
+		invite = {
+			email: email,
+			token: token,
+			inviterName: inviterName,
+			sentAt: new Date(),
+		}
 
-	getInvite: (token, callback) ->
-		Subscription.findOne 'teamInvites.token': token, (err, subscription) ->
-			return callback(err, subscription) if err?
-			return callback(teamNotFound: true) unless subscription?
+		subscription.teamInvites.push(invite)
 
-			invite = subscription.teamInvites.find (i) -> i.token == token
-			return callback(null, invite, subscription)
+		subscription.save (error) ->
+			return callback(error) if error?
 
+			# TODO: use standard way to canonalise email addresses
+			opts =
+				to: email.trim().toLowerCase()
+				inviterName: inviterName
+				acceptInviteUrl: "#{settings.siteUrl}/subscription/invites/#{token}/"
+			EmailHandler.sendEmail "verifyEmailToJoinTeam", opts, (error) ->
+				return callback(error, invite)
 
 	removeInviteFromTeam: (subscriptionId, email, callback) ->
 		searchConditions = { _id: new ObjectId(subscriptionId.toString()) }
 		updateOp = { $pull: { teamInvites: { email: email.trim().toLowerCase() } } }
 
 		Subscription.update(searchConditions, updateOp, callback)
-
-	inviterName: (teamManager) ->
-		if teamManager.first_name and teamManager.last_name
-			"#{teamManager.first_name} #{teamManager.last_name} (#{teamManager.email})"
-		else
-			teamManager.email

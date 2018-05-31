@@ -25,7 +25,7 @@ define [
 		$scope.joinGroup = ->
 			$scope.view = "requestSent"
 			$scope.inflight = true
-			request = $http.post "/user/subscription/#{group_subscription_id}/group/join", {_csrf:window.csrfToken}
+			request = $http.post "/user/subscription/domain/join", {_csrf:window.csrfToken}
 			request.then (response)->
 				{ status } = response
 				$scope.inflight = false

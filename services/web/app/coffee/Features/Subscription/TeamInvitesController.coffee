@@ -2,6 +2,7 @@ settings = require "settings-sharelatex"
 logger = require("logger-sharelatex")
 TeamInvitesHandler = require('./TeamInvitesHandler')
 AuthenticationController = require("../Authentication/AuthenticationController")
+SubscriptionLocator = require("./SubscriptionLocator")
 ErrorController = require("../Errors/ErrorController")
 
 module.exports =
@@ -20,19 +21,20 @@ module.exports =
 		token = req.params.token
 		userId = AuthenticationController.getLoggedInUserId(req)
 
-		TeamInvitesHandler.getInviteDetails token, userId, (err, results) ->
+		TeamInvitesHandler.getInvite token, (err, invite, teamSubscription) ->
 			next(err) if err?
-
-			{ invite, personalSubscription, inviterName } = results
 
 			unless invite?
 				return ErrorController.notFound(req, res, next)
 
-			res.render "subscriptions/group/team_invite",
-				inviterName: inviterName
-				inviteToken: invite.token
-				hasPersonalSubscription: personalSubscription?
-				appName: settings.appName
+			SubscriptionLocator.getUsersSubscription userId, (err, personalSubscription) ->
+				return callback(err) if err?
+
+				res.render "subscriptions/team/invite",
+					inviterName: invite.inviterName
+					inviteToken: invite.token
+					hasPersonalSubscription: personalSubscription?
+					appName: settings.appName
 
 
 	acceptInvite: (req, res, next) ->

@@ -7,6 +7,7 @@ ObjectId = Schema.ObjectId
 TeamInviteSchema = new Schema
 	email          :     { type: String, required: true }
 	token          :     { type: String }
+	inviterName    :     { type: String }
 	sentAt         :     { type: Date }
 
 mongoose.model 'TeamInvite', TeamInviteSchema
