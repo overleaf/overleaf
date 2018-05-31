@@ -257,7 +257,6 @@ formatting-buttons {
 
 .formatting-btn {
 	padding: 0;
-	margin: 3px 0;
 	height: 100%;
 	display: flex;
 	align-items: center;
@@ -266,24 +265,35 @@ formatting-buttons {
 	border: none;
 	border-left: 1px solid #ccc;
 	border-radius: 0;
-}
 
-.formatting-btn-with-icon {
-	min-width: 32px;
-	width: 32px;
+	&--icon {
+		min-width: 32px;
+		width: 32px;
 
-	&:nth-child(-1) {
-		border-right: 1px solid #ccc;
+		&:last-of-type {
+			border-right: 1px solid @formatting-btn-border;
+		}
+	}
+
+	&--more {
+		padding-left: 9px;
+		padding-right: 9px;
 	}
 }
 
-.formatting-btn-overflowed {
-	margin-left: auto;
-	padding-left: 5px;
-	padding-right: 5px;
-}
-
-.formatting-btn-icon {
+.formatting-icon {
 	font-style: normal;
 	line-height: 1.5;
+}
+
+.formatting-more {
+	margin-left: auto;
+}
+
+.formatting-menu {
+	min-width: auto;
+
+	.formatting-menu-item {
+		float: left;
+	}
 }
