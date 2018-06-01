@@ -8,7 +8,7 @@ ObjectId = require("mongojs").ObjectId
 TeamInvite = require("../../models/TeamInvite").TeamInvite
 Subscription = require("../../models/Subscription").Subscription
 
-UserLocator = require("../User/UserLocator")
+UserGetter = require("../User/UserGetter")
 SubscriptionLocator = require("./SubscriptionLocator")
 SubscriptionUpdater = require("./SubscriptionUpdater")
 LimitationsManager = require("./LimitationsManager")
@@ -26,7 +26,7 @@ module.exports = TeamInvitesHandler =
 
 	createManagerInvite: (teamManagerId, email, callback) ->
 		logger.log {teamManagerId, email}, "Creating manager team invite"
-		UserLocator.findById teamManagerId, (error, teamManager) ->
+		UserGetter.getUser teamManagerId, (error, teamManager) ->
 			return callback(error) if error?
 
 			SubscriptionLocator.getUsersSubscription teamManagerId, (error, subscription) ->
@@ -108,7 +108,7 @@ checkIfInviteIsPossible = (subscription, email, callback = (error, possible, rea
 		logger.log {subscriptionId: subscription.id, email}, "user already invited"
 		return callback(null, false, alreadyInvited: true)
 
-	async.map subscription.member_ids, UserLocator.findById, (error, members) ->
+	async.map subscription.member_ids, UserGetter.getUser, (error, members) ->
 		return callback(error) if error?
 
 		existingMember = members.find (member) -> member.email == email

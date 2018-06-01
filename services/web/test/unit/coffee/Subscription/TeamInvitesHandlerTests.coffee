@@ -36,8 +36,8 @@ describe "TeamInvitesHandler", ->
 			getSubscription: sinon.stub().yields(null, @subscription)
 		}
 
-		@UserLocator = {
-			findById: sinon.stub()
+		@UserGetter = {
+			getUser: sinon.stub()
 		}
 
 		@SubscriptionUpdater = {
@@ -64,7 +64,7 @@ describe "TeamInvitesHandler", ->
 				toString: sinon.stub().returns(@newToken)
 		}
 
-		@UserLocator.findById.withArgs(@manager.id).yields(null, @manager)
+		@UserGetter.getUser.withArgs(@manager.id).yields(null, @manager)
 		@SubscriptionLocator.getUsersSubscription.yields(null, @subscription)
 		@Subscription.findOne.yields(null, @subscription)
 
@@ -74,7 +74,7 @@ describe "TeamInvitesHandler", ->
 				"settings-sharelatex": { siteUrl: "http://example.com" }
 				"../../models/TeamInvite": { TeamInvite: @TeamInvite = {} }
 				"../../models/Subscription": { Subscription: @Subscription }
-				"../User/UserLocator": @UserLocator
+				"../User/UserGetter": @UserGetter
 				"./SubscriptionLocator": @SubscriptionLocator
 				"./SubscriptionUpdater": @SubscriptionUpdater
 				"./LimitationsManager": @LimitationsManager
@@ -154,7 +154,7 @@ describe "TeamInvitesHandler", ->
 				email: "tyrion@lannister.com"
 			}
 
-			@UserLocator.findById.withArgs(@user.id).yields(null, @user)
+			@UserGetter.getUser.withArgs(@user.id).yields(null, @user)
 
 			@subscription.teamInvites.push({
 				email: "john.snow@nightwatch.com",
@@ -205,7 +205,7 @@ describe "TeamInvitesHandler", ->
 			}
 
 			@subscription.member_ids = [member.id]
-			@UserLocator.findById.withArgs(member.id).yields(null, member)
+			@UserGetter.getUser.withArgs(member.id).yields(null, member)
 
 			@TeamInvitesHandler.createManagerInvite @manager.id, "tyrion@lannister.com", (err, invite) =>
 				expect(err).to.deep.equal(alreadyInTeam: true)
