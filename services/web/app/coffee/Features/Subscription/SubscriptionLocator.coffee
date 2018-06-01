@@ -30,6 +30,3 @@ module.exports =
 
 	getGroupSubscriptionsMemberOf: (user_id, callback)->
 		Subscription.find {member_ids: user_id}, {_id:1, planCode:1}, callback
-
-	getGroupsWithEmailInvite: (email, callback) ->
-		Subscription.find { teamInvites: { email: email } }, callback
