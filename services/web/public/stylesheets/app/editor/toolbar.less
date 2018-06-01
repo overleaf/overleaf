@@ -259,6 +259,8 @@
 }
 
 .formatting-btn {
+	color: @formatting-btn-color;
+	background-color: @formatting-btn-bg;
 	padding: 0;
 	height: 100%;
 	display: flex;
@@ -266,8 +268,12 @@
 	justify-content: center;
 	box-shadow: none;
 	border: none;
-	border-left: 1px solid #ccc;
+	border-left: 1px solid @formatting-btn-border;
 	border-radius: 0;
+
+	&:hover {
+		color: @formatting-btn-color;
+	}
 
 	&--icon {
 		min-width: 32px;
@@ -296,9 +302,14 @@
 .formatting-menu {
 	min-width: auto;
 	max-width: 130px;
+	background-color: @formatting-menu-bg;
 
 	.formatting-menu-item {
 		float: left;
+
+		.formatting-btn {
+			border-right: none;
+		}
 
 		&:nth-of-type(4n + 1) .formatting-btn {
 			border-left: none;
