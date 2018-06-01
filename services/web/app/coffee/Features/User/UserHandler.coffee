@@ -23,3 +23,7 @@ module.exports = UserHandler =
 
 	setupLoginData: (user, callback = ->)->
 		@notifyDomainLicence user, callback
+
+	# Backwards compatibility: this is called from the public-registration module
+	populateGroupLicenceInvite: (user, callback = ->)->
+		@notifyDomainLicence user, callback
