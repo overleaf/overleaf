@@ -48,6 +48,7 @@ MetaController = require('./Features/Metadata/MetaController')
 TokenAccessController = require('./Features/TokenAccess/TokenAccessController')
 Features = require('./infrastructure/Features')
 LinkedFilesRouter = require './Features/LinkedFiles/LinkedFilesRouter'
+TemplatesRouter = require './Features/Templates/TemplatesRouter'
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -80,9 +81,9 @@ module.exports = class Router
 		ContactRouter.apply(webRouter, privateApiRouter)
 		AnalyticsRouter.apply(webRouter, privateApiRouter, publicApiRouter)
 		LinkedFilesRouter.apply(webRouter, privateApiRouter, publicApiRouter)
+		TemplatesRouter.apply(webRouter)
 
 		Modules.applyRouter(webRouter, privateApiRouter, publicApiRouter)
-
 
 		if Settings.enableSubscriptions
 			webRouter.get  '/user/bonus', AuthenticationController.requireLogin(), ReferalController.bonus
