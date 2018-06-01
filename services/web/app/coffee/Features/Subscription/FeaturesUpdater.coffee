@@ -90,5 +90,3 @@ module.exports = FeaturesUpdater =
 			return {}
 		else
 			return plan.features
-
-	_notifyV1: (user_id, callback = (error) ->) ->

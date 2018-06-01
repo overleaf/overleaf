@@ -41,7 +41,6 @@ module.exports = V1SubscriptionManager =
 			if !v1Id?
 				logger.log {userId}, "[V1SubscriptionManager] no v1 id found for user"
 				return callback(null, null)
-			options.url = options.url
 			request {
 				baseUrl: settings.apis.v1.url
 				url: options.url(v1Id)
