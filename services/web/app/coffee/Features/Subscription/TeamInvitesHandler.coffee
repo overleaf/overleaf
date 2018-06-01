@@ -66,12 +66,14 @@ module.exports = TeamInvitesHandler =
 createInvite = (subscription, email, inviterName, callback) ->
 	logger.log {subscriptionId: subscription.id, email, inviterName}, "Creating invite"
 	checkIfInviteIsPossible subscription, email, (error, possible, reason) ->
-		return callback(reason) unless possible?
+		return callback(error) if error?
+		return callback(reason) unless possible
 
 		token = crypto.randomBytes(32).toString("hex")
 
+		# TODO: use standard way to canonalise email addresses
 		invite = {
-			email: email,
+			email: email.trim().toLowerCase(),
 			token: token,
 			inviterName: inviterName,
 			sentAt: new Date(),
@@ -82,7 +84,6 @@ createInvite = (subscription, email, inviterName, callback) ->
 		subscription.save (error) ->
 			return callback(error) if error?
 
-			# TODO: use standard way to canonalise email addresses
 			opts =
 				to: email.trim().toLowerCase()
 				inviterName: inviterName

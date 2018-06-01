@@ -1,22 +1,213 @@
 SandboxedModule = require('sandboxed-module')
 should = require('chai').should()
 sinon = require 'sinon'
+expect = require("chai").expect
 querystring = require 'querystring'
 modulePath = "../../../../app/js/Features/Subscription/TeamInvitesHandler"
 
+ObjectId = require("mongojs").ObjectId
+
 describe "TeamInvitesHandler", ->
+	beforeEach ->
+		@manager = {
+			id: "666666",
+			first_name: "Daenerys"
+			last_name: "Targaryen"
+			email: "daenerys@motherofdragons.com"
+		}
 
-  describe "getInvite", ->
-    # TODO
+		@token = "aaaaaaaaaaaaaaaaaaaaaa"
 
-  describe "createManagerInvite", ->
-    # TODO
+		@teamInvite = {
+			email: "jorah@mormont.org",
+			token: @token,
+		}
 
-  describe "createDomainInvite", ->
-    # TODO
+		@subscription = {
+			id: "55153a8014829a865bbf700d",
+			admin_id: @manager.id,
+			member_ids: []
+			teamInvites: [ @teamInvite ]
+			save: sinon.stub().yields(null)
+		}
 
-  describe "acceptInvite", ->
-    # TODO
+		@SubscriptionLocator = {
+			getUsersSubscription: sinon.stub(),
+			getSubscription: sinon.stub().yields(null, @subscription)
+		}
 
-  describe "revokeInvite", ->
-    # TODO
+		@UserLocator = {
+			findById: sinon.stub()
+		}
+
+		@SubscriptionUpdater = {
+			addUserToGroup: sinon.stub().yields()
+		}
+
+		@LimitationsManager = {
+			teamHasReachedMemberLimit: sinon.stub().returns(false)
+		}
+
+		@Subscription = {
+			findOne: sinon.stub().yields()
+			update: sinon.stub().yields()
+		}
+
+		@EmailHandler = {
+			sendEmail: sinon.stub().yields(null)
+		}
+
+		@newToken = "bbbbbbbbb"
+
+		@crypto = {
+			randomBytes: =>
+				toString: sinon.stub().returns(@newToken)
+		}
+
+		@UserLocator.findById.withArgs(@manager.id).yields(null, @manager)
+		@SubscriptionLocator.getUsersSubscription.yields(null, @subscription)
+		@Subscription.findOne.yields(null, @subscription)
+
+		@TeamInvitesHandler = SandboxedModule.require modulePath, requires:
+				"logger-sharelatex": { log: -> }
+				"crypto": @crypto
+				"settings-sharelatex": { siteUrl: "http://example.com" }
+				"../../models/TeamInvite": { TeamInvite: @TeamInvite = {} }
+				"../../models/Subscription": { Subscription: @Subscription }
+				"../User/UserLocator": @UserLocator
+				"./SubscriptionLocator": @SubscriptionLocator
+				"./SubscriptionUpdater": @SubscriptionUpdater
+				"./LimitationsManager": @LimitationsManager
+				"../Email/EmailHandler": @EmailHandler
+
+	describe "getInvite", ->
+		it "returns the invite if there's one", (done) ->
+			@TeamInvitesHandler.getInvite @token, (err, invite, subscription) =>
+				expect(err).to.eq(null)
+				expect(invite).to.deep.eq(@teamInvite)
+				expect(subscription).to.deep.eq(@subscription)
+				done()
+
+		it "returns teamNotFound if there's none", (done) ->
+			@Subscription.findOne = sinon.stub().yields(null, null)
+
+			@TeamInvitesHandler.getInvite @token, (err, invite, subscription) ->
+				expect(err).to.deep.eq(teamNotFound: true)
+				done()
+
+	describe "createManagerInvite", ->
+		it "adds the team invite to the subscription", (done) ->
+			@TeamInvitesHandler.createManagerInvite @manager.id, "John.Snow@nightwatch.com", (err, invite) =>
+				expect(err).to.eq(null)
+				expect(invite.token).to.eq(@newToken)
+				expect(invite.email).to.eq("john.snow@nightwatch.com")
+				expect(invite.inviterName).to.eq("Daenerys Targaryen (daenerys@motherofdragons.com)")
+				expect(@subscription.teamInvites).to.deep.include(invite)
+				done()
+
+		it "sends an email", (done) ->
+			@TeamInvitesHandler.createManagerInvite @manager.id, "John.Snow@nightwatch.com", (err, invite) =>
+				@EmailHandler.sendEmail.calledWith("verifyEmailToJoinTeam",
+					sinon.match({
+						to: "john.snow@nightwatch.com",
+						inviterName: "Daenerys Targaryen (daenerys@motherofdragons.com)",
+						acceptInviteUrl: "http://example.com/subscription/invites/#{@newToken}/"
+					})
+				).should.equal true
+				done()
+
+	describe "createDomainInvite", ->
+		beforeEach ->
+			@licence =
+				subscription_id: @subscription.id
+				name: "Team Daenerys"
+
+			@user =
+				email: "John.Snow@nightwatch.com"
+
+		it "adds the team invite to the subscription", (done) ->
+			@TeamInvitesHandler.createDomainInvite @user, @licence, (err, invite) =>
+				expect(err).to.eq(null)
+				expect(invite.token).to.eq(@newToken)
+				expect(invite.email).to.eq("john.snow@nightwatch.com")
+				expect(invite.inviterName).to.eq("Team Daenerys")
+				expect(@subscription.teamInvites).to.deep.include(invite)
+				done()
+
+		it "sends an email", (done) ->
+			@TeamInvitesHandler.createDomainInvite @user, @licence, (err, invite) =>
+				@EmailHandler.sendEmail.calledWith("verifyEmailToJoinTeam",
+					sinon.match({
+						to: "john.snow@nightwatch.com"
+						inviterName: "Team Daenerys"
+						acceptInviteUrl: "http://example.com/subscription/invites/#{@newToken}/"
+					})
+				).should.equal true
+				done()
+
+	describe "acceptInvite", ->
+		beforeEach ->
+			@user = {
+				id: "123456789",
+				first_name: "Tyrion",
+				last_name: "Lannister",
+				email: "tyrion@lannister.com"
+			}
+
+			@UserLocator.findById.withArgs(@user.id).yields(null, @user)
+
+			@subscription.teamInvites.push({
+				email: "john.snow@nightwatch.com",
+				token: "dddddddd",
+				inviterName: "Daenerys Targaryen (daenerys@motherofdragons.com)"
+			})
+
+		it "adds the user to the team", (done) ->
+			@TeamInvitesHandler.acceptInvite "dddddddd", @user.id, =>
+				@SubscriptionUpdater.addUserToGroup.calledWith(@manager.id, @user.id).should.eq true
+				done()
+
+		it "removes the invite from the subscription", (done) ->
+			@TeamInvitesHandler.acceptInvite "dddddddd", @user.id, =>
+				@Subscription.update.calledWith(
+					{ _id: new ObjectId("55153a8014829a865bbf700d") },
+					{ '$pull': { teamInvites: { email: 'john.snow@nightwatch.com' } } }
+				).should.eq true
+				done()
+
+	describe "revokeInvite", ->
+		it "removes the team invite from the subscription", (done) ->
+			@TeamInvitesHandler.revokeInvite @manager.id, "jorah@mormont.org", =>
+				@Subscription.update.calledWith(
+					{ _id: new ObjectId("55153a8014829a865bbf700d") },
+					{ '$pull': { teamInvites: { email: "jorah@mormont.org" } } }
+				).should.eq true
+				done()
+
+	describe "validation", ->
+		it "doesn't create an invite if the team limit has been reached", (done) ->
+			@LimitationsManager.teamHasReachedMemberLimit = sinon.stub().returns(true)
+			@TeamInvitesHandler.createManagerInvite @manager.id, "John.Snow@nightwatch.com", (err, invite) =>
+				console.log('err, invite', err, invite)
+				expect(err).to.deep.equal(limitReached: true)
+				done()
+
+		it "doen't create an invite if the email has already been invited",(done) ->
+			@TeamInvitesHandler.createManagerInvite @manager.id, "jorah@mormont.org", (err, invite) =>
+				expect(err).to.deep.equal(alreadyInvited: true)
+				expect(invite).not.to.exist
+				done()
+
+		it "doen't create an invite if the user is already part of the team", (done) ->
+			member = {
+				id: "1a2b",
+				email: "tyrion@lannister.com"
+			}
+
+			@subscription.member_ids = [member.id]
+			@UserLocator.findById.withArgs(member.id).yields(null, member)
+
+			@TeamInvitesHandler.createManagerInvite @manager.id, "tyrion@lannister.com", (err, invite) =>
+				expect(err).to.deep.equal(alreadyInTeam: true)
+				expect(invite).not.to.exist
+				done()
