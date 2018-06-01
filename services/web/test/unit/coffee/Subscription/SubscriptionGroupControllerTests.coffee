@@ -25,7 +25,6 @@ describe "SubscriptionGroupController", ->
 			addUserToGroup: sinon.stub().callsArgWith(2, null, @user)
 			removeUserFromGroup: sinon.stub().callsArgWith(2)
 			isUserPartOfGroup: sinon.stub()
-			sendVerificationEmail:sinon.stub()
 			getPopulatedListOfMembers: sinon.stub().callsArgWith(1, null, [@user])
 		@SubscriptionLocator = getUsersSubscription: sinon.stub().callsArgWith(1, null, @subscription)
 		@AuthenticationController =

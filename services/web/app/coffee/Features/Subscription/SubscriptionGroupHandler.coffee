@@ -71,16 +71,6 @@ module.exports = SubscriptionGroupHandler =
 			logger.log user_id:user_id, subscription_id:subscription_id, partOfGroup:partOfGroup, "checking if user is part of a group"
 			callback(err, partOfGroup)
 
-
-	sendVerificationEmail: (subscription_id, licenceName, email, callback)->
-		ONE_DAY_IN_S = 1000 * 60 * 60 * 24
-		OneTimeTokenHandler.getNewToken subscription_id, {expiresIn:ONE_DAY_IN_S}, (err, token)->
-			opts =
-				to : email
-				group_name: licenceName
-				completeJoinUrl: "#{settings.siteUrl}/user/subscription/#{subscription_id}/group/complete-join?token=#{token}"
-			EmailHandler.sendEmail "completeJoinGroupAccount", opts, callback
-
 buildUserViewModel = (user)->
 	u =
 		email: user.email

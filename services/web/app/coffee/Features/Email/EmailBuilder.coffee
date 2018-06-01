@@ -144,31 +144,6 @@ Thank You
 			gmailGoToAction: null
 		})
 
-templates.completeJoinGroupAccount =
-	subject: _.template "Verify Email to join <%= group_name %> group"
-	layout: BaseWithHeaderEmailLayout
-	type:"notification"
-	plainTextTemplate: _.template """
-Hi, please verify your email to join the <%= group_name %> and get your free premium account
-
-Click this link to verify now: <%= completeJoinUrl %>
-
-Thank You
-
-#{settings.appName} - <%= siteUrl %>
-"""
-	compiledTemplate: (opts) ->
-		SingleCTAEmailBody({
-			title: "Verify Email to join #{ opts.group_name } group"
-			greeting: "Hi,"
-			message: "please verify your email to join the #{ opts.group_name } group and get your free premium account."
-			secondaryMessage: null
-			ctaText: "Verify now"
-			ctaURL: opts.completeJoinUrl
-			gmailGoToAction: null
-		})
-
-
 templates.testEmail =
 	subject: _.template "A Test Email from ShareLaTeX"
 	layout: BaseWithHeaderEmailLayout

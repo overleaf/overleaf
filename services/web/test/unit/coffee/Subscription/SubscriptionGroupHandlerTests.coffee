@@ -179,21 +179,3 @@ describe "SubscriptionGroupHandler", ->
 			@Handler.isUserPartOfGroup @user_id, @subscription_id, (err, partOfGroup)->
 				partOfGroup.should.equal false
 				done()
-
-
-	describe "sendVerificationEmail", ->
-		beforeEach ->
-			@token = "secret token"
-			@subscription_id = "123ed13123"
-			@licenceName = "great licnece"
-			@email = "bob@smith.com"
-			@OneTimeTokenHandler.getNewToken.callsArgWith(2, null, @token)
-			@EmailHandler.sendEmail.callsArgWith(2)
-
-		it "should put a one time token into the email", (done)->
-			@Handler.sendVerificationEmail @subscription_id, @licenceName, @email, (err)=>
-				emailOpts = @EmailHandler.sendEmail.args[0][1]
-				emailOpts.completeJoinUrl.should.equal "#{@settings.siteUrl}/user/subscription/#{@subscription_id}/group/complete-join?token=#{@token}"
-				emailOpts.to.should.equal @email
-				emailOpts.group_name.should.equal @licenceName
-				done()
