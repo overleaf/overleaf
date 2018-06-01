@@ -120,7 +120,7 @@ Thank you
 
 
 templates.verifyEmailToJoinTeam =
-	subject: _.template "<%= inviterName %> has invited you to join a #{settings.appName} team"
+	subject: _.template "<%= inviterName %> has invited you to join a team on #{settings.appName}"
 	layout: BaseWithHeaderEmailLayout
 	type:"notification"
 	plainTextTemplate: _.template """
@@ -135,7 +135,7 @@ Thank You
 """
 	compiledTemplate: (opts) ->
 		SingleCTAEmailBody({
-			title: "#{opts.inviterName} has invited you to join a #{settings.appName} team"
+			title: "#{opts.inviterName} has invited you to join a team on #{settings.appName}"
 			greeting: "Hi,"
 			message: "please verify your email to join the team and get your free premium account"
 			secondaryMessage: null
