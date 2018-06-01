@@ -8,7 +8,7 @@ define [
 			kbIdx = client.initIndex(window.sharelatex.algolia?.indexes?.kb)
 
 		service =
-			searchWiki: wikiIdx.search.bind(wikiIdx)
-			searchKB: kbIdx.search.bind(kbIdx)
+			searchWiki: if wikiIdx then wikiIdx.search.bind(wikiIdx) else null
+			searchKB: if kbIdx then kbIdx.search.bind(kbIdx) else null
 		
 		return service

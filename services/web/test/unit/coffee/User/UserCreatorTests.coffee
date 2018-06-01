@@ -15,33 +15,15 @@ describe "UserCreator", ->
 			constructor: ->
 				return self.user
 
-		@UserLocator = 
-			findByEmail: sinon.stub()
+		@UserGetter =
+			getUserByMainEmail: sinon.stub()
 		@UserCreator = SandboxedModule.require modulePath, requires:
 			"../../models/User": User:@UserModel
-			"./UserLocator":@UserLocator
+			"./UserGetter":@UserGetter
 			"logger-sharelatex":{log:->}
 			'metrics-sharelatex': {timeAsyncMethod: ()->}
 
 		@email = "bob.oswald@gmail.com"
-
-
-	describe "getUserOrCreateHoldingAccount", ->
-
-		it "should immediately return the user if found", (done)->
-			@UserLocator.findByEmail.callsArgWith(1, null, @user)
-			@UserCreator.getUserOrCreateHoldingAccount @email, (err, returnedUser)=>
-				assert.deepEqual returnedUser, @user
-				done()
-
-		it "should create new holding account if the user is not found", (done)->
-			@UserLocator.findByEmail.callsArgWith(1)
-			@UserCreator.createNewUser = sinon.stub().callsArgWith(1, null, @user)
-			@UserCreator.getUserOrCreateHoldingAccount @email, (err, returnedUser)=>
-				@UserCreator.createNewUser.calledWith(email:@email, holdingAccount:true).should.equal true
-				assert.deepEqual returnedUser, @user
-				done()
-
 
 	describe "createNewUser", ->
 

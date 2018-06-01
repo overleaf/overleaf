@@ -6,6 +6,8 @@ ObjectId = mongojs.ObjectId
 
 module.exports = UserGetter =
 	getUser: (query, projection, callback = (error, user) ->) ->
+		if query?.email?
+			return callback(new Error("Don't use getUser to find user by email"), null)
 		if arguments.length == 2
 			callback = projection
 			projection = {}
@@ -18,6 +20,13 @@ module.exports = UserGetter =
 			query = _id: query
 
 		db.users.findOne query, projection, callback
+
+	getUserByMainEmail: (email, projection, callback = (error, user) ->) ->
+		email = email.trim()
+		if arguments.length == 2
+			callback = projection
+			projection = {}
+		db.users.findOne email: email, projection, callback
 
 	getUsers: (user_ids, projection, callback = (error, users) ->) ->
 		try
@@ -39,6 +48,7 @@ module.exports = UserGetter =
 
 [
 	'getUser',
+	'getUserByMainEmail',
 	'getUsers',
 	'getUserOrUserStubById'
 ].map (method) ->

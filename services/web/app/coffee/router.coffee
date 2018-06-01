@@ -48,6 +48,7 @@ MetaController = require('./Features/Metadata/MetaController')
 TokenAccessController = require('./Features/TokenAccess/TokenAccessController')
 Features = require('./infrastructure/Features')
 LinkedFilesRouter = require './Features/LinkedFiles/LinkedFilesRouter'
+TemplatesRouter = require './Features/Templates/TemplatesRouter'
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -80,9 +81,9 @@ module.exports = class Router
 		ContactRouter.apply(webRouter, privateApiRouter)
 		AnalyticsRouter.apply(webRouter, privateApiRouter, publicApiRouter)
 		LinkedFilesRouter.apply(webRouter, privateApiRouter, publicApiRouter)
+		TemplatesRouter.apply(webRouter)
 
 		Modules.applyRouter(webRouter, privateApiRouter, publicApiRouter)
-
 
 		if Settings.enableSubscriptions
 			webRouter.get  '/user/bonus', AuthenticationController.requireLogin(), ReferalController.bonus
@@ -118,6 +119,11 @@ module.exports = class Router
 
 		webRouter.get  '/user/personal_info', AuthenticationController.requireLogin(), UserInfoController.getLoggedInUsersPersonalInfo
 		privateApiRouter.get  '/user/:user_id/personal_info', AuthenticationController.httpAuth, UserInfoController.getPersonalInfo
+
+		webRouter.get  '/user/projects', AuthenticationController.requireLogin(), ProjectController.userProjectsJson
+		webRouter.get  '/project/:Project_id/entities', AuthenticationController.requireLogin(),
+			AuthorizationMiddlewear.ensureUserCanReadProject,
+			ProjectController.projectEntitiesJson
 
 		webRouter.get  '/project', AuthenticationController.requireLogin(), ProjectController.projectListPage
 		webRouter.post '/project/new', AuthenticationController.requireLogin(), ProjectController.newProject
@@ -201,7 +207,7 @@ module.exports = class Router
 		webRouter.get  "/project/:Project_id/updates", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApiAndInjectUserDetails
 		webRouter.get  "/project/:Project_id/doc/:doc_id/diff", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApi
 		webRouter.get  "/project/:Project_id/diff", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApiAndInjectUserDetails
-		webRouter.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApi
+		webRouter.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApi
 		webRouter.post '/project/:project_id/doc/:doc_id/restore', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, HistoryController.restoreDocFromDeletedDoc
 		webRouter.post "/project/:project_id/restore_file", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, HistoryController.restoreFileFromV2
 		privateApiRouter.post "/project/:Project_id/history/resync", AuthenticationController.httpAuth, HistoryController.resyncProjectHistory

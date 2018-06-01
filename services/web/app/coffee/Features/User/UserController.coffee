@@ -1,6 +1,6 @@
 UserHandler = require("./UserHandler")
 UserDeleter = require("./UserDeleter")
-UserLocator = require("./UserLocator")
+UserGetter = require("./UserGetter")
 User = require("../../models/User").User
 newsLetterManager = require('../Newsletter/NewsletterManager')
 UserRegistrationHandler = require("./UserRegistrationHandler")
@@ -45,7 +45,7 @@ module.exports = UserController =
 
 	unsubscribe: (req, res)->
 		user_id = AuthenticationController.getLoggedInUserId(req)
-		UserLocator.findById user_id, (err, user)->
+		UserGetter.getUser user_id, (err, user)->
 			newsLetterManager.unsubscribe user, ->
 				res.send()
 

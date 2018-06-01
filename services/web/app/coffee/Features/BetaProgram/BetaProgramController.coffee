@@ -1,5 +1,5 @@
 BetaProgramHandler = require './BetaProgramHandler'
-UserLocator = require "../User/UserLocator"
+UserGetter = require "../User/UserGetter"
 Settings = require "settings-sharelatex"
 logger = require 'logger-sharelatex'
 AuthenticationController = require '../Authentication/AuthenticationController'
@@ -30,7 +30,7 @@ module.exports = BetaProgramController =
 	optInPage: (req, res, next)->
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		logger.log {user_id}, "showing beta participation page for user"
-		UserLocator.findById user_id, (err, user)->
+		UserGetter.getUser user_id, (err, user)->
 			if err
 				logger.err {err, user_id}, "error fetching user"
 				return next(err)

@@ -30,8 +30,8 @@ describe "UserController", ->
 
 		@UserDeleter =
 			deleteUser: sinon.stub().callsArgWith(1)
-		@UserLocator =
-			findById: sinon.stub().callsArgWith(1, null, @user)
+		@UserGetter =
+			getUser: sinon.stub().callsArgWith(1, null, @user)
 		@User =
 			findById: sinon.stub().callsArgWith(1, null, @user)
 		@NewsLetterManager =
@@ -63,7 +63,7 @@ describe "UserController", ->
 		@SudoModeHandler =
 			clearSudoMode: sinon.stub()
 		@UserController = SandboxedModule.require modulePath, requires:
-			"./UserLocator": @UserLocator
+			"./UserGetter": @UserGetter
 			"./UserDeleter": @UserDeleter
 			"./UserUpdater":@UserUpdater
 			"../../models/User": User:@User

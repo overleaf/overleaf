@@ -47,7 +47,18 @@ div.binary-file.full-size(
 				|
 				| at {{ openFile.created | formatDate:'h:mm a' }} {{ openFile.created | relativeDate }}
 
-		span(ng-if="openFile.linkedFileData.provider == 'url'")
+		div(ng-if="openFile.linkedFileData.provider == 'project_file'")
+			p
+				i.fa.fa-fw.fa-external-link-square.fa-rotate-180.linked-file-icon
+				| Imported from
+				|
+				a(ng-href='/project/{{openFile.linkedFileData.source_project_id}}' target="_blank")
+					| {{ openFile.linkedFileData.source_project_display_name }}
+				| /{{ openFile.linkedFileData.source_entity_path.slice(1) }},
+				|
+				| at {{ openFile.created | formatDate:'h:mm a' }} {{ openFile.created | relativeDate }}
+
+		span(ng-if="openFile.linkedFileData.provider == 'url' || openFile.linkedFileData.provider == 'project_file'")
 			button.btn.btn-success(
 				href, ng-click="refreshFile(openFile)",
 				ng-disabled="refreshing"
@@ -63,3 +74,7 @@ div.binary-file.full-size(
 			i.fa.fa-fw.fa-download
 			|
 			| #{translate("download")}
+		div(ng-if="refreshError")
+			br
+			.alert.alert-danger.col-md-6.col-md-offset-3
+				| Error: {{ refreshError}}

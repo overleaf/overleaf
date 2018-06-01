@@ -1,4 +1,3 @@
-UserLocator = require("./UserLocator")
 UserGetter = require("./UserGetter")
 UserSessionsManager = require("./UserSessionsManager")
 ErrorController = require("../Errors/ErrorController")
@@ -61,7 +60,7 @@ module.exports =
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		logger.log user: user_id, "loading settings page"
 		shouldAllowEditingDetails = !(Settings?.ldap?.updateUserDetailsOnLogin) and !(Settings?.saml?.updateUserDetailsOnLogin)
-		UserLocator.findById user_id, (err, user)->
+		UserGetter.getUser user_id, (err, user)->
 			return next(err) if err?
 			res.render 'user/settings',
 				title:'account_settings'

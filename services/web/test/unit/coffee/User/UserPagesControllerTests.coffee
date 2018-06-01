@@ -16,10 +16,7 @@ describe "UserPagesController", ->
 			features:{}
 			email: "joe@example.com"
 
-		@UserLocator =
-			findById: sinon.stub().callsArgWith(1, null, @user)
-		@UserGetter =
-			getUser: sinon.stub().callsArgWith(2, null, @user)
+		@UserGetter = getUser: sinon.stub()
 		@UserSessionsManager =
 			getAllUserSessions: sinon.stub()
 		@dropboxStatus = {}
@@ -37,7 +34,6 @@ describe "UserPagesController", ->
 			"logger-sharelatex":
 				log:->
 				err:->
-			"./UserLocator": @UserLocator
 			"./UserGetter": @UserGetter
 			"./UserSessionsManager": @UserSessionsManager
 			"../Errors/ErrorController": @ErrorController
@@ -136,6 +132,8 @@ describe "UserPagesController", ->
 				@UserPagesController.sessionsPage @req, @res, @next
 
 	describe "settingsPage", ->
+		beforeEach ->
+			@UserGetter.getUser = sinon.stub().callsArgWith(1, null, @user)
 
 		it "should render user/settings", (done)->
 			@res.render = (page)->
@@ -185,6 +183,7 @@ describe "UserPagesController", ->
 
 	describe "activateAccountPage", ->
 		beforeEach ->
+			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user)
 			@req.query.user_id = @user_id
 			@req.query.token = @token = "mock-token-123"
 

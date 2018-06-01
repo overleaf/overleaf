@@ -30,7 +30,8 @@ module.exports = Modules =
 		for module in @modules
 			for view, partial of module.viewIncludes or {}
 				@viewIncludes[view] ||= []
-				@viewIncludes[view].push pug.compile(fs.readFileSync(Path.join(MODULE_BASE_PATH, module.name, "app/views", partial + ".pug")), doctype: "html")
+				filePath = Path.join(MODULE_BASE_PATH, module.name, "app/views", partial + ".pug")
+				@viewIncludes[view].push pug.compileFile(filePath, doctype: "html")
 			
 	moduleIncludes: (view, locals) ->
 		compiledPartials = Modules.viewIncludes[view] or []

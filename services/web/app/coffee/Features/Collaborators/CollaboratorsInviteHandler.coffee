@@ -32,7 +32,7 @@ module.exports = CollaboratorsInviteHandler =
 
 	_trySendInviteNotification: (projectId, sendingUser, invite, callback=(err)->) ->
 		email = invite.email
-		UserGetter.getUser {email: email}, {_id: 1}, (err, existingUser) ->
+		UserGetter.getUserByMainEmail email, {_id: 1}, (err, existingUser) ->
 			if err?
 				logger.err {projectId, email}, "error checking if user exists"
 				return callback(err)

@@ -25,6 +25,7 @@ Sources = require "../Authorization/Sources"
 TokenAccessHandler = require '../TokenAccess/TokenAccessHandler'
 CollaboratorsHandler = require '../Collaborators/CollaboratorsHandler'
 Modules = require '../../infrastructure/Modules'
+ProjectEntityHandler = require './ProjectEntityHandler'
 crypto = require 'crypto'
 
 module.exports = ProjectController =
@@ -137,6 +138,33 @@ module.exports = ProjectController =
 		editorController.renameProject project_id, newName, (err)->
 			return next(err) if err?
 			res.sendStatus 200
+
+	userProjectsJson: (req, res, next) ->
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		ProjectGetter.findAllUsersProjects user_id,
+			'name lastUpdated publicAccesLevel archived owner_ref tokens', (err, projects) ->
+				return next(err) if err?
+				projects = ProjectController._buildProjectList(projects)
+					.filter((p) -> !p.archived)
+					.filter((p) -> !p.isV1Project)
+					.map((p) -> {_id: p.id, name: p.name, accessLevel: p.accessLevel})
+
+				res.json({projects: projects})
+
+	projectEntitiesJson: (req, res, next) ->
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		project_id = req.params.Project_id
+		ProjectGetter.getProject project_id, (err, project) ->
+			return next(err) if err?
+			ProjectEntityHandler.getAllEntitiesFromProject project, (err, docs, files) ->
+				return next(err) if err?
+				entities = docs.concat(files)
+					.sort (a, b) -> a.path > b.path  # Sort by path ascending
+					.map (e) -> {
+						path: e.path,
+						type: if e.doc? then 'doc' else 'file'
+					}
+				res.json({project_id: project_id, entities: entities})
 
 	projectListPage: (req, res, next)->
 		timer = new metrics.Timer("project-list")
@@ -313,6 +341,7 @@ module.exports = ProjectController =
 					maxDocLength: Settings.max_doc_length
 					useV2History: !!project.overleaf?.history?.display
 					showRichText: req.query?.rt == 'true'
+					showTestControls: req.query?.tc == 'true' || user.isAdmin
 					showPublishModal: req.query?.pm == 'true'
 				timer.done()
 

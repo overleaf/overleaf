@@ -2,7 +2,7 @@ async = require("async")
 _ = require("underscore")
 SubscriptionUpdater = require("./SubscriptionUpdater")
 SubscriptionLocator = require("./SubscriptionLocator")
-UserLocator = require("../User/UserLocator")
+UserGetter = require("../User/UserGetter")
 LimitationsManager = require("./LimitationsManager")
 logger = require("logger-sharelatex")
 OneTimeTokenHandler = require("../Security/OneTimeTokenHandler")
@@ -22,7 +22,7 @@ module.exports = SubscriptionGroupHandler =
 			if limitReached
 				logger.err adminUserId:adminUserId, newEmail:newEmail, "group subscription limit reached not adding user to group"
 				return callback(limitReached:limitReached)
-			UserLocator.findByEmail newEmail, (err, user)->
+			UserGetter.getUserByMainEmail newEmail, (err, user)->
 				return callback(err) if err?
 				if user?
 					SubscriptionUpdater.addUserToGroup adminUserId, user._id, (err)->
@@ -52,7 +52,7 @@ module.exports = SubscriptionGroupHandler =
 
 			jobs = _.map subscription.member_ids, (user_id)->
 				return (cb)->
-					UserLocator.findById user_id, (err, user)->
+					UserGetter.getUser user_id, (err, user)->
 						if err? or !user?
 							users.push _id:user_id
 							return cb()
