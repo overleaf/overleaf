@@ -33,7 +33,7 @@ module.exports = SubscriptionGroupHandler =
 						userViewModel = buildUserViewModel(user)
 						callback(err, userViewModel)
 				else
-					SubscriptionUpdater.addEmailInviteToGroup adminUserId, newEmail, (err) ->
+					TeamInvitesHandler.createManagerInvite adminUserId, newEmail, (err) ->
 						return callback(err) if err?
 						userViewModel = buildEmailInviteViewModel(newEmail)
 						callback(err, userViewModel)
@@ -41,16 +41,11 @@ module.exports = SubscriptionGroupHandler =
 	removeUserFromGroup: (adminUser_id, userToRemove_id, callback)->
 		SubscriptionUpdater.removeUserFromGroup adminUser_id, userToRemove_id, callback
 
-	removeEmailInviteFromGroup: (adminUser_id, email, callback) ->
-		SubscriptionUpdater.removeEmailInviteFromGroup adminUser_id, email, callback
-
 	getPopulatedListOfMembers: (adminUser_id, callback)->
 		SubscriptionLocator.getUsersSubscription adminUser_id, (err, subscription)->
 			return callback(err) if err?
 
 			users = []
-			for email in subscription.invited_emails or []
-				users.push buildEmailInviteViewModel(email)
 
 			for teamInvite in subscription.teamInvites or []
 				users.push buildEmailInviteViewModel(teamInvite.email)
@@ -85,37 +80,6 @@ module.exports = SubscriptionGroupHandler =
 				group_name: licenceName
 				completeJoinUrl: "#{settings.siteUrl}/user/subscription/#{subscription_id}/group/complete-join?token=#{token}"
 			EmailHandler.sendEmail "completeJoinGroupAccount", opts, callback
-
-	processGroupVerification: (userEmail, subscription_id, token, callback)->
-		logger.log userEmail:userEmail, subscription_id:subscription_id, "processing group verification for user"
-		OneTimeTokenHandler.getValueFromTokenAndExpire token, (err, token_subscription_id)->
-			if err?  or subscription_id != token_subscription_id
-				logger.err userEmail:userEmail, token:token, "token value not found for processing group verification"
-				return callback("token_not_found")
-			SubscriptionLocator.getSubscription subscription_id, (err, subscription)->
-				if err?
-					logger.err err:err, subscription:subscription, userEmail:userEmail, subscription_id:subscription_id, "error getting subscription"
-					return callback(err)
-				if !subscription?
-					logger.warn subscription_id:subscription_id, userEmail:userEmail, "no subscription found"
-					return callback()
-				SubscriptionGroupHandler.addUserToGroup subscription?.admin_id, userEmail, callback
-
-	convertEmailInvitesToMemberships: (email, user_id, callback = (err) ->) ->
-		SubscriptionLocator.getGroupsWithEmailInvite email, (err, groups = []) ->
-			return callback(err) if err?
-			logger.log {email, user_id, groups}, "found groups to convert from email invite to member"
-			jobs = []
-			for group in groups
-				do (group) ->
-					jobs.push (cb) ->
-						SubscriptionUpdater.removeEmailInviteFromGroup group.admin_id, email, (err) ->
-							return cb(err) if err?
-							SubscriptionUpdater.addUserToGroup group.admin_id, user_id, (err) ->
-								return cb(err) if err?
-								logger.log {group_id: group._id, user_id, email}, "converted email invite to group membership"
-								return cb()
-			async.series jobs, callback
 
 buildUserViewModel = (user)->
 	u =

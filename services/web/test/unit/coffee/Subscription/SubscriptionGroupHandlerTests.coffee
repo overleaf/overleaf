@@ -19,19 +19,20 @@ describe "SubscriptionGroupHandler", ->
 			admin_id:@adminUser_id
 			_id:@subscription_id
 
-		@SubscriptionLocator = 
+		@SubscriptionLocator =
 			getUsersSubscription: sinon.stub()
 			getSubscriptionByMemberIdAndId: sinon.stub()
 			getSubscription: sinon.stub()
 
-		@UserCreator = 
+		@UserCreator =
 			getUserOrCreateHoldingAccount: sinon.stub().callsArgWith(1, null, @user)
 
 		@SubscriptionUpdater =
 			addUserToGroup: sinon.stub().callsArgWith(2)
 			removeUserFromGroup: sinon.stub().callsArgWith(2)
-			addEmailInviteToGroup: sinon.stub().callsArgWith(2)
-			removeEmailInviteFromGroup: sinon.stub().callsArgWith(2)
+
+		@TeamInvitesHandler =
+			createManagerInvite: sinon.stub().callsArgWith(2)
 
 		@UserLocator =
 			findById: sinon.stub()
@@ -47,7 +48,7 @@ describe "SubscriptionGroupHandler", ->
 		@EmailHandler =
 			sendEmail:sinon.stub()
 
-		@settings = 
+		@settings =
 			siteUrl:"http://www.sharelatex.com"
 
 		@readStub = sinon.stub()
@@ -58,6 +59,7 @@ describe "SubscriptionGroupHandler", ->
 			"logger-sharelatex": log:->
 			"../User/UserCreator": @UserCreator
 			"./SubscriptionUpdater": @SubscriptionUpdater
+			"./TeamInvitesHandler": @TeamInvitesHandler
 			"./SubscriptionLocator": @SubscriptionLocator
 			"../User/UserLocator": @UserLocator
 			"./LimitationsManager": @LimitationsManager
@@ -65,7 +67,7 @@ describe "SubscriptionGroupHandler", ->
 			"../Email/EmailHandler":@EmailHandler
 			"settings-sharelatex":@settings
 			"../Notifications/NotificationsBuilder": @NotificationsBuilder
-			"logger-sharelatex": 
+			"logger-sharelatex":
 				err:->
 				log:->
 				warn:->
@@ -75,7 +77,7 @@ describe "SubscriptionGroupHandler", ->
 		beforeEach ->
 			@LimitationsManager.hasGroupMembersLimitReached.callsArgWith(1, null, false, @subscription)
 			@UserLocator.findByEmail.callsArgWith(1, null, @user)
-			
+
 		it "should find the user", (done)->
 			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
 				@UserLocator.findByEmail.calledWith(@newEmail).should.equal true
@@ -85,7 +87,7 @@ describe "SubscriptionGroupHandler", ->
 			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
 				@SubscriptionUpdater.addUserToGroup.calledWith(@adminUser_id, @user._id).should.equal true
 				done()
-				
+
 		it "should not add the user to the group if the limit has been reached", (done)->
 			@LimitationsManager.hasGroupMembersLimitReached.callsArgWith(1, null, true, @subscription)
 			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
@@ -103,11 +105,11 @@ describe "SubscriptionGroupHandler", ->
 				@NotificationsBuilder.groupPlan.calledWith(@user, {subscription_id:@subscription._id}).should.equal true
 				@readStub.called.should.equal true
 				done()
-		
-		it "should add an email invite if no user is found", (done) ->
+
+		it "should add a team invite if no user is found", (done) ->
 			@UserLocator.findByEmail.callsArgWith(1, null, null)
 			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
-				@SubscriptionUpdater.addEmailInviteToGroup.calledWith(@adminUser_id, @newEmail).should.equal true
+				@TeamInvitesHandler.createManagerInvite.calledWith(@adminUser_id, @newEmail).should.equal true
 				done()
 
 	describe "removeUserFromGroup", ->
@@ -148,15 +150,18 @@ describe "SubscriptionGroupHandler", ->
 				assert.deepEqual users[1], {_id:@subscription.member_ids[1]}
 				assert.deepEqual users[2], {_id:@subscription.member_ids[2]}
 				done()
-		
+
 		it "should return any invited users", (done) ->
-			@subscription.invited_emails = ["jo@example.com", "charlie@example.com"]
+			@subscription.teamInvites = [
+				{ email: "jo@example.com" },
+				{ email: "charlie@example.com" }
+			]
 			@Handler.getPopulatedListOfMembers @adminUser_id, (err, users)=>
 				users[0].email.should.equal "jo@example.com"
 				users[0].holdingAccount.should.equal true
 				users[1].email.should.equal "charlie@example.com"
 				users[1].holdingAccount.should.equal true
-				users.length.should.equal @subscription.invited_emails.length
+				users.length.should.equal @subscription.teamInvites.length
 				done()
 
 	describe "isUserPartOfGroup", ->
@@ -192,47 +197,3 @@ describe "SubscriptionGroupHandler", ->
 				emailOpts.to.should.equal @email
 				emailOpts.group_name.should.equal @licenceName
 				done()
-
-	describe "processGroupVerification", ->
-		beforeEach ->
-			@token = "31dDAd2Da"
-			@SubscriptionLocator.getSubscription.callsArgWith(1, null, @subscription)
-			@Handler.addUserToGroup = sinon.stub().callsArgWith(2)
-
-		it "should addUserToGroup", (done)->
-			@OneTimeTokenHandler.getValueFromTokenAndExpire.callsArgWith(1, null, @subscription_id)
-			@Handler.processGroupVerification @email, @subscription_id, @token, (err)=>
-				@Handler.addUserToGroup.calledWith(@adminUser_id, @email).should.equal true
-				done()
-
-		it "should return token_not_found error if it couldn't get the token", (done)->
-			@OneTimeTokenHandler.getValueFromTokenAndExpire.callsArgWith(1)
-			@Handler.processGroupVerification @email, @subscription_id, @token, (err)=>
-				err.should.equal "token_not_found"
-				done()
-
-	describe "convertEmailInvitesToMemberships", ->
-		beforeEach ->
-			@SubscriptionLocator.getGroupsWithEmailInvite = sinon.stub().yields(null, @groups = [{ admin_id: "group-1" }, { admin_id: "group-2" }])
-
-		it "should get groups with the email address invited to", (done) ->
-			@Handler.convertEmailInvitesToMemberships @email, @user_id, (err) =>
-				@SubscriptionLocator.getGroupsWithEmailInvite.calledWith(@email).should.equal true
-				done()
-		
-		it "should remove the email from each group", (done) ->
-			@Handler.convertEmailInvitesToMemberships @email, @user_id, (err) =>
-				for group in @groups
-					@SubscriptionUpdater.removeEmailInviteFromGroup
-						.calledWith(group.admin_id, @email)
-						.should.equal true
-				done()
-		
-		it "should add the user to each group", (done) ->
-			@Handler.convertEmailInvitesToMemberships @email, @user_id, (err) =>
-				for group in @groups
-					@SubscriptionUpdater.addUserToGroup
-						.calledWith(group.admin_id, @user_id)
-						.should.equal true
-				done()
-

@@ -1,5 +1,6 @@
 logger = require("logger-sharelatex")
 crypto = require("crypto")
+async = require("async")
 
 settings = require("settings-sharelatex")
 ObjectId = require("mongojs").ObjectId
@@ -15,19 +16,16 @@ LimitationsManager = require("./LimitationsManager")
 EmailHandler = require("../Email/EmailHandler")
 
 module.exports = TeamInvitesHandler =
-
-	getInvites: (subscriptionId, callback) ->
-		TeamInvite.find(subscriptionId: subscriptionId, callback)
-
 	getInvite: (token, callback) ->
 		Subscription.findOne 'teamInvites.token': token, (err, subscription) ->
-			return callback(err, subscription) if err?
+			return callback(err) if err?
 			return callback(teamNotFound: true) unless subscription?
 
 			invite = subscription.teamInvites.find (i) -> i.token == token
 			return callback(null, invite, subscription)
 
 	createManagerInvite: (teamManagerId, email, callback) ->
+		logger.log {teamManagerId, email}, "Creating manager team invite"
 		UserLocator.findById teamManagerId, (error, teamManager) ->
 			return callback(error) if error?
 
@@ -39,14 +37,16 @@ module.exports = TeamInvitesHandler =
 				else
 					inviterName = teamManager.email
 
-				TeamInvitesHandler.createInvite(subscription, email, inviterName, callback)
+				createInvite(subscription, email, inviterName, callback)
 
 	createDomainInvite: (user, licence, callback) ->
+		logger.log {licence, email: user.email}, "Creating domain team invite"
 		SubscriptionLocator.getSubscription licence.subscription_id, (error, subscription) ->
 			return callback(error) if error?
-			TeamInvitesHandler.createInvite(subscription, user.email, licence.name, callback)
+			createInvite(subscription, user.email, licence.name, callback)
 
 	acceptInvite: (token, userId, callback) ->
+		logger.log {userId}, "Accepting invite"
 		TeamInvitesHandler.getInvite token, (err, invite, subscription) ->
 			return callback(err) if err?
 			return callback(inviteNoLongerValid: true) unless invite?
@@ -54,22 +54,19 @@ module.exports = TeamInvitesHandler =
 			SubscriptionUpdater.addUserToGroup subscription.admin_id, userId, (err) ->
 				return callback(err) if err?
 
-				TeamInvitesHandler.removeInviteFromTeam(subscription.id, invite.email, callback)
+				removeInviteFromTeam(subscription.id, invite.email, callback)
 
 	revokeInvite: (teamManagerId, email, callback) ->
+		logger.log {teamManagerId, email}, "Revoking invite"
 		SubscriptionLocator.getUsersSubscription teamManagerId, (err, teamSubscription) ->
 			return callback(err) if err?
 
-			TeamInvitesHandler.removeInviteFromTeam(teamSubscription.id, email, callback)
+			removeInviteFromTeam(teamSubscription.id, email, callback)
 
-	createInvite: (subscription, email, inviterName, callback) ->
-		if LimitationsManager.teamHasReachedMemberLimit(subscription)
-			return callback(limitReached: true)
-
-		existingInvite = subscription.teamInvites.find (invite) -> invite.email == email
-
-		if existingInvite
-			return callback(alreadyInvited: true)
+createInvite = (subscription, email, inviterName, callback) ->
+	logger.log {subscriptionId: subscription.id, email, inviterName}, "Creating invite"
+	checkIfInviteIsPossible subscription, email, (error, possible, reason) ->
+		return callback(reason) unless possible?
 
 		token = crypto.randomBytes(32).toString("hex")
 
@@ -93,8 +90,30 @@ module.exports = TeamInvitesHandler =
 			EmailHandler.sendEmail "verifyEmailToJoinTeam", opts, (error) ->
 				return callback(error, invite)
 
-	removeInviteFromTeam: (subscriptionId, email, callback) ->
-		searchConditions = { _id: new ObjectId(subscriptionId.toString()) }
-		updateOp = { $pull: { teamInvites: { email: email.trim().toLowerCase() } } }
+removeInviteFromTeam = (subscriptionId, email, callback) ->
+	searchConditions = { _id: new ObjectId(subscriptionId.toString()) }
+	updateOp = { $pull: { teamInvites: { email: email.trim().toLowerCase() } } }
 
-		Subscription.update(searchConditions, updateOp, callback)
+	Subscription.update(searchConditions, updateOp, callback)
+
+checkIfInviteIsPossible = (subscription, email, callback = (error, possible, reason) -> ) ->
+	if LimitationsManager.teamHasReachedMemberLimit(subscription)
+		logger.log {subscriptionId: subscription.id}, "team has reached member limit"
+		return callback(null, false, limitReached: true)
+
+	existingInvite = subscription.teamInvites.find (invite) -> invite.email == email
+
+	if existingInvite
+		logger.log {subscriptionId: subscription.id, email}, "user already invited"
+		return callback(null, false, alreadyInvited: true)
+
+	async.map subscription.member_ids, UserLocator.findById, (error, members) ->
+		return callback(error) if error?
+
+		existingMember = members.find (member) -> member.email == email
+
+		if existingMember
+			logger.log {subscriptionId: subscription.id, email}, "user already in team"
+			return callback(null, false, alreadyInTeam: true)
+		else
+			return callback(null, true)

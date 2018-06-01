@@ -6,7 +6,7 @@ Settings = require("settings-sharelatex")
 CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
 CollaboratorsInvitesHandler = require("../Collaborators/CollaboratorsInviteHandler")
 
-module.exports =
+module.exports = LimitationsManager =
 	allowedNumberOfCollaboratorsInProject: (project_id, callback) ->
 		ProjectGetter.getProject project_id, owner_ref: true, (error, project) =>
 			return callback(error) if error?
@@ -56,7 +56,7 @@ module.exports =
 			callback err, subscriptions.length > 0, subscriptions
 
 	teamHasReachedMemberLimit: (subscription) ->
-		currentTotal = (subscription.member_ids or []).length + (subscription.team_invites or []).length
+		currentTotal = (subscription.member_ids or []).length + (subscription.teamInvites or []).length
 		return currentTotal >= subscription.membersLimit
 
 	hasGroupMembersLimitReached: (user_id, callback = (err, limitReached, subscription)->)->
@@ -67,7 +67,6 @@ module.exports =
 			if !subscription?
 				logger.err user_id:user_id, "no subscription found for user"
 				return callback("no subscription found")
-			currentTotal = (subscription.member_ids or []).length + (subscription.invited_emails or []).length
-			limitReached = currentTotal >= subscription.membersLimit
-			logger.log user_id:user_id, limitReached:limitReached, currentTotal: currentTotal, membersLimit: subscription.membersLimit, "checking if subscription members limit has been reached"
+
+			limitReached = LimitationsManager.teamHasReachedMemberLimit(subscription)
 			callback(err, limitReached, subscription)

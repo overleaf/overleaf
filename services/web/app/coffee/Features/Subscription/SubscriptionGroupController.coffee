@@ -33,14 +33,6 @@ module.exports =
 				return res.sendStatus 500
 			res.send()
 
-	removeEmailInviteFromGroup: (req, res)->
-		adminUserId = AuthenticationController.getLoggedInUserId(req)
-		email = req.params.email
-		logger.log {adminUserId, email}, "removing email invite from group subscription"
-		SubscriptionGroupHandler.removeEmailInviteFromGroup adminUserId, email, (err)->
-			return next(error) if error?
-			res.send()
-
 	removeSelfFromGroup: (req, res)->
 		adminUserId = req.query.admin_user_id
 		userToRemove_id = AuthenticationController.getLoggedInUserId(req)
