@@ -390,14 +390,11 @@ define [
 
 		refreshLinkedFile: (file) ->
 			parent_folder = @_findParentFolder(file)
-			data = file.linkedFileData
-			provider = data?.provider
-			return if !provider?
-			return @ide.$http.post "/project/#{@ide.project_id}/linked_file", {
-				name: file.name,
-				parent_folder_id: parent_folder?.id
-				provider,
-				data,
+			provider = file.linkedFileData?.provider
+			if !provider?
+				console.warn ">> no provider for #{file.name}", file
+				return
+			return @ide.$http.post "/project/#{@ide.project_id}/linked_file/#{file.id}/refresh", {
 				_csrf: window.csrfToken
 			}
 

@@ -145,6 +145,9 @@ class User
 	getProject: (project_id, callback = (error, project)->) ->
 		db.projects.findOne {_id: ObjectId(project_id.toString())}, callback
 
+	saveProject: (project, callback=(error)->) ->
+		db.projects.update {_id: project._id}, project, callback
+
 	createProject: (name, options, callback = (error, oroject_id) ->) ->
 		if typeof options == "function"
 			callback = options

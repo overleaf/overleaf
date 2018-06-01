@@ -8,11 +8,11 @@ describe "EditorRealTimeController", ->
 		@rclient =
 			publish: sinon.stub()
 		@EditorRealTimeController = SandboxedModule.require modulePath, requires:
-			"../../infrastructure/RedisWrapper": 
+			"../../infrastructure/RedisWrapper":
 				client: () => @rclient
 			"../../infrastructure/Server" : io: @io = {}
 			"settings-sharelatex":{redis:{}}
-		
+
 		@room_id = "room-id"
 		@message = "message-to-editor"
 		@payload = ["argument one", 42]

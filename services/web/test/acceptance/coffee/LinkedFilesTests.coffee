@@ -94,7 +94,6 @@ describe "LinkedFiles", ->
 				}
 				done()
 
-
 		it 'should import a file from the source project', (done) ->
 			@owner.request.post {
 				url: "/project/#{@project_one_id}/linked_file",
@@ -124,24 +123,68 @@ describe "LinkedFiles", ->
 
 		it 'should refresh the file', (done) ->
 			@owner.request.post {
-				url: "/project/#{@project_one_id}/linked_file",
-				json:
-					name: 'test-link.txt',
-					parent_folder_id: @project_one_root_folder_id,
-					provider: 'project_file',
-					data:
-						source_project_id: @project_two_id,
-						source_entity_path: "/#{@source_doc_name}",
+				url: "/project/#{@project_one_id}/linked_file/#{@existing_file_id}/refresh",
+				json: true
 			}, (error, response, body) =>
 				new_file_id = body.new_file_id
 				expect(new_file_id).to.exist
 				expect(new_file_id).to.not.equal @existing_file_id
+				@refreshed_file_id = new_file_id
 				@owner.getProject @project_one_id, (error, project) =>
 					return done(error) if error?
 					firstFile = project.rootFolder[0].fileRefs[0]
 					expect(firstFile._id.toString()).to.equal(new_file_id.toString())
 					expect(firstFile.name).to.equal('test-link.txt')
 					done()
+
+		it 'should not allow to create a linked-file with v1 id', (done) ->
+			@owner.request.post {
+				url: "/project/#{@project_one_id}/linked_file",
+				json:
+					name: 'test-link-should-not-work.txt',
+					parent_folder_id: @project_one_root_folder_id,
+					provider: 'project_file',
+					data:
+						v1_source_doc_id: 1234
+						source_entity_path: "/#{@source_doc_name}",
+			}, (error, response, body) =>
+				expect(response.statusCode).to.equal 403
+				expect(body).to.equal 'Cannot create linked file'
+				done()
+
+	describe "with a linked project_file from a v1 project that has not been imported", ->
+		before (done) ->
+			async.series [
+				(cb) =>
+					@owner.createProject 'plf-v1-test-one', {template: 'blank'}, (error, project_id) =>
+						@project_one_id = project_id
+						cb(error)
+				(cb) =>
+					@owner.getProject @project_one_id, (error, project) =>
+						@project_one = project
+						@project_one_root_folder_id = project.rootFolder[0]._id.toString()
+						@project_one.rootFolder[0].fileRefs.push {
+							linkedFileData: {
+								provider: "project_file",
+								v1_source_doc_id: 9999999,  # We won't find this id in the database
+								source_entity_path: "example.jpeg"
+							},
+							_id: "abcd",
+							rev: 0,
+							created: new Date(),
+							name: "example.jpeg"
+						}
+						@owner.saveProject @project_one, cb
+			], done
+
+		it 'should refuse to refresh', (done) ->
+			@owner.request.post {
+				url: "/project/#{@project_one_id}/linked_file/abcd/refresh",
+				json: true
+			}, (error, response, body) =>
+				expect(response.statusCode).to.equal 409
+				expect(body).to.equal "Sorry, the source project is not yet imported to Overleaf v2. Please import it to Overleaf v2 to refresh this file"
+				done()
 
 	describe "creating a URL based linked file", ->
 		before (done) ->
