@@ -274,34 +274,34 @@
 	&:hover {
 		color: @formatting-btn-color;
 	}
+}
 
-	&--icon {
-		min-width: 32px;
-		width: 32px;
+.formatting-btn--icon {
+	min-width: 32px;
+	width: 32px;
+}
 
-		&:last-of-type {
-			border-right: 1px solid @formatting-btn-border;
-		}
-	}
+.formatting-btn--icon:last-of-type {
+	border-right: 1px solid @formatting-btn-border;
+}
 
-	&--more {
-		padding-left: 9px;
-		padding-right: 9px;
-	}
+.formatting-btn--more {
+	padding-left: 9px;
+	padding-right: 9px;
 }
 
 .formatting-icon {
 	font-style: normal;
 	line-height: 1.5;
+}
 
-	&--small {
-		font-size: small;
-		line-height: 1.9;
-	}
+.formatting-icon--small {
+	font-size: small;
+	line-height: 1.9;
+}
 
-	&--serif {
-		font-family: @font-family-serif;
-	}
+.formatting-icon--serif {
+	font-family: @font-family-serif;
 }
 
 .formatting-more {
@@ -312,16 +312,17 @@
 	min-width: auto;
 	max-width: 130px;
 	background-color: @formatting-menu-bg;
+}
 
-	.formatting-menu-item {
-		float: left;
+.formatting-menu-item {
+	float: left;
+}
 
-		.formatting-btn {
-			border-right: none;
-		}
+.formatting-menu-item > .formatting-btn {
+	border-right: none;
+}
 
-		&:nth-of-type(4n + 1) .formatting-btn {
-			border-left: none;
-		}
-	}
+// Disable border on left-most icon in menu
+.formatting-menu-item:nth-of-type(4n + 1) > .formatting-btn {
+	border-left: none;
 }
