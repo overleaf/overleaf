@@ -425,7 +425,7 @@ define [
 			for projectId in projectIds
 				queuedHttp {
 					method: "POST"
-					url: "/project/#{project_id}/restore"
+					url: "/project/#{projectId}/restore"
 					headers:
 						"X-CSRF-Token": window.csrfToken
 				}
