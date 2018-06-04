@@ -4,15 +4,11 @@ services:
         restart: always
         image: sharelatex/sharelatex
         container_name: sharelatex
-        depends_on:
-            - mongo
-            - redis
         privileged: true
         ports:
             - 80:80
-        links:
-            - mongo
-            - redis
+        networks:
+            - sharelatex-backend
         volumes:
             - ~/sharelatex_data:/var/lib/sharelatex
             - /var/run/docker.sock:/var/run/docker.sock
@@ -79,6 +75,8 @@ services:
             - 27017
         volumes:
             - ~/mongo_data:/data/db
+        networks:
+            - sharelatex-backend
 
     redis:
         restart: always
@@ -88,19 +86,24 @@ services:
             - 6379
         volumes:
             - ~/redis_data:/data
+        networks:
+            - sharelatex-backend
+#    ldap:
+#       restart: always
+#       image: rroemhild/test-openldap
+#       container_name: ldap
+#       expose:
+#           - 389
+#    nginx-proxy:
+#        image: jwilder/nginx-proxy
+#        container_name: nginx-proxy
+#        ports:
+#          #- "80:80"
+#          - "443:443"
+#        volumes:
+#          - /var/run/docker.sock:/tmp/docker.sock:ro
+#          - /home/sharelatex/tmp:/etc/nginx/certs
+networks:
+    sharelatex-backend:
+        driver: bridge
 
-    # ldap:
-    #    restart: always
-    #    image: rroemhild/test-openldap
-    #    container_name: ldap
-    #    expose:
-    #        - 389
-# nginx-proxy:
-#     image: jwilder/nginx-proxy
-#     container_name: nginx-proxy
-#     ports:
-#       #- "80:80"
-#       - "443:443"
-#     volumes:
-#       - /var/run/docker.sock:/tmp/docker.sock:ro
-#       - /home/sharelatex/tmp:/etc/nginx/certs
