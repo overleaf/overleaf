@@ -109,6 +109,35 @@ describe 'ExportsHandler', ->
 				@callback.calledWith(null, expected_export_data)
 				.should.equal true
 
+		describe "when we send replacement user first and last name", ->
+			beforeEach (done) ->
+				@custom_first_name = "FIRST"
+				@custom_last_name = "LAST"
+				@export_params.first_name = @custom_first_name
+				@export_params.last_name = @custom_last_name
+				@ExportsHandler._buildExport @export_params, (error, export_data) =>
+					@callback(error, export_data)
+					done()
+
+			it "should send the data from the user input", ->
+				expected_export_data =
+					project:
+						id: @project_id
+						rootDocPath: @rootDocPath
+						historyId: @project_history_id
+						historyVersion: @historyVersion
+					user:
+						id: @user_id
+						firstName: @custom_first_name
+						lastName: @custom_last_name
+						email: @user.email
+						orcidId: null
+					destination:
+						brandVariationId: @brand_variation_id
+					options:
+						callbackUrl: null
+				@callback.calledWith(null, expected_export_data)
+				.should.equal true
 
 		describe "when project is not found", ->
 			beforeEach (done) ->

@@ -14,8 +14,8 @@ module.exports =
 		}
 
 		if req.body && req.body.firstName && req.body.firstName
-			export_params.first_name = req.body.firstName
-			export_params.last_name = req.body.lastName
+			export_params.first_name = req.body.firstName.trim()
+			export_params.last_name = req.body.lastName.trim()
 
 		ExportsHandler.exportProject export_params, (err, export_data) ->
 			return next(err) if err?
