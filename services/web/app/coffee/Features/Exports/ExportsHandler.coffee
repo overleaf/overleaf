@@ -10,8 +10,8 @@ settings = require 'settings-sharelatex'
 
 module.exports = ExportsHandler = self =
 
-	exportProject: (project_id, user_id, brand_variation_id, callback=(error, export_data) ->) ->
-		self._buildExport project_id, user_id, brand_variation_id, (err, export_data) ->
+	exportProject: (export_params, callback=(error, export_data) ->) ->
+		self._buildExport export_params, (err, export_data) ->
 			return callback(err) if err?
 			self._requestExport export_data, (err, export_v1_id) ->
 				return callback(err) if err?
@@ -19,7 +19,10 @@ module.exports = ExportsHandler = self =
 				# TODO: possibly store the export data in Mongo
 				callback null, export_data
 
-	_buildExport: (project_id, user_id, brand_variation_id, callback=(err, export_data) ->) ->
+	_buildExport: (export_params, callback=(err, export_data) ->) ->
+		project_id = export_params.project_id
+		user_id = export_params.user_id
+		brand_variation_id = export_params.brand_variation_id
 		jobs =
 			project: (cb) ->
 				ProjectGetter.getProject project_id, cb
@@ -42,6 +45,10 @@ module.exports = ExportsHandler = self =
 				err = new Error("cannot export project without root doc")
 				logger.err err:err, project_id: project_id
 				return callback(err)
+
+			if export_params.first_name && export_params.last_name
+				user.first_name = export_params.first_name
+				user.last_name = export_params.last_name
 
 			export_data =
 				project:
