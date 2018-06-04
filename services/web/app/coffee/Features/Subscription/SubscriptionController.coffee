@@ -101,9 +101,9 @@ module.exports = SubscriptionController =
 				logger.log user: user, "redirecting to plans"
 				res.redirect "/user/subscription/plans"
 			else
-				SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel user, (error, subscription, groupSubscriptions, billingDetailsLink) ->
+				SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel user, (error, subscription, groupSubscriptions, billingDetailsLink, v1Subscription) ->
 					return next(error) if error?
-					logger.log {user, subscription, hasSubOrIsGroupMember, groupSubscriptions, billingDetailsLink}, "showing subscription dashboard"
+					logger.log {user, subscription, hasSubOrIsGroupMember, groupSubscriptions, billingDetailsLink, v1Subscription}, "showing subscription dashboard"
 					plans = SubscriptionViewModelBuilder.buildViewModel()
 					res.render "subscriptions/dashboard",
 						title: "your_subscription"
@@ -116,6 +116,7 @@ module.exports = SubscriptionController =
 						user:user
 						saved_billing_details: req.query.saved_billing_details?
 						billingDetailsLink: billingDetailsLink
+						v1Subscription: v1Subscription
 
 	userCustomSubscriptionPage: (req, res, next)->
 		user = AuthenticationController.getSessionUser(req)

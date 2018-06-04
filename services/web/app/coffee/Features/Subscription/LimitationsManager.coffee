@@ -5,6 +5,7 @@ SubscriptionLocator = require("./SubscriptionLocator")
 Settings = require("settings-sharelatex")
 CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
 CollaboratorsInvitesHandler = require("../Collaborators/CollaboratorsInviteHandler")
+V1SubscriptionManager = require("./V1SubscriptionManager")
 
 module.exports = LimitationsManager =
 	allowedNumberOfCollaboratorsInProject: (project_id, callback) ->
@@ -37,8 +38,10 @@ module.exports = LimitationsManager =
 			return callback(err) if err?
 			@userIsMemberOfGroupSubscription user, (err, isMember)=>
 				return callback(err) if err?
-				logger.log user_id:user._id, isMember:isMember, hasSubscription:hasSubscription, "checking if user has subscription or is group member"
-				callback err, isMember or hasSubscription, subscription
+				@userHasV1SubscriptionOrTeam user, (err, hasV1Subscription)=>
+					return callback(err) if err?
+					logger.log {user_id:user._id, isMember, hasSubscription, hasV1Subscription}, "checking if user has subscription or is group member"
+					callback err, isMember or hasSubscription or hasV1Subscription, subscription
 
 	userHasSubscription: (user, callback = (err, hasSubscription, subscription)->) ->
 		logger.log user_id:user._id, "checking if user has subscription"
@@ -54,6 +57,16 @@ module.exports = LimitationsManager =
 		SubscriptionLocator.getMemberSubscriptions user._id, (err, subscriptions = []) ->
 			return callback(err) if err?
 			callback err, subscriptions.length > 0, subscriptions
+
+	userHasV1SubscriptionOrTeam: (user, callback = (error, hasV1Subscription) ->) ->
+		V1SubscriptionManager.getSubscriptionsFromV1 user._id, (err, v1Subscription = {}) ->
+			return callback(err) if err?
+			hasV1Subscription = false
+			if v1Subscription.has_subscription
+				hasV1Subscription = true
+			if (v1Subscription.teams or []).length > 0
+				hasV1Subscription = true
+			return callback null, hasV1Subscription
 
 	teamHasReachedMemberLimit: (subscription) ->
 		currentTotal = (subscription.member_ids or []).length +

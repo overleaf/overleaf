@@ -32,6 +32,12 @@ module.exports = V1SubscriptionManager =
 			url: (v1Id) -> "/api/v1/sharelatex/users/#{v1Id}/sync"
 		}, callback
 
+	getSubscriptionsFromV1: (userId, callback=(err, subscriptions) ->) ->
+		V1SubscriptionManager._v1Request userId, {
+			method: 'GET',
+			url: (v1Id) -> "/api/v1/sharelatex/users/#{v1Id}/subscriptions"
+		}, callback
+
 	_v1Request: (userId, options, callback=(err, body)->) ->
 		if !settings?.apis?.v1
 			return callback null, null
