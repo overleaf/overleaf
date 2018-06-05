@@ -88,7 +88,7 @@ define [
 		$scope.user = window.user
 
 		$scope.shouldABTestPlans = false
-		if $scope.user.signUpDate >= '2016-10-27'
+		if $scope.user.signUpDate >= '2018-06-06'
 			$scope.shouldABTestPlans = true
 
 		$scope.settings = window.userSettings

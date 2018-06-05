@@ -99,7 +99,11 @@ describe "SubscriptionController", ->
 				@UserGetter.getUser.callCount.should.equal 1
 				done()
 
-			it 'should decide not to AB test the plans when signed up before 2016-10-27', (done) ->
+			it 'should decide not to AB test the plans when signed up before 2018-06-06', (done) ->
+				# Users before we introduce the test may have already seen the old variant, 
+				# and so may react positively to a change rather than the variant itself. 
+				# So it's more likely to skew in favour of the change
+				# just because change makes things 'fresh'
 				@res.renderedVariables.shouldABTestPlans.should.equal false
 				done()
 
