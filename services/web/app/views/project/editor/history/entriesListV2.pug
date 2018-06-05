@@ -67,18 +67,18 @@ aside.change-list(
 				div.description(ng-click="select()")
 					div.time {{ update.meta.end_ts | formatDate:'h:mm a' }}
 					div.action.action-edited(ng-if="history.isV2 && update.pathnames.length > 0")
-						| #{translate("file-action-edited")}
+						| #{translate("file_action_edited")}
 					div.docs(ng-repeat="pathname in update.pathnames")
 						.doc {{ pathname }}
 					div.docs(ng-repeat="project_op in update.project_ops")
 						div(ng-if="project_op.rename")
-							.action #{translate("file-action-renamed")} 
+							.action #{translate("file_action_renamed")} 
 							.doc {{ project_op.rename.pathname }} &rarr; {{ project_op.rename.newPathname }}
 						div(ng-if="project_op.add")
-							.action #{translate("file-action-created")}
+							.action #{translate("file_action_created")}
 							.doc {{ project_op.add.pathname }}
 						div(ng-if="project_op.remove")
-							.action #{translate("file-action-deleted")}
+							.action #{translate("file_action_deleted")}
 							.doc {{ project_op.remove.pathname }}
 					div.users
 						div.user(ng-repeat="update_user in update.meta.users")
@@ -133,20 +133,20 @@ script(type="text/ng-template", id="historyEntryTpl")
 				li.history-entry-change(
 					ng-repeat="pathname in ::$ctrl.entry.pathnames"
 				)
-					span.history-entry-change-action #{translate("file-action-edited")} 
+					span.history-entry-change-action #{translate("file_action_edited")} 
 					span.history-entry-change-doc {{ ::pathname }}
 				li.history-entry-change(
 					ng-repeat="project_op in ::$ctrl.entry.project_ops"
 				)
 					span.history-entry-change-action(
 						ng-if="::project_op.rename"
-					) #{translate("file-action-renamed")}
+					) #{translate("file_action_renamed")}
 					span.history-entry-change-action(
 						ng-if="::project_op.add"
-					) #{translate("file-action-created")}
+					) #{translate("file_action_created")}
 					span.history-entry-change-action(
 						ng-if="::project_op.remove"
-					) #{translate("file-action-deleted")}
+					) #{translate("file_action_deleted")}
 					span.history-entry-change-doc {{ ::$ctrl.getProjectOpDoc(project_op) }}
 			.history-entry-metadata
 				time.history-entry-metadata-time {{ ::$ctrl.entry.meta.end_ts | formatDate:'h:mm a' }}
