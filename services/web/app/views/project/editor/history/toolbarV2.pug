@@ -4,10 +4,10 @@
 	span(ng-show="history.loadingFileTree")
 		i.fa.fa-spin.fa-refresh
 		| &nbsp;&nbsp; #{translate("loading")}...
-	span(ng-show="!history.loadingFileTree") Browsing project as of&nbsp;
+	span(ng-show="!history.loadingFileTree") #{translate("browsing-project-as-of")}&nbsp;
 		time.history-toolbar-time {{ history.selection.updates[0].meta.end_ts | formatDate:'Do MMM YYYY, h:mm a' }}
 	.history-toolbar-btn(
 		ng-click="toggleHistoryViewMode();"
 	) 
 		i.fa
-		| Compare project versions
+		| #{translate("compare-project-versions")}
