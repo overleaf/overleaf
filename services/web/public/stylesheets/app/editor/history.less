@@ -1,4 +1,4 @@
-@changesListWidth:   250px;
+@changesListWidth: 250px;
 @changesListPadding: @line-height-computed / 2;
 
 @selector-padding-vertical: 10px;
@@ -40,7 +40,8 @@
 			}
 	}
 
-	.diff-panel {
+	.diff-panel,
+	.point-in-time-panel {
 		.full-size;
 		margin-right: @changesListWidth;
 	}
@@ -49,6 +50,7 @@
 		.full-size;
 		.toolbar {
 			padding: 3px;
+			height: 32px;
 			.name {
 				float: left;
 				padding: 3px @line-height-computed / 4;
@@ -57,13 +59,9 @@
 		}
 		.diff-editor {
 			.full-size;
-			top: 40px;
+			top: 32px;
 		}
-		.hide-ace-cursor {
-			.ace_active-line, .ace_cursor-layer, .ace_gutter-active-line {
-				display: none;
-			}
-		}
+
 		.diff-deleted {
 			padding: @line-height-computed;
 		}
@@ -90,6 +88,7 @@
 		.loading {
 			text-align: center;
 			font-family: @font-family-serif;
+			margin-top: (@line-height-computed / 2);
 		}
 
 		ul {
@@ -303,6 +302,12 @@
 
 .diff-deleted {
 	padding-top: 15px;
+}
+
+.hide-ace-cursor {
+	.ace_active-line, .ace_cursor-layer, .ace_gutter-active-line {
+		display: none;
+	}
 }
 
 .editor-dark {

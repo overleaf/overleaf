@@ -3,11 +3,16 @@ define [
 	"ide/history/util/displayNameForUser"
 ], (App, displayNameForUser) ->
 
-	App.controller "HistoryListController", ["$scope", "ide", ($scope, ide) ->
+	App.controller "HistoryV2ListController", ["$scope", "ide", ($scope, ide) ->
 		$scope.hoveringOverListSelectors = false
 		
 		$scope.loadMore = () =>
 			ide.historyManager.fetchNextBatchOfUpdates()
+
+		$scope.handleEntrySelect = (entry) ->
+			# $scope.$applyAsync () ->
+			ide.historyManager.selectUpdate(entry)
+			$scope.recalculateSelectedUpdates()
 
 		$scope.recalculateSelectedUpdates = () ->
 			beforeSelection = true
@@ -68,43 +73,4 @@ define [
 
 		$scope.$watch "history.updates.length", () ->
 			$scope.recalculateSelectedUpdates()
-	]
-
-	App.controller "HistoryListItemController", ["$scope", "event_tracking", ($scope, event_tracking) ->
-		$scope.$watch "update.selectedFrom", (selectedFrom, oldSelectedFrom) ->
-			if selectedFrom
-				for update in $scope.history.updates
-					update.selectedFrom = false unless update == $scope.update
-				$scope.recalculateSelectedUpdates()		
-
-		$scope.$watch "update.selectedTo", (selectedTo, oldSelectedTo) ->
-			if selectedTo
-				for update in $scope.history.updates
-					update.selectedTo = false unless update == $scope.update
-				$scope.recalculateSelectedUpdates()
-
-		$scope.select = () ->
-			event_tracking.sendMB "history-view-change"
-			$scope.update.selectedTo = true
-			$scope.update.selectedFrom = true
-
-		$scope.mouseOverSelectedFrom = () ->
-			$scope.history.hoveringOverListSelectors = true
-			$scope.update.hoverSelectedFrom = true
-			$scope.recalculateHoveredUpdates()
-
-		$scope.mouseOutSelectedFrom = () ->
-			$scope.history.hoveringOverListSelectors = false
-			$scope.resetHoverState()
-
-		$scope.mouseOverSelectedTo = () ->
-			$scope.history.hoveringOverListSelectors = true
-			$scope.update.hoverSelectedTo = true
-			$scope.recalculateHoveredUpdates()
-
-		$scope.mouseOutSelectedTo = () ->
-			$scope.history.hoveringOverListSelectors = false
-			$scope.resetHoverState()
-
-		$scope.displayName = displayNameForUser
 	]
