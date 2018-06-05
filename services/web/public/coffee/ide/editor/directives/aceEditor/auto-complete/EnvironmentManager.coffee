@@ -111,15 +111,6 @@ define () ->
 			\\end{frame}
 		"""
 		meta: "env"
-	}, {
-		caption: "\\begin{thebibliography}..."
-		snippet: """
-			\\begin{thebibliography}{$1}
-			\\bibitem{$2}
-			$3
-			\\end{thebibliography}
-		"""
-		meta: "env"
 	}]
 
 	documentSnippet = {
@@ -132,6 +123,16 @@ define () ->
 		meta: "env"
 	}
 
+	bibliographySnippet = {
+		caption: "\\begin{thebibliography}..."
+		snippet: """
+			\\begin{thebibliography}{$1}
+			\\bibitem{$2}
+			$3
+			\\end{thebibliography}
+		"""
+		meta: "env"
+	}
 	staticSnippets.push(documentSnippet)
 
 	parseCustomEnvironments = (text) ->
@@ -163,6 +164,12 @@ define () ->
 		iterations = 0
 		return re.exec(text) != null
 
+	hasBibliographyEnvironment = (text) ->
+		re = /^\\begin{thebibliography}/m
+		envs = []
+		iterations = 0
+		return re.exec(text) != null
+
 	class EnvironmentManager
 		getCompletions: (editor, session, pos, prefix, callback) ->
 			docText = session.getValue()
@@ -174,6 +181,13 @@ define () ->
 					staticSnippets.splice(ind, 1)
 			else
 				staticSnippets.push documentSnippet
+
+			if hasBibliographyEnvironment(docText)
+				ind = staticSnippets.indexOf(bibliographySnippet)
+				if ind != -1
+					staticSnippets.splice(ind, 1)
+			else
+				staticSnippets.push bibliographySnippet
 
 			parsedItemsMap = {}
 			for environment in customEnvironments
