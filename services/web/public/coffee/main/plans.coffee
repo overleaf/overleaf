@@ -3,7 +3,6 @@ define [
 	"libs/recurly-4.8.5"
 ], (App, recurly) ->
 
-
 	App.factory "MultiCurrencyPricing", () ->
 
 		currencyCode = window.recomendedCurrency
@@ -146,17 +145,16 @@ define [
 		}
 
 
-	App.controller "PlansController", ($scope, $modal, event_tracking, abTestManager, MultiCurrencyPricing, $http, sixpack) ->
+	App.controller "PlansController", ($scope, $modal, event_tracking, abTestManager, MultiCurrencyPricing, $http, sixpack, $filter) ->
 
 		$scope.showPlans = false
-
-		$scope.plansVariant = 'default'
 		$scope.shouldABTestPlans = window.shouldABTestPlans
 
 		if $scope.shouldABTestPlans
-				$scope.showPlans = true
-		else
-			$scope.showPlans = true
+			sixpack.participate 'plans-details', ['default', 'more-details'], (chosenVariation, rawResponse)->
+				$scope.plansVariant = chosenVariation
+
+		$scope.showPlans = true
 
 		$scope.plans = MultiCurrencyPricing.plans
 
@@ -169,44 +167,57 @@ define [
 		$scope.ui =
 			view: "monthly"
 
-		$scope.changeCurreny = (newCurrency)->
+		$scope.changeCurreny = (e, newCurrency)->
+			e.preventDefault()
 			$scope.currencyCode = newCurrency
 
 		# because ternary logic in angular bindings is hard
 		$scope.getCollaboratorPlanCode = () ->
 			view = $scope.ui.view
-			variant = $scope.plansVariant
 			if view == "annual"
-				if variant == "default"
-					return "collaborator-annual"
-				else
-					return "collaborator-annual_#{variant}"
+				return "collaborator-annual"
 			else
-				if variant == "default"
-					return "collaborator#{$scope.planQueryString}"
-				else
-					return "collaborator_#{variant}"
+				return "collaborator#{$scope.planQueryString}"
 
-		$scope.signUpNowClicked = (plan, annual)->
-			event_tracking.sendMB 'plans-page-start-trial', {plan}
+		$scope.signUpNowClicked = (plan, location)->
 			if $scope.ui.view == "annual"
 				plan = "#{plan}_annual"
-			event_tracking.send   'subscription-funnel', 'sign_up_now_button', plan
+			plan = eventLabel(plan, location)
+			event_tracking.sendMB 'plans-page-start-trial', {plan}
+			event_tracking.send 'subscription-funnel', 'sign_up_now_button', plan
+			if $scope.shouldABTestPlans
+				sixpack.convert 'plans-details'
 
-		$scope.switchToMonthly = ->
-			$scope.ui.view = "monthly"
-			event_tracking.send 'subscription-funnel', 'plans-page', 'monthly-prices'
+		$scope.switchToMonthly = (e, location) ->
+			uiView = 'monthly'
+			switchEvent(e, uiView + '-prices', location)
+			$scope.ui.view = uiView
 
-		$scope.switchToStudent = ->
-			$scope.ui.view = "student"
-			event_tracking.send 'subscription-funnel', 'plans-page', 'student-prices'
+		$scope.switchToStudent = (e, location) ->
+			uiView = 'student'
+			switchEvent(e, uiView + '-prices', location)
+			$scope.ui.view = uiView
 
-		$scope.switchToAnnual = ->
-			$scope.ui.view = "annual"
-			event_tracking.send 'subscription-funnel', 'plans-page', 'annual-prices'
+		$scope.switchToAnnual = (e, location) ->
+			uiView = 'annual'
+			switchEvent(e, uiView + '-prices', location)
+			$scope.ui.view = uiView
 
 		$scope.openGroupPlanModal = () ->
 			$modal.open {
 				templateUrl: "groupPlanModalTemplate"
 			}
 			event_tracking.send 'subscription-funnel', 'plans-page', 'group-inquiry-potential'
+
+		eventLabel = (label, location) ->
+			if location && $scope.plansVariant != 'default'
+				label = label + '-' + location
+			if $scope.plansVariant != 'default'
+				label += '-exp-' + $scope.plansVariant
+			label
+
+		switchEvent = (e, label, location) ->
+			e.preventDefault()
+			gaLabel = eventLabel(label, location)
+			event_tracking.send 'subscription-funnel', 'plans-page', gaLabel
+

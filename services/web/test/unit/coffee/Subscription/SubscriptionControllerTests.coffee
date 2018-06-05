@@ -87,33 +87,67 @@ describe "SubscriptionController", ->
 		@stubbedCurrencyCode = "GBP"
 
 	describe "plansPage", ->
-		beforeEach (done) ->
+		beforeEach ->
 			@req.ip  = "1234.3123.3131.333 313.133.445.666 653.5345.5345.534"
 			@GeoIpLookup.getCurrencyCode.callsArgWith(1, null, @stubbedCurrencyCode)
-			@res.callback = done
-			@SubscriptionController.plansPage(@req, @res)
-			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user)
 
-		it "should set the recommended currency from the geoiplookup", (done)->
-			@res.renderedVariables.recomendedCurrency.should.equal(@stubbedCurrencyCode)
-			@GeoIpLookup.getCurrencyCode.calledWith(@req.ip).should.equal true
-			done()
+		describe 'when user is logged in', (done) ->
+			beforeEach (done) ->
+				@res.callback = done
+				@SubscriptionController.plansPage(@req, @res)
+			it 'should fetch the current user', (done) ->
+				@UserGetter.getUser.callCount.should.equal 1
+				done()
 
-		it 'should fetch the current user', (done) ->
-			@UserGetter.getUser.callCount.should.equal 1
-			done()
+			it 'should decide not to AB test the plans when signed up before 2016-10-27', (done) ->
+				@res.renderedVariables.shouldABTestPlans.should.equal false
+				done()
 
-		it 'should decide not to AB test the plans', (done) ->
-			@res.renderedVariables.shouldABTestPlans.should.equal false
-			done()
+			describe 'not dependant on logged in state', (done) ->
+				# these could have been put in 'when user is not logged in' too
+				it "should set the recommended currency from the geoiplookup", (done)->
+					@res.renderedVariables.recomendedCurrency.should.equal(@stubbedCurrencyCode)
+					@GeoIpLookup.getCurrencyCode.calledWith(@req.ip).should.equal true
+					done()
+				it 'should include data for features table', (done) ->
+					# this is part of AB test. If default wins test, then remove this test
+					@res.renderedVariables.planFeatures.length.should.not.equal 0
+					done()
 
 		describe 'when user is not logged in', (done) ->
+			beforeEach (done) ->
+				@UserGetter =
+					getUser: sinon.stub().callsArgWith(2, null, null)
+				@res.callback = done
+				@SubscriptionController.plansPage(@req, @res)
+				@AuthenticationController =
+					getLoggedInUser: sinon.stub().callsArgWith(1, null, null)
+					getLoggedInUserId: sinon.stub().returns(null)
+					getSessionUser: sinon.stub().returns(null)
+					isUserLoggedIn: sinon.stub().returns(false)
 
-			beforeEach ->
-				@AuthenticationController.getLoggedInUserId.returns(null)
+				@SubscriptionController = SandboxedModule.require modulePath, requires:
+					'../Authentication/AuthenticationController': @AuthenticationController
+					'./SubscriptionHandler': @SubscriptionHandler
+					"./PlansLocator": @PlansLocator
+					'./SubscriptionViewModelBuilder': @SubscriptionViewModelBuilder
+					"./LimitationsManager": @LimitationsManager
+					"../../infrastructure/GeoIpLookup":@GeoIpLookup
+					"logger-sharelatex":
+						log:->
+						warn:->
+					"settings-sharelatex": @settings
+					"./SubscriptionDomainHandler":@SubscriptionDomainHandler
+					"../User/UserGetter": @UserGetter
+					"./RecurlyWrapper": @RecurlyWrapper = {}
+					"./FeaturesUpdater": @FeaturesUpdater = {}
 
 			it 'should not fetch the current user', (done) ->
 				@UserGetter.getUser.callCount.should.equal 0
+				done()
+
+			it 'should decide to AB test', (done) ->
+				@res.renderedVariables.shouldABTestPlans.should.equal true
 				done()
 
 	describe "paymentPage", ->

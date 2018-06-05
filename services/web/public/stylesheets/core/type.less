@@ -122,6 +122,11 @@ cite    { font-style: normal; }
   text-align: center;
 }
 
+// Transformations
+.text-capitalize {
+  text-transform: capitalize;
+}
+
 // Contextual backgrounds
 // For now we'll leave these alongside the text classes until v4 when we can
 // safely shift things around (per SemVer rules).
@@ -256,7 +261,14 @@ blockquote {
       vertical-align: -0.4em;
       line-height: 0.1em;
   }
-  
+
+  &:after {
+      content: close-quote;
+      display: inherit;
+      height: 0;
+      visibility: hidden;
+  }
+
   p {
       display: inline;
   }

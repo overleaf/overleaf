@@ -1,0 +1,118 @@
+.row
+	.col-md-12
+		.page-header.centered.plans-header.text-centered
+			h1 #{translate("start_x_day_trial", {len:'{{trial_len}}'})}
+.row
+	.col-md-8.col-md-offset-2
+		p.text-centered #{translate("sl_benefits_plans")}
+
+.row.top-switch
+	.col-md-6.col-md-offset-3
+		+plan_switch('card')
+	.col-md-2.text-right
+		+currency_dropdown
+
+div(ng-show="showPlans")
+	.row
+		.col-md-10.col-md-offset-1
+			.row
+				.card-group.text-centered(ng-if="ui.view == 'monthly' || ui.view == 'annual'")
+					.col-md-4
+						.card.card-first
+							.card-header
+								h2 #{translate("personal")}
+							.circle #{translate("free")}
+							+features_free
+					.col-md-4
+						.card.card-highlighted
+							.card-header
+								h2 #{translate("collaborator")}
+							.circle
+								+price_collaborator
+							+features_collaborator
+					.col-md-4
+						.card.card-last
+							.card-header
+								h2 #{translate("professional")}
+							.circle
+								+price_professional
+							+features_professional
+
+				.card-group.text-centered(ng-if="ui.view == 'student'")
+					.col-md-4
+						.card.card-first
+							.card-header
+								h2 #{translate("personal")}
+							.circle #{translate("free")}
+							+features_free
+
+					.col-md-4
+						.card.card-highlighted
+							+card_student_monthly
+
+					.col-md-4
+						.card.card-last
+							+card_student_annual
+
+.row.row-spaced
+	p.text-centered #{translate("choose_plan_works_for_you", {len:'{{trial_len}}'})}
+
+.row
+	.col-md-8.col-md-offset-2
+		.alert.alert-info.text-centered
+			| #{translate("interested_in_group_licence")}
+			br
+			a(href, ng-click="openGroupPlanModal()") #{translate("get_in_touch_for_details")}
+
+	script(type="text/ng-template", id="groupPlanModalTemplate")
+		.modal-header
+			h3 #{translate("group_plan_enquiry")}
+		.modal-body
+			form.text-left.form(ng-controller="UniverstiesContactController", ng-submit="contactUs()")
+				span(ng-show="sent == false && error == false")
+					.form-group
+						label#title9(for='Field9')
+							| Name
+						input#Field9.field.text.medium.span8.form-control(ng-model="form.name", maxlength='255', tabindex='1', onkeyup='')
+					label#title11.desc(for='Field11')
+						| Email
+					.form-group
+						input#Field11.field.text.medium.span8.form-control(ng-model="form.email", name='Field11', type='email', spellcheck='false', value='', maxlength='255', tabindex='2')
+					label#title12.desc(for='Field12')
+						| University / Company
+					.form-group
+						input#Field12.field.text.medium.span8.form-control(ng-model="form.university", name='Field12', type='text', value='', maxlength='255', tabindex='3', onkeyup='')
+					label#title13.desc(for='Field13')
+						| Position
+					.form-group
+						input#Field13.field.text.medium.span8.form-control(ng-model="form.position", name='Field13', type='text', value='', maxlength='255', tabindex='4', onkeyup='')
+					.form-group
+						input(ng-model="form.source", type="hidden", ng-init="form.source = '__ref__'; form.subject = 'General enquiry for larger ShareLaTeX use';")
+					.form-group.text-center
+						input#saveForm.btn-success.btn.btn-lg(name='saveForm', type='submit', ng-disabled="sending",  value='Request a quote')
+				span(ng-show="sent == true && error == false")
+					p Request Sent, Thank you.
+				span(ng-show="error")
+					p Error sending request.
+
+.row
+	.col-md-12
+		.page-header.plans-header.plans-subheader.text-centered
+			h2 #{translate("enjoy_these_features")}
+	.col-md-4
+		.card.features.text-centered
+			i.fa.fa-file-text-o.fa-5x
+			h4 #{translate("unlimited_projects")}
+			p #{translate("create_unlimited_projects")}
+	.col-md-4
+		.card.features.text-centered
+			i.fa.fa-clock-o.fa-5x
+			h4 #{translate("full_doc_history")}
+			p #{translate("never_loose_work")}
+	.col-md-4
+		.card.features.text-centered
+			i.fa.fa-dropbox.fa-5x
+			|  &nbsp; &nbsp;
+			i.fa.fa-github.fa-5x
+			h4 #{translate("sync_to_dropbox_and_github")}
+			p #{translate("access_projects_anywhere")}
