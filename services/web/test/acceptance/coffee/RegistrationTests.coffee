@@ -146,6 +146,15 @@ describe "LoginViaRegistration", ->
 
 	describe "[Security] Trying to register/login as another user", ->
 
+		it 'should not allow sign in with secondary email', (done) ->
+			secondaryEmail = "acceptance-test-secondary@example.com"
+			@user1.addEmail secondaryEmail, (err) =>
+				@user1.loginWith secondaryEmail, (err) =>
+					expect(err?).to.equal false
+					@user1.isLoggedIn (err, isLoggedIn) ->
+						expect(isLoggedIn).to.equal false
+						done()
+
 		it 'should have user1 login', (done) ->
 			@user1.login (err) ->
 				expect(err?).to.equal false

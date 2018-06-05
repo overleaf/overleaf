@@ -56,3 +56,21 @@ describe "UserGetter", ->
 				@findOne.called.should.equal true
 				@findOne.calledWith(email: email).should.equal true
 				done()
+
+	describe "getUserByAnyEmail", ->
+		it "query user for any email", (done)->
+			email = 'hello@world.com'
+			projection = emails: 1
+			@UserGetter.getUserByAnyEmail " #{email} ", projection, (error, user) =>
+				@findOne.calledWith('emails.email': email, projection).should.equal true
+				user.should.deep.equal @fakeUser
+				done()
+
+		it "checks main email as well", (done)->
+			@findOne.callsArgWith(2, null, null)
+			email = 'hello@world.com'
+			projection = emails: 1
+			@UserGetter.getUserByAnyEmail " #{email} ", projection, (error, user) =>
+				@findOne.calledTwice.should.equal true
+				@findOne.calledWith(email: email, projection).should.equal true
+				done()
