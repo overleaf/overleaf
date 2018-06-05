@@ -45,12 +45,12 @@ module.exports = SubscriptionController =
 	paymentPage: (req, res, next) ->
 		user = AuthenticationController.getSessionUser(req)
 		plan = PlansLocator.findLocalPlanInSettings(req.query.planCode)
-		LimitationsManager.userHasSubscription user, (err, hasSubscription)->
+		LimitationsManager.userHasV1OrV2Subscription user, (err, hasSubscription)->
 			return next(err) if err?
 			if hasSubscription or !plan?
 				res.redirect "/user/subscription"
 			else
-				# LimitationsManager.userHasSubscription only checks Mongo. Double check with
+				# LimitationsManager.userHasV2Subscription only checks Mongo. Double check with
 				# Recurly as well at this point (we don't do this most places for speed).
 				SubscriptionHandler.validateNoSubscriptionInRecurly user._id, (error, valid) ->
 					return next(error) if error?
@@ -135,11 +135,17 @@ module.exports = SubscriptionController =
 		recurly_token_id = req.body.recurly_token_id
 		subscriptionDetails = req.body.subscriptionDetails
 		logger.log recurly_token_id: recurly_token_id, user_id:user._id, subscriptionDetails:subscriptionDetails, "creating subscription"
-		SubscriptionHandler.createSubscription user, subscriptionDetails, recurly_token_id, (err)->
-			if err?
-				logger.err err:err, user_id:user._id, "something went wrong creating subscription"
-				return res.sendStatus 500
-			res.sendStatus 201
+		
+		LimitationsManager.userHasV1OrV2Subscription user, (err, hasSubscription)->
+			return next(err) if err?
+			if hasSubscription
+				logger.warn {user_id: user._id}, 'user already has subscription'
+				res.sendStatus 409 # conflict
+			SubscriptionHandler.createSubscription user, subscriptionDetails, recurly_token_id, (err)->
+				if err?
+					logger.err err:err, user_id:user._id, "something went wrong creating subscription"
+					return next(err)
+				res.sendStatus 201
 
 	successful_subscription: (req, res, next)->
 		user = AuthenticationController.getSessionUser(req)
@@ -195,7 +201,7 @@ module.exports = SubscriptionController =
 
 	renderUpgradeToAnnualPlanPage: (req, res, next)->
 		user = AuthenticationController.getSessionUser(req)
-		LimitationsManager.userHasSubscription user, (err, hasSubscription, subscription)->
+		LimitationsManager.userHasV2Subscription user, (err, hasSubscription, subscription)->
 			return next(err) if err?
 			planCode = subscription?.planCode.toLowerCase()
 			if planCode?.indexOf("annual") != -1
@@ -225,7 +231,7 @@ module.exports = SubscriptionController =
 
 	extendTrial: (req, res, next)->
 		user = AuthenticationController.getSessionUser(req)
-		LimitationsManager.userHasSubscription user, (err, hasSubscription, subscription)->
+		LimitationsManager.userHasV2Subscription user, (err, hasSubscription, subscription)->
 			return next(err) if err?
 			SubscriptionHandler.extendTrial subscription, 14, (err)->
 				if err?
