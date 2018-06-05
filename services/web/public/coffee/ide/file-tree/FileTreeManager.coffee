@@ -335,6 +335,11 @@ define [
 
 			return null
 
+		projectContainsFolder: () ->
+			for entity in @$scope.rootFolder.children
+				return true if entity.type == 'folder'
+			return false
+
 		existsInThisFolder: (folder, name) ->
 			for entity in folder?.children or []
 				return true if entity.name is name

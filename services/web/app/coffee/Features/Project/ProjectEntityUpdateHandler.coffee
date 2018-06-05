@@ -45,37 +45,40 @@ wrapWithLock = (methodWithoutLock) ->
 		methodWithLock
 
 module.exports = ProjectEntityUpdateHandler = self =
-	# this doesn't need any locking because it's only called by ProjectDuplicator
-	copyFileFromExistingProjectWithProject: (project, folder_id, originalProject_id, origonalFileRef, userId, callback = (error, fileRef, folder_id) ->)->
-		project_id = project._id
-		projectHistoryId = project.overleaf?.history?.id
-		logger.log { project_id, folder_id, originalProject_id, origonalFileRef }, "copying file in s3 with project"
-		return callback(err) if err?
-		ProjectEntityMongoUpdateHandler._confirmFolder project, folder_id, (folder_id)=>
-			if !origonalFileRef?
-				logger.err { project_id, folder_id, originalProject_id, origonalFileRef }, "file trying to copy is null"
-				return callback()
-			# convert any invalid characters in original file to '_'
-			fileRef = new File name : SafePath.clean(origonalFileRef.name)
-			FileStoreHandler.copyFile originalProject_id, origonalFileRef._id, project._id, fileRef._id, (err, fileStoreUrl)->
-				if err?
-					logger.err { err, project_id, folder_id, originalProject_id, origonalFileRef }, "error coping file in s3"
-					return callback(err)
-				ProjectEntityMongoUpdateHandler._putElement project, folder_id, fileRef, "file", (err, result)=>
-					if err?
-						logger.err { err, project_id, folder_id }, "error putting element as part of copy"
-						return callback(err)
-					TpdsUpdateSender.addFile { project_id, file_id:fileRef._id, path:result?.path?.fileSystem, rev:fileRef.rev, project_name:project.name}, (err) ->
+	copyFileFromExistingProjectWithProject: wrapWithLock
+		beforeLock: (next) ->
+			(project, folder_id, originalProject_id, origonalFileRef, userId, callback = (error, fileRef, folder_id) ->)->
+				project_id = project._id
+				logger.log { project_id, folder_id, originalProject_id, origonalFileRef }, "copying file in s3 with project"
+				ProjectEntityMongoUpdateHandler._confirmFolder project, folder_id, (folder_id) ->
+					if !origonalFileRef?
+						logger.err { project_id, folder_id, originalProject_id, origonalFileRef }, "file trying to copy is null"
+						return callback()
+					# convert any invalid characters in original file to '_'
+					fileRef = new File name : SafePath.clean(origonalFileRef.name)
+					FileStoreHandler.copyFile originalProject_id, origonalFileRef._id, project._id, fileRef._id, (err, fileStoreUrl)->
 						if err?
-							logger.err { err, project_id, folder_id, originalProject_id, origonalFileRef }, "error sending file to tpds worker"
-						newFiles = [
-							file: fileRef
-							path: result?.path?.fileSystem
-							url: fileStoreUrl
-						]
-						DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, {newFiles}, (error) ->
-							return callback(error) if error?
-							callback null, fileRef, folder_id
+							logger.err { err, project_id, folder_id, originalProject_id, origonalFileRef }, "error coping file in s3"
+							return callback(err)
+						next(project, folder_id, originalProject_id, origonalFileRef, userId, fileRef, fileStoreUrl, callback)
+		withLock: (project, folder_id, originalProject_id, origonalFileRef, userId, fileRef, fileStoreUrl, callback = (error, fileRef, folder_id) ->)->
+			project_id = project._id
+			projectHistoryId = project.overleaf?.history?.id
+			ProjectEntityMongoUpdateHandler._putElement project, folder_id, fileRef, "file", (err, result, newProject) ->
+				if err?
+					logger.err { err, project_id, folder_id }, "error putting element as part of copy"
+					return callback(err)
+				TpdsUpdateSender.addFile { project_id, file_id:fileRef._id, path:result?.path?.fileSystem, rev:fileRef.rev, project_name:project.name}, (err) ->
+					if err?
+						logger.err { err, project_id, folder_id, originalProject_id, origonalFileRef }, "error sending file to tpds worker"
+					newFiles = [
+						file: fileRef
+						path: result?.path?.fileSystem
+						url: fileStoreUrl
+					]
+					DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, {newFiles, newProject}, (error) ->
+						return callback(error) if error?
+						callback null, fileRef, folder_id
 
 	updateDocLines: (project_id, doc_id, lines, version, ranges, callback = (error) ->)->
 		ProjectGetter.getProjectWithoutDocLines project_id, (err, project)->

@@ -62,6 +62,23 @@ aside#left-menu.full-size(
 			!= moduleIncludes("editorLeftMenu:editing_services", locals)
 
 
+	if showTestControls
+		h4 Test Controls
+		ul.list-unstyled.nav(ng-controller="TestControlsController")
+			li
+				a(href="#" ng-click="richText()")
+					i.fa.fa-exclamation.fa-fw
+					| Rich Text
+			li
+				a(href="#" ng-click="openProjectLinkedFileModal()")
+					i.fa.fa-exclamation.fa-fw
+					| Project-Linked-File Modal
+			li
+				a(href="#" ng-click="openLinkedFileModal()")
+					i.fa.fa-exclamation.fa-fw
+					| URL-Linked-File Modal
+
+
 	h4(ng-show="!anonymous") #{translate("settings")}
 	form.settings(ng-controller="SettingsController", ng-show="!anonymous")
 		.containter-fluid
@@ -178,6 +195,7 @@ aside#left-menu.full-size(
 				)
 					option(value="pdfjs") #{translate("built_in")}
 					option(value="native") #{translate("native")}
+
 
 	h4 #{translate("hotkeys")}
 	ul.list-unstyled.nav

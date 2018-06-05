@@ -342,6 +342,77 @@ script(type='text/ng-template', id='newDocModalTemplate')
 			span(ng-show="state.inflight") #{translate("creating")}...
 
 
+// Project Linked Files Modal
+script(type='text/ng-template', id='projectLinkedFileModalTemplate')
+	.modal-header
+		h3 New file from Project
+
+	.modal-body
+		div
+			div.alert.alert-danger(ng-if="state.error") Error, something went wrong!
+		div
+			form
+				.form-controls
+					label(for="project-select") Select a Project
+					span(ng-show="state.inFlight.projects")
+						| &nbsp;
+						i.fa.fa-spinner.fa-spin
+					select.form-control(
+						name="project-select"
+						ng-model="data.selectedProjectId"
+						ng-disabled="!shouldEnableProjectSelect()"
+					)
+						option(value="" disabled selected) - Please Select a Project
+						option(
+							ng-repeat="project in data.projects"
+							value="{{ project._id }}"
+						) {{ project.name }}
+
+				br
+				.form-controls
+					label(for="project-entity-select") Select a File
+					span(ng-show="state.inFlight.entities")
+						| &nbsp;
+						i.fa.fa-spinner.fa-spin
+					select.form-control(
+						name="project-entity-select"
+						ng-model="data.selectedProjectEntity"
+						ng-disabled="!shouldEnableProjectEntitySelect()"
+					)
+						option(value="" disabled selected) - Please Select a File
+						option(
+							ng-repeat="projectEntity in data.projectEntities"
+							value="{{ projectEntity.path }}"
+						) {{ projectEntity.path.slice(1) }}
+				br
+
+				.form-controls
+					label(for="name") File Name In This Project
+					input.form-control(
+						type="text"
+						placeholder="example.tex"
+						required
+						ng-model="data.name"
+						name="name"
+					)
+				br
+
+	.modal-footer
+		span(ng-show="state.inFlight.create")
+			i.fa.fa-spinner.fa-spin
+			| &nbsp;
+		button.btn.btn-default(
+			ng-disabled="state.inflight"
+			ng-click="cancel()"
+		) #{translate("cancel")}
+		button.btn.btn-primary(
+			ng-disabled="!shouldEnableCreateButton()"
+			ng-click="create()"
+		)
+			span(ng-hide="state.inflight") #{translate("create")}
+			span(ng-show="state.inflight") #{translate("creating")}...
+
+
 script(type='text/ng-template', id='linkedFileModalTemplate')
 	.modal-header
 		h3 New file from URL

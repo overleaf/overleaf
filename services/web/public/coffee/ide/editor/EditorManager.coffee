@@ -14,7 +14,7 @@ define [
 				opening: true
 				trackChanges: false
 				wantTrackChanges: false
-				richText: false
+				showRichText: false
 			}
 
 			@$scope.$on "entity:selected", (event, entity) =>

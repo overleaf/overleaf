@@ -10,6 +10,8 @@ Async = require('async')
 oneMinInMs = 60 * 1000
 fiveMinsInMs = oneMinInMs * 5
 
+if !settings.apis?.references?.url?
+	logger.log "references search not enabled"
 
 module.exports = ReferencesHandler =
 

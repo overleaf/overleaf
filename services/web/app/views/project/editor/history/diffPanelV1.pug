@@ -13,7 +13,7 @@
 					}"
 				)
 				|  in <strong>{{history.diff.pathname}}</strong>
-			.toolbar-right
+			.toolbar-right(ng-if="permissions.write")
 				a.btn.btn-danger.btn-sm(
 					href,
 					ng-click="openRestoreDiffModal()"
