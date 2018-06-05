@@ -1,0 +1,82 @@
+aside.change-list(
+		ng-if="!history.isV2"
+		ng-controller="HistoryListController"
+		infinite-scroll="loadMore()"
+		infinite-scroll-disabled="history.loading || history.atEnd"
+		infinite-scroll-initialize="ui.view == 'history'"
+	)
+		.infinite-scroll-inner
+			ul.list-unstyled(
+				ng-class="{\
+					'hover-state': history.hoveringOverListSelectors\
+				}"
+			)
+				li.change(
+					ng-repeat="update in history.updates"
+					ng-class="{\
+						'first-in-day': update.meta.first_in_day,\
+						'selected': update.inSelection,\
+						'selected-to': update.selectedTo,\
+						'selected-from': update.selectedFrom,\
+						'hover-selected': update.inHoverSelection,\
+						'hover-selected-to': update.hoverSelectedTo,\
+						'hover-selected-from': update.hoverSelectedFrom,\
+					}"
+					ng-controller="HistoryListItemController"
+				)
+
+					div.day(ng-show="update.meta.first_in_day") {{ update.meta.end_ts | relativeDate }}
+
+					div.selectors
+						div.range
+						form
+							input.selector-from(
+								type="radio"
+								name="fromVersion"
+								ng-model="update.selectedFrom"
+								ng-value="true"
+								ng-mouseover="mouseOverSelectedFrom()"
+								ng-mouseout="mouseOutSelectedFrom()"
+								ng-show="update.afterSelection || update.inSelection"
+							)
+						form
+							input.selector-to(
+								type="radio"
+								name="toVersion"
+								ng-model="update.selectedTo"
+								ng-value="true"
+								ng-mouseover="mouseOverSelectedTo()"
+								ng-mouseout="mouseOutSelectedTo()"
+								ng-show="update.beforeSelection || update.inSelection"
+							)
+
+					div.description(ng-click="select()")
+						div.time {{ update.meta.end_ts | formatDate:'h:mm a' }}
+						div.action.action-edited(ng-if="history.isV2 && update.pathnames.length > 0")
+							| #{translate("file_action_edited")}
+						div.docs(ng-repeat="pathname in update.pathnames")
+							.doc {{ pathname }}
+						div.docs(ng-repeat="project_op in update.project_ops")
+							div(ng-if="project_op.rename")
+								.action #{translate("file_action_renamed")}
+								.doc {{ project_op.rename.pathname }} &rarr; {{ project_op.rename.newPathname }}
+							div(ng-if="project_op.add")
+								.action #{translate("file_action_created")} 
+								.doc {{ project_op.add.pathname }}
+							div(ng-if="project_op.remove")
+								.action #{translate("file_action_deleted")}
+								.doc {{ project_op.remove.pathname }}
+						div.users
+							div.user(ng-repeat="update_user in update.meta.users")
+								.color-square(ng-if="update_user != null", ng-style="{'background-color': 'hsl({{ update_user.hue }}, 70%, 50%)'}")
+								.color-square(ng-if="update_user == null", ng-style="{'background-color': 'hsl(100, 70%, 50%)'}")
+								.name(ng-if="update_user && update_user.id != user.id" ng-bind="displayName(update_user)") 
+								.name(ng-if="update_user && update_user.id == user.id") You
+								.name(ng-if="update_user == null") #{translate("anonymous")}
+							div.user(ng-if="update.meta.users.length == 0")
+								.color-square(style="background-color: hsl(100, 100%, 50%)")
+								span #{translate("anonymous")}
+
+			.loading(ng-show="history.loading")
+				i.fa.fa-spin.fa-refresh
+				| &nbsp;&nbsp; #{translate("loading")}...

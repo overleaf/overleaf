@@ -1,0 +1,70 @@
+aside.file-tree.full-size(
+	ng-controller="HistoryV2FileTreeController"
+	ng-if="ui.view == 'history' && history.isV2 && history.viewMode === HistoryViewModes.POINT_IN_TIME"
+)
+	.history-file-tree-inner
+		history-file-tree(
+			file-tree="currentFileTree"
+			selected-pathname="history.selection.pathname"
+			on-selected-file-change="handleFileSelection(file)"
+			is-loading="history.loadingFileTree"
+		)
+
+aside.file-tree.file-tree-history.full-size(
+	ng-controller="FileTreeController"
+	ng-class="{ 'multi-selected': multiSelectedCount > 0 }"
+	ng-show="ui.view == 'history' && history.isV2 && history.viewMode === HistoryViewModes.COMPARE")
+	.toolbar.toolbar-filetree
+		span Modified files
+
+	.file-tree-inner
+		ul.list-unstyled.file-tree-list
+			li(
+				ng-repeat="(pathname, doc) in history.selection.docs"
+				ng-class="{ 'selected': history.selection.pathname == pathname }"
+			)
+				.entity
+					.entity-name.entity-name-history(
+						ng-click="history.selection.pathname = pathname",
+						ng-class="{ 'deleted': !!doc.deletedAtV }"
+					)
+						i.fa.fa-fw.fa-pencil
+						span  {{ pathname }}
+
+
+
+
+script(type="text/ng-template", id="historyFileTreeTpl")
+	.history-file-tree
+		history-file-entity(
+			ng-repeat="fileEntity in $ctrl.fileTree"
+			file-entity="fileEntity"
+			ng-show="!$ctrl.isLoading"
+		)
+
+
+script(type="text/ng-template", id="historyFileEntityTpl")
+	.history-file-entity-wrapper
+		a.history-file-entity-link(
+			href
+			ng-click="$ctrl.handleClick()"
+			ng-class="{ 'history-file-entity-link-selected': $ctrl.isSelected }"
+		)
+			span.history-file-entity-name
+				i.history-file-entity-icon.history-file-entity-icon-folder-state.fa.fa-fw(
+					ng-class="{\
+						'fa-chevron-down': ($ctrl.fileEntity.type === 'folder' && $ctrl.isOpen),\
+						'fa-chevron-right': ($ctrl.fileEntity.type === 'folder' && !$ctrl.isOpen)\
+					}"
+				)
+				i.history-file-entity-icon.fa(
+					ng-class="$ctrl.iconClass"
+				)
+				| {{ ::$ctrl.fileEntity.name }}
+		div(
+			ng-show="$ctrl.isOpen"
+		)
+			history-file-entity(
+				ng-repeat="childEntity in $ctrl.fileEntity.children"
+				file-entity="childEntity"
+			)

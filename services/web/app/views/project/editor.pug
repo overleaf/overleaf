@@ -57,9 +57,12 @@ block content
 				include ./editor/share
 				!= moduleIncludes("publish:body", locals)
 
+				include ./editor/history/toolbarV2.pug
+
 				main#ide-body(
 					ng-cloak,
 					role="main",
+					ng-class="{ 'ide-history-open' : (ui.view == 'history' && history.isV2 && history.viewMode === HistoryViewModes.POINT_IN_TIME) }",
 					layout="main",
 					ng-hide="state.loading",
 					resize-on="layout:chat:resize",
@@ -70,7 +73,7 @@ block content
 				)
 					.ui-layout-west
 						include ./editor/file-tree
-						include ./editor/history-file-tree
+						include ./editor/history/fileTreeV2
 
 					.ui-layout-center
 						include ./editor/editor

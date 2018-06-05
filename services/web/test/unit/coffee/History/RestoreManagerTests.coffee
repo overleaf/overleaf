@@ -10,6 +10,7 @@ moment = require('moment')
 
 describe 'RestoreManager', ->
 	beforeEach ->
+		tk.freeze Date.now() # freeze the time for these tests
 		@RestoreManager = SandboxedModule.require modulePath, requires:
 			'../../infrastructure/FileWriter': @FileWriter = {}
 			'../Uploads/FileSystemImportManager': @FileSystemImportManager = {}
@@ -22,7 +23,6 @@ describe 'RestoreManager', ->
 		@project_id = 'mock-project-id'
 		@version = 42
 		@callback = sinon.stub()
-		tk.freeze Date.now() # freeze the time for these tests
 
 	afterEach ->
 		tk.reset()

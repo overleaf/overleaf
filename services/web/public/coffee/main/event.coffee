@@ -50,6 +50,10 @@ define [
 			send: (category, action, label, value)->
 				ga('send', 'event', category, action, label, value)
 
+			sendGAOnce: (category, action, label, value) ->
+				if ! _eventInCache(action)
+					_addEventToCache(action)
+					@send category, action, label, value
 
 			editingSessionHeartbeat: () ->
 				return unless nextHeartbeat <= new Date()
@@ -86,6 +90,9 @@ define [
 				if ! _eventInCache(key)
 					_addEventToCache(key)
 					@sendMB key, segmentation
+
+			eventInCache: (key) ->
+				_eventInCache(key)
 		}
 
 

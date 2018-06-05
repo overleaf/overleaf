@@ -31,7 +31,10 @@ block content
 											li(ng-repeat="(currency, value) in plans")
 												a(
 													ng-click="changeCurrency(currency)",
-												) {{currency}} ({{value['symbol']}})
+												) {{currency}} ({{value['symbol']}}) 
+							.row(ng-if="plansVariant == 'more-details' && planCode == 'student-annual' || plansVariant == 'more-details' && planCode == 'student-monthly'")
+								.col-xs-12
+									p.student-disclaimer #{translate('student_disclaimer')}
 							hr.thin
 							.row
 								.col-md-12.text-center

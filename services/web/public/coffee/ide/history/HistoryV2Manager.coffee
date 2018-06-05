@@ -2,13 +2,20 @@ define [
 	"moment"
 	"ide/colors/ColorManager"
 	"ide/history/util/displayNameForUser"
-	"ide/history/controllers/HistoryListController"
-	"ide/history/controllers/HistoryDiffController"
+	"ide/history/util/HistoryViewModes"
+	"ide/history/controllers/HistoryV2ListController"
+	"ide/history/controllers/HistoryV2DiffController"
+	"ide/history/controllers/HistoryV2FileTreeController"
 	"ide/history/directives/infiniteScroll"
-], (moment, ColorManager, displayNameForUser) ->
+	"ide/history/components/historyEntriesList"
+	"ide/history/components/historyEntry"
+	"ide/history/components/historyFileTree"
+	"ide/history/components/historyFileEntity"
+], (moment, ColorManager, displayNameForUser, HistoryViewModes) ->
 	class HistoryManager
 		constructor: (@ide, @$scope) ->
 			@reset()
+			@$scope.HistoryViewModes = HistoryViewModes
 
 			@$scope.toggleHistory = () =>
 				if @$scope.ui.view == "history"
@@ -16,17 +23,31 @@ define [
 				else
 					@show()
 
-			@$scope.$watch "history.selection.updates", (updates) =>
-				if updates? and updates.length > 0
-					@_selectDocFromUpdates()
-					@reloadDiff()
+			@$scope.toggleHistoryViewMode = () =>
+				if @$scope.history.viewMode == HistoryViewModes.COMPARE
+					@reset()
+					@$scope.history.viewMode = HistoryViewModes.POINT_IN_TIME
+				else
+					@reset()
+					@$scope.history.viewMode = HistoryViewModes.COMPARE
 
-			@$scope.$watch "history.selection.pathname", () =>
-				@reloadDiff()
+			@$scope.$watch "history.selection.updates", (updates) =>
+				if @$scope.history.viewMode == HistoryViewModes.COMPARE
+					if updates? and updates.length > 0
+						@_selectDocFromUpdates()
+						@reloadDiff()
+			
+			@$scope.$watch "history.selection.pathname", (pathname) =>
+				if @$scope.history.viewMode == HistoryViewModes.POINT_IN_TIME
+					if pathname?
+						@loadFileAtPointInTime()
+				else 
+					@reloadDiff()
 
 		show: () ->
 			@$scope.ui.view = "history"
 			@reset()
+			@$scope.history.viewMode = HistoryViewModes.POINT_IN_TIME
 
 		hide: () ->
 			@$scope.ui.view = "editor"
@@ -35,6 +56,7 @@ define [
 			@$scope.history = {
 				isV2: true
 				updates: []
+				viewMode: null
 				nextBeforeTimestamp: null
 				atEnd: false
 				selection: {
@@ -46,15 +68,32 @@ define [
 						toV: null
 					}
 				}
-				diff: null
+				files: []
+				diff: null # When history.viewMode == HistoryViewModes.COMPARE
+				selectedFile: null # When history.viewMode == HistoryViewModes.POINT_IN_TIME
 			}
 
 		restoreFile: (version, pathname) ->
 			url = "/project/#{@$scope.project_id}/restore_file"
+
 			@ide.$http.post(url, {
 				version, pathname,
 				_csrf: window.csrfToken
 			})
+
+		loadFileTreeForUpdate: (update) ->
+			{fromV, toV} = update
+			url = "/project/#{@$scope.project_id}/filetree/diff"
+			query = [ "from=#{toV}", "to=#{toV}" ]
+			url += "?" + query.join("&")
+			@$scope.history.loadingFileTree = true
+			@$scope.history.selectedFile = null
+			@$scope.history.selection.pathname = null
+			@ide.$http
+				.get(url)
+				.then (response) =>
+					@$scope.history.files = response.data.diff
+					@$scope.history.loadingFileTree = false
 
 		MAX_RECENT_UPDATES_TO_SELECT: 5
 		autoSelectRecentUpdates: () ->
@@ -70,12 +109,28 @@ define [
 
 			@$scope.history.updates[indexOfLastUpdateNotByMe].selectedFrom = true
 
+		autoSelectLastUpdate: () ->
+			return if @$scope.history.updates.length == 0
+			@selectUpdate @$scope.history.updates[0]
+
+		selectUpdate: (update) ->
+			selectedUpdateIndex = @$scope.history.updates.indexOf update
+			if selectedUpdateIndex == -1
+				selectedUpdateIndex = 0
+			for update in @$scope.history.updates
+				update.selectedTo = false
+				update.selectedFrom = false
+			@$scope.history.updates[selectedUpdateIndex].selectedTo = true
+			@$scope.history.updates[selectedUpdateIndex].selectedFrom = true
+			@loadFileTreeForUpdate @$scope.history.updates[selectedUpdateIndex]
+
 		BATCH_SIZE: 10
 		fetchNextBatchOfUpdates: () ->
 			url = "/project/#{@ide.project_id}/updates?min_count=#{@BATCH_SIZE}"
 			if @$scope.history.nextBeforeTimestamp?
 				url += "&before=#{@$scope.history.nextBeforeTimestamp}"
 			@$scope.history.loading = true
+			@$scope.history.loadingFileTree = true
 			@ide.$http
 				.get(url)
 				.then (response) =>
@@ -85,6 +140,23 @@ define [
 					if !data.nextBeforeTimestamp?
 						@$scope.history.atEnd = true
 					@$scope.history.loading = false
+
+		loadFileAtPointInTime: () ->
+			pathname = @$scope.history.selection.pathname
+			toV =  @$scope.history.selection.updates[0].toV
+			url = "/project/#{@$scope.project_id}/diff"
+			query = ["pathname=#{encodeURIComponent(pathname)}", "from=#{toV}", "to=#{toV}"]
+			url += "?" + query.join("&")
+			@$scope.history.selectedFile =
+				loading: true
+			@ide.$http
+				.get(url)
+				.then (response) =>
+					{text, binary} = @_parseDiff(response.data.diff)
+					@$scope.history.selectedFile.binary = binary
+					@$scope.history.selectedFile.text = text
+					@$scope.history.selectedFile.loading = false
+				.catch () ->
 
 		reloadDiff: () ->
 			diff = @$scope.history.diff
@@ -200,7 +272,11 @@ define [
 			@$scope.history.updates =
 				@$scope.history.updates.concat(updates)
 
-			@autoSelectRecentUpdates() if firstLoad
+			if firstLoad 
+				if @$scope.history.viewMode == HistoryViewModes.COMPARE
+					@autoSelectRecentUpdates()
+				else 
+					@autoSelectLastUpdate()
 
 		_perDocSummaryOfUpdates: (updates) ->
 			# Track current_pathname -> original_pathname
