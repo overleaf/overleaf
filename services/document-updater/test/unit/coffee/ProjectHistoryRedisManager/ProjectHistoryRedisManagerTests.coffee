@@ -26,8 +26,8 @@ describe "ProjectHistoryRedisManager", ->
 			globals:
 				JSON: @JSON = JSON
 
-		afterEach ->
-			tk.reset()
+	afterEach ->
+		tk.reset()
 
 	describe "queueOps", ->
 		beforeEach ->
