@@ -37,7 +37,9 @@ module.exports = UserGetter =
 		if arguments.length == 2
 			callback = projection
 			projection = {}
-		db.users.findOne 'emails.email': email, projection, (error, user) =>
+		# $exists: true MUST be set to use the partial index
+		query = emails: { $exists: true }, 'emails.email': email
+		db.users.findOne query, projection, (error, user) =>
 			return callback(error, user) if error? or user?
 
 			# While multiple emails are being rolled out, check for the main email as

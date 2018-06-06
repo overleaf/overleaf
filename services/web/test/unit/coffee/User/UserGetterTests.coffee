@@ -60,10 +60,21 @@ describe "UserGetter", ->
 	describe "getUserByAnyEmail", ->
 		it "query user for any email", (done)->
 			email = 'hello@world.com'
+			expectedQuery =
+				emails: { $exists: true }
+				'emails.email': email
 			projection = emails: 1
 			@UserGetter.getUserByAnyEmail " #{email} ", projection, (error, user) =>
-				@findOne.calledWith('emails.email': email, projection).should.equal true
+				@findOne.calledWith(expectedQuery, projection).should.equal true
 				user.should.deep.equal @fakeUser
+				done()
+
+		it "query contains $exists:true so partial index is used", (done)->
+			expectedQuery =
+				emails: { $exists: true }
+				'emails.email': ''
+			@UserGetter.getUserByAnyEmail '', {}, (error, user) =>
+				@findOne.calledWith(expectedQuery, {}).should.equal true
 				done()
 
 		it "checks main email as well", (done)->
