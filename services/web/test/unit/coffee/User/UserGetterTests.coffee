@@ -69,6 +69,14 @@ describe "UserGetter", ->
 				user.should.deep.equal @fakeUser
 				done()
 
+		it "query contains $exists:true so partial index is used", (done)->
+			expectedQuery =
+				emails: { $exists: true }
+				'emails.email': ''
+			@UserGetter.getUserByAnyEmail '', {}, (error, user) =>
+				@findOne.calledWith(expectedQuery, {}).should.equal true
+				done()
+
 		it "checks main email as well", (done)->
 			@findOne.callsArgWith(2, null, null)
 			email = 'hello@world.com'
