@@ -80,25 +80,26 @@ createInvite = (subscription, email, inviterName, callback) ->
 		return callback(error) if error?
 		return callback(reason) unless possible
 
-		token = crypto.randomBytes(32).toString("hex")
-
 		# TODO: use standard way to canonalise email addresses
-		invite = {
-			email: email.trim().toLowerCase(),
-			token: token,
-			inviterName: inviterName,
-			sentAt: new Date(),
-		}
+		email = email.trim().toLowerCase()
 
-		subscription.teamInvites.push(invite)
+		invite = subscription.teamInvites.find (invite) -> invite.email == email
+
+		if !invite?
+			invite ||= { email: email }
+			subscription.teamInvites.push(invite)
+
+		invite.inviterName = inviterName
+		invite.token  = crypto.randomBytes(32).toString("hex")
+		invite.sentAt = new Date()
 
 		subscription.save (error) ->
 			return callback(error) if error?
 
 			opts =
-				to: email.trim().toLowerCase()
+				to: email
 				inviterName: inviterName
-				acceptInviteUrl: "#{settings.siteUrl}/subscription/invites/#{token}/"
+				acceptInviteUrl: "#{settings.siteUrl}/subscription/invites/#{invite.token}/"
 			EmailHandler.sendEmail "verifyEmailToJoinTeam", opts, (error) ->
 				return callback(error, invite)
 
@@ -112,12 +113,6 @@ checkIfInviteIsPossible = (subscription, email, callback = (error, possible, rea
 	if LimitationsManager.teamHasReachedMemberLimit(subscription)
 		logger.log {subscriptionId: subscription.id}, "team has reached member limit"
 		return callback(null, false, limitReached: true)
-
-	existingInvite = subscription.teamInvites.find (invite) -> invite.email == email
-
-	if existingInvite
-		logger.log {subscriptionId: subscription.id, email}, "user already invited"
-		return callback(null, false, alreadyInvited: true)
 
 	async.map subscription.member_ids, UserGetter.getUser, (error, members) ->
 		return callback(error) if error?

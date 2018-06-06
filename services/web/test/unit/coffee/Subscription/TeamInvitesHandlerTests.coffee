@@ -116,6 +116,23 @@ describe "TeamInvitesHandler", ->
 				).should.equal true
 				done()
 
+		it "refreshes the existing invite if the email has already been invited", (done) ->
+			originalInvite = Object.assign({}, @teamInvite)
+
+			@TeamInvitesHandler.createManagerInvite @manager.id, originalInvite.email, (err, invite) =>
+				expect(err).to.eq(null)
+				expect(invite).to.exist
+
+				expect(@subscription.teamInvites.length).to.eq 1
+				expect(@subscription.teamInvites).to.deep.include invite
+
+				expect(invite.email).to.eq originalInvite.email
+				expect(invite.token).not.to.eq originalInvite.token
+
+				@subscription.save.calledOnce.should.eq true
+
+				done()
+
 	describe "createDomainInvite", ->
 		beforeEach ->
 			@licence =
@@ -202,17 +219,12 @@ describe "TeamInvitesHandler", ->
 				@TeamInvitesHandler.createManagerInvite.callCount.should.eq 1
 
 				done()
+
 	describe "validation", ->
 		it "doesn't create an invite if the team limit has been reached", (done) ->
 			@LimitationsManager.teamHasReachedMemberLimit = sinon.stub().returns(true)
 			@TeamInvitesHandler.createManagerInvite @manager.id, "John.Snow@nightwatch.com", (err, invite) =>
 				expect(err).to.deep.equal(limitReached: true)
-				done()
-
-		it "doen't create an invite if the email has already been invited",(done) ->
-			@TeamInvitesHandler.createManagerInvite @manager.id, "jorah@mormont.org", (err, invite) =>
-				expect(err).to.deep.equal(alreadyInvited: true)
-				expect(invite).not.to.exist
 				done()
 
 		it "doen't create an invite if the user is already part of the team", (done) ->
