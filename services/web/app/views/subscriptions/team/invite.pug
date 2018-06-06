@@ -14,15 +14,13 @@ block content
 					-if (query.expired)
 						.alert.alert-warning #{translate("email_link_expired")}
 
-			.row
-				div &nbsp;
-			.row
+			.row.row-spaced
 				.col-md-8.col-md-offset-2(ng-cloak)
 					.card(ng-controller="TeamInviteController")
 						.page-header
 							h1.text-centered #{translate("invited_to_group", {inviterName: inviterName, appName: appName})}
 
-						div(ng-show="view =='personalSubscription'").row.text-centered.message
+						div(ng-show="view =='personalSubscription'").text-centered.message
 							p #{translate("cancel_personal_subscription_first")}
 							.row
 								.col-md-12
