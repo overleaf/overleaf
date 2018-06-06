@@ -490,6 +490,9 @@ define [
 			else
 				return "None"
 
+		$scope.isOwner = () ->
+			window.user_id == $scope.project.owner._id
+
 		$scope.$watch "project.selected", (value) ->
 			if value?
 				$scope.updateSelectedProjects()
@@ -502,7 +505,7 @@ define [
 			e.stopPropagation()
 			$scope.downloadProjectsById([$scope.project.id])
 
-		$scope.archive = (e) ->
+		$scope.archiveOrLeave = (e) ->
 			e.stopPropagation()
 			$scope.archiveOrLeaveProjects([$scope.project])
 
