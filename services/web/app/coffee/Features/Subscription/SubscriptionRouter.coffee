@@ -9,7 +9,8 @@ module.exports =
 	apply: (webRouter, privateApiRouter, publicApiRouter) ->
 		return unless Settings.enableSubscriptions
 
-		webRouter.get  '/user/subscription/plans',      SubscriptionController.plansPage
+		if !Settings.disablePlansPage
+			webRouter.get  '/user/subscription/plans', SubscriptionController.plansPage
 
 		webRouter.get  '/user/subscription',            AuthenticationController.requireLogin(), SubscriptionController.userSubscriptionPage
 
