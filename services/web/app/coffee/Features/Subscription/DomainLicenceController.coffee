@@ -33,7 +33,7 @@ module.exports =
 					licenceName: licence.name
 					has_personal_subscription: subscription?
 
-	createInvite: (req, res)->
+	createInvite: (req, res, next)->
 		user = AuthenticationController.getSessionUser(req)
 		licence = SubscriptionDomainHandler.getLicenceUserCanJoin(user)
 
@@ -42,6 +42,6 @@ module.exports =
 
 		TeamInvitesHandler.createDomainInvite user, licence, (err) ->
 			if err?
-				res.sendStatus 500
+				next(err)
 			else
 				res.sendStatus 200
