@@ -29,7 +29,7 @@ block content
 									a.btn.btn.btn-primary(ng-click="cancelPersonalSubscription()", ng-disabled="inflight") #{translate("cancel_your_subscription")}
 
 						div(ng-show="view =='teamInvite'").row.text-centered.message
-							p #{translate("accept_invitation_gives_premium_account")}
+							p #{translate("join_team_explanation", {appName: appName})}
 							.row 
 								.col-md-12
 									.text-center
