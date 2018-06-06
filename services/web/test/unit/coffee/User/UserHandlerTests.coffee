@@ -23,17 +23,33 @@ describe "UserHandler", ->
 		@NotificationsBuilder =
 			groupPlan:sinon.stub().returns({create:@createStub})
 
+		@TeamInvitesHandler =
+			createTeamInvitesForLegacyInvitedEmail: sinon.stub().yields()
+
 		@UserHandler = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": @logger = { log: sinon.stub() }
 			"../Notifications/NotificationsBuilder":@NotificationsBuilder
 			"../Subscription/SubscriptionDomainHandler":@SubscriptionDomainHandler
 			"../Subscription/SubscriptionGroupHandler":@SubscriptionGroupHandler
+			"../Subscription/TeamInvitesHandler": @TeamInvitesHandler
+
+	describe "populateTeamInvites", ->
+		beforeEach (done)->
+			@UserHandler.notifyDomainLicence = sinon.stub().yields()
+			@UserHandler.populateTeamInvites @user, done
+
+		it "notifies the user about domain licences zzzzz", ->
+			@UserHandler.notifyDomainLicence.calledWith(@user).should.eq true
+
+		it "notifies the user about legacy team invites", ->
+			@TeamInvitesHandler.createTeamInvitesForLegacyInvitedEmail
+				.calledWith(@user.email).should.eq true
 
 	describe "notifyDomainLicence", ->
 		describe "no licence", ->
 			beforeEach (done)->
 				@SubscriptionDomainHandler.getLicenceUserCanJoin.returns()
-				@UserHandler.notifyDomainLicence @user, done
+				@UserHandler.populateTeamInvites @user, done
 
 			it "should not call NotificationsBuilder", (done)->
 				@NotificationsBuilder.groupPlan.called.should.equal false
@@ -47,7 +63,7 @@ describe "UserHandler", ->
 			beforeEach (done)->
 				@SubscriptionDomainHandler.getLicenceUserCanJoin.returns(@licence)
 				@SubscriptionGroupHandler.isUserPartOfGroup.callsArgWith(2, null, false)
-				@UserHandler.notifyDomainLicence @user, done
+				@UserHandler.populateTeamInvites @user, done
 
 			it "should create notifcation", (done)->
 				@NotificationsBuilder.groupPlan.calledWith(@user, @licence).should.equal true
@@ -57,7 +73,7 @@ describe "UserHandler", ->
 			beforeEach (done)->
 				@SubscriptionDomainHandler.getLicenceUserCanJoin.returns(@licence)
 				@SubscriptionGroupHandler.isUserPartOfGroup.callsArgWith(2, null, true)
-				@UserHandler.notifyDomainLicence @user, done
+				@UserHandler.populateTeamInvites @user, done
 
 			it "should create notifcation", (done)->
 				@NotificationsBuilder.groupPlan.called.should.equal false

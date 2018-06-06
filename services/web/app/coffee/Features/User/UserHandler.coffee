@@ -1,10 +1,16 @@
 SubscriptionDomainHandler = require("../Subscription/SubscriptionDomainHandler")
 NotificationsBuilder = require("../Notifications/NotificationsBuilder")
 SubscriptionGroupHandler = require("../Subscription/SubscriptionGroupHandler")
+TeamInvitesHandler = require("../Subscription/TeamInvitesHandler")
 logger = require("logger-sharelatex")
 
 
 module.exports = UserHandler =
+
+	populateTeamInvites: (user, callback) ->
+		UserHandler.notifyDomainLicence user, (err) ->
+			return callback(err) if err?
+			TeamInvitesHandler.createTeamInvitesForLegacyInvitedEmail(user.email, callback)
 
 	notifyDomainLicence: (user, callback = ->)->
 		logger.log user_id:user._id, "notiying user about a potential domain licence"
@@ -22,8 +28,4 @@ module.exports = UserHandler =
 				NotificationsBuilder.groupPlan(user, licence).create(callback)
 
 	setupLoginData: (user, callback = ->)->
-		@notifyDomainLicence user, callback
-
-	# Backwards compatibility: this is called from the public-registration module
-	populateGroupLicenceInvite: (user, callback = ->)->
-		@notifyDomainLicence user, callback
+		@populateTeamInvites user, callback

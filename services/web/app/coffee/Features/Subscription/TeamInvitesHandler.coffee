@@ -63,6 +63,17 @@ module.exports = TeamInvitesHandler =
 
 			removeInviteFromTeam(teamSubscription.id, email, callback)
 
+	# Legacy method to allow a user to receive a confirmation email if their
+	# email is in Subscription.invited_emails when they join. We'll remove this
+	# after a short while.
+	createTeamInvitesForLegacyInvitedEmail: (email, callback) ->
+		SubscriptionLocator.getGroupsWithEmailInvite email, (err, teams) ->
+			return callback(err) if err?
+
+			async.map teams,
+				(team, cb) -> TeamInvitesHandler.createManagerInvite(team.admin_id, email, cb)
+			, callback
+
 createInvite = (subscription, email, inviterName, callback) ->
 	logger.log {subscriptionId: subscription.id, email, inviterName}, "Creating invite"
 	checkIfInviteIsPossible subscription, email, (error, possible, reason) ->

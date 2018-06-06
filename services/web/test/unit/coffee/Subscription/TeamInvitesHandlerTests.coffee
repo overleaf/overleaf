@@ -184,11 +184,28 @@ describe "TeamInvitesHandler", ->
 				).should.eq true
 				done()
 
+	describe "createTeamInvitesForLegacyInvitedEmail", (done) ->
+		beforeEach ->
+			@subscription.invited_emails = ["eddard@stark.com", "robert@stark.com"]
+			@TeamInvitesHandler.createManagerInvite = sinon.stub().yields(null)
+			@SubscriptionLocator.getGroupsWithEmailInvite = sinon.stub().yields(null, [@subscription])
+
+		it "sends an invitation email to addresses in the legacy invited_emails field", (done) ->
+			@TeamInvitesHandler.createTeamInvitesForLegacyInvitedEmail "eddard@stark.com", (err, invite) =>
+				expect(err).not.to.exist
+
+				@TeamInvitesHandler.createManagerInvite.calledWith(
+					@subscription.admin_id,
+					"eddard@stark.com"
+				).should.eq true
+
+				@TeamInvitesHandler.createManagerInvite.callCount.should.eq 1
+
+				done()
 	describe "validation", ->
 		it "doesn't create an invite if the team limit has been reached", (done) ->
 			@LimitationsManager.teamHasReachedMemberLimit = sinon.stub().returns(true)
 			@TeamInvitesHandler.createManagerInvite @manager.id, "John.Snow@nightwatch.com", (err, invite) =>
-				console.log('err, invite', err, invite)
 				expect(err).to.deep.equal(limitReached: true)
 				done()
 

@@ -55,7 +55,7 @@ describe "UserController", ->
 		@settings =
 			siteUrl: "sharelatex.example.com"
 		@UserHandler =
-			notifyDomainLicence: sinon.stub().callsArgWith(1)
+			populateTeamInvites: sinon.stub().callsArgWith(1)
 		@UserSessionsManager =
 			trackSession: sinon.stub()
 			untrackSession: sinon.stub()
@@ -267,12 +267,12 @@ describe "UserController", ->
 				done()
 			@UserController.updateUserSettings @req, @res
 
-		it "should call notifyDomainLicence", (done)->
+		it "should call populateTeamInvites", (done)->
 			@req.body.email = @newEmail.toUpperCase()
 			@UserUpdater.changeEmailAddress.callsArgWith(2)
 			@res.sendStatus = (code)=>
 				code.should.equal 200
-				@UserHandler.notifyDomainLicence.calledWith(@user).should.equal true
+				@UserHandler.populateTeamInvites.calledWith(@user).should.equal true
 				done()
 			@UserController.updateUserSettings @req, @res
 
