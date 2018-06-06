@@ -127,7 +127,6 @@ describe "TeamInvitesHandler", ->
 				expect(@subscription.teamInvites).to.deep.include invite
 
 				expect(invite.email).to.eq originalInvite.email
-				expect(invite.token).not.to.eq originalInvite.token
 
 				@subscription.save.calledOnce.should.eq true
 

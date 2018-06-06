@@ -125,7 +125,7 @@ templates.verifyEmailToJoinTeam =
 	type:"notification"
 	plainTextTemplate: _.template """
 
-Please click the button below to join the team and enjoy the benefits of an upgraded  <%= settings.appName %> account.
+Please click the button below to join the team and enjoy the benefits of an upgraded  <%= appName %> account.
 
 <%= acceptInviteUrl %>
 

@@ -86,12 +86,15 @@ createInvite = (subscription, email, inviterName, callback) ->
 		invite = subscription.teamInvites.find (invite) -> invite.email == email
 
 		if !invite?
-			invite ||= { email: email }
+			invite = {
+				email: email
+				inviterName: inviterName
+				token: crypto.randomBytes(32).toString("hex")
+				sentAt: new Date()
+			}
 			subscription.teamInvites.push(invite)
-
-		invite.inviterName = inviterName
-		invite.token  = crypto.randomBytes(32).toString("hex")
-		invite.sentAt = new Date()
+		else
+			invite.sentAt = new Date()
 
 		subscription.save (error) ->
 			return callback(error) if error?
@@ -100,6 +103,7 @@ createInvite = (subscription, email, inviterName, callback) ->
 				to: email
 				inviterName: inviterName
 				acceptInviteUrl: "#{settings.siteUrl}/subscription/invites/#{invite.token}/"
+				appName: settings.appName
 			EmailHandler.sendEmail "verifyEmailToJoinTeam", opts, (error) ->
 				return callback(error, invite)
 
