@@ -125,9 +125,9 @@ templates.verifyEmailToJoinTeam =
 	type:"notification"
 	plainTextTemplate: _.template """
 
-Hi, please verify your email to join the team and get your free premium account.
+Please click the button below to join the team and enjoy the benefits of an upgraded  <%= settings.appName %> account.
 
-Click this link to verify now: <%= acceptInviteUrl %>
+<%= acceptInviteUrl %>
 
 Thank You
 
@@ -137,7 +137,7 @@ Thank You
 		SingleCTAEmailBody({
 			title: "#{opts.inviterName} has invited you to join a team on #{settings.appName}"
 			greeting: "Hi,"
-			message: "please verify your email to join the team and get your free premium account"
+			message: "Join the Team"
 			secondaryMessage: null
 			ctaText: "Verify now"
 			ctaURL: opts.acceptInviteUrl
