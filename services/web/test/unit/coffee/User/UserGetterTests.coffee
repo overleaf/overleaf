@@ -60,9 +60,12 @@ describe "UserGetter", ->
 	describe "getUserByAnyEmail", ->
 		it "query user for any email", (done)->
 			email = 'hello@world.com'
+			expectedQuery =
+				emails: { $exists: true }
+				'emails.email': email
 			projection = emails: 1
 			@UserGetter.getUserByAnyEmail " #{email} ", projection, (error, user) =>
-				@findOne.calledWith('emails.email': email, projection).should.equal true
+				@findOne.calledWith(expectedQuery, projection).should.equal true
 				user.should.deep.equal @fakeUser
 				done()
 
