@@ -43,7 +43,7 @@ module.exports = UserUpdater =
 	# Add a new email address for the user. Email cannot be already used by this
 	# or any other user
 	addEmailAddress: (userId, newEmail, callback) ->
-		UserGetter.ensureUniqueEmailAddress newEmail, (error) =>
+		@_ensureUniqueEmailAddress newEmail, (error) =>
 			return callback(error) if error?
 
 			update = $push: emails: email: newEmail, createdAt: new Date()
@@ -81,11 +81,20 @@ module.exports = UserUpdater =
 				return callback(new Error('Default email does not belong to user'))
 			callback()
 
+
+	# check for duplicate email address. This is also enforced at the DB level
+	_ensureUniqueEmailAddress: (newEmail, callback) ->
+		UserGetter.getUserByAnyEmail newEmail, (error, user) ->
+			return callback(message: 'alread_exists') if user?
+			callback()
+
+
 [
 	'updateUser'
 	'changeEmailAddress'
 	'setDefaultEmailAddress'
 	'addEmailAddress'
 	'removeEmailAddress'
+	'_ensureUniqueEmailAddress'
 ].map (method) ->
 	metrics.timeAsyncMethod(UserUpdater, method, 'mongo.UserUpdater', logger)

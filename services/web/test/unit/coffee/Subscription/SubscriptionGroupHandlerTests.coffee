@@ -32,7 +32,7 @@ describe "SubscriptionGroupHandler", ->
 
 		@UserGetter =
 			getUser: sinon.stub()
-			getUserByAnyEmail: sinon.stub()
+			getUserByMainEmail: sinon.stub()
 
 		@LimitationsManager =
 			hasGroupMembersLimitReached: sinon.stub()
@@ -71,11 +71,11 @@ describe "SubscriptionGroupHandler", ->
 	describe "addUserToGroup", ->
 		beforeEach ->
 			@LimitationsManager.hasGroupMembersLimitReached.callsArgWith(1, null, false, @subscription)
-			@UserGetter.getUserByAnyEmail.callsArgWith(1, null, @user)
+			@UserGetter.getUserByMainEmail.callsArgWith(1, null, @user)
 			
 		it "should find the user", (done)->
 			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
-				@UserGetter.getUserByAnyEmail.calledWith(@newEmail).should.equal true
+				@UserGetter.getUserByMainEmail.calledWith(@newEmail).should.equal true
 				done()
 
 		it "should add the user to the group", (done)->
@@ -102,7 +102,7 @@ describe "SubscriptionGroupHandler", ->
 				done()
 		
 		it "should add an email invite if no user is found", (done) ->
-			@UserGetter.getUserByAnyEmail.callsArgWith(1, null, null)
+			@UserGetter.getUserByMainEmail.callsArgWith(1, null, null)
 			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
 				@SubscriptionUpdater.addEmailInviteToGroup.calledWith(@adminUser_id, @newEmail).should.equal true
 				done()

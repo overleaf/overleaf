@@ -48,7 +48,7 @@ module.exports = UserRegistrationHandler =
 		if !requestIsValid
 			return callback(new Error("request is not valid"))
 		userDetails.email = userDetails.email?.trim()?.toLowerCase()
-		UserGetter.getUserByAnyEmail userDetails.email, (err, user) =>
+		UserGetter.getUserByMainEmail userDetails.email, (err, user) =>
 			if err?
 				return callback err
 			if user?.holdingAccount == false

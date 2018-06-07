@@ -22,29 +22,8 @@ class User
 			jar: @jar
 		})
 
-	setExtraAttributes: (user) ->
-		throw new Error("User does not exist") unless user?._id?
-		@id = user._id.toString()
-		@_id = user._id.toString()
-		@first_name = user.first_name
-		@referal_id = user.referal_id
-
 	get: (callback = (error, user)->) ->
 		db.users.findOne { _id: ObjectId(@_id) }, callback
-
-	register: (callback = (error, user) ->) ->
-		return callback(new Error('User already registered')) if @_id?
-		@getCsrfToken (error) =>
-			return callback(error) if error?
-			@request.post {
-				url: '/register'
-				json: { @email, @password }
-			}, (error, response, body) =>
-				return callback(error) if error?
-				db.users.findOne { email: @email }, (error, user) =>
-					return callback(error) if error?
-					@setExtraAttributes user
-					callback(null, user)
 
 	login: (callback = (error) ->) ->
 		@loginWith(@email, callback)
@@ -68,7 +47,11 @@ class User
 				return callback(error) if error?
 				UserUpdater.updateUser user._id, $set: emails: @emails, (error) =>
 					return callback(error) if error?
-					@setExtraAttributes user
+					@id = user?._id?.toString()
+					@_id = user?._id?.toString()
+					@first_name = user?.first_name
+					@referal_id = user?.referal_id
+
 					callback(null, @password)
 
 	setFeatures: (features, callback = (error) ->) ->
