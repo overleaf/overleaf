@@ -41,9 +41,11 @@ module.exports = TeamInvitesHandler =
 
 	createDomainInvite: (user, licence, callback) ->
 		logger.log {licence, email: user.email}, "Creating domain team invite"
+		inviterName = licence.name.replace(/\s+licence$/i, licence.name)
+
 		SubscriptionLocator.getSubscription licence.subscription_id, (error, subscription) ->
 			return callback(error) if error?
-			createInvite(subscription, user.email, licence.name, callback)
+			createInvite(subscription, user.email, inviterName, callback)
 
 	acceptInvite: (token, userId, callback) ->
 		logger.log {userId}, "Accepting invite"
