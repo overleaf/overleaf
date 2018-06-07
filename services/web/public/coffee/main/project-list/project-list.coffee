@@ -320,6 +320,9 @@ define [
 						name: cloneName
 						id: data.project_id
 						accessLevel: "owner"
+						owner: {
+							_id: user_id
+						}
 						# TODO: Check access level if correct after adding it in
 						# to the rest of the app
 					}
