@@ -17,7 +17,6 @@ describe "UserUpdater", ->
 		@UserGetter =
 			getUserEmail: sinon.stub()
 			getUserByAnyEmail: sinon.stub()
-			ensureUniqueEmailAddress: sinon.stub()
 		@logger = err: sinon.stub(), log: ->
 		@UserUpdater = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
@@ -61,13 +60,13 @@ describe "UserUpdater", ->
 
 	describe 'addEmailAddress', ->
 		beforeEach ->
-			@UserGetter.ensureUniqueEmailAddress = sinon.stub().callsArgWith(1)
+			@UserUpdater._ensureUniqueEmailAddress = sinon.stub().callsArgWith(1)
 
 		it 'add email', (done)->
 			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, null)
 
 			@UserUpdater.addEmailAddress @stubbedUser._id, @newEmail, (err)=>
-				@UserGetter.ensureUniqueEmailAddress.called.should.equal true
+				@UserUpdater._ensureUniqueEmailAddress.called.should.equal true
 				should.not.exist(err)
 				@UserUpdater.updateUser.calledWith(
 					@stubbedUser._id,
@@ -136,3 +135,15 @@ describe "UserUpdater", ->
 				done()
 
 
+	describe '_ensureUniqueEmailAddress', ->
+		it 'should return error if existing user is found', (done)->
+			@UserGetter.getUserByAnyEmail.callsArgWith(1, null, @stubbedUser)
+			@UserUpdater._ensureUniqueEmailAddress @newEmail, (err)=>
+				should.exist(err)
+				done()
+
+		it 'should return null if no user is found', (done)->
+			@UserGetter.getUserByAnyEmail.callsArgWith(1)
+			@UserUpdater._ensureUniqueEmailAddress @newEmail, (err)=>
+				should.not.exist(err)
+				done()

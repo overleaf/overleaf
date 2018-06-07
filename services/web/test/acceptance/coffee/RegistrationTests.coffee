@@ -128,20 +128,6 @@ describe "CSRF protection", ->
 						expect(response.statusCode).to.equal 403
 						done()
 
-describe "Register", ->
-	before ->
-		@user = new User()
-
-	it 'Set emails attribute', (done) ->
-		@user.register (error, user) =>
-			expect(error).to.not.exist
-			user.email.should.equal @user.email
-			user.emails.should.exist
-			user.emails.should.be.a 'array'
-			user.emails.length.should.equal 1
-			user.emails[0].email.should.equal @user.email
-			done()
-
 describe "LoginViaRegistration", ->
 
 	before (done) ->

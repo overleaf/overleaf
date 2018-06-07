@@ -14,7 +14,7 @@ describe "UserRegistrationHandler", ->
 		@User = 
 			update: sinon.stub().callsArgWith(2)
 		@UserGetter =
-			getUserByAnyEmail: sinon.stub()
+			getUserByMainEmail: sinon.stub()
 		@UserCreator = 
 			createNewUser:sinon.stub().callsArgWith(1, null, @user)
 		@AuthenticationManager =
@@ -72,7 +72,7 @@ describe "UserRegistrationHandler", ->
 			beforeEach ->
 				@user.holdingAccount = true
 				@handler._registrationRequestIsValid = sinon.stub().returns true
-				@UserGetter.getUserByAnyEmail.callsArgWith(1, null, @user)
+				@UserGetter.getUserByMainEmail.callsArgWith(1, null, @user)
 
 			it "should not create a new user if there is a holding account there", (done)->
 				@handler.registerNewUser @passingRequest, (err)=>
@@ -96,7 +96,7 @@ describe "UserRegistrationHandler", ->
 					done()
 
 			it "should return email registered in the error if there is a non holdingAccount there", (done)->
-				@UserGetter.getUserByAnyEmail.callsArgWith(1, null, @user = {holdingAccount:false})
+				@UserGetter.getUserByMainEmail.callsArgWith(1, null, @user = {holdingAccount:false})
 				@handler.registerNewUser @passingRequest, (err, user)=>
 					err.should.deep.equal new Error("EmailAlreadyRegistered")
 					user.should.deep.equal @user
@@ -105,7 +105,7 @@ describe "UserRegistrationHandler", ->
 		describe "validRequest", ->
 			beforeEach ->
 				@handler._registrationRequestIsValid = sinon.stub().returns true
-				@UserGetter.getUserByAnyEmail.callsArgWith 1
+				@UserGetter.getUserByMainEmail.callsArgWith 1
 
 			it "should create a new user", (done)->
 				@handler.registerNewUser @passingRequest, (err)=>
