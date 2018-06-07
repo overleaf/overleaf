@@ -110,10 +110,18 @@ createInvite = (subscription, email, inviterName, callback) ->
 				return callback(error, invite)
 
 removeInviteFromTeam = (subscriptionId, email, callback) ->
-	searchConditions = { _id: new ObjectId(subscriptionId.toString()) }
-	updateOp = { $pull: { teamInvites: { email: email.trim().toLowerCase() } } }
+	email = email.trim().toLowerCase()
 
-	Subscription.update(searchConditions, updateOp, callback)
+	searchConditions = { _id: new ObjectId(subscriptionId.toString()) }
+
+	removeInvite = { $pull: { teamInvites: { email: email } } }
+	removeLegacyInvite = { $pull: { invited_emails: email } }
+
+	async.series [
+		(cb) -> Subscription.update(searchConditions, removeInvite, cb),
+		(cb) -> Subscription.update(searchConditions, removeLegacyInvite, cb),
+	], callback
+
 
 checkIfInviteIsPossible = (subscription, email, callback = (error, possible, reason) -> ) ->
 	if LimitationsManager.teamHasReachedMemberLimit(subscription)

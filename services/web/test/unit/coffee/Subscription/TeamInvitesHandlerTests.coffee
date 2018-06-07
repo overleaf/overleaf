@@ -201,6 +201,11 @@ describe "TeamInvitesHandler", ->
 					{ _id: new ObjectId("55153a8014829a865bbf700d") },
 					{ '$pull': { teamInvites: { email: "jorah@mormont.org" } } }
 				).should.eq true
+
+				@Subscription.update.calledWith(
+					{ _id: new ObjectId("55153a8014829a865bbf700d") },
+					{ '$pull': { invited_emails: "jorah@mormont.org" } }
+				).should.eq true
 				done()
 
 	describe "createTeamInvitesForLegacyInvitedEmail", (done) ->

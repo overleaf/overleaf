@@ -47,6 +47,9 @@ module.exports = SubscriptionGroupHandler =
 
 			users = []
 
+			for email in subscription.invited_emails or []
+				users.push buildEmailInviteViewModel(email)
+
 			for teamInvite in subscription.teamInvites or []
 				users.push buildEmailInviteViewModel(teamInvite.email)
 
