@@ -56,9 +56,9 @@ module.exports = LimitationsManager =
 			callback err, subscriptions.length > 0, subscriptions
 
 	teamHasReachedMemberLimit: (subscription) ->
-		currentTotal = (subscription.member_ids or []).length
-			+ (subscription.teamInvites or []).length
-			+ (subscription.invited_emails or []).length
+		currentTotal = (subscription.member_ids or []).length +
+			(subscription.teamInvites or []).length +
+			(subscription.invited_emails or []).length
 
 		return currentTotal >= subscription.membersLimit
 
