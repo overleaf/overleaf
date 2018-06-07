@@ -43,7 +43,7 @@ module.exports =
 		TeamInvitesHandler.acceptInvite token, userId, (err, results) ->
 			return handleError(err, req, res, next) if err?
 
-		res.sendStatus 204
+			res.sendStatus 204
 
 	revokeInvite: (req, res) ->
 		email = req.params.email
