@@ -137,7 +137,7 @@ Thank You
 		SingleCTAEmailBody({
 			title: "#{opts.inviterName} has invited you to join a team on #{settings.appName}"
 			greeting: "Hi,"
-			message: "Join the Team"
+			message: "Please click the button below to join the team and enjoy the benefits of an upgraded  #{ opts.appName } account."
 			secondaryMessage: null
 			ctaText: "Verify now"
 			ctaURL: opts.acceptInviteUrl
