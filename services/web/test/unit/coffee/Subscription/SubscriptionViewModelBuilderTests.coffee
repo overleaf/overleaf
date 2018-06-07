@@ -42,6 +42,7 @@ describe 'SubscriptionViewModelBuilder', ->
 			"./SubscriptionLocator": @SubscriptionLocator = {}
 			"./SubscriptionFormatters": @SubscriptionFormatters
 			"./LimitationsManager": {}
+			"./V1SubscriptionManager": @V1SubscriptionManager = {}
 			"logger-sharelatex":
 				log:->
 				warn:->
@@ -50,13 +51,15 @@ describe 'SubscriptionViewModelBuilder', ->
 		@PlansLocator.findLocalPlanInSettings = sinon.stub().returns(@plan)
 		@SubscriptionLocator.getUsersSubscription =  sinon.stub().callsArgWith(1, null, mockSubscription)
 		@SubscriptionLocator.getMemberSubscriptions = sinon.stub().callsArgWith(1, null, null)
+		@V1SubscriptionManager.getSubscriptionsFromV1 = sinon.stub().yields(null, @mockV1Sub = ['mock-v1-subs'])
 
 	it 'builds the user view model', ->
-		callback = (error, subscription, memberSubscriptions, billingDetailsLink) =>
+		callback = (error, subscription, memberSubscriptions, billingDetailsLink, v1Sub) =>
 			@error = error
 			@subscription = subscription
 			@memberSubscriptions = memberSubscriptions
 			@billingDetailsLink = billingDetailsLink
+			@v1Sub = v1Sub
 
 		@builder.buildUsersSubscriptionViewModel(@user, callback)
 
@@ -64,3 +67,4 @@ describe 'SubscriptionViewModelBuilder', ->
 		@subscription.nextPaymentDueAt.should.eq 'Formatted date'
 		@subscription.price.should.eq 'Formatted price'
 		@billingDetailsLink.should.eq "https://example.com.recurly.com/account/billing_info/edit?ht=hosted_login_token"
+		@v1Sub.should.deep.equal @mockV1Sub
