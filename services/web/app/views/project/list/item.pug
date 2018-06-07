@@ -64,13 +64,21 @@ if settings.overleaf
 		)
 			i.icon.fa.fa-cloud-download
 		button.btn.btn-link.action-btn(
-			ng-if="!project.archived"
+			ng-if="!project.archived && isOwner()"
 			tooltip=translate('archive'),
 			tooltip-placement="top",
 			tooltip-append-to-body="true",
-			ng-click="archive($event)"
+			ng-click="archiveOrLeave($event)"
 		)
 			i.icon.fa.fa-inbox
+		button.btn.btn-link.action-btn(
+			ng-if="!project.archived && !isOwner()"
+			tooltip=translate('leave'),
+			tooltip-placement="top",
+			tooltip-append-to-body="true",
+			ng-click="archiveOrLeave($event)"
+		)
+			i.icon.fa.fa-sign-out
 		button.btn.btn-link.action-btn(
 			ng-if="project.archived"
 			tooltip=translate('unarchive'),
