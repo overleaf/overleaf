@@ -3,13 +3,18 @@ _ = require("underscore")
 settings = require("settings-sharelatex")
 {db, ObjectId} = require("../../../../app/js/infrastructure/mongojs")
 UserModel = require("../../../../app/js/models/User").User
+UserUpdater = require("../../../../app/js/Features/User/UserUpdater")
 AuthenticationManager = require("../../../../app/js/Features/Authentication/AuthenticationManager")
 
 count = 0
 
 class User
 	constructor: (options = {}) ->
-		@email = "acceptance-test-#{count}@example.com"
+		@emails = [
+			email: "acceptance-test-#{count}@example.com"
+			createdAt: new Date()
+		]
+		@email = @emails[0].email
 		@password = "acceptance-test-#{count}-password"
 		count++
 		@jar = request.jar()
@@ -17,14 +22,20 @@ class User
 			jar: @jar
 		})
 
+	get: (callback = (error, user)->) ->
+		db.users.findOne { _id: ObjectId(@_id) }, callback
+
 	login: (callback = (error) ->) ->
+		@loginWith(@email, callback)
+
+	loginWith: (email, callback = (error) ->) ->
 		@ensureUserExists (error) =>
 			return callback(error) if error?
 			@getCsrfToken (error) =>
 				return callback(error) if error?
 				@request.post {
 					url: "/login"
-					json: { @email, @password }
+					json: { email, @password }
 				}, callback
 
 	ensureUserExists: (callback = (error) ->) ->
@@ -34,11 +45,14 @@ class User
 			return callback(error) if error?
 			AuthenticationManager.setUserPassword user._id, @password, (error) =>
 				return callback(error) if error?
-				@id = user?._id?.toString()
-				@_id = user?._id?.toString()
-				@first_name = user?.first_name
-				@referal_id = user?.referal_id
-				callback(null, @password)
+				UserUpdater.updateUser user._id, $set: emails: @emails, (error) =>
+					return callback(error) if error?
+					@id = user?._id?.toString()
+					@_id = user?._id?.toString()
+					@first_name = user?.first_name
+					@referal_id = user?.referal_id
+
+					callback(null, @password)
 
 	setFeatures: (features, callback = (error) ->) ->
 		update = {}
@@ -61,6 +75,10 @@ class User
 					@id = user?._id?.toString()
 					@_id = user?._id?.toString()
 					callback()
+
+	addEmail: (email, callback = (error) ->) ->
+		@emails.push(email: email, createdAt: new Date())
+		UserUpdater.addEmailAddress @id, email, callback
 
 	ensure_admin: (callback = (error) ->) ->
 		db.users.update {_id: ObjectId(@id)}, { $set: { isAdmin: true }}, callback
@@ -225,6 +243,23 @@ class User
 			}, (error, response, body) =>
 				return callback(error) if error?
 				callback(null, response.statusCode)
+
+	activateSudoMode: (callback = (error)->) ->
+		@getCsrfToken (error) =>
+			return callback(error) if error?
+			@request.post {
+				uri: '/confirm-password',
+				json:
+					password: @password
+			}, callback
+
+	updateSettings: (newSettings, callback = (error, response, body) ->) ->
+		@getCsrfToken (error) =>
+			return callback(error) if error?
+			@request.post {
+				url: '/user/settings'
+				json: newSettings
+			}, callback
 
 	getProjectListPage: (callback=(error, statusCode)->) ->
 		@getCsrfToken (error) =>
