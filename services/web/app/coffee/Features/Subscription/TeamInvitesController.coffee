@@ -13,7 +13,7 @@ module.exports =
 		TeamInvitesHandler.createManagerInvite teamManagerId, email, (err, invite) ->
 			return handleError(err, req, res, next) if err?
 			inviteView = { user:
-				{ email: invite.email, sentAt: invite.sentAt, holdingAccount: true }
+				{ email: invite.email, sentAt: invite.sentAt, invite: true }
 			}
 			res.json inviteView
 

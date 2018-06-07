@@ -76,12 +76,12 @@ buildUserViewModel = (user)->
 		email: user.email
 		first_name: user.first_name
 		last_name: user.last_name
-		holdingAccount: user.holdingAccount
+		invite: user.holdingAccount
 		_id: user._id
 	return u
 
 buildEmailInviteViewModel = (email) ->
 	return {
 		email: email
-		holdingAccount: true
+		invite: true
 	}
