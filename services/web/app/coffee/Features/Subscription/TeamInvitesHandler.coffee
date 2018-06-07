@@ -24,7 +24,7 @@ module.exports = TeamInvitesHandler =
 			invite = subscription.teamInvites.find (i) -> i.token == token
 			return callback(null, invite, subscription)
 
-	createManagerInvite: (teamManagerId, email, callback) ->
+	createInvite: (teamManagerId, email, callback) ->
 		logger.log {teamManagerId, email}, "Creating manager team invite"
 		UserGetter.getUser teamManagerId, (error, teamManager) ->
 			return callback(error) if error?
@@ -73,7 +73,7 @@ module.exports = TeamInvitesHandler =
 			return callback(err) if err?
 
 			async.map teams,
-				(team, cb) -> TeamInvitesHandler.createManagerInvite(team.admin_id, email, cb)
+				(team, cb) -> TeamInvitesHandler.createInvite(team.admin_id, email, cb)
 			, callback
 
 createInvite = (subscription, email, inviterName, callback) ->

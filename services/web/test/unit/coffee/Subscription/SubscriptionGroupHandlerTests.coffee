@@ -29,7 +29,7 @@ describe "SubscriptionGroupHandler", ->
 			removeUserFromGroup: sinon.stub().callsArgWith(2)
 
 		@TeamInvitesHandler =
-			createManagerInvite: sinon.stub().callsArgWith(2)
+			createInvite: sinon.stub().callsArgWith(2)
 
 		@UserGetter =
 			getUser: sinon.stub()
@@ -106,7 +106,7 @@ describe "SubscriptionGroupHandler", ->
 		it "should add an email invite if no user is found", (done) ->
 			@UserGetter.getUserByMainEmail.callsArgWith(1, null, null)
 			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
-				@TeamInvitesHandler.createManagerInvite.calledWith(@adminUser_id, @newEmail).should.equal true
+				@TeamInvitesHandler.createInvite.calledWith(@adminUser_id, @newEmail).should.equal true
 				done()
 
 	describe "removeUserFromGroup", ->

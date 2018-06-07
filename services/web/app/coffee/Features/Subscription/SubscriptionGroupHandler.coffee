@@ -33,7 +33,7 @@ module.exports = SubscriptionGroupHandler =
 						userViewModel = buildUserViewModel(user)
 						callback(err, userViewModel)
 				else
-					TeamInvitesHandler.createManagerInvite adminUserId, newEmail, (err) ->
+					TeamInvitesHandler.createInvite adminUserId, newEmail, (err) ->
 						return callback(err) if err?
 						userViewModel = buildEmailInviteViewModel(newEmail)
 						callback(err, userViewModel)

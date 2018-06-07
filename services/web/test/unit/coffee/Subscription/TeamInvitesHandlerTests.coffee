@@ -98,9 +98,9 @@ describe "TeamInvitesHandler", ->
 				expect(err).to.deep.eq(teamNotFound: true)
 				done()
 
-	describe "createManagerInvite", ->
+	describe "createInvite", ->
 		it "adds the team invite to the subscription", (done) ->
-			@TeamInvitesHandler.createManagerInvite @manager.id, "John.Snow@nightwatch.com", (err, invite) =>
+			@TeamInvitesHandler.createInvite @manager.id, "John.Snow@nightwatch.com", (err, invite) =>
 				expect(err).to.eq(null)
 				expect(invite.token).to.eq(@newToken)
 				expect(invite.email).to.eq("john.snow@nightwatch.com")
@@ -109,7 +109,7 @@ describe "TeamInvitesHandler", ->
 				done()
 
 		it "sends an email", (done) ->
-			@TeamInvitesHandler.createManagerInvite @manager.id, "John.Snow@nightwatch.com", (err, invite) =>
+			@TeamInvitesHandler.createInvite @manager.id, "John.Snow@nightwatch.com", (err, invite) =>
 				@EmailHandler.sendEmail.calledWith("verifyEmailToJoinTeam",
 					sinon.match({
 						to: "john.snow@nightwatch.com",
@@ -122,7 +122,7 @@ describe "TeamInvitesHandler", ->
 		it "refreshes the existing invite if the email has already been invited", (done) ->
 			originalInvite = Object.assign({}, @teamInvite)
 
-			@TeamInvitesHandler.createManagerInvite @manager.id, originalInvite.email, (err, invite) =>
+			@TeamInvitesHandler.createInvite @manager.id, originalInvite.email, (err, invite) =>
 				expect(err).to.eq(null)
 				expect(invite).to.exist
 
@@ -206,26 +206,26 @@ describe "TeamInvitesHandler", ->
 	describe "createTeamInvitesForLegacyInvitedEmail", (done) ->
 		beforeEach ->
 			@subscription.invited_emails = ["eddard@stark.com", "robert@stark.com"]
-			@TeamInvitesHandler.createManagerInvite = sinon.stub().yields(null)
+			@TeamInvitesHandler.createInvite = sinon.stub().yields(null)
 			@SubscriptionLocator.getGroupsWithEmailInvite = sinon.stub().yields(null, [@subscription])
 
 		it "sends an invitation email to addresses in the legacy invited_emails field", (done) ->
 			@TeamInvitesHandler.createTeamInvitesForLegacyInvitedEmail "eddard@stark.com", (err, invite) =>
 				expect(err).not.to.exist
 
-				@TeamInvitesHandler.createManagerInvite.calledWith(
+				@TeamInvitesHandler.createInvite.calledWith(
 					@subscription.admin_id,
 					"eddard@stark.com"
 				).should.eq true
 
-				@TeamInvitesHandler.createManagerInvite.callCount.should.eq 1
+				@TeamInvitesHandler.createInvite.callCount.should.eq 1
 
 				done()
 
 	describe "validation", ->
 		it "doesn't create an invite if the team limit has been reached", (done) ->
 			@LimitationsManager.teamHasReachedMemberLimit = sinon.stub().returns(true)
-			@TeamInvitesHandler.createManagerInvite @manager.id, "John.Snow@nightwatch.com", (err, invite) =>
+			@TeamInvitesHandler.createInvite @manager.id, "John.Snow@nightwatch.com", (err, invite) =>
 				expect(err).to.deep.equal(limitReached: true)
 				done()
 
@@ -239,7 +239,7 @@ describe "TeamInvitesHandler", ->
 			@subscription.member_ids = [member.id]
 			@UserGetter.getUserByAnyEmail.withArgs(member.email).yields(null, member)
 
-			@TeamInvitesHandler.createManagerInvite @manager.id, "tyrion@lannister.com", (err, invite) =>
+			@TeamInvitesHandler.createInvite @manager.id, "tyrion@lannister.com", (err, invite) =>
 				expect(err).to.deep.equal(alreadyInTeam: true)
 				expect(invite).not.to.exist
 				done()

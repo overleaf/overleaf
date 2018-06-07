@@ -10,7 +10,7 @@ module.exports =
 		teamManagerId = AuthenticationController.getLoggedInUserId(req)
 		email   = req.body.email
 
-		TeamInvitesHandler.createManagerInvite teamManagerId, email, (err, invite) ->
+		TeamInvitesHandler.createInvite teamManagerId, email, (err, invite) ->
 			return handleError(err, req, res, next) if err?
 			inviteView = { user:
 				{ email: invite.email, sentAt: invite.sentAt, invite: true }
