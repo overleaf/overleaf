@@ -118,10 +118,12 @@ checkIfInviteIsPossible = (subscription, email, callback = (error, possible, rea
 		logger.log {subscriptionId: subscription.id}, "team has reached member limit"
 		return callback(null, false, limitReached: true)
 
-	async.map subscription.member_ids, UserGetter.getUser, (error, members) ->
+	UserGetter.getUserByAnyEmail email, (error, existingUser) ->
 		return callback(error) if error?
+		return callback(null, true) unless existingUser?
 
-		existingMember = members.find (member) -> member.email == email
+		existingMember = subscription.member_ids.find (memberId) ->
+			memberId.toString() == existingUser._id.toString()
 
 		if existingMember
 			logger.log {subscriptionId: subscription.id, email}, "user already in team"

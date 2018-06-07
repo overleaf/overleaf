@@ -37,7 +37,8 @@ describe "TeamInvitesHandler", ->
 		}
 
 		@UserGetter = {
-			getUser: sinon.stub()
+			getUser: sinon.stub().yields(),
+			getUserByAnyEmail: sinon.stub().yields()
 		}
 
 		@SubscriptionUpdater = {
@@ -65,6 +66,8 @@ describe "TeamInvitesHandler", ->
 		}
 
 		@UserGetter.getUser.withArgs(@manager.id).yields(null, @manager)
+		@UserGetter.getUserByAnyEmail.withArgs(@manager.email).yields(null, @manager)
+
 		@SubscriptionLocator.getUsersSubscription.yields(null, @subscription)
 		@Subscription.findOne.yields(null, @subscription)
 
@@ -170,7 +173,7 @@ describe "TeamInvitesHandler", ->
 				email: "tyrion@lannister.com"
 			}
 
-			@UserGetter.getUser.withArgs(@user.id).yields(null, @user)
+			@UserGetter.getUserByAnyEmail.withArgs(@user.email).yields(null, @user)
 
 			@subscription.teamInvites.push({
 				email: "john.snow@nightwatch.com",
@@ -226,14 +229,15 @@ describe "TeamInvitesHandler", ->
 				expect(err).to.deep.equal(limitReached: true)
 				done()
 
-		it "doen't create an invite if the user is already part of the team", (done) ->
+		it "doesn't create an invite if the user is already part of the team", (done) ->
 			member = {
 				id: "1a2b",
+				_id: "1a2b",
 				email: "tyrion@lannister.com"
 			}
 
 			@subscription.member_ids = [member.id]
-			@UserGetter.getUser.withArgs(member.id).yields(null, member)
+			@UserGetter.getUserByAnyEmail.withArgs(member.email).yields(null, member)
 
 			@TeamInvitesHandler.createManagerInvite @manager.id, "tyrion@lannister.com", (err, invite) =>
 				expect(err).to.deep.equal(alreadyInTeam: true)
