@@ -16,10 +16,10 @@ describe 'V1SubscriptionManager', ->
 				err: sinon.stub()
 				warn: sinon.stub()
 			"settings-sharelatex":
-				overleaf:
-					host: @host = "http://overleaf.example.com"
+				apis:
+					v1:
+						host: @host = "http://overleaf.example.com"
 			"request": @request = sinon.stub()
-		@V1SubscriptionManager._v1PlanRequest = sinon.stub()
 		@userId = 'abcd'
 		@v1UserId = 42
 		@user =
@@ -33,33 +33,20 @@ describe 'V1SubscriptionManager', ->
 			@responseBody =
 				id: 32,
 				plan_name: 'pro'
-			@UserGetter.getUser = sinon.stub()
-				.yields(null, @user)
-			@V1SubscriptionManager._v1PlanRequest = sinon.stub()
+			@V1SubscriptionManager._v1Request = sinon.stub()
 				.yields(null, @responseBody)
 			@call = (cb) =>
 				@V1SubscriptionManager.getPlanCodeFromV1 @userId, cb
 
 		describe 'when all goes well', ->
-
-			it 'should call getUser', (done) ->
+			it 'should call _v1Request', (done) ->
 				@call (err, planCode) =>
 					expect(
-						@UserGetter.getUser.callCount
+						@V1SubscriptionManager._v1Request.callCount
 					).to.equal 1
 					expect(
-						@UserGetter.getUser.calledWith(@userId)
-					).to.equal true
-					done()
-
-			it 'should call _v1PlanRequest', (done) ->
-				@call (err, planCode) =>
-					expect(
-						@V1SubscriptionManager._v1PlanRequest.callCount
-					).to.equal 1
-					expect(
-						@V1SubscriptionManager._v1PlanRequest.calledWith(
-							@v1UserId
+						@V1SubscriptionManager._v1Request.calledWith(
+							@userId
 						)
 					).to.equal true
 					done()
@@ -80,49 +67,56 @@ describe 'V1SubscriptionManager', ->
 						expect(planCode).to.equal null
 						done()
 
+	describe '_v1Request', ->
+		beforeEach ->
+			@UserGetter.getUser = sinon.stub()
+				.yields(null, @user)
+
 		describe 'when getUser produces an error', ->
 			beforeEach ->
 				@UserGetter.getUser = sinon.stub()
 					.yields(new Error('woops'))
+				@call = (cb) =>
+					@V1SubscriptionManager._v1Request @user_id, { url: () -> '/foo' }, cb
 
-			it 'should not call _v1PlanRequest', (done) ->
+			it 'should not call request', (done) ->
 				@call (err, planCode) =>
 					expect(
-						@V1SubscriptionManager._v1PlanRequest.callCount
+						@request.callCount
 					).to.equal 0
 					done()
 
 			it 'should produce an error', (done) ->
 				@call (err, planCode) =>
 					expect(err).to.exist
-					expect(planCode).to.not.exist
 					done()
 
 		describe 'when getUser does not find a user', ->
 			beforeEach ->
 				@UserGetter.getUser = sinon.stub()
 					.yields(null, null)
+				@call = (cb) =>
+					@V1SubscriptionManager._v1Request @user_id, { url: () -> '/foo' }, cb
 
-			it 'should not call _v1PlanRequest', (done) ->
+			it 'should not call request', (done) ->
 				@call (err, planCode) =>
 					expect(
-						@V1SubscriptionManager._v1PlanRequest.callCount
+						@request.callCount
 					).to.equal 0
 					done()
 
-			it 'should produce a null plan-code, without error', (done) ->
-				@call (err, planCode) =>
+			it 'should not error', (done) ->
+				@call (err) =>
 					expect(err).to.not.exist
-					expect(planCode).to.not.exist
 					done()
 
 		describe 'when the request to v1 fails', ->
 			beforeEach ->
-				@V1SubscriptionManager._v1PlanRequest = sinon.stub()
-					.yields(new Error('woops'))
+				@request.yields(new Error('woops'))
+				@call = (cb) =>
+					@V1SubscriptionManager._v1Request @user_id, { url: () -> '/foo' }, cb
 
 			it 'should produce an error', (done) ->
-				@call (err, planCode) =>
+				@call (err) =>
 					expect(err).to.exist
-					expect(planCode).to.not.exist
 					done()

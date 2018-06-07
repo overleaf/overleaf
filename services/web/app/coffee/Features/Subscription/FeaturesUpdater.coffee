@@ -11,7 +11,16 @@ V1SubscriptionManager = require("./V1SubscriptionManager")
 oneMonthInSeconds = 60 * 60 * 24 * 30
 
 module.exports = FeaturesUpdater =
-	refreshFeatures: (user_id, callback)->
+	refreshFeatures: (user_id, notifyV1 = true, callback = () ->)->
+		if typeof notifyV1 == 'function'
+			callback = notifyV1
+			notifyV1 = true
+
+		if notifyV1
+			V1SubscriptionManager.notifyV1OfFeaturesChange user_id, (error) ->
+				if error?
+					logger.err {err: error, user_id}, "error notifying v1 about updated features"
+
 		jobs =
 			individualFeatures: (cb) -> FeaturesUpdater._getIndividualFeatures user_id, cb
 			groupFeatureSets:   (cb) -> FeaturesUpdater._getGroupFeatureSets user_id, cb
