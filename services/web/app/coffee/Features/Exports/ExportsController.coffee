@@ -13,7 +13,7 @@ module.exports =
 			user_id: user_id
 		}
 
-		if req.body && req.body.firstName && req.body.firstName
+		if req.body && req.body.firstName && req.body.lastName
 			export_params.first_name = req.body.firstName.trim()
 			export_params.last_name = req.body.lastName.trim()
 
