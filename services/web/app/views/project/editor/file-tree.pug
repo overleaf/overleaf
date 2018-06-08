@@ -345,7 +345,9 @@ script(type='text/ng-template', id='newDocModalTemplate')
 // Project Linked Files Modal
 script(type='text/ng-template', id='projectLinkedFileModalTemplate')
 	.modal-header
-		h3 New file from Project ({{ isOutputFilesMode }})
+		h3
+			span(ng-if="!isOutputFilesMode") New file from Project
+			span(ng-if="isOutputFilesMode") New file from Project output
 
 	.modal-body
 		div

@@ -8,7 +8,8 @@ _ = require 'underscore'
 module.exports = LinkedFilesController = {
 	Agents: {
 		url: require('./UrlAgent'),
-		project_file: require('./ProjectFileAgent')
+		project_file: require('./ProjectFileAgent'),
+		project_output_file: require('./ProjectOutputFileAgent')
 	}
 
 	_getAgent: (provider) ->
