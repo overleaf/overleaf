@@ -20,6 +20,12 @@ SubscriptionSchema = new Schema
 		downgraded: Boolean
 		planCode: String
 		allowed: {type: Boolean, default: true}
+	overleaf:
+		id:
+			type: Number
+			index:
+				unique: true,
+				partialFilterExpression: {'overleaf.id': {$exists: true}}
 
 
 SubscriptionSchema.statics.findAndModify = (query, update, callback)->

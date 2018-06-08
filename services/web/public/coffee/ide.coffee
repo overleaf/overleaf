@@ -213,11 +213,10 @@ define [
 		try
 			chromeVersion = parseFloat(navigator.userAgent.split(" Chrome/")[1]) || null;
 			browserIsChrome61or62 = (
-				chromeVersion? &&
-				(chromeVersion == 61 || chromeVersion == 62)
+				chromeVersion?
 			)
 			if browserIsChrome61or62
-				document.styleSheets[0].insertRule(".ace_editor.ace_autocomplete .ace_completion-highlight { text-shadow: none !important; }", 1)
+				document.styleSheets[0].insertRule(".ace_editor.ace_autocomplete .ace_completion-highlight { text-shadow: none !important; font-weight: bold; }", 1)
 		catch err
 			console.error err
 

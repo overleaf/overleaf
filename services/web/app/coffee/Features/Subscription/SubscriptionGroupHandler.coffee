@@ -3,6 +3,7 @@ _ = require("underscore")
 SubscriptionUpdater = require("./SubscriptionUpdater")
 SubscriptionLocator = require("./SubscriptionLocator")
 UserGetter = require("../User/UserGetter")
+Subscription = require("../../models/Subscription").Subscription
 LimitationsManager = require("./LimitationsManager")
 logger = require("logger-sharelatex")
 OneTimeTokenHandler = require("../Security/OneTimeTokenHandler")
@@ -41,10 +42,26 @@ module.exports = SubscriptionGroupHandler =
 	removeUserFromGroup: (adminUser_id, userToRemove_id, callback)->
 		SubscriptionUpdater.removeUserFromGroup adminUser_id, userToRemove_id, callback
 
+	removeEmailInviteFromGroup: (adminUser_id, email, callback) ->
+		SubscriptionUpdater.removeEmailInviteFromGroup adminUser_id, email, callback
+
+
+	replaceUserReferencesInGroups: (oldId, newId, callback) ->
+		Subscription.update {admin_id: oldId}, {admin_id: newId}, (error) ->
+			callback(error) if error?
+
+			# Mongo won't let us pull and addToSet in the same query, so do it in
+			# two. Note we need to add first, since the query is based on the old user.
+			query = { member_ids: oldId }
+			addNewUserUpdate = $addToSet: { member_ids: newId }
+			removeOldUserUpdate =  $pull: { member_ids: oldId }
+
+			Subscription.update query, addNewUserUpdate, { multi: true }, (error) ->
+				return callback(error) if error?
+				Subscription.update query, removeOldUserUpdate, { multi: true }, callback
+
 	getPopulatedListOfMembers: (adminUser_id, callback)->
 		SubscriptionLocator.getUsersSubscription adminUser_id, (err, subscription)->
-			return callback(err) if err?
-
 			users = []
 
 			for email in subscription.invited_emails or []

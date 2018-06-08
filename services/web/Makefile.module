@@ -62,7 +62,7 @@ test_acceptance_start_service: test_acceptance_stop_service
 	$(DOCKER_COMPOSE) up -d test_acceptance
 
 test_acceptance_stop_service:
-	$(DOCKER_COMPOSE) stop test_acceptance redis mongo
+	$(DOCKER_COMPOSE) stop -t 0 test_acceptance redis mongo
 
 test_acceptance_run:
 	$(DOCKER_COMPOSE) exec -T test_acceptance npm -q run test:acceptance:dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/acceptance/js

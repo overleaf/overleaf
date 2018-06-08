@@ -24,6 +24,9 @@ describe "SubscriptionGroupHandler", ->
 			getSubscriptionByMemberIdAndId: sinon.stub()
 			getSubscription: sinon.stub()
 
+		@UserCreator =
+			getUserOrCreateHoldingAccount: sinon.stub().callsArgWith(1, null, @user)
+
 		@SubscriptionUpdater =
 			addUserToGroup: sinon.stub().callsArgWith(2)
 			removeUserFromGroup: sinon.stub().callsArgWith(2)
@@ -45,6 +48,9 @@ describe "SubscriptionGroupHandler", ->
 		@EmailHandler =
 			sendEmail:sinon.stub()
 
+		@Subscription =
+			update: sinon.stub().yields()
+
 		@settings =
 			siteUrl:"http://www.sharelatex.com"
 
@@ -58,6 +64,7 @@ describe "SubscriptionGroupHandler", ->
 			"./SubscriptionUpdater": @SubscriptionUpdater
 			"./TeamInvitesHandler": @TeamInvitesHandler
 			"./SubscriptionLocator": @SubscriptionLocator
+			"../../models/Subscription": Subscription: @Subscription
 			"../User/UserGetter": @UserGetter
 			"./LimitationsManager": @LimitationsManager
 			"../Security/OneTimeTokenHandler":@OneTimeTokenHandler
@@ -116,6 +123,35 @@ describe "SubscriptionGroupHandler", ->
 				@SubscriptionUpdater.removeUserFromGroup.calledWith(@adminUser_id, @user._id).should.equal true
 				done()
 
+	describe "replaceUserReferencesInGroups", ->
+		beforeEach ->
+			@oldId = "ba5eba11"
+			@newId = "5ca1ab1e"
+
+		it "replaces the admin_id", (done) ->
+			@Handler.replaceUserReferencesInGroups @oldId, @newId, (err) =>
+
+				@Subscription.update.calledWith(
+					{ admin_id: @oldId },
+					{ admin_id: @newId }
+				).should.equal true
+
+				done()
+
+		it "replaces the member ids", (done) ->
+			@Handler.replaceUserReferencesInGroups @oldId, @newId, (err) =>
+
+				@Subscription.update.calledWith(
+					{ member_ids: @oldId },
+					{ $addToSet: { member_ids: @newId } }
+				).should.equal true
+
+				@Subscription.update.calledWith(
+					{ member_ids: @oldId },
+					{ $pull: { member_ids: @oldId } }
+				).should.equal true
+
+				done()
 
 	describe "getPopulatedListOfMembers", ->
 		beforeEach ->

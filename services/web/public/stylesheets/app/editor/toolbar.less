@@ -184,8 +184,12 @@
 	}
 }
 
+/**************************************
+	Toggle Switch
+***************************************/
+
 .toggle-wrapper {
-	width: 200px;
+	min-width: 200px;
 	height: 24px;
 }
 
@@ -240,4 +244,89 @@
 .toggle-switch-input:checked:nth-child(4) ~ .toggle-switch-selection {
   transform: translate(100%);
   border-radius: 0 @btn-border-radius-base @btn-border-radius-base 0;
+}
+
+/**************************************
+	Formatting buttons
+***************************************/
+.formatting-buttons {
+	width: 100%;
+	overflow: hidden;
+}
+
+.formatting-buttons-wrapper {
+	display: flex;
+}
+
+.formatting-btn {
+	color: @formatting-btn-color;
+	background-color: @formatting-btn-bg;
+	padding: 0;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: none;
+	border: none;
+	border-left: 1px solid @formatting-btn-border;
+	border-radius: 0;
+
+	&:hover {
+		color: @formatting-btn-color;
+	}
+}
+
+.formatting-btn--icon {
+	min-width: 32px;
+	width: 32px;
+}
+
+.formatting-btn--icon:last-of-type {
+	border-right: 1px solid @formatting-btn-border;
+}
+
+.formatting-btn--more {
+	padding-left: 9px;
+	padding-right: 9px;
+
+	.caret {
+		margin-top: 1px;
+	}
+}
+
+.formatting-icon {
+	font-style: normal;
+	line-height: 1.5;
+}
+
+.formatting-icon--small {
+	font-size: small;
+	line-height: 1.9;
+}
+
+.formatting-icon--serif {
+	font-family: @font-family-serif;
+}
+
+.formatting-more {
+	margin-left: auto;
+}
+
+.formatting-menu {
+	min-width: auto;
+	max-width: 130px;
+	background-color: @formatting-menu-bg;
+}
+
+.formatting-menu-item {
+	float: left;
+}
+
+.formatting-menu-item > .formatting-btn {
+	border-right: none;
+}
+
+// Disable border on left-most icon in menu
+.formatting-menu-item:nth-of-type(4n + 1) > .formatting-btn {
+	border-left: none;
 }

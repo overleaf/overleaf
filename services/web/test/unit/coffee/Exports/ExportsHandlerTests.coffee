@@ -27,6 +27,11 @@ describe 'ExportsHandler', ->
 		@project_history_id = 987
 		@user_id = "user-id-456"
 		@brand_variation_id = 789
+		@export_params = {
+			project_id: @project_id,
+			brand_variation_id: @brand_variation_id,
+			user_id: @user_id
+		}
 		@callback = sinon.stub()
 
 	describe 'exportProject', ->
@@ -35,13 +40,13 @@ describe 'ExportsHandler', ->
 			@response_body = {iAmAResponseBody: true}
 			@ExportsHandler._buildExport = sinon.stub().yields(null, @export_data)
 			@ExportsHandler._requestExport = sinon.stub().yields(null, @response_body)
-			@ExportsHandler.exportProject @project_id, @user_id, @brand_variation_id, (error, export_data) =>
+			@ExportsHandler.exportProject @export_params, (error, export_data) =>
 				@callback(error, export_data)
 				done()
 
 		it "should build the export", ->
 			@ExportsHandler._buildExport
-			.calledWith(@project_id, @user_id, @brand_variation_id)
+			.calledWith(@export_params)
 			.should.equal true
 
 		it "should request the export", ->
@@ -76,7 +81,7 @@ describe 'ExportsHandler', ->
 
 		describe "when all goes well", ->
 			beforeEach (done) ->
-				@ExportsHandler._buildExport @project_id, @user_id, @brand_variation_id, (error, export_data) =>
+				@ExportsHandler._buildExport @export_params, (error, export_data) =>
 					@callback(error, export_data)
 					done()
 
@@ -104,10 +109,40 @@ describe 'ExportsHandler', ->
 				@callback.calledWith(null, expected_export_data)
 				.should.equal true
 
+		describe "when we send replacement user first and last name", ->
+			beforeEach (done) ->
+				@custom_first_name = "FIRST"
+				@custom_last_name = "LAST"
+				@export_params.first_name = @custom_first_name
+				@export_params.last_name = @custom_last_name
+				@ExportsHandler._buildExport @export_params, (error, export_data) =>
+					@callback(error, export_data)
+					done()
+
+			it "should send the data from the user input", ->
+				expected_export_data =
+					project:
+						id: @project_id
+						rootDocPath: @rootDocPath
+						historyId: @project_history_id
+						historyVersion: @historyVersion
+					user:
+						id: @user_id
+						firstName: @custom_first_name
+						lastName: @custom_last_name
+						email: @user.email
+						orcidId: null
+					destination:
+						brandVariationId: @brand_variation_id
+					options:
+						callbackUrl: null
+				@callback.calledWith(null, expected_export_data)
+				.should.equal true
+
 		describe "when project is not found", ->
 			beforeEach (done) ->
 				@ProjectGetter.getProject = sinon.stub().yields(new Error("project not found"))
-				@ExportsHandler._buildExport @project_id, @user_id, @brand_variation_id, (error, export_data) =>
+				@ExportsHandler._buildExport @export_params, (error, export_data) =>
 					@callback(error, export_data)
 					done()
 
@@ -118,7 +153,7 @@ describe 'ExportsHandler', ->
 		describe "when project has no root doc", ->
 			beforeEach (done) ->
 				@ProjectLocator.findRootDoc = sinon.stub().yields(null, [null, null])
-				@ExportsHandler._buildExport @project_id, @user_id, @brand_variation_id, (error, export_data) =>
+				@ExportsHandler._buildExport @export_params, (error, export_data) =>
 					@callback(error, export_data)
 					done()
 
@@ -129,7 +164,7 @@ describe 'ExportsHandler', ->
 		describe "when user is not found", ->
 			beforeEach (done) ->
 				@UserGetter.getUser = sinon.stub().yields(new Error("user not found"))
-				@ExportsHandler._buildExport @project_id, @user_id, @brand_variation_id, (error, export_data) =>
+				@ExportsHandler._buildExport @export_params, (error, export_data) =>
 					@callback(error, export_data)
 					done()
 
@@ -140,7 +175,7 @@ describe 'ExportsHandler', ->
 		describe "when project history request fails", ->
 			beforeEach (done) ->
 				@ExportsHandler._requestVersion = sinon.stub().yields(new Error("project history call failed"))
-				@ExportsHandler._buildExport @project_id, @user_id, @brand_variation_id, (error, export_data) =>
+				@ExportsHandler._buildExport @export_params, (error, export_data) =>
 					@callback(error, export_data)
 					done()
 

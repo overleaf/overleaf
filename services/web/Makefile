@@ -180,7 +180,7 @@ clean_css:
 	rm -f public/stylesheets/*.css*
 
 clean_ci:
-	docker-compose down -v
+	docker-compose down -v -t 0
 
 test: test_unit test_frontend test_acceptance
 
@@ -204,7 +204,7 @@ test_acceptance_app_start_service: test_clean # stop service and clear dbs
 	docker-compose ${DOCKER_COMPOSE_FLAGS} up -d test_acceptance
 
 test_acceptance_app_stop_service:
-	docker-compose ${DOCKER_COMPOSE_FLAGS} stop test_acceptance redis mongo
+	docker-compose ${DOCKER_COMPOSE_FLAGS} stop -t 0 test_acceptance redis mongo
 
 test_acceptance_app_run:
 	docker-compose ${DOCKER_COMPOSE_FLAGS} exec -T test_acceptance npm -q run test:acceptance -- ${MOCHA_ARGS}
@@ -224,7 +224,7 @@ test_acceptance_module: $(MODULE_MAKEFILES)
 	fi
 
 test_clean:
-	docker-compose ${DOCKER_COMPOSE_FLAGS} down -v
+	docker-compose ${DOCKER_COMPOSE_FLAGS} down -v -t 0
 
 ci:
 	MOCHA_ARGS="--reporter tap" \
