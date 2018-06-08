@@ -74,7 +74,7 @@ describe "SubscriptionGroupHandler", ->
 		beforeEach ->
 			@LimitationsManager.hasGroupMembersLimitReached.callsArgWith(1, null, false, @subscription)
 			@UserGetter.getUserByMainEmail.callsArgWith(1, null, @user)
-			
+
 		it "should find the user", (done)->
 			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
 				@UserGetter.getUserByMainEmail.calledWith(@newEmail).should.equal true
@@ -102,7 +102,7 @@ describe "SubscriptionGroupHandler", ->
 				@NotificationsBuilder.groupPlan.calledWith(@user, {subscription_id:@subscription._id}).should.equal true
 				@readStub.called.should.equal true
 				done()
-		
+
 		it "should add an email invite if no user is found", (done) ->
 			@UserGetter.getUserByMainEmail.callsArgWith(1, null, null)
 			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
@@ -149,16 +149,18 @@ describe "SubscriptionGroupHandler", ->
 				done()
 
 		it "should return any invited users", (done) ->
+			@subscription.invited_emails = [ "jo@example.com" ]
+
 			@subscription.teamInvites = [
-				{ email: "jo@example.com" },
 				{ email: "charlie@example.com" }
 			]
+
 			@Handler.getPopulatedListOfMembers @adminUser_id, (err, users)=>
 				users[0].email.should.equal "jo@example.com"
-				users[0].holdingAccount.should.equal true
+				users[0].invite.should.equal true
 				users[1].email.should.equal "charlie@example.com"
-				users[1].holdingAccount.should.equal true
-				users.length.should.equal @subscription.teamInvites.length
+				users[1].invite.should.equal true
+				users.length.should.equal @subscription.teamInvites.length + @subscription.invited_emails.length
 				done()
 
 	describe "isUserPartOfGroup", ->
