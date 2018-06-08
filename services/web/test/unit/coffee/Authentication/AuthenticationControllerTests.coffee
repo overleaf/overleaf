@@ -12,6 +12,7 @@ ObjectId = require("mongojs").ObjectId
 
 describe "AuthenticationController", ->
 	beforeEach ->
+		tk.freeze(Date.now())
 		@AuthenticationController = SandboxedModule.require modulePath, requires:
 			"./AuthenticationManager": @AuthenticationManager = {}
 			"../User/UserGetter" : @UserGetter = {}
@@ -39,7 +40,6 @@ describe "AuthenticationController", ->
 		@req = new MockRequest()
 		@res = new MockResponse()
 		@callback = @next = sinon.stub()
-		tk.freeze(Date.now())
 
 	afterEach ->
 		tk.reset()

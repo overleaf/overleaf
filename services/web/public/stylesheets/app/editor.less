@@ -74,8 +74,12 @@
 
 #ide-body {
 	.full-size;
-	top: 40px;
+	top: @ide-body-top-offset;
+	&.ide-history-open {
+		top: @ide-body-top-offset + @editor-toolbar-height;
+	}
 }
+
 
 #editor, #editor-rich-text {
 	.full-size;
@@ -88,6 +92,7 @@
 .toolbar-editor {
 	height: @editor-toolbar-height;
 	background-color: @editor-toolbar-bg;
+	overflow: hidden;
 }
 
 .loading-screen {

@@ -18,6 +18,7 @@ define [
 	"ide/chat/index"
 	"ide/clone/index"
 	"ide/hotkeys/index"
+	"ide/test-controls/index"
 	"ide/wordcount/index"
 	"ide/directives/layout"
 	"ide/directives/validFile"
@@ -34,6 +35,7 @@ define [
 	"directives/videoPlayState"
 	"services/queued-http"
 	"services/validateCaptcha"
+	"services/wait-for"
 	"filters/formatDate"
 	"main/event"
 	"main/account-upgrade"
@@ -54,7 +56,7 @@ define [
 	SafariScrollPatcher
 ) ->
 
-	App.controller "IdeController", ($scope, $timeout, ide, localStorage, sixpack, event_tracking, metadata) ->
+	App.controller "IdeController", ($scope, $timeout, ide, localStorage, sixpack, event_tracking, metadata, $q) ->
 		# Don't freak out if we're already in an apply callback
 		$scope.$originalApply = $scope.$apply
 		$scope.$apply = (fn = () ->) ->
@@ -211,11 +213,10 @@ define [
 		try
 			chromeVersion = parseFloat(navigator.userAgent.split(" Chrome/")[1]) || null;
 			browserIsChrome61or62 = (
-				chromeVersion? &&
-				(chromeVersion == 61 || chromeVersion == 62)
+				chromeVersion?
 			)
 			if browserIsChrome61or62
-				document.styleSheets[0].insertRule(".ace_editor.ace_autocomplete .ace_completion-highlight { text-shadow: none !important; }", 1)
+				document.styleSheets[0].insertRule(".ace_editor.ace_autocomplete .ace_completion-highlight { text-shadow: none !important; font-weight: bold; }", 1)
 		catch err
 			console.error err
 

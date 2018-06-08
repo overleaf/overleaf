@@ -2,7 +2,7 @@ define [
 	"base"
 	"moment"
 ], (App, moment) ->
-	App.controller "BinaryFileController", ["$scope", "$rootScope", "$http", "$timeout", "$element", "ide", ($scope, $rootScope, $http, $timeout, $element, ide) ->
+	App.controller "BinaryFileController", ["$scope", "$rootScope", "$http", "$timeout", "$element", "ide", "waitFor", ($scope, $rootScope, $http, $timeout, $element, ide, waitFor) ->
 
 		TWO_MEGABYTES = 2 * 1024 * 1024
 
@@ -31,6 +31,7 @@ define [
 			data: null
 
 		$scope.refreshing = false
+		$scope.refreshError = null
 
 		MAX_URL_LENGTH = 60
 		FRONT_OF_URL_LENGTH = 35
@@ -48,9 +49,27 @@ define [
 
 		$scope.refreshFile = (file) ->
 			$scope.refreshing = true
+			$scope.refreshError = null
 			ide.fileTreeManager.refreshLinkedFile(file)
-				.then () ->
-					loadTextFileFilePreview()
+				.then (response) ->
+					{ data } = response
+					{ new_file_id } = data
+					$timeout(
+						() ->
+							waitFor(
+								() ->
+									ide.fileTreeManager.findEntityById(new_file_id)
+								5000
+							)
+								.then (newFile) ->
+									ide.binaryFilesManager.openFile(newFile)
+								.catch (err) ->
+									console.warn(err)
+						, 0
+					)
+					$scope.refreshError = null
+				.catch (response) ->
+					$scope.refreshError = response.data
 				.finally () ->
 					$scope.refreshing = false
 
@@ -86,11 +105,9 @@ define [
 					# show dots when payload is closs to cutoff
 					if data.length >= (TWO_MEGABYTES - 200)
 						$scope.textPreview.shouldShowDots = true
-					try
 						# remove last partial line
-						data = data.replace(/\n.*$/, '')
-					finally
-						$scope.textPreview.data = data
+						data = data?.replace?(/\n.*$/, '')
+					$scope.textPreview.data = data
 					$timeout(setHeight, 0)
 				.catch (error) ->
 					console.error(error)

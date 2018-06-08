@@ -131,7 +131,10 @@
 			)
 				li.container-fluid
 					.row
-						.col-xs-6
+						- var titleClasses = settings.overleaf ? " col-xs-6 col-sm-4 col-md-6" : "col-xs-6"
+						- var lastUpdatedClasses = settings.overleaf ? " col-xs-4 col-sm-3 col-md-2" : "col-xs-4"
+
+						div(class=titleClasses)
 							input.select-all(
 								select-all,
 								type="checkbox"
@@ -142,9 +145,12 @@
 						.col-xs-2
 							span.header.clickable(ng-click="changePredicate('accessLevel')") #{translate("owner")}
 								i.tablesort.fa(ng-class="getSortIconClass('accessLevel')")
-						.col-xs-4
+						div(class=lastUpdatedClasses)
 							span.header.clickable(ng-click="changePredicate('lastUpdated')") #{translate("last_modified")}
 								i.tablesort.fa(ng-class="getSortIconClass('lastUpdated')")
+						if settings.overleaf
+							.hidden-xs.col-sm-3.col-md-2.action-btn-row-header
+								span.header #{translate("actions")}
 				li.project_entry.container-fluid(
 					ng-repeat="project in visibleProjects | orderBy:predicate:reverse",
 					ng-controller="ProjectListItemController"

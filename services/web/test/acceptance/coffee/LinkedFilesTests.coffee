@@ -27,6 +27,122 @@ describe "LinkedFiles", ->
 			@owner.login ->
 				mkdirp Settings.path.dumpFolder, done
 
+	describe "creating a project linked file", ->
+		before (done) ->
+			@source_doc_name = 'test.txt'
+			async.series [
+				(cb) =>
+					@owner.createProject 'plf-test-one', {template: 'blank'}, (error, project_id) =>
+						@project_one_id = project_id
+						cb(error)
+				(cb) =>
+					@owner.getProject @project_one_id, (error, project) =>
+						@project_one = project
+						@project_one_root_folder_id = project.rootFolder[0]._id.toString()
+						cb(error)
+				(cb) =>
+					@owner.createProject 'plf-test-two', {template: 'blank'}, (error, project_id) =>
+						@project_two_id = project_id
+						cb(error)
+				(cb) =>
+					@owner.getProject @project_two_id, (error, project) =>
+						@project_two = project
+						@project_two_root_folder_id = project.rootFolder[0]._id.toString()
+						cb(error)
+				(cb) =>
+					@owner.createDocInProject @project_two_id,
+						@project_two_root_folder_id,
+						@source_doc_name,
+						(error, doc_id) =>
+							@source_doc_id = doc_id
+							cb(error)
+				(cb) =>
+					@owner.createDocInProject @project_two_id,
+						@project_two_root_folder_id,
+						'some-harmless-doc.txt',
+						(error, doc_id) =>
+							cb(error)
+			], done
+
+		it 'should produce a list of the users projects', (done) ->
+			@owner.request.get {
+				url: "/user/projects",
+				json: true
+			}, (err, response, body) =>
+				expect(err).to.not.exist
+				expect(body).to.deep.equal {
+					projects: [
+						{ _id: @project_one_id, name: 'plf-test-one', accessLevel: 'owner' },
+						{ _id: @project_two_id, name: 'plf-test-two', accessLevel: 'owner' }
+					]
+				}
+				done()
+
+		it 'should produce a list of entities in the project', (done) ->
+			@owner.request.get {
+				url: "/project/#{@project_two_id}/entities",
+				json: true
+			}, (err, response, body) =>
+				expect(err).to.not.exist
+				expect(body).to.deep.equal {
+					project_id: @project_two_id,
+					entities: [
+						{ path: '/main.tex',              type: 'doc' },
+						{ path: '/some-harmless-doc.txt', type: 'doc' },
+						{ path: '/test.txt',              type: 'doc' }
+					]
+				}
+				done()
+
+
+		it 'should import a file from the source project', (done) ->
+			@owner.request.post {
+				url: "/project/#{@project_one_id}/linked_file",
+				json:
+					name: 'test-link.txt',
+					parent_folder_id: @project_one_root_folder_id,
+					provider: 'project_file',
+					data:
+						source_project_id: @project_two_id,
+						source_entity_path: "/#{@source_doc_name}",
+			}, (error, response, body) =>
+				new_file_id = body.new_file_id
+				@existing_file_id = new_file_id
+				expect(new_file_id).to.exist
+				@owner.getProject @project_one_id, (error, project) =>
+					return done(error) if error?
+					firstFile = project.rootFolder[0].fileRefs[0]
+					expect(firstFile._id.toString()).to.equal(new_file_id.toString())
+					expect(firstFile.linkedFileData).to.deep.equal {
+						provider: 'project_file',
+						source_project_id: @project_two_id,
+						source_entity_path: "/#{@source_doc_name}",
+						source_project_display_name: "plf-test-two"
+					}
+					expect(firstFile.name).to.equal('test-link.txt')
+					done()
+
+		it 'should refresh the file', (done) ->
+			@owner.request.post {
+				url: "/project/#{@project_one_id}/linked_file",
+				json:
+					name: 'test-link.txt',
+					parent_folder_id: @project_one_root_folder_id,
+					provider: 'project_file',
+					data:
+						source_project_id: @project_two_id,
+						source_entity_path: "/#{@source_doc_name}",
+			}, (error, response, body) =>
+				new_file_id = body.new_file_id
+				expect(new_file_id).to.exist
+				expect(new_file_id).to.not.equal @existing_file_id
+				@owner.getProject @project_one_id, (error, project) =>
+					return done(error) if error?
+					firstFile = project.rootFolder[0].fileRefs[0]
+					expect(firstFile._id.toString()).to.equal(new_file_id.toString())
+					expect(firstFile.name).to.equal('test-link.txt')
+					done()
+
 	describe "creating a URL based linked file", ->
 		before (done) ->
 			@owner.createProject "url-linked-files-project", {template: "blank"}, (error, project_id) =>
@@ -50,7 +166,7 @@ describe "LinkedFiles", ->
 					name: 'url-test-file-1'
 			}, (error, response, body) =>
 				throw error if error?
-				expect(response.statusCode).to.equal 204
+				expect(response.statusCode).to.equal 200
 				@owner.getProject @project_id, (error, project) =>
 					throw error if error?
 					file = project.rootFolder[0].fileRefs[0]
@@ -76,7 +192,7 @@ describe "LinkedFiles", ->
 					name: 'url-test-file-2'
 			}, (error, response, body) =>
 				throw error if error?
-				expect(response.statusCode).to.equal 204
+				expect(response.statusCode).to.equal 200
 				@owner.request.post {
 					url: "/project/#{@project_id}/linked_file",
 					json:
@@ -88,7 +204,7 @@ describe "LinkedFiles", ->
 						name: 'url-test-file-2'
 				}, (error, response, body) =>
 					throw error if error?
-					expect(response.statusCode).to.equal 204
+					expect(response.statusCode).to.equal 200
 					@owner.getProject @project_id, (error, project) =>
 						throw error if error?
 						file = project.rootFolder[0].fileRefs[1]
@@ -168,7 +284,7 @@ describe "LinkedFiles", ->
 					name: 'url-test-file-6'
 			}, (error, response, body) =>
 				throw error if error?
-				expect(response.statusCode).to.equal 204
+				expect(response.statusCode).to.equal 200
 				@owner.getProject @project_id, (error, project) =>
 					throw error if error?
 					file = _.find project.rootFolder[0].fileRefs, (file) ->

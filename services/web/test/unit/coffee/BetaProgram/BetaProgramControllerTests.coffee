@@ -23,8 +23,8 @@ describe "BetaProgramController", ->
 				optIn: sinon.stub()
 				optOut: sinon.stub()
 			},
-			"../User/UserLocator": @UserLocator = {
-				findById: sinon.stub()
+			"../User/UserGetter": @UserGetter = {
+				getUser: sinon.stub()
 			},
 			"settings-sharelatex": @settings = {
 				languages: {}
@@ -119,7 +119,7 @@ describe "BetaProgramController", ->
 	describe "optInPage", ->
 
 		beforeEach ->
-			@UserLocator.findById.callsArgWith(1, null, @user)
+			@UserGetter.getUser.callsArgWith(1, null, @user)
 
 		it "should render the opt-in page", () ->
 			@BetaProgramController.optInPage @req, @res, @next
@@ -128,10 +128,10 @@ describe "BetaProgramController", ->
 			args[0].should.equal 'beta_program/opt_in'
 
 
-		describe "when UserLocator.findById produces an error", ->
+		describe "when UserGetter.getUser produces an error", ->
 
 			beforeEach ->
-				@UserLocator.findById.callsArgWith(1, new Error('woops'))
+				@UserGetter.getUser.callsArgWith(1, new Error('woops'))
 
 			it "should not render the opt-in page", () ->
 				@BetaProgramController.optInPage @req, @res, @next

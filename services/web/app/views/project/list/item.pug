@@ -1,4 +1,7 @@
-.col-xs-6
+- var titleClasses = settings.overleaf ? "col-xs-6 col-sm-4 col-md-6" : "col-xs-6"
+- var lastUpdatedClasses = settings.overleaf ? " col-xs-4 col-sm-3 col-md-2" : "col-xs-4"
+
+div(class=titleClasses)
 	input.select-item(
 		select-individual,
 		type="checkbox",
@@ -37,8 +40,50 @@
 			tooltip-placement="right"
 			tooltip-append-to-body="true"
 		)
-.col-xs-4
+
+div(class=lastUpdatedClasses)
 	if settings.overleaf
 		span.last-modified(tooltip="{{project.lastUpdated | formatDate}}") {{project.lastUpdated | fromNowDate}}
 	else
 		span.last-modified {{project.lastUpdated | formatDate}}
+
+if settings.overleaf
+	.hidden-xs.col-sm-3.col-md-2.action-btn-row
+		button.btn.btn-link.action-btn(
+			tooltip=translate('copy'),
+			tooltip-placement="top",
+			tooltip-append-to-body="true",
+			ng-click="clone($event)"
+		)
+			i.icon.fa.fa-files-o
+		button.btn.btn-link.action-btn(
+			tooltip=translate('download'),
+			tooltip-placement="top",
+			tooltip-append-to-body="true",
+			ng-click="download($event)"
+		)
+			i.icon.fa.fa-cloud-download
+		button.btn.btn-link.action-btn(
+			ng-if="!project.archived && isOwner()"
+			tooltip=translate('archive'),
+			tooltip-placement="top",
+			tooltip-append-to-body="true",
+			ng-click="archiveOrLeave($event)"
+		)
+			i.icon.fa.fa-inbox
+		button.btn.btn-link.action-btn(
+			ng-if="!project.archived && !isOwner()"
+			tooltip=translate('leave'),
+			tooltip-placement="top",
+			tooltip-append-to-body="true",
+			ng-click="archiveOrLeave($event)"
+		)
+			i.icon.fa.fa-sign-out
+		button.btn.btn-link.action-btn(
+			ng-if="project.archived"
+			tooltip=translate('unarchive'),
+			tooltip-placement="top",
+			tooltip-append-to-body="true",
+			ng-click="restore($event)"
+		)
+			i.icon.fa.fa-reply

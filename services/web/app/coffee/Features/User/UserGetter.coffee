@@ -6,6 +6,8 @@ ObjectId = mongojs.ObjectId
 
 module.exports = UserGetter =
 	getUser: (query, projection, callback = (error, user) ->) ->
+		if query?.email?
+			return callback(new Error("Don't use getUser to find user by email"), null)
 		if arguments.length == 2
 			callback = projection
 			projection = {}
@@ -18,6 +20,31 @@ module.exports = UserGetter =
 			query = _id: query
 
 		db.users.findOne query, projection, callback
+
+	getUserEmail: (userId, callback = (error, email) ->) ->
+		@getUser userId, { email: 1 }, (error, user) ->
+			callback(error, user?.email)
+
+	getUserByMainEmail: (email, projection, callback = (error, user) ->) ->
+		email = email.trim()
+		if arguments.length == 2
+			callback = projection
+			projection = {}
+		db.users.findOne email: email, projection, callback
+
+	getUserByAnyEmail: (email, projection, callback = (error, user) ->) ->
+		email = email.trim()
+		if arguments.length == 2
+			callback = projection
+			projection = {}
+		# $exists: true MUST be set to use the partial index
+		query = emails: { $exists: true }, 'emails.email': email
+		db.users.findOne query, projection, (error, user) =>
+			return callback(error, user) if error? or user?
+
+			# While multiple emails are being rolled out, check for the main email as
+			# well
+			@getUserByMainEmail email, projection, callback
 
 	getUsers: (user_ids, projection, callback = (error, users) ->) ->
 		try
@@ -39,6 +66,9 @@ module.exports = UserGetter =
 
 [
 	'getUser',
+	'getUserEmail',
+	'getUserByMainEmail',
+	'getUserByAnyEmail',
 	'getUsers',
 	'getUserOrUserStubById'
 ].map (method) ->

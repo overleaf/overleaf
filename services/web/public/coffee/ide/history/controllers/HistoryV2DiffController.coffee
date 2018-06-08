@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "HistoryV2DiffController", ($scope, ide, event_tracking) ->
+	App.controller "HistoryV2DiffController", ($scope, ide, event_tracking, waitFor) ->
 		$scope.restoreState =
 			inflight: false
 			error: false
@@ -24,17 +24,16 @@ define [
 					$scope.restoreState.inflight = false
 
 		openEntity = (data) ->
-			iterations = 0
 			{id, type} = data
-			do tryOpen = () ->
-				if iterations > 5
-					return
-				iterations += 1
-				entity = ide.fileTreeManager.findEntityById(id)
-				if entity? and type == 'doc'
-					ide.editorManager.openDoc(entity)
-				else if entity? and type == 'file'
-					ide.binaryFilesManager.openFile(entity)
-				else
-					setTimeout(tryOpen, 500)
-			
+			waitFor(
+				() ->
+					ide.fileTreeManager.findEntityById(id)
+				3000
+			)
+				.then (entity) ->
+					if type == 'doc'
+						ide.editorManager.openDoc(entity)
+					else if type == 'file'
+						ide.binaryFilesManager.openFile(entity)
+				.catch (err) ->
+					console.warn(err)

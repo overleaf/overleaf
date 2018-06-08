@@ -6,16 +6,31 @@ Settings = require 'settings-sharelatex'
 request = require 'request'
 
 module.exports = FileWriter =
+
+	_ensureDumpFolderExists: (callback=(error)->) ->
+		fs.mkdir Settings.path.dumpFolder, (error) ->
+			if error? and error.code != 'EEXIST'
+				# Ignore error about already existing
+				return callback(error)
+			callback(null)
+
+	writeLinesToDisk: (identifier, lines, callback = (error, fsPath)->) ->
+		callback = _.once(callback)
+		fsPath = "#{Settings.path.dumpFolder}/#{identifier}_#{uuid.v4()}"
+		FileWriter._ensureDumpFolderExists (error) ->
+			return callback(error) if error?
+			fs.writeFile fsPath, lines.join('\n'), (error) ->
+				return callback(error) if error?
+				callback(null, fsPath)
+
 	writeStreamToDisk: (identifier, stream, callback = (error, fsPath) ->) ->
 		callback = _.once(callback)
 		fsPath = "#{Settings.path.dumpFolder}/#{identifier}_#{uuid.v4()}"
 
 		stream.pause()
-		fs.mkdir Settings.path.dumpFolder, (error) ->
+		FileWriter._ensureDumpFolderExists (error) ->
+			return callback(error) if error?
 			stream.resume()
-			if error? and error.code != 'EEXIST'
-				# Ignore error about already existing
-				return callback(error)
 
 			writeStream = fs.createWriteStream(fsPath)
 			stream.pipe(writeStream)

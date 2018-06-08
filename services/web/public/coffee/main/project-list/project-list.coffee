@@ -320,6 +320,9 @@ define [
 						name: cloneName
 						id: data.project_id
 						accessLevel: "owner"
+						owner: {
+							_id: user_id
+						}
 						# TODO: Check access level if correct after adding it in
 						# to the rest of the app
 					}
@@ -350,14 +353,15 @@ define [
 				$scope.archiveOrLeaveSelectedProjects()
 
 		$scope.archiveOrLeaveSelectedProjects = () ->
-			selected_projects = $scope.getSelectedProjects()
-			selected_project_ids = $scope.getSelectedProjectIds()
+			$scope.archiveOrLeaveProjects($scope.getSelectedProjects())
 
+		$scope.archiveOrLeaveProjects = (projects) ->
+			projectIds = projects.map (p) -> p.id
 			# Remove project from any tags
 			for tag in $scope.tags
-				$scope._removeProjectIdsFromTagArray(tag, selected_project_ids)
+				$scope._removeProjectIdsFromTagArray(tag, projectIds)
 
-			for project in selected_projects
+			for project in projects
 				project.tags = []
 				if project.accessLevel == "owner"
 					project.archived = true
@@ -414,16 +418,17 @@ define [
 			$scope.updateVisibleProjects()
 
 		$scope.restoreSelectedProjects = () ->
-			selected_projects = $scope.getSelectedProjects()
-			selected_project_ids = $scope.getSelectedProjectIds()
+			$scope.restoreProjects($scope.getSelectedProjects())
 
-			for project in selected_projects
+		$scope.restoreProjects = (projects) ->
+			projectIds = projects.map (p) -> p.id
+			for project in projects
 				project.archived = false
 
-			for project_id in selected_project_ids
+			for projectId in projectIds
 				queuedHttp {
 					method: "POST"
-					url: "/project/#{project_id}/restore"
+					url: "/project/#{projectId}/restore"
 					headers:
 						"X-CSRF-Token": window.csrfToken
 				}
@@ -437,13 +442,14 @@ define [
 			)
 
 		$scope.downloadSelectedProjects = () ->
-			selected_project_ids = $scope.getSelectedProjectIds()
-			event_tracking.send 'project-list-page-interaction', 'project action', 'Download Zip'
-			if selected_project_ids.length > 1
-				path = "/project/download/zip?project_ids=#{selected_project_ids.join(',')}"
-			else
-				path = "/project/#{selected_project_ids[0]}/download/zip"
+			$scope.downloadProjectsById($scope.getSelectedProjectIds())
 
+		$scope.downloadProjectsById = (projectIds) ->
+			event_tracking.send 'project-list-page-interaction', 'project action', 'Download Zip'
+			if projectIds.length > 1
+				path = "/project/download/zip?project_ids=#{projectIds.join(',')}"
+			else
+				path = "/project/#{projectIds[0]}/download/zip"
 			window.location = path
 
 		$scope.openV1ImportModal = (project) ->
@@ -487,6 +493,25 @@ define [
 			else
 				return "None"
 
+		$scope.isOwner = () ->
+			window.user_id == $scope.project.owner._id
+
 		$scope.$watch "project.selected", (value) ->
 			if value?
 				$scope.updateSelectedProjects()
+
+		$scope.clone = (e) ->
+			e.stopPropagation()
+			$scope.cloneProject($scope.project, "#{$scope.project.name} (Copy)")
+
+		$scope.download = (e) ->
+			e.stopPropagation()
+			$scope.downloadProjectsById([$scope.project.id])
+
+		$scope.archiveOrLeave = (e) ->
+			e.stopPropagation()
+			$scope.archiveOrLeaveProjects([$scope.project])
+
+		$scope.restore = (e) ->
+			e.stopPropagation()
+			$scope.restoreProjects([$scope.project])

@@ -4,7 +4,6 @@ define [
 	"ide/history/util/displayNameForUser"
 	"ide/history/controllers/HistoryListController"
 	"ide/history/controllers/HistoryDiffController"
-	"ide/history/controllers/HistoryV2DiffController"
 	"ide/history/directives/infiniteScroll"
 ], (moment, ColorManager, displayNameForUser) ->
 	class HistoryManager
