@@ -25,6 +25,17 @@ module.exports = UserGetter =
 		@getUser userId, { email: 1 }, (error, user) ->
 			callback(error, user?.email)
 
+	getUserFullEmails: (userId, callback = (error, emails) ->) ->
+		@getUser userId, { email: 1, emails: 1 }, (error, user) ->
+			return callback error if error?
+			return callback new Error('User not Found') unless user
+
+			fullEmails = user.emails.map (emailData) ->
+				emailData.default = emailData.email == user.email
+				emailData
+
+			callback null, fullEmails
+
 	getUserByMainEmail: (email, projection, callback = (error, user) ->) ->
 		email = email.trim()
 		if arguments.length == 2

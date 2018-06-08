@@ -9,7 +9,13 @@ expect = require("chai").expect
 describe "UserGetter", ->
 
 	beforeEach ->
-		@fakeUser = {_id:"12390i"}
+		@fakeUser =
+			_id: '12390i'
+			email: 'email2@foo.bar'
+			emails: [
+				{ email: 'email1@foo.bar' }
+				{ email: 'email2@foo.bar' }
+			]
 		@findOne = sinon.stub().callsArgWith(2, null, @fakeUser)
 		@Mongo =
 			db: users: findOne: @findOne
@@ -33,6 +39,24 @@ describe "UserGetter", ->
 		it "should not allow email in query", (done)->
 			@UserGetter.getUser email: 'foo@bar.com', {}, (error, user) =>
 				error.should.exist
+				done()
+
+	describe "getUserFullEmails", -
+		it "should get user", (done)->
+			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @fakeUser)
+			projection = email: 1, emails: 1
+			@UserGetter.getUserFullEmails @fakeUser._id, (error, fullEmails) =>
+				@UserGetter.getUser.called.should.equal true
+				@UserGetter.getUser.calledWith(@fakeUser._id, projection).should.equal true
+				done()
+
+		it "should fetch emails data", (done)->
+			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @fakeUser)
+			@UserGetter.getUserFullEmails @fakeUser._id, (error, fullEmails) =>
+				assert.deepEqual fullEmails, [
+					{ email: 'email1@foo.bar', default: false }
+					{ email: 'email2@foo.bar', default: true }
+				]
 				done()
 
 	describe "getUserbyMainEmail", ->

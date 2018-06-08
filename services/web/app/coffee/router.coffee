@@ -17,6 +17,7 @@ NotificationsController = require("./Features/Notifications/NotificationsControl
 CollaboratorsRouter = require('./Features/Collaborators/CollaboratorsRouter')
 UserInfoController = require('./Features/User/UserInfoController')
 UserController = require("./Features/User/UserController")
+UserEmailsController = require("./Features/User/UserEmailsController")
 UserPagesController = require('./Features/User/UserPagesController')
 DocumentController = require('./Features/Documents/DocumentController')
 CompileManager = require("./Features/Compile/CompileManager")
@@ -107,6 +108,18 @@ module.exports = class Router
 				timeInterval: 60
 			}),
 			UserController.changePassword
+		webRouter.get '/user/emails',
+			AuthenticationController.requireLogin(),
+			UserEmailsController.list
+		webRouter.post '/user/emails',
+			AuthenticationController.requireLogin(),
+			UserEmailsController.add
+		webRouter.delete '/user/emails',
+			AuthenticationController.requireLogin(),
+			UserEmailsController.remove
+		webRouter.post '/user/emails/default',
+			AuthenticationController.requireLogin(),
+			UserEmailsController.setDefault
 
 		webRouter.get  '/user/sessions',
 			AuthenticationController.requireLogin(),
