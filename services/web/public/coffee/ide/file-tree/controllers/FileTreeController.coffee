@@ -53,6 +53,21 @@ define [
 				scope: $scope
 				resolve: {
 					parent_folder: () -> ide.fileTreeManager.getCurrentFolder()
+					isOutputFiles: () -> false
+				}
+			)
+
+		$scope.openProjectOutputLinkedFileModal = window.openProjectOutputLinkedFileModal = () ->
+			unless 'project_output_file' in window.data.enabledLinkedFileTypes
+				console.warn("Project linked output files are not enabled")
+				return
+			$modal.open(
+				templateUrl: "projectLinkedFileModalTemplate"
+				controller:  "ProjectLinkedFileModalController"
+				scope: $scope
+				resolve: {
+					parent_folder: () -> ide.fileTreeManager.getCurrentFolder()
+					isOutputFiles: () -> true
 				}
 			)
 
@@ -215,25 +230,33 @@ define [
 	]
 
 	App.controller "ProjectLinkedFileModalController", [
-		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder",
-		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->
+		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder", "isOutputFiles",
+		($scope,   ide,   $modalInstance,   $timeout,   parent_folder, isOutputFiles) ->
+			$scope.isOutputFiles = isOutputFiles
+			console.log ">>>> LINKED", isOutputFiles
+
 			$scope.data =
 				projects: null # or []
 				selectedProjectId: null
 				projectEntities: null # or []
+				projectOutputFiles: null # or []
 				selectedProjectEntity: null
 				name: null
 			$scope.state =
 				inFlight:
 					projects: false
 					entities: false
+					compile: false
 					create: false
 				error: false
 
 			$scope.$watch 'data.selectedProjectId', (newVal, oldVal) ->
 				return if !newVal
 				$scope.data.selectedProjectEntity = null
-				$scope.getProjectEntities($scope.data.selectedProjectId)
+				if isOutputFiles
+					$scope.compileProjectAndGetOutputFiles($scope.data.selectedProjectId)
+				else
+					$scope.getProjectEntities($scope.data.selectedProjectId)
 
 			# auto-set filename based on selected file
 			$scope.$watch 'data.selectedProjectEntity', (newVal, oldVal) ->
@@ -248,7 +271,7 @@ define [
 			_reset = (opts) ->
 				isError = opts.err == true
 				inFlight = $scope.state.inFlight
-				inFlight.projects = inFlight.entities = inFlight.create = false
+				inFlight.projects = inFlight.entities = inFlight.compile = inFlight.create = false
 				$scope.state.error = isError
 
 			$scope.shouldEnableProjectSelect = () ->
@@ -259,6 +282,10 @@ define [
 				{ state, data } = $scope
 				return !state.inFlight.projects && !state.inFlight.entities && data.projects && data.selectedProjectId
 
+			$scope.shouldEnableProjectOutputFileSelect = () ->
+				{ state, data } = $scope
+				return !state.inFlight.projects && !state.inFlight.compile && data.projects && data.selectedProjectId
+
 			$scope.shouldEnableCreateButton = () ->
 				state = $scope.state
 				data = $scope.data
@@ -266,8 +293,18 @@ define [
 					!state.inFlight.entities &&
 					data.projects &&
 					data.selectedProjectId &&
-					data.projectEntities &&
-					data.selectedProjectEntity &&
+					(
+						(
+							!isOutputFiles &&
+							data.projectEntities &&
+							data.selectedProjectEntity
+						) ||
+						(
+							isOutputFiles &&
+							data.projectOutputFiles &&
+							data.selectedProjectOutputFile
+						)
+					) &&
 					data.name
 
 			$scope.getUserProjects = () ->
@@ -295,23 +332,43 @@ define [
 				.catch (err) ->
 					_reset(err: true)
 
+			window._C = $scope.compileProjectAndGetOutputFiles = (project_id) =>
+				_setInFlight('compile')
+				$http.post("/project/${project_id}/compile", {
+					check: "silent",
+					draft: false,
+					incrementalCompilesEnabled: false
+					_csrf: window.csrfToken
+				})
+				.then (data) ->
+					console.log ">> COMPILE", data
+					_reset(err: false)
+				.catch (err) ->
+					console.error(err)
+					_reset(err: true)
+
 			$scope.init = () ->
 				$scope.getUserProjects()
 			$timeout($scope.init, 0)
 
 			$scope.create = () ->
 				projectId = $scope.data.selectedProjectId
-				path = $scope.data.selectedProjectEntity
 				name = $scope.data.name
-				if !name || !path || !projectId
-					_reset(err: true)
-					return
+				if isOutputFiles
+					provider = 'project_output_file'
+					payload = {
+						source_project_id: projectId,
+						source_output_file_path: $scope.data.selectedProjectOutputFile
+					}
+				else
+					provider = 'project_file'
+					payload = {
+						source_project_id: projectId,
+						source_entity_path: $scope.data.selectedProjectEntity
+					}
 				_setInFlight('create')
 				ide.fileTreeManager
-					.createLinkedFile(name, parent_folder, 'project_file', {
-						source_project_id: projectId,
-						source_entity_path: path
-					})
+					.createLinkedFile(name, parent_folder, provider, payload)
 					.then () ->
 						_reset(err: false)
 						$modalInstance.close()

@@ -7,6 +7,9 @@ define [
 		$scope.openProjectLinkedFileModal = () ->
 			window.openProjectLinkedFileModal()
 
+		$scope.openProjectOutputLinkedFileModal = () ->
+			window.openProjectOutputLinkedFileModal()
+
 		$scope.openLinkedFileModal = () ->
 			window.openLinkedFileModal()
 
