@@ -210,9 +210,9 @@ define [
 			event_tracking.send 'subscription-funnel', 'plans-page', 'group-inquiry-potential'
 
 		eventLabel = (label, location) ->
-			if location && $scope.plansVariant != 'default'
+			if $scope.plansVariant && location && $scope.plansVariant != 'default'
 				label = label + '-' + location
-			if $scope.plansVariant != 'default'
+			if $scope.plansVariant && $scope.plansVariant != 'default'
 				label += '-exp-' + $scope.plansVariant
 			label
 
