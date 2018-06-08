@@ -64,11 +64,6 @@ module.exports = ProjectOutputFileAgent = {
 
 	writeIncomingFileToDisk: (project_id, data, current_user_id, callback = (error, fsPath) ->) ->
 		callback = _.once(callback)
-		# TODO:
-		#   - Compile project
-		#   - Get output file content
-		#   - Write to disk
-		#   - callback with fs-path
 		if !ProjectOutputFileAgent._validate(data)
 			return callback(new BadDataError())
 		{ source_project_id, source_output_file_path } = data
