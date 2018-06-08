@@ -233,7 +233,6 @@ define [
 		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder", "isOutputFilesMode",
 		($scope,   ide,   $modalInstance,   $timeout,   parent_folder, isOutputFilesMode) ->
 			$scope.isOutputFilesMode = isOutputFilesMode
-			console.log ">>>> LINKED", isOutputFilesMode
 
 			$scope.data =
 				projects: null # or []
@@ -349,7 +348,6 @@ define [
 					_csrf: window.csrfToken
 				})
 				.then (resp) ->
-					console.log ">> COMPILE", resp.data
 					if resp.data.status == 'success'
 						$scope.data.projectOutputFiles = resp.data.outputFiles
 						_reset(err: false)

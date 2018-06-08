@@ -524,7 +524,6 @@ define [
 					{ data } = response
 					$scope.pdf.view = "pdf"
 					$scope.pdf.compiling = false
-					console.log ">>", data
 					parseCompileResponse(data)
 				.catch (response) ->
 					{ data, status } = response
