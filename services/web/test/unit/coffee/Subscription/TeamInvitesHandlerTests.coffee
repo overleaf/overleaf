@@ -26,9 +26,10 @@ describe "TeamInvitesHandler", ->
 		@subscription = {
 			id: "55153a8014829a865bbf700d",
 			admin_id: @manager.id,
-			member_ids: []
-			teamInvites: [ @teamInvite ]
-			save: sinon.stub().yields(null)
+			groupPlan: true,
+			member_ids: [],
+			teamInvites: [ @teamInvite ],
+			save: sinon.stub().yields(null),
 		}
 
 		@SubscriptionLocator = {
@@ -232,6 +233,12 @@ describe "TeamInvitesHandler", ->
 			@LimitationsManager.teamHasReachedMemberLimit = sinon.stub().returns(true)
 			@TeamInvitesHandler.createInvite @manager.id, "John.Snow@nightwatch.com", (err, invite) =>
 				expect(err).to.deep.equal(limitReached: true)
+				done()
+
+		it "doesn't create an invite if the subscription is not in a group plan", (done) ->
+			@subscription.groupPlan = false
+			@TeamInvitesHandler.createInvite @manager.id, "John.Snow@nightwatch.com", (err, invite) =>
+				expect(err).to.deep.equal(wrongPlan: true)
 				done()
 
 		it "doesn't create an invite if the user is already part of the team", (done) ->

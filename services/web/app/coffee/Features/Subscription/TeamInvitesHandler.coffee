@@ -124,6 +124,11 @@ removeInviteFromTeam = (subscriptionId, email, callback) ->
 
 
 checkIfInviteIsPossible = (subscription, email, callback = (error, possible, reason) -> ) ->
+	unless subscription.groupPlan
+		logger.log {subscriptionId: subscription.id},
+			"can not add members to a subscription that is not in a group plan"
+		return callback(null, false, wrongPlan: true)
+
 	if LimitationsManager.teamHasReachedMemberLimit(subscription)
 		logger.log {subscriptionId: subscription.id}, "team has reached member limit"
 		return callback(null, false, limitReached: true)
