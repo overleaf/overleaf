@@ -13,6 +13,7 @@ ClsiCookieManager = require("./ClsiCookieManager")
 Path = require("path")
 
 module.exports = CompileController =
+
 	compile: (req, res, next = (error) ->) ->
 		res.setTimeout(5 * 60 * 1000)
 		project_id = req.params.Project_id
@@ -43,6 +44,7 @@ module.exports = CompileController =
 				compileGroup: limits?.compileGroup
 				clsiServerId:clsiServerId
 				validationProblems:validationProblems
+				pdfDownloadDomain: Settings.pdfDownloadDomain
 			}
 
 	stopCompile: (req, res, next = (error) ->) ->
