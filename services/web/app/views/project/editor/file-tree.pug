@@ -345,7 +345,7 @@ script(type='text/ng-template', id='newDocModalTemplate')
 // Project Linked Files Modal
 script(type='text/ng-template', id='projectLinkedFileModalTemplate')
 	.modal-header
-		h3 New file from Project ({{ isOutputFiles }})
+		h3 New file from Project ({{ isOutputFilesMode }})
 
 	.modal-body
 		div
@@ -369,7 +369,7 @@ script(type='text/ng-template', id='projectLinkedFileModalTemplate')
 						) {{ project.name }}
 
 				br
-				.form-controls
+				.form-controls(ng-if="!isOutputFilesMode")
 					label(for="project-entity-select") Select a File
 					span(ng-show="state.inFlight.entities")
 						| &nbsp;
@@ -384,6 +384,22 @@ script(type='text/ng-template', id='projectLinkedFileModalTemplate')
 							ng-repeat="projectEntity in data.projectEntities"
 							value="{{ projectEntity.path }}"
 						) {{ projectEntity.path.slice(1) }}
+
+				.form-controls(ng-if="isOutputFilesMode")
+					label(for="project-entity-select") Select an Output File
+					span(ng-show="state.inFlight.compile")
+						| &nbsp;
+						i.fa.fa-spinner.fa-spin
+					select.form-control(
+						name="project-output-file-select"
+						ng-model="data.selectedProjectOutputFile"
+						ng-disabled="!shouldEnableProjectOutputFileSelect()"
+					)
+						option(value="" disabled selected) - Please Select an Output File
+						option(
+							ng-repeat="outputFile in data.projectOutputFiles"
+							value="{{ outputFile.path }}"
+						) {{ outputFile.path }}
 				br
 
 				.form-controls

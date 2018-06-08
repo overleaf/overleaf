@@ -53,7 +53,7 @@ define [
 				scope: $scope
 				resolve: {
 					parent_folder: () -> ide.fileTreeManager.getCurrentFolder()
-					isOutputFiles: () -> false
+					isOutputFilesMode: () -> false
 				}
 			)
 
@@ -67,7 +67,7 @@ define [
 				scope: $scope
 				resolve: {
 					parent_folder: () -> ide.fileTreeManager.getCurrentFolder()
-					isOutputFiles: () -> true
+					isOutputFilesMode: () -> true
 				}
 			)
 
@@ -230,10 +230,10 @@ define [
 	]
 
 	App.controller "ProjectLinkedFileModalController", [
-		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder", "isOutputFiles",
-		($scope,   ide,   $modalInstance,   $timeout,   parent_folder, isOutputFiles) ->
-			$scope.isOutputFiles = isOutputFiles
-			console.log ">>>> LINKED", isOutputFiles
+		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder", "isOutputFilesMode",
+		($scope,   ide,   $modalInstance,   $timeout,   parent_folder, isOutputFilesMode) ->
+			$scope.isOutputFilesMode = isOutputFilesMode
+			console.log ">>>> LINKED", isOutputFilesMode
 
 			$scope.data =
 				projects: null # or []
@@ -241,6 +241,7 @@ define [
 				projectEntities: null # or []
 				projectOutputFiles: null # or []
 				selectedProjectEntity: null
+				selectedProjectOutputFile: null
 				name: null
 			$scope.state =
 				inFlight:
@@ -253,13 +254,20 @@ define [
 			$scope.$watch 'data.selectedProjectId', (newVal, oldVal) ->
 				return if !newVal
 				$scope.data.selectedProjectEntity = null
-				if isOutputFiles
+				if isOutputFilesMode
 					$scope.compileProjectAndGetOutputFiles($scope.data.selectedProjectId)
 				else
 					$scope.getProjectEntities($scope.data.selectedProjectId)
 
 			# auto-set filename based on selected file
 			$scope.$watch 'data.selectedProjectEntity', (newVal, oldVal) ->
+				return if !newVal
+				fileName = newVal.split('/').reverse()[0]
+				if fileName
+					$scope.data.name = fileName
+
+			# auto-set filename based on selected file
+			$scope.$watch 'data.selectedProjectOutputFile', (newVal, oldVal) ->
 				return if !newVal
 				fileName = newVal.split('/').reverse()[0]
 				if fileName
@@ -295,12 +303,12 @@ define [
 					data.selectedProjectId &&
 					(
 						(
-							!isOutputFiles &&
+							!isOutputFilesMode &&
 							data.projectEntities &&
 							data.selectedProjectEntity
 						) ||
 						(
-							isOutputFiles &&
+							isOutputFilesMode &&
 							data.projectOutputFiles &&
 							data.selectedProjectOutputFile
 						)
@@ -332,17 +340,22 @@ define [
 				.catch (err) ->
 					_reset(err: true)
 
-			window._C = $scope.compileProjectAndGetOutputFiles = (project_id) =>
+			$scope.compileProjectAndGetOutputFiles = (project_id) =>
 				_setInFlight('compile')
-				$http.post("/project/${project_id}/compile", {
+				ide.$http.post("/project/#{project_id}/compile", {
 					check: "silent",
 					draft: false,
 					incrementalCompilesEnabled: false
 					_csrf: window.csrfToken
 				})
-				.then (data) ->
-					console.log ">> COMPILE", data
-					_reset(err: false)
+				.then (resp) ->
+					console.log ">> COMPILE", resp.data
+					if resp.data.status == 'success'
+						$scope.data.projectOutputFiles = resp.data.outputFiles
+						_reset(err: false)
+					else
+						$scope.data.projectOutputFiles = null
+						_reset(err: true)
 				.catch (err) ->
 					console.error(err)
 					_reset(err: true)
@@ -354,7 +367,7 @@ define [
 			$scope.create = () ->
 				projectId = $scope.data.selectedProjectId
 				name = $scope.data.name
-				if isOutputFiles
+				if isOutputFilesMode
 					provider = 'project_output_file'
 					payload = {
 						source_project_id: projectId,
