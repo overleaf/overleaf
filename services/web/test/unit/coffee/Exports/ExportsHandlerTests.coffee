@@ -235,3 +235,34 @@ describe 'ExportsHandler', ->
 			it "should return the error", ->
 				(@callback.args[0][0] instanceof Error)
 				.should.equal true
+
+	describe 'fetchExport', ->
+		beforeEach (done) ->
+			@settings.apis =
+				v1:
+					url: 'http://localhost:5000'
+					user: 'overleaf'
+					pass: 'pass'
+			@export_id = 897
+			@body = "{\"id\":897, \"status_summary\":\"completed\"}"
+			@stubGet = sinon.stub().yields(null, {statusCode: 200}, { body: @body })
+			done()
+
+		describe "when all goes well", ->
+			beforeEach (done) ->
+				@stubRequest.get = @stubGet
+				@ExportsHandler.fetchExport @export_id, (error, body) =>
+					@callback(error, body)
+					done()
+
+			it 'should issue the request', ->
+				expect(@stubGet.getCall(0).args[0]).to.deep.equal
+					url: @settings.apis.v1.url + '/api/v1/sharelatex/exports/' + @export_id
+					auth:
+						user: @settings.apis.v1.user
+						pass: @settings.apis.v1.pass
+
+			it 'should return the v1 export id', ->
+				@callback.calledWith(null, { body: @body })
+				.should.equal true
+

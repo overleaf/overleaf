@@ -104,7 +104,6 @@ module.exports = ExportsHandler = self =
 			url: "#{settings.apis.v1.url}/api/v1/sharelatex/exports/#{export_id}"
 			auth: {user: settings.apis.v1.user, pass: settings.apis.v1.pass }
 		}, (err, res, body) ->
-			console.log(body)
 			if err?
 				logger.err err:err, export:export_id, "error making request to v1 export"
 				callback err
