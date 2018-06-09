@@ -27,3 +27,13 @@ module.exports =
 				"exported project"
 			res.send export_v1_id: export_data.v1_id
 
+	exportStatus: (req, res) ->
+		{export_id} = req.params
+		ExportsHandler.fetchExport export_id, (err, export_json) ->
+			return next(err) if err?
+			parsed_export = JSON.parse(export_json)
+			json = {
+				status_summary: parsed_export.status_summary,
+				status_detail: parsed_export.status_detail
+			}
+			res.send export_json: json
