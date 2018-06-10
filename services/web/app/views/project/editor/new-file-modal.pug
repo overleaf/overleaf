@@ -1,0 +1,209 @@
+script(type='text/ng-template', id='newFileModalTemplate')
+	.modal-header
+		h3 Add Files
+	.modal-body.modal-new-file
+		table
+			tr
+				td.modal-new-file--list
+					ul.list-unstyled
+						li(ng-class="type == 'doc' ? 'active' : null")
+							a(href, ng-click="type = 'doc'")
+								i.fa.fa-fw.fa-file
+								|
+								| New File
+						li(ng-class="type == 'upload' ? 'active' : null")
+							a(href, ng-click="type = 'upload'")
+								i.fa.fa-fw.fa-upload
+								|
+								| Upload
+						li(ng-class="type == 'project' ? 'active' : null")
+							a(href, ng-click="type = 'project'")
+								i.fa.fa-fw.fa-folder-open
+								|
+								| From Another Project
+						li(ng-class="type == 'url' ? 'active' : null")
+							a(href, ng-click="type = 'url'")
+								i.fa.fa-fw.fa-globe
+								|
+								| From External URL
+				td(class="modal-new-file--body modal-new-file--body-{{type}}")
+					div(ng-if="type == 'doc'", ng-controller="NewDocModalController")
+						form(novalidate, name="newDocForm")
+							label(for="name") File Name
+							input.form-control(
+								type="text",
+								placeholder="File Name",
+								required,
+								ng-model="inputs.name",
+								on-enter="create()",
+								select-name-on="open",
+								valid-file,
+								name="name"
+							)
+						div.alert.alert-danger.row-spaced-small(ng-if="error")
+							div(ng-switch="error")
+								span(ng-switch-when="already exists") #{translate("file_already_exists")}
+								span(ng-switch-default) {{error}}
+						div.alert.alert-danger.row-spaced-small(ng-show="newDocForm.name.$error.validFile")
+							| #{translate('files_cannot_include_invalid_characters')}
+					div(ng-if="type == 'upload'", ng-controller="UploadFileModalController")
+						.alert.alert-warning.small.modal(ng-if="tooManyFiles") #{translate("maximum_files_uploaded_together", {max:"{{max_files}}"})}
+						.alert.alert-warning.small.modal(ng-if="rateLimitHit") #{translate("too_many_files_uploaded_throttled_short_period")}
+						.alert.alert-warning.small.modal(ng-if="notLoggedIn") #{translate("session_expired_redirecting_to_login", {seconds:"{{secondsToRedirect}}"})}
+						.alert.alert-warning.small.modal(ng-if="conflicts.length > 0")
+							p.text-center
+								| The following files already exist in this project:
+							ul.text-center.list-unstyled.row-spaced-small
+								li(ng-repeat="conflict in conflicts"): strong {{ conflict }}
+							p.text-center.row-spaced-small
+								| Do you want to overwrite them?
+							p.text-center
+								a(href, ng-click="doUpload()").btn.btn-primary Overwrite
+								| &nbsp;
+								a(href, ng-click="cancel()").btn.btn-default Cancel
+						div(
+							fine-upload
+							endpoint="/project/{{ project_id }}/upload"
+							template-id="qq-file-uploader-template"
+							multiple="true"
+							auto-upload="false"
+							on-complete-callback="onComplete"
+							on-upload-callback="onUpload"
+							on-validate-batch="onValidateBatch"
+							on-error-callback="onError"
+							on-submit-callback="onSubmit"
+							on-cancel-callback="onCancel"
+							control="control"
+							params="{'folder_id': parent_folder_id}"
+						)
+					div(ng-if="type == 'project'", ng-controller="ProjectLinkedFileModalController")
+						div
+							form
+								.form-controls
+									label(for="project-select") Select a Project
+									span(ng-show="state.inFlight.projects")
+										| &nbsp;
+										i.fa.fa-spinner.fa-spin
+									select.form-control(
+										name="project-select"
+										ng-model="data.selectedProjectId"
+										ng-disabled="!shouldEnableProjectSelect()"
+									)
+										option(value="" disabled selected) - Please Select a Project
+										option(
+											ng-repeat="project in data.projects"
+											value="{{ project._id }}"
+										) {{ project.name }}
+
+								.form-controls.row-spaced-small(ng-if="!isOutputFilesMode")
+									label(for="project-entity-select") Select a File
+									span(ng-show="state.inFlight.entities")
+										| &nbsp;
+										i.fa.fa-spinner.fa-spin
+									select.form-control(
+										name="project-entity-select"
+										ng-model="data.selectedProjectEntity"
+										ng-disabled="!shouldEnableProjectEntitySelect()"
+									)
+										option(value="" disabled selected) - Please Select a File
+										option(
+											ng-repeat="projectEntity in data.projectEntities"
+											value="{{ projectEntity.path }}"
+										) {{ projectEntity.path.slice(1) }}
+
+								.form-controls.row-spaced-small(ng-if="isOutputFilesMode")
+									label(for="project-entity-select") Select an Output File
+									span(ng-show="state.inFlight.compile")
+										| &nbsp;
+										i.fa.fa-spinner.fa-spin
+									select.form-control(
+										name="project-output-file-select"
+										ng-model="data.selectedProjectOutputFile"
+										ng-disabled="!shouldEnableProjectOutputFileSelect()"
+									)
+										option(value="" disabled selected) - Please Select an Output File
+										option(
+											ng-repeat="outputFile in data.projectOutputFiles"
+											value="{{ outputFile.path }}"
+										) {{ outputFile.path }}
+
+								.form-controls.row-spaced-small
+									label(for="name") File Name In This Project
+									input.form-control(
+										type="text"
+										placeholder="example.tex"
+										required
+										ng-model="data.name"
+										name="name"
+									)
+						div.alert.alert-danger.row-spaced-small(ng-if="state.error") Error, something went wrong!
+					div(ng-if="type == 'url'", ng-controller="UrlLinkedFileModalController")
+						form(novalidate, name="newLinkedFileForm")
+							label(for="url") URL to fetch the file from
+							input.form-control(
+								type="text",
+								placeholder="www.example.com/my_file",
+								required,
+								ng-model="inputs.url",
+								focus-on="open",
+								on-enter="create()",
+								name="url"
+							)
+							.row-spaced.small
+								label(for="name") File name in this project
+								input.form-control(
+									type="text",
+									placeholder="my_file",
+									required,
+									ng-model="inputs.name",
+									ng-change="nameChangedByUser = true"
+									valid-file,
+									on-enter="create()",
+									name="name"
+								)
+								.text-danger.row-spaced-small(ng-show="newDocForm.name.$error.validFile")
+									| #{translate('files_cannot_include_invalid_characters')}
+						div.alert.alert-danger.row-spaced-small(ng-if="error")
+							div(ng-switch="error")
+								span(ng-switch-when="already exists") #{translate("file_already_exists")}
+								span(ng-switch-default) {{error}}
+	.modal-footer
+		button.btn.btn-default(
+			ng-disabled="state.inflight"
+			ng-click="cancel()"
+		) #{translate("cancel")}
+		button.btn.btn-primary(
+			ng-disabled="state.inflight || !state.valid"
+			ng-click="create()"
+			ng-hide="type == 'upload'"
+		)
+			span(ng-hide="state.inflight") #{translate("create")}
+			span(ng-show="state.inflight") #{translate("creating")}...
+
+script(type="text/template", id="qq-file-uploader-template")
+	div.qq-uploader-selector
+		div(qq-hide-dropzone="").qq-upload-drop-area-selector.qq-upload-drop-area
+			span.qq-upload-drop-area-text-selector #{translate('drop_files_here_to_upload')}
+		div Drag here
+		div.row-spaced-small.small #{translate('or')}
+		div.row-spaced-small
+			div.qq-upload-button-selector.btn.btn-primary
+				| Select from your computer
+		span.qq-drop-processing-selector
+			span #{translate('processing')}
+			span.qq-drop-processing-spinner-selector
+		ul.qq-upload-list-selector
+			li
+				div.qq-progress-bar-container-selector
+					div(
+						role="progressbar"
+						aria-valuenow="0"
+						aria-valuemin="0"
+						aria-valuemax="100"
+						class="qq-progress-bar-selector qq-progress-bar"
+					)
+				span.qq-upload-file-selector.qq-upload-file
+				span.qq-upload-size-selector.qq-upload-size
+				a(type="button").qq-btn.qq-upload-cancel-selector.qq-upload-cancel #{translate('cancel')}
+				button(type="button").qq-btn.qq-upload-retry-selector.qq-upload-retry #{translate('retry')}
+				span(role="status").qq-upload-status-text-selector.qq-upload-status-text
