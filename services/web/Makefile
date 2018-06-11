@@ -192,7 +192,7 @@ test_unit_app:
 
 test_frontend: test_clean # stop service
 	$(MAKE) compile
-	docker-compose ${DOCKER_COMPOSE_FLAGS} up test_frontend
+	docker-compose ${DOCKER_COMPOSE_FLAGS} up --exit-code-from test_frontend --abort-on-container-exit test_frontend
 
 test_acceptance: test_acceptance_app test_acceptance_modules
 

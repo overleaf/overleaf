@@ -11,6 +11,7 @@ define ['ide/history/HistoryV2Manager'], (HistoryV2Manager) ->
 			expect(@scope.history).to.deep.equal({
 				isV2: true
 				updates: []
+				viewMode: null
 				nextBeforeTimestamp: null
 				atEnd: false
 				selection: {
@@ -23,6 +24,8 @@ define ['ide/history/HistoryV2Manager'], (HistoryV2Manager) ->
 					}
 				}
 				diff: null
+				files: []
+				selectedFile: null
 			})
 
 		describe "_perDocSummaryOfUpdates", ->
