@@ -95,7 +95,7 @@ script(type='text/ng-template', id='newFileModalTemplate')
 											value="{{ project._id }}"
 										) {{ project.name }}
 
-								.form-controls.row-spaced-small(ng-if="!isOutputFilesMode")
+								.form-controls.row-spaced-small(ng-if="!state.isOutputFilesMode")
 									label(for="project-entity-select") Select a File
 									span(ng-show="state.inFlight.entities")
 										| &nbsp;
@@ -111,7 +111,7 @@ script(type='text/ng-template', id='newFileModalTemplate')
 											value="{{ projectEntity.path }}"
 										) {{ projectEntity.path.slice(1) }}
 
-								.form-controls.row-spaced-small(ng-if="isOutputFilesMode")
+								.form-controls.row-spaced-small(ng-if="state.isOutputFilesMode")
 									label(for="project-entity-select") Select an Output File
 									span(ng-show="state.inFlight.compile")
 										| &nbsp;

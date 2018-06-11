@@ -223,12 +223,13 @@ define [
 				projects: false
 				entities: false
 				compile: false
+			$scope.state.isOutputFilesMode = false
 			$scope.state.error = false
 
 			$scope.$watch 'data.selectedProjectId', (newVal, oldVal) ->
 				return if !newVal
 				$scope.data.selectedProjectEntity = null
-				if isOutputFilesMode
+				if $scope.state.isOutputFilesMode
 					$scope.compileProjectAndGetOutputFiles($scope.data.selectedProjectId)
 				else
 					$scope.getProjectEntities($scope.data.selectedProjectId)
@@ -279,12 +280,12 @@ define [
 					data.selectedProjectId &&
 					(
 						(
-							!isOutputFilesMode &&
+							!$scope.state.isOutputFilesMode &&
 							data.projectEntities &&
 							data.selectedProjectEntity
 						) ||
 						(
-							isOutputFilesMode &&
+							$scope.state.isOutputFilesMode &&
 							data.projectOutputFiles &&
 							data.selectedProjectOutputFile
 						)
@@ -344,7 +345,7 @@ define [
 			$scope.$on 'create', () ->
 				projectId = $scope.data.selectedProjectId
 				name = $scope.data.name
-				if isOutputFilesMode
+				if $scope.state.isOutputFilesMode
 					provider = 'project_output_file'
 					payload = {
 						source_project_id: projectId,
