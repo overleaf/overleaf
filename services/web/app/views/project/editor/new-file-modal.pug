@@ -126,13 +126,14 @@ script(type='text/ng-template', id='newFileModalTemplate')
 											ng-repeat="outputFile in data.projectOutputFiles"
 											value="{{ outputFile.path }}"
 										) {{ outputFile.path }}
-								div
+								div.toggle-output-files-button
+									| or&nbsp;
 									a(
 										href="#"
 										ng-click="toggleOutputFilesMode()"
 									)
-										span(ng-show="state.isOutputFilesMode") Switch to source files
-										span(ng-show="!state.isOutputFilesMode") Switch to output files
+										span(ng-show="state.isOutputFilesMode") select from source files
+										span(ng-show="!state.isOutputFilesMode") select from output files
 
 								.form-controls.row-spaced-small
 									label(for="name") File Name In This Project
