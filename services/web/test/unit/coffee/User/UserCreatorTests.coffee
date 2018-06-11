@@ -70,3 +70,11 @@ describe "UserCreator", ->
 				assert.equal user.holdingAccount, true
 				assert.equal user.last_name, "lastNammmmeee"
 				done()
+
+		it "should set emails attribute", (done)->
+			@UserCreator.createNewUser email: @email, (err, user)=>
+				user.email.should.equal @email
+				user.emails.length.should.equal 1
+				user.emails[0].email.should.equal @email
+				user.emails[0].createdAt.should.be.a 'date'
+				done()
