@@ -11,7 +11,7 @@ module.exports =
 		email   = req.body.email
 
 		TeamInvitesHandler.createInvite teamManagerId, email, (err, invite) ->
-			return handleError(err, req, res, next) if err?
+			return next(err) if err?
 			inviteView = { user:
 				{ email: invite.email, sentAt: invite.sentAt, invite: true }
 			}
@@ -22,13 +22,13 @@ module.exports =
 		userId = AuthenticationController.getLoggedInUserId(req)
 
 		TeamInvitesHandler.getInvite token, (err, invite, teamSubscription) ->
-			return handleError(err, req, res, next) if err?
+			return next(err) if err?
 
 			if !invite
 				return ErrorController.notFound(req, res, next)
 
 			SubscriptionLocator.getUsersSubscription userId, (err, personalSubscription) ->
-				return handleError(err, req, res, next) if err?
+				return next(err) if err?
 
 				res.render "subscriptions/team/invite",
 					inviterName: invite.inviterName
@@ -41,8 +41,7 @@ module.exports =
 		userId = AuthenticationController.getLoggedInUserId(req)
 
 		TeamInvitesHandler.acceptInvite token, userId, (err, results) ->
-			return handleError(err, req, res, next) if err?
-
+			return next(err) if err?
 			res.sendStatus 204
 
 	revokeInvite: (req, res) ->
@@ -50,12 +49,5 @@ module.exports =
 		teamManagerId = AuthenticationController.getLoggedInUserId(req)
 
 		TeamInvitesHandler.revokeInvite teamManagerId, email, (err, results) ->
-			return handleError(err, req, res, next) if err?
-
+			return next(err) if err?
 			res.sendStatus 204
-
-handleError = (err, req, res, next) ->
-	if err.teamNotFound or err.inviteNoLongerValid
-		ErrorController.notFound(req, res, next)
-	else
-		next(err)

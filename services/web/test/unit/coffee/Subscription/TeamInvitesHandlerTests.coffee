@@ -6,6 +6,7 @@ querystring = require 'querystring'
 modulePath = "../../../../app/js/Features/Subscription/TeamInvitesHandler"
 
 ObjectId = require("mongojs").ObjectId
+Errors = require("../../../../app/js/Features/Errors/Errors")
 
 describe "TeamInvitesHandler", ->
 	beforeEach ->
@@ -13,13 +14,13 @@ describe "TeamInvitesHandler", ->
 			id: "666666",
 			first_name: "Daenerys"
 			last_name: "Targaryen"
-			email: "daenerys@motherofdragons.com"
+			email: "daenerys@example.com"
 		}
 
 		@token = "aaaaaaaaaaaaaaaaaaaaaa"
 
 		@teamInvite = {
-			email: "jorah@mormont.org",
+			email: "jorah@example.com",
 			token: @token,
 		}
 
@@ -83,6 +84,7 @@ describe "TeamInvitesHandler", ->
 				"./SubscriptionUpdater": @SubscriptionUpdater
 				"./LimitationsManager": @LimitationsManager
 				"../Email/EmailHandler": @EmailHandler
+				"../Errors/Errors": Errors
 
 	describe "getInvite", ->
 		it "returns the invite if there's one", (done) ->
@@ -96,25 +98,25 @@ describe "TeamInvitesHandler", ->
 			@Subscription.findOne = sinon.stub().yields(null, null)
 
 			@TeamInvitesHandler.getInvite @token, (err, invite, subscription) ->
-				expect(err).to.deep.eq(teamNotFound: true)
+				expect(err).to.be.instanceof(Errors.NotFoundError)
 				done()
 
 	describe "createInvite", ->
 		it "adds the team invite to the subscription", (done) ->
-			@TeamInvitesHandler.createInvite @manager.id, "John.Snow@nightwatch.com", (err, invite) =>
+			@TeamInvitesHandler.createInvite @manager.id, "John.Snow@example.com", (err, invite) =>
 				expect(err).to.eq(null)
 				expect(invite.token).to.eq(@newToken)
-				expect(invite.email).to.eq("john.snow@nightwatch.com")
-				expect(invite.inviterName).to.eq("Daenerys Targaryen (daenerys@motherofdragons.com)")
+				expect(invite.email).to.eq("john.snow@example.com")
+				expect(invite.inviterName).to.eq("Daenerys Targaryen (daenerys@example.com)")
 				expect(@subscription.teamInvites).to.deep.include(invite)
 				done()
 
 		it "sends an email", (done) ->
-			@TeamInvitesHandler.createInvite @manager.id, "John.Snow@nightwatch.com", (err, invite) =>
+			@TeamInvitesHandler.createInvite @manager.id, "John.Snow@example.com", (err, invite) =>
 				@EmailHandler.sendEmail.calledWith("verifyEmailToJoinTeam",
 					sinon.match({
-						to: "john.snow@nightwatch.com",
-						inviterName: "Daenerys Targaryen (daenerys@motherofdragons.com)",
+						to: "john.snow@example.com",
+						inviterName: "Daenerys Targaryen (daenerys@example.com)",
 						acceptInviteUrl: "http://example.com/subscription/invites/#{@newToken}/"
 					})
 				).should.equal true
@@ -136,6 +138,14 @@ describe "TeamInvitesHandler", ->
 
 				done()
 
+		it "removes any legacy invite from the subscription", (done) ->
+			@TeamInvitesHandler.createInvite @manager.id, "John.Snow@example.com", (err, invite) =>
+				@Subscription.update.calledWith(
+					{ _id: new ObjectId("55153a8014829a865bbf700d") },
+					{ '$pull': { invited_emails: "john.snow@example.com" } }
+				).should.eq true
+				done()
+
 	describe "createDomainInvite", ->
 		beforeEach ->
 			@licence =
@@ -143,13 +153,13 @@ describe "TeamInvitesHandler", ->
 				name: "Team Daenerys"
 
 			@user =
-				email: "John.Snow@nightwatch.com"
+				email: "John.Snow@example.com"
 
 		it "adds the team invite to the subscription", (done) ->
 			@TeamInvitesHandler.createDomainInvite @user, @licence, (err, invite) =>
 				expect(err).to.eq(null)
 				expect(invite.token).to.eq(@newToken)
-				expect(invite.email).to.eq("john.snow@nightwatch.com")
+				expect(invite.email).to.eq("john.snow@example.com")
 				expect(invite.inviterName).to.eq("Team Daenerys")
 				expect(@subscription.teamInvites).to.deep.include(invite)
 				done()
@@ -158,7 +168,7 @@ describe "TeamInvitesHandler", ->
 			@TeamInvitesHandler.createDomainInvite @user, @licence, (err, invite) =>
 				@EmailHandler.sendEmail.calledWith("verifyEmailToJoinTeam",
 					sinon.match({
-						to: "john.snow@nightwatch.com"
+						to: "john.snow@example.com"
 						inviterName: "Team Daenerys"
 						acceptInviteUrl: "http://example.com/subscription/invites/#{@newToken}/"
 					})
@@ -171,15 +181,15 @@ describe "TeamInvitesHandler", ->
 				id: "123456789",
 				first_name: "Tyrion",
 				last_name: "Lannister",
-				email: "tyrion@lannister.com"
+				email: "tyrion@example.com"
 			}
 
 			@UserGetter.getUserByAnyEmail.withArgs(@user.email).yields(null, @user)
 
 			@subscription.teamInvites.push({
-				email: "john.snow@nightwatch.com",
+				email: "john.snow@example.com",
 				token: "dddddddd",
-				inviterName: "Daenerys Targaryen (daenerys@motherofdragons.com)"
+				inviterName: "Daenerys Targaryen (daenerys@example.com)"
 			})
 
 		it "adds the user to the team", (done) ->
@@ -191,37 +201,37 @@ describe "TeamInvitesHandler", ->
 			@TeamInvitesHandler.acceptInvite "dddddddd", @user.id, =>
 				@Subscription.update.calledWith(
 					{ _id: new ObjectId("55153a8014829a865bbf700d") },
-					{ '$pull': { teamInvites: { email: 'john.snow@nightwatch.com' } } }
+					{ '$pull': { teamInvites: { email: 'john.snow@example.com' } } }
 				).should.eq true
 				done()
 
 	describe "revokeInvite", ->
 		it "removes the team invite from the subscription", (done) ->
-			@TeamInvitesHandler.revokeInvite @manager.id, "jorah@mormont.org", =>
+			@TeamInvitesHandler.revokeInvite @manager.id, "jorah@example.com", =>
 				@Subscription.update.calledWith(
 					{ _id: new ObjectId("55153a8014829a865bbf700d") },
-					{ '$pull': { teamInvites: { email: "jorah@mormont.org" } } }
+					{ '$pull': { teamInvites: { email: "jorah@example.com" } } }
 				).should.eq true
 
 				@Subscription.update.calledWith(
 					{ _id: new ObjectId("55153a8014829a865bbf700d") },
-					{ '$pull': { invited_emails: "jorah@mormont.org" } }
+					{ '$pull': { invited_emails: "jorah@example.com" } }
 				).should.eq true
 				done()
 
 	describe "createTeamInvitesForLegacyInvitedEmail", (done) ->
 		beforeEach ->
-			@subscription.invited_emails = ["eddard@stark.com", "robert@stark.com"]
+			@subscription.invited_emails = ["eddard@example.com", "robert@example.com"]
 			@TeamInvitesHandler.createInvite = sinon.stub().yields(null)
 			@SubscriptionLocator.getGroupsWithEmailInvite = sinon.stub().yields(null, [@subscription])
 
 		it "sends an invitation email to addresses in the legacy invited_emails field", (done) ->
-			@TeamInvitesHandler.createTeamInvitesForLegacyInvitedEmail "eddard@stark.com", (err, invite) =>
+			@TeamInvitesHandler.createTeamInvitesForLegacyInvitedEmail "eddard@example.com", (err, invite) =>
 				expect(err).not.to.exist
 
 				@TeamInvitesHandler.createInvite.calledWith(
 					@subscription.admin_id,
-					"eddard@stark.com"
+					"eddard@example.com"
 				).should.eq true
 
 				@TeamInvitesHandler.createInvite.callCount.should.eq 1
@@ -231,13 +241,13 @@ describe "TeamInvitesHandler", ->
 	describe "validation", ->
 		it "doesn't create an invite if the team limit has been reached", (done) ->
 			@LimitationsManager.teamHasReachedMemberLimit = sinon.stub().returns(true)
-			@TeamInvitesHandler.createInvite @manager.id, "John.Snow@nightwatch.com", (err, invite) =>
+			@TeamInvitesHandler.createInvite @manager.id, "John.Snow@example.com", (err, invite) =>
 				expect(err).to.deep.equal(limitReached: true)
 				done()
 
 		it "doesn't create an invite if the subscription is not in a group plan", (done) ->
 			@subscription.groupPlan = false
-			@TeamInvitesHandler.createInvite @manager.id, "John.Snow@nightwatch.com", (err, invite) =>
+			@TeamInvitesHandler.createInvite @manager.id, "John.Snow@example.com", (err, invite) =>
 				expect(err).to.deep.equal(wrongPlan: true)
 				done()
 
@@ -245,13 +255,13 @@ describe "TeamInvitesHandler", ->
 			member = {
 				id: "1a2b",
 				_id: "1a2b",
-				email: "tyrion@lannister.com"
+				email: "tyrion@example.com"
 			}
 
 			@subscription.member_ids = [member.id]
 			@UserGetter.getUserByAnyEmail.withArgs(member.email).yields(null, member)
 
-			@TeamInvitesHandler.createInvite @manager.id, "tyrion@lannister.com", (err, invite) =>
+			@TeamInvitesHandler.createInvite @manager.id, "tyrion@example.com", (err, invite) =>
 				expect(err).to.deep.equal(alreadyInTeam: true)
 				expect(invite).not.to.exist
 				done()

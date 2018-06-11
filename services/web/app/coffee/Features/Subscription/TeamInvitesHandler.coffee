@@ -14,12 +14,15 @@ SubscriptionUpdater = require("./SubscriptionUpdater")
 LimitationsManager = require("./LimitationsManager")
 
 EmailHandler = require("../Email/EmailHandler")
+EmailHelper = require("../Helpers/EmailHelper")
+
+Errors = require "../Errors/Errors"
 
 module.exports = TeamInvitesHandler =
 	getInvite: (token, callback) ->
 		Subscription.findOne 'teamInvites.token': token, (err, subscription) ->
 			return callback(err) if err?
-			return callback(teamNotFound: true) unless subscription?
+			return callback(new Errors.NotFoundError('team not found')) unless subscription?
 
 			invite = subscription.teamInvites.find (i) -> i.token == token
 			return callback(null, invite, subscription)
@@ -37,7 +40,9 @@ module.exports = TeamInvitesHandler =
 				else
 					inviterName = teamManager.email
 
-				createInvite(subscription, email, inviterName, callback)
+				removeLegacyInvite subscription.id, email, (error) ->
+					return callback(error) if error?
+					createInvite(subscription, email, inviterName, callback)
 
 	createDomainInvite: (user, licence, callback) ->
 		logger.log {licence, email: user.email}, "Creating domain team invite"
@@ -51,7 +56,7 @@ module.exports = TeamInvitesHandler =
 		logger.log {userId}, "Accepting invite"
 		TeamInvitesHandler.getInvite token, (err, invite, subscription) ->
 			return callback(err) if err?
-			return callback(inviteNoLongerValid: true) unless invite?
+			return callback(new Errors.NotFoundError('invite not found')) unless invite?
 
 			SubscriptionUpdater.addUserToGroup subscription.admin_id, userId, (err) ->
 				return callback(err) if err?
@@ -82,8 +87,7 @@ createInvite = (subscription, email, inviterName, callback) ->
 		return callback(error) if error?
 		return callback(reason) unless possible
 
-		# TODO: use standard way to canonalise email addresses
-		email = email.trim().toLowerCase()
+		email = EmailHelper.parseEmail(email)
 
 		invite = subscription.teamInvites.find (invite) -> invite.email == email
 
@@ -110,18 +114,24 @@ createInvite = (subscription, email, inviterName, callback) ->
 				return callback(error, invite)
 
 removeInviteFromTeam = (subscriptionId, email, callback) ->
-	email = email.trim().toLowerCase()
-
+	email = EmailHelper.parseEmail(email)
 	searchConditions = { _id: new ObjectId(subscriptionId.toString()) }
-
 	removeInvite = { $pull: { teamInvites: { email: email } } }
-	removeLegacyInvite = { $pull: { invited_emails: email } }
+	logger.log {subscriptionId, email, searchConditions, removeInvite}, 'removeInviteFromTeam'
 
 	async.series [
 		(cb) -> Subscription.update(searchConditions, removeInvite, cb),
-		(cb) -> Subscription.update(searchConditions, removeLegacyInvite, cb),
+		(cb) -> removeLegacyInvite(subscriptionId, email, cb),
 	], callback
 
+removeLegacyInvite = (subscriptionId, email, callback) ->
+	Subscription.update({
+		_id: new ObjectId(subscriptionId.toString())
+	}, {
+		$pull: {
+			invited_emails: EmailHelper.parseEmail(email)
+		}
+	}, callback)
 
 checkIfInviteIsPossible = (subscription, email, callback = (error, possible, reason) -> ) ->
 	unless subscription.groupPlan
