@@ -28,6 +28,8 @@ module.exports = TeamInvitesHandler =
 			return callback(null, invite, subscription)
 
 	createInvite: (teamManagerId, email, callback) ->
+		email = EmailHelper.parseEmail(email)
+		return callback(new Error('invalid email')) if !email?
 		logger.log {teamManagerId, email}, "Creating manager team invite"
 		UserGetter.getUser teamManagerId, (error, teamManager) ->
 			return callback(error) if error?
@@ -45,12 +47,14 @@ module.exports = TeamInvitesHandler =
 					createInvite(subscription, email, inviterName, callback)
 
 	createDomainInvite: (user, licence, callback) ->
-		logger.log {licence, email: user.email}, "Creating domain team invite"
+		email = EmailHelper.parseEmail(user.email)
+		return callback(new Error('invalid email')) if !email?
+		logger.log {licence, email: email}, "Creating domain team invite"
 		inviterName = licence.name.replace(/\s+licence$/i, licence.name)
 
 		SubscriptionLocator.getSubscription licence.subscription_id, (error, subscription) ->
 			return callback(error) if error?
-			createInvite(subscription, user.email, inviterName, callback)
+			createInvite(subscription, email, inviterName, callback)
 
 	acceptInvite: (token, userId, callback) ->
 		logger.log {userId}, "Accepting invite"
@@ -64,6 +68,8 @@ module.exports = TeamInvitesHandler =
 				removeInviteFromTeam(subscription.id, invite.email, callback)
 
 	revokeInvite: (teamManagerId, email, callback) ->
+		email = EmailHelper.parseEmail(email)
+		return callback(new Error('invalid email')) if !email?
 		logger.log {teamManagerId, email}, "Revoking invite"
 		SubscriptionLocator.getUsersSubscription teamManagerId, (err, teamSubscription) ->
 			return callback(err) if err?
@@ -87,7 +93,6 @@ createInvite = (subscription, email, inviterName, callback) ->
 		return callback(error) if error?
 		return callback(reason) unless possible
 
-		email = EmailHelper.parseEmail(email)
 
 		invite = subscription.teamInvites.find (invite) -> invite.email == email
 
@@ -114,7 +119,6 @@ createInvite = (subscription, email, inviterName, callback) ->
 				return callback(error, invite)
 
 removeInviteFromTeam = (subscriptionId, email, callback) ->
-	email = EmailHelper.parseEmail(email)
 	searchConditions = { _id: new ObjectId(subscriptionId.toString()) }
 	removeInvite = { $pull: { teamInvites: { email: email } } }
 	logger.log {subscriptionId, email, searchConditions, removeInvite}, 'removeInviteFromTeam'
@@ -129,7 +133,7 @@ removeLegacyInvite = (subscriptionId, email, callback) ->
 		_id: new ObjectId(subscriptionId.toString())
 	}, {
 		$pull: {
-			invited_emails: EmailHelper.parseEmail(email)
+			invited_emails: email
 		}
 	}, callback)
 

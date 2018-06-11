@@ -4,11 +4,14 @@ TeamInvitesHandler = require('./TeamInvitesHandler')
 AuthenticationController = require("../Authentication/AuthenticationController")
 SubscriptionLocator = require("./SubscriptionLocator")
 ErrorController = require("../Errors/ErrorController")
+EmailHelper = require("../Helpers/EmailHelper")
 
 module.exports =
 	createInvite: (req, res, next) ->
 		teamManagerId = AuthenticationController.getLoggedInUserId(req)
-		email   = req.body.email
+		email = EmailHelper.parseEmail(req.body.email)
+		if !email?
+			return res.sendStatus(400)
 
 		TeamInvitesHandler.createInvite teamManagerId, email, (err, invite) ->
 			return next(err) if err?
@@ -45,8 +48,10 @@ module.exports =
 			res.sendStatus 204
 
 	revokeInvite: (req, res) ->
-		email = req.params.email
+		email = EmailHelper.parseEmail(req.params.email)
 		teamManagerId = AuthenticationController.getLoggedInUserId(req)
+		if !email?
+			return res.sendStatus(400)
 
 		TeamInvitesHandler.revokeInvite teamManagerId, email, (err, results) ->
 			return next(err) if err?
