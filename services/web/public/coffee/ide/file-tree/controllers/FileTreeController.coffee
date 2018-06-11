@@ -229,7 +229,16 @@ define [
 			$scope.$watch 'data.selectedProjectId', (newVal, oldVal) ->
 				return if !newVal
 				$scope.data.selectedProjectEntity = null
+				$scope.data.selectedProjectOutputFile = null
 				if $scope.state.isOutputFilesMode
+					$scope.compileProjectAndGetOutputFiles($scope.data.selectedProjectId)
+				else
+					$scope.getProjectEntities($scope.data.selectedProjectId)
+
+			$scope.$watch 'state.isOutputFilesMode', (newVal, oldVal) ->
+				return if !newVal and !oldVal
+				$scope.data.selectedProjectOutputFile = null
+				if newVal == true
 					$scope.compileProjectAndGetOutputFiles($scope.data.selectedProjectId)
 				else
 					$scope.getProjectEntities($scope.data.selectedProjectId)
@@ -257,6 +266,10 @@ define [
 				inFlight.projects = inFlight.entities = inFlight.compile = false
 				$scope.state.inflight = false
 				$scope.state.error = isError
+
+			$scope.toggleOutputFilesMode = () ->
+				return if !$scope.data.selectedProjectId
+				$scope.state.isOutputFilesMode = !$scope.state.isOutputFilesMode
 
 			$scope.shouldEnableProjectSelect = () ->
 				{ state, data } = $scope
