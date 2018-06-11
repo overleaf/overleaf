@@ -47,13 +47,6 @@ module.exports = SubscriptionUpdater =
 				return callback(err)
 			FeaturesUpdater.refreshFeatures user_id, callback
 
-		removeEmailInviteFromGroup: (adminUser_id, email, callback)->
-			Subscription.update {
-				admin_id: adminUser_id
-			}, "$pull": {
-				invited_emails: email
-			}, callback
-
 	deleteSubscription: (subscription_id, callback = (error) ->) ->
 		SubscriptionLocator.getSubscription subscription_id, (err, subscription) ->
 			return callback(err) if err?
