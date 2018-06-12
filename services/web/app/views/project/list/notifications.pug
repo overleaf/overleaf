@@ -26,27 +26,38 @@ span(ng-controller="NotificationsController").userNotifications
 		)
 			.row(ng-hide="notification.hide")
 				.col-xs-12
-					.alert.alert-info(ng-if="notification.templateKey == 'notification_project_invite'", ng-controller="ProjectInviteNotificationController")
-						div.notification_inner
-							.notification_body(ng-show="!notification.accepted")
-								| !{translate("notification_project_invite_message")}
-								a.pull-right.btn.btn-sm.btn-info(href, ng-click="accept()", ng-disabled="notification.inflight")
-									span(ng-show="!notification.inflight") #{translate("join_project")}
-									span(ng-show="notification.inflight")
-										i.fa.fa-fw.fa-spinner.fa-spin
-										| &nbsp;
-										| #{translate("joining")}...
-							.notification_body(ng-show="notification.accepted")
-								| !{translate("notification_project_invite_accepted_message")}
-								a.pull-right.btn.btn-sm.btn-info(href="/project/{{ notification.messageOpts.projectId }}") #{translate("open_project")}
-							span().notification_close
-								button(ng-click="dismiss(notification)").close.pull-right
-									span(aria-hidden="true") &times;
-									span.sr-only #{translate("close")}
-					.alert.alert-info(ng-if="notification.templateKey != 'notification_project_invite'")
-						div.notification_inner
-							span(ng-bind-html="notification.html").notification_body
-							span().notification_close
-								button(ng-click="dismiss(notification)").close.pull-right
-									span(aria-hidden="true") &times;
-									span.sr-only #{translate("close")}
+					div(ng-switch="notification.templateKey")
+						.alert.alert-info(ng-switch-when="notification_project_invite", ng-controller="ProjectInviteNotificationController")
+							div.notification_inner
+								.notification_body(ng-show="!notification.accepted")
+									| !{translate("notification_project_invite_message")}
+									a.pull-right.btn.btn-sm.btn-info(href, ng-click="accept()", ng-disabled="notification.inflight")
+										span(ng-show="!notification.inflight") #{translate("join_project")}
+										span(ng-show="notification.inflight")
+											i.fa.fa-fw.fa-spinner.fa-spin
+											| &nbsp;
+											| #{translate("joining")}...
+								.notification_body(ng-show="notification.accepted")
+									| !{translate("notification_project_invite_accepted_message")}
+									a.pull-right.btn.btn-sm.btn-info(href="/project/{{ notification.messageOpts.projectId }}") #{translate("open_project")}
+								span().notification_close
+									button(ng-click="dismiss(notification)").close.pull-right
+										span(aria-hidden="true") &times;
+										span.sr-only #{translate("close")}
+						.alert.alert-info(ng-switch-when="notification_group_invite")
+							div.notification_inner
+								.notification_body
+									| #{translate("invited_to_join_team")}: {{ notification.messageOpts.groupName }}
+									a.pull-right.btn.btn-sm.btn-info(href="/user/subscription/domain/join")
+										| #{translate("join_team")}
+								span().notification_close
+									button(ng-click="dismiss(notification)").close.pull-right
+										span(aria-hidden="true") &times;
+										span.sr-only #{translate("close")}
+						.alert.alert-info(ng-switch-default)
+							div.notification_inner
+								span(ng-bind-html="notification.html").notification_body
+								span().notification_close
+									button(ng-click="dismiss(notification)").close.pull-right
+										span(aria-hidden="true") &times;
+										span.sr-only #{translate("close")}
