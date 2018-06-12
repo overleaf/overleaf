@@ -16,9 +16,9 @@
     "test:unit": "npm run compile:app && npm run compile:unit_tests && npm run test:unit:_run -- --grep=$MOCHA_GREP",
     "compile:unit_tests": "[ ! -e test/unit/coffee ] &&  echo 'No unit tests to compile' || coffee -o test/unit/js -c test/unit/coffee",
     "compile:acceptance_tests": "[ ! -e test/acceptance/coffee ] && echo 'No acceptance tests to compile' || coffee -o test/acceptance/js -c test/acceptance/coffee",
-    "compile:all": "npm run compile:app && npm run compile:unit_tests && npm run compile:acceptance_tests",
+    "compile:all": "npm run compile:app && npm run compile:unit_tests && npm run compile:acceptance_tests && npm run compile:smoke_tests",
     "nodemon": "nodemon --config nodemon.json",
-    "compile:smoke_tests": "[ -e test/smoke ] && coffee -o test/smoke/js -c test/smoke/coffee || echo 'No smoke tests to compile, skipping'"
+    "compile:smoke_tests": "[ ! -e test/smoke/coffee] &&  echo 'No smoke tests to compile' || coffee -o test/smoke/js -c test/smoke/coffee"
   },
   "author": "James Allen <james@sharelatex.com>",
   "dependencies": {
