@@ -1,0 +1,40 @@
+extends ../../layout
+
+block scripts
+	script(type='text/javascript').
+		window.teamId = '#{teamId}'
+		window.hasPersonalSubscription = #{hasPersonalSubscription}
+		window.inviteToken = '#{inviteToken}'
+
+block content
+	.content.content-alt.team-invite
+		.container
+			.row
+				.col-md-8.col-md-offset-2
+					-if (query.expired)
+						.alert.alert-warning #{translate("email_link_expired")}
+
+			.row.row-spaced
+				.col-md-8.col-md-offset-2.text-center(ng-cloak)
+					.card(ng-controller="TeamInviteController")
+						.page-header
+							h1.text-centered #{translate("invited_to_group", {inviterName: inviterName, appName: appName})}
+
+						div(ng-show="view =='personalSubscription'")
+							p #{translate("cancel_personal_subscription_first")}
+							p
+								a.btn.btn.btn-default(ng-click="keepPersonalSubscription()", ng-disabled="inflight") #{translate("not_now")}
+								| &nbsp;
+								a.btn.btn.btn-primary(ng-click="cancelPersonalSubscription()", ng-disabled="inflight") #{translate("cancel_your_subscription")}
+
+						div(ng-show="view =='teamInvite'")
+							p #{translate("join_team_explanation", {appName: appName})}
+							p
+								a.btn.btn-default(href="/project") #{translate("not_now")}
+								| &nbsp;
+								a.btn.btn.btn-primary(ng-click="joinTeam()", ng-disabled="inflight") #{translate("accept_invitation")} 
+
+						div(ng-show="view =='inviteAccepted'")
+							p #{translate("joined_team", {inviterName: inviterName})}
+							p
+								a.btn.btn.btn-primary(href="/project") #{translate("done")}

@@ -7,6 +7,7 @@ Subscription = require("../../models/Subscription").Subscription
 LimitationsManager = require("./LimitationsManager")
 logger = require("logger-sharelatex")
 OneTimeTokenHandler = require("../Security/OneTimeTokenHandler")
+TeamInvitesHandler = require("./TeamInvitesHandler")
 EmailHandler = require("../Email/EmailHandler")
 settings = require("settings-sharelatex")
 NotificationsBuilder = require("../Notifications/NotificationsBuilder")
@@ -33,17 +34,13 @@ module.exports = SubscriptionGroupHandler =
 						userViewModel = buildUserViewModel(user)
 						callback(err, userViewModel)
 				else
-					SubscriptionUpdater.addEmailInviteToGroup adminUserId, newEmail, (err) ->
+					TeamInvitesHandler.createInvite adminUserId, newEmail, (err) ->
 						return callback(err) if err?
 						userViewModel = buildEmailInviteViewModel(newEmail)
 						callback(err, userViewModel)
 
 	removeUserFromGroup: (adminUser_id, userToRemove_id, callback)->
 		SubscriptionUpdater.removeUserFromGroup adminUser_id, userToRemove_id, callback
-
-	removeEmailInviteFromGroup: (adminUser_id, email, callback) ->
-		SubscriptionUpdater.removeEmailInviteFromGroup adminUser_id, email, callback
-
 
 	replaceUserReferencesInGroups: (oldId, newId, callback) ->
 		Subscription.update {admin_id: oldId}, {admin_id: newId}, (error) ->
@@ -62,8 +59,13 @@ module.exports = SubscriptionGroupHandler =
 	getPopulatedListOfMembers: (adminUser_id, callback)->
 		SubscriptionLocator.getUsersSubscription adminUser_id, (err, subscription)->
 			users = []
+
 			for email in subscription.invited_emails or []
 				users.push buildEmailInviteViewModel(email)
+
+			for teamInvite in subscription.teamInvites or []
+				users.push buildEmailInviteViewModel(teamInvite.email)
+
 			jobs = _.map subscription.member_ids, (user_id)->
 				return (cb)->
 					UserGetter.getUser user_id, (err, user)->
@@ -85,58 +87,17 @@ module.exports = SubscriptionGroupHandler =
 			logger.log user_id:user_id, subscription_id:subscription_id, partOfGroup:partOfGroup, "checking if user is part of a group"
 			callback(err, partOfGroup)
 
-
-	sendVerificationEmail: (subscription_id, licenceName, email, callback)->
-		ONE_DAY_IN_S = 1000 * 60 * 60 * 24
-		OneTimeTokenHandler.getNewToken subscription_id, {expiresIn:ONE_DAY_IN_S}, (err, token)->
-			opts =
-				to : email
-				group_name: licenceName
-				completeJoinUrl: "#{settings.siteUrl}/user/subscription/#{subscription_id}/group/complete-join?token=#{token}"
-			EmailHandler.sendEmail "completeJoinGroupAccount", opts, callback
-
-	processGroupVerification: (userEmail, subscription_id, token, callback)->
-		logger.log userEmail:userEmail, subscription_id:subscription_id, "processing group verification for user"
-		OneTimeTokenHandler.getValueFromTokenAndExpire token, (err, token_subscription_id)->
-			if err?  or subscription_id != token_subscription_id
-				logger.err userEmail:userEmail, token:token, "token value not found for processing group verification"
-				return callback("token_not_found")
-			SubscriptionLocator.getSubscription subscription_id, (err, subscription)->
-				if err?
-					logger.err err:err, subscription:subscription, userEmail:userEmail, subscription_id:subscription_id, "error getting subscription"
-					return callback(err)
-				if !subscription?
-					logger.warn subscription_id:subscription_id, userEmail:userEmail, "no subscription found"
-					return callback()
-				SubscriptionGroupHandler.addUserToGroup subscription?.admin_id, userEmail, callback
-
-	convertEmailInvitesToMemberships: (email, user_id, callback = (err) ->) ->
-		SubscriptionLocator.getGroupsWithEmailInvite email, (err, groups = []) ->
-			return callback(err) if err?
-			logger.log {email, user_id, groups}, "found groups to convert from email invite to member"
-			jobs = []
-			for group in groups
-				do (group) ->
-					jobs.push (cb) ->
-						SubscriptionUpdater.removeEmailInviteFromGroup group.admin_id, email, (err) ->
-							return cb(err) if err?
-							SubscriptionUpdater.addUserToGroup group.admin_id, user_id, (err) ->
-								return cb(err) if err?
-								logger.log {group_id: group._id, user_id, email}, "converted email invite to group membership"
-								return cb()
-			async.series jobs, callback
-
 buildUserViewModel = (user)->
 	u =
 		email: user.email
 		first_name: user.first_name
 		last_name: user.last_name
-		holdingAccount: user.holdingAccount
+		invite: user.holdingAccount
 		_id: user._id
 	return u
 
 buildEmailInviteViewModel = (email) ->
 	return {
 		email: email
-		holdingAccount: true
+		invite: true
 	}

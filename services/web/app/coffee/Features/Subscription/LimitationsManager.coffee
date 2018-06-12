@@ -6,7 +6,7 @@ Settings = require("settings-sharelatex")
 CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
 CollaboratorsInvitesHandler = require("../Collaborators/CollaboratorsInviteHandler")
 
-module.exports =
+module.exports = LimitationsManager =
 	allowedNumberOfCollaboratorsInProject: (project_id, callback) ->
 		ProjectGetter.getProject project_id, owner_ref: true, (error, project) =>
 			return callback(error) if error?
@@ -19,7 +19,6 @@ module.exports =
 				callback null, user.features.collaborators
 			else
 				callback null, Settings.defaultPlanCode.collaborators
-		
 
 	canAddXCollaborators: (project_id, x_collaborators, callback = (error, allowed)->) ->
 		@allowedNumberOfCollaboratorsInProject project_id, (error, allowed_number) =>
@@ -56,6 +55,13 @@ module.exports =
 			return callback(err) if err?
 			callback err, subscriptions.length > 0, subscriptions
 
+	teamHasReachedMemberLimit: (subscription) ->
+		currentTotal = (subscription.member_ids or []).length +
+			(subscription.teamInvites or []).length +
+			(subscription.invited_emails or []).length
+
+		return currentTotal >= subscription.membersLimit
+
 	hasGroupMembersLimitReached: (user_id, callback = (err, limitReached, subscription)->)->
 		SubscriptionLocator.getUsersSubscription user_id, (err, subscription)->
 			if err?
@@ -64,9 +70,6 @@ module.exports =
 			if !subscription?
 				logger.err user_id:user_id, "no subscription found for user"
 				return callback("no subscription found")
-			currentTotal = (subscription.member_ids or []).length + (subscription.invited_emails or []).length
-			limitReached = currentTotal >= subscription.membersLimit
-			logger.log user_id:user_id, limitReached:limitReached, currentTotal: currentTotal, membersLimit: subscription.membersLimit, "checking if subscription members limit has been reached"
-			callback(err, limitReached, subscription)
 
-getOwnerIdOfProject = (project_id, callback)->
+			limitReached = LimitationsManager.teamHasReachedMemberLimit(subscription)
+			callback(err, limitReached, subscription)

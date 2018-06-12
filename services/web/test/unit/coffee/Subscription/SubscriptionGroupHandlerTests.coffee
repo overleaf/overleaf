@@ -30,8 +30,9 @@ describe "SubscriptionGroupHandler", ->
 		@SubscriptionUpdater =
 			addUserToGroup: sinon.stub().callsArgWith(2)
 			removeUserFromGroup: sinon.stub().callsArgWith(2)
-			addEmailInviteToGroup: sinon.stub().callsArgWith(2)
-			removeEmailInviteFromGroup: sinon.stub().callsArgWith(2)
+
+		@TeamInvitesHandler =
+			createInvite: sinon.stub().callsArgWith(2)
 
 		@UserGetter =
 			getUser: sinon.stub()
@@ -61,6 +62,7 @@ describe "SubscriptionGroupHandler", ->
 			"logger-sharelatex": log:->
 			"../User/UserCreator": @UserCreator
 			"./SubscriptionUpdater": @SubscriptionUpdater
+			"./TeamInvitesHandler": @TeamInvitesHandler
 			"./SubscriptionLocator": @SubscriptionLocator
 			"../../models/Subscription": Subscription: @Subscription
 			"../User/UserGetter": @UserGetter
@@ -111,7 +113,7 @@ describe "SubscriptionGroupHandler", ->
 		it "should add an email invite if no user is found", (done) ->
 			@UserGetter.getUserByAnyEmail.callsArgWith(1, null, null)
 			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
-				@SubscriptionUpdater.addEmailInviteToGroup.calledWith(@adminUser_id, @newEmail).should.equal true
+				@TeamInvitesHandler.createInvite.calledWith(@adminUser_id, @newEmail).should.equal true
 				done()
 
 	describe "removeUserFromGroup", ->
@@ -183,13 +185,18 @@ describe "SubscriptionGroupHandler", ->
 				done()
 
 		it "should return any invited users", (done) ->
-			@subscription.invited_emails = ["jo@example.com", "charlie@example.com"]
+			@subscription.invited_emails = [ "jo@example.com" ]
+
+			@subscription.teamInvites = [
+				{ email: "charlie@example.com" }
+			]
+
 			@Handler.getPopulatedListOfMembers @adminUser_id, (err, users)=>
 				users[0].email.should.equal "jo@example.com"
-				users[0].holdingAccount.should.equal true
+				users[0].invite.should.equal true
 				users[1].email.should.equal "charlie@example.com"
-				users[1].holdingAccount.should.equal true
-				users.length.should.equal @subscription.invited_emails.length
+				users[1].invite.should.equal true
+				users.length.should.equal @subscription.teamInvites.length + @subscription.invited_emails.length
 				done()
 
 	describe "isUserPartOfGroup", ->
@@ -206,65 +213,4 @@ describe "SubscriptionGroupHandler", ->
 			@SubscriptionLocator.getSubscriptionByMemberIdAndId.callsArgWith(2, null)
 			@Handler.isUserPartOfGroup @user_id, @subscription_id, (err, partOfGroup)->
 				partOfGroup.should.equal false
-				done()
-
-
-	describe "sendVerificationEmail", ->
-		beforeEach ->
-			@token = "secret token"
-			@subscription_id = "123ed13123"
-			@licenceName = "great licnece"
-			@email = "bob@smith.com"
-			@OneTimeTokenHandler.getNewToken.callsArgWith(2, null, @token)
-			@EmailHandler.sendEmail.callsArgWith(2)
-
-		it "should put a one time token into the email", (done)->
-			@Handler.sendVerificationEmail @subscription_id, @licenceName, @email, (err)=>
-				emailOpts = @EmailHandler.sendEmail.args[0][1]
-				emailOpts.completeJoinUrl.should.equal "#{@settings.siteUrl}/user/subscription/#{@subscription_id}/group/complete-join?token=#{@token}"
-				emailOpts.to.should.equal @email
-				emailOpts.group_name.should.equal @licenceName
-				done()
-
-	describe "processGroupVerification", ->
-		beforeEach ->
-			@token = "31dDAd2Da"
-			@SubscriptionLocator.getSubscription.callsArgWith(1, null, @subscription)
-			@Handler.addUserToGroup = sinon.stub().callsArgWith(2)
-
-		it "should addUserToGroup", (done)->
-			@OneTimeTokenHandler.getValueFromTokenAndExpire.callsArgWith(1, null, @subscription_id)
-			@Handler.processGroupVerification @email, @subscription_id, @token, (err)=>
-				@Handler.addUserToGroup.calledWith(@adminUser_id, @email).should.equal true
-				done()
-
-		it "should return token_not_found error if it couldn't get the token", (done)->
-			@OneTimeTokenHandler.getValueFromTokenAndExpire.callsArgWith(1)
-			@Handler.processGroupVerification @email, @subscription_id, @token, (err)=>
-				err.should.equal "token_not_found"
-				done()
-
-	describe "convertEmailInvitesToMemberships", ->
-		beforeEach ->
-			@SubscriptionLocator.getGroupsWithEmailInvite = sinon.stub().yields(null, @groups = [{ admin_id: "group-1" }, { admin_id: "group-2" }])
-
-		it "should get groups with the email address invited to", (done) ->
-			@Handler.convertEmailInvitesToMemberships @email, @user_id, (err) =>
-				@SubscriptionLocator.getGroupsWithEmailInvite.calledWith(@email).should.equal true
-				done()
-
-		it "should remove the email from each group", (done) ->
-			@Handler.convertEmailInvitesToMemberships @email, @user_id, (err) =>
-				for group in @groups
-					@SubscriptionUpdater.removeEmailInviteFromGroup
-						.calledWith(group.admin_id, @email)
-						.should.equal true
-				done()
-
-		it "should add the user to each group", (done) ->
-			@Handler.convertEmailInvitesToMemberships @email, @user_id, (err) =>
-				for group in @groups
-					@SubscriptionUpdater.addUserToGroup
-						.calledWith(group.admin_id, @user_id)
-						.should.equal true
 				done()

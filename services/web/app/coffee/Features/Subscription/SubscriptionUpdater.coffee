@@ -26,41 +26,26 @@ module.exports = SubscriptionUpdater =
 
 	addUserToGroup: (adminUser_id, user_id, callback)->
 		logger.log adminUser_id:adminUser_id, user_id:user_id, "adding user into mongo subscription"
-		searchOps = 
+		searchOps =
 			admin_id: adminUser_id
-		insertOperation = 
+		insertOperation =
 			"$addToSet": {member_ids:user_id}
 		Subscription.findAndModify searchOps, insertOperation, (err, subscription)->
 			if err?
 				logger.err err:err, searchOps:searchOps, insertOperation:insertOperation, "error findy and modify add user to group"
 				return callback(err)
 			FeaturesUpdater.refreshFeatures user_id, callback
-	
-	addEmailInviteToGroup: (adminUser_id, email, callback) ->
-		logger.log {adminUser_id, email}, "adding email into mongo subscription"
-		searchOps = 
-			admin_id: adminUser_id
-		insertOperation =
-			"$addToSet": {invited_emails: email}
-		Subscription.findAndModify searchOps, insertOperation, callback
 
 	removeUserFromGroup: (adminUser_id, user_id, callback)->
-		searchOps = 
+		searchOps =
 			admin_id: adminUser_id
-		removeOperation = 
+		removeOperation =
 			"$pull": {member_ids:user_id}
 		Subscription.update searchOps, removeOperation, (err)->
 			if err?
 				logger.err err:err, searchOps:searchOps, removeOperation:removeOperation, "error removing user from group"
 				return callback(err)
 			FeaturesUpdater.refreshFeatures user_id, callback
-
-	removeEmailInviteFromGroup: (adminUser_id, email, callback)->
-		Subscription.update {
-			admin_id: adminUser_id
-		}, "$pull": {
-			invited_emails: email
-		}, callback
 
 	deleteSubscription: (subscription_id, callback = (error) ->) ->
 		SubscriptionLocator.getSubscription subscription_id, (err, subscription) ->

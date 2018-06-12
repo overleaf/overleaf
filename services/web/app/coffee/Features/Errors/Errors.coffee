@@ -56,7 +56,7 @@ V1HistoryNotSyncedError.prototype.__proto___ = Error.prototype
 
 ProjectHistoryDisabledError = (message) ->
 	error = new Error(message)
-	error.name = "ProjectHistoryDisabledError "
+	error.name = "ProjectHistoryDisabledError"
 	error.__proto__ = ProjectHistoryDisabledError.prototype
 	return error
 ProjectHistoryDisabledError.prototype.__proto___ = Error.prototype

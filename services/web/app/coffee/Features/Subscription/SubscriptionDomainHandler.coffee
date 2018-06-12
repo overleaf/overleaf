@@ -15,7 +15,7 @@ module.exports = SubscriptionDomainHandler =
 	getDomainLicencePage: (user)->
 		licence = SubscriptionDomainHandler._findDomainLicence(user.email)
 		if licence?.verifyEmail
-			return "/user/subscription/#{licence.subscription_id}/group/invited"
+			return "/user/subscription/domain/join"
 		else
 			return undefined
 
