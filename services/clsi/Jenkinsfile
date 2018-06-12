@@ -30,11 +30,11 @@ pipeline {
     stage('Package and publish build') {
       steps {
         
-        withCredentials([file(credentialsId: 'csh-gcdm-test', variable: 'DOCKER_REPO_KEY_PATH')]) {
-          sh 'docker login -u _json_key --password-stdin https://csh-gcdm-test < ${DOCKER_REPO_KEY_PATH}'
+        withCredentials([file(credentialsId: 'gcr.io_csh-gcdm-test', variable: 'DOCKER_REPO_KEY_PATH')]) {
+          sh 'docker login -u _json_key --password-stdin https://gcr.io/csh-gcdm-test < ${DOCKER_REPO_KEY_PATH}'
         }
-        sh 'DOCKER_REPO=csh-gcdm-test make publish'
-        sh 'docker logout https://csh-gcdm-test'
+        sh 'DOCKER_REPO=gcr.io/csh-gcdm-test make publish'
+        sh 'docker logout https://gcr.io/csh-gcdm-test'
         
       }
     }
