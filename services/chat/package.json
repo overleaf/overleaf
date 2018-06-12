@@ -16,7 +16,7 @@
     "compile:all": "npm run compile:app && npm run compile:unit_tests && npm run compile:acceptance_tests",
     "nodemon": "nodemon --config nodemon.json",
     "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
-    "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js"
+    "test:unit:_run": "mocha --recursive --reporter spec --exit $@ test/unit/js"
   },
   "dependencies": {
     "async": "0.2.9",
