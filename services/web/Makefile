@@ -209,7 +209,7 @@ test_acceptance_app_stop_service:
 test_acceptance_app_run:
 	@docker-compose ${DOCKER_COMPOSE_FLAGS} exec -T test_acceptance npm -q run test:acceptance -- ${MOCHA_ARGS}; \
 	if [ $$? -eq 137 ]; then \
-		echo "\nOh dear, it looks like the web process crashed! Run:\n\n\tdocker-compose logs test_acceptance\n\nto see why"; \
+		echo "\nOh dear, it looks like the web process crashed! To see why, run:\n\n\tdocker-compose logs test_acceptance\n"; \
 		exit 1; \
 	fi
 
