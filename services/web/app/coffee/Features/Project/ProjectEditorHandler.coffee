@@ -1,5 +1,6 @@
 _ = require("underscore")
 
+
 module.exports = ProjectEditorHandler =
 	trackChangesAvailable: false
 

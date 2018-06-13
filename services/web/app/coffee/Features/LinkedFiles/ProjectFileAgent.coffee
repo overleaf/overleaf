@@ -2,6 +2,7 @@ FileWriter = require('../../infrastructure/FileWriter')
 AuthorizationManager = require('../Authorization/AuthorizationManager')
 ProjectLocator = require('../Project/ProjectLocator')
 ProjectGetter = require('../Project/ProjectGetter')
+Project = require("../../models/Project").Project
 DocstoreManager = require('../Docstore/DocstoreManager')
 FileStoreHandler = require('../FileStore/FileStoreHandler')
 FileWriter = require('../../infrastructure/FileWriter')
@@ -41,9 +42,17 @@ ProjectNotFoundError = (message) ->
 ProjectNotFoundError.prototype.__proto__ = Error.prototype
 
 
+V1ProjectNotFoundError = (message) ->
+	error = new Error(message)
+	error.name = 'V1ProjectNotFound'
+	error.__proto__ = V1ProjectNotFoundError.prototype
+	return error
+V1ProjectNotFoundError.prototype.__proto__ = Error.prototype
+
+
 SourceFileNotFoundError = (message) ->
 	error = new Error(message)
-	error.name = 'BadData'
+	error.name = 'SourceFileNotFound'
 	error.__proto__ = SourceFileNotFoundError.prototype
 	return error
 SourceFileNotFoundError.prototype.__proto__ = Error.prototype
@@ -55,48 +64,71 @@ module.exports = ProjectFileAgent =
 		return _.pick(
 			data,
 			'source_project_id',
+			'v1_source_doc_id',
 			'source_entity_path'
 		)
 
 	_validate: (data) ->
 		return (
-			data.source_project_id? &&
+			(data.source_project_id? || data.v1_source_doc_id?) &&
 			data.source_entity_path?
 		)
 
+	canCreate: (data) ->
+		# Don't allow creation of linked-files with v1 doc ids
+		!data.v1_source_doc_id?
+
+	_getSourceProject: (data, callback=(err, project)->) ->
+		projection = {_id: 1, name: 1}
+		if data.v1_source_doc_id?
+			Project.findOne {'overleaf.id': data.v1_source_doc_id}, projection, (err, project) ->
+				return callback(err) if err?
+				if !project?
+					return callback(new V1ProjectNotFoundError())
+				callback(null, project)
+		else if data.source_project_id?
+			ProjectGetter.getProject data.source_project_id, projection, (err, project) ->
+				return callback(err) if err?
+				if !project?
+					return callback(new ProjectNotFoundError())
+				callback(null, project)
+		else
+			callback(new BadDataError('neither v1 nor v2 id present'))
+
 	decorateLinkedFileData: (data, callback = (err, newData) ->) ->
 		callback = _.once(callback)
-		{ source_project_id } = data
-		return callback(new BadDataError()) if !source_project_id?
-		ProjectGetter.getProject source_project_id, (err, project) ->
+		@_getSourceProject data, (err, project) ->
 			return callback(err) if err?
-			return callback(new ProjectNotFoundError()) if !project?
 			callback(err, _.extend(data, {source_project_display_name: project.name}))
 
 	checkAuth: (project_id, data, current_user_id, callback = (error, allowed)->) ->
 		callback = _.once(callback)
 		if !ProjectFileAgent._validate(data)
 			return callback(new BadDataError())
-		{source_project_id, source_entity_path} = data
-		AuthorizationManager.canUserReadProject current_user_id, source_project_id, null, (err, canRead) ->
+		@_getSourceProject data, (err, project) ->
 			return callback(err) if err?
-			callback(null, canRead)
+			AuthorizationManager.canUserReadProject current_user_id, project._id, null, (err, canRead) ->
+				return callback(err) if err?
+				callback(null, canRead)
 
 	writeIncomingFileToDisk:
 		(project_id, data, current_user_id, callback = (error, fsPath) ->) ->
 			callback = _.once(callback)
 			if !ProjectFileAgent._validate(data)
 				return callback(new BadDataError())
-			{source_project_id, source_entity_path} = data
-			ProjectLocator.findElementByPath {
-				project_id: source_project_id,
-				path: source_entity_path
-			}, (err, entity, type) ->
-				if err?
-					if err.toString().match(/^not found.*/)
-						err = new SourceFileNotFoundError()
-					return callback(err)
-				ProjectFileAgent._writeEntityToDisk source_project_id, entity._id, type, callback
+			{ source_entity_path } = data
+			@_getSourceProject data, (err, project) ->
+				return callback(err) if err?
+				source_project_id = project._id
+				ProjectLocator.findElementByPath {
+					project_id: source_project_id,
+					path: source_entity_path
+				}, (err, entity, type) ->
+					if err?
+						if err.toString().match(/^not found.*/)
+							err = new SourceFileNotFoundError()
+						return callback(err)
+					ProjectFileAgent._writeEntityToDisk source_project_id, entity._id, type, callback
 
 	_writeEntityToDisk: (project_id, entity_id, type, callback=(err, location)->) ->
 		callback = _.once(callback)
@@ -122,6 +154,8 @@ module.exports = ProjectFileAgent =
 			res.status(404).send("Source file not found")
 		else if error instanceof ProjectNotFoundError
 			res.status(404).send("Project not found")
+		else if error instanceof V1ProjectNotFoundError
+			res.status(409).send("Sorry, the source project is not yet imported to Overleaf v2. Please import it to Overleaf v2 to refresh this file")
 		else
 			next(error)
 		next()

@@ -9,3 +9,7 @@ module.exports =
 			AuthorizationMiddlewear.ensureUserCanWriteProjectContent,
 			LinkedFilesController.createLinkedFile
 
+		webRouter.post '/project/:project_id/linked_file/:file_id/refresh',
+			AuthenticationController.requireLogin(),
+			AuthorizationMiddlewear.ensureUserCanWriteProjectContent,
+			LinkedFilesController.refreshLinkedFile

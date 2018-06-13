@@ -52,7 +52,10 @@ div.binary-file.full-size(
 				i.fa.fa-fw.fa-external-link-square.fa-rotate-180.linked-file-icon
 				| Imported from
 				|
-				a(ng-href='/project/{{openFile.linkedFileData.source_project_id}}' target="_blank")
+				a(ng-if='!openFile.linkedFileData.v1_source_doc_id'
+					ng-href='/project/{{openFile.linkedFileData.source_project_id}}' target="_blank")
+					| {{ openFile.linkedFileData.source_project_display_name }}
+				span(ng-if='openFile.linkedFileData.v1_source_doc_id')
 					| {{ openFile.linkedFileData.source_project_display_name }}
 				| /{{ openFile.linkedFileData.source_entity_path.slice(1) }},
 				|

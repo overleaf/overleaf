@@ -27,6 +27,8 @@ module.exports = UrlAgent = {
 			url: @._prependHttpIfNeeded(data.url)
 		}
 
+	canCreate: (data) -> true
+
 	decorateLinkedFileData: (data, callback = (err, newData) ->) ->
 		return callback(null, data)
 
