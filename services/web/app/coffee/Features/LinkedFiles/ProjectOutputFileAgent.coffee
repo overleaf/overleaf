@@ -88,8 +88,8 @@ module.exports = ProjectOutputFileAgent = {
 	handleError: (error, req, res, next) ->
 		if error instanceof BadDataError
 			res.status(400).send("The submitted data is not valid")
-		else if error instanceof SourceFileNotFoundError
-			res.status(404).send("Source file not found")
+		else if error instanceof OutputFileFetchFailedError
+			res.status(404).send("Could not get output file")
 		else if error instanceof ProjectNotFoundError
 			res.status(404).send("Project not found")
 		else
