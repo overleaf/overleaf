@@ -55,7 +55,7 @@ describe "LimitationsManager", ->
 
 			it "should return the number of collaborators the user is allowed", ->
 				@callback.calledWith(null, @user.features.collaborators).should.equal true
-	
+
 	describe "allowedNumberOfCollaboratorsForUser", ->
 		describe "when the user has no features", ->
 			beforeEach ->
@@ -286,7 +286,9 @@ describe "LimitationsManager", ->
 			@subscription =
 				membersLimit: 3
 				member_ids: ["", ""]
-				invited_emails: ["bob@example.com"]
+				teamInvites: [
+					{ email: "bob@example.com", sentAt: new Date(), token: "hey" }
+				]
 
 		it "should return true if the limit is hit (including members and invites)", (done)->
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @subscription)

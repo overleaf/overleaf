@@ -22,7 +22,7 @@ define [
 			emails = parseEmails($scope.inputs.emails)
 			for email in emails
 				queuedHttp
-					.post("/subscription/group/user", {
+					.post("/subscription/invites", {
 						email: email,
 						_csrf: window.csrfToken
 					})
@@ -34,8 +34,8 @@ define [
 		$scope.removeMembers = () ->
 			for user in $scope.selectedUsers
 				do (user) ->
-					if user.holdingAccount and !user._id?
-						url = "/subscription/group/email/#{encodeURIComponent(user.email)}"
+					if user.invite and !user._id?
+						url = "/subscription/invites/#{encodeURIComponent(user.email)}"
 					else
 						url = "/subscription/group/user/#{user._id}"
 					queuedHttp({

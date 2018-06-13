@@ -110,9 +110,9 @@ module.exports = UserController =
 								logger.err err:err, user_id:user_id, "error getting user for email update"
 								return res.send 500
 							AuthenticationController.setInSessionUser(req, {email: user.email, first_name: user.first_name, last_name: user.last_name})
-							UserHandler.populateGroupLicenceInvite user, (err)-> #need to refresh this in the background
+							UserHandler.populateTeamInvites user, (err)-> #need to refresh this in the background
 								if err?
-									logger.err err:err, "error populateGroupLicenceInvite"
+									logger.err err:err, "error populateTeamInvites"
 								res.sendStatus(200)
 
 	logout : (req, res)->

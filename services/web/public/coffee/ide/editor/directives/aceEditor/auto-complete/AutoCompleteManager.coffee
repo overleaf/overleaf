@@ -34,8 +34,7 @@ define [
 				enableLiveAutocompletion: false
 			})
 
-			commandCompleter = new CommandManager(@metadataManager)
-
+			CommandCompleter = new CommandManager(@metadataManager)
 			SnippetCompleter = new EnvironmentManager()
 			PackageCompleter = new PackageManager(@metadataManager, Helpers)
 
@@ -153,7 +152,7 @@ define [
 								callback null, result
 
 			@editor.completers = [
-				commandCompleter
+				CommandCompleter
 				SnippetCompleter
 				PackageCompleter
 				ReferencesCompleter

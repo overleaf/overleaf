@@ -25,7 +25,7 @@ describe "CollaboratorsInviteController", ->
 
 		@LimitationsManager = {}
 		@UserGetter =
-			getUserByMainEmail: sinon.stub()
+			getUserByAnyEmail: sinon.stub()
 			getUser: sinon.stub()
 
 		@CollaboratorsInviteController = SandboxedModule.require modulePath, requires:
@@ -716,7 +716,7 @@ describe "CollaboratorsInviteController", ->
 
 				beforeEach ->
 					@user = {_id: ObjectId().toString()}
-					@UserGetter.getUserByMainEmail = sinon.stub().callsArgWith(2, null, @user)
+					@UserGetter.getUserByAnyEmail = sinon.stub().callsArgWith(2, null, @user)
 
 				it 'should callback with `true`', (done) ->
 					@call (err, shouldAllow) =>
@@ -728,7 +728,7 @@ describe "CollaboratorsInviteController", ->
 
 				beforeEach ->
 					@user = null
-					@UserGetter.getUserByMainEmail = sinon.stub().callsArgWith(2, null, @user)
+					@UserGetter.getUserByAnyEmail = sinon.stub().callsArgWith(2, null, @user)
 
 				it 'should callback with `false`', (done) ->
 					@call (err, shouldAllow) =>
@@ -738,15 +738,15 @@ describe "CollaboratorsInviteController", ->
 
 				it 'should have called getUser', (done) ->
 					@call (err, shouldAllow) =>
-						@UserGetter.getUserByMainEmail.callCount.should.equal 1
-						@UserGetter.getUserByMainEmail.calledWith(@email, {_id: 1}).should.equal true
+						@UserGetter.getUserByAnyEmail.callCount.should.equal 1
+						@UserGetter.getUserByAnyEmail.calledWith(@email, {_id: 1}).should.equal true
 						done()
 
 			describe 'when getUser produces an error', ->
 
 				beforeEach ->
 					@user = null
-					@UserGetter.getUserByMainEmail = sinon.stub().callsArgWith(2, new Error('woops'))
+					@UserGetter.getUserByAnyEmail = sinon.stub().callsArgWith(2, new Error('woops'))
 
 				it 'should callback with an error', (done) ->
 					@call (err, shouldAllow) =>

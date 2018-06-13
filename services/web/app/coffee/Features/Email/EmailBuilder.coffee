@@ -79,7 +79,7 @@ Thank you
 
 #{settings.appName} - <%= siteUrl %>
 """
-	compiledTemplate: (opts) -> 
+	compiledTemplate: (opts) ->
 		SingleCTAEmailBody({
 			title: "Password Reset"
 			greeting: "Hi,"
@@ -104,7 +104,7 @@ Thank you
 
 #{settings.appName} - <%= siteUrl %>
 """
-	compiledTemplate: (opts) -> 
+	compiledTemplate: (opts) ->
 		SingleCTAEmailBody({
 			title: "#{ opts.project.name } &ndash; shared by #{ opts.owner.email }"
 			greeting: "Hi,"
@@ -112,36 +112,37 @@ Thank you
 			secondaryMessage: null
 			ctaText: "View project"
 			ctaURL: opts.inviteUrl
-			gmailGoToAction: 
+			gmailGoToAction:
 				target: opts.inviteUrl
 				name: "View project"
 				description: "Join #{ opts.project.name } at ShareLaTeX"
 		})
 
-templates.completeJoinGroupAccount =
-	subject: _.template "Verify Email to join <%= group_name %> group"
+
+templates.verifyEmailToJoinTeam =
+	subject: _.template "<%= inviterName %> has invited you to join a team on #{settings.appName}"
 	layout: BaseWithHeaderEmailLayout
 	type:"notification"
 	plainTextTemplate: _.template """
-Hi, please verify your email to join the <%= group_name %> and get your free premium account
 
-Click this link to verify now: <%= completeJoinUrl %>
+Please click the button below to join the team and enjoy the benefits of an upgraded  <%= appName %> account.
+
+<%= acceptInviteUrl %>
 
 Thank You
 
 #{settings.appName} - <%= siteUrl %>
 """
-	compiledTemplate: (opts) -> 
+	compiledTemplate: (opts) ->
 		SingleCTAEmailBody({
-			title: "Verify Email to join #{ opts.group_name } group"
+			title: "#{opts.inviterName} has invited you to join a team on #{settings.appName}"
 			greeting: "Hi,"
-			message: "please verify your email to join the #{ opts.group_name } group and get your free premium account."
+			message: "Please click the button below to join the team and enjoy the benefits of an upgraded  #{ opts.appName } account."
 			secondaryMessage: null
 			ctaText: "Verify now"
-			ctaURL: opts.completeJoinUrl
+			ctaURL: opts.acceptInviteUrl
 			gmailGoToAction: null
 		})
-
 
 templates.testEmail =
 	subject: _.template "A Test Email from ShareLaTeX"
@@ -154,7 +155,7 @@ This is a test email sent from ShareLaTeX.
 
 #{settings.appName} - <%= siteUrl %>
 """
-	compiledTemplate: (opts) -> 
+	compiledTemplate: (opts) ->
 		SingleCTAEmailBody({
 			title: "A Test Email from ShareLaTeX"
 			greeting: "Hi,"

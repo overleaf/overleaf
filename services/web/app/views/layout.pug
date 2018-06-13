@@ -54,7 +54,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 			meta(itemprop="image", name="image", content=metaImage.fields.file.url)
 
 		//-	Meta Tags: Twitter
-		-if (typeof(settings.social.twitter.handle) != "undefined")
+		-if (settings.social && settings.social.twitter && settings.social.twitter.handle)
 			meta(name="twitter:site", content=settings.social.twitter.handle)
 			meta(name="twitter:card", content=metaTwitterCard ? metaTwitterCard : 'summary')
 		-if (typeof(metaTwitterDescription) != "undefined")
@@ -65,7 +65,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 			meta(itemprop="image", name="image", content=metaImage.fields.file.url)
 
 		//-	Meta Tags: Open Graph
-		-if (typeof(settings.social.facebook.appId) != "undefined")
+		-if (settings.social && settings.social.facebook && settings.social.facebook.appId)
 			meta(name="fb:app_id", content=settings.social.facebook.appId)
 		-if (typeof(metaOpenGraphDescription) != "undefined")
 				meta(itemprop="og:description", content=metaOpenGraphDescription)

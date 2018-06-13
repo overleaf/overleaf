@@ -32,7 +32,7 @@ block content
 										.col-md-5
 											span.header #{translate("name")}
 										.col-md-2
-											span.header #{translate("registered")}
+											span.header #{translate("accepted_invite")}
 								li.container-fluid(
 									ng-repeat="user in users | orderBy:'email':true",
 									ng-controller="SubscriptionGroupMemberListItemController"
@@ -49,8 +49,8 @@ block content
 											span.name {{ user.first_name }} {{ user.last_name }}
 										.col-md-2
 											span.registered
-												i.fa.fa-check.text-success(ng-show="!user.holdingAccount")
-												i.fa.fa-times(ng-show="user.holdingAccount")
+												i.fa.fa-check.text-success(ng-show="!user.invite")
+												i.fa.fa-times(ng-show="user.invite")
 								li(
 									ng-if="users.length == 0",
 									ng-cloak

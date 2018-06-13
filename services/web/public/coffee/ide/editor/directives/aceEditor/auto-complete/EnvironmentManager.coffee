@@ -23,7 +23,7 @@ define () ->
 		"thebibliography"
 	]
 
-	environmentNames = snippetNames.concat environments
+	environmentNames = snippetNames.concat(environments)
 
 	staticSnippets = for env in environments
 		{
@@ -111,7 +111,19 @@ define () ->
 			\\end{frame}
 		"""
 		meta: "env"
-	}, {
+	}]
+
+	documentSnippet = {
+		caption: "\\begin{document}..."
+		snippet: """
+			\\begin{document}
+			$1
+			\\end{document}
+		"""
+		meta: "env"
+	}
+
+	bibliographySnippet = {
 		caption: "\\begin{thebibliography}..."
 		snippet: """
 			\\begin{thebibliography}{$1}
@@ -120,7 +132,8 @@ define () ->
 			\\end{thebibliography}
 		"""
 		meta: "env"
-	}]
+	}
+	staticSnippets.push(documentSnippet)
 
 	parseCustomEnvironments = (text) ->
 		re = /^\\newenvironment{(\w+)}.*$/gm
@@ -138,18 +151,44 @@ define () ->
 		result = []
 		iterations = 0
 		while match = re.exec(text)
-			if match[1] not in environmentNames
+			if match[1] not in environmentNames and match[1] != "document"
 				result.push {name: match[1], whitespace: match[2]}
 				iterations += 1
 				if iterations >= 1000
 					return result
 		return result
 
+	hasDocumentEnvironment = (text) ->
+		re = /^\\begin{document}/m
+		envs = []
+		iterations = 0
+		return re.exec(text) != null
+
+	hasBibliographyEnvironment = (text) ->
+		re = /^\\begin{thebibliography}/m
+		envs = []
+		iterations = 0
+		return re.exec(text) != null
+
 	class EnvironmentManager
 		getCompletions: (editor, session, pos, prefix, callback) ->
 			docText = session.getValue()
 			customEnvironments = parseCustomEnvironments(docText)
 			beginCommands = parseBeginCommands(docText)
+			if hasDocumentEnvironment(docText)
+				ind = staticSnippets.indexOf(documentSnippet)
+				if ind != -1
+					staticSnippets.splice(ind, 1)
+			else
+				staticSnippets.push documentSnippet
+
+			if hasBibliographyEnvironment(docText)
+				ind = staticSnippets.indexOf(bibliographySnippet)
+				if ind != -1
+					staticSnippets.splice(ind, 1)
+			else
+				staticSnippets.push bibliographySnippet
+
 			parsedItemsMap = {}
 			for environment in customEnvironments
 				parsedItemsMap[environment.name] = environment
