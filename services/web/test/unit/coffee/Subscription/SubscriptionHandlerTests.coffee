@@ -52,8 +52,7 @@ describe "SubscriptionHandler", ->
 			startFreeTrial: sinon.stub().callsArgWith(1)
 
 		@LimitationsManager =
-			userHasSubscription: sinon.stub()
-			userHasSubscriptionOrFreeTrial: sinon.stub()
+			userHasV2Subscription: sinon.stub()
 
 		@EmailHandler =
 			sendEmail:sinon.stub()
@@ -110,7 +109,7 @@ describe "SubscriptionHandler", ->
 			describe "with a valid plan code", ->
 				beforeEach (done) ->
 					@plan_code = "collaborator"
-					@LimitationsManager.userHasSubscription.callsArgWith(1, null, true, @subscription)
+					@LimitationsManager.userHasV2Subscription.callsArgWith(1, null, true, @subscription)
 					@SubscriptionHandler.updateSubscription(@user, @plan_code, null, done)
 
 				it "should update the subscription", ->
@@ -129,7 +128,7 @@ describe "SubscriptionHandler", ->
 
 		describe "with a user without a subscription", ->
 			beforeEach (done) ->
-				@LimitationsManager.userHasSubscription.callsArgWith(1, null, false)
+				@LimitationsManager.userHasV2Subscription.callsArgWith(1, null, false)
 				@SubscriptionHandler.updateSubscription(@user, @plan_code, null, done)
 
 			it "should redirect to the subscription dashboard", ->
@@ -140,7 +139,7 @@ describe "SubscriptionHandler", ->
 			beforeEach (done) ->
 				@plan_code = "collaborator"
 				@coupon_code = "1231312"
-				@LimitationsManager.userHasSubscription.callsArgWith(1, null, true, @subscription)
+				@LimitationsManager.userHasV2Subscription.callsArgWith(1, null, true, @subscription)
 				@SubscriptionHandler.updateSubscription(@user, @plan_code, @coupon_code, done)
 
 			it "should get the users account", ->
@@ -158,7 +157,7 @@ describe "SubscriptionHandler", ->
 	describe "cancelSubscription", ->
 		describe "with a user without a subscription", ->
 			beforeEach (done) ->
-				@LimitationsManager.userHasSubscription.callsArgWith(1, null, false, @subscription)
+				@LimitationsManager.userHasV2Subscription.callsArgWith(1, null, false, @subscription)
 				@SubscriptionHandler.cancelSubscription @user, done
 
 
@@ -167,7 +166,7 @@ describe "SubscriptionHandler", ->
 
 		describe "with a user with a subscription", ->
 			beforeEach (done)  ->
-				@LimitationsManager.userHasSubscription.callsArgWith(1, null, true, @subscription)
+				@LimitationsManager.userHasV2Subscription.callsArgWith(1, null, true, @subscription)
 				@SubscriptionHandler.cancelSubscription @user, done
 
 			it "should cancel the subscription", ->
@@ -180,7 +179,7 @@ describe "SubscriptionHandler", ->
 	describe "reactiveRecurlySubscription", ->
 		describe "with a user without a subscription", ->
 			beforeEach (done) ->
-				@LimitationsManager.userHasSubscription.callsArgWith(1, null, false, @subscription)
+				@LimitationsManager.userHasV2Subscription.callsArgWith(1, null, false, @subscription)
 				@SubscriptionHandler.reactivateSubscription @user, done
 
 			it "should redirect to the subscription dashboard", ->
@@ -188,7 +187,7 @@ describe "SubscriptionHandler", ->
 
 		describe "with a user with a subscription", ->
 			beforeEach (done)  ->
-				@LimitationsManager.userHasSubscription.callsArgWith(1, null, true, @subscription)
+				@LimitationsManager.userHasV2Subscription.callsArgWith(1, null, true, @subscription)
 				@SubscriptionHandler.reactivateSubscription @user, done
 
 			it "should reactivate the subscription", ->

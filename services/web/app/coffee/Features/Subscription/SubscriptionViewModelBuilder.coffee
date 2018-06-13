@@ -4,6 +4,7 @@ PlansLocator = require("./PlansLocator")
 SubscriptionFormatters = require("./SubscriptionFormatters")
 LimitationsManager = require("./LimitationsManager")
 SubscriptionLocator = require("./SubscriptionLocator")
+V1SubscriptionManager = require("./V1SubscriptionManager")
 logger = require('logger-sharelatex')
 _ = require("underscore")
 
@@ -27,34 +28,37 @@ module.exports =
 			SubscriptionLocator.getMemberSubscriptions user, (err, memberSubscriptions = []) ->
 				return callback(err) if err?
 
-				if subscription?
-					return callback(error) if error?
+				V1SubscriptionManager.getSubscriptionsFromV1 user._id, (err, v1Subscriptions) ->
+					return callback(err) if err?
 
-					plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
+					if subscription?
+						return callback(error) if error?
 
-					if !plan?
-						err = new Error("No plan found for planCode '#{subscription.planCode}'")
-						logger.error {user_id: user._id, err}, "error getting subscription plan for user"
-						return callback(err)
+						plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
 
-					RecurlyWrapper.getSubscription subscription.recurlySubscription_id, includeAccount: true, (err, recurlySubscription)->
-						tax = recurlySubscription?.tax_in_cents || 0
+						if !plan?
+							err = new Error("No plan found for planCode '#{subscription.planCode}'")
+							logger.error {user_id: user._id, err}, "error getting subscription plan for user"
+							return callback(err)
 
-						callback null, {
-							admin_id:subscription.admin_id
-							name: plan.name
-							nextPaymentDueAt: SubscriptionFormatters.formatDate(recurlySubscription?.current_period_ends_at)
-							state: recurlySubscription?.state
-							price: SubscriptionFormatters.formatPrice (recurlySubscription?.unit_amount_in_cents + tax), recurlySubscription?.currency
-							planCode: subscription.planCode
-							currency:recurlySubscription?.currency
-							taxRate:parseFloat(recurlySubscription?.tax_rate?._)
-							groupPlan: subscription.groupPlan
-							trial_ends_at:recurlySubscription?.trial_ends_at
-						}, memberSubscriptions, buildBillingDetails(recurlySubscription)
+						RecurlyWrapper.getSubscription subscription.recurlySubscription_id, includeAccount: true, (err, recurlySubscription)->
+							tax = recurlySubscription?.tax_in_cents || 0
 
-				else
-					callback null, null, memberSubscriptions, null
+							callback null, {
+								admin_id:subscription.admin_id
+								name: plan.name
+								nextPaymentDueAt: SubscriptionFormatters.formatDate(recurlySubscription?.current_period_ends_at)
+								state: recurlySubscription?.state
+								price: SubscriptionFormatters.formatPrice (recurlySubscription?.unit_amount_in_cents + tax), recurlySubscription?.currency
+								planCode: subscription.planCode
+								currency:recurlySubscription?.currency
+								taxRate:parseFloat(recurlySubscription?.tax_rate?._)
+								groupPlan: subscription.groupPlan
+								trial_ends_at:recurlySubscription?.trial_ends_at
+							}, memberSubscriptions, buildBillingDetails(recurlySubscription), v1Subscriptions
+
+					else
+						callback null, null, memberSubscriptions, null, v1Subscriptions
 
 	buildViewModel : ->
 		plans = Settings.plans

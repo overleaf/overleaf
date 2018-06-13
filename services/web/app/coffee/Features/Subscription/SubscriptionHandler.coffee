@@ -36,7 +36,7 @@ module.exports =
 
 	updateSubscription: (user, plan_code, coupon_code, callback)->
 		logger.log user:user, plan_code:plan_code, coupon_code:coupon_code, "updating subscription"
-		LimitationsManager.userHasSubscription user, (err, hasSubscription, subscription)->
+		LimitationsManager.userHasV2Subscription user, (err, hasSubscription, subscription)->
 			if !hasSubscription
 				return callback()
 			else
@@ -56,7 +56,7 @@ module.exports =
 		
 
 	cancelSubscription: (user, callback) ->
-		LimitationsManager.userHasSubscription user, (err, hasSubscription, subscription)->
+		LimitationsManager.userHasV2Subscription user, (err, hasSubscription, subscription)->
 			if hasSubscription
 				RecurlyWrapper.cancelSubscription subscription.recurlySubscription_id, (error) ->
 					return callback(error) if error?
@@ -73,7 +73,7 @@ module.exports =
 				callback()
 
 	reactivateSubscription: (user, callback) ->
-		LimitationsManager.userHasSubscription user, (err, hasSubscription, subscription)->
+		LimitationsManager.userHasV2Subscription user, (err, hasSubscription, subscription)->
 			if hasSubscription
 				RecurlyWrapper.reactivateSubscription subscription.recurlySubscription_id, (error) ->
 					return callback(error) if error?

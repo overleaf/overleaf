@@ -103,18 +103,35 @@ block content
 									+printPlans(plans.studentAccounts)
 									+printPlans(plans.individualMonthlyPlans)
 									+printPlans(plans.individualAnnualPlans)
-							
+							hr
 
 						each groupSubscription in groupSubscriptions
 							- if (user._id+'' != groupSubscription.admin_id._id+'')
 								div 
 									p !{translate("member_of_group_subscription", {admin_email: "<strong>" + groupSubscription.admin_id.email + "</strong>"})}
 									span 
-										button.btn.btn-danger(ng-click="removeSelfFromGroup('"+groupSubscription.admin_id._id+"')") #{translate("leave_group")}
+										button.btn.btn-danger.text-capitalise(ng-click="removeSelfFromGroup('"+groupSubscription.admin_id._id+"')") #{translate("leave_group")}
+								hr
 
 						-if(subscription.groupPlan && user._id+'' == subscription.admin_id+'')
 							div
 								a(href="/subscription/group").btn.btn-primary !{translate("manage_group")}
+							hr
+
+						if v1Subscriptions.has_subscription
+							p
+								| You are subscribed to Overleaf through Overleaf v1
+							p
+								a.btn.btn-primary(href=settings.overleaf.host+"/users/edit#status") Manage v1 Subscription
+							hr
+
+						if v1Subscriptions.teams && v1Subscriptions.teams.length > 0
+							for team in v1Subscriptions.teams
+								p
+									| You are a member of the Overleaf v1 team: <strong>#{team.name}</strong>
+							p
+								a.btn.btn-primary(href=settings.overleaf.host+"/teams") Manage v1 Team Membership
+							hr
 
 					.card(ng-if="view == 'cancelation'")
 						.page-header

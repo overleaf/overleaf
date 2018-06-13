@@ -40,7 +40,8 @@ describe "SubscriptionController", ->
 
 		@LimitationsManager =
 			userHasSubscriptionOrIsGroupMember: sinon.stub()
-			userHasSubscription : sinon.stub()
+			userHasV1OrV2Subscription : sinon.stub()
+			userHasV2Subscription: sinon.stub()
 
 		@SubscriptionViewModelBuilder =
 			buildUsersSubscriptionViewModel:sinon.stub().callsArgWith(1, null, @activeRecurlySubscription)
@@ -163,7 +164,7 @@ describe "SubscriptionController", ->
 
 		describe "with a user without a subscription", ->
 			beforeEach ->
-				@LimitationsManager.userHasSubscription.callsArgWith(1, null, false)
+				@LimitationsManager.userHasV1OrV2Subscription.callsArgWith(1, null, false)
 				@PlansLocator.findLocalPlanInSettings.returns({})
 
 			describe "with a valid plan code", ->
@@ -176,7 +177,7 @@ describe "SubscriptionController", ->
 
 		describe "with a user with subscription", ->
 			it "should redirect to the subscription dashboard", (done)->
-				@LimitationsManager.userHasSubscription.callsArgWith(1, null, true)
+				@LimitationsManager.userHasV1OrV2Subscription.callsArgWith(1, null, true)
 				@res.redirect = (url)=>
 					url.should.equal "/user/subscription"
 					done()
@@ -184,7 +185,7 @@ describe "SubscriptionController", ->
 
 		describe "with an invalid plan code", ->
 			it "should redirect to the subscription dashboard", (done)->
-				@LimitationsManager.userHasSubscription.callsArgWith(1, null, false)
+				@LimitationsManager.userHasV1OrV2Subscription.callsArgWith(1, null, false)
 				@PlansLocator.findLocalPlanInSettings.returns(null)
 				@res.redirect = (url)=>
 					url.should.equal "/user/subscription"
@@ -193,7 +194,7 @@ describe "SubscriptionController", ->
 
 		describe "which currency to use", ->
 			beforeEach ->
-				@LimitationsManager.userHasSubscription.callsArgWith(1, null, false)
+				@LimitationsManager.userHasV1OrV2Subscription.callsArgWith(1, null, false)
 				@PlansLocator.findLocalPlanInSettings.returns({})
 
 			it "should use the set currency from the query string", (done)->
@@ -221,7 +222,7 @@ describe "SubscriptionController", ->
 
 		describe "with a recurly subscription already", ->
 			it "should redirect to the subscription dashboard", (done)->
-				@LimitationsManager.userHasSubscription.callsArgWith(1, null, false)
+				@LimitationsManager.userHasV1OrV2Subscription.callsArgWith(1, null, false)
 				@SubscriptionHandler.validateNoSubscriptionInRecurly = sinon.stub().yields(null, false)
 				@res.redirect = (url)=>
 					url.should.equal "/user/subscription"
@@ -334,6 +335,7 @@ describe "SubscriptionController", ->
 				cvv:"123"
 			@req.body.recurly_token_id = "1234"
 			@req.body.subscriptionDetails = @subscriptionDetails
+			@LimitationsManager.userHasV1OrV2Subscription.yields(null, false)
 			@SubscriptionController.createSubscription @req, @res
 
 		it "should send the user and subscriptionId to the handler", (done)->
@@ -442,7 +444,7 @@ describe "SubscriptionController", ->
 
 
 		it "should redirect to the plans page if the user does not have a subscription", (done)->
-			@LimitationsManager.userHasSubscription.callsArgWith(1, null, false)
+			@LimitationsManager.userHasV2Subscription.callsArgWith(1, null, false)
 			@res.redirect = (url)->
 				url.should.equal "/user/subscription/plans"
 				done()
@@ -451,7 +453,7 @@ describe "SubscriptionController", ->
 
 		it "should pass the plan code to the view - student", (done)->
 
-			@LimitationsManager.userHasSubscription.callsArgWith(1, null, true, {planCode:"Student free trial 14 days"})
+			@LimitationsManager.userHasV2Subscription.callsArgWith(1, null, true, {planCode:"Student free trial 14 days"})
 			@res.render = (view, opts)->
 				view.should.equal "subscriptions/upgradeToAnnual"
 				opts.planName.should.equal "student"
@@ -460,7 +462,7 @@ describe "SubscriptionController", ->
 
 		it "should pass the plan code to the view - collaborator", (done)->
 
-			@LimitationsManager.userHasSubscription.callsArgWith(1, null, true, {planCode:"free trial for Collaborator free trial 14 days"})
+			@LimitationsManager.userHasV2Subscription.callsArgWith(1, null, true, {planCode:"free trial for Collaborator free trial 14 days"})
 			@res.render = (view, opts)->
 				opts.planName.should.equal "collaborator"
 				done()
@@ -468,7 +470,7 @@ describe "SubscriptionController", ->
 
 		it "should pass annual as the plan name if the user is already on an annual plan", (done)->
 
-			@LimitationsManager.userHasSubscription.callsArgWith(1, null, true, {planCode:"student annual with free trial"})
+			@LimitationsManager.userHasV2Subscription.callsArgWith(1, null, true, {planCode:"student annual with free trial"})
 			@res.render = (view, opts)->
 				opts.planName.should.equal "annual"
 				done()

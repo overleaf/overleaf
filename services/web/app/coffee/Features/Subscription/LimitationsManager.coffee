@@ -5,6 +5,7 @@ SubscriptionLocator = require("./SubscriptionLocator")
 Settings = require("settings-sharelatex")
 CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
 CollaboratorsInvitesHandler = require("../Collaborators/CollaboratorsInviteHandler")
+V1SubscriptionManager = require("./V1SubscriptionManager")
 
 module.exports = LimitationsManager =
 	allowedNumberOfCollaboratorsInProject: (project_id, callback) ->
@@ -33,14 +34,16 @@ module.exports = LimitationsManager =
 						callback null, false
 
 	userHasSubscriptionOrIsGroupMember: (user, callback = (err, hasSubscriptionOrIsMember)->) ->
-		@userHasSubscription user, (err, hasSubscription, subscription)=>
+		@userHasV2Subscription user, (err, hasSubscription, subscription)=>
 			return callback(err) if err?
 			@userIsMemberOfGroupSubscription user, (err, isMember)=>
 				return callback(err) if err?
-				logger.log user_id:user._id, isMember:isMember, hasSubscription:hasSubscription, "checking if user has subscription or is group member"
-				callback err, isMember or hasSubscription, subscription
+				@userHasV1SubscriptionOrTeam user, (err, hasV1Subscription)=>
+					return callback(err) if err?
+					logger.log {user_id:user._id, isMember, hasSubscription, hasV1Subscription}, "checking if user has subscription or is group member"
+					callback err, isMember or hasSubscription or hasV1Subscription, subscription
 
-	userHasSubscription: (user, callback = (err, hasSubscription, subscription)->) ->
+	userHasV2Subscription: (user, callback = (err, hasSubscription, subscription)->) ->
 		logger.log user_id:user._id, "checking if user has subscription"
 		SubscriptionLocator.getUsersSubscription user._id, (err, subscription)->
 			if err?
@@ -49,11 +52,35 @@ module.exports = LimitationsManager =
 			logger.log user:user, hasValidSubscription:hasValidSubscription, subscription:subscription, "checking if user has subscription"
 			callback err, hasValidSubscription, subscription
 
+	userHasV1OrV2Subscription: (user, callback = (err, hasSubscription) ->) ->
+		@userHasV2Subscription user, (err, hasV2Subscription) =>
+			return callback(err) if err?
+			return callback null, true if hasV2Subscription
+			@userHasV1Subscription user, (err, hasV1Subscription) =>
+				return callback(err) if err?
+				return callback null, true if hasV1Subscription
+				return callback null, false
+
 	userIsMemberOfGroupSubscription: (user, callback = (error, isMember, subscriptions) ->) ->
 		logger.log user_id: user._id, "checking is user is member of subscription groups"
 		SubscriptionLocator.getMemberSubscriptions user._id, (err, subscriptions = []) ->
 			return callback(err) if err?
 			callback err, subscriptions.length > 0, subscriptions
+
+	userHasV1Subscription: (user, callback = (error, hasV1Subscription) ->) ->
+		V1SubscriptionManager.getSubscriptionsFromV1 user._id, (err, v1Subscription) ->
+			logger.log {user_id: user._id, v1Subscription}, '[userHasV1Subscription]'
+			callback err, !!v1Subscription?.has_subscription
+
+	userHasV1SubscriptionOrTeam: (user, callback = (error, hasV1Subscription) ->) ->
+		V1SubscriptionManager.getSubscriptionsFromV1 user._id, (err, v1Subscription = {}) ->
+			return callback(err) if err?
+			hasV1Subscription = false
+			if v1Subscription.has_subscription
+				hasV1Subscription = true
+			if (v1Subscription.teams or []).length > 0
+				hasV1Subscription = true
+			return callback null, hasV1Subscription
 
 	teamHasReachedMemberLimit: (subscription) ->
 		currentTotal = (subscription.member_ids or []).length +

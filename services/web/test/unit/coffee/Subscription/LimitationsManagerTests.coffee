@@ -31,6 +31,7 @@ describe "LimitationsManager", ->
 			'settings-sharelatex' : @Settings = {}
 			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler = {}
 			"../Collaborators/CollaboratorsInviteHandler": @CollaboratorsInviteHandler = {}
+			"./V1SubscriptionManager": @V1SubscriptionManager = {}
 			'logger-sharelatex':log:->
 
 	describe "allowedNumberOfCollaboratorsInProject", ->
@@ -183,33 +184,33 @@ describe "LimitationsManager", ->
 			it "should return false", ->
 				@callback.calledWith(null, false).should.equal true
 
-	describe "userHasSubscription", ->
+	describe "userHasV2Subscription", ->
 		beforeEach ->
 			@SubscriptionLocator.getUsersSubscription = sinon.stub()
 
 		it "should return true if the recurly token is set", (done)->
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, recurlySubscription_id : "1234")
-			@LimitationsManager.userHasSubscription @user, (err, hasSubscription)->
+			@LimitationsManager.userHasV2Subscription @user, (err, hasSubscription)->
 				hasSubscription.should.equal true
 				done()
 
 		it "should return false if the recurly token is not set", (done)->
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, {})
 			@subscription = {}
-			@LimitationsManager.userHasSubscription @user, (err, hasSubscription)->
+			@LimitationsManager.userHasV2Subscription @user, (err, hasSubscription)->
 				hasSubscription.should.equal false
 				done()
 
 		it "should return false if the subscription is undefined", (done)->
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1)
-			@LimitationsManager.userHasSubscription @user, (err, hasSubscription)->
+			@LimitationsManager.userHasV2Subscription @user, (err, hasSubscription)->
 				hasSubscription.should.equal false
 				done()
 
 		it "should return the subscription", (done)->
 			stubbedSubscription = {freeTrial:{}, token:""}
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, stubbedSubscription)
-			@LimitationsManager.userHasSubscription @user, (err, hasSubOrIsGroupMember, subscription)->
+			@LimitationsManager.userHasV2Subscription @user, (err, hasSubOrIsGroupMember, subscription)->
 				subscription.should.deep.equal stubbedSubscription
 				done()
 
@@ -220,12 +221,12 @@ describe "LimitationsManager", ->
 				@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @fakeSubscription)
 
 			it 'should return true', (done) ->
-				@LimitationsManager.userHasSubscription @user, (err, hasSubscription, subscription)->
+				@LimitationsManager.userHasV2Subscription @user, (err, hasSubscription, subscription)->
 					hasSubscription.should.equal true
 					done()
 
 			it 'should return the subscription', (done) ->
-				@LimitationsManager.userHasSubscription @user, (err, hasSubscription, subscription)=>
+				@LimitationsManager.userHasV2Subscription @user, (err, hasSubscription, subscription)=>
 					subscription.should.deep.equal @fakeSubscription
 					done()
 
@@ -248,35 +249,53 @@ describe "LimitationsManager", ->
 
 	describe "userHasSubscriptionOrIsGroupMember", ->
 		beforeEach ->
-			@LimitationsManager.userIsMemberOfGroupSubscription = sinon.stub()
-			@LimitationsManager.userHasSubscription = sinon.stub()
+			@LimitationsManager.userIsMemberOfGroupSubscription = sinon.stub().yields(null, false)
+			@LimitationsManager.userHasV2Subscription = sinon.stub().yields(null, false)
+			@LimitationsManager.userHasV1SubscriptionOrTeam = sinon.stub().yields(null, false)
 
-		it "should return true if both are true", (done)->
-			@LimitationsManager.userIsMemberOfGroupSubscription.callsArgWith(1, null, true)
-			@LimitationsManager.userHasSubscription.callsArgWith(1, null, true)
+		it "should return true if userIsMemberOfGroupSubscription", (done)->
+			@LimitationsManager.userIsMemberOfGroupSubscription = sinon.stub().yields(null, true)
 			@LimitationsManager.userHasSubscriptionOrIsGroupMember @user, (err, hasSubOrIsGroupMember)->
 				hasSubOrIsGroupMember.should.equal true
 				done()
 
-		it "should return true if one is true", (done)->
-			@LimitationsManager.userIsMemberOfGroupSubscription.callsArgWith(1, null, true)
-			@LimitationsManager.userHasSubscription.callsArgWith(1, null, false)
+		it "should return true if userHasV2Subscription", (done)->
+			@LimitationsManager.userHasV2Subscription = sinon.stub().yields(null, true)
 			@LimitationsManager.userHasSubscriptionOrIsGroupMember @user, (err, hasSubOrIsGroupMember)->
 				hasSubOrIsGroupMember.should.equal true
 				done()
 
-		it "should return true if other is true", (done)->
-			@LimitationsManager.userIsMemberOfGroupSubscription.callsArgWith(1, null, false)
-			@LimitationsManager.userHasSubscription.callsArgWith(1, null, true)
+		it "should return true if userHasV1SubscriptionOrTeam", (done)->
+			@LimitationsManager.userHasV1SubscriptionOrTeam = sinon.stub().yields(null, true)
 			@LimitationsManager.userHasSubscriptionOrIsGroupMember @user, (err, hasSubOrIsGroupMember)->
 				hasSubOrIsGroupMember.should.equal true
 				done()
 
-		it "should return false if both are false", (done)->
-			@LimitationsManager.userIsMemberOfGroupSubscription.callsArgWith(1, null, false)
-			@LimitationsManager.userHasSubscription.callsArgWith(1, null, false)
+		it "should return false if none are true", (done)->
 			@LimitationsManager.userHasSubscriptionOrIsGroupMember @user, (err, hasSubOrIsGroupMember)->
 				hasSubOrIsGroupMember.should.equal false
+				done()
+
+	describe "userHasV1OrV2Subscription", ->
+		beforeEach ->
+			@LimitationsManager.userHasV2Subscription = sinon.stub().yields(null, false)
+			@LimitationsManager.userHasV1Subscription = sinon.stub().yields(null, false)
+
+		it "should return true if userHasV2Subscription", (done)->
+			@LimitationsManager.userHasV2Subscription = sinon.stub().yields(null, true)
+			@LimitationsManager.userHasV1OrV2Subscription @user, (err, hasSub)->
+				hasSub.should.equal true
+				done()
+
+		it "should return true if userHasV1Subscription", (done)->
+			@LimitationsManager.userHasV1Subscription = sinon.stub().yields(null, true)
+			@LimitationsManager.userHasV1OrV2Subscription @user, (err, hasSub)->
+				hasSub.should.equal true
+				done()
+
+		it "should return false if none are true", (done)->
+			@LimitationsManager.userHasV1OrV2Subscription @user, (err, hasSub)->
+				hasSub.should.equal false
 				done()
 
 	describe "hasGroupMembersLimitReached", ->
@@ -309,3 +328,55 @@ describe "LimitationsManager", ->
 			@LimitationsManager.hasGroupMembersLimitReached @user_id, (err, limitReached)->
 				limitReached.should.equal true
 				done()
+
+	describe 'userHasV1Subscription', ->
+		it 'should return true if v1 returns has_subscription = true', (done) ->
+			@V1SubscriptionManager.getSubscriptionsFromV1 = sinon.stub().yields(null, { has_subscription: true })
+			@LimitationsManager.userHasV1Subscription @user, (error, result) =>
+				@V1SubscriptionManager.getSubscriptionsFromV1.calledWith(@user_id).should.equal true
+				result.should.equal true
+				done()
+
+		it 'should return false if v1 returns has_subscription = false', (done) ->
+			@V1SubscriptionManager.getSubscriptionsFromV1 = sinon.stub().yields(null, { has_subscription: false })
+			@LimitationsManager.userHasV1Subscription @user, (error, result) =>
+				@V1SubscriptionManager.getSubscriptionsFromV1.calledWith(@user_id).should.equal true
+				result.should.equal false
+				done()
+
+		it 'should return false if v1 returns nothing', (done) ->
+			@V1SubscriptionManager.getSubscriptionsFromV1 = sinon.stub().yields(null, null)
+			@LimitationsManager.userHasV1Subscription @user, (error, result) =>
+				@V1SubscriptionManager.getSubscriptionsFromV1.calledWith(@user_id).should.equal true
+				result.should.equal false
+				done()
+
+	describe 'userHasV1SubscriptionOrTeam', ->
+		it 'should return true if v1 returns has_subscription = true', (done) ->
+			@V1SubscriptionManager.getSubscriptionsFromV1 = sinon.stub().yields(null, { has_subscription: true })
+			@LimitationsManager.userHasV1SubscriptionOrTeam @user, (error, result) =>
+				@V1SubscriptionManager.getSubscriptionsFromV1.calledWith(@user_id).should.equal true
+				result.should.equal true
+				done()
+
+		it 'should return true if v1 returns some teams', (done) ->
+			@V1SubscriptionManager.getSubscriptionsFromV1 = sinon.stub().yields(null, { teams: ['mock-team'] })
+			@LimitationsManager.userHasV1SubscriptionOrTeam @user, (error, result) =>
+				@V1SubscriptionManager.getSubscriptionsFromV1.calledWith(@user_id).should.equal true
+				result.should.equal true
+				done()
+
+		it 'should return false if v1 returns has_subscription = false and no teams', (done) ->
+			@V1SubscriptionManager.getSubscriptionsFromV1 = sinon.stub().yields(null, { has_subscription: false, teams: [] })
+			@LimitationsManager.userHasV1SubscriptionOrTeam @user, (error, result) =>
+				@V1SubscriptionManager.getSubscriptionsFromV1.calledWith(@user_id).should.equal true
+				result.should.equal false
+				done()
+
+		it 'should return false if v1 returns nothing', (done) ->
+			@V1SubscriptionManager.getSubscriptionsFromV1 = sinon.stub().yields(null, null)
+			@LimitationsManager.userHasV1SubscriptionOrTeam @user, (error, result) =>
+				@V1SubscriptionManager.getSubscriptionsFromV1.calledWith(@user_id).should.equal true
+				result.should.equal false
+				done()
+

@@ -9,7 +9,11 @@ module.exports =
 	apply: (webRouter, privateApiRouter, publicApiRouter) ->
 		return unless Settings.enableSubscriptions
 
-		webRouter.get  '/user/subscription/plans',      SubscriptionController.plansPage
+		if Settings.overleaf?
+			webRouter.get  '/user/subscription/plans', (req, res) ->
+				res.redirect "#{Settings.overleaf.host}/plans"
+		else
+			webRouter.get  '/user/subscription/plans', SubscriptionController.plansPage
 
 		webRouter.get  '/user/subscription',            AuthenticationController.requireLogin(), SubscriptionController.userSubscriptionPage
 
