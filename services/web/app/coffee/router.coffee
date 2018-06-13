@@ -295,6 +295,22 @@ module.exports = class Router
 		webRouter.post "/confirm-password", AuthenticationController.requireLogin(), SudoModeController.submitPassword
 
 
+		# New "api" endpoints. Started as a way for v1 to call over to v2 (for
+		# long-term features, as opposed to the nominally temporary ones in the
+		# overleaf-integration module), but may expand beyond that role.
+		publicApiRouter.post '/api/clsi/compile/:submission_id', AuthenticationController.httpAuth, CompileController.compileSubmission
+		publicApiRouter.get /^\/api\/clsi\/compile\/([^\/]*)\/build\/([0-9a-f-]+)\/output\/(.*)$/,
+			((req, res, next) ->
+				params =
+					"submission_id": req.params[0]
+					"build_id":   req.params[1]
+					"file":       req.params[2]
+				req.params = params
+				next()
+			),
+			AuthenticationController.httpAuth,
+			CompileController.getFileFromClsiWithoutUser
+
 		#Admin Stuff
 		webRouter.get  '/admin', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.index
 		webRouter.get  '/admin/user', AuthorizationMiddlewear.ensureUserIsSiteAdmin, (req, res)-> res.redirect("/admin/register") #this gets removed by admin-panel addon
