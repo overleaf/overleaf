@@ -17,6 +17,7 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 clean:
 	docker rmi ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 	docker rmi gcr.io/csh-gcdm-test/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
+	docker rmi gcr.io/csh-staging/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 	rm -f app.js
 	rm -rf app/js
 	rm -rf test/unit/js
@@ -38,6 +39,7 @@ test_acceptance_pre_run:
 build:
 	docker build --pull --tag ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
 		--tag gcr.io/csh-gcdm-test/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
+		--tag gcr.io/csh-staging/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
 		.
 
 publish:
