@@ -29,7 +29,13 @@ pipeline {
 
     stage('Package and publish build') {
       steps {
-        sh 'make publish'
+        
+        withCredentials([file(credentialsId: 'gcr.io_csh-gcdm-test', variable: 'DOCKER_REPO_KEY_PATH')]) {
+          sh 'docker login -u _json_key --password-stdin https://gcr.io/csh-gcdm-test < ${DOCKER_REPO_KEY_PATH}'
+        }
+        sh 'DOCKER_REPO=gcr.io/csh-gcdm-test make publish'
+        sh 'docker logout https://gcr.io/csh-gcdm-test'
+        
       }
     }
 
@@ -47,6 +53,7 @@ pipeline {
   post {
     always {
       sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_clean'
+      sh 'make clean'
     }
 
     failure {
