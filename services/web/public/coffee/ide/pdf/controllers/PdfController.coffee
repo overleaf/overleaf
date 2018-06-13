@@ -228,7 +228,7 @@ define [
 
 			# keep last url
 			last_pdf_url = $scope.pdf.url
-
+			pdfDownloadDomain = response.pdfDownloadDomain
 			# Reset everything
 			$scope.pdf.error      = false
 			$scope.pdf.timedout   = false
@@ -244,6 +244,11 @@ define [
 			$scope.pdf.compileInProgress = false
 			$scope.pdf.autoCompileDisabled = false
 
+			buildPdfDownloadUrl = (path)->
+				if pdfDownloadDomain?
+					return "#{pdfDownloadDomain}#{path}"
+				else
+					return path
 			# make a cache to look up files by name
 			fileByPath = {}
 			if response?.outputFiles?
@@ -269,7 +274,7 @@ define [
 				fetchLogs(fileByPath)
 			else if response.status in ["validation-fail", "validation-pass"]
 				$scope.pdf.view = 'pdf'
-				$scope.pdf.url = last_pdf_url
+				$scope.pdf.url = buildPdfDownloadUrl last_pdf_url
 				$scope.shouldShowLogs = true
 				$scope.pdf.failedCheck = true if response.status is "validation-fail"
 				event_tracking.sendMB "syntax-check-#{response.status}"
@@ -277,7 +282,7 @@ define [
 			else if response.status == "exited"
 				$scope.pdf.view = 'pdf'
 				$scope.pdf.compileExited = true
-				$scope.pdf.url = last_pdf_url
+				$scope.pdf.url = buildPdfDownloadUrl last_pdf_url
 				$scope.shouldShowLogs = true
 				fetchLogs(fileByPath)
 			else if response.status == "autocompile-backoff"
@@ -315,12 +320,12 @@ define [
 
 				# define the base url. if the pdf file has a build number, pass it to the clsi in the url
 				if fileByPath['output.pdf']?.url?
-					$scope.pdf.url = fileByPath['output.pdf'].url
+					$scope.pdf.url = buildPdfDownloadUrl fileByPath['output.pdf'].url
 				else if fileByPath['output.pdf']?.build?
 					build = fileByPath['output.pdf'].build
-					$scope.pdf.url = "/project/#{$scope.project_id}/build/#{build}/output/output.pdf"
+					$scope.pdf.url = buildPdfDownloadUrl "/project/#{$scope.project_id}/build/#{build}/output/output.pdf"
 				else
-					$scope.pdf.url = "/project/#{$scope.project_id}/output/output.pdf"
+					$scope.pdf.url = buildPdfDownloadUrl "/project/#{$scope.project_id}/output/output.pdf"
 				# check if we need to bust cache (build id is unique so don't need it in that case)
 				if not fileByPath['output.pdf']?.build?
 					qs.cache_bust = "#{Date.now()}"
