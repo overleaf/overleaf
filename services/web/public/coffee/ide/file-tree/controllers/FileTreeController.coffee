@@ -342,7 +342,9 @@ define [
 				})
 				.then (resp) ->
 					if resp.data.status == 'success'
-						$scope.data.projectOutputFiles = resp.data.outputFiles
+						filteredFiles = resp.data.outputFiles.filter (f) ->
+							f.path.match(/.*\.(pdf|png|jpeg|jpg|gif)/)
+						$scope.data.projectOutputFiles = filteredFiles
 						_reset(err: false)
 					else
 						$scope.data.projectOutputFiles = null
