@@ -334,7 +334,7 @@ module.exports = settings =
 	# disablePerUserCompiles: true
 
 	# Domain the client (pdfjs) should download the compiled pdf from
-	pdfDownloadDomain: "http://compiles.sharelatex.test:3014"
+	# pdfDownloadDomain: "http://compiles.sharelatex.test:3014"
 
 	# Maximum size of text documents in the real-time editing system.
 	max_doc_length: 2 * 1024 * 1024 # 2mb
