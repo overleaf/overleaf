@@ -99,7 +99,7 @@ module.exports = ProjectOutputFileAgent = {
 		else if error instanceof ProjectNotFoundError
 			res.status(404).send("Project not found")
 		else if error instanceof ProjectFileAgent.V1ProjectNotFoundError
-			res.status(404).send(ProjectFileAgent._v1ProjectNotFoundMessage)
+			res.status(409).send(ProjectFileAgent._v1ProjectNotFoundMessage)
 		else
 			next(error)
 }

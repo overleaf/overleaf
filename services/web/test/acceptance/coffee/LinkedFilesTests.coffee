@@ -412,3 +412,37 @@ describe "LinkedFiles", ->
 					expect(firstFile._id.toString()).to.equal(new_file_id.toString())
 					expect(firstFile.name).to.equal('test.pdf')
 					done()
+
+	describe "with a linked project_output_file from a v1 project that has not been imported", ->
+		before (done) ->
+			async.series [
+				(cb) =>
+					@owner.createProject 'output-v1-test-one', {template: 'blank'}, (error, project_id) =>
+						@project_one_id = project_id
+						cb(error)
+				(cb) =>
+					@owner.getProject @project_one_id, (error, project) =>
+						@project_one = project
+						@project_one_root_folder_id = project.rootFolder[0]._id.toString()
+						@project_one.rootFolder[0].fileRefs.push {
+							linkedFileData: {
+								provider: "project_output_file",
+								v1_source_doc_id: 9999999,  # We won't find this id in the database
+								source_output_file_path: "output.pdf"
+							},
+							_id: "abcdef",
+							rev: 0,
+							created: new Date(),
+							name: "whatever.pdf"
+						}
+						@owner.saveProject @project_one, cb
+			], done
+
+		it 'should refuse to refresh', (done) ->
+			@owner.request.post {
+				url: "/project/#{@project_one_id}/linked_file/abcdef/refresh",
+				json: true
+			}, (error, response, body) =>
+				expect(response.statusCode).to.equal 409
+				expect(body).to.equal "Sorry, the source project is not yet imported to Overleaf v2. Please import it to Overleaf v2 to refresh this file"
+				done()
