@@ -37,3 +37,15 @@ describe 'ExportsController', ->
 		@controller.exportProject @req, send:(body) =>
 			expect(body).to.deep.equal {export_v1_id: 897}
 			done()
+
+	it 'should ask the handler to return the status of an export', (done) ->
+		@handler.fetchExport = sinon.stub().yields(
+			null,
+			 "{\"id\":897, \"status_summary\":\"completed\"}")
+
+		@req.params = {project_id: project_id, export_id: 897}
+		@controller.exportStatus @req, send:(body) =>
+			expect(body).to.deep.equal {export_json: {
+				 status_summary: 'completed', status_detail: undefined
+			}}
+			done()
