@@ -7,7 +7,8 @@ ProjectGetter = require("../Project/ProjectGetter")
 ProjectEntityHandler = require("../Project/ProjectEntityHandler")
 logger = require "logger-sharelatex"
 Url = require("url")
-ClsiCookieManager = require("./ClsiCookieManager")
+ClsiCookieManager = require("./ClsiCookieManager")()
+GoogleCloudClsiCookieManager = require("./ClsiCookieManager")("googlecloud")
 ClsiStateManager = require("./ClsiStateManager")
 _ = require("underscore")
 async = require("async")
@@ -75,20 +76,44 @@ module.exports = ClsiManager =
 				callback()
 
 	_makeRequest: (project_id, opts, callback)->
+		ClsiManager._makeGoogleCloudRequest project_id, opts, ->
 		ClsiCookieManager.getCookieJar project_id, (err, jar)->
 			if err?
 				logger.err err:err, "error getting cookie jar for clsi request"
 				return callback(err)
 			opts.jar = jar
+			timer = new Metrics.Timer("compile.linode")
 			request opts, (err, response, body)->
+				timer.done()
 				if err?
 					logger.err err:err, project_id:project_id, url:opts?.url, "error making request to clsi"
 					return callback(err)
 				ClsiCookieManager.setServerId project_id, response, (err)->
 					if err?
 						logger.warn err:err, project_id:project_id, "error setting server id"
-						
 					return callback err, response, body
+
+	_makeGoogleCloudRequest: (project_id, baseOpts, callback)->
+		if !Settings.apis.clsigc?.url?
+			return callback()
+		opts = _.clone(baseOpts)
+		opts.url = opts.url.replace(Settings.apis.clsi.url, Settings.apis.clsigc?.url)
+		GoogleCloudClsiCookieManager.getCookieJar project_id, (err, jar)->
+			if err?
+				logger.err err:err, "error getting cookie jar for clsi request"
+				return callback(err)
+			opts.jar = jar
+			timer = new Metrics.Timer("compile.google")
+			request opts, (err, response, body)->
+				timer.done()
+				if err?
+					logger.err err:err, project_id:project_id, url:opts?.url, "error making request to clsi"
+					return callback(err)
+				GoogleCloudClsiCookieManager.setServerId project_id, response, (err)->
+					if err?
+						logger.warn err:err, project_id:project_id, "error setting server id"
+					return callback err, response, body
+
 
 	_getCompilerUrl: (compileGroup, project_id, user_id, action) ->
 		host = Settings.apis.clsi.url

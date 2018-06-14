@@ -31,7 +31,7 @@ describe "ClsiManager", ->
 			"../Project/ProjectGetter": @ProjectGetter = {}
 			"../DocumentUpdater/DocumentUpdaterHandler": @DocumentUpdaterHandler =
 				getProjectDocsIfMatch: sinon.stub().callsArgWith(2,null,null)
-			"./ClsiCookieManager": @ClsiCookieManager
+			"./ClsiCookieManager": => @ClsiCookieManager
 			"./ClsiStateManager": @ClsiStateManager
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), err: sinon.stub(), warn: sinon.stub() }
 			"request": @request = sinon.stub()
@@ -486,6 +486,22 @@ describe "ClsiManager", ->
 				done()
 
 
+	describe "_makeGoogleCloudRequest", ->
+
+		beforeEach ->
+			@settings.apis.clsigc = 
+				url : "https://compiles.googlecloud.test"
+			@response = {there:"something"}
+			@request.callsArgWith(1, null, @response)
+
+		it "should change the domain on the url", (done)->
+			@opts = 
+				url: @ClsiManager._getCompilerUrl(null, @project_id)
+
+			@ClsiManager._makeGoogleCloudRequest @project_id, @opts, =>
+				args = @request.args[0]
+				args[0].url.should.equal "https://compiles.googlecloud.test/project/#{@project_id}"
+				done()
 
 
 

@@ -40,7 +40,7 @@ describe "ClsiCookieManager", ->
 			"request": @request
 
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), warn: sinon.stub() }
-		@ClsiCookieManager = SandboxedModule.require modulePath, requires:@requires
+		@ClsiCookieManager = SandboxedModule.require(modulePath, {requires:@requires})()
 
 
 
@@ -107,7 +107,7 @@ describe "ClsiCookieManager", ->
 
 		it "should not set the server id if clsiCookies are not enabled", (done)->
 			delete @settings.clsiCookie.key 
-			@ClsiCookieManager = SandboxedModule.require modulePath, requires:@requires
+			@ClsiCookieManager = SandboxedModule.require(modulePath, requires:@requires)()
 			@ClsiCookieManager.setServerId @project_id, @response, (err, serverId)=>
 				@redisMulti.exec.called.should.equal false
 				done()
@@ -129,7 +129,7 @@ describe "ClsiCookieManager", ->
 			@RedisWrapper.client = sinon.stub()
 			@RedisWrapper.client.withArgs("clsi_cookie").returns(@redis)
 			@RedisWrapper.client.withArgs("clsi_cookie_secondary").returns(@redis_secondary)
-			@ClsiCookieManager = SandboxedModule.require modulePath, requires:@requires
+			@ClsiCookieManager = SandboxedModule.require(modulePath, requires:@requires)()
 			@ClsiCookieManager._parseServerIdFromResponse = sinon.stub().returns("clsi-8")
 			@ClsiCookieManager.setServerId @project_id, @response, (err, serverId)=>
 				@redisSecondaryMulti.set.calledWith("clsiserver:#{@project_id}", "clsi-8").should.equal true
@@ -150,7 +150,7 @@ describe "ClsiCookieManager", ->
 
 		it "should return empty cookie jar if clsiCookies are not enabled", (done)->
 			delete @settings.clsiCookie.key 
-			@ClsiCookieManager = SandboxedModule.require modulePath, requires:@requires
+			@ClsiCookieManager = SandboxedModule.require(modulePath, requires:@requires)()
 			@ClsiCookieManager.getCookieJar @project_id, (err, jar)->
 				assert.deepEqual jar, realRequst.jar()
 				done()
