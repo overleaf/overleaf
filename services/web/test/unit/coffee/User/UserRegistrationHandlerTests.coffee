@@ -5,6 +5,7 @@ path = require('path')
 modulePath = path.join __dirname, '../../../../app/js/Features/User/UserRegistrationHandler'
 sinon = require("sinon")
 expect = require("chai").expect
+EmailHelper = require '../../../../app/js/Features/Helpers/EmailHelper'
 
 describe "UserRegistrationHandler", ->
 
@@ -37,6 +38,7 @@ describe "UserRegistrationHandler", ->
 			"../Security/OneTimeTokenHandler": @OneTimeTokenHandler
 			"../Analytics/AnalyticsManager": @AnalyticsManager = { recordEvent: sinon.stub() }
 			"settings-sharelatex": @settings = {siteUrl: "http://sl.example.com"}
+			"../Helpers/EmailHelper": EmailHelper
 
 		@passingRequest = {email:"something@email.com", password:"123"}
 

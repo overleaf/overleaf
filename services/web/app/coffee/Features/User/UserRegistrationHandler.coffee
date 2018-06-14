@@ -11,12 +11,9 @@ EmailHandler = require("../Email/EmailHandler")
 OneTimeTokenHandler = require "../Security/OneTimeTokenHandler"
 Analytics = require "../Analytics/AnalyticsManager"
 settings = require "settings-sharelatex"
+EmailHelper = require("../Helpers/EmailHelper")
 
 module.exports = UserRegistrationHandler =
-	validateEmail : (email) ->
-		re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\ ".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA -Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-		return re.test(email)
-
 	hasZeroLengths : (props) ->
 		hasZeroLength = false
 		props.forEach (prop) ->
@@ -25,12 +22,9 @@ module.exports = UserRegistrationHandler =
 		return hasZeroLength
 
 	_registrationRequestIsValid : (body, callback)->
-		email = sanitize.escape(body.email).trim().toLowerCase()
+		email = EmailHelper.parseEmail(body.email) or ''
 		password = body.password
-		username = email.match(/^[^@]*/)
 		if @hasZeroLengths([password, email])
-			return false
-		else if !@validateEmail(email)
 			return false
 		else
 			return true
@@ -47,7 +41,7 @@ module.exports = UserRegistrationHandler =
 		requestIsValid = @_registrationRequestIsValid userDetails
 		if !requestIsValid
 			return callback(new Error("request is not valid"))
-		userDetails.email = userDetails.email?.trim()?.toLowerCase()
+		userDetails.email = EmailHelper.parseEmail(userDetails.email)
 		UserGetter.getUserByAnyEmail userDetails.email, (err, user) =>
 			if err?
 				return callback err
