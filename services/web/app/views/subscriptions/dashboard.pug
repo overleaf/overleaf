@@ -118,14 +118,14 @@ block content
 								a(href="/subscription/group").btn.btn-primary !{translate("manage_group")}
 							hr
 
-						if v1Subscriptions.has_subscription
+						if v1Subscriptions && v1Subscriptions.has_subscription
 							p
 								| You are subscribed to Overleaf through Overleaf v1
 							p
 								a.btn.btn-primary(href=settings.overleaf.host+"/users/edit#status") Manage v1 Subscription
 							hr
 
-						if v1Subscriptions.teams && v1Subscriptions.teams.length > 0
+						if v1Subscriptions && v1Subscriptions.teams && v1Subscriptions.teams.length > 0
 							for team in v1Subscriptions.teams
 								p
 									| You are a member of the Overleaf v1 team: <strong>#{team.name}</strong>
