@@ -8,6 +8,8 @@ MockFileStoreApi = require './helpers/MockFileStoreApi'
 request = require "./helpers/request"
 User = require "./helpers/User"
 
+MockClsiApi = require "./helpers/MockClsiApi"
+
 
 express = require("express")
 LinkedUrlProxy = express()
@@ -344,3 +346,69 @@ describe "LinkedFiles", ->
 
 		# TODO: Add test for asking for host that return ENOTFOUND
 		# (This will probably end up handled by the proxy)
+
+	describe "creating a linked output file", ->
+		before (done) ->
+			async.series [
+				(cb) =>
+					@owner.createProject 'output-test-one', {template: 'blank'}, (error, project_id) =>
+						@project_one_id = project_id
+						cb(error)
+				(cb) =>
+					@owner.getProject @project_one_id, (error, project) =>
+						@project_one = project
+						@project_one_root_folder_id = project.rootFolder[0]._id.toString()
+						cb(error)
+				(cb) =>
+					@owner.createProject 'output-test-two', {template: 'blank'}, (error, project_id) =>
+						@project_two_id = project_id
+						cb(error)
+				(cb) =>
+					@owner.getProject @project_two_id, (error, project) =>
+						@project_two = project
+						@project_two_root_folder_id = project.rootFolder[0]._id.toString()
+						cb(error)
+			], done
+
+		it 'should import the output.pdf file from the source project', (done) ->
+			@owner.request.post {
+				url: "/project/#{@project_one_id}/linked_file",
+				json:
+					name: 'test.pdf',
+					parent_folder_id: @project_one_root_folder_id,
+					provider: 'project_output_file',
+					data:
+						source_project_id: @project_two_id,
+						source_output_file_path: "output.pdf",
+			}, (error, response, body) =>
+				new_file_id = body.new_file_id
+				@existing_file_id = new_file_id
+				expect(new_file_id).to.exist
+				@owner.getProject @project_one_id, (error, project) =>
+					return done(error) if error?
+					firstFile = project.rootFolder[0].fileRefs[0]
+					expect(firstFile._id.toString()).to.equal(new_file_id.toString())
+					expect(firstFile.linkedFileData).to.deep.equal {
+						provider: 'project_output_file',
+						source_project_id: @project_two_id,
+						source_output_file_path: "output.pdf",
+						source_project_display_name: "output-test-two"
+					}
+					expect(firstFile.name).to.equal('test.pdf')
+					done()
+
+		it 'should refresh the file', (done) ->
+			@owner.request.post {
+				url: "/project/#{@project_one_id}/linked_file/#{@existing_file_id}/refresh",
+				json: true
+			}, (error, response, body) =>
+				new_file_id = body.new_file_id
+				expect(new_file_id).to.exist
+				expect(new_file_id).to.not.equal @existing_file_id
+				@refreshed_file_id = new_file_id
+				@owner.getProject @project_one_id, (error, project) =>
+					return done(error) if error?
+					firstFile = project.rootFolder[0].fileRefs[0]
+					expect(firstFile._id.toString()).to.equal(new_file_id.toString())
+					expect(firstFile.name).to.equal('test.pdf')
+					done()

@@ -1,4 +1,5 @@
 express = require("express")
+bodyParser = require "body-parser"
 app = express()
 
 module.exports = MockClsiApi =
@@ -29,6 +30,14 @@ module.exports = MockClsiApi =
 				res.status(200).send 'mock-log'
 			else
 				res.sendStatus(404)
+
+		app.post "/project/:project_id/compile", (req, res, next) =>
+			res.json {
+				outputFiles: [{path: 'output.pdf'}]
+			}
+
+		app.get "/project/:project_id/output/:output_path", (req, res, next) =>
+			res.status(200).send("hello")
 
 		app.listen 3013, (error) ->
 			throw error if error?
