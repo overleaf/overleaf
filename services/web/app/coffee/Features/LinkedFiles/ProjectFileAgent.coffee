@@ -60,6 +60,10 @@ SourceFileNotFoundError.prototype.__proto__ = Error.prototype
 
 module.exports = ProjectFileAgent =
 
+	V1ProjectNotFoundError: V1ProjectNotFoundError
+
+	_v1ProjectNotFoundMessage: "Sorry, the source project is not yet imported to Overleaf v2. Please import it to Overleaf v2 to refresh this file"
+
 	sanitizeData: (data) ->
 		return _.pick(
 			data,
@@ -155,7 +159,7 @@ module.exports = ProjectFileAgent =
 		else if error instanceof ProjectNotFoundError
 			res.status(404).send("Project not found")
 		else if error instanceof V1ProjectNotFoundError
-			res.status(409).send("Sorry, the source project is not yet imported to Overleaf v2. Please import it to Overleaf v2 to refresh this file")
+			res.status(409).send(ProjectFileAgent._v1ProjectNotFoundMessage)
 		else
 			next(error)
 		next()
