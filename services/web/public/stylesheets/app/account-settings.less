@@ -10,3 +10,40 @@
 		margin-bottom: 4px;
 	}
 }
+
+
+.affiliations-form-row {
+	display: flex;
+	flex-wrap: wrap;
+	margin-left: -(@grid-gutter-width / 2);
+	margin-right: -(@grid-gutter-width / 2);
+	@media (min-width: @screen-sm-min) {
+		align-items: flex-end;
+	}
+}
+	.affiliation-col-4,
+	.affiliation-col-8 {
+		flex: 0 0 100%;
+		padding-left: (@grid-gutter-width / 2);
+		padding-right: (@grid-gutter-width / 2);
+		margin-bottom: (@grid-gutter-width / 2);
+	}
+
+	.affiliation-col-4 {
+		@media (min-width: @screen-sm-min) {
+			flex-basis: (4 / 12) * 100%;;
+		}
+	}
+	
+	.affiliation-col-8 {
+		@media (min-width: @screen-sm-min) {
+			flex-basis: (8 / 12) * 100%;
+		}
+	}
+
+	.affiliation-col-align-right {
+		@media (min-width: @screen-sm-min) {
+			display: flex;
+			justify-content: flex-end;
+		}
+	}
