@@ -253,9 +253,13 @@ define [
 			# auto-set filename based on selected file
 			$scope.$watch 'data.selectedProjectOutputFile', (newVal, oldVal) ->
 				return if !newVal
-				fileName = newVal.split('/').reverse()[0]
-				if fileName
-					$scope.data.name = fileName
+				if newVal == 'output.pdf'
+					project = _.find($scope.data.projects, (p) -> p._id == $scope.data.selectedProjectId)
+					$scope.data.name = if project?.name? then "#{project.name}.pdf" else 'output.pdf'
+				else
+					fileName = newVal.split('/').reverse()[0]
+					if fileName
+						$scope.data.name = fileName
 
 			_setInFlight = (type) ->
 				$scope.state.inFlight[type] = true
