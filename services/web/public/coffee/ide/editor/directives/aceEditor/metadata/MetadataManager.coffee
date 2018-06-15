@@ -18,41 +18,15 @@ define [
 					return
 				if change.action not in ['remove', 'insert']
 					return
-				cursorPosition = @editor.getCursorPosition()
+
 				end = change.end
-				range = new Range(end.row, 0, end.row, end.column)
-				lineUpToCursor = @editor.getSession().getTextRange range
-				if lineUpToCursor.trim() == '%' or lineUpToCursor.slice(0, 1) == '\\'
-					range = new Range(end.row, 0, end.row, end.column + 80)
-					lineUpToCursor = @editor.getSession().getTextRange range
-				commandFragment = getLastCommandFragment lineUpToCursor
+				lineText = @editor.getSession().getLine end.row
 
-				linesContainPackage = _.any(
-					change.lines,
-					(line) -> line.match(/^\\usepackage(?:\[.{0,80}?])?{(.{0,80}?)}/)
-				)
-				linesContainReqPackage = _.any(
-					change.lines,
-					(line) -> line.match(/^\\RequirePackage(?:\[.{0,80}?])?{(.{0,80}?)}/)
-				)
-				linesContainLabel = _.any(
-					change.lines,
-					(line) -> line.match(/\\label{(.{0,80}?)}/)
-				)
-				linesContainMeta =
-					linesContainPackage or
-					linesContainLabel or
-					linesContainReqPackage
+				# Defensive check against extremely long lines
+				return if lineText.length > 10000
 
-				lastCommandFragmentIsLabel = commandFragment?.slice(0, 7) == '\\label{'
-				lastCommandFragmentIsPackage = commandFragment?.slice(0, 11) == '\\usepackage'
-				lastCommandFragmentIsReqPack = commandFragment?.slice(0, 15) == '\\RequirePackage'
-				lastCommandFragmentIsMeta =
-					lastCommandFragmentIsPackage or
-					lastCommandFragmentIsLabel or
-					lastCommandFragmentIsReqPack
-
-				if linesContainMeta or lastCommandFragmentIsMeta
+				# Check if edited line contains metadata commands
+				if /\\(usepackage|RequirePackage|label)(\[.*])?({.*})?/.test(lineText)
 					@scheduleLoadCurrentDocMetaFromServer()
 
 			@editor.on "changeSession", (e) =>
