@@ -11,22 +11,6 @@ _ = require "underscore"
 request = require "request"
 
 
-BadDataError = (message) ->
-	error = new Error(message)
-	error.name = 'BadData'
-	error.__proto__ = BadDataError.prototype
-	return error
-BadDataError.prototype.__proto__ = Error.prototype
-
-
-ProjectNotFoundError = (message) ->
-	error = new Error(message)
-	error.name = 'ProjectNotFound'
-	error.__proto__ = ProjectNotFoundError.prototype
-	return error
-ProjectNotFoundError.prototype.__proto__ = Error.prototype
-
-
 OutputFileFetchFailedError = (message) ->
 	error = new Error(message)
 	error.name = 'OutputFileFetchFailedError'
@@ -92,11 +76,11 @@ module.exports = ProjectOutputFileAgent = {
 							callback(error)
 
 	handleError: (error, req, res, next) ->
-		if error instanceof BadDataError
+		if error instanceof ProjectFileAgent.BadDataError
 			res.status(400).send("The submitted data is not valid")
 		else if error instanceof OutputFileFetchFailedError
 			res.status(404).send("Could not get output file")
-		else if error instanceof ProjectNotFoundError
+		else if error instanceof ProjectFileAgent.ProjectNotFoundError
 			res.status(404).send("Project not found")
 		else if error instanceof ProjectFileAgent.V1ProjectNotFoundError
 			res.status(409).send(ProjectFileAgent._v1ProjectNotFoundMessage)

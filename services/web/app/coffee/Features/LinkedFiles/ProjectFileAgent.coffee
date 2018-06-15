@@ -58,9 +58,12 @@ SourceFileNotFoundError = (message) ->
 SourceFileNotFoundError.prototype.__proto__ = Error.prototype
 
 
-module.exports = ProjectFileAgent =
+module.exports = ProjectFileAgent = {
 
-	V1ProjectNotFoundError: V1ProjectNotFoundError
+	V1ProjectNotFoundError
+	BadDataError
+	ProjectNotFoundError
+	V1ProjectNotFoundError
 
 	_v1ProjectNotFoundMessage: "Sorry, the source project is not yet imported to Overleaf v2. Please import it to Overleaf v2 to refresh this file"
 
@@ -163,3 +166,4 @@ module.exports = ProjectFileAgent =
 		else
 			next(error)
 		next()
+}
