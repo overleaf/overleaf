@@ -74,6 +74,11 @@ define -> [{
     "meta": "cmd",
     "score": 1.4425339817971206
 }, {
+    "caption": "\\ref{}",
+    "snippet": "\\ref{$1}",
+    "meta": "cross-reference",
+    "score": 0.014379554883991673
+  }{
     "caption": "\\frac{}{}",
     "snippet": "\\frac{$1}{$2}",
     "meta": "cmd",
