@@ -4,8 +4,8 @@ ProjectGetter = require('../Project/ProjectGetter')
 FileWriter = require('../../infrastructure/FileWriter')
 Settings = require 'settings-sharelatex'
 CompileManager = require '../Compile/CompileManager'
-CompileController = require '../Compile/CompileController'
 ClsiCookieManager = require '../Compile/ClsiCookieManager'
+ClsiManager = require '../Compile/ClsiManager'
 ProjectFileAgent = require './ProjectFileAgent'
 _ = require "underscore"
 request = require "request"
@@ -59,16 +59,13 @@ module.exports = ProjectOutputFileAgent = {
 			source_project_id = project._id
 			CompileManager.compile source_project_id, null, {}, (err) ->
 				return callback(err) if err?
-				url = "#{Settings.apis.clsi.url}/project/#{source_project_id}/output/#{source_output_file_path}"
-				ClsiCookieManager.getCookieJar source_project_id, (err, jar)->
+				ClsiManager.getOutputFileStream source_project_id, source_output_file_path, (err, readStream) ->
 					return callback(err) if err?
-					oneMinute = 60 * 1000
-					# the base request
-					options = { url: url, method: "GET", timeout: oneMinute, jar : jar }
-					readStream = request(options)
+					readStream.pause()
 					readStream.on "error", callback
 					readStream.on "response", (response) ->
 						if 200 <= response.statusCode < 300
+							readStream.resume()
 							FileWriter.writeStreamToDisk project_id, readStream, callback
 						else
 							error = new OutputFileFetchFailedError("Output file fetch failed: #{url}")
