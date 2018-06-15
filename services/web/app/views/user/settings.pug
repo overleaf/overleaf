@@ -4,7 +4,7 @@ block content
 	.content.content-alt
 		.container
 			.row
-				.col-md-10.col-md-offset-1.col-lg-8.col-lg-offset-2
+				.col-md-12.col-lg-10.col-lg-offset-1
 					.card
 						.page-header
 							h1  #{translate("account_settings")}
@@ -115,6 +115,106 @@ block content
 														type='submit',
 														ng-disabled="changePasswordForm.$invalid"
 													) #{translate("change")}
+
+							hr
+							div(
+								ng-controller="UserAffiliationsController"
+							)
+								h3 Affiliations
+
+								//- p Do you use multiple e-mail addresses? If so, add those here.
+
+								//- p Why should I do this? 
+
+								//- p Others users will be able to find you under different e-mail address when sharing projects.
+
+								//- p If your e-mail is an institutional e-mail, your account will be associated with that institution (and gain acess to any benefits the institution may have).
+
+								.affiliations-form-row
+									.affiliation-col-4
+										label(for="affiliations-email") #{translate("email")}
+										input-suggestions(
+											ng-model="newAffiliation.email"
+											get-suggestion="getEmailSuggestion(userInput)"
+											input-id="affilitations-email"
+											input-placeholder="e.g. johndoe@mit.edu"
+										)
+									.affiliation-col-8(
+										ng-if="newAffiliation.autoDetected"
+									)
+										p(ng-if="newAffiliation.university") {{ newAffiliation.university }}
+										p(ng-if="!newAffiliation.university") Start by adding your institutional email address.
+
+									.affiliation-col-4(
+										ng-if="!newAffiliation.autoDetected"
+									)
+										label Institution
+										ui-select(
+											ng-model="newAffiliation.country"
+										)
+											ui-select-match(
+												placeholder="Select your country"
+											) {{ $select.selected.name }}
+											ui-select-choices(
+												repeat="country in countries | filter: $select.search"
+											)
+												span(
+													ng-bind="country.name"
+												)
+									.affiliation-col-4(ng-if="!newAffiliation.autoDetected")
+										ui-select(
+											ng-model="newAffiliation.university"
+											ng-disabled="!newAffiliation.country"
+											tagging="addUniversityToSelection"
+											tagging-label="false"
+										)
+											ui-select-match(
+												placeholder="Select your university"
+											) {{ $select.selected.name }}
+											ui-select-choices(
+												repeat="university in universities | filter: $select.search"
+											)
+												span(
+													ng-bind="university.name"
+												)
+									.affiliation-col-4
+										label(for="affiliations-role") Role
+										input.form-control(
+											type="text"
+											id="affiliations-role"
+											placeholder="e.g. Professor"
+											ng-model="newAffiliation.role"
+										)
+									.affiliation-col-4
+										label(for="affiliations-department") Department
+										input.form-control(
+											type="text"
+											id="affiliations-department"
+											placeholder="e.g. Mathematics"
+											ng-model="newAffiliation.department"
+										)
+									.affiliation-col-4.affiliation-col-align-right
+										button.btn.btn-primary(
+										) Add new affiliation
+
+								//- p Your current affiliations
+
+								table.table
+									thead
+										tr
+											th Institution and role
+											th Affiliated e-mail
+											th
+									tbody
+										tr
+											td Universidade de Aveiro
+											td paulojreis@ua.pt
+											td Remove
+										tr
+											td Universidade do Porto
+											td paulojreis@fe.up.pt
+											td Remove
+
 
 							| !{moduleIncludes("userSettings", locals)}
 
