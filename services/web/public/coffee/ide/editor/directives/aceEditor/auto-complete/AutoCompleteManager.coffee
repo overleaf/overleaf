@@ -192,6 +192,13 @@ define [
 					setTimeout () =>
 						@editor.execCommand("startAutocomplete")
 					, 0
+			if (
+				change.action == "insert" and
+				change.lines[0] in ["\\begin{}", "\\ref{}", "\\usepackage{}", "\\cite{}"]
+			)
+				setTimeout () =>
+					@editor.execCommand("startAutocomplete")
+				, 0
 
 		monkeyPatchAutocomplete: () ->
 			Autocomplete = ace.require("ace/autocomplete").Autocomplete
