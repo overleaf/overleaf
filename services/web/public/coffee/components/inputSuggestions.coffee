@@ -1,0 +1,49 @@
+define [
+	"base"
+], (App) ->
+	inputSuggestionsController = ($scope, $element, $attrs) ->
+		ctrl = @ 
+		ctrl.showHint = false
+		ctrl.hasFocus = false
+		ctrl.handleFocus = () ->
+			ctrl.hasFocus = true
+			ctrl.suggestion = null
+		ctrl.handleBlur = () ->
+			ctrl.showHint = false
+			ctrl.hasFocus = false
+			ctrl.suggestion = null
+		ctrl.handleKeyDown = ($event) ->
+			if ($event.which == 9 or $event.which == 13) and ctrl.suggestion? and ctrl.suggestion != ""
+				$event.preventDefault()
+				ctrl.localNgModel += ctrl.suggestion
+				ctrl.suggestion = null
+				ctrl.showHint = false
+
+		$scope.$watch "$ctrl.localNgModel", (newVal, oldVal) ->
+			if ctrl.hasFocus and newVal != oldVal
+				ctrl.suggestion = null
+				ctrl.showHint = false
+				ctrl.getSuggestion({ userInput: newVal })
+					.then (suggestion) -> 
+						if suggestion? and newVal == ctrl.localNgModel
+							ctrl.showHint = true
+							ctrl.suggestion = suggestion.replace newVal, ""
+					.catch () -> ctrl.suggestion = null
+		return
+
+	App.component "inputSuggestions", {
+		bindings:
+			localNgModel: "=ngModel"
+			getSuggestion: "&"
+			inputId: "@"
+			inputPlaceholder: "@"
+		controller: inputSuggestionsController
+		template: """
+			<div class="input-suggestions">
+				<div type="text"  + $ctrl.suggestion" class="form-control input-suggestions-shadow" ng-show="$ctrl.showHint">
+					<span ng-bind="$ctrl.localNgModel" class="input-suggestions-shadow-existing"></span><span ng-bind="$ctrl.suggestion" class="input-suggestions-shadow-suggested"></span>
+				</div>
+				<input type="text" ng-focus="$ctrl.handleFocus()" ng-keyDown="$ctrl.handleKeyDown($event)" ng-blur="$ctrl.handleBlur()" ng-model="$ctrl.localNgModel" ng-model-options="{ debounce: 50 }" class="form-control input-suggestions-main" ng-attr-id="{{ ::$ctrl.inputId }}" ng-attr-placeholder="{{ ::$ctrl.inputPlaceholder }}">
+			</div>
+			"""
+	}
