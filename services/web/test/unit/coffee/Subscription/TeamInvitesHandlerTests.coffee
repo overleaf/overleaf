@@ -175,6 +175,22 @@ describe "TeamInvitesHandler", ->
 				).should.equal true
 				done()
 
+	describe "importInvite", ->
+		beforeEach ->
+			@sentAt = new Date()
+
+		it "can imports an invite from v1", ->
+			@TeamInvitesHandler.importInvite @subscription, "A-Team", "hannibal@a-team.org",
+				"secret", @sentAt, (error) =>
+					expect(error).not.to.exist
+
+					@subscription.save.calledOnce.should.eq true
+
+					invite = @subscription.teamInvites.find (i) -> i.email == "hannibal@a-team.org"
+					expect(invite.token).to.eq("secret")
+					expect(invite.sentAt).to.eq(@sentAt)
+
+
 	describe "acceptInvite", ->
 		beforeEach ->
 			@user = {
