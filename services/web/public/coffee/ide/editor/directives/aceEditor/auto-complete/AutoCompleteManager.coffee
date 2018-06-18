@@ -44,11 +44,11 @@ define [
 
 			GraphicsCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
-					{commandFragment, closingBrace} = Helpers.getContext(editor, pos)
+					{commandFragment} = Helpers.getContext(editor, pos)
 					if commandFragment
 						match = commandFragment.match(/^~?\\(includegraphics(?:\[.*])?){([^}]*, *)?(\w*)/)
 						if match
-							[commandName, _, currentArg] = match
+							[_, commandName, _, currentArg] = match
 							graphicsPaths = Preamble.getGraphicsPaths()
 							result = []
 							for graphic in Graphics.getGraphicsFiles()
@@ -58,8 +58,8 @@ define [
 										path = path.slice(graphicsPath.length)
 										break
 								result.push {
-									caption: "\\#{commandName}{#{path}#{closingBrace}"
-									value: "\\#{commandName}{#{path}#{closingBrace}"
+									caption: "\\#{commandName}{#{path}}"
+									value: "\\#{commandName}{#{path}}"
 									meta: "graphic"
 									score: 50
 								}
@@ -68,18 +68,18 @@ define [
 			metadataManager = @metadataManager
 			FilesCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) =>
-					{commandFragment, closingBrace} = Helpers.getContext(editor, pos)
+					{commandFragment} = Helpers.getContext(editor, pos)
 					if commandFragment
 						match = commandFragment.match(/^\\(input|include){(\w*)/)
 						if match
-							[commandName, currentArg] = match
+							[_, commandName, currentArg] = match
 							result = []
 							for file in Files.getTeXFiles()
 								if file.id != @$scope.docId
 									path = file.path
 									result.push {
-										caption: "\\#{commandName}{#{path}#{closingBrace}"
-										value: "\\#{commandName}{#{path}#{closingBrace}"
+										caption: "\\#{commandName}{#{path}}"
+										value: "\\#{commandName}{#{path}}"
 										meta: "file"
 										score: 50
 									}
@@ -87,11 +87,11 @@ define [
 
 			LabelsCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
-					{commandFragment, closingBrace} = Helpers.getContext(editor, pos)
+					{commandFragment} = Helpers.getContext(editor, pos)
 					if commandFragment
 						refMatch = commandFragment.match(/^~?\\([a-z]*ref){([^}]*, *)?(\w*)/)
 						if refMatch
-							[commandName, currentArg] = refMatch
+							[_, commandName, currentArg] = refMatch
 							result = []
 							if commandName != 'ref' # ref is in top 100 commands
 								result.push {
@@ -102,8 +102,8 @@ define [
 								}
 							for label in metadataManager.getAllLabels()
 								result.push {
-									caption: "\\#{commandName}{#{label}#{closingBrace}"
-									value: "\\#{commandName}{#{label}#{closingBrace}"
+									caption: "\\#{commandName}{#{label}}"
+									value: "\\#{commandName}{#{label}}"
 									meta: "cross-reference"
 									score: 50
 								}
@@ -112,13 +112,13 @@ define [
 			references = @$scope.$root._references
 			ReferencesCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
-					{commandFragment, closingBrace} = Helpers.getContext(editor, pos)
+					{commandFragment} = Helpers.getContext(editor, pos)
 					if commandFragment
 						citeMatch = commandFragment.match(
 							/^~?\\([a-z]*cite[a-z]*(?:\[.*])?){([^}]*, *)?(\w*)/
 						)
 						if citeMatch
-							[commandName, previousArgs, currentArg] = citeMatch
+							[_, commandName, previousArgs, currentArg] = citeMatch
 							if !previousArgs?
 								previousArgs = ""
 							previousArgsCaption = if previousArgs.length > 8 then "…," else previousArgs
@@ -133,8 +133,8 @@ define [
 								references.keys.forEach (key) ->
 									if key?
 										result.push({
-											caption: "\\#{commandName}{#{previousArgsCaption}#{key}#{closingBrace}"
-											value: "\\#{commandName}{#{previousArgs}#{key}#{closingBrace}"
+											caption: "\\#{commandName}{#{previousArgsCaption}#{key}}"
+											value: "\\#{commandName}{#{previousArgs}#{key}}"
 											meta: "reference"
 											score: 50
 										})
@@ -178,13 +178,15 @@ define [
 				end.row == cursorPosition.row and
 				end.column == cursorPosition.column + 1
 			)
-				if (commandFragment? and commandFragment.length > 2) or lastCharIsBackslash
+				if commandFragment?.length > 2 or lastCharIsBackslash
 					setTimeout () =>
 						@editor.execCommand("startAutocomplete")
 					, 0
 			if (
 				change.action == "insert" and
-				change.lines[0].match(/\\(\w+){}/)?[1].match(/(begin|[a-z]*ref|usepackage|[a-z]*cite[a-z]*)/)
+				change.lines[0].match(/\\(\w+){}/)?[1].match(
+					/(begin|end|[a-z]*ref|usepackage|[a-z]*cite[a-z]*|input|include)/
+				)
 			)
 				setTimeout () =>
 					@editor.execCommand("startAutocomplete")
@@ -206,7 +208,7 @@ define [
 
 					# If we are in \begin{it|}, then we need to remove the trailing }
 					# since it will be adding in with the autocomplete of \begin{item}...
-					if this.completions.filterText.match(/^\\begin\{/) and nextChar == "}"
+					if this.completions.filterText.match(/^\\\w+{/) and nextChar == "}"
 						editor.session.remove(range)
 
 					# Provide our own `insertMatch` implementation.
