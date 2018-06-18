@@ -44,13 +44,11 @@ define [
 
 			GraphicsCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
-					context = Helpers.getContext(editor, pos)
-					{commandFragment, closingBrace} = context
+					{commandFragment, closingBrace} = Helpers.getContext(editor, pos)
 					if commandFragment
 						match = commandFragment.match(/^~?\\(includegraphics(?:\[.*])?){([^}]*, *)?(\w*)/)
 						if match
-							commandName = match[1]
-							currentArg = match[3]
+							[commandName, _, currentArg] = match
 							graphicsPaths = Preamble.getGraphicsPaths()
 							result = []
 							for graphic in Graphics.getGraphicsFiles()
@@ -70,13 +68,11 @@ define [
 			metadataManager = @metadataManager
 			FilesCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) =>
-					context = Helpers.getContext(editor, pos)
-					{commandFragment, closingBrace} = context
+					{commandFragment, closingBrace} = Helpers.getContext(editor, pos)
 					if commandFragment
 						match = commandFragment.match(/^\\(input|include){(\w*)/)
 						if match
-							commandName = match[1]
-							currentArg = match[2]
+							[commandName, currentArg] = match
 							result = []
 							for file in Files.getTeXFiles()
 								if file.id != @$scope.docId
@@ -91,13 +87,11 @@ define [
 
 			LabelsCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
-					context = Helpers.getContext(editor, pos)
-					{commandFragment, closingBrace} = context
+					{commandFragment, closingBrace} = Helpers.getContext(editor, pos)
 					if commandFragment
 						refMatch = commandFragment.match(/^~?\\([a-z]*ref){([^}]*, *)?(\w*)/)
 						if refMatch
-							commandName = refMatch[1]
-							currentArg = refMatch[2]
+							[commandName, currentArg] = refMatch
 							result = []
 							if commandName != 'ref' # ref is in top 100 commands
 								result.push {
@@ -118,17 +112,14 @@ define [
 			references = @$scope.$root._references
 			ReferencesCompleter =
 				getCompletions: (editor, session, pos, prefix, callback) ->
-					context = Helpers.getContext(editor, pos)
-					{commandFragment, closingBrace} = context
+					{commandFragment, closingBrace} = Helpers.getContext(editor, pos)
 					if commandFragment
 						citeMatch = commandFragment.match(
 							/^~?\\([a-z]*cite[a-z]*(?:\[.*])?){([^}]*, *)?(\w*)/
 						)
 						if citeMatch
-							commandName = citeMatch[1]
-							previousArgs = citeMatch[2]
-							currentArg = citeMatch[3]
-							if previousArgs == undefined
+							[commandName, previousArgs, currentArg] = citeMatch
+							if !previousArgs?
 								previousArgs = ""
 							previousArgsCaption = if previousArgs.length > 8 then "…," else previousArgs
 							result = []
@@ -140,7 +131,7 @@ define [
 							}
 							if references.keys and references.keys.length > 0
 								references.keys.forEach (key) ->
-									if !(key in [null, undefined])
+									if key?
 										result.push({
 											caption: "\\#{commandName}{#{previousArgsCaption}#{key}#{closingBrace}"
 											value: "\\#{commandName}{#{previousArgs}#{key}#{closingBrace}"
@@ -170,8 +161,7 @@ define [
 		onChange: (change) ->
 			cursorPosition = @editor.getCursorPosition()
 			end = change.end
-			context = Helpers.getContext(@editor, end)
-			{lineUpToCursor, commandFragment} = context
+			{lineUpToCursor, commandFragment} = Helpers.getContext(@editor, end)
 			if lineUpToCursor.match(/.*%.*/)
 				return
 			lastCharIsBackslash = lineUpToCursor.slice(-1) == "\\"
@@ -194,7 +184,7 @@ define [
 					, 0
 			if (
 				change.action == "insert" and
-				change.lines[0] in ["\\begin{}", "\\ref{}", "\\usepackage{}", "\\cite{}"]
+				change.lines[0].match(/\\(\w+){}/)?[1].match(/(begin|[a-z]*ref|usepackage|[a-z]*cite[a-z]*)/)
 			)
 				setTimeout () =>
 					@editor.execCommand("startAutocomplete")
