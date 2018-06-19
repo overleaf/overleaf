@@ -20,7 +20,11 @@ module.exports = UserEmailsController =
 		email = EmailHelper.parseEmail(req.body.email)
 		return res.sendStatus 422 unless email?
 
-		UserUpdater.addEmailAddress userId, email, (error)->
+		affiliationOptions =
+			university: req.body.university
+			role: req.body.role
+			department: req.body.department
+		UserUpdater.addEmailAddress userId, email, affiliationOptions, (error)->
 			return next(error) if error?
 			UserEmailsConfirmationHandler.sendConfirmationEmail userId, email, (err) ->
 				return next(error) if error?

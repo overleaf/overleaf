@@ -53,10 +53,14 @@ describe "UserEmailsController", ->
 	describe 'Add', ->
 		beforeEach ->
 			@newEmail = 'new_email@baz.com'
-			@req.body.email = @newEmail
+			@req.body =
+				email: @newEmail
+				university: { name: 'University Name' }
+				department: 'Department'
+				role: 'Role'
 			@EmailHelper.parseEmail.returns @newEmail
-			@UserUpdater.addEmailAddress.callsArgWith 2, null
 			@UserEmailsConfirmationHandler.sendConfirmationEmail = sinon.stub().yields()
+			@UserUpdater.addEmailAddress.callsArgWith 3, null
 
 		it 'adds new email', (done) ->
 			@UserEmailsController.add @req, 
@@ -64,6 +68,13 @@ describe "UserEmailsController", ->
 					code.should.equal 204
 					assertCalledWith @EmailHelper.parseEmail, @newEmail
 					assertCalledWith @UserUpdater.addEmailAddress, @user._id, @newEmail
+
+					affiliationOptions = @UserUpdater.addEmailAddress.lastCall.args[2]
+					Object.keys(affiliationOptions).length.should.equal 3
+					affiliationOptions.university.should.equal @req.body.university
+					affiliationOptions.department.should.equal @req.body.department
+					affiliationOptions.role.should.equal @req.body.role
+
 					done()
 
 		it 'sends an email confirmation', (done) ->
@@ -75,7 +86,6 @@ describe "UserEmailsController", ->
 
 		it 'handles email parse error', (done) ->
 			@EmailHelper.parseEmail.returns null
-
 			@UserEmailsController.add @req, 
 				sendStatus: (code) =>
 					code.should.equal 422

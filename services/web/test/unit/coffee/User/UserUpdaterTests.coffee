@@ -11,7 +11,6 @@ describe "UserUpdater", ->
 
 	beforeEach ->
 		tk.freeze(Date.now())
-		@settings = {}
 		@mongojs = 
 			db:{}
 			ObjectId:(id)-> return id
@@ -20,12 +19,15 @@ describe "UserUpdater", ->
 			getUserByAnyEmail: sinon.stub()
 			ensureUniqueEmailAddress: sinon.stub()
 		@logger = err: sinon.stub(), log: ->
+		settings = apis: { v1: { url: '', user: '', pass: '' } }
+		@request = sinon.stub()
 		@UserUpdater = SandboxedModule.require modulePath, requires:
-			"settings-sharelatex":@settings
 			"logger-sharelatex": @logger
 			"./UserGetter": @UserGetter
 			"../../infrastructure/mongojs":@mongojs
 			"metrics-sharelatex": timeAsyncMethod: sinon.stub()
+			'settings-sharelatex': settings
+			'request': @request
 
 		@stubbedUser = 
 			_id: "3131231"
@@ -66,10 +68,10 @@ describe "UserUpdater", ->
 	describe 'addEmailAddress', ->
 		beforeEach ->
 			@UserGetter.ensureUniqueEmailAddress = sinon.stub().callsArgWith(1)
+			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, null)
+			@request.callsArgWith(1, null, { statusCode: 201 })
 
 		it 'add email', (done)->
-			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, null)
-
 			@UserUpdater.addEmailAddress @stubbedUser._id, @newEmail, (err)=>
 				@UserGetter.ensureUniqueEmailAddress.called.should.equal true
 				should.not.exist(err)
@@ -77,6 +79,27 @@ describe "UserUpdater", ->
 					@stubbedUser._id,
 					$push: { emails: { email: @newEmail, createdAt: sinon.match.date } }
 				).should.equal true
+				done()
+
+		it 'add affiliation', (done)->
+			affiliationOptions =
+				university: { id: 1 }
+				role: 'Prof'
+				department: 'Math'
+			@UserUpdater.addEmailAddress @stubbedUser._id, @newEmail, affiliationOptions, (err)=>
+				should.not.exist(err)
+				@request.calledOnce.should.equal true
+				requestOptions = @request.lastCall.args[0]
+				expectedUrl = "/api/v2/users/#{@stubbedUser._id}/affiliations"
+				requestOptions.url.should.equal expectedUrl
+				requestOptions.method.should.equal 'POST'
+
+				body = requestOptions.body
+				Object.keys(body).length.should.equal 4
+				body.email.should.equal @newEmail
+				body.university.should.equal affiliationOptions.university
+				body.department.should.equal affiliationOptions.department
+				body.role.should.equal affiliationOptions.role
 				done()
 
 		it 'handle error', (done)->
@@ -87,16 +110,38 @@ describe "UserUpdater", ->
 				should.exist(err)
 				done()
 
-	describe 'removeEmailAddress', ->
-		it 'remove email', (done)->
-			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, null, nMatched: 1)
+		it 'handle affiliation error', (done)->
+			body = errors: 'affiliation error message'
+			@request.callsArgWith(1, null, { statusCode: 422 }, body)
+			@UserUpdater.addEmailAddress @stubbedUser._id, @newEmail, (err)=>
+				err.message.should.have.string 422
+				err.message.should.have.string body.errors
+				@UserUpdater.updateUser.called.should.equal false
+				done()
 
+	describe 'removeEmailAddress', ->
+		beforeEach ->
+			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, null, nMatched: 1)
+			@request.callsArgWith(1, null, { statusCode: 404 })
+
+		it 'remove email', (done)->
 			@UserUpdater.removeEmailAddress @stubbedUser._id, @newEmail, (err)=>
 				should.not.exist(err)
 				@UserUpdater.updateUser.calledWith(
 					{ _id: @stubbedUser._id, email: { $ne: @newEmail } },
 					$pull: { emails: { email: @newEmail } }
 				).should.equal true
+				done()
+
+		it 'remove affiliation', (done)->
+			@UserUpdater.removeEmailAddress @stubbedUser._id, @newEmail, (err)=>
+				should.not.exist(err)
+				@request.calledOnce.should.equal true
+				requestOptions = @request.lastCall.args[0]
+				expectedUrl = "/api/v2/users/#{@stubbedUser._id}/affiliations/"
+				expectedUrl += encodeURIComponent(@newEmail)
+				requestOptions.url.should.equal expectedUrl
+				requestOptions.method.should.equal 'DELETE'
 				done()
 
 		it 'handle error', (done)->
@@ -111,6 +156,13 @@ describe "UserUpdater", ->
 
 			@UserUpdater.removeEmailAddress @stubbedUser._id, @newEmail, (err)=>
 				should.exist(err)
+				done()
+
+		it 'handle affiliation error', (done)->
+			@request.callsArgWith(1, null, { statusCode: 500 })
+			@UserUpdater.removeEmailAddress @stubbedUser._id, @newEmail, (err)=>
+				err.message.should.exist
+				@UserUpdater.updateUser.called.should.equal false
 				done()
 
 	describe 'setDefaultEmailAddress', ->
