@@ -10,6 +10,7 @@ block scripts
 
 block content
 	.content.content-alt
+
 		.container(ng-controller="NewSubscriptionController" ng-cloak)
 			.row.card-group
 				.col-md-5.col-md-push-4
@@ -35,6 +36,15 @@ block content
 							.row(ng-if="plansVariant == 'more-details' && planCode == 'student-annual' || plansVariant == 'more-details' && planCode == 'student-monthly'")
 								.col-xs-12
 									p.student-disclaimer #{translate('student_disclaimer')}
+
+							if plan_code == 'collaborator_free_trial_7_days' && !!settings.overleaf
+								.row
+									.col-xs-12
+										p.small.row-spaced-small
+											| The <strong>Collaborator</strong> plan is a new Overleaf v2 plan which includes track-changes, references search, and Dropbox &amp; GitHub integration. While Overleaf v2 is in beta, you can also still subscribe to a
+											|
+											a(href=settings.overleaf.host + "/plans") legacy plan in Overleaf v1
+											| .
 							hr.thin
 							.row
 								.col-md-12.text-center
