@@ -27,6 +27,7 @@ CollaboratorsHandler = require '../Collaborators/CollaboratorsHandler'
 Modules = require '../../infrastructure/Modules'
 ProjectEntityHandler = require './ProjectEntityHandler'
 crypto = require 'crypto'
+{ V1ConnectionError } = require '../Errors/Errors'
 
 module.exports = ProjectController =
 
@@ -183,7 +184,10 @@ module.exports = ProjectController =
 						return cb(null, projects: [], tags: [], noConnection: true)
 					return cb(error, projects[0]) # hooks.fire returns an array of results, only need first
 			hasSubscription: (cb)->
-				LimitationsManager.userHasSubscriptionOrIsGroupMember currentUser, cb
+				LimitationsManager.userHasSubscriptionOrIsGroupMember currentUser, (error, hasSub) ->
+					if error? and error instanceof V1ConnectionError
+						return cb(null, true)
+					return cb(error, hasSub)
 			user: (cb) ->
 				User.findById user_id, "featureSwitches overleaf awareOfV2 features", cb
 			}, (err, results)->

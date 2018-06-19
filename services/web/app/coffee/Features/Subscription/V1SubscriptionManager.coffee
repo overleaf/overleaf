@@ -2,6 +2,7 @@ UserGetter = require "../User/UserGetter"
 request = require "request"
 settings = require "settings-sharelatex"
 logger = require "logger-sharelatex"
+{ V1ConnectionError } = require "../Errors/Errors"
 
 module.exports = V1SubscriptionManager =
 	# Returned planCode = 'v1_pro' | 'v1_pro_plus' | 'v1_student' | 'v1_free' | null
@@ -58,7 +59,10 @@ module.exports = V1SubscriptionManager =
 				json: true,
 				timeout: 5 * 1000
 			}, (error, response, body) ->
-				return callback(error) if error?
+				if error?
+					# Specially handle no connection err, so warning can be shown
+					error = new V1ConnectionError('No V1 connection') if error.code == 'ECONNREFUSED'
+					return callback(error)
 				if 200 <= response.statusCode < 300
 					return callback null, body
 				else
