@@ -37,21 +37,21 @@ describe "OneTimeTokenHandler", ->
 
 		it "should set a new token into redis with a ttl", (done)->
 			@redisMulti.exec.callsArgWith(0) 
-			@OneTimeTokenHandler.getNewToken @value, (err, token) =>
+			@OneTimeTokenHandler.getNewToken 'password', @value, (err, token) =>
 				@redisMulti.set.calledWith("password_token:#{@stubbedToken.toString("hex")}", @value).should.equal true
 				@redisMulti.expire.calledWith("password_token:#{@stubbedToken.toString("hex")}", 60 * 60).should.equal true
 				done()
 
 		it "should return if there was an error", (done)->
 			@redisMulti.exec.callsArgWith(0, "error")
-			@OneTimeTokenHandler.getNewToken @value, (err, token)=>
+			@OneTimeTokenHandler.getNewToken 'password', @value, (err, token)=>
 				err.should.exist
 				done()
 
 		it "should allow the expiry time to be overridden", (done) ->
 			@redisMulti.exec.callsArgWith(0) 
 			@ttl = 42
-			@OneTimeTokenHandler.getNewToken @value, {expiresIn: @ttl}, (err, token) =>
+			@OneTimeTokenHandler.getNewToken 'password', @value, {expiresIn: @ttl}, (err, token) =>
 				@redisMulti.expire.calledWith("password_token:#{@stubbedToken.toString("hex")}", @ttl).should.equal true
 				done()
 
@@ -59,7 +59,7 @@ describe "OneTimeTokenHandler", ->
 
 		it "should get and delete the token", (done)->
 			@redisMulti.exec.callsArgWith(0, null, [@value]) 
-			@OneTimeTokenHandler.getValueFromTokenAndExpire @stubbedToken, (err, value)=>
+			@OneTimeTokenHandler.getValueFromTokenAndExpire 'password', @stubbedToken, (err, value)=>
 				value.should.equal @value
 				@redisMulti.get.calledWith("password_token:#{@stubbedToken}").should.equal true
 				@redisMulti.del.calledWith("password_token:#{@stubbedToken}").should.equal true

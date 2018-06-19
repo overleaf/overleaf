@@ -6,29 +6,29 @@ logger = require("logger-sharelatex")
 
 ONE_HOUR_IN_S = 60 * 60
 
-buildKey = (token)-> return "password_token:#{token}"
+buildKey = (use, token)-> return "#{use}_token:#{token}"
 
 module.exports =
 
-	getNewToken: (value, options = {}, callback)->
+	getNewToken: (use, value, options = {}, callback)->
 		# options is optional
 		if typeof options == "function"
 			callback = options
 			options = {}
 		expiresIn = options.expiresIn or ONE_HOUR_IN_S
-		logger.log value:value, "generating token for password reset"
 		token = crypto.randomBytes(32).toString("hex")
+		logger.log {value, expiresIn, token_start: token.slice(0,8)}, "generating token for #{use}"
 		multi = rclient.multi()
-		multi.set buildKey(token), value
-		multi.expire buildKey(token), expiresIn
+		multi.set buildKey(use, token), value
+		multi.expire buildKey(use, token), expiresIn
 		multi.exec (err)->
 			callback(err, token)
 
-	getValueFromTokenAndExpire: (token, callback)->
-		logger.log token:token, "getting user id from password token"
+	getValueFromTokenAndExpire: (use, token, callback)->
+		logger.log token_start: token.slice(0,8), "getting value from #{use} token"
 		multi = rclient.multi()
-		multi.get buildKey(token)
-		multi.del buildKey(token)
+		multi.get buildKey(use, token)
+		multi.del buildKey(use, token)
 		multi.exec (err, results)->
 			callback err, results?[0]
 
