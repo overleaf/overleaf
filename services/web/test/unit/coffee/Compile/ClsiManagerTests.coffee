@@ -493,14 +493,20 @@ describe "ClsiManager", ->
 				url : "https://compiles.googlecloud.test"
 			@response = {there:"something"}
 			@request.callsArgWith(1, null, @response)
-
-		it "should change the domain on the url", (done)->
 			@opts = 
 				url: @ClsiManager._getCompilerUrl(null, @project_id)
-
+				
+		it "should change the domain on the url", (done)->
 			@ClsiManager._makeGoogleCloudRequest @project_id, @opts, =>
 				args = @request.args[0]
 				args[0].url.should.equal "https://compiles.googlecloud.test/project/#{@project_id}"
+				done()
+
+		it "should not make a request if there is not clsigc url", (done)->
+			@settings.apis.clsigc = undefined
+			@ClsiManager._makeGoogleCloudRequest @project_id, @opts, (err)=>
+				expect(err).to.equal undefined
+				@request.callCount.should.equal 0
 				done()
 
 
