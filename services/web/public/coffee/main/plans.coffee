@@ -153,6 +153,7 @@ define [
 		if $scope.shouldABTestPlans
 			sixpack.participate 'plans-details', ['default', 'more-details'], (chosenVariation, rawResponse)->
 				$scope.plansVariant = chosenVariation
+				event_tracking.send 'subscription-funnel', 'plans-page-loaded', chosenVariation
 
 		$scope.showPlans = true
 
