@@ -196,8 +196,11 @@ test_frontend: test_clean # stop service
 
 test_acceptance: test_acceptance_app test_acceptance_modules
 
-test_acceptance_app: test_acceptance_app_start_service test_acceptance_app_run
-	$(MAKE) test_acceptance_app_stop_service
+test_acceptance_app:
+	@set -e; \
+	$(MAKE) test_acceptance_app_start_service; \
+	$(MAKE) test_acceptance_app_run; \
+	$(MAKE) test_acceptance_app_stop_service;
 
 test_acceptance_app_start_service: test_clean # stop service and clear dbs
 	$(MAKE) compile
@@ -208,10 +211,12 @@ test_acceptance_app_stop_service:
 
 test_acceptance_app_run:
 	@docker-compose ${DOCKER_COMPOSE_FLAGS} exec -T test_acceptance npm -q run test:acceptance -- ${MOCHA_ARGS}; \
-	if [ $$? -eq 137 ]; then \
-		echo "\nOh dear, it looks like the web process crashed! To see why, run:\n\n\tdocker-compose logs test_acceptance\n"; \
-		exit 1; \
-	fi
+	result=$$?; \
+	if [ $$result -eq 137 ]; then \
+		docker-compose logs --tail=50 test_acceptance; \
+		echo "\nOh dear, it looks like the web process crashed! Some logs are above, but to see them all, run:\n\n\tdocker-compose logs test_acceptance\n"; \
+	fi; \
+	exit $$result
 
 test_acceptance_modules:
 	@set -e; \
