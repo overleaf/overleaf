@@ -1,0 +1,60 @@
+
+//- Title
+-if (metadata && metadata.title)
+	title= metadata.title + ' - ' + settings.appName + ', ' + translate("online_latex_editor")
+	meta(name="twitter:title", content=metadata.title)
+	meta(name="og:title", content=metadata.title)
+-else if (typeof(title) == "undefined")
+	title= settings.appName + ', '+ translate("online_latex_editor")
+	meta(name="twitter:title", content=settings.appName + ', '+ translate("online_latex_editor"))
+	meta(name="og:title", content=settings.appName + ', '+ translate("online_latex_editor"))
+-else
+	title= translate(title) + ' - ' + settings.appName + ', ' + translate("online_latex_editor")
+	//- to do - not translate?
+	meta(name="twitter:title", content=translate(title))
+	meta(name="og:title", content=translate(title))
+
+//- Description
+-if (metadata && metadata.description)
+	meta(itemprop="description", name="description" , content=metadata.description)
+	//-twitter and og descriptions handeled below
+-else
+	meta(itemprop="description", name="description", content=translate("site_description"))
+	meta(itemprop="description", name="twitter:description", content=translate("site_description"))
+	meta(itemprop="description", name="og:description", content=translate("site_description"))
+
+//- Image
+-if (metadata && metadata.image)
+	meta(itemprop="image", name="image", content=metadata.image.fields.file.url)
+-else
+	meta(itemprop="image", name="image", content="/" + settings.brandPrefix + "favicon.ico")
+
+//- Keywords
+-if (metadata && metadata.keywords)
+	meta(name="keywords" content=metadata.keywords)
+
+//- Misc
+meta(itemprop="name", content=settings.appName + ", the Online LaTeX Editor")
+
+//- Twitter
+meta(name="twitter:card", content=metadata.twitterCardType ? metadata.twitterCardType : 'summary')
+-if (settings.social && settings.social.twitter && settings.social.twitter.handle)
+	meta(name="twitter:site", content="@" + settings.social.twitter.handle)
+-if (metadata && metadata.twitterDescription)
+	meta(itemprop="twitter:description", content=metadata.twitterDescription)
+-if (metadata && metadata.twitterImage)
+	meta(itemprop="image", name="twitter:image", content=metadata.twitterImage.fields.file.url)
+	meta(itemprop="image", name="twitter:image:alt", content=metadata.twitterImage.fields.title)
+
+//- Open Graph
+//- to do - add og:url
+-if (settings.social && settings.social.facebook && settings.social.facebook.appId)
+	meta(name="fb:app_id", content=settings.social.facebook.appId)
+-if (metadata && metadata.openGraphDescription)
+	meta(itemprop="description", name="og:description", content=metadata.openGraphDescription)
+-if (metadata && metadata.openGraphImage)
+	meta(itemprop="image", name="og:image", content=metadata.openGraphImage.fields.file.url)
+-if (metadata && metadata.openGraphType)
+	meta(name="og:type", metadata.openGraphType)
+-else
+	meta(name="og:type", content="website")
