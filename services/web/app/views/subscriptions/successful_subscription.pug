@@ -18,17 +18,11 @@ block content
 						p.letter-from-founders
 							p #{translate("thanks_for_subscribing_you_help_sl", {planName:subscription.name})}
 							p #{translate("need_anything_contact_us_at")} 
-								a(href='mailto:support@sharelatex.com') support@sharelatex.com
-								| . #{translate("goes_straight_to_our_inboxes")}.
+								a(href='mailto:support@sharelatex.com') #{settings.adminEmail}
+								| .
 							p #{translate("regards")},
 								br
-								| Henry and James
-							.portraits
-								span.img-circle
-									img(src=buildImgPath("about/henry_oswald.jpg"))
-								| &nbsp;
-								span.img-circle
-									img(src=buildImgPath("about/james_allen.jpg"))
+								| The #{settings.appName} Team
 						p
 							a.btn.btn-primary(href="/project") &lt; #{translate("back_to_your_projects")}
 
