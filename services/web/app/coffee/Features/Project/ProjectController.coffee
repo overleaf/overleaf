@@ -180,7 +180,7 @@ module.exports = ProjectController =
 				ProjectGetter.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref tokens', cb
 			v1Projects: (cb) ->
 				Modules.hooks.fire "findAllV1Projects", user_id, (error, projects = []) ->
-					if error? and error.message == 'No V1 connection'
+					if error? and error instanceof V1ConnectionError
 						return cb(null, projects: [], tags: [], noConnection: true)
 					return cb(error, projects[0]) # hooks.fire returns an array of results, only need first
 			hasSubscription: (cb)->
