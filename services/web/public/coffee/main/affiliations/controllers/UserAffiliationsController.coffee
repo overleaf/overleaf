@@ -12,33 +12,79 @@ define [
 			department: null
 			autoDetectMode: true
 
-		EMAIL_REGEXP = /([^@]+)@(.+)/
+		LOCAL_AND_DOMAIN_REGEX = /([^@]+)@(.+)/
+		EMAIL_REGEX = /^([A-Za-z0-9_\-\.]+)@([^\.]+)\.([A-Za-z]+)$/
 
-		_matchEmail = (email) ->
-			match = email.match EMAIL_REGEXP
+		_matchLocalAndDomain = (userEmailInput) ->
+			match = userEmailInput?.match LOCAL_AND_DOMAIN_REGEX
 			if match?
 				{ local: match[1], domain: match[2] }
 			else
 				{ local: null, domain: null }
 
+		UserAffiliationsDataService.getUserEmails()
 
 		$scope.addUniversityToSelection = (universityName) -> 
-			{ name: universityName, country_code: $scope.newAffiliation.country.code }
+			{ name: universityName, isUserSuggested: true }
 
 		$scope.getEmailSuggestion = (userInput) ->
-			matchedEmail = _matchEmail(userInput)
-			if matchedEmail.domain?
-				UserAffiliationsDataService.getUniversityDomainFromPartialDomainInput(matchedEmail.domain)
-					.then (universityDomain) -> 
-						$scope.newAffiliation.university = universityDomain.university.name
-						$scope.newAffiliation.department = universityDomain.department
-						$q.resolve "#{matchedEmail.local}@#{universityDomain.hostname}"
+			userInputLocalAndDomain = _matchLocalAndDomain(userInput)
+			if userInputLocalAndDomain.domain?
+				UserAffiliationsDataService.getUniversityDomainFromPartialDomainInput(userInputLocalAndDomain.domain)
+					.then (universityDomain) -> 						
+						$scope.newAffiliation.autoDetectMode = true
+						if userInputLocalAndDomain.domain == universityDomain.hostname
+							$scope.newAffiliation.university = universityDomain.university
+							$scope.newAffiliation.department = universityDomain.department
+						else 
+							$scope.newAffiliation.university = null
+							$scope.newAffiliation.department = null
+						$q.resolve "#{userInputLocalAndDomain.local}@#{universityDomain.hostname}"
 					.catch () -> 
 						$scope.newAffiliation.university = null
 						$scope.newAffiliation.department = null
+						# If the input is already a full e-mail and we have no suggestions, then the user
+						# will need to manually select his institution.
+						if userInput.match EMAIL_REGEX
+							$scope.newAffiliation.autoDetectMode = false
 						$q.reject null
-			else 
+			else
+				$scope.newAffiliation.university = null
+				$scope.newAffiliation.department = null
 				$q.resolve null
+
+		$scope.handleEmailInputBlur = () ->
+			if $scope.newAffiliation.autoDetectMode and !$scope.newAffiliation.university and $scope.newAffiliation.email?.match EMAIL_REGEX
+				$scope.newAffiliation.autoDetectMode = false
+
+		$scope.selectUniversityManually = () ->
+			$scope.newAffiliation.university = null
+			$scope.newAffiliation.department = null
+			$scope.newAffiliation.autoDetectMode = false
+
+		$scope.handleAffiliationFormSubmit = () ->
+			if !$scope.newAffiliation.university?
+				UserAffiliationsDataService.addUserEmail(
+					$scope.newAffiliation.email,
+					$scope.newAffiliation.role,
+					$scope.newAffiliation.department
+				)
+			else
+				if $scope.newAffiliation.university.isUserSuggested
+					UserAffiliationsDataService.addUserAffiliationWithUnknownUniversity(
+						$scope.newAffiliation.email,
+						$scope.newAffiliation.university.name, 
+						$scope.newAffiliation.country.code,
+						$scope.newAffiliation.role,
+						$scope.newAffiliation.department
+					)
+				else
+					UserAffiliationsDataService.addUserAffiliation(
+						$scope.newAffiliation.email,
+						$scope.newAffiliation.university.id
+						$scope.newAffiliation.role,
+						$scope.newAffiliation.department
+					)
 
 		UserAffiliationsDataService
 			.getCountries()

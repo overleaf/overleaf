@@ -117,36 +117,51 @@ block content
 													) #{translate("change")}
 
 							hr
-							div(
+							form(
 								ng-controller="UserAffiliationsController"
+								novalidate
+								name="affiliationsForm"
 							)
-								h3 Affiliations
+								h3 Emails and affiliations
+								p Do you use multiple e-mail addresses? If so, add those here.
+								ul
+									li You'll retain access to your account even if you lose access to one of your emails
+									li Others users will be able to find you under different email addresses when sharing projects
+									li If your e-mail is affiliated with an institution with a group license, your account will be associated with that institution (and you'll gain acess to any benefits the institution may have).
 
-								//- p Do you use multiple e-mail addresses? If so, add those here.
-
-								//- p Why should I do this? 
-
-								//- p Others users will be able to find you under different e-mail address when sharing projects.
-
-								//- p If your e-mail is an institutional e-mail, your account will be associated with that institution (and gain acess to any benefits the institution may have).
-
-								.affiliations-form-row
+								pre(style="font-size: 0.8em; position: fixed; left: 80px; top: 80px; color: black;") {{ newAffiliation | json }}
+								.affiliations-row
 									.affiliation-col-4
 										label(for="affiliations-email") #{translate("email")}
 										input-suggestions(
 											ng-model="newAffiliation.email"
+											ng-model-options="{ allowInvalid: true }"
 											get-suggestion="getEmailSuggestion(userInput)"
+											on-blur="handleEmailInputBlur()"
 											input-id="affilitations-email"
+											input-name="affilitationsEmail"
 											input-placeholder="e.g. johndoe@mit.edu"
+											input-type="email"
+											input-required="true"
 										)
 									.affiliation-col-8(
-										ng-if="newAffiliation.autoDetected"
+										ng-show="newAffiliation.autoDetectMode"
 									)
-										p(ng-if="newAffiliation.university") {{ newAffiliation.university }}
-										p(ng-if="!newAffiliation.university") Start by adding your institutional email address.
-
+										p.affiliation-input-feedback(
+											ng-if="newAffiliation.university"
+										)
+											| {{ newAffiliation.university.name }} (
+											a(
+												href
+												ng-click="selectUniversityManually();"
+											) change
+											| )
+										p.affiliation-input-feedback(
+											ng-if="!newAffiliation.university"
+										) Start by adding your email address.
+								.affiliations-row
 									.affiliation-col-4(
-										ng-if="!newAffiliation.autoDetected"
+										ng-if="!newAffiliation.autoDetectMode"
 									)
 										label Institution
 										ui-select(
@@ -161,7 +176,7 @@ block content
 												span(
 													ng-bind="country.name"
 												)
-									.affiliation-col-4(ng-if="!newAffiliation.autoDetected")
+									.affiliation-col-4(ng-if="!newAffiliation.autoDetectMode")
 										ui-select(
 											ng-model="newAffiliation.university"
 											ng-disabled="!newAffiliation.country"
@@ -177,6 +192,9 @@ block content
 												span(
 													ng-bind="university.name"
 												)
+								.affiliations-row(
+									ng-if="newAffiliation.university"
+								)
 									.affiliation-col-4
 										label(for="affiliations-role") Role
 										input.form-control(
@@ -193,9 +211,14 @@ block content
 											placeholder="e.g. Mathematics"
 											ng-model="newAffiliation.department"
 										)
-									.affiliation-col-4.affiliation-col-align-right
-										button.btn.btn-primary(
-										) Add new affiliation
+								.affiliations-row
+									.affiliation-col-4
+										input.btn.btn-primary(
+											type="submit"
+											ng-disabled="affiliationsForm.$invalid"
+											ng-click="handleAffiliationFormSubmit()"
+											value="Add new email"
+										)
 
 								//- p Your current affiliations
 
