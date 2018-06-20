@@ -61,6 +61,13 @@ ProjectHistoryDisabledError = (message) ->
 	return error
 ProjectHistoryDisabledError.prototype.__proto___ = Error.prototype
 
+V1ConnectionError = (message) ->
+	error = new Error(message)
+	error.name = "V1ConnectionError"
+	error.__proto__ = V1ConnectionError.prototype
+	return error
+V1ConnectionError.prototype.__proto___ = Error.prototype
+
 module.exports = Errors =
 	NotFoundError: NotFoundError
 	ServiceNotConfiguredError: ServiceNotConfiguredError
@@ -71,3 +78,4 @@ module.exports = Errors =
 	UnsupportedExportRecordsError: UnsupportedExportRecordsError
 	V1HistoryNotSyncedError: V1HistoryNotSyncedError
 	ProjectHistoryDisabledError: ProjectHistoryDisabledError
+	V1ConnectionError: V1ConnectionError
