@@ -151,7 +151,7 @@ describe "LinkedFiles", ->
 						source_entity_path: "/#{@source_doc_name}",
 			}, (error, response, body) =>
 				expect(response.statusCode).to.equal 403
-				expect(body).to.equal 'Cannot create linked file'
+				expect(body).to.equal 'You do not have access to this project'
 				done()
 
 	describe "with a linked project_file from a v1 project that has not been imported", ->
@@ -380,6 +380,7 @@ describe "LinkedFiles", ->
 					data:
 						source_project_id: @project_two_id,
 						source_output_file_path: "output.pdf",
+						build_id: '1234-abcd'
 			}, (error, response, body) =>
 				new_file_id = body.new_file_id
 				@existing_file_id = new_file_id
@@ -393,6 +394,7 @@ describe "LinkedFiles", ->
 						source_project_id: @project_two_id,
 						source_output_file_path: "output.pdf",
 						source_project_display_name: "output-test-two"
+						build_id: '1234-abcd'
 					}
 					expect(firstFile.name).to.equal('test.pdf')
 					done()

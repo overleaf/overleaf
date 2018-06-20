@@ -182,8 +182,8 @@ module.exports = ClsiManager =
 				return callback(error) if error?
 				callback(null, projectStateHash, docs)
 
-	getOutputFileStream: (project_id, output_file_path, callback=(err, readStream)->) ->
-		url = "#{Settings.apis.clsi.url}/project/#{project_id}/output/#{output_file_path}"
+	getOutputFileStream: (project_id, user_id, build_id, output_file_path, callback=(err, readStream)->) ->
+		url = "#{Settings.apis.clsi.url}/project/#{project_id}/user/#{user_id}/build/#{build_id}/output/#{output_file_path}"
 		ClsiCookieManager.getCookieJar project_id, (err, jar)->
 			return callback(err) if err?
 			options = { url: url, method: "GET", timeout: 60 * 1000, jar : jar }

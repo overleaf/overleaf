@@ -218,6 +218,7 @@ define [
 				projectOutputFiles: null # or []
 				selectedProjectEntity: null
 				selectedProjectOutputFile: null
+				buildId: null
 				name: null
 			$scope.state.inFlight =
 				projects: false
@@ -349,6 +350,8 @@ define [
 						filteredFiles = resp.data.outputFiles.filter (f) ->
 							f.path.match(/.*\.(pdf|png|jpeg|jpg|gif)/)
 						$scope.data.projectOutputFiles = filteredFiles
+						$scope.data.buildId = filteredFiles?[0]?.build
+						console.log ">> build_id", $scope.data.buildId
 						_reset(err: false)
 					else
 						$scope.data.projectOutputFiles = null
@@ -368,7 +371,8 @@ define [
 					provider = 'project_output_file'
 					payload = {
 						source_project_id: projectId,
-						source_output_file_path: $scope.data.selectedProjectOutputFile
+						source_output_file_path: $scope.data.selectedProjectOutputFile,
+						build_id: $scope.data.buildId
 					}
 				else
 					provider = 'project_file'

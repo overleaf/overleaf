@@ -33,11 +33,25 @@ module.exports = MockClsiApi =
 
 		app.post "/project/:project_id/compile", (req, res, next) =>
 			res.json {
-				outputFiles: [{path: 'output.pdf'}]
+				compile:
+					status: 'success'
+					outputFiles: [{path: 'output.pdf', build: 'abcd', url: 'http://example.com'}]
+			}
+		app.post "/project/:project_id/user/:user_id/compile", (req, res, next) =>
+			res.json {
+				compile:
+					status: 'success'
+					outputFiles: [{path: 'output.pdf', build: 'abcd', url: 'http://example.com'}]
 			}
 
-		app.get "/project/:project_id/output/:output_path", (req, res, next) =>
+		app.get "/project/:project_id/status", (req, res, next) =>
+			res.status(200).send()
+
+		app.get "/project/:project_id/user/:user_id/build/:build_id/output/:output_path", (req, res, next) =>
 			res.status(200).send("hello")
+
+		app.all "*", (req, res, next) =>
+			next()
 
 		app.listen 3013, (error) ->
 			throw error if error?
