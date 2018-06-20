@@ -10,7 +10,9 @@ define [
 			university: null
 			role: null
 			department: null
-			autoDetectMode: true
+		$scope.showManualUniversitySelectionUI = false
+		$scope.isValidEmail = false
+		$scope.isBlacklistedEmail = false
 
 		LOCAL_AND_DOMAIN_REGEX = /([^@]+)@(.+)/
 		EMAIL_REGEX = /^([A-Za-z0-9_\-\.]+)@([^\.]+)\.([A-Za-z]+)$/
@@ -29,10 +31,14 @@ define [
 
 		$scope.getEmailSuggestion = (userInput) ->
 			userInputLocalAndDomain = _matchLocalAndDomain(userInput)
+			$scope.isValidEmail = EMAIL_REGEX.test userInput  
+			$scope.isBlacklistedEmail = false
 			if userInputLocalAndDomain.domain?
+				$scope.isBlacklistedEmail = UserAffiliationsDataService.isDomainBlacklisted userInputLocalAndDomain.domain
+
 				UserAffiliationsDataService.getUniversityDomainFromPartialDomainInput(userInputLocalAndDomain.domain)
 					.then (universityDomain) -> 						
-						$scope.newAffiliation.autoDetectMode = true
+						$scope.showManualUniversitySelectionUI = false
 						if userInputLocalAndDomain.domain == universityDomain.hostname
 							$scope.newAffiliation.university = universityDomain.university
 							$scope.newAffiliation.department = universityDomain.department
@@ -43,10 +49,6 @@ define [
 					.catch () -> 
 						$scope.newAffiliation.university = null
 						$scope.newAffiliation.department = null
-						# If the input is already a full e-mail and we have no suggestions, then the user
-						# will need to manually select his institution.
-						if userInput.match EMAIL_REGEX
-							$scope.newAffiliation.autoDetectMode = false
 						$q.reject null
 			else
 				$scope.newAffiliation.university = null
@@ -54,21 +56,17 @@ define [
 				$q.resolve null
 
 		$scope.handleEmailInputBlur = () ->
-			if $scope.newAffiliation.autoDetectMode and !$scope.newAffiliation.university and $scope.newAffiliation.email?.match EMAIL_REGEX
-				$scope.newAffiliation.autoDetectMode = false
+			# if $scope.newAffiliation.autoDetectMode and !$scope.newAffiliation.university and $scope.newAffiliation.email?.match EMAIL_REGEX
+			# 	$scope.newAffiliation.autoDetectMode = false
 
 		$scope.selectUniversityManually = () ->
 			$scope.newAffiliation.university = null
 			$scope.newAffiliation.department = null
-			$scope.newAffiliation.autoDetectMode = false
+			$scope.showManualUniversitySelectionUI = true
 
 		$scope.handleAffiliationFormSubmit = () ->
 			if !$scope.newAffiliation.university?
-				UserAffiliationsDataService.addUserEmail(
-					$scope.newAffiliation.email,
-					$scope.newAffiliation.role,
-					$scope.newAffiliation.department
-				)
+				UserAffiliationsDataService.addUserEmail $scope.newAffiliation.email
 			else
 				if $scope.newAffiliation.university.isUserSuggested
 					UserAffiliationsDataService.addUserAffiliationWithUnknownUniversity(
@@ -86,10 +84,12 @@ define [
 						$scope.newAffiliation.department
 					)
 
+		# Populates the countries dropdown
 		UserAffiliationsDataService
 			.getCountries()
 			.then (countries) -> $scope.countries = countries
 
+		# Populates the universities dropdown (after selecting a country)
 		$scope.$watch "newAffiliation.country", (newSelectedCountry, prevSelectedCountry) ->
 			if newSelectedCountry? and newSelectedCountry != prevSelectedCountry
 				$scope.newAffiliation.university = null

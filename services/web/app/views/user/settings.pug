@@ -129,7 +129,6 @@ block content
 									li Others users will be able to find you under different email addresses when sharing projects
 									li If your e-mail is affiliated with an institution with a group license, your account will be associated with that institution (and you'll gain acess to any benefits the institution may have).
 
-								pre(style="font-size: 0.8em; position: fixed; left: 80px; top: 80px; color: black;") {{ newAffiliation | json }}
 								.affiliations-row
 									.affiliation-col-4
 										label(for="affiliations-email") #{translate("email")}
@@ -144,11 +143,9 @@ block content
 											input-type="email"
 											input-required="true"
 										)
-									.affiliation-col-8(
-										ng-show="newAffiliation.autoDetectMode"
-									)
+									.affiliation-col-8
 										p.affiliation-input-feedback(
-											ng-if="newAffiliation.university"
+											ng-if="newAffiliation.university && !showManualUniversitySelectionUI"
 										)
 											| {{ newAffiliation.university.name }} (
 											a(
@@ -157,12 +154,20 @@ block content
 											) change
 											| )
 										p.affiliation-input-feedback(
-											ng-if="!newAffiliation.university"
+											ng-if="!newAffiliation.university && !isValidEmail && !showManualUniversitySelectionUI"
 										) Start by adding your email address.
-								.affiliations-row
-									.affiliation-col-4(
-										ng-if="!newAffiliation.autoDetectMode"
-									)
+										p.affiliation-input-feedback(
+											ng-if="!newAffiliation.university && isValidEmail && !isBlacklistedEmail && !showManualUniversitySelectionUI"
+										)
+											| Is your email affiliated with an institution? 
+											a(
+												href
+												ng-click="selectUniversityManually();"
+											) Let us know
+								.affiliations-row(
+									ng-if="isValidEmail && showManualUniversitySelectionUI"
+								)
+									.affiliation-col-4
 										label Institution
 										ui-select(
 											ng-model="newAffiliation.country"
@@ -176,7 +181,7 @@ block content
 												span(
 													ng-bind="country.name"
 												)
-									.affiliation-col-4(ng-if="!newAffiliation.autoDetectMode")
+									.affiliation-col-4
 										ui-select(
 											ng-model="newAffiliation.university"
 											ng-disabled="!newAffiliation.country"
@@ -193,7 +198,7 @@ block content
 													ng-bind="university.name"
 												)
 								.affiliations-row(
-									ng-if="newAffiliation.university"
+									ng-if="isValidEmail && newAffiliation.university"
 								)
 									.affiliation-col-4
 										label(for="affiliations-role") Role
@@ -225,17 +230,17 @@ block content
 								table.table
 									thead
 										tr
+											th Email
 											th Institution and role
-											th Affiliated e-mail
 											th
 									tbody
 										tr
-											td Universidade de Aveiro
 											td paulojreis@ua.pt
+											td Universidade de Aveiro
 											td Remove
 										tr
-											td Universidade do Porto
 											td paulojreis@fe.up.pt
+											td Universidade do Porto
 											td Remove
 
 
