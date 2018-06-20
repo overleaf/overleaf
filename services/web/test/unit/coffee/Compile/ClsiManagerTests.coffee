@@ -560,22 +560,22 @@ describe "ClsiManager", ->
 	describe "_makeGoogleCloudRequest", ->
 
 		beforeEach ->
-			@settings.apis.clsigc = 
-				url : "https://compiles.googlecloud.test"
+			@settings.apis.clsi_new = 
+				url : "https://compiles.somewhere.test"
 			@response = {there:"something"}
 			@request.callsArgWith(1, null, @response)
 			@opts = 
 				url: @ClsiManager._getCompilerUrl(null, @project_id)
 				
 		it "should change the domain on the url", (done)->
-			@ClsiManager._makeGoogleCloudRequest @project_id, @opts, =>
+			@ClsiManager._makeNewBackendRequest @project_id, @opts, =>
 				args = @request.args[0]
-				args[0].url.should.equal "https://compiles.googlecloud.test/project/#{@project_id}"
+				args[0].url.should.equal "https://compiles.somewhere.test/project/#{@project_id}"
 				done()
 
-		it "should not make a request if there is not clsigc url", (done)->
-			@settings.apis.clsigc = undefined
-			@ClsiManager._makeGoogleCloudRequest @project_id, @opts, (err)=>
+		it "should not make a request if there is not clsi_new url", (done)->
+			@settings.apis.clsi_new = undefined
+			@ClsiManager._makeNewBackendRequest @project_id, @opts, (err)=>
 				expect(err).to.equal undefined
 				@request.callCount.should.equal 0
 				done()

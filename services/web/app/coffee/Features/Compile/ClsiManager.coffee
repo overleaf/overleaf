@@ -8,7 +8,7 @@ ProjectEntityHandler = require("../Project/ProjectEntityHandler")
 logger = require "logger-sharelatex"
 Url = require("url")
 ClsiCookieManager = require("./ClsiCookieManager")()
-GoogleCloudClsiCookieManager = require("./ClsiCookieManager")("googlecloud")
+NewBackendCloudClsiCookieManager = require("./ClsiCookieManager")("newBackendcloud")
 ClsiStateManager = require("./ClsiStateManager")
 _ = require("underscore")
 async = require("async")
@@ -89,42 +89,56 @@ module.exports = ClsiManager =
 					callback(null, response?.compile?.status, outputFiles, clsiServerId)
 
 	_makeRequest: (project_id, opts, callback)->
-		ClsiManager._makeGoogleCloudRequest project_id, opts, ->
-		ClsiCookieManager.getCookieJar project_id, (err, jar)->
-			if err?
-				logger.err err:err, "error getting cookie jar for clsi request"
-				return callback(err)
-			opts.jar = jar
-			timer = new Metrics.Timer("compile.linode")
-			request opts, (err, response, body)->
-				timer.done()
-				if err?
-					logger.err err:err, project_id:project_id, url:opts?.url, "error making request to clsi"
-					return callback(err)
-				ClsiCookieManager.setServerId project_id, response, (err)->
+		startTime = new Date()
+		async.series {
+			currentBackend: (cb)-> 
+				ClsiCookieManager.getCookieJar project_id, (err, jar)->
 					if err?
-						logger.warn err:err, project_id:project_id, "error setting server id"
-					return callback err, response, body
+						logger.err err:err, "error getting cookie jar for clsi request"
+						return callback(err)
+					opts.jar = jar
+					timer = new Metrics.Timer("compile.currentBackend")
+					request opts, (err, response, body)->
+						timer.done()
+						if err?
+							logger.err err:err, project_id:project_id, url:opts?.url, "error making request to clsi"
+							return callback(err)
+						ClsiCookieManager.setServerId project_id, response, (err)->
+							if err?
+								logger.warn err:err, project_id:project_id, "error setting server id"
+							callback err, response, body #return as soon as the standard compile has returned
+							cb(err, {response:response, body:body, finishTime:new Date() - startTime })
+			newBackend: (cb)-> 
+				ClsiManager._makeNewBackendRequest project_id, opts, (err, response, body)->
+					cb(err, {response:response, body:body, finishTime:new Date() - startTime})
+		}, (err, results)->
+			timeDifference = results.newBackend?.finishTime - results.currentBackend?.finishTime 
+			statusCodeSame = results.newBackend?.response?.statusCode == results.currentBackend?.response?.statusCode
+			currentCompileTime = results.currentBackend?.finishTime
+			newBackendCompileTime = results.newBackend?.finishTime
+			logger.log {statusCodeSame, timeDifference, currentCompileTime, newBackendCompileTime}, "both clsi requests returned"
 
-	_makeGoogleCloudRequest: (project_id, baseOpts, callback)->
-		if !Settings.apis.clsigc?.url?
+
+
+	_makeNewBackendRequest: (project_id, baseOpts, callback)->
+		if !Settings.apis.clsi_new?.url?
 			return callback()
 		opts = _.clone(baseOpts)
-		opts.url = opts.url.replace(Settings.apis.clsi.url, Settings.apis.clsigc?.url)
-		GoogleCloudClsiCookieManager.getCookieJar project_id, (err, jar)->
+		opts.url = opts.url.replace(Settings.apis.clsi.url, Settings.apis.clsi_new?.url)
+		NewBackendCloudClsiCookieManager.getCookieJar project_id, (err, jar)->
 			if err?
 				logger.err err:err, "error getting cookie jar for clsi request"
 				return callback(err)
 			opts.jar = jar
-			timer = new Metrics.Timer("compile.google")
+			timer = new Metrics.Timer("compile.newBackend")
 			request opts, (err, response, body)->
 				timer.done()
 				if err?
-					logger.err err:err, project_id:project_id, url:opts?.url, "error making request to clsi"
+					logger.warn err:err, project_id:project_id, url:opts?.url, "error making request to new clsi"
 					return callback(err)
-				GoogleCloudClsiCookieManager.setServerId project_id, response, (err)->
+				NewBackendCloudClsiCookieManager.setServerId project_id, response, (err)->
 					if err?
-						logger.warn err:err, project_id:project_id, "error setting server id"
+						logger.warn err:err, project_id:project_id, "error setting server id new backend"
 					return callback err, response, body
 
 
