@@ -47,18 +47,14 @@ describe "ProxyManager", ->
 			target = 'http://whatever'
 			@proxyManager.makeTargetUrl(target).should.equal target
 
-		it 'makes from object', ->
+		it 'makes with path', ->
 			target = path: 'baz'
 			@proxyManager.makeTargetUrl(target).should.equal 'baz'
 
 		it 'makes with baseUrl', ->
+			target = baseUrl: 'foo.bar'
+			@proxyManager.makeTargetUrl(target).should.equal 'foo.bar'
+
+		it 'makes with baseUrl and path', ->
 			target = path: 'baz', baseUrl: 'foo.bar/'
 			@proxyManager.makeTargetUrl(target).should.equal 'foo.bar/baz'
-
-		it 'makes with settingsUrl', ->
-			@settings.apis = v1: url: 'foo.bar/'
-			target = path: 'baz', baseUrl: { setting: 'apis.v1.url' }
-			@proxyManager.makeTargetUrl(target).should.equal 'foo.bar/baz'
-
-			target = path: 'baz', baseUrl: { setting: 'incorrect.setting' }
-			expect(@proxyManager.makeTargetUrl(target)).to.equal null

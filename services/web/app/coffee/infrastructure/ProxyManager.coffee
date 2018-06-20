@@ -18,26 +18,8 @@ module.exports =
 	# - an Object with:
 	#   - a path attribute (String)
 	#   - a baseURL attribute (String)
-	#   - a baseURL attribute (Object) with:
-	#     - a setting attribute pointing to a value in the settings
 	makeTargetUrl: (target) ->
 		return target if typeof target is 'string'
 		return target.path unless target.baseUrl?
+		"#{target.baseUrl}#{target.path or ''}"
 
-		if typeof target.baseUrl is 'string'
-			baseUrl = target.baseUrl
-		else if target.baseUrl.setting?
-			baseUrl = digSettingValue target.baseUrl.setting
-
-		return null unless baseUrl?
-		"#{baseUrl}#{target.path}"
-
-# given a setting path (e.g. 'apis.v1.url') recursively find the corresponding
-# settings value
-digSettingValue = (attributesPath, dig = null) ->
-	dig ||= settings
-	[nextAttribute, leftAttributes...] = attributesPath.split('.')
-	dig = dig[nextAttribute]
-	return null unless dig?
-	return dig if leftAttributes.length == 0
-	digSettingValue(leftAttributes.join('.'), dig)
