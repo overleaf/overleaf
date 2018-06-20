@@ -89,9 +89,9 @@ module.exports = ClsiManager =
 					callback(null, response?.compile?.status, outputFiles, clsiServerId)
 
 	_makeRequest: (project_id, opts, callback)->
-		startTime = new Date()
 		async.series {
 			currentBackend: (cb)-> 
+				startTime = new Date()
 				ClsiCookieManager.getCookieJar project_id, (err, jar)->
 					if err?
 						logger.err err:err, "error getting cookie jar for clsi request"
@@ -109,6 +109,7 @@ module.exports = ClsiManager =
 							callback err, response, body #return as soon as the standard compile has returned
 							cb(err, {response:response, body:body, finishTime:new Date() - startTime })
 			newBackend: (cb)-> 
+				startTime = new Date()
 				ClsiManager._makeNewBackendRequest project_id, opts, (err, response, body)->
 					cb(err, {response:response, body:body, finishTime:new Date() - startTime})
 		}, (err, results)->
