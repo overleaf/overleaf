@@ -9,20 +9,14 @@ UserUpdater = require "./UserUpdater"
 ONE_YEAR_IN_S = 365 * 24 * 60 * 60
 
 module.exports = UserEmailsConfirmationHandler =
-	serializeData: (user_id, email) ->
-		JSON.stringify({user_id, email})
-
-	deserializeData: (data) ->
-		JSON.parse(data)
-
 	sendConfirmationEmail: (user_id, email, emailTemplate, callback = (error) ->) ->
 		if arguments.length == 3
 			callback = emailTemplate
 			emailTemplate = 'confirmEmail'
 		email = EmailHelper.parseEmail(email)
 		return callback(new Error('invalid email')) if !email?
-		value = UserEmailsConfirmationHandler.serializeData(user_id, email)
-		OneTimeTokenHandler.getNewToken 'email_confirmation', value, {expiresIn: ONE_YEAR_IN_S}, (err, token)->
+		data = {user_id, email}
+		OneTimeTokenHandler.getNewToken 'email_confirmation', data, {expiresIn: ONE_YEAR_IN_S}, (err, token)->
 			return callback(err) if err?
 			emailOptions =
 				to: email
@@ -35,7 +29,7 @@ module.exports = UserEmailsConfirmationHandler =
 			return callback(error) if error?
 			if !data?
 				return callback(new Errors.NotFoundError('no token found'))
-			{user_id, email} = UserEmailsConfirmationHandler.deserializeData(data)
+			{user_id, email} = data
 			logger.log {data, user_id, email, token_start: token.slice(0,8)}, 'found data for email confirmation'
 			if !user_id? or email != EmailHelper.parseEmail(email)
 				return callback(new Errors.NotFoundError('invalid data'))
