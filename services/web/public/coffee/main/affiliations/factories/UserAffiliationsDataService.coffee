@@ -47,7 +47,8 @@ define [
 
 		addUserEmail = (email) ->
 			$http.post "/user/emails", {
-				email
+				email,
+				_csrf: window.csrfToken
 			}
 
 		addUserAffiliationWithUnknownUniversity = (email, unknownUniversityName, unknownUniversityCountryCode, role, department) ->
@@ -57,7 +58,8 @@ define [
 					name: unknownUniversityName
 					country_code: unknownUniversityCountryCode
 				role,
-				department
+				department,
+				_csrf: window.csrfToken
 			}
 
 		addUserAffiliation = (email, universityId, role, department) ->
@@ -66,7 +68,8 @@ define [
 				university:
 					id: universityId
 				role,
-				department
+				department,
+				_csrf: window.csrfToken
 			}
 
 		isDomainBlacklisted = (domain) ->

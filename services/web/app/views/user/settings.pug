@@ -234,13 +234,11 @@ block content
 											th Institution and role
 											th
 									tbody
-										tr
-											td paulojreis@ua.pt
-											td Universidade de Aveiro
-											td Remove
-										tr
-											td paulojreis@fe.up.pt
-											td Universidade do Porto
+										tr(
+											ng-repeat="userEmail in userEmails"
+										)
+											td {{ userEmail.email + (userEmail.default ? ' (default)' : '') }}
+											td {{ userEmail.institution }}
 											td Remove
 
 
