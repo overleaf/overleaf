@@ -5,6 +5,7 @@ path = require('path')
 sinon = require('sinon')
 modulePath = path.join __dirname, "../../../../app/js/Features/Project/ProjectController"
 expect = require("chai").expect
+Errors = require "../../../../app/js/Features/Errors/Errors"
 
 describe "ProjectController", ->
 
@@ -100,6 +101,7 @@ describe "ProjectController", ->
 			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler
 			"../../infrastructure/Modules": @Modules
 			"./ProjectEntityHandler": @ProjectEntityHandler
+			"../Errors/Errors": Errors
 
 		@projectName = "£12321jkj9ujkljds"
 		@req =
