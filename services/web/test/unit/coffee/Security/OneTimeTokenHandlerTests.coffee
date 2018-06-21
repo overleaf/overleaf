@@ -5,64 +5,99 @@ path = require('path')
 sinon = require('sinon')
 modulePath = path.join __dirname, "../../../../app/js/Features/Security/OneTimeTokenHandler"
 expect = require("chai").expect
+Errors = require "../../../../app/js/Features/Errors/Errors"
+tk = require("timekeeper")
 
 describe "OneTimeTokenHandler", ->
-
 	beforeEach ->
-		@value = "user id here"
-		@stubbedToken = require("crypto").randomBytes(32)
-
-		@settings = 
-			redis:
-				web:{}
-		@redisMulti =
-			set:sinon.stub()
-			get:sinon.stub()
-			del:sinon.stub()
-			expire:sinon.stub()
-			exec:sinon.stub()
-		self = @
+		tk.freeze Date.now() # freeze the time for these tests
+		@stubbedToken = "mock-token"
+		@callback = sinon.stub()
 		@OneTimeTokenHandler = SandboxedModule.require modulePath, requires:
-			"../../infrastructure/RedisWrapper" :
-				client: =>
-					auth:->
-					multi: -> return self.redisMulti
-
 			"settings-sharelatex":@settings
 			"logger-sharelatex": log:->
 			"crypto": randomBytes: () => @stubbedToken
+			"../Errors/Errors": Errors
+			"../../infrastructure/mongojs": db: @db = tokens: {}
 
+	afterEach ->
+		tk.reset()
 
 	describe "getNewToken", ->
+		beforeEach ->
+			@db.tokens.insert = sinon.stub().yields()
 
-		it "should set a new token into redis with a ttl", (done)->
-			@redisMulti.exec.callsArgWith(0) 
-			@OneTimeTokenHandler.getNewToken 'password', @value, (err, token) =>
-				@redisMulti.set.calledWith("password_token:#{@stubbedToken.toString("hex")}", @value).should.equal true
-				@redisMulti.expire.calledWith("password_token:#{@stubbedToken.toString("hex")}", 60 * 60).should.equal true
-				done()
+		describe 'normally', ->
+			beforeEach ->
+				@OneTimeTokenHandler.getNewToken 'password', 'mock-data-to-store', @callback
 
-		it "should return if there was an error", (done)->
-			@redisMulti.exec.callsArgWith(0, "error")
-			@OneTimeTokenHandler.getNewToken 'password', @value, (err, token)=>
-				err.should.exist
-				done()
+			it "should insert a generated token with a 1 hour expiry", ->
+				@db.tokens.insert
+					.calledWith({
+						use: 'password'
+						token: @stubbedToken,
+						createdAt: new Date(),
+						expiresAt: new Date(Date.now() + 60 * 60 * 1000)
+						data: 'mock-data-to-store'
+					})
+					.should.equal true
 
-		it "should allow the expiry time to be overridden", (done) ->
-			@redisMulti.exec.callsArgWith(0) 
-			@ttl = 42
-			@OneTimeTokenHandler.getNewToken 'password', @value, {expiresIn: @ttl}, (err, token) =>
-				@redisMulti.expire.calledWith("password_token:#{@stubbedToken.toString("hex")}", @ttl).should.equal true
-				done()
+			it 'should call the callback with the token', ->
+				@callback.calledWith(null, @stubbedToken).should.equal true
+
+		describe 'with an optional expiresIn parameter', ->
+			beforeEach ->
+				@OneTimeTokenHandler.getNewToken 'password', 'mock-data-to-store', { expiresIn: 42 }, @callback
+
+			it "should insert a generated token with a custom expiry", ->
+				@db.tokens.insert
+					.calledWith({
+						use: 'password'
+						token: @stubbedToken,
+						createdAt: new Date(),
+						expiresAt: new Date(Date.now() + 42 * 1000)
+						data: 'mock-data-to-store'
+					})
+					.should.equal true
+
+			it 'should call the callback with the token', ->
+				@callback.calledWith(null, @stubbedToken).should.equal true
 
 	describe "getValueFromTokenAndExpire", ->
+		describe 'successfully', ->
+			beforeEach ->
+				@db.tokens.findAndModify = sinon.stub().yields(null, { data: 'mock-data' })
+				@OneTimeTokenHandler.getValueFromTokenAndExpire 'password', 'mock-token', @callback
 
-		it "should get and delete the token", (done)->
-			@redisMulti.exec.callsArgWith(0, null, [@value]) 
-			@OneTimeTokenHandler.getValueFromTokenAndExpire 'password', @stubbedToken, (err, value)=>
-				value.should.equal @value
-				@redisMulti.get.calledWith("password_token:#{@stubbedToken}").should.equal true
-				@redisMulti.del.calledWith("password_token:#{@stubbedToken}").should.equal true
-				done()
+			it 'should expire the token', ->
+				@db.tokens.findAndModify
+					.calledWith({
+						query: {
+							use: 'password'
+							token: 'mock-token',
+							expiresAt: { $gt: new Date() },
+							usedAt: { $exists: false }
+						},
+						update: {
+							$set: { usedAt: new Date() }
+						}
+					})
+					.should.equal true
+
+			it 'should return the data', ->
+				@callback.calledWith(null, 'mock-data').should.equal true
+
+		describe 'when a valid token is not found', ->
+			beforeEach ->
+				@db.tokens.findAndModify = sinon.stub().yields(null, null)
+				@OneTimeTokenHandler.getValueFromTokenAndExpire 'password', 'mock-token', @callback
+
+			it 'should return a NotFoundError', ->
+				@callback
+					.calledWith(sinon.match.instanceOf(Errors.NotFoundError))
+					.should.equal true
+
+
+
 
 

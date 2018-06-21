@@ -36,7 +36,7 @@ describe "UserEmailsConfirmationHandler", ->
 				@OneTimeTokenHandler.getNewToken
 					.calledWith(
 						'email_confirmation',
-						JSON.stringify({@user_id, @email}),
+						{@user_id, @email},
 						{ expiresIn: 365 * 24 * 60 * 60 }
 					)
 					.should.equal true
@@ -72,7 +72,7 @@ describe "UserEmailsConfirmationHandler", ->
 		beforeEach ->
 			@OneTimeTokenHandler.getValueFromTokenAndExpire = sinon.stub().yields(
 				null, 
-				JSON.stringify({@user_id, @email})
+				{@user_id, @email}
 			)
 			@UserUpdater.confirmEmail = sinon.stub().yields()
 
@@ -105,7 +105,7 @@ describe "UserEmailsConfirmationHandler", ->
 			beforeEach ->
 				@OneTimeTokenHandler.getValueFromTokenAndExpire = sinon.stub().yields(
 					null, 
-					JSON.stringify({@email})
+					{@email}
 				)
 				@UserEmailsConfirmationHandler.confirmEmailFromToken @token = 'mock-token', @callback
 
@@ -116,7 +116,7 @@ describe "UserEmailsConfirmationHandler", ->
 			beforeEach ->
 				@OneTimeTokenHandler.getValueFromTokenAndExpire = sinon.stub().yields(
 					null, 
-					JSON.stringify({@user_id})
+					{@user_id}
 				)
 				@UserEmailsConfirmationHandler.confirmEmailFromToken @token = 'mock-token', @callback
 
