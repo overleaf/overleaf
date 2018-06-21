@@ -5,6 +5,8 @@ db = mongojs.db
 async = require("async")
 ObjectId = mongojs.ObjectId
 UserGetter = require("./UserGetter")
+EmailHelper = require "../Helpers/EmailHelper"
+Errors = require "../Errors/Errors"
 
 module.exports = UserUpdater =
 	updateUser: (query, update, callback = (error) ->) ->
@@ -53,7 +55,6 @@ module.exports = UserUpdater =
 					return callback(error)
 				callback()
 
-
 	# remove one of the user's email addresses. The email cannot be the user's
 	# default email address
 	removeEmailAddress: (userId, email, callback) ->
@@ -63,7 +64,7 @@ module.exports = UserUpdater =
 			if error?
 				logger.err error:error, 'problem removing users email'
 				return callback(error)
-			if res.nMatched == 0
+			if res.n == 0
 				return callback(new Error('Cannot remove default email'))
 			callback()
 
@@ -77,9 +78,27 @@ module.exports = UserUpdater =
 			if error?
 				logger.err error:error, 'problem setting default emails'
 				return callback(error)
-			if res.nMatched == 0
+			if res.n == 0 # TODO: Check n or nMatched?
 				return callback(new Error('Default email does not belong to user'))
 			callback()
+
+	confirmEmail: (userId, email, callback) ->
+		email = EmailHelper.parseEmail(email)
+		return callback(new Error('invalid email')) if !email?
+		logger.log {userId, email}, 'confirming user email'
+		query =
+			_id: userId
+			'emails.email': email
+		update =
+			$set:
+				'emails.$.confirmedAt': new Date()
+		@updateUser query, update, (error, res) ->
+			return callback(error) if error?
+			logger.log {res, userId, email}, "tried to confirm email"
+			if res.n == 0
+				return callback(new Errors.NotFoundError('user id and email do no match'))
+			callback()
+
 
 [
 	'updateUser'

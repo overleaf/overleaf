@@ -5,11 +5,12 @@ path = require('path')
 sinon = require('sinon')
 modulePath = path.join __dirname, "../../../../app/js/Features/User/UserUpdater"
 expect = require("chai").expect
+tk = require('timekeeper')
 
 describe "UserUpdater", ->
 
 	beforeEach ->
-
+		tk.freeze(Date.now())
 		@settings = {}
 		@mongojs = 
 			db:{}
@@ -31,6 +32,9 @@ describe "UserUpdater", ->
 			name:"bob"
 			email:"hello@world.com"
 		@newEmail = "bob@bob.com"
+
+	afterEach ->
+		tk.reset()
 
 	describe 'changeEmailAddress', ->
 		beforeEach ->
@@ -103,7 +107,7 @@ describe "UserUpdater", ->
 				done()
 
 		it 'handle missed update', (done)->
-			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, null, nMatched: 0)
+			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, null, n: 0)
 
 			@UserUpdater.removeEmailAddress @stubbedUser._id, @newEmail, (err)=>
 				should.exist(err)
@@ -111,7 +115,7 @@ describe "UserUpdater", ->
 
 	describe 'setDefaultEmailAddress', ->
 		it 'set default', (done)->
-			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, null, nMatched: 1)
+			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, null, n: 1)
 
 			@UserUpdater.setDefaultEmailAddress @stubbedUser._id, @newEmail, (err)=>
 				should.not.exist(err)
@@ -129,10 +133,37 @@ describe "UserUpdater", ->
 				done()
 
 		it 'handle missed update', (done)->
-			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, null, nMatched: 0)
+			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, null, n: 0)
 
 			@UserUpdater.setDefaultEmailAddress @stubbedUser._id, @newEmail, (err)=>
 				should.exist(err)
 				done()
+
+	describe 'confirmEmail', ->
+		it 'should update the email record', (done)->
+			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, null, n: 1)
+
+			@UserUpdater.confirmEmail @stubbedUser._id, @newEmail, (err)=>
+				should.not.exist(err)
+				@UserUpdater.updateUser.calledWith(
+					{ _id: @stubbedUser._id, 'emails.email': @newEmail },
+					$set: { 'emails.$.confirmedAt': new Date() }
+				).should.equal true
+				done()
+
+		it 'handle error', (done)->
+			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, new Error('nope'))
+
+			@UserUpdater.confirmEmail @stubbedUser._id, @newEmail, (err)=>
+				should.exist(err)
+				done()
+
+		it 'handle missed update', (done)->
+			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, null, n: 0)
+
+			@UserUpdater.confirmEmail @stubbedUser._id, @newEmail, (err)=>
+				should.exist(err)
+				done()
+
 
 
