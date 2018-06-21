@@ -22,15 +22,6 @@ module.exports = LinkedFilesController = {
 			return null
 		LinkedFilesController.Agents[provider]
 
-	_getFileById: (project_id, file_id, callback=(err, file)->) ->
-		ProjectLocator.findElement {
-			project_id,
-			element_id: file_id,
-			type: 'file'
-		}, (err, file, path, parentFolder) ->
-			return callback(err) if err?
-			callback(null, file, path, parentFolder)
-
 	createLinkedFile: (req, res, next) ->
 		{project_id} = req.params
 		{name, provider, data, parent_folder_id} = req.body
@@ -57,7 +48,7 @@ module.exports = LinkedFilesController = {
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		logger.log {project_id, file_id, user_id}, 'refresh linked file request'
 
-		LinkedFilesController._getFileById project_id, file_id, (err, file, path, parentFolder) ->
+		LinkedFilesHandler.getFileById project_id, file_id, (err, file, path, parentFolder) ->
 			return next(err) if err?
 			return res.sendStatus(404) if !file?
 			name = file.name

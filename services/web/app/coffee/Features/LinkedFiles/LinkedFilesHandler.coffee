@@ -1,10 +1,20 @@
 LinkedFilesErrors = require './LinkedFilesErrors'
 FileWriter = require '../../infrastructure/FileWriter'
 EditorController = require '../Editor/EditorController'
+ProjectLocator = require '../Project/ProjectLocator'
 _ = require 'underscore'
 
 
 module.exports = LinkedFilesHandler =
+
+	getFileById: (project_id, file_id, callback=(err, file)->) ->
+		ProjectLocator.findElement {
+			project_id,
+			element_id: file_id,
+			type: 'file'
+		}, (err, file, path, parentFolder) ->
+			return callback(err) if err?
+			callback(null, file, path, parentFolder)
 
 	importFromStream: (
 		project_id,
