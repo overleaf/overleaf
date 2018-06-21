@@ -21,11 +21,9 @@ module.exports = ProjectOutputFileAgent = {
 		@_checkAuth project_id, linkedFileData, user_id, (err, allowed) =>
 			return callback(err) if err?
 			return callback(new AccessDeniedError()) if !allowed
-			@_decorateLinkedFileData linkedFileData, (err, newLinkedFileData) =>
-				return callback(err) if err?
-				if !@_validate(newLinkedFileData)
-					return callback(new BadDataError())
-				callback(null, newLinkedFileData)
+			if !@_validate(linkedFileData)
+				return callback(new BadDataError())
+			callback(null, linkedFileData)
 
 	createLinkedFile: (project_id, linkedFileData, name, parent_folder_id, user_id, callback) ->
 		if !@_canCreate(linkedFileData)
@@ -92,9 +90,7 @@ module.exports = ProjectOutputFileAgent = {
 
 	_canCreate: ProjectFileAgent._canCreate
 
-	_getSourceProject: ProjectFileAgent._getSourceProject
-
-	_decorateLinkedFileData: ProjectFileAgent._decorateLinkedFileData
+	_getSourceProject: LinkedFilesHandler.getSourceProject
 
 	_validate: (data) ->
 		return (

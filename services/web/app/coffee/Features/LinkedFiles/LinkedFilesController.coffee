@@ -5,6 +5,7 @@ Settings = require 'settings-sharelatex'
 logger = require 'logger-sharelatex'
 _ = require 'underscore'
 LinkedFilesErrors = require './LinkedFilesErrors'
+LinkedFilesHandler = require './LinkedFilesHandler'
 
 
 module.exports = LinkedFilesController = {

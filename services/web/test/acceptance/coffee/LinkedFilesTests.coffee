@@ -118,7 +118,6 @@ describe "LinkedFiles", ->
 						provider: 'project_file',
 						source_project_id: @project_two_id,
 						source_entity_path: "/#{@source_doc_name}",
-						source_project_display_name: "plf-test-two"
 					}
 					expect(firstFile.name).to.equal('test-link.txt')
 					done()
@@ -393,7 +392,6 @@ describe "LinkedFiles", ->
 						provider: 'project_output_file',
 						source_project_id: @project_two_id,
 						source_output_file_path: "output.pdf",
-						source_project_display_name: "output-test-two"
 						build_id: '1234-abcd'
 					}
 					expect(firstFile.name).to.equal('test.pdf')
@@ -430,7 +428,8 @@ describe "LinkedFiles", ->
 							linkedFileData: {
 								provider: "project_output_file",
 								v1_source_doc_id: 9999999,  # We won't find this id in the database
-								source_output_file_path: "output.pdf"
+								source_output_file_path: "output.pdf",
+								build_id: '123'
 							},
 							_id: "abcdef",
 							rev: 0,

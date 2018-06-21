@@ -1,7 +1,6 @@
 AuthorizationManager = require('../Authorization/AuthorizationManager')
 ProjectLocator = require('../Project/ProjectLocator')
 ProjectGetter = require('../Project/ProjectGetter')
-Project = require("../../models/Project").Project
 DocstoreManager = require('../Docstore/DocstoreManager')
 FileStoreHandler = require('../FileStore/FileStoreHandler')
 _ = require "underscore"
@@ -30,11 +29,9 @@ module.exports = ProjectFileAgent = {
 		@_checkAuth project_id, linkedFileData, user_id, (err, allowed) =>
 			return callback(err) if err?
 			return callback(new AccessDeniedError()) if !allowed
-			@_decorateLinkedFileData linkedFileData, (err, newLinkedFileData) =>
-				return callback(err) if err?
-				if !@_validate(newLinkedFileData)
-					return callback(new BadDataError())
-				callback(null, newLinkedFileData)
+			if !@_validate(linkedFileData)
+				return callback(new BadDataError())
+			callback(null, linkedFileData)
 
 	_go: (project_id, linkedFileData, name, parent_folder_id, user_id, callback) ->
 		linkedFileData = @_sanitizeData(linkedFileData)
@@ -107,28 +104,7 @@ module.exports = ProjectFileAgent = {
 		# Don't allow creation of linked-files with v1 doc ids
 		!data.v1_source_doc_id?
 
-	_getSourceProject: (data, callback=(err, project)->) ->
-		projection = {_id: 1, name: 1}
-		if data.v1_source_doc_id?
-			Project.findOne {'overleaf.id': data.v1_source_doc_id}, projection, (err, project) ->
-				return callback(err) if err?
-				if !project?
-					return callback(new V1ProjectNotFoundError())
-				callback(null, project)
-		else if data.source_project_id?
-			ProjectGetter.getProject data.source_project_id, projection, (err, project) ->
-				return callback(err) if err?
-				if !project?
-					return callback(new ProjectNotFoundError())
-				callback(null, project)
-		else
-			callback(new BadDataError('neither v1 nor v2 id present'))
-
-	_decorateLinkedFileData: (data, callback = (err, newData) ->) ->
-		callback = _.once(callback)
-		@_getSourceProject data, (err, project) ->
-			return callback(err) if err?
-			callback(err, _.extend(data, {source_project_display_name: project.name}))
+	_getSourceProject: LinkedFilesHandler.getSourceProject
 
 	_checkAuth: (project_id, data, current_user_id, callback = (error, allowed)->) ->
 		callback = _.once(callback)

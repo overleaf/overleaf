@@ -56,9 +56,9 @@ div.binary-file.full-size(
 				|
 				a(ng-if='!openFile.linkedFileData.v1_source_doc_id'
 					ng-href='/project/{{openFile.linkedFileData.source_project_id}}' target="_blank")
-					| {{ openFile.linkedFileData.source_project_display_name }}
+					| Another project
 				span(ng-if='openFile.linkedFileData.v1_source_doc_id')
-					| {{ openFile.linkedFileData.source_project_display_name }}
+					| Another project
 				| /{{ openFile.linkedFileData.source_entity_path.slice(1) }},
 				|
 				| at {{ openFile.created | formatDate:'h:mm a' }} {{ openFile.created | relativeDate }}
@@ -71,9 +71,9 @@ div.binary-file.full-size(
 				|
 				a(ng-if='!openFile.linkedFileData.v1_source_doc_id'
 					ng-href='/project/{{openFile.linkedFileData.source_project_id}}' target="_blank")
-					| {{ openFile.linkedFileData.source_project_display_name }}
+					| Another project
 				span(ng-if='openFile.linkedFileData.v1_source_doc_id')
-					| {{ openFile.linkedFileData.source_project_display_name }}
+					| Another project
 				| : {{ openFile.linkedFileData.source_output_file_path }},
 				|
 				| at {{ openFile.created | formatDate:'h:mm a' }} {{ openFile.created | relativeDate }}
