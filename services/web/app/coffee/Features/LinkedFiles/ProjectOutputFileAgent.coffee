@@ -5,7 +5,12 @@ CompileManager = require '../Compile/CompileManager'
 ClsiManager = require '../Compile/ClsiManager'
 ProjectFileAgent = require './ProjectFileAgent'
 _ = require "underscore"
-LinkedFilesErrors = require './LinkedFilesErrors'
+{
+	BadDataError,
+	AccessDeniedError,
+	BadEntityTypeError,
+	OutputFileFetchFailedError
+} = require './LinkedFilesErrors'
 LinkedFilesHandler = require './LinkedFilesHandler'
 logger = require 'logger-sharelatex'
 
@@ -15,7 +20,7 @@ module.exports = ProjectOutputFileAgent = {
 	_prepare: (project_id, linkedFileData, user_id, callback=(err, linkedFileData)->) ->
 		@_checkAuth project_id, linkedFileData, user_id, (err, allowed) =>
 			return callback(err) if err?
-			return callback(new LinkedFilesErrors.AccessDeniedError()) if !allowed
+			return callback(new AccessDeniedError()) if !allowed
 			@_decorateLinkedFileData linkedFileData, (err, newLinkedFileData) =>
 				return callback(err) if err?
 				if !@_validate(newLinkedFileData)
@@ -24,7 +29,7 @@ module.exports = ProjectOutputFileAgent = {
 
 	createLinkedFile: (project_id, linkedFileData, name, parent_folder_id, user_id, callback) ->
 		if !@_canCreate(linkedFileData)
-			return callback(new LinkedFilesErrors.AccessDeniedError())
+			return callback(new AccessDeniedError())
 		linkedFileData = @_sanitizeData(linkedFileData)
 		@_prepare project_id, linkedFileData, user_id, (err, linkedFileData) =>
 			return callback(err) if err?
@@ -44,7 +49,7 @@ module.exports = ProjectOutputFileAgent = {
 								return callback(err) if err?
 								callback(null, file._id) # Created
 					else
-						err = new LinkedFilesErrors.OutputFileFetchFailedError(
+						err = new OutputFileFetchFailedError(
 							"Output file fetch failed: #{linkedFileData.build_id}, #{linkedFileData.source_output_file_path}"
 						)
 						err.statusCode = response.statusCode
@@ -70,7 +75,7 @@ module.exports = ProjectOutputFileAgent = {
 								return callback(err) if err?
 								callback(null, file._id) # Created
 					else
-						err = new LinkedFilesErrors.OutputFileFetchFailedError(
+						err = new OutputFileFetchFailedError(
 							"Output file fetch failed: #{linkedFileData.build_id}, #{linkedFileData.source_output_file_path}"
 						)
 						err.statusCode = response.statusCode
@@ -101,7 +106,7 @@ module.exports = ProjectOutputFileAgent = {
 	_checkAuth: (project_id, data, current_user_id, callback = (err, allowed)->) ->
 		callback = _.once(callback)
 		if !@_validate(data)
-			return callback(new LinkedFilesErrors.BadDataError())
+			return callback(new BadDataError())
 		@_getSourceProject data, (err, project) ->
 			return callback(err) if err?
 			AuthorizationManager.canUserReadProject current_user_id,
@@ -138,13 +143,13 @@ module.exports = ProjectOutputFileAgent = {
 				(err, status, outputFiles) ->
 					return callback(err) if err?
 					if status != 'success'
-						return callback(new LinkedFilesErrors.OutputFileFetchFailedError())
+						return callback(new OutputFileFetchFailedError())
 					outputFile = _.find(
 						outputFiles,
 						(o) => o.path == source_output_file_path
 					)
 					if !outputFile?
-						return callback(new LinkedFilesErrors.OutputFileFetchFailedError())
+						return callback(new OutputFileFetchFailedError())
 					build_id = outputFile.build
 					ClsiManager.getOutputFileStream source_project_id,
 						user_id,
