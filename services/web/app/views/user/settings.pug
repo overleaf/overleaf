@@ -14,6 +14,156 @@ block content
 									|  #{translate("thanks_settings_updated")}
 							form-messages(for="changePasswordForm")
 							.container-fluid
+								form.row(
+									ng-controller="UserAffiliationsController"
+									name="affiliationsForm"
+								)
+									.col-md-12
+										h3 Emails and Affiliations
+										p.small Add additional email addresses to your account to access any upgrades your university or institution has, to make it easier for collaborators to find you, and to make sure you can recover your account.
+
+										table.table.affiliations-table
+											thead
+												tr
+													th.affiliations-table-email Email
+													th.affiliations-table-institution Institution and role
+													th.affiliations-table-inline-actions
+											tbody
+												tr(
+													ng-repeat="userEmail in userEmails"
+												)
+													td {{ userEmail.email + (userEmail.default ? ' (default)' : '') }}
+													td {{ userEmail.institution }}
+													td 
+														a(
+															href
+															ng-if="!userEmail.default"
+															ng-click="setDefaultUserEmail(userEmail.email)"
+														) Make default
+														br
+														a(
+															href
+															ng-if="!userEmail.default"
+															ng-click="removeUserEmail(userEmail.email)"
+														) Remove
+												tr(
+													ng-if="ui.isLoadingEmails"
+												)
+													td.text-center(colspan="3") 
+														i.fa.fa-fw.fa-spin.fa-refresh
+														| &nbsp;Loading...
+												
+												tr(
+													ng-if="!ui.showAddEmailUI && !ui.isLoadingEmails"
+												)
+													td(colspan="3")
+														a(
+															href
+															ng-click="showAddEmailForm()"
+														) Add new email
+
+												tr(
+													ng-if="ui.showAddEmailUI"
+												)
+													td
+														p
+															input-suggestions(
+																ng-model="newAffiliation.email"
+																ng-model-options="{ allowInvalid: true }"
+																get-suggestion="getEmailSuggestion(userInput)"
+																on-blur="handleEmailInputBlur()"
+																input-id="affilitations-email"
+																input-name="affilitationsEmail"
+																input-placeholder="e.g. johndoe@mit.edu"
+																input-type="email"
+																input-required="true"
+															)
+													td
+														p(
+															ng-if="newAffiliation.university && !ui.showManualUniversitySelectionUI"
+														)
+															| {{ newAffiliation.university.name }} (
+															a(
+																href
+																ng-click="selectUniversityManually();"
+															) change
+															| )
+														p(
+															ng-if="!newAffiliation.university && !ui.isValidEmail && !ui.showManualUniversitySelectionUI"
+														) Start by adding your email address.
+														p(
+															ng-if="!newAffiliation.university && ui.isValidEmail && !ui.isBlacklistedEmail && !ui.showManualUniversitySelectionUI"
+														)
+															| Is your email affiliated with an institution? 
+															br
+															a(
+																href
+																ng-click="selectUniversityManually();"
+															) Let us know
+														div(
+															ng-if="ui.showManualUniversitySelectionUI"
+														)
+															p
+																ui-select(
+																	ng-model="newAffiliation.country"
+																)
+																	ui-select-match(
+																		placeholder="Select your country"
+																	) {{ $select.selected.name }}
+																	ui-select-choices(
+																		repeat="country in countries | filter: $select.search"
+																	)
+																		span(
+																			ng-bind="country.name"
+																		)
+															p
+																ui-select(
+																	ng-model="newAffiliation.university"
+																	ng-disabled="!newAffiliation.country"
+																	tagging="addUniversityToSelection"
+																	tagging-label="false"
+																)
+																	ui-select-match(
+																		placeholder="Select your university"
+																	) {{ $select.selected.name }}
+																	ui-select-choices(
+																		repeat="university in universities | filter: $select.search"
+																	)
+																		span(
+																			ng-bind="university.name"
+																		)
+														div(
+															ng-if="ui.isValidEmail && newAffiliation.university"
+														)
+															p
+																input.form-control(
+																	type="text"
+																	id="affiliations-role"
+																	placeholder="Role"
+																	ng-model="newAffiliation.role"
+																)
+															p
+																input.form-control(
+																	type="text"
+																	id="affiliations-department"
+																	placeholder="Department"
+																	ng-model="newAffiliation.department"
+																)
+													td
+														button.btn.btn-primary(
+															ng-disabled="affiliationsForm.$invalid || ui.isAddingNewEmail"
+															ng-click="addNewEmail()"
+														)
+															span(
+																ng-if="!ui.isAddingNewEmail"
+															) Add new email
+															span(
+																ng-if="ui.isAddingNewEmail"
+															)
+																i.fa.fa-fw.fa-spin.fa-refresh
+																| &nbsp;Adding...
+										hr
+
 								.row
 									.col-md-5
 										h3  #{translate("update_account_info")}
@@ -116,131 +266,7 @@ block content
 														ng-disabled="changePasswordForm.$invalid"
 													) #{translate("change")}
 
-							hr
-							form(
-								ng-controller="UserAffiliationsController"
-								novalidate
-								name="affiliationsForm"
-							)
-								h3 Emails and affiliations
-								p Do you use multiple e-mail addresses? If so, add those here.
-								ul
-									li You'll retain access to your account even if you lose access to one of your emails
-									li Others users will be able to find you under different email addresses when sharing projects
-									li If your e-mail is affiliated with an institution with a group license, your account will be associated with that institution (and you'll gain acess to any benefits the institution may have).
-
-								.affiliations-row
-									.affiliation-col-4
-										label(for="affiliations-email") #{translate("email")}
-										input-suggestions(
-											ng-model="newAffiliation.email"
-											ng-model-options="{ allowInvalid: true }"
-											get-suggestion="getEmailSuggestion(userInput)"
-											on-blur="handleEmailInputBlur()"
-											input-id="affilitations-email"
-											input-name="affilitationsEmail"
-											input-placeholder="e.g. johndoe@mit.edu"
-											input-type="email"
-											input-required="true"
-										)
-									.affiliation-col-8
-										p.affiliation-input-feedback(
-											ng-if="newAffiliation.university && !showManualUniversitySelectionUI"
-										)
-											| {{ newAffiliation.university.name }} (
-											a(
-												href
-												ng-click="selectUniversityManually();"
-											) change
-											| )
-										p.affiliation-input-feedback(
-											ng-if="!newAffiliation.university && !isValidEmail && !showManualUniversitySelectionUI"
-										) Start by adding your email address.
-										p.affiliation-input-feedback(
-											ng-if="!newAffiliation.university && isValidEmail && !isBlacklistedEmail && !showManualUniversitySelectionUI"
-										)
-											| Is your email affiliated with an institution? 
-											a(
-												href
-												ng-click="selectUniversityManually();"
-											) Let us know
-								.affiliations-row(
-									ng-if="isValidEmail && showManualUniversitySelectionUI"
-								)
-									.affiliation-col-4
-										label Institution
-										ui-select(
-											ng-model="newAffiliation.country"
-										)
-											ui-select-match(
-												placeholder="Select your country"
-											) {{ $select.selected.name }}
-											ui-select-choices(
-												repeat="country in countries | filter: $select.search"
-											)
-												span(
-													ng-bind="country.name"
-												)
-									.affiliation-col-4
-										ui-select(
-											ng-model="newAffiliation.university"
-											ng-disabled="!newAffiliation.country"
-											tagging="addUniversityToSelection"
-											tagging-label="false"
-										)
-											ui-select-match(
-												placeholder="Select your university"
-											) {{ $select.selected.name }}
-											ui-select-choices(
-												repeat="university in universities | filter: $select.search"
-											)
-												span(
-													ng-bind="university.name"
-												)
-								.affiliations-row(
-									ng-if="isValidEmail && newAffiliation.university"
-								)
-									.affiliation-col-4
-										label(for="affiliations-role") Role
-										input.form-control(
-											type="text"
-											id="affiliations-role"
-											placeholder="e.g. Professor"
-											ng-model="newAffiliation.role"
-										)
-									.affiliation-col-4
-										label(for="affiliations-department") Department
-										input.form-control(
-											type="text"
-											id="affiliations-department"
-											placeholder="e.g. Mathematics"
-											ng-model="newAffiliation.department"
-										)
-								.affiliations-row
-									.affiliation-col-4
-										input.btn.btn-primary(
-											type="submit"
-											ng-disabled="affiliationsForm.$invalid"
-											ng-click="handleAffiliationFormSubmit()"
-											value="Add new email"
-										)
-
-								//- p Your current affiliations
-
-								table.table
-									thead
-										tr
-											th Email
-											th Institution and role
-											th
-									tbody
-										tr(
-											ng-repeat="userEmail in userEmails"
-										)
-											td {{ userEmail.email + (userEmail.default ? ' (default)' : '') }}
-											td {{ userEmail.institution }}
-											td Remove
-
+							
 
 							| !{moduleIncludes("userSettings", locals)}
 

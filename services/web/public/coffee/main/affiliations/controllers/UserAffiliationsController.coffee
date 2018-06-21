@@ -5,18 +5,9 @@ define [
 		$scope.userEmails = []
 		$scope.countries = []
 		$scope.universities = []
-		$scope.newAffiliation =
-			email: ""
-			country: null
-			university: null
-			role: null
-			department: null
-		$scope.showManualUniversitySelectionUI = false
-		$scope.isValidEmail = false
-		$scope.isBlacklistedEmail = false
 
 		LOCAL_AND_DOMAIN_REGEX = /([^@]+)@(.+)/
-		EMAIL_REGEX = /^([A-Za-z0-9_\-\.]+)@([^\.]+)\.([A-Za-z]+)$/
+		EMAIL_REGEX = /^([A-Za-z0-9_\-\.]+)@([^\.]+)\.([A-Za-z0-9_\-\.]+)([^\.])$/
 
 		_matchLocalAndDomain = (userEmailInput) ->
 			match = userEmailInput?.match LOCAL_AND_DOMAIN_REGEX
@@ -30,14 +21,14 @@ define [
 
 		$scope.getEmailSuggestion = (userInput) ->
 			userInputLocalAndDomain = _matchLocalAndDomain(userInput)
-			$scope.isValidEmail = EMAIL_REGEX.test userInput  
-			$scope.isBlacklistedEmail = false
+			$scope.ui.isValidEmail = EMAIL_REGEX.test userInput
+			$scope.ui.isBlacklistedEmail = false
+			$scope.ui.showManualUniversitySelectionUI = false
 			if userInputLocalAndDomain.domain?
-				$scope.isBlacklistedEmail = UserAffiliationsDataService.isDomainBlacklisted userInputLocalAndDomain.domain
+				$scope.ui.isBlacklistedEmail = UserAffiliationsDataService.isDomainBlacklisted userInputLocalAndDomain.domain
 
 				UserAffiliationsDataService.getUniversityDomainFromPartialDomainInput(userInputLocalAndDomain.domain)
 					.then (universityDomain) -> 						
-						$scope.showManualUniversitySelectionUI = false
 						if userInputLocalAndDomain.domain == universityDomain.hostname
 							$scope.newAffiliation.university = universityDomain.university
 							$scope.newAffiliation.department = universityDomain.department
@@ -61,9 +52,13 @@ define [
 		$scope.selectUniversityManually = () ->
 			$scope.newAffiliation.university = null
 			$scope.newAffiliation.department = null
-			$scope.showManualUniversitySelectionUI = true
+			$scope.ui.showManualUniversitySelectionUI = true
 
-		$scope.handleAffiliationFormSubmit = () ->
+		$scope.showAddEmailForm = () ->
+			$scope.ui.showAddEmailUI = true
+
+		$scope.addNewEmail = () ->
+			$scope.ui.isAddingNewEmail = true
 			if !$scope.newAffiliation.university?
 				addEmailPromise = UserAffiliationsDataService
 					.addUserEmail $scope.newAffiliation.email
@@ -85,14 +80,45 @@ define [
 							$scope.newAffiliation.role,
 							$scope.newAffiliation.department
 						)
-			addEmailPromise.then () -> getUserEmails()
-			
+			addEmailPromise.then () -> 
+				_reset()
+				_getUserEmails()
+
+		$scope.setDefaultUserEmail = (email) ->
+			UserAffiliationsDataService
+				.setDefaultUserEmail email
+				.then () -> _getUserEmails()
+
+		$scope.removeUserEmail = (email) ->
+			UserAffiliationsDataService
+				.removeUserEmail email
+				.then () -> _getUserEmails()
+
+		_reset = () ->
+			$scope.newAffiliation =
+				email: ""
+				country: null
+				university: null
+				role: null
+				department: null
+			$scope.ui = 
+				showManualUniversitySelectionUI: false
+				isLoadingEmails: false
+				isAddingNewEmail: false
+				showAddEmailUI: false
+				isValidEmail: false
+				isBlacklistedEmail: false
+		_reset()
+
 		# Populates the emails table
-		getUserEmails = () ->
+		_getUserEmails = () ->
+			$scope.ui.isLoadingEmails = true
 			UserAffiliationsDataService
 				.getUserEmails() 
-				.then (emails) -> $scope.userEmails = emails
-		getUserEmails()
+				.then (emails) -> 
+					$scope.userEmails = emails
+					$scope.ui.isLoadingEmails = false
+		_getUserEmails()
 
 		# Populates the countries dropdown
 		UserAffiliationsDataService

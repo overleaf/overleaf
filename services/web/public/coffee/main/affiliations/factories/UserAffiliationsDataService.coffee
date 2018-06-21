@@ -72,6 +72,18 @@ define [
 				_csrf: window.csrfToken
 			}
 
+		setDefaultUserEmail = (email) ->
+			$http.post "/user/emails/default", {
+				email,
+				_csrf: window.csrfToken
+			}
+
+		removeUserEmail = (email) ->
+			$http.delete "/user/emails/#{ encodeURIComponent(email) }", {
+				headers: 
+					"X-CSRF-Token": window.csrfToken
+			}
+
 		isDomainBlacklisted = (domain) ->
 			domain.toLowerCase() of domainsBlackList
 
@@ -83,6 +95,8 @@ define [
 			addUserEmail
 			addUserAffiliationWithUnknownUniversity
 			addUserAffiliation
+			setDefaultUserEmail
+			removeUserEmail
 			isDomainBlacklisted
 		}
 	]
