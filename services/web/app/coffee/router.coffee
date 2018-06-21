@@ -120,6 +120,10 @@ module.exports = class Router
 		webRouter.post '/user/emails/default',
 			AuthenticationController.requireLogin(),
 			UserEmailsController.setDefault
+		webRouter.get '/user/emails/confirm',
+			UserEmailsController.showConfirm
+		webRouter.post '/user/emails/confirm',
+			UserEmailsController.confirm
 
 		webRouter.get  '/user/sessions',
 			AuthenticationController.requireLogin(),
