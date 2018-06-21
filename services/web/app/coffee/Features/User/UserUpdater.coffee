@@ -132,7 +132,8 @@ removeAffiliation = (userId, email, callback = (error) ->) ->
 		defaultErrorMessage: "Couldn't remove affiliation"
 	}, callback
 
-makeAffiliationRequest = (requestOptions,  callback = (error) ->) ->
+makeAffiliationRequest = (requestOptions, callback = (error) ->) ->
+	return callback(null) unless settings?.apis?.v1?.url # service is not configured
 	requestOptions.extraSuccessStatusCodes ||= []
 	request {
 		method: requestOptions.method

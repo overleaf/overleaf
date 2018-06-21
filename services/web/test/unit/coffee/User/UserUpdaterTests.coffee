@@ -19,7 +19,7 @@ describe "UserUpdater", ->
 			getUserByAnyEmail: sinon.stub()
 			ensureUniqueEmailAddress: sinon.stub()
 		@logger = err: sinon.stub(), log: ->
-		settings = apis: { v1: { url: '', user: '', pass: '' } }
+		settings = apis: { v1: { url: 'v1.url', user: '', pass: '' } }
 		@request = sinon.stub()
 		@UserUpdater = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": @logger
@@ -90,7 +90,7 @@ describe "UserUpdater", ->
 				should.not.exist(err)
 				@request.calledOnce.should.equal true
 				requestOptions = @request.lastCall.args[0]
-				expectedUrl = "/api/v2/users/#{@stubbedUser._id}/affiliations"
+				expectedUrl = "v1.url/api/v2/users/#{@stubbedUser._id}/affiliations"
 				requestOptions.url.should.equal expectedUrl
 				requestOptions.method.should.equal 'POST'
 
@@ -138,7 +138,7 @@ describe "UserUpdater", ->
 				should.not.exist(err)
 				@request.calledOnce.should.equal true
 				requestOptions = @request.lastCall.args[0]
-				expectedUrl = "/api/v2/users/#{@stubbedUser._id}/affiliations/"
+				expectedUrl = "v1.url/api/v2/users/#{@stubbedUser._id}/affiliations/"
 				expectedUrl += encodeURIComponent(@newEmail)
 				requestOptions.url.should.equal expectedUrl
 				requestOptions.method.should.equal 'DELETE'
