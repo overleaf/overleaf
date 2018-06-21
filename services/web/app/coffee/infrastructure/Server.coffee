@@ -32,7 +32,7 @@ Mongoose = require("./Mongoose")
 oneDayInMilliseconds = 86400000
 ReferalConnect = require('../Features/Referal/ReferalConnect')
 RedirectManager = require("./RedirectManager")
-ProxyManager = require("./ProxyManager")
+OldAssetProxy = require("./OldAssetProxy")
 translations = require("translations-sharelatex").setup(Settings.i18n)
 Modules = require "./Modules"
 
@@ -74,7 +74,7 @@ app.use methodOverride()
 
 app.use metrics.http.monitor(logger)
 app.use RedirectManager
-ProxyManager.apply(app)
+app.use OldAssetProxy
 
 
 webRouter.use cookieParser(Settings.security.sessionSecret)
