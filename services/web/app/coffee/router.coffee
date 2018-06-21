@@ -114,7 +114,7 @@ module.exports = class Router
 		webRouter.post '/user/emails',
 			AuthenticationController.requireLogin(),
 			UserEmailsController.add
-		webRouter.delete '/user/emails',
+		webRouter.delete '/user/emails/:email',
 			AuthenticationController.requireLogin(),
 			UserEmailsController.remove
 		webRouter.post '/user/emails/default',
