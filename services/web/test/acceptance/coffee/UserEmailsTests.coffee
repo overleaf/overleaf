@@ -34,6 +34,7 @@ describe "UserEmails", ->
 				(cb) =>
 					db.tokens.find {
 						use: 'email_confirmation',
+						'data.user_id': @user._id,
 						usedAt: { $exists: false }
 					}, (error, tokens) =>
 						# There should only be one confirmation token at the moment
@@ -61,6 +62,7 @@ describe "UserEmails", ->
 				(cb) =>
 					db.tokens.find {
 						use: 'email_confirmation',
+						'data.user_id': @user._id,
 						usedAt: { $exists: false }
 					}, (error, tokens) =>
 						# Token should be deleted after use
@@ -85,6 +87,7 @@ describe "UserEmails", ->
 				(cb) =>
 					db.tokens.find {
 						use: 'email_confirmation',
+						'data.user_id': @user._id,
 						usedAt: { $exists: false }
 					}, (error, tokens) =>
 						# There should only be one confirmation token at the moment
@@ -121,6 +124,7 @@ describe "UserEmails", ->
 				(cb) =>
 					db.tokens.find {
 						use: 'email_confirmation',
+						'data.user_id': @user2._id,
 						usedAt: { $exists: false }
 					}, (error, tokens) =>
 						# The first token has been used, so this should be token2 now
@@ -165,6 +169,7 @@ describe "UserEmails", ->
 				(cb) =>
 					db.tokens.find {
 						use: 'email_confirmation',
+						'data.user_id': @user._id,
 						usedAt: { $exists: false }
 					}, (error, tokens) =>
 						# There should only be one confirmation token at the moment
