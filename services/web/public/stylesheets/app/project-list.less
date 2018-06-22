@@ -58,6 +58,10 @@
 			background-color: @sidebar-bg;
 			padding-top: @content-margin-vertical;
 			padding-bottom: @content-margin-vertical;
+			color: @sidebar-color;
+			.small {
+				color: @sidebar-color;
+			}
 		} 
 
 		.project-list-sidebar when (@is-overleaf) {
@@ -109,9 +113,6 @@
 	}
 	p {
 		margin-bottom: @line-height-computed / 4;
-		&.small {
-			color: @sidebar-color;
-		}
 	}
 }
 
