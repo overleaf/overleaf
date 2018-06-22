@@ -81,42 +81,4 @@ module.exports = {
 	ProjectNotFoundError,
 	V1ProjectNotFoundError,
 	SourceFileNotFoundError,
-
-	handleError: (error, req, res, next) ->
-		if error instanceof BadDataError
-			res.status(400).send("The submitted data is not valid")
-
-		else if error instanceof AccessDeniedError
-			res.status(403).send("You do not have access to this project")
-
-		else if error instanceof BadDataError
-			res.status(400).send("The submitted data is not valid")
-
-		else if error instanceof BadEntityTypeError
-			res.status(400).send("The file is the wrong type")
-
-		else if error instanceof SourceFileNotFoundError
-			res.status(404).send("Source file not found")
-
-		else if error instanceof ProjectNotFoundError
-			res.status(404).send("Project not found")
-
-		else if error instanceof V1ProjectNotFoundError
-			res.status(409).send("Sorry, the source project is not yet imported to Overleaf v2. Please import it to Overleaf v2 to refresh this file")
-
-		else if error instanceof OutputFileFetchFailedError
-			res.status(404).send("Could not get output file")
-
-		else if error instanceof UrlFetchFailedError
-			res.status(422).send(
-				"Your URL could not be reached (#{error.statusCode} status code). Please check it and try again."
-			)
-
-		else if error instanceof InvalidUrlError
-			res.status(422).send(
-				"Your URL is not valid. Please check it and try again."
-			)
-
-		else
-			next(error)
 }
