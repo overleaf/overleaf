@@ -148,7 +148,23 @@ block content
 																	id="affiliations-department"
 																	placeholder="Department"
 																	ng-model="newAffiliation.department"
+																	ng-if="!newAffiliation.university.departments || newAffiliation.university.departments.length === 0"
 																)
+																ui-select(
+																	ng-model="newAffiliation.department"
+																	ng-if="newAffiliation.university.departments.length > 0"
+																	tagging
+																	tagging-label="false"
+																)
+																	ui-select-match(
+																		placeholder="Department"
+																	) {{ $select.selected }}
+																	ui-select-choices(
+																		repeat="department in getUniqueUniversityDepartments() | filter: $select.search"
+																	)
+																		span(
+																			ng-bind="department"
+																		)
 													td
 														button.btn.btn-primary(
 															ng-disabled="affiliationsForm.$invalid || ui.isAddingNewEmail"

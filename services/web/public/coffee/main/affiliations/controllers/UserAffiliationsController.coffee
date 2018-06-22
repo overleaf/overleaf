@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "UserAffiliationsController", ["$scope", "UserAffiliationsDataService", "$q", ($scope, UserAffiliationsDataService, $q) ->
+	App.controller "UserAffiliationsController", ["$scope", "UserAffiliationsDataService", "$q", "_", ($scope, UserAffiliationsDataService, $q, _) ->
 		$scope.userEmails = []
 		$scope.countries = []
 		$scope.universities = []
@@ -94,6 +94,9 @@ define [
 				.removeUserEmail email
 				.then () -> _getUserEmails()
 
+		$scope.getUniqueUniversityDepartments = () ->
+			_.uniq $scope.newAffiliation.university.departments
+
 		_reset = () ->
 			$scope.newAffiliation =
 				email: ""
@@ -129,6 +132,8 @@ define [
 		$scope.$watch "newAffiliation.country", (newSelectedCountry, prevSelectedCountry) ->
 			if newSelectedCountry? and newSelectedCountry != prevSelectedCountry
 				$scope.newAffiliation.university = null
+				$scope.newAffiliation.role = null
+				$scope.newAffiliation.department = null
 				UserAffiliationsDataService
 					.getUniversitiesFromCountry(newSelectedCountry)
 					.then (universities) -> $scope.universities = universities

@@ -8,7 +8,7 @@ define [
 	
 	domainsBlackList = { "overleaf.com" : true }
 	commonTLDs = [ "br", "cn", "co", "co.jp",  "co.uk", "com", "com.au", "de","fr", "in", "info", "io", "net", "no", "ru", "se", "us", "com.tw", "com.br", "pl", "it", "co.in", "com.mx" ]
-	commonDomains = [ "gmail", "googlemail", "icloud", "me", "yahoo", "ymail", "yahoomail", "hotmail", "live", "msn", "outlook", "gmx",  "mail", "aol", "163", "mac",  "qq", "o2", "libero", "126" ]
+	commonDomains = [ "gmail", "googlemail", "icloud", "me", "yahoo", "ymail", "yahoomail", "hotmail", "live", "msn", "outlook", "gmx", "mail", "aol", "163", "mac",  "qq", "o2", "libero", "126" ]
 
 	for domain in commonDomains
 		for tld in commonTLDs
