@@ -369,7 +369,7 @@ describe "LinkedFiles", ->
 						cb(error)
 			], done
 
-		it 'should import the output.pdf file from the source project', (done) ->
+		it 'should import the project.pdf file from the source project', (done) ->
 			@owner.request.post {
 				url: "/project/#{@project_one_id}/linked_file",
 				json:
@@ -378,7 +378,7 @@ describe "LinkedFiles", ->
 					provider: 'project_output_file',
 					data:
 						source_project_id: @project_two_id,
-						source_output_file_path: "output.pdf",
+						source_output_file_path: "project.pdf",
 						build_id: '1234-abcd'
 			}, (error, response, body) =>
 				new_file_id = body.new_file_id
@@ -391,7 +391,7 @@ describe "LinkedFiles", ->
 					expect(firstFile.linkedFileData).to.deep.equal {
 						provider: 'project_output_file',
 						source_project_id: @project_two_id,
-						source_output_file_path: "output.pdf",
+						source_output_file_path: "project.pdf",
 						build_id: '1234-abcd'
 					}
 					expect(firstFile.name).to.equal('test.pdf')
@@ -428,7 +428,7 @@ describe "LinkedFiles", ->
 							linkedFileData: {
 								provider: "project_output_file",
 								v1_source_doc_id: 9999999,  # We won't find this id in the database
-								source_output_file_path: "output.pdf",
+								source_output_file_path: "project.pdf",
 								build_id: '123'
 							},
 							_id: "abcdef",

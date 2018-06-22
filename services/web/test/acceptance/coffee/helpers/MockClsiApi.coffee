@@ -4,7 +4,8 @@ app = express()
 
 module.exports = MockClsiApi =
 	run: () ->
-		app.post "/project/:project_id/compile", (req, res, next) =>
+
+		compile = (req, res, next) =>
 			res.status(200).send {
 				compile:
 					status: 'success'
@@ -22,6 +23,9 @@ module.exports = MockClsiApi =
 					]
 			}
 
+		app.post "/project/:project_id/compile", compile
+		app.post "/project/:project_id/user/:user_id/compile", compile
+
 		app.get "/project/:project_id/build/:build_id/output/*", (req, res, next) ->
 			filename = req.params[0]
 			if filename == 'project.pdf'
@@ -31,27 +35,11 @@ module.exports = MockClsiApi =
 			else
 				res.sendStatus(404)
 
-		app.post "/project/:project_id/compile", (req, res, next) =>
-			res.json {
-				compile:
-					status: 'success'
-					outputFiles: [{path: 'output.pdf', build: 'abcd', url: 'http://example.com'}]
-			}
-		app.post "/project/:project_id/user/:user_id/compile", (req, res, next) =>
-			res.json {
-				compile:
-					status: 'success'
-					outputFiles: [{path: 'output.pdf', build: 'abcd', url: 'http://example.com'}]
-			}
-
-		app.get "/project/:project_id/status", (req, res, next) =>
-			res.status(200).send()
-
 		app.get "/project/:project_id/user/:user_id/build/:build_id/output/:output_path", (req, res, next) =>
 			res.status(200).send("hello")
 
-		app.all "*", (req, res, next) =>
-			next()
+		app.get "/project/:project_id/status", (req, res, next) =>
+			res.status(200).send()
 
 		app.listen 3013, (error) ->
 			throw error if error?
