@@ -160,14 +160,10 @@ define () ->
 
 	hasDocumentEnvironment = (text) ->
 		re = /^\\begin{document}/m
-		envs = []
-		iterations = 0
 		return re.exec(text) != null
 
 	hasBibliographyEnvironment = (text) ->
 		re = /^\\begin{thebibliography}/m
-		envs = []
-		iterations = 0
 		return re.exec(text) != null
 
 	class EnvironmentManager
