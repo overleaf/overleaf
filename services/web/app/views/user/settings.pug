@@ -46,7 +46,7 @@ block content
 															ng-if="!userEmail.default"
 															ng-click="removeUserEmail(userEmail.email)"
 														) Remove
-												tr(
+												tr.affiliations-table-highlighted-row(
 													ng-if="ui.isLoadingEmails"
 												)
 													td.text-center(colspan="3") 
@@ -60,13 +60,13 @@ block content
 														a(
 															href
 															ng-click="showAddEmailForm()"
-														) Add new email
+														) Add another email
 
-												tr(
+												tr.affiliations-table-highlighted-row(
 													ng-if="ui.showAddEmailUI"
 												)
 													td
-														p
+														.affiliations-form-group
 															input-suggestions(
 																ng-model="newAffiliation.email"
 																ng-model-options="{ allowInvalid: true }"
@@ -79,7 +79,7 @@ block content
 																input-required="true"
 															)
 													td
-														p(
+														div(
 															ng-if="newAffiliation.university && !ui.showManualUniversitySelectionUI"
 														)
 															| {{ newAffiliation.university.name }} (
@@ -88,10 +88,10 @@ block content
 																ng-click="selectUniversityManually();"
 															) change
 															| )
-														p(
+														div(
 															ng-if="!newAffiliation.university && !ui.isValidEmail && !ui.showManualUniversitySelectionUI"
 														) Start by adding your email address.
-														p(
+														div(
 															ng-if="!newAffiliation.university && ui.isValidEmail && !ui.isBlacklistedEmail && !ui.showManualUniversitySelectionUI"
 														)
 															| Is your email affiliated with an institution? 
@@ -102,21 +102,21 @@ block content
 															) Let us know
 														div(
 															ng-if="ui.showManualUniversitySelectionUI"
-														)
-															p
+														ss)
+															.affiliations-form-group
 																ui-select(
 																	ng-model="newAffiliation.country"
 																)
 																	ui-select-match(
-																		placeholder="Select your country"
+																		placeholder="Country"
 																	) {{ $select.selected.name }}
 																	ui-select-choices(
 																		repeat="country in countries | filter: $select.search"
 																	)
 																		span(
 																			ng-bind="country.name"
-																		)
-															p
+																		s)
+															.affiliations-form-group
 																ui-select(
 																	ng-model="newAffiliation.university"
 																	ng-disabled="!newAffiliation.country"
@@ -124,7 +124,7 @@ block content
 																	tagging-label="false"
 																)
 																	ui-select-match(
-																		placeholder="Select your university"
+																		placeholder="Institution"
 																	) {{ $select.selected.name }}
 																	ui-select-choices(
 																		repeat="university in universities | filter: $select.search"
@@ -132,17 +132,18 @@ block content
 																		span(
 																			ng-bind="university.name"
 																		)
-														div(
-															ng-if="ui.isValidEmail && newAffiliation.university"
-														)
-															p
+															.affiliations-form-group(
+																ng-if="ui.isValidEmail && newAffiliation.university"
+															)
 																input.form-control(
 																	type="text"
 																	id="affiliations-role"
 																	placeholder="Role"
 																	ng-model="newAffiliation.role"
-																)
-															p
+																s)
+															.affiliations-form-group(
+																ng-if="ui.isValidEmail && newAffiliation.university"
+															)
 																input.form-control(
 																	type="text"
 																	id="affiliations-department"
