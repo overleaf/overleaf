@@ -305,6 +305,20 @@ describe "ProjectController", ->
 				done()
 			@ProjectController.projectListPage @req, @res
 
+		it 'should send hasSubscription == false when no subscription', (done) ->
+			@res.render = (pageName, opts)=>
+				opts.hasSubscription.should.equal false
+				done()
+			@ProjectController.projectListPage @req, @res
+
+		it 'should send hasSubscription == true when there is a subscription', (done) ->
+			@LimitationsManager.userHasSubscriptionOrIsGroupMember = sinon.stub().callsArgWith(1, null, true)
+			@res.render = (pageName, opts)=>
+				opts.hasSubscription.should.equal true
+				done()
+			@ProjectController.projectListPage @req, @res
+
+
 		describe 'front widget', (done) ->
 			beforeEach ->
 				@settings.overleaf =
