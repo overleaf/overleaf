@@ -214,7 +214,7 @@ module.exports = ProjectController =
 						tags: tags
 						notifications: notifications or []
 						user: user
-						hasSubscription: results.hasSubscription[0]
+						hasSubscription: results.hasSubscription
 						isShowingV1Projects: results.v1Projects?
 						warnings: warnings
 					}
