@@ -55,6 +55,33 @@ module.exports = CompileController =
 			return next(error) if error?
 			res.status(200).send()
 
+	# Used for submissions through the public API
+	compileSubmission: (req, res, next = (error) ->) ->
+		res.setTimeout(5 * 60 * 1000)
+		submission_id = req.params.submission_id
+		options = {}
+		if req.body?.rootResourcePath?
+			options.rootResourcePath = req.body.rootResourcePath
+		if req.body?.compiler
+			options.compiler = req.body.compiler
+		if req.body?.draft
+			options.draft = req.body.draft
+		if req.body?.check in ['validate', 'error', 'silent']
+			options.check = req.body.check
+		options.compileGroup = req.body?.compileGroup || Settings.defaultFeatures.compileGroup
+		options.timeout = req.body?.timeout || Settings.defaultFeatures.compileTimeout
+		logger.log {options:options, submission_id:submission_id}, "got compileSubmission request"
+		ClsiManager.sendExternalRequest submission_id, req.body, options, (error, status, outputFiles, clsiServerId, validationProblems) ->
+			return next(error) if error?
+			logger.log {submission_id:submission_id, files:outputFiles}, "compileSubmission output files"
+			res.contentType("application/json")
+			res.status(200).send JSON.stringify {
+				status: status
+				outputFiles: outputFiles
+				clsiServerId: clsiServerId
+				validationProblems: validationProblems
+			}
+
 	_compileAsUser: (req, callback) ->
 		# callback with user_id if per-user, undefined otherwise
 		if not Settings.disablePerUserCompiles
@@ -138,6 +165,12 @@ module.exports = CompileController =
 			return next(error) if error?
 			url = CompileController._getFileUrl project_id, user_id, req.params.build_id, req.params.file
 			CompileController.proxyToClsi(project_id, url, req, res, next)
+
+	getFileFromClsiWithoutUser: (req, res, next = (error) ->) ->
+		submission_id = req.params.submission_id
+		url = CompileController._getFileUrl submission_id, null, req.params.build_id, req.params.file
+		limits = { compileGroup: req.body?.compileGroup || Settings.defaultFeatures.compileGroup }
+		CompileController.proxyToClsiWithLimits(submission_id, url, limits, req, res, next)
 
 	# compute a GET file url for a given project, user (optional), build (optional) and file
 	_getFileUrl: (project_id, user_id, build_id, file) ->

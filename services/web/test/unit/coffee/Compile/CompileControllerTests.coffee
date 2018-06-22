@@ -29,6 +29,9 @@ describe "CompileController", ->
 					url: "clsi.example.com"
 				clsi_priority:
 					url: "clsi-priority.example.com"
+			defaultFeatures:
+				compileGroup: 'standard'
+				compileTimeout: 60
 		@jar = {cookie:"stuff"}
 		@ClsiCookieManager =
 			getCookieJar:sinon.stub().callsArgWith(1, null, @jar)
@@ -109,6 +112,62 @@ describe "CompileController", ->
 					.calledWith(@project_id, @user_id, { isAutoCompile: false, draft: true })
 					.should.equal true
 
+	describe "compileSubmission", ->
+		beforeEach ->
+			@submission_id = 'sub-1234'
+			@req.params =
+				submission_id: @submission_id
+			@req.body = {}
+			@ClsiManager.sendExternalRequest = sinon.stub()
+				.callsArgWith(3, null, @status = "success", @outputFiles = ["mock-output-files"], \
+					@clsiServerId = "mock-server-id", @validationProblems = null)
+
+		it "should set the content-type of the response to application/json", ->
+			@CompileController.compileSubmission @req, @res, @next
+			@res.contentType
+				.calledWith("application/json")
+				.should.equal true
+
+		it "should send a successful response reporting the status and files", ->
+			@CompileController.compileSubmission @req, @res, @next
+			@res.statusCode.should.equal 200
+			@res.body.should.equal JSON.stringify({
+				status: @status
+				outputFiles: @outputFiles
+				clsiServerId: 'mock-server-id'
+				validationProblems: null
+			})
+
+		describe "with compileGroup and timeout", ->
+			beforeEach ->
+				@req.body =
+					compileGroup: 'special'
+					timeout: 600
+				@CompileController.compileSubmission @req, @res, @next
+
+			it "should use the supplied values", ->
+				@ClsiManager.sendExternalRequest
+					.calledWith(@submission_id, { compileGroup: 'special', timeout: 600 }, \
+						{ compileGroup: 'special', timeout: 600 })
+					.should.equal true
+
+		describe "with other supported options but not compileGroup and timeout", ->
+			beforeEach ->
+				@req.body =
+					rootResourcePath: 'main.tex'
+					compiler: 'lualatex'
+					draft: true
+					check: 'validate'
+				@CompileController.compileSubmission @req, @res, @next
+
+			it "should use the other options but default values for compileGroup and timeout", ->
+				@ClsiManager.sendExternalRequest
+					.calledWith(@submission_id, \
+						{rootResourcePath: 'main.tex', compiler: 'lualatex', draft: true, check: 'validate'}, \
+						{rootResourcePath: 'main.tex', compiler: 'lualatex', draft: true, check: 'validate', \
+						compileGroup: 'standard', timeout: 60})
+					.should.equal true
+
 	describe "downloadPdf", ->
 		beforeEach ->
 			@req.params =
@@ -166,6 +225,38 @@ describe "CompileController", ->
 					@RateLimiter.addCount.args[0][0].throttle.should.equal 1000
 					done()
 				@CompileController.downloadPdf @req, @res
+
+	describe "getFileFromClsiWithoutUser", ->
+		beforeEach ->
+			@submission_id = 'sub-1234'
+			@build_id = 123456
+			@file = 'project.pdf'
+			@req.params =
+				submission_id: @submission_id
+				build_id: @build_id
+				file: @file
+			@req.body = {}
+			@expected_url = "/project/#{@submission_id}/build/#{@build_id}/output/#{@file}"
+			@CompileController.proxyToClsiWithLimits = sinon.stub()
+
+		describe "without limits specified", ->
+			beforeEach ->
+				@CompileController.getFileFromClsiWithoutUser @req, @res, @next
+
+			it "should proxy to CLSI with correct URL and default limits", ->
+				@CompileController.proxyToClsiWithLimits
+					.calledWith(@submission_id, @expected_url, {compileGroup: 'standard'})
+					.should.equal true
+
+		describe "with limits specified", ->
+			beforeEach ->
+				@req.body = {compileTimeout: 600, compileGroup: 'special'}
+				@CompileController.getFileFromClsiWithoutUser @req, @res, @next
+
+			it "should proxy to CLSI with correct URL and specified limits", ->
+				@CompileController.proxyToClsiWithLimits
+					.calledWith(@submission_id, @expected_url, {compileGroup: 'special'})
+					.should.equal true
 
 	describe "proxyToClsi", ->
 		beforeEach ->

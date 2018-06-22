@@ -8,6 +8,7 @@ modulePath = "../../../../app/js/Features/User/UserEmailsController.js"
 SandboxedModule = require('sandboxed-module')
 MockRequest = require "../helpers/MockRequest"
 MockResponse = require "../helpers/MockResponse"
+Errors = require("../../../../app/js/Features/Errors/Errors")
 
 describe "UserEmailsController", ->
 	beforeEach ->
@@ -30,6 +31,8 @@ describe "UserEmailsController", ->
 			"./UserGetter": @UserGetter
 			"./UserUpdater": @UserUpdater
 			"../Helpers/EmailHelper": @EmailHelper
+			"./UserEmailsConfirmationHandler": @UserEmailsConfirmationHandler = {}
+			"../Errors/Errors": Errors
 			"logger-sharelatex":
 				log: -> console.log(arguments)
 				err: ->
@@ -47,28 +50,27 @@ describe "UserEmailsController", ->
 					assertCalledWith @UserGetter.getUserFullEmails, @user._id
 					done()
 
-		it 'handles error', (done) ->
-			@UserGetter.getUserFullEmails.callsArgWith 1, new Error('Oups')
-
-			@UserEmailsController.list @req, 
-				sendStatus: (code) =>
-					code.should.equal 500
-					done()
-
 	describe 'Add', ->
 		beforeEach ->
 			@newEmail = 'new_email@baz.com'
 			@req.body.email = @newEmail
 			@EmailHelper.parseEmail.returns @newEmail
+			@UserUpdater.addEmailAddress.callsArgWith 2, null
+			@UserEmailsConfirmationHandler.sendConfirmationEmail = sinon.stub().yields()
 
 		it 'adds new email', (done) ->
-			@UserUpdater.addEmailAddress.callsArgWith 2, null
-
 			@UserEmailsController.add @req, 
 				sendStatus: (code) =>
-					code.should.equal 200
+					code.should.equal 204
 					assertCalledWith @EmailHelper.parseEmail, @newEmail
 					assertCalledWith @UserUpdater.addEmailAddress, @user._id, @newEmail
+					done()
+
+		it 'sends an email confirmation', (done) ->
+			@UserEmailsController.add @req, 
+				sendStatus: (code) =>
+					code.should.equal 204
+					assertCalledWith @UserEmailsConfirmationHandler.sendConfirmationEmail, @user._id, @newEmail
 					done()
 
 		it 'handles email parse error', (done) ->
@@ -78,14 +80,6 @@ describe "UserEmailsController", ->
 				sendStatus: (code) =>
 					code.should.equal 422
 					assertNotCalled @UserUpdater.addEmailAddress
-					done()
-
-		it 'handles error', (done) ->
-			@UserUpdater.addEmailAddress.callsArgWith 2, new Error('Oups')
-
-			@UserEmailsController.add @req, 
-				sendStatus: (code) =>
-					code.should.equal 500
 					done()
 
 	describe 'remove', ->
@@ -113,15 +107,6 @@ describe "UserEmailsController", ->
 					assertNotCalled @UserUpdater.removeEmailAddress
 					done()
 
-		it 'handles error', (done) ->
-			@UserUpdater.removeEmailAddress.callsArgWith 2, new Error('Oups')
-
-			@UserEmailsController.remove @req, 
-				sendStatus: (code) =>
-					code.should.equal 500
-					done()
-
-
 	describe 'setDefault', ->
 		beforeEach ->
 			@email = "email_to_set_default@bar.com"
@@ -147,11 +132,50 @@ describe "UserEmailsController", ->
 					assertNotCalled @UserUpdater.setDefaultEmailAddress
 					done()
 
-		it 'handles error', (done) ->
-			@UserUpdater.setDefaultEmailAddress.callsArgWith 2, new Error('Oups')
+	describe 'confirm', ->
+		beforeEach ->
+			@UserEmailsConfirmationHandler.confirmEmailFromToken = sinon.stub().yields()
+			@res =
+				sendStatus: sinon.stub()
+				json: sinon.stub()
+			@res.status = sinon.stub().returns(@res)
+			@next = sinon.stub()
+			@token = 'mock-token'
+			@req.body = token: @token
 
-			@UserEmailsController.setDefault @req, 
-				sendStatus: (code) =>
-					code.should.equal 500
-					done()
+		describe 'successfully', ->
+			beforeEach ->
+				@UserEmailsController.confirm @req, @res, @next
+
+			it 'should confirm the email from the token', ->
+				@UserEmailsConfirmationHandler.confirmEmailFromToken
+					.calledWith(@token)
+					.should.equal true
+
+			it 'should return a 200 status', ->
+				@res.sendStatus.calledWith(200).should.equal true
+
+		describe 'without a token', ->
+			beforeEach ->
+				@req.body.token = null
+				@UserEmailsController.confirm @req, @res, @next
+
+			it 'should return a 422 status', ->
+				@res.sendStatus.calledWith(422).should.equal true
+
+		describe 'when confirming fails', ->
+			beforeEach ->
+				@UserEmailsConfirmationHandler.confirmEmailFromToken = sinon.stub().yields(
+					new Errors.NotFoundError('not found')
+				)
+				@UserEmailsController.confirm @req, @res, @next
+
+			it 'should return a 404 error code with a message', ->
+				@res.status.calledWith(404).should.equal true
+				@res.json.calledWith({
+					message: 'Sorry, your confirmation token is invalid or has expired. Please request a new email confirmation link.'
+				}).should.equal true
+
+
+
 
