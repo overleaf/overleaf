@@ -9,11 +9,7 @@ block content
 						.page-header
 							h1  #{translate("account_settings")}
 						.account-settings(ng-controller="AccountSettingsController", ng-cloak)
-							form-messages(for="settingsForm")
-								.alert.alert-success(ng-show="settingsForm.response.success")
-									|  #{translate("thanks_settings_updated")}
-							form-messages(for="changePasswordForm")
-							div
+							if locals.showAffiliationsUI
 								form.row(
 									ng-controller="UserAffiliationsController"
 									name="affiliationsForm"
@@ -184,110 +180,114 @@ block content
 																i.fa.fa-fw.fa-spin.fa-refresh
 																| &nbsp;Adding...
 										hr
+							form-messages(for="settingsForm")
+								.alert.alert-success(ng-show="settingsForm.response.success")
+									|  #{translate("thanks_settings_updated")}
+							form-messages(for="changePasswordForm")
 
-								.row
-									.col-md-5
-										h3  #{translate("update_account_info")}
-										form(async-form="settings", name="settingsForm", method="POST", action="/user/settings", novalidate)
+							.row
+								.col-md-5
+									h3 #{translate("update_account_info")}
+									form(async-form="settings", name="settingsForm", method="POST", action="/user/settings", novalidate)
+										input(type="hidden", name="_csrf", value=csrfToken)
+										if !externalAuthenticationSystemUsed()
+											.form-group
+												label(for='email')  #{translate("email")}
+												input.form-control(
+													type='email',
+													name='email',
+													placeholder="email@example.com"
+													required,
+													ng-model="email",
+													ng-init="email = "+JSON.stringify(user.email),
+													ng-model-options="{ updateOn: 'blur' }"
+												)
+												span.small.text-primary(ng-show="settingsForm.email.$invalid && settingsForm.email.$dirty")
+													|  #{translate("must_be_email_address")}
+										else
+											// show the email, non-editable
+											.form-group
+												label.control-label #{translate("email")}
+												div.form-control(readonly="true") #{user.email}
+
+										if shouldAllowEditingDetails
+											.form-group
+												label(for='firstName').control-label #{translate("first_name")}
+												input.form-control(
+													type='text',
+													name='first_name',
+													value=user.first_name
+													ng-non-bindable
+												)
+											.form-group
+												label(for='lastName').control-label #{translate("last_name")}
+												input.form-control(
+													type='text',
+													name='last_name',
+													value=user.last_name
+													ng-non-bindable
+												)
+											.actions
+												button.btn.btn-primary(
+													type='submit',
+													ng-disabled="settingsForm.$invalid"
+												)  #{translate("update")}
+										else
+											.form-group
+												label.control-label #{translate("first_name")}
+												div.form-control(readonly="true") #{user.first_name}
+											.form-group
+												label.control-label #{translate("last_name")}
+												div.form-control(readonly="true") #{user.last_name}
+
+								if !externalAuthenticationSystemUsed()
+									.col-md-5.col-md-offset-1
+										h3 #{translate("change_password")}
+										form(async-form="changepassword", name="changePasswordForm", action="/user/password/update", method="POST", novalidate)
 											input(type="hidden", name="_csrf", value=csrfToken)
-											if !externalAuthenticationSystemUsed()
-												.form-group
-													label(for='email')  #{translate("email")}
-													input.form-control(
-														type='email',
-														name='email',
-														placeholder="email@example.com"
-														required,
-														ng-model="email",
-														ng-init="email = "+JSON.stringify(user.email),
-														ng-model-options="{ updateOn: 'blur' }"
-													)
-													span.small.text-primary(ng-show="settingsForm.email.$invalid && settingsForm.email.$dirty")
-														|  #{translate("must_be_email_address")}
-											else
-												// show the email, non-editable
-												.form-group
-													label.control-label #{translate("email")}
-													div.form-control(readonly="true") #{user.email}
+											.form-group
+												label(for='currentPassword') #{translate("current_password")}
+												input.form-control(
+													type='password',
+													name='currentPassword',
+													placeholder='*********',
+													ng-model="currentPassword",
+													required
+												)
+												span.small.text-primary(ng-show="changePasswordForm.currentPassword.$invalid && changePasswordForm.currentPassword.$dirty")
+													| #{translate("required")}
+											.form-group
+												label(for='newPassword1') #{translate("new_password")}
+												input.form-control(
+													id='passwordField',
+													type='password',
+													name='newPassword1',
+													placeholder='*********',
+													ng-model="newPassword1",
+													required,
+													complex-password
+												)
+												span.small.text-primary(ng-show="changePasswordForm.newPassword1.$error.complexPassword && changePasswordForm.newPassword1.$dirty", ng-bind-html="complexPasswordErrorMessage") 
+											.form-group
+												label(for='newPassword2') #{translate("confirm_new_password")}
+												input.form-control(
+													type='password',
+													name='newPassword2',
+													placeholder='*********',
+													ng-model="newPassword2",
+													equals="passwordField"
+												) 
+												span.small.text-primary(ng-show="changePasswordForm.newPassword2.$error.areEqual && changePasswordForm.newPassword2.$dirty")
+													| #{translate("doesnt_match")} 
+												span.small.text-primary(ng-show="!changePasswordForm.newPassword2.$error.areEqual && changePasswordForm.newPassword2.$invalid && changePasswordForm.newPassword2.$dirty")
+													| #{translate("invalid_password")} 
+											.actions
+												button.btn.btn-primary(
+													type='submit',
+													ng-disabled="changePasswordForm.$invalid"
+												) #{translate("change")}
 
-											if shouldAllowEditingDetails
-												.form-group
-													label(for='firstName').control-label #{translate("first_name")}
-													input.form-control(
-														type='text',
-														name='first_name',
-														value=user.first_name
-														ng-non-bindable
-													)
-												.form-group
-													label(for='lastName').control-label #{translate("last_name")}
-													input.form-control(
-														type='text',
-														name='last_name',
-														value=user.last_name
-														ng-non-bindable
-													)
-												.actions
-													button.btn.btn-primary(
-														type='submit',
-														ng-disabled="settingsForm.$invalid"
-													)  #{translate("update")}
-											else
-												.form-group
-													label.control-label #{translate("first_name")}
-													div.form-control(readonly="true") #{user.first_name}
-												.form-group
-													label.control-label #{translate("last_name")}
-													div.form-control(readonly="true") #{user.last_name}
-
-									if !externalAuthenticationSystemUsed()
-										.col-md-5.col-md-offset-1
-											h3  #{translate("change_password")}
-											form(async-form="changepassword", name="changePasswordForm", action="/user/password/update", method="POST", novalidate)
-												input(type="hidden", name="_csrf", value=csrfToken)
-												.form-group
-													label(for='currentPassword') #{translate("current_password")}
-													input.form-control(
-														type='password',
-														name='currentPassword',
-														placeholder='*********',
-														ng-model="currentPassword",
-														required
-													)
-													span.small.text-primary(ng-show="changePasswordForm.currentPassword.$invalid && changePasswordForm.currentPassword.$dirty")
-														| #{translate("required")}
-												.form-group
-													label(for='newPassword1') #{translate("new_password")}
-													input.form-control(
-														id='passwordField',
-														type='password',
-														name='newPassword1',
-														placeholder='*********',
-														ng-model="newPassword1",
-														required,
-														complex-password
-													)
-													span.small.text-primary(ng-show="changePasswordForm.newPassword1.$error.complexPassword && changePasswordForm.newPassword1.$dirty", ng-bind-html="complexPasswordErrorMessage") 
-												.form-group
-													label(for='newPassword2') #{translate("confirm_new_password")}
-													input.form-control(
-														type='password',
-														name='newPassword2',
-														placeholder='*********',
-														ng-model="newPassword2",
-														equals="passwordField"
-													) 
-													span.small.text-primary(ng-show="changePasswordForm.newPassword2.$error.areEqual && changePasswordForm.newPassword2.$dirty")
-														| #{translate("doesnt_match")} 
-													span.small.text-primary(ng-show="!changePasswordForm.newPassword2.$error.areEqual && changePasswordForm.newPassword2.$invalid && changePasswordForm.newPassword2.$dirty")
-														| #{translate("invalid_password")} 
-												.actions
-													button.btn.btn-primary(
-														type='submit',
-														ng-disabled="changePasswordForm.$invalid"
-													) #{translate("change")}
-
-							
+						
 
 							| !{moduleIncludes("userSettings", locals)}
 

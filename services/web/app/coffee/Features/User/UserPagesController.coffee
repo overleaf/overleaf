@@ -68,6 +68,7 @@ module.exports =
 				shouldAllowEditingDetails: shouldAllowEditingDetails
 				languages: Settings.languages,
 				accountSettingsTabActive: true
+				showAffiliationsUI: (req.query?.aff == "true") or false
 
 	sessionsPage: (req, res, next) ->
 		user = AuthenticationController.getSessionUser(req)
