@@ -81,7 +81,7 @@ module.exports = UserUpdater =
 					logger.err error:error, 'problem removing users email'
 					return callback(error)
 				if res.n == 0
-					return callback(new Error('Cannot remove default email'))
+					return callback(new Error('Cannot remove email'))
 				callback()
 
 
