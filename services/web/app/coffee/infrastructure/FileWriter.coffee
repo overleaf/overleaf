@@ -15,11 +15,14 @@ module.exports = FileWriter =
 			callback(null)
 
 	writeLinesToDisk: (identifier, lines, callback = (error, fsPath)->) ->
+		FileWriter.writeContentToDisk(identifier, lines.join('\n'), callback)
+
+	writeContentToDisk: (identifier, content, callback = (error, fsPath)->) ->
 		callback = _.once(callback)
 		fsPath = "#{Settings.path.dumpFolder}/#{identifier}_#{uuid.v4()}"
 		FileWriter._ensureDumpFolderExists (error) ->
 			return callback(error) if error?
-			fs.writeFile fsPath, lines.join('\n'), (error) ->
+			fs.writeFile fsPath, content, (error) ->
 				return callback(error) if error?
 				callback(null, fsPath)
 

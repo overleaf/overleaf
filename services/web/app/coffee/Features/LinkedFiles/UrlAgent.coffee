@@ -1,67 +1,53 @@
 request = require 'request'
-FileWriter = require('../../infrastructure/FileWriter')
 _ = require "underscore"
 urlValidator = require 'valid-url'
 Settings = require 'settings-sharelatex'
+{ InvalidUrlError, UrlFetchFailedError } = require './LinkedFilesErrors'
+LinkedFilesHandler = require './LinkedFilesHandler'
 
-UrlFetchFailedError = (message) ->
-	error = new Error(message)
-	error.name = 'UrlFetchFailedError'
-	error.__proto__ = UrlFetchFailedError.prototype
-	return error
-UrlFetchFailedError.prototype.__proto__ = Error.prototype
-
-InvalidUrlError = (message) ->
-	error = new Error(message)
-	error.name = 'InvalidUrlError'
-	error.__proto__ = InvalidUrlError.prototype
-	return error
-InvalidUrlError.prototype.__proto__ = Error.prototype
 
 module.exports = UrlAgent = {
-	UrlFetchFailedError: UrlFetchFailedError
-	InvalidUrlError: InvalidUrlError
 
-	sanitizeData: (data) ->
+	createLinkedFile: (project_id, linkedFileData, name, parent_folder_id, user_id, callback) ->
+		linkedFileData = @._sanitizeData(linkedFileData)
+		@_getUrlStream project_id, linkedFileData, user_id, (err, readStream) ->
+			return callback(err) if err?
+			readStream.on "error", callback
+			readStream.on "response", (response) ->
+				if 200 <= response.statusCode < 300
+					readStream.resume()
+					LinkedFilesHandler.importFromStream project_id,
+						readStream,
+						linkedFileData,
+						name,
+						parent_folder_id,
+						user_id,
+						(err, file) ->
+							return callback(err) if err?
+							callback(null, file._id) # Created
+				else
+					error = new UrlFetchFailedError("url fetch failed: #{linkedFileData.url}")
+					error.statusCode = response.statusCode
+					callback(error)
+
+	refreshLinkedFile: (project_id, linkedFileData, name, parent_folder_id, user_id, callback) ->
+		@createLinkedFile project_id, linkedFileData, name, parent_folder_id, user_id, callback
+
+	_sanitizeData: (data) ->
 		return {
+			provider: data.provider
 			url: @._prependHttpIfNeeded(data.url)
 		}
 
-	canCreate: (data) -> true
-
-	decorateLinkedFileData: (data, callback = (err, newData) ->) ->
-		return callback(null, data)
-
-	checkAuth: (project_id, data, current_user_id, callback = (error, allowed)->) ->
-		callback(null, true)
-
-	writeIncomingFileToDisk: (project_id, data, current_user_id, callback = (error, fsPath) ->) ->
+	_getUrlStream: (project_id, data, current_user_id, callback = (error, fsPath) ->) ->
 		callback = _.once(callback)
 		url = data.url
 		if !urlValidator.isWebUri(url)
 			return callback(new InvalidUrlError("invalid url: #{url}"))
-		url = UrlAgent._wrapWithProxy(url)
+		url = @_wrapWithProxy(url)
 		readStream = request.get(url)
-		readStream.on "error", callback
-		readStream.on "response", (response) ->
-			if 200 <= response.statusCode < 300
-				FileWriter.writeStreamToDisk project_id, readStream, callback
-			else
-				error = new UrlFetchFailedError("url fetch failed: #{url}")
-				error.statusCode = response.statusCode
-				callback(error)
-
-	handleError: (error, req, res, next) ->
-		if error instanceof UrlFetchFailedError
-			res.status(422).send(
-				"Your URL could not be reached (#{error.statusCode} status code). Please check it and try again."
-			)
-		else if error instanceof InvalidUrlError
-			res.status(422).send(
-				"Your URL is not valid. Please check it and try again."
-			)
-		else
-			next(error)
+		readStream.pause()
+		callback(null, readStream)
 
 	_prependHttpIfNeeded: (url) ->
 		if !url.match('://')

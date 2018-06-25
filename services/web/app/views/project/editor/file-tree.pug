@@ -308,165 +308,10 @@ script(type='text/ng-template', id='entityListItemTemplate')
 					ng-repeat="child in entity.children | orderBy:[orderByFoldersFirst, 'name']"
 				)
 
-script(type='text/ng-template', id='newDocModalTemplate')
-	.modal-header
-		h3 #{translate("new_file")}
-	.modal-body
-		form(novalidate, name="newDocForm")
-			div.alert.alert-danger(ng-if="error")
-				div(ng-switch="error") 
-					span(ng-switch-when="already exists") #{translate("file_already_exists")}
-					span(ng-switch-default) {{error}}
-			input.form-control(
-				type="text",
-				placeholder="File Name",
-				required,
-				ng-model="inputs.name",
-				on-enter="create()",
-				select-name-on="open",
-				valid-file,
-				name="name"
-			)
-			.text-danger.row-spaced-small(ng-show="newDocForm.name.$error.validFile")
-				| #{translate('files_cannot_include_invalid_characters')}
-	.modal-footer
-		button.btn.btn-default(
-			ng-disabled="state.inflight"
-			ng-click="cancel()"
-		) #{translate("cancel")}
-		button.btn.btn-primary(
-			ng-disabled="newDocForm.$invalid || state.inflight"
-			ng-click="create()"
-		)
-			span(ng-hide="state.inflight") #{translate("create")}
-			span(ng-show="state.inflight") #{translate("creating")}...
-
-
-// Project Linked Files Modal
-script(type='text/ng-template', id='projectLinkedFileModalTemplate')
-	.modal-header
-		h3 New file from Project
-
-	.modal-body
-		div
-			div.alert.alert-danger(ng-if="state.error") Error, something went wrong!
-		div
-			form
-				.form-controls
-					label(for="project-select") Select a Project
-					span(ng-show="state.inFlight.projects")
-						| &nbsp;
-						i.fa.fa-spinner.fa-spin
-					select.form-control(
-						name="project-select"
-						ng-model="data.selectedProjectId"
-						ng-disabled="!shouldEnableProjectSelect()"
-					)
-						option(value="" disabled selected) - Please Select a Project
-						option(
-							ng-repeat="project in data.projects"
-							value="{{ project._id }}"
-						) {{ project.name }}
-
-				br
-				.form-controls
-					label(for="project-entity-select") Select a File
-					span(ng-show="state.inFlight.entities")
-						| &nbsp;
-						i.fa.fa-spinner.fa-spin
-					select.form-control(
-						name="project-entity-select"
-						ng-model="data.selectedProjectEntity"
-						ng-disabled="!shouldEnableProjectEntitySelect()"
-					)
-						option(value="" disabled selected) - Please Select a File
-						option(
-							ng-repeat="projectEntity in data.projectEntities"
-							value="{{ projectEntity.path }}"
-						) {{ projectEntity.path.slice(1) }}
-				br
-
-				.form-controls
-					label(for="name") File Name In This Project
-					input.form-control(
-						type="text"
-						placeholder="example.tex"
-						required
-						ng-model="data.name"
-						name="name"
-					)
-				br
-
-	.modal-footer
-		span(ng-show="state.inFlight.create")
-			i.fa.fa-spinner.fa-spin
-			| &nbsp;
-		button.btn.btn-default(
-			ng-disabled="state.inflight"
-			ng-click="cancel()"
-		) #{translate("cancel")}
-		button.btn.btn-primary(
-			ng-disabled="!shouldEnableCreateButton()"
-			ng-click="create()"
-		)
-			span(ng-hide="state.inflight") #{translate("create")}
-			span(ng-show="state.inflight") #{translate("creating")}...
-
-
-script(type='text/ng-template', id='linkedFileModalTemplate')
-	.modal-header
-		h3 New file from URL
-	.modal-body
-		form(novalidate, name="newLinkedFileForm")
-			div.alert.alert-danger(ng-if="error")
-				div(ng-switch="error")
-					span(ng-switch-when="already exists") #{translate("file_already_exists")}
-					span(ng-switch-default) {{error}}
-			label(for="url") URL to fetch the file from
-			input.form-control(
-				type="text",
-				placeholder="www.example.com/my_file",
-				required,
-				ng-model="inputs.url",
-				focus-on="open",
-				on-enter="create()",
-				name="url"
-			)
-			.row-spaced
-				label(for="name") File name in this project
-				input.form-control(
-					type="text",
-					placeholder="my_file",
-					required,
-					ng-model="inputs.name",
-					ng-change="nameChangedByUser = true"
-					valid-file,
-					on-enter="create()",
-					name="name"
-				)
-				.text-danger.row-spaced-small(ng-show="newDocForm.name.$error.validFile")
-					| #{translate('files_cannot_include_invalid_characters')}
-	.modal-footer
-		button.btn.btn-default(
-			ng-disabled="state.inflight"
-			ng-click="cancel()"
-		) #{translate("cancel")}
-		button.btn.btn-primary(
-			ng-disabled="newLinkedFileForm.$invalid || state.inflight"
-			ng-click="create()"
-		)
-			span(ng-hide="state.inflight") #{translate("create")}
-			span(ng-show="state.inflight") #{translate("creating")}...
-
-
 script(type='text/ng-template', id='newFolderModalTemplate')
 	.modal-header
 		h3 #{translate("new_folder")}
 	.modal-body
-		div.alert.alert-danger(ng-if="error")
-			div(ng-switch="error") 
-				span(ng-switch-when="already exists") #{translate("file_already_exists")}
-				span(ng-switch-default) {{error}}
 		form(novalidate, name="newFolderForm")
 			input.form-control(
 				type="text",
@@ -478,8 +323,12 @@ script(type='text/ng-template', id='newFolderModalTemplate')
 				valid-file,
 				name="name"
 			)
-			.text-danger.row-spaced-small(ng-show="newFolderForm.name.$error.validFile")
-				| #{translate('files_cannot_include_invalid_characters')}
+		div.alert.alert-danger.row-spaced-small(ng-show="newFolderForm.name.$error.validFile")
+			| #{translate('files_cannot_include_invalid_characters')}
+		div.alert.alert-danger.row-spaced-small(ng-if="error")
+			div(ng-switch="error")
+				span(ng-switch-when="already exists") #{translate("file_already_exists")}
+				span(ng-switch-default) {{error}}
 	.modal-footer
 		button.btn.btn-default(
 			ng-disabled="state.inflight"
@@ -492,70 +341,7 @@ script(type='text/ng-template', id='newFolderModalTemplate')
 			span(ng-hide="state.inflight") #{translate("create")}
 			span(ng-show="state.inflight") #{translate("creating")}...
 
-
-script(type="text/template", id="qq-file-uploader-template")
-	div.qq-uploader-selector
-		div(qq-hide-dropzone="").qq-upload-drop-area-selector.qq-upload-drop-area
-			span.qq-upload-drop-area-text-selector #{translate('drop_files_here_to_upload')}
-		div.qq-upload-button-selector.btn.btn-primary.btn-lg
-			div #{translate('upload')}
-		span.or.btn-lg #{translate('or')}
-		span.drag-here.btn-lg #{translate('drag_here')}
-		span.qq-drop-processing-selector
-			span #{translate('processing')}
-			span.qq-drop-processing-spinner-selector
-		ul.qq-upload-list-selector
-			li
-				div.qq-progress-bar-container-selector
-					div(
-						role="progressbar"
-						aria-valuenow="0"
-						aria-valuemin="0"
-						aria-valuemax="100"
-						class="qq-progress-bar-selector qq-progress-bar"
-					)
-				span.qq-upload-file-selector.qq-upload-file
-				span.qq-upload-size-selector.qq-upload-size
-				a(type="button").qq-btn.qq-upload-cancel-selector.qq-upload-cancel #{translate('cancel')}
-				button(type="button").qq-btn.qq-upload-retry-selector.qq-upload-retry #{translate('retry')}
-				span(role="status").qq-upload-status-text-selector.qq-upload-status-text
-
-script(type="text/ng-template", id="uploadFileModalTemplate")
-	.modal-header
-		h3 #{translate("upload_files")}
-		.alert.alert-warning.small.modal-alert(ng-if="tooManyFiles") #{translate("maximum_files_uploaded_together", {max:"{{max_files}}"})}
-		.alert.alert-warning.small.modal-alert(ng-if="rateLimitHit") #{translate("too_many_files_uploaded_throttled_short_period")}
-		.alert.alert-warning.small.modal-alert(ng-if="notLoggedIn") #{translate("session_expired_redirecting_to_login", {seconds:"{{secondsToRedirect}}"})}
-		.alert.alert-warning.small.modal-alert(ng-if="conflicts.length > 0")
-			p.text-center
-				| The following files already exist in this project:
-			ul.text-center.list-unstyled.row-spaced-small
-				li(ng-repeat="conflict in conflicts"): strong {{ conflict }}
-			p.text-center.row-spaced-small
-				| Do you want to overwrite them?
-			p.text-center
-				a(href, ng-click="doUpload()").btn.btn-primary Overwrite
-				| &nbsp;
-				a(href, ng-click="cancel()").btn.btn-default Cancel
-
-	.modal-body(
-		fine-upload
-		endpoint="/project/{{ project_id }}/upload"
-		template-id="qq-file-uploader-template"
-		multiple="true"
-		auto-upload="false"
-		on-complete-callback="onComplete"
-		on-upload-callback="onUpload"
-		on-validate-batch="onValidateBatch"
-		on-error-callback="onError"
-		on-submit-callback="onSubmit"
-		on-cancel-callback="onCancel"
-		control="control"
-		params="{'folder_id': parent_folder_id}"
-	)
-	.modal-footer
-		button.btn.btn-default(ng-click="cancel()") #{translate("cancel")}
-
+include ./new-file-modal
 
 script(type='text/ng-template', id='deleteEntityModalTemplate')
 	.modal-header

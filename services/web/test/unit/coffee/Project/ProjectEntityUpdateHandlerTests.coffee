@@ -44,6 +44,8 @@ describe 'ProjectEntityUpdateHandler', ->
 				else
 					@._id = file_id
 				@rev = 0
+				if options.linkedFileData?
+					@linkedFileData = options.linkedFileData
 
 		@docName = "doc-name"
 		@docLines = ['1234','abc']
@@ -119,6 +121,35 @@ describe 'ProjectEntityUpdateHandler', ->
 
 			@DocumentUpdaterHandler.updateProjectStructure
 				.calledWithMatch(project_id, projectHistoryId, userId, changesMatcher)
+				.should.equal true
+
+	describe 'copyFileFromExistingProjectWithProject, with linkedFileData', ->
+
+		beforeEach ->
+			@oldProject_id = "123kljadas"
+			@oldFileRef = {
+				_id:"oldFileRef",
+				name:@fileName,
+				linkedFileData: @linkedFileData
+			}
+			@ProjectEntityMongoUpdateHandler._confirmFolder = sinon.stub().yields(folder_id)
+			@ProjectEntityMongoUpdateHandler._putElement = sinon.stub().yields(null, {path:{fileSystem: @fileSystemPath}})
+
+			@ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject @project, folder_id, @oldProject_id, @oldFileRef, userId, @callback
+
+		it 'should copy the file in FileStoreHandler', ->
+			@FileStoreHandler.copyFile
+				.calledWith(@oldProject_id, @oldFileRef._id, project_id, file_id)
+				.should.equal true
+
+		it 'should put file into folder by calling put element, with the linkedFileData', ->
+			@ProjectEntityMongoUpdateHandler._putElement
+				.calledWithMatch(
+					@project,
+					folder_id,
+					{ _id: file_id, name: @fileName, linkedFileData: @linkedFileData},
+					"file"
+				)
 				.should.equal true
 
 	describe 'updateDocLines', ->
@@ -285,7 +316,7 @@ describe 'ProjectEntityUpdateHandler', ->
 		beforeEach ->
 			@path = "/path/to/file"
 
-			@newFile = {_id: file_id, rev: 0, name: @fileName}
+			@newFile = {_id: file_id, rev: 0, name: @fileName, linkedFileData: @linkedFileData}
 			@TpdsUpdateSender.addFile = sinon.stub().yields()
 			@ProjectEntityMongoUpdateHandler.addFile = sinon.stub().yields(null, {path: fileSystem: @path}, @project)
 			@ProjectEntityUpdateHandler.addFile project_id, folder_id, @fileName, @fileSystemPath, @linkedFileData, userId, @callback
@@ -330,7 +361,7 @@ describe 'ProjectEntityUpdateHandler', ->
 			@newFileUrl = "new-file-url"
 			@FileStoreHandler.uploadFileFromDisk = sinon.stub().yields(null, @newFileUrl)
 
-			@newFile = _id: new_file_id, name: "dummy-upload-filename", rev: 0
+			@newFile = _id: new_file_id, name: "dummy-upload-filename", rev: 0, linkedFileData: @linkedFileData
 			@oldFile = _id: file_id
 			@path = "/path/to/file"
 			@ProjectEntityMongoUpdateHandler._insertDeletedFileReference = sinon.stub().yields()
