@@ -33,7 +33,6 @@ module.exports = UserEmailsController =
 
 	remove: (req, res, next) ->
 		userId = AuthenticationController.getLoggedInUserId(req)
-		logger.log req.params
 		email = EmailHelper.parseEmail(req.params.email)
 		return res.sendStatus 422 unless email?
 
