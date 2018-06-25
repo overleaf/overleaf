@@ -51,7 +51,7 @@ describe "CompileController", ->
 			"./ClsiManager": @ClsiManager
 			"../Authentication/AuthenticationController": @AuthenticationController
 			"../../infrastructure/RateLimiter":@RateLimiter
-			"./ClsiCookieManager":@ClsiCookieManager
+			"./ClsiCookieManager": ()=> @ClsiCookieManager
 		@project_id = "project-id"
 		@next = sinon.stub()
 		@req = new MockRequest()

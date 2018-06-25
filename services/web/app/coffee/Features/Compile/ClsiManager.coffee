@@ -7,7 +7,8 @@ ProjectGetter = require("../Project/ProjectGetter")
 ProjectEntityHandler = require("../Project/ProjectEntityHandler")
 logger = require "logger-sharelatex"
 Url = require("url")
-ClsiCookieManager = require("./ClsiCookieManager")
+ClsiCookieManager = require("./ClsiCookieManager")()
+NewBackendCloudClsiCookieManager = require("./ClsiCookieManager")("newBackendcloud")
 ClsiStateManager = require("./ClsiStateManager")
 _ = require("underscore")
 async = require("async")
@@ -88,20 +89,59 @@ module.exports = ClsiManager =
 					callback(null, response?.compile?.status, outputFiles, clsiServerId)
 
 	_makeRequest: (project_id, opts, callback)->
-		ClsiCookieManager.getCookieJar project_id, (err, jar)->
+		async.series {
+			currentBackend: (cb)-> 
+				startTime = new Date()
+				ClsiCookieManager.getCookieJar project_id, (err, jar)->
+					if err?
+						logger.err err:err, "error getting cookie jar for clsi request"
+						return callback(err)
+					opts.jar = jar
+					timer = new Metrics.Timer("compile.currentBackend")
+					request opts, (err, response, body)->
+						timer.done()
+						if err?
+							logger.err err:err, project_id:project_id, url:opts?.url, "error making request to clsi"
+							return callback(err)
+						ClsiCookieManager.setServerId project_id, response, (err)->
+							if err?
+								logger.warn err:err, project_id:project_id, "error setting server id"
+							callback err, response, body #return as soon as the standard compile has returned
+							cb(err, {response:response, body:body, finishTime:new Date() - startTime })
+			newBackend: (cb)-> 
+				startTime = new Date()
+				ClsiManager._makeNewBackendRequest project_id, opts, (err, response, body)->
+					cb(err, {response:response, body:body, finishTime:new Date() - startTime})
+		}, (err, results)->
+			timeDifference = results.newBackend?.finishTime - results.currentBackend?.finishTime 
+			statusCodeSame = results.newBackend?.response?.statusCode == results.currentBackend?.response?.statusCode
+			currentCompileTime = results.currentBackend?.finishTime
+			newBackendCompileTime = results.newBackend?.finishTime
+			logger.log {statusCodeSame, timeDifference, currentCompileTime, newBackendCompileTime}, "both clsi requests returned"
+
+
+
+	_makeNewBackendRequest: (project_id, baseOpts, callback)->
+		if !Settings.apis.clsi_new?.url?
+			return callback()
+		opts = _.clone(baseOpts)
+		opts.url = opts.url.replace(Settings.apis.clsi.url, Settings.apis.clsi_new?.url)
+		NewBackendCloudClsiCookieManager.getCookieJar project_id, (err, jar)->
 			if err?
 				logger.err err:err, "error getting cookie jar for clsi request"
 				return callback(err)
 			opts.jar = jar
+			timer = new Metrics.Timer("compile.newBackend")
 			request opts, (err, response, body)->
+				timer.done()
 				if err?
-					logger.err err:err, project_id:project_id, url:opts?.url, "error making request to clsi"
+					logger.warn err:err, project_id:project_id, url:opts?.url, "error making request to new clsi"
 					return callback(err)
-				ClsiCookieManager.setServerId project_id, response, (err)->
+				NewBackendCloudClsiCookieManager.setServerId project_id, response, (err)->
 					if err?
-						logger.warn err:err, project_id:project_id, "error setting server id"
-
+						logger.warn err:err, project_id:project_id, "error setting server id new backend"
 					return callback err, response, body
+
 
 	_getCompilerUrl: (compileGroup, project_id, user_id, action) ->
 		host = Settings.apis.clsi.url

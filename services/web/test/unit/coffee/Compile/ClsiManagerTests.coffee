@@ -31,7 +31,7 @@ describe "ClsiManager", ->
 			"../Project/ProjectGetter": @ProjectGetter = {}
 			"../DocumentUpdater/DocumentUpdaterHandler": @DocumentUpdaterHandler =
 				getProjectDocsIfMatch: sinon.stub().callsArgWith(2,null,null)
-			"./ClsiCookieManager": @ClsiCookieManager
+			"./ClsiCookieManager": => @ClsiCookieManager
 			"./ClsiStateManager": @ClsiStateManager
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), err: sinon.stub(), warn: sinon.stub() }
 			"request": @request = sinon.stub()
@@ -557,6 +557,28 @@ describe "ClsiManager", ->
 				done()
 
 
+	describe "_makeGoogleCloudRequest", ->
+
+		beforeEach ->
+			@settings.apis.clsi_new = 
+				url : "https://compiles.somewhere.test"
+			@response = {there:"something"}
+			@request.callsArgWith(1, null, @response)
+			@opts = 
+				url: @ClsiManager._getCompilerUrl(null, @project_id)
+				
+		it "should change the domain on the url", (done)->
+			@ClsiManager._makeNewBackendRequest @project_id, @opts, =>
+				args = @request.args[0]
+				args[0].url.should.equal "https://compiles.somewhere.test/project/#{@project_id}"
+				done()
+
+		it "should not make a request if there is not clsi_new url", (done)->
+			@settings.apis.clsi_new = undefined
+			@ClsiManager._makeNewBackendRequest @project_id, @opts, (err)=>
+				expect(err).to.equal undefined
+				@request.callCount.should.equal 0
+				done()
 
 
 
