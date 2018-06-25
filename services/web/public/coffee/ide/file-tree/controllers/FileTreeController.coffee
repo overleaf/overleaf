@@ -4,10 +4,12 @@ define [
 	App.controller "FileTreeController", ["$scope", "$modal", "ide", "$rootScope", ($scope, $modal, ide, $rootScope) ->
 		$scope.openNewDocModal = () ->
 			$modal.open(
-				templateUrl: "newDocModalTemplate"
-				controller:  "NewDocModalController"
+				templateUrl: "newFileModalTemplate"
+				controller:  "NewFileModalController"
+				size: 'lg'
 				resolve: {
 					parent_folder: () -> ide.fileTreeManager.getCurrentFolder()
+					type: () -> 'doc'
 				}
 			)
 
@@ -22,37 +24,12 @@ define [
 
 		$scope.openUploadFileModal = () ->
 			$modal.open(
-				templateUrl: "uploadFileModalTemplate"
-				controller:  "UploadFileModalController"
-				scope: $scope
+				templateUrl: "newFileModalTemplate"
+				controller:  "NewFileModalController"
+				size: 'lg'
 				resolve: {
 					parent_folder: () -> ide.fileTreeManager.getCurrentFolder()
-				}
-			)
-
-		$scope.openLinkedFileModal = window.openLinkedFileModal = () ->
-			unless 'url' in window.data.enabledLinkedFileTypes
-				console.warn("Url linked files are not enabled")
-				return
-			$modal.open(
-				templateUrl: "linkedFileModalTemplate"
-				controller:  "LinkedFileModalController"
-				scope: $scope
-				resolve: {
-					parent_folder: () -> ide.fileTreeManager.getCurrentFolder()
-				}
-			)
-
-		$scope.openProjectLinkedFileModal = window.openProjectLinkedFileModal = () ->
-			unless 'project_file' in window.data.enabledLinkedFileTypes
-				console.warn("Project linked files are not enabled")
-				return
-			$modal.open(
-				templateUrl: "projectLinkedFileModalTemplate"
-				controller:  "ProjectLinkedFileModalController"
-				scope: $scope
-				resolve: {
-					parent_folder: () -> ide.fileTreeManager.getCurrentFolder()
+					type: () -> 'upload'
 				}
 			)
 
@@ -67,42 +44,10 @@ define [
 			$scope.$broadcast "delete:selected"
 	]
 
-	App.controller "NewDocModalController", [
-		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder",
-		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->
-			$scope.inputs = 
-				name: "name.tex"
-			$scope.state =
-				inflight: false
-
-			$modalInstance.opened.then () ->
-				$timeout () ->
-					$scope.$broadcast "open"
-				, 200
-
-			$scope.create = () ->
-				name = $scope.inputs.name
-				if !name? or name.length == 0
-					return
-				$scope.state.inflight = true
-				ide.fileTreeManager
-					.createDoc(name, parent_folder)
-					.then () ->
-						$scope.state.inflight = false
-						$modalInstance.close()
-					.catch (response)->
-						{ data } = response
-						$scope.error = data
-						$scope.state.inflight = false
-
-			$scope.cancel = () ->
-				$modalInstance.dismiss('cancel')
-	]
-
 	App.controller "NewFolderModalController", [
 		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder",
 		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->
-			$scope.inputs = 
+			$scope.inputs =
 				name: "name"
 			$scope.state =
 				inflight: false
@@ -118,10 +63,10 @@ define [
 					return
 				$scope.state.inflight = true
 				ide.fileTreeManager
-					.createFolder(name, parent_folder)
+					.createFolder(name, $scope.parent_folder)
 					.then () ->
 						$scope.state.inflight = false
-						$modalInstance.close()
+						$modalInstance.dismiss('done')
 					.catch (response)->
 						{ data } = response
 						$scope.error = data
@@ -131,10 +76,60 @@ define [
 				$modalInstance.dismiss('cancel')
 	]
 
+	App.controller "NewFileModalController", [
+		"$scope", "type", "parent_folder", "$modalInstance"
+		($scope,   type,   parent_folder,   $modalInstance) ->
+			$scope.type = type
+			$scope.parent_folder = parent_folder
+			$scope.state = {
+				inflight: false
+				valid: true
+			}
+			$scope.cancel = () ->
+				$modalInstance.dismiss('cancel')
+			$scope.create = () ->
+				$scope.$broadcast 'create'
+			$scope.$on 'done', () ->
+				$modalInstance.dismiss('done')
+	]
+
+	App.controller "NewDocModalController", [
+		"$scope", "ide", "$timeout"
+		($scope,   ide,   $timeout) ->
+			$scope.inputs = 
+				name: "name.tex"
+
+			validate = () ->
+				name = $scope.inputs.name
+				$scope.state.valid = (name? and name.length > 0)
+			$scope.$watch 'inputs.name', validate
+
+			$timeout () ->
+				$scope.$broadcast "open"
+			, 200
+
+			$scope.$on 'create', () ->
+				name = $scope.inputs.name
+				if !name? or name.length == 0
+					return
+				$scope.state.inflight = true
+				ide.fileTreeManager
+					.createDoc(name, $scope.parent_folder)
+					.then () ->
+						$scope.state.inflight = false
+						$scope.$emit 'done'
+					.catch (response)->
+						{ data } = response
+						$scope.error = data
+						$scope.state.inflight = false
+
+	]
+
 	App.controller "UploadFileModalController", [
-		"$scope", "$rootScope", "ide", "$modalInstance", "$timeout", "parent_folder", "$window"
-		($scope,   $rootScope,   ide,   $modalInstance,   $timeout,   parent_folder, $window) ->
-			$scope.parent_folder_id = parent_folder?.id
+		"$scope", "$rootScope", "ide", "$timeout", "$window"
+		($scope,   $rootScope,   ide,   $timeout,   $window) ->
+			$scope.parent_folder_id = $scope.parent_folder?.id
+			$scope.project_id = ide.project_id
 			$scope.tooManyFiles = false
 			$scope.rateLimitHit = false
 			$scope.secondsToRedirect = 10
@@ -162,7 +157,7 @@ define [
 					if response.success
 						$rootScope.$broadcast 'file:upload:complete', response
 					if uploadCount == 0 and response? and response.success
-						$modalInstance.close("done")
+						$scope.$emit 'done'
 				), 250
 
 			$scope.onValidateBatch = (files)->
@@ -210,30 +205,44 @@ define [
 			$scope.doUpload = () ->
 				$scope.control?.q?.uploadStoredFiles()
 
-			$scope.cancel = () ->
-				$modalInstance.dismiss('cancel')
 	]
 
 	App.controller "ProjectLinkedFileModalController", [
-		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder",
-		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->
+		"$scope", "ide", "$timeout",
+		($scope,   ide,   $timeout) ->
+
 			$scope.data =
 				projects: null # or []
 				selectedProjectId: null
 				projectEntities: null # or []
+				projectOutputFiles: null # or []
 				selectedProjectEntity: null
+				selectedProjectOutputFile: null
+				buildId: null
 				name: null
-			$scope.state =
-				inFlight:
-					projects: false
-					entities: false
-					create: false
-				error: false
+			$scope.state.inFlight =
+				projects: false
+				entities: false
+				compile: false
+			$scope.state.isOutputFilesMode = false
+			$scope.state.error = false
 
 			$scope.$watch 'data.selectedProjectId', (newVal, oldVal) ->
 				return if !newVal
 				$scope.data.selectedProjectEntity = null
-				$scope.getProjectEntities($scope.data.selectedProjectId)
+				$scope.data.selectedProjectOutputFile = null
+				if $scope.state.isOutputFilesMode
+					$scope.compileProjectAndGetOutputFiles($scope.data.selectedProjectId)
+				else
+					$scope.getProjectEntities($scope.data.selectedProjectId)
+
+			$scope.$watch 'state.isOutputFilesMode', (newVal, oldVal) ->
+				return if !newVal and !oldVal
+				$scope.data.selectedProjectOutputFile = null
+				if newVal == true
+					$scope.compileProjectAndGetOutputFiles($scope.data.selectedProjectId)
+				else
+					$scope.getProjectEntities($scope.data.selectedProjectId)
 
 			# auto-set filename based on selected file
 			$scope.$watch 'data.selectedProjectEntity', (newVal, oldVal) ->
@@ -242,14 +251,30 @@ define [
 				if fileName
 					$scope.data.name = fileName
 
+			# auto-set filename based on selected file
+			$scope.$watch 'data.selectedProjectOutputFile', (newVal, oldVal) ->
+				return if !newVal
+				if newVal == 'output.pdf'
+					project = _.find($scope.data.projects, (p) -> p._id == $scope.data.selectedProjectId)
+					$scope.data.name = if project?.name? then "#{project.name}.pdf" else 'output.pdf'
+				else
+					fileName = newVal.split('/').reverse()[0]
+					if fileName
+						$scope.data.name = fileName
+
 			_setInFlight = (type) ->
 				$scope.state.inFlight[type] = true
 
 			_reset = (opts) ->
 				isError = opts.err == true
 				inFlight = $scope.state.inFlight
-				inFlight.projects = inFlight.entities = inFlight.create = false
+				inFlight.projects = inFlight.entities = inFlight.compile = false
+				$scope.state.inflight = false
 				$scope.state.error = isError
+
+			$scope.toggleOutputFilesMode = () ->
+				return if !$scope.data.selectedProjectId
+				$scope.state.isOutputFilesMode = !$scope.state.isOutputFilesMode
 
 			$scope.shouldEnableProjectSelect = () ->
 				{ state, data } = $scope
@@ -259,16 +284,33 @@ define [
 				{ state, data } = $scope
 				return !state.inFlight.projects && !state.inFlight.entities && data.projects && data.selectedProjectId
 
-			$scope.shouldEnableCreateButton = () ->
+			$scope.shouldEnableProjectOutputFileSelect = () ->
+				{ state, data } = $scope
+				return !state.inFlight.projects && !state.inFlight.compile && data.projects && data.selectedProjectId
+
+
+			validate = () ->
 				state = $scope.state
 				data = $scope.data
-				return !state.inFlight.projects &&
+				$scope.state.valid = !state.inFlight.projects &&
 					!state.inFlight.entities &&
 					data.projects &&
 					data.selectedProjectId &&
-					data.projectEntities &&
-					data.selectedProjectEntity &&
+					(
+						(
+							!$scope.state.isOutputFilesMode &&
+							data.projectEntities &&
+							data.selectedProjectEntity
+						) ||
+						(
+							$scope.state.isOutputFilesMode &&
+							data.projectOutputFiles &&
+							data.selectedProjectOutputFile
+						)
+					) &&
 					data.name
+			$scope.$watch 'state', validate, true
+			$scope.$watch 'data', validate, true
 
 			$scope.getUserProjects = () ->
 				_setInFlight('projects')
@@ -295,50 +337,84 @@ define [
 				.catch (err) ->
 					_reset(err: true)
 
+			$scope.compileProjectAndGetOutputFiles = (project_id) =>
+				_setInFlight('compile')
+				ide.$http.post("/project/#{project_id}/compile", {
+					check: "silent",
+					draft: false,
+					incrementalCompilesEnabled: false
+					_csrf: window.csrfToken
+				})
+				.then (resp) ->
+					if resp.data.status == 'success'
+						filteredFiles = resp.data.outputFiles.filter (f) ->
+							f.path.match(/.*\.(pdf|png|jpeg|jpg|gif)/)
+						$scope.data.projectOutputFiles = filteredFiles
+						$scope.data.buildId = filteredFiles?[0]?.build
+						console.log ">> build_id", $scope.data.buildId
+						_reset(err: false)
+					else
+						$scope.data.projectOutputFiles = null
+						_reset(err: true)
+				.catch (err) ->
+					console.error(err)
+					_reset(err: true)
+
 			$scope.init = () ->
 				$scope.getUserProjects()
 			$timeout($scope.init, 0)
 
-			$scope.create = () ->
+			$scope.$on 'create', () ->
 				projectId = $scope.data.selectedProjectId
-				path = $scope.data.selectedProjectEntity
 				name = $scope.data.name
-				if !name || !path || !projectId
-					_reset(err: true)
-					return
+				if $scope.state.isOutputFilesMode
+					provider = 'project_output_file'
+					payload = {
+						source_project_id: projectId,
+						source_output_file_path: $scope.data.selectedProjectOutputFile,
+						build_id: $scope.data.buildId
+					}
+				else
+					provider = 'project_file'
+					payload = {
+						source_project_id: projectId,
+						source_entity_path: $scope.data.selectedProjectEntity
+					}
 				_setInFlight('create')
 				ide.fileTreeManager
-					.createLinkedFile(name, parent_folder, 'project_file', {
-						source_project_id: projectId,
-						source_entity_path: path
-					})
+					.createLinkedFile(name, $scope.parent_folder, provider, payload)
 					.then () ->
 						_reset(err: false)
-						$modalInstance.close()
+						$scope.$emit 'done'
 					.catch (response)->
 						{ data } = response
 						_reset(err: true)
 
-			$scope.cancel = () ->
-				$modalInstance.dismiss('cancel')
 
 	]
 
-	# TODO: rename all this to UrlLinkedFilModalController
-	App.controller "LinkedFileModalController", [
-		"$scope", "ide", "$modalInstance", "$timeout", "parent_folder",
-		($scope,   ide,   $modalInstance,   $timeout,   parent_folder) ->
+	App.controller "UrlLinkedFileModalController", [
+		"$scope", "ide", "$timeout"
+		($scope,   ide,   $timeout) ->
 			$scope.inputs =
 				name: ""
 				url: ""
 			$scope.nameChangedByUser = false
-			$scope.state =
-				inflight: false
 
-			$modalInstance.opened.then () ->
-				$timeout () ->
-					$scope.$broadcast "open"
-				, 200
+			$timeout () ->
+				$scope.$broadcast "open"
+			, 200
+
+			validate = () ->
+				{name, url} = $scope.inputs
+				if !name? or name.length == 0
+					$scope.state.valid = false
+				else if !url? or url.length == 0
+					$scope.state.valid = false
+				else
+					$scope.state.valid = true
+			$scope.$watch 'inputs.name', validate
+			$scope.$watch 'inputs.url', validate
 
 			$scope.$watch "inputs.url", (url) ->
 				if url? and url != "" and !$scope.nameChangedByUser
@@ -347,7 +423,7 @@ define [
 					if parts.length > 1 # Wait for at one /
 						$scope.inputs.name = parts[0]
 
-			$scope.create = () ->
+			$scope.$on 'create', () ->
 				{name, url} = $scope.inputs
 				if !name? or name.length == 0
 					return
@@ -355,15 +431,13 @@ define [
 					return
 				$scope.state.inflight = true
 				ide.fileTreeManager
-					.createLinkedFile(name, parent_folder, 'url', {url})
+					.createLinkedFile(name, $scope.parent_folder, 'url', {url})
 					.then () ->
 						$scope.state.inflight = false
-						$modalInstance.close()
+						$scope.$emit 'done'
 					.catch (response)->
 						{ data } = response
 						$scope.error = data
 						$scope.state.inflight = false
 
-			$scope.cancel = () ->
-				$modalInstance.dismiss('cancel')
 	]

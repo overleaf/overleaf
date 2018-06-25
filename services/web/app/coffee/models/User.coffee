@@ -10,7 +10,8 @@ UserSchema = new Schema
 	email             : {type : String, default : ''}
 	emails: [{
 		email: { type : String, default : '' },
-		createdAt: { type : Date, default: () -> new Date() }
+		createdAt: { type : Date, default: () -> new Date() },
+		confirmedAt: { type: Date }
 	}],
 	first_name        : {type : String, default : ''}
 	last_name         : {type : String, default : ''}

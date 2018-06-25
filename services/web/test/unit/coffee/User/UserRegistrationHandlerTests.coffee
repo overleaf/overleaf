@@ -152,7 +152,7 @@ describe "UserRegistrationHandler", ->
 		beforeEach ->
 			@email = "email@example.com"
 			@crypto.randomBytes = sinon.stub().returns({toString: () => @password = "mock-password"})
-			@OneTimeTokenHandler.getNewToken.callsArgWith(2, null, @token = "mock-token")
+			@OneTimeTokenHandler.getNewToken.yields(null, @token = "mock-token")
 			@handler.registerNewUser = sinon.stub()
 			@callback = sinon.stub()
 		
@@ -171,7 +171,7 @@ describe "UserRegistrationHandler", ->
 			it "should generate a new password reset token", ->
 				
 				@OneTimeTokenHandler.getNewToken
-					.calledWith(@user_id, expiresIn: 7 * 24 * 60 * 60)
+					.calledWith('password', @user_id, expiresIn: 7 * 24 * 60 * 60)
 					.should.equal true
 
 			it "should send a registered email", ->

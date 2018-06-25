@@ -154,14 +154,14 @@ define [
 				totalArgs = squareArgsNo + curlyArgsNo
 				if totalArgs == 0
 					completionBeforeCursor = completionBase
-					completionAfterCurspr = ""
+					completionAfterCursor = ""
 				else
 					completionBeforeCursor = completionBase + args[0]
 					completionAfterCursor = args.slice(1)
 
 				return {
-					base: base,
-					completion: completionBase + args,
+					base: base
+					completion: completionBase + args
 					completionBeforeCursor: completionBeforeCursor
 					completionAfterCursor: completionAfterCursor
 				}

@@ -56,6 +56,20 @@ module.exports = TeamInvitesHandler =
 			return callback(error) if error?
 			createInvite(subscription, email, inviterName, callback)
 
+	importInvite: (subscription, inviterName, email, token, sentAt, callback) ->
+		checkIfInviteIsPossible subscription, email, (error, possible, reason) ->
+			return callback(error) if error?
+			return callback(reason) unless possible
+
+			subscription.teamInvites.push({
+				email: email
+				inviterName: inviterName
+				token: token
+				sentAt: sentAt
+			})
+
+			subscription.save callback
+
 	acceptInvite: (token, userId, callback) ->
 		logger.log {userId}, "Accepting invite"
 		TeamInvitesHandler.getInvite token, (err, invite, subscription) ->
@@ -92,7 +106,6 @@ createInvite = (subscription, email, inviterName, callback) ->
 	checkIfInviteIsPossible subscription, email, (error, possible, reason) ->
 		return callback(error) if error?
 		return callback(reason) unless possible
-
 
 		invite = subscription.teamInvites.find (invite) -> invite.email == email
 

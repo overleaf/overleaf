@@ -74,7 +74,7 @@ module.exports = UserRegistrationHandler =
 				logger.log {email}, "user already exists, resending welcome email"
 
 			ONE_WEEK = 7 * 24 * 60 * 60 # seconds
-			OneTimeTokenHandler.getNewToken user._id, { expiresIn: ONE_WEEK }, (err, token)->
+			OneTimeTokenHandler.getNewToken 'password', user._id, { expiresIn: ONE_WEEK }, (err, token)->
 				return callback(err) if err?
 				
 				setNewPasswordUrl = "#{settings.siteUrl}/user/activate?token=#{token}&user_id=#{user._id}"

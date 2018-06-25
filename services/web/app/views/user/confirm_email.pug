@@ -1,0 +1,28 @@
+extends ../layout
+
+block content
+	.content.content-alt
+		.container
+			.row
+				.col-md-6.col-md-offset-3.col-lg-4.col-lg-offset-4
+					.card
+						.page-header
+							h1 #{translate("confirm_email")}
+						form(
+							async-form="confirm-email",
+							name="confirmEmailForm"
+							action="/user/emails/confirm",
+							method="POST",
+							id="confirmEmailForm",
+							auto-submit="true",
+							ng-cloak
+						)
+							input(type="hidden", name="_csrf", value=csrfToken)
+							input(type="hidden", name="token", value=token)
+							form-messages(for="confirmEmailForm")
+								.alert.alert-success(ng-show="confirmEmailForm.response.success")
+									| Thank you, your email is now confirmed
+							p.text-center(ng-show="!confirmEmailForm.response.success && !confirmEmailForm.response.error")
+								i.fa.fa-fw.fa-spin.fa-spinner
+								| 
+								| Confirming your email...

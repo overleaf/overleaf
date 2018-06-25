@@ -14,7 +14,7 @@ module.exports =
 			if !user? or user.holdingAccount
 				logger.err email:email, "user could not be found for password reset"
 				return callback(null, false)
-			OneTimeTokenHandler.getNewToken user._id, (err, token)->
+			OneTimeTokenHandler.getNewToken 'password', user._id, (err, token)->
 				if err then return callback(err)
 				emailOptions =
 					to : email
@@ -24,7 +24,7 @@ module.exports =
 					callback null, true
 
 	setNewUserPassword: (token, password, callback = (error, found, user_id) ->)->
-		OneTimeTokenHandler.getValueFromTokenAndExpire token, (err, user_id)->
+		OneTimeTokenHandler.getValueFromTokenAndExpire 'password', token, (err, user_id)->
 			if err then return callback(err)
 			if !user_id?
 				return callback null, false, null
