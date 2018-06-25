@@ -27,6 +27,7 @@ CollaboratorsHandler = require '../Collaborators/CollaboratorsHandler'
 Modules = require '../../infrastructure/Modules'
 ProjectEntityHandler = require './ProjectEntityHandler'
 crypto = require 'crypto'
+{ V1ConnectionError } = require '../Errors/Errors'
 
 module.exports = ProjectController =
 
@@ -179,11 +180,14 @@ module.exports = ProjectController =
 				ProjectGetter.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref tokens', cb
 			v1Projects: (cb) ->
 				Modules.hooks.fire "findAllV1Projects", user_id, (error, projects = []) ->
-					if error? and error.message == 'No V1 connection'
+					if error? and error instanceof V1ConnectionError
 						return cb(null, projects: [], tags: [], noConnection: true)
 					return cb(error, projects[0]) # hooks.fire returns an array of results, only need first
 			hasSubscription: (cb)->
-				LimitationsManager.userHasSubscriptionOrIsGroupMember currentUser, cb
+				LimitationsManager.userHasSubscriptionOrIsGroupMember currentUser, (error, hasSub) ->
+					if error? and error instanceof V1ConnectionError
+						return cb(null, true)
+					return cb(error, hasSub)
 			user: (cb) ->
 				User.findById user_id, "featureSwitches overleaf awareOfV2 features", cb
 			}, (err, results)->
@@ -210,7 +214,7 @@ module.exports = ProjectController =
 						tags: tags
 						notifications: notifications or []
 						user: user
-						hasSubscription: results.hasSubscription[0]
+						hasSubscription: results.hasSubscription
 						isShowingV1Projects: results.v1Projects?
 						warnings: warnings
 					}

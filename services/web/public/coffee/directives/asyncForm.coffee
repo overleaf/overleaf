@@ -15,11 +15,6 @@ define [
 				scope[attrs.name].response = response = {}
 				scope[attrs.name].inflight = false
 
-				element.on "submit", (e) ->
-					e.preventDefault()
-					validateCaptchaIfEnabled (response) ->
-						submitRequest response
-
 				validateCaptchaIfEnabled = (callback = (response) ->) ->
 					if attrs.captcha?
 						validateCaptcha callback
@@ -84,6 +79,17 @@ define [
 									text: data.message?.text or data.message or "Something went wrong talking to the server :(. Please try again."
 									type: 'error'
 							ga('send', 'event', formName, 'failure', data.message)
+
+				submit = () ->
+					validateCaptchaIfEnabled (response) ->
+						submitRequest response
+
+				element.on "submit", (e) ->
+					e.preventDefault()
+					submit()
+
+				if attrs.autoSubmit
+					submit()
 		}
 
 	App.directive "formMessages", () ->

@@ -5,6 +5,10 @@ db = mongojs.db
 async = require("async")
 ObjectId = mongojs.ObjectId
 UserGetter = require("./UserGetter")
+EmailHelper = require "../Helpers/EmailHelper"
+Errors = require "../Errors/Errors"
+settings = require "settings-sharelatex"
+request = require "request"
 
 module.exports = UserUpdater =
 	updateUser: (query, update, callback = (error) ->) ->
@@ -42,30 +46,43 @@ module.exports = UserUpdater =
 
 	# Add a new email address for the user. Email cannot be already used by this
 	# or any other user
-	addEmailAddress: (userId, newEmail, callback) ->
+	addEmailAddress: (userId, newEmail, affiliationOptions, callback) ->
+		unless callback? # affiliationOptions is optional
+			callback = affiliationOptions
+			affiliationOptions = {}
+
 		UserGetter.ensureUniqueEmailAddress newEmail, (error) =>
 			return callback(error) if error?
 
-			update = $push: emails: email: newEmail, createdAt: new Date()
-			@updateUser userId, update, (error) ->
+			addAffiliation userId, newEmail, affiliationOptions, (error) =>
 				if error?
-					logger.err error: error, 'problem updating users emails'
+					logger.err error: error, 'problem adding affiliation'
 					return callback(error)
-				callback()
 
+				update = $push: emails: email: newEmail, createdAt: new Date()
+				@updateUser userId, update, (error) ->
+					if error?
+						logger.err error: error, 'problem updating users emails'
+						return callback(error)
+					callback()
 
 	# remove one of the user's email addresses. The email cannot be the user's
 	# default email address
 	removeEmailAddress: (userId, email, callback) ->
-		query = _id: userId, email: $ne: email
-		update = $pull: emails: email: email
-		@updateUser query, update, (error, res) ->
+		removeAffiliation userId, email, (error) =>
 			if error?
-				logger.err error:error, 'problem removing users email'
+				logger.err error: error, 'problem removing affiliation'
 				return callback(error)
-			if res.nMatched == 0
-				return callback(new Error('Cannot remove default email'))
-			callback()
+
+			query = _id: userId, email: $ne: email
+			update = $pull: emails: email: email
+			@updateUser query, update, (error, res) ->
+				if error?
+					logger.err error:error, 'problem removing users email'
+					return callback(error)
+				if res.n == 0
+					return callback(new Error('Cannot remove email'))
+				callback()
 
 
 	# set the default email address by setting the `email` attribute. The email
@@ -77,9 +94,66 @@ module.exports = UserUpdater =
 			if error?
 				logger.err error:error, 'problem setting default emails'
 				return callback(error)
-			if res.nMatched == 0
+			if res.n == 0 # TODO: Check n or nMatched?
 				return callback(new Error('Default email does not belong to user'))
 			callback()
+
+	confirmEmail: (userId, email, callback) ->
+		email = EmailHelper.parseEmail(email)
+		return callback(new Error('invalid email')) if !email?
+		logger.log {userId, email}, 'confirming user email'
+		query =
+			_id: userId
+			'emails.email': email
+		update =
+			$set:
+				'emails.$.confirmedAt': new Date()
+		@updateUser query, update, (error, res) ->
+			return callback(error) if error?
+			logger.log {res, userId, email}, "tried to confirm email"
+			if res.n == 0
+				return callback(new Errors.NotFoundError('user id and email do no match'))
+			callback()
+
+addAffiliation = (userId, email, { university, department, role }, callback = (error) ->) ->
+	makeAffiliationRequest {
+		method: 'POST'
+		path: "/api/v2/users/#{userId.toString()}/affiliations"
+		body: { email, university, department, role }
+		defaultErrorMessage: "Couldn't create affiliation"
+	}, callback
+
+removeAffiliation = (userId, email, callback = (error) ->) ->
+	email = encodeURIComponent(email)
+	makeAffiliationRequest {
+		method: 'DELETE'
+		path: "/api/v2/users/#{userId.toString()}/affiliations/#{email}"
+		extraSuccessStatusCodes: [404] # `Not Found` responses are considered successful
+		defaultErrorMessage: "Couldn't remove affiliation"
+	}, callback
+
+makeAffiliationRequest = (requestOptions, callback = (error) ->) ->
+	return callback(null) unless settings?.apis?.v1?.url # service is not configured
+	requestOptions.extraSuccessStatusCodes ||= []
+	request {
+		method: requestOptions.method
+		url: "#{settings.apis.v1.url}#{requestOptions.path}"
+		body: requestOptions.body
+		auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass }
+		json: true,
+		timeout: 20 * 1000
+	}, (error, response, body) ->
+		return callback(error) if error?
+		isSuccess = 200 <= response.statusCode < 300
+		isSuccess ||= response.statusCode in requestOptions.extraSuccessStatusCodes
+		unless isSuccess
+			if body?.errors
+				errorMessage = "#{response.statusCode}: #{body.errors}"
+			else
+				errorMessage = "#{requestOptions.defaultErrorMessage}: #{response.statusCode}"
+			return callback(new Error(errorMessage))
+
+		callback(null)
 
 [
 	'updateUser'

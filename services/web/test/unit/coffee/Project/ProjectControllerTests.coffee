@@ -5,6 +5,7 @@ path = require('path')
 sinon = require('sinon')
 modulePath = path.join __dirname, "../../../../app/js/Features/Project/ProjectController"
 expect = require("chai").expect
+Errors = require "../../../../app/js/Features/Errors/Errors"
 
 describe "ProjectController", ->
 
@@ -100,6 +101,7 @@ describe "ProjectController", ->
 			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler
 			"../../infrastructure/Modules": @Modules
 			"./ProjectEntityHandler": @ProjectEntityHandler
+			"../Errors/Errors": Errors
 
 		@projectName = "£12321jkj9ujkljds"
 		@req =
@@ -302,6 +304,20 @@ describe "ProjectController", ->
 				opts.projects[1].owner.should.equal (@users[@projects[1].owner_ref])
 				done()
 			@ProjectController.projectListPage @req, @res
+
+		it 'should send hasSubscription == false when no subscription', (done) ->
+			@res.render = (pageName, opts)=>
+				opts.hasSubscription.should.equal false
+				done()
+			@ProjectController.projectListPage @req, @res
+
+		it 'should send hasSubscription == true when there is a subscription', (done) ->
+			@LimitationsManager.userHasSubscriptionOrIsGroupMember = sinon.stub().callsArgWith(1, null, true)
+			@res.render = (pageName, opts)=>
+				opts.hasSubscription.should.equal true
+				done()
+			@ProjectController.projectListPage @req, @res
+
 
 		describe 'front widget', (done) ->
 			beforeEach ->

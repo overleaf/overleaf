@@ -8,6 +8,8 @@ MockFileStoreApi = require './helpers/MockFileStoreApi'
 request = require "./helpers/request"
 User = require "./helpers/User"
 
+MockClsiApi = require "./helpers/MockClsiApi"
+
 
 express = require("express")
 LinkedUrlProxy = express()
@@ -116,7 +118,6 @@ describe "LinkedFiles", ->
 						provider: 'project_file',
 						source_project_id: @project_two_id,
 						source_entity_path: "/#{@source_doc_name}",
-						source_project_display_name: "plf-test-two"
 					}
 					expect(firstFile.name).to.equal('test-link.txt')
 					done()
@@ -149,7 +150,7 @@ describe "LinkedFiles", ->
 						source_entity_path: "/#{@source_doc_name}",
 			}, (error, response, body) =>
 				expect(response.statusCode).to.equal 403
-				expect(body).to.equal 'Cannot create linked file'
+				expect(body).to.equal 'You do not have access to this project'
 				done()
 
 	describe "with a linked project_file from a v1 project that has not been imported", ->
@@ -344,3 +345,105 @@ describe "LinkedFiles", ->
 
 		# TODO: Add test for asking for host that return ENOTFOUND
 		# (This will probably end up handled by the proxy)
+
+	describe "creating a linked output file", ->
+		before (done) ->
+			async.series [
+				(cb) =>
+					@owner.createProject 'output-test-one', {template: 'blank'}, (error, project_id) =>
+						@project_one_id = project_id
+						cb(error)
+				(cb) =>
+					@owner.getProject @project_one_id, (error, project) =>
+						@project_one = project
+						@project_one_root_folder_id = project.rootFolder[0]._id.toString()
+						cb(error)
+				(cb) =>
+					@owner.createProject 'output-test-two', {template: 'blank'}, (error, project_id) =>
+						@project_two_id = project_id
+						cb(error)
+				(cb) =>
+					@owner.getProject @project_two_id, (error, project) =>
+						@project_two = project
+						@project_two_root_folder_id = project.rootFolder[0]._id.toString()
+						cb(error)
+			], done
+
+		it 'should import the project.pdf file from the source project', (done) ->
+			@owner.request.post {
+				url: "/project/#{@project_one_id}/linked_file",
+				json:
+					name: 'test.pdf',
+					parent_folder_id: @project_one_root_folder_id,
+					provider: 'project_output_file',
+					data:
+						source_project_id: @project_two_id,
+						source_output_file_path: "project.pdf",
+						build_id: '1234-abcd'
+			}, (error, response, body) =>
+				new_file_id = body.new_file_id
+				@existing_file_id = new_file_id
+				expect(new_file_id).to.exist
+				@owner.getProject @project_one_id, (error, project) =>
+					return done(error) if error?
+					firstFile = project.rootFolder[0].fileRefs[0]
+					expect(firstFile._id.toString()).to.equal(new_file_id.toString())
+					expect(firstFile.linkedFileData).to.deep.equal {
+						provider: 'project_output_file',
+						source_project_id: @project_two_id,
+						source_output_file_path: "project.pdf",
+						build_id: '1234-abcd'
+					}
+					expect(firstFile.name).to.equal('test.pdf')
+					done()
+
+		it 'should refresh the file', (done) ->
+			@owner.request.post {
+				url: "/project/#{@project_one_id}/linked_file/#{@existing_file_id}/refresh",
+				json: true
+			}, (error, response, body) =>
+				new_file_id = body.new_file_id
+				expect(new_file_id).to.exist
+				expect(new_file_id).to.not.equal @existing_file_id
+				@refreshed_file_id = new_file_id
+				@owner.getProject @project_one_id, (error, project) =>
+					return done(error) if error?
+					firstFile = project.rootFolder[0].fileRefs[0]
+					expect(firstFile._id.toString()).to.equal(new_file_id.toString())
+					expect(firstFile.name).to.equal('test.pdf')
+					done()
+
+	describe "with a linked project_output_file from a v1 project that has not been imported", ->
+		before (done) ->
+			async.series [
+				(cb) =>
+					@owner.createProject 'output-v1-test-one', {template: 'blank'}, (error, project_id) =>
+						@project_one_id = project_id
+						cb(error)
+				(cb) =>
+					@owner.getProject @project_one_id, (error, project) =>
+						@project_one = project
+						@project_one_root_folder_id = project.rootFolder[0]._id.toString()
+						@project_one.rootFolder[0].fileRefs.push {
+							linkedFileData: {
+								provider: "project_output_file",
+								v1_source_doc_id: 9999999,  # We won't find this id in the database
+								source_output_file_path: "project.pdf",
+								build_id: '123'
+							},
+							_id: "abcdef",
+							rev: 0,
+							created: new Date(),
+							name: "whatever.pdf"
+						}
+						@owner.saveProject @project_one, cb
+			], done
+
+		it 'should refuse to refresh', (done) ->
+			@owner.request.post {
+				url: "/project/#{@project_one_id}/linked_file/abcdef/refresh",
+				json: true
+			}, (error, response, body) =>
+				expect(response.statusCode).to.equal 409
+				expect(body).to.equal "Sorry, the source project is not yet imported to Overleaf v2. Please import it to Overleaf v2 to refresh this file"
+				done()

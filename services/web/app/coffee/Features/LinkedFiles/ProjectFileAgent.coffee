@@ -1,68 +1,94 @@
-FileWriter = require('../../infrastructure/FileWriter')
 AuthorizationManager = require('../Authorization/AuthorizationManager')
 ProjectLocator = require('../Project/ProjectLocator')
 ProjectGetter = require('../Project/ProjectGetter')
-Project = require("../../models/Project").Project
 DocstoreManager = require('../Docstore/DocstoreManager')
 FileStoreHandler = require('../FileStore/FileStoreHandler')
-FileWriter = require('../../infrastructure/FileWriter')
 _ = require "underscore"
 Settings = require 'settings-sharelatex'
+LinkedFilesHandler = require './LinkedFilesHandler'
+{
+	BadDataError,
+	AccessDeniedError,
+	BadEntityTypeError,
+	SourceFileNotFoundError,
+	ProjectNotFoundError,
+	V1ProjectNotFoundError
+} = require './LinkedFilesErrors'
 
+module.exports = ProjectFileAgent = {
 
-AccessDeniedError = (message) ->
-	error = new Error(message)
-	error.name = 'AccessDenied'
-	error.__proto__ = AccessDeniedError.prototype
-	return error
-AccessDeniedError.prototype.__proto__ = Error.prototype
+	createLinkedFile: (project_id, linkedFileData, name, parent_folder_id, user_id, callback) ->
+		if !@_canCreate(linkedFileData)
+			return callback(new AccessDeniedError())
+		@_go(project_id, linkedFileData, name, parent_folder_id, user_id, callback)
 
+	refreshLinkedFile: (project_id, linkedFileData, name, parent_folder_id, user_id, callback) ->
+		@_go project_id, linkedFileData, name, parent_folder_id, user_id, callback
 
-BadEntityTypeError = (message) ->
-	error = new Error(message)
-	error.name = 'BadEntityType'
-	error.__proto__ = BadEntityTypeError.prototype
-	return error
-BadEntityTypeError.prototype.__proto__ = Error.prototype
+	_prepare: (project_id, linkedFileData, user_id, callback=(err, linkedFileData)->) ->
+		@_checkAuth project_id, linkedFileData, user_id, (err, allowed) =>
+			return callback(err) if err?
+			return callback(new AccessDeniedError()) if !allowed
+			if !@_validate(linkedFileData)
+				return callback(new BadDataError())
+			callback(null, linkedFileData)
 
+	_go: (project_id, linkedFileData, name, parent_folder_id, user_id, callback) ->
+		linkedFileData = @_sanitizeData(linkedFileData)
+		@_prepare project_id, linkedFileData, user_id, (err, linkedFileData) =>
+			return callback(err) if err?
+			if !@_validate(linkedFileData)
+				return callback(new BadDataError())
+			@_getEntity linkedFileData, user_id, (err, source_project, entity, type) =>
+				return callback(err) if err?
+				if type == 'doc'
+					DocstoreManager.getDoc source_project._id, entity._id, (err, lines) ->
+						return callback(err) if err?
+						LinkedFilesHandler.importContent project_id,
+							lines.join('\n'),
+							linkedFileData,
+							name,
+							parent_folder_id,
+							user_id,
+							(err, file) ->
+								return callback(err) if err?
+								callback(null, file._id) # Created
+				else if type == 'file'
+					FileStoreHandler.getFileStream source_project._id, entity._id, null, (err, fileStream) ->
+						return callback(err) if err?
+						LinkedFilesHandler.importFromStream project_id,
+							fileStream,
+							linkedFileData,
+							name,
+							parent_folder_id,
+							user_id,
+							(err, file) ->
+								return callback(err) if err?
+								callback(null, file._id) # Created
+				else
+					callback(new BadEntityTypeError())
 
-BadDataError = (message) ->
-	error = new Error(message)
-	error.name = 'BadData'
-	error.__proto__ = BadDataError.prototype
-	return error
-BadDataError.prototype.__proto__ = Error.prototype
+	_getEntity:
+		(linkedFileData, current_user_id, callback = (err, entity, type) ->) ->
+			callback = _.once(callback)
+			{ source_entity_path } = linkedFileData
+			@_getSourceProject linkedFileData, (err, project) ->
+				return callback(err) if err?
+				source_project_id = project._id
+				ProjectLocator.findElementByPath {
+					project_id: source_project_id,
+					path: source_entity_path
+				}, (err, entity, type) ->
+					if err?
+						if err.toString().match(/^not found.*/)
+							err = new SourceFileNotFoundError()
+						return callback(err)
+					callback(null, project, entity, type)
 
-
-ProjectNotFoundError = (message) ->
-	error = new Error(message)
-	error.name = 'ProjectNotFound'
-	error.__proto__ = ProjectNotFoundError.prototype
-	return error
-ProjectNotFoundError.prototype.__proto__ = Error.prototype
-
-
-V1ProjectNotFoundError = (message) ->
-	error = new Error(message)
-	error.name = 'V1ProjectNotFound'
-	error.__proto__ = V1ProjectNotFoundError.prototype
-	return error
-V1ProjectNotFoundError.prototype.__proto__ = Error.prototype
-
-
-SourceFileNotFoundError = (message) ->
-	error = new Error(message)
-	error.name = 'SourceFileNotFound'
-	error.__proto__ = SourceFileNotFoundError.prototype
-	return error
-SourceFileNotFoundError.prototype.__proto__ = Error.prototype
-
-
-module.exports = ProjectFileAgent =
-
-	sanitizeData: (data) ->
+	_sanitizeData: (data) ->
 		return _.pick(
 			data,
+			'provider',
 			'source_project_id',
 			'v1_source_doc_id',
 			'source_entity_path'
@@ -74,34 +100,13 @@ module.exports = ProjectFileAgent =
 			data.source_entity_path?
 		)
 
-	canCreate: (data) ->
+	_canCreate: (data) ->
 		# Don't allow creation of linked-files with v1 doc ids
 		!data.v1_source_doc_id?
 
-	_getSourceProject: (data, callback=(err, project)->) ->
-		projection = {_id: 1, name: 1}
-		if data.v1_source_doc_id?
-			Project.findOne {'overleaf.id': data.v1_source_doc_id}, projection, (err, project) ->
-				return callback(err) if err?
-				if !project?
-					return callback(new V1ProjectNotFoundError())
-				callback(null, project)
-		else if data.source_project_id?
-			ProjectGetter.getProject data.source_project_id, projection, (err, project) ->
-				return callback(err) if err?
-				if !project?
-					return callback(new ProjectNotFoundError())
-				callback(null, project)
-		else
-			callback(new BadDataError('neither v1 nor v2 id present'))
+	_getSourceProject: LinkedFilesHandler.getSourceProject
 
-	decorateLinkedFileData: (data, callback = (err, newData) ->) ->
-		callback = _.once(callback)
-		@_getSourceProject data, (err, project) ->
-			return callback(err) if err?
-			callback(err, _.extend(data, {source_project_display_name: project.name}))
-
-	checkAuth: (project_id, data, current_user_id, callback = (error, allowed)->) ->
+	_checkAuth: (project_id, data, current_user_id, callback = (error, allowed)->) ->
 		callback = _.once(callback)
 		if !ProjectFileAgent._validate(data)
 			return callback(new BadDataError())
@@ -110,52 +115,4 @@ module.exports = ProjectFileAgent =
 			AuthorizationManager.canUserReadProject current_user_id, project._id, null, (err, canRead) ->
 				return callback(err) if err?
 				callback(null, canRead)
-
-	writeIncomingFileToDisk:
-		(project_id, data, current_user_id, callback = (error, fsPath) ->) ->
-			callback = _.once(callback)
-			if !ProjectFileAgent._validate(data)
-				return callback(new BadDataError())
-			{ source_entity_path } = data
-			@_getSourceProject data, (err, project) ->
-				return callback(err) if err?
-				source_project_id = project._id
-				ProjectLocator.findElementByPath {
-					project_id: source_project_id,
-					path: source_entity_path
-				}, (err, entity, type) ->
-					if err?
-						if err.toString().match(/^not found.*/)
-							err = new SourceFileNotFoundError()
-						return callback(err)
-					ProjectFileAgent._writeEntityToDisk source_project_id, entity._id, type, callback
-
-	_writeEntityToDisk: (project_id, entity_id, type, callback=(err, location)->) ->
-		callback = _.once(callback)
-		if type == 'doc'
-			DocstoreManager.getDoc project_id, entity_id, (err, lines) ->
-				return callback(err) if err?
-				FileWriter.writeLinesToDisk entity_id, lines, callback
-		else if type == 'file'
-			FileStoreHandler.getFileStream project_id, entity_id, null, (err, fileStream) ->
-				return callback(err) if err?
-				FileWriter.writeStreamToDisk entity_id, fileStream, callback
-		else
-			callback(new BadEntityTypeError())
-
-	handleError: (error, req, res, next) ->
-		if error instanceof AccessDeniedError
-			res.status(403).send("You do not have access to this project")
-		else if error instanceof BadDataError
-			res.status(400).send("The submitted data is not valid")
-		else if error instanceof BadEntityTypeError
-			res.status(400).send("The file is the wrong type")
-		else if error instanceof SourceFileNotFoundError
-			res.status(404).send("Source file not found")
-		else if error instanceof ProjectNotFoundError
-			res.status(404).send("Project not found")
-		else if error instanceof V1ProjectNotFoundError
-			res.status(409).send("Sorry, the source project is not yet imported to Overleaf v2. Please import it to Overleaf v2 to refresh this file")
-		else
-			next(error)
-		next()
+}

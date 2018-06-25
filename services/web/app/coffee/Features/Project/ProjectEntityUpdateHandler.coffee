@@ -55,7 +55,10 @@ module.exports = ProjectEntityUpdateHandler = self =
 						logger.err { project_id, folder_id, originalProject_id, origonalFileRef }, "file trying to copy is null"
 						return callback()
 					# convert any invalid characters in original file to '_'
-					fileRef = new File name : SafePath.clean(origonalFileRef.name)
+					fileProperties = name : SafePath.clean(origonalFileRef.name)
+					if origonalFileRef.linkedFileData?
+						fileProperties.linkedFileData = origonalFileRef.linkedFileData
+					fileRef = new File(fileProperties)
 					FileStoreHandler.copyFile originalProject_id, origonalFileRef._id, project._id, fileRef._id, (err, fileStoreUrl)->
 						if err?
 							logger.err { err, project_id, folder_id, originalProject_id, origonalFileRef }, "error coping file in s3"

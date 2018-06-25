@@ -261,3 +261,43 @@
 		}
 	}
 }
+
+.modal-new-file {
+	padding: 0;
+	table {
+		width: 100%;
+		td {
+			vertical-align: top;
+		}
+	}
+	.toggle-output-files-button {
+		font-size: 80%;
+	}
+}
+	.modal-new-file--list {
+		background-color: @modal-footer-background-color;
+		width: 220px;
+		ul {
+			li {
+				padding: (@line-height-computed / 4);
+				a {
+					color: @text-color;
+				}
+			}
+			li.active {
+				background-color: white;
+				a {
+					color: @link-color;
+				}
+			}
+		}
+	}
+
+	.modal-new-file--body {
+		padding: 20px;
+		padding-top: (@line-height-computed / 4);
+	}
+
+	.modal-new-file--body-upload {
+		padding-top: 20px;
+	}

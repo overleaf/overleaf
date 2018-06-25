@@ -1,6 +1,4 @@
-define [
-	"./Helpers"
-], (Helpers) ->
+define [], () ->
 	packages = [
 		'inputenc', 'graphicx', 'amsmath', 'geometry', 'amssymb', 'hyperref',
 		'babel', 'color', 'xcolor', 'url', 'natbib', 'fontenc', 'fancyhdr',
@@ -26,14 +24,13 @@ define [
 		constructor: (@metadataManager) ->
 
 		getCompletions: (editor, session, pos, prefix, callback) ->
-			{closingBrace} = Helpers.getContext(editor, pos)
 			usedPackages = Object.keys(@metadataManager.getAllPackages())
 			packageSnippets = []
 			for pkg in packages
 				if pkg not in usedPackages
 					packageSnippets.push {
-						caption: "\\usepackage{#{pkg}#{closingBrace}"
-						snippet: "\\usepackage{#{pkg}#{closingBrace}"
+						caption: "\\usepackage{#{pkg}}"
+						snippet: "\\usepackage{#{pkg}}"
 						meta: "pkg"
 					}
 

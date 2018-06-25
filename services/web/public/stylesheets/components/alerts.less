@@ -65,3 +65,10 @@
 .alert-danger {
   .alert-variant(@alert-danger-bg; @alert-danger-border; @alert-danger-text);
 }
+
+.alert when (@is-overleaf = true) {
+  a {
+    color: white;
+    text-decoration: underline;
+  }
+}

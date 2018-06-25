@@ -87,7 +87,7 @@ div
 			+plan_switch('table')
 		.col-md-3.text-right
 			+currency_dropdown
-	.row(event-tracking="features-table-viewed" event-tracking-ga="subscription-funnel" event-tracking-trigger="scroll"  event-tracking-send-once="true")
+	.row(event-tracking="features-table-viewed" event-tracking-ga="subscription-funnel" event-tracking-trigger="scroll" event-tracking-send-once="true" event-tracking-label=`exp-{{plansVariant}}`)
 		.col-sm-12(ng-if="ui.view != 'student'")
 			+table_premium
 		.col-sm-12(ng-if="ui.view == 'student'")

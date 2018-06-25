@@ -1,5 +1,6 @@
 _ = require('underscore')
 settings = require("settings-sharelatex")
+marked = require('marked')
 
 PersonalEmailLayout = require("./Layouts/PersonalEmailLayout")
 NotificationEmailLayout = require("./Layouts/NotificationEmailLayout")
@@ -7,169 +8,113 @@ BaseWithHeaderEmailLayout = require("./Layouts/" + settings.brandPrefix + "BaseW
 
 SingleCTAEmailBody = require("./Bodies/" + settings.brandPrefix + "SingleCTAEmailBody")
 
+CTAEmailTemplate = (content) ->
+	content.greeting ?= () -> 'Hi,'
+	content.secondaryMessage ?= () -> ""
+	return {
+		subject: (opts) -> content.subject(opts),
+		layout: BaseWithHeaderEmailLayout,
+		plainTextTemplate: (opts) -> """
+#{content.greeting(opts)}
+
+#{content.message(opts).trim()}
+
+#{content.ctaText(opts)}: #{content.ctaURL(opts)}
+
+#{content.secondaryMessage?(opts).trim() or ""}
+
+Regards,
+The #{settings.appName} Team - #{settings.siteUrl}
+		"""
+		compiledTemplate: (opts) ->
+			SingleCTAEmailBody({
+				title: content.title?(opts)
+				greeting: content.greeting(opts)
+				message: marked(content.message(opts).trim())
+				secondaryMessage: marked(content.secondaryMessage(opts).trim())
+				ctaText: content.ctaText(opts)
+				ctaURL: content.ctaURL(opts)
+				gmailGoToAction: content.gmailGoToAction?(opts)
+			})
+	}
+
 templates = {}
 
-templates.registered =
-	subject:  _.template "Activate your #{settings.appName} Account"
-	layout: PersonalEmailLayout
-	type: "notification"
-	plainTextTemplate: _.template """
-Congratulations, you've just had an account created for you on #{settings.appName} with the email address "<%= to %>".
+templates.registered = CTAEmailTemplate({
+	subject: () -> "Activate your #{settings.appName} Account"
+	message: (opts) -> """
+Congratulations, you've just had an account created for you on #{settings.appName} with the email address '#{opts.to}'.
 
-Click here to set your password and log in: <%= setNewPasswordUrl %>
-
-If you have any questions or problems, please contact #{settings.adminEmail}
+Click here to set your password and log in:
 """
-	compiledTemplate: _.template """
-<p>Congratulations, you've just had an account created for you on #{settings.appName} with the email address "<%= to %>".</p>
+	secondaryMessage: () -> "If you have any questions or problems, please contact #{settings.adminEmail}"
+	ctaText: () -> "Set password"
+	ctaURL: (opts) -> opts.setNewPasswordUrl
+})
 
-<p><a href="<%= setNewPasswordUrl %>">Click here to set your password and log in.</a></p>
-
-<p>If you have any questions or problems, please contact <a href="mailto:#{settings.adminEmail}">#{settings.adminEmail}</a>.</p>
+templates.canceledSubscription = CTAEmailTemplate({
+	subject: () -> "#{settings.appName} thoughts"
+	message: () -> """
+I'm sorry to see you cancelled your #{settings.appName} premium account. Would you mind giving us some feedback on what the site is lacking at the moment via this quick survey?
 """
+	secondaryMessage: () -> "Thank you in advance!"
+	ctaText: () -> "Leave Feedback"
+	ctaURL: (opts) -> "https://sharelatex.typeform.com/to/f5lBiZ"
+})
 
-
-templates.canceledSubscription =
-	subject:  _.template "ShareLaTeX thoughts"
-	layout: PersonalEmailLayout
-	type:"lifecycle"
-	plainTextTemplate: _.template """
-Hi <%= first_name %>,
-
-I'm sorry to see you cancelled your ShareLaTeX premium account. Would you mind giving me some advice on what the site is lacking at the moment via this survey?:
-
-https://sharelatex.typeform.com/to/f5lBiZ
-
-Thank you in advance.
-
-Henry
-
-ShareLaTeX Co-founder
-"""
-	compiledTemplate: _.template '''
-<p>Hi <%= first_name %>,</p>
-
-<p>I'm sorry to see you cancelled your ShareLaTeX premium account. Would you mind giving me some advice on what the site is lacking at the moment via <a href="https://sharelatex.typeform.com/to/f5lBiZ">this survey</a>?</p>
-
-<p>Thank you in advance.</p>
-
-<p>
-Henry <br>
-ShareLaTeX Co-founder
-</p>
-'''
-
-
-templates.passwordResetRequested =
-	subject:  _.template "Password Reset - #{settings.appName}"
-	layout: BaseWithHeaderEmailLayout
-	type:"notification"
-	plainTextTemplate: _.template """
-Password Reset
-
-We got a request to reset your #{settings.appName} password.
-
-Click this link to reset your password: <%= setNewPasswordUrl %>
-
+templates.passwordResetRequested = CTAEmailTemplate({
+	subject: () -> "Password Reset - #{settings.appName}"
+	title: () -> "Password Reset"
+	message: () -> "We got a request to reset your #{settings.appName} password."
+	secondaryMessage: () -> """
 If you ignore this message, your password won't be changed.
 
 If you didn't request a password reset, let us know.
-
-Thank you
-
-#{settings.appName} - <%= siteUrl %>
 """
-	compiledTemplate: (opts) ->
-		SingleCTAEmailBody({
-			title: "Password Reset"
-			greeting: "Hi,"
-			message: "We got a request to reset your #{settings.appName} password."
-			secondaryMessage: "If you ignore this message, your password won't be changed.<br>If you didn't request a password reset, let us know."
-			ctaText: "Reset password"
-			ctaURL: opts.setNewPasswordUrl
-			gmailGoToAction: null
-		})
+	ctaText: () -> "Reset password"
+	ctaURL: (opts) -> opts.setNewPasswordUrl
+})
 
+templates.confirmEmail = CTAEmailTemplate({
+	subject: () -> "Confirm Email - #{settings.appName}"
+	title: () -> "Confirm Email"
+	message: () -> "Please confirm your email on #{settings.appName}."
+	ctaText: () -> "Confirm Email"
+	ctaURL: (opts) -> opts.confirmEmailUrl
+})
 
-templates.projectInvite =
-	subject: _.template "<%= project.name %> - shared by <%= owner.email %>"
-	layout: BaseWithHeaderEmailLayout
-	type:"notification"
-	plainTextTemplate: _.template """
-Hi, <%= owner.email %> wants to share '<%= project.name %>' with you.
+templates.projectInvite = CTAEmailTemplate({
+	subject: (opts) -> "#{opts.project.name} - shared by #{opts.owner.email}"
+	title: (opts) -> "#{ opts.project.name } - shared by #{ opts.owner.email }"
+	message: (opts) -> "#{ opts.owner.email } wants to share '#{ opts.project.name }' with you."
+	ctaText: () -> "View project"
+	ctaURL: (opts) -> opts.inviteUrl
+	gmailGoToAction: (opts) ->
+		target: opts.inviteUrl
+		name: "View project"
+		description: "Join #{ opts.project.name } at #{ settings.appName }"
+})
 
-Follow this link to view the project: <%= inviteUrl %>
+templates.verifyEmailToJoinTeam = CTAEmailTemplate({
+	subject: (opts) -> "#{ opts.inviterName } has invited you to join a team on #{settings.appName}"
+	title: (opts) -> "#{opts.inviterName} has invited you to join a team on #{settings.appName}"
+	message: (opts) -> "Please click the button below to join the team and enjoy the benefits of an upgraded #{ settings.appName } account."
+	ctaText: (opts) -> "Join now"
+	ctaURL: (opts) -> opts.acceptInviteUrl
+})
 
-Thank you
-
-#{settings.appName} - <%= siteUrl %>
-"""
-	compiledTemplate: (opts) ->
-		SingleCTAEmailBody({
-			title: "#{ opts.project.name } &ndash; shared by #{ opts.owner.email }"
-			greeting: "Hi,"
-			message: "#{ opts.owner.email } wants to share &ldquo;#{ opts.project.name }&rdquo; with you."
-			secondaryMessage: null
-			ctaText: "View project"
-			ctaURL: opts.inviteUrl
-			gmailGoToAction:
-				target: opts.inviteUrl
-				name: "View project"
-				description: "Join #{ opts.project.name } at ShareLaTeX"
-		})
-
-
-templates.verifyEmailToJoinTeam =
-	subject: _.template "<%= inviterName %> has invited you to join a team on #{settings.appName}"
-	layout: BaseWithHeaderEmailLayout
-	type:"notification"
-	plainTextTemplate: _.template """
-
-Please click the button below to join the team and enjoy the benefits of an upgraded  <%= appName %> account.
-
-<%= acceptInviteUrl %>
-
-Thank You
-
-#{settings.appName} - <%= siteUrl %>
-"""
-	compiledTemplate: (opts) ->
-		SingleCTAEmailBody({
-			title: "#{opts.inviterName} has invited you to join a team on #{settings.appName}"
-			greeting: "Hi,"
-			message: "Please click the button below to join the team and enjoy the benefits of an upgraded  #{ opts.appName } account."
-			secondaryMessage: null
-			ctaText: "Verify now"
-			ctaURL: opts.acceptInviteUrl
-			gmailGoToAction: null
-		})
-
-templates.testEmail =
-	subject: _.template "A Test Email from ShareLaTeX"
-	layout: BaseWithHeaderEmailLayout
-	type:"notification"
-	plainTextTemplate: _.template """
-Hi,
-
-This is a test email sent from ShareLaTeX.
-
-#{settings.appName} - <%= siteUrl %>
-"""
-	compiledTemplate: (opts) ->
-		SingleCTAEmailBody({
-			title: "A Test Email from ShareLaTeX"
-			greeting: "Hi,"
-			message: "This is a test email sent from ShareLaTeX"
-			secondaryMessage: null
-			ctaText: "Open ShareLaTeX"
-			ctaURL: "/"
-			gmailGoToAction: null
-		})
-
+templates.testEmail = CTAEmailTemplate({
+	subject: () -> "A Test Email from #{settings.appName}"
+	title: () -> "A Test Email from #{settings.appName}"
+	greeting: () -> "Hi,"
+	message: () -> "This is a test Email from #{settings.appName}"
+	ctaText: () -> "Open #{settings.appName}"
+	ctaURL: () -> settings.siteUrl
+})
 
 module.exports =
 	templates: templates
-
+	CTAEmailTemplate: CTAEmailTemplate
 	buildEmail: (templateName, opts)->
 		template = templates[templateName]
 		opts.siteUrl = settings.siteUrl
@@ -180,5 +125,4 @@ module.exports =
 			subject : template.subject(opts)
 			html: template.layout(opts)
 			text: template?.plainTextTemplate?(opts)
-			type:template.type
 		}
