@@ -3,6 +3,8 @@ metrics = require('metrics-sharelatex')
 logger = require('logger-sharelatex')
 db = mongojs.db
 ObjectId = mongojs.ObjectId
+settings = require "settings-sharelatex"
+request = require "request"
 
 module.exports = UserGetter =
 	getUser: (query, projection, callback = (error, user) ->) ->
@@ -30,11 +32,9 @@ module.exports = UserGetter =
 			return callback error if error?
 			return callback new Error('User not Found') unless user
 
-			fullEmails = user.emails.map (emailData) ->
-				emailData.default = emailData.email == user.email
-				emailData
-
-			callback null, fullEmails
+			getAffiliations userId, (error, affiliationsData) ->
+				return callback error if error?
+				callback null, decorateFullEmails(user.email, user.emails, affiliationsData)
 
 	getUserByMainEmail: (email, projection, callback = (error, user) ->) ->
 		email = email.trim()
@@ -80,6 +80,35 @@ module.exports = UserGetter =
 		@getUserByAnyEmail newEmail, (error, user) ->
 			return callback(message: 'alread_exists') if user?
 			callback(error)
+
+decorateFullEmails = (defaultEmail, emailsData, affiliationsData) ->
+	emailsData.map (emailData) ->
+		emailData.default = emailData.email == defaultEmail
+
+		affiliation = affiliationsData.find (aff) -> aff.email == emailData.email
+		if affiliation?
+			{ institution, inferred, role, department } = affiliation
+			emailData.affiliation = { institution, inferred, role, department }
+		else
+			emailsData.affiliation = null
+
+		emailData
+
+getAffiliations = (userId, callback = (error) ->) ->
+	return callback(null, []) unless settings?.apis?.v1?.url # service is not configured
+	request {
+		method: 'GET'
+		url: "#{settings.apis.v1.url}/api/v2/users/#{userId.toString()}/affiliations"
+		auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass }
+		json: true,
+		timeout: 20 * 1000
+	}, (error, response, body) ->
+		return callback(error) if error?
+		unless 200 <= response.statusCode < 300
+			errorMessage = "Couldn't get affiliations: #{response.statusCode}"
+			return callback(new Error(errorMessage))
+
+		callback(null, body)
 
 [
 	'getUser',

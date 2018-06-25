@@ -42,6 +42,14 @@ module.exports = MockV1Api =
 			@exportParams = Object.assign({}, req.body)
 			res.json exportId: @exportId
 
+		app.get "/api/v2/users/:userId/affiliations", (req, res, next) =>
+			res.json []
+
+		app.post "/api/v2/users/:userId/affiliations", (req, res, next) =>
+			res.sendStatus 201
+
+		app.delete "/api/v2/users/:userId/affiliations/:email", (req, res, next) =>
+			res.sendStatus 204
 
 		app.listen 5000, (error) ->
 			throw error if error?

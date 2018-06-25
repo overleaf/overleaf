@@ -4,6 +4,7 @@ User = require "./helpers/User"
 request = require "./helpers/request"
 settings = require "settings-sharelatex"
 {db, ObjectId} = require("../../../app/js/infrastructure/mongojs")
+MockV1Api = require "./helpers/MockV1Api"
 
 describe "UserEmails", ->
 	beforeEach (done) ->
