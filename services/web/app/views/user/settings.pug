@@ -21,7 +21,6 @@ block content
 									.col-md-12
 										h3 Emails and Affiliations
 										p.small Add additional email addresses to your account to access any upgrades your university or institution has, to make it easier for collaborators to find you, and to make sure you can recover your account.
-
 										table.table.affiliations-table
 											thead
 												tr
@@ -33,7 +32,11 @@ block content
 													ng-repeat="userEmail in userEmails"
 												)
 													td {{ userEmail.email + (userEmail.default ? ' (default)' : '') }}
-													td {{ userEmail.institution }}
+													td 
+														div(ng-if="userEmail.affiliation.institution") {{ userEmail.affiliation.institution.name }}
+														div(ng-if="userEmail.affiliation.role || userEmail.affiliation.department") 
+															span(ng-if="userEmail.affiliation.role") {{ userEmail.affiliation.role + ", " }}
+															span(ng-if="userEmail.affiliation.department") {{ userEmail.affiliation.department }}
 													td 
 														a(
 															href
@@ -53,7 +56,7 @@ block content
 														i.fa.fa-fw.fa-spin.fa-refresh
 														| &nbsp;Loading...
 												
-												tr(
+												tr.affiliations-table-highlighted-row(
 													ng-if="!ui.showAddEmailUI && !ui.isLoadingEmails"
 												)
 													td(colspan="3")
@@ -100,72 +103,73 @@ block content
 																href
 																ng-click="selectUniversityManually();"
 															) Let us know
-														div(
+														.affiliations-form-group(
 															ng-if="ui.showManualUniversitySelectionUI"
 														)
-															.affiliations-form-group
-																ui-select(
-																	ng-model="newAffiliation.country"
-																)
-																	ui-select-match(
-																		placeholder="Country"
-																	) {{ $select.selected.name }}
-																	ui-select-choices(
-																		repeat="country in countries | filter: $select.search"
-																	)
-																		span(
-																			ng-bind="country.name"
-																		s)
-															.affiliations-form-group
-																ui-select(
-																	ng-model="newAffiliation.university"
-																	ng-disabled="!newAffiliation.country"
-																	tagging="addUniversityToSelection"
-																	tagging-label="false"
-																)
-																	ui-select-match(
-																		placeholder="Institution"
-																	) {{ $select.selected.name }}
-																	ui-select-choices(
-																		repeat="university in universities | filter: $select.search"
-																	)
-																		span(
-																			ng-bind="university.name"
-																		)
-															.affiliations-form-group(
-																ng-if="ui.isValidEmail && newAffiliation.university"
+															ui-select(
+																ng-model="newAffiliation.country"
 															)
-																input.form-control(
-																	type="text"
-																	id="affiliations-role"
-																	placeholder="Role"
-																	ng-model="newAffiliation.role"
-																s)
-															.affiliations-form-group(
-																ng-if="ui.isValidEmail && newAffiliation.university"
+																ui-select-match(
+																	placeholder="Country"
+																) {{ $select.selected.name }}
+																ui-select-choices(
+																	repeat="country in countries | filter: $select.search"
+																)
+																	span(
+																		ng-bind="country.name"
+																	s)
+														.affiliations-form-group(
+															ng-if="ui.showManualUniversitySelectionUI"
+														)
+															ui-select(
+																ng-model="newAffiliation.university"
+																ng-disabled="!newAffiliation.country"
+																tagging="addUniversityToSelection"
+																tagging-label="false"
 															)
-																input.form-control(
-																	type="text"
-																	id="affiliations-department"
+																ui-select-match(
+																	placeholder="Institution"
+																) {{ $select.selected.name }}
+																ui-select-choices(
+																	repeat="university in universities | filter: $select.search"
+																)
+																	span(
+																		ng-bind="university.name"
+																	)
+														.affiliations-form-group(
+															ng-if="ui.isValidEmail && newAffiliation.university"
+														)
+															input.form-control(
+																type="text"
+																id="affiliations-role"
+																placeholder="Role"
+																ng-model="newAffiliation.role"
+															)
+														.affiliations-form-group(
+															ng-if="ui.isValidEmail && newAffiliation.university"
+														)
+															input.form-control(
+																type="text"
+																id="affiliations-department"
+																placeholder="Department"
+																ng-model="newAffiliation.department"
+																ng-if="!newAffiliation.university.departments || newAffiliation.university.departments.length === 0"
+															)
+															ui-select(
+																ng-model="newAffiliation.department"
+																ng-if="newAffiliation.university.departments.length > 0"
+																tagging
+																tagging-label="false"
+															)
+																ui-select-match(
 																	placeholder="Department"
-																	ng-model="newAffiliation.department"
-																	ng-if="!newAffiliation.university.departments || newAffiliation.university.departments.length === 0"
+																) {{ $select.selected }}
+																ui-select-choices(
+																	repeat="department in getUniqueUniversityDepartments() | filter: $select.search"
 																)
-																ui-select(
-																	ng-model="newAffiliation.department"
-																	ng-if="newAffiliation.university.departments.length > 0"
-																	tagging
-																	tagging-label="false"
-																)
-																	ui-select-match(
-																		placeholder="Department"
-																	) {{ $select.selected }}
-																	ui-select-choices(
-																		repeat="department in getUniqueUniversityDepartments() | filter: $select.search"
+																	span(
+																		ng-bind="department"
 																	)
-																		span(
-																			ng-bind="department"
-																		)
 													td
 														button.btn.btn-primary(
 															ng-disabled="affiliationsForm.$invalid || ui.isAddingNewEmail"

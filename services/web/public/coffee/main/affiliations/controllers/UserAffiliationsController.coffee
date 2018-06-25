@@ -28,7 +28,7 @@ define [
 				$scope.ui.isBlacklistedEmail = UserAffiliationsDataService.isDomainBlacklisted userInputLocalAndDomain.domain
 
 				UserAffiliationsDataService.getUniversityDomainFromPartialDomainInput(userInputLocalAndDomain.domain)
-					.then (universityDomain) -> 						
+					.then (universityDomain) ->
 						if userInputLocalAndDomain.domain == universityDomain.hostname
 							$scope.newAffiliation.university = universityDomain.university
 							$scope.newAffiliation.department = universityDomain.department

@@ -28,7 +28,7 @@ define [
 				universitiesFromCountry = universities[country.code]
 			else
 				universitiesFromCountry = $http
-					.get "http://www.overleaf.test:5000/universities/list.json" , { params: { country_code: country.code } }
+					.get "/institutions/list" , { params: { country_code: country.code } }
 					.then (response) -> universities[country.code] = response.data
 			$q.resolve(universitiesFromCountry)
 
@@ -36,7 +36,7 @@ define [
 			if universitiesByDomain[partialDomainInput]?
 				$q.resolve universitiesByDomain[partialDomainInput]
 			else 
-				$http.get "http://www.overleaf.test:5000/university/domains.json" , { params: { hostname: partialDomainInput, limit: 1 } }
+				$http.get "/institutions/domains" , { params: { hostname: partialDomainInput, limit: 1 } }
 					.then (response) ->
 						university = response.data[0]
 						if university?

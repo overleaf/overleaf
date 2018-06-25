@@ -45,8 +45,8 @@ define [
 		controller: inputSuggestionsController
 		template: """
 			<div class="input-suggestions">
-				<div type="text"  + $ctrl.suggestion" class="form-control input-suggestions-shadow" ng-show="$ctrl.showHint">
-					<span ng-bind="$ctrl.localNgModel" class="input-suggestions-shadow-existing"></span><span ng-bind="$ctrl.suggestion" class="input-suggestions-shadow-suggested"></span>
+				<div type="text" class="form-control input-suggestions-shadow">
+					<span ng-bind="$ctrl.localNgModel" class="input-suggestions-shadow-existing" ng-show="$ctrl.showHint"></span><span ng-bind="$ctrl.suggestion" class="input-suggestions-shadow-suggested" ng-show="$ctrl.showHint"></span>
 				</div>
 				<input type="text" ng-focus="$ctrl.handleFocus()" ng-keyDown="$ctrl.handleKeyDown($event)" ng-blur="$ctrl.handleBlur()" ng-model="$ctrl.localNgModel" ng-model-options="$ctrl.localNgModelOptions" ng-model-options="{ debounce: 50 }" class="form-control input-suggestions-main" ng-attr-id="{{ ::$ctrl.inputId }}" ng-attr-placeholder="{{ ::$ctrl.inputPlaceholder }}" ng-attr-type="{{ ::$ctrl.inputType }}" ng-attr-name="{{ ::$ctrl.inputName }}" ng-required="::$ctrl.inputRequired">
 			</div>
