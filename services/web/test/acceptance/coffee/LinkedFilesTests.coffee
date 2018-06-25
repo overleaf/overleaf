@@ -428,8 +428,7 @@ describe "LinkedFiles", ->
 							linkedFileData: {
 								provider: "project_output_file",
 								v1_source_doc_id: 9999999,  # We won't find this id in the database
-								source_output_file_path: "project.pdf",
-								build_id: '123'
+								source_output_file_path: "project.pdf"
 							},
 							_id: "abcdef",
 							rev: 0,
