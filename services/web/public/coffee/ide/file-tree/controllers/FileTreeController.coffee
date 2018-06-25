@@ -280,6 +280,10 @@ define [
 				{ state, data } = $scope
 				return !state.inFlight.projects && data.projects
 
+			$scope.hasNoProjects = () ->
+				{ state, data } = $scope
+				return !state.inFlight.projects && (data.projects.length == 0 || !data.projects?)
+
 			$scope.shouldEnableProjectEntitySelect = () ->
 				{ state, data } = $scope
 				return !state.inFlight.projects && !state.inFlight.entities && data.projects && data.selectedProjectId
