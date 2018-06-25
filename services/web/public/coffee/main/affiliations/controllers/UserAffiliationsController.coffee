@@ -85,11 +85,14 @@ define [
 				_getUserEmails()
 
 		$scope.setDefaultUserEmail = (email) ->
+			$scope.ui.isLoadingEmails = true
 			UserAffiliationsDataService
 				.setDefaultUserEmail email
 				.then () -> _getUserEmails()
+				.catch () -> console.log "fodeu"
 
 		$scope.removeUserEmail = (email) ->
+			$scope.ui.isLoadingEmails = true
 			UserAffiliationsDataService
 				.removeUserEmail email
 				.then () -> _getUserEmails()

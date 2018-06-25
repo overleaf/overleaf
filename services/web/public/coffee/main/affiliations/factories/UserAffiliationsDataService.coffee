@@ -74,7 +74,6 @@ define [
 
 		setDefaultUserEmail = (email) ->
 			$http.post "/user/emails/default", {
-				email,
 				_csrf: window.csrfToken
 			}
 

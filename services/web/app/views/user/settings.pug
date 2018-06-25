@@ -13,7 +13,7 @@ block content
 								.alert.alert-success(ng-show="settingsForm.response.success")
 									|  #{translate("thanks_settings_updated")}
 							form-messages(for="changePasswordForm")
-							.container-fluid
+							div
 								form.row(
 									ng-controller="UserAffiliationsController"
 									name="affiliationsForm"
@@ -79,7 +79,7 @@ block content
 																input-required="true"
 															)
 													td
-														div(
+														.affiliations-table-label(
 															ng-if="newAffiliation.university && !ui.showManualUniversitySelectionUI"
 														)
 															| {{ newAffiliation.university.name }} (
@@ -88,10 +88,10 @@ block content
 																ng-click="selectUniversityManually();"
 															) change
 															| )
-														div(
+														.affiliations-table-label(
 															ng-if="!newAffiliation.university && !ui.isValidEmail && !ui.showManualUniversitySelectionUI"
 														) Start by adding your email address.
-														div(
+														.affiliations-table-label(
 															ng-if="!newAffiliation.university && ui.isValidEmail && !ui.isBlacklistedEmail && !ui.showManualUniversitySelectionUI"
 														)
 															| Is your email affiliated with an institution? 
@@ -102,7 +102,7 @@ block content
 															) Let us know
 														div(
 															ng-if="ui.showManualUniversitySelectionUI"
-														ss)
+														)
 															.affiliations-form-group
 																ui-select(
 																	ng-model="newAffiliation.country"
