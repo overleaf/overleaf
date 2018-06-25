@@ -28,10 +28,12 @@ define [
 
 		$scope.openNewDocModal = () ->
 			$modal.open(
-				templateUrl: "newDocModalTemplate"
-				controller:  "NewDocModalController"
+				templateUrl: "newFileModalTemplate"
+				controller:  "NewFileModalController"
+				size: 'lg'
 				resolve: {
 					parent_folder: () -> $scope.entity
+					type: () -> 'doc'
 				}
 			)
 
@@ -45,12 +47,12 @@ define [
 			)
 
 		$scope.openUploadFileModal = () ->
-			$scope.project_id = ide.project_id
 			$modal.open(
-				templateUrl: "uploadFileModalTemplate"
-				controller:  "UploadFileModalController"
-				scope: $scope
+				templateUrl: "newFileModalTemplate"
+				controller:  "NewFileModalController"
+				size: 'lg'
 				resolve: {
 					parent_folder: () -> $scope.entity
+					type: () -> 'upload'
 				}
 			)
