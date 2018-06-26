@@ -124,13 +124,11 @@ describe "SubscriptionController", ->
 				@UserGetter =
 					getUser: sinon.stub().callsArgWith(2, null, null)
 				@res.callback = done
-				@SubscriptionController.plansPage(@req, @res)
 				@AuthenticationController =
 					getLoggedInUser: sinon.stub().callsArgWith(1, null, null)
 					getLoggedInUserId: sinon.stub().returns(null)
 					getSessionUser: sinon.stub().returns(null)
 					isUserLoggedIn: sinon.stub().returns(false)
-
 				@SubscriptionController = SandboxedModule.require modulePath, requires:
 					'../Authentication/AuthenticationController': @AuthenticationController
 					'./SubscriptionHandler': @SubscriptionHandler
@@ -146,6 +144,7 @@ describe "SubscriptionController", ->
 					"../User/UserGetter": @UserGetter
 					"./RecurlyWrapper": @RecurlyWrapper = {}
 					"./FeaturesUpdater": @FeaturesUpdater = {}
+				@SubscriptionController.plansPage(@req, @res)
 
 			it 'should not fetch the current user', (done) ->
 				@UserGetter.getUser.callCount.should.equal 0
