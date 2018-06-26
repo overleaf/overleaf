@@ -39,7 +39,7 @@ define [
 				$http.get "/institutions/domains" , { params: { hostname: partialDomainInput, limit: 1 } }
 					.then (response) ->
 						university = response.data[0]
-						if university?
+						if university? and !isDomainBlacklisted university.hostname
 							universitiesByDomain[university.hostname] = university
 							$q.resolve university
 						else

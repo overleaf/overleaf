@@ -26,7 +26,6 @@ define [
 			$scope.ui.showManualUniversitySelectionUI = false
 			if userInputLocalAndDomain.domain?
 				$scope.ui.isBlacklistedEmail = UserAffiliationsDataService.isDomainBlacklisted userInputLocalAndDomain.domain
-
 				UserAffiliationsDataService.getUniversityDomainFromPartialDomainInput(userInputLocalAndDomain.domain)
 					.then (universityDomain) ->
 						currentUserInputLocalAndDomain = _matchLocalAndDomain $scope.newAffiliation.email
@@ -44,7 +43,7 @@ define [
 			else
 				$scope.newAffiliation.university = null
 				$scope.newAffiliation.department = null
-				$q.resolve null
+				$q.reject null
 
 		$scope.handleEmailInputBlur = () ->
 			# if $scope.newAffiliation.autoDetectMode and !$scope.newAffiliation.university and $scope.newAffiliation.email?.match EMAIL_REGEX
