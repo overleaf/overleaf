@@ -1,27 +1,18 @@
 doctype html
 html(itemscope, itemtype='http://schema.org/Product')
+	- metadata = metadata || {}
 	block vars
 
 	head
+		include ./_metadata.pug
+
 		script(type="text/javascript").
 			// Stop superfish from loading
 			window.similarproducts = true
 		style [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak  {display: none !important; display: none; }
 
-
 		-if (typeof(gaExperiments) != "undefined")
 			|!{gaExperiments}
-
-		//- Title
-		-if (typeof(title) == "undefined")
-			title= settings.appName + ', '+ translate("online_latex_editor")
-			meta(name="twitter:title", content=settings.appName + ', '+ translate("online_latex_editor"))
-			meta(name="og:title", content=settings.appName + ', '+ translate("online_latex_editor"))
-		-else
-			title= translate(title) + ' - ' + settings.appName + ', ' + translate("online_latex_editor")
-			//- to do - not translate?
-			meta(name="twitter:title", content=translate(title))
-			meta(name="og:title", content=translate(title))
 
 		//- Icons
 		link(rel="icon", href="/" + settings.brandPrefix + "favicon.ico")
@@ -38,45 +29,6 @@ html(itemscope, itemtype='http://schema.org/Product')
 			each subdomainDetails in settings.i18n.subdomainLang
 				if !subdomainDetails.hide
 					link(rel="alternate", href=subdomainDetails.url+currentUrl, hreflang=subdomainDetails.lngCode)
-
-
-		meta(itemprop="name", content=settings.appName + ", the Online LaTeX Editor")
-
-		//- Description
-		-if (typeof(meta) == "undefined")
-			meta(itemprop="description", name="description", content=translate("site_description"))
-		-else
-			meta(itemprop="description", name="description" , content=meta)
-
-		-if (typeof(metaImage) == "undefined")
-			meta(itemprop="image", name="image", content="/" + settings.brandPrefix + "favicon.ico")
-		-else
-			meta(itemprop="image", name="image", content=metaImage.fields.file.url)
-
-		//-	Meta Tags: Twitter
-		-if (settings.social && settings.social.twitter && settings.social.twitter.handle)
-			meta(name="twitter:site", content=settings.social.twitter.handle)
-			meta(name="twitter:card", content=metaTwitterCard ? metaTwitterCard : 'summary')
-		-if (typeof(metaTwitterDescription) != "undefined")
-				meta(itemprop="twitter:description", content=metaTwitterDescription)
-		-if (typeof(metaTwitterImage) != "undefined")
-			meta(itemprop="image", name="image", content=metaTwitterImage.fields.file.url)
-		-else if (typeof(metaImage) != "undefined")
-			meta(itemprop="image", name="image", content=metaImage.fields.file.url)
-
-		//-	Meta Tags: Open Graph
-		-if (settings.social && settings.social.facebook && settings.social.facebook.appId)
-			meta(name="fb:app_id", content=settings.social.facebook.appId)
-		-if (typeof(metaOpenGraphDescription) != "undefined")
-				meta(itemprop="og:description", content=metaOpenGraphDescription)
-		-if (typeof(metaOpenGraphImage) != "undefined")
-			meta(itemprop="image", name="image", content=metaOpenGraphImage.fields.file.url)
-		-else if (typeof(metaImage) != "undefined")
-			meta(itemprop="image", name="image", content=metaImage.fields.file.url)
-		-if (typeof(metaOgType) != "undefined")
-			meta(name="og:type", metaOgType)
-		-else
-			meta(name="og:type", content="website")
 
 		//- Scripts
 
