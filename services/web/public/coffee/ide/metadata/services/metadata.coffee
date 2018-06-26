@@ -3,6 +3,7 @@ define [
 ], (App) ->
 
 	App.factory 'metadata', ($http, ide) ->
+		debouncer = {}  # DocId => Timeout
 
 		state = {documents: {}}
 
@@ -45,5 +46,20 @@ define [
 					"/project/#{window.project_id}/doc/#{docId}/metadata",
 					{_csrf: window.csrfToken}
 				)
+
+		metadata.scheduleLoadDocMetaFromServer = (docId) ->
+			# De-bounce loading labels with a timeout
+			existingTimeout = debouncer[docId]
+
+			if existingTimeout?
+				clearTimeout(existingTimeout)
+				delete debouncer[docId]
+
+			debouncer[docId] = setTimeout(
+				() =>
+					metadata.loadDocMetaFromServer docId
+					delete debouncer[docId]
+				, 1000
+			)
 
 		return metadata
