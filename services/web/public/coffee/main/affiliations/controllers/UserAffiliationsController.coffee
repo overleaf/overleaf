@@ -29,7 +29,8 @@ define [
 
 				UserAffiliationsDataService.getUniversityDomainFromPartialDomainInput(userInputLocalAndDomain.domain)
 					.then (universityDomain) ->
-						if userInputLocalAndDomain.domain == universityDomain.hostname
+						currentUserInputLocalAndDomain = _matchLocalAndDomain $scope.newAffiliation.email
+						if currentUserInputLocalAndDomain.domain == universityDomain.hostname
 							$scope.newAffiliation.university = universityDomain.university
 							$scope.newAffiliation.department = universityDomain.department
 						else 
