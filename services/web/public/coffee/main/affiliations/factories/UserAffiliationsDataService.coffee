@@ -78,9 +78,9 @@ define [
 			}
 
 		removeUserEmail = (email) ->
-			$http.delete "/user/emails/#{ encodeURIComponent(email) }", {
-				headers: 
-					"X-CSRF-Token": window.csrfToken
+			$http.post "/user/emails/delete", {
+				email,
+				_csrf: window.csrfToken
 			}
 
 		isDomainBlacklisted = (domain) ->

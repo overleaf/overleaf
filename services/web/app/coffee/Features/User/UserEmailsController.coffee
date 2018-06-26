@@ -33,7 +33,7 @@ module.exports = UserEmailsController =
 
 	remove: (req, res, next) ->
 		userId = AuthenticationController.getLoggedInUserId(req)
-		email = EmailHelper.parseEmail(req.params.email)
+		email = EmailHelper.parseEmail(req.body.email)
 		return res.sendStatus 422 unless email?
 
 		UserUpdater.removeEmailAddress userId, email, (error)->
