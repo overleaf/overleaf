@@ -95,7 +95,7 @@ script(type='text/ng-template', id='newFileModalTemplate')
 											value="{{ project._id }}"
 										) {{ project.name }}
 									small(ng-if="hasNoProjects() && shouldEnableProjectSelect() ")
-										| No other projects found
+										| No other projects found, please create another project first
 
 
 								.form-controls.row-spaced-small(ng-if="!state.isOutputFilesMode")
