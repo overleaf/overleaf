@@ -107,6 +107,7 @@ describe "LinkedFiles", ->
 						source_project_id: @project_two_id,
 						source_entity_path: "/#{@source_doc_name}",
 			}, (error, response, body) =>
+				expect(response.statusCode).to.equal 200
 				new_file_id = body.new_file_id
 				@existing_file_id = new_file_id
 				expect(new_file_id).to.exist
@@ -127,6 +128,7 @@ describe "LinkedFiles", ->
 				url: "/project/#{@project_one_id}/linked_file/#{@existing_file_id}/refresh",
 				json: true
 			}, (error, response, body) =>
+				expect(response.statusCode).to.equal 200
 				new_file_id = body.new_file_id
 				expect(new_file_id).to.exist
 				expect(new_file_id).to.not.equal @existing_file_id

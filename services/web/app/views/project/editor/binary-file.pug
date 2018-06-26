@@ -78,6 +78,8 @@ div.binary-file.full-size(
 				|
 				| at {{ openFile.created | formatDate:'h:mm a' }} {{ openFile.created | relativeDate }}
 
+		!= moduleIncludes("binaryFile:linkedFileInfo", locals)
+
 		// Bottom Controls
 		span(ng-if="openFile.linkedFileData.provider")
 			button.btn.btn-success(
@@ -95,7 +97,10 @@ div.binary-file.full-size(
 			i.fa.fa-fw.fa-download
 			|
 			| #{translate("download")}
-		div(ng-if="refreshError")
+
+		// Refresh Error
+		div(ng-if="refreshError").row
 			br
 			.alert.alert-danger.col-md-6.col-md-offset-3
 				| Error: {{ refreshError}}
+				!= moduleIncludes("binaryFile:linkedFileRefreshError", locals)
