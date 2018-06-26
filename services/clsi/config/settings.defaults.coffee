@@ -44,8 +44,8 @@ if process.env["DOCKER_RUNNER"]
 	try
 		seccomp_profile_path = Path.resolve(__dirname + "/../seccomp/clsi-profile.json")
 		module.exports.clsi.seccomp_profile = JSON.stringify(JSON.parse(require("fs").readFileSync(seccomp_profile_path)))
-	catch
-		console.log "could not load seccom profile from #{seccomp_profile_path}"
+	catch error
+		console.log error, "could not load seccom profile from #{seccomp_profile_path}"
 
 	module.exports.path.synctexBaseDir = -> "/compile"	
 	
