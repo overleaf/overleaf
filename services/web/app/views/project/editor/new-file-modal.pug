@@ -47,10 +47,10 @@ script(type='text/ng-template', id='newFileModalTemplate')
 						div.alert.alert-danger.row-spaced-small(ng-show="newDocForm.name.$error.validFile")
 							| #{translate('files_cannot_include_invalid_characters')}
 					div(ng-if="type == 'upload'", ng-controller="UploadFileModalController")
-						.alert.alert-warning.small.modal(ng-if="tooManyFiles") #{translate("maximum_files_uploaded_together", {max:"{{max_files}}"})}
-						.alert.alert-warning.small.modal(ng-if="rateLimitHit") #{translate("too_many_files_uploaded_throttled_short_period")}
-						.alert.alert-warning.small.modal(ng-if="notLoggedIn") #{translate("session_expired_redirecting_to_login", {seconds:"{{secondsToRedirect}}"})}
-						.alert.alert-warning.small.modal(ng-if="conflicts.length > 0")
+						.alert.alert-warning.small(ng-if="tooManyFiles") #{translate("maximum_files_uploaded_together", {max:"{{max_files}}"})}
+						.alert.alert-warning.small(ng-if="rateLimitHit") #{translate("too_many_files_uploaded_throttled_short_period")}
+						.alert.alert-warning.small(ng-if="notLoggedIn") #{translate("session_expired_redirecting_to_login", {seconds:"{{secondsToRedirect}}"})}
+						.alert.alert-warning.small(ng-if="conflicts.length > 0")
 							p.text-center
 								| The following files already exist in this project:
 							ul.text-center.list-unstyled.row-spaced-small
