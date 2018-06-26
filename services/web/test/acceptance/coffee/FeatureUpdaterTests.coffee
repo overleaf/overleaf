@@ -83,6 +83,23 @@ describe "FeatureUpdater.refreshFeatures", ->
 				))
 				done()
 
+	describe "when the user is due bonus features and has extra features that no longer apply", ->
+		beforeEach ->
+			User.update {
+				_id: @user._id
+			}, {
+				refered_user_count: 10,
+				'features.github': true
+			} # returns a promise
+
+		it "should set their features to the bonus set and downgrade the extras", (done) ->
+			syncUserAndGetFeatures @user, (error, features) =>
+				throw error if error?
+				expect(features).to.deep.equal(Object.assign(
+					{}, settings.defaultFeatures,	settings.bonus_features[9]
+				))
+				done()
+
 	describe "when the user has a v1 plan", ->
 		beforeEach ->
 			MockV1Api.setUser 42, plan_name: 'free'
