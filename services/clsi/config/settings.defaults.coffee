@@ -40,7 +40,12 @@ if process.env["DOCKER_RUNNER"]
 			user: process.env["TEXLIVE_IMAGE_USER"] or "tex"
 		expireProjectAfterIdleMs: 24 * 60 * 60 * 1000
 		checkProjectsIntervalMs: 10 * 60 * 1000
-		seccomp_profile: JSON.stringify(JSON.parse(require("fs").readFileSync(Path.resolve(__dirname + "/../seccomp/clsi-profile.json"))))
+
+	try
+		seccomp_profile_path = Path.resolve(__dirname + "/../seccomp/clsi-profile.json")
+		module.exports.clsi.seccomp_profile = JSON.stringify(JSON.parse(require("fs").readFileSync(seccomp_profile_path)))
+	catch
+		console.log "could not load seccom profile from #{seccomp_profile_path}"
 
 	module.exports.path.synctexBaseDir = -> "/compile"	
 	
