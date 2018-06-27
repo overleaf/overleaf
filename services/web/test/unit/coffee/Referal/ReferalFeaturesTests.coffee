@@ -8,7 +8,7 @@ describe 'ReferalFeatures', ->
 
 	beforeEach ->
 		@ReferalFeatures = SandboxedModule.require modulePath, requires:
-			'../../models/User': User: @User = {}
+			'../User/UserGetter': @UserGetter = {}
 			"settings-sharelatex": @Settings = {}
 			'logger-sharelatex':
 				log:->
@@ -27,17 +27,17 @@ describe 'ReferalFeatures', ->
 						collaborators: 3
 						dropbox: false
 						versioning: false
-				stubbedUser = { 
-					refered_user_count: @refered_user_count, 
-					features:{collaborators:1, dropbox:false, versioning:false} 
+				stubbedUser = {
+					refered_user_count: @refered_user_count,
+					features:{collaborators:1, dropbox:false, versioning:false}
 				}
 
-				@User.findOne = sinon.stub().callsArgWith 1, null, stubbedUser
+				@UserGetter.getUserOrUserStubById = sinon.stub().yields null, stubbedUser
 				@ReferalFeatures.getBonusFeatures @user_id, @callback
 
 			it "should get the users number of refered user", ->
-				@User.findOne
-					.calledWith(_id: @user_id)
+				@UserGetter.getUserOrUserStubById
+					.calledWith(@user_id, { _id: 1 })
 					.should.equal true
 
 			it "should call the callback with the features", ->
@@ -51,15 +51,14 @@ describe 'ReferalFeatures', ->
 						collaborators: 3
 						dropbox: false
 						versioning: false
-				@User.findOne = sinon.stub().callsArgWith 1, null, { refered_user_count: @refered_user_count }
+				@UserGetter.getUserOrUserStubById =
+					sinon.stub().yields null, { refered_user_count: @refered_user_count }
 				@ReferalFeatures.getBonusFeatures @user_id, @callback
 
 			it "should get the users number of refered user", ->
-				@User.findOne
-					.calledWith(_id: @user_id)
+				@UserGetter.getUserOrUserStubById
+					.calledWith(@user_id, { _id: 1 })
 					.should.equal true
 
 			it "should call the callback with no features", ->
 				@callback.calledWith(null, {}).should.equal true
-
-
