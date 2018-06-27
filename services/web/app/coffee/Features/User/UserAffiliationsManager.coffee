@@ -22,10 +22,10 @@ module.exports = UserAffiliationsManager =
 
 
 	removeAffiliation: (userId, email, callback = (error) ->) ->
-		email = encodeURIComponent(email)
 		makeAffiliationRequest {
-			method: 'DELETE'
-			path: "/api/v2/users/#{userId.toString()}/affiliations/#{email}"
+			method: 'POST'
+			path: "/api/v2/users/#{userId.toString()}/affiliations/remove"
+			body: { email }
 			extraSuccessStatusCodes: [404] # `Not Found` responses are considered successful
 			defaultErrorMessage: "Couldn't remove affiliation"
 		}, callback
