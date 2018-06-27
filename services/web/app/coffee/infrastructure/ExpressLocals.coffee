@@ -167,6 +167,11 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 			path = Path.join("/img/", imgFile)
 			return Url.resolve(staticFilesBase, path)
 
+		res.locals.mathJaxPath = res.locals.buildJsPath(
+			'libs/mathjax/MathJax.js',
+			{cdn:false, qs:{config:'TeX-AMS_HTML'}}
+		)
+
 		next()
 
 
