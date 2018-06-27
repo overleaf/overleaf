@@ -24,6 +24,15 @@ module.exports = SubscriptionUpdater =
 					return callback(err) if err?
 					SubscriptionUpdater._updateSubscriptionFromRecurly recurlySubscription, subscription, callback
 
+	addUsersToGroup: (subscriptionId, memberIds, callback)->
+		logger.log subscriptionId: subscriptionId, memberIds: memberIds, "adding members into mongo subscription"
+		searchOps =
+			_id: new ObjectId(subscriptionId.toString())
+		insertOperation =
+			{ $push: { member_ids: { $each: memberIds } } }
+
+		Subscription.findAndModify searchOps, insertOperation, callback
+
 	addUserToGroup: (adminUser_id, user_id, callback)->
 		logger.log adminUser_id:adminUser_id, user_id:user_id, "adding user into mongo subscription"
 		searchOps =
@@ -46,6 +55,9 @@ module.exports = SubscriptionUpdater =
 				logger.err err:err, searchOps:searchOps, removeOperation:removeOperation, "error removing user from group"
 				return callback(err)
 			FeaturesUpdater.refreshFeatures user_id, callback
+
+	deleteWithV1Id: (v1TeamId, callback)->
+		Subscription.deleteOne { "overleaf.id": v1TeamId }, callback
 
 	deleteSubscription: (subscription_id, callback = (error) ->) ->
 		SubscriptionLocator.getSubscription subscription_id, (err, subscription) ->

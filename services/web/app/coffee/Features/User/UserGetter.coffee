@@ -62,7 +62,7 @@ module.exports = UserGetter =
 			user_ids = user_ids.map (u) -> ObjectId(u.toString())
 		catch error
 			return callback error
-		
+
 		db.users.find { _id: { $in: user_ids} }, projection, callback
 
 	getUserOrUserStubById: (user_id, projection, callback = (error, user) ->) ->

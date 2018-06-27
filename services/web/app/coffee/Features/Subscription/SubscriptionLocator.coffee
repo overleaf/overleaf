@@ -33,3 +33,6 @@ module.exports =
 
 	getGroupsWithEmailInvite: (email, callback) ->
 		Subscription.find { invited_emails: email }, callback
+
+	getGroupWithV1Id: (v1TeamId, callback) ->
+		Subscription.findOne { "overleaf.id": v1TeamId }, callback
