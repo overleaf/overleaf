@@ -15,6 +15,11 @@ httpAuthUsers[httpAuthUser] = httpAuthPass
 
 sessionSecret = "secret-please-change"
 
+v1Api =
+	url: "http://#{process.env['V1_HOST'] or 'localhost'}:5000"
+	user: 'overleaf'
+	pass: 'password'
+
 module.exports = settings =
 
 	allowAnonymousReadAndWriteSharing:
@@ -157,9 +162,9 @@ module.exports = settings =
 		thirdpartyreferences:
 			url: "http://#{process.env['THIRD_PARTY_REFERENCES_HOST'] or 'localhost'}:3046"
 		v1:
-			url: "http://#{process.env['V1_HOST'] or 'localhost'}:5000"
-			user: 'overleaf'
-			pass: 'password'
+			url: v1Api.url
+			user: v1Api.user
+			pass: v1Api.pass
 
 	templates:
 		user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"
@@ -420,7 +425,9 @@ module.exports = settings =
 	redirects:
 		"/templates/index": "/templates/"
 
-	proxyUrls: {}
+	proxyUrls:
+		'/institutions/list': { baseUrl: v1Api.url, path: '/universities/list' }
+		'/institutions/domains': { baseUrl: v1Api.url, path: '/university/domains' }
 
 	reloadModuleViewsOnEachRequest: true
 
