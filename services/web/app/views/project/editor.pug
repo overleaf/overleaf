@@ -103,6 +103,8 @@ block content
 			h3 {{ title }}
 		.modal-body(ng-bind-html="message")
 
+	script(src=mathJaxPath)
+
 block requirejs
 	script(type="text/javascript" src='/socket.io/socket.io.js')
 
@@ -133,7 +135,6 @@ block requirejs
 		window.wikiEnabled = #{!!(settings.apis.wiki && settings.apis.wiki.url)};
 		window.requirejs = {
 			"paths" : {
-				"mathjax": "#{buildJsPath('/libs/mathjax/MathJax.js', {cdn:false, qs:{config:'TeX-AMS_HTML'}})}",
 				"moment": "libs/#{lib('moment')}",
 				"pdfjs-dist/build/pdf": "libs/#{lib('pdfjs')}/pdf",
 				"pdfjs-dist/build/pdf.worker": "#{pdfWorkerPath}",
