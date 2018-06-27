@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	inputSuggestionsController = ($scope, $element, $attrs) ->
+	inputSuggestionsController = ($scope, $element, $attrs, Keys) ->
 		ctrl = @ 
 		ctrl.showHint = false
 		ctrl.hasFocus = false
@@ -14,7 +14,7 @@ define [
 			ctrl.suggestion = null
 			ctrl.onBlur()
 		ctrl.handleKeyDown = ($event) ->
-			if ($event.which == 9 or $event.which == 13) and ctrl.suggestion? and ctrl.suggestion != ""
+			if ($event.which == Keys.TAB or $event.which == Keys.ENTER) and ctrl.suggestion? and ctrl.suggestion != ""
 				$event.preventDefault()
 				ctrl.localNgModel += ctrl.suggestion
 			ctrl.suggestion = null

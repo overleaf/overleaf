@@ -22,6 +22,7 @@ define [
 	"main/learn"
 	"main/affiliations/controllers/UserAffiliationsController"
 	"main/affiliations/factories/UserAffiliationsDataService"
+	"main/keys"
 	"analytics/AbTestingManager"
 	"directives/asyncForm"
 	"directives/stopPropagation"
