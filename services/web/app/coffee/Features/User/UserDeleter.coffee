@@ -4,6 +4,7 @@ ProjectDeleter = require("../Project/ProjectDeleter")
 logger = require("logger-sharelatex")
 SubscriptionHandler = require("../Subscription/SubscriptionHandler")
 async = require("async")
+{ deleteAffiliations } = require("./UserAffiliationsManager")
 
 module.exports =
 
@@ -22,6 +23,8 @@ module.exports =
 					ProjectDeleter.deleteUsersProjects user._id, cb
 				(cb)->
 					SubscriptionHandler.cancelSubscription user, cb
+				(cb)->
+					deleteAffiliations user._id, cb
 				(cb)->
 					user.remove cb
 			], (err)->

@@ -103,3 +103,24 @@ describe "UserAffiliationsManager", ->
 				should.exist(err)
 				err.message.should.exist
 				done()
+
+	describe 'deleteAffiliations', ->
+		it 'delete affiliations', (done)->
+			@request.callsArgWith(1, null, { statusCode: 200 })
+			@UserAffiliationsManager.deleteAffiliations @stubbedUser._id, (err) =>
+				should.not.exist(err)
+				@request.calledOnce.should.equal true
+				requestOptions = @request.lastCall.args[0]
+				expectedUrl = "v1.url/api/v2/users/#{@stubbedUser._id}/affiliations"
+				requestOptions.url.should.equal expectedUrl
+				requestOptions.method.should.equal 'DELETE'
+				done()
+
+		it 'handle error', (done)->
+			body = errors: 'affiliation error message'
+			@request.callsArgWith(1, null, { statusCode: 518 }, body)
+			@UserAffiliationsManager.deleteAffiliations @stubbedUser._id, (err) =>
+				should.exist(err)
+				err.message.should.have.string 518
+				err.message.should.have.string body.errors
+				done()

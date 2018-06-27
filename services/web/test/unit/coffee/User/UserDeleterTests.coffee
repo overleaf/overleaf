@@ -23,11 +23,16 @@ describe "UserDeleter", ->
 
 		@SubscriptionHandler = 
 			cancelSubscription: sinon.stub().callsArgWith(1)
+
+		@deleteAffiliations = sinon.stub().callsArgWith(1)
+
 		@UserDeleter = SandboxedModule.require modulePath, requires:
 			"../../models/User": User: @User
 			"../Newsletter/NewsletterManager":  @NewsletterManager
 			"../Subscription/SubscriptionHandler": @SubscriptionHandler
 			"../Project/ProjectDeleter": @ProjectDeleter
+			"./UserAffiliationsManager":
+				deleteAffiliations: @deleteAffiliations
 			"logger-sharelatex": @logger = { log: sinon.stub() }
 
 	describe "deleteUser", ->
@@ -51,4 +56,9 @@ describe "UserDeleter", ->
 		it "should unsubscribe the user", (done)->
 			@UserDeleter.deleteUser @user._id, (err)=>
 				@SubscriptionHandler.cancelSubscription.calledWith(@user).should.equal true
+				done()
+
+		it "should delete user affiliations", (done)->
+			@UserDeleter.deleteUser @user._id, (err)=>
+				@deleteAffiliations.calledWith(@user._id).should.equal true
 				done()

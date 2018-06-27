@@ -31,6 +31,14 @@ module.exports = UserAffiliationsManager =
 		}, callback
 
 
+	deleteAffiliations: (userId, callback = (error) ->) ->
+		makeAffiliationRequest {
+			method: 'DELETE'
+			path: "/api/v2/users/#{userId.toString()}/affiliations"
+			defaultErrorMessage: "Couldn't delete affiliations"
+		}, callback
+
+
 makeAffiliationRequest = (requestOptions, callback = (error) ->) ->
 	return callback(null) unless settings?.apis?.v1?.url # service is not configured
 	requestOptions.extraSuccessStatusCodes ||= []
