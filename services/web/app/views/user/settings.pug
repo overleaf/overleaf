@@ -31,7 +31,8 @@ block content
 													td 
 														div(ng-if="userEmail.affiliation.institution") {{ userEmail.affiliation.institution.name }}
 														div(ng-if="userEmail.affiliation.role || userEmail.affiliation.department") 
-															span(ng-if="userEmail.affiliation.role") {{ userEmail.affiliation.role + ", " }}
+															span(ng-if="userEmail.affiliation.role") {{ userEmail.affiliation.role }}
+															span(ng-if="userEmail.affiliation.role && userEmail.affiliation.department") , 
 															span(ng-if="userEmail.affiliation.department") {{ userEmail.affiliation.department }}
 													td 
 														a(
