@@ -1,6 +1,5 @@
 define [
 	"base"
-	"mathjax"
 ], (App) ->
 	mathjaxConfig =
 		messageStyle: "none"
