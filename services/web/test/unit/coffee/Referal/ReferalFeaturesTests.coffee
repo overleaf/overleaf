@@ -37,7 +37,7 @@ describe 'ReferalFeatures', ->
 
 			it "should get the users number of refered user", ->
 				@UserGetter.getUserOrUserStubById
-					.calledWith(@user_id, { _id: 1 })
+					.calledWith(@user_id, null)
 					.should.equal true
 
 			it "should call the callback with the features", ->
@@ -57,7 +57,7 @@ describe 'ReferalFeatures', ->
 
 			it "should get the users number of refered user", ->
 				@UserGetter.getUserOrUserStubById
-					.calledWith(@user_id, { _id: 1 })
+					.calledWith(@user_id, null)
 					.should.equal true
 
 			it "should call the callback with no features", ->

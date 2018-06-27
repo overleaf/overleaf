@@ -5,7 +5,7 @@ Settings = require "settings-sharelatex"
 
 module.exports = ReferalFeatures =
 	getBonusFeatures: (user_id, callback = (error) ->) ->
-		UserGetter.getUserOrUserStubById user_id, { _id: 1 }, (error, user) ->
+		UserGetter.getUserOrUserStubById user_id, null, (error, user) ->
 			return callback(error) if error
 			return callback(new Error("user not found #{user_id} for assignBonus")) if !user?
 			logger.log user_id: user_id, refered_user_count: user.refered_user_count, "assigning bonus"
