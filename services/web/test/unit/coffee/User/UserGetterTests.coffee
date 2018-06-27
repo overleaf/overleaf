@@ -21,14 +21,15 @@ describe "UserGetter", ->
 			db: users: findOne: @findOne
 			ObjectId: (id) -> return id
 		settings = apis: { v1: { url: 'v1.url', user: '', pass: '' } }
-		@request = sinon.stub()
+		@getAffiliations = sinon.stub().callsArgWith(1, null, [])
 
 		@UserGetter = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": log:->
 			"../../infrastructure/mongojs": @Mongo
 			"metrics-sharelatex": timeAsyncMethod: sinon.stub()
 			'settings-sharelatex': settings
-			'request': @request
+			'./UserAffiliationsManager':
+				getAffiliations: @getAffiliations
 
 	describe "getUser", ->
 		it "should get user", (done)->
@@ -46,9 +47,6 @@ describe "UserGetter", ->
 				done()
 
 	describe "getUserFullEmails", ->
-		beforeEach ->
-			@request.callsArgWith(1, null, { statusCode: 200 }, [])
-
 		it "should get user", (done)->
 			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @fakeUser)
 			projection = email: 1, emails: 1
@@ -77,7 +75,7 @@ describe "UserGetter", ->
 					institution: { name: 'University Name', isUniversity: true }
 				}
 			]
-			@request.callsArgWith(1, null, { statusCode: 200 }, affiliationsData)
+			@getAffiliations.callsArgWith(1, null, affiliationsData)
 			@UserGetter.getUserFullEmails @fakeUser._id, (error, fullEmails) =>
 				assert.deepEqual fullEmails, [
 					{

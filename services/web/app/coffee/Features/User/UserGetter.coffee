@@ -3,8 +3,7 @@ metrics = require('metrics-sharelatex')
 logger = require('logger-sharelatex')
 db = mongojs.db
 ObjectId = mongojs.ObjectId
-settings = require "settings-sharelatex"
-request = require "request"
+{ getAffiliations } = require("./UserAffiliationsManager")
 
 module.exports = UserGetter =
 	getUser: (query, projection, callback = (error, user) ->) ->
@@ -93,22 +92,6 @@ decorateFullEmails = (defaultEmail, emailsData, affiliationsData) ->
 			emailsData.affiliation = null
 
 		emailData
-
-getAffiliations = (userId, callback = (error) ->) ->
-	return callback(null, []) unless settings?.apis?.v1?.url # service is not configured
-	request {
-		method: 'GET'
-		url: "#{settings.apis.v1.url}/api/v2/users/#{userId.toString()}/affiliations"
-		auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass }
-		json: true,
-		timeout: 20 * 1000
-	}, (error, response, body) ->
-		return callback(error) if error?
-		unless 200 <= response.statusCode < 300
-			errorMessage = "Couldn't get affiliations: #{response.statusCode}"
-			return callback(new Error(errorMessage))
-
-		callback(null, body)
 
 [
 	'getUser',
