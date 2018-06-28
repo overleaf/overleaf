@@ -45,7 +45,7 @@ describe "UserGetter", ->
 				error.should.exist
 				done()
 
-	describe "getUserFullEmails", -
+	describe "getUserFullEmails", ->
 		beforeEach ->
 			@request.callsArgWith(1, null, { statusCode: 200 }, [])
 
