@@ -20,7 +20,11 @@ module.exports =
 		clsi:
 			port: 3013
 			host: process.env["LISTEN_ADDRESS"] or "localhost"
-
+			
+		load_balancer_agent:
+			report_load:true
+			load_port: 3048
+			local_port: 3049
 	apis:
 		clsi:
 			url: "http://#{process.env['CLSI_HOST'] or 'localhost'}:3013"
@@ -28,6 +32,7 @@ module.exports =
 	smokeTest: process.env["SMOKE_TEST"] or false
 	project_cache_length_ms: 1000 * 60 * 60 * 24
 	parallelFileDownloads:1
+
 
 if process.env["DOCKER_RUNNER"]
 	module.exports.clsi =
@@ -52,5 +57,3 @@ if process.env["DOCKER_RUNNER"]
 	module.exports.path.sandboxedCompilesHostDir = process.env["COMPILES_HOST_DIR"]
 
 	module.exports.path.synctexBinHostPath = process.env["SYNCTEX_BIN_HOST_PATH"]
-console.log "configggggg"
-console.log module.exports

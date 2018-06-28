@@ -174,7 +174,11 @@ os = require "os"
 
 STATE = "up"
 
-server = net.createServer (socket) ->
+process.on "SIGHUP", ->
+	console.log "got SIGHUP event"
+	STATE = "down"
+
+loadTcpServer = net.createServer (socket) ->
 	socket.on "error", (err)->
 		if err.code == "ECONNRESET"
 			# this always comes up, we don't know why
@@ -182,7 +186,7 @@ server = net.createServer (socket) ->
 		logger.err err:err, "error with socket on load check"
 		socket.destroy()
 	
-	if STATE == "up" and Settings.load_balancer_agent.report_load
+	if STATE == "up" and Settings.internal.load_balancer_agent.report_load
 		currentLoad = os.loadavg()[0]
 
 		# staging clis's have 1 cpu core only
@@ -201,25 +205,37 @@ server = net.createServer (socket) ->
 		socket.write("#{STATE}\n", "ASCII")
 		socket.end()
 
+loadHttpServer = express()
 
+loadHttpServer.post "/state/up", (req, res, next) ->
+	STATE = "up"
+	logger.info "getting message to set server to down"
+	res.sendStatus 204
 
+loadHttpServer.post "/state/down", (req, res, next) ->
+	STATE = "down"
+	logger.info "getting message to set server to down"
+	res.sendStatus 204
 
 port = (Settings.internal?.clsi?.port or 3013)
 host = (Settings.internal?.clsi?.host or "localhost")
-load_port = Settings.internal.clsi.load_port or 3048
 
-
+load_tcp_port = Settings.internal.load_balancer_agent.load_port
+load_http_port = Settings.internal.load_balancer_agent.local_port
 
 if !module.parent # Called directly
 	app.listen port, host, (error) ->
 		logger.info "CLSI starting up, listening on #{host}:#{port}"
 
-	server.listen load_port, host, (error) ->
+	loadTcpServer.listen load_tcp_port, host, (error) ->
 		throw error if error?
-		logger.info "Load agent listening on load port #{load_port}"
+		logger.info "Load tcp agent listening on load port #{load_tcp_port}"
+
+	loadHttpServer.listen load_http_port, host, (error) ->
+		throw error if error?
+		logger.info "Load http agent listening on load port #{load_http_port}"
+
 module.exports = app
-
-
 
 setInterval () ->
 	ProjectPersistenceManager.clearExpiredProjects()
