@@ -1,4 +1,5 @@
 should = require('chai').should()
+expect = require('chai').expect
 SandboxedModule = require('sandboxed-module')
 assert = require('assert')
 path = require('path')
@@ -91,10 +92,10 @@ describe "UserAffiliationsManager", ->
 				should.not.exist(err)
 				@request.calledOnce.should.equal true
 				requestOptions = @request.lastCall.args[0]
-				expectedUrl = "v1.url/api/v2/users/#{@stubbedUser._id}/affiliations/"
-				expectedUrl += encodeURIComponent(@newEmail)
+				expectedUrl = "v1.url/api/v2/users/#{@stubbedUser._id}/affiliations/remove"
 				requestOptions.url.should.equal expectedUrl
-				requestOptions.method.should.equal 'DELETE'
+				requestOptions.method.should.equal 'POST'
+				expect(requestOptions.body).to.deep.equal { email: @newEmail }
 				done()
 
 		it 'handle error', (done)->
