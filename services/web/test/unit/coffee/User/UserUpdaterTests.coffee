@@ -19,15 +19,16 @@ describe "UserUpdater", ->
 			getUserByAnyEmail: sinon.stub()
 			ensureUniqueEmailAddress: sinon.stub()
 		@logger = err: sinon.stub(), log: ->
-		settings = apis: { v1: { url: 'v1.url', user: '', pass: '' } }
-		@request = sinon.stub()
+		@addAffiliation = sinon.stub().callsArgWith(3, null)
+		@removeAffiliation = sinon.stub().callsArgWith(2, null)
 		@UserUpdater = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": @logger
 			"./UserGetter": @UserGetter
+			'./UserAffiliationsManager':
+				addAffiliation: @addAffiliation
+				removeAffiliation: @removeAffiliation
 			"../../infrastructure/mongojs":@mongojs
 			"metrics-sharelatex": timeAsyncMethod: sinon.stub()
-			'settings-sharelatex': settings
-			'request': @request
 
 		@stubbedUser = 
 			_id: "3131231"
@@ -69,7 +70,6 @@ describe "UserUpdater", ->
 		beforeEach ->
 			@UserGetter.ensureUniqueEmailAddress = sinon.stub().callsArgWith(1)
 			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, null)
-			@request.callsArgWith(1, null, { statusCode: 201 })
 
 		it 'add email', (done)->
 			@UserUpdater.addEmailAddress @stubbedUser._id, @newEmail, (err)=>
@@ -88,18 +88,11 @@ describe "UserUpdater", ->
 				department: 'Math'
 			@UserUpdater.addEmailAddress @stubbedUser._id, @newEmail, affiliationOptions, (err)=>
 				should.not.exist(err)
-				@request.calledOnce.should.equal true
-				requestOptions = @request.lastCall.args[0]
-				expectedUrl = "v1.url/api/v2/users/#{@stubbedUser._id}/affiliations"
-				requestOptions.url.should.equal expectedUrl
-				requestOptions.method.should.equal 'POST'
-
-				body = requestOptions.body
-				Object.keys(body).length.should.equal 4
-				body.email.should.equal @newEmail
-				body.university.should.equal affiliationOptions.university
-				body.department.should.equal affiliationOptions.department
-				body.role.should.equal affiliationOptions.role
+				@addAffiliation.calledOnce.should.equal true
+				args = @addAffiliation.lastCall.args
+				args[0].should.equal @stubbedUser._id
+				args[1].should.equal @newEmail
+				args[2].should.equal affiliationOptions
 				done()
 
 		it 'handle error', (done)->
@@ -112,17 +105,15 @@ describe "UserUpdater", ->
 
 		it 'handle affiliation error', (done)->
 			body = errors: 'affiliation error message'
-			@request.callsArgWith(1, null, { statusCode: 422 }, body)
+			@addAffiliation.callsArgWith(3, new Error('nope'))
 			@UserUpdater.addEmailAddress @stubbedUser._id, @newEmail, (err)=>
-				err.message.should.have.string 422
-				err.message.should.have.string body.errors
+				should.exist(err)
 				@UserUpdater.updateUser.called.should.equal false
 				done()
 
 	describe 'removeEmailAddress', ->
 		beforeEach ->
 			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, null, nMatched: 1)
-			@request.callsArgWith(1, null, { statusCode: 404 })
 
 		it 'remove email', (done)->
 			@UserUpdater.removeEmailAddress @stubbedUser._id, @newEmail, (err)=>
@@ -136,12 +127,10 @@ describe "UserUpdater", ->
 		it 'remove affiliation', (done)->
 			@UserUpdater.removeEmailAddress @stubbedUser._id, @newEmail, (err)=>
 				should.not.exist(err)
-				@request.calledOnce.should.equal true
-				requestOptions = @request.lastCall.args[0]
-				expectedUrl = "v1.url/api/v2/users/#{@stubbedUser._id}/affiliations/"
-				expectedUrl += encodeURIComponent(@newEmail)
-				requestOptions.url.should.equal expectedUrl
-				requestOptions.method.should.equal 'DELETE'
+				@removeAffiliation.calledOnce.should.equal true
+				args = @removeAffiliation.lastCall.args
+				args[0].should.equal @stubbedUser._id
+				args[1].should.equal @newEmail
 				done()
 
 		it 'handle error', (done)->
@@ -159,9 +148,9 @@ describe "UserUpdater", ->
 				done()
 
 		it 'handle affiliation error', (done)->
-			@request.callsArgWith(1, null, { statusCode: 500 })
+			@removeAffiliation.callsArgWith(2, new Error('nope'))
 			@UserUpdater.removeEmailAddress @stubbedUser._id, @newEmail, (err)=>
-				err.message.should.exist
+				should.exist(err)
 				@UserUpdater.updateUser.called.should.equal false
 				done()
 
@@ -216,6 +205,3 @@ describe "UserUpdater", ->
 			@UserUpdater.confirmEmail @stubbedUser._id, @newEmail, (err)=>
 				should.exist(err)
 				done()
-
-
-
