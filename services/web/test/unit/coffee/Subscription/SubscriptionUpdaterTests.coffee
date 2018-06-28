@@ -58,6 +58,11 @@ describe "SubscriptionUpdater", ->
 		@PlansLocator =
 			findLocalPlanInSettings: sinon.stub().returns({})
 
+		@UserGetter =
+			getUsers: (memberIds, projection, callback) ->
+				users = memberIds.map (id) -> { _id: id }
+				callback(null, users)
+
 		@ReferalFeatures = getBonusFeatures: sinon.stub().callsArgWith(1)
 		@Modules = {hooks: {fire: sinon.stub().callsArgWith(2, null, null)}}
 		@SubscriptionUpdater = SandboxedModule.require modulePath, requires:
@@ -74,7 +79,6 @@ describe "SubscriptionUpdater", ->
 	describe "syncSubscription", ->
 
 		beforeEach ->
-
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @subscription)
 			@SubscriptionUpdater._updateSubscriptionFromRecurly = sinon.stub().callsArgWith(2)
 
@@ -88,7 +92,6 @@ describe "SubscriptionUpdater", ->
 				done()
 
 		it "should not call updateFeatures with group subscription if recurly subscription is not expired", (done)->
-
 			@SubscriptionUpdater.syncSubscription @recurlySubscription, @adminUser._id, (err)=>
 				@SubscriptionLocator.getUsersSubscription.calledWith(@adminUser._id).should.equal true
 				@SubscriptionUpdater._updateSubscriptionFromRecurly.called.should.equal true
@@ -144,7 +147,6 @@ describe "SubscriptionUpdater", ->
 				done()
 
 
-
 	describe "_createNewSubscription", ->
 		it "should create a new subscription then update the subscription", (done)->
 			@SubscriptionUpdater._createNewSubscription @adminUser._id, =>
@@ -155,14 +157,24 @@ describe "SubscriptionUpdater", ->
 
 	describe "addUserToGroup", ->
 		beforeEach ->
+			@SubscriptionUpdater.addUsersToGroup = sinon.stub().yields(null)
+
+		it "delegates to addUsersToGroup", (done)->
+			@SubscriptionUpdater.addUserToGroup @adminUser._id, @otherUserId, =>
+				@SubscriptionUpdater.addUsersToGroup
+					.calledWith(@adminUser._id, [@otherUserId]).should.equal true
+				done()
+
+	describe "addUsersToGroup", ->
+		beforeEach ->
 			@FeaturesUpdater.refreshFeatures = sinon.stub().callsArgWith(1)
 
-		it "should add the users id to the group as a set", (done)->
-			@SubscriptionUpdater.addUserToGroup @adminUser._id, @otherUserId, =>
+		it "should add the user ids to the group as a set", (done)->
+			@SubscriptionUpdater.addUsersToGroup @adminUser._id, [@otherUserId], =>
 				searchOps =
 					admin_id: @adminUser._id
 				insertOperation =
-					"$addToSet": {member_ids:@otherUserId}
+					{ $push: { member_ids: { $each: [@otherUserId] } } }
 				@findAndModifyStub.calledWith(searchOps, insertOperation).should.equal true
 				done()
 
