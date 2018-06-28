@@ -5,6 +5,10 @@ define [
 		$scope.userEmails = []
 		$scope.countries = []
 		$scope.universities = []
+		$scope.roles = []
+		$scope.departments = []
+
+		_defaultDepartments = []
 
 		LOCAL_AND_DOMAIN_REGEX = /([^@]+)@(.+)/
 		EMAIL_REGEX = /^([A-Za-z0-9_\-\.]+)@([^\.]+)\.([A-Za-z0-9_\-\.]+)([^\.])$/
@@ -45,9 +49,6 @@ define [
 				$scope.newAffiliation.department = null
 				$q.reject null
 
-		$scope.handleEmailInputBlur = () ->
-			# if $scope.newAffiliation.autoDetectMode and !$scope.newAffiliation.university and $scope.newAffiliation.email?.match EMAIL_REGEX
-			# 	$scope.newAffiliation.autoDetectMode = false
 
 		$scope.selectUniversityManually = () ->
 			$scope.newAffiliation.university = null
@@ -96,8 +97,11 @@ define [
 				.removeUserEmail email
 				.then () -> _getUserEmails()
 
-		$scope.getUniqueUniversityDepartments = () ->
-			_.uniq $scope.newAffiliation.university.departments
+		$scope.getDepartments = () ->
+			if $scope.newAffiliation.university?.departments.length > 0
+				_.uniq $scope.newAffiliation.university.departments
+			else
+				UserAffiliationsDataService.getDefaultDepartmentHints()
 
 		_reset = () ->
 			$scope.newAffiliation =
@@ -130,6 +134,17 @@ define [
 			.getCountries()
 			.then (countries) -> $scope.countries = countries
 
+		# Populates the roles dropdown
+		UserAffiliationsDataService
+			.getDefaultRoleHints()
+			.then (roles) -> $scope.roles = roles 
+
+		# Fetches the default department hints
+		UserAffiliationsDataService
+			.getDefaultDepartmentHints()
+			.then (departments) -> 
+				_defaultDepartments = departments
+
 		# Populates the universities dropdown (after selecting a country)
 		$scope.$watch "newAffiliation.country", (newSelectedCountry, prevSelectedCountry) ->
 			if newSelectedCountry? and newSelectedCountry != prevSelectedCountry
@@ -139,4 +154,13 @@ define [
 				UserAffiliationsDataService
 					.getUniversitiesFromCountry(newSelectedCountry)
 					.then (universities) -> $scope.universities = universities
+
+		# Populates the departments dropdown (after selecting a university)
+		$scope.$watch "newAffiliation.university", (newSelectedUniversity, prevSelectedUniversity) ->
+			if newSelectedUniversity? and newSelectedUniversity != prevSelectedUniversity
+				if newSelectedUniversity.departments?.length > 0
+					$scope.departments = _.uniq newSelectedUniversity.departments
+				else 
+					$scope.departments = _defaultDepartments
+
 	]
