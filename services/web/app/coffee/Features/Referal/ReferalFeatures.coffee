@@ -1,11 +1,12 @@
 _ = require("underscore")
 logger = require('logger-sharelatex')
-UserGetter = require('../User/UserGetter')
+User = require('../../models/User').User
 Settings = require "settings-sharelatex"
 
 module.exports = ReferalFeatures =
 	getBonusFeatures: (user_id, callback = (error) ->) ->
-		UserGetter.getUserOrUserStubById user_id, null, (error, user) ->
+		query = _id: user_id
+		User.findOne query, (error, user) ->
 			return callback(error) if error
 			return callback(new Error("user not found #{user_id} for assignBonus")) if !user?
 			logger.log user_id: user_id, refered_user_count: user.refered_user_count, "assigning bonus"

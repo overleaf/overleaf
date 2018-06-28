@@ -64,6 +64,7 @@ describe "SubscriptionUpdater", ->
 			'../../models/Subscription': Subscription:@SubscriptionModel
 			'./UserFeaturesUpdater': @UserFeaturesUpdater
 			'./SubscriptionLocator': @SubscriptionLocator
+			'../User/UserGetter': @UserGetter
 			'./PlansLocator': @PlansLocator
 			"logger-sharelatex": log:->
 			'settings-sharelatex': @Settings
