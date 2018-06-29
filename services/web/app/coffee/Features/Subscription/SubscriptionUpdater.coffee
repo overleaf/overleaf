@@ -71,7 +71,7 @@ module.exports = SubscriptionUpdater =
 
 	_createNewSubscription: (adminUser_id, callback)->
 		logger.log adminUser_id:adminUser_id, "creating new subscription"
-		subscription = new Subscription(admin_id:adminUser_id)
+		subscription = new Subscription(admin_id:adminUser_id, manager_ids: [adminUser_id])
 		subscription.freeTrial.allowed = false
 		subscription.save (err)->
 			callback err, subscription
