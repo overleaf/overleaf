@@ -39,6 +39,7 @@ describe "FeatureUpdater.refreshFeatures", ->
 		beforeEach ->
 			Subscription.create {
 				admin_id: @user._id
+				manager_ids: [@user._id]
 				planCode: 'collaborator'
 				customAccount: true
 			} # returns a promise
@@ -163,6 +164,7 @@ describe "FeatureUpdater.refreshFeatures", ->
 		beforeEach (done) ->
 			Subscription.create {
 				admin_id: @user._id
+				manager_ids: [@user._id]
 				planCode: 'professional'
 				customAccount: true
 			}, (error) =>

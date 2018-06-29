@@ -16,7 +16,8 @@ describe "SubscriptionGroupHandler", ->
 		@subscription_id = "31DSd1123D"
 
 		@subscription =
-			admin_id:@adminUser_id
+			admin_id: @adminUser_id
+			manager_ids: [@adminUser_id]
 			_id:@subscription_id
 
 		@SubscriptionLocator =
@@ -124,34 +125,37 @@ describe "SubscriptionGroupHandler", ->
 				done()
 
 	describe "replaceUserReferencesInGroups", ->
-		beforeEach ->
+		beforeEach (done)->
 			@oldId = "ba5eba11"
 			@newId = "5ca1ab1e"
+			@Handler.replaceUserReferencesInGroups @oldId, @newId, ->
+				done()
 
-		it "replaces the admin_id", (done) ->
-			@Handler.replaceUserReferencesInGroups @oldId, @newId, (err) =>
-
+		it "replaces the admin_id", ->
 				@Subscription.update.calledWith(
 					{ admin_id: @oldId },
 					{ admin_id: @newId }
 				).should.equal true
 
-				done()
-
-		it "replaces the member ids", (done) ->
-			@Handler.replaceUserReferencesInGroups @oldId, @newId, (err) =>
-
+		it "replaces the manager_ids", ->
 				@Subscription.update.calledWith(
-					{ member_ids: @oldId },
-					{ $addToSet: { member_ids: @newId } }
+					{manager_ids:"ba5eba11"},{$addToSet:{manager_ids:"5ca1ab1e"}},{multi:true}
 				).should.equal true
 
 				@Subscription.update.calledWith(
-					{ member_ids: @oldId },
-					{ $pull: { member_ids: @oldId } }
+					{manager_ids:"ba5eba11"},{$pull:{manager_ids:"ba5eba11"}},{multi:true}
 				).should.equal true
 
-				done()
+		it "replaces the member ids", ->
+			@Subscription.update.calledWith(
+				{ member_ids: @oldId },
+				{ $addToSet: { member_ids: @newId } }
+			).should.equal true
+
+			@Subscription.update.calledWith(
+				{ member_ids: @oldId },
+				{ $pull: { member_ids: @oldId } }
+			).should.equal true
 
 	describe "getPopulatedListOfMembers", ->
 		beforeEach ->
