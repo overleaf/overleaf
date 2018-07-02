@@ -2,6 +2,23 @@
   "name": "web-sharelatex",
   "version": "0.1.4",
   "dependencies": {
+    "@contentful/axios": {
+      "version": "0.18.0",
+      "from": "@contentful/axios@>=0.18.0 <0.19.0",
+      "resolved": "https://registry.npmjs.org/@contentful/axios/-/axios-0.18.0.tgz",
+      "dependencies": {
+        "debug": {
+          "version": "3.1.0",
+          "from": "debug@>=3.1.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/debug/-/debug-3.1.0.tgz"
+        },
+        "follow-redirects": {
+          "version": "1.5.0",
+          "from": "follow-redirects@>=1.2.5 <2.0.0",
+          "resolved": "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.5.0.tgz"
+        }
+      }
+    },
     "@types/geojson": {
       "version": "1.0.6",
       "from": "@types/geojson@>=1.0.0 <2.0.0",
@@ -53,11 +70,6 @@
       "from": "acorn-jsx@>=3.0.0 <4.0.0",
       "resolved": "https://registry.npmjs.org/acorn-jsx/-/acorn-jsx-3.0.1.tgz",
       "dev": true
-    },
-    "addressparser": {
-      "version": "0.2.1",
-      "from": "addressparser@>=0.2.0 <0.3.0",
-      "resolved": "https://registry.npmjs.org/addressparser/-/addressparser-0.2.1.tgz"
     },
     "after": {
       "version": "0.8.2",
@@ -1917,6 +1929,28 @@
       "version": "1.0.4",
       "from": "content-type@>=1.0.4 <1.1.0",
       "resolved": "https://registry.npmjs.org/content-type/-/content-type-1.0.4.tgz"
+    },
+    "contentful": {
+      "version": "6.1.1",
+      "from": "contentful@>=6.1.1 <7.0.0",
+      "resolved": "https://registry.npmjs.org/contentful/-/contentful-6.1.1.tgz",
+      "dependencies": {
+        "lodash": {
+          "version": "4.17.10",
+          "from": "lodash@>=4.17.5 <5.0.0",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.10.tgz"
+        }
+      }
+    },
+    "contentful-resolve-response": {
+      "version": "1.1.4",
+      "from": "contentful-resolve-response@>=1.1.4 <2.0.0",
+      "resolved": "https://registry.npmjs.org/contentful-resolve-response/-/contentful-resolve-response-1.1.4.tgz"
+    },
+    "contentful-sdk-core": {
+      "version": "6.0.0-beta1",
+      "from": "contentful-sdk-core@>=6.0.0-beta0 <7.0.0",
+      "resolved": "https://registry.npmjs.org/contentful-sdk-core/-/contentful-sdk-core-6.0.0-beta1.tgz"
     },
     "continuable-cache": {
       "version": "0.3.1",
@@ -6922,11 +6956,6 @@
       "version": "2.1.17",
       "from": "mime-types@>=2.1.17 <2.2.0",
       "resolved": "https://registry.npmjs.org/mime-types/-/mime-types-2.1.17.tgz"
-    },
-    "mimelib": {
-      "version": "0.2.14",
-      "from": "mimelib@0.2.14",
-      "resolved": "https://registry.npmjs.org/mimelib/-/mimelib-0.2.14.tgz"
     },
     "mimic-fn": {
       "version": "1.2.0",
