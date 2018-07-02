@@ -2,6 +2,9 @@
 	.alert {
 		margin-bottom: 0;
 	}
+	h3 {
+		margin-top: 0;
+	}
 }
 
 #delete-account-modal {
@@ -10,3 +13,29 @@
 		margin-bottom: 4px;
 	}
 }
+
+.affiliations-table {
+	table-layout: fixed;
+}
+	.affiliations-table-email {
+		width: 40%;
+	}
+	.affiliations-table-institution {
+		width: 40%;
+	}
+	.affiliations-table-inline-actions {
+		width: 20%;
+	}
+	.affiliations-table-highlighted-row {
+		background-color: tint(@content-alt-bg-color, 6%);
+	}
+
+	.affiliations-form-group {
+		margin-top: @table-cell-padding;
+		&:first-child {
+			margin-top: 0;
+		}
+	}
+	.affiliations-table-label {
+		padding-top: 4px;
+	}

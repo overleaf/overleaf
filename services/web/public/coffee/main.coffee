@@ -20,6 +20,9 @@ define [
 	"main/subscription/team-invite-controller"
 	"main/contact-us"
 	"main/learn"
+	"main/affiliations/controllers/UserAffiliationsController"
+	"main/affiliations/factories/UserAffiliationsDataService"
+	"main/keys"
 	"analytics/AbTestingManager"
 	"directives/asyncForm"
 	"directives/stopPropagation"
@@ -34,6 +37,7 @@ define [
 	"services/queued-http"
 	"services/validateCaptcha"
 	"filters/formatDate"
+	"components/inputSuggestions"
 	"__MAIN_CLIENTSIDE_INCLUDES__"
 ], () ->
 	angular.module('SharelatexApp').config(
