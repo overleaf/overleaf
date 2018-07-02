@@ -64,6 +64,7 @@ describe 'ExportsHandler', ->
 			@project =
 				id: @project_id
 				overleaf:
+					id: @project_history_id # for projects imported from v1
 					history:
 						id: @project_history_id
 			@user =
@@ -90,12 +91,13 @@ describe 'ExportsHandler', ->
 				.should.equal true
 
 			it "should return export data", ->
-				expected_export_data = 
+				expected_export_data =
 					project:
 						id: @project_id
 						rootDocPath: @rootDocPath
 						historyId: @project_history_id
 						historyVersion: @historyVersion
+						v1ProjectId: @project_history_id
 					user:
 						id: @user_id
 						firstName: @user.first_name
@@ -126,6 +128,7 @@ describe 'ExportsHandler', ->
 						rootDocPath: @rootDocPath
 						historyId: @project_history_id
 						historyVersion: @historyVersion
+						v1ProjectId: @project_history_id
 					user:
 						id: @user_id
 						firstName: @custom_first_name

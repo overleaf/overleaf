@@ -56,6 +56,7 @@ module.exports = ExportsHandler = self =
 					rootDocPath: rootDoc[1]?.fileSystem
 					historyId: project.overleaf?.history?.id
 					historyVersion: historyVersion
+					v1ProjectId: project.overleaf?.id
 				user:
 					id: user_id
 					firstName: user.first_name
