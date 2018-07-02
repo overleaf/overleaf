@@ -159,9 +159,7 @@ module.exports = AuthenticationController =
 		return isValid
 
 	_redirectToLoginOrRegisterPage: (req, res)->
-		if (req.query.zipUrl? or
-			  req.query.project_name? or
-			  req.path == '/user/subscription/new')
+		if (req.query.zipUrl? or req.query.project_name? or req.path == '/user/subscription/new')
 			return AuthenticationController._redirectToRegisterPage(req, res)
 		else
 			AuthenticationController._redirectToLoginPage(req, res)

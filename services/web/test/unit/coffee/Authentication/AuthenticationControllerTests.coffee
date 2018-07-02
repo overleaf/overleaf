@@ -341,7 +341,7 @@ describe "AuthenticationController", ->
 						_id:@user_id
 					}
 				}
-		 	}
+			}
 			result = @AuthenticationController.getLoggedInUserId @req
 			expect(result).to.equal @user_id
 

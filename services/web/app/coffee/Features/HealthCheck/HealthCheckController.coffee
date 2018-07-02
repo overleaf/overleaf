@@ -10,7 +10,7 @@ module.exports = HealthCheckController =
 	check: (req, res, next = (error) ->) ->
 		d = domain.create()
 		d.on "error", (error) ->
- 			logger.err err: error, "error in mocha"
+			logger.err err: error, "error in mocha"
 		d.run () ->
 			mocha = new Mocha(reporter: Reporter(res), timeout: 10000)
 			mocha.addFile("test/smoke/js/SmokeTests.js")
