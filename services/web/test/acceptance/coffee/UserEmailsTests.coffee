@@ -100,8 +100,8 @@ describe "UserEmails", ->
 				(cb) =>
 					# Delete the email from the first user
 					@user.request { 
-						method: 'DELETE',
-						url: '/user/emails',
+						method: 'POST',
+						url: '/user/emails/delete',
 						json: {@email}
 					}, cb
 				(cb) =>
