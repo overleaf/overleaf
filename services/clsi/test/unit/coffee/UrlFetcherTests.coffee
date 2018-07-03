@@ -7,16 +7,47 @@ EventEmitter = require("events").EventEmitter
 describe "UrlFetcher", ->
 	beforeEach ->
 		@callback = sinon.stub()
-		@url = "www.example.com/file"
+		@url = "https://www.example.com/file/here?query=string"
 		@UrlFetcher = SandboxedModule.require modulePath, requires:
 			request: defaults: @defaults = sinon.stub().returns(@request = {})
 			fs: @fs = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			"settings-sharelatex": @settings = {}
 
 	it "should turn off the cookie jar in request", ->
 		@defaults.calledWith(jar: false)
 			.should.equal true
-		
+
+	describe "rewrite url domain if filestoreDomainOveride is set", ->
+		beforeEach ->
+			@path = "/path/to/file/on/disk"
+			@request.get = sinon.stub().returns(@urlStream = new EventEmitter)
+			@urlStream.pipe = sinon.stub()
+			@urlStream.pause = sinon.stub()
+			@urlStream.resume = sinon.stub()
+			@fs.createWriteStream = sinon.stub().returns(@fileStream = new EventEmitter)
+			@fs.unlink = (file, callback) -> callback()
+
+		it "should use the normal domain when override not set", (done)->
+			@UrlFetcher.pipeUrlToFile @url, @path, =>
+				@request.get.args[0][0].url.should.equal @url
+				done()
+			@res = statusCode: 200
+			@urlStream.emit "response", @res
+			@urlStream.emit "end"
+			@fileStream.emit "finish"
+
+
+		it "should use override domain when filestoreDomainOveride is set", (done)->
+			@settings.filestoreDomainOveride = "192.11.11.11"
+			@UrlFetcher.pipeUrlToFile @url, @path, =>
+				@request.get.args[0][0].url.should.equal "192.11.11.11/file/here?query=string"
+				done()
+			@res = statusCode: 200
+			@urlStream.emit "response", @res
+			@urlStream.emit "end"
+			@fileStream.emit "finish"
+
 	describe "pipeUrlToFile", ->
 		beforeEach (done)->
 			@path = "/path/to/file/on/disk"
