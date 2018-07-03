@@ -10,13 +10,14 @@ define [
 	"ide/editor/directives/aceEditor/spell-check/SpellCheckAdapter"
 	"ide/editor/directives/aceEditor/highlights/HighlightsManager"
 	"ide/editor/directives/aceEditor/cursor-position/CursorPositionManager"
+	"ide/editor/directives/aceEditor/cursor-position/CursorPositionAdapter"
 	"ide/editor/directives/aceEditor/track-changes/TrackChangesManager"
 	"ide/editor/directives/aceEditor/metadata/MetadataManager"
 	"ide/metadata/services/metadata"
 	"ide/graphics/services/graphics"
 	"ide/preamble/services/preamble"
     "ide/files/services/files"
-], (App, Ace, SearchBox, Vim, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, SpellCheckAdapter, HighlightsManager, CursorPositionManager, TrackChangesManager, MetadataManager) ->
+], (App, Ace, SearchBox, Vim, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, SpellCheckAdapter, HighlightsManager, CursorPositionManager, CursorPositionAdapter, TrackChangesManager, MetadataManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
 	ModeList = ace.require('ace/ext/modelist')
 	Vim = ace.require('ace/keyboard/vim').Vim
@@ -108,7 +109,7 @@ define [
 
 				undoManager           = new UndoManager(scope, editor, element)
 				highlightsManager     = new HighlightsManager(scope, editor, element)
-				cursorPositionManager = new CursorPositionManager(scope, editor, element, localStorage)
+				cursorPositionManager = new CursorPositionManager(scope, new CursorPositionAdapter(editor), localStorage)
 				trackChangesManager   = new TrackChangesManager(scope, editor, element)
 				metadataManager = new MetadataManager(scope, editor, element, metadata)
 				autoCompleteManager = new AutoCompleteManager(scope, editor, element, metadataManager, graphics, preamble, files)
@@ -380,6 +381,21 @@ define [
 					editor.off 'changeSession', onSessionChangeForSpellCheck
 					editor.off 'nativecontextmenu', spellCheckManager.onContextMenu
 
+				onSessionChangeForCursorPosition = (e) ->
+					cursorPositionManager.onSessionChange(e)
+					e.oldSession?.selection.off 'changeCursor', cursorPositionManager.onCursorChange
+					e.session.selection.on 'changeCursor', cursorPositionManager.onCursorChange
+
+				initCursorPosition = () ->
+					cursorPositionManager.init()
+					editor.on 'changeSession', onSessionChangeForCursorPosition
+					onSessionChangeForCursorPosition({ session: editor.getSession() }) # Force initial setup
+					$(window).on "unload", () ->
+						cursorPositionManager.onUnload(editor.getSession())
+
+				tearDownCursorPosition = () ->
+					editor.off 'changeSession', onSessionChangeForCursorPosition
+
 				attachToAce = (sharejs_doc) ->
 					lines = sharejs_doc.getSnapshot().split("\n")
 					session = editor.getSession()
@@ -426,6 +442,7 @@ define [
 					# now ready to edit document
 					editor.setReadOnly(scope.readOnly) # respect the readOnly setting, normally false
 					initSpellCheck()
+					initCursorPosition()
 
 					resetScrollMargins()
 
@@ -488,6 +505,7 @@ define [
 				scope.$on '$destroy', () ->
 					if scope.sharejsDoc?
 						tearDownSpellCheck()
+						tearDownCursorPosition()
 						detachFromAce(scope.sharejsDoc)
 						session = editor.getSession()
 						session?.destroy()
