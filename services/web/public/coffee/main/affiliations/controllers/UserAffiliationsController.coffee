@@ -3,12 +3,6 @@ define [
 ], (App) ->
 	App.controller "UserAffiliationsController", ["$scope", "UserAffiliationsDataService", "$q", "_", ($scope, UserAffiliationsDataService, $q, _) ->
 		$scope.userEmails = []
-		$scope.countries = []
-		$scope.universities = []
-		$scope.roles = []
-		$scope.departments = []
-
-		_defaultDepartments = []
 
 		LOCAL_AND_DOMAIN_REGEX = /([^@]+)@(.+)/
 		EMAIL_REGEX = /^([A-Za-z0-9_\-\.]+)@([^\.]+)\.([A-Za-z0-9_\-\.]+)([^\.])$/
@@ -19,9 +13,6 @@ define [
 				{ local: match[1], domain: match[2] }
 			else
 				{ local: null, domain: null }
-
-		$scope.addUniversityToSelection = (universityName) -> 
-			{ name: universityName, isUserSuggested: true }
 
 		$scope.getEmailSuggestion = (userInput) ->
 			userInputLocalAndDomain = _matchLocalAndDomain(userInput)
@@ -97,11 +88,11 @@ define [
 				.removeUserEmail email
 				.then () -> _getUserEmails()
 
-		$scope.getDepartments = () ->
-			if $scope.newAffiliation.university?.departments.length > 0
-				_.uniq $scope.newAffiliation.university.departments
-			else
-				UserAffiliationsDataService.getDefaultDepartmentHints()
+		# $scope.getDepartments = () ->
+		# 	if $scope.newAffiliation.university?.departments.length > 0
+		# 		_.uniq $scope.newAffiliation.university.departments
+		# 	else
+		# 		UserAffiliationsDataService.getDefaultDepartmentHints()
 
 		_reset = () ->
 			$scope.newAffiliation =
@@ -128,39 +119,5 @@ define [
 					$scope.userEmails = emails
 					$scope.ui.isLoadingEmails = false
 		_getUserEmails()
-
-		# Populates the countries dropdown
-		UserAffiliationsDataService
-			.getCountries()
-			.then (countries) -> $scope.countries = countries
-
-		# Populates the roles dropdown
-		UserAffiliationsDataService
-			.getDefaultRoleHints()
-			.then (roles) -> $scope.roles = roles 
-
-		# Fetches the default department hints
-		UserAffiliationsDataService
-			.getDefaultDepartmentHints()
-			.then (departments) -> 
-				_defaultDepartments = departments
-
-		# Populates the universities dropdown (after selecting a country)
-		$scope.$watch "newAffiliation.country", (newSelectedCountry, prevSelectedCountry) ->
-			if newSelectedCountry? and newSelectedCountry != prevSelectedCountry
-				$scope.newAffiliation.university = null
-				$scope.newAffiliation.role = null
-				$scope.newAffiliation.department = null
-				UserAffiliationsDataService
-					.getUniversitiesFromCountry(newSelectedCountry)
-					.then (universities) -> $scope.universities = universities
-
-		# Populates the departments dropdown (after selecting a university)
-		$scope.$watch "newAffiliation.university", (newSelectedUniversity, prevSelectedUniversity) ->
-			if newSelectedUniversity? and newSelectedUniversity != prevSelectedUniversity
-				if newSelectedUniversity.departments?.length > 0
-					$scope.departments = _.uniq newSelectedUniversity.departments
-				else 
-					$scope.departments = _defaultDepartments
 
 	]

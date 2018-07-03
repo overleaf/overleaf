@@ -88,74 +88,11 @@ form.row(
 								href
 								ng-click="selectUniversityManually();"
 							) Let us know
-						.affiliations-form-group(
-							ng-if="ui.showManualUniversitySelectionUI"
+						affiliation-form(
+							affiliation-data="newAffiliation"
+							show-university-and-country="ui.showManualUniversitySelectionUI"
+							show-role-and-department="ui.isValidEmail && newAffiliation.university"
 						)
-							ui-select(
-								ng-model="newAffiliation.country"
-							)
-								ui-select-match(
-									placeholder="Country"
-								) {{ $select.selected.name }}
-								ui-select-choices(
-									repeat="country in countries | filter: $select.search"
-								)
-									span(
-										ng-bind="country.name"
-									s)
-						.affiliations-form-group(
-							ng-if="ui.showManualUniversitySelectionUI"
-						)
-							ui-select(
-								ng-model="newAffiliation.university"
-								ng-disabled="!newAffiliation.country"
-								tagging="addUniversityToSelection"
-								tagging-label="false"
-							)
-								ui-select-match(
-									placeholder="Institution"
-								) {{ $select.selected.name }}
-								ui-select-choices(
-									repeat="university in universities | filter: $select.search"
-								)
-									span(
-										ng-bind="university.name"
-									)
-						.affiliations-form-group(
-							ng-if="ui.isValidEmail && newAffiliation.university"
-						)
-							ui-select(
-								ng-model="newAffiliation.role"
-								tagging
-								tagging-label="false"
-							)
-								ui-select-match(
-									placeholder="Role"
-								) {{ $select.selected }}
-								ui-select-choices(
-									repeat="role in roles | filter: $select.search"
-								)
-									span(
-										ng-bind="role"
-									)
-
-						.affiliations-form-group(
-							ng-if="ui.isValidEmail && newAffiliation.university"
-						)
-							ui-select(
-								ng-model="newAffiliation.department"
-								tagging
-								tagging-label="false"
-							)
-								ui-select-match(
-									placeholder="Department"
-								) {{ $select.selected }}
-								ui-select-choices(
-									repeat="department in departments | filter: $select.search"
-								)
-									span(
-										ng-bind="department"
-									)
 					td
 						button.btn.btn-primary(
 							ng-disabled="affiliationsForm.$invalid || ui.isAddingNewEmail"
@@ -170,3 +107,73 @@ form.row(
 								i.fa.fa-fw.fa-spin.fa-refresh
 								| &nbsp;Adding...
 		hr
+
+script(type="text/ng-template", id="affiliationFormTpl")
+	.affiliations-form-group(
+		ng-if="$ctrl.showUniversityAndCountry"
+	)
+		ui-select(
+			ng-model="$ctrl.affiliationData.country"
+		)
+			ui-select-match(
+				placeholder="Country"
+			) {{ $select.selected.name }}
+			ui-select-choices(
+				repeat="country in $ctrl.countries | filter: $select.search"
+			)
+				span(
+					ng-bind="country.name"
+				)
+	.affiliations-form-group(
+		ng-if="$ctrl.showUniversityAndCountry"
+	)
+		ui-select(
+			ng-model="$ctrl.affiliationData.university"
+			ng-disabled="!$ctrl.affiliationData.country"
+			tagging="$ctrladdUniversityToSelection"
+			tagging-label="false"
+		)
+			ui-select-match(
+				placeholder="Institution"
+			) {{ $select.selected.name }}
+			ui-select-choices(
+				repeat="university in $ctrl.universities | filter: $select.search"
+			)
+				span(
+					ng-bind="university.name"
+				)
+	.affiliations-form-group(
+		ng-if="$ctrl.showRoleAndDepartment"
+	)
+		ui-select(
+			ng-model="$ctrl.affiliationData.role"
+			tagging
+			tagging-label="false"
+		)
+			ui-select-match(
+				placeholder="Role"
+			) {{ $select.selected }}
+			ui-select-choices(
+				repeat="role in $ctrl.roles | filter: $select.search"
+			)
+				span(
+					ng-bind="role"
+				)
+
+	.affiliations-form-group(
+		ng-if="$ctrl.showRoleAndDepartment"
+	)
+		ui-select(
+			ng-model="$ctrl.affiliationData.department"
+			tagging
+			tagging-label="false"
+		)
+			ui-select-match(
+				placeholder="Department"
+			) {{ $select.selected }}
+			ui-select-choices(
+				repeat="department in $ctrl.departments | filter: $select.search"
+			)
+				span(
+					ng-bind="department"
+				)
