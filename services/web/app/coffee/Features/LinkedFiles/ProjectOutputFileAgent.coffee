@@ -93,11 +93,17 @@ module.exports = ProjectOutputFileAgent = {
 	_getSourceProject: LinkedFilesHandler.getSourceProject
 
 	_validate: (data) ->
-		return (
-			(data.source_project_id? || data.v1_source_doc_id?) &&
-			data.source_output_file_path? &&
-			data.build_id?
-		)
+		if data.v1_source_doc_id?
+			(
+				data.v1_source_doc_id? &&
+				data.source_output_file_path?
+			)
+		else
+			(
+				data.source_project_id? &&
+				data.source_output_file_path? &&
+				data.build_id?
+			)
 
 	_checkAuth: (project_id, data, current_user_id, callback = (err, allowed)->) ->
 		callback = _.once(callback)
