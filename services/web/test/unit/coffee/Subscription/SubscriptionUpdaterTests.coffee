@@ -4,16 +4,16 @@ expect = require('chai').expect
 sinon = require 'sinon'
 modulePath = "../../../../app/js/Features/Subscription/SubscriptionUpdater"
 assert = require("chai").assert
-ObjectId = require('mongoose').Types.ObjectId	
+ObjectId = require('mongoose').Types.ObjectId
 
 describe "SubscriptionUpdater", ->
 
 	beforeEach ->
-		@recurlySubscription = 
+		@recurlySubscription =
 			uuid: "1238uoijdasjhd"
 			plan:
 				plan_code: "kjhsakjds"
-		@adminUser = 
+		@adminUser =
 			_id: @adminuser_id = "5208dd34438843e2db000007"
 		@otherUserId = "5208dd34438842e2db000005"
 		@allUserIds = ["13213", "dsadas", "djsaiud89"]
@@ -36,18 +36,18 @@ describe "SubscriptionUpdater", ->
 		@updateStub = sinon.stub().callsArgWith(2, null)
 		@findAndModifyStub = sinon.stub().callsArgWith(2, null, @subscription)
 		@SubscriptionModel = class
-			constructor: (opts)-> 
+			constructor: (opts)->
 				subscription.admin_id = opts.admin_id
 				return subscription
 			@remove: sinon.stub().yields()
 		@SubscriptionModel.update = @updateStub
 		@SubscriptionModel.findAndModify = @findAndModifyStub
 
-		@SubscriptionLocator = 
+		@SubscriptionLocator =
 			getUsersSubscription: sinon.stub()
 			getGroupSubscriptionMemberOf:sinon.stub()
-			
-		@Settings = 
+
+		@Settings =
 			freeTrialPlanCode: "collaborator"
 			defaultPlanCode: "personal"
 			defaultFeatures: { "default": "features" }
@@ -58,12 +58,18 @@ describe "SubscriptionUpdater", ->
 		@PlansLocator =
 			findLocalPlanInSettings: sinon.stub().returns({})
 
+		@UserGetter =
+			getUsers: (memberIds, projection, callback) ->
+				users = memberIds.map (id) -> { _id: id }
+				callback(null, users)
+
 		@ReferalFeatures = getBonusFeatures: sinon.stub().callsArgWith(1)
 		@Modules = {hooks: {fire: sinon.stub().callsArgWith(2, null, null)}}
 		@SubscriptionUpdater = SandboxedModule.require modulePath, requires:
 			'../../models/Subscription': Subscription:@SubscriptionModel
 			'./UserFeaturesUpdater': @UserFeaturesUpdater
 			'./SubscriptionLocator': @SubscriptionLocator
+			'../User/UserGetter': @UserGetter
 			'./PlansLocator': @PlansLocator
 			"logger-sharelatex": log:->
 			'settings-sharelatex': @Settings
@@ -73,7 +79,6 @@ describe "SubscriptionUpdater", ->
 	describe "syncSubscription", ->
 
 		beforeEach ->
-
 			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @subscription)
 			@SubscriptionUpdater._updateSubscriptionFromRecurly = sinon.stub().callsArgWith(2)
 
@@ -87,7 +92,6 @@ describe "SubscriptionUpdater", ->
 				done()
 
 		it "should not call updateFeatures with group subscription if recurly subscription is not expired", (done)->
-
 			@SubscriptionUpdater.syncSubscription @recurlySubscription, @adminUser._id, (err)=>
 				@SubscriptionLocator.getUsersSubscription.calledWith(@adminUser._id).should.equal true
 				@SubscriptionUpdater._updateSubscriptionFromRecurly.called.should.equal true
@@ -99,7 +103,7 @@ describe "SubscriptionUpdater", ->
 	describe "_updateSubscriptionFromRecurly", ->
 		beforeEach ->
 			@FeaturesUpdater.refreshFeatures = sinon.stub().callsArgWith(1)
-			
+
 		it "should update the subscription with token etc when not expired", (done)->
 			@SubscriptionUpdater._updateSubscriptionFromRecurly @recurlySubscription, @subscription, (err)=>
 				@subscription.recurlySubscription_id.should.equal @recurlySubscription.uuid
@@ -143,7 +147,6 @@ describe "SubscriptionUpdater", ->
 				done()
 
 
-
 	describe "_createNewSubscription", ->
 		it "should create a new subscription then update the subscription", (done)->
 			@SubscriptionUpdater._createNewSubscription @adminUser._id, =>
@@ -154,14 +157,24 @@ describe "SubscriptionUpdater", ->
 
 	describe "addUserToGroup", ->
 		beforeEach ->
+			@SubscriptionUpdater.addUsersToGroup = sinon.stub().yields(null)
+
+		it "delegates to addUsersToGroup", (done)->
+			@SubscriptionUpdater.addUserToGroup @adminUser._id, @otherUserId, =>
+				@SubscriptionUpdater.addUsersToGroup
+					.calledWith(@adminUser._id, [@otherUserId]).should.equal true
+				done()
+
+	describe "addUsersToGroup", ->
+		beforeEach ->
 			@FeaturesUpdater.refreshFeatures = sinon.stub().callsArgWith(1)
 
-		it "should add the users id to the group as a set", (done)->
-			@SubscriptionUpdater.addUserToGroup @adminUser._id, @otherUserId, =>
-				searchOps = 
+		it "should add the user ids to the group as a set", (done)->
+			@SubscriptionUpdater.addUsersToGroup @adminUser._id, [@otherUserId], =>
+				searchOps =
 					admin_id: @adminUser._id
-				insertOperation = 
-					"$addToSet": {member_ids:@otherUserId}
+				insertOperation =
+					{ $push: { member_ids: { $each: [@otherUserId] } } }
 				@findAndModifyStub.calledWith(searchOps, insertOperation).should.equal true
 				done()
 
@@ -176,9 +189,9 @@ describe "SubscriptionUpdater", ->
 
 		it "should pull the users id from the group", (done)->
 			@SubscriptionUpdater.removeUserFromGroup @adminUser._id, @otherUserId, =>
-				searchOps = 
+				searchOps =
 					admin_id:@adminUser._id
-				removeOperation = 
+				removeOperation =
 					"$pull": {member_ids:@otherUserId}
 				@updateStub.calledWith(searchOps, removeOperation).should.equal true
 				done()
@@ -199,22 +212,22 @@ describe "SubscriptionUpdater", ->
 			@SubscriptionLocator.getSubscription = sinon.stub().yields(null, @subscription)
 			@FeaturesUpdater.refreshFeatures = sinon.stub().yields()
 			@SubscriptionUpdater.deleteSubscription @subscription_id, done
-			
+
 		it "should look up the subscription", ->
 			@SubscriptionLocator.getSubscription
 				.calledWith(@subscription_id)
 				.should.equal true
-		
+
 		it "should remove the subscription", ->
 			@SubscriptionModel.remove
 				.calledWith({_id: ObjectId(@subscription_id)})
 				.should.equal true
-		
+
 		it "should downgrade the admin_id", ->
 			@FeaturesUpdater.refreshFeatures
 				.calledWith(@subscription.admin_id)
 				.should.equal true
-		
+
 		it "should downgrade all of the members", ->
 			for user_id in @subscription.member_ids
 				@FeaturesUpdater.refreshFeatures

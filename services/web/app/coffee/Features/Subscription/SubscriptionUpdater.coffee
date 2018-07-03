@@ -2,6 +2,7 @@ async = require("async")
 _ = require("underscore")
 Subscription = require('../../models/Subscription').Subscription
 SubscriptionLocator = require("./SubscriptionLocator")
+UserGetter = require("../User/UserGetter")
 PlansLocator = require("./PlansLocator")
 Settings = require("settings-sharelatex")
 logger = require("logger-sharelatex")
@@ -24,17 +25,26 @@ module.exports = SubscriptionUpdater =
 					return callback(err) if err?
 					SubscriptionUpdater._updateSubscriptionFromRecurly recurlySubscription, subscription, callback
 
-	addUserToGroup: (adminUser_id, user_id, callback)->
-		logger.log adminUser_id:adminUser_id, user_id:user_id, "adding user into mongo subscription"
+	addUserToGroup: (adminUserId, userId, callback)->
+		@addUsersToGroup(adminUserId, [userId], callback)
+
+	addUsersToGroup: (adminUserId, memberIds, callback)->
+		logger.log adminUserId: adminUserId, memberIds: memberIds, "adding members into mongo subscription"
 		searchOps =
-			admin_id: adminUser_id
+			admin_id: adminUserId
 		insertOperation =
-			"$addToSet": {member_ids:user_id}
-		Subscription.findAndModify searchOps, insertOperation, (err, subscription)->
-			if err?
-				logger.err err:err, searchOps:searchOps, insertOperation:insertOperation, "error findy and modify add user to group"
-				return callback(err)
-			FeaturesUpdater.refreshFeatures user_id, callback
+			{ $push: { member_ids: { $each: memberIds } } }
+
+		Subscription.findAndModify searchOps, insertOperation, (err, subscription) ->
+			return callback(err) if err?
+
+			# Only apply features updates to users, not user stubs
+			UserGetter.getUsers memberIds, { _id: 1 }, (err, users) ->
+				return callback(err) if err?
+
+				userIds = users.map (u) -> u._id.toString()
+				async.map userIds, FeaturesUpdater.refreshFeatures, callback
+
 
 	removeUserFromGroup: (adminUser_id, user_id, callback)->
 		searchOps =
@@ -46,6 +56,9 @@ module.exports = SubscriptionUpdater =
 				logger.err err:err, searchOps:searchOps, removeOperation:removeOperation, "error removing user from group"
 				return callback(err)
 			FeaturesUpdater.refreshFeatures user_id, callback
+
+	deleteWithV1Id: (v1TeamId, callback)->
+		Subscription.deleteOne { "overleaf.id": v1TeamId }, callback
 
 	deleteSubscription: (subscription_id, callback = (error) ->) ->
 		SubscriptionLocator.getSubscription subscription_id, (err, subscription) ->
