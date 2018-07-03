@@ -72,6 +72,8 @@ describe 'ExportsHandler', ->
 				first_name: 'Arthur'
 				last_name: 'Author'
 				email: 'arthur.author@arthurauthoring.org'
+				overleaf:
+					id: 876
 			@rootDocPath = 'main.tex'
 			@historyVersion = 777
 			@ProjectGetter.getProject = sinon.stub().yields(null, @project)
@@ -104,6 +106,7 @@ describe 'ExportsHandler', ->
 						lastName: @user.last_name
 						email: @user.email
 						orcidId: null
+						v1UserId: 876
 					destination:
 						brandVariationId: @brand_variation_id
 					options:
@@ -135,6 +138,7 @@ describe 'ExportsHandler', ->
 						lastName: @custom_last_name
 						email: @user.email
 						orcidId: null
+						v1UserId: 876
 					destination:
 						brandVariationId: @brand_variation_id
 					options:
