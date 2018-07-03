@@ -94,6 +94,9 @@ script(type='text/ng-template', id='newFileModalTemplate')
 											ng-repeat="project in data.projects"
 											value="{{ project._id }}"
 										) {{ project.name }}
+									small(ng-if="hasNoProjects() && shouldEnableProjectSelect() ")
+										| No other projects found, please create another project first
+
 
 								.form-controls.row-spaced-small(ng-if="!state.isOutputFilesMode")
 									label(for="project-entity-select") Select a File
