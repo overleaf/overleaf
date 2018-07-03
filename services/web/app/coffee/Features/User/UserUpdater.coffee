@@ -29,6 +29,8 @@ module.exports = UserUpdater =
 	# emails and the default rather than calling this method directly
 	#
 	changeEmailAddress: (userId, newEmail, callback)->
+		newEmail = EmailHelper.parseEmail(newEmail)
+		return callback(new Error('invalid email')) if !newEmail?
 		logger.log userId: userId, newEmail: newEmail, "updaing email address of user"
 
 		oldEmail = null
@@ -49,6 +51,8 @@ module.exports = UserUpdater =
 		unless callback? # affiliationOptions is optional
 			callback = affiliationOptions
 			affiliationOptions = {}
+		newEmail = EmailHelper.parseEmail(newEmail)
+		return callback(new Error('invalid email')) if !newEmail?
 
 		UserGetter.ensureUniqueEmailAddress newEmail, (error) =>
 			return callback(error) if error?
@@ -69,6 +73,8 @@ module.exports = UserUpdater =
 	# remove one of the user's email addresses. The email cannot be the user's
 	# default email address
 	removeEmailAddress: (userId, email, callback) ->
+		email = EmailHelper.parseEmail(email)
+		return callback(new Error('invalid email')) if !email?
 		removeAffiliation userId, email, (error) =>
 			if error?
 				logger.err error: error, 'problem removing affiliation'
@@ -88,6 +94,8 @@ module.exports = UserUpdater =
 	# set the default email address by setting the `email` attribute. The email
 	# must be one of the user's multiple emails (`emails` attribute)
 	setDefaultEmailAddress: (userId, email, callback) ->
+		email = EmailHelper.parseEmail(email)
+		return callback(new Error('invalid email')) if !email?
 		query = _id: userId, 'emails.email': email
 		update = $set: email: email
 		@updateUser query, update, (error, res) ->
