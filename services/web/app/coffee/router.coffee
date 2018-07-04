@@ -111,19 +111,22 @@ module.exports = class Router
 		webRouter.get '/user/emails',
 			AuthenticationController.requireLogin(),
 			UserEmailsController.list
-		webRouter.post '/user/emails',
-			AuthenticationController.requireLogin(),
-			UserEmailsController.add
-		webRouter.post '/user/emails/delete',
-			AuthenticationController.requireLogin(),
-			UserEmailsController.remove
-		webRouter.post '/user/emails/default',
-			AuthenticationController.requireLogin(),
-			UserEmailsController.setDefault
 		webRouter.get '/user/emails/confirm',
 			UserEmailsController.showConfirm
 		webRouter.post '/user/emails/confirm',
 			UserEmailsController.confirm
+
+		unless Features.externalAuthenticationSystemUsed()
+			webRouter.post '/user/emails',
+				AuthenticationController.requireLogin(),
+				UserEmailsController.add
+			webRouter.post '/user/emails/delete',
+				AuthenticationController.requireLogin(),
+				UserEmailsController.remove
+			webRouter.post '/user/emails/default',
+				AuthenticationController.requireLogin(),
+				UserEmailsController.setDefault
+
 
 		webRouter.get  '/user/sessions',
 			AuthenticationController.requireLogin(),
