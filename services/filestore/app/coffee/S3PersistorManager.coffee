@@ -68,8 +68,8 @@ module.exports =
 		callback = _.once callback
 		logger.log bucketName:bucketName, key:key, "getting file from s3"
 		s3Client = knox.createClient
-			key: settings.filestore.s3.key
-			secret: settings.filestore.s3.secret
+			key: opts.credentials?.auth_key || settings.filestore.s3.key
+			secret: opts.credentials?.auth_secret || settings.filestore.s3.secret
 			bucket: bucketName
 		s3Stream = s3Client.get(key, headers)
 		s3Stream.end()
