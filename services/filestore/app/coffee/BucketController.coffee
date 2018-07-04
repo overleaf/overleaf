@@ -10,7 +10,7 @@ module.exports = BucketController =
 		{bucket} = req.params
 		key = req.params[0]
 		{format, style} = req.query
-		credentials = settings.filestore.s3&[bucket]
+		credentials = settings.filestore.s3[bucket]
 		options = {
 			key: key,
 			bucket: bucket,
