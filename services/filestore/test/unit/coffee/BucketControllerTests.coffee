@@ -43,9 +43,10 @@ describe "BucketController", ->
 		@bucket = "user_files"
 		@key = "#{@project_id}/#{@file_id}"
 		@req =
-			bucket:@bucket
-			0:@key
 			query:{}
+			params:
+				bucket: @bucket
+				0: @key
 			headers: {}
 		@res =
 			setHeader: ->

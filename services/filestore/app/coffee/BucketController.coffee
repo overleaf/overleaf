@@ -7,8 +7,8 @@ Errors = require('./Errors')
 module.exports = BucketController =
 
 	getFile: (req, res)->
-		{bucket} = req
-		key = req[0]
+		{bucket} = req.params
+		key = req.params[0]
 		{format, style} = req.query
 		credentials = settings.filestore.s3&[bucket]
 		options = {
