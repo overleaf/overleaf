@@ -35,11 +35,10 @@ define [
 					.then (universities) -> ctrl.universities = universities
 		# Populates the departments dropdown (after selecting a university)
 		$scope.$watch "$ctrl.affiliationData.university", (newSelectedUniversity, prevSelectedUniversity) ->
-			if newSelectedUniversity? and newSelectedUniversity != prevSelectedUniversity
-				if newSelectedUniversity.departments?.length > 0
-					ctrl.departments = _.uniq newSelectedUniversity.departments
-				else 
-					ctrl.departments = _defaultDepartments
+			if newSelectedUniversity? and newSelectedUniversity != prevSelectedUniversity and newSelectedUniversity.departments?.length > 0
+				ctrl.departments = _.uniq newSelectedUniversity.departments
+			else 
+				ctrl.departments = _defaultDepartments
 
 		return
 

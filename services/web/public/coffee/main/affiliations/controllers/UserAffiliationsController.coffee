@@ -46,6 +46,27 @@ define [
 			$scope.newAffiliation.department = null
 			$scope.ui.showManualUniversitySelectionUI = true
 
+		$scope.changeAffiliation = (userEmail) ->
+			$scope.affiliationToChange.email = userEmail.email
+			$scope.affiliationToChange.role = userEmail.affiliation.role
+			$scope.affiliationToChange.department = userEmail.affiliation.department
+
+		$scope.saveAffiliationChange = () ->
+			UserAffiliationsDataService
+				.addRoleAndDepartment(
+					$scope.affiliationToChange.email,
+					$scope.affiliationToChange.role,
+					$scope.affiliationToChange.department
+				)
+
+		$scope.cancelAffiliationChange = (email) ->
+			$scope.affiliationToChange.email = ""
+			$scope.affiliationToChange.role = null
+			$scope.affiliationToChange.department = null
+		
+		$scope.isChangingAffiliation = (email) ->
+			$scope.affiliationToChange.email == email
+
 		$scope.showAddEmailForm = () ->
 			$scope.ui.showAddEmailUI = true
 
@@ -88,12 +109,6 @@ define [
 				.removeUserEmail email
 				.then () -> _getUserEmails()
 
-		# $scope.getDepartments = () ->
-		# 	if $scope.newAffiliation.university?.departments.length > 0
-		# 		_.uniq $scope.newAffiliation.university.departments
-		# 	else
-		# 		UserAffiliationsDataService.getDefaultDepartmentHints()
-
 		_reset = () ->
 			$scope.newAffiliation =
 				email: ""
@@ -102,12 +117,17 @@ define [
 				role: null
 				department: null
 			$scope.ui = 
+				showChangeAffiliationUI: false
 				showManualUniversitySelectionUI: false
 				isLoadingEmails: false
 				isAddingNewEmail: false
 				showAddEmailUI: false
 				isValidEmail: false
 				isBlacklistedEmail: false
+			$scope.affiliationToChange = 
+				email: ""
+				role: null
+				department: null
 		_reset()
 
 		# Populates the emails table

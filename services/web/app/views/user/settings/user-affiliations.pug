@@ -16,12 +16,45 @@ form.row(
 					ng-repeat="userEmail in userEmails"
 				)
 					td {{ userEmail.email + (userEmail.default ? ' (default)' : '') }}
+					//- td {{ userEmail | json }}
 					td 
-						div(ng-if="userEmail.affiliation.institution") {{ userEmail.affiliation.institution.name }}
-						div(ng-if="userEmail.affiliation.role || userEmail.affiliation.department") 
-							span(ng-if="userEmail.affiliation.role") {{ userEmail.affiliation.role }}
-							span(ng-if="userEmail.affiliation.role && userEmail.affiliation.department") , 
-							span(ng-if="userEmail.affiliation.department") {{ userEmail.affiliation.department }}
+						div(ng-if="userEmail.affiliation.institution") 
+							div {{ userEmail.affiliation.institution.name }}
+							a(
+								href
+								ng-if="!isChangingAffiliation(userEmail.email) && !userEmail.affiliation.role && !userEmail.affiliation.department"
+								ng-click="changeAffiliation(userEmail);"
+							) Add role and department
+							div(
+								ng-if="!isChangingAffiliation(userEmail.email) && (userEmail.affiliation.role || userEmail.affiliation.department)"
+							)
+								span(ng-if="userEmail.affiliation.role") {{ userEmail.affiliation.role }}
+								span(ng-if="userEmail.affiliation.role && userEmail.affiliation.department") , 
+								span(ng-if="userEmail.affiliation.department") {{ userEmail.affiliation.department }}
+								|  (
+								a(
+									href
+									ng-click="changeAffiliation(userEmail);"
+								) change
+								| )
+							div(
+								ng-if="isChangingAffiliation(userEmail.email)"
+							)
+								affiliation-form(
+									affiliation-data="affiliationToChange"
+									show-university-and-country="false"
+									show-role-and-department="true"
+								)
+								.pull-right
+									a(
+										href
+										ng-click="saveAffiliationChange();"
+									) Save
+									|  or 
+									a(
+										href
+										ng-click="cancelAffiliationChange();"
+									) Cancel
 					td 
 						a(
 							href

@@ -80,6 +80,15 @@ define [
 				_csrf: window.csrfToken
 			}
 
+		addRoleAndDepartment = (email, role, department) ->
+			$http.post "/endorse", {
+				email,
+				role,
+				department,
+				_csrf: window.csrfToken
+			}
+
+
 		setDefaultUserEmail = (email) ->
 			$http.post "/user/emails/default", {
 				email,
@@ -105,6 +114,7 @@ define [
 			addUserEmail
 			addUserAffiliationWithUnknownUniversity
 			addUserAffiliation
+			addRoleAndDepartment
 			setDefaultUserEmail
 			removeUserEmail
 			isDomainBlacklisted
