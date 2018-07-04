@@ -6,7 +6,6 @@ logger = require 'logger-sharelatex'
 _ = require 'underscore'
 LinkedFilesHandler = require './LinkedFilesHandler'
 {
-
 	UrlFetchFailedError,
 	InvalidUrlError,
 	OutputFileFetchFailedError,
@@ -16,16 +15,23 @@ LinkedFilesHandler = require './LinkedFilesHandler'
 	ProjectNotFoundError,
 	V1ProjectNotFoundError,
 	SourceFileNotFoundError,
+	NotOriginalImporterError,
+	FeatureNotAvailableError,
+	RemoteServiceError
 } = require './LinkedFilesErrors'
+Modules = require '../../infrastructure/Modules'
 
 
 module.exports = LinkedFilesController = {
 
-	Agents: {
-		url: require('./UrlAgent'),
-		project_file: require('./ProjectFileAgent'),
-		project_output_file: require('./ProjectOutputFileAgent')
-	}
+	Agents: _.extend(
+		{
+			url: require('./UrlAgent'),
+			project_file: require('./ProjectFileAgent'),
+			project_output_file: require('./ProjectOutputFileAgent'),
+		},
+		Modules.linkedFileAgentsIncludes()
+	)
 
 	_getAgent: (provider) ->
 		if !LinkedFilesController.Agents.hasOwnProperty(provider)
@@ -116,6 +122,22 @@ module.exports = LinkedFilesController = {
 			res.status(422).send(
 				"Your URL is not valid. Please check it and try again."
 			)
+
+		else if error instanceof NotOriginalImporterError
+			res.status(400).send(
+				"You are not the user who originally imported this file"
+			)
+
+		else if error instanceof FeatureNotAvailableError
+			res.status(400).send(
+				"This feature is not enabled on your account"
+			)
+
+		else if error instanceof RemoteServiceError
+			res.status(502).send(
+				"The remote service produced an error"
+			)
+
 
 		else
 			next(error)

@@ -32,6 +32,9 @@ class User
 	get: (callback = (error, user)->) ->
 		db.users.findOne { _id: ObjectId(@_id) }, callback
 
+	mongoUpdate: (updateOp, callback=(error)->) ->
+		db.users.update {_id: ObjectId(@_id)}, updateOp, callback
+
 	register: (callback = (error, user) ->) ->
 		return callback(new Error('User already registered')) if @_id?
 		@getCsrfToken (error) =>

@@ -70,6 +70,30 @@ SourceFileNotFoundError = (message) ->
 SourceFileNotFoundError.prototype.__proto__ = Error.prototype
 
 
+NotOriginalImporterError = (message) ->
+	error = new Error(message)
+	error.name = 'NotOriginalImporter'
+	error.__proto__ = NotOriginalImporterError.prototype
+	return error
+NotOriginalImporterError.prototype.__proto__ = Error.prototype
+
+
+FeatureNotAvailableError = (message) ->
+	error = new Error(message)
+	error.name = 'FeatureNotAvailable'
+	error.__proto__ = FeatureNotAvailableError.prototype
+	return error
+FeatureNotAvailableError.prototype.__proto__ = Error.prototype
+
+
+RemoteServiceError = (message) ->
+	error = new Error(message)
+	error.name = 'RemoteService'
+	error.__proto__ = RemoteServiceError.prototype
+	return error
+RemoteServiceError.prototype.__proto__ = Error.prototype
+
+
 module.exports = {
 
 	UrlFetchFailedError,
@@ -81,4 +105,7 @@ module.exports = {
 	ProjectNotFoundError,
 	V1ProjectNotFoundError,
 	SourceFileNotFoundError,
+	NotOriginalImporterError,
+	FeatureNotAvailableError,
+	RemoteServiceError
 }

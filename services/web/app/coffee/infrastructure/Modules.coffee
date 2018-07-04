@@ -23,7 +23,7 @@ module.exports = Modules =
 		for module in @modules
 			module.nonCsrfRouter?.apply(webRouter, privateApiRouter, publicApiRouter)
 			module.router?.applyNonCsrfRouter?(webRouter, privateApiRouter, publicApiRouter)
-			
+
 	viewIncludes: {}
 	loadViewIncludes: (app) ->
 		@viewIncludes = {}
@@ -32,7 +32,7 @@ module.exports = Modules =
 				@viewIncludes[view] ||= []
 				filePath = Path.join(MODULE_BASE_PATH, module.name, "app/views", partial + ".pug")
 				@viewIncludes[view].push pug.compileFile(filePath, doctype: "html")
-			
+
 	moduleIncludes: (view, locals) ->
 		compiledPartials = Modules.viewIncludes[view] or []
 		html = ""
@@ -43,7 +43,7 @@ module.exports = Modules =
 
 	moduleIncludesAvailable: (view) ->
 		return (Modules.viewIncludes[view] or []).length > 0
-	
+
 	moduleAssetFiles: (pathPrefix) ->
 		assetFiles = []
 		for module in @modules
@@ -51,18 +51,25 @@ module.exports = Modules =
 				assetFiles.push "#{pathPrefix}#{assetFile}"
 		return assetFiles
 
+	linkedFileAgentsIncludes: () ->
+		agents = {}
+		for module in @modules
+			for name, agentFunction of module.linkedFileAgents
+				agents[name] = agentFunction()
+		return agents
+
 	attachHooks: () ->
 		for module in @modules
 			if module.hooks?
 				for hook, method of module.hooks
 					Modules.hooks.attach hook, method
-			
+
 	hooks:
 		_hooks: {}
 		attach: (name, method) ->
 			@_hooks[name] ?= []
 			@_hooks[name].push method
-			
+
 		fire: (name, args..., callback) ->
 			methods = @_hooks[name] or []
 			call_methods = methods.map (method) ->
@@ -70,5 +77,5 @@ module.exports = Modules =
 			async.series call_methods, (error, results) ->
 				return callback(error) if error?
 				return callback null, results
-		
+
 Modules.loadModules()

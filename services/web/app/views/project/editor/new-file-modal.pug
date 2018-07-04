@@ -26,6 +26,8 @@ script(type='text/ng-template', id='newFileModalTemplate')
 								i.fa.fa-fw.fa-globe
 								|
 								| From External URL
+						!= moduleIncludes("newFileModal:selector", locals)
+
 				td(class="modal-new-file--body modal-new-file--body-{{type}}")
 					div(ng-if="type == 'doc'", ng-controller="NewDocModalController")
 						form(novalidate, name="newDocForm")
@@ -178,6 +180,9 @@ script(type='text/ng-template', id='newFileModalTemplate')
 							div(ng-switch="error")
 								span(ng-switch-when="already exists") #{translate("file_already_exists")}
 								span(ng-switch-default) {{error}}
+
+					!= moduleIncludes("newFileModal:panel", locals)
+
 	.modal-footer
 		button.btn.btn-default(
 			ng-disabled="state.inflight"
