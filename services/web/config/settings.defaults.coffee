@@ -425,10 +425,6 @@ module.exports = settings =
 	redirects:
 		"/templates/index": "/templates/"
 
-	proxyUrls:
-		'/institutions/list': { baseUrl: v1Api.url, path: '/universities/list' }
-		'/institutions/domains': { baseUrl: v1Api.url, path: '/university/domains' }
-
 	reloadModuleViewsOnEachRequest: true
 
 	domainLicences: [

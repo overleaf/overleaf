@@ -9,6 +9,8 @@ class MockRequest
 	_parsedUrl:{}
 	i18n:
 		translate:->
+	route:
+		path: ''
 
 module.exports = MockRequest
 

@@ -1,3 +1,6 @@
+v1Api =
+	url: "http://#{process.env['V1_HOST'] or 'localhost'}:5000"
+
 module.exports =
 	enableSubscriptions: true
 
@@ -93,3 +96,11 @@ module.exports =
 			collaborators: -1
 			dropbox: true
 			versioning: true
+
+	proxyUrls:
+		'/institutions/list': { baseUrl: v1Api.url, path: '/universities/list' }
+		'/institutions/list/:id':
+			baseUrl: v1Api.url
+			path: (params) -> "/universities/list/#{params.id}"
+		'/institutions/domains': { baseUrl: v1Api.url, path: '/university/domains' }
+		'/proxy/missing/baseUrl': path: '/foo/bar'

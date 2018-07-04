@@ -51,6 +51,15 @@ module.exports = MockV1Api =
 		app.delete "/api/v2/users/:userId/affiliations/:email", (req, res, next) =>
 			res.sendStatus 204
 
+		app.get '/universities/list', (req, res, next) ->
+			res.json []
+
+		app.get '/universities/list/:id', (req, res, next) ->
+			res.json id: parseInt(req.params.id)
+
+		app.get '/university/domains', (req, res, next) ->
+			res.json []
+
 		app.listen 5000, (error) ->
 			throw error if error?
 		.on "error", (error) ->
