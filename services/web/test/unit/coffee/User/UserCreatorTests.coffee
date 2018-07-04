@@ -17,11 +17,12 @@ describe "UserCreator", ->
 
 		@UserGetter =
 			getUserByMainEmail: sinon.stub()
+		@addAffiliation = sinon.stub().yields()
 		@UserCreator = SandboxedModule.require modulePath, requires:
 			"../../models/User": User:@UserModel
-			"./UserGetter":@UserGetter
 			"logger-sharelatex":{log:->}
 			'metrics-sharelatex': {timeAsyncMethod: ()->}
+			"./UserAffiliationsManager": addAffiliation: @addAffiliation
 
 		@email = "bob.oswald@gmail.com"
 
@@ -78,3 +79,12 @@ describe "UserCreator", ->
 				user.emails[0].email.should.equal @email
 				user.emails[0].createdAt.should.be.a 'date'
 				done()
+
+		it "should add affiliation in background", (done)->
+			@UserCreator.createNewUser email: @email, (err, user) =>
+				# addaffiliation should not be called before the callback but only after
+				# a tick of the event loop
+				sinon.assert.notCalled(@addAffiliation)
+				process.nextTick () =>
+					sinon.assert.calledWith(@addAffiliation, user._id, user.email)
+					done()

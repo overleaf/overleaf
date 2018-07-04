@@ -12,7 +12,12 @@ module.exports = UserAffiliationsManager =
 		}, callback
 
 
-	addAffiliation: (userId, email, { university, department, role }, callback = (error) ->) ->
+	addAffiliation: (userId, email, affiliationOptions, callback) ->
+		unless callback? # affiliationOptions is optional
+			callback = affiliationOptions
+			affiliationOptions = {}
+
+		{ university, department, role } = affiliationOptions
 		makeAffiliationRequest {
 			method: 'POST'
 			path: "/api/v2/users/#{userId.toString()}/affiliations"
