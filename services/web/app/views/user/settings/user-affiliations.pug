@@ -59,13 +59,13 @@ form.row(
 						a(
 							href
 							ng-if="!userEmail.default"
-							ng-click="setDefaultUserEmail(userEmail.email)"
+							ng-click="setDefaultUserEmail(userEmail)"
 						) Make default
 						br
 						a(
 							href
 							ng-if="!userEmail.default"
-							ng-click="removeUserEmail(userEmail.email)"
+							ng-click="removeUserEmail(userEmail)"
 						) Remove
 				tr.affiliations-table-highlighted-row(
 					ng-if="ui.isLoadingEmails"

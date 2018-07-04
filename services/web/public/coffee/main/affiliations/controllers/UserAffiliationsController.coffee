@@ -97,16 +97,19 @@ define [
 				_reset()
 				_getUserEmails()
 
-		$scope.setDefaultUserEmail = (email) ->
+		$scope.setDefaultUserEmail = (userEmail) ->
 			$scope.ui.isLoadingEmails = true
 			UserAffiliationsDataService
-				.setDefaultUserEmail email
+				.setDefaultUserEmail userEmail.email
 				.then () -> _getUserEmails()
 
-		$scope.removeUserEmail = (email) ->
+		$scope.removeUserEmail = (userEmail) ->
 			$scope.ui.isLoadingEmails = true
+			userEmailIdx = _.indexOf $scope.userEmails, userEmail
+			if userEmailIdx > -1
+				$scope.userEmails.splice userEmailIdx, 1
 			UserAffiliationsDataService
-				.removeUserEmail email
+				.removeUserEmail userEmail.email
 				.then () -> _getUserEmails()
 
 		_reset = () ->
