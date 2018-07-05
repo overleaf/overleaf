@@ -126,6 +126,9 @@ module.exports = class Router
 			webRouter.post '/user/emails/default',
 				AuthenticationController.requireLogin(),
 				UserEmailsController.setDefault
+			webRouter.post '/user/emails/endorse',
+				AuthenticationController.requireLogin(),
+				UserEmailsController.endorse
 
 
 		webRouter.get  '/user/sessions',

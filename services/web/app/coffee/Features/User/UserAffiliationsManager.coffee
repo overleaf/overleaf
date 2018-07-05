@@ -31,6 +31,15 @@ module.exports = UserAffiliationsManager =
 		}, callback
 
 
+	endorseAffiliation: (userId, email, role, department, callback = (error) ->) ->
+		makeAffiliationRequest {
+			method: 'POST'
+			path: "/api/v2/users/#{userId.toString()}/affiliations/endorse"
+			body: { email, role, department }
+			defaultErrorMessage: "Couldn't endorse affiliation"
+		}, callback
+
+
 	deleteAffiliations: (userId, callback = (error) ->) ->
 		makeAffiliationRequest {
 			method: 'DELETE'

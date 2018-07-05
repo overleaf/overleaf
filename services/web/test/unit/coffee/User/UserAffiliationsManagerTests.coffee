@@ -125,3 +125,23 @@ describe "UserAffiliationsManager", ->
 				err.message.should.have.string 518
 				err.message.should.have.string body.errors
 				done()
+
+	describe 'endorseAffiliation', ->
+		beforeEach ->
+			@request.callsArgWith(1, null, { statusCode: 204 })
+
+		it 'endorse affiliation', (done)->
+			@UserAffiliationsManager.endorseAffiliation @stubbedUser._id, @newEmail, 'Student','Physics', (err)=>
+				should.not.exist(err)
+				@request.calledOnce.should.equal true
+				requestOptions = @request.lastCall.args[0]
+				expectedUrl = "v1.url/api/v2/users/#{@stubbedUser._id}/affiliations/endorse"
+				requestOptions.url.should.equal expectedUrl
+				requestOptions.method.should.equal 'POST'
+
+				body = requestOptions.body
+				Object.keys(body).length.should.equal 3
+				body.email.should.equal @newEmail
+				body.role.should.equal 'Student'
+				body.department.should.equal 'Physics'
+				done()
