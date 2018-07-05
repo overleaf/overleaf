@@ -20,5 +20,7 @@ module.exports = Features =
 				return Settings.overleaf?
 			when 'templates'
 				return !Settings.overleaf?
+			when 'affiliations'
+				return !(Settings.ldap? or Settings.saml?)
 			else
 				throw new Error("unknown feature: #{feature}")
