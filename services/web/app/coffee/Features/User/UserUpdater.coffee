@@ -59,7 +59,7 @@ module.exports = UserUpdater =
 
 			addAffiliation userId, newEmail, affiliationOptions, (error) =>
 				if error?
-					logger.err error: error, 'problem adding affiliation'
+					logger.err error: error, 'problem adding affiliation while adding email'
 					return callback(error)
 
 				update = $push: emails: email: newEmail, createdAt: new Date()
@@ -110,18 +110,23 @@ module.exports = UserUpdater =
 		email = EmailHelper.parseEmail(email)
 		return callback(new Error('invalid email')) if !email?
 		logger.log {userId, email}, 'confirming user email'
-		query =
-			_id: userId
-			'emails.email': email
-		update =
-			$set:
-				'emails.$.confirmedAt': new Date()
-		@updateUser query, update, (error, res) ->
-			return callback(error) if error?
-			logger.log {res, userId, email}, "tried to confirm email"
-			if res.n == 0
-				return callback(new Errors.NotFoundError('user id and email do no match'))
-			callback()
+		addAffiliation userId, email, (error) =>
+			if error?
+				logger.err error: error, 'problem adding affiliation while confirming email'
+				return callback(error)
+
+			query =
+				_id: userId
+				'emails.email': email
+			update =
+				$set:
+					'emails.$.confirmedAt': new Date()
+			@updateUser query, update, (error, res) ->
+				return callback(error) if error?
+				logger.log {res, userId, email}, "tried to confirm email"
+				if res.n == 0
+					return callback(new Errors.NotFoundError('user id and email do no match'))
+				callback()
 
 [
 	'updateUser'

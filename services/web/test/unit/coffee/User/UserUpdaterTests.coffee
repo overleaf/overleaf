@@ -19,7 +19,7 @@ describe "UserUpdater", ->
 			getUserByAnyEmail: sinon.stub()
 			ensureUniqueEmailAddress: sinon.stub()
 		@logger = err: sinon.stub(), log: ->
-		@addAffiliation = sinon.stub().callsArgWith(3, null)
+		@addAffiliation = sinon.stub().yields()
 		@removeAffiliation = sinon.stub().callsArgWith(2, null)
 		@UserUpdater = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": @logger
@@ -201,15 +201,23 @@ describe "UserUpdater", ->
 				done()
 
 	describe 'confirmEmail', ->
-		it 'should update the email record', (done)->
+		beforeEach ->
 			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, null, n: 1)
 
+		it 'should update the email record', (done)->
 			@UserUpdater.confirmEmail @stubbedUser._id, @newEmail, (err)=>
 				should.not.exist(err)
 				@UserUpdater.updateUser.calledWith(
 					{ _id: @stubbedUser._id, 'emails.email': @newEmail },
 					$set: { 'emails.$.confirmedAt': new Date() }
 				).should.equal true
+				done()
+
+		it 'add affiliation', (done)->
+			@UserUpdater.confirmEmail @stubbedUser._id, @newEmail, (err)=>
+				should.not.exist(err)
+				@addAffiliation.calledOnce.should.equal true
+				sinon.assert.calledWith(@addAffiliation, @stubbedUser._id, @newEmail)
 				done()
 
 		it 'handle error', (done)->
@@ -229,4 +237,11 @@ describe "UserUpdater", ->
 		it 'validates email', (done)->
 			@UserUpdater.confirmEmail @stubbedUser._id, '@', (err)=>
 				should.exist(err)
+				done()
+
+		it 'handle affiliation error', (done)->
+			@addAffiliation.callsArgWith(2, new Error('nope'))
+			@UserUpdater.confirmEmail @stubbedUser._id, @newEmail, (err)=>
+				should.exist(err)
+				@UserUpdater.updateUser.called.should.equal false
 				done()
