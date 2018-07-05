@@ -19,9 +19,9 @@ define [], () ->
 		init: () ->
 			@emitCursorUpdateEvent()
 
-		onSessionChange: (e) =>
-			if e.oldSession?
-				@storeCursorPosition(e.oldSession)
+		onBeforeSessionChange: (hasPrevSession = false) =>
+			if hasPrevSession
+				@storeCursorPosition()
 				@storeFirstVisibleLine()
 
 			@doc_id = @$scope.sharejsDoc?.doc_id
@@ -30,8 +30,8 @@ define [], () ->
 				@gotoStoredPosition()
 			, 0
 
-		onUnload: (session) =>
-			@storeCursorPosition(session)
+		onUnload: () =>
+			@storeCursorPosition()
 			@storeFirstVisibleLine()
 
 		onCursorChange: () =>
@@ -43,10 +43,10 @@ define [], () ->
 				docPosition.firstVisibleLine = @adapter.getEditorScrollPosition()
 				@localStorage("doc.position.#{@doc_id}", docPosition)
 
-		storeCursorPosition: (session) ->
+		storeCursorPosition: () ->
 			if @doc_id?
 				docPosition = @localStorage("doc.position.#{@doc_id}") || {}
-				docPosition.cursorPosition = @adapter.getCursorForSession(session)
+				docPosition.cursorPosition = @adapter.getCursor()
 				@localStorage("doc.position.#{@doc_id}", docPosition)
 
 		emitCursorUpdateEvent: () ->

@@ -308,6 +308,8 @@ define [
 						editor.renderer.updateFontSize()
 
 				scope.$watch "sharejsDoc", (sharejs_doc, old_sharejs_doc) ->
+					cursorPositionManager.onBeforeSessionChange(!!old_sharejs_doc)
+
 					if old_sharejs_doc?
 						detachFromAce(old_sharejs_doc)
 
@@ -382,7 +384,6 @@ define [
 					editor.off 'nativecontextmenu', spellCheckManager.onContextMenu
 
 				onSessionChangeForCursorPosition = (e) ->
-					cursorPositionManager.onSessionChange(e)
 					e.oldSession?.selection.off 'changeCursor', cursorPositionManager.onCursorChange
 					e.session.selection.on 'changeCursor', cursorPositionManager.onCursorChange
 
