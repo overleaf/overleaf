@@ -174,9 +174,6 @@ os = require "os"
 
 STATE = "up"
 
-process.on "SIGHUP", ->
-	console.log "got SIGHUP event"
-	STATE = "down"
 
 loadTcpServer = net.createServer (socket) ->
 	socket.on "error", (err)->
@@ -216,6 +213,12 @@ loadHttpServer.post "/state/down", (req, res, next) ->
 	STATE = "down"
 	logger.info "getting message to set server to down"
 	res.sendStatus 204
+
+loadHttpServer.post "/state/maint", (req, res, next) ->
+	STATE = "maint"
+	logger.info "getting message to set server to maint"
+	res.sendStatus 204
+	
 
 port = (Settings.internal?.clsi?.port or 3013)
 host = (Settings.internal?.clsi?.host or "localhost")
