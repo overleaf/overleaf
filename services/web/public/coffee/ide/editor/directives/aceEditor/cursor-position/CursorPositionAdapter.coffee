@@ -7,19 +7,16 @@ define [
 		getCursor: () ->
 			@editor.getCursorPosition()
 
-		getCursorForSession: (session) ->
-			session.selection.getCursor()
-
-		getScrollTopForSession: (session) ->
-			session.getScrollTop()
+		getEditorScrollPosition: () ->
+			@editor.getFirstVisibleRow()
 
 		setCursor: (pos) ->
 			pos = pos.cursorPosition or { row: 0, column: 0 }
 			@editor.moveCursorToPosition(pos)
 
-		setScrollTop: (pos) ->
-			pos = pos.scrollTop or 0
-			@editor.getSession().setScrollTop(pos)
+		setEditorScrollPosition: (pos) ->
+			pos = pos.firstVisibleLine or 0
+			@editor.scrollToLine(pos)
 
 		clearSelection: () ->
 			@editor.selection.clearSelection()
