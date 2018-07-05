@@ -386,15 +386,18 @@ define [
 					e.oldSession?.selection.off 'changeCursor', cursorPositionManager.onCursorChange
 					e.session.selection.on 'changeCursor', cursorPositionManager.onCursorChange
 
+				onUnloadForCursorPosition = () ->
+					cursorPositionManager.onUnload(editor.getSession())
+
 				initCursorPosition = () ->
 					cursorPositionManager.init()
 					editor.on 'changeSession', onSessionChangeForCursorPosition
 					onSessionChangeForCursorPosition({ session: editor.getSession() }) # Force initial setup
-					$(window).on "unload", () ->
-						cursorPositionManager.onUnload(editor.getSession())
+					$(window).on "unload", onUnloadForCursorPosition
 
 				tearDownCursorPosition = () ->
 					editor.off 'changeSession', onSessionChangeForCursorPosition
+					$(window).off "unload", onUnloadForCursorPosition
 
 				attachToAce = (sharejs_doc) ->
 					lines = sharejs_doc.getSnapshot().split("\n")
