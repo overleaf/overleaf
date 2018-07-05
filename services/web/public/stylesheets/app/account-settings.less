@@ -32,22 +32,22 @@
 	.affiliations-table-error-row {
 		background-color: @alert-danger-bg;
 		color: @alert-danger-text;
-		a {
-			color: #FFF;
-			font-weight: bold;
-			&:hover,
-			&:focus {
-				color: #FFF;
-			}
+		.btn {
+			margin-top: @table-cell-padding;
+			.button-variant(@btn-danger-color; darken(@btn-danger-bg, 8%); @btn-danger-border);
 		}
 	}
-
 	.affiliations-form-group {
 		margin-top: @table-cell-padding;
 		&:first-child {
 			margin-top: 0;
 		}
 	}
+	.affiliation-change-container,
+	.affiliation-change-actions {
+		margin-top: @table-cell-padding;
+	}
+
 	.affiliations-table-label {
 		padding-top: 4px;
 	}

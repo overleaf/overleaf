@@ -3,13 +3,13 @@ form.row(
 	name="affiliationsForm"
 )
 	.col-md-12
-		h3 Emails and Affiliations
-		p.small Add additional email addresses to your account to access any upgrades your university or institution has, to make it easier for collaborators to find you, and to make sure you can recover your account.
+		h3 #{translate("emails_and_affiliations_title")}
+		p.small #{translate("emails_and_affiliations_explanation")}
 		table.table.affiliations-table
 			thead
 				tr
-					th.affiliations-table-email Email
-					th.affiliations-table-institution Institution and role
+					th.affiliations-table-email  #{translate("email")}
+					th.affiliations-table-institution  #{translate("institution_and_role")}
 					th.affiliations-table-inline-actions
 			tbody(
 				ng-if="!ui.hasError"
@@ -18,7 +18,6 @@ form.row(
 					ng-repeat="userEmail in userEmails"
 				)
 					td {{ userEmail.email + (userEmail.default ? ' (default)' : '') }}
-					//- td {{ userEmail | json }}
 					td 
 						div(ng-if="userEmail.affiliation.institution") 
 							div {{ userEmail.affiliation.institution.name }}
@@ -26,7 +25,7 @@ form.row(
 								href
 								ng-if="!isChangingAffiliation(userEmail.email) && !userEmail.affiliation.role && !userEmail.affiliation.department"
 								ng-click="changeAffiliation(userEmail);"
-							) Add role and department
+							)  #{translate("add_role_and_department")}
 							div(
 								ng-if="!isChangingAffiliation(userEmail.email) && (userEmail.affiliation.role || userEmail.affiliation.department)"
 							)
@@ -37,9 +36,9 @@ form.row(
 								a(
 									href
 									ng-click="changeAffiliation(userEmail);"
-								) change
+								)  #{translate("change")}
 								| )
-							div(
+							.affiliation-change-container(
 								ng-if="isChangingAffiliation(userEmail.email)"
 							)
 								affiliation-form(
@@ -47,34 +46,34 @@ form.row(
 									show-university-and-country="false"
 									show-role-and-department="true"
 								)
-								.pull-right
+								.affiliation-change-actions
 									a(
 										href
 										ng-click="saveAffiliationChange();"
-									) Save
-									|  or 
+									) #{translate("save_or_cancel-save")}
+									|  #{translate("save_or_cancel-or" )}
 									a(
 										href
 										ng-click="cancelAffiliationChange();"
-									) Cancel
+									) #{translate("save_or_cancel-cancel")}
 					td 
 						a(
 							href
 							ng-if="!userEmail.default"
 							ng-click="setDefaultUserEmail(userEmail)"
-						) Make default
+						)  #{translate("make_default")}
 						br
 						a(
 							href
 							ng-if="!userEmail.default"
 							ng-click="removeUserEmail(userEmail)"
-						) Remove
+						) #{translate("remove")}
 				tr.affiliations-table-highlighted-row(
 					ng-if="ui.isLoadingEmails"
 				)
 					td.text-center(colspan="3") 
 						i.fa.fa-fw.fa-spin.fa-refresh
-						| &nbsp;Loading...
+						| &nbsp;#{translate("loading")}...
 				tr.affiliations-table-highlighted-row(
 					ng-if="!ui.showAddEmailUI && !ui.isLoadingEmails"
 				)
@@ -82,7 +81,7 @@ form.row(
 						a(
 							href
 							ng-click="showAddEmailForm()"
-						) Add another email
+						) #{translate("add_another_email")}
 
 				tr.affiliations-table-highlighted-row(
 					ng-if="ui.showAddEmailUI"
@@ -108,20 +107,20 @@ form.row(
 							a(
 								href
 								ng-click="selectUniversityManually();"
-							) change
+							) #{translate("change")}
 							| )
 						.affiliations-table-label(
 							ng-if="!newAffiliation.university && !ui.isValidEmail && !ui.showManualUniversitySelectionUI"
-						) Start by adding your email address.
+						) #{translate("start_by_adding_your_email")}
 						.affiliations-table-label(
 							ng-if="!newAffiliation.university && ui.isValidEmail && !ui.isBlacklistedEmail && !ui.showManualUniversitySelectionUI"
 						)
-							| Is your email affiliated with an institution? 
+							| #{translate("is_email_affiliated")}
 							br
 							a(
 								href
 								ng-click="selectUniversityManually();"
-							) Let us know
+							) #{translate("let_us_know")}
 						affiliation-form(
 							affiliation-data="newAffiliation"
 							show-university-and-country="ui.showManualUniversitySelectionUI"
@@ -134,12 +133,12 @@ form.row(
 						)
 							span(
 								ng-if="!ui.isAddingNewEmail"
-							) Add new email
+							) #{translate("add_new_email")}
 							span(
 								ng-if="ui.isAddingNewEmail"
 							)
 								i.fa.fa-fw.fa-spin.fa-refresh
-								| &nbsp;Adding...
+								| &nbsp;#{translate("adding")}...
 			tbody(
 				ng-if="ui.hasError"
 			)
@@ -149,14 +148,11 @@ form.row(
 					td.text-center(colspan="3") 
 						div
 							i.fa.fa-fw.fa-exclamation-triangle 
-							| &nbsp;An error has occurred while performing your request.
+							| &nbsp;#{translate("error_performing_request")}
 						div
-							| Click 
-							a(
-								href
+							button.btn.btn-xs(
 								ng-click="acknowledgeError();"
-							) here
-							|  to reload your emails and affiliations.
+							) #{translate("reload_emails_and_affiliations")}
 				
 		hr
 
