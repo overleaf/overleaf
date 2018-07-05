@@ -1,5 +1,5 @@
 define [
-	"./top_hundred_snippets"
+	"./snippets/TopHundredSnippets"
 ], (topHundred) ->
 
 	class Parser

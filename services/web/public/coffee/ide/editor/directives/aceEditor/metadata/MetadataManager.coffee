@@ -53,30 +53,11 @@ define [
 					lastCommandFragmentIsReqPack
 
 				if linesContainMeta or lastCommandFragmentIsMeta
-					@scheduleLoadCurrentDocMetaFromServer()
+					@Metadata.scheduleLoadDocMetaFromServer @$scope.docId
 
 			@editor.on "changeSession", (e) =>
 				e.oldSession.off "change", onChange
 				e.session.on "change", onChange
-
-
-		loadDocMetaFromServer: (docId) ->
-			@Metadata.loadDocMetaFromServer docId
-
-		scheduleLoadCurrentDocMetaFromServer: () ->
-			# De-bounce loading labels with a timeout
-			currentDocId = @$scope.docId
-			existingTimeout = @debouncer[currentDocId]
-			if existingTimeout?
-				clearTimeout(existingTimeout)
-				delete @debouncer[currentDocId]
-			@debouncer[currentDocId] = setTimeout(
-				() =>
-					@loadDocMetaFromServer currentDocId
-					delete @debouncer[currentDocId]
-				, 1000
-				, this
-			)
 
 		getAllLabels: () ->
 			@Metadata.getAllLabels()

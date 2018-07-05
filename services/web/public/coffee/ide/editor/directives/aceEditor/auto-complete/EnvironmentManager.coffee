@@ -1,31 +1,7 @@
-define () ->
-	environments = [
-		"abstract",
-		"align", "align*",
-		"equation", "equation*",
-		"gather", "gather*",
-		"multline", "multline*",
-		"split",
-		"verbatim",
-		"quote",
-		"center"
-	]
-
-	snippetNames = [
-		"array",
-		"figure",
-		"tabular",
-		"table",
-		"list",
-		"enumerate",
-		"itemize",
-		"frame",
-		"thebibliography"
-	]
-
-	environmentNames = snippetNames.concat(environments)
-
-	staticSnippets = for env in environments
+define [
+	'ide/editor/directives/aceEditor/auto-complete/snippets/Environments'
+], (Environments) ->
+	staticSnippets = for env in Environments.withoutSnippets
 		{
 			caption: "\\begin{#{env}}..."
 			snippet: """
@@ -151,7 +127,7 @@ define () ->
 		result = []
 		iterations = 0
 		while match = re.exec(text)
-			if match[1] not in environmentNames and match[1] != "document"
+			if match[1] not in Environments.all and match[1] != "document"
 				result.push {name: match[1], whitespace: match[2]}
 				iterations += 1
 				if iterations >= 1000
