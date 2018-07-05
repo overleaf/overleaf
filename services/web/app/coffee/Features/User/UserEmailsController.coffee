@@ -3,6 +3,7 @@ UserGetter = require("./UserGetter")
 UserUpdater = require("./UserUpdater")
 EmailHelper = require("../Helpers/EmailHelper")
 UserEmailsConfirmationHandler = require "./UserEmailsConfirmationHandler"
+{ endorseAffiliation } = require("./UserAffiliationsManager")
 logger = require("logger-sharelatex")
 Errors = require "../Errors/Errors"
 
@@ -49,6 +50,17 @@ module.exports = UserEmailsController =
 		UserUpdater.setDefaultEmailAddress userId, email, (error)->
 			return next(error) if error?
 			res.sendStatus 200
+
+
+	endorse: (req, res, next) ->
+		userId = AuthenticationController.getLoggedInUserId(req)
+		email = EmailHelper.parseEmail(req.body.email)
+		return res.sendStatus 422 unless email?
+
+		endorseAffiliation userId, email, req.body.role, req.body.department, (error)->
+			return next(error) if error?
+			res.sendStatus 204
+
 
 	showConfirm: (req, res, next) ->
 		res.render 'user/confirm_email', {

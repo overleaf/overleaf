@@ -26,12 +26,14 @@ describe "UserEmailsController", ->
 			setDefaultEmailAddress: sinon.stub()
 		@EmailHelper =
 			parseEmail: sinon.stub()
+		@endorseAffiliation = sinon.stub().yields()
 		@UserEmailsController = SandboxedModule.require modulePath, requires:
 			"../Authentication/AuthenticationController": @AuthenticationController
 			"./UserGetter": @UserGetter
 			"./UserUpdater": @UserUpdater
 			"../Helpers/EmailHelper": @EmailHelper
 			"./UserEmailsConfirmationHandler": @UserEmailsConfirmationHandler = {}
+			"./UserAffiliationsManager": endorseAffiliation: @endorseAffiliation
 			"../Errors/Errors": Errors
 			"logger-sharelatex":
 				log: -> console.log(arguments)
@@ -140,6 +142,22 @@ describe "UserEmailsController", ->
 				sendStatus: (code) =>
 					code.should.equal 422
 					assertNotCalled @UserUpdater.setDefaultEmailAddress
+					done()
+
+	describe 'endorse', ->
+		beforeEach ->
+			@email = 'email_to_endorse@bar.com'
+			@req.body.email = @email
+			@EmailHelper.parseEmail.returns @email
+
+		it 'endorses affiliation', (done) ->
+			@req.body.role = 'Role'
+			@req.body.department = 'Department'
+
+			@UserEmailsController.endorse @req,
+				sendStatus: (code) =>
+					code.should.equal 204
+					assertCalledWith @endorseAffiliation, @user._id, @email, 'Role', 'Department'
 					done()
 
 	describe 'confirm', ->
