@@ -60,6 +60,11 @@ describe "UserUpdater", ->
 				).should.equal true
 				done()
 
+		it 'validates email', (done)->
+			@UserUpdater.changeEmailAddress @stubbedUser._id, 'foo', (err)=>
+				should.exist(err)
+				done()
+
 		it 'handle error', (done)->
 			@UserUpdater.removeEmailAddress.callsArgWith(2, new Error('nope'))
 			@UserUpdater.changeEmailAddress @stubbedUser._id, @newEmail, (err)=>
@@ -111,6 +116,11 @@ describe "UserUpdater", ->
 				@UserUpdater.updateUser.called.should.equal false
 				done()
 
+		it 'validates email', (done)->
+			@UserUpdater.addEmailAddress @stubbedUser._id, 'bar', (err)=>
+				should.exist(err)
+				done()
+
 	describe 'removeEmailAddress', ->
 		beforeEach ->
 			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, null, nMatched: 1)
@@ -154,6 +164,11 @@ describe "UserUpdater", ->
 				@UserUpdater.updateUser.called.should.equal false
 				done()
 
+		it 'validates email', (done)->
+			@UserUpdater.removeEmailAddress @stubbedUser._id, 'baz', (err)=>
+				should.exist(err)
+				done()
+
 	describe 'setDefaultEmailAddress', ->
 		it 'set default', (done)->
 			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, null, n: 1)
@@ -180,6 +195,11 @@ describe "UserUpdater", ->
 				should.exist(err)
 				done()
 
+		it 'validates email', (done)->
+			@UserUpdater.setDefaultEmailAddress @stubbedUser._id, '.edu', (err)=>
+				should.exist(err)
+				done()
+
 	describe 'confirmEmail', ->
 		it 'should update the email record', (done)->
 			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, null, n: 1)
@@ -203,5 +223,10 @@ describe "UserUpdater", ->
 			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, null, n: 0)
 
 			@UserUpdater.confirmEmail @stubbedUser._id, @newEmail, (err)=>
+				should.exist(err)
+				done()
+
+		it 'validates email', (done)->
+			@UserUpdater.confirmEmail @stubbedUser._id, '@', (err)=>
 				should.exist(err)
 				done()
