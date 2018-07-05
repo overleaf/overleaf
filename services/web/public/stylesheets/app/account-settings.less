@@ -29,6 +29,18 @@
 	.affiliations-table-highlighted-row {
 		background-color: tint(@content-alt-bg-color, 6%);
 	}
+	.affiliations-table-error-row {
+		background-color: @alert-danger-bg;
+		color: @alert-danger-text;
+		a {
+			color: #FFF;
+			font-weight: bold;
+			&:hover,
+			&:focus {
+				color: #FFF;
+			}
+		}
+	}
 
 	.affiliations-form-group {
 		margin-top: @table-cell-padding;

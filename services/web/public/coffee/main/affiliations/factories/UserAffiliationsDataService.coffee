@@ -27,7 +27,7 @@ define [
 		getDefaultDepartmentHints = () ->
 			$q.resolve defaultDepartmentHints
 
-		getUserEmails = () ->
+		getUserEmails = () ->			
 			$http.get "/user/emails"
 				.then (response) -> response.data
 
@@ -87,7 +87,6 @@ define [
 				department,
 				_csrf: window.csrfToken
 			}
-
 
 		setDefaultUserEmail = (email) ->
 			$http.post "/user/emails/default", {

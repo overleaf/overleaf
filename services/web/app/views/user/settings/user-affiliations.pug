@@ -11,7 +11,9 @@ form.row(
 					th.affiliations-table-email Email
 					th.affiliations-table-institution Institution and role
 					th.affiliations-table-inline-actions
-			tbody
+			tbody(
+				ng-if="!ui.hasError"
+			)
 				tr(
 					ng-repeat="userEmail in userEmails"
 				)
@@ -73,7 +75,6 @@ form.row(
 					td.text-center(colspan="3") 
 						i.fa.fa-fw.fa-spin.fa-refresh
 						| &nbsp;Loading...
-				
 				tr.affiliations-table-highlighted-row(
 					ng-if="!ui.showAddEmailUI && !ui.isLoadingEmails"
 				)
@@ -139,6 +140,24 @@ form.row(
 							)
 								i.fa.fa-fw.fa-spin.fa-refresh
 								| &nbsp;Adding...
+			tbody(
+				ng-if="ui.hasError"
+			)
+				tr.affiliations-table-error-row(
+					ng-if="true"
+				)
+					td.text-center(colspan="3") 
+						div
+							i.fa.fa-fw.fa-exclamation-triangle 
+							| &nbsp;An error has occurred while performing your request.
+						div
+							| Click 
+							a(
+								href
+								ng-click="acknowledgeError();"
+							) here
+							|  to reload your emails and affiliations.
+				
 		hr
 
 script(type="text/ng-template", id="affiliationFormTpl")

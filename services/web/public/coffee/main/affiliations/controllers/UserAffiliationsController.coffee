@@ -52,12 +52,15 @@ define [
 			$scope.affiliationToChange.department = userEmail.affiliation.department
 
 		$scope.saveAffiliationChange = () ->
+			$scope.ui.isLoadingEmails = true
 			UserAffiliationsDataService
 				.addRoleAndDepartment(
 					$scope.affiliationToChange.email,
 					$scope.affiliationToChange.role,
 					$scope.affiliationToChange.department
 				)
+				.then () -> _getUserEmails()
+				.catch () -> $scope.ui.hasError = true
 
 		$scope.cancelAffiliationChange = (email) ->
 			$scope.affiliationToChange.email = ""
@@ -93,15 +96,19 @@ define [
 							$scope.newAffiliation.role,
 							$scope.newAffiliation.department
 						)
-			addEmailPromise.then () -> 
-				_reset()
-				_getUserEmails()
+			addEmailPromise
+				.then () -> 
+					_reset()
+					_getUserEmails()
+				.catch () ->
+					$scope.ui.hasError = true
 
 		$scope.setDefaultUserEmail = (userEmail) ->
 			$scope.ui.isLoadingEmails = true
 			UserAffiliationsDataService
 				.setDefaultUserEmail userEmail.email
 				.then () -> _getUserEmails()
+				.catch () -> $scope.ui.hasError = true
 
 		$scope.removeUserEmail = (userEmail) ->
 			$scope.ui.isLoadingEmails = true
@@ -111,6 +118,11 @@ define [
 			UserAffiliationsDataService
 				.removeUserEmail userEmail.email
 				.then () -> _getUserEmails()
+				.catch () -> $scope.ui.hasError = true
+
+		$scope.acknowledgeError = () ->
+			_reset()
+			_getUserEmails()
 
 		_reset = () ->
 			$scope.newAffiliation =
@@ -120,6 +132,7 @@ define [
 				role: null
 				department: null
 			$scope.ui = 
+				hasError: false
 				showChangeAffiliationUI: false
 				showManualUniversitySelectionUI: false
 				isLoadingEmails: false
@@ -141,6 +154,9 @@ define [
 				.then (emails) -> 
 					$scope.userEmails = emails
 					$scope.ui.isLoadingEmails = false
+				.catch () ->
+					$scope.ui.hasError = true
+
 		_getUserEmails()
 
 	]
