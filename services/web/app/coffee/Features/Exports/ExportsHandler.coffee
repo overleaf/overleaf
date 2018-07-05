@@ -31,7 +31,7 @@ module.exports = ExportsHandler = self =
 				ProjectLocator.findRootDoc {project: results.project, project_id: project_id}, cb
 			]
 			user: (cb) ->
-				UserGetter.getUser user_id, {first_name: 1, last_name: 1, email: 1}, cb
+				UserGetter.getUser user_id, {first_name: 1, last_name: 1, email: 1, overleaf: 1}, cb
 			historyVersion: (cb) ->
 				self._requestVersion project_id, cb
 
@@ -56,12 +56,14 @@ module.exports = ExportsHandler = self =
 					rootDocPath: rootDoc[1]?.fileSystem
 					historyId: project.overleaf?.history?.id
 					historyVersion: historyVersion
+					v1ProjectId: project.overleaf?.id
 				user:
 					id: user_id
 					firstName: user.first_name
 					lastName: user.last_name
 					email: user.email
 					orcidId: null # until v2 gets ORCID
+					v1UserId: user.overleaf?.id
 				destination:
 					brandVariationId: brand_variation_id
 				options:

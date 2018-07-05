@@ -64,6 +64,7 @@ describe 'ExportsHandler', ->
 			@project =
 				id: @project_id
 				overleaf:
+					id: @project_history_id # for projects imported from v1
 					history:
 						id: @project_history_id
 			@user =
@@ -71,6 +72,8 @@ describe 'ExportsHandler', ->
 				first_name: 'Arthur'
 				last_name: 'Author'
 				email: 'arthur.author@arthurauthoring.org'
+				overleaf:
+					id: 876
 			@rootDocPath = 'main.tex'
 			@historyVersion = 777
 			@ProjectGetter.getProject = sinon.stub().yields(null, @project)
@@ -90,18 +93,20 @@ describe 'ExportsHandler', ->
 				.should.equal true
 
 			it "should return export data", ->
-				expected_export_data = 
+				expected_export_data =
 					project:
 						id: @project_id
 						rootDocPath: @rootDocPath
 						historyId: @project_history_id
 						historyVersion: @historyVersion
+						v1ProjectId: @project_history_id
 					user:
 						id: @user_id
 						firstName: @user.first_name
 						lastName: @user.last_name
 						email: @user.email
 						orcidId: null
+						v1UserId: 876
 					destination:
 						brandVariationId: @brand_variation_id
 					options:
@@ -126,12 +131,14 @@ describe 'ExportsHandler', ->
 						rootDocPath: @rootDocPath
 						historyId: @project_history_id
 						historyVersion: @historyVersion
+						v1ProjectId: @project_history_id
 					user:
 						id: @user_id
 						firstName: @custom_first_name
 						lastName: @custom_last_name
 						email: @user.email
 						orcidId: null
+						v1UserId: 876
 					destination:
 						brandVariationId: @brand_variation_id
 					options:
