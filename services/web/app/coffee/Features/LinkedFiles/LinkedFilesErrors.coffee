@@ -94,6 +94,14 @@ RemoteServiceError = (message) ->
 RemoteServiceError.prototype.__proto__ = Error.prototype
 
 
+FileCannotRefreshError = (message) ->
+	error = new Error(message)
+	error.name = 'RemoteService'
+	error.__proto__ = FileCannotRefreshError.prototype
+	return error
+FileCannotRefreshError.prototype.__proto__ = Error.prototype
+
+
 module.exports = {
 
 	UrlFetchFailedError,
@@ -107,5 +115,6 @@ module.exports = {
 	SourceFileNotFoundError,
 	NotOriginalImporterError,
 	FeatureNotAvailableError,
-	RemoteServiceError
+	RemoteServiceError,
+	FileCannotRefreshError
 }
