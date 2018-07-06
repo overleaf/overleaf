@@ -53,6 +53,10 @@ define [
 						else
 							$q.reject null
 
+		getUniversityDetails = (universityId) ->
+			$http.get "/institutions/list/#{ universityId }"
+				.then (response) -> response.data
+
 		addUserEmail = (email) ->
 			$http.post "/user/emails", {
 				email,
@@ -110,6 +114,7 @@ define [
 			getUserEmails
 			getUniversitiesFromCountry
 			getUniversityDomainFromPartialDomainInput
+			getUniversityDetails
 			addUserEmail
 			addUserAffiliationWithUnknownUniversity
 			addUserAffiliation

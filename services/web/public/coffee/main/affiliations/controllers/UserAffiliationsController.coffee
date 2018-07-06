@@ -47,6 +47,10 @@ define [
 			$scope.ui.showManualUniversitySelectionUI = true
 
 		$scope.changeAffiliation = (userEmail) ->
+			if userEmail.affiliation?.institution?.id?
+				UserAffiliationsDataService.getUniversityDetails userEmail.affiliation.institution.id
+					.then (universityDetails) -> $scope.affiliationToChange.university = universityDetails
+
 			$scope.affiliationToChange.email = userEmail.email
 			$scope.affiliationToChange.role = userEmail.affiliation.role
 			$scope.affiliationToChange.department = userEmail.affiliation.department
@@ -64,6 +68,7 @@ define [
 
 		$scope.cancelAffiliationChange = (email) ->
 			$scope.affiliationToChange.email = ""
+			$scope.affiliationToChange.university = null
 			$scope.affiliationToChange.role = null
 			$scope.affiliationToChange.department = null
 		
@@ -142,6 +147,7 @@ define [
 				isBlacklistedEmail: false
 			$scope.affiliationToChange = 
 				email: ""
+				university: null
 				role: null
 				department: null
 		_reset()
