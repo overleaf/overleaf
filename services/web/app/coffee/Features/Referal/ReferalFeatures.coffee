@@ -18,21 +18,7 @@ module.exports = ReferalFeatures =
 
 	_calculateFeatures : (user)->
 		bonusLevel = ReferalFeatures._getBonusLevel(user)
-		currentFeatures = _.clone(user.features) #need to clone because we exend with underscore later
-		betterBonusFeatures = {}
-		_.each Settings.bonus_features["#{bonusLevel}"], (bonusLevel, key)->
-			currentLevel = user?.features?[key]
-			if _.isBoolean(currentLevel) and currentLevel == false
-				betterBonusFeatures[key] = bonusLevel
-
-			if _.isNumber(currentLevel)
-				if currentLevel == -1
-					return
-				bonusIsGreaterThanCurrent = currentLevel < bonusLevel
-				if bonusIsGreaterThanCurrent or bonusLevel == -1
-					betterBonusFeatures[key] = bonusLevel
-		newFeatures = _.extend(currentFeatures, betterBonusFeatures)
-		return newFeatures
+		return Settings.bonus_features?["#{bonusLevel}"] or {}
 
 	_getBonusLevel: (user)->
 		highestBonusLevel = 0
