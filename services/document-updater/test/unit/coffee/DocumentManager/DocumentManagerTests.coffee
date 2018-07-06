@@ -8,6 +8,7 @@ tk = require "timekeeper"
 
 describe "DocumentManager", ->
 	beforeEach ->
+		tk.freeze(new Date())
 		@DocumentManager = SandboxedModule.require modulePath, requires:
 			"./RedisManager": @RedisManager = {}
 			"./ProjectHistoryRedisManager": @ProjectHistoryRedisManager = {}
@@ -34,6 +35,9 @@ describe "DocumentManager", ->
 		@ranges = { comments: "mock", entries: "mock" }
 		@pathname = '/a/b/c.tex'
 		@unflushedTime = Date.now()
+
+	afterEach ->
+		tk.reset()
 
 	describe "flushAndDeleteDoc", ->
 		describe "successfully", ->
@@ -394,11 +398,7 @@ describe "DocumentManager", ->
 
 	describe "getDocAndFlushIfOld", ->
 		beforeEach ->
-			tk.freeze(new Date())
 			@DocumentManager.flushDocIfLoaded = sinon.stub().callsArg(2)
-
-		afterEach ->
-			tk.reset()
 
 		describe "when the doc is in Redis", ->
 			describe "and has changes to be flushed", ->

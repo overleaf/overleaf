@@ -55,13 +55,13 @@ describe "RedisManager", ->
 			globals:
 				JSON: @JSON = JSON
 
-		afterEach ->
-			tk.reset()
-
 		@doc_id = "doc-id-123"
 		@project_id = "project-id-123"
 		@projectHistoryId = 123
 		@callback = sinon.stub()
+
+	afterEach ->
+		tk.reset()
 
 	describe "getDoc", ->
 		beforeEach ->
