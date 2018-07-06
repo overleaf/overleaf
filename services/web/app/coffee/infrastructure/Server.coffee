@@ -74,7 +74,7 @@ app.use methodOverride()
 
 app.use metrics.http.monitor(logger)
 app.use RedirectManager
-app.use ProxyManager.call
+ProxyManager.apply(publicApiRouter)
 
 
 webRouter.use cookieParser(Settings.security.sessionSecret)
