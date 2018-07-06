@@ -9,7 +9,7 @@ module.exports = BucketController =
 	getFile: (req, res)->
 		{bucket} = req.params
 		key = req.params[0]
-		credentials = settings.filestore.s3[bucket]
+		credentials = settings.filestore.s3?[bucket]
 		options = {
 			key: key,
 			bucket: bucket,
