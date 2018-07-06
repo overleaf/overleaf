@@ -63,8 +63,11 @@ define [
 					$scope.affiliationToChange.role,
 					$scope.affiliationToChange.department
 				)
-				.then () -> _getUserEmails()
-				.catch () -> $scope.ui.hasError = true
+				.then () ->
+					_reset()
+					_getUserEmails()
+				.catch () ->
+					$scope.ui.hasError = true
 
 		$scope.cancelAffiliationChange = (email) ->
 			$scope.affiliationToChange.email = ""
