@@ -16,7 +16,7 @@ define [
 	"ide/metadata/services/metadata"
 	"ide/graphics/services/graphics"
 	"ide/preamble/services/preamble"
-    "ide/files/services/files"
+	"ide/files/services/files"
 ], (App, Ace, SearchBox, Vim, ModeList, UndoManager, AutoCompleteManager, SpellCheckManager, SpellCheckAdapter, HighlightsManager, CursorPositionManager, CursorPositionAdapter, TrackChangesManager, MetadataManager) ->
 	EditSession = ace.require('ace/edit_session').EditSession
 	ModeList = ace.require('ace/ext/modelist')
@@ -308,13 +308,13 @@ define [
 						editor.renderer.updateFontSize()
 
 				scope.$watch "sharejsDoc", (sharejs_doc, old_sharejs_doc) ->
-					cursorPositionManager.onBeforeSessionChange(!!old_sharejs_doc)
-
 					if old_sharejs_doc?
+						scope.$broadcast('beforeChangeDocument')
 						detachFromAce(old_sharejs_doc)
-
 					if sharejs_doc?
 						attachToAce(sharejs_doc)
+					if sharejs_doc? and old_sharejs_doc?
+						scope.$broadcast('afterChangeDocument')
 
 				scope.$watch "text", (text) ->
 					if text?
@@ -391,7 +391,6 @@ define [
 					cursorPositionManager.onUnload(editor.getSession())
 
 				initCursorPosition = () ->
-					cursorPositionManager.init()
 					editor.on 'changeSession', onSessionChangeForCursorPosition
 					onSessionChangeForCursorPosition({ session: editor.getSession() }) # Force initial setup
 					$(window).on "unload", onUnloadForCursorPosition
@@ -399,6 +398,14 @@ define [
 				tearDownCursorPosition = () ->
 					editor.off 'changeSession', onSessionChangeForCursorPosition
 					$(window).off "unload", onUnloadForCursorPosition
+
+				initCursorPosition()
+
+				# Trigger the event once *only* - this is called after Ace is connected
+				# to the ShareJs instance but this event should only be triggered the
+				# first time the editor is opened. Not every time the docs opened
+				triggerEditorInitEvent = _.once () ->
+					scope.$broadcast('editorInit')
 
 				attachToAce = (sharejs_doc) ->
 					lines = sharejs_doc.getSnapshot().split("\n")
@@ -445,8 +452,8 @@ define [
 					editor.initing = false
 					# now ready to edit document
 					editor.setReadOnly(scope.readOnly) # respect the readOnly setting, normally false
+					triggerEditorInitEvent()
 					initSpellCheck()
-					initCursorPosition()
 
 					resetScrollMargins()
 

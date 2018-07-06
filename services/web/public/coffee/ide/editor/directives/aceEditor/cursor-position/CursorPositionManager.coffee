@@ -1,6 +1,14 @@
 define [], () ->
 	class CursorPositionManager
 		constructor: (@$scope, @adapter, @localStorage) ->
+			@$scope.$on 'editorInit', @jumpToPositionInNewDoc
+
+			@$scope.$on 'beforeChangeDocument', () =>
+				@storeCursorPosition()
+				@storeFirstVisibleLine()
+
+			@$scope.$on 'afterChangeDocument', @jumpToPositionInNewDoc
+
 			@$scope.$on "#{@$scope.name}:gotoLine", (e, line, column) =>
 				if line?
 					setTimeout () =>
@@ -16,16 +24,8 @@ define [], () ->
 			@$scope.$on "#{@$scope.name}:clearSelection", (e) =>
 				@adapter.clearSelection()
 
-		init: () ->
-			@emitCursorUpdateEvent()
-
-		onBeforeSessionChange: (hasPrevSession = false) =>
-			if hasPrevSession
-				@storeCursorPosition()
-				@storeFirstVisibleLine()
-
+		jumpToPositionInNewDoc: () =>
 			@doc_id = @$scope.sharejsDoc?.doc_id
-
 			setTimeout () =>
 				@gotoStoredPosition()
 			, 0
