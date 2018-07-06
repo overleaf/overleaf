@@ -1,13 +1,3 @@
-let USER_QUERY = null
-if (process.argv[2] === '--all') {
-  USER_QUERY = {}
-} else if (process.argv[2] === '--v1-only') {
-  USER_QUERY = { 'overleaf.id': { $exists: true } }
-} else {
-  console.error(`Usage:\n\n\tnode ${process.argv[1]} (--all|--v1-only)`)
-  process.exit(1)
-}
-
 const {db} = require('../app/js/infrastructure/mongojs')
 const FeaturesUpdater = require(
   '../app/js/Features/Subscription/FeaturesUpdater'
@@ -19,7 +9,7 @@ const async = require('async')
 const logger = require('logger-sharelatex')
 logger.logger.level('error')
 
-const areFeaturesEqual = function (featuresA, featuresB) {
+const areFeaturesEqual = function(featuresA, featuresB) {
   for (const feature in featuresA) {
     if (featuresA[feature] !== featuresB[feature]) {
       return false
@@ -31,7 +21,9 @@ const areFeaturesEqual = function (featuresA, featuresB) {
 var outOfSyncUserCount = 0
 var userCount = null
 
-db.users.find(USER_QUERY, {
+db.users.find({
+  'overleaf.id': { $exists: true }
+}, {
   overleaf: 1,
   features: 1
 }, function (error, users) {
