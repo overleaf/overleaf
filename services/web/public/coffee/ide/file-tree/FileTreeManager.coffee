@@ -386,6 +386,8 @@ define [
 				provider,
 				data,
 				_csrf: window.csrfToken
+			}, {
+				disableAutoLoginRedirect: true
 			}
 
 		refreshLinkedFile: (file) ->
@@ -396,6 +398,8 @@ define [
 				return
 			return @ide.$http.post "/project/#{@ide.project_id}/linked_file/#{file.id}/refresh", {
 				_csrf: window.csrfToken
+			}, {
+				disableAutoLoginRedirect: true
 			}
 
 		renameEntity: (entity, name, callback = (error) ->) ->
