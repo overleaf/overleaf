@@ -25,12 +25,16 @@ module.exports =
 			template_files: Path.resolve(__dirname + "/../template_files")
 		# if you are using S3, then fill in your S3 details below
 		# s3:
-		# 	key: ""
-		# 	secret: ""
+		# 	key: ""     # default
+		# 	secret: ""  # default
+		#   bucketname1: # secrets for bucketname1
+		#     auth_key: ""
+		#     auth_secret: ""
+		#  bucketname2: # secrets for bucketname2...
 
 	path:
 		uploadFolder: Path.resolve(__dirname + "/../uploads")
-		
+
 	commands:
 		# Any commands to wrap the convert utility in, for example ["nice"], or ["firejail", "--profile=/etc/firejail/convert.profile"]
 		convertCommandPrefix: []
