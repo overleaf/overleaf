@@ -35,8 +35,8 @@ module.exports = ContactsController =
 	_formatContact: (contact) ->
 		return  {
 			id: contact._id?.toString()
-			email: contact.email
-			first_name: contact.first_name
-			last_name: contact.last_name
+			email: contact.email || ""
+			first_name: contact.first_name || ""
+			last_name: contact.last_name || ""
 			type: "user"
 		}
