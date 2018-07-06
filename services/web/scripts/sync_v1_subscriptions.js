@@ -9,7 +9,7 @@ const async = require('async')
 const logger = require('logger-sharelatex')
 logger.logger.level('error')
 
-const areFeaturesEqual = function(featuresA, featuresB) {
+const areFeaturesEqual = function (featuresA, featuresB) {
   for (const feature in featuresA) {
     if (featuresA[feature] !== featuresB[feature]) {
       return false
