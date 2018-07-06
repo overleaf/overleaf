@@ -17,7 +17,8 @@ LinkedFilesHandler = require './LinkedFilesHandler'
 	SourceFileNotFoundError,
 	NotOriginalImporterError,
 	FeatureNotAvailableError,
-	RemoteServiceError
+	RemoteServiceError,
+	FileCannotRefreshError
 } = require './LinkedFilesErrors'
 Modules = require '../../infrastructure/Modules'
 
@@ -138,6 +139,10 @@ module.exports = LinkedFilesController = {
 				"The remote service produced an error"
 			)
 
+		else if error instanceof FileCannotRefreshError
+			res.status(400).send(
+				"This file cannot be refreshed"
+			)
 
 		else
 			next(error)
