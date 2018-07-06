@@ -36,7 +36,7 @@ form.row(
 								a(
 									href
 									ng-click="changeAffiliation(userEmail);"
-								)  #{translate("change")}
+								) #{translate("change")}
 								| )
 							.affiliation-change-container(
 								ng-if="isChangingAffiliation(userEmail.email)"
@@ -51,19 +51,19 @@ form.row(
 										href
 										ng-click="saveAffiliationChange();"
 									) #{translate("save_or_cancel-save")}
-									|  #{translate("save_or_cancel-or" )}
+									| &nbsp;#{translate("save_or_cancel-or" )}&nbsp;
 									a(
 										href
 										ng-click="cancelAffiliationChange();"
 									) #{translate("save_or_cancel-cancel")}
 					td 
-						a(
+						a.affiliations-table-inline-action(
 							href
 							ng-if="!userEmail.default"
 							ng-click="setDefaultUserEmail(userEmail)"
 						)  #{translate("make_default")}
 						br
-						a(
+						a.affiliations-table-inline-action(
 							href
 							ng-if="!userEmail.default"
 							ng-click="removeUserEmail(userEmail)"

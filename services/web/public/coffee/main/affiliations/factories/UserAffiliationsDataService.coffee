@@ -81,7 +81,7 @@ define [
 			}
 
 		addRoleAndDepartment = (email, role, department) ->
-			$http.post "/endorse", {
+			$http.post "/user/emails/endorse", {
 				email,
 				role,
 				department,
