@@ -23,7 +23,8 @@ module.exports =
 			user_files: Path.resolve(__dirname + "/../user_files")
 			public_files: Path.resolve(__dirname + "/../public_files")
 			template_files: Path.resolve(__dirname + "/../template_files")
-		# if you are using S3, then fill in your S3 details below
+		# if you are using S3, then fill in your S3 details below,
+		# or use env var with the same structure.
 		# s3:
 		# 	key: ""     # default
 		# 	secret: ""  # default
@@ -31,6 +32,7 @@ module.exports =
 		#     auth_key: ""
 		#     auth_secret: ""
 		#  bucketname2: # secrets for bucketname2...
+		s3: JSON.parse process.env['S3_CREDENTIALS'] if process.env['S3_CREDENTIALS']
 
 	path:
 		uploadFolder: Path.resolve(__dirname + "/../uploads")
