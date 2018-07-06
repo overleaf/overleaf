@@ -18,7 +18,7 @@ module.exports = ReferalFeatures =
 
 	_calculateFeatures : (user)->
 		bonusLevel = ReferalFeatures._getBonusLevel(user)
-		return Settings.bonus_features?["#{bonusLevel}"] or Settings.defaultFeatures
+		return Settings.bonus_features?["#{bonusLevel}"] or {}
 
 	_getBonusLevel: (user)->
 		highestBonusLevel = 0
