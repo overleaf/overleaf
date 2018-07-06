@@ -9,7 +9,6 @@ module.exports = BucketController =
 	getFile: (req, res)->
 		{bucket} = req.params
 		key = req.params[0]
-		{format, style} = req.query
 		credentials = settings.filestore.s3[bucket]
 		options = {
 			key: key,
@@ -20,11 +19,11 @@ module.exports = BucketController =
 		logger.log key:key, bucket:bucket, "receiving request to get file from bucket"
 		FileHandler.getFile bucket, key, options, (err, fileStream)->
 			if err?
-				logger.err err:err, key:key, bucket:bucket, format:format, style:style, "problem getting file from bucket"
+				logger.err err:err, key:key, bucket:bucket, "problem getting file from bucket"
 				if err instanceof Errors.NotFoundError
 					return res.send 404
 				else
 					return res.send 500
 			else
-				logger.log key:key, bucket:bucket, format:format, style:style, "sending bucket file to response"
+				logger.log key:key, bucket:bucket, "sending bucket file to response"
 				fileStream.pipe res
