@@ -1,5 +1,5 @@
 StatsD = require('lynx')
-statsd = new StatsD('localhost', 8125, {on_error:->})
+statsd = new StatsD(process.env["STATSD_HOST"] or "localhost", 8125, {on_error:->})
 
 name = "unknown"
 hostname = require('os').hostname()
