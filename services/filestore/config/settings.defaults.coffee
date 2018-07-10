@@ -23,14 +23,23 @@ module.exports =
 			user_files: Path.resolve(__dirname + "/../user_files")
 			public_files: Path.resolve(__dirname + "/../public_files")
 			template_files: Path.resolve(__dirname + "/../template_files")
-		# if you are using S3, then fill in your S3 details below
+		# if you are using S3, then fill in your S3 details below,
+		# or use env var with the same structure.
 		# s3:
-		# 	key: ""
-		# 	secret: ""
+		# 	key: ""     # default
+		# 	secret: ""  # default
+		#
+		# s3BucketCreds:
+		#   bucketname1: # secrets for bucketname1
+		#     auth_key: ""
+		#     auth_secret: ""
+		#  bucketname2: # secrets for bucketname2...
+
+		s3BucketCreds: JSON.parse process.env['S3_BUCKET_CREDENTIALS'] if process.env['S3_BUCKET_CREDENTIALS']
 
 	path:
 		uploadFolder: Path.resolve(__dirname + "/../uploads")
-		
+
 	commands:
 		# Any commands to wrap the convert utility in, for example ["nice"], or ["firejail", "--profile=/etc/firejail/convert.profile"]
 		convertCommandPrefix: []
