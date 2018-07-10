@@ -67,15 +67,38 @@ pipeline {
       }
     }
     
-    stage('Unit Test') {
-      agent {
-        docker {
-          image 'node:6.9.5'
-          reuseNode true
+    stage('Test and Minify') {
+      parallel {
+        stage('Unit Test') {
+          agent {
+            docker {
+              image 'node:6.9.5'
+              reuseNode true
+            }
+          }
+          steps {
+            sh 'make --no-print-directory test_unit MOCHA_ARGS="--reporter tap"'
+          }
         }
-      }
-      steps {
-        sh 'make --no-print-directory test_unit MOCHA_ARGS="--reporter tap"'
+        
+        stage('Acceptance Test') {
+          steps {
+            // Spawns its own docker containers
+            sh 'make --no-print-directory test_acceptance MOCHA_ARGS="--reporter tap"'
+          }
+        }
+
+        stage('Minify') {
+          agent {
+            docker {
+              image 'node:6.9.5'
+              reuseNode true
+            }
+          }
+          steps {
+            sh 'WEBPACK_ENV=production make minify'
+          }
+        }
       }
     }
 
@@ -83,25 +106,6 @@ pipeline {
       steps {
         // Spawns its own docker containers
         sh 'make --no-print-directory test_frontend'
-      }
-    }
-    
-    stage('Acceptance Test') {
-      steps {
-        // Spawns its own docker containers
-        sh 'make --no-print-directory test_acceptance MOCHA_ARGS="--reporter tap"'
-      }
-    }
-
-    stage('Minify') {
-      agent {
-        docker {
-          image 'node:6.9.5'
-          reuseNode true
-        }
-      }
-      steps {
-        sh 'WEBPACK_ENV=production make minify'
       }
     }
     
