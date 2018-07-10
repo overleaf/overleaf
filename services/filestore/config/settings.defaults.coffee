@@ -28,11 +28,14 @@ module.exports =
 		# s3:
 		# 	key: ""     # default
 		# 	secret: ""  # default
+		#
+		# s3BucketCreds:
 		#   bucketname1: # secrets for bucketname1
 		#     auth_key: ""
 		#     auth_secret: ""
 		#  bucketname2: # secrets for bucketname2...
-		s3: JSON.parse process.env['S3_CREDENTIALS'] if process.env['S3_CREDENTIALS']
+
+		s3BucketCreds: JSON.parse process.env['S3_BUCKET_CREDENTIALS'] if process.env['S3_BUCKET_CREDENTIALS']
 
 	path:
 		uploadFolder: Path.resolve(__dirname + "/../uploads")
