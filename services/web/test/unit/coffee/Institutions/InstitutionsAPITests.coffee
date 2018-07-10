@@ -25,6 +25,22 @@ describe "InstitutionsAPI", ->
 			email:"hello@world.com"
 		@newEmail = "bob@bob.com"
 
+	describe 'getInstitutionAffiliations', ->
+		it 'get affiliations', (done)->
+			@institutionId = 123
+			responseBody = ['123abc', '456def']
+			@request.yields(null, { statusCode: 200 }, responseBody)
+			@InstitutionsAPI.getInstitutionAffiliations @institutionId, (err, body) =>
+				should.not.exist(err)
+				@request.calledOnce.should.equal true
+				requestOptions = @request.lastCall.args[0]
+				expectedUrl = "v1.url/api/v2/institutions/#{@institutionId}/affiliations"
+				requestOptions.url.should.equal expectedUrl
+				requestOptions.method.should.equal 'GET'
+				should.not.exist(requestOptions.body)
+				body.should.equal responseBody
+				done()
+
 	describe 'getUserAffiliations', ->
 		it 'get affiliations', (done)->
 			responseBody = [{ foo: 'bar' }]

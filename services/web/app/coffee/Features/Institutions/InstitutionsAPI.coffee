@@ -4,6 +4,14 @@ settings = require "settings-sharelatex"
 request = require "request"
 
 module.exports = InstitutionsAPI =
+	getInstitutionAffiliations: (institutionId, callback = (error, body) ->) ->
+		makeAffiliationRequest {
+			method: 'GET'
+			path: "/api/v2/institutions/#{institutionId.toString()}/affiliations"
+			defaultErrorMessage: "Couldn't get institution affiliations"
+		}, callback
+
+
 	getUserAffiliations: (userId, callback = (error, body) ->) ->
 		makeAffiliationRequest {
 			method: 'GET'
@@ -77,6 +85,7 @@ makeAffiliationRequest = (requestOptions, callback = (error) ->) ->
 		callback(null, body)
 
 [
+	'getInstitutionAffiliations'
 	'getUserAffiliations',
 	'addAffiliation',
 	'removeAffiliation',
