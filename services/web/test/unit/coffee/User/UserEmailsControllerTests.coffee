@@ -34,7 +34,7 @@ describe "UserEmailsController", ->
 			"./UserUpdater": @UserUpdater
 			"../Helpers/EmailHelper": @EmailHelper
 			"./UserEmailsConfirmationHandler": @UserEmailsConfirmationHandler = {}
-			"./UserAffiliationsManager": endorseAffiliation: @endorseAffiliation
+			"../Institutions/InstitutionsAPI": endorseAffiliation: @endorseAffiliation
 			"../Errors/Errors": Errors
 			"logger-sharelatex":
 				log: -> console.log(arguments)

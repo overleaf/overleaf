@@ -1,7 +1,7 @@
 User = require("../../models/User").User
 logger = require("logger-sharelatex")
 metrics = require('metrics-sharelatex')
-{ addAffiliation } = require("./UserAffiliationsManager")
+{ addAffiliation } = require("../Institutions/InstitutionsAPI")
 
 
 module.exports = UserCreator =

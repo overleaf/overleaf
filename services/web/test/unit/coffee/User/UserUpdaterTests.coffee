@@ -25,7 +25,7 @@ describe "UserUpdater", ->
 		@UserUpdater = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": @logger
 			"./UserGetter": @UserGetter
-			'./UserAffiliationsManager':
+			'../Institutions/InstitutionsAPI':
 				addAffiliation: @addAffiliation
 				removeAffiliation: @removeAffiliation
 			'../Subscription/FeaturesUpdater': refreshFeatures: @refreshFeatures

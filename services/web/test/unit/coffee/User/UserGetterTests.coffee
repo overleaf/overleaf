@@ -22,15 +22,15 @@ describe "UserGetter", ->
 			db: users: findOne: @findOne
 			ObjectId: (id) -> return id
 		settings = apis: { v1: { url: 'v1.url', user: '', pass: '' } }
-		@getAffiliations = sinon.stub().callsArgWith(1, null, [])
+		@getUserAffiliations = sinon.stub().callsArgWith(1, null, [])
 
 		@UserGetter = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": log:->
 			"../../infrastructure/mongojs": @Mongo
 			"metrics-sharelatex": timeAsyncMethod: sinon.stub()
 			'settings-sharelatex': settings
-			'./UserAffiliationsManager':
-				getAffiliations: @getAffiliations
+			'../Institutions/InstitutionsAPI':
+				getUserAffiliations: @getUserAffiliations
 			"../Errors/Errors": Errors
 
 	describe "getUser", ->
@@ -77,7 +77,7 @@ describe "UserGetter", ->
 					institution: { name: 'University Name', isUniversity: true }
 				}
 			]
-			@getAffiliations.callsArgWith(1, null, affiliationsData)
+			@getUserAffiliations.callsArgWith(1, null, affiliationsData)
 			@UserGetter.getUserFullEmails @fakeUser._id, (error, fullEmails) =>
 				assert.deepEqual fullEmails, [
 					{

@@ -3,12 +3,12 @@ metrics = require("metrics-sharelatex")
 settings = require "settings-sharelatex"
 request = require "request"
 
-module.exports = UserAffiliationsManager =
-	getAffiliations: (userId, callback = (error, body) ->) ->
+module.exports = InstitutionsAPI =
+	getUserAffiliations: (userId, callback = (error, body) ->) ->
 		makeAffiliationRequest {
 			method: 'GET'
 			path: "/api/v2/users/#{userId.toString()}/affiliations"
-			defaultErrorMessage: "Couldn't get affiliations"
+			defaultErrorMessage: "Couldn't get user affiliations"
 		}, callback
 
 
@@ -77,10 +77,10 @@ makeAffiliationRequest = (requestOptions, callback = (error) ->) ->
 		callback(null, body)
 
 [
-	'getAffiliations',
+	'getUserAffiliations',
 	'addAffiliation',
 	'removeAffiliation',
 ].map (method) ->
 	metrics.timeAsyncMethod(
-		UserAffiliationsManager, method, 'mongo.UserAffiliationsManager', logger
+		InstitutionsAPI, method, 'mongo.InstitutionsAPI', logger
 	)
