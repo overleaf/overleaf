@@ -425,7 +425,7 @@ module.exports = settings =
 	redirects:
 		"/templates/index": "/templates/"
 
-	reloadModuleViewsOnEachRequest: true
+	reloadModuleViewsOnEachRequest: process.env['NODE_ENV'] != 'production'
 
 	domainLicences: [
 
