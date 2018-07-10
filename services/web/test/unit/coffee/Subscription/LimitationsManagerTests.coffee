@@ -37,14 +37,14 @@ describe "LimitationsManager", ->
 	describe "allowedNumberOfCollaboratorsInProject", ->
 		describe "when the project is owned by a user without a subscription", ->
 			beforeEach ->
-				@Settings.defaultPlanCode = collaborators: 23
+				@Settings.defaultFeatures = collaborators: 23
 				@project.owner_ref = @user_id
 				delete @user.features
 				@callback = sinon.stub()
 				@LimitationsManager.allowedNumberOfCollaboratorsInProject(@project_id, @callback)
 
 			it "should return the default number", ->
-				@callback.calledWith(null, @Settings.defaultPlanCode.collaborators).should.equal true
+				@callback.calledWith(null, @Settings.defaultFeatures.collaborators).should.equal true
 
 		describe "when the project is owned by a user with a subscription", ->
 			beforeEach ->
@@ -60,13 +60,13 @@ describe "LimitationsManager", ->
 	describe "allowedNumberOfCollaboratorsForUser", ->
 		describe "when the user has no features", ->
 			beforeEach ->
-				@Settings.defaultPlanCode = collaborators: 23
+				@Settings.defaultFeatures = collaborators: 23
 				delete @user.features
 				@callback = sinon.stub()
 				@LimitationsManager.allowedNumberOfCollaboratorsForUser(@user_id, @callback)
 
 			it "should return the default number", ->
-				@callback.calledWith(null, @Settings.defaultPlanCode.collaborators).should.equal true
+				@callback.calledWith(null, @Settings.defaultFeatures.collaborators).should.equal true
 
 		describe "when the user has features", ->
 			beforeEach ->
