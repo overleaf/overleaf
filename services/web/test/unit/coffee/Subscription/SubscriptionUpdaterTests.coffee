@@ -103,6 +103,7 @@ describe "SubscriptionUpdater", ->
 	describe "_updateSubscriptionFromRecurly", ->
 		beforeEach ->
 			@FeaturesUpdater.refreshFeatures = sinon.stub().callsArgWith(1)
+			@SubscriptionUpdater.deleteSubscription = sinon.stub().yields()
 
 		it "should update the subscription with token etc when not expired", (done)->
 			@SubscriptionUpdater._updateSubscriptionFromRecurly @recurlySubscription, @subscription, (err)=>
@@ -116,13 +117,10 @@ describe "SubscriptionUpdater", ->
 				@FeaturesUpdater.refreshFeatures.calledWith(@adminUser._id).should.equal true
 				done()
 
-		it "should remove the recurlySubscription_id when expired", (done)->
+		it "should remove the subscription when expired", (done)->
 			@recurlySubscription.state = "expired"
-
 			@SubscriptionUpdater._updateSubscriptionFromRecurly @recurlySubscription, @subscription, (err)=>
-				assert.equal(@subscription.recurlySubscription_id, undefined)
-				@subscription.save.called.should.equal true
-				@FeaturesUpdater.refreshFeatures.calledWith(@adminUser._id).should.equal true
+				@SubscriptionUpdater.deleteSubscription.calledWith(@subscription._id).should.equal true
 				done()
 
 		it "should update all the users features", (done)->

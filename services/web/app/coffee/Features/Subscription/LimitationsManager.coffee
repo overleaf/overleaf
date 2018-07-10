@@ -19,7 +19,7 @@ module.exports = LimitationsManager =
 			if user.features? and user.features.collaborators?
 				callback null, user.features.collaborators
 			else
-				callback null, Settings.defaultPlanCode.collaborators
+				callback null, Settings.defaultFeatures.collaborators
 
 	canAddXCollaborators: (project_id, x_collaborators, callback = (error, allowed)->) ->
 		@allowedNumberOfCollaboratorsInProject project_id, (error, allowed_number) =>

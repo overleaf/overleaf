@@ -78,16 +78,16 @@ module.exports = SubscriptionUpdater =
 
 	_updateSubscriptionFromRecurly: (recurlySubscription, subscription, callback)->
 		logger.log recurlySubscription:recurlySubscription, subscription:subscription, "updaing subscription"
-		plan = PlansLocator.findLocalPlanInSettings(recurlySubscription.plan.plan_code)
 		if recurlySubscription.state == "expired"
-			subscription.recurlySubscription_id = undefined
-			subscription.planCode = Settings.defaultPlanCode
-		else
-			subscription.recurlySubscription_id = recurlySubscription.uuid
-			subscription.freeTrial.expiresAt = undefined
-			subscription.freeTrial.planCode = undefined
-			subscription.freeTrial.allowed = true
-			subscription.planCode = recurlySubscription.plan.plan_code
+			return SubscriptionUpdater.deleteSubscription subscription._id, callback
+		subscription.recurlySubscription_id = recurlySubscription.uuid
+		subscription.freeTrial.expiresAt = undefined
+		subscription.freeTrial.planCode = undefined
+		subscription.freeTrial.allowed = true
+		subscription.planCode = recurlySubscription.plan.plan_code
+		plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
+		if !plan?
+			return callback(new Error("plan code not found: #{subscription.planCode}"))
 		if plan.groupPlan
 			subscription.groupPlan = true
 			subscription.membersLimit = plan.membersLimit
