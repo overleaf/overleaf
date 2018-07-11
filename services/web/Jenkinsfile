@@ -6,6 +6,10 @@ pipeline {
 
   environment  {
       HOME = "/tmp"
+      GIT_PROJECT = "web-sharelatex-internal"
+      JENKINS_WORKFLOW = "web-sharelatex-internal"
+      TARGET_URL = "${env.JENKINS_URL}blue/organizations/jenkins/${JENKINS_WORKFLOW}/detail/$BRANCH_NAME/$BUILD_NUMBER/pipeline"
+      GIT_API_URL = "https://api.github.com/repos/sharelatex/${GIT_PROJECT}/statuses/$GIT_COMMIT"
   }
 
   triggers {
@@ -14,6 +18,20 @@ pipeline {
   }
 
   stages {
+    stage('Pre') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'GITHUB_INTEGRATION', usernameVariable: 'GH_AUTH_USERNAME', passwordVariable: 'GH_AUTH_PASSWORD')]) {
+          sh "curl $GIT_API_URL \
+            --data '{ \
+            \"state\" : \"pending\", \
+            \"target_url\": \"$TARGET_URL\", \
+            \"description\": \"Your build is underway\", \
+            \"context\": \"ci/jenkins\" }' \
+            -u $GH_AUTH_USERNAME:$GH_AUTH_PASSWORD"
+        }
+      }
+    }
+
     stage('Install modules') {
       steps {
         sshagent (credentials: ['GIT_DEPLOY_KEY']) {
@@ -146,11 +164,32 @@ pipeline {
       sh 'make clean_ci'
     }
 
+    success {
+      withCredentials([usernamePassword(credentialsId: 'GITHUB_INTEGRATION', usernameVariable: 'GH_AUTH_USERNAME', passwordVariable: 'GH_AUTH_PASSWORD')]) {
+        sh "curl $GIT_API_URL \
+          --data '{ \
+          \"state\" : \"success\", \
+          \"target_url\": \"$TARGET_URL\", \
+          \"description\": \"Your build succeeded!\", \
+          \"context\": \"ci/jenkins\" }' \
+          -u $GH_AUTH_USERNAME:$GH_AUTH_PASSWORD"
+      }
+    }
+
     failure {
       mail(from: "${EMAIL_ALERT_FROM}",
            to: "${EMAIL_ALERT_TO}",
            subject: "Jenkins build failed: ${JOB_NAME}:${BUILD_NUMBER}",
            body: "Build: ${BUILD_URL}")
+      withCredentials([usernamePassword(credentialsId: 'GITHUB_INTEGRATION', usernameVariable: 'GH_AUTH_USERNAME', passwordVariable: 'GH_AUTH_PASSWORD')]) {
+        sh "curl $GIT_API_URL \
+          --data '{ \
+          \"state\" : \"failure\", \
+          \"target_url\": \"$TARGET_URL\", \
+          \"description\": \"Your build failed\", \
+          \"context\": \"ci/jenkins\" }' \
+          -u $GH_AUTH_USERNAME:$GH_AUTH_PASSWORD"
+      }
     }
   }
 
