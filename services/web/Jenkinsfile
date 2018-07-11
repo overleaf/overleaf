@@ -1,18 +1,18 @@
 String cron_string = BRANCH_NAME == "master" ? "@daily" : ""
 
 pipeline {
-  
+
   agent any
-  
+
   environment  {
       HOME = "/tmp"
   }
-  
+
   triggers {
     pollSCM('* * * * *')
     cron(cron_string)
   }
-  
+
   stages {
     stage('Install modules') {
       steps {
@@ -21,7 +21,7 @@ pipeline {
         }
       }
     }
-    
+
     stage('Install') {
       agent {
         docker {
@@ -66,7 +66,7 @@ pipeline {
         sh 'make --no-print-directory lint'
       }
     }
-    
+
     stage('Test and Minify') {
       parallel {
         stage('Unit Test') {
@@ -80,7 +80,7 @@ pipeline {
             sh 'make --no-print-directory test_unit MOCHA_ARGS="--reporter tap"'
           }
         }
-        
+
         stage('Acceptance Test') {
           steps {
             // Spawns its own docker containers
@@ -108,7 +108,7 @@ pipeline {
         sh 'make --no-print-directory test_frontend'
       }
     }
-    
+
     stage('Package') {
       steps {
         sh 'rm -rf ./node_modules/grunt*'
@@ -117,7 +117,7 @@ pipeline {
         sh 'tar -czf build.tar.gz --exclude=build.tar.gz --exclude-vcs .'
       }
     }
-    
+
     stage('Publish') {
       steps {
         withAWS(credentials:'S3_CI_BUILDS_AWS_KEYS', region:"${S3_REGION_BUILD_ARTEFACTS}") {
@@ -127,8 +127,8 @@ pipeline {
         }
       }
     }
-    
-    
+
+
     stage('Sync OSS') {
       when {
         branch 'master'
@@ -140,29 +140,29 @@ pipeline {
       }
     }
   }
-  
+
   post {
     always {
       sh 'make clean_ci'
     }
 
     failure {
-      mail(from: "${EMAIL_ALERT_FROM}", 
-           to: "${EMAIL_ALERT_TO}", 
+      mail(from: "${EMAIL_ALERT_FROM}",
+           to: "${EMAIL_ALERT_TO}",
            subject: "Jenkins build failed: ${JOB_NAME}:${BUILD_NUMBER}",
            body: "Build: ${BUILD_URL}")
     }
   }
-  
+
 
   // The options directive is for configuration that applies to the whole job.
   options {
     // Only build one at a time
     disableConcurrentBuilds()
-    
+
     // we'd like to make sure remove old builds, so we don't fill up our storage!
     buildDiscarder(logRotator(numToKeepStr:'50'))
-    
+
     // And we'd really like to be sure that this build doesn't hang forever, so let's time it out after:
     timeout(time: 30, unit: 'MINUTES')
   }
