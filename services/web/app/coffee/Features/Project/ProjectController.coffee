@@ -346,7 +346,6 @@ module.exports = ProjectController =
 					useV2History: !!project.overleaf?.history?.display
 					showRichText: req.query?.rt == 'true'
 					showTestControls: req.query?.tc == 'true' || user.isAdmin
-					showPublishModal: req.query?.pm == 'true'
 				timer.done()
 
 	_buildProjectList: (allProjects, v1Projects = [])->
