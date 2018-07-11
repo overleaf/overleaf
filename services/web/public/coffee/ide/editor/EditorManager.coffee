@@ -14,7 +14,7 @@ define [
 				opening: true
 				trackChanges: false
 				wantTrackChanges: false
-				showRichText: localStorage("editor.mode.#{@$scope.project_id}") or false
+				showRichText: localStorage("editor.mode.#{@$scope.project_id}") == 'rich-text'
 			}
 
 			@$scope.$on "entity:selected", (event, entity) =>
