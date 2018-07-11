@@ -521,6 +521,7 @@ define [
 						detachFromAce(scope.sharejsDoc)
 						session = editor.getSession()
 						session?.destroy()
+						scope.eventsBridge.emit "aceScrollbarVisibilityChanged", false, 0
 
 				scope.$emit "#{scope.name}:inited", editor
 
