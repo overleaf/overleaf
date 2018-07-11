@@ -14,19 +14,19 @@ NotificationsBuilder = require("../Notifications/NotificationsBuilder")
 
 module.exports = SubscriptionGroupHandler =
 
-	addUserToGroup: (adminUserId, newEmail, callback)->
-		logger.log adminUserId:adminUserId, newEmail:newEmail, "adding user to group"
-		LimitationsManager.hasGroupMembersLimitReached adminUserId, (err, limitReached, subscription)->
+	addUserToGroup: (subscriptionId, newEmail, callback)->
+		logger.log subscriptionId:subscriptionId, newEmail:newEmail, "adding user to group"
+		LimitationsManager.hasGroupMembersLimitReached subscriptionId, (err, limitReached, subscription)->
 			if err?
-				logger.err err:err, adminUserId:adminUserId, newEmail:newEmail, "error checking if limit reached for group plan"
+				logger.err err:err, subscriptionId:subscriptionId, newEmail:newEmail, "error checking if limit reached for group plan"
 				return callback(err)
 			if limitReached
-				logger.err adminUserId:adminUserId, newEmail:newEmail, "group subscription limit reached not adding user to group"
+				logger.err subscriptionId:subscriptionId, newEmail:newEmail, "group subscription limit reached not adding user to group"
 				return callback(limitReached:limitReached)
 			UserGetter.getUserByAnyEmail newEmail, (err, user)->
 				return callback(err) if err?
 				if user?
-					SubscriptionUpdater.addUserToGroup adminUserId, user._id, (err)->
+					SubscriptionUpdater.addUserToGroup subscriptionId, user._id, (err)->
 						if err?
 							logger.err err:err, "error adding user to group"
 							return callback(err)
@@ -34,13 +34,13 @@ module.exports = SubscriptionGroupHandler =
 						userViewModel = buildUserViewModel(user)
 						callback(err, userViewModel)
 				else
-					TeamInvitesHandler.createInvite adminUserId, newEmail, (err) ->
+					TeamInvitesHandler.createInvite subscriptionId, newEmail, (err) ->
 						return callback(err) if err?
 						userViewModel = buildEmailInviteViewModel(newEmail)
 						callback(err, userViewModel)
 
-	removeUserFromGroup: (adminUser_id, userToRemove_id, callback)->
-		SubscriptionUpdater.removeUserFromGroup adminUser_id, userToRemove_id, callback
+	removeUserFromGroup: (subscriptionId, userToRemove_id, callback)->
+		SubscriptionUpdater.removeUserFromGroup subscriptionId, userToRemove_id, callback
 
 	replaceUserReferencesInGroups: (oldId, newId, callback) ->
 		Subscription.update {admin_id: oldId}, {admin_id: newId}, (error) ->
@@ -56,8 +56,8 @@ module.exports = SubscriptionGroupHandler =
 				return callback(error) if error?
 				Subscription.update query, removeOldUserUpdate, { multi: true }, callback
 
-	getPopulatedListOfMembers: (adminUser_id, callback)->
-		SubscriptionLocator.getUsersSubscription adminUser_id, (err, subscription)->
+	getPopulatedListOfMembers: (subscriptionId, callback)->
+		SubscriptionLocator.getSubscription subscriptionId, (err, subscription)->
 			users = []
 
 			for email in subscription.invited_emails or []

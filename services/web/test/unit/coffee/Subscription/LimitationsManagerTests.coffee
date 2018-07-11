@@ -23,6 +23,7 @@ describe "LimitationsManager", ->
 
 		@SubscriptionLocator =
 			getUsersSubscription: sinon.stub()
+			getSubscription: sinon.stub()
 
 		@LimitationsManager = SandboxedModule.require modulePath, requires:
 			'../Project/ProjectGetter': @ProjectGetter
@@ -310,21 +311,21 @@ describe "LimitationsManager", ->
 				]
 
 		it "should return true if the limit is hit (including members and invites)", (done)->
-			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @subscription)
+			@SubscriptionLocator.getSubscription.callsArgWith(1, null, @subscription)
 			@LimitationsManager.hasGroupMembersLimitReached @user_id, (err, limitReached)->
 				limitReached.should.equal true
 				done()
 
 		it "should return false if the limit is not hit (including members and invites)", (done)->
 			@subscription.membersLimit = 4
-			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @subscription)
+			@SubscriptionLocator.getSubscription.callsArgWith(1, null, @subscription)
 			@LimitationsManager.hasGroupMembersLimitReached @user_id, (err, limitReached)->
 				limitReached.should.equal false
 				done()
 
 		it "should return true if the limit has been exceded (including members and invites)", (done)->
 			@subscription.membersLimit = 2
-			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @subscription)
+			@SubscriptionLocator.getSubscription.callsArgWith(1, null, @subscription)
 			@LimitationsManager.hasGroupMembersLimitReached @user_id, (err, limitReached)->
 				limitReached.should.equal true
 				done()
@@ -379,4 +380,3 @@ describe "LimitationsManager", ->
 				@V1SubscriptionManager.getSubscriptionsFromV1.calledWith(@user_id).should.equal true
 				result.should.equal false
 				done()
-
