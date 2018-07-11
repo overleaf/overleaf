@@ -846,12 +846,28 @@
 		}
 	}
 
-.rp-unsupported-msg {
+.rp-unsupported-msg-wrapper {
 	display: none;
-	.rp-unsupported & {
+	.rp-size-expanded.rp-unsupported & {
+		display: block;
+	}
+
+	height: 100%;
+
+	.rp-unsupported-msg {
 		display: flex;
+		width: @review-panel-width - 40px;
+		height: 100%;
 		flex-direction: column;
-		width: @review-panel-width;
+		justify-content: center;
+		align-items: center;
+		margin: 0 auto;
+		text-align: center;
+
+		p {
+			font-size: 1.3em;
+			margin-top: 13px;
+		}
 	}
 }
 
