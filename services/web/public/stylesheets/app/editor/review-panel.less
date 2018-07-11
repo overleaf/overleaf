@@ -846,6 +846,15 @@
 		}
 	}
 
+.rp-unsupported-msg {
+	display: none;
+	.rp-unsupported & {
+		display: flex;
+		flex-direction: column;
+		width: @review-panel-width;
+	}
+}
+
 .ace-editor-wrapper {
 	.track-changes-marker-callout {
 		border-radius: 0;
