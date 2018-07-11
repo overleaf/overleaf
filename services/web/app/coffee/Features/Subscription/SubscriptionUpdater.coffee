@@ -25,13 +25,13 @@ module.exports = SubscriptionUpdater =
 					return callback(err) if err?
 					SubscriptionUpdater._updateSubscriptionFromRecurly recurlySubscription, subscription, callback
 
-	addUserToGroup: (adminUserId, userId, callback)->
-		@addUsersToGroup(adminUserId, [userId], callback)
+	addUserToGroup: (subscriptionId, userId, callback)->
+		@addUsersToGroup(subscriptionId, [userId], callback)
 
-	addUsersToGroup: (adminUserId, memberIds, callback)->
-		logger.log adminUserId: adminUserId, memberIds: memberIds, "adding members into mongo subscription"
+	addUsersToGroup: (subscriptionId, memberIds, callback)->
+		logger.log subscriptionId: subscriptionId, memberIds: memberIds, "adding members into mongo subscription"
 		searchOps =
-			admin_id: adminUserId
+			_id: subscriptionId
 		insertOperation =
 			{ $push: { member_ids: { $each: memberIds } } }
 
@@ -46,9 +46,9 @@ module.exports = SubscriptionUpdater =
 				async.map userIds, FeaturesUpdater.refreshFeatures, callback
 
 
-	removeUserFromGroup: (adminUser_id, user_id, callback)->
+	removeUserFromGroup: (subscriptionId, user_id, callback)->
 		searchOps =
-			admin_id: adminUser_id
+			_id: subscriptionId
 		removeOperation =
 			"$pull": {member_ids:user_id}
 		Subscription.update searchOps, removeOperation, (err)->

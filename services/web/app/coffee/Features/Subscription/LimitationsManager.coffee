@@ -89,13 +89,13 @@ module.exports = LimitationsManager =
 
 		return currentTotal >= subscription.membersLimit
 
-	hasGroupMembersLimitReached: (user_id, callback = (err, limitReached, subscription)->)->
-		SubscriptionLocator.getUsersSubscription user_id, (err, subscription)->
+	hasGroupMembersLimitReached: (subscriptionId, callback = (err, limitReached, subscription)->)->
+		SubscriptionLocator.getSubscription subscriptionId, (err, subscription)->
 			if err?
-				logger.err err:err, user_id:user_id, "error getting users subscription"
+				logger.err err:err, subscriptionId: subscriptionId, "error getting subscription"
 				return callback(err)
 			if !subscription?
-				logger.err user_id:user_id, "no subscription found for user"
+				logger.err subscriptionId: subscriptionId, "no subscription found"
 				return callback("no subscription found")
 
 			limitReached = LimitationsManager.teamHasReachedMemberLimit(subscription)

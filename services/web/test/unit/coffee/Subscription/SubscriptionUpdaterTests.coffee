@@ -18,6 +18,7 @@ describe "SubscriptionUpdater", ->
 		@otherUserId = "5208dd34438842e2db000005"
 		@allUserIds = ["13213", "dsadas", "djsaiud89"]
 		@subscription = subscription =
+			_id: "111111111111111111111111"
 			admin_id: @adminUser._id
 			member_ids: @allUserIds
 			save: sinon.stub().callsArgWith(0)
@@ -26,6 +27,7 @@ describe "SubscriptionUpdater", ->
 		@user_id = @adminuser_id
 
 		@groupSubscription =
+			_id: "222222222222222222222222"
 			admin_id: @adminUser._id
 			member_ids: @allUserIds
 			save: sinon.stub().callsArgWith(0)
@@ -158,9 +160,9 @@ describe "SubscriptionUpdater", ->
 			@SubscriptionUpdater.addUsersToGroup = sinon.stub().yields(null)
 
 		it "delegates to addUsersToGroup", (done)->
-			@SubscriptionUpdater.addUserToGroup @adminUser._id, @otherUserId, =>
+			@SubscriptionUpdater.addUserToGroup @subscription._id, @otherUserId, =>
 				@SubscriptionUpdater.addUsersToGroup
-					.calledWith(@adminUser._id, [@otherUserId]).should.equal true
+					.calledWith(@subscription._id, [@otherUserId]).should.equal true
 				done()
 
 	describe "addUsersToGroup", ->
@@ -168,16 +170,16 @@ describe "SubscriptionUpdater", ->
 			@FeaturesUpdater.refreshFeatures = sinon.stub().callsArgWith(1)
 
 		it "should add the user ids to the group as a set", (done)->
-			@SubscriptionUpdater.addUsersToGroup @adminUser._id, [@otherUserId], =>
+			@SubscriptionUpdater.addUsersToGroup @subscription._id, [@otherUserId], =>
 				searchOps =
-					admin_id: @adminUser._id
+					_id: @subscription._id
 				insertOperation =
 					{ $push: { member_ids: { $each: [@otherUserId] } } }
 				@findAndModifyStub.calledWith(searchOps, insertOperation).should.equal true
 				done()
 
 		it "should update the users features", (done)->
-			@SubscriptionUpdater.addUserToGroup @adminUser._id, @otherUserId, =>
+			@SubscriptionUpdater.addUserToGroup @subscription._id, @otherUserId, =>
 				@FeaturesUpdater.refreshFeatures.calledWith(@otherUserId).should.equal true
 				done()
 
@@ -186,16 +188,16 @@ describe "SubscriptionUpdater", ->
 			@FeaturesUpdater.refreshFeatures = sinon.stub().callsArgWith(1)
 
 		it "should pull the users id from the group", (done)->
-			@SubscriptionUpdater.removeUserFromGroup @adminUser._id, @otherUserId, =>
+			@SubscriptionUpdater.removeUserFromGroup @subscription._id, @otherUserId, =>
 				searchOps =
-					admin_id:@adminUser._id
+					_id: @subscription._id
 				removeOperation =
 					"$pull": {member_ids:@otherUserId}
 				@updateStub.calledWith(searchOps, removeOperation).should.equal true
 				done()
 
 		it "should update the users features", (done)->
-			@SubscriptionUpdater.removeUserFromGroup @adminUser._id, @otherUserId, =>
+			@SubscriptionUpdater.removeUserFromGroup @subscription._id, @otherUserId, =>
 				@FeaturesUpdater.refreshFeatures.calledWith(@otherUserId).should.equal true
 				done()
 

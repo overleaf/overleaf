@@ -81,7 +81,7 @@ describe "SubscriptionGroupHandler", ->
 		beforeEach ->
 			@LimitationsManager.hasGroupMembersLimitReached.callsArgWith(1, null, false, @subscription)
 			@UserGetter.getUserByAnyEmail.callsArgWith(1, null, @user)
-			
+
 		it "should find the user", (done)->
 			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
 				@UserGetter.getUserByAnyEmail.calledWith(@newEmail).should.equal true
@@ -156,13 +156,13 @@ describe "SubscriptionGroupHandler", ->
 	describe "getPopulatedListOfMembers", ->
 		beforeEach ->
 			@subscription = {}
-			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @subscription)
+			@SubscriptionLocator.getSubscription.callsArgWith(1, null, @subscription)
 			@UserGetter.getUser.callsArgWith(1, null, {_id:"31232"})
 
 		it "should locate the subscription", (done)->
 			@UserGetter.getUser.callsArgWith(1, null, {_id:"31232"})
-			@Handler.getPopulatedListOfMembers @adminUser_id, (err, users)=>
-				@SubscriptionLocator.getUsersSubscription.calledWith(@adminUser_id).should.equal true
+			@Handler.getPopulatedListOfMembers @subscriptionId, (err, users)=>
+				@SubscriptionLocator.getSubscription.calledWith(@subscriptionId).should.equal true
 				done()
 
 		it "should get the users by id", (done)->

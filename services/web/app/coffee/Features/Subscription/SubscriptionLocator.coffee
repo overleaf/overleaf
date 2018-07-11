@@ -14,6 +14,16 @@ module.exports =
 			logger.log user_id:user_id, "got users subscription"
 			callback(err, subscription)
 
+	getManagedSubscription: (managerId, callback)->
+			logger.log managerId: managerId, "getting managed subscription"
+			Subscription.findOne admin_id: managerId, (err, subscription)->
+				if subscription?
+					logger.log managerId: managerId, "got managed subscription"
+				else
+					err ||= new Error("No subscription found managed by user #{managerId}")
+
+				callback(err, subscription)
+
 	getMemberSubscriptions: (user_or_id, callback) ->
 		if user_or_id? and user_or_id._id?
 			user_id = user_or_id._id
