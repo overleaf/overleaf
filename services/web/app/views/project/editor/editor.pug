@@ -15,6 +15,7 @@ div.full-size(
 	.ui-layout-center(
 		ng-controller="ReviewPanelController",
 		ng-class="{\
+			'rp-unsupported': editor.showRichText,\
 			'rp-state-current-file': (reviewPanel.subView === SubViews.CUR_FILE),\
 			'rp-state-current-file-expanded': (reviewPanel.subView === SubViews.CUR_FILE && ui.reviewPanelOpen),\
 			'rp-state-current-file-mini': (reviewPanel.subView === SubViews.CUR_FILE && !ui.reviewPanelOpen),\

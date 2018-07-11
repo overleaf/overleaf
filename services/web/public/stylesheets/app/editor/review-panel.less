@@ -139,6 +139,10 @@
 		padding: 0 5px;
 	}
 
+	.rp-unsupported & {
+		display: none;
+	}
+
 	position: relative;
 	border-bottom: 1px solid @rp-border-grey;
 	background-color: @rp-bg-dim-blue;
@@ -216,6 +220,10 @@
 	.rp-size-expanded &,
 	.rp-size-mini & {
 		display: block;
+	}
+
+	.rp-unsupported & {
+		display: none;
 	}
 	
 	.rp-state-current-file & {
@@ -714,6 +722,10 @@
 		display: flex;
 	}
 
+	.rp-unsupported & {
+		display: none;
+	}
+
 	.rp-state-current-file & {
 		position: absolute;
 		bottom: 0;
@@ -1003,7 +1015,8 @@
 	.rp-size-mini & {
 		right: @review-off-width;
 	}
-	.rp-size-expanded & {
+	.rp-size-expanded &,
+	.rp-unsupported & {
 		display: none;
 	}
 }
@@ -1051,6 +1064,10 @@
 	.rp-size-mini &,
 	.rp-size-expanded & {
 		display: block;
+	}
+
+	.rp-unsupported & {
+		display: none;
 	}
 
 	.rp-size-expanded & {
