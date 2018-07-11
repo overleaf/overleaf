@@ -468,6 +468,7 @@ define [
 					editor.focus()
 
 				detachFromAce = (sharejs_doc) ->
+					tearDownSpellCheck()
 					sharejs_doc.detachFromAce()
 					sharejs_doc.off "remoteop.recordRemote"
 
