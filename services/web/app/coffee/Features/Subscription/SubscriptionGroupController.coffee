@@ -69,6 +69,8 @@ module.exports =
 		logger.log user_id: user_id, "exporting group csv"
 		SubscriptionLocator.getManagedSubscription user_id, (err, subscription)->
 			return next(error) if error?
+			if !subscription.groupPlan
+				return res.redirect("/")
 			SubscriptionGroupHandler.getPopulatedListOfMembers subscription._id, (err, users)->
 				groupCsv = ""
 				for user in users
