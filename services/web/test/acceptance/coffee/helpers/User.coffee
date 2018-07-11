@@ -100,6 +100,11 @@ class User
 		@emails.push(email: email, createdAt: new Date())
 		UserUpdater.addEmailAddress @id, email, callback
 
+	confirmEmail: (email, callback = (error) ->) ->
+		for emailData, idx in @emails
+			@emails[idx].confirmedAt = new Date() if emailData.email == email
+		UserUpdater.confirmEmail @id, email, callback
+
 	ensure_admin: (callback = (error) ->) ->
 		db.users.update {_id: ObjectId(@id)}, { $set: { isAdmin: true }}, callback
 

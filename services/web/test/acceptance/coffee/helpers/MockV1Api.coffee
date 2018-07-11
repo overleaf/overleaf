@@ -26,6 +26,10 @@ module.exports = MockV1Api =
 
 	syncUserFeatures: sinon.stub()
 
+	affiliations: []
+
+	setAffiliations: (affiliations) -> @affiliations = affiliations
+
 	run: () ->
 		app.get "/api/v1/sharelatex/users/:v1_user_id/plan_code", (req, res, next) =>
 			user = @users[req.params.v1_user_id]
@@ -43,7 +47,7 @@ module.exports = MockV1Api =
 			res.json exportId: @exportId
 
 		app.get "/api/v2/users/:userId/affiliations", (req, res, next) =>
-			res.json []
+			res.json @affiliations
 
 		app.post "/api/v2/users/:userId/affiliations", (req, res, next) =>
 			res.sendStatus 201
