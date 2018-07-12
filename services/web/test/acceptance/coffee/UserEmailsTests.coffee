@@ -17,7 +17,7 @@ describe "UserEmails", ->
 			token = null
 			async.series [
 				(cb) =>
-					@user.request { 
+					@user.request {
 						method: 'POST',
 						url: '/user/emails',
 						json:
@@ -45,7 +45,7 @@ describe "UserEmails", ->
 						token = tokens[0].token
 						cb()
 				(cb) =>
-					@user.request { 
+					@user.request {
 						method: 'POST',
 						url: '/user/emails/confirm',
 						json:
@@ -80,7 +80,7 @@ describe "UserEmails", ->
 				(cb) => @user2.login cb
 				(cb) =>
 					# Create email for first user
-					@user.request { 
+					@user.request {
 						method: 'POST',
 						url: '/user/emails',
 						json: {@email}
@@ -99,21 +99,21 @@ describe "UserEmails", ->
 						cb()
 				(cb) =>
 					# Delete the email from the first user
-					@user.request { 
+					@user.request {
 						method: 'POST',
 						url: '/user/emails/delete',
 						json: {@email}
 					}, cb
 				(cb) =>
 					# Create email for second user
-					@user2.request { 
+					@user2.request {
 						method: 'POST',
 						url: '/user/emails',
 						json: {@email}
 					}, cb
 				(cb) =>
 					# Original confirmation token should no longer work
-					@user.request { 
+					@user.request {
 						method: 'POST',
 						url: '/user/emails/confirm',
 						json:
@@ -158,7 +158,7 @@ describe "UserEmails", ->
 			token = null
 			async.series [
 				(cb) =>
-					@user.request { 
+					@user.request {
 						method: 'POST',
 						url: '/user/emails',
 						json:
@@ -183,12 +183,12 @@ describe "UserEmails", ->
 					db.tokens.update {
 						token: token
 					}, {
-						$set: { 
+						$set: {
 							expiresAt: new Date(Date.now() - 1000000)
 						}
 					}, cb
 				(cb) =>
-					@user.request { 
+					@user.request {
 						method: 'POST',
 						url: '/user/emails/confirm',
 						json:
@@ -196,5 +196,113 @@ describe "UserEmails", ->
 					}, (error, response, body) =>
 						return done(error) if error?
 						expect(response.statusCode).to.equal 404
+						cb()
+			], done
+
+	describe 'resending the confirmation', ->
+		it 'should resend the existing token', (done) ->
+			token = null
+			async.series [
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails',
+						json:
+							email: 'reconfirmation-email@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 204
+						cb()
+				(cb) =>
+					db.tokens.find {
+						use: 'email_confirmation',
+						'data.user_id': @user._id,
+						usedAt: { $exists: false }
+					}, (error, tokens) =>
+						# There should only be one confirmation token at the moment
+						expect(tokens.length).to.equal 1
+						expect(tokens[0].data.email).to.equal 'reconfirmation-email@example.com'
+						expect(tokens[0].data.user_id).to.equal @user._id
+						token = tokens[0].token
+						cb()
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails/resend_confirmation',
+						json:
+							email: 'reconfirmation-email@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 200
+						cb()
+				(cb) =>
+					db.tokens.find {
+						use: 'email_confirmation',
+						'data.user_id': @user._id,
+						usedAt: { $exists: false }
+					}, (error, tokens) =>
+						# There should still only be one confirmation token
+						expect(tokens.length).to.equal 1
+						expect(tokens[0].data.email).to.equal 'reconfirmation-email@example.com'
+						expect(tokens[0].data.user_id).to.equal @user._id
+						token = tokens[0].token
+						cb()
+			], done
+
+		it 'should create a new token if none exists', (done) ->
+			# This should only be for users that have sign up with their main
+			# emails before the confirmation system existed
+			token = null
+			async.series [
+				(cb) =>
+					db.tokens.remove {
+						use: 'email_confirmation',
+						'data.user_id': @user._id,
+						usedAt: { $exists: false }
+					}, cb
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails/resend_confirmation',
+						json:
+							email: @user.email
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 200
+						cb()
+				(cb) =>
+					db.tokens.find {
+						use: 'email_confirmation',
+						'data.user_id': @user._id,
+						usedAt: { $exists: false }
+					}, (error, tokens) =>
+						# There should still only be one confirmation token
+						expect(tokens.length).to.equal 1
+						expect(tokens[0].data.email).to.equal @user.email
+						expect(tokens[0].data.user_id).to.equal @user._id
+						token = tokens[0].token
+						cb()
+			], done
+
+		it "should not allow reconfirmation if the email doesn't match the user", (done) ->
+			token = null
+			async.series [
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails/resend_confirmation',
+						json:
+							email: 'non-matching-email@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 422
+						cb()
+				(cb) =>
+					db.tokens.find {
+						use: 'email_confirmation',
+						'data.user_id': @user._id,
+						usedAt: { $exists: false }
+					}, (error, tokens) =>
+						expect(tokens.length).to.equal 0
 						cb()
 			], done
