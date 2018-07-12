@@ -25,7 +25,10 @@ div.full-size(
 			'rp-loading-threads': reviewPanel.loadingThreads,\
 		}"
 	)
-		.loading-panel(ng-show="!editor.sharejs_doc || editor.opening")
+		.loading-panel(
+			ng-show="!editor.sharejs_doc || editor.opening",
+			style=showRichText ? "top: 32px" : "",
+		)
 			span(ng-show="editor.open_doc_id")
 				i.fa.fa-spin.fa-refresh
 				| &nbsp;&nbsp;#{translate("loading")}...
