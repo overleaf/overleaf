@@ -139,6 +139,10 @@
 		padding: 0 5px;
 	}
 
+	.rp-unsupported & {
+		display: none;
+	}
+
 	position: relative;
 	border-bottom: 1px solid @rp-border-grey;
 	background-color: @rp-bg-dim-blue;
@@ -216,6 +220,10 @@
 	.rp-size-expanded &,
 	.rp-size-mini & {
 		display: block;
+	}
+
+	.rp-unsupported & {
+		display: none;
 	}
 	
 	.rp-state-current-file & {
@@ -714,6 +722,10 @@
 		display: flex;
 	}
 
+	.rp-unsupported & {
+		display: none;
+	}
+
 	.rp-state-current-file & {
 		position: absolute;
 		bottom: 0;
@@ -781,6 +793,12 @@
 	}
 }
 
+.toolbar-editor {
+	.rp-size-expanded & {
+		margin-right: @review-panel-width;
+	}
+}
+
 .rp-toggle {
 	display: inline-block;
 	vertical-align: middle;
@@ -833,6 +851,31 @@
 			opacity: .35;
 		}
 	}
+
+.rp-unsupported-msg-wrapper {
+	display: none;
+	.rp-size-expanded.rp-unsupported & {
+		display: block;
+	}
+
+	height: 100%;
+
+	.rp-unsupported-msg {
+		display: flex;
+		width: @review-panel-width - 40px;
+		height: 100%;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		margin: 0 auto;
+		text-align: center;
+
+		.rp-unsupported-msg-title {
+			font-size: 1.3em;
+			margin-top: 13px;
+		}
+	}
+}
 
 .ace-editor-wrapper {
 	.track-changes-marker-callout {
@@ -1003,7 +1046,8 @@
 	.rp-size-mini & {
 		right: @review-off-width;
 	}
-	.rp-size-expanded & {
+	.rp-size-expanded &,
+	.rp-unsupported & {
 		display: none;
 	}
 }
@@ -1051,6 +1095,10 @@
 	.rp-size-mini &,
 	.rp-size-expanded & {
 		display: block;
+	}
+
+	.rp-unsupported & {
+		display: none;
 	}
 
 	.rp-size-expanded & {

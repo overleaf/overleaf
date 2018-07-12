@@ -164,7 +164,7 @@ define [
 			updateScrollbar()
 
 		updateScrollbar = () ->
-			if scrollbar.isVisible and $scope.reviewPanel.subView == $scope.SubViews.CUR_FILE
+			if scrollbar.isVisible and $scope.reviewPanel.subView == $scope.SubViews.CUR_FILE and !$scope.editor.showRichText
 				$reviewPanelEl.css "right", "#{ scrollbar.scrollbarWidth }px"
 			else
 				$reviewPanelEl.css "right", "0"
