@@ -128,6 +128,13 @@ define [
 				.then () -> _getUserEmails()
 				.catch () -> $scope.ui.hasError = true
 
+		$scope.resendConfirmationEmail = (userEmail) ->
+			$scope.ui.isLoadingEmails = true
+			UserAffiliationsDataService
+				.resendConfirmationEmail userEmail.email
+				.then () -> _getUserEmails()
+				.catch () -> $scope.ui.hasError = true
+
 		$scope.acknowledgeError = () ->
 			_reset()
 			_getUserEmails()

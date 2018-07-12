@@ -104,6 +104,12 @@ define [
 				_csrf: window.csrfToken
 			}
 
+		resendConfirmationEmail = (email) ->
+			$http.post "/user/emails/resend_confirmation", {
+				email,
+				_csrf: window.csrfToken
+			}
+
 		isDomainBlacklisted = (domain) ->
 			domain.toLowerCase() of domainsBlackList
 
@@ -121,6 +127,7 @@ define [
 			addRoleAndDepartment
 			setDefaultUserEmail
 			removeUserEmail
+			resendConfirmationEmail
 			isDomainBlacklisted
 		}
 	]
