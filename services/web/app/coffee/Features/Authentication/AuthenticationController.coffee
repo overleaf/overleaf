@@ -83,20 +83,23 @@ module.exports = AuthenticationController =
 				return done(error) if error?
 				if user?
 					# async actions
-					UserHandler.setupLoginData(user, ()->)
-					LoginRateLimiter.recordSuccessfulLogin(email)
-					AuthenticationController._recordSuccessfulLogin(user._id)
-					Analytics.recordEvent(user._id, "user-logged-in", {ip:req.ip})
-					Analytics.identifyUser(user._id, req.sessionID)
-					logger.log email: email, user_id: user._id.toString(), "successful log in"
-					req.session.justLoggedIn = true
-					# capture the request ip for use when creating the session
-					user._login_req_ip = req.ip
+					AuthenticationController._loginAsyncHandlers(req, email, user)
 					return done(null, user)
 				else
 					AuthenticationController._recordFailedLogin()
 					logger.log email: email, "failed log in"
 					return done(null, false, {text: req.i18n.translate("email_or_password_wrong_try_again"), type: 'error'})
+
+	_loginAsyncHandlers: (req, email, user) ->
+		UserHandler.setupLoginData(user, ()->)
+		LoginRateLimiter.recordSuccessfulLogin(email)
+		AuthenticationController._recordSuccessfulLogin(user._id)
+		Analytics.recordEvent(user._id, "user-logged-in", {ip:req.ip})
+		Analytics.identifyUser(user._id, req.sessionID)
+		logger.log email: email, user_id: user._id.toString(), "successful log in"
+		req.session.justLoggedIn = true
+		# capture the request ip for use when creating the session
+		user._login_req_ip = req.ip
 
 	setInSessionUser: (req, props) ->
 		for key, value of props
