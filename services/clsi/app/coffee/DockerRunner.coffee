@@ -38,6 +38,10 @@ module.exports = DockerRunner =
 		if !image?
 			image = Settings.clsi.docker.image
 
+		if Settings.texliveImageNameOveride?
+			tag = image.split(":")[1]
+			image = "#{Settings.texliveImageNameOveride}:#{tag}"
+
 		options      = DockerRunner._getContainerOptions(command, image, volumes, timeout, environment)
 		fingerprint  = DockerRunner._fingerprintContainer(options)
 		options.name = name = "project-#{project_id}-#{fingerprint}"
