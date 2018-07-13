@@ -27,16 +27,6 @@ module.exports =
 			return callback(error) if error?
 			callback null, token
 
-	findValidTokenFromData: (use, data, callback = (error, token) ->) ->
-		db.tokens.findOne {
-			use: use,
-			data: data,
-			expiresAt: { $gt: new Date() },
-			usedAt: { $exists: false }
-		}, (error, token) ->
-			return callback(error) if error?
-			return callback null, token?.token
-
 	getValueFromTokenAndExpire: (use, token, callback = (error, data) ->)->
 		logger.log token_start: token.slice(0,8), "getting data from #{use} token"
 		now = new Date()

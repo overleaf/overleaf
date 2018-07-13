@@ -23,17 +23,6 @@ module.exports = UserEmailsConfirmationHandler =
 				confirmEmailUrl: "#{settings.siteUrl}/user/emails/confirm?token=#{token}"
 			EmailHandler.sendEmail emailTemplate, emailOptions, callback
 
-	resendConfirmationEmail: (user_id, email, callback = (error) ->) ->
-		OneTimeTokenHandler.findValidTokenFromData 'email_confirmation', { user_id, email }, (error, token) ->
-			return callback(error) if error?
-			if !token?
-				UserEmailsConfirmationHandler.sendConfirmationEmail user_id, email, callback
-			else
-				emailOptions =
-					to: email
-					confirmEmailUrl: "#{settings.siteUrl}/user/emails/confirm?token=#{token}"
-				EmailHandler.sendEmail 'confirmEmail', emailOptions, callback
-
 	confirmEmailFromToken: (token, callback = (error) ->) ->
 		logger.log {token_start: token.slice(0,8)}, 'confirming email from token'
 		OneTimeTokenHandler.getValueFromTokenAndExpire 'email_confirmation', token, (error, data) ->

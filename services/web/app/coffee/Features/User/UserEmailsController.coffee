@@ -71,7 +71,7 @@ module.exports = UserEmailsController =
 				logger.log {userId, email, foundUserId: user?._id}, "email doesn't match logged in user"
 				return res.sendStatus 422
 			logger.log {userId, email}, 'resending email confirmation token'
-			UserEmailsConfirmationHandler.resendConfirmationEmail userId, email, (error) ->
+			UserEmailsConfirmationHandler.sendConfirmationEmail userId, email, (error) ->
 				return next(error) if error?
 				res.sendStatus 200
 

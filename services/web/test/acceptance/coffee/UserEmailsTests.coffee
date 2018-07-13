@@ -200,8 +200,7 @@ describe "UserEmails", ->
 			], done
 
 	describe 'resending the confirmation', ->
-		it 'should resend the existing token', (done) ->
-			token = null
+		it 'should generate a new token', (done) ->
 			async.series [
 				(cb) =>
 					@user.request {
@@ -223,7 +222,6 @@ describe "UserEmails", ->
 						expect(tokens.length).to.equal 1
 						expect(tokens[0].data.email).to.equal 'reconfirmation-email@example.com'
 						expect(tokens[0].data.user_id).to.equal @user._id
-						token = tokens[0].token
 						cb()
 				(cb) =>
 					@user.request {
@@ -241,18 +239,18 @@ describe "UserEmails", ->
 						'data.user_id': @user._id,
 						usedAt: { $exists: false }
 					}, (error, tokens) =>
-						# There should still only be one confirmation token
-						expect(tokens.length).to.equal 1
+						# There should be two tokens now
+						expect(tokens.length).to.equal 2
 						expect(tokens[0].data.email).to.equal 'reconfirmation-email@example.com'
 						expect(tokens[0].data.user_id).to.equal @user._id
-						token = tokens[0].token
+						expect(tokens[1].data.email).to.equal 'reconfirmation-email@example.com'
+						expect(tokens[1].data.user_id).to.equal @user._id
 						cb()
 			], done
 
 		it 'should create a new token if none exists', (done) ->
 			# This should only be for users that have sign up with their main
 			# emails before the confirmation system existed
-			token = null
 			async.series [
 				(cb) =>
 					db.tokens.remove {
@@ -280,12 +278,10 @@ describe "UserEmails", ->
 						expect(tokens.length).to.equal 1
 						expect(tokens[0].data.email).to.equal @user.email
 						expect(tokens[0].data.user_id).to.equal @user._id
-						token = tokens[0].token
 						cb()
 			], done
 
 		it "should not allow reconfirmation if the email doesn't match the user", (done) ->
-			token = null
 			async.series [
 				(cb) =>
 					@user.request {
