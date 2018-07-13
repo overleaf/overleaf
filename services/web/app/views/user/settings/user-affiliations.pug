@@ -19,7 +19,7 @@ form.row(
 				)
 					td
 						| {{ userEmail.email + (userEmail.default ? ' (default)' : '') }}
-						div(ng-show="!userEmail.confirmedAt").small
+						div(ng-if="!userEmail.confirmedAt").small
 							strong #{translate('unconfirmed')}.
 							|
 							| #{translate('please_check_your_inbox')}.
