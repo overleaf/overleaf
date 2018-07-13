@@ -66,14 +66,6 @@ describe "RequestParser", ->
 		it "should set the imageName", ->
 			@data.imageName.should.equal "basicImageName/here:2017-1"
 
-	describe "with texliveImageNameOveride set", ->
-		beforeEach ->
-			@settings.texliveImageNameOveride = "usethisoveride/overhere"
-			@RequestParser.parse @validRequest, (error, @data) =>
-
-		it "should override the image path", ->
-			@data.imageName.should.equal "usethisoveride/overhere:2017-1"
-
 	describe "without a timeout specified", ->
 		beforeEach ->
 			delete @validRequest.compile.options.timeout

@@ -135,6 +135,16 @@ describe "DockerRunner", ->
 				@DockerRunner._getContainerOptions
 					.calledWith(@command_with_dir, @defaultImage, @volumes, @timeout)
 					.should.equal true
+		
+		describe "with image override", ->
+			beforeEach ->
+				@Settings.texliveImageNameOveride = "overrideimage/here"
+				@DockerRunner._runAndWaitForContainer = sinon.stub().callsArgWith(3, null, @output = "mock-output")
+				@DockerRunner.run @project_id, @command, @directory, @image, @timeout, @env, @callback
+
+			it "should use the override and keep the tag", ->
+				image = @DockerRunner._getContainerOptions.args[0][1]
+				image.should.equal "overrideimage/here:2016.2"
 
 	describe "_runAndWaitForContainer", ->
 		beforeEach ->

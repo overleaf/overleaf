@@ -69,10 +69,6 @@ module.exports = RequestParser =
 			sanitizedRootResourcePath = RequestParser._sanitizePath(rootResourcePath)
 			response.rootResourcePath = RequestParser._checkPath(sanitizedRootResourcePath)
 			
-			if settings.texliveImageNameOveride? and compile.options?.imageName?
-				tag = compile.options.imageName.split(":")[1]
-				response.imageName = "#{settings.texliveImageNameOveride}:#{tag}"
-
 			for resource in response.resources
 				if resource.path == originalRootResourcePath
 					resource.path = sanitizedRootResourcePath
