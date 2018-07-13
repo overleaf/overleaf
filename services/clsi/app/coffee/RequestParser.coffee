@@ -1,3 +1,5 @@
+settings = require("settings-sharelatex")
+
 module.exports = RequestParser =
 	VALID_COMPILERS: ["pdflatex", "latex", "xelatex", "lualatex"]
 	MAX_TIMEOUT: 300
@@ -67,6 +69,10 @@ module.exports = RequestParser =
 			sanitizedRootResourcePath = RequestParser._sanitizePath(rootResourcePath)
 			response.rootResourcePath = RequestParser._checkPath(sanitizedRootResourcePath)
 			
+			if settings.texliveImageNameOveride?
+				tag = compile.options.imageName.split(":")[1]
+				response.imageName = "#{settings.texliveImageNameOveride}:#{tag}"
+
 			for resource in response.resources
 				if resource.path == originalRootResourcePath
 					resource.path = sanitizedRootResourcePath
