@@ -45,7 +45,7 @@ describe "Subscription Locator Tests", ->
 
 			it "should query the database", (done)->
 				@Subscription.findOne.callsArgWith(1, null, @subscription)
-				@SubscriptionLocator.getManagedSubscription @user._id, (err, subscription)=>
+				@SubscriptionLocator.findManagedSubscription @user._id, (err, subscription)=>
 					@Subscription.findOne.calledWith({"manager_ids":@user._id}).should.equal true
 					subscription.should.equal @subscription
 					done()

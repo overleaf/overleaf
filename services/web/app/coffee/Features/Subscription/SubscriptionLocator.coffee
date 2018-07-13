@@ -14,15 +14,6 @@ module.exports = SubscriptionLocator =
 			logger.log user_id:user_id, "got users subscription"
 			callback(err, subscription)
 
-	getManagedSubscription: (managerId, callback)->
-		SubscriptionLocator.findManagedSubscription managerId, (err, subscription)->
-			if subscription?
-				logger.log managerId: managerId, "got managed subscription"
-			else
-				err ||= new Error("No subscription found managed by user #{managerId}")
-
-			callback(err, subscription)
-
 	findManagedSubscription: (managerId, callback)->
 		logger.log managerId: managerId, "finding managed subscription"
 		Subscription.findOne manager_ids: managerId, callback
