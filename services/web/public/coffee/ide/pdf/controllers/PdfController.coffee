@@ -718,6 +718,8 @@ define [
 				.then (highlights) ->
 					$scope.pdf.highlights = highlights
 
+		ide.$scope.$on "cursor:editor:syncToPdf", $scope.syncToPdf
+
 		$scope.syncToCode = () ->
 			synctex
 				.syncToCode($scope.pdf.position, includeVisualOffset: true, fromPdfPosition: true)
