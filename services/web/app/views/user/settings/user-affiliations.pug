@@ -69,8 +69,7 @@ form.row(
 					td.affiliations-table-inline-actions
 						// Disabled buttons don't work with tooltips, due to pointer-events: none,
 						// so create a wrapper for the tooltip
-						div(
-							style="display: inline-block"
+						div.affiliations-table-inline-action-disabled-wrapper(
 							tooltip=translate("please_confirm_your_email_before_making_it_default")
 							ng-if="!userEmail.default && !userEmail.confirmedAt"
 						)
