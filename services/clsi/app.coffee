@@ -35,6 +35,7 @@ TIMEOUT = 6 * 60 * 1000
 app.use (req, res, next) ->
 	req.setTimeout TIMEOUT
 	res.setTimeout TIMEOUT
+	res.removeHeader("X-Powered-By")
 	next()
 
 app.param 'project_id', (req, res, next, project_id) ->
