@@ -1,12 +1,20 @@
-@rt-font-family: 'Source Sans Pro', 'Helvetica', 'Arial', sans-serif;
-// @rt-font-family-serif: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+@rt-font-family-serif: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
 
 .rich-text .CodeMirror {
-  font-family: @rt-font-family;
+  font-family: @rt-font-family-serif;
   font-size: 1.15em;
 
   pre {
-    font-family: @rt-font-family;
+    font-family: @rt-font-family-serif;
+  }
+
+  .CodeMirror-line {
+    // Add horizontal padding, to emulate a manuscript more closely
+    padding: 0 8%;
+  }
+
+  .CodeMirror-linenumber {
+    font-size: 0.8em;
   }
 
   // TODO: Change prefix away from wl- ?
@@ -108,7 +116,7 @@
   .wl-figure-wrap {
     padding: 10px 0;
     background-color: #f5f5f5;
-    box-shadow: 2px 2px 2px #DFDFDF;
+    box-shadow: 1.3px 2px 2px #DFDFDF;
     width: 96%;
     margin: 0 auto;
     text-align: center;
