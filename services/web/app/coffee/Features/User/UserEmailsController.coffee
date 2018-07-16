@@ -61,6 +61,19 @@ module.exports = UserEmailsController =
 			return next(error) if error?
 			res.sendStatus 204
 
+	resendConfirmation: (req, res, next) ->
+		userId = AuthenticationController.getLoggedInUserId(req)
+		email = EmailHelper.parseEmail(req.body.email)
+		return res.sendStatus 422 unless email?
+		UserGetter.getUserByAnyEmail email, {_id:1}, (error, user) ->
+			return next(error) if error?
+			if !user? or user?._id?.toString() != userId
+				logger.log {userId, email, foundUserId: user?._id}, "email doesn't match logged in user"
+				return res.sendStatus 422
+			logger.log {userId, email}, 'resending email confirmation token'
+			UserEmailsConfirmationHandler.sendConfirmationEmail userId, email, (error) ->
+				return next(error) if error?
+				res.sendStatus 200
 
 	showConfirm: (req, res, next) ->
 		res.render 'user/confirm_email', {

@@ -20,5 +20,7 @@ module.exports = Features =
 				return Settings.overleaf?
 			when 'templates'
 				return !Settings.overleaf?
+			when 'affiliations'
+				return Settings?.apis?.v1?.url?
 			else
 				throw new Error("unknown feature: #{feature}")

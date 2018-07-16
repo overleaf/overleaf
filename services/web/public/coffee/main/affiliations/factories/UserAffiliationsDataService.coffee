@@ -27,7 +27,7 @@ define [
 		getDefaultDepartmentHints = () ->
 			$q.resolve defaultDepartmentHints
 
-		getUserEmails = () ->
+		getUserEmails = () ->			
 			$http.get "/user/emails"
 				.then (response) -> response.data
 
@@ -52,6 +52,10 @@ define [
 							$q.resolve university
 						else
 							$q.reject null
+
+		getUniversityDetails = (universityId) ->
+			$http.get "/institutions/list/#{ universityId }"
+				.then (response) -> response.data
 
 		addUserEmail = (email) ->
 			$http.post "/user/emails", {
@@ -80,13 +84,28 @@ define [
 				_csrf: window.csrfToken
 			}
 
+		addRoleAndDepartment = (email, role, department) ->
+			$http.post "/user/emails/endorse", {
+				email,
+				role,
+				department,
+				_csrf: window.csrfToken
+			}
+
 		setDefaultUserEmail = (email) ->
 			$http.post "/user/emails/default", {
+				email,
 				_csrf: window.csrfToken
 			}
 
 		removeUserEmail = (email) ->
 			$http.post "/user/emails/delete", {
+				email,
+				_csrf: window.csrfToken
+			}
+
+		resendConfirmationEmail = (email) ->
+			$http.post "/user/emails/resend_confirmation", {
 				email,
 				_csrf: window.csrfToken
 			}
@@ -101,11 +120,14 @@ define [
 			getUserEmails
 			getUniversitiesFromCountry
 			getUniversityDomainFromPartialDomainInput
+			getUniversityDetails
 			addUserEmail
 			addUserAffiliationWithUnknownUniversity
 			addUserAffiliation
+			addRoleAndDepartment
 			setDefaultUserEmail
 			removeUserEmail
+			resendConfirmationEmail
 			isDomainBlacklisted
 		}
 	]

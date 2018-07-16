@@ -9,7 +9,7 @@ block content
 						.page-header
 							h1  #{translate("account_settings")}
 						.account-settings(ng-controller="AccountSettingsController", ng-cloak)
-							if locals.showAffiliationsUI
+							if locals.showAffiliationsUI && hasFeature('affiliations')
 								include settings/user-affiliations
 								
 							form-messages(for="settingsForm")
@@ -22,25 +22,26 @@ block content
 									h3 #{translate("update_account_info")}
 									form(async-form="settings", name="settingsForm", method="POST", action="/user/settings", novalidate)
 										input(type="hidden", name="_csrf", value=csrfToken)
-										if !externalAuthenticationSystemUsed()
-											.form-group
-												label(for='email')  #{translate("email")}
-												input.form-control(
-													type='email',
-													name='email',
-													placeholder="email@example.com"
-													required,
-													ng-model="email",
-													ng-init="email = "+JSON.stringify(user.email),
-													ng-model-options="{ updateOn: 'blur' }"
-												)
-												span.small.text-primary(ng-show="settingsForm.email.$invalid && settingsForm.email.$dirty")
-													|  #{translate("must_be_email_address")}
-										else
-											// show the email, non-editable
-											.form-group
-												label.control-label #{translate("email")}
-												div.form-control(readonly="true") #{user.email}
+										if !(locals.showAffiliationsUI && hasFeature('affiliations'))
+											if !externalAuthenticationSystemUsed() 
+												.form-group
+													label(for='email')  #{translate("email")}
+													input.form-control(
+														type='email',
+														name='email',
+														placeholder="email@example.com"
+														required,
+														ng-model="email",
+														ng-init="email = "+JSON.stringify(user.email),
+														ng-model-options="{ updateOn: 'blur' }"
+													)
+													span.small.text-primary(ng-show="settingsForm.email.$invalid && settingsForm.email.$dirty")
+														|  #{translate("must_be_email_address")}
+											else
+												// show the email, non-editable
+												.form-group
+													label.control-label #{translate("email")}
+													div.form-control(readonly="true") #{user.email}
 
 										if shouldAllowEditingDetails
 											.form-group

@@ -3,12 +3,6 @@ define [
 ], (App) ->
 	App.controller "UserAffiliationsController", ["$scope", "UserAffiliationsDataService", "$q", "_", ($scope, UserAffiliationsDataService, $q, _) ->
 		$scope.userEmails = []
-		$scope.countries = []
-		$scope.universities = []
-		$scope.roles = []
-		$scope.departments = []
-
-		_defaultDepartments = []
 
 		LOCAL_AND_DOMAIN_REGEX = /([^@]+)@(.+)/
 		EMAIL_REGEX = /^([A-Za-z0-9_\-\.]+)@([^\.]+)\.([A-Za-z0-9_\-\.]+)([^\.])$/
@@ -19,9 +13,6 @@ define [
 				{ local: match[1], domain: match[2] }
 			else
 				{ local: null, domain: null }
-
-		$scope.addUniversityToSelection = (universityName) -> 
-			{ name: universityName, isUserSuggested: true }
 
 		$scope.getEmailSuggestion = (userInput) ->
 			userInputLocalAndDomain = _matchLocalAndDomain(userInput)
@@ -55,6 +46,38 @@ define [
 			$scope.newAffiliation.department = null
 			$scope.ui.showManualUniversitySelectionUI = true
 
+		$scope.changeAffiliation = (userEmail) ->
+			if userEmail.affiliation?.institution?.id?
+				UserAffiliationsDataService.getUniversityDetails userEmail.affiliation.institution.id
+					.then (universityDetails) -> $scope.affiliationToChange.university = universityDetails
+
+			$scope.affiliationToChange.email = userEmail.email
+			$scope.affiliationToChange.role = userEmail.affiliation.role
+			$scope.affiliationToChange.department = userEmail.affiliation.department
+
+		$scope.saveAffiliationChange = () ->
+			$scope.ui.isLoadingEmails = true
+			UserAffiliationsDataService
+				.addRoleAndDepartment(
+					$scope.affiliationToChange.email,
+					$scope.affiliationToChange.role,
+					$scope.affiliationToChange.department
+				)
+				.then () ->
+					_reset()
+					_getUserEmails()
+				.catch () ->
+					$scope.ui.hasError = true
+
+		$scope.cancelAffiliationChange = (email) ->
+			$scope.affiliationToChange.email = ""
+			$scope.affiliationToChange.university = null
+			$scope.affiliationToChange.role = null
+			$scope.affiliationToChange.department = null
+		
+		$scope.isChangingAffiliation = (email) ->
+			$scope.affiliationToChange.email == email
+
 		$scope.showAddEmailForm = () ->
 			$scope.ui.showAddEmailUI = true
 
@@ -81,27 +104,40 @@ define [
 							$scope.newAffiliation.role,
 							$scope.newAffiliation.department
 						)
-			addEmailPromise.then () -> 
-				_reset()
-				_getUserEmails()
+			addEmailPromise
+				.then () -> 
+					_reset()
+					_getUserEmails()
+				.catch () ->
+					$scope.ui.hasError = true
 
-		$scope.setDefaultUserEmail = (email) ->
+		$scope.setDefaultUserEmail = (userEmail) ->
 			$scope.ui.isLoadingEmails = true
 			UserAffiliationsDataService
-				.setDefaultUserEmail email
+				.setDefaultUserEmail userEmail.email
 				.then () -> _getUserEmails()
+				.catch () -> $scope.ui.hasError = true
 
-		$scope.removeUserEmail = (email) ->
+		$scope.removeUserEmail = (userEmail) ->
+			$scope.ui.isLoadingEmails = true
+			userEmailIdx = _.indexOf $scope.userEmails, userEmail
+			if userEmailIdx > -1
+				$scope.userEmails.splice userEmailIdx, 1
+			UserAffiliationsDataService
+				.removeUserEmail userEmail.email
+				.then () -> _getUserEmails()
+				.catch () -> $scope.ui.hasError = true
+
+		$scope.resendConfirmationEmail = (userEmail) ->
 			$scope.ui.isLoadingEmails = true
 			UserAffiliationsDataService
-				.removeUserEmail email
+				.resendConfirmationEmail userEmail.email
 				.then () -> _getUserEmails()
+				.catch () -> $scope.ui.hasError = true
 
-		$scope.getDepartments = () ->
-			if $scope.newAffiliation.university?.departments.length > 0
-				_.uniq $scope.newAffiliation.university.departments
-			else
-				UserAffiliationsDataService.getDefaultDepartmentHints()
+		$scope.acknowledgeError = () ->
+			_reset()
+			_getUserEmails()
 
 		_reset = () ->
 			$scope.newAffiliation =
@@ -111,12 +147,19 @@ define [
 				role: null
 				department: null
 			$scope.ui = 
+				hasError: false
+				showChangeAffiliationUI: false
 				showManualUniversitySelectionUI: false
 				isLoadingEmails: false
 				isAddingNewEmail: false
 				showAddEmailUI: false
 				isValidEmail: false
 				isBlacklistedEmail: false
+			$scope.affiliationToChange = 
+				email: ""
+				university: null
+				role: null
+				department: null
 		_reset()
 
 		# Populates the emails table
@@ -127,40 +170,9 @@ define [
 				.then (emails) -> 
 					$scope.userEmails = emails
 					$scope.ui.isLoadingEmails = false
+				.catch () ->
+					$scope.ui.hasError = true
+
 		_getUserEmails()
-
-		# Populates the countries dropdown
-		UserAffiliationsDataService
-			.getCountries()
-			.then (countries) -> $scope.countries = countries
-
-		# Populates the roles dropdown
-		UserAffiliationsDataService
-			.getDefaultRoleHints()
-			.then (roles) -> $scope.roles = roles 
-
-		# Fetches the default department hints
-		UserAffiliationsDataService
-			.getDefaultDepartmentHints()
-			.then (departments) -> 
-				_defaultDepartments = departments
-
-		# Populates the universities dropdown (after selecting a country)
-		$scope.$watch "newAffiliation.country", (newSelectedCountry, prevSelectedCountry) ->
-			if newSelectedCountry? and newSelectedCountry != prevSelectedCountry
-				$scope.newAffiliation.university = null
-				$scope.newAffiliation.role = null
-				$scope.newAffiliation.department = null
-				UserAffiliationsDataService
-					.getUniversitiesFromCountry(newSelectedCountry)
-					.then (universities) -> $scope.universities = universities
-
-		# Populates the departments dropdown (after selecting a university)
-		$scope.$watch "newAffiliation.university", (newSelectedUniversity, prevSelectedUniversity) ->
-			if newSelectedUniversity? and newSelectedUniversity != prevSelectedUniversity
-				if newSelectedUniversity.departments?.length > 0
-					$scope.departments = _.uniq newSelectedUniversity.departments
-				else 
-					$scope.departments = _defaultDepartments
 
 	]
