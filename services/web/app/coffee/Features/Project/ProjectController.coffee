@@ -28,7 +28,7 @@ Modules = require '../../infrastructure/Modules'
 ProjectEntityHandler = require './ProjectEntityHandler'
 crypto = require 'crypto'
 { V1ConnectionError } = require '../Errors/Errors'
-Features = require('../../Infrastructure/Features')
+Features = require('../../infrastructure/Features')
 
 module.exports = ProjectController =
 

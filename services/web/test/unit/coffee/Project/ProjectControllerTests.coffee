@@ -104,7 +104,7 @@ describe "ProjectController", ->
 			"../../infrastructure/Modules": @Modules
 			"./ProjectEntityHandler": @ProjectEntityHandler
 			"../Errors/Errors": Errors
-			"../../Infrastructure/Features": @Features
+			"../../infrastructure/Features": @Features
 
 		@projectName = "£12321jkj9ujkljds"
 		@req =
