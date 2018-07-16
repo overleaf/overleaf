@@ -76,7 +76,7 @@ module.exports = TeamInvitesHandler =
 			return callback(err) if err?
 			return callback(new Errors.NotFoundError('invite not found')) unless invite?
 
-			SubscriptionUpdater.addUserToGroup subscription.admin_id, userId, (err) ->
+			SubscriptionUpdater.addUserToGroup subscription._id, userId, (err) ->
 				return callback(err) if err?
 
 				removeInviteFromTeam(subscription.id, invite.email, callback)
