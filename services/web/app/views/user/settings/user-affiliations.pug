@@ -17,27 +17,37 @@ form.row(
 				tr(
 					ng-repeat="userEmail in userEmails"
 				)
-					td {{ userEmail.email + (userEmail.default ? ' (default)' : '') }}
+					td
+						| {{ userEmail.email + (userEmail.default ? ' (default)' : '') }}
+						div(ng-if="!userEmail.confirmedAt").small
+							strong #{translate('unconfirmed')}.
+							|
+							| #{translate('please_check_your_inbox')}.
+							br
+							a(
+								href,
+								ng-click="resendConfirmationEmail(userEmail)"
+							) #{translate('resend_confirmation_email')}
 					td 
 						div(ng-if="userEmail.affiliation.institution") 
 							div {{ userEmail.affiliation.institution.name }}
-							a(
-								href
-								ng-if="!isChangingAffiliation(userEmail.email) && !userEmail.affiliation.role && !userEmail.affiliation.department"
-								ng-click="changeAffiliation(userEmail);"
-							)  #{translate("add_role_and_department")}
-							div(
+							span.small
+								a(
+									href
+									ng-if="!isChangingAffiliation(userEmail.email) && !userEmail.affiliation.role && !userEmail.affiliation.department"
+									ng-click="changeAffiliation(userEmail);"
+								)  #{translate("add_role_and_department")}
+							div.small(
 								ng-if="!isChangingAffiliation(userEmail.email) && (userEmail.affiliation.role || userEmail.affiliation.department)"
 							)
 								span(ng-if="userEmail.affiliation.role") {{ userEmail.affiliation.role }}
 								span(ng-if="userEmail.affiliation.role && userEmail.affiliation.department") , 
 								span(ng-if="userEmail.affiliation.department") {{ userEmail.affiliation.department }}
-								|  (
+								br
 								a(
 									href
 									ng-click="changeAffiliation(userEmail);"
 								) #{translate("change")}
-								| )
 							.affiliation-change-container(
 								ng-if="isChangingAffiliation(userEmail.email)"
 							)
@@ -46,7 +56,7 @@ form.row(
 									show-university-and-country="false"
 									show-role-and-department="true"
 								)
-								.affiliation-change-actions
+								.affiliation-change-actions.small
 									a(
 										href
 										ng-click="saveAffiliationChange();"
@@ -56,18 +66,27 @@ form.row(
 										href
 										ng-click="cancelAffiliationChange();"
 									) #{translate("save_or_cancel-cancel")}
-					td 
-						a.affiliations-table-inline-action(
-							href
-							ng-if="!userEmail.default"
+					td.affiliations-table-inline-actions
+						// Disabled buttons don't work with tooltips, due to pointer-events: none,
+						// so create a wrapper for the tooltip
+						div.affiliations-table-inline-action-disabled-wrapper(
+							tooltip=translate("please_confirm_your_email_before_making_it_default")
+							ng-if="!userEmail.default && !userEmail.confirmedAt"
+						)
+							button.btn.btn-sm.btn-success.affiliations-table-inline-action(
+								disabled
+							) #{translate("make_default")}
+						button.btn.btn-sm.btn-success.affiliations-table-inline-action(
+							ng-if="!userEmail.default && userEmail.confirmedAt"
 							ng-click="setDefaultUserEmail(userEmail)"
-						)  #{translate("make_default")}
-						br
-						a.affiliations-table-inline-action(
-							href
+						) #{translate("make_default")}
+						| &nbsp;
+						button.btn.btn-sm.btn-danger.affiliations-table-inline-action(
 							ng-if="!userEmail.default"
 							ng-click="removeUserEmail(userEmail)"
-						) #{translate("remove")}
+							tooltip=translate("remove")
+						)
+							i.fa.fa-fw.fa-trash
 				tr.affiliations-table-highlighted-row(
 					ng-if="ui.isLoadingEmails"
 				)
@@ -100,15 +119,17 @@ form.row(
 								input-required="true"
 							)
 					td
-						.affiliations-table-label(
+						p.affiliations-table-label(
 							ng-if="newAffiliation.university && !ui.showManualUniversitySelectionUI"
 						)
-							| {{ newAffiliation.university.name }} (
-							a(
-								href
-								ng-click="selectUniversityManually();"
-							) #{translate("change")}
-							| )
+							| {{ newAffiliation.university.name }}
+							span.small
+								|  (
+								a(
+									href
+									ng-click="selectUniversityManually();"
+								) #{translate("change")}
+								| )
 						.affiliations-table-label(
 							ng-if="!newAffiliation.university && !ui.isValidEmail && !ui.showManualUniversitySelectionUI"
 						) #{translate("start_by_adding_your_email")}
@@ -127,7 +148,7 @@ form.row(
 							show-role-and-department="ui.isValidEmail && newAffiliation.university"
 						)
 					td
-						button.btn.btn-primary(
+						button.btn.btn-sm.btn-primary(
 							ng-disabled="affiliationsForm.$invalid || ui.isAddingNewEmail"
 							ng-click="addNewEmail()"
 						)

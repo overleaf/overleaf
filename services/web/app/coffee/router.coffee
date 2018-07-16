@@ -115,6 +115,9 @@ module.exports = class Router
 			UserEmailsController.showConfirm
 		webRouter.post '/user/emails/confirm',
 			UserEmailsController.confirm
+		webRouter.post '/user/emails/resend_confirmation',
+			AuthenticationController.requireLogin(),
+			UserEmailsController.resendConfirmation
 
 		if Features.hasFeature 'affiliations'
 			webRouter.post '/user/emails',
