@@ -345,7 +345,7 @@ module.exports = ProjectController =
 					themes: THEME_LIST
 					maxDocLength: Settings.max_doc_length
 					useV2History: !!project.overleaf?.history?.display
-					richTextEnabled: Features.richTextEnabled()
+					richTextEnabled: Features.hasFeature('rich-text')
 					showTestControls: req.query?.tc == 'true' || user.isAdmin
 					showPublishModal: req.query?.pm == 'true'
 				timer.done()
