@@ -24,6 +24,7 @@ describe "UserEmailsController", ->
 			addEmailAddress: sinon.stub()
 			removeEmailAddress: sinon.stub()
 			setDefaultEmailAddress: sinon.stub()
+			updateV1AndSetDefaultEmailAddress: sinon.stub()
 		@EmailHelper =
 			parseEmail: sinon.stub()
 		@endorseAffiliation = sinon.stub().yields()
@@ -126,13 +127,13 @@ describe "UserEmailsController", ->
 			@EmailHelper.parseEmail.returns @email
 
 		it 'sets default email', (done) ->
-			@UserUpdater.setDefaultEmailAddress.callsArgWith 2, null
+			@UserUpdater.updateV1AndSetDefaultEmailAddress.callsArgWith 2, null
 
 			@UserEmailsController.setDefault @req, 
 				sendStatus: (code) =>
 					code.should.equal 200
 					assertCalledWith @EmailHelper.parseEmail, @email
-					assertCalledWith @UserUpdater.setDefaultEmailAddress, @user._id, @email
+					assertCalledWith @UserUpdater.updateV1AndSetDefaultEmailAddress, @user._id, @email
 					done()
 
 		it 'handles email parse error', (done) ->

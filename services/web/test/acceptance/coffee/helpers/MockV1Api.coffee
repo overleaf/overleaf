@@ -28,6 +28,8 @@ module.exports = MockV1Api =
 
 	affiliations: []
 
+	updateEmail: sinon.stub()
+
 	setAffiliations: (affiliations) -> @affiliations = affiliations
 
 	run: () ->
@@ -63,6 +65,10 @@ module.exports = MockV1Api =
 
 		app.get '/university/domains', (req, res, next) ->
 			res.json []
+
+		app.put '/api/v1/sharelatex/users/:id/email', (req, res, next) =>
+			@updateEmail parseInt(req.params.id), req.body.email
+			res.sendStatus 200
 
 		app.listen 5000, (error) ->
 			throw error if error?

@@ -47,9 +47,14 @@ module.exports = UserEmailsController =
 		email = EmailHelper.parseEmail(req.body.email)
 		return res.sendStatus 422 unless email?
 
-		UserUpdater.setDefaultEmailAddress userId, email, (error)->
-			return next(error) if error?
-			res.sendStatus 200
+		UserUpdater.updateV1AndSetDefaultEmailAddress userId, email, (error)->
+			if error?
+				if error instanceof Errors.UnconfirmedEmailError
+					return res.sendStatus 409
+				else
+					return next(error)
+			else
+				return res.sendStatus 200
 
 
 	endorse: (req, res, next) ->

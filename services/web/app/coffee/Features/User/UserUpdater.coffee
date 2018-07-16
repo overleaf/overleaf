@@ -8,6 +8,8 @@ UserGetter = require("./UserGetter")
 { addAffiliation, removeAffiliation } = require("./UserAffiliationsManager")
 EmailHelper = require "../Helpers/EmailHelper"
 Errors = require "../Errors/Errors"
+Settings = require "settings-sharelatex"
+request = require 'request'
 
 module.exports = UserUpdater =
 	updateUser: (query, update, callback = (error) ->) ->
@@ -105,6 +107,45 @@ module.exports = UserUpdater =
 			if res.n == 0 # TODO: Check n or nMatched?
 				return callback(new Error('Default email does not belong to user'))
 			callback()
+
+	updateV1AndSetDefaultEmailAddress: (userId, email, callback) ->
+		@updateEmailAddressInV1 userId, email, (error) =>
+			return callback(error) if error?
+			@setDefaultEmailAddress userId, email, callback
+
+	updateEmailAddressInV1: (userId, newEmail, callback) ->
+		if !Settings.apis?.v1?.url?
+			return callback()
+		UserGetter.getUser userId, { 'overleaf.id': 1, emails: 1 }, (error, user) ->
+			return callback(error) if error?
+			return callback(new Errors.NotFoundError('no user found')) if !user?
+			if !user.overleaf?.id?
+				return callback()
+			newEmailIsConfirmed = false
+			for email in user.emails
+				if email.email == newEmail and email.confirmedAt?
+					newEmailIsConfirmed = true
+					break
+			if !newEmailIsConfirmed
+				return callback(new Errors.UnconfirmedEmailError("can't update v1 with unconfirmed email"))
+			request {
+				baseUrl: Settings.apis.v1.url
+				url: "/api/v1/sharelatex/users/#{user.overleaf.id}/email"
+				method: 'PUT'
+				auth:
+					user: Settings.apis.v1.user
+					pass: Settings.apis.v1.pass
+					sendImmediately: true
+				json: { email: newEmail },
+				timeout: 5 * 1000
+			}, (error, response, body) ->
+				if error?
+					error = new Errors.V1ConnectionError('No V1 connection') if error.code == 'ECONNREFUSED'
+					return callback(error)
+				if 200 <= response.statusCode < 300
+					return callback()
+				else
+					return callback new Error("non-success code from v1: #{response.statusCode}")
 
 	confirmEmail: (userId, email, callback) ->
 		email = EmailHelper.parseEmail(email)
