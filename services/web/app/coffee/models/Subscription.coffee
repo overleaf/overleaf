@@ -7,6 +7,7 @@ ObjectId = Schema.ObjectId
 
 SubscriptionSchema = new Schema
 	admin_id     :   {type:ObjectId, ref:'User', index: {unique: true, dropDups: true}}
+	manager_ids  :   [ type:ObjectId, ref:'User' ]
 	member_ids   :   [ type:ObjectId, ref:'User' ]
 	invited_emails:  [ String ]
 	teamInvites  :   [ TeamInviteSchema ]

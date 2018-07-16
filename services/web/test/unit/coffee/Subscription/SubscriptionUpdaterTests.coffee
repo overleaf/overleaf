@@ -20,6 +20,7 @@ describe "SubscriptionUpdater", ->
 		@subscription = subscription =
 			_id: "111111111111111111111111"
 			admin_id: @adminUser._id
+			manager_ids: [@adminUser._id]
 			member_ids: @allUserIds
 			save: sinon.stub().callsArgWith(0)
 			freeTrial:{}
@@ -29,6 +30,7 @@ describe "SubscriptionUpdater", ->
 		@groupSubscription =
 			_id: "222222222222222222222222"
 			admin_id: @adminUser._id
+			manager_ids: [@adminUser._id]
 			member_ids: @allUserIds
 			save: sinon.stub().callsArgWith(0)
 			freeTrial:{}
@@ -40,6 +42,7 @@ describe "SubscriptionUpdater", ->
 		@SubscriptionModel = class
 			constructor: (opts)->
 				subscription.admin_id = opts.admin_id
+				subscription.manager_ids = [opts.admin_id]
 				return subscription
 			@remove: sinon.stub().yields()
 		@SubscriptionModel.update = @updateStub
@@ -151,6 +154,7 @@ describe "SubscriptionUpdater", ->
 		it "should create a new subscription then update the subscription", (done)->
 			@SubscriptionUpdater._createNewSubscription @adminUser._id, =>
 				@subscription.admin_id.should.equal @adminUser._id
+				@subscription.manager_ids.should.deep.equal [@adminUser._id]
 				@subscription.freeTrial.allowed.should.equal false
 				@subscription.save.called.should.equal true
 				done()
