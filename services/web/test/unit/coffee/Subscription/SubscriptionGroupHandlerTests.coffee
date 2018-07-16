@@ -88,8 +88,8 @@ describe "SubscriptionGroupHandler", ->
 				done()
 
 		it "should add the user to the group", (done)->
-			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
-				@SubscriptionUpdater.addUserToGroup.calledWith(@adminUser_id, @user._id).should.equal true
+			@Handler.addUserToGroup @subscription_id, @newEmail, (err)=>
+				@SubscriptionUpdater.addUserToGroup.calledWith(@subscription_id, @user._id).should.equal true
 				done()
 
 		it "should not add the user to the group if the limit has been reached", (done)->
