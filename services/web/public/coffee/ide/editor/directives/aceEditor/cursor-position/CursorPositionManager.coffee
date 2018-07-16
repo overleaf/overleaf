@@ -37,6 +37,9 @@ define [], () ->
 		onCursorChange: () =>
 			@emitCursorUpdateEvent()
 
+		onSyncToPdf: () =>
+			@$scope.$emit "cursor:#{@$scope.name}:syncToPdf"
+
 		storeFirstVisibleLine: () ->
 			if @doc_id?
 				docPosition = @localStorage("doc.position.#{@doc_id}") || {}
