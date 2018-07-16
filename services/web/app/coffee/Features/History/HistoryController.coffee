@@ -21,16 +21,12 @@ module.exports = HistoryController =
 				req.useProjectHistory = false
 			next()
 
-	ensureProjectHistoryEnabled: (req, res, next) ->
-		{project_id} = req.params
-		ProjectDetailsHandler.getDetails project_id, (err, project) ->
-			return next(err) if err?
-			historyEnabled = project.overleaf?.history?.id?
-			if historyEnabled
-				next()
-			else
-				logger.log {project_id}, "project history not enabled"
-				res.sendStatus(404)
+	ensureProjectHistoryEnabled: (req, res, next = (error) ->) ->
+		if req.useProjectHistory?
+			next()
+		else
+			logger.log {project_id}, "project history not enabled"
+			res.sendStatus(404)
 
 	proxyToHistoryApi: (req, res, next = (error) ->) ->
 		user_id = AuthenticationController.getLoggedInUserId req
@@ -52,22 +48,17 @@ module.exports = HistoryController =
 		user_id = AuthenticationController.getLoggedInUserId req
 		url = HistoryController.buildHistoryServiceUrl(req.useProjectHistory) + req.url
 		logger.log url: url, "proxying to history api"
-		request {
+		HistoryController._makeRequest {
 			url: url
 			method: req.method
 			json: true
 			headers:
 				"X-User-Id": user_id
-		}, (error, response, body) ->
+		}, (error, body) ->
 			return next(error) if error?
-			if 200 <= response.statusCode < 300
-				HistoryManager.injectUserDetails body, (error, data) ->
-					return next(error) if error?
-					res.json data
-			else
-				error = new Error("history api responded with non-success code: #{response.statusCode}")
-				logger.error err: error, user_id: user_id, "error proxying request to history api"
-				next(error)
+			HistoryManager.injectUserDetails body, (error, data) ->
+				return next(error) if error?
+				res.json data
 
 	buildHistoryServiceUrl: (useProjectHistory) ->
 		# choose a history service, either document-level (trackchanges)
@@ -110,47 +101,45 @@ module.exports = HistoryController =
 			}
 
 	getLabels: (req, res, next) ->
-		{project_id} = req.params
+		project_id = req.params.Project_id
 		user_id = AuthenticationController.getLoggedInUserId(req)
-		request.get {
+		HistoryController._makeRequest {
+			method: "GET"
 			url: "#{settings.apis.project_history.url}/project/#{project_id}/labels"
 			json: true
-		}, (error, response, body) ->
+		}, (error, labels) ->
 			return next(error) if error?
-			if 200 <= response.statusCode < 300
-				res.json body
-			else
-				error = new Error("history api responded with non-success code: #{response.statusCode}")
-				logger.error err: error, user_id: user_id, "error getting labels from project-history"
-				next(error)
+			res.json labels
 
 	createLabel: (req, res, next) ->
-		{project_id} = req.params
+		project_id = req.params.Project_id
 		{comment, version} = req.body
 		user_id = AuthenticationController.getLoggedInUserId(req)
-		request.post {
+		HistoryController._makeRequest {
+			method: "POST"
 			url: "#{settings.apis.project_history.url}/project/#{project_id}/user/#{user_id}/labels"
 			json: {comment, version}
-		}, (error, response, body) ->
+		}, (error, label) ->
 			return next(error) if error?
-			if 200 <= response.statusCode < 300
-				res.json body
-			else
-				error = new Error("history api responded with non-success code: #{response.statusCode}")
-				logger.error err: error, user_id: user_id, "error creating label in project-history"
-				next(error)
+			res.json label
 
 	deleteLabel: (req, res, next) ->
-		{project_id, label_id} = req.params
+		project_id = req.params.Project_id
+		label_id = req.params.label_id
 		user_id = AuthenticationController.getLoggedInUserId(req)
-		console.log "hof-debug DEL #{settings.apis.project_history.url}/project/#{project_id}/user/#{user_id}/labels/#{label_id}"
-		request.del {
+		HistoryController._makeRequest {
+			method: "DELETE"
 			url: "#{settings.apis.project_history.url}/project/#{project_id}/user/#{user_id}/labels/#{label_id}"
-		}, (error, response, body) ->
+		}, (error) ->
 			return next(error) if error?
+			res.sendStatus 204
+
+	_makeRequest: (options, callback) ->
+		request options, (error, response, body) ->
+			return callback(error) if error?
 			if 200 <= response.statusCode < 300
-				res.sendStatus 204
+				callback(null, body)
 			else
 				error = new Error("history api responded with non-success code: #{response.statusCode}")
-				logger.error err: error, user_id: user_id, "error deleting label in project-history"
-				next(error)
+				logger.error err: error, "project-history api responded with non-success code: #{response.statusCode}"
+				callback(error)
