@@ -142,7 +142,9 @@ module.exports = UserUpdater =
 				if error?
 					error = new Errors.V1ConnectionError('No V1 connection') if error.code == 'ECONNREFUSED'
 					return callback(error)
-				if 200 <= response.statusCode < 300
+				if response.statusCode == 409 # Conflict
+					return callback(new Errors.EmailExistsError('email exists in v1'))
+				else if 200 <= response.statusCode < 300
 					return callback()
 				else
 					return callback new Error("non-success code from v1: #{response.statusCode}")

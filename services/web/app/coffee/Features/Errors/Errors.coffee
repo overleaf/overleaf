@@ -75,6 +75,13 @@ UnconfirmedEmailError = (message) ->
 	return error
 UnconfirmedEmailError.prototype.__proto___ = Error.prototype
 
+EmailExistsError = (message) ->
+	error = new Error(message)
+	error.name = "EmailExistsError"
+	error.__proto__ = EmailExistsError.prototype
+	return error
+EmailExistsError.prototype.__proto___ = Error.prototype
+
 module.exports = Errors =
 	NotFoundError: NotFoundError
 	ServiceNotConfiguredError: ServiceNotConfiguredError
@@ -87,3 +94,4 @@ module.exports = Errors =
 	ProjectHistoryDisabledError: ProjectHistoryDisabledError
 	V1ConnectionError: V1ConnectionError
 	UnconfirmedEmailError: UnconfirmedEmailError
+	EmailExistsError: EmailExistsError

@@ -51,6 +51,11 @@ module.exports = UserEmailsController =
 			if error?
 				if error instanceof Errors.UnconfirmedEmailError
 					return res.sendStatus 409
+				else if error instanceof Errors.EmailExistsError
+					return res.status(409).json {
+						error:
+							message: "The email '#{email}' is already in use by another account"
+					}
 				else
 					return next(error)
 			else

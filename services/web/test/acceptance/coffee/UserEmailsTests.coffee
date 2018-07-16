@@ -304,7 +304,7 @@ describe "UserEmails", ->
 			], done
 
 	describe 'setting a default email', ->
-		it 'should update confirmed emails', (done) ->
+		it 'should update confirmed emails for users not in v1', (done) ->
 			token = null
 			async.series [
 				(cb) =>
@@ -384,7 +384,7 @@ describe "UserEmails", ->
 						cb()
 			], done
 
-		it 'should update the email in v2', (done) ->
+		it 'should update the email in v1 if confirmed', (done) ->
 			token = null
 			async.series [
 				(cb) =>
@@ -430,3 +430,53 @@ describe "UserEmails", ->
 					MockV1Api.updateEmail.calledWith(42, 'new-confirmed-default-in-v1@example.com')
 				).to.equal true
 				done()
+
+		it 'should return an error if the email exists in v1', (done) ->
+			MockV1Api.existingEmails.push 'exists-in-v1@example.com'
+			async.series [
+				(cb) =>
+					db.users.update {
+						_id: ObjectId(@user._id)
+					}, {
+						$set: {
+							'overleaf.id': 42
+						}
+					}, cb
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails',
+						json:
+							email: 'exists-in-v1@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 204
+						cb()
+				(cb) =>
+					# Mark the email as confirmed
+					db.users.update {
+						'emails.email': 'exists-in-v1@example.com'
+					}, { 
+						$set: {
+							'emails.$.confirmedAt': new Date()
+						}
+					}, cb
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails/default',
+						json:
+							email: 'exists-in-v1@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 409
+						expect(body.error).to.deep.equal {
+							message: "The email 'exists-in-v1@example.com' is already in use by another account"
+						}
+						cb()
+				(cb) =>
+					@user.request { url: '/user/emails', json: true }, (error, response, body) ->
+						expect(body[0].default).to.equal true
+						expect(body[1].default).to.equal false
+						cb()
+			], done
