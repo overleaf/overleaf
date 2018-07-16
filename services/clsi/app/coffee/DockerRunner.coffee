@@ -39,8 +39,8 @@ module.exports = DockerRunner =
 			image = Settings.clsi.docker.image
 
 		if Settings.texliveImageNameOveride?
-			tag = image.split(":")[1]
-			image = "#{Settings.texliveImageNameOveride}:#{tag}"
+			img = image.split("/")
+			image = "#{Settings.texliveImageNameOveride}/#{img[2]}"
 
 		options      = DockerRunner._getContainerOptions(command, image, volumes, timeout, environment)
 		fingerprint  = DockerRunner._fingerprintContainer(options)
