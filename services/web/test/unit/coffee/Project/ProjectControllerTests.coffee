@@ -72,6 +72,8 @@ describe "ProjectController", ->
 		@Modules =
 			hooks:
 				fire: sinon.stub()
+		@Features =
+			hasFeature: sinon.stub()
 		@ProjectController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex":
@@ -102,6 +104,7 @@ describe "ProjectController", ->
 			"../../infrastructure/Modules": @Modules
 			"./ProjectEntityHandler": @ProjectEntityHandler
 			"../Errors/Errors": Errors
+			"../../Infrastructure/Features": @Features
 
 		@projectName = "£12321jkj9ujkljds"
 		@req =
