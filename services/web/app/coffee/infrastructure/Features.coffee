@@ -4,6 +4,10 @@ module.exports = Features =
 	externalAuthenticationSystemUsed: ->
 		Settings.ldap? or Settings.saml? or Settings.overleaf?.oauth?
 
+	richTextEnabled: ->
+		isEnabled = true # Switch to false to disable
+		Settings.overleaf? and isEnabled
+
 	hasFeature: (feature) ->
 		switch feature
 			when 'homepage'
