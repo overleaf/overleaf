@@ -5,6 +5,7 @@ path = require('path')
 sinon = require('sinon')
 modulePath = path.join __dirname, "../../../../app/js/Features/User/UserGetter"
 expect = require("chai").expect
+Errors = require "../../../../app/js/Features/Errors/Errors"
 
 describe "UserGetter", ->
 
@@ -30,6 +31,7 @@ describe "UserGetter", ->
 			'settings-sharelatex': settings
 			'./UserAffiliationsManager':
 				getAffiliations: @getAffiliations
+			"../Errors/Errors": Errors
 
 	describe "getUser", ->
 		it "should get user", (done)->
@@ -150,6 +152,7 @@ describe "UserGetter", ->
 			@UserGetter.getUserByAnyEmail.callsArgWith(1, null, @fakeUser)
 			@UserGetter.ensureUniqueEmailAddress @newEmail, (err)=>
 				should.exist(err)
+				expect(err).to.be.an.instanceof(Errors.EmailExistsError)
 				err.message.should.equal 'alread_exists'
 				done()
 

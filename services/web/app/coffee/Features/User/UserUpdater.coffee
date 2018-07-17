@@ -136,7 +136,9 @@ module.exports = UserUpdater =
 					user: Settings.apis.v1.user
 					pass: Settings.apis.v1.pass
 					sendImmediately: true
-				json: { email: newEmail },
+				json:
+					user:
+						email: newEmail
 				timeout: 5 * 1000
 			}, (error, response, body) ->
 				if error?

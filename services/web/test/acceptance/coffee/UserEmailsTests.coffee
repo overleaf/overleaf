@@ -470,8 +470,8 @@ describe "UserEmails", ->
 					}, (error, response, body) =>
 						return done(error) if error?
 						expect(response.statusCode).to.equal 409
-						expect(body.error).to.deep.equal {
-							message: "The email 'exists-in-v1@example.com' is already in use by another account"
+						expect(body).to.deep.equal {
+							message: "This email is already registered"
 						}
 						cb()
 				(cb) =>

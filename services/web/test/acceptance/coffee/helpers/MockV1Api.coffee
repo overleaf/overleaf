@@ -69,7 +69,7 @@ module.exports = MockV1Api =
 			res.json []
 
 		app.put '/api/v1/sharelatex/users/:id/email', (req, res, next) =>
-			{ email } = req.body
+			{ email } = req.body?.user
 			if email in @existingEmails
 				return res.sendStatus 409
 			else

@@ -26,7 +26,8 @@ module.exports = UserEmailsController =
 			role: req.body.role
 			department: req.body.department
 		UserUpdater.addEmailAddress userId, email, affiliationOptions, (error)->
-			return next(error) if error?
+			if error?
+				return UserEmailsController._handleEmailError error, req, res, next
 			UserEmailsConfirmationHandler.sendConfirmationEmail userId, email, (err) ->
 				return next(error) if error?
 				res.sendStatus 204
@@ -49,15 +50,7 @@ module.exports = UserEmailsController =
 
 		UserUpdater.updateV1AndSetDefaultEmailAddress userId, email, (error)->
 			if error?
-				if error instanceof Errors.UnconfirmedEmailError
-					return res.sendStatus 409
-				else if error instanceof Errors.EmailExistsError
-					return res.status(409).json {
-						error:
-							message: "The email '#{email}' is already in use by another account"
-					}
-				else
-					return next(error)
+				return UserEmailsController._handleEmailError error, req, res, next
 			else
 				return res.sendStatus 200
 
@@ -105,3 +98,15 @@ module.exports = UserEmailsController =
 					next(error)
 			else
 				res.sendStatus 200
+
+	_handleEmailError: (error, req, res, next) ->
+		if error instanceof Errors.UnconfirmedEmailError
+			return res.status(409).json {
+				message: 'email must be confirmed'
+			}
+		else if error instanceof Errors.EmailExistsError
+			return res.status(409).json {
+				message: req.i18n.translate("email_already_registered")
+			}
+		else
+			return next(error)
