@@ -3,12 +3,33 @@ String cron_string = BRANCH_NAME == "master" ? "@daily" : ""
 pipeline {
   agent any
 
+  environment {
+    GIT_PROJECT = "clsi-sharelatex"
+    JENKINS_WORKFLOW = "clsi-sharelatex"
+    TARGET_URL = "${env.JENKINS_URL}blue/organizations/jenkins/${JENKINS_WORKFLOW}/detail/$BRANCH_NAME/$BUILD_NUMBER/pipeline"
+    GIT_API_URL = "https://api.github.com/repos/sharelatex/${GIT_PROJECT}/statuses/$GIT_COMMIT"
+  }
+
   triggers {
     pollSCM('* * * * *')
     cron(cron_string)
   }
 
   stages {
+    stage('Install') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'GITHUB_INTEGRATION', usernameVariable: 'GH_AUTH_USERNAME', passwordVariable: 'GH_AUTH_PASSWORD')]) {
+          sh "curl $GIT_API_URL \
+            --data '{ \
+            \"state\" : \"pending\", \
+            \"target_url\": \"$TARGET_URL\", \
+            \"description\": \"Your build is underway\", \
+            \"context\": \"ci/jenkins\" }' \
+            -u $GH_AUTH_USERNAME:$GH_AUTH_PASSWORD"
+        }
+      }
+    }
+
     stage('Build') {
       steps {
         sh 'make build'
@@ -30,17 +51,11 @@ pipeline {
     stage('Package and publish build') {
       steps {
         
-        withCredentials([file(credentialsId: 'gcr.io_csh-gcdm-test', variable: 'DOCKER_REPO_KEY_PATH')]) {
-          sh 'docker login -u _json_key --password-stdin https://gcr.io/csh-gcdm-test < ${DOCKER_REPO_KEY_PATH}'
+        withCredentials([file(credentialsId: 'gcr.io_cr-test2', variable: 'DOCKER_REPO_KEY_PATH')]) {
+          sh 'docker login -u _json_key --password-stdin https://gcr.io/cr-test2 < ${DOCKER_REPO_KEY_PATH}'
         }
-        sh 'DOCKER_REPO=gcr.io/csh-gcdm-test make publish'
-        sh 'docker logout https://gcr.io/csh-gcdm-test'
-        
-        withCredentials([file(credentialsId: 'gcr.io_csh-staging', variable: 'DOCKER_REPO_KEY_PATH')]) {
-          sh 'docker login -u _json_key --password-stdin https://gcr.io/csh-staging < ${DOCKER_REPO_KEY_PATH}'
-        }
-        sh 'DOCKER_REPO=gcr.io/csh-staging make publish'
-        sh 'docker logout https://gcr.io/csh-staging'
+        sh 'DOCKER_REPO=gcr.io/cr-test2 make publish'
+        sh 'docker logout https://gcr.io/cr-test2'
         
       }
     }
@@ -62,11 +77,32 @@ pipeline {
       sh 'make clean'
     }
 
+    success {
+      withCredentials([usernamePassword(credentialsId: 'GITHUB_INTEGRATION', usernameVariable: 'GH_AUTH_USERNAME', passwordVariable: 'GH_AUTH_PASSWORD')]) {
+        sh "curl $GIT_API_URL \
+          --data '{ \
+          \"state\" : \"success\", \
+          \"target_url\": \"$TARGET_URL\", \
+          \"description\": \"Your build succeeded!\", \
+          \"context\": \"ci/jenkins\" }' \
+          -u $GH_AUTH_USERNAME:$GH_AUTH_PASSWORD"
+      }
+    }
+
     failure {
       mail(from: "${EMAIL_ALERT_FROM}",
            to: "${EMAIL_ALERT_TO}",
            subject: "Jenkins build failed: ${JOB_NAME}:${BUILD_NUMBER}",
            body: "Build: ${BUILD_URL}")
+      withCredentials([usernamePassword(credentialsId: 'GITHUB_INTEGRATION', usernameVariable: 'GH_AUTH_USERNAME', passwordVariable: 'GH_AUTH_PASSWORD')]) {
+        sh "curl $GIT_API_URL \
+          --data '{ \
+          \"state\" : \"failure\", \
+          \"target_url\": \"$TARGET_URL\", \
+          \"description\": \"Your build failed\", \
+          \"context\": \"ci/jenkins\" }' \
+          -u $GH_AUTH_USERNAME:$GH_AUTH_PASSWORD"
+      }
     }
   }
 
