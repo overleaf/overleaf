@@ -29,7 +29,7 @@ describe "SubscriptionGroupController", ->
 			isUserPartOfGroup: sinon.stub()
 			getPopulatedListOfMembers: sinon.stub().callsArgWith(1, null, [@user])
 		@SubscriptionLocator =
-			getManagedSubscription: sinon.stub().callsArgWith(1, null, @subscription)
+			findManagedSubscription: sinon.stub().callsArgWith(1, null, @subscription)
 
 		@AuthenticationController =
 			getLoggedInUserId: (req) -> req.session.user._id

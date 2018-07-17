@@ -2,7 +2,7 @@ Subscription = require('../../models/Subscription').Subscription
 logger = require("logger-sharelatex")
 ObjectId = require('mongoose').Types.ObjectId
 
-module.exports =
+module.exports = SubscriptionLocator =
 
 	getUsersSubscription: (user_or_id, callback)->
 		if user_or_id? and user_or_id._id?
@@ -14,15 +14,9 @@ module.exports =
 			logger.log user_id:user_id, "got users subscription"
 			callback(err, subscription)
 
-	getManagedSubscription: (managerId, callback)->
-			logger.log managerId: managerId, "getting managed subscription"
-			Subscription.findOne admin_id: managerId, (err, subscription)->
-				if subscription?
-					logger.log managerId: managerId, "got managed subscription"
-				else
-					err ||= new Error("No subscription found managed by user #{managerId}")
-
-				callback(err, subscription)
+	findManagedSubscription: (managerId, callback)->
+		logger.log managerId: managerId, "finding managed subscription"
+		Subscription.findOne manager_ids: managerId, callback
 
 	getMemberSubscriptions: (user_or_id, callback) ->
 		if user_or_id? and user_or_id._id?
