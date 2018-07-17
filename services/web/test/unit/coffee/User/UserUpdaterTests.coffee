@@ -29,6 +29,8 @@ describe "UserUpdater", ->
 				removeAffiliation: @removeAffiliation
 			"../../infrastructure/mongojs":@mongojs
 			"metrics-sharelatex": timeAsyncMethod: sinon.stub()
+			"settings-sharelatex": @settings = {}
+			"request": @request = {}
 
 		@stubbedUser = 
 			_id: "3131231"
