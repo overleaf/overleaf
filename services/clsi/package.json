@@ -17,7 +17,7 @@
     "compile:acceptance_tests": "[ ! -e test/acceptance/coffee ] && echo 'No acceptance tests to compile' || coffee -o test/acceptance/js -c test/acceptance/coffee",
     "compile:all": "npm run compile:app && npm run compile:unit_tests && npm run compile:acceptance_tests && npm run compile:smoke_tests",
     "nodemon": "nodemon --config nodemon.json",
-    "compile:smoke_tests": "[ ! -e test/smoke/coffee] &&  echo 'No smoke tests to compile' || coffee -o test/smoke/js -c test/smoke/coffee"
+    "compile:smoke_tests": "[ ! -e test/smoke/coffee ] &&  echo 'No smoke tests to compile' || coffee -o test/smoke/js -c test/smoke/coffee"
   },
   "author": "James Allen <james@sharelatex.com>",
   "dependencies": {
