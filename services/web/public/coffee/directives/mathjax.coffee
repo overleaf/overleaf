@@ -1,8 +1,8 @@
 define [
 	"base"
-	"mathjax"
 ], (App) ->
 	mathjaxConfig =
+		extensions: ["Safe.js"]
 		messageStyle: "none"
 		imageFont:null
 		"HTML-CSS": { availableFonts: ["TeX"] },
