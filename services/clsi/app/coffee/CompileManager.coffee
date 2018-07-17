@@ -281,7 +281,7 @@ module.exports = CompileManager =
 		file_path = "$COMPILE_DIR/" + file_name
 		command = [ "texcount", '-nocol', '-inc', file_path, "-out=" + file_path + ".wc"]
 		directory = getCompileDir(project_id, user_id)
-		timeout = 10 * 1000
+		timeout = 60 * 1000 # increased to allow for large projects
 		compileName = getCompileName(project_id, user_id)
 
 		CommandRunner.run compileName, command, directory, image, timeout, {}, (error) ->
