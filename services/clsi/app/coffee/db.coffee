@@ -14,7 +14,8 @@ sequelize = new Sequelize(
 	options
 )
 
-sequelize.query("PRAGMA journal_mode=WAL;")
+if Settings.mysql.clsi.dialect == "sqlite"
+	sequelize.query("PRAGMA journal_mode=WAL;")
 
 module.exports =
 	UrlCache: sequelize.define("UrlCache", {
