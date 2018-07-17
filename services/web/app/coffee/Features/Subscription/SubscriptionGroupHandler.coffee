@@ -46,15 +46,10 @@ module.exports = SubscriptionGroupHandler =
 		Subscription.update {admin_id: oldId}, {admin_id: newId}, (error) ->
 			callback(error) if error?
 
-			# Mongo won't let us pull and addToSet in the same query, so do it in
-			# two. Note we need to add first, since the query is based on the old user.
-			query = { member_ids: oldId }
-			addNewUserUpdate = $addToSet: { member_ids: newId }
-			removeOldUserUpdate =  $pull: { member_ids: oldId }
+			replaceInArray Subscription, "manager_ids", oldId, newId, (error) ->
+				callback(error) if error?
 
-			Subscription.update query, addNewUserUpdate, { multi: true }, (error) ->
-				return callback(error) if error?
-				Subscription.update query, removeOldUserUpdate, { multi: true }, callback
+				replaceInArray Subscription, "member_ids", oldId, newId, callback
 
 	getPopulatedListOfMembers: (subscriptionId, callback)->
 		SubscriptionLocator.getSubscription subscriptionId, (err, subscription)->
@@ -86,6 +81,24 @@ module.exports = SubscriptionGroupHandler =
 				partOfGroup = false
 			logger.log user_id:user_id, subscription_id:subscription_id, partOfGroup:partOfGroup, "checking if user is part of a group"
 			callback(err, partOfGroup)
+
+replaceInArray = (model, property, oldValue, newValue, callback) ->
+	logger.log "Replacing #{oldValue} with #{newValue} in #{property} of #{model}"
+
+	# Mongo won't let us pull and addToSet in the same query, so do it in
+	# two. Note we need to add first, since the query is based on the old user.
+	query = {}
+	query[property] = oldValue
+
+	setNewValue = {}
+	setNewValue[property] = newValue
+
+	setOldValue = {}
+	setOldValue[property] = oldValue
+
+	model.update query, { $addToSet: setNewValue }, { multi: true }, (error) ->
+		return callback(error) if error?
+		model.update query, { $pull: setOldValue }, { multi: true }, callback
 
 buildUserViewModel = (user)->
 	u =

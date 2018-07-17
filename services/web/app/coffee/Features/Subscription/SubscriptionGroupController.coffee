@@ -13,7 +13,7 @@ module.exports =
 		adminUserId = AuthenticationController.getLoggedInUserId(req)
 		newEmail = req.body?.email?.toLowerCase()?.trim()
 
-		SubscriptionLocator.getManagedSubscription adminUserId, (error, subscription) ->
+		getManagedSubscription adminUserId, (error, subscription) ->
 			return next(error) if error?
 
 			logger.log adminUserId:adminUserId, newEmail:newEmail, "adding user to group subscription"
@@ -31,7 +31,7 @@ module.exports =
 	removeUserFromGroup: (req, res, next)->
 		adminUserId = AuthenticationController.getLoggedInUserId(req)
 		userToRemove_id = req.params.user_id
-		SubscriptionLocator.getManagedSubscription adminUserId, (error, subscription) ->
+		getManagedSubscription adminUserId, (error, subscription) ->
 			return next(error) if error?
 			logger.log adminUserId:adminUserId, userToRemove_id:userToRemove_id, "removing user from group subscription"
 			SubscriptionGroupHandler.removeUserFromGroup subscription._id, userToRemove_id, (err)->
@@ -43,7 +43,7 @@ module.exports =
 	removeSelfFromGroup: (req, res, next)->
 		adminUserId = req.query.admin_user_id
 		userToRemove_id = AuthenticationController.getLoggedInUserId(req)
-		SubscriptionLocator.getManagedSubscription adminUserId, (error, subscription) ->
+		getManagedSubscription adminUserId, (error, subscription) ->
 			return next(error) if error?
 			logger.log adminUserId:adminUserId, userToRemove_id:userToRemove_id, "removing user from group subscription after self request"
 			SubscriptionGroupHandler.removeUserFromGroup subscription._id, userToRemove_id, (err)->
@@ -54,7 +54,7 @@ module.exports =
 
 	renderSubscriptionGroupAdminPage: (req, res, next)->
 		user_id = AuthenticationController.getLoggedInUserId(req)
-		SubscriptionLocator.getManagedSubscription user_id, (error, subscription)->
+		getManagedSubscription user_id, (error, subscription)->
 			return next(error) if error?
 			if !subscription?.groupPlan
 				return res.redirect("/user/subscription")
@@ -67,7 +67,7 @@ module.exports =
 	exportGroupCsv: (req, res)->
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		logger.log user_id: user_id, "exporting group csv"
-		SubscriptionLocator.getManagedSubscription user_id, (err, subscription)->
+		getManagedSubscription user_id, (err, subscription)->
 			return next(error) if error?
 			if !subscription.groupPlan
 				return res.redirect("/")
@@ -81,3 +81,13 @@ module.exports =
 				)
 				res.contentType('text/csv')
 				res.send(groupCsv)
+
+
+getManagedSubscription = (managerId, callback) ->
+	SubscriptionLocator.findManagedSubscription managerId, (err, subscription)->
+		if subscription?
+			logger.log managerId: managerId, "got managed subscription"
+		else
+			err ||= new Error("No subscription found managed by user #{managerId}")
+
+		return callback(err, subscription)

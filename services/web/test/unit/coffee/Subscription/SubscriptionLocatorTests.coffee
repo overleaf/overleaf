@@ -3,7 +3,7 @@ should = require('chai').should()
 sinon = require 'sinon'
 modulePath = "../../../../app/js/Features/Subscription/SubscriptionLocator"
 assert = require("chai").assert
-ObjectId = require('mongoose').Types.ObjectId	
+ObjectId = require('mongoose').Types.ObjectId
 
 
 describe "Subscription Locator Tests", ->
@@ -41,3 +41,11 @@ describe "Subscription Locator Tests", ->
 				subscription.should.equal @subscription
 				done()
 
+		describe "finding managed subscription", ->
+
+			it "should query the database", (done)->
+				@Subscription.findOne.callsArgWith(1, null, @subscription)
+				@SubscriptionLocator.findManagedSubscription @user._id, (err, subscription)=>
+					@Subscription.findOne.calledWith({"manager_ids":@user._id}).should.equal true
+					subscription.should.equal @subscription
+					done()
