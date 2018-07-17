@@ -41,6 +41,8 @@
 
   /****************************************************************************/
 
+  // wl-indent-X is used to add extra left padding to nested itemize/enumerate
+  // environments, so that the inner list appears more indented than the outer
   .wl-indent-0 {
     padding-left: calc(~"2.5em + @{rt-line-padding}") !important;
   }
@@ -61,24 +63,26 @@
     padding-left: calc(~"6.5em + @{rt-line-padding}") !important;
   }
 
+  // wl-indent-env-X is used to add extra left padding to empty nested itemize/
+  // enumerate environments
   .wl-indent-env-0 {
-    padding-left: 4px !important;
+    padding-left: calc(~"4px + @{rt-line-padding}") !important;
   }
 
   .wl-indent-env-1 {
-    padding-left: 1.5em !important;
+    padding-left: calc(~"1.5em + @{rt-line-padding}") !important;
   }
 
   .wl-indent-env-2 {
-    padding-left: 2.5em !important;
+    padding-left: calc(~"2.5em + @{rt-line-padding}") !important;
   }
 
   .wl-indent-env-3 {
-    padding-left: 3.5em !important;
+    padding-left: calc(~"3.5em + @{rt-line-padding}") !important;
   }
 
   .wl-indent-env-4 {
-    padding-left: 4.5em !important;
+    padding-left: calc(~"4.5em + @{rt-line-padding}") !important;
   }
 
   .wl-enumerate-item-open {
