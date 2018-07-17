@@ -4,8 +4,8 @@ pipeline {
   agent any
 
   environment {
-    GIT_PROJECT = "filestore/-sharelatex"
-    JENKINS_WORKFLOW = "filestore/-sharelatex"
+    GIT_PROJECT = "filestore-sharelatex"
+    JENKINS_WORKFLOW = "filestore-sharelatex"
     TARGET_URL = "${env.JENKINS_URL}blue/organizations/jenkins/${JENKINS_WORKFLOW}/detail/$BRANCH_NAME/$BUILD_NUMBER/pipeline"
     GIT_API_URL = "https://api.github.com/repos/sharelatex/${GIT_PROJECT}/statuses/$GIT_COMMIT"
   }
