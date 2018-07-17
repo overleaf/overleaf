@@ -18,6 +18,7 @@ clean:
 	docker rmi ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 	docker rmi gcr.io/csh-gcdm-test/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 	docker rmi gcr.io/csh-staging/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
+	docker rmi gcr.io/cr-test2/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 	rm -f app.js
 	rm -rf app/js
 	rm -rf test/unit/js
@@ -40,6 +41,7 @@ build:
 	docker build --pull --tag ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
 		--tag gcr.io/csh-gcdm-test/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
 		--tag gcr.io/csh-staging/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
+		--tag gcr.io/cr-test2/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
 		.
 
 publish:
