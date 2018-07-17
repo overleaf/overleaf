@@ -1,5 +1,6 @@
 define [
 	"base"
+	"directives/mathjax"
 	"services/algolia-search"
 ], (App) ->
 
@@ -55,4 +56,4 @@ define [
 					hits = _.map response.hits, buildHitViewModel
 					updateHits hits
 
-
+	App.controller "LearnController", () -> 
