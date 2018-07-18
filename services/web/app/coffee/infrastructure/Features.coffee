@@ -22,5 +22,8 @@ module.exports = Features =
 				return !Settings.overleaf?
 			when 'affiliations'
 				return Settings?.apis?.v1?.url?
+			when 'rich-text'
+				isEnabled = true # Switch to false to disable
+				Settings.overleaf? and isEnabled
 			else
 				throw new Error("unknown feature: #{feature}")

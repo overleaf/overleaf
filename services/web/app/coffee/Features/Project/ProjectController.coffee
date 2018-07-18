@@ -28,6 +28,7 @@ Modules = require '../../infrastructure/Modules'
 ProjectEntityHandler = require './ProjectEntityHandler'
 crypto = require 'crypto'
 { V1ConnectionError } = require '../Errors/Errors'
+Features = require('../../infrastructure/Features')
 
 module.exports = ProjectController =
 
@@ -344,7 +345,7 @@ module.exports = ProjectController =
 					themes: THEME_LIST
 					maxDocLength: Settings.max_doc_length
 					useV2History: !!project.overleaf?.history?.display
-					showRichText: req.query?.rt == 'true'
+					richTextEnabled: Features.hasFeature('rich-text')
 					showTestControls: req.query?.tc == 'true' || user.isAdmin
 					showPublishModal: req.query?.pm == 'true'
 				timer.done()
