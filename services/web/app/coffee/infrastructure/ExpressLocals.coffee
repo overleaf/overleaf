@@ -109,7 +109,7 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 			logger.log user_id:user_id, ip:req?.ip, "cdnBlocked for user, not using it and turning it off for future requets"
 			req.session.cdnBlocked = true
 
-		isDark = req.headers?.host?.slice(0,4)?.toLowerCase() == "dark"
+		isDark = req.headers?.host?.slice(0,7)?.toLowerCase().indexOf("dark") != -1
 		isSmoke = req.headers?.host?.slice(0,5)?.toLowerCase() == "smoke"
 		isLive = !isDark and !isSmoke
 
