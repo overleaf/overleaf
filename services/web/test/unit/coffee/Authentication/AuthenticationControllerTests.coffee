@@ -579,3 +579,56 @@ describe "AuthenticationController", ->
 			@AuthenticationController._clearRedirectFromSession(@req)
 			expect(@req.session.postLoginRedirect).to.equal undefined
 
+
+	describe 'finishLogin', ->
+		# - get redirect
+		# - async handlers
+		# - afterLoginSessionSetup
+		# - clear redirect
+		# - issue redir, two ways
+		beforeEach ->
+			@AuthenticationController._getRedirectFromSession = sinon.stub().returns '/some/page'
+			@AuthenticationController._loginAsyncHandlers = sinon.stub()
+			@AuthenticationController.afterLoginSessionSetup = sinon.stub().callsArgWith(2, null)
+			@AuthenticationController._clearRedirectFromSession = sinon.stub()
+			@req.headers = {accept: 'application/json, whatever'}
+			@res.json = sinon.stub()
+			@res.redirect = sinon.stub()
+
+		it 'should extract the redirect from the session', () ->
+			@AuthenticationController.finishLogin(@user, @req, @res, @next)
+			expect(@AuthenticationController._getRedirectFromSession.callCount).to.equal 1
+			expect(@AuthenticationController._getRedirectFromSession.calledWith(@req)).to.equal true
+
+		it 'should call the async handlers', () ->
+			@AuthenticationController.finishLogin(@user, @req, @res, @next)
+			expect(@AuthenticationController._loginAsyncHandlers.callCount).to.equal 1
+			expect(@AuthenticationController._loginAsyncHandlers.calledWith(@req, @user)).to.equal true
+
+		it 'should call afterLoginSessionSetup', () ->
+			@AuthenticationController.finishLogin(@user, @req, @res, @next)
+			expect(@AuthenticationController.afterLoginSessionSetup.callCount).to.equal 1
+			expect(@AuthenticationController.afterLoginSessionSetup.calledWith(@req, @user)).to.equal true
+
+		it 'should clear redirect from session', () ->
+			@AuthenticationController.finishLogin(@user, @req, @res, @next)
+			expect(@AuthenticationController._clearRedirectFromSession.callCount).to.equal 1
+			expect(@AuthenticationController._clearRedirectFromSession.calledWith(@req)).to.equal true
+
+		it 'should issue a json response with a redirect', () ->
+			@AuthenticationController.finishLogin(@user, @req, @res, @next)
+			expect(@res.json.callCount).to.equal 1
+			expect(@res.redirect.callCount).to.equal 0
+			expect(@res.json.calledWith({ redir: '/some/page' })).to.equal true
+
+		describe 'with a non-json request', ->
+			beforeEach ->
+				@req.headers = {}
+				@res.json = sinon.stub()
+				@res.redirect = sinon.stub()
+
+			it 'should issue a plain redirect', () ->
+				@AuthenticationController.finishLogin(@user, @req, @res, @next)
+				expect(@res.json.callCount).to.equal 0
+				expect(@res.redirect.callCount).to.equal 1
+				expect(@res.redirect.calledWith('/some/page')).to.equal true
