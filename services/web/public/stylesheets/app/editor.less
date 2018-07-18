@@ -93,6 +93,8 @@
 	height: @editor-toolbar-height;
 	background-color: @editor-toolbar-bg;
 	overflow: hidden;
+	position: relative;
+	z-index: 10; // Prevent track changes showing over toolbar
 }
 
 .loading-screen {
