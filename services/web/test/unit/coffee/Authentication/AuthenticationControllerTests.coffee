@@ -249,34 +249,41 @@ describe "AuthenticationController", ->
 			it "should establish the user's session", ->
 				@cb.calledWith(null, @user).should.equal true
 
-			# TODO: move these to a test for the async handlers, or for finishLogin
+		describe '_loginAsyncHandlers', ->
+			beforeEach ->
+				@UserHandler.setupLoginData = sinon.stub()
+				@LoginRateLimiter.recordSuccessfulLogin = sinon.stub()
+				@AuthenticationController._recordSuccessfulLogin = sinon.stub()
+				@AnalyticsManager.recordEvent = sinon.stub()
+				@AnalyticsManager.identifyUser = sinon.stub()
+				@AuthenticationController._loginAsyncHandlers(@req, @user)
 
-			# it "should call identifyUser", ->
-			# 	@AnalyticsManager.identifyUser.calledWith(@user._id, @req.sessionID).should.equal true
+			it "should call identifyUser", ->
+				@AnalyticsManager.identifyUser.calledWith(@user._id, @req.sessionID).should.equal true
 
-			# it "should setup the user data in the background", ->
-			# 	@UserHandler.setupLoginData.calledWith(@user).should.equal true
+			it "should setup the user data in the background", ->
+				@UserHandler.setupLoginData.calledWith(@user).should.equal true
 
-			# it "should set res.session.justLoggedIn", ->
-			# 	@req.session.justLoggedIn.should.equal true
+			it "should set res.session.justLoggedIn", ->
+				@req.session.justLoggedIn.should.equal true
 
-			# it "should record the successful login", ->
-			# 	@AuthenticationController._recordSuccessfulLogin
-			# 		.calledWith(@user._id)
-			# 		.should.equal true
+			it "should record the successful login", ->
+				@AuthenticationController._recordSuccessfulLogin
+					.calledWith(@user._id)
+					.should.equal true
 
-			# it "should tell the rate limiter that there was a success for that email", ->
-			# 	@LoginRateLimiter.recordSuccessfulLogin.calledWith(@email.toLowerCase()).should.equal true
+			it "should tell the rate limiter that there was a success for that email", ->
+				@LoginRateLimiter.recordSuccessfulLogin.calledWith(@user.email).should.equal true
 
-			# it "should log the successful login", ->
-			# 	@logger.log
-			# 		.calledWith(email: @email.toLowerCase(), user_id: @user._id.toString(), "successful log in")
-			# 		.should.equal true
+			it "should log the successful login", ->
+				@logger.log
+					.calledWith(email: @user.email, user_id: @user._id.toString(), "successful log in")
+					.should.equal true
 
-			# it "should track the login event", ->
-			# 	@AnalyticsManager.recordEvent
-			# 		.calledWith(@user._id, "user-logged-in")
-			# 		.should.equal true
+			it "should track the login event", ->
+				@AnalyticsManager.recordEvent
+					.calledWith(@user._id, "user-logged-in")
+					.should.equal true
 
 		describe 'when the user is not authenticated', ->
 			beforeEach ->
