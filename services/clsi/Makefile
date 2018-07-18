@@ -16,7 +16,7 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 
 clean:
 	docker rmi ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
-	docker rmi gcr.io/cr-test2/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
+	docker rmi gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 	rm -f app.js
 	rm -rf app/js
 	rm -rf test/unit/js
@@ -37,7 +37,7 @@ test_acceptance_pre_run:
 	@[ ! -f test/acceptance/scripts/pre-run ] && echo "clsi has no pre acceptance tests task" || $(DOCKER_COMPOSE) run --rm test_acceptance test/acceptance/scripts/pre-run
 build:
 	docker build --pull --tag ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
-		--tag gcr.io/cr-test2/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
+		--tag gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
 		.
 
 publish:
