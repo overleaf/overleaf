@@ -21,6 +21,13 @@ module.exports = HistoryController =
 				req.useProjectHistory = false
 			next()
 
+	ensureProjectHistoryEnabled: (req, res, next = (error) ->) ->
+		if req.useProjectHistory?
+			next()
+		else
+			logger.log {project_id}, "project history not enabled"
+			res.sendStatus(404)
+
 	proxyToHistoryApi: (req, res, next = (error) ->) ->
 		user_id = AuthenticationController.getLoggedInUserId req
 		url = HistoryController.buildHistoryServiceUrl(req.useProjectHistory) + req.url
@@ -41,22 +48,17 @@ module.exports = HistoryController =
 		user_id = AuthenticationController.getLoggedInUserId req
 		url = HistoryController.buildHistoryServiceUrl(req.useProjectHistory) + req.url
 		logger.log url: url, "proxying to history api"
-		request {
+		HistoryController._makeRequest {
 			url: url
 			method: req.method
 			json: true
 			headers:
 				"X-User-Id": user_id
-		}, (error, response, body) ->
+		}, (error, body) ->
 			return next(error) if error?
-			if 200 <= response.statusCode < 300
-				HistoryManager.injectUserDetails body, (error, data) ->
-					return next(error) if error?
-					res.json data
-			else
-				error = new Error("history api responded with non-success code: #{response.statusCode}")
-				logger.error err: error, user_id: user_id, "error proxying request to history api"
-				next(error)
+			HistoryManager.injectUserDetails body, (error, data) ->
+				return next(error) if error?
+				res.json data
 
 	buildHistoryServiceUrl: (useProjectHistory) ->
 		# choose a history service, either document-level (trackchanges)
@@ -98,3 +100,46 @@ module.exports = HistoryController =
 				doc_id: doc._id
 			}
 
+	getLabels: (req, res, next) ->
+		project_id = req.params.Project_id
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		HistoryController._makeRequest {
+			method: "GET"
+			url: "#{settings.apis.project_history.url}/project/#{project_id}/labels"
+			json: true
+		}, (error, labels) ->
+			return next(error) if error?
+			res.json labels
+
+	createLabel: (req, res, next) ->
+		project_id = req.params.Project_id
+		{comment, version} = req.body
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		HistoryController._makeRequest {
+			method: "POST"
+			url: "#{settings.apis.project_history.url}/project/#{project_id}/user/#{user_id}/labels"
+			json: {comment, version}
+		}, (error, label) ->
+			return next(error) if error?
+			res.json label
+
+	deleteLabel: (req, res, next) ->
+		project_id = req.params.Project_id
+		label_id = req.params.label_id
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		HistoryController._makeRequest {
+			method: "DELETE"
+			url: "#{settings.apis.project_history.url}/project/#{project_id}/user/#{user_id}/labels/#{label_id}"
+		}, (error) ->
+			return next(error) if error?
+			res.sendStatus 204
+
+	_makeRequest: (options, callback) ->
+		request options, (error, response, body) ->
+			return callback(error) if error?
+			if 200 <= response.statusCode < 300
+				callback(null, body)
+			else
+				error = new Error("history api responded with non-success code: #{response.statusCode}")
+				logger.error err: error, "project-history api responded with non-success code: #{response.statusCode}"
+				callback(error)
