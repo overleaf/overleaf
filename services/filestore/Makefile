@@ -15,12 +15,12 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 
 
 clean:
-	docker rmi ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 	docker rmi gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 	rm -f app.js
 	rm -rf app/js
 	rm -rf test/unit/js
 	rm -rf test/acceptance/js
+	docker rmi ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 
 test: test_unit test_acceptance
 
