@@ -93,7 +93,7 @@ define [
 					# don't want to compile as soon as it is fixed, so reset the timeout.
 					$scope.startedTryingAutoCompileAt = Date.now()
 					$scope.docLastChangedAt = Date.now()
-			if autoCompileLintingError
+			if autoCompileLintingError and $scope.stop_on_validation_error
 				return
 
 			# If there's a longish compile, don't compile immediately after if user is still typing
