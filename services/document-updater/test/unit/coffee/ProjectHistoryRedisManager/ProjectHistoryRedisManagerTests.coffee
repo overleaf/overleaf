@@ -20,6 +20,7 @@ describe "ProjectHistoryRedisManager", ->
 						project_history:
 							key_schema:
 								projectHistoryOps: ({project_id}) -> "ProjectHistory:Ops:#{project_id}"
+								projectHistoryFirstOpTimestamp: ({project_id}) -> "ProjectHistory:FirstOpTimestamp:#{project_id}"
 				}
 				"redis-sharelatex":
 					createClient: () => @rclient
@@ -32,16 +33,26 @@ describe "ProjectHistoryRedisManager", ->
 	describe "queueOps", ->
 		beforeEach ->
 			@ops = ["mock-op-1", "mock-op-2"]
-			@rclient.rpush = sinon.stub()
+			@multi = exec: sinon.stub()
+			@multi.rpush = sinon.stub()
+			@multi.setnx = sinon.stub()
+			@rclient.multi = () => @multi
+			# @rclient = multi: () => @multi
 			@ProjectHistoryRedisManager.queueOps @project_id, @ops..., @callback
 
 		it "should queue an update", ->
-			@rclient.rpush
+			@multi.rpush
 				.calledWithExactly(
 					"ProjectHistory:Ops:#{@project_id}"
 					@ops[0]
 					@ops[1]
-					@callback
+				).should.equal true
+
+		it "should set the queue timestamp if not present", ->
+			@multi.setnx
+				.calledWithExactly(
+					"ProjectHistory:FirstOpTimestamp:#{@project_id}"
+					Date.now()
 				).should.equal true
 
 	describe "queueRenameEntity", ->

@@ -4,8 +4,18 @@ rclient = require("redis-sharelatex").createClient(Settings.redis.documentupdate
 logger = require('logger-sharelatex')
 
 module.exports = ProjectHistoryRedisManager =
-	queueOps: (project_id, ops..., callback) ->
-		rclient.rpush projectHistoryKeys.projectHistoryOps({project_id}), ops..., callback
+	queueOps: (project_id, ops..., callback = (error, projectUpdateCount) ->) ->
+		multi = rclient.multi()
+		# Push the ops onto the project history queue
+		multi.rpush projectHistoryKeys.projectHistoryOps({project_id}), ops...
+		# To record the age of the oldest op on the queue set a timestamp if not
+		# already present (SETNX).
+		multi.setnx projectHistoryKeys.projectHistoryFirstOpTimestamp({project_id}), Date.now()
+		multi.exec (error, result) ->
+			return callback(error) if error?
+			# return the number of entries pushed onto the project history queue
+			callback null, result[0]
+
 
 	queueRenameEntity: (project_id, projectHistoryId, entity_type, entity_id, user_id, projectUpdate, callback) ->
 		projectUpdate =
