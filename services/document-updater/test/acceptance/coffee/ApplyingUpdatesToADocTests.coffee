@@ -33,7 +33,7 @@ describe "Applying updates to a doc", ->
 		before (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
 			sinon.spy MockWebApi, "getDocument"
-			@startTime = Date.now()
+
 			MockWebApi.insertDoc @project_id, @doc_id, {lines: @lines, version: @version}
 			DocUpdaterClient.sendUpdate @project_id, @doc_id, @update, (error) ->
 				throw error if error?
@@ -66,27 +66,6 @@ describe "Applying updates to a doc", ->
 				throw error if error?
 				JSON.parse(updates[0]).op.should.deep.equal @update.op
 				done()
-
-		it "should set the first op timestamp", (done) ->
-			rclient_history.get ProjectHistoryKeys.projectHistoryFirstOpTimestamp({@project_id}), (error, result) =>
-				throw error if error?
-				result.should.be.within(@startTime, Date.now())
-				@firstOpTimestamp = result
-				done()
-
-		describe "when sending another update", ->
-			before (done) ->
-				@second_update = Object.create(@update)
-				@second_update.v = @version + 1
-				DocUpdaterClient.sendUpdate @project_id, @doc_id, @second_update, (error) ->
-					throw error if error?
-					setTimeout done, 200
-
-			it "should not change the first op timestamp", (done) ->
-				rclient_history.get ProjectHistoryKeys.projectHistoryFirstOpTimestamp({@project_id}), (error, result) =>
-					throw error if error?
-					result.should.equal @firstOpTimestamp
-					done()
 
 	describe "when the document is loaded", ->
 		before (done) ->

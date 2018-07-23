@@ -74,7 +74,6 @@ module.exports =
 		project_history:
 			key_schema:
 				projectHistoryOps: ({project_id}) -> "ProjectHistory:Ops:#{project_id}"
-				projectHistoryFirstOpTimestamp: ({project_id}) -> "ProjectHistory:FirstOpTimestamp:#{project_id}"
 			# cluster: [{
 			# 	port: "7000"
 			# 	host: "localhost"
