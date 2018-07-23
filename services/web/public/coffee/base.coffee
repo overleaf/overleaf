@@ -26,7 +26,22 @@ define [
 			baseUrl: window.sharelatex.sixpackDomain
 			client_id: window.user_id
 		})
-	
+
+		MathJax?.Hub?.Config(
+			extensions: ["Safe.js"]
+			messageStyle: "none"
+			imageFont:null
+			"HTML-CSS": { availableFonts: ["TeX"] },
+			TeX:
+				equationNumbers: { autoNumber: "AMS" },
+				useLabelIDs: false
+			skipStartupTypeset: true
+			tex2jax:
+				processEscapes: true,
+				inlineMath: [ ["\\(","\\)"] ],
+				displayMath: [ ['$$','$$'], ["\\[","\\]"] ]
+		)
+
 	App.run ($templateCache) ->
 		# UI Select templates are hard-coded and use Glyphicon icons (which we don't import). 
 		# The line below simply overrides the hard-coded template with our own, which is 
