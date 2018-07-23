@@ -31,14 +31,21 @@ define [
 			extensions: ["Safe.js"]
 			messageStyle: "none"
 			imageFont:null
-			"HTML-CSS": { availableFonts: ["TeX"] },
+			"HTML-CSS":
+				availableFonts: ["TeX"]
+				# MathJax's automatic font scaling does not work well when we render math
+				# that isn't yet on the page, so we disable it and set a global font
+				# scale factor
+				scale: 110
+				matchFontHeight: false
 			TeX:
-				equationNumbers: { autoNumber: "AMS" },
+				equationNumbers: { autoNumber: "AMS" }
 				useLabelIDs: false
 			skipStartupTypeset: true
 			tex2jax:
-				processEscapes: true,
-				inlineMath: [ ["\\(","\\)"] ],
+				processEscapes: true
+				# Dollar delimiters are added by the mathjax directive
+				inlineMath: [ ["\\(","\\)"] ]
 				displayMath: [ ['$$','$$'], ["\\[","\\]"] ]
 		)
 
