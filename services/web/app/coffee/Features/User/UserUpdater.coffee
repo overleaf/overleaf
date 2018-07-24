@@ -6,6 +6,7 @@ async = require("async")
 ObjectId = mongojs.ObjectId
 UserGetter = require("./UserGetter")
 { addAffiliation, removeAffiliation } = require("./UserAffiliationsManager")
+FeaturesUpdater = require("../Subscription/FeaturesUpdater")
 EmailHelper = require "../Helpers/EmailHelper"
 Errors = require "../Errors/Errors"
 
@@ -126,7 +127,7 @@ module.exports = UserUpdater =
 				logger.log {res, userId, email}, "tried to confirm email"
 				if res.n == 0
 					return callback(new Errors.NotFoundError('user id and email do no match'))
-				callback()
+				FeaturesUpdater.refreshFeatures userId, true, callback
 
 [
 	'updateUser'

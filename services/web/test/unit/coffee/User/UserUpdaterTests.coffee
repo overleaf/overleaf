@@ -21,12 +21,14 @@ describe "UserUpdater", ->
 		@logger = err: sinon.stub(), log: ->
 		@addAffiliation = sinon.stub().yields()
 		@removeAffiliation = sinon.stub().callsArgWith(2, null)
+		@refreshFeatures = sinon.stub().yields()
 		@UserUpdater = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": @logger
 			"./UserGetter": @UserGetter
 			'./UserAffiliationsManager':
 				addAffiliation: @addAffiliation
 				removeAffiliation: @removeAffiliation
+			'../Subscription/FeaturesUpdater': refreshFeatures: @refreshFeatures
 			"../../infrastructure/mongojs":@mongojs
 			"metrics-sharelatex": timeAsyncMethod: sinon.stub()
 
@@ -244,4 +246,10 @@ describe "UserUpdater", ->
 			@UserUpdater.confirmEmail @stubbedUser._id, @newEmail, (err)=>
 				should.exist(err)
 				@UserUpdater.updateUser.called.should.equal false
+				done()
+
+		it 'refresh features', (done)->
+			@UserUpdater.confirmEmail @stubbedUser._id, @newEmail, (err)=>
+				should.not.exist(err)
+				sinon.assert.calledWith(@refreshFeatures, @stubbedUser._id, true)
 				done()
