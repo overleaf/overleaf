@@ -26,7 +26,29 @@ define [
 			baseUrl: window.sharelatex.sixpackDomain
 			client_id: window.user_id
 		})
-	
+
+		MathJax?.Hub?.Config(
+			extensions: ["Safe.js"]
+			messageStyle: "none"
+			imageFont:null
+			"HTML-CSS":
+				availableFonts: ["TeX"]
+				# MathJax's automatic font scaling does not work well when we render math
+				# that isn't yet on the page, so we disable it and set a global font
+				# scale factor
+				scale: 110
+				matchFontHeight: false
+			TeX:
+				equationNumbers: { autoNumber: "AMS" }
+				useLabelIDs: false
+			skipStartupTypeset: true
+			tex2jax:
+				processEscapes: true
+				# Dollar delimiters are added by the mathjax directive
+				inlineMath: [ ["\\(","\\)"] ]
+				displayMath: [ ['$$','$$'], ["\\[","\\]"] ]
+		)
+
 	App.run ($templateCache) ->
 		# UI Select templates are hard-coded and use Glyphicon icons (which we don't import). 
 		# The line below simply overrides the hard-coded template with our own, which is 

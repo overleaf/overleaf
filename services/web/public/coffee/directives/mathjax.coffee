@@ -4,23 +4,16 @@ define [
 	App.directive "mathjax", () ->
 		return {
 			link: (scope, element, attrs) ->
-				mathjaxConfig =
-					extensions: ["Safe.js"]
-					messageStyle: "none"
-					imageFont:null
-					"HTML-CSS": { availableFonts: ["TeX"] },
-					TeX:
-						equationNumbers: { autoNumber: "AMS" },
-						useLabelIDs: false
-					skipStartupTypeset: true
-					tex2jax:
-						processEscapes: true,
-						inlineMath: [ ["\\(","\\)"] ],
-						displayMath: [ ['$$','$$'], ["\\[","\\]"] ]
 				if attrs.delimiter != 'no-single-dollar'
-					mathjaxConfig.tex2jax.inlineMath.push(['$','$']);
+					inlineMathConfig = MathJax?.Hub?.config?.tex2jax.inlineMath
+					alreadyConfigured = _.find inlineMathConfig, (c) ->
+						c[0] == '$' and c[1] == '$'
 
-				MathJax?.Hub?.Config(mathjaxConfig);
+					if !alreadyConfigured?
+						MathJax?.Hub?.Config(
+							tex2jax:
+								inlineMath: inlineMathConfig.concat([['$', '$']])
+						)
 
 				setTimeout () ->
 					MathJax?.Hub?.Queue(["Typeset", MathJax?.Hub, element.get(0)])
