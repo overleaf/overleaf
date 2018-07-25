@@ -1,0 +1,161 @@
+.content-portal {
+  padding-top: @navbar-height!important;
+
+  /*
+    Begin Header
+  */
+  .banner-image {
+    background-size: cover;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    height: 375px;
+  }
+
+  .image-fill {
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+  }
+
+  .institution-logo {
+    left: 50%;
+    margin-left: -100px;
+    padding: 0;
+    position: absolute;
+    div {
+      background-color: @white;
+      box-shadow: 1px 11px 22px -9px @black-alpha-strong;
+      display: inline-block;
+      height: 125px;
+      overflow: hidden;
+      position: absolute;
+      text-align: center;
+      top: -110px;
+      white-space: nowrap;
+      width: @btn-portal-width;
+    }
+    img {
+      max-height: 75px;
+      max-width: 150px;
+      vertical-align: middle;
+    }
+  }
+
+  .portal-name {
+    background-color: @ol-blue-gray-0;
+    padding-bottom: @line-height-computed; //- center header when no tabs
+    padding-top: @padding-md;
+    text-align: center;
+    width: 100%;
+  }
+  // End Header
+
+  /*
+    Begin Layout
+  */
+  .button-pull,
+  .content-pull {
+    float: left;
+  }
+
+  .button-pull {
+    text-align: right;
+    > a.btn {
+      white-space: normal;
+      width: @btn-portal-width;
+      text-align: center;
+    }
+  }
+  .content-pull {
+    padding-right: @padding-sm;
+    width: calc(~"100% - "@btn-portal-width);
+  }
+  // End Layout
+
+  /*
+    Begin Card
+  */
+  .card {
+    margin-bottom: @margin-md;
+  }
+  // End Card
+
+  /*
+    Begin Actions
+  */
+  .portal-actions {
+    i {
+      margin-bottom: @margin-sm;
+    }
+  }
+  // End Actions
+
+  /*
+    Begin Print
+  */
+  .print {
+    .hidden-print {
+      display: none;
+    }
+  }
+  // End Print
+
+  /*
+    Begin Tabs
+  */
+  .nav-tabs {
+    // Overrides for nav.less
+    background-color: @ol-blue-gray-0;
+    border: 0!important;
+    margin-bottom: @margin-md;
+    margin-top: -@line-height-computed; //- adjusted for portal-name
+    padding: @padding-lg 0 @padding-md;
+    text-align: center;
+
+    a {
+      color: @link-color;
+      &:hover {
+        background-color: transparent!important;
+        border: 0!important;
+        color: @link-hover-color!important;
+      }
+    }
+
+    li {
+      display: inline-block;
+      float: none;
+      a {
+        border: 0;
+      }
+    }
+
+    li.active > a {
+      background-color: transparent!important;
+      border: 0;
+      border-bottom: 1px solid @accent-color-secondary!important;
+      color: @accent-color-secondary;
+      &:hover {
+        color: @accent-color-secondary!important;
+      }
+    }
+  }
+
+  .tab-content:extend(.container) {
+    background-color: transparent!important;
+    border: none!important;
+  }
+  // End Tabs
+
+  @media (max-width: @screen-size-sm-max) {
+    .content-pull {
+      padding: 0;
+      width: auto;
+    }
+
+    .button-pull {
+      > a.btn {
+        width: auto;
+      }
+    }
+  }
+}
