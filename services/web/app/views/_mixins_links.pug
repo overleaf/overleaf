@@ -1,0 +1,75 @@
+mixin linkAdvisors(linkText, linkClass, tracked)
+	//- To Do: verify path
+	//- To Do: track
+	a(href="/advisors" 
+		class=linkClass ? linkClass : ''
+		eventTrackingGa=track ? 'advisors' : null
+	)
+		| #{linkText ? linkText : 'advisor programme'}
+
+mixin linkBenefits(linkText, linkClass)
+	//- To Do: verify path
+	a(href="/benefits" class=linkClass ? linkClass : '')
+		| #{linkText ? linkText : 'benefits'}
+		
+mixin linkBlog(linkText, linkClass, slug)
+	if slug
+		a(href="/blog/#{slug}" class=linkClass ? linkClass : '')
+			| #{linkText ? linkText : 'blog'}
+
+mixin linkContact(linkText, linkClass)
+	a(href="/contact" class=linkClass ? linkClass : '')
+		| #{linkText ? linkText : 'contact'}
+
+mixin linkEducation(linkText, linkClass)
+	//- To Do: verify path
+	a(href="/plans" class=linkClass ? linkClass : '')
+		| #{linkText ? linkText : 'teaching toolkit'}
+
+mixin linkEmail(linkText, linkClass, email)
+	//- To Do: env var?
+	- var emailDomain = 'overleaf.com'
+	a(href="mailto:#{email ? email : 'contact'}@#{emailDomain}" class=linkClass ? linkClass : '')
+		| #{linkText ? linkText : 'email'}
+
+mixin linkInvite(linkText, linkClass)
+	a(href="/user/bonus" class=linkClass ? linkClass : '')
+		| #{linkText ? linkText : 'invite your friends'}
+
+mixin linkPlansAndPricing(linkText, linkClass)
+	//- To Do: verify path
+	a(href="/plans" class=linkClass ? linkClass : '')
+		| #{linkText ? linkText : 'plans and pricing'}
+
+mixin linkPrintNewTab(linkText, linkClass, icon, track)
+	//- To Do: track
+	a(href='?media=print'
+		class=linkClass ? linkClass : ''
+		eventTrackingGa=track ? 'print' : null
+		target="_BLANK"
+	)
+		if icon
+			i(class="fa fa-print")
+			| &nbsp;
+		| #{linkText ? linkText : 'print'}
+
+mixin linkSignIn(linkText, linkClass)
+	a(href="/login" class=linkClass ? linkClass : '')
+		| #{linkText ? linkText : 'sign in'}
+
+mixin linkSignUp(linkText, linkClass)
+	a(href="/register" class=linkClass ? linkClass : '')
+		| #{linkText ? linkText : 'sign up'}
+
+mixin linkTweet(linkText, linkClass, tweetText, track)
+	//- twitter-share-button is required by twitter
+	//- To Do: track
+	a(class="twitter-share-button " + linkClass
+		href="https://twitter.com/intent/tweet?text=" + tweetText
+		target="_BLANK"
+	) #{linkText ? linkText : 'tweet'}
+
+mixin linkUniversities(linkText, linkClass)
+	//- To Do: verify path
+	a(href="/universities" class=linkClass ? linkClass : '')
+		| #{linkText ? linkText : 'universities'}
