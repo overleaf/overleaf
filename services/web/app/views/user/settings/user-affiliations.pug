@@ -11,9 +11,7 @@ form.row(
 					th.affiliations-table-email  #{translate("email")}
 					th.affiliations-table-institution  #{translate("institution_and_role")}
 					th.affiliations-table-inline-actions
-			tbody(
-				ng-if="!ui.hasError"
-			)
+			tbody
 				tr(
 					ng-repeat="userEmail in userEmails"
 				)
@@ -59,7 +57,7 @@ form.row(
 								.affiliation-change-actions.small
 									a(
 										href
-										ng-click="saveAffiliationChange();"
+										ng-click="saveAffiliationChange(userEmail);"
 									) #{translate("save_or_cancel-save")}
 									| &nbsp;#{translate("save_or_cancel-or" )}&nbsp;
 									a(
@@ -71,30 +69,26 @@ form.row(
 						// so create a wrapper for the tooltip
 						div.affiliations-table-inline-action-disabled-wrapper(
 							tooltip=translate("please_confirm_your_email_before_making_it_default")
-							ng-if="!userEmail.default && !userEmail.confirmedAt"
+							tooltip-enable="!ui.isMakingRequest"
+							ng-if="!userEmail.default && (!userEmail.confirmedAt || ui.isMakingRequest)"
 						)
 							button.btn.btn-sm.btn-success.affiliations-table-inline-action(
 								disabled
 							) #{translate("make_default")}
 						button.btn.btn-sm.btn-success.affiliations-table-inline-action(
-							ng-if="!userEmail.default && userEmail.confirmedAt"
+							ng-if="!userEmail.default && (userEmail.confirmedAt && !ui.isMakingRequest)"
 							ng-click="setDefaultUserEmail(userEmail)"
 						) #{translate("make_default")}
 						| &nbsp;
 						button.btn.btn-sm.btn-danger.affiliations-table-inline-action(
 							ng-if="!userEmail.default"
 							ng-click="removeUserEmail(userEmail)"
+							ng-disabled="ui.isMakingRequest"
 							tooltip=translate("remove")
 						)
 							i.fa.fa-fw.fa-trash
 				tr.affiliations-table-highlighted-row(
-					ng-if="ui.isLoadingEmails"
-				)
-					td.text-center(colspan="3") 
-						i.fa.fa-fw.fa-spin.fa-refresh
-						| &nbsp;#{translate("loading")}...
-				tr.affiliations-table-highlighted-row(
-					ng-if="!ui.showAddEmailUI && !ui.isLoadingEmails"
+					ng-if="!ui.showAddEmailUI && !ui.isMakingRequest"
 				)
 					td(colspan="3")
 						a(
@@ -103,7 +97,7 @@ form.row(
 						) #{translate("add_another_email")}
 
 				tr.affiliations-table-highlighted-row(
-					ng-if="ui.showAddEmailUI"
+					ng-if="ui.showAddEmailUI && !ui.isLoadingEmails"
 				)
 					td
 						.affiliations-form-group
@@ -149,31 +143,30 @@ form.row(
 						)
 					td
 						button.btn.btn-sm.btn-primary(
-							ng-disabled="affiliationsForm.$invalid || ui.isAddingNewEmail"
+							ng-disabled="affiliationsForm.$invalid || ui.isMakingRequest"
 							ng-click="addNewEmail()"
 						)
-							span(
-								ng-if="!ui.isAddingNewEmail"
-							) #{translate("add_new_email")}
-							span(
-								ng-if="ui.isAddingNewEmail"
-							)
-								i.fa.fa-fw.fa-spin.fa-refresh
-								| &nbsp;#{translate("adding")}...
-			tbody(
-				ng-if="ui.hasError"
-			)
+							| #{translate("add_new_email")}
+				tr.affiliations-table-highlighted-row(
+					ng-if="ui.isMakingRequest"
+				)
+					td.text-center(colspan="3", ng-if="ui.isLoadingEmails") 
+						i.fa.fa-fw.fa-spin.fa-refresh
+						| &nbsp;#{translate("loading")}...
+					td.text-center(colspan="3", ng-if="ui.isResendingConfirmation") 
+						i.fa.fa-fw.fa-spin.fa-refresh
+						| &nbsp;#{translate("sending")}...
+					td.text-center(colspan="3", ng-if="!ui.isLoadingEmails && !ui.isResendingConfirmation") 
+						i.fa.fa-fw.fa-spin.fa-refresh
+						| &nbsp;#{translate("saving")}...
 				tr.affiliations-table-error-row(
-					ng-if="true"
+					ng-if="ui.hasError"
 				)
 					td.text-center(colspan="3") 
 						div
 							i.fa.fa-fw.fa-exclamation-triangle 
-							| &nbsp;#{translate("error_performing_request")}
-						div
-							button.btn.btn-xs(
-								ng-click="acknowledgeError();"
-							) #{translate("reload_emails_and_affiliations")}
+							span(ng-if="!ui.errorMessage") &nbsp;#{translate("error_performing_request")}
+							span(ng-if="ui.errorMessage") &nbsp;{{ui.errorMessage}}
 				
 		hr
 
