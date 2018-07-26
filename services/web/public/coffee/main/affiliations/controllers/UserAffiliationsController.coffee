@@ -55,25 +55,23 @@ define [
 			$scope.affiliationToChange.role = userEmail.affiliation.role
 			$scope.affiliationToChange.department = userEmail.affiliation.department
 
-		$scope.saveAffiliationChange = () ->
-			$scope.ui.isLoadingEmails = true
-			UserAffiliationsDataService
-				.addRoleAndDepartment(
-					$scope.affiliationToChange.email,
-					$scope.affiliationToChange.role,
-					$scope.affiliationToChange.department
-				)
+		$scope.saveAffiliationChange = (userEmail) ->
+			userEmail.affiliation.role = $scope.affiliationToChange.role
+			userEmail.affiliation.department = $scope.affiliationToChange.department
+			_resetAffiliationToChange()
+			_monitorRequest(
+				UserAffiliationsDataService
+					.addRoleAndDepartment(
+						userEmail.email,
+						userEmail.affiliation.role,
+						userEmail.affiliation.department
+					)
+			)
 				.then () ->
-					_reset()
-					_getUserEmails()
-				.catch () ->
-					$scope.ui.hasError = true
+					setTimeout () -> _getUserEmails()
 
 		$scope.cancelAffiliationChange = (email) ->
-			$scope.affiliationToChange.email = ""
-			$scope.affiliationToChange.university = null
-			$scope.affiliationToChange.role = null
-			$scope.affiliationToChange.department = null
+			_resetAffiliationToChange()
 		
 		$scope.isChangingAffiliation = (email) ->
 			$scope.affiliationToChange.email == email
@@ -82,7 +80,6 @@ define [
 			$scope.ui.showAddEmailUI = true
 
 		$scope.addNewEmail = () ->
-			$scope.ui.isAddingNewEmail = true
 			if !$scope.newAffiliation.university?
 				addEmailPromise = UserAffiliationsDataService
 					.addUserEmail $scope.newAffiliation.email
@@ -104,75 +101,104 @@ define [
 							$scope.newAffiliation.role,
 							$scope.newAffiliation.department
 						)
-			addEmailPromise
-				.then () -> 
-					_reset()
-					_getUserEmails()
-				.catch () ->
-					$scope.ui.hasError = true
+
+			$scope.ui.isAddingNewEmail = true
+			$scope.ui.showAddEmailUI = false
+			_monitorRequest(addEmailPromise)
+				.then () ->
+					_resetNewAffiliation()
+					_resetAddingEmail()
+					setTimeout () -> _getUserEmails()
+				.finally () ->
+					$scope.ui.isAddingNewEmail = false
 
 		$scope.setDefaultUserEmail = (userEmail) ->
-			$scope.ui.isLoadingEmails = true
-			UserAffiliationsDataService
-				.setDefaultUserEmail userEmail.email
-				.then () -> _getUserEmails()
-				.catch () -> $scope.ui.hasError = true
+			_monitorRequest(
+				UserAffiliationsDataService
+					.setDefaultUserEmail userEmail.email
+			)
+				.then () ->
+					for email in $scope.userEmails or []
+						email.default = false
+					userEmail.default = true
 
 		$scope.removeUserEmail = (userEmail) ->
-			$scope.ui.isLoadingEmails = true
-			userEmailIdx = _.indexOf $scope.userEmails, userEmail
-			if userEmailIdx > -1
-				$scope.userEmails.splice userEmailIdx, 1
-			UserAffiliationsDataService
-				.removeUserEmail userEmail.email
-				.then () -> _getUserEmails()
-				.catch () -> $scope.ui.hasError = true
+			$scope.userEmails = $scope.userEmails.filter (ue) -> ue != userEmail
+			_monitorRequest(
+				UserAffiliationsDataService
+					.removeUserEmail userEmail.email
+			)
 
 		$scope.resendConfirmationEmail = (userEmail) ->
-			$scope.ui.isLoadingEmails = true
-			UserAffiliationsDataService
-				.resendConfirmationEmail userEmail.email
-				.then () -> _getUserEmails()
-				.catch () -> $scope.ui.hasError = true
+			$scope.ui.isResendingConfirmation = true
+			_monitorRequest(
+				UserAffiliationsDataService
+					.resendConfirmationEmail userEmail.email
+			)
+				.finally () ->
+					$scope.ui.isResendingConfirmation = false
 
 		$scope.acknowledgeError = () ->
 			_reset()
 			_getUserEmails()
 
-		_reset = () ->
+		_resetAffiliationToChange = () ->
+			$scope.affiliationToChange = 
+				email: ""
+				university: null
+				role: null
+				department: null
+
+		_resetNewAffiliation = () ->
 			$scope.newAffiliation =
 				email: ""
 				country: null
 				university: null
 				role: null
 				department: null
+
+		_resetAddingEmail = () ->
+			$scope.ui.showAddEmailUI = false
+			$scope.ui.isValidEmail = false
+			$scope.ui.isBlacklistedEmail = false
+			$scope.ui.showManualUniversitySelectionUI = false
+
+		_reset = () ->
 			$scope.ui = 
 				hasError: false
+				errorMessage: ""
 				showChangeAffiliationUI: false
-				showManualUniversitySelectionUI: false
+				isMakingRequest: false
 				isLoadingEmails: false
 				isAddingNewEmail: false
-				showAddEmailUI: false
-				isValidEmail: false
-				isBlacklistedEmail: false
-			$scope.affiliationToChange = 
-				email: ""
-				university: null
-				role: null
-				department: null
+				isResendingConfirmation: false
+			_resetAffiliationToChange()
+			_resetNewAffiliation()
+			_resetAddingEmail()
 		_reset()
+
+		_monitorRequest = (promise) ->
+			$scope.ui.hasError = false
+			$scope.ui.isMakingRequest = true
+			promise
+				.catch (response) ->
+					$scope.ui.hasError = true
+					$scope.ui.errorMessage = response?.data?.message
+				.finally () ->
+					$scope.ui.isMakingRequest = false
+			return promise
 
 		# Populates the emails table
 		_getUserEmails = () ->
 			$scope.ui.isLoadingEmails = true
-			UserAffiliationsDataService
-				.getUserEmails() 
+			_monitorRequest(
+				UserAffiliationsDataService
+					.getUserEmails()
+			)
 				.then (emails) -> 
 					$scope.userEmails = emails
+				.finally () ->
 					$scope.ui.isLoadingEmails = false
-				.catch () ->
-					$scope.ui.hasError = true
-
 		_getUserEmails()
 
 	]

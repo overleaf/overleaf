@@ -302,3 +302,181 @@ describe "UserEmails", ->
 						expect(tokens.length).to.equal 0
 						cb()
 			], done
+
+	describe 'setting a default email', ->
+		it 'should update confirmed emails for users not in v1', (done) ->
+			token = null
+			async.series [
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails',
+						json:
+							email: 'new-confirmed-default@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 204
+						cb()
+				(cb) =>
+					# Mark the email as confirmed
+					db.users.update {
+						'emails.email': 'new-confirmed-default@example.com'
+					}, { 
+						$set: {
+							'emails.$.confirmedAt': new Date()
+						}
+					}, cb
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails/default',
+						json:
+							email: 'new-confirmed-default@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 200
+						cb()
+				(cb) =>
+					@user.request { url: '/user/emails', json: true }, (error, response, body) ->
+						expect(response.statusCode).to.equal 200
+						expect(body[0].confirmedAt).to.not.exist
+						expect(body[0].default).to.equal false
+						expect(body[1].confirmedAt).to.exist
+						expect(body[1].default).to.equal true
+						cb()
+			], done
+
+		it 'should not allow changing unconfirmed emails in v1', (done) ->
+			token = null
+			async.series [
+				(cb) =>
+					db.users.update {
+						_id: ObjectId(@user._id)
+					}, {
+						$set: {
+							'overleaf.id': 42
+						}
+					}, cb
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails',
+						json:
+							email: 'new-unconfirmed-default@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 204
+						cb()
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails/default',
+						json:
+							email: 'new-unconfirmed-default@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 409
+						cb()
+				(cb) =>
+					@user.request { url: '/user/emails', json: true }, (error, response, body) ->
+						expect(body[0].default).to.equal true
+						expect(body[1].default).to.equal false
+						cb()
+			], done
+
+		it 'should update the email in v1 if confirmed', (done) ->
+			token = null
+			async.series [
+				(cb) =>
+					db.users.update {
+						_id: ObjectId(@user._id)
+					}, {
+						$set: {
+							'overleaf.id': 42
+						}
+					}, cb
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails',
+						json:
+							email: 'new-confirmed-default-in-v1@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 204
+						cb()
+				(cb) =>
+					# Mark the email as confirmed
+					db.users.update {
+						'emails.email': 'new-confirmed-default-in-v1@example.com'
+					}, { 
+						$set: {
+							'emails.$.confirmedAt': new Date()
+						}
+					}, cb
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails/default',
+						json:
+							email: 'new-confirmed-default-in-v1@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 200
+						cb()
+			], (error) =>
+				return done(error) if error?
+				expect(
+					MockV1Api.updateEmail.calledWith(42, 'new-confirmed-default-in-v1@example.com')
+				).to.equal true
+				done()
+
+		it 'should return an error if the email exists in v1', (done) ->
+			MockV1Api.existingEmails.push 'exists-in-v1@example.com'
+			async.series [
+				(cb) =>
+					db.users.update {
+						_id: ObjectId(@user._id)
+					}, {
+						$set: {
+							'overleaf.id': 42
+						}
+					}, cb
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails',
+						json:
+							email: 'exists-in-v1@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 204
+						cb()
+				(cb) =>
+					# Mark the email as confirmed
+					db.users.update {
+						'emails.email': 'exists-in-v1@example.com'
+					}, { 
+						$set: {
+							'emails.$.confirmedAt': new Date()
+						}
+					}, cb
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails/default',
+						json:
+							email: 'exists-in-v1@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 409
+						expect(body).to.deep.equal {
+							message: "This email is already registered"
+						}
+						cb()
+				(cb) =>
+					@user.request { url: '/user/emails', json: true }, (error, response, body) ->
+						expect(body[0].default).to.equal true
+						expect(body[1].default).to.equal false
+						cb()
+			], done

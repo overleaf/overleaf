@@ -4,6 +4,7 @@ logger = require('logger-sharelatex')
 db = mongojs.db
 ObjectId = mongojs.ObjectId
 { getAffiliations } = require("./UserAffiliationsManager")
+Errors = require("../Errors/Errors")
 
 module.exports = UserGetter =
 	getUser: (query, projection, callback = (error, user) ->) ->
@@ -77,7 +78,7 @@ module.exports = UserGetter =
 	# check for duplicate email address. This is also enforced at the DB level
 	ensureUniqueEmailAddress: (newEmail, callback) ->
 		@getUserByAnyEmail newEmail, (error, user) ->
-			return callback(message: 'alread_exists') if user?
+			return callback(new Errors.EmailExistsError('alread_exists')) if user?
 			callback(error)
 
 decorateFullEmails = (defaultEmail, emailsData, affiliationsData) ->

@@ -13,6 +13,7 @@ UserSessionsManager = require("./UserSessionsManager")
 UserUpdater = require("./UserUpdater")
 SudoModeHandler = require('../SudoMode/SudoModeHandler')
 settings = require "settings-sharelatex"
+Errors = require "../Errors/Errors"
 
 module.exports = UserController =
 
@@ -100,7 +101,7 @@ module.exports = UserController =
 					UserUpdater.changeEmailAddress user_id, newEmail, (err)->
 						if err?
 							logger.err err:err, user_id:user_id, newEmail:newEmail, "problem updaing users email address"
-							if err.message == "alread_exists"
+							if err instanceof Errors.EmailExistsError
 								message = req.i18n.translate("email_already_registered")
 							else
 								message = req.i18n.translate("problem_changing_email_address")
