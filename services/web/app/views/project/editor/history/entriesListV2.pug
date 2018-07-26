@@ -129,6 +129,12 @@ script(type="text/ng-template", id="historyEntryTpl")
 		time.history-entry-day(ng-if="::$ctrl.entry.meta.first_in_day") {{ ::$ctrl.entry.meta.end_ts | relativeDate }}
 
 		.history-entry-details(ng-click="$ctrl.onSelect({ selectedEntry: $ctrl.entry })")
+			.history-entry-label(
+				ng-if="$ctrl.entry.labels.length > 0"
+				ng-repeat="label in ::$ctrl.entry.labels"
+			)
+				i.fa.fa-tag
+				| &nbsp;{{ label.comment }}
 			ol.history-entry-changes
 				li.history-entry-change(
 					ng-repeat="pathname in ::$ctrl.entry.pathnames"
