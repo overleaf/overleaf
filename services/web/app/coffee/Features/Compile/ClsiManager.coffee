@@ -117,7 +117,7 @@ module.exports = ClsiManager =
 			statusCodeSame = results.newBackend?.response?.statusCode == results.currentBackend?.response?.statusCode
 			currentCompileTime = results.currentBackend?.finishTime
 			newBackendCompileTime = results.newBackend?.finishTime
-			logger.log {statusCodeSame, timeDifference, currentCompileTime, newBackendCompileTime}, "both clsi requests returned"
+			logger.log {statusCodeSame, timeDifference, currentCompileTime, newBackendCompileTime, project_id}, "both clsi requests returned"
 
 
 
