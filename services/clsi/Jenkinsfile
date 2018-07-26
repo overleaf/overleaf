@@ -51,11 +51,11 @@ pipeline {
     stage('Package and publish build') {
       steps {
         
-        withCredentials([file(credentialsId: 'gcr.io_cr-test2', variable: 'DOCKER_REPO_KEY_PATH')]) {
-          sh 'docker login -u _json_key --password-stdin https://gcr.io/cr-test2 < ${DOCKER_REPO_KEY_PATH}'
+        withCredentials([file(credentialsId: 'gcr.io_overleaf-ops', variable: 'DOCKER_REPO_KEY_PATH')]) {
+          sh 'docker login -u _json_key --password-stdin https://gcr.io/overleaf-ops < ${DOCKER_REPO_KEY_PATH}'
         }
-        sh 'DOCKER_REPO=gcr.io/cr-test2 make publish'
-        sh 'docker logout https://gcr.io/cr-test2'
+        sh 'DOCKER_REPO=gcr.io/overleaf-ops make publish'
+        sh 'docker logout https://gcr.io/overleaf-ops'
         
       }
     }
