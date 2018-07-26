@@ -34,7 +34,7 @@
 @daterangepicker-in-range-bg-color:          #ebf4f8;
 
 @daterangepicker-active-color:               #fff;
-@daterangepicker-active-bg-color:            #a93529;
+@daterangepicker-active-bg-color:            #4F9C45;
 @daterangepicker-active-border-color:        transparent;
 
 @daterangepicker-unselected-color:           #999;
@@ -393,13 +393,14 @@
 
   .daterangepicker_input {
     position: relative;
+    padding-left: 0;
 
     i {
       position: absolute;
 
       // NOTE: These appear to be eyeballed to me...
       left: 8px;
-      top: 8px;
+      top: 10px;
     }
   }
   &.rtl {
@@ -476,6 +477,19 @@
 /*  Larger Screen Styling */
 @media (min-width: 564px) {
   .daterangepicker {
+    .glyphicon {
+      font-family: FontAwesome;
+    }
+    .glyphicon-chevron-left:before{
+      content: "\f053";
+    }
+    .glyphicon-chevron-right:before{
+      content: "\f054";
+    }
+    .glyphicon-calendar:before{
+      content: "\f073";
+    }
+
     width: auto;
 
     .ranges {
