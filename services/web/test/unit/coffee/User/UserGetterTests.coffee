@@ -5,6 +5,7 @@ path = require('path')
 sinon = require('sinon')
 modulePath = path.join __dirname, "../../../../app/js/Features/User/UserGetter"
 expect = require("chai").expect
+Errors = require "../../../../app/js/Features/Errors/Errors"
 
 describe "UserGetter", ->
 
@@ -21,15 +22,16 @@ describe "UserGetter", ->
 			db: users: findOne: @findOne
 			ObjectId: (id) -> return id
 		settings = apis: { v1: { url: 'v1.url', user: '', pass: '' } }
-		@getAffiliations = sinon.stub().callsArgWith(1, null, [])
+		@getUserAffiliations = sinon.stub().callsArgWith(1, null, [])
 
 		@UserGetter = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": log:->
 			"../../infrastructure/mongojs": @Mongo
 			"metrics-sharelatex": timeAsyncMethod: sinon.stub()
 			'settings-sharelatex': settings
-			'./UserAffiliationsManager':
-				getAffiliations: @getAffiliations
+			'../Institutions/InstitutionsAPI':
+				getUserAffiliations: @getUserAffiliations
+			"../Errors/Errors": Errors
 
 	describe "getUser", ->
 		it "should get user", (done)->
@@ -75,7 +77,7 @@ describe "UserGetter", ->
 					institution: { name: 'University Name', isUniversity: true }
 				}
 			]
-			@getAffiliations.callsArgWith(1, null, affiliationsData)
+			@getUserAffiliations.callsArgWith(1, null, affiliationsData)
 			@UserGetter.getUserFullEmails @fakeUser._id, (error, fullEmails) =>
 				assert.deepEqual fullEmails, [
 					{
@@ -150,6 +152,7 @@ describe "UserGetter", ->
 			@UserGetter.getUserByAnyEmail.callsArgWith(1, null, @fakeUser)
 			@UserGetter.ensureUniqueEmailAddress @newEmail, (err)=>
 				should.exist(err)
+				expect(err).to.be.an.instanceof(Errors.EmailExistsError)
 				err.message.should.equal 'alread_exists'
 				done()
 

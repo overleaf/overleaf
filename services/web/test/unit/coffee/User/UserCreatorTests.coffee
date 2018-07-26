@@ -22,7 +22,7 @@ describe "UserCreator", ->
 			"../../models/User": User:@UserModel
 			"logger-sharelatex":{log:->}
 			'metrics-sharelatex': {timeAsyncMethod: ()->}
-			"./UserAffiliationsManager": addAffiliation: @addAffiliation
+			"../Institutions/InstitutionsAPI": addAffiliation: @addAffiliation
 
 		@email = "bob.oswald@gmail.com"
 

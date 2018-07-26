@@ -9,6 +9,7 @@ MockResponse = require "../helpers/MockResponse"
 MockRequest = require "../helpers/MockRequest"
 ObjectId = require("mongojs").ObjectId
 assert = require("assert")
+Errors = require "../../../../app/js/Features/Errors/Errors"
 
 describe "UserController", ->
 	beforeEach ->
@@ -81,6 +82,7 @@ describe "UserController", ->
 				log:->
 				err:->
 			"metrics-sharelatex": inc:->
+			"../Errors/Errors": Errors
 
 		@res =
 			send: sinon.stub()
