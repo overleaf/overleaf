@@ -3,7 +3,7 @@ UserGetter = require("./UserGetter")
 UserUpdater = require("./UserUpdater")
 EmailHelper = require("../Helpers/EmailHelper")
 UserEmailsConfirmationHandler = require "./UserEmailsConfirmationHandler"
-{ endorseAffiliation } = require("./UserAffiliationsManager")
+{ endorseAffiliation } = require("../Institutions/InstitutionsAPI")
 logger = require("logger-sharelatex")
 Errors = require "../Errors/Errors"
 

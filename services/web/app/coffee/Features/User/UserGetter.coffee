@@ -3,7 +3,7 @@ metrics = require('metrics-sharelatex')
 logger = require('logger-sharelatex')
 db = mongojs.db
 ObjectId = mongojs.ObjectId
-{ getAffiliations } = require("./UserAffiliationsManager")
+{ getUserAffiliations } = require("../Institutions/InstitutionsAPI")
 Errors = require("../Errors/Errors")
 
 module.exports = UserGetter =
@@ -32,7 +32,7 @@ module.exports = UserGetter =
 			return callback error if error?
 			return callback new Error('User not Found') unless user
 
-			getAffiliations userId, (error, affiliationsData) ->
+			getUserAffiliations userId, (error, affiliationsData) ->
 				return callback error if error?
 				callback null, decorateFullEmails(user.email, user.emails, affiliationsData)
 

@@ -31,7 +31,7 @@ describe "UserDeleter", ->
 			"../Newsletter/NewsletterManager":  @NewsletterManager
 			"../Subscription/SubscriptionHandler": @SubscriptionHandler
 			"../Project/ProjectDeleter": @ProjectDeleter
-			"./UserAffiliationsManager":
+			"../Institutions/InstitutionsAPI":
 				deleteAffiliations: @deleteAffiliations
 			"logger-sharelatex": @logger = { log: sinon.stub() }
 
