@@ -162,7 +162,7 @@ define [
 			cursorPosition = @editor.getCursorPosition()
 			end = change.end
 			{lineUpToCursor, commandFragment} = Helpers.getContext(@editor, end)
-			if lineUpToCursor.match(/.*%.*/)
+			if lineUpToCursor.match(/.*((?![\\]).|^)%.*/)
 				return
 			lastCharIsBackslash = lineUpToCursor.slice(-1) == "\\"
 			lastTwoChars = lineUpToCursor.slice(-2)
