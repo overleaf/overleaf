@@ -15,6 +15,7 @@ sequelize = new Sequelize(
 )
 
 if Settings.mysql.clsi.dialect == "sqlite"
+	logger.log "running PRAGMA journal_mode=WAL;"
 	sequelize.query("PRAGMA journal_mode=WAL;")
 
 module.exports =
