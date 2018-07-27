@@ -63,6 +63,8 @@ describe 'ExportsHandler', ->
 		beforeEach (done) ->
 			@project =
 				id: @project_id
+				compiler: 'pdflatex'
+				imageName: 'mock-image-name'
 				overleaf:
 					id: @project_history_id # for projects imported from v1
 					history:
@@ -100,6 +102,9 @@ describe 'ExportsHandler', ->
 						historyId: @project_history_id
 						historyVersion: @historyVersion
 						v1ProjectId: @project_history_id
+						metadata:
+							compiler: 'pdflatex'
+							imageName: 'mock-image-name'
 					user:
 						id: @user_id
 						firstName: @user.first_name
@@ -132,6 +137,9 @@ describe 'ExportsHandler', ->
 						historyId: @project_history_id
 						historyVersion: @historyVersion
 						v1ProjectId: @project_history_id
+						metadata:
+							compiler: 'pdflatex'
+							imageName: 'mock-image-name'
 					user:
 						id: @user_id
 						firstName: @custom_first_name
