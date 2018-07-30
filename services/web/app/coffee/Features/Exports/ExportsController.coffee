@@ -37,3 +37,10 @@ module.exports =
 				status_detail: parsed_export.status_detail
 			}
 			res.send export_json: json
+
+	exportZip: (req, res) ->
+		{export_id} = req.params
+		ExportsHandler.fetchZip export_id, (err, export_zip_url) ->
+			return err if err?
+
+			res.redirect export_zip_url

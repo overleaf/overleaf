@@ -115,3 +115,19 @@ module.exports = ExportsHandler = self =
 				err = new Error("v1 export returned a failure status code: #{res.statusCode}")
 				logger.err err:err, export:export_id, "v1 export returned failure status code: #{res.statusCode}"
 				callback err
+
+	fetchZip: (export_id, callback=(err, zip_url) ->) ->
+		console.log("#{settings.apis.v1.url}/api/v1/sharelatex/exports/#{export_id}/zip_url")
+		request.get {
+			url: "#{settings.apis.v1.url}/api/v1/sharelatex/exports/#{export_id}/zip_url"
+			auth: {user: settings.apis.v1.user, pass: settings.apis.v1.pass }
+		}, (err, res, body) ->
+			if err?
+				logger.err err:err, export:export_id, "error making request to v1 export"
+				callback err
+			else if 200 <= res.statusCode < 300
+				callback null, body
+			else
+				err = new Error("v1 export returned a failure status code: #{res.statusCode}")
+				logger.err err:err, export:export_id, "v1 export zip fetch returned failure status code: #{res.statusCode}"
+				callback err
