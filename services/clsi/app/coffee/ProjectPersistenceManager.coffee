@@ -11,6 +11,7 @@ module.exports = ProjectPersistenceManager =
 	EXPIRY_TIMEOUT: Settings.project_cache_length_ms || oneDay * 2.5
 
 	markProjectAsJustAccessed: (project_id, callback = (error) ->) ->
+		console.log("markProjectAsJustAccessed")
 		db.Project.findOrCreate(where: {project_id: project_id})
 			.spread(
 				(project, created) ->
@@ -53,11 +54,13 @@ module.exports = ProjectPersistenceManager =
 				callback()
 
 	_clearProjectFromDatabase: (project_id, callback = (error) ->) ->
+		console.log("_clearProjectFromDatabase")
 		db.Project.destroy(where: {project_id: project_id})
 			.then(() -> callback())
 			.error callback
 
 	_findExpiredProjectIds: (callback = (error, project_ids) ->) ->
+		console.log("_findExpiredProjectIds")
 		db.Project.findAll(where: ["lastAccessed < ?", new Date(Date.now() - ProjectPersistenceManager.EXPIRY_TIMEOUT)])
 			.then((projects) ->
 				callback null, projects.map((project) -> project.project_id)
