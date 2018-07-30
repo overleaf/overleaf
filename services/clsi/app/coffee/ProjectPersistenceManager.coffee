@@ -68,11 +68,15 @@ module.exports = ProjectPersistenceManager =
 
 	_findExpiredProjectIds: (callback = (error, project_ids) ->) ->
 		job = (cb)->
-			console.log("_findExpiredProjectIds")
-			db.Project.findAll(where: ["lastAccessed < ?", new Date(Date.now() - ProjectPersistenceManager.EXPIRY_TIMEOUT)])
+			keepProjectsFrom = new Date(Date.now() - ProjectPersistenceManager.EXPIRY_TIMEOUT)
+			console.log("_findExpiredProjectIds", keepProjectsFrom)
+			q = {}
+			q[db.op.gt] = keepProjectsFrom
+			db.Project.findAll(where:{lastAccessed:q})
 				.then((projects) ->
 					cb null, projects.map((project) -> project.project_id)
 				).error cb
+
 		dbQueue.queue.push(job, callback)
 
 

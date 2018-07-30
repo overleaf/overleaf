@@ -41,6 +41,8 @@ module.exports =
 		]
 	})
 
+	op: Sequelize.Op
+	
 	sync: () -> 
 		logger.log dbPath:Settings.mysql.clsi.storage, "syncing db schema"
 		sequelize.sync()
