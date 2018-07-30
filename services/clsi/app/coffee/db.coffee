@@ -42,4 +42,10 @@ module.exports =
 	sync: () -> 
 		logger.log dbPath:Settings.mysql.clsi.storage, "syncing db schema"
 		sequelize.sync()
+			.then(-> 
+				logger.log "db sync complete"
+			).catch((err)->
+				console.log err, "error syncing"
+			)
+
 	

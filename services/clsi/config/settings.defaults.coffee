@@ -7,12 +7,11 @@ module.exports =
 		clsi:
 			database: "clsi"
 			username: "clsi"
-			password: null
 			dialect: "sqlite"
 			storage: process.env["SQLITE_PATH"] or Path.resolve(__dirname + "/../db.sqlite")
 			pool:
 				max: 1
-				min: 0
+				min: 1
 			retry:
 				max: 10
 
