@@ -1,6 +1,7 @@
 UrlCache = require "./UrlCache"
 CompileManager = require "./CompileManager"
 db = require "./db"
+dbQueue = require "./DbQueue"
 async = require "async"
 logger = require "logger-sharelatex"
 oneDay = 24 * 60 * 60 * 1000
@@ -11,15 +12,18 @@ module.exports = ProjectPersistenceManager =
 	EXPIRY_TIMEOUT: Settings.project_cache_length_ms || oneDay * 2.5
 
 	markProjectAsJustAccessed: (project_id, callback = (error) ->) ->
-		console.log("markProjectAsJustAccessed")
-		db.Project.findOrCreate(where: {project_id: project_id})
-			.spread(
-				(project, created) ->
-					project.updateAttributes(lastAccessed: new Date())
-						.then(() -> callback())
-						.error callback
-			)
-			.error callback
+		job = (cb)->
+			console.log("markProjectAsJustAccessed")
+			db.Project.findOrCreate(where: {project_id: project_id})
+				.spread(
+					(project, created) ->
+						project.updateAttributes(lastAccessed: new Date())
+							.then(() -> cb())
+							.error cb
+				)
+				.error cb
+		dbQueue.queue.push(job, callback)
+
 
 	clearExpiredProjects: (callback = (error) ->) ->
 		ProjectPersistenceManager._findExpiredProjectIds (error, project_ids) ->
@@ -54,16 +58,22 @@ module.exports = ProjectPersistenceManager =
 				callback()
 
 	_clearProjectFromDatabase: (project_id, callback = (error) ->) ->
-		console.log("_clearProjectFromDatabase")
-		db.Project.destroy(where: {project_id: project_id})
-			.then(() -> callback())
-			.error callback
+		job = (cb)->
+			console.log("_clearProjectFromDatabase")
+			db.Project.destroy(where: {project_id: project_id})
+				.then(() -> callback())
+				.error callback
+		dbQueue.queue.push(job, callback)
+
 
 	_findExpiredProjectIds: (callback = (error, project_ids) ->) ->
-		console.log("_findExpiredProjectIds")
-		db.Project.findAll(where: ["lastAccessed < ?", new Date(Date.now() - ProjectPersistenceManager.EXPIRY_TIMEOUT)])
-			.then((projects) ->
-				callback null, projects.map((project) -> project.project_id)
-			).error callback
+		job = (cb)->
+			console.log("_findExpiredProjectIds")
+			db.Project.findAll(where: ["lastAccessed < ?", new Date(Date.now() - ProjectPersistenceManager.EXPIRY_TIMEOUT)])
+				.then((projects) ->
+					callback null, projects.map((project) -> project.project_id)
+				).error callback
+		dbQueue.queue.push(job, callback)
+
 
 logger.log {EXPIRY_TIMEOUT: ProjectPersistenceManager.EXPIRY_TIMEOUT}, "project assets kept timeout"

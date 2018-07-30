@@ -1,19 +1,11 @@
 db = require("./db")
+dbQueue = require "./DbQueue"
 UrlFetcher = require("./UrlFetcher")
 Settings = require("settings-sharelatex")
 crypto = require("crypto")
 fs = require("fs")
 logger = require "logger-sharelatex"
 async = require "async"
-
-queue = async.queue((task, cb)->
-	console.log("running task")
-	task(cb)
-, 1)
-
-console.log("hi there queue")
-queue.drain = ()->
-    console.log('HI all items have been processed')
 
 module.exports = UrlCache =
 	downloadUrlToFile: (project_id, url, destPath, lastModified, callback = (error) ->) ->
@@ -108,7 +100,7 @@ module.exports = UrlCache =
 			db.UrlCache.find(where: { url: url, project_id: project_id })
 				.then((urlDetails) -> cb null, urlDetails)
 				.error cb
-		queue.push job, callback
+		dbQueue.queue.push job, callback
 
 	_updateOrCreateUrlDetails: (project_id, url, lastModified, callback = (error) ->) ->
 		job = (cb)->
@@ -121,7 +113,7 @@ module.exports = UrlCache =
 							.error(cb)
 				)
 				.error cb
-		queue.push(job, callback)
+		dbQueue.queue.push(job, callback)
 
 	_clearUrlDetails: (project_id, url, callback = (error) ->) ->
 		job = (cb)->
@@ -129,7 +121,7 @@ module.exports = UrlCache =
 			db.UrlCache.destroy(where: {url: url, project_id: project_id})
 				.then(() -> cb null)
 				.error cb
-		queue.push(job, callback)
+		dbQueue.queue.push(job, callback)
 
 
 	_findAllUrlsInProject: (project_id, callback = (error, urls) ->) ->
@@ -141,7 +133,7 @@ module.exports = UrlCache =
 						cb null, urlEntries.map((entry) -> entry.url)
 				)
 				.error cb
-		queue.push(job, callback)
+		dbQueue.queue.push(job, callback)
 
 		
 		
