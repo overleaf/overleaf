@@ -10,6 +10,11 @@ module.exports =
 			password: null
 			dialect: "sqlite"
 			storage: process.env["SQLITE_PATH"] or Path.resolve(__dirname + "/../db.sqlite")
+			pool:
+				max: 1
+				min: 0
+			retry:
+				max: 10
 
 	path:
 		compilesDir:  Path.resolve(__dirname + "/../compiles")
