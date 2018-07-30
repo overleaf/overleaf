@@ -121,11 +121,9 @@ module.exports = ResourceWriter =
 						callback() #try and continue compiling even if http resource can not be downloaded at this time
 				else
 					process = require("process")
-					console.log "writing file out", path, process.getuid()
 					fs.writeFile path, resource.content, callback
 					try 
 						result = fs.lstatSync(path)
-						console.log "path stats", result
 					catch e
 
 	checkPath: (basePath, resourcePath, callback) ->

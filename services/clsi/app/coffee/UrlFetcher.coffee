@@ -36,7 +36,6 @@ module.exports = UrlFetcher =
 			logger.log url:url, filePath: filePath, "finished downloading file into cache"
 
 		urlStream.on "response", (res) ->
-			console.log
 			if res.statusCode >= 200 and res.statusCode < 300
 				fileStream = fs.createWriteStream(filePath)
 

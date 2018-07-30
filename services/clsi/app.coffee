@@ -133,7 +133,6 @@ resCacher =
 if Settings.smokeTest
 	do runSmokeTest = ->
 		logger.log("running smoke tests")
-		console.log(__dirname, __filename)
 		smokeTest.run(require.resolve(__dirname + "/test/smoke/js/SmokeTests.js"))({}, resCacher)
 		setTimeout(runSmokeTest, 30 * 1000)
 
