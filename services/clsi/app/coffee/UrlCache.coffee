@@ -94,11 +94,13 @@ module.exports = UrlCache =
 				return callback()
 
 	_findUrlDetails: (project_id, url, callback = (error, urlDetails) ->) ->
+		console.log("_findUrlDetails")
 		db.UrlCache.find(where: { url: url, project_id: project_id })
 			.then((urlDetails) -> callback null, urlDetails)
 			.error callback
 
 	_updateOrCreateUrlDetails: (project_id, url, lastModified, callback = (error) ->) ->
+		console.log("_updateOrCreateUrlDetails")
 		db.UrlCache.findOrCreate(where: {url: url, project_id: project_id})
 			.spread(
 				(urlDetails, created) ->
@@ -109,11 +111,13 @@ module.exports = UrlCache =
 			.error callback
 
 	_clearUrlDetails: (project_id, url, callback = (error) ->) ->
+		console.log("_clearUrlDetails")
 		db.UrlCache.destroy(where: {url: url, project_id: project_id})
 			.then(() -> callback null)
 			.error callback
 
 	_findAllUrlsInProject: (project_id, callback = (error, urls) ->) ->
+		console.log("_findAllUrlsInProject")
 		db.UrlCache.findAll(where: { project_id: project_id })
 			.then(
 				(urlEntries) ->
