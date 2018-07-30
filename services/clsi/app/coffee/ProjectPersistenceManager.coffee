@@ -61,8 +61,8 @@ module.exports = ProjectPersistenceManager =
 		job = (cb)->
 			console.log("_clearProjectFromDatabase")
 			db.Project.destroy(where: {project_id: project_id})
-				.then(() -> callback())
-				.error callback
+				.then(() -> cb())
+				.error cb
 		dbQueue.queue.push(job, callback)
 
 
@@ -71,8 +71,8 @@ module.exports = ProjectPersistenceManager =
 			console.log("_findExpiredProjectIds")
 			db.Project.findAll(where: ["lastAccessed < ?", new Date(Date.now() - ProjectPersistenceManager.EXPIRY_TIMEOUT)])
 				.then((projects) ->
-					callback null, projects.map((project) -> project.project_id)
-				).error callback
+					cb null, projects.map((project) -> project.project_id)
+				).error cb
 		dbQueue.queue.push(job, callback)
 
 
