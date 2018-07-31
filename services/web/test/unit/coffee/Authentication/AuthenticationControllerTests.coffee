@@ -15,7 +15,6 @@ describe "AuthenticationController", ->
 		tk.freeze(Date.now())
 		@AuthenticationController = SandboxedModule.require modulePath, requires:
 			"./AuthenticationManager": @AuthenticationManager = {}
-			"../User/UserGetter" : @UserGetter = {}
 			"../User/UserUpdater" : @UserUpdater = {}
 			"metrics-sharelatex": @Metrics = { inc: sinon.stub() }
 			"../Security/LoginRateLimiter": @LoginRateLimiter = { processLoginRequest:sinon.stub(), recordSuccessfulLogin:sinon.stub() }
@@ -29,6 +28,7 @@ describe "AuthenticationController", ->
 				trackSession: sinon.stub()
 				untrackSession: sinon.stub()
 				revokeAllUserSessions: sinon.stub().callsArgWith(1, null)
+			"../../infrastructure/Modules": {hooks: {fire: sinon.stub().callsArgWith(2, null, [])}}
 		@user =
 			_id: ObjectId()
 			email: @email = "USER@example.com"
