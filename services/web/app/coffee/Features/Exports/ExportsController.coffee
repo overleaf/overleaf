@@ -40,6 +40,7 @@ module.exports =
 
 	exportZip: (req, res) ->
 		{export_id} = req.params
+		AuthenticationController.getLoggedInUserId(req)
 		ExportsHandler.fetchZip export_id, (err, export_zip_url) ->
 			return err if err?
 
