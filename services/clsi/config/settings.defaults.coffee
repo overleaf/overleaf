@@ -36,6 +36,7 @@ module.exports =
 	smokeTest: process.env["SMOKE_TEST"] or false
 	project_cache_length_ms: 1000 * 60 * 60 * 24
 	parallelFileDownloads:1
+	parallelSqlQueryLimit:1
 	filestoreDomainOveride: process.env["FILESTORE_DOMAIN_OVERRIDE"]
 	texliveImageNameOveride: process.env["TEX_LIVE_IMAGE_NAME_OVERRIDE"]
 
