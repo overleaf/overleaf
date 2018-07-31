@@ -100,7 +100,7 @@ module.exports = ClsiManager =
 					timer = new Metrics.Timer("compile.currentBackend")
 					request opts, (err, response, body)->
 						timer.done()
-						metrics.inc "compile.currentBackend.response.#{response.statusCode}"
+						Metrics.inc "compile.currentBackend.response.#{response.statusCode}"
 						if err?
 							logger.err err:err, project_id:project_id, url:opts?.url, "error making request to clsi"
 							return callback(err)
@@ -112,7 +112,7 @@ module.exports = ClsiManager =
 			newBackend: (cb)-> 
 				startTime = new Date()
 				ClsiManager._makeNewBackendRequest project_id, opts, (err, response, body)->
-					metrics.inc "compile.newBackend.response.#{response.statusCode}"
+					Metrics.inc "compile.newBackend.response.#{response.statusCode}"
 					cb(err, {response:response, body:body, finishTime:new Date() - startTime})
 		}, (err, results)->
 			timeDifference = results.newBackend?.finishTime - results.currentBackend?.finishTime 
