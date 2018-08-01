@@ -8,6 +8,7 @@ define [
 	"ide/history/controllers/HistoryV2FileTreeController"
 	"ide/history/controllers/HistoryV2ToolbarController"
 	"ide/history/controllers/HistoryV2AddLabelModalController"
+	"ide/history/controllers/HistoryV2DeleteLabelModalController"
 	"ide/history/directives/infiniteScroll"
 	"ide/history/components/historyEntriesList"
 	"ide/history/components/historyEntry"
@@ -136,15 +137,9 @@ define [
 			@$scope.history.loading = true
 			@$scope.history.loadingFileTree = true
 			
-			requests =
-				updates: @ide.$http.get updatesURL
-
-			if !@$scope.history.labels?
-				requests.labels = @ide.$http.get "/project/#{@ide.project_id}/labels"
-
-			@ide.$q.all requests
-				.then (responses) =>
-					updatesData = responses.updates.data
+			@ide.$http.get updatesURL
+				.then (response) =>
+					updatesData = response.data
 					@_loadUpdates(updatesData.updates)
 					@$scope.history.nextBeforeTimestamp = updatesData.nextBeforeTimestamp
 					if !updatesData.nextBeforeTimestamp?
@@ -211,6 +206,24 @@ define [
 
 		labelCurrentVersion: (labelComment) => 
 			@_labelVersion labelComment, @$scope.history.selection.updates[0].toV
+
+		deleteLabel: (labelId) =>
+			url = "/project/#{@$scope.project_id}/labels/#{labelId}"
+
+			@ide.$http({
+				url,
+				method: "DELETE"
+				headers:
+					"X-CSRF-Token": window.csrfToken
+			}).then (response) =>
+				@_deleteLabelFromLocalCollection @$scope.history.updates, labelId
+				@_deleteLabelFromLocalCollection @$scope.history.selection, labelId
+
+
+		_deleteLabelFromLocalCollection: (collection, labelId) ->
+			for update in collection
+				update.labels = _.filter update.labels, (label) -> 
+					label.id != labelId
 
 		_parseDiff: (diff) ->
 			if diff.binary

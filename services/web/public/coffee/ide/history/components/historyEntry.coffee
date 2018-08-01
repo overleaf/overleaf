@@ -22,6 +22,7 @@ define [
 			entry: "<"
 			currentUser: "<"
 			onSelect: "&"
+			onLabelDelete: "&"
 		controller: historyEntryController
 		templateUrl: "historyEntryTpl"
 	}

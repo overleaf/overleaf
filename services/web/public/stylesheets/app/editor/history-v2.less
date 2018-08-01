@@ -56,12 +56,38 @@
 
 	.history-entry-label {
 		color: @history-entry-label-color;
-		font-weight: bold;
+		font-size: @font-size-small;
 		margin-bottom: 3px;
+		margin-right: 10px;
+		&:last-of-type {
+			margin-right: 0;
+		}
 		.history-entry-selected & {
-			color: #FFF;
+			color: @history-entry-selected-label-color;
 		}
 	}
+		.history-entry-label-comment,
+		.history-entry-label-delete-btn {
+			display: inline-block;
+			padding: 0 (@padding-xs-horizontal / 2) 1px @padding-xs-horizontal;
+			border: 0;
+			background-color: @history-entry-label-bg-color;
+			border-radius: 9999px 0 0 9999px;
+			.history-entry-selected & {
+				background-color: @history-entry-selected-label-bg-color;
+			}
+		}
+		.history-entry-label-delete-btn {
+			padding-left: (@padding-xs-horizontal / 2);
+			padding-right: @padding-xs-horizontal;
+			border-radius: 0 9999px 9999px 0;
+			&:hover {
+				background-color: darken(@history-entry-label-bg-color, 8%);
+				.history-entry-selected & {
+					background-color: darken(@history-entry-selected-label-bg-color, 8%);
+				}
+			}
+		}
 
 	.history-entry-changes {
 		.list-unstyled;

@@ -1,21 +1,15 @@
 define [
 	"base",
 ], (App) ->
-	App.controller "HistoryV2AddLabelModalController", ["$scope", "$modalInstance", "ide", "update", ($scope, $modalInstance, ide, update) ->
-		$scope.update = update
-		$scope.inputs = 
-			labelName: null
+	App.controller "HistoryV2DeleteLabelModalController", ["$scope", "$modalInstance", "ide", "labelDetails", ($scope, $modalInstance, ide, labelDetails) ->
+		$scope.labelDetails = labelDetails
 		$scope.state =
 			inflight: false
 			error: false
-			
-		$modalInstance.opened.then () ->
-			$scope.$applyAsync () ->
-				$scope.$broadcast "open"
 
-		$scope.addLabelModalFormSubmit = () ->
+		$scope.deleteLabel = () ->
 			$scope.state.inflight = true
-			ide.historyManager.labelCurrentVersion $scope.inputs.labelName
+			ide.historyManager.deleteLabel labelDetails.id
 				.then (response) ->
 					$scope.state.inflight = false
 					$modalInstance.close()

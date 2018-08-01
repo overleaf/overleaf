@@ -27,7 +27,7 @@ script(type="text/ng-template", id="historyV2AddLabelModalTemplate")
 		novalidate
 	)
 		.modal-header
-			h3 Label this version
+			h3 Add label
 		.modal-body
 			.alert.alert-danger(ng-show="state.error.message") {{ state.error.message}} 
 			.alert.alert-danger(ng-show="state.error && !state.error.message") #{translate("generic_something_went_wrong")}
@@ -39,6 +39,9 @@ script(type="text/ng-template", id="historyV2AddLabelModalTemplate")
 					focus-on="open"
 					required
 				)
+			p.help-block(ng-if="update")
+				| A new label will be added as of 
+				strong {{ update.meta.end_ts | formatDate:'ddd Do MMM YYYY, h:mm a' }}
 		.modal-footer
 			button.btn.btn-default(
 				type="button"
@@ -50,3 +53,25 @@ script(type="text/ng-template", id="historyV2AddLabelModalTemplate")
 				ng-value="state.inflight ? 'Adding label' : 'Add label'"
 				type="submit"
 			)
+
+script(type="text/ng-template", id="historyV2DeleteLabelModalTemplate")
+	.modal-header
+		h3 Delete label
+	.modal-body
+		.alert.alert-danger(ng-show="state.error.message") {{ state.error.message}} 
+		.alert.alert-danger(ng-show="state.error && !state.error.message") #{translate("generic_something_went_wrong")}
+		p.help-block(ng-if="labelDetails")
+			| Are you sure you want to delete the following label: 
+			strong "{{ labelDetails.comment }}"
+			| ?
+	.modal-footer
+		button.btn.btn-default(
+			type="button"
+			ng-disabled="state.inflight"
+			ng-click="$dismiss()"
+		) #{translate("cancel")}
+		button.btn.btn-primary(
+			type="button"
+			ng-click="deleteLabel()"
+			ng-disabled="state.inflight"
+		) {{ state.inflight ? 'Deleting label' : 'Delete label' }}

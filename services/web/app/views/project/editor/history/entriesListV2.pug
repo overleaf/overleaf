@@ -10,6 +10,7 @@ aside.change-list(
 		load-initialize="ui.view == 'history'"
 		is-loading="history.loading"
 		on-entry-select="handleEntrySelect(selectedEntry)"
+		on-label-delete="handleLabelDelete(label)"
 	)
 
 aside.change-list(
@@ -107,6 +108,7 @@ script(type="text/ng-template", id="historyEntriesListTpl")
 				entry="entry"
 				current-user="$ctrl.currentUser"
 				on-select="$ctrl.onEntrySelect({ selectedEntry: selectedEntry })"
+				on-label-delete="$ctrl.onLabelDelete({ label: label })"
 				ng-show="!$ctrl.isLoading"
 			)
 			.loading(ng-show="$ctrl.isLoading")
@@ -133,8 +135,14 @@ script(type="text/ng-template", id="historyEntryTpl")
 				ng-if="$ctrl.entry.labels.length > 0"
 				ng-repeat="label in ::$ctrl.entry.labels"
 			)
-				i.fa.fa-tag
-				| &nbsp;{{ label.comment }}
+				span.history-entry-label-comment
+					i.fa.fa-tag
+					| &nbsp;{{ label.comment }}
+				button.history-entry-label-delete-btn(
+					stop-propagation="click"
+					ng-click="$ctrl.onLabelDelete({ label: label })"
+				) &times;
+
 			ol.history-entry-changes
 				li.history-entry-change(
 					ng-repeat="pathname in ::$ctrl.entry.pathnames"

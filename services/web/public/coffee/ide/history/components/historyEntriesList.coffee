@@ -14,6 +14,7 @@ define [
 			isLoading: "<"
 			currentUser: "<"
 			onEntrySelect: "&"
+			onLabelDelete: "&"
 		controller: historyEntriesListController
 		templateUrl: "historyEntriesListTpl"
 	}

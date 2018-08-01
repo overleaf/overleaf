@@ -6,5 +6,7 @@ define [
 			$modal.open(
 				templateUrl: "historyV2AddLabelModalTemplate"
 				controller: "HistoryV2AddLabelModalController"
+				resolve:
+					update: () -> $scope.history.selection.updates[0]
 			)
 	]
