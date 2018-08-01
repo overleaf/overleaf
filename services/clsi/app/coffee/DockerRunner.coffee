@@ -46,7 +46,9 @@ module.exports = DockerRunner =
 		fingerprint  = DockerRunner._fingerprintContainer(options)
 		options.name = name = "project-#{project_id}-#{fingerprint}"
 
-		logger.log project_id: project_id, options: options, "running docker container"
+		logOptions = _.clone(options)
+		logOptions.HostConfig.SecurityOpt = "secomp used, removed in logging"
+		logger.log project_id: project_id, options:logOptions, "running docker container"
 		DockerRunner._runAndWaitForContainer options, volumes, timeout, (error, output) ->
 			if error?.message?.match("HTTP code is 500")
 				logger.log err: error, project_id: project_id, "error running container so destroying and retrying"
@@ -144,14 +146,14 @@ module.exports = DockerRunner =
 				"Ulimits": [{'Name': 'cpu', 'Soft': timeoutInSeconds+5, 'Hard': timeoutInSeconds+10}]
 				"CapDrop": "ALL"
 				"SecurityOpt": ["no-new-privileges"]
-				
-		if Settings.clsi.docker.seccomp_profile?
-			options.HostConfig.SecurityOpt.push "seccomp=#{Settings.clsi.docker.seccomp_profile}"
+		
 
 		if Settings.path?.synctexBinHostPath?
 			options["HostConfig"]["Binds"].push("#{Settings.path.synctexBinHostPath}:/opt/synctex:ro")
 
-		logger.log options:options, "options for running docker container"
+		if Settings.clsi.docker.seccomp_profile?
+			options.HostConfig.SecurityOpt.push "seccomp=#{Settings.clsi.docker.seccomp_profile}"
+
 		return options
 
 	_fingerprintContainer: (containerOptions) ->

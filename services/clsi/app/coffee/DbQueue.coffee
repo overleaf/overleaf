@@ -2,7 +2,6 @@ async = require "async"
 Settings = require "settings-sharelatex"
 
 queue = async.queue((task, cb)->
-		console.log("running task")
 		task(cb)
 	, Settings.parallelSqlQueryLimit)
 

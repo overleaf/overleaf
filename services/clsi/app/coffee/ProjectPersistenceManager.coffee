@@ -13,7 +13,6 @@ module.exports = ProjectPersistenceManager =
 
 	markProjectAsJustAccessed: (project_id, callback = (error) ->) ->
 		job = (cb)->
-			console.log("markProjectAsJustAccessed")
 			db.Project.findOrCreate(where: {project_id: project_id})
 				.spread(
 					(project, created) ->
@@ -59,7 +58,6 @@ module.exports = ProjectPersistenceManager =
 
 	_clearProjectFromDatabase: (project_id, callback = (error) ->) ->
 		job = (cb)->
-			console.log("_clearProjectFromDatabase")
 			db.Project.destroy(where: {project_id: project_id})
 				.then(() -> cb())
 				.error cb
@@ -69,7 +67,6 @@ module.exports = ProjectPersistenceManager =
 	_findExpiredProjectIds: (callback = (error, project_ids) ->) ->
 		job = (cb)->
 			keepProjectsFrom = new Date(Date.now() - ProjectPersistenceManager.EXPIRY_TIMEOUT)
-			console.log("_findExpiredProjectIds", keepProjectsFrom)
 			q = {}
 			q[db.op.gt] = keepProjectsFrom
 			db.Project.findAll(where:{lastAccessed:q})

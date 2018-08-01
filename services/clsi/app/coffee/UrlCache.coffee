@@ -52,9 +52,7 @@ module.exports = UrlCache =
 	_doesUrlNeedDownloading: (project_id, url, lastModified, callback = (error, needsDownloading) ->) ->
 		if !lastModified?
 			return callback null, true
-		console.log "about to get _findUrlDetails"
 		UrlCache._findUrlDetails project_id, url, (error, urlDetails) ->
-			console.log error, urlDetails, "_findUrlDetails result"
 			return callback(error) if error?
 			if !urlDetails? or !urlDetails.lastModified? or urlDetails.lastModified.getTime() < lastModified.getTime()
 				return callback null, true
@@ -104,7 +102,6 @@ module.exports = UrlCache =
 
 	_updateOrCreateUrlDetails: (project_id, url, lastModified, callback = (error) ->) ->
 		job = (cb)->
-			console.log("_updateOrCreateUrlDetails")
 			db.UrlCache.findOrCreate(where: {url: url, project_id: project_id})
 				.spread(
 					(urlDetails, created) ->
@@ -117,7 +114,6 @@ module.exports = UrlCache =
 
 	_clearUrlDetails: (project_id, url, callback = (error) ->) ->
 		job = (cb)->
-			console.log("_clearUrlDetails")
 			db.UrlCache.destroy(where: {url: url, project_id: project_id})
 				.then(() -> cb null)
 				.error cb
@@ -126,7 +122,6 @@ module.exports = UrlCache =
 
 	_findAllUrlsInProject: (project_id, callback = (error, urls) ->) ->
 		job = (cb)->
-			console.log("_findAllUrlsInProject")
 			db.UrlCache.findAll(where: { project_id: project_id })
 				.then(
 					(urlEntries) ->
