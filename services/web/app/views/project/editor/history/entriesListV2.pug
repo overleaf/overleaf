@@ -66,6 +66,18 @@ aside.change-list(
 						)
 
 				div.description(ng-click="select()")
+					div
+						.history-entry-label(
+							ng-if="update.labels.length > 0"
+							ng-repeat="label in update.labels"
+						)
+							span.history-entry-label-comment
+								i.fa.fa-tag
+								| &nbsp;{{ label.comment }}
+							button.history-entry-label-delete-btn(
+								stop-propagation="click"
+								ng-click="deleteLabel(label)"
+							) &times;
 					div.time {{ update.meta.end_ts | formatDate:'h:mm a' }}
 					div.action.action-edited(ng-if="history.isV2 && update.pathnames.length > 0")
 						| #{translate("file_action_edited")}
@@ -133,7 +145,7 @@ script(type="text/ng-template", id="historyEntryTpl")
 		.history-entry-details(ng-click="$ctrl.onSelect({ selectedEntry: $ctrl.entry })")
 			.history-entry-label(
 				ng-if="$ctrl.entry.labels.length > 0"
-				ng-repeat="label in ::$ctrl.entry.labels"
+				ng-repeat="label in $ctrl.entry.labels"
 			)
 				span.history-entry-label-comment
 					i.fa.fa-tag
@@ -162,6 +174,7 @@ script(type="text/ng-template", id="historyEntryTpl")
 						ng-if="::project_op.remove"
 					) #{translate("file_action_deleted")}
 					span.history-entry-change-doc {{ ::$ctrl.getProjectOpDoc(project_op) }}
+
 			.history-entry-metadata
 				time.history-entry-metadata-time {{ ::$ctrl.entry.meta.end_ts | formatDate:'h:mm a' }}
 				span

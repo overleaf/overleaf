@@ -3,9 +3,17 @@ define [
 	"ide/history/util/displayNameForUser"
 ], (App, displayNameForUser) ->
 
-	App.controller "HistoryListController", ["$scope", "ide", ($scope, ide) ->
+	App.controller "HistoryListController", ["$scope", "$modal", "ide", ($scope, $modal, ide) ->
 		$scope.hoveringOverListSelectors = false
 		
+		$scope.deleteLabel = (labelDetails) ->
+			$modal.open(
+				templateUrl: "historyV2DeleteLabelModalTemplate"
+				controller: "HistoryV2DeleteLabelModalController"
+				resolve:
+					labelDetails: () -> labelDetails
+			)
+
 		$scope.loadMore = () =>
 			ide.historyManager.fetchNextBatchOfUpdates()
 

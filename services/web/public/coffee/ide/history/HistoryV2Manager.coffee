@@ -306,11 +306,19 @@ define [
 
 		_labelVersion: (comment, version) ->
 			url = "/project/#{@$scope.project_id}/labels"
-			@ide.$http.post url, {
-				comment,
-				version,
-				_csrf: window.csrfToken
-			}
+			@ide.$http
+				.post url, {
+					comment,
+					version,
+					_csrf: window.csrfToken
+				}
+				.then (response) =>
+					@_addLabelToLocalUpdate response.data
+
+		_addLabelToLocalUpdate: (label) ->
+			localUpdate = _.find @$scope.history.updates, (update) -> update.toV == label.version
+			if localUpdate?
+				localUpdate.labels.push label
 
 		_perDocSummaryOfUpdates: (updates) ->
 			# Track current_pathname -> original_pathname
