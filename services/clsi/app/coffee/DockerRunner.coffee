@@ -47,7 +47,7 @@ module.exports = DockerRunner =
 		options.name = name = "project-#{project_id}-#{fingerprint}"
 
 		logOptions = _.clone(options)
-		logOptions.HostConfig.SecurityOpt = "secomp used, removed in logging"
+		logOptions?.HostConfig?.SecurityOpt = "secomp used, removed in logging"
 		logger.log project_id: project_id, options:logOptions, "running docker container"
 		DockerRunner._runAndWaitForContainer options, volumes, timeout, (error, output) ->
 			if error?.message?.match("HTTP code is 500")
