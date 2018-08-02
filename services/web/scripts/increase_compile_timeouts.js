@@ -30,7 +30,7 @@ const updateUsers = (users, callback) =>
     if (DO_ALL) {
       return loopForUsers(callback)
     } else {
-      console.log('run again to continue updating');
+      console.log('*** run again to continue updating ***')
       return callback()
     }
   })
@@ -66,7 +66,19 @@ var setup = function () {
   // --async M  run M updates in parallel
   ASYNC_LIMIT = (args.async) ? args.async : 10
   // --all means run to completion
-  DO_ALL = (args.all)
+  if (args.all) {
+    if (args.fetch) {
+      console.error('error: do not use --fetch with --all')
+      process.exit(1)
+    } else {
+      DO_ALL = true
+      // if we are updating for all users then ignore the fetch limit.
+      FETCH_LIMIT = 0
+      // A limit() value of 0 (i.e. .limit(0)) is equivalent to setting
+      // no limit.
+      // https://docs.mongodb.com/manual/reference/method/cursor.limit
+    }
+  }
 }
 
 setup()
