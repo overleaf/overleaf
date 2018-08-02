@@ -25,11 +25,11 @@ module.exports = InstitutionsAPI =
 			callback = affiliationOptions
 			affiliationOptions = {}
 
-		{ university, department, role } = affiliationOptions
+		{ university, department, role, confirmed } = affiliationOptions
 		makeAffiliationRequest {
 			method: 'POST'
 			path: "/api/v2/users/#{userId.toString()}/affiliations"
-			body: { email, university, department, role }
+			body: { email, university, department, role, confirmed }
 			defaultErrorMessage: "Couldn't create affiliation"
 		}, callback
 

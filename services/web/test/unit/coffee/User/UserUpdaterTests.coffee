@@ -241,7 +241,7 @@ describe "UserUpdater", ->
 			@UserUpdater.confirmEmail @stubbedUser._id, @newEmail, (err)=>
 				should.not.exist(err)
 				@addAffiliation.calledOnce.should.equal true
-				sinon.assert.calledWith(@addAffiliation, @stubbedUser._id, @newEmail)
+				sinon.assert.calledWith(@addAffiliation, @stubbedUser._id, @newEmail, { confirmed: true } )
 				done()
 
 		it 'handle error', (done)->
@@ -264,7 +264,7 @@ describe "UserUpdater", ->
 				done()
 
 		it 'handle affiliation error', (done)->
-			@addAffiliation.callsArgWith(2, new Error('nope'))
+			@addAffiliation.callsArgWith(3, new Error('nope'))
 			@UserUpdater.confirmEmail @stubbedUser._id, @newEmail, (err)=>
 				should.exist(err)
 				@UserUpdater.updateUser.called.should.equal false
