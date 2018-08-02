@@ -26,8 +26,13 @@ const updateUsers = (users, callback) =>
       return
     }
     counter += users.length
-    console.log(`${counter} users updated`)
-    loopForUsers(callback)
+    console.log(`${counter} users updated`);
+    if (DO_ALL) {
+      return loopForUsers(callback)
+    } else {
+      console.log('run again to continue updating');
+      return callback()
+    }
   })
 
 var loopForUsers = callback =>
@@ -53,11 +58,15 @@ var run = () =>
     process.exit()
   })
 
-let FETCH_LIMIT, ASYNC_LIMIT
+let FETCH_LIMIT, ASYNC_LIMIT, DO_ALL
 var setup = function () {
   let args = minilist(process.argv.slice(2))
+  // --fetch N  get N users each time
   FETCH_LIMIT = (args.fetch) ? args.fetch : 100
+  // --async M  run M updates in parallel
   ASYNC_LIMIT = (args.async) ? args.async : 10
+  // --all means run to completion
+  DO_ALL = (args.all)
 }
 
 setup()
