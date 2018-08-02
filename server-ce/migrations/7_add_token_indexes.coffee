@@ -17,10 +17,10 @@ handleExit = () ->
 exports.migrate = (client, done=()->) ->
 	console.log ">> Adding indexes for token-based project access: "
 	db.projects.ensureIndex {'tokens.readAndWrite': 1}, {
-    partialFilterExpression: { 'tokens.readAndWrite': { $exists: true } },
-    unique: true,
-    background: true
-  }, (err) ->
+		partialFilterExpression: { 'tokens.readAndWrite': { $exists: true } },
+		unique: true,
+		background: true
+	}, (err) ->
 		if err?
 			return done(err)
 		db.projects.ensureIndex {'tokens.readOnly': 1}, {
