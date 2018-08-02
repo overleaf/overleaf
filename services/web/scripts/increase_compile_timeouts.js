@@ -26,7 +26,7 @@ const updateUsers = (users, callback) =>
       return
     }
     counter += users.length
-    console.log(`${counter} users updated`);
+    console.log(`${counter} users updated`)
     if (DO_ALL) {
       return loopForUsers(callback)
     } else {
