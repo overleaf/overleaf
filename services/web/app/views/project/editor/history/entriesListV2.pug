@@ -5,10 +5,12 @@ aside.change-list(
 	history-entries-list(
 		entries="history.updates"
 		current-user="user"
+		users="projectUsers"
 		load-entries="loadMore()"
 		load-disabled="history.loading || history.atEnd"
 		load-initialize="ui.view == 'history'"
 		is-loading="history.loading"
+		show-only-labelled="listConfig.showOnlyLabelled"
 		on-entry-select="handleEntrySelect(selectedEntry)"
 		on-label-delete="handleLabelDelete(label)"
 	)
@@ -116,9 +118,10 @@ script(type="text/ng-template", id="historyEntriesListTpl")
 	)
 		.infinite-scroll-inner
 			history-entry(
-				ng-repeat="entry in $ctrl.entries"
+				ng-repeat="entry in $ctrl.entries | filter:$ctrl.shouldShowEntry"
 				entry="entry"
 				current-user="$ctrl.currentUser"
+				users="$ctrl.users"
 				on-select="$ctrl.onEntrySelect({ selectedEntry: selectedEntry })"
 				on-label-delete="$ctrl.onLabelDelete({ label: label })"
 				ng-show="!$ctrl.isLoading"
@@ -143,17 +146,14 @@ script(type="text/ng-template", id="historyEntryTpl")
 		time.history-entry-day(ng-if="::$ctrl.entry.meta.first_in_day") {{ ::$ctrl.entry.meta.end_ts | relativeDate }}
 
 		.history-entry-details(ng-click="$ctrl.onSelect({ selectedEntry: $ctrl.entry })")
-			.history-entry-label(
-				ng-if="$ctrl.entry.labels.length > 0"
+			history-label(
 				ng-repeat="label in $ctrl.entry.labels"
+				label-text="label.comment"
+				label-owner-name="$ctrl.displayNameById(label.user_id)"
+				label-creation-date-time="label.created_at"
+				is-owned-by-current-user="label.user_id === $ctrl.currentUser.id"
+				on-label-delete="$ctrl.onLabelDelete({ label: label })"
 			)
-				span.history-entry-label-comment
-					i.fa.fa-tag
-					| &nbsp;{{ label.comment }}
-				button.history-entry-label-delete-btn(
-					stop-propagation="click"
-					ng-click="$ctrl.onLabelDelete({ label: label })"
-				) &times;
 
 			ol.history-entry-changes
 				li.history-entry-change(
@@ -199,3 +199,27 @@ script(type="text/ng-template", id="historyEntryTpl")
 						span.name(
 							ng-style="$ctrl.getUserCSSStyle();"
 						) #{translate("anonymous")}
+
+script(type="text/ng-template", id="historyLabelTpl")
+	.history-entry-label(
+		ng-class="{ 'history-entry-label-own' : $ctrl.isOwnedByCurrentUser }"
+	)
+		span.history-entry-label-comment(
+			tooltip-template="'historyLabelTooltipTpl'"
+			tooltip-placement="left"
+		)
+			i.fa.fa-tag
+			| &nbsp;{{ $ctrl.labelText }}
+		button.history-entry-label-delete-btn(
+			ng-if="$ctrl.isOwnedByCurrentUser"
+			stop-propagation="click"
+			ng-click="$ctrl.onLabelDelete()"
+		) &times;
+
+script(type="text/ng-template", id="historyLabelTooltipTpl")
+	.history-label-tooltip
+		p.history-label-tooltip-title 
+			i.fa.fa-tag
+			| &nbsp;{{ $ctrl.labelText }}
+		p.history-label-tooltip-owner Created by {{ $ctrl.labelOwnerName }}
+		time.history-label-tooltip-datetime {{ labelCreationDateTime | formatDate }}

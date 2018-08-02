@@ -5,6 +5,9 @@ define [
 
 	App.controller "HistoryV2ListController", ["$scope", "$modal", "ide", ($scope, $modal, ide) ->
 		$scope.hoveringOverListSelectors = false
+		$scope.listConfig =
+			showOnlyLabelled: false
+		$scope.projectUsers = $scope.project.members.concat $scope.project.owner
 		
 		$scope.loadMore = () =>
 			ide.historyManager.fetchNextBatchOfUpdates()

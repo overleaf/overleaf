@@ -12,6 +12,7 @@ define [
 	"ide/history/directives/infiniteScroll"
 	"ide/history/components/historyEntriesList"
 	"ide/history/components/historyEntry"
+	"ide/history/components/historyLabel"
 	"ide/history/components/historyFileTree"
 	"ide/history/components/historyFileEntity"
 ], (moment, ColorManager, displayNameForUser, HistoryViewModes) ->
