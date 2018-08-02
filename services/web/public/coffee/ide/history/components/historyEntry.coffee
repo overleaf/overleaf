@@ -2,7 +2,7 @@ define [
 	"base"
 	"ide/history/util/displayNameForUser"
 ], (App, displayNameForUser) ->
-	historyEntryController = ($scope, $element, $attrs, $filter, _) ->
+	historyEntryController = ($scope, $element, $attrs, _) ->
 		ctrl = @
 		_getUserById = (id) ->
 			_.find ctrl.users, (user) ->

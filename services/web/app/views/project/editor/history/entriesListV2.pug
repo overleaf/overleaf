@@ -77,17 +77,6 @@ aside.change-list(
 							is-owned-by-current-user="label.user_id === $ctrl.currentUser.id"
 							on-label-delete="deleteLabel(label)"
 						)
-						//- .history-entry-label(
-						//- 	ng-if="update.labels.length > 0"
-						//- 	ng-repeat="label in update.labels"
-						//- )
-						//- 	span.history-entry-label-comment
-						//- 		i.fa.fa-tag
-						//- 		| &nbsp;{{ label.comment }}
-						//- 	button.history-entry-label-delete-btn(
-						//- 		stop-propagation="click"
-						//- 		ng-click="deleteLabel(label)"
-						//- 	) &times;
 					div.time {{ update.meta.end_ts | formatDate:'h:mm a' }}
 					div.action.action-edited(ng-if="history.isV2 && update.pathnames.length > 0")
 						| #{translate("file_action_edited")}

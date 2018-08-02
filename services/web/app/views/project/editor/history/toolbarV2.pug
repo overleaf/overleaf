@@ -12,7 +12,7 @@
 		ng-disabled="history.loadingFileTree"
 	) 
 		i.fa.fa-tag
-		| &nbsp;Label this version
+		| &nbsp;#{translate("history_label_this_version")}
 	button.history-toolbar-btn(
 		ng-click="toggleHistoryViewMode();"
 		ng-disabled="history.loadingFileTree"
@@ -27,20 +27,20 @@ script(type="text/ng-template", id="historyV2AddLabelModalTemplate")
 		novalidate
 	)
 		.modal-header
-			h3 Add label
+			h3 #{translate("history_add_label")}
 		.modal-body
 			.alert.alert-danger(ng-show="state.error.message") {{ state.error.message}} 
 			.alert.alert-danger(ng-show="state.error && !state.error.message") #{translate("generic_something_went_wrong")}
 			.form-group
 				input.form-control(
 					type="text"
-					placeholder="New label name"
+					placeholder=translate("history_new_label_name")
 					ng-model="inputs.labelName"
 					focus-on="open"
 					required
 				)
 			p.help-block(ng-if="update")
-				| A new label will be added as of 
+				| #{translate("history_new_label_added_at")} 
 				strong {{ update.meta.end_ts | formatDate:'ddd Do MMM YYYY, h:mm a' }}
 		.modal-footer
 			button.btn.btn-default(
@@ -50,18 +50,18 @@ script(type="text/ng-template", id="historyV2AddLabelModalTemplate")
 			) #{translate("cancel")}
 			input.btn.btn-primary(
 				ng-disabled="addLabelModalForm.$invalid || state.inflight"
-				ng-value="state.inflight ? 'Adding label' : 'Add label'"
+				ng-value="state.inflight ? '" + translate("history_adding_label") + "' : '" + translate("history_add_label") + "'"
 				type="submit"
 			)
 
 script(type="text/ng-template", id="historyV2DeleteLabelModalTemplate")
 	.modal-header
-		h3 Delete label
+		h3 #{translate("history_delete_label")}
 	.modal-body
 		.alert.alert-danger(ng-show="state.error.message") {{ state.error.message}} 
 		.alert.alert-danger(ng-show="state.error && !state.error.message") #{translate("generic_something_went_wrong")}
 		p.help-block(ng-if="labelDetails")
-			| Are you sure you want to delete the following label: 
+			| #{translate("history_are_you_sure_delete_label")} 
 			strong "{{ labelDetails.comment }}"
 			| ?
 	.modal-footer
@@ -74,4 +74,4 @@ script(type="text/ng-template", id="historyV2DeleteLabelModalTemplate")
 			type="button"
 			ng-click="deleteLabel()"
 			ng-disabled="state.inflight"
-		) {{ state.inflight ? 'Deleting label' : 'Delete label' }}
+		) {{ state.inflight ? '#{translate("history_deleting_label")}' : '#{translate("history_delete_label")}' }}

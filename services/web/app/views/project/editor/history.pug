@@ -91,5 +91,5 @@ script(type="text/ng-template", id="historyLabelTooltipTpl")
 		p.history-label-tooltip-title 
 			i.fa.fa-tag
 			| &nbsp;{{ $ctrl.labelText }}
-		p.history-label-tooltip-owner Created by {{ $ctrl.labelOwnerName }}
+		p.history-label-tooltip-owner #{translate("history_label_created_by")} {{ $ctrl.labelOwnerName }}
 		time.history-label-tooltip-datetime {{ labelCreationDateTime | formatDate }}
