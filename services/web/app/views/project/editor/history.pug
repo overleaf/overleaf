@@ -67,3 +67,29 @@ script(type="text/ng-template", id="historyRestoreDiffModalTemplate")
 		)
 			span(ng-show="!state.inflight") #{translate("restore")}
 			span(ng-show="state.inflight") #{translate("restoring")} ...
+
+
+script(type="text/ng-template", id="historyLabelTpl")
+	.history-entry-label(
+		ng-class="{ 'history-entry-label-own' : $ctrl.isOwnedByCurrentUser }"
+	)
+		span.history-entry-label-comment(
+			tooltip-append-to-body="true"
+			tooltip-template="'historyLabelTooltipTpl'"
+			tooltip-placement="left"
+		)
+			i.fa.fa-tag
+			| &nbsp;{{ $ctrl.labelText }}
+		button.history-entry-label-delete-btn(
+			ng-if="$ctrl.isOwnedByCurrentUser"
+			stop-propagation="click"
+			ng-click="$ctrl.onLabelDelete()"
+		) &times;
+
+script(type="text/ng-template", id="historyLabelTooltipTpl")
+	.history-label-tooltip
+		p.history-label-tooltip-title 
+			i.fa.fa-tag
+			| &nbsp;{{ $ctrl.labelText }}
+		p.history-label-tooltip-owner Created by {{ $ctrl.labelOwnerName }}
+		time.history-label-tooltip-datetime {{ labelCreationDateTime | formatDate }}

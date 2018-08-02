@@ -5,7 +5,17 @@ define [
 
 	App.controller "HistoryListController", ["$scope", "$modal", "ide", ($scope, $modal, ide) ->
 		$scope.hoveringOverListSelectors = false
-		
+
+		projectUsers = $scope.project.members.concat $scope.project.owner
+		console.log projectUsers
+		_getUserById = (id) ->
+			_.find projectUsers, (user) ->
+				curUserId = user?._id or user?.id
+				curUserId == id
+
+		$scope.getDisplayNameById = (id) ->
+			displayNameForUser(_getUserById(id))
+
 		$scope.deleteLabel = (labelDetails) ->
 			$modal.open(
 				templateUrl: "historyV2DeleteLabelModalTemplate"

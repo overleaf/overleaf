@@ -69,17 +69,25 @@ aside.change-list(
 
 				div.description(ng-click="select()")
 					div
-						.history-entry-label(
-							ng-if="update.labels.length > 0"
+						history-label(
 							ng-repeat="label in update.labels"
+							label-text="label.comment"
+							label-owner-name="getDisplayNameById(label.user_id)"
+							label-creation-date-time="label.created_at"
+							is-owned-by-current-user="label.user_id === $ctrl.currentUser.id"
+							on-label-delete="deleteLabel(label)"
 						)
-							span.history-entry-label-comment
-								i.fa.fa-tag
-								| &nbsp;{{ label.comment }}
-							button.history-entry-label-delete-btn(
-								stop-propagation="click"
-								ng-click="deleteLabel(label)"
-							) &times;
+						//- .history-entry-label(
+						//- 	ng-if="update.labels.length > 0"
+						//- 	ng-repeat="label in update.labels"
+						//- )
+						//- 	span.history-entry-label-comment
+						//- 		i.fa.fa-tag
+						//- 		| &nbsp;{{ label.comment }}
+						//- 	button.history-entry-label-delete-btn(
+						//- 		stop-propagation="click"
+						//- 		ng-click="deleteLabel(label)"
+						//- 	) &times;
 					div.time {{ update.meta.end_ts | formatDate:'h:mm a' }}
 					div.action.action-edited(ng-if="history.isV2 && update.pathnames.length > 0")
 						| #{translate("file_action_edited")}
@@ -199,27 +207,3 @@ script(type="text/ng-template", id="historyEntryTpl")
 						span.name(
 							ng-style="$ctrl.getUserCSSStyle();"
 						) #{translate("anonymous")}
-
-script(type="text/ng-template", id="historyLabelTpl")
-	.history-entry-label(
-		ng-class="{ 'history-entry-label-own' : $ctrl.isOwnedByCurrentUser }"
-	)
-		span.history-entry-label-comment(
-			tooltip-template="'historyLabelTooltipTpl'"
-			tooltip-placement="left"
-		)
-			i.fa.fa-tag
-			| &nbsp;{{ $ctrl.labelText }}
-		button.history-entry-label-delete-btn(
-			ng-if="$ctrl.isOwnedByCurrentUser"
-			stop-propagation="click"
-			ng-click="$ctrl.onLabelDelete()"
-		) &times;
-
-script(type="text/ng-template", id="historyLabelTooltipTpl")
-	.history-label-tooltip
-		p.history-label-tooltip-title 
-			i.fa.fa-tag
-			| &nbsp;{{ $ctrl.labelText }}
-		p.history-label-tooltip-owner Created by {{ $ctrl.labelOwnerName }}
-		time.history-label-tooltip-datetime {{ labelCreationDateTime | formatDate }}
