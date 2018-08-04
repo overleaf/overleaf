@@ -277,10 +277,10 @@ module.exports = settings =
 	# Third party services
 	# --------------------
 	#
-	# ShareLaTeX's regular newsletter is managed by Markdown mail. Add your
+	# ShareLaTeX's regular newsletter is managed by mailchimp. Add your
 	# credentials here to integrate with this.
-	# markdownmail:
-	# 	secret: ""
+	# mailchimp:
+	# 	api_key: ""
 	# 	list_id: ""
 	#
 	# Fill in your unique token from various analytics services to enable

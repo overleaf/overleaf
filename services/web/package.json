@@ -59,6 +59,7 @@
     "lodash": "^4.13.1",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#master",
     "lynx": "0.1.1",
+    "mailchimp-api-v3": "^1.12.0",
     "marked": "^0.3.5",
     "method-override": "^2.3.3",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.7.1",
