@@ -10,7 +10,6 @@ aside.change-list(
 		load-disabled="history.loading || history.atEnd"
 		load-initialize="ui.view == 'history'"
 		is-loading="history.loading"
-		show-only-labelled="listConfig.showOnlyLabelled"
 		on-entry-select="handleEntrySelect(selectedEntry)"
 		on-label-delete="handleLabelDelete(label)"
 	)
@@ -115,7 +114,7 @@ script(type="text/ng-template", id="historyEntriesListTpl")
 	)
 		.infinite-scroll-inner
 			history-entry(
-				ng-repeat="entry in $ctrl.entries | filter:$ctrl.shouldShowEntry"
+				ng-repeat="entry in $ctrl.entries"
 				entry="entry"
 				current-user="$ctrl.currentUser"
 				users="$ctrl.users"
