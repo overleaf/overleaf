@@ -132,9 +132,15 @@ describe "UserRegistrationHandler", ->
 					@AuthenticationManager.setUserPassword.calledWith(@user._id, @passingRequest.password).should.equal true
 					done()			
 
-			it "should add the user to the news letter manager", (done)->
+			it "should add the user to the newsletter if accepted terms", (done)->
+				@passingRequest.subscribeToNewsletter = "true"
 				@handler.registerNewUser @passingRequest, (err)=>
 					@NewsLetterManager.subscribe.calledWith(@user).should.equal true
+					done()
+
+			it "should not add the user to the newsletter if not accepted terms", (done)->
+				@handler.registerNewUser @passingRequest, (err)=>
+					@NewsLetterManager.subscribe.calledWith(@user).should.equal false
 					done()
 
 			it "should track the registration event", (done)->
