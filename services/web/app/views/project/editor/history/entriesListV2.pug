@@ -72,7 +72,7 @@ aside.change-list(
 						label-text="label.comment"
 						label-owner-name="getDisplayNameById(label.user_id)"
 						label-creation-date-time="label.created_at"
-						is-owned-by-current-user="label.user_id === $ctrl.currentUser.id"
+						is-owned-by-current-user="label.user_id === user.id"
 						on-label-delete="deleteLabel(label)"
 					)
 					div.time {{ update.meta.end_ts | formatDate:'h:mm a' }}

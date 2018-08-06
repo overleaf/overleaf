@@ -93,3 +93,26 @@ script(type="text/ng-template", id="historyLabelTooltipTpl")
 			| &nbsp;{{ $ctrl.labelText }}
 		p.history-label-tooltip-owner #{translate("history_label_created_by")} {{ $ctrl.labelOwnerName }}
 		time.history-label-tooltip-datetime {{ labelCreationDateTime | formatDate }}
+
+
+script(type="text/ng-template", id="historyV2DeleteLabelModalTemplate")
+	.modal-header
+		h3 #{translate("history_delete_label")}
+	.modal-body
+		.alert.alert-danger(ng-show="state.error.message") {{ state.error.message}} 
+		.alert.alert-danger(ng-show="state.error && !state.error.message") #{translate("generic_something_went_wrong")}
+		p.help-block(ng-if="labelDetails")
+			| #{translate("history_are_you_sure_delete_label")}
+			strong "{{ labelDetails.comment }}"
+			| ?
+	.modal-footer
+		button.btn.btn-default(
+			type="button"
+			ng-disabled="state.inflight"
+			ng-click="$dismiss()"
+		) #{translate("cancel")}
+		button.btn.btn-primary(
+			type="button"
+			ng-click="deleteLabel()"
+			ng-disabled="state.inflight"
+		) {{ state.inflight ? '#{translate("history_deleting_label")}' : '#{translate("history_delete_label")}' }}
