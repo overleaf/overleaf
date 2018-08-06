@@ -55,7 +55,8 @@ module.exports = ProjectCreationHandler =
 		if Settings.apis?.project_history?.displayHistoryForNewProjects
 			project.overleaf.history.display = true
 		if Settings.currentImageName?
-			project.imageName = Settings.currentImageName
+			# avoid clobbering any imageName already set in attributes (e.g. importedImageName)
+			project.imageName ?= Settings.currentImageName
 		project.rootFolder[0] = rootFolder
 		User.findById owner_id, "ace.spellCheckLanguage", (err, user)->
 			project.spellCheckLanguage = user.ace.spellCheckLanguage
