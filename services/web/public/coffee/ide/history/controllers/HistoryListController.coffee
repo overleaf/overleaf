@@ -7,7 +7,7 @@ define [
 		$scope.hoveringOverListSelectors = false
 
 		projectUsers = $scope.project.members.concat $scope.project.owner
-		console.log projectUsers
+
 		_getUserById = (id) ->
 			_.find projectUsers, (user) ->
 				curUserId = user?._id or user?.id
