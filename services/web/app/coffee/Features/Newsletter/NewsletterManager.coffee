@@ -3,7 +3,6 @@ logger = require 'logger-sharelatex'
 Settings = require 'settings-sharelatex'
 crypto = require('crypto')
 Mailchimp = require('mailchimp-api-v3')
-mailchimp = new Mailchimp(Settings.mailchimp?.api_key) if Settings.mailchimp?
 
 module.exports =
 	subscribe: (user, callback = () ->)->
@@ -12,6 +11,7 @@ module.exports =
 			return callback()
 		options = buildOptions(user, true)
 		logger.log options:options, user:user, email:user.email, "trying to subscribe user to the mailing list"
+		mailchimp = new Mailchimp(Settings.mailchimp?.api_key)
 		mailchimp.request options, (err)->
 			if err?
 				logger.err err:err, "error subscribing person to newsletter"
@@ -25,6 +25,7 @@ module.exports =
 			return callback()
 		logger.log user:user, email:user.email, "trying to unsubscribe user to the mailing list"
 		options = buildOptions(user, false)
+		mailchimp = new Mailchimp(Settings.mailchimp?.api_key)
 		mailchimp.request options, (err)->
 			if err?
 				logger.err err:err, "error unsubscribing person to newsletter"
