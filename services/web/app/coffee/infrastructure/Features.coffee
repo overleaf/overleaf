@@ -25,5 +25,7 @@ module.exports = Features =
 			when 'rich-text'
 				isEnabled = true # Switch to false to disable
 				Settings.overleaf? and isEnabled
+			when 'redirect-sl'
+				return Settings.createV1AccountOnLogin
 			else
 				throw new Error("unknown feature: #{feature}")
