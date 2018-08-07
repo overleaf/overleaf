@@ -11,6 +11,7 @@ EmailHelper = require "../Helpers/EmailHelper"
 Errors = require "../Errors/Errors"
 Settings = require "settings-sharelatex"
 request = require 'request'
+NewsletterManager = require "../Newsletter/NewsletterManager"
 
 module.exports = UserUpdater =
 	updateUser: (query, update, callback = (error) ->) ->
