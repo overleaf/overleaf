@@ -3,6 +3,7 @@ aside.change-list(
 	ng-controller="HistoryV2ListController"
 )
 	history-entries-list(
+		ng-if="!history.showOnlyLabels"
 		entries="history.updates"
 		current-user="user"
 		users="projectUsers"
@@ -12,6 +13,10 @@ aside.change-list(
 		is-loading="history.loading"
 		on-entry-select="handleEntrySelect(selectedEntry)"
 		on-label-delete="handleLabelDelete(label)"
+	)
+	history-labels-list(
+		ng-if="history.showOnlyLabels"
+		labels="history.labels"
 	)
 
 aside.change-list(
@@ -194,3 +199,14 @@ script(type="text/ng-template", id="historyEntryTpl")
 						span.name(
 							ng-style="$ctrl.getUserCSSStyle();"
 						) #{translate("anonymous")}
+
+script(type="text/ng-template", id="historyLabelsListTpl")
+	history-label(
+		ng-repeat="label in $ctrl.labels"
+		show-tooltip="false"
+		label-text="label.comment"
+		label-owner-name="$ctrl.displayNameById(label.user_id)"
+		label-creation-date-time="label.created_at"
+		is-owned-by-current-user="label.user_id === $ctrl.currentUser.id"
+		on-label-delete="$ctrl.onLabelDelete({ label: label })"
+	)
