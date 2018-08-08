@@ -5,10 +5,11 @@ crypto = require('crypto')
 Mailchimp = require('mailchimp-api-v3')
 
 if !Settings.mailchimp?.api_key?
-	logger.warn "No newsletter provider configured so not chaning email on user"
+	logger.info "Using newsletter provider: none"
 	mailchimp =
 		request: (opts, cb)-> cb()
 else
+	logger.info "Using newsletter provider: mailchimp"
 	mailchimp = new Mailchimp(Settings.mailchimp?.api_key)
 
 module.exports =
