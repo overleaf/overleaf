@@ -77,6 +77,7 @@ script(type="text/ng-template", id="historyLabelTpl")
 			tooltip-append-to-body="true"
 			tooltip-template="'historyLabelTooltipTpl'"
 			tooltip-placement="left"
+			tooltip-enable="$ctrl.showTooltip"
 		)
 			i.fa.fa-tag
 			| &nbsp;{{ $ctrl.labelText }}
