@@ -15,7 +15,6 @@ describe "AuthenticationController", ->
 		tk.freeze(Date.now())
 		@AuthenticationController = SandboxedModule.require modulePath, requires:
 			"./AuthenticationManager": @AuthenticationManager = {}
-			"../User/UserGetter" : @UserGetter = {}
 			"../User/UserUpdater" : @UserUpdater = {}
 			"metrics-sharelatex": @Metrics = { inc: sinon.stub() }
 			"../Security/LoginRateLimiter": @LoginRateLimiter = { processLoginRequest:sinon.stub(), recordSuccessfulLogin:sinon.stub() }
@@ -29,6 +28,7 @@ describe "AuthenticationController", ->
 				trackSession: sinon.stub()
 				untrackSession: sinon.stub()
 				revokeAllUserSessions: sinon.stub().callsArgWith(1, null)
+			"../../infrastructure/Modules": @Modules = {hooks: {fire: sinon.stub().callsArgWith(2, null, [])}}
 		@user =
 			_id: ObjectId()
 			email: @email = "USER@example.com"
@@ -214,6 +214,7 @@ describe "AuthenticationController", ->
 		beforeEach ->
 			@AuthenticationController._recordFailedLogin = sinon.stub()
 			@AuthenticationController._recordSuccessfulLogin = sinon.stub()
+			@Modules.hooks.fire = sinon.stub().callsArgWith(2, null, [])
 			# @AuthenticationController.establishUserSession = sinon.stub().callsArg(2)
 			@req.body =
 				email: @email
@@ -221,6 +222,17 @@ describe "AuthenticationController", ->
 				session:
 					postLoginRedirect: "/path/to/redir/to"
 			@cb = sinon.stub()
+
+		describe "when the preDoPassportLogin hooks produce an info object", ->
+			beforeEach ->
+				@Modules.hooks.fire = sinon.stub().callsArgWith(2, null, [null, {redir: '/somewhere'}, null])
+
+			it "should stop early and call done with this info object", (done) ->
+				@AuthenticationController.doPassportLogin(@req, @req.body.email, @req.body.password, @cb)
+				@cb.callCount.should.equal 1
+				@cb.calledWith(null, false, {redir: '/somewhere'}).should.equal true
+				@LoginRateLimiter.processLoginRequest.callCount.should.equal 0
+				done()
 
 		describe "when the users rate limit", ->
 
