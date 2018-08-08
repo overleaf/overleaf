@@ -12,6 +12,7 @@ define [
 	"ide/history/directives/infiniteScroll"
 	"ide/history/components/historyEntriesList"
 	"ide/history/components/historyEntry"
+	"ide/history/components/historyLabelsList"
 	"ide/history/components/historyLabel"
 	"ide/history/components/historyFileTree"
 	"ide/history/components/historyFileEntity"
@@ -72,6 +73,7 @@ define [
 						toV: null
 					}
 				}
+				showOnlyLabels: false
 				labels: null
 				files: []
 				diff: null # When history.viewMode == HistoryViewModes.COMPARE
@@ -134,17 +136,26 @@ define [
 			updatesURL = "/project/#{@ide.project_id}/updates?min_count=#{@BATCH_SIZE}"
 			if @$scope.history.nextBeforeTimestamp?
 				updatesURL += "&before=#{@$scope.history.nextBeforeTimestamp}"
-			
+			labelsURL = "/project/#{@ide.project_id}/labels"
+
 			@$scope.history.loading = true
 			@$scope.history.loadingFileTree = true
 			
-			@ide.$http.get updatesURL
+			requests = 
+				updates: @ide.$http.get updatesURL
+			
+			if !@$scope.history.labels?
+				requests.labels = @ide.$http.get labelsURL
+
+			@ide.$q.all requests
 				.then (response) =>
-					updatesData = response.data
+					updatesData = response.updates.data
 					@_loadUpdates(updatesData.updates)
 					@$scope.history.nextBeforeTimestamp = updatesData.nextBeforeTimestamp
 					if !updatesData.nextBeforeTimestamp?
 						@$scope.history.atEnd = true
+					if response.labels?
+						@$scope.history.labels = response.labels.data
 					@$scope.history.loading = false
 
 		loadFileAtPointInTime: () ->

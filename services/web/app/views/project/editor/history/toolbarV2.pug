@@ -20,6 +20,14 @@
 		i.fa.fa-exchange
 		| &nbsp;#{translate("compare_to_another_version")}
 
+	.history-toolbar-entries-list
+		toggle-switch(
+			ng-model="history.showOnlyLabels"
+			label-true="Labels"
+			label-false="All history"
+			description="Show all of the project history or only labelled versions."
+		)
+
 script(type="text/ng-template", id="historyV2AddLabelModalTemplate")
 	form(
 		name="addLabelModalForm"
