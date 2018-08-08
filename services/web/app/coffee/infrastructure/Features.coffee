@@ -26,6 +26,6 @@ module.exports = Features =
 				isEnabled = true # Switch to false to disable
 				Settings.overleaf? and isEnabled
 			when 'redirect-sl'
-				return Settings.createV1AccountOnLogin
+				return Settings.redirectToV2?
 			else
 				throw new Error("unknown feature: #{feature}")
