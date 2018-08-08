@@ -10,8 +10,8 @@ define [
 	App.component "historyLabel", {
 		bindings:
 			labelText: "<"
-			labelOwnerName: "<"
-			labelCreationDateTime: "<"
+			labelOwnerName: "<?"
+			labelCreationDateTime: "<?"
 			isOwnedByCurrentUser: "<"
 			onLabelDelete: "&"
 			showTooltip: "<?"

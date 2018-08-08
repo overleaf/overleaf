@@ -16,6 +16,9 @@ define [
 			ide.historyManager.selectUpdate(entry)
 			$scope.recalculateSelectedUpdates()
 
+		$scope.handleLabelSelect = (label) ->
+			console.log label
+
 		$scope.handleLabelDelete = (labelDetails) ->
 			$modal.open(
 				templateUrl: "historyV2DeleteLabelModalTemplate"
