@@ -1,4 +1,3 @@
-resanitize = require('sanitizer')
 User = require("../../models/User").User
 UserCreator = require("./UserCreator")
 UserGetter = require("./UserGetter")
