@@ -4,7 +4,6 @@ Settings = require 'settings-sharelatex'
 crypto = require('crypto')
 Mailchimp = require('mailchimp-api-v3')
 
-
 if !Settings.mailchimp?.api_key?
 	logger.warn "No newsletter provider configured so not chaning email on user"
 	mailchimp =
@@ -63,5 +62,6 @@ buildOptions = (user, is_subscribed)->
 			merge_fields:
 				FNAME: user.first_name
 				LNAME: user.last_name
+				MONGO_ID:user._id
 	return opts
 
