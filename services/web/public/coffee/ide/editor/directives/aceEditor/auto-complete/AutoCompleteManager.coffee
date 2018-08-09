@@ -162,7 +162,8 @@ define [
 			cursorPosition = @editor.getCursorPosition()
 			end = change.end
 			{lineUpToCursor, commandFragment} = Helpers.getContext(@editor, end)
-			if (i = lineUpToCursor.indexOf('%') > -1 and lineUpToCursor[i-1] != '\\')
+			if ((i = lineUpToCursor.indexOf('%')) > -1 and lineUpToCursor[i-1] != '\\')
+				console.log lineUpToCursor, i
 				return
 			lastCharIsBackslash = lineUpToCursor.slice(-1) == "\\"
 			lastTwoChars = lineUpToCursor.slice(-2)
