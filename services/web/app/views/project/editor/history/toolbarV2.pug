@@ -9,6 +9,7 @@
 		time.history-toolbar-time {{ history.selection.updates[0].meta.end_ts | formatDate:'Do MMM YYYY, h:mm a' }}
 	button.history-toolbar-btn(
 		ng-click="showAddLabelDialog();"
+		ng-if="!history.showOnlyLabels"
 		ng-disabled="history.loadingFileTree"
 	) 
 		i.fa.fa-tag

@@ -56,7 +56,8 @@
 	padding: 5px 10px;
 	cursor: pointer;
 
-	.history-entry-selected & {
+	.history-entry-selected &,
+	.history-entry-label-selected & {
 		background-color: @history-entry-selected-bg;
 		color: #FFF;
 	}
@@ -68,7 +69,8 @@
 		margin-bottom: 3px;
 		margin-right: 10px;
 		white-space: nowrap;
-		.history-entry-selected & {
+		.history-entry-selected &,
+		.history-entry-label-selected & {
 			color: @history-entry-selected-label-color;
 		}
 	}
@@ -77,7 +79,8 @@
 			padding: 0 @padding-xs-horizontal 1px @padding-xs-horizontal;
 			border: 0;
 			background-color: @history-entry-label-bg-color;
-			.history-entry-selected & {
+			.history-entry-selected &,
+			.history-entry-label-selected & {
 				background-color: @history-entry-selected-label-bg-color;
 			}
 		}
@@ -99,7 +102,8 @@
 			border-radius: 0 9999px 9999px 0;
 			&:hover {
 				background-color: darken(@history-entry-label-bg-color, 8%);
-				.history-entry-selected & {
+				.history-entry-selected &,
+				.history-entry-label-selected & {
 					background-color: darken(@history-entry-selected-label-bg-color, 8%);
 				}
 			}
@@ -137,7 +141,8 @@
 				color: @history-highlight-color;
 				font-weight: bold;
 				word-break: break-all;
-				.history-entry-selected & {
+				.history-entry-selected &,
+				.history-entry-label-selected & {
 					color: #FFF;
 				}
 			}
@@ -169,6 +174,10 @@
 	.history-entry-label {
 		.history-entry-details;
 		padding: 7px 10px;
+		&.history-entry-label-selected {
+			background-color: @history-entry-selected-bg;
+			color: #FFF;
+		}
 	}
 
 .history-file-tree-inner {

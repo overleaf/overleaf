@@ -13,10 +13,10 @@ define [
 				curUserId = user?._id or user?.id
 				curUserId == id
 		ctrl.displayName = displayNameForUser
-		ctrl.getUserCSSStyle = (user) ->
+		ctrl.getUserCSSStyle = (user, label) ->
 			curUserId = user?._id or user?.id
 			hue = ColorManager.getHueForUserId(curUserId) or 100
-			if false #ctrl.entry.inSelection 
+			if label.selected
 				color : "#FFF" 
 			else 
 				color: "hsl(#{ hue }, 70%, 50%)"

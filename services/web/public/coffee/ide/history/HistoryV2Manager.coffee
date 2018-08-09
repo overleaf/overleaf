@@ -49,6 +49,10 @@ define [
 				else 
 					@reloadDiff()
 
+			@$scope.$watch "history.showOnlyLabels", (showOnlyLabels, prevVal) =>
+				if showOnlyLabels? and showOnlyLabels != prevVal and showOnlyLabels
+					@selectedLabelFromUpdatesSelection()
+
 		show: () ->
 			@$scope.ui.view = "history"
 			@reset()
@@ -131,6 +135,36 @@ define [
 			@$scope.history.updates[selectedUpdateIndex].selectedFrom = true
 			@loadFileTreeForUpdate @$scope.history.updates[selectedUpdateIndex]
 
+		selectLastLabel = () ->
+			return if @$scope.history.labels.length == 0
+			# TODO Select last label
+			
+		selectedLabelFromUpdatesSelection: () ->
+			nLabels = @$scope.history.selection.updates?[0]?.labels?.length
+			if nLabels == 1
+				@selectLabel @$scope.history.selection.updates[0].labels[0]
+			else if nLabels > 1
+				sortedLabels = @ide.$filter("orderBy")(@$scope.history.selection.updates[0].labels, '-created_at')
+				lastLabelFromUpdate = sortedLabels[0]
+				@selectLabel lastLabelFromUpdate
+				
+		selectLabel: (labelToSelect) ->
+			labelToSelectIndex = -1
+			for update, i in @$scope.history.updates
+				if update.toV == labelToSelect.version
+					labelToSelectIndex = i
+					break
+			if labelToSelectIndex == -1
+				labelToSelectIndex = 0
+			for update in @$scope.history.updates
+				update.selectedTo = false
+				update.selectedFrom = false
+			for label in @$scope.history.labels
+				label.selected = (labelToSelect.id == label.id)
+			@$scope.history.updates[labelToSelectIndex].selectedTo = true
+			@$scope.history.updates[labelToSelectIndex].selectedFrom = true
+			@loadFileTreeForUpdate @$scope.history.updates[labelToSelectIndex]
+
 		BATCH_SIZE: 10
 		fetchNextBatchOfUpdates: () ->
 			updatesURL = "/project/#{@ide.project_id}/updates?min_count=#{@BATCH_SIZE}"
@@ -155,8 +189,11 @@ define [
 					if !updatesData.nextBeforeTimestamp?
 						@$scope.history.atEnd = true
 					if response.labels?
-						@$scope.history.labels = response.labels.data
+						@$scope.history.labels = @_sortLabelsByVersionAndDate response.labels.data
 					@$scope.history.loading = false
+
+		_sortLabelsByVersionAndDate: (labels) ->
+			@ide.$filter("orderBy")(labels, [ '-version', '-created_at' ])
 
 		loadFileAtPointInTime: () ->
 			pathname = @$scope.history.selection.pathname
@@ -219,8 +256,8 @@ define [
 		labelCurrentVersion: (labelComment) => 
 			@_labelVersion labelComment, @$scope.history.selection.updates[0].toV
 
-		deleteLabel: (labelId) =>
-			url = "/project/#{@$scope.project_id}/labels/#{labelId}"
+		deleteLabel: (label) =>
+			url = "/project/#{@$scope.project_id}/labels/#{label.id}"
 
 			@ide.$http({
 				url,
@@ -228,14 +265,16 @@ define [
 				headers:
 					"X-CSRF-Token": window.csrfToken
 			}).then (response) =>
-				@_deleteLabelFromLocalCollection @$scope.history.updates, labelId
-				@_deleteLabelFromLocalCollection @$scope.history.selection, labelId
+				@_deleteLabelLocally label
 
-
-		_deleteLabelFromLocalCollection: (collection, labelId) ->
-			for update in collection
-				update.labels = _.filter update.labels, (label) -> 
-					label.id != labelId
+		_deleteLabelLocally: (labelToDelete) ->
+			for update, i in @$scope.history.updates
+				if update.toV == labelToDelete.version
+					update.labels = _.filter update.labels, (label) -> 
+						label.id != labelToDelete.id
+					break 
+			@$scope.history.labels = _.filter @$scope.history.labels, (label) -> 
+				label.id != labelToDelete.id
 
 		_parseDiff: (diff) ->
 			if diff.binary
@@ -314,7 +353,10 @@ define [
 				if @$scope.history.viewMode == HistoryViewModes.COMPARE
 					@autoSelectRecentUpdates()
 				else 
-					@autoSelectLastUpdate()
+					if @$scope.history.showOnlyLabels
+						@selectLastLabel()
+					else
+						@autoSelectLastUpdate()
 
 		_labelVersion: (comment, version) ->
 			url = "/project/#{@$scope.project_id}/labels"
@@ -327,10 +369,11 @@ define [
 				.then (response) =>
 					@_addLabelToLocalUpdate response.data
 
-		_addLabelToLocalUpdate: (label) ->
+		_addLabelToLocalUpdate: (label) =>
 			localUpdate = _.find @$scope.history.updates, (update) -> update.toV == label.version
 			if localUpdate?
-				localUpdate.labels.push label
+				localUpdate.labels = @_sortLabelsByVersionAndDate localUpdate.labels.concat label
+			@$scope.history.labels = @_sortLabelsByVersionAndDate @$scope.history.labels.concat label
 
 		_perDocSummaryOfUpdates: (updates) ->
 			# Track current_pathname -> original_pathname

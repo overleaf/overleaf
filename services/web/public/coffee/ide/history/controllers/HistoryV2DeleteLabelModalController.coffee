@@ -9,7 +9,7 @@ define [
 
 		$scope.deleteLabel = () ->
 			$scope.state.inflight = true
-			ide.historyManager.deleteLabel labelDetails.id
+			ide.historyManager.deleteLabel labelDetails
 				.then (response) ->
 					$scope.state.inflight = false
 					$modalInstance.close()

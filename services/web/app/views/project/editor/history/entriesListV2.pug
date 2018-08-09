@@ -152,7 +152,7 @@ script(type="text/ng-template", id="historyEntryTpl")
 
 		.history-entry-details(ng-click="$ctrl.onSelect({ selectedEntry: $ctrl.entry })")
 			history-label(
-				ng-repeat="label in $ctrl.entry.labels"
+				ng-repeat="label in $ctrl.entry.labels | orderBy : '-created_at'"
 				label-text="label.comment"
 				label-owner-name="$ctrl.displayNameById(label.user_id)"
 				label-creation-date-time="label.created_at"
@@ -208,8 +208,9 @@ script(type="text/ng-template", id="historyEntryTpl")
 script(type="text/ng-template", id="historyLabelsListTpl")
 	.history-labels-list
 		.history-entry-label(
-			ng-repeat="label in $ctrl.labels | orderBy : [ '-version', '-created_at' ] track by label.id"
+			ng-repeat="label in $ctrl.labels track by label.id"
 			ng-click="$ctrl.onLabelSelect({ label: label })"
+			ng-class="{ 'history-entry-label-selected': label.selected }" 
 		)
 			history-label(
 				show-tooltip="false"
@@ -222,15 +223,15 @@ script(type="text/ng-template", id="historyLabelsListTpl")
 					| Saved by 
 					span.name(
 						ng-if="user && user._id !== $ctrl.currentUser.id"
-						ng-style="$ctrl.getUserCSSStyle(user);"
+						ng-style="$ctrl.getUserCSSStyle(user, label);"
 					) {{ ::$ctrl.displayName(user) }} 
 					span.name(
 						ng-if="user && user._id == $ctrl.currentUser.id"
-						ng-style="$ctrl.getUserCSSStyle(user);"
+						ng-style="$ctrl.getUserCSSStyle(user, label);"
 					) You
 					span.name(
 						ng-if="user == null"
-						ng-style="$ctrl.getUserCSSStyle(user);"
+						ng-style="$ctrl.getUserCSSStyle(user, label);"
 					) #{translate("anonymous")}
 				time.history-entry-label-metadata-time {{ ::label.created_at | formatDate }}
 		.loading(ng-show="$ctrl.isLoading")
