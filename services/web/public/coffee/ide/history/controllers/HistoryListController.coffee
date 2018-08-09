@@ -6,13 +6,17 @@ define [
 	App.controller "HistoryListController", ["$scope", "$modal", "ide", ($scope, $modal, ide) ->
 		$scope.hoveringOverListSelectors = false
 
-		projectUsers = $scope.project.members.concat $scope.project.owner
+		$scope.projectUsers = []
+
+		$scope.$watch "project.members", (newVal) ->
+			if newVal?
+				$scope.projectUsers = newVal.concat $scope.project.owner
 
 		# This method (and maybe the one below) will be removed soon. User details data will be 
 		# injected into the history API responses, so we won't need to fetch user data from other
 		# local data structures.
 		_getUserById = (id) ->
-			_.find projectUsers, (user) ->
+			_.find $scope.projectUsers, (user) ->
 				curUserId = user?._id or user?.id
 				curUserId == id
 
