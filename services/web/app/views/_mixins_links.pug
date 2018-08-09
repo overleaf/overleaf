@@ -1,9 +1,19 @@
-mixin linkAdvisors(linkText, linkClass, tracked)
+mixin linkAdvisors(linkText, linkClass, track)
 	//- To Do: verify path
-	//- To Do: track
+	- var gaCategory = track && track.category ? track.category : 'All'
+	- var gaAction = track && track.action ? track.action : null
+	- var gaLabel = track && track.label ? track.label : null
+	- var mb = track && track.mb ? 'true' : null
+	- var mbSegmentation = track && track.segmentation ? track.segmentation : null
+	- var trigger = track && track.trigger ? track.trigger : null
 	a(href="/advisors" 
 		class=linkClass ? linkClass : ''
-		eventTrackingGa=track ? 'advisors' : null
+		event-tracking-ga=gaCategory
+		event-tracking=gaAction
+		event-tracking-label=gaLabel
+		event-tracking-trigger=trigger
+		event-tracking-mb=mb
+		event-segmentation=mbSegmentation
 	)
 		| #{linkText ? linkText : 'advisor programme'}
 
@@ -32,8 +42,23 @@ mixin linkEmail(linkText, linkClass, email)
 	a(href="mailto:#{email ? email : 'contact'}@#{emailDomain}" class=linkClass ? linkClass : '')
 		| #{linkText ? linkText : 'email'}
 
-mixin linkInvite(linkText, linkClass)
-	a(href="/user/bonus" class=linkClass ? linkClass : '')
+mixin linkInvite(linkText, linkClass, track)
+	- var gaCategory = track && track.category ? track.category : 'All'
+	- var gaAction = track && track.action ? track.action : null
+	- var gaLabel = track && track.label ? track.label : null
+	- var mb = track && track.mb ? 'true' : null
+	- var mbSegmentation = track && track.segmentation ? track.segmentation : null
+	- var trigger = track && track.trigger ? track.trigger : null
+
+	a(href="/user/bonus"
+		class=linkClass ? linkClass : ''
+		event-tracking-ga=gaCategory
+		event-tracking=gaAction
+		event-tracking-label=gaLabel
+		event-tracking-trigger=trigger
+		event-tracking-mb=mb
+		event-segmentation=mbSegmentation
+	)
 		| #{linkText ? linkText : 'invite your friends'}
 
 mixin linkPlansAndPricing(linkText, linkClass)
@@ -42,10 +67,21 @@ mixin linkPlansAndPricing(linkText, linkClass)
 		| #{linkText ? linkText : 'plans and pricing'}
 
 mixin linkPrintNewTab(linkText, linkClass, icon, track)
-	//- To Do: track
+	- var gaCategory = track && track.category ? track.category : null
+	- var gaAction = track && track.action ? track.action : null
+	- var gaLabel = track && track.label ? track.label : null
+	- var mb = track && track.mb ? 'true' : null
+	- var mbSegmentation = track && track.segmentation ? track.segmentation : null
+	- var trigger = track && track.trigger ? track.trigger : null
+
 	a(href='?media=print'
 		class=linkClass ? linkClass : ''
-		eventTrackingGa=track ? 'print' : null
+		event-tracking-ga=gaCategory
+		event-tracking=gaAction
+		event-tracking-label=gaLabel
+		event-tracking-trigger=trigger
+		event-tracking-mb=mb
+		event-segmentation=mbSegmentation
 		target="_BLANK"
 	)
 		if icon
@@ -63,8 +99,19 @@ mixin linkSignUp(linkText, linkClass)
 
 mixin linkTweet(linkText, linkClass, tweetText, track)
 	//- twitter-share-button is required by twitter
-	//- To Do: track
+	- var gaCategory = track && track.category ? track.category : 'All'
+	- var gaAction = track && track.action ? track.action : null
+	- var gaLabel = track && track.label ? track.label : null
+	- var mb = track && track.mb ? 'true' : null
+	- var mbSegmentation = track && track.segmentation ? track.segmentation : null
+	- var trigger = track && track.trigger ? track.trigger : null
 	a(class="twitter-share-button " + linkClass
+		event-tracking-ga=gaCategory
+		event-tracking=gaAction
+		event-tracking-label=gaLabel
+		event-tracking-trigger=trigger
+		event-tracking-mb=mb
+		event-segmentation=mbSegmentation
 		href="https://twitter.com/intent/tweet?text=" + tweetText
 		target="_BLANK"
 	) #{linkText ? linkText : 'tweet'}
