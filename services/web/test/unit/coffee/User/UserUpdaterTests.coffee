@@ -241,7 +241,7 @@ describe "UserUpdater", ->
 			@UserUpdater.confirmEmail @stubbedUser._id, @newEmail, (err)=>
 				should.not.exist(err)
 				@addAffiliation.calledOnce.should.equal true
-				sinon.assert.calledWith(@addAffiliation, @stubbedUser._id, @newEmail, { confirmed: true } )
+				sinon.assert.calledWith(@addAffiliation, @stubbedUser._id, @newEmail, { confirmedAt: new Date() } )
 				done()
 
 		it 'handle error', (done)->
