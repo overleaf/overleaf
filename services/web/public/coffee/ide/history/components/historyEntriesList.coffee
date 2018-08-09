@@ -8,12 +8,14 @@ define [
 	App.component "historyEntriesList", {
 		bindings:
 			entries: "<"
+			users: "<"
 			loadEntries: "&"
 			loadDisabled: "<"
 			loadInitialize: "<"
 			isLoading: "<"
 			currentUser: "<"
 			onEntrySelect: "&"
+			onLabelDelete: "&"
 		controller: historyEntriesListController
 		templateUrl: "historyEntriesListTpl"
 	}

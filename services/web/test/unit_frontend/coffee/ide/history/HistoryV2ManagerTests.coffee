@@ -23,6 +23,7 @@ define ['ide/history/HistoryV2Manager'], (HistoryV2Manager) ->
 						toV: null
 					}
 				}
+				labels: null
 				diff: null
 				files: []
 				selectedFile: null

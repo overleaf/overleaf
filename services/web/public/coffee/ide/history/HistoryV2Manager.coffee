@@ -6,9 +6,13 @@ define [
 	"ide/history/controllers/HistoryV2ListController"
 	"ide/history/controllers/HistoryV2DiffController"
 	"ide/history/controllers/HistoryV2FileTreeController"
+	"ide/history/controllers/HistoryV2ToolbarController"
+	"ide/history/controllers/HistoryV2AddLabelModalController"
+	"ide/history/controllers/HistoryV2DeleteLabelModalController"
 	"ide/history/directives/infiniteScroll"
 	"ide/history/components/historyEntriesList"
 	"ide/history/components/historyEntry"
+	"ide/history/components/historyLabel"
 	"ide/history/components/historyFileTree"
 	"ide/history/components/historyFileEntity"
 ], (moment, ColorManager, displayNameForUser, HistoryViewModes) ->
@@ -68,6 +72,7 @@ define [
 						toV: null
 					}
 				}
+				labels: null
 				files: []
 				diff: null # When history.viewMode == HistoryViewModes.COMPARE
 				selectedFile: null # When history.viewMode == HistoryViewModes.POINT_IN_TIME
@@ -126,18 +131,19 @@ define [
 
 		BATCH_SIZE: 10
 		fetchNextBatchOfUpdates: () ->
-			url = "/project/#{@ide.project_id}/updates?min_count=#{@BATCH_SIZE}"
+			updatesURL = "/project/#{@ide.project_id}/updates?min_count=#{@BATCH_SIZE}"
 			if @$scope.history.nextBeforeTimestamp?
-				url += "&before=#{@$scope.history.nextBeforeTimestamp}"
+				updatesURL += "&before=#{@$scope.history.nextBeforeTimestamp}"
+			
 			@$scope.history.loading = true
 			@$scope.history.loadingFileTree = true
-			@ide.$http
-				.get(url)
+			
+			@ide.$http.get updatesURL
 				.then (response) =>
-					{ data } = response
-					@_loadUpdates(data.updates)
-					@$scope.history.nextBeforeTimestamp = data.nextBeforeTimestamp
-					if !data.nextBeforeTimestamp?
+					updatesData = response.data
+					@_loadUpdates(updatesData.updates)
+					@$scope.history.nextBeforeTimestamp = updatesData.nextBeforeTimestamp
+					if !updatesData.nextBeforeTimestamp?
 						@$scope.history.atEnd = true
 					@$scope.history.loading = false
 
@@ -198,6 +204,27 @@ define [
 				.catch () ->
 					diff.loading = false
 					diff.error = true
+
+		labelCurrentVersion: (labelComment) => 
+			@_labelVersion labelComment, @$scope.history.selection.updates[0].toV
+
+		deleteLabel: (labelId) =>
+			url = "/project/#{@$scope.project_id}/labels/#{labelId}"
+
+			@ide.$http({
+				url,
+				method: "DELETE"
+				headers:
+					"X-CSRF-Token": window.csrfToken
+			}).then (response) =>
+				@_deleteLabelFromLocalCollection @$scope.history.updates, labelId
+				@_deleteLabelFromLocalCollection @$scope.history.selection, labelId
+
+
+		_deleteLabelFromLocalCollection: (collection, labelId) ->
+			for update in collection
+				update.labels = _.filter update.labels, (label) -> 
+					label.id != labelId
 
 		_parseDiff: (diff) ->
 			if diff.binary
@@ -277,6 +304,22 @@ define [
 					@autoSelectRecentUpdates()
 				else 
 					@autoSelectLastUpdate()
+
+		_labelVersion: (comment, version) ->
+			url = "/project/#{@$scope.project_id}/labels"
+			@ide.$http
+				.post url, {
+					comment,
+					version,
+					_csrf: window.csrfToken
+				}
+				.then (response) =>
+					@_addLabelToLocalUpdate response.data
+
+		_addLabelToLocalUpdate: (label) ->
+			localUpdate = _.find @$scope.history.updates, (update) -> update.toV == label.version
+			if localUpdate?
+				localUpdate.labels.push label
 
 		_perDocSummaryOfUpdates: (updates) ->
 			# Track current_pathname -> original_pathname
