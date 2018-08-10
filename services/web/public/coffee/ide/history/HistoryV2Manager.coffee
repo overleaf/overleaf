@@ -53,8 +53,15 @@ define [
 					@reloadDiff()
 
 			@$scope.$watch "history.showOnlyLabels", (showOnlyLabels, prevVal) =>
-				if showOnlyLabels? and showOnlyLabels != prevVal and showOnlyLabels
-					@selectedLabelFromUpdatesSelection()
+				if showOnlyLabels? and showOnlyLabels != prevVal 
+					if showOnlyLabels
+						@selectedLabelFromUpdatesSelection()
+					else
+						if @$scope.history.selection.updates.length == 0
+							@autoSelectLastUpdate()
+
+			@$scope.$watch "history.updates.length", () =>
+				@recalculateSelectedUpdates()
 
 		show: () ->
 			@$scope.ui.view = "history"
@@ -95,10 +102,9 @@ define [
 				_csrf: window.csrfToken
 			})
 
-		loadFileTreeForUpdate: (update) ->
-			{fromV, toV} = update
+		loadFileTreeForVersion: (version) ->
 			url = "/project/#{@$scope.project_id}/filetree/diff"
-			query = [ "from=#{toV}", "to=#{toV}" ]
+			query = [ "from=#{version}", "to=#{version}" ]
 			url += "?" + query.join("&")
 			@$scope.history.loadingFileTree = true
 			@$scope.history.selectedFile = null
@@ -140,33 +146,66 @@ define [
 				update.selectedFrom = false
 			@$scope.history.updates[selectedUpdateIndex].selectedTo = true
 			@$scope.history.updates[selectedUpdateIndex].selectedFrom = true
-			@loadFileTreeForUpdate @$scope.history.updates[selectedUpdateIndex]
+			@recalculateSelectedUpdates()
+			@loadFileTreeForVersion @$scope.history.updates[selectedUpdateIndex].toV
 
 		selectedLabelFromUpdatesSelection: () ->
-			nLabels = @$scope.history.selection.updates?[0]?.labels?.length
-			if nLabels == 1
+			# Get the number of labels associated with the currently selected update
+			nSelectedLabels = @$scope.history.selection.updates?[0]?.labels?.length
+			# If the currently selected update has no labels, select the last one (version-wise)
+			if nSelectedLabels == 0
+				@autoSelectLastLabel()
+			# If the update has one label, select it 
+			else if nSelectedLabels == 1
 				@selectLabel @$scope.history.selection.updates[0].labels[0]
-			else if nLabels > 1
+			# If there are multiple labels for the update, select the latest
+			else if nSelectedLabels > 1
 				sortedLabels = @ide.$filter("orderBy")(@$scope.history.selection.updates[0].labels, '-created_at')
 				lastLabelFromUpdate = sortedLabels[0]
 				@selectLabel lastLabelFromUpdate
 				
 		selectLabel: (labelToSelect) ->
-			labelToSelectIndex = -1
-			for update, i in @$scope.history.updates
-				if update.toV == labelToSelect.version
-					labelToSelectIndex = i
-					break
-			if labelToSelectIndex == -1
-				labelToSelectIndex = 0
+			updateToSelect = null
+			alreadySelected = false
 			for update in @$scope.history.updates
-				update.selectedTo = false
-				update.selectedFrom = false
+				if update.toV == labelToSelect.version
+					updateToSelect = update
+					break
+
 			for label in @$scope.history.labels
-				label.selected = (labelToSelect.id == label.id)
-			@$scope.history.updates[labelToSelectIndex].selectedTo = true
-			@$scope.history.updates[labelToSelectIndex].selectedFrom = true
-			@loadFileTreeForUpdate @$scope.history.updates[labelToSelectIndex]
+				matchingLabel = (labelToSelect.id == label.id)
+				if matchingLabel and label.selected
+					alreadySelected = true
+				label.selected = matchingLabel
+
+			if alreadySelected
+				return
+
+			if updateToSelect?
+				@selectUpdate updateToSelect
+			else
+				@$scope.history.selection.updates = []
+				@loadFileTreeForVersion labelToSelect.version
+
+		recalculateSelectedUpdates: () ->
+			beforeSelection = true
+			afterSelection = false
+			@$scope.history.selection.updates = []
+			for update in @$scope.history.updates
+				if update.selectedTo
+					inSelection = true
+					beforeSelection = false
+
+				update.beforeSelection = beforeSelection
+				update.inSelection = inSelection
+				update.afterSelection = afterSelection
+
+				if inSelection
+					@$scope.history.selection.updates.push update
+
+				if update.selectedFrom
+					inSelection = false
+					afterSelection = true
 
 		BATCH_SIZE: 10
 		fetchNextBatchOfUpdates: () ->
@@ -199,6 +238,7 @@ define [
 			@ide.$filter("orderBy")(labels, [ '-version', '-created_at' ])
 
 		loadFileAtPointInTime: () ->
+			console.log @$scope.history.selection.pathname, @$scope.history.selection.updates
 			pathname = @$scope.history.selection.pathname
 			toV =  @$scope.history.selection.updates[0].toV
 			url = "/project/#{@$scope.project_id}/diff"
