@@ -27,6 +27,9 @@ define [
 					@hide()
 				else
 					@show()
+				@ide.$timeout () =>
+					@$scope.$broadcast "history:toggle"
+				, 0
 
 			@$scope.toggleHistoryViewMode = () =>
 				if @$scope.history.viewMode == HistoryViewModes.COMPARE
@@ -124,6 +127,10 @@ define [
 			return if @$scope.history.updates.length == 0
 			@selectUpdate @$scope.history.updates[0]
 
+		autoSelectLastLabel: () ->
+			return if @$scope.history.labels.length == 0
+			@selectLabel @$scope.history.labels[0]
+			
 		selectUpdate: (update) ->
 			selectedUpdateIndex = @$scope.history.updates.indexOf update
 			if selectedUpdateIndex == -1
@@ -135,10 +142,6 @@ define [
 			@$scope.history.updates[selectedUpdateIndex].selectedFrom = true
 			@loadFileTreeForUpdate @$scope.history.updates[selectedUpdateIndex]
 
-		selectLastLabel = () ->
-			return if @$scope.history.labels.length == 0
-			# TODO Select last label
-			
 		selectedLabelFromUpdatesSelection: () ->
 			nLabels = @$scope.history.selection.updates?[0]?.labels?.length
 			if nLabels == 1
@@ -184,12 +187,12 @@ define [
 			@ide.$q.all requests
 				.then (response) =>
 					updatesData = response.updates.data
+					if response.labels?
+						@$scope.history.labels = @_sortLabelsByVersionAndDate response.labels.data
 					@_loadUpdates(updatesData.updates)
 					@$scope.history.nextBeforeTimestamp = updatesData.nextBeforeTimestamp
 					if !updatesData.nextBeforeTimestamp?
 						@$scope.history.atEnd = true
-					if response.labels?
-						@$scope.history.labels = @_sortLabelsByVersionAndDate response.labels.data
 					@$scope.history.loading = false
 
 		_sortLabelsByVersionAndDate: (labels) ->
@@ -354,7 +357,7 @@ define [
 					@autoSelectRecentUpdates()
 				else 
 					if @$scope.history.showOnlyLabels
-						@selectLastLabel()
+						@autoSelectLastLabel()
 					else
 						@autoSelectLastUpdate()
 
