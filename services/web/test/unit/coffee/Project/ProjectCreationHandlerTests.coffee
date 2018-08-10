@@ -111,7 +111,7 @@ describe 'ProjectCreationHandler', ->
 					project.spellCheckLanguage.should.equal "de"
 					done()
 
-			it "should set the imageName to currentImageName if set", (done) ->
+			it "should set the imageName to currentImageName if set and no imageName attribute", (done) ->
 				@Settings.currentImageName = "mock-image-name"
 				@handler.createBlankProject ownerId, projectName, (err, project)=>
 					project.imageName.should.equal @Settings.currentImageName
@@ -121,6 +121,14 @@ describe 'ProjectCreationHandler', ->
 				@Settings.currentImageName = null
 				@handler.createBlankProject ownerId, projectName, (err, project)=>
 					expect(project.imageName).to.not.exist
+					done()
+
+			it "should set the imageName to the attribute value if set and not overwrite it with the currentImageName", (done) ->
+				@Settings.currentImageName = "mock-image-name"
+				attributes =
+					imageName: "attribute-image-name"
+				@handler.createBlankProject ownerId, projectName, attributes, (err, project)=>
+					project.imageName.should.equal attributes.imageName
 					done()
 
 			it "should not set the overleaf.history.display if not configured in settings", (done) ->

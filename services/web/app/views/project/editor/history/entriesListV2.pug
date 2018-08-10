@@ -129,7 +129,6 @@ script(type="text/ng-template", id="historyEntriesListTpl")
 				users="$ctrl.users"
 				on-select="$ctrl.onEntrySelect({ selectedEntry: selectedEntry })"
 				on-label-delete="$ctrl.onLabelDelete({ label: label })"
-				ng-show="!$ctrl.isLoading"
 			)
 			.loading(ng-show="$ctrl.isLoading")
 				i.fa.fa-spin.fa-refresh

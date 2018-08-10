@@ -7,8 +7,13 @@ define [
 		$scope.hoveringOverListSelectors = false
 		$scope.listConfig =
 			showOnlyLabelled: false
-		$scope.projectUsers = $scope.project.members.concat $scope.project.owner
 		
+		$scope.projectUsers = []
+
+		$scope.$watch "project.members", (newVal) ->
+			if newVal?
+				$scope.projectUsers = newVal.concat $scope.project.owner
+
 		$scope.loadMore = () =>
 			ide.historyManager.fetchNextBatchOfUpdates()
 
