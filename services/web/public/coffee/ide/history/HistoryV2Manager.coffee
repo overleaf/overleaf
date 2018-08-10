@@ -238,9 +238,15 @@ define [
 			@ide.$filter("orderBy")(labels, [ '-version', '-created_at' ])
 
 		loadFileAtPointInTime: () ->
-			console.log @$scope.history.selection.pathname, @$scope.history.selection.updates
 			pathname = @$scope.history.selection.pathname
-			toV =  @$scope.history.selection.updates[0].toV
+			if @$scope.history.selection.updates?[0]?
+				toV = @$scope.history.selection.updates[0].toV
+			else
+				for label in @$scope.history.labels or []
+					if label.selected
+						toV = label.version
+			if !toV?
+				return
 			url = "/project/#{@$scope.project_id}/diff"
 			query = ["pathname=#{encodeURIComponent(pathname)}", "from=#{toV}", "to=#{toV}"]
 			url += "?" + query.join("&")
