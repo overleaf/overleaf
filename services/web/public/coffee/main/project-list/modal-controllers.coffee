@@ -105,7 +105,10 @@ define [
 			project.accessLevel == "owner" and !project.archived
 
 		if $scope.projectsToLeave.length > 0 and $scope.projectsToDelete.length > 0
-			$scope.action = "delete-and-leave"
+			if $scope.projectsToArchive.length > 0 and window.ExposedSettings.isOverleaf
+				$scope.action = "archive-and-leave"
+			else
+				$scope.action = "delete-and-leave"
 		else if $scope.projectsToLeave.length == 0 and $scope.projectsToDelete.length > 0
 			if $scope.projectsToArchive.length > 0 and window.ExposedSettings.isOverleaf
 				$scope.action = "archive"
