@@ -39,7 +39,6 @@ module.exports =
 	parallelSqlQueryLimit:1
 	filestoreDomainOveride: process.env["FILESTORE_DOMAIN_OVERRIDE"]
 	texliveImageNameOveride: process.env["TEX_LIVE_IMAGE_NAME_OVERRIDE"]
-if process.env['SENTRY_DSN']
 	sentry:
 		dsn: process.env['SENTRY_DSN']
 
