@@ -333,3 +333,7 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 			defaultLineHeight          : if isOl then 'normal' else 'compact'
 			renderAnnouncements        : !isOl
 		next()
+
+	webRouter.use (req, res, next) ->
+		res.locals.exposedSettings =
+			isOverleaf: Settings.overleaf?
