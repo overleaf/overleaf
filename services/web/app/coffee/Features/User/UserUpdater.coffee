@@ -152,7 +152,10 @@ module.exports = UserUpdater =
 				else
 					return callback new Error("non-success code from v1: #{response.statusCode}")
 
-	confirmEmail: (userId, email, callback) ->
+	confirmEmail: (userId, email, confirmedAt, callback) ->
+		if arguments.length == 3
+			callback = confirmedAt
+			confirmedAt = new Date()
 		email = EmailHelper.parseEmail(email)
 		return callback(new Error('invalid email')) if !email?
 		logger.log {userId, email}, 'confirming user email'
@@ -166,7 +169,7 @@ module.exports = UserUpdater =
 				'emails.email': email
 			update =
 				$set:
-					'emails.$.confirmedAt': new Date()
+					'emails.$.confirmedAt': confirmedAt
 			@updateUser query, update, (error, res) ->
 				return callback(error) if error?
 				logger.log {res, userId, email}, "tried to confirm email"
