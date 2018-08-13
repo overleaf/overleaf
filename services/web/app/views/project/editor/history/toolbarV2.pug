@@ -11,7 +11,7 @@
 		time.history-toolbar-time {{ history.selection.updates[0].meta.end_ts | formatDate:'Do MMM YYYY, h:mm a' }}
 	span.history-toolbar-selected-version(
 		ng-show="!history.loadingFileTree && history.showOnlyLabels && history.selection.label"
-	) Browsing project version labelled 
+	) #{translate("browsing_project_labelled")}&nbsp;
 		span.history-toolbar-selected-label "{{ history.selection.label.comment }}"
 	div.history-toolbar-actions
 		button.history-toolbar-btn(
@@ -31,9 +31,9 @@
 	.history-toolbar-entries-list
 		toggle-switch(
 			ng-model="history.showOnlyLabels"
-			label-true="Labels"
-			label-false="All history"
-			description="Show all of the project history or only labelled versions."
+			label-true=translate("history_view_labels")
+			label-false=translate("history_view_all")
+			description=translate("history_view_a11y_description")
 		)
 
 script(type="text/ng-template", id="historyV2AddLabelModalTemplate")

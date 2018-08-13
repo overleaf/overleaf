@@ -45,7 +45,7 @@
 			text="history.diff.text",
 			highlights="history.diff.highlights",
 			read-only="true",
-			resize-on="layout:main:resize",
+			resize-on="layout:main:resize,history:toggle",
 			navigate-highlights="true"
 		)
 		.alert.alert-info(ng-if="history.diff.binary")
@@ -70,7 +70,7 @@
 			font-size="settings.fontSize",
 			text="history.selectedFile.text",
 			read-only="true",
-			resize-on="layout:main:resize",
+			resize-on="layout:main:resize,history:toggle",
 		)
 		.alert.alert-info(ng-if="history.selectedFile.binary")
 			| We're still working on showing image and binary changes, sorry. Stay tuned!
