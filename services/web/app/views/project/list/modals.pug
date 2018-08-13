@@ -197,7 +197,8 @@ script(type='text/ng-template', id='deleteProjectsModalTemplate')
 		h3(ng-if="action == 'delete-and-leave'") #{translate("delete_and_leave_projects")}
 	.modal-body
 		div(ng-show="projectsToDelete.length > 0")
-			p #{translate("about_to_delete_projects")}
+			p(ng-if="action == 'delete'") #{translate("about_to_delete_projects")}
+			p(ng-if="action == 'archive'") #{translate("about_to_archive_projects")}
 			ul
 				li(ng-repeat="project in projectsToDelete | orderBy:'name'")
 					strong {{project.name}}
