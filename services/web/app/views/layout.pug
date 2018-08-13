@@ -70,7 +70,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 			window.systemMessages = !{JSON.stringify(systemMessages).replace(/\//g, '\\/')};
 			window.ab = {};
 			window.user_id = '#{getLoggedInUserId()}';
-			window.exposedSettings = JSON.parse('!{JSON.stringify(exposedSettings).replace(/\//g, "\\/")}');
+			window.ExposedSettings = JSON.parse('!{JSON.stringify(ExposedSettings).replace(/\//g, "\\/")}');
 
 		- if (typeof(settings.algolia) != "undefined")
 			script.
