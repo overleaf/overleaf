@@ -335,5 +335,6 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 		next()
 
 	webRouter.use (req, res, next) ->
-		res.locals.exposedSettings =
+		res.locals.ExposedSettings =
 			isOverleaf: Settings.overleaf?
+		next()
