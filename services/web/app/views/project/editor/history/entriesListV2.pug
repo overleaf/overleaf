@@ -20,6 +20,7 @@ aside.change-list(
 		current-user="user"
 		users="projectUsers"
 		is-loading="history.loading"
+		selected-label="history.selection.label"
 		on-label-select="handleLabelSelect(label)"
 		on-label-delete="handleLabelDelete(label)"
 	)
@@ -209,7 +210,7 @@ script(type="text/ng-template", id="historyLabelsListTpl")
 		.history-entry-label(
 			ng-repeat="label in $ctrl.labels track by label.id"
 			ng-click="$ctrl.onLabelSelect({ label: label })"
-			ng-class="{ 'history-entry-label-selected': label.selected }" 
+			ng-class="{ 'history-entry-label-selected': label.id === $ctrl.selectedLabel.id }" 
 		)
 			history-label(
 				show-tooltip="false"

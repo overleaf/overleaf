@@ -38,6 +38,9 @@ define [
 				else
 					@reset()
 					@$scope.history.viewMode = HistoryViewModes.COMPARE
+				@ide.$timeout () =>
+					@$scope.$broadcast "history:toggle"
+				, 0
 
 			@$scope.$watch "history.selection.updates", (updates) =>
 				if @$scope.history.viewMode == HistoryViewModes.COMPARE
@@ -57,6 +60,7 @@ define [
 					if showOnlyLabels
 						@selectedLabelFromUpdatesSelection()
 					else
+						@$scope.history.selection.label = null
 						if @$scope.history.selection.updates.length == 0
 							@autoSelectLastUpdate()
 
@@ -79,6 +83,7 @@ define [
 				nextBeforeTimestamp: null
 				atEnd: false
 				selection: {
+					label: null
 					updates: []
 					docs: {}
 					pathname: null
@@ -166,21 +171,17 @@ define [
 				
 		selectLabel: (labelToSelect) ->
 			updateToSelect = null
-			alreadySelected = false
+
+			if @_isLabelSelected labelToSelect
+				# Label already selected
+				return
+
 			for update in @$scope.history.updates
 				if update.toV == labelToSelect.version
 					updateToSelect = update
 					break
 
-			for label in @$scope.history.labels
-				matchingLabel = (labelToSelect.id == label.id)
-				if matchingLabel and label.selected
-					alreadySelected = true
-				label.selected = matchingLabel
-
-			if alreadySelected
-				return
-
+			@$scope.history.selection.label = labelToSelect
 			if updateToSelect?
 				@selectUpdate updateToSelect
 			else
@@ -241,10 +242,9 @@ define [
 			pathname = @$scope.history.selection.pathname
 			if @$scope.history.selection.updates?[0]?
 				toV = @$scope.history.selection.updates[0].toV
-			else
-				for label in @$scope.history.labels or []
-					if label.selected
-						toV = label.version
+			else if @$scope.history.selection.label?
+				toV = @$scope.history.selection.label.version
+
 			if !toV?
 				return
 			url = "/project/#{@$scope.project_id}/diff"
@@ -315,6 +315,9 @@ define [
 					"X-CSRF-Token": window.csrfToken
 			}).then (response) =>
 				@_deleteLabelLocally label
+
+		_isLabelSelected: (label) ->
+			label.id == @$scope.history.selection.label?.id
 
 		_deleteLabelLocally: (labelToDelete) ->
 			for update, i in @$scope.history.updates

@@ -16,7 +16,7 @@ define [
 		ctrl.getUserCSSStyle = (user, label) ->
 			curUserId = user?._id or user?.id
 			hue = ColorManager.getHueForUserId(curUserId) or 100
-			if label.selected
+			if label.id == ctrl.selectedLabel?.id
 				color : "#FFF" 
 			else 
 				color: "hsl(#{ hue }, 70%, 50%)"
@@ -28,6 +28,7 @@ define [
 			users: "<"
 			currentUser: "<"
 			isLoading: "<"
+			selectedLabel: "<"
 			onLabelSelect: "&"
 			onLabelDelete: "&"
 		controller: historyLabelsListController

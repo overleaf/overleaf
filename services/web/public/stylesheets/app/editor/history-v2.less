@@ -15,22 +15,28 @@
 .history-toolbar when (@is-overleaf = false) {
 	border-bottom: @toolbar-border-bottom;
 }
-	.history-toolbar-time {
-		font-weight: bold;
+	.history-toolbar-selected-version {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
-	.history-toolbar-btn {
-		.btn;
-		.btn-info;
-		.btn-xs;
-		padding-left: @padding-small-horizontal;
-		padding-right: @padding-small-horizontal;
-		margin-left: (@line-height-computed / 2);
+		.history-toolbar-time,
+		.history-toolbar-selected-label {
+			font-weight: bold;
+		}
+	.history-toolbar-actions {
+		flex-grow: 1;
 	}
-
+		.history-toolbar-btn {
+			.btn;
+			.btn-info;
+			.btn-xs;
+			padding-left: @padding-small-horizontal;
+			padding-right: @padding-small-horizontal;
+			margin-left: (@line-height-computed / 2);
+		}
 	.history-toolbar-entries-list {
-		position: absolute; 
-		right: 0;
-		width: @changesListWidth;
+		flex: 0 0 @changesListWidth;
 		padding: 0 10px;
 		border-left: 1px solid @editor-border-color;
 	}
