@@ -26,6 +26,8 @@ define [
 				color : "#FFF" 
 			else 
 				color: "hsl(#{ hue }, 70%, 50%)"
+		ctrl.$onInit = () ->
+			ctrl.historyEntriesList.onEntryLinked ctrl.entry, $element.find "> .history-entry"
 		return
 
 	App.component "historyEntry", {
@@ -35,6 +37,8 @@ define [
 			users: "<"
 			onSelect: "&"
 			onLabelDelete: "&"
+		require:
+			historyEntriesList: '^historyEntriesList'
 		controller: historyEntryController
 		templateUrl: "historyEntryTpl"
 	}
