@@ -163,6 +163,13 @@ module.exports = EditorController =
 			EditorRealTimeController.emitToRoom project_id, 'compilerUpdated', compiler
 			callback()
 
+	setImageName : (project_id, imageName, callback = (err) ->) ->
+		ProjectOptionsHandler.setImageName project_id, imageName, (err) ->
+			return callback(err) if err?
+			logger.log imageName:imageName, project_id:project_id, "setting imageName"
+			EditorRealTimeController.emitToRoom project_id, 'imageNameUpdated', imageName
+			callback()
+
 	setSpellCheckLanguage : (project_id, languageCode, callback = (err) ->) ->
 		ProjectOptionsHandler.setSpellCheckLanguage project_id, languageCode, (err) ->
 			return callback(err) if err?
