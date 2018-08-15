@@ -14,5 +14,5 @@ block content
 		.content.plans(ng-controller="PlansController")
 			.container(class="more-details" ng-cloak ng-if="plansVariant === 'more-details'")
 				include _plans_page_details_more
-			.container(ng-cloak ng-if="plansVariant === 'default' || !shouldABTestPlans")
+			.container(ng-cloak ng-if="plansVariant === 'default' || !shouldABTestPlans || timeout")
 				include _plans_page_details_less

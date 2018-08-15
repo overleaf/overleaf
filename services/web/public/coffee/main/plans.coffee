@@ -145,7 +145,7 @@ define [
 		}
 
 
-	App.controller "PlansController", ($scope, $modal, event_tracking, abTestManager, MultiCurrencyPricing, $http, sixpack, $filter) ->
+	App.controller "PlansController", ($scope, $modal, event_tracking, abTestManager, MultiCurrencyPricing, $http, sixpack, $filter, ipCookie) ->
 
 		$scope.showPlans = false
 		$scope.shouldABTestPlans = window.shouldABTestPlans
@@ -154,7 +154,12 @@ define [
 			sixpack.participate 'plans-details', ['default', 'more-details'], (chosenVariation, rawResponse)->
 				if rawResponse?.status != 'failed' 
 					$scope.plansVariant = chosenVariation
+					expiration = new Date();
+					expiration.setDate(expiration.getDate() + 5);
+					ipCookie('plansVariant', chosenVariation, {expires: expiration})
 					event_tracking.send 'subscription-funnel', 'plans-page-loaded', chosenVariation
+				else
+					$scope.timeout = true
 
 		$scope.showPlans = true
 
@@ -185,9 +190,9 @@ define [
 			if $scope.ui.view == "annual"
 				plan = "#{plan}_annual"
 			plan = eventLabel(plan, location)
-			event_tracking.sendMB 'plans-page-start-trial', {plan}
+			event_tracking.sendMB 'plans-page-start-trial', {plan, variant: $scope.plansVariant}
 			event_tracking.send 'subscription-funnel', 'sign_up_now_button', plan
-			if $scope.shouldABTestPlans
+			if $scope.plansVariant
 				sixpack.convert 'plans-details'
 
 		$scope.switchToMonthly = (e, location) ->
