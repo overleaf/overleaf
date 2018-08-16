@@ -135,6 +135,7 @@ module.exports = settings =
 			url: "http://#{process.env['FILESTORE_HOST'] or 'localhost'}:3009"
 		clsi:
 			url: "http://#{process.env['CLSI_HOST'] or 'localhost'}:3013"
+			backendGroupName: undefined
 		templates:
 			url: "http://#{process.env['TEMPLATES_HOST'] or 'localhost'}:3007"
 		githubSync:
