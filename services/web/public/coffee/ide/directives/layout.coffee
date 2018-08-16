@@ -112,7 +112,8 @@ define [
 					element.layout().resizeAll()
 
 					if attrs.resizeOn?
-						scope.$on attrs.resizeOn, () -> onExternalResize()
+						for event in attrs.resizeOn.split ","
+							scope.$on event, () -> onExternalResize()
 
 					if hasCustomToggler
 						state = element.layout().readState()

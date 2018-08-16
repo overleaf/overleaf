@@ -70,17 +70,18 @@ script(type="text/ng-template", id="historyRestoreDiffModalTemplate")
 
 
 script(type="text/ng-template", id="historyLabelTpl")
-	.history-entry-label(
-		ng-class="{ 'history-entry-label-own' : $ctrl.isOwnedByCurrentUser }"
+	.history-label(
+		ng-class="{ 'history-label-own' : $ctrl.isOwnedByCurrentUser }"
 	)
-		span.history-entry-label-comment(
+		span.history-label-comment(
 			tooltip-append-to-body="true"
 			tooltip-template="'historyLabelTooltipTpl'"
 			tooltip-placement="left"
+			tooltip-enable="$ctrl.showTooltip"
 		)
 			i.fa.fa-tag
 			| &nbsp;{{ $ctrl.labelText }}
-		button.history-entry-label-delete-btn(
+		button.history-label-delete-btn(
 			ng-if="$ctrl.isOwnedByCurrentUser"
 			stop-propagation="click"
 			ng-click="$ctrl.onLabelDelete()"

@@ -12,6 +12,7 @@ define [
 	"ide/history/directives/infiniteScroll"
 	"ide/history/components/historyEntriesList"
 	"ide/history/components/historyEntry"
+	"ide/history/components/historyLabelsList"
 	"ide/history/components/historyLabel"
 	"ide/history/components/historyFileTree"
 	"ide/history/components/historyFileEntity"
@@ -26,6 +27,9 @@ define [
 					@hide()
 				else
 					@show()
+				@ide.$timeout () =>
+					@$scope.$broadcast "history:toggle"
+				, 0
 
 			@$scope.toggleHistoryViewMode = () =>
 				if @$scope.history.viewMode == HistoryViewModes.COMPARE
@@ -34,6 +38,9 @@ define [
 				else
 					@reset()
 					@$scope.history.viewMode = HistoryViewModes.COMPARE
+				@ide.$timeout () =>
+					@$scope.$broadcast "history:toggle"
+				, 0
 
 			@$scope.$watch "history.selection.updates", (updates) =>
 				if @$scope.history.viewMode == HistoryViewModes.COMPARE
@@ -47,6 +54,18 @@ define [
 						@loadFileAtPointInTime()
 				else 
 					@reloadDiff()
+
+			@$scope.$watch "history.showOnlyLabels", (showOnlyLabels, prevVal) =>
+				if showOnlyLabels? and showOnlyLabels != prevVal 
+					if showOnlyLabels
+						@selectedLabelFromUpdatesSelection()
+					else
+						@$scope.history.selection.label = null
+						if @$scope.history.selection.updates.length == 0
+							@autoSelectLastUpdate()
+
+			@$scope.$watch "history.updates.length", () =>
+				@recalculateSelectedUpdates()
 
 		show: () ->
 			@$scope.ui.view = "history"
@@ -64,6 +83,7 @@ define [
 				nextBeforeTimestamp: null
 				atEnd: false
 				selection: {
+					label: null
 					updates: []
 					docs: {}
 					pathname: null
@@ -72,6 +92,8 @@ define [
 						toV: null
 					}
 				}
+				error: null
+				showOnlyLabels: false
 				labels: null
 				files: []
 				diff: null # When history.viewMode == HistoryViewModes.COMPARE
@@ -86,10 +108,9 @@ define [
 				_csrf: window.csrfToken
 			})
 
-		loadFileTreeForUpdate: (update) ->
-			{fromV, toV} = update
+		loadFileTreeForVersion: (version) ->
 			url = "/project/#{@$scope.project_id}/filetree/diff"
-			query = [ "from=#{toV}", "to=#{toV}" ]
+			query = [ "from=#{version}", "to=#{version}" ]
 			url += "?" + query.join("&")
 			@$scope.history.loadingFileTree = true
 			@$scope.history.selectedFile = null
@@ -118,6 +139,10 @@ define [
 			return if @$scope.history.updates.length == 0
 			@selectUpdate @$scope.history.updates[0]
 
+		autoSelectLastLabel: () ->
+			return if @$scope.history.labels.length == 0
+			@selectLabel @$scope.history.labels[0]
+			
 		selectUpdate: (update) ->
 			selectedUpdateIndex = @$scope.history.updates.indexOf update
 			if selectedUpdateIndex == -1
@@ -127,29 +152,107 @@ define [
 				update.selectedFrom = false
 			@$scope.history.updates[selectedUpdateIndex].selectedTo = true
 			@$scope.history.updates[selectedUpdateIndex].selectedFrom = true
-			@loadFileTreeForUpdate @$scope.history.updates[selectedUpdateIndex]
+			@recalculateSelectedUpdates()
+			@loadFileTreeForVersion @$scope.history.updates[selectedUpdateIndex].toV
+
+		selectedLabelFromUpdatesSelection: () ->
+			# Get the number of labels associated with the currently selected update
+			nSelectedLabels = @$scope.history.selection.updates?[0]?.labels?.length
+			# If the currently selected update has no labels, select the last one (version-wise)
+			if nSelectedLabels == 0
+				@autoSelectLastLabel()
+			# If the update has one label, select it 
+			else if nSelectedLabels == 1
+				@selectLabel @$scope.history.selection.updates[0].labels[0]
+			# If there are multiple labels for the update, select the latest
+			else if nSelectedLabels > 1
+				sortedLabels = @ide.$filter("orderBy")(@$scope.history.selection.updates[0].labels, '-created_at')
+				lastLabelFromUpdate = sortedLabels[0]
+				@selectLabel lastLabelFromUpdate
+				
+		selectLabel: (labelToSelect) ->
+			updateToSelect = null
+
+			if @_isLabelSelected labelToSelect
+				# Label already selected
+				return
+
+			for update in @$scope.history.updates
+				if update.toV == labelToSelect.version
+					updateToSelect = update
+					break
+
+			@$scope.history.selection.label = labelToSelect
+			if updateToSelect?
+				@selectUpdate updateToSelect
+			else
+				@$scope.history.selection.updates = []
+				@loadFileTreeForVersion labelToSelect.version
+
+		recalculateSelectedUpdates: () ->
+			beforeSelection = true
+			afterSelection = false
+			@$scope.history.selection.updates = []
+			for update in @$scope.history.updates
+				if update.selectedTo
+					inSelection = true
+					beforeSelection = false
+
+				update.beforeSelection = beforeSelection
+				update.inSelection = inSelection
+				update.afterSelection = afterSelection
+
+				if inSelection
+					@$scope.history.selection.updates.push update
+
+				if update.selectedFrom
+					inSelection = false
+					afterSelection = true
 
 		BATCH_SIZE: 10
 		fetchNextBatchOfUpdates: () ->
 			updatesURL = "/project/#{@ide.project_id}/updates?min_count=#{@BATCH_SIZE}"
 			if @$scope.history.nextBeforeTimestamp?
 				updatesURL += "&before=#{@$scope.history.nextBeforeTimestamp}"
-			
+			labelsURL = "/project/#{@ide.project_id}/labels"
+
 			@$scope.history.loading = true
 			@$scope.history.loadingFileTree = true
 			
-			@ide.$http.get updatesURL
+			requests = 
+				updates: @ide.$http.get updatesURL
+			
+			if !@$scope.history.labels?
+				requests.labels = @ide.$http.get labelsURL
+
+			@ide.$q.all requests
 				.then (response) =>
-					updatesData = response.data
+					updatesData = response.updates.data
+					if response.labels?
+						@$scope.history.labels = @_sortLabelsByVersionAndDate response.labels.data
 					@_loadUpdates(updatesData.updates)
 					@$scope.history.nextBeforeTimestamp = updatesData.nextBeforeTimestamp
 					if !updatesData.nextBeforeTimestamp?
 						@$scope.history.atEnd = true
 					@$scope.history.loading = false
+				.catch (error) =>
+					{ status, statusText } = error
+					@$scope.history.error = { status, statusText }
+					@$scope.history.loading = false
+					@$scope.history.loadingFileTree = false
+
+		_sortLabelsByVersionAndDate: (labels) ->
+			@ide.$filter("orderBy")(labels, [ '-version', '-created_at' ])
 
 		loadFileAtPointInTime: () ->
 			pathname = @$scope.history.selection.pathname
-			toV =  @$scope.history.selection.updates[0].toV
+			if @$scope.history.selection.updates?[0]?
+				toV = @$scope.history.selection.updates[0].toV
+			else if @$scope.history.selection.label?
+				toV = @$scope.history.selection.label.version
+
+			if !toV?
+				return
 			url = "/project/#{@$scope.project_id}/diff"
 			query = ["pathname=#{encodeURIComponent(pathname)}", "from=#{toV}", "to=#{toV}"]
 			url += "?" + query.join("&")
@@ -208,8 +311,8 @@ define [
 		labelCurrentVersion: (labelComment) => 
 			@_labelVersion labelComment, @$scope.history.selection.updates[0].toV
 
-		deleteLabel: (labelId) =>
-			url = "/project/#{@$scope.project_id}/labels/#{labelId}"
+		deleteLabel: (label) =>
+			url = "/project/#{@$scope.project_id}/labels/#{label.id}"
 
 			@ide.$http({
 				url,
@@ -217,14 +320,19 @@ define [
 				headers:
 					"X-CSRF-Token": window.csrfToken
 			}).then (response) =>
-				@_deleteLabelFromLocalCollection @$scope.history.updates, labelId
-				@_deleteLabelFromLocalCollection @$scope.history.selection, labelId
+				@_deleteLabelLocally label
 
+		_isLabelSelected: (label) ->
+			label.id == @$scope.history.selection.label?.id
 
-		_deleteLabelFromLocalCollection: (collection, labelId) ->
-			for update in collection
-				update.labels = _.filter update.labels, (label) -> 
-					label.id != labelId
+		_deleteLabelLocally: (labelToDelete) ->
+			for update, i in @$scope.history.updates
+				if update.toV == labelToDelete.version
+					update.labels = _.filter update.labels, (label) -> 
+						label.id != labelToDelete.id
+					break 
+			@$scope.history.labels = _.filter @$scope.history.labels, (label) -> 
+				label.id != labelToDelete.id
 
 		_parseDiff: (diff) ->
 			if diff.binary
@@ -303,7 +411,10 @@ define [
 				if @$scope.history.viewMode == HistoryViewModes.COMPARE
 					@autoSelectRecentUpdates()
 				else 
-					@autoSelectLastUpdate()
+					if @$scope.history.showOnlyLabels
+						@autoSelectLastLabel()
+					else
+						@autoSelectLastUpdate()
 
 		_labelVersion: (comment, version) ->
 			url = "/project/#{@$scope.project_id}/labels"
@@ -316,10 +427,11 @@ define [
 				.then (response) =>
 					@_addLabelToLocalUpdate response.data
 
-		_addLabelToLocalUpdate: (label) ->
+		_addLabelToLocalUpdate: (label) =>
 			localUpdate = _.find @$scope.history.updates, (update) -> update.toV == label.version
 			if localUpdate?
-				localUpdate.labels.push label
+				localUpdate.labels = @_sortLabelsByVersionAndDate localUpdate.labels.concat label
+			@$scope.history.labels = @_sortLabelsByVersionAndDate @$scope.history.labels.concat label
 
 		_perDocSummaryOfUpdates: (updates) ->
 			# Track current_pathname -> original_pathname
