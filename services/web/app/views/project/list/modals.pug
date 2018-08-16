@@ -192,11 +192,14 @@ script(type='text/ng-template', id='deleteProjectsModalTemplate')
 			ng-click="cancel()"
 		) &times;
 		h3(ng-if="action == 'delete'") #{translate("delete_projects")}
+		h3(ng-if="action == 'archive'") #{translate("archive_projects")}
 		h3(ng-if="action == 'leave'") #{translate("leave_projects")}
 		h3(ng-if="action == 'delete-and-leave'") #{translate("delete_and_leave_projects")}
+		h3(ng-if="action == 'archive-and-leave'") #{translate("archive_and_leave_projects")}
 	.modal-body
 		div(ng-show="projectsToDelete.length > 0")
-			p #{translate("about_to_delete_projects")}
+			p(ng-if="action == 'delete' || action == 'delete-and-leave'") #{translate("about_to_delete_projects")}
+			p(ng-if="action == 'archive' || action == 'archive-and-leave'") #{translate("about_to_archive_projects")}
 			ul
 				li(ng-repeat="project in projectsToDelete | orderBy:'name'")
 					strong {{project.name}}
