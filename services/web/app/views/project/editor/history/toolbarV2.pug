@@ -6,14 +6,16 @@
 		i.fa.fa-spin.fa-refresh
 		| &nbsp;&nbsp; #{translate("loading")}...
 	span.history-toolbar-selected-version(
-		ng-show="!history.loadingFileTree && !history.showOnlyLabels"
+		ng-show="!history.loadingFileTree && !history.showOnlyLabels && !history.error"
 	) #{translate("browsing_project_as_of")}&nbsp;
 		time.history-toolbar-time {{ history.selection.updates[0].meta.end_ts | formatDate:'Do MMM YYYY, h:mm a' }}
 	span.history-toolbar-selected-version(
-		ng-show="!history.loadingFileTree && history.showOnlyLabels && history.selection.label"
+		ng-show="!history.loadingFileTree && history.showOnlyLabels && history.selection.label && !history.error"
 	) #{translate("browsing_project_labelled")}&nbsp;
 		span.history-toolbar-selected-label "{{ history.selection.label.comment }}"
-	div.history-toolbar-actions
+	div.history-toolbar-actions(
+		ng-if="!history.error"
+	)
 		button.history-toolbar-btn(
 			ng-click="showAddLabelDialog();"
 			ng-if="!history.showOnlyLabels"
@@ -28,7 +30,9 @@
 			i.fa.fa-exchange
 			| &nbsp;#{translate("compare_to_another_version")}
 
-	.history-toolbar-entries-list
+	.history-toolbar-entries-list(
+		ng-if="!history.error"
+	)
 		toggle-switch(
 			ng-model="history.showOnlyLabels"
 			label-true=translate("history_view_labels")

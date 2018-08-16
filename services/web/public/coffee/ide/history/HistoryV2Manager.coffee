@@ -92,6 +92,7 @@ define [
 						toV: null
 					}
 				}
+				error: null
 				showOnlyLabels: false
 				labels: null
 				files: []
@@ -234,6 +235,11 @@ define [
 					if !updatesData.nextBeforeTimestamp?
 						@$scope.history.atEnd = true
 					@$scope.history.loading = false
+				.catch (error) =>
+					{ status, statusText } = error
+					@$scope.history.error = { status, statusText }
+					@$scope.history.loading = false
+					@$scope.history.loadingFileTree = false
 
 		_sortLabelsByVersionAndDate: (labels) ->
 			@ide.$filter("orderBy")(labels, [ '-version', '-created_at' ])

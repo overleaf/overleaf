@@ -3,7 +3,7 @@ aside.change-list(
 	ng-controller="HistoryV2ListController"
 )
 	history-entries-list(
-		ng-if="!history.showOnlyLabels"
+		ng-if="!history.showOnlyLabels && !history.error"
 		entries="history.updates"
 		current-user="user"
 		users="projectUsers"
@@ -15,7 +15,7 @@ aside.change-list(
 		on-label-delete="handleLabelDelete(label)"
 	)
 	history-labels-list(
-		ng-if="history.showOnlyLabels"
+		ng-if="history.showOnlyLabels && !history.error"
 		labels="history.labels"
 		current-user="user"
 		users="projectUsers"
