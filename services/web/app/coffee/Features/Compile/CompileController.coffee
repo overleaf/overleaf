@@ -9,7 +9,7 @@ Settings = require "settings-sharelatex"
 AuthenticationController = require "../Authentication/AuthenticationController"
 UserGetter = require "../User/UserGetter"
 RateLimiter = require("../../infrastructure/RateLimiter")
-ClsiCookieManager = require("./ClsiCookieManager")()
+ClsiCookieManager = require("./ClsiCookieManager")(Settings.apis.clsi?.backendGroupName)
 Path = require("path")
 
 module.exports = CompileController =

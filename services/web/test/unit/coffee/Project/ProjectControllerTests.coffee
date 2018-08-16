@@ -145,6 +145,18 @@ describe "ProjectController", ->
 				done()
 			@ProjectController.updateProjectSettings @req, @res
 
+		it "should update the imageName", (done) ->
+			@EditorController.setImageName = sinon.stub().callsArg(2)
+			@req.body =
+				imageName: @imageName = "texlive-1234.5"
+			@res.sendStatus = (code) =>
+				@EditorController.setImageName
+					.calledWith(@project_id, @imageName)
+					.should.equal true
+				code.should.equal 204
+				done()
+			@ProjectController.updateProjectSettings @req, @res
+
 		it "should update the spell check language", (done) ->
 			@EditorController.setSpellCheckLanguage = sinon.stub().callsArg(2)
 			@req.body =

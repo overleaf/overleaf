@@ -135,6 +135,7 @@ module.exports = settings =
 			url: "http://#{process.env['FILESTORE_HOST'] or 'localhost'}:3009"
 		clsi:
 			url: "http://#{process.env['CLSI_HOST'] or 'localhost'}:3013"
+			backendGroupName: undefined
 		templates:
 			url: "http://#{process.env['TEMPLATES_HOST'] or 'localhost'}:3007"
 		githubSync:
@@ -277,10 +278,10 @@ module.exports = settings =
 	# Third party services
 	# --------------------
 	#
-	# ShareLaTeX's regular newsletter is managed by Markdown mail. Add your
+	# ShareLaTeX's regular newsletter is managed by mailchimp. Add your
 	# credentials here to integrate with this.
-	# markdownmail:
-	# 	secret: ""
+	# mailchimp:
+	# 	api_key: ""
 	# 	list_id: ""
 	#
 	# Fill in your unique token from various analytics services to enable
@@ -472,3 +473,14 @@ module.exports = settings =
 		autoCompile:
 			everyone: 100
 			standard: 25
+
+	# currentImage: "texlive-full:2017.1"
+	# imageRoot: "<DOCKER REPOSITORY ROOT>" # without any trailing slash
+	
+	# allowedImageNames: [
+	# 	{imageName: 'texlive-full:2017.1', imageDesc: 'TeXLive 2017'}
+	# 	{imageName:   'wl_texlive:2018.1', imageDesc: 'Legacy OL TeXLive 2015'}
+	# 	{imageName: 'texlive-full:2016.1', imageDesc: 'Legacy SL TeXLive 2016'}
+	# 	{imageName: 'texlive-full:2015.1', imageDesc: 'Legacy SL TeXLive 2015'}
+	# 	{imageName: 'texlive-full:2014.2', imageDesc: 'Legacy SL TeXLive 2014.2'}
+	# ]
