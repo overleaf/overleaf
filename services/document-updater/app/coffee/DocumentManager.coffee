@@ -181,14 +181,19 @@ module.exports = DocumentManager =
 				callback(null, lines, version)
 
 	resyncDocContents: (project_id, doc_id, callback) ->
+		logger.log {project_id: project_id, doc_id: doc_id}, "start resyncing doc contents"
 		RedisManager.getDoc project_id, doc_id, (error, lines, version, ranges, pathname, projectHistoryId) ->
 			return callback(error) if error?
 
 			if !lines? or !version?
+				logger.log {project_id: project_id, doc_id: doc_id}, "resyncing doc contents - not found in redis - retrieving from web"
 				PersistenceManager.getDoc project_id, doc_id, (error, lines, version, ranges, pathname, projectHistoryId) ->
-					return callback(error) if error?
+					if error?
+						logger.error {project_id: project_id, doc_id: doc_id, getDocError: error}, "resyncing doc contents - error retrieving from web"
+						return callback(error)
 					ProjectHistoryRedisManager.queueResyncDocContent project_id, projectHistoryId, doc_id, lines, version, pathname, callback
 			else
+				logger.log {project_id: project_id, doc_id: doc_id}, "resyncing doc contents - doc in redis - will queue in redis"
 				ProjectHistoryRedisManager.queueResyncDocContent project_id, projectHistoryId, doc_id, lines, version, pathname, callback
 
 	getDocWithLock: (project_id, doc_id, callback = (error, lines, version) ->) ->

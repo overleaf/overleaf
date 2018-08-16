@@ -65,10 +65,12 @@ module.exports = HistoryManager =
 		newBlock  = Math.floor(length / threshold)
 		return newBlock != prevBlock
 
+	MAX_PARALLEL_REQUESTS: 4
+
 	resyncProjectHistory: (project_id, projectHistoryId, docs, files, callback) ->
 		ProjectHistoryRedisManager.queueResyncProjectStructure project_id, projectHistoryId, docs, files, (error) ->
 			return callback(error) if error?
 			DocumentManager = require "./DocumentManager"
 			resyncDoc = (doc, cb) ->
 				DocumentManager.resyncDocContentsWithLock project_id, doc.doc, cb
-			async.each docs, resyncDoc, callback
+			async.eachLimit docs, HistoryManager.MAX_PARALLEL_REQUESTS, resyncDoc, callback
