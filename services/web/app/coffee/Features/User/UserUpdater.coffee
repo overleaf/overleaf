@@ -11,6 +11,7 @@ EmailHelper = require "../Helpers/EmailHelper"
 Errors = require "../Errors/Errors"
 Settings = require "settings-sharelatex"
 request = require 'request'
+NewsletterManager = require "../Newsletter/NewsletterManager"
 
 module.exports = UserUpdater =
 	updateUser: (query, update, callback = (error) ->) ->
@@ -99,15 +100,21 @@ module.exports = UserUpdater =
 	setDefaultEmailAddress: (userId, email, callback) ->
 		email = EmailHelper.parseEmail(email)
 		return callback(new Error('invalid email')) if !email?
-		query = _id: userId, 'emails.email': email
-		update = $set: email: email
-		@updateUser query, update, (error, res) ->
-			if error?
-				logger.err error:error, 'problem setting default emails'
+		UserGetter.getUserEmail userId, (error, oldEmail) =>
+			if err?
 				return callback(error)
-			if res.n == 0 # TODO: Check n or nMatched?
-				return callback(new Error('Default email does not belong to user'))
-			callback()
+			query = _id: userId, 'emails.email': email
+			update = $set: email: email
+			@updateUser query, update, (error, res) ->
+				if error?
+					logger.err error:error, 'problem setting default emails'
+					return callback(error)
+				else if res.n == 0 # TODO: Check n or nMatched?
+					return callback(new Error('Default email does not belong to user'))
+				else
+					NewsletterManager.changeEmail oldEmail, email, callback
+
+
 
 	updateV1AndSetDefaultEmailAddress: (userId, email, callback) ->
 		@updateEmailAddressInV1 userId, email, (error) =>
