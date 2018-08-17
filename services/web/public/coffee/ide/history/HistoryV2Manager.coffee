@@ -410,7 +410,7 @@ define [
 				previousUpdate = update
 
 				if !@$scope.history.userHasFullFeature and update.meta.end_ts < timestamp24hoursAgo
-					cutOffIndex = i
+					cutOffIndex = i or 1 # Make sure that we show at least one entry (to allow labelling).
 					@$scope.history.freeHistoryLimitHit = true
 					break
 
