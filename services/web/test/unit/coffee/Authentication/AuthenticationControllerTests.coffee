@@ -214,7 +214,7 @@ describe "AuthenticationController", ->
 		beforeEach ->
 			@AuthenticationController._recordFailedLogin = sinon.stub()
 			@AuthenticationController._recordSuccessfulLogin = sinon.stub()
-			@Modules.hooks.fire = sinon.stub().callsArgWith(2, null, [])
+			@Modules.hooks.fire = sinon.stub().callsArgWith(3, null, [])
 			# @AuthenticationController.establishUserSession = sinon.stub().callsArg(2)
 			@req.body =
 				email: @email
@@ -225,7 +225,7 @@ describe "AuthenticationController", ->
 
 		describe "when the preDoPassportLogin hooks produce an info object", ->
 			beforeEach ->
-				@Modules.hooks.fire = sinon.stub().callsArgWith(2, null, [null, {redir: '/somewhere'}, null])
+				@Modules.hooks.fire = sinon.stub().callsArgWith(3, null, [null, {redir: '/somewhere'}, null])
 
 			it "should stop early and call done with this info object", (done) ->
 				@AuthenticationController.doPassportLogin(@req, @req.body.email, @req.body.password, @cb)
