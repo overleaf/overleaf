@@ -88,3 +88,11 @@ describe "UserCreator", ->
 				process.nextTick () =>
 					sinon.assert.calledWith(@addAffiliation, user._id, user.email)
 					done()
+
+		it "should not add affiliation if skipping", (done)->
+			attributes =  email: @email
+			options = skip_affiliation: true
+			@UserCreator.createNewUser attributes, options, (err, user) =>
+				process.nextTick () =>
+					sinon.assert.notCalled(@addAffiliation)
+					done()
