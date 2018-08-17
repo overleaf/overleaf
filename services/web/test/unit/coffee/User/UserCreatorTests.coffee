@@ -20,7 +20,7 @@ describe "UserCreator", ->
 		@addAffiliation = sinon.stub().yields()
 		@UserCreator = SandboxedModule.require modulePath, requires:
 			"../../models/User": User:@UserModel
-			"logger-sharelatex":{log:->}
+			"logger-sharelatex":{ log: sinon.stub(), err: sinon.stub() }
 			'metrics-sharelatex': {timeAsyncMethod: ()->}
 			"../Institutions/InstitutionsAPI": addAffiliation: @addAffiliation
 
