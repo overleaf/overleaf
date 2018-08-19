@@ -51,12 +51,16 @@ module.exports = ProjectPersistenceManager =
 	clearProjectFromCache: (project_id, callback = (error) ->) ->
 		logger.log project_id: project_id, "clearing project from cache"
 		UrlCache.clearProject project_id, (error) ->
-			return callback(error) if error?
+			if error?
+				logger.err error:error, project_id: project_id, "error clearing project from cache"
+				return callback(error) 
 			ProjectPersistenceManager._clearProjectFromDatabase project_id, (error) ->
-				return callback(error) if error?
-				callback()
+				if error?
+					logger.err error:error, project_id:project_id, "error clearing project from database"
+				callback(error)
 
 	_clearProjectFromDatabase: (project_id, callback = (error) ->) ->
+		logger.log project_id:project_id, "clearing project from database"
 		job = (cb)->
 			db.Project.destroy(where: {project_id: project_id})
 				.then(() -> cb())
