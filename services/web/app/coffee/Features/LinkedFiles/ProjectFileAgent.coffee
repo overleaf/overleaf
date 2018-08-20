@@ -2,6 +2,7 @@ AuthorizationManager = require('../Authorization/AuthorizationManager')
 ProjectLocator = require('../Project/ProjectLocator')
 ProjectGetter = require('../Project/ProjectGetter')
 DocstoreManager = require('../Docstore/DocstoreManager')
+DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 FileStoreHandler = require('../FileStore/FileStoreHandler')
 _ = require "underscore"
 Settings = require 'settings-sharelatex'
@@ -75,15 +76,17 @@ module.exports = ProjectFileAgent = {
 			@_getSourceProject linkedFileData, (err, project) ->
 				return callback(err) if err?
 				source_project_id = project._id
-				ProjectLocator.findElementByPath {
-					project_id: source_project_id,
-					path: source_entity_path
-				}, (err, entity, type) ->
-					if err?
-						if err.toString().match(/^not found.*/)
-							err = new SourceFileNotFoundError()
-						return callback(err)
-					callback(null, project, entity, type)
+				DocumentUpdaterHandler.flushProjectToMongo source_project_id, (err) ->
+					return callback(err) if err?
+					ProjectLocator.findElementByPath {
+						project_id: source_project_id,
+						path: source_entity_path
+					}, (err, entity, type) ->
+						if err?
+							if err.toString().match(/^not found.*/)
+								err = new SourceFileNotFoundError()
+							return callback(err)
+						callback(null, project, entity, type)
 
 	_sanitizeData: (data) ->
 		return _.pick(
