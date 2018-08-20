@@ -214,7 +214,7 @@ module.exports = DockerRunner =
 			if error?.statusCode == 404
 				createAndStartContainer()
 			else if error?
-				logger.err {container_name: name}, "unable to inspect container to start"
+				logger.err {container_name: name, error:error}, "unable to inspect container to start"
 				return callback(error)
 			else
 				startExistingContainer()

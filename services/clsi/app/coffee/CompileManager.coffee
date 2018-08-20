@@ -290,7 +290,8 @@ module.exports = CompileManager =
 			return callback(error) if error?
 			fs.readFile directory + "/" + file_name + ".wc", "utf-8", (err, stdout) ->
 				if err?
-					logger.err err:err, command:command, directory:directory, project_id:project_id, user_id:user_id, "error reading word count output"
+					#call it node_err so sentry doesn't use random path error as unique id so it can't be ignored
+					logger.err node_err:err, command:command, directory:directory, project_id:project_id, user_id:user_id, "error reading word count output"
 					return callback(err)
 				results = CompileManager._parseWordcountFromOutput(stdout)
 				logger.log project_id:project_id, user_id:user_id, wordcount: results, "word count results"
