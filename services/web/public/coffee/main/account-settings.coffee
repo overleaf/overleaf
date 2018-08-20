@@ -25,9 +25,8 @@ define [
 				resolve:
 					userDefaultEmail: () ->
 						UserAffiliationsDataService
-							.getUserEmails()
-							.then (userEmails) ->
-								defaultEmailDetails = _.find userEmails, (userEmail) -> userEmail.default
+							.getUserDefaultEmail()
+							.then (defaultEmailDetails) ->
 								return defaultEmailDetails?.email or null
 							.catch () -> null
 			)
