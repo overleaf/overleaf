@@ -9,7 +9,7 @@ module.exports = InstitutionsAPI =
 			method: 'GET'
 			path: "/api/v2/institutions/#{institutionId.toString()}/affiliations"
 			defaultErrorMessage: "Couldn't get institution affiliations"
-		}, callback
+		}, (error, body) -> callback(error, body or [])
 
 
 	getUserAffiliations: (userId, callback = (error, body) ->) ->
@@ -17,7 +17,7 @@ module.exports = InstitutionsAPI =
 			method: 'GET'
 			path: "/api/v2/users/#{userId.toString()}/affiliations"
 			defaultErrorMessage: "Couldn't get user affiliations"
-		}, callback
+		}, (error, body) -> callback(error, body or [])
 
 
 	addAffiliation: (userId, email, affiliationOptions, callback) ->
