@@ -922,7 +922,7 @@
 	}
 }
 
-.review-icon {
+.review-icon when (@is-overleaf = false) {
 	display: inline-block;
 	background: url('/img/review-icon-sprite.png') top/30px no-repeat;
 	width: 30px;
@@ -945,10 +945,17 @@
 	}
 }
 
-.review-icon when (@is-overleaf) {
-	background-position-y: -60px;
-	.toolbar .btn-full-height:hover & {
-		background-position-y: -60px;
+.review-icon when (@is-overleaf = true) {
+	display: inline-block;
+	background: url('/img/review-icon-sprite-ol.png') top/30px no-repeat;
+	width: 30px;
+
+	&::before {
+		content: '\00a0'; // Non-breakable space. A non-breakable character here makes this icon work like font-awesome.
+	}
+	
+	@media (min-device-pixel-ratio: 1.5), (min-resolution: 144dpi) {
+		background-image: url('/img/review-icon-sprite-ol@2x.png');
 	}
 }
 
