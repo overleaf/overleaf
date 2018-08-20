@@ -167,7 +167,12 @@ block content
 									)
 										i.fa.fa-check
 										| #{translate("unsubscribed")}
-				
+
+									if !settings.overleaf && user.overleaf
+										p
+											| Please note: If you have linked your account with Overleaf
+											| v2, then deleting your ShareLaTeX account will also delete
+											| account and all of it's associated projects and data.
 									p #{translate("need_to_leave")} 
 										a(href, ng-click="deleteAccount()")  #{translate("delete_your_account")}
 
