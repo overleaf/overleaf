@@ -225,7 +225,8 @@ define [
 			}, {params: params}
 
 		buildPdfDownloadUrl = (pdfDownloadDomain, path)->
-			if pdfDownloadDomain?
+			 #we only download builds from compiles server for security reasons
+			if pdfDownloadDomain? and path.indexOf("build") != -1
 				return "#{pdfDownloadDomain}#{path}"
 			else
 				return path
@@ -378,14 +379,15 @@ define [
 						compileGroup:ide.compileGroup
 						clsiserverid:ide.clsiServerId
 				if file?.url?  # FIXME clean this up when we have file.urls out consistently
-					opts.url = buildPdfDownloadUrl options.pdfDownloadDomain, file.url
+					opts.url = file.url
 				else if file?.build?
-					opts.url = buildPdfDownloadUrl options.pdfDownloadDomain, "/project/#{$scope.project_id}/build/#{file.build}/output/#{name}"
+					opts.url = "/project/#{$scope.project_id}/build/#{file.build}/output/#{name}"
 				else
-					opts.url = buildPdfDownloadUrl options.pdfDownloadDomain,  "/project/#{$scope.project_id}/output/#{name}"
+					opts.url = "/project/#{$scope.project_id}/output/#{name}"
 				# check if we need to bust cache (build id is unique so don't need it in that case)
 				if not file?.build?
 					opts.params.cache_bust = "#{Date.now()}"
+				opts.url = buildPdfDownloadUrl options.pdfDownloadDomain, opts.url
 				return $http(opts)
 
 			# accumulate the log entries
