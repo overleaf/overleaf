@@ -32,6 +32,21 @@
             "args": []
         },
         {
+            "name": "clock_getres",
+            "action": "SCMP_ACT_ALLOW",
+            "args": []
+        },
+        {
+            "name": "clock_gettime",
+            "action": "SCMP_ACT_ALLOW",
+            "args": []
+        },
+        {
+            "name": "clock_nanosleep",
+            "action": "SCMP_ACT_ALLOW",
+            "args": []
+        },
+        {
             "name": "clone",
             "action": "SCMP_ACT_ALLOW",
             "args": [
@@ -665,6 +680,31 @@
         },
         {
             "name": "tgkill",
+            "action": "SCMP_ACT_ALLOW",
+            "args": []
+        },
+        {
+            "name": "timer_create",
+            "action": "SCMP_ACT_ALLOW",
+            "args": []
+        },
+        {
+            "name": "timer_delete",
+            "action": "SCMP_ACT_ALLOW",
+            "args": []
+        },
+        {
+            "name": "timer_getoverrun",
+            "action": "SCMP_ACT_ALLOW",
+            "args": []
+        },
+        {
+            "name": "timer_gettime",
+            "action": "SCMP_ACT_ALLOW",
+            "args": []
+        },
+        {
+            "name": "timer_settime",
             "action": "SCMP_ACT_ALLOW",
             "args": []
         },
