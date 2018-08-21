@@ -84,7 +84,7 @@ module.exports = AuthenticationController =
 	doPassportLogin: (req, username, password, done) ->
 		email = username.toLowerCase()
 		Modules = require "../../infrastructure/Modules"
-		Modules.hooks.fire 'preDoPassportLogin', email, (err, infoList) ->
+		Modules.hooks.fire 'preDoPassportLogin', req, email, (err, infoList) ->
 			return next(err) if err?
 			info = infoList.find((i) => i?)
 			if info?
