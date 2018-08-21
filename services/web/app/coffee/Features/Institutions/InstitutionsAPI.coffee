@@ -80,6 +80,8 @@ makeAffiliationRequest = (requestOptions, callback = (error) ->) ->
 				errorMessage = "#{response.statusCode}: #{body.errors}"
 			else
 				errorMessage = "#{requestOptions.defaultErrorMessage}: #{response.statusCode}"
+
+			logger.err path: requestOptions.path, body: requestOptions.body, errorMessage
 			return callback(new Error(errorMessage))
 
 		callback(null, body)

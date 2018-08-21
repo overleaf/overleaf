@@ -135,6 +135,7 @@ module.exports = settings =
 			url: "http://#{process.env['FILESTORE_HOST'] or 'localhost'}:3009"
 		clsi:
 			url: "http://#{process.env['CLSI_HOST'] or 'localhost'}:3013"
+			# url: "http://#{process.env['CLSI_LB_HOST']}:3014"
 			backendGroupName: undefined
 		templates:
 			url: "http://#{process.env['TEMPLATES_HOST'] or 'localhost'}:3007"
@@ -340,7 +341,7 @@ module.exports = settings =
 	# disablePerUserCompiles: true
 
 	# Domain the client (pdfjs) should download the compiled pdf from
-	# pdfDownloadDomain: "http://compiles.sharelatex.test:3014"
+	# pdfDownloadDomain: "http://clsi-lb:3014"
 
 	# Maximum size of text documents in the real-time editing system.
 	max_doc_length: 2 * 1024 * 1024 # 2mb

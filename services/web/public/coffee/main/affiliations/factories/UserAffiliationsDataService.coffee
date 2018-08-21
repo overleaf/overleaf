@@ -31,6 +31,10 @@ define [
 			$http.get "/user/emails"
 				.then (response) -> response.data
 
+		getUserDefaultEmail = () ->
+			getUserEmails().then (userEmails) ->
+				_.find userEmails, (userEmail) -> userEmail.default
+
 		getUniversitiesFromCountry = (country) ->
 			if universities[country.code]?
 				universitiesFromCountry = universities[country.code]
@@ -118,6 +122,7 @@ define [
 			getDefaultRoleHints
 			getDefaultDepartmentHints
 			getUserEmails
+			getUserDefaultEmail
 			getUniversitiesFromCountry
 			getUniversityDomainFromPartialDomainInput
 			getUniversityDetails
