@@ -230,7 +230,7 @@ define [
 
 		buildPdfDownloadUrl = (pdfDownloadDomain, path)->
 			 #we only download builds from compiles server for security reasons
-			if pdfDownloadDomain? and path.indexOf("build") != -1
+			if pdfDownloadDomain? and path? and path.indexOf("build") != -1
 				return "#{pdfDownloadDomain}#{path}"
 			else
 				return path
