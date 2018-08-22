@@ -17,7 +17,7 @@ describe "UserEmails", ->
 			token = null
 			async.series [
 				(cb) =>
-					@user.request { 
+					@user.request {
 						method: 'POST',
 						url: '/user/emails',
 						json:
@@ -45,7 +45,7 @@ describe "UserEmails", ->
 						token = tokens[0].token
 						cb()
 				(cb) =>
-					@user.request { 
+					@user.request {
 						method: 'POST',
 						url: '/user/emails/confirm',
 						json:
@@ -80,7 +80,7 @@ describe "UserEmails", ->
 				(cb) => @user2.login cb
 				(cb) =>
 					# Create email for first user
-					@user.request { 
+					@user.request {
 						method: 'POST',
 						url: '/user/emails',
 						json: {@email}
@@ -99,21 +99,21 @@ describe "UserEmails", ->
 						cb()
 				(cb) =>
 					# Delete the email from the first user
-					@user.request { 
+					@user.request {
 						method: 'POST',
 						url: '/user/emails/delete',
 						json: {@email}
 					}, cb
 				(cb) =>
 					# Create email for second user
-					@user2.request { 
+					@user2.request {
 						method: 'POST',
 						url: '/user/emails',
 						json: {@email}
 					}, cb
 				(cb) =>
 					# Original confirmation token should no longer work
-					@user.request { 
+					@user.request {
 						method: 'POST',
 						url: '/user/emails/confirm',
 						json:
@@ -158,7 +158,7 @@ describe "UserEmails", ->
 			token = null
 			async.series [
 				(cb) =>
-					@user.request { 
+					@user.request {
 						method: 'POST',
 						url: '/user/emails',
 						json:
@@ -183,12 +183,12 @@ describe "UserEmails", ->
 					db.tokens.update {
 						token: token
 					}, {
-						$set: { 
+						$set: {
 							expiresAt: new Date(Date.now() - 1000000)
 						}
 					}, cb
 				(cb) =>
-					@user.request { 
+					@user.request {
 						method: 'POST',
 						url: '/user/emails/confirm',
 						json:
@@ -196,5 +196,287 @@ describe "UserEmails", ->
 					}, (error, response, body) =>
 						return done(error) if error?
 						expect(response.statusCode).to.equal 404
+						cb()
+			], done
+
+	describe 'resending the confirmation', ->
+		it 'should generate a new token', (done) ->
+			async.series [
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails',
+						json:
+							email: 'reconfirmation-email@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 204
+						cb()
+				(cb) =>
+					db.tokens.find {
+						use: 'email_confirmation',
+						'data.user_id': @user._id,
+						usedAt: { $exists: false }
+					}, (error, tokens) =>
+						# There should only be one confirmation token at the moment
+						expect(tokens.length).to.equal 1
+						expect(tokens[0].data.email).to.equal 'reconfirmation-email@example.com'
+						expect(tokens[0].data.user_id).to.equal @user._id
+						cb()
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails/resend_confirmation',
+						json:
+							email: 'reconfirmation-email@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 200
+						cb()
+				(cb) =>
+					db.tokens.find {
+						use: 'email_confirmation',
+						'data.user_id': @user._id,
+						usedAt: { $exists: false }
+					}, (error, tokens) =>
+						# There should be two tokens now
+						expect(tokens.length).to.equal 2
+						expect(tokens[0].data.email).to.equal 'reconfirmation-email@example.com'
+						expect(tokens[0].data.user_id).to.equal @user._id
+						expect(tokens[1].data.email).to.equal 'reconfirmation-email@example.com'
+						expect(tokens[1].data.user_id).to.equal @user._id
+						cb()
+			], done
+
+		it 'should create a new token if none exists', (done) ->
+			# This should only be for users that have sign up with their main
+			# emails before the confirmation system existed
+			async.series [
+				(cb) =>
+					db.tokens.remove {
+						use: 'email_confirmation',
+						'data.user_id': @user._id,
+						usedAt: { $exists: false }
+					}, cb
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails/resend_confirmation',
+						json:
+							email: @user.email
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 200
+						cb()
+				(cb) =>
+					db.tokens.find {
+						use: 'email_confirmation',
+						'data.user_id': @user._id,
+						usedAt: { $exists: false }
+					}, (error, tokens) =>
+						# There should still only be one confirmation token
+						expect(tokens.length).to.equal 1
+						expect(tokens[0].data.email).to.equal @user.email
+						expect(tokens[0].data.user_id).to.equal @user._id
+						cb()
+			], done
+
+		it "should not allow reconfirmation if the email doesn't match the user", (done) ->
+			async.series [
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails/resend_confirmation',
+						json:
+							email: 'non-matching-email@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 422
+						cb()
+				(cb) =>
+					db.tokens.find {
+						use: 'email_confirmation',
+						'data.user_id': @user._id,
+						usedAt: { $exists: false }
+					}, (error, tokens) =>
+						expect(tokens.length).to.equal 0
+						cb()
+			], done
+
+	describe 'setting a default email', ->
+		it 'should update confirmed emails for users not in v1', (done) ->
+			token = null
+			async.series [
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails',
+						json:
+							email: 'new-confirmed-default@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 204
+						cb()
+				(cb) =>
+					# Mark the email as confirmed
+					db.users.update {
+						'emails.email': 'new-confirmed-default@example.com'
+					}, { 
+						$set: {
+							'emails.$.confirmedAt': new Date()
+						}
+					}, cb
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails/default',
+						json:
+							email: 'new-confirmed-default@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 200
+						cb()
+				(cb) =>
+					@user.request { url: '/user/emails', json: true }, (error, response, body) ->
+						expect(response.statusCode).to.equal 200
+						expect(body[0].confirmedAt).to.not.exist
+						expect(body[0].default).to.equal false
+						expect(body[1].confirmedAt).to.exist
+						expect(body[1].default).to.equal true
+						cb()
+			], done
+
+		it 'should not allow changing unconfirmed emails in v1', (done) ->
+			token = null
+			async.series [
+				(cb) =>
+					db.users.update {
+						_id: ObjectId(@user._id)
+					}, {
+						$set: {
+							'overleaf.id': 42
+						}
+					}, cb
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails',
+						json:
+							email: 'new-unconfirmed-default@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 204
+						cb()
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails/default',
+						json:
+							email: 'new-unconfirmed-default@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 409
+						cb()
+				(cb) =>
+					@user.request { url: '/user/emails', json: true }, (error, response, body) ->
+						expect(body[0].default).to.equal true
+						expect(body[1].default).to.equal false
+						cb()
+			], done
+
+		it 'should update the email in v1 if confirmed', (done) ->
+			token = null
+			async.series [
+				(cb) =>
+					db.users.update {
+						_id: ObjectId(@user._id)
+					}, {
+						$set: {
+							'overleaf.id': 42
+						}
+					}, cb
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails',
+						json:
+							email: 'new-confirmed-default-in-v1@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 204
+						cb()
+				(cb) =>
+					# Mark the email as confirmed
+					db.users.update {
+						'emails.email': 'new-confirmed-default-in-v1@example.com'
+					}, { 
+						$set: {
+							'emails.$.confirmedAt': new Date()
+						}
+					}, cb
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails/default',
+						json:
+							email: 'new-confirmed-default-in-v1@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 200
+						cb()
+			], (error) =>
+				return done(error) if error?
+				expect(
+					MockV1Api.updateEmail.calledWith(42, 'new-confirmed-default-in-v1@example.com')
+				).to.equal true
+				done()
+
+		it 'should return an error if the email exists in v1', (done) ->
+			MockV1Api.existingEmails.push 'exists-in-v1@example.com'
+			async.series [
+				(cb) =>
+					db.users.update {
+						_id: ObjectId(@user._id)
+					}, {
+						$set: {
+							'overleaf.id': 42
+						}
+					}, cb
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails',
+						json:
+							email: 'exists-in-v1@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 204
+						cb()
+				(cb) =>
+					# Mark the email as confirmed
+					db.users.update {
+						'emails.email': 'exists-in-v1@example.com'
+					}, { 
+						$set: {
+							'emails.$.confirmedAt': new Date()
+						}
+					}, cb
+				(cb) =>
+					@user.request {
+						method: 'POST',
+						url: '/user/emails/default',
+						json:
+							email: 'exists-in-v1@example.com'
+					}, (error, response, body) =>
+						return done(error) if error?
+						expect(response.statusCode).to.equal 409
+						expect(body).to.deep.equal {
+							message: "This email is already registered"
+						}
+						cb()
+				(cb) =>
+					@user.request { url: '/user/emails', json: true }, (error, response, body) ->
+						expect(body[0].default).to.equal true
+						expect(body[1].default).to.equal false
 						cb()
 			], done

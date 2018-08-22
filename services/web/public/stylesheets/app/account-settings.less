@@ -24,18 +24,36 @@
 		width: 40%;
 	}
 	.affiliations-table-inline-actions {
-		width: 20%;
+		text-align: right;
 	}
+		.affiliations-table-inline-action {
+			text-transform: capitalize;
+		}
+		.affiliations-table-inline-action-disabled-wrapper {
+			display: inline-block;
+		}
 	.affiliations-table-highlighted-row {
 		background-color: tint(@content-alt-bg-color, 6%);
 	}
-
+	.affiliations-table-error-row {
+		background-color: @alert-danger-bg;
+		color: @alert-danger-text;
+		.btn {
+			margin-top: @table-cell-padding;
+			.button-variant(@btn-danger-color; darken(@btn-danger-bg, 8%); @btn-danger-border);
+		}
+	}
 	.affiliations-form-group {
 		margin-top: @table-cell-padding;
 		&:first-child {
 			margin-top: 0;
 		}
 	}
+	.affiliation-change-container,
+	.affiliation-change-actions {
+		margin-top: @table-cell-padding;
+	}
+
 	.affiliations-table-label {
 		padding-top: 4px;
 	}

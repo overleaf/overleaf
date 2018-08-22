@@ -72,6 +72,8 @@ describe "ProjectController", ->
 		@Modules =
 			hooks:
 				fire: sinon.stub()
+		@Features =
+			hasFeature: sinon.stub()
 		@ProjectController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex":
@@ -102,6 +104,7 @@ describe "ProjectController", ->
 			"../../infrastructure/Modules": @Modules
 			"./ProjectEntityHandler": @ProjectEntityHandler
 			"../Errors/Errors": Errors
+			"../../infrastructure/Features": @Features
 
 		@projectName = "£12321jkj9ujkljds"
 		@req =
@@ -137,6 +140,18 @@ describe "ProjectController", ->
 			@res.sendStatus = (code) =>
 				@EditorController.setCompiler
 					.calledWith(@project_id, @compiler)
+					.should.equal true
+				code.should.equal 204
+				done()
+			@ProjectController.updateProjectSettings @req, @res
+
+		it "should update the imageName", (done) ->
+			@EditorController.setImageName = sinon.stub().callsArg(2)
+			@req.body =
+				imageName: @imageName = "texlive-1234.5"
+			@res.sendStatus = (code) =>
+				@EditorController.setImageName
+					.calledWith(@project_id, @imageName)
 					.should.equal true
 				code.should.equal 204
 				done()

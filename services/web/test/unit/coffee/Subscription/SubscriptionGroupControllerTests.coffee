@@ -10,7 +10,7 @@ describe "SubscriptionGroupController", ->
 	beforeEach ->
 		@user = {_id:"!@312431",email:"user@email.com"}
 		@adminUserId = "123jlkj"
-		@subscription_id = "123434325412"
+		@subscriptionId = "123434325412"
 		@user_email = "bob@gmail.com"
 		@req =
 			session:
@@ -18,15 +18,19 @@ describe "SubscriptionGroupController", ->
 					_id: @adminUserId
 					email:@user_email
 			params:
-				subscription_id:@subscription_id
+				subscriptionId:@subscriptionId
 			query:{}
-		@subscription = {}
+		@subscription = {
+			_id: @subscriptionId
+		}
 		@GroupHandler =
 			addUserToGroup: sinon.stub().callsArgWith(2, null, @user)
 			removeUserFromGroup: sinon.stub().callsArgWith(2)
 			isUserPartOfGroup: sinon.stub()
 			getPopulatedListOfMembers: sinon.stub().callsArgWith(1, null, [@user])
-		@SubscriptionLocator = getUsersSubscription: sinon.stub().callsArgWith(1, null, @subscription)
+		@SubscriptionLocator =
+			findManagedSubscription: sinon.stub().callsArgWith(1, null, @subscription)
+
 		@AuthenticationController =
 			getLoggedInUserId: (req) -> req.session.user._id
 			getSessionUser: (req) -> req.session.user
@@ -55,25 +59,25 @@ describe "SubscriptionGroupController", ->
 
 	describe "addUserToGroup", ->
 
-		it "should use the admin id for the logged in user and take the email address from the body", (done)->
+		it "should use the subscription id for the logged in user and take the email address from the body", (done)->
 			newEmail = " boB@gmaiL.com "
 			@req.body = email: newEmail
 			res =
 				json : (data)=>
-					@GroupHandler.addUserToGroup.calledWith(@adminUserId, "bob@gmail.com").should.equal true
+					@GroupHandler.addUserToGroup.calledWith(@subscriptionId, "bob@gmail.com").should.equal true
 					data.user.should.deep.equal @user
 					done()
 			@Controller.addUserToGroup @req, res
 
 
 	describe "removeUserFromGroup", ->
-		it "should use the admin id for the logged in user and take the user id from the params", (done)->
+		it "should use the subscription id for the logged in user and take the user id from the params", (done)->
 			userIdToRemove = "31231"
 			@req.params = user_id: userIdToRemove
 
 			res =
 				send : =>
-					@GroupHandler.removeUserFromGroup.calledWith(@adminUserId, userIdToRemove).should.equal true
+					@GroupHandler.removeUserFromGroup.calledWith(@subscriptionId, userIdToRemove).should.equal true
 					done()
 			@Controller.removeUserFromGroup @req, res
 

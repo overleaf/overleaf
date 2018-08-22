@@ -23,6 +23,7 @@ describe "LimitationsManager", ->
 
 		@SubscriptionLocator =
 			getUsersSubscription: sinon.stub()
+			getSubscription: sinon.stub()
 
 		@LimitationsManager = SandboxedModule.require modulePath, requires:
 			'../Project/ProjectGetter': @ProjectGetter
@@ -37,14 +38,14 @@ describe "LimitationsManager", ->
 	describe "allowedNumberOfCollaboratorsInProject", ->
 		describe "when the project is owned by a user without a subscription", ->
 			beforeEach ->
-				@Settings.defaultPlanCode = collaborators: 23
+				@Settings.defaultFeatures = collaborators: 23
 				@project.owner_ref = @user_id
 				delete @user.features
 				@callback = sinon.stub()
 				@LimitationsManager.allowedNumberOfCollaboratorsInProject(@project_id, @callback)
 
 			it "should return the default number", ->
-				@callback.calledWith(null, @Settings.defaultPlanCode.collaborators).should.equal true
+				@callback.calledWith(null, @Settings.defaultFeatures.collaborators).should.equal true
 
 		describe "when the project is owned by a user with a subscription", ->
 			beforeEach ->
@@ -60,13 +61,13 @@ describe "LimitationsManager", ->
 	describe "allowedNumberOfCollaboratorsForUser", ->
 		describe "when the user has no features", ->
 			beforeEach ->
-				@Settings.defaultPlanCode = collaborators: 23
+				@Settings.defaultFeatures = collaborators: 23
 				delete @user.features
 				@callback = sinon.stub()
 				@LimitationsManager.allowedNumberOfCollaboratorsForUser(@user_id, @callback)
 
 			it "should return the default number", ->
-				@callback.calledWith(null, @Settings.defaultPlanCode.collaborators).should.equal true
+				@callback.calledWith(null, @Settings.defaultFeatures.collaborators).should.equal true
 
 		describe "when the user has features", ->
 			beforeEach ->
@@ -301,7 +302,7 @@ describe "LimitationsManager", ->
 	describe "hasGroupMembersLimitReached", ->
 
 		beforeEach ->
-			@user_id = "12312"
+			@subscriptionId = "12312"
 			@subscription =
 				membersLimit: 3
 				member_ids: ["", ""]
@@ -310,22 +311,22 @@ describe "LimitationsManager", ->
 				]
 
 		it "should return true if the limit is hit (including members and invites)", (done)->
-			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @subscription)
-			@LimitationsManager.hasGroupMembersLimitReached @user_id, (err, limitReached)->
+			@SubscriptionLocator.getSubscription.callsArgWith(1, null, @subscription)
+			@LimitationsManager.hasGroupMembersLimitReached @subscriptionId, (err, limitReached)->
 				limitReached.should.equal true
 				done()
 
 		it "should return false if the limit is not hit (including members and invites)", (done)->
 			@subscription.membersLimit = 4
-			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @subscription)
-			@LimitationsManager.hasGroupMembersLimitReached @user_id, (err, limitReached)->
+			@SubscriptionLocator.getSubscription.callsArgWith(1, null, @subscription)
+			@LimitationsManager.hasGroupMembersLimitReached @subscriptionId, (err, limitReached)->
 				limitReached.should.equal false
 				done()
 
 		it "should return true if the limit has been exceded (including members and invites)", (done)->
 			@subscription.membersLimit = 2
-			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @subscription)
-			@LimitationsManager.hasGroupMembersLimitReached @user_id, (err, limitReached)->
+			@SubscriptionLocator.getSubscription.callsArgWith(1, null, @subscription)
+			@LimitationsManager.hasGroupMembersLimitReached @subscriptionId, (err, limitReached)->
 				limitReached.should.equal true
 				done()
 
@@ -379,4 +380,3 @@ describe "LimitationsManager", ->
 				@V1SubscriptionManager.getSubscriptionsFromV1.calledWith(@user_id).should.equal true
 				result.should.equal false
 				done()
-

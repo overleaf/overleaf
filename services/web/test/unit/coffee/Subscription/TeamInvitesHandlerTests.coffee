@@ -26,6 +26,7 @@ describe "TeamInvitesHandler", ->
 
 		@subscription = {
 			id: "55153a8014829a865bbf700d",
+			_id: new ObjectId("55153a8014829a865bbf700d"),
 			admin_id: @manager.id,
 			groupPlan: true,
 			member_ids: [],
@@ -210,7 +211,7 @@ describe "TeamInvitesHandler", ->
 
 		it "adds the user to the team", (done) ->
 			@TeamInvitesHandler.acceptInvite "dddddddd", @user.id, =>
-				@SubscriptionUpdater.addUserToGroup.calledWith(@manager.id, @user.id).should.eq true
+				@SubscriptionUpdater.addUserToGroup.calledWith(@subscription._id, @user.id).should.eq true
 				done()
 
 		it "removes the invite from the subscription", (done) ->

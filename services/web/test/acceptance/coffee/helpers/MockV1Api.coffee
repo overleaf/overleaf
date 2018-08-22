@@ -26,6 +26,14 @@ module.exports = MockV1Api =
 
 	syncUserFeatures: sinon.stub()
 
+	affiliations: []
+
+	updateEmail: sinon.stub()
+
+	existingEmails: []
+
+	setAffiliations: (affiliations) -> @affiliations = affiliations
+
 	run: () ->
 		app.get "/api/v1/sharelatex/users/:v1_user_id/plan_code", (req, res, next) =>
 			user = @users[req.params.v1_user_id]
@@ -43,7 +51,7 @@ module.exports = MockV1Api =
 			res.json exportId: @exportId
 
 		app.get "/api/v2/users/:userId/affiliations", (req, res, next) =>
-			res.json []
+			res.json @affiliations
 
 		app.post "/api/v2/users/:userId/affiliations", (req, res, next) =>
 			res.sendStatus 201
@@ -59,6 +67,14 @@ module.exports = MockV1Api =
 
 		app.get '/university/domains', (req, res, next) ->
 			res.json []
+
+		app.put '/api/v1/sharelatex/users/:id/email', (req, res, next) =>
+			{ email } = req.body?.user
+			if email in @existingEmails
+				return res.sendStatus 409
+			else
+				@updateEmail parseInt(req.params.id), email
+				return res.sendStatus 200
 
 		app.listen 5000, (error) ->
 			throw error if error?

@@ -16,7 +16,8 @@ describe "SubscriptionGroupHandler", ->
 		@subscription_id = "31DSd1123D"
 
 		@subscription =
-			admin_id:@adminUser_id
+			admin_id: @adminUser_id
+			manager_ids: [@adminUser_id]
 			_id:@subscription_id
 
 		@SubscriptionLocator =
@@ -81,15 +82,15 @@ describe "SubscriptionGroupHandler", ->
 		beforeEach ->
 			@LimitationsManager.hasGroupMembersLimitReached.callsArgWith(1, null, false, @subscription)
 			@UserGetter.getUserByAnyEmail.callsArgWith(1, null, @user)
-			
+
 		it "should find the user", (done)->
 			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
 				@UserGetter.getUserByAnyEmail.calledWith(@newEmail).should.equal true
 				done()
 
 		it "should add the user to the group", (done)->
-			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
-				@SubscriptionUpdater.addUserToGroup.calledWith(@adminUser_id, @user._id).should.equal true
+			@Handler.addUserToGroup @subscription_id, @newEmail, (err)=>
+				@SubscriptionUpdater.addUserToGroup.calledWith(@subscription_id, @user._id).should.equal true
 				done()
 
 		it "should not add the user to the group if the limit has been reached", (done)->
@@ -124,45 +125,48 @@ describe "SubscriptionGroupHandler", ->
 				done()
 
 	describe "replaceUserReferencesInGroups", ->
-		beforeEach ->
+		beforeEach (done)->
 			@oldId = "ba5eba11"
 			@newId = "5ca1ab1e"
+			@Handler.replaceUserReferencesInGroups @oldId, @newId, ->
+				done()
 
-		it "replaces the admin_id", (done) ->
-			@Handler.replaceUserReferencesInGroups @oldId, @newId, (err) =>
-
+		it "replaces the admin_id", ->
 				@Subscription.update.calledWith(
 					{ admin_id: @oldId },
 					{ admin_id: @newId }
 				).should.equal true
 
-				done()
-
-		it "replaces the member ids", (done) ->
-			@Handler.replaceUserReferencesInGroups @oldId, @newId, (err) =>
-
+		it "replaces the manager_ids", ->
 				@Subscription.update.calledWith(
-					{ member_ids: @oldId },
-					{ $addToSet: { member_ids: @newId } }
+					{manager_ids:"ba5eba11"},{$addToSet:{manager_ids:"5ca1ab1e"}},{multi:true}
 				).should.equal true
 
 				@Subscription.update.calledWith(
-					{ member_ids: @oldId },
-					{ $pull: { member_ids: @oldId } }
+					{manager_ids:"ba5eba11"},{$pull:{manager_ids:"ba5eba11"}},{multi:true}
 				).should.equal true
 
-				done()
+		it "replaces the member ids", ->
+			@Subscription.update.calledWith(
+				{ member_ids: @oldId },
+				{ $addToSet: { member_ids: @newId } }
+			).should.equal true
+
+			@Subscription.update.calledWith(
+				{ member_ids: @oldId },
+				{ $pull: { member_ids: @oldId } }
+			).should.equal true
 
 	describe "getPopulatedListOfMembers", ->
 		beforeEach ->
 			@subscription = {}
-			@SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, @subscription)
+			@SubscriptionLocator.getSubscription.callsArgWith(1, null, @subscription)
 			@UserGetter.getUser.callsArgWith(1, null, {_id:"31232"})
 
 		it "should locate the subscription", (done)->
 			@UserGetter.getUser.callsArgWith(1, null, {_id:"31232"})
-			@Handler.getPopulatedListOfMembers @adminUser_id, (err, users)=>
-				@SubscriptionLocator.getUsersSubscription.calledWith(@adminUser_id).should.equal true
+			@Handler.getPopulatedListOfMembers @subscriptionId, (err, users)=>
+				@SubscriptionLocator.getSubscription.calledWith(@subscriptionId).should.equal true
 				done()
 
 		it "should get the users by id", (done)->

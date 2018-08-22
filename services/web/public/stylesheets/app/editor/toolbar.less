@@ -194,56 +194,57 @@
 }
 
 .toggle-switch {
-  position: relative;
+	position: relative;
 	height: 100%;
 	width: 100%;
-  background-color: @toggle-switch-bg;
-  border-radius: @btn-border-radius-base;
+	background-color: @toggle-switch-bg;
+	border-radius: @btn-border-radius-base;
 }
 
 .toggle-switch-label {
 	position: relative;
 	display: block;
 	font-weight: normal;
-  z-index: 2;
-  float: left;
-  width: 50%;
-  height: 100%;
-  line-height: 24px;
+	z-index: 2;
+	float: left;
+	width: 50%;
+	height: 100%;
+	line-height: 24px;
 	text-align: center;
 	margin-bottom: 0;
-  cursor: pointer;
-  user-select: none;
-  transition: color 0.12s ease-out;
+	cursor: pointer;
+	user-select: none;
+	color: @text-color;
+	transition: color 0.12s ease-out;
 }
 
 .toggle-switch-input {
-  position: absolute;
-  opacity: 0;
+	position: absolute;
+	opacity: 0;
 }
 
 .toggle-switch-input:checked + .toggle-switch-label {
-  color: #fff;
-  font-weight: bold;
+	color: #fff;
+	font-weight: bold;
 }
 
 .toggle-switch-selection {
-  display: block;
-  position: absolute;
-  z-index: 1;
-  top: 2px;
-  left: 2px;
-  right: 2px;
-  width: calc(~"50% - 2px");
-  height: calc(~"100% - 4px");
-  background: @toggle-switch-highlight-color;
-  border-radius: @btn-border-radius-base 0 0 @btn-border-radius-base;
-  transition: transform 0.12s ease-out, border-radius 0.12s ease-out;
+	display: block;
+	position: absolute;
+	z-index: 1;
+	top: 2px;
+	left: 2px;
+	right: 2px;
+	width: calc(~"50% - 2px");
+	height: calc(~"100% - 4px");
+	background: @toggle-switch-highlight-color;
+	border-radius: @btn-border-radius-base 0 0 @btn-border-radius-base;
+	transition: transform 0.12s ease-out, border-radius 0.12s ease-out;
 }
 
 .toggle-switch-input:checked:nth-child(4) ~ .toggle-switch-selection {
-  transform: translate(100%);
-  border-radius: 0 @btn-border-radius-base @btn-border-radius-base 0;
+	transform: translate(100%);
+	border-radius: 0 @btn-border-radius-base @btn-border-radius-base 0;
 }
 
 /**************************************

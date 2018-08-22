@@ -7,6 +7,7 @@ Settings = require("settings-sharelatex")
 logger = require("logger-sharelatex")
 ReferalFeatures = require("../Referal/ReferalFeatures")
 V1SubscriptionManager = require("./V1SubscriptionManager")
+InstitutionsFeatures = require '../Institutions/InstitutionsFeatures'
 
 oneMonthInSeconds = 60 * 60 * 24 * 30
 
@@ -21,9 +22,11 @@ module.exports = FeaturesUpdater =
 				if error?
 					logger.err {err: error, user_id}, "error notifying v1 about updated features"
 
+
 		jobs =
 			individualFeatures: (cb) -> FeaturesUpdater._getIndividualFeatures user_id, cb
 			groupFeatureSets:   (cb) -> FeaturesUpdater._getGroupFeatureSets user_id, cb
+			institutionFeatures:(cb) -> InstitutionsFeatures.getInstitutionsFeatures user_id, cb
 			v1Features:         (cb) -> FeaturesUpdater._getV1Features user_id, cb
 			bonusFeatures:      (cb) -> ReferalFeatures.getBonusFeatures user_id, cb
 		async.series jobs, (err, results)->
@@ -32,9 +35,9 @@ module.exports = FeaturesUpdater =
 					"error getting subscription or group for refreshFeatures"
 				return callback(err)
 
-			{individualFeatures, groupFeatureSets, v1Features, bonusFeatures} = results
-			logger.log {user_id, individualFeatures, groupFeatureSets, v1Features, bonusFeatures}, 'merging user features'
-			featureSets = groupFeatureSets.concat [individualFeatures, v1Features, bonusFeatures]
+			{individualFeatures, groupFeatureSets, institutionFeatures, v1Features, bonusFeatures} = results
+			logger.log {user_id, individualFeatures, groupFeatureSets, institutionFeatures, v1Features, bonusFeatures}, 'merging user features'
+			featureSets = groupFeatureSets.concat [individualFeatures, institutionFeatures, v1Features, bonusFeatures]
 			features = _.reduce(featureSets, FeaturesUpdater._mergeFeatures, Settings.defaultFeatures)
 
 			logger.log {user_id, features}, 'updating user features'

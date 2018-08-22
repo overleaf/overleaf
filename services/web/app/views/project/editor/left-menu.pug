@@ -188,6 +188,15 @@ aside#left-menu.full-size(
 					option(value="pdfjs") #{translate("built_in")}
 					option(value="native") #{translate("native")}
 
+			if (getSessionUser() && getSessionUser().isAdmin && typeof(allowedImageNames) !== 'undefined' && allowedImageNames.length > 0)
+				.form-controls(ng-show="permissions.write")
+					label(for="imageName") #{translate("TeXLive")}
+					select(
+						name="imageName"
+						ng-model="project.imageName"
+					)
+						each image in allowedImageNames
+							option(value=image.imageName) #{image.imageDesc}
 
 	h4 #{translate("hotkeys")}
 	ul.list-unstyled.nav

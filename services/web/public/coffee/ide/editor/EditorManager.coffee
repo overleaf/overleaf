@@ -6,7 +6,7 @@ define [
 	"ide/editor/controllers/SavingNotificationController"
 ], (Document) ->
 	class EditorManager
-		constructor: (@ide, @$scope) ->
+		constructor: (@ide, @$scope, @localStorage) ->
 			@$scope.editor = {
 				sharejs_doc: null
 				open_doc_id: null
@@ -14,7 +14,7 @@ define [
 				opening: true
 				trackChanges: false
 				wantTrackChanges: false
-				showRichText: false
+				showRichText: @showRichText()
 			}
 
 			@$scope.$on "entity:selected", (event, entity) =>
@@ -40,6 +40,11 @@ define [
 			@$scope.$watch "editor.wantTrackChanges", (value) =>
 				return if !value?
 				@_syncTrackChangesState(@$scope.editor.sharejs_doc)
+
+		showRichText: () ->
+			if !window.richTextEnabled
+				return false
+			@localStorage("editor.mode.#{@$scope.project_id}") == 'rich-text'
 
 		autoOpenDoc: () ->
 			open_doc_id = 

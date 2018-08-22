@@ -5,9 +5,13 @@ db = mongojs.db
 async = require("async")
 ObjectId = mongojs.ObjectId
 UserGetter = require("./UserGetter")
-{ addAffiliation, removeAffiliation } = require("./UserAffiliationsManager")
+{ addAffiliation, removeAffiliation } = require("../Institutions/InstitutionsAPI")
+FeaturesUpdater = require("../Subscription/FeaturesUpdater")
 EmailHelper = require "../Helpers/EmailHelper"
 Errors = require "../Errors/Errors"
+Settings = require "settings-sharelatex"
+request = require 'request'
+NewsletterManager = require "../Newsletter/NewsletterManager"
 
 module.exports = UserUpdater =
 	updateUser: (query, update, callback = (error) ->) ->
@@ -96,17 +100,69 @@ module.exports = UserUpdater =
 	setDefaultEmailAddress: (userId, email, callback) ->
 		email = EmailHelper.parseEmail(email)
 		return callback(new Error('invalid email')) if !email?
-		query = _id: userId, 'emails.email': email
-		update = $set: email: email
-		@updateUser query, update, (error, res) ->
-			if error?
-				logger.err error:error, 'problem setting default emails'
+		UserGetter.getUserEmail userId, (error, oldEmail) =>
+			if err?
 				return callback(error)
-			if res.n == 0 # TODO: Check n or nMatched?
-				return callback(new Error('Default email does not belong to user'))
-			callback()
+			query = _id: userId, 'emails.email': email
+			update = $set: email: email
+			@updateUser query, update, (error, res) ->
+				if error?
+					logger.err error:error, 'problem setting default emails'
+					return callback(error)
+				else if res.n == 0 # TODO: Check n or nMatched?
+					return callback(new Error('Default email does not belong to user'))
+				else
+					NewsletterManager.changeEmail oldEmail, email, callback
 
-	confirmEmail: (userId, email, callback) ->
+
+
+	updateV1AndSetDefaultEmailAddress: (userId, email, callback) ->
+		@updateEmailAddressInV1 userId, email, (error) =>
+			return callback(error) if error?
+			@setDefaultEmailAddress userId, email, callback
+
+	updateEmailAddressInV1: (userId, newEmail, callback) ->
+		if !Settings.apis?.v1?.url?
+			return callback()
+		UserGetter.getUser userId, { 'overleaf.id': 1, emails: 1 }, (error, user) ->
+			return callback(error) if error?
+			return callback(new Errors.NotFoundError('no user found')) if !user?
+			if !user.overleaf?.id?
+				return callback()
+			newEmailIsConfirmed = false
+			for email in user.emails
+				if email.email == newEmail and email.confirmedAt?
+					newEmailIsConfirmed = true
+					break
+			if !newEmailIsConfirmed
+				return callback(new Errors.UnconfirmedEmailError("can't update v1 with unconfirmed email"))
+			request {
+				baseUrl: Settings.apis.v1.url
+				url: "/api/v1/sharelatex/users/#{user.overleaf.id}/email"
+				method: 'PUT'
+				auth:
+					user: Settings.apis.v1.user
+					pass: Settings.apis.v1.pass
+					sendImmediately: true
+				json:
+					user:
+						email: newEmail
+				timeout: 5 * 1000
+			}, (error, response, body) ->
+				if error?
+					error = new Errors.V1ConnectionError('No V1 connection') if error.code == 'ECONNREFUSED'
+					return callback(error)
+				if response.statusCode == 409 # Conflict
+					return callback(new Errors.EmailExistsError('email exists in v1'))
+				else if 200 <= response.statusCode < 300
+					return callback()
+				else
+					return callback new Error("non-success code from v1: #{response.statusCode}")
+
+	confirmEmail: (userId, email, confirmedAt, callback) ->
+		if arguments.length == 3
+			callback = confirmedAt
+			confirmedAt = new Date()
 		email = EmailHelper.parseEmail(email)
 		return callback(new Error('invalid email')) if !email?
 		logger.log {userId, email}, 'confirming user email'
@@ -120,13 +176,13 @@ module.exports = UserUpdater =
 				'emails.email': email
 			update =
 				$set:
-					'emails.$.confirmedAt': new Date()
+					'emails.$.confirmedAt': confirmedAt
 			@updateUser query, update, (error, res) ->
 				return callback(error) if error?
 				logger.log {res, userId, email}, "tried to confirm email"
 				if res.n == 0
 					return callback(new Errors.NotFoundError('user id and email do no match'))
-				callback()
+				FeaturesUpdater.refreshFeatures userId, true, callback
 
 [
 	'updateUser'

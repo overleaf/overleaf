@@ -15,6 +15,7 @@ div.full-size(
 	.ui-layout-center(
 		ng-controller="ReviewPanelController",
 		ng-class="{\
+			'rp-unsupported': editor.showRichText,\
 			'rp-state-current-file': (reviewPanel.subView === SubViews.CUR_FILE),\
 			'rp-state-current-file-expanded': (reviewPanel.subView === SubViews.CUR_FILE && ui.reviewPanelOpen),\
 			'rp-state-current-file-mini': (reviewPanel.subView === SubViews.CUR_FILE && !ui.reviewPanelOpen),\
@@ -25,7 +26,10 @@ div.full-size(
 			'rp-loading-threads': reviewPanel.loadingThreads,\
 		}"
 	)
-		.loading-panel(ng-show="!editor.sharejs_doc || editor.opening")
+		.loading-panel(
+			ng-show="!editor.sharejs_doc || editor.opening",
+			style=showRichText ? "top: 32px" : "",
+		)
 			span(ng-show="editor.open_doc_id")
 				i.fa.fa-spin.fa-refresh
 				| &nbsp;&nbsp;#{translate("loading")}...
@@ -39,7 +43,7 @@ div.full-size(
 			ace-editor="editor",
 			ng-if="!editor.showRichText",
 			ng-show="!!editor.sharejs_doc && !editor.opening",
-			style=showRichText ? "top: 32px" : "",
+			style=richTextEnabled ? "top: 32px" : "",
 			theme="settings.theme",
 			keybindings="settings.mode",
 			font-size="settings.fontSize",

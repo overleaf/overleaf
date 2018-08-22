@@ -15,14 +15,18 @@ define ['ide/history/HistoryV2Manager'], (HistoryV2Manager) ->
 				nextBeforeTimestamp: null
 				atEnd: false
 				selection: {
+					label: null
 					updates: []
-					pathname: null
 					docs: {}
+					pathname: null
 					range: {
 						fromV: null
 						toV: null
 					}
 				}
+				error: null
+				showOnlyLabels: false
+				labels: null
 				diff: null
 				files: []
 				selectedFile: null

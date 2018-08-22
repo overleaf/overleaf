@@ -15,7 +15,6 @@ describe "AuthenticationController", ->
 		tk.freeze(Date.now())
 		@AuthenticationController = SandboxedModule.require modulePath, requires:
 			"./AuthenticationManager": @AuthenticationManager = {}
-			"../User/UserGetter" : @UserGetter = {}
 			"../User/UserUpdater" : @UserUpdater = {}
 			"metrics-sharelatex": @Metrics = { inc: sinon.stub() }
 			"../Security/LoginRateLimiter": @LoginRateLimiter = { processLoginRequest:sinon.stub(), recordSuccessfulLogin:sinon.stub() }
@@ -29,6 +28,7 @@ describe "AuthenticationController", ->
 				trackSession: sinon.stub()
 				untrackSession: sinon.stub()
 				revokeAllUserSessions: sinon.stub().callsArgWith(1, null)
+			"../../infrastructure/Modules": @Modules = {hooks: {fire: sinon.stub().callsArgWith(2, null, [])}}
 		@user =
 			_id: ObjectId()
 			email: @email = "USER@example.com"
@@ -98,6 +98,7 @@ describe "AuthenticationController", ->
 			@req.session.destroy = sinon.stub().callsArgWith(0, null)
 			@req.session.save = sinon.stub().callsArgWith(0, null)
 			@req.sessionStore = {generate: sinon.stub()}
+			@AuthenticationController.finishLogin = sinon.stub()
 			@passport.authenticate.callsArgWith(1, null, @user, @info)
 			@err = new Error('woops')
 
@@ -123,27 +124,10 @@ describe "AuthenticationController", ->
 			afterEach ->
 				delete @req.session.postLoginRedirect
 
-			it 'should call req.login', () ->
+			it 'should call finishLogin', () ->
 				@AuthenticationController.passportLogin @req, @res, @next
-				@req.login.callCount.should.equal 1
-				@req.login.calledWith(@user).should.equal true
-
-			it 'should send a json response with redirect', () ->
-				@AuthenticationController.passportLogin @req, @res, @next
-				@res.json.callCount.should.equal 1
-				@res.json.calledWith({redir: 'some_redirect'}).should.equal true
-
-			describe 'when session.save produces an error', () ->
-				beforeEach ->
-					@req.session.save = sinon.stub().callsArgWith(0, new Error('woops'))
-
-				it 'should return next with an error', () ->
-					@AuthenticationController.passportLogin @req, @res, @next
-					@next.calledWith(@err).should.equal true
-
-				it 'should not return json', () ->
-					@AuthenticationController.passportLogin @req, @res, @next
-					@res.json.callCount.should.equal 0
+				@AuthenticationController.finishLogin.callCount.should.equal 1
+				@AuthenticationController.finishLogin.calledWith(@user).should.equal true
 
 		describe 'when authenticate does not produce a user', ->
 
@@ -151,9 +135,9 @@ describe "AuthenticationController", ->
 				@info = {text: 'a', type: 'b'}
 				@passport.authenticate.callsArgWith(1, null, false, @info)
 
-			it 'should not call req.login', () ->
+			it 'should not call finishLogin', () ->
 				@AuthenticationController.passportLogin @req, @res, @next
-				@req.login.callCount.should.equal 0
+				@AuthenticationController.finishLogin.callCount.should.equal 0
 
 			it 'should not send a json response with redirect', () ->
 				@AuthenticationController.passportLogin @req, @res, @next
@@ -230,6 +214,7 @@ describe "AuthenticationController", ->
 		beforeEach ->
 			@AuthenticationController._recordFailedLogin = sinon.stub()
 			@AuthenticationController._recordSuccessfulLogin = sinon.stub()
+			@Modules.hooks.fire = sinon.stub().callsArgWith(3, null, [])
 			# @AuthenticationController.establishUserSession = sinon.stub().callsArg(2)
 			@req.body =
 				email: @email
@@ -237,6 +222,17 @@ describe "AuthenticationController", ->
 				session:
 					postLoginRedirect: "/path/to/redir/to"
 			@cb = sinon.stub()
+
+		describe "when the preDoPassportLogin hooks produce an info object", ->
+			beforeEach ->
+				@Modules.hooks.fire = sinon.stub().callsArgWith(3, null, [null, {redir: '/somewhere'}, null])
+
+			it "should stop early and call done with this info object", (done) ->
+				@AuthenticationController.doPassportLogin(@req, @req.body.email, @req.body.password, @cb)
+				@cb.callCount.should.equal 1
+				@cb.calledWith(null, false, {redir: '/somewhere'}).should.equal true
+				@LoginRateLimiter.processLoginRequest.callCount.should.equal 0
+				done()
 
 		describe "when the users rate limit", ->
 
@@ -255,7 +251,6 @@ describe "AuthenticationController", ->
 				@LoginRateLimiter.processLoginRequest.callsArgWith(1, null, true)
 				@AuthenticationManager.authenticate = sinon.stub().callsArgWith(2, null, @user)
 				@req.sessionID = Math.random()
-				@AnalyticsManager.identifyUser = sinon.stub()
 				@AuthenticationController.doPassportLogin(@req, @req.body.email, @req.body.password, @cb)
 
 			it "should attempt to authorise the user", ->
@@ -263,14 +258,23 @@ describe "AuthenticationController", ->
 					.calledWith(email: @email.toLowerCase(), @password)
 					.should.equal true
 
+			it "should establish the user's session", ->
+				@cb.calledWith(null, @user).should.equal true
+
+		describe '_loginAsyncHandlers', ->
+			beforeEach ->
+				@UserHandler.setupLoginData = sinon.stub()
+				@LoginRateLimiter.recordSuccessfulLogin = sinon.stub()
+				@AuthenticationController._recordSuccessfulLogin = sinon.stub()
+				@AnalyticsManager.recordEvent = sinon.stub()
+				@AnalyticsManager.identifyUser = sinon.stub()
+				@AuthenticationController._loginAsyncHandlers(@req, @user)
+
 			it "should call identifyUser", ->
 				@AnalyticsManager.identifyUser.calledWith(@user._id, @req.sessionID).should.equal true
 
 			it "should setup the user data in the background", ->
 				@UserHandler.setupLoginData.calledWith(@user).should.equal true
-
-			it "should establish the user's session", ->
-				@cb.calledWith(null, @user).should.equal true
 
 			it "should set res.session.justLoggedIn", ->
 				@req.session.justLoggedIn.should.equal true
@@ -281,11 +285,11 @@ describe "AuthenticationController", ->
 					.should.equal true
 
 			it "should tell the rate limiter that there was a success for that email", ->
-				@LoginRateLimiter.recordSuccessfulLogin.calledWith(@email.toLowerCase()).should.equal true
+				@LoginRateLimiter.recordSuccessfulLogin.calledWith(@user.email).should.equal true
 
 			it "should log the successful login", ->
 				@logger.log
-					.calledWith(email: @email.toLowerCase(), user_id: @user._id.toString(), "successful log in")
+					.calledWith(email: @user.email, user_id: @user._id.toString(), "successful log in")
 					.should.equal true
 
 			it "should track the login event", ->
@@ -587,3 +591,56 @@ describe "AuthenticationController", ->
 			@AuthenticationController._clearRedirectFromSession(@req)
 			expect(@req.session.postLoginRedirect).to.equal undefined
 
+
+	describe 'finishLogin', ->
+		# - get redirect
+		# - async handlers
+		# - afterLoginSessionSetup
+		# - clear redirect
+		# - issue redir, two ways
+		beforeEach ->
+			@AuthenticationController._getRedirectFromSession = sinon.stub().returns '/some/page'
+			@AuthenticationController._loginAsyncHandlers = sinon.stub()
+			@AuthenticationController.afterLoginSessionSetup = sinon.stub().callsArgWith(2, null)
+			@AuthenticationController._clearRedirectFromSession = sinon.stub()
+			@req.headers = {accept: 'application/json, whatever'}
+			@res.json = sinon.stub()
+			@res.redirect = sinon.stub()
+
+		it 'should extract the redirect from the session', () ->
+			@AuthenticationController.finishLogin(@user, @req, @res, @next)
+			expect(@AuthenticationController._getRedirectFromSession.callCount).to.equal 1
+			expect(@AuthenticationController._getRedirectFromSession.calledWith(@req)).to.equal true
+
+		it 'should call the async handlers', () ->
+			@AuthenticationController.finishLogin(@user, @req, @res, @next)
+			expect(@AuthenticationController._loginAsyncHandlers.callCount).to.equal 1
+			expect(@AuthenticationController._loginAsyncHandlers.calledWith(@req, @user)).to.equal true
+
+		it 'should call afterLoginSessionSetup', () ->
+			@AuthenticationController.finishLogin(@user, @req, @res, @next)
+			expect(@AuthenticationController.afterLoginSessionSetup.callCount).to.equal 1
+			expect(@AuthenticationController.afterLoginSessionSetup.calledWith(@req, @user)).to.equal true
+
+		it 'should clear redirect from session', () ->
+			@AuthenticationController.finishLogin(@user, @req, @res, @next)
+			expect(@AuthenticationController._clearRedirectFromSession.callCount).to.equal 1
+			expect(@AuthenticationController._clearRedirectFromSession.calledWith(@req)).to.equal true
+
+		it 'should issue a json response with a redirect', () ->
+			@AuthenticationController.finishLogin(@user, @req, @res, @next)
+			expect(@res.json.callCount).to.equal 1
+			expect(@res.redirect.callCount).to.equal 0
+			expect(@res.json.calledWith({ redir: '/some/page' })).to.equal true
+
+		describe 'with a non-json request', ->
+			beforeEach ->
+				@req.headers = {}
+				@res.json = sinon.stub()
+				@res.redirect = sinon.stub()
+
+			it 'should issue a plain redirect', () ->
+				@AuthenticationController.finishLogin(@user, @req, @res, @next)
+				expect(@res.json.callCount).to.equal 0
+				expect(@res.redirect.callCount).to.equal 1
+				expect(@res.redirect.calledWith('/some/page')).to.equal true

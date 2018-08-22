@@ -19,6 +19,7 @@ describe "FeaturesUpdater", ->
 			'settings-sharelatex': @Settings = {}
 			"../Referal/ReferalFeatures" : @ReferalFeatures = {}
 			"./V1SubscriptionManager": @V1SubscriptionManager = {}
+			'../Institutions/InstitutionsFeatures': @InstitutionsFeatures = {}
 
 	describe "refreshFeatures", ->
 		beforeEach ->
@@ -26,6 +27,7 @@ describe "FeaturesUpdater", ->
 			@UserFeaturesUpdater.updateFeatures = sinon.stub().yields()
 			@FeaturesUpdater._getIndividualFeatures = sinon.stub().yields(null, { 'individual': 'features' })
 			@FeaturesUpdater._getGroupFeatureSets = sinon.stub().yields(null, [{ 'group': 'features' }, { 'group': 'features2' }])
+			@InstitutionsFeatures.getInstitutionsFeatures = sinon.stub().yields(null, { 'institutions': 'features' })
 			@FeaturesUpdater._getV1Features = sinon.stub().yields(null, { 'v1': 'features' })
 			@ReferalFeatures.getBonusFeatures = sinon.stub().yields(null, { 'bonus': 'features' })
 			@FeaturesUpdater._mergeFeatures = sinon.stub().returns({'merged': 'features'})
@@ -42,6 +44,11 @@ describe "FeaturesUpdater", ->
 
 			it "should get the group features", ->
 				@FeaturesUpdater._getGroupFeatureSets
+					.calledWith(@user_id)
+					.should.equal true
+
+			it "should get the institution features", ->
+				@InstitutionsFeatures.getInstitutionsFeatures
 					.calledWith(@user_id)
 					.should.equal true
 
@@ -64,6 +71,9 @@ describe "FeaturesUpdater", ->
 			it "should merge the group features", ->
 				@FeaturesUpdater._mergeFeatures.calledWith(sinon.match.any, { 'group': 'features' }).should.equal true
 				@FeaturesUpdater._mergeFeatures.calledWith(sinon.match.any, { 'group': 'features2' }).should.equal true
+
+			it "should merge the institutions features", ->
+				@FeaturesUpdater._mergeFeatures.calledWith(sinon.match.any, { 'institutions': 'features' }).should.equal true
 
 			it "should merge the v1 features", ->
 				@FeaturesUpdater._mergeFeatures.calledWith(sinon.match.any, { 'v1': 'features' }).should.equal true

@@ -25,13 +25,13 @@ module.exports = SubscriptionUpdater =
 					return callback(err) if err?
 					SubscriptionUpdater._updateSubscriptionFromRecurly recurlySubscription, subscription, callback
 
-	addUserToGroup: (adminUserId, userId, callback)->
-		@addUsersToGroup(adminUserId, [userId], callback)
+	addUserToGroup: (subscriptionId, userId, callback)->
+		@addUsersToGroup(subscriptionId, [userId], callback)
 
-	addUsersToGroup: (adminUserId, memberIds, callback)->
-		logger.log adminUserId: adminUserId, memberIds: memberIds, "adding members into mongo subscription"
+	addUsersToGroup: (subscriptionId, memberIds, callback)->
+		logger.log subscriptionId: subscriptionId, memberIds: memberIds, "adding members into mongo subscription"
 		searchOps =
-			admin_id: adminUserId
+			_id: subscriptionId
 		insertOperation =
 			{ $push: { member_ids: { $each: memberIds } } }
 
@@ -46,9 +46,9 @@ module.exports = SubscriptionUpdater =
 				async.map userIds, FeaturesUpdater.refreshFeatures, callback
 
 
-	removeUserFromGroup: (adminUser_id, user_id, callback)->
+	removeUserFromGroup: (subscriptionId, user_id, callback)->
 		searchOps =
-			admin_id: adminUser_id
+			_id: subscriptionId
 		removeOperation =
 			"$pull": {member_ids:user_id}
 		Subscription.update searchOps, removeOperation, (err)->
@@ -71,23 +71,23 @@ module.exports = SubscriptionUpdater =
 
 	_createNewSubscription: (adminUser_id, callback)->
 		logger.log adminUser_id:adminUser_id, "creating new subscription"
-		subscription = new Subscription(admin_id:adminUser_id)
+		subscription = new Subscription(admin_id:adminUser_id, manager_ids: [adminUser_id])
 		subscription.freeTrial.allowed = false
 		subscription.save (err)->
 			callback err, subscription
 
 	_updateSubscriptionFromRecurly: (recurlySubscription, subscription, callback)->
 		logger.log recurlySubscription:recurlySubscription, subscription:subscription, "updaing subscription"
-		plan = PlansLocator.findLocalPlanInSettings(recurlySubscription.plan.plan_code)
 		if recurlySubscription.state == "expired"
-			subscription.recurlySubscription_id = undefined
-			subscription.planCode = Settings.defaultPlanCode
-		else
-			subscription.recurlySubscription_id = recurlySubscription.uuid
-			subscription.freeTrial.expiresAt = undefined
-			subscription.freeTrial.planCode = undefined
-			subscription.freeTrial.allowed = true
-			subscription.planCode = recurlySubscription.plan.plan_code
+			return SubscriptionUpdater.deleteSubscription subscription._id, callback
+		subscription.recurlySubscription_id = recurlySubscription.uuid
+		subscription.freeTrial.expiresAt = undefined
+		subscription.freeTrial.planCode = undefined
+		subscription.freeTrial.allowed = true
+		subscription.planCode = recurlySubscription.plan.plan_code
+		plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
+		if !plan?
+			return callback(new Error("plan code not found: #{subscription.planCode}"))
 		if plan.groupPlan
 			subscription.groupPlan = true
 			subscription.membersLimit = plan.membersLimit

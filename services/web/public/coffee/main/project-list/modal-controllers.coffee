@@ -101,11 +101,19 @@ define [
 	App.controller 'DeleteProjectsModalController', ($scope, $modalInstance, $timeout, projects) ->
 		$scope.projectsToDelete = projects.filter (project) -> project.accessLevel == "owner"
 		$scope.projectsToLeave = projects.filter (project) -> project.accessLevel != "owner"
+		$scope.projectsToArchive = projects.filter (project) ->
+			project.accessLevel == "owner" and !project.archived
 
 		if $scope.projectsToLeave.length > 0 and $scope.projectsToDelete.length > 0
-			$scope.action = "delete-and-leave"
+			if $scope.projectsToArchive.length > 0 and window.ExposedSettings.isOverleaf
+				$scope.action = "archive-and-leave"
+			else
+				$scope.action = "delete-and-leave"
 		else if $scope.projectsToLeave.length == 0 and $scope.projectsToDelete.length > 0
-			$scope.action = "delete"
+			if $scope.projectsToArchive.length > 0 and window.ExposedSettings.isOverleaf
+				$scope.action = "archive"
+			else
+				$scope.action = "delete"
 		else
 			$scope.action = "leave"
 

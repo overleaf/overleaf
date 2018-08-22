@@ -1,6 +1,5 @@
 AuthenticationManager = require ("./AuthenticationManager")
 LoginRateLimiter = require("../Security/LoginRateLimiter")
-UserGetter = require "../User/UserGetter"
 UserUpdater = require "../User/UserUpdater"
 Metrics = require('metrics-sharelatex')
 logger = require("logger-sharelatex")
@@ -62,41 +61,63 @@ module.exports = AuthenticationController =
 			if err?
 				return next(err)
 			if user # `user` is either a user object or false
-				redir = AuthenticationController._getRedirectFromSession(req) || "/project"
-				AuthenticationController.afterLoginSessionSetup req, user, (err) ->
-					if err?
-						return next(err)
-					AuthenticationController._clearRedirectFromSession(req)
-					res.json {redir: redir}
+				AuthenticationController.finishLogin(user, req, res, next)
 			else
-				res.json message: info
+				if info.redir?
+					res.json {redir: info.redir}
+				else
+					res.json message: info
 		)(req, res, next)
+
+	finishLogin: (user, req, res, next) ->
+		redir = AuthenticationController._getRedirectFromSession(req) || "/project"
+		AuthenticationController._loginAsyncHandlers(req, user)
+		AuthenticationController.afterLoginSessionSetup req, user, (err) ->
+			if err?
+				return next(err)
+			AuthenticationController._clearRedirectFromSession(req)
+			if req.headers?['accept']?.match(/^application\/json.*$/)
+				res.json {redir: redir}
+			else
+				res.redirect(redir)
 
 	doPassportLogin: (req, username, password, done) ->
 		email = username.toLowerCase()
-		LoginRateLimiter.processLoginRequest email, (err, isAllowed)->
-			return done(err) if err?
-			if !isAllowed
-				logger.log email:email, "too many login requests"
-				return done(null, null, {text: req.i18n.translate("to_many_login_requests_2_mins"), type: 'error'})
-			AuthenticationManager.authenticate email: email, password, (error, user) ->
-				return done(error) if error?
-				if user?
-					# async actions
-					UserHandler.setupLoginData(user, ()->)
-					LoginRateLimiter.recordSuccessfulLogin(email)
-					AuthenticationController._recordSuccessfulLogin(user._id)
-					Analytics.recordEvent(user._id, "user-logged-in", {ip:req.ip})
-					Analytics.identifyUser(user._id, req.sessionID)
-					logger.log email: email, user_id: user._id.toString(), "successful log in"
-					req.session.justLoggedIn = true
-					# capture the request ip for use when creating the session
-					user._login_req_ip = req.ip
-					return done(null, user)
-				else
-					AuthenticationController._recordFailedLogin()
-					logger.log email: email, "failed log in"
-					return done(null, false, {text: req.i18n.translate("email_or_password_wrong_try_again"), type: 'error'})
+		Modules = require "../../infrastructure/Modules"
+		Modules.hooks.fire 'preDoPassportLogin', req, email, (err, infoList) ->
+			return next(err) if err?
+			info = infoList.find((i) => i?)
+			if info?
+				return done(null, false, info)
+			LoginRateLimiter.processLoginRequest email, (err, isAllowed)->
+				return done(err) if err?
+				if !isAllowed
+					logger.log email:email, "too many login requests"
+					return done(null, null, {text: req.i18n.translate("to_many_login_requests_2_mins"), type: 'error'})
+				AuthenticationManager.authenticate email: email, password, (error, user) ->
+					return done(error) if error?
+					if user?
+						# async actions
+						return done(null, user)
+					else
+						AuthenticationController._recordFailedLogin()
+						logger.log email: email, "failed log in"
+						return done(
+							null,
+							false,
+							{text: req.i18n.translate("email_or_password_wrong_try_again"), type: 'error'}
+						)
+
+	_loginAsyncHandlers: (req, user) ->
+		UserHandler.setupLoginData(user, ()->)
+		LoginRateLimiter.recordSuccessfulLogin(user.email)
+		AuthenticationController._recordSuccessfulLogin(user._id)
+		Analytics.recordEvent(user._id, "user-logged-in", {ip:req.ip})
+		Analytics.identifyUser(user._id, req.sessionID)
+		logger.log email: user.email, user_id: user._id.toString(), "successful log in"
+		req.session.justLoggedIn = true
+		# capture the request ip for use when creating the session
+		user._login_req_ip = req.ip
 
 	setInSessionUser: (req, props) ->
 		for key, value of props

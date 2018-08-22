@@ -67,3 +67,53 @@ script(type="text/ng-template", id="historyRestoreDiffModalTemplate")
 		)
 			span(ng-show="!state.inflight") #{translate("restore")}
 			span(ng-show="state.inflight") #{translate("restoring")} ...
+
+
+script(type="text/ng-template", id="historyLabelTpl")
+	.history-label(
+		ng-class="{ 'history-label-own' : $ctrl.isOwnedByCurrentUser }"
+	)
+		span.history-label-comment(
+			tooltip-append-to-body="true"
+			tooltip-template="'historyLabelTooltipTpl'"
+			tooltip-placement="left"
+			tooltip-enable="$ctrl.showTooltip"
+		)
+			i.fa.fa-tag
+			| &nbsp;{{ $ctrl.labelText }}
+		button.history-label-delete-btn(
+			ng-if="$ctrl.isOwnedByCurrentUser"
+			stop-propagation="click"
+			ng-click="$ctrl.onLabelDelete()"
+		) &times;
+
+script(type="text/ng-template", id="historyLabelTooltipTpl")
+	.history-label-tooltip
+		p.history-label-tooltip-title 
+			i.fa.fa-tag
+			| &nbsp;{{ $ctrl.labelText }}
+		p.history-label-tooltip-owner #{translate("history_label_created_by")} {{ $ctrl.labelOwnerName }}
+		time.history-label-tooltip-datetime {{ $ctrl.labelCreationDateTime | formatDate }}
+
+
+script(type="text/ng-template", id="historyV2DeleteLabelModalTemplate")
+	.modal-header
+		h3 #{translate("history_delete_label")}
+	.modal-body
+		.alert.alert-danger(ng-show="state.error.message") {{ state.error.message}} 
+		.alert.alert-danger(ng-show="state.error && !state.error.message") #{translate("generic_something_went_wrong")}
+		p.help-block(ng-if="labelDetails")
+			| #{translate("history_are_you_sure_delete_label")}
+			strong "{{ labelDetails.comment }}"
+			| ?
+	.modal-footer
+		button.btn.btn-default(
+			type="button"
+			ng-disabled="state.inflight"
+			ng-click="$dismiss()"
+		) #{translate("cancel")}
+		button.btn.btn-primary(
+			type="button"
+			ng-click="deleteLabel()"
+			ng-disabled="state.inflight"
+		) {{ state.inflight ? '#{translate("history_deleting_label")}' : '#{translate("history_delete_label")}' }}

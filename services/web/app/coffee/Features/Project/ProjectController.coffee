@@ -28,6 +28,7 @@ Modules = require '../../infrastructure/Modules'
 ProjectEntityHandler = require './ProjectEntityHandler'
 crypto = require 'crypto'
 { V1ConnectionError } = require '../Errors/Errors'
+Features = require('../../infrastructure/Features')
 
 module.exports = ProjectController =
 
@@ -47,6 +48,10 @@ module.exports = ProjectController =
 		if req.body.compiler?
 			jobs.push (callback) ->
 				editorController.setCompiler project_id, req.body.compiler, callback
+
+		if req.body.imageName?
+			jobs.push (callback) ->
+				editorController.setImageName project_id, req.body.imageName, callback
 
 		if req.body.name?
 			jobs.push (callback) ->
@@ -344,9 +349,9 @@ module.exports = ProjectController =
 					themes: THEME_LIST
 					maxDocLength: Settings.max_doc_length
 					useV2History: !!project.overleaf?.history?.display
-					showRichText: req.query?.rt == 'true'
+					richTextEnabled: Features.hasFeature('rich-text')
 					showTestControls: req.query?.tc == 'true' || user.isAdmin
-					showPublishModal: req.query?.pm == 'true'
+					allowedImageNames: Settings.allowedImageNames || []
 				timer.done()
 
 	_buildProjectList: (allProjects, v1Projects = [])->

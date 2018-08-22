@@ -3,7 +3,7 @@ UserGetter = require("./UserGetter")
 UserUpdater = require("./UserUpdater")
 EmailHelper = require("../Helpers/EmailHelper")
 UserEmailsConfirmationHandler = require "./UserEmailsConfirmationHandler"
-{ endorseAffiliation } = require("./UserAffiliationsManager")
+{ endorseAffiliation } = require("../Institutions/InstitutionsAPI")
 logger = require("logger-sharelatex")
 Errors = require "../Errors/Errors"
 
@@ -26,7 +26,8 @@ module.exports = UserEmailsController =
 			role: req.body.role
 			department: req.body.department
 		UserUpdater.addEmailAddress userId, email, affiliationOptions, (error)->
-			return next(error) if error?
+			if error?
+				return UserEmailsController._handleEmailError error, req, res, next
 			UserEmailsConfirmationHandler.sendConfirmationEmail userId, email, (err) ->
 				return next(error) if error?
 				res.sendStatus 204
@@ -47,9 +48,11 @@ module.exports = UserEmailsController =
 		email = EmailHelper.parseEmail(req.body.email)
 		return res.sendStatus 422 unless email?
 
-		UserUpdater.setDefaultEmailAddress userId, email, (error)->
-			return next(error) if error?
-			res.sendStatus 200
+		UserUpdater.updateV1AndSetDefaultEmailAddress userId, email, (error)->
+			if error?
+				return UserEmailsController._handleEmailError error, req, res, next
+			else
+				return res.sendStatus 200
 
 
 	endorse: (req, res, next) ->
@@ -61,6 +64,19 @@ module.exports = UserEmailsController =
 			return next(error) if error?
 			res.sendStatus 204
 
+	resendConfirmation: (req, res, next) ->
+		userId = AuthenticationController.getLoggedInUserId(req)
+		email = EmailHelper.parseEmail(req.body.email)
+		return res.sendStatus 422 unless email?
+		UserGetter.getUserByAnyEmail email, {_id:1}, (error, user) ->
+			return next(error) if error?
+			if !user? or user?._id?.toString() != userId
+				logger.log {userId, email, foundUserId: user?._id}, "email doesn't match logged in user"
+				return res.sendStatus 422
+			logger.log {userId, email}, 'resending email confirmation token'
+			UserEmailsConfirmationHandler.sendConfirmationEmail userId, email, (error) ->
+				return next(error) if error?
+				res.sendStatus 200
 
 	showConfirm: (req, res, next) ->
 		res.render 'user/confirm_email', {
@@ -82,3 +98,15 @@ module.exports = UserEmailsController =
 					next(error)
 			else
 				res.sendStatus 200
+
+	_handleEmailError: (error, req, res, next) ->
+		if error instanceof Errors.UnconfirmedEmailError
+			return res.status(409).json {
+				message: 'email must be confirmed'
+			}
+		else if error instanceof Errors.EmailExistsError
+			return res.status(409).json {
+				message: req.i18n.translate("email_already_registered")
+			}
+		else
+			return next(error)

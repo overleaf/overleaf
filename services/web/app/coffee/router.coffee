@@ -22,7 +22,7 @@ UserPagesController = require('./Features/User/UserPagesController')
 DocumentController = require('./Features/Documents/DocumentController')
 CompileManager = require("./Features/Compile/CompileManager")
 CompileController = require("./Features/Compile/CompileController")
-ClsiCookieManager = require("./Features/Compile/ClsiCookieManager")
+ClsiCookieManager = require("./Features/Compile/ClsiCookieManager")(Settings.apis.clsi?.backendGroupName)
 HealthCheckController = require("./Features/HealthCheck/HealthCheckController")
 ProjectDownloadsController = require "./Features/Downloads/ProjectDownloadsController"
 FileStoreController = require("./Features/FileStore/FileStoreController")
@@ -115,8 +115,11 @@ module.exports = class Router
 			UserEmailsController.showConfirm
 		webRouter.post '/user/emails/confirm',
 			UserEmailsController.confirm
+		webRouter.post '/user/emails/resend_confirmation',
+			AuthenticationController.requireLogin(),
+			UserEmailsController.resendConfirmation
 
-		unless Features.externalAuthenticationSystemUsed()
+		if Features.hasFeature 'affiliations'
 			webRouter.post '/user/emails',
 				AuthenticationController.requireLogin(),
 				UserEmailsController.add
@@ -236,8 +239,13 @@ module.exports = class Router
 		webRouter.post "/project/:project_id/restore_file", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, HistoryController.restoreFileFromV2
 		privateApiRouter.post "/project/:Project_id/history/resync", AuthenticationController.httpAuth, HistoryController.resyncProjectHistory
 
+		webRouter.get "/project/:Project_id/labels", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.ensureProjectHistoryEnabled, HistoryController.getLabels
+		webRouter.post "/project/:Project_id/labels", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, HistoryController.selectHistoryApi, HistoryController.ensureProjectHistoryEnabled, HistoryController.createLabel
+		webRouter.delete "/project/:Project_id/labels/:label_id", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, HistoryController.selectHistoryApi, HistoryController.ensureProjectHistoryEnabled, HistoryController.deleteLabel
+
 		webRouter.post '/project/:project_id/export/:brand_variation_id', AuthorizationMiddlewear.ensureUserCanAdminProject, ExportsController.exportProject
 		webRouter.get '/project/:project_id/export/:export_id', AuthorizationMiddlewear.ensureUserCanAdminProject, ExportsController.exportStatus
+		webRouter.get '/project/:project_id/export/:export_id/zip', AuthorizationMiddlewear.ensureUserCanAdminProject, ExportsController.exportZip
 
 		webRouter.get  '/Project/:Project_id/download/zip', AuthorizationMiddlewear.ensureUserCanReadProject, ProjectDownloadsController.downloadProject
 		webRouter.get  '/project/download/zip', AuthorizationMiddlewear.ensureUserCanReadMultipleProjects, ProjectDownloadsController.downloadMultipleProjects

@@ -4,20 +4,21 @@ define [
 	"libs/recurly-4.8.5"
 ], (App)->
 
-	App.controller "NewSubscriptionController", ($scope, MultiCurrencyPricing, abTestManager, $http, sixpack, event_tracking, ccUtils)->
+	App.controller "NewSubscriptionController", ($scope, MultiCurrencyPricing, abTestManager, $http, sixpack, event_tracking, ccUtils, ipCookie)->
 		throw new Error("Recurly API Library Missing.")  if typeof recurly is "undefined"
 
 		$scope.currencyCode = MultiCurrencyPricing.currencyCode
 		$scope.plans = MultiCurrencyPricing.plans
 		$scope.planCode = window.plan_code
+		$scope.plansVariant = ipCookie('plansVariant')
 
 		$scope.switchToStudent = ()->
 			currentPlanCode = window.plan_code
 			planCode = currentPlanCode.replace('collaborator', 'student')
-			event_tracking.sendMB 'subscription-form-switch-to-student', { plan: window.plan_code }
+			event_tracking.sendMB 'subscription-form-switch-to-student', { plan: window.plan_code, variant: $scope.plansVariant }
 			window.location = "/user/subscription/new?planCode=#{planCode}&currency=#{$scope.currencyCode}&cc=#{$scope.data.coupon}"
 
-		event_tracking.sendMB "subscription-form", { plan : window.plan_code }
+		event_tracking.sendMB "subscription-form", { plan : window.plan_code, variant: $scope.plansVariant }
 
 		$scope.paymentMethod =
 			value: "credit_card"
@@ -143,13 +144,14 @@ define [
 					currencyCode	: postData.subscriptionDetails.currencyCode,
 					plan_code		: postData.subscriptionDetails.plan_code,
 					coupon_code		: postData.subscriptionDetails.coupon_code,
-					isPaypal		: postData.subscriptionDetails.isPaypal
+					isPaypal		: postData.subscriptionDetails.isPaypal,
+					variant			: $scope.plansVariant
 				}
 
 
 				$http.post("/user/subscription/create", postData)
 					.then ()->
-						event_tracking.sendMB "subscription-submission-success"
+						event_tracking.sendMB "subscription-submission-success", { variant: $scope.plansVariant }
 						window.location.href = "/user/subscription/thank-you"
 					.catch ()->
 						$scope.processing = false
@@ -235,6 +237,3 @@ define [
 			{code:'WK',name:'Wake Island'},{code:'WF',name:'Wallis and Futuna'},{code:'EH',name:'Western Sahara'},{code:'YE',name:'Yemen'},
 			{code:'ZM',name:'Zambia'},{code:'AX',name:'&angst;land Islandscode:'}
 		]
-
-		sixpack.participate 'plans', ['default', 'more-details'], (chosenVariation, rawResponse)->
-			$scope.plansVariant = chosenVariation

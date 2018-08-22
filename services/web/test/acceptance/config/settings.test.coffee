@@ -56,6 +56,7 @@ module.exports =
 
 	defaultFeatures: features.personal
 	defaultPlanCode: 'personal'
+	institutionPlanCode: 'professional'
 
 	plans: plans = [{
 		planCode: "v1_free"

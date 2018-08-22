@@ -7,8 +7,8 @@ ProjectGetter = require("../Project/ProjectGetter")
 ProjectEntityHandler = require("../Project/ProjectEntityHandler")
 logger = require "logger-sharelatex"
 Url = require("url")
-ClsiCookieManager = require("./ClsiCookieManager")()
-NewBackendCloudClsiCookieManager = require("./ClsiCookieManager")("newBackendcloud")
+ClsiCookieManager = require("./ClsiCookieManager")(Settings.apis.clsi?.backendGroupName)
+NewBackendCloudClsiCookieManager = require("./ClsiCookieManager")(Settings.apis.clsi_new?.backendGroupName)
 ClsiStateManager = require("./ClsiStateManager")
 _ = require("underscore")
 async = require("async")
@@ -100,6 +100,7 @@ module.exports = ClsiManager =
 					timer = new Metrics.Timer("compile.currentBackend")
 					request opts, (err, response, body)->
 						timer.done()
+						Metrics.inc "compile.currentBackend.response.#{response?.statusCode}"
 						if err?
 							logger.err err:err, project_id:project_id, url:opts?.url, "error making request to clsi"
 							return callback(err)
@@ -111,13 +112,14 @@ module.exports = ClsiManager =
 			newBackend: (cb)-> 
 				startTime = new Date()
 				ClsiManager._makeNewBackendRequest project_id, opts, (err, response, body)->
+					Metrics.inc "compile.newBackend.response.#{response?.statusCode}"
 					cb(err, {response:response, body:body, finishTime:new Date() - startTime})
 		}, (err, results)->
 			timeDifference = results.newBackend?.finishTime - results.currentBackend?.finishTime 
 			statusCodeSame = results.newBackend?.response?.statusCode == results.currentBackend?.response?.statusCode
 			currentCompileTime = results.currentBackend?.finishTime
 			newBackendCompileTime = results.newBackend?.finishTime
-			logger.log {statusCodeSame, timeDifference, currentCompileTime, newBackendCompileTime}, "both clsi requests returned"
+			logger.log {statusCodeSame, timeDifference, currentCompileTime, newBackendCompileTime, project_id}, "both clsi requests returned"
 
 
 

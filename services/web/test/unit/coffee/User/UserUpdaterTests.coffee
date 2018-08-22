@@ -18,17 +18,27 @@ describe "UserUpdater", ->
 			getUserEmail: sinon.stub()
 			getUserByAnyEmail: sinon.stub()
 			ensureUniqueEmailAddress: sinon.stub()
-		@logger = err: sinon.stub(), log: ->
+		@logger = 
+			err: sinon.stub()
+			log: ->
+			warn: ->
 		@addAffiliation = sinon.stub().yields()
 		@removeAffiliation = sinon.stub().callsArgWith(2, null)
+		@refreshFeatures = sinon.stub().yields()
+		@NewsletterManager = 
+			changeEmail:sinon.stub()
 		@UserUpdater = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": @logger
-			"./UserGetter": @UserGetter
-			'./UserAffiliationsManager':
-				addAffiliation: @addAffiliation
-				removeAffiliation: @removeAffiliation
 			"../../infrastructure/mongojs":@mongojs
 			"metrics-sharelatex": timeAsyncMethod: sinon.stub()
+			"./UserGetter": @UserGetter
+			'../Institutions/InstitutionsAPI':
+				addAffiliation: @addAffiliation
+				removeAffiliation: @removeAffiliation
+			'../Subscription/FeaturesUpdater': refreshFeatures: @refreshFeatures
+			"settings-sharelatex": @settings = {}
+			"request": @request = {}
+			"../Newsletter/NewsletterManager": @NewsletterManager
 
 		@stubbedUser = 
 			_id: "3131231"
@@ -170,6 +180,10 @@ describe "UserUpdater", ->
 				done()
 
 	describe 'setDefaultEmailAddress', ->
+		beforeEach ->
+			@UserGetter.getUserEmail.callsArgWith(1, null, @stubbedUser.email)
+			@NewsletterManager.changeEmail.callsArgWith(2, null)
+
 		it 'set default', (done)->
 			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, null, n: 1)
 
@@ -178,6 +192,16 @@ describe "UserUpdater", ->
 				@UserUpdater.updateUser.calledWith(
 					{ _id: @stubbedUser._id, 'emails.email': @newEmail },
 					$set: { email: @newEmail }
+				).should.equal true
+				done()
+
+		it 'set changed the email in newsletter', (done)->
+			@UserUpdater.updateUser = sinon.stub().callsArgWith(2, null, n: 1)
+
+			@UserUpdater.setDefaultEmailAddress @stubbedUser._id, @newEmail, (err)=>
+				should.not.exist(err)
+				@NewsletterManager.changeEmail.calledWith(
+					@stubbedUser.email, @newEmail
 				).should.equal true
 				done()
 
@@ -244,4 +268,10 @@ describe "UserUpdater", ->
 			@UserUpdater.confirmEmail @stubbedUser._id, @newEmail, (err)=>
 				should.exist(err)
 				@UserUpdater.updateUser.called.should.equal false
+				done()
+
+		it 'refresh features', (done)->
+			@UserUpdater.confirmEmail @stubbedUser._id, @newEmail, (err)=>
+				should.not.exist(err)
+				sinon.assert.calledWith(@refreshFeatures, @stubbedUser._id, true)
 				done()

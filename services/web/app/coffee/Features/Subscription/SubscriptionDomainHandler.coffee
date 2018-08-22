@@ -9,9 +9,6 @@ module.exports = SubscriptionDomainHandler =
 		licence = SubscriptionDomainHandler._findDomainLicence(user.email)
 		return licence
 
-	rejectInvitationToGroup: (user, subscription, callback)->
-		removeUserFromGroup(subscription.admin_id, user._id, callback)
-
 	getDomainLicencePage: (user)->
 		licence = SubscriptionDomainHandler._findDomainLicence(user.email)
 		if licence?.verifyEmail

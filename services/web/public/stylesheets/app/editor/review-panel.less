@@ -139,6 +139,10 @@
 		padding: 0 5px;
 	}
 
+	.rp-unsupported & {
+		display: none;
+	}
+
 	position: relative;
 	border-bottom: 1px solid @rp-border-grey;
 	background-color: @rp-bg-dim-blue;
@@ -216,6 +220,10 @@
 	.rp-size-expanded &,
 	.rp-size-mini & {
 		display: block;
+	}
+
+	.rp-unsupported & {
+		display: none;
 	}
 	
 	.rp-state-current-file & {
@@ -714,6 +722,10 @@
 		display: flex;
 	}
 
+	.rp-unsupported & {
+		display: none;
+	}
+
 	.rp-state-current-file & {
 		position: absolute;
 		bottom: 0;
@@ -834,6 +846,31 @@
 		}
 	}
 
+.rp-unsupported-msg-wrapper {
+	display: none;
+	.rp-size-expanded.rp-unsupported & {
+		display: block;
+	}
+
+	height: 100%;
+
+	.rp-unsupported-msg {
+		display: flex;
+		width: @review-panel-width - 40px;
+		height: 100%;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		margin: 0 auto;
+		text-align: center;
+
+		.rp-unsupported-msg-title {
+			font-size: 1.3em;
+			margin-top: 13px;
+		}
+	}
+}
+
 .ace-editor-wrapper {
 	.track-changes-marker-callout {
 		border-radius: 0;
@@ -885,7 +922,7 @@
 	}
 }
 
-.review-icon {
+.review-icon when (@is-overleaf = false) {
 	display: inline-block;
 	background: url('/img/review-icon-sprite.png') top/30px no-repeat;
 	width: 30px;
@@ -908,10 +945,17 @@
 	}
 }
 
-.review-icon when (@is-overleaf) {
-	background-position-y: -60px;
-	.toolbar .btn-full-height:hover & {
-		background-position-y: -60px;
+.review-icon when (@is-overleaf = true) {
+	display: inline-block;
+	background: url('/img/review-icon-sprite-ol.png') top/30px no-repeat;
+	width: 30px;
+
+	&::before {
+		content: '\00a0'; // Non-breakable space. A non-breakable character here makes this icon work like font-awesome.
+	}
+	
+	@media (min-device-pixel-ratio: 1.5), (min-resolution: 144dpi) {
+		background-image: url('/img/review-icon-sprite-ol@2x.png');
 	}
 }
 
@@ -1003,7 +1047,8 @@
 	.rp-size-mini & {
 		right: @review-off-width;
 	}
-	.rp-size-expanded & {
+	.rp-size-expanded &,
+	.rp-unsupported & {
 		display: none;
 	}
 }
@@ -1051,6 +1096,10 @@
 	.rp-size-mini &,
 	.rp-size-expanded & {
 		display: block;
+	}
+
+	.rp-unsupported & {
+		display: none;
 	}
 
 	.rp-size-expanded & {

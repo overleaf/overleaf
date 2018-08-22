@@ -1,7 +1,7 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "AccountSettingsController", ["$scope", "$http", "$modal", "event_tracking", ($scope, $http, $modal, event_tracking) ->
+	App.controller "AccountSettingsController", ["$scope", "$http", "$modal", "event_tracking", "UserAffiliationsDataService", ($scope, $http, $modal, event_tracking, UserAffiliationsDataService) ->
 		$scope.subscribed = true
 
 		$scope.unsubscribe = () ->
@@ -21,8 +21,14 @@ define [
 		$scope.deleteAccount = () ->
 			modalInstance = $modal.open(
 				templateUrl: "deleteAccountModalTemplate"
-				controller: "DeleteAccountModalController",
-				scope: $scope
+				controller: "DeleteAccountModalController"
+				resolve:
+					userDefaultEmail: () ->
+						UserAffiliationsDataService
+							.getUserDefaultEmail()
+							.then (defaultEmailDetails) ->
+								return defaultEmailDetails?.email or null
+							.catch () -> null
 			)
 
 		$scope.upgradeIntegration = (service) ->
@@ -30,8 +36,8 @@ define [
 	]
 
 	App.controller "DeleteAccountModalController", [
-		"$scope", "$modalInstance", "$timeout", "$http",
-		($scope,   $modalInstance,   $timeout,   $http) ->
+		"$scope", "$modalInstance", "$timeout", "$http", "userDefaultEmail",
+		($scope,   $modalInstance,   $timeout,   $http,   userDefaultEmail) ->
 			$scope.state =
 				isValid : false
 				deleteText: ""
@@ -46,7 +52,7 @@ define [
 				, 700
 
 			$scope.checkValidation = ->
-				$scope.state.isValid = $scope.state.deleteText == $scope.email and $scope.state.password.length > 0
+				$scope.state.isValid = userDefaultEmail? and $scope.state.deleteText == userDefaultEmail and $scope.state.password.length > 0
 
 			$scope.delete = () ->
 				$scope.state.inflight = true

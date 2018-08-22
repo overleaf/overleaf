@@ -109,7 +109,7 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 			logger.log user_id:user_id, ip:req?.ip, "cdnBlocked for user, not using it and turning it off for future requets"
 			req.session.cdnBlocked = true
 
-		isDark = req.headers?.host?.slice(0,4)?.toLowerCase() == "dark"
+		isDark = req.headers?.host?.slice(0,7)?.toLowerCase().indexOf("dark") != -1
 		isSmoke = req.headers?.host?.slice(0,5)?.toLowerCase() == "smoke"
 		isLive = !isDark and !isSmoke
 
@@ -166,6 +166,11 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 		res.locals.buildImgPath = (imgFile)->
 			path = Path.join("/img/", imgFile)
 			return Url.resolve(staticFilesBase, path)
+
+		res.locals.mathJaxPath = res.locals.buildJsPath(
+			'libs/mathjax/MathJax.js',
+			{cdn:false, qs:{config:'TeX-AMS_HTML'}}
+		)
 
 		next()
 
@@ -327,4 +332,9 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 			defaultFontFamily          : if isOl then 'lucida' else 'monaco'
 			defaultLineHeight          : if isOl then 'normal' else 'compact'
 			renderAnnouncements        : !isOl
+		next()
+
+	webRouter.use (req, res, next) ->
+		res.locals.ExposedSettings =
+			isOverleaf: Settings.overleaf?
 		next()

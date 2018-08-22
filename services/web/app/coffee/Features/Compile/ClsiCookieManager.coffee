@@ -49,7 +49,7 @@ module.exports = (backendGroup)->
 			return callback()
 		serverId = @_parseServerIdFromResponse(response)
 		if !serverId? # We don't get a cookie back if it hasn't changed
-			return callback()
+			return rclient.expire(@buildKey(project_id), Settings.clsiCookie.ttl, callback)
 		if rclient_secondary?
 			@_setServerIdInRedis rclient_secondary, project_id, serverId
 		@_setServerIdInRedis rclient, project_id, serverId, (err) ->

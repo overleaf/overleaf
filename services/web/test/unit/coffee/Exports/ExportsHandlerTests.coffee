@@ -63,6 +63,8 @@ describe 'ExportsHandler', ->
 		beforeEach (done) ->
 			@project =
 				id: @project_id
+				compiler: 'pdflatex'
+				imageName: 'mock-image-name'
 				overleaf:
 					id: @project_history_id # for projects imported from v1
 					history:
@@ -100,6 +102,9 @@ describe 'ExportsHandler', ->
 						historyId: @project_history_id
 						historyVersion: @historyVersion
 						v1ProjectId: @project_history_id
+						metadata:
+							compiler: 'pdflatex'
+							imageName: 'mock-image-name'
 					user:
 						id: @user_id
 						firstName: @user.first_name
@@ -132,6 +137,9 @@ describe 'ExportsHandler', ->
 						historyId: @project_history_id
 						historyVersion: @historyVersion
 						v1ProjectId: @project_history_id
+						metadata:
+							compiler: 'pdflatex'
+							imageName: 'mock-image-name'
 					user:
 						id: @user_id
 						firstName: @custom_first_name
@@ -273,3 +281,32 @@ describe 'ExportsHandler', ->
 				@callback.calledWith(null, { body: @body })
 				.should.equal true
 
+	describe 'fetchZip', ->
+		beforeEach (done) ->
+			@settings.apis =
+				v1:
+					url: 'http://localhost:5000'
+					user: 'overleaf'
+					pass: 'pass'
+			@export_id = 897
+			@body = "https://writelatex-conversions-dev.s3.amazonaws.com/exports/ieee_latexqc/tnb/2912/xggmprcrpfwbsnqzqqmvktddnrbqkqkr.zip?X-Amz-Expires=14400&X-Amz-Date=20180730T181003Z&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAJDGDIJFGLNVGZH6A/20180730/us-east-1/s3/aws4_request&X-Amz-SignedHeaders=host&X-Amz-Signature=dec990336913cef9933f0e269afe99722d7ab2830ebf2c618a75673ee7159fee"
+			@stubGet = sinon.stub().yields(null, {statusCode: 200}, { body: @body })
+			done()
+
+		describe "when all goes well", ->
+			beforeEach (done) ->
+				@stubRequest.get = @stubGet
+				@ExportsHandler.fetchZip @export_id, (error, body) =>
+					@callback(error, body)
+					done()
+
+			it 'should issue the request', ->
+				expect(@stubGet.getCall(0).args[0]).to.deep.equal
+					url: @settings.apis.v1.url + '/api/v1/sharelatex/exports/' + @export_id + '/zip_url'
+					auth:
+						user: @settings.apis.v1.user
+						pass: @settings.apis.v1.pass
+
+			it 'should return the v1 export id', ->
+				@callback.calledWith(null, { body: @body })
+				.should.equal true

@@ -65,7 +65,7 @@ block content
 					ng-class="{ 'ide-history-open' : (ui.view == 'history' && history.isV2 && history.viewMode === HistoryViewModes.POINT_IN_TIME) }",
 					layout="main",
 					ng-hide="state.loading",
-					resize-on="layout:chat:resize",
+					resize-on="layout:chat:resize,history:toggle",
 					minimum-restore-size-west="130"
 					custom-toggler-pane=hasFeature('custom-togglers') ? "'west'" : "false"
 					custom-toggler-msg-when-open=hasFeature('custom-togglers') ? "'" + translate("tooltip_hide_filetree") + "'" : "false"
@@ -103,6 +103,8 @@ block content
 			h3 {{ title }}
 		.modal-body(ng-bind-html="message")
 
+	script(src=mathJaxPath)
+
 block requirejs
 	script(type="text/javascript" src='/socket.io/socket.io.js')
 
@@ -131,9 +133,9 @@ block requirejs
 		window.maxDocLength = #{maxDocLength};
 		window.trackChangesState = data.trackChangesState;
 		window.wikiEnabled = #{!!(settings.apis.wiki && settings.apis.wiki.url)};
+		window.richTextEnabled = #{richTextEnabled}
 		window.requirejs = {
 			"paths" : {
-				"mathjax": "#{buildJsPath('/libs/mathjax/MathJax.js', {cdn:false, qs:{config:'TeX-AMS_HTML'}})}",
 				"moment": "libs/#{lib('moment')}",
 				"pdfjs-dist/build/pdf": "libs/#{lib('pdfjs')}/pdf",
 				"pdfjs-dist/build/pdf.worker": "#{pdfWorkerPath}",

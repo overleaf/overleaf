@@ -136,7 +136,7 @@ define [
 		ide.referencesSearchManager = new ReferencesManager(ide, $scope)
 		ide.connectionManager = new ConnectionManager(ide, $scope)
 		ide.fileTreeManager = new FileTreeManager(ide, $scope)
-		ide.editorManager = new EditorManager(ide, $scope)
+		ide.editorManager = new EditorManager(ide, $scope, localStorage)
 		ide.onlineUsersManager = new OnlineUsersManager(ide, $scope)
 		if window.data.useV2History
 			ide.historyManager = new HistoryV2Manager(ide, $scope)

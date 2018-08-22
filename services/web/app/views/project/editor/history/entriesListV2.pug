@@ -3,13 +3,26 @@ aside.change-list(
 	ng-controller="HistoryV2ListController"
 )
 	history-entries-list(
+		ng-if="!history.showOnlyLabels && !history.error"
 		entries="history.updates"
 		current-user="user"
+		users="projectUsers"
 		load-entries="loadMore()"
 		load-disabled="history.loading || history.atEnd"
 		load-initialize="ui.view == 'history'"
 		is-loading="history.loading"
 		on-entry-select="handleEntrySelect(selectedEntry)"
+		on-label-delete="handleLabelDelete(label)"
+	)
+	history-labels-list(
+		ng-if="history.showOnlyLabels && !history.error"
+		labels="history.labels"
+		current-user="user"
+		users="projectUsers"
+		is-loading="history.loading"
+		selected-label="history.selection.label"
+		on-label-select="handleLabelSelect(label)"
+		on-label-delete="handleLabelDelete(label)"
 	)
 
 aside.change-list(
@@ -65,6 +78,14 @@ aside.change-list(
 						)
 
 				div.description(ng-click="select()")
+					history-label(
+						ng-repeat="label in update.labels"
+						label-text="label.comment"
+						label-owner-name="getDisplayNameById(label.user_id)"
+						label-creation-date-time="label.created_at"
+						is-owned-by-current-user="label.user_id === user.id"
+						on-label-delete="deleteLabel(label)"
+					)
 					div.time {{ update.meta.end_ts | formatDate:'h:mm a' }}
 					div.action.action-edited(ng-if="history.isV2 && update.pathnames.length > 0")
 						| #{translate("file_action_edited")}
@@ -106,8 +127,9 @@ script(type="text/ng-template", id="historyEntriesListTpl")
 				ng-repeat="entry in $ctrl.entries"
 				entry="entry"
 				current-user="$ctrl.currentUser"
+				users="$ctrl.users"
 				on-select="$ctrl.onEntrySelect({ selectedEntry: selectedEntry })"
-				ng-show="!$ctrl.isLoading"
+				on-label-delete="$ctrl.onLabelDelete({ label: label })"
 			)
 			.loading(ng-show="$ctrl.isLoading")
 				i.fa.fa-spin.fa-refresh
@@ -129,6 +151,15 @@ script(type="text/ng-template", id="historyEntryTpl")
 		time.history-entry-day(ng-if="::$ctrl.entry.meta.first_in_day") {{ ::$ctrl.entry.meta.end_ts | relativeDate }}
 
 		.history-entry-details(ng-click="$ctrl.onSelect({ selectedEntry: $ctrl.entry })")
+			history-label(
+				ng-repeat="label in $ctrl.entry.labels | orderBy : '-created_at'"
+				label-text="label.comment"
+				label-owner-name="$ctrl.displayNameById(label.user_id)"
+				label-creation-date-time="label.created_at"
+				is-owned-by-current-user="label.user_id === $ctrl.currentUser.id"
+				on-label-delete="$ctrl.onLabelDelete({ label: label })"
+			)
+
 			ol.history-entry-changes
 				li.history-entry-change(
 					ng-repeat="pathname in ::$ctrl.entry.pathnames"
@@ -148,6 +179,7 @@ script(type="text/ng-template", id="historyEntryTpl")
 						ng-if="::project_op.remove"
 					) #{translate("file_action_deleted")}
 					span.history-entry-change-doc {{ ::$ctrl.getProjectOpDoc(project_op) }}
+
 			.history-entry-metadata
 				time.history-entry-metadata-time {{ ::$ctrl.entry.meta.end_ts | formatDate:'h:mm a' }}
 				span
@@ -172,3 +204,36 @@ script(type="text/ng-template", id="historyEntryTpl")
 						span.name(
 							ng-style="$ctrl.getUserCSSStyle();"
 						) #{translate("anonymous")}
+
+script(type="text/ng-template", id="historyLabelsListTpl")
+	.history-labels-list
+		.history-entry-label(
+			ng-repeat="label in $ctrl.labels track by label.id"
+			ng-click="$ctrl.onLabelSelect({ label: label })"
+			ng-class="{ 'history-entry-label-selected': label.id === $ctrl.selectedLabel.id }" 
+		)
+			history-label(
+				show-tooltip="false"
+				label-text="label.comment"
+				is-owned-by-current-user="label.user_id === $ctrl.currentUser.id"
+				on-label-delete="$ctrl.onLabelDelete({ label: label })"
+			)
+			.history-entry-label-metadata
+				.history-entry-label-metadata-user(ng-init="user = $ctrl.getUserById(label.user_id)")
+					| Saved by 
+					span.name(
+						ng-if="user && user._id !== $ctrl.currentUser.id"
+						ng-style="$ctrl.getUserCSSStyle(user, label);"
+					) {{ ::$ctrl.displayName(user) }} 
+					span.name(
+						ng-if="user && user._id == $ctrl.currentUser.id"
+						ng-style="$ctrl.getUserCSSStyle(user, label);"
+					) You
+					span.name(
+						ng-if="user == null"
+						ng-style="$ctrl.getUserCSSStyle(user, label);"
+					) #{translate("anonymous")}
+				time.history-entry-label-metadata-time {{ ::label.created_at | formatDate }}
+		.loading(ng-show="$ctrl.isLoading")
+			i.fa.fa-spin.fa-refresh
+			| &nbsp;&nbsp; #{translate("loading")}...

@@ -1,4 +1,4 @@
-#review-panel
+#review-panel(style=richTextEnabled ? "top: 32px" : "")
 	.rp-in-editor-widgets
 		a.rp-track-changes-indicator(
 			href
@@ -234,6 +234,13 @@
 		)
 			i.fa.fa-list
 			span.rp-nav-label #{translate("overview")}
+
+	.rp-unsupported-msg-wrapper
+		.rp-unsupported-msg
+			i.fa.fa-5x.fa-exclamation-triangle
+			p.rp-unsupported-msg-title Sorry, Track Changes is not supported in Rich Text mode (yet).
+			p We didn't want to delay your ability to use Rich Text mode so we've launched without support for Track Changes.
+			p We're working hard to include Track Changes as soon as possible.
 
 
 script(type='text/ng-template', id='changeEntryTemplate')

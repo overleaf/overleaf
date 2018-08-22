@@ -4,16 +4,16 @@ SandboxedModule = require('sandboxed-module')
 assert = require('assert')
 path = require('path')
 sinon = require('sinon')
-modulePath = path.join __dirname, "../../../../app/js/Features/User/UserAffiliationsManager"
+modulePath = path.join __dirname, "../../../../app/js/Features/Institutions/InstitutionsAPI"
 expect = require("chai").expect
 
-describe "UserAffiliationsManager", ->
+describe "InstitutionsAPI", ->
 
 	beforeEach ->
 		@logger = err: sinon.stub(), log: ->
 		settings = apis: { v1: { url: 'v1.url', user: '', pass: '' } }
 		@request = sinon.stub()
-		@UserAffiliationsManager = SandboxedModule.require modulePath, requires:
+		@InstitutionsAPI = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": @logger
 			"metrics-sharelatex": timeAsyncMethod: sinon.stub()
 			'settings-sharelatex': settings
@@ -25,11 +25,27 @@ describe "UserAffiliationsManager", ->
 			email:"hello@world.com"
 		@newEmail = "bob@bob.com"
 
-	describe 'getAffiliations', ->
+	describe 'getInstitutionAffiliations', ->
+		it 'get affiliations', (done)->
+			@institutionId = 123
+			responseBody = ['123abc', '456def']
+			@request.yields(null, { statusCode: 200 }, responseBody)
+			@InstitutionsAPI.getInstitutionAffiliations @institutionId, (err, body) =>
+				should.not.exist(err)
+				@request.calledOnce.should.equal true
+				requestOptions = @request.lastCall.args[0]
+				expectedUrl = "v1.url/api/v2/institutions/#{@institutionId}/affiliations"
+				requestOptions.url.should.equal expectedUrl
+				requestOptions.method.should.equal 'GET'
+				should.not.exist(requestOptions.body)
+				body.should.equal responseBody
+				done()
+
+	describe 'getUserAffiliations', ->
 		it 'get affiliations', (done)->
 			responseBody = [{ foo: 'bar' }]
 			@request.callsArgWith(1, null, { statusCode: 201 }, responseBody)
-			@UserAffiliationsManager.getAffiliations @stubbedUser._id, (err, body) =>
+			@InstitutionsAPI.getUserAffiliations @stubbedUser._id, (err, body) =>
 				should.not.exist(err)
 				@request.calledOnce.should.equal true
 				requestOptions = @request.lastCall.args[0]
@@ -43,7 +59,7 @@ describe "UserAffiliationsManager", ->
 		it 'handle error', (done)->
 			body = errors: 'affiliation error message'
 			@request.callsArgWith(1, null, { statusCode: 503 }, body)
-			@UserAffiliationsManager.getAffiliations @stubbedUser._id, (err) =>
+			@InstitutionsAPI.getUserAffiliations @stubbedUser._id, (err) =>
 				should.exist(err)
 				err.message.should.have.string 503
 				err.message.should.have.string body.errors
@@ -58,7 +74,7 @@ describe "UserAffiliationsManager", ->
 				university: { id: 1 }
 				role: 'Prof'
 				department: 'Math'
-			@UserAffiliationsManager.addAffiliation @stubbedUser._id, @newEmail, affiliationOptions, (err)=>
+			@InstitutionsAPI.addAffiliation @stubbedUser._id, @newEmail, affiliationOptions, (err)=>
 				should.not.exist(err)
 				@request.calledOnce.should.equal true
 				requestOptions = @request.lastCall.args[0]
@@ -77,7 +93,7 @@ describe "UserAffiliationsManager", ->
 		it 'handle error', (done)->
 			body = errors: 'affiliation error message'
 			@request.callsArgWith(1, null, { statusCode: 422 }, body)
-			@UserAffiliationsManager.addAffiliation @stubbedUser._id, @newEmail, {}, (err)=>
+			@InstitutionsAPI.addAffiliation @stubbedUser._id, @newEmail, {}, (err)=>
 				should.exist(err)
 				err.message.should.have.string 422
 				err.message.should.have.string body.errors
@@ -88,7 +104,7 @@ describe "UserAffiliationsManager", ->
 			@request.callsArgWith(1, null, { statusCode: 404 })
 
 		it 'remove affiliation', (done)->
-			@UserAffiliationsManager.removeAffiliation @stubbedUser._id, @newEmail, (err)=>
+			@InstitutionsAPI.removeAffiliation @stubbedUser._id, @newEmail, (err)=>
 				should.not.exist(err)
 				@request.calledOnce.should.equal true
 				requestOptions = @request.lastCall.args[0]
@@ -100,7 +116,7 @@ describe "UserAffiliationsManager", ->
 
 		it 'handle error', (done)->
 			@request.callsArgWith(1, null, { statusCode: 500 })
-			@UserAffiliationsManager.removeAffiliation @stubbedUser._id, @newEmail, (err)=>
+			@InstitutionsAPI.removeAffiliation @stubbedUser._id, @newEmail, (err)=>
 				should.exist(err)
 				err.message.should.exist
 				done()
@@ -108,7 +124,7 @@ describe "UserAffiliationsManager", ->
 	describe 'deleteAffiliations', ->
 		it 'delete affiliations', (done)->
 			@request.callsArgWith(1, null, { statusCode: 200 })
-			@UserAffiliationsManager.deleteAffiliations @stubbedUser._id, (err) =>
+			@InstitutionsAPI.deleteAffiliations @stubbedUser._id, (err) =>
 				should.not.exist(err)
 				@request.calledOnce.should.equal true
 				requestOptions = @request.lastCall.args[0]
@@ -120,7 +136,7 @@ describe "UserAffiliationsManager", ->
 		it 'handle error', (done)->
 			body = errors: 'affiliation error message'
 			@request.callsArgWith(1, null, { statusCode: 518 }, body)
-			@UserAffiliationsManager.deleteAffiliations @stubbedUser._id, (err) =>
+			@InstitutionsAPI.deleteAffiliations @stubbedUser._id, (err) =>
 				should.exist(err)
 				err.message.should.have.string 518
 				err.message.should.have.string body.errors
@@ -131,7 +147,7 @@ describe "UserAffiliationsManager", ->
 			@request.callsArgWith(1, null, { statusCode: 204 })
 
 		it 'endorse affiliation', (done)->
-			@UserAffiliationsManager.endorseAffiliation @stubbedUser._id, @newEmail, 'Student','Physics', (err)=>
+			@InstitutionsAPI.endorseAffiliation @stubbedUser._id, @newEmail, 'Student','Physics', (err)=>
 				should.not.exist(err)
 				@request.calledOnce.should.equal true
 				requestOptions = @request.lastCall.args[0]
