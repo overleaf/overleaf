@@ -9,9 +9,10 @@ describe "DockerLockManager", ->
 	beforeEach ->
 		@LockManager = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": {}
-			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), err:-> }
 			"fs":
 				lstat:sinon.stub().callsArgWith(1)
+				readdir: sinon.stub().callsArgWith(1)
 			"lockfile": @Lockfile = {}
 		@lockFile = "/local/compile/directory/.project-lock"
 
