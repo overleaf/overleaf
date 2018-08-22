@@ -12,7 +12,7 @@ define [
 	# and then again on ack.
 	AUTO_COMPILE_DEBOUNCE = 2000
 
-	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, logHintsFeedback, localStorage) ->
+	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, localStorage) ->
 		# enable per-user containers by default
 		perUserCompile = true
 		autoCompile = true
@@ -38,22 +38,6 @@ define [
 				$scope.$applyAsync () ->
 					$scope.shouldDropUp = getFilesDropdownTopCoordAsRatio() > 0.65
 
-		# log hints tracking
-		$scope.logHintsNegFeedbackValues = logHintsFeedback.feedbackOpts
-
-		$scope.trackLogHintsLearnMore = () ->
-			event_tracking.sendMB "logs-hints-learn-more"
-
-		trackLogHintsFeedback = (isPositive, hintId) ->
-			event_tracking.send "log-hints", (if isPositive then "feedback-positive" else "feedback-negative"), hintId
-			event_tracking.sendMB (if isPositive then "log-hints-feedback-positive" else "log-hints-feedback-negative"), { hintId }
-
-		$scope.trackLogHintsNegFeedbackDetails = (hintId, feedbackOpt, feedbackOtherVal) ->
-			logHintsFeedback.submitFeedback hintId, feedbackOpt, feedbackOtherVal
-
-		$scope.trackLogHintsPositiveFeedback = (hintId) -> trackLogHintsFeedback true, hintId
-		$scope.trackLogHintsNegativeFeedback = (hintId) -> trackLogHintsFeedback false, hintId
-
 		if ace.require("ace/lib/useragent").isMac
 			$scope.modifierKey = "Cmd"
 		else
@@ -65,9 +49,9 @@ define [
 			if qs_args.length then "?" + qs_args.join("&") else ""
 
 		$scope.stripHTMLFromString = (htmlStr) ->
-   			tmp = document.createElement("DIV")
-   			tmp.innerHTML = htmlStr
-   			return tmp.textContent || tmp.innerText || ""
+				tmp = document.createElement("DIV")
+				tmp.innerHTML = htmlStr
+				return tmp.textContent || tmp.innerText || ""
 
 		$scope.$on "project:joined", () ->
 			return if !autoCompile
