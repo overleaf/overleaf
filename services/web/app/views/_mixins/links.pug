@@ -31,6 +31,10 @@ mixin linkContact(linkText, linkClass)
 	a(href="/contact" class=linkClass ? linkClass : '')
 		| #{linkText ? linkText : 'contact'}
 
+mixin linkDash(linkText, linkClass)
+	a(href="/project" class=linkClass ? linkClass : '')
+		| #{linkText ? linkText : 'project dashboard'}
+
 mixin linkEducation(linkText, linkClass)
 	//- To Do: verify path
 	a(href="/plans" class=linkClass ? linkClass : '')
