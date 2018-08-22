@@ -16,11 +16,13 @@ module.exports = LockManager =
 			stale: @LOCK_STALE
 		Lockfile.lock path, lockOpts, (error) ->
 			return callback new Errors.AlreadyCompilingError("compile in progress")	if error?.code is 'EEXIST'
-			if error?
-				logger.err error:error, path:path, statLock:fs.lstatSync(path), statDir: fs.lstatSync(path.dirname(path)), "unable to get lock"
-				return callback(error) 
-			runner (error1, args...) ->
-				Lockfile.unlock path, (error2) ->
-					error = error1 or error2
-					return callback(error) if error?
-					callback(null, args...)
+			fs.lstat path, (err, statLock)->
+				fs.lstat Path.dirname(path), (err, statDir)->
+					if error?
+						logger.err error:error, path:path, statLock:statLock, statDir: statDir, "unable to get lock"
+						return callback(error)
+					runner (error1, args...) ->
+						Lockfile.unlock path, (error2) ->
+							error = error1 or error2
+							return callback(error) if error?
+							callback(null, args...)
