@@ -10,8 +10,8 @@ block content
 							h1 Admin Panel
 						tabset(ng-cloak)
 							tab(heading="System Messages")
-								each message in systemMessages 
-									.alert.alert-info.row-spaced !{message.content}
+								each message in systemMessages
+									.alert.alert-info.row-spaced #{message.content}
 								hr
 								form(enctype='multipart/form-data', method='post', action='/admin/messages')
 									input(name="_csrf", type="hidden", value=csrfToken)
