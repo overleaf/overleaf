@@ -72,7 +72,7 @@ module.exports = ProjectPersistenceManager =
 		job = (cb)->
 			keepProjectsFrom = new Date(Date.now() - ProjectPersistenceManager.EXPIRY_TIMEOUT)
 			q = {}
-			q[db.op.gt] = keepProjectsFrom
+			q[db.op.lt] = keepProjectsFrom
 			db.Project.findAll(where:{lastAccessed:q})
 				.then((projects) ->
 					cb null, projects.map((project) -> project.project_id)
