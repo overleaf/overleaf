@@ -166,7 +166,7 @@ module.exports = UserUpdater =
 		email = EmailHelper.parseEmail(email)
 		return callback(new Error('invalid email')) if !email?
 		logger.log {userId, email}, 'confirming user email'
-		addAffiliation userId, email, (error) =>
+		addAffiliation userId, email, {confirmedAt: confirmedAt}, (error) =>
 			if error?
 				logger.err error: error, 'problem adding affiliation while confirming email'
 				return callback(error)

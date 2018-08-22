@@ -74,6 +74,7 @@ describe "InstitutionsAPI", ->
 				university: { id: 1 }
 				role: 'Prof'
 				department: 'Math'
+				confirmedAt: new Date()
 			@InstitutionsAPI.addAffiliation @stubbedUser._id, @newEmail, affiliationOptions, (err)=>
 				should.not.exist(err)
 				@request.calledOnce.should.equal true
@@ -83,11 +84,12 @@ describe "InstitutionsAPI", ->
 				requestOptions.method.should.equal 'POST'
 
 				body = requestOptions.body
-				Object.keys(body).length.should.equal 4
+				Object.keys(body).length.should.equal 5
 				body.email.should.equal @newEmail
 				body.university.should.equal affiliationOptions.university
 				body.department.should.equal affiliationOptions.department
 				body.role.should.equal affiliationOptions.role
+				body.confirmedAt.should.equal affiliationOptions.confirmedAt
 				done()
 
 		it 'handle error', (done)->
