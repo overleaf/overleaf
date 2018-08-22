@@ -41,6 +41,26 @@ describe "InstitutionsAPI", ->
 				body.should.equal responseBody
 				done()
 
+	describe 'getInstitutionLicences', ->
+		it 'get licences', (done)->
+			@institutionId = 123
+			responseBody = {"lag":"monthly","data":[{"key":"users","values":[{"x":"2018-01-01","y":1}]}]}
+			@request.yields(null, { statusCode: 200 }, responseBody)
+			startDate = '1417392000'
+			endDate = '1420848000'
+			@InstitutionsAPI.getInstitutionLicences @institutionId, startDate, endDate, 'monthly', (err, body) =>
+				should.not.exist(err)
+				@request.calledOnce.should.equal true
+				requestOptions = @request.lastCall.args[0]
+				expectedUrl = "v1.url/api/v2/institutions/#{@institutionId}/institution_licences"
+				requestOptions.url.should.equal expectedUrl
+				requestOptions.method.should.equal 'GET'
+				requestOptions.body['start_date'].should.equal startDate
+				requestOptions.body['end_date'].should.equal endDate
+				requestOptions.body.lag.should.equal 'monthly'
+				body.should.equal responseBody
+				done()
+
 	describe 'getUserAffiliations', ->
 		it 'get affiliations', (done)->
 			responseBody = [{ foo: 'bar' }]

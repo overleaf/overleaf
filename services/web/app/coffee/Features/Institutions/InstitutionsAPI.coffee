@@ -11,6 +11,13 @@ module.exports = InstitutionsAPI =
 			defaultErrorMessage: "Couldn't get institution affiliations"
 		}, callback
 
+	getInstitutionLicences: (institutionId, startDate, endDate, lag, callback = (error, body) ->) ->
+		makeAffiliationRequest {
+			method: 'GET'
+			path: "/api/v2/institutions/#{institutionId.toString()}/institution_licences"
+			body: {start_date: startDate, end_date: endDate, lag}
+			defaultErrorMessage: "Couldn't get institution affiliations"
+		}, callback
 
 	getUserAffiliations: (userId, callback = (error, body) ->) ->
 		makeAffiliationRequest {
