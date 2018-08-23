@@ -203,14 +203,18 @@ module.exports = CompileManager =
 		compileDir = getCompileDir(project_id, user_id)
 		synctex_path =  "#{base_dir}/output.pdf"
 		command = ["code", synctex_path, file_path, line, column]
-		CompileManager._runSynctex project_id, user_id, command, (error, stdout) ->
-			return callback(error) if error?
-			if stdout.toLowerCase().indexOf("warning") == -1
-				logType = "log"
-			else
-				logType = "err"
-			logger[logType] project_id: project_id, user_id:user_id, file_name: file_name, line: line, column: column, command:command, stdout: stdout, "synctex code output"
-			callback null, CompileManager._parseSynctexFromCodeOutput(stdout)
+		fse.ensureDir compileDir, (error) ->
+			if error?
+				logger.err {error, project_id, user_id, file_name}, "error ensuring dir for sync from code"
+				return callback(error)
+			CompileManager._runSynctex project_id, user_id, command, (error, stdout) ->
+				return callback(error) if error?
+				if stdout.toLowerCase().indexOf("warning") == -1
+					logType = "log"
+				else
+					logType = "err"
+				logger[logType] project_id: project_id, user_id:user_id, file_name: file_name, line: line, column: column, command:command, stdout: stdout, "synctex code output"
+				callback null, CompileManager._parseSynctexFromCodeOutput(stdout)
 
 	syncFromPdf: (project_id, user_id, page, h, v, callback = (error, filePositions) ->) ->
 		compileName = getCompileName(project_id, user_id)
@@ -218,10 +222,14 @@ module.exports = CompileManager =
 		base_dir = Settings.path.synctexBaseDir(compileName)
 		synctex_path =  "#{base_dir}/output.pdf"
 		command = ["pdf", synctex_path, page, h, v]
-		CompileManager._runSynctex  project_id, user_id, command, (error, stdout) ->
-			return callback(error) if error?
-			logger.log project_id: project_id, user_id:user_id, page: page, h: h, v:v, stdout: stdout, "synctex pdf output"
-			callback null, CompileManager._parseSynctexFromPdfOutput(stdout, base_dir)
+		fse.ensureDir compileDir, (error) ->
+			if error?
+				logger.err {error, project_id, user_id, file_name}, "error ensuring dir for sync to code"
+				return callback(error)
+			CompileManager._runSynctex  project_id, user_id, command, (error, stdout) ->
+				return callback(error) if error?
+				logger.log project_id: project_id, user_id:user_id, page: page, h: h, v:v, stdout: stdout, "synctex pdf output"
+				callback null, CompileManager._parseSynctexFromPdfOutput(stdout, base_dir)
 
 	_checkFileExists: (path, callback = (error) ->) ->
 		synctexDir = Path.dirname(path)
@@ -282,20 +290,23 @@ module.exports = CompileManager =
 		logger.log project_id:project_id, user_id:user_id, file_name:file_name, image:image, "running wordcount"
 		file_path = "$COMPILE_DIR/" + file_name
 		command = [ "texcount", '-nocol', '-inc', file_path, "-out=" + file_path + ".wc"]
-		directory = getCompileDir(project_id, user_id)
+		compileDir = getCompileDir(project_id, user_id)
 		timeout = 10 * 1000
 		compileName = getCompileName(project_id, user_id)
-
-		CommandRunner.run compileName, command, directory, image, timeout, {}, (error) ->
-			return callback(error) if error?
-			fs.readFile directory + "/" + file_name + ".wc", "utf-8", (err, stdout) ->
-				if err?
-					#call it node_err so sentry doesn't use random path error as unique id so it can't be ignored
-					logger.err node_err:err, command:command, directory:directory, project_id:project_id, user_id:user_id, "error reading word count output"
-					return callback(err)
-				results = CompileManager._parseWordcountFromOutput(stdout)
-				logger.log project_id:project_id, user_id:user_id, wordcount: results, "word count results"
-				callback null, results
+		fse.ensureDir compileDir, (error) ->
+			if error?
+				logger.err {error, project_id, user_id, file_name}, "error ensuring dir for sync from code"
+				return callback(error)
+			CommandRunner.run compileName, command, compileDir, image, timeout, {}, (error) ->
+				return callback(error) if error?
+				fs.readFile compileDir + "/" + file_name + ".wc", "utf-8", (err, stdout) ->
+					if err?
+						#call it node_err so sentry doesn't use random path error as unique id so it can't be ignored
+						logger.err node_err:err, command:command, compileDir:compileDir, project_id:project_id, user_id:user_id, "error reading word count output"
+						return callback(err)
+					results = CompileManager._parseWordcountFromOutput(stdout)
+					logger.log project_id:project_id, user_id:user_id, wordcount: results, "word count results"
+					callback null, results
 
 	_parseWordcountFromOutput: (output) ->
 		results = {

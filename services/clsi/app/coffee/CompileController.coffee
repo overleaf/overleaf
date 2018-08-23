@@ -82,7 +82,6 @@ module.exports = CompileController =
 		column = parseInt(req.query.column, 10)
 		project_id = req.params.project_id
 		user_id = req.params.user_id
-
 		CompileManager.syncFromCode project_id, user_id, file, line, column, (error, pdfPositions) ->
 			return next(error) if error?
 			res.send JSON.stringify {
@@ -95,7 +94,6 @@ module.exports = CompileController =
 		v      = parseFloat(req.query.v)
 		project_id = req.params.project_id
 		user_id = req.params.user_id
-
 		CompileManager.syncFromPdf project_id, user_id, page, h, v, (error, codePositions) ->
 			return next(error) if error?
 			res.send JSON.stringify {
