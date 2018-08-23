@@ -12,6 +12,10 @@ define [
 	# and then again on ack.
 	AUTO_COMPILE_DEBOUNCE = 2000
 
+	App.filter('trusted', ['$sce', ($sce)->
+		return (url)-> return $sce.trustAsResourceUrl(url);
+	])
+
 	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, logHintsFeedback, localStorage) ->
 		# enable per-user containers by default
 		perUserCompile = true
@@ -226,7 +230,7 @@ define [
 
 		buildPdfDownloadUrl = (pdfDownloadDomain, path)->
 			 #we only download builds from compiles server for security reasons
-			if pdfDownloadDomain? and path.indexOf("build") != -1
+			if pdfDownloadDomain? and path? and path.indexOf("build") != -1
 				return "#{pdfDownloadDomain}#{path}"
 			else
 				return path
