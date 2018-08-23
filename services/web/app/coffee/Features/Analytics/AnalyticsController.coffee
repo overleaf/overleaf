@@ -25,11 +25,10 @@ module.exports = AnalyticsController =
 			respondWith(error, res, next)
 
 	licences: (req, res, next) ->
-		AuthenticationController.getLoggedInUserId(req) or req.sessionID
 		{resource_id, start_date, end_date, lag} = req.query
 		InstitutionsAPI.getInstitutionLicences resource_id, start_date, end_date, lag, (error, licences) ->
 			if error?
-				res.send 503
+				next(error)
 			else
 				res.send licences
 

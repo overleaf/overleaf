@@ -9,8 +9,6 @@ module.exports =
 		webRouter.put  '/editingSession/:projectId',
 			AnalyticsController.updateEditingSession
 
-		webRouter.get '/graphs/licences', AnalyticsController.licences
-
 		publicApiRouter.use '/analytics/graphs',
 			AuthenticationController.httpAuth,
 			AnalyticsProxy.call('/graphs')
