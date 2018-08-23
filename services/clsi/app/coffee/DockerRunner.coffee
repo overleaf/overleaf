@@ -107,9 +107,10 @@ module.exports = DockerRunner =
 				if exitCode is 1 # exit status from chktex
 					err = DockerRunner.ERR_EXITED
 					err.code = exitCode
-					logger.err err:err, exitCode:exitCode, options:options, "docker container has exited"
 					return callback(err)
 				containerReturned = true
+				options.SecurityOpt = null #small log line
+				logger.log err:err, exitCode:exitCode, options:options, "docker container has exited"
 				callbackIfFinished()
 
 	_getContainerOptions: (command, image, volumes, timeout, environment) ->
