@@ -3,7 +3,6 @@ define [
 	"ace/ace"
 	"ide/human-readable-logs/HumanReadableLogs"
 	"libs/bib-log-parser"
-	"services/log-hints-feedback"
 ], (App, Ace, HumanReadableLogs, BibLogParser) ->
 	AUTO_COMPILE_MAX_WAIT = 5000
 	# We add a 1 second debounce to sending user changes to server if they aren't
@@ -38,6 +37,9 @@ define [
 				$scope.$applyAsync () ->
 					$scope.shouldDropUp = getFilesDropdownTopCoordAsRatio() > 0.65
 
+		$scope.trackLogHintsLearnMore = () ->
+			event_tracking.sendMB "logs-hints-learn-more"
+
 		if ace.require("ace/lib/useragent").isMac
 			$scope.modifierKey = "Cmd"
 		else
@@ -49,9 +51,9 @@ define [
 			if qs_args.length then "?" + qs_args.join("&") else ""
 
 		$scope.stripHTMLFromString = (htmlStr) ->
-				tmp = document.createElement("DIV")
-				tmp.innerHTML = htmlStr
-				return tmp.textContent || tmp.innerText || ""
+			tmp = document.createElement("DIV")
+			tmp.innerHTML = htmlStr
+			return tmp.textContent || tmp.innerText || ""
 
 		$scope.$on "project:joined", () ->
 			return if !autoCompile
