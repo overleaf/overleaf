@@ -11,12 +11,12 @@ describe "InstitutionsAPI", ->
 
 	beforeEach ->
 		@logger = err: sinon.stub(), log: ->
-		settings = apis: { v1: { url: 'v1.url', user: '', pass: '' } }
+		@settings = apis: { v1: { url: 'v1.url', user: '', pass: '' } }
 		@request = sinon.stub()
 		@InstitutionsAPI = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": @logger
 			"metrics-sharelatex": timeAsyncMethod: sinon.stub()
-			'settings-sharelatex': settings
+			'settings-sharelatex': @settings
 			'request': @request
 
 		@stubbedUser = 
@@ -41,6 +41,14 @@ describe "InstitutionsAPI", ->
 				body.should.equal responseBody
 				done()
 
+		it 'handle empty response', (done)->
+			@settings.apis = null
+			@InstitutionsAPI.getInstitutionAffiliations @institutionId, (err, body) =>
+				should.not.exist(err)
+				expect(body).to.be.a 'Array'
+				body.length.should.equal 0
+				done()
+
 	describe 'getUserAffiliations', ->
 		it 'get affiliations', (done)->
 			responseBody = [{ foo: 'bar' }]
@@ -63,6 +71,14 @@ describe "InstitutionsAPI", ->
 				should.exist(err)
 				err.message.should.have.string 503
 				err.message.should.have.string body.errors
+				done()
+
+		it 'handle empty response', (done)->
+			@settings.apis = null
+			@InstitutionsAPI.getUserAffiliations @stubbedUser._id, (err, body) =>
+				should.not.exist(err)
+				expect(body).to.be.a 'Array'
+				body.length.should.equal 0
 				done()
 
 	describe 'addAffiliation', ->
