@@ -59,7 +59,7 @@ I'm sorry to see you cancelled your #{settings.appName} premium account. Would y
 """
 	secondaryMessage: () -> "Thank you in advance!"
 	ctaText: () -> "Leave Feedback"
-	ctaURL: (opts) -> "https://sharelatex.typeform.com/to/f5lBiZ"
+	ctaURL: (opts) -> "https://docs.google.com/forms/d/e/1FAIpQLScqU6Je1r4Afz6ul6oY0RAfN7RabdWv_oL1u7Rj1YBmXS4fiQ/viewform?usp=sf_link"
 })
 
 templates.passwordResetRequested = CTAEmailTemplate({
