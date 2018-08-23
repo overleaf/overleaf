@@ -109,7 +109,7 @@ module.exports = DockerRunner =
 					err.code = exitCode
 					return callback(err)
 				containerReturned = true
-				options.SecurityOpt = null #small log line
+				options?.HostConfig?.SecurityOpt = null #small log line
 				logger.log err:err, exitCode:exitCode, options:options, "docker container has exited"
 				callbackIfFinished()
 

@@ -209,11 +209,7 @@ module.exports = CompileManager =
 				return callback(error)
 			CompileManager._runSynctex project_id, user_id, command, (error, stdout) ->
 				return callback(error) if error?
-				if stdout.toLowerCase().indexOf("warning") == -1
-					logType = "log"
-				else
-					logType = "err"
-				logger[logType] project_id: project_id, user_id:user_id, file_name: file_name, line: line, column: column, command:command, stdout: stdout, "synctex code output"
+				logger.log project_id: project_id, user_id:user_id, file_name: file_name, line: line, column: column, command:command, stdout: stdout, "synctex code output"
 				callback null, CompileManager._parseSynctexFromCodeOutput(stdout)
 
 	syncFromPdf: (project_id, user_id, page, h, v, callback = (error, filePositions) ->) ->
