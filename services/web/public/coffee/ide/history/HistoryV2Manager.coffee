@@ -82,6 +82,8 @@ define [
 				viewMode: null
 				nextBeforeTimestamp: null
 				atEnd: false
+				userHasFullFeature: @$scope.project?.features?.versioning or false
+				freeHistoryLimitHit: false
 				selection: {
 					label: null
 					updates: []
@@ -232,9 +234,11 @@ define [
 						@$scope.history.labels = @_sortLabelsByVersionAndDate response.labels.data
 					@_loadUpdates(updatesData.updates)
 					@$scope.history.nextBeforeTimestamp = updatesData.nextBeforeTimestamp
-					if !updatesData.nextBeforeTimestamp?
+					if !updatesData.nextBeforeTimestamp? or @$scope.history.freeHistoryLimitHit
 						@$scope.history.atEnd = true
 					@$scope.history.loading = false
+					if @$scope.history.updates.length == 0
+						@$scope.history.loadingFileTree = false
 				.catch (error) =>
 					{ status, statusText } = error
 					@$scope.history.error = { status, statusText }
@@ -387,22 +391,33 @@ define [
 
 		_loadUpdates: (updates = []) ->
 			previousUpdate = @$scope.history.updates[@$scope.history.updates.length - 1]
-
-			for update in updates or []
+			dateTimeNow = new Date()
+			timestamp24hoursAgo = dateTimeNow.setDate(dateTimeNow.getDate() - 1)
+			cutOffIndex = null
+			
+			for update, i in updates or []
 				for user in update.meta.users or []
 					if user?
 						user.hue = ColorManager.getHueForUserId(user.id)
 
 				if !previousUpdate? or !moment(previousUpdate.meta.end_ts).isSame(update.meta.end_ts, "day")
 					update.meta.first_in_day = true
-
+				
 				update.selectedFrom = false
 				update.selectedTo = false
 				update.inSelection = false
 
 				previousUpdate = update
 
+				if !@$scope.history.userHasFullFeature and update.meta.end_ts < timestamp24hoursAgo
+					cutOffIndex = i or 1 # Make sure that we show at least one entry (to allow labelling).
+					@$scope.history.freeHistoryLimitHit = true
+					break
+
 			firstLoad = @$scope.history.updates.length == 0
+
+			if !@$scope.history.userHasFullFeature and cutOffIndex?
+				updates = updates.slice 0, cutOffIndex
 
 			@$scope.history.updates =
 				@$scope.history.updates.concat(updates)

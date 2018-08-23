@@ -4,16 +4,21 @@ define ['ide/history/HistoryV2Manager'], (HistoryV2Manager) ->
 			@scope =
 				$watch: sinon.stub()
 				$on: sinon.stub()
+				project:
+					features:
+						versioning: true
 			@ide = {}
 			@historyManager = new HistoryV2Manager(@ide, @scope)
 
-		it "should setup the history scope on intialization", ->
+		it "should setup the history scope on initialization", ->
 			expect(@scope.history).to.deep.equal({
 				isV2: true
 				updates: []
 				viewMode: null
 				nextBeforeTimestamp: null
 				atEnd: false
+				userHasFullFeature: true
+				freeHistoryLimitHit: false
 				selection: {
 					label: null
 					updates: []
@@ -31,6 +36,12 @@ define ['ide/history/HistoryV2Manager'], (HistoryV2Manager) ->
 				files: []
 				selectedFile: null
 			})
+
+
+		it "should setup history without full access to the feature if the project does not have versioning", ->
+			@scope.project.features.versioning = false
+			@historyManager = new HistoryV2Manager(@ide, @scope)
+			expect(@scope.history.userHasFullFeature).to.equal false
 
 		describe "_perDocSummaryOfUpdates", ->
 			it "should return the range of updates for the docs", ->

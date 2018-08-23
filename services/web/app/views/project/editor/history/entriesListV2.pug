@@ -6,11 +6,13 @@ aside.change-list(
 		ng-if="!history.showOnlyLabels && !history.error"
 		entries="history.updates"
 		current-user="user"
+		current-user-is-owner="project.owner._id === user.id"
 		users="projectUsers"
 		load-entries="loadMore()"
 		load-disabled="history.loading || history.atEnd"
 		load-initialize="ui.view == 'history'"
 		is-loading="history.loading"
+		free-history-limit-hit="history.freeHistoryLimitHit"
 		on-entry-select="handleEntrySelect(selectedEntry)"
 		on-label-delete="handleLabelDelete(label)"
 	)
@@ -134,6 +136,48 @@ script(type="text/ng-template", id="historyEntriesListTpl")
 			.loading(ng-show="$ctrl.isLoading")
 				i.fa.fa-spin.fa-refresh
 				| &nbsp;&nbsp; #{translate("loading")}...
+			.history-entries-list-upgrade-prompt(
+				ng-if="$ctrl.freeHistoryLimitHit && $ctrl.currentUserIsOwner"
+				ng-controller="FreeTrialModalController"
+			)
+				p #{translate("currently_seeing_only_24_hrs_history")}
+				p: strong #{translate("upgrade_to_get_feature", {feature:"full Project History"})}
+				ul.list-unstyled
+					li 
+						i.fa.fa-check &nbsp;
+						| #{translate("unlimited_projects")}
+					
+					li
+						i.fa.fa-check &nbsp;
+						| #{translate("collabs_per_proj", {collabcount:'Multiple'})}
+					
+					li 
+						i.fa.fa-check &nbsp;
+						| #{translate("full_doc_history")}
+					
+					li 
+						i.fa.fa-check &nbsp;
+						| #{translate("sync_to_dropbox")}
+
+					li 
+						i.fa.fa-check &nbsp;
+						| #{translate("sync_to_github")}
+
+					li  
+						i.fa.fa-check &nbsp;
+						|#{translate("compile_larger_projects")}
+				p.text-center
+					a.btn.btn-success(
+						href
+						ng-class="buttonClass"
+						ng-click="startFreeTrial('history')"
+					) #{translate("start_free_trial")}
+				p.small(ng-show="startedFreeTrial") #{translate("refresh_page_after_starting_free_trial")}
+			.history-entries-list-upgrade-prompt(
+				ng-if="$ctrl.freeHistoryLimitHit && !$ctrl.currentUserIsOwner"
+			) 
+				p #{translate("currently_seeing_only_24_hrs_history")}
+				strong #{translate("ask_proj_owner_to_upgrade_for_full_history")}
 
 script(type="text/ng-template", id="historyEntryTpl")
 	.history-entry(
