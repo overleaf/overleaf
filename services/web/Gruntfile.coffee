@@ -156,6 +156,7 @@ module.exports = (grunt) ->
 					sourceMapBasepath: "public/stylesheets"
 					globalVars:
 						'is-overleaf': false
+						'is-overleaf-light': false
 						'show-rich-text': Settings.showRichText
 				files:
 					"public/stylesheets/style.css": "public/stylesheets/style.less"
@@ -166,6 +167,7 @@ module.exports = (grunt) ->
 					sourceMapBasepath: "public/stylesheets"
 					globalVars:
 						'is-overleaf': true
+						'is-overleaf-light': false
 						'show-rich-text': Settings.showRichText
 				files:
 					"public/stylesheets/ol-style.css": "public/stylesheets/ol-style.less"
@@ -177,6 +179,7 @@ module.exports = (grunt) ->
 					sourceMapBasepath: "public/stylesheets"
 					globalVars:
 						'is-overleaf': true
+						'is-overleaf-light': true
 						'show-rich-text': Settings.showRichText
 				files:
 					"public/stylesheets/ol-light-style.css": "public/stylesheets/ol-light-style.less"
