@@ -243,7 +243,7 @@ div.full-size.pdf(ng-controller="PdfController")
 				dbl-click-callback="syncToCode"
 			)
 			iframe(
-				ng-src="{{ pdf.url }}"
+				ng-src="{{ pdf.url | trusted }}"
 				ng-if="settings.pdfViewer == 'native'"
 			)
 

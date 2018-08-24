@@ -30,6 +30,8 @@ define [
 			loadInitialize: "<"
 			isLoading: "<"
 			currentUser: "<"
+			freeHistoryLimitHit: "<"
+			currentUserIsOwner: "<"
 			onEntrySelect: "&"
 			onLabelDelete: "&"
 		controller: historyEntriesListController

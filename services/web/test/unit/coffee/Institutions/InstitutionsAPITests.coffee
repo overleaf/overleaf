@@ -11,12 +11,12 @@ describe "InstitutionsAPI", ->
 
 	beforeEach ->
 		@logger = err: sinon.stub(), log: ->
-		settings = apis: { v1: { url: 'v1.url', user: '', pass: '' } }
+		@settings = apis: { v1: { url: 'v1.url', user: '', pass: '' } }
 		@request = sinon.stub()
 		@InstitutionsAPI = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": @logger
 			"metrics-sharelatex": timeAsyncMethod: sinon.stub()
-			'settings-sharelatex': settings
+			'settings-sharelatex': @settings
 			'request': @request
 
 		@stubbedUser = 
@@ -38,6 +38,34 @@ describe "InstitutionsAPI", ->
 				requestOptions.url.should.equal expectedUrl
 				requestOptions.method.should.equal 'GET'
 				should.not.exist(requestOptions.body)
+				body.should.equal responseBody
+				done()
+        
+		it 'handle empty response', (done)->
+			@settings.apis = null
+			@InstitutionsAPI.getInstitutionAffiliations @institutionId, (err, body) =>
+				should.not.exist(err)
+				expect(body).to.be.a 'Array'
+				body.length.should.equal 0
+				done()
+
+	describe 'getInstitutionLicences', ->
+		it 'get licences', (done)->
+			@institutionId = 123
+			responseBody = {"lag":"monthly","data":[{"key":"users","values":[{"x":"2018-01-01","y":1}]}]}
+			@request.yields(null, { statusCode: 200 }, responseBody)
+			startDate = '1417392000'
+			endDate = '1420848000'
+			@InstitutionsAPI.getInstitutionLicences @institutionId, startDate, endDate, 'monthly', (err, body) =>
+				should.not.exist(err)
+				@request.calledOnce.should.equal true
+				requestOptions = @request.lastCall.args[0]
+				expectedUrl = "v1.url/api/v2/institutions/#{@institutionId}/institution_licences"
+				requestOptions.url.should.equal expectedUrl
+				requestOptions.method.should.equal 'GET'
+				requestOptions.body['start_date'].should.equal startDate
+				requestOptions.body['end_date'].should.equal endDate
+				requestOptions.body.lag.should.equal 'monthly'
 				body.should.equal responseBody
 				done()
 
@@ -65,6 +93,14 @@ describe "InstitutionsAPI", ->
 				err.message.should.have.string body.errors
 				done()
 
+		it 'handle empty response', (done)->
+			@settings.apis = null
+			@InstitutionsAPI.getUserAffiliations @stubbedUser._id, (err, body) =>
+				should.not.exist(err)
+				expect(body).to.be.a 'Array'
+				body.length.should.equal 0
+				done()
+
 	describe 'addAffiliation', ->
 		beforeEach ->
 			@request.callsArgWith(1, null, { statusCode: 201 })
@@ -74,6 +110,7 @@ describe "InstitutionsAPI", ->
 				university: { id: 1 }
 				role: 'Prof'
 				department: 'Math'
+				confirmedAt: new Date()
 			@InstitutionsAPI.addAffiliation @stubbedUser._id, @newEmail, affiliationOptions, (err)=>
 				should.not.exist(err)
 				@request.calledOnce.should.equal true
@@ -83,11 +120,12 @@ describe "InstitutionsAPI", ->
 				requestOptions.method.should.equal 'POST'
 
 				body = requestOptions.body
-				Object.keys(body).length.should.equal 4
+				Object.keys(body).length.should.equal 5
 				body.email.should.equal @newEmail
 				body.university.should.equal affiliationOptions.university
 				body.department.should.equal affiliationOptions.department
 				body.role.should.equal affiliationOptions.role
+				body.confirmedAt.should.equal affiliationOptions.confirmedAt
 				done()
 
 		it 'handle error', (done)->
