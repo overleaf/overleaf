@@ -1,8 +1,8 @@
 // Styleguide colors
-@ol-blue-gray-0 : lighten(#E4E8EE, 6%);
-@ol-blue-gray-1 : lighten(#E4E8EE, 1%);
+@ol-blue-gray-0 : #F4F5F8;
+@ol-blue-gray-1 : #DFE2E8;
 @ol-blue-gray-2 : #9DA7B7;
-@ol-blue-gray-3 : #5D6879;
+@ol-blue-gray-3 : #727E91;
 @ol-blue-gray-4 : #455265;
 @ol-blue-gray-5 : #2C3645;
 @ol-blue-gray-6 : #1E2530;
@@ -31,14 +31,14 @@
 @v2-dash-pane-btn-hover-bg      : @ol-blue-gray-6;
 
 // Editor file-tree
-@file-tree-bg                    : @ol-blue-gray-1;
+@file-tree-bg                    : #FFF;
 @file-tree-line-height           : 2.05;
 @file-tree-item-color            : @ol-blue-gray-3;
 @file-tree-item-selected-color   : #FFF;
-@file-tree-item-input-color      : @ol-blue-gray-3;
-@file-tree-item-toggle-color     : @ol-blue-gray-3;
-@file-tree-item-icon-color       : @ol-blue-gray-3;
-@file-tree-item-folder-color     : @ol-blue-gray-3;
+@file-tree-item-input-color      : @ol-blue-gray-2;
+@file-tree-item-toggle-color     : @ol-blue-gray-2;
+@file-tree-item-icon-color       : @ol-blue-gray-2;
+@file-tree-item-folder-color     : @ol-blue-gray-2;
 @file-tree-item-hover-bg         : @ol-blue-gray-1;
 @file-tree-item-selected-bg      : @ol-green;
 @file-tree-multiselect-bg        : @ol-blue;
@@ -48,21 +48,32 @@
 @content-alt-bg-color            : @ol-blue-gray-1;
 
 // Editor resizers
-@editor-resizer-bg-color         : darken(@ol-blue-gray-1, 5%);
-@editor-resizer-bg-color-dragging: darken(@ol-blue-gray-1, 5%);
-@editor-toggler-bg-color         : darken(@ol-blue-gray-1, 15%);
+@editor-resizer-bg-color         : @ol-blue-gray-1;
+@editor-resizer-bg-color-dragging: @ol-blue-gray-1;
+@editor-toggler-bg-color         : @ol-blue-gray-2;
 @editor-toggler-hover-bg-color   : @ol-green;
 @synctex-controls-z-index        : 6;
 @synctex-controls-padding        : 0;
 @editor-border-color             : @ol-blue-gray-5;
 
-@toolbar-border-color            : darken(@ol-blue-gray-1, 5%);
-@toolbar-alt-bg-color            : darken(@ol-blue-gray-1, 5%);
+
+@toolbar-border-color            : @ol-blue-gray-1;
+@toolbar-alt-bg-color            : #FFF;
+@editor-toolbar-bg               : @toolbar-alt-bg-color;
 @navbar-default-bg               : @ol-blue-gray-4;
-@toolbar-header-bg-color         : @ol-blue-gray-4;
-@toolbar-header-btn-border-color : @ol-blue-gray-3;
-@toolbar-btn-color               : #FFF;
+@toolbar-header-bg-color         : #FFF;
+@toolbar-header-btn-border-color : @ol-blue-gray-1;
+@toolbar-btn-color               : @ol-blue-gray-3;
+@toolbar-btn-hover-color         : @ol-blue-gray-3;
+@toolbar-btn-hover-bg-color      : @ol-blue-gray-0;
 @toolbar-icon-btn-color          : @ol-blue-gray-3;
 @toolbar-icon-btn-hover-color    : @ol-blue-gray-3;
-@editor-header-logo-background   : url(/img/ol-brand/overleaf-o-white.svg) center / contain no-repeat;
+@editor-header-logo-background   : url(/img/ol-brand/overleaf-o.svg) center / contain no-repeat;
+@project-name-color              : @ol-blue-gray-3;
 @pdf-bg                          : @ol-blue-gray-0;
+
+// Formatting buttons
+@formatting-btn-color            : @toolbar-icon-btn-color;
+@formatting-btn-bg               : transparent;
+@formatting-btn-border           : @ol-blue-gray-1;
+@formatting-menu-bg              : transparent;
