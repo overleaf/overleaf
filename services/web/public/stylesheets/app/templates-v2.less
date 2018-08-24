@@ -1,0 +1,113 @@
+.template-title {
+	margin-bottom: @margin-xl;
+}
+
+.field-title {
+	font-weight: bold;
+}
+
+.filters {
+	float: right;
+	margin-bottom: @margin-lg;
+
+	@media (max-width: @screen-md-min) {
+		float: none;
+	}
+}
+
+.cta-links {
+	margin-top: @margin-lg;
+
+	.cta-link.btn {
+		margin: 0 @margin-sm;
+	}
+}
+
+.tag-link {
+	margin-right: @margin-xs;
+}
+
+.template-thumbnail {
+
+	.thumbnail {
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		-webkit-box-shadow:0 2px 4px rgba(0, 0, 0, 0.1);
+		height: 465px;
+		margin: 5% 0;
+
+		&.thumbnail-tag {
+			height: 100px;
+		}
+
+		img {
+			width: 100%;
+			height: 100%;
+		}
+	}
+
+	a {
+		padding:0px;
+		h3 {
+			color:@link-color;
+			margin: 10px 0px 10px 20px;
+		}
+
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.caption {
+        // Override ShareLatex template styles
+        background: none;
+        border: none;
+
+		text-align: center;
+
+		.description {
+			font-style: italic;
+			padding: 5px 0;
+			text-overflow: ellipsis;
+			overflow: hidden;
+			white-space: nowrap;
+		}
+
+	}
+
+	/* Media Queries */
+	@media (max-width: @screen-md-min) {
+		.thumbnail {
+			height: 400px;
+			width: 300px;
+
+			margin: 5% auto;
+		}
+
+		img {
+			width: 90%;
+		}
+
+		.caption .description {
+			padding: 5px 50px;
+		}
+	}
+
+}
+
+    .section-preview {
+        margin-top: @margin-xl;
+
+        .abstract {
+            padding-right:10%;
+            padding-bottom: 10%;
+
+            @media (max-width: @screen-md-min) {
+                padding: 5%;
+            }
+        }
+    }
+
+    .section-tags {
+		margin-bottom: @margin-xl;
+		margin-top: @margin-xl;
+    }
