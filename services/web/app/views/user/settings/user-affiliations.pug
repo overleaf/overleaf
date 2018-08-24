@@ -2,6 +2,7 @@ form.row(
 	ng-controller="UserAffiliationsController"
 	name="affiliationsForm"
 )
+	pre(style="position: fixed; width: 200px; left: 0;") {{ newAffiliation | json }}
 	.col-md-12
 		h3 #{translate("emails_and_affiliations_title")}
 		p.small #{translate("emails_and_affiliations_explanation")}
@@ -192,7 +193,7 @@ script(type="text/ng-template", id="affiliationFormTpl")
 		ui-select(
 			ng-model="$ctrl.affiliationData.university"
 			ng-disabled="!$ctrl.affiliationData.country"
-			tagging="$ctrladdUniversityToSelection"
+			tagging="$ctrl.addUniversityToSelection"
 			tagging-label="false"
 		)
 			ui-select-match(
