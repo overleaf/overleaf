@@ -19,6 +19,7 @@
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		margin-right: (@line-height-computed / 2);
 	}
 		.history-toolbar-time,
 		.history-toolbar-selected-label {
@@ -33,7 +34,7 @@
 			.btn-xs;
 			padding-left: @padding-small-horizontal;
 			padding-right: @padding-small-horizontal;
-			margin-left: (@line-height-computed / 2);
+			margin-right: (@line-height-computed / 2);
 		}
 	.history-toolbar-entries-list {
 		flex: 0 0 @changesListWidth;
@@ -172,6 +173,12 @@
 					content: none;
 				}
 			}
+
+.history-entries-list-upgrade-prompt {
+	background-color: #FFF;
+	margin-bottom: 2px;
+	padding: 5px 10px;
+}
 
 .history-labels-list {
 	.history-entries;

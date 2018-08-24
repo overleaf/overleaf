@@ -9,15 +9,22 @@ module.exports = InstitutionsAPI =
 			method: 'GET'
 			path: "/api/v2/institutions/#{institutionId.toString()}/affiliations"
 			defaultErrorMessage: "Couldn't get institution affiliations"
-		}, callback
+		}, (error, body) -> callback(error, body or [])
 
+	getInstitutionLicences: (institutionId, startDate, endDate, lag, callback = (error, body) ->) ->
+		makeAffiliationRequest {
+			method: 'GET'
+			path: "/api/v2/institutions/#{institutionId.toString()}/institution_licences"
+			body: {start_date: startDate, end_date: endDate, lag}
+			defaultErrorMessage: "Couldn't get institution licences"
+		}, callback
 
 	getUserAffiliations: (userId, callback = (error, body) ->) ->
 		makeAffiliationRequest {
 			method: 'GET'
 			path: "/api/v2/users/#{userId.toString()}/affiliations"
 			defaultErrorMessage: "Couldn't get user affiliations"
-		}, callback
+		}, (error, body) -> callback(error, body or [])
 
 
 	addAffiliation: (userId, email, affiliationOptions, callback) ->
@@ -25,11 +32,11 @@ module.exports = InstitutionsAPI =
 			callback = affiliationOptions
 			affiliationOptions = {}
 
-		{ university, department, role } = affiliationOptions
+		{ university, department, role, confirmedAt } = affiliationOptions
 		makeAffiliationRequest {
 			method: 'POST'
 			path: "/api/v2/users/#{userId.toString()}/affiliations"
-			body: { email, university, department, role }
+			body: { email, university, department, role, confirmedAt }
 			defaultErrorMessage: "Couldn't create affiliation"
 		}, callback
 
