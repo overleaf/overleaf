@@ -33,7 +33,7 @@
 @navbar-default-bg        : @ol-blue-gray-6;
 @navbar-default-border    : transparent;
 @navbar-brand-image-url   : url(/img/ol-brand/overleaf-white.svg);
-
+@navbar-default-link-bg   : transparent;
 // Backgrounds
 @body-bg                : #FFF;
 @content-alt-bg-color   : @ol-blue-gray-1;
@@ -110,6 +110,7 @@
 @navbar-default-padding-h         : 10px;
 @navbar-default-padding           : @navbar-default-padding-v @navbar-default-padding-h;
 @navbar-default-link-color        : #FFF;
+@navbar-default-link-border-color : @navbar-default-link-color;
 @navbar-default-link-hover-bg     : @ol-green;
 @navbar-default-link-active-bg    : @ol-green;
 @navbar-default-link-hover-color  : @ol-green;
@@ -150,10 +151,13 @@
 @sidebar-active-border-radius   : 0;
 @sidebar-active-bg              : @ol-blue-gray-6;
 @sidebar-active-color           : #FFF;
+@sidebar-active-font-weight     : 700;
 @sidebar-hover-bg               : @ol-blue-gray-4;
 @sidebar-hover-text-decoration  : none;
 @v2-dash-pane-bg                : @ol-blue-gray-4;
 @v2-dash-pane-link-color        : #FFF;
+@v2-dash-pane-color             : #FFF;
+@v2-dash-pane-toggle-color      : #FFF;
 @v2-dash-pane-btn-bg            : @ol-blue-gray-5;
 @v2-dash-pane-btn-hover-bg      : @ol-blue-gray-6;
 
@@ -279,6 +283,7 @@
 @chat-new-message-bg              : @ol-blue-gray-4;
 @chat-new-message-textarea-bg     : @ol-blue-gray-1;
 @chat-new-message-textarea-color  : @ol-blue-gray-6;
+@chat-new-message-border-color    : @editor-border-color;
 
 // Pagination
 @pagination-active-bg             : @ol-dark-green;

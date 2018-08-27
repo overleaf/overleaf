@@ -327,6 +327,7 @@
 
 // Navbar links
 @navbar-default-link-color:                @link-color;
+@navbar-default-link-border-color:         @navbar-default-link-color;
 @navbar-default-link-hover-color:          @link-hover-color;
 @navbar-default-link-hover-bg:             @link-hover-color;
 @navbar-default-link-active-color:         #fff;
@@ -835,7 +836,7 @@
 
 @dropdown-divider-margin    :((@line-height-computed / 2) - 1) 0;
 @dropdown-item-padding      : 3px 20px;
-
+@navbar-default-link-bg     : transparent;
 
 // Button colors and sizing
 @btn-border-radius-large : @border-radius-large;
@@ -861,6 +862,7 @@
 @sidebar-active-border-radius  : @border-radius-small;
 @sidebar-active-bg             : @link-color;
 @sidebar-active-color          : #FFF;
+@sidebar-active-font-weight    : 700;
 @sidebar-hover-bg              : transparent;
 @sidebar-hover-text-decoration : underline;
 
@@ -968,6 +970,7 @@
 @chat-new-message-bg              : @gray-lightest;
 @chat-new-message-textarea-bg     : #FFF;
 @chat-new-message-textarea-color  : @gray-dark;
+@chat-new-message-border-color    : @editor-border-color;
 
 // PDF
 @pdf-top-offset                  : @toolbar-tall-height;

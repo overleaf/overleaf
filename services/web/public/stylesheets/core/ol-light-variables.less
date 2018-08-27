@@ -1,5 +1,5 @@
 // Styleguide colors
-@ol-blue-gray-0 : #F4F5F8;
+@ol-blue-gray-0 : #F4F5FB;
 @ol-blue-gray-1 : #DFE2E8;
 @ol-blue-gray-2 : #9DA7B7;
 @ol-blue-gray-3 : #727E91;
@@ -17,19 +17,26 @@
 @ol-type-color  : @ol-blue-gray-3;
 
 // Sidebar
-@sidebar-bg                     : @ol-blue-gray-0;
-@sidebar-color                  : @ol-blue-gray-3;
-@sidebar-link-color             : @ol-blue-gray-4;
-@sidebar-active-border-radius   : 0;
-@sidebar-active-bg              : @ol-blue-gray-1;
-@sidebar-active-color           : @ol-blue-gray-4;
-@sidebar-hover-bg               : @ol-blue-gray-1;
-@sidebar-hover-text-decoration  : none;
-@v2-dash-pane-bg                : @ol-blue-gray-4;
-@v2-dash-pane-link-color        : #FFF;
-@v2-dash-pane-btn-bg            : @ol-blue-gray-5;
-@v2-dash-pane-btn-hover-bg      : @ol-blue-gray-6;
+@sidebar-bg                      : #FFF;
+@sidebar-color                   : @ol-blue-gray-2;
+@sidebar-link-color              : @ol-blue-gray-3;
+@sidebar-active-bg               : @ol-green;
+@sidebar-active-color            : #FFF;
+@sidebar-hover-bg                : @ol-blue-gray-1;
+@sidebar-active-font-weight      : normal;
+@sidebar-hover-text-decoration   : none;
 
+@v2-dash-pane-bg                 : @ol-blue-gray-1;
+@v2-dash-pane-link-color         : @ol-blue;
+@v2-dash-pane-toggle-color       : @ol-blue-gray-3;
+@v2-dash-pane-btn-bg             : @ol-blue-gray-5;
+@v2-dash-pane-btn-hover-bg       : @ol-blue-gray-6;
+@v2-dash-pane-color              : @ol-blue-gray-3;
+
+@progress-bar-shadow             : inset 0 -1px 0 rgba(0,0,0,.15);
+@progress-bg                     : @ol-blue-gray-0;
+
+@input-border                    : @ol-blue-gray-1;
 // Editor file-tree
 @file-tree-bg                    : #FFF;
 @file-tree-line-height           : 2.05;
@@ -45,7 +52,7 @@
 @file-tree-multiselect-hover-bg  : @ol-dark-blue;
 @file-tree-droppable-bg-color    : tint(@ol-green, 5%);
 
-@content-alt-bg-color            : @ol-blue-gray-1;
+@content-alt-bg-color            : @ol-blue-gray-0;
 
 // Editor resizers
 @editor-resizer-bg-color         : @ol-blue-gray-1;
@@ -54,13 +61,12 @@
 @editor-toggler-hover-bg-color   : @ol-green;
 @synctex-controls-z-index        : 6;
 @synctex-controls-padding        : 0;
-@editor-border-color             : @ol-blue-gray-5;
-
+@editor-border-color             : @ol-blue-gray-1;
 
 @toolbar-border-color            : @ol-blue-gray-1;
 @toolbar-alt-bg-color            : #FFF;
 @editor-toolbar-bg               : @toolbar-alt-bg-color;
-@navbar-default-bg               : @ol-blue-gray-4;
+
 @toolbar-header-bg-color         : #FFF;
 @toolbar-header-btn-border-color : @ol-blue-gray-1;
 @toolbar-btn-color               : @ol-blue-gray-3;
@@ -72,8 +78,45 @@
 @project-name-color              : @ol-blue-gray-3;
 @pdf-bg                          : @ol-blue-gray-0;
 
+// Navbar
+@navbar-default-bg               : #FFF;
+@navbar-default-border           : @ol-blue-gray-1;
+@navbar-default-link-bg          : @ol-green;
+@navbar-default-link-color       : #FFF;
+@navbar-default-link-border-color: transparent;
+@navbar-default-link-hover-bg    : @ol-green;
+@navbar-default-link-active-bg   : @ol-green;
+@navbar-default-link-hover-color : @ol-green;
+
+@navbar-title-color              : @ol-blue-gray-1;
+@navbar-title-color-hover        : @ol-blue-gray-2;
+@navbar-default-color            : @ol-blue-gray-3;
+@navbar-brand-image-url          : url(/img/ol-brand/overleaf.svg);
+
+@navbar-subdued-color            : @ol-blue-gray-3;
+@navbar-subdued-hover-bg         : @ol-blue-gray-1;
+@navbar-subdued-hover-color      : @ol-blue-gray-3;
+
+@card-box-shadow                 : 0 0 0 1px @ol-blue-gray-1;
+
+// v2 History
+@history-toolbar-color           : @ol-blue-gray-3;
+@history-entry-day-bg            : @ol-blue-gray-2;
+@history-base-bg                 : @ol-blue-gray-0;
+
 // Formatting buttons
 @formatting-btn-color            : @toolbar-icon-btn-color;
 @formatting-btn-bg               : transparent;
 @formatting-btn-border           : @ol-blue-gray-1;
 @formatting-menu-bg              : transparent;
+
+
+// Chat 
+@chat-bg                          : #FFF;
+@chat-message-color               : #FFF;
+@chat-message-name-color          : @ol-blue-gray-3;
+@chat-message-date-color          : @ol-blue-gray-3;
+@chat-new-message-bg              : @ol-blue-gray-0;
+@chat-new-message-textarea-bg     : #FFF;
+@chat-new-message-textarea-color  : @ol-blue-gray-6;
+@chat-new-message-border-color    : @ol-blue-gray-1;

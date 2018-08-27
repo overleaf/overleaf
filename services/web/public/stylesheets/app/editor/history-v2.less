@@ -12,9 +12,11 @@
 	color: @history-toolbar-color;
 	padding-left: (@line-height-computed / 2);
 }
-.history-toolbar when (@is-overleaf = false) {
+
+.history-toolbar when (@is-overleaf = false) or (@is-overleaf-light) {
 	border-bottom: @toolbar-border-bottom;
 }
+
 	.history-toolbar-selected-version {
 		white-space: nowrap;
 		overflow: hidden;
