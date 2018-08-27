@@ -46,7 +46,7 @@
 		background: @plans-non-highlighted;
 	}
 	.card-highlighted {
-		border: @highlight-border solid @gray-lighter;
+		border: @border-width-base solid @border-color-base;
 		padding-top: 10px!important;
 		.best-value {
 			margin-bottom: 15px;
@@ -164,7 +164,7 @@
 	Plans Test
 */
 @best-val-height: 35px;
-@highlight-border: 3px;
+@border-width-base: 3px;
 @gray-med: #6d6d6d;
 
 /* Media Queries */
@@ -266,7 +266,7 @@
 			/* keep here position here, otherwise messes up border on safari when there is a bg color */
 			&:before {
 				/* needed for safafi */
-				border-top: 1px solid @gray-lighter;
+				border-top: 1px solid @border-color-base;
 				content: '';
 				left: 0;
 				position: absolute;
@@ -291,17 +291,17 @@
 	/* highlighted column */
 	td:nth-child(3), th:nth-child(3) {
 		background-color: white;
-		border-left: @highlight-border solid @gray-lighter;
-		border-right: @highlight-border solid @gray-lighter;
+		border-left: @border-width-base solid @border-color-base;
+		border-right: @border-width-base solid @border-color-base;
 	}
 	.outer {
-		left: -@highlight-border;
-		right: -@highlight-border;
+		left: -@border-width-base;
+		right: -@border-width-base;
 		position: absolute;
 
 		.outer-content {
 			background: white;
-			border: @highlight-border solid @gray-lighter;
+			border: @border-width-base solid @border-color-base;
 			border-radius: @border-radius-base;
 			font-size: @font-size-base;
 			font-family: @font-family-sans-serif;
