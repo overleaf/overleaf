@@ -68,8 +68,8 @@ module.exports = UserController =
 				user.institution = req.body.institution.trim()
 			if req.body.mode?
 				user.ace.mode = req.body.mode
-			if req.body.theme?
-				user.ace.theme = req.body.theme
+			if req.body.editorTheme?
+				user.ace.theme = req.body.editorTheme
 			if req.body.fontSize?
 				user.ace.fontSize = req.body.fontSize
 			if req.body.autoComplete?
@@ -86,6 +86,8 @@ module.exports = UserController =
 				user.ace.fontFamily = req.body.fontFamily
 			if req.body.lineHeight?
 				user.ace.lineHeight = req.body.lineHeight
+			if req.body.overallTheme?
+				user.overallTheme = req.body.overallTheme
 
 			user.save (err)->
 				newEmail = req.body.email?.trim().toLowerCase()

@@ -224,9 +224,17 @@ describe "UserController", ->
 
 		it "should set some props on ace", (done)->
 			@req.body =
-				theme: "something"
+				editorTheme: "something"
 			@res.sendStatus = (code)=>
 				@user.ace.theme.should.equal "something"
+				done()
+			@UserController.updateUserSettings @req, @res
+
+		it "should set the overall theme", (done)->
+			@req.body =
+				overallTheme: "green-ish"
+			@res.sendStatus = (code)=>
+				@user.overallTheme.should.equal "green-ish"
 				done()
 			@UserController.updateUserSettings @req, @res
 

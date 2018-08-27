@@ -72,6 +72,7 @@ UserSchema = new Schema
 		id: { type: Number }
 		accessToken: { type: String }
 		refreshToken: { type: String }
+	overallTheme: { type: String, default: "" }
 	awareOfV2: { type:Boolean, default: false }
 
 conn = mongoose.createConnection(Settings.mongo.url, {

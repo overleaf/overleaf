@@ -163,6 +163,12 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 				return Url.resolve(staticFilesBase, hashedPath)
 			return Url.resolve(staticFilesBase, path)
 
+		res.locals.buildCssFileName = (userSettings) ->
+			themeModifier = ""
+			if userSettings?.overallTheme? and Settings.overleaf?
+				themeModifier = userSettings.overallTheme
+			return "/" + Settings.brandPrefix + themeModifier + "style.css"
+
 		res.locals.buildImgPath = (imgFile)->
 			path = Path.join("/img/", imgFile)
 			return Url.resolve(staticFilesBase, path)

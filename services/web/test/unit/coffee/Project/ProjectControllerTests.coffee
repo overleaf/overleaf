@@ -524,7 +524,7 @@ describe "ProjectController", ->
 		it "should add on userSettings", (done)->
 			@res.render = (pageName, opts)=>
 				opts.userSettings.fontSize.should.equal @user.ace.fontSize
-				opts.userSettings.theme.should.equal @user.ace.theme
+				opts.userSettings.editorTheme.should.equal @user.ace.theme
 				done()
 			@ProjectController.loadEditor @req, @res
 

@@ -131,13 +131,22 @@ aside#left-menu.full-size(
 				)
 
 			.form-controls
-				label(for="theme") #{translate("theme")}
+				label(for="editorTheme") #{translate("theme")}
 				select(
-					name="theme"
-					ng-model="settings.theme"
+					name="editorTheme"
+					ng-model="settings.editorTheme"
 				)
-					each theme in themes
-						option(value=theme) #{theme.replace(/_/g, ' ')}
+					each editorTheme in editorThemes
+						option(value=editorTheme) #{editorTheme.replace(/_/g, ' ')}
+
+			- if (settings.overleaf != null)
+				.form-controls
+					label(for="overallTheme") overall theme
+					select(
+						name="overallTheme"
+						ng-model="settings.overallTheme"
+						ng-options="o.v as o.n for o in [{ n: 'Default', v: '' }, { n: 'Light', v: 'light-' }]"
+					)
 
 			.form-controls(ng-show="!anonymous")
 				label(for="mode") #{translate("keybindings")}

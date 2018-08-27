@@ -19,9 +19,13 @@ define [
 				$scope.settings.fontSize = newVal
 			return $scope.settings.fontSize.toString()
 
-		$scope.$watch "settings.theme", (theme, oldTheme) =>
-			if theme != oldTheme
-				settings.saveSettings({theme: theme})
+		$scope.$watch "settings.editorTheme", (editorTheme, oldEditorTheme) =>
+			if editorTheme != oldEditorTheme
+				settings.saveSettings({editorTheme})
+
+		$scope.$watch "settings.overallTheme", (overallTheme, oldOverallTheme) =>
+			if overallTheme != oldOverallTheme
+				settings.saveSettings({overallTheme})
 
 		$scope.$watch "settings.fontSize", (fontSize, oldFontSize) =>
 			if fontSize != oldFontSize
