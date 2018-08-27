@@ -250,12 +250,13 @@ block content
 							hr
 								
 							p.small.text-center We're confident that you'll love #{settings.appName}, but if not you can cancel anytime. We'll give you your money back, no questions asked, if you let us know within 30 days.
-							hr
-							span &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;
-							a(href="https://www.positivessl.com" style="font-family: arial; font-size: 10px; color: #212121; text-decoration: none;")
-								img(src="https://www.positivessl.com/images-new/PositiveSSL_tl_trans.png" alt="SSL Certificate" title="SSL Certificate" border="0")
-								div(style="font-family: arial;font-weight:bold;font-size:15px;color:#86BEE0;")
-									a(href="https://www.positivessl.com" style="color:#86BEE0; text-decoration: none;")
+							if !settings.overleaf
+								hr
+								span &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;  &nbsp;
+								a(href="https://www.positivessl.com" style="font-family: arial; font-size: 10px; color: #212121; text-decoration: none;")
+									img(src="https://www.positivessl.com/images-new/PositiveSSL_tl_trans.png" alt="SSL Certificate" title="SSL Certificate" border="0")
+									div(style="font-family: arial;font-weight:bold;font-size:15px;color:#86BEE0;")
+										a(href="https://www.positivessl.com" style="color:#86BEE0; text-decoration: none;")
 
 
 	script(type="text/javascript").
