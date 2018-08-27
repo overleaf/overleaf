@@ -50,7 +50,7 @@ module.exports = UrlAgent = {
 		callback(null, readStream)
 
 	_prependHttpIfNeeded: (url) ->
-		if !/:///.test(url)
+		if !url.match('://')
 			url = 'http://' + url
 		return url
 

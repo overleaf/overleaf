@@ -200,7 +200,7 @@ define [
 				userAgent &&
 				/.*Safari\/.*/.test(userAgent) &&
 				!/.*Chrome\/.*/.test(userAgent) &&
-				!/.*Chromium\/.*/.test(userAgent) &&
+				!/.*Chromium\/.*/.test(userAgent)
 			)
 		catch err
 			console.error err
