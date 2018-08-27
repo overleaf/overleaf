@@ -100,14 +100,6 @@ describe "SubscriptionController", ->
 				@UserGetter.getUser.callCount.should.equal 1
 				done()
 
-			it 'should decide not to AB test the plans when signed up before 2018-06-06', (done) ->
-				# Users before we introduce the test may have already seen the old variant, 
-				# and so may react positively to a change rather than the variant itself. 
-				# So it's more likely to skew in favour of the change
-				# just because change makes things 'fresh'
-				@res.renderedVariables.shouldABTestPlans.should.equal false
-				done()
-
 			describe 'not dependant on logged in state', (done) ->
 				# these could have been put in 'when user is not logged in' too
 				it "should set the recommended currency from the geoiplookup", (done)->
@@ -115,7 +107,6 @@ describe "SubscriptionController", ->
 					@GeoIpLookup.getCurrencyCode.calledWith(@req.ip).should.equal true
 					done()
 				it 'should include data for features table', (done) ->
-					# this is part of AB test. If default wins test, then remove this test
 					@res.renderedVariables.planFeatures.length.should.not.equal 0
 					done()
 
@@ -148,10 +139,6 @@ describe "SubscriptionController", ->
 
 			it 'should not fetch the current user', (done) ->
 				@UserGetter.getUser.callCount.should.equal 0
-				done()
-
-			it 'should decide to AB test', (done) ->
-				@res.renderedVariables.shouldABTestPlans.should.equal true
 				done()
 
 	describe "paymentPage", ->

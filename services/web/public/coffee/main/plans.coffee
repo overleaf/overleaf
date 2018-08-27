@@ -145,21 +145,7 @@ define [
 		}
 
 
-	App.controller "PlansController", ($scope, $modal, event_tracking, abTestManager, MultiCurrencyPricing, $http, sixpack, $filter, ipCookie) ->
-
-		$scope.showPlans = false
-		$scope.shouldABTestPlans = window.shouldABTestPlans
-
-		if $scope.shouldABTestPlans
-			sixpack.participate 'plans-details', ['default', 'more-details'], (chosenVariation, rawResponse)->
-				if rawResponse?.status != 'failed' 
-					$scope.plansVariant = chosenVariation
-					expiration = new Date();
-					expiration.setDate(expiration.getDate() + 5);
-					ipCookie('plansVariant', chosenVariation, {expires: expiration})
-					event_tracking.send 'subscription-funnel', 'plans-page-loaded', chosenVariation
-				else
-					$scope.timeout = true
+	App.controller "PlansController", ($scope, $modal, event_tracking, MultiCurrencyPricing, $http, $filter, ipCookie) ->
 
 		$scope.showPlans = true
 
@@ -190,10 +176,8 @@ define [
 			if $scope.ui.view == "annual"
 				plan = "#{plan}_annual"
 			plan = eventLabel(plan, location)
-			event_tracking.sendMB 'plans-page-start-trial', {plan, variant: $scope.plansVariant}
+			event_tracking.sendMB 'plans-page-start-trial'
 			event_tracking.send 'subscription-funnel', 'sign_up_now_button', plan
-			if $scope.plansVariant
-				sixpack.convert 'plans-details'
 
 		$scope.switchToMonthly = (e, location) ->
 			uiView = 'monthly'
@@ -217,14 +201,9 @@ define [
 			event_tracking.send 'subscription-funnel', 'plans-page', 'group-inquiry-potential'
 
 		eventLabel = (label, location) ->
-			if $scope.plansVariant && location && $scope.plansVariant != 'default'
-				label = label + '-' + location
-			if $scope.plansVariant && $scope.plansVariant != 'default'
-				label += '-exp-' + $scope.plansVariant
 			label
 
 		switchEvent = (e, label, location) ->
 			e.preventDefault()
 			gaLabel = eventLabel(label, location)
 			event_tracking.send 'subscription-funnel', 'plans-page', gaLabel
-

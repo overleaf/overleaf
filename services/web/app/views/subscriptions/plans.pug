@@ -7,12 +7,9 @@ block scripts
 	script(type='text/javascript').
 		window.recomendedCurrency = '#{recomendedCurrency}'
 		window.abCurrencyFlag = '#{abCurrencyFlag}'
-		window.shouldABTestPlans = #{shouldABTestPlans || false}
 
 block content
 	.content.content-alt
 		.content.plans(ng-controller="PlansController")
-			.container(class="more-details" ng-cloak ng-if="plansVariant === 'more-details'")
+			.container(class="more-details" ng-cloak)
 				include _plans_page_details_more
-			.container(ng-cloak ng-if="plansVariant === 'default' || !shouldABTestPlans || timeout")
-				include _plans_page_details_less

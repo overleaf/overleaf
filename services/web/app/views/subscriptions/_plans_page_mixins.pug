@@ -12,8 +12,7 @@ mixin btn_buy_free(location)
 		style=(getLoggedInUserId() === null ? "" : "visibility: hidden")
 		ng-click="signUpNowClicked('free','" + location + "')"
 	)
-		span(ng-if="plansVariant !== 'more-details'") #{translate('sign_up_now')}
-		span.text-capitalize(ng-if="plansVariant === 'more-details'") #{translate('get_started_now')}
+		span.text-capitalize #{translate('get_started_now')}
 mixin btn_buy_professional(location)
 	a.btn.btn-info(
 		ng-href="/user/subscription/new?planCode=professional{{ ui.view == 'annual' && '-annual' || planQueryString}}&currency={{currencyCode}}"
@@ -36,11 +35,11 @@ mixin btn_buy_student(location, plan)
 
 //- Cards
 mixin card_student_annual
-	.best-value(ng-if="plansVariant == 'more-details'")
+	.best-value
 		strong #{translate('best_value')}
 	.card-header
 		h2 #{translate("student")} (#{translate("annual")})
-	h5.tagline(ng-if="plansVariant == 'more-details'") #{translate('tagline_student_annual')}
+	h5.tagline #{translate('tagline_student_annual')}
 	.circle
 		span
 			+price_student_annual
@@ -48,7 +47,7 @@ mixin card_student_annual
 mixin card_student_monthly
 	.card-header
 		h2 #{translate("student")}
-	h5.tagline(ng-if="plansVariant == 'more-details'") #{translate('tagline_student_monthly')}
+	h5.tagline #{translate('tagline_student_monthly')}
 	.circle
 		span
 			+price_student_monthly
@@ -69,23 +68,20 @@ mixin features_free
 		li(class="hidden-xs hidden-sm") &nbsp;
 		li(class="hidden-xs hidden-sm") &nbsp;
 		li(class="hidden-xs hidden-sm") &nbsp;
-		li(class="hidden-xs hidden-sm" ng-if="plansVariant === 'more-details'") &nbsp;
-		li(class="hidden-xs hidden-sm" ng-if="plansVariant === 'more-details'") &nbsp;
-		li(class="hidden-xs hidden-sm" ng-if="plansVariant === 'more-details'") &nbsp;
+		li(class="hidden-xs hidden-sm") &nbsp;
+		li(class="hidden-xs hidden-sm") &nbsp;
+		li(class="hidden-xs hidden-sm") &nbsp;
 		li
 			br
 			+btn_buy_free('card')
 mixin features_premium
-	li(ng-if="plansVariant != 'more-details'") #{translate("full_doc_history")}
-	li(ng-if="plansVariant != 'more-details'") #{translate("sync_to_dropbox")}
-	li(ng-if="plansVariant != 'more-details'") #{translate("sync_to_github")}
-	li(ng-if="plansVariant === 'more-details'") &nbsp;
-	li(ng-if="plansVariant === 'more-details'")
+	li &nbsp;
+	li
 		strong #{translate('all_premium_features')}
-	li(ng-if="plansVariant === 'more-details'") #{translate('sync_dropbox_github')}
-	li(ng-if="plansVariant === 'more-details'") #{translate('full_doc_history')}
-	li(ng-if="plansVariant === 'more-details'") #{translate('track_changes')}
-	li(ng-if="plansVariant === 'more-details'") + #{translate('more').toLowerCase()}
+	li #{translate('sync_dropbox_github')}
+	li #{translate('full_doc_history')}
+	li #{translate('track_changes')}
+	li + #{translate('more').toLowerCase()}
 mixin features_professional
 	ul.list-unstyled
 		li
@@ -159,4 +155,3 @@ mixin plan_switch(location)
 				href="#"
 				ng-click="switchToStudent($event,'" + location + "')"
 			) #{translate("half_price_student")}
-
