@@ -28,7 +28,6 @@ define [
 				@redrawAnnotations()
 
 			@$scope.$watch "theme", (value) =>
-				console.log value
 				@redrawAnnotations()
 
 			@editor.on "mousemove", (e) =>

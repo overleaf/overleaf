@@ -949,6 +949,7 @@
 	display: inline-block;
 	background: url('/img/review-icon-sprite-ol.png') top/30px no-repeat;
 	width: 30px;
+	background-position-y: -30px;
 
 	&::before {
 		content: '\00a0'; // Non-breakable space. A non-breakable character here makes this icon work like font-awesome.
@@ -956,6 +957,14 @@
 	
 	@media (min-device-pixel-ratio: 1.5), (min-resolution: 144dpi) {
 		background-image: url('/img/review-icon-sprite-ol@2x.png');
+	}
+}
+
+.review-icon when (@is-overleaf-light = true) {
+	background-position-y: 0;
+	.toolbar .btn-full-height.active &,
+	.toolbar .btn-full-height:active & {
+		background-position-y: -30px;
 	}
 }
 

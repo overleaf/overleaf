@@ -131,7 +131,7 @@ aside#left-menu.full-size(
 				)
 
 			.form-controls
-				label(for="editorTheme") #{translate("theme")}
+				label(for="editorTheme") #{translate("editor_theme")}
 				select(
 					name="editorTheme"
 					ng-model="settings.editorTheme"
@@ -141,7 +141,7 @@ aside#left-menu.full-size(
 
 			- if (settings.overleaf != null)
 				.form-controls
-					label(for="overallTheme") overall theme
+					label(for="overallTheme") #{translate("overall_theme")}
 					select(
 						name="overallTheme"
 						ng-model="settings.overallTheme"
