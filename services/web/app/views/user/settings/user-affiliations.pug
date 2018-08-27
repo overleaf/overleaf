@@ -57,9 +57,9 @@ form.row(
 									show-role-and-department="true"
 								)
 								.affiliation-change-actions.small
-									a(
-										href
+									button.btn.btn-sm.btn-success(
 										ng-click="saveAffiliationChange(userEmail);"
+										ng-disabled="!(affiliationToChange.role && affiliationToChange.department)"
 									) #{translate("save_or_cancel-save")}
 									| &nbsp;#{translate("save_or_cancel-or" )}&nbsp;
 									a(
