@@ -89,7 +89,13 @@ block content
 							span #{translate('reduce_costs_group_licenses')}
 							br
 							br
-							a.btn.btn-info(href="/i/university/groups") #{translate('find_out_more')}
+							if settings.overleaf
+								a.btn.btn-default(
+									href
+									ng-click="openGroupPlanModal()"
+								) #{translate('find_out_more')}
+							else
+								a.btn.btn-info(href="/i/university/groups") #{translate('find_out_more')}
 
 				div
 					.row.row-spaced-large
@@ -144,3 +150,4 @@ block content
 
 					.row.row-spaced
 
+	include _modal_group_inquiry
