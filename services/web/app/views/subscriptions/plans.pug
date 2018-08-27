@@ -145,7 +145,11 @@ block content
 						.col-md-12
 							.plans-header.plans-subheader.text-centered
 								h2 #{translate('still_have_questions')}
-									button.btn.btn-info.btn-header.text-capitalize(ng-controller="ContactGeneralModal" ng-click="openModal()") #{translate('get_in_touch')}
+									button.btn.btn-header.text-capitalize(
+										class=settings.overleaf ? 'btn-default' : 'btn-info'
+										ng-controller="ContactGeneralModal"
+										ng-click="openModal()"
+									) #{translate('get_in_touch')}
 									!= moduleIncludes("contactModalGeneral", locals)
 
 					.row.row-spaced
