@@ -3,20 +3,23 @@
 		color: @gray-dark;
 		margin-bottom: @line-height-computed;
 	}
-	.plans-header{
-		h1, h2, p {
-			text-shadow: 0 -1px 1px white;
-		}
-		h1, h2 {
-			color: @red;
-		}
-		p {
-			margin-bottom: 0;
+	.best-value {
+		color: @red;
+		line-height: @line-height-computed;
+	}
+	blockquote {
+		footer{
+			/* accessibility fix */
+			color: @gray-med;
 		}
 	}
-	.plans-subheader {
-		margin-bottom: @line-height-computed;
+	.btn-header {
+		font-family: @font-family-sans-serif;
+		margin-left: 10px;
+		margin-top: -10px;
+		text-shadow: 0 0 0;
 	}
+	.card .btn { white-space:normal; }
 	.card.features {
 		margin-top: @line-height-computed;
 		i {
@@ -32,7 +35,22 @@
 			padding-bottom: @line-height-computed * 2;
 		}
 	}
-
+	.card-first, .card-last {
+		background: @white-med;
+	}
+	.card-highlighted {
+		border: @highlight-border solid @gray-lighter;
+		padding-top: 10px!important;
+		.best-value {
+			margin-bottom: 15px;
+		}
+		.card-header {
+			padding-bottom: 22px; /* align hr with other plans */
+		}
+	}
+	.card-header {
+		margin-bottom: 15px;
+	}
 	.circle {
 		font-size: 1.5rem;
 		font-weight: 700;
@@ -46,8 +64,54 @@
 		color: white;
 		white-space: nowrap;
 		span.small {
-			color: rgba(255, 255, 255, 0.75);
+			color: rgba(255, 255, 255, 0.85);
 			font-size: @font-size-base * .8;
+		}
+	}
+	.circle-img {
+		border-radius: 50%;
+		float: right;
+		height: 100px;
+		overflow: hidden;
+		position: relative;
+		width: 100px;
+		img {
+			display: inline;
+			margin: 0 auto;
+			width: 100%;
+		}
+	}
+	.faq {
+		p {
+			margin: 0
+		}
+	}
+	.plans-header{
+		h1, h2, p {
+			text-shadow: 0 -1px 1px white;
+		}
+		h1, h2 {
+			color: @red;
+		}
+		p {
+			margin-bottom: 0;
+		}
+	}
+	.plans-subheader {
+		margin-bottom: @line-height-computed;
+	}
+	.questions-header {
+		color: @red;
+		line-height: 37px;
+		margin: 0;
+		text-align: right;
+	}
+	.tagline {
+		margin-bottom: 20px;
+	}
+	.top-switch {
+		.currency-dropdown {
+			margin-right: -15px;
 		}
 	}
 	ul.nav-pills {
@@ -59,14 +123,6 @@
 		}
 		> li + li {
 			margin-left: @line-height-computed / 2;
-		}
-	}
-
-	.card .btn { white-space:normal; }
-
-	.top-switch {
-		.currency-dropdown {
-			margin-right: -15px;
 		}
 	}
 }
@@ -141,74 +197,10 @@ input.paymentTypeOption.ng-valid {
 @highlight-color: #d3584b;
 @gray-med: #6d6d6d;
 @white-med: #fdfdfd;
-.more-details {
-	.best-value {
-		color: @red;
-		line-height: @line-height-computed;
-	}
-	blockquote {
-		footer{
-			/* accessibility fix */
-			color: @gray-med;
-		}
-	}
-	.btn-header {
-		font-family: @font-family-sans-serif;
-		margin-left: 10px;
-		margin-top: -10px;
-		text-shadow: 0 0 0;
-	}
-	.card-first, .card-last {
-		background: @white-med;
-	}
-	.card-highlighted {
-		border: @highlight-border solid @gray-lighter;
-		padding-top: 10px!important;
-		.best-value {
-			margin-bottom: 15px;
-		}
-		.card-header {
-			padding-bottom: 22px; /* align hr with other plans */
-		}
-	}
-	.card-header {
-		margin-bottom: 15px;
-	}
-	.circle {
-		/* accessibility fix */
-		span.small {
-			color: rgba(255, 255, 255, 0.85)
-		}
-	}
-	.circle-img {
-		border-radius: 50%;
-		float: right;
-		height: 100px;
-		overflow: hidden;
-		position: relative;
-		width: 100px;
-		img {
-			display: inline;
-			margin: 0 auto;
-			width: 100%;
-		}
-	}
-	.faq:last-child {
-		p {
-			margin-bottom: 0;
-		}
-	}
-	.questions-header {
-		color: @red;
-		line-height: 37px;
-		margin: 0;
-		text-align: right;
-	}
-	.tagline {
-		margin-bottom: 20px;
-	}
-	/* Media Queries */
-	@media (max-width: @screen-md-min) {
+
+/* Media Queries */
+@media (max-width: @screen-sm-max) {
+	.plans {
 		.card-highlighted {
 			/*override style in cards.less */
 			margin-top: @line-height-computed!important;
@@ -217,8 +209,10 @@ input.paymentTypeOption.ng-valid {
 			float: left;
 			margin: 0 15px;
 		}
-	}
-	@media (min-width: @screen-md-min) {
+	} 
+}
+@media (min-width: @screen-md-min) {
+	.plans {
 		blockquote {
 			margin-bottom: 0;
 		}
