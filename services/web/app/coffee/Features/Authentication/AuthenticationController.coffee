@@ -1,6 +1,5 @@
 AuthenticationManager = require ("./AuthenticationManager")
 LoginRateLimiter = require("../Security/LoginRateLimiter")
-UserGetter = require "../User/UserGetter"
 UserUpdater = require "../User/UserUpdater"
 Metrics = require('metrics-sharelatex')
 logger = require("logger-sharelatex")
@@ -64,7 +63,10 @@ module.exports = AuthenticationController =
 			if user # `user` is either a user object or false
 				AuthenticationController.finishLogin(user, req, res, next)
 			else
-				res.json message: info
+				if info.redir?
+					res.json {redir: info.redir}
+				else
+					res.json message: info
 		)(req, res, next)
 
 	finishLogin: (user, req, res, next) ->
@@ -81,20 +83,30 @@ module.exports = AuthenticationController =
 
 	doPassportLogin: (req, username, password, done) ->
 		email = username.toLowerCase()
-		LoginRateLimiter.processLoginRequest email, (err, isAllowed)->
-			return done(err) if err?
-			if !isAllowed
-				logger.log email:email, "too many login requests"
-				return done(null, null, {text: req.i18n.translate("to_many_login_requests_2_mins"), type: 'error'})
-			AuthenticationManager.authenticate email: email, password, (error, user) ->
-				return done(error) if error?
-				if user?
-					# async actions
-					return done(null, user)
-				else
-					AuthenticationController._recordFailedLogin()
-					logger.log email: email, "failed log in"
-					return done(null, false, {text: req.i18n.translate("email_or_password_wrong_try_again"), type: 'error'})
+		Modules = require "../../infrastructure/Modules"
+		Modules.hooks.fire 'preDoPassportLogin', req, email, (err, infoList) ->
+			return next(err) if err?
+			info = infoList.find((i) => i?)
+			if info?
+				return done(null, false, info)
+			LoginRateLimiter.processLoginRequest email, (err, isAllowed)->
+				return done(err) if err?
+				if !isAllowed
+					logger.log email:email, "too many login requests"
+					return done(null, null, {text: req.i18n.translate("to_many_login_requests_2_mins"), type: 'error'})
+				AuthenticationManager.authenticate email: email, password, (error, user) ->
+					return done(error) if error?
+					if user?
+						# async actions
+						return done(null, user)
+					else
+						AuthenticationController._recordFailedLogin()
+						logger.log email: email, "failed log in"
+						return done(
+							null,
+							false,
+							{text: req.i18n.translate("email_or_password_wrong_try_again"), type: 'error'}
+						)
 
 	_loginAsyncHandlers: (req, user) ->
 		UserHandler.setupLoginData(user, ()->)

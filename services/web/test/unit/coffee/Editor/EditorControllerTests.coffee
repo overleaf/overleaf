@@ -32,6 +32,7 @@ describe "EditorController", ->
 			'../Project/ProjectEntityUpdateHandler' : @ProjectEntityUpdateHandler = {}
 			'../Project/ProjectOptionsHandler' : @ProjectOptionsHandler =
 				setCompiler: sinon.stub().yields()
+				setImageName: sinon.stub().yields()
 				setSpellCheckLanguage: sinon.stub().yields()
 			'../Project/ProjectDetailsHandler': @ProjectDetailsHandler =
 				setProjectDescription: sinon.stub().yields()
@@ -375,6 +376,19 @@ describe "EditorController", ->
 				.should.equal true
 			@EditorRealTimeController.emitToRoom
 				.calledWith(@project_id, "compilerUpdated", @compiler)
+				.should.equal true
+
+	describe "setImageName", ->
+		beforeEach ->
+			@imageName = "texlive-1234.5"
+			@EditorController.setImageName @project_id, @imageName, @callback
+
+		it "should send the new imageName and project id to the project options handler", ->
+			@ProjectOptionsHandler.setImageName
+				.calledWith(@project_id, @imageName)
+				.should.equal true
+			@EditorRealTimeController.emitToRoom
+				.calledWith(@project_id, "imageNameUpdated", @imageName)
 				.should.equal true
 
 	describe "setSpellCheckLanguage", ->

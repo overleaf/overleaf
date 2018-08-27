@@ -8,11 +8,11 @@ modulePath = require('path').join __dirname, '../../../../app/js/Features/Instit
 describe 'InstitutionsFeatures', ->
 
 	beforeEach ->
-		@UserGetter = getUserFullEmails: sinon.stub()
+		@InstitutionsGetter = getConfirmedInstitutions: sinon.stub()
 		@PlansLocator = findLocalPlanInSettings: sinon.stub()
 		@institutionPlanCode = 'institution_plan_code'
 		@InstitutionsFeatures = SandboxedModule.require modulePath, requires:
-			'../User/UserGetter': @UserGetter
+			'./InstitutionsGetter': @InstitutionsGetter
 			'../Subscription/PlansLocator': @PlansLocator
 			'settings-sharelatex': institutionPlanCode: @institutionPlanCode
 			'logger-sharelatex':
@@ -23,47 +23,37 @@ describe 'InstitutionsFeatures', ->
 
 	describe "hasLicence", ->
 			it 'should handle error', (done)->
-				@UserGetter.getUserFullEmails.yields(new Error('Nope'))
+				@InstitutionsGetter.getConfirmedInstitutions.yields(new Error('Nope'))
 				@InstitutionsFeatures.hasLicence @userId, (error, hasLicence) ->
 					expect(error).to.exist
 					done()
 
-			it 'should return false if user has no affiliations', (done) ->
-				@UserGetter.getUserFullEmails.yields(null, [])
-				@InstitutionsFeatures.hasLicence @userId, (error, hasLicence) ->
-					expect(error).to.not.exist
-					expect(hasLicence).to.be.false
-					done()
-
 			it 'should return false if user has no confirmed affiliations', (done) ->
-				affiliations = [
-					{ confirmedAt: null, affiliation: institution: { licence: 'pro_plus' } }
-				]
-				@UserGetter.getUserFullEmails.yields(null, affiliations)
+				institutions = []
+				@InstitutionsGetter.getConfirmedInstitutions.yields(null, institutions)
 				@InstitutionsFeatures.hasLicence @userId, (error, hasLicence) ->
 					expect(error).to.not.exist
 					expect(hasLicence).to.be.false
 					done()
 
 			it 'should return false if user has no paid affiliations', (done) ->
-				affiliations = [
-					{ confirmedAt: new Date(), affiliation: institution: { licence: 'free' } }
+				institutions = [
+					{ licence: 'free' }
 				]
-				@UserGetter.getUserFullEmails.yields(null, affiliations)
+				@InstitutionsGetter.getConfirmedInstitutions.yields(null, institutions)
 				@InstitutionsFeatures.hasLicence @userId, (error, hasLicence) ->
 					expect(error).to.not.exist
 					expect(hasLicence).to.be.false
 					done()
 
 			it 'should return true if user has confirmed paid affiliation', (done)->
-				affiliations = [
-					{ confirmedAt: new Date(), affiliation: institution: { licence: 'pro_plus' } }
-					{ confirmedAt: new Date(), affiliation: institution: { licence: 'free' } }
-					{ confirmedAt: null, affiliation: institution: { licence: 'pro' } }
-					{ confirmedAt: null, affiliation: institution: { licence: null } }
-					{ confirmedAt: new Date(), affiliation: institution: {} }
+				institutions = [
+					{ licence: 'pro_plus' }
+					{ licence: 'free' }
+					{ licence: 'pro' }
+					{ licence: null }
 				]
-				@UserGetter.getUserFullEmails.yields(null, affiliations)
+				@InstitutionsGetter.getConfirmedInstitutions.yields(null, institutions)
 				@InstitutionsFeatures.hasLicence @userId, (error, hasLicence) ->
 					expect(error).to.not.exist
 					expect(hasLicence).to.be.true

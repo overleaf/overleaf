@@ -12,6 +12,10 @@ define [
 	# and then again on ack.
 	AUTO_COMPILE_DEBOUNCE = 2000
 
+	App.filter('trusted', ['$sce', ($sce)->
+		return (url)-> return $sce.trustAsResourceUrl(url);
+	])
+
 	App.controller "PdfController", ($scope, $http, ide, $modal, synctex, event_tracking, logHintsFeedback, localStorage) ->
 		# enable per-user containers by default
 		perUserCompile = true
@@ -224,6 +228,13 @@ define [
 				_csrf: window.csrfToken
 			}, {params: params}
 
+		buildPdfDownloadUrl = (pdfDownloadDomain, path)->
+			 #we only download builds from compiles server for security reasons
+			if pdfDownloadDomain? and path? and path.indexOf("build") != -1
+				return "#{pdfDownloadDomain}#{path}"
+			else
+				return path
+
 		parseCompileResponse = (response) ->
 
 			# keep last url
@@ -244,11 +255,7 @@ define [
 			$scope.pdf.compileInProgress = false
 			$scope.pdf.autoCompileDisabled = false
 
-			buildPdfDownloadUrl = (path)->
-				if pdfDownloadDomain?
-					return "#{pdfDownloadDomain}#{path}"
-				else
-					return path
+
 			# make a cache to look up files by name
 			fileByPath = {}
 			if response?.outputFiles?
@@ -267,24 +274,24 @@ define [
 			if response.status == "timedout"
 				$scope.pdf.view = 'errors'
 				$scope.pdf.timedout = true
-				fetchLogs(fileByPath)
+				fetchLogs(fileByPath, {pdfDownloadDomain:pdfDownloadDomain})
 			else if response.status == "terminated"
 				$scope.pdf.view = 'errors'
 				$scope.pdf.compileTerminated = true
-				fetchLogs(fileByPath)
+				fetchLogs(fileByPath, {pdfDownloadDomain:pdfDownloadDomain})
 			else if response.status in ["validation-fail", "validation-pass"]
 				$scope.pdf.view = 'pdf'
-				$scope.pdf.url = buildPdfDownloadUrl last_pdf_url
+				$scope.pdf.url = buildPdfDownloadUrl pdfDownloadDomain, last_pdf_url
 				$scope.shouldShowLogs = true
 				$scope.pdf.failedCheck = true if response.status is "validation-fail"
 				event_tracking.sendMB "syntax-check-#{response.status}"
-				fetchLogs(fileByPath, { validation: true })
+				fetchLogs(fileByPath, { validation: true, pdfDownloadDomain:pdfDownloadDomain})
 			else if response.status == "exited"
 				$scope.pdf.view = 'pdf'
 				$scope.pdf.compileExited = true
-				$scope.pdf.url = buildPdfDownloadUrl last_pdf_url
+				$scope.pdf.url = buildPdfDownloadUrl pdfDownloadDomain, last_pdf_url
 				$scope.shouldShowLogs = true
-				fetchLogs(fileByPath)
+				fetchLogs(fileByPath, {pdfDownloadDomain:pdfDownloadDomain})
 			else if response.status == "autocompile-backoff"
 				if $scope.pdf.isAutoCompileOnLoad # initial autocompile
 					$scope.pdf.view = 'uncompiled'
@@ -300,7 +307,7 @@ define [
 				$scope.pdf.view = 'errors'
 				$scope.pdf.failure = true
 				$scope.shouldShowLogs = true
-				fetchLogs(fileByPath)
+				fetchLogs(fileByPath, {pdfDownloadDomain:pdfDownloadDomain})
 			else if response.status == 'clsi-maintenance'
 				$scope.pdf.view = 'errors'
 				$scope.pdf.clsiMaintenance = true
@@ -320,12 +327,12 @@ define [
 
 				# define the base url. if the pdf file has a build number, pass it to the clsi in the url
 				if fileByPath['output.pdf']?.url?
-					$scope.pdf.url = buildPdfDownloadUrl fileByPath['output.pdf'].url
+					$scope.pdf.url = buildPdfDownloadUrl pdfDownloadDomain, fileByPath['output.pdf'].url
 				else if fileByPath['output.pdf']?.build?
 					build = fileByPath['output.pdf'].build
-					$scope.pdf.url = buildPdfDownloadUrl "/project/#{$scope.project_id}/build/#{build}/output/output.pdf"
+					$scope.pdf.url = buildPdfDownloadUrl pdfDownloadDomain, "/project/#{$scope.project_id}/build/#{build}/output/output.pdf"
 				else
-					$scope.pdf.url = buildPdfDownloadUrl "/project/#{$scope.project_id}/output/output.pdf"
+					$scope.pdf.url = buildPdfDownloadUrl pdfDownloadDomain, "/project/#{$scope.project_id}/output/output.pdf"
 				# check if we need to bust cache (build id is unique so don't need it in that case)
 				if not fileByPath['output.pdf']?.build?
 					qs.cache_bust = "#{Date.now()}"
@@ -335,7 +342,7 @@ define [
 				qs.popupDownload = true
 				$scope.pdf.downloadUrl = "/project/#{$scope.project_id}/output/output.pdf" + createQueryString(qs)
 
-				fetchLogs(fileByPath)
+				fetchLogs(fileByPath, {pdfDownloadDomain:pdfDownloadDomain})
 
 			IGNORE_FILES = ["output.fls", "output.fdb_latexmk"]
 			$scope.pdf.outputFiles = []
@@ -384,6 +391,7 @@ define [
 				# check if we need to bust cache (build id is unique so don't need it in that case)
 				if not file?.build?
 					opts.params.cache_bust = "#{Date.now()}"
+				opts.url = buildPdfDownloadUrl options.pdfDownloadDomain, opts.url
 				return $http(opts)
 
 			# accumulate the log entries

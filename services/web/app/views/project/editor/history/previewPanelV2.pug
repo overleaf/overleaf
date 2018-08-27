@@ -45,7 +45,7 @@
 			text="history.diff.text",
 			highlights="history.diff.highlights",
 			read-only="true",
-			resize-on="layout:main:resize",
+			resize-on="layout:main:resize,history:toggle",
 			navigate-highlights="true"
 		)
 		.alert.alert-info(ng-if="history.diff.binary")
@@ -70,12 +70,24 @@
 			font-size="settings.fontSize",
 			text="history.selectedFile.text",
 			read-only="true",
-			resize-on="layout:main:resize",
+			resize-on="layout:main:resize,history:toggle",
 		)
 		.alert.alert-info(ng-if="history.selectedFile.binary")
 			| We're still working on showing image and binary changes, sorry. Stay tuned!
 	.loading-panel(ng-show="history.selectedFile.loading")
 		i.fa.fa-spin.fa-refresh
 		| &nbsp;&nbsp;#{translate("loading")}...
+	.error-panel(ng-show="history.error")
+		.alert.alert-danger 
+			p
+				| #{translate("generic_history_error")} 
+				a(
+					ng-href="mailto:#{settings.adminEmail}?Subject=Error%20loading%20history%20for%project%20{{ project_id }}"
+				) #{settings.adminEmail}
+			p.clearfix
+				a.alert-link-as-btn.pull-right(
+					href
+					ng-click="toggleHistory()"
+			) #{translate("back_to_editor")}
 	.error-panel(ng-show="history.selectedFile.error")
 		.alert.alert-danger #{translate("generic_something_went_wrong")}

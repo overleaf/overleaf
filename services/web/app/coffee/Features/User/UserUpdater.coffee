@@ -11,6 +11,7 @@ EmailHelper = require "../Helpers/EmailHelper"
 Errors = require "../Errors/Errors"
 Settings = require "settings-sharelatex"
 request = require 'request'
+NewsletterManager = require "../Newsletter/NewsletterManager"
 
 module.exports = UserUpdater =
 	updateUser: (query, update, callback = (error) ->) ->
@@ -99,15 +100,21 @@ module.exports = UserUpdater =
 	setDefaultEmailAddress: (userId, email, callback) ->
 		email = EmailHelper.parseEmail(email)
 		return callback(new Error('invalid email')) if !email?
-		query = _id: userId, 'emails.email': email
-		update = $set: email: email
-		@updateUser query, update, (error, res) ->
-			if error?
-				logger.err error:error, 'problem setting default emails'
+		UserGetter.getUserEmail userId, (error, oldEmail) =>
+			if err?
 				return callback(error)
-			if res.n == 0 # TODO: Check n or nMatched?
-				return callback(new Error('Default email does not belong to user'))
-			callback()
+			query = _id: userId, 'emails.email': email
+			update = $set: email: email
+			@updateUser query, update, (error, res) ->
+				if error?
+					logger.err error:error, 'problem setting default emails'
+					return callback(error)
+				else if res.n == 0 # TODO: Check n or nMatched?
+					return callback(new Error('Default email does not belong to user'))
+				else
+					NewsletterManager.changeEmail oldEmail, email, callback
+
+
 
 	updateV1AndSetDefaultEmailAddress: (userId, email, callback) ->
 		@updateEmailAddressInV1 userId, email, (error) =>
@@ -152,11 +159,14 @@ module.exports = UserUpdater =
 				else
 					return callback new Error("non-success code from v1: #{response.statusCode}")
 
-	confirmEmail: (userId, email, callback) ->
+	confirmEmail: (userId, email, confirmedAt, callback) ->
+		if arguments.length == 3
+			callback = confirmedAt
+			confirmedAt = new Date()
 		email = EmailHelper.parseEmail(email)
 		return callback(new Error('invalid email')) if !email?
 		logger.log {userId, email}, 'confirming user email'
-		addAffiliation userId, email, (error) =>
+		addAffiliation userId, email, {confirmedAt: confirmedAt}, (error) =>
 			if error?
 				logger.err error: error, 'problem adding affiliation while confirming email'
 				return callback(error)
@@ -166,7 +176,7 @@ module.exports = UserUpdater =
 				'emails.email': email
 			update =
 				$set:
-					'emails.$.confirmedAt': new Date()
+					'emails.$.confirmedAt': confirmedAt
 			@updateUser query, update, (error, res) ->
 				return callback(error) if error?
 				logger.log {res, userId, email}, "tried to confirm email"

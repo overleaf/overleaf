@@ -6,6 +6,7 @@
 @footer-height: 50px;
 
 // Styleguide colors
+@ol-blue-gray-0 : #f4f5f8;
 @ol-blue-gray-1 : #E4E8EE;
 @ol-blue-gray-2 : #9DA7B7;
 @ol-blue-gray-3 : #5D6879;
@@ -21,6 +22,8 @@
 @ol-dark-red    : #A6312B;
 
 @ol-type-color  : @ol-blue-gray-3;
+@accent-color-primary: @ol-green; 
+@accent-color-secondary: @ol-dark-green;
 
 // Navbar customization
 @navbar-title-color       : @ol-blue-gray-1;
@@ -65,7 +68,13 @@
 @btn-info-bg             : @ol-blue;
 @btn-info-border         : transparent;
 
+// Padding
 @padding-xs-horizontal   : 8px;
+
+@padding-sm: 10px;
+@padding-md: 20px;
+@padding-lg: 30px;
+@padding-xl: 40px;
 
 // Alerts
 @alert-padding : 15px;
@@ -167,6 +176,9 @@
 @folders-tag-menu-hover         : rgba(0, 0, 0, .1);
 @folders-tag-menu-active-hover  : rgba(0, 0, 0, .1);
 
+// Portal
+@btn-portal-width               : 200px;
+
 // Project table
 @structured-list-line-height    : 2.5;
 @structured-list-link-color     : @ol-blue;
@@ -265,6 +277,21 @@
 @chat-new-message-textarea-bg     : @ol-blue-gray-1;
 @chat-new-message-textarea-color  : @ol-blue-gray-6;
 
+// Pagination
+@pagination-active-bg             : @ol-dark-green;
+@pagination-active-border         : @gray-lighter;
+@pagination-active-color          : #FFF;
+@pagination-bg                    : #FFF;
+@pagination-border                : @gray-lighter;
+@pagination-color                 : @ol-dark-green;
+@pagination-disabled-color        : @gray-dark;
+@pagination-disabled-bg           : @gray-lightest;
+@pagination-disabled-border       : @gray-lighter;
+@pagination-hover-color           : @ol-dark-green;
+@pagination-hover-bg              : @gray-lightest;
+@pagination-hover-border          : @gray-lighter;
+
+
 // PDF
 @pdf-top-offset                 : @toolbar-small-height;
 @pdf-bg                         : @ol-blue-gray-1;
@@ -273,16 +300,29 @@
 @log-line-no-color              : #FFF;
 @log-hints-color                : @ol-blue-gray-4;
 
+// Portals
+@black-alpha-strong             : rgba(0,0,0,0.8);
+
 
 // v2 History
-@history-base-font-size          : @font-size-small;
-@history-base-bg                 : @ol-blue-gray-1;
-@history-entry-day-bg            : @ol-blue-gray-2;
-@history-entry-selected-bg       : @ol-green;
-@history-base-color              : @ol-blue-gray-2;
-@history-highlight-color         : @ol-type-color;
-@history-toolbar-bg-color        : @editor-toolbar-bg;
-@history-toolbar-color           : #FFF;
+@history-base-font-size               : @font-size-small;
+@history-base-bg                      : @ol-blue-gray-1;
+@history-entry-label-bg-color         : @ol-blue;
+@history-entry-label-color            : #FFF;
+@history-entry-selected-label-bg-color: #FFF;
+@history-entry-selected-label-color   : @ol-blue;
+@history-entry-day-bg                 : @ol-blue-gray-2;
+@history-entry-selected-bg            : @ol-green;
+@history-base-color                   : @ol-blue-gray-2;
+@history-highlight-color              : @ol-type-color;
+@history-toolbar-bg-color             : @editor-toolbar-bg;
+@history-toolbar-color                : #FFF;
+
+// Screens
+// added -size to not conflict with common_variables
+@screen-size-sm-max                   : 767px;
+@screen-size-md-min                   : 768px;
+@screen-size-md-max                   : 991px;
 
 // System messages
 @sys-msg-background             : @ol-blue;
@@ -300,6 +340,7 @@
 @gray-light:            #a4a4a4;
 @gray-lighter:          #cfcfcf;
 @gray-lightest:         #f0f0f0;
+@white:                 #ffffff;
 
 @blue:                  #405ebf;
 @blueDark:              #040D2D;

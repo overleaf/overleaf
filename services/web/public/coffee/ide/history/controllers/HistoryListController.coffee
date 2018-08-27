@@ -3,9 +3,34 @@ define [
 	"ide/history/util/displayNameForUser"
 ], (App, displayNameForUser) ->
 
-	App.controller "HistoryListController", ["$scope", "ide", ($scope, ide) ->
+	App.controller "HistoryListController", ["$scope", "$modal", "ide", ($scope, $modal, ide) ->
 		$scope.hoveringOverListSelectors = false
-		
+
+		$scope.projectUsers = []
+
+		$scope.$watch "project.members", (newVal) ->
+			if newVal?
+				$scope.projectUsers = newVal.concat $scope.project.owner
+
+		# This method (and maybe the one below) will be removed soon. User details data will be 
+		# injected into the history API responses, so we won't need to fetch user data from other
+		# local data structures.
+		_getUserById = (id) ->
+			_.find $scope.projectUsers, (user) ->
+				curUserId = user?._id or user?.id
+				curUserId == id
+
+		$scope.getDisplayNameById = (id) ->
+			displayNameForUser(_getUserById(id))
+
+		$scope.deleteLabel = (labelDetails) ->
+			$modal.open(
+				templateUrl: "historyV2DeleteLabelModalTemplate"
+				controller: "HistoryV2DeleteLabelModalController"
+				resolve:
+					labelDetails: () -> labelDetails
+			)
+
 		$scope.loadMore = () =>
 			ide.historyManager.fetchNextBatchOfUpdates()
 

@@ -1,13 +1,75 @@
 .history-toolbar(
+	ng-controller="HistoryV2ToolbarController"
 	ng-if="ui.view == 'history' && history.isV2 && history.viewMode === HistoryViewModes.POINT_IN_TIME"
 )
-	span(ng-show="history.loadingFileTree")
+	span.history-toolbar-selected-version(ng-show="history.loadingFileTree")
 		i.fa.fa-spin.fa-refresh
 		| &nbsp;&nbsp; #{translate("loading")}...
-	span(ng-show="!history.loadingFileTree") #{translate("browsing_project_as_of")}&nbsp;
+	span.history-toolbar-selected-version(
+		ng-show="!history.loadingFileTree && !history.showOnlyLabels && history.selection.updates.length && !history.error"
+	) #{translate("browsing_project_as_of")}&nbsp;
 		time.history-toolbar-time {{ history.selection.updates[0].meta.end_ts | formatDate:'Do MMM YYYY, h:mm a' }}
-	.history-toolbar-btn(
-		ng-click="toggleHistoryViewMode();"
-	) 
-		i.fa
-		| #{translate("compare_to_another_version")}
+	span.history-toolbar-selected-version(
+		ng-show="!history.loadingFileTree && history.showOnlyLabels && history.selection.label && !history.error"
+	) #{translate("browsing_project_labelled")}&nbsp;
+		span.history-toolbar-selected-label "{{ history.selection.label.comment }}"
+	div.history-toolbar-actions(
+		ng-if="!history.error"
+	)
+		button.history-toolbar-btn(
+			ng-click="showAddLabelDialog();"
+			ng-if="!history.showOnlyLabels"
+			ng-disabled="history.loadingFileTree || history.selection.updates.length == 0"
+		) 
+			i.fa.fa-tag
+			| &nbsp;#{translate("history_label_this_version")}
+		button.history-toolbar-btn(
+			ng-click="toggleHistoryViewMode();"
+			ng-disabled="history.loadingFileTree || history.selection.updates.length == 0"
+		) 
+			i.fa.fa-exchange
+			| &nbsp;#{translate("compare_to_another_version")}
+
+	.history-toolbar-entries-list(
+		ng-if="!history.error"
+	)
+		toggle-switch(
+			ng-model="history.showOnlyLabels"
+			label-true=translate("history_view_labels")
+			label-false=translate("history_view_all")
+			description=translate("history_view_a11y_description")
+		)
+
+script(type="text/ng-template", id="historyV2AddLabelModalTemplate")
+	form(
+		name="addLabelModalForm"
+		ng-submit="addLabelModalFormSubmit();"
+		novalidate
+	)
+		.modal-header
+			h3 #{translate("history_add_label")}
+		.modal-body
+			.alert.alert-danger(ng-show="state.error.message") {{ state.error.message}} 
+			.alert.alert-danger(ng-show="state.error && !state.error.message") #{translate("generic_something_went_wrong")}
+			.form-group
+				input.form-control(
+					type="text"
+					placeholder=translate("history_new_label_name")
+					ng-model="inputs.labelName"
+					focus-on="open"
+					required
+				)
+			p.help-block(ng-if="update")
+				| #{translate("history_new_label_added_at")} 
+				strong {{ update.meta.end_ts | formatDate:'ddd Do MMM YYYY, h:mm a' }}
+		.modal-footer
+			button.btn.btn-default(
+				type="button"
+				ng-disabled="state.inflight"
+				ng-click="$dismiss()"
+			) #{translate("cancel")}
+			input.btn.btn-primary(
+				ng-disabled="addLabelModalForm.$invalid || state.inflight"
+				ng-value="state.inflight ? '" + translate("history_adding_label") + "' : '" + translate("history_add_label") + "'"
+				type="submit"
+			)

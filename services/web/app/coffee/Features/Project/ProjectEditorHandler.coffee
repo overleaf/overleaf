@@ -1,5 +1,5 @@
 _ = require("underscore")
-
+Path = require 'path'
 
 module.exports = ProjectEditorHandler =
 	trackChangesAvailable: false
@@ -20,6 +20,7 @@ module.exports = ProjectEditorHandler =
 			members:     []
 			invites:     invites
 			tokens:      project.tokens
+			imageName:   if project.imageName? then Path.basename(project.imageName) else undefined
 
 		if !result.invites?
 			result.invites = []

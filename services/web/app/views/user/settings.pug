@@ -9,7 +9,7 @@ block content
 						.page-header
 							h1  #{translate("account_settings")}
 						.account-settings(ng-controller="AccountSettingsController", ng-cloak)
-							if locals.showAffiliationsUI && hasFeature('affiliations')
+							if hasFeature('affiliations')
 								include settings/user-affiliations
 								
 							form-messages(for="settingsForm")
@@ -22,7 +22,7 @@ block content
 									h3 #{translate("update_account_info")}
 									form(async-form="settings", name="settingsForm", method="POST", action="/user/settings", novalidate)
 										input(type="hidden", name="_csrf", value=csrfToken)
-										if !(locals.showAffiliationsUI && hasFeature('affiliations'))
+										if !hasFeature('affiliations')
 											if !externalAuthenticationSystemUsed() 
 												.form-group
 													label(for='email')  #{translate("email")}
@@ -167,7 +167,12 @@ block content
 									)
 										i.fa.fa-check
 										| #{translate("unsubscribed")}
-				
+
+									if !settings.overleaf && user.overleaf
+										p
+											| Please note: If you have linked your account with Overleaf
+											| v2, then deleting your ShareLaTeX account will also delete
+											| account and all of it's associated projects and data.
 									p #{translate("need_to_leave")} 
 										a(href, ng-click="deleteAccount()")  #{translate("delete_your_account")}
 

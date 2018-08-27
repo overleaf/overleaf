@@ -17,6 +17,16 @@ module.exports =
 			if callback?
 				callback()
 
+	setImageName : (project_id, imageName, callback = ()->)->
+		logger.log project_id:project_id, imageName:imageName, "setting the imageName"
+		imageName = imageName.toLowerCase()
+		if ! _.some(settings.allowedImageNames, (allowed) -> imageName is allowed.imageName)
+			return callback()
+		conditions = {_id:project_id}
+		update = {imageName: settings.imageRoot + '/' + imageName}
+		Project.update conditions, update, {}, (err)->
+			if callback?
+				callback()
 
 	setSpellCheckLanguage: (project_id, languageCode, callback = ()->)->
 		logger.log project_id:project_id, languageCode:languageCode, "setting the spell check language"

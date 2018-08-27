@@ -22,7 +22,7 @@ UserPagesController = require('./Features/User/UserPagesController')
 DocumentController = require('./Features/Documents/DocumentController')
 CompileManager = require("./Features/Compile/CompileManager")
 CompileController = require("./Features/Compile/CompileController")
-ClsiCookieManager = require("./Features/Compile/ClsiCookieManager")()
+ClsiCookieManager = require("./Features/Compile/ClsiCookieManager")(Settings.apis.clsi?.backendGroupName)
 HealthCheckController = require("./Features/HealthCheck/HealthCheckController")
 ProjectDownloadsController = require "./Features/Downloads/ProjectDownloadsController"
 FileStoreController = require("./Features/FileStore/FileStoreController")
@@ -245,6 +245,7 @@ module.exports = class Router
 
 		webRouter.post '/project/:project_id/export/:brand_variation_id', AuthorizationMiddlewear.ensureUserCanAdminProject, ExportsController.exportProject
 		webRouter.get '/project/:project_id/export/:export_id', AuthorizationMiddlewear.ensureUserCanAdminProject, ExportsController.exportStatus
+		webRouter.get '/project/:project_id/export/:export_id/zip', AuthorizationMiddlewear.ensureUserCanAdminProject, ExportsController.exportZip
 
 		webRouter.get  '/Project/:Project_id/download/zip', AuthorizationMiddlewear.ensureUserCanReadProject, ProjectDownloadsController.downloadProject
 		webRouter.get  '/project/download/zip', AuthorizationMiddlewear.ensureUserCanReadMultipleProjects, ProjectDownloadsController.downloadMultipleProjects

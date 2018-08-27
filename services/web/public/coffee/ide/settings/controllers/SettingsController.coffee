@@ -67,6 +67,11 @@ define [
 			if oldCompiler? and compiler != oldCompiler
 				settings.saveProjectSettings({compiler: compiler})
 
+		$scope.$watch "project.imageName", (imageName, oldImageName) =>
+			return if @ignoreUpdates
+			if oldImageName? and imageName != oldImageName
+				settings.saveProjectSettings({imageName: imageName})
+
 		$scope.$watch "project.rootDoc_id", (rootDoc_id, oldRootDoc_id) =>
 			return if @ignoreUpdates
 			# don't save on initialisation, Angular passes oldRootDoc_id as
@@ -81,6 +86,12 @@ define [
 			@ignoreUpdates = true
 			$scope.$apply () =>
 				$scope.project.compiler = compiler
+			delete @ignoreUpdates
+
+		ide.socket.on "imageNameUpdated", (imageName) =>
+			@ignoreUpdates = true
+			$scope.$apply () =>
+				$scope.project.imageName = imageName
 			delete @ignoreUpdates
 
 		ide.socket.on "spellCheckLanguageUpdated", (languageCode) =>

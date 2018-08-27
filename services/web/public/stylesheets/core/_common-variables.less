@@ -62,9 +62,12 @@
 //
 //## Define common padding and border radius sizes and more. Values based on 14px text and 1.428 line-height (~20px to start).
 
-@margin-sm: 10px;
-@margin-md: 20px;
-@margin-lg: 30px;
+@margin-xs:                  5px;
+@margin-sm:                 10px;
+@margin-md:                 20px;
+@margin-lg:                 30px;
+@margin-xl:                 40px;
+@margin-xxl:                50px;
 
 @padding-base-vertical:     5px;
 @padding-base-horizontal:   16px;
@@ -986,14 +989,18 @@
 @sys-msg-border     : 1px solid @common-border-color;
 
 // v2 History
-@history-base-font-size           : @font-size-small;
-@history-base-bg                  : @gray-lightest;
-@history-entry-day-bg             : @gray;
-@history-entry-selected-bg        : @red;
-@history-base-color               : @gray-light;
-@history-highlight-color          : @gray;
-@history-toolbar-bg-color         : @toolbar-alt-bg-color;
-@history-toolbar-color            : @text-color;
+@history-base-font-size                : @font-size-small;
+@history-base-bg                       : @gray-lightest;
+@history-entry-label-bg-color          : @red;
+@history-entry-label-color             : #FFF;
+@history-entry-selected-label-bg-color : #FFF;
+@history-entry-selected-label-color    : @red;
+@history-entry-day-bg                  : @gray;
+@history-entry-selected-bg             : @red;
+@history-base-color                    : @gray-light;
+@history-highlight-color               : @gray;
+@history-toolbar-bg-color              : @toolbar-alt-bg-color;
+@history-toolbar-color                 : @text-color;
 
 // Input suggestions
 @input-suggestion-v-offset        : 6px;

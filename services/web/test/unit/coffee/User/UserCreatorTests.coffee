@@ -20,7 +20,7 @@ describe "UserCreator", ->
 		@addAffiliation = sinon.stub().yields()
 		@UserCreator = SandboxedModule.require modulePath, requires:
 			"../../models/User": User:@UserModel
-			"logger-sharelatex":{log:->}
+			"logger-sharelatex":{ log: sinon.stub(), err: sinon.stub() }
 			'metrics-sharelatex': {timeAsyncMethod: ()->}
 			"../Institutions/InstitutionsAPI": addAffiliation: @addAffiliation
 
@@ -87,4 +87,12 @@ describe "UserCreator", ->
 				sinon.assert.notCalled(@addAffiliation)
 				process.nextTick () =>
 					sinon.assert.calledWith(@addAffiliation, user._id, user.email)
+					done()
+
+		it "should not add affiliation if skipping", (done)->
+			attributes =  email: @email
+			options = skip_affiliation: true
+			@UserCreator.createNewUser attributes, options, (err, user) =>
+				process.nextTick () =>
+					sinon.assert.notCalled(@addAffiliation)
 					done()

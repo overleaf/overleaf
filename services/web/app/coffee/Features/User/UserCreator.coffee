@@ -6,15 +6,18 @@ metrics = require('metrics-sharelatex')
 
 module.exports = UserCreator =
 
-	createNewUser: (opts, callback)->
-		logger.log opts:opts, "creating new user"
+	createNewUser: (attributes, options, callback = (error, user) ->)->
+		if arguments.length == 2
+			callback = options
+			options = {}
+		logger.log user: attributes, "creating new user"
 		user = new User()
 
-		username = opts.email.match(/^[^@]*/)
-		if !opts.first_name? or opts.first_name == ""
-			opts.first_name = username[0]
+		username = attributes.email.match(/^[^@]*/)
+		if !attributes.first_name? or attributes.first_name == ""
+			attributes.first_name = username[0]
 
-		for key, value of opts
+		for key, value of attributes
 			user[key] = value
 			
 		user.ace.syntaxValidation = true
@@ -27,6 +30,7 @@ module.exports = UserCreator =
 		user.save (err)->
 			callback(err, user)
 
+			return if options?.skip_affiliation
 			# call addaffiliation after the main callback so it runs in the
 			# background. There is no guaranty this will run so we must no rely on it
 			addAffiliation user._id, user.email, (error) ->

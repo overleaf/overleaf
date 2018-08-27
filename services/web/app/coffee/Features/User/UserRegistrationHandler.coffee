@@ -1,4 +1,3 @@
-sanitize = require('sanitizer')
 User = require("../../models/User").User
 UserCreator = require("./UserCreator")
 UserGetter = require("./UserGetter")
@@ -54,7 +53,8 @@ module.exports = UserRegistrationHandler =
 					(cb)-> User.update {_id: user._id}, {"$set":{holdingAccount:false}}, cb
 					(cb)-> AuthenticationManager.setUserPassword user._id, userDetails.password, cb
 					(cb)->
-						NewsLetterManager.subscribe user, ->
+						if userDetails.subscribeToNewsletter == "true"
+							NewsLetterManager.subscribe user, ->
 						cb() #this can be slow, just fire it off
 				], (err)->
 					logger.log user: user, "registered"
