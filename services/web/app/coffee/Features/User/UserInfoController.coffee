@@ -22,9 +22,9 @@ module.exports = UserController =
 	getPersonalInfo: (req, res, next = (error) ->) ->
 		{user_id} = req.params
 
-		if user_id.match(/^\d+$/)
+		if /^\d+$/.test(user_id)
 			query = { "overleaf.id": parseInt(user_id, 10) }
-		else if user_id.match(/^[a-f0-9]{24}$/)
+		else if /^[a-f0-9]{24}$/.test(user_id)
 			query = { _id: ObjectId(user_id) }
 		else
 			return res.send(400)

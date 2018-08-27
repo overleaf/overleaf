@@ -80,7 +80,7 @@ module.exports = ProjectFileAgent = {
 					path: source_entity_path
 				}, (err, entity, type) ->
 					if err?
-						if err.toString().match(/^not found.*/)
+						if /^not found.*/.test(err.toString())
 							err = new SourceFileNotFoundError()
 						return callback(err)
 					callback(null, project, entity, type)

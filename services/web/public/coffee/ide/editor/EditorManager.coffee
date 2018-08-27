@@ -36,7 +36,7 @@ define [
 
 			@$scope.$on "flush-changes", () =>
 				Document.flushAll()
-			
+
 			@$scope.$watch "editor.wantTrackChanges", (value) =>
 				return if !value?
 				@_syncTrackChangesState(@$scope.editor.sharejs_doc)
@@ -47,7 +47,7 @@ define [
 			@localStorage("editor.mode.#{@$scope.project_id}") == 'rich-text'
 
 		autoOpenDoc: () ->
-			open_doc_id = 
+			open_doc_id =
 				@ide.localStorage("doc.open_id.#{@$scope.project_id}") or
 				@$scope.project.rootDoc_id
 			return if !open_doc_id?
@@ -76,7 +76,7 @@ define [
 					setTimeout () =>
 						@$scope.$broadcast "editor:gotoOffset", options.gotoOffset
 					, 0
-					
+
 
 			if doc.id == @$scope.editor.open_doc_id and !options.forceReopen
 				@$scope.$apply () =>
@@ -97,7 +97,7 @@ define [
 						"Sorry, something went wrong opening this document. Please try again."
 					)
 					return
-				
+
 				@_syncTrackChangesState(sharejs_doc)
 
 				@$scope.$broadcast "doc:opened"
@@ -131,12 +131,12 @@ define [
 					message = error
 				else
 					message = ""
-				if message.match "maxDocLength"
+				if /maxDocLength/.test(message)
 					@ide.showGenericMessageModal(
 						"Document Too Long"
 						"Sorry, this file is too long to be edited manually. Please upload it directly."
 					)
-				else if message.match "too many comments or tracked changes"
+				else if /too many comments or tracked changes/.test(message)
 					@ide.showGenericMessageModal(
 						"Too many comments or tracked changes"
 						"Sorry, this file has too many comments or tracked changes. Please try accepting or rejecting some existing changes, or resolving and deleting some comments."
@@ -165,13 +165,13 @@ define [
 
 		getCurrentDocId: () ->
 			@$scope.editor.open_doc_id
-			
+
 		startIgnoringExternalUpdates: () ->
 			@_ignoreExternalUpdates = true
-			
+
 		stopIgnoringExternalUpdates: () ->
 			@_ignoreExternalUpdates = false
-		
+
 		_syncTimeout: null
 		_syncTrackChangesState: (doc) ->
 			return if !doc?

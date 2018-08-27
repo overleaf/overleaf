@@ -28,9 +28,9 @@ define [
 			# Only show the lines that have a highlighted match
 			matching_lines = []
 			for line in lines
-				if !line.match(/^\[edit\]/)
+				if !/^\[edit\]/.test(line)
 					content += line + "\n"
-					if line.match(/<em>/)
+					if /<em>/.test(line)
 						matching_lines.push line
 			content = matching_lines.join("\n...\n")
 			result =
@@ -38,7 +38,7 @@ define [
 				url :"/learn/#{page_underscored}##{section_underscored}"
 				content: content
 			return result
-			
+
 		updateHits = (hits)->
 			$scope.safeApply ->
 				$scope.hits = hits
@@ -48,7 +48,7 @@ define [
 			if !query? or query.length == 0
 				updateHits []
 				return
-				
+
 			algoliaSearch.searchWiki query, (err, response)->
 				if response.hits.length == 0
 					updateHits []
@@ -56,4 +56,4 @@ define [
 					hits = _.map response.hits, buildHitViewModel
 					updateHits hits
 
-	App.controller "LearnController", () -> 
+	App.controller "LearnController", () ->

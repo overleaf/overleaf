@@ -1,5 +1,5 @@
 # This file is shared between the frontend and server code of web, so that
-# filename validation is the same in both implementations.  
+# filename validation is the same in both implementations.
 # Both copies must be kept in sync:
 #   app/coffee/Features/Project/SafePath.coffee
 #   public/coffee/ide/directives/SafePath.coffee
@@ -55,7 +55,7 @@ load = () ->
 		clean: (filename) ->
 			filename = filename.replace BADCHAR_RX, '_'
 			# for BADFILE_RX replace any matches with an equal number of underscores
-			filename = filename.replace BADFILE_RX, (match) -> 
+			filename = filename.replace BADFILE_RX, (match) ->
 				return new Array(match.length + 1).join("_")
 			# replace blocked filenames 'prototype' with '@prototype'
 			filename = filename.replace BLOCKEDFILE_RX, "@$1"
@@ -63,9 +63,9 @@ load = () ->
 
 		isCleanFilename: (filename) ->
 			return SafePath.isAllowedLength(filename) &&
-				not filename.match(BADCHAR_RX) &&
-				not filename.match(BADFILE_RX) &&
-				not filename.match(BLOCKEDFILE_RX)
+				!BADCHAR_RX.test(filename) &&
+				!BADFILE_RX.test(filename) &&
+				!BLOCKEDFILE_RX.test(filename)
 
 		isAllowedLength: (pathname) ->
 			return pathname.length > 0 && pathname.length <= MAX_PATH

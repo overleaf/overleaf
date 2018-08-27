@@ -349,7 +349,7 @@ define [
 				qs.clsiserverid = response.clsiServerId
 			for file in response.outputFiles
 				if IGNORE_FILES.indexOf(file.path) == -1
-					isOutputFile = file.path.match(/^output\./)
+					isOutputFile = /^output\./.test(file.path)
 					$scope.pdf.outputFiles.push {
 						# Turn 'output.blg' into 'blg file'.
 						name: if isOutputFile then "#{file.path.replace(/^output\./, "")} file" else file.path
@@ -481,8 +481,7 @@ define [
 			doc = ide.editorManager.getCurrentDocValue()
 			return null if !doc?
 			for line in doc.split("\n")
-				match = line.match /^[^%]*\\documentclass/
-				if match
+				if /^[^%]*\\documentclass/.test(line)
 					return ide.editorManager.getCurrentDocId()
 			return null
 

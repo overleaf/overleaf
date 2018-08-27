@@ -28,7 +28,7 @@ define [
 			# TODO need a proper url manipulation library to add to query string
 			url = $scope.pdfSrc
 			# add 'pdfng=true' to show that we are using the angular pdfjs viewer
-			queryStringExists = url.match(/\?/)
+			queryStringExists = /\?/.test(url)
 			url = url + (if not queryStringExists then '?' else '&') + 'pdfng=true'
 			# for isolated compiles, load the pdf on-demand because nobody will overwrite it
 			onDemandLoading = true
@@ -307,7 +307,7 @@ define [
 					return unless scale?
 					origposition = angular.copy scope.position
 					# console.log 'origposition', origposition
-					
+
 					if not spinnerTimer?
 						spinnerTimer = setTimeout () ->
 							spinner.add(element)
@@ -384,7 +384,7 @@ define [
 					return if error == 'cancelled'
 					# check if too many retries or file is missing
 					message = error?.message or error
-					if scope.loadCount > 3 || message.match(/^Missing PDF/i) || message.match(/^loading/i)
+					if scope.loadCount > 3 || /^Missing PDF/i.test(message) || /^loading/i.test(message)
 						scope.$emit 'pdf:error:display'
 						return
 					if scope.loadSuccess
@@ -408,12 +408,12 @@ define [
 						element.scrollTop(currentScrollTop + delta)
 
 				element.on 'mousedown', (e) ->
-					# We're checking that the event target isn't the directive root element 
+					# We're checking that the event target isn't the directive root element
 					# to make sure that the click was within a PDF page - no point in showing
 					# the text layer when the click is outside.
 					# If the user clicks a PDF page, the mousedown target will be the canvas
 					# element (or the text layer one). Alternatively, if the event target is
-					# the root element, we can assume that the user has clicked either the 
+					# the root element, we can assume that the user has clicked either the
 					# grey background area or the scrollbars.
 					if e.target != element[0] and !_hasSelection()
 						element.addClass 'pdfjs-viewer-show-text'
@@ -444,7 +444,7 @@ define [
 				_hasSelection = () ->
 					selection = window.getSelection?()
 					# check the selection collapsed state in preference to
-					# using selection.toString() as the latter is "" when 
+					# using selection.toString() as the latter is "" when
 					# the selection is hidden (e.g. while viewing logs)
 					return selection? and _isSelectionWithinPDF(selection) and !selection.isCollapsed
 
