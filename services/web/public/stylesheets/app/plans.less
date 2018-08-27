@@ -43,7 +43,7 @@
 		}
 	}
 	.card-first, .card-last {
-		background: @white-med;
+		background: @plans-non-highlighted;
 	}
 	.card-highlighted {
 		border: @highlight-border solid @gray-lighter;
@@ -165,9 +165,7 @@
 */
 @best-val-height: 35px;
 @highlight-border: 3px;
-@highlight-color: #d3584b;
 @gray-med: #6d6d6d;
-@white-med: #fdfdfd;
 
 /* Media Queries */
 @media (max-width: @screen-sm-max) {
@@ -208,7 +206,7 @@
 */
 .plans-table {
 	border: 1px solid @gray-lighter;
-	background-color: @white-med;
+	background-color: @plans-non-highlighted;
 	margin: @best-val-height 0 15px 0;
 	table-layout: fixed;
 	width: 100%;
@@ -231,8 +229,8 @@
 		border-top: 0;
 		font-family: @headings-font-family;
 		font-size: @font-size-h2;
-	  font-weight: @headings-font-weight;
-	  line-height: @headings-line-height;
+		font-weight: @headings-font-weight;
+		line-height: @headings-line-height;
 		padding: 18px;
 	}
 
@@ -262,7 +260,7 @@
 			border-bottom: 0;
 			padding: 18px;
 		}
-			/* highlighted column */
+		/* highlighted column */
 		td:nth-child(3) {
 			position: relative;
 			/* keep here position here, otherwise messes up border on safari when there is a bg color */
@@ -333,7 +331,7 @@
 	/* highlight rows on hover */
 	tr:hover {
 		td {
-			background-color: @gray-lightest;
+			background-color: @table-hover-bg;
 		}
 	}
 	tr:first-child:hover {
