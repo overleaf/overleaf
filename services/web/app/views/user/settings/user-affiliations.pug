@@ -26,6 +26,8 @@ form.row(
 								href,
 								ng-click="resendConfirmationEmail(userEmail)"
 							) #{translate('resend_confirmation_email')}
+						div(ng-if="userEmail.confirmedAt && userEmail.affiliation.institution && userEmail.affiliation.institution.confirmed && userEmail.affiliation.institution.licence != 'free'").small
+							span.label.label-primary #{translate("professional")}
 					td 
 						div(ng-if="userEmail.affiliation.institution") 
 							div {{ userEmail.affiliation.institution.name }}
