@@ -39,8 +39,11 @@ module.exports =
 		delete options.body.status
 		options.body.email_address = newEmail
 		mailchimp.request options, (err)->
+			if err? and err?.message?.indexOf("merge fields were invalid") 
+				logger.log {oldEmail, newEmail}, "unable to change email in newsletter as user has not subscribed"
+				return callback()
 			# if the user has unsubscribed mailchimp will error on email address change
-			if err? and err?.message.indexOf("could not be validated") == -1
+			else if err? and err?.message?.indexOf("could not be validated") == -1
 				logger.err err:err, "error changing email in newsletter"
 				return callback(err)
 			else
