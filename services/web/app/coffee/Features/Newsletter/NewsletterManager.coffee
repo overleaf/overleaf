@@ -38,6 +38,7 @@ module.exports =
 		options = buildOptions({email:oldEmail})
 		delete options.body.status
 		options.body.email_address = newEmail
+		logger.log {oldEmail, newEmail, options}, "changing email in newsletter"
 		mailchimp.request options, (err)->
 			if err? and err?.message?.indexOf("merge fields were invalid") != -1
 				logger.log {oldEmail, newEmail}, "unable to change email in newsletter, user has never subscribed"
@@ -75,6 +76,5 @@ buildOptions = (user, is_subscribed)->
 			LNAME: user.last_name
 			MONGO_ID:user._id
 
-	console.log opts
 	return opts
 
