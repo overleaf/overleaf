@@ -44,6 +44,7 @@ pathList = [
 	"#{jsPath}libraries.js"
 	"/stylesheets/style.css"
 	"/stylesheets/ol-style.css"
+	"/stylesheets/ol-light-style.css"
 ].concat(Modules.moduleAssetFiles(jsPath))
 
 if !Settings.useMinifiedJs 
@@ -163,11 +164,13 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 				return Url.resolve(staticFilesBase, hashedPath)
 			return Url.resolve(staticFilesBase, path)
 
-		res.locals.buildCssFileName = (userSettings) ->
-			themeModifier = ""
+		res.locals.buildCssFileNameForUser = (userSettings) ->
 			if userSettings?.overallTheme? and Settings.overleaf?
 				themeModifier = userSettings.overallTheme
-			return "/" + Settings.brandPrefix + themeModifier + "style.css"
+			return res.locals.buildCssFileName(themeModifier)
+
+		res.locals.buildCssFileName = (themeModifier) ->
+			return "/" + Settings.brandPrefix + (if themeModifier then themeModifier else "") + "style.css"
 
 		res.locals.buildImgPath = (imgFile)->
 			path = Path.join("/img/", imgFile)
@@ -338,6 +341,14 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 			defaultFontFamily          : if isOl then 'lucida' else 'monaco'
 			defaultLineHeight          : if isOl then 'normal' else 'compact'
 			renderAnnouncements        : !isOl
+		next()
+
+	webRouter.use (req, res, next) ->
+		if Settings.overleaf?
+			res.locals.overallThemes = [
+				{ name: "Default", val: "",       path: res.locals.buildCssPath(res.locals.buildCssFileName()) }
+				{ name: "Light",   val: "light-", path: res.locals.buildCssPath(res.locals.buildCssFileName("light-")) }
+			]
 		next()
 
 	webRouter.use (req, res, next) ->

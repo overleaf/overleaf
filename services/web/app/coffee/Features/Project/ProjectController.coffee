@@ -288,6 +288,7 @@ module.exports = ProjectController =
 					return cb()
 				CollaboratorsHandler.userIsTokenMember user_id, project_id, cb
 		}, (err, results)->
+			logger.log locals: res.locals, "### locals"
 			if err?
 				logger.err err:err, "error getting details for project page"
 				return next err

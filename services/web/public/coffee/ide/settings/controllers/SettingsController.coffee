@@ -1,7 +1,25 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "SettingsController", ["$scope", "settings", "ide", ($scope, settings, ide) ->
+	App.controller "SettingsController", ["$scope", "settings", "ide", "_", ($scope, settings, ide, _) ->
+		$scope.overallThemesList = window.overallThemes
+		$scope.ui = 
+			loadingStyleSheet: false
+
+		_updateCSSFile = (theme) ->
+			$scope.ui.loadingStyleSheet = true
+			docHeadEl = document.querySelector "head"
+			oldStyleSheetEl = document.getElementById "main-stylesheet"
+			newStyleSheetEl = document.createElement "link" 
+			newStyleSheetEl.addEventListener "load", (e) =>
+				$scope.$applyAsync () =>
+					$scope.ui.loadingStyleSheet = false
+					docHeadEl.removeChild oldStyleSheetEl
+			newStyleSheetEl.setAttribute "rel", "stylesheet"
+			newStyleSheetEl.setAttribute "id", "main-stylesheet"
+			newStyleSheetEl.setAttribute "href", theme.path
+			docHeadEl.appendChild newStyleSheetEl
+
 		if $scope.settings.mode not in ["default", "vim", "emacs"]
 			$scope.settings.mode = "default"
 			
@@ -25,7 +43,10 @@ define [
 
 		$scope.$watch "settings.overallTheme", (overallTheme, oldOverallTheme) =>
 			if overallTheme != oldOverallTheme
-				settings.saveSettings({overallTheme})
+				chosenTheme = _.find $scope.overallThemesList, (theme) -> theme.val == overallTheme
+				if chosenTheme?
+					_updateCSSFile chosenTheme
+					settings.saveSettings({overallTheme})
 
 		$scope.$watch "settings.fontSize", (fontSize, oldFontSize) =>
 			if fontSize != oldFontSize

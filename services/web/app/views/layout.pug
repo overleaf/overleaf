@@ -21,7 +21,7 @@ html(itemscope, itemtype='http://schema.org/Product')
 		link(rel="mask-icon", href="/" + settings.brandPrefix + "mask-favicon.svg", color=settings.brandPrefix === 'ol-' ? "#4f9c45" : "#a93529")
 
 		//- Stylesheet
-		link(rel='stylesheet', href=buildCssPath(buildCssFileName(userSettings), {hashedPath:true}))
+		link(rel='stylesheet', href=buildCssPath(buildCssFileNameForUser(userSettings), {hashedPath:true}), id="main-stylesheet")
 
 		block _headLinks
 

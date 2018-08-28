@@ -144,9 +144,14 @@ aside#left-menu.full-size(
 					label(for="overallTheme") #{translate("overall_theme")}
 					select(
 						name="overallTheme"
+						ng-if="!ui.loadingStyleSheet"
 						ng-model="settings.overallTheme"
-						ng-options="o.v as o.n for o in [{ n: 'Default', v: '' }, { n: 'Light', v: 'light-' }]"
+						ng-options="overallTheme.val as overallTheme.name for overallTheme in overallThemesList"
 					)
+					p.loading.pull-right(
+						ng-if="ui.loadingStyleSheet"
+					)
+						i.fa.fa-fw.fa-spin.fa-refresh
 
 			.form-controls(ng-show="!anonymous")
 				label(for="mode") #{translate("keybindings")}
