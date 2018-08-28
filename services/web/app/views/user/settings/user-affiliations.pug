@@ -26,6 +26,8 @@ form.row(
 								href,
 								ng-click="resendConfirmationEmail(userEmail)"
 							) #{translate('resend_confirmation_email')}
+						div(ng-if="userEmail.confirmedAt && userEmail.affiliation.institution && userEmail.affiliation.institution.confirmed && userEmail.affiliation.institution.licence != 'free'").small
+							span.label.label-primary #{translate("professional")}
 					td 
 						div(ng-if="userEmail.affiliation.institution") 
 							div {{ userEmail.affiliation.institution.name }}
@@ -55,9 +57,9 @@ form.row(
 									show-role-and-department="true"
 								)
 								.affiliation-change-actions.small
-									a(
-										href
+									button.btn.btn-sm.btn-success(
 										ng-click="saveAffiliationChange(userEmail);"
+										ng-disabled="!(affiliationToChange.role && affiliationToChange.department)"
 									) #{translate("save_or_cancel-save")}
 									| &nbsp;#{translate("save_or_cancel-or" )}&nbsp;
 									a(
