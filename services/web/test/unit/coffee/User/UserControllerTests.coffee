@@ -234,7 +234,7 @@ describe "UserController", ->
 			@req.body =
 				overallTheme: "green-ish"
 			@res.sendStatus = (code)=>
-				@user.overallTheme.should.equal "green-ish"
+				@user.ace.overallTheme.should.equal "green-ish"
 				done()
 			@UserController.updateUserSettings @req, @res
 
