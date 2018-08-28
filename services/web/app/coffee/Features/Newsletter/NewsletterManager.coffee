@@ -16,10 +16,10 @@ module.exports =
 
 	subscribe: (user, callback = () ->)->
 		options = buildOptions(user, true)
-		logger.log options:options, user:user, email:user.email, "trying to subscribe user to the mailing list"
+		logger.log options:options, user:user, email:user.email, "subscribing user to the mailing list"
 		mailchimp.request options, (err)->
 			if err?
-				logger.err err:err, "error subscribing person to newsletter"
+				logger.err err:err, user:user, "error subscribing person to newsletter"
 			else
 				logger.log user:user, "finished subscribing user to the newsletter"
 			callback(err)
@@ -29,7 +29,7 @@ module.exports =
 		options = buildOptions(user, false)
 		mailchimp.request options, (err)->
 			if err?
-				logger.err err:err, "error unsubscribing person to newsletter"
+				logger.err err:err, user:user, "error unsubscribing person to newsletter"
 			else
 				logger.log user:user, "finished unsubscribing user to the newsletter"
 			callback(err)
@@ -38,10 +38,17 @@ module.exports =
 		options = buildOptions({email:oldEmail})
 		delete options.body.status
 		options.body.email_address = newEmail
+		logger.log {oldEmail, newEmail, options}, "changing email in newsletter"
 		mailchimp.request options, (err)->
-			# if the user has unsubscribed mailchimp will error on email address change
-			if err? and err?.message.indexOf("could not be validated") == -1
-				logger.err err:err, "error changing email in newsletter"
+			if err? and err?.message?.indexOf("merge fields were invalid") != -1
+				logger.log {oldEmail, newEmail}, "unable to change email in newsletter, user has never subscribed"
+				return callback()
+			else if err? and err?.message?.indexOf("could not be validated") != -1
+				logger.log {oldEmail, newEmail}, 
+					"unable to change email in newsletter, user has previously unsubscribed or new email already exist on list"
+				return callback(err)
+			else if err?
+				logger.err {err, oldEmail, newEmail}, "error changing email in newsletter"
 				return callback(err)
 			else
 				logger.log "finished changing email in the newsletter"
@@ -51,18 +58,23 @@ hashEmail = (email)->
 	crypto.createHash('md5').update(email.toLowerCase()).digest("hex")
 
 buildOptions = (user, is_subscribed)->
-	status =  if is_subscribed then "subscribed" else "unsubscribed"
 	subscriber_hash = hashEmail(user.email)
 	opts =
 		method: "PUT"
 		path: "/lists/#{Settings.mailchimp?.list_id}/members/#{subscriber_hash}"
 		body:
-			status_if_new: status
-			status: status
 			email_address:user.email
-			merge_fields:
-				FNAME: user.first_name
-				LNAME: user.last_name
-				MONGO_ID:user._id
+				
+	status = if is_subscribed then "subscribed" else "unsubscribed"
+	if is_subscribed?
+		opts.body.status = status
+		opts.body.status_if_new = status
+
+	if user._id?
+		opts.body.merge_fields = 
+			FNAME: user.first_name
+			LNAME: user.last_name
+			MONGO_ID:user._id
+
 	return opts
 
