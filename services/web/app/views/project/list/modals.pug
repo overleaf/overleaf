@@ -323,71 +323,40 @@ script(type="text/ng-template", id="v1ImportModalTemplate")
 		h3 Move Project to Overleaf v2
 
 	.modal-body.v1-import-wrapper
-		.v1-import-step-1(ng-show="step === 1")
-			.v1-import-row
-				.v1-import-col
-					img.v1-import-img(
-						src="/img/v1-import/v2-editor.png"
-						alt="The new V2 Editor."
-					)
-				.v1-import-col
-					h2.v1-import-title Try the Overleaf v2 Editor
-					p The Overleaf v2 editor has many great new features including:
-					ul
-						li Faster real-time collaboration
-						li See your coauthors’ cursors
-						li Chat with math support
-						li Tracked changes and commenting
-						li Improved LaTeX autocomplete
-						li Two-way Dropbox sync
-			p.v1-import-cta Would you like to move #[strong {{project.name}}] into Overleaf v2?
-
-		.v1-import-step-2(ng-show="step === 2")
-			.v1-import-row
-				.v1-import-warning.v1-import-col(aria-label="Warning symbol.")
-					i.fa.fa-flask
-				.v1-import-col
-					h2.v1-import-title #[strong Warning:] Overleaf v2 is Experimental
-					p We are still working hard to bring some Overleaf v1 features to the v2 editor. In v2:
-					ul
-						li You may not be able to access all of your <strong>Labelled versions</strong> yet
-						li There are <strong>no Zotero and CiteULike</strong> integrations yet
-						li Some <strong>Journals and Services in the Submit menu</strong> don't support direct submissions yet
-					p.row-spaced-small
-						| If you currently use the <strong>Overleaf Git bridge</strong> with your v1 project, you can migrate your project to the Overleaf v2 GitHub integration.
-						|
-						a(href='https://www.overleaf.com/help/343-working-offline-in-overleaf-v2', target='_blank') Read More.
-			.v1-import-cta
-				p
-					strong Please note: you cannot move this project back to v1 once you have moved it to v2. If this is an important project, please consider making a clone in v1 before you move the project to v2.
-				p Are you sure you want to move #[strong {{project.name}}] into Overleaf v2?
+		.v1-import-row
+			.v1-import-warning.v1-import-col(aria-label="Warning symbol.")
+				i.fa.fa-flask
+			.v1-import-col
+				h2.v1-import-title #[strong Warning:] Some Overleaf v1 features aren't supported yet!
+				p We are still working hard to bring some Overleaf v1 features to the v2 editor. In v2:
+				ul
+					li You may not be able to access all of your <strong>Labelled versions</strong> yet
+					li There are <strong>no Zotero and CiteULike</strong> integrations yet
+					li Some <strong>Journals and Services in the Submit menu</strong> don't support direct submissions yet
+				p.row-spaced-small
+					| If you currently use the <strong>Overleaf Git bridge</strong> with your v1 project, you can migrate your project to the Overleaf v2 GitHub integration.
+					|
+					a(href='https://www.overleaf.com/help/343-working-offline-in-overleaf-v2', target='_blank') Read More.
+		.v1-import-cta
+			p Are you sure you want to move #[strong {{project.name}}] into Overleaf v2?
 
 	.modal-footer.v1-import-footer
-		div(ng-show="step === 1")
+		form(
+			async-form="v1Import",
+			name="v1ImportForm",
+			action="{{'/overleaf/project/'+ project.id + '/import'}}"
+			method="POST"
+			ng-cloak
+		)
+			input(name='_csrf', type='hidden', value=csrfToken)
+			form-messages(for="v1ImportForm")
 			if settings.overleaf && settings.overleaf.host
 				a.btn.btn-primary.v1-import-btn(
 					ng-href=settings.overleaf.host + "/{{project.id}}"
+					ng-class="{disabled: v1ImportForm.inflight || v1ImportForm.response.success}"
 				) No thanks, open in v1
-			button.btn.btn-primary.v1-import-btn(
-				ng-click="moveToConfirmation()"
-			) Yes, move project to v2
-		div(ng-show="step === 2")
-			form(
-				async-form="v1Import",
-				name="v1ImportForm",
-				action="{{'/overleaf/project/'+ project.id + '/import'}}"
-				method="POST"
-				ng-cloak
+			input.btn.btn-primary.v1-import-btn(
+				type="submit",
+				value="Yes, move project to v2"
+				ng-disabled="v1ImportForm.inflight || v1ImportForm.response.success"
 			)
-				input(name='_csrf', type='hidden', value=csrfToken)
-				form-messages(for="v1ImportForm")
-				if settings.overleaf && settings.overleaf.host
-					a.btn.btn-primary.v1-import-btn(
-						ng-href=settings.overleaf.host + "/{{project.id}}"
-						ng-class="{disabled: v1ImportForm.inflight || v1ImportForm.response.success}"
-					) No thanks, open in v1
-				input.btn.btn-primary.v1-import-btn(
-					type="submit",
-					value="Yes, move project to v2"
-					ng-disabled="v1ImportForm.inflight || v1ImportForm.response.success"
-				)
