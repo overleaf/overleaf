@@ -16,12 +16,13 @@ describe 'InstitutionsGetter', ->
 		@userId = '12345abcde'
 
 	describe "getConfirmedInstitutions", ->
-			it 'filters unconfirmed emails', (done) ->
+			it 'filters unconfirmed affiliations', (done) ->
 				@userEmails = [
-					{ confirmedAt: null, affiliation: institution: { id: 123 } }
-					{ confirmedAt: new Date(), affiliation: institution: { id: 456 } }
+					{ confirmedAt: null, affiliation: institution: { id: 123, confirmed: true } }
+					{ confirmedAt: new Date(), affiliation: institution: { id: 456, confirmed: true } }
 					{ confirmedAt: new Date(), affiliation: null }
 					{ confirmedAt: new Date(), affiliation: institution: null }
+					{ confirmedAt: new Date(), affiliation: institution: { id: 789, confirmed: false } }
 				]
 				@UserGetter.getUserFullEmails.yields(null, @userEmails)
 				@InstitutionsGetter.getConfirmedInstitutions @userId, (error, institutions) ->

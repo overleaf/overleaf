@@ -7,7 +7,7 @@ module.exports = InstitutionsGetter =
 			return callback error if error?
 
 			confirmedInstitutions = emailsData.filter (emailData) -> 
-				emailData.confirmedAt? and emailData.affiliation?.institution?
+				emailData.confirmedAt? and emailData.affiliation?.institution?.confirmed
 			.map (emailData) ->
 				emailData.affiliation?.institution
 

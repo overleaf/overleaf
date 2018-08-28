@@ -89,20 +89,29 @@ describe "FeatureUpdater.refreshFeatures", ->
 			@institutionPlan = settings.plans.find (plan) ->
 				plan.planCode == settings.institutionPlanCode
 			@email = @user.emails[0].email
-			affiliationData =
+			@affiliationData =
 				email: @email
-				institution: { licence: 'pro_plus' }
-			MockV1Api.setAffiliations [affiliationData]
+				institution: { licence: 'pro_plus', confirmed: true }
 
 		it "should not set their features if email is not confirmed", (done) ->
+			MockV1Api.setAffiliations [@affiliationData]
 			syncUserAndGetFeatures @user, (error, features) =>
 				expect(features).to.deep.equal(settings.defaultFeatures)
 				done()
 
 		it "should set their features if email is confirmed", (done) ->
+			MockV1Api.setAffiliations [@affiliationData]
 			@user.confirmEmail @email, (error) =>
 				syncUserAndGetFeatures @user, (error, features) =>
 					expect(features).to.deep.equal(@institutionPlan.features)
+					done()
+
+		it "should not set their features if institution is not confirmed", (done) ->
+			@affiliationData.institution.confirmed = false
+			MockV1Api.setAffiliations [@affiliationData]
+			@user.confirmEmail @email, (error) =>
+				syncUserAndGetFeatures @user, (error, features) =>
+					expect(features).to.deep.equal(settings.defaultFeatures)
 					done()
 
 	describe "when the user is due bonus features and has extra features that no longer apply", ->
