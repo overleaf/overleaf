@@ -194,7 +194,7 @@ script(type="text/ng-template", id="affiliationFormTpl")
 		ui-select(
 			ng-model="$ctrl.affiliationData.university"
 			ng-disabled="!$ctrl.affiliationData.country"
-			tagging="$ctrladdUniversityToSelection"
+			tagging="$ctrl.addUniversityToSelection"
 			tagging-label="false"
 		)
 			ui-select-match(
