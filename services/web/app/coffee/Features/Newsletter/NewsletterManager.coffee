@@ -47,6 +47,10 @@ module.exports =
 				logger.log {oldEmail, newEmail}, 
 					"unable to change email in newsletter, user has previously unsubscribed or new email already exist on list"
 				return callback(err)
+			else if err? and err.message.indexOf("is already a list member") != -1
+				logger.log {oldEmail, newEmail},
+					"unable to change email in newsletter, new email is already on mailing list"
+				return callback()
 			else if err?
 				logger.err {err, oldEmail, newEmail}, "error changing email in newsletter"
 				return callback(err)
