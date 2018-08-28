@@ -59,16 +59,17 @@ hashEmail = (email)->
 
 buildOptions = (user, is_subscribed)->
 	subscriber_hash = hashEmail(user.email)
+	status = if is_subscribed then "subscribed" else "unsubscribed"
 	opts =
 		method: "PUT"
 		path: "/lists/#{Settings.mailchimp?.list_id}/members/#{subscriber_hash}"
 		body:
 			email_address:user.email
+			status_if_new: status
 				
-	status = if is_subscribed then "subscribed" else "unsubscribed"
+	#only set status if we explictly want to set it
 	if is_subscribed?
 		opts.body.status = status
-		opts.body.status_if_new = status
 
 	if user._id?
 		opts.body.merge_fields = 
