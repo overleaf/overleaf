@@ -338,7 +338,7 @@ module.exports = ProjectController =
 						syntaxValidation: user.ace.syntaxValidation
 						fontFamily: user.ace.fontFamily
 						lineHeight: user.ace.lineHeight
-						overallTheme: user.overallTheme
+						overallTheme: user.ace.overallTheme
 					}
 					trackChangesState: project.track_changes
 					privilegeLevel: privilegeLevel

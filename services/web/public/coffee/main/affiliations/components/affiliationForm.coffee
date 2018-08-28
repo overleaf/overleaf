@@ -10,7 +10,6 @@ define [
 		_defaultDepartments = []
 
 		ctrl.addUniversityToSelection = (universityName) -> 
-			console.log universityName
 			{ name: universityName, isUserSuggested: true }
 		# Populates the countries dropdown
 		UserAffiliationsDataService

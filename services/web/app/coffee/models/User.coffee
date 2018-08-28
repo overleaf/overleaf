@@ -27,6 +27,7 @@ UserSchema = new Schema
 	ace               : {
 		mode               : {type : String, default: 'none'}
 		theme              : {type : String, default: 'textmate'}
+		overallTheme       : {type: String, default: "" }
 		fontSize           : {type : Number, default:'12'}
 		autoComplete       : {type : Boolean, default: true}
 		autoPairDelimiters : {type : Boolean, default: true}
@@ -72,7 +73,6 @@ UserSchema = new Schema
 		id: { type: Number }
 		accessToken: { type: String }
 		refreshToken: { type: String }
-	overallTheme: { type: String, default: "" }
 	awareOfV2: { type:Boolean, default: false }
 
 conn = mongoose.createConnection(Settings.mongo.url, {
