@@ -334,12 +334,14 @@ script(type="text/ng-template", id="v1ImportModalTemplate")
 				p We are still working hard to bring some Overleaf v1 features to the v2 editor. In v2:
 				ul
 					li
-						| The <strong>Git Bridge</strong> is not yet available, but you can migrate your project to the Overleaf v2 GitHub integration
+						| <strong>Direct git access to your projects</strong> is not yet available, but you can migrate your project to the Overleaf v2 GitHub integration
 						|
 						a(href='https://www.overleaf.com/help/343-working-offline-in-overleaf-v2', target='_blank') Read More.
 					li There are <strong>no Zotero and CiteULike</strong> integrations yet
 					li Some <strong>Journals and Services in the Submit menu</strong> don't support direct submissions yet
 		.v1-import-cta
+			p
+				strong Please note: you cannot move this project back to v1 once you have moved it to v2.
 			p Are you sure you want to move #[strong {{project.name}}] into Overleaf v2?
 
 	.modal-footer.v1-import-footer
