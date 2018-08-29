@@ -38,11 +38,11 @@ define [
 					$scope.notification.error = true
 
 	App.controller "OverleafV2NotificationController", ($scope, localStorage) ->
-		$scope.visible = !localStorage('overleaf_v2_notification_hidden_at')
+		$scope.visible = !localStorage('overleaf_v2_2_notification_hidden_at')
 
 		$scope.dismiss = () ->
 			$scope.visible = false
-			localStorage('overleaf_v2_notification_hidden_at', Date.now())
+			localStorage('overleaf_v2_2_notification_hidden_at', Date.now())
 
 	App.controller "OverleafV1NotificationController", ($scope, localStorage) ->
 		$scope.visible = !localStorage('overleaf_v1_notification_hidden_at')

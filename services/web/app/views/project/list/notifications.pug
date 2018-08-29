@@ -4,13 +4,19 @@ if hasFeature('v2-banner')
 			li.notification_entry
 				.row
 					.col-xs-12
-						.alert.alert-info
+						.alert.alert-danger
 							.notification_inner
-								.notification_body(event-tracking="sees_v2_banner" event-tracking-mb="true" event-segmentation="{location: 'welcome', v2_onboard: true}" event-tracking-trigger="load" event-tracking-send-once="true")
-									a.btn.btn-info.btn-sm.pull-right(event-tracking="go_to_v2" event-tracking-mb="true" event-segmentation="{location: 'welcome', v2_onboard: true}" event-tracking-trigger="click" href="/user/login_to_ol_v2") Try Overleaf v2
-									| ShareLaTeX is joining Overleaf and will become <em>Overleaf v2</em> in late 2018 (<a event-tracking="click_v2_read_more" event-tracking-mb="true" event-segmentation="{location: 'welcome', v2_onboard: true}" event-tracking-trigger="click" href="https://www.overleaf.com/help/342-overleaf-v2-faq">read more</a>).
-									<br/>
-									| We’re beta testing Overleaf v2 now and you can try it out with your ShareLaTeX account.
+								.notification_body(event-tracking="sees_v2_banner_2" event-tracking-mb="true" event-segmentation="{location: 'welcome', v2_onboard: true}" event-tracking-trigger="load" event-tracking-send-once="true")
+									a.btn.btn-info.btn-sm.pull-right(
+										event-tracking="go_to_v2"
+										event-tracking-mb="true"
+										event-segmentation="{location: 'welcome', v2_onboard: true}"
+										event-tracking-trigger="click"
+										href="/user/login_to_ol_v2"
+										style="margin-left: 8px;"
+									) Go to Overleaf v2
+									i.fa.fa-bullhorn
+									| &nbsp;Good news! Overleaf and ShareLaTeX have joined forces to bring you <em>Overleaf v2</em>, which is based on the ShareLaTeX editor and combines the best of both services. All ShareLaTeX accounts will move to Overleaf v2 on <strong>September 4th, 2018</strong> (<a event-tracking="click_v2_read_more" event-tracking-mb="true" event-segmentation="{location: 'welcome', v2_onboard: true}" event-tracking-trigger="click" href="https://www.overleaf.com/blog/654-overleaf-v2-launch-announcement" style="text-decoration: underline">read more</a>). You can also <a href="/user/login_to_ol_v2" style="text-decoration: underline">try Overleaf v2 now</a>.
 								.notification_close
 									button(ng-click="dismiss()" event-tracking="closes_v2_banner" event-tracking-mb="true" event-segmentation="{location: 'welcome', v2_onboard: true}"  event-tracking-trigger="click").close.pull-right
 										span(aria-hidden="true") &times;
