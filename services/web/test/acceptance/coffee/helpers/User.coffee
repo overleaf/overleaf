@@ -80,6 +80,9 @@ class User
 			update["features.#{key}"] = value
 		UserModel.update { _id: @id }, update, callback
 
+	setOverleafId: (overleaf_id, callback = (error) ->) ->
+		UserModel.update { _id: @id }, { 'overleaf.id': overleaf_id }, callback
+
 	logout: (callback = (error) ->) ->
 		@getCsrfToken (error) =>
 			return callback(error) if error?
