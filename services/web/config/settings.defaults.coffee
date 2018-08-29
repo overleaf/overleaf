@@ -485,3 +485,23 @@ module.exports = settings =
 	# 	{imageName: 'texlive-full:2015.1', imageDesc: 'Legacy SL TeXLive 2015'}
 	# 	{imageName: 'texlive-full:2014.2', imageDesc: 'Legacy SL TeXLive 2014.2'}
 	# ]
+
+	# module options
+	# ----------
+	modules:
+		sanitize:
+			options: 
+				allowedTags: [ 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol', 'nl', 'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div', 'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre', 'iframe', 'img', 'figure', 'figcaption' ]
+				allowedAttributes:
+					'a': [ 'href', 'name', 'target', 'class' ]
+					'div': [ 'class', 'id', 'style' ]
+					'h1': [ 'class', 'id' ]
+					'h2': [ 'class', 'id' ]
+					'h3': [ 'class', 'id' ]
+					'h4': [ 'class', 'id' ]
+					'h5': [ 'class', 'id' ]
+					'h6': [ 'class', 'id' ]
+					'figure': [ 'class', 'id', 'style']
+					'figcaption': [ 'class', 'id', 'style']
+					'iframe': [ 'allowfullscreen', 'frameborder', 'height', 'src', 'width' ]
+					'img': [ 'alt', 'class', 'src', 'style' ]
