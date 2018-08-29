@@ -18,7 +18,9 @@ module.exports = Features =
 				return Settings.showV2Banner
 			when 'custom-togglers'
 				return Settings.overleaf?
-			when 'templates'
+			when 'publish-templates'
+				return true
+			when 'view-templates'
 				return !Settings.overleaf?
 			when 'affiliations'
 				return Settings?.apis?.v1?.url?
