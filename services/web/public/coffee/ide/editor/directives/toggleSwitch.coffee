@@ -14,7 +14,7 @@ define [
 
     <input
       type="radio"
-      name="editor-mode"
+      name="toggle-switch-{{$id}}"
       class="toggle-switch-input"
       id="toggle-switch-false-{{$id}}"
       ng-value="false"
@@ -25,7 +25,7 @@ define [
     <input
       type="radio"
       class="toggle-switch-input"
-      name="editor-mode"
+      name="toggle-switch-{{$id}}"
       id="toggle-switch-true-{{$id}}"
       ng-value="true"
       ng-model="ngModel"
