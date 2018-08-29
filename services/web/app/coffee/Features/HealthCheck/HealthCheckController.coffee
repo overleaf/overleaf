@@ -5,6 +5,7 @@ rclient = RedisWrapper.client("health_check")
 settings = require("settings-sharelatex")
 logger = require "logger-sharelatex"
 domain = require "domain"
+UserGetter = require("../User/UserGetter")
 
 module.exports = HealthCheckController =
 	check: (req, res, next = (error) ->) ->
@@ -37,6 +38,20 @@ module.exports = HealthCheckController =
 				res.sendStatus 500
 			else
 				res.sendStatus 200
+
+	checkMongo: (req, res, next)->
+		logger.log "running mongo health check"
+		UserGetter.getUserEmail settings.smokeTest.userId, (err, email)->
+			if err?
+				logger.err err:err, "mongo health check failed, error present"
+				return res.sendStatus 500
+			else if !email?
+				logger.err err:err, "mongo health check failed, no emai present in find result"
+				return res.sendStatus 500
+			else
+				logger.log email:email, "mongo health check passed"
+				res.sendStatus 200
+
 		
 Reporter = (res) ->
 	(runner) ->
