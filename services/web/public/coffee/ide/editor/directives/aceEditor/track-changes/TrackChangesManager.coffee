@@ -6,41 +6,41 @@ define [
 ], (_, EventEmitter, ColorManager, AceShareJsCodec) ->
 	class TrackChangesManager
 		Range = ace.require("ace/range").Range
-		
+
 		constructor: (@$scope, @editor, @element) ->
 			window.trackChangesManager ?= @
 
 			@$scope.$watch "trackChanges", (track_changes) =>
 				return if !track_changes?
 				@setTrackChanges(track_changes)
-			
+
 			@$scope.$watch "sharejsDoc", (doc, oldDoc) =>
 				return if !doc?
 				if oldDoc?
 					@disconnectFromDoc(oldDoc)
 				@connectToDoc(doc)
-			
+
 			@$scope.$on "comment:add", (e, thread_id, offset, length) =>
 				@addCommentToSelection(thread_id, offset, length)
 
 			@$scope.$on "comment:select_line", (e) =>
 				@selectLineIfNoSelection()
-			
+
 			@$scope.$on "changes:accept", (e, change_ids) =>
 				@acceptChangeIds(change_ids)
 
 			@$scope.$on "changes:reject", (e, change_ids) =>
 				@rejectChangeIds(change_ids)
-			
+
 			@$scope.$on "comment:remove", (e, comment_id) =>
 				@removeCommentId(comment_id)
-			
+
 			@$scope.$on "comment:resolve_threads", (e, thread_ids) =>
 				@hideCommentsByThreadIds(thread_ids)
-			
+
 			@$scope.$on "comment:unresolve_thread", (e, thread_id) =>
 				@showCommentByThreadId(thread_id)
-			
+
 			@$scope.$on "review-panel:recalculate-screen-positions", () =>
 				@recalculateReviewEntriesScreenPositions()
 
@@ -53,7 +53,7 @@ define [
 					@$scope.$evalAsync () =>
 						changingSelection = false
 						@updateFocus()
-			
+
 			onResize = () =>
 				@recalculateReviewEntriesScreenPositions()
 
@@ -99,7 +99,7 @@ define [
 					bindToAce()
 				else
 					unbindFromAce()
-		
+
 		disconnectFromDoc: (doc) ->
 			@changeIdToMarkerIdMap = {}
 			doc.off "ranges:clear"
@@ -111,18 +111,18 @@ define [
 				@$scope.sharejsDoc?.track_changes_as = window.user.id or "anonymous"
 			else
 				@$scope.sharejsDoc?.track_changes_as = null
-		
+
 		connectToDoc: (doc) ->
 			@rangesTracker = doc.ranges
 			@setTrackChanges(@$scope.trackChanges)
-			
+
 			doc.on "ranges:dirty", () =>
 				@updateAnnotations()
 			doc.on "ranges:clear", () =>
 				@clearAnnotations()
 			doc.on "ranges:redraw", () =>
 				@redrawAnnotations()
-		
+
 		clearAnnotations: () ->
 			session = @editor.getSession()
 			for change_id, markers of @changeIdToMarkerIdMap
@@ -139,9 +139,9 @@ define [
 
 			for comment in @rangesTracker.comments
 				@_onCommentAdded(comment)
-			
+
 			@broadcastChange()
-		
+
 		_doneUpdateThisLoop: false
 		_pendingUpdates: false
 		updateAnnotations: () ->
@@ -161,9 +161,9 @@ define [
 
 		_doUpdateAnnotations: () ->
 			dirty = @rangesTracker.getDirtyState()
-			
+
 			updateMarkers = false
-			
+
 			for id, change of dirty.change.added
 				if change.op.i?
 					@_onInsertAdded(change)
@@ -177,7 +177,7 @@ define [
 			for id, change of dirty.change.moved
 				updateMarkers = true
 				@_onChangeMoved(change)
-				
+
 			for id, comment of dirty.comment.added
 				@_onCommentAdded(comment)
 			for id, comment of dirty.comment.removed
@@ -185,7 +185,7 @@ define [
 			for id, comment of dirty.comment.moved
 				updateMarkers = true
 				@_onCommentMoved(comment)
-			
+
 			@rangesTracker.resetDirtyState()
 			if updateMarkers
 				@editor.renderer.updateBackMarkers()
@@ -195,18 +195,18 @@ define [
 			op = { c: content, p: offset, t: thread_id }
 			# @rangesTracker.applyOp op # Will apply via sharejs
 			@$scope.sharejsDoc.submitOp op
-		
+
 		addCommentToSelection: (thread_id, offset, length) ->
 			start = @_shareJsOffsetToAcePosition(offset)
 			end = @_shareJsOffsetToAcePosition(offset + length)
 			range = new Range(start.row, start.column, end.row, end.column)
 			content = @editor.session.getTextRange(range)
 			@addComment(offset, content, thread_id)
-		
+
 		selectLineIfNoSelection: () ->
 			if @editor.selection.isEmpty()
 				@editor.selection.selectLine()
-		
+
 		acceptChangeIds: (change_ids) ->
 			@rangesTracker.removeChangeIds(change_ids)
 			@updateAnnotations()
@@ -225,12 +225,12 @@ define [
 			#
 			#     foo quux baz
 			#         |--| -> insertion of "quux", op 1, at position 4
-			#             | -> deletion of "bar", op 2, pushed forward by "quux" to position 8 
+			#             | -> deletion of "bar", op 2, pushed forward by "quux" to position 8
 			#
-			# When rejecting these changes at once, if the insertion is rejected first, we get unexpected 
+			# When rejecting these changes at once, if the insertion is rejected first, we get unexpected
 			# results. What happens is:
 			#
-			#     1) Rejecting the insertion deletes the added word "quux", i.e., it removes 4 chars 
+			#     1) Rejecting the insertion deletes the added word "quux", i.e., it removes 4 chars
 			#        starting from position 4;
 			#
 			#           "foo quux baz" -> "foo  baz"
@@ -247,27 +247,27 @@ define [
 			#      "foo  bazbar" (note "bar" readded at position 8)
 			#
 			# The issue happens because of step 1. To revert the insertion of "quux", 4 characters are deleted
-			# from position 4. This includes the position where the deletion exists; when that position is 
+			# from position 4. This includes the position where the deletion exists; when that position is
 			# cleared, the RangesTracker considers that the deletion is gone and stops tracking/updating it.
 			# As we still hold a reference to it, the code tries to revert it by readding the deleted text, but
 			# does so at the outdated position (position 8, which was valid when "quux" was present).
 			#
-			# To avoid this kind of problem, we need to make sure that reverting operations doesn't affect 
-			# subsequent operations that come after. Reverse sorting the operations based on position will 
+			# To avoid this kind of problem, we need to make sure that reverting operations doesn't affect
+			# subsequent operations that come after. Reverse sorting the operations based on position will
 			# achieve it; in the case above, it makes sure that the the deletion is reverted first:
 			#
-			#     1) Rejecting the deletion adds the deleted word "bar" at position 8 
+			#     1) Rejecting the deletion adds the deleted word "bar" at position 8
 			#
 			#            "foo quux baz" -> "foo quuxbar baz"
-			#                                       | -> deletion of "bar" is reverted by 
+			#                                       | -> deletion of "bar" is reverted by
 			#                                            reinserting "bar" at position 8
 			#
-			#     2) Rejecting the insertion deletes the added word "quux", i.e., it removes 4 chars 
+			#     2) Rejecting the insertion deletes the added word "quux", i.e., it removes 4 chars
 			#        starting from position 4 and achieves the expected result:
 			#
 			#           "foo quuxbar baz" -> "foo bar baz"
 			#                |--| -> 4 characters to be removed
-			
+
 			changes.sort((a, b) -> b.op.p - a.op.p)
 
 			session = @editor.getSession()
@@ -303,7 +303,7 @@ define [
 				if resolve_ids[comment.op.t]
 					@_onCommentRemoved(comment)
 			@broadcastChange()
-			
+
 		showCommentByThreadId: (thread_id) ->
 			for comment in @rangesTracker?.comments or []
 				if comment.op.t == thread_id
@@ -339,7 +339,7 @@ define [
 				return if change.action != "insert"
 				pasted_text = change.lines.join("\n")
 				paste_offset = @_aceRangeToShareJs(change.start)
-				# We have to wait until the change has been processed by the range tracker, 
+				# We have to wait until the change has been processed by the range tracker,
 				# since if we move the ops into place beforehand, they will be moved again
 				# when the changes are processed by the range tracker. This ranges:dirty
 				# event is fired after the doc has applied the changes to the range tracker.
@@ -374,7 +374,7 @@ define [
 						end = start
 					expected_markers.push { marker_id: background_marker_id, start, end }
 					expected_markers.push { marker_id: callout_marker_id, start, end: start }
-			
+
 			for comment in @rangesTracker.comments
 				if @changeIdToMarkerIdMap[comment.id]?
 					{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[comment.id]
@@ -382,7 +382,7 @@ define [
 					end = @_shareJsOffsetToAcePosition(comment.op.p + comment.op.c.length)
 					expected_markers.push { marker_id: background_marker_id, start, end }
 					expected_markers.push { marker_id: callout_marker_id, start, end: start }
-			
+
 			for {marker_id, start, end} in expected_markers
 				marker = markers[marker_id]
 				delete markers[marker_id]
@@ -391,11 +391,11 @@ define [
 						marker.range.end.row != end.row or
 						marker.range.end.column != end.column
 					console.error "Change doesn't match marker anymore", {change, marker, start, end}
-			
+
 			for marker_id, marker of markers
-				if marker.clazz.match("track-changes")
+				if /track-changes/.test(marker.clazz)
 					console.error "Orphaned ace marker", marker
-		
+
 		updateFocus: () ->
 			selection = @editor.getSelectionRange()
 			selection_start = @_aceRangeToShareJs(selection.start)
@@ -403,10 +403,10 @@ define [
 			entries = @_getCurrentDocEntries()
 			is_selection = (selection_start != selection_end)
 			@$scope.$emit "editor:focus:changed", selection_start, selection_end, is_selection
-		
+
 		broadcastChange: () ->
 			@$scope.$emit "editor:track-changes:changed", @$scope.docId
-		
+
 		recalculateReviewEntriesScreenPositions: () ->
 			session = @editor.getSession()
 			renderer = @editor.renderer
@@ -455,7 +455,7 @@ define [
 					first_row > @end.row or last_row < @start.row
 				return @
 			return ace_range
-		
+
 		_createCalloutMarker: (position, klass) ->
 			session = @editor.getSession()
 			callout_range = @_makeZeroWidthRange(position)
@@ -486,21 +486,21 @@ define [
 
 			callout_marker_id = @_createCalloutMarker(position, "track-changes-deleted-marker-callout")
 			@changeIdToMarkerIdMap[change.id] = { background_marker_id, callout_marker_id }
-		
+
 		_onInsertRemoved: (change) ->
 			{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[change.id]
 			delete @changeIdToMarkerIdMap[change.id]
 			session = @editor.getSession()
 			session.removeMarker background_marker_id
 			session.removeMarker callout_marker_id
-		
+
 		_onDeleteRemoved: (change) ->
 			{background_marker_id, callout_marker_id} = @changeIdToMarkerIdMap[change.id]
 			delete @changeIdToMarkerIdMap[change.id]
 			session = @editor.getSession()
 			session.removeMarker background_marker_id
 			session.removeMarker callout_marker_id
-		
+
 		_onCommentAdded: (comment) ->
 			if @rangesTracker.resolvedThreadIds[comment.op.t]
 				# Comment is resolved so shouldn't be displayed.
@@ -515,7 +515,7 @@ define [
 				background_marker_id = session.addMarker background_range, "track-changes-marker track-changes-comment-marker", "text"
 				callout_marker_id = @_createCalloutMarker(start, "track-changes-comment-marker-callout")
 				@changeIdToMarkerIdMap[comment.id] = { background_marker_id, callout_marker_id }
-		
+
 		_onCommentRemoved: (comment) ->
 			if @changeIdToMarkerIdMap[comment.id]?
 				# Resolved comments may not have marker ids
@@ -532,11 +532,11 @@ define [
 		_aceChangeToShareJs: (delta) ->
 			lines = @editor.getSession().getDocument().getLines 0, delta.start.row
 			return AceShareJsCodec.aceChangeToShareJs(delta, lines)
-		
+
 		_shareJsOffsetToAcePosition: (offset) ->
 			lines = @editor.getSession().getDocument().getAllLines()
 			return AceShareJsCodec.shareJsOffsetToAcePosition(offset, lines)
-		
+
 		_onChangeMoved: (change) ->
 			start = @_shareJsOffsetToAcePosition(change.op.p)
 			if change.op.i?
@@ -544,12 +544,12 @@ define [
 			else
 				end = start
 			@_updateMarker(change.id, start, end)
-		
+
 		_onCommentMoved: (comment) ->
 			start = @_shareJsOffsetToAcePosition(comment.op.p)
 			end = @_shareJsOffsetToAcePosition(comment.op.p + comment.op.c.length)
 			@_updateMarker(comment.id, start, end)
-	
+
 		_updateMarker: (change_id, start, end) ->
 			return if !@changeIdToMarkerIdMap[change_id]?
 			session = @editor.getSession()
@@ -563,4 +563,3 @@ define [
 				callout_marker = markers[callout_marker_id]
 				callout_marker.range.start = start
 				callout_marker.range.end = start
-

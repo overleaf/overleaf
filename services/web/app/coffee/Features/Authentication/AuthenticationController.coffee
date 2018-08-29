@@ -217,8 +217,8 @@ module.exports = AuthenticationController =
 			value = if Object.keys(req.query).length > 0 then "#{req.path}?#{querystring.stringify(req.query)}" else "#{req.path}"
 		if (
 			req.session? &&
-			!value.match(new RegExp('^\/(socket.io|js|stylesheets|img)\/.*$')) &&
-			!value.match(new RegExp('^.*\.(png|jpeg|svg)$'))
+			!/^\/(socket.io|js|stylesheets|img)\/.*$/.test(value) &&
+			!/^.*\.(png|jpeg|svg)$/.test(value)
 		)
 			req.session.postLoginRedirect = value
 

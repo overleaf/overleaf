@@ -466,6 +466,6 @@ THEME_LIST = []
 do generateThemeList = () ->
 	files = fs.readdirSync __dirname + '/../../../../public/js/' + PackageVersions.lib('ace')
 	for file in files
-		if file.slice(-2) == "js" and file.match(/^theme-/)
+		if file.slice(-2) == "js" and /^theme-/.test(file)
 			cleanName = file.slice(0,-3).slice(6)
 			THEME_LIST.push cleanName

@@ -88,7 +88,7 @@ module.exports = PgDb = (options) ->
     client.query sql, values, (error, result) ->
       if !error?
         callback?()
-      else if error.toString().match "duplicate key value violates unique constraint"
+      else if /duplicate key value violates unique constraint/.test(error.toString())
         callback? "Document already exists"
       else
         callback? error?.message

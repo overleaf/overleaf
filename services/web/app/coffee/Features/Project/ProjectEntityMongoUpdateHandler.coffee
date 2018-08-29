@@ -294,7 +294,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 			# in the destination folder
 			self._checkValidElementName destEntity, entity.name, (err)->
 				return callback(err) if err?
-				if entityType.match(/folder/)
+				if /folder/.test(entityType)
 					logger.log destFolderPath: destFolderPath.fileSystem, folderPath: entityPath.fileSystem, "checking folder is not moving into child folder"
 					isNestedFolder = destFolderPath.fileSystem.slice(0, entityPath.fileSystem.length) == entityPath.fileSystem
 					if isNestedFolder

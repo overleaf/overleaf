@@ -416,10 +416,10 @@ define [
 					# see if we can lookup a suitable mode from ace
 					# but fall back to text by default
 					try
-						if scope.fileName.match(/\.(Rtex|bbl)$/i)
+						if /\.(Rtex|bbl)$/i.test(scope.fileName)
 							# recognise Rtex and bbl as latex
 							mode = "ace/mode/latex"
-						else if scope.fileName.match(/\.(sty|cls|clo)$/)
+						else if /\.(sty|cls|clo)$/.test(scope.fileName)
 							# recognise some common files as tex
 							mode = "ace/mode/tex"
 						else
@@ -437,7 +437,7 @@ define [
 
 					session.setUseWrapMode(true)
 					# use syntax validation only when explicitly set
-					if scope.syntaxValidation? and syntaxValidationEnabled and !scope.fileName.match(/\.bib$/)
+					if scope.syntaxValidation? and syntaxValidationEnabled and !/\.bib$/.test(scope.fileName)
 						session.setOption("useWorker", scope.syntaxValidation);
 
 					# now attach session to editor

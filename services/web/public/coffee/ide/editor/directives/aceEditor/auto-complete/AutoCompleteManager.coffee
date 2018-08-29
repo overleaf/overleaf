@@ -163,12 +163,11 @@ define [
 			end = change.end
 			{lineUpToCursor, commandFragment} = Helpers.getContext(@editor, end)
 			if ((i = lineUpToCursor.indexOf('%')) > -1 and lineUpToCursor[i-1] != '\\')
-				console.log lineUpToCursor, i
 				return
 			lastCharIsBackslash = lineUpToCursor.slice(-1) == "\\"
 			lastTwoChars = lineUpToCursor.slice(-2)
 			# Don't offer autocomplete on double-backslash, backslash-colon, etc
-			if lastTwoChars.match(/^\\[^a-zA-Z]$/)
+			if /^\\[^a-zA-Z]$/.test(lastTwoChars)
 				@editor?.completer?.detach?()
 				return
 			# Check that this change was made by us, not a collaborator
@@ -185,8 +184,8 @@ define [
 					, 0
 			if (
 				change.action == "insert" and
-				change.lines[0].match(/\\(\w+){}/)?[1].match(
-					/(begin|end|[a-z]*ref|usepackage|[a-z]*cite[a-z]*|input|include)/
+				/(begin|end|[a-z]*ref|usepackage|[a-z]*cite[a-z]*|input|include)/.test(
+					change.lines[0].match(/\\(\w+){}/)?[1]
 				)
 			)
 				setTimeout () =>
@@ -209,7 +208,7 @@ define [
 
 					# If we are in \begin{it|}, then we need to remove the trailing }
 					# since it will be adding in with the autocomplete of \begin{item}...
-					if this.completions.filterText.match(/^\\\w+{/) and nextChar == "}"
+					if /^\\\w+{/.test(this.completions.filterText) and nextChar == "}"
 						editor.session.remove(range)
 
 					# Provide our own `insertMatch` implementation.

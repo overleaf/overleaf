@@ -20,8 +20,8 @@ module.exports = ProjectRootDocManager =
 						# Previously /.*\\documentclass/ would totally lock up on lines of 500kb (data text files :()
 						# This regex will only look from the start of the line, including whitespace so will return quickly
 						# regardless of line length.
-						match = line.match /^\s*\\documentclass/
-						isRootDoc = Path.extname(path).match(/\.R?tex$/) and match
+						match = /^\s*\\documentclass/.test(line)
+						isRootDoc = /\.R?tex$/.test(Path.extname(path)) and match
 						if isRootDoc
 							rootDocId = doc?._id
 					cb(rootDocId)
@@ -31,4 +31,3 @@ module.exports = ProjectRootDocManager =
 					ProjectEntityUpdateHandler.setRootDoc project_id, root_doc_id, callback
 				else
 					callback()
-

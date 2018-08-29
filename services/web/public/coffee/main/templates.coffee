@@ -27,9 +27,9 @@ define [
 			# Only show the lines that have a highlighted match
 			matching_lines = []
 			for line in lines
-				if !line.match(/^\[edit\]/)
+				if !/^\[edit\]/.test(line)
 					content += line + "\n"
-					if line.match(/<em>/)
+					if /<em>/.test(line)
 						matching_lines.push line
 			content = matching_lines.join("\n...\n")
 			result =
