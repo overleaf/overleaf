@@ -324,19 +324,21 @@ script(type="text/ng-template", id="v1ImportModalTemplate")
 
 	.modal-body.v1-import-wrapper
 		.v1-import-row
-			.v1-import-warning.v1-import-col(aria-label="Warning symbol.")
-				i.fa.fa-flask
 			.v1-import-col
-				h2.v1-import-title #[strong Warning:] Some Overleaf v1 features aren't supported yet!
+				img.v1-import-img(
+					src="/img/v1-import/v2-editor.png"
+					alt="The new V2 editor."
+				)
+			.v1-import-col
+				h2.v1-import-title #[strong Warning:] Some Overleaf v1 features aren't supported yet
 				p We are still working hard to bring some Overleaf v1 features to the v2 editor. In v2:
 				ul
-					li You may not be able to access all of your <strong>Labelled versions</strong> yet
+					li
+						| The <strong>Git Bridge</strong> is not yet available, but you can migrate your project to the Overleaf v2 GitHub integration
+						|
+						a(href='https://www.overleaf.com/help/343-working-offline-in-overleaf-v2', target='_blank') Read More.
 					li There are <strong>no Zotero and CiteULike</strong> integrations yet
 					li Some <strong>Journals and Services in the Submit menu</strong> don't support direct submissions yet
-				p.row-spaced-small
-					| If you currently use the <strong>Overleaf Git bridge</strong> with your v1 project, you can migrate your project to the Overleaf v2 GitHub integration.
-					|
-					a(href='https://www.overleaf.com/help/343-working-offline-in-overleaf-v2', target='_blank') Read More.
 		.v1-import-cta
 			p Are you sure you want to move #[strong {{project.name}}] into Overleaf v2?
 
