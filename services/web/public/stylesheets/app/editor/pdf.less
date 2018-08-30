@@ -7,7 +7,6 @@
 .pdf .toolbar.toolbar-pdf when (@is-overleaf = true) {
 	.toolbar-small-mixin;
 	.toolbar-alt-mixin;
-	border-bottom: 0;
 	padding-right: 5px;
 	&.uncompiled-changes {
 		#gradient > .striped(@color: rgba(255,255,255,.10), @angle: -45deg);
@@ -22,6 +21,11 @@
 		}
 	}
 }
+
+.pdf .toolbar.toolbar-pdf when (@is-overleaf = true) and (@is-overleaf-light = false) {
+	border-bottom: 0;
+}
+
 
 .pdf .toolbar.toolbar-pdf when (@is-overleaf = false) {
 	.toolbar-tall-mixin;

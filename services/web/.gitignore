@@ -67,6 +67,7 @@ public/js/utils/
 
 public/stylesheets/style.css
 public/stylesheets/ol-style.css
+public/stylesheets/ol-light-style.css
 public/stylesheets/*.map
 public/brand/
 public/minjs/

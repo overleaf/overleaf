@@ -327,6 +327,7 @@
 
 // Navbar links
 @navbar-default-link-color:                @link-color;
+@navbar-default-link-border-color:         @navbar-default-link-color;
 @navbar-default-link-hover-color:          @link-hover-color;
 @navbar-default-link-hover-bg:             @link-hover-color;
 @navbar-default-link-active-color:         #fff;
@@ -796,6 +797,7 @@
 @left-menu-animation-duration: 0.35s;
 
 @toolbar-border-color: @gray-lighter;
+@toolbar-header-btn-border-color: @toolbar-border-color;
 @common-border-color: @gray-lighter;
 @editor-border-color: @gray-lighter;
 @file-tree-droppable-bg-color: rgb(252, 231, 199);
@@ -834,7 +836,7 @@
 
 @dropdown-divider-margin    :((@line-height-computed / 2) - 1) 0;
 @dropdown-item-padding      : 3px 20px;
-
+@navbar-default-link-bg     : transparent;
 
 // Button colors and sizing
 @btn-border-radius-large : @border-radius-large;
@@ -859,6 +861,8 @@
 @sidebar-link-color            : #333;
 @sidebar-active-border-radius  : @border-radius-small;
 @sidebar-active-bg             : @link-color;
+@sidebar-active-color          : #FFF;
+@sidebar-active-font-weight    : 700;
 @sidebar-hover-bg              : transparent;
 @sidebar-hover-text-decoration : underline;
 
@@ -966,6 +970,7 @@
 @chat-new-message-bg              : @gray-lightest;
 @chat-new-message-textarea-bg     : #FFF;
 @chat-new-message-textarea-color  : @gray-dark;
+@chat-new-message-border-color    : @editor-border-color;
 
 // PDF
 @pdf-top-offset                  : @toolbar-tall-height;

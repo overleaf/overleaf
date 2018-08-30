@@ -131,13 +131,27 @@ aside#left-menu.full-size(
 				)
 
 			.form-controls
-				label(for="theme") #{translate("theme")}
+				label(for="editorTheme") #{translate("editor_theme")}
 				select(
-					name="theme"
-					ng-model="settings.theme"
+					name="editorTheme"
+					ng-model="settings.editorTheme"
 				)
-					each theme in themes
-						option(value=theme) #{theme.replace(/_/g, ' ')}
+					each editorTheme in editorThemes
+						option(value=editorTheme) #{editorTheme.replace(/_/g, ' ')}
+
+			- if (settings.overleaf != null)
+				.form-controls
+					label(for="overallTheme") #{translate("overall_theme")}
+					select(
+						name="overallTheme"
+						ng-if="!ui.loadingStyleSheet"
+						ng-model="settings.overallTheme"
+						ng-options="overallTheme.val as overallTheme.name for overallTheme in overallThemesList"
+					)
+					p.loading.pull-right(
+						ng-if="ui.loadingStyleSheet"
+					)
+						i.fa.fa-fw.fa-spin.fa-refresh
 
 			.form-controls(ng-show="!anonymous")
 				label(for="mode") #{translate("keybindings")}
@@ -156,7 +170,7 @@ aside#left-menu.full-size(
 					ng-model="fontSizeAsStr"
 					ng-model-options="{ getterSetter: true }"
 				)
-					each size in ['10','11','12','13','14','16','20','24']
+					each size in ['10','11','12','13','14','16','18','20','22','24']
 						option(value=size) #{size}px
 
 			.form-controls

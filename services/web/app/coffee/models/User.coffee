@@ -27,6 +27,7 @@ UserSchema = new Schema
 	ace               : {
 		mode               : {type : String, default: 'none'}
 		theme              : {type : String, default: 'textmate'}
+		overallTheme       : {type: String, default: "" }
 		fontSize           : {type : Number, default:'12'}
 		autoComplete       : {type : Boolean, default: true}
 		autoPairDelimiters : {type : Boolean, default: true}
