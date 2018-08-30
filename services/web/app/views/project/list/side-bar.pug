@@ -131,9 +131,10 @@
 			p.small #{translate("on_free_sl")}
 			p
 				a(href="/user/subscription/plans").btn.btn-primary #{translate("upgrade")}
-			p.small.text-centered
-				| #{translate("or_unlock_features_bonus")} 
-				a(href="/user/bonus") #{translate("sharing_sl")} .
+			if (!settings.overleaf)
+				p.small.text-centered
+					| #{translate("or_unlock_features_bonus")} 
+					a(href="/user/bonus") #{translate("sharing_sl")} .
 
 			
 script.
