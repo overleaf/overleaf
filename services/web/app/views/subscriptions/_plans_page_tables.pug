@@ -22,7 +22,7 @@ mixin table_premium
 
 		for feature in planFeatures
 			tr
-				td(event-tracking="features-table" event-tracking-trigger="hover" event-tracking-ga="subscription-funnel" event-tracking-label=`${feature.feature}-exp-{{plansVariant}}`)
+				td(event-tracking="features-table" event-tracking-trigger="hover" event-tracking-ga="subscription-funnel" event-tracking-label=`${feature.feature}`)
 					if feature.info
 						span(tooltip=translate(feature.info)) #{translate(feature.feature)}
 					else
@@ -77,7 +77,7 @@ mixin table_student
 
 		for feature in planFeatures
 			tr
-				td(event-tracking="plans-page-table" event-tracking-trigger="hover" event-tracking-ga="subscription-funnel" event-tracking-label=`${feature.feature}-exp-{{plansVariant}}`)
+				td(event-tracking="plans-page-table" event-tracking-trigger="hover" event-tracking-ga="subscription-funnel" event-tracking-label=`${feature.feature}`)
 					if feature.info
 						span(tooltip=translate(feature.info)) #{translate(feature.feature)}
 					else
@@ -104,4 +104,3 @@ mixin table_student
 					.outer-content &nbsp;
 			td
 				+btn_buy_student('table', 'monthly')
-
