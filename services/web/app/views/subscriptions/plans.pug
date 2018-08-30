@@ -89,13 +89,10 @@ block content
 							span #{translate('reduce_costs_group_licenses')}
 							br
 							br
-							if settings.overleaf
-								a.btn.btn-default(
-									href
-									ng-click="openGroupPlanModal()"
-								) #{translate('find_out_more')}
-							else
-								a.btn.btn-info(href="/i/university/groups") #{translate('find_out_more')}
+							a.btn.btn-default(
+								href
+								ng-click="openGroupPlanModal()"
+							) #{translate('find_out_more')}
 
 				div
 					.row.row-spaced-large
@@ -113,17 +110,13 @@ block content
 						.col-sm-12(ng-if="ui.view == 'student'")
 							+table_student
 
-					if !settings.overleaf
-						include _plans_quotes
-
 					include _plans_faq
 
 					.row.row-spaced-large
 						.col-md-12
 							.plans-header.plans-subheader.text-centered
 								h2 #{translate('still_have_questions')}
-									button.btn.btn-header.text-capitalize(
-										class=settings.overleaf ? 'btn-default' : 'btn-info'
+									button.btn.btn-default.btn-header.text-capitalize(
 										ng-controller="ContactGeneralModal"
 										ng-click="openModal()"
 									) #{translate('get_in_touch')}
