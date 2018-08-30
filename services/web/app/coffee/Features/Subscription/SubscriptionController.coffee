@@ -15,33 +15,30 @@ planFeatures = require './planFeatures'
 module.exports = SubscriptionController =
 
 	plansPage: (req, res, next) ->
-		if Settings.overleaf? && !req.query.plns
-			res.redirect "#{Settings.overleaf.host}/plans"
-		else
-			plans = SubscriptionViewModelBuilder.buildViewModel()
-			viewName = "subscriptions/plans"
-			if req.query.v?
-				viewName = "#{viewName}_#{req.query.v}"
-			logger.log viewName:viewName, "showing plans page"
-			currentUser = null
+		plans = SubscriptionViewModelBuilder.buildViewModel()
+		viewName = "subscriptions/plans"
+		if req.query.v?
+			viewName = "#{viewName}_#{req.query.v}"
+		logger.log viewName:viewName, "showing plans page"
+		currentUser = null
 
-			GeoIpLookup.getCurrencyCode req.query?.ip || req.ip, (err, recomendedCurrency)->
-				return next(err) if err?
-				render = () ->
-					res.render viewName,
-						title: "plans_and_pricing"
-						plans: plans
-						gaExperiments: Settings.gaExperiments.plansPage
-						recomendedCurrency:recomendedCurrency
-						planFeatures: planFeatures
-				user_id = AuthenticationController.getLoggedInUserId(req)
-				if user_id?
-					UserGetter.getUser user_id, {signUpDate: 1}, (err, user) ->
-						return next(err) if err?
-						currentUser = user
-						render()
-				else
+		GeoIpLookup.getCurrencyCode req.query?.ip || req.ip, (err, recomendedCurrency)->
+			return next(err) if err?
+			render = () ->
+				res.render viewName,
+					title: "plans_and_pricing"
+					plans: plans
+					gaExperiments: Settings.gaExperiments.plansPage
+					recomendedCurrency:recomendedCurrency
+					planFeatures: planFeatures
+			user_id = AuthenticationController.getLoggedInUserId(req)
+			if user_id?
+				UserGetter.getUser user_id, {signUpDate: 1}, (err, user) ->
+					return next(err) if err?
+					currentUser = user
 					render()
+			else
+				render()
 
 	#get to show the recurly.js page
 	paymentPage: (req, res, next) ->
