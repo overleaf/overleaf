@@ -294,7 +294,7 @@ module.exports = ProjectController =
 			project = results.project
 			user = results.user
 			subscription = results.subscription
-
+			
 			daysSinceLastUpdated =  (new Date() - project.lastUpdated) / 86400000
 			logger.log project_id:project_id, daysSinceLastUpdated:daysSinceLastUpdated, "got db results for loading editor"
 
@@ -330,7 +330,7 @@ module.exports = ProjectController =
 					}
 					userSettings: {
 						mode  : user.ace.mode
-						theme : user.ace.theme
+						editorTheme : user.ace.theme
 						fontSize : user.ace.fontSize
 						autoComplete: user.ace.autoComplete
 						autoPairDelimiters: user.ace.autoPairDelimiters
@@ -338,6 +338,7 @@ module.exports = ProjectController =
 						syntaxValidation: user.ace.syntaxValidation
 						fontFamily: user.ace.fontFamily
 						lineHeight: user.ace.lineHeight
+						overallTheme: user.ace.overallTheme
 					}
 					trackChangesState: project.track_changes
 					privilegeLevel: privilegeLevel
@@ -346,7 +347,7 @@ module.exports = ProjectController =
 					anonymousAccessToken: req._anonymousAccessToken
 					isTokenMember: isTokenMember
 					languages: Settings.languages
-					themes: THEME_LIST
+					editorThemes: THEME_LIST
 					maxDocLength: Settings.max_doc_length
 					useV2History: !!project.overleaf?.history?.display
 					richTextEnabled: Features.hasFeature('rich-text')

@@ -12,9 +12,11 @@
 	color: @history-toolbar-color;
 	padding-left: (@line-height-computed / 2);
 }
-.history-toolbar when (@is-overleaf = false) {
+
+.history-toolbar when (@is-overleaf = false) or (@is-overleaf-light) {
 	border-bottom: @toolbar-border-bottom;
 }
+
 	.history-toolbar-selected-version {
 		white-space: nowrap;
 		overflow: hidden;
@@ -27,14 +29,22 @@
 		}
 	.history-toolbar-actions {
 		flex-grow: 1;
+		flex-shrink: 0;
 	}
-		.history-toolbar-btn {
+		.history-toolbar-btn,
+		.history-toolbar-btn-danger {
 			.btn;
-			.btn-info;
 			.btn-xs;
 			padding-left: @padding-small-horizontal;
 			padding-right: @padding-small-horizontal;
 			margin-right: (@line-height-computed / 2);
+		}
+		.history-toolbar-btn {
+			.btn-info;
+		}
+		.history-toolbar-btn-danger {
+			.btn-danger;
+			opacity: 0.65;
 		}
 	.history-toolbar-entries-list {
 		flex: 0 0 @changesListWidth;

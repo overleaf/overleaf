@@ -33,7 +33,7 @@
 .editor-menu-icon when (@is-overleaf = true) {
 	&.fa {
 		width: 1em;
-		background: url(/img/ol-brand/overleaf-o-white.svg) center / contain no-repeat;
+		background: @editor-header-logo-background;
 		
 		&::before {
 			// Disable the font-awesome icon when in Overleaf by replacing it with a
@@ -92,6 +92,7 @@
 .toolbar-editor {
 	height: @editor-toolbar-height;
 	background-color: @editor-toolbar-bg;
+	padding: 0 5px;
 	overflow: hidden;
 	position: relative;
 	z-index: 10; // Prevent track changes showing over toolbar

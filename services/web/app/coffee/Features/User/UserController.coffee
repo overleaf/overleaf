@@ -68,8 +68,10 @@ module.exports = UserController =
 				user.institution = req.body.institution.trim()
 			if req.body.mode?
 				user.ace.mode = req.body.mode
-			if req.body.theme?
-				user.ace.theme = req.body.theme
+			if req.body.editorTheme?
+				user.ace.theme = req.body.editorTheme
+			if req.body.overallTheme?
+				user.ace.overallTheme = req.body.overallTheme
 			if req.body.fontSize?
 				user.ace.fontSize = req.body.fontSize
 			if req.body.autoComplete?

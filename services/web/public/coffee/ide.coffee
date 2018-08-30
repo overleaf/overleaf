@@ -185,7 +185,7 @@ define [
 			"twilight", "vibrant_ink"
 		]
 		$scope.darkTheme = false
-		$scope.$watch "settings.theme", (theme) ->
+		$scope.$watch "settings.editorTheme", (theme) ->
 			if theme in DARK_THEMES
 				$scope.darkTheme = true
 			else

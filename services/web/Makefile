@@ -24,7 +24,7 @@ SHAREJS_COFFEE_FILES := \
 	public/coffee/ide/editor/sharejs/vendor/client/ace.coffee \
 	public/coffee/ide/editor/sharejs/vendor/client/cm.coffee
 LESS_FILES := $(shell find public/stylesheets -name '*.less')
-CSS_FILES := public/stylesheets/style.css public/stylesheets/ol-style.css
+CSS_FILES := public/stylesheets/style.css public/stylesheets/ol-style.css public/stylesheets/ol-light-style.css
 
 # The automatic variable $(@D) is the target directory name
 app.js: app.coffee
