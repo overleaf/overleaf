@@ -359,6 +359,9 @@ module.exports = class Router
 		publicApiRouter.get '/health_check/redis', HealthCheckController.checkRedis
 		privateApiRouter.get '/health_check/redis', HealthCheckController.checkRedis
 
+		publicApiRouter.get '/health_check/mongo', HealthCheckController.checkMongo
+		privateApiRouter.get '/health_check/mongo', HealthCheckController.checkMongo
+
 		webRouter.get "/status/compiler/:Project_id", AuthorizationMiddlewear.ensureUserCanReadProject, (req, res) ->
 			project_id = req.params.Project_id
 			sendRes = _.once (statusCode, message)->
