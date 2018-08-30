@@ -182,6 +182,8 @@ block content
 			h3 #{translate("delete_account")}
 		div.modal-body#delete-account-modal
 			p !{translate("delete_account_warning_message_3")}
+			p
+				strong This will also delete your account on Overleaf v1!
 			form(novalidate, name="deleteAccountForm")
 				label #{translate('email')}
 				input.form-control(
