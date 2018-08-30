@@ -134,10 +134,6 @@ define [
 
 	App.controller 'V1ImportModalController', ($scope, $modalInstance, project) ->
 		$scope.project = project
-		$scope.step = 1
 
 		$scope.dismiss = () ->
 			$modalInstance.dismiss('cancel')
-
-		$scope.moveToConfirmation = () ->
-			$scope.step = 2
