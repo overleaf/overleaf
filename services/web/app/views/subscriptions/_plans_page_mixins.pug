@@ -1,20 +1,23 @@
 //- Buy Buttons
 mixin btn_buy_collaborator(location)
-	a.btn.btn-info(
+	a.btn(
+		class=settings.overleaf ? 'btn-primary' : 'btn-info'
 		ng-href="/user/subscription/new?planCode={{ getCollaboratorPlanCode() }}&currency={{currencyCode}}",
 		ng-click="signUpNowClicked('collaborator','" + location + "')"
 	)
 		span(ng-show="ui.view != 'annual'") #{translate("start_free_trial")}
 		span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
 mixin btn_buy_free(location)
-	a.btn.btn-info(
+	a.btn(
+		class=settings.overleaf ? 'btn-primary' : 'btn-info'
 		href="/register"
 		style=(getLoggedInUserId() === null ? "" : "visibility: hidden")
 		ng-click="signUpNowClicked('free','" + location + "')"
 	)
 		span.text-capitalize #{translate('get_started_now')}
 mixin btn_buy_professional(location)
-	a.btn.btn-info(
+	a.btn(
+		class=settings.overleaf ? 'btn-primary' : 'btn-info'
 		ng-href="/user/subscription/new?planCode=professional{{ ui.view == 'annual' && '-annual' || planQueryString}}&currency={{currencyCode}}"
 		ng-click="signUpNowClicked('professional','" + location + "')"
 	)
@@ -22,13 +25,15 @@ mixin btn_buy_professional(location)
 		span(ng-show="ui.view == 'annual'") #{translate("buy_now")}
 mixin btn_buy_student(location, plan)
 	if plan == 'annual'
-		a.btn.btn-info(
+		a.btn(
+			class=settings.overleaf ? 'btn-primary' : 'btn-info'
 			ng-href="/user/subscription/new?planCode=student-annual&currency={{currencyCode}}",
 			ng-click="signUpNowClicked('student-annual','" + location + "')"
 		) #{translate("buy_now")}
 	else
 		//- planQueryString will contain _free_trial_7_days
-		a.btn.btn-info(
+		a.btn(
+			class=settings.overleaf ? 'btn-primary' : 'btn-info'
 			ng-href="/user/subscription/new?planCode=student{{planQueryString}}&currency={{currencyCode}}",
 			ng-click="signUpNowClicked('student-monthly','" + location + "')"
 		) #{translate("start_free_trial")}

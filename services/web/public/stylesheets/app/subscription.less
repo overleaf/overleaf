@@ -44,16 +44,16 @@
 		border: solid 1px @gray-lighter;
 		border-radius: @border-radius-large 0 0 @border-radius-large;
 		padding: (@line-height-computed / 2);
-		color: @gray;
+		color: @btn-switch-color;
 
 		&:hover,
 		&:focus {
-			color: @gray;
+			color: @btn-switch-color;
 			text-decoration: none;
 		}
 
 		&:hover {
-			color: @gray-dark;
+			color: @btn-switch-hover-color;
 		}
 
 		& + & {
@@ -62,12 +62,12 @@
 		}
 
 		&-selected {
-			color: @link-color;
+			color: @link-active-color;
 			box-shadow: inset 0 -2px 0 0;
 
 			&:hover,
 			&:focus {
-				color: @link-color;
+				color: @link-active-color;
 			}
 		}
 	}

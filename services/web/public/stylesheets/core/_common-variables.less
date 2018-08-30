@@ -13,6 +13,7 @@
 
 //** Global textual link color.
 @link-color:            @brand-primary;
+@link-active-color:     @link-color;
 //** Link hover color set via `darken()` function.
 @link-hover-color:      darken(@link-color, 15%);
 
@@ -87,6 +88,12 @@
 @border-radius-base:        3px;
 @border-radius-large:       5px;
 @border-radius-small:       2px;
+@border-width-base:         3px;
+@border-color-base:         @gray-lighter;
+
+@btn-switch-color:               @gray;
+@btn-switch-hover-color:         @gray-dark;
+
 //** Global color for active items (e.g., navs or dropdowns).
 @component-active-color:    #fff;
 //** Global background color for active items (e.g., navs or dropdowns).
@@ -370,6 +377,9 @@
 @nav-tabs-justified-active-link-border-color:     @body-bg;
 
 //== Pills
+@nav-pills-link-color:                      @link-color;
+@nav-pills-link-hover-color:                @nav-link-hover-bg;
+@nav-pills-link-hover-bg:                   @nav-link-hover-bg;
 @nav-pills-border-radius:                   @border-radius-base;
 @nav-pills-active-link-hover-bg:            @component-active-bg;
 @nav-pills-active-link-hover-color:         @component-active-color;
@@ -411,6 +421,10 @@
 
 @pager-disabled-color:                 @pagination-disabled-color;
 
+
+// Plans
+@table-hover-bg:                       @gray-lightest;
+@plans-non-highlighted:                #fdfdfd;
 
 //== Jumbotron
 //
