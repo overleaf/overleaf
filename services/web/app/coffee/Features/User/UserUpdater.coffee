@@ -112,8 +112,8 @@ module.exports = UserUpdater =
 				else if res.n == 0 # TODO: Check n or nMatched?
 					return callback(new Error('Default email does not belong to user'))
 				else
-					callback()
 					NewsletterManager.changeEmail oldEmail, email, ->
+					callback()
 
 
 
