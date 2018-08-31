@@ -72,6 +72,17 @@
 			background-color: @toolbar-btn-active-bg-color;
 			box-shadow: @toolbar-btn-active-shadow;
 		}
+		&.btn-full-height-disabled {
+			opacity: 0.65;
+			&:hover,
+			&.active,
+			&:active {
+				text-shadow: none;
+				background-color: transparent;
+				color: @toolbar-btn-color;
+				box-shadow: none;
+			}
+		}
 		.label {
 			top: 4px;
 			right: 4px;
