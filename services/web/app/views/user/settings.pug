@@ -73,6 +73,7 @@ block content
 												label.control-label #{translate("last_name")}
 												div.form-control(readonly="true") #{user.last_name}
 
+
 								if !externalAuthenticationSystemUsed()
 									.col-md-5.col-md-offset-1
 										h3 #{translate("change_password")}
@@ -120,7 +121,12 @@ block content
 													ng-disabled="changePasswordForm.$invalid"
 												) #{translate("change")}
 
-						
+								else
+									if settings.overleaf && settings.createV1AccountOnLogin
+										p
+											| To change your password
+											| , go to #[a(href=settings.overleaf.host+'/users/edit') Overleaf v1 settings]
+
 
 							| !{moduleIncludes("userSettings", locals)}
 
