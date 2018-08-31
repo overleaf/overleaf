@@ -3,6 +3,80 @@
 		color: @gray-dark;
 		margin-bottom: @line-height-computed;
 	}
+	.best-value {
+		color: @red;
+		line-height: @line-height-computed;
+	}
+	blockquote {
+		footer{
+			/* accessibility fix */
+			color: @gray-med;
+		}
+	}
+	.btn-header {
+		font-family: @font-family-sans-serif;
+		margin-left: 10px;
+		margin-top: -10px;
+		text-shadow: 0 0 0;
+	}
+	.card .btn { white-space:normal; }
+	.card-group {
+		.card-highlighted {
+			padding-top: @line-height-computed * 2;
+			padding-bottom: @line-height-computed * 2;
+		}
+	}
+	.card-first, .card-last {
+		background: @white-med;
+	}
+	.card-highlighted {
+		border: @highlight-border solid @gray-lighter;
+		padding-top: 10px!important;
+		.best-value {
+			margin-bottom: 15px;
+		}
+		.card-header {
+			padding-bottom: 22px; /* align hr with other plans */
+		}
+	}
+	.card-header {
+		margin-bottom: 15px;
+	}
+	.circle {
+		font-size: 1.5rem;
+		font-weight: 700;
+		padding: 38px 18px;
+		margin: 0 auto @line-height-computed;
+		text-shadow: 0 -1px 1px darken(@link-color, 10%);
+		width: 120px;
+		height: 120px;
+		border-radius: 50%;
+		background-color: @red;
+		color: white;
+		white-space: nowrap;
+		span.small {
+			color: rgba(255, 255, 255, 0.85);
+			font-size: @font-size-base * .8;
+		}
+	}
+	.circle-img {
+		border-radius: 50%;
+		float: right;
+		height: 100px;
+		overflow: hidden;
+		position: relative;
+		width: 100px;
+		img {
+			display: inline;
+			margin: 0 auto;
+			width: 100%;
+		}
+	}
+	.faq {
+		p {
+			margin: 0
+		}
+	}
 	.plans-header{
 		h1, h2, p {
 			text-shadow: 0 -1px 1px white;
@@ -17,37 +91,12 @@
 	.plans-subheader {
 		margin-bottom: @line-height-computed;
 	}
-	.card.features {
-		margin-top: @line-height-computed;
-		i {
-			color: @red;
-		}
-		p {
-			margin: 0;
-		}
+	.tagline {
+		margin-bottom: 20px;
 	}
-	.card-group {
-		.card-highlighted {
-			padding-top: @line-height-computed * 2;
-			padding-bottom: @line-height-computed * 2;
-		}
-	}
-
-	.circle {
-		font-size: 1.5rem;
-		font-weight: 700;
-		padding: 38px 18px;
-		margin: 0 auto @line-height-computed;
-		text-shadow: 0 -1px 1px darken(@link-color, 10%);
-		width: 120px;
-		height: 120px;
-		border-radius: 50%;
-		background-color: @red;
-		color: white;
-		white-space: nowrap;
-		span.small {
-			color: rgba(255, 255, 255, 0.75);
-			font-size: @font-size-base * .8;
+	.top-switch {
+		.currency-dropdown {
+			margin-right: -15px;
 		}
 	}
 	ul.nav-pills {
@@ -59,14 +108,6 @@
 		}
 		> li + li {
 			margin-left: @line-height-computed / 2;
-		}
-	}
-
-	.card .btn { white-space:normal; }
-
-	.top-switch {
-		.currency-dropdown {
-			margin-right: -15px;
 		}
 	}
 }
@@ -98,39 +139,9 @@
 
 }
 
-.feature {
-	margin-top: (@line-height-computed / 2);
-	margin-bottom: (@line-height-computed / 1.5);
-}
-
-.features-check,
-.features-copy {
-	display: inline-block;
-	width: 12%;
-	line-height: 1.4;
-	vertical-align: top;
-}
-
-.features-copy {
-	width: 88%;
-}
-
-
 .plansPageStudentLink {
 	margin-left: 20px;
 	margin-top: 20px;
-}
-
-input.paymentTypeOption.ng-valid {
-	margin-top: 15px;
-}
-
-.totalPrice {
-	padding-top: 15px;
-}
-
-.pricingBreakdown {
-	text-align: right;
 }
 
 /**
@@ -141,74 +152,10 @@ input.paymentTypeOption.ng-valid {
 @highlight-color: #d3584b;
 @gray-med: #6d6d6d;
 @white-med: #fdfdfd;
-.more-details {
-	.best-value {
-		color: @red;
-		line-height: @line-height-computed;
-	}
-	blockquote {
-		footer{
-			/* accessibility fix */
-			color: @gray-med;
-		}
-	}
-	.btn-header {
-		font-family: @font-family-sans-serif;
-		margin-left: 10px;
-		margin-top: -10px;
-		text-shadow: 0 0 0;
-	}
-	.card-first, .card-last {
-		background: @white-med;
-	}
-	.card-highlighted {
-		border: @highlight-border solid @gray-lighter;
-		padding-top: 10px!important;
-		.best-value {
-			margin-bottom: 15px;
-		}
-		.card-header {
-			padding-bottom: 22px; /* align hr with other plans */
-		}
-	}
-	.card-header {
-		margin-bottom: 15px;
-	}
-	.circle {
-		/* accessibility fix */
-		span.small {
-			color: rgba(255, 255, 255, 0.85)
-		}
-	}
-	.circle-img {
-		border-radius: 50%;
-		float: right;
-		height: 100px;
-		overflow: hidden;
-		position: relative;
-		width: 100px;
-		img {
-			display: inline;
-			margin: 0 auto;
-			width: 100%;
-		}
-	}
-	.faq:last-child {
-		p {
-			margin-bottom: 0;
-		}
-	}
-	.questions-header {
-		color: @red;
-		line-height: 37px;
-		margin: 0;
-		text-align: right;
-	}
-	.tagline {
-		margin-bottom: 20px;
-	}
-	/* Media Queries */
-	@media (max-width: @screen-md-min) {
+
+/* Media Queries */
+@media (max-width: @screen-sm-max) {
+	.plans {
 		.card-highlighted {
 			/*override style in cards.less */
 			margin-top: @line-height-computed!important;
@@ -217,8 +164,10 @@ input.paymentTypeOption.ng-valid {
 			float: left;
 			margin: 0 15px;
 		}
-	}
-	@media (min-width: @screen-md-min) {
+	} 
+}
+@media (min-width: @screen-md-min) {
+	.plans {
 		blockquote {
 			margin-bottom: 0;
 		}
