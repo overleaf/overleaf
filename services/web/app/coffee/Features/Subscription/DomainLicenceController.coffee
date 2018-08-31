@@ -18,9 +18,9 @@ module.exports =
 
 		jobs =
 			partOfGroup: (cb)->
-				SubscriptionGroupHandler.isUserPartOfGroup user.id, licence.group_subscription_id, cb
+				SubscriptionGroupHandler.isUserPartOfGroup user._id, licence.group_subscription_id, cb
 			subscription: (cb)->
-				SubscriptionLocator.getUsersSubscription user.id, cb
+				SubscriptionLocator.getUsersSubscription user._id, cb
 
 		async.series jobs, (err, results)->
 			{ partOfGroup, subscription } = results
