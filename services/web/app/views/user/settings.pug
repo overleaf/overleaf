@@ -123,10 +123,11 @@ block content
 
 								else
 									if settings.overleaf && settings.createV1AccountOnLogin
-										h3 #{translate("change_password")}
-										p
-											| To change your password,
-											| please go to #[a(href=settings.overleaf.host+'/users/edit') Overleaf v1 settings]
+										.col-md-5.col-md-offset-1
+											h3 #{translate("change_password")}
+											p
+												| To change your password,
+												| please go to #[a(href=settings.overleaf.host+'/users/edit') Overleaf v1 settings]
 
 
 							| !{moduleIncludes("userSettings", locals)}
