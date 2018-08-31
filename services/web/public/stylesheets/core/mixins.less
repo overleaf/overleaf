@@ -438,6 +438,7 @@
   .alert-link-as-btn when (@is-overleaf = true) {
     display: inline-block;
     font-weight: bold;
+    text-decoration: none;
     .button-variant(#FFF, shade(@background, 20%), transparent);
     .button-size(@padding-xs-vertical; @padding-small-horizontal; @font-size-small; @line-height-small; @btn-border-radius-small);
     &:hover {
@@ -511,6 +512,10 @@
   background-color: @background;
   border-color: @border;
 
+  .alert & when (@is-overleaf = true) {
+      background-color: darken(@background, 16%);
+  }
+
   &:hover,
   &:focus,
   &:active,
@@ -520,6 +525,9 @@
     color: @color;
     background-color: darken(@background, 8%);
         border-color: darken(@border, 12%);
+      .alert & when (@is-overleaf = true) {
+          background-color: darken(@background, 24%);
+      }
   }
   &:active,
   &.active,
