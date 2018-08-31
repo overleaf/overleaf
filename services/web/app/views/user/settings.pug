@@ -148,7 +148,7 @@ block content
 
 							hr
 
-							if !externalAuthenticationSystemUsed()
+							if !externalAuthenticationSystemUsed() || (settings.createV1AccountOnLogin && settings.overleaf)
 
 								p.small
 									| #{translate("newsletter_info_and_unsubscribe")} 

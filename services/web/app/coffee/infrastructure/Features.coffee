@@ -2,7 +2,7 @@ Settings = require 'settings-sharelatex'
 
 module.exports = Features =
 	externalAuthenticationSystemUsed: ->
-		Settings.ldap? or Settings.saml? or (Settings.overleaf?.oauth? && !Settings.createV1AccountOnLogin)
+		Settings.ldap? or Settings.saml? or Settings.overleaf?.oauth?
 
 	hasFeature: (feature) ->
 		switch feature
