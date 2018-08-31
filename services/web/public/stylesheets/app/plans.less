@@ -4,13 +4,30 @@
 		margin-bottom: @line-height-computed;
 	}
 	.best-value {
-		color: @red;
+		color: @brand-secondary;
 		line-height: @line-height-computed;
+		text-transform: capitalize;
 	}
 	blockquote {
 		footer{
 			/* accessibility fix */
 			color: @gray-med;
+		}
+	}
+	.btn-header {
+		font-family: @font-family-sans-serif;
+		margin-left: 10px;
+		margin-top: -10px;
+		text-shadow: 0 0 0;
+	}
+	.card .btn { white-space:normal; }
+	.card.features {
+		margin-top: @line-height-computed;
+		i {
+			color: @red;
+		}
+		p {
+			margin: 0;
 		}
 	}
 	.btn-header {
@@ -27,10 +44,10 @@
 		}
 	}
 	.card-first, .card-last {
-		background: @white-med;
+		background: @plans-non-highlighted;
 	}
 	.card-highlighted {
-		border: @highlight-border solid @gray-lighter;
+		border: @border-width-base solid @border-color-base;
 		padding-top: 10px!important;
 		.best-value {
 			margin-bottom: 15px;
@@ -51,7 +68,7 @@
 		width: 120px;
 		height: 120px;
 		border-radius: 50%;
-		background-color: @red;
+		background-color: @brand-secondary;
 		color: white;
 		white-space: nowrap;
 		span.small {
@@ -148,10 +165,8 @@
 	Plans Test
 */
 @best-val-height: 35px;
-@highlight-border: 3px;
-@highlight-color: #d3584b;
+@border-width-base: 3px;
 @gray-med: #6d6d6d;
-@white-med: #fdfdfd;
 
 /* Media Queries */
 @media (max-width: @screen-sm-max) {
@@ -192,7 +207,7 @@
 */
 .plans-table {
 	border: 1px solid @gray-lighter;
-	background-color: @white-med;
+	background-color: @plans-non-highlighted;
 	margin: @best-val-height 0 15px 0;
 	table-layout: fixed;
 	width: 100%;
@@ -215,8 +230,8 @@
 		border-top: 0;
 		font-family: @headings-font-family;
 		font-size: @font-size-h2;
-	  font-weight: @headings-font-weight;
-	  line-height: @headings-line-height;
+		font-weight: @headings-font-weight;
+		line-height: @headings-line-height;
 		padding: 18px;
 	}
 
@@ -246,13 +261,13 @@
 			border-bottom: 0;
 			padding: 18px;
 		}
-			/* highlighted column */
+		/* highlighted column */
 		td:nth-child(3) {
 			position: relative;
 			/* keep here position here, otherwise messes up border on safari when there is a bg color */
 			&:before {
 				/* needed for safafi */
-				border-top: 1px solid @gray-lighter;
+				border-top: 1px solid @border-color-base;
 				content: '';
 				left: 0;
 				position: absolute;
@@ -277,17 +292,17 @@
 	/* highlighted column */
 	td:nth-child(3), th:nth-child(3) {
 		background-color: white;
-		border-left: @highlight-border solid @gray-lighter;
-		border-right: @highlight-border solid @gray-lighter;
+		border-left: @border-width-base solid @border-color-base;
+		border-right: @border-width-base solid @border-color-base;
 	}
 	.outer {
-		left: -@highlight-border;
-		right: -@highlight-border;
+		left: -@border-width-base;
+		right: -@border-width-base;
 		position: absolute;
 
 		.outer-content {
 			background: white;
-			border: @highlight-border solid @gray-lighter;
+			border: @border-width-base solid @border-color-base;
 			border-radius: @border-radius-base;
 			font-size: @font-size-base;
 			font-family: @font-family-sans-serif;
@@ -317,7 +332,7 @@
 	/* highlight rows on hover */
 	tr:hover {
 		td {
-			background-color: @gray-lightest;
+			background-color: @table-hover-bg;
 		}
 	}
 	tr:first-child:hover {
@@ -332,7 +347,7 @@
 
 	/* tooltip */
 	sup {
-		color: @red;
+		color: @brand-secondary;
 		cursor: pointer;
 		margin-left: 5px;
 	}

@@ -11,6 +11,18 @@ define [
 
 		ctrl.addUniversityToSelection = (universityName) -> 
 			{ name: universityName, isUserSuggested: true }
+		ctrl.handleFreeformInputChange = ($select, propertyToMatch) ->
+			if !$select.search? or $select.search == ""
+				return
+			resultingItem = $select.search
+			if $select.tagging?.fct?
+				resultingItem = $select.tagging.fct $select.search
+			if propertyToMatch?
+				matchingItem = _.find $select.items, (item) -> item[propertyToMatch] == $select.search
+				if matchingItem?
+					resultingItem = matchingItem
+			$select.searchInput.scope().$broadcast "uis:select", resultingItem
+
 		# Populates the countries dropdown
 		UserAffiliationsDataService
 			.getCountries()
