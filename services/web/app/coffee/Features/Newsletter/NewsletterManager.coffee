@@ -46,10 +46,14 @@ module.exports =
 			else if err? and err?.message?.indexOf("could not be validated") != -1
 				logger.log {oldEmail, newEmail}, 
 					"unable to change email in newsletter, user has previously unsubscribed or new email already exist on list"
-				return callback(err)
+				return callback()
 			else if err? and err.message.indexOf("is already a list member") != -1
 				logger.log {oldEmail, newEmail},
 					"unable to change email in newsletter, new email is already on mailing list"
+				return callback()
+			else if err? and err?.message?.indexOf("looks fake or invalid") != -1
+				logger.log {oldEmail, newEmail},
+					"unable to change email in newsletter, email looks fake to mailchimp"
 				return callback()
 			else if err?
 				logger.err {err, oldEmail, newEmail}, "error changing email in newsletter"
