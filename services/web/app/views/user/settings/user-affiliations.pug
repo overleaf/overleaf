@@ -202,6 +202,8 @@ script(type="text/ng-template", id="affiliationFormTpl")
 			) {{ $select.selected.name }}
 			ui-select-choices(
 				repeat="university in $ctrl.universities | filter: $select.search"
+				refresh="$ctrl.handleFreeformInputChange($select, 'name');"
+				refresh-delay="10"
 			)
 				span(
 					ng-bind="university.name"
@@ -219,6 +221,8 @@ script(type="text/ng-template", id="affiliationFormTpl")
 			) {{ $select.selected }}
 			ui-select-choices(
 				repeat="role in $ctrl.roles | filter: $select.search"
+				refresh="$ctrl.handleFreeformInputChange($select);"
+				refresh-delay="10"
 			)
 				span(
 					ng-bind="role"
@@ -237,6 +241,8 @@ script(type="text/ng-template", id="affiliationFormTpl")
 			) {{ $select.selected }}
 			ui-select-choices(
 				repeat="department in $ctrl.departments | filter: $select.search"
+				refresh="$ctrl.handleFreeformInputChange($select);"
+				refresh-delay="10"
 			)
 				span(
 					ng-bind="department"
