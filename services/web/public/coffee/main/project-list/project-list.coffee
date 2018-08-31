@@ -502,7 +502,10 @@ define [
 
 		$scope.clone = (e) ->
 			e.stopPropagation()
+			$scope.project.isTableActionInflight = true
 			$scope.cloneProject($scope.project, "#{$scope.project.name} (Copy)")
+				.then () -> $scope.project.isTableActionInflight = false
+				.catch () -> $scope.project.isTableActionInflight = false
 
 		$scope.download = (e) ->
 			e.stopPropagation()
