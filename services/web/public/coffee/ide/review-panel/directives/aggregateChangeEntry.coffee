@@ -13,18 +13,28 @@ define [
 			onIndicatorClick: "&"
 			onBodyClick: "&"
 		link: (scope, element, attrs) ->
-			scope.contentLimit = 35
-			scope.isCollapsed = true
-			scope.needsCollapsing = false
+			scope.contentLimit = 17
+			scope.isDeletionCollapsed = true
+			scope.isInsertionCollapsed = true
+			scope.deletionNeedsCollapsing = false
+			scope.insertionNeedsCollapsing = false
 
 			element.on "click", (e) ->
 				if $(e.target).is('.rp-entry, .rp-entry-description, .rp-entry-body, .rp-entry-action-icon i')
 					scope.onBodyClick()
 
-			scope.toggleCollapse = () ->
-				scope.isCollapsed = !scope.isCollapsed
+			scope.toggleDeletionCollapse = () ->
+				scope.isDeletionCollapsed = !scope.isDeletionCollapsed
 				$timeout () ->
 					scope.$emit "review-panel:layout"
 
-			scope.$watch "entry.content.length + entry.metadata.agg_op.content.length", (contentLength) ->
-					scope.needsCollapsing = contentLength > scope.contentLimit
+			scope.toggleInsertionCollapse = () ->
+				scope.isInsertionCollapsed = !scope.isInsertionCollapsed
+				$timeout () ->
+					scope.$emit "review-panel:layout"
+
+			scope.$watch "entry.metadata.replaced_content.length", (deletionContentLength) ->
+					scope.deletionNeedsCollapsing = deletionContentLength > scope.contentLimit
+
+			scope.$watch "entry.content.length", (insertionContentLength) ->
+					scope.insertionNeedsCollapsing = insertionContentLength > scope.contentLimit
