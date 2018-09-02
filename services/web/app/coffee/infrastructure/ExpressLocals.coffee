@@ -346,8 +346,8 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 	webRouter.use (req, res, next) ->
 		if Settings.overleaf?
 			res.locals.overallThemes = [
-				{ name: "Default", val: "",       path: res.locals.buildCssPath(res.locals.buildCssFileName()) }
-				{ name: "Light",   val: "light-", path: res.locals.buildCssPath(res.locals.buildCssFileName("light-")) }
+				{ name: "Default", val: "",       path: res.locals.buildCssPath(res.locals.buildCssFileName(), {hashedPath:true}) }
+				{ name: "Light",   val: "light-", path: res.locals.buildCssPath(res.locals.buildCssFileName("light-"), {hashedPath:true}) }
 			]
 		next()
 
