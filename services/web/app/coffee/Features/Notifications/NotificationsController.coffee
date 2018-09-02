@@ -15,7 +15,9 @@ module.exports =
 
 		# in v2 add notifications for matching university IPs
 		if Settings.overleaf?
-			NotificationsBuilder.ipMatcherAffiliation(user_id, ip)
+			NotificationsBuilder.ipMatcherAffiliation(user_id, ip).create((err) ->
+				return err
+			)
 
 		NotificationsHandler.getUserNotifications user_id, (err, unreadNotifications)->
 			unreadNotifications = _.map unreadNotifications, (notification)->
