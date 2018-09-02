@@ -90,6 +90,14 @@ if settings.overleaf
 				ng-click="restore($event)"
 			)
 				i.icon.fa.fa-reply
+			button.btn.btn-link.action-btn(
+				ng-if="project.archived && isOwner()"
+				tooltip=translate('delete_forever'),
+				tooltip-placement="top",
+				tooltip-append-to-body="true",
+				ng-click="deleteProject($event)"
+			)
+				i.icon.fa.fa-trash
 		div(
 			ng-if="project.isTableActionInflight"
 		)

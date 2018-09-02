@@ -469,7 +469,7 @@ define [
 		else
 			$scope.updateVisibleProjects()
 
-	App.controller "ProjectListItemController", ($scope) ->
+	App.controller "ProjectListItemController", ($scope, $modal, queuedHttp) ->
 
 		$scope.shouldDisableCheckbox = (project) ->
 			$scope.filter == 'archived' && project.accessLevel != 'owner'
@@ -518,3 +518,28 @@ define [
 		$scope.restore = (e) ->
 			e.stopPropagation()
 			$scope.restoreProjects([$scope.project])
+
+		$scope.deleteProject = (e) ->
+			e.stopPropagation()
+			modalInstance = $modal.open(
+				templateUrl: "deleteProjectsModalTemplate"
+				controller: "DeleteProjectsModalController"
+				resolve:
+					projects: () -> [ $scope.project ]
+			)
+
+			modalInstance.result.then () ->
+				$scope.project.isTableActionInflight = true
+				queuedHttp({
+					method: "DELETE"
+					url: "/project/#{$scope.project.id}?forever=true"
+					headers:
+						"X-CSRF-Token": window.csrfToken
+				}).then () -> 
+					$scope.project.isTableActionInflight = false
+					$scope._removeProjectFromList $scope.project
+					for tag in $scope.tags
+						$scope._removeProjectIdsFromTagArray(tag, [ $scope.project.id ])
+					$scope.updateVisibleProjects()
+				.catch () -> 
+					$scope.project.isTableActionInflight = false
