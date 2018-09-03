@@ -248,32 +248,32 @@ describe "LimitationsManager", ->
 				retSubscriptions.should.equal subscriptions
 				done()
 
-	describe "userHasSubscriptionOrIsGroupMember", ->
+	describe "hasPaidSubscription", ->
 		beforeEach ->
 			@LimitationsManager.userIsMemberOfGroupSubscription = sinon.stub().yields(null, false)
 			@LimitationsManager.userHasV2Subscription = sinon.stub().yields(null, false)
-			@LimitationsManager.userHasV1SubscriptionOrTeam = sinon.stub().yields(null, false)
+			@LimitationsManager.userHasV1Subscription = sinon.stub().yields(null, false)
 
 		it "should return true if userIsMemberOfGroupSubscription", (done)->
 			@LimitationsManager.userIsMemberOfGroupSubscription = sinon.stub().yields(null, true)
-			@LimitationsManager.userHasSubscriptionOrIsGroupMember @user, (err, hasSubOrIsGroupMember)->
+			@LimitationsManager.hasPaidSubscription @user, (err, hasSubOrIsGroupMember)->
 				hasSubOrIsGroupMember.should.equal true
 				done()
 
 		it "should return true if userHasV2Subscription", (done)->
 			@LimitationsManager.userHasV2Subscription = sinon.stub().yields(null, true)
-			@LimitationsManager.userHasSubscriptionOrIsGroupMember @user, (err, hasSubOrIsGroupMember)->
+			@LimitationsManager.hasPaidSubscription @user, (err, hasSubOrIsGroupMember)->
 				hasSubOrIsGroupMember.should.equal true
 				done()
 
-		it "should return true if userHasV1SubscriptionOrTeam", (done)->
-			@LimitationsManager.userHasV1SubscriptionOrTeam = sinon.stub().yields(null, true)
-			@LimitationsManager.userHasSubscriptionOrIsGroupMember @user, (err, hasSubOrIsGroupMember)->
+		it "should return true if userHasV1Subscription", (done)->
+			@LimitationsManager.userHasV1Subscription= sinon.stub().yields(null, true)
+			@LimitationsManager.hasPaidSubscription @user, (err, hasSubOrIsGroupMember)->
 				hasSubOrIsGroupMember.should.equal true
 				done()
 
 		it "should return false if none are true", (done)->
-			@LimitationsManager.userHasSubscriptionOrIsGroupMember @user, (err, hasSubOrIsGroupMember)->
+			@LimitationsManager.hasPaidSubscription @user, (err, hasSubOrIsGroupMember)->
 				hasSubOrIsGroupMember.should.equal false
 				done()
 
@@ -348,35 +348,6 @@ describe "LimitationsManager", ->
 		it 'should return false if v1 returns nothing', (done) ->
 			@V1SubscriptionManager.getSubscriptionsFromV1 = sinon.stub().yields(null, null)
 			@LimitationsManager.userHasV1Subscription @user, (error, result) =>
-				@V1SubscriptionManager.getSubscriptionsFromV1.calledWith(@user_id).should.equal true
-				result.should.equal false
-				done()
-
-	describe 'userHasV1SubscriptionOrTeam', ->
-		it 'should return true if v1 returns has_subscription = true', (done) ->
-			@V1SubscriptionManager.getSubscriptionsFromV1 = sinon.stub().yields(null, { has_subscription: true })
-			@LimitationsManager.userHasV1SubscriptionOrTeam @user, (error, result) =>
-				@V1SubscriptionManager.getSubscriptionsFromV1.calledWith(@user_id).should.equal true
-				result.should.equal true
-				done()
-
-		it 'should return true if v1 returns some teams', (done) ->
-			@V1SubscriptionManager.getSubscriptionsFromV1 = sinon.stub().yields(null, { teams: ['mock-team'] })
-			@LimitationsManager.userHasV1SubscriptionOrTeam @user, (error, result) =>
-				@V1SubscriptionManager.getSubscriptionsFromV1.calledWith(@user_id).should.equal true
-				result.should.equal true
-				done()
-
-		it 'should return false if v1 returns has_subscription = false and no teams', (done) ->
-			@V1SubscriptionManager.getSubscriptionsFromV1 = sinon.stub().yields(null, { has_subscription: false, teams: [] })
-			@LimitationsManager.userHasV1SubscriptionOrTeam @user, (error, result) =>
-				@V1SubscriptionManager.getSubscriptionsFromV1.calledWith(@user_id).should.equal true
-				result.should.equal false
-				done()
-
-		it 'should return false if v1 returns nothing', (done) ->
-			@V1SubscriptionManager.getSubscriptionsFromV1 = sinon.stub().yields(null, null)
-			@LimitationsManager.userHasV1SubscriptionOrTeam @user, (error, result) =>
 				@V1SubscriptionManager.getSubscriptionsFromV1.calledWith(@user_id).should.equal true
 				result.should.equal false
 				done()

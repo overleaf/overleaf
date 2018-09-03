@@ -39,7 +39,7 @@ describe "SubscriptionController", ->
 			findLocalPlanInSettings: sinon.stub()
 
 		@LimitationsManager =
-			userHasSubscriptionOrIsGroupMember: sinon.stub()
+			hasPaidSubscription: sinon.stub()
 			userHasV1OrV2Subscription : sinon.stub()
 			userHasV2Subscription: sinon.stub()
 
@@ -226,7 +226,7 @@ describe "SubscriptionController", ->
 		describe "with a user without a subscription", ->
 			beforeEach (done) ->
 				@res.callback = done
-				@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, false)
+				@LimitationsManager.hasPaidSubscription.callsArgWith(1, null, false)
 				@SubscriptionController.userSubscriptionPage @req, @res
 
 			it "should redirect to the plans page", ->
@@ -241,7 +241,7 @@ describe "SubscriptionController", ->
 			describe "without an existing subscription", ->
 				beforeEach (done)->
 					@res.callback = done
-					@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, false)
+					@LimitationsManager.hasPaidSubscription.callsArgWith(1, null, false)
 					@SubscriptionController.userSubscriptionPage @req, @res
 
 				it "should redirect to the group invite url", ->
@@ -253,7 +253,7 @@ describe "SubscriptionController", ->
 					@res.callback = done
 					@settings.apis.recurly.subdomain = 'test'
 					@userSub = {account: {hosted_login_token: 'abcd'}}
-					@LimitationsManager.userHasSubscriptionOrIsGroupMember
+					@LimitationsManager.hasPaidSubscription
 						.callsArgWith(1, null, true, {})
 					@SubscriptionController.userSubscriptionPage @req, @res
 
@@ -265,7 +265,7 @@ describe "SubscriptionController", ->
 			beforeEach (done) ->
 				@res.callback = done
 				@SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(1, null, @activeRecurlySubscription)
-				@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true, {})
+				@LimitationsManager.hasPaidSubscription.callsArgWith(1, null, true, {})
 				@SubscriptionController.userSubscriptionPage @req, @res
 
 			it "should render the dashboard", (done)->
@@ -280,7 +280,7 @@ describe "SubscriptionController", ->
 			beforeEach (done) ->
 				@res.callback = done
 				@SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(1, null, @activeRecurlySubscription)
-				@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true, {})
+				@LimitationsManager.hasPaidSubscription.callsArgWith(1, null, true, {})
 				@SubscriptionController.userSubscriptionPage @req, @res
 
 			it "should render the dashboard", ->
@@ -292,7 +292,7 @@ describe "SubscriptionController", ->
 
 		describe "when its a custom subscription which is non recurly", ->
 			beforeEach ()->
-				@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true, {customAccount:true})
+				@LimitationsManager.hasPaidSubscription.callsArgWith(1, null, true, {customAccount:true})
 				@SubscriptionController.userSubscriptionPage @req, @res
 
 			it "should redirect to /user/subscription/custom_account", ->
@@ -301,7 +301,7 @@ describe "SubscriptionController", ->
 	describe "userCustomSubscriptionPage", ->
 		beforeEach (done) ->
 			@res.callback = done
-			@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, true, {})
+			@LimitationsManager.hasPaidSubscription.callsArgWith(1, null, true, {})
 			@SubscriptionController.userCustomSubscriptionPage @req, @res
 
 		it "should render the page", (done)->

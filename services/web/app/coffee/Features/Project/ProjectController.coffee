@@ -189,10 +189,10 @@ module.exports = ProjectController =
 						return cb(null, projects: [], tags: [], noConnection: true)
 					return cb(error, projects[0]) # hooks.fire returns an array of results, only need first
 			hasSubscription: (cb)->
-				LimitationsManager.userHasSubscriptionOrIsGroupMember currentUser, (error, hasSub) ->
+				LimitationsManager.hasPaidSubscription currentUser, (error, hasPaidSubscription) ->
 					if error? and error instanceof V1ConnectionError
 						return cb(null, true)
-					return cb(error, hasSub)
+					return cb(error, hasPaidSubscription)
 			user: (cb) ->
 				User.findById user_id, "featureSwitches overleaf awareOfV2 features", cb
 			}, (err, results)->
