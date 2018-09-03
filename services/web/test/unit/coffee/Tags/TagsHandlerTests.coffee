@@ -212,3 +212,57 @@ describe 'TagsHandler', ->
 			
 			it "should call the callback with an Error", ->
 				@callback.calledWith(new Error()).should.equal true
+
+	describe "addProjectToTagName", ->
+		describe "successfully", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
+				@handler.addProjectToTagName user_id, tag, project_id, @callback
+
+			it "should send a request to the tag backend", ->
+				@request.post
+					.calledWith({
+						json:
+							name: tag
+						url: "#{tagsUrl}/user/#{user_id}/tag/project/#{project_id}"
+						timeout: 1000
+					})
+					.should.equal true
+
+			it "should call the callback with no error", ->
+				@callback.calledWith(null).should.equal true
+
+		describe "with error", ->
+			beforeEach ->
+				@request.post = sinon.stub().callsArgWith(1, null, {statusCode: 500}, "")
+				@handler.addProjectToTagName user_id, tag_id, project_id, @callback
+
+			it "should call the callback with an Error", ->
+				@callback.calledWith(new Error()).should.equal true
+
+	describe "updateTagUserIds", ->
+		describe "successfully", ->
+			beforeEach ->
+				@request.put = sinon.stub().callsArgWith(1, null, {statusCode: 204}, "")
+				@handler.updateTagUserIds "old-user-id", "new-user-id", @callback
+
+			it "should send a request to the tag backend", ->
+				@request.put
+					.calledWith({
+						json:
+							user_id: "new-user-id"
+						url: "#{tagsUrl}/user/old-user-id/tag"
+						timeout: 1000
+					})
+					.should.equal true
+
+			it "should call the callback with no error", ->
+				@callback.calledWith(null).should.equal true
+
+		describe "with error", ->
+			beforeEach ->
+				@request.put = sinon.stub().callsArgWith(1, null, {statusCode: 500}, "")
+				@handler.updateTagUserIds "old-user-id", "new-user-id", @callback
+
+			it "should call the callback with an Error", ->
+				@callback.calledWith(new Error()).should.equal true

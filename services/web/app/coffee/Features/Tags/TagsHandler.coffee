@@ -39,6 +39,15 @@ module.exports = TagsHandler =
 		request.del {url, timeout: TIMEOUT}, (err, res, body) ->
 			TagsHandler._handleResponse err, res, {url, user_id, tag_id}, callback
 
+	updateTagUserIds: (old_user_id, new_user_id, callback) ->
+		opts =
+			url: "#{settings.apis.tags.url}/user/#{old_user_id}/tag"
+			json:
+				user_id: new_user_id
+			timeout: TIMEOUT
+		request.put opts, (err, res, body)->
+			TagsHandler._handleResponse err, res, {old_user_id, new_user_id}, callback
+
 	removeProjectFromTag: (user_id, tag_id, project_id, callback)->
 		url = "#{settings.apis.tags.url}/user/#{user_id}/tag/#{tag_id}/project/#{project_id}"
 		request.del {url, timeout: TIMEOUT}, (err, res, body) ->
@@ -48,6 +57,15 @@ module.exports = TagsHandler =
 		url = "#{settings.apis.tags.url}/user/#{user_id}/tag/#{tag_id}/project/#{project_id}"
 		request.post {url, timeout: TIMEOUT}, (err, res, body) ->
 			TagsHandler._handleResponse err, res, {url, user_id, tag_id, project_id}, callback
+
+	addProjectToTagName: (user_id, name, project_id, callback)->
+		url = "#{settings.apis.tags.url}/user/#{user_id}/tag/project/#{project_id}"
+		opts =
+			json: { name }
+			timeout: TIMEOUT
+			url: url
+		request.post opts, (err, res, body) ->
+			TagsHandler._handleResponse err, res, {url, user_id, name, project_id}, callback
 
 	removeProjectFromAllTags: (user_id, project_id, callback)->
 		url = "#{settings.apis.tags.url}/user/#{user_id}/project/#{project_id}"
