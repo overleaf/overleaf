@@ -4,6 +4,7 @@ define ["base"], (App) ->
       open: "<"
       top: "<"
       left: "<"
+      layoutFromBottom: "<"
       highlight: "<"
       replaceWord: "&"
       learnWord: "&"
@@ -13,7 +14,7 @@ define ["base"], (App) ->
     class="dropdown context-menu spell-check-menu"
     ng-show="$ctrl.open"
     ng-style="{top: $ctrl.top, left: $ctrl.left}"
-    ng-class="{open: $ctrl.open}"
+    ng-class="{open: $ctrl.open, 'spell-check-menu-from-bottom': $ctrl.layoutFromBottom}"
   >
     <ul class="dropdown-menu">
       <li ng-repeat="suggestion in $ctrl.highlight.suggestions | limitTo:8">

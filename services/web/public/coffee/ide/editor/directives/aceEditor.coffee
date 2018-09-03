@@ -544,6 +544,7 @@ define [
 						open="spellMenu.open"
 						top="spellMenu.top"
 						left="spellMenu.left"
+						layout-from-bottom="spellMenu.layoutFromBottom"
 						highlight="spellMenu.highlight"
 						replace-word="replaceWord(highlight, suggestion)"
 						learn-word="learnWord(highlight)"

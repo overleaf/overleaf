@@ -55,6 +55,7 @@ define [], () ->
 		openContextMenu: (e) ->
 			coords = @adapter.getCoordsFromContextMenuEvent(e)
 			highlight = @adapter.getHighlightFromCoords(coords)
+			shouldPositionFromBottom = @adapter.isContextMenuEventOnBottomHalf(e)
 			if highlight
 				@adapter.preventContextMenuEventDefault(e)
 				@adapter.selectHighlightedWord(highlight)
@@ -63,6 +64,7 @@ define [], () ->
 						open: true
 						top: coords.y + 'px'
 						left: coords.x + 'px'
+						layoutFromBottom: shouldPositionFromBottom
 						highlight: highlight
 					}
 				return false
