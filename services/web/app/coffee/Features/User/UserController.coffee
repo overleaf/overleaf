@@ -118,7 +118,7 @@ module.exports = UserController =
 									logger.err err:err, "error populateTeamInvites"
 								res.sendStatus(200)
 
-	logout : (req, res)->
+	_doLogout: (req, cb = (err) ->) ->
 		metrics.inc "user.logout"
 		user = AuthenticationController.getSessionUser(req)
 		logger.log user: user, "logging out"
@@ -127,9 +127,14 @@ module.exports = UserController =
 		req.session.destroy (err)->
 			if err
 				logger.err err: err, 'error destorying session'
+				cb(err)
 			if user?
 				UserSessionsManager.untrackSession(user, sessionId)
 				SudoModeHandler.clearSudoMode(user._id)
+			cb()
+
+	logout : (req, res)->
+		UserController._doLogout req, (err) ->
 			res.redirect '/login'
 
 	register : (req, res, next = (error) ->)->
