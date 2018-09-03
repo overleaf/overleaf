@@ -133,8 +133,9 @@ module.exports = UserController =
 				SudoModeHandler.clearSudoMode(user._id)
 			cb()
 
-	logout : (req, res)->
+	logout : (req, res, next)->
 		UserController._doLogout req, (err) ->
+			return next(err) if err?
 			res.redirect '/login'
 
 	register : (req, res, next = (error) ->)->
