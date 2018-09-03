@@ -306,14 +306,21 @@ script(type='text/ng-template', id='aggregateChangeEntryTemplate')
 				.rp-entry-details
 					.rp-entry-description
 						| #{translate("aggregate_changed")} 
-						del.rp-content-highlight {{ entry.metadata.replaced_content }}
-						|  #{translate("aggregate_to")} 
-						ins.rp-content-highlight {{ entry.content }}
+						del.rp-content-highlight
+							| {{ entry.metadata.replaced_content | limitTo:(isDeletionCollapsed ? contentLimit : entry.metadata.replaced_contentlength) }}
 						a.rp-collapse-toggle(
 							href
-							ng-if="needsCollapsing"
-							ng-click="toggleCollapse();"
-						) {{ isCollapsed ? '... (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
+							ng-if="deletionNeedsCollapsing"
+							ng-click="toggleDeletionCollapse();"
+						) {{ isDeletionCollapsed ? '... (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
+						|  #{translate("aggregate_to")} 
+						ins.rp-content-highlight
+							| {{ entry.content | limitTo:(isInsertionCollapsed ? contentLimit : entry.contentlength) }}
+						a.rp-collapse-toggle(
+							href
+							ng-if="insertionNeedsCollapsing"
+							ng-click="toggleInsertionCollapse();"
+						) {{ isInsertionCollapsed ? '... (#{translate("show_all")})' : ' (#{translate("show_less")})' }}
 					.rp-entry-metadata
 						| {{ entry.metadata.ts | date : 'MMM d, y h:mm a' }}&nbsp;&bull;&nbsp;
 						span.rp-entry-user(style="color: hsl({{ user.hue }}, 70%, 40%);") {{ user.name }} 

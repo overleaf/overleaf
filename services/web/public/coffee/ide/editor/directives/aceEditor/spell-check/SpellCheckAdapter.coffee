@@ -30,6 +30,12 @@ define [
 				end: position
 			})
 
+		isContextMenuEventOnBottomHalf: (e) ->
+			clientY = e.domEvent.clientY
+			editorBoundingRect = e.target.container.getBoundingClientRect()
+			relativeYPos = (clientY - editorBoundingRect.top) / editorBoundingRect.height
+			return relativeYPos > 0.5
+
 		selectHighlightedWord: (highlight) ->
 			row = highlight.range.start.row
 			startColumn = highlight.range.start.column

@@ -49,41 +49,56 @@ div(class=lastUpdatedClasses)
 
 if settings.overleaf
 	.hidden-xs.col-sm-3.col-md-2.action-btn-row
-		button.btn.btn-link.action-btn(
-			tooltip=translate('copy'),
-			tooltip-placement="top",
-			tooltip-append-to-body="true",
-			ng-click="clone($event)"
+		div(
+			ng-if="!project.isTableActionInflight"
 		)
-			i.icon.fa.fa-files-o
-		button.btn.btn-link.action-btn(
-			tooltip=translate('download'),
-			tooltip-placement="top",
-			tooltip-append-to-body="true",
-			ng-click="download($event)"
+			button.btn.btn-link.action-btn(
+				tooltip=translate('copy'),
+				tooltip-placement="top",
+				tooltip-append-to-body="true",
+				ng-click="clone($event)"
+			)
+				i.icon.fa.fa-files-o
+			button.btn.btn-link.action-btn(
+				tooltip=translate('download'),
+				tooltip-placement="top",
+				tooltip-append-to-body="true",
+				ng-click="download($event)"
+			)
+				i.icon.fa.fa-cloud-download
+			button.btn.btn-link.action-btn(
+				ng-if="!project.archived && isOwner()"
+				tooltip=translate('archive'),
+				tooltip-placement="top",
+				tooltip-append-to-body="true",
+				ng-click="archiveOrLeave($event)"
+			)
+				i.icon.fa.fa-inbox
+			button.btn.btn-link.action-btn(
+				ng-if="!project.archived && !isOwner()"
+				tooltip=translate('leave'),
+				tooltip-placement="top",
+				tooltip-append-to-body="true",
+				ng-click="archiveOrLeave($event)"
+			)
+				i.icon.fa.fa-sign-out
+			button.btn.btn-link.action-btn(
+				ng-if="project.archived"
+				tooltip=translate('unarchive'),
+				tooltip-placement="top",
+				tooltip-append-to-body="true",
+				ng-click="restore($event)"
+			)
+				i.icon.fa.fa-reply
+			button.btn.btn-link.action-btn(
+				ng-if="project.archived && isOwner()"
+				tooltip=translate('delete_forever'),
+				tooltip-placement="top",
+				tooltip-append-to-body="true",
+				ng-click="deleteProject($event)"
+			)
+				i.icon.fa.fa-trash
+		div(
+			ng-if="project.isTableActionInflight"
 		)
-			i.icon.fa.fa-cloud-download
-		button.btn.btn-link.action-btn(
-			ng-if="!project.archived && isOwner()"
-			tooltip=translate('archive'),
-			tooltip-placement="top",
-			tooltip-append-to-body="true",
-			ng-click="archiveOrLeave($event)"
-		)
-			i.icon.fa.fa-inbox
-		button.btn.btn-link.action-btn(
-			ng-if="!project.archived && !isOwner()"
-			tooltip=translate('leave'),
-			tooltip-placement="top",
-			tooltip-append-to-body="true",
-			ng-click="archiveOrLeave($event)"
-		)
-			i.icon.fa.fa-sign-out
-		button.btn.btn-link.action-btn(
-			ng-if="project.archived"
-			tooltip=translate('unarchive'),
-			tooltip-placement="top",
-			tooltip-append-to-body="true",
-			ng-click="restore($event)"
-		)
-			i.icon.fa.fa-reply
+			i.fa.fa-spinner.fa-spin

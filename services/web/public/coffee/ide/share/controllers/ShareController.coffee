@@ -3,7 +3,10 @@ define [
 ], (App) ->
 	App.controller "ShareController", ["$scope", "$modal", "ide", "projectInvites", "projectMembers", "event_tracking",
 	($scope, $modal, ide, projectInvites, projectMembers, event_tracking) ->
-			$scope.openShareProjectModal = () ->
+			$scope.openShareProjectModal = (isAdmin) ->
+				if !isAdmin
+					return
+					
 				event_tracking.sendMBOnce "ide-open-share-modal-once"
 
 				$modal.open(
