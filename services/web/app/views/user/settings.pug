@@ -73,6 +73,7 @@ block content
 												label.control-label #{translate("last_name")}
 												div.form-control(readonly="true") #{user.last_name}
 
+
 								if !externalAuthenticationSystemUsed()
 									.col-md-5.col-md-offset-1
 										h3 #{translate("change_password")}
@@ -120,7 +121,14 @@ block content
 													ng-disabled="changePasswordForm.$invalid"
 												) #{translate("change")}
 
-						
+								else
+									if settings.overleaf && settings.createV1AccountOnLogin
+										.col-md-5.col-md-offset-1
+											h3 #{translate("change_password")}
+											p
+												| To change your password,
+												| please go to #[a(href=settings.overleaf.host+'/users/edit') Overleaf v1 settings]
+
 
 							| !{moduleIncludes("userSettings", locals)}
 
@@ -148,7 +156,7 @@ block content
 
 							hr
 
-							if !externalAuthenticationSystemUsed()
+							if !externalAuthenticationSystemUsed() || (settings.createV1AccountOnLogin && settings.overleaf)
 
 								p.small
 									| #{translate("newsletter_info_and_unsubscribe")} 
@@ -182,6 +190,8 @@ block content
 			h3 #{translate("delete_account")}
 		div.modal-body#delete-account-modal
 			p !{translate("delete_account_warning_message_3")}
+			p
+				strong This will also delete your account on Overleaf v1!
 			form(novalidate, name="deleteAccountForm")
 				label #{translate('email')}
 				input.form-control(
