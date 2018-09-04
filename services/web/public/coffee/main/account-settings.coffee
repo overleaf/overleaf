@@ -42,6 +42,7 @@ define [
 				isValid : false
 				deleteText: ""
 				password: ""
+				confirmV1Purge: false
 				inflight: false
 				error: false
 				invalidCredentials: false
@@ -52,7 +53,7 @@ define [
 				, 700
 
 			$scope.checkValidation = ->
-				$scope.state.isValid = userDefaultEmail? and $scope.state.deleteText == userDefaultEmail and $scope.state.password.length > 0
+				$scope.state.isValid = userDefaultEmail? and $scope.state.deleteText == userDefaultEmail and $scope.state.password.length > 0 and $scope.state.confirmV1Purge
 
 			$scope.delete = () ->
 				$scope.state.inflight = true
