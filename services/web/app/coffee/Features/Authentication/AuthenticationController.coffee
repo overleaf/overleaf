@@ -11,6 +11,7 @@ UserHandler = require("../User/UserHandler")
 UserSessionsManager = require("../User/UserSessionsManager")
 Analytics = require "../Analytics/AnalyticsManager"
 passport = require 'passport'
+NotificationsBuilder = require("../Notifications/NotificationsBuilder")
 
 module.exports = AuthenticationController =
 
@@ -72,6 +73,7 @@ module.exports = AuthenticationController =
 	finishLogin: (user, req, res, next) ->
 		redir = AuthenticationController._getRedirectFromSession(req) || "/project"
 		AuthenticationController._loginAsyncHandlers(req, user)
+		AuthenticationController.ipMatchCheck(req, user)
 		AuthenticationController.afterLoginSessionSetup req, user, (err) ->
 			if err?
 				return next(err)
@@ -118,6 +120,15 @@ module.exports = AuthenticationController =
 		req.session.justLoggedIn = true
 		# capture the request ip for use when creating the session
 		user._login_req_ip = req.ip
+
+	ipMatchCheck: (req, user) ->
+		if req.ip != user.lastLoginIp
+			NotificationsBuilder.ipMatcherAffiliation(user._id, req.ip).create((err) ->
+				return err
+			)
+		UserUpdater.updateUser user._id.toString(), {
+			$set: { "lastLoginIp": req.ip }
+		}
 
 	setInSessionUser: (req, props) ->
 		for key, value of props
