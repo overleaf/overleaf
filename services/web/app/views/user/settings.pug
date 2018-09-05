@@ -190,8 +190,13 @@ block content
 			h3 #{translate("delete_account")}
 		div.modal-body#delete-account-modal
 			p !{translate("delete_account_warning_message_3")}
-			p
-				strong This will also delete your account on Overleaf v1!
+			if settings.createV1AccountOnLogin && settings.overleaf
+				p
+					strong
+						| This will also delete your user account on #[a(href=settings.overleaf.host target="_blank") Overleaf v1].
+						| If you want to remove your projects from Overleaf v1, you must do this before you
+						| delete your account by going to your My Projects page in Overleaf v1, moving your
+						| projects to the Trash, and then from there either ‘leaving’ or ‘purging’ them, as appropriate.
 			form(novalidate, name="deleteAccountForm")
 				label #{translate('email')}
 				input.form-control(
@@ -210,12 +215,25 @@ block content
 					ng-model="state.password",
 					ng-keyup="checkValidation()"
 				)
+				input(
+					type="checkbox"
+					ng-model="state.confirmV1Purge"
+					ng-change="checkValidation()"
+				)
+				label &nbsp;I have left or purged my projects on Overleaf v1 (if any) &nbsp;
 			div(ng-if="state.error")
 				div.alert.alert-danger
 					| #{translate('generic_something_went_wrong')}
 			div(ng-if="state.invalidCredentials")
 				div.alert.alert-danger
 					| #{translate('email_or_password_wrong_try_again')}
+			if settings.createV1AccountOnLogin && settings.overleaf
+				div(ng-if="state.error || state.invalidCredentials")
+					div.alert.alert-info
+						| If you can't remember your password, or if you are using Single-Sign-On with another provider
+						| to sign in (such as Twitter or Google), please
+						| #[a(href=settings.overleaf.host+'/users/password/new', target='_blank') reset your password],
+						| and try again.
 		.modal-footer
 			button.btn.btn-default(
 				ng-click="cancel()"
