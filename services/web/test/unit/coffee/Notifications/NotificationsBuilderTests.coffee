@@ -9,10 +9,10 @@ describe 'NotificationsBuilder', ->
 
 	beforeEach ->
 		@handler =
-			createNotification: sinon.stub().callsArgWith(5)
+			createNotification: sinon.stub().callsArgWith(6)
 
 		@settings =	 apis: { v1: { url: 'v1.url', user: '', pass: '' } }
-		@body = {university_id: 1, university_name: 'stanford', ad_copy: 'v1 ad content'}
+		@body = {id: 1, name: 'stanford', enrolment_ad_html: 'v1 ad content'}
 		response = {statusCode: 200}
 		@request = sinon.stub().returns(@stubResponse).callsArgWith(1, null, response, @body)
 		@controller = SandboxedModule.require modulePath, requires:
@@ -28,9 +28,9 @@ describe 'NotificationsBuilder', ->
 		@controller.ipMatcherAffiliation(user_id, ip).create (callback)=>
 			@request.calledOnce.should.equal true
 			expectedOpts =
-				university_id: @body.university_id
-				university_name: @body.university_name
-				content: @body.ad_copy
+				university_id: @body.id
+				university_name: @body.name
+				content: @body.enrolment_ad_html
 			@handler.createNotification.calledWith(
 				user_id,
 				 "ip-matched-affiliation-#{ip}",

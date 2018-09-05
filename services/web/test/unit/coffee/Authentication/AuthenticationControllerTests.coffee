@@ -603,6 +603,7 @@ describe "AuthenticationController", ->
 			@AuthenticationController._loginAsyncHandlers = sinon.stub()
 			@AuthenticationController.afterLoginSessionSetup = sinon.stub().callsArgWith(2, null)
 			@AuthenticationController._clearRedirectFromSession = sinon.stub()
+			@UserUpdater.updateUser = sinon.stub()
 			@req.headers = {accept: 'application/json, whatever'}
 			@res.json = sinon.stub()
 			@res.redirect = sinon.stub()

@@ -18,7 +18,6 @@ module.exports =
 		# in v2 add notifications for matching university IPs
 		if Settings.overleaf?
 			UserGetter.getUser user_id, { 'lastLoginIp': 1 }, (error, user) ->
-				console.log(user.lastLoginIp)
 				if ip != user.lastLoginIp
 					async.series ([
 						() ->

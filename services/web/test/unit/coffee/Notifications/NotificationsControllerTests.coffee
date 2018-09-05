@@ -15,6 +15,8 @@ describe 'NotificationsController', ->
 			markAsRead: sinon.stub().callsArgWith(2)
 		@builder =
 			ipMatcherAffiliation: sinon.stub().returns({create: sinon.stub()})
+		@userGetter =
+			getUser: sinon.stub().callsArgWith 2, null, {lastLoginIp: '192.170.18.2'}
 		@settings =
 			apis: { v1: { url: 'v1.url', user: '', pass: '' } }
 		@req =
@@ -33,6 +35,7 @@ describe 'NotificationsController', ->
 		@controller = SandboxedModule.require modulePath, requires:
 			"./NotificationsHandler":@handler
 			"./NotificationsBuilder":@builder
+			"../User/UserGetter": @userGetter
 			"settings-sharelatex":@settings
 			"underscore":@underscore =
 				map:(arr)-> return arr
@@ -49,7 +52,7 @@ describe 'NotificationsController', ->
 			@handler.getUserNotifications.calledWith(user_id).should.equal true
 			done()
 
-	it 'should send a delete request when a delete has been received to mark a notification', (done)->
+	it 'should send a remove request when notification read', (done)->
 		@controller.markNotificationAsRead @req, send:=>
 			@handler.markAsRead.calledWith(user_id, notification_id).should.equal true
 			done()
