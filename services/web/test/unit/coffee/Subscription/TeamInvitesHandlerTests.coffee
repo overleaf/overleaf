@@ -176,6 +176,27 @@ describe "TeamInvitesHandler", ->
 				).should.equal true
 				done()
 
+		it "stripe licence from name", (done) ->
+			@licence.name = 'Foo Licence'
+			@TeamInvitesHandler.createDomainInvite @user, @licence, (err, invite) =>
+				@EmailHandler.sendEmail.calledWith("verifyEmailToJoinTeam",
+					sinon.match({
+						inviterName: 'Foo'
+					})
+				).should.equal true
+				done()
+
+
+		it "stripe site licence from name", (done) ->
+			@licence.name = 'Foo Site Licence'
+			@TeamInvitesHandler.createDomainInvite @user, @licence, (err, invite) =>
+				@EmailHandler.sendEmail.calledWith("verifyEmailToJoinTeam",
+					sinon.match({
+						inviterName: 'Foo'
+					})
+				).should.equal true
+				done()
+
 	describe "importInvite", ->
 		beforeEach ->
 			@sentAt = new Date()
