@@ -63,8 +63,12 @@ span(ng-controller="NotificationsController").userNotifications
 						.alert.alert-info(ng-switch-when="notification_ip_matched_affiliation")
 							div.notification_inner
 								.notification_body
-									| Add an email for 
-									strong {{ notification.messageOpts.university_name }}
+									| It looks like you're at 
+									strong {{ notification.messageOpts.university_name }}! <br/>
+									|	Did you know that {{notification.messageOpts.university_name}} is providing
+									strong  free Overleaf Professional accounts 
+									|	 to everyone at {{notification.messageOpts.university_name}}? <br/>
+									|	Add an institutional email address to claim your account.
 									a.pull-right.btn.btn-sm.btn-info(href="/user/settings")
 										| Add Affiliation
 								span().notification_close
