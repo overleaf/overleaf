@@ -90,22 +90,22 @@ module.exports = SubscriptionController =
 
 	userSubscriptionPage: (req, res, next) ->
 		user = AuthenticationController.getSessionUser(req)
-		LimitationsManager.userHasSubscriptionOrIsGroupMember user, (err, hasSubOrIsGroupMember, subscription)->
+		LimitationsManager.hasPaidSubscription user, (err, hasPaidSubscription, subscription)->
 			return next(err) if err?
 			groupLicenceInviteUrl = SubscriptionDomainHandler.getDomainLicencePage(user)
 			if subscription?.customAccount
 				logger.log user: user, "redirecting to custom account page"
 				res.redirect "/user/subscription/custom_account"
-			else if groupLicenceInviteUrl? and !hasSubOrIsGroupMember
+			else if groupLicenceInviteUrl? and !hasPaidSubscription
 				logger.log user:user, "redirecting to group subscription invite page"
 				res.redirect groupLicenceInviteUrl
-			else if !hasSubOrIsGroupMember
+			else if !hasPaidSubscription
 				logger.log user: user, "redirecting to plans"
 				res.redirect "/user/subscription/plans"
 			else
 				SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel user, (error, subscription, groupSubscriptions, billingDetailsLink, v1Subscriptions) ->
 					return next(error) if error?
-					logger.log {user, subscription, hasSubOrIsGroupMember, groupSubscriptions, billingDetailsLink, v1Subscriptions}, "showing subscription dashboard"
+					logger.log {user, subscription, hasPaidSubscription, groupSubscriptions, billingDetailsLink, v1Subscriptions}, "showing subscription dashboard"
 					plans = SubscriptionViewModelBuilder.buildViewModel()
 					res.render "subscriptions/dashboard",
 						title: "your_subscription"
@@ -122,7 +122,7 @@ module.exports = SubscriptionController =
 
 	userCustomSubscriptionPage: (req, res, next)->
 		user = AuthenticationController.getSessionUser(req)
-		LimitationsManager.userHasSubscriptionOrIsGroupMember user, (err, hasSubOrIsGroupMember, subscription)->
+		LimitationsManager.hasPaidSubscription user, (err, hasPaidSubscription, subscription)->
 			return next(err) if err?
 			if !subscription?
 				err = new Error("subscription null for custom account, user:#{user?._id}")

@@ -33,12 +33,12 @@ module.exports = LimitationsManager =
 					else
 						callback null, false
 
-	userHasSubscriptionOrIsGroupMember: (user, callback = (err, hasSubscriptionOrIsMember)->) ->
+	hasPaidSubscription: (user, callback = (err, hasSubscriptionOrIsMember)->) ->
 		@userHasV2Subscription user, (err, hasSubscription, subscription)=>
 			return callback(err) if err?
 			@userIsMemberOfGroupSubscription user, (err, isMember)=>
 				return callback(err) if err?
-				@userHasV1SubscriptionOrTeam user, (err, hasV1Subscription)=>
+				@userHasV1Subscription user, (err, hasV1Subscription)=>
 					return callback(err) if err?
 					logger.log {user_id:user._id, isMember, hasSubscription, hasV1Subscription}, "checking if user has subscription or is group member"
 					callback err, isMember or hasSubscription or hasV1Subscription, subscription
@@ -71,16 +71,6 @@ module.exports = LimitationsManager =
 		V1SubscriptionManager.getSubscriptionsFromV1 user._id, (err, v1Subscription) ->
 			logger.log {user_id: user._id, v1Subscription}, '[userHasV1Subscription]'
 			callback err, !!v1Subscription?.has_subscription
-
-	userHasV1SubscriptionOrTeam: (user, callback = (error, hasV1Subscription) ->) ->
-		V1SubscriptionManager.getSubscriptionsFromV1 user._id, (err, v1Subscription = {}) ->
-			return callback(err) if err?
-			hasV1Subscription = false
-			if v1Subscription.has_subscription
-				hasV1Subscription = true
-			if (v1Subscription.teams or []).length > 0
-				hasV1Subscription = true
-			return callback null, hasV1Subscription
 
 	teamHasReachedMemberLimit: (subscription) ->
 		currentTotal = (subscription.member_ids or []).length +

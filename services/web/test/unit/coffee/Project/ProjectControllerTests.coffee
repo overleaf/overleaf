@@ -36,7 +36,7 @@ describe "ProjectController", ->
 		@SubscriptionLocator =
 			getUsersSubscription: sinon.stub()
 		@LimitationsManager =
-			userHasSubscriptionOrIsGroupMember: sinon.stub()
+			hasPaidSubscription: sinon.stub()
 		@TagsHandler =
 			getAllTags: sinon.stub()
 		@NotificationsHandler =
@@ -283,7 +283,7 @@ describe "ProjectController", ->
 			@UserModel.findById = (id, fields, callback) =>
 				callback null, @users[id]
 
-			@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, false)
+			@LimitationsManager.hasPaidSubscription.callsArgWith(1, null, false)
 			@TagsHandler.getAllTags.callsArgWith(1, null, @tags, {})
 			@NotificationsHandler.getUserNotifications = sinon.stub().callsArgWith(1, null, @notifications, {})
 			@ProjectGetter.findAllUsersProjects.callsArgWith(2, null, @allProjects)
@@ -327,7 +327,7 @@ describe "ProjectController", ->
 			@ProjectController.projectListPage @req, @res
 
 		it 'should send hasSubscription == true when there is a subscription', (done) ->
-			@LimitationsManager.userHasSubscriptionOrIsGroupMember = sinon.stub().callsArgWith(1, null, true)
+			@LimitationsManager.hasPaidSubscription = sinon.stub().callsArgWith(1, null, true)
 			@res.render = (pageName, opts)=>
 				opts.hasSubscription.should.equal true
 				done()
@@ -447,7 +447,7 @@ describe "ProjectController", ->
 			@UserModel.findById = (id, fields, callback) =>
 				callback null, @users[id]
 
-			@LimitationsManager.userHasSubscriptionOrIsGroupMember.callsArgWith(1, null, false)
+			@LimitationsManager.hasPaidSubscription.callsArgWith(1, null, false)
 			@TagsHandler.getAllTags.callsArgWith(1, null, @tags, {})
 			@NotificationsHandler.getUserNotifications = sinon.stub().callsArgWith(1, null, @notifications, {})
 			@ProjectGetter.findAllUsersProjects.callsArgWith(2, null, @allProjects)
