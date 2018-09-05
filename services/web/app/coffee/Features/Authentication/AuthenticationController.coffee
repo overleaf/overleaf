@@ -73,7 +73,6 @@ module.exports = AuthenticationController =
 	finishLogin: (user, req, res, next) ->
 		redir = AuthenticationController._getRedirectFromSession(req) || "/project"
 		AuthenticationController._loginAsyncHandlers(req, user)
-		AuthenticationController.ipMatchCheck(req, user)
 		AuthenticationController.afterLoginSessionSetup req, user, (err) ->
 			if err?
 				return next(err)
@@ -114,6 +113,7 @@ module.exports = AuthenticationController =
 		UserHandler.setupLoginData(user, ()->)
 		LoginRateLimiter.recordSuccessfulLogin(user.email)
 		AuthenticationController._recordSuccessfulLogin(user._id)
+		AuthenticationController.ipMatchCheck(req, user)
 		Analytics.recordEvent(user._id, "user-logged-in", {ip:req.ip})
 		Analytics.identifyUser(user._id, req.sessionID)
 		logger.log email: user.email, user_id: user._id.toString(), "successful log in"

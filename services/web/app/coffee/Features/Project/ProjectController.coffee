@@ -26,6 +26,8 @@ TokenAccessHandler = require '../TokenAccess/TokenAccessHandler'
 CollaboratorsHandler = require '../Collaborators/CollaboratorsHandler'
 Modules = require '../../infrastructure/Modules'
 ProjectEntityHandler = require './ProjectEntityHandler'
+UserGetter = require("../User/UserGetter")
+NotificationsBuilder = require("../Notifications/NotificationsBuilder")
 crypto = require 'crypto'
 { V1ConnectionError } = require '../Errors/Errors'
 Features = require('../../infrastructure/Features')
@@ -209,6 +211,16 @@ module.exports = ProjectController =
 				user = results.user
 				warnings = ProjectController._buildWarningsList results.v1Projects
 
+				# in v2 add notifications for matching university IPs
+				if Settings.overleaf?
+					ip = req.headers['x-forwarded-for'] ||
+						req.connection.remoteAddress ||
+						req.socket.remoteAddress
+					UserGetter.getUser user_id, { 'lastLoginIp': 1 }, (error, user) ->
+						if ip != user.lastLoginIp
+							NotificationsBuilder.ipMatcherAffiliation(user._id, ip).create((err) ->
+								return err
+							)
 
 				ProjectController._injectProjectOwners projects, (error, projects) ->
 					return next(error) if error?

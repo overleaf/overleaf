@@ -15,7 +15,7 @@ describe "AuthenticationController", ->
 		tk.freeze(Date.now())
 		@AuthenticationController = SandboxedModule.require modulePath, requires:
 			"./AuthenticationManager": @AuthenticationManager = {}
-			"../User/UserUpdater" : @UserUpdater = {}
+			"../User/UserUpdater" : @UserUpdater = {updateUser:sinon.stub()}
 			"metrics-sharelatex": @Metrics = { inc: sinon.stub() }
 			"../Security/LoginRateLimiter": @LoginRateLimiter = { processLoginRequest:sinon.stub(), recordSuccessfulLogin:sinon.stub() }
 			"../User/UserHandler": @UserHandler = {setupLoginData:sinon.stub()}
@@ -603,7 +603,6 @@ describe "AuthenticationController", ->
 			@AuthenticationController._loginAsyncHandlers = sinon.stub()
 			@AuthenticationController.afterLoginSessionSetup = sinon.stub().callsArgWith(2, null)
 			@AuthenticationController._clearRedirectFromSession = sinon.stub()
-			@UserUpdater.updateUser = sinon.stub()
 			@req.headers = {accept: 'application/json, whatever'}
 			@res.json = sinon.stub()
 			@res.redirect = sinon.stub()

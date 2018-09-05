@@ -46,7 +46,7 @@ module.exports =
 				timeout: 20 * 1000
 			}, (error, response, body) ->
 				return error if error?
-				return null if response.statusCode == 204
+				return null unless response.statusCode == 200
 
 				messageOpts =
 					university_id: body.id

@@ -13,16 +13,7 @@ describe 'NotificationsController', ->
 		@handler =
 			getUserNotifications: sinon.stub().callsArgWith(1)
 			markAsRead: sinon.stub().callsArgWith(2)
-		@builder =
-			ipMatcherAffiliation: sinon.stub().returns({create: sinon.stub()})
-		@userGetter =
-			getUser: sinon.stub().callsArgWith 2, null, {lastLoginIp: '192.170.18.2'}
-		@settings =
-			apis: { v1: { url: 'v1.url', user: '', pass: '' } }
 		@req =
-			headers: {}
-			connection:
-				remoteAddress: "192.170.18.1"
 			params:
 				notification_id:notification_id
 			session:
@@ -34,9 +25,6 @@ describe 'NotificationsController', ->
 			getLoggedInUserId: sinon.stub().returns(@req.session.user._id)
 		@controller = SandboxedModule.require modulePath, requires:
 			"./NotificationsHandler":@handler
-			"./NotificationsBuilder":@builder
-			"../User/UserGetter": @userGetter
-			"settings-sharelatex":@settings
 			"underscore":@underscore =
 				map:(arr)-> return arr
 			'logger-sharelatex':
@@ -52,13 +40,7 @@ describe 'NotificationsController', ->
 			@handler.getUserNotifications.calledWith(user_id).should.equal true
 			done()
 
-	it 'should send a remove request when notification read', (done)->
+	it 'should send a delete request when a delete has been received to mark a notification', (done)->
 		@controller.markNotificationAsRead @req, send:=>
 			@handler.markAsRead.calledWith(user_id, notification_id).should.equal true
-			done()
-
-	it 'should call the builder with the user ip if v2', (done)->
-		@settings.overleaf = true
-		@controller.getAllUnreadNotifications @req, send:(body)=>
-			@builder.ipMatcherAffiliation.calledWith(user_id, @req.connection.remoteAddress).should.equal true
 			done()
