@@ -277,6 +277,11 @@ describe "LimitationsManager", ->
 				hasSubOrIsGroupMember.should.equal false
 				done()
 
+		it "should have userHasSubscriptionOrIsGroupMember alias", (done)->
+			@LimitationsManager.userHasSubscriptionOrIsGroupMember @user, (err, hasSubOrIsGroupMember)->
+				hasSubOrIsGroupMember.should.equal false
+				done()
+
 	describe "userHasV1OrV2Subscription", ->
 		beforeEach ->
 			@LimitationsManager.userHasV2Subscription = sinon.stub().yields(null, false)

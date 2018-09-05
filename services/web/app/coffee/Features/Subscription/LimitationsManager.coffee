@@ -43,6 +43,11 @@ module.exports = LimitationsManager =
 					logger.log {user_id:user._id, isMember, hasSubscription, hasV1Subscription}, "checking if user has subscription or is group member"
 					callback err, isMember or hasSubscription or hasV1Subscription, subscription
 
+
+	# alias for backward-compatibility with modules. Use `haspaidsubscription` instead
+	userHasSubscriptionOrIsGroupMember: (user, callback) ->
+		@hasPaidSubscription(user, callback)
+
 	userHasV2Subscription: (user, callback = (err, hasSubscription, subscription)->) ->
 		logger.log user_id:user._id, "checking if user has subscription"
 		SubscriptionLocator.getUsersSubscription user._id, (err, subscription)->
