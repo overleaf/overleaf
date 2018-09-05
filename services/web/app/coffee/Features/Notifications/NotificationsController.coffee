@@ -2,7 +2,9 @@ NotificationsHandler = require("./NotificationsHandler")
 NotificationsBuilder = require("./NotificationsBuilder")
 AuthenticationController = require("../Authentication/AuthenticationController")
 Settings = require 'settings-sharelatex'
+UserGetter = require("../User/UserGetter")
 logger = require("logger-sharelatex")
+async = require "async"
 _ = require("underscore")
 
 module.exports =
@@ -15,9 +17,15 @@ module.exports =
 
 		# in v2 add notifications for matching university IPs
 		if Settings.overleaf?
-			NotificationsBuilder.ipMatcherAffiliation(user_id, ip).create((err) ->
-				return err
-			)
+			UserGetter.getUser user_id, { 'lastLoginIp': 1 }, (error, user) ->
+				console.log(user.lastLoginIp)
+				if ip != user.lastLoginIp
+					async.series ([
+						() ->
+							NotificationsBuilder.ipMatcherAffiliation(user_id, ip).create((err) ->
+								return err
+							)
+					])
 
 		NotificationsHandler.getUserNotifications user_id, (err, unreadNotifications)->
 			unreadNotifications = _.map unreadNotifications, (notification)->

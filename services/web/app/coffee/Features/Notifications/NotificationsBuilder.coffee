@@ -39,7 +39,7 @@ module.exports =
 			_key = @key
 			request {
 				method: 'GET'
-				url: "#{settings.apis.v1.url}/api/v2/users/ip_matcher/#{userId}"
+				url: "#{settings.apis.v1.url}/api/v2/users/#{userId}/ip_matcher"
 				auth: { user: settings.apis.v1.user, pass: settings.apis.v1.pass }
 				body: { ip: ip }
 				json: true
@@ -49,9 +49,9 @@ module.exports =
 				return null if response.statusCode == 204
 
 				messageOpts =
-					university_id: body.university_id
-					university_name: body.university_name
-					content: body.ad_copy
+					university_id: body.id
+					university_name: body.name
+					content: body.enrolment_ad_html
 				logger.log user_id:userId, key:_key, "creating notification key for user"
 				NotificationsHandler.createNotification userId, _key, "notification_ip_matched_affiliation", messageOpts, null, callback
 

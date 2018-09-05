@@ -63,7 +63,8 @@ span(ng-controller="NotificationsController").userNotifications
 						.alert.alert-info(ng-switch-when="notification_ip_matched_affiliation")
 							div.notification_inner
 								.notification_body
-									| Add an email for: {{ notification.messageOpts.university_name }}
+									| Add an email for 
+									strong {{ notification.messageOpts.university_name }}
 									a.pull-right.btn.btn-sm.btn-info(href="/user/settings")
 										| Add Affiliation
 								span().notification_close
