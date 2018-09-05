@@ -53,7 +53,7 @@ module.exports =
 					university_name: body.name
 					content: body.enrolment_ad_html
 				logger.log user_id:userId, key:_key, "creating notification key for user"
-				NotificationsHandler.createNotification userId, _key, "notification_ip_matched_affiliation", messageOpts, null, callback
+				NotificationsHandler.createNotification userId, _key, "notification_ip_matched_affiliation", messageOpts, null, false, callback
 
 		read: (callback = ->)->
 			NotificationsHandler.markAsReadWithKey userId, @key, callback
