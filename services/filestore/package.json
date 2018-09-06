@@ -18,7 +18,7 @@
     "fs-extra": "^1.0.0",
     "heapdump": "^0.3.2",
     "knox": "~0.9.1",
-    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.1.0",
+    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.7",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.3.0",
     "node-transloadit": "0.0.4",
     "node-uuid": "~1.4.1",
