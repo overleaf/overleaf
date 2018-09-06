@@ -207,6 +207,7 @@ block content
 					focus-on="open",
 					ng-keyup="checkValidation()"
 				)
+
 				label #{translate('password')}
 				input.form-control(
 					type="password",
@@ -215,12 +216,23 @@ block content
 					ng-model="state.password",
 					ng-keyup="checkValidation()"
 				)
-				input(
-					type="checkbox"
-					ng-model="state.confirmV1Purge"
-					ng-change="checkValidation()"
-				)
-				label &nbsp;I have left or purged my projects on Overleaf v1 (if any) &nbsp;
+
+				div.confirmation-checkbox-wrapper
+					input(
+						type="checkbox"
+						ng-model="state.confirmV1Purge"
+						ng-change="checkValidation()"
+					).pull-left
+					label(style="display: inline") &nbsp;I have left or purged my projects on Overleaf v1 (if any) &nbsp;
+
+				div.confirmation-checkbox-wrapper
+					input(
+						type="checkbox"
+						ng-model="state.confirmSharelatexDelete"
+						ng-change="checkValidation()"
+					).pull-left
+					label(style="display: inline") &nbsp;I understand this will delete all projects in my Overleaf v2 account (and ShareLaTeX account, if any) with email address #[em {{ userDefaultEmail }}]
+
 			div(ng-if="state.error")
 				div.alert.alert-danger
 					| #{translate('generic_something_went_wrong')}

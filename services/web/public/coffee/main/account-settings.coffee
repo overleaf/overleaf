@@ -43,9 +43,12 @@ define [
 				deleteText: ""
 				password: ""
 				confirmV1Purge: false
+				confirmSharelatexDelete: false
 				inflight: false
 				error: false
 				invalidCredentials: false
+
+			$scope.userDefaultEmail = userDefaultEmail
 
 			$modalInstance.opened.then () ->
 				$timeout () ->
@@ -53,7 +56,7 @@ define [
 				, 700
 
 			$scope.checkValidation = ->
-				$scope.state.isValid = userDefaultEmail? and $scope.state.deleteText == userDefaultEmail and $scope.state.password.length > 0 and $scope.state.confirmV1Purge
+				$scope.state.isValid = userDefaultEmail? and $scope.state.deleteText == userDefaultEmail and $scope.state.password.length > 0 and $scope.state.confirmV1Purge and $scope.state.confirmSharelatexDelete
 
 			$scope.delete = () ->
 				$scope.state.inflight = true
