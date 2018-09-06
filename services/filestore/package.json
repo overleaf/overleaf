@@ -29,6 +29,7 @@
     "response": "0.14.0",
     "rimraf": "2.2.8",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
+    "stream-browserify": "^2.0.1",
     "stream-buffers": "~0.2.5",
     "underscore": "~1.5.2"
   },
