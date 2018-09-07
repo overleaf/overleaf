@@ -123,9 +123,7 @@ module.exports = AuthenticationController =
 
 	ipMatchCheck: (req, user) ->
 		if req.ip != user.lastLoginIp
-			NotificationsBuilder.ipMatcherAffiliation(user._id, req.ip).create((err) ->
-				return err
-			)
+			NotificationsBuilder.ipMatcherAffiliation(user._id, req.ip).create()
 		UserUpdater.updateUser user._id.toString(), {
 			$set: { "lastLoginIp": req.ip }
 		}

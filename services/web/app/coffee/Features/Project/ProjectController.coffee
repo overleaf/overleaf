@@ -213,14 +213,9 @@ module.exports = ProjectController =
 
 				# in v2 add notifications for matching university IPs
 				if Settings.overleaf?
-					ip = req.headers['x-forwarded-for'] ||
-						req.connection.remoteAddress ||
-						req.socket.remoteAddress
 					UserGetter.getUser user_id, { 'lastLoginIp': 1 }, (error, user) ->
-						if ip != user.lastLoginIp
-							NotificationsBuilder.ipMatcherAffiliation(user._id, ip).create((err) ->
-								return err
-							)
+						if req.ip != user.lastLoginIp
+							NotificationsBuilder.ipMatcherAffiliation(user._id, req.ip).create()
 
 				ProjectController._injectProjectOwners projects, (error, projects) ->
 					return next(error) if error?
