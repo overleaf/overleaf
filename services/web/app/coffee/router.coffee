@@ -50,6 +50,7 @@ TokenAccessController = require('./Features/TokenAccess/TokenAccessController')
 Features = require('./infrastructure/Features')
 LinkedFilesRouter = require './Features/LinkedFiles/LinkedFilesRouter'
 TemplatesRouter = require './Features/Templates/TemplatesRouter'
+AccountMergeEmailController = require './Features/AccountMerge/AccountMergeEmailController'
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -67,6 +68,8 @@ module.exports = class Router
 
 		webRouter.get  '/logout', UserController.logout
 		webRouter.get  '/restricted', AuthorizationMiddlewear.restricted
+
+		webRouter.get '/account-merge/email/confirm', AccountMergeEmailController.confirmMergeFromEmail
 
 		if Features.hasFeature('registration')
 			webRouter.get '/register', UserPagesController.registerPage
