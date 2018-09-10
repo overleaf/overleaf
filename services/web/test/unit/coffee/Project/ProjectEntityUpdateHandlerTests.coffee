@@ -190,11 +190,6 @@ describe 'ProjectEntityUpdateHandler', ->
 					.calledWith(project_id, doc_id, @docLines, @version, @ranges)
 					.should.equal true
 
-			it "should mark the project as updated", ->
-				@ProjectUpdater.markAsUpdated
-					.calledWith(project_id)
-					.should.equal true
-
 			it "should send the doc the to the TPDS", ->
 				@TpdsUpdateSender.addDoc
 					.calledWith({

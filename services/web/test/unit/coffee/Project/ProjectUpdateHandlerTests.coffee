@@ -16,12 +16,15 @@ describe 'ProjectUpdateHandler', ->
 	describe 'marking a project as recently updated', ->
 		it 'should send an update to mongo', (done)->
 			project_id = "project_id"
-			@handler.markAsUpdated project_id, (err)=>
-				args = @ProjectModel.update.args[0]
-				args[0]._id.should.equal project_id
-				date = args[1].lastUpdated+""
-				now = Date.now()+""
-				date.substring(0,5).should.equal now.substring(0,5)
+			user_id = "mock_user_id"
+			timestamp = Date.now()
+			@handler.markAsUpdated project_id, user_id, timestamp, (err)=>
+				@ProjectModel.update.calledWith({
+					_id: project_id,
+				}, {
+					lastUpdated: new Date(timestamp),
+					lastUpdatedBy: user_id
+				}).should.equal true
 				done()
 
 	describe "markAsOpened", ->

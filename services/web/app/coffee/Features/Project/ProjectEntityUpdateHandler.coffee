@@ -114,8 +114,6 @@ module.exports = ProjectEntityUpdateHandler = self =
 					logger.log {project_id, doc_id, modified}, "finished updating doc lines"
 					# path will only be present if the doc is not deleted
 					if modified && !isDeletedDoc
-						# Don't need to block for marking as updated
-						ProjectUpdateHandler.markAsUpdated project_id
 						TpdsUpdateSender.addDoc {project_id:project_id, path:path.fileSystem, doc_id:doc_id, project_name:project.name, rev:rev}, callback
 					else
 						callback()
