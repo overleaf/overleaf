@@ -314,8 +314,38 @@ ul.structured-list {
 	padding: 0 (@line-height-computed / 4);
 }
 
-ul.project-list {
-	li {
+.table-wrapper {
+	overflow: scroll;
+}
+
+table.project-list {
+	margin: 0;
+	width: 100%;
+
+	th when (@is-overleaf = true) {
+		font-weight: 600;
+	}
+	th when (@is-overleaf = false) {
+		text-transform: uppercase;
+		font-weight: normal;
+	}
+
+	// thead > tr > th {
+	// 	padding-top: @line-height-computed / 8;
+	// }
+
+	td {
+		@media (min-width: @screen-md-min) {
+			white-space: nowrap;
+		}
+		&.projectName {
+			white-space: normal;
+			width: 50%;
+		}
+		&.selectProject {
+			width: 1%;
+		}
+
 		.last-modified when (@is-overleaf = false) {
 			font-size: .8rem;
 		}
@@ -325,12 +355,13 @@ ul.project-list {
 		.owner when (@is-overleaf = false) {
 			margin-right: 0;
 		}
-		.projectName {
+		a.projectName {
 			margin-right: @line-height-computed / 4;
 			padding: 0;
 			vertical-align: inherit;
 			white-space: normal;
 			text-align: left;
+			color: @structured-list-link-color;
 		}
 
 		.tag-label {

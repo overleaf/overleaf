@@ -123,54 +123,44 @@
 
 	.col-xs-12
 		.card.card-thin.project-list-card
-			ul.list-unstyled.project-list.structured-list(
-				select-all-list,
-				ng-if="projects.length > 0",
-				max-height="projectListHeight - 25",
-				ng-cloak
-			)
-				li.container-fluid
-					.row
-						- var titleClasses = settings.overleaf ? " col-xs-6 col-sm-4 col-md-6" : "col-xs-6"
-						- var lastUpdatedClasses = settings.overleaf ? " col-xs-4 col-sm-3 col-md-2" : "col-xs-4"
-
-						div(class=titleClasses)
-							input.select-all(
-								select-all,
-								type="checkbox"
-								aria-label=translate('select_all_projects')
-							)
-							span.header.clickable(ng-click="changePredicate('name')") #{translate("title")}
-								i.tablesort.fa(ng-class="getSortIconClass('name')")
-						.col-xs-2
-							span.header.clickable(ng-click="changePredicate('accessLevel')") #{translate("owner")}
-								i.tablesort.fa(ng-class="getSortIconClass('accessLevel')")
-						div(class=lastUpdatedClasses)
-							span.header.clickable(ng-click="changePredicate('lastUpdated')") #{translate("last_modified")}
-								i.tablesort.fa(ng-class="getSortIconClass('lastUpdated')")
-						if settings.overleaf
-							.hidden-xs.col-sm-3.col-md-2.action-btn-row-header
-								span.header #{translate("actions")}
-				li.project_entry.container-fluid(
-					ng-repeat="project in visibleProjects | orderBy:predicate:reverse",
-					ng-controller="ProjectListItemController"
-				)
-					.row(
-						ng-if="!project.isV1Project"
-						select-row
-					)
-						include ./item
-					.row(
-						ng-if="project.isV1Project"
-					)
-						include ./v1-item
-				li(
-					ng-if="visibleProjects.length == 0",
+			.table-wrapper(max-height="projectListHeight - 25",)
+				table.table.table-hover.project-list(
+					select-all-list,
+					ng-if="projects.length > 0",
 					ng-cloak
 				)
-					.row
-						.col-xs-12.text-centered
-							small #{translate("no_projects")}
+					thead
+						tr
+							th.selectProject
+								input.select-all(
+									select-all,
+									type="checkbox"
+									aria-label=translate('select_all_projects')
+								)
+							th.projectName
+								span.header.clickable(ng-click="changePredicate('name')") #{translate("title")}
+									i.tablesort.fa(ng-class="getSortIconClass('name')")
+							th
+								span.header.clickable(ng-click="changePredicate('accessLevel')") #{translate("owner")}
+									i.tablesort.fa(ng-class="getSortIconClass('accessLevel')")
+							th
+								span.header.clickable(ng-click="changePredicate('lastUpdated')") #{translate("last_modified")}
+									i.tablesort.fa(ng-class="getSortIconClass('lastUpdated')")
+							if settings.overleaf
+								th.text-right
+									span.header #{translate("actions")}
+					tbody
+						tr.project_entry(
+							ng-repeat="project in visibleProjects | orderBy:predicate:reverse",
+							ng-controller="ProjectListItemController"
+						)
+							include ./item
+						tr(
+							ng-if="visibleProjects.length == 0",
+							ng-cloak
+						)
+							td(colspan=5).text-center
+								small #{translate("no_projects")}
 
 			div.welcome.text-centered(ng-if="projects.length == 0", ng-cloak)
 				h2 #{translate("welcome_to_sl")}

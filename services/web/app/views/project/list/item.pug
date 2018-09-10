@@ -1,7 +1,4 @@
-- var titleClasses = settings.overleaf ? "col-xs-6 col-sm-4 col-md-6" : "col-xs-6"
-- var lastUpdatedClasses = settings.overleaf ? " col-xs-4 col-sm-3 col-md-2" : "col-xs-4"
-
-div(class=titleClasses)
+td.selectProject
 	input.select-item(
 		select-individual,
 		type="checkbox",
@@ -10,29 +7,29 @@ div(class=titleClasses)
 		stop-propagation="click"
 		aria-label=translate('select_project') + " '{{ project.name }}'"
 	)
-	span
-		a.projectName(
-			ng-href="{{projectLink(project)}}"
+td.projectName
+	a.projectName(
+		ng-href="{{projectLink(project)}}"
+		stop-propagation="click"
+	) {{project.name}}
+	span(
+		ng-controller="TagListController"
+	)
+		.tag-label(
+			ng-repeat='tag in project.tags'
 			stop-propagation="click"
-		) {{project.name}}
-		span(
-			ng-controller="TagListController"
 		)
-			.tag-label(
-				ng-repeat='tag in project.tags'
-				stop-propagation="click"
-			)
-				a.label.label-default.tag-label-name(
-					href,
-					ng-click="selectTag(tag)"
-				) {{tag.name}}
-				a.label.label-default.tag-label-remove(
-					href
-					ng-click="removeProjectFromTag(project, tag)"
-				) &times;
+			a.label.label-default.tag-label-name(
+				href,
+				ng-click="selectTag(tag)"
+			) {{tag.name}}
+			a.label.label-default.tag-label-remove(
+				href
+				ng-click="removeProjectFromTag(project, tag)"
+			) &times;
 
-.col-xs-2
-	span.owner {{ownerName()}}
+td
+	span.owner {{userDisplayName(project.owner)}}
 	span(ng-if="isLinkSharingProject(project)")
 		| &nbsp;
 		i.fa.fa-link.small(
@@ -41,64 +38,52 @@ div(class=titleClasses)
 			tooltip-append-to-body="true"
 		)
 
-div(class=lastUpdatedClasses)
-	if settings.overleaf
-		span.last-modified(tooltip="{{project.lastUpdated | formatDate}}") {{project.lastUpdated | fromNowDate}}
-	else
-		span.last-modified {{project.lastUpdated | formatDate}}
+td
+	span.last-modified(tooltip="{{project.lastUpdated | formatDate}}")
+		| {{project.lastUpdated | fromNowDate}}
+	span(ng-show='project.lastUpdatedBy')
+		|
+		| by {{userDisplayName(project.lastUpdatedBy)}}
 
-if settings.overleaf
-	.hidden-xs.col-sm-3.col-md-2.action-btn-row
-		div(
-			ng-if="!project.isTableActionInflight"
+td.text-right
+	div(
+		ng-if="!project.isTableActionInflight"
+	)
+		button.btn.btn-link.action-btn(
+			tooltip=translate('copy'),
+			tooltip-placement="top",
+			tooltip-append-to-body="true",
+			ng-click="clone($event)"
 		)
-			button.btn.btn-link.action-btn(
-				tooltip=translate('copy'),
-				tooltip-placement="top",
-				tooltip-append-to-body="true",
-				ng-click="clone($event)"
-			)
-				i.icon.fa.fa-files-o
-			button.btn.btn-link.action-btn(
-				tooltip=translate('download'),
-				tooltip-placement="top",
-				tooltip-append-to-body="true",
-				ng-click="download($event)"
-			)
-				i.icon.fa.fa-cloud-download
-			button.btn.btn-link.action-btn(
-				ng-if="!project.archived && isOwner()"
-				tooltip=translate('archive'),
-				tooltip-placement="top",
-				tooltip-append-to-body="true",
-				ng-click="archiveOrLeave($event)"
-			)
-				i.icon.fa.fa-inbox
-			button.btn.btn-link.action-btn(
-				ng-if="!project.archived && !isOwner()"
-				tooltip=translate('leave'),
-				tooltip-placement="top",
-				tooltip-append-to-body="true",
-				ng-click="archiveOrLeave($event)"
-			)
-				i.icon.fa.fa-sign-out
-			button.btn.btn-link.action-btn(
-				ng-if="project.archived"
-				tooltip=translate('unarchive'),
-				tooltip-placement="top",
-				tooltip-append-to-body="true",
-				ng-click="restore($event)"
-			)
-				i.icon.fa.fa-reply
-			button.btn.btn-link.action-btn(
-				ng-if="project.archived && isOwner()"
-				tooltip=translate('delete_forever'),
-				tooltip-placement="top",
-				tooltip-append-to-body="true",
-				ng-click="deleteProject($event)"
-			)
-				i.icon.fa.fa-trash
-		div(
-			ng-if="project.isTableActionInflight"
+			i.icon.fa.fa-files-o
+		button.btn.btn-link.action-btn(
+			tooltip=translate('download'),
+			tooltip-placement="top",
+			tooltip-append-to-body="true",
+			ng-click="download($event)"
 		)
-			i.fa.fa-spinner.fa-spin
+			i.icon.fa.fa-cloud-download
+		button.btn.btn-link.action-btn(
+			ng-if="!project.archived && isOwner()"
+			tooltip=translate('archive'),
+			tooltip-placement="top",
+			tooltip-append-to-body="true",
+			ng-click="archiveOrLeave($event)"
+		)
+			i.icon.fa.fa-inbox
+		button.btn.btn-link.action-btn(
+			ng-if="!project.archived && !isOwner()"
+			tooltip=translate('leave'),
+			tooltip-placement="top",
+			tooltip-append-to-body="true",
+			ng-click="archiveOrLeave($event)"
+		)
+			i.icon.fa.fa-sign-out
+		button.btn.btn-link.action-btn(
+			ng-if="project.archived"
+			tooltip=translate('unarchive'),
+			tooltip-placement="top",
+			tooltip-append-to-body="true",
+			ng-click="restore($event)"
+		)
+			i.icon.fa.fa-reply

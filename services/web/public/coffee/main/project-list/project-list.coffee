@@ -485,11 +485,11 @@ define [
 		$scope.isLinkSharingProject = (project) ->
 			return project.source == 'token'
 
-		$scope.ownerName = () ->
-			if $scope.project.accessLevel == "owner"
+		$scope.userDisplayName = (user) ->
+			if user._id == window.user_id
 				return "You"
-			else if $scope.project.owner?
-				return [$scope.project.owner.first_name, $scope.project.owner.last_name].filter((n) -> n?).join(" ")
+			else if user?
+				return [user.first_name, user.last_name].filter((n) -> n?).join(" ")
 			else
 				return "None"
 
