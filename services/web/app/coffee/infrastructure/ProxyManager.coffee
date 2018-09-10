@@ -7,14 +7,20 @@ module.exports = ProxyManager =
 	apply: (publicApiRouter) ->
 		for proxyUrl, target of settings.proxyUrls
 			do (target) ->
-				publicApiRouter.get proxyUrl, ProxyManager.createProxy(target)
+				method = target.options?.method || 'get'
+				publicApiRouter[method] proxyUrl, ProxyManager.createProxy(target)
 
 	createProxy:  (target) ->
 		(req, res, next) ->
 			targetUrl = makeTargetUrl(target, req)
 			logger.log targetUrl: targetUrl, reqUrl: req.url, "proxying url"
 
-			upstream = request(targetUrl)
+			options =
+				url: targetUrl
+			options.headers = { Cookie: req.headers.cookie } if req.headers?.cookie
+			Object.assign(options, target.options) if target?.options?
+			options.form = req.body if options.method in ['post', 'put']
+			upstream = request(options)
 			upstream.on "error", (error) ->
 				logger.error err: error, "error in ProxyManager"
 
