@@ -33,7 +33,7 @@ block content
 														required,
 														ng-model="email",
 														ng-init="email = "+JSON.stringify(user.email),
-														ng-model-options="{ updateOn: 'blur' }"
+														ng-model-options="{ pdateOn: 'blur' }"
 													)
 													span.small.text-primary(ng-show="settingsForm.email.$invalid && settingsForm.email.$dirty")
 														|  #{translate("must_be_email_address")}
@@ -73,62 +73,51 @@ block content
 												label.control-label #{translate("last_name")}
 												div.form-control(readonly="true") #{user.last_name}
 
-
-								if !externalAuthenticationSystemUsed()
-									.col-md-5.col-md-offset-1
-										h3 #{translate("change_password")}
-										form(async-form="changepassword", name="changePasswordForm", action="/user/password/update", method="POST", novalidate)
-											input(type="hidden", name="_csrf", value=csrfToken)
-											.form-group
-												label(for='currentPassword') #{translate("current_password")}
-												input.form-control(
-													type='password',
-													name='currentPassword',
-													placeholder='*********',
-													ng-model="currentPassword",
-													required
-												)
-												span.small.text-primary(ng-show="changePasswordForm.currentPassword.$invalid && changePasswordForm.currentPassword.$dirty")
-													| #{translate("required")}
-											.form-group
-												label(for='newPassword1') #{translate("new_password")}
-												input.form-control(
-													id='passwordField',
-													type='password',
-													name='newPassword1',
-													placeholder='*********',
-													ng-model="newPassword1",
-													required,
-													complex-password
-												)
-												span.small.text-primary(ng-show="changePasswordForm.newPassword1.$error.complexPassword && changePasswordForm.newPassword1.$dirty", ng-bind-html="complexPasswordErrorMessage") 
-											.form-group
-												label(for='newPassword2') #{translate("confirm_new_password")}
-												input.form-control(
-													type='password',
-													name='newPassword2',
-													placeholder='*********',
-													ng-model="newPassword2",
-													equals="passwordField"
-												) 
-												span.small.text-primary(ng-show="changePasswordForm.newPassword2.$error.areEqual && changePasswordForm.newPassword2.$dirty")
-													| #{translate("doesnt_match")} 
-												span.small.text-primary(ng-show="!changePasswordForm.newPassword2.$error.areEqual && changePasswordForm.newPassword2.$invalid && changePasswordForm.newPassword2.$dirty")
-													| #{translate("invalid_password")} 
-											.actions
-												button.btn.btn-primary(
-													type='submit',
-													ng-disabled="changePasswordForm.$invalid"
-												) #{translate("change")}
-
-								else
-									if settings.overleaf && settings.createV1AccountOnLogin
-										.col-md-5.col-md-offset-1
-											h3 #{translate("change_password")}
-											p
-												| To change your password,
-												| please go to #[a(href=settings.overleaf.host+'/users/edit') Overleaf v1 settings]
-
+								.col-md-5.col-md-offset-1
+									h3 #{translate("change_password")}
+									form(async-form="changepassword", name="changePasswordForm", action="/user/password/update", method="POST", novalidate)
+										input(type="hidden", name="_csrf", value=csrfToken)
+										.form-group
+											label(for='currentPassword') #{translate("current_password")}
+											input.form-control(
+												type='password',
+												name='currentPassword',
+												placeholder='*********',
+												ng-model="currentPassword",
+												required
+											)
+											span.small.text-primary(ng-show="changePasswordForm.currentPassword.$invalid && changePasswordForm.currentPassword.$dirty")
+												| #{translate("required")}
+										.form-group
+											label(for='newPassword1') #{translate("new_password")}
+											input.form-control(
+												id='passwordField',
+												type='password',
+												name='newPassword1',
+												placeholder='*********',
+												ng-model="newPassword1",
+												required,
+												complex-password
+											)
+											span.small.text-primary(ng-show="changePasswordForm.newPassword1.$error.complexPassword && changePasswordForm.newPassword1.$dirty", ng-bind-html="complexPasswordErrorMessage") 
+										.form-group
+											label(for='newPassword2') #{translate("confirm_new_password")}
+											input.form-control(
+												type='password',
+												name='newPassword2',
+												placeholder='*********',
+												ng-model="newPassword2",
+												equals="passwordField"
+											) 
+											span.small.text-primary(ng-show="changePasswordForm.newPassword2.$error.areEqual && changePasswordForm.newPassword2.$dirty")
+												| #{translate("doesnt_match")} 
+											span.small.text-primary(ng-show="!changePasswordForm.newPassword2.$error.areEqual && changePasswordForm.newPassword2.$invalid && changePasswordForm.newPassword2.$dirty")
+												| #{translate("invalid_password")} 
+										.actions
+											button.btn.btn-primary(
+												type='submit',
+												ng-disabled="changePasswordForm.$invalid"
+											) #{translate("change")}
 
 							| !{moduleIncludes("userSettings", locals)}
 
