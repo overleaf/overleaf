@@ -426,6 +426,7 @@ module.exports = class Router
 				maxRequests: 10,
 				timeInterval: 60
 			}),
-			TokenAccessController.readAndWriteToken
+			TokenAccessController.readAndWriteToken,
+			TokenAccessController.redirectNotFoundErrorToV1
 
 		webRouter.get '*', ErrorController.notFound

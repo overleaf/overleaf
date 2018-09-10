@@ -3,8 +3,18 @@ AuthenticationController = require '../Authentication/AuthenticationController'
 TokenAccessHandler = require './TokenAccessHandler'
 Errors = require '../Errors/Errors'
 logger = require 'logger-sharelatex'
+settings = require 'settings-sharelatex'
 
 module.exports = TokenAccessController =
+
+	redirectNotFoundErrorToV1: (err, req, res, next) ->
+		if err instanceof Errors.NotFoundError and settings.overleaf
+			logger.log {
+				token: req.params['read_and_write_token']
+			}, "[TokenAccess] No project found for token, redirecting to v1"
+			res.redirect(settings.overleaf.host + req.url)
+		else
+			next(err)
 
 	_loadEditor: (projectId, req, res, next) ->
 		req.params.Project_id = projectId.toString()
