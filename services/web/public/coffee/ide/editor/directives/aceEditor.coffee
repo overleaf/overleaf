@@ -516,6 +516,7 @@ define [
 
 				scope.$on '$destroy', () ->
 					if scope.sharejsDoc?
+						scope.$broadcast('changeEditor')
 						tearDownSpellCheck()
 						tearDownCursorPosition()
 						detachFromAce(scope.sharejsDoc)

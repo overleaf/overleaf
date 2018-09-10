@@ -3,11 +3,11 @@ define [], () ->
 		constructor: (@$scope, @adapter, @localStorage) ->
 			@$scope.$on 'editorInit', @jumpToPositionInNewDoc
 
-			@$scope.$on 'beforeChangeDocument', () =>
-				@storeCursorPosition()
-				@storeFirstVisibleLine()
+			@$scope.$on 'beforeChangeDocument', @storePositionAndLine
 
 			@$scope.$on 'afterChangeDocument', @jumpToPositionInNewDoc
+
+			@$scope.$on 'changeEditor', @storePositionAndLine
 
 			@$scope.$on "#{@$scope.name}:gotoLine", (e, line, column) =>
 				if line?
@@ -23,6 +23,10 @@ define [], () ->
 
 			@$scope.$on "#{@$scope.name}:clearSelection", (e) =>
 				@adapter.clearSelection()
+
+		storePositionAndLine: () =>
+			@storeCursorPosition()
+			@storeFirstVisibleLine()
 
 		jumpToPositionInNewDoc: () =>
 			@doc_id = @$scope.sharejsDoc?.doc_id
