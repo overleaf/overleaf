@@ -1,175 +1,183 @@
 .row
-	.col-xs-12(ng-cloak)
+  .col-xs-12(ng-cloak)
 
 
 
-		form.project-search.form-horizontal(role="form")
-			.form-group.has-feedback.has-feedback-left.col-md-7.col-xs-12
-				input.form-control.col-md-7.col-xs-12(
-					placeholder=translate('search_projects')+"…",
-					aria-label=translate('search_projects')+"…",
-					autofocus='autofocus',
-					ng-model="searchText.value",
-					focus-on='search:clear',
-					ng-keyup="searchProjects()"
-				)
-				i.fa.fa-search.form-control-feedback-left
-				i.fa.fa-times.form-control-feedback(
-					ng-click="clearSearchText()",
-					style="cursor: pointer;",
-					ng-show="searchText.value.length > 0"
-				)
-			//- i.fa.fa-remove
+    form.project-search.form-horizontal(role="form")
+      .form-group.has-feedback.has-feedback-left.col-md-7.col-xs-12
+        input.form-control.col-md-7.col-xs-12(
+          placeholder=translate('search_projects')+"…",
+          aria-label=translate('search_projects')+"…",
+          autofocus='autofocus',
+          ng-model="searchText.value",
+          focus-on='search:clear',
+          ng-keyup="searchProjects()"
+        )
+        i.fa.fa-search.form-control-feedback-left
+        i.fa.fa-times.form-control-feedback(
+          ng-click="clearSearchText()",
+          style="cursor: pointer;",
+          ng-show="searchText.value.length > 0"
+        )
+      //- i.fa.fa-remove
 
-		.project-tools(ng-cloak)
-			.btn-toolbar(ng-show="filter != 'archived'")
-				.btn-group(ng-hide="selectedProjects.length < 1")
-					a.btn.btn-default(
-						href,
-						tooltip=translate('download'),
-						tooltip-placement="bottom",
-						tooltip-append-to-body="true",
-						ng-click="downloadSelectedProjects()"
-					)
-						i.fa.fa-cloud-download
-					- var archiveButtonString = settings.overleaf ? translate("archive") : translate("delete")
-					- var archiveButtonIcon = settings.overleaf ? "fa-inbox" : "fa-trash-o"
-					a.btn.btn-default(
-						href,
-						tooltip=`{{ isArchiveableProjectSelected ? '${archiveButtonString}' : '${translate("leave")}' }}`,
-						tooltip-placement="bottom",
-						tooltip-append-to-body="true",
-						ng-click="openArchiveProjectsModal()"
-					)
-						i.fa(ng-class=`isArchiveableProjectSelected ? '${archiveButtonIcon}' : 'fa-sign-out'`)
+    .project-tools(ng-cloak)
+      .btn-toolbar(ng-show="filter != 'archived'")
+        .btn-group(ng-hide="selectedProjects.length < 1")
+          a.btn.btn-default(
+            href,
+            tooltip=translate('download'),
+            tooltip-placement="bottom",
+            tooltip-append-to-body="true",
+            ng-click="downloadSelectedProjects()"
+          )
+            i.fa.fa-cloud-download
+          - var archiveButtonString = settings.overleaf ? translate("archive") : translate("delete")
+          - var archiveButtonIcon = settings.overleaf ? "fa-inbox" : "fa-trash-o"
+          a.btn.btn-default(
+            href,
+            tooltip=`{{ isArchiveableProjectSelected ? '${archiveButtonString}' : '${translate("leave")}' }}`,
+            tooltip-placement="bottom",
+            tooltip-append-to-body="true",
+            ng-click="openArchiveProjectsModal()"
+          )
+            i.fa(ng-class=`isArchiveableProjectSelected ? '${archiveButtonIcon}' : 'fa-sign-out'`)
 
-				.btn-group.dropdown(ng-hide="selectedProjects.length < 1", dropdown)
-					a.btn.btn-default.dropdown-toggle(
-						href,
-						data-toggle="dropdown",
-						dropdown-toggle,
-						tooltip=translate('add_to_folders'),
-						tooltip-append-to-body="true",
-						tooltip-placement="bottom"
-					)
-						i.fa.fa-folder-open-o
-						|  
-						span.caret
-					ul.dropdown-menu.dropdown-menu-right.js-tags-dropdown-menu.tags-dropdown-menu(
-						role="menu"
-						ng-controller="TagListController"
-					)
-						li.dropdown-header #{translate("add_to_folder")}
-						li(
-							ng-repeat="tag in tags | orderBy:'name'",
-							ng-controller="TagDropdownItemController"
-							ng-if="!tag.isV1"
-						)
-							a(href="#", ng-click="addOrRemoveProjectsFromTag()", stop-propagation="click")
-								i.fa(
-									ng-class="{\
-										'fa-check-square-o': areSelectedProjectsInTag == true,\
-										'fa-square-o': areSelectedProjectsInTag == false,\
-										'fa-minus-square-o': areSelectedProjectsInTag == 'partial'\
-									}"
-								)
-								|  {{tag.name}}
-						li.divider
-						li
-							a(href, ng-click="openNewTagModal()", stop-propagation="click") #{translate("create_new_folder")}
+        .btn-group.dropdown(ng-hide="selectedProjects.length < 1", dropdown)
+          a.btn.btn-default.dropdown-toggle(
+            href,
+            data-toggle="dropdown",
+            dropdown-toggle,
+            tooltip=translate('add_to_folders'),
+            tooltip-append-to-body="true",
+            tooltip-placement="bottom"
+          )
+            i.fa.fa-folder-open-o
+            |
+            span.caret
+          ul.dropdown-menu.dropdown-menu-right.js-tags-dropdown-menu.tags-dropdown-menu(
+            role="menu"
+            ng-controller="TagListController"
+          )
+            li.dropdown-header #{translate("add_to_folder")}
+            li(
+              ng-repeat="tag in tags | orderBy:'name'",
+              ng-controller="TagDropdownItemController"
+              ng-if="!tag.isV1"
+            )
+              a(href="#", ng-click="addOrRemoveProjectsFromTag()", stop-propagation="click")
+                i.fa(
+                  ng-class="{\
+                    'fa-check-square-o': areSelectedProjectsInTag == true,\
+                    'fa-square-o': areSelectedProjectsInTag == false,\
+                    'fa-minus-square-o': areSelectedProjectsInTag == 'partial'\
+                  }"
+                )
+                |  {{tag.name}}
+            li.divider
+            li
+              a(href, ng-click="openNewTagModal()", stop-propagation="click") #{translate("create_new_folder")}
 
-				.btn-group(ng-hide="selectedProjects.length != 1", dropdown).dropdown
-					a.btn.btn-default.dropdown-toggle(
-						href,
-						data-toggle="dropdown",
-						dropdown-toggle
-					) #{translate("more")} 
-						span.caret
-					ul.dropdown-menu.dropdown-menu-right(role="menu")
-						li(ng-show="getFirstSelectedProject().accessLevel == 'owner'")
-							a(
-								href,
-								ng-click="openRenameProjectModal()"
-							) #{translate("rename")}
-						li
-							a(
-								href,
-								ng-click="openCloneProjectModal()"
-							) #{translate("make_copy")}
+        .btn-group(ng-hide="selectedProjects.length != 1", dropdown).dropdown
+          a.btn.btn-default.dropdown-toggle(
+            href,
+            data-toggle="dropdown",
+            dropdown-toggle
+          ) #{translate("more")}
+            span.caret
+          ul.dropdown-menu.dropdown-menu-right(role="menu")
+            li(ng-show="getFirstSelectedProject().accessLevel == 'owner'")
+              a(
+                href,
+                ng-click="openRenameProjectModal()"
+              ) #{translate("rename")}
+            li
+              a(
+                href,
+                ng-click="openCloneProjectModal()"
+              ) #{translate("make_copy")}
 
-			.btn-toolbar(ng-show="filter == 'archived'")
-				.btn-group(ng-hide="selectedProjects.length < 1")
-					a.btn.btn-default(
-						href,
-						data-original-title="Restore",
-						data-toggle="tooltip",
-						data-placement="bottom",
-						ng-click="restoreSelectedProjects()"
-					) #{translate("restore")}
+      .btn-toolbar(ng-show="filter == 'archived'")
+        .btn-group(ng-hide="selectedProjects.length < 1")
+          a.btn.btn-default(
+            href,
+            data-original-title="Restore",
+            data-toggle="tooltip",
+            data-placement="bottom",
+            ng-click="restoreSelectedProjects()"
+          ) #{translate("restore")}
 
-				.btn-group(ng-hide="selectedProjects.length < 1")
-					a.btn.btn-danger(
-						href,
-						data-original-title="Delete Forever",
-						data-toggle="tooltip",
-						data-placement="bottom",
-						ng-click="openDeleteProjectsModal()"
-					) #{translate("delete_forever")}
+        .btn-group(ng-hide="selectedProjects.length < 1")
+          a.btn.btn-danger(
+            href,
+            data-original-title="Delete Forever",
+            data-toggle="tooltip",
+            data-placement="bottom",
+            ng-click="openDeleteProjectsModal()"
+          ) #{translate("delete_forever")}
 
 .row.row-spaced
-	each warning in warnings
-		.col-xs-12
-			.alert.alert-warning(role="alert")= warning
+  each warning in warnings
+    .col-xs-12
+      .alert.alert-warning(role="alert")= warning
 
-	.col-xs-12
-		.card.card-thin.project-list-card
-			.table-wrapper(max-height="projectListHeight - 25",)
-				table.table.table-hover.project-list(
-					select-all-list,
-					ng-if="projects.length > 0",
-					ng-cloak
-				)
-					thead
-						tr
-							th.selectProject
-								input.select-all(
-									select-all,
-									type="checkbox"
-									aria-label=translate('select_all_projects')
-								)
-							th.projectName
-								span.header.clickable(ng-click="changePredicate('name')") #{translate("title")}
-									i.tablesort.fa(ng-class="getSortIconClass('name')")
-							th
-								span.header.clickable(ng-click="changePredicate('accessLevel')") #{translate("owner")}
-									i.tablesort.fa(ng-class="getSortIconClass('accessLevel')")
-							th
-								span.header.clickable(ng-click="changePredicate('lastUpdated')") #{translate("last_modified")}
-									i.tablesort.fa(ng-class="getSortIconClass('lastUpdated')")
-							if settings.overleaf
-								th.text-right
-									span.header #{translate("actions")}
-					tbody
-						tr.project_entry(
-							ng-repeat="project in visibleProjects | orderBy:predicate:reverse",
-							ng-controller="ProjectListItemController"
-						)
-							include ./item
-						tr(
-							ng-if="visibleProjects.length == 0",
-							ng-cloak
-						)
-							td(colspan=5).text-center
-								small #{translate("no_projects")}
+  .col-xs-12
+    .card.card-thin.project-list-card
+      .table-wrapper(max-height="projectListHeight - 25",)
+        table.table.table-hover.project-list(
+          select-all-list,
+          ng-if="projects.length > 0",
+          ng-cloak
+        )
+          thead
+            tr
+              th.selectProject
+                input.select-all(
+                  select-all,
+                  type="checkbox"
+                  aria-label=translate('select_all_projects')
+                )
+              th.projectName
+                span.header.clickable(ng-click="changePredicate('name')") #{translate("title")}
+                  i.tablesort.fa(ng-class="getSortIconClass('name')")
+              th
+                span.header.clickable(ng-click="changePredicate('accessLevel')") #{translate("owner")}
+                  i.tablesort.fa(ng-class="getSortIconClass('accessLevel')")
+              th
+                span.header.clickable(ng-click="changePredicate('lastUpdated')") #{translate("last_modified")}
+                  i.tablesort.fa(ng-class="getSortIconClass('lastUpdated')")
+              if settings.overleaf
+                th.text-right
+                  span.header #{translate("actions")}
+          tbody
+            tr.project_entry(
+              ng-repeat="project in visibleProjects | orderBy:predicate:reverse",
+              ng-controller="ProjectListItemController"
+            )
+              .row(
+                ng-if="!project.isV1Project"
+                select-row
+              )
+                include ./item
+              .row(
+                ng-if="project.isV1Project"
+              )
+                include ./v1-item
+            tr(
+              ng-if="visibleProjects.length == 0",
+              ng-cloak
+            )
+              td(colspan=5).text-center
+                small #{translate("no_projects")}
 
-			div.welcome.text-centered(ng-if="projects.length == 0", ng-cloak)
-				h2 #{translate("welcome_to_sl")}
-				p #{translate("new_to_latex_look_at")} 
-					a(href="/templates") #{translate("templates").toLowerCase()}
-					|   #{translate("or")}
-					a(href="/learn")  #{translate("latex_help_guide")}
-					| ,
-					br 
-					|  #{translate("or_create_project_left")}
+      div.welcome.text-centered(ng-if="projects.length == 0", ng-cloak)
+        h2 #{translate("welcome_to_sl")}
+        p #{translate("new_to_latex_look_at")}
+          a(href="/templates") #{translate("templates").toLowerCase()}
+          |   #{translate("or")}
+          a(href="/learn")  #{translate("latex_help_guide")}
+          | ,
+          br
+          |  #{translate("or_create_project_left")}
 
-							
+
