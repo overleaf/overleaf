@@ -35,6 +35,11 @@ module.exports = AccountMergeEmailController =
 					'$set': {
 						'overleaf.id': v1_id,
 						email: final_email
+					},
+					'$push': {
+						emails: {
+							email: final_email, createdAt: new Date()
+						}
 					}
 				}, (err) ->
 					return next(err) if err?
