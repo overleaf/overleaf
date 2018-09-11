@@ -319,7 +319,7 @@ describe "CompileManager", ->
 			@callback  = sinon.stub()
 
 			@project_id
-			@timeout = 10 * 1000
+			@timeout = 60 * 1000
 			@file_name = "main.tex"
 			@Settings.path.compilesDir = "/local/compile/directory"
 			@image = "example.com/image"
