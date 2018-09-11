@@ -134,6 +134,9 @@ describe "ResourceWriter", ->
 				type: "aux"
 			}, {
 				path: "cache/_chunk1"
+			},{
+				path: "figures/image-eps-converted-to.pdf"
+				type: "pdf"
 			}]
 			@resources = "mock-resources"
 			@OutputFileFinder.findOutputFiles = sinon.stub().callsArgWith(2, null, @output_files)
@@ -163,6 +166,11 @@ describe "ResourceWriter", ->
 		it "should not delete the knitr cache file", ->
 			@ResourceWriter._deleteFileIfNotDirectory
 				.calledWith(path.join(@basePath, "cache/_chunk1"))
+				.should.equal false
+
+		it "should not delete the epstopdf converted files", ->
+			@ResourceWriter._deleteFileIfNotDirectory
+				.calledWith(path.join(@basePath, "figures/image-eps-converted-to.pdf"))
 				.should.equal false
 
 		it "should call the callback", ->
