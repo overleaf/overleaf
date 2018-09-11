@@ -16,10 +16,12 @@ describe "RequestParser", ->
 			compile:
 				token: "token-123"
 				options:
+					imageName: "basicImageName/here:2017-1"
 					compiler: "pdflatex"
 					timeout:  42
 				resources: []
-		@RequestParser = SandboxedModule.require modulePath
+		@RequestParser = SandboxedModule.require modulePath, requires:
+			"settings-sharelatex": @settings = {}
 	
 	afterEach ->
 		tk.reset()
@@ -56,6 +58,13 @@ describe "RequestParser", ->
 		
 		it "should set the compiler to pdflatex by default", ->
 			@data.compiler.should.equal "pdflatex"
+
+	describe "with imageName set", ->
+		beforeEach ->
+			@RequestParser.parse @validRequest, (error, @data) =>
+
+		it "should set the imageName", ->
+			@data.imageName.should.equal "basicImageName/here:2017-1"
 
 	describe "without a timeout specified", ->
 		beforeEach ->

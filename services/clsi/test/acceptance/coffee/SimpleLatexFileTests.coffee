@@ -1,6 +1,7 @@
 Client = require "./helpers/Client"
 request = require "request"
 require("chai").should()
+ClsiApp = require "./helpers/ClsiApp"
 
 describe "Simple LaTeX file", ->
 	before (done) ->
@@ -15,7 +16,8 @@ describe "Simple LaTeX file", ->
 					\\end{document}
 				'''
 			]
-		Client.compile @project_id, @request, (@error, @res, @body) => done()
+		ClsiApp.ensureRunning =>
+			Client.compile @project_id, @request, (@error, @res, @body) => done()
 
 	it "should return the PDF", ->
 		pdf = Client.getOutputFile(@body, "pdf")

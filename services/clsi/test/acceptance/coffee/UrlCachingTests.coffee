@@ -2,6 +2,7 @@ Client = require "./helpers/Client"
 request = require "request"
 require("chai").should()
 sinon = require "sinon"
+ClsiApp = require "./helpers/ClsiApp"
 
 host = "localhost"
 
@@ -46,7 +47,8 @@ describe "Url Caching", ->
 				}]
 
 			sinon.spy Server, "getFile"
-			Client.compile @project_id, @request, (@error, @res, @body) => done()
+			ClsiApp.ensureRunning =>
+				Client.compile @project_id, @request, (@error, @res, @body) => done()
 
 		afterEach ->
 			Server.getFile.restore()

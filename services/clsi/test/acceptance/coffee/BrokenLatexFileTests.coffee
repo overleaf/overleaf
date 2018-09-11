@@ -1,9 +1,10 @@
 Client = require "./helpers/Client"
 request = require "request"
 require("chai").should()
+ClsiApp = require "./helpers/ClsiApp"
 
 describe "Broken LaTeX file", ->
-	before ->
+	before (done)->
 		@broken_request =
 			resources: [
 				path: "main.tex"
@@ -24,6 +25,7 @@ describe "Broken LaTeX file", ->
 					\\end{document}
 				'''
 			]
+		ClsiApp.ensureRunning done
 		
 	describe "on first run", ->
 		before (done) ->

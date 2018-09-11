@@ -35,6 +35,7 @@ TIMEOUT = 6 * 60 * 1000
 app.use (req, res, next) ->
 	req.setTimeout TIMEOUT
 	res.setTimeout TIMEOUT
+	res.removeHeader("X-Powered-By")
 	next()
 
 app.param 'project_id', (req, res, next, project_id) ->
@@ -139,6 +140,14 @@ app.get "/health_check", (req, res)->
 	res.contentType(resCacher?.setContentType)
 	res.status(resCacher?.code).send(resCacher?.body)
 
+app.get "/smoke_test_force", (req, res)->
+	smokeTest.run(require.resolve(__dirname + "/test/smoke/js/SmokeTests.js"))(req, res)
+
+
+#TODO delete this
+app.get "/settings", (req, res)->
+	res.json(Settings)
+
 profiler = require "v8-profiler"
 app.get "/profile", (req, res) ->
 	time = parseInt(req.query.time || "1000")
@@ -160,8 +169,76 @@ app.use (error, req, res, next) ->
 		logger.error {err: error, url: req.url}, "server error"
 		res.sendStatus(error?.statusCode || 500)
 
-app.listen port = (Settings.internal?.clsi?.port or 3013), host = (Settings.internal?.clsi?.host or "localhost"), (error) ->
-	logger.info "CLSI starting up, listening on #{host}:#{port}"
+net = require "net"
+os = require "os"
+
+STATE = "up"
+
+
+loadTcpServer = net.createServer (socket) ->
+	socket.on "error", (err)->
+		if err.code == "ECONNRESET"
+			# this always comes up, we don't know why
+			return
+		logger.err err:err, "error with socket on load check"
+		socket.destroy()
+	
+	if STATE == "up" and Settings.internal.load_balancer_agent.report_load
+		currentLoad = os.loadavg()[0]
+
+		# staging clis's have 1 cpu core only
+		if os.cpus().length == 1
+			availableWorkingCpus = 1
+		else
+			availableWorkingCpus = os.cpus().length - 1
+
+		freeLoad = availableWorkingCpus - currentLoad
+		freeLoadPercentage = Math.round((freeLoad / availableWorkingCpus) * 100)
+		if freeLoadPercentage <= 0
+			freeLoadPercentage = 1 # when its 0 the server is set to drain and will move projects to different servers
+		socket.write("up, #{freeLoadPercentage}%\n", "ASCII")
+		socket.end()
+	else
+		socket.write("#{STATE}\n", "ASCII")
+		socket.end()
+
+loadHttpServer = express()
+
+loadHttpServer.post "/state/up", (req, res, next) ->
+	STATE = "up"
+	logger.info "getting message to set server to down"
+	res.sendStatus 204
+
+loadHttpServer.post "/state/down", (req, res, next) ->
+	STATE = "down"
+	logger.info "getting message to set server to down"
+	res.sendStatus 204
+
+loadHttpServer.post "/state/maint", (req, res, next) ->
+	STATE = "maint"
+	logger.info "getting message to set server to maint"
+	res.sendStatus 204
+	
+
+port = (Settings.internal?.clsi?.port or 3013)
+host = (Settings.internal?.clsi?.host or "localhost")
+
+load_tcp_port = Settings.internal.load_balancer_agent.load_port
+load_http_port = Settings.internal.load_balancer_agent.local_port
+
+if !module.parent # Called directly
+	app.listen port, host, (error) ->
+		logger.info "CLSI starting up, listening on #{host}:#{port}"
+
+	loadTcpServer.listen load_tcp_port, host, (error) ->
+		throw error if error?
+		logger.info "Load tcp agent listening on load port #{load_tcp_port}"
+
+	loadHttpServer.listen load_http_port, host, (error) ->
+		throw error if error?
+		logger.info "Load http agent listening on load port #{load_http_port}"
+
+module.exports = app
 
 setInterval () ->
 	ProjectPersistenceManager.clearExpiredProjects()

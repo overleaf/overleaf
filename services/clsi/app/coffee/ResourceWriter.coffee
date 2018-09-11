@@ -120,7 +120,11 @@ module.exports = ResourceWriter =
 							logger.err err:err, project_id:project_id, path:path, resource_url:resource.url, modified:resource.modified, "error downloading file for resources"
 						callback() #try and continue compiling even if http resource can not be downloaded at this time
 				else
+					process = require("process")
 					fs.writeFile path, resource.content, callback
+					try 
+						result = fs.lstatSync(path)
+					catch e
 
 	checkPath: (basePath, resourcePath, callback) ->
 		path = Path.normalize(Path.join(basePath, resourcePath))

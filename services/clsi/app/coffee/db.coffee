@@ -1,8 +1,11 @@
 Sequelize = require("sequelize")
 Settings = require("settings-sharelatex")
 _ = require("underscore")
+logger = require "logger-sharelatex"
 
 options = _.extend {logging:false}, Settings.mysql.clsi
+
+logger.log dbPath:Settings.mysql.clsi.storage, "connecting to db"
 
 sequelize = new Sequelize(
 	Settings.mysql.clsi.database,
@@ -10,6 +13,12 @@ sequelize = new Sequelize(
 	Settings.mysql.clsi.password,
 	options
 )
+
+if Settings.mysql.clsi.dialect == "sqlite"
+	logger.log "running PRAGMA journal_mode=WAL;"
+	sequelize.query("PRAGMA journal_mode=WAL;")
+	sequelize.query("PRAGMA synchronous=OFF;")
+	sequelize.query("PRAGMA read_uncommitted = true;")
 
 module.exports =
 	UrlCache: sequelize.define("UrlCache", {
@@ -32,5 +41,15 @@ module.exports =
 		]
 	})
 
-	sync: () -> sequelize.sync()
+	op: Sequelize.Op
+	
+	sync: () -> 
+		logger.log dbPath:Settings.mysql.clsi.storage, "syncing db schema"
+		sequelize.sync()
+			.then(-> 
+				logger.log "db sync complete"
+			).catch((err)->
+				console.log err, "error syncing"
+			)
+
 	

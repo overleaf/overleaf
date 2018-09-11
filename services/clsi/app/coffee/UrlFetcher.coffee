@@ -1,6 +1,8 @@
 request = require("request").defaults(jar: false)
 fs = require("fs")
 logger = require "logger-sharelatex"
+settings = require("settings-sharelatex")
+URL = require('url');
 
 oneMinute = 60 * 1000
 
@@ -11,6 +13,9 @@ module.exports = UrlFetcher =
 			_callback(error)
 			_callback = () ->
 
+		if settings.filestoreDomainOveride?
+			p = URL.parse(url).path
+			url = "#{settings.filestoreDomainOveride}#{p}"
 		timeoutHandler = setTimeout () ->
 			timeoutHandler = null
 			logger.error url:url, filePath: filePath, "Timed out downloading file to cache"

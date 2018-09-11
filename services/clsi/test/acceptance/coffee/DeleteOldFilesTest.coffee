@@ -1,9 +1,10 @@
 Client = require "./helpers/Client"
 request = require "request"
 require("chai").should()
+ClsiApp = require "./helpers/ClsiApp"
 
 describe "Deleting Old Files", ->
-	before ->
+	before (done)->
 		@request =
 			resources: [
 				path: "main.tex"
@@ -14,7 +15,8 @@ describe "Deleting Old Files", ->
 					\\end{document}
 				'''
 			]
-		
+		ClsiApp.ensureRunning done
+
 	describe "on first run", ->
 		before (done) ->
 			@project_id = Client.randomId()

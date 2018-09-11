@@ -7,17 +7,18 @@ EventEmitter = require("events").EventEmitter
 describe "UrlFetcher", ->
 	beforeEach ->
 		@callback = sinon.stub()
-		@url = "www.example.com/file"
+		@url = "https://www.example.com/file/here?query=string"
 		@UrlFetcher = SandboxedModule.require modulePath, requires:
 			request: defaults: @defaults = sinon.stub().returns(@request = {})
 			fs: @fs = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			"settings-sharelatex": @settings = {}
 
 	it "should turn off the cookie jar in request", ->
 		@defaults.calledWith(jar: false)
 			.should.equal true
-		
-	describe "_pipeUrlToFile", ->
+
+	describe "rewrite url domain if filestoreDomainOveride is set", ->
 		beforeEach ->
 			@path = "/path/to/file/on/disk"
 			@request.get = sinon.stub().returns(@urlStream = new EventEmitter)
@@ -26,20 +27,53 @@ describe "UrlFetcher", ->
 			@urlStream.resume = sinon.stub()
 			@fs.createWriteStream = sinon.stub().returns(@fileStream = new EventEmitter)
 			@fs.unlink = (file, callback) -> callback()
-			@UrlFetcher.pipeUrlToFile(@url, @path, @callback)
 
-		it "should request the URL", ->
-			@request.get
-				.calledWith(sinon.match {"url": @url})
-				.should.equal true
+		it "should use the normal domain when override not set", (done)->
+			@UrlFetcher.pipeUrlToFile @url, @path, =>
+				@request.get.args[0][0].url.should.equal @url
+				done()
+			@res = statusCode: 200
+			@urlStream.emit "response", @res
+			@urlStream.emit "end"
+			@fileStream.emit "finish"
 
+
+		it "should use override domain when filestoreDomainOveride is set", (done)->
+			@settings.filestoreDomainOveride = "192.11.11.11"
+			@UrlFetcher.pipeUrlToFile @url, @path, =>
+				@request.get.args[0][0].url.should.equal "192.11.11.11/file/here?query=string"
+				done()
+			@res = statusCode: 200
+			@urlStream.emit "response", @res
+			@urlStream.emit "end"
+			@fileStream.emit "finish"
+
+	describe "pipeUrlToFile", ->
+		beforeEach (done)->
+			@path = "/path/to/file/on/disk"
+			@request.get = sinon.stub().returns(@urlStream = new EventEmitter)
+			@urlStream.pipe = sinon.stub()
+			@urlStream.pause = sinon.stub()
+			@urlStream.resume = sinon.stub()
+			@fs.createWriteStream = sinon.stub().returns(@fileStream = new EventEmitter)
+			@fs.unlink = (file, callback) -> callback()
+			done()
 
 		describe "successfully", ->
-			beforeEach ->
+			beforeEach (done)->
+				@UrlFetcher.pipeUrlToFile @url, @path, =>
+					@callback()
+					done()
 				@res = statusCode: 200
 				@urlStream.emit "response", @res
 				@urlStream.emit "end"
 				@fileStream.emit "finish"
+
+
+			it "should request the URL", ->
+				@request.get
+					.calledWith(sinon.match {"url": @url})
+					.should.equal true
 
 			it "should open the file for writing", ->
 				@fs.createWriteStream
@@ -55,7 +89,10 @@ describe "UrlFetcher", ->
 				@callback.called.should.equal true
 
 		describe "with non success status code", ->
-			beforeEach ->
+			beforeEach (done)->
+				@UrlFetcher.pipeUrlToFile @url, @path, (err)=>
+					@callback(err)
+					done()	
 				@res = statusCode: 404
 				@urlStream.emit "response", @res
 				@urlStream.emit "end"
@@ -66,7 +103,10 @@ describe "UrlFetcher", ->
 					.should.equal true
 
 		describe "with error", ->
-			beforeEach ->
+			beforeEach (done)->
+				@UrlFetcher.pipeUrlToFile @url, @path, (err)=>
+					@callback(err)
+					done()
 				@urlStream.emit "error", @error = new Error("something went wrong")
 
 			it "should call the callback with the error", ->

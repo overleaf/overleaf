@@ -15,10 +15,7 @@ fse = require "fs-extra"
 os = require("os")
 async = require "async"
 Errors = require './Errors'
-
-commandRunner = Settings.clsi?.commandRunner or "./CommandRunner"
-logger.info commandRunner:commandRunner, "selecting command runner for clsi"
-CommandRunner = require(commandRunner)
+CommandRunner = require "./CommandRunner"
 
 getCompileName = (project_id, user_id) ->
 	if user_id? then "#{project_id}-#{user_id}" else project_id
@@ -41,7 +38,6 @@ module.exports = CompileManager =
 
 	doCompile: (request, callback = (error, outputFiles) ->) ->
 		compileDir = getCompileDir(request.project_id, request.user_id)
-
 		timer = new Metrics.Timer("write-to-disk")
 		logger.log project_id: request.project_id, user_id: request.user_id, "syncing resources to disk"
 		ResourceWriter.syncResourcesToDisk request, compileDir, (error, resourceList) ->
@@ -205,21 +201,31 @@ module.exports = CompileManager =
 		base_dir = Settings.path.synctexBaseDir(compileName)
 		file_path = base_dir + "/" + file_name
 		compileDir = getCompileDir(project_id, user_id)
-		synctex_path = Path.join(compileDir, "output.pdf")
-		CompileManager._runSynctex ["code", synctex_path, file_path, line, column], (error, stdout) ->
-			return callback(error) if error?
-			logger.log project_id: project_id, user_id:user_id, file_name: file_name, line: line, column: column, stdout: stdout, "synctex code output"
-			callback null, CompileManager._parseSynctexFromCodeOutput(stdout)
+		synctex_path =  "#{base_dir}/output.pdf"
+		command = ["code", synctex_path, file_path, line, column]
+		fse.ensureDir compileDir, (error) ->
+			if error?
+				logger.err {error, project_id, user_id, file_name}, "error ensuring dir for sync from code"
+				return callback(error)
+			CompileManager._runSynctex project_id, user_id, command, (error, stdout) ->
+				return callback(error) if error?
+				logger.log project_id: project_id, user_id:user_id, file_name: file_name, line: line, column: column, command:command, stdout: stdout, "synctex code output"
+				callback null, CompileManager._parseSynctexFromCodeOutput(stdout)
 
 	syncFromPdf: (project_id, user_id, page, h, v, callback = (error, filePositions) ->) ->
 		compileName = getCompileName(project_id, user_id)
-		base_dir = Settings.path.synctexBaseDir(compileName)
 		compileDir = getCompileDir(project_id, user_id)
-		synctex_path = Path.join(compileDir, "output.pdf")
-		CompileManager._runSynctex ["pdf", synctex_path, page, h, v], (error, stdout) ->
-			return callback(error) if error?
-			logger.log project_id: project_id, user_id:user_id, page: page, h: h, v:v, stdout: stdout, "synctex pdf output"
-			callback null, CompileManager._parseSynctexFromPdfOutput(stdout, base_dir)
+		base_dir = Settings.path.synctexBaseDir(compileName)
+		synctex_path =  "#{base_dir}/output.pdf"
+		command = ["pdf", synctex_path, page, h, v]
+		fse.ensureDir compileDir, (error) ->
+			if error?
+				logger.err {error, project_id, user_id, file_name}, "error ensuring dir for sync to code"
+				return callback(error)
+			CompileManager._runSynctex  project_id, user_id, command, (error, stdout) ->
+				return callback(error) if error?
+				logger.log project_id: project_id, user_id:user_id, page: page, h: h, v:v, stdout: stdout, "synctex pdf output"
+				callback null, CompileManager._parseSynctexFromPdfOutput(stdout, base_dir)
 
 	_checkFileExists: (path, callback = (error) ->) ->
 		synctexDir = Path.dirname(path)
@@ -235,19 +241,19 @@ module.exports = CompileManager =
 				return callback(new Error("not a file")) if not stats?.isFile()
 				callback()
 
-	_runSynctex: (args, callback = (error, stdout) ->) ->
-		bin_path = Path.resolve(__dirname + "/../../bin/synctex")
+	_runSynctex: (project_id, user_id, command, callback = (error, stdout) ->) ->
 		seconds = 1000
-		outputFilePath = args[1]
-		CompileManager._checkFileExists outputFilePath, (error) ->
-			return callback(error) if error?
-			if Settings.clsi?.synctexCommandWrapper?
-				[bin_path, args] = Settings.clsi?.synctexCommandWrapper bin_path, args
-			child_process.execFile bin_path, args, timeout: 10 * seconds, (error, stdout, stderr) ->
-				if error?
-					logger.err err:error, args:args, "error running synctex"
-					return callback(error)
-				callback(null, stdout)
+
+		command.unshift("/opt/synctex")
+
+		directory = getCompileDir(project_id, user_id)
+		timeout = 60 * 1000 # increased to allow for large projects
+		compileName = getCompileName(project_id, user_id)
+		CommandRunner.run compileName, command, directory, Settings.clsi.docker.image, timeout, {}, (error, output) ->
+			if error?
+				logger.err err:error, command:command, project_id:project_id, user_id:user_id, "error running synctex"
+				return callback(error)
+			callback(null, output.stdout)
 
 	_parseSynctexFromCodeOutput: (output) ->
 		results = []
@@ -276,23 +282,28 @@ module.exports = CompileManager =
 				}
 		return results
 
+
 	wordcount: (project_id, user_id, file_name, image, callback = (error, pdfPositions) ->) ->
 		logger.log project_id:project_id, user_id:user_id, file_name:file_name, image:image, "running wordcount"
 		file_path = "$COMPILE_DIR/" + file_name
 		command = [ "texcount", '-nocol', '-inc', file_path, "-out=" + file_path + ".wc"]
-		directory = getCompileDir(project_id, user_id)
-		timeout = 60 * 1000 # increased to allow for large projects
+		compileDir = getCompileDir(project_id, user_id)
+		timeout = 60 * 1000
 		compileName = getCompileName(project_id, user_id)
-
-		CommandRunner.run compileName, command, directory, image, timeout, {}, (error) ->
-			return callback(error) if error?
-			fs.readFile directory + "/" + file_name + ".wc", "utf-8", (err, stdout) ->
-				if err?
-					logger.err err:err, command:command, directory:directory, project_id:project_id, user_id:user_id, "error reading word count output"
-					return callback(err)
-				results = CompileManager._parseWordcountFromOutput(stdout)
-				logger.log project_id:project_id, user_id:user_id, wordcount: results, "word count results"
-				callback null, results
+		fse.ensureDir compileDir, (error) ->
+			if error?
+				logger.err {error, project_id, user_id, file_name}, "error ensuring dir for sync from code"
+				return callback(error)
+			CommandRunner.run compileName, command, compileDir, image, timeout, {}, (error) ->
+				return callback(error) if error?
+				fs.readFile compileDir + "/" + file_name + ".wc", "utf-8", (err, stdout) ->
+					if err?
+						#call it node_err so sentry doesn't use random path error as unique id so it can't be ignored
+						logger.err node_err:err, command:command, compileDir:compileDir, project_id:project_id, user_id:user_id, "error reading word count output"
+						return callback(err)
+					results = CompileManager._parseWordcountFromOutput(stdout)
+					logger.log project_id:project_id, user_id:user_id, wordcount: results, "word count results"
+					callback null, results
 
 	_parseWordcountFromOutput: (output) ->
 		results = {

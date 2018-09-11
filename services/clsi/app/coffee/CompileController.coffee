@@ -34,11 +34,16 @@ module.exports = CompileController =
 							status = "error"
 							code = 500
 							logger.error err: error, project_id: request.project_id, "error running compile"
+
 					else
 						status = "failure"
 						for file in outputFiles
 							if file.path?.match(/output\.pdf$/)
 								status = "success"
+								
+						if status == "failure"
+							logger.err project_id: request.project_id, outputFiles:outputFiles, "project failed to compile successfully, no output.pdf generated"
+
 						# log an error if any core files are found
 						for file in outputFiles
 							if file.path is "core"
@@ -77,7 +82,6 @@ module.exports = CompileController =
 		column = parseInt(req.query.column, 10)
 		project_id = req.params.project_id
 		user_id = req.params.user_id
-
 		CompileManager.syncFromCode project_id, user_id, file, line, column, (error, pdfPositions) ->
 			return next(error) if error?
 			res.send JSON.stringify {
@@ -90,7 +94,6 @@ module.exports = CompileController =
 		v      = parseFloat(req.query.v)
 		project_id = req.params.project_id
 		user_id = req.params.user_id
-
 		CompileManager.syncFromPdf project_id, user_id, page, h, v, (error, codePositions) ->
 			return next(error) if error?
 			res.send JSON.stringify {

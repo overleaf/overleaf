@@ -3,15 +3,23 @@ request = require "request"
 require("chai").should()
 fs = require "fs"
 ChildProcess = require "child_process"
-
-fixturePath = (path) -> __dirname + "/../fixtures/" + path
-
+ClsiApp = require "./helpers/ClsiApp"
+logger = require("logger-sharelatex")
+Path = require("path")
+fixturePath = (path) -> Path.normalize(__dirname + "/../fixtures/" + path)
+process = require "process"
+console.log process.pid, process.ppid, process.getuid(),process.getgroups(), "PID"
 try
+	console.log "creating tmp directory", fixturePath("tmp")
 	fs.mkdirSync(fixturePath("tmp"))
-catch e
+catch err
+	console.log err, fixturePath("tmp"), "unable to create fixture tmp path"
 
 convertToPng = (pdfPath, pngPath, callback = (error) ->) ->
-	convert = ChildProcess.exec "convert #{fixturePath(pdfPath)} #{fixturePath(pngPath)}"
+	command = "convert #{fixturePath(pdfPath)} #{fixturePath(pngPath)}"
+	console.log "COMMAND"
+	console.log command
+	convert = ChildProcess.exec command
 	stdout = ""
 	convert.stdout.on "data", (chunk) -> console.log "STDOUT", chunk.toString()
 	convert.stderr.on "data", (chunk) -> console.log "STDERR", chunk.toString()
@@ -40,7 +48,6 @@ checkPdfInfo = (pdfPath, callback = (error, output) ->) ->
 		if stdout.match(/Optimized:\s+yes/)
 			callback null, true
 		else
-			console.log "pdfinfo result", stdout
 			callback null, false
 
 compareMultiplePages = (project_id, callback = (error) ->) ->
@@ -57,6 +64,8 @@ compareMultiplePages = (project_id, callback = (error) ->) ->
 	compareNext 0, callback
 
 comparePdf = (project_id, example_dir, callback = (error) ->) ->
+	console.log "CONVERT"
+	console.log "tmp/#{project_id}.pdf", "tmp/#{project_id}-generated.png"
 	convertToPng "tmp/#{project_id}.pdf", "tmp/#{project_id}-generated.png", (error) =>
 		throw error if error?
 		convertToPng "examples/#{example_dir}/output.pdf", "tmp/#{project_id}-source.png", (error) =>
@@ -75,6 +84,7 @@ comparePdf = (project_id, example_dir, callback = (error) ->) ->
 downloadAndComparePdf = (project_id, example_dir, url, callback = (error) ->) ->
 	writeStream = fs.createWriteStream(fixturePath("tmp/#{project_id}.pdf"))
 	request.get(url).pipe(writeStream)
+	console.log("writing file out", fixturePath("tmp/#{project_id}.pdf"))
 	writeStream.on "close", () =>
 		checkPdfInfo "tmp/#{project_id}.pdf", (error, optimised) =>
 			throw error if error?
@@ -85,7 +95,9 @@ Client.runServer(4242, fixturePath("examples"))
 
 describe "Example Documents", ->
 	before (done) ->
-		ChildProcess.exec("rm test/acceptance/fixtures/tmp/*").on "exit", () -> done()
+		ChildProcess.exec("rm test/acceptance/fixtures/tmp/*").on "exit", () -> 
+			ClsiApp.ensureRunning done
+
 
 	for example_dir in fs.readdirSync fixturePath("examples")
 		do (example_dir) ->

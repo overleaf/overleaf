@@ -1,0 +1,5 @@
+#!/bin/bash
+echo "hello world"
+sleep 3
+echo "awake"
+/opt/synctex pdf /compile/output.pdf 1 100 200

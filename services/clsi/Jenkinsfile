@@ -1,79 +1,69 @@
-pipeline {
+String cron_string = BRANCH_NAME == "master" ? "@daily" : ""
 
+pipeline {
   agent any
+
+  environment {
+    GIT_PROJECT = "clsi-sharelatex"
+    JENKINS_WORKFLOW = "clsi-sharelatex"
+    TARGET_URL = "${env.JENKINS_URL}blue/organizations/jenkins/${JENKINS_WORKFLOW}/detail/$BRANCH_NAME/$BUILD_NUMBER/pipeline"
+    GIT_API_URL = "https://api.github.com/repos/sharelatex/${GIT_PROJECT}/statuses/$GIT_COMMIT"
+  }
 
   triggers {
     pollSCM('* * * * *')
-    cron('@daily')
+    cron(cron_string)
   }
 
   stages {
-    stage('Clean') {
-      steps {
-        // This is a terrible hack to set the file ownership to jenkins:jenkins so we can cleanup the directory
-        sh 'docker run -v $(pwd):/app --rm busybox /bin/chown -R 111:119 /app'
-        sh 'rm -fr node_modules'
-      }
-    }
     stage('Install') {
-      agent {
-        docker {
-          image 'node:6.11.2'
-          args "-v /var/lib/jenkins/.npm:/tmp/.npm -e HOME=/tmp"
-          reuseNode true
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'GITHUB_INTEGRATION', usernameVariable: 'GH_AUTH_USERNAME', passwordVariable: 'GH_AUTH_PASSWORD')]) {
+          sh "curl $GIT_API_URL \
+            --data '{ \
+            \"state\" : \"pending\", \
+            \"target_url\": \"$TARGET_URL\", \
+            \"description\": \"Your build is underway\", \
+            \"context\": \"ci/jenkins\" }' \
+            -u $GH_AUTH_USERNAME:$GH_AUTH_PASSWORD"
         }
       }
+    }
+
+    stage('Build') {
       steps {
-        sh 'git config --global core.logallrefupdates false'
-        sh 'rm -fr node_modules'
-        checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: '_docker-runner'], [$class: 'CloneOption', shallow: true]], userRemoteConfigs: [[credentialsId: 'GIT_DEPLOY_KEY', url: 'git@github.com:sharelatex/docker-runner-sharelatex']]])
-        sh 'npm install ./_docker-runner'
-        sh 'rm -fr ./_docker-runner ./_docker-runner@tmp'
-        sh 'npm install'
-        sh 'npm rebuild'
-        sh 'npm install --quiet grunt-cli'
+        sh 'make build'
       }
     }
-    stage('Compile and Test') {
-      agent {
-        docker {
-          image 'node:6.11.2'
-          reuseNode true
-        }
-      }
+
+    stage('Unit Tests') {
       steps {
-        sh 'node_modules/.bin/grunt compile:app'
-        sh 'node_modules/.bin/grunt compile:acceptance_tests'
-        sh 'NODE_ENV=development node_modules/.bin/grunt test:unit'
+        sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_unit'
       }
     }
+
     stage('Acceptance Tests') {
-      environment {
-        TEXLIVE_IMAGE="quay.io/sharelatex/texlive-full:2017.1"
-      }
       steps {
-        sh 'mkdir -p compiles cache'
-        // Not yet running, due to volumes/sibling containers
-        sh 'docker container prune -f || true'
-        sh 'docker pull $TEXLIVE_IMAGE'
-        sh 'docker pull sharelatex/acceptance-test-runner:clsi-6.11.2'
-        sh 'docker run --rm -e SIBLING_CONTAINER_USER=root -e SANDBOXED_COMPILES_HOST_DIR=$(pwd)/compiles -e SANDBOXED_COMPILES_SIBLING_CONTAINERS=true -e TEXLIVE_IMAGE=$TEXLIVE_IMAGE -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd):/app sharelatex/acceptance-test-runner:clsi-6.11.2'
-        // This is a terrible hack to set the file ownership to jenkins:jenkins so we can cleanup the directory
-        sh 'docker run -v $(pwd):/app --rm busybox /bin/chown -R 111:119 /app'
-        sh 'rm -r compiles cache server.log db.sqlite config/settings.defaults.coffee'
+        sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_acceptance'
       }
     }
-    stage('Package') {
+
+    stage('Package and publish build') {
       steps {
-        sh 'echo ${BUILD_NUMBER} > build_number.txt'
-        sh 'touch build.tar.gz' // Avoid tar warning about files changing during read
-        sh 'tar -czf build.tar.gz --exclude=build.tar.gz --exclude-vcs .'
+        
+        withCredentials([file(credentialsId: 'gcr.io_overleaf-ops', variable: 'DOCKER_REPO_KEY_PATH')]) {
+          sh 'docker login -u _json_key --password-stdin https://gcr.io/overleaf-ops < ${DOCKER_REPO_KEY_PATH}'
+        }
+        sh 'DOCKER_REPO=gcr.io/overleaf-ops make publish'
+        sh 'docker logout https://gcr.io/overleaf-ops'
+        
       }
     }
-    stage('Publish') {
+
+    stage('Publish build number') {
       steps {
+        sh 'echo ${BRANCH_NAME}-${BUILD_NUMBER} > build_number.txt'
         withAWS(credentials:'S3_CI_BUILDS_AWS_KEYS', region:"${S3_REGION_BUILD_ARTEFACTS}") {
-            s3Upload(file:'build.tar.gz', bucket:"${S3_BUCKET_BUILD_ARTEFACTS}", path:"${JOB_NAME}/${BUILD_NUMBER}.tar.gz")
             // The deployment process uses this file to figure out the latest build
             s3Upload(file:'build_number.txt', bucket:"${S3_BUCKET_BUILD_ARTEFACTS}", path:"${JOB_NAME}/latest")
         }
@@ -82,11 +72,37 @@ pipeline {
   }
 
   post {
+    always {
+      sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_clean'
+      sh 'make clean'
+    }
+
+    success {
+      withCredentials([usernamePassword(credentialsId: 'GITHUB_INTEGRATION', usernameVariable: 'GH_AUTH_USERNAME', passwordVariable: 'GH_AUTH_PASSWORD')]) {
+        sh "curl $GIT_API_URL \
+          --data '{ \
+          \"state\" : \"success\", \
+          \"target_url\": \"$TARGET_URL\", \
+          \"description\": \"Your build succeeded!\", \
+          \"context\": \"ci/jenkins\" }' \
+          -u $GH_AUTH_USERNAME:$GH_AUTH_PASSWORD"
+      }
+    }
+
     failure {
       mail(from: "${EMAIL_ALERT_FROM}",
            to: "${EMAIL_ALERT_TO}",
            subject: "Jenkins build failed: ${JOB_NAME}:${BUILD_NUMBER}",
            body: "Build: ${BUILD_URL}")
+      withCredentials([usernamePassword(credentialsId: 'GITHUB_INTEGRATION', usernameVariable: 'GH_AUTH_USERNAME', passwordVariable: 'GH_AUTH_PASSWORD')]) {
+        sh "curl $GIT_API_URL \
+          --data '{ \
+          \"state\" : \"failure\", \
+          \"target_url\": \"$TARGET_URL\", \
+          \"description\": \"Your build failed\", \
+          \"context\": \"ci/jenkins\" }' \
+          -u $GH_AUTH_USERNAME:$GH_AUTH_PASSWORD"
+      }
     }
   }
 

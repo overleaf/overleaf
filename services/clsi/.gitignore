@@ -12,5 +12,7 @@ app.js
 cache
 .vagrant
 db.sqlite
+db.sqlite-wal
+db.sqlite-shm
 config/*
-bin/synctex
+npm-debug.log

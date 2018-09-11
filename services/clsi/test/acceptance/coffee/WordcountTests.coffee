@@ -4,6 +4,7 @@ require("chai").should()
 expect = require("chai").expect
 path = require("path")
 fs = require("fs")
+ClsiApp = require "./helpers/ClsiApp"
 
 describe "Syncing", ->
 	before (done) ->
@@ -13,7 +14,8 @@ describe "Syncing", ->
 				content: fs.readFileSync(path.join(__dirname,"../fixtures/naugty_strings.txt"),"utf-8")
 			]
 		@project_id = Client.randomId()
-		Client.compile @project_id, @request, (@error, @res, @body) => done()
+		ClsiApp.ensureRunning =>
+			Client.compile @project_id, @request, (@error, @res, @body) => done()
 
 	describe "wordcount file", ->
 		it "should return wordcount info", (done) ->

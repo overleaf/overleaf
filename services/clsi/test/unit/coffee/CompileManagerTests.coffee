@@ -13,7 +13,14 @@ describe "CompileManager", ->
 			"./ResourceWriter": @ResourceWriter = {}
 			"./OutputFileFinder": @OutputFileFinder = {}
 			"./OutputCacheManager": @OutputCacheManager = {}
-			"settings-sharelatex": @Settings = { path: compilesDir: "/compiles/dir" }
+			"settings-sharelatex": @Settings = 
+				path:
+					compilesDir: "/compiles/dir"
+				synctexBaseDir: -> "/compile"
+				clsi:
+					docker:
+						image: "SOMEIMAGE"
+
 			"logger-sharelatex": @logger = { log: sinon.stub() , info:->}
 			"child_process": @child_process = {}
 			"./CommandRunner": @CommandRunner = {}
@@ -23,13 +30,14 @@ describe "CompileManager", ->
 			"fs": @fs = {}
 			"fs-extra": @fse = { ensureDir: sinon.stub().callsArg(1) }
 		@callback = sinon.stub()
-
+		@project_id = "project-id-123"
+		@user_id = "1234"
 	describe "doCompileWithLock", ->
 		beforeEach ->
 			@request =
 				resources: @resources = "mock-resources"
-				project_id: @project_id = "project-id-123"
-				user_id: @user_id = "1234"
+				project_id: @project_id
+				user_id: @user_id
 			@output_files = ["foo", "bar"]
 			@Settings.compileDir = "compiles"
 			@compileDir = "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}"
@@ -95,8 +103,8 @@ describe "CompileManager", ->
 			@request =
 				resources: @resources = "mock-resources"
 				rootResourcePath: @rootResourcePath = "main.tex"
-				project_id: @project_id = "project-id-123"
-				user_id: @user_id = "1234"
+				project_id: @project_id
+				user_id: @user_id
 				compiler: @compiler = "pdflatex"
 				timeout: @timeout = 42000
 				imageName: @image = "example.com/image"
@@ -247,16 +255,23 @@ describe "CompileManager", ->
 		describe "syncFromCode", ->
 			beforeEach ->
 				@fs.stat = sinon.stub().callsArgWith(1, null,{isFile: ()->true})
-				@child_process.execFile.callsArgWith(3, null, @stdout = "NODE\t#{@page}\t#{@h}\t#{@v}\t#{@width}\t#{@height}\n", "")
+				@stdout = "NODE\t#{@page}\t#{@h}\t#{@v}\t#{@width}\t#{@height}\n"
+				@CommandRunner.run = sinon.stub().callsArgWith(6, null, {stdout:@stdout})
 				@CompileManager.syncFromCode @project_id, @user_id, @file_name, @line, @column, @callback
 
 			it "should execute the synctex binary", ->
 				bin_path = Path.resolve(__dirname + "/../../../bin/synctex")
 				synctex_path = "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}/output.pdf"
 				file_path = "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}/#{@file_name}"
-				@child_process.execFile
-					.calledWith(bin_path, ["code", synctex_path, file_path, @line, @column], timeout: 10000)
-					.should.equal true
+				@CommandRunner.run
+					.calledWith(
+						"#{@project_id}-#{@user_id}",
+						['/opt/synctex', 'code', synctex_path, file_path, @line, @column],
+						"#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}",
+						@Settings.clsi.docker.image,
+						60000,
+						{}
+						).should.equal true
 
 			it "should call the callback with the parsed output", ->
 				@callback
@@ -272,15 +287,21 @@ describe "CompileManager", ->
 		describe "syncFromPdf", ->
 			beforeEach ->
 				@fs.stat = sinon.stub().callsArgWith(1, null,{isFile: ()->true})
-				@child_process.execFile.callsArgWith(3, null, @stdout = "NODE\t#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}/#{@file_name}\t#{@line}\t#{@column}\n", "")
+				@stdout = "NODE\t#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}/#{@file_name}\t#{@line}\t#{@column}\n"
+				@CommandRunner.run = sinon.stub().callsArgWith(6, null, {stdout:@stdout})
 				@CompileManager.syncFromPdf @project_id, @user_id, @page, @h, @v, @callback
 
 			it "should execute the synctex binary", ->
 				bin_path = Path.resolve(__dirname + "/../../../bin/synctex")
 				synctex_path = "#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}/output.pdf"
-				@child_process.execFile
-					.calledWith(bin_path, ["pdf", synctex_path, @page, @h, @v], timeout: 10000)
-					.should.equal true
+				@CommandRunner.run
+					.calledWith(
+						"#{@project_id}-#{@user_id}",
+						['/opt/synctex', "pdf", synctex_path, @page, @h, @v],				
+						"#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}",
+						@Settings.clsi.docker.image,
+						60000,
+						{}).should.equal true
 
 			it "should call the callback with the parsed output", ->
 				@callback
@@ -297,7 +318,7 @@ describe "CompileManager", ->
 			@fs.readFile = sinon.stub().callsArgWith(2, null, @stdout = "Encoding: ascii\nWords in text: 2")
 			@callback  = sinon.stub()
 
-			@project_id = "project-id-123"
+			@project_id
 			@timeout = 60 * 1000
 			@file_name = "main.tex"
 			@Settings.path.compilesDir = "/local/compile/directory"

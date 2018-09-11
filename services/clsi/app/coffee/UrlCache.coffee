@@ -1,4 +1,5 @@
 db = require("./db")
+dbQueue = require "./DbQueue"
 UrlFetcher = require("./UrlFetcher")
 Settings = require("settings-sharelatex")
 crypto = require("crypto")
@@ -51,7 +52,6 @@ module.exports = UrlCache =
 	_doesUrlNeedDownloading: (project_id, url, lastModified, callback = (error, needsDownloading) ->) ->
 		if !lastModified?
 			return callback null, true
-
 		UrlCache._findUrlDetails project_id, url, (error, urlDetails) ->
 			return callback(error) if error?
 			if !urlDetails? or !urlDetails.lastModified? or urlDetails.lastModified.getTime() < lastModified.getTime()
@@ -94,32 +94,41 @@ module.exports = UrlCache =
 				return callback()
 
 	_findUrlDetails: (project_id, url, callback = (error, urlDetails) ->) ->
-		db.UrlCache.find(where: { url: url, project_id: project_id })
-			.then((urlDetails) -> callback null, urlDetails)
-			.error callback
+		job = (cb)->
+			db.UrlCache.find(where: { url: url, project_id: project_id })
+				.then((urlDetails) -> cb null, urlDetails)
+				.error cb
+		dbQueue.queue.push job, callback
 
 	_updateOrCreateUrlDetails: (project_id, url, lastModified, callback = (error) ->) ->
-		db.UrlCache.findOrCreate(where: {url: url, project_id: project_id})
-			.spread(
-				(urlDetails, created) ->
-					urlDetails.updateAttributes(lastModified: lastModified)
-						.then(() -> callback())
-						.error(callback)
-			)
-			.error callback
+		job = (cb)->
+			db.UrlCache.findOrCreate(where: {url: url, project_id: project_id})
+				.spread(
+					(urlDetails, created) ->
+						urlDetails.updateAttributes(lastModified: lastModified)
+							.then(() -> cb())
+							.error(cb)
+				)
+				.error cb
+		dbQueue.queue.push(job, callback)
 
 	_clearUrlDetails: (project_id, url, callback = (error) ->) ->
-		db.UrlCache.destroy(where: {url: url, project_id: project_id})
-			.then(() -> callback null)
-			.error callback
+		job = (cb)->
+			db.UrlCache.destroy(where: {url: url, project_id: project_id})
+				.then(() -> cb null)
+				.error cb
+		dbQueue.queue.push(job, callback)
+
 
 	_findAllUrlsInProject: (project_id, callback = (error, urls) ->) ->
-		db.UrlCache.findAll(where: { project_id: project_id })
-			.then(
-				(urlEntries) ->
-					callback null, urlEntries.map((entry) -> entry.url)
-			)
-			.error callback
+		job = (cb)->
+			db.UrlCache.findAll(where: { project_id: project_id })
+				.then(
+					(urlEntries) ->
+						cb null, urlEntries.map((entry) -> entry.url)
+				)
+				.error cb
+		dbQueue.queue.push(job, callback)
 
 		
 		

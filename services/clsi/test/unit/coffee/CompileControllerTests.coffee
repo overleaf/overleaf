@@ -14,7 +14,7 @@ describe "CompileController", ->
 					clsi:
 						url: "http://clsi.example.com"
 			"./ProjectPersistenceManager": @ProjectPersistenceManager = {}
-			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
+			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), err:sinon.stub() }
 		@Settings.externalUrl = "http://www.example.com"
 		@req = {}
 		@res = {}

@@ -1,3 +1,5 @@
+settings = require("settings-sharelatex")
+
 module.exports = RequestParser =
 	VALID_COMPILERS: ["pdflatex", "latex", "xelatex", "lualatex"]
 	MAX_TIMEOUT: 300
