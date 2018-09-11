@@ -286,8 +286,8 @@ module.exports = CompileManager =
 		logger.log project_id:project_id, user_id:user_id, file_name:file_name, image:image, "running wordcount"
 		file_path = "$COMPILE_DIR/" + file_name
 		command = [ "texcount", '-nocol', '-inc', file_path, "-out=" + file_path + ".wc"]
-		compileDir = getCompileDir(project_id, user_id)
-		timeout = 10 * 1000
+		directory = getCompileDir(project_id, user_id)
+		timeout = 60 * 1000 # increased to allow for large projects
 		compileName = getCompileName(project_id, user_id)
 		fse.ensureDir compileDir, (error) ->
 			if error?
