@@ -269,7 +269,7 @@ describe "CompileManager", ->
 						['/opt/synctex', 'code', synctex_path, file_path, @line, @column],
 						"#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}",
 						@Settings.clsi.docker.image,
-						10000,
+						60000,
 						{}
 						).should.equal true
 
@@ -300,7 +300,7 @@ describe "CompileManager", ->
 						['/opt/synctex', "pdf", synctex_path, @page, @h, @v],				
 						"#{@Settings.path.compilesDir}/#{@project_id}-#{@user_id}",
 						@Settings.clsi.docker.image,
-						10000,
+						60000,
 						{}).should.equal true
 
 			it "should call the callback with the parsed output", ->
