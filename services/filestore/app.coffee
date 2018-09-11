@@ -11,8 +11,8 @@ domain = require("domain")
 appIsOk = true
 app = express()
 
-if Settings.sentry?.dsn?
-	logger.initializeErrorReporting(Settings.sentry.dsn)
+if settings.sentry?.dsn?
+	logger.initializeErrorReporting(settings.sentry.dsn)
 
 Metrics = require "metrics-sharelatex"
 Metrics.initialize("filestore")
