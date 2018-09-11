@@ -8,13 +8,14 @@ describe "Timed out compile", ->
 	before (done) ->
 		@request =
 			options:
-				timeout: 1 #seconds
+				timeout: 10 #seconds
 			resources: [
 				path: "main.tex"
 				content: '''
 					\\documentclass{article}
 					\\begin{document}
-					\\input{|"/bin/bash -c ':(){ :|:& };:'"}
+					\\def\\x{Hello!\\par\\x}
+					\\x					
 					\\end{document}
 				'''
 			]
