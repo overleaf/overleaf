@@ -8,7 +8,6 @@ define [
 		$scope.olEmail = ""
 		$scope.errorCode = null
 		$scope.success = null
-		console.log ">>>> here"
 
 		$scope.submitEmail = () ->
 			return if !$scope.olEmail
@@ -16,15 +15,12 @@ define [
 				overleafEmail: $scope.olEmail
 				_csrf: window.csrfToken
 			}
-			console.log ">>>> sending email", data
 			$scope.errorCode = null
 			$http.post("/account-merge/email/overleaf", data)
 				.then (resp) ->
-					console.log ">>>> success", resp
 					$scope.errorCode = null
 					$scope.success = true
 				.catch (resp) ->
-					console.log ">>>> error", resp
 					$scope.errorCode = resp?.data?.errorCode || 'default_error'
 					$scope.success = false
 
