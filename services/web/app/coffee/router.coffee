@@ -69,7 +69,6 @@ module.exports = class Router
 		webRouter.get  '/logout', UserController.logout
 		webRouter.get  '/restricted', AuthorizationMiddlewear.restricted
 
-		webRouter.get '/account-merge/email/confirm', AccountMergeEmailController.confirmMergeFromEmail
 
 		if Features.hasFeature('registration')
 			webRouter.get '/register', UserPagesController.registerPage
@@ -344,6 +343,15 @@ module.exports = class Router
 		webRouter.post '/admin/pollDropboxForUser', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.pollDropboxForUser
 		webRouter.post '/admin/messages', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.createMessage
 		webRouter.post '/admin/messages/clear', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.clearMessages
+
+		webRouter.get '/account-merge/email/confirm',
+			RateLimiterMiddlewear.rateLimit({
+				endpointName: "account-merge-email-confirm",
+				ipOnly: true,
+				maxRequests: 10
+				timeInterval: 60
+			}),
+			AccountMergeEmailController.confirmMergeFromEmail
 
 		privateApiRouter.get '/perfTest', (req,res)->
 			res.send("hello")
