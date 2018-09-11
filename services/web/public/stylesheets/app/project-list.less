@@ -62,7 +62,7 @@
 			.small {
 				color: @sidebar-color;
 			}
-		} 
+		}
 
 		.project-list-sidebar when (@is-overleaf) {
 			overflow-x: hidden;
@@ -271,7 +271,7 @@ ul.structured-list {
 	li {
 		border-bottom: 1px solid @structured-list-border-color;
 		padding: (@line-height-computed / 4) 0;
-		
+
 		&:last-child {
 			border-bottom: 0 none;
 		}
@@ -294,7 +294,7 @@ ul.structured-list {
 		.header when (@is-overleaf = false) {
 			text-transform: uppercase;
 		}
-		
+
 		.select-item, .select-all {
 			position: absolute;
 			left: @line-height-computed;
@@ -355,7 +355,7 @@ table.project-list {
 		.owner when (@is-overleaf = false) {
 			margin-right: 0;
 		}
-		a.projectName {
+		a.projectName, button.projectName {
 			margin-right: @line-height-computed / 4;
 			padding: 0;
 			vertical-align: inherit;
@@ -400,6 +400,7 @@ table.project-list {
 
 		.v1-badge {
 			margin-left: -4px;
+      margin-right: -4px;
 		}
 
 		.action-btn-row-header, .action-btn-row {
@@ -595,7 +596,7 @@ table.project-list {
 			&:last-child {
 				margin-bottom: 0;
 			}
-		}	
+		}
 			.announcement-header {
 				.page-header;
 				margin: 0;

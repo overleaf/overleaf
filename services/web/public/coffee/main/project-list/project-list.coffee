@@ -13,7 +13,7 @@ define [
 		$scope.predicate = "lastUpdated"
 		$scope.nUntagged = 0
 		$scope.reverse = true
-		$scope.searchText = 
+		$scope.searchText =
 			value : ""
 
 		$timeout () ->
@@ -37,7 +37,7 @@ define [
 		angular.element($window).bind "resize", () ->
 			recalculateProjectListHeight()
 			$scope.$apply()
-			
+
 		# Allow tags to be accessed on projects as well
 		projectsById = {}
 		for project in $scope.projects
@@ -56,7 +56,7 @@ define [
 					tag.selected = true
 				else
 					tag.selected = false
-		
+
 		$scope.changePredicate = (newPredicate)->
 			if $scope.predicate == newPredicate
 				$scope.reverse = !$scope.reverse
@@ -145,7 +145,7 @@ define [
 					# We don't want hidden selections
 					project.selected = false
 
-			localStorage("project_list", JSON.stringify({ 
+			localStorage("project_list", JSON.stringify({
 				filter: $scope.filter,
 				selectedTagId: selectedTag?._id
 			}))
@@ -461,7 +461,7 @@ define [
 				resolve:
 					project: () -> project
 			)
-			
+
 		if storedUIOpts?.filter?
 			if storedUIOpts.filter == "tag" and storedUIOpts.selectedTagId?
 				markTagAsSelected(storedUIOpts.selectedTagId)
@@ -486,7 +486,7 @@ define [
 			return project.source == 'token'
 
 		$scope.userDisplayName = (user) ->
-			if user._id == window.user_id
+			if user? and user._id == window.user_id
 				return "You"
 			else if user?
 				return [user.first_name, user.last_name].filter((n) -> n?).join(" ")
@@ -535,11 +535,11 @@ define [
 					url: "/project/#{$scope.project.id}?forever=true"
 					headers:
 						"X-CSRF-Token": window.csrfToken
-				}).then () -> 
+				}).then () ->
 					$scope.project.isTableActionInflight = false
 					$scope._removeProjectFromList $scope.project
 					for tag in $scope.tags
 						$scope._removeProjectIdsFromTagArray(tag, [ $scope.project.id ])
 					$scope.updateVisibleProjects()
-				.catch () -> 
+				.catch () ->
 					$scope.project.isTableActionInflight = false

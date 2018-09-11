@@ -154,15 +154,7 @@
               ng-repeat="project in visibleProjects | orderBy:predicate:reverse",
               ng-controller="ProjectListItemController"
             )
-              .row(
-                ng-if="!project.isV1Project"
-                select-row
-              )
-                include ./item
-              .row(
-                ng-if="project.isV1Project"
-              )
-                include ./v1-item
+              include ./item
             tr(
               ng-if="visibleProjects.length == 0",
               ng-cloak

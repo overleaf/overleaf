@@ -1,5 +1,6 @@
 td.selectProject
   input.select-item(
+    ng-if="!project.isV1Project",
     select-individual,
     type="checkbox",
     ng-disabled="shouldDisableCheckbox(project)",
@@ -7,26 +8,45 @@ td.selectProject
     stop-propagation="click"
     aria-label=translate('select_project') + " '{{ project.name }}'"
   )
-td.projectName
-  a.projectName(
-    ng-href="{{projectLink(project)}}"
-    stop-propagation="click"
-  ) {{project.name}}
-  span(
-    ng-controller="TagListController"
+  span.v1-badge(
+    ng-if="project.isV1Project",
+    aria-label=translate("v1_badge")
+    tooltip-template="'v1ProjectTooltipTemplate'"
+    tooltip-append-to-body="true"
   )
-    .tag-label(
-      ng-repeat='tag in project.tags'
+td.projectName
+  span(ng-if="project.isV1Project")
+    if settings.overleaf && settings.overleaf.host
+      button.btn.btn-link.projectName(
+        ng-click="openV1ImportModal(project)"
+        stop-propagation="click"
+        ng-show="project.accessLevel == 'owner'"
+      ) {{project.name}}
+      a.projectName(
+        href=settings.overleaf.host + "/{{project.id}}"
+        target="_blank"
+        ng-hide="project.accessLevel == 'owner'"
+      ) {{project.name}}
+  span(ng-if="!project.isV1Project")
+    a.projectName(
+      ng-href="{{projectLink(project)}}"
       stop-propagation="click"
+    ) {{project.name}}
+    span(
+      ng-controller="TagListController"
     )
-      a.label.label-default.tag-label-name(
-        href,
-        ng-click="selectTag(tag)"
-      ) {{tag.name}}
-      a.label.label-default.tag-label-remove(
-        href
-        ng-click="removeProjectFromTag(project, tag)"
-      ) &times;
+      .tag-label(
+        ng-repeat='tag in project.tags'
+        stop-propagation="click"
+      )
+        a.label.label-default.tag-label-name(
+          href,
+          ng-click="selectTag(tag)"
+        ) {{tag.name}}
+        a.label.label-default.tag-label-remove(
+          href
+          ng-click="removeProjectFromTag(project, tag)"
+        ) &times;
 
 td
   span.owner {{userDisplayName(project.owner)}}
@@ -41,13 +61,13 @@ td
 td
   span.last-modified(tooltip="{{project.lastUpdated | formatDate}}")
     | {{project.lastUpdated | fromNowDate}}
-  span(ng-show='project.lastUpdatedBy')
+  span(ng-if='project.lastUpdatedBy')
     |
     | by {{userDisplayName(project.lastUpdatedBy)}}
 
 td.text-right
   div(
-    ng-if="!project.isTableActionInflight"
+    ng-if="!project.isTableActionInflight && !project.isV1Project"
   )
     button.btn.btn-link.action-btn(
       tooltip=translate('copy'),
