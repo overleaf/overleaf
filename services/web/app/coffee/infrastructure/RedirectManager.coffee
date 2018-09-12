@@ -1,20 +1,27 @@
 settings = require("settings-sharelatex")
 logger = require("logger-sharelatex")
 
-module.exports = (req, res, next)->
-	
-	requestedUrl = req.url
+module.exports = RedirectManager =
+	apply: (webRouter) ->
+		for redirectUrl, target of settings.redirects
+			do (target) ->
+				method = target.method || 'get'
+				webRouter[method] redirectUrl, RedirectManager.createRedirect(target)
 
-	redirectUrl = settings.redirects[requestedUrl]
-
-	#remove starting slash
-	if !redirectUrl? and requestedUrl[requestedUrl.length-1] == "/"
-		requestedUrl = requestedUrl.substring(0, requestedUrl.length - 1)
-		redirectUrl = settings.redirects[requestedUrl]
-
-	if redirectUrl?
-		logger.log redirectUrl:redirectUrl, reqUrl:req.url, "redirecting to new path"
-		res.redirect 301, "#{redirectUrl}"
-	else
-		next()
-
+	createRedirect: (target) ->
+		(req, res, next) ->
+			code = 302
+			if typeof target is 'string'
+				url = target
+			else
+				if target.method == "post"
+					code = 307
+				if typeof target.url == "function"
+					url = target.url(req.params)
+					if !url
+						return next()
+				else
+					url = target.url
+				if target.baseUrl?
+					url = "#{target.baseUrl}#{url}"
+			res.redirect code, url
