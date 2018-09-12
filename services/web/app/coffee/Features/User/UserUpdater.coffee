@@ -185,11 +185,28 @@ module.exports = UserUpdater =
 					return callback(new Errors.NotFoundError('user id and email do no match'))
 				FeaturesUpdater.refreshFeatures userId, true, callback
 
+	mergeSharelatexAndV1Accounts: (sl_id, v1_id, final_email, callback) ->
+		UserGetter.getUser {'overleaf.id': v1_id}, {_id: 1}, (err, otherUser) =>
+			if otherUser?
+				return callback(new Error('v1_id matches an existing user overleaf.id, cannot merge accounts'))
+			@updateUser sl_id, {
+				'$set': {
+					'overleaf.id': v1_id,
+					email: final_email
+				},
+				'$push': {
+					emails: {
+						email: final_email, createdAt: new Date()
+					}
+				}
+			}, callback
+
 [
 	'updateUser'
 	'changeEmailAddress'
 	'setDefaultEmailAddress'
 	'addEmailAddress'
 	'removeEmailAddress'
+	'mergeSharelatexAndV1Accounts'
 ].map (method) ->
 	metrics.timeAsyncMethod(UserUpdater, method, 'mongo.UserUpdater', logger)

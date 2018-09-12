@@ -17,33 +17,20 @@ module.exports = AccountMergeEmailController =
 				return res.status(404).send()
 			if data.origin != 'sl'
 				logger.log {}, "Only sharelatex origin supported"
-				# TODO: better error handling
 				return res.status(501).send()
 			{ sl_id, v1_id, final_email } = data
 			UserGetter.getUser sl_id, {_id: 1, overleaf: 1}, (err, user) ->
 				return next(err) if err?
 				if !user?
 					logger.err {userId: sl_id}, 'SL user not found for account-merge'
-					# TODO: better error handling
 					return res.status(400).send()
 				if user?.overleaf?.id?
 					logger.err {userId: sl_id}, 'SL user is already linked to overleaf'
 					return res.status(400).send()
 				logger.log {sl_id, v1_id, final_email, origin: data.origin},
 					"[AccountMergeEmailController] about to merge sharelatex and overleaf-v1 accounts"
-				UserUpdater.updateUser sl_id, {
-					'$set': {
-						'overleaf.id': v1_id,
-						email: final_email
-					},
-					'$push': {
-						emails: {
-							email: final_email, createdAt: new Date()
-						}
-					}
-				}, (err) ->
+				UserUpdater.mergeSharelatexAndV1Accounts sl_id, v1_id, final_email, (err) ->
 					return next(err) if err?
 					res.render 'account_merge/finish', {
-						finalEmail: final_email,
-						continueUrl: "#{Settings.accountMerge.sharelatexHost}/user/login_to_ol_v2"
+						finalEmail: final_email
 					}
