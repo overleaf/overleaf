@@ -82,13 +82,6 @@ EmailExistsError = (message) ->
 	return error
 EmailExistsError.prototype.__proto__ = Error.prototype
 
-ProjectNotTokenAccessError = (message) ->
-	error = new Error(message)
-	error.name = "ProjectNotTokenAccessError"
-	error.__proto__ = ProjectNotTokenAccessError.prototype
-	return error
-ProjectNotTokenAccessError.prototype.__proto__ = Error.prototype
-
 module.exports = Errors =
 	NotFoundError: NotFoundError
 	ServiceNotConfiguredError: ServiceNotConfiguredError
@@ -102,4 +95,3 @@ module.exports = Errors =
 	V1ConnectionError: V1ConnectionError
 	UnconfirmedEmailError: UnconfirmedEmailError
 	EmailExistsError: EmailExistsError
-	ProjectNotTokenAccessError: ProjectNotTokenAccessError

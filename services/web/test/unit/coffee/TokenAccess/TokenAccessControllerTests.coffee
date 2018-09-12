@@ -30,6 +30,10 @@ describe "TokenAccessController", ->
 			'../Authentication/AuthenticationController': @AuthenticationController = {}
 			'./TokenAccessHandler': @TokenAccessHandler = {}
 			'logger-sharelatex': {log: sinon.stub(), err: sinon.stub()}
+			'settings-sharelatex': {
+				overleaf:
+					host: 'http://overleaf.test:5000'
+			}
 
 		@AuthenticationController.getLoggedInUserId = sinon.stub().returns(@userId.toString())
 
@@ -234,6 +238,7 @@ describe "TokenAccessController", ->
 				describe 'when project does not exist', ->
 					beforeEach ->
 						@req = new MockRequest()
+						@req.url = '/123abc'
 						@res = new MockResponse()
 						@res.redirect = sinon.stub()
 						@next = sinon.stub()
@@ -245,10 +250,10 @@ describe "TokenAccessController", ->
 							.callsArgWith(2, null, @project, false)
 						@TokenAccessController.readAndWriteToken @req, @res, @next
 
-					it 'should return a ProjectNotTokenAccessError', (done) ->
-						expect(@next.callCount).to.equal 1
-						expect(@next.firstCall.args[0].name)
-							.to.equal 'ProjectNotTokenAccessError'
+					it 'should redirect to v1', (done) ->
+						expect(@res.redirect.callCount).to.equal 1
+						expect(@res.redirect.firstCall.args[0])
+							.to.equal 'http://overleaf.test:5000/123abc'
 						done()
 
 				describe 'when token access is off, but user has higher access anyway', ->
@@ -311,7 +316,7 @@ describe "TokenAccessController", ->
 							.callsArgWith(1, null, null)
 						@TokenAccessHandler.findProjectWithHigherAccess =
 							sinon.stub()
-							.callsArgWith(2, null, null)
+							.callsArgWith(2, null, null, true)
 						@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
 							.callsArgWith(2, null)
 						@ProjectController.loadEditor = sinon.stub()
@@ -502,6 +507,7 @@ describe "TokenAccessController", ->
 			describe 'when project does not exist', ->
 				beforeEach ->
 					@req = new MockRequest()
+					@req.url = '/123abc'
 					@res = new MockResponse()
 					@res.redirect = sinon.stub()
 					@next = sinon.stub()
@@ -514,9 +520,9 @@ describe "TokenAccessController", ->
 					@TokenAccessController.readOnlyToken @req, @res, @next
 
 				it 'should return a ProjectNotTokenAccessError', (done) ->
-					expect(@next.callCount).to.equal 1
-					expect(@next.firstCall.args[0].name)
-						.to.equal 'ProjectNotTokenAccessError'
+					expect(@res.redirect.callCount).to.equal 1
+					expect(@res.redirect.firstCall.args[0])
+						.to.equal 'http://overleaf.test:5000/123abc'
 					done()
 
 			describe 'when token access is off, but user has higher access anyway', ->
@@ -578,7 +584,7 @@ describe "TokenAccessController", ->
 						.callsArgWith(1, null, null)
 					@TokenAccessHandler.findProjectWithHigherAccess =
 						sinon.stub()
-						.callsArgWith(2, null, null)
+						.callsArgWith(2, null, null, true)
 					@TokenAccessHandler.addReadOnlyUserToProject = sinon.stub()
 						.callsArgWith(2, null)
 					@ProjectController.loadEditor = sinon.stub()

@@ -418,8 +418,7 @@ module.exports = class Router
 				maxRequests: 10,
 				timeInterval: 60
 			}),
-			TokenAccessController.readOnlyToken,
-			TokenAccessController.redirectNotFoundErrorToV1
+			TokenAccessController.readOnlyToken
 
 		webRouter.get '/:read_and_write_token([0-9]+[a-z]+)',
 			RateLimiterMiddlewear.rateLimit({
@@ -427,7 +426,6 @@ module.exports = class Router
 				maxRequests: 10,
 				timeInterval: 60
 			}),
-			TokenAccessController.readAndWriteToken,
-			TokenAccessController.redirectNotFoundErrorToV1
+			TokenAccessController.readAndWriteToken
 
 		webRouter.get '*', ErrorController.notFound
