@@ -107,4 +107,4 @@ module.exports =
 		'/proxy/missing/baseUrl': path: '/foo/bar'
 
 	overleaf:
-		host: "http://#{process.env['V1_HOST']}:5000"
+		host: "http://overleaf.test:5000"
