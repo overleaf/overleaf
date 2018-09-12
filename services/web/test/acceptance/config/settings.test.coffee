@@ -108,3 +108,17 @@ module.exports =
 
 	overleaf:
 		host: "http://overleaf.test:5000"
+
+	redirects:
+		'/redirect/one': '/destination/one',
+		'/redirect/post': {
+			method: 'post',
+			url: '/destination/post'
+		},
+		'/redirect/base_url': {
+			baseUrl: 'https://example.com'
+			url: '/destination/base_url'
+		},
+		'/redirect/params/:id': {
+			url: (params) -> "/destination/#{params.id}/params"
+		}
