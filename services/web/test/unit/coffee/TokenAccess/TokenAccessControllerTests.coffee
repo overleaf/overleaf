@@ -231,6 +231,26 @@ describe "TokenAccessController", ->
 					@AuthenticationController.getLoggedInUserId =
 						sinon.stub().returns(@userId.toString())
 
+				describe 'when project does not exist', ->
+					beforeEach ->
+						@req = new MockRequest()
+						@res = new MockResponse()
+						@res.redirect = sinon.stub()
+						@next = sinon.stub()
+						@req.params['read_and_write_token'] = '123abc'
+						@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
+							.callsArgWith(1, null, null)
+						@TokenAccessHandler.findProjectWithHigherAccess =
+							sinon.stub()
+							.callsArgWith(2, null, @project, false)
+						@TokenAccessController.readAndWriteToken @req, @res, @next
+
+					it 'should return a ProjectNotTokenAccessError', (done) ->
+						expect(@next.callCount).to.equal 1
+						expect(@next.firstCall.args[0].name)
+							.to.equal 'ProjectNotTokenAccessError'
+						done()
+
 				describe 'when token access is off, but user has higher access anyway', ->
 					beforeEach ->
 						@req = new MockRequest()
@@ -242,7 +262,7 @@ describe "TokenAccessController", ->
 							.callsArgWith(1, null, null)
 						@TokenAccessHandler.findProjectWithHigherAccess =
 							sinon.stub()
-							.callsArgWith(2, null, @project)
+							.callsArgWith(2, null, @project, true)
 						@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
 							.callsArgWith(2, null)
 						@ProjectController.loadEditor = sinon.stub()
@@ -479,6 +499,26 @@ describe "TokenAccessController", ->
 		describe 'when findProject does not find a project', ->
 			beforeEach ->
 
+			describe 'when project does not exist', ->
+				beforeEach ->
+					@req = new MockRequest()
+					@res = new MockResponse()
+					@res.redirect = sinon.stub()
+					@next = sinon.stub()
+					@req.params['read_and_write_token'] = '123abc'
+					@TokenAccessHandler.findProjectWithReadOnlyToken = sinon.stub()
+						.callsArgWith(1, null, null)
+					@TokenAccessHandler.findProjectWithHigherAccess =
+						sinon.stub()
+						.callsArgWith(2, null, @project, false)
+					@TokenAccessController.readOnlyToken @req, @res, @next
+
+				it 'should return a ProjectNotTokenAccessError', (done) ->
+					expect(@next.callCount).to.equal 1
+					expect(@next.firstCall.args[0].name)
+						.to.equal 'ProjectNotTokenAccessError'
+					done()
+
 			describe 'when token access is off, but user has higher access anyway', ->
 				beforeEach ->
 					@req = new MockRequest()
@@ -490,7 +530,7 @@ describe "TokenAccessController", ->
 						.callsArgWith(1, null, null)
 					@TokenAccessHandler.findProjectWithHigherAccess =
 						sinon.stub()
-						.callsArgWith(2, null, @project)
+						.callsArgWith(2, null, @project, true)
 					@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
 						.callsArgWith(2, null)
 					@ProjectController.loadEditor = sinon.stub()
