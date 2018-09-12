@@ -8,7 +8,7 @@ settings = require 'settings-sharelatex'
 module.exports = TokenAccessController =
 
 	redirectNotFoundErrorToV1: (err, req, res, next) ->
-		if err instanceof Errors.NotFoundError and settings.overleaf
+		if err instanceof Errors.ProjectNotTokenAccessError and settings.overleaf
 			logger.log {
 				token: req.params['read_and_write_token']
 			}, "[TokenAccess] No project found for token, redirecting to v1"
@@ -21,11 +21,15 @@ module.exports = TokenAccessController =
 		return ProjectController.loadEditor(req, res, next)
 
 	_tryHigherAccess: (token, userId, req, res, next) ->
-		TokenAccessHandler.findProjectWithHigherAccess token, userId, (err, project) ->
+		TokenAccessHandler.findProjectWithHigherAccess token, userId, (err, project, projectExists) ->
 			if err?
 				logger.err {err, token, userId},
 					"[TokenAccess] error finding project with higher access"
 				return next(err)
+			if !projectExists
+				logger.log {token, userId},
+					"[TokenAccess] no project found for this token"
+				return next(new Errors.ProjectNotTokenAccessError())
 			if !project?
 				logger.log {token, userId},
 					"[TokenAccess] no project with higher access found for this user and token"
