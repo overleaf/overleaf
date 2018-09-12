@@ -31,56 +31,56 @@ UnsupportedFileTypeError = (message) ->
 	error.name = "UnsupportedFileTypeError"
 	error.__proto__ = UnsupportedFileTypeError.prototype
 	return error
-UnsupportedFileTypeError.prototype.__proto___ = Error.prototype
+UnsupportedFileTypeError.prototype.__proto__ = Error.prototype
 
 UnsupportedBrandError = (message) ->
 	error = new Error(message)
 	error.name = "UnsupportedBrandError"
 	error.__proto__ = UnsupportedBrandError.prototype
 	return error
-UnsupportedBrandError.prototype.__proto___ = Error.prototype
+UnsupportedBrandError.prototype.__proto__ = Error.prototype
 
 UnsupportedExportRecordsError = (message) ->
 	error = new Error(message)
 	error.name = "UnsupportedExportRecordsError"
 	error.__proto__ = UnsupportedExportRecordsError.prototype
 	return error
-UnsupportedExportRecordsError.prototype.__proto___ = Error.prototype
+UnsupportedExportRecordsError.prototype.__proto__ = Error.prototype
 
 V1HistoryNotSyncedError = (message) ->
 	error = new Error(message)
 	error.name = "V1HistoryNotSyncedError"
 	error.__proto__ = V1HistoryNotSyncedError.prototype
 	return error
-V1HistoryNotSyncedError.prototype.__proto___ = Error.prototype
+V1HistoryNotSyncedError.prototype.__proto__ = Error.prototype
 
 ProjectHistoryDisabledError = (message) ->
 	error = new Error(message)
 	error.name = "ProjectHistoryDisabledError"
 	error.__proto__ = ProjectHistoryDisabledError.prototype
 	return error
-ProjectHistoryDisabledError.prototype.__proto___ = Error.prototype
+ProjectHistoryDisabledError.prototype.__proto__ = Error.prototype
 
 V1ConnectionError = (message) ->
 	error = new Error(message)
 	error.name = "V1ConnectionError"
 	error.__proto__ = V1ConnectionError.prototype
 	return error
-V1ConnectionError.prototype.__proto___ = Error.prototype
+V1ConnectionError.prototype.__proto__ = Error.prototype
 
 UnconfirmedEmailError = (message) ->
 	error = new Error(message)
 	error.name = "UnconfirmedEmailError"
 	error.__proto__ = UnconfirmedEmailError.prototype
 	return error
-UnconfirmedEmailError.prototype.__proto___ = Error.prototype
+UnconfirmedEmailError.prototype.__proto__ = Error.prototype
 
 EmailExistsError = (message) ->
 	error = new Error(message)
 	error.name = "EmailExistsError"
 	error.__proto__ = EmailExistsError.prototype
 	return error
-EmailExistsError.prototype.__proto___ = Error.prototype
+EmailExistsError.prototype.__proto__ = Error.prototype
 
 module.exports = Errors =
 	NotFoundError: NotFoundError
