@@ -50,7 +50,6 @@ TokenAccessController = require('./Features/TokenAccess/TokenAccessController')
 Features = require('./infrastructure/Features')
 LinkedFilesRouter = require './Features/LinkedFiles/LinkedFilesRouter'
 TemplatesRouter = require './Features/Templates/TemplatesRouter'
-AccountMergeEmailController = require './Features/AccountMerge/AccountMergeEmailController'
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -343,15 +342,6 @@ module.exports = class Router
 		webRouter.post '/admin/pollDropboxForUser', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.pollDropboxForUser
 		webRouter.post '/admin/messages', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.createMessage
 		webRouter.post '/admin/messages/clear', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.clearMessages
-
-		webRouter.get '/account-merge/email/confirm',
-			RateLimiterMiddlewear.rateLimit({
-				endpointName: "account-merge-email-confirm",
-				ipOnly: true,
-				maxRequests: 10
-				timeInterval: 60
-			}),
-			AccountMergeEmailController.confirmMergeFromEmail
 
 		privateApiRouter.get '/perfTest', (req,res)->
 			res.send("hello")
