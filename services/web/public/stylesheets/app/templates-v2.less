@@ -58,24 +58,20 @@
 	}
 
 	.caption {
-        // Override ShareLatex template styles
-        background: none;
-        border: none;
-
+		// Override ShareLatex template styles
+		background: none;
+		border: none;
 		text-align: center;
-
-		.description {
-			font-style: italic;
-			padding: 5px 0;
-			text-overflow: ellipsis;
-			overflow: hidden;
-			white-space: nowrap;
-		}
-
 	}
 
-	.caption.caption--portals {
-		height: 50px;
+	.caption__description {
+		font-style: italic;
+		padding: 5px 0;
+		.text-overflow();
+
+		a {
+			display: inline;
+		}
 	}
 
 	/* Media Queries */
