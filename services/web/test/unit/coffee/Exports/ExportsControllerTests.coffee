@@ -34,7 +34,12 @@ describe 'ExportsController', ->
 
 	it 'should ask the handler to perform the export', (done) ->
 		@handler.exportProject = sinon.stub().yields(null, {iAmAnExport: true, v1_id: 897})
+		expected =
+			project_id: project_id
+			user_id: user_id
+			brand_variation_id: brand_variation_id
 		@controller.exportProject @req, send:(body) =>
+			expect(@handler.exportProject.args[0][0]).to.deep.equal expected
 			expect(body).to.deep.equal {export_v1_id: 897}
 			done()
 
