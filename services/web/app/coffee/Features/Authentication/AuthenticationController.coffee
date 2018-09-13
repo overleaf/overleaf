@@ -44,7 +44,7 @@ module.exports = AuthenticationController =
 					return callback(err)
 				req.sessionStore.generate(req)
 				for key, value of oldSession
-					req.session[key] = value
+					req.session[key] = value unless key == '__tmp'
 				# copy to the old `session.user` location, for backward-comptability
 				req.session.user = req.session.passport.user
 				req.session.save (err) ->
