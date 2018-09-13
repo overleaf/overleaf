@@ -48,6 +48,8 @@ templates.accountMergeToOverleafAddress = CTAEmailTemplate({
 	ctaURL: (opts) -> opts.tokenLinkUrl
 })
 
+templates.accountMergeToSharelatexAddress = templates.accountMergeToOverleafAddress
+
 templates.registered = CTAEmailTemplate({
 	subject: () -> "Activate your #{settings.appName} Account"
 	message: (opts) -> """
