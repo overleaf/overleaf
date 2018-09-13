@@ -20,9 +20,7 @@ module.exports = ExportsHandler = self =
 				callback null, export_data
 
 	_buildExport: (export_params, callback=(err, export_data) ->) ->
-		project_id = export_params.project_id
-		user_id = export_params.user_id
-		brand_variation_id = export_params.brand_variation_id
+		{project_id, user_id, brand_variation_id, title, description, author, license, show_source} = export_params
 		jobs =
 			project: (cb) ->
 				ProjectGetter.getProject project_id, cb
@@ -60,6 +58,11 @@ module.exports = ExportsHandler = self =
 					metadata:
 						compiler: project.compiler
 						imageName: project.imageName
+						title: title
+						description: description
+						author: author
+						license: license
+						show_source: show_source
 				user:
 					id: user_id
 					firstName: user.first_name

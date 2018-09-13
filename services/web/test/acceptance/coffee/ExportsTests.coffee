@@ -30,7 +30,13 @@ describe 'Exports', ->
 			@owner.request {
 				method: 'POST',
 				url: "/project/#{@project_id}/export/#{@brand_variation_id}",
-				json: {},
+				json: true,
+				body:
+					title: 'title'
+					description: 'description'
+					author: 'author'
+					license: 'other'
+					show_source: true
 			}, (error, response, body) =>
 				throw error if error?
 				expect(response.statusCode).to.equal 200
@@ -42,6 +48,12 @@ describe 'Exports', ->
 			# project details should match
 			expect(project.id).to.equal @project_id
 			expect(project.rootDocPath).to.equal '/main.tex'
+			# gallery details should match
+			expect(project.metadata.title).to.equal 'title'
+			expect(project.metadata.description).to.equal 'description'
+			expect(project.metadata.author).to.equal 'author'
+			expect(project.metadata.license).to.equal 'other'
+			expect(project.metadata.show_source).to.equal true
 			# version should match what was retrieved from project-history
 			expect(project.historyVersion).to.equal @version
 			# user details should match
