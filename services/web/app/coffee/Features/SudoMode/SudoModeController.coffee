@@ -4,12 +4,13 @@ AuthenticationController = require '../Authentication/AuthenticationController'
 AuthenticationManager = require '../Authentication/AuthenticationManager'
 ObjectId = require('../../infrastructure/Mongoose').mongo.ObjectId
 UserGetter = require '../User/UserGetter'
+Settings = require 'settings-sharelatex'
 
 
 module.exports = SudoModeController =
 
 	sudoModePrompt: (req, res, next) ->
-		if req.externalAuthenticationSystemUsed()
+		if req.externalAuthenticationSystemUsed() and !Settings.overleaf?
 			logger.log {userId}, "[SudoMode] using external auth, redirecting"
 			return res.redirect('/project')
 		userId = AuthenticationController.getLoggedInUserId(req)
