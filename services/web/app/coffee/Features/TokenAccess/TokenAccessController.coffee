@@ -17,7 +17,7 @@ module.exports = TokenAccessController =
 				logger.err {err, token, userId},
 					"[TokenAccess] error finding project with higher access"
 				return next(err)
-			if !projectExists
+			if !projectExists and settings.overleaf
 				logger.log {token, userId},
 					"[TokenAccess] no project found for this token"
 				# Project does not exist, but may be unimported - try it on v1
