@@ -184,7 +184,7 @@ module.exports = ProjectController =
 			notifications: (cb)->
 				NotificationsHandler.getUserNotifications user_id, cb
 			projects: (cb)->
-				ProjectGetter.findAllUsersProjects user_id, 'name lastUpdated lastUpdatedBy publicAccesLevel archived owner_ref tokens', cb
+				ProjectGetter.findAllUsersProjects user_id, 'name lastUpdated publicAccesLevel archived owner_ref tokens', cb
 			v1Projects: (cb) ->
 				Modules.hooks.fire "findAllV1Projects", user_id, (error, projects = []) ->
 					if error? and error instanceof V1ConnectionError
@@ -392,7 +392,6 @@ module.exports = ProjectController =
 			id: project._id
 			name: project.name
 			lastUpdated: project.lastUpdated
-			lastUpdatedBy: project.lastUpdatedBy
 			publicAccessLevel: project.publicAccesLevel
 			accessLevel: accessLevel
 			source: source
@@ -431,8 +430,6 @@ module.exports = ProjectController =
 		for project in projects
 			if project.owner_ref?
 				users[project.owner_ref.toString()] = true
-			if project.lastUpdatedBy?
-				users[project.lastUpdatedBy] = true
 
 		jobs = []
 		for user_id, _ of users
@@ -447,8 +444,6 @@ module.exports = ProjectController =
 			for project in projects
 				if project.owner_ref?
 					project.owner = users[project.owner_ref.toString()]
-				if project.lastUpdatedBy?
-					project.lastUpdatedBy = users[project.lastUpdatedBy.toString()]
 			callback null, projects
 
 	_buildWarningsList: (v1ProjectData = {}) ->
