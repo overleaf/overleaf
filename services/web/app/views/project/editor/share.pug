@@ -177,7 +177,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 
 					p.small(ng-show="startedFreeTrial")
 						| #{translate("refresh_page_after_starting_free_trial")}
-			.row.public-access-level(ng-show="!isAdmin")
+			.row.public-access-level.public-access-level--notice(ng-show="!isAdmin")
 				.col-xs-12.text-center To add more collaborators, please ask the project owner
 	.modal-footer.modal-footer-share
 		.modal-footer-left
