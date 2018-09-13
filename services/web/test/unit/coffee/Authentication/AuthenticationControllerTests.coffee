@@ -15,7 +15,7 @@ describe "AuthenticationController", ->
 		tk.freeze(Date.now())
 		@AuthenticationController = SandboxedModule.require modulePath, requires:
 			"./AuthenticationManager": @AuthenticationManager = {}
-			"../User/UserUpdater" : @UserUpdater = {}
+			"../User/UserUpdater" : @UserUpdater = {updateUser:sinon.stub()}
 			"metrics-sharelatex": @Metrics = { inc: sinon.stub() }
 			"../Security/LoginRateLimiter": @LoginRateLimiter = { processLoginRequest:sinon.stub(), recordSuccessfulLogin:sinon.stub() }
 			"../User/UserHandler": @UserHandler = {setupLoginData:sinon.stub()}
