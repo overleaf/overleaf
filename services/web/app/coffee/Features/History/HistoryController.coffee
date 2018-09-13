@@ -7,7 +7,6 @@ HistoryManager = require "./HistoryManager"
 ProjectDetailsHandler = require "../Project/ProjectDetailsHandler"
 ProjectEntityUpdateHandler = require "../Project/ProjectEntityUpdateHandler"
 RestoreManager = require "./RestoreManager"
-ProjectUpdateHandler = require "../Project/ProjectUpdateHandler"
 
 module.exports = HistoryController =
 	selectHistoryApi: (req, res, next = (error) ->) ->
@@ -144,11 +143,3 @@ module.exports = HistoryController =
 				error = new Error("history api responded with non-success code: #{response.statusCode}")
 				logger.error err: error, "project-history api responded with non-success code: #{response.statusCode}"
 				callback(error)
-
-	setLastUpdated: (req, res, next) ->
-		{project_id} = req.params
-		{user_id, timestamp} = req.body
-		logger.log {project_id, user_id, timestamp}, 'updating last updated date'
-		ProjectUpdateHandler.markAsUpdated project_id, user_id, timestamp, (error) ->
-			return next(error) if error?
-			res.sendStatus 200
