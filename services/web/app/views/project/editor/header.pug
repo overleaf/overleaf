@@ -103,12 +103,8 @@ header.toolbar.toolbar-header.toolbar-with-labels(
 
 		a.btn.btn-full-height(
 			href
-			ng-class="{ 'btn-full-height-disabled' : !permissions.admin }"
 			ng-click="openShareProjectModal(permissions.admin);"
 			ng-controller="ShareController"
-			tooltip-enable="!permissions.admin"
-			tooltip="Only the project owner can use the Share menu at the moment, but we're working on making it accessible to collaborators, too."
-			tooltip-placement="bottom"
 		)
 			i.fa.fa-fw.fa-group
 			p.toolbar-label #{translate("share")}
