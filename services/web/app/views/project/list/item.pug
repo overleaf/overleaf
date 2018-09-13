@@ -63,7 +63,9 @@ td
     | {{project.lastUpdated | fromNowDate}}
   span(ng-if='project.lastUpdatedBy')
     |
-    | by {{userDisplayName(project.lastUpdatedBy)}}
+    | #{translate('by')}
+    |
+    | {{userDisplayName(project.lastUpdatedBy)}}
 
 td.text-right
   div(
