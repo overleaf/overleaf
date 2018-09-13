@@ -115,18 +115,14 @@
 	span(ng-controller="LeftHandMenuPromoController",  ng-cloak)
 
 		.row-spaced#userProfileInformation(ng-if="hasProjects")
-			div(ng-controller="UserProfileController")
-				hr(ng-show="percentComplete < 100")
-				.text-centered.user-profile(ng-show="percentComplete < 100")
-					.progress
-						.progress-bar.progress-bar-info(ng-style="{'width' : (percentComplete+'%')}")
-
-					p.small #{translate("profile_complete_percentage", {percentval:"{{percentComplete}}"})}
+			div(ng-controller="UserAffiliationsController")
+				hr(ng-show="userEmails.length == 1 && userEmails[0].affiliations == null")
+				.text-centered.user-profile(ng-show="userEmails.length == 1 && userEmails[0].affiliations == null")
+					p Are you affiliated with an institution?
 					
-					button#completeUserProfileInformation.btn.btn-info(
-						ng-hide="formVisable",
-						ng-click="openUserProfileModal()"
-					) #{translate("complete")}
+					a.btn.btn-info(
+						href="/user/settings"
+					) Tell Us
 
 
 		.row-spaced(ng-if="hasProjects && userHasNoSubscription", ng-cloak).text-centered
