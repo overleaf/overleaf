@@ -238,6 +238,7 @@ module.exports = class Router
 		webRouter.post '/project/:project_id/doc/:doc_id/restore', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, HistoryController.restoreDocFromDeletedDoc
 		webRouter.post "/project/:project_id/restore_file", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, HistoryController.restoreFileFromV2
 		privateApiRouter.post "/project/:Project_id/history/resync", AuthenticationController.httpAuth, HistoryController.resyncProjectHistory
+		privateApiRouter.post "/project/:project_id/last_updated", AuthenticationController.httpAuth, HistoryController.setLastUpdated
 
 		webRouter.get "/project/:Project_id/labels", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.ensureProjectHistoryEnabled, HistoryController.getLabels
 		webRouter.post "/project/:Project_id/labels", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, HistoryController.selectHistoryApi, HistoryController.ensureProjectHistoryEnabled, HistoryController.createLabel
