@@ -48,6 +48,11 @@ describe "UserGetter", ->
 				error.should.exist
 				done()
 
+		it "should not allow null query", (done)->
+			@UserGetter.getUser null, {}, (error, user) =>
+				error.should.exist
+				done()
+
 	describe "getUserFullEmails", ->
 		it "should get user", (done)->
 			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @fakeUser)
