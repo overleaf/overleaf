@@ -13,11 +13,10 @@ module.exports =
 			user_id: user_id
 		}
 
-		if req.body && req.body.firstName && req.body.lastName
-			export_params.first_name = req.body.firstName.trim()
-			export_params.last_name = req.body.lastName.trim()
-		# additional parameters for gallery exports
 		if req.body
+			export_params.first_name = req.body.firstName.trim() if req.body.firstName
+			export_params.last_name = req.body.lastName.trim() if req.body.lastName
+			# additional parameters for gallery exports
 			export_params.title = req.body.title.trim() if req.body.title
 			export_params.description = req.body.description.trim() if req.body.description
 			export_params.author = req.body.author.trim() if req.body.author
