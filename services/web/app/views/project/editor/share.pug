@@ -76,7 +76,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 				.col-xs-3.text-left
 					span(ng-show="member.privileges == 'readAndWrite'") #{translate("can_edit")}
 					span(ng-show="member.privileges == 'readOnly'") #{translate("read_only")}
-				.col-xs-1
+				.col-xs-1(ng-show="isAdmin")
 					a(
 						href
 						tooltip=translate('remove_collaborator')
@@ -178,7 +178,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 					p.small(ng-show="startedFreeTrial")
 						| #{translate("refresh_page_after_starting_free_trial")}
 			.row.public-access-level.public-access-level--notice(ng-show="!isAdmin")
-				.col-xs-12.text-center To add more collaborators or turn on link sharing, please ask the project owner
+				.col-xs-12.text-center #{translate("to_add_more_collaborators")}
 	.modal-footer.modal-footer-share
 		.modal-footer-left
 			i.fa.fa-refresh.fa-spin(ng-show="state.inflight")
