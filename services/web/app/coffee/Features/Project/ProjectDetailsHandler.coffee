@@ -67,6 +67,36 @@ module.exports = ProjectDetailsHandler =
 		else
 			return callback()
 
+	_addSuffixToProjectName: (name, suffix = '') ->
+		# append the suffix and truncate the project title if needed
+		truncatedLength = ProjectDetailsHandler.MAX_PROJECT_NAME_LENGTH - suffix.length
+		return name.substr(0, truncatedLength) + suffix
+
+	# FIXME: we should put a lock around this to make it completely safe, but we would need to do that at
+	# the point of project creation, rather than just checking the name at the start of the import.
+	# If we later move this check into ProjectCreationHandler we can ensure all new projects are created
+	# with a unique name.  But that requires thinking through how we would handle incoming projects from
+	# dropbox for example.
+	ensureProjectNameIsUnique: (user_id, name, suffixes = [], callback = (error, name, changed)->) ->
+		ProjectGetter.findAllUsersProjects user_id, {name: 1}, (error, allUsersProjects) ->
+			return callback(error) if error?
+			{owned, readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly} = allUsersProjects
+			# create a set of all project names
+			allProjectNames = new Set()
+			for projectName in owned.concat(readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly)
+				allProjectNames.add(projectName)
+			isUnique = (x) -> !allProjectNames.has(x)
+			# check if the supplied name is already unique
+			if isUnique(name)
+				return callback(null, name, false)
+			# the name already exists, try adding the user-supplied suffixes to generate a unique name
+			for suffix in suffixes
+				candidateName = ProjectDetailsHandler._addSuffixToProjectName(name, suffix)
+				if isUnique(candidateName)
+					return callback(null, candidateName, true)
+			# we couldn't make the name unique, something is wrong
+			return callback new Errors.InvalidNameError("Project name could not be made unique")
+
 	setPublicAccessLevel : (project_id, newAccessLevel, callback = ->)->
 		logger.log project_id: project_id, level: newAccessLevel, "set public access level"
 		# DEPRECATED: `READ_ONLY` and `READ_AND_WRITE` are still valid in, but should no longer
