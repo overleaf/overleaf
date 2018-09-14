@@ -356,7 +356,7 @@ script(type="text/ng-template", id="v1ImportModalTemplate")
 			form-messages(for="v1ImportForm")
 			if settings.overleaf && settings.overleaf.host
 				a.btn.btn-primary.v1-import-btn(
-					ng-href=settings.overleaf.host + "/{{project.id}}"
+					ng-href='/sign_in_to_v1?return_to=%2F{{project.id}}'
 					ng-class="{disabled: v1ImportForm.inflight || v1ImportForm.response.success}"
 				) No thanks, open in v1
 			input.btn.btn-primary.v1-import-btn(
