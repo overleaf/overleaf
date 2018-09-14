@@ -53,6 +53,41 @@ describe "S3PersistorManagerTests", ->
 			@stubbedKnoxClient.get.calledWith(@key).should.equal true
 			done()
 
+		it "should use default auth", (done)->
+			@stubbedKnoxClient.get.returns(
+				on:->
+				end:->
+			)
+			@S3PersistorManager.getFileStream @bucketName, @key, @opts, (err)=> # empty callback
+			clientParams =
+				key: @settings.filestore.s3.key
+				secret: @settings.filestore.s3.secret
+				bucket: @bucketName
+			@knox.createClient.calledWith(clientParams).should.equal true
+			done()
+
+		describe "with supplied auth", ->
+			beforeEach ->
+				@S3PersistorManager = SandboxedModule.require modulePath, requires: @requires
+				@credentials =
+					auth_key: "that_key"
+					auth_secret: "that_secret"
+				@opts =
+					credentials: @credentials
+
+			it "should use supplied auth", (done)->
+				@stubbedKnoxClient.get.returns(
+					on:->
+					end:->
+				)
+				@S3PersistorManager.getFileStream @bucketName, @key, @opts, (err)=> # empty callback
+				clientParams =
+					key: @credentials.auth_key
+					secret: @credentials.auth_secret
+					bucket: @bucketName
+				@knox.createClient.calledWith(clientParams).should.equal true
+				done()
+
 		describe "with start and end options", ->
 			beforeEach ->
 				@opts =

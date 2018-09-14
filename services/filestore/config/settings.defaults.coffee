@@ -11,7 +11,7 @@ settings =
 		# Choices are
 		# s3 - Amazon S3
 		# fs - local filesystem
-		if process.env['AWS_KEY']?
+		if process.env['AWS_KEY']? or process.env['S3_BUCKET_CREDENTIALS']?
 			backend: "s3"
 			s3:
 				key: process.env['AWS_KEY']
@@ -20,6 +20,18 @@ settings =
 				user_files: process.env['AWS_S3_USER_FILES_BUCKET_NAME']
 				template_files: process.env['AWS_S3_TEMPLATE_FILES_BUCKET_NAME']
 				public_files: process.env['AWS_S3_PUBLIC_FILES_BUCKET_NAME']
+			# if you are using S3, then fill in your S3 details below,
+			# or use env var with the same structure.
+			# s3:
+			# 	key: ""     # default
+			# 	secret: ""  # default
+			#
+			# s3BucketCreds:
+			#   bucketname1: # secrets for bucketname1
+			#     auth_key: ""
+			#     auth_secret: ""
+			#  bucketname2: # secrets for bucketname2...
+			s3BucketCreds: JSON.parse process.env['S3_BUCKET_CREDENTIALS'] if process.env['S3_BUCKET_CREDENTIALS']?
 		else
 			backend: "fs"
 			stores:
@@ -31,10 +43,9 @@ settings =
 				public_files: Path.resolve(__dirname + "/../public_files")
 				template_files: Path.resolve(__dirname + "/../template_files")
 
-
 	path:
 		uploadFolder: Path.resolve(__dirname + "/../uploads")
-		
+
 	commands:
 		# Any commands to wrap the convert utility in, for example ["nice"], or ["firejail", "--profile=/etc/firejail/convert.profile"]
 		convertCommandPrefix: []
