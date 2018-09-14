@@ -22,6 +22,7 @@ UserSchema = new Schema
 	confirmed         : {type : Boolean, default : false}
 	signUpDate        : {type : Date, default: () -> new Date() }
 	lastLoggedIn      : {type : Date}
+	lastLoginIp       : {type : String, default : ''}
 	loginCount        : {type : Number, default: 0}
 	holdingAccount    : {type : Boolean, default: false}
 	ace               : {

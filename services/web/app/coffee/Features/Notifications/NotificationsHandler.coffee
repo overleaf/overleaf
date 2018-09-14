@@ -29,12 +29,15 @@ module.exports =
 					unreadNotifications = []
 				callback(null, unreadNotifications)
 
-	createNotification: (user_id, key, templateKey, messageOpts, expiryDateTime, callback)->
+	createNotification: (user_id, key, templateKey, messageOpts, expiryDateTime, forceCreate, callback)->
+		if !callback
+			callback = forceCreate
+			forceCreate = true
 		payload = {
 				key:key
 				messageOpts:messageOpts
 				templateKey:templateKey
-				forceCreate: true
+				forceCreate:forceCreate
 		}
 		if expiryDateTime?
 			payload.expires = expiryDateTime

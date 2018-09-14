@@ -100,51 +100,9 @@
   }
   // End Print
 
-  /*
-    Begin Tabs
-  */
   .nav-tabs {
-    // Overrides for nav.less
     background-color: @ol-blue-gray-0;
-    border: 0!important;
-    margin-bottom: @margin-md;
-    margin-top: -@line-height-computed; //- adjusted for portal-name
-    padding: @padding-lg 0 @padding-md;
-    text-align: center;
-
-    a {
-      color: @link-color;
-      &:hover {
-        background-color: transparent!important;
-        border: 0!important;
-        color: @link-hover-color!important;
-      }
-    }
-
-    li {
-      display: inline-block;
-      float: none;
-      a {
-        border: 0;
-      }
-    }
-
-    li.active > a {
-      background-color: transparent!important;
-      border: 0;
-      border-bottom: 1px solid @accent-color-secondary!important;
-      color: @accent-color-secondary;
-      &:hover {
-        color: @accent-color-secondary!important;
-      }
-    }
   }
-
-  .tab-content:extend(.container) {
-    background-color: transparent!important;
-    border: none!important;
-  }
-  // End Tabs
 
   @media (max-width: @screen-size-sm-max) {
     .content-pull {
