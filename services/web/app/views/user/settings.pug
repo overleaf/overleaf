@@ -75,7 +75,7 @@ block content
 
 								.col-md-5.col-md-offset-1
 									h3 #{translate("change_password")}
-									form(async-form="changepassword", name="changePasswordForm", action="/user/password/update", method="POST", novalidate)
+									form(async-form="changepassword", name="changePasswordForm", action="/change_password/v1", method="POST", novalidate)
 										input(type="hidden", name="_csrf", value=csrfToken)
 										.form-group
 											label(for='currentPassword') #{translate("current_password")}
