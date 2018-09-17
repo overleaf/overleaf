@@ -8,9 +8,8 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 		h3 #{translate("share_project")}
 	.modal-body.modal-body-share
 		.container-fluid
-
 			//- Private (with token-access available)
-			.row.public-access-level(ng-show="project.publicAccesLevel == 'private'")
+			.row.public-access-level(ng-show="isAdmin && project.publicAccesLevel == 'private'")
 				.col-xs-12.text-center
 					| #{translate('link_sharing_is_off')}
 					| &nbsp;&nbsp;
@@ -28,7 +27,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						)
 
 			//- Token-based access
-			.row.public-access-level(ng-show="project.publicAccesLevel == 'tokenBased'")
+			.row.public-access-level(ng-show="isAdmin && project.publicAccesLevel == 'tokenBased'")
 				.col-xs-12.text-center
 					strong
 						| #{translate('link_sharing_is_on')}.
@@ -57,7 +56,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						pre.access-token(ng-hide="readOnlyTokenLink") #{translate('loading')}...
 
 			//- legacy public-access
-			.row.public-access-level(ng-show="project.publicAccesLevel == 'readAndWrite' || project.publicAccesLevel == 'readOnly'")
+			.row.public-access-level(ng-show="isAdmin && (project.publicAccesLevel == 'readAndWrite' || project.publicAccesLevel == 'readOnly')")
 				.col-xs-12.text-center
 					strong(ng-if="project.publicAccesLevel == 'readAndWrite'") #{translate("this_project_is_public")}
 					strong(ng-if="project.publicAccesLevel == 'readOnly'") #{translate("this_project_is_public_read_only")}
@@ -77,7 +76,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 				.col-xs-3.text-left
 					span(ng-show="member.privileges == 'readAndWrite'") #{translate("can_edit")}
 					span(ng-show="member.privileges == 'readOnly'") #{translate("read_only")}
-				.col-xs-1
+				.col-xs-1(ng-show="isAdmin")
 					a(
 						href
 						tooltip=translate('remove_collaborator')
@@ -102,7 +101,7 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						ng-click="revokeInvite(invite)"
 					)
 						i.fa.fa-times
-			.row.invite-controls
+			.row.invite-controls(ng-show="isAdmin")
 				form(ng-show="canAddCollaborators")
 					.small #{translate("share_with_your_collabs")}
 					.form-group
@@ -177,8 +176,9 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 						) #{translate("start_free_trial")}
 
 					p.small(ng-show="startedFreeTrial")
-						| #{translate("refresh_page_after_starting_free_trial")}.
-
+						| #{translate("refresh_page_after_starting_free_trial")}
+			.row.public-access-level.public-access-level--notice(ng-show="!isAdmin")
+				.col-xs-12.text-center #{translate("to_add_more_collaborators")}
 	.modal-footer.modal-footer-share
 		.modal-footer-left
 			i.fa.fa-refresh.fa-spin(ng-show="state.inflight")
