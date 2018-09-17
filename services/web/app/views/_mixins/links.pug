@@ -18,8 +18,7 @@ mixin linkAdvisors(linkText, linkClass, track)
 		| #{linkText ? linkText : 'advisor programme'}
 
 mixin linkBenefits(linkText, linkClass)
-	//- To Do: verify path
-	a(href="/benefits" class=linkClass ? linkClass : '')
+	a(href="/for/authors" class=linkClass ? linkClass : '')
 		| #{linkText ? linkText : 'benefits'}
 		
 mixin linkBlog(linkText, linkClass, slug)
@@ -36,8 +35,7 @@ mixin linkDash(linkText, linkClass)
 		| #{linkText ? linkText : 'project dashboard'}
 
 mixin linkEducation(linkText, linkClass)
-	//- To Do: verify path
-	a(href="/plans" class=linkClass ? linkClass : '')
+	a(href="/for/edu" class=linkClass ? linkClass : '')
 		| #{linkText ? linkText : 'teaching toolkit'}
 
 mixin linkEmail(linkText, linkClass, email)
@@ -66,8 +64,7 @@ mixin linkInvite(linkText, linkClass, track)
 		| #{linkText ? linkText : 'invite your friends'}
 
 mixin linkPlansAndPricing(linkText, linkClass)
-	//- To Do: verify path
-	a(href="/plans" class=linkClass ? linkClass : '')
+	a(href="/user/subscription/plans" class=linkClass ? linkClass : '')
 		| #{linkText ? linkText : 'plans and pricing'}
 
 mixin linkPrintNewTab(linkText, linkClass, icon, track)
@@ -121,6 +118,5 @@ mixin linkTweet(linkText, linkClass, tweetText, track)
 	) #{linkText ? linkText : 'tweet'}
 
 mixin linkUniversities(linkText, linkClass)
-	//- To Do: verify path
-	a(href="/universities" class=linkClass ? linkClass : '')
+	a(href="/for/universities" class=linkClass ? linkClass : '')
 		| #{linkText ? linkText : 'universities'}
