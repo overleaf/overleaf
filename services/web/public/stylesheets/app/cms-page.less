@@ -91,6 +91,51 @@
   }
 
   /*
+    universities page
+  */
+  #universities-container {
+    display: table;
+    padding: @padding-md;
+    width: 100%;
+    .row {
+      display: table-row;
+      div {
+        border-bottom: 1px solid @gray-lightest;
+        display: table-cell;
+        float: none;
+        padding: @padding-md;
+        vertical-align: middle;
+      }
+    }
+    .row:first-child {
+      // parent container contains padding
+      div {
+        padding-top: 0;
+      }
+    }
+    .row:last-child {
+      // parent container contains padding
+      div {
+        border: 0;
+        padding-bottom: 0;
+      }
+    }
+    p {
+      margin: 0 auto;
+      width: 100%;
+    }
+    // Logos
+    .uni-logo {
+      margin: 0 auto;
+      max-height: 55px;
+      min-width: 55px;
+    }
+    .university-claim-btn {
+      text-align: center;
+    }
+  }
+
+  /*
     videos
   */
   video {
