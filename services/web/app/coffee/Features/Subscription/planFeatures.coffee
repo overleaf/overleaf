@@ -33,7 +33,7 @@ module.exports =
 			student: true
 		}
 		{
-			feature: 'hundreds_templates'
+			feature: 'thousands_templates'
 			value: 'bool'
 			info: 'hundreds_templates_info'
 			plans: {
