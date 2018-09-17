@@ -105,15 +105,19 @@ module.exports =
 			path: (params) -> "/universities/list/#{params.id}"
 		'/institutions/domains': { baseUrl: v1Api.url, path: '/university/domains' }
 		'/proxy/missing/baseUrl': path: '/foo/bar'
+		'/proxy/get_and_post': {
+			methods: ['get', 'post'],
+			path: '/destination/get_and_post'
+		}
 
 	overleaf:
 		host: "http://overleaf.test:5000"
 
 	redirects:
 		'/redirect/one': '/destination/one',
-		'/redirect/post': {
-			method: 'post',
-			url: '/destination/post'
+		'/redirect/get_and_post': {
+			methods: ['get', 'post'],
+			url: '/destination/get_and_post'
 		},
 		'/redirect/base_url': {
 			baseUrl: 'https://example.com'

@@ -4,8 +4,7 @@ logger = require("logger-sharelatex")
 module.exports = RedirectManager =
 	apply: (webRouter) ->
 		for redirectUrl, target of settings.redirects
-			do (target) ->
-				method = target.method || 'get'
+			for method in (target.methods or ['get'])
 				webRouter[method] redirectUrl, RedirectManager.createRedirect(target)
 
 	createRedirect: (target) ->
@@ -14,7 +13,7 @@ module.exports = RedirectManager =
 			if typeof target is 'string'
 				url = target
 			else
-				if target.method == "post"
+				if req.method == "POST"
 					code = 307
 				if typeof target.url == "function"
 					url = target.url(req.params)

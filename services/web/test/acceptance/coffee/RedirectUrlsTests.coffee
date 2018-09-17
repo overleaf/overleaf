@@ -24,5 +24,8 @@ describe "RedirectUrls", ->
 	it 'proxy URLs with baseUrl', (done) ->
 		assertRedirect 'get', '/redirect/base_url', 302, 'https://example.com/destination/base_url', done
 
-	it 'proxy URLs with POST', (done) ->
-		assertRedirect 'post', '/redirect/post', 307, '/destination/post', done
+	it 'proxy URLs with POST with a 307', (done) ->
+		assertRedirect 'post', '/redirect/get_and_post', 307, '/destination/get_and_post', done
+
+	it 'proxy URLs with multiple support methods', (done) ->
+		assertRedirect 'get', '/redirect/get_and_post', 302, '/destination/get_and_post', done
