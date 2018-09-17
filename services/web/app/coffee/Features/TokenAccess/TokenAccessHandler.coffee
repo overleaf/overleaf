@@ -22,7 +22,7 @@ module.exports = TokenAccessHandler =
 			'publicAccesLevel': PublicAccessLevels.TOKEN_BASED
 		}, {_id: 1, publicAccesLevel: 1, owner_ref: 1}, callback
 
-	findProjectWithHigherAccess: (token, userId, callback=(err, project)->) ->
+	findProjectWithHigherAccess: (token, userId, callback=(err, project, projectExists)->) ->
 		Project.findOne {
 			$or: [
 				{'tokens.readAndWrite': token},
@@ -32,12 +32,16 @@ module.exports = TokenAccessHandler =
 			if err?
 				return callback(err)
 			if !project?
-				return callback(null, null)
+				return callback(null, null, false) # Project doesn't exist, so we handle differently
 			projectId = project._id
 			CollaboratorsHandler.isUserInvitedMemberOfProject userId, projectId, (err, isMember) ->
 				if err?
 					return callback(err)
-				callback(null, if isMember == true then project else null)
+				callback(
+					null,
+					if isMember == true then project else null,
+					true # Project does exist, but user doesn't have access
+				)
 
 	addReadOnlyUserToProject: (userId, projectId, callback=(err)->) ->
 		userId = ObjectId(userId.toString())

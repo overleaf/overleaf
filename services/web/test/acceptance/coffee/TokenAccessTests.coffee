@@ -415,3 +415,13 @@ describe 'TokenAccess', ->
 			try_content_access(@other2, @project_id, (response, body) =>
 				expect(body.privilegeLevel).to.equal false
 			, done)
+
+	describe 'unimported v1 project', ->
+		it 'should redirect to v1', (done) ->
+			unimportedV1Token = '123abc'
+			try_read_and_write_token_access(@owner, unimportedV1Token, (response, body) =>
+				expect(response.statusCode).to.equal 302
+				expect(response.headers.location).to.equal(
+					'http://overleaf.test:5000/123abc'
+				)
+			, done)

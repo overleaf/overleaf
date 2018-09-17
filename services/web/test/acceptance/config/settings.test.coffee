@@ -105,3 +105,6 @@ module.exports =
 			path: (params) -> "/universities/list/#{params.id}"
 		'/institutions/domains': { baseUrl: v1Api.url, path: '/university/domains' }
 		'/proxy/missing/baseUrl': path: '/foo/bar'
+
+	overleaf:
+		host: "http://overleaf.test:5000"
