@@ -27,10 +27,20 @@ describe 'ExportsHandler', ->
 		@project_history_id = 987
 		@user_id = "user-id-456"
 		@brand_variation_id = 789
+		@title = "title"
+		@description = "description"
+		@author = "author"
+		@license = "other"
+		@show_source = true
 		@export_params = {
 			project_id: @project_id,
 			brand_variation_id: @brand_variation_id,
 			user_id: @user_id
+			title: @title
+			description: @description
+			author: @author
+			license: @license
+			show_source: @show_source
 		}
 		@callback = sinon.stub()
 
@@ -105,6 +115,11 @@ describe 'ExportsHandler', ->
 						metadata:
 							compiler: 'pdflatex'
 							imageName: 'mock-image-name'
+							title: @title
+							description: @description
+							author: @author
+							license: @license
+							show_source: @show_source
 					user:
 						id: @user_id
 						firstName: @user.first_name
@@ -140,6 +155,11 @@ describe 'ExportsHandler', ->
 						metadata:
 							compiler: 'pdflatex'
 							imageName: 'mock-image-name'
+							title: @title
+							description: @description
+							author: @author
+							license: @license
+							show_source: @show_source
 					user:
 						id: @user_id
 						firstName: @custom_first_name

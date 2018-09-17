@@ -13,13 +13,19 @@ module.exports =
 			user_id: user_id
 		}
 
-		if req.body && req.body.firstName && req.body.lastName
-			export_params.first_name = req.body.firstName.trim()
-			export_params.last_name = req.body.lastName.trim()
+		if req.body
+			export_params.first_name = req.body.firstName.trim() if req.body.firstName
+			export_params.last_name = req.body.lastName.trim() if req.body.lastName
+			# additional parameters for gallery exports
+			export_params.title = req.body.title.trim() if req.body.title
+			export_params.description = req.body.description.trim() if req.body.description
+			export_params.author = req.body.author.trim() if req.body.author
+			export_params.license = req.body.license.trim() if req.body.license
+			export_params.show_source = req.body.show_source if req.body.show_source
 
 		ExportsHandler.exportProject export_params, (err, export_data) ->
 			return next(err) if err?
-			logger.log 
+			logger.log
 				user_id:user_id
 				project_id: project_id
 				brand_variation_id:brand_variation_id
