@@ -93,6 +93,18 @@ describe "UserGetter", ->
 				]
 				done()
 
+		it "should get user when it has no emails field", (done)->
+			@fakeUser =
+				_id: '12390i'
+				email: 'email2@foo.bar'
+			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @fakeUser)
+			projection = email: 1, emails: 1
+			@UserGetter.getUserFullEmails @fakeUser._id, (error, fullEmails) =>
+				@UserGetter.getUser.called.should.equal true
+				@UserGetter.getUser.calledWith(@fakeUser._id, projection).should.equal true
+				assert.deepEqual fullEmails, []
+				done()
+
 	describe "getUserbyMainEmail", ->
 		it "query user by main email", (done)->
 			email = 'hello@world.com'
