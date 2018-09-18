@@ -24,7 +24,7 @@ module.exports =
 			export_params.show_source = req.body.show_source if req.body.show_source
 
 		ExportsHandler.exportProject export_params, (err, export_data) ->
-			return next(err) if err?
+			return err if err?
 			logger.log
 				user_id:user_id
 				project_id: project_id
@@ -36,11 +36,13 @@ module.exports =
 	exportStatus: (req, res) ->
 		{export_id} = req.params
 		ExportsHandler.fetchExport export_id, (err, export_json) ->
-			return next(err) if err?
+			return err if err?
 			parsed_export = JSON.parse(export_json)
 			json = {
 				status_summary: parsed_export.status_summary,
-				status_detail: parsed_export.status_detail
+				status_detail: parsed_export.status_detail,
+				partner_submission_id: parsed_export.partner_submission_id,
+				token: parsed_export.token
 			}
 			res.send export_json: json
 

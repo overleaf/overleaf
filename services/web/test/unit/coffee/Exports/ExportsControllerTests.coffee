@@ -90,6 +90,6 @@ describe 'ExportsController', ->
 		@req.params = {project_id: project_id, export_id: 897}
 		@controller.exportStatus @req, send:(body) =>
 			expect(body).to.deep.equal {export_json: {
-				status_summary: 'completed', status_detail: undefined
+				status_summary: 'completed', status_detail: undefined, partner_submission_id: undefined, token: undefined
 			}}
 			done()
