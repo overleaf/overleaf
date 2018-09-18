@@ -115,15 +115,14 @@
 	span(ng-controller="LeftHandMenuPromoController",  ng-cloak)
 
 		.row-spaced#userProfileInformation(ng-if="hasProjects")
-			div(ng-controller="UserAffiliationsController")
-				hr(ng-show="userEmails.length == 1 && userEmails[0].affiliations == null")
-				.text-centered.user-profile(ng-show="userEmails.length == 1 && userEmails[0].affiliations == null")
+			div(ng-show="userEmails.length > 0 && userAffiliations.length == 0", ng-cloak)
+				hr
+				.text-centered.user-profile
 					p Are you affiliated with an institution?
 					
 					a.btn.btn-info(
 						href="/user/settings"
 					) Add Affiliation
-
 
 		.row-spaced(ng-if="hasProjects && userHasNoSubscription", ng-cloak).text-centered
 			hr
