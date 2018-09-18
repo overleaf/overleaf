@@ -45,12 +45,14 @@ templates.accountMergeToOverleafAddress = CTAEmailTemplate({
 	title: () -> "Confirm Account Merge"
 	message: () ->
 		"""
-			To merge your ShareLaTeX and Overleaf accounts, click the link below.
+			To merge your ShareLaTeX and Overleaf accounts, click the button below.
 			If you think you have received this message in error,
 			please contact us at https://www.overleaf.com/contact
 		"""
 	ctaText: () -> "Confirm Account Merge"
 	ctaURL: (opts) -> opts.tokenLinkUrl
+	secondaryMessage: (opts) ->
+		"If the button does not appear, open this link in your browser: #{opts.tokenLinkUrl}"
 })
 
 templates.accountMergeToSharelatexAddress = templates.accountMergeToOverleafAddress
