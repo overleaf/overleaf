@@ -8,6 +8,7 @@ Errors = require("../Errors/Errors")
 
 module.exports = UserGetter =
 	getUser: (query, projection, callback = (error, user) ->) ->
+		return callback(new Error("no query provided")) unless query?
 		if query?.email?
 			return callback(new Error("Don't use getUser to find user by email"), null)
 		if arguments.length == 2
