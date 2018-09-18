@@ -27,11 +27,17 @@
 	margin-right: @margin-xs;
 }
 
-.template-thumbnail {
+.templates-container {
+	column-count: 3;
+	column-gap: 1em;
+}
 
+.template-thumbnail {
+	display: inline-block;
+	margin: 0 0 1em;
+	width: 100%;
 	.thumbnail {
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-		height: 465px;
 		margin: 5% 0;
 		padding:0px;
 		display: flex;
