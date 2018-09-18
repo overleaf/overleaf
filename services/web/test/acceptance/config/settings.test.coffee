@@ -125,4 +125,5 @@ module.exports =
 		},
 		'/redirect/params/:id': {
 			url: (params) -> "/destination/#{params.id}/params"
-		}
+		},
+		'/redirect/qs': '/destination/qs'

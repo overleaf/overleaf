@@ -29,3 +29,6 @@ describe "RedirectUrls", ->
 
 	it 'proxy URLs with multiple support methods', (done) ->
 		assertRedirect 'get', '/redirect/get_and_post', 302, '/destination/get_and_post', done
+
+	it 'redirects with query params', (done) ->
+		assertRedirect 'get', '/redirect/qs?foo=bar&baz[]=qux1&baz[]=qux2', 302, '/destination/qs?foo=bar&baz[]=qux1&baz[]=qux2', done
