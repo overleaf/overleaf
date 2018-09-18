@@ -23,4 +23,11 @@ module.exports = RedirectManager =
 					url = target.url
 				if target.baseUrl?
 					url = "#{target.baseUrl}#{url}"
-			res.redirect code, url
+			res.redirect code, url + getQueryString(req)
+
+# Naively get the query params string. Stringifying the req.query object may
+# have differences between Express and Rails, so safer to just pass the raw
+# string
+getQueryString = (req) ->
+	qs = req.url.match(/\?.*$/)
+	if qs? then qs[0] else ""
