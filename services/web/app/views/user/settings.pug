@@ -127,7 +127,7 @@ block content
 											h3 #{translate("change_password")}
 											p
 												| To change your password,
-												| please go to #[a(href=settings.overleaf.host+'/users/edit') Overleaf v1 settings]
+												| please go to #[a(href='/sign_in_to_v1?return_to=/users/edit%23details') Overleaf v1 settings]
 
 
 							| !{moduleIncludes("userSettings", locals)}
@@ -193,7 +193,7 @@ block content
 			if settings.createV1AccountOnLogin && settings.overleaf
 				p
 					strong
-						| This will also delete your user account on #[a(href=settings.overleaf.host target="_blank") Overleaf v1].
+						| This will also delete your user account on #[a(href='/sign_in_to_v1?return_to=/dash%3Fprefer-v1-dash%3D1' target="_blank") Overleaf v1].
 						| If you want to remove your projects from Overleaf v1, you must do this before you
 						| delete your account by going to your My Projects page in Overleaf v1, moving your
 						| projects to the Trash, and then from there either ‘leaving’ or ‘purging’ them, as appropriate.
@@ -244,7 +244,7 @@ block content
 					div.alert.alert-info
 						| If you can't remember your password, or if you are using Single-Sign-On with another provider
 						| to sign in (such as Twitter or Google), please
-						| #[a(href=settings.overleaf.host+'/users/password/new', target='_blank') reset your password],
+						| #[a(href='/sign_in_to_v1?return_to=/users/password/new', target='_blank') reset your password],
 						| and try again.
 		.modal-footer
 			button.btn.btn-default(

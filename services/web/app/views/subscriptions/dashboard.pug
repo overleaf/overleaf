@@ -122,7 +122,7 @@ block content
 							p
 								| You are subscribed to Overleaf through Overleaf v1
 							p
-								a.btn.btn-primary(href=settings.overleaf.host+"/users/edit#status") Manage v1 Subscription
+								a.btn.btn-primary(href='/sign_in_to_v1?return_to=/users/edit%23status') Manage v1 Subscription
 							hr
 
 						if settings.overleaf && v1Subscriptions && v1Subscriptions.teams && v1Subscriptions.teams.length > 0
@@ -130,7 +130,7 @@ block content
 								p
 									| You are a member of the Overleaf v1 team: <strong>#{team.name}</strong>
 							p
-								a.btn.btn-primary(href=settings.overleaf.host+"/teams") Manage v1 Team Membership
+								a.btn.btn-primary(href="/sign_in_to_v1?return_to=/teams") Manage v1 Team Membership
 							hr
 
 					.card(ng-if="view == 'cancelation'")
