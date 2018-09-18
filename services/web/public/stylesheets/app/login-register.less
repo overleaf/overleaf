@@ -1,0 +1,152 @@
+@brand-ieee-color       : #00629B;
+@brand-google-color     : #4885ED;
+@brand-twitter-color    : #1DA1F2;
+@brand-orcid-color      : #A6CE39;
+@brand-sharelatex-color : #A93529;
+
+.make-login-register-brand-btn(@color) {
+	background-color: @color;
+	text-indent: -10px;
+	&:focus,
+	&:hover {
+		background-color: darken(@color, 8%);
+	}
+	&:active {
+		background-color: darken(@color, 16%);
+	} 
+}
+
+.login-register-container {
+	max-width: 400px;
+	margin: 0 auto;
+}
+	.login-register-header {
+		padding-top: @line-height-computed;
+		padding-bottom: @line-height-computed - 5;
+		border-bottom: solid 1px @hr-border;
+	}
+		.login-register-header-heading {
+			margin: 0;
+			color: @text-color;
+		}
+
+	.login-register-card {
+		padding-top: 0;
+		padding-bottom: 0;
+		text-align: center;
+	}
+
+		.login-register-form,
+		.login-register-sharelatex {
+			padding: @line-height-computed (@line-height-computed * 2);
+			border-bottom: solid 1px @hr-border;
+			&:last-child {
+				border-bottom-width: 0;
+			}
+		}
+		.login-register-other-links {
+			padding: @line-height-computed (@line-height-computed * 2);
+		}
+
+		.login-register-text,
+		.login-register-hr-text-container {
+			margin: 0;
+			line-height: 1;
+			font-size: 90%;
+		}
+
+		.login-register-text {
+			padding-bottom: 25px;
+			&:last-child {
+				padding-bottom: 0;
+			}
+		}
+
+		.login-register-hr-text-container {
+			position: relative;
+			padding: @line-height-computed 0;
+
+			&::before {
+				content: '';
+				position: absolute;
+				height: 1px;
+				background-color: @hr-border;
+				top: 50%;
+				left: 0;
+				right: 0;
+			}
+		}
+			.login-register-hr-text {
+				position: relative;
+				background-color: #FFF;
+				padding: 0 (@line-height-computed / 2);
+			}
+		.login-register-sharelatex-tooltip {
+			display: inline-block;
+			font-size: 135%;
+			position: relative;
+			top: 2px;
+			margin-left: 3px;
+			color: @link-color;
+			cursor: pointer;
+		}
+
+		.login-btn-ieee {
+			.make-login-register-brand-btn(@brand-ieee-color);
+		}
+
+		.login-btn-google {
+			.make-login-register-brand-btn(@brand-google-color);
+		} 
+
+		.login-btn-twitter {
+			.make-login-register-brand-btn(@brand-twitter-color);
+		} 
+
+		.login-btn-orcid {
+			.make-login-register-brand-btn(@brand-orcid-color);
+		} 
+
+		.login-btn-sharelatex {
+			.make-login-register-brand-btn(@brand-sharelatex-color);
+		} 
+			.login-btn-icon {
+				display: inline-block;
+				float: left;
+				margin-left: 5px;
+				background: url(/img/brand/lion.svg) center/contain no-repeat;
+				width: 24px;
+
+				&::before {
+					content: '\00a0'; // Non-breakable space. A non-breakable character here makes this icon work like font-awesome.
+				}
+			}
+			.login-btn-icon-ieee {
+				background-image: url(/img/other-brands/logo_ieee.svg);
+			}
+			.login-btn-icon-google {
+				background-image: url(/img/other-brands/logo_google.svg);
+			}
+			.login-btn-icon-twitter {
+				background-image: url(/img/other-brands/logo_twitter.svg);
+			}
+			.login-btn-icon-orcid {
+				background-image: url(/img/other-brands/logo_orcid.svg);
+			}
+			.login-btn-icon-sharelatex {
+				background-image: url(/img/other-brands/logo_sharelatex.svg);
+			}
+
+		.login-register-header-heading {
+			margin: 0;
+			color: @text-color;
+		}
+
+.registration-message-heading {
+	color: @text-color;	
+}
+
+.registration-message-details {
+	font-size: 90%;
+}
+
