@@ -35,7 +35,7 @@ module.exports = UserGetter =
 
 			getUserAffiliations userId, (error, affiliationsData) ->
 				return callback error if error?
-				callback null, decorateFullEmails(user.email, user.emails, affiliationsData)
+				callback null, decorateFullEmails(user.email, user.emails or [], affiliationsData)
 
 	getUserByMainEmail: (email, projection, callback = (error, user) ->) ->
 		email = email.trim()
