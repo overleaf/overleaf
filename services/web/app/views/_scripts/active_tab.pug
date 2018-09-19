@@ -1,0 +1,10 @@
+script(type="text/javascript").
+	if (window.location.hash) {
+		setTimeout(function(){
+			tabID = window.location.hash.replace('#', '')
+			tab = document.getElementById(tabID)
+			if (tab && typeof(tab) != 'undefined' && tab != null) {
+				tab.setAttribute('active', true)
+			}
+		}, 500);
+	}
