@@ -68,6 +68,7 @@ module.exports = class Router
 		webRouter.get  '/logout', UserController.logout
 		webRouter.get  '/restricted', AuthorizationMiddlewear.restricted
 
+
 		if Features.hasFeature('registration')
 			webRouter.get '/register', UserPagesController.registerPage
 			AuthenticationController.addEndpointToLoginWhitelist '/register'
