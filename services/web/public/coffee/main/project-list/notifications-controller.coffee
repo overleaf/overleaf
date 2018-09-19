@@ -53,3 +53,16 @@ define [
 				localStorage('overleaf_v1_notification_hidden_at', Date.now())
 			else
 				localStorage('overleaf_v1_notification_hidden_at', null)
+
+	App.controller "EmailNotificationController", ($scope, $http, UserAffiliationsDataService) ->
+		$scope.userEmails = []
+
+		_getUserEmails = () ->
+				UserAffiliationsDataService
+					.getUserEmails().then (emails) -> 
+						$scope.userEmails = emails
+		_getUserEmails()
+
+		$scope.resendConfirmationEmail = (userEmail) ->
+			UserAffiliationsDataService
+				.resendConfirmationEmail userEmail.email
