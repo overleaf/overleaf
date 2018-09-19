@@ -77,11 +77,11 @@ block content
 									h3 #{translate("change_password")}
 									if externalAuthenticationSystemUsed() && !settings.overleaf
 										p
-											Password settings are managed externally to Overleaf
+											Password settings are managed externally
 									else
 										- var submitAction
 										if settings.overleaf
-											- submitAction = '/change_password/v1'
+											- submitAction = '/user/change_password/v1'
 										else
 											- submitAction = '/user/password/update'
 										form(
