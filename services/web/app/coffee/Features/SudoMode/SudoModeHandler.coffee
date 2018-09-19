@@ -1,6 +1,7 @@
 RedisWrapper = require('../../infrastructure/RedisWrapper')
 rclient = RedisWrapper.client('sudomode')
 logger = require('logger-sharelatex')
+AuthenticationManager = require '../Authentication/AuthenticationManager'
 
 
 TIMEOUT_IN_SECONDS = 60 * 60
@@ -10,6 +11,9 @@ module.exports = SudoModeHandler =
 
 	_buildKey: (userId) ->
 		"SudoMode:{#{userId}}"
+
+	authenticate: (email, password, callback=(err, user)->) ->
+		AuthenticationManager.authenticate {email}, password, callback
 
 	activateSudoMode: (userId, callback=(err)->) ->
 		if !userId?

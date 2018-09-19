@@ -9,12 +9,17 @@ modulePath = require('path').join __dirname, '../../../../app/js/Features/SudoMo
 describe 'SudoModeHandler', ->
 	beforeEach ->
 		@userId = 'some_user_id'
+		@email = 'someuser@example.com'
+		@user =
+			_id: @userId
+			email: @email
 		@rclient = {get: sinon.stub(), set: sinon.stub(), del: sinon.stub()}
 		@RedisWrapper =
 			client: () => @rclient
 		@SudoModeHandler = SandboxedModule.require modulePath, requires:
 			'../../infrastructure/RedisWrapper': @RedisWrapper
 			'logger-sharelatex': @logger = {log: sinon.stub(), err: sinon.stub()}
+			'../Authentication/AuthenticationManager': @AuthenticationManager = {}
 
 	describe '_buildKey', ->
 
@@ -114,6 +119,18 @@ describe 'SudoModeHandler', ->
 				@call (err) =>
 					expect(@rclient.del.callCount).to.equal 0
 					done()
+
+	describe 'authenticate', ->
+		beforeEach ->
+			@AuthenticationManager.authenticate = sinon.stub().callsArgWith(2, null, @user)
+
+		it 'should call AuthenticationManager.authenticate', (done) ->
+			@SudoModeHandler.authenticate @email, 'password', (err, user) =>
+				expect(err).to.not.exist
+				expect(user).to.exist
+				expect(user).to.deep.equal @user
+				expect(@AuthenticationManager.authenticate.callCount).to.equal 1
+				done()
 
 	describe 'isSudoModeActive', ->
 		beforeEach ->

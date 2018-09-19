@@ -1,7 +1,6 @@
 logger = require 'logger-sharelatex'
 SudoModeHandler = require './SudoModeHandler'
 AuthenticationController = require '../Authentication/AuthenticationController'
-AuthenticationManager = require '../Authentication/AuthenticationManager'
 ObjectId = require('../../infrastructure/Mongoose').mongo.ObjectId
 UserGetter = require '../User/UserGetter'
 Settings = require 'settings-sharelatex'
@@ -40,7 +39,7 @@ module.exports = SudoModeController =
 				err = new Error('user not found')
 				logger.err {err, userId}, "[SudoMode] user not found"
 				return next(err)
-			AuthenticationManager.authenticate email: userRecord.email, password, (err, user) ->
+			SudoModeHandler.authenticate userRecord.email, password, (err, user) ->
 				if err?
 					logger.err {err, userId}, "[SudoMode] error authenticating user"
 					return next(err)
