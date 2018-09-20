@@ -1,3 +1,5 @@
+@register-v-spacing: 20px;
+
 .deprecated-sl-masthead {
 	display: inline-block;
 	margin-top: @header-height;
@@ -73,7 +75,7 @@
 	.register-banner {
 		background-image: -webkit-linear-gradient(top,rgba(0,0,0,0.7),rgba(0,0,0,0.9));
 		background-image: linear-gradient(to bottom,rgba(0,0,0,0.7),rgba(0,0,0,0.9));
-		padding: @line-height-computed 0;
+		padding: @register-v-spacing 0;
 		position: absolute;
 		bottom: 0;
 		width: 100%;
@@ -83,13 +85,17 @@
 			font-family: @font-family-sans-serif;
 			font-weight: 500;
 			letter-spacing: 1px;
+			margin-bottom: @register-v-spacing;
 		}
 		.form-group {
 			margin-left: @line-height-computed / 2;
 		}
+		.input-lg {
+			border-radius: 9999px;
+		}
 	}
 	.screenshot {
-		height: 550px;
+		height: 600px;
 		margin: auto;
 		margin-bottom: -50px;
 		overflow-y: hidden;
@@ -119,6 +125,39 @@
 		float: left;
 	}
 }
+
+.hp-register-external-separator {
+	margin: 0 0 (@register-v-spacing / 2);
+	color: #FFF;
+}
+
+	.hp-register-external-separator-or {
+		vertical-align: middle;
+		&::before,
+		&::after {
+			content: "";
+			display: inline-block;
+			vertical-align: middle;
+			width: 5em;
+			height: 1px;
+			background-color: rgba(255, 255, 255, .3);
+		}
+		&::before {
+			margin-right: 1.25em;
+		}
+		&::after {
+			margin-left: 1.25em;
+		}
+	}
+
+.hp-register-newsletter-checkbox {
+	font-size: 90%;
+}
+
+.hp-login-btn {
+	min-width: 220px;
+}
+
 @media only screen and (max-width: @screen-sm-max) {
 	.masthead {
 		.btn-hero {

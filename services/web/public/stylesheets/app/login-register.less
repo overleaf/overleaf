@@ -4,15 +4,34 @@
 @brand-orcid-color      : #A6CE39;
 @brand-sharelatex-color : #A93529;
 
-.make-login-register-brand-btn(@color) {
-	background-color: @color;
+.make-login-register-brand-btn(@bg-color) {
+	background-color: @bg-color;
 	text-indent: -10px;
+	padding-left: 0;
+	padding-right: 0;
 	&:focus,
 	&:hover {
-		background-color: darken(@color, 8%);
+		background-color: darken(@bg-color, 8%);
 	}
 	&:active {
-		background-color: darken(@color, 16%);
+		background-color: darken(@bg-color, 16%);
+	} 
+}
+
+.make-login-register-brand-btn-alt(@color) {
+	background-color: #FFF;
+	color: @color;
+	text-indent: -10px;
+	padding-left: 0;
+	padding-right: 0;
+	&:focus,
+	&:hover {
+		background-color: #FFF;
+		color: darken(@color, 8%);
+	}
+	&:active {
+		background-color: #FFF;
+		color: darken(@color, 16%);
 	} 
 }
 
@@ -109,12 +128,20 @@
 			.make-login-register-brand-btn(@brand-google-color);
 		} 
 
+		.login-btn-google-alt {
+			.make-login-register-brand-btn-alt(@brand-google-color);
+		} 
+
 		.login-btn-twitter {
 			.make-login-register-brand-btn(@brand-twitter-color);
 		} 
 
 		.login-btn-orcid {
 			.make-login-register-brand-btn(@brand-orcid-color);
+		} 
+
+		.login-btn-orcid-alt {
+			.make-login-register-brand-btn-alt(darken(@brand-orcid-color, 6%));
 		} 
 
 		.login-btn-sharelatex {
@@ -137,11 +164,17 @@
 			.login-btn-icon-google {
 				background-image: url(/img/other-brands/logo_google.svg);
 			}
+			.login-btn-icon-google-alt {
+				background-image: url(/img/other-brands/logo_google_alt.svg);
+			}
 			.login-btn-icon-twitter {
 				background-image: url(/img/other-brands/logo_twitter.svg);
 			}
 			.login-btn-icon-orcid {
 				background-image: url(/img/other-brands/logo_orcid.svg);
+			}
+			.login-btn-icon-orcid-alt {
+				background-image: url(/img/other-brands/logo_orcid_alt.svg);
 			}
 			.login-btn-icon-sharelatex {
 				background-image: url(/img/other-brands/logo_sharelatex.svg);
