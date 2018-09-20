@@ -2,7 +2,7 @@ script(type="text/ng-template", id="groupPlanModalTemplate")
 	.modal-header
 		h3 #{translate("group_plan_enquiry")}
 	.modal-body
-		form.text-left.form(ng-controller="UniverstiesContactController", ng-submit="contactUs()")
+		form.text-left.form(ng-controller="GroupPlanContactController", ng-submit="contactUs()")
 			span(ng-show="sent == false && error == false")
 				.form-group
 					label#title9(for='Field9')
