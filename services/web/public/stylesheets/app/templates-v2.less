@@ -43,6 +43,7 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
+		overflow: hidden;
 
 		h3 {
 			color:@link-color;
@@ -51,11 +52,6 @@
 
 		&.thumbnail-tag {
 			height: 100px;
-		}
-
-		img {
-			max-height: 100%;
-			width: 100%;
 		}
 	}
 
@@ -70,23 +66,12 @@
 		font-style: italic;
 		padding: 5px 0;
 		.text-overflow();
-
-		a {
-			display: inline;
-		}
 	}
 
 	/* Media Queries */
 	@media (max-width: @screen-md-min) {
 		.thumbnail {
-			height: 400px;
-			width: 300px;
-
 			margin: 5% auto;
-		}
-
-		img {
-			width: 90%;
 		}
 
 		.caption .description {
