@@ -1,5 +1,8 @@
 extends ../layout
 
+block vars
+	- var suppressNavContentLinks = true
+
 block content
 	//- We need to do .replace(/\//g, '\\/') do that '</script>' -> '<\/script>'
 	//- and doesn't prematurely end the script tag.
