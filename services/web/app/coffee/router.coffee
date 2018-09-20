@@ -330,6 +330,7 @@ module.exports = class Router
 			AuthenticationController.httpAuth,
 			CompileController.getFileFromClsiWithoutUser
 
+<<<<<<< HEAD
 		webRouter.get '/teams', (req, res, next) ->
 			# Match v1 behaviour - if the user is signed in, show their teams list
 			# Otherwise show some information about teams
@@ -337,6 +338,14 @@ module.exports = class Router
 				res.redirect('/user/subscription')
 			else
 				res.redirect("#{settings.v1Api.host}/teams")
+=======
+		webRouter.get '/chrome', (req, res, next) ->
+			# Match v1 behaviour - this is used for a Chrome web app
+			if AuthenticationController.isUserLoggedIn(req)
+				res.redirect('/project')
+			else
+				res.redirect('/register')
+>>>>>>> Add /chrome redirect to match v1 behaviour
 
 		#Admin Stuff
 		webRouter.get  '/admin', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.index
