@@ -3,6 +3,7 @@ v1Api =
 
 module.exports =
 	enableSubscriptions: true
+	enableLegacyRegistration: true
 
 	features: features =
 		v1_free:
