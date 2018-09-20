@@ -2,6 +2,9 @@ RedisWrapper = require('../../infrastructure/RedisWrapper')
 rclient = RedisWrapper.client('sudomode')
 logger = require('logger-sharelatex')
 AuthenticationManager = require '../Authentication/AuthenticationManager'
+Settings = require 'settings-sharelatex'
+V1Handler = require '../V1/V1Handler'
+UserGetter = require '../User/UserGetter'
 
 
 TIMEOUT_IN_SECONDS = 60 * 60
@@ -13,7 +16,13 @@ module.exports = SudoModeHandler =
 		"SudoMode:{#{userId}}"
 
 	authenticate: (email, password, callback=(err, user)->) ->
-		AuthenticationManager.authenticate {email}, password, callback
+		if Settings.overleaf?
+			V1Handler.authWithV1 email, password, (err, isValid, v1Profile) ->
+				if !isValid
+					return callback(null, null)
+				UserGetter.getUser {'overleaf.id': v1Profile.id}, callback
+		else
+			AuthenticationManager.authenticate {email}, password, callback
 
 	activateSudoMode: (userId, callback=(err)->) ->
 		if !userId?

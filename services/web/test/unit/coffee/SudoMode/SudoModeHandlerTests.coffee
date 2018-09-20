@@ -20,6 +20,9 @@ describe 'SudoModeHandler', ->
 			'../../infrastructure/RedisWrapper': @RedisWrapper
 			'logger-sharelatex': @logger = {log: sinon.stub(), err: sinon.stub()}
 			'../Authentication/AuthenticationManager': @AuthenticationManager = {}
+			'settings-sharelatex': @Settings = {}
+			'../V1/V1Handler': @V1Handler = {authWithV1: sinon.stub()}
+			'../User/UserGetter': @UserGetter = {getUser: sinon.stub()}
 
 	describe '_buildKey', ->
 

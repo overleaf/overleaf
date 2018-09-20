@@ -28,6 +28,7 @@ describe 'SudoModeController', ->
 			'../Authentication/AuthenticationController': @AuthenticationController
 			'../../infrastructure/Mongoose': {mongo: {ObjectId: () -> 'some_object_id'}}
 			'../User/UserGetter': @UserGetter
+			'settings-sharelatex': @Settings = {}
 
 	describe 'sudoModePrompt', ->
 		beforeEach ->
