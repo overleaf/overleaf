@@ -121,9 +121,6 @@
 			}
 		}
 	}
-	.btn-hero {
-		float: left;
-	}
 }
 
 .hp-register-external-separator {
@@ -152,27 +149,35 @@
 
 .hp-register-newsletter-checkbox {
 	font-size: 90%;
+	& > .checkbox-newsletter {
+		text-align: left;
+		@media only screen and (min-width: @screen-sm-min) {
+			text-align: center;
+		}
+	}
 }
 
 .hp-login-btn {
 	min-width: 220px;
 }
 
-@media only screen and (max-width: @screen-sm-max) {
-	.masthead {
-		.btn-hero {
-			float: none;
-		}
-	}
-}
-@media only screen and (min-width: @screen-sm-min) and (max-width: @screen-sm-max) {
-	.masthead {
-		.btn-hero {
-			margin-top: @margin-md;
-		}
-	}
+.hp-register-form-email-pwd {
+	position: relative;
 }
 
+	.hp-register-form-email-pwd-btn-container.form-group {
+		display: block;
+		margin-top: (@register-v-spacing / 2);
+		@media only screen and (min-width: @screen-md-min) {
+			position: absolute;
+			display: inline-block;
+			height: 100%;
+			top: -(@register-v-spacing / 2);
+			& > .btn-hero {
+				height: 100%;
+			}
+		}
+	}
 
 .universities {
 	border-bottom: 1px solid @gray-lighter;
