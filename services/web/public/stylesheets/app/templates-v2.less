@@ -24,7 +24,7 @@
 }
 
 .tag-link {
-	margin-right: @margin-xs;
+	margin: 0 @margin-xs @margin-sm 0;
 }
 
 .templates-container {
@@ -33,9 +33,12 @@
 }
 
 .template-thumbnail {
-	display: inline-block;
-	margin: 0 0 1em;
-	width: 100%;
+	&.template-thumbnail__container {
+		display: inline-block;
+		margin: 0 0 1em;
+		width: 100%;
+	}
+
 	.thumbnail {
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 		margin: 5% 0;
@@ -68,6 +71,12 @@
 		.text-overflow();
 	}
 
+	.caption__title {
+		display: inline-block;
+		max-width: 100%;
+		.text-overflow();
+	}
+
 	/* Media Queries */
 	@media (max-width: @screen-md-min) {
 		.thumbnail {
@@ -78,7 +87,6 @@
 			padding: 5px 50px;
 		}
 	}
-
 }
 
     .section-preview {
