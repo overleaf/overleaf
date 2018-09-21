@@ -33,9 +33,12 @@
 }
 
 .template-thumbnail {
-	display: inline-block;
-	margin: 0 0 1em;
-	width: 100%;
+	&.template-thumbnail__container {
+		display: inline-block;
+		margin: 0 0 1em;
+		width: 100%;
+	}
+
 	.thumbnail {
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 		margin: 5% 0;
@@ -84,7 +87,6 @@
 			padding: 5px 50px;
 		}
 	}
-
 }
 
     .section-preview {
