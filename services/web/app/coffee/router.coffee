@@ -330,6 +330,14 @@ module.exports = class Router
 			AuthenticationController.httpAuth,
 			CompileController.getFileFromClsiWithoutUser
 
+		webRouter.get '/teams', (req, res, next) ->
+			# Match v1 behaviour - if the user is signed in, show their teams list
+			# Otherwise show some information about teams
+			if AuthenticationController.isUserLoggedIn(req)
+				res.redirect('/user/subscription')
+			else
+				res.redirect("#{settings.v1Api.host}/teams")
+
 		#Admin Stuff
 		webRouter.get  '/admin', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.index
 		webRouter.get  '/admin/user', AuthorizationMiddlewear.ensureUserIsSiteAdmin, (req, res)-> res.redirect("/admin/register") #this gets removed by admin-panel addon
