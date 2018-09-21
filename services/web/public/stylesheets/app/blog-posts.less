@@ -32,7 +32,7 @@
     li {
       display: inline-block;
       margin: 0;
-      padding: 0 @margin-sm 0 0;
+      padding: 0 @padding-sm @padding-sm 0;
     }
     a {
       font-size: small;
@@ -43,5 +43,17 @@
     border: 1px solid @ol-blue-gray-2;
     border-radius: @border-radius-base;
     padding: @padding-sm;
+  }
+
+  .figure {
+    background-color: #ffffff;
+    border: 1px solid @ol-blue-gray-2;
+    display: inline-block;
+    margin: 0 auto @margin-sm 0;
+    padding: @padding-sm;
+    .figure-caption {
+      padding-top: @padding-sm;
+      font-size: small;
+    }
   }
 }
