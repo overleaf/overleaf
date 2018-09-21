@@ -45,8 +45,8 @@
     All content from CMS is in .row-spaced.
     Margin below is to fix extra whitespace for first rows
   */
-  .container > .row:nth-child(2) {
-    //- first child is page header, don't correct margin
+  .container > .row:nth-child(2), .content-container > .row:first-child {
+    //- .container first child is page header, don't correct margin
     margin-top: 0;
   }
   .tab-pane {
