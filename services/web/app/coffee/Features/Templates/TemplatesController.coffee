@@ -45,6 +45,7 @@ module.exports = TemplatesController =
 				docId: req.body.docId
 				templateId: req.body.templateId
 				templateVersionId: req.body.templateVersionId
+				image: 'wl_texlive:2018.1'
 			},
 			req,
 			res
@@ -63,18 +64,26 @@ module.exports = TemplatesController =
 					logger.err err:err, zipReq:zipReq, "problem building project from zip"
 					return res.sendStatus 500
 				setCompiler project._id, options.compiler, ->
-					fs.unlink dumpPath, ->
-					delete req.session.templateData
-					conditions = {_id:project._id}
-					update = {
-						fromV1TemplateId:options.templateId,
-						fromV1TemplateVersionId:options.templateVersionId
-					}
-					Project.update conditions, update, {}, (err)->
-						res.redirect "/project/#{project._id}"
+					setImage project._id, options.image, ->
+						fs.unlink dumpPath, ->
+						delete req.session.templateData
+						conditions = {_id:project._id}
+						update = {
+							fromV1TemplateId:options.templateId,
+							fromV1TemplateVersionId:options.templateVersionId
+						}
+						Project.update conditions, update, {}, (err)->
+							res.redirect "/project/#{project._id}"
 
 setCompiler = (project_id, compiler, callback)->
 	if compiler?
 		ProjectOptionsHandler.setCompiler project_id, compiler, callback
+	else
+		callback()
+
+setImage = (project_id, imageName, callback)->
+	console.log(project_id, imageName)
+	if imageName?
+		ProjectOptionsHandler.setImageName project_id, imageName, callback
 	else
 		callback()

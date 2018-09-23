@@ -22,7 +22,10 @@ describe 'TemplatesController', ->
 		}
 		@ProjectUploadManager = {createProjectFromZipArchive : sinon.stub().callsArgWith(3, null, {_id:project_id})}
 		@dumpFolder = "dump/path"
-		@ProjectOptionsHandler = {setCompiler:sinon.stub().callsArgWith(2)}
+		@ProjectOptionsHandler = {
+			setCompiler:sinon.stub().callsArgWith(2)
+			setImageName:sinon.stub().callsArgWith(2)
+		}
 		@uuid = "1234"
 		@ProjectDetailsHandler =
 			getProjectDescription:sinon.stub()
