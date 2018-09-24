@@ -37,6 +37,7 @@ define [
 	"directives/selectAll"
 	"directives/maxHeight"
 	"directives/creditCards"
+	"directives/bookmarkableTabset"
 	"services/queued-http"
 	"services/validateCaptcha"
 	"filters/formatDate"
