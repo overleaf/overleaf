@@ -58,7 +58,7 @@ describe "TokenAccessHandler", ->
 					expect(err).to.be.instanceof Error
 					done()
 
-		describe 'when project is not tokenBased', ->
+		describe 'when project does not have tokenBased access level', ->
 			beforeEach ->
 				@project.publicAccesLevel = 'private'
 				@Project.findOne = sinon.stub().callsArgWith(2, null, @project, true)
@@ -97,8 +97,7 @@ describe "TokenAccessHandler", ->
 			@TokenAccessHandler.findProjectWithReadAndWriteToken @token, (err, project) =>
 				expect(@Project.findOne.callCount).to.equal 1
 				expect(@Project.findOne.calledWith({
-					'tokens.readAndWrite': @token,
-					'publicAccesLevel': 'tokenBased'
+					'tokens.readAndWrite': @token
 				})).to.equal true
 				done()
 
@@ -107,6 +106,11 @@ describe "TokenAccessHandler", ->
 				expect(err).to.not.exist
 				expect(project).to.exist
 				expect(project).to.deep.equal @project
+				done()
+
+		it 'should return projectExists flag as true', (done) ->
+			@TokenAccessHandler.findProjectWithReadAndWriteToken @token, (err, project, projectExists) ->
+				expect(projectExists).to.equal true
 				done()
 
 		describe 'when Project.findOne produces an error', ->
@@ -118,6 +122,22 @@ describe "TokenAccessHandler", ->
 					expect(err).to.exist
 					expect(project).to.not.exist
 					expect(err).to.be.instanceof Error
+					done()
+
+		describe 'when project does not have tokenBased access level', ->
+			beforeEach ->
+				@project.publicAccesLevel = 'private'
+				@Project.findOne = sinon.stub().callsArgWith(2, null, @project, true)
+
+			it 'should not return a project', (done) ->
+				@TokenAccessHandler.findProjectWithReadAndWriteToken @token, (err, project) ->
+					expect(err).to.not.exist
+					expect(project).to.not.exist
+					done()
+
+			it 'should return projectExists flag as true', (done) ->
+				@TokenAccessHandler.findProjectWithReadAndWriteToken @token, (err, project, projectExists) ->
+					expect(projectExists).to.equal true
 					done()
 
 

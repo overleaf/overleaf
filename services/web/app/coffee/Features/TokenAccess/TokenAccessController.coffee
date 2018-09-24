@@ -34,11 +34,15 @@ module.exports = TokenAccessController =
 		userId = AuthenticationController.getLoggedInUserId(req)
 		token = req.params['read_and_write_token']
 		logger.log {userId, token}, "[TokenAccess] requesting read-and-write token access"
-		TokenAccessHandler.findProjectWithReadAndWriteToken token, (err, project) ->
+		TokenAccessHandler.findProjectWithReadAndWriteToken token, (err, project, projectExists) ->
 			if err?
 				logger.err {err, token, userId},
 					"[TokenAccess] error getting project by readAndWrite token"
 				return next(err)
+			if !projectExists and settings.overleaf
+				logger.log {token, userId},
+						"[TokenAccess] no project found for this token"
+				return res.redirect(302, settings.overleaf.host + '/' + token)
 			if !project?
 				logger.log {token, userId},
 					"[TokenAccess] no token-based project found for readAndWrite token"

@@ -48,7 +48,7 @@ describe "TokenAccessController", ->
 				@next = sinon.stub()
 				@req.params['read_and_write_token'] = @readAndWriteToken
 				@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
-					.callsArgWith(1, null, @project)
+					.callsArgWith(1, null, @project, true)
 				@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
 					.callsArgWith(2, null)
 				@ProjectController.loadEditor = sinon.stub()
@@ -85,7 +85,7 @@ describe "TokenAccessController", ->
 				@req.params['read_and_write_token'] = @readAndWriteToken
 				@project.owner_ref = @userId
 				@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
-					.callsArgWith(1, null, @project)
+					.callsArgWith(1, null, @project, true)
 				@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
 					.callsArgWith(2, null)
 				@ProjectController.loadEditor = sinon.stub()
@@ -123,7 +123,7 @@ describe "TokenAccessController", ->
 					@next = sinon.stub()
 					@req.params['read_and_write_token'] = @readAndWriteToken
 					@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
-						.callsArgWith(1, null, @project)
+						.callsArgWith(1, null, @project, true)
 					@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
 						.callsArgWith(2, null)
 					@ProjectController.loadEditor = sinon.stub()
@@ -159,7 +159,7 @@ describe "TokenAccessController", ->
 					@next = sinon.stub()
 					@req.params['read_and_write_token'] = @readAndWriteToken
 					@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
-						.callsArgWith(1, null, @project)
+						.callsArgWith(1, null, @project, true)
 					@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
 						.callsArgWith(2, null)
 					@ProjectController.loadEditor = sinon.stub()
@@ -244,7 +244,7 @@ describe "TokenAccessController", ->
 						@next = sinon.stub()
 						@req.params['read_and_write_token'] = '123abc'
 						@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
-							.callsArgWith(1, null, null)
+							.callsArgWith(1, null, null, false)
 						@TokenAccessHandler.findProjectWithHigherAccess =
 							sinon.stub()
 							.callsArgWith(2, null, @project, false)
@@ -252,8 +252,10 @@ describe "TokenAccessController", ->
 
 					it 'should redirect to v1', (done) ->
 						expect(@res.redirect.callCount).to.equal 1
-						expect(@res.redirect.firstCall.args[0])
-							.to.equal 'http://overleaf.test:5000/123abc'
+						expect(@res.redirect.calledWith(
+							302,
+							'http://overleaf.test:5000/123abc'
+						)).to.equal true
 						done()
 
 				describe 'when token access is off, but user has higher access anyway', ->
@@ -264,7 +266,7 @@ describe "TokenAccessController", ->
 						@next = sinon.stub()
 						@req.params['read_and_write_token'] = @readAndWriteToken
 						@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
-							.callsArgWith(1, null, null)
+							.callsArgWith(1, null, null, true)
 						@TokenAccessHandler.findProjectWithHigherAccess =
 							sinon.stub()
 							.callsArgWith(2, null, @project, true)
@@ -313,7 +315,7 @@ describe "TokenAccessController", ->
 						@next = sinon.stub()
 						@req.params['read_and_write_token'] = @readAndWriteToken
 						@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
-							.callsArgWith(1, null, null)
+							.callsArgWith(1, null, null, true)
 						@TokenAccessHandler.findProjectWithHigherAccess =
 							sinon.stub()
 							.callsArgWith(2, null, null, true)
@@ -358,7 +360,7 @@ describe "TokenAccessController", ->
 				@next = sinon.stub()
 				@req.params['read_and_write_token'] = @readAndWriteToken
 				@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
-					.callsArgWith(1, null, @project)
+					.callsArgWith(1, null, @project, true)
 				@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
 					.callsArgWith(2, new Error('woops'))
 				@ProjectController.loadEditor = sinon.stub()
@@ -500,31 +502,7 @@ describe "TokenAccessController", ->
 					expect(@next.lastCall.args[0]).to.be.instanceof Error
 					done()
 
-			##
 		describe 'when findProject does not find a project', ->
-			beforeEach ->
-
-			describe 'when project does not exist', ->
-				beforeEach ->
-					@req = new MockRequest()
-					@req.url = '/123abc'
-					@res = new MockResponse()
-					@res.redirect = sinon.stub()
-					@next = sinon.stub()
-					@req.params['read_and_write_token'] = '123abc'
-					@TokenAccessHandler.findProjectWithReadOnlyToken = sinon.stub()
-						.callsArgWith(1, null, null, true)
-					@TokenAccessHandler.findProjectWithHigherAccess =
-						sinon.stub()
-						.callsArgWith(2, null, @project, false)
-					@TokenAccessController.readOnlyToken @req, @res, @next
-
-				it 'should return a ProjectNotTokenAccessError', (done) ->
-					expect(@res.redirect.callCount).to.equal 1
-					expect(@res.redirect.firstCall.args[0])
-						.to.equal 'http://overleaf.test:5000/123abc'
-					done()
-
 			describe 'when token access is off, but user has higher access anyway', ->
 				beforeEach ->
 					@req = new MockRequest()
@@ -533,7 +511,7 @@ describe "TokenAccessController", ->
 					@next = sinon.stub()
 					@req.params['read_and_write_token'] = @readAndWriteToken
 					@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
-						.callsArgWith(1, null, null)
+						.callsArgWith(1, null, null, true)
 					@TokenAccessHandler.findProjectWithHigherAccess =
 						sinon.stub()
 						.callsArgWith(2, null, @project, true)
@@ -581,7 +559,7 @@ describe "TokenAccessController", ->
 					@next = sinon.stub()
 					@req.params['read_and_write_token'] = @readAndWriteToken
 					@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
-						.callsArgWith(1, null, null)
+						.callsArgWith(1, null, null, true)
 					@TokenAccessHandler.findProjectWithHigherAccess =
 						sinon.stub()
 						.callsArgWith(2, null, null, true)
@@ -780,7 +758,7 @@ describe "TokenAccessController", ->
 						.to.equal 0
 					done()
 
-				it 'should call next with a not-found error', (done) ->
+				it 'should redirect to v1', (done) ->
 					expect(@res.redirect.callCount).to.equal 1
 					expect(@res.redirect.calledWith(
 						302,

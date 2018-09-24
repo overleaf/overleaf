@@ -22,11 +22,17 @@ module.exports = TokenAccessHandler =
 				return callback(null, null, true)
 			return callback(null, project, true)
 
-	findProjectWithReadAndWriteToken: (token, callback=(err, project)->) ->
+	findProjectWithReadAndWriteToken: (token, callback=(err, project, projectExists)->) ->
 		Project.findOne {
-			'tokens.readAndWrite': token,
-			'publicAccesLevel': PublicAccessLevels.TOKEN_BASED
-		}, {_id: 1, publicAccesLevel: 1, owner_ref: 1}, callback
+			'tokens.readAndWrite': token
+		}, {_id: 1, publicAccesLevel: 1, owner_ref: 1}, (err, project) ->
+			if err?
+				return callback(err)
+			if !project?
+				return callback(null, null, false)
+			if project.publicAccesLevel != PublicAccessLevels.TOKEN_BASED
+				return callback(null, null, true)
+			return callback(null, project, true)
 
 	findProjectWithHigherAccess: (token, userId, callback=(err, project, projectExists)->) ->
 		Project.findOne {
