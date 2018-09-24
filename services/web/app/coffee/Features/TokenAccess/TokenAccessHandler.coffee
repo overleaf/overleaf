@@ -10,11 +10,17 @@ module.exports = TokenAccessHandler =
 	ANONYMOUS_READ_AND_WRITE_ENABLED:
 		Settings.allowAnonymousReadAndWriteSharing == true
 
-	findProjectWithReadOnlyToken: (token, callback=(err, project)->) ->
+	findProjectWithReadOnlyToken: (token, callback=(err, project, projectExists)->) ->
 		Project.findOne {
-			'tokens.readOnly': token,
-			'publicAccesLevel': PublicAccessLevels.TOKEN_BASED
-		}, {_id: 1, publicAccesLevel: 1, owner_ref: 1}, callback
+			'tokens.readOnly': token
+		}, {_id: 1, publicAccesLevel: 1, owner_ref: 1}, (err, project) ->
+			if err?
+				return callback(err)
+			if !project?
+				return callback(null, null, false)
+			if project.publicAccesLevel != PublicAccessLevels.TOKEN_BASED
+				return callback(null, null, true)
+			return callback(null, project, true)
 
 	findProjectWithReadAndWriteToken: (token, callback=(err, project)->) ->
 		Project.findOne {

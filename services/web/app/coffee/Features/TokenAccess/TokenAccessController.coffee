@@ -77,11 +77,15 @@ module.exports = TokenAccessController =
 		userId = AuthenticationController.getLoggedInUserId(req)
 		token = req.params['read_only_token']
 		logger.log {userId, token}, "[TokenAccess] requesting read-only token access"
-		TokenAccessHandler.findProjectWithReadOnlyToken token, (err, project) ->
+		TokenAccessHandler.findProjectWithReadOnlyToken token, (err, project, projectExists) ->
 			if err?
 				logger.err {err, token, userId},
 					"[TokenAccess] error getting project by readOnly token"
 				return next(err)
+			if !projectExists and settings.overleaf
+				logger.log {token, userId},
+						"[TokenAccess] no project found for this token"
+				return res.redirect(302, settings.overleaf.host + '/read/' + token)
 			if !project?
 				logger.log {token, userId},
 					"[TokenAccess] no project found for readOnly token"
