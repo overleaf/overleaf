@@ -263,21 +263,8 @@ describe "Sessions", ->
 			@user3 = new User()
 			@user3.email = @user1.email
 			@user3.password = @user1.password
-			v1Id = 2345
-			v1User2 = {
-				id: v1Id,
-				email: @user2.email,
-				password: @user2.password,
-				profile:
-					id: v1Id,
-					email: @user2.email
-			}
 			async.series [
 				@user2.login.bind(@user2)
-				(cb) => @user2.mongoUpdate {$set: {'overleaf.id': v1Id}}, cb
-				(cb) =>
-					MockV1Api.setUser v1Id, v1User2
-					cb()
 				@user2.activateSudoMode.bind(@user2)
 			], done
 

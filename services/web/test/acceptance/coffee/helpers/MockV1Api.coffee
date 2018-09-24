@@ -78,14 +78,14 @@ module.exports = MockV1Api =
 
 		app.post "/api/v1/sharelatex/login", (req, res, next) =>
 			for id, user of @users
-				if user.email == req.body.email && user.password == req.body.password
+				if user? && user.email == req.body.email && user.password == req.body.password
 					return res.json {
 						email: user.email,
 						valid: true,
 						user_profile: user.profile
 					}
 			return res.status(403).json {
-				email: user.email,
+				email: req.body.email,
 				valid: false
 			}
 
