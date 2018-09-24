@@ -5,11 +5,17 @@ logger = require 'logger-sharelatex'
 
 module.exports = InstitutionsFeatures =
 	getInstitutionsFeatures: (userId, callback = (error, features) ->) ->
+		InstitutionsFeatures.getInstitutionsPlan userId, (error, plan) ->
+			return callback error if error?
+			plan = PlansLocator.findLocalPlanInSettings plan
+			callback(null, plan?.features or {})
+
+
+	getInstitutionsPlan: (userId, callback = (error, plan) ->) ->
 		InstitutionsFeatures.hasLicence userId, (error, hasLicence) ->
 			return callback error if error?
-			return callback(null, {}) unless hasLicence
-			plan = PlansLocator.findLocalPlanInSettings Settings.institutionPlanCode
-			callback(null, plan?.features or {})
+			return callback(null, null) unless hasLicence
+			callback(null, Settings.institutionPlanCode)
 
 
 	hasLicence: (userId, callback = (error, hasLicence) ->) ->

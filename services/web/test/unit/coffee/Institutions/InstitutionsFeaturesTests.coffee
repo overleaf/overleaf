@@ -61,26 +61,50 @@ describe 'InstitutionsFeatures', ->
 
 	describe "getInstitutionsFeatures", ->
 			beforeEach ->
-				@InstitutionsFeatures.hasLicence = sinon.stub()
+				@InstitutionsFeatures.getInstitutionsPlan = sinon.stub()
 				@testFeatures = features: { institution: 'all' }
 				@PlansLocator.findLocalPlanInSettings.withArgs(@institutionPlanCode).returns(@testFeatures)
 
 			it 'should handle error', (done)->
-				@InstitutionsFeatures.hasLicence.yields(new Error('Nope'))
+				@InstitutionsFeatures.getInstitutionsPlan.yields(new Error('Nope'))
 				@InstitutionsFeatures.getInstitutionsFeatures @userId, (error, features) ->
 					expect(error).to.exist
 					done()
 
 			it 'should return no feaures if user has no plan code', (done) ->
-				@InstitutionsFeatures.hasLicence.yields(null, false)
+				@InstitutionsFeatures.getInstitutionsPlan.yields(null, null)
 				@InstitutionsFeatures.getInstitutionsFeatures @userId, (error, features) ->
 					expect(error).to.not.exist
 					expect(features).to.deep.equal {}
 					done()
 
 			it 'should return feaures if user has affiliations plan code', (done) ->
-				@InstitutionsFeatures.hasLicence.yields(null, true)
+				@InstitutionsFeatures.getInstitutionsPlan.yields(null, @institutionPlanCode)
 				@InstitutionsFeatures.getInstitutionsFeatures @userId, (error, features) =>
 					expect(error).to.not.exist
 					expect(features).to.deep.equal @testFeatures.features
+					done()
+
+	describe "getInstitutionsPlan", ->
+			beforeEach ->
+				@InstitutionsFeatures.hasLicence = sinon.stub()
+
+			it 'should handle error', (done)->
+				@InstitutionsFeatures.hasLicence.yields(new Error('Nope'))
+				@InstitutionsFeatures.getInstitutionsPlan @userId, (error) ->
+					expect(error).to.exist
+					done()
+
+			it 'should return no plan if user has no licence', (done) ->
+				@InstitutionsFeatures.hasLicence.yields(null, false)
+				@InstitutionsFeatures.getInstitutionsPlan @userId, (error, plan) ->
+					expect(error).to.not.exist
+					expect(plan).to.equal null
+					done()
+
+			it 'should return plan if user has licence', (done) ->
+				@InstitutionsFeatures.hasLicence.yields(null, true)
+				@InstitutionsFeatures.getInstitutionsPlan @userId, (error, plan) =>
+					expect(error).to.not.exist
+					expect(plan).to.equal @institutionPlanCode
 					done()
