@@ -27,8 +27,18 @@ nav.navbar.navbar-default.navbar-main
 
 				// loop over header_extras
 				each item in nav.header_extras
+					-
+						if ((item.only_when_logged_in && getSessionUser())
+							|| (item.only_when_logged_out && (!getSessionUser()))
+							|| (!item.only_when_logged_out && !item.only_when_logged_in && !item.only_content_pages)
+							|| (item.only_content_pages && (typeof(suppressNavContentLinks) == "undefined" || !suppressNavContentLinks))
+						){ 
+							var showNavItem = true
+						} else {
+							var showNavItem = false
+						}
 
-					if ((item.only_when_logged_in && getSessionUser()) || (item.only_when_logged_out && (!getSessionUser())) || (!item.only_when_logged_out && !item.only_when_logged_in))
+					if showNavItem
 						if item.dropdown
 							li.dropdown(class=item.class, dropdown)
 								a.dropdown-toggle(href, dropdown-toggle)

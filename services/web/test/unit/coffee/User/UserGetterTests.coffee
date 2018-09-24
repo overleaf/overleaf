@@ -48,6 +48,11 @@ describe "UserGetter", ->
 				error.should.exist
 				done()
 
+		it "should not allow null query", (done)->
+			@UserGetter.getUser null, {}, (error, user) =>
+				error.should.exist
+				done()
+
 	describe "getUserFullEmails", ->
 		it "should get user", (done)->
 			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @fakeUser)
@@ -91,6 +96,18 @@ describe "UserGetter", ->
 					}
 					{ email: 'email2@foo.bar', default: true }
 				]
+				done()
+
+		it "should get user when it has no emails field", (done)->
+			@fakeUser =
+				_id: '12390i'
+				email: 'email2@foo.bar'
+			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @fakeUser)
+			projection = email: 1, emails: 1
+			@UserGetter.getUserFullEmails @fakeUser._id, (error, fullEmails) =>
+				@UserGetter.getUser.called.should.equal true
+				@UserGetter.getUser.calledWith(@fakeUser._id, projection).should.equal true
+				assert.deepEqual fullEmails, []
 				done()
 
 	describe "getUserbyMainEmail", ->

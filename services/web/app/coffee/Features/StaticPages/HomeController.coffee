@@ -9,7 +9,8 @@ fs = require "fs"
 ErrorController = require "../Errors/ErrorController"
 AuthenticationController = require('../Authentication/AuthenticationController')
 
-homepageExists = fs.existsSync Path.resolve(__dirname + "/../../../views/external/home.pug")
+slHomepageExists = fs.existsSync Path.resolve(__dirname + "/../../../views/external/home/sl.pug")
+v2HomepageExists = fs.existsSync Path.resolve(__dirname + "/../../../views/external/home/v2.pug")
 
 module.exports = HomeController =
 	index : (req,res)->
@@ -21,11 +22,13 @@ module.exports = HomeController =
 		else
 			HomeController.home(req, res)
 
-	home: (req, res)->
-		if Features.hasFeature('homepage') and homepageExists
-			res.render 'external/home'
+	home: (req, res, next)->
+		if Features.hasFeature('homepage') and !Settings.overleaf and slHomepageExists
+			res.render 'external/home/sl'
+		else if Features.hasFeature('homepage') and Settings.overleaf and v2HomepageExists
+			res.render 'external/home/v2'
 		else
-			res.redirect "/login"
+			res.redirect '/login'
 
 	externalPage: (page, title) ->
 		return (req, res, next = (error) ->) ->

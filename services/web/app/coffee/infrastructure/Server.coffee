@@ -73,7 +73,7 @@ app.use multer(dest: Settings.path.uploadFolder)
 app.use methodOverride()
 
 app.use metrics.http.monitor(logger)
-app.use RedirectManager
+RedirectManager.apply(webRouter)
 ProxyManager.apply(publicApiRouter)
 
 

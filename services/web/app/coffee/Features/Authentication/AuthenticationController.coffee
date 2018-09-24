@@ -11,6 +11,7 @@ UserHandler = require("../User/UserHandler")
 UserSessionsManager = require("../User/UserSessionsManager")
 Analytics = require "../Analytics/AnalyticsManager"
 passport = require 'passport'
+NotificationsBuilder = require("../Notifications/NotificationsBuilder")
 
 module.exports = AuthenticationController =
 
@@ -43,7 +44,7 @@ module.exports = AuthenticationController =
 					return callback(err)
 				req.sessionStore.generate(req)
 				for key, value of oldSession
-					req.session[key] = value
+					req.session[key] = value unless key == '__tmp'
 				# copy to the old `session.user` location, for backward-comptability
 				req.session.user = req.session.passport.user
 				req.session.save (err) ->
@@ -112,12 +113,20 @@ module.exports = AuthenticationController =
 		UserHandler.setupLoginData(user, ()->)
 		LoginRateLimiter.recordSuccessfulLogin(user.email)
 		AuthenticationController._recordSuccessfulLogin(user._id)
+		AuthenticationController.ipMatchCheck(req, user)
 		Analytics.recordEvent(user._id, "user-logged-in", {ip:req.ip})
 		Analytics.identifyUser(user._id, req.sessionID)
 		logger.log email: user.email, user_id: user._id.toString(), "successful log in"
 		req.session.justLoggedIn = true
 		# capture the request ip for use when creating the session
 		user._login_req_ip = req.ip
+
+	ipMatchCheck: (req, user) ->
+		if req.ip != user.lastLoginIp
+			NotificationsBuilder.ipMatcherAffiliation(user._id, req.ip).create()
+		UserUpdater.updateUser user._id.toString(), {
+			$set: { "lastLoginIp": req.ip }
+		}
 
 	setInSessionUser: (req, props) ->
 		for key, value of props

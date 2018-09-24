@@ -60,6 +60,21 @@ span(ng-controller="NotificationsController").userNotifications
 									button(ng-click="dismiss(notification)").close.pull-right
 										span(aria-hidden="true") &times;
 										span.sr-only #{translate("close")}
+						.alert.alert-info(ng-switch-when="notification_ip_matched_affiliation")
+							div.notification_inner
+								.notification_body
+									| It looks like you're at 
+									strong {{ notification.messageOpts.university_name }}! <br/>
+									|	Did you know that {{notification.messageOpts.university_name}} is providing
+									strong  free Overleaf Professional accounts 
+									|	 to everyone at {{notification.messageOpts.university_name}}? <br/>
+									|	Add an institutional email address to claim your account.
+									a.pull-right.btn.btn-sm.btn-info(href="/user/settings")
+										| Add Affiliation
+								span().notification_close
+									button(ng-click="dismiss(notification)").close.pull-right
+										span(aria-hidden="true") &times;
+										span.sr-only #{translate("close")}
 						.alert.alert-info(ng-switch-default)
 							div.notification_inner
 								span(ng-bind-html="notification.html").notification_body

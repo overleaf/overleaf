@@ -491,7 +491,7 @@ module.exports = settings =
 	modules:
 		sanitize:
 			options: 
-				allowedTags: [ 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol', 'nl', 'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div', 'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre', 'iframe', 'img', 'figure', 'figcaption' ]
+				allowedTags: [ 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol', 'nl', 'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div', 'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre', 'iframe', 'img', 'figure', 'figcaption', 'source', 'video' ]
 				allowedAttributes:
 					'a': [ 'href', 'name', 'target', 'class' ]
 					'div': [ 'class', 'id', 'style' ]
@@ -505,3 +505,5 @@ module.exports = settings =
 					'figcaption': [ 'class', 'id', 'style']
 					'iframe': [ 'allowfullscreen', 'frameborder', 'height', 'src', 'width' ]
 					'img': [ 'alt', 'class', 'src', 'style' ]
+					'source': [ 'src', 'type' ]
+					'video': [ 'alt', 'class', 'controls', 'height', 'width' ]

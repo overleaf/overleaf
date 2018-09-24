@@ -24,7 +24,6 @@ define [
 	"main/affiliations/controllers/UserAffiliationsController"
 	"main/affiliations/factories/UserAffiliationsDataService"
 	"main/keys"
-	"main/account-merge-checker"
 	"main/cms/index"
 	"analytics/AbTestingManager"
 	"directives/asyncForm"

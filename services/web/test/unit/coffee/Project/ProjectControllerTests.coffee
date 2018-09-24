@@ -69,6 +69,10 @@ describe "ProjectController", ->
 		@CollaboratorsHandler =
 			userIsTokenMember: sinon.stub().callsArgWith(2, null, false)
 		@ProjectEntityHandler = {}
+		@NotificationBuilder =
+			ipMatcherAffiliation: sinon.stub().returns({create: sinon.stub()})
+		@UserGetter =
+			getUser: sinon.stub().callsArgWith 2, null, {lastLoginIp: '192.170.18.2'}
 		@Modules =
 			hooks:
 				fire: sinon.stub()
@@ -105,11 +109,16 @@ describe "ProjectController", ->
 			"./ProjectEntityHandler": @ProjectEntityHandler
 			"../Errors/Errors": Errors
 			"../../infrastructure/Features": @Features
+			"../Notifications/NotificationsBuilder":@NotificationBuilder
+			"../User/UserGetter": @UserGetter
 
 		@projectName = "£12321jkj9ujkljds"
 		@req =
 			params:
 				Project_id: @project_id
+			headers: {}
+			connection:
+				remoteAddress: "192.170.18.1"
 			session:
 				user: @user
 			body:
@@ -298,6 +307,13 @@ describe "ProjectController", ->
 		it "should send the tags", (done)->
 			@res.render = (pageName, opts)=>
 				opts.tags.length.should.equal @tags.length
+				done()
+			@ProjectController.projectListPage @req, @res
+
+		it "should create trigger ip matcher notifications", (done)->
+			@settings.overleaf = true
+			@res.render = (pageName, opts)=>
+				@NotificationBuilder.ipMatcherAffiliation.called.should.equal true
 				done()
 			@ProjectController.projectListPage @req, @res
 

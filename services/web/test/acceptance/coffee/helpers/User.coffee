@@ -58,7 +58,7 @@ class User
 			@getCsrfToken (error) =>
 				return callback(error) if error?
 				@request.post {
-					url: "/login"
+					url: if settings.enableLegacyLogin then "/login/legacy" else "/login"
 					json: { email, @password }
 				}, callback
 

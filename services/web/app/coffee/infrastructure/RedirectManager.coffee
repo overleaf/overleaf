@@ -1,20 +1,33 @@
 settings = require("settings-sharelatex")
 logger = require("logger-sharelatex")
 
-module.exports = (req, res, next)->
-	
-	requestedUrl = req.url
+module.exports = RedirectManager =
+	apply: (webRouter) ->
+		for redirectUrl, target of settings.redirects
+			for method in (target.methods or ['get'])
+				webRouter[method] redirectUrl, RedirectManager.createRedirect(target)
 
-	redirectUrl = settings.redirects[requestedUrl]
+	createRedirect: (target) ->
+		(req, res, next) ->
+			code = 302
+			if typeof target is 'string'
+				url = target
+			else
+				if req.method == "POST"
+					code = 307
+				if typeof target.url == "function"
+					url = target.url(req.params)
+					if !url
+						return next()
+				else
+					url = target.url
+				if target.baseUrl?
+					url = "#{target.baseUrl}#{url}"
+			res.redirect code, url + getQueryString(req)
 
-	#remove starting slash
-	if !redirectUrl? and requestedUrl[requestedUrl.length-1] == "/"
-		requestedUrl = requestedUrl.substring(0, requestedUrl.length - 1)
-		redirectUrl = settings.redirects[requestedUrl]
-
-	if redirectUrl?
-		logger.log redirectUrl:redirectUrl, reqUrl:req.url, "redirecting to new path"
-		res.redirect 301, "#{redirectUrl}"
-	else
-		next()
-
+# Naively get the query params string. Stringifying the req.query object may
+# have differences between Express and Rails, so safer to just pass the raw
+# string
+getQueryString = (req) ->
+	qs = req.url.match(/\?.*$/)
+	if qs? then qs[0] else ""

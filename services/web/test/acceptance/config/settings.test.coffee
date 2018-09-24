@@ -3,6 +3,7 @@ v1Api =
 
 module.exports =
 	enableSubscriptions: true
+	enableLegacyRegistration: true
 
 	features: features =
 		v1_free:
@@ -105,3 +106,25 @@ module.exports =
 			path: (params) -> "/universities/list/#{params.id}"
 		'/institutions/domains': { baseUrl: v1Api.url, path: '/university/domains' }
 		'/proxy/missing/baseUrl': path: '/foo/bar'
+		'/proxy/get_and_post': {
+			methods: ['get', 'post'],
+			path: '/destination/get_and_post'
+		}
+
+	overleaf:
+		host: "http://overleaf.test:5000"
+
+	redirects:
+		'/redirect/one': '/destination/one',
+		'/redirect/get_and_post': {
+			methods: ['get', 'post'],
+			url: '/destination/get_and_post'
+		},
+		'/redirect/base_url': {
+			baseUrl: 'https://example.com'
+			url: '/destination/base_url'
+		},
+		'/redirect/params/:id': {
+			url: (params) -> "/destination/#{params.id}/params"
+		},
+		'/redirect/qs': '/destination/qs'

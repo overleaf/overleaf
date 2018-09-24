@@ -137,11 +137,6 @@ describe "EditorHttpController", ->
 					.calledWith(@project_id)
 					.should.equal true
 
-			it "should look up the user", ->
-				@UserGetter.getUser
-					.calledWith(@user_id, { isAdmin: true })
-					.should.equal true
-					
 			it "should check the privilege level", ->
 				@AuthorizationManager.getPrivilegeLevelForProject
 					.calledWith(@user_id, @project_id, @token)

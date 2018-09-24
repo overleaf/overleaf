@@ -1,3 +1,5 @@
+@register-v-spacing: 20px;
+
 .deprecated-sl-masthead {
 	display: inline-block;
 	margin-top: @header-height;
@@ -38,15 +40,12 @@
 }
 
 .masthead {
-	display: inline-block;
-	width: 100%;
-	background-color: rgba(0,0,0,0.85);
-	background-image: -webkit-linear-gradient(left,rgba(153,93,179,0.6),rgba(44,155,219,0.6));
-	background-image: linear-gradient(to right,rgba(153,93,179,0.6),rgba(44,155,219,0.6));
+	background-image: -webkit-linear-gradient(to left, rgba(79,156,69,1.0), rgba(28,91,38,1.0));
+	background-image: linear-gradient(to left, rgba(79,156,69,1.0), rgba(28,91,38,1.0));
 	position: relative;
 	text-align: center;
 	overflow: hidden;
-	margin-top: @header-height;
+	padding-top: @header-height;
 	h1, p, label {
 		color: white;
 		text-align: center;
@@ -70,10 +69,13 @@
 		text-rendering: auto;
 		margin-bottom: @line-height-computed;
 	}
+	label {
+		display: block;
+	}
 	.register-banner {
 		background-image: -webkit-linear-gradient(top,rgba(0,0,0,0.7),rgba(0,0,0,0.9));
 		background-image: linear-gradient(to bottom,rgba(0,0,0,0.7),rgba(0,0,0,0.9));
-		padding: @line-height-computed 0;
+		padding: @register-v-spacing 0;
 		position: absolute;
 		bottom: 0;
 		width: 100%;
@@ -83,13 +85,17 @@
 			font-family: @font-family-sans-serif;
 			font-weight: 500;
 			letter-spacing: 1px;
+			margin-bottom: @register-v-spacing;
 		}
 		.form-group {
 			margin-left: @line-height-computed / 2;
 		}
+		.input-lg {
+			border-radius: 9999px;
+		}
 	}
 	.screenshot {
-		height: 550px;
+		height: 600px;
 		margin: auto;
 		margin-bottom: -50px;
 		overflow-y: hidden;
@@ -97,7 +103,7 @@
 		max-width: 960px;
 		.img {
 			max-width: 960px;
-			background-image: url('/img/screen.png');
+			background-image: url('/img/homepage.png');
 			background-size: 100%;
 			background-repeat: no-repeat;
 			margin: auto;
@@ -111,38 +117,75 @@
 		only screen and (                min-resolution: 192dpi),
 		only screen and (                min-resolution: 2dppx) { 
 			.img {
-				background-image: url('/img/screen@2x.png');
-			}
-		}
-	}
-	.btn-hero {
-		background-color: transparent;
-		border-color: white;
-		border-width: 3px;
-		color: white;
-		margin-right: @line-height-computed / 2;
-		&:hover {
-			background-color: white;
-			color: @gray-dark;
-		}
-		&.btn-primary {
-			border-color: lighten(@link-color, 10%);
-			color: lighten(@link-color, 10%);
-			&:hover {
-				background-color: lighten(@link-color, 10%);
-				color: white;
+				background-image: url('/img/homepage@2x.png');
 			}
 		}
 	}
 }
 
+.hp-register-external-separator {
+	margin: 0 0 (@register-v-spacing / 2);
+	color: #FFF;
+}
+
+	.hp-register-external-separator-or {
+		vertical-align: middle;
+		&::before,
+		&::after {
+			content: "";
+			display: inline-block;
+			vertical-align: middle;
+			width: 5em;
+			height: 1px;
+			background-color: rgba(255, 255, 255, .3);
+		}
+		&::before {
+			margin-right: 1.25em;
+		}
+		&::after {
+			margin-left: 1.25em;
+		}
+	}
+
+.hp-register-newsletter-checkbox {
+	font-size: 90%;
+	& > .checkbox-newsletter {
+		text-align: left;
+		@media only screen and (min-width: @screen-sm-min) {
+			text-align: center;
+		}
+	}
+}
+
+.hp-login-btn {
+	min-width: 220px;
+}
+
+.hp-register-form-email-pwd {
+	position: relative;
+}
+
+	.hp-register-form-email-pwd-btn-container.form-group {
+		display: block;
+		margin-top: (@register-v-spacing / 2);
+		@media only screen and (min-width: @screen-md-min) {
+			position: absolute;
+			display: inline-block;
+			height: 100%;
+			top: -(@register-v-spacing / 2);
+			& > .btn-hero {
+				height: 100%;
+			}
+		}
+	}
+
 .universities {
-	padding-bottom: @line-height-computed;
+	border-bottom: 1px solid @gray-lighter;
 	text-align: center;
-	margin: 0 auto;
-	img {
-		max-width: 100%;
-		max-height: 60px;
+	.uni-logo {
+		display: inline-block;
+		padding: 0 @padding-md;
+		width: 20%;
 	}
 }
 
@@ -150,6 +193,12 @@
 	background: url('/img/pattern-home.png') repeat #f1f1f1;
 	border-top: 1px solid @gray-lightest;
 	border-bottom: 1px solid @gray-lightest;
+}
+
+.pattern-grid {
+	background: url('/img/grid.png') repeat @content-alt-bg-color;
+	border-top: 1px solid @gray-lighter;
+	border-bottom: 1px solid @gray-lighter;
 }
 
 .real-time-example {
@@ -211,4 +260,10 @@
 		color: @blue;
 	}
 	box-shadow: 0 3px 5px rgba(0,0,0,.3);
+}
+
+@media only screen and (max-width: @screen-sm-max) {
+	.doc-history-example {
+		margin-bottom: @margin-md;
+	}
 }
