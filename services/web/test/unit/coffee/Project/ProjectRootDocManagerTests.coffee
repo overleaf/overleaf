@@ -83,12 +83,12 @@ describe 'ProjectRootDocManager', ->
 					"doc-id-2": "/main.tex"
 					"doc-id-3": "/nested/chapter1a.tex"
 					"doc-id-4": "/nested/chapter1b.tex"
-				@ProjectEntityHandler.getAllDocPathsFromProject = sinon.stub().callsArgWith(1, null, @docPaths)
+				@ProjectEntityHandler.getAllDocPathsFromProjectById = sinon.stub().callsArgWith(1, null, @docPaths)
 				@ProjectEntityUpdateHandler.setRootDoc = sinon.stub().callsArgWith(2)
 				@ProjectRootDocManager.setRootDocFromName @project_id, '/main.tex', done
 
 			it "should check the docs of the project", ->
-				@ProjectEntityHandler.getAllDocPathsFromProject.calledWith(@project_id)
+				@ProjectEntityHandler.getAllDocPathsFromProjectById.calledWith(@project_id)
 					.should.equal true
 
 			it "should set the root doc to main.tex", ->
@@ -102,12 +102,12 @@ describe 'ProjectRootDocManager', ->
 					"doc-id-2": "/main.tex"
 					"doc-id-3": "/nested/chapter1a.tex"
 					"doc-id-4": "/nested/chapter1b.tex"
-				@ProjectEntityHandler.getAllDocPathsFromProject = sinon.stub().callsArgWith(1, null, @docPaths)
+				@ProjectEntityHandler.getAllDocPathsFromProjectById = sinon.stub().callsArgWith(1, null, @docPaths)
 				@ProjectEntityUpdateHandler.setRootDoc = sinon.stub().callsArgWith(2)
 				@ProjectRootDocManager.setRootDocFromName @project_id, 'main.tex', done
 
 			it "should check the docs of the project", ->
-				@ProjectEntityHandler.getAllDocPathsFromProject.calledWith(@project_id)
+				@ProjectEntityHandler.getAllDocPathsFromProjectById.calledWith(@project_id)
 					.should.equal true
 
 			it "should set the root doc to main.tex", ->
@@ -121,12 +121,12 @@ describe 'ProjectRootDocManager', ->
 					"doc-id-2": "/main.tex"
 					"doc-id-3": "/nested/chapter1a.tex"
 					"doc-id-4": "/nested/chapter1b.tex"
-				@ProjectEntityHandler.getAllDocPathsFromProject = sinon.stub().callsArgWith(1, null, @docPaths)
+				@ProjectEntityHandler.getAllDocPathsFromProjectById = sinon.stub().callsArgWith(1, null, @docPaths)
 				@ProjectEntityUpdateHandler.setRootDoc = sinon.stub().callsArgWith(2)
 				@ProjectRootDocManager.setRootDocFromName @project_id, 'chapter1a.tex', done
 
 			it "should check the docs of the project", ->
-				@ProjectEntityHandler.getAllDocPathsFromProject.calledWith(@project_id)
+				@ProjectEntityHandler.getAllDocPathsFromProjectById.calledWith(@project_id)
 					.should.equal true
 
 			it "should set the root doc using the basename", ->
@@ -140,7 +140,7 @@ describe 'ProjectRootDocManager', ->
 					"doc-id-2": "/main.tex"
 					"doc-id-3": "/nested/chapter1a.tex"
 					"doc-id-4": "/nested/chapter1b.tex"
-				@ProjectEntityHandler.getAllDocPathsFromProject = sinon.stub().callsArgWith(1, null, @docPaths)
+				@ProjectEntityHandler.getAllDocPathsFromProjectById = sinon.stub().callsArgWith(1, null, @docPaths)
 				@ProjectEntityUpdateHandler.setRootDoc = sinon.stub().callsArgWith(2)
 				@ProjectRootDocManager.setRootDocFromName @project_id, "other.tex", done
 

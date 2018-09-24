@@ -33,7 +33,7 @@ module.exports = ProjectRootDocManager =
 					callback()
 
 	setRootDocFromName: (project_id, rootDocName, callback = (error) ->) ->
-		ProjectEntityHandler.getAllDocPathsFromProject project_id, (error, docPaths) ->
+		ProjectEntityHandler.getAllDocPathsFromProjectById project_id, (error, docPaths) ->
 			return callback(error) if error?
 			# find the root doc from the filename
 			root_doc_id = null
