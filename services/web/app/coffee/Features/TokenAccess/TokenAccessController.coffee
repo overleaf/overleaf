@@ -12,16 +12,11 @@ module.exports = TokenAccessController =
 		return ProjectController.loadEditor(req, res, next)
 
 	_tryHigherAccess: (token, userId, req, res, next) ->
-		TokenAccessHandler.findProjectWithHigherAccess token, userId, (err, project, projectExists) ->
+		TokenAccessHandler.findProjectWithHigherAccess token, userId, (err, project) ->
 			if err?
 				logger.err {err, token, userId},
 					"[TokenAccess] error finding project with higher access"
 				return next(err)
-			if !projectExists and settings.overleaf
-				logger.log {token, userId},
-					"[TokenAccess] no project found for this token"
-				# Project does not exist, but may be unimported - try it on v1
-				return res.redirect(settings.overleaf.host + req.url)
 			if !project?
 				logger.log {token, userId},
 					"[TokenAccess] no project with higher access found for this user and token"

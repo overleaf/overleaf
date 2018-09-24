@@ -247,7 +247,7 @@ describe "TokenAccessController", ->
 							.callsArgWith(1, null, null, false)
 						@TokenAccessHandler.findProjectWithHigherAccess =
 							sinon.stub()
-							.callsArgWith(2, null, @project, false)
+							.callsArgWith(2, null, @project)
 						@TokenAccessController.readAndWriteToken @req, @res, @next
 
 					it 'should redirect to v1', (done) ->
@@ -269,7 +269,7 @@ describe "TokenAccessController", ->
 							.callsArgWith(1, null, null, true)
 						@TokenAccessHandler.findProjectWithHigherAccess =
 							sinon.stub()
-							.callsArgWith(2, null, @project, true)
+							.callsArgWith(2, null, @project)
 						@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
 							.callsArgWith(2, null)
 						@ProjectController.loadEditor = sinon.stub()
@@ -318,7 +318,7 @@ describe "TokenAccessController", ->
 							.callsArgWith(1, null, null, true)
 						@TokenAccessHandler.findProjectWithHigherAccess =
 							sinon.stub()
-							.callsArgWith(2, null, null, true)
+							.callsArgWith(2, null, null)
 						@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
 							.callsArgWith(2, null)
 						@ProjectController.loadEditor = sinon.stub()
@@ -514,7 +514,7 @@ describe "TokenAccessController", ->
 						.callsArgWith(1, null, null, true)
 					@TokenAccessHandler.findProjectWithHigherAccess =
 						sinon.stub()
-						.callsArgWith(2, null, @project, true)
+						.callsArgWith(2, null, @project)
 					@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
 						.callsArgWith(2, null)
 					@ProjectController.loadEditor = sinon.stub()
@@ -562,7 +562,7 @@ describe "TokenAccessController", ->
 						.callsArgWith(1, null, null, true)
 					@TokenAccessHandler.findProjectWithHigherAccess =
 						sinon.stub()
-						.callsArgWith(2, null, null, true)
+						.callsArgWith(2, null, null)
 					@TokenAccessHandler.addReadOnlyUserToProject = sinon.stub()
 						.callsArgWith(2, null)
 					@ProjectController.loadEditor = sinon.stub()
