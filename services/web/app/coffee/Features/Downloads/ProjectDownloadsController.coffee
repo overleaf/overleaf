@@ -32,7 +32,7 @@ module.exports = ProjectDownloadsController =
 				return next(error) if error?
 				res.setContentDisposition(
 					'attachment',
-					{filename: "ShareLaTeX Projects (#{project_ids.length} items).zip"}
+					{filename: "Overleaf Projects (#{project_ids.length} items).zip"}
 				)
 				res.contentType('application/zip')
 				stream.pipe(res)
