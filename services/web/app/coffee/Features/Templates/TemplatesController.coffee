@@ -2,6 +2,7 @@ path = require('path')
 Project = require('../../../js/models/Project').Project
 ProjectUploadManager = require('../../../js/Features/Uploads/ProjectUploadManager')
 ProjectOptionsHandler = require('../../../js/Features/Project/ProjectOptionsHandler')
+ProjectRootDocManager = require('../../../js/Features/Project/ProjectRootDocManager')
 AuthenticationController = require('../../../js/Features/Authentication/AuthenticationController')
 settings = require('settings-sharelatex')
 fs = require('fs')
