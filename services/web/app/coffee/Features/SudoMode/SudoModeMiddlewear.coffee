@@ -7,7 +7,6 @@ Settings = require 'settings-sharelatex'
 module.exports = SudoModeMiddlewear =
 
 	protectPage: (req, res, next) ->
-		console.log ">>>>>> Settings", Settings.overleaf
 		if req.externalAuthenticationSystemUsed() and !Settings.overleaf?
 			logger.log {userId}, "[SudoMode] using external auth, skipping sudo-mode check"
 			return next()
