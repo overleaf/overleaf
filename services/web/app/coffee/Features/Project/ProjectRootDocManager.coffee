@@ -31,3 +31,23 @@ module.exports = ProjectRootDocManager =
 					ProjectEntityUpdateHandler.setRootDoc project_id, root_doc_id, callback
 				else
 					callback()
+
+	setRootDocFromName: (project_id, rootDocName, callback = (error) ->) ->
+		ProjectEntityHandler.getAllDocPathsFromProject project_id, (error, docPaths) ->
+			return callback(error) if error?
+			# find the root doc from the filename
+			root_doc_id = null
+			for doc_id, path of docPaths
+				# docpaths have a leading / so allow matching "folder/filename" and "/folder/filename"
+				if path == rootDocName or path == "/#{rootDocName}"
+					root_doc_id = doc_id
+			# try a basename match if there was no match 
+			if !root_doc_id
+				for doc_id, path of docPaths
+					if Path.basename(path) == Path.basename(rootDocName) 
+						root_doc_id = doc_id
+			# set the root doc id if we found a match
+			if root_doc_id?
+				ProjectEntityUpdateHandler.setRootDoc project_id, root_doc_id, callback
+			else
+				callback()

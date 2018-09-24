@@ -75,3 +75,74 @@ describe 'ProjectRootDocManager', ->
 			it "should not set the root doc to the doc containing a documentclass", ->
 				@ProjectEntityUpdateHandler.setRootDoc.called.should.equal false
 
+	describe "setRootDocFromName", ->
+		describe "when there is a suitable root doc", ->
+			beforeEach (done)->
+				@docPaths =
+					"doc-id-1": "/chapter1.tex"
+					"doc-id-2": "/main.tex"
+					"doc-id-3": "/nested/chapter1a.tex"
+					"doc-id-4": "/nested/chapter1b.tex"
+				@ProjectEntityHandler.getAllDocPathsFromProject = sinon.stub().callsArgWith(1, null, @docPaths)
+				@ProjectEntityUpdateHandler.setRootDoc = sinon.stub().callsArgWith(2)
+				@ProjectRootDocManager.setRootDocFromName @project_id, '/main.tex', done
+
+			it "should check the docs of the project", ->
+				@ProjectEntityHandler.getAllDocPathsFromProject.calledWith(@project_id)
+					.should.equal true
+
+			it "should set the root doc to main.tex", ->
+				@ProjectEntityUpdateHandler.setRootDoc.calledWith(@project_id, "doc-id-2")
+					.should.equal true
+
+		describe "when there is a suitable root doc but the leading slash is missing", ->
+			beforeEach (done)->
+				@docPaths =
+					"doc-id-1": "/chapter1.tex"
+					"doc-id-2": "/main.tex"
+					"doc-id-3": "/nested/chapter1a.tex"
+					"doc-id-4": "/nested/chapter1b.tex"
+				@ProjectEntityHandler.getAllDocPathsFromProject = sinon.stub().callsArgWith(1, null, @docPaths)
+				@ProjectEntityUpdateHandler.setRootDoc = sinon.stub().callsArgWith(2)
+				@ProjectRootDocManager.setRootDocFromName @project_id, 'main.tex', done
+
+			it "should check the docs of the project", ->
+				@ProjectEntityHandler.getAllDocPathsFromProject.calledWith(@project_id)
+					.should.equal true
+
+			it "should set the root doc to main.tex", ->
+				@ProjectEntityUpdateHandler.setRootDoc.calledWith(@project_id, "doc-id-2")
+					.should.equal true
+
+		describe "when there is a suitable root doc with a basename match", ->
+			beforeEach (done)->
+				@docPaths =
+					"doc-id-1": "/chapter1.tex"
+					"doc-id-2": "/main.tex"
+					"doc-id-3": "/nested/chapter1a.tex"
+					"doc-id-4": "/nested/chapter1b.tex"
+				@ProjectEntityHandler.getAllDocPathsFromProject = sinon.stub().callsArgWith(1, null, @docPaths)
+				@ProjectEntityUpdateHandler.setRootDoc = sinon.stub().callsArgWith(2)
+				@ProjectRootDocManager.setRootDocFromName @project_id, 'chapter1a.tex', done
+
+			it "should check the docs of the project", ->
+				@ProjectEntityHandler.getAllDocPathsFromProject.calledWith(@project_id)
+					.should.equal true
+
+			it "should set the root doc using the basename", ->
+				@ProjectEntityUpdateHandler.setRootDoc.calledWith(@project_id, "doc-id-3")
+					.should.equal true
+
+		describe "when there is no suitable root doc", ->
+			beforeEach (done)->
+				@docPaths =
+					"doc-id-1": "/chapter1.tex"
+					"doc-id-2": "/main.tex"
+					"doc-id-3": "/nested/chapter1a.tex"
+					"doc-id-4": "/nested/chapter1b.tex"
+				@ProjectEntityHandler.getAllDocPathsFromProject = sinon.stub().callsArgWith(1, null, @docPaths)
+				@ProjectEntityUpdateHandler.setRootDoc = sinon.stub().callsArgWith(2)
+				@ProjectRootDocManager.setRootDocFromName @project_id, "other.tex", done
+
+			it "should not set the root doc", ->
+				@ProjectEntityUpdateHandler.setRootDoc.called.should.equal false
