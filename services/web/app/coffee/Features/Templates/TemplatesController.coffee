@@ -82,7 +82,6 @@ setCompiler = (project_id, compiler, callback)->
 		callback()
 
 setImage = (project_id, imageName, callback)->
-	console.log(project_id, imageName)
 	if imageName?
 		ProjectOptionsHandler.setImageName project_id, imageName, callback
 	else
