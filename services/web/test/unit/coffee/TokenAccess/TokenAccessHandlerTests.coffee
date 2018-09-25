@@ -459,7 +459,7 @@ describe "TokenAccessHandler", ->
 					@TokenAccessHandler.checkV1Access @token, @callback
 
 				it 'should check api', ->
-					expect(@V1Api.request.calledWith { url: "/api/v1/sharelatex/docs/#{@token}/read" }).to.equal true
+					expect(@V1Api.request.calledWith { url: "/api/v1/sharelatex/docs/#{@token}/is_published" }).to.equal true
 
 				it 'should callback with true', ->
 					expect(@callback.calledWith null, true).to.equal true
