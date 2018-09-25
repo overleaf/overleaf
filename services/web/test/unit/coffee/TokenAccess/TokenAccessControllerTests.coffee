@@ -254,7 +254,7 @@ describe "TokenAccessController", ->
 						expect(@res.redirect.callCount).to.equal 1
 						expect(@res.redirect.calledWith(
 							302,
-							'http://overleaf.test:5000/123abc'
+							'/sign_in_to_v1?return_to=http://overleaf.test:5000/123abc'
 						)).to.equal true
 						done()
 
