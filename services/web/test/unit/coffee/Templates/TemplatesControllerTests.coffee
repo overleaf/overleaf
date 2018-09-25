@@ -27,6 +27,9 @@ describe 'TemplatesController', ->
 			setImageName:sinon.stub().callsArgWith(2)
 		}
 		@uuid = "1234"
+		@ProjectRootDocManager = {
+			setRootDocFromName: sinon.stub().callsArgWith(2)
+		}
 		@ProjectDetailsHandler =
 			getProjectDescription:sinon.stub()
 		@Project =
@@ -34,6 +37,7 @@ describe 'TemplatesController', ->
 		@controller = SandboxedModule.require modulePath, requires:
 			'../../../js/Features/Uploads/ProjectUploadManager':@ProjectUploadManager
 			'../../../js/Features/Project/ProjectOptionsHandler':@ProjectOptionsHandler
+			'../../../js/Features/Project/ProjectRootDocManager':@ProjectRootDocManager
 			'../../../js/Features/Authentication/AuthenticationController': @AuthenticationController = {getLoggedInUserId: sinon.stub()}
 			'./TemplatesPublisher':@TemplatesPublisher
 			"logger-sharelatex":

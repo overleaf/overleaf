@@ -2,6 +2,7 @@ path = require('path')
 Project = require('../../../js/models/Project').Project
 ProjectUploadManager = require('../../../js/Features/Uploads/ProjectUploadManager')
 ProjectOptionsHandler = require('../../../js/Features/Project/ProjectOptionsHandler')
+ProjectRootDocManager = require('../../../js/Features/Project/ProjectRootDocManager')
 AuthenticationController = require('../../../js/Features/Authentication/AuthenticationController')
 settings = require('settings-sharelatex')
 fs = require('fs')
@@ -24,6 +25,7 @@ module.exports = TemplatesController =
 		data.templateId = templateId
 		data.name = req.query.templateName
 		data.compiler = req.query.latexEngine
+		data.mainFile = req.query.mainFile
 		res.render path.resolve(__dirname, "../../../views/project/editor/new_from_template"), data
 
 	createProjectFromV1Template: (req, res)->
@@ -43,6 +45,7 @@ module.exports = TemplatesController =
 				currentUserId: currentUserId,
 				compiler: req.body.compiler
 				docId: req.body.docId
+				mainFile: req.body.mainFile
 				templateId: req.body.templateId
 				templateVersionId: req.body.templateVersionId
 				image: 'wl_texlive:2018.1'
@@ -65,15 +68,16 @@ module.exports = TemplatesController =
 					return res.sendStatus 500
 				setCompiler project._id, options.compiler, ->
 					setImage project._id, options.image, ->
-						fs.unlink dumpPath, ->
-						delete req.session.templateData
-						conditions = {_id:project._id}
-						update = {
-							fromV1TemplateId:options.templateId,
-							fromV1TemplateVersionId:options.templateVersionId
-						}
-						Project.update conditions, update, {}, (err)->
-							res.redirect "/project/#{project._id}"
+						setMainFile project._id, options.mainFile, ->
+							fs.unlink dumpPath, ->
+							delete req.session.templateData
+							conditions = {_id:project._id}
+							update = {
+								fromV1TemplateId:options.templateId,
+								fromV1TemplateVersionId:options.templateVersionId
+							}
+							Project.update conditions, update, {}, (err)->
+								res.redirect "/project/#{project._id}"
 
 setCompiler = (project_id, compiler, callback)->
 	if compiler?
@@ -84,5 +88,11 @@ setCompiler = (project_id, compiler, callback)->
 setImage = (project_id, imageName, callback)->
 	if imageName?
 		ProjectOptionsHandler.setImageName project_id, imageName, callback
+	else
+		callback()
+
+setMainFile = (project_id, mainFile, callback) ->
+	if mainFile?
+		ProjectRootDocManager.setRootDocFromName project_id, mainFile, callback
 	else
 		callback()
