@@ -3,6 +3,7 @@ Project = require('../../../js/models/Project').Project
 ProjectUploadManager = require('../../../js/Features/Uploads/ProjectUploadManager')
 ProjectOptionsHandler = require('../../../js/Features/Project/ProjectOptionsHandler')
 ProjectRootDocManager = require('../../../js/Features/Project/ProjectRootDocManager')
+ProjectDetailsHandler = require('../../../js/Features/Project/ProjectDetailsHandler')
 AuthenticationController = require('../../../js/Features/Authentication/AuthenticationController')
 settings = require('settings-sharelatex')
 fs = require('fs')
@@ -55,6 +56,8 @@ module.exports = TemplatesController =
 		)
 
 	createFromZip: (zipReq, options, req, res)->
+		# remove any invalid characters from template name
+		projectName = ProjectDetailsHandler.fixProjectName(options.templateName)
 		dumpPath = "#{settings.path.dumpFolder}/#{uuid.v4()}"
 		writeStream = fs.createWriteStream(dumpPath)
 
@@ -62,7 +65,7 @@ module.exports = TemplatesController =
 			logger.error err: error, "error getting zip from template API"
 		zipReq.pipe(writeStream)
 		writeStream.on 'close', ->
-			ProjectUploadManager.createProjectFromZipArchive options.currentUserId, options.templateName, dumpPath, (err, project)->
+			ProjectUploadManager.createProjectFromZipArchive options.currentUserId, projectName, dumpPath, (err, project)->
 				if err?
 					logger.err err:err, zipReq:zipReq, "problem building project from zip"
 					return res.sendStatus 500

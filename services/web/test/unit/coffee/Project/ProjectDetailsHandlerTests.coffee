@@ -196,6 +196,20 @@ describe 'ProjectDetailsHandler', ->
 				expect(error).to.eql new Errors.InvalidNameError("Project name could not be made unique")
 				done()
 
+	describe "fixProjectName", ->
+
+		it "should change empty names to Untitled", () ->
+			expect(@handler.fixProjectName "").to.equal "Untitled"
+
+		it "should replace / with -", () ->
+			expect(@handler.fixProjectName "foo/bar").to.equal "foo-bar"
+
+		it "should truncate long names", () ->
+			expect(@handler.fixProjectName new Array(1000).join("a")).to.equal "a".repeat(150)
+
+		it "should accept normal names", () ->
+			expect(@handler.fixProjectName "foobar").to.equal "foobar"
+
 
 	describe "setPublicAccessLevel", ->
 		beforeEach ->
