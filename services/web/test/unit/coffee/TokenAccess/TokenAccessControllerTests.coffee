@@ -407,7 +407,7 @@ describe "TokenAccessController", ->
 				@res.redirect = sinon.stub()
 				@next = sinon.stub()
 				@TokenAccessHandler.findProjectWithReadOnlyToken = sinon.stub()
-						.callsArgWith(1, null, @project)
+						.callsArgWith(1, null, @project, true)
 				@TokenAccessHandler.checkV1Access = sinon.stub().callsArgWith(1, null, false, 'doc-url')
 				@TokenAccessController.readOnlyToken @req, @res, @next
 
