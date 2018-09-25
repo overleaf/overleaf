@@ -35,11 +35,15 @@ module.exports = ProjectRootDocManager =
 	setRootDocFromName: (project_id, rootDocName, callback = (error) ->) ->
 		ProjectEntityHandler.getAllDocPathsFromProjectById project_id, (error, docPaths) ->
 			return callback(error) if error?
+			# strip off leading and trailing quotes from rootDocName
+			rootDocName = rootDocName.replace(/^\'|\'$/g,"")
+			# prepend a slash for the root folder if not present
+			rootDocName = "/#{rootDocName}" if rootDocName[0] isnt '/'
 			# find the root doc from the filename
 			root_doc_id = null
 			for doc_id, path of docPaths
 				# docpaths have a leading / so allow matching "folder/filename" and "/folder/filename"
-				if path == rootDocName or path == "/#{rootDocName}"
+				if path == rootDocName
 					root_doc_id = doc_id
 			# try a basename match if there was no match 
 			if !root_doc_id
