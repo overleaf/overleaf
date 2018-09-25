@@ -4,6 +4,7 @@ PublicAccessLevels = require '../Authorization/PublicAccessLevels'
 PrivilegeLevels = require '../Authorization/PrivilegeLevels'
 ObjectId = require("mongojs").ObjectId
 Settings = require('settings-sharelatex')
+V1Api = require "../V1/V1Api"
 
 module.exports = TokenAccessHandler =
 
@@ -108,3 +109,10 @@ module.exports = TokenAccessHandler =
 				project.tokens.readAndWrite = ''
 			if privilegeLevel != PrivilegeLevels.READ_ONLY
 				project.tokens.readOnly = ''
+
+	checkV1Access: (token, callback=(err, allow, redirect)->) ->
+		return callback(null, true) unless Settings.apis?.v1?
+		V1Api.request { url: "/api/v1/sharelatex/docs/#{token}/is_published" }, (err, response, body) ->
+			return callback err if err?
+			callback null, false, body.published_path if body.allow == false
+			callback null, true

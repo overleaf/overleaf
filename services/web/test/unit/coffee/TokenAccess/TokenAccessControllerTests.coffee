@@ -34,6 +34,9 @@ describe "TokenAccessController", ->
 				overleaf:
 					host: 'http://overleaf.test:5000'
 			}
+			'../V1/V1Api': @V1Api = {
+				request: sinon.stub().callsArgWith(1, null, {}, { allow: true })
+			}
 
 		@AuthenticationController.getLoggedInUserId = sinon.stub().returns(@userId.toString())
 
@@ -395,6 +398,21 @@ describe "TokenAccessController", ->
 
 	describe 'readOnlyToken', ->
 		beforeEach ->
+			@TokenAccessHandler.checkV1Access = sinon.stub().callsArgWith(1, null, true)
+
+		describe 'when access not allowed by v1 api', ->
+			beforeEach ->
+				@req = new MockRequest()
+				@res = new MockResponse()
+				@res.redirect = sinon.stub()
+				@next = sinon.stub()
+				@TokenAccessHandler.findProjectWithReadOnlyToken = sinon.stub()
+						.callsArgWith(1, null, @project)
+				@TokenAccessHandler.checkV1Access = sinon.stub().callsArgWith(1, null, false, 'doc-url')
+				@TokenAccessController.readOnlyToken @req, @res, @next
+
+			it 'should redirect to doc-url', ->
+				expect(@res.redirect.calledWith('doc-url')).to.equal true
 
 		describe 'with a user', ->
 			beforeEach ->

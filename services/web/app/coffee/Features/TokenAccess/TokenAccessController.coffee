@@ -94,23 +94,26 @@ module.exports = TokenAccessController =
 					return next(new Errors.NotFoundError())
 				TokenAccessController._tryHigherAccess(token, userId, req, res, next)
 			else
-				if !userId?
-					logger.log {userId, projectId: project._id},
-						"[TokenAccess] adding anonymous user to project with readOnly token"
-					TokenAccessHandler.grantSessionTokenAccess(req, project._id, token)
-					req._anonymousAccessToken = token
-					return TokenAccessController._loadEditor(project._id, req, res, next)
-				else
-					if project.owner_ref.toString() == userId
+				TokenAccessHandler.checkV1Access token, (err, allow_access, redirect_path) ->
+					return next err if err?
+					return res.redirect redirect_path unless allow_access
+					if !userId?
 						logger.log {userId, projectId: project._id},
-							"[TokenAccess] user is already project owner"
+							"[TokenAccess] adding anonymous user to project with readOnly token"
+						TokenAccessHandler.grantSessionTokenAccess(req, project._id, token)
+						req._anonymousAccessToken = token
 						return TokenAccessController._loadEditor(project._id, req, res, next)
-					logger.log {userId, projectId: project._id},
-						"[TokenAccess] adding user to project with readOnly token"
-					TokenAccessHandler.addReadOnlyUserToProject userId, project._id, (err) ->
-						if err?
-							logger.err {err, token, userId, projectId: project._id},
-								"[TokenAccess] error adding user to project with readAndWrite token"
-							return next(err)
-						return TokenAccessController._loadEditor(project._id, req, res, next)
+					else
+						if project.owner_ref.toString() == userId
+							logger.log {userId, projectId: project._id},
+								"[TokenAccess] user is already project owner"
+							return TokenAccessController._loadEditor(project._id, req, res, next)
+						logger.log {userId, projectId: project._id},
+							"[TokenAccess] adding user to project with readOnly token"
+						TokenAccessHandler.addReadOnlyUserToProject userId, project._id, (err) ->
+							if err?
+								logger.err {err, token, userId, projectId: project._id},
+									"[TokenAccess] error adding user to project with readAndWrite token"
+								return next(err)
+							return TokenAccessController._loadEditor(project._id, req, res, next)
 
