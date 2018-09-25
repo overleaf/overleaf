@@ -422,7 +422,7 @@ describe 'TokenAccess', ->
 			try_read_and_write_token_access(@owner, unimportedV1Token, (response, body) =>
 				expect(response.statusCode).to.equal 302
 				expect(response.headers.location).to.equal(
-					'/sign_in_to_v1?return_to=http://overleaf.test:5000/123abc'
+					'/sign_in_to_v1?return_to=/123abc'
 				)
 			, done)
 

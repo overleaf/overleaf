@@ -37,7 +37,7 @@ module.exports = TokenAccessController =
 			if !projectExists and settings.overleaf
 				logger.log {token, userId},
 						"[TokenAccess] no project found for this token"
-				return res.redirect(302, "/sign_in_to_v1?return_to=#{settings.overleaf.host}/#{token}")
+				return res.redirect(302, "/sign_in_to_v1?return_to=/#{token}")
 			if !project?
 				logger.log {token, userId},
 					"[TokenAccess] no token-based project found for readAndWrite token"
