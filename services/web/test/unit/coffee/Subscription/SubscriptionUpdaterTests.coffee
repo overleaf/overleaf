@@ -17,6 +17,7 @@ describe "SubscriptionUpdater", ->
 			_id: @adminuser_id = "5208dd34438843e2db000007"
 		@otherUserId = "5208dd34438842e2db000005"
 		@allUserIds = ["13213", "dsadas", "djsaiud89"]
+		@userStub = _id: 'mock-user-stub-id', email: 'mock-stub-email@baz.com'
 		@subscription = subscription =
 			_id: "111111111111111111111111"
 			admin_id: @adminUser._id
@@ -67,6 +68,7 @@ describe "SubscriptionUpdater", ->
 			getUsers: (memberIds, projection, callback) ->
 				users = memberIds.map (id) -> { _id: id }
 				callback(null, users)
+			getUserOrUserStubById: sinon.stub()
 
 		@ReferalFeatures = getBonusFeatures: sinon.stub().callsArgWith(1)
 		@Modules = {hooks: {fire: sinon.stub().callsArgWith(2, null, null)}}
@@ -190,6 +192,7 @@ describe "SubscriptionUpdater", ->
 	describe "removeUserFromGroup", ->
 		beforeEach ->
 			@FeaturesUpdater.refreshFeatures = sinon.stub().callsArgWith(1)
+			@UserGetter.getUserOrUserStubById.yields(null, {}, false)
 
 		it "should pull the users id from the group", (done)->
 			@SubscriptionUpdater.removeUserFromGroup @subscription._id, @otherUserId, =>
@@ -203,6 +206,12 @@ describe "SubscriptionUpdater", ->
 		it "should update the users features", (done)->
 			@SubscriptionUpdater.removeUserFromGroup @subscription._id, @otherUserId, =>
 				@FeaturesUpdater.refreshFeatures.calledWith(@otherUserId).should.equal true
+				done()
+
+		it "should not update features for user stubs", (done)->
+			@UserGetter.getUserOrUserStubById.yields(null, {}, true)
+			@SubscriptionUpdater.removeUserFromGroup @subscription._id, @userStub._id, =>
+				@FeaturesUpdater.refreshFeatures.called.should.equal false
 				done()
 
 	describe "deleteSubscription", ->

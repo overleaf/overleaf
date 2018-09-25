@@ -157,52 +157,6 @@ describe "SubscriptionGroupHandler", ->
 				{ $pull: { member_ids: @oldId } }
 			).should.equal true
 
-	describe "getPopulatedListOfMembers", ->
-		beforeEach ->
-			@subscription = {}
-			@SubscriptionLocator.getSubscription.callsArgWith(1, null, @subscription)
-			@UserGetter.getUser.callsArgWith(1, null, {_id:"31232"})
-
-		it "should locate the subscription", (done)->
-			@UserGetter.getUser.callsArgWith(1, null, {_id:"31232"})
-			@Handler.getPopulatedListOfMembers @subscriptionId, (err, users)=>
-				@SubscriptionLocator.getSubscription.calledWith(@subscriptionId).should.equal true
-				done()
-
-		it "should get the users by id", (done)->
-			@UserGetter.getUser.callsArgWith(1, null, {_id:"31232"})
-			@subscription.member_ids = ["1234", "342432", "312312"]
-			@Handler.getPopulatedListOfMembers @adminUser_id, (err, users)=>
-				@UserGetter.getUser.calledWith(@subscription.member_ids[0]).should.equal true
-				@UserGetter.getUser.calledWith(@subscription.member_ids[1]).should.equal true
-				@UserGetter.getUser.calledWith(@subscription.member_ids[2]).should.equal true
-				users.length.should.equal @subscription.member_ids.length
-				done()
-
-		it "should just return the id if the user can not be found as they may have deleted their account", (done)->
-			@UserGetter.getUser.callsArgWith(1)
-			@subscription.member_ids = ["1234", "342432", "312312"]
-			@Handler.getPopulatedListOfMembers @adminUser_id, (err, users)=>
-				assert.deepEqual users[0], {_id:@subscription.member_ids[0]}
-				assert.deepEqual users[1], {_id:@subscription.member_ids[1]}
-				assert.deepEqual users[2], {_id:@subscription.member_ids[2]}
-				done()
-
-		it "should return any invited users", (done) ->
-			@subscription.invited_emails = [ "jo@example.com" ]
-
-			@subscription.teamInvites = [
-				{ email: "charlie@example.com" }
-			]
-
-			@Handler.getPopulatedListOfMembers @adminUser_id, (err, users)=>
-				users[0].email.should.equal "jo@example.com"
-				users[0].invite.should.equal true
-				users[1].email.should.equal "charlie@example.com"
-				users[1].invite.should.equal true
-				users.length.should.equal @subscription.teamInvites.length + @subscription.invited_emails.length
-				done()
-
 	describe "isUserPartOfGroup", ->
 		beforeEach ->
 			@subscription_id = "123ed13123"

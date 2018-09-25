@@ -5,7 +5,7 @@ define [
 	"main/clear-sessions"
 	"main/account-upgrade"
 	"main/plans"
-	"main/group-members"
+	"main/user-membership"
 	"main/scribtex-popup"
 	"main/event"
 	"main/bonus"
