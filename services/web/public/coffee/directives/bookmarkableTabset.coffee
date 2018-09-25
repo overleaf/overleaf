@@ -12,6 +12,7 @@ define [
 						tab.bookmarkableTabId == hash
 					if matchingTab?
 						matchingTab.select()
+						el.children()[0].scrollIntoView({ behavior: "smooth" })
 
 	App.directive "bookmarkableTab", ($location) ->
 		restrict: "A"
@@ -22,7 +23,7 @@ define [
 			if tabScope? and tabId? and tabId != ""
 				tabScope.bookmarkableTabId = tabId
 				tabScope.$watch "active", (isActive, wasActive) ->
-					if isActive and !wasActive
+					if isActive and !wasActive and $location.hash() != tabId
 						$location.hash tabId
 
 
