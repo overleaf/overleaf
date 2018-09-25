@@ -4,7 +4,6 @@ TokenAccessHandler = require './TokenAccessHandler'
 Errors = require '../Errors/Errors'
 logger = require 'logger-sharelatex'
 settings = require 'settings-sharelatex'
-V1Api = require "../V1/V1Api"
 
 module.exports = TokenAccessController =
 
@@ -92,9 +91,9 @@ module.exports = TokenAccessController =
 					return next(new Errors.NotFoundError())
 				TokenAccessController._tryHigherAccess(token, userId, req, res, next)
 			else
-				V1Api.request { url: "/api/v1/sharelatex/docs/#{token}/read" }, (err, respose, body) ->
+				TokenAccessHandler.checkV1Access token, (err, allow_access, redirect_path) ->
 					return next err if err?
-					return res.redirect body.published_path if body.allow == false
+					return res.redirect redirect_path unless allow_access
 					if !userId?
 						logger.log {userId, projectId: project._id},
 							"[TokenAccess] adding anonymous user to project with readOnly token"

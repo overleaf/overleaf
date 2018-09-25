@@ -396,6 +396,7 @@ describe "TokenAccessController", ->
 
 	describe 'readOnlyToken', ->
 		beforeEach ->
+			@TokenAccessHandler.checkV1Access = sinon.stub().callsArgWith(1, null, true)
 
 		describe 'when access not allowed by v1 api', ->
 			beforeEach ->
@@ -405,7 +406,7 @@ describe "TokenAccessController", ->
 				@next = sinon.stub()
 				@TokenAccessHandler.findProjectWithReadOnlyToken = sinon.stub()
 						.callsArgWith(1, null, @project)
-				@V1Api.request = sinon.stub().callsArgWith(1, null, {}, { allow: false, published_path: 'doc-url'} )
+				@TokenAccessHandler.checkV1Access = sinon.stub().callsArgWith(1, null, false, 'doc-url')
 				@TokenAccessController.readOnlyToken @req, @res, @next
 
 			it 'should redirect to doc-url', ->
