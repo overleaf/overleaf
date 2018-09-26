@@ -342,7 +342,7 @@ module.exports = class Router
 			if AuthenticationController.isUserLoggedIn(req)
 				res.redirect('/user/subscription')
 			else
-				res.redirect("#{settings.v1Api.host}/teams")
+				res.redirect("#{settings.apis.v1.url}/teams")
 
 		webRouter.get '/chrome', (req, res, next) ->
 			# Match v1 behaviour - this is used for a Chrome web app
