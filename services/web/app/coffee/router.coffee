@@ -330,6 +330,12 @@ module.exports = class Router
 			AuthenticationController.httpAuth,
 			CompileController.getFileFromClsiWithoutUser
 
+		# We want to redirect POST and GET to different locations, but this is
+		# unsupported by RedirectManager. Therefore we redirect GETs with
+		# RedirectManager and POSTs with this custom route
+		publicApiRouter.post '/docs', (req, res, next) ->
+			res.redirect(307, "#{Settings.apis.v1.url}/docs")
+
 		webRouter.get '/teams', (req, res, next) ->
 			# Match v1 behaviour - if the user is signed in, show their teams list
 			# Otherwise show some information about teams
