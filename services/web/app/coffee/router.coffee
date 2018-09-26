@@ -334,7 +334,7 @@ module.exports = class Router
 		# unsupported by RedirectManager. Therefore we redirect GETs with
 		# RedirectManager and POSTs with this custom route
 		publicApiRouter.post '/docs', (req, res, next) ->
-			res.redirect(307, "#{Settings.apis.v1.url}/docs")
+			res.redirect(307, "#{Settings.overleaf.host}/docs")
 
 		webRouter.get '/teams', (req, res, next) ->
 			# Match v1 behaviour - if the user is signed in, show their teams list
@@ -342,7 +342,7 @@ module.exports = class Router
 			if AuthenticationController.isUserLoggedIn(req)
 				res.redirect('/user/subscription')
 			else
-				res.redirect("#{settings.apis.v1.url}/teams")
+				res.redirect("#{settings.overleaf.host}/teams")
 
 		webRouter.get '/chrome', (req, res, next) ->
 			# Match v1 behaviour - this is used for a Chrome web app
