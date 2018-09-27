@@ -58,3 +58,7 @@ meta(name="twitter:card", content=metadata.twitterCardType ? metadata.twitterCar
 	meta(name="og:type", metadata.openGraphType)
 -else
 	meta(name="og:type", content="website")
+
+//- Viewport
+if metadata.viewport
+	meta(name="viewport" content="width=device-width; initial-scale=1.0; user-scalable=yes;")
