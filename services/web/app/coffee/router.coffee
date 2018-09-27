@@ -90,8 +90,9 @@ module.exports = class Router
 		if Settings.enableSubscriptions
 			webRouter.get  '/user/bonus', AuthenticationController.requireLogin(), ReferalController.bonus
 
-		webRouter.get '/blog', BlogController.getIndexPage
-		webRouter.get '/blog/*', BlogController.getPage
+		if !Settings.overleaf?
+			webRouter.get '/blog', BlogController.getIndexPage
+			webRouter.get '/blog/*', BlogController.getPage
 
 		webRouter.get '/user/activate', UserPagesController.activateAccountPage
 		AuthenticationController.addEndpointToLoginWhitelist '/user/activate'
