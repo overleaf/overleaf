@@ -248,18 +248,30 @@ describe "TokenAccessController", ->
 						@req.params['read_and_write_token'] = '123abc'
 						@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
 							.callsArgWith(1, null, null, false)
-						@TokenAccessHandler.findProjectWithHigherAccess =
-							sinon.stub()
-							.callsArgWith(2, null, @project)
-						@TokenAccessController.readAndWriteToken @req, @res, @next
 
-					it 'should redirect to v1', (done) ->
-						expect(@res.redirect.callCount).to.equal 1
-						expect(@res.redirect.calledWith(
-							302,
-							'/sign_in_to_v1?return_to=/123abc'
-						)).to.equal true
-						done()
+					describe 'when project was not exported from v1', ->
+						beforeEach ->
+							@TokenAccessHandler.checkV1ProjectExported = sinon.stub()
+								.callsArgWith(1, null, false)
+							@TokenAccessController.readAndWriteToken @req, @res, @next
+
+						it 'should redirect to v1', (done) ->
+							expect(@res.redirect.callCount).to.equal 1
+							expect(@res.redirect.calledWith(
+								302,
+								'/sign_in_to_v1?return_to=/123abc'
+							)).to.equal true
+							done()
+
+					describe 'when project was exported from v1', ->
+						beforeEach ->
+							@TokenAccessHandler.checkV1ProjectExported = sinon.stub()
+								.callsArgWith(1, null, false)
+							@TokenAccessController.readAndWriteToken @req, @res, @next
+
+						it 'should call next with a not-found error', (done) ->
+							expect(@next.callCount).to.equal 0
+							done()
 
 				describe 'when token access is off, but user has higher access anyway', ->
 					beforeEach ->

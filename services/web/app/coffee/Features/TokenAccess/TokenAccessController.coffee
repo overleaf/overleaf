@@ -1,6 +1,7 @@
 ProjectController = require "../Project/ProjectController"
 AuthenticationController = require '../Authentication/AuthenticationController'
 TokenAccessHandler = require './TokenAccessHandler'
+V1Api = require '../V1/V1Api'
 Errors = require '../Errors/Errors'
 logger = require 'logger-sharelatex'
 settings = require 'settings-sharelatex'
@@ -36,9 +37,12 @@ module.exports = TokenAccessController =
 				return next(err)
 			if !projectExists and settings.overleaf
 				logger.log {token, userId},
-						"[TokenAccess] no project found for this token"
-				return res.redirect(302, "/sign_in_to_v1?return_to=/#{token}")
-			if !project?
+					"[TokenAccess] no project found for this token"
+				TokenAccessHandler.checkV1ProjectExported token, (err, exported) ->
+					return next err if err?
+					return next(new Errors.NotFoundError()) if exported
+					return res.redirect(302, "/sign_in_to_v1?return_to=/#{token}")
+			else if !project?
 				logger.log {token, userId},
 					"[TokenAccess] no token-based project found for readAndWrite token"
 				if !userId?
