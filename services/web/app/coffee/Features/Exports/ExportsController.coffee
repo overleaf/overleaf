@@ -46,10 +46,11 @@ module.exports =
 			}
 			res.send export_json: json
 
-	exportZip: (req, res) ->
-		{export_id} = req.params
+	exportDownload: (req, res) ->
+		{type, export_id} = req.params
+
 		AuthenticationController.getLoggedInUserId(req)
-		ExportsHandler.fetchZip export_id, (err, export_zip_url) ->
+		ExportsHandler.fetchDownload export_id, type, (err, export_file_url) ->
 			return err if err?
 
-			res.redirect export_zip_url
+			res.redirect export_file_url

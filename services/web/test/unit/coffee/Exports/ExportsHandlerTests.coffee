@@ -301,7 +301,7 @@ describe 'ExportsHandler', ->
 				@callback.calledWith(null, { body: @body })
 				.should.equal true
 
-	describe 'fetchZip', ->
+	describe 'fetchDownload', ->
 		beforeEach (done) ->
 			@settings.apis =
 				v1:
@@ -316,7 +316,7 @@ describe 'ExportsHandler', ->
 		describe "when all goes well", ->
 			beforeEach (done) ->
 				@stubRequest.get = @stubGet
-				@ExportsHandler.fetchZip @export_id, (error, body) =>
+				@ExportsHandler.fetchDownload @export_id, 'zip', (error, body) =>
 					@callback(error, body)
 					done()
 
