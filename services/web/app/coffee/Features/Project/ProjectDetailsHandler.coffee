@@ -78,12 +78,14 @@ module.exports = ProjectDetailsHandler =
 	# with a unique name.  But that requires thinking through how we would handle incoming projects from
 	# dropbox for example.
 	ensureProjectNameIsUnique: (user_id, name, suffixes = [], callback = (error, name, changed)->) ->
-		ProjectGetter.findAllUsersProjects user_id, {name: 1}, (error, allUsersProjects) ->
+		ProjectGetter.findAllUsersProjects user_id, {name: 1}, (error, allUsersProjectNames) ->
 			return callback(error) if error?
-			{owned, readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly} = allUsersProjects
+			# allUsersProjectNames is returned as a hash {owned: [name1, name2, ...], readOnly: [....]}
+			# collect all of the names and flatten them into a single array
+			projectNameList = _.flatten(_.values(allUsersProjectNames))
 			# create a set of all project names
 			allProjectNames = new Set()
-			for projectName in owned.concat(readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly)
+			for projectName in projectNameList
 				allProjectNames.add(projectName)
 			isUnique = (x) -> !allProjectNames.has(x)
 			# check if the supplied name is already unique
