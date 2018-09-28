@@ -27,5 +27,7 @@ if process.env['AWS_ACCESS_KEY_ID']? and process.env['AWS_SECRET_ACCESS_KEY']? a
 		key: process.env['AWS_ACCESS_KEY_ID']
 		secret: process.env['AWS_SECRET_ACCESS_KEY']
 		bucket: process.env['AWS_BUCKET']
+		
+console.log Settings, process.env['HEALTH_CHECK_PROJECT_ID']
 
 module.exports = Settings
