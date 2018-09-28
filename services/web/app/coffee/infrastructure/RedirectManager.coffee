@@ -15,7 +15,7 @@ module.exports = RedirectManager =
 			if typeof target is 'string'
 				url = target
 			else
-				if req.method == "POST"
+				if req.method != "GET"
 					code = 307
 
 				if typeof target.url == "function"
