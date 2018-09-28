@@ -98,6 +98,16 @@ module.exports = ProjectDetailsHandler =
 					return callback(null, candidateName, true)
 			# we couldn't make the name unique, something is wrong
 			return callback new Errors.InvalidNameError("Project name could not be made unique")
+	
+	fixProjectName: (name) ->
+		if name == ""
+			name = "Untitled"
+		if name.indexOf('/') > -1
+			# v2 does not allow / in a project name
+			name = name.replace(/\//g, '-')
+		if name.length > @MAX_PROJECT_NAME_LENGTH
+			name = name.substr(0, @MAX_PROJECT_NAME_LENGTH)
+		return name
 
 	setPublicAccessLevel : (project_id, newAccessLevel, callback = ->)->
 		logger.log project_id: project_id, level: newAccessLevel, "set public access level"
