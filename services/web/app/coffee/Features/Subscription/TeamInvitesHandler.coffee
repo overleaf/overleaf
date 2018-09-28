@@ -50,7 +50,9 @@ module.exports = TeamInvitesHandler =
 		email = EmailHelper.parseEmail(user.email)
 		return callback(new Error('invalid email')) if !email?
 		logger.log {licence, email: email}, "Creating domain team invite"
-		inviterName = licence.name.replace(/\s+licence$/i, licence.name)
+		# If name == 'Uni of X License', make the email read only
+		# 'Uni of X has invited you...'
+		inviterName = licence.name.replace(/\s+(site\s+)?licence$/i, '')
 
 		SubscriptionLocator.getSubscription licence.subscription_id, (error, subscription) ->
 			return callback(error) if error?
