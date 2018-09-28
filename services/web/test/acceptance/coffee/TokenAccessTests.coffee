@@ -431,6 +431,6 @@ describe 'TokenAccess', ->
 			try_read_only_token_access(@owner, unimportedV1Token, (response, body) =>
 				expect(response.statusCode).to.equal 302
 				expect(response.headers.location).to.equal(
-					'http://overleaf.test:5000/read/abcd'
+					'/sign_in_to_v1?return_to=/read/abcd'
 				)
 			, done)

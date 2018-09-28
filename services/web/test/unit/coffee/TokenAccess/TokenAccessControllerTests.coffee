@@ -533,6 +533,44 @@ describe "TokenAccessController", ->
 					done()
 
 		describe 'when findProject does not find a project', ->
+			describe 'when project does not exist', ->
+				beforeEach ->
+					@req = new MockRequest()
+					@res = new MockResponse()
+					@res.redirect = sinon.stub()
+					@next = sinon.stub()
+					@req.params['read_only_token'] = 'abcd'
+					@TokenAccessHandler.findProjectWithReadOnlyToken = sinon.stub()
+						.callsArgWith(1, null, null, false)
+					@TokenAccessHandler.checkV1ProjectExported = sinon.stub()
+						.callsArgWith(1, null, false)
+					@TokenAccessController.readOnlyToken @req, @res, @next
+
+				it 'should redirect to v1', (done) ->
+					expect(@res.redirect.callCount).to.equal 1
+					expect(@res.redirect.calledWith(
+						302,
+						'/sign_in_to_v1?return_to=/read/abcd'
+					)).to.equal true
+					done()
+
+			describe 'when project was exported from v1', ->
+				beforeEach ->
+					@req = new MockRequest()
+					@res = new MockResponse()
+					@res.redirect = sinon.stub()
+					@next = sinon.stub()
+					@req.params['read_only_token'] = 'abcd'
+					@TokenAccessHandler.findProjectWithReadOnlyToken = sinon.stub()
+						.callsArgWith(1, null, null, false)
+					@TokenAccessHandler.checkV1ProjectExported = sinon.stub()
+						.callsArgWith(1, null, true)
+					@TokenAccessController.readOnlyToken @req, @res, @next
+
+				it 'should call next with a not-found error', (done) ->
+					expect(@next.callCount).to.equal 1
+					done()
+
 			describe 'when token access is off, but user has higher access anyway', ->
 				beforeEach ->
 					@req = new MockRequest()
@@ -761,6 +799,8 @@ describe "TokenAccessController", ->
 					@req.params['read_only_token'] = @readOnlyToken
 					@TokenAccessHandler.findProjectWithReadOnlyToken = sinon.stub()
 						.callsArgWith(1, null, null)
+					@TokenAccessHandler.checkV1ProjectExported = sinon.stub()
+						.callsArgWith(1, null, false)
 					@TokenAccessHandler.addReadOnlyUserToProject = sinon.stub()
 						.callsArgWith(2, null)
 					@ProjectController.loadEditor = sinon.stub()
@@ -788,11 +828,17 @@ describe "TokenAccessController", ->
 						.to.equal 0
 					done()
 
-				it 'should redirect to v1', (done) ->
-					expect(@res.redirect.callCount).to.equal 1
-					expect(@res.redirect.calledWith(
-						302,
-						"http://overleaf.test:5000/read/#{@readOnlyToken}"
-					)).to.equal true
-					done()
+				describe 'when project was exported to v2', ->
+					beforeEach ->
+						@TokenAccessHandler.checkV1ProjectExported = sinon.stub()
+							.callsArgWith(1, null, true)
+						@TokenAccessController.readOnlyToken @req, @res, @next
+
+					it 'should redirect to v1', (done) ->
+						expect(@res.redirect.callCount).to.equal 1
+						expect(@res.redirect.calledWith(
+							302,
+							"/sign_in_to_v1?return_to=/read/#{@readOnlyToken}"
+						)).to.equal true
+						done()
 
