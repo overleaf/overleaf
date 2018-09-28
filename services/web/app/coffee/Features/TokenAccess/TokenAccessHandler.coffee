@@ -116,3 +116,9 @@ module.exports = TokenAccessHandler =
 			return callback err if err?
 			callback null, false, body.published_path if body.allow == false
 			callback null, true
+
+	checkV1ProjectExported: (token, callback = (err, exists) ->) ->
+		return callback(null, false) unless Settings.apis?.v1?
+		V1Api.request { url: "/api/v1/sharelatex/docs/#{token}/exported_to_v2" }, (err, response, body) ->
+			return callback err if err?
+			callback null, body.exported
