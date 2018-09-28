@@ -1,20 +1,21 @@
 # This file was auto-generated, do not edit it directly.
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
-# Version: 1.1.4
+# Version: 1.1.9
 
 version: "2"
 
 services:
   test_unit:
-    image: gcr.io/overleaf-ops/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     user: node
     command: npm run test:unit:_run
 
   test_acceptance:
     build: .
-    image: gcr.io/overleaf-ops/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     environment:
+      ELASTIC_SEARCH_DSN: es:9200
       REDIS_HOST: redis
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
@@ -33,4 +34,3 @@ services:
 
   mongo:
     image: mongo:3.4
-
