@@ -23,7 +23,7 @@ module.exports =
 		realtime:
 			port: "6379"
 			host: process.env["REDIS_HOST"] or "localhost"
-			password:""
+			password: process.env["REDIS_PASSWORD"]
 			key_schema:
 				pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
 			# cluster: [{
@@ -35,7 +35,7 @@ module.exports =
 		documentupdater:
 			port: "6379"
 			host: process.env["REDIS_HOST"] or "localhost"
-			password: ""
+			password: process.env["REDIS_PASSWORD"]
 			key_schema:
 				blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
 				docLines: ({doc_id}) -> "doclines:#{doc_id}"
@@ -66,7 +66,7 @@ module.exports =
 		history:
 			port: "6379"
 			host: process.env["REDIS_HOST"] or "localhost"
-			password:""
+			password: process.env["REDIS_PASSWORD"]
 			key_schema:
 				uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
 				docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:#{project_id}"
@@ -84,7 +84,7 @@ module.exports =
 		lock:
 			port: "6379"
 			host: process.env["REDIS_HOST"] or "localhost"
-			password:""
+			password: process.env["REDIS_PASSWORD"]
 			key_schema:
 				blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
 			# cluster: [{
