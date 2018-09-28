@@ -7,13 +7,13 @@ version: "2"
 
 services:
   test_unit:
-    image: gcr.io/csh-gcdm-test/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    image: gcr.io/overleaf-ops/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     user: node
     command: npm run test:unit:_run
 
   test_acceptance:
     build: .
-    image: gcr.io/csh-gcdm-test/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    image: gcr.io/overleaf-ops/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     environment:
       REDIS_HOST: redis
       MONGO_HOST: mongo
