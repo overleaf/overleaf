@@ -21,7 +21,7 @@ module.exports =
 
 	redis:
 		realtime:
-			port: "6379"
+			port: process.env["REDIS_PORT"] or "6379"
 			host: process.env["REDIS_HOST"] or "localhost"
 			password: process.env["REDIS_PASSWORD"]
 			key_schema:
@@ -33,7 +33,7 @@ module.exports =
 			# key_schema:
 			# 	pendingUpdates: ({doc_id}) -> "PendingUpdates:{#{doc_id}}"
 		documentupdater:
-			port: "6379"
+			port: process.env["REDIS_PORT"] or "6379"
 			host: process.env["REDIS_HOST"] or "localhost"
 			password: process.env["REDIS_PASSWORD"]
 			key_schema:
@@ -64,7 +64,7 @@ module.exports =
 			# 	ranges: ({doc_id}) -> "Ranges:{#{doc_id}}"
 			# 	projectState: ({project_id}) -> "ProjectState:{#{project_id}}"
 		history:
-			port: "6379"
+			port: process.env["REDIS_PORT"] or "6379"
 			host: process.env["REDIS_HOST"] or "localhost"
 			password: process.env["REDIS_PASSWORD"]
 			key_schema:
@@ -82,7 +82,7 @@ module.exports =
 			# 	uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:{#{doc_id}}"
 			# 	docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:{#{project_id}}"
 		lock:
-			port: "6379"
+			port: process.env["REDIS_PORT"] or "6379"
 			host: process.env["REDIS_HOST"] or "localhost"
 			password: process.env["REDIS_PASSWORD"]
 			key_schema:
