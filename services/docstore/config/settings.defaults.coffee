@@ -11,7 +11,7 @@ Settings =
 
 	docstore:
 		healthCheck:
-			project_id: ""
+			project_id: process.env['HEALTH_CHECK_PROJECT_ID']
 
 	max_doc_length: 2 * 1024 * 1024 # 2mb
 
