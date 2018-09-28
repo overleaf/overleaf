@@ -15,6 +15,7 @@ checkCanStoreFiles = (callback)->
 	req = {params:{}, query:{}, headers:{}}
 	req.params.project_id = settings.health_check.project_id
 	req.params.file_id = settings.health_check.file_id
+	console.log settings
 	myWritableStreamBuffer = new streamBuffers.WritableStreamBuffer(initialSize: 100)
 	res = {
 		send: (code) ->
