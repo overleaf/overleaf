@@ -1,7 +1,7 @@
 # This file was auto-generated, do not edit it directly.
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
-# Version: 1.1.3
+# Version: 1.1.4
 
 BUILD_NUMBER ?= local
 BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
@@ -14,7 +14,7 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 	AWS_BUCKET=${AWS_BUCKET} \
 	AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
 	AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
-	docker-compose ${DOCKER_COMPOSE_FLAGS} 
+	docker-compose ${DOCKER_COMPOSE_FLAGS}
 
 
 clean:

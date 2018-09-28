@@ -2,7 +2,7 @@ String cron_string = BRANCH_NAME == "master" ? "@daily" : ""
 
 pipeline {
   agent any
-  
+
   triggers {
     pollSCM('* * * * *')
     cron(cron_string)
@@ -24,11 +24,10 @@ pipeline {
     stage('Acceptance Tests') {
       steps {
         withCredentials([usernamePassword(credentialsId: 'S3_DOCSTORE_TEST_AWS_KEYS', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
-          sh 'AWS_BUCKET="sl-doc-archive-testing" AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_acceptance'
+          sh 'AWS_BUCKET="sl-acceptance-tests" AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_acceptance'
         }
       }
     }
-
 
     stage('Package and publish build') {
       steps {
