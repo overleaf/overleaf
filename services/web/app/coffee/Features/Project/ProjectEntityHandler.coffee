@@ -65,6 +65,12 @@ module.exports = ProjectEntityHandler = self =
 						files.push({path: path.join(folderPath, file.name), file:file})
 			callback null, docs, files
 
+	getAllDocPathsFromProjectById: (project_id, callback) ->
+		ProjectGetter.getProjectWithoutDocLines project_id, (err, project) ->
+			return callback(err) if err?
+			return callback(Errors.NotFoundError("no project")) if !project?
+			self.getAllDocPathsFromProject project, callback
+
 	getAllDocPathsFromProject: (project, callback) ->
 		logger.log project:project, "getting all docs for project"
 		self._getAllFoldersFromProject project, (err, folders = {}) ->

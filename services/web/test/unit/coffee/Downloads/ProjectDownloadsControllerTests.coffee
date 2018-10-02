@@ -112,7 +112,7 @@ describe "ProjectDownloadsController", ->
 			@res.setContentDisposition
 				.calledWith(
 					'attachment',
-					{filename: "ShareLaTeX Projects (2 items).zip"})
+					{filename: "Overleaf Projects (2 items).zip"})
 				.should.equal true
 
 		it "should record the action via Metrics", ->

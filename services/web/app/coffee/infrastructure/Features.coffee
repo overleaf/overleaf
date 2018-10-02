@@ -9,7 +9,7 @@ module.exports = Features =
 			when 'homepage'
 				return Settings.enableHomepage
 			when 'registration'
-				return not Features.externalAuthenticationSystemUsed()
+				return not Features.externalAuthenticationSystemUsed() or Settings.overleaf?
 			when 'github-sync'
 				return Settings.enableGithubSync
 			when 'v1-return-message'

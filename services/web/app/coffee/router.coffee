@@ -90,8 +90,9 @@ module.exports = class Router
 		if Settings.enableSubscriptions
 			webRouter.get  '/user/bonus', AuthenticationController.requireLogin(), ReferalController.bonus
 
-		webRouter.get '/blog', BlogController.getIndexPage
-		webRouter.get '/blog/*', BlogController.getPage
+		if !Settings.overleaf?
+			webRouter.get '/blog', BlogController.getIndexPage
+			webRouter.get '/blog/*', BlogController.getPage
 
 		webRouter.get '/user/activate', UserPagesController.activateAccountPage
 		AuthenticationController.addEndpointToLoginWhitelist '/user/activate'
@@ -336,7 +337,7 @@ module.exports = class Router
 			if AuthenticationController.isUserLoggedIn(req)
 				res.redirect('/user/subscription')
 			else
-				res.redirect("#{settings.v1Api.host}/teams")
+				res.redirect("#{settings.overleaf.host}/teams")
 
 		webRouter.get '/chrome', (req, res, next) ->
 			# Match v1 behaviour - this is used for a Chrome web app

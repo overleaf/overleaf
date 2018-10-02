@@ -1,5 +1,7 @@
 settings = require("settings-sharelatex")
 logger = require("logger-sharelatex")
+URL = require('url')
+querystring = require('querystring')
 
 module.exports = RedirectManager =
 	apply: (webRouter) ->
@@ -13,14 +15,22 @@ module.exports = RedirectManager =
 			if typeof target is 'string'
 				url = target
 			else
-				if req.method == "POST"
+				if req.method != "GET"
 					code = 307
+
 				if typeof target.url == "function"
 					url = target.url(req.params)
 					if !url
 						return next()
 				else
 					url = target.url
+
+				# Special handling for redirecting to v1, to ensure that query params
+				# are encoded
+				if target.authWithV1
+					url = "/sign_in_to_v1?" + querystring.stringify(return_to: url + getQueryString(req))
+					return res.redirect code, url
+
 				if target.baseUrl?
 					url = "#{target.baseUrl}#{url}"
 			res.redirect code, url + getQueryString(req)
@@ -29,5 +39,5 @@ module.exports = RedirectManager =
 # have differences between Express and Rails, so safer to just pass the raw
 # string
 getQueryString = (req) ->
-	qs = req.url.match(/\?.*$/)
-	if qs? then qs[0] else ""
+	{search} = URL.parse(req.url)
+	if search then search else ""

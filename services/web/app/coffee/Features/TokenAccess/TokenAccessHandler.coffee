@@ -4,25 +4,38 @@ PublicAccessLevels = require '../Authorization/PublicAccessLevels'
 PrivilegeLevels = require '../Authorization/PrivilegeLevels'
 ObjectId = require("mongojs").ObjectId
 Settings = require('settings-sharelatex')
+V1Api = require "../V1/V1Api"
 
 module.exports = TokenAccessHandler =
 
 	ANONYMOUS_READ_AND_WRITE_ENABLED:
 		Settings.allowAnonymousReadAndWriteSharing == true
 
-	findProjectWithReadOnlyToken: (token, callback=(err, project)->) ->
+	findProjectWithReadOnlyToken: (token, callback=(err, project, projectExists)->) ->
 		Project.findOne {
-			'tokens.readOnly': token,
-			'publicAccesLevel': PublicAccessLevels.TOKEN_BASED
-		}, {_id: 1, publicAccesLevel: 1, owner_ref: 1}, callback
+			'tokens.readOnly': token
+		}, {_id: 1, publicAccesLevel: 1, owner_ref: 1}, (err, project) ->
+			if err?
+				return callback(err)
+			if !project?
+				return callback(null, null, false) # Project doesn't exist, so we handle differently
+			if project.publicAccesLevel != PublicAccessLevels.TOKEN_BASED
+				return callback(null, null, true) # Project does exist, but it isn't token based
+			return callback(null, project, true)
 
-	findProjectWithReadAndWriteToken: (token, callback=(err, project)->) ->
+	findProjectWithReadAndWriteToken: (token, callback=(err, project, projectExists)->) ->
 		Project.findOne {
-			'tokens.readAndWrite': token,
-			'publicAccesLevel': PublicAccessLevels.TOKEN_BASED
-		}, {_id: 1, publicAccesLevel: 1, owner_ref: 1}, callback
+			'tokens.readAndWrite': token
+		}, {_id: 1, publicAccesLevel: 1, owner_ref: 1}, (err, project) ->
+			if err?
+				return callback(err)
+			if !project?
+				return callback(null, null, false) # Project doesn't exist, so we handle differently
+			if project.publicAccesLevel != PublicAccessLevels.TOKEN_BASED
+				return callback(null, null, true) # Project does exist, but it isn't token based
+			return callback(null, project, true)
 
-	findProjectWithHigherAccess: (token, userId, callback=(err, project, projectExists)->) ->
+	findProjectWithHigherAccess: (token, userId, callback=(err, project)->) ->
 		Project.findOne {
 			$or: [
 				{'tokens.readAndWrite': token},
@@ -32,15 +45,14 @@ module.exports = TokenAccessHandler =
 			if err?
 				return callback(err)
 			if !project?
-				return callback(null, null, false) # Project doesn't exist, so we handle differently
+				return callback(null, null)
 			projectId = project._id
 			CollaboratorsHandler.isUserInvitedMemberOfProject userId, projectId, (err, isMember) ->
 				if err?
 					return callback(err)
 				callback(
 					null,
-					if isMember == true then project else null,
-					true # Project does exist, but user doesn't have access
+					if isMember == true then project else null
 				)
 
 	addReadOnlyUserToProject: (userId, projectId, callback=(err)->) ->
@@ -97,3 +109,16 @@ module.exports = TokenAccessHandler =
 				project.tokens.readAndWrite = ''
 			if privilegeLevel != PrivilegeLevels.READ_ONLY
 				project.tokens.readOnly = ''
+
+	checkV1Access: (token, callback=(err, allow, redirect)->) ->
+		return callback(null, true) unless Settings.apis?.v1?
+		V1Api.request { url: "/api/v1/sharelatex/docs/#{token}/is_published" }, (err, response, body) ->
+			return callback err if err?
+			callback null, false, body.published_path if body.allow == false
+			callback null, true
+
+	checkV1ProjectExported: (token, callback = (err, exists) ->) ->
+		return callback(null, false) unless Settings.apis?.v1?
+		V1Api.request { url: "/api/v1/sharelatex/docs/#{token}/exported_to_v2" }, (err, response, body) ->
+			return callback err if err?
+			callback null, body.exported

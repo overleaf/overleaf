@@ -19,9 +19,11 @@ describe "TokenAccessHandler", ->
 		@req = {}
 		@TokenAccessHandler = SandboxedModule.require modulePath, requires:
 			'../../models/Project': {Project: @Project = {}}
-			'settings-sharelatex': {}
+			'settings-sharelatex': @settings = {}
 			'../Collaborators/CollaboratorsHandler': @CollaboratorsHandler = {}
-
+			'../V1/V1Api': @V1Api = {
+				request: sinon.stub()
+			}
 
 	describe 'findProjectWithReadOnlyToken', ->
 		beforeEach ->
@@ -31,8 +33,7 @@ describe "TokenAccessHandler", ->
 			@TokenAccessHandler.findProjectWithReadOnlyToken @token, (err, project) =>
 				expect(@Project.findOne.callCount).to.equal 1
 				expect(@Project.findOne.calledWith({
-					'tokens.readOnly': @token,
-					'publicAccesLevel': 'tokenBased'
+					'tokens.readOnly': @token
 				})).to.equal true
 				done()
 
@@ -41,6 +42,11 @@ describe "TokenAccessHandler", ->
 				expect(err).to.not.exist
 				expect(project).to.exist
 				expect(project).to.deep.equal @project
+				done()
+
+		it 'should return projectExists flag as true', (done) ->
+			@TokenAccessHandler.findProjectWithReadOnlyToken @token, (err, project, projectExists) ->
+				expect(projectExists).to.equal true
 				done()
 
 		describe 'when Project.findOne produces an error', ->
@@ -54,6 +60,37 @@ describe "TokenAccessHandler", ->
 					expect(err).to.be.instanceof Error
 					done()
 
+		describe 'when project does not have tokenBased access level', ->
+			beforeEach ->
+				@project.publicAccesLevel = 'private'
+				@Project.findOne = sinon.stub().callsArgWith(2, null, @project, true)
+
+			it 'should not return a project', (done) ->
+				@TokenAccessHandler.findProjectWithReadOnlyToken @token, (err, project) ->
+					expect(err).to.not.exist
+					expect(project).to.not.exist
+					done()
+
+			it 'should return projectExists flag as true', (done) ->
+				@TokenAccessHandler.findProjectWithReadOnlyToken @token, (err, project, projectExists) ->
+					expect(projectExists).to.equal true
+					done()
+
+		describe 'when project does not exist', ->
+			beforeEach ->
+				@Project.findOne = sinon.stub().callsArgWith(2, null, null)
+
+			it 'should not return a project', (done) ->
+				@TokenAccessHandler.findProjectWithReadOnlyToken @token, (err, project) ->
+					expect(err).to.not.exist
+					expect(project).to.not.exist
+					done()
+
+			it 'should return projectExists flag as false', (done) ->
+				@TokenAccessHandler.findProjectWithReadOnlyToken @token, (err, project, projectExists) ->
+					expect(projectExists).to.equal false
+					done()
+
 	describe 'findProjectWithReadAndWriteToken', ->
 		beforeEach ->
 			@Project.findOne = sinon.stub().callsArgWith(2, null, @project)
@@ -62,8 +99,7 @@ describe "TokenAccessHandler", ->
 			@TokenAccessHandler.findProjectWithReadAndWriteToken @token, (err, project) =>
 				expect(@Project.findOne.callCount).to.equal 1
 				expect(@Project.findOne.calledWith({
-					'tokens.readAndWrite': @token,
-					'publicAccesLevel': 'tokenBased'
+					'tokens.readAndWrite': @token
 				})).to.equal true
 				done()
 
@@ -72,6 +108,11 @@ describe "TokenAccessHandler", ->
 				expect(err).to.not.exist
 				expect(project).to.exist
 				expect(project).to.deep.equal @project
+				done()
+
+		it 'should return projectExists flag as true', (done) ->
+			@TokenAccessHandler.findProjectWithReadAndWriteToken @token, (err, project, projectExists) ->
+				expect(projectExists).to.equal true
 				done()
 
 		describe 'when Project.findOne produces an error', ->
@@ -83,6 +124,22 @@ describe "TokenAccessHandler", ->
 					expect(err).to.exist
 					expect(project).to.not.exist
 					expect(err).to.be.instanceof Error
+					done()
+
+		describe 'when project does not have tokenBased access level', ->
+			beforeEach ->
+				@project.publicAccesLevel = 'private'
+				@Project.findOne = sinon.stub().callsArgWith(2, null, @project, true)
+
+			it 'should not return a project', (done) ->
+				@TokenAccessHandler.findProjectWithReadAndWriteToken @token, (err, project) ->
+					expect(err).to.not.exist
+					expect(project).to.not.exist
+					done()
+
+			it 'should return projectExists flag as true', (done) ->
+				@TokenAccessHandler.findProjectWithReadAndWriteToken @token, (err, project, projectExists) ->
+					expect(projectExists).to.equal true
 					done()
 
 
@@ -434,3 +491,46 @@ describe "TokenAccessHandler", ->
 			@TokenAccessHandler.protectTokens(@project, 'owner')
 			expect(@project.tokens.readAndWrite).to.equal 'rw'
 			expect(@project.tokens.readOnly).to.equal 'ro'
+
+	describe 'checkV1Access', ->
+		beforeEach ->
+			@callback = sinon.stub()
+
+		describe 'when v1 api not set', ->
+			beforeEach ->
+				@TokenAccessHandler.checkV1Access @token, @callback
+
+			it 'should not check access and return true', ->
+				expect(@V1Api.request.called).to.equal false
+				expect(@callback.calledWith null, true).to.equal true
+
+		describe 'when v1 api is set', ->
+			beforeEach ->
+				@settings.apis = { v1: 'v1' }
+
+			describe 'when access allowed', ->
+				beforeEach ->
+					@V1Api.request = sinon.stub().callsArgWith(1, null, {}, { allow: true} )
+					@TokenAccessHandler.checkV1Access @token, @callback
+
+				it 'should check api', ->
+					expect(@V1Api.request.calledWith { url: "/api/v1/sharelatex/docs/#{@token}/is_published" }).to.equal true
+
+				it 'should callback with true', ->
+					expect(@callback.calledWith null, true).to.equal true
+
+			describe 'when access denied', ->
+				beforeEach ->
+					@V1Api.request = sinon.stub().callsArgWith(1, null, {}, { allow: false, published_path: 'doc-url'} )
+					@TokenAccessHandler.checkV1Access @token, @callback
+
+				it 'should callback with false and redirect', ->
+					expect(@callback.calledWith null, false, 'doc-url').to.equal true
+
+			describe 'on error', ->
+				beforeEach ->
+					@V1Api.request = sinon.stub().callsArgWith(1, 'error')
+					@TokenAccessHandler.checkV1Access @token, @callback
+
+				it 'should callback with error', ->
+					expect(@callback.calledWith 'error').to.equal true

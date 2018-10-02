@@ -204,6 +204,11 @@ define [
 				when options.try then "silent" # allow use to try compile once
 				when $scope.stop_on_validation_error then "error" # try to compile
 				else "silent" # ignore errors
+			# FIXME: Temporarily disable syntax checking as it is causing
+			# excessive support requests for projects migrated from v1
+			# https://github.com/overleaf/sharelatex/issues/911
+			if checkType == "error"
+				checkType = "silent"
 			return $http.post url, {
 				rootDoc_id: options.rootDocOverride_id or null
 				draft: $scope.draft
