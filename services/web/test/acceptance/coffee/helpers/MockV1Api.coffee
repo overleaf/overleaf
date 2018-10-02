@@ -82,10 +82,7 @@ module.exports = MockV1Api =
 			console.error "error starting MockV1Api:", error.message
 			process.exit(1)
 		
-		app.get '/api/v1/sharelatex/docs/:token/is_published', (req, res, next) =>
-			res.json { allow: true }
-
-		app.get '/api/v1/sharelatex/docs/:token/exported_to_v2', (req, res, next) =>
-			res.json { exported: false }
+		app.get '/api/v1/sharelatex/docs/:token/info', (req, res, next) =>
+			res.json { allow: true, exported: false }
 
 MockV1Api.run()

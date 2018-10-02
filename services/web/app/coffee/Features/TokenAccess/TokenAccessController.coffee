@@ -1,7 +1,6 @@
 ProjectController = require "../Project/ProjectController"
 AuthenticationController = require '../Authentication/AuthenticationController'
 TokenAccessHandler = require './TokenAccessHandler'
-V1Api = require '../V1/V1Api'
 Errors = require '../Errors/Errors'
 logger = require 'logger-sharelatex'
 settings = require 'settings-sharelatex'
@@ -38,9 +37,9 @@ module.exports = TokenAccessController =
 			if !projectExists and settings.overleaf
 				logger.log {token, userId},
 					"[TokenAccess] no project found for this token"
-				TokenAccessHandler.checkV1ProjectExported token, (err, exported) ->
+				TokenAccessHandler.getV1DocInfo token, (err, doc_info) ->
 					return next err if err?
-					return next(new Errors.NotFoundError()) if exported
+					return next(new Errors.NotFoundError()) if doc_info.exported
 					return res.redirect(302, "/sign_in_to_v1?return_to=/#{token}")
 			else if !project?
 				logger.log {token, userId},
@@ -80,30 +79,28 @@ module.exports = TokenAccessController =
 		userId = AuthenticationController.getLoggedInUserId(req)
 		token = req.params['read_only_token']
 		logger.log {userId, token}, "[TokenAccess] requesting read-only token access"
-		TokenAccessHandler.findProjectWithReadOnlyToken token, (err, project, projectExists) ->
-			if err?
-				logger.err {err, token, userId},
-					"[TokenAccess] error getting project by readOnly token"
-				return next(err)
-			if !projectExists and settings.overleaf
-				logger.log {token, userId},
-					"[TokenAccess] no project found for this token"
-				TokenAccessHandler.checkV1ProjectExported token, (err, exported) ->
-					return next err if err?
-					return next(new Errors.NotFoundError()) if exported
+		TokenAccessHandler.getV1DocInfo token, (err, doc_info) ->
+			return res.redirect doc_info.published_path if doc_info.allow == false
+
+			TokenAccessHandler.findProjectWithReadOnlyToken token, (err, project, projectExists) ->
+				if err?
+					logger.err {err, token, userId},
+						"[TokenAccess] error getting project by readOnly token"
+					return next(err)
+				if !projectExists and settings.overleaf
+					logger.log {token, userId},
+						"[TokenAccess] no project found for this token"
+					return next(new Errors.NotFoundError()) if doc_info.exported
 					return res.redirect(302, "/sign_in_to_v1?return_to=/read/#{token}")
-			else if !project?
-				logger.log {token, userId},
-					"[TokenAccess] no project found for readOnly token"
-				if !userId?
-					logger.log {token},
-						"[TokenAccess] No project found with readOnly token, anonymous user, deny"
-					return next(new Errors.NotFoundError())
-				TokenAccessController._tryHigherAccess(token, userId, req, res, next)
-			else
-				TokenAccessHandler.checkV1Access token, (err, allow_access, redirect_path) ->
-					return next err if err?
-					return res.redirect redirect_path unless allow_access
+				else if !project?
+					logger.log {token, userId},
+						"[TokenAccess] no project found for readOnly token"
+					if !userId?
+						logger.log {token},
+							"[TokenAccess] No project found with readOnly token, anonymous user, deny"
+						return next(new Errors.NotFoundError())
+					TokenAccessController._tryHigherAccess(token, userId, req, res, next)
+				else
 					if !userId?
 						logger.log {userId, projectId: project._id},
 							"[TokenAccess] adding anonymous user to project with readOnly token"
@@ -123,4 +120,3 @@ module.exports = TokenAccessController =
 									"[TokenAccess] error adding user to project with readAndWrite token"
 								return next(err)
 							return TokenAccessController._loadEditor(project._id, req, res, next)
-
