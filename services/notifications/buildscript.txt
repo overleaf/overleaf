@@ -1,0 +1,9 @@
+--script-version=1.1.9
+notifications
+--node-version=6.14.1
+--acceptance-creds=None
+--language=coffeescript
+--dependencies=mongo,redis
+--docker-repos=gcr.io/overleaf-ops
+--kube=false
+--build-target=docker
