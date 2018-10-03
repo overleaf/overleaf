@@ -9,6 +9,7 @@ RUN npm install --quiet
 
 COPY . /app
 
+
 RUN npm run compile:all
 
 FROM node:6.9.5
