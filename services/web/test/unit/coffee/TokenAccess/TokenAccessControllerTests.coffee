@@ -28,7 +28,13 @@ describe "TokenAccessController", ->
 		@TokenAccessController = SandboxedModule.require modulePath, requires:
 			'../Project/ProjectController': @ProjectController = {}
 			'../Authentication/AuthenticationController': @AuthenticationController = {}
-			'./TokenAccessHandler': @TokenAccessHandler = {}
+			'./TokenAccessHandler': @TokenAccessHandler = {
+				getV1DocInfo: sinon.stub().yields(null, {
+					allow: true
+					exists: true
+					exported: false
+				})
+			}
 			'logger-sharelatex': {log: sinon.stub(), err: sinon.stub()}
 			'settings-sharelatex': {
 				overleaf:
@@ -420,7 +426,12 @@ describe "TokenAccessController", ->
 				@next = sinon.stub()
 				@TokenAccessHandler.findProjectWithReadOnlyToken = sinon.stub()
 						.callsArgWith(1, null, @project, true)
-				@TokenAccessHandler.checkV1Access = sinon.stub().callsArgWith(1, null, false, 'doc-url')
+				@TokenAccessHandler.getV1DocInfo = sinon.stub().yields(null, {
+					allow: false
+					exists: true
+					exported: false
+					published_path: 'doc-url'
+				})
 				@TokenAccessController.readOnlyToken @req, @res, @next
 
 			it 'should redirect to doc-url', ->
@@ -563,8 +574,11 @@ describe "TokenAccessController", ->
 					@req.params['read_only_token'] = 'abcd'
 					@TokenAccessHandler.findProjectWithReadOnlyToken = sinon.stub()
 						.callsArgWith(1, null, null, false)
-					@TokenAccessHandler.checkV1ProjectExported = sinon.stub()
-						.callsArgWith(1, null, true)
+					@TokenAccessHandler.getV1DocInfo = sinon.stub().yields(null, {
+						allow: true
+						exists: true
+						exported: true
+					})
 					@TokenAccessController.readOnlyToken @req, @res, @next
 
 				it 'should call next with a not-found error', (done) ->
@@ -830,8 +844,11 @@ describe "TokenAccessController", ->
 
 				describe 'when project was exported to v2', ->
 					beforeEach ->
-						@TokenAccessHandler.checkV1ProjectExported = sinon.stub()
-							.callsArgWith(1, null, true)
+						@TokenAccessHandler.getV1DocInfo = sinon.stub().yields(null, {
+							allow: true
+							exists: true
+							exported: true
+						})
 						@TokenAccessController.readOnlyToken @req, @res, @next
 
 					it 'should redirect to v1', (done) ->
