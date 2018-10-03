@@ -2,7 +2,7 @@ module.exports =
 	redis:
 		realtime:
 			host: process.env['REDIS_HOST'] or "localhostssss"
-			port: "6379"
+			port: process.env['REDIS_PORT'] or "6379"
 			password: process.env["REDIS_PASSWORD"] or ""
 			key_schema:
 				clientsInProject: ({project_id}) -> "clients_in_project:#{project_id}"
@@ -10,14 +10,14 @@ module.exports =
 
 		documentupdater:
 			host: process.env['REDIS_HOST'] or "localhostssss"
-			port: "6379"
+			port: process.env['REDIS_PORT'] or "6379"
 			password: process.env["REDIS_PASSWORD"] or ""
 			key_schema:
 				pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
 
 		websessions:
 			host: process.env['REDIS_HOST'] or "localhostssss"
-			port: "6379"
+			port: process.env['REDIS_PORT'] or "6379"
 			password: process.env["REDIS_PASSWORD"] or ""
 
 	internal:

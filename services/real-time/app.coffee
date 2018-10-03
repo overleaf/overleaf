@@ -8,8 +8,6 @@ Settings = require "settings-sharelatex"
 if Settings.sentry?.dsn?
 	logger.initializeErrorReporting(Settings.sentry.dsn)
 
-console.log "dasdsadasdsadsadsadsad"
-console.log Settings.redis.websessions
 sessionRedisClient = redis.createClient(Settings.redis.websessions)
 
 RedisStore = require('connect-redis')(session)
