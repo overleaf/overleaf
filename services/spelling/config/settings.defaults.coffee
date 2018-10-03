@@ -7,12 +7,12 @@ module.exports = Settings =
 			host: process.env["LISTEN_ADDRESS"] or "localhost"
 			
 	redis:
-		port: 6379
+		port: process.env['REDIS_PORT']
 		host: process.env["REDIS_HOST"] or "localhost"
-		password:""
+		password: process.env["REDIS_PASSWORD"] or ""
 		
 	mongo:
-		url : "mongodb://#{process.env["MONGO_HOST"] or "localhost"}/sharelatex"
+		url: process.env['MONGO_CONNECTION_STRING'] or "mongodb://#{process.env["MONGO_HOST"] or "localhost"}/sharelatex"
 
 	cacheDir: Path.resolve "cache"
 
