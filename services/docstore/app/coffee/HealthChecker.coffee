@@ -1,4 +1,4 @@
-ObjectId = require("mongojs").ObjectId
+{db, ObjectId} = require "./mongojs"
 request = require("request")
 async = require("async")
 _ = require("underscore")
@@ -40,4 +40,4 @@ module.exports =
 		async.series jobs, (err)->
 			if err?
 				callback(err)
-			request.del getOpts(), callback
+			db.docs.remove {_id: doc_id, project_id: project_id}, callback
