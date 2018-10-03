@@ -26,8 +26,10 @@
 //- Image
 -if (metadata && metadata.image)
 	meta(itemprop="image", name="image", content=metadata.image.fields.file.url)
+-else if (settings.overleaf)
+	meta(itemprop="image", name="image", content=buildImgPath('ol-brand/overleaf_og_logo.png'))
 -else
-	meta(itemprop="image", name="image", content="/" + settings.brandPrefix + "favicon.ico")
+	meta(itemprop="image", name="image", content='/touch-icon-192x192.png')
 
 //- Keywords
 -if (metadata && metadata.keywords)
