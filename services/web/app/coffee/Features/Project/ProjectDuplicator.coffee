@@ -2,6 +2,7 @@ projectCreationHandler = require('./ProjectCreationHandler')
 ProjectEntityUpdateHandler = require('./ProjectEntityUpdateHandler')
 projectLocator = require('./ProjectLocator')
 projectOptionsHandler = require('./ProjectOptionsHandler')
+projectDeleter = require('./ProjectDeleter')
 DocumentUpdaterHandler = require("../DocumentUpdater/DocumentUpdaterHandler")
 DocstoreManager = require "../Docstore/DocstoreManager"
 ProjectGetter = require("./ProjectGetter")
@@ -69,28 +70,45 @@ module.exports = ProjectDuplicator =
 				DocumentUpdaterHandler.flushProjectToMongo originalProject_id, cb
 			originalProject: (cb)->
 				ProjectGetter.getProject originalProject_id, {compiler:true, rootFolder:true, rootDoc_id:true}, cb
-			newProject: (cb)->
-				projectCreationHandler.createBlankProject owner._id, newProjectName, cb
 			originalRootDoc: (cb)->
 				projectLocator.findRootDoc {project_id:originalProject_id}, cb
 			docContentsArray: (cb)-> 
 				DocstoreManager.getAllDocs originalProject_id, cb
 
+		# Get the contents of the original project first
 		async.series jobs, (err, results)->
 			if err?
-				logger.err err:err, originalProject_id:originalProject_id, "error duplicating project"
+				logger.err err:err, originalProject_id:originalProject_id, "error duplicating project reading original project"
 				return callback(err)
-			{originalProject, newProject, originalRootDoc, docContentsArray} = results
+			{originalProject, originalRootDoc, docContentsArray} = results
 
 			originalRootDoc = originalRootDoc?[0]
 
 			docContents = {}
 			for docContent in docContentsArray
 				docContents[docContent._id] = docContent
-			
-			projectOptionsHandler.setCompiler newProject._id, originalProject.compiler, ->
 
-			ProjectDuplicator._copyFolderRecursivly owner._id, newProject._id, originalProject_id, originalRootDoc, originalProject.rootFolder[0], newProject.rootFolder[0], docContents, ->
+			# Now create the new project, cleaning it up on failure if necessary
+			projectCreationHandler.createBlankProject owner._id, newProjectName, (err, newProject) ->
 				if err?
-					logger.err err:err, originalProject_id:originalProject_id,  newProjectName:newProjectName, "error cloning project"
-				callback(err, newProject)
+					logger.err err:err, originalProject_id:originalProject_id, "error duplicating project when creating new project"
+					return callback(err)
+
+				copyJobs =
+					setCompiler: (cb) ->
+						projectOptionsHandler.setCompiler newProject._id, originalProject.compiler, cb
+					copyFiles: (cb) ->
+						ProjectDuplicator._copyFolderRecursivly owner._id, newProject._id, originalProject_id, originalRootDoc, originalProject.rootFolder[0], newProject.rootFolder[0], docContents, cb
+
+				# Copy the contents of the original project into the new project
+				async.series copyJobs, (err) ->
+					if err?
+						logger.err err:err, originalProject_id:originalProject_id, newProjectName:newProjectName, newProject_id: newProject._id, "error cloning project, will delete broken clone"
+						# Clean up broken clone on error.
+						# Make sure we delete the new failed project, not the original one!
+						projectDeleter.deleteProject newProject._id, (delete_err) ->
+							if delete_err?
+								logger.error newProject_id: newProject._id, delete_err:delete_err, "error deleting broken clone of project"
+							callback(err)
+					else
+						callback(null, newProject)
