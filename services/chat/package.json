@@ -13,10 +13,11 @@
     "test:unit": "npm run compile:app && npm run compile:unit_tests && npm run test:unit:_run -- --grep=$MOCHA_GREP",
     "compile:unit_tests": "[ ! -e test/unit/coffee ] &&  echo 'No unit tests to compile' || coffee -o test/unit/js -c test/unit/coffee",
     "compile:acceptance_tests": "[ ! -e test/acceptance/coffee ] && echo 'No acceptance tests to compile' || coffee -o test/acceptance/js -c test/acceptance/coffee",
-    "compile:all": "npm run compile:app && npm run compile:unit_tests && npm run compile:acceptance_tests",
+    "compile:all": "npm run compile:app && npm run compile:unit_tests && npm run compile:acceptance_tests && npm run compile:smoke_tests",
     "nodemon": "nodemon --config nodemon.json",
-    "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
-    "test:unit:_run": "mocha --recursive --reporter spec --exit $@ test/unit/js"
+    "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 30000 --exit $@ test/acceptance/js",
+    "test:unit:_run": "mocha --recursive --reporter spec --exit $@ test/unit/js",
+    "compile:smoke_tests": "[ ! -e test/smoke/coffee ] &&  echo 'No smoke tests to compile' || coffee -o test/smoke/js -c test/smoke/coffee"
   },
   "dependencies": {
     "async": "0.2.9",
