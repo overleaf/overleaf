@@ -1,4 +1,4 @@
-module.exports =
+settings =
 	internal:
 		chat:
 			host: process.env['LISTEN_ADDRESS'] or "localhost"
@@ -11,10 +11,13 @@ module.exports =
 			pass: "password"
 			
 	mongo:
-		url : "mongodb://#{process.env['MONGO_HOST'] || "localhost"}/sharelatex"
+		url: process.env['MONGO_CONNECTION_STRING'] or "mongodb://#{process.env["MONGO_HOST"] or "localhost"}/sharelatex"
+
 
 	redis:
 		web:
 			host: process.env['REDIS_HOST'] || "localhost"
 			port: "6379"
-			password: ""
+			password: process.env['REDIS_PASSWORD'] || ""
+
+module.exports = settings
