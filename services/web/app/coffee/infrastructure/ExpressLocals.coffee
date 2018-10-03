@@ -178,7 +178,7 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 
 		res.locals.mathJaxPath = res.locals.buildJsPath(
 			'libs/mathjax/MathJax.js',
-			{cdn:false, qs:{config:'TeX-AMS_HTML'}}
+			{cdn:false, qs:{config:'TeX-AMS_HTML,Safe'}}
 		)
 
 		next()

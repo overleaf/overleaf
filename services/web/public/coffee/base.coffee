@@ -28,7 +28,6 @@ define [
 		})
 
 		MathJax?.Hub?.Config(
-			extensions: ["Safe.js"]
 			messageStyle: "none"
 			imageFont:null
 			"HTML-CSS":
