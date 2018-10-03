@@ -38,7 +38,7 @@ define [
 
 		$scope.$watch "project.name", (name) ->
 			if name?
-				window.document.title = name + " - Online LaTeX Editor ShareLaTeX"
+				window.document.title = name + " - Online LaTeX Editor #{ExposedSettings.appName}"
 				$scope.$applyAsync () ->
 					# This ensures that the element is measured *after* the binding is done (i.e. project name is rendered).
 					$scope.state.overflowed = (projectNameReadOnlyEl.scrollWidth > projectNameReadOnlyEl.clientWidth)
