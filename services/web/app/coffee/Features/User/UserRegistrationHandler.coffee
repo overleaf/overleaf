@@ -13,20 +13,11 @@ settings = require "settings-sharelatex"
 EmailHelper = require("../Helpers/EmailHelper")
 
 module.exports = UserRegistrationHandler =
-	hasZeroLengths : (props) ->
-		hasZeroLength = false
-		props.forEach (prop) ->
-			if prop.length == 0
-				hasZeroLength = true
-		return hasZeroLength
-
-	isTooShort: (prop, length) ->
-		return prop.length < length
-
 	_registrationRequestIsValid : (body, callback)->
 		email = EmailHelper.parseEmail(body.email) or ''
-		password = body.password
-		if @hasZeroLengths([password, email]) or @isTooShort(password, 6)
+		invalidEmail = AuthenticationManager.validateEmail(email)
+		invalidPassword = AuthenticationManager.validatePassword(body.password)
+		if invalidEmail? or invalidPassword?
 			return false
 		else
 			return true
