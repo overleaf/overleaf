@@ -25,10 +25,16 @@
 
 //- Image
 -if (metadata && metadata.image)
+	//- from the CMS
 	meta(itemprop="image", name="image", content=metadata.image.fields.file.url)
+-else if (metadata && metadata.image_src)
+	//- pages with custom metadata images, metadata.image_src is the full image URL
+	meta(itemprop="image", name="image", content=metadata.image_src)
 -else if (settings.overleaf)
+	//- the default image for Overleaf
 	meta(itemprop="image", name="image", content=buildImgPath('ol-brand/overleaf_og_logo.png'))
 -else
+	//- the default image for ShareLaTeX
 	meta(itemprop="image", name="image", content='/touch-icon-192x192.png')
 
 //- Keywords
