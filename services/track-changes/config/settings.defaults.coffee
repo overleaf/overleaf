@@ -1,5 +1,5 @@
 Path = require('path')
-TMP_DIR = Path.resolve(Path.join(__dirname, "../../", "tmp"))
+TMP_DIR = process.env["TMP_PATH"] or Path.resolve(Path.join(__dirname, "../../", "tmp"))
 
 module.exports =
 	mongo:
