@@ -20,10 +20,13 @@ module.exports = UserRegistrationHandler =
 				hasZeroLength = true
 		return hasZeroLength
 
+	isTooShort: (prop, length) ->
+		return prop.length < length
+
 	_registrationRequestIsValid : (body, callback)->
 		email = EmailHelper.parseEmail(body.email) or ''
 		password = body.password
-		if @hasZeroLengths([password, email])
+		if @hasZeroLengths([password, email]) or @isTooShort(password, 6)
 			return false
 		else
 			return true
