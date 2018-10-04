@@ -3,6 +3,7 @@ User = require("../../models/User").User
 {db, ObjectId} = require("../../infrastructure/mongojs")
 crypto = require 'crypto'
 bcrypt = require 'bcrypt'
+EmailHelper = require("../Helpers/EmailHelper")
 
 BCRYPT_ROUNDS = Settings?.security?.bcryptRounds or 12
 
@@ -29,8 +30,9 @@ module.exports = AuthenticationManager =
 				callback null, null
 
 	validateEmail: (email) ->
-		if !email?.length
-			return { message: 'email not set' }
+		parsed = EmailHelper.parseEmail(email)
+		if !parsed?
+			return { message: 'email not valid' }
 		return null
 
 	validatePassword: (password) ->
@@ -45,7 +47,7 @@ module.exports = AuthenticationManager =
 		return null
 
 	setUserPassword: (user_id, password, callback = (error) ->) ->
-		validation = validatePassword(password)
+		validation = @validatePassword(password)
 		return callback(validation.message) if validation?
 
 		bcrypt.genSalt BCRYPT_ROUNDS, (error, salt) ->

@@ -14,9 +14,8 @@ EmailHelper = require("../Helpers/EmailHelper")
 
 module.exports = UserRegistrationHandler =
 	_registrationRequestIsValid : (body, callback)->
-		email = EmailHelper.parseEmail(body.email) or ''
-		invalidEmail = AuthenticationManager.validateEmail(email)
-		invalidPassword = AuthenticationManager.validatePassword(body.password)
+		invalidEmail = AuthenticationManager.validateEmail(body.email or '')
+		invalidPassword = AuthenticationManager.validatePassword(body.password or '')
 		if invalidEmail? or invalidPassword?
 			return false
 		else
