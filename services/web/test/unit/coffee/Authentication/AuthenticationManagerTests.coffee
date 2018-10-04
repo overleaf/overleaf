@@ -94,6 +94,48 @@ describe "AuthenticationManager", ->
 			it "should not return a user", ->
 				@callback.calledWith(null, null).should.equal true
 
+	describe "validateEmail", ->
+		describe "valid", ->
+			it "should return null", ->
+				result = @AuthenticationManager.validateEmail 'foo@example.com'
+				expect(result).to.equal null
+
+		describe "invalid", ->
+			it "should return validation error object for no email", ->
+				result = @AuthenticationManager.validateEmail ''
+				expect(result).to.not.equal null
+				expect(result.message).to.equal 'email not valid'
+
+			it "should return validation error object for invalid", ->
+				result = @AuthenticationManager.validateEmail 'notanemail'
+				expect(result).to.not.equal null
+				expect(result.message).to.equal 'email not valid'
+
+	describe "validatePassword", ->
+		it "should return null if valid", ->
+			result = @AuthenticationManager.validatePassword 'banana'
+			expect(result).to.equal null
+
+		describe "invalid", ->
+			beforeEach ->
+				@settings.passwordStrengthOptions =
+					length:
+						max:10
+						min:6
+
+			it "should return validation error object if not set", ->
+				result = @AuthenticationManager.validatePassword()
+				expect(result).to.not.equal null
+				expect(result.message).to.equal 'password not set'
+
+			it "should return validation error object if too short", ->
+				result = @AuthenticationManager.validatePassword 'dsd'
+				expect(result).to.not.equal null
+				expect(result.message).to.equal 'password is too short'
+
+			it "should return validation error object if too long", ->
+				result = @AuthenticationManager.validatePassword 'dsdsadsadsadsadsadkjsadjsadjsadljs'
+
 	describe "setUserPassword", ->
 		beforeEach ->
 			@user_id = ObjectId()
