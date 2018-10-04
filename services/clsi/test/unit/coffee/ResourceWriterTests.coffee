@@ -137,6 +137,27 @@ describe "ResourceWriter", ->
 			},{
 				path: "figures/image-eps-converted-to.pdf"
 				type: "pdf"
+			},{
+				path: "foo/main-figure0.md5"
+				type: "md5"
+			}, {
+				path: "foo/main-figure0.dpth"
+				type: "dpth"
+			}, {
+				path: "foo/main-figure0.pdf"
+				type: "pdf"
+			}, {
+				path: "_minted-main/default-pyg-prefix.pygstyle"
+				type: "pygstyle"
+			}, {
+				path: "_minted-main/default.pygstyle"
+				type: "pygstyle"
+			}, {
+				path: "_minted-main/35E248B60965545BD232AE9F0FE9750D504A7AF0CD3BAA7542030FC560DFCC45.pygtex"
+				type: "pygtex"
+			}, {
+				path: "_markdown_main/30893013dec5d869a415610079774c2f.md.tex"
+				type: "tex"
 			}]
 			@resources = "mock-resources"
 			@OutputFileFinder.findOutputFiles = sinon.stub().callsArgWith(2, null, @output_files)
@@ -171,6 +192,41 @@ describe "ResourceWriter", ->
 		it "should not delete the epstopdf converted files", ->
 			@ResourceWriter._deleteFileIfNotDirectory
 				.calledWith(path.join(@basePath, "figures/image-eps-converted-to.pdf"))
+				.should.equal false
+
+		it "should not delete the tikz md5 files", ->
+			@ResourceWriter._deleteFileIfNotDirectory
+				.calledWith(path.join(@basePath, "foo/main-figure0.md5"))
+				.should.equal false
+
+		it "should not delete the tikz dpth files", ->
+			@ResourceWriter._deleteFileIfNotDirectory
+				.calledWith(path.join(@basePath, "foo/main-figure0.dpth"))
+				.should.equal false
+
+		it "should not delete the tikz pdf files", ->
+			@ResourceWriter._deleteFileIfNotDirectory
+				.calledWith(path.join(@basePath, "foo/main-figure0.pdf"))
+				.should.equal false
+
+		it "should not delete the minted pygstyle files", ->
+			@ResourceWriter._deleteFileIfNotDirectory
+				.calledWith(path.join(@basePath, "_minted-main/default-pyg-prefix.pygstyle"))
+				.should.equal false
+
+		it "should not delete the minted default pygstyle files", ->
+			@ResourceWriter._deleteFileIfNotDirectory
+				.calledWith(path.join(@basePath, "_minted-main/default.pygstyle"))
+				.should.equal false
+
+		it "should not delete the minted default pygtex files", ->
+			@ResourceWriter._deleteFileIfNotDirectory
+				.calledWith(path.join(@basePath, "_minted-main/35E248B60965545BD232AE9F0FE9750D504A7AF0CD3BAA7542030FC560DFCC45.pygtex"))
+				.should.equal false
+
+		it "should not delete the markdown md.tex files", ->
+			@ResourceWriter._deleteFileIfNotDirectory
+				.calledWith(path.join(@basePath, "_markdown_main/30893013dec5d869a415610079774c2f.md.tex"))
 				.should.equal false
 
 		it "should call the callback", ->
