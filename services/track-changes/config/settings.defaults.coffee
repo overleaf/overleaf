@@ -3,7 +3,8 @@ TMP_DIR = Path.resolve(Path.join(__dirname, "../../", "tmp"))
 
 module.exports =
 	mongo:
-		url: "mongodb://#{process.env["MONGO_HOST"] or "localhost"}/sharelatex"
+		url: process.env['MONGO_CONNECTION_STRING'] or "mongodb://#{process.env["MONGO_HOST"] or "localhost"}/sharelatex"
+
 	internal:
 		trackchanges:
 			port: 3015
@@ -20,15 +21,15 @@ module.exports =
 	redis:
 		lock:
 			host: process.env["REDIS_HOST"] or "localhost"
-			port: 6379
-			pass: ""
+			port: process.env['REDIS_PORT'] or 6379
+			password: process.env["REDIS_PASSWORD"] or ""
 			key_schema:
 				historyLock: ({doc_id}) -> "HistoryLock:#{doc_id}"
 				historyIndexLock: ({project_id}) -> "HistoryIndexLock:#{project_id}"
 		history:
-			port: "6379"
 			host: process.env["REDIS_HOST"] or "localhost"
-			password:""
+			port: process.env['REDIS_PORT'] or 6379
+			password: process.env["REDIS_PASSWORD"] or ""
 			key_schema:
 				uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
 				docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:#{project_id}"
