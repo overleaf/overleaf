@@ -3,12 +3,33 @@ String cron_string = BRANCH_NAME == "master" ? "@daily" : ""
 pipeline {
   agent any
 
+  environment {
+    GIT_PROJECT = "track-changes-sharelatex"
+    JENKINS_WORKFLOW = "track-changes-sharelatex"
+    TARGET_URL = "${env.JENKINS_URL}blue/organizations/jenkins/${JENKINS_WORKFLOW}/detail/$BRANCH_NAME/$BUILD_NUMBER/pipeline"
+    GIT_API_URL = "https://api.github.com/repos/sharelatex/${GIT_PROJECT}/statuses/$GIT_COMMIT"
+  }
+
   triggers {
     pollSCM('* * * * *')
     cron(cron_string)
   }
 
   stages {
+    stage('Install') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'GITHUB_INTEGRATION', usernameVariable: 'GH_AUTH_USERNAME', passwordVariable: 'GH_AUTH_PASSWORD')]) {
+          sh "curl $GIT_API_URL \
+            --data '{ \
+            \"state\" : \"pending\", \
+            \"target_url\": \"$TARGET_URL\", \
+            \"description\": \"Your build is underway\", \
+            \"context\": \"ci/jenkins\" }' \
+            -u $GH_AUTH_USERNAME:$GH_AUTH_PASSWORD"
+        }
+      }
+    }
+
     stage('Build') {
       steps {
         sh 'make build'
@@ -23,15 +44,19 @@ pipeline {
 
     stage('Acceptance Tests') {
       steps {
-        withCredentials([usernamePassword(credentialsId: 'S3_DOCSTORE_TEST_AWS_KEYS', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
-          sh 'AWS_BUCKET="sl-doc-archive-testing" AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_acceptance'
-        }
+        sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_acceptance'
       }
     }
 
     stage('Package and publish build') {
       steps {
-        sh 'make publish'
+        
+        withCredentials([file(credentialsId: 'gcr.io_overleaf-ops', variable: 'DOCKER_REPO_KEY_PATH')]) {
+          sh 'docker login -u _json_key --password-stdin https://gcr.io/overleaf-ops < ${DOCKER_REPO_KEY_PATH}'
+        }
+        sh 'DOCKER_REPO=gcr.io/overleaf-ops make publish'
+        sh 'docker logout https://gcr.io/overleaf-ops'
+        
       }
     }
 
@@ -49,6 +74,19 @@ pipeline {
   post {
     always {
       sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_clean'
+      sh 'make clean'
+    }
+
+    success {
+      withCredentials([usernamePassword(credentialsId: 'GITHUB_INTEGRATION', usernameVariable: 'GH_AUTH_USERNAME', passwordVariable: 'GH_AUTH_PASSWORD')]) {
+        sh "curl $GIT_API_URL \
+          --data '{ \
+          \"state\" : \"success\", \
+          \"target_url\": \"$TARGET_URL\", \
+          \"description\": \"Your build succeeded!\", \
+          \"context\": \"ci/jenkins\" }' \
+          -u $GH_AUTH_USERNAME:$GH_AUTH_PASSWORD"
+      }
     }
 
     failure {
@@ -56,6 +94,15 @@ pipeline {
            to: "${EMAIL_ALERT_TO}",
            subject: "Jenkins build failed: ${JOB_NAME}:${BUILD_NUMBER}",
            body: "Build: ${BUILD_URL}")
+      withCredentials([usernamePassword(credentialsId: 'GITHUB_INTEGRATION', usernameVariable: 'GH_AUTH_USERNAME', passwordVariable: 'GH_AUTH_PASSWORD')]) {
+        sh "curl $GIT_API_URL \
+          --data '{ \
+          \"state\" : \"failure\", \
+          \"target_url\": \"$TARGET_URL\", \
+          \"description\": \"Your build failed\", \
+          \"context\": \"ci/jenkins\" }' \
+          -u $GH_AUTH_USERNAME:$GH_AUTH_PASSWORD"
+      }
     }
   }
 
