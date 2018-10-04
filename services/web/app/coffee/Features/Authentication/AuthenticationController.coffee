@@ -77,7 +77,9 @@ module.exports = AuthenticationController =
 		AuthenticationController.afterLoginSessionSetup req, user, (err) ->
 			if err?
 				return next(err)
-			SudoModeHandler.activateSudoMode user._id, () ->
+			SudoModeHandler.activateSudoMode user._id, (err) ->
+				if err?
+					logger.err {err, user_id: user._id}, "Error activating Sudo Mode on login, continuing"
 				AuthenticationController._clearRedirectFromSession(req)
 				if req.headers?['accept']?.match(/^application\/json.*$/)
 					res.json {redir: redir}
