@@ -70,7 +70,11 @@ define [
 								onErrorHandler(httpResponse)
 								return
 
-							if status == 403 # Forbidden
+							if status == 400 # Bad Request
+								response.message =
+									text: "Invalid Request. Please correct the data and try again."
+									type: 'error'
+							else if status == 403 # Forbidden
 								response.message =
 									text: "Session error. Please check you have cookies enabled. If the problem persists, try clearing your cache and cookies."
 									type: "error"
