@@ -30,6 +30,8 @@ describe "AuthenticationController", ->
 				revokeAllUserSessions: sinon.stub().callsArgWith(1, null)
 			"../../infrastructure/Modules": @Modules = {hooks: {fire: sinon.stub().callsArgWith(2, null, [])}}
 			"../SudoMode/SudoModeHandler": @SudoModeHandler = {activateSudoMode: sinon.stub().callsArgWith(1, null)}
+			"../Notifications/NotificationsBuilder": @NotificationsBuilder =
+				ipMatcherAffiliation: sinon.stub()
 		@user =
 			_id: ObjectId()
 			email: @email = "USER@example.com"
