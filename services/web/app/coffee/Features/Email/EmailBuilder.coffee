@@ -51,8 +51,6 @@ templates.accountMergeToOverleafAddress = CTAEmailTemplate({
 		"""
 	ctaText: () -> "Confirm Account Merge"
 	ctaURL: (opts) -> opts.tokenLinkUrl
-	secondaryMessage: (opts) ->
-		"If the button does not appear, open this link in your browser: #{opts.tokenLinkUrl}"
 })
 
 templates.accountMergeToSharelatexAddress = templates.accountMergeToOverleafAddress
