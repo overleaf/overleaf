@@ -12,6 +12,12 @@ uuid = require('uuid')
 logger = require('logger-sharelatex')
 async = require("async")
 
+ENGINE_TO_COMPILER_MAP = {
+	latex_dvipdf: "latex"
+	pdflatex:     "pdflatex"
+	xelatex:      "xelatex"
+	lualatex:     "lualatex"
+}
 
 module.exports = TemplatesController =
 
@@ -25,7 +31,7 @@ module.exports = TemplatesController =
 		data.templateVersionId = templateVersionId
 		data.templateId = templateId
 		data.name = req.query.templateName
-		data.compiler = req.query.latexEngine
+		data.compiler = ENGINE_TO_COMPILER_MAP[req.query.latexEngine]
 		data.mainFile = req.query.mainFile
 		res.render path.resolve(__dirname, "../../../views/project/editor/new_from_template"), data
 
