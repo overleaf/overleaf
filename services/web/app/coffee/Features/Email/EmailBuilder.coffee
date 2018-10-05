@@ -97,8 +97,6 @@ templates.confirmEmail = CTAEmailTemplate({
 	title: () -> "Confirm Email"
 	message: () -> "Please confirm your email on #{settings.appName}."
 	ctaText: () -> "Confirm Email"
-	secondaryMessage: (opts) ->
-		"If the button does not appear, open this link in your browser: #{opts.confirmEmailUrl}"
 	ctaURL: (opts) -> opts.confirmEmailUrl
 })
 
