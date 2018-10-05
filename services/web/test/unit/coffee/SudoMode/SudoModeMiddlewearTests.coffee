@@ -18,6 +18,7 @@ describe 'SudoModeMiddlewear', ->
 			'./SudoModeHandler': @SudoModeHandler
 			'../Authentication/AuthenticationController': @AuthenticationController
 			'logger-sharelatex': {log: sinon.stub(), err: sinon.stub()}
+			'settings-sharelatex': @Settings = {}
 
 	describe 'protectPage', ->
 		beforeEach ->

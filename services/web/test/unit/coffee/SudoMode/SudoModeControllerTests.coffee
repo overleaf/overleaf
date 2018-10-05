@@ -14,22 +14,21 @@ describe 'SudoModeController', ->
 		@UserGetter =
 			getUser: sinon.stub().callsArgWith(2, null, @user)
 		@SudoModeHandler =
+			authenticate: sinon.stub()
 			isSudoModeActive: sinon.stub()
 			activateSudoMode: sinon.stub()
 		@AuthenticationController =
 			getLoggedInUserId: sinon.stub().returns(@user._id)
 			_getRediretFromSession: sinon.stub()
-		@AuthenticationManager =
-			authenticate: sinon.stub()
 		@UserGetter =
 			getUser: sinon.stub()
 		@SudoModeController = SandboxedModule.require modulePath, requires:
 			'logger-sharelatex': {log: sinon.stub(), err: sinon.stub()}
 			'./SudoModeHandler': @SudoModeHandler
 			'../Authentication/AuthenticationController': @AuthenticationController
-			'../Authentication/AuthenticationManager': @AuthenticationManager
 			'../../infrastructure/Mongoose': {mongo: {ObjectId: () -> 'some_object_id'}}
 			'../User/UserGetter': @UserGetter
+			'settings-sharelatex': @Settings = {}
 
 	describe 'sudoModePrompt', ->
 		beforeEach ->
@@ -95,7 +94,7 @@ describe 'SudoModeController', ->
 		beforeEach ->
 			@AuthenticationController._getRedirectFromSession = sinon.stub().returns '/somewhere'
 			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user)
-			@AuthenticationManager.authenticate = sinon.stub().callsArgWith(2, null, @user)
+			@SudoModeHandler.authenticate = sinon.stub().callsArgWith(2, null, @user)
 			@SudoModeHandler.activateSudoMode = sinon.stub().callsArgWith(1, null)
 			@password = 'a_terrible_secret'
 			@req = {body: {password: @password}}
@@ -122,8 +121,8 @@ describe 'SudoModeController', ->
 
 			it 'should try to authenticate the user with the password', ->
 				@SudoModeController.submitPassword(@req, @res, @next)
-				@AuthenticationManager.authenticate.callCount.should.equal 1
-				@AuthenticationManager.authenticate.calledWith({email: @user.email}, @password).should.equal true
+				@SudoModeHandler.authenticate.callCount.should.equal 1
+				@SudoModeHandler.authenticate.calledWith(@user.email, @password).should.equal true
 
 			it 'should activate sudo mode', ->
 				@SudoModeController.submitPassword(@req, @res, @next)
@@ -155,7 +154,7 @@ describe 'SudoModeController', ->
 
 				it 'should not try to authenticate the user with the password', ->
 					@SudoModeController.submitPassword(@req, @res, @next)
-					@AuthenticationManager.authenticate.callCount.should.equal 0
+					@SudoModeHandler.authenticate.callCount.should.equal 0
 
 				it 'should not activate sudo mode', ->
 					@SudoModeController.submitPassword(@req, @res, @next)
@@ -182,7 +181,7 @@ describe 'SudoModeController', ->
 
 				it 'should not try to authenticate the user with the password', ->
 					@SudoModeController.submitPassword(@req, @res, @next)
-					@AuthenticationManager.authenticate.callCount.should.equal 0
+					@SudoModeHandler.authenticate.callCount.should.equal 0
 
 				it 'should not activate sudo mode', ->
 					@SudoModeController.submitPassword(@req, @res, @next)
@@ -209,7 +208,7 @@ describe 'SudoModeController', ->
 
 				it 'should not try to authenticate the user with the password', ->
 					@SudoModeController.submitPassword(@req, @res, @next)
-					@AuthenticationManager.authenticate.callCount.should.equal 0
+					@SudoModeHandler.authenticate.callCount.should.equal 0
 
 				it 'should not activate sudo mode', ->
 					@SudoModeController.submitPassword(@req, @res, @next)
@@ -221,7 +220,7 @@ describe 'SudoModeController', ->
 
 			describe 'when authentication fails', ->
 				beforeEach ->
-					@AuthenticationManager.authenticate = sinon.stub().callsArgWith(2, null, null)
+					@SudoModeHandler.authenticate = sinon.stub().callsArgWith(2, null, null)
 					@res.json = sinon.stub()
 					@req.i18n = {translate: sinon.stub()}
 
@@ -240,8 +239,8 @@ describe 'SudoModeController', ->
 
 				it 'should try to authenticate the user with the password', ->
 					@SudoModeController.submitPassword(@req, @res, @next)
-					@AuthenticationManager.authenticate.callCount.should.equal 1
-					@AuthenticationManager.authenticate.calledWith({email: @user.email}, @password).should.equal true
+					@SudoModeHandler.authenticate.callCount.should.equal 1
+					@SudoModeHandler.authenticate.calledWith(@user.email, @password).should.equal true
 
 				it 'should not activate sudo mode', ->
 					@SudoModeController.submitPassword(@req, @res, @next)
@@ -249,7 +248,7 @@ describe 'SudoModeController', ->
 
 			describe 'when authentication produces an error', ->
 				beforeEach ->
-					@AuthenticationManager.authenticate = sinon.stub().callsArgWith(2, new Error('woops'))
+					@SudoModeHandler.authenticate = sinon.stub().callsArgWith(2, new Error('woops'))
 					@next = sinon.stub()
 
 				it 'should return next with an error', ->
@@ -264,8 +263,8 @@ describe 'SudoModeController', ->
 
 				it 'should try to authenticate the user with the password', ->
 					@SudoModeController.submitPassword(@req, @res, @next)
-					@AuthenticationManager.authenticate.callCount.should.equal 1
-					@AuthenticationManager.authenticate.calledWith({email: @user.email}, @password).should.equal true
+					@SudoModeHandler.authenticate.callCount.should.equal 1
+					@SudoModeHandler.authenticate.calledWith(@user.email, @password).should.equal true
 
 				it 'should not activate sudo mode', ->
 					@SudoModeController.submitPassword(@req, @res, @next)
@@ -288,8 +287,8 @@ describe 'SudoModeController', ->
 
 				it 'should try to authenticate the user with the password', ->
 					@SudoModeController.submitPassword(@req, @res, @next)
-					@AuthenticationManager.authenticate.callCount.should.equal 1
-					@AuthenticationManager.authenticate.calledWith({email: @user.email}, @password).should.equal true
+					@SudoModeHandler.authenticate.callCount.should.equal 1
+					@SudoModeHandler.authenticate.calledWith(@user.email, @password).should.equal true
 
 				it 'should have tried to activate sudo mode', ->
 					@SudoModeController.submitPassword(@req, @res, @next)

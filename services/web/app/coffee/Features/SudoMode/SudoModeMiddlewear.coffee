@@ -1,12 +1,13 @@
 logger = require 'logger-sharelatex'
 SudoModeHandler = require './SudoModeHandler'
 AuthenticationController = require '../Authentication/AuthenticationController'
+Settings = require 'settings-sharelatex'
 
 
 module.exports = SudoModeMiddlewear =
 
 	protectPage: (req, res, next) ->
-		if req.externalAuthenticationSystemUsed()
+		if req.externalAuthenticationSystemUsed() and !Settings.overleaf?
 			logger.log {userId}, "[SudoMode] using external auth, skipping sudo-mode check"
 			return next()
 		userId = AuthenticationController.getLoggedInUserId(req)

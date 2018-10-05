@@ -12,6 +12,7 @@ UserSessionsManager = require("../User/UserSessionsManager")
 Analytics = require "../Analytics/AnalyticsManager"
 passport = require 'passport'
 NotificationsBuilder = require("../Notifications/NotificationsBuilder")
+SudoModeHandler = require '../SudoMode/SudoModeHandler'
 
 module.exports = AuthenticationController =
 
@@ -76,11 +77,14 @@ module.exports = AuthenticationController =
 		AuthenticationController.afterLoginSessionSetup req, user, (err) ->
 			if err?
 				return next(err)
-			AuthenticationController._clearRedirectFromSession(req)
-			if req.headers?['accept']?.match(/^application\/json.*$/)
-				res.json {redir: redir}
-			else
-				res.redirect(redir)
+			SudoModeHandler.activateSudoMode user._id, (err) ->
+				if err?
+					logger.err {err, user_id: user._id}, "Error activating Sudo Mode on login, continuing"
+				AuthenticationController._clearRedirectFromSession(req)
+				if req.headers?['accept']?.match(/^application\/json.*$/)
+					res.json {redir: redir}
+				else
+					res.redirect(redir)
 
 	doPassportLogin: (req, username, password, done) ->
 		email = username.toLowerCase()

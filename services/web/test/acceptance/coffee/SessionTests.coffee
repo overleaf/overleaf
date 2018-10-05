@@ -4,6 +4,7 @@ User = require "./helpers/User"
 request = require "./helpers/request"
 settings = require "settings-sharelatex"
 redis = require "./helpers/redis"
+MockV1Api = require './helpers/MockV1Api'
 
 describe "Sessions", ->
 	before (done) ->
@@ -254,7 +255,7 @@ describe "Sessions", ->
 
 	describe 'three sessions, sessions page', ->
 
-		before ->
+		before (done) ->
 			# set up second session for this user
 			@user2 = new User()
 			@user2.email = @user1.email
@@ -262,7 +263,10 @@ describe "Sessions", ->
 			@user3 = new User()
 			@user3.email = @user1.email
 			@user3.password = @user1.password
-
+			async.series [
+				@user2.login.bind(@user2)
+				@user2.activateSudoMode.bind(@user2)
+			], done
 
 		it "should allow the user to erase the other two sessions", (done) ->
 			async.series(
