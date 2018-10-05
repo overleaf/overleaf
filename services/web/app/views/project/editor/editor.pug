@@ -102,7 +102,6 @@ div.full-size(
 		)
 			i.synctex-control-icon
 div.full-size(
-	ng-if="ui.pdfLayout == 'flat'"
-	ng-show="ui.view == 'pdf'"
+	ng-if="ui.pdfLayout == 'flat' && ui.view == 'pdf'"
 )
 	include ./pdf
