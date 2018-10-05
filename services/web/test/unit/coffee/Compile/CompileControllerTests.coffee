@@ -194,7 +194,6 @@ describe "CompileController", ->
 					.should.equal true
 
 			it "should set the content-disposition header with a safe version of the project name", ->
-				console.log @res.setContentDisposition.args[0]
 				@res.setContentDisposition
 					.calledWith('', filename: "test_nam_.pdf")
 					.should.equal true
