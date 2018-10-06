@@ -52,6 +52,7 @@ load = () ->
 	MAX_PATH = 1024 # Maximum path length, in characters. This is fairly arbitrary.
 
 	SafePath =
+		# convert any invalid characters to underscores in the given filename
 		clean: (filename) ->
 			filename = filename.replace BADCHAR_RX, '_'
 			# for BADFILE_RX replace any matches with an equal number of underscores
@@ -61,15 +62,21 @@ load = () ->
 			filename = filename.replace BLOCKEDFILE_RX, "@$1"
 			return filename
 
+		# returns whether the filename is 'clean' (does not contain any invalid
+		# characters or reserved words)
 		isCleanFilename: (filename) ->
 			return SafePath.isAllowedLength(filename) &&
 				!BADCHAR_RX.test(filename) &&
 				!BADFILE_RX.test(filename) &&
 				!BLOCKEDFILE_RX.test(filename)
 
+		# returns whether a full path is 'clean' - e.g. is a full or relative path
+		# that points to a file, and each element passes the rules in 'isCleanFilename'
 		isCleanPath: (path) ->
 			elements = path.split('/')
-			return false if elements[elements.length - 1].length == 0
+
+			lastElementIsEmpty = elements[elements.length - 1].length == 0
+			return false if lastElementIsEmpty
 
 			for element in elements
 				return false if element.length > 0 && !SafePath.isCleanFilename element

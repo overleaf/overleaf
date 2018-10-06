@@ -129,6 +129,8 @@ module.exports = ProjectEntityUpdateHandler = self =
 		Project.update {_id:project_id}, {$unset: {rootDoc_id: true}}, {}, callback
 
 	addDoc: wrapWithLock (project_id, folder_id, docName, docLines, userId, callback = (error, doc, folder_id) ->)=>
+		if not SafePath.isCleanFilename docName
+			return callback new Errors.InvalidNameError("invalid element name")
 		self.addDocWithoutUpdatingHistory.withoutLock project_id, folder_id, docName, docLines, userId, (error, doc, folder_id, path, project) ->
 			return callback(error) if error?
 			projectHistoryId = project.overleaf?.history?.id
@@ -166,6 +168,8 @@ module.exports = ProjectEntityUpdateHandler = self =
 	addFile: wrapWithLock
 		beforeLock: (next) ->
 			(project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback) ->
+				if not SafePath.isCleanFilename fileName
+					return callback new Errors.InvalidNameError("invalid element name")
 				ProjectEntityUpdateHandler._uploadFile project_id, folder_id, fileName, fsPath, linkedFileData, userId, (error, fileRef, fileStoreUrl) ->
 					return callback(error) if error?
 					next(project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback)
@@ -241,6 +245,8 @@ module.exports = ProjectEntityUpdateHandler = self =
 		# the history unless you are making sure it is updated in some other way.
 		beforeLock: (next) ->
 			(project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback) ->
+				if not SafePath.isCleanFilename fileName
+					return callback(new Errors.InvalidNameError("invalid element name"))
 				ProjectEntityUpdateHandler._uploadFile project_id, folder_id, fileName, fsPath, linkedFileData, userId, (error, fileRef, fileStoreUrl) ->
 					return callback(error) if error?
 					next(project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback)
@@ -250,6 +256,8 @@ module.exports = ProjectEntityUpdateHandler = self =
 				callback(null, fileRef, folder_id, result?.path?.fileSystem, fileStoreUrl)
 
 	upsertDoc: wrapWithLock (project_id, folder_id, docName, docLines, source, userId, callback = (err, doc, folder_id, isNewDoc)->)->
+		if not SafePath.isCleanFilename docName
+			return callback new Errors.InvalidNameError("invalid element name")
 		ProjectLocator.findElement project_id: project_id, element_id: folder_id, type: "folder", (error, folder) ->
 			return callback(error) if error?
 			return callback(new Error("Couldn't find folder")) if !folder?
@@ -272,6 +280,8 @@ module.exports = ProjectEntityUpdateHandler = self =
 	upsertFile: wrapWithLock
 		beforeLock: (next) ->
 			(project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback)->
+				if not SafePath.isCleanFilename fileName
+					return callback new Errors.InvalidNameError("invalid element name")
 				# create a new file
 				fileRef = new File(
 					name: fileName
@@ -301,6 +311,8 @@ module.exports = ProjectEntityUpdateHandler = self =
 						callback null, newFileRef, !existingFile?, existingFile
 
 	upsertDocWithPath: wrapWithLock (project_id, elementPath, docLines, source, userId, callback) ->
+		if not SafePath.isCleanPath elementPath
+			return callback new Errors.InvalidNameError("invalid element name")
 		docName = path.basename(elementPath)
 		folderPath = path.dirname(elementPath)
 		self.mkdirp.withoutLock project_id, folderPath, (err, newFolders, folder) ->
@@ -312,6 +324,8 @@ module.exports = ProjectEntityUpdateHandler = self =
 	upsertFileWithPath: wrapWithLock
 		beforeLock: (next) ->
 			(project_id, elementPath, fsPath, linkedFileData, userId, callback)->
+				if not SafePath.isCleanPath elementPath
+					return callback new Errors.InvalidNameError("invalid element name")
 				fileName = path.basename(elementPath)
 				folderPath = path.dirname(elementPath)
 				# create a new file
@@ -351,6 +365,9 @@ module.exports = ProjectEntityUpdateHandler = self =
 			self.deleteEntity.withoutLock project_id, element._id, type, userId, callback
 
 	mkdirp: wrapWithLock (project_id, path, callback = (err, newlyCreatedFolders, lastFolderInPath)->)->
+		for folder in path.split('/')
+			if folder.length > 0 and not SafePath.isCleanFilename folder
+				return callback new Errors.InvalidNameError("invalid element name")
 		ProjectEntityMongoUpdateHandler.mkdirp project_id, path, callback
 
 	addFolder: wrapWithLock (project_id, parentFolder_id, folderName, callback) ->
