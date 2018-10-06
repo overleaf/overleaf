@@ -58,6 +58,11 @@ module.exports = UserGetter =
 			# well
 			@getUserByMainEmail email, projection, callback
 
+	getUsersByHostname: (hostname, projection, callback = (error, users) ->) ->
+		hostname = hostname.trim()
+		query = emails: { $exists: true }, 'emails.hostname': hostname
+		db.users.find query, projection, callback
+
 	getUsers: (user_ids, projection, callback = (error, users) ->) ->
 		try
 			user_ids = user_ids.map (u) -> ObjectId(u.toString())
