@@ -67,6 +67,15 @@ load = () ->
 				!BADFILE_RX.test(filename) &&
 				!BLOCKEDFILE_RX.test(filename)
 
+		isCleanPath: (path) ->
+			elements = path.split('/')
+			return false if elements[elements.length - 1].length == 0
+
+			for element in elements
+				return false if element.length > 0 && !SafePath.isCleanFilename element
+
+			return true
+
 		isAllowedLength: (pathname) ->
 			return pathname.length > 0 && pathname.length <= MAX_PATH
 
