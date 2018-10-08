@@ -32,6 +32,11 @@ module.exports = _.template """
 				<%= secondaryMessage %>
 			</p>
 		<% } %>
+		<table class="spacer" style="border-collapse: collapse; border-spacing: 0; padding: 0; text-align: left; vertical-align: top; width: 100%;"><tbody><tr style="padding: 0; text-align: left; vertical-align: top;"><td height="20px" style="-moz-hyphens: auto; -webkit-hyphens: auto; Margin: 0; border-collapse: collapse !important; color: #5D6879; font-family: Helvetica, Arial, sans-serif; font-size: 20px; font-weight: normal; hyphens: auto; line-height: 20px; margin: 0; mso-line-height-rule: exactly; padding: 0; text-align: left; vertical-align: top; word-wrap: break-word;">&#xA0;</td></tr></tbody></table>
+		<p class="avoid-auto-linking" style="Margin: 0; Margin-bottom: 10px; color: #5D6879; font-family: Helvetica, Arial, sans-serif; font-size: 12px; font-weight: normal; margin: 0; margin-bottom: 10px; padding: 0; text-align: left;">
+			If the button above does not appear, please open the link in your browser here:<br>
+			<a href="<%= ctaURL %>"><%= ctaURL %></a>
+		</p>
 	</th>
 	<th class="expander" style="Margin: 0; color: #5D6879; font-family: Helvetica, Arial, sans-serif; font-size: 16px; font-weight: normal; line-height: 1.3; margin: 0; padding: 0 !important; text-align: left; visibility: hidden; width: 0;"></th></tr></table></th>
 </tr></tbody></table>
