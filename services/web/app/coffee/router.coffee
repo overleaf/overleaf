@@ -247,7 +247,7 @@ module.exports = class Router
 
 		webRouter.post '/project/:project_id/export/:brand_variation_id', AuthorizationMiddlewear.ensureUserCanAdminProject, ExportsController.exportProject
 		webRouter.get '/project/:project_id/export/:export_id', AuthorizationMiddlewear.ensureUserCanAdminProject, ExportsController.exportStatus
-		webRouter.get '/project/:project_id/export/:export_id/zip', AuthorizationMiddlewear.ensureUserCanAdminProject, ExportsController.exportZip
+		webRouter.get '/project/:project_id/export/:export_id/:type', AuthorizationMiddlewear.ensureUserCanAdminProject, ExportsController.exportDownload
 
 		webRouter.get  '/Project/:Project_id/download/zip', AuthorizationMiddlewear.ensureUserCanReadProject, ProjectDownloadsController.downloadProject
 		webRouter.get  '/project/download/zip', AuthorizationMiddlewear.ensureUserCanReadMultipleProjects, ProjectDownloadsController.downloadMultipleProjects
