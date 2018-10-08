@@ -331,7 +331,7 @@ module.exports = class Router
 			),
 			AuthenticationController.httpAuth,
 			CompileController.getFileFromClsiWithoutUser
-		publicApiRouter.post '/api/institutions/confirm_affiliation_domain', AuthenticationController.httpAuth, InstitutionsController.confirmDomain
+		publicApiRouter.post '/api/institutions/confirm_university_domain', AuthenticationController.httpAuth, InstitutionsController.confirmDomain
 
 		webRouter.get '/teams', (req, res, next) ->
 			# Match v1 behaviour - if the user is signed in, show their teams list

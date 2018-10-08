@@ -10,20 +10,22 @@ describe "InstitutionsController", ->
 
 	beforeEach ->
 		@logger = err: sinon.stub(), log: ->
+		@host = "mit.edu".split('').reverse().join('')
 		@stubbedUser1 =
 			_id: "3131231"
 			name:"bob"
 			email:"hello@world.com"
 			emails: [
-				{"email":"stubb1@mit.edu","hostname":"mit.edu"},
-				{"email":"test@test.com","hostname":"test.com"}
+				{"email":"stubb1@mit.edu","hostname":@host},
+				{"email":"test@test.com","hostname":"test.com"},
+				{"email":"another@mit.edu","hostname":@host}
 			]
 		@stubbedUser2 =
 			_id: "3131232"
 			name:"test"
 			email:"hello2@world.com"
 			emails: [
-				{"email":"subb2@mit.edu","hostname":"mit.edu"}
+				{"email":"subb2@mit.edu","hostname":@host}
 			]
 		
 		@getUsersByHostname = sinon.stub().callsArgWith(2, null, [ @stubbedUser1, @stubbedUser2 ])
@@ -48,7 +50,8 @@ describe "InstitutionsController", ->
 			@req.body.hostname = "mit.edu"
 			@res.sendStatus = (code) =>
 				@getUsersByHostname.calledOnce.should.equal true
-				@addAffiliation.calledTwice.should.equal true
+				@addAffiliation.calledThrice.should.equal true
 				@addAffiliation.calledWith(@stubbedUser1._id, @stubbedUser1.emails[0].email).should.equal true
+				@addAffiliation.calledWith(@stubbedUser1._id, @stubbedUser1.emails[2].email).should.equal true
 				done()
 			@InstitutionsController.confirmDomain @req, @res, @next
