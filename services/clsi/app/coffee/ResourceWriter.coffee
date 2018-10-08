@@ -78,7 +78,13 @@ module.exports = ResourceWriter =
 					should_delete = true
 					if path.match(/^output\./) or path.match(/\.aux$/) or path.match(/^cache\//) # knitr cache
 						should_delete = false
-					if path.match(/^output-.*/) # Tikz cached figures
+					if path.match(/^output-.*/) # Tikz cached figures (default case)
+						should_delete = false
+					if path.match(/\.(pdf|dpth|md5)$/) # Tikz cached figures (by extension)
+						should_delete = false
+					if path.match(/\.(pygtex|pygstyle)$/) or path.match(/(^|\/)_minted-[^\/]+\//) # minted files/directory
+						should_delete = false
+					if path.match(/\.md\.tex$/) or path.match(/(^|\/)_markdown_[^\/]+\//) # markdown files/directory
 						should_delete = false
 					if path.match(/-eps-converted-to\.pdf$/) # Epstopdf generated files
 						should_delete = false 
