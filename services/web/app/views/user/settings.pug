@@ -33,7 +33,7 @@ block content
 														required,
 														ng-model="email",
 														ng-init="email = "+JSON.stringify(user.email),
-														ng-model-options="{ updateOn: 'blur' }"
+														ng-model-options="{ pdateOn: 'blur' }"
 													)
 													span.small.text-primary(ng-show="settingsForm.email.$invalid && settingsForm.email.$dirty")
 														|  #{translate("must_be_email_address")}
@@ -73,11 +73,24 @@ block content
 												label.control-label #{translate("last_name")}
 												div.form-control(readonly="true") #{user.last_name}
 
-
-								if !externalAuthenticationSystemUsed()
-									.col-md-5.col-md-offset-1
-										h3 #{translate("change_password")}
-										form(async-form="changepassword", name="changePasswordForm", action="/user/password/update", method="POST", novalidate)
+								.col-md-5.col-md-offset-1
+									h3 #{translate("change_password")}
+									if externalAuthenticationSystemUsed() && !settings.overleaf
+										p
+											Password settings are managed externally
+									else
+										- var submitAction
+										if settings.overleaf
+											- submitAction = '/user/change_password/v1'
+										else
+											- submitAction = '/user/password/update'
+										form(
+											async-form="changepassword"
+											name="changePasswordForm"
+											action=submitAction
+											method="POST"
+											novalidate
+										)
 											input(type="hidden", name="_csrf", value=csrfToken)
 											.form-group
 												label(for='currentPassword') #{translate("current_password")}
@@ -120,15 +133,6 @@ block content
 													type='submit',
 													ng-disabled="changePasswordForm.$invalid"
 												) #{translate("change")}
-
-								else
-									if settings.overleaf && settings.createV1AccountOnLogin
-										.col-md-5.col-md-offset-1
-											h3 #{translate("change_password")}
-											p
-												| To change your password,
-												| please go to #[a(href='/sign_in_to_v1?return_to=/users/edit%23details') Overleaf v1 settings]
-
 
 							| !{moduleIncludes("userSettings", locals)}
 
