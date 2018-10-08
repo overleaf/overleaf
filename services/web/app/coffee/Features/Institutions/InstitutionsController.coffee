@@ -5,13 +5,14 @@ async = require('async')
 
 module.exports = InstitutionsController =
 	confirmDomain: (req, res, next) ->
-		hostname = req.body.hostname.split('').reverse().join('')
+		hostname = req.body.hostname
+		reversedHostname = hostname.trim().split('').reverse().join('')
 		UserGetter.getUsersByHostname hostname, {_id:1, emails:1}, (error, users) ->
 			if error?
 				logger.err error: error, 'problem fetching users by hostname'
 				return next(error)
 			async.map users, ((user) ->
-				matchingEmails = user.emails.filter (email) -> email.hostname == hostname
+				matchingEmails = user.emails.filter (email) -> email.reversedHostname == reversedHostname
 				for email in matchingEmails
 					addAffiliation user._id, email.email, {confirmedAt: email.confirmedAt}, (error) =>
 						if error?

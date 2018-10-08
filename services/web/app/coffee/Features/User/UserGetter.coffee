@@ -59,8 +59,8 @@ module.exports = UserGetter =
 			@getUserByMainEmail email, projection, callback
 
 	getUsersByHostname: (hostname, projection, callback = (error, users) ->) ->
-		hostname = hostname.trim()
-		query = emails: { $exists: true }, 'emails.hostname': hostname
+		reversedHostname = hostname.trim().split('').reverse().join('')
+		query = emails: { $exists: true }, 'emails.reversedHostname': reversedHostname
 		db.users.find query, projection, callback
 
 	getUsers: (user_ids, projection, callback = (error, users) ->) ->

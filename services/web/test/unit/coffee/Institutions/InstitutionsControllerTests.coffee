@@ -16,16 +16,16 @@ describe "InstitutionsController", ->
 			name:"bob"
 			email:"hello@world.com"
 			emails: [
-				{"email":"stubb1@mit.edu","hostname":@host},
-				{"email":"test@test.com","hostname":"test.com"},
-				{"email":"another@mit.edu","hostname":@host}
+				{"email":"stubb1@mit.edu","reversedHostname":@host},
+				{"email":"test@test.com","reversedHostname":"test.com"},
+				{"email":"another@mit.edu","reversedHostname":@host}
 			]
 		@stubbedUser2 =
 			_id: "3131232"
 			name:"test"
 			email:"hello2@world.com"
 			emails: [
-				{"email":"subb2@mit.edu","hostname":@host}
+				{"email":"subb2@mit.edu","reversedHostname":@host}
 			]
 		
 		@getUsersByHostname = sinon.stub().callsArgWith(2, null, [ @stubbedUser1, @stubbedUser2 ])
