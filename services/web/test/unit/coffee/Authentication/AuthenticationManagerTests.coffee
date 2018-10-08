@@ -135,6 +135,8 @@ describe "AuthenticationManager", ->
 
 			it "should return validation error object if too long", ->
 				result = @AuthenticationManager.validatePassword 'dsdsadsadsadsadsadkjsadjsadjsadljs'
+				expect(result).to.not.equal null
+				expect(result.message).to.equal 'password is too long'
 
 	describe "setUserPassword", ->
 		beforeEach ->

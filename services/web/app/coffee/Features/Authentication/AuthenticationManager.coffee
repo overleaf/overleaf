@@ -39,11 +39,11 @@ module.exports = AuthenticationManager =
 		if !password?
 			return { message: 'password not set' }
 		if (Settings.passwordStrengthOptions?.length?.max? and
-				Settings.passwordStrengthOptions?.length?.max < password.length)
-			return { message: 'password is too short' }
-		if (Settings.passwordStrengthOptions?.length?.min? and
-				Settings.passwordStrengthOptions?.length?.min > password.length)
+				password.length > Settings.passwordStrengthOptions?.length?.max)
 			return { message: "password is too long" }
+		if (Settings.passwordStrengthOptions?.length?.min? and
+				password.length < Settings.passwordStrengthOptions?.length?.min)
+			return { message: 'password is too short' }
 		return null
 
 	setUserPassword: (user_id, password, callback = (error) ->) ->
