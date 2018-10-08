@@ -25,6 +25,10 @@ module.exports = ErrorController =
 		else if error instanceof Errors.TooManyRequestsError
 			logger.warn {err: error, url: req.url}, "too many requests error"
 			res.sendStatus(429)
+		else if error instanceof Errors.InvalidError
+			logger.warn {err: error, url: req.url}, "invalid error"
+			res.status(400)
+			res.send(error.message)
 		else if error instanceof Errors.InvalidNameError
 			logger.warn {err: error, url: req.url}, "invalid name error"
 			res.status(400)

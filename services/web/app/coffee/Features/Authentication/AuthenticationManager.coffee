@@ -3,6 +3,7 @@ User = require("../../models/User").User
 {db, ObjectId} = require("../../infrastructure/mongojs")
 crypto = require 'crypto'
 bcrypt = require 'bcrypt'
+EmailHelper = require("../Helpers/EmailHelper")
 
 BCRYPT_ROUNDS = Settings?.security?.bcryptRounds or 12
 
@@ -28,13 +29,26 @@ module.exports = AuthenticationManager =
 			else
 				callback null, null
 
-	setUserPassword: (user_id, password, callback = (error) ->) ->
+	validateEmail: (email) ->
+		parsed = EmailHelper.parseEmail(email)
+		if !parsed?
+			return { message: 'email not valid' }
+		return null
+
+	validatePassword: (password) ->
+		if !password?
+			return { message: 'password not set' }
 		if (Settings.passwordStrengthOptions?.length?.max? and
-				Settings.passwordStrengthOptions?.length?.max < password.length)
-			return callback("password is too long")
+				password.length > Settings.passwordStrengthOptions?.length?.max)
+			return { message: "password is too long" }
 		if (Settings.passwordStrengthOptions?.length?.min? and
-				Settings.passwordStrengthOptions?.length?.min > password.length)
-			return callback("password is too short")
+				password.length < Settings.passwordStrengthOptions?.length?.min)
+			return { message: 'password is too short' }
+		return null
+
+	setUserPassword: (user_id, password, callback = (error) ->) ->
+		validation = @validatePassword(password)
+		return callback(validation.message) if validation?
 
 		bcrypt.genSalt BCRYPT_ROUNDS, (error, salt) ->
 			return callback(error) if error?
