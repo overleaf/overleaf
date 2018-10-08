@@ -19,7 +19,6 @@ UserSchema = new Schema
 	institution       : {type : String, default : ''}
 	hashedPassword    : String
 	isAdmin           : {type : Boolean, default : false}
-	confirmed         : {type : Boolean, default : false}
 	signUpDate        : {type : Date, default: () -> new Date() }
 	lastLoggedIn      : {type : Date}
 	lastLoginIp       : {type : String, default : ''}
