@@ -2,9 +2,9 @@ define [
 	"base"
 ], (App) ->
 	App.controller 'RenameProjectModalController', ($scope, $modalInstance, $timeout, project, queuedHttp) ->
-		$scope.inputs = 
+		$scope.inputs =
 			projectName: project.name
-		
+
 		$scope.state =
 			inflight: false
 			error: false
@@ -35,7 +35,7 @@ define [
 			$modalInstance.dismiss('cancel')
 
 	App.controller 'CloneProjectModalController', ($scope, $modalInstance, $timeout, project) ->
-		$scope.inputs = 
+		$scope.inputs =
 			projectName: project.name + " (Copy)"
 		$scope.state =
 			inflight: false
@@ -66,7 +66,7 @@ define [
 			$modalInstance.dismiss('cancel')
 
 	App.controller 'NewProjectModalController', ($scope, $modalInstance, $timeout, template) ->
-		$scope.inputs = 
+		$scope.inputs =
 			projectName: ""
 		$scope.state =
 			inflight: false
@@ -123,7 +123,6 @@ define [
 		$scope.cancel = () ->
 			$modalInstance.dismiss('cancel')
 
-
 	App.controller 'UploadProjectModalController', ($scope, $modalInstance, $timeout) ->
 		$scope.cancel = () ->
 			$modalInstance.dismiss('cancel')
@@ -136,4 +135,9 @@ define [
 		$scope.project = project
 
 		$scope.dismiss = () ->
+			$modalInstance.dismiss('cancel')
+
+	App.controller 'ShowErrorModalController', ($scope, $modalInstance, error) ->
+		$scope.error = error
+		$scope.cancel = () ->
 			$modalInstance.dismiss('cancel')
