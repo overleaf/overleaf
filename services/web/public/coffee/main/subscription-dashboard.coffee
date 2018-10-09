@@ -36,7 +36,7 @@ define [
 
 		$scope.pricing = MultiCurrencyPricing
 		# $scope.plans = MultiCurrencyPricing.plans
-		$scope.currencySymbol = MultiCurrencyPricing.plans[MultiCurrencyPricing.currencyCode].symbol
+		$scope.currencySymbol = MultiCurrencyPricing.plans[MultiCurrencyPricing.currencyCode]?.symbol
 
 		$scope.currencyCode = MultiCurrencyPricing.currencyCode
 
