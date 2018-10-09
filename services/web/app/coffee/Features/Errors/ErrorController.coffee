@@ -13,6 +13,11 @@ module.exports = ErrorController =
 		res.render 'general/500',
 			title: "Server Error"
 
+	accountMergeError: (req, res)->
+		res.status(500)
+		res.render 'general/account-merge-error',
+			title: "Account Access Error"
+
 	handleError: (error, req, res, next) ->
 		user = AuthenticationController.getSessionUser(req)
 		if error?.code is 'EBADCSRFTOKEN'
@@ -33,6 +38,9 @@ module.exports = ErrorController =
 			logger.warn {err: error, url: req.url}, "invalid name error"
 			res.status(400)
 			res.send(error.message)
+		else if error instanceof Errors.AccountMergeError
+			logger.error err: error, "account merge error"
+			ErrorController.accountMergeError req, res
 		else
 			logger.error err: error, url:req.url, method:req.method, user:user, "error passed to top level next middlewear"
 			ErrorController.serverError req, res
