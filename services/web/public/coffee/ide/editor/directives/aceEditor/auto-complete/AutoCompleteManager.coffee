@@ -89,7 +89,7 @@ define [
 				getCompletions: (editor, session, pos, prefix, callback) ->
 					{commandFragment} = Helpers.getContext(editor, pos)
 					if commandFragment
-						refMatch = commandFragment.match(/^~?\\([a-z]*ref){([^}]*, *)?(\w*)/)
+						refMatch = commandFragment.match(/^~?\\([a-zA-Z]*ref){([^}]*, *)?(\w*)/)
 						if refMatch
 							[_, commandName, currentArg] = refMatch
 							result = []
@@ -184,7 +184,7 @@ define [
 					, 0
 			if (
 				change.action == "insert" and
-				/(begin|end|[a-z]*ref|usepackage|[a-z]*cite[a-z]*|input|include)/.test(
+				/(begin|end|[a-zA-Z]*ref|usepackage|[a-z]*cite[a-z]*|input|include)/.test(
 					change.lines[0].match(/\\(\w+){}/)?[1]
 				)
 			)
