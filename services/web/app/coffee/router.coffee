@@ -50,6 +50,7 @@ TokenAccessController = require('./Features/TokenAccess/TokenAccessController')
 Features = require('./infrastructure/Features')
 LinkedFilesRouter = require './Features/LinkedFiles/LinkedFilesRouter'
 TemplatesRouter = require './Features/Templates/TemplatesRouter'
+UserMembershipRouter = require './Features/UserMembership/UserMembershipRouter'
 
 logger = require("logger-sharelatex")
 _ = require("underscore")
@@ -84,6 +85,7 @@ module.exports = class Router
 		AnalyticsRouter.apply(webRouter, privateApiRouter, publicApiRouter)
 		LinkedFilesRouter.apply(webRouter, privateApiRouter, publicApiRouter)
 		TemplatesRouter.apply(webRouter)
+		UserMembershipRouter.apply(webRouter)
 
 		Modules.applyRouter(webRouter, privateApiRouter, publicApiRouter)
 

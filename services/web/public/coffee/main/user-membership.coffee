@@ -1,9 +1,10 @@
 define [
 	"base"
 ], (App) ->
-	App.controller "SubscriptionGroupMembersController", ($scope, queuedHttp) ->
+	App.controller "UserMembershipController", ($scope, queuedHttp) ->
 		$scope.users = window.users
 		$scope.groupSize = window.groupSize
+		$scope.paths = window.paths
 		$scope.selectedUsers = []
 
 		$scope.inputs =
@@ -22,7 +23,7 @@ define [
 			emails = parseEmails($scope.inputs.emails)
 			for email in emails
 				queuedHttp
-					.post("/subscription/invites", {
+					.post(paths.addMember, {
 						email: email,
 						_csrf: window.csrfToken
 					})
@@ -34,10 +35,12 @@ define [
 		$scope.removeMembers = () ->
 			for user in $scope.selectedUsers
 				do (user) ->
-					if user.invite and !user._id?
-						url = "/subscription/invites/#{encodeURIComponent(user.email)}"
+					if paths.removeInvite and user.invite and !user._id?
+						url = "#{paths.removeInvite}/#{encodeURIComponent(user.email)}"
+					else if paths.removeMember and user._id?
+						url = "#{paths.removeMember}/#{user._id}"
 					else
-						url = "/subscription/group/user/#{user._id}"
+						return
 					queuedHttp({
 						method: "DELETE",
 						url: url
@@ -53,7 +56,7 @@ define [
 		$scope.updateSelectedUsers = () ->
 			$scope.selectedUsers = $scope.users.filter (user) -> user.selected
 
-	App.controller "SubscriptionGroupMemberListItemController", ($scope) ->
+	App.controller "UserMembershipListItemController", ($scope) ->
 		$scope.$watch "user.selected", (value) ->
 			if value?
 				$scope.updateSelectedUsers()
