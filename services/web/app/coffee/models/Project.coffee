@@ -36,6 +36,7 @@ ProjectSchema = new Schema
 	deletedDocs       : [DeletedDocSchema]
 	deletedFiles      : [DeletedFileSchema]
 	imageName         : { type: String }
+	brandVariationId  : { type: String }
 	track_changes     : { type: Object }
 	tokens            :
 		readOnly        : {
