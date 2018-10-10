@@ -88,11 +88,11 @@ describe 'TemplatesController', ->
 		it "should set project options based on payload data", (done)->
 			@compiler = "pdflatex"
 			@mainFile = "main.tex"
+			@templateVersionId = 15
 			@brandVariationId = "123"
 
 			@req.body = 
-				templateVersionId: 15
-				templateId: 14231
+				templateVersionId: @templateVersionId
 				name: @templateName
 				compiler: @compiler
 				mainFile: @mainFile
@@ -108,11 +108,11 @@ describe 'TemplatesController', ->
 
 		it "should only set project options which are defined in the payload", (done)->
 			@compiler = "pdflatex"
+			@templateVersionId = 15
 			@brandVariationId = "123"
 
 			@req.body = 
-				templateVersionId: 15
-				templateId: 14231
+				templateVersionId: @templateVersionId
 				name: @templateName
 				compiler: @compiler
 				brandVariationId: @brandVariationId
