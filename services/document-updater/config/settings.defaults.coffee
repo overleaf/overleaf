@@ -10,7 +10,7 @@ module.exports =
 
 	apis:
 		web:
-			url: "http://#{process.env["WEB_HOST"] or "localhost"}:3000"
+			url: "http://#{process.env["WEB_HOST"] or "localhost"}:#{process.env['WEB_PORT'] or 3000}"
 			user: "sharelatex"
 			pass: "password"
 		trackchanges:
