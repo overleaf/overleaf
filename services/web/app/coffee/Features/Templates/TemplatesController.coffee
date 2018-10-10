@@ -110,7 +110,6 @@ setMainFile = (project_id, mainFile, callback) ->
 		callback()
 
 setBrandVariationId = (project_id, brandVariationId, callback) ->
-	logger.log brandVariationId, "brandVariationId"
 	if brandVariationId?
 		ProjectOptionsHandler.setBrandVariationId project_id, brandVariationId, callback
 	else

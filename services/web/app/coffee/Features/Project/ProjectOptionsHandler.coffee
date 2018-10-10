@@ -49,7 +49,7 @@ module.exports =
 
 	setBrandVariationId: (project_id, brandVariationId, callback = ()->)->
 		logger.log project_id:project_id, brandVariationId:brandVariationId, "setting the brand variation id"
-		if !brandVariationId?
+		if !brandVariationId? or brandVariationId == ""
 			return callback()
 		conditions = {_id:project_id}
 		update = {brandVariationId}
