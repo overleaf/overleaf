@@ -53,3 +53,24 @@ define [
 				localStorage('overleaf_v1_notification_hidden_at', Date.now())
 			else
 				localStorage('overleaf_v1_notification_hidden_at', null)
+
+	App.controller "EmailNotificationController", ($scope, $http, UserAffiliationsDataService) ->
+		$scope.userEmails = []
+		for userEmail in $scope.userEmails
+			userEmail.hide = false
+
+		_getUserEmails = () ->
+			UserAffiliationsDataService
+				.getUserEmails().then (emails) ->
+					$scope.userEmails = emails
+					$scope.$emit "project-list:notifications-received"
+		_getUserEmails()
+
+		$scope.resendConfirmationEmail = (userEmail) ->
+			userEmail.confirmationInflight = true
+			UserAffiliationsDataService
+				.resendConfirmationEmail userEmail.email
+				.then () ->
+					userEmail.hide = true
+					userEmail.confirmationInflight = false
+					$scope.$emit "project-list:notifications-received"

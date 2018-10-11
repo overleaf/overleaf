@@ -38,6 +38,9 @@ define [
 			recalculateProjectListHeight()
 			$scope.$apply()
 
+		$scope.$on "project-list:notifications-received", () ->
+			$scope.$applyAsync () -> recalculateProjectListHeight()
+
 		# Allow tags to be accessed on projects as well
 		projectsById = {}
 		for project in $scope.projects
