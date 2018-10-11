@@ -71,7 +71,7 @@ define [
 
 		autoCompileInterval = null
 		autoCompileIfReady = () ->
-			if $scope.pdf.compiling
+			if $scope.pdf.compiling or !$scope.autocompile_enabled
 				return
 
 			# Only checking linting if syntaxValidation is on and visible to the user
@@ -125,6 +125,9 @@ define [
 
 		$scope.uncompiledChanges = false
 		recalculateUncompiledChanges = () ->
+			if !$scope.autocompile_enabled
+				# Auto-compile was disabled
+				$scope.uncompiledChanges = false
 			if $scope.ui.pdfHidden
 				# Don't bother auto-compiling if pdf isn't visible
 				$scope.uncompiledChanges = false
