@@ -1,65 +1,36 @@
+ObjectId = require('mongoose').Types.ObjectId
 async = require("async")
 Errors = require('../Errors/Errors')
-SubscriptionLocator = require('../Subscription/SubscriptionLocator')
-InstitutionsLocator = require('../Institutions/InstitutionsLocator')
+EntityModels =
+	Institution: require('../../models/Institution').Institution
+	Subscription: require('../../models/Subscription').Subscription
 UserMembershipViewModel = require('./UserMembershipViewModel')
 UserGetter = require('../User/UserGetter')
 logger = require('logger-sharelatex')
 
 module.exports =
-	getEntity: (entityName, userId, callback = (error, entity) ->) ->
-		switch entityName
-			when 'group' then getGroupSubscription(userId, callback)
-			when 'groupManagers'
-				getGroupSubscription userId, (error, subscription) ->
-					subscription.membersLimit = null if subscription # managers are unlimited
-					callback(error, subscription)
-			when 'institution' then getInstitution(userId, callback)
-			else callback(new Errors.NotFoundError("No such entity: #{entityName}"))
+	getEntity: (entityId, entityConfig, loggedInUser, callback = (error, entity) ->) ->
+		query = Object.assign({}, entityConfig.baseQuery)
+		query._id = ObjectId(entityId)
+		unless loggedInUser.isAdmin
+			query[entityConfig.fields.access] = ObjectId(loggedInUser._id)
+		EntityModels[entityConfig.modelName].findOne query, callback
 
-	getUsers: (entityName, entity, callback = (error, users) ->) ->
-		attributes = switch entityName
-			when 'group' then ['invited_emails', 'teamInvites', 'member_ids']
-			when 'groupManagers' then ['manager_ids']
-			when 'institution' then ['managerIds']
+	getUsers: (entity, entityConfig, callback = (error, users) ->) ->
+		attributes = entityConfig.fields.read
 		getPopulatedListOfMembers(entity, attributes, callback)
 
-	addUser: (entityName, entity, email, callback = (error, user) ->) ->
-		attribute = switch entityName
-			when 'groupManagers' then 'manager_ids'
-			when 'institution' then 'managerIds'
-		unless attribute
-			return callback(new Errors.NotFoundError("Cannot add user to entity: #{entityName}"))
+	addUser: (entity, entityConfig, email, callback = (error, user) ->) ->
+		attribute = entityConfig.fields.write
 		UserGetter.getUserByAnyEmail email, (error, user) ->
 			error ||= new Errors.NotFoundError("No user found with email #{email}") unless user
 			return callback(error) if error?
 			addUserToEntity entity, attribute, user, (error) ->
 				callback(error, UserMembershipViewModel.build(user))
 
-	removeUser: (entityName, entity, userId, callback = (error) ->) ->
-		attribute = switch entityName
-			when 'groupManagers' then 'manager_ids'
-			when 'institution' then 'managerIds'
-			else callback(new Errors.NotFoundError("Cannot remove user from entity: #{entityName}"))
+	removeUser: (entity, entityConfig, userId, callback = (error) ->) ->
+		attribute = entityConfig.fields.write
 		removeUserFromEntity entity, attribute, userId, callback
-
-getGroupSubscription = (managerId, callback = (error, subscription) ->) ->
-	SubscriptionLocator.findManagedSubscription managerId, (err, subscription)->
-		if subscription? and subscription.groupPlan
-			logger.log managerId: managerId, 'got managed subscription'
-		else
-			err ||= new Errors.NotFoundError("No subscription found managed by user #{managerId}")
-
-		callback(err, subscription)
-
-getInstitution = (managerId, callback = (error, institution) ->) ->
-	InstitutionsLocator.findManagedInstitution managerId, (err, institution)->
-		if institution?
-			logger.log managerId: managerId, 'got managed subscription'
-		else
-			err ||= new Errors.NotFoundError("No institution found managed by user #{managerId}")
-
-		callback(err, institution)
 
 getPopulatedListOfMembers = (entity, attributes, callback = (error, users)->)->
 		userObjects = []

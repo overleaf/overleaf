@@ -86,4 +86,4 @@ block content
 	script(type="text/javascript").
 		window.users = !{JSON.stringify(users)};
 		window.paths = !{JSON.stringify(paths)};
-		window.groupSize = #{entity.membersLimit || 'null'};
+		window.groupSize = #{groupSize || 'null'};
