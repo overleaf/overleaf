@@ -122,10 +122,9 @@ module.exports = ExportsHandler = self =
 				logger.err err:err, export:export_id, "v1 export returned failure status code: #{res.statusCode}"
 				callback err
 
-	fetchZip: (export_id, callback=(err, zip_url) ->) ->
-		console.log("#{settings.apis.v1.url}/api/v1/sharelatex/exports/#{export_id}/zip_url")
+	fetchDownload: (export_id, type, callback=(err, file_url) ->) ->
 		request.get {
-			url: "#{settings.apis.v1.url}/api/v1/sharelatex/exports/#{export_id}/zip_url"
+			url: "#{settings.apis.v1.url}/api/v1/sharelatex/exports/#{export_id}/#{type}_url"
 			auth: {user: settings.apis.v1.user, pass: settings.apis.v1.pass }
 		}, (err, res, body) ->
 			if err?

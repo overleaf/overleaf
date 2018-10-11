@@ -11,6 +11,7 @@ TeamInvitesHandler = require("./TeamInvitesHandler")
 EmailHandler = require("../Email/EmailHandler")
 settings = require("settings-sharelatex")
 NotificationsBuilder = require("../Notifications/NotificationsBuilder")
+UserMembershipViewModel = require("../UserMembership/UserMembershipViewModel")
 
 module.exports = SubscriptionGroupHandler =
 
@@ -31,12 +32,12 @@ module.exports = SubscriptionGroupHandler =
 							logger.err err:err, "error adding user to group"
 							return callback(err)
 						NotificationsBuilder.groupPlan(user, {subscription_id:subscription._id}).read()
-						userViewModel = buildUserViewModel(user)
+						userViewModel = UserMembershipViewModel.build(user)
 						callback(err, userViewModel)
 				else
 					TeamInvitesHandler.createInvite subscriptionId, newEmail, (err) ->
 						return callback(err) if err?
-						userViewModel = buildEmailInviteViewModel(newEmail)
+						userViewModel = UserMembershipViewModel.build(newEmail)
 						callback(err, userViewModel)
 
 	removeUserFromGroup: (subscriptionId, userToRemove_id, callback)->
@@ -50,28 +51,6 @@ module.exports = SubscriptionGroupHandler =
 				callback(error) if error?
 
 				replaceInArray Subscription, "member_ids", oldId, newId, callback
-
-	getPopulatedListOfMembers: (subscriptionId, callback)->
-		SubscriptionLocator.getSubscription subscriptionId, (err, subscription)->
-			users = []
-
-			for email in subscription.invited_emails or []
-				users.push buildEmailInviteViewModel(email)
-
-			for teamInvite in subscription.teamInvites or []
-				users.push buildEmailInviteViewModel(teamInvite.email)
-
-			jobs = _.map subscription.member_ids, (user_id)->
-				return (cb)->
-					UserGetter.getUser user_id, (err, user)->
-						if err? or !user?
-							users.push _id:user_id
-							return cb()
-						userViewModel = buildUserViewModel(user)
-						users.push(userViewModel)
-						cb()
-			async.series jobs, (err)->
-				callback(err, users)
 
 	isUserPartOfGroup: (user_id, subscription_id, callback=(err, partOfGroup)->)->
 		SubscriptionLocator.getSubscriptionByMemberIdAndId user_id, subscription_id, (err, subscription)->
@@ -99,18 +78,3 @@ replaceInArray = (model, property, oldValue, newValue, callback) ->
 	model.update query, { $addToSet: setNewValue }, { multi: true }, (error) ->
 		return callback(error) if error?
 		model.update query, { $pull: setOldValue }, { multi: true }, callback
-
-buildUserViewModel = (user)->
-	u =
-		email: user.email
-		first_name: user.first_name
-		last_name: user.last_name
-		invite: user.holdingAccount
-		_id: user._id
-	return u
-
-buildEmailInviteViewModel = (email) ->
-	return {
-		email: email
-		invite: true
-	}

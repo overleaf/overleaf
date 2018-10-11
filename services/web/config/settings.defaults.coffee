@@ -91,7 +91,7 @@ module.exports = settings =
 	# running which conflict, or want to run the web process on port 80.
 	internal:
 		web:
-			port: webPort = 3000
+			port: webPort = process.env['WEB_PORT'] or 3000
 			host: process.env['LISTEN_ADDRESS'] or 'localhost'
 		documentupdater:
 			port: docUpdaterPort = 3003
@@ -192,7 +192,7 @@ module.exports = settings =
 	#clsiCookieKey: "clsiserver"
 
 	# Same, but with http auth credentials.
-	httpAuthSiteUrl: 'http://#{httpAuthUser}:#{httpAuthPass}@localhost:3000'
+	httpAuthSiteUrl: 'http://#{httpAuthUser}:#{httpAuthPass}@#{siteUrl}'
 
 
 	maxEntitiesPerProject: 2000

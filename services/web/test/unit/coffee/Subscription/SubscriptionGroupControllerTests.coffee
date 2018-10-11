@@ -81,25 +81,6 @@ describe "SubscriptionGroupController", ->
 					done()
 			@Controller.removeUserFromGroup @req, res
 
-	describe "renderSubscriptionGroupAdminPage", ->
-		it "should redirect you if you don't have a group account", (done)->
-			@subscription.groupPlan = false
-
-			res =
-				redirect : (path)=>
-					path.should.equal("/user/subscription")
-					done()
-			@Controller.renderSubscriptionGroupAdminPage @req, res
-
-		it "should redirect you don't have a subscription", (done)->
-			@SubscriptionLocator.getUsersSubscription = sinon.stub().callsArgWith(1)
-
-			res =
-				redirect : (path)=>
-					path.should.equal("/user/subscription")
-					done()
-			@Controller.renderSubscriptionGroupAdminPage @req, res
-
 	describe "exportGroupCsv", ->
 
 		beforeEach ->

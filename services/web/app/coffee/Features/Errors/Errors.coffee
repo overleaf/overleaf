@@ -82,6 +82,20 @@ EmailExistsError = (message) ->
 	return error
 EmailExistsError.prototype.__proto__ = Error.prototype
 
+InvalidError = (message) ->
+	error = new Error(message)
+	error.name = "InvalidError"
+	error.__proto__ = InvalidError.prototype
+	return error
+InvalidError.prototype.__proto__ = Error.prototype
+
+AccountMergeError = (message) ->
+	error = new Error(message)
+	error.name = "AccountMergeError"
+	error.__proto__ = AccountMergeError.prototype
+	return error
+AccountMergeError.prototype.__proto__ = Error.prototype
+
 module.exports = Errors =
 	NotFoundError: NotFoundError
 	ServiceNotConfiguredError: ServiceNotConfiguredError
@@ -95,3 +109,5 @@ module.exports = Errors =
 	V1ConnectionError: V1ConnectionError
 	UnconfirmedEmailError: UnconfirmedEmailError
 	EmailExistsError: EmailExistsError
+	InvalidError: InvalidError
+	AccountMergeError: AccountMergeError

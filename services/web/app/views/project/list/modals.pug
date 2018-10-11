@@ -98,7 +98,7 @@ script(type='text/ng-template', id='renameProjectModalTemplate')
 		) &times;
 		h3 #{translate("rename_project")}
 	.modal-body
-		.alert.alert-danger(ng-show="state.error.message") {{ state.error.message}} 
+		.alert.alert-danger(ng-show="state.error.message") {{state.error.message}}
 		.alert.alert-danger(ng-show="state.error && !state.error.message") #{translate("generic_something_went_wrong")}
 		form(name="renameProjectForm", novalidate)
 			input.form-control(
@@ -127,7 +127,7 @@ script(type='text/ng-template', id='cloneProjectModalTemplate')
 		) &times;
 		h3 #{translate("copy_project")}
 	.modal-body
-		.alert.alert-danger(ng-show="state.error.message") {{ state.error.message}} 
+		.alert.alert-danger(ng-show="state.error.message") {{state.error.message === "invalid element name" ? "#{translate("invalid_element_name")}" : state.error.message}}
 		.alert.alert-danger(ng-show="state.error && !state.error.message") #{translate("generic_something_went_wrong")}
 		form(name="cloneProjectForm", novalidate)
 			.form-group
@@ -161,7 +161,7 @@ script(type='text/ng-template', id='newProjectModalTemplate')
 		) &times;
 		h3 #{translate("new_project")}
 	.modal-body
-		.alert.alert-danger(ng-show="state.error.message") {{ state.error.message}} 
+		.alert.alert-danger(ng-show="state.error.message") {{state.error.message}}
 		.alert.alert-danger(ng-show="state.error && !state.error.message") #{translate("generic_something_went_wrong")}
 		form(novalidate, name="newProjectForm")
 			input.form-control(
@@ -259,6 +259,20 @@ script(type="text/ng-template", id="uploadProjectModalTemplate")
 		allowed-extensions="['zip']"
 		on-complete-callback="onComplete"
 	)
+	.modal-footer
+		button.btn.btn-default(ng-click="cancel()") #{translate("cancel")}
+
+script(type="text/ng-template", id="showErrorModalTemplate")
+	.modal-header
+		button.close(
+			type="button"
+			data-dismiss="modal"
+			ng-click="cancel()"
+		) &times;
+		h3 #{translate("generic_something_went_wrong")}
+	.modal-body
+		.alert.alert-danger(ng-show="error.message") {{error.message === "invalid element name" ? "#{translate("invalid_element_name")}" : error.message}}
+		.alert.alert-danger(ng-show="error && !error.message") #{translate("generic_something_went_wrong")}
 	.modal-footer
 		button.btn.btn-default(ng-click="cancel()") #{translate("cancel")}
 

@@ -71,15 +71,18 @@ module.exports = UserGetter =
 		
 		db.users.find { _id: { $in: user_ids} }, projection, callback
 
-	getUserOrUserStubById: (user_id, projection, callback = (error, user) ->) ->
+	getUserOrUserStubById: (user_id, projection, callback = (error, user, isStub) ->) ->
 		try
 			query = _id: ObjectId(user_id.toString())
 		catch e
 			return callback(new Error(e))
 		db.users.findOne query, projection, (error, user) ->
 			return callback(error) if error?
-			return callback(null, user) if user?
-			db.userstubs.findOne query, projection, callback
+			return callback(null, user, false) if user?
+			db.userstubs.findOne query, projection, (error, user) ->
+				return callback(error) if error
+				return callback() if !user?
+				callback(null, user, true)
 
 	# check for duplicate email address. This is also enforced at the DB level
 	ensureUniqueEmailAddress: (newEmail, callback) ->

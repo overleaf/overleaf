@@ -83,6 +83,59 @@ describe 'SafePath', ->
 			result = @SafePath.isCleanFilename 'foo\\bar'
 			result.should.equal false
 
+	describe 'isCleanPath', ->
+		it 'should accept a valid filename "main.tex"', ->
+			result = @SafePath.isCleanPath 'main.tex'
+			result.should.equal true
+
+		it 'should accept a valid path "foo/main.tex"', ->
+			result = @SafePath.isCleanPath 'foo/main.tex'
+			result.should.equal true
+
+		it 'should accept empty path elements', ->
+			result = @SafePath.isCleanPath 'foo//main.tex'
+			result.should.equal true
+
+		it 'should not accept an empty filename', ->
+			result = @SafePath.isCleanPath 'foo/bar/'
+			result.should.equal false
+
+		it 'should accept a path that starts with a slash', ->
+			result = @SafePath.isCleanPath '/etc/passwd'
+			result.should.equal true
+
+		it 'should not accept a path that has an asterisk as the 0th element', ->
+			result = @SafePath.isCleanPath '*/foo/bar'
+			result.should.equal false
+
+		it 'should not accept a path that has an asterisk as a middle element', ->
+			result = @SafePath.isCleanPath 'foo/*/bar'
+			result.should.equal false
+
+		it 'should not accept a path that has an asterisk as the filename', ->
+			result = @SafePath.isCleanPath 'foo/bar/*'
+			result.should.equal false
+
+		it 'should not accept a path that contains an asterisk in the 0th element', ->
+			result = @SafePath.isCleanPath 'f*o/bar/baz'
+			result.should.equal false
+
+		it 'should not accept a path that contains an asterisk in a middle element', ->
+			result = @SafePath.isCleanPath 'foo/b*r/baz'
+			result.should.equal false
+
+		it 'should not accept a path that contains an asterisk in the filename', ->
+			result = @SafePath.isCleanPath 'foo/bar/b*z'
+			result.should.equal false
+
+		it 'should not accept multiple problematic elements', ->
+			result = @SafePath.isCleanPath 'f*o/b*r/b*z'
+			result.should.equal false
+
+		it 'should not accept a problematic path with an empty element', ->
+			result = @SafePath.isCleanPath 'foo//*/bar'
+			result.should.equal false
+
 	describe 'isAllowedLength', ->
 		it 'should accept a valid path "main.tex"', ->
 			result = @SafePath.isAllowedLength 'main.tex'
@@ -96,7 +149,7 @@ describe 'SafePath', ->
 		it 'should not accept an empty path', ->
 			result = @SafePath.isAllowedLength ''
 			result.should.equal false
-	
+
 	describe 'clean', ->
 		it 'should not modify a valid filename', ->
 			result = @SafePath.clean 'main.tex'
@@ -105,7 +158,7 @@ describe 'SafePath', ->
 		it 'should replace invalid characters with _', ->
 			result = @SafePath.clean 'foo/bar*/main.tex'
 			result.should.equal 'foo_bar__main.tex'
-			
+
 		it 'should replace "." with "_"', ->
 			result = @SafePath.clean '.'
 			result.should.equal '_'
@@ -133,7 +186,7 @@ describe 'SafePath', ->
 		it 'should prefix javascript property names with @', ->
 			result = @SafePath.clean 'prototype'
 			result.should.equal '@prototype'
-		
+
 		it 'should prefix javascript property names in the prototype with @', ->
 			result = @SafePath.clean 'hasOwnProperty'
 			result.should.equal '@hasOwnProperty'

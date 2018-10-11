@@ -71,7 +71,7 @@ define [
 
 		autoCompileInterval = null
 		autoCompileIfReady = () ->
-			if $scope.pdf.compiling
+			if $scope.pdf.compiling or !$scope.autocompile_enabled
 				return
 
 			# Only checking linting if syntaxValidation is on and visible to the user
@@ -125,6 +125,9 @@ define [
 
 		$scope.uncompiledChanges = false
 		recalculateUncompiledChanges = () ->
+			if !$scope.autocompile_enabled
+				# Auto-compile was disabled
+				$scope.uncompiledChanges = false
 			if $scope.ui.pdfHidden
 				# Don't bother auto-compiling if pdf isn't visible
 				$scope.uncompiledChanges = false
@@ -587,22 +590,6 @@ define [
 				.then (data) ->
 					{doc, line} = data
 					ide.editorManager.openDoc(doc, gotoLine: line)
-
-		$scope.switchToFlatLayout = () ->
-			$scope.ui.pdfLayout = 'flat'
-			$scope.ui.view = 'pdf'
-			ide.localStorage "pdf.layout", "flat"
-
-		$scope.switchToSideBySideLayout = () ->
-			$scope.ui.pdfLayout = 'sideBySide'
-			$scope.ui.view = 'editor'
-			localStorage "pdf.layout", "split"
-
-		if pdfLayout = localStorage("pdf.layout")
-			$scope.switchToSideBySideLayout() if pdfLayout == "split"
-			$scope.switchToFlatLayout() if pdfLayout == "flat"
-		else
-			$scope.switchToSideBySideLayout()
 
 	App.factory "synctex", ["ide", "$http", "$q", (ide, $http, $q) ->
 		# enable per-user containers by default

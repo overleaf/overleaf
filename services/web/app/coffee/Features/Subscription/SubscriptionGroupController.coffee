@@ -52,18 +52,6 @@ module.exports =
 					return res.sendStatus 500
 				res.send()
 
-	renderSubscriptionGroupAdminPage: (req, res, next)->
-		user_id = AuthenticationController.getLoggedInUserId(req)
-		getManagedSubscription user_id, (error, subscription)->
-			return next(error) if error?
-			if !subscription?.groupPlan
-				return res.redirect("/user/subscription")
-			SubscriptionGroupHandler.getPopulatedListOfMembers subscription._id, (err, users)->
-				res.render "subscriptions/group_admin",
-					title: 'group_admin'
-					users: users
-					subscription: subscription
-
 	exportGroupCsv: (req, res)->
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		logger.log user_id: user_id, "exporting group csv"

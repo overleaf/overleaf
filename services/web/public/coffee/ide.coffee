@@ -190,6 +190,23 @@ define [
 		ide.localStorage = localStorage
 
 		ide.browserIsSafari = false
+
+		$scope.switchToFlatLayout = (view) ->
+			$scope.ui.pdfLayout = 'flat'
+			$scope.ui.view = view
+			ide.localStorage "pdf.layout", "flat"
+
+		$scope.switchToSideBySideLayout = (view) ->
+			$scope.ui.pdfLayout = 'sideBySide'
+			$scope.ui.view = view
+			localStorage "pdf.layout", "split"
+
+		if pdfLayout = localStorage("pdf.layout")
+			$scope.switchToSideBySideLayout() if pdfLayout == "split"
+			$scope.switchToFlatLayout() if pdfLayout == "flat"
+		else
+			$scope.switchToSideBySideLayout()
+
 		try
 			userAgent = navigator.userAgent
 			ide.browserIsSafari = (

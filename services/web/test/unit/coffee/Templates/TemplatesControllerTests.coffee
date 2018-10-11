@@ -59,7 +59,7 @@ describe 'TemplatesController', ->
 			"uuid":v4:=>@uuid
 			"request": @request
 			"fs":@fs
-			"../../../../app/js/models/Project": {Project: @Project}
+			"../../../js/models/Project": {Project: @Project}
 		@zipUrl = "%2Ftemplates%2F52fb86a81ae1e566597a25f6%2Fv%2F4%2Fzip&templateName=Moderncv%20Banking&compiler=pdflatex"
 		@templateName = "project name here"
 		@user_id = "1234"

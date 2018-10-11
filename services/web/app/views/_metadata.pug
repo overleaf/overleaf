@@ -25,10 +25,16 @@
 
 //- Image
 -if (metadata && metadata.image)
+	//- from the CMS
 	meta(itemprop="image", name="image", content=metadata.image.fields.file.url)
+-else if (metadata && metadata.image_src)
+	//- pages with custom metadata images, metadata.image_src is the full image URL
+	meta(itemprop="image", name="image", content=metadata.image_src)
 -else if (settings.overleaf)
+	//- the default image for Overleaf
 	meta(itemprop="image", name="image", content=buildImgPath('ol-brand/overleaf_og_logo.png'))
 -else
+	//- the default image for ShareLaTeX
 	meta(itemprop="image", name="image", content='/touch-icon-192x192.png')
 
 //- Keywords
@@ -45,8 +51,15 @@ meta(name="twitter:card", content=metadata.twitterCardType ? metadata.twitterCar
 -if (metadata && metadata.twitterDescription)
 	meta(itemprop="twitter:description", content=metadata.twitterDescription)
 -if (metadata && metadata.twitterImage)
+	//- from the CMS
 	meta(itemprop="image", name="twitter:image", content=metadata.twitterImage.fields.file.url)
 	meta(itemprop="image", name="twitter:image:alt", content=metadata.twitterImage.fields.title)
+-else if (settings.overleaf)
+	//- the default image for Overleaf
+	meta(itemprop="image", name="twitter:image", content=buildImgPath('ol-brand/overleaf_og_logo.png'))
+-else
+	//- the default image for ShareLaTeX
+	meta(itemprop="image", name="twitter:image", content='/touch-icon-192x192.png')
 
 //- Open Graph
 //- to do - add og:url
@@ -55,7 +68,14 @@ meta(name="twitter:card", content=metadata.twitterCardType ? metadata.twitterCar
 -if (metadata && metadata.openGraphDescription)
 	meta(itemprop="description", name="og:description", content=metadata.openGraphDescription)
 -if (metadata && metadata.openGraphImage)
+	//- from the CMS
 	meta(itemprop="image", name="og:image", content=metadata.openGraphImage.fields.file.url)
+-else if (settings.overleaf)
+	//- the default image for Overleaf
+	meta(itemprop="image", name="og:image", content=buildImgPath('ol-brand/overleaf_og_logo.png'))
+-else
+	//- the default image for ShareLaTeX
+	meta(itemprop="image", name="og:image", content='/touch-icon-192x192.png')
 -if (metadata && metadata.openGraphType)
 	meta(name="og:type", metadata.openGraphType)
 -else
