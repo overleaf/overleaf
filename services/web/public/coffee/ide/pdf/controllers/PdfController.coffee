@@ -71,7 +71,7 @@ define [
 
 		autoCompileInterval = null
 		autoCompileIfReady = () ->
-			if $scope.pdf.compiling
+			if $scope.pdf.compiling or !$scope.autocompile_enabled
 				return
 
 			# Only checking linting if syntaxValidation is on and visible to the user
