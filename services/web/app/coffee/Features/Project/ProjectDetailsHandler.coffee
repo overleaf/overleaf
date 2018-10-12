@@ -82,7 +82,7 @@ module.exports = ProjectDetailsHandler =
 			return callback(error) if error?
 			# allUsersProjectNames is returned as a hash {owned: [name1, name2, ...], readOnly: [....]}
 			# collect all of the names and flatten them into a single array
-			projectNameList = _.flatten(_.values(allUsersProjectNames))
+			projectNameList = _.pluck(_.flatten(_.values(allUsersProjectNames)),'name')
 			# create a set of all project names
 			allProjectNames = new Set()
 			for projectName in projectNameList
