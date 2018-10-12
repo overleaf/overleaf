@@ -67,6 +67,10 @@ module.exports = ProjectDetailsHandler =
 		else
 			return callback()
 
+	generateUniqueName: (user_id, name, callback = (error, newName) -> ) ->
+		timestamp = new Date().toISOString().replace(/T(\d+):(\d+):(\d+)\..*/,' $1$2$3') # strip out unwanted characters
+		ProjectDetailsHandler.ensureProjectNameIsUnique user_id, name, [" #{timestamp}"], callback
+
 	_addSuffixToProjectName: (name, suffix = '') ->
 		# append the suffix and truncate the project title if needed
 		truncatedLength = ProjectDetailsHandler.MAX_PROJECT_NAME_LENGTH - suffix.length

@@ -15,6 +15,7 @@ describe "ProjectUploadManager", ->
 			"./ArchiveManager" : @ArchiveManager = {}
 			"../Project/ProjectCreationHandler" : @ProjectCreationHandler = {}
 			"../Project/ProjectRootDocManager" : @ProjectRootDocManager = {}
+			"../Project/ProjectDetailsHandler" : @ProjectDetailsHandler = {}
 			"rimraf" : @rimraf = sinon.stub().callsArg(1)
 
 	describe "createProjectFromZipArchive", ->
@@ -26,6 +27,7 @@ describe "ProjectUploadManager", ->
 			@project =
 				_id: @project_id
 				rootFolder: [ _id: @root_folder_id ]
+			@ProjectDetailsHandler.generateUniqueName = sinon.stub().callsArgWith(2, null, @name)
 			@ProjectCreationHandler.createBlankProject = sinon.stub().callsArgWith(2, null, @project)
 			@ProjectUploadManager.insertZipArchiveIntoFolder = sinon.stub().callsArg(4)
 			@ProjectRootDocManager.setRootDocAutomatically = sinon.stub().callsArg(1)
