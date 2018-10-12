@@ -32,6 +32,6 @@ module.exports = TikzManager =
 			return callback(error) if error?
 			fs.readFile path, "utf8", (error, content) ->
 				return callback(error) if error?
-				logger.log compileDir: compileDir, mainFile: mainFile, "copied file to output.tex for tikz"
+				logger.log compileDir: compileDir, mainFile: mainFile, "copied file to output.tex as project uses packages which require it"
 				# use wx flag to ensure that output file does not already exist
 				fs.writeFile Path.join(compileDir, "output.tex"), content, {flag:'wx'}, callback
