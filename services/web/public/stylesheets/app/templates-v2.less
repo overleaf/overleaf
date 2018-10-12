@@ -106,74 +106,74 @@
 }
 
 .search__container--addsearch {
-  .search__input-bar {
-    display: flex;
-  }
+	.search__input-bar {
+		display: flex;
+	}
 
-  .search__input {
-    flex: 1;
-    margin-right: 10px;
-    padding: 0 10px;
-  }
+	.search__input {
+		flex: 1;
+		margin-right: 10px;
+		padding: 0 10px;
+	}
 
-  // AddSearch overrides
-  #addsearch-results {
-    min-height: 0 !important;
+	// AddSearch overrides
+	#addsearch-results {
+		min-height: 0 !important;
 
-    .addsearch-result-item-container {
-      background-size: auto 80px !important; // Resize image to be smaller
-      padding: 10px;
-      margin-left: 10px;
-      margin-right: 10px;
-      border-bottom: 2px solid rgb(236, 236, 236);
-    }
+		.addsearch-result-item-container {
+			background-size: auto 80px !important; // Resize image to be smaller
+			padding: 10px;
+			margin-left: 10px;
+			margin-right: 10px;
+			border-bottom: 2px solid rgb(236, 236, 236);
+		}
 
-    .addsearch-result-item-sub {
-      min-height: 0 !important;
-      background: none !important;
-      border-bottom: none !important;
+		.addsearch-result-item-sub {
+			min-height: 0 !important;
+			background: none !important;
+			border-bottom: none !important;
 
-      // Unfortunately AddSearch doesn't add very useful classes, so have to use
-      // some horrible nesting :/
-      & > div {
-        min-height: 0 !important;
-        padding-left: 90px !important;
+			// Unfortunately AddSearch doesn't add very useful classes, so have to use
+			// some horrible nesting :/
+			& > div {
+				min-height: 0 !important;
+				padding-left: 90px !important;
 
-        // Hide some unnecessary metadata
-        span {
-          display: none !important;
-        }
-      }
+				// Hide some unnecessary metadata
+				span {
+					display: none !important;
+				}
+			}
 
-      a {
-        color: @ol-green !important;
-      }
+			a {
+				color: @ol-green !important;
+			}
 
-      &:hover a {
-        color: @ol-dark-green !important;
-      }
-    }
-  }
+			&:hover a {
+				color: @ol-dark-green !important;
+			}
+		}
+	}
 
-  #addsearch-results-bottom {
-    height: auto !important;
-    background: none !important;
-    padding-top: 0 !important;
+	#addsearch-results-bottom {
+		height: auto !important;
+		background: none !important;
+		padding-top: 0 !important;
 
-    #addsearch-rp-paging {
-      margin-bottom: 10px;
+		#addsearch-rp-paging {
+			margin-bottom: 10px;
 
-      a {
-        color: @ol-green !important;
+			a {
+				color: @ol-green !important;
 
-        &.currentResultPage {
-          color: @ol-blue-gray-5 !important;
-        }
-      }
-    }
-  }
+				&.currentResultPage {
+					color: @ol-blue-gray-5 !important;
+				}
+			}
+		}
+	}
 
-  #addsearch-logo {
-    display: none !important;
-  }
+	#addsearch-logo {
+		display: none !important;
+	}
 }
