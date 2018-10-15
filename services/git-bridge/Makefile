@@ -1,6 +1,7 @@
 # git-bridge makefile
 
-run:
+
+run: package
 	java -jar target/writelatex-git-bridge-1.0-SNAPSHOT-jar-with-dependencies.jar conf/local.json
 
 
@@ -20,4 +21,4 @@ package:
 	mvn package
 
 
-.PHONY: build clean test
+.PHONY: run package build clean test
