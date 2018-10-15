@@ -65,6 +65,22 @@ describe 'TikzManager', ->
 					@callback.calledWithExactly(null, false)
 					.should.equal true
 
+			describe "and the main file contains \\usepackage{pstool}", ->
+				beforeEach ->
+					@SafeReader.readFile = sinon.stub()
+						.withArgs("#{@compileDir}/#{@mainFile}")
+						.callsArgWith(3, null, "hello \\usepackage[random-options]{pstool}")
+					@TikzManager.checkMainFile @compileDir, @mainFile, @resources, @callback
+
+				it "should look at the file on disk", ->
+					@SafeReader.readFile
+					.calledWith("#{@compileDir}/#{@mainFile}")
+					.should.equal true
+
+				it "should call the callback with true ", ->
+					@callback.calledWithExactly(null, true)
+					.should.equal true
+
 	describe "injectOutputFile", ->
 		beforeEach ->
 			@rootDir = "/mock"

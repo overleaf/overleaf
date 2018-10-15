@@ -58,9 +58,9 @@ module.exports = CompileManager =
 					callback()
 
 			createTikzFileIfRequired = (callback) ->
-				TikzManager.checkMainFile compileDir, request.rootResourcePath, resourceList, (error, usesTikzExternalize) ->
+				TikzManager.checkMainFile compileDir, request.rootResourcePath, resourceList, (error, needsMainFile) ->
 					return callback(error) if error?
-					if usesTikzExternalize
+					if needsMainFile
 						TikzManager.injectOutputFile compileDir, request.rootResourcePath, callback
 					else
 						callback()
