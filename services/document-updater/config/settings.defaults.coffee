@@ -10,7 +10,7 @@ module.exports =
 
 	apis:
 		web:
-			url: "http://#{process.env["WEB_HOST"] or "localhost"}:3000"
+			url: "http://#{process.env["WEB_HOST"] or "localhost"}:#{process.env['WEB_PORT'] or 3000}"
 			user: "sharelatex"
 			pass: "password"
 		trackchanges:
@@ -74,6 +74,7 @@ module.exports =
 		project_history:
 			key_schema:
 				projectHistoryOps: ({project_id}) -> "ProjectHistory:Ops:#{project_id}"
+				projectHistoryFirstOpTimestamp: ({project_id}) -> "ProjectHistory:FirstOpTimestamp:#{project_id}"
 			# cluster: [{
 			# 	port: "7000"
 			# 	host: "localhost"
