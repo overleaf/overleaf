@@ -22,7 +22,7 @@ module.exports = TikzManager =
 			SafeReader.readFile path, 65536, "utf8", (error, content) ->
 				return callback(error) if error?
 				usesTikzExternalize = content?.indexOf("\\tikzexternalize") >= 0
-				usesPsTool = content.indexOf("{pstool}") >= 0
+				usesPsTool = content?.indexOf("{pstool}") >= 0
 				logger.log compileDir: compileDir, mainFile: mainFile, usesTikzExternalize:usesTikzExternalize, usesPsTool: usesPsTool, "checked for packages needing main file as output.tex"
 				needsMainFile = (usesTikzExternalize || usesPsTool)
 				callback null, needsMainFile
