@@ -70,6 +70,14 @@ module.exports =
 				res.contentType('text/csv')
 				res.send(groupCsv)
 
+	# legacy route
+	redirectToSubscriptionGroupAdminPage: (req, res) ->
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		getManagedSubscription user_id, (error, subscription) ->
+			return next(error) if error?
+			if !subscription?.groupPlan
+				return res.redirect("/user/subscription")
+			res.redirect("/manage/groups/#{subscription._id}/members")
 
 getManagedSubscription = (managerId, callback) ->
 	SubscriptionLocator.findManagedSubscription managerId, (err, subscription)->
