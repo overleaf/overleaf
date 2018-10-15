@@ -7,7 +7,7 @@ define [
 		link: (scope, el, attrs, tabset) ->
 			scope.$applyAsync () ->
 				hash = $location.hash()
-				if hash?
+				if hash? and hash != ""
 					matchingTab = _.find tabset.tabs, (tab) ->
 						tab.bookmarkableTabId == hash
 					if matchingTab?
