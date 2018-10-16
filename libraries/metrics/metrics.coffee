@@ -1,6 +1,9 @@
 StatsD = require('lynx')
 statsd = new StatsD(process.env["STATSD_HOST"] or "localhost", 8125, {on_error:->})
 
+prom = require('prom-client')
+collectDefaultMetrics = client.collectDefaultMetrics
+
 name = "unknown"
 hostname = require('os').hostname()
 
@@ -14,6 +17,8 @@ require "./uv_threadpool_size"
 module.exports = Metrics =
 	initialize: (_name) ->
 		name = _name
+		collectDefaultMetrics({ timeout: 5000, prefix: name })
+
 
 	registerDestructor: (func) ->
 		destructors.push func
@@ -23,9 +28,19 @@ module.exports = Metrics =
 
 	inc : (key, sampleRate = 1)->
 		statsd.increment buildKey(key), sampleRate
+		counter = new prom.Counter({
+		  name: key,
+		  help: key #https://prometheus.io/docs/instrumenting/writing_exporters/#help-strings this is probably wrong
+		});
+		counter.inc()
 
 	count : (key, count, sampleRate = 1)->
 		statsd.count buildKey(key), count, sampleRate
+		counter = new prom.Counter({
+		  name: key,
+		  help: key #https://prometheus.io/docs/instrumenting/writing_exporters/#help-strings this is probably wrong
+		});
+		counter.inc(count)
 
 	timing: (key, timeSpan, sampleRate)->
 		statsd.timing(buildKey(key), timeSpan, sampleRate)

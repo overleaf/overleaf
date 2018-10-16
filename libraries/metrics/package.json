@@ -7,8 +7,9 @@
     "url": "https://github.com/sharelatex/metrics-sharelatex.git"
   },
   "dependencies": {
-    "lynx": "~0.1.1",
     "coffee-script": "1.6.0",
+    "lynx": "~0.1.1",
+    "prom-client": "^11.1.3",
     "underscore": "~1.6.0"
   },
   "devDependencies": {
