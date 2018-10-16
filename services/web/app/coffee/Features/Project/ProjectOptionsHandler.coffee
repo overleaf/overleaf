@@ -46,3 +46,14 @@ module.exports =
 		else
 			logger.err project_id:project_id, languageCode:languageCode, "tryed to set unsafe language"
 			callback()
+
+	setBrandVariationId: (project_id, brandVariationId, callback = ()->)->
+		logger.log project_id:project_id, brandVariationId:brandVariationId, "setting the brand variation id"
+		if !brandVariationId? or brandVariationId == ""
+			return callback()
+		conditions = {_id:project_id}
+		update = {brandVariationId}
+		Project.update conditions, update, {}, (err)->
+			if err?
+				logger.err err:err, "error setting brandVariationId"
+			callback()

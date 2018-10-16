@@ -8,7 +8,7 @@ modulePath = '../../../../app/js/Features/Templates/TemplatesController'
 
 describe 'TemplatesController', ->
 
-	project_id = "213432"
+	@project_id = "213432"
 
 	beforeEach ->
 		@request = sinon.stub()
@@ -20,11 +20,12 @@ describe 'TemplatesController', ->
 			unlink : sinon.stub()
 			createWriteStream : sinon.stub().returns(on:(_, cb)->cb())
 		}
-		@ProjectUploadManager = {createProjectFromZipArchive : sinon.stub().callsArgWith(3, null, {_id:project_id})}
+		@ProjectUploadManager = {createProjectFromZipArchive : sinon.stub().callsArgWith(3, null, {_id:@project_id})}
 		@dumpFolder = "dump/path"
 		@ProjectOptionsHandler = {
 			setCompiler:sinon.stub().callsArgWith(2)
 			setImageName:sinon.stub().callsArgWith(2)
+			setBrandVariationId:sinon.stub().callsArgWith(2)
 		}
 		@uuid = "1234"
 		@ProjectRootDocManager = {
@@ -83,3 +84,45 @@ describe 'TemplatesController', ->
 				done()
 			res = redirect:redirect
 			@controller.createProjectFromV1Template @req, res
+
+		it "should set project options based on payload data", (done)->
+			@compiler = "pdflatex"
+			@mainFile = "main.tex"
+			@templateVersionId = 15
+			@brandVariationId = "123"
+
+			@req.body = 
+				templateVersionId: @templateVersionId
+				name: @templateName
+				compiler: @compiler
+				mainFile: @mainFile
+				brandVariationId: @brandVariationId
+
+			redirect = =>
+				@ProjectOptionsHandler.setCompiler.calledWith(@project_id, @compiler).should.equal true
+				@ProjectOptionsHandler.setBrandVariationId.calledWith(@project_id, @brandVariationId).should.equal true
+				@ProjectRootDocManager.setRootDocFromName.calledWith(@project_id, @mainFile).should.equal true
+				done()
+			res = redirect:redirect
+			@controller.createProjectFromV1Template @req, res
+
+		it "should only set project options which are defined in the payload", (done)->
+			@compiler = "pdflatex"
+			@templateVersionId = 15
+			@brandVariationId = "123"
+
+			@req.body = 
+				templateVersionId: @templateVersionId
+				name: @templateName
+				compiler: @compiler
+				brandVariationId: @brandVariationId
+
+			redirect = =>
+				# Payload doesn't refine a main file, so `setRootDocFromName` should not be called
+				@ProjectOptionsHandler.setCompiler.calledWith(@project_id, @compiler).should.equal true
+				@ProjectOptionsHandler.setBrandVariationId.calledWith(@project_id, @brandVariationId).should.equal true
+				@ProjectRootDocManager.setRootDocFromName.called.should.equal false
+				done()
+			res = redirect:redirect
+			@controller.createProjectFromV1Template @req, res
+

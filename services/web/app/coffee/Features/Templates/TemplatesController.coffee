@@ -33,6 +33,7 @@ module.exports = TemplatesController =
 		data.name = req.query.templateName
 		data.compiler = ENGINE_TO_COMPILER_MAP[req.query.latexEngine]
 		data.mainFile = req.query.mainFile
+		data.brandVariationId = req.query.brandVariationId
 		res.render path.resolve(__dirname, "../../../views/project/editor/new_from_template"), data
 
 	createProjectFromV1Template: (req, res)->
@@ -55,6 +56,7 @@ module.exports = TemplatesController =
 				mainFile: req.body.mainFile
 				templateId: req.body.templateId
 				templateVersionId: req.body.templateVersionId
+				brandVariationId: req.body.brandVariationId
 				image: 'wl_texlive:2018.1'
 			},
 			req,
@@ -78,15 +80,16 @@ module.exports = TemplatesController =
 				setCompiler project._id, options.compiler, ->
 					setImage project._id, options.image, ->
 						setMainFile project._id, options.mainFile, ->
-							fs.unlink dumpPath, ->
-							delete req.session.templateData
-							conditions = {_id:project._id}
-							update = {
-								fromV1TemplateId:options.templateId,
-								fromV1TemplateVersionId:options.templateVersionId
-							}
-							Project.update conditions, update, {}, (err)->
-								res.redirect "/project/#{project._id}"
+							setBrandVariationId project._id, options.brandVariationId, ->
+								fs.unlink dumpPath, ->
+								delete req.session.templateData
+								conditions = {_id:project._id}
+								update = {
+									fromV1TemplateId:options.templateId,
+									fromV1TemplateVersionId:options.templateVersionId
+								}
+								Project.update conditions, update, {}, (err)->
+									res.redirect "/project/#{project._id}"
 
 setCompiler = (project_id, compiler, callback)->
 	if compiler?
@@ -105,3 +108,10 @@ setMainFile = (project_id, mainFile, callback) ->
 		ProjectRootDocManager.setRootDocFromName project_id, mainFile, callback
 	else
 		callback()
+
+setBrandVariationId = (project_id, brandVariationId, callback) ->
+	if brandVariationId?
+		ProjectOptionsHandler.setBrandVariationId project_id, brandVariationId, callback
+	else
+		callback()
+
