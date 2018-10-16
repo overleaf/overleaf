@@ -67,9 +67,12 @@ module.exports = ProjectDetailsHandler =
 		else
 			return callback()
 
-	generateUniqueName: (user_id, name, callback = (error, newName) -> ) ->
+	generateUniqueName: (user_id, name, suffixes = [], callback = (error, newName) -> ) ->
+		if arguments.length is 3 && typeof suffixes is 'function' # make suffixes an optional argument
+			callback = suffixes
+			suffixes = []
 		timestamp = new Date().toISOString().replace(/T(\d+):(\d+):(\d+)\..*/,' $1$2$3') # strip out unwanted characters
-		ProjectDetailsHandler.ensureProjectNameIsUnique user_id, name, [" #{timestamp}"], callback
+		ProjectDetailsHandler.ensureProjectNameIsUnique user_id, name, suffixes.concat(" (#{timestamp})"), callback
 
 	_addSuffixToProjectName: (name, suffix = '') ->
 		# append the suffix and truncate the project title if needed
