@@ -66,7 +66,8 @@ module.exports = UserUpdater =
 					logger.err error: error, 'problem adding affiliation while adding email'
 					return callback(error)
 
-				update = $push: emails: email: newEmail, createdAt: new Date()
+				reversedHostname = newEmail.split('@')[1].split('').reverse().join('')
+				update = $push: emails: email: newEmail, createdAt: new Date(), reversedHostname: reversedHostname
 				@updateUser userId, update, (error) ->
 					if error?
 						logger.err error: error, 'problem updating users emails'

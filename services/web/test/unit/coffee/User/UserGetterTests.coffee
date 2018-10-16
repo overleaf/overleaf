@@ -14,12 +14,15 @@ describe "UserGetter", ->
 			_id: '12390i'
 			email: 'email2@foo.bar'
 			emails: [
-				{ email: 'email1@foo.bar' }
-				{ email: 'email2@foo.bar' }
+				{ email: 'email1@foo.bar', reversedHostname: 'rab.oof' }
+				{ email: 'email2@foo.bar', reversedHostname: 'rab.oof' }
 			]
 		@findOne = sinon.stub().callsArgWith(2, null, @fakeUser)
+		@find = sinon.stub().callsArgWith(2, null, [ @fakeUser ])
 		@Mongo =
-			db: users: findOne: @findOne
+			db: users:
+				 findOne: @findOne
+				 find: @find
 			ObjectId: (id) -> return id
 		settings = apis: { v1: { url: 'v1.url', user: '', pass: '' } }
 		@getUserAffiliations = sinon.stub().callsArgWith(1, null, [])
@@ -66,8 +69,8 @@ describe "UserGetter", ->
 			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @fakeUser)
 			@UserGetter.getUserFullEmails @fakeUser._id, (error, fullEmails) =>
 				assert.deepEqual fullEmails, [
-					{ email: 'email1@foo.bar', default: false }
-					{ email: 'email2@foo.bar', default: true }
+					{ email: 'email1@foo.bar', reversedHostname: 'rab.oof', default: false }
+					{ email: 'email2@foo.bar', reversedHostname: 'rab.oof', default: true }
 				]
 				done()
 
@@ -86,7 +89,8 @@ describe "UserGetter", ->
 			@UserGetter.getUserFullEmails @fakeUser._id, (error, fullEmails) =>
 				assert.deepEqual fullEmails, [
 					{
-						email: 'email1@foo.bar'
+						email: 'email1@foo.bar',
+						reversedHostname: 'rab.oof'
 						default: false
 						affiliation:
 							institution: affiliationsData[0].institution
@@ -94,7 +98,7 @@ describe "UserGetter", ->
 							department: affiliationsData[0].department
 							role: affiliationsData[0].role
 					}
-					{ email: 'email2@foo.bar', default: true }
+					{ email: 'email2@foo.bar', reversedHostname: 'rab.oof', default: true }
 				]
 				done()
 
@@ -159,6 +163,18 @@ describe "UserGetter", ->
 			@UserGetter.getUserByAnyEmail " #{email} ", projection, (error, user) =>
 				@findOne.calledTwice.should.equal true
 				@findOne.calledWith(email: email, projection).should.equal true
+				done()
+
+	describe "getUsersByHostname", ->
+		it "should find user by hostname", (done)->
+			hostname = "bar.foo"
+			expectedQuery =
+				emails: {$exists: true },
+				'emails.reversedHostname': hostname.split('').reverse().join('')
+			projection = emails: 1
+			@UserGetter.getUsersByHostname hostname, projection, (error, users) =>
+				@find.calledOnce.should.equal true
+				@find.calledWith(expectedQuery, projection).should.equal true
 				done()
 
 	describe 'ensureUniqueEmailAddress', ->

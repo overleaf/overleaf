@@ -90,9 +90,10 @@ describe "UserUpdater", ->
 			@UserUpdater.addEmailAddress @stubbedUser._id, @newEmail, (err)=>
 				@UserGetter.ensureUniqueEmailAddress.called.should.equal true
 				should.not.exist(err)
+				reversedHostname = @newEmail.split('@')[1].split('').reverse().join('')
 				@UserUpdater.updateUser.calledWith(
 					@stubbedUser._id,
-					$push: { emails: { email: @newEmail, createdAt: sinon.match.date } }
+					$push: { emails: { email: @newEmail, createdAt: sinon.match.date, reversedHostname: reversedHostname } }
 				).should.equal true
 				done()
 
