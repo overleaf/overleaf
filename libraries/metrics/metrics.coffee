@@ -14,11 +14,30 @@ destructors = []
 
 require "./uv_threadpool_size"
 
+
+traceAgent = require('@google-cloud/trace-agent')
+debugAgent = require('@google-cloud/debug-agent')
+
+.start({
+  serviceContext: {
+	allowExpressions: true,
+	service: 'filestore-readonly',
+	version: '0.0.1'
+  }
+});
+
 module.exports = Metrics =
 	initialize: (_name) ->
 		name = _name
 		collectDefaultMetrics({ timeout: 5000, prefix: name })
-
+		traceAgent.start()
+		debugAgent.start({
+			serviceContext: {
+				allowExpressions: true,
+				service: name,
+				version: '0.0.1'
+			}
+		})
 
 	registerDestructor: (func) ->
 		destructors.push func

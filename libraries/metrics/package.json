@@ -22,6 +22,8 @@
     "grunt-execute": "^0.2.2",
     "grunt-mocha-test": "^0.11.0",
     "sandboxed-module": "",
-    "sinon": ""
+    "sinon": "",
+    "@google-cloud/debug-agent": "^3.0.0",
+    "@google-cloud/trace-agent": "^3.2.0"
   }
 }
