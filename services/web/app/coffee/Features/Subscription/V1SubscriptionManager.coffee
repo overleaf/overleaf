@@ -66,7 +66,7 @@ module.exports = V1SubscriptionManager =
 
 		V1SubscriptionManager.v1IdForUser userId, (err, v1Id) ->
 			return callback(err) if err?
-			return callback(null, null) if !v1Id?
+			return callback(null, null, null) if !v1Id?
 			request {
 				baseUrl: settings.apis.v1.url
 				url: options.url(v1Id)

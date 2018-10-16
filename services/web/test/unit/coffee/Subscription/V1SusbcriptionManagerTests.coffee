@@ -55,6 +55,11 @@ describe 'V1SubscriptionManager', ->
 					).to.equal true
 					done()
 
+			it 'should return the v1 user id', (done) ->
+				@call (err, planCode, v1Id) ->
+					expect(v1Id).to.equal @v1UserId
+					done()
+
 			it 'should produce a plan-code without error', (done) ->
 				@call (err, planCode) =>
 					expect(err).to.not.exist
@@ -135,6 +140,42 @@ describe 'V1SubscriptionManager', ->
 
 			it 'should produce an error', (done) ->
 				@call (err) =>
+					expect(err).to.exist
+					done()
+
+		describe 'when the call succeeds', ->
+			beforeEach ->
+				@V1SubscriptionManager.v1IdForUser = sinon.stub()
+					.yields(null, @v1UserId)
+				@request.yields(null, { statusCode: 200 }, "{}")
+				@call = (cb) =>
+					@V1SubscriptionManager._v1Request @user_id, { url: () -> '/foo' }, cb
+
+			it 'should not produce an error', (done) ->
+				@call (err, body, v1Id) =>
+					expect(err).not.to.exist
+					done()
+
+			it 'should return the v1 user id', (done) ->
+				@call (err, body, v1Id) =>
+					expect(v1Id).to.equal @v1UserId
+					done()
+
+			it 'should return the http response body', (done) ->
+				@call (err, body, v1Id) =>
+					expect(body).to.equal "{}"
+					done()
+
+		describe 'when the call returns an http error status code', ->
+			beforeEach ->
+				@V1SubscriptionManager.v1IdForUser = sinon.stub()
+					.yields(null, @v1UserId)
+				@request.yields(null, { statusCode: 500 }, "{}")
+				@call = (cb) =>
+					@V1SubscriptionManager._v1Request @user_id, { url: () -> '/foo' }, cb
+
+			it 'should produce an error', (done) ->
+				@call (err, body, v1Id) =>
 					expect(err).to.exist
 					done()
 
