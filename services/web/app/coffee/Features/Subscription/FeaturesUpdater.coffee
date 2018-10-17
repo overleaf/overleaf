@@ -52,8 +52,14 @@ module.exports = FeaturesUpdater =
 			callback err, (subs or []).map FeaturesUpdater._subscriptionToFeatures
 
 	_getV1Features: (user_id, callback = (error, features = {}) ->) ->
-		V1SubscriptionManager.getPlanCodeFromV1 user_id, (err, planCode) ->
-			callback err, FeaturesUpdater._planCodeToFeatures(planCode)
+		V1SubscriptionManager.getPlanCodeFromV1 user_id, (err, planCode, v1Id) ->
+			if err?
+				return callback(err)
+
+			callback(err, FeaturesUpdater._mergeFeatures(
+				V1SubscriptionManager.getGrandfatheredFeaturesForV1User(v1Id) or {},
+				FeaturesUpdater._planCodeToFeatures(planCode)
+			))
 
 	_mergeFeatures: (featuresA, featuresB) ->
 		features = Object.assign({}, featuresA)
