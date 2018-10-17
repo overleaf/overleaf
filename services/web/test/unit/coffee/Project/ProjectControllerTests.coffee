@@ -22,6 +22,12 @@ describe "ProjectController", ->
 				chat:
 					url:"chat.com"
 			siteUrl: "mysite.com"
+		@brandVariationDetails = 
+			id: "12"
+			active: true
+			brand_name: "The journal"
+			home_url: "http://www.thejournal.com/"
+			publish_menu_link_html: "Submit your paper to the <em>The Journal</em>"
 		@token = 'some-token'
 		@ProjectDeleter =
 			archiveProject: sinon.stub().callsArg(1)
@@ -78,6 +84,9 @@ describe "ProjectController", ->
 				fire: sinon.stub()
 		@Features =
 			hasFeature: sinon.stub()
+		@BrandVariationsHandler = 
+			getBrandVariationById: sinon.stub().callsArgWith 1, null, @brandVariationDetails
+
 		@ProjectController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"logger-sharelatex":
@@ -111,6 +120,7 @@ describe "ProjectController", ->
 			"../../infrastructure/Features": @Features
 			"../Notifications/NotificationsBuilder":@NotificationBuilder
 			"../User/UserGetter": @UserGetter
+			"../BrandVariations/BrandVariationsHandler": @BrandVariationsHandler
 
 		@projectName = "£12321jkj9ujkljds"
 		@req =
@@ -510,6 +520,11 @@ describe "ProjectController", ->
 				name:"my proj"
 				_id:"213123kjlkj"
 				owner_ref: '59fc84d5fbea77482d436e1b'
+			@brandedProject =
+				name:"my branded proj"
+				_id:"3252332"
+				owner_ref: '59fc84d5fbea77482d436e1b'
+				brandVariationId:"12"
 			@user =
 				_id: "588f3ddae8ebc1bac07c9fa4"
 				ace:
@@ -567,6 +582,26 @@ describe "ProjectController", ->
 		it "should mark project as opened", (done)->
 			@res.render = (pageName, opts)=>
 				@ProjectUpdateHandler.markAsOpened.calledWith(@project_id).should.equal true
+				done()
+			@ProjectController.loadEditor @req, @res
+
+		it "should call the brand variations handler for branded projects", (done)->
+			@ProjectGetter.getProject.callsArgWith 2, null, @brandedProject
+			@res.render = (pageName, opts)=>
+				@BrandVariationsHandler.getBrandVariationById.calledWith().should.equal true
+				done()
+			@ProjectController.loadEditor @req, @res
+
+		it "should not call the brand variations handler for unbranded projects", (done)->
+			@res.render = (pageName, opts)=>
+				@BrandVariationsHandler.getBrandVariationById.called.should.equal false
+				done()
+			@ProjectController.loadEditor @req, @res
+
+		it "should expose the brand variation details as locals for branded projects", (done)->
+			@ProjectGetter.getProject.callsArgWith 2, null, @brandedProject
+			@res.render = (pageName, opts)=>
+				opts.brandVariation.should.deep.equal @brandVariationDetails
 				done()
 			@ProjectController.loadEditor @req, @res
 
