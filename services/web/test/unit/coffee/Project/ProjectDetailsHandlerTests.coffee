@@ -158,11 +158,11 @@ describe 'ProjectDetailsHandler', ->
 	describe "ensureProjectNameIsUnique", ->
 		beforeEach ->
 			@result = {
-				owned: ["name", "name1", "name11"]
-				readAndWrite: ["name2", "name22"]
-				readOnly: ["name3", "name33"]
-				tokenReadAndWrite: ["name4", "name44"]
-				tokenReadOnly: ["name5", "name55", "x".repeat(15)]
+				owned: [{_id: 1, name:"name"}, {_id: 2, name: "name1"}, {_id: 3, name: "name11"}]
+				readAndWrite: [{_id: 4, name:"name2"}, {_id: 5, name:"name22"}]
+				readOnly: [{_id:6, name:"name3"}, {_id:7, name: "name33"}]
+				tokenReadAndWrite: [{_id:8, name:"name4"}, {_id:9, name:"name44"}]
+				tokenReadOnly: [{_id:10, name:"name5"}, {_id:11, name:"name55"}, {_id:12, name:"x".repeat(15)}]
 			}
 			@ProjectGetter.findAllUsersProjects = sinon.stub().callsArgWith(2, null, @result)
 

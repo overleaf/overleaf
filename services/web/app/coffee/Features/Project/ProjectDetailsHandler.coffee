@@ -67,6 +67,13 @@ module.exports = ProjectDetailsHandler =
 		else
 			return callback()
 
+	generateUniqueName: (user_id, name, suffixes = [], callback = (error, newName) -> ) ->
+		if arguments.length is 3 && typeof suffixes is 'function' # make suffixes an optional argument
+			callback = suffixes
+			suffixes = []
+		timestamp = new Date().toISOString().replace(/T(\d+):(\d+):(\d+)\..*/,' $1$2$3') # strip out unwanted characters
+		ProjectDetailsHandler.ensureProjectNameIsUnique user_id, name, suffixes.concat(" (#{timestamp})"), callback
+
 	_addSuffixToProjectName: (name, suffix = '') ->
 		# append the suffix and truncate the project title if needed
 		truncatedLength = ProjectDetailsHandler.MAX_PROJECT_NAME_LENGTH - suffix.length
@@ -82,7 +89,7 @@ module.exports = ProjectDetailsHandler =
 			return callback(error) if error?
 			# allUsersProjectNames is returned as a hash {owned: [name1, name2, ...], readOnly: [....]}
 			# collect all of the names and flatten them into a single array
-			projectNameList = _.flatten(_.values(allUsersProjectNames))
+			projectNameList = _.pluck(_.flatten(_.values(allUsersProjectNames)),'name')
 			# create a set of all project names
 			allProjectNames = new Set()
 			for projectName in projectNameList
