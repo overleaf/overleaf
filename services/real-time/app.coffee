@@ -43,6 +43,9 @@ io.configure ->
 	io.set('transports', ['websocket', 'flashsocket', 'htmlfile', 'xhr-polling', 'jsonp-polling'])
 	io.set('log level', 1)
 
+app.get "/", (req, res, next) ->
+	res.send "real-time-sharelatex is alive"
+
 app.get "/status", (req, res, next) ->
 	res.send "real-time-sharelatex is alive"
 
