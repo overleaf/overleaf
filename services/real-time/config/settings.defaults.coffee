@@ -1,7 +1,7 @@
 module.exports =
 	redis:
 		realtime:
-			host: process.env['REDIS_HOST'] or "localhostssss"
+			host: process.env['REDIS_HOST'] or "localhost"
 			port: process.env['REDIS_PORT'] or "6379"
 			password: process.env["REDIS_PASSWORD"] or ""
 			key_schema:
@@ -9,14 +9,14 @@ module.exports =
 				connectedUser: ({project_id, client_id})-> "connected_user:#{project_id}:#{client_id}"
 
 		documentupdater:
-			host: process.env['REDIS_HOST'] or "localhostssss"
+			host: process.env['REDIS_HOST'] or "localhost"
 			port: process.env['REDIS_PORT'] or "6379"
 			password: process.env["REDIS_PASSWORD"] or ""
 			key_schema:
 				pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
 
 		websessions:
-			host: process.env['REDIS_HOST'] or "localhostssss"
+			host: process.env['REDIS_HOST'] or "localhost"
 			port: process.env['REDIS_PORT'] or "6379"
 			password: process.env["REDIS_PASSWORD"] or ""
 
@@ -29,7 +29,7 @@ module.exports =
 			
 	apis:
 		web:
-			url: "http://#{process.env['WEB_HOST'] or "localhost"}:3000"
+			url: "http://#{process.env['WEB_API_HOST'] or process.env['WEB_HOST'] or "localhost"}:3000"
 			user: "sharelatex"
 			pass: "password"
 		documentupdater:
