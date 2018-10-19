@@ -146,14 +146,23 @@ pipeline {
       }
     }
 
-
     stage('Sync OSS') {
       when {
         branch 'master'
       }
+      agent {
+        docker {
+          image 'sharelatex/copybara'
+          args "-u 0:0 -v /tmp/copybara:/root/copybara/cache"
+        }
+      }
       steps {
         sshagent (credentials: ['GIT_DEPLOY_KEY']) {
-          sh 'git push git@github.com:sharelatex/web-sharelatex.git HEAD:master'
+          sh 'git config --global user.name Copybot'
+          sh 'git config --global user.email copybot@overleaf.com'
+          sh 'mkdir -p /root/.ssh'
+          sh 'ssh-keyscan github.com >> /root/.ssh/known_hosts'
+          sh 'COPYBARA_CONFIG=./copybara/copy.bara.sky copybara --git-committer-email=copybot@overleaf.com --git-committer-name=Copybot || true'
         }
       }
     }
