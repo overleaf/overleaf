@@ -36,8 +36,9 @@ module.exports =
 						cb()
 					else
 						cb("health check lines not equal #{body.lines} != #{lines}")
+			(cb)-> 
+				db.docs.remove {_id: doc_id, project_id: project_id}, cb
+			(cb)-> 
+				db.docOps.remove {doc_id: doc_id}, cb
 		]
-		async.series jobs, (err)->
-			if err?
-				callback(err)
-			db.docs.remove {_id: doc_id, project_id: project_id}, callback
+		async.series jobs, callback
