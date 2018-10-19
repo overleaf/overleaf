@@ -18,8 +18,7 @@
 @rfp-header-height-collapsed: 50px;
 
 .rfp-main {
-	background-color: @rfp-rp-blue-dark;
-	color: #FFF;
+	background-color: @content-alt-bg-color;
 	font-size: 18px;
 	min-width: 240px;
 }
@@ -56,7 +55,6 @@
 		max-width: 30em;
 		margin-left: auto;
 		margin-right: auto;
-		font-weight: 300;
 		@media (min-width: @screen-xs-min) {
 			font-size: @rfp-lead-size;
 		}			
@@ -76,7 +74,6 @@
 		max-width: 30em;
 		margin-left: auto;
 		margin-right: auto;
-		font-weight: 300;
 		.rfp-section-feature & {
 			margin-left: initial;
 		}
@@ -126,7 +123,7 @@
 				height: 100%;
 			}
 	.rfp-section {
-		padding: 30px 20px;
+		padding: 30px;
 		text-align: center;
 		overflow: hidden;
 		@media (min-width: @screen-xs-min) {
@@ -137,7 +134,7 @@
 		}
 	}
 	.rfp-section-masthead {
-	    color: #FFF;
+		color: #FFF;
 		background-size: cover;
 		background-position: center;
 		background-color: @rfp-rp-blue-darker;
@@ -156,13 +153,11 @@
 		position: relative;
 		padding-top: 30px;
 		padding-bottom: 30px;
-		background-color: @rfp-sl-red;
+		background-color: @brand-secondary;
 		box-shadow: @rfp-card-shadow;
 	}
 	.rfp-section-feature {
 		display: block;
-		color: @rfp-rp-blue-dark;
-		background-color: @rfp-rp-blue-light;
 		text-align: left;
 		@media (min-width: @screen-sm-min) {
 			.rfp-section-wrapper {
@@ -196,10 +191,13 @@
 		}
 	.rfp-section-feature-alt {
 		color: #FFF;
-		background-color: transparent;
+		background-color: @ol-blue-gray-5;
 		@media (min-width: @screen-sm-min) {
 			text-align: right;
 		}
+	}
+	.rfp-section-feature-white {
+		background: #ffffff;
 	}
 	.rfp-section-testimonials {
 		background-color: @rfp-rp-blue-darkest;
@@ -329,6 +327,7 @@
 		}
 	}
 	.rfp-quote-main {
+		color: #ffffff;
 		display: block;
 		max-width: none;
 		border-left: 0;
@@ -441,31 +440,6 @@
 			box-shadow: @rfp-card-shadow;
  			border-radius: @rfp-border-radius;
 		}
-			.rfp-cta {
-				display: inline-block;
-				background-color: @rfp-sl-red;
-				color: #FFF;
-				font-size: @rfp-h3-size;
-				border-radius: @rfp-border-radius;
-				padding: .75em;
-				@media (min-width: @screen-xs-min) {
-					padding: .75em 1.5em;
-				}
-				&:hover,
-				&:focus {
-					color: #FFF;
-					text-decoration: none;
-					outline: 0;
-					.rfp-cta-main {
-						transform: translate(0, -30%);
-					}
-					.rfp-cta-extra {
-						opacity: 1;
-						transform: translate(-50%, -40%);
-					}
-				}
-			}
-
 			.rfp-cta-header {
 				font-size: 1em;
 				padding: .2em 1em;

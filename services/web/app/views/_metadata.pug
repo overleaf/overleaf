@@ -45,7 +45,7 @@
 meta(itemprop="name", content=settings.appName + ", the Online LaTeX Editor")
 
 //- Twitter
-meta(name="twitter:card", content=metadata.twitterCardType ? metadata.twitterCardType : 'summary')
+meta(name="twitter:card", content=metadata && metadata.twitterCardType ? metadata.twitterCardType : 'summary')
 -if (settings.social && settings.social.twitter && settings.social.twitter.handle)
 	meta(name="twitter:site", content="@" + settings.social.twitter.handle)
 -if (metadata && metadata.twitterDescription)
@@ -82,5 +82,5 @@ meta(name="twitter:card", content=metadata.twitterCardType ? metadata.twitterCar
 	meta(name="og:type", content="website")
 
 //- Viewport
-if metadata.viewport
+if metadata && metadata.viewport
 	meta(name="viewport" content="width=device-width; initial-scale=1.0; user-scalable=yes;")

@@ -187,8 +187,10 @@
 		}
 	}
 
-.universities {
+.universities-container {
 	border-bottom: 1px solid @gray-lighter;
+}
+.universities {
 	text-align: center;
 	.uni-logo {
 		display: inline-block;
@@ -273,5 +275,11 @@
 @media only screen and (max-width: @screen-sm-max) {
 	.doc-history-example {
 		margin-bottom: @margin-md;
+	}
+	.universities {
+		.uni-logo {
+			padding: @padding-md;
+			width: 50%;
+		}
 	}
 }
