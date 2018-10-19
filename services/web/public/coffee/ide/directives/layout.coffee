@@ -8,10 +8,10 @@ define [
 				pre: (scope, element, attrs) ->
 					name = attrs.layout
 
-					customTogglerPane = scope.$eval(attrs.customTogglerPane or "false")
+					customTogglerPane = attrs.customTogglerPane
 					customTogglerMsgWhenOpen = attrs.customTogglerMsgWhenOpen
 					customTogglerMsgWhenClosed = attrs.customTogglerMsgWhenClosed
-					hasCustomToggler = customTogglerPane != false and customTogglerMsgWhenOpen != "" and customTogglerMsgWhenClosed != ""
+					hasCustomToggler = customTogglerPane? and customTogglerMsgWhenOpen? and customTogglerMsgWhenClosed?
 
 					if attrs.spacingOpen?
 						spacingOpen = parseInt(attrs.spacingOpen, 10)
