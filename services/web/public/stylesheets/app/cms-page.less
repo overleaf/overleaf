@@ -94,15 +94,11 @@
     universities page
   */
   #universities-container {
-    display: table;
     padding: @padding-md;
     width: 100%;
     .row {
-      display: table-row;
+      border-bottom: 1px solid @gray-lightest;
       div {
-        border-bottom: 1px solid @gray-lightest;
-        display: table-cell;
-        float: none;
         padding: @padding-md;
         vertical-align: middle;
       }
@@ -114,6 +110,7 @@
       }
     }
     .row:last-child {
+      border: 0;
       // parent container contains padding
       div {
         border: 0;
@@ -132,6 +129,18 @@
     }
     .university-claim-btn {
       text-align: center;
+    }
+    @media only screen and (min-width: @screen-xs-min) {
+      display: table;
+      table-layout: fixed;
+      .row {
+        display: table-row;
+        div {
+          border-bottom: 1px solid @gray-lightest;
+          display: table-cell;
+          float: none;
+        }
+      }
     }
   }
 
