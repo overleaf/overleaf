@@ -31,6 +31,7 @@ NotificationsBuilder = require("../Notifications/NotificationsBuilder")
 crypto = require 'crypto'
 { V1ConnectionError } = require '../Errors/Errors'
 Features = require('../../infrastructure/Features')
+BrandVariationsHandler = require("../BrandVariations/BrandVariationsHandler")
 
 module.exports = ProjectController =
 
@@ -265,11 +266,11 @@ module.exports = ProjectController =
 		project_id = req.params.Project_id
 		logger.log project_id:project_id, anonymous:anonymous, user_id:user_id, "loading editor"
 
-		async.parallel {
+		async.auto {
 			project: (cb)->
 				ProjectGetter.getProject(
 					project_id,
-					{ name: 1, lastUpdated: 1, track_changes: 1, owner_ref: 1, 'overleaf.history.display': 1 },
+					{ name: 1, lastUpdated: 1, track_changes: 1, owner_ref: 1, brandVariationId: 1, 'overleaf.history.display': 1 },
 					cb
 				)
 			user: (cb)->
@@ -294,6 +295,12 @@ module.exports = ProjectController =
 				if !user_id?
 					return cb()
 				CollaboratorsHandler.userIsTokenMember user_id, project_id, cb
+			brandVariation: [ "project", (cb, results) ->
+				if !results.project?.brandVariationId?
+					return cb()
+				BrandVariationsHandler.getBrandVariationById results.project.brandVariationId, (error, brandVariationDetails) ->
+					cb(error, brandVariationDetails)
+			]
 		}, (err, results)->
 			if err?
 				logger.err err:err, "error getting details for project page"
@@ -301,6 +308,7 @@ module.exports = ProjectController =
 			project = results.project
 			user = results.user
 			subscription = results.subscription
+			brandVariation = results.brandVariation
 			
 			daysSinceLastUpdated =  (new Date() - project.lastUpdated) / 86400000
 			logger.log project_id:project_id, daysSinceLastUpdated:daysSinceLastUpdated, "got db results for loading editor"
@@ -359,6 +367,7 @@ module.exports = ProjectController =
 					useV2History: !!project.overleaf?.history?.display
 					richTextEnabled: Features.hasFeature('rich-text')
 					showTestControls: req.query?.tc == 'true' || user.isAdmin
+					brandVariation: brandVariation
 					allowedImageNames: Settings.allowedImageNames || []
 				timer.done()
 
