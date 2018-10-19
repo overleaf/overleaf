@@ -8,9 +8,9 @@ div.full-size(
 	initial-size-east="'50%'"
 	minimum-restore-size-east="300"
 	allow-overflow-on="'center'"
-	custom-toggler-pane=hasFeature('custom-togglers') ? "'east'" : "false"
-	custom-toggler-msg-when-open=hasFeature('custom-togglers') ? "'" + translate("tooltip_hide_pdf") + "'" : "false"
-	custom-toggler-msg-when-closed=hasFeature('custom-togglers') ? "'" + translate("tooltip_show_pdf") + "'" : "false"
+	custom-toggler-pane=hasFeature('custom-togglers') ? "east" : false
+	custom-toggler-msg-when-open=hasFeature('custom-togglers') ? translate("tooltip_hide_pdf") : false
+	custom-toggler-msg-when-closed=hasFeature('custom-togglers') ? translate("tooltip_show_pdf") : false
 )
 	.ui-layout-center(
 		ng-controller="ReviewPanelController",
@@ -101,6 +101,7 @@ div.full-size(
 			ng-click="syncToCode()"
 		)
 			i.synctex-control-icon
+
 div.full-size(
 	ng-if="ui.pdfLayout == 'flat'"
 	ng-show="ui.view == 'pdf'"
