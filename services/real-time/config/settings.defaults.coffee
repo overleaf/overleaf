@@ -33,7 +33,7 @@ module.exports =
 			user: "sharelatex"
 			pass: "password"
 		documentupdater:
-			url: "http://#{process.env['DOCUPDATER_HOST'] or "localhost"}:3003"
+			url: "http://#{process.env['DOCUMENT_UPDATER_HOST'] or process.env['DOCUPDATER_HOST'] or "localhost"}:3003"
 			
 	security:
 		sessionSecret: "secret-please-change"
