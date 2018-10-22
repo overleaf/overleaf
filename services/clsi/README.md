@@ -8,12 +8,12 @@ A web api for compiling LaTeX documents in the cloud
 The CLSI provide a RESTful interface to traditional LaTeX tools (or, more generally, any command line tool for composing marked-up documents into a display format such as PDF or HTML). The CLSI listens on the following ports by default:
 
 * TCP/3009 - the RESTful interface
-* TCP/3048 - reports load information to the `CLSI-lb`
+* TCP/3048 - reports load information
 * TCP/3049 - HTTP interface to control the CLSI service
 
 These defaults can be modified in `config/settings.defaults.coffee`.
 
-The provided `Dockerfile` builds a docker image which has the docker command line tools installed. The configuration in `docker-compose-config.yml` mounts the docker socket, in order that the CLSI container can talk to the docker host it is running in. This allows it to spin up `sibling containers` running our TEXLIVE image on the same docker host to perform the actual compiles.
+The provided `Dockerfile` builds a docker image which has the docker command line tools installed. The configuration in `docker-compose-config.yml` mounts the docker socket, in order that the CLSI container can talk to the docker host it is running in. This allows it to spin up `sibling containers` running an image with a TeX distribution installed to perform the actual compiles.
 
 The CLSI can be configured through the following environment variables:
 
@@ -21,9 +21,9 @@ The CLSI can be configured through the following environment variables:
     * `SYNCTEX_BIN_HOST_PATH` - Path to SyncTeX binary
     * `COMPILES_HOST_DIR` - Working directory for LaTeX compiles
     * `SQLITE_PATH` - Path to SQLite database
-    * `TEXLIVE_IMAGE` - The TEXLIVE docker image to use for sibling containers, e.g. `gcr.io/overleaf-ops/texlive-full:2017.1`
+    * `TEXLIVE_IMAGE` - The docker image with a TeX distribution to use for sibling containers
     * `TEXLIVE_IMAGE_USER` - When using sibling containers, the user to run as in the TEXLIVE image. Defaults to `tex`
-    * `TEX_LIVE_IMAGE_NAME_OVERRIDE` - The name of the registry for the docker image e.g. `gcr.io/overleaf-ops`
+    * `TEX_LIVE_IMAGE_NAME_OVERRIDE` - The name of the registry for the docker image
     * `FILESTORE_DOMAIN_OVERRIDE` - The url for the filestore service e.g.`http://$FILESTORE_HOST:3009`
     * `STATSD_HOST` - The address of the Statsd service (used by the metrics module)
     * `LISTEN_ADDRESS` - The address for the RESTful service to listen on. Set to `0.0.0.0` to listen on all network interfaces
