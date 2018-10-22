@@ -17,17 +17,17 @@ The provided `Dockerfile` builds a docker image which has the docker command lin
 
 The CLSI can be configured through the following environment variables:
 
-    * `DOCKER_RUNNER` - Set to true to use sibling containers
-    * `SYNCTEX_BIN_HOST_PATH` - Path to SyncTeX binary
-    * `COMPILES_HOST_DIR` - Working directory for LaTeX compiles
-    * `SQLITE_PATH` - Path to SQLite database
-    * `TEXLIVE_IMAGE` - The TEXLIVE docker image to use for sibling containers, e.g. `gcr.io/overleaf-ops/texlive-full:2017.1`
-    * `TEXLIVE_IMAGE_USER` - When using sibling containers, the user to run as in the TEXLIVE image. Defaults to `tex`
-    * `TEX_LIVE_IMAGE_NAME_OVERRIDE` - The name of the registry for the docker image e.g. `gcr.io/overleaf-ops`
-    * `FILESTORE_DOMAIN_OVERRIDE` - The url for the filestore service e.g.`http://$FILESTORE_HOST:3009`
-    * `STATSD_HOST` - The address of the Statsd service (used by the metrics module)
-    * `LISTEN_ADDRESS` - The address for the RESTful service to listen on. Set to `0.0.0.0` to listen on all network interfaces
-    * `SMOKE_TEST` - Whether to run smoke tests
+  * `DOCKER_RUNNER` - Set to true to use sibling containers
+  * `SYNCTEX_BIN_HOST_PATH` - Path to SyncTeX binary
+  * `COMPILES_HOST_DIR` - Working directory for LaTeX compiles
+  * `SQLITE_PATH` - Path to SQLite database
+  * `TEXLIVE_IMAGE` - The TEXLIVE docker image to use for sibling containers, e.g. `gcr.io/overleaf-ops/texlive-full:2017.1`
+  * `TEXLIVE_IMAGE_USER` - When using sibling containers, the user to run as in the TEXLIVE image. Defaults to `tex`
+  * `TEX_LIVE_IMAGE_NAME_OVERRIDE` - The name of the registry for the docker image e.g. `gcr.io/overleaf-ops`
+  * `FILESTORE_DOMAIN_OVERRIDE` - The url for the filestore service e.g.`http://$FILESTORE_HOST:3009`
+  * `STATSD_HOST` - The address of the Statsd service (used by the metrics module)
+  * `LISTEN_ADDRESS` - The address for the RESTful service to listen on. Set to `0.0.0.0` to listen on all network interfaces
+  * `SMOKE_TEST` - Whether to run smoke tests
 
 Installation
 ------------
