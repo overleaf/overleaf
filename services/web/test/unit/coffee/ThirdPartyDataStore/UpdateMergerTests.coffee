@@ -16,27 +16,46 @@ describe 'UpdateMerger :', ->
 			'../Editor/EditorController': @EditorController = {}
 			'../Uploads/FileTypeManager':@FileTypeManager = {}
 			'../../infrastructure/FileWriter': @FileWriter = {}
+			'../Project/ProjectEntityHandler': @ProjectEntityHandler = {}
 			'settings-sharelatex':{path:{dumpPath:"dump_here"}}
 		@project_id = "project_id_here"
 		@user_id = "mock-user-id"
 
-		@docPath = "/folder/doc.tex"
-		@filePath = "/folder/file.png"
+		@docPath = @newDocPath = "/folder/doc.tex"
+		@filePath = @newFilePath = "/folder/file.png"
+
+		@existingDocPath = '/folder/other.tex'
+		@existingFilePath = '/folder/fig1.pdf'
+		
 		@linkedFileData = {provider: 'url'}
 
-		@fsPath = "/tmp/file/path"
+		@existingDocs = [ 
+			{path: '/main.tex'}
+			{path: '/folder/other.tex'}
+		]
+		@existingFiles = [
+			{path: '/figure.pdf'}
+			{path: '/folder/fig1.pdf'}
+		]
+		@ProjectEntityHandler.getAllEntities = sinon.stub().callsArgWith(1, null, @existingDocs, @existingFiles)
 
+		@fsPath = "/tmp/file/path"
 		@source = "dropbox"
 		@updateRequest = new BufferedStream()
 		@FileWriter.writeStreamToDisk = sinon.stub().yields(null, @fsPath)
 		@callback = sinon.stub()
 
 	describe 'mergeUpdate', ->
-		describe "doc updates", ->
+	
+		describe "doc updates for a new doc", ->
+
 			beforeEach ->
 				@FileTypeManager.isBinary = sinon.stub().yields(null, false)
 				@updateMerger.p.processDoc = sinon.stub().yields()
 				@updateMerger.mergeUpdate @user_id, @project_id, @docPath, @updateRequest, @source, @callback
+
+			it 'should look at the file contents', ->
+				@FileTypeManager.isBinary.called.should.equal true
 
 			it 'should process update as doc', ->
 				@updateMerger.p.processDoc
@@ -46,15 +65,52 @@ describe 'UpdateMerger :', ->
 			it 'removes the temp file from disk', ->
 				@fs.unlink.calledWith(@fsPath).should.equal true
 
-		describe "file updates", ->
+		describe "file updates for a new file ", ->
 			beforeEach ->
 				@FileTypeManager.isBinary = sinon.stub().yields(null, true)
 				@updateMerger.p.processFile = sinon.stub().yields()
 				@updateMerger.mergeUpdate @user_id, @project_id, @filePath, @updateRequest, @source, @callback
 
+			it 'should look at the file contents', ->
+				@FileTypeManager.isBinary.called.should.equal true
+
 			it 'should process update as file', ->
 				@updateMerger.p.processFile
 					.calledWith(@project_id, @fsPath, @filePath, @source, @user_id)
+					.should.equal true
+
+			it 'removes the temp file from disk', ->
+				@fs.unlink.calledWith(@fsPath).should.equal true
+
+		describe "doc updates for an existing doc", ->
+			beforeEach ->
+				@FileTypeManager.isBinary = sinon.stub()
+				@updateMerger.p.processDoc = sinon.stub().yields()
+				@updateMerger.mergeUpdate @user_id, @project_id, @existingDocPath, @updateRequest, @source, @callback
+
+			it 'should not look at the file contents', ->
+				@FileTypeManager.isBinary.called.should.equal false
+
+			it 'should process update as doc', ->
+				@updateMerger.p.processDoc
+					.calledWith(@project_id, @user_id, @fsPath, @existingDocPath, @source)
+					.should.equal true
+
+			it 'removes the temp file from disk', ->
+				@fs.unlink.calledWith(@fsPath).should.equal true
+
+		describe "file updates for an existing file", ->
+			beforeEach ->
+				@FileTypeManager.isBinary = sinon.stub()
+				@updateMerger.p.processFile = sinon.stub().yields()
+				@updateMerger.mergeUpdate @user_id, @project_id, @existingFilePath, @updateRequest, @source, @callback
+
+			it 'should not look at the file contents', ->
+				@FileTypeManager.isBinary.called.should.equal false
+
+			it 'should process update as file', ->
+				@updateMerger.p.processFile
+					.calledWith(@project_id, @fsPath, @existingFilePath, @source, @user_id)
 					.should.equal true
 
 			it 'removes the temp file from disk', ->

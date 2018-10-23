@@ -4,6 +4,7 @@ logger = require('logger-sharelatex')
 EditorController = require('../Editor/EditorController')
 FileTypeManager = require('../Uploads/FileTypeManager')
 FileWriter = require('../../infrastructure/FileWriter')
+ProjectEntityHandler = require('../Project/ProjectEntityHandler')
 
 module.exports = UpdateMerger =
 	mergeUpdate: (user_id, project_id, path, updateRequest, source, callback = (error) ->)->
@@ -16,13 +17,30 @@ module.exports = UpdateMerger =
 						logger.err project_id:project_id, fsPath:fsPath, "error deleting file"
 					callback mergeErr
 
-	_mergeUpdate: (user_id, project_id, path, fsPath, source, callback = (error) ->)->
-		FileTypeManager.isBinary path, fsPath, (err, isFile)->
+	_determineFileType: (project_id, path, fsPath, callback = (err, fileType) ->) ->
+		ProjectEntityHandler.getAllEntities project_id, (err, docs, files) ->
 			return callback(err) if err?
-			if isFile
+			if _.some(files, (f) -> f.path is path)
+				return callback(null, "existing-file")
+			if _.some(docs, (d) -> d.path is path)
+				return callback(null, "existing-doc") 
+			# existing file not found in project, fall back to extension check
+			FileTypeManager.isBinary path, fsPath, (err, isFile)->
+				return callback(err) if err?
+				if isFile
+					callback(null, "new-file") # extension was not text
+				else
+					callback(null, "new-doc")
+
+	_mergeUpdate: (user_id, project_id, path, fsPath, source, callback = (error) ->)->
+		UpdateMerger._determineFileType project_id, path, fsPath, (err, fileType)->
+			return callback(err) if err?
+			if fileType in ["existing-file", "new-file"]
 				UpdateMerger.p.processFile project_id, fsPath, path, source, user_id, callback
-			else
+			else if fileType in ["existing-doc", "new-doc"]
 				UpdateMerger.p.processDoc project_id, user_id, fsPath, path, source, callback
+			else
+				callback new Error("unrecognized file")
 
 	deleteUpdate: (user_id, project_id, path, source, callback = () ->)->
 		EditorController.deleteEntityWithPath project_id, path, source, user_id, () ->
