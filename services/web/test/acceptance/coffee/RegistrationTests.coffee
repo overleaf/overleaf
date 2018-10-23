@@ -7,7 +7,8 @@ settings = require "settings-sharelatex"
 redis = require "./helpers/redis"
 _ = require 'lodash'
 
-
+# Currently this is testing registration via the 'public-registration' module,
+# whereas in production we're using the 'overleaf-integration' module.
 
 # Expectations
 expectProjectAccess = (user, projectId, callback=(err,result)->) ->
@@ -78,7 +79,6 @@ describe "CSRF protection", ->
 
 	afterEach ->
 		@user.full_delete_user(@email)
-		
 
 	it 'should register with the csrf token', (done) ->
 		@user.request.get '/login', (err, res, body) =>
@@ -140,6 +140,22 @@ describe "Register", ->
 			user.emails.should.be.a 'array'
 			user.emails.length.should.equal 1
 			user.emails[0].email.should.equal @user.email
+			done()
+
+describe "Register with bonus referal id", ->
+	before (done) ->
+		@user1 = new User()
+		@user2 = new User()
+		async.series [
+			(cb) => @user1.register cb
+			(cb) => @user2.registerWithQuery '?r=' + @user1.referal_id  + '&rm=d&rs=b', cb
+		], done
+
+	it 'Adds a referal when an id is supplied and the referal source is "bonus"', (done) ->
+		@user1.get (error, user) =>
+			expect(error).to.not.exist
+			user.refered_user_count.should.eql 1
+
 			done()
 
 describe "LoginViaRegistration", ->

@@ -36,11 +36,14 @@ class User
 		db.users.update {_id: ObjectId(@_id)}, updateOp, callback
 
 	register: (callback = (error, user) ->) ->
+		@registerWithQuery('', callback)
+
+	registerWithQuery: (query, callback = (error, user) ->) ->
 		return callback(new Error('User already registered')) if @_id?
 		@getCsrfToken (error) =>
 			return callback(error) if error?
 			@request.post {
-				url: '/register'
+				url: '/register' + query
 				json: { @email, @password }
 			}, (error, response, body) =>
 				return callback(error) if error?
@@ -149,7 +152,7 @@ class User
 				return callback()
 			user_id = user._id
 			db.projects.remove owner_ref:ObjectId(user_id), {multi:true}, (err)->
-				if err? 
+				if err?
 					callback(err)
 				db.users.remove {_id: ObjectId(user_id)}, callback
 
