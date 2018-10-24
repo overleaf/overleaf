@@ -10,7 +10,7 @@ core.workflow(
       push = "master"
     ),
     # Exclude the modules directory
-    origin_files = glob(["**"], exclude = ["modules/**"]),
+    origin_files = glob(["**"], exclude = ["modules/**", "app/views/external/**", "public/brand/**"]),
     mode="ITERATIVE",
     migrate_noop_changes=True,
     authoring = authoring.pass_thru("Copybot <copybot@overleaf.com>")
