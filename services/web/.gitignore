@@ -69,7 +69,6 @@ public/stylesheets/style.css
 public/stylesheets/ol-style.css
 public/stylesheets/ol-light-style.css
 public/stylesheets/*.map
-public/brand/
 public/minjs/
 
 Gemfile.lock
@@ -82,9 +81,6 @@ public/js/libs/require*.js
 *.swp
 .DS_Store
 
-app/views/external
-
-modules
 docker-shared.yml
 
 config/*.coffee
