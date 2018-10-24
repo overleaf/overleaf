@@ -80,9 +80,9 @@ describe 'UserMembershipHandler', ->
 
 		describe 'institutions', ->
 			it 'get institution', (done) ->
-				@UserMembershipHandler.getEntity @fakeEntityId, EntityConfigs.institution, @user, (error, institution) =>
+				@UserMembershipHandler.getEntity @institution.v1Id, EntityConfigs.institution, @user, (error, institution) =>
 					should.not.exist(error)
-					expectedQuery = _id: @fakeEntityId, managerIds: ObjectId(@user._id)
+					expectedQuery = v1Id: @institution.v1Id, managerIds: ObjectId(@user._id)
 					assertCalledWith(@Institution.findOne, expectedQuery)
 					expect(institution).to.equal @institution
 					done()

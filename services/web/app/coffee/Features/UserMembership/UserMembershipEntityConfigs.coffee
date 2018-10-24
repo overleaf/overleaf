@@ -4,6 +4,7 @@ module.exports =
 		readOnly: true
 		hasMembersLimit: true
 		fields:
+			primaryKey: '_id'
 			read: ['invited_emails', 'teamInvites', 'member_ids']
 			write: null
 			access: 'manager_ids'
@@ -21,6 +22,7 @@ module.exports =
 	groupManagers:
 		modelName: 'Subscription'
 		fields:
+			primaryKey: '_id'
 			read: ['manager_ids']
 			write: 'manager_ids'
 			access: 'manager_ids'
@@ -36,6 +38,7 @@ module.exports =
 	institution:
 		modelName: 'Institution'
 		fields:
+			primaryKey: 'v1Id'
 			read: ['managerIds']
 			write: 'managerIds'
 			access: 'managerIds'

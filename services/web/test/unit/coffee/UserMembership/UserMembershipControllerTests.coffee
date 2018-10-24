@@ -19,6 +19,7 @@ describe "UserMembershipController", ->
 		@user = _id: 'mock-user-id'
 		@newUser = _id: 'mock-new-user-id', email: 'new-user-email@foo.bar'
 		@subscription = { _id: 'mock-subscription-id'}
+		@institution = _id: 'mock-institution-id', v1Id: 123
 		@users = [{ _id: 'mock-member-id-1' }, { _id: 'mock-member-id-2' }]
 
 		@AuthenticationController =
@@ -37,18 +38,12 @@ describe "UserMembershipController", ->
 				err: ->
 
 	describe 'index', ->
-		it 'get entity', (done) ->
-			@UserMembershipController.index 'group', @req, render: () =>
-				sinon.assert.calledWithMatch(
-					@UserMembershipHandler.getEntity,
-					@req.params.id,
-					modelName: 'Subscription',
-					@user
-				)
-				done()
+		beforeEach ->
+			@req.entity = @subscription
+			@req.entityConfig = EntityConfigs.group
 
 		it 'get users', (done) ->
-			@UserMembershipController.index 'group', @req, render: () =>
+			@UserMembershipController.index @req, render: () =>
 				sinon.assert.calledWithMatch(
 					@UserMembershipHandler.getUsers,
 					@subscription,
@@ -57,7 +52,7 @@ describe "UserMembershipController", ->
 				done()
 
 		it 'render group view', (done) ->
-			@UserMembershipController.index 'group', @req, render: (viewPath, viewParams) =>
+			@UserMembershipController.index @req, render: (viewPath, viewParams) =>
 				expect(viewPath).to.equal 'user_membership/index'
 				expect(viewParams.users).to.deep.equal @users
 				expect(viewParams.groupSize).to.equal @subscription.membersLimit
@@ -66,7 +61,8 @@ describe "UserMembershipController", ->
 				done()
 
 		it 'render group managers view', (done) ->
-			@UserMembershipController.index 'groupManagers', @req, render: (viewPath, viewParams) =>
+			@req.entityConfig = EntityConfigs.groupManagers
+			@UserMembershipController.index @req, render: (viewPath, viewParams) =>
 				expect(viewPath).to.equal 'user_membership/index'
 				expect(viewParams.groupSize).to.equal undefined
 				expect(viewParams.translations.title).to.equal 'group_managers'
@@ -74,43 +70,23 @@ describe "UserMembershipController", ->
 				done()
 
 		it 'render institution view', (done) ->
-			@UserMembershipController.index 'institution', @req, render: (viewPath, viewParams) =>
+			@req.entity = @institution
+			@req.entityConfig = EntityConfigs.institution
+			@UserMembershipController.index @req, render: (viewPath, viewParams) =>
 				expect(viewPath).to.equal 'user_membership/index'
 				expect(viewParams.groupSize).to.equal undefined
 				expect(viewParams.translations.title).to.equal 'institution_managers'
 				expect(viewParams.paths.exportMembers).to.be.undefined
 				done()
 
-		it 'handle unknown entity', (done) ->
-			@UserMembershipController.index 'foo', @req, null, (error) =>
-				expect(error).to.extist
-				expect(error).to.be.an.instanceof(Errors.NotFoundError)
-				done()
-
-
-		it 'handle entity not found', (done) ->
-			@UserMembershipHandler.getEntity.yields(null, null)
-			@UserMembershipController.index 'group', @req, null, (error) =>
-				expect(error).to.extist
-				expect(error).to.be.an.instanceof(Errors.NotFoundError)
-				done()
-
 	describe 'add', ->
 		beforeEach ->
 			@req.body.email = @newUser.email
-
-		it 'get entity', (done) ->
-			@UserMembershipController.add 'groupManagers', @req, json: () =>
-				sinon.assert.calledWithMatch(
-					@UserMembershipHandler.getEntity,
-					@req.params.id,
-					modelName: 'Subscription',
-					@user
-				)
-				done()
+			@req.entity = @subscription
+			@req.entityConfig = EntityConfigs.groupManagers
 
 		it 'add user', (done) ->
-			@UserMembershipController.add 'groupManagers', @req, json: () =>
+			@UserMembershipController.add @req, json: () =>
 				sinon.assert.calledWithMatch(
 					@UserMembershipHandler.addUser,
 					@subscription,
@@ -120,12 +96,13 @@ describe "UserMembershipController", ->
 				done()
 
 		it 'return user object', (done) ->
-			@UserMembershipController.add 'groupManagers', @req, json: (payload) =>
+			@UserMembershipController.add @req, json: (payload) =>
 				payload.user.should.equal @newUser
 				done()
 
 		it 'handle readOnly entity', (done) ->
-			@UserMembershipController.add 'group', @req, null, (error) =>
+			@req.entityConfig = EntityConfigs.group
+			@UserMembershipController.add @req, null, (error) =>
 				expect(error).to.extist
 				expect(error).to.be.an.instanceof(Errors.NotFoundError)
 				done()
@@ -133,9 +110,11 @@ describe "UserMembershipController", ->
 	describe 'remove', ->
 		beforeEach ->
 			@req.params.userId = @newUser._id
+			@req.entity = @subscription
+			@req.entityConfig = EntityConfigs.groupManagers
 
 		it 'remove user', (done) ->
-			@UserMembershipController.remove 'groupManagers', @req, send: () =>
+			@UserMembershipController.remove @req, send: () =>
 				sinon.assert.calledWithMatch(
 					@UserMembershipHandler.removeUser,
 					@subscription,
@@ -145,7 +124,8 @@ describe "UserMembershipController", ->
 				done()
 
 		it 'handle readOnly entity', (done) ->
-			@UserMembershipController.remove 'group', @req, null, (error) =>
+			@req.entityConfig = EntityConfigs.group
+			@UserMembershipController.remove @req, null, (error) =>
 				expect(error).to.extist
 				expect(error).to.be.an.instanceof(Errors.NotFoundError)
 				done()

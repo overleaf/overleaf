@@ -10,8 +10,9 @@ logger = require('logger-sharelatex')
 
 module.exports =
 	getEntity: (entityId, entityConfig, loggedInUser, callback = (error, entity) ->) ->
+		entityId = ObjectId(entityId) if ObjectId.isValid(entityId.toString())
 		query = Object.assign({}, entityConfig.baseQuery)
-		query._id = ObjectId(entityId)
+		query[entityConfig.fields.primaryKey] = entityId
 		unless loggedInUser.isAdmin
 			query[entityConfig.fields.access] = ObjectId(loggedInUser._id)
 		EntityModels[entityConfig.modelName].findOne query, callback
