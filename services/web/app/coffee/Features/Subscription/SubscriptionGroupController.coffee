@@ -52,7 +52,7 @@ module.exports =
 					return res.sendStatus 500
 				res.send()
 
-	exportGroupCsv: (req, res)->
+	exportGroupCsv: (req, res, next)->
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		logger.log user_id: user_id, "exporting group csv"
 		getManagedSubscription user_id, (err, subscription)->
@@ -71,7 +71,7 @@ module.exports =
 				res.send(groupCsv)
 
 	# legacy route
-	redirectToSubscriptionGroupAdminPage: (req, res) ->
+	redirectToSubscriptionGroupAdminPage: (req, res, next) ->
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		getManagedSubscription user_id, (error, subscription) ->
 			return next(error) if error?
