@@ -84,3 +84,5 @@ public/js/libs/require*.js
 docker-shared.yml
 
 config/*.coffee
+
+modules/**/Makefile
