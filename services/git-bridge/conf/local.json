@@ -4,7 +4,7 @@
     "apiBaseUrl": "http://v2.overleaf.test:4000/api/git-bridge",
     "username": "user",
     "password": "pass",
-    "postbackBaseUrl": "http://git_bridge:8000",
+    "postbackBaseUrl": "http://git-bridge:8000",
     "serviceName": "Overleaf",
     "oauth2": {
         "oauth2ClientID": "264c723c925c13590880751f861f13084934030c13b4452901e73bdfab226edc",
