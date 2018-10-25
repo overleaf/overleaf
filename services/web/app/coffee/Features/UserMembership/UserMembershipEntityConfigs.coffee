@@ -19,6 +19,14 @@ module.exports =
 			removeInvite: '/subscription/invites'
 			exportMembers: '/subscription/group/export'
 
+	team: # for metrics only
+		modelName: 'Subscription'
+		fields:
+			primaryKey: 'overleaf.id'
+			access: 'manager_ids'
+		baseQuery:
+			groupPlan: true
+
 	groupManagers:
 		modelName: 'Subscription'
 		fields:

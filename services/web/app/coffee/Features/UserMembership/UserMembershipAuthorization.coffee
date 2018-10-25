@@ -6,13 +6,13 @@ Errors = require('../Errors/Errors')
 logger = require("logger-sharelatex")
 
 module.exports =
-	requireEntityAccess: (entityName) ->
+	requireEntityAccess: (entityName, entityId = null) ->
 		(req, res, next) ->
 			loggedInUser = AuthenticationController.getSessionUser(req)
 			unless loggedInUser
 				return AuthorizationMiddlewear.redirectToRestricted req, res, next
 
-			entityId = req.params.id
+			entityId = req.params.id unless entityId?
 			getEntity entityName, entityId, loggedInUser, (error, entity, entityConfig) ->
 				return next(error) if error?
 				unless entity?
