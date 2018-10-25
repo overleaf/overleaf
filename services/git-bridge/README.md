@@ -107,4 +107,4 @@ You have to restart the server for configuration changes to take effect.
   - `apiBaseUrl = "http://www.overleaf.test:5000/api/v0"`
   - `postbackBaseUrl = "http://git_bridge:8000"`
   - `oauth2Server = "http://www.overleaf.test:5000"`
-- From this repo, do `make run`
+- From this repo, `docker-compose up`
