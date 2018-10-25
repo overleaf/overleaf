@@ -101,6 +101,7 @@ You have to restart the server for configuration changes to take effect.
 - In this repo, copy `conf/example.json` to `conf/local.json`
 - Set up an OAuth app in v1
   - with `scopes = 'git_bridge'`, and `callback = 'http://v1.overleaf.test:500/no-callback'`
+  - (see below for SQL to do this)
 - Update values in `conf/local.json`:
   - Set oauth creds
   - `swapStore = {type: "noop"}"`
@@ -108,3 +109,24 @@ You have to restart the server for configuration changes to take effect.
   - `postbackBaseUrl = "http://git_bridge:8000"`
   - `oauth2Server = "http://www.overleaf.test:5000"`
 - From this repo, `docker-compose up`
+
+
+## Creating OAuth app
+
+```sql
+INSERT INTO public.oauth_applications (
+  "name", uid, secret, redirect_uri, scopes, skip_authorization,
+  created_at, updated_at, partner, confidential
+) VALUES (
+  'gitbridge',
+  '264c723c925c13590880751f861f13084934030c13b4452901e73bdfab226edc',
+  'e6b2e9eee7ae2bb653823250bb69594a91db0547fe3790a7135acb497108e62d',
+  'http://www.overleaf.test:5000/no-callback-required',
+  'git_bridge',
+  true,
+  now(),
+  now(),
+  null,
+  true
+);
+```
