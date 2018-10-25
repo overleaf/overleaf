@@ -9,25 +9,6 @@ async = require("async")
 
 module.exports =
 
-	addUserToGroup: (req, res, next)->
-		adminUserId = AuthenticationController.getLoggedInUserId(req)
-		newEmail = req.body?.email?.toLowerCase()?.trim()
-
-		getManagedSubscription adminUserId, (error, subscription) ->
-			return next(error) if error?
-
-			logger.log adminUserId:adminUserId, newEmail:newEmail, "adding user to group subscription"
-
-			SubscriptionGroupHandler.addUserToGroup subscription._id, newEmail, (err, user)->
-				if err?
-					logger.err err:err, newEmail:newEmail, adminUserId:adminUserId, "error adding user from group"
-					return res.sendStatus 500
-				result =
-					user:user
-				if err and err.limitReached
-					result.limitReached = true
-				res.json(result)
-
 	removeUserFromGroup: (req, res, next)->
 		adminUserId = AuthenticationController.getLoggedInUserId(req)
 		userToRemove_id = req.params.user_id

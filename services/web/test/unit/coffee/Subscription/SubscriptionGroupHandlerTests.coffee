@@ -29,7 +29,6 @@ describe "SubscriptionGroupHandler", ->
 			getUserOrCreateHoldingAccount: sinon.stub().callsArgWith(1, null, @user)
 
 		@SubscriptionUpdater =
-			addUserToGroup: sinon.stub().callsArgWith(2)
 			removeUserFromGroup: sinon.stub().callsArgWith(2)
 
 		@TeamInvitesHandler =
@@ -81,45 +80,6 @@ describe "SubscriptionGroupHandler", ->
 				log:->
 				warn:->
 
-
-	describe "addUserToGroup", ->
-		beforeEach ->
-			@LimitationsManager.hasGroupMembersLimitReached.callsArgWith(1, null, false, @subscription)
-			@UserGetter.getUserByAnyEmail.callsArgWith(1, null, @user)
-
-		it "should find the user", (done)->
-			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
-				@UserGetter.getUserByAnyEmail.calledWith(@newEmail).should.equal true
-				done()
-
-		it "should add the user to the group", (done)->
-			@Handler.addUserToGroup @subscription_id, @newEmail, (err)=>
-				@SubscriptionUpdater.addUserToGroup.calledWith(@subscription_id, @user._id).should.equal true
-				done()
-
-		it "should not add the user to the group if the limit has been reached", (done)->
-			@LimitationsManager.hasGroupMembersLimitReached.callsArgWith(1, null, true, @subscription)
-			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
-				@SubscriptionUpdater.addUserToGroup.called.should.equal false
-				done()
-
-		it "should return error that limit has been reached", (done)->
-			@LimitationsManager.hasGroupMembersLimitReached.callsArgWith(1, null, true, @subscription)
-			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
-				err.limitReached.should.equal true
-				done()
-
-		it "should mark any notification as read if it is part of a licence", (done)->
-			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
-				@NotificationsBuilder.groupPlan.calledWith(@user, {subscription_id:@subscription._id}).should.equal true
-				@readStub.called.should.equal true
-				done()
-
-		it "should add an email invite if no user is found", (done) ->
-			@UserGetter.getUserByAnyEmail.callsArgWith(1, null, null)
-			@Handler.addUserToGroup @adminUser_id, @newEmail, (err)=>
-				@TeamInvitesHandler.createInvite.calledWith(@adminUser_id, @newEmail).should.equal true
-				done()
 
 	describe "removeUserFromGroup", ->
 

@@ -24,7 +24,6 @@ describe "SubscriptionGroupController", ->
 			_id: @subscriptionId
 		}
 		@GroupHandler =
-			addUserToGroup: sinon.stub().callsArgWith(2, null, @user)
 			removeUserFromGroup: sinon.stub().callsArgWith(2)
 			isUserPartOfGroup: sinon.stub()
 			getPopulatedListOfMembers: sinon.stub().callsArgWith(1, null, [@user])
@@ -55,19 +54,6 @@ describe "SubscriptionGroupController", ->
 
 
 		@token = "super-secret-token"
-
-
-	describe "addUserToGroup", ->
-
-		it "should use the subscription id for the logged in user and take the email address from the body", (done)->
-			newEmail = " boB@gmaiL.com "
-			@req.body = email: newEmail
-			res =
-				json : (data)=>
-					@GroupHandler.addUserToGroup.calledWith(@subscriptionId, "bob@gmail.com").should.equal true
-					data.user.should.deep.equal @user
-					done()
-			@Controller.addUserToGroup @req, res
 
 
 	describe "removeUserFromGroup", ->

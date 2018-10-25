@@ -15,31 +15,6 @@ UserMembershipViewModel = require("../UserMembership/UserMembershipViewModel")
 
 module.exports = SubscriptionGroupHandler =
 
-	addUserToGroup: (subscriptionId, newEmail, callback)->
-		logger.log subscriptionId:subscriptionId, newEmail:newEmail, "adding user to group"
-		LimitationsManager.hasGroupMembersLimitReached subscriptionId, (err, limitReached, subscription)->
-			if err?
-				logger.err err:err, subscriptionId:subscriptionId, newEmail:newEmail, "error checking if limit reached for group plan"
-				return callback(err)
-			if limitReached
-				logger.err subscriptionId:subscriptionId, newEmail:newEmail, "group subscription limit reached not adding user to group"
-				return callback(limitReached:limitReached)
-			UserGetter.getUserByAnyEmail newEmail, (err, user)->
-				return callback(err) if err?
-				if user?
-					SubscriptionUpdater.addUserToGroup subscriptionId, user._id, (err)->
-						if err?
-							logger.err err:err, "error adding user to group"
-							return callback(err)
-						NotificationsBuilder.groupPlan(user, {subscription_id:subscription._id}).read()
-						userViewModel = UserMembershipViewModel.build(user)
-						callback(err, userViewModel)
-				else
-					TeamInvitesHandler.createInvite subscriptionId, newEmail, (err) ->
-						return callback(err) if err?
-						userViewModel = UserMembershipViewModel.build(newEmail)
-						callback(err, userViewModel)
-
 	removeUserFromGroup: (subscriptionId, userToRemove_id, callback)->
 		SubscriptionUpdater.removeUserFromGroup subscriptionId, userToRemove_id, callback
 
