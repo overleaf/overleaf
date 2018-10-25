@@ -21,19 +21,13 @@ module.exports =
 
 
 		webRouter.get '/subscription/group', AuthenticationController.requireLogin(), SubscriptionGroupController.redirectToSubscriptionGroupAdminPage
-		webRouter.get '/subscription/group/export',  AuthenticationController.requireLogin(), SubscriptionGroupController.exportGroupCsv
-		webRouter.delete '/subscription/group/user/:user_id', AuthenticationController.requireLogin(), SubscriptionGroupController.removeUserFromGroup
 		webRouter.delete '/subscription/group/user', AuthenticationController.requireLogin(), SubscriptionGroupController.removeSelfFromGroup
 
 		# Team invites
-		webRouter.post '/subscription/invites',  AuthenticationController.requireLogin(),
-			TeamInvitesController.createInvite
 		webRouter.get '/subscription/invites/:token/',  AuthenticationController.requireLogin(),
 			TeamInvitesController.viewInvite
 		webRouter.put '/subscription/invites/:token/',  AuthenticationController.requireLogin(),
 			TeamInvitesController.acceptInvite
-		webRouter.delete '/subscription/invites/:email/',  AuthenticationController.requireLogin(),
-			TeamInvitesController.revokeInvite
 
 		# Routes to join a domain licence team
 		webRouter.get '/user/subscription/domain/join', AuthenticationController.requireLogin(), DomainLicenceController.join

@@ -38,3 +38,18 @@ module.exports =
 		UserMembershipHandler.removeUser entity, entityConfig, userId, (error, user)->
 			return next(error) if error?
 			res.send()
+
+	exportCsv: (req, res, next)->
+		{ entity, entityConfig } = req
+		logger.log subscriptionId: entity._id, "exporting csv"
+		UserMembershipHandler.getUsers entity, entityConfig, (error, users)->
+			return next(error) if error?
+			csvOutput = ""
+			for user in users
+				csvOutput += user.email + "\n"
+			res.header(
+				"Content-Disposition",
+				"attachment; filename=Group.csv"
+			)
+			res.contentType('text/csv')
+			res.send(csvOutput)

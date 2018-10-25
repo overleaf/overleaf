@@ -1,8 +1,6 @@
 SubscriptionGroupHandler = require("./SubscriptionGroupHandler")
 logger = require("logger-sharelatex")
 SubscriptionLocator = require("./SubscriptionLocator")
-ErrorsController = require("../Errors/ErrorController")
-SubscriptionDomainHandler = require("./SubscriptionDomainHandler")
 AuthenticationController = require('../Authentication/AuthenticationController')
 _ = require("underscore")
 async = require("async")
@@ -10,16 +8,14 @@ async = require("async")
 module.exports =
 
 	removeUserFromGroup: (req, res, next)->
-		adminUserId = AuthenticationController.getLoggedInUserId(req)
+		subscription = req.entity
 		userToRemove_id = req.params.user_id
-		getManagedSubscription adminUserId, (error, subscription) ->
-			return next(error) if error?
-			logger.log adminUserId:adminUserId, userToRemove_id:userToRemove_id, "removing user from group subscription"
-			SubscriptionGroupHandler.removeUserFromGroup subscription._id, userToRemove_id, (err)->
-				if err?
-					logger.err err:err, adminUserId:adminUserId, userToRemove_id:userToRemove_id, "error removing user from group"
-					return res.sendStatus 500
-				res.send()
+		logger.log subscriptionId: subscription._id, userToRemove_id:userToRemove_id, "removing user from group subscription"
+		SubscriptionGroupHandler.removeUserFromGroup subscription._id, userToRemove_id, (err)->
+			if err?
+				logger.err err:err, adminUserId:adminUserId, userToRemove_id:userToRemove_id, "error removing user from group"
+				return next(err)
+			res.send()
 
 	removeSelfFromGroup: (req, res, next)->
 		adminUserId = req.query.admin_user_id
@@ -32,24 +28,6 @@ module.exports =
 					logger.err err:err, userToRemove_id:userToRemove_id, adminUserId:adminUserId, "error removing self from group"
 					return res.sendStatus 500
 				res.send()
-
-	exportGroupCsv: (req, res, next)->
-		user_id = AuthenticationController.getLoggedInUserId(req)
-		logger.log user_id: user_id, "exporting group csv"
-		getManagedSubscription user_id, (err, subscription)->
-			return next(error) if error?
-			if !subscription.groupPlan
-				return res.redirect("/")
-			SubscriptionGroupHandler.getPopulatedListOfMembers subscription._id, (err, users)->
-				groupCsv = ""
-				for user in users
-					groupCsv += user.email + "\n"
-				res.header(
-					"Content-Disposition",
-					"attachment; filename=Group.csv"
-				)
-				res.contentType('text/csv')
-				res.send(groupCsv)
 
 	# legacy route
 	redirectToSubscriptionGroupAdminPage: (req, res, next) ->

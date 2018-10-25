@@ -65,7 +65,6 @@ describe "SubscriptionGroupHandler", ->
 			"logger-sharelatex": log:->
 			"../User/UserCreator": @UserCreator
 			"./SubscriptionUpdater": @SubscriptionUpdater
-			"./TeamInvitesHandler": @TeamInvitesHandler
 			"./SubscriptionLocator": @SubscriptionLocator
 			"../../models/Subscription": Subscription: @Subscription
 			"../User/UserGetter": @UserGetter

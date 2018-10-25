@@ -7,7 +7,6 @@ Subscription = require("../../models/Subscription").Subscription
 LimitationsManager = require("./LimitationsManager")
 logger = require("logger-sharelatex")
 OneTimeTokenHandler = require("../Security/OneTimeTokenHandler")
-TeamInvitesHandler = require("./TeamInvitesHandler")
 EmailHandler = require("../Email/EmailHandler")
 settings = require("settings-sharelatex")
 NotificationsBuilder = require("../Notifications/NotificationsBuilder")

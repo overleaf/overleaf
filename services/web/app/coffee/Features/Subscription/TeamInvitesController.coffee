@@ -9,11 +9,12 @@ EmailHelper = require("../Helpers/EmailHelper")
 module.exports =
 	createInvite: (req, res, next) ->
 		teamManagerId = AuthenticationController.getLoggedInUserId(req)
+		subscription = req.entity
 		email = EmailHelper.parseEmail(req.body.email)
 		if !email?
 			return res.sendStatus(400)
 
-		TeamInvitesHandler.createInvite teamManagerId, email, (err, invite) ->
+		TeamInvitesHandler.createInvite teamManagerId, subscription, email, (err, invite) ->
 			return next(err) if err?
 			inviteView = { user:
 				{ email: invite.email, sentAt: invite.sentAt, invite: true }
@@ -48,11 +49,12 @@ module.exports =
 			res.sendStatus 204
 
 	revokeInvite: (req, res) ->
+		subscription = req.entity
 		email = EmailHelper.parseEmail(req.params.email)
 		teamManagerId = AuthenticationController.getLoggedInUserId(req)
 		if !email?
 			return res.sendStatus(400)
 
-		TeamInvitesHandler.revokeInvite teamManagerId, email, (err, results) ->
+		TeamInvitesHandler.revokeInvite teamManagerId, subscription, email, (err, results) ->
 			return next(err) if err?
 			res.sendStatus 204

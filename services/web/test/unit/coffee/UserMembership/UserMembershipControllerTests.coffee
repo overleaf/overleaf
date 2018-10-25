@@ -20,7 +20,10 @@ describe "UserMembershipController", ->
 		@newUser = _id: 'mock-new-user-id', email: 'new-user-email@foo.bar'
 		@subscription = { _id: 'mock-subscription-id'}
 		@institution = _id: 'mock-institution-id', v1Id: 123
-		@users = [{ _id: 'mock-member-id-1' }, { _id: 'mock-member-id-2' }]
+		@users = [
+			{ _id: 'mock-member-id-1', email: 'mock-email-1@foo.com' }
+			{ _id: 'mock-member-id-2', email: 'mock-email-2@foo.com' }
+		]
 
 		@AuthenticationController =
 			getSessionUser: sinon.stub().returns(@user)
@@ -57,7 +60,7 @@ describe "UserMembershipController", ->
 				expect(viewParams.users).to.deep.equal @users
 				expect(viewParams.groupSize).to.equal @subscription.membersLimit
 				expect(viewParams.translations.title).to.equal 'group_account'
-				expect(viewParams.paths.addMember).to.equal '/subscription/invites'
+				expect(viewParams.paths.addMember).to.equal "/manage/groups/#{@subscription._id}/invites"
 				done()
 
 		it 'render group managers view', (done) ->
@@ -129,3 +132,34 @@ describe "UserMembershipController", ->
 				expect(error).to.extist
 				expect(error).to.be.an.instanceof(Errors.NotFoundError)
 				done()
+
+	describe "exportCsv", ->
+
+		beforeEach ->
+			@req.entity = @subscription
+			@req.entityConfig = EntityConfigs.groupManagers
+			@res = new MockResponse()
+			@res.contentType = sinon.stub()
+			@res.header = sinon.stub()
+			@res.send = sinon.stub()
+			@UserMembershipController.exportCsv @req, @res
+
+		it 'get users', ->
+			sinon.assert.calledWithMatch(
+				@UserMembershipHandler.getUsers,
+				@subscription,
+				modelName: 'Subscription',
+			)
+
+		it "should set the correct content type on the request", ->
+			assertCalledWith(@res.contentType, "text/csv")
+
+		it "should name the exported csv file", ->
+			assertCalledWith(
+				@res.header
+				"Content-Disposition",
+				"attachment; filename=Group.csv"
+			)
+
+		it "should export the correct csv", ->
+			assertCalledWith(@res.send, "mock-email-1@foo.com\nmock-email-2@foo.com\n")
