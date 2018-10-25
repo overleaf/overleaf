@@ -59,6 +59,9 @@ describe "SubscriptionGroupHandler", ->
 		@NotificationsBuilder =
 			groupPlan: sinon.stub().returns({read:@readStub})
 
+		@UserMembershipViewModel =
+			build: (email) -> { email }
+
 		@Handler = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": log:->
 			"../User/UserCreator": @UserCreator
@@ -72,6 +75,7 @@ describe "SubscriptionGroupHandler", ->
 			"../Email/EmailHandler":@EmailHandler
 			"settings-sharelatex":@settings
 			"../Notifications/NotificationsBuilder": @NotificationsBuilder
+			"../UserMembership/UserMembershipViewModel": @UserMembershipViewModel
 			"logger-sharelatex":
 				err:->
 				log:->
