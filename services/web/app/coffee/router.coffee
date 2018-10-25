@@ -340,8 +340,10 @@ module.exports = class Router
 			# Otherwise show some information about teams
 			if AuthenticationController.isUserLoggedIn(req)
 				res.redirect('/user/subscription')
+			else if Settings.overleaf?.host
+				res.redirect("#{Settings.overleaf.host}/teams")
 			else
-				res.redirect("#{settings.overleaf.host}/teams")
+				next()
 
 		webRouter.get '/chrome', (req, res, next) ->
 			# Match v1 behaviour - this is used for a Chrome web app
