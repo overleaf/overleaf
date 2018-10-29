@@ -10,7 +10,7 @@ describe "CompileManager", ->
 	beforeEach ->
 		@rateLimitGetStub = sinon.stub()
 		rateLimitGetStub = @rateLimitGetStub
-		@ratelimiter = 
+		@ratelimiter =
 			addCount: sinon.stub()
 		@CompileManager = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings =
@@ -34,11 +34,11 @@ describe "CompileManager", ->
 			timeout: 42
 		}
 
-	
+
 	describe "compile", ->
 		beforeEach ->
 			@CompileManager._checkIfRecentlyCompiled = sinon.stub().callsArgWith(2, null, false)
-			@CompileManager._ensureRootDocumentIsSet = sinon.stub().callsArgWith(1, null)
+			@ProjectRootDocManager.ensureRootDocumentIsSet = sinon.stub().callsArgWith(1, null)
 			@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith(1, null, @limits)
 			@ClsiManager.sendRequest = sinon.stub().callsArgWith(3, null, @status = "mock-status", @outputFiles = "mock output files", @output = "mock output")
 
@@ -53,7 +53,7 @@ describe "CompileManager", ->
 					.should.equal true
 
 			it "should ensure that the root document is set", ->
-				@CompileManager._ensureRootDocumentIsSet
+				@ProjectRootDocManager.ensureRootDocumentIsSet
 					.calledWith(@project_id)
 					.should.equal true
 
@@ -81,7 +81,7 @@ describe "CompileManager", ->
 				@logger.log
 					.calledWith(project_id: @project_id, user_id: @user_id, "compiling project")
 					.should.equal true
-				
+
 		describe "when the project has been recently compiled", ->
 			it "should return", (done)->
 				@CompileManager._checkIfAutoCompileLimitHasBeenHit = (isAutoCompile, compileGroup, cb)-> cb(null, true)
@@ -96,7 +96,7 @@ describe "CompileManager", ->
 				@CompileManager.compile @project_id, @user_id, {}, (err, status)->
 					status.should.equal "autocompile-backoff"
 					done()
-					
+
 	describe "getProjectCompileLimits", ->
 		beforeEach ->
 			@features = {
@@ -106,17 +106,17 @@ describe "CompileManager", ->
 			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, @project = { owner_ref: @owner_id = "owner-id-123" })
 			@UserGetter.getUser = sinon.stub().callsArgWith(2, null, @user = { features: @features })
 			@CompileManager.getProjectCompileLimits @project_id, @callback
-			
+
 		it "should look up the owner of the project", ->
 			@ProjectGetter.getProject
 				.calledWith(@project_id, { owner_ref: 1 })
 				.should.equal true
-				
+
 		it "should look up the owner's features", ->
 			@UserGetter.getUser
 				.calledWith(@project.owner_ref, { features: 1 })
 				.should.equal true
-				
+
 		it "should return the limits", ->
 			@callback
 				.calledWith(null, {
@@ -124,23 +124,23 @@ describe "CompileManager", ->
 					compileGroup: @group
 				})
 				.should.equal true
-				
+
 	describe "deleteAuxFiles", ->
 		beforeEach ->
 			@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith 1, null, @limits = { compileGroup: "mock-compile-group" }
 			@ClsiManager.deleteAuxFiles = sinon.stub().callsArg(3)
 			@CompileManager.deleteAuxFiles @project_id, @user_id, @callback
-			
+
 		it "should look up the compile group to use", ->
 			@CompileManager.getProjectCompileLimits
 				.calledWith(@project_id)
 				.should.equal true
-				
+
 		it "should delete the aux files", ->
 			@ClsiManager.deleteAuxFiles
 				.calledWith(@project_id, @user_id, @limits)
 				.should.equal true
-				
+
 		it "should call the callback", ->
 			@callback.called.should.equal true
 
@@ -170,55 +170,7 @@ describe "CompileManager", ->
 
 			it "should call the callback with false", ->
 				@callback.calledWith(null, false).should.equal true
-				
-	describe "_ensureRootDocumentIsSet", ->
-		beforeEach ->
-			@project = {}
-			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, @project)
-			@ProjectRootDocManager.setRootDocAutomatically = sinon.stub().callsArgWith(1, null)
-			
-		describe "when the root doc is set", ->
-			beforeEach ->
-				@project.rootDoc_id = "root-doc-id"
-				@CompileManager._ensureRootDocumentIsSet(@project_id, @callback)
 
-			it "should find the project with only the rootDoc_id fiel", ->
-				@ProjectGetter.getProject
-					.calledWith(@project_id, rootDoc_id: 1)
-					.should.equal true
-
-			it "should not try to update the project rootDoc_id", ->
-				@ProjectRootDocManager.setRootDocAutomatically
-					.called.should.equal false
-
-			it "should call the callback", ->
-				@callback.called.should.equal true
-
-		describe "when the root doc is not set", ->
-			beforeEach ->
-				@CompileManager._ensureRootDocumentIsSet(@project_id, @callback)
-
-			it "should find the project with only the rootDoc_id fiel", ->
-				@ProjectGetter.getProject
-					.calledWith(@project_id, rootDoc_id: 1)
-					.should.equal true
-
-			it "should update the project rootDoc_id", ->
-				@ProjectRootDocManager.setRootDocAutomatically
-					.calledWith(@project_id)
-					.should.equal true
-
-			it "should call the callback", ->
-				@callback.called.should.equal true
-		
-		describe "when the project does not exist", ->
-			beforeEach ->
-				@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, null)
-				@CompileManager._ensureRootDocumentIsSet(@project_id, @callback)
-
-			it "should call the callback with an error", ->
-				@callback.calledWith(new Error("project not found")).should.equal true
-			
 	describe "_checkIfAutoCompileLimitHasBeenHit", ->
 
 		it "should be able to compile if it is not an autocompile", (done)->
@@ -255,16 +207,16 @@ describe "CompileManager", ->
 			@CompileManager.getProjectCompileLimits = sinon.stub().callsArgWith 1, null, @limits = { compileGroup: "mock-compile-group" }
 			@ClsiManager.wordCount = sinon.stub().callsArg(4)
 			@CompileManager.wordCount @project_id, @user_id, false, @callback
-			
+
 		it "should look up the compile group to use", ->
 			@CompileManager.getProjectCompileLimits
 				.calledWith(@project_id)
 				.should.equal true
-				
+
 		it "should call wordCount for project", ->
 			@ClsiManager.wordCount
 				.calledWith(@project_id, @user_id, false, @limits)
 				.should.equal true
-				
+
 		it "should call the callback", ->
 			@callback.called.should.equal true

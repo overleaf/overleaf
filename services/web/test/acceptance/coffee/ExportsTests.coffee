@@ -36,7 +36,7 @@ describe 'Exports', ->
 					description: 'description'
 					author: 'author'
 					license: 'other'
-					show_source: true
+					showSource: true
 			}, (error, response, body) =>
 				throw error if error?
 				expect(response.statusCode).to.equal 200
@@ -53,7 +53,7 @@ describe 'Exports', ->
 			expect(project.metadata.description).to.equal 'description'
 			expect(project.metadata.author).to.equal 'author'
 			expect(project.metadata.license).to.equal 'other'
-			expect(project.metadata.show_source).to.equal true
+			expect(project.metadata.showSource).to.equal true
 			# version should match what was retrieved from project-history
 			expect(project.historyVersion).to.equal @version
 			# user details should match

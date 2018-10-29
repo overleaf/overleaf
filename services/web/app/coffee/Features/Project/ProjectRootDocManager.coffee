@@ -1,5 +1,6 @@
 ProjectEntityHandler = require "./ProjectEntityHandler"
 ProjectEntityUpdateHandler = require "./ProjectEntityUpdateHandler"
+ProjectGetter = require "./ProjectGetter"
 Path = require "path"
 async = require("async")
 _ = require("underscore")
@@ -45,13 +46,24 @@ module.exports = ProjectRootDocManager =
 				# docpaths have a leading / so allow matching "folder/filename" and "/folder/filename"
 				if path == rootDocName
 					root_doc_id = doc_id
-			# try a basename match if there was no match 
+			# try a basename match if there was no match
 			if !root_doc_id
 				for doc_id, path of docPaths
-					if Path.basename(path) == Path.basename(rootDocName) 
+					if Path.basename(path) == Path.basename(rootDocName)
 						root_doc_id = doc_id
 			# set the root doc id if we found a match
 			if root_doc_id?
 				ProjectEntityUpdateHandler.setRootDoc project_id, root_doc_id, callback
 			else
 				callback()
+
+	ensureRootDocumentIsSet: (project_id, callback = (error) ->) ->
+		ProjectGetter.getProject project_id, rootDoc_id: 1, (error, project) ->
+			return callback(error) if error?
+			if !project?
+				return callback new Error("project not found")
+
+			if project.rootDoc_id?
+				callback()
+			else
+				ProjectRootDocManager.setRootDocAutomatically project_id, callback

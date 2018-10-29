@@ -12,7 +12,8 @@ describe 'ProjectRootDocManager', ->
 		@ProjectRootDocManager = SandboxedModule.require modulePath, requires:
 			"./ProjectEntityHandler" : @ProjectEntityHandler = {}
 			"./ProjectEntityUpdateHandler" : @ProjectEntityUpdateHandler = {}
-	
+			"./ProjectGetter" : @ProjectGetter = {}
+
 	describe "setRootDocAutomatically", ->
 		describe "when there is a suitable root doc", ->
 			beforeEach (done)->
@@ -165,3 +166,53 @@ describe 'ProjectRootDocManager', ->
 
 			it "should not set the root doc", ->
 				@ProjectEntityUpdateHandler.setRootDoc.called.should.equal false
+
+
+	describe "ensureRootDocumentIsSet", ->
+		beforeEach ->
+			@project = {}
+			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, @project)
+			@ProjectRootDocManager.setRootDocAutomatically = sinon.stub().callsArgWith(1, null)
+
+		describe "when the root doc is set", ->
+			beforeEach ->
+				@project.rootDoc_id = "root-doc-id"
+				@ProjectRootDocManager.ensureRootDocumentIsSet(@project_id, @callback)
+
+			it "should find the project with only the rootDoc_id fiel", ->
+				@ProjectGetter.getProject
+					.calledWith(@project_id, rootDoc_id: 1)
+					.should.equal true
+
+			it "should not try to update the project rootDoc_id", ->
+				@ProjectRootDocManager.setRootDocAutomatically
+					.called.should.equal false
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+		describe "when the root doc is not set", ->
+			beforeEach ->
+				@ProjectRootDocManager.ensureRootDocumentIsSet(@project_id, @callback)
+
+			it "should find the project with only the rootDoc_id fiel", ->
+				@ProjectGetter.getProject
+					.calledWith(@project_id, rootDoc_id: 1)
+					.should.equal true
+
+			it "should update the project rootDoc_id", ->
+				@ProjectRootDocManager.setRootDocAutomatically
+					.calledWith(@project_id)
+					.should.equal true
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+		describe "when the project does not exist", ->
+			beforeEach ->
+				@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, null)
+				@ProjectRootDocManager.ensureRootDocumentIsSet(@project_id, @callback)
+
+			it "should call the callback with an error", ->
+				@callback.calledWith(new Error("project not found")).should.equal true
+

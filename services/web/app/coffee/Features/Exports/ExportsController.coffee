@@ -4,7 +4,7 @@ logger = require("logger-sharelatex")
 
 module.exports =
 
-	exportProject: (req, res) ->
+	exportProject: (req, res, next) ->
 		{project_id, brand_variation_id} = req.params
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		export_params = {
@@ -21,10 +21,10 @@ module.exports =
 			export_params.description = req.body.description.trim() if req.body.description
 			export_params.author = req.body.author.trim() if req.body.author
 			export_params.license = req.body.license.trim() if req.body.license
-			export_params.show_source = req.body.show_source if req.body.show_source
+			export_params.show_source = req.body.showSource if req.body.showSource?
 
 		ExportsHandler.exportProject export_params, (err, export_data) ->
-			return err if err?
+			return next(err) if err?
 			logger.log
 				user_id:user_id
 				project_id: project_id
@@ -36,7 +36,13 @@ module.exports =
 	exportStatus: (req, res) ->
 		{export_id} = req.params
 		ExportsHandler.fetchExport export_id, (err, export_json) ->
-			return err if err?
+			if err?
+				json = {
+					status_summary: 'failed',
+					status_detail: err.toString,
+				}
+				res.send export_json: json
+				return err
 			parsed_export = JSON.parse(export_json)
 			json = {
 				status_summary: parsed_export.status_summary,
@@ -46,11 +52,11 @@ module.exports =
 			}
 			res.send export_json: json
 
-	exportDownload: (req, res) ->
+	exportDownload: (req, res, next) ->
 		{type, export_id} = req.params
 
 		AuthenticationController.getLoggedInUserId(req)
 		ExportsHandler.fetchDownload export_id, type, (err, export_file_url) ->
-			return err if err?
+			return next(err) if err?
 
 			res.redirect export_file_url

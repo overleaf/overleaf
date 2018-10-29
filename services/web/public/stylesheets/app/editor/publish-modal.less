@@ -1,11 +1,16 @@
 .modal-body-publish {
+    @label-column-width: 10em;
+    @control-left-margin: 1.0em;
     .form-control-box {
       margin-bottom: 1.5ex;
-      margin-left: 1.0em;
+      margin-left: @control-left-margin;
       label {
         display: inline-block;
-        width: 10em;
+        width: @label-column-width;
         vertical-align: baseline;
+      }
+      label.checkbox-label {
+        width: auto;
       }
       .form-control {
         display: inline-block;
@@ -26,6 +31,12 @@
       option {
         margin-left: -4px;
       }
+      a.help {
+        margin-left: 0.6em;
+      }
+    }
+    .no-label {
+      margin-left: @label-column-width + @control-left-margin;
     }
 		#search-input-container {
 				overflow: hidden;

@@ -62,7 +62,7 @@ describe 'ExportsController', ->
 			@req.body.description = description
 			@req.body.author = author
 			@req.body.license = license
-			@req.body.show_source = true
+			@req.body.showSource = true
 
 		it 'should ask the handler to perform the export', (done) ->
 			@handler.exportProject = sinon.stub().yields(null, {iAmAnExport: true, v1_id: 897})

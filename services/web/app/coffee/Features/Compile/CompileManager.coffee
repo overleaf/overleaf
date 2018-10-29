@@ -28,8 +28,8 @@ module.exports = CompileManager =
 			CompileManager._checkIfAutoCompileLimitHasBeenHit options.isAutoCompile, "everyone", (err, canCompile)->
 				if !canCompile
 					return callback null, "autocompile-backoff", []
-				
-				CompileManager._ensureRootDocumentIsSet project_id, (error) ->
+
+				ProjectRootDocManager.ensureRootDocumentIsSet project_id, (error) ->
 					return callback(error) if error?
 					CompileManager.getProjectCompileLimits project_id, (error, limits) ->
 						return callback(error) if error?
@@ -103,17 +103,6 @@ module.exports = CompileManager =
 				Metrics.inc "auto-compile-#{compileGroup}-limited"
 			callback err, canCompile
 
-	_ensureRootDocumentIsSet: (project_id, callback = (error) ->) ->
-		ProjectGetter.getProject project_id, rootDoc_id: 1, (error, project) ->
-			return callback(error) if error?
-			if !project?
-				return callback new Error("project not found")
-
-			if project.rootDoc_id?
-				callback()
-			else
-				ProjectRootDocManager.setRootDocAutomatically project_id, callback
-		
 	wordCount: (project_id, user_id, file, callback = (error) ->) ->
 		CompileManager.getProjectCompileLimits project_id, (error, limits) ->
 			return callback(error) if error?
