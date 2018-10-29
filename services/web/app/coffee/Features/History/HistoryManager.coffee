@@ -27,6 +27,17 @@ module.exports = HistoryManager =
 				error = new Error("project-history returned a non-success status code: #{res.statusCode}")
 				callback error
 
+	flushProject: (project_id, callback = (error) ->) ->
+		request.post {
+			url: "#{settings.apis.project_history.url}/project/#{project_id}/flush"
+		}, (error, res, body)->
+			return callback(error) if error?
+			if res.statusCode >= 200 and res.statusCode < 300
+				callback()
+			else
+				error = new Error("project-history returned a non-success status code: #{res.statusCode}")
+				callback error
+
 	injectUserDetails: (data, callback = (error, data_with_users) ->) ->
 		# data can be either:
 		# {
