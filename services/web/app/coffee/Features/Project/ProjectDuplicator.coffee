@@ -34,10 +34,21 @@ module.exports = ProjectDuplicator =
 
 	_copyFiles: (owner_id, newProject, originalProject_id, originalFolder, desFolder, callback)->
 		fileRefs = originalFolder.fileRefs or []
+		firstError = null # track first error to exit gracefully from parallel copy
 		jobs = fileRefs.map (file)->
 			return (cb)->
-				ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject newProject, desFolder._id, originalProject_id, file, owner_id, cb
-		async.parallelLimit jobs, 5, callback
+				return async.setImmediate(cb) if firstError? # skip further copies if an error has occurred
+				ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject newProject, desFolder._id, originalProject_id, file, owner_id, (err) ->
+					firstError ||= err if err? # set the error flag if this copy failed
+					return cb()
+		# If one of these jobs fails then we wait until all running jobs have
+		# finished, skipping those which have not started yet. We need to wait
+		# for all the copy jobs to finish to avoid them writing to the project
+		# entry in the background while we are deleting it.
+		async.parallelLimit jobs, 5, (err) ->
+			return callback(firstError) if firstError?
+			return callback(err) if err? # shouldn't happen
+			return callback()
 
 
 	_copyFolderRecursivly: (owner_id, newProject_id, originalProject_id, originalRootDoc, originalFolder, desFolder, docContents, callback)->

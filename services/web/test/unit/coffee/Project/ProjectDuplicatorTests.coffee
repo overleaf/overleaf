@@ -178,7 +178,7 @@ describe 'ProjectDuplicator', ->
 
 	describe 'when there is an error', ->
 		beforeEach ->
-			@rootFolder.fileRefs = [{name:"file0", _id:"file0"}, "BROKEN-FILE"]
+			@rootFolder.fileRefs = [{name:"file0", _id:"file0"}, "BROKEN-FILE", {name:"file1", _id:"file1"}, {name:"file2", _id:"file2"}]
 
 		it 'should delete the broken cloned project', (done) ->
 			@duplicator.duplicate @owner, @old_project_id, "", (err, newProject)=>
