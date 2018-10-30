@@ -7,7 +7,7 @@ module.exports = FileTypeManager =
 	]
 
 	IGNORE_EXTENSIONS : [
-		"dvi", "aux", "log", "ps", "toc", "out", "pdfsync"
+		"dvi", "aux", "log", "toc", "out", "pdfsync"
 		# Index and glossary files
 		"nlo", "ind", "glo", "gls", "glg"
 		# Bibtex
