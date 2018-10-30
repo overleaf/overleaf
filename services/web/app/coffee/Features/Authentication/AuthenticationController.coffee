@@ -13,6 +13,8 @@ Analytics = require "../Analytics/AnalyticsManager"
 passport = require 'passport'
 NotificationsBuilder = require("../Notifications/NotificationsBuilder")
 SudoModeHandler = require '../SudoMode/SudoModeHandler'
+V1Api = require "../V1/V1Api"
+{User} = require "../../models/User"
 
 module.exports = AuthenticationController =
 
@@ -168,6 +170,24 @@ module.exports = AuthenticationController =
 				next()
 
 		return doRequest
+
+	requireOauth: () ->
+		return (req, res, next = (error) ->) ->
+			return res.status(401).send() unless req.token?
+			options =
+				expectedStatusCodes: [401]
+				json: token: req.token
+				method: "POST"
+				uri: "/api/v1/sharelatex/oauth_authorize"
+			V1Api.request options, (error, response, body) ->
+				return next(error) if error?
+				return res.status(401).json({error: "invalid_token"}) unless body?.user_profile?.id
+				User.findOne { "overleaf.id": body.user_profile.id }, (error, user) ->
+					return next(error) if error?
+					return res.status(401).send() unless user?
+					req.oauth = access_token: body.access_token
+					req.oauth_user = user
+					next()
 
 	_globalLoginWhitelist: []
 	addEndpointToLoginWhitelist: (endpoint) ->

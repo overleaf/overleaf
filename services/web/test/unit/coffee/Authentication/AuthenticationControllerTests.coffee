@@ -1,5 +1,7 @@
 sinon = require('sinon')
 chai = require('chai')
+sinonChai = require "sinon-chai"
+chai.use sinonChai
 should = chai.should()
 expect = chai.expect
 modulePath = "../../../../app/js/Features/Authentication/AuthenticationController.js"
@@ -13,6 +15,7 @@ ObjectId = require("mongojs").ObjectId
 describe "AuthenticationController", ->
 	beforeEach ->
 		tk.freeze(Date.now())
+		@UserModel = findOne: sinon.stub()
 		@AuthenticationController = SandboxedModule.require modulePath, requires:
 			"./AuthenticationManager": @AuthenticationManager = {}
 			"../User/UserUpdater" : @UserUpdater = {updateUser:sinon.stub()}
@@ -32,6 +35,8 @@ describe "AuthenticationController", ->
 			"../SudoMode/SudoModeHandler": @SudoModeHandler = {activateSudoMode: sinon.stub().callsArgWith(1, null)}
 			"../Notifications/NotificationsBuilder": @NotificationsBuilder =
 				ipMatcherAffiliation: sinon.stub()
+			"../V1/V1Api": @V1Api = request: sinon.stub()
+			"../../models/User": { User: @UserModel }
 		@user =
 			_id: ObjectId()
 			email: @email = "USER@example.com"
@@ -394,6 +399,93 @@ describe "AuthenticationController", ->
 
 			it "should redirect to the register or login page", ->
 				@AuthenticationController._redirectToLoginOrRegisterPage.calledWith(@req, @res).should.equal true
+
+	describe "requireOauth", ->
+		beforeEach ->
+			@res.send = sinon.stub()
+			@res.status = sinon.stub().returns(@res)
+			@middleware = @AuthenticationController.requireOauth()
+
+		describe "when token not provided", ->
+			beforeEach ->
+				@middleware(@req, @res, @next)
+
+			it "should return 401 error", ->
+				@res.status.should.have.been.calledWith 401
+
+		describe "when token provided", ->
+			beforeEach ->
+				@V1Api.request = sinon.stub().yields("error", {}, {})
+				@req.token = "foo"
+				@middleware(@req, @res, @next)
+
+			it "should make request to v1 api with token", ->
+				@V1Api.request.should.have.been.calledWith {
+					expectedStatusCodes: [401]
+					json: token: "foo"
+					method: "POST"
+					uri: "/api/v1/sharelatex/oauth_authorize"
+				}
+
+		describe "when v1 api returns error", ->
+			beforeEach ->
+				@V1Api.request = sinon.stub().yields("error", {}, {})
+				@req.token = "foo"
+				@middleware(@req, @res, @next)
+
+			it "should return status", ->
+				@next.should.have.been.calledWith "error"
+
+		describe "when v1 api status code is not 200", ->
+			beforeEach ->
+				@V1Api.request = sinon.stub().yields(null, {statusCode: 401}, {})
+				@req.token = "foo"
+				@middleware(@req, @res, @next)
+
+			it "should return status", ->
+				@res.status.should.have.been.calledWith 401
+
+		describe "when v1 api returns authorized profile and access token", ->
+			beforeEach ->
+				@oauth_authorize =
+					access_token: "access_token"
+					user_profile: id: "overleaf-id"
+				@V1Api.request = sinon.stub().yields(null, {statusCode: 200}, @oauth_authorize)
+				@req.token = "foo"
+
+			describe "in all cases", ->
+				beforeEach ->
+					@middleware(@req, @res, @next)
+
+				it "should find user", ->
+					@UserModel.findOne.should.have.been.calledWithMatch { "overleaf.id": "overleaf-id" }
+
+			describe "when user find returns error", ->
+				beforeEach ->
+					@UserModel.findOne = sinon.stub().yields("error")
+					@middleware(@req, @res, @next)
+
+				it "should return error", ->
+					@next.should.have.been.calledWith "error"
+
+			describe "when user is not found", ->
+				beforeEach ->
+					@UserModel.findOne = sinon.stub().yields(null, null)
+					@middleware(@req, @res, @next)
+
+				it "should return unauthorized", ->
+					@res.status.should.have.been.calledWith 401
+
+			describe "when user is found", ->
+				beforeEach ->
+					@UserModel.findOne = sinon.stub().yields(null, "user")
+					@middleware(@req, @res, @next)
+
+				it "should add user to request", ->
+					@req.oauth_user.should.equal "user"
+
+				it "should add access_token to request", ->
+					@req.oauth.access_token.should.equal "access_token"
 
 	describe "requireGlobalLogin", ->
 		beforeEach ->

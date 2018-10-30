@@ -3332,6 +3332,11 @@
         }
       }
     },
+    "express-bearer-token": {
+      "version": "2.2.0",
+      "from": "express-bearer-token@>=2.2.0 <3.0.0",
+      "resolved": "https://registry.npmjs.org/express-bearer-token/-/express-bearer-token-2.2.0.tgz"
+    },
     "express-http-proxy": {
       "version": "1.1.0",
       "from": "express-http-proxy@>=1.1.0 <2.0.0",

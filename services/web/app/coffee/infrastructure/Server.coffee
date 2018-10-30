@@ -20,6 +20,7 @@ methodOverride = require('method-override')
 csrf = require('csurf')
 csrfProtection = csrf()
 cookieParser = require('cookie-parser')
+bearerToken = require('express-bearer-token')
 
 # Init the session store
 sessionStore = new RedisStore(client:sessionsRedisClient)
@@ -71,6 +72,7 @@ app.use bodyParser.urlencoded({ extended: true, limit: "2mb"})
 app.use bodyParser.json({limit: Settings.max_doc_length + 64 * 1024}) # 64kb overhead
 app.use multer(dest: Settings.path.uploadFolder)
 app.use methodOverride()
+app.use bearerToken()
 
 app.use metrics.http.monitor(logger)
 RedirectManager.apply(webRouter)
