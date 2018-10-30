@@ -60,14 +60,17 @@ module.exports = ProjectManager =
 
 			logger.log project_id: project_id, doc_ids: doc_ids, "deleting docs"
 			async.series jobs, () ->
-				# There is no harm in flushing project history if the previous call
-				# failed and sometimes it is required
-				HistoryManager.flushProjectChangesAsync project_id
-
-				if errors.length > 0
-					callback new Error("Errors deleting docs. See log for details")
-				else
-					callback(null)
+				# When deleting the project here we want to ensure that project
+				# history is completely flushed because the project may be
+				# deleted in web after this call completes, and so further
+				# attempts to flush would fail after that.
+				HistoryManager.flushProjectChanges project_id, (error) ->
+					if errors.length > 0
+						callback new Error("Errors deleting docs. See log for details")
+					else if error?
+						callback(error)
+					else
+						callback(null)
 
 	getProjectDocsAndFlushIfOld: (project_id, projectStateHash, excludeVersions = {}, _callback = (error, docs) ->) ->
 		timer = new Metrics.Timer("projectManager.getProjectDocsAndFlushIfOld")
