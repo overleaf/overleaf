@@ -36,9 +36,11 @@ describe "InstitutionsController", ->
 				getUsersByHostname: @getUsersByHostname
 			'../Institutions/InstitutionsAPI':
 				addAffiliation: @addAffiliation
+			'../../models/Institution': Institution: @Institution =
+				findOneAndUpdate: sinon.stub().yields()
 
 		@req =
-			body:{}
+			body: hostname: 'mit.edu'
 
 		@res =
 			send: sinon.stub()
@@ -47,11 +49,24 @@ describe "InstitutionsController", ->
 
 	describe 'confirmDomain', ->
 		it 'should add affiliations for matching users', (done)->
-			@req.body.hostname = "mit.edu"
 			@res.sendStatus = (code) =>
 				@getUsersByHostname.calledOnce.should.equal true
 				@addAffiliation.calledThrice.should.equal true
 				@addAffiliation.calledWith(@stubbedUser1._id, @stubbedUser1.emails[0].email).should.equal true
 				@addAffiliation.calledWith(@stubbedUser1._id, @stubbedUser1.emails[2].email).should.equal true
+				done()
+			@InstitutionsController.confirmDomain @req, @res, @next
+
+	describe 'create institution', ->
+		it 'should create new institution', (done)->
+			@req.body.institution_id = 123
+			expectedData = v1Id: 123
+			@res.sendStatus = (code) =>
+				sinon.assert.calledWith(
+					@Institution.findOneAndUpdate,
+					expectedData,
+					expectedData,
+					{ upsert: true }
+				)
 				done()
 			@InstitutionsController.confirmDomain @req, @res, @next

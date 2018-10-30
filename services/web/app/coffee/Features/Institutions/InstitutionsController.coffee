@@ -1,24 +1,37 @@
 logger = require("logger-sharelatex")
 UserGetter = require("../User/UserGetter")
 { addAffiliation } = require("../Institutions/InstitutionsAPI")
+Institution = require('../../models/Institution').Institution
 async = require('async')
 
 module.exports = InstitutionsController =
 	confirmDomain: (req, res, next) ->
 		hostname = req.body.hostname
-		reversedHostname = hostname.trim().split('').reverse().join('')
-		UserGetter.getUsersByHostname hostname, {_id:1, emails:1}, (error, users) ->
-			if error?
-				logger.err error: error, 'problem fetching users by hostname'
-				return next(error)
-			async.map users, ((user) ->
-				matchingEmails = user.emails.filter (email) -> email.reversedHostname == reversedHostname
-				for email in matchingEmails
-					addAffiliation user._id, email.email, {confirmedAt: email.confirmedAt}, (error) =>
-						if error?
-							logger.err error: error, 'problem adding affiliation while confirming hostname'
-							return next(error)
-				), (error) ->
+		institutionId = req.body.institution_id
+		createInstitution institutionId, (error) ->
+			return next(error) if error?
+			affiliateUsers hostname, (error) ->
+				return next(error) if error?
+				res.sendStatus 200
+
+createInstitution = (institutionId, callback = (error)->) ->
+	data = v1Id: institutionId
+	Institution.findOneAndUpdate data, data, { upsert: true }, callback
+
+affiliateUsers = (hostname, callback = (error)->) ->
+	reversedHostname = hostname.trim().split('').reverse().join('')
+	UserGetter.getUsersByHostname hostname, {_id:1, emails:1}, (error, users) ->
+		if error?
+			logger.err error: error, 'problem fetching users by hostname'
+			return callback(error)
+		async.map users, ((user) ->
+			matchingEmails = user.emails.filter (email) -> email.reversedHostname == reversedHostname
+			for email in matchingEmails
+				addAffiliation user._id, email.email, {confirmedAt: email.confirmedAt}, (error) =>
 					if error?
-						return next(error)
-			res.sendStatus 200
+						logger.err error: error, 'problem adding affiliation while confirming hostname'
+						return callback(error)
+			), (error) ->
+				if error?
+					return callback(error)
+			callback()
