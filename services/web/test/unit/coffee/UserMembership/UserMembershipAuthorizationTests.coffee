@@ -73,3 +73,27 @@ describe "UserMembershipAuthorization", ->
 				sinon.assert.notCalled(@UserMembershipHandler.getEntity)
 				expect(@req.entity).to.not.exist
 				done()
+
+		it 'can override entity id', (done) ->
+			middlewear = @UserMembershipAuthorization.requireEntityAccess 'group', 'entity-id-override'
+			middlewear @req, null, (error) =>
+				expect(error).to.not.extist
+				sinon.assert.calledWithMatch(
+					@UserMembershipHandler.getEntity,
+					'entity-id-override',
+				)
+				done()
+
+		it "doesn't cache entity id between requests", (done) ->
+			middlewear = @UserMembershipAuthorization.requireEntityAccess 'group'
+			middlewear @req, null, (error) =>
+				expect(error).to.not.extist
+				lastCallArs = @UserMembershipHandler.getEntity.lastCall.args
+				expect(lastCallArs[0]).to.equal @req.params.id
+				newEntityId = 'another-mock-id'
+				@req.params.id = newEntityId
+				middlewear @req, null, (error) =>
+					expect(error).to.not.extist
+					lastCallArs = @UserMembershipHandler.getEntity.lastCall.args
+					expect(lastCallArs[0]).to.equal newEntityId
+					done()
