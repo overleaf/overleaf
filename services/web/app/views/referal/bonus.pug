@@ -24,27 +24,34 @@ block content
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
-										a(href='https://twitter.com/share?text=is%20trying%20out%20the%20online%20LaTeX%20Editor%20ShareLaTeX&url='+encodeURIComponent(buildReferalUrl("t"))+'&counturl=https://www.sharelatex.com', target="_blank").twitter Tweet
+										a(href='https://twitter.com/share?text='+encodeURIComponent(translate("bonus_twitter_share_text"))+'&url='+encodeURIComponent(buildReferalUrl("t"))+'&counturl='+settings.social.twitter.counturl, target="_blank").twitter
+											i.fa.fa-fw.fa-2x.fa-twitter(aria-hidden)
+											|
+											| Tweet
 									
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
-										a(href='#', onclick='postToFeed(); return false;').facebook #{translate("post_on_facebook")}
+										a(href='#', onclick='postToFeed(); return false;').facebook
+											i.fa.fa-fw.fa-2x.fa-facebook-square(aria-hidden)
+											|
+											| #{translate("post_on_facebook")}
 
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
-										a(href="https://plus.google.com/share?url="+encodeURIComponent(buildReferalUrl('gp')), onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');return false;").google-plus #{translate("share_us_on_googleplus")}
-									
-							.row
-								.col-md-8.col-md-offset-2.bonus-banner
-									.title
-										a(href='mailto:?subject=Online LaTeX editor you may like &body=Hey, I have been using the online LaTeX editor ShareLaTeX recently and thought you might like to check it out. '+encodeURIComponent(buildReferalUrl("e")), title='Share by Email').email #{translate("email_us_to_your_friends")}
+										a(href='mailto:?subject='+encodeURIComponent(translate("bonus_email_share_header"))+'&body='+encodeURIComponent(translate("bonus_email_share_body")+' ')+encodeURIComponent(buildReferalUrl("e")), title='Share by Email').email
+											i.fa.fa-fw.fa-2x.fa-envelope-open-o(aria-hidden)
+											|
+											| #{translate("email_us_to_your_friends")}
 
 							.row
 								.col-md-8.col-md-offset-2.bonus-banner
 									.title
-										a(href='#link-modal', data-toggle="modal", ng-click="openLinkToUsModal()").link #{translate("link_to_us")}
+										a(href='#link-modal', data-toggle="modal", ng-click="openLinkToUsModal()").link
+											i.fa.fa-fw.fa-2x.fa-globe(aria-hidden)
+											|
+											| #{translate("link_to_us")}
 
 							.row
 								.col-md-10.col-md-offset-1.bonus-banner
@@ -100,7 +107,7 @@ block content
 								p #{translate("can_link_to_sl_with_html")}
 								p
 									textarea.col-md-12(readonly=true)
-										<a href="#{buildReferalUrl("d")}">Online LaTeX Editor ShareLaTeX</a>
+										<a href="#{buildReferalUrl("d")}">#{translate("bonus_share_link_text")}</a>
 
 								p #{translate("thanks")}!
 
@@ -125,19 +132,19 @@ block content
 	script(type='text/javascript', src='//platform.twitter.com/widgets.js')
 	script(src='https://connect.facebook.net/en_US/all.js')
 	script(type='text/javascript').
-		FB.init({appId: "148710621956179", status: true, cookie: true});
+		FB.init({appId: '#{settings.social.facebook.appId}', status: true, cookie: true});
 
 		function postToFeed() {
 
 			// calling the API ...
 			var obj = {
 				method: 'feed',
-				redirect_uri: 'https://www.sharelatex.com',
+				redirect_uri: '#{settings.social.facebook.redirectUri}',
 				link: '!{buildReferalUrl("fb")}',
-				picture: 'https://www.sharelatex.com/brand/logo/logosmall.png',
-				name: 'ShareLaTeX - Online LaTeX Editor',
-				caption: 'Free Unlimited Projects and Compiles',
-				description: 'ShareLaTeX is a free online LaTeX Editor. Real time collaboration like Google Docs, with Dropbox, history and auto-complete'
+				picture: '#{settings.social.facebook.picture}',
+				name: '#{translate("bonus_facebook_name").replace(/'/g, "\\x27")}',
+				caption: '#{translate("bonus_facebook_caption").replace(/'/g, "\\x27")}',
+				description: '#{translate("bonus_facebook_description").replace(/'/g, "\\x27")}'
 			};
 
 			function callback(response) {
@@ -158,9 +165,6 @@ block content
 			});
 			$(".facebook").click(function() {
 				ga('send', 'event', 'referal-button', 'clicked', "facebook")
-			});
-			$(".google-plus").click(function() {
-				ga('send', 'event', 'referal-button', 'clicked', "google-plus")
 			});
 			$(".link").click(function() {
 				ga('send', 'event', 'referal-button', 'clicked', "direct-link")

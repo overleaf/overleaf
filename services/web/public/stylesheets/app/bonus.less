@@ -1,3 +1,8 @@
+@twitter-color    : #1DA1F2;
+@facebook-color   : #3B5998;
+@email-color      : #808B9A;
+@link-to-us-color : #406EB3;
+
 .bonus {
 	margin-top: 15px;
 	.page-header h1 {
@@ -21,41 +26,35 @@
 		}
 		.title {
 			a {
-				display: block;
+				display: flex;
+				align-items: center;
 				font-size: 18px;
-				padding: 20px 62px;
+				padding: 20px;
 				background-color: white;
 				border-bottom: 1px solid lighten(@blue, 40%);
 				color: @blue;
-				&:hover {
-					background-color: lighten(@blue, 45%);
+				> i {
+					margin-right: 10px;
 				}
+				&:hover,
+				&:focus {
+					background-color: lighten(@blue, 45%);
+					text-decoration: none;
+				}
+
 			}
 		}
-		a.twitter {
-			background-image: url(/img/social/twitter-32.png);
-			background-repeat: no-repeat;
-			background-position: 16px center;
+		a.twitter > i {
+			color: @twitter-color;
 		}
-		a.facebook {
-			background-image: url(/img/social/facebook-32.png);
-			background-repeat: no-repeat;
-			background-position: 16px center;
+		a.facebook > i {
+			color: @facebook-color;
 		}
-		a.email {
-			background-image: url(/img/social/mail-32.png);
-			background-repeat: no-repeat;
-			background-position: 16px center;
+		a.email > i {
+			color: @email-color;
 		}
-		a.google-plus {
-			background-image: url(//www.gstatic.com/images/icons/gplus-32.png);
-			background-repeat: no-repeat;
-			background-position: 16px center;
-		}
-		a.link {
-			background-image: url(/img/social/link-32.png);
-			background-repeat: no-repeat;
-			background-position: 16px center;
+		a.link > i {
+			color: @link-to-us-color;
 		}
 		h2.direct-link {
 		}
