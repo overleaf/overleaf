@@ -17,6 +17,12 @@ block content
 							h1 #{translate(translations.title)}
 
 						.row-spaced-small
+							div(ng-if="inputs.removeMembers.error", ng-cloak)
+								div.alert.alert-danger(ng-if="inputs.removeMembers.errorMessage")
+									| #{translate('error')}:
+									| {{ inputs.removeMembers.errorMessage }}
+								div.alert.alert-danger(ng-if="!inputs.removeMembers.errorMessage")
+									| #{translate('generic_something_went_wrong')}
 							ul.list-unstyled.structured-list(
 								select-all-list,
 								ng-cloak
@@ -62,6 +68,12 @@ block content
 						hr
 						div(ng-if="!groupSize || users.length < groupSize", ng-cloak)
 							p.small #{translate("add_more_members")}
+							div(ng-if="inputs.addMembers.error", ng-cloak)
+								div.alert.alert-danger(ng-if="inputs.addMembers.errorMessage")
+									| #{translate('error')}:
+									| {{ inputs.addMembers.errorMessage }}
+								div.alert.alert-danger(ng-if="!inputs.addMembers.errorMessage")
+									| #{translate('generic_something_went_wrong')}
 							form.form
 								.row
 									.col-xs-6
@@ -69,7 +81,7 @@ block content
 											name="email",
 											type="text",
 											placeholder="jane@example.com, joe@example.com",
-											ng-model="inputs.emails",
+											ng-model="inputs.addMembers.content",
 											on-enter="addMembers()"
 										)
 									.col-xs-4

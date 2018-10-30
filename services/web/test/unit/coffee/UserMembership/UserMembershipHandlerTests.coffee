@@ -12,8 +12,8 @@ EntityConfigs = require("../../../../app/js/Features/UserMembership/UserMembersh
 
 describe 'UserMembershipHandler', ->
 	beforeEach ->
-		@user = _id: 'mock-user-id'
-		@newUser = _id: 'mock-new-user-id', email: 'new-user-email@foo.bar'
+		@user = _id: ObjectId()
+		@newUser = _id: ObjectId(), email: 'new-user-email@foo.bar'
 		@fakeEntityId = ObjectId()
 		@subscription =
 			_id: 'mock-subscription-id'
@@ -133,7 +133,14 @@ describe 'UserMembershipHandler', ->
 				@UserGetter.getUserByAnyEmail.yields(null, null)
 				@UserMembershipHandler.addUser @institution, EntityConfigs.institution, @email, (error) =>
 					expect(error).to.exist
-					expect(error).to.be.an.instanceof(Errors.NotFoundError)
+					expect(error.userNotFound).to.equal true
+					done()
+
+			it 'handle user already added', (done) ->
+				@institution.managerIds.push(@newUser._id)
+				@UserMembershipHandler.addUser @institution, EntityConfigs.institution, @email, (error, users) =>
+					expect(error).to.exist
+					expect(error.alreadyAdded).to.equal true
 					done()
 
 			it 'add user to institution', (done) ->
@@ -152,4 +159,11 @@ describe 'UserMembershipHandler', ->
 				@UserMembershipHandler.removeUser @institution, EntityConfigs.institution, @newUser._id, (error, user) =>
 					lastCall = @institution.update.lastCall
 					assertCalledWith(@institution.update, { $pull: managerIds: @newUser._id })
+					done()
+
+			it 'handle admin', (done) ->
+				@subscription.admin_id = @newUser._id
+				@UserMembershipHandler.removeUser @subscription, EntityConfigs.groupManagers, @newUser._id, (error, user) =>
+					expect(error).to.exist
+					expect(error.isAdmin).to.equal true
 					done()

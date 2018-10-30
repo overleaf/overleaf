@@ -27,6 +27,7 @@ describe "UserMembershipController", ->
 
 		@AuthenticationController =
 			getSessionUser: sinon.stub().returns(@user)
+			getLoggedInUserId: sinon.stub().returns(@user._id)
 		@UserMembershipHandler =
 			getEntity: sinon.stub().yields(null, @subscription)
 			getUsers: sinon.stub().yields(null, @users)
@@ -110,6 +111,24 @@ describe "UserMembershipController", ->
 				expect(error).to.be.an.instanceof(Errors.NotFoundError)
 				done()
 
+		it 'handle user already added', (done) ->
+			@UserMembershipHandler.addUser.yields(alreadyAdded: true)
+			@UserMembershipController.add @req, status: () => json: (payload) =>
+				expect(payload.error.code).to.equal 'user_already_added'
+				done()
+
+		it 'handle user not found', (done) ->
+			@UserMembershipHandler.addUser.yields(userNotFound: true)
+			@UserMembershipController.add @req, status: () => json: (payload) =>
+				expect(payload.error.code).to.equal 'user_not_found'
+				done()
+
+		it 'handle invalid email', (done) ->
+			@req.body.email = 'not_valid_email'
+			@UserMembershipController.add @req, status: () => json: (payload) =>
+				expect(payload.error.code).to.equal 'invalid_email'
+				done()
+
 	describe 'remove', ->
 		beforeEach ->
 			@req.params.userId = @newUser._id
@@ -131,6 +150,18 @@ describe "UserMembershipController", ->
 			@UserMembershipController.remove @req, null, (error) =>
 				expect(error).to.extist
 				expect(error).to.be.an.instanceof(Errors.NotFoundError)
+				done()
+
+		it 'prevent self removal', (done) ->
+			@req.params.userId = @user._id
+			@UserMembershipController.remove @req, status: () => json: (payload) =>
+				expect(payload.error.code).to.equal 'managers_cannot_remove_self'
+				done()
+
+		it 'prevent admin removal', (done) ->
+			@UserMembershipHandler.removeUser.yields(isAdmin: true)
+			@UserMembershipController.remove @req, status: () => json: (payload) =>
+				expect(payload.error.code).to.equal 'managers_cannot_remove_admin'
 				done()
 
 	describe "exportCsv", ->

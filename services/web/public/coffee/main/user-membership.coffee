@@ -8,7 +8,13 @@ define [
 		$scope.selectedUsers = []
 
 		$scope.inputs =
-			emails: ""
+			addMembers:
+				content: ''
+				error: false
+				errorMessage: null
+			removeMembers:
+				error: false
+				errorMessage: null
 
 		parseEmails = (emailsString)->
 			regexBySpaceOrComma = /[\s,]+/
@@ -20,7 +26,9 @@ define [
 			return emails
 
 		$scope.addMembers = () ->
-			emails = parseEmails($scope.inputs.emails)
+			$scope.inputs.addMembers.error = false
+			$scope.inputs.addMembers.errorMessage = null
+			emails = parseEmails($scope.inputs.addMembers.content)
 			for email in emails
 				queuedHttp
 					.post(paths.addMember, {
@@ -30,9 +38,15 @@ define [
 					.then (response) ->
 						{ data } = response
 						$scope.users.push data.user if data.user?
-						$scope.inputs.emails = ""
+						$scope.inputs.addMembers.content = ""
+					.catch (response) ->
+						{ data } = response
+						$scope.inputs.addMembers.error = true
+						$scope.inputs.addMembers.errorMessage = data.error?.message
 
 		$scope.removeMembers = () ->
+			$scope.inputs.removeMembers.error = false
+			$scope.inputs.removeMembers.errorMessage = null
 			for user in $scope.selectedUsers
 				do (user) ->
 					if paths.removeInvite and user.invite and !user._id?
@@ -51,7 +65,11 @@ define [
 							index = $scope.users.indexOf(user)
 							return if index == -1
 							$scope.users.splice(index, 1)
-			$scope.selectedUsers = []
+						.catch (response) ->
+							{ data } = response
+							$scope.inputs.removeMembers.error = true
+							$scope.inputs.removeMembers.errorMessage = data.error?.message
+			$scope.updateSelectedUsers
 
 		$scope.updateSelectedUsers = () ->
 			$scope.selectedUsers = $scope.users.filter (user) -> user.selected

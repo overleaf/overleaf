@@ -12,7 +12,10 @@ module.exports =
 		subscription = req.entity
 		email = EmailHelper.parseEmail(req.body.email)
 		if !email?
-			return res.sendStatus(400)
+			return res.status(422).json error:
+				code: 'invalid_email'
+				message: req.i18n.translate('invalid_email')
+
 
 		TeamInvitesHandler.createInvite teamManagerId, subscription, email, (err, invite) ->
 			return next(err) if err?
