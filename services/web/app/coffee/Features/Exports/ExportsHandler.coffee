@@ -1,4 +1,5 @@
 ProjectGetter = require('../Project/ProjectGetter')
+ProjectHistoryHandler = require('../Project/ProjectHistoryHandler')
 ProjectLocator = require('../Project/ProjectLocator')
 ProjectRootDocManager = require('../Project/ProjectRootDocManager')
 UserGetter = require('../User/UserGetter')
@@ -35,7 +36,9 @@ module.exports = ExportsHandler = self =
 			user: (cb) ->
 				UserGetter.getUser user_id, {first_name: 1, last_name: 1, email: 1, overleaf: 1}, cb
 			historyVersion: (cb) ->
-				self._requestVersion project_id, cb
+				ProjectHistoryHandler.ensureHistoryExistsForProject project_id, (error) ->
+					return callback(error) if error?
+					self._requestVersion project_id, cb
 
 		async.auto jobs, (err, results) ->
 			if err?

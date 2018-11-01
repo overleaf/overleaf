@@ -15,6 +15,7 @@ describe 'ExportsHandler', ->
 				log: ->
 				err: ->
 			'../Project/ProjectGetter': @ProjectGetter = {}
+			'../Project/ProjectHistoryHandler': @ProjectHistoryHandler = {}
 			'../Project/ProjectLocator': @ProjectLocator = {}
 			'../Project/ProjectRootDocManager': @ProjectRootDocManager = {}
 			'../User/UserGetter': @UserGetter = {}
@@ -101,6 +102,7 @@ describe 'ExportsHandler', ->
 			@rootDocPath = 'main.tex'
 			@historyVersion = 777
 			@ProjectGetter.getProject = sinon.stub().yields(null, @project)
+			@ProjectHistoryHandler.ensureHistoryExistsForProject = sinon.stub().yields(null)
 			@ProjectLocator.findRootDoc = sinon.stub().yields(null, [null, {fileSystem: 'main.tex'}])
 			@ProjectRootDocManager.ensureRootDocumentIsSet = sinon.stub().callsArgWith(1, null)
 			@UserGetter.getUser = sinon.stub().yields(null, @user)
@@ -112,6 +114,10 @@ describe 'ExportsHandler', ->
 				@ExportsHandler._buildExport @export_params, (error, export_data) =>
 					@callback(error, export_data)
 					done()
+
+			it "should ensure the project has history", ->
+				@ProjectHistoryHandler.ensureHistoryExistsForProject.called
+				.should.equal true
 
 			it "should request the project history version", ->
 				@ExportsHandler._requestVersion.called

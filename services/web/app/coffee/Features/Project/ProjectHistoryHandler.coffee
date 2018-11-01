@@ -19,7 +19,6 @@ module.exports = ProjectHistoryHandler =
 	getHistoryId: (project_id, callback = (err, result) ->) ->
 		ProjectDetailsHandler.getDetails project_id, (err, project) ->
 			return callback(err) if err? # n.b. getDetails returns an error if the project doesn't exist
-			return callback(new Error("history exists")) if project.overleaf?.history?.id?
 			callback(null, project?.overleaf?.history?.id)
 
 	ensureHistoryExistsForProject: (project_id, callback = (err) ->) ->
