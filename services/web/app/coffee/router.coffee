@@ -248,9 +248,9 @@ module.exports = class Router
 		webRouter.post "/project/:Project_id/labels", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, HistoryController.selectHistoryApi, HistoryController.ensureProjectHistoryEnabled, HistoryController.createLabel
 		webRouter.delete "/project/:Project_id/labels/:label_id", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, HistoryController.selectHistoryApi, HistoryController.ensureProjectHistoryEnabled, HistoryController.deleteLabel
 
-		webRouter.post '/project/:project_id/export/:brand_variation_id', AuthorizationMiddlewear.ensureUserCanAdminProject, ExportsController.exportProject
-		webRouter.get '/project/:project_id/export/:export_id', AuthorizationMiddlewear.ensureUserCanAdminProject, ExportsController.exportStatus
-		webRouter.get '/project/:project_id/export/:export_id/:type', AuthorizationMiddlewear.ensureUserCanAdminProject, ExportsController.exportDownload
+		webRouter.post '/project/:project_id/export/:brand_variation_id', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, ExportsController.exportProject
+		webRouter.get '/project/:project_id/export/:export_id', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, ExportsController.exportStatus
+		webRouter.get '/project/:project_id/export/:export_id/:type', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, ExportsController.exportDownload
 
 		webRouter.get  '/Project/:Project_id/download/zip', AuthorizationMiddlewear.ensureUserCanReadProject, ProjectDownloadsController.downloadProject
 		webRouter.get  '/project/download/zip', AuthorizationMiddlewear.ensureUserCanReadMultipleProjects, ProjectDownloadsController.downloadMultipleProjects
