@@ -1,3 +1,6 @@
+# run this with 
+# ./node_modules/.bin/mocha --reporter tap --compilers coffee:coffee-script/register test/unit/coffee/loggingManagerTests.coffee
+
 require('coffee-script')
 chai = require('chai')
 should = chai.should()
@@ -24,6 +27,18 @@ describe 'logger.error', ->
 		@logger.error {foo:'bar'}, "message"
 		@captureException.called.should.equal true
 
+	it 'should report the same error to sentry only once', () ->
+		error1 = new Error('this is the error')
+		@logger.error {foo: error1}, "first message"
+		@logger.error {bar: error1}, "second message"
+		@captureException.callCount.should.equal 1
+
+	it 'should report two different errors to sentry individually', () ->
+		error1 = new Error('this is the error')
+		error2 = new Error('this is the error')
+		@logger.error {foo: error1}, "first message"
+		@logger.error {bar: error2}, "second message"
+		@captureException.callCount.should.equal 2
 
 	it 'for multiple errors should only report a maximum of 5 errors to sentry', () ->
 		@logger.error {foo:'bar'}, "message"
