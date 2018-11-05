@@ -1,5 +1,9 @@
 doctype html
-html(itemscope, itemtype='http://schema.org/Product')
+html(
+	lang=(currentLngCode || 'en'),
+	itemscope,
+	itemtype='http://schema.org/Product'
+)
 	- metadata = metadata || {}
 	block vars
 
