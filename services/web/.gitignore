@@ -53,7 +53,6 @@ public/es/modules
 
 public/js/*.js
 public/js/*.map
-public/js/libs/sharejs.js
 public/js/analytics/
 public/js/directives/
 public/js/components/

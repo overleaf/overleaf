@@ -2,9 +2,13 @@
   "extends": [
     "standard",
     "standard-react",
+    "prettier",
+    "prettier/react",
+    "prettier/standard",
     "plugin:jsx-a11y/recommended"
   ],
   "plugins": [
+    "prettier",
     "jsx-a11y",
     "mocha",
     "chai-expect",
@@ -24,10 +28,14 @@
   },
   "rules": {
     "max-len": ["error", {
-      // Ignore long describe/it test blocks
       "ignoreUrls": true,
-      "ignorePattern": "^\\s*(it|describe)\\s*\\(['\"]"
+      // Ignore long describe/it test blocks, long import/require statements
+      "ignorePattern": "(^\\s*(it|describe)\\s*\\(['\"]|^import\\s*.*\\s*from\\s*['\"]|^.*\\s*=\\s*require\\(['\"])"
     }],
+
+    // Fix conflict between prettier & standard by overriding to prefer
+    // double quotes
+    "jsx-quotes": ["error", "prefer-double"],
 
     // Override weird behaviour of jsx-a11y label-has-for (says labels must be
     // nested *and* have for/id attributes)

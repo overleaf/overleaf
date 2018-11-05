@@ -1,0 +1,12 @@
+app/js
+modules/**/app/js
+modules/**/scripts
+modules/**/index.js
+public/js
+public/minjs
+modules/**/public/js
+test/**/js
+modules/**/test/**/js
+app.js
+webpack.config.*
+karma.conf.js

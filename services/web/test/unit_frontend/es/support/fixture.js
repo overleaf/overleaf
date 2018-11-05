@@ -1,15 +1,15 @@
 class Fixture {
-  constructor () {
+  constructor() {
     this.el = document.createElement('div')
     document.body.appendChild(this.el)
   }
 
-  load (html) {
+  load(html) {
     this.el.innerHTML = html
     return this.el.firstChild
   }
 
-  cleanUp () {
+  cleanUp() {
     this.el.innerHTML = ''
   }
 }

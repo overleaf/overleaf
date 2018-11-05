@@ -6,9 +6,9 @@
   "verbose": true,
   "exec": "make compile || exit 1",
   "watch": [
-    "public/coffee/",
+    "public/src/",
     "public/stylesheets/",
-    "modules/**/public/coffee/"
+    "modules/**/public/src/"
   ],
-  "ext": "coffee less"
+  "ext": "js less"
 }
