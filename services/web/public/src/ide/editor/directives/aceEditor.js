@@ -594,6 +594,7 @@ define([
         }
 
         const initSpellCheck = function() {
+          if (!spellCheckManager) return
           spellCheckManager.init()
           editor.on('changeSession', onSessionChangeForSpellCheck)
           onSessionChangeForSpellCheck({ session: editor.getSession() }) // Force initial setup
@@ -601,6 +602,7 @@ define([
         }
 
         const tearDownSpellCheck = function() {
+          if (!spellCheckManager) return
           editor.off('changeSession', onSessionChangeForSpellCheck)
           return editor.off(
             'nativecontextmenu',
