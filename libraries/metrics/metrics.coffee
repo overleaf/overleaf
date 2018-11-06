@@ -1,6 +1,10 @@
 StatsD = require('lynx')
 statsd = new StatsD(process.env["STATSD_HOST"] or "localhost", 8125, {on_error:->})
 
+prom = require('prom-client')
+Register = require('prom-client').register
+collectDefaultMetrics = prom.collectDefaultMetrics
+
 name = "unknown"
 hostname = require('os').hostname()
 
@@ -14,9 +18,16 @@ require "./uv_threadpool_size"
 module.exports = Metrics =
 	initialize: (_name) ->
 		name = _name
+		collectDefaultMetrics({ timeout: 5000, prefix: name })
 
 	registerDestructor: (func) ->
 		destructors.push func
+
+	injectMetricsRoute: (app) ->
+		app.get('/metrics', (req, res) -> 
+			res.set('Content-Type', Register.contentType)
+			res.end(Register.metrics())
+		)
 
 	set : (key, value, sampleRate = 1)->
 		statsd.set buildKey(key), value, sampleRate
