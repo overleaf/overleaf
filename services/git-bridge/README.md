@@ -95,23 +95,10 @@ The configuration file is in `.json` format.
 You have to restart the server for configuration changes to take effect.
 
 
-## Setup with v2 Dev-Environment
-
-- Set `APP_GIT_BRIDGE_URL=http://localhost:8000` in v1 `common.env`
-- In this repo, copy `conf/example.json` to `conf/local.json`
-- Set up an OAuth app in v1
-  - with `scopes = 'git_bridge'`, and `callback = 'http://v1.overleaf.test:500/no-callback'`
-  - (see below for SQL to do this)
-- Update values in `conf/local.json`:
-  - Set oauth creds
-  - `swapStore = {type: "noop"}"`
-  - `apiBaseUrl = "http://www.overleaf.test:5000/api/v0"`
-  - `postbackBaseUrl = "http://git_bridge:8000"`
-  - `oauth2Server = "http://www.overleaf.test:5000"`
-- From this repo, `docker-compose up`
-
-
 ## Creating OAuth app
+
+In dev-env, run `bin/run rails_v1 rake db:seed`, or, if using this solo, run the following in the v1
+database:
 
 ```sql
 INSERT INTO public.oauth_applications (
