@@ -11,6 +11,8 @@ hostname = require('os').hostname()
 buildKey = (key)-> "#{name}.#{hostname}.#{key}"
 buildGlobalKey = (key)-> "#{name}.global.#{key}"
 
+counters = {}
+
 destructors = []
 
 require "./uv_threadpool_size"
@@ -34,6 +36,14 @@ module.exports = Metrics =
 
 	inc : (key, sampleRate = 1)->
 		statsd.increment buildKey(key), sampleRate
+		if !counters[key]
+			console.log("No Metric")
+			counters[key] = new prom.Counter({
+		  		name: key,
+				help: key #https://prometheus.io/docs/instrumenting/writing_exporters/#help-strings this is probably wrong
+				labelNames: ['name','host']
+			})
+		counters[key].inc({name: name, host: hostname})
 
 	count : (key, count, sampleRate = 1)->
 		statsd.count buildKey(key), count, sampleRate
