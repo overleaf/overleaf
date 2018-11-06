@@ -185,6 +185,10 @@ class User
 			return callback(error) if error?
 			callback(null)
 
+	deleteProjects: (callback=(error)) ->
+		db.projects.remove owner_ref:ObjectId(@id), {multi:true}, (err)->
+			callback(err)
+
 	openProject: (project_id, callback=(error)) ->
 		@request.get {
 			url: "/project/#{project_id}"

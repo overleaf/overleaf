@@ -85,6 +85,7 @@ docker-shared.yml
 config/*.coffee
 
 modules/**/Makefile
+
 modules/**/index.js
 modules/**/app/js/*
 modules/**/test/unit/js/*
