@@ -40,6 +40,12 @@ describe 'logger.error', ->
 		@logger.error {bar: error2}, "second message"
 		@captureException.callCount.should.equal 2
 
+	it 'should remove the path from fs errors', () ->
+		fsError = new Error("Error: ENOENT: no such file or directory, stat '/tmp/3279b8d0-da10-11e8-8255-efd98985942b'")
+		fsError.path = "/tmp/3279b8d0-da10-11e8-8255-efd98985942b"
+		@logger.error {err: fsError}, "message"
+		@captureException.calledWith(sinon.match.has('message', 'Error: ENOENT: no such file or directory, stat')).should.equal true
+
 	it 'for multiple errors should only report a maximum of 5 errors to sentry', () ->
 		@logger.error {foo:'bar'}, "message"
 		@logger.error {foo:'bar'}, "message"

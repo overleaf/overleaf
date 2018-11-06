@@ -50,6 +50,10 @@ module.exports = Logger =
 				for own key, value of error
 					newError[key] = value
 				error = newError
+			# filter paths from the message to avoid duplicate errors in sentry
+			# (e.g. errors from `fs` methods which have a path attribute)
+			try
+				error.message = error.message.replace(" '#{error.path}'", '') if error.path
 			# send the error to sentry
 			try
 				@raven.captureException(error, {tags: tags, extra: extra, level: level})
