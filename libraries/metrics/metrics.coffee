@@ -12,6 +12,7 @@ buildKey = (key)-> "#{name}.#{hostname}.#{key}"
 buildGlobalKey = (key)-> "#{name}.global.#{key}"
 
 counters = {}
+gauges = {}
 
 destructors = []
 
@@ -37,10 +38,9 @@ module.exports = Metrics =
 	inc : (key, sampleRate = 1)->
 		statsd.increment buildKey(key), sampleRate
 		if !counters[key]
-			console.log("No Metric")
 			counters[key] = new prom.Counter({
 		  		name: key,
-				help: key #https://prometheus.io/docs/instrumenting/writing_exporters/#help-strings this is probably wrong
+				help: key, 
 				labelNames: ['name','host']
 			})
 		counters[key].inc({name: name, host: hostname})
@@ -63,9 +63,23 @@ module.exports = Metrics =
 
 	gauge : (key, value, sampleRate = 1)->
 		statsd.gauge buildKey(key), value, sampleRate
+		if !gauges[key]
+			gauges[key] = new prom.Gauge({
+		  		name: key,
+				help: key, 
+				labelNames: ['name','host']
+			})
+		gauges[key].set({name: name, host: hostname},value)
 
 	globalGauge: (key, value, sampleRate = 1)->
 		statsd.gauge buildGlobalKey(key), value, sampleRate
+		if !gauges[key]
+			gauges[key] = new prom.Gauge({
+		  		name: key,
+				help: key, 
+				labelNames: ['name','host']
+			})
+		gauges[key].set({name: name},value)
 
 	mongodb: require "./mongodb"
 	http: require "./http"
