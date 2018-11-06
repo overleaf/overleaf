@@ -140,8 +140,13 @@ describe 'ProjectDetailsHandler', ->
 				expect(error).to.exist
 				done()
 
-		it "should reject empty names with /s", (done) ->
+		it "should reject names with /s", (done) ->
 			@handler.validateProjectName "foo/bar", (error) ->
+				expect(error).to.exist
+				done()
+
+		it "should reject names with \\s", (done) ->
+			@handler.validateProjectName "foo\\bar", (error) ->
 				expect(error).to.exist
 				done()
 
@@ -203,6 +208,9 @@ describe 'ProjectDetailsHandler', ->
 
 		it "should replace / with -", () ->
 			expect(@handler.fixProjectName "foo/bar").to.equal "foo-bar"
+
+		it "should replace \\ with ''", () ->
+			expect(@handler.fixProjectName "foo \\ bar").to.equal "foo  bar"
 
 		it "should truncate long names", () ->
 			expect(@handler.fixProjectName new Array(1000).join("a")).to.equal "a".repeat(150)

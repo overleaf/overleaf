@@ -63,7 +63,9 @@ module.exports = ProjectDetailsHandler =
 		else if name.length > @MAX_PROJECT_NAME_LENGTH
 			return callback(new Errors.InvalidNameError("Project name is too long"))
 		else if name.indexOf("/") > -1
-			return callback(new Errors.InvalidNameError("Project name cannot not contain / characters"))
+			return callback(new Errors.InvalidNameError("Project name cannot contain / characters"))
+		else if name.indexOf("\\") > -1
+			return callback(new Errors.InvalidNameError("Project name cannot contain \\ characters"))
 		else
 			return callback()
 
@@ -112,6 +114,9 @@ module.exports = ProjectDetailsHandler =
 		if name.indexOf('/') > -1
 			# v2 does not allow / in a project name
 			name = name.replace(/\//g, '-')
+		if name.indexOf('\\') > -1
+			# backslashes in project name will prevent syncing to dropbox
+			name = name.replace(/\\/g, '')
 		if name.length > @MAX_PROJECT_NAME_LENGTH
 			name = name.substr(0, @MAX_PROJECT_NAME_LENGTH)
 		return name
