@@ -19,6 +19,9 @@ module.exports = Logger =
 			attributes = {err: new Error(attributes)}
 		# extract any error object
 		error = attributes.err or attributes.error
+		# avoid reporting errors twice
+		for key, value of attributes
+			return if value instanceof Error && value.reportedToSentry
 		# include our log message in the error report
 		if not error?
 			error = {message: message} if typeof message is 'string'
@@ -50,6 +53,9 @@ module.exports = Logger =
 			# send the error to sentry
 			try
 				@raven.captureException(error, {tags: tags, extra: extra, level: level})
+				# put a flag on the errors to avoid reporting them multiple times
+				for key, value of attributes
+					value.reportedToSentry = true if value instanceof Error
 			catch
 				return # ignore any errors
 
