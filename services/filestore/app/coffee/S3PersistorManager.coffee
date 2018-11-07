@@ -42,9 +42,8 @@ module.exports =
 			if res.statusCode != 200
 				logger.err bucketName:bucketName, key:key, fsPath:fsPath, "non 200 response from s3 putting file"
 				return callback("non 200 response from s3 on put file")
-			LocalFileWriter.deleteFile fsPath, (err)->
-				logger.log res:res,  bucketName:bucketName, key:key, fsPath:fsPath,"file uploaded to s3"
-				callback(err)
+			logger.log res:res,  bucketName:bucketName, key:key, fsPath:fsPath,"file uploaded to s3"
+			callback(err)
 		putEventEmiter.on "error", (err)->
 			logger.err err:err,  bucketName:bucketName, key:key, fsPath:fsPath, "error emmited on put of file"
 			callback err
@@ -57,7 +56,10 @@ module.exports =
 			if err?
 				logger.err  bucketName:bucketName, key:key, fsPath:fsPath, err:err, "something went wrong writing stream to disk"
 				return callback(err)
-			@sendFile bucketName, key, fsPath, callback
+			@sendFile bucketName, key, fsPath, (err) ->
+				# delete the temporary file created above and return the original error
+				LocalFileWriter.deleteFile fsPath, () ->
+					callback(err)
 
 	# opts may be {start: Number, end: Number}
 	getFileStream: (bucketName, key, opts, callback = (err, res)->)->
