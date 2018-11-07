@@ -64,7 +64,24 @@ module.exports = FileHandler =
 				LocalFileWriter.deleteFile convertedFsPath, ->
 				LocalFileWriter.deleteFile originalFsPath, ->
 				return callback(err)
-			PersistorManager.getFileStream bucket, convertedKey, opts, callback
+			# Send back the converted file from the local copy to avoid problems
+			# with the file not being present in S3 yet.  As described in the
+			# documentation below, we have already made a 'HEAD' request in
+			# checkIfFileExists so we only have "eventual consistency" if we try
+			# to stream it from S3 here.  This was a cause of many 403 errors.
+			#
+			# "Amazon S3 provides read-after-write consistency for PUTS of new
+			# objects in your S3 bucket in all regions with one caveat. The
+			# caveat is that if you make a HEAD or GET request to the key name
+			# (to find if the object exists) before creating the object, Amazon
+			# S3 provides eventual consistency for read-after-write.""
+			# https://docs.aws.amazon.com/AmazonS3/latest/dev/Introduction.html#ConsistencyModel
+			LocalFileWriter.getStream convertedFsPath, (err, readStream) ->
+				return callback(err) if err?
+				readStream.on 'end', () ->
+					logger.log {convertedFsPath: convertedFsPath}, "deleting temporary file"
+					LocalFileWriter.deleteFile convertedFsPath, ->
+				callback(null, readStream)
 
 	_convertFile: (bucket, originalKey, opts, callback)->
 		@_writeS3FileToDisk bucket, originalKey, opts, (err, originalFsPath)->
