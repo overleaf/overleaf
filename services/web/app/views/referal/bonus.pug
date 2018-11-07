@@ -1,5 +1,32 @@
 extends ../layout
 
+block scripts
+	script(type='text/javascript').
+		$(document).ready(function () {
+			$.ajax({dataType: "script", cache: true, url: "//connect.facebook.net/en_US/all.js"}).done(function () {
+				window.fbAsyncInit = function() {
+					FB.init({appId: '#{settings.social.facebook.appId}', xfbml: true});
+				}
+			});
+		});
+
+		function postToFeed() {
+			// calling the API ...
+			var obj = {
+				method: 'feed',
+				redirect_uri: '#{settings.social.facebook.redirectUri}',
+				link: '!{buildReferalUrl("fb")}',
+				picture: '#{settings.social.facebook.picture}',
+				name: '#{translate("bonus_facebook_name").replace(/'/g, "\\x27")}',
+				caption: '#{translate("bonus_facebook_caption").replace(/'/g, "\\x27")}',
+				description: '#{translate("bonus_facebook_description").replace(/'/g, "\\x27")}'
+			};
+
+			if (typeof FB !== "undefined" && FB !== null) {
+				FB.ui(obj);
+			}
+		}
+
 block content
 	.content.content-alt
 		.container.bonus
@@ -130,30 +157,6 @@ block content
 
 
 	script(type='text/javascript', src='//platform.twitter.com/widgets.js')
-	script(src='https://connect.facebook.net/en_US/all.js')
-	script(type='text/javascript').
-		FB.init({appId: '#{settings.social.facebook.appId}', status: true, cookie: true});
-
-		function postToFeed() {
-
-			// calling the API ...
-			var obj = {
-				method: 'feed',
-				redirect_uri: '#{settings.social.facebook.redirectUri}',
-				link: '!{buildReferalUrl("fb")}',
-				picture: '#{settings.social.facebook.picture}',
-				name: '#{translate("bonus_facebook_name").replace(/'/g, "\\x27")}',
-				caption: '#{translate("bonus_facebook_caption").replace(/'/g, "\\x27")}',
-				description: '#{translate("bonus_facebook_description").replace(/'/g, "\\x27")}'
-			};
-
-			function callback(response) {
-				// document.getElementById('msg').innerHTML = "Post ID: " + response['post_id'];
-			}
-			if (typeof FB !== "undefined" && FB !== null) {
-				FB.ui(obj, callback);
-			}
-		}
 
 	script(type="text/javascript").
 		$(function() {
