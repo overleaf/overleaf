@@ -762,11 +762,13 @@ define([
           return doc.off('change', onChange)
         }
 
-        editor.renderer.on('changeCharacterSize', () =>
-          scope.$apply(
-            () => (scope.rendererData.lineHeight = editor.renderer.lineHeight)
-          )
-        )
+        if (scope.rendererData != null) {
+          editor.renderer.on('changeCharacterSize', () => {
+            scope.$apply(
+              () => (scope.rendererData.lineHeight = editor.renderer.lineHeight)
+            )
+          })
+        }
 
         scope.$watch('rendererData', function(rendererData) {
           if (rendererData != null) {
