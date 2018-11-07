@@ -32,6 +32,7 @@ define([
   'ide/metadata/MetadataManager',
   'ide/review-panel/ReviewPanelManager',
   'ide/SafariScrollPatcher',
+  'ide/cobranding/CobrandingDataService',
   'ide/settings/index',
   'ide/share/index',
   'ide/chat/index',
@@ -82,7 +83,8 @@ define([
     sixpack,
     event_tracking,
     metadata,
-    $q
+    $q,
+    CobrandingDataService
   ) {
     // Don't freak out if we're already in an apply callback
     let err, pdfLayout, userAgent
@@ -123,6 +125,14 @@ define([
     $scope.settings = window.userSettings
     $scope.anonymous = window.anonymous
     $scope.isTokenMember = window.isTokenMember
+
+    $scope.cobranding = {
+      isProjectCobranded: CobrandingDataService.isProjectCobranded(),
+      logoImgUrl: CobrandingDataService.getLogoImgUrl(),
+      submitBtnHtml: CobrandingDataService.getSubmitBtnHtml(),
+      brandVariationName: CobrandingDataService.getBrandVariationName(),
+      brandVariationHomeUrl: CobrandingDataService.getBrandVariationHomeUrl()
+    }
 
     $scope.chat = {}
 

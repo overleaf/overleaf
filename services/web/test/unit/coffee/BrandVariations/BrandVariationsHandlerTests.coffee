@@ -9,6 +9,10 @@ modulePath = path.join __dirname, "../../../../app/js/Features/BrandVariations/B
 describe "BrandVariationsHandler", ->
 
 	beforeEach ->
+		@settings =
+			apis:
+				v1:
+					url: "http://overleaf.example.com"
 		@logger = 
 			err: ->
 			log: ->
@@ -22,6 +26,8 @@ describe "BrandVariationsHandler", ->
 			id: "12"
 			active: true
 			brand_name: "The journal"
+			logo_url: "http://my.cdn.tld/journal-logo.png"
+			journal_cover_url: "http://my.cdn.tld/journal-cover.jpg"
 			home_url: "http://www.thejournal.com/"
 			publish_menu_link_html: "Submit your paper to the <em>The Journal</em>"
 
@@ -42,5 +48,12 @@ describe "BrandVariationsHandler", ->
 			@BrandVariationsHandler.getBrandVariationById "12", (err, brandVariationDetails) =>
 				expect(err).to.not.exist
 				expect(brandVariationDetails).to.deep.equal @mockedBrandVariationDetails
+				done()
+
+		it "should transform relative URLs in v1 absolute ones", (done) ->
+			@mockedBrandVariationDetails.logo_url = "/journal-logo.png" 
+			@V1Api.request.callsArgWith 1, null, { statusCode: 200 }, @mockedBrandVariationDetails
+			@BrandVariationsHandler.getBrandVariationById "12", (err, brandVariationDetails) =>
+				expect(brandVariationDetails.logo_url.startsWith(@settings.apis.v1.url)).to.be.true
 				done()
 

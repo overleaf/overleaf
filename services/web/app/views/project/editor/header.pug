@@ -9,6 +9,17 @@ header.toolbar.toolbar-header.toolbar-with-labels(
 		)
 			i.fa.fa-fw.fa-bars.editor-menu-icon
 			p.toolbar-label #{translate("menu")}
+		a.btn.btn-full-height.header-cobranding-logo-container(
+			ng-if="::(cobranding.isProjectCobranded && cobranding.logoImgUrl)"
+			ng-href="{{ ::cobranding.brandVariationHomeUrl }}"
+			target="_blank"
+			rel="noopener"
+		)
+			img.header-cobranding-logo(
+				ng-src="{{ ::cobranding.logoImgUrl }}"
+				alt="{{ ::cobranding.brandVariationName }}"
+			)
+
 		a.toolbar-header-back-projects(
 			href="/project"
 		)

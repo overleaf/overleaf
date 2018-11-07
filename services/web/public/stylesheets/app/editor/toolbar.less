@@ -1,7 +1,9 @@
+@toolbar-height: 40px;
+
 .toolbar {
 	display: flex;
 	align-items: center;
-	height: 40px;
+	height: @toolbar-height;
 	border-bottom: @toolbar-border-bottom;
 
 	> a, .toolbar-right > a {
@@ -33,6 +35,7 @@
 			padding: 5px 10px 4px;
 			margin-bottom: 1px;
 		}
+
 		&:hover {
 			text-shadow: @toolbar-icon-btn-hover-shadow;
 			color: @toolbar-icon-btn-hover-color;
@@ -62,6 +65,7 @@
 		color: @toolbar-btn-color;
 		padding: 3px 10px 5px;
 		font-size: 20px;
+		max-height: 39px;
 		&:hover {
 			text-shadow: @toolbar-btn-hover-text-shadow;
 			background-color: @toolbar-btn-hover-bg-color;
@@ -75,6 +79,12 @@
 		.label {
 			top: 4px;
 			right: 4px;
+		}
+
+		&.header-cobranding-logo-container {
+			height: @toolbar-height - 1;
+			padding: 8px 10px;
+			background-color: @toolbar-header-branded-btn-bg-color;
 		}
 	}
 	.btn-full-height-no-border {
@@ -134,6 +144,12 @@
 	}
 }
 
+	.header-cobranding-logo {
+		display: block;
+		width: auto;
+		max-height: 100%;
+	}
+
 .toolbar-small-mixin() {
 	height: @toolbar-small-height;
 }
@@ -153,9 +169,14 @@
 	font-weight: 600;
 	margin-bottom: 2px;
 	vertical-align: middle;
+	text-align: left;
 
 	@media (min-width: @screen-sm-min) {
 		display: inline-block;
+	}
+
+	&.toolbar-label-multiline {
+		line-height: 1.1;
 	}
 }
 
