@@ -35,6 +35,9 @@ module.exports = Metrics =
 	sanitizeKey: (key) ->
 		key.replace /[^a-zA-Z0-9]/g, "_"
 
+	sanitizeValue: (value) ->
+		parseFloat(value)
+
 	set : (key, value, sampleRate = 1)->
 		statsd.set buildKey(key), value, sampleRate
 
@@ -74,7 +77,7 @@ module.exports = Metrics =
 				help: key, 
 				labelNames: ['name','host']
 			})
-		gauges[key].set({name: name, host: hostname},value)
+		gauges[key].set({name: name, host: hostname},this.sanitizeValue(value))
 
 	globalGauge: (key, value, sampleRate = 1)->
 		statsd.gauge buildGlobalKey(key), value, sampleRate
@@ -85,7 +88,7 @@ module.exports = Metrics =
 				help: key, 
 				labelNames: ['name','host']
 			})
-		gauges[key].set({name: name},value)
+		gauges[key].set({name: name},this.sanitizeValue(value))
 
 	mongodb: require "./mongodb"
 	http: require "./http"
