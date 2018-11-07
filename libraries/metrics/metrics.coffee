@@ -32,11 +32,15 @@ module.exports = Metrics =
 			res.end(Register.metrics())
 		)
 
+	sanitizeKey: (key) ->
+		key.replace /[^a-zA-Z0-9]/g, "_"
+
 	set : (key, value, sampleRate = 1)->
 		statsd.set buildKey(key), value, sampleRate
 
 	inc : (key, sampleRate = 1)->
 		statsd.increment buildKey(key), sampleRate
+		key = this.sanitizeKey(key)
 		if !counters[key]
 			counters[key] = new prom.Counter({
 		  		name: key,
@@ -63,6 +67,7 @@ module.exports = Metrics =
 
 	gauge : (key, value, sampleRate = 1)->
 		statsd.gauge buildKey(key), value, sampleRate
+		key = this.sanitizeKey(key)
 		if !gauges[key]
 			gauges[key] = new prom.Gauge({
 		  		name: key,
@@ -73,6 +78,7 @@ module.exports = Metrics =
 
 	globalGauge: (key, value, sampleRate = 1)->
 		statsd.gauge buildGlobalKey(key), value, sampleRate
+		key = this.sanitizeKey(key)
 		if !gauges[key]
 			gauges[key] = new prom.Gauge({
 		  		name: key,
