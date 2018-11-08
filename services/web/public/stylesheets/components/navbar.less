@@ -468,13 +468,13 @@
       padding: @navbar-subdued-padding;
       margin-left: 0;
       background-color: transparent;
-      &:hover {
+      &:hover,
+      &:focus {
         color: @navbar-subdued-hover-color;
         background-color: @navbar-subdued-hover-bg;
       }
       &:focus {
-          color: @navbar-subdued-color;
-          background-color: transparent;
+        .tab-focus()
       }
     }
 
