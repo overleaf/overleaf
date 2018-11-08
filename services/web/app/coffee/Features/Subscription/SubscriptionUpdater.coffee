@@ -33,7 +33,7 @@ module.exports = SubscriptionUpdater =
 		searchOps =
 			_id: subscriptionId
 		insertOperation =
-			{ $push: { member_ids: { $each: memberIds } } }
+			{ $addToSet: { member_ids: { $each: memberIds } } }
 
 		Subscription.findAndModify searchOps, insertOperation, (err, subscription) ->
 			return callback(err) if err?

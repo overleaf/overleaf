@@ -180,7 +180,7 @@ describe "SubscriptionUpdater", ->
 				searchOps =
 					_id: @subscription._id
 				insertOperation =
-					{ $push: { member_ids: { $each: [@otherUserId] } } }
+					{ $addToSet: { member_ids: { $each: [@otherUserId] } } }
 				@findAndModifyStub.calledWith(searchOps, insertOperation).should.equal true
 				done()
 
