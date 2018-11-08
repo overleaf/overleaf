@@ -3,13 +3,16 @@ extends ../layout
 include _plans_page_mixins
 include _plans_page_tables
 
+block vars
+	- metadata = { viewport: true }
+
 block scripts
 	script(type='text/javascript').
 		window.recomendedCurrency = '#{recomendedCurrency}'
 		window.abCurrencyFlag = '#{abCurrencyFlag}'
 
 block content
-	.content.content-alt
+	.content.content-alt.content-page
 		.plans(ng-controller="PlansController")
 			.container(ng-cloak)
 				.row
@@ -75,11 +78,12 @@ block content
 											+card_student_monthly
 
 				.row.row-spaced-large.text-centered
-					i.fa.fa-cc-mastercard.fa-2x &nbsp;
-					i.fa.fa-cc-visa.fa-2x &nbsp;
-					i.fa.fa-cc-amex.fa-2x &nbsp;
-					i.fa.fa-cc-paypal.fa-2x &nbsp;
-					div.text-centered #{translate('change_plans_any_time')}<br/> #{translate('billed_after_x_days', {len:'{{trial_len}}'})}
+					.col-xs-12
+						i.fa.fa-cc-mastercard.fa-2x &nbsp;
+						i.fa.fa-cc-visa.fa-2x &nbsp;
+						i.fa.fa-cc-amex.fa-2x &nbsp;
+						i.fa.fa-cc-paypal.fa-2x &nbsp;
+						div.text-centered #{translate('change_plans_any_time')}<br/> #{translate('billed_after_x_days', {len:'{{trial_len}}'})}
 
 				.row.row-spaced-large
 					.col-md-8.col-md-offset-2
@@ -117,7 +121,7 @@ block content
 					.row.row-spaced-large
 						.col-md-12
 							.plans-header.plans-subheader.text-centered
-								h2 #{translate('still_have_questions')}
+								h2.header-with-btn #{translate('still_have_questions')}
 									button.btn.btn-default.btn-header.text-capitalize(
 										ng-controller="ContactGeneralModal"
 										ng-click="openModal()"

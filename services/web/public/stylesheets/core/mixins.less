@@ -552,6 +552,51 @@
     background-color: @color;
   }
 }
+.button-outline-variant(@color) {
+  color: @color;
+  background-color: transparent;
+  border-color: @color;
+
+  .alert & when (@is-overleaf = true) {
+    background-color: transparent;
+  }
+
+  &:hover,
+  &:focus,
+  &:active,
+  &.active,
+  &.checked,
+  .open .dropdown-toggle& {
+    color: @color;
+    background-color: transparent;
+    border-color: darken(@color, 12%);
+    .alert & when (@is-overleaf = true) {
+      background-color: transparent;
+    }
+  }
+  &:active,
+  &.active,
+  .open .dropdown-toggle& {
+    background-image: none;
+  }
+  &.disabled,
+  &[disabled],
+  fieldset[disabled] & {
+    &,
+    &:hover,
+    &:focus,
+    &:active,
+    &.active {
+      background-color: transparent;
+      border-color: @color;
+    }
+  }
+
+  .badge {
+    color: transparent;
+    background-color: @color;
+  }
+}
 
 // Button sizes
 // -------------------------

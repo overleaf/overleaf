@@ -141,17 +141,17 @@ mixin currency_dropdown
 mixin plan_switch(location)
 	ul.nav.nav-pills
 		li(ng-class="{'active': ui.view == 'monthly'}")
-			a(
+			a.btn.btn-default-outline(
 				href="#"
 				ng-click="switchToMonthly($event,'" + location + "')"
 			) #{translate("monthly")}
 		li(ng-class="{'active': ui.view == 'annual'}")
-			a(
+			a.btn.btn-default-outline(
 				href="#"
 				ng-click="switchToAnnual($event,'" + location + "')"
 			) #{translate("annual")}
 		li(ng-class="{'active': ui.view == 'student'}")
-			a(
+			a.btn.btn-default-outline(
 				href="#"
 				ng-click="switchToStudent($event,'" + location + "')"
 			) #{translate("half_price_student")}

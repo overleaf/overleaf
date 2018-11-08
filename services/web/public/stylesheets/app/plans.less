@@ -84,6 +84,9 @@
 			margin: 0
 		}
 	}
+	.header-with-btn {
+		line-height: 1.6;
+	}
 	.plans-header{
 		h1, h2, p {
 			text-shadow: 0 -1px 1px white;
@@ -100,11 +103,6 @@
 	}
 	.tagline {
 		margin-bottom: 20px;
-	}
-	.top-switch {
-		.currency-dropdown {
-			margin-right: -15px;
-		}
 	}
 	ul.nav-pills {
 		text-align: center;
@@ -161,13 +159,25 @@
 /* Media Queries */
 @media (max-width: @screen-sm-max) {
 	.plans {
-		.card-highlighted {
+		.card-group {
 			/*override style in cards.less */
-			margin-top: @line-height-computed!important;
+			.card {
+				margin-left: 0;
+				margin-right: 0;
+			}
+			.card-highlighted {
+				margin-top: @line-height-computed!important;
+			}
 		}
 		.circle-img {
 			float: left;
 			margin: 0 15px;
+		}
+		ul.nav-pills {
+			margin-bottom: @margin-xs;
+			li {
+				margin-bottom: @margin-sm;
+			}
 		}
 	} 
 }
@@ -181,6 +191,11 @@
 				h3 {
 					margin-top: 0;
 				}
+			}
+		}
+		.top-switch {
+			.currency-dropdown {
+				margin-right: -15px;
 			}
 		}
 	}
@@ -221,6 +236,7 @@
 		font-family: @headings-font-family;
 		font-size: @font-size-h2;
 		font-weight: @headings-font-weight;
+		hyphens: auto;
 		line-height: @headings-line-height;
 		padding: 18px;
 	}
@@ -343,5 +359,34 @@
 	}
 	.tooltip.in {
 		min-width: 200px
+	}
+
+	/* Media Queries */
+	@media (max-width: @screen-sm-max) {
+		font-size: @font-size-small;
+		hyphens: auto;
+		margin-top: @best-val-height*2;
+		th {
+			font-size: @font-size-base;
+			padding-left: @padding-xs;
+			padding-right: @padding-xs;
+		}
+		td:first-child {
+			padding-left: @padding-xs;
+		}
+		tr:last-child {
+			td {
+				padding: @padding-xs;
+				.btn {
+					word-break: normal;
+				}
+			}
+		}
+		.best-value {
+			line-height: 1;
+		}
+		.btn {
+			font-size: @font-size-small;
+		}
 	}
 }
