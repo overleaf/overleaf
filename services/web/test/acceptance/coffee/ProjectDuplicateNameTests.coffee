@@ -84,27 +84,6 @@ describe "ProjectDuplicateNames", ->
 				it "should respond with 400 error status", ->
 					expect(@res.statusCode).to.equal 400
 
-			describe "trying to upload a file with the same name", ->
-				before (done) ->
-					@owner.request.post
-						uri: "/project/#{@example_project_id}/upload"
-						json: true
-						qs:
-							folder_id: @rootFolderId
-							qqfilename: "main.tex"
-						formData:
-							qqfile:
-								value:	fs.createReadStream Path.resolve(__dirname + '/../files/1pixel.png')
-								options:
-									filename: 'main.tex',
-									contentType: 'image/png'
-					, (err, res, body) =>
-						@body = body
-						done()
-
-				it "should respond with failure status", ->
-					expect(@body.success).to.equal false
-
 			describe "trying to add a folder with the same name", ->
 				before (done) ->
 					@owner.request.post {
@@ -118,28 +97,6 @@ describe "ProjectDuplicateNames", ->
 
 				it "should respond with 400 error status", ->
 					expect(@res.statusCode).to.equal 400
-
-			describe "trying to upload a file with the same name", ->
-				before (done) ->
-					@owner.request.post
-						uri: "/project/#{@example_project_id}/upload"
-						json: true
-						qs:
-							folder_id: @rootFolderId
-							qqfilename: "main.tex"
-						formData:
-							qqfile:
-								value:	fs.createReadStream Path.resolve(__dirname + '/../files/1pixel.png')
-								options:
-									filename: 'main.tex',
-									contentType: 'image/png'
-					, (err, res, body) =>
-						@body = body
-						done()
-
-				it "should respond with failure status", ->
-					expect(@body.success).to.equal false
-
 
 		describe "for an existing file", ->
 			describe "trying to add a doc with the same name", ->

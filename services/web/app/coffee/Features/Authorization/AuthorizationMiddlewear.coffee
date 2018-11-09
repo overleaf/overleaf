@@ -35,7 +35,10 @@ module.exports = AuthorizationMiddlewear =
 					next()
 				else
 					logger.log {user_id, project_id}, "denying user read access to project"
-					AuthorizationMiddlewear.redirectToRestricted req, res, next
+					if req.headers?['accept']?.match(/^application\/json.*$/)
+						res.sendStatus(403)
+					else
+						AuthorizationMiddlewear.redirectToRestricted req, res, next
 
 	ensureUserCanWriteProjectSettings: (req, res, next) ->
 		AuthorizationMiddlewear._getUserAndProjectId req, (error, user_id, project_id) ->
@@ -99,7 +102,7 @@ module.exports = AuthorizationMiddlewear =
 			callback(null, user_id, project_id)
 
 	_getUserId: (req, callback = (error, user_id) ->) ->
-		user_id = AuthenticationController.getLoggedInUserId(req)
+		user_id = AuthenticationController.getLoggedInUserId(req) || req?.oauth_user?._id || null
 		return callback(null, user_id)
 
 	redirectToRestricted: (req, res, next) ->
