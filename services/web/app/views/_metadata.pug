@@ -44,6 +44,9 @@
 //- Misc
 meta(itemprop="name", content=settings.appName + ", the Online LaTeX Editor")
 
+-if (metadata && metadata.robotsNoindexNofollow)
+	meta(name="robots" content="noindex, nofollow")
+
 //- Twitter
 meta(name="twitter:card", content=metadata && metadata.twitterCardType ? metadata.twitterCardType : 'summary')
 -if (settings.social && settings.social.twitter && settings.social.twitter.handle)
