@@ -7,6 +7,11 @@ SandboxedModule = require('sandboxed-module')
 describe 'ProjectRootDocManager', ->
 	beforeEach ->
 		@project_id = "project-123"
+		@docPaths =
+			"doc-id-1": "/chapter1.tex"
+			"doc-id-2": "/main.tex"
+			"doc-id-3": "/nested/chapter1a.tex"
+			"doc-id-4": "/nested/chapter1b.tex"
 		@sl_req_id = "sl-req-id-123"
 		@callback = sinon.stub()
 		@ProjectRootDocManager = SandboxedModule.require modulePath, requires:
@@ -98,11 +103,6 @@ describe 'ProjectRootDocManager', ->
 
 		describe "when there is a suitable root doc but the leading slash is missing", ->
 			beforeEach (done)->
-				@docPaths =
-					"doc-id-1": "/chapter1.tex"
-					"doc-id-2": "/main.tex"
-					"doc-id-3": "/nested/chapter1a.tex"
-					"doc-id-4": "/nested/chapter1b.tex"
 				@ProjectEntityHandler.getAllDocPathsFromProjectById = sinon.stub().callsArgWith(1, null, @docPaths)
 				@ProjectEntityUpdateHandler.setRootDoc = sinon.stub().callsArgWith(2)
 				@ProjectRootDocManager.setRootDocFromName @project_id, 'main.tex', done
@@ -117,11 +117,6 @@ describe 'ProjectRootDocManager', ->
 
 		describe "when there is a suitable root doc with a basename match", ->
 			beforeEach (done)->
-				@docPaths =
-					"doc-id-1": "/chapter1.tex"
-					"doc-id-2": "/main.tex"
-					"doc-id-3": "/nested/chapter1a.tex"
-					"doc-id-4": "/nested/chapter1b.tex"
 				@ProjectEntityHandler.getAllDocPathsFromProjectById = sinon.stub().callsArgWith(1, null, @docPaths)
 				@ProjectEntityUpdateHandler.setRootDoc = sinon.stub().callsArgWith(2)
 				@ProjectRootDocManager.setRootDocFromName @project_id, 'chapter1a.tex', done
@@ -136,11 +131,6 @@ describe 'ProjectRootDocManager', ->
 
 		describe "when there is a suitable root doc but the filename is in quotes", ->
 			beforeEach (done)->
-				@docPaths =
-					"doc-id-1": "/chapter1.tex"
-					"doc-id-2": "/main.tex"
-					"doc-id-3": "/nested/chapter1a.tex"
-					"doc-id-4": "/nested/chapter1b.tex"
 				@ProjectEntityHandler.getAllDocPathsFromProjectById = sinon.stub().callsArgWith(1, null, @docPaths)
 				@ProjectEntityUpdateHandler.setRootDoc = sinon.stub().callsArgWith(2)
 				@ProjectRootDocManager.setRootDocFromName @project_id, "'main.tex'", done
@@ -155,11 +145,6 @@ describe 'ProjectRootDocManager', ->
 
 		describe "when there is no suitable root doc", ->
 			beforeEach (done)->
-				@docPaths =
-					"doc-id-1": "/chapter1.tex"
-					"doc-id-2": "/main.tex"
-					"doc-id-3": "/nested/chapter1a.tex"
-					"doc-id-4": "/nested/chapter1b.tex"
 				@ProjectEntityHandler.getAllDocPathsFromProjectById = sinon.stub().callsArgWith(1, null, @docPaths)
 				@ProjectEntityUpdateHandler.setRootDoc = sinon.stub().callsArgWith(2)
 				@ProjectRootDocManager.setRootDocFromName @project_id, "other.tex", done
@@ -179,7 +164,7 @@ describe 'ProjectRootDocManager', ->
 				@project.rootDoc_id = "root-doc-id"
 				@ProjectRootDocManager.ensureRootDocumentIsSet(@project_id, @callback)
 
-			it "should find the project with only the rootDoc_id fiel", ->
+			it "should find the project fetching only the rootDoc_id field", ->
 				@ProjectGetter.getProject
 					.calledWith(@project_id, rootDoc_id: 1)
 					.should.equal true
@@ -196,6 +181,79 @@ describe 'ProjectRootDocManager', ->
 				@ProjectRootDocManager.ensureRootDocumentIsSet(@project_id, @callback)
 
 			it "should find the project with only the rootDoc_id fiel", ->
+				@ProjectGetter.getProject
+					.calledWith(@project_id, rootDoc_id: 1)
+					.should.equal true
+
+			it "should update the project rootDoc_id", ->
+				@ProjectRootDocManager.setRootDocAutomatically
+					.calledWith(@project_id)
+					.should.equal true
+
+			it "should call the callback", ->
+				@callback.called.should.equal true
+
+		describe "when the project does not exist", ->
+			beforeEach ->
+				@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, null)
+				@ProjectRootDocManager.ensureRootDocumentIsSet(@project_id, @callback)
+
+			it "should call the callback with an error", ->
+				@callback.calledWith(new Error("project not found")).should.equal true
+
+	describe "ensureRootDocumentIsValid", ->
+		beforeEach ->
+			@project = {}
+			@ProjectGetter.getProject = sinon.stub().callsArgWith(2, null, @project)
+			@ProjectEntityUpdateHandler.setRootDoc = sinon.stub().yields()
+			@ProjectEntityHandler.getAllDocPathsFromProjectById = sinon.stub().callsArgWith(1, null, @docPaths)
+			@ProjectRootDocManager.setRootDocAutomatically = sinon.stub().callsArgWith(1, null)
+
+		describe "when the root doc is set", ->
+			describe "when the root doc is valid", ->
+				beforeEach ->
+					@project.rootDoc_id = "doc-id-2"
+					@ProjectRootDocManager.ensureRootDocumentIsValid(@project_id, @callback)
+
+				it "should find the project fetching only the rootDoc_id field", ->
+					@ProjectGetter.getProject
+						.calledWith(@project_id, rootDoc_id: 1)
+						.should.equal true
+
+				it "should not try to update the project rootDoc_id", ->
+					@ProjectRootDocManager.setRootDocAutomatically
+						.called.should.equal false
+
+				it "should call the callback", ->
+					@callback.called.should.equal true
+
+			describe "when the root doc is not valid", ->
+				beforeEach ->
+					@project.rootDoc_id = "bogus-doc-id"
+					@ProjectRootDocManager.ensureRootDocumentIsValid(@project_id, @callback)
+
+				it "should find the project fetching only the rootDoc_id field", ->
+					@ProjectGetter.getProject
+						.calledWith(@project_id, rootDoc_id: 1)
+						.should.equal true
+
+				it "should null the rootDoc_id field", ->
+					@ProjectEntityUpdateHandler.setRootDoc
+						.calledWith(@project_id, null)
+						.should.equal true
+
+				it "should try to find a new rootDoc", ->
+					@ProjectRootDocManager.setRootDocAutomatically
+						.called.should.equal true
+
+				it "should call the callback", ->
+					@callback.called.should.equal true
+
+		describe "when the root doc is not set", ->
+			beforeEach ->
+				@ProjectRootDocManager.ensureRootDocumentIsSet(@project_id, @callback)
+
+			it "should find the project fetching only the rootDoc_id fiel", ->
 				@ProjectGetter.getProject
 					.calledWith(@project_id, rootDoc_id: 1)
 					.should.equal true

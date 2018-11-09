@@ -104,7 +104,7 @@ describe 'ExportsHandler', ->
 			@ProjectGetter.getProject = sinon.stub().yields(null, @project)
 			@ProjectHistoryHandler.ensureHistoryExistsForProject = sinon.stub().yields(null)
 			@ProjectLocator.findRootDoc = sinon.stub().yields(null, [null, {fileSystem: 'main.tex'}])
-			@ProjectRootDocManager.ensureRootDocumentIsSet = sinon.stub().callsArgWith(1, null)
+			@ProjectRootDocManager.ensureRootDocumentIsValid = sinon.stub().callsArgWith(1, null)
 			@UserGetter.getUser = sinon.stub().yields(null, @user)
 			@ExportsHandler._requestVersion = sinon.stub().yields(null, @historyVersion)
 			done()
@@ -214,7 +214,51 @@ describe 'ExportsHandler', ->
 						done()
 
 				it "should set a root doc", ->
-					@ProjectRootDocManager.ensureRootDocumentIsSet.called
+					@ProjectRootDocManager.ensureRootDocumentIsValid.called
+					.should.equal true
+
+				it "should return export data", ->
+					expected_export_data =
+						project:
+							id: @project_id
+							rootDocPath: 'other.tex'
+							historyId: @project_history_id
+							historyVersion: @historyVersion
+							v1ProjectId: @project_history_id
+							metadata:
+								compiler: 'pdflatex'
+								imageName: 'mock-image-name'
+								title: @title
+								description: @description
+								author: @author
+								license: @license
+								showSource: @show_source
+						user:
+							id: @user_id
+							firstName: @user.first_name
+							lastName: @user.last_name
+							email: @user.email
+							orcidId: null
+							v1UserId: 876
+						destination:
+							brandVariationId: @brand_variation_id
+						options:
+							callbackUrl: null
+					@callback.calledWith(null, expected_export_data)
+					.should.equal true
+
+		describe "when project has an invalid root doc", ->
+			describe "when a new root doc can be set automatically", ->
+				beforeEach (done) ->
+					@fakeDoc_id = '1a2b3c4d5e6f'
+					@project.rootDoc_id = @fakeDoc_id
+					@ProjectLocator.findRootDoc = sinon.stub().yields(null, [null, {fileSystem: 'other.tex'}])
+					@ExportsHandler._buildExport @export_params, (error, export_data) =>
+						@callback(error, export_data)
+						done()
+
+				it "should set a valid root doc", ->
+					@ProjectRootDocManager.ensureRootDocumentIsValid.called
 					.should.equal true
 
 				it "should return export data", ->

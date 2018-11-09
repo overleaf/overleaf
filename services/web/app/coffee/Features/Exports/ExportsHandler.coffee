@@ -29,7 +29,7 @@ module.exports = ExportsHandler = self =
 				ProjectGetter.getProject project_id, cb
 			# TODO: when we update async, signature will change from (cb, results) to (results, cb)
 			rootDoc: [ 'project', (cb, results) ->
-				ProjectRootDocManager.ensureRootDocumentIsSet project_id, (error) ->
+				ProjectRootDocManager.ensureRootDocumentIsValid project_id, (error) ->
 					return callback(error) if error?
 					ProjectLocator.findRootDoc {project: results.project, project_id: project_id}, cb
 			]

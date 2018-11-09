@@ -67,3 +67,24 @@ module.exports = ProjectRootDocManager =
 				callback()
 			else
 				ProjectRootDocManager.setRootDocAutomatically project_id, callback
+
+	ensureRootDocumentIsValid: (project_id, callback = (error) ->) ->
+		ProjectGetter.getProject project_id, rootDoc_id: 1, (error, project) ->
+			return callback(error) if error?
+			if !project?
+				return callback new Error("project not found")
+
+			if project.rootDoc_id?
+				ProjectEntityHandler.getAllDocPathsFromProjectById project_id, (error, docPaths) ->
+					return callback(error) if error?
+					rootDocValid = false
+					for doc_id, _path of docPaths
+						if doc_id == project.rootDoc_id
+							rootDocValid = true
+					if rootDocValid
+						callback()
+					else
+						ProjectEntityUpdateHandler.setRootDoc project_id, null, ->
+							ProjectRootDocManager.setRootDocAutomatically project_id, callback
+			else
+				ProjectRootDocManager.setRootDocAutomatically project_id, callback
