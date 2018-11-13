@@ -31,7 +31,8 @@ groups.each do |usage, data|
 					name: "Overleaf #{plan_code.capitalize} - Group Account (#{size} licenses) - #{usage.capitalize}",
 					unit_amount_in_cents: {},
 					plan_interval_length: 12,
-					plan_interval_unit: 'months'
+					plan_interval_unit: 'months',
+					tax_code: 'digital'
 				}
 				plan[:unit_amount_in_cents][currency] = price * 100
 			end
