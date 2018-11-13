@@ -15,8 +15,11 @@ describe "LocalFileWriter", ->
 			on: (type, cb)->
 				if type == "finish"
 					cb()
+		@readStream = 
+			on: ->
 		@fs = 
 			createWriteStream : sinon.stub().returns(@writeStream)
+			createReadStream: sinon.stub().returns(@readStream)
 			unlink: sinon.stub()
 		@settings =
 			path:
@@ -49,6 +52,18 @@ describe "LocalFileWriter", ->
 						cb()
 			@writer.writeStream stream, null, (err, fsPath)=>
 				fsPath.should.equal @stubbedFsPath
+				done()
+
+	describe "getStream", ->
+
+		it "should read the stream from the file ", (done)->
+			@writer.getStream @stubbedFsPath, (err, stream)=>
+				@fs.createReadStream.calledWith(@stubbedFsPath).should.equal true
+				done()
+
+		it "should send the stream in the callback", (done)->
+			@writer.getStream @stubbedFsPath, (err, readStream)=>
+				readStream.should.equal @readStream
 				done()
 
 	describe "delete file", ->

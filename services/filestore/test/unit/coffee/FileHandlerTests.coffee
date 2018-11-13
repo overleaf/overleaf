@@ -23,6 +23,7 @@ describe "FileHandler", ->
 			directorySize: sinon.stub()
 		@LocalFileWriter =
 			writeStream: sinon.stub()
+			getStream: sinon.stub()
 			deleteFile: sinon.stub()
 		@FileConverter =
 			convert: sinon.stub()
@@ -152,17 +153,20 @@ describe "FileHandler", ->
 
 		it "should _convertFile ", (done)->
 			@stubbedStream = {"something":"here"}
+			@localStream = {
+				on: ->
+			}
 			@PersistorManager.sendFile = sinon.stub().callsArgWith(3)
-			@PersistorManager.getFileStream = sinon.stub().callsArgWith(3, null, @stubbedStream)
+			@LocalFileWriter.getStream = sinon.stub().callsArgWith(1, null, @localStream)
 			@convetedKey = @key+"converted"
 			@handler._convertFile = sinon.stub().callsArgWith(3, null, @stubbedPath)
 			@ImageOptimiser.compressPng = sinon.stub().callsArgWith(1)
 			@handler._getConvertedFileAndCache @bucket, @key, @convetedKey, {}, (err, fsStream)=>
 				@handler._convertFile.called.should.equal true
 				@PersistorManager.sendFile.calledWith(@bucket, @convetedKey, @stubbedPath).should.equal true
-				@PersistorManager.getFileStream.calledWith(@bucket, @convetedKey).should.equal true
 				@ImageOptimiser.compressPng.calledWith(@stubbedPath).should.equal true
-				fsStream.should.equal @stubbedStream
+				@LocalFileWriter.getStream.calledWith(@stubbedPath).should.equal true
+				fsStream.should.equal @localStream
 				done()
 
 	describe "_convertFile", ->
