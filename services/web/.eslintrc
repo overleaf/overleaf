@@ -18,7 +18,12 @@
     "mocha": true
   },
   "globals": {
-    "expect": true
+    "expect": true,
+    "define": true,
+    "$": true,
+    "angular": true,
+    // Injected in layout.pug
+    "user_id": true
   },
   "settings": {
     // Tell eslint-plugin-react which version of React we are using

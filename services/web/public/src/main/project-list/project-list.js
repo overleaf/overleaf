@@ -1,9 +1,5 @@
 /* eslint-disable
     camelcase,
-    max-len,
-    no-return-assign,
-    no-undef,
-    no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -27,7 +23,6 @@ define(['base'], function(App) {
     $timeout,
     localStorage
   ) {
-    let project_id
     $scope.projects = window.data.projects
     $scope.tags = window.data.tags
     $scope.notifications = window.data.notifications
@@ -80,7 +75,7 @@ define(['base'], function(App) {
     }
 
     for (var tag of Array.from($scope.tags)) {
-      for (project_id of Array.from(tag.project_ids || [])) {
+      for (let project_id of Array.from(tag.project_ids || [])) {
         project = projectsById[project_id]
         if (project != null) {
           if (!project.tags) {
@@ -146,9 +141,9 @@ define(['base'], function(App) {
       $scope.selectedProjects = $scope.projects.filter(
         project => project.selected
       )
-      return ($scope.isArchiveableProjectSelected = $scope.selectedProjects.some(
+      $scope.isArchiveableProjectSelected = $scope.selectedProjects.some(
         project => window.user_id === project.owner._id
-      ))
+      )
     }
 
     $scope.getSelectedProjects = () => $scope.selectedProjects
@@ -252,7 +247,7 @@ define(['base'], function(App) {
       // Remove project_id from tag.project_ids
       const remaining_project_ids = []
       const removed_project_ids = []
-      for (project_id of Array.from(tag.project_ids)) {
+      for (let project_id of Array.from(tag.project_ids)) {
         if (!Array.from(remove_project_ids).includes(project_id)) {
           remaining_project_ids.push(project_id)
         } else {
@@ -282,7 +277,6 @@ define(['base'], function(App) {
       )
 
       // Remove tag from project.tags
-      const remaining_tags = []
       for (project of Array.from(selected_projects)) {
         if (!project.tags) {
           project.tags = []
@@ -293,7 +287,7 @@ define(['base'], function(App) {
         }
       }
 
-      for (project_id of Array.from(removed_project_ids)) {
+      for (let project_id of Array.from(removed_project_ids)) {
         queuedHttp({
           method: 'DELETE',
           url: `/tag/${tag._id}/project/${project_id}`,
@@ -340,7 +334,7 @@ define(['base'], function(App) {
 
       // Add project_ids into tag.project_ids
       const added_project_ids = []
-      for (project_id of Array.from($scope.getSelectedProjectIds())) {
+      for (let project_id of Array.from($scope.getSelectedProjectIds())) {
         if (!Array.from(tag.project_ids).includes(project_id)) {
           tag.project_ids.push(project_id)
           added_project_ids.push(project_id)
@@ -359,7 +353,7 @@ define(['base'], function(App) {
 
       return (() => {
         const result = []
-        for (project_id of Array.from(added_project_ids)) {
+        for (let project_id of Array.from(added_project_ids)) {
           result.push(
             queuedHttp.post(`/tag/${tag._id}/project/${project_id}`, {
               _csrf: window.csrfToken
@@ -441,7 +435,6 @@ define(['base'], function(App) {
         .then(() => (project.name = newName))
 
     $scope.openRenameProjectModal = function() {
-      let modalInstance
       project = $scope.getFirstSelectedProject()
       if (project == null || project.accessLevel !== 'owner') {
         return
@@ -451,7 +444,7 @@ define(['base'], function(App) {
         'project action',
         'Rename'
       )
-      return (modalInstance = $modal.open({
+      $modal.open({
         templateUrl: 'renameProjectModalTemplate',
         controller: 'RenameProjectModalController',
         resolve: {
@@ -460,7 +453,7 @@ define(['base'], function(App) {
           }
         },
         scope: $scope
-      }))
+      })
     }
 
     $scope.cloneProject = function(project, cloneName) {
@@ -491,13 +484,12 @@ define(['base'], function(App) {
     }
 
     $scope.openCloneProjectModal = function() {
-      let modalInstance
       project = $scope.getFirstSelectedProject()
       if (project == null) {
         return
       }
 
-      return (modalInstance = $modal.open({
+      $modal.open({
         templateUrl: 'cloneProjectModalTemplate',
         controller: 'CloneProjectModalController',
         resolve: {
@@ -506,7 +498,7 @@ define(['base'], function(App) {
           }
         },
         scope: $scope
-      }))
+      })
     }
 
     $scope.openArchiveProjectsModal = function() {
@@ -533,14 +525,7 @@ define(['base'], function(App) {
       $scope.archiveOrLeaveProjects($scope.getSelectedProjects())
 
     $scope.archiveOrLeaveProjects = function(projects) {
-      const projectIds = projects.map(p => p.id)
-      // Remove project from any tags
-      for (tag of Array.from($scope.tags)) {
-        $scope._removeProjectIdsFromTagArray(tag, projectIds)
-      }
-
-      for (project of Array.from(projects)) {
-        project.tags = []
+      for (let project of projects) {
         if (project.accessLevel === 'owner') {
           project.archived = true
           queuedHttp({
@@ -594,7 +579,7 @@ define(['base'], function(App) {
         $scope._removeProjectIdsFromTagArray(tag, selected_project_ids)
       }
 
-      for (project_id of Array.from(selected_project_ids)) {
+      for (let project_id of Array.from(selected_project_ids)) {
         queuedHttp({
           method: 'DELETE',
           url: `/project/${project_id}?forever=true`,
@@ -630,11 +615,10 @@ define(['base'], function(App) {
     }
 
     $scope.openUploadProjectModal = function() {
-      let modalInstance
-      return (modalInstance = $modal.open({
+      $modal.open({
         templateUrl: 'uploadProjectModalTemplate',
         controller: 'UploadProjectModalController'
-      }))
+      })
     }
 
     $scope.downloadSelectedProjects = () =>
@@ -733,7 +717,7 @@ define(['base'], function(App) {
         .catch(function(response) {
           const { data, status } = response
           const error = status === 400 ? { message: data } : true
-          const modalInstance = $modal.open({
+          $modal.open({
             templateUrl: 'showErrorModalTemplate',
             controller: 'ShowErrorModalController',
             resolve: {

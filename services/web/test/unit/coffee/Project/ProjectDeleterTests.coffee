@@ -82,44 +82,40 @@ describe 'ProjectDeleter', ->
 	describe "deleteProject", ->
 		beforeEach (done) ->
 			@project_id = "mock-project-id-123"
-			@deleter.archiveProject = sinon.stub().callsArg(1)
-
-			@deleter.deleteProject @project_id, done
-
-		it "should archive the project to clean it up", ->
-			@deleter.archiveProject
-				.calledWith(@project_id)
-				.should.equal true
-
-		it "should remove the project from Mongo", ->
-			@Project.remove
-				.calledWith(_id: @project_id)
-				.should.equal true
-
-	describe "archiveProject", ->
-		beforeEach ->
 			@CollaboratorsHandler.getMemberIds = sinon.stub()
 			@CollaboratorsHandler.getMemberIds.withArgs(@project_id).yields(null, ["member-id-1", "member-id-2"])
-			@Project.update.callsArgWith(2)
+			@Project.remove.callsArgWith(1)
+			done()
 
 		it "should flushProjectToMongoAndDelete in doc updater", (done)->
-			@deleter.archiveProject @project_id, =>
+			@deleter.deleteProject @project_id, =>
 				@documentUpdaterHandler.flushProjectToMongoAndDelete.calledWith(@project_id).should.equal true
 				done()
 
-		it "should remove the project", (done)->
+		it "should removeProjectFromAllTags", (done)->
+			@deleter.deleteProject @project_id, =>
+				@TagsHandler.removeProjectFromAllTags.calledWith("member-id-1", @project_id).should.equal true
+				@TagsHandler.removeProjectFromAllTags.calledWith("member-id-2", @project_id).should.equal true
+				done()
+
+		it "should remove the project from Mongo", (done) ->
+			@deleter.deleteProject @project_id, =>
+				@Project.remove.calledWith({
+					_id: @project_id
+				}).should.equal true
+				done()
+
+	describe "archiveProject", ->
+		beforeEach ->
+			@Project.update.callsArgWith(2)
+
+		it "should update the project", (done)->
 			@deleter.archiveProject @project_id, =>
 				@Project.update.calledWith({
 					_id:@project_id
 				}, {
 					$set: { archived: true }
 				}).should.equal true
-				done()
-
-		it "should removeProjectFromAllTags", (done)->
-			@deleter.archiveProject @project_id, =>
-				@TagsHandler.removeProjectFromAllTags.calledWith("member-id-1", @project_id).should.equal true
-				@TagsHandler.removeProjectFromAllTags.calledWith("member-id-2", @project_id).should.equal true
 				done()
 
 	describe "restoreProject", ->

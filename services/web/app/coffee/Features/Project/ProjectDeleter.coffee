@@ -30,13 +30,7 @@ module.exports = ProjectDeleter =
 			CollaboratorsHandler.removeUserFromAllProjets user_id, callback
 
 	deleteProject: (project_id, callback = (error) ->) ->
-		# archiveProject takes care of the clean-up
-		ProjectDeleter.archiveProject project_id, (error) ->
-			logger.log project_id: project_id, "deleting project"
-			Project.remove _id: project_id, callback
-
-	archiveProject: (project_id, callback = (error) ->)->
-		logger.log project_id:project_id, "archived project from user request"
+		logger.log project_id: project_id, "deleting project"
 		async.series [
 			(cb)->
 				documentUpdaterHandler.flushProjectToMongoAndDelete project_id, cb
@@ -45,9 +39,18 @@ module.exports = ProjectDeleter =
 					for member_id in member_ids
 						tagsHandler.removeProjectFromAllTags member_id, project_id, (err)->
 				cb() #doesn't matter if this fails or the order it happens in
-			(cb)->
-				Project.update {_id:project_id}, { $set: { archived: true }}, cb
-		], (err)->
+			(cb) ->
+				Project.remove _id: project_id, cb
+		], (err) ->
+			if err?
+				logger.err err:err, "problem deleting project"
+				return callback(err)
+			logger.log project_id:project_id, "successfully deleting project from user request"
+			callback()
+
+	archiveProject: (project_id, callback = (error) ->)->
+		logger.log project_id:project_id, "archived project from user request"
+		Project.update {_id:project_id}, { $set: { archived: true }}, (err)->
 			if err?
 				logger.err err:err, "problem archived project"
 				return callback(err)
