@@ -1,19 +1,9 @@
 /* eslint-disable
     camelcase,
     max-len,
-    no-return-assign,
-    no-undef,
-    no-unused-vars,
+    no-return-assign
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* global recurly,_,define */
 define(['base', 'directives/creditCards', 'libs/recurly-4.8.5'], App =>
   App.controller('NewSubscriptionController', function(
     $scope,
@@ -22,13 +12,13 @@ define(['base', 'directives/creditCards', 'libs/recurly-4.8.5'], App =>
     event_tracking,
     ccUtils
   ) {
-    let inputHasError, isFormValid, setPaymentMethod
     if (typeof recurly === 'undefined') {
       throw new Error('Recurly API Library Missing.')
     }
 
     $scope.currencyCode = MultiCurrencyPricing.currencyCode
-    $scope.plans = MultiCurrencyPricing.plans
+    $scope.allCurrencies = MultiCurrencyPricing.plans
+    $scope.availableCurrencies = {}
     $scope.planCode = window.plan_code
 
     $scope.switchToStudent = function() {
@@ -37,9 +27,9 @@ define(['base', 'directives/creditCards', 'libs/recurly-4.8.5'], App =>
       event_tracking.sendMB('subscription-form-switch-to-student', {
         plan: window.plan_code
       })
-      return (window.location = `/user/subscription/new?planCode=${planCode}&currency=${
+      window.location = `/user/subscription/new?planCode=${planCode}&currency=${
         $scope.currencyCode
-      }&cc=${$scope.data.coupon}`)
+      }&cc=${$scope.data.coupon}`
     }
 
     event_tracking.sendMB('subscription-form', { plan: window.plan_code })
@@ -85,7 +75,7 @@ define(['base', 'directives/creditCards', 'libs/recurly-4.8.5'], App =>
     const pricing = recurly.Pricing()
     window.pricing = pricing
 
-    const initialPricing = pricing
+    pricing
       .plan(window.plan_code, { quantity: 1 })
       .address({ country: $scope.data.country })
       .tax({ tax_code: 'digital', vat_number: '' })
@@ -96,58 +86,41 @@ define(['base', 'directives/creditCards', 'libs/recurly-4.8.5'], App =>
     pricing.on('change', () => {
       $scope.planName = pricing.items.plan.name
       $scope.price = pricing.price
-      $scope.trialLength =
-        pricing.items.plan.trial != null
-          ? pricing.items.plan.trial.length
-          : undefined
+      if (pricing.items.plan.trial) {
+        $scope.trialLength = pricing.items.plan.trial.length
+      }
       $scope.monthlyBilling = pricing.items.plan.period.length === 1
 
+      $scope.availableCurrencies = {}
+      for (let currencyCode in pricing.items.plan.price) {
+        if (MultiCurrencyPricing.plans[currencyCode]) {
+          $scope.availableCurrencies[currencyCode] =
+            MultiCurrencyPricing.plans[currencyCode]
+        }
+      }
+
       if (
-        __guard__(
-          __guard__(
-            pricing.items != null ? pricing.items.coupon : undefined,
-            x1 => x1.discount
-          ),
-          x => x.type
-        ) === 'percent'
+        pricing.items &&
+        pricing.items.coupon &&
+        pricing.items.coupon.discount &&
+        pricing.items.coupon.discount.type === 'percent'
       ) {
         const basePrice = parseInt(pricing.price.base.plan.unit)
         $scope.normalPrice = basePrice
         if (
           pricing.items.coupon.applies_for_months > 0 &&
-          __guard__(
-            pricing.items.coupon != null
-              ? pricing.items.coupon.discount
-              : undefined,
-            x2 => x2.rate
-          ) &&
-          (pricing.items.coupon != null
-            ? pricing.items.coupon.applies_for_months
-            : undefined) != null
+          pricing.items.coupon.discount.rate &&
+          pricing.items.coupon.applies_for_months
         ) {
-          $scope.discountMonths =
-            pricing.items.coupon != null
-              ? pricing.items.coupon.applies_for_months
-              : undefined
-          $scope.discountRate =
-            __guard__(
-              pricing.items.coupon != null
-                ? pricing.items.coupon.discount
-                : undefined,
-              x3 => x3.rate
-            ) * 100
+          $scope.discountMonths = pricing.items.coupon.applies_for_months
+          $scope.discountRate = pricing.items.coupon.discount.rate * 100
         }
 
-        if (
-          __guard__(
-            pricing.price != null ? pricing.price.taxes[0] : undefined,
-            x4 => x4.rate
-          ) != null
-        ) {
+        if (pricing.price.taxes[0] && pricing.price.taxes[0].rate) {
           $scope.normalPrice += basePrice * pricing.price.taxes[0].rate
         }
       }
-      return $scope.$apply()
+      $scope.$apply()
     })
 
     $scope.applyCoupon = () => pricing.coupon($scope.data.coupon).done()
@@ -162,7 +135,7 @@ define(['base', 'directives/creditCards', 'libs/recurly-4.8.5'], App =>
       return pricing.currency(newCurrency).done()
     }
 
-    $scope.inputHasError = inputHasError = function(formItem) {
+    $scope.inputHasError = function(formItem) {
       if (formItem == null) {
         return false
       }
@@ -170,7 +143,7 @@ define(['base', 'directives/creditCards', 'libs/recurly-4.8.5'], App =>
       return formItem.$touched && formItem.$invalid
     }
 
-    $scope.isFormValid = isFormValid = function(form) {
+    $scope.isFormValid = function(form) {
       if ($scope.paymentMethod.value === 'paypal') {
         return $scope.data.country !== ''
       } else {
@@ -181,10 +154,10 @@ define(['base', 'directives/creditCards', 'libs/recurly-4.8.5'], App =>
     $scope.updateCountry = () =>
       pricing.address({ country: $scope.data.country }).done()
 
-    $scope.setPaymentMethod = setPaymentMethod = function(method) {
+    $scope.setPaymentMethod = function(method) {
       $scope.paymentMethod.value = method
       $scope.validation.errorFields = {}
-      return ($scope.genericError = '')
+      $scope.genericError = ''
     }
 
     const completeSubscription = function(err, recurly_token_id) {
@@ -193,10 +166,10 @@ define(['base', 'directives/creditCards', 'libs/recurly-4.8.5'], App =>
         event_tracking.sendMB('subscription-error', err)
         // We may or may not be in a digest loop here depending on
         // whether recurly could do validation locally, so do it async
-        return $scope.$evalAsync(function() {
+        $scope.$evalAsync(function() {
           $scope.processing = false
           $scope.genericError = err.message
-          return _.each(
+          _.each(
             err.fields,
             field => ($scope.validation.errorFields[field] = true)
           )
@@ -208,11 +181,8 @@ define(['base', 'directives/creditCards', 'libs/recurly-4.8.5'], App =>
           subscriptionDetails: {
             currencyCode: pricing.items.currency,
             plan_code: pricing.items.plan.code,
-            coupon_code:
-              __guard__(
-                pricing.items != null ? pricing.items.coupon : undefined,
-                x => x.code
-              ) || '',
+            coupon_code: pricing.items.coupon ? pricing.items.coupon.code : '',
+
             isPaypal: $scope.paymentMethod.value === 'paypal',
             address: {
               address1: $scope.data.address1,
@@ -235,12 +205,11 @@ define(['base', 'directives/creditCards', 'libs/recurly-4.8.5'], App =>
           .post('/user/subscription/create', postData)
           .then(function() {
             event_tracking.sendMB('subscription-submission-success')
-            return (window.location.href = '/user/subscription/thank-you')
+            window.location.href = '/user/subscription/thank-you'
           })
           .catch(function() {
             $scope.processing = false
-            return ($scope.genericError =
-              'Something went wrong processing the request')
+            $scope.genericError = 'Something went wrong processing the request'
           })
       }
     }
@@ -255,7 +224,7 @@ define(['base', 'directives/creditCards', 'libs/recurly-4.8.5'], App =>
       }
     }
 
-    return ($scope.countries = [
+    $scope.countries = [
       { code: 'AF', name: 'Afghanistan' },
       { code: 'AL', name: 'Albania' },
       { code: 'DZ', name: 'Algeria' },
@@ -507,10 +476,5 @@ define(['base', 'directives/creditCards', 'libs/recurly-4.8.5'], App =>
       { code: 'YE', name: 'Yemen' },
       { code: 'ZM', name: 'Zambia' },
       { code: 'AX', name: '&angst;land Islandscode:' }
-    ])
+    ]
   }))
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}

@@ -220,6 +220,9 @@ module.exports = settings =
 		templates: true
 		trackChanges: true
 
+	features:
+		personal: defaultFeatures
+
 	plans: plans = [{
 		planCode: "personal"
 		name: "Personal"

@@ -179,7 +179,9 @@ define(['base'], function(App) {
     if ($scope.subscriptionSuffix === 'free_trial_7_days') {
       $scope.subscriptionSuffix = ''
     }
-    $scope.isNextGenPlan = ['heron', 'ibis'].includes($scope.subscriptionSuffix)
+    $scope.isNextGenPlan =
+      ['heron', 'ibis'].includes($scope.subscriptionSuffix) ||
+      subscription.groupPlan
 
     $scope.shouldShowPlan = function(planCode) {
       let needle
@@ -201,7 +203,8 @@ define(['base'], function(App) {
           ? subscription.planCode
           : undefined,
         x2 => x2.indexOf('ann')
-      ) === -1
+      ) === -1 &&
+      !subscription.groupPlan
     const stillInFreeTrial = freeTrialInFuture && freeTrialExpiresUnderSevenDays
 
     if (isMonthlyCollab && stillInFreeTrial) {

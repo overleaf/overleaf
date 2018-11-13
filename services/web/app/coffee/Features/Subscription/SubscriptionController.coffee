@@ -11,6 +11,7 @@ SubscriptionDomainHandler = require("./SubscriptionDomainHandler")
 UserGetter = require "../User/UserGetter"
 FeaturesUpdater = require './FeaturesUpdater'
 planFeatures = require './planFeatures'
+GroupPlansData = require './GroupPlansData'
 
 module.exports = SubscriptionController =
 
@@ -31,6 +32,7 @@ module.exports = SubscriptionController =
 					gaExperiments: Settings.gaExperiments.plansPage
 					recomendedCurrency:recomendedCurrency
 					planFeatures: planFeatures
+					groupPlans: GroupPlansData
 			user_id = AuthenticationController.getLoggedInUserId(req)
 			if user_id?
 				UserGetter.getUser user_id, {signUpDate: 1}, (err, user) ->

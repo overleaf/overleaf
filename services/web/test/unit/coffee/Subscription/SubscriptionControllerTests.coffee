@@ -77,6 +77,7 @@ describe "SubscriptionController", ->
 			"../User/UserGetter": @UserGetter
 			"./RecurlyWrapper": @RecurlyWrapper = {}
 			"./FeaturesUpdater": @FeaturesUpdater = {}
+			"./GroupPlansData": @GroupPlansData = {}
 
 
 		@res = new MockResponse()
@@ -135,6 +136,8 @@ describe "SubscriptionController", ->
 					"../User/UserGetter": @UserGetter
 					"./RecurlyWrapper": @RecurlyWrapper = {}
 					"./FeaturesUpdater": @FeaturesUpdater = {}
+					"./GroupPlansData": @GroupPlansData
+
 				@SubscriptionController.plansPage(@req, @res)
 
 			it 'should not fetch the current user', (done) ->

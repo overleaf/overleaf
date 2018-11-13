@@ -26,10 +26,10 @@ block content
 											data-toggle="dropdown",
 											dropdown-toggle
 										)
-											| {{currencyCode}} ({{plans[currencyCode]['symbol']}}) 
+											| {{currencyCode}} ({{allCurrencies[currencyCode]['symbol']}}) 
 											span.caret
 										ul.dropdown-menu(role="menu")
-											li(ng-repeat="(currency, value) in plans")
+											li(ng-repeat="(currency, value) in availableCurrencies")
 												a(
 													ng-click="changeCurrency(currency)",
 												) {{currency}} ({{value['symbol']}}) 
@@ -44,11 +44,11 @@ block content
 										span !{translate("first_few_days_free", {trialLen:'{{trialLength}}'})}
 										span(ng-if="discountMonths && discountRate") &nbsp; -  {{discountMonths}} #{translate("month")}s {{discountRate}}% Off
 									div(ng-if="price")
-										strong {{plans[currencyCode]['symbol']}}{{price.next.total}} 
+										strong {{availableCurrencies[currencyCode]['symbol']}}{{price.next.total}} 
 										span(ng-if="monthlyBilling")  #{translate("every")} #{translate("month")}
 										span(ng-if="!monthlyBilling")  #{translate("every")} #{translate("year")}
 									div(ng-if="normalPrice")
-										span.small Normally {{plans[currencyCode]['symbol']}}{{normalPrice}}
+										span.small Normally {{availableCurrencies[currencyCode]['symbol']}}{{normalPrice}}
 						.row
 							div()
 								.col-md-12()
@@ -188,8 +188,8 @@ block content
 											div.price-breakdown(ng-if="price.next.tax !== '0.00'")
 												hr.thin
 												span Total: 
-												strong {{plans[currencyCode]['symbol']}}{{price.next.total}} 
-												span ({{plans[currencyCode]['symbol']}}{{price.next.subtotal}} + {{plans[currencyCode]['symbol']}}{{price.next.tax}} tax) 
+												strong {{availableCurrencies[currencyCode]['symbol']}}{{price.next.total}} 
+												span ({{availableCurrencies[currencyCode]['symbol']}}{{price.next.subtotal}} + {{availableCurrencies[currencyCode]['symbol']}}{{price.next.tax}} tax) 
 												span(ng-if="monthlyBilling") #{translate("every")} #{translate("month")}
 												span(ng-if="!monthlyBilling") #{translate("every")} #{translate("year")}
 												hr.thin

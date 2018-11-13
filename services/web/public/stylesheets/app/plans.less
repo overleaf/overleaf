@@ -62,7 +62,7 @@
 	.circle {
 		font-size: 1.5rem;
 		font-weight: 700;
-		padding: 38px 18px;
+		padding: 46px 18px;
 		margin: 0 auto @line-height-computed;
 		text-shadow: 0 -1px 1px darken(@link-color, 10%);
 		width: 120px;
@@ -71,10 +71,19 @@
 		background-color: @brand-secondary;
 		color: white;
 		white-space: nowrap;
+		line-height: 1;
 		span.small {
 			color: rgba(255, 255, 255, 0.85);
 			font-size: @font-size-base * .8;
 		}
+	}
+	.circle-lg {
+		width: 150px;
+		height: 150px;
+		padding-top: 50px;
+	}
+	.circle-subtext {
+		font-size: 1rem;
 	}
 	.circle-img {
 		float: right;

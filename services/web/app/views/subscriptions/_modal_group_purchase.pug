@@ -1,0 +1,52 @@
+script(type="text/ng-template", id="groupPlanModalPurchaseTemplate")
+	.modal-header
+		h3 Save 30% or more with a group license
+	.modal-body.plans
+		.container-fluid
+			.row
+				.col-md-6.text-center
+					.circle.circle-lg
+						| {{ displayPrice }}
+						span.small / year
+						br
+						span.circle-subtext For {{ selected.size }} users
+					ul.list-unstyled
+						li Each user will have access to:
+						li &nbsp;
+						li(ng-if="selected.plan_code == 'collaborator'")
+							strong #{translate("collabs_per_proj", {collabcount:10})}
+						li(ng-if="selected.plan_code == 'professional'")
+							strong #{translate("unlimited_collabs")}
+						+features_premium
+				.col-md-6
+					form.form
+						.form-group
+							label(for='plan_code')
+								| Plan
+							select.form-control(id="plan_code", ng-model="selected.plan_code")
+								option(ng-repeat="plan_code in options.plan_codes", value="{{plan_code.code}}") {{ plan_code.display }}
+						.form-group
+							label(for='size')
+								| Number of users
+							select.form-control(id="size", ng-model="selected.size")
+								option(ng-repeat="size in options.sizes", value="{{size}}") {{ size }}
+						.form-group
+							label(for='currency')
+								| Currency
+							select.form-control(id="currency", ng-model="selected.currency")
+								option(ng-repeat="currency in options.currencies", value="{{currency.code}}") {{ currency.display }}
+						.form-group
+							label(for='usage')
+								| Usage
+							select.form-control(id="usage", ng-model="selected.usage")
+								option(ng-repeat="usage in options.usages", value="{{usage.code}}") {{ usage.display }}
+							p.small.text-center.row-spaced-small(ng-show="selected.usage == 'educational'")
+								| Save an additional 40% on groups of 10 or more with our educational discount
+	.modal-footer
+		.text-center
+			button.btn.btn-primary.btn-lg(ng-click="purchase()") Purchase Now
+			br
+			| or
+			br
+			a(href, ng-click="payByInvoice()") Pay by invoice or VAT invoice
+

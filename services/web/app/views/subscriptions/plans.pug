@@ -8,8 +8,9 @@ block vars
 
 block scripts
 	script(type='text/javascript').
-		window.recomendedCurrency = '#{recomendedCurrency}'
-		window.abCurrencyFlag = '#{abCurrencyFlag}'
+		window.recomendedCurrency = '#{recomendedCurrency}';
+		window.abCurrencyFlag = '#{abCurrencyFlag}';
+		window.groupPlans = !{JSON.stringify(groupPlans)};
 
 block content
 	.content.content-alt.content-page
@@ -94,7 +95,7 @@ block content
 							br
 							br
 							a.btn.btn-default(
-								href
+								href="#groups"
 								ng-click="openGroupPlanModal()"
 							) #{translate('find_out_more')}
 
@@ -131,3 +132,4 @@ block content
 					.row.row-spaced
 
 	include _modal_group_inquiry
+	include _modal_group_purchase
