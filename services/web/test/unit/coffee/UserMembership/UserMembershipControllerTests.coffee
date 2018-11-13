@@ -69,7 +69,8 @@ describe "UserMembershipController", ->
 			@UserMembershipController.index @req, render: (viewPath, viewParams) =>
 				expect(viewPath).to.equal 'user_membership/index'
 				expect(viewParams.groupSize).to.equal undefined
-				expect(viewParams.translations.title).to.equal 'group_managers'
+				expect(viewParams.translations.title).to.equal 'group_account'
+				expect(viewParams.translations.subtitle).to.equal 'managers_management'
 				expect(viewParams.paths.exportMembers).to.be.undefined
 				done()
 
@@ -79,7 +80,7 @@ describe "UserMembershipController", ->
 			@UserMembershipController.index @req, render: (viewPath, viewParams) =>
 				expect(viewPath).to.equal 'user_membership/index'
 				expect(viewParams.groupSize).to.equal undefined
-				expect(viewParams.translations.title).to.equal 'institution_managers'
+				expect(viewParams.translations.title).to.equal 'institution_account'
 				expect(viewParams.paths.exportMembers).to.be.undefined
 				done()
 

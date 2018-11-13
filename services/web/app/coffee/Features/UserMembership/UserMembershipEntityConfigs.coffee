@@ -8,10 +8,12 @@ module.exports =
 			read: ['invited_emails', 'teamInvites', 'member_ids']
 			write: null
 			access: 'manager_ids'
+			name: 'teamName'
 		baseQuery:
 			groupPlan: true
 		translations:
 			title: 'group_account'
+			subtitle: 'members_management'
 			remove: 'remove_from_group'
 		pathsFor: (id) ->
 			addMember: "/manage/groups/#{id}/invites"
@@ -34,10 +36,12 @@ module.exports =
 			read: ['manager_ids']
 			write: 'manager_ids'
 			access: 'manager_ids'
+			name: 'teamName'
 		baseQuery:
 			groupPlan: true
 		translations:
-			title: 'group_managers'
+			title: 'group_account'
+			subtitle: 'managers_management'
 			remove: 'remove_manager'
 		pathsFor: (id) ->
 			addMember: "/manage/groups/#{id}/managers"
@@ -51,7 +55,8 @@ module.exports =
 			write: 'managerIds'
 			access: 'managerIds'
 		translations:
-			title: 'institution_managers'
+			title: 'institution_account'
+			subtitle: 'managers_management'
 			remove: 'remove_manager'
 		pathsFor: (id) ->
 			addMember: "/manage/institutions/#{id}/managers"
