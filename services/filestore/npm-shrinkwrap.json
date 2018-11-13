@@ -1094,9 +1094,9 @@
       "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz"
     },
     "logger-sharelatex": {
-      "version": "1.5.7",
-      "from": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.7",
-      "resolved": "git+https://github.com/sharelatex/logger-sharelatex.git#13562f8866708fc86aef8202bf5a2ce4d1c6eed7",
+      "version": "1.5.8",
+      "from": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.8",
+      "resolved": "git+https://github.com/sharelatex/logger-sharelatex.git#3f841b014572706e472c47fe0d0c0c1e569bad8c",
       "dependencies": {
         "ansi-styles": {
           "version": "1.1.0",
@@ -1238,9 +1238,9 @@
           }
         },
         "nan": {
-          "version": "2.11.0",
+          "version": "2.11.1",
           "from": "nan@>=2.0.8 <3.0.0",
-          "resolved": "https://registry.npmjs.org/nan/-/nan-2.11.0.tgz",
+          "resolved": "https://registry.npmjs.org/nan/-/nan-2.11.1.tgz",
           "optional": true
         },
         "ncp": {
