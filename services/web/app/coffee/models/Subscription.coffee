@@ -13,6 +13,7 @@ SubscriptionSchema = new Schema
 	teamInvites  :   [ TeamInviteSchema ]
 	recurlySubscription_id : String
 	teamName 	 : {type: String}
+	teamNotice : {type: String}
 	planCode 	 : {type: String}
 	groupPlan	 : {type: Boolean, default: false}
 	membersLimit: {type:Number, default:0}
