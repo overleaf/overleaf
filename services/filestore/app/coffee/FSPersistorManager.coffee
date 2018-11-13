@@ -13,10 +13,19 @@ module.exports =
   sendFile: ( location, target, source, callback = (err)->) ->
     filteredTarget = filterName target
     logger.log location:location, target:filteredTarget, source:source, "sending file"
-    fs.rename source, "#{location}/#{filteredTarget}", (err) ->
-      if err!=null
+    done = _.once (err) ->
+      if err?
         logger.err err:err, location:location, target:filteredTarget, source:source, "Error on put of file"
-      callback err
+      callback(err)
+    # actually copy the file (instead of moving it) to maintain consistent behaviour
+    # between the different implementations
+    sourceStream = fs.createReadStream source
+    sourceStream.on 'error', done
+    targetStream = fs.createWriteStream "#{location}/#{filteredTarget}"
+    targetStream.on 'error', done
+    targetStream.on 'finish', () ->
+      done()
+    sourceStream.pipe targetStream
 
   sendStream: ( location, target, sourceStream, callback = (err)->) ->
     logger.log location:location, target:target, "sending file stream"
@@ -26,7 +35,10 @@ module.exports =
       if err?
         logger.err  location:location, target:target, fsPath:fsPath, err:err, "something went wrong writing stream to disk"
         return callback err
-      @sendFile location, target, fsPath, callback
+      @sendFile location, target, fsPath, (err) -> 
+        # delete the temporary file created above and return the original error
+        LocalFileWriter.deleteFile fsPath, () ->
+          callback(err)
 
   # opts may be {start: Number, end: Number}
   getFileStream: (location, name, opts, _callback = (err, res)->) ->
