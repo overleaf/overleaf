@@ -76,7 +76,9 @@ module.exports =
 		s3Stream = s3Client.get(key, headers)
 		s3Stream.end()
 		s3Stream.on 'response', (res) ->
-			if res.statusCode == 404
+			if res.statusCode in [403, 404]
+				# S3 returns a 403 instead of a 404 when the user doesn't have
+				# permission to list the bucket contents.
 				logger.log bucketName:bucketName, key:key, "file not found in s3"
 				return callback new Errors.NotFoundError("File not found in S3: #{bucketName}:#{key}"), null
 			if res.statusCode not in [200, 206]

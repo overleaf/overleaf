@@ -6,6 +6,7 @@ FileConverter = require("./FileConverter")
 KeyBuilder = require("./KeyBuilder")
 async = require("async")
 ImageOptimiser = require("./ImageOptimiser")
+Errors = require('./Errors')
 
 module.exports = FileHandler =
 
@@ -32,7 +33,7 @@ module.exports = FileHandler =
 
 	_getStandardFile: (bucket, key, opts, callback)->
 		PersistorManager.getFileStream bucket, key, opts, (err, fileStream)->
-			if err?
+			if err? and !(err instanceof Errors.NotFoundError)
 				logger.err  bucket:bucket, key:key, opts:FileHandler._scrubSecrets(opts), "error getting fileStream"
 			callback err, fileStream
 
