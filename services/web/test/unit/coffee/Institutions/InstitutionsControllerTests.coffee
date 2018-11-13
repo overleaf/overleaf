@@ -47,17 +47,27 @@ describe "InstitutionsController", ->
 			json: sinon.stub()
 		@next = sinon.stub()
 
-	describe 'confirmDomain', ->
+	describe 'affiliateUsers', ->
 		it 'should add affiliations for matching users', (done)->
 			@res.sendStatus = (code) =>
+				code.should.equal 200
 				@getUsersByHostname.calledOnce.should.equal true
 				@addAffiliation.calledThrice.should.equal true
 				@addAffiliation.calledWith(@stubbedUser1._id, @stubbedUser1.emails[0].email).should.equal true
 				@addAffiliation.calledWith(@stubbedUser1._id, @stubbedUser1.emails[2].email).should.equal true
+				@addAffiliation.calledWith(@stubbedUser2._id, @stubbedUser2.emails[0].email).should.equal true
 				done()
 			@InstitutionsController.confirmDomain @req, @res, @next
 
-	describe 'create institution', ->
+		it 'should return errors if last affiliation cannot be added', (done)->
+			@addAffiliation.onCall(2).callsArgWith(3, new Error("error"))
+			@next = (error) =>
+				expect(error).to.exist
+				@getUsersByHostname.calledOnce.should.equal true
+				done()
+			@InstitutionsController.confirmDomain @req, @res, @next
+
+	describe 'createInstitution', ->
 		it 'should create new institution', (done)->
 			@req.body.institution_id = 123
 			expectedData = v1Id: 123

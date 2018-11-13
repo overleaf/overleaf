@@ -24,14 +24,17 @@ affiliateUsers = (hostname, callback = (error)->) ->
 		if error?
 			logger.err error: error, 'problem fetching users by hostname'
 			return callback(error)
-		async.map users, ((user) ->
-			matchingEmails = user.emails.filter (email) -> email.reversedHostname == reversedHostname
-			for email in matchingEmails
-				addAffiliation user._id, email.email, {confirmedAt: email.confirmedAt}, (error) =>
-					if error?
-						logger.err error: error, 'problem adding affiliation while confirming hostname'
-						return callback(error)
-			), (error) ->
-				if error?
-					return callback(error)
-			callback()
+
+		async.map users, ((user, innerCallback) ->
+			affiliateUserByReversedHostname user, reversedHostname, innerCallback
+		), callback
+
+affiliateUserByReversedHostname = (user, reversedHostname, callback) ->
+	matchingEmails = user.emails.filter (email) -> email.reversedHostname == reversedHostname
+	async.map matchingEmails, ((email, innerCallback) ->
+		addAffiliation user._id, email.email, {confirmedAt: email.confirmedAt}, (error) =>
+			if error?
+				logger.err error: error, 'problem adding affiliation while confirming hostname'
+				return innerCallback(error)
+			innerCallback()
+	), callback
