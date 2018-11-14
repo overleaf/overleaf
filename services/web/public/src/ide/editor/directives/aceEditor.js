@@ -36,9 +36,9 @@ define([
 ], function(
   App,
   Ace,
-  SearchBox,
-  Vim,
-  ModeList,
+  _ignore1,
+  _ignore2,
+  _ignore3,
   UndoManager,
   AutoCompleteManager,
   SpellCheckManager,
@@ -49,10 +49,11 @@ define([
   TrackChangesManager,
   MetadataManager
 ) {
-  let monkeyPatchSearch, syntaxValidationEnabled
+  let syntaxValidationEnabled
   const { EditSession } = ace.require('ace/edit_session')
-  ModeList = ace.require('ace/ext/modelist')
-  ;({ Vim } = ace.require('ace/keyboard/vim'))
+  const ModeList = ace.require('ace/ext/modelist')
+  const { Vim } = ace.require('ace/keyboard/vim')
+  const SearchBox = ace.require('ace/ext/searchbox')
 
   // set the path for ace workers if using a CDN (from editor.pug)
   if (window.aceWorkerPath !== '') {
@@ -263,7 +264,7 @@ define([
             mac: 'Command-F'
           },
           exec(editor) {
-            return ace.require('ace/ext/searchbox').Search(editor, true)
+            return SearchBox.Search(editor, true)
           },
           readOnly: true
         })
@@ -375,7 +376,7 @@ define([
         // Make '/' work for search in vim mode.
         editor.showCommandLine = arg => {
           if (arg === '/') {
-            return ace.require('ace/ext/searchbox').Search(editor, true)
+            return SearchBox.Search(editor, true)
           }
         }
 
@@ -861,8 +862,7 @@ define([
     }
   })
 
-  return (monkeyPatchSearch = function($rootScope, $compile) {
-    ;({ SearchBox } = ace.require('ace/ext/searchbox'))
+  function monkeyPatchSearch($rootScope, $compile) {
     const searchHtml = `\
 <div class="ace_search right">
 	<a href type="button" action="hide" class="ace_searchbtn_close">
@@ -888,21 +888,25 @@ define([
 	</div>
 	<div class="ace_search_options">
 		<div class="btn-group">
-			<span action="toggleRegexpMode" class="btn btn-default btn-sm" tooltip-placement="bottom" tooltip-append-to-body="true" tooltip="RegExp Search">.*</span>
-			<span action="toggleCaseSensitive" class="btn btn-default btn-sm" tooltip-placement="bottom" tooltip-append-to-body="true" tooltip="CaseSensitive Search">Aa</span>
-			<span action="toggleWholeWords" class="btn btn-default btn-sm" tooltip-placement="bottom" tooltip-append-to-body="true" tooltip="Whole Word Search">"..."</span>
+			<button action="toggleRegexpMode" class="btn btn-default btn-sm" tooltip-placement="bottom" tooltip-append-to-body="true" tooltip="RegExp Search">.*</button>
+			<button action="toggleCaseSensitive" class="btn btn-default btn-sm" tooltip-placement="bottom" tooltip-append-to-body="true" tooltip="CaseSensitive Search">Aa</button>
+			<button action="toggleWholeWords" class="btn btn-default btn-sm" tooltip-placement="bottom" tooltip-append-to-body="true" tooltip="Whole Word Search">"..."</button>
+			<button action="searchInSelection" class="btn btn-default btn-sm" tooltip-placement="bottom" tooltip-append-to-body="true" tooltip="Search Within Selection"><i class="fa fa-align-left"></i></button>
 		</div>
+		<span class="ace_search_counter"></span>
 	</div>
+	<div action="toggleReplace" class="hidden"></div>
 </div>\
 `
 
     // Remove Ace CSS
     $('#ace_searchbox').remove()
 
-    const { $init } = SearchBox.prototype
-    return (SearchBox.prototype.$init = function() {
+    const SB = SearchBox.SearchBox
+    const { $init } = SB.prototype
+    SB.prototype.$init = function() {
       this.element = $compile(searchHtml)($rootScope.$new())[0]
       return $init.apply(this)
-    })
-  })
+    }
+  }
 })
