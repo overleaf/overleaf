@@ -28,6 +28,33 @@ describe "AuthorizationMiddlewear", ->
 		@ObjectId.isValid.withArgs(@project_id).returns true
 		@next = sinon.stub()
 
+	describe "_getUserId", ->
+		beforeEach ->
+			@req = {}
+
+		it "should get the user from session", (done) ->
+			@AuthenticationController.getLoggedInUserId = sinon.stub().returns("1234")
+			@AuthorizationMiddlewear._getUserId @req, (err, user_id) =>
+				expect(err).to.not.exist
+				expect(user_id).to.equal "1234"
+				done()
+
+		it "should get oauth_user from request", (done) ->
+			@AuthenticationController.getLoggedInUserId = sinon.stub().returns(null)
+			@req.oauth_user = {_id: "5678"}
+			@AuthorizationMiddlewear._getUserId @req, (err, user_id) =>
+				expect(err).to.not.exist
+				expect(user_id).to.equal "5678"
+				done()
+
+		it "should fall back to null", (done) ->
+			@AuthenticationController.getLoggedInUserId = sinon.stub().returns(null)
+			@req.oauth_user = undefined
+			@AuthorizationMiddlewear._getUserId @req, (err, user_id) =>
+				expect(err).to.not.exist
+				expect(user_id).to.equal null
+				done()
+
 	METHODS_TO_TEST = {
 		"ensureUserCanReadProject": "canUserReadProject"
 		"ensureUserCanWriteProjectSettings": "canUserWriteProjectSettings"

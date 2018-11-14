@@ -12,6 +12,8 @@ module.exports = Features =
 				return not Features.externalAuthenticationSystemUsed() or Settings.overleaf?
 			when 'github-sync'
 				return Settings.enableGithubSync
+			when 'git-bridge'
+				return Settings.enableGitBridge
 			when 'v1-return-message'
 				return Settings.accountMerge? and Settings.overleaf?
 			when 'custom-togglers'

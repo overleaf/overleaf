@@ -135,6 +135,7 @@ block requirejs
 		window.trackChangesState = data.trackChangesState;
 		window.wikiEnabled = #{!!(settings.apis.wiki && settings.apis.wiki.url)};
 		window.richTextEnabled = #{richTextEnabled}
+		window.gitBridgePublicBaseUrl = '#{gitBridgePublicBaseUrl}'
 		window.requirejs = {
 			"paths" : {
 				"moment": "libs/#{lib('moment')}",

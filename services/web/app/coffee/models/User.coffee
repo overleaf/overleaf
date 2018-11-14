@@ -43,6 +43,7 @@ UserSchema = new Schema
 		versioning:       { type:Boolean, default: Settings.defaultFeatures.versioning }
 		dropbox:          { type:Boolean, default: Settings.defaultFeatures.dropbox }
 		github:           { type:Boolean, default: Settings.defaultFeatures.github }
+		gitBridge:        { type:Boolean, default: Settings.defaultFeatures.gitBridge }
 		compileTimeout:   { type:Number, default: Settings.defaultFeatures.compileTimeout }
 		compileGroup:     { type:String,  default: Settings.defaultFeatures.compileGroup }
 		templates:        { type:Boolean, default: Settings.defaultFeatures.templates }

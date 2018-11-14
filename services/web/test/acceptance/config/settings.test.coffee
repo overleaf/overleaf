@@ -16,6 +16,7 @@ module.exports =
 			dropbox: false
 			versioning: false
 			github: true
+			gitBridge: true
 			templates: false
 			references: false
 			referencesSearch: false
@@ -28,6 +29,7 @@ module.exports =
 			dropbox: false
 			versioning: false
 			github: false
+			gitBridge: false
 			templates: false
 			references: false
 			referencesSearch: false
@@ -40,6 +42,7 @@ module.exports =
 			dropbox: true
 			versioning: true
 			github: true
+			gitBridge: true
 			templates: true
 			references: true
 			referencesSearch: true
@@ -52,6 +55,7 @@ module.exports =
 			dropbox: true
 			versioning: true
 			github: true
+			gitBridge: true
 			templates: true
 			references: true
 			referencesSearch: true

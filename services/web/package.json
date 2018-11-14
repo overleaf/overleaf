@@ -77,6 +77,7 @@
     "nodemailer-ses-transport": "^1.3.0",
     "nvd3": "^1.8.6",
     "optimist": "0.6.1",
+    "overleaf-error-type": "git+https://github.com/overleaf/overleaf-error-type.git",
     "passport": "^0.3.2",
     "passport-google-oauth20": "^1.0.0",
     "passport-ldapauth": "^0.6.0",
