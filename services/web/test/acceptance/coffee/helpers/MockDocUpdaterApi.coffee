@@ -27,13 +27,16 @@ module.exports = MockDocUpdaterApi =
 
 	run: () ->
 		app.post "/project/:project_id/flush", (req, res, next) =>
-			res.sendStatus 200
+			res.sendStatus 204
 
 		app.post "/project/:project_id", jsonParser, (req, res, next) =>
 			project_id = req.params.project_id
 			{userId, docUpdates, fileUpdates, version} = req.body
 			@addProjectStructureUpdates(project_id, userId, docUpdates, fileUpdates, version)
 			res.sendStatus 200
+
+		app.post "/project/:project_id/doc/:doc_id", (req, res, next) =>
+			res.sendStatus 204
 
 		app.post "/project/:project_id/doc/:doc_id/flush", (req, res, next) =>
 			res.sendStatus 204

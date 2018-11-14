@@ -1,6 +1,7 @@
 ProjectGetter = require("./ProjectGetter")
 UserGetter = require("../User/UserGetter")
 Project = require('../../models/Project').Project
+ObjectId = require("mongojs").ObjectId
 logger = require("logger-sharelatex")
 tpdsUpdateSender = require '../ThirdPartyDataStore/TpdsUpdateSender'
 _ = require("underscore")
@@ -109,7 +110,7 @@ module.exports = ProjectDetailsHandler =
 			return callback new Errors.InvalidNameError("Project name could not be made unique")
 	
 	fixProjectName: (name) ->
-		if name == ""
+		if name == "" || !name
 			name = "Untitled"
 		if name.indexOf('/') > -1
 			# v2 does not allow / in a project name
