@@ -66,6 +66,7 @@
     "method-override": "^2.3.3",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.8.0",
     "minimist": "1.2.0",
+    "mmmagic": "^0.5.2",
     "mocha": "^5.0.1",
     "mongojs": "2.4.0",
     "mongoose": "4.11.4",

@@ -64,18 +64,18 @@ module.exports = ProjectCreationHandler =
 				return callback(err) if err?
 				callback err, project
 
+	createProjectFromSnippet : (owner_id, projectName, docLines, callback = (error, project) ->)->
+		@createBlankProject owner_id, projectName, (error, project)->
+			return callback(error) if error?
+			ProjectCreationHandler._createRootDoc project, owner_id, docLines, callback
+
 	createBasicProject :  (owner_id, projectName, callback = (error, project) ->)->
 		self = @
 		@createBlankProject owner_id, projectName, (error, project)->
 			return callback(error) if error?
 			self._buildTemplate "mainbasic.tex", owner_id, projectName, (error, docLines)->
 				return callback(error) if error?
-				ProjectEntityUpdateHandler.addDoc project._id, project.rootFolder[0]._id, "main.tex", docLines, owner_id, (error, doc)->
-					if error?
-						logger.err err:error, "error adding doc when creating basic project"
-						return callback(error)
-					ProjectEntityUpdateHandler.setRootDoc project._id, doc._id, (error) ->
-						callback(error, project)
+				ProjectCreationHandler._createRootDoc project, owner_id, docLines, callback
 
 	createExampleProject: (owner_id, projectName, callback = (error, project) ->)->
 		self = @
@@ -85,9 +85,7 @@ module.exports = ProjectCreationHandler =
 				(callback) ->
 					self._buildTemplate "main.tex", owner_id, projectName, (error, docLines)->
 						return callback(error) if error?
-						ProjectEntityUpdateHandler.addDoc project._id, project.rootFolder[0]._id, "main.tex", docLines, owner_id, (error, doc)->
-							return callback(error) if error?
-							ProjectEntityUpdateHandler.setRootDoc project._id, doc._id, callback
+						ProjectCreationHandler._createRootDoc project, owner_id, docLines, callback
 				(callback) ->
 					self._buildTemplate "references.bib", owner_id, projectName, (error, docLines)->
 						return callback(error) if error?
@@ -97,6 +95,14 @@ module.exports = ProjectCreationHandler =
 					universePath = Path.resolve(__dirname + "/../../../templates/project_files/universe.jpg")
 					ProjectEntityUpdateHandler.addFile project._id, project.rootFolder[0]._id, "universe.jpg", universePath, null, owner_id, callback
 			], (error) ->
+				callback(error, project)
+
+	_createRootDoc: (project, owner_id, docLines, callback = (error, project) ->)->
+		ProjectEntityUpdateHandler.addDoc project._id, project.rootFolder[0]._id, "main.tex", docLines, owner_id, (error, doc)->
+			if error?
+				logger.err err:error, "error adding root doc when creating project"
+				return callback(error)
+			ProjectEntityUpdateHandler.setRootDoc project._id, doc._id, (error) ->
 				callback(error, project)
 
 	_buildTemplate: (template_name, user_id, project_name, callback = (error, output) ->)->

@@ -189,24 +189,38 @@ describe 'ProjectCreationHandler', ->
 				throw new Error("unknown template: #{template_name}")
 			sinon.spy @handler, "_buildTemplate"
 			@handler.createBlankProject = sinon.stub().callsArgWith(2, null, @project)
+			@handler._createRootDoc = sinon.stub().callsArgWith(3, null, @project)
 			@handler.createBasicProject(ownerId, projectName, @callback)
 
 		it "should create a blank project first", ->
 			@handler.createBlankProject.calledWith(ownerId, projectName)
 				.should.equal true
 
-		it 'should insert main.tex', ->
-			@ProjectEntityUpdateHandler.addDoc.calledWith(project_id, rootFolderId, "main.tex", ["mainbasic.tex", "lines"], ownerId)
+		it 'should create the root document', ->
+			@handler._createRootDoc
+				.calledWith(@project, ownerId, ["mainbasic.tex", "lines"])
 				.should.equal true
-
-		it 'should set the main doc id', ->
-			@ProjectEntityUpdateHandler.setRootDoc.calledWith(project_id, docId).should.equal true
 
 		it 'should build the mainbasic.tex template', ->
 			@handler._buildTemplate
 				.calledWith("mainbasic.tex", ownerId, projectName)
 				.should.equal true
 
+	describe 'Creating a project from a snippet', ->
+		beforeEach ->
+			@project = new @ProjectModel
+			@handler.createBlankProject = sinon.stub().callsArgWith(2, null, @project)
+			@handler._createRootDoc = sinon.stub().callsArgWith(3, null, @project)
+			@handler.createProjectFromSnippet(ownerId, projectName, ["snippet line 1", "snippet line 2"], @callback)
+
+		it "should create a blank project first", ->
+			@handler.createBlankProject.calledWith(ownerId, projectName)
+				.should.equal true
+
+		it 'should create the root document', ->
+			@handler._createRootDoc
+				.calledWith(@project, ownerId, ["snippet line 1", "snippet line 2"])
+				.should.equal true
 
 	describe 'Creating an example project', ->
 		beforeEach ->
@@ -219,15 +233,16 @@ describe 'ProjectCreationHandler', ->
 				throw new Error("unknown template: #{template_name}")
 			sinon.spy @handler, "_buildTemplate"
 			@handler.createBlankProject = sinon.stub().callsArgWith(2, null, @project)
+			@handler._createRootDoc = sinon.stub().callsArgWith(3, null, @project)
 			@handler.createExampleProject(ownerId, projectName, @callback)
 
 		it "should create a blank project first", ->
 			@handler.createBlankProject.calledWith(ownerId, projectName)
 				.should.equal true
 
-		it 'should insert main.tex', ->
-			@ProjectEntityUpdateHandler.addDoc
-				.calledWith(project_id, rootFolderId, "main.tex", ["main.tex", "lines"], ownerId)
+		it 'should create the root document', ->
+			@handler._createRootDoc
+				.calledWith(@project, ownerId, ["main.tex", "lines"])
 				.should.equal true
 
 		it 'should insert references.bib', ->
@@ -244,9 +259,6 @@ describe 'ProjectCreationHandler', ->
 					ownerId
 				)
 				.should.equal true
-
-		it 'should set the main doc id', ->
-			@ProjectEntityUpdateHandler.setRootDoc.calledWith(project_id, docId).should.equal true
 
 		it 'should build the main.tex template', ->
 			@handler._buildTemplate
@@ -287,3 +299,17 @@ describe 'ProjectCreationHandler', ->
 		it "should put the year in", (done)->
 			@template.indexOf(new Date().getUTCFullYear()).should.not.equal -1
 			done()
+
+	describe "_createRootDoc", ->
+		beforeEach (done)->
+			@project = new @ProjectModel()
+
+			@handler._createRootDoc @project, ownerId, ["line 1", "line 2"], done
+
+		it 'should insert main.tex', ->
+			@ProjectEntityUpdateHandler.addDoc
+				.calledWith(project_id, rootFolderId, "main.tex", ["line 1", "line 2"], ownerId)
+				.should.equal true
+
+		it 'should set the main doc id', ->
+			@ProjectEntityUpdateHandler.setRootDoc.calledWith(project_id, docId).should.equal true

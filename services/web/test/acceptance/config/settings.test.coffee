@@ -137,7 +137,7 @@ module.exports =
 			url: (params) -> "/destination/#{params.id}/params"
 		},
 		'/redirect/qs': '/destination/qs'
-		'/docs': {
+		'/docs_v1': {
 			authWithV1: true
 			url: '/docs'
 		}

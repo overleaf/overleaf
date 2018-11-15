@@ -1,10 +1,9 @@
 request = require 'request'
 _ = require "underscore"
 urlValidator = require 'valid-url'
-Settings = require 'settings-sharelatex'
 { InvalidUrlError, UrlFetchFailedError } = require './LinkedFilesErrors'
 LinkedFilesHandler = require './LinkedFilesHandler'
-
+UrlHelper = require '../Helpers/UrlHelper'
 
 module.exports = UrlAgent = {
 
@@ -36,7 +35,7 @@ module.exports = UrlAgent = {
 	_sanitizeData: (data) ->
 		return {
 			provider: data.provider
-			url: @._prependHttpIfNeeded(data.url)
+			url: UrlHelper.prependHttpIfNeeded(data.url)
 		}
 
 	_getUrlStream: (project_id, data, current_user_id, callback = (error, fsPath) ->) ->
@@ -44,19 +43,9 @@ module.exports = UrlAgent = {
 		url = data.url
 		if !urlValidator.isWebUri(url)
 			return callback(new InvalidUrlError("invalid url: #{url}"))
-		url = @_wrapWithProxy(url)
+		url = UrlHelper.wrapUrlWithProxy(url)
 		readStream = request.get(url)
 		readStream.pause()
 		callback(null, readStream)
 
-	_prependHttpIfNeeded: (url) ->
-		if !url.match('://')
-			url = 'http://' + url
-		return url
-
-	_wrapWithProxy: (url) ->
-		# TODO: Consider what to do for Community and Enterprise edition?
-		if !Settings.apis?.linkedUrlProxy?.url?
-			throw new Error('no linked url proxy configured')
-		return "#{Settings.apis.linkedUrlProxy.url}?url=#{encodeURIComponent(url)}"
 }

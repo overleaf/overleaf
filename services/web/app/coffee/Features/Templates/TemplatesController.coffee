@@ -1,14 +1,8 @@
 path = require('path')
 AuthenticationController = require('../../../js/Features/Authentication/AuthenticationController')
 TemplatesManager = require('./TemplatesManager')
+ProjectHelper = require('../../../js/Features/Project/ProjectHelper')
 logger = require('logger-sharelatex')
-
-ENGINE_TO_COMPILER_MAP = {
-	latex_dvipdf: "latex"
-	pdflatex:     "pdflatex"
-	xelatex:      "xelatex"
-	lualatex:     "lualatex"
-}
 
 module.exports = TemplatesController =
 
@@ -22,7 +16,7 @@ module.exports = TemplatesController =
 		data.templateVersionId = templateVersionId
 		data.templateId = templateId
 		data.name = req.query.templateName
-		data.compiler = ENGINE_TO_COMPILER_MAP[req.query.latexEngine]
+		data.compiler = ProjectHelper.compilerFromV1Engine(req.query.latexEngine)
 		data.mainFile = req.query.mainFile
 		data.brandVariationId = req.query.brandVariationId
 		res.render path.resolve(__dirname, "../../../views/project/editor/new_from_template"), data

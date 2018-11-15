@@ -9,6 +9,7 @@ Router = require('../router')
 helmet = require "helmet"
 metrics.inc("startup")
 UserSessionsRedis = require('../Features/User/UserSessionsRedis')
+Csrf = require('./Csrf')
 
 sessionsRedisClient = UserSessionsRedis.client()
 
@@ -17,8 +18,6 @@ RedisStore = require('connect-redis')(session)
 bodyParser = require('body-parser')
 multer  = require('multer')
 methodOverride = require('method-override')
-csrf = require('csurf')
-csrfProtection = csrf()
 cookieParser = require('cookie-parser')
 bearerToken = require('express-bearer-token')
 
@@ -114,7 +113,8 @@ Modules.hooks.fire 'passportSetup', passport, (err) ->
 
 Modules.applyNonCsrfRouter(webRouter, privateApiRouter, publicApiRouter)
 
-webRouter.use csrfProtection
+webRouter.csrf = new Csrf()
+webRouter.use webRouter.csrf.middleware
 webRouter.use translations.expressMiddlewear
 webRouter.use translations.setLangBasedOnDomainMiddlewear
 
