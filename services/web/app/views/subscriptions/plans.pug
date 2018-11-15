@@ -80,10 +80,14 @@ block content
 
 				.row.row-spaced-large.text-centered
 					.col-xs-12
-						i.fa.fa-cc-mastercard.fa-2x &nbsp;
-						i.fa.fa-cc-visa.fa-2x &nbsp;
-						i.fa.fa-cc-amex.fa-2x &nbsp;
-						i.fa.fa-cc-paypal.fa-2x &nbsp;
+						i.fa.fa-cc-mastercard.fa-2x(aria-hidden) &nbsp;
+						span.sr-only Mastercard accepted
+						i.fa.fa-cc-visa.fa-2x(aria-hidden) &nbsp;
+						span.sr-only Visa accepted
+						i.fa.fa-cc-amex.fa-2x(aria-hidden) &nbsp;
+						span.sr-only Amex accepted
+						i.fa.fa-cc-paypal.fa-2x(aria-hidden) &nbsp;
+						span.sr-only Paypal accepted
 						div.text-centered #{translate('change_plans_any_time')}<br/> #{translate('billed_after_x_days', {len:'{{trial_len}}'})}
 
 				.row.row-spaced-large

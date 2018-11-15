@@ -172,12 +172,12 @@ block content
 									span(
 										ng-show="unsubscribing"
 									)
-										i.fa.fa-spin.fa-refresh
+										i.fa.fa-spin.fa-refresh(aria-hidden)
 										| #{translate("unsubscribing")}
 									span.text-success(
 										ng-show="!subscribed"
 									)
-										i.fa.fa-check
+										i.fa.fa-check(aria-hidden)
 										| #{translate("unsubscribed")}
 
 									if !settings.overleaf && user.overleaf

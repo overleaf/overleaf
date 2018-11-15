@@ -13,12 +13,17 @@
 					focus-on='search:clear',
 					ng-keyup="searchProjects()"
 				)
-				i.fa.fa-search.form-control-feedback-left
+				i.fa.fa-search.form-control-feedback-left(aria-hidden)
 				i.fa.fa-times.form-control-feedback(
 					ng-click="clearSearchText()",
 					style="cursor: pointer;",
 					ng-show="searchText.value.length > 0"
+					aria-hidden
 				)
+				button.sr-only(
+					ng-click="clearSearchText()"
+					ng-show="searchText.value.length > 0"
+				) #{translate('clear_search')}
 			//- i.fa.fa-remove
 
 		.project-tools(ng-cloak)
@@ -26,22 +31,24 @@
 				.btn-group(ng-hide="selectedProjects.length < 1")
 					a.btn.btn-default(
 						href,
+						aria-label=translate('download'),
 						tooltip=translate('download'),
 						tooltip-placement="bottom",
 						tooltip-append-to-body="true",
 						ng-click="downloadSelectedProjects()"
 					)
-						i.fa.fa-cloud-download
+						i.fa.fa-cloud-download(aria-hidden)
 					- var archiveButtonString = settings.overleaf ? translate("archive") : translate("delete")
 					- var archiveButtonIcon = settings.overleaf ? "fa-inbox" : "fa-trash-o"
 					a.btn.btn-default(
 						href,
+						aria-label=`{{ isArchiveableProjectSelected ? '${archiveButtonString}' : '${translate("leave")}' }}`,
 						tooltip=`{{ isArchiveableProjectSelected ? '${archiveButtonString}' : '${translate("leave")}' }}`,
 						tooltip-placement="bottom",
 						tooltip-append-to-body="true",
 						ng-click="openArchiveProjectsModal()"
 					)
-						i.fa(ng-class=`isArchiveableProjectSelected ? '${archiveButtonIcon}' : 'fa-sign-out'`)
+						i.fa(ng-class=`isArchiveableProjectSelected ? '${archiveButtonIcon}' : 'fa-sign-out'` aria-hidden)
 
 				.btn-group.dropdown(ng-hide="selectedProjects.length < 1", dropdown)
 					a.btn.btn-default.dropdown-toggle(
@@ -55,6 +62,7 @@
 						i.fa.fa-folder-open-o
 						|  
 						span.caret
+						span.sr-only #{translate('add_to_folders')}
 					ul.dropdown-menu.dropdown-menu-right.js-tags-dropdown-menu.tags-dropdown-menu(
 						role="menu"
 						ng-controller="TagListController"
@@ -73,6 +81,7 @@
 										'fa-minus-square-o': areSelectedProjectsInTag == 'partial'\
 									}"
 								)
+								span.sr-only Add or remove project from tag
 								|  {{tag.name}}
 						li.divider
 						li
@@ -141,13 +150,16 @@
 								aria-label=translate('select_all_projects')
 							)
 							span.header.clickable(ng-click="changePredicate('name')") #{translate("title")}
-								i.tablesort.fa(ng-class="getSortIconClass('name')")
+								i.tablesort.fa(ng-class="getSortIconClass('name')" aria-hidden)
+							button.sr-only(ng-click="changePredicate('name')") Sort by #{translate("title")}
 						.col-xs-2
 							span.header.clickable(ng-click="changePredicate('accessLevel')") #{translate("owner")}
-								i.tablesort.fa(ng-class="getSortIconClass('accessLevel')")
+								i.tablesort.fa(ng-class="getSortIconClass('accessLevel')" aria-hidden)
+							button.sr-only(ng-click="changePredicate('accessLevel')") Sort by #{translate("owner")}
 						div(class=lastUpdatedClasses)
 							span.header.clickable(ng-click="changePredicate('lastUpdated')") #{translate("last_modified")}
-								i.tablesort.fa(ng-class="getSortIconClass('lastUpdated')")
+								i.tablesort.fa(ng-class="getSortIconClass('lastUpdated')" aria-hidden)
+							button.sr-only(ng-click="changePredicate('accessLevel')") Sort by #{translate("last_modified")}
 						if settings.overleaf
 							.hidden-xs.col-sm-3.col-md-2.action-btn-row-header
 								span.header #{translate("actions")}

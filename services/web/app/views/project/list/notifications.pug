@@ -16,7 +16,7 @@ span(ng-controller="NotificationsController").userNotifications
 									a.pull-right.btn.btn-sm.btn-info(href, ng-click="accept()", ng-disabled="notification.inflight")
 										span(ng-show="!notification.inflight") #{translate("join_project")}
 										span(ng-show="notification.inflight")
-											i.fa.fa-fw.fa-spinner.fa-spin
+											i.fa.fa-fw.fa-spinner.fa-spin(aria-hidden)
 											| &nbsp;
 											| #{translate("joining")}...
 								.notification_body(ng-show="notification.accepted")
@@ -82,6 +82,6 @@ span(ng-controller="NotificationsController").userNotifications
 						.notification_inner(
 							ng-if="userEmail.confirmationInflight"
 						)
-							i.fa.fa-spinner.fa-spin
+							i.fa.fa-spinner.fa-spin(aria-hidden)
 							|
 							| #{translate('resending_confirmation_email')}&hellip;

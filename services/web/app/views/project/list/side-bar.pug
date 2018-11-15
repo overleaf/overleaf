@@ -52,7 +52,7 @@
 			h2 #{translate("tags_slash_folders")}
 		li.tag(ng-cloak)
 			a.tag-name(href, ng-click="openNewTagModal()")
-				i.fa.fa-fw.fa-plus
+				i.fa.fa-fw.fa-plus(aria-hidden)
 				span.name #{translate("new_folder")}
 		li.tag(
 			ng-repeat="tag in tags | orderBy:'name'",
@@ -66,6 +66,7 @@
 						'fa-folder-open-o': tag.selected,\
 						'fa-folder-o': !tag.selected\
 					}"
+					aria-hidden
 				)
 				span.name {{tag.name}} 
 					span.subdued  ({{tag.project_ids.length}})
@@ -107,7 +108,7 @@
 .row-spaced(ng-if="projects.length == 0", ng-cloak)
 	.first-project
 		div
-			i.fa.fa-arrow-up.fa-2x
+			i.fa.fa-arrow-up.fa-2x(aria-hidden)
 		div
 			strong #{translate("create_your_first_project")}
 			

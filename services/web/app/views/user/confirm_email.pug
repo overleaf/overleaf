@@ -23,6 +23,6 @@ block content
 								.alert.alert-success(ng-show="confirmEmailForm.response.success")
 									| Thank you, your email is now confirmed
 							p.text-center(ng-show="!confirmEmailForm.response.success && !confirmEmailForm.response.error")
-								i.fa.fa-fw.fa-spin.fa-spinner
+								i.fa.fa-fw.fa-spin.fa-spinner(aria-hidden)
 								| 
 								| Confirming your email...

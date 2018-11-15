@@ -32,9 +32,11 @@ mixin table_premium
 						if feature.value == 'str'
 							| #{plan}
 						else if plan
-							i.fa.fa-check
+							i.fa.fa-check(aria-hidden)
+							span.sr-only Feature included
 						else
-							i.fa.fa-times
+							i.fa.fa-times(aria-hidden)
+							span.sr-only Feature not included
 
 		tr
 			td
@@ -51,9 +53,11 @@ mixin table_cell_student(feature)
 	if feature.value == 'str'
 		| #{feature.student}
 	else if feature.student
-		i.fa.fa-check
+		i.fa.fa-check(aria-hidden)
+		span.sr-only Feature included
 	else
-		i.fa.fa-times
+		i.fa.fa-times(aria-hidden)
+		span.sr-only Feature not included
 
 mixin table_student
 	table.card.plans-table
@@ -86,9 +90,11 @@ mixin table_student
 					if feature.value == 'str'
 						| #{feature.plans.free}
 					else if feature.plans.free
-						i.fa.fa-check
+						i.fa.fa-check(aria-hidden)
+						span.sr-only Feature included
 					else
-						i.fa.fa-times
+						i.fa.fa-times(aria-hidden)
+						span.sr-only Feature included
 				td
 					+table_cell_student(feature)
 				td

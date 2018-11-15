@@ -39,7 +39,9 @@ div(class=titleClasses)
 			tooltip=translate("link_sharing")
 			tooltip-placement="right"
 			tooltip-append-to-body="true"
+			aria-hidden
 		)
+		span.sr-only #{translate("link_sharing")}
 
 div(class=lastUpdatedClasses)
 	if settings.overleaf
@@ -53,52 +55,59 @@ if settings.overleaf
 			ng-if="!project.isTableActionInflight"
 		)
 			button.btn.btn-link.action-btn(
+				aria-label=translate('copy'),
 				tooltip=translate('copy'),
 				tooltip-placement="top",
 				tooltip-append-to-body="true",
 				ng-click="clone($event)"
 			)
-				i.icon.fa.fa-files-o
+				i.icon.fa.fa-files-o(aria-hidden)
 			button.btn.btn-link.action-btn(
+				aria-label=translate('download'),
 				tooltip=translate('download'),
 				tooltip-placement="top",
 				tooltip-append-to-body="true",
 				ng-click="download($event)"
 			)
-				i.icon.fa.fa-cloud-download
+				i.icon.fa.fa-cloud-download(aria-hidden)
 			button.btn.btn-link.action-btn(
 				ng-if="!project.archived && isOwner()"
+				aria-label=translate('archive'),
 				tooltip=translate('archive'),
 				tooltip-placement="top",
 				tooltip-append-to-body="true",
 				ng-click="archiveOrLeave($event)"
 			)
-				i.icon.fa.fa-inbox
+				i.icon.fa.fa-inbox(aria-hidden)
 			button.btn.btn-link.action-btn(
 				ng-if="!project.archived && !isOwner()"
+				aria-label=translate('leave'),
 				tooltip=translate('leave'),
 				tooltip-placement="top",
 				tooltip-append-to-body="true",
 				ng-click="archiveOrLeave($event)"
 			)
-				i.icon.fa.fa-sign-out
+				i.icon.fa.fa-sign-out(aria-hidden)
 			button.btn.btn-link.action-btn(
 				ng-if="project.archived"
+				aria-label=translate('unarchive'),
 				tooltip=translate('unarchive'),
 				tooltip-placement="top",
 				tooltip-append-to-body="true",
 				ng-click="restore($event)"
 			)
-				i.icon.fa.fa-reply
+				i.icon.fa.fa-reply(aria-hidden)
 			button.btn.btn-link.action-btn(
 				ng-if="project.archived && isOwner()"
+				aria-label=translate('delete_forever'),
 				tooltip=translate('delete_forever'),
 				tooltip-placement="top",
 				tooltip-append-to-body="true",
 				ng-click="deleteProject($event)"
 			)
-				i.icon.fa.fa-trash
+				i.icon.fa.fa-trash(aria-hidden)
 		div(
 			ng-if="project.isTableActionInflight"
+			aria-label=translate('processing')
 		)
-			i.fa.fa-spinner.fa-spin
+			i.fa.fa-spinner.fa-spin(aria-hidden)

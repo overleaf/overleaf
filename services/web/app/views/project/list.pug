@@ -93,7 +93,8 @@ block content
 									button.btn-link.pull-right.project-list-sidebar-v2-pane-toggle(
 										ng-click="toggle()"
 									)
-										i.fa.fa-fw(ng-class="{ 'fa-chevron-up': !visible, 'fa-close': visible }")
+										i.fa.fa-fw(ng-class="{ 'fa-chevron-up': !visible, 'fa-close': visible }" aria-hidden)
+										span.sr-only Toggle welcome to #{settings.appName} message
 									| Welcome to Overleaf v2!
 								div(ng-show="visible") #[a(href="https://www.overleaf.com/help/342-overleaf-v2-faq") Find out more].
 								if userIsFromOLv1(user)
