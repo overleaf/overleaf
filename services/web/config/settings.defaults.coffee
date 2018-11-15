@@ -96,6 +96,8 @@ module.exports = settings =
 		documentupdater:
 			port: docUpdaterPort = 3003
 
+	gitBridgePublicBaseUrl: "http://#{process.env['GIT_BRIDGE_HOST'] || 'localhost'}:8000"
+
 	# Tell each service where to find the other services. If everything
 	# is running locally then this is easy, but they exist as separate config
 	# options incase you want to run some services on remote hosts.
