@@ -2,7 +2,7 @@
 	script(type="text/javascript").
 		require.config({
 			paths: {
-				'raven': 'libs/raven-3.15.0.min'
+				'raven': 'libs/raven-3.27.0.min'
 			}
 		});
 
@@ -71,6 +71,12 @@
 				// we highly recommend restricting exceptions to a domain in order to filter out clutter
 				// whitelistUrls: ['example.com/scripts/']
 				}).install();
+				//- We conditionally depend on Raven (based on whether the sentry
+				//- config is set or not). This does not play well with require.js when
+				//- minifying as it is expecting all dependencies to be defined at
+				//- compile time. Previously Raven added itself as a global, so we just
+				//- mimic that old behaviour
+				window.Raven = Raven
 			}
 		}, function(err) {
 			console.log(">> error loading raven", err);
