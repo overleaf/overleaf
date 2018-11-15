@@ -3,7 +3,7 @@ mixin faq_search(headerText, headerClass)
 		if headerText
 			div(class=headerClass) #{headerText}
 		.wiki(ng-controller="SearchWikiController")
-			form.project-search.form-horizontal(role="form")
+			form.project-search.form-horizontal(role="search")
 				.form-group.has-feedback.has-feedback-left
 					.col-sm-12
 						input.form-control(type='text', ng-model='searchQueryText', ng-keyup='search()', placeholder="Search help library....")
@@ -19,8 +19,11 @@ mixin faq_search(headerText, headerClass)
 							ng-show="searchQueryText.length > 0"
 						) #{translate('clear_search')}
 
-			.row
+			.row(role="region" aria-label="search results")
 				.col-md-12(ng-cloak)
+					span.sr-only(ng-show="searchQueryText.length > 0" aria-live="polite")
+						span(ng-if="hits_total > config_hits_per_page") Showing first {{hits.length}} results of {{hits_total}} for {{searchQueryText}}
+						span(ng-if="hits_total <= config_hits_per_page") {{hits.length}} results for {{searchQueryText}}
 					a(ng-href='{{hit.url}}',ng-repeat='hit in hits').search-result.card.card-thin
 						span(ng-bind-html='hit.name')
 						div.search-result-content(ng-show="hit.content != ''", ng-bind-html='hit.content')
