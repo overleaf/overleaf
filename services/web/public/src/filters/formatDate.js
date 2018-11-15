@@ -25,6 +25,7 @@ define(['base', 'moment'], function(App, moment) {
     'formatDate',
     () =>
       function(date, format) {
+        if (!date) return 'N/A'
         if (format == null) {
           format = 'Do MMM YYYY, h:mm a'
         }
@@ -34,5 +35,5 @@ define(['base', 'moment'], function(App, moment) {
 
   App.filter('relativeDate', () => date => moment(date).calendar())
 
-  return App.filter('fromNowDate', () => date => moment(date).fromNow())
+  App.filter('fromNowDate', () => date => moment(date).fromNow())
 })
