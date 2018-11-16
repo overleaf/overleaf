@@ -18,8 +18,16 @@ describe "UserMembershipController", ->
 		@req.params.id = 'mock-entity-id'
 		@user = _id: 'mock-user-id'
 		@newUser = _id: 'mock-new-user-id', email: 'new-user-email@foo.bar'
-		@subscription = { _id: 'mock-subscription-id'}
-		@institution = _id: 'mock-institution-id', v1Id: 123
+		@subscription =
+			_id: 'mock-subscription-id'
+			fetchV1Data: (callback) => callback(null, @subscription)
+		@institution =
+			_id: 'mock-institution-id'
+			v1Id: 123
+			fetchV1Data: (callback) =>
+				institution = Object.assign({}, @institution)
+				institution.name = 'Test Institution Name'
+				callback(null, institution)
 		@users = [
 			{ _id: 'mock-member-id-1', email: 'mock-email-1@foo.com' }
 			{ _id: 'mock-member-id-2', email: 'mock-email-2@foo.com' }
@@ -79,6 +87,7 @@ describe "UserMembershipController", ->
 			@req.entityConfig = EntityConfigs.institution
 			@UserMembershipController.index @req, render: (viewPath, viewParams) =>
 				expect(viewPath).to.equal 'user_membership/index'
+				expect(viewParams.name).to.equal 'Test Institution Name'
 				expect(viewParams.groupSize).to.equal undefined
 				expect(viewParams.translations.title).to.equal 'institution_account'
 				expect(viewParams.paths.exportMembers).to.be.undefined

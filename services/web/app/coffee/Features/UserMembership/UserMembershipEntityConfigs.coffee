@@ -54,6 +54,7 @@ module.exports =
 			read: ['managerIds']
 			write: 'managerIds'
 			access: 'managerIds'
+			name: 'name'
 		translations:
 			title: 'institution_account'
 			subtitle: 'managers_management'

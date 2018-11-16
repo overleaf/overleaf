@@ -36,6 +36,10 @@ SubscriptionSchema.statics.findAndModify = (query, update, callback)->
 	this.update query, update, ->
 		self.findOne query, callback
 
+# Subscriptions have no v1 data to fetch
+SubscriptionSchema.method 'fetchV1Data', (callback = (error, subscription)->) ->
+	callback(null, this)
+
 conn = mongoose.createConnection(Settings.mongo.url, {
 	server: {poolSize: Settings.mongo.poolSize || 10},
 	config: {autoIndex: false}

@@ -8,16 +8,18 @@ logger = require("logger-sharelatex")
 module.exports =
 	index: (req, res, next)->
 		{ entity, entityConfig } = req
-		UserMembershipHandler.getUsers entity, entityConfig, (error, users)->
+		entity.fetchV1Data (error, entity) ->
 			return next(error) if error?
-			entityPrimaryKey = entity[entityConfig.fields.primaryKey].toString()
-			entityName = entity[entityConfig.fields.name] if entityConfig.fields.name
-			res.render "user_membership/index",
-				name: entityName
-				users: users
-				groupSize: entity.membersLimit if entityConfig.hasMembersLimit
-				translations: entityConfig.translations
-				paths: entityConfig.pathsFor(entityPrimaryKey)
+			UserMembershipHandler.getUsers entity, entityConfig, (error, users)->
+				return next(error) if error?
+				entityPrimaryKey = entity[entityConfig.fields.primaryKey].toString()
+				entityName = entity[entityConfig.fields.name] if entityConfig.fields.name
+				res.render "user_membership/index",
+					name: entityName
+					users: users
+					groupSize: entity.membersLimit if entityConfig.hasMembersLimit
+					translations: entityConfig.translations
+					paths: entityConfig.pathsFor(entityPrimaryKey)
 
 	add: (req, res, next)->
 		{ entity, entityConfig } = req
