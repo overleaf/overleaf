@@ -16,6 +16,7 @@ InstitutionSchema.method 'fetchV1Data', (callback = (error, institution)->) ->
 		this.name = parsedBody?.name
 		this.countryCode = parsedBody?.country_code
 		this.departments = parsedBody?.departments
+		this.portalSlug = parsedBody?.portal_slug
 		callback(null, this)
 
 mongoose.model 'Institution', InstitutionSchema
