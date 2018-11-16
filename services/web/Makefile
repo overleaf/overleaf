@@ -8,6 +8,8 @@ MODULE_MAKEFILES := $(MODULE_DIRS:=/Makefile)
 COFFEE := node_modules/.bin/coffee $(COFFEE_OPTIONS)
 BABEL := node_modules/.bin/babel
 GRUNT := node_modules/.bin/grunt
+LESSC := node_modules/.bin/lessc
+CLEANCSS := node_modules/.bin/cleancss
 
 APP_COFFEE_FILES := $(shell find app/coffee -name '*.coffee')
 FRONT_END_SRC_FILES := $(shell find public/src -name '*.js')
@@ -20,7 +22,19 @@ SRC_FILES := $(FRONT_END_SRC_FILES) $(TEST_SRC_FILES)
 JS_FILES := $(subst coffee,js,$(COFFEE_FILES))
 OUTPUT_SRC_FILES := $(subst src,js,$(SRC_FILES))
 LESS_FILES := $(shell find public/stylesheets -name '*.less')
-CSS_FILES := public/stylesheets/style.css public/stylesheets/ol-style.css public/stylesheets/ol-light-style.css
+LESSC_COMMON_FLAGS := --source-map --autoprefix="last 2 versions, ie >= 10"
+CLEANCSS_FLAGS := --s0 --source-map
+
+LESS_SL_FILE := public/stylesheets/style.less
+CSS_SL_FILE := public/stylesheets/style.css
+LESS_OL_FILE := public/stylesheets/ol-style.less
+CSS_OL_FILE := public/stylesheets/ol-style.css
+LESS_OL_LIGHT_FILE := public/stylesheets/ol-light-style.less
+CSS_OL_LIGHT_FILE := public/stylesheets/ol-light-style.css
+LESS_OL_IEEE_FILE := public/stylesheets/ol-ieee-style.less
+CSS_OL_IEEE_FILE := public/stylesheets/ol-ieee-style.css
+
+CSS_FILES := $(CSS_SL_FILE) $(CSS_OL_FILE) $(CSS_OL_LIGHT_FILE) $(CSS_OL_IEEE_FILE)
 
 # The automatic variable $(@D) is the target directory name
 app.js: app.coffee
@@ -81,17 +95,26 @@ public/js/main.js: public/src/main.js $(MODULE_MAIN_SRC_FILES)
 		sed -e s=\'__MAIN_CLIENTSIDE_INCLUDES__\'=$$INCLUDES= \
 		> $@
 
-$(CSS_FILES): $(LESS_FILES)
-	$(GRUNT) compile:css
+public/stylesheets/%.css: $(LESS_FILES)
+	$(LESSC) $(LESSC_COMMON_FLAGS) $(@D)/$*.less $(@D)/$*.css
+
+css_full: $(CSS_FILES)
+
+css: $(CSS_OL_FILE)
 
 minify: $(CSS_FILES) $(JS_FILES) $(OUTPUT_SRC_FILES)
 	$(GRUNT) compile:minify
+	$(MAKE) minify_css
 	$(MAKE) minify_es
+
+minify_css: $(CSS_FILES) 
+	$(CLEANCSS) $(CLEANCSS_FLAGS) -o $(CSS_SL_FILE) $(CSS_SL_FILE)
+	$(CLEANCSS) $(CLEANCSS_FLAGS) -o $(CSS_OL_FILE) $(CSS_OL_FILE)
+	$(CLEANCSS) $(CLEANCSS_FLAGS) -o $(CSS_OL_LIGHT_FILE) $(CSS_OL_LIGHT_FILE)
+	$(CLEANCSS) $(CLEANCSS_FLAGS) -o $(CSS_OL_IEEE_FILE) $(CSS_OL_IEEE_FILE)
 
 minify_es:
 	npm -q run webpack:production
-
-css: $(CSS_FILES)
 
 compile: $(JS_FILES) $(OUTPUT_SRC_FILES) css public/js/main.js public/js/ide.js
 	@$(MAKE) compile_modules
@@ -105,7 +128,7 @@ compile_full:
 	$(COFFEE) -o test/unit/js -c test/unit/coffee
 	$(BABEL) test/unit_frontend/src --out-dir test/unit_frontend/js
 	rm -f public/js/ide.js public/js/main.js # We need to generate ide.js, main.js manually later
-	$(MAKE) $(CSS_FILES)
+	$(MAKE) css_full
 	$(MAKE) compile_modules_full
 	$(MAKE) compile # ide.js, main.js, share.js, and anything missed
 
