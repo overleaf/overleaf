@@ -13,12 +13,12 @@
 					focus-on='search:clear',
 					ng-keyup="searchProjects()"
 				)
-				i.fa.fa-search.form-control-feedback-left(aria-hidden)
+				i.fa.fa-search.form-control-feedback-left(aria-hidden="true")
 				i.fa.fa-times.form-control-feedback(
 					ng-click="clearSearchText()",
 					style="cursor: pointer;",
 					ng-show="searchText.value.length > 0"
-					aria-hidden
+					aria-hidden="true"
 				)
 				button.sr-only(
 					ng-click="clearSearchText()"
@@ -37,7 +37,7 @@
 						tooltip-append-to-body="true",
 						ng-click="downloadSelectedProjects()"
 					)
-						i.fa.fa-cloud-download(aria-hidden)
+						i.fa.fa-cloud-download(aria-hidden="true")
 					- var archiveButtonString = settings.overleaf ? translate("archive") : translate("delete")
 					- var archiveButtonIcon = settings.overleaf ? "fa-inbox" : "fa-trash-o"
 					a.btn.btn-default(
@@ -48,7 +48,7 @@
 						tooltip-append-to-body="true",
 						ng-click="openArchiveProjectsModal()"
 					)
-						i.fa(ng-class=`isArchiveableProjectSelected ? '${archiveButtonIcon}' : 'fa-sign-out'` aria-hidden)
+						i.fa(ng-class=`isArchiveableProjectSelected ? '${archiveButtonIcon}' : 'fa-sign-out'` aria-hidden="true")
 
 				.btn-group.dropdown(ng-hide="selectedProjects.length < 1", dropdown)
 					a.btn.btn-default.dropdown-toggle(
@@ -150,15 +150,15 @@
 								aria-label=translate('select_all_projects')
 							)
 							span.header.clickable(ng-click="changePredicate('name')") #{translate("title")}
-								i.tablesort.fa(ng-class="getSortIconClass('name')" aria-hidden)
+								i.tablesort.fa(ng-class="getSortIconClass('name')" aria-hidden="true")
 							button.sr-only(ng-click="changePredicate('name')") Sort by #{translate("title")}
 						.col-xs-2
 							span.header.clickable(ng-click="changePredicate('accessLevel')") #{translate("owner")}
-								i.tablesort.fa(ng-class="getSortIconClass('accessLevel')" aria-hidden)
+								i.tablesort.fa(ng-class="getSortIconClass('accessLevel')" aria-hidden="true")
 							button.sr-only(ng-click="changePredicate('accessLevel')") Sort by #{translate("owner")}
 						div(class=lastUpdatedClasses)
 							span.header.clickable(ng-click="changePredicate('lastUpdated')") #{translate("last_modified")}
-								i.tablesort.fa(ng-class="getSortIconClass('lastUpdated')" aria-hidden)
+								i.tablesort.fa(ng-class="getSortIconClass('lastUpdated')" aria-hidden="true")
 							button.sr-only(ng-click="changePredicate('accessLevel')") Sort by #{translate("last_modified")}
 						if settings.overleaf
 							.hidden-xs.col-sm-3.col-md-2.action-btn-row-header

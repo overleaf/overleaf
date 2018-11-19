@@ -64,18 +64,18 @@ block content
 												ng-click="setPaymentMethod('credit_card');"
 												ng-class="paymentMethod.value === 'credit_card' ? 'payment-method-toggle-switch-selected' : ''"
 											)
-												i.fa.fa-cc-mastercard.fa-2x(aria-hidden)
+												i.fa.fa-cc-mastercard.fa-2x(aria-hidden="true")
 												span &nbsp;
-												i.fa.fa-cc-visa.fa-2x(aria-hidden)
+												i.fa.fa-cc-visa.fa-2x(aria-hidden="true")
 												span &nbsp;
-												i.fa.fa-cc-amex.fa-2x(aria-hidden)
+												i.fa.fa-cc-amex.fa-2x(aria-hidden="true")
 												span.sr-only Pay with Mastercard, Visa, or Amex
 											a.payment-method-toggle-switch(
 												href
 												ng-click="setPaymentMethod('paypal');"
 												ng-class="paymentMethod.value === 'paypal' ? 'payment-method-toggle-switch-selected' : ''"
 											)
-												i.fa.fa-cc-paypal.fa-2x(aria-hidden)
+												i.fa.fa-cc-paypal.fa-2x(aria-hidden="true")
 												span.sr-only Pay with PayPal
 										
 										.alert.alert-warning.small(ng-show="genericError")
@@ -202,7 +202,7 @@ block content
 													ng-disabled="processing  || !isFormValid(simpleCCForm);" 
 												) 
 													span(ng-show="processing") 
-														i.fa.fa-spinner.fa-spin(aria-hidden)
+														i.fa.fa-spinner.fa-spin(aria-hidden="true")
 														span.sr-only #{translate('processing')}
 														| &nbsp;
 													span(ng-if="paymentMethod.value === 'credit_card'")

@@ -88,7 +88,7 @@ form.row(
 							ng-disabled="ui.isMakingRequest"
 							tooltip=translate("remove")
 						)
-							i.fa.fa-fw.fa-trash(aria-hidden)
+							i.fa.fa-fw.fa-trash(aria-hidden="true")
 							span.sr-only #{translate("remove")}
 				tr.affiliations-table-highlighted-row(
 					ng-if="!ui.showAddEmailUI && !ui.isMakingRequest"
@@ -154,20 +154,20 @@ form.row(
 					ng-if="ui.isMakingRequest"
 				)
 					td.text-center(colspan="3", ng-if="ui.isLoadingEmails") 
-						i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden)
+						i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden="true")
 						| &nbsp;#{translate("loading")}...
 					td.text-center(colspan="3", ng-if="ui.isResendingConfirmation") 
-						i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden)
+						i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden="true")
 						| &nbsp;#{translate("sending")}...
 					td.text-center(colspan="3", ng-if="!ui.isLoadingEmails && !ui.isResendingConfirmation") 
-						i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden)
+						i.fa.fa-fw.fa-spin.fa-refresh(aria-hidden="true")
 						| &nbsp;#{translate("saving")}...
 				tr.affiliations-table-error-row(
 					ng-if="ui.hasError"
 				)
 					td.text-center(colspan="3") 
 						div
-							i.fa.fa-fw.fa-exclamation-triangle(aria-hidden)
+							i.fa.fa-fw.fa-exclamation-triangle(aria-hidden="true")
 							span(ng-if="!ui.errorMessage") &nbsp;#{translate("error_performing_request")}
 							span(ng-if="ui.errorMessage") &nbsp;{{ui.errorMessage}}
 				

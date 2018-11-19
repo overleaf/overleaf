@@ -2,7 +2,7 @@ nav.navbar.navbar-default.navbar-main
 	.container-fluid
 		.navbar-header
 			button.navbar-toggle(ng-init="navCollapsed = true", ng-click="navCollapsed = !navCollapsed", ng-class="{active: !navCollapsed}", aria-label="Toggle " + translate('navigation'))
-				i.fa.fa-bars(aria-hidden)
+				i.fa.fa-bars(aria-hidden="true")
 			if settings.nav.custom_logo
 				a(href='/', aria-label=settings.appName, style='background-image:url("'+settings.nav.custom_logo+'")').navbar-brand
 			else if (nav.title)

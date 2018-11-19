@@ -39,7 +39,7 @@ div(class=titleClasses)
 			tooltip=translate("link_sharing")
 			tooltip-placement="right"
 			tooltip-append-to-body="true"
-			aria-hidden
+			aria-hidden="true"
 		)
 		span.sr-only #{translate("link_sharing")}
 
@@ -61,7 +61,7 @@ if settings.overleaf
 				tooltip-append-to-body="true",
 				ng-click="clone($event)"
 			)
-				i.icon.fa.fa-files-o(aria-hidden)
+				i.icon.fa.fa-files-o(aria-hidden="true")
 			button.btn.btn-link.action-btn(
 				aria-label=translate('download'),
 				tooltip=translate('download'),
@@ -69,7 +69,7 @@ if settings.overleaf
 				tooltip-append-to-body="true",
 				ng-click="download($event)"
 			)
-				i.icon.fa.fa-cloud-download(aria-hidden)
+				i.icon.fa.fa-cloud-download(aria-hidden="true")
 			button.btn.btn-link.action-btn(
 				ng-if="!project.archived && isOwner()"
 				aria-label=translate('archive'),
@@ -78,7 +78,7 @@ if settings.overleaf
 				tooltip-append-to-body="true",
 				ng-click="archiveOrLeave($event)"
 			)
-				i.icon.fa.fa-inbox(aria-hidden)
+				i.icon.fa.fa-inbox(aria-hidden="true")
 			button.btn.btn-link.action-btn(
 				ng-if="!project.archived && !isOwner()"
 				aria-label=translate('leave'),
@@ -87,7 +87,7 @@ if settings.overleaf
 				tooltip-append-to-body="true",
 				ng-click="archiveOrLeave($event)"
 			)
-				i.icon.fa.fa-sign-out(aria-hidden)
+				i.icon.fa.fa-sign-out(aria-hidden="true")
 			button.btn.btn-link.action-btn(
 				ng-if="project.archived"
 				aria-label=translate('unarchive'),
@@ -96,7 +96,7 @@ if settings.overleaf
 				tooltip-append-to-body="true",
 				ng-click="restore($event)"
 			)
-				i.icon.fa.fa-reply(aria-hidden)
+				i.icon.fa.fa-reply(aria-hidden="true")
 			button.btn.btn-link.action-btn(
 				ng-if="project.archived && isOwner()"
 				aria-label=translate('delete_forever'),
@@ -105,9 +105,9 @@ if settings.overleaf
 				tooltip-append-to-body="true",
 				ng-click="deleteProject($event)"
 			)
-				i.icon.fa.fa-trash(aria-hidden)
+				i.icon.fa.fa-trash(aria-hidden="true")
 		div(
 			ng-if="project.isTableActionInflight"
 			aria-label=translate('processing')
 		)
-			i.fa.fa-spinner.fa-spin(aria-hidden)
+			i.fa.fa-spinner.fa-spin(aria-hidden="true")

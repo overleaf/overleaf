@@ -7,12 +7,12 @@ mixin faq_search(headerText, headerClass)
 				.form-group.has-feedback.has-feedback-left
 					.col-sm-12
 						input.form-control(type='text', ng-model='searchQueryText', ng-keyup='search()', placeholder="Search help library....")
-						i.fa.fa-search.form-control-feedback-left(aria-hidden)
+						i.fa.fa-search.form-control-feedback-left(aria-hidden="true")
 						i.fa.fa-times.form-control-feedback(
 							ng-click="clearSearchText()",
 							style="cursor: pointer;",
 							ng-show="searchQueryText.length > 0"
-							aria-hidden
+							aria-hidden="true"
 						)
 						button.sr-only(
 							ng-click="clearSearchText()",

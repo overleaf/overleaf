@@ -56,9 +56,9 @@ block content
 											span.name {{ user.first_name }} {{ user.last_name }}
 										.col-md-2
 											span.registered
-												i.fa.fa-check.text-success(ng-show="!user.invite" aria-hidden)
+												i.fa.fa-check.text-success(ng-show="!user.invite" aria-hidden="true")
 												span.sr-only(ng-show="!user.invite") #{translate('accepted_invite')}
-												i.fa.fa-times(ng-show="user.invite" aria-hidden)
+												i.fa.fa-times(ng-show="user.invite" aria-hidden="true")
 												span.sr-only(ng-show="user.invite") #{translate('invite_not_accepted')}
 								li(
 									ng-if="users.length == 0",

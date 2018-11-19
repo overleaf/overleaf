@@ -32,10 +32,10 @@ mixin table_premium
 						if feature.value == 'str'
 							| #{plan}
 						else if plan
-							i.fa.fa-check(aria-hidden)
+							i.fa.fa-check(aria-hidden="true")
 							span.sr-only Feature included
 						else
-							i.fa.fa-times(aria-hidden)
+							i.fa.fa-times(aria-hidden="true")
 							span.sr-only Feature not included
 
 		tr
@@ -53,10 +53,10 @@ mixin table_cell_student(feature)
 	if feature.value == 'str'
 		| #{feature.student}
 	else if feature.student
-		i.fa.fa-check(aria-hidden)
+		i.fa.fa-check(aria-hidden="true")
 		span.sr-only Feature included
 	else
-		i.fa.fa-times(aria-hidden)
+		i.fa.fa-times(aria-hidden="true")
 		span.sr-only Feature not included
 
 mixin table_student
@@ -90,10 +90,10 @@ mixin table_student
 					if feature.value == 'str'
 						| #{feature.plans.free}
 					else if feature.plans.free
-						i.fa.fa-check(aria-hidden)
+						i.fa.fa-check(aria-hidden="true")
 						span.sr-only Feature included
 					else
-						i.fa.fa-times(aria-hidden)
+						i.fa.fa-times(aria-hidden="true")
 						span.sr-only Feature included
 				td
 					+table_cell_student(feature)
