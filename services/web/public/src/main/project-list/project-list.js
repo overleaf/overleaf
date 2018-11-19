@@ -393,7 +393,10 @@ define(['base'], function(App) {
           $scope.projects.push({
             name,
             _id: data.project_id,
-            accessLevel: 'owner'
+            accessLevel: 'owner',
+            owner: {
+              _id: window.user_id
+            }
             // TODO: Check access level if correct after adding it in
             // to the rest of the app
           })
