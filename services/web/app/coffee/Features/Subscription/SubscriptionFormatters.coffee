@@ -29,4 +29,5 @@ module.exports =
 		return "#{symbol}#{dollars}.#{cents}"
 
 	formatDate: (date) ->
+		return null if !date?
 		dateformat date, "dS mmmm yyyy"

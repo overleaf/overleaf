@@ -1,6 +1,7 @@
 SandboxedModule = require('sandboxed-module')
 sinon = require 'sinon'
 should = require("chai").should()
+expect = require("chai").expect
 MockRequest = require "../helpers/MockRequest"
 MockResponse = require "../helpers/MockResponse"
 modulePath = '../../../../app/js/Features/Subscription/SubscriptionController'
@@ -44,7 +45,7 @@ describe "SubscriptionController", ->
 			userHasV2Subscription: sinon.stub()
 
 		@SubscriptionViewModelBuilder =
-			buildUsersSubscriptionViewModel:sinon.stub().callsArgWith(1, null, @activeRecurlySubscription)
+			buildUsersSubscriptionViewModel:sinon.stub().callsArgWith(1, null, {})
 			buildViewModel: sinon.stub()
 		@settings =
 			coupon_codes:
@@ -226,92 +227,28 @@ describe "SubscriptionController", ->
 			@SubscriptionController.successful_subscription @req, @res
 
 	describe "userSubscriptionPage", ->
-		describe "with a user without a subscription", ->
-			beforeEach (done) ->
-				@res.callback = done
-				@LimitationsManager.hasPaidSubscription.callsArgWith(1, null, false)
-				@SubscriptionController.userSubscriptionPage @req, @res
-
-			it "should redirect to the plans page", ->
-				@res.redirected.should.equal true
-				@res.redirectedTo.should.equal "/user/subscription/plans"
-
-		describe "with a potential domain licence", ->
-			beforeEach () ->
-				@groupUrl = "/go/over-here"
-				@SubscriptionDomainHandler.getDomainLicencePage.returns(@groupUrl)
-
-			describe "without an existing subscription", ->
-				beforeEach (done)->
-					@res.callback = done
-					@LimitationsManager.hasPaidSubscription.callsArgWith(1, null, false)
-					@SubscriptionController.userSubscriptionPage @req, @res
-
-				it "should redirect to the group invite url", ->
-					@res.redirected.should.equal true
-					@res.redirectedTo.should.equal @groupUrl
-
-			describe "with an existing subscription", ->
-				beforeEach (done)->
-					@res.callback = done
-					@settings.apis.recurly.subdomain = 'test'
-					@userSub = {account: {hosted_login_token: 'abcd'}}
-					@LimitationsManager.hasPaidSubscription
-						.callsArgWith(1, null, true, {})
-					@SubscriptionController.userSubscriptionPage @req, @res
-
-
-				it "should render the dashboard", ->
-					@res.renderedTemplate.should.equal "subscriptions/dashboard"
-
-		describe "with a user with a paid subscription", ->
-			beforeEach (done) ->
-				@res.callback = done
-				@SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(1, null, @activeRecurlySubscription)
-				@LimitationsManager.hasPaidSubscription.callsArgWith(1, null, true, {})
-				@SubscriptionController.userSubscriptionPage @req, @res
-
-			it "should render the dashboard", (done)->
-				@res.rendered.should.equal true
-				@res.renderedTemplate.should.equal "subscriptions/dashboard"
-				done()
-
-			it "should set the correct subscription details", ->
-				@res.renderedVariables.subscription.should.deep.equal @activeRecurlySubscription
-
-		describe "with a user with a free trial", ->
-			beforeEach (done) ->
-				@res.callback = done
-				@SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(1, null, @activeRecurlySubscription)
-				@LimitationsManager.hasPaidSubscription.callsArgWith(1, null, true, {})
-				@SubscriptionController.userSubscriptionPage @req, @res
-
-			it "should render the dashboard", ->
-				@res.renderedTemplate.should.equal "subscriptions/dashboard"
-
-			it "should set the correct subscription details", ->
-				@res.renderedVariables.subscription.should.deep.equal @activeRecurlySubscription
-
-
-		describe "when its a custom subscription which is non recurly", ->
-			beforeEach ()->
-				@LimitationsManager.hasPaidSubscription.callsArgWith(1, null, true, {customAccount:true})
-				@SubscriptionController.userSubscriptionPage @req, @res
-
-			it "should redirect to /user/subscription/custom_account", ->
-				@res.redirectedTo.should.equal("/user/subscription/custom_account")
-
-	describe "userCustomSubscriptionPage", ->
 		beforeEach (done) ->
-			@res.callback = done
-			@LimitationsManager.hasPaidSubscription.callsArgWith(1, null, true, {})
-			@SubscriptionController.userCustomSubscriptionPage @req, @res
+			@SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(1, null, {
+				personalSubscription: @personalSubscription = { 'personal-subscription': 'mock' }
+				groupSubscriptions: @groupSubscriptions = { 'personal-subscriptions': 'mock' }
+				v1Subscriptions: @v1Subscriptions = { 'v1-subscriptions': 'mock' }
+			})
+			@SubscriptionViewModelBuilder.buildViewModel.returns(@plans = {'plans': 'mock'})
+			@res.render = (view, @data) =>
+				expect(view).to.equal 'subscriptions/dashboard'
+				done()
+			@SubscriptionController.userSubscriptionPage @req, @res
 
-		it "should render the page", (done)->
-			@res.rendered.should.equal true
-			@res.renderedTemplate.should.equal "subscriptions/custom_account"
-			done()
+		it "should load the personal, groups and v1 subscriptions", ->
+			expect(@data.personalSubscription).to.deep.equal @personalSubscription
+			expect(@data.groupSubscriptions).to.deep.equal @groupSubscriptions
+			expect(@data.v1Subscriptions).to.deep.equal @v1Subscriptions
 
+		it "should load the user", ->
+			expect(@data.user).to.deep.equal @user
+
+		it "should load the plans", ->
+			expect(@data.plans).to.deep.equal @plans
 
 	describe "createSubscription", ->
 		beforeEach (done)->

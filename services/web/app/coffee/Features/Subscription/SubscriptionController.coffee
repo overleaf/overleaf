@@ -89,47 +89,19 @@ module.exports = SubscriptionController =
 
 	userSubscriptionPage: (req, res, next) ->
 		user = AuthenticationController.getSessionUser(req)
-		LimitationsManager.hasPaidSubscription user, (err, hasPaidSubscription, subscription)->
-			return next(err) if err?
-			groupLicenceInviteUrl = SubscriptionDomainHandler.getDomainLicencePage(user)
-			if subscription?.customAccount
-				logger.log user: user, "redirecting to custom account page"
-				res.redirect "/user/subscription/custom_account"
-			else if groupLicenceInviteUrl? and !hasPaidSubscription
-				logger.log user:user, "redirecting to group subscription invite page"
-				res.redirect groupLicenceInviteUrl
-			else if !hasPaidSubscription
-				logger.log user: user, "redirecting to plans"
-				res.redirect "/user/subscription/plans"
-			else
-				SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel user, (error, subscription, groupSubscriptions, billingDetailsLink, v1Subscriptions) ->
-					return next(error) if error?
-					logger.log {user, subscription, hasPaidSubscription, groupSubscriptions, billingDetailsLink, v1Subscriptions}, "showing subscription dashboard"
-					plans = SubscriptionViewModelBuilder.buildViewModel()
-					res.render "subscriptions/dashboard",
-						title: "your_subscription"
-						recomendedCurrency: subscription?.currency
-						taxRate:subscription?.taxRate
-						plans: plans
-						subscription: subscription || {}
-						groupSubscriptions: groupSubscriptions
-						subscriptionTabActive: true
-						user:user
-						saved_billing_details: req.query.saved_billing_details?
-						billingDetailsLink: billingDetailsLink
-						v1Subscriptions: v1Subscriptions
-
-	userCustomSubscriptionPage: (req, res, next)->
-		user = AuthenticationController.getSessionUser(req)
-		LimitationsManager.hasPaidSubscription user, (err, hasPaidSubscription, subscription)->
-			return next(err) if err?
-			if !subscription?
-				err = new Error("subscription null for custom account, user:#{user?._id}")
-				logger.warn err:err, "subscription is null for custom accounts page"
-				return next(err)
-			res.render "subscriptions/custom_account",
+		SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel user, (error, results) ->
+			return next(error) if error?
+			{ personalSubscription, groupSubscriptions, v1Subscriptions } = results
+			logger.log {user, personalSubscription, groupSubscriptions, v1Subscriptions}, "showing subscription dashboard"
+			plans = SubscriptionViewModelBuilder.buildViewModel()
+			data = 
 				title: "your_subscription"
-				subscription: subscription
+				plans: plans
+				user: user
+				personalSubscription: personalSubscription
+				groupSubscriptions: groupSubscriptions
+				v1Subscriptions: v1Subscriptions
+			res.render "subscriptions/dashboard", data
 
 	createSubscription: (req, res, next)->
 		user = AuthenticationController.getSessionUser(req)
@@ -150,11 +122,13 @@ module.exports = SubscriptionController =
 
 	successful_subscription: (req, res, next)->
 		user = AuthenticationController.getSessionUser(req)
-		SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel user, (error, subscription) ->
+		SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel user, (error, {personalSubscription}) ->
 			return next(error) if error?
+			if !personalSubscription?
+				return res.redirect '/user/subscription/plans'
 			res.render "subscriptions/successful_subscription",
 				title: "thank_you"
-				subscription:subscription
+				subscription:personalSubscription
 
 	cancelSubscription: (req, res, next) ->
 		user = AuthenticationController.getSessionUser(req)

@@ -24,7 +24,6 @@ describe "SubscriptionUpdater", ->
 			manager_ids: [@adminUser._id]
 			member_ids: @allUserIds
 			save: sinon.stub().callsArgWith(0)
-			freeTrial:{}
 			planCode:"student_or_something"
 		@user_id = @adminuser_id
 
@@ -34,7 +33,6 @@ describe "SubscriptionUpdater", ->
 			manager_ids: [@adminUser._id]
 			member_ids: @allUserIds
 			save: sinon.stub().callsArgWith(0)
-			freeTrial:{}
 			planCode:"group_subscription"
 
 
@@ -54,7 +52,6 @@ describe "SubscriptionUpdater", ->
 			getGroupSubscriptionMemberOf:sinon.stub()
 
 		@Settings =
-			freeTrialPlanCode: "collaborator"
 			defaultPlanCode: "personal"
 			defaultFeatures: { "default": "features" }
 
@@ -116,10 +113,6 @@ describe "SubscriptionUpdater", ->
 			@SubscriptionUpdater._updateSubscriptionFromRecurly @recurlySubscription, @subscription, (err)=>
 				@subscription.recurlySubscription_id.should.equal @recurlySubscription.uuid
 				@subscription.planCode.should.equal @recurlySubscription.plan.plan_code
-
-				@subscription.freeTrial.allowed.should.equal true
-				assert.equal(@subscription.freeTrial.expiresAt, undefined)
-				assert.equal(@subscription.freeTrial.planCode, undefined)
 				@subscription.save.called.should.equal true
 				@FeaturesUpdater.refreshFeatures.calledWith(@adminUser._id).should.equal true
 				done()
@@ -157,7 +150,6 @@ describe "SubscriptionUpdater", ->
 			@SubscriptionUpdater._createNewSubscription @adminUser._id, =>
 				@subscription.admin_id.should.equal @adminUser._id
 				@subscription.manager_ids.should.deep.equal [@adminUser._id]
-				@subscription.freeTrial.allowed.should.equal false
 				@subscription.save.called.should.equal true
 				done()
 

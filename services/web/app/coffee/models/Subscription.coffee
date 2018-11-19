@@ -18,11 +18,6 @@ SubscriptionSchema = new Schema
 	groupPlan	 : {type: Boolean, default: false}
 	membersLimit: {type:Number, default:0}
 	customAccount: Boolean
-	freeTrial:
-		expiresAt: Date
-		downgraded: Boolean
-		planCode: String
-		allowed: {type: Boolean, default: true}
 	overleaf:
 		id:
 			type: Number

@@ -75,7 +75,6 @@ module.exports = SubscriptionUpdater =
 	_createNewSubscription: (adminUser_id, callback)->
 		logger.log adminUser_id:adminUser_id, "creating new subscription"
 		subscription = new Subscription(admin_id:adminUser_id, manager_ids: [adminUser_id])
-		subscription.freeTrial.allowed = false
 		subscription.save (err)->
 			callback err, subscription
 
@@ -84,9 +83,6 @@ module.exports = SubscriptionUpdater =
 		if recurlySubscription.state == "expired"
 			return SubscriptionUpdater.deleteSubscription subscription._id, callback
 		subscription.recurlySubscription_id = recurlySubscription.uuid
-		subscription.freeTrial.expiresAt = undefined
-		subscription.freeTrial.planCode = undefined
-		subscription.freeTrial.allowed = true
 		subscription.planCode = recurlySubscription.plan.plan_code
 		plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
 		if !plan?

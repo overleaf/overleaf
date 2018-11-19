@@ -7,7 +7,7 @@ logger = require("logger-sharelatex")
 Async = require('async')
 
 module.exports = RecurlyWrapper =
-	apiUrl : "https://api.recurly.com/v2"
+	apiUrl : Settings.apis?.recurly?.url or "https://api.recurly.com/v2"
 
 	_addressToXml: (address) ->
 		allowedKeys = ['address1', 'address2', 'city', 'country', 'state', 'zip', 'postal_code']

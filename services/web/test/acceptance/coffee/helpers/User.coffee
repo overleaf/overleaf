@@ -318,4 +318,12 @@ class User
 			else
 				return callback(new Error("unexpected status code from /user/personal_info: #{response.statusCode}"))
 
+	setV1Id: (v1Id, callback) ->
+		UserModel.update {
+			_id: @_id
+		}, {
+			overleaf:
+				id: v1Id
+		}, callback
+
 module.exports = User
