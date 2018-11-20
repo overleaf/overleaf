@@ -69,7 +69,7 @@ module.exports = Metrics =
 			timeSpan = new Date - this.start
 			statsd.timing(buildKey(this.key), timeSpan, this.sampleRate)
 			if !summaries[this.key]?
-				summary = new client.Summary({
+				summary = new prom.Summary({
 					name: "#{name}_#{this.key}",
 					help: this.key,
 					maxAgeSeconds: 600,
