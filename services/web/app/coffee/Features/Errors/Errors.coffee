@@ -33,13 +33,6 @@ UnsupportedFileTypeError = (message) ->
 	return error
 UnsupportedFileTypeError.prototype.__proto__ = Error.prototype
 
-UnsupportedBrandError = (message) ->
-	error = new Error(message)
-	error.name = "UnsupportedBrandError"
-	error.__proto__ = UnsupportedBrandError.prototype
-	return error
-UnsupportedBrandError.prototype.__proto__ = Error.prototype
-
 UnsupportedExportRecordsError = (message) ->
 	error = new Error(message)
 	error.name = "UnsupportedExportRecordsError"
@@ -102,7 +95,6 @@ module.exports = Errors =
 	TooManyRequestsError: TooManyRequestsError
 	InvalidNameError: InvalidNameError
 	UnsupportedFileTypeError: UnsupportedFileTypeError
-	UnsupportedBrandError: UnsupportedBrandError
 	UnsupportedExportRecordsError: UnsupportedExportRecordsError
 	V1HistoryNotSyncedError: V1HistoryNotSyncedError
 	ProjectHistoryDisabledError: ProjectHistoryDisabledError
