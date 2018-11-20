@@ -13,6 +13,7 @@ buildGlobalKey = (key)-> "#{name}.global.#{key}"
 
 counters = {}
 gauges = {}
+summaries = {}
 
 destructors = []
 
@@ -44,7 +45,7 @@ module.exports = Metrics =
 	inc : (key, sampleRate = 1)->
 		statsd.increment buildKey(key), sampleRate
 		key = this.sanitizeKey(key)
-		if !counters[key]
+		if !counters[key]?
 			counters[key] = new prom.Counter({
 		  		name: "#{name}_#{key}",
 				help: key, 
@@ -66,18 +67,26 @@ module.exports = Metrics =
 		done:->
 			timeSpan = new Date - this.start
 			statsd.timing(buildKey(this.key), timeSpan, this.sampleRate)
+			if !summaries[key]?
+				summary = new client.Summary({
+					name: "#{name}_#{key}",
+					help: key,
+					maxAgeSeconds: 600,
+					ageBuckets: 10
+				})
+			summaries[key].observe(timeSpan)
 			return timeSpan
 
 	gauge : (key, value, sampleRate = 1)->
 		statsd.gauge buildKey(key), value, sampleRate
 		key = this.sanitizeKey(key)
-		if !gauges[key]
+		if !gauges[key]?
 			gauges[key] = new prom.Gauge({
-		  		name: "#{name}_#{key}",
+				name: "#{name}_#{key}",
 				help: key, 
 				labelNames: ['name','host']
 			})
-		gauges[key].set({name: name, host: hostname},this.sanitizeValue(value))
+		gauges[key].set({name: name, host: hostname}, this.sanitizeValue(value))
 
 	globalGauge: (key, value, sampleRate = 1)->
 		statsd.gauge buildGlobalKey(key), value, sampleRate
