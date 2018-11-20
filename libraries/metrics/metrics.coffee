@@ -46,7 +46,7 @@ module.exports = Metrics =
 		key = this.sanitizeKey(key)
 		if !counters[key]
 			counters[key] = new prom.Counter({
-		  		name: buildKey(key),
+		  		name: "#{name}_#{key}",
 				help: key, 
 				labelNames: ['name','host']
 			})
@@ -73,7 +73,7 @@ module.exports = Metrics =
 		key = this.sanitizeKey(key)
 		if !gauges[key]
 			gauges[key] = new prom.Gauge({
-		  		name: buildKey(key),
+		  		name: "#{name}_#{key}",
 				help: key, 
 				labelNames: ['name','host']
 			})
@@ -84,7 +84,7 @@ module.exports = Metrics =
 		key = this.sanitizeKey(key)
 		if !gauges[key]
 			gauges[key] = new prom.Gauge({
-		  		name: buildKey(key),
+		  		name: "#{name}_#{key}",
 				help: key, 
 				labelNames: ['name','host']
 			})
