@@ -11,9 +11,7 @@ hostname = require('os').hostname()
 buildKey = (key)-> "#{name}.#{hostname}.#{key}"
 buildGlobalKey = (key)-> "#{name}.global.#{key}"
 
-counters = {}
-gauges = {}
-summaries = {}
+promMetrics = {}
 
 destructors = []
 
@@ -45,13 +43,13 @@ module.exports = Metrics =
 	inc : (key, sampleRate = 1)->
 		statsd.increment buildKey(key), sampleRate
 		key = this.sanitizeKey(key)
-		if !counters[key]?
-			counters[key] = new prom.Counter({
-		  		name: "#{name}_#{key}",
+		if !promMetrics[key]?
+			promMetrics[key] = new prom.Counter({
+				name: "#{name}_#{key}",
 				help: key, 
 				labelNames: ['name','host']
 			})
-		counters[key].inc({name: name, host: hostname})
+		promMetrics[key].inc({name: name, host: hostname})
 
 	count : (key, count, sampleRate = 1)->
 		statsd.count buildKey(key), count, sampleRate
@@ -68,37 +66,37 @@ module.exports = Metrics =
 		done:->
 			timeSpan = new Date - this.start
 			statsd.timing(buildKey(this.key), timeSpan, this.sampleRate)
-			if !summaries[this.key]?
-				summary = new prom.Summary({
-					name: "#{name}_#{this.key}",
+			if !promMetrics[this.key]
+				promMetrics[this.key] = new prom.Summary({
+					name: "#{name}_timer_#{this.key}".replace(/\./g,"_"),
 					help: this.key,
 					maxAgeSeconds: 600,
 					ageBuckets: 10
 				})
-			summaries[this.key].observe(timeSpan)
+			promMetrics[this.key].observe(timeSpan)
 			return timeSpan
 
 	gauge : (key, value, sampleRate = 1)->
 		statsd.gauge buildKey(key), value, sampleRate
 		key = this.sanitizeKey(key)
-		if !gauges[key]?
-			gauges[key] = new prom.Gauge({
+		if !promMetrics[key]
+			promMetrics[key] = new prom.Gauge({
 				name: "#{name}_#{key}",
 				help: key, 
 				labelNames: ['name','host']
 			})
-		gauges[key].set({name: name, host: hostname}, this.sanitizeValue(value))
+		promMetrics[key].set({name: name, host: hostname}, this.sanitizeValue(value))
 
 	globalGauge: (key, value, sampleRate = 1)->
 		statsd.gauge buildGlobalKey(key), value, sampleRate
 		key = this.sanitizeKey(key)
-		if !gauges[key]
-			gauges[key] = new prom.Gauge({
-		  		name: "#{name}_#{key}",
+		if !promMetrics[key]
+			promMetrics[key] = new prom.Gauge({
+				name: "#{name}_#{key}",
 				help: key, 
 				labelNames: ['name','host']
 			})
-		gauges[key].set({name: name},this.sanitizeValue(value))
+		promMetrics[key].set({name: name},this.sanitizeValue(value))
 
 	mongodb: require "./mongodb"
 	http: require "./http"
