@@ -1,5 +1,7 @@
 extends ../layout
 
+include ./dashboard/_team_name_mixin
+
 block content
 	.content.content-alt(ng-cloak)
 		.container
@@ -14,9 +16,21 @@ block content
 							-hasAnySubscription = true
 							include ./dashboard/_personal_subscription
 
-						-if (groupSubscriptions && groupSubscriptions.length > 0)
+						-if (managedGroupSubscriptions && managedGroupSubscriptions.length > 0)
+							-hasAnySubscription = true
+							include ./dashboard/_managed_groups
+
+						-if (managedInstitutions && managedInstitutions.length > 0)
+							-hasAnySubscription = true
+							include ./dashboard/_managed_institutions
+
+						-if (memberGroupSubscriptions && memberGroupSubscriptions.length > 0)
 							-hasAnySubscription = true
 							include ./dashboard/_group_memberships
+
+						-if (confirmedMemberInstitutions && confirmedMemberInstitutions.length > 0)
+							-hasAnySubscription = true
+							include ./dashboard/_institution_memberships
 
 						-if (settings.overleaf && v1Subscriptions)
 							include ./dashboard/_v1_subscriptions

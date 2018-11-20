@@ -91,16 +91,35 @@ module.exports = SubscriptionController =
 		user = AuthenticationController.getSessionUser(req)
 		SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel user, (error, results) ->
 			return next(error) if error?
-			{ personalSubscription, groupSubscriptions, v1Subscriptions } = results
-			logger.log {user, personalSubscription, groupSubscriptions, v1Subscriptions}, "showing subscription dashboard"
+			{
+				personalSubscription,
+				memberGroupSubscriptions,
+				managedGroupSubscriptions,
+				confirmedMemberInstitutions,
+				managedInstitutions,
+				v1Subscriptions
+			} = results
+			logger.log {
+				user,
+				personalSubscription,
+				memberGroupSubscriptions,
+				managedGroupSubscriptions,
+				confirmedMemberInstitutions,
+				managedInstitutions,
+				v1Subscriptions
+			}, "showing subscription dashboard"
 			plans = SubscriptionViewModelBuilder.buildViewModel()
-			data = 
+			data = {
 				title: "your_subscription"
-				plans: plans
-				user: user
-				personalSubscription: personalSubscription
-				groupSubscriptions: groupSubscriptions
-				v1Subscriptions: v1Subscriptions
+				plans,
+				user,
+				personalSubscription,
+				memberGroupSubscriptions,
+				managedGroupSubscriptions,
+				confirmedMemberInstitutions,
+				managedInstitutions,
+				v1Subscriptions
+			}
 			res.render "subscriptions/dashboard", data
 
 	createSubscription: (req, res, next)->

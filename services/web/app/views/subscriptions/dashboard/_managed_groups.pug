@@ -1,0 +1,13 @@
+each managedGroupSubscription in managedGroupSubscriptions
+	p
+		| You are a manager of
+		|
+		+teamName(managedGroupSubscription)
+	p
+		a.btn.btn-primary(href="/manage/groups/" + managedGroupSubscription._id + "/members")
+			| Manage members
+		| &nbsp;
+		a.btn.btn-primary(href="/manage/groups/" + managedGroupSubscription._id + "/managers")
+			| Manage group managers
+
+	hr

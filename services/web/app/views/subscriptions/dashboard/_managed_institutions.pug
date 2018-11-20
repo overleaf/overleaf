@@ -1,0 +1,9 @@
+each institution in managedInstitutions
+	p
+		| You are a manager of
+		|
+		strong= institution.name
+	p
+		a.btn.btn-primary(href="/manage/institutions/" + institution.v1Id + "/managers")
+			| Manage institution managers
+	hr

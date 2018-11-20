@@ -19,6 +19,11 @@ InstitutionSchema.method 'fetchV1Data', (callback = (error, institution)->) ->
 		this.portalSlug = parsedBody?.portal_slug
 		callback(null, this)
 
-mongoose.model 'Institution', InstitutionSchema
-exports.Institution = mongoose.model 'Institution'
+conn = mongoose.createConnection(settings.mongo.url, {
+	server: {poolSize: settings.mongo.poolSize || 10},
+	config: {autoIndex: false}
+})
+
+Institution = conn.model 'Institution', InstitutionSchema
+exports.Institution = Institution
 exports.InstitutionSchema = InstitutionSchema

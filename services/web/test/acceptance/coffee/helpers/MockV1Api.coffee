@@ -75,7 +75,10 @@ module.exports = MockV1Api =
 			res.json []
 
 		app.get '/universities/list/:id', (req, res, next) ->
-			res.json id: parseInt(req.params.id)
+			res.json {
+				id: parseInt(req.params.id)
+				name: "Institution #{req.params.id}"
+			}
 
 		app.get '/university/domains', (req, res, next) ->
 			res.json []

@@ -230,7 +230,7 @@ describe "SubscriptionController", ->
 		beforeEach (done) ->
 			@SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel.callsArgWith(1, null, {
 				personalSubscription: @personalSubscription = { 'personal-subscription': 'mock' }
-				groupSubscriptions: @groupSubscriptions = { 'personal-subscriptions': 'mock' }
+				memberGroupSubscriptions: @memberGroupSubscriptions = { 'group-subscriptions': 'mock' }
 				v1Subscriptions: @v1Subscriptions = { 'v1-subscriptions': 'mock' }
 			})
 			@SubscriptionViewModelBuilder.buildViewModel.returns(@plans = {'plans': 'mock'})
@@ -241,7 +241,7 @@ describe "SubscriptionController", ->
 
 		it "should load the personal, groups and v1 subscriptions", ->
 			expect(@data.personalSubscription).to.deep.equal @personalSubscription
-			expect(@data.groupSubscriptions).to.deep.equal @groupSubscriptions
+			expect(@data.memberGroupSubscriptions).to.deep.equal @memberGroupSubscriptions
 			expect(@data.v1Subscriptions).to.deep.equal @v1Subscriptions
 
 		it "should load the user", ->

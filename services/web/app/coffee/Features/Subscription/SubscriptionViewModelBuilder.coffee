@@ -5,6 +5,7 @@ SubscriptionFormatters = require("./SubscriptionFormatters")
 LimitationsManager = require("./LimitationsManager")
 SubscriptionLocator = require("./SubscriptionLocator")
 V1SubscriptionManager = require("./V1SubscriptionManager")
+InstitutionsGetter = require("../Institutions/InstitutionsGetter")
 logger = require('logger-sharelatex')
 _ = require("underscore")
 async = require('async')
@@ -37,8 +38,14 @@ module.exports =
 				return cb(new Error("No plan found for planCode '#{personalSubscription.planCode}'")) if !plan?
 				cb(null, plan)
 			]
-			groupSubscriptions: (cb) ->
+			memberGroupSubscriptions: (cb) ->
 				SubscriptionLocator.getMemberSubscriptions user, cb
+			managedGroupSubscriptions: (cb) ->
+				SubscriptionLocator.getManagedGroupSubscriptions user, cb
+			confirmedMemberInstitutions: (cb) ->
+				InstitutionsGetter.getConfirmedInstitutions user._id, cb
+			managedInstitutions: (cb) ->
+				InstitutionsGetter.getManagedInstitutions user._id, cb
 			v1Subscriptions: (cb) ->
 				V1SubscriptionManager.getSubscriptionsFromV1 user._id, (error, subscriptions, v1Id) ->
 					return cb(error) if error?
@@ -46,9 +53,22 @@ module.exports =
 					cb(null, subscriptions)
 		}, (err, results) ->
 			return callback(err) if err?
-			{personalSubscription, groupSubscriptions, v1Subscriptions, recurlySubscription, plan} = results
-			groupSubscriptions ?= []
+			{
+				personalSubscription,
+				memberGroupSubscriptions,
+				managedGroupSubscriptions,
+				confirmedMemberInstitutions,
+				managedInstitutions,
+				v1Subscriptions,
+				recurlySubscription,
+				plan
+			} = results
+			memberGroupSubscriptions ?= []
+			managedGroupSubscriptions ?= []
+			confirmedMemberInstitutions ?= []
+			managedInstitutions ?= []
 			v1Subscriptions ?= {}
+
 
 			if personalSubscription?.toObject?
 				# Downgrade from Mongoose object, so we can add a recurly and plan attribute
@@ -72,7 +92,12 @@ module.exports =
 				}
 
 			callback null, {
-				personalSubscription, groupSubscriptions, v1Subscriptions
+				personalSubscription,
+				managedGroupSubscriptions,
+				memberGroupSubscriptions,
+				confirmedMemberInstitutions,
+				managedInstitutions,
+				v1Subscriptions
 			}
 
 	buildViewModel : ->

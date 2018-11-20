@@ -1,8 +1,14 @@
 div(ng-controller="GroupMembershipController")
-	each groupSubscription in groupSubscriptions
+	each groupSubscription in memberGroupSubscriptions
 		- if (user._id+'' != groupSubscription.admin_id._id+'')
 			div 
-				p !{translate("member_of_group_subscription", {admin_email: "<strong>" + groupSubscription.admin_id.email + "</strong>"})}
+				p
+					| You are a member of
+					|
+					+teamName(groupSubscription)
+				- if (groupSubscription.teamNotice && groupSubscription.teamNotice != '')
+					p
+						em= groupSubscription.teamNotice
 				span 
 					button.btn.btn-danger.text-capitalise(ng-click="removeSelfFromGroup('"+groupSubscription.admin_id._id+"')") #{translate("leave_group")}
 			hr

@@ -7,6 +7,7 @@ EntityModels =
 UserMembershipViewModel = require('./UserMembershipViewModel')
 UserGetter = require('../User/UserGetter')
 logger = require('logger-sharelatex')
+UserMembershipEntityConfigs = require "./UserMembershipEntityConfigs"
 
 module.exports =
 	getEntity: (entityId, entityConfig, loggedInUser, callback = (error, entity) ->) ->
@@ -38,6 +39,15 @@ module.exports =
 		if entity.admin_id?.equals(userId)
 			return callback(isAdmin: true)
 		removeUserFromEntity entity, attribute, userId, callback
+
+	getEntitiesByUser: (entityConfig, userId, callback = (error, entities) ->) ->
+		query = Object.assign({}, entityConfig.baseQuery)
+		query[entityConfig.fields.access] = userId
+		EntityModels[entityConfig.modelName].find query, (error, entities = []) ->
+			return callback(error) if error?
+			async.mapSeries entities,
+				(entity, cb) -> entity.fetchV1Data(cb),
+				callback
 
 getPopulatedListOfMembers = (entity, attributes, callback = (error, users)->)->
 		userObjects = []

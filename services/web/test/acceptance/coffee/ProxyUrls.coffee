@@ -24,8 +24,8 @@ describe "ProxyUrls", ->
 
 	it 'proxy dynamic URLs', (done) ->
 		async.series [
-			(cb) -> assertResponse '/institutions/list/123', 200, { id: 123 }, cb
-			(cb) -> assertResponse '/institutions/list/456', 200, { id: 456 }, cb
+			(cb) -> assertResponse '/institutions/list/123', 200, { id: 123, name: "Institution 123" }, cb
+			(cb) -> assertResponse '/institutions/list/456', 200, { id: 456, name: "Institution 456" }, cb
 		],
 		done
 

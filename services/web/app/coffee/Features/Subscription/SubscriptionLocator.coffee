@@ -5,10 +5,7 @@ ObjectId = require('mongoose').Types.ObjectId
 module.exports = SubscriptionLocator =
 
 	getUsersSubscription: (user_or_id, callback)->
-		if user_or_id? and user_or_id._id?
-			user_id = user_or_id._id
-		else if user_or_id?
-			user_id = user_or_id
+		user_id = @_getUserId(user_or_id)
 		logger.log user_id:user_id, "getting users subscription"
 		Subscription.findOne admin_id:user_id, (err, subscription)->
 			logger.log user_id:user_id, "got users subscription"
@@ -18,11 +15,15 @@ module.exports = SubscriptionLocator =
 		logger.log managerId: managerId, "finding managed subscription"
 		Subscription.findOne manager_ids: managerId, callback
 
+	getManagedGroupSubscriptions: (user_or_id, callback = (error, managedSubscriptions) ->) ->
+		user_id = @_getUserId(user_or_id)
+		Subscription.find({
+			manager_ids: user_or_id,
+			groupPlan: true
+		}).populate("admin_id").exec callback
+
 	getMemberSubscriptions: (user_or_id, callback) ->
-		if user_or_id? and user_or_id._id?
-			user_id = user_or_id._id
-		else if user_or_id?
-			user_id = user_or_id
+		user_id = @_getUserId(user_or_id)
 		logger.log user_id: user_id, "getting users group subscriptions"
 		Subscription.find(member_ids: user_id).populate("admin_id").exec callback
 
@@ -40,3 +41,9 @@ module.exports = SubscriptionLocator =
 
 	getGroupWithV1Id: (v1TeamId, callback) ->
 		Subscription.findOne { "overleaf.id": v1TeamId }, callback
+
+	_getUserId: (user_or_id) ->
+		if user_or_id? and user_or_id._id?
+			return user_or_id._id
+		else if user_or_id?
+			return user_or_id

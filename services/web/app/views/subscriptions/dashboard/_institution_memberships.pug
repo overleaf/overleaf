@@ -1,0 +1,12 @@
+each institution in confirmedMemberInstitutions
+	if (institution.licence != 'free')
+		p
+			| You have a
+			|
+			strong Professional
+			|
+			| #{settings.appName} account as a confirmed member of
+			|
+			strong= institution.name
+		hr
+

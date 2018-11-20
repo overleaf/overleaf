@@ -1,0 +1,9 @@
+mixin teamName(subscription)
+	- if (subscription.teamName && subscription.teamName != '')
+		strong= subscription.teamName
+	- else if (subscription.admin_id._id == user._id)
+		| a group account
+	- else
+		| the group account owned by
+		|
+		strong= subscription.admin_id.email
