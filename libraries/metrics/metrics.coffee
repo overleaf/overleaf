@@ -20,8 +20,8 @@ require "./uv_threadpool_size"
 
 module.exports = Metrics =
 	initialize: (_name) ->
-		name = _name
-		collectDefaultMetrics({ timeout: 5000, prefix: name + "_" })
+		name = _name + "_"
+		collectDefaultMetrics({ timeout: 5000, prefix: name+"_"})
 
 	registerDestructor: (func) ->
 		destructors.push func
@@ -46,7 +46,7 @@ module.exports = Metrics =
 		key = this.sanitizeKey(key)
 		if !counters[key]
 			counters[key] = new prom.Counter({
-		  		name: key,
+		  		name: buildKey(key),
 				help: key, 
 				labelNames: ['name','host']
 			})
@@ -73,7 +73,7 @@ module.exports = Metrics =
 		key = this.sanitizeKey(key)
 		if !gauges[key]
 			gauges[key] = new prom.Gauge({
-		  		name: key,
+		  		name: buildKey(key),
 				help: key, 
 				labelNames: ['name','host']
 			})
@@ -84,7 +84,7 @@ module.exports = Metrics =
 		key = this.sanitizeKey(key)
 		if !gauges[key]
 			gauges[key] = new prom.Gauge({
-		  		name: key,
+		  		name: buildKey(key),
 				help: key, 
 				labelNames: ['name','host']
 			})
