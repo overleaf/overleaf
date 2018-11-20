@@ -64,17 +64,18 @@ module.exports = Metrics =
 			this.start = new Date()
 			this.key = key
 			this.sampleRate = sampleRate
+
 		done:->
 			timeSpan = new Date - this.start
 			statsd.timing(buildKey(this.key), timeSpan, this.sampleRate)
-			if !summaries[key]?
+			if !summaries[this.key]?
 				summary = new client.Summary({
-					name: "#{name}_#{key}",
-					help: key,
+					name: "#{name}_#{this.key}",
+					help: this.key,
 					maxAgeSeconds: 600,
 					ageBuckets: 10
 				})
-			summaries[key].observe(timeSpan)
+			summaries[this.key].observe(timeSpan)
 			return timeSpan
 
 	gauge : (key, value, sampleRate = 1)->
