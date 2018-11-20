@@ -21,7 +21,7 @@ require "./uv_threadpool_size"
 module.exports = Metrics =
 	initialize: (_name) ->
 		name = _name
-		collectDefaultMetrics({ timeout: 5000, prefix: name })
+		collectDefaultMetrics({ timeout: 5000, prefix: name + "_" })
 
 	registerDestructor: (func) ->
 		destructors.push func
