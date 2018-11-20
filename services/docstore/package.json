@@ -26,7 +26,7 @@
     "coffee-script": "^1.7.1",
     "express": "~4.1.1",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.4.0",
-    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#e9d0f200ee3ab80c05b9244756eda2a5b50dd529",
+    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#98ca80bb991c411b5c38ecc48f8027e1e18529ba",
     "mongojs": "2.4.0",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
     "underscore": "~1.6.0"

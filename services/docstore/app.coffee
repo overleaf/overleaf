@@ -1,10 +1,10 @@
+Metrics    = require "metrics-sharelatex"
 Settings   = require "settings-sharelatex"
 logger     = require "logger-sharelatex"
 express    = require "express"
 bodyParser = require "body-parser"
 Errors     = require "./app/js/Errors"
 HttpController = require "./app/js/HttpController"
-Metrics    = require "metrics-sharelatex"
 Path       = require "path"
 
 Metrics.initialize("docstore")
