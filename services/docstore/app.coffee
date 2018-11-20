@@ -27,6 +27,8 @@ app.param 'doc_id', (req, res, next, doc_id) ->
 	else
 		next new Error("invalid doc id")
 
+Metrics.injectMetricsRoute(app)
+
 app.get  '/project/:project_id/doc', HttpController.getAllDocs
 app.get  '/project/:project_id/ranges', HttpController.getAllRanges
 app.get  '/project/:project_id/doc/:doc_id', HttpController.getDoc
