@@ -56,6 +56,14 @@ module.exports = Metrics =
 
 	timing: (key, timeSpan, sampleRate)->
 		statsd.timing(buildKey(key), timeSpan, sampleRate)
+		if !promMetrics[this.key]
+			promMetrics[this.key] = new prom.Summary({
+				name: "#{name}_timer_#{this.key}".replace(/\./g,"_"),
+				help: key,
+				maxAgeSeconds: 600,
+				ageBuckets: 10
+			})
+		promMetrics[this.key].observe(timeSpan)
 
 	Timer : class
 		constructor :(key, sampleRate = 1)->
@@ -65,15 +73,7 @@ module.exports = Metrics =
 
 		done:->
 			timeSpan = new Date - this.start
-			statsd.timing(buildKey(this.key), timeSpan, this.sampleRate)
-			if !promMetrics[this.key]
-				promMetrics[this.key] = new prom.Summary({
-					name: "#{name}_timer_#{this.key}".replace(/\./g,"_"),
-					help: this.key,
-					maxAgeSeconds: 600,
-					ageBuckets: 10
-				})
-			promMetrics[this.key].observe(timeSpan)
+			Metrics.timing(this.key, timeSpan, this.sampleRate)
 			return timeSpan
 
 	gauge : (key, value, sampleRate = 1)->
