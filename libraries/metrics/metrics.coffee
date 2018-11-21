@@ -56,14 +56,16 @@ module.exports = Metrics =
 
 	timing: (key, timeSpan, sampleRate)->
 		statsd.timing(buildKey(key), timeSpan, sampleRate)
-		if !promMetrics[this.key]
-			promMetrics[this.key] = new prom.Summary({
-				name: "#{name}_timer_#{this.key}".replace(/\./g,"_"),
+		if !promMetrics[key]
+			k = "#{name}_timer_#{key}".replace(/\./g,"_")
+			console.log("sending timing", k)
+			promMetrics[key] = new prom.Summary({
+				name: k,
 				help: key,
 				maxAgeSeconds: 600,
 				ageBuckets: 10
 			})
-		promMetrics[this.key].observe(timeSpan)
+		promMetrics[key].observe(timeSpan)
 
 	Timer : class
 		constructor :(key, sampleRate = 1)->
