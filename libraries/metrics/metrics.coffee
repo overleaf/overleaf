@@ -21,8 +21,6 @@ destructors = []
 
 require "./uv_threadpool_size"
 
-
-
 module.exports = Metrics =
 	initialize: (_name) ->
 		name = _name
