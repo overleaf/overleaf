@@ -57,7 +57,7 @@ module.exports = Metrics =
 	timing: (key, timeSpan, sampleRate)->
 		statsd.timing(buildKey(key), timeSpan, sampleRate)
 		if !promMetrics[key]
-			k = "#{name}_timer_#{key}".replace(/\./g,"_")
+			k = "#{name}_timer_#{key}".replace(/\./g,"_").replace(/-/g,"_")
 			console.log("sending timing", k)
 			promMetrics[key] = new prom.Summary({
 				name: k,
