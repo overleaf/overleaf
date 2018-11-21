@@ -58,6 +58,14 @@ module.exports = Metrics =
 
 	count : (key, count, sampleRate = 1)->
 		statsd.count buildKey(key), count, sampleRate
+		key = Metrics.buildPromKey(key)
+		if !promMetrics[key]?
+			promMetrics[key] = new prom.Counter({
+				name: key,
+				help: key, 
+				labelNames: ['name','host']
+			})
+		promMetrics[key].inc({name: name, host: hostname}, count)
 
 	timing: (key, timeSpan, sampleRate)->
 		statsd.timing(buildKey(key), timeSpan, sampleRate)
