@@ -62,7 +62,7 @@ module.exports = Metrics =
 	timing: (key, timeSpan, sampleRate)->
 		statsd.timing(buildKey(key), timeSpan, sampleRate)
 		key = Metrics.buildPromKey("timer_#{key}")
-		if !promMetrics[key]
+		if !promMetrics[key]?
 			promMetrics[key] = new prom.Summary({
 				name: key,
 				help: key,
@@ -86,7 +86,7 @@ module.exports = Metrics =
 	gauge : (key, value, sampleRate = 1)->
 		statsd.gauge buildKey(key), value, sampleRate
 		key = Metrics.buildPromKey(key)
-		if !promMetrics[key]
+		if !promMetrics[key]?
 			promMetrics[key] = new prom.Gauge({
 				name: key,
 				help: key, 
@@ -97,7 +97,7 @@ module.exports = Metrics =
 	globalGauge: (key, value, sampleRate = 1)->
 		statsd.gauge buildGlobalKey(key), value, sampleRate
 		key = Metrics.buildPromKey(key)
-		if !promMetrics[key]
+		if !promMetrics[key]?
 			promMetrics[key] = new prom.Gauge({
 				name: key,
 				help: key, 
