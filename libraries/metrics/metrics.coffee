@@ -11,6 +11,8 @@ hostname = require('os').hostname()
 buildKey = (key)-> "#{name}.#{hostname}.#{key}"
 buildGlobalKey = (key)-> "#{name}.global.#{key}"
 
+
+
 promMetrics = {}
 
 destructors = []
@@ -20,7 +22,7 @@ require "./uv_threadpool_size"
 module.exports = Metrics =
 	initialize: (_name) ->
 		name = _name
-		collectDefaultMetrics({ timeout: 5000, prefix: name+"_"})
+		collectDefaultMetrics({ timeout: 5000, prefix: Metrics.buildPromKey()})
 
 	registerDestructor: (func) ->
 		destructors.push func
@@ -30,6 +32,9 @@ module.exports = Metrics =
 			res.set('Content-Type', Register.contentType)
 			res.end(Register.metrics())
 		)
+
+	buildPromKey: (key = "")->
+		Metrics.sanitizeKey "#{name}_#{key}"
 
 	sanitizeKey: (key) ->
 		key.replace /[^a-zA-Z0-9]/g, "_"
@@ -42,10 +47,10 @@ module.exports = Metrics =
 
 	inc : (key, sampleRate = 1)->
 		statsd.increment buildKey(key), sampleRate
-		key = this.sanitizeKey(key)
+		key = Metrics.buildPromKey(key)
 		if !promMetrics[key]?
 			promMetrics[key] = new prom.Counter({
-				name: "#{name}_#{key}",
+				name: key,
 				help: key, 
 				labelNames: ['name','host']
 			})
@@ -56,11 +61,10 @@ module.exports = Metrics =
 
 	timing: (key, timeSpan, sampleRate)->
 		statsd.timing(buildKey(key), timeSpan, sampleRate)
+		key = Metrics.buildPromKey("timer_#{key}")
 		if !promMetrics[key]
-			k = "#{name}_timer_#{key}".replace(/\./g,"_").replace(/-/g,"_")
-			console.log("sending timing", k)
 			promMetrics[key] = new prom.Summary({
-				name: k,
+				name: key,
 				help: key,
 				maxAgeSeconds: 600,
 				ageBuckets: 10
@@ -70,6 +74,7 @@ module.exports = Metrics =
 	Timer : class
 		constructor :(key, sampleRate = 1)->
 			this.start = new Date()
+			key = Metrics.sanitizeKey(key)
 			this.key = key
 			this.sampleRate = sampleRate
 
@@ -80,10 +85,10 @@ module.exports = Metrics =
 
 	gauge : (key, value, sampleRate = 1)->
 		statsd.gauge buildKey(key), value, sampleRate
-		key = this.sanitizeKey(key)
+		key = Metrics.buildPromKey(key)
 		if !promMetrics[key]
 			promMetrics[key] = new prom.Gauge({
-				name: "#{name}_#{key}",
+				name: key,
 				help: key, 
 				labelNames: ['name','host']
 			})
@@ -91,10 +96,10 @@ module.exports = Metrics =
 
 	globalGauge: (key, value, sampleRate = 1)->
 		statsd.gauge buildGlobalKey(key), value, sampleRate
-		key = this.sanitizeKey(key)
+		key = Metrics.buildPromKey(key)
 		if !promMetrics[key]
 			promMetrics[key] = new prom.Gauge({
-				name: "#{name}_#{key}",
+				name: key,
 				help: key, 
 				labelNames: ['name','host']
 			})
