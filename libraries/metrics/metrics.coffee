@@ -1,6 +1,9 @@
 StatsD = require('lynx')
 statsd = new StatsD(process.env["STATSD_HOST"] or "localhost", 8125, {on_error:->})
 
+traceAgent = require('@google-cloud/trace-agent')
+debugAgent = require('@google-cloud/debug-agent')
+
 prom = require('prom-client')
 Register = require('prom-client').register
 collectDefaultMetrics = prom.collectDefaultMetrics
@@ -23,6 +26,14 @@ module.exports = Metrics =
 	initialize: (_name) ->
 		name = _name
 		collectDefaultMetrics({ timeout: 5000, prefix: Metrics.buildPromKey()})
+		traceAgent.start()
+		debugAgent.start({
+			serviceContext: {
+				allowExpressions: true,
+				service: name,
+				version: '0.0.1'
+			}
+		})
 
 	registerDestructor: (func) ->
 		destructors.push func
