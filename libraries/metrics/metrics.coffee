@@ -1,6 +1,9 @@
 StatsD = require('lynx')
 statsd = new StatsD(process.env["STATSD_HOST"] or "localhost", 8125, {on_error:->})
 
+traceAgent = require('@google-cloud/trace-agent')
+debugAgent = require('@google-cloud/debug-agent')
+
 prom = require('prom-client')
 Register = require('prom-client').register
 collectDefaultMetrics = prom.collectDefaultMetrics
@@ -21,6 +24,15 @@ require "./uv_threadpool_size"
 module.exports = Metrics =
 	initialize: (_name) ->
 		name = _name
+		traceAgent.start()
+		debugAgent.start({
+			serviceContext: {
+				allowExpressions: true,
+				service: name,
+				version: '0.0.1'
+			}
+		})
+
 		collectDefaultMetrics({ timeout: 5000, prefix: name + "_" })
 
 	registerDestructor: (func) ->
