@@ -11,6 +11,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const app = angular.module('ErrorCatcher', [])
+const UNHANDLED_REJECTION_ERR_MSG = 'Possibly unhandled rejection: canceled'
 
 app.config([
   '$provide',
@@ -20,6 +21,12 @@ app.config([
       '$delegate',
       ($log, $delegate) =>
         function(exception, cause) {
+          if (
+            exception === UNHANDLED_REJECTION_ERR_MSG &&
+            cause === undefined
+          ) {
+            return
+          }
           if (
             (typeof Raven !== 'undefined' && Raven !== null
               ? Raven.captureException
