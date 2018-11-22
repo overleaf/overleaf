@@ -4,7 +4,7 @@ html.full-height(itemscope, itemtype='http://schema.org/Product')
 		title Something went wrong
 		link(rel="icon", href="/" + settings.brandPrefix + "favicon.ico")
 		if buildCssPath
-			link(rel="stylesheet", href=buildCssPath("/" + settings.brandPrefix + "style.css"))
+			link(rel="stylesheet", href=buildCssPath(null, { hashedPath: true }))
 		link(href="//netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css",rel="stylesheet")
 	body.full-height
 		.content.content-alt.full-height
