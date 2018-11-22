@@ -139,7 +139,7 @@ aside#left-menu.full-size(
 					each editorTheme in editorThemes
 						option(value=editorTheme) #{editorTheme.replace(/_/g, ' ')}
 
-			- if (settings.overleaf != null)
+			- if (settings.overleaf != null && !isIEEE(brandVariation))
 				.form-controls
 					label(for="overallTheme") #{translate("overall_theme")}
 					select(
