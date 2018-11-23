@@ -78,17 +78,20 @@ module.exports = Metrics =
 			})
 		promMetrics[key].inc({name: name, host: hostname}, count)
 
-	timing: (key, timeSpan, sampleRate)->
+	timing: (key, timeSpan, sampleRate, opts = {})->
 		statsd.timing(buildKey(key), timeSpan, sampleRate)
-		key = Metrics.buildPromKey("timer_#{key}")
+		key = Metrics.sanitizeKey("timer_" + key)
 		if !promMetrics[key]?
 			promMetrics[key] = new prom.Summary({
 				name: key,
 				help: key,
 				maxAgeSeconds: 600,
-				ageBuckets: 10
+				ageBuckets: 10,
+				labelNames: ['app', 'path', 'status_code', 'method']
 			})
-		promMetrics[key].observe(timeSpan)
+		opts.app = name
+		console.log(key, opts, "timing key")
+		promMetrics[key].observe(opts, timeSpan)
 
 	Timer : class
 		constructor :(key, sampleRate = 1)->
@@ -109,9 +112,9 @@ module.exports = Metrics =
 			promMetrics[key] = new prom.Gauge({
 				name: key,
 				help: key, 
-				labelNames: ['name','host']
+				labelNames: ['app','host']
 			})
-		promMetrics[key].set({name: name, host: hostname}, this.sanitizeValue(value))
+		promMetrics[key].set({app: name, host: hostname}, this.sanitizeValue(value))
 
 	globalGauge: (key, value, sampleRate = 1)->
 		statsd.gauge buildGlobalKey(key), value, sampleRate
@@ -120,9 +123,9 @@ module.exports = Metrics =
 			promMetrics[key] = new prom.Gauge({
 				name: key,
 				help: key, 
-				labelNames: ['name','host']
+				labelNames: ['app','host']
 			})
-		promMetrics[key].set({name: name},this.sanitizeValue(value))
+		promMetrics[key].set({app: name},this.sanitizeValue(value))
 
 	mongodb: require "./mongodb"
 	http: require "./http"
