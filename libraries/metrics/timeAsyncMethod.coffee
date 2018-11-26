@@ -17,7 +17,7 @@ module.exports = (obj, methodName, prefix, logger) ->
 				logger.log "[Metrics] expected wrapped method '#{methodName}' to be invoked with a callback"
 			return realMethod.apply this, originalArgs
 
-		timer = new metrics.Timer(key)
+		timer = new metrics.Timer(prefix, null, {method: methodName})
 
 		realMethod.call this, firstArgs..., (callbackArgs...) ->
 			elapsedTime = timer.done()

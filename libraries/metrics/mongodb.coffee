@@ -34,7 +34,7 @@ module.exports =
 					query = Object.keys(db_command.query).sort().join("_")
 					key += "." + query
 
-				timer = new Metrics.Timer(key)
+				timer = new Metrics.Timer("mongo", {collection: collection, query:query})
 				start = new Date()
 				_method.call this, db_command, options, () ->
 					timer.done()

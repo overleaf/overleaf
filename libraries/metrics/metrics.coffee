@@ -87,22 +87,22 @@ module.exports = Metrics =
 				help: key,
 				maxAgeSeconds: 600,
 				ageBuckets: 10,
-				labelNames: ['app', 'path', 'status_code', 'method']
+				labelNames: ['app', 'path', 'status_code', 'method', 'collection', 'query']
 			})
 		opts.app = name
-		console.log(key, opts, "timing key")
 		promMetrics[key].observe(opts, timeSpan)
 
 	Timer : class
-		constructor :(key, sampleRate = 1)->
+		constructor :(key, sampleRate = 1, opts)->
 			this.start = new Date()
 			key = Metrics.sanitizeKey(key)
 			this.key = key
 			this.sampleRate = sampleRate
+			this.opts = opts
 
 		done:->
 			timeSpan = new Date - this.start
-			Metrics.timing(this.key, timeSpan, this.sampleRate)
+			Metrics.timing(this.key, timeSpan, this.sampleRate, this.opts)
 			return timeSpan
 
 	gauge : (key, value, sampleRate = 1)->
