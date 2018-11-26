@@ -4,6 +4,18 @@ each institution in managedInstitutions
 		|
 		strong= institution.name
 	p
-		a.btn.btn-primary(href="/manage/institutions/" + institution.v1Id + "/managers")
+		a.btn.btn-primary(href="/metrics/institutions/" + institution.v1Id)
+			i.fa.fa-fw.fa-line-chart
+			| &nbsp;
+			| View metrics
+	p
+		a(href="/institutions/" + institution.v1Id + "/hub")
+			i.fa.fa-fw.fa-user-circle
+			| &nbsp;
+			| View hub
+	p
+		a(href="/manage/institutions/" + institution.v1Id + "/managers")
+			i.fa.fa-fw.fa-users
+			| &nbsp;
 			| Manage institution managers
 	hr
