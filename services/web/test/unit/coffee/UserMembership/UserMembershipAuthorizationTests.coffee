@@ -30,10 +30,9 @@ describe "UserMembershipAuthorization", ->
 				log: ->
 				err: ->
 
-	describe 'requireEntityAccess', ->
+	describe 'requireAccessToEntity', ->
 		it 'get entity', (done) ->
-			middlewear = @UserMembershipAuthorization.requireEntityAccess 'group'
-			middlewear @req, null, (error) =>
+			@UserMembershipAuthorization.requireGroupAccess @req, null, (error) =>
 				expect(error).to.not.extist
 				sinon.assert.calledWithMatch(
 					@UserMembershipHandler.getEntity,
@@ -45,19 +44,9 @@ describe "UserMembershipAuthorization", ->
 				expect(@req.entityConfig).to.exist
 				done()
 
-		it 'handle unknown entity', (done) ->
-			middlewear = @UserMembershipAuthorization.requireEntityAccess 'foo'
-			middlewear @req, null, (error) =>
-				expect(error).to.extist
-				expect(error).to.be.an.instanceof(Errors.NotFoundError)
-				sinon.assert.notCalled(@UserMembershipHandler.getEntity)
-				expect(@req.entity).to.not.exist
-				done()
-
 		it 'handle entity not found', (done) ->
 			@UserMembershipHandler.getEntity.yields(null, null)
-			middlewear = @UserMembershipAuthorization.requireEntityAccess 'institution'
-			middlewear @req, null, (error) =>
+			@UserMembershipAuthorization.requireGroupAccess @req, null, (error) =>
 				expect(error).to.extist
 				sinon.assert.called(@AuthorizationMiddlewear.redirectToRestricted)
 				sinon.assert.called(@UserMembershipHandler.getEntity)
@@ -66,34 +55,63 @@ describe "UserMembershipAuthorization", ->
 
 		it 'handle anonymous user', (done) ->
 			@AuthenticationController.getSessionUser.returns(null)
-			middlewear = @UserMembershipAuthorization.requireEntityAccess 'institution'
-			middlewear @req, null, (error) =>
+			@UserMembershipAuthorization.requireGroupAccess @req, null, (error) =>
 				expect(error).to.extist
 				sinon.assert.called(@AuthorizationMiddlewear.redirectToRestricted)
 				sinon.assert.notCalled(@UserMembershipHandler.getEntity)
 				expect(@req.entity).to.not.exist
 				done()
 
-		it 'can override entity id', (done) ->
-			middlewear = @UserMembershipAuthorization.requireEntityAccess 'group', 'entity-id-override'
+	describe 'requireEntityAccess', ->
+		it 'handle team access', (done) ->
+			@UserMembershipAuthorization.requireTeamAccess @req, null, (error) =>
+				expect(error).to.not.extist
+				sinon.assert.calledWithMatch(
+					@UserMembershipHandler.getEntity,
+					@req.params.id,
+					fields: primaryKey: 'overleaf.id'
+				)
+				done()
+
+		it 'handle group access', (done) ->
+			@UserMembershipAuthorization.requireGroupAccess @req, null, (error) =>
+				expect(error).to.not.extist
+				sinon.assert.calledWithMatch(
+					@UserMembershipHandler.getEntity,
+					@req.params.id,
+					translations: title: 'group_account'
+				)
+				done()
+
+		it 'handle group managers access', (done) ->
+			@UserMembershipAuthorization.requireGroupManagersAccess @req, null, (error) =>
+				expect(error).to.not.extist
+				sinon.assert.calledWithMatch(
+					@UserMembershipHandler.getEntity,
+					@req.params.id,
+					translations: subtitle: 'managers_management'
+				)
+				done()
+
+		it 'handle institution access', (done) ->
+			@UserMembershipAuthorization.requireInstitutionAccess @req, null, (error) =>
+				expect(error).to.not.extist
+				sinon.assert.calledWithMatch(
+					@UserMembershipHandler.getEntity,
+					@req.params.id,
+					modelName: 'Institution',
+				)
+				done()
+
+		it 'handle graph access', (done) ->
+			@req.query.resource_id = 'mock-resource-id'
+			@req.query.resource_type = 'institution'
+			middlewear = @UserMembershipAuthorization.requireGraphAccess
 			middlewear @req, null, (error) =>
 				expect(error).to.not.extist
 				sinon.assert.calledWithMatch(
 					@UserMembershipHandler.getEntity,
-					'entity-id-override',
+					@req.query.resource_id,
+					modelName: 'Institution',
 				)
 				done()
-
-		it "doesn't cache entity id between requests", (done) ->
-			middlewear = @UserMembershipAuthorization.requireEntityAccess 'group'
-			middlewear @req, null, (error) =>
-				expect(error).to.not.extist
-				lastCallArs = @UserMembershipHandler.getEntity.lastCall.args
-				expect(lastCallArs[0]).to.equal @req.params.id
-				newEntityId = 'another-mock-id'
-				@req.params.id = newEntityId
-				middlewear @req, null, (error) =>
-					expect(error).to.not.extist
-					lastCallArs = @UserMembershipHandler.getEntity.lastCall.args
-					expect(lastCallArs[0]).to.equal newEntityId
-					done()
