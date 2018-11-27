@@ -6,8 +6,14 @@ module.exports = (obj, methodName, prefix, logger) ->
 		throw new Error("[Metrics] expected object property '#{methodName}' to be a function")
 
 	realMethod = obj[methodName]
-	key = "#{prefix}.#{methodName}"
+	keys = prefix.split(".")
+	key = keys[0].toLowerCase()
 
+
+	if keys[1]?
+		methodName = "#{keys[1]}_#{methodName}"
+
+	console.log "Async method", keys, methodName 
 	obj[methodName] = (originalArgs...) ->
 
 		[firstArgs..., callback] = originalArgs
@@ -17,7 +23,8 @@ module.exports = (obj, methodName, prefix, logger) ->
 				logger.log "[Metrics] expected wrapped method '#{methodName}' to be invoked with a callback"
 			return realMethod.apply this, originalArgs
 
-		timer = new metrics.Timer(prefix, null, {method: methodName})
+		console.log("creating timer for async method")
+		timer = new metrics.Timer(key, null, {method: methodName})
 
 		realMethod.call this, firstArgs..., (callbackArgs...) ->
 			elapsedTime = timer.done()

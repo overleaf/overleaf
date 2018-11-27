@@ -1,6 +1,3 @@
-StatsD = require('lynx')
-statsd = new StatsD(process.env["STATSD_HOST"] or "localhost", 8125, {on_error:->})
-
 traceAgent = require('@google-cloud/trace-agent')
 debugAgent = require('@google-cloud/debug-agent')
 
@@ -8,7 +5,7 @@ prom = require('prom-client')
 Register = require('prom-client').register
 collectDefaultMetrics = prom.collectDefaultMetrics
 
-name = "unknown"
+appname = "unknown"
 hostname = require('os').hostname()
 
 buildKey = (key)-> "#{name}.#{hostname}.#{key}"
@@ -24,13 +21,13 @@ require "./uv_threadpool_size"
 
 module.exports = Metrics =
 	initialize: (_name) ->
-		name = _name
+		appname = _name
 		collectDefaultMetrics({ timeout: 5000, prefix: Metrics.buildPromKey()})
 		traceAgent.start()
 		debugAgent.start({
 			serviceContext: {
 				allowExpressions: true,
-				service: name,
+				service: appname,
 				version: '0.0.1'
 			}
 		})
@@ -45,7 +42,7 @@ module.exports = Metrics =
 		)
 
 	buildPromKey: (key = "")->
-		Metrics.sanitizeKey "#{name}_#{key}"
+		Metrics.sanitizeKey key
 
 	sanitizeKey: (key) ->
 		key.replace /[^a-zA-Z0-9]/g, "_"
@@ -54,32 +51,29 @@ module.exports = Metrics =
 		parseFloat(value)
 
 	set : (key, value, sampleRate = 1)->
-		statsd.set buildKey(key), value, sampleRate
 
 	inc : (key, sampleRate = 1)->
-		statsd.increment buildKey(key), sampleRate
 		key = Metrics.buildPromKey(key)
 		if !promMetrics[key]?
 			promMetrics[key] = new prom.Counter({
 				name: key,
 				help: key, 
-				labelNames: ['name','host']
+				labelNames: ['app','host']
 			})
-		promMetrics[key].inc({name: name, host: hostname})
+		console.log("doing inc", key, appname)
+		promMetrics[key].inc({app: appname, host: hostname})
 
 	count : (key, count, sampleRate = 1)->
-		statsd.count buildKey(key), count, sampleRate
 		key = Metrics.buildPromKey(key)
 		if !promMetrics[key]?
 			promMetrics[key] = new prom.Counter({
 				name: key,
 				help: key, 
-				labelNames: ['name','host']
+				labelNames: ['app','host']
 			})
-		promMetrics[key].inc({name: name, host: hostname}, count)
+		promMetrics[key].inc({app: appname, host: hostname}, count)
 
 	timing: (key, timeSpan, sampleRate, opts = {})->
-		statsd.timing(buildKey(key), timeSpan, sampleRate)
 		key = Metrics.sanitizeKey("timer_" + key)
 		if !promMetrics[key]?
 			promMetrics[key] = new prom.Summary({
@@ -89,12 +83,14 @@ module.exports = Metrics =
 				ageBuckets: 10,
 				labelNames: ['app', 'path', 'status_code', 'method', 'collection', 'query']
 			})
-		opts.app = name
+		opts.app = appname
+		console.log("doing timing", key, opts)
 		promMetrics[key].observe(opts, timeSpan)
 
 	Timer : class
 		constructor :(key, sampleRate = 1, opts)->
 			this.start = new Date()
+			console.log("creating new timer", key)
 			key = Metrics.sanitizeKey(key)
 			this.key = key
 			this.sampleRate = sampleRate
@@ -106,7 +102,6 @@ module.exports = Metrics =
 			return timeSpan
 
 	gauge : (key, value, sampleRate = 1)->
-		statsd.gauge buildKey(key), value, sampleRate
 		key = Metrics.buildPromKey(key)
 		if !promMetrics[key]?
 			promMetrics[key] = new prom.Gauge({
@@ -114,10 +109,9 @@ module.exports = Metrics =
 				help: key, 
 				labelNames: ['app','host']
 			})
-		promMetrics[key].set({app: name, host: hostname}, this.sanitizeValue(value))
+		promMetrics[key].set({app: appname, host: hostname}, this.sanitizeValue(value))
 
 	globalGauge: (key, value, sampleRate = 1)->
-		statsd.gauge buildGlobalKey(key), value, sampleRate
 		key = Metrics.buildPromKey(key)
 		if !promMetrics[key]?
 			promMetrics[key] = new prom.Gauge({
@@ -125,7 +119,7 @@ module.exports = Metrics =
 				help: key, 
 				labelNames: ['app','host']
 			})
-		promMetrics[key].set({app: name},this.sanitizeValue(value))
+		promMetrics[key].set({app: appname},this.sanitizeValue(value))
 
 	mongodb: require "./mongodb"
 	http: require "./http"
@@ -138,4 +132,3 @@ module.exports = Metrics =
 	close: () ->
 		for func in destructors
 			func()
-		statsd.close()
