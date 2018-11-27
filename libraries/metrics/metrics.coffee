@@ -60,7 +60,7 @@ module.exports = Metrics =
 				help: key, 
 				labelNames: ['app','host','status','method']
 			})
-		console.log("doing inc", key, appname)
+		console.log("doing inc", key, opts)
 		opts.app = appname
 		opts.host = hostname
 		promMetrics[key].inc(opts)

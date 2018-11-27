@@ -8,10 +8,14 @@ module.exports = (obj, methodName, prefix, logger) ->
 	key = "#{prefix}.#{methodName}"
 
 	realMethod = obj[methodName]
-	startPrefix = prefix.split(".")[0]
 
-	endPrefix = prefix.split(".")[1]
-	modifedMethodName = "#{endPrefix}_#{methodName}"
+	splitPrefix = prefix.split(".")
+	startPrefix = splitPrefix[0]
+
+	if splitPrefix[1]?
+		modifedMethodName = "#{splitPrefix[1]}_#{methodName}"
+	else
+		modifedMethodName = methodName
 	console.log "Async method", prefix, key, methodName, modifedMethodName
 	obj[methodName] = (originalArgs...) ->
 
@@ -31,9 +35,9 @@ module.exports = (obj, methodName, prefix, logger) ->
 			elapsedTime = timer.done()
 			possibleError = callbackArgs[0]
 			if possibleError? 
-				metrics.inc "#{startPrefix}", null, {status:"success", method: modifedMethodName}
+				metrics.inc "#{startPrefix}_result", null, {status:"failed", method: modifedMethodName}
 			else
-				metrics.inc "#{startPrefix}", null, {status:"failed", method: modifedMethodName}
+				metrics.inc "#{startPrefix}_result", null, {status:"success", method: modifedMethodName}
 			if logger?
 				loggableArgs = {}
 				try
