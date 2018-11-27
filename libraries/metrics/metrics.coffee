@@ -52,7 +52,7 @@ module.exports = Metrics =
 
 	set : (key, value, sampleRate = 1)->
 
-	inc : (key, sampleRate = 1, opts)->
+	inc : (key, sampleRate = 1, opts = {})->
 		key = Metrics.buildPromKey(key)
 		if !promMetrics[key]?
 			promMetrics[key] = new prom.Counter({
