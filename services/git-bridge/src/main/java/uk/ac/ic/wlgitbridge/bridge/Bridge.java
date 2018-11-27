@@ -354,34 +354,32 @@ public class Bridge {
     ) throws IOException, GitUserException {
         ProjectRepo repo;
         ProjectState state = dbStore.getProjectState(projectName);
-        Log.info(">>>> RepoStore {}", repoStore.getRepoStorePath());
-        Log.info(
-                ">>>> getUpdatedRepoCritical, {} migratedFrom {}",
-                projectName,
-                doc.getMigratedFromID()
-        );
         switch (state) {
         case NOT_PRESENT:
-            Log.info(">>>> Not present {}", projectName);
+            Log.info(">>>> [{}] Repo not present", projectName);
             String migratedFromID = doc.getMigratedFromID();
             if (migratedFromID != null) {
-                Log.info(">>>> has a migratedFromId {} {}", projectName, migratedFromID);
+                Log.info("[{}] Has a migratedFromId: {}", projectName, migratedFromID);
                 ProjectState sourceState = dbStore.getProjectState(migratedFromID);
                 try (LockGuard __ = lock.lockGuard(migratedFromID)) {
                     switch (sourceState) {
                         case NOT_PRESENT:
                             // Normal init-repo
-                            Log.info(">>>> migrated-from-id not present, proceed as normal");
+                            Log.info("[{}] migrated-from project not present, proceed as normal",
+                                 projectName
+                            );
                             repo = repoStore.initRepo(projectName);
                             break;
                         case SWAPPED:
                             // Swap back and then copy
-                            Log.info(">>>> migrated-from-id swapped, unswap and proceed");
                             swapJob.restore(migratedFromID);
                             /* Fallthrough */
                         default:
                             // Copy data, and set version to zero
-                            Log.info(">>>> migrated-from-id init from existing");
+                            Log.info("[{}] Init from other project: {}",
+                                projectName,
+                                migratedFromID
+                            );
                             repo = repoStore.initRepoFromExisting(projectName, migratedFromID);
                             dbStore.setLatestVersionForProject(migratedFromID, 0);
                             dbStore.setLastAccessedTime(
@@ -393,7 +391,6 @@ public class Bridge {
                 }
                 break;
             } else {
-                Log.info(">>>> no migrated-from-id {}", projectName);
                 repo = repoStore.initRepo(projectName);
                 break;
             }

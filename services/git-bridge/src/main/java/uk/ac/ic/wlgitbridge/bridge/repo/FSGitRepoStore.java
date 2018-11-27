@@ -80,13 +80,15 @@ public class FSGitRepoStore implements RepoStore {
              String project, String fromProject
      ) throws IOException {
          GitProjectRepo ret = GitProjectRepo.fromName(project);
-         // GitProjectRepo origin = GitProjectRepo.fromName(fromProject);
          ret.initRepo(this);
-         Log.info(">>>> Copy from {} to {}", fromProject, project);
          String repoRoot = getRepoStorePath();
          String sourcePath = repoRoot + "/" + fromProject;
          String destinationPath = repoRoot + "/" + project;
-         Log.info(">>>> paths from: {} and to: {}", sourcePath, destinationPath);
+         Log.info("[{}] Init repo by copying data from: {}, to: {}",
+             project,
+             sourcePath,
+             destinationPath
+         );
          new ProcessBuilder(
                  "rm", "-rf",
                  destinationPath
@@ -96,7 +98,6 @@ public class FSGitRepoStore implements RepoStore {
                  sourcePath,
                  destinationPath + "/"
          ).start();
-         Log.info(">>>> done copy");
          try {
              copyProcess.waitFor();
          } catch (InterruptedException e) {
