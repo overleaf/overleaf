@@ -4,6 +4,7 @@ import com.google.api.client.repackaged.com.google.common.base.Preconditions;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
+import uk.ac.ic.wlgitbridge.util.Log;
 import uk.ac.ic.wlgitbridge.util.Project;
 import uk.ac.ic.wlgitbridge.util.Tar;
 
@@ -73,6 +74,38 @@ public class FSGitRepoStore implements RepoStore {
         return new WalkOverrideGitRepo(
                 ret, Optional.of(maxFileSize), Optional.empty());
     }
+
+     @Override
+     public ProjectRepo initRepoFromExisting(
+             String project, String fromProject
+     ) throws IOException {
+         GitProjectRepo ret = GitProjectRepo.fromName(project);
+         // GitProjectRepo origin = GitProjectRepo.fromName(fromProject);
+         ret.initRepo(this);
+         Log.info(">>>> Copy from {} to {}", fromProject, project);
+         String repoRoot = getRepoStorePath();
+         String sourcePath = repoRoot + "/" + fromProject;
+         String destinationPath = repoRoot + "/" + project;
+         Log.info(">>>> paths from: {} and to: {}", sourcePath, destinationPath);
+         new ProcessBuilder(
+                 "rm", "-rf",
+                 destinationPath
+         ).start();
+         Process copyProcess = new ProcessBuilder(
+                 "cp", "-ra",
+                 sourcePath,
+                 destinationPath + "/"
+         ).start();
+         Log.info(">>>> done copy");
+         try {
+             copyProcess.waitFor();
+         } catch (InterruptedException e) {
+             e.printStackTrace();
+             throw new IOException("copy failed" + e.getLocalizedMessage());
+         }
+         return new WalkOverrideGitRepo(
+                 ret, Optional.of(maxFileSize), Optional.empty());
+     }
 
     @Override
     public ProjectRepo getExistingRepo(String project) throws IOException {

@@ -44,6 +44,15 @@ public class SnapshotApiFacade {
         }
     }
 
+    public Optional<GetDocResult> getDoc(
+            Optional<Credential> oauth2,
+            String projectName
+    ) throws FailedConnectionException, GitUserException {
+        GetDocResult doc = SnapshotApi
+                .getResult(api.getDoc(oauth2, projectName));
+        return Optional.ofNullable(doc);
+    }
+
     public Deque<Snapshot> getSnapshots(
             Optional<Credential> oauth2,
             String projectName,

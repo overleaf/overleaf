@@ -90,7 +90,7 @@ public class WLRepositoryResolver
             return bridge.getUpdatedRepo(oauth2, projName).getJGitRepository();
         } catch (RepositoryNotFoundException e) {
             Log.info("Repository not found: " + name);
-            throw e;
+            throw new RepositoryNotFoundException("derp");
             /*
         } catch (ServiceNotAuthorizedException e) {
             cannot occur
