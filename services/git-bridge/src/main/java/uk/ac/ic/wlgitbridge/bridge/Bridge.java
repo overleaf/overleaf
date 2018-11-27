@@ -384,6 +384,11 @@ public class Bridge {
                             Log.info(">>>> migrated-from-id init from existing");
                             repo = repoStore.initRepoFromExisting(projectName, migratedFromID);
                             dbStore.setLatestVersionForProject(migratedFromID, 0);
+                            dbStore.setLastAccessedTime(
+                                    migratedFromID,
+                                    Timestamp.valueOf(LocalDateTime.now())
+
+                            );
                     }
                 }
                 break;
