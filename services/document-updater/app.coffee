@@ -1,3 +1,6 @@
+Metrics = require "metrics-sharelatex"
+Metrics.initialize("doc-updater")
+
 express = require('express')
 http = require("http")
 Settings = require('settings-sharelatex')
@@ -14,8 +17,7 @@ Errors = require "./app/js/Errors"
 HttpController = require "./app/js/HttpController"
 
 Path = require "path"
-Metrics = require "metrics-sharelatex"
-Metrics.initialize("doc-updater")
+
 Metrics.mongodb.monitor(Path.resolve(__dirname + "/node_modules/mongojs/node_modules/mongodb"), logger)
 Metrics.event_loop.monitor(logger, 100)
 
