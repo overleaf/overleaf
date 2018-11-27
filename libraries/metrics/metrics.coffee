@@ -52,16 +52,18 @@ module.exports = Metrics =
 
 	set : (key, value, sampleRate = 1)->
 
-	inc : (key, sampleRate = 1)->
+	inc : (key, sampleRate = 1, opts)->
 		key = Metrics.buildPromKey(key)
 		if !promMetrics[key]?
 			promMetrics[key] = new prom.Counter({
 				name: key,
 				help: key, 
-				labelNames: ['app','host']
+				labelNames: ['app','host','status','method']
 			})
 		console.log("doing inc", key, appname)
-		promMetrics[key].inc({app: appname, host: hostname})
+		opts.app = appname
+		opts.host = hostname
+		promMetrics[key].inc(opts)
 
 	count : (key, count, sampleRate = 1)->
 		key = Metrics.buildPromKey(key)

@@ -11,7 +11,7 @@ module.exports = (obj, methodName, prefix, logger) ->
 	startPrefix = prefix.split(".")[0]
 
 	endPrefix = prefix.split(".")[1]
-	modifedMethodName = "#{endPrefix}_methodName"
+	modifedMethodName = "#{endPrefix}_#{methodName}"
 	console.log "Async method", prefix, key, methodName, modifedMethodName
 	obj[methodName] = (originalArgs...) ->
 
@@ -25,16 +25,15 @@ module.exports = (obj, methodName, prefix, logger) ->
 		console.log("creating timer for async method", prefix, startPrefix, modifedMethodName)
 
 
-		timer = new metrics.Timer(prefix, null, {method: methodName})
-		console.log("changed timer for async method", prefix, methodName, key)
+		timer = new metrics.Timer(startPrefix, null, {method: modifedMethodName})
 
 		realMethod.call this, firstArgs..., (callbackArgs...) ->
 			elapsedTime = timer.done()
 			possibleError = callbackArgs[0]
 			if possibleError? 
-				metrics.inc "#{key}.failure"
+				metrics.inc "#{startPrefix}", null, {status:"success", method: modifedMethodName}
 			else
-				metrics.inc "#{key}.success"
+				metrics.inc "#{startPrefix}", null, {status:"failed", method: modifedMethodName}
 			if logger?
 				loggableArgs = {}
 				try
