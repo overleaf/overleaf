@@ -356,7 +356,7 @@ public class Bridge {
         ProjectState state = dbStore.getProjectState(projectName);
         switch (state) {
         case NOT_PRESENT:
-            Log.info(">>>> [{}] Repo not present", projectName);
+            Log.info("[{}] Repo not present", projectName);
             String migratedFromID = doc.getMigratedFromID();
             if (migratedFromID != null) {
                 Log.info("[{}] Has a migratedFromId: {}", projectName, migratedFromID);
