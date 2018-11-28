@@ -79,7 +79,8 @@ define([
               name: file.name,
               id: file._id,
               type: 'file',
-              linkedFileData
+              linkedFileData,
+              created: file.created
             })
             return this.recalculateDocList()
           })
