@@ -62,19 +62,3 @@ module.exports =
 		pathsFor: (id) ->
 			addMember: "/manage/institutions/#{id}/managers"
 			removeMember: "/manage/institutions/#{id}/managers"
-
-	publisher:
-		modelName: 'Publisher'
-		fields:
-			primaryKey: 'slug'
-			read: ['managerIds']
-			write: 'managerIds'
-			access: 'managerIds'
-			name: 'name'
-		translations:
-			title: 'publisher_account'
-			subtitle: 'managers_management'
-			remove: 'remove_manager'
-		pathsFor: (id) ->
-			addMember: "/manage/publishers/#{id}/managers"
-			removeMember: "/manage/publishers/#{id}/managers"

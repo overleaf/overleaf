@@ -50,7 +50,6 @@ UserSchema = new Schema
 		references:       { type:Boolean, default: Settings.defaultFeatures.references }
 		trackChanges:     { type:Boolean, default: Settings.defaultFeatures.trackChanges }
 		mendeley:         { type:Boolean, default: Settings.defaultFeatures.mendeley }
-		zotero:           { type:Boolean, default: Settings.defaultFeatures.zotero }
 		referencesSearch: { type:Boolean, default: Settings.defaultFeatures.referencesSearch }
 	}
 	referal_id : {type:String, default:() -> uuid.v4().split("-")[0]}

@@ -117,5 +117,5 @@ module.exports = AuthorizationMiddlewear =
 			logger.log {from: from}, "redirecting to login"
 			redirect_to = "/login"
 			if from?
-				AuthenticationController.setRedirectInSession(req, from)
+				AuthenticationController._setRedirectInSession(req, from)
 			res.redirect redirect_to

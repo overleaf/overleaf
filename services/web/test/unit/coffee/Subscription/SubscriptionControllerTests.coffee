@@ -79,7 +79,6 @@ describe "SubscriptionController", ->
 			"./RecurlyWrapper": @RecurlyWrapper = {}
 			"./FeaturesUpdater": @FeaturesUpdater = {}
 			"./GroupPlansData": @GroupPlansData = {}
-			"./V1SubscriptionManager": @V1SubscriptionManager = {}
 
 
 		@res = new MockResponse()

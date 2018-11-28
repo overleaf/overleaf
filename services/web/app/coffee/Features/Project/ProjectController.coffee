@@ -270,7 +270,7 @@ module.exports = ProjectController =
 			project: (cb)->
 				ProjectGetter.getProject(
 					project_id,
-					{ name: 1, lastUpdated: 1, track_changes: 1, owner_ref: 1, brandVariationId: 1, overleaf: 1 },
+					{ name: 1, lastUpdated: 1, track_changes: 1, owner_ref: 1, brandVariationId: 1, 'overleaf.history.display': 1 },
 					cb
 				)
 			user: (cb)->
@@ -323,9 +323,6 @@ module.exports = ProjectController =
 				if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?
 					allowedFreeTrial = !!subscription.freeTrial.allowed || true
 
-				showGitBridge =
-					user.betaProgram && !project.overleaf?.id? # don't support v1 projects yet
-
 				logger.log project_id:project_id, "rendering editor page"
 				res.render 'project/editor',
 					title:  project.name
@@ -373,7 +370,7 @@ module.exports = ProjectController =
 					brandVariation: brandVariation
 					allowedImageNames: Settings.allowedImageNames || []
 					gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl
-					showGitBridge: showGitBridge
+					showGitBridge: req.query?.gitbridge == 'true' || user.isAdmin
 				timer.done()
 
 	_buildProjectList: (allProjects, v1Projects = [])->

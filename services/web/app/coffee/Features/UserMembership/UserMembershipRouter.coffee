@@ -5,52 +5,36 @@ TeamInvitesController = require '../Subscription/TeamInvitesController'
 
 module.exports =
 	apply: (webRouter) ->
-		# group members routes
 		webRouter.get '/manage/groups/:id/members',
-			UserMembershipAuthorization.requireGroupAccess,
+			UserMembershipAuthorization.requireEntityAccess('group'),
 			UserMembershipController.index
 		webRouter.post '/manage/groups/:id/invites',
-			UserMembershipAuthorization.requireGroupAccess,
+			UserMembershipAuthorization.requireEntityAccess('group'),
 			TeamInvitesController.createInvite
 		webRouter.delete '/manage/groups/:id/user/:user_id',
-			UserMembershipAuthorization.requireGroupAccess,
+			UserMembershipAuthorization.requireEntityAccess('group'),
 			SubscriptionGroupController.removeUserFromGroup
 		webRouter.delete '/manage/groups/:id/invites/:email',
-			UserMembershipAuthorization.requireGroupAccess,
+			UserMembershipAuthorization.requireEntityAccess('group'),
 			TeamInvitesController.revokeInvite
 		webRouter.get '/manage/groups/:id/members/export',
-			UserMembershipAuthorization.requireGroupAccess,
+			UserMembershipAuthorization.requireEntityAccess('group'),
 			UserMembershipController.exportCsv
 
-		# group managers routes
-		webRouter.get "/manage/groups/:id/managers",
-			UserMembershipAuthorization.requireGroupManagersAccess,
-			UserMembershipController.index
-		webRouter.post "/manage/groups/:id/managers",
-			UserMembershipAuthorization.requireGroupManagersAccess,
-			UserMembershipController.add
-		webRouter.delete "/manage/groups/:id/managers/:userId",
-			UserMembershipAuthorization.requireGroupManagersAccess,
-			UserMembershipController.remove
 
-		# institution members routes
-		webRouter.get "/manage/institutions/:id/managers",
-			UserMembershipAuthorization.requireInstitutionAccess,
-			UserMembershipController.index
-		webRouter.post "/manage/institutions/:id/managers",
-			UserMembershipAuthorization.requireInstitutionAccess,
-			UserMembershipController.add
-		webRouter.delete "/manage/institutions/:id/managers/:userId",
-			UserMembershipAuthorization.requireInstitutionAccess,
-			UserMembershipController.remove
+		regularEntitites =
+			groups: 'groupManagers'
+			institutions: 'institution'
+		for pathName, entityName of regularEntitites
+			do (pathName, entityName) ->
+				webRouter.get "/manage/#{pathName}/:id/managers",
+					UserMembershipAuthorization.requireEntityAccess(entityName),
+					UserMembershipController.index
 
-		# publisher members routes
-		webRouter.get "/manage/publishers/:id/managers",
-			UserMembershipAuthorization.requirePublisherAccess,
-			UserMembershipController.index
-		webRouter.post "/manage/publishers/:id/managers",
-			UserMembershipAuthorization.requirePublisherAccess,
-			UserMembershipController.add
-		webRouter.delete "/manage/publishers/:id/managers/:userId",
-			UserMembershipAuthorization.requirePublisherAccess,
-			UserMembershipController.remove
+				webRouter.post "/manage/#{pathName}/:id/managers",
+					UserMembershipAuthorization.requireEntityAccess(entityName),
+					UserMembershipController.add
+
+				webRouter.delete "/manage/#{pathName}/:id/managers/:userId",
+					UserMembershipAuthorization.requireEntityAccess(entityName),
+					UserMembershipController.remove

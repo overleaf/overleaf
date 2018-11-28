@@ -491,10 +491,10 @@ describe "AuthenticationController", ->
 		beforeEach ->
 			@req.headers = {}
 			@AuthenticationController.httpAuth = sinon.stub()
-			@setRedirect = sinon.spy(@AuthenticationController, 'setRedirectInSession')
+			@_setRedirect = sinon.spy(@AuthenticationController, '_setRedirectInSession')
 
 		afterEach ->
-			@setRedirect.restore()
+			@_setRedirect.restore()
 
 		describe "with white listed url", ->
 			beforeEach ->
@@ -540,7 +540,7 @@ describe "AuthenticationController", ->
 				@AuthenticationController.requireGlobalLogin @req, @res, @next
 
 			it 'should have called setRedirectInSession', ->
-				@setRedirect.callCount.should.equal 1
+				@_setRedirect.callCount.should.equal 1
 
 			it "should redirect to the /login page", ->
 				@res.redirectedTo.should.equal "/login"
@@ -640,18 +640,18 @@ describe "AuthenticationController", ->
 			@callback.called.should.equal true
 
 
-	describe 'setRedirectInSession', ->
+	describe '_setRedirectInSession', ->
 		beforeEach ->
 			@req = {session: {}}
 			@req.path = "/somewhere"
 			@req.query = {one: "1"}
 
 		it 'should set redirect property on session', ->
-			@AuthenticationController.setRedirectInSession(@req)
+			@AuthenticationController._setRedirectInSession(@req)
 			expect(@req.session.postLoginRedirect).to.equal "/somewhere?one=1"
 
 		it 'should set the supplied value', ->
-			@AuthenticationController.setRedirectInSession(@req, '/somewhere/specific')
+			@AuthenticationController._setRedirectInSession(@req, '/somewhere/specific')
 			expect(@req.session.postLoginRedirect).to.equal "/somewhere/specific"
 
 		describe 'with a png', ->
@@ -659,7 +659,7 @@ describe "AuthenticationController", ->
 				@req = {session: {}}
 
 			it 'should not set the redirect', ->
-				@AuthenticationController.setRedirectInSession(@req, '/something.png')
+				@AuthenticationController._setRedirectInSession(@req, '/something.png')
 				expect(@req.session.postLoginRedirect).to.equal undefined
 
 		describe 'with a js path', ->
@@ -668,7 +668,7 @@ describe "AuthenticationController", ->
 				@req = {session: {}}
 
 			it 'should not set the redirect', ->
-				@AuthenticationController.setRedirectInSession(@req, '/js/something.js')
+				@AuthenticationController._setRedirectInSession(@req, '/js/something.js')
 				expect(@req.session.postLoginRedirect).to.equal undefined
 
 	describe '_getRedirectFromSession', ->

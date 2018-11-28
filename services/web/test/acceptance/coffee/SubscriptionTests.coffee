@@ -234,8 +234,7 @@ describe 'Subscriptions', ->
 			before (done) ->
 				v1Id = MockV1Api.nextV1Id()
 				MockV1Api.setUser v1Id, {
-					subscription: {},
-					subscription_status: {}
+					subscription: {}
 				}
 				MockV1Api.setAffiliations [{
 					email: 'confirmed-affiliation-email@stanford.example.edu'
@@ -282,10 +281,6 @@ describe 'Subscriptions', ->
 							name: 'Test team'
 						}]
 					}
-					subscription_status: @subscription_status = {
-						product: { 'mock': 'product' }
-						team: null
-					}
 				}
 				@user.setV1Id v1Id, (error) =>
 					return done(error) if error?
@@ -301,28 +296,3 @@ describe 'Subscriptions', ->
 
 			it 'should return a v1Subscriptions', ->
 				expect(@data.v1Subscriptions).to.deep.equal @subscription
-
-			it 'should return a v1SubscriptionStatus', ->
-				expect(@data.v1SubscriptionStatus).to.deep.equal @subscription_status
-
-	describe.only 'canceling', ->
-		before (done) ->
-			@user = new User()
-			MockV1Api.setUser v1Id = MockV1Api.nextV1Id(), @v1_user = {}
-			async.series [
-				(cb) => @user.login(cb)
-				(cb) => @user.setV1Id(v1Id, cb)
-			], (error) =>
-				@user.request {
-					method: 'POST',
-					url: '/user/subscription/v1/cancel'
-				}, (error, @response) =>
-					return done(error) if error?
-					done()
-
-		it 'should tell v1 to cancel the subscription', ->
-			expect(@v1_user.canceled).to.equal true
-
-		it 'should redirect to the subscription dashboard', ->
-			expect(@response.statusCode).to.equal 302
-			expect(@response.headers.location).to.equal '/user/subscription'

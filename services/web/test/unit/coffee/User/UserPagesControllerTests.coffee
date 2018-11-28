@@ -28,7 +28,7 @@ describe "UserPagesController", ->
 			getLoggedInUserId: sinon.stub().returns(@user._id)
 			getSessionUser: sinon.stub().returns(@user)
 			_getRedirectFromSession: sinon.stub()
-			setRedirectInSession: sinon.stub()
+			_setRedirectInSession: sinon.stub()
 		@UserPagesController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex": @settings
 			"logger-sharelatex":
@@ -92,13 +92,13 @@ describe "UserPagesController", ->
 
 			beforeEach ->
 				@AuthenticationController._getRedirectFromSession = sinon.stub().returns(null)
-				@AuthenticationController.setRedirectInSession = sinon.stub()
+				@AuthenticationController._setRedirectInSession = sinon.stub()
 				@req.query.redir = '/somewhere/in/particular'
 
 			it 'should set a redirect', (done) ->
 				@res.render = (page) =>
-					@AuthenticationController.setRedirectInSession.callCount.should.equal 1
-					expect(@AuthenticationController.setRedirectInSession.lastCall.args[1]).to.equal @req.query.redir
+					@AuthenticationController._setRedirectInSession.callCount.should.equal 1
+					expect(@AuthenticationController._setRedirectInSession.lastCall.args[1]).to.equal @req.query.redir
 					done()
 				@UserPagesController.loginPage @req, @res
 

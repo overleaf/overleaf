@@ -163,14 +163,12 @@ describe 'ProjectDetailsHandler', ->
 	describe "ensureProjectNameIsUnique", ->
 		beforeEach ->
 			@result = {
-				owned: [{_id: 1, name:"name"}, {_id: 2, name: "name1"}, {_id: 3, name: "name11"}, {_id: 100, name: "numeric"}]
+				owned: [{_id: 1, name:"name"}, {_id: 2, name: "name1"}, {_id: 3, name: "name11"}]
 				readAndWrite: [{_id: 4, name:"name2"}, {_id: 5, name:"name22"}]
 				readOnly: [{_id:6, name:"name3"}, {_id:7, name: "name33"}]
 				tokenReadAndWrite: [{_id:8, name:"name4"}, {_id:9, name:"name44"}]
 				tokenReadOnly: [{_id:10, name:"name5"}, {_id:11, name:"name55"}, {_id:12, name:"x".repeat(15)}]
 			}
-			for i in [1..20].concat([30..40])
-				@result.owned.push {_id: 100 + i, name: "numeric (#{i})"}
 			@ProjectGetter.findAllUsersProjects = sinon.stub().callsArgWith(2, null, @result)
 
 		it "should leave a unique name unchanged", (done) ->
@@ -198,34 +196,9 @@ describe 'ProjectDetailsHandler', ->
 				expect(changed).to.equal true
 				done()
 
-		it "should use a numeric index if no suffix is supplied", (done) ->
-			@handler.ensureProjectNameIsUnique @user_id, "name1", [], (error, name, changed) ->
-				expect(name).to.equal "name1 (1)"
-				expect(changed).to.equal true
-				done()
-
-		it "should use a numeric index if all suffixes are exhausted", (done) ->
-			@handler.ensureProjectNameIsUnique @user_id, "name", ["1", "11"], (error, name, changed) ->
-				expect(name).to.equal "name (1)"
-				expect(changed).to.equal true
-				done()
-
-		it "should find the next lowest available numeric index for the base name", (done) ->
-			@handler.ensureProjectNameIsUnique @user_id, "numeric", [], (error, name, changed) ->
-				expect(name).to.equal "numeric (21)"
-				expect(changed).to.equal true
-				done()
-
-		it "should find the next available numeric index when a numeric index is already present", (done) ->
-			@handler.ensureProjectNameIsUnique @user_id, "numeric (5)", [], (error, name, changed) ->
-				expect(name).to.equal "numeric (21)"
-				expect(changed).to.equal true
-				done()
-
-		it "should not find a numeric index lower than the one already present", (done) ->
-			@handler.ensureProjectNameIsUnique @user_id, "numeric (31)", [], (error, name, changed) ->
-				expect(name).to.equal "numeric (41)"
-				expect(changed).to.equal true
+		it "should return an error if the name cannot be made unique", (done) ->
+			@handler.ensureProjectNameIsUnique @user_id, "name", ["1", "5", "55"], (error, name, changed) ->
+				expect(error).to.eql new Errors.InvalidNameError("Project name could not be made unique")
 				done()
 
 	describe "fixProjectName", ->

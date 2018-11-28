@@ -29,7 +29,13 @@ module.exports = SubscriptionUpdater =
 		@addUsersToGroup(subscriptionId, [userId], callback)
 
 	addUsersToGroup: (subscriptionId, memberIds, callback)->
-		@addUsersToGroupWithoutFeaturesRefresh subscriptionId, memberIds, (err) ->
+		logger.log subscriptionId: subscriptionId, memberIds: memberIds, "adding members into mongo subscription"
+		searchOps =
+			_id: subscriptionId
+		insertOperation =
+			{ $addToSet: { member_ids: { $each: memberIds } } }
+
+		Subscription.findAndModify searchOps, insertOperation, (err, subscription) ->
 			return callback(err) if err?
 
 			# Only apply features updates to users, not user stubs
@@ -39,14 +45,6 @@ module.exports = SubscriptionUpdater =
 				userIds = users.map (u) -> u._id.toString()
 				async.map userIds, FeaturesUpdater.refreshFeatures, callback
 
-	addUsersToGroupWithoutFeaturesRefresh: (subscriptionId, memberIds, callback)->
-		logger.log subscriptionId: subscriptionId, memberIds: memberIds, "adding members into mongo subscription"
-		searchOps =
-			_id: subscriptionId
-		insertOperation =
-			{ $addToSet: { member_ids: { $each: memberIds } } }
-
-		Subscription.findAndModify searchOps, insertOperation, callback
 
 	removeUserFromGroup: (subscriptionId, user_id, callback)->
 		searchOps =

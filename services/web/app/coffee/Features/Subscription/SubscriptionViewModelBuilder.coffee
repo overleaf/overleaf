@@ -51,10 +51,6 @@ module.exports =
 					return cb(error) if error?
 					# Only return one argument to async.auto, otherwise it returns an array
 					cb(null, subscriptions)
-			v1SubscriptionStatus: (cb) ->
-				V1SubscriptionManager.getSubscriptionStatusFromV1 user._id, (error, status, v1Id) ->
-					return cb(error) if error?
-					cb(null, status)
 		}, (err, results) ->
 			return callback(err) if err?
 			{
@@ -64,7 +60,6 @@ module.exports =
 				confirmedMemberInstitutions,
 				managedInstitutions,
 				v1Subscriptions,
-				v1SubscriptionStatus,
 				recurlySubscription,
 				plan
 			} = results
@@ -73,7 +68,6 @@ module.exports =
 			confirmedMemberInstitutions ?= []
 			managedInstitutions ?= []
 			v1Subscriptions ?= {}
-			v1SubscriptionStatus ?= {}
 
 
 			if personalSubscription?.toObject?
@@ -103,8 +97,7 @@ module.exports =
 				memberGroupSubscriptions,
 				confirmedMemberInstitutions,
 				managedInstitutions,
-				v1Subscriptions,
-				v1SubscriptionStatus
+				v1Subscriptions
 			}
 
 	buildViewModel : ->
