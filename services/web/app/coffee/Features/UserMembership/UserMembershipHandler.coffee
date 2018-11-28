@@ -4,6 +4,7 @@ Errors = require('../Errors/Errors')
 EntityModels =
 	Institution: require('../../models/Institution').Institution
 	Subscription: require('../../models/Subscription').Subscription
+	Publisher: require('../../models/Publisher').Publisher
 UserMembershipViewModel = require('./UserMembershipViewModel')
 UserGetter = require('../User/UserGetter')
 logger = require('logger-sharelatex')

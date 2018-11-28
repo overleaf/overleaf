@@ -43,3 +43,14 @@ module.exports =
 		webRouter.delete "/manage/institutions/:id/managers/:userId",
 			UserMembershipAuthorization.requireInstitutionAccess,
 			UserMembershipController.remove
+
+		# publisher members routes
+		webRouter.get "/manage/publishers/:id/managers",
+			UserMembershipAuthorization.requirePublisherAccess,
+			UserMembershipController.index
+		webRouter.post "/manage/publishers/:id/managers",
+			UserMembershipAuthorization.requirePublisherAccess,
+			UserMembershipController.add
+		webRouter.delete "/manage/publishers/:id/managers/:userId",
+			UserMembershipAuthorization.requirePublisherAccess,
+			UserMembershipController.remove

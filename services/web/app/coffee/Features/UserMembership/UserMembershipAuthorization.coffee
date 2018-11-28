@@ -18,6 +18,9 @@ module.exports =
 	requireInstitutionAccess: (req, res, next) ->
 		requireAccessToEntity('institution', req.params.id, req, res, next)
 
+	requirePublisherAccess: (req, res, next) ->
+		requireAccessToEntity('publisher', req.params.id, req, res, next)
+
 	requireGraphAccess: (req, res, next) ->
 		requireAccessToEntity(
 			req.query.resource_type, req.query.resource_id, req, res, next
