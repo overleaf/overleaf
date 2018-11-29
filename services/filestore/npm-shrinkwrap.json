@@ -1194,9 +1194,9 @@
       "resolved": "https://registry.npmjs.org/methods/-/methods-1.1.2.tgz"
     },
     "metrics-sharelatex": {
-      "version": "2.0.3",
-      "from": "git+https://github.com/sharelatex/metrics-sharelatex.git#v2.0.3",
-      "resolved": "git+https://github.com/sharelatex/metrics-sharelatex.git#02522a50b7a5ec46eed9b0a93513ef992a21eb45",
+      "version": "2.0.4",
+      "from": "git+https://github.com/sharelatex/metrics-sharelatex.git#v2.0.4",
+      "resolved": "git+https://github.com/sharelatex/metrics-sharelatex.git#49c4bc072f707eb6252adfec540268dfbea1615b",
       "dependencies": {
         "coffee-script": {
           "version": "1.6.0",
