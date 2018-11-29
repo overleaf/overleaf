@@ -89,18 +89,12 @@ public class FSGitRepoStore implements RepoStore {
              sourcePath,
              destinationPath
          );
-         new ProcessBuilder(
-                 "rm", "-rf",
-                 destinationPath
-         ).start();
-         Process copyProcess = new ProcessBuilder(
-                 "cp", "-ra",
-                 sourcePath,
-                 destinationPath + "/"
-         ).start();
          try {
-             copyProcess.waitFor();
-         } catch (InterruptedException e) {
+             File source = new File(sourcePath);
+             File destination = new File(destinationPath);
+             FileUtils.deleteDirectory(destination);
+             FileUtils.copyDirectory(source, destination);
+         } catch (Exception e) {
              e.printStackTrace();
              throw new IOException("copy failed" + e.getLocalizedMessage());
          }
