@@ -1466,8 +1466,9 @@
       "integrity": "sha1-VSmk1nZUE07cxSZmVoNbD4Ua/O4="
     },
     "metrics-sharelatex": {
-      "version": "git+https://github.com/sharelatex/metrics-sharelatex.git#e5356366b5b83997c8e1645b2e936af453381517",
-      "integrity": "sha1-JA9No3q08VfmnEuRjv/AQU3MoRg=",
+      "version": "2.0.3",
+      "from": "git+https://github.com/sharelatex/metrics-sharelatex.git#v2.0.3",
+      "resolved": "git+https://github.com/sharelatex/metrics-sharelatex.git#02522a50b7a5ec46eed9b0a93513ef992a21eb45",
       "requires": {
         "coffee-script": "https://registry.npmjs.org/coffee-script/-/coffee-script-1.6.0.tgz",
         "lynx": "https://registry.npmjs.org/lynx/-/lynx-0.1.1.tgz",
