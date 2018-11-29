@@ -16,7 +16,6 @@ Metrics = require "metrics-sharelatex"
 Metrics.initialize("clsi")
 Metrics.open_sockets.monitor(logger)
 Metrics.memory.monitor(logger)
-Metrics.injectMetricsRoute(app)
 
 ProjectPersistenceManager = require "./app/js/ProjectPersistenceManager"
 OutputCacheManager = require "./app/js/OutputCacheManager"
@@ -27,6 +26,7 @@ express = require "express"
 bodyParser = require "body-parser"
 app = express()
 
+Metrics.injectMetricsRoute(app)
 app.use Metrics.http.monitor(logger)
 
 # Compile requests can take longer than the default two
