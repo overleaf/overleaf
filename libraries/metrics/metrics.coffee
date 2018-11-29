@@ -60,7 +60,6 @@ module.exports = Metrics =
 				help: key, 
 				labelNames: ['app','host','status','method']
 			})
-		console.log("doing inc", key, opts)
 		opts.app = appname
 		opts.host = hostname
 		promMetrics[key].inc(opts)
@@ -86,13 +85,11 @@ module.exports = Metrics =
 				labelNames: ['app', 'path', 'status_code', 'method', 'collection', 'query']
 			})
 		opts.app = appname
-		console.log("doing timing", key, opts)
 		promMetrics[key].observe(opts, timeSpan)
 
 	Timer : class
 		constructor :(key, sampleRate = 1, opts)->
 			this.start = new Date()
-			console.log("creating new timer", key)
 			key = Metrics.sanitizeKey(key)
 			this.key = key
 			this.sampleRate = sampleRate

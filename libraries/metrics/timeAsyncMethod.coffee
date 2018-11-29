@@ -16,7 +16,6 @@ module.exports = (obj, methodName, prefix, logger) ->
 		modifedMethodName = "#{splitPrefix[1]}_#{methodName}"
 	else
 		modifedMethodName = methodName
-	console.log "Async method", prefix, key, methodName, modifedMethodName
 	obj[methodName] = (originalArgs...) ->
 
 		[firstArgs..., callback] = originalArgs
@@ -25,9 +24,6 @@ module.exports = (obj, methodName, prefix, logger) ->
 			if logger?
 				logger.log "[Metrics] expected wrapped method '#{methodName}' to be invoked with a callback"
 			return realMethod.apply this, originalArgs
-
-		console.log("creating timer for async method", prefix, startPrefix, modifedMethodName)
-
 
 		timer = new metrics.Timer(startPrefix, null, {method: modifedMethodName})
 
