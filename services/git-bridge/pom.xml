@@ -23,6 +23,14 @@
                     <compilerArgument></compilerArgument>
                 </configuration>
             </plugin>
+						<!-- Hack, test loader crashes without this bit -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <useSystemClassLoader>false</useSystemClassLoader>
+                </configuration>
+            </plugin>
             <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-assembly-plugin -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
