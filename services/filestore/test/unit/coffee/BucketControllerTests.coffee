@@ -35,6 +35,8 @@ describe "BucketController", ->
 			"./FileHandler": @FileHandler
 			"./PersistorManager":@PersistorManager
 			"settings-sharelatex": @settings
+			"metrics-sharelatex": 
+				inc:->
 			"logger-sharelatex":
 				log:->
 				err:->

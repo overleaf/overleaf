@@ -63,6 +63,8 @@ app.use (req, res, next) ->
 		res.set 'Connection', 'close'
 	next()
 
+Metrics.injectMetricsRoute(app)
+
 app.get  "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.getFile
 app.post "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.insertFile
 

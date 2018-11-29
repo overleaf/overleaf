@@ -16,6 +16,10 @@ describe "FileConverter", ->
 			"logger-sharelatex":
 				log:->
 				err:->
+			"metrics-sharelatex": 
+				inc:->
+				Timer:->
+					done:->
 			"settings-sharelatex": @Settings =
 				commands:
 					convertCommandPrefix: []
