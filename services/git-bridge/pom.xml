@@ -23,12 +23,13 @@
                     <compilerArgument></compilerArgument>
                 </configuration>
             </plugin>
-						<!-- Hack, test loader crashes without this bit -->
+						<!-- Workaround, test loader crashes without this configuration option -->
+						<!-- See: https://stackoverflow.com/questions/53010200/maven-surefire-could-not-find-forkedbooter-class -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <useSystemClassLoader>false</useSystemClassLoader>
+                  <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
                 </configuration>
             </plugin>
             <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-assembly-plugin -->
