@@ -61,7 +61,7 @@ describe "TokenAccessController", ->
 				@TokenAccessHandler.addReadAndWriteUserToProject = sinon.stub()
 					.callsArgWith(2, null)
 				@ProjectController.loadEditor = sinon.stub()
-				@AuthenticationController._setRedirectInSession = sinon.stub()
+				@AuthenticationController.setRedirectInSession = sinon.stub()
 				@TokenAccessController.readAndWriteToken @req, @res, @next
 
 			it 'should try to find a project with this token', (done) ->
@@ -173,7 +173,7 @@ describe "TokenAccessController", ->
 						.callsArgWith(2, null)
 					@ProjectController.loadEditor = sinon.stub()
 					@TokenAccessHandler.grantSessionTokenAccess = sinon.stub()
-					@AuthenticationController._setRedirectInSession = sinon.stub()
+					@AuthenticationController.setRedirectInSession = sinon.stub()
 					@TokenAccessController.readAndWriteToken @req, @res, @next
 
 				it 'should not add the user to the project with read-write access', (done) ->
@@ -192,8 +192,8 @@ describe "TokenAccessController", ->
 					done()
 
 				it 'should set redirect in session', (done) ->
-					expect(@AuthenticationController._setRedirectInSession.callCount).to.equal 1
-					expect(@AuthenticationController._setRedirectInSession.calledWith(@req)).to.equal true
+					expect(@AuthenticationController.setRedirectInSession.callCount).to.equal 1
+					expect(@AuthenticationController.setRedirectInSession.calledWith(@req)).to.equal true
 					done()
 
 				it 'should redirect to restricted page', (done) ->

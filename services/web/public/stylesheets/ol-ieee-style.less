@@ -4,3 +4,41 @@
 @is-overleaf      : true;
 @is-overleaf-light: false;
 @show-rich-text   : true;
+
+@ieee-wedge: 30px;
+
+body > .portal-ieee {
+  padding-top: @header-height;
+}
+
+.portal-ieee {
+  .ieee-header {
+    background-color: @ieee-blue;
+    margin-bottom: @margin-xl;
+    padding-bottom: @padding-sm;
+    padding-top: @padding-sm;
+    h1 {
+      margin: 0;
+    }
+    .ieee-logo {
+      width: @navbar-brand-width;
+    }
+  }
+  .ieee-subheader {
+    background-color: @ieee-blue;
+    color: #ffffff;
+    line-height: 1;
+    padding: @padding-md @ieee-wedge;
+    position: relative;
+    &:after {
+      content: "";
+      display: block;
+      position: absolute;
+      border-style: solid;
+      left: -1px;
+      top: -1px;
+      border-color: @content-alt-bg-color transparent;
+      border-width: @ieee-wedge @ieee-wedge 0 0;
+    }
+  }
+}

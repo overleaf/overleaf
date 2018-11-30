@@ -132,6 +132,9 @@ compile_full:
 	$(MAKE) compile_modules_full
 	$(MAKE) compile # ide.js, main.js, share.js, and anything missed
 
+compile_css_full:
+	$(MAKE) css_full
+
 compile_modules: $(MODULE_MAKEFILES)
 	@set -e; \
 	for dir in $(MODULE_DIRS); \

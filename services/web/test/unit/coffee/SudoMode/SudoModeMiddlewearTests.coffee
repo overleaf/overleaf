@@ -13,7 +13,7 @@ describe 'SudoModeMiddlewear', ->
 			isSudoModeActive: sinon.stub()
 		@AuthenticationController =
 			getLoggedInUserId: sinon.stub().returns(@userId)
-			_setRedirectInSession: sinon.stub()
+			setRedirectInSession: sinon.stub()
 		@SudoModeMiddlewear = SandboxedModule.require modulePath, requires:
 			'./SudoModeHandler': @SudoModeHandler
 			'../Authentication/AuthenticationController': @AuthenticationController
@@ -54,7 +54,7 @@ describe 'SudoModeMiddlewear', ->
 
 		describe 'when sudo mode is not active', ->
 			beforeEach ->
-				@AuthenticationController._setRedirectInSession = sinon.stub()
+				@AuthenticationController.setRedirectInSession = sinon.stub()
 				@AuthenticationController.getLoggedInUserId = sinon.stub().returns(@userId)
 				@SudoModeHandler.isSudoModeActive = sinon.stub().callsArgWith(1, null, false)
 
@@ -71,8 +71,8 @@ describe 'SudoModeMiddlewear', ->
 
 			it 'should set redirect in session', (done) ->
 				@call () =>
-					@AuthenticationController._setRedirectInSession.callCount.should.equal 1
-					@AuthenticationController._setRedirectInSession.calledWith(@req).should.equal true
+					@AuthenticationController.setRedirectInSession.callCount.should.equal 1
+					@AuthenticationController.setRedirectInSession.calledWith(@req).should.equal true
 					done()
 
 			it 'should redirect to the password-prompt page', (done) ->

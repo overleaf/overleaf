@@ -51,7 +51,7 @@ module.exports =
 		# such as being sent from the editor to /login, then set the redirect explicitly
 		if req.query.redir? and !AuthenticationController._getRedirectFromSession(req)?
 			logger.log {redir: req.query.redir}, "setting explicit redirect from login page"
-			AuthenticationController._setRedirectInSession(req, req.query.redir)
+			AuthenticationController.setRedirectInSession(req, req.query.redir)
 		res.render 'user/login',
 			title: 'login',
 			email: req.query.email

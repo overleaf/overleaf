@@ -1,0 +1,60 @@
+- if (v1SubscriptionStatus['team'])
+  p
+    | You have a legacy group licence from Overleaf v1.
+  - if (v1SubscriptionStatus['team']['will_end_at'])
+    p
+      | Your current group licence ends on
+      |
+      strong= moment(v1SubscriptionStatus['team']['will_end_at']).format('Do MMM YY')
+      |
+      | and will
+      |
+      - if (v1SubscriptionStatus['team']['will_renew'])
+        | be automatically renewed.
+      - else 
+        | not be automatically renewed.
+  - if (v1SubscriptionStatus['can_cancel_team'])
+    p
+      form(method="POST", action="/user/subscription/v1/cancel")
+        input(type="hidden", name="_csrf", value=csrfToken)
+        button().btn.btn-danger Stop automatic renewal
+  - else
+    p
+      | Please
+      |
+      a(href="/contact") contact support
+      |
+      | to make changes to your plan
+  hr
+
+- if (v1SubscriptionStatus['product'])
+  p  
+    | You have a legacy Overleaf v1
+    |
+    strong= v1SubscriptionStatus['product']['display_name']
+    |
+    | plan.
+  p
+    | Your plan ends on
+    |
+    strong= moment(v1SubscriptionStatus['product']['will_end_at']).format('Do MMM YY')
+    |
+    | and will
+    |
+    - if (v1SubscriptionStatus['product']['will_renew'])
+      | be automatically renewed.
+    - else 
+      | not be automatically renewed.
+  - if (v1SubscriptionStatus['can_cancel'])
+    p
+      form(method="POST", action="/user/subscription/v1/cancel")
+        input(type="hidden", name="_csrf", value=csrfToken)
+        button().btn.btn-danger Stop automatic renewal
+  - else
+    p
+      | Please
+      |
+      a(href="/contact") contact support
+      |
+      | to make changes to your plan
+  hr

@@ -12,6 +12,7 @@ UserGetter = require "../User/UserGetter"
 FeaturesUpdater = require './FeaturesUpdater'
 planFeatures = require './planFeatures'
 GroupPlansData = require './GroupPlansData'
+V1SubscriptionManager = require "./V1SubscriptionManager"
 
 module.exports = SubscriptionController =
 
@@ -97,7 +98,8 @@ module.exports = SubscriptionController =
 				managedGroupSubscriptions,
 				confirmedMemberInstitutions,
 				managedInstitutions,
-				v1Subscriptions
+				v1Subscriptions,
+				v1SubscriptionStatus
 			} = results
 			logger.log {
 				user,
@@ -106,7 +108,8 @@ module.exports = SubscriptionController =
 				managedGroupSubscriptions,
 				confirmedMemberInstitutions,
 				managedInstitutions,
-				v1Subscriptions
+				v1Subscriptions,
+				v1SubscriptionStatus
 			}, "showing subscription dashboard"
 			plans = SubscriptionViewModelBuilder.buildViewModel()
 			data = {
@@ -118,7 +121,8 @@ module.exports = SubscriptionController =
 				managedGroupSubscriptions,
 				confirmedMemberInstitutions,
 				managedInstitutions,
-				v1Subscriptions
+				v1Subscriptions,
+				v1SubscriptionStatus
 			}
 			res.render "subscriptions/dashboard", data
 
@@ -155,6 +159,15 @@ module.exports = SubscriptionController =
 		SubscriptionHandler.cancelSubscription user, (err)->
 			if err?
 				logger.err err:err, user_id:user._id, "something went wrong canceling subscription"
+				return next(err)
+			res.redirect "/user/subscription"
+
+	cancelV1Subscription: (req, res, next) ->
+		user_id = AuthenticationController.getLoggedInUserId(req)
+		logger.log {user_id}, "canceling v1 subscription"
+		V1SubscriptionManager.cancelV1Subscription user_id, (err)->
+			if err?
+				logger.err err:err, user_id:user_id, "something went wrong canceling v1 subscription"
 				return next(err)
 			res.redirect "/user/subscription"
 

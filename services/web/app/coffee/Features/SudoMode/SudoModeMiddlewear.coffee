@@ -21,5 +21,5 @@ module.exports = SudoModeMiddlewear =
 				return next()
 			else
 				logger.log {userId}, "[SudoMode] sudo mode not active, redirecting"
-				AuthenticationController._setRedirectInSession(req)
+				AuthenticationController.setRedirectInSession(req)
 				return res.redirect('/confirm-password')
