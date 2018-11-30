@@ -35,6 +35,9 @@ block content
 						-if (settings.overleaf && v1Subscriptions)
 							include ./dashboard/_v1_subscriptions
 
+						-if (v1SubscriptionStatus)
+							include ./dashboard/_v1_subscription_status
+
 						-if (!hasAnySubscription)
 							p You're on the #{settings.appName} Free plan.
 							|

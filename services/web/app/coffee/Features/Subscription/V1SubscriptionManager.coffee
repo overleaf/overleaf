@@ -39,6 +39,18 @@ module.exports = V1SubscriptionManager =
 			url: (v1Id) -> "/api/v1/sharelatex/users/#{v1Id}/subscriptions"
 		}, callback
 
+	getSubscriptionStatusFromV1: (userId, callback=(err, status) ->) ->
+		V1SubscriptionManager._v1Request userId, {
+			method: 'GET',
+			url: (v1Id) -> "/api/v1/sharelatex/users/#{v1Id}/subscription_status"
+		}, callback
+
+	cancelV1Subscription: (userId, callback=(err)->) ->
+		V1SubscriptionManager._v1Request userId, {
+			method: 'DELETE',
+			url: (v1Id) -> "/api/v1/sharelatex/users/#{v1Id}/subscription"
+		}, callback
+
 	v1IdForUser: (userId, callback=(err, v1Id) ->) ->
 		UserGetter.getUser userId, {'overleaf.id': 1}, (err, user) ->
 			return callback(err) if err?
@@ -76,7 +88,7 @@ module.exports = V1SubscriptionManager =
 					pass: settings.apis.v1.pass
 					sendImmediately: true
 				json: true,
-				timeout: 5 * 1000
+				timeout: 15 * 1000
 			}, (error, response, body) ->
 				if error?
 					# Specially handle no connection err, so warning can be shown

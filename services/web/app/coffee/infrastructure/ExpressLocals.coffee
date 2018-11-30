@@ -16,6 +16,7 @@ hashedFiles = {}
 Path = require 'path'
 Features = require "./Features"
 Modules = require "./Modules"
+moment = require 'moment'
 
 jsPath =
 	if Settings.useMinifiedJs
@@ -126,6 +127,7 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 		res.locals.fullJsPath = Url.resolve(staticFilesBase, jsPath)
 		res.locals.lib = PackageVersions.lib
 
+		res.locals.moment = moment
 
 		res.locals.buildJsPath = (jsFile, opts = {})->
 			path = Path.join(jsPath, jsFile)
