@@ -221,8 +221,6 @@ describe "ProjectInviteTests", ->
 			@fakeProject = null
 			done()
 
-		afterEach ->
-
 		describe 'creating two invites', ->
 
 			beforeEach (done) ->
