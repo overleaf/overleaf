@@ -1,12 +1,7 @@
 **.swp
 
-app.js
-app/js/
-test/unit/js/
-test/acceptance/js/
 public/build/
 
 node_modules/
 
-/public/js/chat.js
 plato/
