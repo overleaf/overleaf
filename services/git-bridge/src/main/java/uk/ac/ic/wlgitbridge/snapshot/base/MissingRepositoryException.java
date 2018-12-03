@@ -34,7 +34,7 @@ public class MissingRepositoryException extends SnapshotAPIException {
                     "",
                     "    git remote set-url origin " + remoteUrl,
                     "",
-                    "If this does not work, contact us at support@overleaf.com, or",
+                    "If this does not work, please contact us at support@overleaf.com, or",
                     "see https://www.overleaf.com/help/342 for more information."
             );
         }
