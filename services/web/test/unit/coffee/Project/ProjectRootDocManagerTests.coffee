@@ -1,5 +1,6 @@
 chai = require('chai')
 should = chai.should()
+expect = chai.expect
 sinon = require("sinon")
 modulePath = "../../../../app/js/Features/Project/ProjectRootDocManager.js"
 SandboxedModule = require('sandboxed-module')
@@ -14,10 +15,18 @@ describe 'ProjectRootDocManager', ->
 			"doc-id-4": "/nested/chapter1b.tex"
 		@sl_req_id = "sl-req-id-123"
 		@callback = sinon.stub()
+		@globby = sinon.stub().returns(new Promise (resolve) ->
+			resolve(['a.tex', 'b.tex', 'main.tex'])
+		)
+		@fs =
+			readFile: sinon.stub().callsArgWith(2, new Error('file not found'))
+			stat: sinon.stub().callsArgWith(1, null, {size: 100})
 		@ProjectRootDocManager = SandboxedModule.require modulePath, requires:
 			"./ProjectEntityHandler" : @ProjectEntityHandler = {}
 			"./ProjectEntityUpdateHandler" : @ProjectEntityUpdateHandler = {}
 			"./ProjectGetter" : @ProjectGetter = {}
+			"globby" : @globby
+			"fs" : @fs
 
 	describe "setRootDocAutomatically", ->
 		describe "when there is a suitable root doc", ->
@@ -80,6 +89,106 @@ describe 'ProjectRootDocManager', ->
 
 			it "should not set the root doc to the doc containing a documentclass", ->
 				@ProjectEntityUpdateHandler.setRootDoc.called.should.equal false
+
+	describe "findRootDocFileFromDirectory", ->
+		beforeEach ->
+			@fs.readFile.withArgs('/foo/a.tex').callsArgWith(2, null, 'Hello World!')
+			@fs.readFile.withArgs('/foo/b.tex').callsArgWith(2, null, "I'm a little teapot, get me out of here.")
+			@fs.readFile.withArgs('/foo/main.tex').callsArgWith(2, null, "Help, I'm trapped in a unit testing factory")
+			@fs.readFile.withArgs('/foo/c.tex').callsArgWith(2, null, 'Tomato, tomahto.')
+			@fs.readFile.withArgs('/foo/a/a.tex').callsArgWith(2, null, 'Potato? Potahto. Potootee!')
+			@documentclassContent = "% test\n\\documentclass\n\% test"
+
+		describe "when there is a file in a subfolder", ->
+			@globby = sinon.stub().returns(new Promise (resolve) ->
+				resolve(['c.tex', 'a.tex', 'a/a.tex', 'b.tex'])
+			)
+
+			it "processes the root folder files first, and then the subfolder, in alphabetical order", ->
+				@ProjectRootDocManager.findRootDocFileFromDirectory '/foo', =>
+					expect(error).not.to.exist
+					expect(path).to.equal null
+					sinon.assert.callOrder(
+						@fs.readFile.withArgs('/foo/a.tex')
+						@fs.readFile.withArgs('/foo/b.tex')
+						@fs.readFile.withArgs('/foo/c.tex')
+						@fs.readFile.withArgs('/foo/a/a.tex')
+					)
+					done()
+
+			it "processes smaller files first", ->
+				@fs.stat.withArgs('/foo/c.tex').callsArgWith(1, null, {size: 1})
+				@ProjectRootDocManager.findRootDocFileFromDirectory '/foo', =>
+					expect(error).not.to.exist
+					expect(path).to.equal null
+					sinon.assert.callOrder(
+						@fs.readFile.withArgs('/foo/c.tex')
+						@fs.readFile.withArgs('/foo/a.tex')
+						@fs.readFile.withArgs('/foo/b.tex')
+						@fs.readFile.withArgs('/foo/a/a.tex')
+					)
+					done()
+
+		describe "when main.tex contains a documentclass", ->
+			beforeEach ->
+				@fs.readFile.withArgs('/foo/main.tex').callsArgWith(2, null, @documentclassContent)
+
+			it "returns main.tex", (done) ->
+				@ProjectRootDocManager.findRootDocFileFromDirectory '/foo', (error, path, content) =>
+					expect(error).not.to.exist
+					expect(path).to.equal 'main.tex'
+					expect(content).to.equal @documentclassContent
+					done()
+
+			it "processes main.text first and stops processing when it finds the content", (done) ->
+				@ProjectRootDocManager.findRootDocFileFromDirectory '/foo', =>
+					expect(@fs.readFile).to.be.calledWith('/foo/main.tex')
+					expect(@fs.readFile).not.to.be.calledWith('/foo/a.tex')
+					done()
+
+		describe "when a.tex contains a documentclass", ->
+			beforeEach ->
+				@fs.readFile.withArgs('/foo/a.tex').callsArgWith(2, null, @documentclassContent)
+
+			it "returns a.tex", (done) ->
+				@ProjectRootDocManager.findRootDocFileFromDirectory '/foo', (error, path, content) =>
+					expect(error).not.to.exist
+					expect(path).to.equal 'a.tex'
+					expect(content).to.equal @documentclassContent
+					done()
+
+			it "processes main.text first and stops processing when it finds the content", (done) ->
+				@ProjectRootDocManager.findRootDocFileFromDirectory '/foo', =>
+					expect(@fs.readFile).to.be.calledWith('/foo/main.tex')
+					expect(@fs.readFile).to.be.calledWith('/foo/a.tex')
+					expect(@fs.readFile).not.to.be.calledWith('/foo/b.tex')
+					done()
+
+		describe "when there is no documentclass", ->
+			it "returns null with no error", (done) ->
+				@ProjectRootDocManager.findRootDocFileFromDirectory '/foo', (error, path, content) =>
+					expect(error).not.to.exist
+					expect(path).not.to.exist
+					expect(content).not.to.exist
+					done()
+
+			it "processes all the files", (done) ->
+				@ProjectRootDocManager.findRootDocFileFromDirectory '/foo', =>
+					expect(@fs.readFile).to.be.calledWith('/foo/main.tex')
+					expect(@fs.readFile).to.be.calledWith('/foo/a.tex')
+					expect(@fs.readFile).to.be.calledWith('/foo/b.tex')
+					done()
+
+		describe "when there is an error reading a file", ->
+			beforeEach ->
+				@fs.readFile.withArgs('/foo/a.tex').callsArgWith(2, new Error('something went wrong'))
+
+			it "returns an error", (done) ->
+				@ProjectRootDocManager.findRootDocFileFromDirectory '/foo', (error, path, content) =>
+					expect(error).to.exist
+					expect(path).not.to.exist
+					expect(content).not.to.exist
+					done()
 
 	describe "setRootDocFromName", ->
 		describe "when there is a suitable root doc", ->

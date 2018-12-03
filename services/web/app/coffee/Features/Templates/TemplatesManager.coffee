@@ -28,7 +28,7 @@ module.exports = TemplatesManager =
 			if zipReq.response.statusCode != 200
 				logger.err { uri: zipUrl, statusCode: zipReq.response.statusCode }, "non-success code getting zip from template API"
 				return callback new Error("get zip failed")
-			ProjectUploadManager.createProjectFromZipArchive user_id, projectName, dumpPath, (err, project) ->
+			ProjectUploadManager.createProjectFromZipArchiveWithName user_id, projectName, dumpPath, (err, project) ->
 				if err?
 					logger.err { err, zipReq }, "problem building project from zip"
 					return callback err

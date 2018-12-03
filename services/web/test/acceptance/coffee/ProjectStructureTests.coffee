@@ -125,6 +125,7 @@ describe "ProjectStructureChanges", ->
 			MockDocUpdaterApi.clearProjectStructureUpdates()
 
 			zip_file = fs.createReadStream(Path.resolve(__dirname + '/../files/test_project.zip'))
+			@test_project_name = 'wombat'
 
 			req = @owner.request.post {
 				uri: "project/new/upload",
@@ -137,7 +138,7 @@ describe "ProjectStructureChanges", ->
 				@uploaded_project_id = JSON.parse(body).project_id
 				done()
 
-		it "should version the dosc created", ->
+		it "should version the docs created", ->
 			{docUpdates: updates, version} = MockDocUpdaterApi.getProjectStructureUpdates(@uploaded_project_id)
 			expect(updates.length).to.equal(1)
 			update = updates[0]
@@ -154,6 +155,30 @@ describe "ProjectStructureChanges", ->
 			expect(update.pathname).to.equal("/1pixel.png")
 			expect(update.url).to.be.a('string');
 			expect(version).to.equal(2)
+
+	describe "uploading a project with a name", ->
+		before (done) ->
+			MockDocUpdaterApi.clearProjectStructureUpdates()
+
+			zip_file = fs.createReadStream(Path.resolve(__dirname + '/../files/test_project_with_name.zip'))
+			@test_project_name = 'wombat'
+
+			req = @owner.request.post {
+				uri: "project/new/upload",
+				formData:
+					qqfile: zip_file
+			}, (error, res, body) =>
+				throw error if error?
+				if res.statusCode < 200 || res.statusCode >= 300
+					throw new Error("failed to upload project #{res.statusCode}")
+				@uploaded_project_id = JSON.parse(body).project_id
+				done()
+
+		it "should set the project name from the zip contents", (done) ->
+			ProjectGetter.getProject @uploaded_project_id, (error, project) =>
+				expect(error).not.to.exist
+				expect(project.name).to.equal @test_project_name
+				done()
 
 	describe "uploading a file", ->
 		beforeEach (done) ->

@@ -26,3 +26,20 @@ describe "DocumentHelper", ->
 		it "should accept an array", ->
 			document = ["\\begin{document}","\\title{foo}","\\end{document}"]
 			expect(@DocumentHelper.getTitleFromTexContent(document)).to.equal "foo"
+
+	describe "contentHasDocumentclass", ->
+		it "should return true if the content has a documentclass", ->
+			document = ["% line", "% line", "% line", "\\documentclass"]
+			expect(@DocumentHelper.contentHasDocumentclass(document)).to.equal true
+
+		it "should allow whitespace before the documentclass", ->
+			document = ["% line", "% line", "% line", "        \\documentclass"]
+			expect(@DocumentHelper.contentHasDocumentclass(document)).to.equal true
+
+		it "should not allow non-whitespace before the documentclass", ->
+			document = ["% line", "% line", "% line", "    asdf \\documentclass"]
+			expect(@DocumentHelper.contentHasDocumentclass(document)).to.equal false
+
+		it "should return false when there is no documentclass", ->
+			document = ["% line", "% line", "% line"]
+			expect(@DocumentHelper.contentHasDocumentclass(document)).to.equal false

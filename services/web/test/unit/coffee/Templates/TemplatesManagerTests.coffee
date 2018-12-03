@@ -31,7 +31,7 @@ describe 'TemplatesManager', ->
 			unlink : sinon.stub()
 			createWriteStream : sinon.stub().returns(on: sinon.stub().yields())
 		}
-		@ProjectUploadManager = {createProjectFromZipArchive : sinon.stub().callsArgWith(3, null, {_id:@project_id})}
+		@ProjectUploadManager = {createProjectFromZipArchiveWithName : sinon.stub().callsArgWith(3, null, {_id:@project_id})}
 		@dumpFolder = "dump/path"
 		@ProjectOptionsHandler = {
 			setCompiler:sinon.stub().callsArgWith(2)
@@ -87,7 +87,7 @@ describe 'TemplatesManager', ->
 				@fs.createWriteStream.should.have.been.calledWith @dumpPath
 
 			it "should create project", ->
-				@ProjectUploadManager.createProjectFromZipArchive.should.have.been.calledWithMatch @user_id, @templateName, @dumpPath
+				@ProjectUploadManager.createProjectFromZipArchiveWithName.should.have.been.calledWithMatch @user_id, @templateName, @dumpPath
 
 			it "should unlink file", ->
 				@fs.unlink.should.have.been.calledWith @dumpPath
