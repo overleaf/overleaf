@@ -1,57 +1,29 @@
 set -ex
 
-npx bulk-decaffeinate convert --dir public/coffee
-
-for module in modules/**/public/coffee; do
-  npx bulk-decaffeinate convert --dir $module
-done
+npx bulk-decaffeinate convert --dir app/coffee
 
 npx bulk-decaffeinate clean
 
-git mv public/coffee public/src
+git mv app/coffee app/js
 
-for module in modules/**/public; do
-  if [ -e $module/coffee ]; then
-    git mv $module/coffee $module/src
-  fi
-done
+git commit -m "Rename app/coffee dir to app/js"
 
-git commit -m "Rename public/coffee dir to public/src"
-
-npx prettier-eslint 'public/src/**/*.js' --write
-
-for module in modules/**/public/src; do
-  npx prettier-eslint "$module/**/*.js" --write
-done
+npx prettier-eslint 'app/js/**/*.js' --write
 
 git add .
-git commit -m "Prettier: convert public/src decaffeinated files to Prettier format"
+git commit -m "Prettier: convert app/js decaffeinated files to Prettier format"
 
-npx bulk-decaffeinate convert --dir test/unit_frontend/coffee
-
-for module in modules/**/test/unit_frontend/coffee; do
-  npx bulk-decaffeinate convert --dir $module
-done
+npx bulk-decaffeinate convert --dir test/acceptance/coffee
 
 npx bulk-decaffeinate clean
 
-git mv test/unit_frontend/coffee test/unit_frontend/src
+git mv test/acceptance/coffee test/acceptance/js
 
-for module in modules/**/test/unit_frontend; do
-  if [ -e $module/coffee ]; then
-    git mv $module/coffee $module/src
-  fi
-done
+git commit -m "Rename test/acceptance/coffee to test/acceptance/js"
 
-git commit -m "Rename test/unit_frontend/coffee to test/unit_frontend/src"
-
-npx prettier-eslint 'test/unit_frontend/src/**/*.js' --write
-
-for module in modules/**/test/unit_frontend/src; do
-  npx prettier-eslint "$module/**/*.js" --write
-done
+npx prettier-eslint 'test/acceptance/js/**/*.js' --write
 
 git add .
-git commit -m "Prettier: convert test/unit_frontend decaffeinated files to Prettier format"
+git commit -m "Prettier: convert test/acceptance decaffeinated files to Prettier format"
 
 echo "done"
