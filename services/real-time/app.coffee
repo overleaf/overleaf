@@ -27,6 +27,8 @@ io = require('socket.io').listen(server)
 # Bind to sessions
 sessionStore = new RedisStore(client: sessionRedisClient)
 cookieParser = CookieParser(Settings.security.sessionSecret)
+console.log(Settings.security.sessionSecret, Settings.cookieName)
+console.log(Settings)
 sessionSockets = new SessionSockets(io, sessionStore, cookieParser, Settings.cookieName)
 
 io.configure ->
