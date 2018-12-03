@@ -2,6 +2,7 @@ mongoose = require 'mongoose'
 Schema = mongoose.Schema
 ObjectId = Schema.ObjectId
 settings = require 'settings-sharelatex'
+logger = require 'logger-sharelatex'
 request = require 'request'
 
 PublisherSchema = new Schema
@@ -19,7 +20,10 @@ PublisherSchema.method 'fetchV1Data', (callback = (error, publisher)->) ->
 			pass: settings.apis.v1.pass
 			sendImmediately: true
 	}, (error, response, body) =>
-		try parsedBody = JSON.parse(body) catch e
+		try
+			parsedBody = JSON.parse(body)
+		catch error # log error and carry on without v1 data
+			logger.err { model: 'Publisher', slug: this.slug, error }, '[fetchV1DataError]'
 		this.name = parsedBody?.name
 		this.partner = parsedBody?.partner
 		callback(null, this)

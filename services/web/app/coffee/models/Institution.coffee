@@ -2,6 +2,7 @@ mongoose = require 'mongoose'
 Schema = mongoose.Schema
 ObjectId = Schema.ObjectId
 settings = require 'settings-sharelatex'
+logger = require 'logger-sharelatex'
 request = require 'request'
 
 InstitutionSchema = new Schema
@@ -12,7 +13,10 @@ InstitutionSchema = new Schema
 InstitutionSchema.method 'fetchV1Data', (callback = (error, institution)->) ->
 	url = "#{settings.apis.v1.url}/universities/list/#{this.v1Id}"
 	request.get url, (error, response, body) =>
-		try parsedBody = JSON.parse(body) catch e
+		try
+			parsedBody = JSON.parse(body)
+		catch error # log error and carry on without v1 data
+			logger.err { model: 'Institution', v1Id: this.v1Id, error }, '[fetchV1DataError]'
 		this.name = parsedBody?.name
 		this.countryCode = parsedBody?.country_code
 		this.departments = parsedBody?.departments
