@@ -26,4 +26,20 @@ npx prettier-eslint 'test/acceptance/js/**/*.js' --write
 git add .
 git commit -m "Prettier: convert test/acceptance decaffeinated files to Prettier format"
 
+git mv app.coffee app.js
+git mv Gruntfile.coffe Gruntfile.js
+git mv config/settings.defaults.coffee config/settings.defaults.js
+
+git commit -m "Rename individual coffee files to js files"
+
+decaffeinate app.js
+decaffeinate Gruntfile.js
+decaffeinate config/settings.defaults.js
+
+git commit -m "Decaffeinate: convert individual files to js"
+
+npx prettier-eslint app.js Gruntfile.js config/settings.defaults.js --write
+
+git commit -m "Prettier: convert individual decaffeinated files to Prettier format"
+
 echo "done"
