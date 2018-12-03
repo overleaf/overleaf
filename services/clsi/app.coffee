@@ -26,6 +26,7 @@ express = require "express"
 bodyParser = require "body-parser"
 app = express()
 
+Metrics.injectMetricsRoute(app)
 app.use Metrics.http.monitor(logger)
 
 # Compile requests can take longer than the default two
