@@ -26,7 +26,19 @@
 				ng-click="openUploadProjectModal()"
 			) #{translate("upload_project")}
 		!= moduleIncludes("newProjectMenu", locals)
+
+		if portalTemplates.length > 0
+			//- portalTemplates is set in ProjectController
+			li.divider
+			li.dropdown-header #{translate("institution")} #{translate("templates")}
+			for portal in portalTemplates
+				li
+					a.menu-indent(href=portal.url + "#templates") #{portal.name}
+
+
+
 		if (templates)
+			//- templates is an express local var, via settings.templateLinks
 			li.divider
 			li.dropdown-header #{translate("templates")}
 			each item in templates
@@ -137,5 +149,3 @@
 			
 script.
 	window.userHasNoSubscription = #{!!(settings.enableSubscriptions && !hasSubscription)}
-
-

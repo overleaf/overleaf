@@ -32,6 +32,7 @@ crypto = require 'crypto'
 { V1ConnectionError } = require '../Errors/Errors'
 Features = require('../../infrastructure/Features')
 BrandVariationsHandler = require("../BrandVariations/BrandVariationsHandler")
+{ getUserAffiliations } = require("../Institutions/InstitutionsAPI")
 
 module.exports = ProjectController =
 
@@ -198,6 +199,8 @@ module.exports = ProjectController =
 					return cb(error, hasPaidSubscription)
 			user: (cb) ->
 				User.findById user_id, "featureSwitches overleaf awareOfV2 features", cb
+			userAffiliations: (cb) ->
+				getUserAffiliations user_id, cb
 			}, (err, results)->
 				if err?
 					logger.err err:err, "error getting data for project list page"
@@ -208,8 +211,10 @@ module.exports = ProjectController =
 				notifications = require("underscore").map results.notifications, (notification)->
 					notification.html = req.i18n.translate(notification.templateKey, notification.messageOpts)
 					return notification
+				portalTemplates = ProjectController._buildPortalTemplatesList results.userAffiliations
 				projects = ProjectController._buildProjectList results.projects, results.v1Projects?.projects
 				user = results.user
+				userAffiliations = results.userAffiliations
 				warnings = ProjectController._buildWarningsList results.v1Projects
 
 				# in v2 add notifications for matching university IPs
@@ -226,7 +231,9 @@ module.exports = ProjectController =
 						projects: projects
 						tags: tags
 						notifications: notifications or []
+						portalTemplates: portalTemplates
 						user: user
+						userAffiliations: userAffiliations
 						hasSubscription: results.hasSubscription
 						isShowingV1Projects: results.v1Projects?
 						warnings: warnings
@@ -309,7 +316,7 @@ module.exports = ProjectController =
 			user = results.user
 			subscription = results.subscription
 			brandVariation = results.brandVariation
-			
+
 			daysSinceLastUpdated =  (new Date() - project.lastUpdated) / 86400000
 			logger.log project_id:project_id, daysSinceLastUpdated:daysSinceLastUpdated, "got db results for loading editor"
 
@@ -467,6 +474,17 @@ module.exports = ProjectController =
 		if v1ProjectData.hasHiddenV1Projects
 			warnings.push "Looks like you've got a lot of V1 projects! Some of them may be hidden on V2. To view them all, use the V1 dashboard."
 		return warnings
+
+	_buildPortalTemplatesList: (affiliations = []) ->
+			portalTemplates = []
+			for aff in affiliations
+				if aff.portal && aff.portal.slug && aff.portal.templates_count && aff.portal.templates_count > 0
+					portalPath = if aff.institution.isUniversity then '/edu/' else '/org/'
+					portalTemplates.push({
+						name: aff.institution.name
+						url: Settings.siteUrl + portalPath + aff.portal.slug
+					})
+			return portalTemplates
 
 defaultSettingsForAnonymousUser = (user_id)->
 	id : user_id

@@ -22,7 +22,7 @@ describe "ProjectController", ->
 				chat:
 					url:"chat.com"
 			siteUrl: "mysite.com"
-		@brandVariationDetails = 
+		@brandVariationDetails =
 			id: "12"
 			active: true
 			brand_name: "The journal"
@@ -84,8 +84,9 @@ describe "ProjectController", ->
 				fire: sinon.stub()
 		@Features =
 			hasFeature: sinon.stub()
-		@BrandVariationsHandler = 
+		@BrandVariationsHandler =
 			getBrandVariationById: sinon.stub().callsArgWith 1, null, @brandVariationDetails
+		@getUserAffiliations = sinon.stub().callsArgWith(1, null, [])
 
 		@ProjectController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
@@ -121,6 +122,8 @@ describe "ProjectController", ->
 			"../Notifications/NotificationsBuilder":@NotificationBuilder
 			"../User/UserGetter": @UserGetter
 			"../BrandVariations/BrandVariationsHandler": @BrandVariationsHandler
+			'../Institutions/InstitutionsAPI':
+				getUserAffiliations: @getUserAffiliations
 
 		@projectName = "£12321jkj9ujkljds"
 		@req =
@@ -736,5 +739,3 @@ describe "ProjectController", ->
 				false,
 				false
 			]
-
-
