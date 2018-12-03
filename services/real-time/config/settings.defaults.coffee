@@ -36,8 +36,8 @@ module.exports =
 			url: "http://#{process.env['DOCUMENT_UPDATER_HOST'] or process.env['DOCUPDATER_HOST'] or "localhost"}:3003"
 			
 	security:
-		sessionSecret: "secret-please-change"
+		sessionSecret: process.env['SESSION_SECRET'] or "secret-please-change"
 		
-	cookieName: "sharelatex.sid"
+	cookieName: process.env['COOKIE_NAME'] or "sharelatex.sid"
 	
 	max_doc_length: 2 * 1024 * 1024 # 2mb
