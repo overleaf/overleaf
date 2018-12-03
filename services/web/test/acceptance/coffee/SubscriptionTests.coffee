@@ -305,7 +305,7 @@ describe 'Subscriptions', ->
 			it 'should return a v1SubscriptionStatus', ->
 				expect(@data.v1SubscriptionStatus).to.deep.equal @subscription_status
 
-	describe.only 'canceling', ->
+	describe 'canceling', ->
 		before (done) ->
 			@user = new User()
 			MockV1Api.setUser v1Id = MockV1Api.nextV1Id(), @v1_user = {}
