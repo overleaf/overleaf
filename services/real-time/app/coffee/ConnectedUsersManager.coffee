@@ -12,7 +12,6 @@ FOUR_DAYS_IN_S = ONE_DAY_IN_S * 4
 USER_TIMEOUT_IN_S = ONE_HOUR_IN_S / 4
 
 module.exports =
-
 	# Use the same method for when a user connects, and when a user sends a cursor
 	# update. This way we don't care if the connected_user key has expired when
 	# we receive a cursor update. 

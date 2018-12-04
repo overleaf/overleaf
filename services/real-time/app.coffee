@@ -1,5 +1,9 @@
+Metrics = require("metrics-sharelatex")
+Metrics.initialize(Settings.appName or "real-time")
+
 logger = require "logger-sharelatex"
 logger.initialize("real-time-sharelatex")
+Metrics.event_loop.monitor(logger)
 
 express = require("express")
 session = require("express-session")
@@ -14,9 +18,7 @@ RedisStore = require('connect-redis')(session)
 SessionSockets = require('session.socket.io')
 CookieParser = require("cookie-parser")
 
-Metrics = require("metrics-sharelatex")
-Metrics.initialize(Settings.appName or "real-time")
-Metrics.event_loop.monitor(logger)
+
 
 
 DrainManager = require("./app/js/DrainManager")
@@ -84,21 +86,22 @@ Error.stackTraceLimit = 10
 
 shutdownCleanly = (signal) ->
 	connectedClients = io.sockets.clients()?.length
-	logger.log {connectedClients, signal}, "looking to shut down process"
 	if connectedClients == 0
 		logger.log("no clients connected, exiting")
 		process.exit()
 	else
+		logger.log {connectedClients}, "clients still connected, not shutting down yet"
 		setTimeout () ->
 			shutdownCleanly(signal)
 		, 10000
 
 forceDrain = ->
 	THREE_HOURS = 60 * 1000 * 60 * 3
-	setTimeout( -> , 
-		logger.log({delay_ms:THREE_HOURS}, "starting drain")
+	logger.log {delay_ms:THREE_HOURS}, "starting force drain after timeout"
+	setTimeout ()-> 
+		logger.log "starting drain"
 		DrainManager.startDrain(io, 4)
-	, THREE_HOURS)
+	, THREE_HOURS
 	
 
 if Settings.drainBeforeShutdown
