@@ -31,6 +31,7 @@ module.exports = Metrics =
 				version: '0.0.1'
 			}
 		})
+		Metrics.inc("process_startup")
 
 	registerDestructor: (func) ->
 		destructors.push func
