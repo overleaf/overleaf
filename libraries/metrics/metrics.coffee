@@ -54,6 +54,7 @@ module.exports = Metrics =
 	set : (key, value, sampleRate = 1)->
 
 	inc : (key, sampleRate = 1, opts = {})->
+		console.log("doing inc", key)
 		key = Metrics.buildPromKey(key)
 		if !promMetrics[key]?
 			promMetrics[key] = new prom.Counter({
