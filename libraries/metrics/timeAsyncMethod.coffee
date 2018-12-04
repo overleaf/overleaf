@@ -25,15 +25,15 @@ module.exports = (obj, methodName, prefix, logger) ->
 				logger.log "[Metrics] expected wrapped method '#{methodName}' to be invoked with a callback"
 			return realMethod.apply this, originalArgs
 
-		timer = new metrics.Timer(startPrefix, null, {method: modifedMethodName})
+		timer = new metrics.Timer(startPrefix, 1, {method: modifedMethodName})
 
 		realMethod.call this, firstArgs..., (callbackArgs...) ->
 			elapsedTime = timer.done()
 			possibleError = callbackArgs[0]
 			if possibleError? 
-				metrics.inc "#{startPrefix}_result", null, {status:"failed", method: modifedMethodName}
+				metrics.inc "#{startPrefix}_result", 1, {status:"failed", method: modifedMethodName}
 			else
-				metrics.inc "#{startPrefix}_result", null, {status:"success", method: modifedMethodName}
+				metrics.inc "#{startPrefix}_result", 1, {status:"success", method: modifedMethodName}
 			if logger?
 				loggableArgs = {}
 				try

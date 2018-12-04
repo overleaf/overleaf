@@ -11,8 +11,6 @@ hostname = require('os').hostname()
 buildKey = (key)-> "#{name}.#{hostname}.#{key}"
 buildGlobalKey = (key)-> "#{name}.global.#{key}"
 
-
-
 promMetrics = {}
 
 destructors = []
