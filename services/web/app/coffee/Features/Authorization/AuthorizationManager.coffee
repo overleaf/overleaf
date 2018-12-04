@@ -25,9 +25,10 @@ module.exports = AuthorizationManager =
 	#	* privilegeLevel: "owner", "readAndWrite", of "readOnly" if the user has
 	#	  access. false if the user does not have access
 	#   * becausePublic: true if the access level is only because the project is public.
+	#   * becauseSiteAdmin: true if access level is only because user is admin
 	getPrivilegeLevelForProject: (
 		user_id, project_id, token,
-		callback = (error, privilegeLevel, becausePublic) ->
+		callback = (error, privilegeLevel, becausePublic, becauseSiteAdmin) ->
 	) ->
 		if !user_id?
 			# User is Anonymous, Try Token-based access
@@ -41,48 +42,48 @@ module.exports = AuthorizationManager =
 						return callback(err) if err?
 						if isValidReadOnly
 							# Grant anonymous user read-only access
-							callback null, PrivilegeLevels.READ_ONLY, false
+							callback null, PrivilegeLevels.READ_ONLY, false, false
 						else if (
 							isValidReadAndWrite and
 							TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED
 						)
 							# Grant anonymous user read-and-write access
-							callback null, PrivilegeLevels.READ_AND_WRITE, false
+							callback null, PrivilegeLevels.READ_AND_WRITE, false, false
 						else
 							# Deny anonymous access
-							callback null, PrivilegeLevels.NONE, false
+							callback null, PrivilegeLevels.NONE, false, false
 				else if publicAccessLevel == PublicAccessLevels.READ_ONLY
 					# Legacy public read-only access for anonymous user
-					callback null, PrivilegeLevels.READ_ONLY, true
+					callback null, PrivilegeLevels.READ_ONLY, true, false
 				else if publicAccessLevel == PublicAccessLevels.READ_AND_WRITE
 					# Legacy public read-write access for anonymous user
-					callback null, PrivilegeLevels.READ_AND_WRITE, true
+					callback null, PrivilegeLevels.READ_AND_WRITE, true, false
 				else
 					# Deny anonymous user access
-					callback null, PrivilegeLevels.NONE, false
+					callback null, PrivilegeLevels.NONE, false, false
 		else
 			# User is present, get their privilege level from database
 			CollaboratorsHandler.getMemberIdPrivilegeLevel user_id, project_id, (error, privilegeLevel) ->
 				return callback(error) if error?
 				if privilegeLevel? and privilegeLevel != PrivilegeLevels.NONE
 					# The user has direct access
-					callback null, privilegeLevel, false
+					callback null, privilegeLevel, false, false
 				else
 					AuthorizationManager.isUserSiteAdmin user_id, (error, isAdmin) ->
 						return callback(error) if error?
 						if isAdmin
-							callback null, PrivilegeLevels.OWNER, false
+							callback null, PrivilegeLevels.OWNER, false, true
 						else
 							# Legacy public-access system
 							# User is present (not anonymous), but does not have direct access
 							AuthorizationManager.getPublicAccessLevel project_id, (err, publicAccessLevel) ->
 								return callback(err) if err?
 								if publicAccessLevel == PublicAccessLevels.READ_ONLY
-									callback null, PrivilegeLevels.READ_ONLY, true
+									callback null, PrivilegeLevels.READ_ONLY, true, false
 								else if publicAccessLevel == PublicAccessLevels.READ_AND_WRITE
-									callback null, PrivilegeLevels.READ_AND_WRITE, true
+									callback null, PrivilegeLevels.READ_AND_WRITE, true, false
 								else
-									callback null, PrivilegeLevels.NONE, false
+									callback null, PrivilegeLevels.NONE, false, false
 
 	canUserReadProject: (user_id, project_id, token, callback = (error, canRead) ->) ->
 		AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, token, (error, privilegeLevel) ->
@@ -104,10 +105,10 @@ module.exports = AuthorizationManager =
 			else
 				return callback null, false
 	
-	canUserAdminProject: (user_id, project_id, token, callback = (error, canAdmin) ->) ->
-		AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, token, (error, privilegeLevel) ->
+	canUserAdminProject: (user_id, project_id, token, callback = (error, canAdmin, becauseSiteAdmin) ->) ->
+		AuthorizationManager.getPrivilegeLevelForProject user_id, project_id, token, (error, privilegeLevel, becausePublic, becauseSiteAdmin) ->
 			return callback(error) if error?
-			return callback null, (privilegeLevel == PrivilegeLevels.OWNER)
+			return callback null, (privilegeLevel == PrivilegeLevels.OWNER), becauseSiteAdmin
 	
 	isUserSiteAdmin: (user_id, callback = (error, isAdmin) ->) ->
 		if !user_id?

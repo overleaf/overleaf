@@ -42,7 +42,7 @@ describe "AuthorizationManager", ->
 					@AuthorizationManager.getPrivilegeLevelForProject @user_id, @project_id, @token, @callback
 
 				it "should return the user's privilege level", ->
-					@callback.calledWith(null, "readOnly", false).should.equal true
+					@callback.calledWith(null, "readOnly", false, false).should.equal true
 
 			describe "with a user_id with no privilege level", ->
 				beforeEach ->
@@ -53,7 +53,7 @@ describe "AuthorizationManager", ->
 					@AuthorizationManager.getPrivilegeLevelForProject @user_id, @project_id, @token, @callback
 
 				it "should return false", ->
-					@callback.calledWith(null, false, false).should.equal true
+					@callback.calledWith(null, false, false, false).should.equal true
 
 			describe "with a user_id who is an admin", ->
 				beforeEach ->
@@ -64,7 +64,7 @@ describe "AuthorizationManager", ->
 					@AuthorizationManager.getPrivilegeLevelForProject @user_id, @project_id, @token, @callback
 
 				it "should return the user as an owner", ->
-					@callback.calledWith(null, "owner", false).should.equal true
+					@callback.calledWith(null, "owner", false, true).should.equal true
 
 			describe "with no user (anonymous)", ->
 
@@ -86,7 +86,7 @@ describe "AuthorizationManager", ->
 						@TokenAccessHandler.isValidToken.calledWith(@project_id, @token).should.equal true
 
 					it "should return false", ->
-						@callback.calledWith(null, false, false).should.equal true
+						@callback.calledWith(null, false, false, false).should.equal true
 
 				describe 'when the token is valid for read-and-write', ->
 
@@ -108,7 +108,7 @@ describe "AuthorizationManager", ->
 							@TokenAccessHandler.isValidToken.calledWith(@project_id, @token).should.equal true
 
 						it "should deny access", ->
-							@callback.calledWith(null, false, false).should.equal true
+							@callback.calledWith(null, false, false, false).should.equal true
 
 					describe 'when read-write-sharing is enabled', ->
 						beforeEach ->
@@ -165,7 +165,7 @@ describe "AuthorizationManager", ->
 					@AuthorizationManager.getPrivilegeLevelForProject @user_id, @project_id, @token, @callback
 
 				it "should return the user's privilege level", ->
-					@callback.calledWith(null, "readOnly", false).should.equal true
+					@callback.calledWith(null, "readOnly", false, false).should.equal true
 
 			describe "with a user_id with no privilege level", ->
 				beforeEach ->
@@ -176,7 +176,7 @@ describe "AuthorizationManager", ->
 					@AuthorizationManager.getPrivilegeLevelForProject @user_id, @project_id, @token, @callback
 
 				it "should return false", ->
-					@callback.calledWith(null, false, false).should.equal true
+					@callback.calledWith(null, false, false, false).should.equal true
 
 			describe "with a user_id who is an admin", ->
 				beforeEach ->
@@ -187,7 +187,7 @@ describe "AuthorizationManager", ->
 					@AuthorizationManager.getPrivilegeLevelForProject @user_id, @project_id, @token, @callback
 
 				it "should return the user as an owner", ->
-					@callback.calledWith(null, "owner", false).should.equal true
+					@callback.calledWith(null, "owner", false, true).should.equal true
 
 			describe "with no user (anonymous)", ->
 				beforeEach ->
@@ -200,7 +200,7 @@ describe "AuthorizationManager", ->
 					@AuthorizationManager.isUserSiteAdmin.called.should.equal false
 
 				it "should return false", ->
-					@callback.calledWith(null, false, false).should.equal true
+					@callback.calledWith(null, false, false, false).should.equal true
 
 		describe "with a public project", ->
 			beforeEach ->
