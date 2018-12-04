@@ -42,4 +42,4 @@ module.exports =
 	
 	max_doc_length: 2 * 1024 * 1024 # 2mb
 
-	delayExitUntilDrained: process.env['DELAY_EXIT_UNTIL_DRAINED'] or false
+	forceDrainMsDelay: process.env['FORCE_DRAIN_MS_DELAY'] or false

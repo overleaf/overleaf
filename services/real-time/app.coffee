@@ -96,15 +96,14 @@ shutdownCleanly = (signal) ->
 		, 10000
 
 forceDrain = ->
-	THREE_HOURS = 60 * 1000 * 60 * 3
-	logger.log {delay_ms:THREE_HOURS}, "starting force drain after timeout"
+	forceDrainMsDelay = parseInt(Settings.forceDrainMsDelay, 10)
+	logger.log {delay_ms:forceDrainMsDelay}, "starting force drain after timeout"
 	setTimeout ()-> 
 		logger.log "starting drain"
 		DrainManager.startDrain(io, 4)
-	, THREE_HOURS
+	, Settings.forceDrainMsDelay
 	
-
-if Settings.delayExitUntilDrained
+if Settings.forceDrainMsDelay?
 	logger.log "drainBeforeShutdown enabled"
 	for signal in ['SIGINT', 'SIGHUP', 'SIGQUIT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM', 'SIGABRT']
 		logger.log signal: signal, "received interrupt, cleaning up"
