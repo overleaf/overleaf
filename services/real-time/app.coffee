@@ -27,8 +27,7 @@ io = require('socket.io').listen(server)
 # Bind to sessions
 sessionStore = new RedisStore(client: sessionRedisClient)
 cookieParser = CookieParser(Settings.security.sessionSecret)
-console.log(Settings.security.sessionSecret, Settings.cookieName)
-console.log(Settings)
+
 sessionSockets = new SessionSockets(io, sessionStore, cookieParser, Settings.cookieName)
 
 io.configure ->
@@ -49,7 +48,7 @@ app.get "/", (req, res, next) ->
 	res.send "real-time-sharelatex is alive"
 
 app.get "/status", (req, res, next) ->
-	console.log("got status", req.query)
+	console.log("got status", req.query, io.sockets.clients()?.length)
 	res.send "real-time-sharelatex is alive"
 
 rclient = require("redis-sharelatex").createClient(Settings.redis.realtime)
