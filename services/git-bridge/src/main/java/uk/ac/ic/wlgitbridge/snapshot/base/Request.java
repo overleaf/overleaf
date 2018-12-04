@@ -80,8 +80,8 @@ public abstract class Request<T extends Result> {
                         JsonObject json = Instance.gson.fromJson(httpCause.getContent(), JsonObject.class);
                         String message = json.get("message").getAsString();
                         String newRemote;
-                        if (json.has("new_remote")) {
-                            newRemote = json.get("new_remote").getAsString();
+                        if (json.has("newRemote")) {
+                            newRemote = json.get("newRemote").getAsString();
                         } else {
                             newRemote = null;
                         }
