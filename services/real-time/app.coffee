@@ -78,3 +78,20 @@ server.listen port, host, (error) ->
 
 # Stop huge stack traces in logs from all the socket.io parsing steps.
 Error.stackTraceLimit = 10
+
+
+shutdownCleanly = (signal) ->
+	return () ->
+		logger.log signal: signal, "received interrupt, cleaning up"
+		connectedClients = io.sockets.clients()?.length
+		logger.log {connectedClients, signal}, "looking to shut down process"
+		if connectedClients == 0
+			logger.log("no clients connected, exiting")
+			process.exit()
+		else
+			setTimeout () ->
+				shutdownCleanly(signal)
+			, 10000
+
+for signal in ['SIGINT', 'SIGHUP', 'SIGQUIT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM', 'SIGABRT']
+	process.on signal, shutdownCleanly(signal)
