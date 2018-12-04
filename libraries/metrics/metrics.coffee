@@ -54,7 +54,6 @@ module.exports = Metrics =
 	set : (key, value, sampleRate = 1)->
 
 	inc : (key, sampleRate = 1, opts = {})->
-		console.log("doing inc", key)
 		key = Metrics.buildPromKey(key)
 		if !promMetrics[key]?
 			promMetrics[key] = new prom.Counter({
@@ -65,6 +64,8 @@ module.exports = Metrics =
 		opts.app = appname
 		opts.host = hostname
 		promMetrics[key].inc(opts)
+		if process.env['DEBUG_METRICS']
+			console.log("doing inc", key, opts)
 
 	count : (key, count, sampleRate = 1)->
 		key = Metrics.buildPromKey(key)
@@ -75,6 +76,8 @@ module.exports = Metrics =
 				labelNames: ['app','host']
 			})
 		promMetrics[key].inc({app: appname, host: hostname}, count)
+		if process.env['DEBUG_METRICS']
+			console.log("doing count/inc", key, opts)
 
 	timing: (key, timeSpan, sampleRate, opts = {})->
 		key = Metrics.sanitizeKey("timer_" + key)
@@ -88,6 +91,8 @@ module.exports = Metrics =
 			})
 		opts.app = appname
 		promMetrics[key].observe(opts, timeSpan)
+		if process.env['DEBUG_METRICS']
+			console.log("doing timing", key, opts)
 
 	Timer : class
 		constructor :(key, sampleRate = 1, opts)->
@@ -111,7 +116,9 @@ module.exports = Metrics =
 				labelNames: ['app','host']
 			})
 		promMetrics[key].set({app: appname, host: hostname}, this.sanitizeValue(value))
-
+		if process.env['DEBUG_METRICS']
+			console.log("doing gauge", key, opts)
+			
 	globalGauge: (key, value, sampleRate = 1)->
 		key = Metrics.buildPromKey(key)
 		if !promMetrics[key]?
