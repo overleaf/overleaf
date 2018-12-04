@@ -27,7 +27,7 @@ git add .
 git commit -m "Prettier: convert test/acceptance decaffeinated files to Prettier format"
 
 git mv app.coffee app.js
-git mv Gruntfile.coffe Gruntfile.js
+git mv Gruntfile.coffee Gruntfile.js
 git mv config/settings.defaults.coffee config/settings.defaults.js
 
 git commit -m "Rename individual coffee files to js files"
