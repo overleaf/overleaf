@@ -42,4 +42,4 @@ module.exports =
 	
 	max_doc_length: 2 * 1024 * 1024 # 2mb
 
-	drainBeforeShutdown: process.env['DRAIN_BEFORE_SHUTDOWN'] or false
+	delayExitUntilDrained: process.env['DELAY_EXIT_UNTIL_DRAINED'] or false

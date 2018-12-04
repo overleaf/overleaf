@@ -1,4 +1,5 @@
 Metrics = require("metrics-sharelatex")
+Settings = require "settings-sharelatex"
 Metrics.initialize(Settings.appName or "real-time")
 
 logger = require "logger-sharelatex"
@@ -8,7 +9,6 @@ Metrics.event_loop.monitor(logger)
 express = require("express")
 session = require("express-session")
 redis = require("redis-sharelatex")
-Settings = require "settings-sharelatex"
 if Settings.sentry?.dsn?
 	logger.initializeErrorReporting(Settings.sentry.dsn)
 
@@ -104,7 +104,7 @@ forceDrain = ->
 	, THREE_HOURS
 	
 
-if Settings.drainBeforeShutdown
+if Settings.delayExitUntilDrained
 	logger.log "drainBeforeShutdown enabled"
 	for signal in ['SIGINT', 'SIGHUP', 'SIGQUIT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM', 'SIGABRT']
 		logger.log signal: signal, "received interrupt, cleaning up"
