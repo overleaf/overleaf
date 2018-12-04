@@ -41,3 +41,5 @@ module.exports =
 	cookieName: process.env['COOKIE_NAME'] or "sharelatex.sid"
 	
 	max_doc_length: 2 * 1024 * 1024 # 2mb
+
+	drainBeforeShutdown: process.env['DRAIN_BEFORE_SHUTDOWN'] or false

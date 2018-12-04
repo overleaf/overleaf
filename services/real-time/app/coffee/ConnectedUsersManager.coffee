@@ -5,8 +5,6 @@ redis = require("redis-sharelatex")
 rclient = redis.createClient(Settings.redis.realtime)
 Keys = Settings.redis.realtime.key_schema
 
-console.log Settings.redis.realtime, "REALTIME"
-
 ONE_HOUR_IN_S = 60 * 60
 ONE_DAY_IN_S = ONE_HOUR_IN_S * 24
 FOUR_DAYS_IN_S = ONE_DAY_IN_S * 4

@@ -19,6 +19,8 @@ Metrics.initialize(Settings.appName or "real-time")
 Metrics.event_loop.monitor(logger)
 
 
+DrainManager = require("./app/js/DrainManager")
+
 # Set up socket.io server
 app = express()
 server = require('http').createServer(app)
@@ -81,17 +83,28 @@ Error.stackTraceLimit = 10
 
 
 shutdownCleanly = (signal) ->
-	return () ->
-		logger.log signal: signal, "received interrupt, cleaning up"
-		connectedClients = io.sockets.clients()?.length
-		logger.log {connectedClients, signal}, "looking to shut down process"
-		if connectedClients == 0
-			logger.log("no clients connected, exiting")
-			process.exit()
-		else
-			setTimeout () ->
-				shutdownCleanly(signal)
-			, 10000
+	connectedClients = io.sockets.clients()?.length
+	logger.log {connectedClients, signal}, "looking to shut down process"
+	if connectedClients == 0
+		logger.log("no clients connected, exiting")
+		process.exit()
+	else
+		setTimeout () ->
+			shutdownCleanly(signal)
+		, 10000
 
-for signal in ['SIGINT', 'SIGHUP', 'SIGQUIT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM', 'SIGABRT']
-	process.on signal, shutdownCleanly(signal)
+forceDrain = ->
+	THREE_HOURS = 60 * 1000 * 60 * 3
+	setTimeout( -> , 
+		logger.log({delay_ms:THREE_HOURS}, "starting drain")
+		DrainManager.startDrain(io, 4)
+	, THREE_HOURS)
+	
+
+if Settings.drainBeforeShutdown
+	logger.log "drainBeforeShutdown enabled"
+	for signal in ['SIGINT', 'SIGHUP', 'SIGQUIT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM', 'SIGABRT']
+		logger.log signal: signal, "received interrupt, cleaning up"
+		process.on signal, ->
+			shutdownCleanly(signal)
+			forceDrain()
