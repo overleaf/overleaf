@@ -4,8 +4,10 @@ UserMembershipHandler = require('./UserMembershipHandler')
 EntityConfigs = require('./UserMembershipEntityConfigs')
 Errors = require('../Errors/Errors')
 logger = require("logger-sharelatex")
+settings = require 'settings-sharelatex'
+request = require 'request'
 
-module.exports =
+module.exports = UserMembershipAuthorization =
 	requireTeamAccess: (req, res, next) ->
 		requireAccessToEntity('team', req.params.id, req, res, next)
 
@@ -21,7 +23,41 @@ module.exports =
 	requirePublisherAccess: (req, res, next) ->
 		requireAccessToEntity('publisher', req.params.id, req, res, next)
 
+	requireTemplateAccess: (req, res, next) ->
+		templateId = req.params.id
+		request {
+			baseUrl: settings.apis.v1.url
+			url: "/api/v2/templates/#{templateId}"
+			method: 'GET'
+			auth:
+				user: settings.apis.v1.user
+				pass: settings.apis.v1.pass
+				sendImmediately: true
+		}, (error, response, body) =>
+			if response.statusCode == 404
+				return next(new Errors.NotFoundError())
+
+			if response.statusCode != 200
+				logger.err { templateId }, "[TemplateMetrics] Couldn't fetch template data from v1"
+				return next(new Error("Couldn't fetch template data from v1"))
+
+			return next(error) if error?
+			try
+				body = JSON.parse(body)
+			catch error
+				return next(error)
+
+			req.template =
+				id: body.id
+				title: body.title
+			requireAccessToEntity('publisher', body.brand.slug, req, res, next)
+
 	requireGraphAccess: (req, res, next) ->
+		if req.query.resource_type == 'template'
+			# templates are a special case; can't use requireaccesstoentity directly
+			req.params.id = req.query.resource_id
+			return UserMembershipAuthorization.requireTemplateAccess(req, res, next)
+
 		requireAccessToEntity(
 			req.query.resource_type, req.query.resource_id, req, res, next
 		)

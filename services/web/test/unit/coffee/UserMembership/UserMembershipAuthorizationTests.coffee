@@ -26,6 +26,7 @@ describe "UserMembershipAuthorization", ->
 			'./UserMembershipHandler': @UserMembershipHandler
 			'./EntityConfigs': EntityConfigs
 			'../Errors/Errors': Errors
+			'request': @request = sinon.stub().yields(null, null, {})
 			"logger-sharelatex":
 				log: ->
 				err: ->
@@ -100,6 +101,21 @@ describe "UserMembershipAuthorization", ->
 					@UserMembershipHandler.getEntity,
 					@req.params.id,
 					modelName: 'Institution',
+				)
+				done()
+
+		it 'handle template access', (done) ->
+			templateData =
+				id: 123
+				title: 'Template Title'
+				brand: { slug: 'brand-slug' }
+			@request.yields(null, { statusCode: 200 }, JSON.stringify(templateData))
+			@UserMembershipAuthorization.requireTemplateAccess @req, null, (error) =>
+				expect(error).to.not.extist
+				sinon.assert.calledWithMatch(
+					@UserMembershipHandler.getEntity,
+					'brand-slug',
+					modelName: 'Publisher',
 				)
 				done()
 
