@@ -30,7 +30,7 @@
     "heap": "^0.2.6",
     "line-reader": "^0.2.4",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.6",
-    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.7.1",
+    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v2.0.8",
     "mongo-uri": "^0.1.2",
     "mongojs": "2.4.0",
     "redis": "~0.10.1",
