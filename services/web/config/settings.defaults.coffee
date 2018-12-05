@@ -171,6 +171,8 @@ module.exports = settings =
 			pass: v1Api.pass
 		v1_history:
 			url: "http://#{process.env['V1_HISTORY_HOST'] or "localhost"}:3100/api"
+			user: 'staging'
+			pass: 'password'
 
 	templates:
 		user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"

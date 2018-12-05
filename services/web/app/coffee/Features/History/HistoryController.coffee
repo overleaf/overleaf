@@ -143,3 +143,37 @@ module.exports = HistoryController =
 				error = new Error("history api responded with non-success code: #{response.statusCode}")
 				logger.error err: error, "project-history api responded with non-success code: #{response.statusCode}"
 				callback(error)
+
+	downloadZipOfVersion: (req, res, next) ->
+		{project_id, version} = req.params
+		logger.log {project_id, version}, "got request for zip file at version"
+		ProjectDetailsHandler.getDetails project_id, (err, project) ->
+			return next(err) if err?
+			v1_id = project.overleaf?.history?.id
+			if !v1_id?
+				logger.err {project_id, version}, 'got request for zip version of non-v1 history project'
+				return res.sendStatus(402)
+
+			url = "#{settings.apis.v1_history.url}/projects/#{v1_id}/version/#{version}/zip"
+			logger.log {project_id, v1_id, version, url}, "proxying to history api"
+			getReq = request(
+				url: url
+				auth:
+					user: settings.apis.v1_history.user
+					pass: settings.apis.v1_history.pass
+					sendImmediately: true
+			)
+			getReq.on 'response', (response) ->
+				# pipe also proxies the headers, but we want to customize these ones
+				delete response.headers['content-disposition']
+				delete response.headers['content-type']
+				res.status response.statusCode
+				res.setContentDisposition(
+					'attachment',
+					{filename: "#{project.name} (Version #{version}).zip"}
+				)
+				res.contentType('application/zip')
+				getReq.pipe(res)
+			getReq.on "error", (err) ->
+				logger.error {err, project_id, v1_id, version}, "history API error"
+				next(error)

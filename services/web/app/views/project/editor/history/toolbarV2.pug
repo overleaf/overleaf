@@ -30,12 +30,13 @@
 			i.fa.fa-exchange
 			| &nbsp;#{translate("compare_to_another_version")}
 
-		button.history-toolbar-btn-danger.pull-right(
-			tooltip-html="'<p>This feature is still in progress. Please use copy and paste to restore your files.</p><p>More restore options are coming soon.</p>'"
-			tooltip-placement="bottom"
+		a.history-toolbar-btn-danger.pull-right(
+			ng-hide="history.loadingFileTree || history.selection.updates.length == 0"
+			ng-href="/project/{{ project_id }}/version/{{ history.selection.updates[0].toV }}/zip"
+			target="_blank"
 		) 
-			i.fa.fa-undo
-			| &nbsp;#{translate("restore_to_before_these_changes")}
+			i.fa.fa-download
+			| &nbsp;#{translate("download_project_at_this_version")}
 
 	.history-toolbar-entries-list(
 		ng-if="!history.error"
