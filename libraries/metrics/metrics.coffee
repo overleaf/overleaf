@@ -41,15 +41,13 @@ module.exports = Metrics =
 		)
 
 	buildPromKey: (key = "")->
-		Metrics.sanitizeKey key
-
-	sanitizeKey: (key) ->
 		key.replace /[^a-zA-Z0-9]/g, "_"
 
 	sanitizeValue: (value) ->
 		parseFloat(value)
 
 	set : (key, value, sampleRate = 1)->
+		console.log("counts are not currently supported")
 
 	inc : (key, sampleRate = 1, opts = {})->
 		key = Metrics.buildPromKey(key)
@@ -78,7 +76,7 @@ module.exports = Metrics =
 			console.log("doing count/inc", key, opts)
 
 	timing: (key, timeSpan, sampleRate, opts = {})->
-		key = Metrics.sanitizeKey("timer_" + key)
+		key = Metrics.buildPromKey("timer_" + key)
 		if !promMetrics[key]?
 			promMetrics[key] = new prom.Summary({
 				name: key,
@@ -95,7 +93,7 @@ module.exports = Metrics =
 	Timer : class
 		constructor :(key, sampleRate = 1, opts)->
 			this.start = new Date()
-			key = Metrics.sanitizeKey(key)
+			key = Metrics.buildPromKey(key)
 			this.key = key
 			this.sampleRate = sampleRate
 			this.opts = opts
