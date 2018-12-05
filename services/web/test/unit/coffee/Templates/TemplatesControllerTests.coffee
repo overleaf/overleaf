@@ -21,6 +21,9 @@ describe "TemplatesController", ->
 			"./TemplatesManager": @TemplatesManager = {
 				createProjectFromV1Template: sinon.stub()
 			}
+			"logger-sharelatex":
+				log:->
+				err:->
 		@next = sinon.stub()
 		@req =
 			body:
