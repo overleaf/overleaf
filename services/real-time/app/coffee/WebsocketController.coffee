@@ -197,8 +197,6 @@ module.exports = WebsocketController =
 				update.meta.source = client.id
 				update.meta.user_id = user_id
 				metrics.inc "editor.doc-update", 0.3
-				metrics.set "editor.active-projects", project_id, 0.3
-				metrics.set "editor.active-users", user_id, 0.3
 
 				logger.log {user_id, doc_id, project_id, client_id: client.id, version: update.v}, "sending update to doc updater"
 
