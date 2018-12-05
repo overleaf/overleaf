@@ -559,12 +559,6 @@ describe 'WebsocketController', ->
 
 			it "should call the callback", ->
 				@callback.called.should.equal true
-
-			it "should update the active users metric", ->
-				@metrics.set.calledWith("editor.active-users", @user_id).should.equal true
-			
-			it "should update the active projects metric", ->
-				@metrics.set.calledWith("editor.active-projects", @project_id).should.equal true
 			
 			it "should increment the doc updates", ->
 				@metrics.inc.calledWith("editor.doc-update").should.equal true
