@@ -11,7 +11,7 @@ module.exports =
 			host: process.env["LISTEN_ADDRESS"] or "localhost"
 	apis:
 		documentupdater:
-			url: "http://#{process.env["DOCUPDATER_HOST"] or "localhost"}:3003"
+			url: "http://#{process.env["DOCUMENT_UPDATER_HOST"] or process.env["DOCUPDATER_HOST"] or "localhost"}:3003"
 		docstore:
 			url: "http://#{process.env["DOCSTORE_HOST"] or "localhost"}:3016"
 		web:
