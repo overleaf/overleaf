@@ -24,6 +24,8 @@ describe "ProjectHistoryRedisManager", ->
 				}
 				"redis-sharelatex":
 					createClient: () => @rclient
+				"logger-sharelatex":
+					log:->
 			globals:
 				JSON: @JSON = JSON
 

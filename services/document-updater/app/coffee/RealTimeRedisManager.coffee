@@ -1,6 +1,6 @@
 Settings = require('settings-sharelatex')
-rclient = require("redis-sharelatex").createClient(Settings.redis.realtime)
-Keys = Settings.redis.realtime.key_schema
+rclient = require("redis-sharelatex").createClient(Settings.redis.documentupdater)
+Keys = Settings.redis.documentupdater.key_schema
 logger = require('logger-sharelatex')
 
 MAX_OPS_PER_ITERATION = 8 # process a limited number of ops for safety

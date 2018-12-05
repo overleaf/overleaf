@@ -15,7 +15,7 @@ describe "RealTimeRedisManager", ->
 			"redis-sharelatex": createClient: () => @rclient
 			"settings-sharelatex":
 				redis:
-					realtime: @settings =
+					documentupdater: @settings =
 						key_schema:
 							pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
 			"logger-sharelatex": { log: () -> }

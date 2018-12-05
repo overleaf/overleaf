@@ -20,18 +20,6 @@ module.exports =
 			url: "http://#{process.env["PROJECT_HISTORY_HOST"] or "localhost"}:3054"
 
 	redis:
-		realtime:
-			port: process.env["REAL_TIME_REDIS_PORT"] or process.env["REDIS_PORT"] or "6379"
-			host: process.env["REAL_TIME_REDIS_HOST"] or process.env["REDIS_HOST"] or "localhost"
-			password: process.env["REAL_TIME_REDIS_PASSWORD"] or process.env["REDIS_PASSWORD"] or ""
-			key_schema:
-				pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
-			# cluster: [{
-			# 	port: "7000"
-			# 	host: "localhost"
-			# }]
-			# key_schema:
-			# 	pendingUpdates: ({doc_id}) -> "PendingUpdates:{#{doc_id}}"
 		documentupdater:
 			port: process.env["DOC_UPDATER_REDIS_PORT"] or process.env["REDIS_PORT"] or "6379"
 			host: process.env["DOC_UPDATER_REDIS_HOST"] or process.env["REDIS_HOST"] or "localhost"
@@ -49,6 +37,7 @@ module.exports =
 				projectHistoryId: ({doc_id}) -> "ProjectHistoryId:#{doc_id}"
 				projectState: ({project_id}) -> "ProjectState:#{project_id}"
 				unflushedTime: ({doc_id}) -> "UnflushedTime:#{doc_id}"
+				pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
 			# cluster: [{
 			# 	port: "7000"
 			# 	host: "localhost"

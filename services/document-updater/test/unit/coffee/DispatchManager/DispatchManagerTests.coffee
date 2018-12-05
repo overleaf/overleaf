@@ -4,16 +4,21 @@ should = chai.should()
 modulePath = "../../../../app/js/DispatchManager.js"
 SandboxedModule = require('sandboxed-module')
 
+
 describe "DispatchManager", ->
 	beforeEach ->
+		@timeout(3000)
 		@DispatchManager = SandboxedModule.require modulePath, requires:
 			"./UpdateManager" : @UpdateManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub() }
 			"settings-sharelatex": @settings =
 				redis:
-					realtime: {}
+					documentupdater: {}
 			"redis-sharelatex": @redis = {}
 			"./RateLimitManager": {}
+			"./Metrics":
+				Timer: ->
+					done: ->
 		@callback = sinon.stub()
 		@RateLimiter = { run: (task,cb) -> task(cb) } # run task without rate limit
 
@@ -22,7 +27,6 @@ describe "DispatchManager", ->
 			@client =
 				auth: sinon.stub()
 			@redis.createClient = sinon.stub().returns @client
-			
 			@worker = @DispatchManager.createDispatcher(@RateLimiter)
 			
 		it "should create a new redis client", ->
