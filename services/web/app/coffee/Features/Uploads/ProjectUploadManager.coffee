@@ -22,7 +22,7 @@ module.exports = ProjectUploadHandler =
 					cb(error, _docPath, docContents)
 			(_docPath, docContents, cb) ->
 				docPath = _docPath
-				proposedName = DocumentHelper.getTitleFromTexContent(docContents || '') || defaultName
+				proposedName = ProjectDetailsHandler.fixProjectName(DocumentHelper.getTitleFromTexContent(docContents || '') || defaultName)
 				ProjectDetailsHandler.generateUniqueName owner_id, proposedName, (error, name) ->
 					cb(error, name)
 			(name, cb) ->
@@ -42,7 +42,7 @@ module.exports = ProjectUploadHandler =
 		], callback)
 
 	createProjectFromZipArchiveWithName: (owner_id, proposedName, zipPath, callback = (error, project) ->) ->
-		ProjectDetailsHandler.generateUniqueName owner_id, proposedName, (error, name) =>
+		ProjectDetailsHandler.generateUniqueName owner_id, ProjectDetailsHandler.fixProjectName(proposedName), (error, name) =>
 			return callback(error) if error?
 			ProjectCreationHandler.createBlankProject owner_id, name, (error, project) =>
 				return callback(error) if error?

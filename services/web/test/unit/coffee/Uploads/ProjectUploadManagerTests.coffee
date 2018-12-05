@@ -36,6 +36,7 @@ describe "ProjectUploadManager", ->
 		@ProjectRootDocManager.findRootDocFileFromDirectory = sinon.stub().callsArgWith(1, null, 'main.tex', @othername)
 		@ProjectRootDocManager.setRootDocFromName = sinon.stub().callsArg(2)
 		@DocumentHelper.getTitleFromTexContent = sinon.stub().returns(@othername)
+		@ProjectDetailsHandler.fixProjectName = sinon.stub().returnsArg(0)
 
 	describe "createProjectFromZipArchive", ->
 		describe "when the title can be read from the root document", ->
@@ -79,6 +80,9 @@ describe "ProjectUploadManager", ->
 
 			it "should call the callback", ->
 				@callback.calledWith(sinon.match.falsy, @project).should.equal true
+
+			it "should ensure the name is valid", ->
+				@ProjectDetailsHandler.fixProjectName.called.should.equal true
 
 		describe "when the root document can't be determined", ->
 			beforeEach (done) ->

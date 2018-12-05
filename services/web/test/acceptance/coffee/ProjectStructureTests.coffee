@@ -180,6 +180,30 @@ describe "ProjectStructureChanges", ->
 				expect(project.name).to.equal @test_project_name
 				done()
 
+	describe "uploading a project with an invalid name", ->
+		before (done) ->
+			MockDocUpdaterApi.clearProjectStructureUpdates()
+
+			zip_file = fs.createReadStream(Path.resolve(__dirname + '/../files/test_project_with_invalid_name.zip'))
+			@test_project_match = /^bad[^\\]+name$/
+
+			req = @owner.request.post {
+				uri: "project/new/upload",
+				formData:
+					qqfile: zip_file
+			}, (error, res, body) =>
+				throw error if error?
+				if res.statusCode < 200 || res.statusCode >= 300
+					throw new Error("failed to upload project #{res.statusCode}")
+				@uploaded_project_id = JSON.parse(body).project_id
+				done()
+
+		it "should set the project name from the zip contents", (done) ->
+			ProjectGetter.getProject @uploaded_project_id, (error, project) =>
+				expect(error).not.to.exist
+				expect(project.name).to.match @test_project_match
+				done()
+
 	describe "uploading a file", ->
 		beforeEach (done) ->
 			MockDocUpdaterApi.clearProjectStructureUpdates()
