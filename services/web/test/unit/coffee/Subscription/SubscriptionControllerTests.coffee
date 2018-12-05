@@ -115,31 +115,8 @@ describe "SubscriptionController", ->
 
 		describe 'when user is not logged in', (done) ->
 			beforeEach (done) ->
-				@UserGetter =
-					getUser: sinon.stub().callsArgWith(2, null, null)
 				@res.callback = done
-				@AuthenticationController =
-					getLoggedInUser: sinon.stub().callsArgWith(1, null, null)
-					getLoggedInUserId: sinon.stub().returns(null)
-					getSessionUser: sinon.stub().returns(null)
-					isUserLoggedIn: sinon.stub().returns(false)
-				@SubscriptionController = SandboxedModule.require modulePath, requires:
-					'../Authentication/AuthenticationController': @AuthenticationController
-					'./SubscriptionHandler': @SubscriptionHandler
-					"./PlansLocator": @PlansLocator
-					'./SubscriptionViewModelBuilder': @SubscriptionViewModelBuilder
-					"./LimitationsManager": @LimitationsManager
-					"../../infrastructure/GeoIpLookup":@GeoIpLookup
-					"logger-sharelatex":
-						log:->
-						warn:->
-					"settings-sharelatex": @settings
-					"./SubscriptionDomainHandler":@SubscriptionDomainHandler
-					"../User/UserGetter": @UserGetter
-					"./RecurlyWrapper": @RecurlyWrapper = {}
-					"./FeaturesUpdater": @FeaturesUpdater = {}
-					"./GroupPlansData": @GroupPlansData
-
+				@AuthenticationController.getLoggedInUserId = sinon.stub().returns(null)
 				@SubscriptionController.plansPage(@req, @res)
 
 			it 'should not fetch the current user', (done) ->
