@@ -25,7 +25,8 @@ public class MissingRepositoryException extends SnapshotAPIException {
             );
         } else {
             return Arrays.asList(
-                    "This Overleaf project has been moved to Overleaf v2, You should change your remote to:",
+                    "This Overleaf project has been moved to Overleaf v2, and has a new identifier.",
+                    "Please update your remote to:",
                     "",
                     "    " + remoteUrl,
                     "",
