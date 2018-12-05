@@ -40,6 +40,7 @@ test/IntergrationTests/js/*
 data/*/*
 
 app.js
+app.js.map
 cluster.js
 app/js/*
 test/IntergrationTests/js/*
