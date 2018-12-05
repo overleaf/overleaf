@@ -48,7 +48,8 @@ public class SnapshotAPIState {
                         243,
                         "2014-11-30T18:40:58Z",
                         "jdleesmiller+1@gmail.com",
-                        "John+1"
+                        "John+1",
+                        null
                 )
         );
 

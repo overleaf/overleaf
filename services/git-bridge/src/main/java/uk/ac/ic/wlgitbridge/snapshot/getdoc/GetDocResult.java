@@ -52,16 +52,6 @@ public class GetDocResult extends Result {
         this.migratedFromID = migratedFromID;
     }
 
-    public GetDocResult(
-            JsonElement error,
-            int versionID,
-            String createdAt,
-            String email,
-            String name
-    ) {
-        this(error, versionID, createdAt, email, name, null);
-    }
-
     @Override
     public JsonElement toJson() {
         JsonObject jsonThis = new JsonObject();
