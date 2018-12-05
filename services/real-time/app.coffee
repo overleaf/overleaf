@@ -52,7 +52,6 @@ app.get "/", (req, res, next) ->
 	res.send "real-time-sharelatex is alive"
 
 app.get "/status", (req, res, next) ->
-	console.log("got status", req.query, io.sockets.clients()?.length)
 	res.send "real-time-sharelatex is alive"
 
 rclient = require("redis-sharelatex").createClient(Settings.redis.realtime)
