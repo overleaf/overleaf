@@ -15,8 +15,9 @@ describe 'ProjectRootDocManager', ->
 			"doc-id-4": "/nested/chapter1b.tex"
 		@sl_req_id = "sl-req-id-123"
 		@callback = sinon.stub()
-		@globby = sinon.stub().returns(new Promise (resolve) ->
-			resolve(['a.tex', 'b.tex', 'main.tex'])
+		@globbyFiles = ['a.tex', 'b.tex', 'main.tex']
+		@globby = sinon.stub().returns(new Promise (resolve) =>
+			resolve(@globbyFiles)
 		)
 		@fs =
 			readFile: sinon.stub().callsArgWith(2, new Error('file not found'))
@@ -100,14 +101,14 @@ describe 'ProjectRootDocManager', ->
 			@documentclassContent = "% test\n\\documentclass\n\% test"
 
 		describe "when there is a file in a subfolder", ->
-			@globby = sinon.stub().returns(new Promise (resolve) ->
-				resolve(['c.tex', 'a.tex', 'a/a.tex', 'b.tex'])
-			)
+			beforeEach ->
+				# have to splice globbyFiles weirdly because of the way the stubbed globby method handles references
+				@globbyFiles.splice(0, @globbyFiles.length, 'c.tex', 'a.tex', 'a/a.tex', 'b.tex')
 
-			it "processes the root folder files first, and then the subfolder, in alphabetical order", ->
-				@ProjectRootDocManager.findRootDocFileFromDirectory '/foo', =>
+			it "processes the root folder files first, and then the subfolder, in alphabetical order", (done) ->
+				@ProjectRootDocManager.findRootDocFileFromDirectory '/foo', (error, path) =>
 					expect(error).not.to.exist
-					expect(path).to.equal null
+					expect(path).not.to.exist
 					sinon.assert.callOrder(
 						@fs.readFile.withArgs('/foo/a.tex')
 						@fs.readFile.withArgs('/foo/b.tex')
@@ -116,11 +117,11 @@ describe 'ProjectRootDocManager', ->
 					)
 					done()
 
-			it "processes smaller files first", ->
+			it "processes smaller files first", (done) ->
 				@fs.stat.withArgs('/foo/c.tex').callsArgWith(1, null, {size: 1})
-				@ProjectRootDocManager.findRootDocFileFromDirectory '/foo', =>
+				@ProjectRootDocManager.findRootDocFileFromDirectory '/foo',(error, path) =>
 					expect(error).not.to.exist
-					expect(path).to.equal null
+					expect(path).not.to.exist
 					sinon.assert.callOrder(
 						@fs.readFile.withArgs('/foo/c.tex')
 						@fs.readFile.withArgs('/foo/a.tex')
