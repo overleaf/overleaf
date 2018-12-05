@@ -64,6 +64,8 @@ app.get "/health_check/redis", (req, res, next) ->
 		else
 			res.sendStatus 200
 
+Metrics.injectMetricsRoute(app)
+
 Router = require "./app/js/Router"
 Router.configure(app, io, sessionSockets)
 
