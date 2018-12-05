@@ -79,8 +79,6 @@ public class FSGitRepoStore implements RepoStore {
      public ProjectRepo initRepoFromExisting(
              String project, String fromProject
      ) throws IOException {
-         GitProjectRepo ret = GitProjectRepo.fromName(project);
-         ret.initRepo(this);
          String repoRoot = getRepoStorePath();
          String sourcePath = repoRoot + "/" + fromProject;
          String destinationPath = repoRoot + "/" + project;
@@ -92,12 +90,13 @@ public class FSGitRepoStore implements RepoStore {
          try {
              File source = new File(sourcePath);
              File destination = new File(destinationPath);
-             FileUtils.deleteDirectory(destination);
              FileUtils.copyDirectory(source, destination);
          } catch (Exception e) {
              e.printStackTrace();
              throw new IOException("copy failed" + e.getLocalizedMessage());
          }
+         GitProjectRepo ret = GitProjectRepo.fromName(project);
+         ret.useExistingRepository(this);
          return new WalkOverrideGitRepo(
                  ret, Optional.of(maxFileSize), Optional.empty());
      }
