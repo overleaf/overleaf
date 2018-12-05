@@ -5,9 +5,17 @@ module.exports = (obj, methodName, prefix, logger) ->
 	if typeof obj[methodName] != 'function'
 		throw new Error("[Metrics] expected object property '#{methodName}' to be a function")
 
-	realMethod = obj[methodName]
 	key = "#{prefix}.#{methodName}"
 
+	realMethod = obj[methodName]
+
+	splitPrefix = prefix.split(".")
+	startPrefix = splitPrefix[0]
+
+	if splitPrefix[1]?
+		modifedMethodName = "#{splitPrefix[1]}_#{methodName}"
+	else
+		modifedMethodName = methodName
 	obj[methodName] = (originalArgs...) ->
 
 		[firstArgs..., callback] = originalArgs
@@ -17,15 +25,15 @@ module.exports = (obj, methodName, prefix, logger) ->
 				logger.log "[Metrics] expected wrapped method '#{methodName}' to be invoked with a callback"
 			return realMethod.apply this, originalArgs
 
-		timer = new metrics.Timer(key)
+		timer = new metrics.Timer(startPrefix, 1, {method: modifedMethodName})
 
 		realMethod.call this, firstArgs..., (callbackArgs...) ->
 			elapsedTime = timer.done()
 			possibleError = callbackArgs[0]
 			if possibleError? 
-				metrics.inc "#{key}.failure"
+				metrics.inc "#{startPrefix}_result", 1, {status:"failed", method: modifedMethodName}
 			else
-				metrics.inc "#{key}.success"
+				metrics.inc "#{startPrefix}_result", 1, {status:"success", method: modifedMethodName}
 			if logger?
 				loggableArgs = {}
 				try
