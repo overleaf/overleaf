@@ -29,6 +29,16 @@
 
 .tag-link {
 	margin: 0 @margin-xs @margin-sm 0;
+	max-width: 100%;
+	white-space: inherit;
+}
+
+.template-abstract {
+	word-break: break-word;
+	hyphens: auto;
+	a {
+		hyphens: none;
+	}
 }
 
 .templates-container {
@@ -87,7 +97,7 @@
 	margin-top: @margin-lg;
 }
 
-/* Media Queries */ 
+/* Media Queries */
 @media (min-width: @screen-sm-min) {
 	.templates-container {
 		column-count: 3;

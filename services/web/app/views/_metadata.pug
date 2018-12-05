@@ -16,26 +16,30 @@
 
 //- Description
 -if (metadata && metadata.description)
-	meta(itemprop="description", name="description" , content=metadata.description)
-	//-twitter and og descriptions handeled below
+	meta(name="description" , content=metadata.description)
+	meta(itemprop="description" , content=metadata.description)
+	//-twitter and og descriptions handeled in their sections below
 -else
-	meta(itemprop="description", name="description", content=translate("site_description"))
-	meta(itemprop="description", name="twitter:description", content=translate("site_description"))
-	meta(itemprop="description", name="og:description", content=translate("site_description"))
+	meta(name="description", content=translate("site_description"))
+	meta(itemprop="description", content=translate("site_description"))
 
 //- Image
 -if (metadata && metadata.image)
 	//- from the CMS
-	meta(itemprop="image", name="image", content=metadata.image.fields.file.url)
+	meta(itemprop="image", content=metadata.image.fields.file.url)
+	meta(name="image", content=metadata.image.fields.file.url)
 -else if (metadata && metadata.image_src)
 	//- pages with custom metadata images, metadata.image_src is the full image URL
-	meta(itemprop="image", name="image", content=metadata.image_src)
+	meta(itemprop="image", content=metadata.image_src)
+	meta(name="image", content=metadata.image_src)
 -else if (settings.overleaf)
 	//- the default image for Overleaf
-	meta(itemprop="image", name="image", content=buildImgPath('ol-brand/overleaf_og_logo.png'))
+	meta(itemprop="image", content=buildImgPath('ol-brand/overleaf_og_logo.png'))
+	meta(name="image", content=buildImgPath('ol-brand/overleaf_og_logo.png'))
 -else
 	//- the default image for ShareLaTeX
-	meta(itemprop="image", name="image", content='/touch-icon-192x192.png')
+	meta(itemprop="image", content='/touch-icon-192x192.png')
+	meta(name="image", content='/touch-icon-192x192.png')
 
 //- Keywords
 -if (metadata && metadata.keywords)
@@ -52,33 +56,37 @@ meta(name="twitter:card", content=metadata && metadata.twitterCardType ? metadat
 -if (settings.social && settings.social.twitter && settings.social.twitter.handle)
 	meta(name="twitter:site", content="@" + settings.social.twitter.handle)
 -if (metadata && metadata.twitterDescription)
-	meta(itemprop="twitter:description", content=metadata.twitterDescription)
+	meta(name="twitter:description", content=metadata.twitterDescription)
+- else
+	meta(name="twitter:description", content=translate("site_description"))
 -if (metadata && metadata.twitterImage)
 	//- from the CMS
-	meta(itemprop="image", name="twitter:image", content=metadata.twitterImage.fields.file.url)
-	meta(itemprop="image", name="twitter:image:alt", content=metadata.twitterImage.fields.title)
+	meta(name="twitter:image", content=metadata.twitterImage.fields.file.url)
+	meta(name="twitter:image:alt", content=metadata.twitterImage.fields.title)
 -else if (settings.overleaf)
 	//- the default image for Overleaf
-	meta(itemprop="image", name="twitter:image", content=buildImgPath('ol-brand/overleaf_og_logo.png'))
+	meta(name="twitter:image", content=buildImgPath('ol-brand/overleaf_og_logo.png'))
 -else
 	//- the default image for ShareLaTeX
-	meta(itemprop="image", name="twitter:image", content='/touch-icon-192x192.png')
+	meta(name="twitter:image", content='/touch-icon-192x192.png')
 
 //- Open Graph
 //- to do - add og:url
 -if (settings.social && settings.social.facebook && settings.social.facebook.appId)
 	meta(name="fb:app_id", content=settings.social.facebook.appId)
 -if (metadata && metadata.openGraphDescription)
-	meta(itemprop="description", name="og:description", content=metadata.openGraphDescription)
+	meta(name="og:description", content=metadata.openGraphDescription)
+-else
+	meta(name="og:description", content=translate("site_description"))
 -if (metadata && metadata.openGraphImage)
 	//- from the CMS
-	meta(itemprop="image", name="og:image", content=metadata.openGraphImage.fields.file.url)
+	meta(name="og:image", content=metadata.openGraphImage.fields.file.url)
 -else if (settings.overleaf)
 	//- the default image for Overleaf
-	meta(itemprop="image", name="og:image", content=buildImgPath('ol-brand/overleaf_og_logo.png'))
+	meta(name="og:image", content=buildImgPath('ol-brand/overleaf_og_logo.png'))
 -else
 	//- the default image for ShareLaTeX
-	meta(itemprop="image", name="og:image", content='/touch-icon-192x192.png')
+	meta(name="og:image", content='/touch-icon-192x192.png')
 -if (metadata && metadata.openGraphType)
 	meta(name="og:type", metadata.openGraphType)
 -else
@@ -86,4 +94,4 @@ meta(name="twitter:card", content=metadata && metadata.twitterCardType ? metadat
 
 //- Viewport
 if metadata && metadata.viewport
-	meta(name="viewport" content="width=device-width; initial-scale=1.0; user-scalable=yes;")
+	meta(name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes")
