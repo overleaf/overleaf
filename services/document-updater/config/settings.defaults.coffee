@@ -21,9 +21,9 @@ module.exports =
 
 	redis:
 		realtime:
-			port: process.env["REDIS_PORT"] or "6379"
-			host: process.env["REDIS_HOST"] or "localhost"
-			password: process.env["REDIS_PASSWORD"]
+			port: process.env["REAL_TIME_REDIS_PORT"] or process.env["REDIS_PORT"] or "6379"
+			host: process.env["REAL_TIME_REDIS_HOST"] or process.env["REDIS_HOST"] or "localhost"
+			password: process.env["REAL_TIME_REDIS_PASSWORD"] or process.env["REDIS_PASSWORD"] or ""
 			key_schema:
 				pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
 			# cluster: [{
@@ -33,9 +33,9 @@ module.exports =
 			# key_schema:
 			# 	pendingUpdates: ({doc_id}) -> "PendingUpdates:{#{doc_id}}"
 		documentupdater:
-			port: process.env["REDIS_PORT"] or "6379"
-			host: process.env["REDIS_HOST"] or "localhost"
-			password: process.env["REDIS_PASSWORD"]
+			port: process.env["DOC_UPDATER_REDIS_PORT"] or process.env["REDIS_PORT"] or "6379"
+			host: process.env["DOC_UPDATER_REDIS_HOST"] or process.env["REDIS_HOST"] or "localhost"
+			password: process.env["DOC_UPDATER_REDIS_PASSWORD"] or process.env["REDIS_PASSWORD"] or ""
 			key_schema:
 				blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
 				docLines: ({doc_id}) -> "doclines:#{doc_id}"
@@ -64,9 +64,9 @@ module.exports =
 			# 	ranges: ({doc_id}) -> "Ranges:{#{doc_id}}"
 			# 	projectState: ({project_id}) -> "ProjectState:{#{project_id}}"
 		history:
-			port: process.env["REDIS_PORT"] or "6379"
-			host: process.env["REDIS_HOST"] or "localhost"
-			password: process.env["REDIS_PASSWORD"]
+			port: process.env["HISTORY_REDIS_PORT"] or process.env["REDIS_PORT"] or "6379"
+			host: process.env["HISTORY_REDIS_HOST"] or process.env["REDIS_HOST"] or "localhost"
+			password: process.env["HISTORY_REDIS_PASSWORD"] or process.env["REDIS_PASSWORD"] or ""
 			key_schema:
 				uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
 				docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:#{project_id}"
@@ -83,9 +83,9 @@ module.exports =
 			# 	uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:{#{doc_id}}"
 			# 	docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:{#{project_id}}"
 		lock:
-			port: process.env["REDIS_PORT"] or "6379"
-			host: process.env["REDIS_HOST"] or "localhost"
-			password: process.env["REDIS_PASSWORD"]
+			port: process.env["LOCK_REDIS_PORT"] or process.env["REDIS_PORT"] or "6379"
+			host: process.env["LOCK_REDIS_HOST"] or process.env["REDIS_HOST"] or "localhost"
+			password: process.env["LOCK_REDIS_PASSWORD"] or process.env["REDIS_PASSWORD"] or ""
 			key_schema:
 				blockingKey: ({doc_id}) -> "Blocking:#{doc_id}"
 			# cluster: [{
