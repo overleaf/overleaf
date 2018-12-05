@@ -83,30 +83,21 @@ public class SnapshotAPIStateBuilder {
             String projectName,
             JsonObject jsonGetDoc
     ) {
+        String migratedFromId = null;
         if (jsonGetDoc.has("migratedFromId")) {
-            getDoc.put(
-                    projectName,
-                    new GetDocResult(
-                            jsonGetDoc.get("error"),
-                            jsonGetDoc.get("versionID").getAsInt(),
-                            jsonGetDoc.get("createdAt").getAsString(),
-                            jsonGetDoc.get("email").getAsString(),
-                            jsonGetDoc.get("name").getAsString(),
-                            jsonGetDoc.get("migratedFromId").getAsString()
-                    )
-            );
-        } else {
-            getDoc.put(
-                    projectName,
-                    new GetDocResult(
-                            jsonGetDoc.get("error"),
-                            jsonGetDoc.get("versionID").getAsInt(),
-                            jsonGetDoc.get("createdAt").getAsString(),
-                            jsonGetDoc.get("email").getAsString(),
-                            jsonGetDoc.get("name").getAsString()
-                    )
-            );
+            migratedFromId = jsonGetDoc.get("migratedFromId").getAsString();
         }
+        getDoc.put(
+                projectName,
+                new GetDocResult(
+                        jsonGetDoc.get("error"),
+                        jsonGetDoc.get("versionID").getAsInt(),
+                        jsonGetDoc.get("createdAt").getAsString(),
+                        jsonGetDoc.get("email").getAsString(),
+                        jsonGetDoc.get("name").getAsString(),
+                        migratedFromId
+                )
+        );
     }
 
     private void addGetSavedVersForProject(
