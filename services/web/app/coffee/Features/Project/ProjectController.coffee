@@ -330,8 +330,7 @@ module.exports = ProjectController =
 				if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?
 					allowedFreeTrial = !!subscription.freeTrial.allowed || true
 
-				showGitBridge =
-					user.betaProgram && !project.overleaf?.id? # don't support v1 projects yet
+				showGitBridge = user.betaProgram
 
 				logger.log project_id:project_id, "rendering editor page"
 				res.render 'project/editor',
