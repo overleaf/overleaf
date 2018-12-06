@@ -37,6 +37,7 @@ import uk.ac.ic.wlgitbridge.server.PostbackContents;
 import uk.ac.ic.wlgitbridge.server.PostbackHandler;
 import uk.ac.ic.wlgitbridge.snapshot.base.MissingRepositoryException;
 import uk.ac.ic.wlgitbridge.snapshot.base.ForbiddenException;
+import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocResult;
 import uk.ac.ic.wlgitbridge.snapshot.getforversion.SnapshotAttachment;
 import uk.ac.ic.wlgitbridge.snapshot.push.PostbackManager;
 import uk.ac.ic.wlgitbridge.snapshot.push.PostbackPromise;
@@ -299,7 +300,7 @@ public class Bridge {
      * Synchronises the given repository with Overleaf.
      *
      * It acquires the project lock and calls
-     * {@link #getUpdatedRepoCritical(Optional, String)}.
+     * {@link #getUpdatedRepoCritical(Optional, String, GetDocResult)}.
      * @param oauth2 The oauth2 to use
      * @param projectName The name of the project
      * @throws IOException
@@ -310,11 +311,13 @@ public class Bridge {
             String projectName
     ) throws IOException, GitUserException {
         try (LockGuard __ = lock.lockGuard(projectName)) {
-            if (!snapshotAPI.projectExists(oauth2, projectName)) {
+            Optional<GetDocResult> maybeDoc = snapshotAPI.getDoc(oauth2, projectName);
+            if (!maybeDoc.isPresent()) {
                 throw new RepositoryNotFoundException(projectName);
             }
+            GetDocResult doc = maybeDoc.get();
             Log.info("[{}] Updating repository", projectName);
-            return getUpdatedRepoCritical(oauth2, projectName);
+            return getUpdatedRepoCritical(oauth2, projectName, doc);
         }
     }
 
@@ -346,14 +349,51 @@ public class Bridge {
      */
     private ProjectRepo getUpdatedRepoCritical(
             Optional<Credential> oauth2,
-            String projectName
+            String projectName,
+            GetDocResult doc
     ) throws IOException, GitUserException {
         ProjectRepo repo;
         ProjectState state = dbStore.getProjectState(projectName);
         switch (state) {
         case NOT_PRESENT:
-            repo = repoStore.initRepo(projectName);
-            break;
+            Log.info("[{}] Repo not present", projectName);
+            String migratedFromID = doc.getMigratedFromID();
+            if (migratedFromID != null) {
+                Log.info("[{}] Has a migratedFromId: {}", projectName, migratedFromID);
+                try (LockGuard __ = lock.lockGuard(migratedFromID)) {
+                    ProjectState sourceState = dbStore.getProjectState(migratedFromID);
+                    switch (sourceState) {
+                        case NOT_PRESENT:
+                            // Normal init-repo
+                            Log.info("[{}] migrated-from project not present, proceed as normal",
+                                 projectName
+                            );
+                            repo = repoStore.initRepo(projectName);
+                            break;
+                        case SWAPPED:
+                            // Swap back and then copy
+                            swapJob.restore(migratedFromID);
+                            /* Fallthrough */
+                        default:
+                            // Copy data, and set version to zero
+                            Log.info("[{}] Init from other project: {}",
+                                projectName,
+                                migratedFromID
+                            );
+                            repo = repoStore.initRepoFromExisting(projectName, migratedFromID);
+                            dbStore.setLatestVersionForProject(migratedFromID, 0);
+                            dbStore.setLastAccessedTime(
+                                    migratedFromID,
+                                    Timestamp.valueOf(LocalDateTime.now())
+
+                            );
+                    }
+                }
+                break;
+            } else {
+                repo = repoStore.initRepo(projectName);
+                break;
+            }
         case SWAPPED:
             swapJob.restore(projectName);
             /* Fallthrough */

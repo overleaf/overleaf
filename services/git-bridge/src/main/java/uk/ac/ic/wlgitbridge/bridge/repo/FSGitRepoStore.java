@@ -4,6 +4,7 @@ import com.google.api.client.repackaged.com.google.common.base.Preconditions;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
+import uk.ac.ic.wlgitbridge.util.Log;
 import uk.ac.ic.wlgitbridge.util.Project;
 import uk.ac.ic.wlgitbridge.util.Tar;
 
@@ -73,6 +74,27 @@ public class FSGitRepoStore implements RepoStore {
         return new WalkOverrideGitRepo(
                 ret, Optional.of(maxFileSize), Optional.empty());
     }
+
+     @Override
+     public ProjectRepo initRepoFromExisting(
+             String project, String fromProject
+     ) throws IOException {
+         String repoRoot = getRepoStorePath();
+         String sourcePath = repoRoot + "/" + fromProject;
+         String destinationPath = repoRoot + "/" + project;
+         Log.info("[{}] Init repo by copying data from: {}, to: {}",
+             project,
+             sourcePath,
+             destinationPath
+         );
+         File source = new File(sourcePath);
+         File destination = new File(destinationPath);
+         FileUtils.copyDirectory(source, destination);
+         GitProjectRepo ret = GitProjectRepo.fromName(project);
+         ret.useExistingRepository(this);
+         return new WalkOverrideGitRepo(
+                 ret, Optional.of(maxFileSize), Optional.empty());
+     }
 
     @Override
     public ProjectRepo getExistingRepo(String project) throws IOException {

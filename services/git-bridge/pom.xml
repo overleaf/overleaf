@@ -9,6 +9,7 @@
     <version>1.0-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!--<maven.test.skip>true</maven.test.skip>-->
     </properties>
     <build>
         <plugins>
@@ -20,6 +21,15 @@
                     <source>1.8</source>
                     <target>1.8</target>
                     <compilerArgument></compilerArgument>
+                </configuration>
+            </plugin>
+            <!-- Workaround, test loader crashes without this configuration option -->
+            <!-- See: https://stackoverflow.com/questions/53010200/maven-surefire-could-not-find-forkedbooter-class -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                  <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
                 </configuration>
             </plugin>
             <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-assembly-plugin -->

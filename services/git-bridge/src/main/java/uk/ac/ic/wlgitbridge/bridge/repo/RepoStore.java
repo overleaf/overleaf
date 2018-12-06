@@ -22,6 +22,8 @@ public interface RepoStore {
 
     ProjectRepo initRepo(String project) throws IOException;
 
+    ProjectRepo initRepoFromExisting(String project, String fromProject) throws IOException;
+
     ProjectRepo getExistingRepo(String project) throws IOException;
 
     ProjectRepo useJGitRepo(Repository repo, ObjectId commitId);

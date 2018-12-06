@@ -14,6 +14,7 @@ import uk.ac.ic.wlgitbridge.bridge.snapshot.SnapshotApiFacade;
 import uk.ac.ic.wlgitbridge.bridge.swap.job.SwapJob;
 import uk.ac.ic.wlgitbridge.bridge.swap.store.SwapStore;
 import uk.ac.ic.wlgitbridge.git.exception.GitUserException;
+import uk.ac.ic.wlgitbridge.snapshot.getdoc.GetDocResult;
 
 import java.io.IOException;
 import java.util.ArrayDeque;
@@ -91,6 +92,9 @@ public class BridgeTest {
         when(repoStore.getExistingRepo("asdf")).thenReturn(repo);
         when(dbStore.getProjectState("asdf")).thenReturn(ProjectState.PRESENT);
         when(snapshotAPI.projectExists(Optional.empty(), "asdf")).thenReturn(true);
+        when(
+            snapshotAPI.getDoc(Optional.empty(), "asdf")
+        ).thenReturn(Optional.of(mock(GetDocResult.class)));
         when(
                 snapshotAPI.getSnapshots(
                         any(),

@@ -79,9 +79,17 @@ public abstract class Request<T extends Result> {
                     try {
                         JsonObject json = Instance.gson.fromJson(httpCause.getContent(), JsonObject.class);
                         String message = json.get("message").getAsString();
+                        String newRemote;
+                        if (json.has("newRemote")) {
+                            newRemote = json.get("newRemote").getAsString();
+                        } else {
+                            newRemote = null;
+                        }
 
                         if ("Exported to v2".equals(message)) {
-                            throw new MissingRepositoryException(MissingRepositoryException.EXPORTED_TO_V2);
+                            throw new MissingRepositoryException(
+                                MissingRepositoryException.buildExportedToV2Message(newRemote)
+                            );
                         }
                     } catch (IllegalStateException
                             | ClassCastException

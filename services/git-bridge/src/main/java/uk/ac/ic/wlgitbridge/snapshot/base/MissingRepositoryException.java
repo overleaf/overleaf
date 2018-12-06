@@ -15,11 +15,31 @@ public class MissingRepositoryException extends SnapshotAPIException {
         "If this problem persists, please contact us."
     );
 
-    public static final List<String> EXPORTED_TO_V2 = Arrays.asList(
-        "This Overleaf project has been moved to Overleaf v2, and git access is temporarily unsupported.",
-        "",
-        "See https://www.overleaf.com/help/342 for more information."
-    );
+    static List<String> buildExportedToV2Message(String remoteUrl) {
+        if (remoteUrl == null) {
+            return Arrays.asList(
+                    "This Overleaf project has been moved to Overleaf v2 and cannot be used with git at this time.",
+                    "",
+                    "If this error persists, please contact us at support@overleaf.com, or",
+                    "see https://www.overleaf.com/help/342 for more information."
+            );
+        } else {
+            return Arrays.asList(
+                    "This Overleaf project has been moved to Overleaf v2 and has a new identifier.",
+                    "Please update your remote to:",
+                    "",
+                    "    " + remoteUrl,
+                    "",
+                    "Assuming you are using the default \"origin\" remote, the following commands",
+                    "will change the remote for you:",
+                    "",
+                    "    git remote set-url origin " + remoteUrl,
+                    "",
+                    "If this does not work, please contact us at support@overleaf.com, or",
+                    "see https://www.overleaf.com/help/342 for more information."
+            );
+        }
+    }
 
     private List<String> descriptionLines;
 

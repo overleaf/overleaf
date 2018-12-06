@@ -117,6 +117,12 @@ public class WLGitBridgeIntegrationTest {
         put("pushSubmoduleFailsWithInvalidGitRepo", new HashMap<String, SnapshotAPIState>() {{
             put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/pushSubmoduleFailsWithInvalidGitRepo/state/state.json")).build());
         }});
+        put("canMigrateRepository", new HashMap<String, SnapshotAPIState>() {{
+            put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/canMigrateRepository/state/state.json")).build());
+        }});
+        put("skipMigrationWhenMigratedFromMissing", new HashMap<String, SnapshotAPIState>() {{
+            put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/skipMigrationWhenMigratedFromMissing/state/state.json")).build());
+        }});
     }};
 
     @Rule
@@ -785,6 +791,43 @@ public class WLGitBridgeIntegrationTest {
         Process gitProcess = runtime.exec("git clone http://127.0.0.1:" + gitBridgePort + "/testproj.git", null, dir);
         wlgb.stop();
         assertNotEquals(0, gitProcess.waitFor());
+    }
+
+    @Test
+    public void canMigrateRepository() throws IOException, GitAPIException, InterruptedException {
+        int gitBridgePort = 33881;
+        int mockServerPort = 3881;
+        MockSnapshotServer server = new MockSnapshotServer(mockServerPort, getResource("/canMigrateRepository").toFile());
+        server.start();
+        server.setState(states.get("canMigrateRepository").get("state"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+                makeConfigFile(gitBridgePort, mockServerPort)
+        });
+        wlgb.run();
+        File testprojDir = gitClone("testproj", gitBridgePort, dir);
+        File testprojDir2 = gitClone("testproj2", gitBridgePort, dir);
+        wlgb.stop();
+
+        // Second project content is equal to content of the first
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canMigrateRepository/state/testproj"), testprojDir2.toPath()));
+    }
+
+    @Test
+    public void skipMigrationWhenMigratedFromMissing() throws IOException, GitAPIException, InterruptedException {
+        int gitBridgePort = 33882;
+        int mockServerPort = 3882;
+        MockSnapshotServer server = new MockSnapshotServer(mockServerPort, getResource("/skipMigrationWhenMigratedFromMissing").toFile());
+        server.start();
+        server.setState(states.get("skipMigrationWhenMigratedFromMissing").get("state"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+                makeConfigFile(gitBridgePort, mockServerPort)
+        });
+        wlgb.run();
+        // don't clone the source project first
+        File testprojDir2 = gitClone("testproj2", gitBridgePort, dir);
+        wlgb.stop();
+
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/skipMigrationWhenMigratedFromMissing/state/testproj2"), testprojDir2.toPath()));
     }
 
     private String makeConfigFile(
