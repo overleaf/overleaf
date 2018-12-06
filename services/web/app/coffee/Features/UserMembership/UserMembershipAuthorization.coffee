@@ -50,7 +50,10 @@ module.exports = UserMembershipAuthorization =
 			req.template =
 				id: body.id
 				title: body.title
-			requireAccessToEntity('publisher', body.brand.slug, req, res, next)
+			if body?.brand?.slug
+				requireAccessToEntity('publisher', body.brand.slug, req, res, next)
+			else
+				AuthorizationMiddlewear.ensureUserIsSiteAdmin(req, res, next)
 
 	requireGraphAccess: (req, res, next) ->
 		if req.query.resource_type == 'template'

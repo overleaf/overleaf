@@ -21,6 +21,7 @@ describe "UserMembershipAuthorization", ->
 			getEntityWithoutAuthorizationCheck: sinon.stub().yields(null, @subscription)
 		@AuthorizationMiddlewear =
 			redirectToRestricted: sinon.stub().yields()
+			ensureUserIsSiteAdmin: sinon.stub().yields()
 		@UserMembershipAuthorization = SandboxedModule.require modulePath, requires:
 			'../Authentication/AuthenticationController': @AuthenticationController
 			'../Authorization/AuthorizationMiddlewear': @AuthorizationMiddlewear
@@ -132,7 +133,7 @@ describe "UserMembershipAuthorization", ->
 				)
 				done()
 
-		it 'handle template access', (done) ->
+		it 'handle template with brand access', (done) ->
 			templateData =
 				id: 123
 				title: 'Template Title'
@@ -145,6 +146,18 @@ describe "UserMembershipAuthorization", ->
 					'brand-slug',
 					modelName: 'Publisher',
 				)
+				done()
+
+		it 'handle template without brand access', (done) ->
+			templateData =
+				id: 123
+				title: 'Template Title'
+				brand: null
+			@request.yields(null, { statusCode: 200 }, JSON.stringify(templateData))
+			@UserMembershipAuthorization.requireTemplateAccess @req, null, (error) =>
+				expect(error).to.not.extist
+				sinon.assert.notCalled(@UserMembershipHandler.getEntity)
+				sinon.assert.calledOnce(@AuthorizationMiddlewear.ensureUserIsSiteAdmin)
 				done()
 
 		it 'handle graph access', (done) ->
