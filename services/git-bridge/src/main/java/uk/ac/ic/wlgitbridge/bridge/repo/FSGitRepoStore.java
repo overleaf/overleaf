@@ -87,14 +87,9 @@ public class FSGitRepoStore implements RepoStore {
              sourcePath,
              destinationPath
          );
-         try {
-             File source = new File(sourcePath);
-             File destination = new File(destinationPath);
-             FileUtils.copyDirectory(source, destination);
-         } catch (Exception e) {
-             e.printStackTrace();
-             throw new IOException("copy failed" + e.getLocalizedMessage());
-         }
+         File source = new File(sourcePath);
+         File destination = new File(destinationPath);
+         FileUtils.copyDirectory(source, destination);
          GitProjectRepo ret = GitProjectRepo.fromName(project);
          ret.useExistingRepository(this);
          return new WalkOverrideGitRepo(
