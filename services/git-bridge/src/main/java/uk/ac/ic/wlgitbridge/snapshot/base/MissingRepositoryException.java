@@ -18,14 +18,14 @@ public class MissingRepositoryException extends SnapshotAPIException {
     static List<String> buildExportedToV2Message(String remoteUrl) {
         if (remoteUrl == null) {
             return Arrays.asList(
-                    "This Overleaf project has been moved to Overleaf v2, and cannot be used with git at this time.",
+                    "This Overleaf project has been moved to Overleaf v2 and cannot be used with git at this time.",
                     "",
                     "If this error persists, please contact us at support@overleaf.com, or",
                     "see https://www.overleaf.com/help/342 for more information."
             );
         } else {
             return Arrays.asList(
-                    "This Overleaf project has been moved to Overleaf v2, and has a new identifier.",
+                    "This Overleaf project has been moved to Overleaf v2 and has a new identifier.",
                     "Please update your remote to:",
                     "",
                     "    " + remoteUrl,
