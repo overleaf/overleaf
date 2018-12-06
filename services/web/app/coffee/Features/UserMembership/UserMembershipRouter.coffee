@@ -2,6 +2,7 @@ UserMembershipAuthorization = require './UserMembershipAuthorization'
 UserMembershipController = require './UserMembershipController'
 SubscriptionGroupController = require '../Subscription/SubscriptionGroupController'
 TeamInvitesController = require '../Subscription/TeamInvitesController'
+AuthorizationMiddlewear = require('../Authorization/AuthorizationMiddlewear')
 
 module.exports =
 	apply: (webRouter) ->
@@ -54,3 +55,11 @@ module.exports =
 		webRouter.delete "/manage/publishers/:id/managers/:userId",
 			UserMembershipAuthorization.requirePublisherAccess,
 			UserMembershipController.remove
+
+		# create new entitites
+		webRouter.get "/entities/:name/create/:id",
+			AuthorizationMiddlewear.ensureUserIsSiteAdmin,
+			UserMembershipController.new
+		webRouter.post "/entities/:name/create/:id",
+			AuthorizationMiddlewear.ensureUserIsSiteAdmin,
+			UserMembershipController.create

@@ -12,12 +12,18 @@ UserMembershipEntityConfigs = require "./UserMembershipEntityConfigs"
 
 module.exports =
 	getEntity: (entityId, entityConfig, loggedInUser, callback = (error, entity) ->) ->
-		entityId = ObjectId(entityId) if ObjectId.isValid(entityId.toString())
-		query = Object.assign({}, entityConfig.baseQuery)
-		query[entityConfig.fields.primaryKey] = entityId
+		query = buildEntityQuery(entityId, entityConfig)
 		unless loggedInUser.isAdmin
 			query[entityConfig.fields.access] = ObjectId(loggedInUser._id)
 		EntityModels[entityConfig.modelName].findOne query, callback
+
+	getEntityWithoutAuthorizationCheck: (entityId, entityConfig, callback = (error, entity) ->) ->
+		query = buildEntityQuery(entityId, entityConfig)
+		EntityModels[entityConfig.modelName].findOne query, callback
+
+	createEntity: (entityId, entityConfig, callback = (error, entity) ->) ->
+		data = buildEntityQuery(entityId, entityConfig)
+		EntityModels[entityConfig.modelName].create data, callback
 
 	getUsers: (entity, entityConfig, callback = (error, users) ->) ->
 		attributes = entityConfig.fields.read
@@ -72,3 +78,9 @@ removeUserFromEntity = (entity, attribute, userId, callback = (error)->) ->
 	fieldUpdate = {}
 	fieldUpdate[attribute] = userId
 	entity.update { $pull: fieldUpdate }, callback
+
+buildEntityQuery = (entityId, entityConfig, loggedInUser) ->
+	entityId = ObjectId(entityId) if ObjectId.isValid(entityId.toString())
+	query = Object.assign({}, entityConfig.baseQuery)
+	query[entityConfig.fields.primaryKey] = entityId
+	query

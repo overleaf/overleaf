@@ -49,6 +49,7 @@ module.exports =
 
 	institution:
 		modelName: 'Institution'
+		canCreate: true
 		fields:
 			primaryKey: 'v1Id'
 			read: ['managerIds']
@@ -60,11 +61,13 @@ module.exports =
 			subtitle: 'managers_management'
 			remove: 'remove_manager'
 		pathsFor: (id) ->
+			index: "/manage/institutions/#{id}/managers"
 			addMember: "/manage/institutions/#{id}/managers"
 			removeMember: "/manage/institutions/#{id}/managers"
 
 	publisher:
 		modelName: 'Publisher'
+		canCreate: true
 		fields:
 			primaryKey: 'slug'
 			read: ['managerIds']
@@ -76,5 +79,6 @@ module.exports =
 			subtitle: 'managers_management'
 			remove: 'remove_manager'
 		pathsFor: (id) ->
+			index: "/manage/publishers/#{id}/managers"
 			addMember: "/manage/publishers/#{id}/managers"
 			removeMember: "/manage/publishers/#{id}/managers"

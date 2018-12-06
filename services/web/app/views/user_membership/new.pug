@@ -1,0 +1,15 @@
+extends ../layout
+
+block content
+	.content.content-alt
+		.container
+			.row
+				.col-md-10.col-md-offset-1
+					h3 #{entityName} "#{entityId}" does not exists in v2
+					form(
+						enctype='multipart/form-data',
+						method='post',
+						action=''
+					)
+						input(name="_csrf", type="hidden", value=csrfToken)
+						button.btn.btn-primary.text-capitalize(type="submit") Create #{entityName} in v2

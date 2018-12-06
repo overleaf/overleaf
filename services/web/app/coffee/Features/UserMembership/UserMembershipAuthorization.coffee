@@ -67,20 +67,33 @@ requireAccessToEntity = (entityName, entityId, req, res, next) ->
 	unless loggedInUser
 		return AuthorizationMiddlewear.redirectToRestricted req, res, next
 
-	getEntity entityName, entityId, loggedInUser, (error, entity, entityConfig) ->
+	getEntity entityName, entityId, loggedInUser, (error, entity, entityConfig, entityExists) ->
 		return next(error) if error?
-		unless entity?
+
+		if entity?
+			req.entity = entity
+			req.entityConfig = entityConfig
+			return next()
+
+		if entityExists # user doesn't have access to entity
 			return AuthorizationMiddlewear.redirectToRestricted(req, res, next)
 
-		req.entity = entity
-		req.entityConfig = entityConfig
-		next()
+		if loggedInUser.isAdmin and entityConfig.canCreate
+			# entity doesn't exists, admin can create it
+			return res.redirect "/entities/#{entityName}/create/#{entityId}"
 
-getEntity = (entityName, entityId, userId, callback = (error, entity, entityConfig)->) ->
+		next(new Errors.NotFoundError())
+
+getEntity = (entityName, entityId, user, callback = (error, entity, entityConfig, entityExists)->) ->
 	entityConfig = EntityConfigs[entityName]
 	unless entityConfig
 		return callback(new Errors.NotFoundError("No such entity: #{entityName}"))
 
-	UserMembershipHandler.getEntity entityId, entityConfig, userId, (error, entity)->
+	UserMembershipHandler.getEntity entityId, entityConfig, user, (error, entity)->
 		return callback(error) if error?
-		callback(null, entity, entityConfig)
+		return callback(null, entity, entityConfig, true) if entity?
+
+		# no access to entity. Check if entity exists
+		UserMembershipHandler.getEntityWithoutAuthorizationCheck entityId, entityConfig, (error, entity)->
+			return callback(error) if error?
+			callback(null, null, entityConfig, entity?)

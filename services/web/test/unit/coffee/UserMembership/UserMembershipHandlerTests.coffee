@@ -46,6 +46,7 @@ describe 'UserMembershipHandler', ->
 			findOne: sinon.stub().yields(null, @subscription)
 		@Publisher =
 			findOne: sinon.stub().yields(null, @publisher)
+			create: sinon.stub().yields(null, @publisher)
 		@UserMembershipHandler = SandboxedModule.require modulePath, requires:
 			'./UserMembershipViewModel': @UserMembershipViewModel
 			'../User/UserGetter': @UserGetter
@@ -57,7 +58,7 @@ describe 'UserMembershipHandler', ->
 				log: -> 
 				err: ->
 
-	describe 'getEntty', ->
+	describe 'getEntity', ->
 		describe 'group subscriptions', ->
 			it 'get subscription', (done) ->
 				@UserMembershipHandler.getEntity @fakeEntityId, EntityConfigs.group, @user, (error, subscription) =>
@@ -85,6 +86,15 @@ describe 'UserMembershipHandler', ->
 				@UserMembershipHandler.getEntity @fakeEntityId, EntityConfigs.group, @user._id, (error, subscription) =>
 					should.exist(error)
 					done()
+
+	describe 'getEntityWithoutAuthorizationCheck', ->
+		it 'get publisher', (done) ->
+			@UserMembershipHandler.getEntityWithoutAuthorizationCheck @fakeEntityId, EntityConfigs.publisher, (error, subscription) =>
+				should.not.exist(error)
+				expectedQuery = slug: @fakeEntityId
+				assertCalledWith(@Publisher.findOne, expectedQuery)
+				expect(subscription).to.equal @publisher
+				done()
 
 		describe 'institutions', ->
 			it 'get institution', (done) ->
@@ -135,6 +145,13 @@ describe 'UserMembershipHandler', ->
 					expectedCallcount = @institution.managerIds.length
 					expect(@UserMembershipViewModel.buildAsync.callCount).to.equal expectedCallcount
 					done()
+
+	describe 'createEntity', ->
+		it 'creates publisher', (done) ->
+			@UserMembershipHandler.createEntity @fakeEntityId, EntityConfigs.publisher, (error, publisher) =>
+				should.not.exist(error)
+				assertCalledWith(@Publisher.create, slug: @fakeEntityId)
+				done()
 
 	describe 'addUser', ->
 		beforeEach ->

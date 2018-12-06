@@ -38,6 +38,7 @@ describe "UserMembershipController", ->
 			getLoggedInUserId: sinon.stub().returns(@user._id)
 		@UserMembershipHandler =
 			getEntity: sinon.stub().yields(null, @subscription)
+			createEntity: sinon.stub().yields(null, @institution)
 			getUsers: sinon.stub().yields(null, @users)
 			addUser: sinon.stub().yields(null, @newUser)
 			removeUser: sinon.stub().yields(null)
@@ -204,3 +205,37 @@ describe "UserMembershipController", ->
 
 		it "should export the correct csv", ->
 			assertCalledWith(@res.send, "mock-email-1@foo.com\nmock-email-2@foo.com\n")
+
+	describe 'new', ->
+		beforeEach ->
+			@req.params.name = 'publisher'
+			@req.params.id = 'abc'
+
+		it 'renders view', (done) ->
+			@UserMembershipController.new @req, render: (viewPath, data) =>
+				expect(data.entityName).to.eq 'publisher'
+				expect(data.entityId).to.eq 'abc'
+				done()
+
+	describe 'create', ->
+		beforeEach ->
+			@req.params.name = 'institution'
+			@req.params.id = 123
+
+		it 'creates institution', (done) ->
+			@UserMembershipController.create @req, redirect: (path) =>
+				expect(path).to.eq EntityConfigs['institution'].pathsFor(123).index
+				sinon.assert.calledWithMatch(
+					@UserMembershipHandler.createEntity,
+					123,
+					modelName: 'Institution',
+				)
+				done()
+
+		it 'checks canCreate', (done) ->
+			@req.params.name = 'group'
+			@UserMembershipController.create @req, null, (error) =>
+				expect(error).to.extist
+				expect(error).to.be.an.instanceof(Errors.NotFoundError)
+				sinon.assert.notCalled(@UserMembershipHandler.createEntity)
+				done()

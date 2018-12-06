@@ -80,3 +80,21 @@ module.exports =
 			)
 			res.contentType('text/csv')
 			res.send(csvOutput)
+
+	new: (req, res, next)->
+		res.render "user_membership/new",
+			entityName: req.params.name
+			entityId: req.params.id
+
+	create: (req, res, next)->
+		entityName = req.params.name
+		entityId = req.params.id
+		entityConfig = EntityConfigs[entityName]
+		unless entityConfig
+			return next(new Errors.NotFoundError("No such entity: #{entityName}"))
+		unless entityConfig.canCreate
+			return next(new Errors.NotFoundError("Cannot create new #{entityName}"))
+
+		UserMembershipHandler.createEntity entityId, entityConfig, (error, entity) ->
+			return next(error) if error?
+			res.redirect entityConfig.pathsFor(entityId).index
