@@ -8,6 +8,7 @@ _ = require("underscore")
 PublicAccessLevels = require("../Authorization/PublicAccessLevels")
 Errors = require("../Errors/Errors")
 ProjectTokenGenerator = require('./ProjectTokenGenerator')
+ProjectHelper = require('./ProjectHelper')
 
 module.exports = ProjectDetailsHandler =
 	getDetails: (project_id, callback)->
@@ -87,25 +88,7 @@ module.exports = ProjectDetailsHandler =
 			# allUsersProjectNames is returned as a hash {owned: [name1, name2, ...], readOnly: [....]}
 			# collect all of the names and flatten them into a single array
 			projectNameList = _.pluck(_.flatten(_.values(allUsersProjectNames)),'name')
-			# create a set of all project names
-			allProjectNames = new Set()
-			for projectName in projectNameList
-				allProjectNames.add(projectName)
-			isUnique = (x) -> !allProjectNames.has(x)
-			# check if the supplied name is already unique
-			if isUnique(name)
-				return callback(null, name, false)
-			# the name already exists, try adding the user-supplied suffixes to generate a unique name
-			for suffix in suffixes
-				candidateName = ProjectDetailsHandler._addSuffixToProjectName(name, suffix)
-				if isUnique(candidateName)
-					return callback(null, candidateName, true)
-			# if there are no (more) suffixes, use a numeric one
-			uniqueName = ProjectDetailsHandler._addNumericSuffixToProjectName(name, allProjectNames)
-			if uniqueName?
-				callback(null, uniqueName, true)
-			else
-				callback(new Error("Failed to generate a unique name for file: #{name}"))
+			ProjectHelper.ensureNameIsUnique projectNameList, name, suffixes, ProjectDetailsHandler.MAX_PROJECT_NAME_LENGTH, callback
 	
 	fixProjectName: (name) ->
 		if name == "" || !name
@@ -154,30 +137,3 @@ module.exports = ProjectDetailsHandler =
 				Project.update {_id: project_id}, {$set: {tokens: tokens}}, (err) ->
 					return callback(err) if err?
 					callback(null, tokens)
-
-	_addSuffixToProjectName: (name, suffix = '') ->
-		# append the suffix and truncate the project title if needed
-		truncatedLength = ProjectDetailsHandler.MAX_PROJECT_NAME_LENGTH - suffix.length
-		return name.substr(0, truncatedLength) + suffix
-
-	_addNumericSuffixToProjectName: (name, allProjectNames) ->
-		NUMERIC_SUFFIX_MATCH = / \((\d+)\)$/
-		suffixedName = (basename, number) ->
-			suffix = " (#{number})"
-			return basename.substr(0, ProjectDetailsHandler.MAX_PROJECT_NAME_LENGTH - suffix.length) + suffix
-
-		match = name.match(NUMERIC_SUFFIX_MATCH)
-		basename = name
-		n = 1
-		last = allProjectNames.size + n
-
-		if match?
-			basename = name.replace(NUMERIC_SUFFIX_MATCH, '')
-			n = parseInt(match[1])
-
-		while n <= last
-			candidate = suffixedName(basename, n)
-			return candidate unless allProjectNames.has(candidate)
-			n += 1
-
-		return null

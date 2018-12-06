@@ -102,8 +102,6 @@ describe 'ProjectDetailsHandler', ->
 				@ProjectModel.update.calledWith({_id:@project_id}, {description:@description}).should.equal true
 				done()
 
-
-
 	describe "renameProject", ->
 		beforeEach ->
 			@handler.validateProjectName = sinon.stub().yields()

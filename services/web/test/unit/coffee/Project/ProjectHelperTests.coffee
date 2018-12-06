@@ -21,3 +21,6 @@ describe "ProjectHelper", ->
 
 		it "returns the correct engine for lualatex", ->
 			expect(@ProjectHelper.compilerFromV1Engine('lualatex')).to.equal 'lualatex'
+
+	# describe "ensureNameIsUnique", ->
+		# see tests for: ProjectDetailsHandler.ensureProjectNameIsUnique, which calls here.
