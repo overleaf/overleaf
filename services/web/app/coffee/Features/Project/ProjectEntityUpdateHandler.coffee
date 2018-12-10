@@ -128,20 +128,45 @@ module.exports = ProjectEntityUpdateHandler = self =
 		logger.log project_id: project_id, "removing root doc"
 		Project.update {_id:project_id}, {$unset: {rootDoc_id: true}}, {}, callback
 
-	addDoc: wrapWithLock (project_id, folder_id, docName, docLines, userId, callback = (error, doc, folder_id) ->)=>
-		if not SafePath.isCleanFilename docName
-			return callback new Errors.InvalidNameError("invalid element name")
-		self.addDocWithoutUpdatingHistory.withoutLock project_id, folder_id, docName, docLines, userId, (error, doc, folder_id, path, project) ->
-			return callback(error) if error?
-			projectHistoryId = project.overleaf?.history?.id
-			newDocs = [
-				doc: doc
-				path: path
-				docLines: docLines.join('\n')
-			]
-			DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, {newDocs}, (error) ->
-				return callback(error) if error?
-				callback null, doc, folder_id
+	_addDocAndSendToTpds: (project_id, folder_id, doc, callback = (error, result, project) ->)->
+		ProjectEntityMongoUpdateHandler.addDoc project_id, folder_id, doc, (err, result, project) ->
+			if err?
+				logger.err err:err, project_id: project_id, folder_id: folder_id, doc_name: doc?.name, doc_id:doc?._id, "error adding file with project"
+				return callback(err)
+			TpdsUpdateSender.addDoc {
+				project_id:   project_id,
+				doc_id:       doc?._id,
+				path:         result?.path?.fileSystem,
+				project_name: project.name,
+				rev:          0
+			}, (err) ->
+				return callback(err) if err?
+				callback(null, result, project)
+
+	addDoc: wrapWithLock
+		beforeLock: (next) ->
+			(project_id, folder_id, docName, docLines, userId, callback = (error, doc, folder_id) ->) ->
+				if not SafePath.isCleanFilename docName
+					return callback new Errors.InvalidNameError("invalid element name")
+				# Put doc in docstore first, so that if it errors, we don't have a doc_id in the project
+				# which hasn't been created in docstore.
+				doc = new Doc name: docName
+				DocstoreManager.updateDoc project_id.toString(), doc._id.toString(), docLines, 0, {}, (err, modified, rev) ->
+					return callback(err) if err?
+					next(project_id, folder_id, doc, docName, docLines, userId, callback)
+		withLock: (project_id, folder_id, doc, docName, docLines, userId, callback = (error, doc, folder_id) ->) ->
+			ProjectEntityUpdateHandler._addDocAndSendToTpds project_id, folder_id, doc, (err, result, project) ->
+				return callback(err) if err?
+				docPath = result?.path?.fileSystem
+				projectHistoryId = project.overleaf?.history?.id
+				newDocs = [
+					doc: doc
+					path: docPath
+					docLines: docLines.join('\n')
+				]
+				DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, {newDocs}, (error) ->
+					return callback(error) if error?
+					callback null, doc, folder_id
 
 	_uploadFile: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback = (error, fileRef, fileStoreUrl) ->)->
 		if not SafePath.isCleanFilename fileName
@@ -156,10 +181,10 @@ module.exports = ProjectEntityUpdateHandler = self =
 				return callback(err)
 			callback(null, fileRef, fileStoreUrl)
 
-	_addFileAndSendToTpds: (project_id, folder_id, fileName, fileRef, callback = (error) ->)->
+	_addFileAndSendToTpds: (project_id, folder_id, fileRef, callback = (error) ->)->
 		ProjectEntityMongoUpdateHandler.addFile project_id, folder_id, fileRef, (err, result, project) ->
 			if err?
-				logger.err err:err, project_id: project_id, folder_id: folder_id, file_name: fileName, fileRef:fileRef, "error adding file with project"
+				logger.err err:err, project_id: project_id, folder_id: folder_id, file_name: fileRef.name, fileRef:fileRef, "error adding file with project"
 				return callback(err)
 			TpdsUpdateSender.addFile {project_id:project_id, file_id:fileRef._id, path:result?.path?.fileSystem, project_name:project.name, rev:fileRef.rev}, (err) ->
 				return callback(err) if err?
@@ -174,7 +199,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 					return callback(error) if error?
 					next(project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback)
 		withLock: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback = (error, fileRef, folder_id) ->)->
-			ProjectEntityUpdateHandler._addFileAndSendToTpds project_id, folder_id, fileName, fileRef, (err, result, project) ->
+			ProjectEntityUpdateHandler._addFileAndSendToTpds project_id, folder_id, fileRef, (err, result, project) ->
 				return callback(err) if err?
 				projectHistoryId = project.overleaf?.history?.id
 				newFiles = [
@@ -213,47 +238,6 @@ module.exports = ProjectEntityUpdateHandler = self =
 				TpdsUpdateSender.addFile {project_id:project._id, file_id:newFileRef._id, path:path.fileSystem, rev:newFileRef.rev+1, project_name:project.name}, (err) ->
 					return callback(err) if err?
 					DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, {oldFiles, newFiles}, callback
-
-	addDocWithoutUpdatingHistory: wrapWithLock (project_id, folder_id, docName, docLines, userId, callback = (error, doc, folder_id) ->)=>
-		# This method should never be called directly, except when importing a project
-		# from Overleaf. It skips sending updates to the project history, which will break
-		# the history unless you are making sure it is updated in some other way.
-
-		if not SafePath.isCleanFilename docName
-			return callback new Errors.InvalidNameError("invalid element name")
-
-		# Put doc in docstore first, so that if it errors, we don't have a doc_id in the project
-		# which hasn't been created in docstore.
-		doc = new Doc name: docName
-		DocstoreManager.updateDoc project_id.toString(), doc._id.toString(), docLines, 0, {}, (err, modified, rev) ->
-			return callback(err) if err?
-			ProjectEntityMongoUpdateHandler.addDoc project_id, folder_id, doc, (err, result, project) ->
-				return callback(err) if err?
-				TpdsUpdateSender.addDoc {
-					project_id:   project_id,
-					doc_id:		    doc?._id
-					path:         result?.path?.fileSystem,
-					project_name: project.name,
-					rev:          0
-				}, (err) ->
-					return callback(err) if err?
-					callback(null, doc, folder_id, result?.path?.fileSystem, project)
-
-	addFileWithoutUpdatingHistory: wrapWithLock
-		# This method should never be called directly, except when importing a project
-		# from Overleaf. It skips sending updates to the project history, which will break
-		# the history unless you are making sure it is updated in some other way.
-		beforeLock: (next) ->
-			(project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback) ->
-				if not SafePath.isCleanFilename fileName
-					return callback(new Errors.InvalidNameError("invalid element name"))
-				ProjectEntityUpdateHandler._uploadFile project_id, folder_id, fileName, fsPath, linkedFileData, userId, (error, fileRef, fileStoreUrl) ->
-					return callback(error) if error?
-					next(project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback)
-		withLock: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback = (error, fileRef, folder_id, path, fileStoreUrl) ->)->
-			ProjectEntityUpdateHandler._addFileAndSendToTpds project_id, folder_id, fileName, fileRef, (err, result, project) ->
-				return callback(err) if err?
-				callback(null, fileRef, folder_id, result?.path?.fileSystem, fileStoreUrl)
 
 	upsertDoc: wrapWithLock (project_id, folder_id, docName, docLines, source, userId, callback = (err, doc, folder_id, isNewDoc)->)->
 		if not SafePath.isCleanFilename docName

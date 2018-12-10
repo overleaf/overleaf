@@ -293,14 +293,15 @@ describe 'ProjectEntityUpdateHandler', ->
 			beforeEach ->
 				@path = "/path/to/doc"
 
-				@newDoc = _id: doc_id
-				@ProjectEntityUpdateHandler.addDocWithoutUpdatingHistory =
-					withoutLock: sinon.stub().yields(null, @newDoc, folder_id, @path, @project)
-				@ProjectEntityUpdateHandler.addDoc project_id, folder_id, @docName, @docLines, userId, @callback
+				@newDoc = name:@docName, lines:undefined, _id: doc_id, rev: 0
+				@DocstoreManager.updateDoc = sinon.stub().yields(null, false, @rev = 5)
+				@TpdsUpdateSender.addDoc = sinon.stub().yields()
+				@ProjectEntityMongoUpdateHandler.addDoc = sinon.stub().yields(null, {path: fileSystem: @path}, @project)
+				@ProjectEntityUpdateHandler.addDoc project_id, doc_id, @docName, @docLines, userId, @callback
 
 			it "creates the doc without history", () ->
-				@ProjectEntityUpdateHandler.addDocWithoutUpdatingHistory.withoutLock
-					.calledWith(project_id, folder_id, @docName, @docLines, userId)
+				@DocstoreManager.updateDoc
+					.calledWith(project_id, doc_id, @docLines, 0, {})
 					.should.equal true
 
 			it "sends the change in project structure to the doc updater", () ->
@@ -318,8 +319,6 @@ describe 'ProjectEntityUpdateHandler', ->
 				@path = "/path/to/doc"
 
 				@newDoc = _id: doc_id
-				@ProjectEntityUpdateHandler.addDocWithoutUpdatingHistory =
-					withoutLock: sinon.stub().yields(null, @newDoc, folder_id, @path, @project)
 				@ProjectEntityUpdateHandler.addDoc project_id, folder_id, "*" + @docName, @docLines, userId, @callback
 
 			it 'returns an error', ->
@@ -432,118 +431,6 @@ describe 'ProjectEntityUpdateHandler', ->
 			@DocumentUpdaterHandler.updateProjectStructure
 				.calledWith(project_id, projectHistoryId, userId, {oldFiles, newFiles})
 				.should.equal true
-
-	describe 'addDocWithoutUpdatingHistory', ->
-		describe 'adding a doc', ->
-			beforeEach ->
-				@path = "/path/to/doc"
-
-				@project = _id: project_id, name: 'some project'
-
-				@TpdsUpdateSender.addDoc = sinon.stub().yields()
-				@DocstoreManager.updateDoc = sinon.stub().yields(null, false, @rev = 5)
-				@ProjectEntityMongoUpdateHandler.addDoc = sinon.stub().yields(null, {path: fileSystem: @path}, @project)
-				@ProjectEntityUpdateHandler.addDocWithoutUpdatingHistory project_id, folder_id, @docName, @docLines, userId, @callback
-
-			it "updates the doc in the docstore", () ->
-				@DocstoreManager.updateDoc
-					.calledWith(project_id, doc_id, @docLines, 0, {})
-					.should.equal true
-
-			it "updates the doc in mongo", () ->
-				docMatcher = sinon.match (doc) =>
-					doc.name == @docName
-
-				@ProjectEntityMongoUpdateHandler.addDoc
-					.calledWithMatch(project_id, folder_id, docMatcher)
-					.should.equal true
-
-			it "notifies the tpds", () ->
-				@TpdsUpdateSender.addDoc
-					.calledWith({
-						project_id: project_id
-						project_name: @project.name
-						doc_id: doc_id
-						rev: 0
-						path: @path
-					})
-					.should.equal true
-
-			it "should not should send the change in project structure to the doc updater", () ->
-				@DocumentUpdaterHandler.updateProjectStructure
-					.called
-					.should.equal false
-
-		describe 'adding a doc with an invalid name', ->
-			beforeEach ->
-				@path = "/path/to/doc"
-
-				@project = _id: project_id, name: 'some project'
-
-				@TpdsUpdateSender.addDoc = sinon.stub().yields()
-				@DocstoreManager.updateDoc = sinon.stub().yields(null, false, @rev = 5)
-				@ProjectEntityMongoUpdateHandler.addDoc = sinon.stub().yields(null, {path: fileSystem: @path}, @project)
-				@ProjectEntityUpdateHandler.addDocWithoutUpdatingHistory project_id, folder_id, "*" + @docName, @docLines, userId, @callback
-
-			it 'returns an error', ->
-				errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
-				@callback.calledWithMatch(errorMatcher)
-					.should.equal true
-
-	describe 'addFileWithoutUpdatingHistory', ->
-		describe 'adding a file', ->
-			beforeEach ->
-				@path = "/path/to/file"
-
-				@project = _id: project_id, name: 'some project'
-
-				@TpdsUpdateSender.addFile = sinon.stub().yields()
-				@ProjectEntityMongoUpdateHandler.addFile = sinon.stub().yields(null, {path: fileSystem: @path}, @project)
-				@ProjectEntityUpdateHandler.addFileWithoutUpdatingHistory project_id, folder_id, @fileName, @fileSystemPath, @linkedFileData, userId, @callback
-
-			it "updates the file in the filestore", () ->
-				@FileStoreHandler.uploadFileFromDisk
-					.calledWith(project_id, file_id, @fileSystemPath)
-					.should.equal true
-
-			it "updates the file in mongo", () ->
-				fileMatcher = sinon.match (file) =>
-					file.name == @fileName
-
-				@ProjectEntityMongoUpdateHandler.addFile
-					.calledWithMatch(project_id, folder_id, fileMatcher)
-					.should.equal true
-
-			it "notifies the tpds", () ->
-				@TpdsUpdateSender.addFile
-					.calledWith({
-						project_id: project_id
-						project_name: @project.name
-						file_id: file_id
-						rev: 0
-						path: @path
-					})
-					.should.equal true
-
-			it "should not should send the change in project structure to the doc updater", () ->
-				@DocumentUpdaterHandler.updateProjectStructure
-					.called
-					.should.equal false
-
-		describe 'adding a file with an invalid name', ->
-			beforeEach ->
-				@path = "/path/to/file"
-
-				@project = _id: project_id, name: 'some project'
-
-				@TpdsUpdateSender.addFile = sinon.stub().yields()
-				@ProjectEntityMongoUpdateHandler.addFile = sinon.stub().yields(null, {path: fileSystem: @path}, @project)
-				@ProjectEntityUpdateHandler.addFileWithoutUpdatingHistory project_id, folder_id, "*" + @fileName, @fileSystemPath, @linkedFileData, userId, @callback
-
-			it 'returns an error', ->
-				errorMatcher = sinon.match.instanceOf(Errors.InvalidNameError)
-				@callback.calledWithMatch(errorMatcher)
-					.should.equal true
 
 	describe 'upsertDoc', ->
 		describe 'upserting into an invalid folder', ->
