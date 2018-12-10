@@ -22,12 +22,14 @@ module.exports = Metrics =
 		appname = _name
 		collectDefaultMetrics({ timeout: 5000, prefix: Metrics.buildPromKey()})
 		if process.env['ENABLE_TRACE_AGENT'] == "true"
-			traceAgent.start()
+			traceOpts =
+				ignoreUrls: [/^\/status/, /^\/health_check/] 
+			traceAgent.start(traceOpts)
 		debugAgent.start({
 			serviceContext: {
 				allowExpressions: true,
 				service: appname,
-				version: '0.0.1'
+				version: process.env['BUILD_VERSION']
 			}
 		})
 		Metrics.inc("process_startup")
