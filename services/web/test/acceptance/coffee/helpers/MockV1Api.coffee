@@ -36,6 +36,8 @@ module.exports = MockV1Api =
 
 	existingEmails: []
 
+	brands: {}
+
 	setAffiliations: (affiliations) -> @affiliations = affiliations
 
 	run: () ->
@@ -84,6 +86,12 @@ module.exports = MockV1Api =
 
 		app.delete "/api/v2/users/:userId/affiliations/:email", (req, res, next) =>
 			res.sendStatus 204
+
+		app.get "/api/v2/brands/:slug", (req, res, next) =>
+			if brand = @brands[req.params.slug]
+				res.json brand
+			else
+				res.sendStatus 404
 
 		app.get '/universities/list', (req, res, next) ->
 			res.json []

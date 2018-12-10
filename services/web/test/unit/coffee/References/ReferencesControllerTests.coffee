@@ -114,7 +114,7 @@ describe "ReferencesController", ->
 					@res.json.calledWith(@fakeResponseData).should.equal true
 					done()
 
-	describe 'there is no dataaaaaaa', ->
+	describe 'there is no data', ->
 
 			beforeEach ->
 				@ReferencesHandler.indexAll.callsArgWith(1)
