@@ -40,6 +40,7 @@ git commit -m "Decaffeinate: convert individual files to js"
 
 npx prettier-eslint app.js Gruntfile.js config/settings.defaults.js --write
 
+git add .
 git commit -m "Prettier: convert individual decaffeinated files to Prettier format"
 
 echo "done"
