@@ -8,7 +8,7 @@
     "url": "https://github.com/sharelatex/docstore-sharelatex.git"
   },
   "scripts": {
-    "compile:app": "([ -e app/coffee ] && coffee -m $COFFEE_OPTIONS -o app/js -c app/coffee || echo 'No CoffeeScript folder to compile') && ( [ -e app.coffee ] && coffee -m $COFFEE_OPTIONS -c app.coffee || echo 'No CoffeeScript app to compile')",
+    "compile:app": "([ -e app/coffee ] && coffee -M $COFFEE_OPTIONS -o app/js -c app/coffee || echo 'No CoffeeScript folder to compile') && ( [ -e app.coffee ] && coffee -M $COFFEE_OPTIONS -c app.coffee || echo 'No CoffeeScript app to compile')",
     "start": "npm run compile:app && node $NODE_APP_OPTIONS app.js",
     "test:acceptance:_run": "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY AWS_BUCKET=$AWS_BUCKET AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID mocha --recursive --reporter spec --timeout 30000 --exit $@ test/acceptance/js",
     "test:acceptance": "npm run compile:app && npm run compile:acceptance_tests && npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
@@ -34,16 +34,7 @@
   "devDependencies": {
     "bunyan": "~0.22.3",
     "chai": "~1.9.1",
-    "grunt": "~0.4.4",
-    "grunt-bunyan": "~0.5.0",
-    "grunt-cli": "^1.2.0",
-    "grunt-contrib-clean": "~0.5.0",
-    "grunt-contrib-coffee": "~0.10.1",
-    "grunt-execute": "~0.2.1",
-    "grunt-forever": "~0.4.4",
-    "grunt-mocha-test": "~0.10.2",
     "mocha": "^4.0.1",
-    "grunt-shell": "~0.7.0",
     "request": "~2.34.0",
     "sandboxed-module": "~0.3.0",
     "sinon": "~3.2.1"
