@@ -86,9 +86,10 @@ module.exports = Metrics =
 				help: key,
 				maxAgeSeconds: 600,
 				ageBuckets: 10,
-				labelNames: ['app', 'path', 'status_code', 'method', 'collection', 'query']
+				labelNames: ['app', 'host', 'path', 'status_code', 'method', 'collection', 'query']
 			})
 		opts.app = appname
+		opts.host = hostname
 		promMetrics[key].observe(opts, timeSpan)
 		if process.env['DEBUG_METRICS']
 			console.log("doing timing", key, opts)
