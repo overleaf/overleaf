@@ -10,42 +10,39 @@ import java.util.List;
 public class MissingRepositoryException extends SnapshotAPIException {
 
     public static final List<String> GENERIC_REASON = Arrays.asList(
-        "This Overleaf project currently has no git access.",
+        "This Overleaf project currently has no git access, either",
+        "because the project does not exist, or git access is not enabled for the project.",
         "",
-        "If this problem persists, please contact us."
+        "If this problem persists, please contact us at at support@overleaf.com"
     );
 
     static List<String> buildExportedToV2Message(String remoteUrl) {
         if (remoteUrl == null) {
             return Arrays.asList(
-                    "This Overleaf project has been moved to Overleaf v2 and cannot be used with git at this time.",
-                    "",
-                    "If this error persists, please contact us at support@overleaf.com, or",
-                    "see https://www.overleaf.com/help/342 for more information."
+                "This Overleaf project has been moved to Overleaf v2 and cannot be used with git at this time.",
+                "",
+                "If this error persists, please contact us at support@overleaf.com, or",
+                "see https://www.overleaf.com/help/342 for more information."
             );
         } else {
             return Arrays.asList(
-                    "This Overleaf project has been moved to Overleaf v2 and has a new identifier.",
-                    "Please update your remote to:",
-                    "",
-                    "    " + remoteUrl,
-                    "",
-                    "Assuming you are using the default \"origin\" remote, the following commands",
-                    "will change the remote for you:",
-                    "",
-                    "    git remote set-url origin " + remoteUrl,
-                    "",
-                    "If this does not work, please contact us at support@overleaf.com, or",
-                    "see https://www.overleaf.com/help/342 for more information."
+                "This Overleaf project has been moved to Overleaf v2 and has a new identifier.",
+                "Please update your remote to:",
+                "",
+                "    " + remoteUrl,
+                "",
+                "Assuming you are using the default \"origin\" remote, the following commands",
+                "will change the remote for you:",
+                "",
+                "    git remote set-url origin " + remoteUrl,
+                "",
+                "If this does not work, please contact us at support@overleaf.com, or",
+                "see https://www.overleaf.com/help/342 for more information."
             );
         }
     }
 
     private List<String> descriptionLines;
-
-    public MissingRepositoryException() {
-        descriptionLines = new ArrayList<String>();
-    }
 
     public MissingRepositoryException(List<String> descriptionLines) {
         this.descriptionLines = descriptionLines;
