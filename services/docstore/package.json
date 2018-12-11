@@ -23,7 +23,7 @@
   "dependencies": {
     "async": "~0.8.0",
     "body-parser": "~1.0.2",
-    "coffee-script": "^1.7.1",
+    "coffee-script": "^1.12.7",
     "express": "~4.1.1",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.4.0",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v2.0.10",
