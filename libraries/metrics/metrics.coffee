@@ -1,5 +1,3 @@
-debugAgent = require('@google-cloud/debug-agent')
-traceAgent = require('@google-cloud/trace-agent')
 
 prom = require('prom-client')
 Register = require('prom-client').register
@@ -21,17 +19,23 @@ module.exports = Metrics =
 	initialize: (_name) ->
 		appname = _name
 		collectDefaultMetrics({ timeout: 5000, prefix: Metrics.buildPromKey()})
+		
 		if process.env['ENABLE_TRACE_AGENT'] == "true"
+			traceAgent = require('@google-cloud/trace-agent')
+
 			traceOpts =
 				ignoreUrls: [/^\/status/, /^\/health_check/] 
 			traceAgent.start(traceOpts)
-		debugAgent.start({
-			serviceContext: {
-				allowExpressions: true,
-				service: appname,
-				version: process.env['BUILD_VERSION']
-			}
-		})
+
+		if process.env['ENABLE_DEBUG_AGENT'] == "true"
+			debugAgent = require('@google-cloud/debug-agent')
+			debugAgent.start({
+				serviceContext: {
+					allowExpressions: true,
+					service: appname,
+					version: process.env['BUILD_VERSION']
+				}
+			})
 		Metrics.inc("process_startup")
 
 	registerDestructor: (func) ->
