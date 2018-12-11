@@ -13,7 +13,7 @@ public class PostbackTimeoutException extends SevereSnapshotPostException {
 
     @Override
     public String getMessage() {
-        return "timeout (60s)";
+        return "timeout";
     }
 
     @Override

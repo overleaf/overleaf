@@ -35,7 +35,7 @@ public class PostbackPromise {
         try {
             while (!received) {
                 try {
-                    if (!cond.await(60, TimeUnit.SECONDS)) {
+                    if (!cond.await(60 * 3, TimeUnit.SECONDS)) {
                         throw new PostbackTimeoutException();
                     }
                 } catch (InterruptedException e) {
