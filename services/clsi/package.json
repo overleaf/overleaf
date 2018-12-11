@@ -31,7 +31,7 @@
     "lockfile": "^1.0.3",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.4",
     "lynx": "0.0.11",
-    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v2.0.4",
+    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#d96892cc1741dd6d59e83c924a1458e4929d39b7",
     "mkdirp": "0.3.5",
     "mysql": "2.6.2",
     "request": "^2.21.0",
