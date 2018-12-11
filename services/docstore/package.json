@@ -8,7 +8,7 @@
     "url": "https://github.com/sharelatex/docstore-sharelatex.git"
   },
   "scripts": {
-    "compile:app": "([ -e app/coffee ] && coffee -M $COFFEE_OPTIONS -o app/js -c app/coffee || echo 'No CoffeeScript folder to compile') && ( [ -e app.coffee ] && coffee -M $COFFEE_OPTIONS -c app.coffee || echo 'No CoffeeScript app to compile')",
+    "compile:app": "([ -e app/coffee ] && coffee -m $COFFEE_OPTIONS -o app/js -c app/coffee || echo 'No CoffeeScript folder to compile') && ( [ -e app.coffee ] && coffee -m $COFFEE_OPTIONS -c app.coffee || echo 'No CoffeeScript app to compile')",
     "start": "npm run compile:app && node $NODE_APP_OPTIONS app.js",
     "test:acceptance:_run": "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY AWS_BUCKET=$AWS_BUCKET AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID mocha --recursive --reporter spec --timeout 30000 --exit $@ test/acceptance/js",
     "test:acceptance": "npm run compile:app && npm run compile:acceptance_tests && npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
