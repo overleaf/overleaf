@@ -13,7 +13,7 @@ module.exports =
 		logger.log subscriptionId: subscription._id, userToRemove_id:userToRemove_id, "removing user from group subscription"
 		SubscriptionGroupHandler.removeUserFromGroup subscription._id, userToRemove_id, (err)->
 			if err?
-				logger.err err:err, adminUserId:adminUserId, userToRemove_id:userToRemove_id, "error removing user from group"
+				logger.err err:err, subscriptionId: subscription._id, userToRemove_id:userToRemove_id, "error removing user from group"
 				return next(err)
 			res.send()
 
