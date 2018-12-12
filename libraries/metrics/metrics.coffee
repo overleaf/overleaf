@@ -34,8 +34,19 @@ module.exports = Metrics =
 			logger.log("starting google debug agent")
 			debugAgent = require('@google-cloud/debug-agent')
 			debugAgent.start({
+				allowExpressions: true,
 				serviceContext: {
-					allowExpressions: true,
+					service: appname,
+					version: process.env['BUILD_VERSION']
+				}
+			})
+
+		logger.log("ENABLE_PROFILER_AGENT set to #{process.env['ENABLE_PROFILER_AGENT']}")
+		if process.env['ENABLE_PROFILER_AGENT'] == "true"
+			logger.log("starting google profile agent")
+			profiler = require('@google-cloud/profiler')
+			profiler.start({
+				serviceContext: {
 					service: appname,
 					version: process.env['BUILD_VERSION']
 				}
