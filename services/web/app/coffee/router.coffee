@@ -336,16 +336,6 @@ module.exports = class Router
 			CompileController.getFileFromClsiWithoutUser
 		publicApiRouter.post '/api/institutions/confirm_university_domain', AuthenticationController.httpAuth, InstitutionsController.confirmDomain
 
-		webRouter.get '/teams', (req, res, next) ->
-			# Match v1 behaviour - if the user is signed in, show their teams list
-			# Otherwise show some information about teams
-			if AuthenticationController.isUserLoggedIn(req)
-				res.redirect('/user/subscription')
-			else if Settings.overleaf?.host
-				res.redirect("#{Settings.overleaf.host}/teams")
-			else
-				next()
-
 		webRouter.get '/chrome', (req, res, next) ->
 			# Match v1 behaviour - this is used for a Chrome web app
 			if AuthenticationController.isUserLoggedIn(req)
