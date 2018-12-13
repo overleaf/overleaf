@@ -115,6 +115,7 @@ describe "FileStoreHandler", ->
 						cb({statusCode: 500})
 
 			it 'should callback with an error', (done) ->
+				@fs.createReadStream.callCount = 0
 				@fs.createReadStream.returns
 					pipe:->
 					on: (type, cb)->
@@ -123,6 +124,7 @@ describe "FileStoreHandler", ->
 				@handler.uploadFileFromDisk @project_id, @file_id, @fsPath, (err) =>
 					expect(err).to.exist
 					expect(err).to.be.instanceof Error
+					expect(@fs.createReadStream.callCount).to.equal @handler.RETRY_ATTEMPTS
 					done()
 
 	describe "deleteFile", ->
