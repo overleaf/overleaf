@@ -16,7 +16,6 @@ sessionsRedisClient = UserSessionsRedis.client()
 session = require("express-session")
 RedisStore = require('connect-redis')(session)
 bodyParser = require('body-parser')
-multer  = require('multer')
 methodOverride = require('method-override')
 cookieParser = require('cookie-parser')
 bearerToken = require('express-bearer-token')
@@ -69,7 +68,6 @@ Modules.loadViewIncludes app
 app.use bodyParser.urlencoded({ extended: true, limit: "2mb"})
 # Make sure we can process the max doc length plus some overhead for JSON encoding
 app.use bodyParser.json({limit: Settings.max_doc_length + 64 * 1024}) # 64kb overhead
-app.use multer(dest: Settings.path.uploadFolder)
 app.use methodOverride()
 app.use bearerToken()
 

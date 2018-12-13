@@ -292,11 +292,11 @@ describe "ProjectStructureChanges", ->
 		before (done) ->
 			@owner.request.post {
 				uri: "project/#{example_project_id}/folder",
-				formData:
+				json:
 					name: 'foo'
 			}, (error, res, body) =>
 				throw error if error?
-				example_folder_id_1 = JSON.parse(body)._id
+				example_folder_id_1 = body._id
 				done()
 
 		beforeEach (done) ->
@@ -360,11 +360,11 @@ describe "ProjectStructureChanges", ->
 		it "should version moving a folder", (done) ->
 			@owner.request.post {
 				uri: "project/#{example_project_id}/folder",
-				formData:
+				json:
 					name: 'bar'
 			}, (error, res, body) =>
 				throw error if error?
-				example_folder_id_2 = JSON.parse(body)._id
+				example_folder_id_2 = body._id
 
 				@owner.request.post {
 					uri: "project/#{example_project_id}/Folder/#{example_folder_id_1}/move",

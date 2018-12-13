@@ -10,7 +10,7 @@ module.exports = ProjectUploadController =
 	uploadProject: (req, res, next) ->
 		timer = new metrics.Timer("project-upload")
 		user_id = AuthenticationController.getLoggedInUserId(req)
-		{originalname, path} = req.files.qqfile
+		{originalname, path} = req.file
 		name = Path.basename(originalname, ".zip")
 		ProjectUploadManager.createProjectFromZipArchive user_id, name, path, (error, project) ->
 			fs.unlink path, ->
@@ -28,8 +28,8 @@ module.exports = ProjectUploadController =
 
 	uploadFile: (req, res, next) ->
 		timer = new metrics.Timer("file-upload")
-		name = req.files.qqfile?.originalname
-		path = req.files.qqfile?.path
+		name = req.file?.originalname
+		path = req.file?.path
 		project_id   = req.params.Project_id
 		folder_id    = req.query.folder_id
 		if !name? or name.length == 0 or name.length > 150

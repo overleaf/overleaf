@@ -30,10 +30,9 @@ describe "ProjectUploadController", ->
 		beforeEach ->
 			@path = "/path/to/file/on/disk.zip"
 			@name = "filename.zip"
-			@req.files =
-				qqfile:
-					path: @path
-					originalname: @name
+			@req.file =
+				path: @path
+				originalname: @name
 			@req.session =
 				user:
 					_id: @user_id
@@ -103,10 +102,9 @@ describe "ProjectUploadController", ->
 			@folder_id = "folder-id-123"
 			@path = "/path/to/file/on/disk.png"
 			@name = "filename.png"
-			@req.files =
-				qqfile:
-					path: @path
-					originalname: @name
+			@req.file =
+				path: @path
+				originalname: @name
 			@req.session =
 				user:
 					_id: @user_id
@@ -166,7 +164,7 @@ describe "ProjectUploadController", ->
 		describe "with a bad request", ->
 
 			beforeEach ->
-				@req.files.qqfile.originalname = ""
+				@req.file.originalname = ""
 				@ProjectUploadController.uploadFile @req, @res
 
 			it "should return a a non success response", ->
