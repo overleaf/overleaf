@@ -10,8 +10,9 @@ import java.util.List;
 public class MissingRepositoryException extends SnapshotAPIException {
 
     public static final List<String> GENERIC_REASON = Arrays.asList(
-        "This Overleaf project currently has no git access, either",
-        "because the project does not exist, or because git access is not enabled for the project.",
+        "This Overleaf project currently has no git access, either because",
+        "the project does not exist, or because git access is not enabled",
+        "for the project.",
         "",
         "If this is unexpected, please contact us at support@overleaf.com, or",
         "see https://www.overleaf.com/help/342 for more information."
