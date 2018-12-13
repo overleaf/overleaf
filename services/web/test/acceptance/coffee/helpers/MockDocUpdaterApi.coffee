@@ -47,6 +47,9 @@ module.exports = MockDocUpdaterApi =
 		app.delete "/project/:project_id/doc/:doc_id", (req, res, next) =>
 			res.sendStatus 204
 
+		app.post "/project/:project_id/history/resync", (req, res, next) =>
+			res.sendStatus 204
+
 		app.listen 3003, (error) ->
 			throw error if error?
 		.on "error", (error) ->

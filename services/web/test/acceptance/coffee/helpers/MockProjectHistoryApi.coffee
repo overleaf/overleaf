@@ -17,7 +17,10 @@ module.exports = MockProjectHistoryApi =
 		@oldFiles["#{project_id}:#{version}:#{pathname}"] = content
 
 	setProjectVersion: (project_id, version) ->
-		@projectVersions[project_id] = version
+		@projectVersions[project_id] = {version: version}
+
+	setProjectVersionInfo: (project_id, versionInfo) ->
+		@projectVersions[project_id] = versionInfo
 
 	addLabel: (project_id, label_id, comment, version) ->
 		@labels[project_id] ?= {}
@@ -50,7 +53,7 @@ module.exports = MockProjectHistoryApi =
 		app.get "/project/:project_id/version", (req, res, next) =>
 			{project_id} = req.params
 			if @projectVersions[project_id]?
-				res.json version: @projectVersions[project_id]
+				res.json @projectVersions[project_id]
 			else
 				res.send 404
 
@@ -77,6 +80,9 @@ module.exports = MockProjectHistoryApi =
 				res.send 204
 			else
 				res.send 404
+
+		app.post "/project/:project_id/flush", (req, res, next) =>
+			res.sendStatus 200
 
 		app.listen 3054, (error) ->
 			throw error if error?
