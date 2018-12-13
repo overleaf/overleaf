@@ -1,5 +1,11 @@
 set -ex
 
+curl -o .eslintrc https://raw.githubusercontent.com/sharelatex/web-sharelatex-internal/master/.eslintrc?token=AMHVk43L42-Htd0MSIfjao6vRukW52r4ks5cHA9WwA%3D%3D
+curl -o .prettierrc https://raw.githubusercontent.com/sharelatex/web-sharelatex-internal/master/.prettierrc?token=AMHVk45yPk51AJkmy-hYGoHI9gW-kZHvks5cHAu3wA%3D%3D
+
+git add .
+git commit -m "add rc files"
+
 npx bulk-decaffeinate convert --dir app/coffee
 
 npx bulk-decaffeinate clean
@@ -38,7 +44,7 @@ decaffeinate config/settings.defaults.js
 
 git commit -m "Decaffeinate: convert individual files to js"
 
-npx prettier-eslint app.js Gruntfile.js config/settings.defaults.js --write
+npx prettier-eslint 'app.js' 'Gruntfile.js' 'config/settings.defaults.js' --write
 
 git add .
 git commit -m "Prettier: convert individual decaffeinated files to Prettier format"
