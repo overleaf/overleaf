@@ -59,14 +59,5 @@ compile_full:
 	if [ -e test/unit_frontend/src/ide ]; then $(BABEL) test/unit_frontend/src/ide --out-dir ../../test/unit_frontend/js/ide/$(MODULE_NAME); fi
 	@$(MAKE) compile
 
-test_acceptance: test_acceptance_start_service test_acceptance_run
-	$(MAKE) test_acceptance_stop_service
-
-test_acceptance_start_service: test_acceptance_stop_service
-	$(DOCKER_COMPOSE) up -d test_acceptance
-
-test_acceptance_stop_service:
-	$(DOCKER_COMPOSE) stop -t 0 test_acceptance redis mongo
-
-test_acceptance_run:
-	$(DOCKER_COMPOSE) exec -T test_acceptance npm -q run test:acceptance:dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/acceptance/js
+test_acceptance:
+	${DOCKER_COMPOSE} run --rm test_acceptance npm -q run test:acceptance:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/acceptance/js

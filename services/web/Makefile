@@ -209,40 +209,26 @@ test_frontend: test_clean # stop service
 	$(MAKE) compile
 	docker-compose ${DOCKER_COMPOSE_FLAGS} up --exit-code-from test_frontend --abort-on-container-exit test_frontend
 
-test_acceptance: test_acceptance_app test_acceptance_modules
+test_acceptance: compile test_acceptance_app_run test_acceptance_modules_run
 
-test_acceptance_app:
+test_acceptance_app: compile test_acceptance_app_run
+
+test_acceptance_module: compile test_acceptance_module_run
+
+test_acceptance_app_run: test_clean
 	@set -e; \
-	$(MAKE) test_acceptance_app_start_service; \
-	$(MAKE) test_acceptance_app_run; \
-	$(MAKE) test_acceptance_app_stop_service;
+	docker-compose ${DOCKER_COMPOSE_FLAGS} run --rm test_acceptance npm -q run test:acceptance:run_dir -- ${MOCHA_ARGS} test/acceptance/js
 
-test_acceptance_app_start_service: test_clean # stop service and clear dbs
-	$(MAKE) compile
-	docker-compose ${DOCKER_COMPOSE_FLAGS} up -d test_acceptance
-
-test_acceptance_app_stop_service:
-	docker-compose ${DOCKER_COMPOSE_FLAGS} stop -t 0 test_acceptance redis mongo
-
-test_acceptance_app_run:
-	@docker-compose ${DOCKER_COMPOSE_FLAGS} exec -T test_acceptance npm -q run test:acceptance -- ${MOCHA_ARGS}; \
-	result=$$?; \
-	if [ $$result -eq 137 ]; then \
-		docker-compose logs --tail=50 test_acceptance; \
-		echo "\nOh dear, it looks like the web process crashed! Some logs are above, but to see them all, run:\n\n\tdocker-compose logs test_acceptance\n"; \
-	fi; \
-	exit $$result
-
-test_acceptance_modules:
+test_acceptance_modules_run:
 	@set -e; \
 	for dir in $(MODULE_DIRS); \
 	do \
 		if [ -e $$dir/test/acceptance ]; then \
-			$(MAKE) test_acceptance_module MODULE=$$dir; \
+			$(MAKE) test_acceptance_module_run MODULE=$$dir; \
 		fi; \
 	done
 
-test_acceptance_module: $(MODULE_MAKEFILES)
+test_acceptance_module_run: $(MODULE_MAKEFILES) test_clean
 	@if [ -e $(MODULE)/test/acceptance ]; then \
 		cd $(MODULE) && $(MAKE) test_acceptance; \
 	fi

@@ -7,8 +7,7 @@ services:
   test_acceptance:
     image: node:6.9.5
     volumes:
-      - .:/app:ro
-      - data:/app/data:rw
+      - .:/app
     working_dir: /app
     environment:
       REDIS_HOST: redis
@@ -23,7 +22,7 @@ services:
     depends_on:
       - redis
       - mongo
-    command: node app.js
+    command: npm run test:acceptance:app
 
   test_frontend:
     build:
