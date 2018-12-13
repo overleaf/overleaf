@@ -98,8 +98,6 @@ public class WLRepositoryResolver
         } catch (ServiceNotEnabledException e) {
             cannot occur
             */
-        } catch (MissingRepositoryException e) {
-            throw new ServiceMayNotContinueException(String.join("\n", e.getDescriptionLines()), e);
         } catch (ServiceMayNotContinueException e) {
             /* Such as FailedConnectionException */
             throw e;
@@ -112,7 +110,7 @@ public class WLRepositoryResolver
         } catch (ForbiddenException e) {
             throw new ServiceNotAuthorizedException();
         } catch (GitUserException e) {
-            throw new ServiceMayNotContinueException(e.getMessage(), e);
+            throw new ServiceMayNotContinueException(String.join("\n", e.getDescriptionLines()), e);
         } catch (IOException e) {
             Log.warn(
                     "IOException when trying to open repo: " + projName,
