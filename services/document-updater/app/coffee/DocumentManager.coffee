@@ -25,7 +25,7 @@ module.exports = DocumentManager =
 				logger.log {project_id, doc_id}, "doc not in redis so getting from persistence API"
 				PersistenceManager.getDoc project_id, doc_id, (error, lines, version, ranges, pathname, projectHistoryId) ->
 					return callback(error) if error?
-					logger.log {project_id, doc_id, lines, version, pathname, projectHistoryId}, "got doc from persistence API"
+					logger.info {project_id, doc_id, lines, version, pathname, projectHistoryId}, "got doc from persistence API"
 					RedisManager.putDocInMemory project_id, doc_id, lines, version, ranges, pathname, projectHistoryId, (error) ->
 						return callback(error) if error?
 						callback null, lines, version, ranges, pathname, projectHistoryId, null, false

@@ -11,7 +11,7 @@ module.exports = HttpController =
 	getDoc: (req, res, next = (error) ->) ->
 		doc_id = req.params.doc_id
 		project_id = req.params.project_id
-		logger.log project_id: project_id, doc_id: doc_id, "getting doc via http"
+		logger.info project_id: project_id, doc_id: doc_id, "getting doc via http"
 		timer = new Metrics.Timer("http.getDoc")
 
 		if req.query?.fromVersion?
@@ -22,7 +22,7 @@ module.exports = HttpController =
 		DocumentManager.getDocAndRecentOpsWithLock project_id, doc_id, fromVersion, (error, lines, version, ops, ranges, pathname) ->
 			timer.done()
 			return next(error) if error?
-			logger.log project_id: project_id, doc_id: doc_id, "got doc via http"
+			logger.info project_id: project_id, doc_id: doc_id, "got doc via http"
 			if !lines? or !version?
 				return next(new Errors.NotFoundError("document not found"))
 			res.send JSON.stringify
@@ -44,13 +44,13 @@ module.exports = HttpController =
 		projectStateHash = req.query?.state
 		# exclude is string of existing docs "id:version,id:version,..."
 		excludeItems = req.query?.exclude?.split(',') or []
-		logger.log project_id: project_id, exclude: excludeItems, "getting docs via http"
+		logger.info project_id: project_id, exclude: excludeItems, "getting docs via http"
 		timer = new Metrics.Timer("http.getAllDocs")
 		excludeVersions = {}
 		for item in excludeItems
 			[id,version] = item?.split(':')
 			excludeVersions[id] = version
-		logger.log {project_id: project_id, projectStateHash: projectStateHash, excludeVersions: excludeVersions}, "excluding versions"
+		logger.info {project_id: project_id, projectStateHash: projectStateHash, excludeVersions: excludeVersions}, "excluding versions"
 		ProjectManager.getProjectDocsAndFlushIfOld project_id, projectStateHash, excludeVersions, (error, result) ->
 			timer.done()
 			if error instanceof Errors.ProjectStateChangedError

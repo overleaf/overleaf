@@ -233,7 +233,7 @@ module.exports = RedisManager =
 			newHash = RedisManager._computeHash(newDocLines)
 
 			opVersions = appliedOps.map (op) -> op?.v
-			logger.log doc_id: doc_id, version: newVersion, hash: newHash, op_versions: opVersions, "updating doc in redis"
+			logger.info doc_id: doc_id, version: newVersion, hash: newHash, op_versions: opVersions, "updating doc in redis"
 
 			RedisManager._serializeRanges ranges, (error, ranges) ->
 				if error?

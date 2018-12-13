@@ -7,10 +7,15 @@ SandboxedModule = require('sandboxed-module')
 
 describe "RangesManager", ->
 	beforeEach ->
+		@logger = 
+			error: sinon.stub()
+			log: sinon.stub()
+			warn: sinon.stub()
+			info: sinon.stub()
+
 		@RangesManager = SandboxedModule.require modulePath,
 			requires:
-				"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }
-
+				"logger-sharelatex": @logger 
 		@doc_id = "doc-id-123"
 		@project_id = "project-id-123"
 		@user_id = "user-id-123"
@@ -184,7 +189,7 @@ describe "RangesManager", ->
 		beforeEach ->
 			@RangesManager = SandboxedModule.require modulePath,
 				requires:
-					"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }
+					"logger-sharelatex": @logger
 					"./RangesTracker":@RangesTracker = SandboxedModule.require "../../../../app/js/RangesTracker.js"
 
 			@ranges = {
@@ -226,7 +231,7 @@ describe "RangesManager", ->
 					done()
 
 			it "should log the call with the correct number of changes", ->
-				@logger.log
+				@logger.info
 					.calledWith("accepting 1 changes in ranges")
 					.should.equal true
 
@@ -258,7 +263,7 @@ describe "RangesManager", ->
 					done()
 
 			it "should log the call with the correct number of changes", ->
-				@logger.log
+				@logger.info
 					.calledWith("accepting #{ @change_ids.length } changes in ranges")
 					.should.equal true
 

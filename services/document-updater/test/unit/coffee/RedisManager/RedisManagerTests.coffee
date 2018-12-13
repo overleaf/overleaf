@@ -14,7 +14,7 @@ describe "RedisManager", ->
 		tk.freeze(new Date())
 		@RedisManager = SandboxedModule.require modulePath,
 			requires:
-				"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub() }
+				"logger-sharelatex": @logger = { error: sinon.stub(), log: sinon.stub(), warn: sinon.stub(), info:-> }
 				"./ProjectHistoryRedisManager": @ProjectHistoryRedisManager = {}
 				"settings-sharelatex": @settings = {
 					documentupdater: {logHashErrors: {write:true, read:true}}

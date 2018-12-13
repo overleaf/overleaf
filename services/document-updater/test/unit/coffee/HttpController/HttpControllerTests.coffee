@@ -12,7 +12,7 @@ describe "HttpController", ->
 			"./HistoryManager": @HistoryManager =
 				flushProjectChangesAsync: sinon.stub()
 			"./ProjectManager": @ProjectManager = {}
-			"logger-sharelatex" : @logger = { log: sinon.stub() }
+			"logger-sharelatex" : @logger = { log: sinon.stub(), info: sinon.stub() }
 			"./Metrics": @Metrics = {}
 			"./Errors" : Errors
 		@Metrics.Timer = class Timer
@@ -59,7 +59,7 @@ describe "HttpController", ->
 					.should.equal true
 
 			it "should log the request", ->
-				@logger.log
+				@logger.info
 					.calledWith(doc_id: @doc_id, project_id: @project_id, "getting doc via http")
 					.should.equal true
 
@@ -88,7 +88,7 @@ describe "HttpController", ->
 					.should.equal true
 
 			it "should log the request", ->
-				@logger.log
+				@logger.info
 					.calledWith(doc_id: @doc_id, project_id: @project_id, "getting doc via http")
 					.should.equal true
 
@@ -475,7 +475,7 @@ describe "HttpController", ->
 					.should.equal true
 
 			it "should log the request", ->
-				@logger.log
+				@logger.info
 					.calledWith({project_id: @project_id, exclude: []}, "getting docs via http")
 					.should.equal true
 

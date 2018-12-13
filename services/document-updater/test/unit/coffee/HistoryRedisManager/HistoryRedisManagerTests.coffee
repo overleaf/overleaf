@@ -19,7 +19,9 @@ describe "HistoryRedisManager", ->
 						key_schema:
 							uncompressedHistoryOps: ({doc_id}) -> "UncompressedHistoryOps:#{doc_id}"
 							docsWithHistoryOps: ({project_id}) -> "DocsWithHistoryOps:#{project_id}"
-			"logger-sharelatex": { log: () -> }
+			"logger-sharelatex":
+				log: ->
+				info: ->
 		@doc_id = "doc-id-123"
 		@project_id = "project-id-123"
 		@callback = sinon.stub()
