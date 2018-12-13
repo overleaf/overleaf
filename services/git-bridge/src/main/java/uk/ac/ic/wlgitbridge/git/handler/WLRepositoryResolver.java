@@ -109,7 +109,10 @@ public class WLRepositoryResolver
         } catch (ForbiddenException e) {
             throw new ServiceNotAuthorizedException();
         } catch (GitUserException e) {
-            throw new ServiceMayNotContinueException(String.join("\n", e.getDescriptionLines()), e);
+            throw new ServiceMayNotContinueException(
+                e.getMessage() + "\n" +
+                    String.join("\n", e.getDescriptionLines()),
+                e);
         } catch (IOException e) {
             Log.warn(
                     "IOException when trying to open repo: " + projName,
