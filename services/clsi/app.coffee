@@ -1,8 +1,3 @@
-Metrics = require "metrics-sharelatex"
-Metrics.initialize("clsi")
-Metrics.open_sockets.monitor(logger)
-Metrics.memory.monitor(logger)
-
 CompileController = require "./app/js/CompileController"
 Settings = require "settings-sharelatex"
 logger = require "logger-sharelatex"
@@ -16,6 +11,11 @@ Errors = require './app/js/Errors'
 
 Path = require "path"
 fs = require "fs"
+
+Metrics = require "metrics-sharelatex"
+Metrics.initialize("clsi")
+Metrics.open_sockets.monitor(logger)
+Metrics.memory.monitor(logger)
 
 ProjectPersistenceManager = require "./app/js/ProjectPersistenceManager"
 OutputCacheManager = require "./app/js/OutputCacheManager"
