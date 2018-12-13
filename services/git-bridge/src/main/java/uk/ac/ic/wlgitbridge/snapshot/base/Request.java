@@ -97,7 +97,7 @@ public abstract class Request<T extends Result> {
                         // disregard any errors that arose while handling the JSON
                     }
 
-                    throw new MissingRepositoryException(MissingRepositoryException.GENERIC_REASON);
+                    throw new MissingRepositoryException();
                 } else if (sc >= 400 && sc < 500) {
                     throw new MissingRepositoryException(MissingRepositoryException.GENERIC_REASON);
                 }

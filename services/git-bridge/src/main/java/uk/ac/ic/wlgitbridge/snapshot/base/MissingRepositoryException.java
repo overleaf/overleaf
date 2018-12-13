@@ -45,6 +45,8 @@ public class MissingRepositoryException extends SnapshotAPIException {
 
     private List<String> descriptionLines;
 
+    public MissingRepositoryException() { this.descriptionLines = GENERIC_REASON; }
+
     public MissingRepositoryException(List<String> descriptionLines) {
         this.descriptionLines = descriptionLines;
     }
