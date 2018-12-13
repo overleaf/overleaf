@@ -168,7 +168,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 					return callback(error) if error?
 					callback null, doc, folder_id
 
-	_uploadFile: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback = (error, fileRef, fileStoreUrl) ->)->
+	_uploadFile: (project_id, folder_id, fileName, fsPath, linkedFileData, callback = (error, fileRef, fileStoreUrl) ->)->
 		if not SafePath.isCleanFilename fileName
 			return callback new Errors.InvalidNameError("invalid element name")
 		fileRef = new File(
@@ -195,7 +195,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 			(project_id, folder_id, fileName, fsPath, linkedFileData, userId, callback) ->
 				if not SafePath.isCleanFilename fileName
 					return callback new Errors.InvalidNameError("invalid element name")
-				ProjectEntityUpdateHandler._uploadFile project_id, folder_id, fileName, fsPath, linkedFileData, userId, (error, fileRef, fileStoreUrl) ->
+				ProjectEntityUpdateHandler._uploadFile project_id, folder_id, fileName, fsPath, linkedFileData, (error, fileRef, fileStoreUrl) ->
 					return callback(error) if error?
 					next(project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback)
 		withLock: (project_id, folder_id, fileName, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback = (error, fileRef, folder_id) ->)->

@@ -59,7 +59,8 @@ module.exports = ProjectCreationHandler =
 			project.imageName ?= Settings.currentImageName
 		project.rootFolder[0] = rootFolder
 		User.findById owner_id, "ace.spellCheckLanguage", (err, user)->
-			project.spellCheckLanguage = user.ace.spellCheckLanguage
+			if user? # It's possible the owner_id is a UserStub
+				project.spellCheckLanguage = user.ace.spellCheckLanguage
 			project.save (err)->
 				return callback(err) if err?
 				callback err, project
