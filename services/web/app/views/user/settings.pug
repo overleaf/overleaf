@@ -158,6 +158,14 @@ block content
 							div
 								a(id="sessions-link", href="/user/sessions") #{translate("manage_sessions")}
 
+							if settings.overleaf
+								hr
+								p
+									| To manage your account's connection to Google, Twitter, ORCID and IEEE, please
+									|
+									a(href="/sign_in_to_v1?return_to=/users/edit#linked-accounts") click here
+									| .
+
 							hr
 
 							if !externalAuthenticationSystemUsed() || (settings.createV1AccountOnLogin && settings.overleaf)
