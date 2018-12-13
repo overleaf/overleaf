@@ -78,6 +78,7 @@ describe "UserCreator", ->
 				user.emails.length.should.equal 1
 				user.emails[0].email.should.equal @email
 				user.emails[0].createdAt.should.be.a 'date'
+				user.emails[0].reversedHostname.should.equal "moc.liamg"
 				done()
 
 		it "should add affiliation in background", (done)->

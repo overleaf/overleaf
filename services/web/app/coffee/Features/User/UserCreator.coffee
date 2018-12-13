@@ -25,6 +25,7 @@ module.exports = UserCreator =
 		user.emails = [
 			email: user.email
 			createdAt: new Date()
+			reversedHostname: user.email.split('@')[1].split('').reverse().join('')
 		]
 
 		user.save (err)->
