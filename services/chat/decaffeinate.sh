@@ -42,6 +42,7 @@ decaffeinate app.js
 decaffeinate Gruntfile.js
 decaffeinate config/settings.defaults.js
 
+git add .
 git commit -m "Decaffeinate: convert individual files to js"
 
 npx prettier-eslint 'app.js' 'Gruntfile.js' 'config/settings.defaults.js' --write
