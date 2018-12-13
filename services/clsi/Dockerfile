@@ -20,4 +20,4 @@ WORKDIR /app
 RUN chmod 0755 ./install_deps.sh && ./install_deps.sh
 ENTRYPOINT ["/bin/sh", "entrypoint.sh"]
 
-CMD ["node", "--expose-gc", "app.js"]
+CMD ["node","app.js"]
