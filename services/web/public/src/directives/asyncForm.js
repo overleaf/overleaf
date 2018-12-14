@@ -148,8 +148,7 @@ define(['base', 'libs/passfield'], function(App) {
 <div class="alert" ng-class="{
 	'alert-danger': form.response.message.type == 'error',
 	'alert-success': form.response.message.type != 'error'
-}" ng-show="!!form.response.message">
-	{{form.response.message.text}}
+}" ng-show="!!form.response.message" ng-bind-html="form.response.message.text">
 </div>
 <div ng-transclude></div>\
 `,
