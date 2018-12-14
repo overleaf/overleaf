@@ -28,6 +28,6 @@ module.exports =
 			if err then return callback(err)
 			if !user_id?
 				return callback null, false, null
-			AuthenticationManager.setUserPassword user_id, password, (err) ->
+			AuthenticationManager.setUserPassword user_id, password, (err, reset) ->
 				if err then return callback(err)
-				callback null, true, user_id
+				callback null, reset, user_id

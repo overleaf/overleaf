@@ -79,7 +79,7 @@ describe "PasswordResetHandler", ->
 
 		it "should set the user password", (done)->
 			@OneTimeTokenHandler.getValueFromTokenAndExpire.yields(null, @user_id)
-			@AuthenticationManager.setUserPassword.callsArgWith(2)
+			@AuthenticationManager.setUserPassword.yields(null, true)
 			@PasswordResetHandler.setNewUserPassword @token, @password, (err, found, user_id) =>
 				found.should.equal true
 				user_id.should.equal @user_id

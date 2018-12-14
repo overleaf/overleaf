@@ -70,7 +70,7 @@ class User
 		options = {upsert: true, new: true, setDefaultsOnInsert: true}
 		UserModel.findOneAndUpdate filter, {}, options, (error, user) =>
 			return callback(error) if error?
-			AuthenticationManager.setUserPassword user._id, @password, (error) =>
+			AuthenticationManager._setUserPasswordInV2 user._id, @password, (error) =>
 				return callback(error) if error?
 				UserUpdater.updateUser user._id, $set: emails: @emails, (error) =>
 					return callback(error) if error?

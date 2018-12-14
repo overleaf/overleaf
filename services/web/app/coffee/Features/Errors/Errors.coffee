@@ -89,6 +89,20 @@ AccountMergeError = (message) ->
 	return error
 AccountMergeError.prototype.__proto__ = Error.prototype
 
+NotInV2Error = (message) ->
+	error = new Error(message)
+	error.name = "NotInV2Error"
+	error.__proto__ = NotInV2Error.prototype
+	return error
+NotInV2Error.prototype.__proto__ = Error.prototype
+
+SLInV2Error = (message) ->
+	error = new Error(message)
+	error.name = "SLInV2Error"
+	error.__proto__ = SLInV2Error.prototype
+	return error
+SLInV2Error.prototype.__proto__ = Error.prototype
+
 module.exports = Errors =
 	NotFoundError: NotFoundError
 	ServiceNotConfiguredError: ServiceNotConfiguredError
@@ -103,3 +117,5 @@ module.exports = Errors =
 	EmailExistsError: EmailExistsError
 	InvalidError: InvalidError
 	AccountMergeError: AccountMergeError
+	NotInV2Error: NotInV2Error
+	SLInV2Error: SLInV2Error

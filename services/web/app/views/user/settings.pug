@@ -256,7 +256,7 @@ block content
 					div.alert.alert-info
 						| If you can't remember your password, or if you are using Single-Sign-On with another provider
 						| to sign in (such as Twitter or Google), please
-						| #[a(href='/sign_in_to_v1?return_to=/users/password/new', target='_blank') reset your password],
+						| #[a(href="/user/password/reset", target='_blank') reset your password],
 						| and try again.
 		.modal-footer
 			button.btn.btn-default(
@@ -271,4 +271,3 @@ block content
 	
 	script(type='text/javascript').
 		window.passwordStrengthOptions = !{JSON.stringify(settings.passwordStrengthOptions || {})}
-

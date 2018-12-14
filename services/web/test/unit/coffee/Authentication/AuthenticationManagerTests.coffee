@@ -6,6 +6,7 @@ modulePath = "../../../../app/js/Features/Authentication/AuthenticationManager.j
 SandboxedModule = require('sandboxed-module')
 events = require "events"
 ObjectId = require("mongojs").ObjectId
+Errors = require "../../../../app/js/Features/Errors/Errors"
 
 describe "AuthenticationManager", ->
 	beforeEach ->
@@ -18,6 +19,8 @@ describe "AuthenticationManager", ->
 				ObjectId: ObjectId
 			"bcrypt": @bcrypt = {}
 			"settings-sharelatex": @settings
+			"../V1/V1Handler": @V1Handler = {}
+			"../User/UserGetter": @UserGetter = {}
 		@callback = sinon.stub()
 
 	describe "authenticate", ->
@@ -28,7 +31,7 @@ describe "AuthenticationManager", ->
 					email: @email = "USER@sharelatex.com"
 				@unencryptedPassword = "banana"
 				@User.findOne = sinon.stub().callsArgWith(1, null, @user)
-		
+
 			describe "when the hashed password matches", ->
 				beforeEach (done) ->
 					@user.hashedPassword = @hashedPassword = "asdfjadflasdf"
@@ -151,7 +154,7 @@ describe "AuthenticationManager", ->
 		describe "too long", ->
 			beforeEach ->
 				@settings.passwordStrengthOptions =
-					length: 
+					length:
 						max:10
 				@password = "dsdsadsadsadsadsadkjsadjsadjsadljs"
 
@@ -185,30 +188,62 @@ describe "AuthenticationManager", ->
 					@bcrypt.hash.called.should.equal false
 					done()
 
-		describe "successful set", ->
-			beforeEach -> 
-				@AuthenticationManager.setUserPassword(@user_id, @password, @callback)
+		describe "password set attempt", ->
+			describe "with SL user in SL", ->
+				beforeEach ->
+					@UserGetter.getUser = sinon.stub().yields(null, { overleaf: null })
+					@AuthenticationManager.setUserPassword(@user_id, @password, @callback)
 
-			it "should update the user's password in the database", ->
-				args = @db.users.update.lastCall.args
-				expect(args[0]).to.deep.equal {_id: ObjectId(@user_id.toString())}
-				expect(args[1]).to.deep.equal {
-					$set: {
-						"hashedPassword": @hashedPassword
+				it 'should look up the user', ->
+					@UserGetter.getUser.calledWith(@user_id).should.equal true
+
+				it "should update the user's password in the database", ->
+					args = @db.users.update.lastCall.args
+					expect(args[0]).to.deep.equal {_id: ObjectId(@user_id.toString())}
+					expect(args[1]).to.deep.equal {
+						$set: {
+							"hashedPassword": @hashedPassword
+						}
+						$unset: password: true
 					}
-					$unset: password: true
-				}
 
-			it "should hash the password", ->
-				@bcrypt.genSalt
-					.calledWith(12)
-					.should.equal true
-				@bcrypt.hash
-					.calledWith(@password, @salt)
-					.should.equal true
+				it "should hash the password", ->
+					@bcrypt.genSalt
+						.calledWith(12)
+						.should.equal true
+					@bcrypt.hash
+						.calledWith(@password, @salt)
+						.should.equal true
 
-			it "should call the callback", ->
-				@callback.called.should.equal true
+				it "should call the callback", ->
+					@callback.called.should.equal true
 
+			describe "with SL user in v2", ->
+				beforeEach (done) ->
+					@settings.overleaf = true
+					@UserGetter.getUser = sinon.stub().yields(null, { overleaf: null })
+					@AuthenticationManager.setUserPassword @user_id, @password, (err, changed) =>
+						@callback(err, changed)
+						done()
+				it "should error", ->
+					@callback.calledWith(new Errors.SLInV2Error("Password Reset Attempt")).should.equal true
 
+			describe "with v2 user in SL", ->
+				beforeEach (done) ->
+					@UserGetter.getUser = sinon.stub().yields(null, { overleaf: {id: 1} })
+					@AuthenticationManager.setUserPassword @user_id, @password, (err, changed) =>
+						@callback(err, changed)
+						done()
+				it "should error", ->
+					@callback.calledWith(new Errors.NotInV2Error("Password Reset Attempt")).should.equal true
 
+			describe "with v2 user in v2", ->
+				beforeEach (done) ->
+					@settings.overleaf = true
+					@UserGetter.getUser = sinon.stub().yields(null, { overleaf: {id: 1} })
+					@V1Handler.doPasswordReset = sinon.stub().yields(null, true)
+					@AuthenticationManager.setUserPassword @user_id, @password, (err, changed) =>
+						@callback(err, changed)
+						done()
+				it "should set the password in v2", ->
+					@callback.calledWith(null, true).should.equal true

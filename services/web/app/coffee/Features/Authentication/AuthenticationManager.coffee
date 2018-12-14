@@ -4,8 +4,18 @@ User = require("../../models/User").User
 crypto = require 'crypto'
 bcrypt = require 'bcrypt'
 EmailHelper = require("../Helpers/EmailHelper")
+Errors = require("../Errors/Errors")
+UserGetter = require("../User/UserGetter")
+V1Handler = require '../V1/V1Handler'
 
 BCRYPT_ROUNDS = Settings?.security?.bcryptRounds or 12
+
+_checkWriteResult = (result, callback = (error, updated) ->) ->
+	# for MongoDB
+	if result and result.nModified == 1
+		callback(null, true)
+	else
+		callback(null, false)
 
 module.exports = AuthenticationManager =
 	authenticate: (query, password, callback = (error, user) ->) ->
@@ -46,10 +56,41 @@ module.exports = AuthenticationManager =
 			return { message: 'password is too short' }
 		return null
 
-	setUserPassword: (user_id, password, callback = (error) ->) ->
+	setUserPassword: (user_id, password, callback = (error, changed) ->) ->
 		validation = @validatePassword(password)
 		return callback(validation.message) if validation?
 
+		UserGetter.getUser user_id, { email:1, overleaf: 1 }, (error, user) ->
+			return callback(error) if error?
+			overleafId = user.overleaf?.id?
+			if overleafId and Settings.overleaf? # v2 user in v2
+				# v2 user in v2, change password in v1
+				AuthenticationManager._setUserPasswordInV1({
+					v1Id: user.overleaf.id,
+					email: user.email,
+					password: password
+				}, callback)
+			else if overleafId and !Settings.overleaf?
+				# v2 user in SL
+				return callback(new Errors.NotInV2Error("Password Reset Attempt"))
+			else if !overleafId and !Settings.overleaf?
+				# SL user in SL, change password in SL
+				AuthenticationManager._setUserPasswordInV2(user_id, password, callback)
+			else if !overleafId and Settings.overleaf?
+				# SL user in v2, should not happen
+				return callback(new Errors.SLInV2Error("Password Reset Attempt"))
+			else
+				return callback(new Error("Password Reset Attempt Failed"))
+
+	checkRounds: (user, hashedPassword, password, callback = (error) ->) ->
+		# check current number of rounds and rehash if necessary
+		currentRounds = bcrypt.getRounds hashedPassword
+		if currentRounds < BCRYPT_ROUNDS
+			AuthenticationManager.setUserPassword user._id, password, callback
+		else
+			callback()
+
+	_setUserPasswordInV2: (user_id, password, callback) ->
 		bcrypt.genSalt BCRYPT_ROUNDS, (error, salt) ->
 			return callback(error) if error?
 			bcrypt.hash password, salt, (error, hash) ->
@@ -59,12 +100,12 @@ module.exports = AuthenticationManager =
 				}, {
 					$set: hashedPassword: hash
 					$unset: password: true
-				}, callback)
+				}, (updateError, result)->
+					return callback(updateError) if updateError?
+					_checkWriteResult(result, callback)
+				)
 
-	checkRounds: (user, hashedPassword, password, callback = (error) ->) ->
-		# check current number of rounds and rehash if necessary
-		currentRounds = bcrypt.getRounds hashedPassword
-		if currentRounds < BCRYPT_ROUNDS
-			AuthenticationManager.setUserPassword user._id, password, callback
-		else
-			callback()
+	_setUserPasswordInV1: (user, callback) ->
+		V1Handler.doPasswordReset user, (error, reset)->
+			return callback(error) if error?
+			return callback(error, reset)

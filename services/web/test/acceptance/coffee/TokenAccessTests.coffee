@@ -417,6 +417,13 @@ describe 'TokenAccess', ->
 			, done)
 
 	describe 'unimported v1 project', ->
+		before ->
+			settings.overleaf =
+				host: 'http://localhost:5000'
+
+		after ->
+			delete settings.overleaf
+
 		it 'should redirect read and write token to v1', (done) ->
 			unimportedV1Token = '123abc'
 			try_read_and_write_token_access(@owner, unimportedV1Token, (response, body) =>

@@ -126,9 +126,6 @@ module.exports =
 			path: '/destination/get_and_post'
 		}
 
-	overleaf:
-		host: "http://overleaf.test:5000"
-
 	redirects:
 		'/redirect/one': '/destination/one',
 		'/redirect/get_and_post': {

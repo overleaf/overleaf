@@ -46,8 +46,17 @@ module.exports =
 			return res.sendStatus 400
 		delete req.session.resetToken
 		PasswordResetHandler.setNewUserPassword passwordResetToken?.trim(), password?.trim(), (err, found, user_id) ->
-			return next(err) if err?
-			if found
+			if err and err.name and err.name == "NotFoundError"
+				res.status(404).send("NotFoundError")
+			else if err and err.name and err.name == "NotInV2Error"
+				res.status(403).send("NotInV2Error")
+			else if err and err.name and err.name == "SLInV2Error"
+				res.status(403).send("SLInV2Error")
+			else if err and err.statusCode and err.statusCode == 500
+				res.status(500)
+			else if err and !err.statusCode
+				res.status(500)
+			else if found
 				UserSessionsManager.revokeAllUserSessions {_id: user_id}, [], (err) ->
 					return next(err) if err?
 					if req.body.login_after

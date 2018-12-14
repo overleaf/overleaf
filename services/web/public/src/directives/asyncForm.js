@@ -93,6 +93,8 @@ define(['base', 'libs/passfield'], function(App) {
             scope[attrs.name].inflight = false
             response.success = false
             response.error = true
+            response.status = status
+            response.data = data
 
             const onErrorHandler = scope[attrs.onError]
             if (onErrorHandler) {

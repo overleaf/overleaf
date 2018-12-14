@@ -25,3 +25,26 @@ module.exports = V1Handler =
 			else
 				err = new Error("Unexpected status from v1 login api: #{response.statusCode}")
 				callback(err)
+
+	doPasswordReset: (userData, callback=(err, created)->) ->
+		logger.log({v1Id: userData.v1Id, email: userData.email},
+			"sending password reset request to v1 login api")
+		V1Api.request {
+			method: 'POST'
+			url: "/api/v1/sharelatex/reset_password"
+			json: {
+				user_id: userData.v1Id,
+				email: userData.email,
+				password: userData.password
+			}
+			expectedStatusCodes: [200]
+		}, (err, response, body) ->
+			if err?
+				logger.err {email: userData.email, err}, "error while talking to v1 password reset api"
+				return callback(err, false)
+			if response.statusCode in [200]
+				logger.log {email: userData.email, changed: true}, "got success response from v1 password reset api"
+				callback(null, true)
+			else
+				err = new Error("Unexpected status from v1 password reset api: #{response.statusCode}")
+				callback(err, false)
