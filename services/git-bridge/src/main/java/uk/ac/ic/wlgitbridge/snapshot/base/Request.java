@@ -148,6 +148,7 @@ public abstract class Request<T extends Result> {
                             getPostBody().getBytes()
                     )
             );
+            setTimeouts(request);
             request(request);
         } catch (IOException e) {
             e.printStackTrace();
