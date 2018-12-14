@@ -130,6 +130,7 @@ public abstract class Request<T extends Result> {
             HttpRequest request = Instance.httpRequestFactory.buildGetRequest(
                     new GenericUrl(url)
             );
+            setTimeouts(request);
             request(request);
         } catch (IOException e) {
             e.printStackTrace();
@@ -157,6 +158,13 @@ public abstract class Request<T extends Result> {
     private void request(HttpRequest request) throws IOException {
         onBeforeRequest(request);
         future = request.executeAsync();
+    }
+
+    private void setTimeouts(HttpRequest request) {
+        // timeouts are 20s by default
+        int threeMinutesInMs = 1000 * 60 * 3;
+        request.setConnectTimeout(threeMinutesInMs);
+        request.setReadTimeout(threeMinutesInMs);
     }
 
 }
