@@ -11,9 +11,15 @@ import java.util.List;
  */
 public class PostbackTimeoutException extends SevereSnapshotPostException {
 
+    private int timeout;
+
+    public PostbackTimeoutException(int timeout) {
+        this.timeout = timeout;
+    }
+
     @Override
     public String getMessage() {
-        return "timeout (60s)";
+        return "Request timed out (after " + this.timeout + " seconds)";
     }
 
     @Override

@@ -14,6 +14,8 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class PostbackPromise {
 
+    private static int TIMEOUT_SECONDS = 60 * 3;
+
     private final String postbackKey;
     private final ReentrantLock lock;
     private final Condition cond;
@@ -35,8 +37,8 @@ public class PostbackPromise {
         try {
             while (!received) {
                 try {
-                    if (!cond.await(60, TimeUnit.SECONDS)) {
-                        throw new PostbackTimeoutException();
+                    if (!cond.await(TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+                        throw new PostbackTimeoutException(TIMEOUT_SECONDS);
                     }
                 } catch (InterruptedException e) {
                     throw new InternalErrorException();
