@@ -8,10 +8,6 @@ module.exports = ErrorController =
 		res.render 'general/404',
 			title: "page_not_found"
 
-	forbidden: (req, res) ->
-		res.status(403)
-		res.render 'user/restricted'
-
 	serverError: (req, res)->
 		res.status(500)
 		res.render 'general/500',
@@ -31,9 +27,6 @@ module.exports = ErrorController =
 		if error instanceof Errors.NotFoundError
 			logger.warn {err: error, url: req.url}, "not found error"
 			ErrorController.notFound req, res
-		else if error instanceof Errors.ForbiddenError
-			logger.error err: error, "forbidden error"
-			ErrorController.forbidden req, res
 		else if error instanceof Errors.TooManyRequestsError
 			logger.warn {err: error, url: req.url}, "too many requests error"
 			res.sendStatus(429)

@@ -1,6 +1,5 @@
 request = require 'request'
 settings = require 'settings-sharelatex'
-Errors = require '../Errors/Errors'
 
 # TODO: check what happens when these settings aren't defined
 DEFAULT_V1_PARAMS = {
@@ -39,10 +38,6 @@ module.exports = V1Api =
 			return callback(error, response, body) if error?
 			if 200 <= response.statusCode < 300 or response.statusCode in (options.expectedStatusCodes or [])
 				callback null, response, body
-			else if response.statusCode == 403
-				error = new Errors.ForbiddenError("overleaf v1 returned forbidden")
-				error.statusCode = response.statusCode
-				callback error
 			else
 				error = new Error("overleaf v1 returned non-success code: #{response.statusCode} #{options.method} #{options.uri}")
 				error.statusCode = response.statusCode

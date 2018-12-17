@@ -29,7 +29,5 @@ module.exports = Features =
 				Settings.overleaf? and isEnabled
 			when 'redirect-sl'
 				return Settings.redirectToV2?
-			when 'force-import-to-v2'
-				return Settings.forceImportToV2
 			else
 				throw new Error("unknown feature: #{feature}")

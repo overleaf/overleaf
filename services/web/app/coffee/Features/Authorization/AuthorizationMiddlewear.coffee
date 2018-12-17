@@ -106,7 +106,6 @@ module.exports = AuthorizationMiddlewear =
 		return callback(null, user_id)
 
 	redirectToRestricted: (req, res, next) ->
-		# TODO: move this to throwing ForbiddenError
 		res.redirect "/restricted?from=#{encodeURIComponent(req.url)}"
 
 	restricted : (req, res, next)->
