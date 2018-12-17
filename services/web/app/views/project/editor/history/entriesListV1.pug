@@ -1,6 +1,6 @@
 aside.change-list(
 		ng-if="!history.isV2"
-		ng-controller="HistoryCompareListController"
+		ng-controller="HistoryListController"
 		infinite-scroll="loadMore()"
 		infinite-scroll-disabled="history.loading || history.atEnd"
 		infinite-scroll-initialize="ui.view == 'history'"
@@ -22,7 +22,7 @@ aside.change-list(
 						'hover-selected-to': update.hoverSelectedTo,\
 						'hover-selected-from': update.hoverSelectedFrom,\
 					}"
-					ng-controller="HistoryCompareListItemController"
+					ng-controller="HistoryListItemController"
 				)
 
 					div.day(ng-show="update.meta.first_in_day") {{ update.meta.end_ts | relativeDate }}
