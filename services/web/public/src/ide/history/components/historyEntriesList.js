@@ -31,8 +31,7 @@ define(['base'], function(App) {
     }
     ctrl.onEntryLinked = function(entry, $entryEl) {
       if (
-        entry.selectedTo &&
-        entry.selectedFrom &&
+        entry.toV === ctrl.selectedHistoryVersion &&
         !_isEntryElVisible($entryEl)
       ) {
         return $scope.$applyAsync(() =>
@@ -57,6 +56,7 @@ define(['base'], function(App) {
       currentUser: '<',
       freeHistoryLimitHit: '<',
       currentUserIsOwner: '<',
+      selectedHistoryVersion: '<',
       onEntrySelect: '&',
       onLabelDelete: '&'
     },

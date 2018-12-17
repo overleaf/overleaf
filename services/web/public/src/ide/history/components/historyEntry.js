@@ -43,7 +43,7 @@ define([
         (user != null ? user._id : undefined) ||
         (user != null ? user.id : undefined)
       const hue = ColorManager.getHueForUserId(curUserId) || 100
-      if (ctrl.entry.inSelection) {
+      if (ctrl.entry.toV === ctrl.selectedHistoryVersion) {
         return { color: '#FFF' }
       } else {
         return { color: `hsl(${hue}, 70%, 50%)` }
@@ -61,6 +61,7 @@ define([
       entry: '<',
       currentUser: '<',
       users: '<',
+      selectedHistoryVersion: '<',
       onSelect: '&',
       onLabelDelete: '&'
     },

@@ -24,7 +24,7 @@ define(['base'], App =>
       const _pathnameExistsInFiles = (pathname, files) =>
         _.any(files, file => file.pathname === pathname)
 
-      const _getSelectedDefaultPathname = function(files) {
+      const _getSelectedDefaultFile = function(files) {
         let selectedPathname = null
         if (
           _previouslySelectedPathname != null &&
@@ -41,24 +41,25 @@ define(['base'], App =>
             selectedPathname = _previouslySelectedPathname = files[0].pathname
           }
         }
-        return selectedPathname
+        return _.find(files, { pathname: selectedPathname })
       }
 
-      $scope.handleFileSelection = file =>
-        ($scope.history.selection.pathname = _previouslySelectedPathname =
-          file.pathname)
+      $scope.handleFileSelection = file => {
+        _previouslySelectedPathname = file.pathname
+        ide.historyManager.selectFile(file)
+      }
 
-      $scope.$watch('history.files', function(files) {
+      $scope.$watch('history.selection.files', function(files) {
         if (files != null && files.length > 0) {
           $scope.currentFileTree = _.reduce(files, _reducePathsToTree, [])
-          return ($scope.history.selection.pathname = _getSelectedDefaultPathname(
-            files
-          ))
+          ide.historyManager.selectFile(_getSelectedDefaultFile(files))
         }
       })
 
       return (_reducePathsToTree = function(currentFileTree, fileObject) {
-        const filePathParts = fileObject.pathname.split('/')
+        const filePathParts = fileObject.newPathname
+          ? fileObject.newPathname.split('/')
+          : fileObject.pathname.split('/')
         let currentFileTreeLocation = currentFileTree
         for (let index = 0; index < filePathParts.length; index++) {
           var fileTreeEntity
@@ -69,7 +70,14 @@ define(['base'], App =>
               name: pathPart,
               pathname: fileObject.pathname,
               type: 'file',
-              operation: fileObject.operation || 'edited'
+              operation: fileObject.operation
+            }
+            if (fileObject.operation === 'renamed') {
+              fileTreeEntity.pathname = fileObject.newPathname
+              fileTreeEntity.oldPathname = fileObject.pathname
+            }
+            if (fileObject.operation === 'removed' && fileObject.deletedAtV) {
+              fileTreeEntity.deletedAtV = fileObject.deletedAtV
             }
             currentFileTreeLocation.push(fileTreeEntity)
           } else {

@@ -249,19 +249,21 @@
 @global-alerts-padding               : 7px;
 
 // Editor file-tree
-@file-tree-bg                   : @ol-blue-gray-4;
-@file-tree-line-height          : 2.05;
-@file-tree-item-color           : #FFF;
-@file-tree-item-selected-color  : @file-tree-item-color;
-@file-tree-item-input-color     : @ol-blue-gray-5;
-@file-tree-item-toggle-color    : @ol-blue-gray-2;
-@file-tree-item-icon-color      : @ol-blue-gray-2;
-@file-tree-item-folder-color    : @ol-blue-gray-2;
-@file-tree-item-hover-bg        : @ol-blue-gray-5;
-@file-tree-item-selected-bg     : @ol-green;
-@file-tree-multiselect-bg       : @ol-blue;
-@file-tree-multiselect-hover-bg : @ol-dark-blue;
-@file-tree-droppable-bg-color   : tint(@ol-green, 5%);
+@file-tree-bg                        : @ol-blue-gray-4;
+@file-tree-line-height               : 2.05;
+@file-tree-item-color                : #FFF;
+@file-tree-item-focus-color          : @file-tree-item-color;
+@file-tree-item-focus-selected-color : @file-tree-item-color;
+@file-tree-item-selected-color       : @file-tree-item-color;
+@file-tree-item-input-color          : @ol-blue-gray-5;
+@file-tree-item-toggle-color         : @ol-blue-gray-2;
+@file-tree-item-icon-color           : @ol-blue-gray-2;
+@file-tree-item-folder-color         : @ol-blue-gray-2;
+@file-tree-item-hover-bg             : @ol-blue-gray-5;
+@file-tree-item-selected-bg          : @ol-green;
+@file-tree-multiselect-bg            : @ol-blue;
+@file-tree-multiselect-hover-bg      : @ol-dark-blue;
+@file-tree-droppable-bg-color        : tint(@ol-green, 5%);
 
 // Editor resizers
 @editor-resizer-bg-color          : @ol-blue-gray-5;
@@ -333,19 +335,22 @@
 
 
 // v2 History
-@history-base-font-size               : @font-size-small;
-@history-base-bg                      : @ol-blue-gray-1;
-@history-entry-label-bg-color         : @ol-blue;
-@history-entry-label-color            : #FFF;
-@history-entry-selected-label-bg-color: #FFF;
-@history-entry-selected-label-color   : @ol-blue;
-@history-entry-day-bg                 : @ol-blue-gray-2;
-@history-entry-selected-bg            : @ol-green;
-@history-base-color                   : @ol-blue-gray-2;
-@history-highlight-color              : @ol-type-color;
-@history-toolbar-bg-color             : @editor-toolbar-bg;
-@history-toolbar-color                : #FFF;
-
+@history-base-font-size                   : @font-size-small;
+@history-base-bg                          : @ol-blue-gray-1;
+@history-entry-label-bg-color             : @ol-blue;
+@history-entry-pseudo-label-bg-color      : @ol-green;
+@history-entry-label-color                : #FFF;
+@history-entry-selected-label-bg-color    : #FFF;
+@history-entry-selected-label-color       : @ol-blue;
+@history-entry-selected-pseudo-label-color: @ol-green;
+@history-entry-day-bg                     : @ol-blue-gray-2;
+@history-entry-selected-bg                : @ol-green;
+@history-base-color                       : @ol-blue-gray-2;
+@history-highlight-color                  : @ol-type-color;
+@history-toolbar-bg-color                 : @editor-toolbar-bg;
+@history-toolbar-color                    : #FFF;
+@history-file-badge-bg                    : rgba(255, 255, 255, .25);
+@history-file-badge-color:                : @file-tree-item-color;
 // Screens
 // added -size to not conflict with common_variables
 @screen-size-sm-max                   : 767px;

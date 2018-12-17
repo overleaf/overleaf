@@ -5,6 +5,7 @@ aside.change-list(
 	history-entries-list(
 		ng-if="!history.showOnlyLabels && !history.error"
 		entries="history.updates"
+		selected-history-version="history.selection.range.toV"
 		current-user="user"
 		current-user-is-owner="project.owner._id === user.id"
 		users="projectUsers"
@@ -26,98 +27,220 @@ aside.change-list(
 		on-label-select="handleLabelSelect(label)"
 		on-label-delete="handleLabelDelete(label)"
 	)
-
-aside.change-list(
+aside.change-list.change-list-compare(
 	ng-if="history.isV2 && history.viewMode === HistoryViewModes.COMPARE"
-	ng-controller="HistoryListController"
-	infinite-scroll="loadMore()"
-	infinite-scroll-disabled="history.loading || history.atEnd"
-	infinite-scroll-initialize="ui.view == 'history'"
+	ng-controller="HistoryCompareController"
 )
-	.infinite-scroll-inner
+	div(
+		ng-if="!history.showOnlyLabels && !history.error"
+	)
+		aside.change-list(
+			infinite-scroll="loadMore()"
+			infinite-scroll-disabled="history.loading || history.atEnd"
+			infinite-scroll-initialize="ui.view == 'history' && history.viewMode === HistoryViewModes.COMPARE"
+		)
+			.infinite-scroll-inner
+				ul.list-unstyled(
+					ng-class="{\
+						'hover-state': history.hoveringOverListSelectors\
+					}"
+				)
+					li.change(
+						ng-repeat="update in history.updates track by update.fromV"
+						ng-class="{\
+							'first-in-day': update.meta.first_in_day,\
+							'selected': update.toV <= history.selection.range.toV && update.fromV >= history.selection.range.fromV,\
+							'selected-to': update.toV === history.selection.range.toV,\
+							'selected-from': update.fromV === history.selection.range.fromV,\
+							'hover-selected': update.toV <= history.selection.hoveredRange.toV && update.fromV >= history.selection.hoveredRange.fromV,\
+							'hover-selected-to': update.toV === history.selection.hoveredRange.toV,\
+							'hover-selected-from': update.fromV === history.selection.hoveredRange.fromV,\
+						}"
+					)
+
+						div.day(ng-if="::update.meta.first_in_day") {{ ::update.meta.end_ts | relativeDate }}
+
+						div.selectors
+							div.range
+							form
+								input.selector-from(
+									type="radio"
+									name="fromVersion"
+									ng-model="history.selection.range.fromV"
+									ng-value="update.fromV"
+									ng-mouseover="setHoverFrom(update.fromV)"
+									ng-mouseout="resetHover()"
+									ng-show="update.fromV < history.selection.range.fromV || update.toV <= history.selection.range.toV && update.fromV >= history.selection.range.fromV"
+								)
+							form
+								input.selector-to(
+									type="radio"
+									name="toVersion"
+									ng-model="history.selection.range.toV"
+									ng-value="update.toV"
+									ng-mouseover="setHoverTo(update.toV)"
+									ng-mouseout="resetHover()"
+									ng-show="update.toV > history.selection.range.toV || update.toV <= history.selection.range.toV && update.fromV >= history.selection.range.fromV"
+								)
+
+						div.description(ng-click="select(update.toV, update.fromV)")
+							history-label(
+								ng-repeat="label in update.labels track by label.id"
+								label-text="label.comment"
+								label-owner-name="getDisplayNameById(label.user_id)"
+								label-creation-date-time="label.created_at"
+								is-owned-by-current-user="label.user_id === user.id"
+								on-label-delete="deleteLabel(label)"
+							)
+							div.time {{ ::update.meta.end_ts | formatDate:'h:mm a' }}
+							div.action.action-edited(ng-if="::history.isV2 && update.pathnames.length > 0")
+								| #{translate("file_action_edited")}
+							div.docs(ng-repeat="pathname in ::update.pathnames")
+								.doc {{ ::pathname }}
+							div.docs(ng-repeat="project_op in ::update.project_ops")
+								div(ng-if="::project_op.rename")
+									.action #{translate("file_action_renamed")} 
+									.doc {{ ::project_op.rename.pathname }} &rarr; {{ ::project_op.rename.newPathname }}
+								div(ng-if="::project_op.add")
+									.action #{translate("file_action_created")}
+									.doc {{ ::project_op.add.pathname }}
+								div(ng-if="::project_op.remove")
+									.action #{translate("file_action_deleted")}
+									.doc {{ ::project_op.remove.pathname }}
+							div.users
+								div.user(ng-repeat="update_user in ::update.meta.users")
+									.color-square(ng-if="::update_user != null", ng-style="::{'background-color': 'hsl({{ update_user.hue }}, 70%, 50%)'}")
+									.color-square(ng-if="::update_user == null", ng-style="::{'background-color': 'hsl(100, 70%, 50%)'}")
+									.name(ng-if="::update_user && update_user.id != user.id" ng-bind="displayName(update_user)") 
+									.name(ng-if="::update_user && update_user.id == user.id") You
+									.name(ng-if="::update_user == null") #{translate("anonymous")}
+								div.user(ng-if="::update.meta.users.length == 0")
+									.color-square(style="background-color: hsl(100, 100%, 50%)")
+									span #{translate("anonymous")}
+
+				.loading(ng-show="history.loading")
+					i.fa.fa-spin.fa-refresh
+					| &nbsp;&nbsp; #{translate("loading")}...
+				.history-entries-list-upgrade-prompt(
+					ng-if="history.freeHistoryLimitHit && project.owner._id === user.id"
+					ng-controller="FreeTrialModalController"
+				)
+					p #{translate("currently_seeing_only_24_hrs_history")}
+					p: strong #{translate("upgrade_to_get_feature", {feature:"full Project History"})}
+					ul.list-unstyled
+						li
+							i.fa.fa-check &nbsp;
+							| #{translate("unlimited_projects")}
+
+						li
+							i.fa.fa-check &nbsp;
+							| #{translate("collabs_per_proj", {collabcount:'Multiple'})}
+
+						li
+							i.fa.fa-check &nbsp;
+							| #{translate("full_doc_history")}
+
+						li
+							i.fa.fa-check &nbsp;
+							| #{translate("sync_to_dropbox")}
+
+						li
+							i.fa.fa-check &nbsp;
+							| #{translate("sync_to_github")}
+
+						li 
+							i.fa.fa-check &nbsp;
+							|#{translate("compile_larger_projects")}
+					p.text-center
+						a.btn.btn-success(
+							href
+							ng-class="buttonClass"
+							ng-click="startFreeTrial('history')"
+						) #{translate("start_free_trial")}
+					p.small(ng-show="startedFreeTrial") #{translate("refresh_page_after_starting_free_trial")}
+				.history-entries-list-upgrade-prompt(
+					ng-if="history.freeHistoryLimitHit && !project.owner._id === user.id"
+				) 
+					p #{translate("currently_seeing_only_24_hrs_history")}
+					strong #{translate("ask_proj_owner_to_upgrade_for_full_history")}
+	.history-labels-list-compare(
+		ng-if="history.showOnlyLabels && !history.error"
+	)
 		ul.list-unstyled(
 			ng-class="{\
 				'hover-state': history.hoveringOverListSelectors\
 			}"
 		)
 			li.change(
-				ng-repeat="update in history.updates"
+				ng-repeat="versionWithLabel in versionsWithLabels  | orderBy:'-version' track by versionWithLabel.version"
 				ng-class="{\
-					'first-in-day': update.meta.first_in_day,\
-					'selected': update.inSelection,\
-					'selected-to': update.selectedTo,\
-					'selected-from': update.selectedFrom,\
-					'hover-selected': update.inHoverSelection,\
-					'hover-selected-to': update.hoverSelectedTo,\
-					'hover-selected-from': update.hoverSelectedFrom,\
+					'selected': versionWithLabel.version <= history.selection.range.toV && versionWithLabel.version >= history.selection.range.fromV,\
+					'selected-to': versionWithLabel.version === history.selection.range.toV,\
+					'selected-from': versionWithLabel.version === history.selection.range.fromV,\
+					'hover-selected': versionWithLabel.version <= history.selection.hoveredRange.toV && versionWithLabel.version >= history.selection.hoveredRange.fromV,\
+					'hover-selected-to': versionWithLabel.version === history.selection.hoveredRange.toV,\
+					'hover-selected-from': versionWithLabel.version === history.selection.hoveredRange.fromV,\
 				}"
-				ng-controller="HistoryListItemController"
 			)
-
-				div.day(ng-show="update.meta.first_in_day") {{ update.meta.end_ts | relativeDate }}
-
 				div.selectors
 					div.range
 					form
 						input.selector-from(
 							type="radio"
-							name="fromVersion"
-							ng-model="update.selectedFrom"
-							ng-value="true"
-							ng-mouseover="mouseOverSelectedFrom()"
-							ng-mouseout="mouseOutSelectedFrom()"
-							ng-show="update.afterSelection || update.inSelection"
+							name="fromVersionForLabel"
+							ng-model="history.selection.range.fromV"
+							ng-value="versionWithLabel.version"
+							ng-mouseover="setHoverFrom(versionWithLabel.version)"
+							ng-mouseout="resetHover()"
+							ng-show="versionWithLabel.version < history.selection.range.fromV || versionWithLabel.version <= history.selection.range.toV && versionWithLabel.version >= history.selection.range.fromV"
 						)
 					form
 						input.selector-to(
 							type="radio"
-							name="toVersion"
-							ng-model="update.selectedTo"
-							ng-value="true"
-							ng-mouseover="mouseOverSelectedTo()"
-							ng-mouseout="mouseOutSelectedTo()"
-							ng-show="update.beforeSelection || update.inSelection"
+							name="toVersionForLabel"
+							ng-model="history.selection.range.toV"
+							ng-value="versionWithLabel.version"
+							ng-mouseover="setHoverTo(versionWithLabel.version)"
+							ng-mouseout="resetHover()"
+							ng-show="versionWithLabel.version > history.selection.range.toV || versionWithLabel.version <= history.selection.range.toV && versionWithLabel.version >= history.selection.range.fromV"
 						)
 
-				div.description(ng-click="select()")
-					history-label(
-						ng-repeat="label in update.labels"
-						label-text="label.comment"
-						label-owner-name="getDisplayNameById(label.user_id)"
-						label-creation-date-time="label.created_at"
-						is-owned-by-current-user="label.user_id === user.id"
-						on-label-delete="deleteLabel(label)"
+
+				.description(ng-click="addLabelVersionToSelection(versionWithLabel.version)")
+					div(
+						ng-repeat="label in versionWithLabel.labels track by label.id"
 					)
-					div.time {{ update.meta.end_ts | formatDate:'h:mm a' }}
-					div.action.action-edited(ng-if="history.isV2 && update.pathnames.length > 0")
-						| #{translate("file_action_edited")}
-					div.docs(ng-repeat="pathname in update.pathnames")
-						.doc {{ pathname }}
-					div.docs(ng-repeat="project_op in update.project_ops")
-						div(ng-if="project_op.rename")
-							.action #{translate("file_action_renamed")} 
-							.doc {{ project_op.rename.pathname }} &rarr; {{ project_op.rename.newPathname }}
-						div(ng-if="project_op.add")
-							.action #{translate("file_action_created")}
-							.doc {{ project_op.add.pathname }}
-						div(ng-if="project_op.remove")
-							.action #{translate("file_action_deleted")}
-							.doc {{ project_op.remove.pathname }}
-					div.users
-						div.user(ng-repeat="update_user in update.meta.users")
-							.color-square(ng-if="update_user != null", ng-style="{'background-color': 'hsl({{ update_user.hue }}, 70%, 50%)'}")
-							.color-square(ng-if="update_user == null", ng-style="{'background-color': 'hsl(100, 70%, 50%)'}")
-							.name(ng-if="update_user && update_user.id != user.id" ng-bind="displayName(update_user)") 
-							.name(ng-if="update_user && update_user.id == user.id") You
-							.name(ng-if="update_user == null") #{translate("anonymous")}
-						div.user(ng-if="update.meta.users.length == 0")
-							.color-square(style="background-color: hsl(100, 100%, 50%)")
-							span #{translate("anonymous")}
+						history-label(
+							show-tooltip="false"
+							label-text="label.comment"
+							is-owned-by-current-user="label.user_id === user.id"
+							is-pseudo-current-state-label="label.isPseudoCurrentStateLabel"
+							on-label-delete="deleteLabel(label)"
+						)
+						.history-entry-label-metadata
+							.history-entry-label-metadata-user(
+								ng-if="!label.isPseudoCurrentStateLabel"	
+								ng-init="labelOwner = getUserById(label.user_id)"
+							)
+								| Saved by 
+								span.name(
+									ng-if="::labelOwner && labelOwner._id !== user.id"
+									ng-style="::{'color': 'hsl({{ hueForUser(label.user_id) }}, 70%, 50%)'}"
+								) {{ ::getDisplayNameById(label.user_id) }} 
+								span.name(
+									ng-if="labelOwner && labelOwner._id == user.id"
+									ng-style="::{'color': 'hsl({{ hueForUser(label.user_id) }}, 70%, 50%)'}"
+								) You
+								span.name(
+									ng-if="::labelOwner == null"
+									ng-style="::{'color': 'hsl(100, 70%, 50%)'}"
+								) #{translate("anonymous")}
+							time.history-entry-label-metadata-time {{ ::label.created_at | formatDate }}
 
 		.loading(ng-show="history.loading")
 			i.fa.fa-spin.fa-refresh
 			| &nbsp;&nbsp; #{translate("loading")}...
-			
+				
 script(type="text/ng-template", id="historyEntriesListTpl")
 	.history-entries(
 		infinite-scroll="$ctrl.loadEntries()"
@@ -127,6 +250,7 @@ script(type="text/ng-template", id="historyEntriesListTpl")
 		.infinite-scroll-inner
 			history-entry(
 				ng-repeat="entry in $ctrl.entries"
+				selected-history-version="$ctrl.selectedHistoryVersion"
 				entry="entry"
 				current-user="$ctrl.currentUser"
 				users="$ctrl.users"
@@ -183,12 +307,7 @@ script(type="text/ng-template", id="historyEntryTpl")
 	.history-entry(
 		ng-class="{\
 			'history-entry-first-in-day': $ctrl.entry.meta.first_in_day,\
-			'history-entry-selected': $ctrl.entry.inSelection,\
-			'history-entry-selected-to': $ctrl.entry.selectedTo,\
-			'history-entry-selected-from': $ctrl.entry.selectedFrom,\
-			'history-entry-hover-selected': $ctrl.entry.inHoverSelection,\
-			'history-entry-hover-selected-to': $ctrl.entry.hoverSelectedTo,\
-			'history-entry-hover-selected-from': $ctrl.entry.hoverSelectedFrom,\
+			'history-entry-selected': $ctrl.entry.toV === $ctrl.selectedHistoryVersion,\
 		}"
 	)
 
@@ -261,9 +380,13 @@ script(type="text/ng-template", id="historyLabelsListTpl")
 				label-text="label.comment"
 				is-owned-by-current-user="label.user_id === $ctrl.currentUser.id"
 				on-label-delete="$ctrl.onLabelDelete({ label: label })"
+				is-pseudo-current-state-label="label.isPseudoCurrentStateLabel"
 			)
 			.history-entry-label-metadata
-				.history-entry-label-metadata-user(ng-init="user = $ctrl.getUserById(label.user_id)")
+				.history-entry-label-metadata-user(
+					ng-if="!label.isPseudoCurrentStateLabel"
+					ng-init="user = $ctrl.getUserById(label.user_id)"
+				)
 					| Saved by 
 					span.name(
 						ng-if="user && user._id !== $ctrl.currentUser.id"

@@ -19,7 +19,7 @@ define([
   'moment',
   'ide/colors/ColorManager',
   'ide/history/util/displayNameForUser',
-  'ide/history/controllers/HistoryListController',
+  'ide/history/controllers/HistoryCompareController',
   'ide/history/controllers/HistoryDiffController',
   'ide/history/directives/infiniteScroll'
 ], function(moment, ColorManager, displayNameForUser) {

@@ -948,17 +948,19 @@
 @global-alerts-padding               : (@line-height-computed / 4);
 
 // Editor file-tree
-@file-tree-bg                    : transparent;
-@file-tree-line-height           : 2.6;
-@file-tree-item-color            : @gray-darker;
-@file-tree-item-toggle-color     : @gray;
-@file-tree-item-icon-color       : @gray-light;
-@file-tree-item-input-color      : inherit;
-@file-tree-item-folder-color     : lighten(desaturate(@link-color, 10%), 5%);
-@file-tree-item-hover-bg         : @gray-lightest;
-@file-tree-item-selected-bg      : transparent;
-@file-tree-multiselect-bg        : lighten(@brand-info, 40%);
-@file-tree-multiselect-hover-bg  : lighten(@brand-info, 30%);
+@file-tree-bg                        : transparent;
+@file-tree-line-height               : 2.6;
+@file-tree-item-color                : @gray-darker;
+@file-tree-item-focus-color          : @file-tree-item-color;
+@file-tree-item-focus-selected-color : @file-tree-item-color;
+@file-tree-item-toggle-color         : @gray;
+@file-tree-item-icon-color           : @gray-light;
+@file-tree-item-input-color          : inherit;
+@file-tree-item-folder-color         : lighten(desaturate(@link-color, 10%), 5%);
+@file-tree-item-hover-bg             : @gray-lightest;
+@file-tree-item-selected-bg          : transparent;
+@file-tree-multiselect-bg            : lighten(@brand-info, 40%);
+@file-tree-multiselect-hover-bg      : lighten(@brand-info, 30%);
 
 // Editor resizers
 @editor-resizer-bg-color          : #F4F4F4;
@@ -1018,18 +1020,22 @@
 @sys-msg-border     : 1px solid @common-border-color;
 
 // v2 History
-@history-base-font-size                : @font-size-small;
-@history-base-bg                       : @gray-lightest;
-@history-entry-label-bg-color          : @red;
-@history-entry-label-color             : #FFF;
-@history-entry-selected-label-bg-color : #FFF;
-@history-entry-selected-label-color    : @red;
-@history-entry-day-bg                  : @gray;
-@history-entry-selected-bg             : @red;
-@history-base-color                    : @gray-light;
-@history-highlight-color               : @gray;
-@history-toolbar-bg-color              : @toolbar-alt-bg-color;
-@history-toolbar-color                 : @text-color;
+@history-base-font-size                   : @font-size-small;
+@history-base-bg                          : @gray-lightest;
+@history-entry-label-bg-color             : @red;
+@history-entry-pseudo-label-bg-color      : @green;
+@history-entry-label-color                : #FFF;
+@history-entry-selected-label-bg-color    : #FFF;
+@history-entry-selected-label-color       : @red;
+@history-entry-selected-pseudo-label-color: @green;
+@history-entry-day-bg                     : @gray;
+@history-entry-selected-bg                : @red;
+@history-base-color                       : @gray-light;
+@history-highlight-color                  : @gray;
+@history-toolbar-bg-color                 : @toolbar-alt-bg-color;
+@history-toolbar-color                    : @text-color;
+@history-file-badge-bg                    : rgba(0, 0, 0, .25);
+@history-file-badge-color                 : #FFF;
 
 // Input suggestions
 @input-suggestion-v-offset        : 6px;

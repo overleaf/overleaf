@@ -1,6 +1,6 @@
 aside.file-tree.full-size(
 	ng-controller="HistoryV2FileTreeController"
-	ng-if="ui.view == 'history' && history.isV2 && history.viewMode === HistoryViewModes.POINT_IN_TIME"
+	ng-if="ui.view == 'history' && history.isV2"
 )
 	.history-file-tree-inner
 		history-file-tree(
@@ -10,38 +10,13 @@ aside.file-tree.full-size(
 			is-loading="history.loadingFileTree"
 		)
 
-aside.file-tree.file-tree-history.full-size(
-	ng-controller="FileTreeController"
-	ng-class="{ 'multi-selected': multiSelectedCount > 0 }"
-	ng-show="ui.view == 'history' && history.isV2 && history.viewMode === HistoryViewModes.COMPARE")
-	.toolbar.toolbar-filetree
-		span Modified files
-
-	.file-tree-inner
-		ul.list-unstyled.file-tree-list
-			li(
-				ng-repeat="(pathname, doc) in history.selection.docs"
-				ng-class="{ 'selected': history.selection.pathname == pathname }"
-			)
-				.entity
-					.entity-name.entity-name-history(
-						ng-click="history.selection.pathname = pathname",
-						ng-class="{ 'deleted': !!doc.deletedAtV }"
-					)
-						i.fa.fa-fw.fa-pencil
-						span  {{ pathname }}
-
-
-
-
 script(type="text/ng-template", id="historyFileTreeTpl")
 	.history-file-tree
 		history-file-entity(
-			ng-repeat="fileEntity in $ctrl.fileTree"
+			ng-repeat="fileEntity in $ctrl.fileTree | orderBy : [ '-type', 'operation', 'name' ]"
 			file-entity="fileEntity"
 			ng-show="!$ctrl.isLoading"
 		)
-
 
 script(type="text/ng-template", id="historyFileEntityTpl")
 	.history-file-entity-wrapper
@@ -50,7 +25,7 @@ script(type="text/ng-template", id="historyFileEntityTpl")
 			ng-click="$ctrl.handleClick()"
 			ng-class="{ 'history-file-entity-link-selected': $ctrl.isSelected }"
 		)
-			span.history-file-entity-name
+			span.history-file-entity-name-container
 				i.history-file-entity-icon.history-file-entity-icon-folder-state.fa.fa-fw(
 					ng-class="{\
 						'fa-chevron-down': ($ctrl.fileEntity.type === 'folder' && $ctrl.isOpen),\
@@ -58,9 +33,21 @@ script(type="text/ng-template", id="historyFileEntityTpl")
 					}"
 				)
 				i.history-file-entity-icon.fa(
-					ng-class="$ctrl.iconClass"
+					ng-class="::$ctrl.entityTypeIconClass"
 				)
-				| {{ ::$ctrl.fileEntity.name }}
+				span.history-file-entity-name(
+					ng-class="::$ctrl.entityOpTextClass"
+				) {{ ::$ctrl.fileEntity.name }}
+				span.history-file-entity-operation-badge(
+					ng-if="::$ctrl.hasOperation && $ctrl.fileEntity.operation !== 'renamed' && $ctrl.fileEntity.operation !== 'removed'"
+				) {{ ::$ctrl.getFileOperationName() }}
+				span.history-file-entity-operation-badge(
+					ng-if="::$ctrl.hasOperation && $ctrl.fileEntity.operation === 'renamed'"
+					tooltip-append-to-body="true"
+					tooltip-placement="right"
+					tooltip-class="tooltip-history-file-tree"
+					tooltip-html=`::$ctrl.getRenameTooltip()`
+				) {{ ::$ctrl.getFileOperationName() }}
 		div(
 			ng-show="$ctrl.isOpen"
 		)
@@ -68,3 +55,8 @@ script(type="text/ng-template", id="historyFileEntityTpl")
 				ng-repeat="childEntity in $ctrl.fileEntity.children"
 				file-entity="childEntity"
 			)
+
+script(type="template", id="file_action_edited_str") #{ translate('file_action_edited') }
+script(type="template", id="file_action_renamed_str") #{ translate('file_action_renamed') }
+script(type="template", id="file_action_created_str") #{ translate('file_action_created') }
+script(type="template", id="file_action_deleted_str") #{ translate('file_action_deleted') }

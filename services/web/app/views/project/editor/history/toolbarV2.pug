@@ -1,48 +1,95 @@
 .history-toolbar(
 	ng-controller="HistoryV2ToolbarController"
-	ng-if="ui.view == 'history' && history.isV2 && history.viewMode === HistoryViewModes.POINT_IN_TIME"
+	ng-if="ui.view == 'history' && history.isV2"
 )
-	span.history-toolbar-selected-version(ng-show="history.loadingFileTree")
+	span.history-toolbar-selected-version(ng-show="history.loadingFileTree || history.selection.diff.loading")
 		i.fa.fa-spin.fa-refresh
 		| &nbsp;&nbsp; #{translate("loading")}...
+
+	//- point-in-time mode info
 	span.history-toolbar-selected-version(
-		ng-show="!history.loadingFileTree && !history.showOnlyLabels && history.selection.updates.length && !history.error"
+		ng-show="!history.loadingFileTree && !history.showOnlyLabels && history.selection.update && !history.error"
 	) #{translate("browsing_project_as_of")}&nbsp;
-		time.history-toolbar-time {{ history.selection.updates[0].meta.end_ts | formatDate:'Do MMM YYYY, h:mm a' }}
+		time.history-toolbar-time {{ history.selection.update.meta.end_ts | formatDate:'Do MMM YYYY, h:mm a' }}
 	span.history-toolbar-selected-version(
 		ng-show="!history.loadingFileTree && history.showOnlyLabels && history.selection.label && !history.error"
-	) #{translate("browsing_project_labelled")}&nbsp;
-		span.history-toolbar-selected-label "{{ history.selection.label.comment }}"
+	) 
+		span(ng-if="history.selection.label.comment && !history.selection.label.isPseudoCurrentStateLabel") 
+			| #{translate("browsing_project_labelled")}&nbsp;
+			span.history-toolbar-selected-label "{{ history.selection.label.comment }}"
+		span.history-toolbar-selected-label(ng-if="history.selection.label.isPseudoCurrentStateLabel") 
+			| #{translate("browsing_project_latest_for_pseudo_label")}
+
+
+
+	//- compare mode info
+	span.history-toolbar-selected-version(ng-show="history.viewMode === HistoryViewModes.COMPARE && history.selection.diff && !history.selection.diff.binary && !history.selection.diff.loading && !history.selection.diff.error && !history.loadingFileTree")
+		| <strong>{{history.selection.diff.highlights.length}} </strong>
+		ng-pluralize(
+			count="history.selection.diff.highlights.length",
+			when="{\
+				'one': 'change',\
+				'other': 'changes'\
+			}"
+		)
+		|  in <strong>{{history.selection.diff.pathname}}</strong>
+
+	//- point-in-time mode actions
 	div.history-toolbar-actions(
-		ng-if="!history.error"
+		ng-if="history.viewMode === HistoryViewModes.POINT_IN_TIME && !history.error"
 	)
 		button.history-toolbar-btn(
 			ng-click="showAddLabelDialog();"
 			ng-if="!history.showOnlyLabels"
-			ng-disabled="history.loadingFileTree || history.selection.updates.length == 0"
+			ng-disabled="history.loadingFileTree || history.selection.range.toV == null || history.selection.range.fromV == null"
 		) 
 			i.fa.fa-tag
 			| &nbsp;#{translate("history_label_this_version")}
 		button.history-toolbar-btn(
 			ng-click="toggleHistoryViewMode();"
-			ng-disabled="history.loadingFileTree || history.selection.updates.length == 0"
+			ng-disabled="history.loadingFileTree"
 		) 
 			i.fa.fa-exchange
 			| &nbsp;#{translate("compare_to_another_version")}
 
 		a.history-toolbar-btn-danger.pull-right(
-			ng-hide="history.loadingFileTree || history.selection.updates.length == 0"
-			ng-href="/project/{{ project_id }}/version/{{ history.selection.updates[0].toV }}/zip"
+			ng-hide="history.loadingFileTree || history.selection.range.toV == null"
+			ng-href="/project/{{ project_id }}/version/{{ history.selection.range.toV }}/zip"
 			target="_blank"
 		) 
 			i.fa.fa-download
 			| &nbsp;#{translate("download_project_at_this_version")}
 
+
+
+	//- compare mode actions
+	div.history-toolbar-actions(
+		ng-if="history.viewMode === HistoryViewModes.COMPARE && !history.error"
+	)
+		button.history-toolbar-btn(
+			ng-click="toggleHistoryViewMode();"
+		) 
+			i.fa
+			| #{translate("view_single_version")}
+		button.history-toolbar-btn-danger.pull-right(
+			ng-if="history.selection.file.deletedAtV"
+			ng-click="restoreDeletedFile()"
+			ng-show="!restoreState.error"
+			ng-disabled="restoreState.inflight"
+		)
+			i.fa.fa-fw.fa-step-backward
+			span(ng-show="!restoreState.inflight")
+				| Restore this deleted file
+			span(ng-show="restoreState.inflight")
+				| Restoring...
+		span.text-danger(ng-show="restoreState.error")
+			| Error restoring, sorry
+
 	.history-toolbar-entries-list(
 		ng-if="!history.error"
 	)
 		toggle-switch(
-			ng-model="history.showOnlyLabels"
+			ng-model="toolbarUIConfig.showOnlyLabels"
 			label-true=translate("history_view_labels")
 			label-false=translate("history_view_all")
 			description=translate("history_view_a11y_description")

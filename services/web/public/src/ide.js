@@ -193,7 +193,7 @@ define([
     ide.editorManager = new EditorManager(ide, $scope, localStorage)
     ide.onlineUsersManager = new OnlineUsersManager(ide, $scope)
     if (window.data.useV2History) {
-      ide.historyManager = new HistoryV2Manager(ide, $scope)
+      ide.historyManager = new HistoryV2Manager(ide, $scope, localStorage)
     } else {
       ide.historyManager = new HistoryManager(ide, $scope)
     }

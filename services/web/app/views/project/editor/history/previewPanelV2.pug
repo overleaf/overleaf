@@ -1,80 +1,48 @@
 .diff-panel.full-size(
 	ng-if="history.isV2 && history.viewMode === HistoryViewModes.COMPARE"
-	ng-controller="HistoryV2DiffController"
 )
 	.diff(
-		ng-if="!!history.diff && !history.diff.loading && !history.diff.error",
-		ng-class="{ 'diff-binary': history.diff.binary }"
+		ng-if="!!history.selection.diff && !history.selection.diff.loading && !history.selection.diff.error",
+		ng-class="{ 'diff-binary': history.selection.diff.binary }"
 	)
-		.toolbar.toolbar-alt
-			span.name(ng-if="history.diff.binary")
-				strong {{history.diff.pathname}}
-			span.name(ng-if="!history.diff.binary")
-				| <strong>{{history.diff.highlights.length}} </strong>
-				ng-pluralize(
-					count="history.diff.highlights.length",
-					when="{\
-						'one': 'change',\
-						'other': 'changes'\
-					}"
-				)
-				|  in <strong>{{history.diff.pathname}}</strong>
-			.history-toolbar-btn(
-				ng-click="toggleHistoryViewMode();"
-			) 
-				i.fa
-				| #{translate("view_single_version")}
-			.toolbar-right(ng-if="history.selection.docs[history.selection.pathname].deletedAtV")
-				button.btn.btn-danger.btn-xs(
-					ng-click="restoreDeletedFile()"
-					ng-show="!restoreState.error"
-					ng-disabled="restoreState.inflight"
-				)
-					i.fa.fa-fw.fa-step-backward
-					span(ng-show="!restoreState.inflight")
-						| Restore this deleted file
-					span(ng-show="restoreState.inflight")
-						| Restoring...
-				span.text-danger(ng-show="restoreState.error")
-					| Error restoring, sorry
 		.diff-editor.hide-ace-cursor(
-			ng-if="!history.diff.binary"
+			ng-if="!history.selection.diff.binary"
 			ace-editor="history",
 			theme="settings.editorTheme",
 			font-size="settings.fontSize",
-			text="history.diff.text",
-			highlights="history.diff.highlights",
+			text="history.selection.diff.text",
+			highlights="history.selection.diff.highlights",
 			read-only="true",
 			resize-on="layout:main:resize,history:toggle",
 			navigate-highlights="true"
 		)
-		.alert.alert-info(ng-if="history.diff.binary")
+		.alert.alert-info(ng-if="history.selection.diff.binary")
 			| We're still working on showing image and binary changes, sorry. Stay tuned!
 
-	.loading-panel(ng-show="history.diff.loading")
+	.loading-panel(ng-show="history.selection.diff.loading")
 		i.fa.fa-spin.fa-refresh
 		| &nbsp;&nbsp;#{translate("loading")}...
-	.error-panel(ng-show="history.diff.error")
+	.error-panel(ng-show="history.selection.diff.error")
 		.alert.alert-danger #{translate("generic_something_went_wrong")}
 
 .point-in-time-panel.full-size(
 	ng-if="history.isV2 && history.viewMode === HistoryViewModes.POINT_IN_TIME"
 )
 	.point-in-time-editor-container(
-		ng-if="!!history.selectedFile && !history.selectedFile.loading && !history.selectedFile.error"
+		ng-if="!!history.selection.file && !history.selection.file.loading && !history.selection.file.error"
 	)
 		.hide-ace-cursor(
-			ng-if="!history.selectedFile.binary"
+			ng-if="!history.selection.file.binary"
 			ace-editor="history-pointintime",
 			theme="settings.editorTheme",
 			font-size="settings.fontSize",
-			text="history.selectedFile.text",
+			text="history.selection.file.text",
 			read-only="true",
 			resize-on="layout:main:resize,history:toggle",
 		)
-		.alert.alert-info(ng-if="history.selectedFile.binary")
+		.alert.alert-info(ng-if="history.selection.file.binary")
 			| We're still working on showing image and binary changes, sorry. Stay tuned!
-	.loading-panel(ng-show="history.selectedFile.loading")
+	.loading-panel(ng-show="history.selection.file.loading")
 		i.fa.fa-spin.fa-refresh
 		| &nbsp;&nbsp;#{translate("loading")}...
 	.error-panel(ng-show="history.error")
@@ -89,5 +57,5 @@
 					href
 					ng-click="toggleHistory()"
 			) #{translate("back_to_editor")}
-	.error-panel(ng-show="history.selectedFile.error")
+	.error-panel(ng-show="history.selection.file.error")
 		.alert.alert-danger #{translate("generic_something_went_wrong")}

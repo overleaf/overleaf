@@ -30,7 +30,10 @@ script(type="text/ng-template", id="historyRestoreDiffModalTemplate")
 
 script(type="text/ng-template", id="historyLabelTpl")
 	.history-label(
-		ng-class="{ 'history-label-own' : $ctrl.isOwnedByCurrentUser }"
+		ng-class="{\
+			'history-label-own' : $ctrl.isOwnedByCurrentUser,\
+			'history-label-pseudo-current-state': $ctrl.isPseudoCurrentStateLabel,\
+		}"
 	)
 		span.history-label-comment(
 			tooltip-append-to-body="true"
@@ -39,9 +42,9 @@ script(type="text/ng-template", id="historyLabelTpl")
 			tooltip-enable="$ctrl.showTooltip"
 		)
 			i.fa.fa-tag
-			| &nbsp;{{ $ctrl.labelText }}
+			| &nbsp;{{ ::$ctrl.isPseudoCurrentStateLabel ? '#{translate("history_label_project_current_state")}' : $ctrl.labelText }}
 		button.history-label-delete-btn(
-			ng-if="$ctrl.isOwnedByCurrentUser"
+			ng-if="$ctrl.isOwnedByCurrentUser && !$ctrl.isPseudoCurrentStateLabel"
 			stop-propagation="click"
 			ng-click="$ctrl.onLabelDelete()"
 		) &times;
