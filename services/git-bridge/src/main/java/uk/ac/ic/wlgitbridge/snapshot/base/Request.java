@@ -164,7 +164,6 @@ public abstract class Request<T extends Result> {
     private void setTimeouts(HttpRequest request) {
         // timeouts are 20s by default
         int threeMinutesInMs = 1000 * 60 * 3;
-        request.setConnectTimeout(threeMinutesInMs);
         request.setReadTimeout(threeMinutesInMs);
     }
 
