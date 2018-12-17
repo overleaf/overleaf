@@ -87,7 +87,7 @@ module.exports = RequestParser =
 				throw "resource modified date could not be understood: #{resource.modified}"
 
 		if !resource.url? and !resource.content?
-		   	throw "all resources should have either a url or content attribute"
+			throw "all resources should have either a url or content attribute"
 		if resource.content? and typeof resource.content != "string"
 			throw "content attribute should be a string"
 		if resource.url? and typeof resource.url != "string"
