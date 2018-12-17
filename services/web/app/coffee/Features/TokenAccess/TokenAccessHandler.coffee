@@ -2,6 +2,7 @@ Project = require('../../models/Project').Project
 CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
 PublicAccessLevels = require '../Authorization/PublicAccessLevels'
 PrivilegeLevels = require '../Authorization/PrivilegeLevels'
+UserGetter = require '../User/UserGetter'
 ObjectId = require("mongojs").ObjectId
 Settings = require('settings-sharelatex')
 V1Api = require "../V1/V1Api"
@@ -110,7 +111,7 @@ module.exports = TokenAccessHandler =
 			if privilegeLevel != PrivilegeLevels.READ_ONLY
 				project.tokens.readOnly = ''
 
-	getV1DocInfo: (token, callback=(err, info)->) ->
+	getV1DocInfo: (token, v2UserId, callback=(err, info)->) ->
 		# default to allowing access and not exported
 		return callback(null, {
 			allow: true
@@ -118,6 +119,9 @@ module.exports = TokenAccessHandler =
 			exported: false
 		}) unless Settings.apis?.v1?
 
-		V1Api.request { url: "/api/v1/sharelatex/docs/#{token}/info" }, (err, response, body) ->
-			return callback err if err?
-			callback null, body
+		UserGetter.getUser v2UserId, { overleaf: 1 }, (err, user) ->
+			return callback(err) if err?
+			v1UserId = user.overleaf?.id
+			V1Api.request { url: "/api/v1/sharelatex/users/#{v1UserId}/docs/#{token}/info" }, (err, response, body) ->
+				return callback err if err?
+				callback null, body

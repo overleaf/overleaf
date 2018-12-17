@@ -35,6 +35,9 @@ describe "TokenAccessController", ->
 					exported: false
 				})
 			}
+			'../../infrastructure/Features': @Features = {
+				hasFeature: sinon.stub().returns(false)
+			}
 			'logger-sharelatex': {log: sinon.stub(), err: sinon.stub()}
 			'settings-sharelatex': {
 				overleaf:
@@ -250,6 +253,7 @@ describe "TokenAccessController", ->
 						@req.url = '/123abc'
 						@res = new MockResponse()
 						@res.redirect = sinon.stub()
+						@res.render = sinon.stub()
 						@next = sinon.stub()
 						@req.params['read_and_write_token'] = '123abc'
 						@TokenAccessHandler.findProjectWithReadAndWriteToken = sinon.stub()
@@ -257,8 +261,11 @@ describe "TokenAccessController", ->
 
 					describe 'when project was not exported from v1', ->
 						beforeEach ->
-							@TokenAccessHandler.checkV1ProjectExported = sinon.stub()
-								.callsArgWith(1, null, false)
+							@TokenAccessHandler.getV1DocInfo = sinon.stub().yields(null, {
+									allow: true
+									exists: true
+									exported: false
+								})
 							@TokenAccessController.readAndWriteToken @req, @res, @next
 
 						it 'should redirect to v1', (done) ->
@@ -269,14 +276,87 @@ describe "TokenAccessController", ->
 							)).to.equal true
 							done()
 
+					describe 'when project was not exported from v1 but forcing import to v2', ->
+						beforeEach ->
+							@Features.hasFeature.returns(true)
+
+						describe 'with project name', ->
+							beforeEach ->
+								@TokenAccessHandler.getV1DocInfo = sinon.stub().yields(null, {
+									allow: true
+									exists: true
+									exported: false
+									has_owner: true
+									name: 'A title'
+								})
+								@TokenAccessController.readAndWriteToken @req, @res, @next
+
+							it 'should render v2-import page with name', (done) ->
+								expect(@res.render.calledWith(
+									'project/v2-import',
+									{
+										projectId: '123abc'
+										name: 'A title'
+										hasOwner: true
+									}
+								)).to.equal true
+								done()
+
+						describe 'with project owner', ->
+							beforeEach ->
+								@TokenAccessHandler.getV1DocInfo = sinon.stub().yields(null, {
+									allow: true
+									exists: true
+									exported: false
+									has_owner: true
+									name: 'A title'
+								})
+								@TokenAccessController.readAndWriteToken @req, @res, @next
+
+							it 'should render v2-import page', (done) ->
+								expect(@res.render.calledWith(
+									'project/v2-import',
+									{
+										projectId: '123abc',
+										hasOwner: true
+										name: 'A title'
+									}
+								)).to.equal true
+								done()
+
+						describe 'without project owner', ->
+							beforeEach ->
+								@TokenAccessHandler.getV1DocInfo = sinon.stub().yields(null, {
+									allow: true
+									exists: true
+									exported: false
+									has_owner: false
+									name: 'A title'
+								})
+								@TokenAccessController.readAndWriteToken @req, @res, @next
+
+							it 'should render v2-import page', (done) ->
+								expect(@res.render.calledWith(
+									'project/v2-import',
+									{
+										projectId: '123abc',
+										hasOwner: false
+										name: 'A title'
+									}
+								)).to.equal true
+								done()
+
 					describe 'when project was exported from v1', ->
 						beforeEach ->
-							@TokenAccessHandler.checkV1ProjectExported = sinon.stub()
-								.callsArgWith(1, null, false)
+							@TokenAccessHandler.getV1DocInfo = sinon.stub().yields(null, {
+									allow: true
+									exists: true
+									exported: true
+								})
 							@TokenAccessController.readAndWriteToken @req, @res, @next
 
 						it 'should call next with a not-found error', (done) ->
-							expect(@next.callCount).to.equal 0
+							expect(@next.callCount).to.equal 1
 							done()
 
 				describe 'when token access is off, but user has higher access anyway', ->

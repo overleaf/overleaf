@@ -21,6 +21,7 @@ describe "TokenAccessHandler", ->
 			'../../models/Project': {Project: @Project = {}}
 			'settings-sharelatex': @settings = {}
 			'../Collaborators/CollaboratorsHandler': @CollaboratorsHandler = {}
+			'../User/UserGetter': @UserGetter = {}
 			'../V1/V1Api': @V1Api = {
 				request: sinon.stub()
 			}
@@ -493,11 +494,12 @@ describe "TokenAccessHandler", ->
 
 	describe 'getV1DocInfo', ->
 		beforeEach ->
+			@v2UserId = 123
 			@callback = sinon.stub()
 
 		describe 'when v1 api not set', ->
 			beforeEach ->
-				@TokenAccessHandler.getV1DocInfo @token, @callback
+				@TokenAccessHandler.getV1DocInfo @token, @v2UserId, @callback
 
 			it 'should not check access and return default info', ->
 				expect(@V1Api.request.called).to.equal false
@@ -511,19 +513,45 @@ describe "TokenAccessHandler", ->
 			beforeEach ->
 				@settings.apis = { v1: 'v1' }
 
-			describe 'on success', ->
+			describe 'on UserGetter.getUser success', ->
 				beforeEach ->
+					@UserGetter.getUser = sinon.stub().yields(null, {
+						overleaf: { id: 1 }
+					})
+					@TokenAccessHandler.getV1DocInfo @token, @v2UserId, @callback
+				
+				it 'should get user', ->
+					expect(@UserGetter.getUser.calledWith(@v2UserId)).to.equal true
+
+			describe 'on UserGetter.getUser error', ->
+				beforeEach ->
+					@error = new Error('failed to get user')
+					@UserGetter.getUser = sinon.stub().yields(@error)
+					@TokenAccessHandler.getV1DocInfo @token, @v2UserId, @callback
+
+				it 'should callback with error', ->
+					expect(@callback.calledWith @error).to.equal true
+
+			describe 'on V1Api.request success', ->
+				beforeEach ->
+					@v1UserId = 1
+					@UserGetter.getUser = sinon.stub().yields(null, {
+						overleaf: { id: @v1UserId }
+					})
 					@V1Api.request = sinon.stub().callsArgWith(1, null, null, 'mock-data')
-					@TokenAccessHandler.getV1DocInfo @token, @callback
+					@TokenAccessHandler.getV1DocInfo @token, @v2UserId, @callback
 
 				it 'should return response body', ->
-					expect(@V1Api.request.calledWith { url: "/api/v1/sharelatex/docs/#{@token}/info" }).to.equal true
+					expect(@V1Api.request.calledWith { url: "/api/v1/sharelatex/users/#{@v1UserId}/docs/#{@token}/info" }).to.equal true
 					expect(@callback.calledWith null, 'mock-data').to.equal true
 
-			describe 'on error', ->
+			describe 'on V1Api.request error', ->
 				beforeEach ->
+					@UserGetter.getUser = sinon.stub().yields(null, {
+						overleaf: { id: 1 }
+					})
 					@V1Api.request = sinon.stub().callsArgWith(1, 'error')
-					@TokenAccessHandler.getV1DocInfo @token, @callback
+					@TokenAccessHandler.getV1DocInfo @token, @v2UserId, @callback
 
 				it 'should callback with error', ->
 					expect(@callback.calledWith 'error').to.equal true
