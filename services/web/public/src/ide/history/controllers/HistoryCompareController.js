@@ -70,6 +70,8 @@ define(['base', 'ide/history/util/displayNameForUser'], function(
       $scope.getDisplayNameById = id =>
         displayNameForUser($scope.getUserById(id))
 
+      $scope.getDisplayNameForUser = user => displayNameForUser(user)
+
       $scope.deleteLabel = labelDetails =>
         $modal.open({
           templateUrl: 'historyV2DeleteLabelModalTemplate',

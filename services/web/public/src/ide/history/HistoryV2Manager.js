@@ -482,10 +482,15 @@ define([
           .all(requests)
           .then(response => {
             const updatesData = response.updates.data
+            let lastUpdateToV = null
+
+            if (updatesData.updates.length > 0) {
+              lastUpdateToV = updatesData.updates[0].toV
+            }
             if (response.labels != null) {
               this.$scope.history.labels = this._loadLabels(
                 response.labels.data,
-                updatesData.updates[0].toV
+                lastUpdateToV
               )
             }
             this._loadUpdates(updatesData.updates)
@@ -493,7 +498,8 @@ define([
               updatesData.nextBeforeTimestamp
             if (
               updatesData.nextBeforeTimestamp == null ||
-              this.$scope.history.freeHistoryLimitHit
+              this.$scope.history.freeHistoryLimitHit ||
+              this.$scope.history.updates.length === 0
             ) {
               this.$scope.history.atEnd = true
             }
@@ -504,6 +510,8 @@ define([
           .catch(error => {
             const { status, statusText } = error
             this.$scope.history.error = { status, statusText }
+            this.$scope.history.atEnd = true
+            this.$scope.history.loadingFileTree = false
           })
       }
 
