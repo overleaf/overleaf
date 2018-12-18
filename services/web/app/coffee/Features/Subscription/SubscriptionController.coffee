@@ -98,6 +98,7 @@ module.exports = SubscriptionController =
 				managedGroupSubscriptions,
 				confirmedMemberInstitutions,
 				managedInstitutions,
+				managedPublishers,
 				v1Subscriptions,
 				v1SubscriptionStatus
 			} = results
@@ -108,6 +109,7 @@ module.exports = SubscriptionController =
 				managedGroupSubscriptions,
 				confirmedMemberInstitutions,
 				managedInstitutions,
+				managedPublishers,
 				v1Subscriptions,
 				v1SubscriptionStatus
 			}, "showing subscription dashboard"
@@ -121,6 +123,7 @@ module.exports = SubscriptionController =
 				managedGroupSubscriptions,
 				confirmedMemberInstitutions,
 				managedInstitutions,
+				managedPublishers,
 				v1Subscriptions,
 				v1SubscriptionStatus
 			}

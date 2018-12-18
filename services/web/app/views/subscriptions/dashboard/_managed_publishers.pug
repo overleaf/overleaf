@@ -1,0 +1,16 @@
+each publisher in managedPublishers
+	p
+		| You are a manager of
+		|
+		strong= publisher.name
+	p
+		a(href="/publishers/" + publisher.slug + "/hub")
+			i.fa.fa-fw.fa-user-circle
+			| &nbsp;
+			| View hub
+	p
+		a(href="/manage/publishers/" + publisher.slug + "/managers")
+			i.fa.fa-fw.fa-users
+			| &nbsp;
+			| Manage publisher managers
+	hr

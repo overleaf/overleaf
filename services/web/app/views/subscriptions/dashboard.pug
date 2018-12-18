@@ -24,6 +24,10 @@ block content
 							-hasAnySubscription = true
 							include ./dashboard/_managed_institutions
 
+						-if (managedPublishers && managedPublishers.length > 0)
+							-hasAnySubscription = true
+							include ./dashboard/_managed_publishers
+
 						-if (memberGroupSubscriptions && memberGroupSubscriptions.length > 0)
 							-hasAnySubscription = true
 							include ./dashboard/_group_memberships
