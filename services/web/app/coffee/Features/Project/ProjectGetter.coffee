@@ -70,6 +70,12 @@ module.exports = ProjectGetter =
 				return callback(err)
 			callback(null, project?[0])
 
+	getProjectIdByReadAndWriteToken: (token, callback=(err, project_id)->) ->
+		Project.findOne {'tokens.readAndWrite': token}, {_id: 1}, (err, project) ->
+			return callback err if err?
+			return callback() unless project?
+			callback null, project._id
+
 	findAllUsersProjects: (
 		user_id,
 		fields,

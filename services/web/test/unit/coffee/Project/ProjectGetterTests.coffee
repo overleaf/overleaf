@@ -177,3 +177,33 @@ describe "ProjectGetter", ->
 					tokenReadOnly: ['mock-token-ro-projects']
 				})
 				.should.equal true
+
+	describe "getProjectIdByReadAndWriteToken", ->
+		describe "when project find returns project", ->
+			@beforeEach ->
+				@Project.findOne = sinon.stub().yields(null, {_id: "project-id"})
+				@ProjectGetter.getProjectIdByReadAndWriteToken "token", @callback
+
+			it "should find project with token", ->
+				@Project.findOne.calledWithMatch(
+					{'tokens.readAndWrite': "token"}
+				).should.equal true
+
+			it "should callback with project id", ->
+				@callback.calledWith(null, "project-id").should.equal true
+
+		describe "when project not found", ->
+			@beforeEach ->
+				@Project.findOne = sinon.stub().yields()
+				@ProjectGetter.getProjectIdByReadAndWriteToken "token", @callback
+
+			it "should callback empty", ->
+				expect(@callback.firstCall.args.length).to.equal 0
+
+		describe "when project find returns error", ->
+			@beforeEach ->
+				@Project.findOne = sinon.stub().yields("error")
+				@ProjectGetter.getProjectIdByReadAndWriteToken "token", @callback
+
+			it "should callback with error", ->
+				@callback.calledWith("error").should.equal true

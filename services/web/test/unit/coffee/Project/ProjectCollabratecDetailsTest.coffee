@@ -15,6 +15,7 @@ describe "ProjectCollabratecDetailsHandler", ->
 	beforeEach ->
 		@projectId = ObjectId("5bea8747c7bba6012fcaceb3")
 		@userId = ObjectId("5be316a9c7f6aa03802ea8fb")
+		@userId2 = ObjectId("5c1794b3f0e89b1d1c577eca")
 		@ProjectModel = {}
 		@ProjectCollabratecDetailsHandler = SandboxedModule.require modulePath, requires:
 			"../../models/Project": { Project: @ProjectModel }
@@ -140,6 +141,63 @@ describe "ProjectCollabratecDetailsHandler", ->
 			it "should callback with error", ->
 				expect(@callback.firstCall.args[0]).to.be.instanceOf Error
 
+	describe "setCollabratecUsers", ->
+		beforeEach ->
+			@collabratecUsers = [
+				{
+					user_id: @userId
+					collabratec_document_id: "collabratec-document-id-1"
+					collabratec_privategroup_id: "collabratec-private-group-id-1"
+				},
+				{
+					user_id: @userId2
+					collabratec_document_id: "collabratec-document-id-2"
+					collabratec_privategroup_id: "collabratec-private-group-id-2"
+				}
+			]
+
+		describe "when update succeeds", ->
+			beforeEach ->
+				@ProjectModel.update = sinon.stub().yields()
+				@ProjectCollabratecDetailsHandler.setCollabratecUsers @projectId, @collabratecUsers, @callback
+
+			it "should update project model", ->
+				update = $set: {
+					collabratecUsers: @collabratecUsers
+				}
+				expect(@ProjectModel.update).to.have.been.calledWith { _id: @projectId }, update, @callback
+
+		describe "when update has error", ->
+			beforeEach ->
+				@ProjectModel.update = sinon.stub().yields("error")
+				@ProjectCollabratecDetailsHandler.setCollabratecUsers @projectId, @collabratecUsers, @callback
+
+			it "should callback with error", ->
+				expect(@callback).to.have.been.calledWith("error")
+
+		describe "with invalid project_id", ->
+			beforeEach ->
+				@ProjectModel.update = sinon.stub()
+				@ProjectCollabratecDetailsHandler.setCollabratecUsers "bad-project-id", @collabratecUsers, @callback
+
+			it "should not update", ->
+				expect(@ProjectModel.update).not.to.have.beenCalled
+
+			it "should callback with error", ->
+				expect(@callback.firstCall.args[0]).to.be.instanceOf Error
+
+		describe "with invalid user_id", ->
+			beforeEach ->
+				@collabratecUsers[1].user_id = "bad-user-id"
+				@ProjectModel.update = sinon.stub()
+				@ProjectCollabratecDetailsHandler.setCollabratecUsers @projectId, @collabratecUsers, @callback
+
+			it "should not update", ->
+				expect(@ProjectModel.update).not.to.have.beenCalled
+
+			it "should callback with error", ->
+				expect(@callback.firstCall.args[0]).to.be.instanceOf Error
+
 	describe "unlinkCollabratecUserProject", ->
 
 		describe "when update succeeds", ->
@@ -166,6 +224,46 @@ describe "ProjectCollabratecDetailsHandler", ->
 			beforeEach ->
 				@ProjectModel.update = sinon.stub()
 				@ProjectCollabratecDetailsHandler.unlinkCollabratecUserProject "bad-project-id", "bad-user-id", @callback
+
+			it "should not update", ->
+				expect(@ProjectModel.update).not.to.have.beenCalled
+
+			it "should callback with error", ->
+				expect(@callback.firstCall.args[0]).to.be.instanceOf Error
+
+	describe "updateCollabratecUserIds", ->
+
+		describe "when update succeeds", ->
+			beforeEach ->
+				@ProjectModel.update = sinon.stub().yields()
+				@ProjectCollabratecDetailsHandler.updateCollabratecUserIds @userId, @userId2, @callback
+
+			it "should update project model", ->
+				expect(@ProjectModel.update).to.have.been.calledWith { "collabratecUsers.user_id": @userId }, { $set: "collabratecUsers.$.user_id": @userId2 }, { multi: true},  @callback
+
+		describe "when update has error", ->
+			beforeEach ->
+				@ProjectModel.update = sinon.stub().yields("error")
+				@ProjectCollabratecDetailsHandler.updateCollabratecUserIds @userId, @userId2, @callback
+
+			it "should callback with error", ->
+				expect(@callback).to.have.been.calledWith("error")
+
+		describe "with invalid old_user_id", ->
+			beforeEach ->
+				@ProjectModel.update = sinon.stub()
+				@ProjectCollabratecDetailsHandler.updateCollabratecUserIds "bad-user-id", @userId2, @callback
+
+			it "should not update", ->
+				expect(@ProjectModel.update).not.to.have.beenCalled
+
+			it "should callback with error", ->
+				expect(@callback.firstCall.args[0]).to.be.instanceOf Error
+
+		describe "with invalid new_user_id", ->
+			beforeEach ->
+				@ProjectModel.update = sinon.stub()
+				@ProjectCollabratecDetailsHandler.updateCollabratecUserIds @userId, "bad-user-id", @callback
 
 			it "should not update", ->
 				expect(@ProjectModel.update).not.to.have.beenCalled
