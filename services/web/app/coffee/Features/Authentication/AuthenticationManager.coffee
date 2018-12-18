@@ -62,21 +62,17 @@ module.exports = AuthenticationManager =
 
 		UserGetter.getUser user_id, { email:1, overleaf: 1 }, (error, user) ->
 			return callback(error) if error?
-			overleafId = user.overleaf?.id?
-			if overleafId and Settings.overleaf? # v2 user in v2
+			v1IdExists = user.overleaf?.id?
+			if v1IdExists and Settings.overleaf? # v2 user in v2
 				# v2 user in v2, change password in v1
-				AuthenticationManager._setUserPasswordInV1({
-					v1Id: user.overleaf.id,
-					email: user.email,
-					password: password
-				}, callback)
-			else if overleafId and !Settings.overleaf?
+				AuthenticationManager.setUserPasswordInV1(user.overleaf.id, password, callback)
+			else if v1IdExists and !Settings.overleaf?
 				# v2 user in SL
 				return callback(new Errors.NotInV2Error("Password Reset Attempt"))
-			else if !overleafId and !Settings.overleaf?
+			else if !v1IdExists and !Settings.overleaf?
 				# SL user in SL, change password in SL
-				AuthenticationManager._setUserPasswordInV2(user_id, password, callback)
-			else if !overleafId and Settings.overleaf?
+				AuthenticationManager.setUserPasswordInV2(user_id, password, callback)
+			else if !v1IdExists and Settings.overleaf?
 				# SL user in v2, should not happen
 				return callback(new Errors.SLInV2Error("Password Reset Attempt"))
 			else
@@ -90,7 +86,10 @@ module.exports = AuthenticationManager =
 		else
 			callback()
 
-	_setUserPasswordInV2: (user_id, password, callback) ->
+	setUserPasswordInV2: (user_id, password, callback) ->
+		validation = @validatePassword(password)
+		return callback(validation.message) if validation?
+
 		bcrypt.genSalt BCRYPT_ROUNDS, (error, salt) ->
 			return callback(error) if error?
 			bcrypt.hash password, salt, (error, hash) ->
@@ -105,7 +104,10 @@ module.exports = AuthenticationManager =
 					_checkWriteResult(result, callback)
 				)
 
-	_setUserPasswordInV1: (user, callback) ->
-		V1Handler.doPasswordReset user, (error, reset)->
+	setUserPasswordInV1: (v1_user_id, password, callback) ->
+		validation = @validatePassword(password)
+		return callback(validation.message) if validation?
+
+		V1Handler.doPasswordReset v1_user_id, password, (error, reset)->
 			return callback(error) if error?
 			return callback(error, reset)

@@ -57,6 +57,7 @@ module.exports =
 			else if err and !err.statusCode
 				res.status(500)
 			else if found
+				return res.sendStatus 200 if !user_id? # will not exist for v1-only users
 				UserSessionsManager.revokeAllUserSessions {_id: user_id}, [], (err) ->
 					return next(err) if err?
 					if req.body.login_after

@@ -29,6 +29,7 @@ describe "PasswordResetController", ->
 			"../User/UserSessionsManager": @UserSessionsManager
 
 		@email = "bob@bob.com "
+		@user_id = 'mock-user-id'
 		@token = "my security token that was emailed to me"
 		@password = "my new password"
 		@req =
@@ -98,7 +99,7 @@ describe "PasswordResetController", ->
 			@req.session.resetToken = @token
 
 		it "should tell the user handler to reset the password", (done)->
-			@PasswordResetHandler.setNewUserPassword.callsArgWith(2, null, true)
+			@PasswordResetHandler.setNewUserPassword.callsArgWith(2, null, true, @user_id)
 			@res.sendStatus = (code)=>
 				code.should.equal 200
 				@PasswordResetHandler.setNewUserPassword.calledWith(@token, @password).should.equal true
@@ -106,7 +107,7 @@ describe "PasswordResetController", ->
 			@PasswordResetController.setNewUserPassword @req, @res
 
 		it "should send 404 if the token didn't work", (done)->
-			@PasswordResetHandler.setNewUserPassword.callsArgWith(2, null, false)
+			@PasswordResetHandler.setNewUserPassword.callsArgWith(2, null, false, @user_id)
 			@res.sendStatus = (code)=>
 				code.should.equal 404
 				done()
@@ -131,7 +132,7 @@ describe "PasswordResetController", ->
 			@PasswordResetController.setNewUserPassword @req, @res
 
 		it "should clear the session.resetToken", (done) ->
-			@PasswordResetHandler.setNewUserPassword.callsArgWith(2, null, true)
+			@PasswordResetHandler.setNewUserPassword.callsArgWith(2, null, true, @user_id)
 			@res.sendStatus = (code)=>
 				code.should.equal 200
 				@req.session.should.not.have.property 'resetToken'
@@ -139,7 +140,7 @@ describe "PasswordResetController", ->
 			@PasswordResetController.setNewUserPassword @req, @res
 
 		it 'should clear sessions', (done) ->
-			@PasswordResetHandler.setNewUserPassword.callsArgWith(2, null, true)
+			@PasswordResetHandler.setNewUserPassword.callsArgWith(2, null, true, @user_id)
 			@res.sendStatus = (code)=>
 				@UserSessionsManager.revokeAllUserSessions.callCount.should.equal 1
 				done()
