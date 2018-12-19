@@ -10,9 +10,9 @@ merge = (settings, defaults) ->
 			defaults[key] = value
 	return defaults
 
-defaultSettingsPath = path.normalize(__dirname + "/../../config/settings.defaults.coffee")
+defaultSettingsPath = path.normalize(__dirname + "/../../config/settings.defaults")
 
-if fs.existsSync(defaultSettingsPath)
+if fs.existsSync("#{defaultSettingsPath}.coffee") or fs.existsSync("#{defaultSettingsPath}.js")
 	defaults = require(defaultSettingsPath)
 	settingsExist = true
 else
@@ -23,6 +23,8 @@ if process.env.SHARELATEX_CONFIG?
 	possibleConfigFiles = [process.env.SHARELATEX_CONFIG]
 else
 	possibleConfigFiles = [
+		process.cwd() + "/config/settings.#{env}.js"
+		path.normalize(__dirname + "/../../config/settings.#{env}.js")
 		process.cwd() + "/config/settings.#{env}.coffee"
 		path.normalize(__dirname + "/../../config/settings.#{env}.coffee")
 	]
@@ -37,4 +39,3 @@ if !settingsExist
 	console.warn "No settings or defaults found. I'm flying blind."
 
 module.exports = defaults
-
