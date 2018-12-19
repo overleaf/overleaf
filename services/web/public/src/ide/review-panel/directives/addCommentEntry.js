@@ -50,13 +50,18 @@ define(['base'], App =>
 
       return (scope.submitNewComment = function(event) {
         // If this is from a blur event from clicking on cancel, ignore it.
-        if (
-          event != null &&
-          event.type === 'blur' &&
-          $(event.relatedTarget).hasClass('rp-entry-button-cancel')
-        ) {
-          return true
+        if (event != null && event.type === 'blur') {
+          if (
+            // Includes relatedTarget workaround for Firefox
+            $(event.relatedTarget).hasClass('rp-entry-button-cancel') ||
+            $(event.originalEvent.explicitOriginalTarget).hasClass(
+              'rp-entry-button-cancel'
+            )
+          ) {
+            return true
+          }
         }
+
         scope.onSubmit({ content: scope.state.content })
         scope.state.isAdding = false
         return (scope.state.content = '')
