@@ -115,6 +115,12 @@ define(['base', 'libs/passfield'], function(App) {
                   'Session error. Please check you have cookies enabled. If the problem persists, try clearing your cache and cookies.',
                 type: 'error'
               }
+            } else if (status === 429) {
+              response.message = {
+                text:
+                  'Too many attempts. Please wait for a while and try again.',
+                type: 'error'
+              }
             } else {
               response.message = {
                 text:
@@ -146,8 +152,8 @@ define(['base', 'libs/passfield'], function(App) {
     restrict: 'E',
     template: `\
 <div class="alert" ng-class="{
-	'alert-danger': form.response.message.type == 'error',
-	'alert-success': form.response.message.type != 'error'
+  'alert-danger': form.response.message.type == 'error',
+  'alert-success': form.response.message.type != 'error'
 }" ng-show="!!form.response.message" ng-bind-html="form.response.message.text">
 </div>
 <div ng-transclude></div>\
