@@ -85,11 +85,28 @@ describe 'ExportsController', ->
 	it 'should ask the handler to return the status of an export', (done) ->
 		@handler.fetchExport = sinon.stub().yields(
 			null,
-			"{\"id\":897, \"status_summary\":\"completed\"}")
+			"{
+				\"id\":897,
+				\"status_summary\":\"completed\",
+				\"status_detail\":\"all done\",
+				\"partner_submission_id\":\"abc123\",
+				\"v2_user_email\":\"la@tex.com\",
+				\"v2_user_first_name\":\"Arthur\",
+				\"v2_user_last_name\":\"Author\",
+				\"title\":\"my project\",
+				\"token\":\"token\"
+			}")
 
 		@req.params = {project_id: project_id, export_id: 897}
 		@controller.exportStatus @req, send:(body) =>
 			expect(body).to.deep.equal {export_json: {
-				status_summary: 'completed', status_detail: undefined, partner_submission_id: undefined, token: undefined
+				status_summary: 'completed',
+				status_detail: "all done",
+				partner_submission_id: "abc123",
+				v2_user_email: "la@tex.com",
+				v2_user_first_name: "Arthur",
+				v2_user_last_name: "Author",
+				title: "my project",
+				token: "token"
 			}}
 			done()

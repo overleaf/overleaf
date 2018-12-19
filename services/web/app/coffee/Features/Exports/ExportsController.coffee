@@ -48,6 +48,10 @@ module.exports =
 				status_summary: parsed_export.status_summary,
 				status_detail: parsed_export.status_detail,
 				partner_submission_id: parsed_export.partner_submission_id,
+				v2_user_email: parsed_export.v2_user_email,
+				v2_user_first_name: parsed_export.v2_user_first_name,
+				v2_user_last_name: parsed_export.v2_user_last_name,
+				title: parsed_export.title,
 				token: parsed_export.token
 			}
 			res.send export_json: json
