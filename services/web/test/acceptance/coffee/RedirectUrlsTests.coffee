@@ -33,6 +33,12 @@ describe "RedirectUrls", ->
 	it 'redirects with query params', (done) ->
 		assertRedirect 'get', '/redirect/qs?foo=bar&baz[]=qux1&baz[]=qux2', 302, '/destination/qs?foo=bar&baz[]=qux1&baz[]=qux2', done
 
+	it "skips redirects if the 'skip-redirects' header is set", (done) ->
+		request.get {url: '/redirect/one', headers: {'x-skip-redirects': 'true'}}, (error, response) ->
+			should.not.exist error
+			response.statusCode.should.equal 404
+			done()
+
 	it 'redirects to /sign_in_to_v1 with authWithV1 setting', (done) ->
 		assertRedirect(
 			'get',

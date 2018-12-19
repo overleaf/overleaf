@@ -11,6 +11,7 @@ module.exports = RedirectManager =
 
 	createRedirect: (target) ->
 		(req, res, next) ->
+			return next() if req.headers?['x-skip-redirects']?
 			code = 302
 			if typeof target is 'string'
 				url = target
