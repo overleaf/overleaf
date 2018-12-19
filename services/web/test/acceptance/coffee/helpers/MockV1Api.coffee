@@ -38,6 +38,8 @@ module.exports = MockV1Api =
 
 	brands: {}
 
+	validation_clients: {}
+
 	setAffiliations: (affiliations) -> @affiliations = affiliations
 
 	run: () ->
@@ -125,6 +127,14 @@ module.exports = MockV1Api =
 				email: req.body.email,
 				valid: false
 			}
+
+		app.get "/api/v2/partners/:partner/conversions/:id", (req, res, next) =>
+			partner = @validation_clients[req.params.partner]
+			conversion = partner?.conversions?[req.params.id]
+			if conversion?
+				res.status(200).json {input_file_uri: conversion, brand_variation_id: partner.brand_variation_id}
+			else
+				res.status(404).json {}
 
 		app.listen 5000, (error) ->
 			throw error if error?
