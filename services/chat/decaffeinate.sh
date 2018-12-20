@@ -4,7 +4,7 @@ curl -o .eslintrc https://raw.githubusercontent.com/sharelatex/web-sharelatex-in
 curl -o .prettierrc https://raw.githubusercontent.com/sharelatex/web-sharelatex-internal/master/.prettierrc?token=AMHVk45yPk51AJkmy-hYGoHI9gW-kZHvks5cHAu3wA%3D%3D
 
 git add .
-git commit -m "add rc files"
+git commit -m "Decaffeinate: add eslint and prettier rc files"
 
 npx bulk-decaffeinate convert --dir app/coffee
 
