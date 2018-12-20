@@ -1,0 +1,81 @@
+extends ../layout
+
+block content
+	main.content
+		.container
+			.row
+				.col-sm-8.col-sm-offset-2
+					h1.text-center Move project to Overleaf v2
+					img.v2-import__img(
+						src="/img/v1-import/v2-editor.png"
+						alt="The new V2 editor."
+					)
+
+					if loginRedirect
+						p.text-center.row-spaced-small
+							| This project has not yet been moved into the new version of
+							| Overleaf. You will need to log in and move it in order to
+							| continue working on it.
+
+						.row-spaced.text-center
+							a.btn.btn-primary(
+								href="/login?redir=" + loginRedirect
+							) Log In To Move Project
+					else if hasOwner
+						p.text-center.row-spaced-small
+							| #[strong #{name}] has not yet been moved into the new version of
+							| Overleaf. You will need to move it in order to continue working
+							| on it. It should only take a few seconds.
+
+						form(
+							async-form="v2Import"
+							name="v2ImportForm"
+							action="/overleaf/project/"+ projectId + "/import"
+							method="POST"
+							ng-cloak
+						)
+							input(name='_csrf', type='hidden', value=csrfToken)
+							form-messages(for="v2ImportForm")
+							input.row-spaced.btn.btn-primary.text-center.center-block(
+								type="submit"
+								value="Move Project and Continue"
+								ng-disabled="v2ImportForm.inflight || v2ImportForm.response.success"
+							)
+					else
+						p.text-center.row-spaced.small
+							| #[strong #{name}] has not yet been moved into the new version of
+							| Overleaf. This project was created anonymously and therefore
+							| cannot be automatically imported. Please download a zip file of
+							| the project and upload that to continue editing it.
+
+						form(
+							async-form="v2ZipDownload"
+							name="v2ZipDownloadForm"
+							async-form-download-response="true"
+							method="GET"
+							action="/overleaf/project/" + projectId + "/download/zip"
+						)
+							form-messages(form="v2ZipDownloadForm")
+							input.row-spaced.btn.btn-primary.text-center.center-block(
+								type="submit"
+								value="Download project zip file"
+								ng-disabled="v2ZipDownloadForm.inflight || v2ZipDownloadForm.success"
+							)
+
+					h3 What can I do once I've moved my project?
+					ul
+						li New &amp; Improved Editor
+						li Tracked Changed &amp; Comments
+						li Git access (still supported)
+
+					h3 Is there anything I can't do once I've moved my project to
+					ul
+						li Assignments
+						li F1000 Research Workflow
+						li
+							| Files you have imported from CiteULike and Plotly will become
+							| ordinary files, but you can still use these services by
+							| downloading and uploading files
+						li
+							| Publishing to Figshare and PeerWith are not presently available,
+							| but improved versions will be coming back

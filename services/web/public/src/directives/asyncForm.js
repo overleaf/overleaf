@@ -55,13 +55,12 @@ define(['base', 'libs/passfield'], function(App) {
 
         // for asyncForm prevent automatic redirect to /login if
         // authentication fails, we will handle it ourselves
-        return $http
-          .post(element.attr('action'), formData, {
-            disableAutoLoginRedirect: true
-          })
+        const httpRequestFn = _httpRequestFn(element.attr('method'))
+        return httpRequestFn(element.attr('action'), formData, {
+          disableAutoLoginRedirect: true
+        })
           .then(function(httpResponse) {
-            let config, headers, status
-            ;({ data, status, headers, config } = httpResponse)
+            const { data, headers } = httpResponse
             scope[attrs.name].inflight = false
             response.success = true
             response.error = false
@@ -85,6 +84,11 @@ define(['base', 'libs/passfield'], function(App) {
               } else {
                 return ga('send', 'event', formName, 'success')
               }
+            } else if (scope.$eval(attrs.asyncFormDownloadResponse)) {
+              const blob = new Blob([data], {
+                type: headers('Content-Type')
+              })
+              location.href = URL.createObjectURL(blob) // Trigger file save
             }
           })
           .catch(function(httpResponse) {
@@ -136,6 +140,14 @@ define(['base', 'libs/passfield'], function(App) {
 
       const submit = () =>
         validateCaptchaIfEnabled(response => submitRequest(response))
+
+      const _httpRequestFn = (method = 'post') => {
+        const $HTTP_FNS = {
+          post: $http.post,
+          get: $http.get
+        }
+        return $HTTP_FNS[method.toLowerCase()]
+      }
 
       element.on('submit', function(e) {
         e.preventDefault()

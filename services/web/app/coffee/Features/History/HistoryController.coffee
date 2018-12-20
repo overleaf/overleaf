@@ -153,27 +153,29 @@ module.exports = HistoryController =
 			if !v1_id?
 				logger.err {project_id, version}, 'got request for zip version of non-v1 history project'
 				return res.sendStatus(402)
+			HistoryController._pipeHistoryZipToResponse v1_id, version, "#{project.name} (Version #{version})", res, next
 
-			url = "#{settings.apis.v1_history.url}/projects/#{v1_id}/version/#{version}/zip"
-			logger.log {project_id, v1_id, version, url}, "proxying to history api"
-			getReq = request(
-				url: url
-				auth:
-					user: settings.apis.v1_history.user
-					pass: settings.apis.v1_history.pass
-					sendImmediately: true
+	_pipeHistoryZipToResponse: (v1_project_id, version, name, res, next) ->
+		url = "#{settings.apis.v1_history.url}/projects/#{v1_project_id}/version/#{version}/zip"
+		logger.log {v1_project_id, version, url}, "proxying to history api"
+		getReq = request(
+			url: url
+			auth:
+				user: settings.apis.v1_history.user
+				pass: settings.apis.v1_history.pass
+				sendImmediately: true
+		)
+		getReq.on 'response', (response) ->
+			# pipe also proxies the headers, but we want to customize these ones
+			delete response.headers['content-disposition']
+			delete response.headers['content-type']
+			res.status response.statusCode
+			res.setContentDisposition(
+				'attachment',
+				{filename: "#{name}.zip"}
 			)
-			getReq.on 'response', (response) ->
-				# pipe also proxies the headers, but we want to customize these ones
-				delete response.headers['content-disposition']
-				delete response.headers['content-type']
-				res.status response.statusCode
-				res.setContentDisposition(
-					'attachment',
-					{filename: "#{project.name} (Version #{version}).zip"}
-				)
-				res.contentType('application/zip')
-				getReq.pipe(res)
-			getReq.on "error", (err) ->
-				logger.error {err, project_id, v1_id, version}, "history API error"
-				next(error)
+			res.contentType('application/zip')
+			getReq.pipe(res)
+		getReq.on "error", (err) ->
+			logger.error {err, v1_project_id, version}, "history API error"
+			next(error)
