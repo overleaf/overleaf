@@ -63,6 +63,7 @@
     "grunt-plato": "~0.2.1",
     "mocha": "^4.1.0",
     "nodemon": "^1.14.11",
+    "prettier-eslint-cli": "^4.7.1",
     "sandboxed-module": "",
     "sinon": "",
     "timekeeper": ""
