@@ -22,9 +22,11 @@ module.exports = MockProjectHistoryApi =
 	setProjectVersionInfo: (project_id, versionInfo) ->
 		@projectVersions[project_id] = versionInfo
 
-	addLabel: (project_id, label_id, comment, version) ->
+	addLabel: (project_id, label) ->
+		if !label.id?
+			label.id = new ObjectId().toString()
 		@labels[project_id] ?= {}
-		@labels[project_id][label_id] = {label_id,comment,version}
+		@labels[project_id][label.id] = label
 
 	deleteLabel: (project_id, label_id) ->
 		delete @labels[project_id][label_id]
@@ -69,7 +71,7 @@ module.exports = MockProjectHistoryApi =
 			{project_id} = req.params
 			{comment, version} = req.body
 			label_id = new ObjectId().toString()
-			@addLabel project_id, label_id, comment, version
+			@addLabel project_id, {id: label_id, comment, version}
 			res.json {label_id, comment, version}
 
 		app.delete "/project/:project_id/user/:user_id/labels/:label_id", (req, res, next) =>

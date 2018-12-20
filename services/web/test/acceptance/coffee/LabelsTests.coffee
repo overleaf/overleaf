@@ -22,7 +22,7 @@ describe 'Labels', ->
 		label_id = new ObjectId().toString()
 		comment = 'a label comment'
 		version = 3
-		MockProjectHistoryApi.addLabel @project_id, label_id, comment, version
+		MockProjectHistoryApi.addLabel @project_id, {id: label_id, comment, version}
 
 		@owner.request {
 			method: 'GET'
@@ -31,7 +31,7 @@ describe 'Labels', ->
 		}, (error, response, body) =>
 			throw error if error?
 			expect(response.statusCode).to.equal 200
-			expect(body).to.deep.equal [{ label_id, comment, version }]
+			expect(body).to.deep.equal [{ id: label_id, comment, version }]
 			done()
 
 	it 'creating a label', (done) ->
@@ -48,14 +48,14 @@ describe 'Labels', ->
 			{label_id} = body
 			expect(
 				MockProjectHistoryApi.getLabels(@project_id)
-			).to.deep.equal [{label_id, comment, version} ]
+			).to.deep.equal [{id: label_id, comment, version} ]
 			done()
 
 	it 'deleting a label', (done) ->
 		label_id = new ObjectId().toString()
 		comment = 'a label comment'
 		version = 3
-		MockProjectHistoryApi.addLabel @project_id, label_id, comment, version
+		MockProjectHistoryApi.addLabel @project_id, {id: label_id, comment, version}
 
 		@owner.request {
 			method: 'DELETE'
