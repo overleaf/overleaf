@@ -488,7 +488,7 @@ module.exports = settings =
 
 	# currentImage: "texlive-full:2017.1"
 	# imageRoot: "<DOCKER REPOSITORY ROOT>" # without any trailing slash
-	
+
 	# allowedImageNames: [
 	# 	{imageName: 'texlive-full:2017.1', imageDesc: 'TeXLive 2017'}
 	# 	{imageName:   'wl_texlive:2018.1', imageDesc: 'Legacy OL TeXLive 2015'}
@@ -501,7 +501,7 @@ module.exports = settings =
 	# ----------
 	modules:
 		sanitize:
-			options: 
+			options:
 				allowedTags: [ 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol', 'nl', 'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'div', 'table', 'thead', 'caption', 'tbody', 'tr', 'th', 'td', 'pre', 'iframe', 'img', 'figure', 'figcaption', 'span', 'source', 'video' ]
 				allowedAttributes:
 					'a': [ 'href', 'name', 'target', 'class', 'event-tracking', 'event-tracking-ga', 'event-tracking-label', 'event-tracking-trigger' ]
@@ -514,7 +514,7 @@ module.exports = settings =
 					'h6': [ 'class', 'id' ]
 					'figure': [ 'class', 'id', 'style']
 					'figcaption': [ 'class', 'id', 'style']
-					'iframe': [ 'allowfullscreen', 'frameborder', 'height', 'src', 'width' ]
+					'iframe': [ 'allowfullscreen', 'frameborder', 'height', 'src', 'style', 'width' ]
 					'img': [ 'alt', 'class', 'src', 'style' ]
 					'source': [ 'src', 'type' ]
 					'span': [ 'class', 'id', 'style' ]
