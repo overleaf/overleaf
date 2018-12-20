@@ -1,39 +1,48 @@
-logger = require 'logger-sharelatex'
-logger.initialize("chat-sharelatex")
-metrics = require("metrics-sharelatex")
-metrics.initialize("chat")
-Path = require("path")
-express = require("express")
-app = express()
-server = require("http").createServer(app)
-Router = require "./router"
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const logger = require('logger-sharelatex');
+logger.initialize("chat-sharelatex");
+const metrics = require("metrics-sharelatex");
+metrics.initialize("chat");
+const Path = require("path");
+const express = require("express");
+const app = express();
+const server = require("http").createServer(app);
+const Router = require("./router");
 
-app.use express.bodyParser()
-app.use metrics.http.monitor(logger)
+app.use(express.bodyParser());
+app.use(metrics.http.monitor(logger));
 
-if (app.get 'env') == 'development'
-	console.log "Development Enviroment"
-	app.use express.errorHandler({ dumpExceptions: true, showStack: true })
+if ((app.get('env')) === 'development') {
+	console.log("Development Enviroment");
+	app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+}
 
-if (app.get 'env') == 'production'
-	console.log "Production Enviroment"
-	app.use express.logger()
-	app.use express.errorHandler()
+if ((app.get('env')) === 'production') {
+	console.log("Production Enviroment");
+	app.use(express.logger());
+	app.use(express.errorHandler());
+}
 	
-profiler = require "v8-profiler"
-app.get "/profile", (req, res) ->
-	time = parseInt(req.query.time || "1000")
-	profiler.startProfiling("test")
-	setTimeout () ->
-		profile = profiler.stopProfiling("test")
-		res.json(profile)
-	, time
+const profiler = require("v8-profiler");
+app.get("/profile", function(req, res) {
+	const time = parseInt(req.query.time || "1000");
+	profiler.startProfiling("test");
+	return setTimeout(function() {
+		const profile = profiler.stopProfiling("test");
+		return res.json(profile);
+	}
+	, time);
+});
 
-Router.route(app)
+Router.route(app);
 
 module.exports = {
-	server: server
-	app: app
-}
+	server,
+	app
+};
 
 

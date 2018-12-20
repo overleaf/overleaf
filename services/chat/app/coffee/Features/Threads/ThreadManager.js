@@ -1,81 +1,107 @@
-mongojs = require("../../mongojs")
-db = mongojs.db
-ObjectId = mongojs.ObjectId
-logger = require('logger-sharelatex')
-metrics = require('metrics-sharelatex')
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let ThreadManager;
+const mongojs = require("../../mongojs");
+const { db } = mongojs;
+const { ObjectId } = mongojs;
+const logger = require('logger-sharelatex');
+const metrics = require('metrics-sharelatex');
 
-module.exports = ThreadManager =
-	GLOBAL_THREAD: "GLOBAL"
+module.exports = (ThreadManager = {
+	GLOBAL_THREAD: "GLOBAL",
 
-	findOrCreateThread: (project_id, thread_id, callback = (error, thread) ->) ->
-		project_id = ObjectId(project_id.toString())
-		if thread_id != ThreadManager.GLOBAL_THREAD
-			thread_id = ObjectId(thread_id.toString())
+	findOrCreateThread(project_id, thread_id, callback) {
+		let query, update;
+		if (callback == null) { callback = function(error, thread) {}; }
+		project_id = ObjectId(project_id.toString());
+		if (thread_id !== ThreadManager.GLOBAL_THREAD) {
+			thread_id = ObjectId(thread_id.toString());
+		}
 
-		if thread_id == ThreadManager.GLOBAL_THREAD
+		if (thread_id === ThreadManager.GLOBAL_THREAD) {
 			query = {
-				project_id: project_id
+				project_id,
 				thread_id: { $exists: false }
-			}
+			};
 			update = {
-				project_id: project_id
-			}
-		else
+				project_id
+			};
+		} else {
 			query = {
-				project_id: project_id
-				thread_id: thread_id
-			}
+				project_id,
+				thread_id
+			};
 			update = {
-				project_id: project_id
-				thread_id: thread_id
-			}
+				project_id,
+				thread_id
+			};
+		}
 		
-		db.rooms.update query, update, { upsert: true }, (error) ->
-			return callback(error) if error?
-			db.rooms.find query, (error, rooms = []) ->
-				return callback(error) if error?
-				return callback null, rooms[0]
+		return db.rooms.update(query, update, { upsert: true }, function(error) {
+			if (error != null) { return callback(error); }
+			return db.rooms.find(query, function(error, rooms) {
+				if (rooms == null) { rooms = []; }
+				if (error != null) { return callback(error); }
+				return callback(null, rooms[0]);
+		});
+	});
+	},
 	
-	findAllThreadRooms: (project_id, callback = (error, rooms) ->) ->
-		db.rooms.find {
-			project_id: ObjectId(project_id.toString())
+	findAllThreadRooms(project_id, callback) {
+		if (callback == null) { callback = function(error, rooms) {}; }
+		return db.rooms.find({
+			project_id: ObjectId(project_id.toString()),
 			thread_id: { $exists: true }
 		}, {
 			thread_id: 1,
 			resolved: 1
-		}, callback
+		}, callback);
+	},
 	
-	resolveThread: (project_id, thread_id, user_id, callback = (error) ->) ->
-		db.rooms.update {
-			project_id: ObjectId(project_id.toString())
+	resolveThread(project_id, thread_id, user_id, callback) {
+		if (callback == null) { callback = function(error) {}; }
+		return db.rooms.update({
+			project_id: ObjectId(project_id.toString()),
 			thread_id: ObjectId(thread_id.toString())
 		}, {
 			$set: {
 				resolved: {
-					user_id: user_id
+					user_id,
 					ts: new Date()
 				}
 			}
-		}, callback
+		}, callback);
+	},
 	
-	reopenThread: (project_id, thread_id, callback = (error) ->) ->
-		db.rooms.update {
-			project_id: ObjectId(project_id.toString())
+	reopenThread(project_id, thread_id, callback) {
+		if (callback == null) { callback = function(error) {}; }
+		return db.rooms.update({
+			project_id: ObjectId(project_id.toString()),
 			thread_id: ObjectId(thread_id.toString())
 		}, {
 			$unset: {
 				resolved: true
 			}
-		}, callback
+		}, callback);
+	},
 
-	deleteThread: (project_id, thread_id, callback = (error, room_id) ->) ->
-		@findOrCreateThread project_id, thread_id, (error, room) ->
-			return callback(error) if error?
-			db.rooms.remove {
+	deleteThread(project_id, thread_id, callback) {
+		if (callback == null) { callback = function(error, room_id) {}; }
+		return this.findOrCreateThread(project_id, thread_id, function(error, room) {
+			if (error != null) { return callback(error); }
+			return db.rooms.remove({
 				_id: room._id
-			}, (error) ->
-				return callback(error) if error?
-				return callback null, room._id
+			}, function(error) {
+				if (error != null) { return callback(error); }
+				return callback(null, room._id);
+			});
+		});
+	}
+});
 
 
 [
@@ -84,5 +110,4 @@ module.exports = ThreadManager =
 	 'resolveThread',
 	 'reopenThread',
 	 'deleteThread',
-].map (method) ->
-	metrics.timeAsyncMethod(ThreadManager, method, 'mongo.ThreadManager', logger)
+].map(method => metrics.timeAsyncMethod(ThreadManager, method, 'mongo.ThreadManager', logger));
