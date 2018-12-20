@@ -99,7 +99,6 @@ module.exports = SubscriptionController =
 				confirmedMemberInstitutions,
 				managedInstitutions,
 				managedPublishers,
-				v1Subscriptions,
 				v1SubscriptionStatus
 			} = results
 			logger.log {
@@ -110,7 +109,6 @@ module.exports = SubscriptionController =
 				confirmedMemberInstitutions,
 				managedInstitutions,
 				managedPublishers,
-				v1Subscriptions,
 				v1SubscriptionStatus
 			}, "showing subscription dashboard"
 			plans = SubscriptionViewModelBuilder.buildViewModel()
@@ -124,7 +122,6 @@ module.exports = SubscriptionController =
 				confirmedMemberInstitutions,
 				managedInstitutions,
 				managedPublishers,
-				v1Subscriptions,
 				v1SubscriptionStatus
 			}
 			res.render "subscriptions/dashboard", data

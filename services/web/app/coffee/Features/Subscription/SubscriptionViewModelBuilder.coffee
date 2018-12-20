@@ -49,11 +49,6 @@ module.exports =
 				InstitutionsGetter.getManagedInstitutions user._id, cb
 			managedPublishers: (cb) ->
 				PublishersGetter.getManagedPublishers user._id, cb
-			v1Subscriptions: (cb) ->
-				V1SubscriptionManager.getSubscriptionsFromV1 user._id, (error, subscriptions, v1Id) ->
-					return cb(error) if error?
-					# Only return one argument to async.auto, otherwise it returns an array
-					cb(null, subscriptions)
 			v1SubscriptionStatus: (cb) ->
 				V1SubscriptionManager.getSubscriptionStatusFromV1 user._id, (error, status, v1Id) ->
 					return cb(error) if error?
@@ -67,7 +62,6 @@ module.exports =
 				confirmedMemberInstitutions,
 				managedInstitutions,
 				managedPublishers,
-				v1Subscriptions,
 				v1SubscriptionStatus,
 				recurlySubscription,
 				plan
@@ -76,7 +70,6 @@ module.exports =
 			managedGroupSubscriptions ?= []
 			confirmedMemberInstitutions ?= []
 			managedInstitutions ?= []
-			v1Subscriptions ?= {}
 			v1SubscriptionStatus ?= {}
 
 
@@ -108,7 +101,6 @@ module.exports =
 				confirmedMemberInstitutions,
 				managedInstitutions,
 				managedPublishers,
-				v1Subscriptions,
 				v1SubscriptionStatus
 			}
 

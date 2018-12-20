@@ -1,8 +1,0 @@
-- if (v1Subscriptions.teams && v1Subscriptions.teams.length > 0)
-	-hasAnySubscription = true
-	for team in v1Subscriptions.teams
-		p
-			| You are a member of the Overleaf v1 team: <strong>#{team.name}</strong>
-	p
-		a.btn.btn-primary(href="/sign_in_to_v1?return_to=/teams") Manage v1 Team Membership
-	hr

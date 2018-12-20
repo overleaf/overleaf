@@ -26,9 +26,6 @@ describe 'Subscriptions', ->
 			it 'should return no memberGroupSubscriptions', ->
 				expect(@data.memberGroupSubscriptions).to.deep.equal []
 
-			it 'should return no v1Subscriptions', ->
-				expect(@data.v1Subscriptions).to.deep.equal {}
-
 		describe 'when the user has a subscription with recurly', ->
 			before (done) ->
 				MockRecurlyApi.accounts['mock-account-id'] = @accounts = {
@@ -298,9 +295,6 @@ describe 'Subscriptions', ->
 
 			it 'should return no memberGroupSubscriptions', ->
 				expect(@data.memberGroupSubscriptions).to.deep.equal []
-
-			it 'should return a v1Subscriptions', ->
-				expect(@data.v1Subscriptions).to.deep.equal @subscription
 
 			it 'should return a v1SubscriptionStatus', ->
 				expect(@data.v1SubscriptionStatus).to.deep.equal @subscription_status
