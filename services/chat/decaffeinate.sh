@@ -1,7 +1,7 @@
 set -ex
 
-curl -o .eslintrc https://raw.githubusercontent.com/sharelatex/web-sharelatex-internal/master/.eslintrc?token=AMHVk43L42-Htd0MSIfjao6vRukW52r4ks5cHA9WwA%3D%3D
-curl -o .prettierrc https://raw.githubusercontent.com/sharelatex/web-sharelatex-internal/master/.prettierrc?token=AMHVk45yPk51AJkmy-hYGoHI9gW-kZHvks5cHAu3wA%3D%3D
+curl -o .eslintrc https://raw.githubusercontent.com/sharelatex/web-sharelatex/master/.eslintrc
+curl -o .prettierrc https://raw.githubusercontent.com/sharelatex/web-sharelatex/master/.prettierrc
 
 git add .
 git commit -m "Decaffeinate: add eslint and prettier rc files"
