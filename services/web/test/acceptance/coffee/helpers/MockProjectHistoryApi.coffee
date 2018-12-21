@@ -13,8 +13,13 @@ module.exports = MockProjectHistoryApi =
 
 	labels: {}
 
+	projectSnapshots: {}
+
 	addOldFile: (project_id, version, pathname, content) ->
 		@oldFiles["#{project_id}:#{version}:#{pathname}"] = content
+
+	addProjectSnapshot: (project_id, version, snapshot) ->
+		@projectSnapshots["#{project_id}:#{version}"] = snapshot
 
 	setProjectVersion: (project_id, version) ->
 		@projectVersions[project_id] = {version: version}
@@ -51,6 +56,14 @@ module.exports = MockProjectHistoryApi =
 				res.send @oldFiles[key]
 			else
 				res.send 404
+
+		app.get "/project/:project_id/version/:version", (req, res, next) =>
+			{project_id, version} = req.params
+			key = "#{project_id}:#{version}"
+			if @projectSnapshots[key]?
+				res.json @projectSnapshots[key]
+			else
+				res.sendStatus 404
 
 		app.get "/project/:project_id/version", (req, res, next) =>
 			{project_id} = req.params
