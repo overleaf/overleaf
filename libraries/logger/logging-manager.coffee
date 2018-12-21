@@ -2,9 +2,11 @@ bunyan = require('bunyan')
 
 module.exports = Logger =
 	initialize: (name) ->
+		level = process.env['LOG_LEVEL'] or "debug"
 		@logger = bunyan.createLogger
 			name: name
 			serializers: bunyan.stdSerializers
+			level: level
 		return @
 
 	initializeErrorReporting: (sentry_dsn, options) ->

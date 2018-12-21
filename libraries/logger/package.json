@@ -6,7 +6,7 @@
     "type": "git",
     "url": "http://github.com/sharelatex/logger-sharelatex.git"
   },
-  "version": "1.5.8",
+  "version": "1.5.9",
   "dependencies": {
     "bunyan": "1.5.1",
     "chai": "",
