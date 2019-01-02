@@ -27,3 +27,9 @@ module.exports = SpellingAPIController =
 			return next(error) if error?
 			res.sendStatus(204)
 
+
+	getDic: (req, res, next)->
+		logger.info token: req?.params?.user_id, "getting user dictionary"
+		SpellingAPIManager.getDic req.params.user_id, (error, words)->
+			return next(error) if error?
+			res.send(words)

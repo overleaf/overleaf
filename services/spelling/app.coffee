@@ -20,6 +20,7 @@ server.use bodyParser.json(limit: "2mb")
 server.use metrics.http.monitor(logger)
 
 server.del "/user/:user_id", SpellingAPIController.deleteDic
+server.get "/user/:user_id", SpellingAPIController.getDic
 server.post "/user/:user_id/check", SpellingAPIController.check
 server.post "/user/:user_id/learn", SpellingAPIController.learn
 server.get "/status", (req, res)->
