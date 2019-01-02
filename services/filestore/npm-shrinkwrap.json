@@ -1142,9 +1142,9 @@
       "resolved": "https://registry.npmjs.org/lodash.isstring/-/lodash.isstring-4.0.1.tgz"
     },
     "logger-sharelatex": {
-      "version": "1.5.7",
-      "from": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.7",
-      "resolved": "git+https://github.com/sharelatex/logger-sharelatex.git#13562f8866708fc86aef8202bf5a2ce4d1c6eed7",
+      "version": "1.5.8",
+      "from": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.8",
+      "resolved": "git+https://github.com/sharelatex/logger-sharelatex.git#3f841b014572706e472c47fe0d0c0c1e569bad8c",
       "dependencies": {
         "coffee-script": {
           "version": "1.12.4",
@@ -1202,6 +1202,11 @@
           "version": "1.6.0",
           "from": "coffee-script@1.6.0",
           "resolved": "https://registry.npmjs.org/coffee-script/-/coffee-script-1.6.0.tgz"
+        },
+        "underscore": {
+          "version": "1.6.0",
+          "from": "underscore@>=1.6.0 <1.7.0",
+          "resolved": "https://registry.npmjs.org/underscore/-/underscore-1.6.0.tgz"
         }
       }
     },
