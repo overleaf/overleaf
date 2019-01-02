@@ -1,7 +1,7 @@
 # This file was auto-generated, do not edit it directly.
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
-# Version: 1.0.0
+# Version: 1.1.10
 
 version: "2"
 
@@ -11,7 +11,8 @@ services:
     volumes:
       - .:/app
     working_dir: /app
-    entrypoint: npm run test:unit:_run
+    user: node
+    command: npm run test:unit:_run
 
   test_acceptance:
     image: node:6.14.1
@@ -19,12 +20,16 @@ services:
       - .:/app
     working_dir: /app
     environment:
+      ELASTIC_SEARCH_DSN: es:9200
       REDIS_HOST: redis
       MONGO_HOST: mongo
+      POSTGRES_HOST: postgres
+      MOCHA_GREP: ${MOCHA_GREP}
     depends_on:
-      - redis
       - mongo
-    entrypoint: npm run test:acceptance:_run
+      - redis
+    user: node
+    command: npm run test:acceptance:_run
 
   redis:
     image: redis

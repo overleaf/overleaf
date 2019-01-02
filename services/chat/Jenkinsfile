@@ -3,6 +3,13 @@ String cron_string = BRANCH_NAME == "master" ? "@daily" : ""
 pipeline {
   agent any
 
+  environment {
+    GIT_PROJECT = "chat-sharelatex"
+    JENKINS_WORKFLOW = "chat-sharelatex"
+    TARGET_URL = "${env.JENKINS_URL}blue/organizations/jenkins/${JENKINS_WORKFLOW}/detail/$BRANCH_NAME/$BUILD_NUMBER/pipeline"
+    GIT_API_URL = "https://api.github.com/repos/sharelatex/${GIT_PROJECT}/statuses/$GIT_COMMIT"
+  }
+
   triggers {
     pollSCM('* * * * *')
     cron(cron_string)
@@ -18,25 +25,22 @@ pipeline {
         }
       }
       steps {
-        // we need to disable logallrefupdates, else git clones 
-        // during the npm install will require git to lookup the 
-        // user id which does not exist in the container's 
+        withCredentials([usernamePassword(credentialsId: 'GITHUB_INTEGRATION', usernameVariable: 'GH_AUTH_USERNAME', passwordVariable: 'GH_AUTH_PASSWORD')]) {
+          sh "curl $GIT_API_URL \
+            --data '{ \
+            \"state\" : \"pending\", \
+            \"target_url\": \"$TARGET_URL\", \
+            \"description\": \"Your build is underway\", \
+            \"context\": \"ci/jenkins\" }' \
+            -u $GH_AUTH_USERNAME:$GH_AUTH_PASSWORD"
+        }
+        // we need to disable logallrefupdates, else git clones
+        // during the npm install will require git to lookup the
+        // user id which does not exist in the container's
         // /etc/passwd file, causing the clone to fail.
         sh 'git config --global core.logallrefupdates false'
         sh 'rm -rf node_modules'
         sh 'npm install && npm rebuild'
-      }
-    }
-
-    stage('Compile') {
-      agent {
-        docker {
-          image 'node:6.14.1'
-          reuseNode true
-        }
-      }
-      steps {
-        sh 'npm run compile:all'
       }
     }
 
@@ -77,6 +81,19 @@ pipeline {
   post {
     always {
       sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make test_clean'
+      sh 'make clean'
+    }
+
+    success {
+      withCredentials([usernamePassword(credentialsId: 'GITHUB_INTEGRATION', usernameVariable: 'GH_AUTH_USERNAME', passwordVariable: 'GH_AUTH_PASSWORD')]) {
+        sh "curl $GIT_API_URL \
+          --data '{ \
+          \"state\" : \"success\", \
+          \"target_url\": \"$TARGET_URL\", \
+          \"description\": \"Your build succeeded!\", \
+          \"context\": \"ci/jenkins\" }' \
+          -u $GH_AUTH_USERNAME:$GH_AUTH_PASSWORD"
+      }
     }
 
     failure {
@@ -84,6 +101,15 @@ pipeline {
            to: "${EMAIL_ALERT_TO}",
            subject: "Jenkins build failed: ${JOB_NAME}:${BUILD_NUMBER}",
            body: "Build: ${BUILD_URL}")
+      withCredentials([usernamePassword(credentialsId: 'GITHUB_INTEGRATION', usernameVariable: 'GH_AUTH_USERNAME', passwordVariable: 'GH_AUTH_PASSWORD')]) {
+        sh "curl $GIT_API_URL \
+          --data '{ \
+          \"state\" : \"failure\", \
+          \"target_url\": \"$TARGET_URL\", \
+          \"description\": \"Your build failed\", \
+          \"context\": \"ci/jenkins\" }' \
+          -u $GH_AUTH_USERNAME:$GH_AUTH_PASSWORD"
+      }
     }
   }
 
