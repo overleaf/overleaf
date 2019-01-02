@@ -5,7 +5,7 @@ volumes:
 
 services:
   test_acceptance:
-    image: node:6.9.5
+    image: node:6.15.1
     volumes:
       - .:/app
     working_dir: /app
