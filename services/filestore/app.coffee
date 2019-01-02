@@ -23,8 +23,6 @@ Metrics.memory.monitor(logger)
 
 app.use Metrics.http.monitor(logger)
 
-Metrics.inc "startup"
-
 app.use (req, res, next)->
 	Metrics.inc "http-request"
 	next()
