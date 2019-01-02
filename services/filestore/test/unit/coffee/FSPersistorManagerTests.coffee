@@ -25,6 +25,7 @@ describe "FSPersistorManagerTests", ->
     @Rimraf = sinon.stub()
     @LocalFileWriter =
       writeStream: sinon.stub()
+      deleteFile: sinon.stub()
     @requires =
       "./LocalFileWriter":@LocalFileWriter
       "fs":@Fs
@@ -41,10 +42,32 @@ describe "FSPersistorManagerTests", ->
     @FSPersistorManager = SandboxedModule.require modulePath, requires: @requires
 
   describe "sendFile", ->
-    it "should put the file", (done) ->
-      @Fs.rename.callsArgWith(2,@error)
+    beforeEach ->
+      @Fs.createReadStream = sinon.stub().returns({
+        on: ->
+        pipe: ->
+      })
+
+    it "should copy the file", (done) ->
+      @Fs.createWriteStream =sinon.stub().returns({
+        on: (event, handler) ->
+          process.nextTick(handler) if event is 'finish'
+      })
       @FSPersistorManager.sendFile @location, @name1, @name2, (err)=>
-        @Fs.rename.calledWith( @name2, "#{@location}/#{@name1Filtered}" ).should.equal true
+        @Fs.createReadStream.calledWith(@name2).should.equal true
+        @Fs.createWriteStream.calledWith("#{@location}/#{@name1Filtered}" ).should.equal true
+        done()
+
+    it "should return an error if the file cannot be stored", (done) ->
+      @Fs.createWriteStream =sinon.stub().returns({
+        on: (event, handler) =>
+         if event is 'error'
+          process.nextTick () =>
+            handler(@error)
+      })
+      @FSPersistorManager.sendFile @location, @name1, @name2, (err)=>
+        @Fs.createReadStream.calledWith(@name2).should.equal true
+        @Fs.createWriteStream.calledWith("#{@location}/#{@name1Filtered}" ).should.equal true
         err.should.equal @error
         done()
 
@@ -52,6 +75,7 @@ describe "FSPersistorManagerTests", ->
     beforeEach ->
       @FSPersistorManager.sendFile = sinon.stub().callsArgWith(3)
       @LocalFileWriter.writeStream.callsArgWith(2, null, @name1)
+      @LocalFileWriter.deleteFile.callsArg(1)
       @SourceStream =
         on:->
 
