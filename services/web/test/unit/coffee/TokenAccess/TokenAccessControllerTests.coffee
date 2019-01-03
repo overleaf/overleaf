@@ -264,7 +264,6 @@ describe "TokenAccessController", ->
 					describe 'when project was not exported from v1', ->
 						beforeEach ->
 							@TokenAccessHandler.getV1DocInfo = sinon.stub().yields(null, {
-									allow: true
 									exists: true
 									exported: false
 								})
@@ -285,11 +284,12 @@ describe "TokenAccessController", ->
 						describe 'with project name', ->
 							beforeEach ->
 								@TokenAccessHandler.getV1DocInfo = sinon.stub().yields(null, {
-									allow: true
 									exists: true
 									exported: false
 									has_owner: true
 									name: 'A title'
+									has_assignment: false
+									brand_info: null
 								})
 								@TokenAccessController.readAndWriteToken @req, @res, @next
 
@@ -300,6 +300,8 @@ describe "TokenAccessController", ->
 										projectId: '123abc'
 										name: 'A title'
 										hasOwner: true
+										hasAssignment: false
+										brandInfo: null
 									}
 								)).to.equal true
 								done()
@@ -307,11 +309,12 @@ describe "TokenAccessController", ->
 						describe 'with project owner', ->
 							beforeEach ->
 								@TokenAccessHandler.getV1DocInfo = sinon.stub().yields(null, {
-									allow: true
 									exists: true
 									exported: false
 									has_owner: true
 									name: 'A title'
+									has_assignment: false
+									brand_info: null
 								})
 								@TokenAccessController.readAndWriteToken @req, @res, @next
 
@@ -319,9 +322,11 @@ describe "TokenAccessController", ->
 								expect(@res.render.calledWith(
 									'project/v2-import',
 									{
-										projectId: '123abc',
+										projectId: '123abc'
 										hasOwner: true
 										name: 'A title'
+										hasAssignment: false
+										brandInfo: null
 									}
 								)).to.equal true
 								done()
@@ -329,11 +334,12 @@ describe "TokenAccessController", ->
 						describe 'without project owner', ->
 							beforeEach ->
 								@TokenAccessHandler.getV1DocInfo = sinon.stub().yields(null, {
-									allow: true
 									exists: true
 									exported: false
 									has_owner: false
 									name: 'A title'
+									has_assignment: false
+									brand_info: null
 								})
 								@TokenAccessController.readAndWriteToken @req, @res, @next
 
@@ -343,7 +349,59 @@ describe "TokenAccessController", ->
 									{
 										projectId: '123abc',
 										hasOwner: false
-										name: 'A title'
+										name: 'A title',
+										hasAssignment: false,
+										brandInfo: null
+									}
+								)).to.equal true
+								done()
+
+						describe 'with assignment', ->
+							beforeEach ->
+								@TokenAccessHandler.getV1DocInfo = sinon.stub().yields(null, {
+									exists: true
+									exported: false
+									has_owner: false
+									name: 'A title'
+									has_assignment: true
+									brand_info: null
+								})
+								@TokenAccessController.readAndWriteToken @req, @res, @next
+
+							it 'should render v2-import page', (done) ->
+								expect(@res.render.calledWith(
+									'project/v2-import',
+									{
+										projectId: '123abc',
+										hasOwner: false
+										name: 'A title',
+										hasAssignment: true,
+										brandInfo: null
+									}
+								)).to.equal true
+								done()
+
+						describe 'with brand info', ->
+							beforeEach ->
+								@TokenAccessHandler.getV1DocInfo = sinon.stub().yields(null, {
+									exists: true
+									exported: false
+									has_owner: false
+									name: 'A title'
+									has_assignment: false
+									brand_info: 'wellcome'
+								})
+								@TokenAccessController.readAndWriteToken @req, @res, @next
+
+							it 'should render v2-import page', (done) ->
+								expect(@res.render.calledWith(
+									'project/v2-import',
+									{
+										projectId: '123abc',
+										hasOwner: false
+										name: 'A title',
+										hasAssignment: false,
+										brandInfo: 'wellcome'
 									}
 								)).to.equal true
 								done()
@@ -364,7 +422,6 @@ describe "TokenAccessController", ->
 					describe 'when project was exported from v1', ->
 						beforeEach ->
 							@TokenAccessHandler.getV1DocInfo = sinon.stub().yields(null, {
-									allow: true
 									exists: true
 									exported: true
 								})
@@ -672,11 +729,12 @@ describe "TokenAccessController", ->
 				describe 'with project name', ->
 					beforeEach ->
 						@TokenAccessHandler.getV1DocInfo = sinon.stub().yields(null, {
-							allow: true
 							exists: true
 							exported: false
 							has_owner: true
 							name: 'A title'
+							has_assignment: false
+							brand_info: null
 						})
 						@TokenAccessController.readOnlyToken @req, @res, @next
 
@@ -687,6 +745,8 @@ describe "TokenAccessController", ->
 								projectId: 'abcd'
 								name: 'A title'
 								hasOwner: true
+								hasAssignment: false
+								brandInfo: null
 							}
 						)).to.equal true
 						done()
@@ -694,11 +754,12 @@ describe "TokenAccessController", ->
 				describe 'with project owner', ->
 					beforeEach ->
 						@TokenAccessHandler.getV1DocInfo = sinon.stub().yields(null, {
-							allow: true
 							exists: true
 							exported: false
 							has_owner: true
 							name: 'A title'
+							has_assignment: false
+							brand_info: null
 						})
 						@TokenAccessController.readOnlyToken @req, @res, @next
 
@@ -709,6 +770,8 @@ describe "TokenAccessController", ->
 								projectId: 'abcd',
 								hasOwner: true
 								name: 'A title'
+								hasAssignment: false
+								brandInfo: null
 							}
 						)).to.equal true
 						done()
@@ -716,11 +779,12 @@ describe "TokenAccessController", ->
 				describe 'without project owner', ->
 					beforeEach ->
 						@TokenAccessHandler.getV1DocInfo = sinon.stub().yields(null, {
-							allow: true
 							exists: true
 							exported: false
 							has_owner: false
 							name: 'A title'
+							has_assignment: false
+							brand_info: null
 						})
 						@TokenAccessController.readOnlyToken @req, @res, @next
 
@@ -731,6 +795,58 @@ describe "TokenAccessController", ->
 								projectId: 'abcd',
 								hasOwner: false
 								name: 'A title'
+								hasAssignment: false
+								brandInfo: null
+							}
+						)).to.equal true
+						done()
+
+				describe 'with assignment', ->
+					beforeEach ->
+						@TokenAccessHandler.getV1DocInfo = sinon.stub().yields(null, {
+							exists: true
+							exported: false
+							has_owner: false
+							name: 'A title'
+							has_assignment: true
+							brand_info: null
+						})
+						@TokenAccessController.readOnlyToken @req, @res, @next
+
+					it 'should render v2-import page', (done) ->
+						expect(@res.render.calledWith(
+							'project/v2-import',
+							{
+								projectId: 'abcd',
+								hasOwner: false
+								name: 'A title'
+								hasAssignment: true
+								brandInfo: null
+							}
+						)).to.equal true
+						done()
+
+				describe 'with brand info', ->
+					beforeEach ->
+						@TokenAccessHandler.getV1DocInfo = sinon.stub().yields(null, {
+							exists: true
+							exported: false
+							has_owner: false
+							name: 'A title'
+							has_assignment: false
+							brand_info: 'f1000'
+						})
+						@TokenAccessController.readOnlyToken @req, @res, @next
+
+					it 'should render v2-import page', (done) ->
+						expect(@res.render.calledWith(
+							'project/v2-import',
+							{
+								projectId: 'abcd',
+								hasOwner: false
+								name: 'A title'
+								hasAssignment: false
+								brandInfo: 'f1000'
 							}
 						)).to.equal true
 						done()

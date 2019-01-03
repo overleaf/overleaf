@@ -62,20 +62,29 @@ block content
 								ng-disabled="v2ZipDownloadForm.inflight || v2ZipDownloadForm.success"
 							)
 
-					h3 What can I do once I've moved my project?
-					ul
-						li New &amp; Improved Editor
-						li Tracked Changed &amp; Comments
-						li Git access (still supported)
-
-					h3 Is there anything I can't do once I've moved my project to
-					ul
-						li Assignments
-						li F1000 Research Workflow
-						li
-							| Files you have imported from CiteULike and Plotly will become
-							| ordinary files, but you can still use these services by
-							| downloading and uploading files
-						li
-							| Publishing to Figshare and PeerWith are not presently available,
-							| but improved versions will be coming back
+					.row-spaced.text-center
+						if hasAssignment
+							p
+								| #[span.fa.fa-exclamation-triangle]
+								| This project is an assignment, and the assignment toolkit is
+								| no longer supported in Overleaf v2. When you move it to
+								| Overleaf v2, it will become a normal project.
+								| #[a(href="https://www.overleaf.com/learn/how-to/Overleaf_v2_FAQ#assignment-tools") Please see our FAQ]
+								| for more information or contact your instructor if you haven't
+								| already submitted it.
+						else if brandInfo == 'f1000'
+							p
+								| #[span.fa.fa-exclamation-triangle]
+								| This project is an F1000Research article, and our integration
+								| with F1000Research has changed in Overleaf v2.
+								| #[a(href="https://www.overleaf.com/learn/how-to/Overleaf_v2_FAQ#f1000research") Find out more about moving to Overleaf v2]
+						else if brandInfo == 'wellcome'
+							p
+								| #[span.fa.fa-exclamation-triangle]
+								| This project is an Wellcome Open Research article, and our
+								| integration with Wellcome Open Research has changed in
+								| Overleaf v2.
+								| #[a(href="https://www.overleaf.com/learn/how-to/Overleaf_v2_FAQ#f1000research") Find out more about moving to Overleaf v2]
+						else
+							a(href="https://www.overleaf.com/learn/how-to/Overleaf_v2_FAQ")
+								| Find out more about moving to Overleaf v2

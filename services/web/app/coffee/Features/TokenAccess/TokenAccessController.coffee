@@ -145,7 +145,9 @@ module.exports = TokenAccessController =
 					return res.render('project/v2-import', {
 						projectId: token,
 						hasOwner: doc_info.has_owner,
-						name: doc_info.name
+						name: doc_info.name,
+						hasAssignment: doc_info.has_assignment,
+						brandInfo: doc_info.brand_info
 					})
 				else
 					return res.redirect(302, "/sign_in_to_v1?return_to=#{redirectPath}")
