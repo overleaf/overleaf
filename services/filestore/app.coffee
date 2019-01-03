@@ -1,3 +1,5 @@
+Metrics = require "metrics-sharelatex"
+Metrics.initialize("filestore")
 express = require('express')
 bodyParser = require "body-parser"
 logger = require('logger-sharelatex')
@@ -15,15 +17,11 @@ app = express()
 if settings.sentry?.dsn?
 	logger.initializeErrorReporting(settings.sentry.dsn)
 
-Metrics = require "metrics-sharelatex"
-Metrics.initialize("filestore")
 Metrics.open_sockets.monitor(logger)
 Metrics.event_loop?.monitor(logger)
 Metrics.memory.monitor(logger)
 
 app.use Metrics.http.monitor(logger)
-
-Metrics.inc "startup"
 
 app.use (req, res, next)->
 	Metrics.inc "http-request"
