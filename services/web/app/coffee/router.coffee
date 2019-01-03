@@ -172,7 +172,7 @@ module.exports = class Router
 		webRouter.get  '/Project/:Project_id', RateLimiterMiddlewear.rateLimit({
 			endpointName: "open-project"
 			params: ["Project_id"]
-			maxRequests: 10
+			maxRequests: 15
 			timeInterval: 60
 		}), AuthorizationMiddlewear.ensureUserCanReadProject, ProjectController.loadEditor
 		webRouter.get  '/Project/:Project_id/file/:File_id', AuthorizationMiddlewear.ensureUserCanReadProject, FileStoreController.getFile
@@ -439,7 +439,7 @@ module.exports = class Router
 		webRouter.get '/read/:read_only_token([a-z]+)',
 			RateLimiterMiddlewear.rateLimit({
 				endpointName: 'read-only-token',
-				maxRequests: 10,
+				maxRequests: 15,
 				timeInterval: 60
 			}),
 			TokenAccessController.readOnlyToken
@@ -447,7 +447,7 @@ module.exports = class Router
 		webRouter.get '/:read_and_write_token([0-9]+[a-z]+)',
 			RateLimiterMiddlewear.rateLimit({
 				endpointName: 'read-and-write-token',
-				maxRequests: 10,
+				maxRequests: 15,
 				timeInterval: 60
 			}),
 			TokenAccessController.readAndWriteToken

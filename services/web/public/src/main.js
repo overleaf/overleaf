@@ -37,6 +37,7 @@ define([
   'main/keys',
   'main/cms/blog',
   'main/cms/index',
+  'main/importing',
   'analytics/AbTestingManager',
   'directives/asyncForm',
   'directives/stopPropagation',

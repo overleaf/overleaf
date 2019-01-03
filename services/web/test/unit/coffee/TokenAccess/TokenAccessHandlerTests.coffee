@@ -541,6 +541,7 @@ describe "TokenAccessHandler", ->
 				expect(@callback.calledWith null, {
 					exists: true
 					exported: false
+					exporting: false
 				}).to.equal true
 
 		describe 'when v1 api is set', ->
@@ -577,6 +578,18 @@ describe "TokenAccessHandler", ->
 
 				it 'should return response body', ->
 					expect(@V1Api.request.calledWith { url: "/api/v1/sharelatex/users/#{@v1UserId}/docs/#{@token}/info" }).to.equal true
+					expect(@callback.calledWith null, 'mock-data').to.equal true
+
+			describe 'when user id arg is null', ->
+				beforeEach ->
+					@v2UserId = null
+					@UserGetter.getUser = sinon.stub()
+					@V1Api.request = sinon.stub().callsArgWith(1, null, null, 'mock-data')
+					@TokenAccessHandler.getV1DocInfo @token, @v2UserId, @callback
+
+				it 'should get info without user', ->
+					expect(@UserGetter.getUser.called).to.equal false
+					expect(@V1Api.request.calledWith { url: "/api/v1/sharelatex/docs/#{@token}/info" }).to.equal true
 					expect(@callback.calledWith null, 'mock-data').to.equal true
 
 			describe 'on V1Api.request error', ->

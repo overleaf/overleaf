@@ -1,5 +1,6 @@
 expect = require("chai").expect
 async = require("async")
+MockV1Api = require "./helpers/MockV1Api"
 User = require "./helpers/User"
 request = require "./helpers/request"
 settings = require "settings-sharelatex"
@@ -441,3 +442,48 @@ describe 'TokenAccess', ->
 					'/sign_in_to_v1?return_to=/read/abcd'
 				)
 			, done)
+
+	describe 'importing v1 project', ->
+		before (done) ->
+			settings.projectImportingCheckMaxCreateDelta = 3600
+			settings.overleaf =
+				host: 'http://localhost:5000'
+			@owner.createProject "token-rw-test#{Math.random()}", (err, project_id) =>
+				return done(err) if err?
+				@project_id = project_id
+				@owner.makeTokenBased @project_id, (err) =>
+					return done(err) if err?
+					db.projects.update {_id: ObjectId(project_id)}, $set: overleaf: id: 1234, (err) =>
+						return done(err) if err?
+						@owner.getProject @project_id, (err, project) =>
+							return done(err) if err?
+							@tokens = project.tokens
+							MockV1Api.setDocInfo @tokens.readAndWrite, exporting: true
+							MockV1Api.setDocInfo @tokens.readOnly, exporting: true
+							done()
+
+		after ->
+			delete settings.projectImportingCheckMaxCreateDelta
+			delete settings.overleaf
+
+		it 'should show importing page for read and write token', (done) ->
+			try_read_and_write_token_access(@owner, @tokens.readAndWrite, (response, body) =>
+				expect(response.statusCode).to.equal 200
+				expect(body).to.include('ImportingController')
+			, done)
+
+		it 'should show importing page for read only token', (done) ->
+			try_read_only_token_access(@owner, @tokens.readOnly, (response, body) =>
+				expect(response.statusCode).to.equal 200
+				expect(body).to.include('ImportingController')
+			, done)
+
+		describe 'when importing check not configured', ->
+			before ->
+				delete settings.projectImportingCheckMaxCreateDelta
+
+			it 'should load editor', (done) ->
+				try_read_and_write_token_access(@owner, @tokens.readAndWrite, (response, body) =>
+					expect(response.statusCode).to.equal 200
+					expect(body).to.include('IdeController')
+				, done)
