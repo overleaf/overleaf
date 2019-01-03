@@ -20,4 +20,4 @@ WORKDIR /app
 RUN chmod 0755 ./install_deps.sh && ./install_deps.sh
 USER node
 
-CMD ["node","app.js"]
+CMD ["node", "--expose-gc", "app.js"]
