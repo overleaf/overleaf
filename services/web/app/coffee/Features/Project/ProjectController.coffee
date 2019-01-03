@@ -330,8 +330,6 @@ module.exports = ProjectController =
 				if subscription? and subscription.freeTrial? and subscription.freeTrial.expiresAt?
 					allowedFreeTrial = !!subscription.freeTrial.allowed || true
 
-				showGitBridge = user.betaProgram
-
 				logger.log project_id:project_id, "rendering editor page"
 				res.render 'project/editor',
 					title:  project.name
@@ -379,7 +377,6 @@ module.exports = ProjectController =
 					brandVariation: brandVariation
 					allowedImageNames: Settings.allowedImageNames || []
 					gitBridgePublicBaseUrl: Settings.gitBridgePublicBaseUrl
-					showGitBridge: showGitBridge
 				timer.done()
 
 	_buildProjectList: (allProjects, v1Projects = [])->
