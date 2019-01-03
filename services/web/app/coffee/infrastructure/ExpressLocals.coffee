@@ -226,6 +226,10 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 			return email
 		next()
 
+	webRouter.use (req, res, next) ->
+		res.locals.StringHelper = require('../Features/Helpers/StringHelper')
+		next()
+
 	webRouter.use (req, res, next)->
 		res.locals.formatProjectPublicAccessLevel = (privilegeLevel)->
 			formatedPrivileges = private:"Private", readOnly:"Public: Read Only", readAndWrite:"Public: Read and Write"
