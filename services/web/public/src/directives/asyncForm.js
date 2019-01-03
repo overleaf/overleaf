@@ -188,7 +188,7 @@ define(['base', 'libs/passfield'], function(App) {
           max: 128
         },
         allowEmpty: false,
-        allowAnyChars: false,
+        allowAnyChars: true,
         isMasked: true,
         showToggle: false,
         showGenerate: false,
