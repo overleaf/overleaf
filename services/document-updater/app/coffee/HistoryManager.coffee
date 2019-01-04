@@ -20,16 +20,25 @@ module.exports = HistoryManager =
 			else if res.statusCode < 200 and res.statusCode >= 300
 				logger.error { doc_id, project_id }, "track changes api returned a failure status code: #{res.statusCode}"
 
+	# flush changes in the background
 	flushProjectChangesAsync: (project_id) ->
 		return if !Settings.apis?.project_history?.enabled
+		HistoryManager.flushProjectChanges project_id, ->
 
+	# flush changes and callback (for when we need to know the queue is flushed)
+	flushProjectChanges: (project_id, callback = (error) ->) ->
+		return callback() if !Settings.apis?.project_history?.enabled
 		url = "#{Settings.apis.project_history.url}/project/#{project_id}/flush"
 		logger.log { project_id, url }, "flushing doc in project history api"
 		request.post url, (error, res, body)->
 			if error?
 				logger.error { error, project_id}, "project history doc to track changes api"
+				return callback(error)
 			else if res.statusCode < 200 and res.statusCode >= 300
 				logger.error { project_id }, "project history api returned a failure status code: #{res.statusCode}"
+				return callback(error)
+			else
+				return callback()
 
 	FLUSH_DOC_EVERY_N_OPS: 100
 	FLUSH_PROJECT_EVERY_N_OPS: 500
