@@ -1713,7 +1713,7 @@
     },
     "logger-sharelatex": {
       "version": "1.5.9",
-      "from": "git+https://github.com/sharelatex/logger-sharelatex.git#master",
+      "from": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.9",
       "resolved": "git+https://github.com/sharelatex/logger-sharelatex.git#e8e1b95052f62e107336053e4a983f81cdbdf589",
       "dependencies": {
         "bunyan": {
