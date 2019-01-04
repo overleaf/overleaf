@@ -26,6 +26,7 @@ app.configure ->
 	app.use(Metrics.http.monitor(logger));
 	app.use express.bodyParser()
 	app.use app.router
+Metrics.injectMetricsRoute(app)
 
 DispatchManager.createAndStartDispatchers(Settings.dispatcherCount || 10)
 

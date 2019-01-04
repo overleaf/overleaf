@@ -25,7 +25,7 @@
     "express": "3.3.4",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.6",
     "lynx": "0.0.11",
-    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v2.0.8",
+    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v2.0.12",
     "redis-sharelatex": "git+https://github.com/sharelatex/redis-sharelatex.git#v1.0.4",
     "request": "2.25.0",
     "requestretry": "^1.12.0",
