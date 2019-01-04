@@ -1292,9 +1292,9 @@
       "resolved": "https://registry.npmjs.org/lodash.values/-/lodash.values-4.3.0.tgz"
     },
     "logger-sharelatex": {
-      "version": "1.5.6",
-      "from": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.6",
-      "resolved": "git+https://github.com/sharelatex/logger-sharelatex.git#b2956ec56b582b9f4fc8fdda8dc00c06e77c5537",
+      "version": "1.5.9",
+      "from": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.9",
+      "resolved": "git+https://github.com/sharelatex/logger-sharelatex.git#e8e1b95052f62e107336053e4a983f81cdbdf589",
       "dependencies": {
         "bunyan": {
           "version": "1.5.1",
