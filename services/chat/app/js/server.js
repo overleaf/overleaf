@@ -8,10 +8,10 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const logger = require('logger-sharelatex')
-logger.initialize('chat-sharelatex')
 const metrics = require('metrics-sharelatex')
 metrics.initialize('chat')
+const logger = require('logger-sharelatex')
+logger.initialize('chat-sharelatex')
 const Path = require('path')
 const express = require('express')
 const app = express()
@@ -20,6 +20,7 @@ const Router = require('./router')
 
 app.use(express.bodyParser())
 app.use(metrics.http.monitor(logger))
+metrics.injectMetricsRoute(app)
 
 if (app.get('env') === 'development') {
   console.log('Development Enviroment')
