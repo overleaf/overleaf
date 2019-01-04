@@ -25,6 +25,7 @@ DrainManager = require("./app/js/DrainManager")
 
 # Set up socket.io server
 app = express()
+Metrics.injectMetricsRoute(app)
 server = require('http').createServer(app)
 io = require('socket.io').listen(server)
 
