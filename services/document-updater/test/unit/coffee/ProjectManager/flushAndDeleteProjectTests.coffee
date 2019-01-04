@@ -12,7 +12,7 @@ describe "ProjectManager - flushAndDeleteProject", ->
 			"./DocumentManager": @DocumentManager = {}
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"./HistoryManager": @HistoryManager =
-				flushProjectChangesAsync: sinon.stub()
+				flushProjectChanges: sinon.stub().callsArg(1)
 			"./Metrics": @Metrics =
 				Timer: class Timer
 					done: sinon.stub()
@@ -40,8 +40,8 @@ describe "ProjectManager - flushAndDeleteProject", ->
 					.should.equal true
 
 		it "should flush project history", ->
-			@HistoryManager.flushProjectChangesAsync
-				.calledWithExactly(@project_id)
+			@HistoryManager.flushProjectChanges
+				.calledWith(@project_id)
 				.should.equal true
 
 		it "should call the callback without error", ->
@@ -70,8 +70,8 @@ describe "ProjectManager - flushAndDeleteProject", ->
 					.should.equal true
 
 		it "should still flush project history", ->
-			@HistoryManager.flushProjectChangesAsync
-				.calledWithExactly(@project_id)
+			@HistoryManager.flushProjectChanges
+				.calledWith(@project_id)
 				.should.equal true
 
 		it "should record the error", ->
