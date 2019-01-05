@@ -32,7 +32,7 @@
     "node-statsd": "0.0.3",
     "redis": "~0.8.4",
     "request": "^2.53.0",
-    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
+    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.1.0",
     "underscore": "1.4.4",
     "v8-profiler": "^5.2.4"
   },
