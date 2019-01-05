@@ -897,7 +897,7 @@
         "lru-cache": {
           "version": "2.7.3",
           "from": "lru-cache@2",
-          "resolved": "http://registry.npmjs.org/lru-cache/-/lru-cache-2.7.3.tgz"
+          "resolved": "https://registry.npmjs.org/lru-cache/-/lru-cache-2.7.3.tgz"
         },
         "minimatch": {
           "version": "0.2.14",
