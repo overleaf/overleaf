@@ -50,6 +50,7 @@ define(['base'], App =>
       )
     }
 
+    // searchKB is deprecated
     const service = {
       searchWiki: wikiIdx ? wikiIdx.search.bind(wikiIdx) : null,
       searchKB: kbIdx ? kbIdx.search.bind(kbIdx) : null
