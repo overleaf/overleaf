@@ -21,32 +21,33 @@ block content
 							a.btn.btn-primary(
 								href="/login?redir=" + loginRedirect
 							) Log In To Move Project
-					else if hasOwner
-						p.text-center.row-spaced-small
-							| #[strong #{name}] has not yet been moved into the new version of
-							| Overleaf. You will need to move it in order to continue working
-							| on it. It should only take a few seconds.
-
-						form(
-							async-form="v2Import"
-							name="v2ImportForm"
-							action="/overleaf/project/"+ projectId + "/import"
-							method="POST"
-							ng-cloak
-						)
-							input(name='_csrf', type='hidden', value=csrfToken)
-							form-messages(for="v2ImportForm")
-							input.row-spaced.btn.btn-primary.text-center.center-block(
-								type="submit"
-								value="Move Project and Continue"
-								ng-disabled="v2ImportForm.inflight || v2ImportForm.response.success"
-							)
 					else
-						p.text-center.row-spaced.small
-							| #[strong #{name}] has not yet been moved into the new version of
-							| Overleaf. This project was created anonymously and therefore
-							| cannot be automatically imported. Please download a zip file of
-							| the project and upload that to continue editing it.
+						if hasOwner
+							p.text-center.row-spaced-small
+								| #[strong #{name}] has not yet been moved into the new version of
+								| Overleaf. You will need to move it in order to continue working
+								| on it. It should only take a few seconds.
+
+							form(
+								async-form="v2Import"
+								name="v2ImportForm"
+								action="/overleaf/project/"+ projectId + "/import"
+								method="POST"
+								ng-cloak
+							)
+								input(name='_csrf', type='hidden', value=csrfToken)
+								form-messages(for="v2ImportForm")
+								input.row-spaced.btn.btn-primary.text-center.center-block(
+									type="submit"
+									ng-value="v2ImportForm.inflight || v2ImportForm.response.success ? 'Moving to v2...' : 'Move Project and Continue'"
+									ng-disabled="v2ImportForm.inflight || v2ImportForm.response.success"
+								)
+						else
+							p.text-center.row-spaced.small
+								| #[strong #{name}] has not yet been moved into the new version of
+								| Overleaf. This project was created anonymously and therefore
+								| cannot be automatically imported. Please download a zip file of
+								| the project and upload that to continue editing it.
 
 						form(
 							async-form="v2ZipDownload"
@@ -58,7 +59,7 @@ block content
 							form-messages(form="v2ZipDownloadForm")
 							input.row-spaced.btn.btn-primary.text-center.center-block(
 								type="submit"
-								value="Download project zip file"
+								ng-value="v2ZipDownloadForm.inflight || v2ZipDownloadForm.success ? 'Downloading zip file...' : 'Download project zip file'"
 								ng-disabled="v2ZipDownloadForm.inflight || v2ZipDownloadForm.success"
 							)
 
