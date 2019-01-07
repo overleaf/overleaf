@@ -33,6 +33,7 @@ crypto = require 'crypto'
 Features = require('../../infrastructure/Features')
 BrandVariationsHandler = require("../BrandVariations/BrandVariationsHandler")
 { getUserAffiliations } = require("../Institutions/InstitutionsAPI")
+V1Handler = require "../V1/V1Handler"
 
 module.exports = ProjectController =
 
@@ -283,9 +284,9 @@ module.exports = ProjectController =
 						return cb(null, project) unless project.overleaf?.id? and project.tokens?.readAndWrite? and Settings.projectImportingCheckMaxCreateDelta?
 						createDelta = (new Date().getTime() - new Date(project._id.getTimestamp()).getTime()) / 1000
 						return cb(null, project) unless createDelta < Settings.projectImportingCheckMaxCreateDelta
-						TokenAccessHandler.getV1DocInfo project.tokens.readAndWrite, null, (err, doc_info) ->
+						V1Handler.getDocExported project.tokens.readAndWrite, (err, doc_exported) ->
 							return next err if err?
-							project.exporting = doc_info.exporting
+							project.exporting = doc_exported.exporting
 							cb(null, project)
 				)
 			user: (cb)->

@@ -458,8 +458,8 @@ describe 'TokenAccess', ->
 						@owner.getProject @project_id, (err, project) =>
 							return done(err) if err?
 							@tokens = project.tokens
-							MockV1Api.setDocInfo @tokens.readAndWrite, exporting: true
-							MockV1Api.setDocInfo @tokens.readOnly, exporting: true
+							MockV1Api.setDocExported @tokens.readAndWrite, exporting: true
+							MockV1Api.setDocExported @tokens.readOnly, exporting: true
 							done()
 
 		after ->

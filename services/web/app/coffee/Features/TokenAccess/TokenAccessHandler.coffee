@@ -126,18 +126,12 @@ module.exports = TokenAccessHandler =
 		return callback(null, {
 			exists: true
 			exported: false
-			exporting: false
 		}) unless Settings.apis?.v1?
 
-		if v2UserId?
-			UserGetter.getUser v2UserId, { overleaf: 1 }, (err, user) ->
-				return callback(err) if err?
-				v1UserId = user.overleaf?.id
-				V1Api.request { url: "/api/v1/sharelatex/users/#{v1UserId}/docs/#{token}/info" }, (err, response, body) ->
-					return callback err if err?
-					callback null, body
-		else
-			V1Api.request { url: "/api/v1/sharelatex/docs/#{token}/info" }, (err, response, body) ->
+		UserGetter.getUser v2UserId, { overleaf: 1 }, (err, user) ->
+			return callback(err) if err?
+			v1UserId = user.overleaf?.id
+			V1Api.request { url: "/api/v1/sharelatex/users/#{v1UserId}/docs/#{token}/info" }, (err, response, body) ->
 				return callback err if err?
 				callback null, body
 

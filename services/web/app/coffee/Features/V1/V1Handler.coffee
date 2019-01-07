@@ -47,3 +47,14 @@ module.exports = V1Handler =
 			else
 				err = new Error("Unexpected status from v1 password reset api: #{response.statusCode}")
 				callback(err, false)
+
+	getDocExported: (token, callback=(err, info)->) ->
+		# default to not exported
+		return callback(null, {
+			exported: false
+			exporting: false
+		}) unless Settings.apis?.v1?
+
+		V1Api.request { url: "/api/v1/sharelatex/docs/#{token}/exported_to_v2" }, (err, response, body) ->
+			return callback err if err?
+			callback null, body

@@ -42,9 +42,9 @@ module.exports = MockV1Api =
 
 	setAffiliations: (affiliations) -> @affiliations = affiliations
 
-	doc_info: {}
+	doc_exported: {}
 
-	setDocInfo: (token, info) -> @doc_info[token] = info
+	setDocExported: (token, info) -> @doc_exported[token] = info
 
 	run: () ->
 		app.get "/api/v1/sharelatex/users/:v1_user_id/plan_code", (req, res, next) =>
@@ -146,9 +146,9 @@ module.exports = MockV1Api =
 		app.get '/api/v1/sharelatex/users/:user_id/docs/:token/info', (req, res, next) =>
 			res.json { exported: false }
 
-		app.get '/api/v1/sharelatex/docs/:token/info', (req, res, next) =>
-			return res.json @doc_info[req.params.token] if @doc_info[req.params.token]?
-			res.json { exporting: false }
+		app.get '/api/v1/sharelatex/docs/:token/exported_to_v2', (req, res, next) =>
+			return res.json @doc_exported[req.params.token] if @doc_exported[req.params.token]?
+			res.json { exporting: false, exported: false }
 
 		app.listen 5000, (error) ->
 			throw error if error?
