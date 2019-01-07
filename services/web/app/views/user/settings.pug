@@ -203,12 +203,19 @@ block content
 		div.modal-body#delete-account-modal
 			p !{translate("delete_account_warning_message_3")}
 			if settings.createV1AccountOnLogin && settings.overleaf
-				p
-					strong
-						| This will also delete your user account on #[a(href='/sign_in_to_v1?return_to=/dash%3Fprefer-v1-dash%3D1' target="_blank") Overleaf v1].
-						| If you want to remove your projects from Overleaf v1, you must do this before you
-						| delete your account by going to your My Projects page in Overleaf v1, moving your
-						| projects to the Trash, and then from there either ‘leaving’ or ‘purging’ them, as appropriate.
+				if settings.forceImportToV2
+					p
+						strong
+							| Your Overleaf v2 projects will be deleted if you delete your account.
+							| If you want to remove any remaining Overleaf v1 projects in your account,
+							| please first make sure they are imported to Overleaf v2.
+				else
+					p
+						strong
+							| This will also delete your user account on #[a(href='/sign_in_to_v1?return_to=/dash%3Fprefer-v1-dash%3D1' target="_blank") Overleaf v1].
+							| If you want to remove your projects from Overleaf v1, you must do this before you
+							| delete your account by going to your My Projects page in Overleaf v1, moving your
+							| projects to the Trash, and then from there either ‘leaving’ or ‘purging’ them, as appropriate.
 			form(novalidate, name="deleteAccountForm")
 				label #{translate('email')}
 				input.form-control(
@@ -235,7 +242,7 @@ block content
 						ng-model="state.confirmV1Purge"
 						ng-change="checkValidation()"
 					).pull-left
-					label(style="display: inline") &nbsp;I have left or purged my projects on Overleaf v1 (if any) &nbsp;
+					label(style="display: inline") &nbsp;I have left, purged or imported my projects on Overleaf v1 (if any) &nbsp;
 
 				div.confirmation-checkbox-wrapper
 					input(
