@@ -18,6 +18,13 @@ public class MissingRepositoryException extends SnapshotAPIException {
         "see https://www.overleaf.com/help/342 for more information."
     );
 
+    public static final List<String> OVERLEAF_V1_DEPRECATED_REASON = Arrays.asList(
+            "Overleaf v1 is deprecated, and you need to migrate this project to v2.",
+            "",
+            "If this is unexpected, please contact us at support@overleaf.com, or",
+            "see https://www.overleaf.com/help/342 for more information."
+    );
+
     static List<String> buildExportedToV2Message(String remoteUrl) {
         if (remoteUrl == null) {
             return Arrays.asList(
