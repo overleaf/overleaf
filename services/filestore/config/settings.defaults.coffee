@@ -50,6 +50,7 @@ settings =
 		# Any commands to wrap the convert utility in, for example ["nice"], or ["firejail", "--profile=/etc/firejail/convert.profile"]
 		convertCommandPrefix: []
 
+	enableConversions: false
 
 # Filestore health check
 # ----------------------
