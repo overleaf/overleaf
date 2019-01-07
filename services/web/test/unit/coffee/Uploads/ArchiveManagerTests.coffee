@@ -111,11 +111,38 @@ describe "ArchiveManager", ->
 				@zipfile.emit "entry", {fileName: "foo/./testfile.txt"}
 				@zipfile.emit "end"
 
-			it "should not write try to read the file entry", ->
+			it "should not try to read the file entry", ->
 				@zipfile.openReadStream.called.should.equal false
 
 			it "should log out a warning", ->
 				@logger.warn.called.should.equal true
+
+		describe "with backslashes in the path", ->
+			beforeEach (done) ->
+				@readStream = new events.EventEmitter
+				@readStream.pipe = sinon.stub()
+				@writeStream = new events.EventEmitter
+				@fs.createWriteStream = sinon.stub().returns @writeStream
+				@zipfile.openReadStream = sinon.stub().callsArgWith(1, null, @readStream)
+				@fse.ensureDir = sinon.stub().callsArg(1)
+				@ArchiveManager.extractZipArchive @source, @destination, (error) =>
+					@callback(error)
+					done()
+				@zipfile.emit "entry", {fileName: 'wombat\\foo.tex'}
+				@zipfile.emit "entry", {fileName: 'potato\\bar.tex'}
+				@zipfile.emit "end"
+
+			it "should read the file entry with its original path", ->
+				@zipfile.openReadStream.should.be.calledWith({fileName: 'wombat\\foo.tex'})
+				@zipfile.openReadStream.should.be.calledWith({fileName: 'potato\\bar.tex'})
+
+			it "should treat the backslashes as a directory separator when creating the directory", ->
+				@fse.ensureDir.should.be.calledWith("#{@destination}/wombat");
+				@fse.ensureDir.should.be.calledWith("#{@destination}/potato");
+
+			it "should treat the backslashes as a directory separator when creating the file", ->
+				@fs.createWriteStream.should.be.calledWith("#{@destination}/wombat/foo.tex");
+				@fs.createWriteStream.should.be.calledWith("#{@destination}/potato/bar.tex");
 
 		describe "with a directory entry", ->
 			beforeEach (done) ->
@@ -126,7 +153,7 @@ describe "ArchiveManager", ->
 				@zipfile.emit "entry", {fileName: "testdir/"}
 				@zipfile.emit "end"
 
-			it "should not write try to read the entry", ->
+			it "should not try to read the entry", ->
 				@zipfile.openReadStream.called.should.equal false
 
 			it "should not log out a warning", ->
@@ -295,4 +322,3 @@ describe "ArchiveManager", ->
 				@callback
 					.calledWith(null, @directory + "/folder")
 					.should.equal true
-

@@ -104,7 +104,7 @@
     "v8-profiler": "^5.2.3",
     "valid-url": "^1.0.9",
     "xml2js": "0.2.0",
-    "yauzl": "^2.8.0"
+    "yauzl": "^2.10.0"
   },
   "devDependencies": {
     "autoprefixer": "^6.6.1",

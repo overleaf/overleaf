@@ -204,6 +204,54 @@ describe "ProjectStructureChanges", ->
 				expect(project.name).to.match @test_project_match
 				done()
 
+	describe "uploading a project with a shared top-level folder", ->
+		before (done) ->
+			MockDocUpdaterApi.clearProjectStructureUpdates()
+
+			zip_file = fs.createReadStream(Path.resolve(__dirname + '/../files/test_project_with_shared_top_level_folder.zip'))
+
+			@owner.request.post {
+				uri: "project/new/upload",
+				formData:
+					qqfile: zip_file
+			}, (error, res, body) =>
+				throw error if error?
+				if res.statusCode < 200 || res.statusCode >= 300
+					throw new Error("failed to upload project #{res.statusCode}")
+				@uploaded_project_id = JSON.parse(body).project_id
+				done()
+
+		it "should not create the top-level folder", (done) ->
+			ProjectGetter.getProject @uploaded_project_id, (error, project) ->
+				expect(error).not.to.exist
+				expect(project.rootFolder[0].folders.length).to.equal 0
+				expect(project.rootFolder[0].docs.length).to.equal 2
+				done()
+
+	describe "uploading a project with backslashes in the path names", ->
+		before (done) ->
+			MockDocUpdaterApi.clearProjectStructureUpdates()
+
+			zip_file = fs.createReadStream(Path.resolve(__dirname + '/../files/test_project_with_backslash_in_filename.zip'))
+
+			@owner.request.post {
+				uri: "project/new/upload",
+				formData:
+					qqfile: zip_file
+			}, (error, res, body) =>
+				throw error if error?
+				if res.statusCode < 200 || res.statusCode >= 300
+					throw new Error("failed to upload project #{res.statusCode}")
+				@uploaded_project_id = JSON.parse(body).project_id
+				done()
+
+		it "should set the project name from the zip contents", (done) ->
+			ProjectGetter.getProject @uploaded_project_id, (error, project) ->
+				expect(error).not.to.exist
+				expect(project.rootFolder[0].folders[0].name).to.equal('styles')
+				expect(project.rootFolder[0].folders[0].docs[0].name).to.equal('ao.sty')
+				done()
+
 	describe "uploading a file", ->
 		beforeEach (done) ->
 			MockDocUpdaterApi.clearProjectStructureUpdates()

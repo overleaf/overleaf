@@ -38,16 +38,18 @@ module.exports = ArchiveManager =
 				callback(null, isTooLarge)
 
 	_checkFilePath: (entry, destination, callback = (err, destFile) ->) ->
+		# transform backslashes to forwardslashes to accommodate badly-behaved zip archives
+		transformedFilename = entry.fileName.replace(/\\/g, '/')
 		# check if the entry is a directory
 		endsWithSlash = /\/$/
-		if endsWithSlash.test(entry.fileName)
+		if endsWithSlash.test(transformedFilename)
 			return callback() # don't give a destfile for directory
 		# check that the file does not use a relative path
-		for dir in entry.fileName.split('/')
+		for dir in transformedFilename.split('/')
 			if dir == '..'
 				return callback(new Error("relative path"))
 		# check that the destination file path is normalized
-		dest = "#{destination}/#{entry.fileName}"
+		dest = "#{destination}/#{transformedFilename}"
 		if dest != Path.normalize(dest)
 			return callback(new Error("unnormalized path"))
 		else
