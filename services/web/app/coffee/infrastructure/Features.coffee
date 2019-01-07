@@ -15,7 +15,7 @@ module.exports = Features =
 			when 'git-bridge'
 				return Settings.enableGitBridge
 			when 'v1-return-message'
-				return Settings.accountMerge? and Settings.overleaf?
+				return Settings.accountMerge? and Settings.overleaf? and !Settings.forceImportToV2
 			when 'custom-togglers'
 				return Settings.overleaf?
 			when 'publish-templates'
