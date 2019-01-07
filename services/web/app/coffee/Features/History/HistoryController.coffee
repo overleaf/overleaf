@@ -1,3 +1,5 @@
+_ = require "lodash"
+async = require "async"
 logger = require "logger-sharelatex"
 request = require "request"
 settings = require "settings-sharelatex"
@@ -156,26 +158,52 @@ module.exports = HistoryController =
 			HistoryController._pipeHistoryZipToResponse v1_id, version, "#{project.name} (Version #{version})", res, next
 
 	_pipeHistoryZipToResponse: (v1_project_id, version, name, res, next) ->
+		# increase timeout to 6 minutes
+		res.setTimeout(6 * 60 * 1000)
 		url = "#{settings.apis.v1_history.url}/projects/#{v1_project_id}/version/#{version}/zip"
-		logger.log {v1_project_id, version, url}, "proxying to history api"
-		getReq = request(
-			url: url
+		logger.log {v1_project_id, version, url}, "getting s3 url from history api"
+		options =
 			auth:
 				user: settings.apis.v1_history.user
 				pass: settings.apis.v1_history.pass
-				sendImmediately: true
-		)
-		getReq.on 'response', (response) ->
-			# pipe also proxies the headers, but we want to customize these ones
-			delete response.headers['content-disposition']
-			delete response.headers['content-type']
-			res.status response.statusCode
-			res.setContentDisposition(
-				'attachment',
-				{filename: "#{name}.zip"}
-			)
-			res.contentType('application/zip')
-			getReq.pipe(res)
-		getReq.on "error", (err) ->
-			logger.error {err, v1_project_id, version}, "history API error"
-			next(error)
+			json: true
+			method: 'post'
+			url: url
+		request options, (err, response, body) ->
+			if err
+				logger.error {err, v1_project_id, version}, "history API error"
+				return next(err)
+			retryAttempt = 0
+			retryDelay = 2000
+			# retry for about 6 minutes starting with short delay
+			async.retry 40,
+				(callback) ->
+					setTimeout(() ->
+						# increase delay by 1 second up to 10
+						retryDelay += 1000 if retryDelay < 10000
+						retryAttempt++
+						getReq = request(
+							url: body.zipUrl
+							sendImmediately: true
+						)
+						getReq.on 'response', (response) ->
+							return callback new Error "invalid response" unless response.statusCode == 200
+							# pipe also proxies the headers, but we want to customize these ones
+							delete response.headers['content-disposition']
+							delete response.headers['content-type']
+							res.status response.statusCode
+							res.setContentDisposition(
+								'attachment',
+								{filename: "#{name}.zip"}
+							)
+							res.contentType('application/zip')
+							getReq.pipe(res)
+							callback()
+						getReq.on "error", (err) ->
+							logger.error {err, v1_project_id, version, retryAttempt}, "history s3 download error"
+							callback(err)
+					, retryDelay)
+				(err) ->
+					if err
+						logger.error {err, v1_project_id, version, retryAttempt}, "history s3 download failed"
+						next(err)
