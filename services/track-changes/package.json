@@ -43,20 +43,12 @@
     "v8-profiler": "^5.6.5"
   },
   "devDependencies": {
-    "chai": "~4.1.1",
-    "sinon": "~3.2.1",
-    "sandboxed-module": "~0.3.0",
-    "grunt-execute": "~0.1.5",
-    "grunt-contrib-clean": "~0.5.0",
-    "grunt-mocha-test": "~0.9.3",
-    "grunt": "~0.4.2",
-    "grunt-available-tasks": "~0.4.2",
-    "grunt-contrib-coffee": "~0.10.1",
     "bunyan": "~2.0.2",
+    "chai": "~4.1.1",
+    "memorystream": "0.3.1",
     "mocha": "^4.0.1",
-    "grunt-bunyan": "~0.5.0",
-    "grunt-forever": "~0.4.2",
-    "timekeeper": "0.0.4",
-    "memorystream": "0.3.1"
+    "sandboxed-module": "~0.3.0",
+    "sinon": "~3.2.1",
+    "timekeeper": "0.0.4"
   }
 }
