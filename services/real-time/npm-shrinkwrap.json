@@ -1896,9 +1896,9 @@
       "resolved": "https://registry.npmjs.org/setprototypeof/-/setprototypeof-1.1.0.tgz"
     },
     "settings-sharelatex": {
-      "version": "1.0.0",
-      "from": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
-      "resolved": "git+https://github.com/sharelatex/settings-sharelatex.git#cbc5e41c1dbe6789721a14b3fdae05bf22546559",
+      "version": "1.1.0",
+      "from": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.1.0",
+      "resolved": "git+https://github.com/sharelatex/settings-sharelatex.git#93f63d029b52fef8825c3a401b2b6a7ba29b4750",
       "dependencies": {
         "coffee-script": {
           "version": "1.6.0",
