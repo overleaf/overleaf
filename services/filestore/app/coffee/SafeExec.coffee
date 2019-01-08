@@ -1,6 +1,7 @@
 _ = require("underscore")
 logger = require("logger-sharelatex")
 child_process = require('child_process')
+Settings = require "settings-sharelatex"
 
 # execute a command in the same way as 'exec' but with a timeout that
 # kills all child processes
@@ -9,6 +10,10 @@ child_process = require('child_process')
 # group, then we can kill everything in that process group.
 
 module.exports = (command, options, callback = (err, stdout, stderr) ->) ->
+	if !Settings.enableConversions
+		error = new Error("Image conversions are disabled")
+		return callback(error)
+
 	# options are {timeout:  number-of-milliseconds, killSignal: signal-name}
 	[cmd, args...] = command
 

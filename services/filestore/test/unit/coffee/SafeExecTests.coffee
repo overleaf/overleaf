@@ -9,11 +9,13 @@ SandboxedModule = require('sandboxed-module')
 describe "SafeExec", ->
 
 	beforeEach ->
-
+		@settings = 
+			enableConversions:true
 		@safe_exec = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex":
 				log:->
 				err:->
+			"settings-sharelatex": @settings
 		@options = {timeout: 10*1000, killSignal: "SIGTERM" }
 
 	describe "safe_exec", ->
@@ -22,6 +24,12 @@ describe "SafeExec", ->
 			@safe_exec ["/bin/echo", "hello"], @options, (err, stdout, stderr) =>
 				stdout.should.equal "hello\n"
 				should.not.exist(err)
+				done()
+
+		it "should error when conversions are disabled", (done) ->
+			@settings.enableConversions = false
+			@safe_exec ["/bin/echo", "hello"], @options, (err, stdout, stderr) =>
+				expect(err).to.exist
 				done()
 
 		it "should execute a command with non-zero exit status", (done) ->

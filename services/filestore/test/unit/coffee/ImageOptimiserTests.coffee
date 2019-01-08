@@ -11,13 +11,16 @@ describe "ImageOptimiser", ->
 	beforeEach ->
 		@child_process =
 			exec : sinon.stub()
-
+		@settings = 
+			enableConversions:true
 		@optimiser = SandboxedModule.require modulePath, requires:
 			'child_process': @child_process
 			"logger-sharelatex":
 				log:->
 				err:->
 				warn:->
+			"settings-sharelatex": @settings
+				
 
 		@sourcePath = "/this/path/here.eps"
 		@error = "Error"
@@ -33,18 +36,29 @@ describe "ImageOptimiser", ->
 				done()
 
 
-		it "should return the errro the file", (done)->
+		it "should return the error", (done)->
 			@child_process.exec.callsArgWith(2, @error)
 			@optimiser.compressPng @sourcePath, (err)=>
 				err.should.equal @error
 				done()
 
-		describe 'when optimiser is sigkilled', ->
+	describe 'when enableConversions is disabled', ->
 
-			it 'should not produce an error', (done) ->
-				@error = new Error('woops')
-				@error.signal = 'SIGKILL'
-				@child_process.exec.callsArgWith(2, @error)
-				@optimiser.compressPng @sourcePath, (err)=>
-					expect(err).to.equal(null)
-					done()
+		it 'should produce an error', (done) ->
+			@settings.enableConversions = false
+			@child_process.exec.callsArgWith(2)
+			@optimiser.compressPng @sourcePath, (err)=>
+				@child_process.exec.called.should.equal false
+				expect(err).to.exist
+				done()
+
+
+	describe 'when optimiser is sigkilled', ->
+
+		it 'should not produce an error', (done) ->
+			@error = new Error('woops')
+			@error.signal = 'SIGKILL'
+			@child_process.exec.callsArgWith(2, @error)
+			@optimiser.compressPng @sourcePath, (err)=>
+				expect(err).to.equal(null)
+				done()

@@ -1,5 +1,6 @@
 exec = require('child_process').exec
 logger = require("logger-sharelatex")
+Settings = require "settings-sharelatex"
 
 module.exports = 
 
@@ -10,6 +11,9 @@ module.exports =
 		opts =
 			timeout: 30 * 1000
 			killSignal: "SIGKILL"
+		if !Settings.enableConversions
+			error = new Error("Image conversions are disabled")
+			return callback(error)
 		exec args, opts,(err, stdout, stderr)->
 			if err? and err.signal == 'SIGKILL'
 				logger.warn {err: err, stderr: stderr, localPath: localPath}, "optimiser timeout reached"
