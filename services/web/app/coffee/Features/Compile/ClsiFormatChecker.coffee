@@ -1,5 +1,6 @@
 _ = require("lodash")
 async = require("async")
+settings = require("settings-sharelatex")
 
 module.exports = ClsiFormatChecker =
 
@@ -39,7 +40,7 @@ module.exports = ClsiFormatChecker =
 
 	_checkDocsAreUnderSizeLimit: (resources, callback)->
 		
-		FIVEMB = 1000 * 1000 * 5
+		sizeLimit = 1000 * 1000 * settings.compileBodySizeLimitMb
 
 		totalSize = 0
 
@@ -53,7 +54,7 @@ module.exports = ClsiFormatChecker =
 			totalSize += result.size
 			return result
 
-		tooLarge = totalSize > FIVEMB
+		tooLarge = totalSize > sizeLimit
 		if !tooLarge
 			return callback()
 		else

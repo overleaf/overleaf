@@ -8,7 +8,7 @@ SandboxedModule = require('sandboxed-module')
 describe "ClsiFormatChecker", ->
 	beforeEach ->
 		@ClsiFormatChecker = SandboxedModule.require modulePath, requires:
-			"settings-sharelatex": @settings ={}
+			"settings-sharelatex": @settings = { compileBodySizeLimitMb: 5 }
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), warn: sinon.stub() }
 		@project_id = "project-id"
 

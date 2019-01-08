@@ -488,6 +488,8 @@ module.exports = settings =
 
 	# currentImage: "texlive-full:2017.1"
 	# imageRoot: "<DOCKER REPOSITORY ROOT>" # without any trailing slash
+	
+	compileBodySizeLimitMb: process.env['COMPILE_BODY_SIZE_LIMIT_MB'] or 5
 
 	# allowedImageNames: [
 	# 	{imageName: 'texlive-full:2017.1', imageDesc: 'TeXLive 2017'}
