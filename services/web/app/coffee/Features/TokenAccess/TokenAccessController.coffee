@@ -145,7 +145,7 @@ module.exports = TokenAccessController =
 					return res.render('project/v2-import', {
 						projectId: token,
 						hasOwner: doc_info.has_owner,
-						name: doc_info.name,
+						name: doc_info.name || 'Untitled',
 						hasAssignment: doc_info.has_assignment,
 						brandInfo: doc_info.brand_info
 					})

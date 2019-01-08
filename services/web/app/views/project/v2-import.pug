@@ -49,19 +49,8 @@ block content
 								| cannot be automatically imported. Please download a zip file of
 								| the project and upload that to continue editing it.
 
-						form(
-							async-form="v2ZipDownload"
-							name="v2ZipDownloadForm"
-							async-form-download-response="true"
-							method="GET"
-							action="/overleaf/project/" + projectId + "/download/zip"
-						)
-							form-messages(form="v2ZipDownloadForm")
-							input.row-spaced.btn.btn-primary.text-center.center-block(
-								type="submit"
-								ng-value="v2ZipDownloadForm.inflight || v2ZipDownloadForm.success ? 'Downloading zip file...' : 'Download project zip file'"
-								ng-disabled="v2ZipDownloadForm.inflight || v2ZipDownloadForm.success"
-							)
+						.row-spaced.text-center
+							a.btn.btn-primary(href="/overleaf/project/" + projectId + "/download/zip") Download project zip file
 
 					.row-spaced.text-center
 						if hasAssignment
