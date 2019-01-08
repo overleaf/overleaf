@@ -39,7 +39,7 @@ Thumbs.db
 
 app.js
 app/js/*
-app.map
+**/*.map
 
 test/unit/js/*
 test/acceptance/js/*
