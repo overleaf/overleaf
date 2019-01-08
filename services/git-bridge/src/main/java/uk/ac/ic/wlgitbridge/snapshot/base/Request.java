@@ -90,6 +90,16 @@ public abstract class Request<T extends Result> {
                             throw new MissingRepositoryException(
                                 MissingRepositoryException.buildExportedToV2Message(newRemote)
                             );
+                        } else if ("Overleaf v1 is Deprecated".equals(message)) {
+                            String newUrl;
+                            if (json.has("newUrl")) {
+                                newUrl = json.get("newUrl").getAsString();
+                            } else {
+                                newUrl = null;
+                            }
+                            throw new MissingRepositoryException(
+                                    MissingRepositoryException.buildDeprecatedMessage(newUrl)
+                            );
                         }
                     } catch (IllegalStateException
                             | ClassCastException
