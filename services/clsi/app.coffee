@@ -58,7 +58,7 @@ app.param 'build_id', (req, res, next, build_id) ->
 		next new Error("invalid build id #{build_id}")
 
 
-app.post   "/project/:project_id/compile", bodyParser.json(limit: "5mb"), CompileController.compile
+app.post   "/project/:project_id/compile", bodyParser.json(limit: Settings.compileSizeLimit), CompileController.compile
 app.post   "/project/:project_id/compile/stop", CompileController.stopCompile
 app.delete "/project/:project_id", CompileController.clearCache
 
@@ -68,7 +68,7 @@ app.get  "/project/:project_id/wordcount", CompileController.wordcount
 app.get  "/project/:project_id/status", CompileController.status
 
 # Per-user containers
-app.post   "/project/:project_id/user/:user_id/compile", bodyParser.json(limit: "5mb"), CompileController.compile
+app.post   "/project/:project_id/user/:user_id/compile", bodyParser.json(limit: Settings.compileSizeLimit), CompileController.compile
 app.post   "/project/:project_id/user/:user_id/compile/stop", CompileController.stopCompile
 app.delete "/project/:project_id/user/:user_id", CompileController.clearCache
 

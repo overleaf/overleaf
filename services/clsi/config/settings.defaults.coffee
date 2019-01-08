@@ -15,6 +15,8 @@ module.exports =
 			retry:
 				max: 10
 
+	compileSizeLimit:  process.env["COMPILE_SIZE_LIMIT"] or "7mb"
+	
 	path:
 		compilesDir:  Path.resolve(__dirname + "/../compiles")
 		clsiCacheDir: Path.resolve(__dirname + "/../cache")
@@ -32,6 +34,7 @@ module.exports =
 	apis:
 		clsi:
 			url: "http://#{process.env['CLSI_HOST'] or 'localhost'}:3013"
+
 			
 	smokeTest: process.env["SMOKE_TEST"] or false
 	project_cache_length_ms: 1000 * 60 * 60 * 24
