@@ -18,12 +18,36 @@ public class MissingRepositoryException extends SnapshotAPIException {
         "see https://www.overleaf.com/help/342 for more information."
     );
 
-    public static final List<String> OVERLEAF_V1_DEPRECATED_REASON = Arrays.asList(
-            "Overleaf v1 is deprecated, and you need to migrate this project to v2.",
-            "",
-            "If this is unexpected, please contact us at support@overleaf.com, or",
-            "see https://www.overleaf.com/help/342 for more information."
-    );
+    static List<String> buildDeprecatedMessage(String newUrl) {
+        if (newUrl == null) {
+            return Arrays.asList(
+                    "This project has not yet been moved into the new version of Overleaf. You will",
+                    "need to move it in order to continue working on it. Please visit this project",
+                    "online on www.overleaf.com to do this.",
+                    "",
+                    "After migrating this project to the new version of Overleaf, you will be",
+                    "prompted to update your git remote to the project's new identifier.",
+                    "",
+                    "If this is unexpected, please contact us at support@overleaf.com, or",
+                    "see https://www.overleaf.com/help/342 for more information."
+            );
+        } else {
+            return Arrays.asList(
+                "This project has not yet been moved into the new version of Overleaf. You will",
+                "need to move it in order to continue working on it. Please visit this project",
+                "online to do this:",
+                "",
+                "    " + newUrl,
+                "",
+                "After migrating this project to the new version of Overleaf, you will be",
+                "prompted to update your git remote to the project's new identifier.",
+                "",
+                "If this is unexpected, please contact us at support@overleaf.com, or",
+                "see https://www.overleaf.com/help/342 for more information."
+            );
+        }
+
+    }
 
     static List<String> buildExportedToV2Message(String remoteUrl) {
         if (remoteUrl == null) {
