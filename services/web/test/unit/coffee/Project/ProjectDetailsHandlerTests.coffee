@@ -39,6 +39,8 @@ describe 'ProjectDetailsHandler', ->
 				log:->
 				err:->
 			'./ProjectTokenGenerator': @ProjectTokenGenerator = {}
+			'settings-sharelatex': @settings =
+				defaultFeatures: 'default-features'
 
 	describe "getDetails", ->
 
@@ -63,6 +65,12 @@ describe 'ProjectDetailsHandler', ->
 			err = new Errors.NotFoundError("project not found")
 			@handler.getDetails "0123456789012345678901234", (error, details) =>
 				err.should.eql error
+				done()
+
+		it 'should return the default features if no owner found', (done) ->
+			@UserGetter.getUser.callsArgWith(1, null, null)
+			@handler.getDetails @project_id, (err, details)=>
+				details.features.should.equal @settings.defaultFeatures
 				done()
 
 		it "should return the error", (done)->

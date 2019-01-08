@@ -63,8 +63,8 @@ module.exports = CompileManager =
 			UserGetter.getUser project.owner_ref, {"features":1}, (err, owner)->
 				return callback(error) if error?
 				callback null, {
-					timeout: owner.features?.compileTimeout || Settings.defaultFeatures.compileTimeout
-					compileGroup: owner.features?.compileGroup || Settings.defaultFeatures.compileGroup
+					timeout: owner?.features?.compileTimeout || Settings.defaultFeatures.compileTimeout
+					compileGroup: owner?.features?.compileGroup || Settings.defaultFeatures.compileGroup
 				}
 
 	COMPILE_DELAY: 1 # seconds

@@ -9,6 +9,7 @@ PublicAccessLevels = require("../Authorization/PublicAccessLevels")
 Errors = require("../Errors/Errors")
 ProjectTokenGenerator = require('./ProjectTokenGenerator')
 ProjectHelper = require('./ProjectHelper')
+settings = require('settings-sharelatex')
 
 module.exports = ProjectDetailsHandler =
 	getDetails: (project_id, callback)->
@@ -23,7 +24,7 @@ module.exports = ProjectDetailsHandler =
 					name : project.name
 					description: project.description
 					compiler: project.compiler
-					features: user.features
+					features: user?.features or settings.defaultFeatures
 
 				if project.overleaf?
 					details.overleaf = project.overleaf
