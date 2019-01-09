@@ -98,6 +98,9 @@ public class GetDocResult extends Result {
             }
         } else {
             versionID = jsonObject.get("latestVerId").getAsInt();
+            // Handle edge-case for projects with no changes, that were imported
+            // to v2. In which case `latestVerAt` will not be present.
+            // See: https://github.com/overleaf/writelatex-git-bridge/pull/50
             if (jsonObject.has("latestVerAt")) {
                 createdAt = jsonObject.get("latestVerAt").getAsString();
             } else {

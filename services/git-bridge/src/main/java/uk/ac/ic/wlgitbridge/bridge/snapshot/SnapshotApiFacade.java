@@ -97,6 +97,9 @@ public class SnapshotApiFacade {
                 = api.getSavedVers(oauth2, projectName);
         GetDocResult latestDoc = SnapshotApi.getResult(getDoc);
         int latest = latestDoc.getVersionID();
+        // Handle edge-case for projects with no changes, that were imported
+        // to v2. In which case both `latest` and `version` will be zero.
+        // See: https://github.com/overleaf/writelatex-git-bridge/pull/50
         if (latest > version || (latest == 0 && version == 0)) {
             for (
                     SnapshotInfo snapshotInfo :
