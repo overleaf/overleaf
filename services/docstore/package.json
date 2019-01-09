@@ -25,10 +25,10 @@
     "body-parser": "~1.0.2",
     "coffee-script": "^1.12.7",
     "express": "~4.1.1",
-    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.4.0",
-    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v2.0.10",
+    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.9",
+    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v2.0.12",
     "mongojs": "2.4.0",
-    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
+    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.1.0",
     "underscore": "~1.6.0"
   },
   "devDependencies": {
