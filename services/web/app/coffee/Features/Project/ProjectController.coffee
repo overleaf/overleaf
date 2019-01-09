@@ -466,7 +466,7 @@ module.exports = ProjectController =
 		for user_id, _ of users
 			do (user_id) ->
 				jobs.push (callback) ->
-					User.findById user_id, "first_name last_name", (error, user) ->
+					UserGetter.getUserOrUserStubById user_id, { first_name: 1, last_name: 1 }, (error, user) ->
 						return callback(error) if error?
 						users[user_id] = user
 						callback()

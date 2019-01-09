@@ -79,6 +79,7 @@ describe "ProjectController", ->
 			ipMatcherAffiliation: sinon.stub().returns({create: sinon.stub()})
 		@UserGetter =
 			getUser: sinon.stub().callsArgWith 2, null, {lastLoginIp: '192.170.18.2'}
+			getUserOrUserStubById: sinon.stub().callsArgWith 2, null, {}
 		@Modules =
 			hooks:
 				fire: sinon.stub()
@@ -303,6 +304,8 @@ describe "ProjectController", ->
 					first_name: 'Henry'
 			@users[@user._id] = @user # Owner
 			@UserModel.findById = (id, fields, callback) =>
+				callback null, @users[id]
+			@UserGetter.getUserOrUserStubById = (id, fields, callback) =>
 				callback null, @users[id]
 
 			@LimitationsManager.hasPaidSubscription.callsArgWith(1, null, false)

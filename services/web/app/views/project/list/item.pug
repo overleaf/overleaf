@@ -33,6 +33,13 @@ div(class=titleClasses)
 
 .col-xs-2
 	span.owner {{ownerName()}}
+		| &nbsp;
+		i.fa.fa-question-circle.small(
+			ng-if="hasGenericOwnerName()"
+			tooltip="This project is owned by a user who hasn’t yet migrated their account to Overleaf v2"
+			tooltip-append-to-body="true"
+			aria-hidden="true"
+		)
 	span(ng-if="isLinkSharingProject(project)")
 		| &nbsp;
 		i.fa.fa-link.small(
