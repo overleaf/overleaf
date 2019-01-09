@@ -98,7 +98,11 @@ public class GetDocResult extends Result {
             }
         } else {
             versionID = jsonObject.get("latestVerId").getAsInt();
-            createdAt = jsonObject.get("latestVerAt").getAsString();
+            if (jsonObject.has("latestVerAt")) {
+                createdAt = jsonObject.get("latestVerAt").getAsString();
+            } else {
+                createdAt = null;
+            }
             if (jsonObject.has("migratedFromId")) {
                 migratedFromID = jsonObject.get("migratedFromId").getAsString();
             } else {
