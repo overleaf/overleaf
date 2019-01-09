@@ -60,8 +60,11 @@ module.exports = FileController =
 		logger.log key:key, bucket:bucket, oldProject_id:oldProject_id, oldFile_id:oldFile_id, "reciving request to copy file"
 		PersistorManager.copyFile bucket, "#{oldProject_id}/#{oldFile_id}", key, (err)->
 			if err?
-				logger.log err:err, oldProject_id:oldProject_id, oldFile_id:oldFile_id, "something went wrong copying file"
-				res.send 500
+				if err instanceof Errors.NotFoundError
+					res.send 404
+				else
+					logger.log err:err, oldProject_id:oldProject_id, oldFile_id:oldFile_id, "something went wrong copying file"
+					res.send 500
 			else
 				res.send 200
 
