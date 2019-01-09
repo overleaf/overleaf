@@ -42,6 +42,9 @@ block content
 									ng-value="v2ImportForm.inflight || v2ImportForm.response.success ? 'Moving to v2...' : 'Move Project and Continue'"
 									ng-disabled="v2ImportForm.inflight || v2ImportForm.response.success"
 								)
+
+							.row-spaced-small.text-center
+								a(href="/overleaf/project/" + projectId + "/download/zip") Download project zip file
 						else
 							p.text-center.row-spaced.small
 								| #[strong #{name}] has not yet been moved into the new version of
@@ -51,8 +54,8 @@ block content
 								| would like to delete this project after you have made a copy,
 								| please contact support.
 
-						.row-spaced.text-center
-							a.btn.btn-primary(href="/overleaf/project/" + projectId + "/download/zip") Download project zip file
+							.row-spaced.text-center
+								a.btn.btn-primary(href="/overleaf/project/" + projectId + "/download/zip") Download project zip file
 
 					.row-spaced.text-center
 						if hasAssignment
