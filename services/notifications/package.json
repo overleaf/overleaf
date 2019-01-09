@@ -22,19 +22,19 @@
     "async": "^0.1.22",
     "coffee-script": "^1.7.1",
     "express": "3.1.0",
-    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.1.0",
-    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.7.1",
+    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.9",
+    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v2.0.12",
     "mongojs": "^2.4.0",
     "node-statsd": "0.0.3",
     "request": "^2.65.0",
-    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
+    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.1.0",
     "underscore": "1.4.4"
   },
   "devDependencies": {
     "bunyan": "^1.0.0",
+    "chai": "^4.2.0",
     "mocha": "^4.1.0",
-    "chai": "",
-    "sandboxed-module": "",
-    "sinon": ""
+    "sandboxed-module": "^2.0.3",
+    "sinon": "^6.3.5"
   }
 }
