@@ -97,7 +97,7 @@ public class SnapshotApiFacade {
                 = api.getSavedVers(oauth2, projectName);
         GetDocResult latestDoc = SnapshotApi.getResult(getDoc);
         int latest = latestDoc.getVersionID();
-        if (latest > version) {
+        if (latest > version || (latest == 0 && version == 0)) {
             for (
                     SnapshotInfo snapshotInfo :
                     SnapshotApi.getResult(savedVers).getSavedVers()
