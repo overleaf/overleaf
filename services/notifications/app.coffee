@@ -1,3 +1,5 @@
+metrics = require("metrics-sharelatex")
+metrics.initialize("notifications")
 Settings = require 'settings-sharelatex'
 logger = require 'logger-sharelatex'
 logger.initialize("notifications-sharelatex")
@@ -7,8 +9,7 @@ controller = require("./app/js/NotificationsController")
 mongojs = require('mongojs')
 db = mongojs(Settings.mongo.url, ['notifications'])
 Path = require("path")
-metrics = require("metrics-sharelatex")
-metrics.initialize("notifications")
+
 metrics.memory.monitor(logger)
 
 HealthCheckController = require("./app/js/HealthCheckController")
@@ -18,6 +19,8 @@ app.configure ()->
 	app.use express.bodyParser()
 	app.use metrics.http.monitor(logger)
 	app.use express.errorHandler()
+
+metrics.injectMetricsRoute(app)
 
 app.post '/user/:user_id', controller.addNotification
 app.get '/user/:user_id', controller.getUserNotifications
