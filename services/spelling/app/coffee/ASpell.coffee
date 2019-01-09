@@ -63,7 +63,7 @@ class ASpellRunner
 			for k, v of addToCache
 				cache.set(k, v)
 
-			logger.log hits: hits, total: words.length, hitrate: (hits/words.length).toFixed(2), "cache hit rate"
+			logger.info hits: hits, total: words.length, hitrate: (hits/words.length).toFixed(2), "cache hit rate"
 			callback null, results
 
 	getSuggestions: (language, output) ->

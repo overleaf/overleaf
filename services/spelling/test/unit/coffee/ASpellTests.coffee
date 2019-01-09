@@ -9,6 +9,7 @@ describe "ASpell", ->
 		@ASpell = SandboxedModule.require "../../../app/js/ASpell", requires:
 			"logger-sharelatex":
 				log:->
+				info:->
 				err:->
 			'metrics-sharelatex':
 				gauge:->

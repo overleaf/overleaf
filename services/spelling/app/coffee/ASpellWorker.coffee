@@ -10,11 +10,11 @@ class ASpellWorker
 		@language = language
 		@count = 0
 		@pipe = child_process.spawn("aspell", ["pipe", "-t", "--encoding=utf-8", "-d", language])
-		logger.log process: @pipe.pid, lang: @language, "starting new aspell worker"
+		logger.info process: @pipe.pid, lang: @language, "starting new aspell worker"
 		metrics.inc "aspellWorker-start-" + @language
 		@pipe.on 'exit', () =>
 			@state = 'killed'
-			logger.log process: @pipe.pid, lang: @language, "aspell worker has exited"
+			logger.info process: @pipe.pid, lang: @language, "aspell worker has exited"
 			metrics.inc "aspellWorker-exit-" + @language
 		@pipe.on 'close', () =>
 			@state = 'closed' unless @state == 'killed'
@@ -30,7 +30,7 @@ class ASpellWorker
 				@callback = null
 		@pipe.stdin.on 'error', (err) =>
 			@state = 'error' unless @state == 'killed'
-			logger.log process: @pipe.pid, error: err, stdout: output.slice(-1024), stderr: error.slice(-1024), lang: @language, "aspell worker error on stdin"
+			logger.info process: @pipe.pid, error: err, stdout: output.slice(-1024), stderr: error.slice(-1024), lang: @language, "aspell worker error on stdin"
 			if @callback?
 				@callback err, []
 				@callback = null
@@ -89,12 +89,12 @@ class ASpellWorker
 		@sendCommand("$$l")
 
 	shutdown: (reason) ->
-		logger.log process: @pipe.pid, reason: reason, 'shutting down'
+		logger.info process: @pipe.pid, reason: reason, 'shutting down'
 		@state = "closing"
 		@pipe.stdin.end()
 
 	kill: (reason) ->
-		logger.log process: @pipe.pid, reason: reason, 'killing'
+		logger.info process: @pipe.pid, reason: reason, 'killing'
 		return if @state == 'killed'
 		@pipe.kill('SIGKILL')
 
