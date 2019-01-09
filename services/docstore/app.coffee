@@ -1,4 +1,5 @@
 Metrics    = require "metrics-sharelatex"
+Metrics.initialize("docstore")
 Settings   = require "settings-sharelatex"
 logger     = require "logger-sharelatex"
 express    = require "express"
@@ -7,13 +8,15 @@ Errors     = require "./app/js/Errors"
 HttpController = require "./app/js/HttpController"
 Path       = require "path"
 
-Metrics.initialize("docstore")
+
 logger.initialize("docstore")
 Metrics.event_loop?.monitor(logger)
 
 app = express()
 
 app.use Metrics.http.monitor(logger)
+
+Metrics.injectMetricsRoute(app)
 
 app.param 'project_id', (req, res, next, project_id) ->
 	if project_id?.match /^[0-9a-f]{24}$/
