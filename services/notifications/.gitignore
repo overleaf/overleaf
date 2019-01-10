@@ -39,6 +39,7 @@ data/*
 app.js
 example.js
 app/js/*
+**/*.map
 test/unit/js/*
 test/smoke/js/*
 cookies.txt
