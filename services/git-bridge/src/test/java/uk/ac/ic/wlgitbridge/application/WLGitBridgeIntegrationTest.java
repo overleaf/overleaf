@@ -123,6 +123,9 @@ public class WLGitBridgeIntegrationTest {
         put("skipMigrationWhenMigratedFromMissing", new HashMap<String, SnapshotAPIState>() {{
             put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/skipMigrationWhenMigratedFromMissing/state/state.json")).build());
         }});
+        put("canCloneAMigratedRepositoryWithoutChanges", new HashMap<String, SnapshotAPIState>() {{
+            put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/canCloneAMigratedRepositoryWithoutChanges/state/state.json")).build());
+        }});
     }};
 
     @Rule
@@ -828,6 +831,22 @@ public class WLGitBridgeIntegrationTest {
         wlgb.stop();
 
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/skipMigrationWhenMigratedFromMissing/state/testproj2"), testprojDir2.toPath()));
+    }
+
+    @Test
+    public void canCloneAMigratedRepositoryWithoutChanges() throws IOException, GitAPIException, InterruptedException {
+        int gitBridgePort = 33883;
+        int mockServerPort = 3883;
+        MockSnapshotServer server = new MockSnapshotServer(mockServerPort, getResource("/canCloneAMigratedRepositoryWithoutChanges").toFile());
+        server.start();
+        server.setState(states.get("canCloneAMigratedRepositoryWithoutChanges").get("state"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+                makeConfigFile(gitBridgePort, mockServerPort)
+        });
+        wlgb.run();
+        File testprojDir = gitClone("testproj_no_change", gitBridgePort, dir);
+        wlgb.stop();
+        assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneAMigratedRepositoryWithoutChanges/state/testproj_no_change"), testprojDir.toPath()));
     }
 
     private String makeConfigFile(

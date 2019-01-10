@@ -83,7 +83,20 @@ public class SnapshotAPIStateBuilder {
             String projectName,
             JsonObject jsonGetDoc
     ) {
+        int versionID = jsonGetDoc.get("versionID").getAsInt();
+        String createdAt = null;
+        String email = null;
+        String name = null;
         String migratedFromId = null;
+        if (jsonGetDoc.has("createdAt")) {
+            createdAt = jsonGetDoc.get("createdAt").getAsString();
+        }
+        if (jsonGetDoc.has("email")) {
+            email = jsonGetDoc.get("email").getAsString();
+        }
+        if (jsonGetDoc.has("name")) {
+            name = jsonGetDoc.get("name").getAsString();
+        }
         if (jsonGetDoc.has("migratedFromId")) {
             migratedFromId = jsonGetDoc.get("migratedFromId").getAsString();
         }
@@ -91,10 +104,10 @@ public class SnapshotAPIStateBuilder {
                 projectName,
                 new GetDocResult(
                         jsonGetDoc.get("error"),
-                        jsonGetDoc.get("versionID").getAsInt(),
-                        jsonGetDoc.get("createdAt").getAsString(),
-                        jsonGetDoc.get("email").getAsString(),
-                        jsonGetDoc.get("name").getAsString(),
+                        versionID,
+                        createdAt,
+                        email,
+                        name,
                         migratedFromId
                 )
         );
