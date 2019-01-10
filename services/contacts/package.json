@@ -35,15 +35,7 @@
   "devDependencies": {
     "bunyan": "~0.22.3",
     "chai": "~1.9.1",
-    "grunt": "~0.4.4",
-    "grunt-bunyan": "~0.5.0",
-    "grunt-contrib-clean": "~0.5.0",
-    "grunt-contrib-coffee": "~0.10.1",
-    "grunt-execute": "~0.2.1",
-    "grunt-forever": "~0.4.4",
-    "grunt-mocha-test": "~0.10.2",
     "mocha": "^4.0.1",
-    "grunt-shell": "~0.7.0",
     "sandboxed-module": "~0.3.0",
     "sinon": "~1.5.2",
     "timekeeper": "0.0.5"
