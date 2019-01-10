@@ -8,7 +8,7 @@
     "url": "https://github.com/sharelatex/contacts-sharelatex.git"
   },
   "scripts": {
-    "compile:app": "([ -e app/coffee ] && coffee $COFFEE_OPTIONS -o app/js -c app/coffee || echo 'No CoffeeScript folder to compile') && ( [ -e app.coffee ] && coffee $COFFEE_OPTIONS -c app.coffee || echo 'No CoffeeScript app to compile')",
+    "compile:app": "([ -e app/coffee ] && coffee -m $COFFEE_OPTIONS -o app/js -c app/coffee || echo 'No CoffeeScript folder to compile') && ( [ -e app.coffee ] && coffee -m $COFFEE_OPTIONS -c app.coffee || echo 'No CoffeeScript app to compile')",
     "start": "npm run compile:app && node $NODE_APP_OPTIONS app.js",
     "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 30000 --exit $@ test/acceptance/js",
     "test:acceptance": "npm run compile:app && npm run compile:acceptance_tests && npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
@@ -25,25 +25,17 @@
     "body-parser": "~1.0.2",
     "coffee-script": "^1.7.1",
     "express": "~4.1.1",
-    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.1.0",
-    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.7.1",
+    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.9",
+    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v2.0.12",
     "mongojs": "2.4.0",
     "request": "~2.34.0",
-    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
+    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.1.0",
     "underscore": "~1.6.0"
   },
   "devDependencies": {
     "bunyan": "~0.22.3",
     "chai": "~1.9.1",
-    "grunt": "~0.4.4",
-    "grunt-bunyan": "~0.5.0",
-    "grunt-contrib-clean": "~0.5.0",
-    "grunt-contrib-coffee": "~0.10.1",
-    "grunt-execute": "~0.2.1",
-    "grunt-forever": "~0.4.4",
-    "grunt-mocha-test": "~0.10.2",
     "mocha": "^4.0.1",
-    "grunt-shell": "~0.7.0",
     "sandboxed-module": "~0.3.0",
     "sinon": "~1.5.2",
     "timekeeper": "0.0.5"
