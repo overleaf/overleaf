@@ -11,9 +11,9 @@ logger = require('logger-sharelatex')
 UserMembershipEntityConfigs = require "./UserMembershipEntityConfigs"
 
 module.exports =
-	getEntity: (entityId, entityConfig, loggedInUser, callback = (error, entity) ->) ->
+	getEntity: (entityId, entityConfig, loggedInUser, requiredStaffAccess, callback = (error, entity) ->) ->
 		query = buildEntityQuery(entityId, entityConfig)
-		unless loggedInUser.isAdmin
+		unless loggedInUser.isAdmin or loggedInUser.staffAccess?[requiredStaffAccess]
 			query[entityConfig.fields.access] = ObjectId(loggedInUser._id)
 		EntityModels[entityConfig.modelName].findOne query, callback
 

@@ -35,7 +35,7 @@ describe "UserMembershipAuthorization", ->
 
 	describe 'requireAccessToEntity', ->
 		it 'get entity', (done) ->
-			@UserMembershipAuthorization.requireGroupAccess @req, null, (error) =>
+			@UserMembershipAuthorization.requireGroupMetricsAccess @req, null, (error) =>
 				expect(error).to.not.extist
 				sinon.assert.calledWithMatch(
 					@UserMembershipHandler.getEntity,
@@ -50,7 +50,7 @@ describe "UserMembershipAuthorization", ->
 		it 'handle entity not found as non-admin', (done) ->
 			@UserMembershipHandler.getEntity.yields(null, null)
 			@UserMembershipHandler.getEntityWithoutAuthorizationCheck.yields(null, null)
-			@UserMembershipAuthorization.requireGroupAccess @req, null, (error) =>
+			@UserMembershipAuthorization.requireGroupMetricsAccess @req, null, (error) =>
 				expect(error).to.extist
 				expect(error).to.be.instanceof(Error)
 				expect(error.constructor.name).to.equal('NotFoundError')
@@ -62,7 +62,7 @@ describe "UserMembershipAuthorization", ->
 			@user.isAdmin = true
 			@UserMembershipHandler.getEntity.yields(null, null)
 			@UserMembershipHandler.getEntityWithoutAuthorizationCheck.yields(null, null)
-			@UserMembershipAuthorization.requirePublisherAccess @req, redirect: (path) =>
+			@UserMembershipAuthorization.requirePublisherMetricsAccess @req, redirect: (path) =>
 				expect(path).to.extist
 				expect(path).to.match /create/
 				done()
@@ -71,7 +71,7 @@ describe "UserMembershipAuthorization", ->
 			@user.isAdmin = true
 			@UserMembershipHandler.getEntity.yields(null, null)
 			@UserMembershipHandler.getEntityWithoutAuthorizationCheck.yields(null, null)
-			@UserMembershipAuthorization.requireGroupAccess @req, null, (error) =>
+			@UserMembershipAuthorization.requireGroupMetricsAccess @req, null, (error) =>
 				expect(error).to.extist
 				expect(error).to.be.instanceof(Error)
 				expect(error.constructor.name).to.equal('NotFoundError')
@@ -79,13 +79,13 @@ describe "UserMembershipAuthorization", ->
 
 		it 'handle entity no access', (done) ->
 			@UserMembershipHandler.getEntity.yields(null, null)
-			@UserMembershipAuthorization.requireGroupAccess @req, null, (error) =>
+			@UserMembershipAuthorization.requireGroupMetricsAccess @req, null, (error) =>
 				sinon.assert.called(@AuthorizationMiddlewear.redirectToRestricted)
 				done()
 
 		it 'handle anonymous user', (done) ->
 			@AuthenticationController.getSessionUser.returns(null)
-			@UserMembershipAuthorization.requireGroupAccess @req, null, (error) =>
+			@UserMembershipAuthorization.requireGroupMetricsAccess @req, null, (error) =>
 				expect(error).to.extist
 				sinon.assert.called(@AuthorizationMiddlewear.redirectToRestricted)
 				sinon.assert.notCalled(@UserMembershipHandler.getEntity)
@@ -94,7 +94,7 @@ describe "UserMembershipAuthorization", ->
 
 	describe 'requireEntityAccess', ->
 		it 'handle team access', (done) ->
-			@UserMembershipAuthorization.requireTeamAccess @req, null, (error) =>
+			@UserMembershipAuthorization.requireTeamMetricsAccess @req, null, (error) =>
 				expect(error).to.not.extist
 				sinon.assert.calledWithMatch(
 					@UserMembershipHandler.getEntity,
@@ -104,7 +104,7 @@ describe "UserMembershipAuthorization", ->
 				done()
 
 		it 'handle group access', (done) ->
-			@UserMembershipAuthorization.requireGroupAccess @req, null, (error) =>
+			@UserMembershipAuthorization.requireGroupMetricsAccess @req, null, (error) =>
 				expect(error).to.not.extist
 				sinon.assert.calledWithMatch(
 					@UserMembershipHandler.getEntity,
@@ -114,7 +114,7 @@ describe "UserMembershipAuthorization", ->
 				done()
 
 		it 'handle group managers access', (done) ->
-			@UserMembershipAuthorization.requireGroupManagersAccess @req, null, (error) =>
+			@UserMembershipAuthorization.requireGroupManagersManagementAccess @req, null, (error) =>
 				expect(error).to.not.extist
 				sinon.assert.calledWithMatch(
 					@UserMembershipHandler.getEntity,
@@ -124,7 +124,7 @@ describe "UserMembershipAuthorization", ->
 				done()
 
 		it 'handle institution access', (done) ->
-			@UserMembershipAuthorization.requireInstitutionAccess @req, null, (error) =>
+			@UserMembershipAuthorization.requireInstitutionMetricsAccess @req, null, (error) =>
 				expect(error).to.not.extist
 				sinon.assert.calledWithMatch(
 					@UserMembershipHandler.getEntity,
@@ -139,7 +139,7 @@ describe "UserMembershipAuthorization", ->
 				title: 'Template Title'
 				brand: { slug: 'brand-slug' }
 			@request.yields(null, { statusCode: 200 }, JSON.stringify(templateData))
-			@UserMembershipAuthorization.requireTemplateAccess @req, null, (error) =>
+			@UserMembershipAuthorization.requireTemplateMetricsAccess @req, null, (error) =>
 				expect(error).to.not.extist
 				sinon.assert.calledWithMatch(
 					@UserMembershipHandler.getEntity,
@@ -154,7 +154,7 @@ describe "UserMembershipAuthorization", ->
 				title: 'Template Title'
 				brand: null
 			@request.yields(null, { statusCode: 200 }, JSON.stringify(templateData))
-			@UserMembershipAuthorization.requireTemplateAccess @req, null, (error) =>
+			@UserMembershipAuthorization.requireTemplateMetricsAccess @req, null, (error) =>
 				expect(error).to.not.extist
 				sinon.assert.notCalled(@UserMembershipHandler.getEntity)
 				sinon.assert.calledOnce(@AuthorizationMiddlewear.ensureUserIsSiteAdmin)

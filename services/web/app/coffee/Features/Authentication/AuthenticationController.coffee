@@ -24,6 +24,7 @@ module.exports = AuthenticationController =
 			first_name: user.first_name
 			last_name: user.last_name
 			isAdmin: user.isAdmin
+			staffAccess: user.staffAccess
 			email: user.email
 			referal_id: user.referal_id
 			session_created: (new Date()).toISOString()

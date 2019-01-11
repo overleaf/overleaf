@@ -20,6 +20,14 @@ UserSchema = new Schema
 	institution       : {type : String, default : ''}
 	hashedPassword    : String
 	isAdmin           : {type : Boolean, default : false}
+	staffAccess: {
+		publisherMetrics: {type : Boolean, default: false}
+		publisherManagement: {type : Boolean, default: false}
+		institutionMetrics: {type : Boolean, default: false}
+		institutionManagement: {type : Boolean, default: false}
+		groupMetrics: {type : Boolean, default: false}
+		groupManagement: {type : Boolean, default: false}
+	}
 	signUpDate        : {type : Date, default: () -> new Date() }
 	lastLoggedIn      : {type : Date}
 	lastLoginIp       : {type : String, default : ''}

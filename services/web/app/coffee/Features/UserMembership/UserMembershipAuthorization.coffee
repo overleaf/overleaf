@@ -8,22 +8,31 @@ settings = require 'settings-sharelatex'
 request = require 'request'
 
 module.exports = UserMembershipAuthorization =
-	requireTeamAccess: (req, res, next) ->
-		requireAccessToEntity('team', req.params.id, req, res, next)
+	requireTeamMetricsAccess: (req, res, next) ->
+		requireAccessToEntity('team', req.params.id, req, res, next, 'groupMetrics')
 
-	requireGroupAccess: (req, res, next) ->
-		requireAccessToEntity('group', req.params.id, req, res, next)
+	requireGroupManagementAccess: (req, res, next) ->
+		requireAccessToEntity('group', req.params.id, req, res, next, 'groupManagement')
 
-	requireGroupManagersAccess: (req, res, next) ->
-		requireAccessToEntity('groupManagers', req.params.id, req, res, next)
+	requireGroupMetricsAccess:	(req, res, next) ->
+		requireAccessToEntity('group', req.params.id, req, res, next, 'groupMetrics')
 
-	requireInstitutionAccess: (req, res, next) ->
-		requireAccessToEntity('institution', req.params.id, req, res, next)
+	requireGroupManagersManagementAccess: (req, res, next) ->
+		requireAccessToEntity('groupManagers', req.params.id, req, res, next, 'groupManagement')
 
-	requirePublisherAccess: (req, res, next) ->
-		requireAccessToEntity('publisher', req.params.id, req, res, next)
+	requireInstitutionMetricsAccess:	(req, res, next) ->
+		requireAccessToEntity('institution', req.params.id, req, res, next, 'institutionMetrics')
 
-	requireTemplateAccess: (req, res, next) ->
+	requireInstitutionManagementAccess:	(req, res, next) ->
+		requireAccessToEntity('institution', req.params.id, req, res, next, 'institutionManagement')
+
+	requirePublisherMetricsAccess:	(req, res, next) ->
+		requireAccessToEntity('publisher', req.params.id, req, res, next, 'publisherMetrics')
+
+	requirePublisherManagementAccess:	(req, res, next) ->
+		requireAccessToEntity('publisher', req.params.id, req, res, next, 'publisherManagement')
+
+	requireTemplateMetricsAccess: (req, res, next) ->
 		templateId = req.params.id
 		request {
 			baseUrl: settings.apis.v1.url
@@ -51,26 +60,29 @@ module.exports = UserMembershipAuthorization =
 				id: body.id
 				title: body.title
 			if body?.brand?.slug
-				requireAccessToEntity('publisher', body.brand.slug, req, res, next)
+				req.params.id = body.brand.slug
+				UserMembershipAuthorization.requirePublisherMetricsAccess(req, res, next)
 			else
 				AuthorizationMiddlewear.ensureUserIsSiteAdmin(req, res, next)
 
 	requireGraphAccess: (req, res, next) ->
+		req.params.id = req.query.resource_id
 		if req.query.resource_type == 'template'
-			# templates are a special case; can't use requireaccesstoentity directly
-			req.params.id = req.query.resource_id
-			return UserMembershipAuthorization.requireTemplateAccess(req, res, next)
+			return UserMembershipAuthorization.requireTemplateMetricsAccess(req, res, next)
+		else if req.query.resource_type == 'institution'
+			return UserMembershipAuthorization.requireInstitutionMetricsAccess(req, res, next)
+		else if req.query.resource_type == 'group'
+			return UserMembershipAuthorization.requireGroupMetricsAccess(req, res, next)
+		else if req.query.resource_type == 'team'
+			return UserMembershipAuthorization.requireTeamMetricsAccess(req, res, next)
+		requireAccessToEntity(req.query.resource_type, req.query.resource_id, req, res, next)
 
-		requireAccessToEntity(
-			req.query.resource_type, req.query.resource_id, req, res, next
-		)
-
-requireAccessToEntity = (entityName, entityId, req, res, next) ->
+requireAccessToEntity = (entityName, entityId, req, res, next, requiredStaffAccess=null) ->
 	loggedInUser = AuthenticationController.getSessionUser(req)
 	unless loggedInUser
 		return AuthorizationMiddlewear.redirectToRestricted req, res, next
 
-	getEntity entityName, entityId, loggedInUser, (error, entity, entityConfig, entityExists) ->
+	getEntity entityName, entityId, loggedInUser, requiredStaffAccess, (error, entity, entityConfig, entityExists) ->
 		return next(error) if error?
 
 		if entity?
@@ -87,12 +99,12 @@ requireAccessToEntity = (entityName, entityId, req, res, next) ->
 
 		next(new Errors.NotFoundError())
 
-getEntity = (entityName, entityId, user, callback = (error, entity, entityConfig, entityExists)->) ->
+getEntity = (entityName, entityId, user, requiredStaffAccess, callback = (error, entity, entityConfig, entityExists)->) ->
 	entityConfig = EntityConfigs[entityName]
 	unless entityConfig
 		return callback(new Errors.NotFoundError("No such entity: #{entityName}"))
 
-	UserMembershipHandler.getEntity entityId, entityConfig, user, (error, entity)->
+	UserMembershipHandler.getEntity entityId, entityConfig, user, requiredStaffAccess, (error, entity)->
 		return callback(error) if error?
 		return callback(null, entity, entityConfig, true) if entity?
 
