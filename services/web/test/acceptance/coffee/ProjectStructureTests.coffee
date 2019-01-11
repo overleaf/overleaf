@@ -245,7 +245,7 @@ describe "ProjectStructureChanges", ->
 				@uploaded_project_id = JSON.parse(body).project_id
 				done()
 
-		it "should set the project name from the zip contents", (done) ->
+		it "should treat the backslash as a directory separator", (done) ->
 			ProjectGetter.getProject @uploaded_project_id, (error, project) ->
 				expect(error).not.to.exist
 				expect(project.rootFolder[0].folders[0].name).to.equal('styles')
