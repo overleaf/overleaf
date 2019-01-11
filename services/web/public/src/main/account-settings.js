@@ -97,7 +97,8 @@ define(['base'], function(App) {
       $scope.checkValidation = () =>
         ($scope.state.isValid =
           userDefaultEmail != null &&
-          $scope.state.deleteText === userDefaultEmail &&
+          $scope.state.deleteText.toLowerCase() ===
+            userDefaultEmail.toLowerCase() &&
           $scope.state.password.length > 0 &&
           $scope.state.confirmV1Purge &&
           $scope.state.confirmSharelatexDelete)
