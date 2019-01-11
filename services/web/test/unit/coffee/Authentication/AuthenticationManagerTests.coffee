@@ -115,31 +115,83 @@ describe "AuthenticationManager", ->
 				expect(result.message).to.equal 'email not valid'
 
 	describe "validatePassword", ->
-		it "should return null if valid", ->
-			result = @AuthenticationManager.validatePassword 'banana'
-			expect(result).to.equal null
+		beforeEach ->
+			# 73 characters:
+			@longPassword = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef012345678'
 
-		describe "invalid", ->
-			beforeEach ->
-				@settings.passwordStrengthOptions =
-					length:
-						max:10
-						min:6
+		describe "with a null password", ->
+			it "should return an error", ->
+				expect(@AuthenticationManager.validatePassword()).to.eql { message: 'password not set' }
 
-			it "should return validation error object if not set", ->
-				result = @AuthenticationManager.validatePassword()
-				expect(result).to.not.equal null
-				expect(result.message).to.equal 'password not set'
+		describe "password length", ->
+			describe "with the default password length options", ->
+				it "should reject passwords that are too short", ->
+					expect(@AuthenticationManager.validatePassword('')).to.eql { message: 'password is too short' }
+					expect(@AuthenticationManager.validatePassword('foo')).to.eql { message: 'password is too short' }
 
-			it "should return validation error object if too short", ->
-				result = @AuthenticationManager.validatePassword 'dsd'
-				expect(result).to.not.equal null
-				expect(result.message).to.equal 'password is too short'
+				it "should reject passwords that are too long", ->
+					expect(@AuthenticationManager.validatePassword(@longPassword)).to.eql { message: 'password is too long' }
 
-			it "should return validation error object if too long", ->
-				result = @AuthenticationManager.validatePassword 'dsdsadsadsadsadsadkjsadjsadjsadljs'
-				expect(result).to.not.equal null
-				expect(result.message).to.equal 'password is too long'
+				it "should accept passwords that are a good length", ->
+					expect(@AuthenticationManager.validatePassword('l337h4x0r')).to.equal null
+
+			describe "when the password length is specified in settings", ->
+				beforeEach ->
+					@settings.passwordStrengthOptions =
+						length:
+							min: 10
+							max: 12
+
+				it "should reject passwords that are too short", ->
+					expect(@AuthenticationManager.validatePassword('012345678')).to.eql { message: 'password is too short' }
+
+				it "should accept passwords of exactly minimum length", ->
+					expect(@AuthenticationManager.validatePassword('0123456789')).to.equal null
+
+				it "should reject passwords that are too long", ->
+					expect(@AuthenticationManager.validatePassword('0123456789abc')).to.eql { message: 'password is too long' }
+
+				it "should accept passwords of exactly maximum length", ->
+					expect(@AuthenticationManager.validatePassword('0123456789ab')).to.equal null
+
+			describe "when the maximum password length is set to >72 characters in settings", ->
+				beforeEach ->
+					@settings.passwordStrengthOptions =
+						length:
+							max: 128
+
+				it "should still reject passwords > 72 characters in length", ->
+					expect(@AuthenticationManager.validatePassword(@longPassword)).to.eql { message: 'password is too long' }
+
+		describe "allowed characters", ->
+			describe "with the default settings for allowed characters", ->
+				it "should allow passwords with valid characters", ->
+					expect(@AuthenticationManager.validatePassword("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")).to.equal null
+					expect(@AuthenticationManager.validatePassword("1234567890@#$%^&*()-_=+[]{};:<>/?!£€.,")).to.equal null
+
+				it "should not allow passwords with invalid characters", ->
+					expect(@AuthenticationManager.validatePassword("correct horse battery staple")).to.eql { message: 'password contains an invalid character' }
+
+			describe "when valid characters are overridden in settings", ->
+				beforeEach ->
+					@settings.passwordStrengthOptions =
+						chars:
+							symbols: " "
+
+				it "should allow passwords with valid characters", ->
+					expect(@AuthenticationManager.validatePassword("correct horse battery staple")).to.equal null
+
+				it "should disallow passwords with invalid characters", ->
+					expect(@AuthenticationManager.validatePassword("1234567890@#$%^&*()-_=+[]{};:<>/?!£€.,")).to.eql { message: 'password contains an invalid character' }
+
+			describe "when allowAnyChars is set", ->
+				beforeEach ->
+					@settings.passwordStrengthOptions =
+						allowAnyChars: true
+
+				it "should allow any characters", ->
+					expect(@AuthenticationManager.validatePassword("correct horse battery staple")).to.equal null
+					expect(@AuthenticationManager.validatePassword("1234567890@#$%^&*()-_=+[]{};:<>/?!£€.,")).to.equal null
 
 	describe "setUserPassword", ->
 		beforeEach ->

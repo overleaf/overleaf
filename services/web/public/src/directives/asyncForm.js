@@ -10,7 +10,6 @@
  * decaffeinate suggestions:
  * DS101: Remove unnecessary use of Array.from
  * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
@@ -175,85 +174,4 @@ define(['base', 'libs/passfield'], function(App) {
       form: '=for'
     }
   }))
-
-  return App.directive('complexPassword', () => ({
-    require: ['^asyncForm', 'ngModel'],
-
-    link(scope, element, attrs, ctrl) {
-      PassField.Config.blackList = []
-      const defaultPasswordOpts = {
-        pattern: '',
-        length: {
-          min: 6,
-          max: 128
-        },
-        allowEmpty: false,
-        allowAnyChars: true,
-        isMasked: true,
-        showToggle: false,
-        showGenerate: false,
-        showTip: false,
-        showWarn: false,
-        checkMode: PassField.CheckModes.STRICT,
-        chars: {
-          digits: '1234567890',
-          letters: 'abcdefghijklmnopqrstuvwxyz',
-          letters_up: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-          symbols: '@#$%^&*()-_=+[]{};:<>/?!£€.,'
-        }
-      }
-
-      const opts = _.defaults(
-        window.passwordStrengthOptions || {},
-        defaultPasswordOpts
-      )
-      if (opts.length.min === 1) {
-        opts.acceptRate = 0 // this allows basically anything to be a valid password
-      }
-      const passField = new PassField.Field('passwordField', opts)
-
-      const [asyncFormCtrl, ngModelCtrl] = Array.from(ctrl)
-
-      return ngModelCtrl.$parsers.unshift(function(modelValue) {
-        let isValid = passField.validatePass()
-        const email = asyncFormCtrl.getEmail() || window.usersEmail
-        if (!isValid) {
-          scope.complexPasswordErrorMessage = passField.getPassValidationMessage()
-        } else if (email != null && email !== '') {
-          const startOfEmail = __guard__(
-            email != null ? email.split('@') : undefined,
-            x => x[0]
-          )
-          if (
-            modelValue.indexOf(email) !== -1 ||
-            modelValue.indexOf(startOfEmail) !== -1
-          ) {
-            isValid = false
-            scope.complexPasswordErrorMessage =
-              'Password can not contain email address'
-          }
-        }
-        if (opts.length.max != null && modelValue.length === opts.length.max) {
-          isValid = false
-          scope.complexPasswordErrorMessage = `Maximum password length ${
-            opts.length.max
-          } reached`
-        }
-        if (opts.length.min != null && modelValue.length < opts.length.min) {
-          isValid = false
-          scope.complexPasswordErrorMessage = `Password too short, minimum ${
-            opts.length.min
-          }`
-        }
-        ngModelCtrl.$setValidity('complexPassword', isValid)
-        return modelValue
-      })
-    }
-  }))
 })
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
-}

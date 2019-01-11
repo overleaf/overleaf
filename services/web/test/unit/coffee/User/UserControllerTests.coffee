@@ -47,6 +47,7 @@ describe "UserController", ->
 		@AuthenticationManager =
 			authenticate: sinon.stub()
 			setUserPassword: sinon.stub()
+			validatePassword: sinon.stub()
 		@ReferalAllocator =
 			allocate:sinon.stub()
 		@SubscriptionDomainHandler =
@@ -379,7 +380,6 @@ describe "UserController", ->
 				done()
 			@UserController.changePassword @req, @res
 
-
 		it "it should not set the new password if they do not match", (done)->
 			@AuthenticationManager.authenticate.callsArgWith(2, null, {})
 			@req.body =
@@ -398,5 +398,16 @@ describe "UserController", ->
 				newPassword2: "newpass"
 			@res.send = =>
 				@AuthenticationManager.setUserPassword.calledWith(@user._id, "newpass").should.equal true
+				done()
+			@UserController.changePassword @req, @res
+
+		it "it should not set the new password if it is invalid", (done)->
+			@AuthenticationManager.validatePassword = sinon.stub().returns { message: 'password contains invalid characters' }
+			@AuthenticationManager.authenticate.callsArgWith(2, null, {})
+			@req.body =
+				newPassword1: "correct horse battery staple"
+				newPassword2: "correct horse battery staple"
+			@res.send = =>
+				@AuthenticationManager.setUserPassword.called.should.equal false
 				done()
 			@UserController.changePassword @req, @res

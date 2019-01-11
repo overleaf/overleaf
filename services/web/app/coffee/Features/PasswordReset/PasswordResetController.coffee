@@ -1,6 +1,7 @@
 PasswordResetHandler = require("./PasswordResetHandler")
 RateLimiter = require("../../infrastructure/RateLimiter")
 AuthenticationController = require("../Authentication/AuthenticationController")
+AuthenticationManager = require("../Authentication/AuthenticationManager")
 UserGetter = require("../User/UserGetter")
 UserSessionsManager = require("../User/UserSessionsManager")
 logger = require "logger-sharelatex"
@@ -42,7 +43,7 @@ module.exports =
 
 	setNewUserPassword: (req, res, next)->
 		{passwordResetToken, password} = req.body
-		if !password? or password.length == 0 or !passwordResetToken? or passwordResetToken.length == 0
+		if !password? or password.length == 0 or !passwordResetToken? or passwordResetToken.length == 0 or AuthenticationManager.validatePassword(password?.trim())?
 			return res.sendStatus 400
 		delete req.session.resetToken
 		PasswordResetHandler.setNewUserPassword passwordResetToken?.trim(), password?.trim(), (err, found, user_id) ->

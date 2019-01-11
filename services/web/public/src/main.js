@@ -40,6 +40,7 @@ define([
   'main/importing',
   'analytics/AbTestingManager',
   'directives/asyncForm',
+  'directives/complexPassword',
   'directives/stopPropagation',
   'directives/focus',
   'directives/equals',
