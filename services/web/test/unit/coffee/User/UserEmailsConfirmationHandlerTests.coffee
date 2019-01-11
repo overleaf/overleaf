@@ -46,6 +46,7 @@ describe "UserEmailsConfirmationHandler", ->
 					.calledWith('confirmEmail', {
 						to: @email,
 						confirmEmailUrl: 'emails.example.com/user/emails/confirm?token=new-token'
+						sendingUser_id: @user_id
 					})
 					.should.equal true
 

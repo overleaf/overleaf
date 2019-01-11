@@ -21,6 +21,7 @@ module.exports = UserEmailsConfirmationHandler =
 			emailOptions =
 				to: email
 				confirmEmailUrl: "#{settings.siteUrl}/user/emails/confirm?token=#{token}"
+				sendingUser_id: user_id
 			EmailHandler.sendEmail emailTemplate, emailOptions, callback
 
 	confirmEmailFromToken: (token, callback = (error) ->) ->

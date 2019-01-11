@@ -51,7 +51,7 @@ describe "PasswordResetController", ->
 			@PasswordResetHandler.generateAndEmailResetToken.callsArgWith(1, null, true)
 			@RateLimiter.addCount.callsArgWith(1, null, false)
 			@res.send = (code)=>
-				code.should.equal 500
+				code.should.equal 429
 				@PasswordResetHandler.generateAndEmailResetToken.calledWith(@email.trim()).should.equal false
 				done()
 			@PasswordResetController.requestReset @req, @res

@@ -101,11 +101,15 @@ module.exports = CollaboratorsInviteController =
 		inviteId = req.params.invite_id
 		logger.log {projectId, inviteId}, "resending invite"
 		sendingUser = AuthenticationController.getSessionUser(req)
-		CollaboratorsInviteHandler.resendInvite projectId, sendingUser, inviteId, (err) ->
-			if err?
-				logger.err {projectId, inviteId}, "error resending invite"
-				return next(err)
-			res.sendStatus(201)
+		CollaboratorsInviteController._checkRateLimit sendingUser._id, (error, underRateLimit) ->
+			return next(error) if error?
+			if !underRateLimit
+				return res.sendStatus(429)
+			CollaboratorsInviteHandler.resendInvite projectId, sendingUser, inviteId, (err) ->
+				if err?
+					logger.err {projectId, inviteId}, "error resending invite"
+					return next(err)
+				res.sendStatus(201)
 
 	viewInvite: (req, res, next) ->
 		projectId = req.params.Project_id

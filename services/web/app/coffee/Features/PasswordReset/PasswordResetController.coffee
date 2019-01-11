@@ -21,7 +21,7 @@ module.exports =
 			throttle: 6
 		RateLimiter.addCount opts, (err, canContinue)->
 			if !canContinue
-				return res.send 500, { message: req.i18n.translate("rate_limit_hit_wait")}
+				return res.send 429, { message: req.i18n.translate("rate_limit_hit_wait")}
 			PasswordResetHandler.generateAndEmailResetToken email, (err, exists)->
 				if err?
 					res.send 500, {message:err?.message}

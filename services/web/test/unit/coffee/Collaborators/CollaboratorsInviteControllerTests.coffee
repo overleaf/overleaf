@@ -570,6 +570,7 @@ describe "CollaboratorsInviteController", ->
 			@res.render = sinon.stub()
 			@res.sendStatus = sinon.stub()
 			@CollaboratorsInviteHandler.resendInvite = sinon.stub().callsArgWith(3, null)
+			@CollaboratorsInviteController._checkRateLimit = sinon.stub().yields(null, true)
 			@callback = sinon.stub()
 			@next = sinon.stub()
 
@@ -584,6 +585,9 @@ describe "CollaboratorsInviteController", ->
 
 			it 'should have called resendInvite', ->
 				@CollaboratorsInviteHandler.resendInvite.callCount.should.equal 1
+
+			it 'should check the rate limit', ->
+				@CollaboratorsInviteController._checkRateLimit.callCount.should.equal 1
 
 		describe 'when resendInvite produces an error', ->
 
