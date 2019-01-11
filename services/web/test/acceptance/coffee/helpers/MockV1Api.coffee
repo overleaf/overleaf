@@ -38,6 +38,8 @@ module.exports = MockV1Api =
 
 	brands: {}
 
+	brand_variations: {}
+
 	validation_clients: {}
 
 	setAffiliations: (affiliations) -> @affiliations = affiliations
@@ -137,6 +139,13 @@ module.exports = MockV1Api =
 			conversion = partner?.conversions?[req.params.id]
 			if conversion?
 				res.status(200).json {input_file_uri: conversion, brand_variation_id: partner.brand_variation_id}
+			else
+				res.status(404).json {}
+
+		app.get "/api/v2/brand_variations/:id", (req, res, next) =>
+			variation = @brand_variations[req.params.id]
+			if variation?
+				res.status(200).json variation
 			else
 				res.status(404).json {}
 
