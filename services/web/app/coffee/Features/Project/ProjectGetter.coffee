@@ -24,13 +24,11 @@ module.exports = ProjectGetter =
 		ProjectGetter.getProject project_id, excludes, callback
 
 	getProject: (project_id, projection, callback) ->
-		if !project_id?
-			return callback(new Error("no project_id provided"))
-
 		if typeof(projection) == "function" && !callback?
 			callback = projection
 			projection = {}
-
+		if !project_id?
+			return callback(new Error("no project_id provided"))
 		if typeof(projection) != "object"
 			return callback(new Error("projection is not an object"))
 
@@ -43,13 +41,11 @@ module.exports = ProjectGetter =
 			ProjectGetter.getProjectWithoutLock project_id, projection, callback
 
 	getProjectWithoutLock: (project_id, projection, callback) ->
-		if !project_id?
-			return callback(new Error("no project_id provided"))
-
 		if typeof(projection) == "function" && !callback?
 			callback = projection
 			projection = {}
-
+		if !project_id?
+			return callback(new Error("no project_id provided"))
 		if typeof(projection) != "object"
 			return callback(new Error("projection is not an object"))
 
