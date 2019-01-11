@@ -38,7 +38,7 @@ module.exports = ProjectDuplicator =
 		jobs = fileRefs.map (file)->
 			return (cb)->
 				return async.setImmediate(cb) if firstError? # skip further copies if an error has occurred
-				ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject newProject, desFolder._id, originalProject_id, file, owner_id, (err) ->
+				ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject newProject._id, newProject, desFolder._id, originalProject_id, file, owner_id, (err) ->
 					firstError ||= err if err? # set the error flag if this copy failed
 					return cb()
 		# If one of these jobs fails then we wait until all running jobs have

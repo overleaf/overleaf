@@ -47,8 +47,7 @@ wrapWithLock = (methodWithoutLock) ->
 module.exports = ProjectEntityUpdateHandler = self =
 	copyFileFromExistingProjectWithProject: wrapWithLock
 		beforeLock: (next) ->
-			(project, folder_id, originalProject_id, origonalFileRef, userId, callback = (error, fileRef, folder_id) ->)->
-				project_id = project._id
+			(project_id, project, folder_id, originalProject_id, origonalFileRef, userId, callback = (error, fileRef, folder_id) ->)->
 				logger.log { project_id, folder_id, originalProject_id, origonalFileRef }, "copying file in s3 with project"
 				ProjectEntityMongoUpdateHandler._confirmFolder project, folder_id, (folder_id) ->
 					if !origonalFileRef?
@@ -63,9 +62,8 @@ module.exports = ProjectEntityUpdateHandler = self =
 						if err?
 							logger.err { err, project_id, folder_id, originalProject_id, origonalFileRef }, "error coping file in s3"
 							return callback(err)
-						next(project, folder_id, originalProject_id, origonalFileRef, userId, fileRef, fileStoreUrl, callback)
-		withLock: (project, folder_id, originalProject_id, origonalFileRef, userId, fileRef, fileStoreUrl, callback = (error, fileRef, folder_id) ->)->
-			project_id = project._id
+						next(project_id, project, folder_id, originalProject_id, origonalFileRef, userId, fileRef, fileStoreUrl, callback)
+		withLock: (project_id, project, folder_id, originalProject_id, origonalFileRef, userId, fileRef, fileStoreUrl, callback = (error, fileRef, folder_id) ->)->
 			projectHistoryId = project.overleaf?.history?.id
 			ProjectEntityMongoUpdateHandler._putElement project, folder_id, fileRef, "file", (err, result, newProject) ->
 				if err?

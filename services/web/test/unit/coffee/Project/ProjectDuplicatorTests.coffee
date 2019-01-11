@@ -69,9 +69,9 @@ describe 'ProjectDuplicator', ->
 			setRootDoc: sinon.stub()
 			addFolder: sinon.stub().callsArgWith(3, null, @newFolder)
 
-		@ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject.withArgs(sinon.match.any, sinon.match.any, sinon.match.any, "BROKEN-FILE", sinon.match.any, sinon.match.any).callsArgWith(5, new Error("failed"))
-		@ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject.withArgs(sinon.match.any, sinon.match.any, sinon.match.any, sinon.match.object, sinon.match.any).callsArg(5)
-		@ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject.withArgs(sinon.match.any, sinon.match.any, sinon.match.any, null, sinon.match.any).callsArg(5)
+		@ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject.withArgs(sinon.match.any, sinon.match.any, sinon.match.any, sinon.match.any, "BROKEN-FILE", sinon.match.any, sinon.match.any).callsArgWith(6, new Error("failed"))
+		@ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject.withArgs(sinon.match.any, sinon.match.any, sinon.match.any, sinon.match.any, sinon.match.object, sinon.match.any).callsArg(6)
+		@ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject.withArgs(sinon.match.any, sinon.match.any, sinon.match.any, sinon.match.any, null, sinon.match.any).callsArg(6)
 
 		@DocumentUpdaterHandler =
 			flushProjectToMongo: sinon.stub().callsArg(1)
@@ -166,13 +166,13 @@ describe 'ProjectDuplicator', ->
 		it 'should copy all the files', (done)->
 			@duplicator.duplicate @owner, @old_project_id, "", (err, newProject)=>
 				@ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject
-					.calledWith(@stubbedNewProject, @stubbedNewProject.rootFolder[0]._id, @project._id, @rootFolder.fileRefs[0], @owner._id)
+					.calledWith(@stubbedNewProject._id, @stubbedNewProject, @stubbedNewProject.rootFolder[0]._id, @project._id, @rootFolder.fileRefs[0], @owner._id)
 					.should.equal true
 				@ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject
-					.calledWith(@stubbedNewProject, @newFolder._id, @project._id, @level1folder.fileRefs[0], @owner._id)
+					.calledWith(@stubbedNewProject._id, @stubbedNewProject, @newFolder._id, @project._id, @level1folder.fileRefs[0], @owner._id)
 					.should.equal true
 				@ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject
-					.calledWith(@stubbedNewProject, @newFolder._id, @project._id, @level2folder.fileRefs[0], @owner._id)
+					.calledWith(@stubbedNewProject._id, @stubbedNewProject, @newFolder._id, @project._id, @level2folder.fileRefs[0], @owner._id)
 					.should.equal true
 				done()
 

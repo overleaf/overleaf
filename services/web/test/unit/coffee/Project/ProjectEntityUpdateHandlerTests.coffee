@@ -86,7 +86,7 @@ describe 'ProjectEntityUpdateHandler', ->
 			@ProjectEntityMongoUpdateHandler._confirmFolder = sinon.stub().yields(folder_id)
 			@ProjectEntityMongoUpdateHandler._putElement = sinon.stub().yields(null, {path:{fileSystem: @fileSystemPath}})
 
-			@ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject @project, folder_id, @oldProject_id, @oldFileRef, userId, @callback
+			@ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject @project._id, @project, folder_id, @oldProject_id, @oldFileRef, userId, @callback
 
 		it 'should copy the file in FileStoreHandler', ->
 			@FileStoreHandler.copyFile
@@ -135,7 +135,7 @@ describe 'ProjectEntityUpdateHandler', ->
 			@ProjectEntityMongoUpdateHandler._confirmFolder = sinon.stub().yields(folder_id)
 			@ProjectEntityMongoUpdateHandler._putElement = sinon.stub().yields(null, {path:{fileSystem: @fileSystemPath}})
 
-			@ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject @project, folder_id, @oldProject_id, @oldFileRef, userId, @callback
+			@ProjectEntityUpdateHandler.copyFileFromExistingProjectWithProject @project._id, @project, folder_id, @oldProject_id, @oldFileRef, userId, @callback
 
 		it 'should copy the file in FileStoreHandler', ->
 			@FileStoreHandler.copyFile
