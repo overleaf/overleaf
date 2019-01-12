@@ -1,7 +1,3 @@
-async = require "async"
-_ = require "underscore"
-{db, ObjectId, BSON} = require "./mongojs"
-logger = require "logger-sharelatex"
 Heap = require "heap"
 
 module.exports = ProjectIterator =

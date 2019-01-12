@@ -19,4 +19,4 @@ COPY --from=app /app /app
 WORKDIR /app
 USER node
 
-CMD ["node","app.js"]
+CMD ["node", "--expose-gc", "app.js"]
