@@ -11,11 +11,11 @@ class ASpellWorker
 		@count = 0
 		@pipe = child_process.spawn("aspell", ["pipe", "-t", "--encoding=utf-8", "-d", language])
 		logger.info process: @pipe.pid, lang: @language, "starting new aspell worker"
-		metrics.inc "aspellWorker-start-" + @language
+		metrics.inc "aspellWorker-start", 1, {method: @language}
 		@pipe.on 'exit', () =>
 			@state = 'killed'
 			logger.info process: @pipe.pid, lang: @language, "aspell worker has exited"
-			metrics.inc "aspellWorker-exit-" + @language
+			metrics.inc "aspellWorker-exit" , 1, {method: @language}
 		@pipe.on 'close', () =>
 			@state = 'closed' unless @state == 'killed'
 			if @callback?
