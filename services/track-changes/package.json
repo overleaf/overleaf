@@ -35,6 +35,7 @@
   },
   "devDependencies": {
     "chai": "~4.1.1",
+    "coffee-script": "^1.7.1",
     "sinon": "~3.2.1",
     "sandboxed-module": "~0.3.0",
     "grunt-execute": "~0.1.5",
