@@ -10,7 +10,6 @@ RUN npm install --quiet
 COPY . /app
 
 
-RUN npm run compile:all
 
 FROM node:6.14.1
 
@@ -19,4 +18,4 @@ COPY --from=app /app /app
 WORKDIR /app
 USER node
 
-CMD ["node","app.js"]
+CMD ["node", "--expose-gc", "app.js"]

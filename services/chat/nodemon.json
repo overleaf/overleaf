@@ -10,10 +10,9 @@
   },
 
   "watch": [
-    "app/coffee/",
-    "app.coffee",
+    "app/js/",
+    "app.js",
     "config/"
   ],
-  "ext": "coffee"
-
+  "ext": "js"
 }
