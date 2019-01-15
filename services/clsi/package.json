@@ -7,7 +7,7 @@
     "url": "https://github.com/sharelatex/clsi-sharelatex.git"
   },
   "scripts": {
-    "compile:app": "([ -e app/coffee ] && coffee $COFFEE_OPTIONS -o app/js -c app/coffee || echo 'No CoffeeScript folder to compile') && ( [ -e app.coffee ] && coffee $COFFEE_OPTIONS -c app.coffee || echo 'No CoffeeScript app to compile')",
+    "compile:app": "([ -e app/coffee ] && coffee -m $COFFEE_OPTIONS -o app/js -c app/coffee || echo 'No CoffeeScript folder to compile') && ( [ -e app.coffee ] && coffee -m $COFFEE_OPTIONS -c app.coffee || echo 'No CoffeeScript app to compile')",
     "start": "npm run compile:app && node $NODE_APP_OPTIONS app.js",
     "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 30000 --exit $@ test/acceptance/js",
     "test:acceptance": "npm run compile:app && npm run compile:acceptance_tests && npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
@@ -26,17 +26,16 @@
     "dockerode": "^2.5.3",
     "express": "^4.2.0",
     "fs-extra": "^0.16.3",
-    "grunt-mkdir": "^1.0.0",
     "heapdump": "^0.3.5",
     "lockfile": "^1.0.3",
-    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.4",
+    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.9",
     "lynx": "0.0.11",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v2.0.12",
     "mkdirp": "0.3.5",
     "mysql": "2.6.2",
     "request": "^2.21.0",
     "sequelize": "^4.38.0",
-    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
+    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.1.0",
     "smoke-test-sharelatex": "git+https://github.com/sharelatex/smoke-test-sharelatex.git#v0.2.0",
     "sqlite3": "^4.0.2",
     "underscore": "^1.8.2",
@@ -44,19 +43,12 @@
     "wrench": "~1.5.4"
   },
   "devDependencies": {
-    "mocha": "^4.0.1",
-    "coffee-script": "1.6.0",
-    "chai": "~1.8.1",
-    "sinon": "~1.7.3",
-    "grunt": "~0.4.2",
-    "grunt-contrib-coffee": "~0.7.0",
-    "grunt-contrib-clean": "~0.5.0",
-    "grunt-shell": "~0.6.1",
-    "grunt-mocha-test": "~0.8.1",
-    "sandboxed-module": "~0.3.0",
-    "timekeeper": "0.0.4",
-    "grunt-execute": "^0.1.5",
     "bunyan": "^0.22.1",
-    "grunt-bunyan": "^0.5.0"
+    "chai": "~1.8.1",
+    "coffee-script": "1.6.0",
+    "mocha": "^4.0.1",
+    "sandboxed-module": "~0.3.0",
+    "sinon": "~1.7.3",
+    "timekeeper": "0.0.4"
   }
 }

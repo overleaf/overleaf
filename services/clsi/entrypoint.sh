@@ -20,4 +20,4 @@ chown -R node:node /app
 chown -R node:node /app/bin
 
 ./bin/install_texlive_gce.sh
-exec runuser -u node "$@"
+exec runuser -u node -- "$@"
