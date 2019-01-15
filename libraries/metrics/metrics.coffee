@@ -62,8 +62,8 @@ module.exports = Metrics =
 
 	injectMetricsRoute: (app) ->
 		app.get('/metrics', (req, res) -> 
-			res.set('Content-Type', register.contentType)
-			res.end(register.metrics())
+			res.set('Content-Type', Register.contentType)
+			res.end(Register.metrics())
 		)
 
 	buildPromKey: (key = "")->
