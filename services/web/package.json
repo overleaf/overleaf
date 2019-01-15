@@ -21,7 +21,8 @@
     "webpack": "webpack-dev-server --config webpack.config.dev.js",
     "webpack:production": "webpack --config webpack.config.prod.js",
     "lint": "eslint -f unix .",
-    "format": "prettier-eslint '**/*.js' --list-different"
+    "format": "prettier-eslint '**/*.js' --list-different",
+    "format:fix": "prettier-eslint '**/*.js' --write"
   },
   "dependencies": {
     "archiver": "0.9.0",

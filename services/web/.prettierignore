@@ -1,7 +1,7 @@
 app/js
 modules/**/app/js
 modules/**/scripts
-modules/**/index.js
+modules/*/index.js
 public/js
 public/minjs
 modules/**/public/js

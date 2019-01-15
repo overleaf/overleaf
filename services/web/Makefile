@@ -243,6 +243,9 @@ ci:
 format:
 	npm -q run format
 
+format_fix:
+	npm -q run format:fix
+
 lint:
 	npm -q run lint
 
