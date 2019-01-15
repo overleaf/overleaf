@@ -99,10 +99,17 @@ module.exports = FileStoreHandler =
 					file_id:oldFile_id
 			uri: @_buildUrl(newProject_id, newFile_id)
 			timeout:fiveMinsInMs
-		request opts, (err)->
+		request opts, (err, response)->
 			if err?
 				logger.err err:err, oldProject_id:oldProject_id, oldFile_id:oldFile_id, newProject_id:newProject_id, newFile_id:newFile_id, "something went wrong telling filestore api to copy file"
-			callback(err, opts.uri)
+				callback(err)
+			else if 200 <= response.statusCode < 300
+				# successful response
+				callback(null, opts.uri)
+			else
+				err = new Error("non-ok response from filestore for copyFile: #{response.statusCode}")
+				logger.err {uri: opts.uri, statusCode: response.statusCode}, "error uploading to filestore"
+				callback(err)
 
 	_buildUrl: (project_id, file_id)->
 		return "#{settings.apis.filestore.url}/project/#{project_id}/file/#{file_id}"

@@ -210,7 +210,7 @@ describe "FileStoreHandler", ->
 			@newFile_id = "new file id"
 
 		it "should post json", (done)->
-			@request.callsArgWith(1, null)
+			@request.callsArgWith(1, null, {statusCode: 200})
 
 			@handler.copyFile @project_id, @file_id, @newProject_id, @newFile_id, =>
 				@request.args[0][0].method.should.equal "put"
@@ -220,13 +220,13 @@ describe "FileStoreHandler", ->
 				done()
 
 		it "builds the correct url", (done)->
-			@request.callsArgWith(1, null)
+			@request.callsArgWith(1, null, {statusCode: 200})
 			@handler.copyFile @project_id, @file_id, @newProject_id, @newFile_id, =>
 				@handler._buildUrl.calledWith(@newProject_id, @newFile_id).should.equal true
 				done()
 
 		it "returns the url", (done)->
-			@request.callsArgWith(1, null)
+			@request.callsArgWith(1, null, {statusCode: 200})
 			@handler.copyFile @project_id, @file_id, @newProject_id, @newFile_id, (err, url) =>
 				url.should.equal "http://filestore.stubbedBuilder.com"
 				done()
@@ -236,4 +236,11 @@ describe "FileStoreHandler", ->
 			@request.callsArgWith(1, error)
 			@handler.copyFile @project_id, @file_id, @newProject_id, @newFile_id, (err)=>
 				err.should.equal error
+				done()
+
+		it "should return an error for a non-success statusCode", (done)->
+			@request.callsArgWith(1, null, {statusCode: 500})
+			@handler.copyFile @project_id, @file_id, @newProject_id, @newFile_id, (err)=>
+				err.should.be.an('error')
+				err.message.should.equal 'non-ok response from filestore for copyFile: 500'
 				done()
