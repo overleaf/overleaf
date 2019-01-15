@@ -14,7 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class PostbackPromise {
 
-    private static int TIMEOUT_SECONDS = 60 * 3;
+    private static int TIMEOUT_SECONDS = 60 * 6;
 
     private final String postbackKey;
     private final ReentrantLock lock;
