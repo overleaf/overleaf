@@ -102,8 +102,14 @@ module.exports =
 		# use the AWS SDK instead of knox due to problems with error handling (https://github.com/Automattic/knox/issues/114)
 		s3.copyObject {Bucket: bucketName, Key: destKey, CopySource: source}, (err) ->
 			if err?
-				logger.err err:err, bucketName:bucketName, sourceKey:sourceKey, destKey:destKey, "something went wrong copying file in aws"
-			callback(err)
+				if err.code is 'NoSuchKey'
+					logger.err bucketName:bucketName, sourceKey:sourceKey, "original file not found in s3 when copying"
+					callback(new Errors.NotFoundError("original file not found in S3 when copying"))
+				else
+					logger.err err:err, bucketName:bucketName, sourceKey:sourceKey, destKey:destKey, "something went wrong copying file in aws"
+					callback(err)
+			else
+				callback()
 
 	deleteFile: (bucketName, key, callback)->
 		logger.log bucketName:bucketName, key:key, "delete file in s3"

@@ -218,6 +218,13 @@ describe "S3PersistorManagerTests", ->
 				@stubbedS3Client.copyObject.calledWith({Bucket: @bucketName, Key: @destKey, CopySource: @bucketName + '/' + @key}).should.equal true
 				done()
 
+		it "should return a NotFoundError object if the original file does not exist", (done)->
+			NoSuchKeyError = {code: "NoSuchKey"}
+			@stubbedS3Client.copyObject.callsArgWith(1, NoSuchKeyError)
+			@S3PersistorManager.copyFile @bucketName, @sourceKey, @destKey, (err)=>
+				expect(err instanceof @Errors.NotFoundError).to.equal true
+				done()
+
 	describe "deleteDirectory", ->
 
 		beforeEach ->
