@@ -73,3 +73,38 @@ describe 'LockManager - getting the lock', ->
 
 		it "should return the callback with an error", ->
 			@callback.calledWith(new Error("timeout")).should.equal true
+
+	describe "when there are multiple requests for the same lock", ->
+		beforeEach (done) ->
+			locked = false
+			@results = []
+			@LockManager.LOCK_TEST_INTERVAL = 1
+			@LockManager._tryLock = (key, namespace, callback = (error, gotLock, lockValue) ->) ->
+				if locked
+					callback null, false
+				else
+					locked = true # simulate getting the lock
+					callback null, true
+			# Start ten lock requests in order at 1ms 2ms 3ms...
+			# with them randomly holding the lock for 0-100ms.
+			# Use predefined values for the random delay to make the test
+			# deterministic.
+			randomDelays = [52, 45, 41, 84, 60, 81, 31, 46, 9, 43 ]
+			startTime = 0
+			for randomDelay, i in randomDelays
+				do (randomDelay, i) =>
+					startTime += 1
+					setTimeout () =>
+						# changing the next line to the old method of LockManager._getLockByPolling
+						# should give results in a random order and cause the test to fail.
+						@LockManager._getLock @key, @namespace, (args...) =>
+							setTimeout () ->
+								locked = false  # release the lock after a random amount of time
+							, randomDelay
+							@results.push i
+							if @results.length is 10
+								done()
+					, startTime
+
+		it "should process the requests in order", ->
+			@results.should.deep.equal [0,1,2,3,4,5,6,7,8,9]

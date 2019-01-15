@@ -5,11 +5,14 @@ rclient = RedisWrapper.client("lock")
 logger = require "logger-sharelatex"
 os = require "os"
 crypto = require "crypto"
+async = require "async"
 
 HOST = os.hostname()
 PID = process.pid
 RND = crypto.randomBytes(4).toString('hex')
 COUNT = 0
+
+LOCK_QUEUES = new Map() # queue lock requests for each name/id so they get the lock on a first-come first-served basis
 
 module.exports = LockManager =
 	LOCK_TEST_INTERVAL: 50 # 50ms between each test of the lock
@@ -68,7 +71,34 @@ module.exports = LockManager =
 				logger.log key: key, redis_response: gotLock, "lock is locked"
 				callback err, false
 
+	# it's sufficient to serialize within a process because that is where the parallel operations occur
 	_getLock: (key, namespace, callback = (error, lockValue) ->) ->
+		# this is what we need to do for each lock we want to request
+		task = (next) ->
+			LockManager._getLockByPolling key, namespace, (error, lockValue) ->
+				# tell the queue to start trying to get the next lock (if any)
+				next()
+				# we have got a lock result, so we can continue with our own execution
+				callback(error, lockValue)
+		# create a queue for this key if needed
+		queueName = "#{key}:#{namespace}"
+		queue = LOCK_QUEUES.get queueName
+		if !queue?
+			handler = (fn, cb) ->
+				fn(cb) # execute any function as our task
+			# set up a new queue for this key
+			queue = async.queue handler, 1
+			queue.push task
+			# remove the queue object when queue is empty
+			queue.drain = () ->
+				LOCK_QUEUES.delete queueName
+			# store the queue in our global map
+			LOCK_QUEUES.set queueName, queue
+		else
+			# queue the request to get the lock
+			queue.push task
+
+	_getLockByPolling: (key, namespace, callback = (error, lockValue) ->) ->
 		startTime = Date.now()
 		testInterval = LockManager.LOCK_TEST_INTERVAL
 		attempts = 0
@@ -85,8 +115,6 @@ module.exports = LockManager =
 					callback(null, lockValue)
 				else
 					setTimeout attempt, testInterval
-					# back off when the lock is taken to avoid overloading
-					testInterval = Math.min(testInterval * 2, LockManager.MAX_TEST_INTERVAL)
 
 	_releaseLock: (key, lockValue, callback)->
 		rclient.eval LockManager.unlockScript, 1, key, lockValue, (err, result) ->
