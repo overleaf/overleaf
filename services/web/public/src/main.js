@@ -39,6 +39,7 @@ define([
   'main/cms/index',
   'main/importing',
   'analytics/AbTestingManager',
+  'directives/autoSubmitForm',
   'directives/asyncForm',
   'directives/complexPassword',
   'directives/stopPropagation',

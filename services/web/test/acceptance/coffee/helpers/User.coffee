@@ -89,7 +89,7 @@ class User
 	logout: (callback = (error) ->) ->
 		@getCsrfToken (error) =>
 			return callback(error) if error?
-			@request.get {
+			@request.post {
 				url: "/logout"
 				json:
 					email: @email

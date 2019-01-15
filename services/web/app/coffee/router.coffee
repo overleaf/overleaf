@@ -67,7 +67,9 @@ module.exports = class Router
 
 		webRouter.post '/login', AuthenticationController.passportLogin
 
-		webRouter.get  '/logout', UserController.logout
+		webRouter.get  '/logout', UserPagesController.logoutPage
+		webRouter.post '/logout', UserController.logout
+
 		webRouter.get  '/restricted', AuthorizationMiddlewear.restricted
 
 

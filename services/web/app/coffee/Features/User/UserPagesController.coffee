@@ -56,6 +56,9 @@ module.exports =
 			title: 'login',
 			email: req.query.email
 
+	logoutPage: (req, res) ->
+		res.render 'user/logout'
+
 	settingsPage : (req, res, next)->
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		logger.log user: user_id, "loading settings page"

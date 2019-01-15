@@ -115,7 +115,7 @@ describe "CSRF protection", ->
 		@user.request.get '/login', (err, res, body) =>
 			@user.getCsrfToken (error) =>
 				oldCsrfToken = @user.csrfToken
-				@user.request.get '/logout', (err, res, body) =>
+				@user.logout (err) =>
 					@user.request.post {
 						url: "/register"
 						json:

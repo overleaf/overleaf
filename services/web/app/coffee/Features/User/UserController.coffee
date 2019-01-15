@@ -136,7 +136,8 @@ module.exports = UserController =
 	logout : (req, res, next)->
 		UserController._doLogout req, (err) ->
 			return next(err) if err?
-			res.redirect '/login'
+			redirect_url = if settings.overleaf? then settings.overleaf.host + '/users/ensure_signed_out' else '/login'
+			res.redirect redirect_url
 
 	register : (req, res, next = (error) ->)->
 		email = req.body.email
