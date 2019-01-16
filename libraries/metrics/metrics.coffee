@@ -1,5 +1,6 @@
 prom = require('prom-client')
 Register = require('prom-client').register
+
 collectDefaultMetrics = prom.collectDefaultMetrics
 
 appname = "unknown"
@@ -15,6 +16,7 @@ destructors = []
 require "./uv_threadpool_size"
 
 module.exports = Metrics =
+	register:Register
 	initialize: (_name) ->
 		appname = _name
 		collectDefaultMetrics({ timeout: 5000, prefix: Metrics.buildPromKey()})
