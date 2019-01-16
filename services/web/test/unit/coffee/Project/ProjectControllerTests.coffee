@@ -142,6 +142,7 @@ describe "ProjectController", ->
 		@res =
 			locals:
 				jsPath:"js path here"
+			setTimeout: sinon.stub()
 
 	describe "updateProjectSettings", ->
 		it "should update the name", (done) ->

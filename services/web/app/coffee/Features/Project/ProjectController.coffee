@@ -112,6 +112,7 @@ module.exports = ProjectController =
 				res.sendStatus 200
 
 	cloneProject: (req, res, next)->
+		res.setTimeout(5 * 60 * 1000) # allow extra time for the copy to complete
 		metrics.inc "cloned-project"
 		project_id = req.params.Project_id
 		projectName = req.body.projectName
