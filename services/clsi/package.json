@@ -37,15 +37,15 @@
     "sequelize": "^4.38.0",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.1.0",
     "smoke-test-sharelatex": "git+https://github.com/sharelatex/smoke-test-sharelatex.git#v0.2.0",
-    "sqlite3": "^4.0.2",
+    "sqlite3": "^4.0.6",
     "underscore": "^1.8.2",
-    "v8-profiler": "^5.2.4",
+    "v8-profiler-node8": "^6.0.1",
     "wrench": "~1.5.4"
   },
   "devDependencies": {
     "bunyan": "^0.22.1",
     "chai": "~1.8.1",
-    "coffee-script": "1.6.0",
+    "coffeescript": "1.6.0",
     "mocha": "^4.0.1",
     "sandboxed-module": "~0.3.0",
     "sinon": "~1.7.3",

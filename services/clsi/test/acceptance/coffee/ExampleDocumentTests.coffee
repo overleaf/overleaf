@@ -33,7 +33,10 @@ compare = (originalPath, generatedPath, callback = (error, same) ->) ->
 	proc.stderr.on "data", (chunk) -> stderr += chunk
 	proc.on "exit", () ->
 		if stderr.trim() == "0 (0)"
-			fs.unlink diff_file # remove output diff if test matches expected image
+			# remove output diff if test matches expected image
+			fs.unlink diff_file, (err) ->
+				if err
+					throw err
 			callback null, true
 		else
 			console.log "compare result", stderr
