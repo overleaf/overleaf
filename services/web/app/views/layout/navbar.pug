@@ -91,7 +91,6 @@ nav.navbar.navbar-default.navbar-main
 									a(href="/user/subscription") #{translate('subscription')}
 							li.divider
 							li
-								a(href="#")
-									form(method="POST" action="/logout")
-										input(name='_csrf', type='hidden', value=csrfToken)
-										button.btn-unstyled #{translate('log_out')}
+								form(method="POST" action="/logout")
+									input(name='_csrf', type='hidden', value=csrfToken)
+									button.btn-link.text-left.dropdown-menu-button #{translate('log_out')}

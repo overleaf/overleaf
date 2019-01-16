@@ -60,7 +60,7 @@
   }
 
   // Links and other items within the dropdown menu
-  > li > a,div {
+  > li > a,div, .dropdown-menu-button {
     display: block;
     padding: @dropdown-item-padding;
     clear: both;
@@ -75,10 +75,17 @@
       color: #7a7a7a
     }
   }
+
+  // button specific styles
+  .dropdown-menu-button {
+    border: none;
+    outline: none;
+    width: 100%;
+  }
 }
 
 // Hover/Focus state
-.dropdown-menu > li > a {
+.dropdown-menu > li > a, .dropdown-menu .dropdown-menu-button {
   &:hover,
   &:focus {
     text-decoration: none;
