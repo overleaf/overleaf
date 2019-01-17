@@ -54,6 +54,7 @@
     "http-proxy": "^1.8.1",
     "jade": "~1.3.1",
     "jquery": "^1.11.1",
+    "json2csv": "^4.3.3",
     "jsonwebtoken": "^8.0.1",
     "ldapjs": "^0.7.1",
     "lodash": "^4.13.1",
