@@ -1616,7 +1616,7 @@
         "readdirp": {
           "version": "2.1.0",
           "from": "readdirp@>=2.0.0 <3.0.0",
-          "resolved": "http://registry.npmjs.org/readdirp/-/readdirp-2.1.0.tgz",
+          "resolved": "https://registry.npmjs.org/readdirp/-/readdirp-2.1.0.tgz",
           "dev": true
         },
         "string_decoder": {
@@ -1936,7 +1936,7 @@
         "readable-stream": {
           "version": "2.3.6",
           "from": "readable-stream@>=2.2.2 <3.0.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz"
+          "resolved": "http://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz"
         },
         "string_decoder": {
           "version": "1.1.1",
@@ -3210,12 +3210,6 @@
         }
       }
     },
-    "eslint-plugin-prettier": {
-      "version": "2.7.0",
-      "from": "eslint-plugin-prettier@>=2.7.0 <3.0.0",
-      "resolved": "https://registry.npmjs.org/eslint-plugin-prettier/-/eslint-plugin-prettier-2.7.0.tgz",
-      "dev": true
-    },
     "eslint-plugin-promise": {
       "version": "3.7.0",
       "from": "eslint-plugin-promise@>=3.6.0 <4.0.0",
@@ -3555,12 +3549,6 @@
       "version": "1.0.0",
       "from": "fast-deep-equal@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/fast-deep-equal/-/fast-deep-equal-1.0.0.tgz"
-    },
-    "fast-diff": {
-      "version": "1.2.0",
-      "from": "fast-diff@>=1.1.1 <2.0.0",
-      "resolved": "https://registry.npmjs.org/fast-diff/-/fast-diff-1.2.0.tgz",
-      "dev": true
     },
     "fast-json-stable-stringify": {
       "version": "2.0.0",
@@ -4798,7 +4786,7 @@
         "readable-stream": {
           "version": "2.3.6",
           "from": "readable-stream@^2.0.1",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz",
+          "resolved": "http://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz",
           "dev": true
         },
         "string_decoder": {
@@ -5500,12 +5488,6 @@
           "resolved": "https://registry.npmjs.org/mkdirp/-/mkdirp-0.3.5.tgz"
         }
       }
-    },
-    "jest-docblock": {
-      "version": "21.2.0",
-      "from": "jest-docblock@>=21.0.0 <22.0.0",
-      "resolved": "https://registry.npmjs.org/jest-docblock/-/jest-docblock-21.2.0.tgz",
-      "dev": true
     },
     "jmespath": {
       "version": "0.15.0",
@@ -7148,7 +7130,7 @@
         "readable-stream": {
           "version": "2.3.6",
           "from": "readable-stream@^2.0.1",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz",
+          "resolved": "http://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz",
           "dev": true
         },
         "string_decoder": {
@@ -7799,7 +7781,7 @@
         "readable-stream": {
           "version": "2.3.6",
           "from": "readable-stream@^2.3.3",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz",
+          "resolved": "http://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz",
           "dev": true
         },
         "string_decoder": {
@@ -10712,7 +10694,7 @@
         "readable-stream": {
           "version": "2.3.6",
           "from": "readable-stream@^2.2.9",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz",
+          "resolved": "http://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz",
           "dev": true
         },
         "string_decoder": {
@@ -10802,7 +10784,7 @@
         "readable-stream": {
           "version": "2.3.6",
           "from": "readable-stream@^2.0.2",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz",
+          "resolved": "http://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz",
           "dev": true
         },
         "string_decoder": {
@@ -10840,7 +10822,7 @@
         "readable-stream": {
           "version": "2.3.6",
           "from": "readable-stream@^2.3.6",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz",
+          "resolved": "http://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz",
           "dev": true
         },
         "string_decoder": {
@@ -10878,7 +10860,7 @@
         "readable-stream": {
           "version": "2.3.6",
           "from": "readable-stream@^2.3.0",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz",
+          "resolved": "http://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz",
           "dev": true
         },
         "string_decoder": {
@@ -12203,7 +12185,7 @@
         "readable-stream": {
           "version": "2.3.6",
           "from": "readable-stream@^2.0.2",
-          "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz",
+          "resolved": "http://registry.npmjs.org/readable-stream/-/readable-stream-2.3.6.tgz",
           "dev": true
         },
         "readdirp": {
@@ -12833,7 +12815,7 @@
         "readdirp": {
           "version": "2.1.0",
           "from": "readdirp@^2.0.0",
-          "resolved": "http://registry.npmjs.org/readdirp/-/readdirp-2.1.0.tgz",
+          "resolved": "https://registry.npmjs.org/readdirp/-/readdirp-2.1.0.tgz",
           "dev": true
         },
         "rimraf": {

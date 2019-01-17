@@ -8,7 +8,6 @@
     "plugin:jsx-a11y/recommended"
   ],
   "plugins": [
-    "prettier",
     "jsx-a11y",
     "mocha",
     "chai-expect",
@@ -26,9 +25,9 @@
     "user_id": true
   },
   "settings": {
-    // Tell eslint-plugin-react which version of React we are using
+    // Tell eslint-plugin-react to detect which version of React we are using
     "react": {
-      "version": "15"
+      "version": "detect"
     }
   },
   "rules": {
