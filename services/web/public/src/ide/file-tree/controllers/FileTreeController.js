@@ -116,10 +116,11 @@ define(['base'], function(App) {
 
   App.controller('NewFileModalController', [
     '$scope',
+    'ide',
     'type',
     'parent_folder',
     '$modalInstance',
-    function($scope, type, parent_folder, $modalInstance) {
+    function($scope, ide, type, parent_folder, $modalInstance) {
       $scope.type = type
       $scope.parent_folder = parent_folder
       $scope.state = {
@@ -128,7 +129,13 @@ define(['base'], function(App) {
       }
       $scope.cancel = () => $modalInstance.dismiss('cancel')
       $scope.create = () => $scope.$broadcast('create')
-      return $scope.$on('done', () => $modalInstance.dismiss('done'))
+      return $scope.$on('done', (e, opts = {}) => {
+        isBibFile = opts.name && opts.name.match(/^.*\.bib$$/)
+        if (opts.shouldReindexReferences || isBibFile) {
+          ide.$scope.$emit('references:should-reindex', {})
+        }
+        $modalInstance.dismiss('done')
+      })
     }
   ])
 
@@ -210,7 +217,7 @@ define(['base'], function(App) {
             $rootScope.$broadcast('file:upload:complete', response)
           }
           if (uploadCount === 0 && response != null && response.success) {
-            return $scope.$emit('done')
+            return $scope.$emit('done', { name: name })
           }
         }, 250)
 
@@ -384,7 +391,7 @@ define(['base'], function(App) {
         const { state, data } = $scope
         return (
           !state.inFlight.projects &&
-          (data.projects.length === 0 || data.projects == null)
+          (data.projects == null || data.projects.length === 0)
         )
       }
 
@@ -516,7 +523,7 @@ define(['base'], function(App) {
           .createLinkedFile(name, $scope.parent_folder, provider, payload)
           .then(function() {
             _reset({ err: false })
-            return $scope.$emit('done')
+            return $scope.$emit('done', { name: name })
           })
           .catch(function(response) {
             const { data } = response
@@ -576,7 +583,7 @@ define(['base'], function(App) {
           .createLinkedFile(name, $scope.parent_folder, 'url', { url })
           .then(function() {
             $scope.state.inflight = false
-            return $scope.$emit('done')
+            return $scope.$emit('done', { name: name })
           })
           .catch(function(response) {
             const { data } = response
