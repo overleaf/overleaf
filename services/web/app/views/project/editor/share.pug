@@ -88,12 +88,15 @@ script(type='text/ng-template', id='shareProjectModalTemplate')
 				.col-xs-8 {{ invite.email }}&nbsp;
 					div.small
 						| #{translate("invite_not_accepted")}.&nbsp;
-						a(href="#", ng-click="resendInvite(invite, $event)") #{translate("resend")}
+						button.btn.btn-inline-link(
+							ng-show="isAdmin",
+							ng-click="resendInvite(invite, $event)"
+						) #{translate("resend")}
 				.col-xs-3.text-left
 					// todo: get invite privileges
 					span(ng-show="invite.privileges == 'readAndWrite'") #{translate("can_edit")}
 					span(ng-show="invite.privileges == 'readOnly'") #{translate("read_only")}
-				.col-xs-1
+				.col-xs-1(ng-show="isAdmin")
 					a(
 						href
 						tooltip=translate('revoke_invite')
