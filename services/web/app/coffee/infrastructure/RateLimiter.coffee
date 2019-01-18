@@ -1,4 +1,5 @@
 settings = require("settings-sharelatex")
+Metrics = require('metrics-sharelatex')
 RedisWrapper = require('./RedisWrapper')
 rclient = RedisWrapper.client('ratelimiter')
 RollingRateLimiter = require('rolling-rate-limiter')
@@ -19,6 +20,7 @@ module.exports = RateLimiter =
 			if err?
 				return callback(err)
 			allowed = timeLeft == 0
+			Metrics.inc "rate-limit-hit.#{opts.endpointName}", 1, {path: opts.endpointName} unless allowed
 			callback(null, allowed)
 
 	clearRateLimit: (endpointName, subject, callback) ->

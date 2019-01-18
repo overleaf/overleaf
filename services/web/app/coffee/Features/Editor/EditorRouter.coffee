@@ -1,11 +1,24 @@
 EditorHttpController = require('./EditorHttpController')
 AuthenticationController = require "../Authentication/AuthenticationController"
 AuthorizationMiddlewear = require('../Authorization/AuthorizationMiddlewear')
+RateLimiterMiddlewear = require('../Security/RateLimiterMiddlewear')
 
 module.exports =
 	apply: (webRouter, apiRouter) ->
-		webRouter.post   '/project/:Project_id/doc', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, EditorHttpController.addDoc
-		webRouter.post   '/project/:Project_id/folder', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, EditorHttpController.addFolder
+		webRouter.post   '/project/:Project_id/doc', AuthorizationMiddlewear.ensureUserCanWriteProjectContent,
+			RateLimiterMiddlewear.rateLimit({
+				endpointName: "add-doc-to-project"
+				params: ["Project_id"]
+				maxRequests: 30
+				timeInterval: 60
+			}), EditorHttpController.addDoc
+		webRouter.post   '/project/:Project_id/folder', AuthorizationMiddlewear.ensureUserCanWriteProjectContent,
+			RateLimiterMiddlewear.rateLimit({
+				endpointName: "add-folder-to-project"
+				params: ["Project_id"]
+				maxRequests: 60
+				timeInterval: 60
+			}), EditorHttpController.addFolder
 
 		webRouter.post   '/project/:Project_id/:entity_type/:entity_id/rename', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, EditorHttpController.renameEntity
 		webRouter.post   '/project/:Project_id/:entity_type/:entity_id/move', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, EditorHttpController.moveEntity

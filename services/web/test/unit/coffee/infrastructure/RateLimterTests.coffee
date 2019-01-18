@@ -32,6 +32,7 @@ describe "RateLimiter", ->
 		@requires =
 			"settings-sharelatex":@settings
 			"logger-sharelatex" : @logger = {log:sinon.stub(), err:sinon.stub()}
+			"metrics-sharelatex" : @Metrics = {inc: sinon.stub()}
 			"./RedisWrapper": @RedisWrapper
 
 		@details = 
@@ -61,6 +62,11 @@ describe "RateLimiter", ->
 				expect(should).to.equal true
 				done()
 
+		it 'should not increment the metric', (done) ->
+			@limiter.addCount {endpointName: @endpointName}, (err, should) =>
+				sinon.assert.notCalled(@Metrics.inc)
+				done()
+
 	describe 'when action is not permitted', ->
 
 		beforeEach ->
@@ -76,6 +82,11 @@ describe "RateLimiter", ->
 		it 'should callback with false', (done) ->
 			@limiter.addCount {}, (err, should) ->
 				expect(should).to.equal false
+				done()
+
+		it 'should increment the metric', (done) ->
+			@limiter.addCount {endpointName: @endpointName}, (err, should) =>
+				sinon.assert.calledWith(@Metrics.inc, "rate-limit-hit.#{@endpointName}", 1, {path: @endpointName})
 				done()
 
 	describe 'when limiter produces an error', ->

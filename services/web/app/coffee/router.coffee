@@ -121,6 +121,12 @@ module.exports = class Router
 		webRouter.get '/user/emails/confirm',
 			UserEmailsController.showConfirm
 		webRouter.post '/user/emails/confirm',
+			AuthenticationController.requireLogin(),
+			RateLimiterMiddlewear.rateLimit({
+				endpointName: "confirm-email"
+				maxRequests: 10
+				timeInterval: 60
+			}),
 			UserEmailsController.confirm
 		webRouter.post '/user/emails/resend_confirmation',
 			AuthenticationController.requireLogin(),
@@ -153,6 +159,11 @@ module.exports = class Router
 				UserEmailsController.setDefault
 			webRouter.post '/user/emails/endorse',
 				AuthenticationController.requireLogin(),
+				RateLimiterMiddlewear.rateLimit({
+					endpointName: "endorse-email"
+					maxRequests: 30
+					timeInterval: 60
+				}),
 				UserEmailsController.endorse
 
 
@@ -174,7 +185,11 @@ module.exports = class Router
 			ProjectController.projectEntitiesJson
 
 		webRouter.get  '/project', AuthenticationController.requireLogin(), ProjectController.projectListPage
-		webRouter.post '/project/new', AuthenticationController.requireLogin(), ProjectController.newProject
+		webRouter.post '/project/new', AuthenticationController.requireLogin(), RateLimiterMiddlewear.rateLimit({
+			endpointName: "create-project"
+			maxRequests: 20
+			timeInterval: 60
+		}), ProjectController.newProject
 
 		webRouter.get  '/Project/:Project_id', RateLimiterMiddlewear.rateLimit({
 			endpointName: "open-project"
@@ -278,11 +293,31 @@ module.exports = class Router
 
 
 		webRouter.get    '/tag', AuthenticationController.requireLogin(), TagsController.getAllTags
-		webRouter.post   '/tag', AuthenticationController.requireLogin(), TagsController.createTag
-		webRouter.post   '/tag/:tag_id/rename', AuthenticationController.requireLogin(), TagsController.renameTag
-		webRouter.delete '/tag/:tag_id', AuthenticationController.requireLogin(), TagsController.deleteTag
-		webRouter.post   '/tag/:tag_id/project/:project_id', AuthenticationController.requireLogin(), TagsController.addProjectToTag
-		webRouter.delete '/tag/:tag_id/project/:project_id', AuthenticationController.requireLogin(), TagsController.removeProjectFromTag
+		webRouter.post   '/tag', AuthenticationController.requireLogin(), RateLimiterMiddlewear.rateLimit({
+			endpointName: "create-tag"
+			maxRequests: 30
+			timeInterval: 60
+		}), TagsController.createTag
+		webRouter.post   '/tag/:tag_id/rename', AuthenticationController.requireLogin(), RateLimiterMiddlewear.rateLimit({
+			endpointName: "rename-tag"
+			maxRequests: 30
+			timeInterval: 60
+		}), TagsController.renameTag
+		webRouter.delete '/tag/:tag_id', AuthenticationController.requireLogin(), RateLimiterMiddlewear.rateLimit({
+			endpointName: "delete-tag"
+			maxRequests: 30
+			timeInterval: 60
+		}), TagsController.deleteTag
+		webRouter.post   '/tag/:tag_id/project/:project_id', AuthenticationController.requireLogin(), RateLimiterMiddlewear.rateLimit({
+			endpointName: "add-project-to-tag"
+			maxRequests: 30
+			timeInterval: 60
+		}), TagsController.addProjectToTag
+		webRouter.delete '/tag/:tag_id/project/:project_id', AuthenticationController.requireLogin(), RateLimiterMiddlewear.rateLimit({
+			endpointName: "remove-project-from-tag"
+			maxRequests: 30
+			timeInterval: 60
+		}), TagsController.removeProjectFromTag
 
 		webRouter.get '/notifications', AuthenticationController.requireLogin(), NotificationsController.getAllUnreadNotifications
 		webRouter.delete '/notifications/:notification_id', AuthenticationController.requireLogin(), NotificationsController.markNotificationAsRead
@@ -323,10 +358,22 @@ module.exports = class Router
 		webRouter.post "/spelling/learn", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
 
 		webRouter.get  "/project/:project_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, ChatController.getMessages
-		webRouter.post "/project/:project_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, ChatController.sendMessage
+		webRouter.post "/project/:project_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, RateLimiterMiddlewear.rateLimit({
+			endpointName: "send-chat-message"
+			maxRequests: 100
+			timeInterval: 60
+		}), ChatController.sendMessage
 
-		webRouter.post "/project/:Project_id/references/index", AuthorizationMiddlewear.ensureUserCanReadProject, ReferencesController.index
-		webRouter.post "/project/:Project_id/references/indexAll", AuthorizationMiddlewear.ensureUserCanReadProject, ReferencesController.indexAll
+		webRouter.post "/project/:Project_id/references/index", AuthorizationMiddlewear.ensureUserCanReadProject, RateLimiterMiddlewear.rateLimit({
+			endpointName: "index-project-references"
+			maxRequests: 30
+			timeInterval: 60
+		}), ReferencesController.index
+		webRouter.post "/project/:Project_id/references/indexAll", AuthorizationMiddlewear.ensureUserCanReadProject, RateLimiterMiddlewear.rateLimit({
+			endpointName: "index-all-project-references"
+			maxRequests: 30
+			timeInterval: 60
+		}), ReferencesController.indexAll
 
 		# disable beta program while v2 is in beta
 		# webRouter.get "/beta/participate",  AuthenticationController.requireLogin(), BetaProgramController.optInPage

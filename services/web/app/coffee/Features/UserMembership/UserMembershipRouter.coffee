@@ -3,6 +3,7 @@ UserMembershipController = require './UserMembershipController'
 SubscriptionGroupController = require '../Subscription/SubscriptionGroupController'
 TeamInvitesController = require '../Subscription/TeamInvitesController'
 AuthorizationMiddlewear = require('../Authorization/AuthorizationMiddlewear')
+RateLimiterMiddlewear = require('../Security/RateLimiterMiddlewear')
 
 module.exports =
 	apply: (webRouter) ->
@@ -12,6 +13,11 @@ module.exports =
 			UserMembershipController.index
 		webRouter.post '/manage/groups/:id/invites',
 			UserMembershipAuthorization.requireGroupManagementAccess,
+			RateLimiterMiddlewear.rateLimit({
+				endpointName: "create-team-invite"
+				maxRequests: 100
+				timeInterval: 60
+			}),
 			TeamInvitesController.createInvite
 		webRouter.delete '/manage/groups/:id/user/:user_id',
 			UserMembershipAuthorization.requireGroupManagementAccess,
@@ -21,6 +27,11 @@ module.exports =
 			TeamInvitesController.revokeInvite
 		webRouter.get '/manage/groups/:id/members/export',
 			UserMembershipAuthorization.requireGroupManagementAccess,
+			RateLimiterMiddlewear.rateLimit({
+				endpointName: "export-team-csv"
+				maxRequests: 30
+				timeInterval: 60
+			}),
 			UserMembershipController.exportCsv
 
 		# group managers routes
