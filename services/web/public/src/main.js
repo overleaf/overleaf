@@ -54,6 +54,7 @@ define([
   'directives/bookmarkableTabset',
   'services/queued-http',
   'services/validateCaptcha',
+  'services/validateCaptchaV3',
   'filters/formatDate',
   'components/inputSuggestions',
   '__MAIN_CLIENTSIDE_INCLUDES__'

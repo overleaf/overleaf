@@ -27,6 +27,7 @@ define(['base'], App =>
     $http,
     ide,
     validateCaptcha,
+    validateCaptchaV3,
     settings,
     event_tracking
   ) {
@@ -160,6 +161,9 @@ define(['base'], App =>
             // Skip this existing member
             return addNextMember()
           }
+          // do v3 captcha to collect data only
+          validateCaptchaV3('invite')
+          // do v2 captcha
           return validateCaptcha(function(response) {
             let inviteId, request
             $scope.grecaptchaResponse = response

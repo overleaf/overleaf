@@ -14,7 +14,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 define(['base', 'libs/passfield'], function(App) {
-  App.directive('asyncForm', ($http, validateCaptcha) => ({
+  App.directive('asyncForm', ($http, validateCaptcha, validateCaptchaV3) => ({
     controller: [
       '$scope',
       function($scope) {
@@ -32,6 +32,9 @@ define(['base', 'libs/passfield'], function(App) {
       const validateCaptchaIfEnabled = function(callback) {
         if (callback == null) {
           callback = function(response) {}
+        }
+        if (attrs.captchaActionName) {
+          validateCaptchaV3(attrs.captchaActionName)
         }
         if (attrs.captcha != null) {
           return validateCaptcha(callback)

@@ -373,4 +373,5 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 			isOverleaf: Settings.overleaf?
 			appName: Settings.appName
 			siteUrl: Settings.siteUrl
+			recaptchaSiteKeyV3: Settings.recaptcha?.siteKeyV3
 		next()

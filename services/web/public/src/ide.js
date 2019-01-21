@@ -55,6 +55,7 @@ define([
   'directives/videoPlayState',
   'services/queued-http',
   'services/validateCaptcha',
+  'services/validateCaptchaV3',
   'services/wait-for',
   'filters/formatDate',
   'main/event',

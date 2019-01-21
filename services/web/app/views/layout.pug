@@ -99,7 +99,10 @@ html(
 
 	body
 		if(settings.recaptcha)
-			script(src="https://www.google.com/recaptcha/api.js?render=explicit")
+			if (settings.recaptcha.siteKeyV3)
+				script(src="https://www.google.com/recaptcha/api.js?render="+settings.recaptcha.siteKeyV3)
+			else
+				script(src="https://www.google.com/recaptcha/api.js?render=explicit")
 			div(
 				id="recaptcha"
 				class="g-recaptcha"
