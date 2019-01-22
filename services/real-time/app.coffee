@@ -19,7 +19,7 @@ SessionSockets = require('session.socket.io')
 CookieParser = require("cookie-parser")
 
 
-
+sessionRedisClient.set "hello-a", "hello-there"
 
 DrainManager = require("./app/js/DrainManager")
 

@@ -1755,9 +1755,9 @@
       }
     },
     "redis-sharelatex": {
-      "version": "1.0.4",
-      "from": "git+https://github.com/sharelatex/redis-sharelatex.git#v1.0.4",
-      "resolved": "git+https://github.com/sharelatex/redis-sharelatex.git#ca4e906559c1405d132e8edd7db763d64a57be62",
+      "version": "511b59f3414d6e3db23a4b61239fd2cf3e07cdb0",
+      "from": "git+https://github.com/sharelatex/redis-sharelatex.git#511b59f3414d6e3db23a4b61239fd2cf3e07cdb0",
+      "resolved": "git+https://github.com/sharelatex/redis-sharelatex.git#511b59f3414d6e3db23a4b61239fd2cf3e07cdb0",
       "dependencies": {
         "async": {
           "version": "2.6.1",
