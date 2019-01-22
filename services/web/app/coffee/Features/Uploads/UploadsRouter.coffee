@@ -14,6 +14,11 @@ module.exports =
 	apply: (webRouter, apiRouter) ->
 		webRouter.post '/project/new/upload',
 			AuthenticationController.requireLogin(),
+			RateLimiterMiddlewear.rateLimit({
+				endpointName: "project-upload"
+				maxRequests: 20
+				timeInterval: 60
+			}),
 			upload.single('qqfile'),
 			ProjectUploadController.uploadProject
 
