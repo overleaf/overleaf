@@ -46,7 +46,9 @@ settings =
 
 	forceDrainMsDelay: process.env['FORCE_DRAIN_MS_DELAY'] or false
 
+console.log "process.env['REDIS_CLUSTER_ENABLED']", process.env['REDIS_CLUSTER_ENABLED']
 if process.env['REDIS_CLUSTER_ENABLED'] == "true"
+
 	settings.redis.websessions.cluster = [
 		{ host: process.env["SL_LIN_STAG_REDIS_3_SERVICE_HOST"], port: "6379" }
 	]
