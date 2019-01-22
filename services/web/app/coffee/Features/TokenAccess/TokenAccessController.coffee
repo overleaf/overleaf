@@ -140,6 +140,7 @@ module.exports = TokenAccessController =
 		else
 			TokenAccessHandler.getV1DocInfo token, userId, (err, doc_info) ->
 				return next err if err?
+				return next(new Errors.NotFoundError()) if !doc_info.exists
 				return next(new Errors.NotFoundError()) if doc_info.exported
 				if Features.hasFeature('force-import-to-v2')
 					return res.render('project/v2-import', {

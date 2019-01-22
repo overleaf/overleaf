@@ -153,7 +153,10 @@ module.exports = MockV1Api =
 			res.json { allow: true }
 
 		app.get '/api/v1/sharelatex/users/:user_id/docs/:token/info', (req, res, next) =>
-			res.json { exported: false }
+			res.json {
+				exists: true,
+				exported: false
+			}
 
 		app.get '/api/v1/sharelatex/docs/:token/exported_to_v2', (req, res, next) =>
 			return res.json @doc_exported[req.params.token] if @doc_exported[req.params.token]?

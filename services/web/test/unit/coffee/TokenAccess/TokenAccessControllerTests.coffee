@@ -431,6 +431,19 @@ describe "TokenAccessController", ->
 							expect(@next.callCount).to.equal 1
 							done()
 
+					describe 'when project does not exist on v1', ->
+						beforeEach ->
+							@TokenAccessHandler.getV1DocInfo = sinon.stub().yields(null, {
+								exists: false
+								exported: false
+							})
+							@TokenAccessController.readAndWriteToken @req, @res, @next
+
+						it 'should call next with a not-found error', (done) ->
+							expect(@next.callCount).to.equal 1
+							expect(@next.calledWith(new Errors.NotFoundError())).to.equal true
+							done()
+
 				describe 'when token access is off, but user has higher access anyway', ->
 					beforeEach ->
 						@req = new MockRequest()
@@ -1150,6 +1163,19 @@ describe "TokenAccessController", ->
 							302,
 							"/sign_in_to_v1?return_to=/read/#{@readOnlyToken}"
 						)).to.equal true
+						done()
+
+				describe 'when project does not exist on v1', ->
+					beforeEach ->
+						@TokenAccessHandler.getV1DocInfo = sinon.stub().yields(null, {
+							exists: false,
+							exported: false
+						})
+						@TokenAccessController.readOnlyToken @req, @res, @next
+
+					it 'should call next with not found error', (done) ->
+						expect(@next.callCount).to.equal 1
+						expect(@next.calledWith(new Errors.NotFoundError())).to.equal true
 						done()
 
 				describe 'anonymous user', ->
