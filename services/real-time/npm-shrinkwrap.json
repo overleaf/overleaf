@@ -1125,11 +1125,6 @@
       "from": "inherits@2.0.3",
       "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.3.tgz"
     },
-    "ioredis": {
-      "version": "3.2.2",
-      "from": "ioredis@>=3.2.1 <4.0.0",
-      "resolved": "https://registry.npmjs.org/ioredis/-/ioredis-3.2.2.tgz"
-    },
     "ipaddr.js": {
       "version": "1.6.0",
       "from": "ipaddr.js@1.6.0",
@@ -1755,9 +1750,9 @@
       }
     },
     "redis-sharelatex": {
-      "version": "f5956885d59938f1972c75865bedffa8914fdf63",
-      "from": "git+https://github.com/sharelatex/redis-sharelatex.git#f5956885d59938f1972c75865bedffa8914fdf63",
-      "resolved": "git+https://github.com/sharelatex/redis-sharelatex.git#f5956885d59938f1972c75865bedffa8914fdf63",
+      "version": "4156cfd9ba9444d87a599f6d7035b73b505070f2",
+      "from": "git+https://github.com/sharelatex/redis-sharelatex.git#4156cfd9ba9444d87a599f6d7035b73b505070f2",
+      "resolved": "git+https://github.com/sharelatex/redis-sharelatex.git#4156cfd9ba9444d87a599f6d7035b73b505070f2",
       "dependencies": {
         "async": {
           "version": "2.6.1",
