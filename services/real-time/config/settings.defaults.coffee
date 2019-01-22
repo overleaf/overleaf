@@ -15,7 +15,10 @@ settings =
 			key_schema:
 				pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
 
-		websessions: {}
+		websessions: 			
+			host: process.env['WEB_REDIS_HOST'] or process.env['REDIS_HOST'] or "localhost"
+			port: process.env['WEB_REDIS_PORT'] or process.env['REDIS_PORT'] or "6379"
+			password: process.env["WEB_REDIS_PASSWORD"] or process.env["REDIS_PASSWORD"] or ""
 
 
 
