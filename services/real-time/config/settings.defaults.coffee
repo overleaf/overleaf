@@ -49,10 +49,10 @@ settings =
 console.log "process.env['REDIS_CLUSTER_ENABLED']", process.env['REDIS_CLUSTER_ENABLED']
 if process.env['REDIS_CLUSTER_ENABLED'] == "true"
 
-	settings.redis.websessions.cluster = [
+	settings.redis.realtime.cluster =  settings.redis.documentupdater.cluster = settings.redis.websessions.cluster = [
 		{ host: process.env["SL_LIN_STAG_REDIS_3_SERVICE_HOST"], port: "6379" }
 	]
-	settings.redis.websessions.natMap =	{
+	settings.redis.realtime.natMap =  settings.redis.documentupdater.natMap = settings.redis.websessions.natMap =	{
 		'192.168.201.24:6379': { host: process.env["SL_LIN_STAG_REDIS_0_SERVICE_HOST"], port: "6379" }
 		'192.168.195.231:6379': { host: process.env["SL_LIN_STAG_REDIS_1_SERVICE_HOST"], port: "6379" }
 		'192.168.223.53:6379': { host: process.env["SL_LIN_STAG_REDIS_2_SERVICE_HOST"], port: "6379" }
@@ -62,5 +62,6 @@ if process.env['REDIS_CLUSTER_ENABLED'] == "true"
 		'192.168.220.59:6379': { host: process.env["SL_LIN_STAG_REDIS_6_SERVICE_HOST"], port: "6379" }
 		'192.168.129.122:6379': { host: process.env["SL_LIN_STAG_REDIS_7_SERVICE_HOST"], port: "6379" }
 	}
+	settings.redis.documentupdater.cluster
 	
 module.exports = settings
