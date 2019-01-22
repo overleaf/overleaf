@@ -1,13 +1,32 @@
 bunyan = require('bunyan')
+request = require('request')
 
 module.exports = Logger =
 	initialize: (name) ->
-		level = process.env['LOG_LEVEL'] or "debug"
+		@defaultLevel = process.env['LOG_LEVEL'] or if process.env["NODE_ENV"] == 'production' then "warn" else  "debug"
+		@loggerName = name
 		@logger = bunyan.createLogger
 			name: name
 			serializers: bunyan.stdSerializers
-			level: level
+			level: @defaultLevel
+		if process.env["NODE_ENV"] == 'production'
+			# check for log level override on startup
+			@.checkLogLevel()
+			# re-check log level every minute
+			checkLogLevel = () => @.checkLogLevel()
+			setInterval(checkLogLevel, 1000 * 60)
 		return @
+
+	checkLogLevel: () ->
+		options =
+			headers:
+				"Metadata-Flavor": "Google"
+			uri: "http://metadata.google.internal/computeMetadata/v1/project/attributes/#{@loggerName}-setLogLevelEndTime"
+		request options, (err, response, body) =>
+			if parseInt(body) > Date.now()
+				@logger.level('trace')
+			else
+				@logger.level(@defaultLevel)
 
 	initializeErrorReporting: (sentry_dsn, options) ->
 		raven = require "raven"
@@ -94,7 +113,7 @@ module.exports = Logger =
 		@error.apply(this, arguments)
 	warn: ()->
 		@logger.warn.apply(@logger, arguments)
-	fatal: (attributes, message, callback) ->
+	fatal: (attributes, message, callback = () ->) ->
 		@logger.fatal(attributes, message)
 		if @raven?
 			cb = (e) -> # call the callback once after 'logged' or 'error' event
