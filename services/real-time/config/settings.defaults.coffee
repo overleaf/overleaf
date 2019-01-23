@@ -7,6 +7,8 @@ settings =
 			key_schema:
 				clientsInProject: ({project_id}) -> "clients_in_project:#{project_id}"
 				connectedUser: ({project_id, client_id})-> "connected_user:#{project_id}:#{client_id}"
+			cluster: process.env['REDIS_CLUSTER_HOSTS']
+			natMap: process.env['REDIS_CLUSTER_NATMAP']
 
 		documentupdater:
 			host: process.env['DOC_UPDATER_REDIS_HOST'] or process.env['REDIS_HOST'] or "localhost"
@@ -14,13 +16,15 @@ settings =
 			password: process.env["DOC_UPDATER_REDIS_PASSWORD"] or process.env["REDIS_PASSWORD"] or ""
 			key_schema:
 				pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
+			cluster: process.env['REDIS_CLUSTER_HOSTS']
+			natMap: process.env['REDIS_CLUSTER_NATMAP']
 
 		websessions: 			
 			host: process.env['WEB_REDIS_HOST'] or process.env['REDIS_HOST'] or "localhost"
 			port: process.env['WEB_REDIS_PORT'] or process.env['REDIS_PORT'] or "6379"
 			password: process.env["WEB_REDIS_PASSWORD"] or process.env["REDIS_PASSWORD"] or ""
-
-
+			cluster: process.env['REDIS_CLUSTER_HOSTS']
+			natMap: process.env['REDIS_CLUSTER_NATMAP']
 
 	internal:
 		realTime:
@@ -46,22 +50,16 @@ settings =
 
 	forceDrainMsDelay: process.env['FORCE_DRAIN_MS_DELAY'] or false
 
-console.log "process.env['REDIS_CLUSTER_ENABLED']", process.env['REDIS_CLUSTER_ENABLED']
-if process.env['REDIS_CLUSTER_ENABLED'] == "true"
+console.log process.env['REDIS_CLUSTER_HOSTS'], process.env['REDIS_CLUSTER_NATMAP']
+if process.env['REDIS_CLUSTER_HOSTS']? or process.env['REDIS_CLUSTER_NATMAP']?
 
-	settings.redis.realtime.cluster =  settings.redis.documentupdater.cluster = settings.redis.websessions.cluster = [
-		{ host: process.env["SL_LIN_STAG_REDIS_3_SERVICE_HOST"], port: "6379" }
-	]
-	settings.redis.realtime.natMap =  settings.redis.documentupdater.natMap = settings.redis.websessions.natMap =	{
-		'192.168.201.24:6379': { host: process.env["SL_LIN_STAG_REDIS_0_SERVICE_HOST"], port: "6379" }
-		'192.168.195.231:6379': { host: process.env["SL_LIN_STAG_REDIS_1_SERVICE_HOST"], port: "6379" }
-		'192.168.223.53:6379': { host: process.env["SL_LIN_STAG_REDIS_2_SERVICE_HOST"], port: "6379" }
-		'192.168.221.84:6379': { host: process.env["SL_LIN_STAG_REDIS_3_SERVICE_HOST"], port: "6379" }
-		'192.168.219.81:6379': { host: process.env["SL_LIN_STAG_REDIS_4_SERVICE_HOST"], port: "6379" }
-		'192.168.180.104:6379': { host: process.env["SL_LIN_STAG_REDIS_5_SERVICE_HOST"], port: "6379" }
-		'192.168.220.59:6379': { host: process.env["SL_LIN_STAG_REDIS_6_SERVICE_HOST"], port: "6379" }
-		'192.168.129.122:6379': { host: process.env["SL_LIN_STAG_REDIS_7_SERVICE_HOST"], port: "6379" }
-	}
-	settings.redis.documentupdater.cluster
-	
+	for redisKey in Object.keys(settings.redis)
+		
+		if process.env['REDIS_CLUSTER_HOSTS']?
+			settings.redis[redisKey].cluster = JSON.parse(process.env['REDIS_CLUSTER_HOSTS'])
+
+		
+		if process.env['REDIS_CLUSTER_NATMAP']?
+			settings.redis[redisKey].natMap = JSON.parse(process.env['REDIS_CLUSTER_NATMAP'])
+console.log settings
 module.exports = settings
