@@ -57,3 +57,13 @@ module.exports =
 			if err?
 				logger.err err:err, "error setting brandVariationId"
 			callback()
+
+	unsetBrandVariationId: (project_id, callback = ()->)->
+		logger.log project_id:project_id, "unsetting the brand variation id"
+		conditions = {_id:project_id}
+		update = {$unset: {brandVariationId: 1}}
+		Project.update conditions, update, {}, (err)->
+			if err?
+				logger.err err:err, "error unsetting brandVariationId"
+				return callback(err)
+			callback()

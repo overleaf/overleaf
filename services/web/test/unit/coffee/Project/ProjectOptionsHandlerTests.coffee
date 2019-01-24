@@ -1,5 +1,6 @@
 sinon = require('sinon')
 chai = require('chai')
+expect = chai.expect
 should = chai.should()
 modulePath = "../../../../app/js/Features/Project/ProjectOptionsHandler.js"
 SandboxedModule = require('sandboxed-module')
@@ -97,3 +98,12 @@ describe 'ProjectOptionsHandler', ->
 			@handler.setBrandVariationId project_id, "", (err)=>
 				@projectModel.update.called.should.equal false
 				done()
+
+	describe "unsetting the brandVariationId", ->
+		it 'should perform and update on mongo', (done)->
+			@handler.unsetBrandVariationId project_id, (err)=>
+				args = @projectModel.update.args[0]
+				args[0]._id.should.equal project_id
+				expect(args[1]).to.deep.equal {$unset: {brandVariationId: 1}}
+				done()
+			@projectModel.update.args[0][3]()
