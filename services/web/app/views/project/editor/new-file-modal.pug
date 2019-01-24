@@ -149,7 +149,10 @@ script(type='text/ng-template', id='newFileModalTemplate')
 										ng-model="data.name"
 										name="name"
 									)
-						div.alert.alert-danger.row-spaced-small(ng-if="state.error") Error, something went wrong!
+						div.alert.alert-danger.row-spaced-small(ng-if="error")
+							div(ng-switch="error")
+								span(ng-switch-when="already exists") #{translate("file_already_exists")}
+								span(ng-switch-default) Error, something went wrong!
 					div(ng-if="type == 'url'", ng-controller="UrlLinkedFileModalController")
 						form(novalidate, name="newLinkedFileForm")
 							label(for="url") URL to fetch the file from

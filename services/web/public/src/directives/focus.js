@@ -80,9 +80,8 @@ define(['base'], function(App) {
     }
   }))
 
-  return (selectName = function(element) {
-    // Select up to last '.'. I.e. everything
-    // except the file extension
+  selectName = function(element) {
+    // Select up to last '.'. I.e. everything except the file extension
     element.focus()
     const name = element.val()
     if (element[0].setSelectionRange != null) {
@@ -92,5 +91,5 @@ define(['base'], function(App) {
       }
       return element[0].setSelectionRange(0, selectionEnd)
     }
-  })
+  }
 })
