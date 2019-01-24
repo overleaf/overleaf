@@ -137,7 +137,7 @@
 						href="/user/settings"
 					) Add Affiliation
 
-		.row-spaced(ng-if="hasProjects && userHasNoSubscription", ng-cloak).text-centered
+		.row-spaced(ng-if="hasProjects && userHasNoSubscription && !userOnPayingUniversity", ng-cloak).text-centered
 			hr
 			p.small #{translate("on_free_sl")}
 			p
