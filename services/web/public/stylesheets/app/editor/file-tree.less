@@ -288,9 +288,11 @@
 		width: 220px;
 		ul {
 			li {
-				padding: (@line-height-computed / 4);
 				a {
 					color: @text-color;
+					padding: (@line-height-computed / 4);
+					display: block;
+					text-decoration: none;
 				}
 			}
 			li.active {
@@ -298,6 +300,9 @@
 				a {
 					color: @link-color;
 				}
+			}
+			li:hover {
+				background-color: white;
 			}
 		}
 	}

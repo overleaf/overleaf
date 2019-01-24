@@ -141,7 +141,7 @@ script(type='text/ng-template', id='newFileModalTemplate')
 										span(ng-show="!state.isOutputFilesMode") select from output files
 
 								.form-controls.row-spaced-small
-									label(for="name") File Name In This Project
+									label(for="name") #{translate("file_name_in_this_project")}
 									input.form-control(
 										type="text"
 										placeholder="example.tex"
@@ -166,7 +166,7 @@ script(type='text/ng-template', id='newFileModalTemplate')
 								name="url"
 							)
 							.row-spaced-small
-								label(for="name") File name in this project
+								label(for="name") #{translate("file_name_in_this_project")}
 								input.form-control(
 									type="text",
 									placeholder="my_file",
