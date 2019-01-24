@@ -83,25 +83,30 @@ module.exports = ProjectLocator =
 					getRootDoc project
 
 	findElementByPath: (options, callback = (err, foundEntity, type)->)->
-		{project, project_id, path} = options
+		{project, project_id, path, exactCaseMatch} = options
 		if !path?
 			return new Error('no path provided for findElementByPath')
 
 		if project?
-			ProjectLocator._findElementByPathWithProject project, path, callback
+			ProjectLocator._findElementByPathWithProject project, path, exactCaseMatch, callback
 		else
 			ProjectGetter.getProject project_id, {rootFolder:true, rootDoc_id:true}, (err, project)->
 				return callback(err) if err?
-				ProjectLocator._findElementByPathWithProject project, path, callback
+				ProjectLocator._findElementByPathWithProject project, path, exactCaseMatch, callback
 
-	_findElementByPathWithProject: (project, needlePath, callback = (err, foundEntity, type)->)->
+	_findElementByPathWithProject: (project, needlePath, exactCaseMatch, callback = (err, foundEntity, type)->)->
+		if exactCaseMatch
+			matchFn = (a, b) -> (a == b)
+		else
+			matchFn = (a, b) -> (a?.toLowerCase() == b?.toLowerCase())
+
 		getParentFolder = (haystackFolder, foldersList, level, cb)->
 			if foldersList.length == 0
 				return cb null, haystackFolder
 			needleFolderName = foldersList[level]
 			found = false
 			for folder in haystackFolder.folders
-				if folder.name.toLowerCase() == needleFolderName.toLowerCase()
+				if matchFn(folder.name, needleFolderName)
 					found = true
 					if level == foldersList.length-1
 						return cb null, folder
@@ -114,15 +119,15 @@ module.exports = ProjectLocator =
 			if !entityName?
 				return cb null, folder, "folder"
 			for file in folder.fileRefs or []
-				if file?.name.toLowerCase() == entityName.toLowerCase()
+				if matchFn(file?.name, entityName)
 					result = file
 					type = "file"
 			for doc in folder.docs or []
-				if doc?.name.toLowerCase() == entityName.toLowerCase()
+				if matchFn(doc?.name, entityName)
 					result = doc
 					type = "doc"
 			for childFolder in folder.folders or []
-				if childFolder?.name.toLowerCase() == entityName.toLowerCase()
+				if matchFn(childFolder?.name, entityName)
 					result = childFolder
 					type = "folder"
 

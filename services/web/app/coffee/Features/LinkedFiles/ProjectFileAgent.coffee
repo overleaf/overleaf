@@ -81,6 +81,7 @@ module.exports = ProjectFileAgent = {
 					ProjectLocator.findElementByPath {
 						project_id: source_project_id,
 						path: source_entity_path
+						exactCaseMatch: true
 					}, (err, entity, type) ->
 						if err?
 							if /^not found.*/.test(err.toString())

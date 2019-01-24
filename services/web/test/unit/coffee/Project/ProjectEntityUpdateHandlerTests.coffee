@@ -776,6 +776,17 @@ describe 'ProjectEntityUpdateHandler', ->
 				.calledWith(project_id, @docPath)
 				.should.equal true
 
+	describe 'mkdirpWithExactCase', ->
+		beforeEach ->
+			@docPath = '/folder/doc.tex'
+			@ProjectEntityMongoUpdateHandler.mkdirp = sinon.stub().yields()
+			@ProjectEntityUpdateHandler.mkdirpWithExactCase project_id, @docPath, @callback
+
+		it 'calls ProjectEntityMongoUpdateHandler', ->
+			@ProjectEntityMongoUpdateHandler.mkdirp
+				.calledWith(project_id, @docPath, {exactCaseMatch: true})
+				.should.equal true
+
 	describe 'addFolder', ->
 		describe 'adding a folder', ->
 			beforeEach ->

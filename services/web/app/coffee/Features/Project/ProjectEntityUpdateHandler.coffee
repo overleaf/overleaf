@@ -350,7 +350,13 @@ module.exports = ProjectEntityUpdateHandler = self =
 		for folder in path.split('/')
 			if folder.length > 0 and not SafePath.isCleanFilename folder
 				return callback new Errors.InvalidNameError("invalid element name")
-		ProjectEntityMongoUpdateHandler.mkdirp project_id, path, callback
+		ProjectEntityMongoUpdateHandler.mkdirp project_id, path, {exactCaseMatch: false}, callback
+
+	mkdirpWithExactCase: wrapWithLock (project_id, path, callback = (err, newlyCreatedFolders, lastFolderInPath)->)->
+		for folder in path.split('/')
+			if folder.length > 0 and not SafePath.isCleanFilename folder
+				return callback new Errors.InvalidNameError("invalid element name")
+		ProjectEntityMongoUpdateHandler.mkdirp project_id, path, {exactCaseMatch: true}, callback
 
 	addFolder: wrapWithLock (project_id, parentFolder_id, folderName, callback) ->
 		if not SafePath.isCleanFilename folderName
