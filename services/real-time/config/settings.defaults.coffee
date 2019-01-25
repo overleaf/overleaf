@@ -8,7 +8,6 @@ settings =
 				clientsInProject: ({project_id}) -> "clients_in_project:#{project_id}"
 				connectedUser: ({project_id, client_id})-> "connected_user:#{project_id}:#{client_id}"
 			cluster: process.env['REDIS_CLUSTER_HOSTS']
-			natMap: process.env['REDIS_CLUSTER_NATMAP']
 
 		documentupdater:
 			host: process.env['DOC_UPDATER_REDIS_HOST'] or process.env['REDIS_HOST'] or "localhost"
@@ -17,14 +16,12 @@ settings =
 			key_schema:
 				pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
 			cluster: process.env['REDIS_CLUSTER_HOSTS']
-			natMap: process.env['REDIS_CLUSTER_NATMAP']
 
 		websessions: 			
 			host: process.env['WEB_REDIS_HOST'] or process.env['REDIS_HOST'] or "localhost"
 			port: process.env['WEB_REDIS_PORT'] or process.env['REDIS_PORT'] or "6379"
 			password: process.env["WEB_REDIS_PASSWORD"] or process.env["REDIS_PASSWORD"] or ""
 			cluster: process.env['REDIS_CLUSTER_HOSTS']
-			natMap: process.env['REDIS_CLUSTER_NATMAP']
 
 	internal:
 		realTime:
