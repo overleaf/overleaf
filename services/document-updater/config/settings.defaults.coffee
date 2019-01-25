@@ -86,5 +86,7 @@ module.exports =
 	
 	max_doc_length: 2 * 1024 * 1024 # 2mb
 
+	dispatcherCount: process.env["DISPATCHER_COUNT"]
+
 	mongo:
 		url: "mongodb://#{process.env["MONGO_HOST"] or "localhost"}/sharelatex"
