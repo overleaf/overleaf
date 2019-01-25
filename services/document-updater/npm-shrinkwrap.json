@@ -1698,23 +1698,7 @@
         }
       }
     },
-    "redis-sharelatex": {
-      "version": "1.0.4",
-      "from": "git+https://github.com/sharelatex/redis-sharelatex.git#v1.0.4",
-      "resolved": "git+https://github.com/sharelatex/redis-sharelatex.git#ca4e906559c1405d132e8edd7db763d64a57be62",
-      "dependencies": {
-        "coffee-script": {
-          "version": "1.8.0",
-          "from": "coffee-script@1.8.0",
-          "resolved": "https://registry.npmjs.org/coffee-script/-/coffee-script-1.8.0.tgz"
-        },
-        "underscore": {
-          "version": "1.7.0",
-          "from": "underscore@1.7.0",
-          "resolved": "https://registry.npmjs.org/underscore/-/underscore-1.7.0.tgz"
-        }
-      }
-    },
+    
     "request": {
       "version": "2.25.0",
       "from": "request@2.25.0",
