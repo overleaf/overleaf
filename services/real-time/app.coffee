@@ -21,7 +21,8 @@ SessionSockets = require('session.socket.io')
 CookieParser = require("cookie-parser")
 
 
-sessionRedisClient.set "hello-a", "hello-there"
+sessionRedisClient.set "hello-a", "hello-there", (err)->
+	console.log "setting hello-a", err
 
 DrainManager = require("./app/js/DrainManager")
 
