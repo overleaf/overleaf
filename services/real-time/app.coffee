@@ -2,6 +2,8 @@ Metrics = require("metrics-sharelatex")
 Settings = require "settings-sharelatex"
 Metrics.initialize(Settings.appName or "real-time")
 
+console.log Settings.redis
+
 logger = require "logger-sharelatex"
 logger.initialize("real-time-sharelatex")
 Metrics.event_loop.monitor(logger)
