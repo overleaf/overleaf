@@ -30,7 +30,7 @@
     "express-session": "^1.9.1",
     "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.9",
     "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v2.0.12",
-    "redis-sharelatex": "git+https://github.com/sharelatex/redis-sharelatex.git#4156cfd9ba9444d87a599f6d7035b73b505070f2",
+    "redis-sharelatex": "git+https://github.com/sharelatex/redis-sharelatex.git#v1.0.5",
     "request": "~2.34.0",
     "session.socket.io": "^0.1.6",
     "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.1.0",
