@@ -50,17 +50,6 @@ settings =
 
 	forceDrainMsDelay: process.env['FORCE_DRAIN_MS_DELAY'] or false
 
-console.log process.env['REDIS_CLUSTER_HOSTS'], process.env['REDIS_CLUSTER_NATMAP']
-console.log typeof(process.env['REDIS_CLUSTER_HOSTS'])
-if process.env['REDIS_CLUSTER_HOSTS']? or process.env['REDIS_CLUSTER_NATMAP']?
-
-	for redisKey in Object.keys(settings.redis)
-		
-		if process.env['REDIS_CLUSTER_HOSTS']?
-			settings.redis[redisKey].cluster = JSON.parse(process.env['REDIS_CLUSTER_HOSTS'])
-
-		
-		if process.env['REDIS_CLUSTER_NATMAP']?
-			settings.redis[redisKey].natMap = JSON.parse(process.env['REDIS_CLUSTER_NATMAP'])
-console.log settings
+	
+# console.log settings.redis
 module.exports = settings
