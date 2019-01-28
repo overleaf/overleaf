@@ -111,14 +111,22 @@
 	}
 
 	.toolbar-center {
-		width: 300px;
-		position: absolute;
-		top: 0;
-		left: 50%;
-		margin-left: -150px;
 		text-align: center;
 		text-overflow: ellipsis;
 		overflow: hidden;
+		// At small screen sizes, center relative to the left menu and right buttons
+		width: 100%;
+		display: flex;
+		justify-content: center;
+
+		// At large screen sizes, center relative to the viewport
+		@media (min-width: @screen-lg-min) {
+			width: 300px;
+			position: absolute;
+			top: 0;
+			left: 50%;
+			margin-left: -150px;
+		}
 	}
 
 	&.toolbar-header {
@@ -171,7 +179,7 @@
 	vertical-align: middle;
 	text-align: left;
 
-	@media (min-width: @screen-sm-min) {
+	@media (min-width: @screen-md-min) {
 		display: inline-block;
 	}
 
