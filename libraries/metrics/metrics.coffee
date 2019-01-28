@@ -81,7 +81,7 @@ module.exports = Metrics =
 			promMetrics[key] = new prom.Counter({
 				name: key,
 				help: key, 
-				labelNames: ['app','host','status','method']
+				labelNames: ['app','host','status','method', 'path']
 			})
 		opts.app = appname
 		opts.host = hostname
