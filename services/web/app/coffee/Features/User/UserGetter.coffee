@@ -58,6 +58,15 @@ module.exports = UserGetter =
 			# well
 			@getUserByMainEmail email, projection, callback
 
+	getUsersByAnyConfirmedEmail: (emails, projection, callback = (error, user) ->) ->
+		if arguments.length == 2
+			callback = projection
+			projection = {}
+		# $exists: true MUST be set to use the partial index
+		query = emails: { emails: { $exists: true, $elemMatch: { email: { $in: emails }, confirmedAt: { $exists: true }}}}
+		db.users.find query, projection, (error, users) =>
+			callback(error, users)
+
 	getUsersByHostname: (hostname, projection, callback = (error, users) ->) ->
 		reversedHostname = hostname.trim().split('').reverse().join('')
 		query = emails: { $exists: true }, 'emails.reversedHostname': reversedHostname
