@@ -7,7 +7,6 @@ RecurlyWrapper = require './RecurlyWrapper'
 Settings   = require 'settings-sharelatex'
 logger     = require('logger-sharelatex')
 GeoIpLookup = require("../../infrastructure/GeoIpLookup")
-SubscriptionDomainHandler = require("./SubscriptionDomainHandler")
 UserGetter = require "../User/UserGetter"
 FeaturesUpdater = require './FeaturesUpdater'
 planFeatures = require './planFeatures'

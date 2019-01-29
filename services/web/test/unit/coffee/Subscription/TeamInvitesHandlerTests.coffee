@@ -147,56 +147,6 @@ describe "TeamInvitesHandler", ->
 				).should.eq true
 				done()
 
-	describe "createDomainInvite", ->
-		beforeEach ->
-			@licence =
-				subscription_id: @subscription.id
-				name: "Team Daenerys"
-
-			@user =
-				email: "John.Snow@example.com"
-
-		it "adds the team invite to the subscription", (done) ->
-			@TeamInvitesHandler.createDomainInvite @user, @licence, (err, invite) =>
-				expect(err).to.eq(null)
-				expect(invite.token).to.eq(@newToken)
-				expect(invite.email).to.eq("john.snow@example.com")
-				expect(invite.inviterName).to.eq("Team Daenerys")
-				expect(@subscription.teamInvites).to.deep.include(invite)
-				done()
-
-		it "sends an email", (done) ->
-			@TeamInvitesHandler.createDomainInvite @user, @licence, (err, invite) =>
-				@EmailHandler.sendEmail.calledWith("verifyEmailToJoinTeam",
-					sinon.match({
-						to: "john.snow@example.com"
-						inviterName: "Team Daenerys"
-						acceptInviteUrl: "http://example.com/subscription/invites/#{@newToken}/"
-					})
-				).should.equal true
-				done()
-
-		it "stripe licence from name", (done) ->
-			@licence.name = 'Foo Licence'
-			@TeamInvitesHandler.createDomainInvite @user, @licence, (err, invite) =>
-				@EmailHandler.sendEmail.calledWith("verifyEmailToJoinTeam",
-					sinon.match({
-						inviterName: 'Foo'
-					})
-				).should.equal true
-				done()
-
-
-		it "stripe site licence from name", (done) ->
-			@licence.name = 'Foo Site Licence'
-			@TeamInvitesHandler.createDomainInvite @user, @licence, (err, invite) =>
-				@EmailHandler.sendEmail.calledWith("verifyEmailToJoinTeam",
-					sinon.match({
-						inviterName: 'Foo'
-					})
-				).should.equal true
-				done()
-
 	describe "importInvite", ->
 		beforeEach ->
 			@sentAt = new Date()

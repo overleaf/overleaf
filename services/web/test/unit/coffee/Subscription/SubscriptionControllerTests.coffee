@@ -59,8 +59,6 @@ describe "SubscriptionController", ->
 			gaExperiments:{}
 		@GeoIpLookup =
 			getCurrencyCode:sinon.stub()
-		@SubscriptionDomainHandler =
-			getDomainLicencePage:sinon.stub()
 		@UserGetter =
 			getUser: sinon.stub().callsArgWith(2, null, @user)
 		@SubscriptionController = SandboxedModule.require modulePath, requires:
@@ -74,7 +72,6 @@ describe "SubscriptionController", ->
 				log:->
 				warn:->
 			"settings-sharelatex": @settings
-			"./SubscriptionDomainHandler":@SubscriptionDomainHandler
 			"../User/UserGetter": @UserGetter
 			"./RecurlyWrapper": @RecurlyWrapper = {}
 			"./FeaturesUpdater": @FeaturesUpdater = {}

@@ -26,16 +26,6 @@ span(ng-controller="NotificationsController").userNotifications
 									button(ng-click="dismiss(notification)").close.pull-right
 										span(aria-hidden="true") &times;
 										span.sr-only #{translate("close")}
-						.alert.alert-info(ng-switch-when="notification_group_invite")
-							div.notification_inner
-								.notification_body
-									| #{translate("invited_to_join_team")}: {{ notification.messageOpts.groupName }}
-									a.pull-right.btn.btn-sm.btn-info(href="/user/subscription/domain/join")
-										| #{translate("join_team")}
-								span().notification_close
-									button(ng-click="dismiss(notification)").close.pull-right
-										span(aria-hidden="true") &times;
-										span.sr-only #{translate("close")}
 						.alert.alert-info(ng-switch-when="notification_ip_matched_affiliation")
 							div.notification_inner
 								.notification_body

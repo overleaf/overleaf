@@ -27,7 +27,6 @@ define([
   'main/annual-upgrade',
   'main/announcements',
   'main/register-users',
-  'main/subscription/domain-subscription-join-controller',
   'main/subscription/team-invite-controller',
   'main/contact-us',
   'main/learn',

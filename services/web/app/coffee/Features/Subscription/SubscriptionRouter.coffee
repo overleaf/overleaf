@@ -1,7 +1,6 @@
 AuthenticationController = require('../Authentication/AuthenticationController')
 SubscriptionController = require('./SubscriptionController')
 SubscriptionGroupController = require './SubscriptionGroupController'
-DomainLicenceController = require './DomainLicenceController'
 TeamInvitesController = require './TeamInvitesController'
 RateLimiterMiddlewear = require('../Security/RateLimiterMiddlewear')
 Settings = require "settings-sharelatex"
@@ -33,17 +32,6 @@ module.exports =
 				timeInterval: 60
 			}),
 			TeamInvitesController.acceptInvite
-
-		# Routes to join a domain licence team
-		webRouter.get '/user/subscription/domain/join', AuthenticationController.requireLogin(), DomainLicenceController.join
-		webRouter.post '/user/subscription/domain/join',
-			AuthenticationController.requireLogin(),
-			RateLimiterMiddlewear.rateLimit({
-				endpointName: 'join-domain-subscription',
-				maxRequests: 10
-				timeInterval: 60
-			}),
-			DomainLicenceController.createInvite
 
 		#recurly callback
 		publicApiRouter.post '/user/subscription/callback',   SubscriptionController.recurlyNotificationParser, SubscriptionController.recurlyCallback
