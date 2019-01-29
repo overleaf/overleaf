@@ -6,7 +6,7 @@
     "type": "git",
     "url": "http://github.com/sharelatex/logger-sharelatex.git"
   },
-  "version": "1.5.9",
+  "version": "1.6.0",
   "scripts": {
     "test": "mocha --require coffee-script/register test/**/*.coffee"
   },

@@ -3,13 +3,14 @@ request = require('request')
 
 module.exports = Logger =
 	initialize: (name) ->
-		@defaultLevel = process.env['LOG_LEVEL'] or if process.env["NODE_ENV"] == 'production' then "warn" else  "debug"
+		isProduction = process.env['NODE_ENV']?.toLowerCase() == 'production'
+		@defaultLevel = process.env['LOG_LEVEL'] or if isProduction then "warn" else  "debug"
 		@loggerName = name
 		@logger = bunyan.createLogger
 			name: name
 			serializers: bunyan.stdSerializers
 			level: @defaultLevel
-		if process.env["NODE_ENV"] == 'production'
+		if isProduction
 			# check for log level override on startup
 			@.checkLogLevel()
 			# re-check log level every minute
