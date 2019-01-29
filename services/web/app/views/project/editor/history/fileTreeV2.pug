@@ -4,7 +4,7 @@ aside.file-tree.full-size(
 )
 	.history-file-tree-inner
 		history-file-tree(
-			file-tree="currentFileTree"
+			files="history.selection.files"
 			selected-pathname="history.selection.pathname"
 			on-selected-file-change="handleFileSelection(file)"
 			is-loading="history.loadingFileTree"
@@ -13,7 +13,7 @@ aside.file-tree.full-size(
 script(type="text/ng-template", id="historyFileTreeTpl")
 	.history-file-tree
 		history-file-entity(
-			ng-repeat="fileEntity in $ctrl.fileTree | orderBy : [ '-type', 'operation', 'name' ]"
+			ng-repeat="fileEntity in $ctrl._fileTree | orderBy : [ '-type', 'operation', 'name' ]"
 			file-entity="fileEntity"
 			ng-show="!$ctrl.isLoading"
 		)

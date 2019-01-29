@@ -200,4 +200,178 @@ define(['ide/history/HistoryV2Manager'], HistoryV2Manager =>
       this.$scope.$digest()
       expect(this.$scope.history.userHasFullFeature).to.equal(false)
     })
+
+    describe('autoSelectFile', function() {
+      beforeEach(function() {
+        this.mockedFilesList = [
+          {
+            pathname: 'main.tex'
+          },
+          {
+            pathname: 'references.bib'
+          },
+          {
+            pathname: 'universe.jpg'
+          },
+          {
+            pathname: 'chapters/chapter2.tex'
+          },
+          {
+            pathname: 'chapters/draft.tex',
+            operation: 'removed',
+            deletedAtV: 47
+          },
+          {
+            pathname: 'chapters/chapter3.tex',
+            operation: 'added'
+          },
+          {
+            pathname: 'chapters/chapter1.tex',
+            operation: 'edited'
+          },
+          {
+            pathname: 'chapters/foo.tex',
+            oldPathname: 'chapters/bar.tex',
+            operation: 'renamed'
+          }
+        ]
+        this.mockedMainTex = this.mockedFilesList[0]
+        this.mockedReferencesFile = this.mockedFilesList[1]
+        this.mockedRemovedFile = this.mockedFilesList[4]
+        this.mockedAddedFile = this.mockedFilesList[5]
+        this.mockedEditedFile = this.mockedFilesList[6]
+        this.mockedRenamedFile = this.mockedFilesList[7]
+
+        this.$scope.history.selection.files = this.mockedFilesList
+      })
+
+      describe('with a previously selected file', function() {
+        it('should prefer the previously selected file if it is available', function() {
+          this.historyManager._previouslySelectedPathname = this.mockedReferencesFile.pathname
+          this.historyManager.autoSelectFile()
+          expect(this.$scope.history.selection.file).to.deep.equal(
+            this.mockedReferencesFile
+          )
+        })
+
+        it('should ignore the previously selected file if it is not available', function() {
+          this.historyManager._previouslySelectedPathname = 'non/existent.file'
+          this.historyManager.autoSelectFile()
+          expect(this.$scope.history.selection.file.pathname).to.not.equal(
+            'non/existent.file'
+          )
+        })
+      })
+
+      describe('without a previously selected file, with a list of files containing operations', function() {
+        it('should prefer edited files', function() {
+          this.historyManager.autoSelectFile()
+          expect(this.$scope.history.selection.file).to.deep.equal(
+            this.mockedEditedFile
+          )
+        })
+
+        it('should prefer added files if no edited files are present', function() {
+          const indexOfEditedFile = this.$scope.history.selection.files.indexOf(
+            this.mockedEditedFile
+          )
+          this.$scope.history.selection.files.splice(indexOfEditedFile, 1)
+          this.historyManager.autoSelectFile()
+          expect(this.$scope.history.selection.file).to.deep.equal(
+            this.mockedAddedFile
+          )
+        })
+
+        it('should prefer renamed files if no edited or added files are present', function() {
+          const indexOfEditedFile = this.$scope.history.selection.files.indexOf(
+            this.mockedEditedFile
+          )
+          this.$scope.history.selection.files.splice(indexOfEditedFile, 1)
+          const indexOfAddedFile = this.$scope.history.selection.files.indexOf(
+            this.mockedAddedFile
+          )
+          this.$scope.history.selection.files.splice(indexOfAddedFile, 1)
+          this.historyManager.autoSelectFile()
+          expect(this.$scope.history.selection.file).to.deep.equal(
+            this.mockedRenamedFile
+          )
+        })
+
+        it('should prefer removed files if no edited, added or renamed files are present', function() {
+          const indexOfEditedFile = this.$scope.history.selection.files.indexOf(
+            this.mockedEditedFile
+          )
+          this.$scope.history.selection.files.splice(indexOfEditedFile, 1)
+          const indexOfAddedFile = this.$scope.history.selection.files.indexOf(
+            this.mockedAddedFile
+          )
+          this.$scope.history.selection.files.splice(indexOfAddedFile, 1)
+          const indexOfRenamedFile = this.$scope.history.selection.files.indexOf(
+            this.mockedRenamedFile
+          )
+          this.$scope.history.selection.files.splice(indexOfRenamedFile, 1)
+          this.historyManager.autoSelectFile()
+          expect(this.$scope.history.selection.file).to.deep.equal(
+            this.mockedRemovedFile
+          )
+        })
+      })
+
+      describe('without a previously selected file, with a list of files without operations', function() {
+        beforeEach(function() {
+          this.mockedFilesListWithNoOps = [
+            {
+              pathname: 'main.tex'
+            },
+            {
+              pathname: 'references.bib'
+            },
+            {
+              pathname: 'other.tex'
+            },
+            {
+              pathname: 'universe.jpg'
+            }
+          ]
+          this.mockedMainTex = this.mockedFilesListWithNoOps[0]
+          this.mockedReferencesFile = this.mockedFilesListWithNoOps[1]
+          this.mockedOtherTexFile = this.mockedFilesListWithNoOps[2]
+
+          this.$scope.history.selection.files = this.mockedFilesListWithNoOps
+        })
+
+        it('should prefer main.tex if it exists', function() {
+          this.historyManager.autoSelectFile()
+          expect(this.$scope.history.selection.file).to.deep.equal(
+            this.mockedMainTex
+          )
+        })
+
+        it('should prefer another tex file if main.tex does not exist', function() {
+          const indexOfMainTex = this.$scope.history.selection.files.indexOf(
+            this.mockedMainTex
+          )
+          this.$scope.history.selection.files.splice(indexOfMainTex, 1)
+          this.historyManager.autoSelectFile()
+          expect(this.$scope.history.selection.file).to.deep.equal(
+            this.mockedOtherTexFile
+          )
+        })
+
+        it('should pick the first available file if no tex files are available', function() {
+          const indexOfMainTex = this.$scope.history.selection.files.indexOf(
+            this.mockedMainTex
+          )
+          this.$scope.history.selection.files.splice(indexOfMainTex, 1)
+          const indexOfOtherTexFile = this.$scope.history.selection.files.indexOf(
+            this.mockedOtherTexFile
+          )
+          this.$scope.history.selection.files.splice(indexOfOtherTexFile, 1)
+          this.historyManager.autoSelectFile()
+          expect(this.$scope.history.selection.file).to.deep.equal(
+            this.mockedReferencesFile
+          )
+        })
+      })
+    })
   }))

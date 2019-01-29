@@ -91,8 +91,8 @@ define([
         ctrl.handleClick = _handleFileClick
         $scope.$watch(
           () => ctrl.historyFileTreeController.selectedPathname,
-          newPathname =>
-            (ctrl.isSelected = ctrl.fileEntity.pathname === newPathname)
+          selectedPathname =>
+            (ctrl.isSelected = ctrl.fileEntity.pathname === selectedPathname)
         )
       }
     }
