@@ -10,7 +10,7 @@ define([
   'libs/underscore-1.9.1',
   'libs/algolia-2.5.2',
   'libs/jquery.storage',
-  'libs/angular-sanitize-1.2.17',
+  'libs/angular-sanitize-1.6.4',
   'libs/angular-cookie',
   'libs/passfield',
   'libs/sixpack',
