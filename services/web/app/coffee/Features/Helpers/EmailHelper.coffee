@@ -4,6 +4,7 @@ module.exports = EmailHelper =
 
 	parseEmail: (email) ->
 		return null unless email?
+		return null if email.length > 254
 		email = email.trim().toLowerCase()
 
 		matched = email.match EMAIL_REGEXP

@@ -6,10 +6,13 @@ uuid = require('uuid')
 Schema = mongoose.Schema
 ObjectId = Schema.ObjectId
 
+# See https://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address/574698#574698
+MAX_EMAIL_LENGTH = 254
+
 UserSchema = new Schema
-	email             : {type : String, default : ''}
+	email             : {type : String, default : '', maxlength: MAX_EMAIL_LENGTH }
 	emails: [{
-		email: { type : String, default : '' },
+		email: { type : String, default : '', maxlength: MAX_EMAIL_LENGTH },
 		reversedHostname: { type : String, default : '' },
 		createdAt: { type : Date, default: () -> new Date() },
 		confirmedAt: { type: Date }
