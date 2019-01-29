@@ -63,7 +63,7 @@ module.exports = UserGetter =
 			callback = projection
 			projection = {}
 		# $exists: true MUST be set to use the partial index
-		query = emails: { emails: { $exists: true, $elemMatch: { email: { $in: emails }, confirmedAt: { $exists: true }}}}
+		query = emails: { $exists: true, $elemMatch: { email: { $in: emails }, confirmedAt: { $exists: true }}}
 		db.users.find query, projection, (error, users) =>
 			callback(error, users)
 
