@@ -1,6 +1,7 @@
 DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
 BUILD_NUMBER ?= local
 BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
+GIT_SHA ?= $(shell git rev-parse HEAD)
 PROJECT_NAME = web
 
 MODULE_DIRS := $(shell find modules -mindepth 1 -maxdepth 1 -type d -not -name '.git' )
@@ -35,6 +36,8 @@ LESS_OL_IEEE_FILE := public/stylesheets/ol-ieee-style.less
 CSS_OL_IEEE_FILE := public/stylesheets/ol-ieee-style.css
 
 CSS_FILES := $(CSS_SL_FILE) $(CSS_OL_FILE) $(CSS_OL_LIGHT_FILE) $(CSS_OL_IEEE_FILE)
+
+SENTRY_TEMPLATE := app/views/sentry.pug
 
 # The automatic variable $(@D) is the target directory name
 app.js: app.coffee
@@ -248,6 +251,11 @@ format_fix:
 
 lint:
 	npm -q run lint
+
+version:
+	sed -i.original -e "s/@@COMMIT@@/${GIT_SHA}/g" $(SENTRY_TEMPLATE)
+	sed -i.original -e "s/@@RELEASE@@/${BUILD_NUMBER}/g" $(SENTRY_TEMPLATE)
+	rm $(SENTRY_TEMPLATE).original
 
 .PHONY:
 	all add install update test test_unit test_frontend test_acceptance \
