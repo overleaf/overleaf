@@ -1,3 +1,9 @@
+if process.env["USE_PROM_METRICS"] != "true" 
+	return module.exports = require("./statsd/metrics")
+else
+ 	console.log("using prometheus")
+
+
 prom = require('prom-client')
 Register = require('prom-client').register
 
