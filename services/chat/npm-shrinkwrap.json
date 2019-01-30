@@ -7341,7 +7341,7 @@
     },
     "settings-sharelatex": {
       "version": "git+https://github.com/sharelatex/settings-sharelatex.git#93f63d029b52fef8825c3a401b2b6a7ba29b4750",
-      "from": "git+https://github.com/sharelatex/settings-sharelatex.git#1.1.0",
+      "from": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.1.0",
       "requires": {
         "coffee-script": "1.6.0"
       },
