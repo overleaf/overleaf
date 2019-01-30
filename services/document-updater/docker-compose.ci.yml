@@ -1,7 +1,7 @@
 # This file was auto-generated, do not edit it directly.
 # Instead run bin/update_build_scripts from
 # https://github.com/sharelatex/sharelatex-dev-environment
-# Version: 1.1.10
+# Version: 1.1.12
 
 version: "2"
 
@@ -10,6 +10,7 @@ services:
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     user: node
     command: npm run test:unit:_run
+
 
   test_acceptance:
     build: .
@@ -25,6 +26,16 @@ services:
       - redis
     user: node
     command: npm run test:acceptance:_run
+
+
+
+  tar:
+    build: .
+    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    volumes:
+      - ./:/tmp/build/
+    command: tar -czf /tmp/build/build.tar.gz --exclude=build.tar.gz --exclude-vcs .
+    user: root
 
   redis:
     image: redis
