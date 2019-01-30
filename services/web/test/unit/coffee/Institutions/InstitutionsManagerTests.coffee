@@ -33,7 +33,7 @@ describe "InstitutionsManager", ->
 				sinon.assert.calledTwice(@refreshFeatures)
 				done()
 
-	describe.only 'checkInstitutionUsers', ->
+	describe 'checkInstitutionUsers', ->
 		it 'check all users Features', (done) ->
 			affiliations = [
 				{ email: 'foo@bar.com' }
