@@ -11,9 +11,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 define([], function() {
-  let AceShareJsCodec
-  return (AceShareJsCodec = {
-    aceRangeToShareJs(range, lines) {
+  let EditorShareJsCodec
+  return (EditorShareJsCodec = {
+    rangeToShareJs(range, lines) {
       let offset = 0
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i]
@@ -23,8 +23,8 @@ define([], function() {
       return offset
     },
 
-    aceChangeToShareJs(delta, lines) {
-      const offset = AceShareJsCodec.aceRangeToShareJs(delta.start, lines)
+    changeToShareJs(delta, lines) {
+      const offset = EditorShareJsCodec.rangeToShareJs(delta.start, lines)
 
       const text = delta.lines.join('\n')
       switch (delta.action) {
@@ -37,7 +37,7 @@ define([], function() {
       }
     },
 
-    shareJsOffsetToAcePosition(offset, lines) {
+    shareJsOffsetToRowColumn(offset, lines) {
       let row = 0
       for (row = 0; row < lines.length; row++) {
         const line = lines[row]

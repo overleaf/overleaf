@@ -43,7 +43,6 @@ div.full-size(
 			ace-editor="editor",
 			ng-if="!editor.showRichText",
 			ng-show="!!editor.sharejs_doc && !editor.opening",
-			style=richTextEnabled ? "top: 32px" : "",
 			theme="settings.editorTheme",
 			keybindings="settings.mode",
 			font-size="settings.fontSize",
@@ -69,7 +68,6 @@ div.full-size(
 			syntax-validation="settings.syntaxValidation",
 			review-panel="reviewPanel",
 			events-bridge="reviewPanelEventsBridge"
-			track-changes-enabled="project.features.trackChangesVisible",
 			track-changes= "editor.trackChanges",
 			doc-id="editor.open_doc_id"
 			renderer-data="reviewPanel.rendererData"

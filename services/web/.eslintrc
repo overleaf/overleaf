@@ -22,7 +22,8 @@
     "$": true,
     "angular": true,
     // Injected in layout.pug
-    "user_id": true
+    "user_id": true,
+    "ace": true
   },
   "settings": {
     // Tell eslint-plugin-react to detect which version of React we are using

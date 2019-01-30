@@ -1,18 +1,7 @@
+/* global _ */
 /* eslint-disable
     camelcase,
-    max-len,
-    no-return-assign,
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+    max-len
  */
 define([
   'base',
@@ -28,6 +17,7 @@ define([
   'ide/editor/directives/aceEditor/cursor-position/CursorPositionManager',
   'ide/editor/directives/aceEditor/cursor-position/CursorPositionAdapter',
   'ide/editor/directives/aceEditor/track-changes/TrackChangesManager',
+  'ide/editor/directives/aceEditor/track-changes/TrackChangesAdapter',
   'ide/editor/directives/aceEditor/metadata/MetadataManager',
   'ide/metadata/services/metadata',
   'ide/graphics/services/graphics',
@@ -47,6 +37,7 @@ define([
   CursorPositionManager,
   CursorPositionAdapter,
   TrackChangesManager,
+  TrackChangesAdapter,
   MetadataManager
 ) {
   let syntaxValidationEnabled
@@ -119,7 +110,6 @@ define([
         reviewPanel: '=',
         eventsBridge: '=',
         trackChanges: '=',
-        trackChangesEnabled: '=',
         docId: '=',
         rendererData: '=',
         lineHeight: '=',
@@ -177,6 +167,7 @@ define([
           )
         }
 
+        /* eslint-disable no-unused-vars */
         const undoManager = new UndoManager(scope, editor, element)
         const highlightsManager = new HighlightsManager(scope, editor, element)
         const cursorPositionManager = new CursorPositionManager(
@@ -187,8 +178,10 @@ define([
         const trackChangesManager = new TrackChangesManager(
           scope,
           editor,
-          element
+          element,
+          new TrackChangesAdapter(editor)
         )
+
         const metadataManager = new MetadataManager(
           scope,
           editor,
@@ -204,6 +197,8 @@ define([
           preamble,
           files
         )
+
+        /* eslint-enable no-unused-vars */
 
         scope.$watch('onSave', function(callback) {
           if (callback != null) {
@@ -387,10 +382,6 @@ define([
             cursorPosition.row,
             cursorPosition.column
           )
-          const screenPos = editor.renderer.textToScreenCoordinates(
-            sessionPos.row,
-            sessionPos.column
-          )
           return (
             sessionPos.row * editor.renderer.lineHeight - session.getScrollTop()
           )
@@ -460,12 +451,21 @@ define([
         )
 
         scope.$watch('fontFamily', function(value) {
+          const monospaceFamilies = [
+            'Monaco',
+            'Menlo',
+            'Ubuntu Mono',
+            'Consolas',
+            'source-code-pro',
+            'monospace'
+          ]
+
           if (value != null) {
             switch (value) {
               case 'monaco':
                 return editor.setOption(
                   'fontFamily',
-                  '"Monaco", "Menlo", "Ubuntu Mono", "Consolas", "source-code-pro", monospace'
+                  monospaceFamilies.join(', ')
                 )
               case 'lucida':
                 return editor.setOption(
@@ -598,7 +598,9 @@ define([
           if (!spellCheckManager) return
           spellCheckManager.init()
           editor.on('changeSession', onSessionChangeForSpellCheck)
-          onSessionChangeForSpellCheck({ session: editor.getSession() }) // Force initial setup
+          onSessionChangeForSpellCheck({
+            session: editor.getSession()
+          }) // Force initial setup
           return editor.on('nativecontextmenu', spellCheckManager.onContextMenu)
         }
 
@@ -609,6 +611,36 @@ define([
             'nativecontextmenu',
             spellCheckManager.onContextMenu
           )
+        }
+
+        const initTrackChanges = function() {
+          trackChangesManager.rangesTracker = scope.sharejsDoc.ranges
+
+          // Force onChangeSession in order to set up highlights etc.
+          trackChangesManager.onChangeSession()
+
+          if (!trackChangesManager) return
+          editor.on('changeSelection', trackChangesManager.onChangeSelection)
+
+          // Selection also moves with updates elsewhere in the document
+          editor.on('change', trackChangesManager.onChangeSelection)
+
+          editor.on('changeSession', trackChangesManager.onChangeSession)
+          editor.on('cut', trackChangesManager.onCut)
+          editor.on('paste', trackChangesManager.onPaste)
+          editor.renderer.on('resize', trackChangesManager.onResize)
+        }
+
+        const tearDownTrackChanges = function() {
+          if (!trackChangesManager) return
+          this.trackChangesManager.tearDown()
+          editor.off('changeSelection', trackChangesManager.onChangeSelection)
+
+          editor.off('change', trackChangesManager.onChangeSelection)
+          editor.off('changeSession', trackChangesManager.onChangeSession)
+          editor.off('cut', trackChangesManager.onCut)
+          editor.off('paste', trackChangesManager.onPaste)
+          editor.renderer.off('resize', trackChangesManager.onResize)
         }
 
         const onSessionChangeForCursorPosition = function(e) {
@@ -629,7 +661,10 @@ define([
 
         const initCursorPosition = function() {
           editor.on('changeSession', onSessionChangeForCursorPosition)
-          onSessionChangeForCursorPosition({ session: editor.getSession() }) // Force initial setup
+
+          // Force initial setup
+          onSessionChangeForCursorPosition({ session: editor.getSession() })
+
           return $(window).on('unload', onUnloadForCursorPosition)
         }
 
@@ -690,8 +725,10 @@ define([
             session.setOption('useWorker', scope.syntaxValidation)
           }
 
+          // set to readonly until document change handlers are attached
+          editor.setReadOnly(true)
+
           // now attach session to editor
-          editor.setReadOnly(true) // set to readonly until document change handlers are attached
           editor.setSession(session)
 
           const doc = session.getDocument()
@@ -700,10 +737,13 @@ define([
           editor.initing = true
           sharejs_doc.attachToAce(editor)
           editor.initing = false
+
           // now ready to edit document
-          editor.setReadOnly(scope.readOnly) // respect the readOnly setting, normally false
+          // respect the readOnly setting, normally false
+          editor.setReadOnly(scope.readOnly)
           triggerEditorInitEvent()
           initSpellCheck()
+          initTrackChanges()
 
           resetScrollMargins()
 
@@ -753,6 +793,7 @@ define([
 
         var detachFromAce = function(sharejs_doc) {
           tearDownSpellCheck()
+          tearDownTrackChanges()
           sharejs_doc.detachFromAce()
           sharejs_doc.off('remoteop.recordRemote')
 

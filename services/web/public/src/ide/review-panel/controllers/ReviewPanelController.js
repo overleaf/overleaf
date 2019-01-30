@@ -522,8 +522,12 @@ define([
     $scope.$on('editor:track-changes:changed', function() {
       const doc_id = $scope.editor.open_doc_id
       updateEntries(doc_id)
-      $scope.$broadcast('review-panel:recalculate-screen-positions')
-      return $scope.$broadcast('review-panel:layout')
+
+      // For now, not worrying about entry panels for rich text
+      if (!$scope.editor.showRichText) {
+        $scope.$broadcast('review-panel:recalculate-screen-positions')
+        return $scope.$broadcast('review-panel:layout')
+      }
     })
 
     $scope.$on('editor:track-changes:visibility_changed', () =>

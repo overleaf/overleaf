@@ -83,9 +83,6 @@ define([
       }
 
       showRichText() {
-        if (!window.richTextEnabled) {
-          return false
-        }
         return (
           this.localStorage(`editor.mode.${this.$scope.project_id}`) ===
           'rich-text'

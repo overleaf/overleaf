@@ -114,7 +114,7 @@
 	}
 	
 	position: absolute;
-	top: 0px;
+	top: 32px;
 	bottom: 0px;
 	right: 0px;
 	background-color: @rp-bg-blue;
@@ -919,7 +919,27 @@
 		}
 		.track-changes-added-marker {
 			background-color: @rp-green-on-dark;
-		}	
+		}
+	}
+}
+
+.cm-editor-wrapper {
+	.track-changes-marker {
+		border-radius: 0;
+	}
+
+	.track-changes-added-marker {
+		// Uses rgba so not to affect the opacity of the text - doesn't layer like ace
+		background-color: rgba(44, 142, 48, 0.3);
+		color: black;
+	}
+
+	.track-changes-deleted-marker-callout {
+		border-bottom: 1px dashed #c5060b;
+		border-left: 1px dotted #c5060b;
+		width: 100%;
+		height: 20px;
+		margin-top: -20px;
 	}
 }
 
