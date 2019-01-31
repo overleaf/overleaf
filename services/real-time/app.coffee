@@ -5,7 +5,7 @@ Metrics.initialize(Settings.appName or "real-time")
 console.log Settings.redis
 
 logger = require "logger-sharelatex"
-logger.initialize("real-time-sharelatex")
+logger.initialize("real-time")
 Metrics.event_loop.monitor(logger)
 
 express = require("express")
@@ -19,10 +19,6 @@ sessionRedisClient = redis.createClient(Settings.redis.websessions)
 RedisStore = require('connect-redis')(session)
 SessionSockets = require('session.socket.io')
 CookieParser = require("cookie-parser")
-
-
-sessionRedisClient.set "hello-a", "hello-there", (err)->
-	console.log "setting hello-a", err
 
 DrainManager = require("./app/js/DrainManager")
 
