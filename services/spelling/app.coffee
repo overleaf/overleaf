@@ -4,7 +4,7 @@ metrics.initialize("spelling")
 
 Settings = require 'settings-sharelatex'
 logger = require 'logger-sharelatex'
-logger.initialize("spelling-sharelatex")
+logger.initialize("spelling")
 if Settings.sentry?.dsn?
 	logger.initializeErrorReporting(Settings.sentry.dsn)
 metrics.memory.monitor(logger)
