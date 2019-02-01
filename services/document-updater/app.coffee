@@ -1,11 +1,11 @@
 Metrics = require "metrics-sharelatex"
-Metrics.initialize("doc-updater")
+Metrics.initialize("document-updater")
 
 express = require('express')
 http = require("http")
 Settings = require('settings-sharelatex')
 logger = require('logger-sharelatex')
-logger.initialize("documentupdater")
+logger.initialize("document-updater")
 logger.logger.serializers.docs = require("./app/js/LoggerSerializers").docs
 logger.logger.serializers.files = require("./app/js/LoggerSerializers").files
 if Settings.sentry?.dsn?
