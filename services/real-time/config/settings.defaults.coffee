@@ -30,8 +30,8 @@ settings =
 	apis:
 		web:
 			url: "http://#{process.env['WEB_HOST'] or "localhost"}:#{process.env['WEB_PORT'] or 3000}"
-			user: "sharelatex"
-			pass: "password"
+			user: process.env['WEB_API_USER'] or "sharelatex"
+			pass: process.env['WEB_API_PASSWORD'] or "password"
 		documentupdater:
 			url: "http://#{process.env['DOCUMENT_UPDATER_HOST'] or process.env['DOCUPDATER_HOST'] or "localhost"}:3003"
 			
