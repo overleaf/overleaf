@@ -11,6 +11,7 @@ path = require("path")
 LocalFileWriter = require("./LocalFileWriter")
 Errors = require("./Errors")
 _ = require("underscore")
+awsS3 = require "aws-sdk/clients/s3"
 
 thirtySeconds = 30 * 1000
 
@@ -24,6 +25,12 @@ buildDefaultOptions = (bucketName, method, key)->
 			timeout: thirtySeconds
 			uri:"https://#{bucketName}.s3.amazonaws.com/#{key}"
 	}
+
+s3 = new awsS3({
+	credentials:
+		accessKeyId: settings.filestore.s3.key,
+		secretAccessKey: settings.filestore.s3.secret
+})
 
 module.exports =
 
@@ -90,15 +97,19 @@ module.exports =
 			callback err
 
 	copyFile: (bucketName, sourceKey, destKey, callback)->
-		logger.log bucketName:bucketName, sourceKey:sourceKey, destKey:destKey, "copying file in s3"
-		s3Client = knox.createClient
-			key: settings.filestore.s3.key
-			secret: settings.filestore.s3.secret
-			bucket: bucketName
-		s3Client.copyFile sourceKey, destKey, (err)->
+		logger.log bucketName:bucketName, sourceKey:sourceKey, destKey: destKey, "copying file in s3"
+		source = bucketName + '/' + sourceKey
+		# use the AWS SDK instead of knox due to problems with error handling (https://github.com/Automattic/knox/issues/114)
+		s3.copyObject {Bucket: bucketName, Key: destKey, CopySource: source}, (err) ->
 			if err?
-				logger.err err:err, bucketName:bucketName, sourceKey:sourceKey, destKey:destKey, "something went wrong copying file in aws"
-			callback(err)
+				if err.code is 'NoSuchKey'
+					logger.err bucketName:bucketName, sourceKey:sourceKey, "original file not found in s3 when copying"
+					callback(new Errors.NotFoundError("original file not found in S3 when copying"))
+				else
+					logger.err err:err, bucketName:bucketName, sourceKey:sourceKey, destKey:destKey, "something went wrong copying file in aws"
+					callback(err)
+			else
+				callback()
 
 	deleteFile: (bucketName, key, callback)->
 		logger.log bucketName:bucketName, key:key, "delete file in s3"
