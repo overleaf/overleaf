@@ -144,7 +144,7 @@ describe "SubscriptionController", ->
 			it "should redirect to the subscription dashboard", (done)->
 				@LimitationsManager.userHasV1OrV2Subscription.callsArgWith(1, null, true)
 				@res.redirect = (url)=>
-					url.should.equal "/user/subscription"
+					url.should.equal "/user/subscription?hasSubscription=true"
 					done()
 				@SubscriptionController.paymentPage(@req, @res)
 
@@ -153,7 +153,7 @@ describe "SubscriptionController", ->
 				@LimitationsManager.userHasV1OrV2Subscription.callsArgWith(1, null, false)
 				@PlansLocator.findLocalPlanInSettings.returns(null)
 				@res.redirect = (url)=>
-					url.should.equal "/user/subscription"
+					url.should.equal "/user/subscription?hasSubscription=true"
 					done()
 				@SubscriptionController.paymentPage(@req, @res)
 
@@ -190,7 +190,7 @@ describe "SubscriptionController", ->
 				@LimitationsManager.userHasV1OrV2Subscription.callsArgWith(1, null, false)
 				@SubscriptionHandler.validateNoSubscriptionInRecurly = sinon.stub().yields(null, false)
 				@res.redirect = (url)=>
-					url.should.equal "/user/subscription"
+					url.should.equal "/user/subscription?hasSubscription=true"
 					done()
 				@SubscriptionController.paymentPage(@req, @res)
 
@@ -208,6 +208,7 @@ describe "SubscriptionController", ->
 				memberGroupSubscriptions: @memberGroupSubscriptions = { 'group-subscriptions': 'mock' }
 			})
 			@SubscriptionViewModelBuilder.buildViewModel.returns(@plans = {'plans': 'mock'})
+			@LimitationsManager.userHasV1OrV2Subscription.callsArgWith(1, null, false)
 			@res.render = (view, @data) =>
 				expect(view).to.equal 'subscriptions/dashboard'
 				done()
