@@ -5,15 +5,15 @@ settings =
 			port: process.env['REAL_TIME_REDIS_PORT'] or process.env['REDIS_PORT'] or "6379"
 			password: process.env["REAL_TIME_REDIS_PASSWORD"] or process.env["REDIS_PASSWORD"] or ""
 			key_schema:
-				clientsInProject: ({project_id}) -> "clients_in_project:#{project_id}"
-				connectedUser: ({project_id, client_id})-> "connected_user:#{project_id}:#{client_id}"
+				clientsInProject: ({project_id}) -> "clients_in_project:{#{project_id}}"
+				connectedUser: ({project_id, client_id})-> "connected_user:{#{project_id}}:#{client_id}"
 
 		documentupdater:
 			host: process.env['DOC_UPDATER_REDIS_HOST'] or process.env['REDIS_HOST'] or "localhost"
 			port: process.env['DOC_UPDATER_REDIS_PORT'] or process.env['REDIS_PORT'] or "6379"
 			password: process.env["DOC_UPDATER_REDIS_PASSWORD"] or process.env["REDIS_PASSWORD"] or ""
 			key_schema:
-				pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
+				pendingUpdates: ({doc_id}) -> "PendingUpdates:{#{doc_id}}"
 
 		websessions: 			
 			host: process.env['WEB_REDIS_HOST'] or process.env['REDIS_HOST'] or "localhost"

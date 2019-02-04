@@ -10,6 +10,8 @@ settings = require "settings-sharelatex"
 redis = require "redis-sharelatex"
 rclient = redis.createClient(settings.redis.websessions)
 
+redisSettings = settings.redis
+
 describe "applyOtUpdate", ->
 	before ->
 		@update = {
@@ -48,7 +50,7 @@ describe "applyOtUpdate", ->
 				done()
 
 		it "should push the update into redis", (done) ->
-			rclient.lrange "PendingUpdates:#{@doc_id}", 0, -1, (error, [update]) =>
+			rclient.lrange redisSettings.documentupdater.key_schema.pendingUpdates({@doc_id}), 0, -1, (error, [update]) =>
 				update = JSON.parse(update)
 				update.op.should.deep.equal @update.op
 				update.meta.should.deep.equal {
@@ -61,7 +63,7 @@ describe "applyOtUpdate", ->
 			async.series [
 				(cb) => rclient.del "pending-updates-list", cb
 				(cb) => rclient.del "DocsWithPendingUpdates", "#{@project_id}:#{@doc_id}", cb
-				(cb) => rclient.del "PendingUpdates:#{@doc_id}", cb
+				(cb) => rclient.del redisSettings.documentupdater.key_schema.pendingUpdates(@doc_id), cb
 			], done
 		
 	describe "when authorized to read-only with an edit update", ->
@@ -102,7 +104,7 @@ describe "applyOtUpdate", ->
 			, 300
 			
 		it "should not put the update in redis", (done) ->
-			rclient.llen "PendingUpdates:#{@doc_id}", (error, len) =>
+			rclient.llen redisSettings.documentupdater.key_schema.pendingUpdates({@doc_id}), (error, len) =>
 				len.should.equal 0
 				done()
 				
@@ -142,7 +144,7 @@ describe "applyOtUpdate", ->
 				done()
 
 		it "should push the update into redis", (done) ->
-			rclient.lrange "PendingUpdates:#{@doc_id}", 0, -1, (error, [update]) =>
+			rclient.lrange redisSettings.documentupdater.key_schema.pendingUpdates({@doc_id}), 0, -1, (error, [update]) =>
 				update = JSON.parse(update)
 				update.op.should.deep.equal @comment_update.op
 				update.meta.should.deep.equal {
@@ -155,5 +157,5 @@ describe "applyOtUpdate", ->
 			async.series [
 				(cb) => rclient.del "pending-updates-list", cb
 				(cb) => rclient.del "DocsWithPendingUpdates", "#{@project_id}:#{@doc_id}", cb
-				(cb) => rclient.del "PendingUpdates:#{@doc_id}", cb
+				(cb) => rclient.del redisSettings.documentupdater.key_schema.pendingUpdates({@doc_id}), cb
 			], done
