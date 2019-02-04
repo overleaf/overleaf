@@ -700,7 +700,7 @@ define([
           // see if we can lookup a suitable mode from ace
           // but fall back to text by default
           try {
-            if (/\.(Rtex|bbl)$/i.test(scope.fileName)) {
+            if (/\.(Rtex|bbl|tikz)$/i.test(scope.fileName)) {
               // recognise Rtex and bbl as latex
               mode = 'ace/mode/latex'
             } else if (/\.(sty|cls|clo)$/.test(scope.fileName)) {
