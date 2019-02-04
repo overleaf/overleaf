@@ -206,7 +206,7 @@ There are no entries found in a list you have created. Make sure you label list 
     extraInfoURL:
       'https://www.sharelatex.com/learn/Errors/Misplaced_%5Cnoalign',
     humanReadableHint: `\
-You have used a \\hline command in the wrong place, probably outside a table. If the \\hline command is written inside a table, try including \\\ before it.\
+You have used a \\hline command in the wrong place, probably outside a table. If the \\hline command is written inside a table, try including \\\\ before it.\
 `
   },
   {
