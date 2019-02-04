@@ -82,6 +82,14 @@ describe 'ExportsController', ->
 				expect(body).to.deep.equal {export_v1_id: 897}
 				done()
 
+	describe "with an error return from v1 to forward to the publish modal",->
+		it 'should forward the response onward', (done) ->
+			@error_json = { status: 422, message: 'nope' }
+			@handler.exportProject = sinon.stub().yields({forwardResponse: @error_json})
+			@controller.exportProject @req, send:(body) =>
+				expect(body).to.deep.equal @error_json
+				done()
+
 	it 'should ask the handler to return the status of an export', (done) ->
 		@handler.fetchExport = sinon.stub().yields(
 			null,

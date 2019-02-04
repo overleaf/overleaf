@@ -24,7 +24,12 @@ module.exports =
 			export_params.show_source = req.body.showSource if req.body.showSource?
 
 		ExportsHandler.exportProject export_params, (err, export_data) ->
-			return next(err) if err?
+			if err?
+				if err.forwardResponse?
+					logger.log {responseError: err.forwardResponse}, "forwarding response"
+					return res.send err.forwardResponse
+				else
+					return next(err)
 			logger.log
 				user_id:user_id
 				project_id: project_id

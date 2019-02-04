@@ -81,6 +81,20 @@ describe 'ExportsHandler', ->
 				(@callback.args[0][0] instanceof Error)
 				.should.equal true
 
+
+		describe "when export request returns an error to forward to the user", ->
+			beforeEach (done) ->
+				@error_json = { status: 422, message: 'nope' }
+				@ExportsHandler._requestExport = sinon.stub().yields(null, forwardResponse: @error_json)
+				@ExportsHandler.exportProject @export_params, (error, export_data) =>
+					@callback(error, export_data)
+					done()
+
+			it "should return success and the response to forward", ->
+				(@callback.args[0][0] instanceof Error)
+				.should.equal false
+				@callback.calledWith(null, {forwardResponse: @error_json})
+
 	describe '_buildExport', ->
 		beforeEach (done) ->
 			@project =
@@ -366,16 +380,19 @@ describe 'ExportsHandler', ->
 				(@callback.args[0][0] instanceof Error)
 				.should.equal true
 
-		describe "when the request returns an error code", ->
+		describe "when the request returns an error response to forward", ->
 			beforeEach (done) ->
-				@stubRequest.post = sinon.stub().yields(null, {statusCode: 401}, { })
+				@error_code = 422
+				@error_json = { status: @error_code, message: 'nope' }
+				@stubRequest.post = sinon.stub().yields(null, {statusCode: @error_code}, @error_json)
 				@ExportsHandler._requestExport @export_data, (error, export_v1_id) =>
 					@callback(error, export_v1_id)
 					done()
 
-			it "should return the error", ->
+			it "should return success and the response to forward", ->
 				(@callback.args[0][0] instanceof Error)
-				.should.equal true
+				.should.equal false
+				@callback.calledWith(null, {forwardResponse: @error_json})
 
 	describe 'fetchExport', ->
 		beforeEach (done) ->

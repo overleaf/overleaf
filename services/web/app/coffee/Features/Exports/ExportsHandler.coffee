@@ -95,9 +95,9 @@ module.exports = ExportsHandler = self =
 			else if 200 <= res.statusCode < 300
 				callback null, body.exportId
 			else
-				err = new Error("v1 export returned a failure status code: #{res.statusCode}")
-				logger.err err:err, export:export_data, "v1 export returned failure status code: #{res.statusCode}"
-				callback err
+				logger.err export:export_data, "v1 export returned failure; forwarding: #{body}"
+				# pass the v1 error along for the publish modal to handle
+				callback {forwardResponse: body}
 
 	_requestVersion: (project_id, callback=(err, export_v1_id) ->) ->
 		request.get {
