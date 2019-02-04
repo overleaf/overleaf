@@ -1,0 +1,9 @@
+{
+  "files.exclude": {
+    "app/js": true,
+    "public/js": true,
+    "test/**/js": true,
+    "node_modules": true,
+    "data": true
+  }
+}
