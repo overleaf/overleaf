@@ -98,7 +98,17 @@ define(['base', 'moment'], (App, moment) =>
             return ($scope.refreshError = null)
           })
           .catch(response => ($scope.refreshError = response.data))
-          .finally(() => ($scope.refreshing = false))
+          .finally(() => {
+            $scope.refreshing = false
+            const provider = file.linkedFileData.provider
+            if (
+              provider === 'mendeley' ||
+              provider === 'zotero' ||
+              file.name.match(/^.*\.bib$/)
+            ) {
+              ide.$scope.$emit('references:should-reindex', {})
+            }
+          })
       }
 
       // Callback fired when the `img` tag fails to load,
