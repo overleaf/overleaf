@@ -26,6 +26,7 @@ module.exports = DocumentUpdaterController =
 				DocumentUpdaterController._processErrorFromDocumentUpdater(io, message.doc_id, message.error, message)
 
 	_applyUpdateFromDocumentUpdater: (io, doc_id, update) ->
+		logger.log({doc_id}, "apply update from doc updater")
 		for client in io.sockets.clients(doc_id)
 			if client.id == update.meta.source
 				logger.log doc_id: doc_id, version: update.v, source: update.meta?.source, "distributing update to sender"
