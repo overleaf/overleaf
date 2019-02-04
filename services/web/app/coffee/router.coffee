@@ -121,7 +121,6 @@ module.exports = class Router
 		webRouter.get '/user/emails/confirm',
 			UserEmailsController.showConfirm
 		webRouter.post '/user/emails/confirm',
-			AuthenticationController.requireLogin(),
 			RateLimiterMiddlewear.rateLimit({
 				endpointName: "confirm-email"
 				maxRequests: 10
