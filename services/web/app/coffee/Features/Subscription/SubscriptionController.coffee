@@ -49,14 +49,14 @@ module.exports = SubscriptionController =
 		LimitationsManager.userHasV1OrV2Subscription user, (err, hasSubscription)->
 			return next(err) if err?
 			if hasSubscription or !plan?
-				res.redirect "/user/subscription"
+				res.redirect "/user/subscription?hasSubscription=true"
 			else
 				# LimitationsManager.userHasV2Subscription only checks Mongo. Double check with
 				# Recurly as well at this point (we don't do this most places for speed).
 				SubscriptionHandler.validateNoSubscriptionInRecurly user._id, (error, valid) ->
 					return next(error) if error?
 					if !valid
-						res.redirect "/user/subscription"
+						res.redirect "/user/subscription?hasSubscription=true"
 						return
 					else
 						currency = req.query.currency?.toUpperCase()
@@ -100,30 +100,37 @@ module.exports = SubscriptionController =
 				managedPublishers,
 				v1SubscriptionStatus
 			} = results
-			logger.log {
-				user,
-				personalSubscription,
-				memberGroupSubscriptions,
-				managedGroupSubscriptions,
-				confirmedMemberInstitutions,
-				managedInstitutions,
-				managedPublishers,
-				v1SubscriptionStatus
-			}, "showing subscription dashboard"
-			plans = SubscriptionViewModelBuilder.buildViewModel()
-			data = {
-				title: "your_subscription"
-				plans,
-				user,
-				personalSubscription,
-				memberGroupSubscriptions,
-				managedGroupSubscriptions,
-				confirmedMemberInstitutions,
-				managedInstitutions,
-				managedPublishers,
-				v1SubscriptionStatus
-			}
-			res.render "subscriptions/dashboard", data
+			LimitationsManager.userHasV1OrV2Subscription user, (err, hasSubscription) ->
+				return next(error) if error?
+				fromPlansPage = req.query.hasSubscription
+				logger.log {
+					user,
+					hasSubscription,
+					fromPlansPage,
+					personalSubscription,
+					memberGroupSubscriptions,
+					managedGroupSubscriptions,
+					confirmedMemberInstitutions,
+					managedInstitutions,
+					managedPublishers,
+					v1SubscriptionStatus
+				}, "showing subscription dashboard"
+				plans = SubscriptionViewModelBuilder.buildViewModel()
+				data = {
+					title: "your_subscription"
+					plans,
+					user,
+					hasSubscription,
+					fromPlansPage,
+					personalSubscription,
+					memberGroupSubscriptions,
+					managedGroupSubscriptions,
+					confirmedMemberInstitutions,
+					managedInstitutions,
+					managedPublishers,
+					v1SubscriptionStatus
+				}
+				res.render "subscriptions/dashboard", data
 
 	createSubscription: (req, res, next)->
 		user = AuthenticationController.getSessionUser(req)

@@ -7,29 +7,29 @@ block content
 		.container
 			.row
 				.col-md-8.col-md-offset-2
+					-if (fromPlansPage)
+						.alert.alert-warning
+							p You already have a subscription
 					.card
 						.page-header
 							h1 #{translate("your_subscription")} 
 
-						-var hasAnySubscription = false
+						-var hasDisplayedSubscription = false
 						-if (personalSubscription)
-							-hasAnySubscription = true
+							-hasDisplayedSubscription = true
 							include ./dashboard/_personal_subscription
 
 						-if (managedGroupSubscriptions && managedGroupSubscriptions.length > 0)
-							-hasAnySubscription = true
 							include ./dashboard/_managed_groups
 
 						-if (managedInstitutions && managedInstitutions.length > 0)
-							-hasAnySubscription = true
 							include ./dashboard/_managed_institutions
 
 						-if (managedPublishers && managedPublishers.length > 0)
-							-hasAnySubscription = true
 							include ./dashboard/_managed_publishers
 
 						-if (memberGroupSubscriptions && memberGroupSubscriptions.length > 0)
-							-hasAnySubscription = true
+							-hasDisplayedSubscription = true
 							include ./dashboard/_group_memberships
 
 						-if (confirmedMemberInstitutions && confirmedMemberInstitutions.length > 0)
@@ -38,7 +38,13 @@ block content
 						-if (v1SubscriptionStatus)
 							include ./dashboard/_v1_subscription_status
 
-						-if (!hasAnySubscription)
+						-if (hasSubscription && !hasDisplayedSubscription)
+							-hasDisplayedSubscription = true
+							p You're on an #{settings.appName} Paid plan. Contact 
+								a(href="mailto:support@overleaf.com") support@overleaf.com
+								|  to find out more. 
+
+						-if (!hasSubscription)
 							p You're on the #{settings.appName} Free plan.
 							|
 							a(href="/user/subscription/plans").btn.btn-primary Upgrade now
