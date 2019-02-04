@@ -12,7 +12,7 @@ span(ng-controller="NotificationsController").userNotifications
 						.alert.alert-info(ng-switch-when="notification_project_invite", ng-controller="ProjectInviteNotificationController")
 							div.notification_inner
 								.notification_body(ng-show="!notification.accepted")
-									| !{translate("notification_project_invite_message")}
+									| !{translate("notification_project_invite_message", { userName: "{{ userName }}" })}
 									a.pull-right.btn.btn-sm.btn-info(href, ng-click="accept()", ng-disabled="notification.inflight")
 										span(ng-show="!notification.inflight") #{translate("join_project")}
 										span(ng-show="notification.inflight")
@@ -20,7 +20,7 @@ span(ng-controller="NotificationsController").userNotifications
 											| &nbsp;
 											| #{translate("joining")}...
 								.notification_body(ng-show="notification.accepted")
-									| !{translate("notification_project_invite_accepted_message")}
+									| !{translate("notification_project_invite_accepted_message", { projectName: "{{ projectName }}" })}
 									a.pull-right.btn.btn-sm.btn-info(href="/project/{{ notification.messageOpts.projectId }}") #{translate("open_project")}
 								span().notification_close
 									button(ng-click="dismiss(notification)").close.pull-right
