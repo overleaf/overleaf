@@ -19,6 +19,8 @@ define([
   'ide/editor/directives/aceEditor/track-changes/TrackChangesManager',
   'ide/editor/directives/aceEditor/track-changes/TrackChangesAdapter',
   'ide/editor/directives/aceEditor/metadata/MetadataManager',
+  'ide/editor/directives/aceEditor/global-key-binding/GlobalKeybindingManager',
+  'ide/editor/directives/aceEditor/global-key-binding/GlobalKeybindingAdapter',
   'ide/metadata/services/metadata',
   'ide/graphics/services/graphics',
   'ide/preamble/services/preamble',
@@ -38,7 +40,9 @@ define([
   CursorPositionAdapter,
   TrackChangesManager,
   TrackChangesAdapter,
-  MetadataManager
+  MetadataManager,
+  GlobalKeybindingManager,
+  GlobalKeybindingAdapter
 ) {
   let syntaxValidationEnabled
   const { EditSession } = ace.require('ace/edit_session')
@@ -197,8 +201,11 @@ define([
           preamble,
           files
         )
-
         /* eslint-enable no-unused-vars */
+
+        const keybindingManager = new GlobalKeybindingManager(
+          new GlobalKeybindingAdapter(editor)
+        )
 
         scope.$watch('onSave', function(callback) {
           if (callback != null) {
@@ -744,6 +751,7 @@ define([
           triggerEditorInitEvent()
           initSpellCheck()
           initTrackChanges()
+          keybindingManager.init()
 
           resetScrollMargins()
 
@@ -794,6 +802,7 @@ define([
         var detachFromAce = function(sharejs_doc) {
           tearDownSpellCheck()
           tearDownTrackChanges()
+          keybindingManager.tearDown()
           sharejs_doc.detachFromAce()
           sharejs_doc.off('remoteop.recordRemote')
 
