@@ -30,6 +30,7 @@ describe "InstitutionsController", ->
 		
 		@getUsersByHostname = sinon.stub().callsArgWith(2, null, [ @stubbedUser1, @stubbedUser2 ])
 		@addAffiliation = sinon.stub().callsArgWith(3, null)
+		@refreshFeatures = sinon.stub().callsArgWith(2, null)
 		@InstitutionsController = SandboxedModule.require modulePath, requires:
 			'logger-sharelatex': @logger
 			'../User/UserGetter':
@@ -38,6 +39,8 @@ describe "InstitutionsController", ->
 				addAffiliation: @addAffiliation
 			'../../models/Institution': Institution: @Institution =
 				findOneAndUpdate: sinon.stub().yields()
+			'../Subscription/FeaturesUpdater':
+				refreshFeatures: @refreshFeatures
 
 		@req =
 			body: hostname: 'mit.edu'
@@ -56,6 +59,8 @@ describe "InstitutionsController", ->
 				@addAffiliation.calledWith(@stubbedUser1._id, @stubbedUser1.emails[0].email).should.equal true
 				@addAffiliation.calledWith(@stubbedUser1._id, @stubbedUser1.emails[2].email).should.equal true
 				@addAffiliation.calledWith(@stubbedUser2._id, @stubbedUser2.emails[0].email).should.equal true
+				@refreshFeatures.calledWith(@stubbedUser1._id, true).should.equal true
+				@refreshFeatures.calledWith(@stubbedUser2._id, true).should.equal true
 				done()
 			@InstitutionsController.confirmDomain @req, @res, @next
 

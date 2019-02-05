@@ -2,6 +2,7 @@ logger = require("logger-sharelatex")
 UserGetter = require("../User/UserGetter")
 { addAffiliation } = require("../Institutions/InstitutionsAPI")
 Institution = require('../../models/Institution').Institution
+FeaturesUpdater = require('../Subscription/FeaturesUpdater')
 async = require('async')
 
 module.exports = InstitutionsController =
@@ -36,5 +37,5 @@ affiliateUserByReversedHostname = (user, reversedHostname, callback) ->
 			if error?
 				logger.err error: error, 'problem adding affiliation while confirming hostname'
 				return innerCallback(error)
-			innerCallback()
+			FeaturesUpdater.refreshFeatures user._id, true, innerCallback
 	), callback
