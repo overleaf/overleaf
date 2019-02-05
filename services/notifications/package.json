@@ -4,8 +4,17 @@
   "description": "An API to handle user notifications",
   "main": "app.js",
   "scripts": {
-    "compile:app": "coffee -o app/js -c app/coffee && coffee -c app.coffee",
-    "start": "npm run compile:app && node app.js"
+    "compile:app": "([ -e app/coffee ] && coffee -m $COFFEE_OPTIONS -o app/js -c app/coffee || echo 'No CoffeeScript folder to compile') && ( [ -e app.coffee ] && coffee -m $COFFEE_OPTIONS -c app.coffee || echo 'No CoffeeScript app to compile')",
+    "start": "npm run compile:app && node $NODE_APP_OPTIONS app.js",
+    "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 30000 --exit $@ test/acceptance/js",
+    "test:acceptance": "npm run compile:app && npm run compile:acceptance_tests && npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
+    "test:unit:_run": "mocha --recursive --reporter spec --exit $@ test/unit/js",
+    "test:unit": "npm run compile:app && npm run compile:unit_tests && npm run test:unit:_run -- --grep=$MOCHA_GREP",
+    "compile:unit_tests": "[ ! -e test/unit/coffee ] &&  echo 'No unit tests to compile' || coffee -o test/unit/js -c test/unit/coffee",
+    "compile:acceptance_tests": "[ ! -e test/acceptance/coffee ] && echo 'No acceptance tests to compile' || coffee -o test/acceptance/js -c test/acceptance/coffee",
+    "compile:all": "npm run compile:app && npm run compile:unit_tests && npm run compile:acceptance_tests && npm run compile:smoke_tests",
+    "nodemon": "nodemon --config nodemon.json",
+    "compile:smoke_tests": "[ ! -e test/smoke/coffee ] &&  echo 'No smoke tests to compile' || coffee -o test/smoke/js -c test/smoke/coffee"
   },
   "author": "",
   "license": "ISC",
@@ -13,24 +22,19 @@
     "async": "^0.1.22",
     "coffee-script": "^1.7.1",
     "express": "3.1.0",
-    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.1.0",
-    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.7.1",
+    "logger-sharelatex": "^1.6.0",
+    "metrics-sharelatex": "^2.1.1",
     "mongojs": "^2.4.0",
     "node-statsd": "0.0.3",
     "request": "^2.65.0",
-    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
+    "settings-sharelatex": "^1.1.0",
     "underscore": "1.4.4"
   },
   "devDependencies": {
     "bunyan": "^1.0.0",
-    "chai": "",
-    "grunt": "^0.4.5",
-    "grunt-bunyan": "^0.5.0",
-    "grunt-contrib-clean": "^0.6.0",
-    "grunt-contrib-coffee": "^0.11.0",
-    "grunt-execute": "^0.2.2",
-    "grunt-mocha-test": "^0.11.0",
-    "sandboxed-module": "",
-    "sinon": ""
+    "chai": "^4.2.0",
+    "mocha": "^4.1.0",
+    "sandboxed-module": "^2.0.3",
+    "sinon": "^6.3.5"
   }
 }
