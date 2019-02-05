@@ -1,19 +1,24 @@
+Metrics    = require "metrics-sharelatex"
+Metrics.initialize("contacts")
+
 Settings   = require "settings-sharelatex"
 logger     = require "logger-sharelatex"
 express    = require "express"
 bodyParser = require "body-parser"
 Errors     = require "./app/js/Errors"
 HttpController = require "./app/js/HttpController"
-Metrics    = require "metrics-sharelatex"
+
 Path       = require "path"
 
-Metrics.initialize("contacts")
+
 logger.initialize("contacts")
 Metrics.event_loop?.monitor(logger)
 
 app = express()
 
 app.use Metrics.http.monitor(logger)
+
+Metrics.injectMetricsRoute(app)
 
 app.get  '/user/:user_id/contacts', HttpController.getContacts
 app.post '/user/:user_id/contacts', bodyParser.json(limit: "2mb"), HttpController.addContact
@@ -30,6 +35,11 @@ app.use (error, req, res, next) ->
 
 port = Settings.internal.contacts.port
 host = Settings.internal.contacts.host
-app.listen port, host, (error) ->
-	throw error if error?
-	logger.info "contacts starting up, listening on #{host}:#{port}"
+
+
+if !module.parent # Called directly
+	app.listen port, host, (error) ->
+		throw error if error?
+		logger.info "contacts starting up, listening on #{host}:#{port}"
+
+module.exports = app
