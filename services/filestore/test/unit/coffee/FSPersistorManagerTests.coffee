@@ -34,6 +34,8 @@ describe "FSPersistorManagerTests", ->
         err:->
       "response":response
       "rimraf":@Rimraf
+      "./Errors": @Errors =
+        NotFoundError: sinon.stub()
     @location = "/tmp"
     @name1 = "530f2407e7ef165704000007/530f838b46d9a9e859000008"
     @name1Filtered ="530f2407e7ef165704000007_530f838b46d9a9e859000008"
@@ -119,32 +121,33 @@ describe "FSPersistorManagerTests", ->
 
     describe "error conditions", ->
 
-      beforeEach ->
-        @fakeCode = 'ENOENT'
-        @Fs.createReadStream.returns(
-          on: (key, callback) =>
-            err = new Error()
-            err.message = "this is from a test"
-            err.code = @fakeCode
-            callback(err, null)
-        )
-
       describe "when the file does not exist", ->
 
         beforeEach ->
           @fakeCode = 'ENOENT'
-
+          @Fs.createReadStream.returns(
+            on: (key, callback) =>
+              err = new Error()
+              err.code = @fakeCode
+              callback(err, null)
+          )
         it "should give a NotFoundError", (done) ->
           @FSPersistorManager.getFileStream @location, @name1, @opts, (err,res)=>
             expect(res).to.equal null
             expect(err).to.not.equal null
-            expect(err.name == "NotFoundError").to.equal true
+            expect(err instanceof @Errors.NotFoundError).to.equal true
             done()
 
       describe "when some other error happens", ->
 
         beforeEach ->
           @fakeCode = 'SOMETHINGHORRIBLE'
+          @Fs.createReadStream.returns(
+            on: (key, callback) =>
+              err = new Error()
+              err.code = @fakeCode
+              callback(err, null)
+          )
 
         it "should give an Error", (done) ->
           @FSPersistorManager.getFileStream @location, @name1, @opts, (err,res)=>
