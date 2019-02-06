@@ -31,6 +31,8 @@ describe "FileController", ->
 			"./Errors": @Errors =
 				NotFoundError: sinon.stub()
 			"settings-sharelatex": @settings
+			"metrics-sharelatex": 
+				inc:->
 			"logger-sharelatex":
 				log:->
 				err:->

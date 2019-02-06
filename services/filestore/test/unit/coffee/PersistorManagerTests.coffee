@@ -66,14 +66,14 @@ describe "PersistorManagerTests", ->
 	describe "test unspecified mixins", ->
 
 		it "should load s3 when no wrapper specified", (done) ->
-			@settings =
+			@settings = {filestore:{}}
 			@requires =
 				"./S3PersistorManager": @S3PersistorManager
 				"settings-sharelatex": @settings
 				"logger-sharelatex":
 					log:->
 					err:->
-			@PersistorManager=SandboxedModule.require modulePath, requires: @requires
+			@PersistorManager = SandboxedModule.require modulePath, requires: @requires
 			@PersistorManager.should.respondTo("getFileStream")
 			@PersistorManager.getFileStream()
 			@S3PersistorManager.getFileStream.calledOnce.should.equal true

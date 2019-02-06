@@ -110,21 +110,17 @@ describe "S3PersistorManagerTests", ->
 
 		describe "error conditions", ->
 
-			beforeEach ->
-				@fakeResponse =
-					statusCode: 500
-				@stubbedKnoxClient.get.returns(
-					on: (key, callback) =>
-						if key == 'response'
-							callback(@fakeResponse)
-					end: ->
-				)
-
 			describe "when the file doesn't exist", ->
 
 				beforeEach ->
 					@fakeResponse =
 						statusCode: 404
+					@stubbedKnoxClient.get.returns(
+						on: (key, callback) =>
+							if key == 'response'
+								callback(@fakeResponse)
+						end: ->
+					)
 
 				it "should produce a NotFoundError", (done) ->
 					@S3PersistorManager.getFileStream @bucketName, @key, @opts, (err, stream)=> # empty callback
@@ -145,6 +141,12 @@ describe "S3PersistorManagerTests", ->
 				beforeEach ->
 					@fakeResponse =
 						statusCode: 500
+					@stubbedKnoxClient.get.returns(
+						on: (key, callback) =>
+							if key == 'response'
+								callback(@fakeResponse)
+						end: ->
+					)
 
 				it "should produce an error", (done) ->
 					@S3PersistorManager.getFileStream @bucketName, @key, @opts, (err, stream)=> # empty callback

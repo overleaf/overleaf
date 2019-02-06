@@ -33,6 +33,8 @@ checkCanStoreFiles = (callback)->
 				callback(err)
 
 checkFileConvert = (callback)->
+	if !settings.enableConversions
+		return callback()
 	imgPath = path.join(settings.path.uploadFolder, "/tiny.pdf")
 	async.waterfall [
 		(cb)->

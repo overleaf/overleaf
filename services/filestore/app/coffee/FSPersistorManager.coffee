@@ -49,13 +49,13 @@ module.exports =
     sourceStream.on 'error', (err) ->
       logger.err err:err, location:location, name:name, "Error reading from file"
       if err.code == 'ENOENT'
-        callback new Errors.NotFoundError(err.message), null
+        return callback new Errors.NotFoundError(err.message), null
       else
-        callback err, null
+        return callback err, null
     sourceStream.on 'readable', () ->
       # This can be called multiple times, but the callback wrapper
       # ensures the callback is only called once
-      callback null, sourceStream
+      return callback null, sourceStream
 
 
   copyFile: (location, fromName, toName, callback = (err)->)->

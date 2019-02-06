@@ -1,4 +1,7 @@
+Metrics = require "metrics-sharelatex"
+Metrics.initialize("filestore")
 express = require('express')
+bodyParser = require "body-parser"
 logger = require('logger-sharelatex')
 logger.initialize("filestore")
 settings = require("settings-sharelatex")
@@ -14,24 +17,11 @@ app = express()
 if settings.sentry?.dsn?
 	logger.initializeErrorReporting(settings.sentry.dsn)
 
-Metrics = require "metrics-sharelatex"
-Metrics.initialize("filestore")
 Metrics.open_sockets.monitor(logger)
 Metrics.event_loop?.monitor(logger)
 Metrics.memory.monitor(logger)
 
-app.configure ->
-	app.use Metrics.http.monitor(logger)
-
-app.configure 'development', ->
-	console.log "Development Enviroment"
-	app.use express.errorHandler({ dumpExceptions: true, showStack: true })
-
-app.configure 'production', ->
-	console.log "Production Enviroment"
-	app.use express.errorHandler()
-
-Metrics.inc "startup"
+app.use Metrics.http.monitor(logger)
 
 app.use (req, res, next)->
 	Metrics.inc "http-request"
@@ -71,10 +61,12 @@ app.use (req, res, next) ->
 		res.set 'Connection', 'close'
 	next()
 
+Metrics.injectMetricsRoute(app)
+
 app.get  "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.getFile
 app.post "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.insertFile
 
-app.put "/project/:project_id/file/:file_id", keyBuilder.userFileKey, express.bodyParser(), fileController.copyFile
+app.put "/project/:project_id/file/:file_id", keyBuilder.userFileKey, bodyParser.json(), fileController.copyFile
 app.del "/project/:project_id/file/:file_id", keyBuilder.userFileKey, fileController.deleteFile
 
 app.get  "/template/:template_id/v/:version/:format", keyBuilder.templateFileKey, fileController.getFile
@@ -85,7 +77,7 @@ app.post "/template/:template_id/v/:version/:format", keyBuilder.templateFileKey
 app.get  "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.getFile
 app.post "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.insertFile
 
-app.put "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, express.bodyParser(), fileController.copyFile
+app.put "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, bodyParser.json(), fileController.copyFile
 app.del "/project/:project_id/public/:public_file_id", keyBuilder.publicFileKey, fileController.deleteFile
 
 app.get "/project/:project_id/size", keyBuilder.publicProjectKey, fileController.directorySize
@@ -114,9 +106,8 @@ app.get "/health_check", healthCheckController.check
 app.get '*', (req, res)->
 	res.send 404
 
-server = require('http').createServer(app)
-port = settings.internal.filestore.port or 3009
-host = settings.internal.filestore.host or "localhost"
+
+
 
 beginShutdown = () ->
 	if appIsOk
@@ -126,14 +117,22 @@ beginShutdown = () ->
 			process.exit 1
 		, 120*1000
 		killTimer.unref?() # prevent timer from keeping process alive
-		server.close () ->
+		app.close () ->
 			logger.log "closed all connections"
 			Metrics.close()
 			process.disconnect?()
 		logger.log "server will stop accepting connections"
 
-server.listen port, host, ->
-	logger.info "Filestore starting up, listening on #{host}:#{port}"
+
+port = settings.internal.filestore.port or 3009
+host = "0.0.0.0"
+
+if !module.parent # Called directly
+	app.listen port, host, (error) ->
+		logger.info "Filestore starting up, listening on #{host}:#{port}"
+
+
+module.exports = app
 
 process.on 'SIGTERM', () ->
 	logger.log("filestore got SIGTERM, shutting down gracefully")

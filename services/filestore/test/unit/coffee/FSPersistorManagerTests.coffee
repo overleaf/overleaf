@@ -121,20 +121,16 @@ describe "FSPersistorManagerTests", ->
 
     describe "error conditions", ->
 
-      beforeEach ->
-        @fakeCode = 'ENOENT'
-        @Fs.createReadStream.returns(
-          on: (key, callback) =>
-            err = new Error()
-            err.code = @fakeCode
-            callback(err, null)
-        )
-
       describe "when the file does not exist", ->
 
         beforeEach ->
           @fakeCode = 'ENOENT'
-
+          @Fs.createReadStream.returns(
+            on: (key, callback) =>
+              err = new Error()
+              err.code = @fakeCode
+              callback(err, null)
+          )
         it "should give a NotFoundError", (done) ->
           @FSPersistorManager.getFileStream @location, @name1, @opts, (err,res)=>
             expect(res).to.equal null
@@ -146,6 +142,12 @@ describe "FSPersistorManagerTests", ->
 
         beforeEach ->
           @fakeCode = 'SOMETHINGHORRIBLE'
+          @Fs.createReadStream.returns(
+            on: (key, callback) =>
+              err = new Error()
+              err.code = @fakeCode
+              callback(err, null)
+          )
 
         it "should give an Error", (done) ->
           @FSPersistorManager.getFileStream @location, @name1, @opts, (err,res)=>

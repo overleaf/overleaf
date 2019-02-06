@@ -30,6 +30,11 @@ describe "LocalFileWriter", ->
 				log:->
 				err:->
 			"settings-sharelatex":@settings
+			"metrics-sharelatex": 
+				inc:->
+				Timer:->
+					done:->
+
 		@stubbedFsPath = "something/uploads/eio2k1j3"
 
 	describe "writeStrem", ->

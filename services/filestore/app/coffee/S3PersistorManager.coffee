@@ -88,10 +88,11 @@ module.exports =
 				# permission to list the bucket contents.
 				logger.log bucketName:bucketName, key:key, "file not found in s3"
 				return callback new Errors.NotFoundError("File not found in S3: #{bucketName}:#{key}"), null
-			if res.statusCode not in [200, 206]
+			else if res.statusCode not in [200, 206]
 				logger.log bucketName:bucketName, key:key, "error getting file from s3: #{res.statusCode}"
 				return callback new Error("Got non-200 response from S3: #{res.statusCode}"), null
-			callback null, res
+			else 
+				return callback null, res
 		s3Stream.on 'error', (err) ->
 			logger.err err:err, bucketName:bucketName, key:key, "error getting file stream from s3"
 			callback err
