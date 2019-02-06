@@ -33,6 +33,7 @@ define([], function() {
       constructor(ide, $scope) {
         this.ide = ide
         this.$scope = $scope
+        this.wsUrl = ide.wsUrl || null // websocket url (if defined)
         if (typeof io === 'undefined' || io === null) {
           console.error(
             'Socket.io javascript not loaded. Please check that the real-time service is running and accessible.'
@@ -94,7 +95,7 @@ define([], function() {
         })
 
         this.ide.socket = io.connect(
-          null,
+          this.wsUrl,
           {
             reconnect: false,
             'connect timeout': 30 * 1000,

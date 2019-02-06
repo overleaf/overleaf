@@ -185,6 +185,7 @@ define([
 
     ide.validFileRegex = '^[^*/]*$' // Don't allow * and /
 
+    ide.wsUrl = window.sharelatex.wsUrl || null // websocket url (if defined)
     ide.project_id = $scope.project_id = window.project_id
     ide.$scope = $scope
 
