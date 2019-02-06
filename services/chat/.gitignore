@@ -5,3 +5,5 @@ public/build/
 node_modules/
 
 plato/
+
+**/*.map

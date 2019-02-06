@@ -17,13 +17,6 @@ pipeline {
 
   stages {
     stage('Install') {
-      agent {
-        docker {
-          image 'node:6.14.1'
-          args "-v /var/lib/jenkins/.npm:/tmp/.npm -e HOME=/tmp"
-          reuseNode true
-        }
-      }
       steps {
         withCredentials([usernamePassword(credentialsId: 'GITHUB_INTEGRATION', usernameVariable: 'GH_AUTH_USERNAME', passwordVariable: 'GH_AUTH_PASSWORD')]) {
           sh "curl $GIT_API_URL \
@@ -34,13 +27,12 @@ pipeline {
             \"context\": \"ci/jenkins\" }' \
             -u $GH_AUTH_USERNAME:$GH_AUTH_PASSWORD"
         }
-        // we need to disable logallrefupdates, else git clones
-        // during the npm install will require git to lookup the
-        // user id which does not exist in the container's
-        // /etc/passwd file, causing the clone to fail.
-        sh 'git config --global core.logallrefupdates false'
-        sh 'rm -rf node_modules'
-        sh 'npm install && npm rebuild'
+      }
+    }
+
+    stage('Build') {
+      steps {
+        sh 'make build'
       }
     }
 
@@ -56,20 +48,27 @@ pipeline {
       }
     }
 
-    stage('Package and publish build') {
+    stage('Package and docker push') {
       steps {
         sh 'echo ${BUILD_NUMBER} > build_number.txt'
         sh 'touch build.tar.gz' // Avoid tar warning about files changing during read
-        sh 'tar -czf build.tar.gz --exclude=build.tar.gz --exclude-vcs .'
-        withAWS(credentials:'S3_CI_BUILDS_AWS_KEYS', region:"${S3_REGION_BUILD_ARTEFACTS}") {
-            s3Upload(file:'build.tar.gz', bucket:"${S3_BUCKET_BUILD_ARTEFACTS}", path:"${JOB_NAME}/${BUILD_NUMBER}.tar.gz")
+        sh 'DOCKER_COMPOSE_FLAGS="-f docker-compose.ci.yml" make tar'
+        
+        withCredentials([file(credentialsId: 'gcr.io_overleaf-ops', variable: 'DOCKER_REPO_KEY_PATH')]) {
+          sh 'docker login -u _json_key --password-stdin https://gcr.io/overleaf-ops < ${DOCKER_REPO_KEY_PATH}'
         }
+        sh 'DOCKER_REPO=gcr.io/overleaf-ops make publish'
+        sh 'docker logout https://gcr.io/overleaf-ops'
+        
       }
     }
 
-    stage('Publish build number') {
+    stage('Publish to s3') {
       steps {
         sh 'echo ${BRANCH_NAME}-${BUILD_NUMBER} > build_number.txt'
+        withAWS(credentials:'S3_CI_BUILDS_AWS_KEYS', region:"${S3_REGION_BUILD_ARTEFACTS}") {
+            s3Upload(file:'build.tar.gz', bucket:"${S3_BUCKET_BUILD_ARTEFACTS}", path:"${JOB_NAME}/${BUILD_NUMBER}.tar.gz")
+        }
         withAWS(credentials:'S3_CI_BUILDS_AWS_KEYS', region:"${S3_REGION_BUILD_ARTEFACTS}") {
             // The deployment process uses this file to figure out the latest build
             s3Upload(file:'build_number.txt', bucket:"${S3_BUCKET_BUILD_ARTEFACTS}", path:"${JOB_NAME}/latest")
