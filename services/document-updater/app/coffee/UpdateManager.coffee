@@ -47,7 +47,7 @@ module.exports = UpdateManager =
 		profile = new Profiler("fetchAndApplyUpdates", {project_id, doc_id})
 		RealTimeRedisManager.getPendingUpdatesForDoc doc_id, (error, updates) =>
 			return callback(error) if error?
-			logger.info {project_id: project_id, doc_id: doc_id, count: updates.length}, "processing updates"
+			logger.log {project_id: project_id, doc_id: doc_id, count: updates.length}, "processing updates"
 			if updates.length == 0
 				return callback()
 			profile.log("getPendingUpdatesForDoc")

@@ -30,12 +30,12 @@ module.exports = RangesManager =
 			return callback(error)
 
 		response = RangesManager._getRanges rangesTracker
-		logger.info {project_id, doc_id, changesCount: response.changes?.length, commentsCount: response.comments?.length}, "applied updates to ranges"
+		logger.log {project_id, doc_id, changesCount: response.changes?.length, commentsCount: response.comments?.length}, "applied updates to ranges"
 		callback null, response
 
 	acceptChanges: (change_ids, ranges, callback = (error, ranges) ->) ->
 		{changes, comments} = ranges
-		logger.info "accepting #{ change_ids.length } changes in ranges"
+		logger.log "accepting #{ change_ids.length } changes in ranges"
 		rangesTracker = new RangesTracker(changes, comments)
 		rangesTracker.removeChangeIds(change_ids)
 		response = RangesManager._getRanges(rangesTracker)
@@ -43,7 +43,7 @@ module.exports = RangesManager =
 
 	deleteComment: (comment_id, ranges, callback = (error, ranges) ->) ->
 		{changes, comments} = ranges
-		logger.info {comment_id}, "deleting comment in ranges"
+		logger.log {comment_id}, "deleting comment in ranges"
 		rangesTracker = new RangesTracker(changes, comments)
 		rangesTracker.removeCommentId(comment_id)
 		response = RangesManager._getRanges(rangesTracker)

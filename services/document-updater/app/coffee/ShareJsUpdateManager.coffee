@@ -20,7 +20,7 @@ module.exports = ShareJsUpdateManager =
 		return model
 
 	applyUpdate: (project_id, doc_id, update, lines, version, callback = (error, updatedDocLines) ->) ->
-		logger.info project_id: project_id, doc_id: doc_id, update: update, "applying sharejs updates"
+		logger.log project_id: project_id, doc_id: doc_id, update: update, "applying sharejs updates"
 		jobs = []
 
 		# We could use a global model for all docs, but we're hitting issues with the
@@ -39,7 +39,7 @@ module.exports = ShareJsUpdateManager =
 					ShareJsUpdateManager._sendOp(project_id, doc_id, update)
 				else
 					return callback(error)
-			logger.info project_id: project_id, doc_id: doc_id, error: error, "applied update"
+			logger.log project_id: project_id, doc_id: doc_id, error: error, "applied update"
 			model.getSnapshot doc_key, (error, data) =>
 				return callback(error) if error?
 				docLines = data.snapshot.split(/\r\n|\n|\r/)

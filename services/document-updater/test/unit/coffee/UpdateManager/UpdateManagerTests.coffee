@@ -16,7 +16,7 @@ describe "UpdateManager", ->
 			"./RealTimeRedisManager" : @RealTimeRedisManager = {}
 			"./ShareJsUpdateManager" : @ShareJsUpdateManager = {}
 			"./HistoryManager" : @HistoryManager = {}
-			"logger-sharelatex": @logger = { log: sinon.stub(), info:-> }
+			"logger-sharelatex": @logger = { log: sinon.stub() }
 			"./Metrics": @Metrics =
 				Timer: class Timer
 					done: sinon.stub()

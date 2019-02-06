@@ -16,7 +16,7 @@ describe "DocumentManager", ->
 			"./HistoryManager": @HistoryManager =
 				flushDocChangesAsync: sinon.stub()
 				flushProjectChangesAsync: sinon.stub()
-			"logger-sharelatex": @logger = {log: sinon.stub(), info: sinon.stub()}
+			"logger-sharelatex": @logger = {log: sinon.stub()}
 			"./DocOpsManager": @DocOpsManager = {}
 			"./Metrics": @Metrics =
 				Timer: class Timer
