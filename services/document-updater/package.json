@@ -26,7 +26,7 @@
     "logger-sharelatex": "^1.6.0",
     "lynx": "0.0.11",
     "metrics-sharelatex": "^2.1.1",
-    "redis-sharelatex": "https://registry.npmjs.org/redis-sharelatex/-/redis-sharelatex-1.0.5.tgz",
+    "redis-sharelatex": "^1.0.5",
     "request": "2.25.0",
     "requestretry": "^1.12.0",
     "sandboxed-module": "~0.2.0",

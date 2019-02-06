@@ -1284,7 +1284,7 @@
     },
     "redis-sharelatex": {
       "version": "1.0.5",
-      "from": "https://registry.npmjs.org/redis-sharelatex/-/redis-sharelatex-1.0.5.tgz",
+      "from": "redis-sharelatex@latest",
       "resolved": "https://registry.npmjs.org/redis-sharelatex/-/redis-sharelatex-1.0.5.tgz",
       "dependencies": {
         "coffee-script": {
