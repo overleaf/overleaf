@@ -1,19 +1,22 @@
+Metrics    = require "metrics-sharelatex"
+Metrics.initialize("docstore")
 Settings   = require "settings-sharelatex"
 logger     = require "logger-sharelatex"
 express    = require "express"
 bodyParser = require "body-parser"
 Errors     = require "./app/js/Errors"
 HttpController = require "./app/js/HttpController"
-Metrics    = require "metrics-sharelatex"
 Path       = require "path"
 
-Metrics.initialize("docstore")
+
 logger.initialize("docstore")
 Metrics.event_loop?.monitor(logger)
 
 app = express()
 
 app.use Metrics.http.monitor(logger)
+
+Metrics.injectMetricsRoute(app)
 
 app.param 'project_id', (req, res, next, project_id) ->
 	if project_id?.match /^[0-9a-f]{24}$/
@@ -26,6 +29,8 @@ app.param 'doc_id', (req, res, next, doc_id) ->
 		next()
 	else
 		next new Error("invalid doc id")
+
+Metrics.injectMetricsRoute(app)
 
 app.get  '/project/:project_id/doc', HttpController.getAllDocs
 app.get  '/project/:project_id/ranges', HttpController.getAllRanges
@@ -52,6 +57,10 @@ app.use (error, req, res, next) ->
 
 port = Settings.internal.docstore.port
 host = Settings.internal.docstore.host
-app.listen port, host, (error) ->
-	throw error if error?
-	logger.info "Docstore starting up, listening on #{host}:#{port}"
+
+if !module.parent # Called directly
+	app.listen port, host, (error) ->
+		throw error if error?
+		logger.info "Docstore starting up, listening on #{host}:#{port}"
+
+module.exports = app

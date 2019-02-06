@@ -2,6 +2,7 @@ sinon = require "sinon"
 chai = require("chai")
 chai.should()
 {ObjectId} = require "mongojs"
+DocstoreApp = require "./helpers/DocstoreApp"
 
 DocstoreClient = require "./helpers/DocstoreClient"
 
@@ -30,9 +31,10 @@ describe "Applying updates to a doc", ->
 			}]
 		}
 		@version = 42
-		DocstoreClient.createDoc @project_id, @doc_id, @originalLines, @version, @originalRanges, (error) =>
-			throw error if error?
-			done()
+		DocstoreApp.ensureRunning =>
+			DocstoreClient.createDoc @project_id, @doc_id, @originalLines, @version, @originalRanges, (error) =>
+				throw error if error?
+				done()
 
 	describe "when nothing has been updated", ->
 		beforeEach (done) ->

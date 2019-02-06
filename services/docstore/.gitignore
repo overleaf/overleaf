@@ -3,4 +3,5 @@ app/js/
 test/unit/js
 test/acceptance/js
 app.js
+**/*.map
 forever

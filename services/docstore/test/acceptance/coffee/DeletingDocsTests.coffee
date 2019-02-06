@@ -2,6 +2,7 @@ sinon = require "sinon"
 chai = require("chai")
 chai.should()
 {db, ObjectId} = require "../../../app/js/mongojs"
+DocstoreApp = require "./helpers/DocstoreApp"
 
 DocstoreClient = require "./helpers/DocstoreClient"
 
@@ -12,9 +13,10 @@ describe "Deleting a doc", ->
 		@lines = ["original", "lines"]
 		@version = 42
 		@ranges = []
-		DocstoreClient.createDoc @project_id, @doc_id, @lines, @version, @ranges, (error) =>
-			throw error if error?
-			done()
+		DocstoreApp.ensureRunning =>
+			DocstoreClient.createDoc @project_id, @doc_id, @lines, @version, @ranges, (error) =>
+				throw error if error?
+				done()
 
 	describe "when the doc exists", ->
 		beforeEach (done) ->
