@@ -53,5 +53,4 @@ module.exports =
 		if !key?
 			key = uuid.v1()
 		key = key.replace(/\//g,"-")
-		console.log Settings.path.uploadFolder, key
 		path.join(Settings.path.uploadFolder, key)
