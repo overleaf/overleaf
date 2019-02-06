@@ -425,6 +425,8 @@ module.exports = class Router
 		webRouter.post '/admin/messages', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.createMessage
 		webRouter.post '/admin/messages/clear', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.clearMessages
 
+		privateApiRouter.post '/disconnectAllUsers', AdminController.dissconectAllUsers
+
 		privateApiRouter.get '/perfTest', (req,res)->
 			res.send("hello")
 
