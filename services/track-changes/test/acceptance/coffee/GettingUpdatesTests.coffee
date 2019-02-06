@@ -7,6 +7,7 @@ db = mongojs.db
 ObjectId = mongojs.ObjectId
 Settings = require "settings-sharelatex"
 
+TrackChangesApp = require "./helpers/TrackChangesApp"
 TrackChangesClient = require "./helpers/TrackChangesClient"
 MockWebApi = require "./helpers/MockWebApi"
 
@@ -46,10 +47,11 @@ describe "Getting updates", ->
 				v: 2 * i + 2
 			}
 		@updates[0].meta.user_id = @deleted_user_id
-
-		TrackChangesClient.pushRawUpdates @project_id, @doc_id, @updates, (error) =>
-			throw error if error?
-			done()
+		
+		TrackChangesApp.ensureRunning =>
+			TrackChangesClient.pushRawUpdates @project_id, @doc_id, @updates, (error) =>
+				throw error if error?
+				done()
 
 	after: () ->
 		MockWebApi.getUserInfo.restore()

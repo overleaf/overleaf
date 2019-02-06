@@ -2,6 +2,7 @@
 node_modules/
 app/js
 app.js
+**/*.map
 test/unit/js
 test/acceptance/js
 forever/

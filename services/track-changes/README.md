@@ -5,6 +5,15 @@ An API for converting raw editor updates into a compressed and browseable histor
 
 [![Build Status](https://travis-ci.org/sharelatex/track-changes-sharelatex.png?branch=master)](https://travis-ci.org/sharelatex/track-changes-sharelatex)
 
+Acceptance tests can be run with the command
+```
+AWS_BUCKET=<bucket-name> AWS_ACCESS_KEY_ID=<aws-access-key> AWS_SECRET_ACCESS_KEY=<aws-secret-access-key> make test
+```
+where `bucket-name`, `aws-access-key` and `aws-secret-access-key` are the credentials for an AWS S3 bucket.
+
+
+
+
 License
 -------
 

@@ -1,3 +1,5 @@
+Metrics = require "metrics-sharelatex"
+Metrics.initialize("track-changes")
 Settings = require "settings-sharelatex"
 logger = require "logger-sharelatex"
 TrackChangesLogger = logger.initialize("track-changes").logger
@@ -23,8 +25,7 @@ TrackChangesLogger.addSerializers {
 }
 
 Path = require "path"
-Metrics = require "metrics-sharelatex"
-Metrics.initialize("track-changes")
+
 Metrics.memory.monitor(logger)
 
 child_process = require "child_process"
@@ -34,6 +35,8 @@ express = require "express"
 app = express()
 
 app.use Metrics.http.monitor(logger)
+
+Metrics.injectMetricsRoute(app)
 
 app.post "/project/:project_id/doc/:doc_id/flush", HttpController.flushDoc
 
@@ -92,9 +95,13 @@ app.use (error, req, res, next) ->
 
 port = Settings.internal?.trackchanges?.port or 3015
 host = Settings.internal?.trackchanges?.host or "localhost"
-app.listen port, host, (error) ->
-	if error?
-		logger.error err: error, "could not start track-changes server"
-	else
-		logger.info "trackchanges starting up, listening on #{host}:#{port}"
+
+if !module.parent # Called directly
+	app.listen port, host, (error) ->
+		if error?
+			logger.error err: error, "could not start track-changes server"
+		else
+			logger.info "trackchanges starting up, listening on #{host}:#{port}"
+
+module.exports = app
 

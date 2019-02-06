@@ -7,12 +7,14 @@ db = mongojs.db
 ObjectId = mongojs.ObjectId
 Settings = require "settings-sharelatex"
 
+TrackChangesApp = require "./helpers/TrackChangesApp"
 TrackChangesClient = require "./helpers/TrackChangesClient"
 MockDocUpdaterApi = require "./helpers/MockDocUpdaterApi"
 MockWebApi = require "./helpers/MockWebApi"
 
 describe "Getting a diff", ->
-	before (done) ->
+
+	beforeEach (done) ->
 		sinon.spy MockDocUpdaterApi, "getDoc"
 
 		@now = Date.now()
@@ -58,15 +60,15 @@ describe "Getting a diff", ->
 		MockDocUpdaterApi.docs[@doc_id] =
 			lines: @lines
 			version: 7
-
-		TrackChangesClient.pushRawUpdates @project_id, @doc_id, @updates, (error) =>
-			throw error if error?
-			TrackChangesClient.getDiff @project_id, @doc_id, @fromVersion, @toVersion, (error, diff) =>
+		TrackChangesApp.ensureRunning =>
+			TrackChangesClient.pushRawUpdates @project_id, @doc_id, @updates, (error) =>
 				throw error if error?
-				@diff = diff.diff
-				done()
+				TrackChangesClient.getDiff @project_id, @doc_id, @fromVersion, @toVersion, (error, diff) =>
+					throw error if error?
+					@diff = diff.diff
+					done()
 
-	after () ->
+	afterEach () ->
 		MockDocUpdaterApi.getDoc.restore()
 		MockWebApi.getUserInfo.restore()
 

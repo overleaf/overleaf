@@ -7,6 +7,7 @@ db = mongojs.db
 ObjectId = mongojs.ObjectId
 Settings = require "settings-sharelatex"
 
+TrackChangesApp = require "./helpers/TrackChangesApp"
 TrackChangesClient = require "./helpers/TrackChangesClient"
 MockDocUpdaterApi = require "./helpers/MockDocUpdaterApi"
 MockWebApi = require "./helpers/MockWebApi"
@@ -54,11 +55,12 @@ describe "Restoring a version", ->
 			lines: @lines
 			version: 7
 
-		TrackChangesClient.pushRawUpdates @project_id, @doc_id, @updates, (error) =>
-			throw error if error?
-			TrackChangesClient.restoreDoc @project_id, @doc_id, @beforeVersion, @user_id, (error) =>
+		TrackChangesApp.ensureRunning =>
+			TrackChangesClient.pushRawUpdates @project_id, @doc_id, @updates, (error) =>
 				throw error if error?
-				done()
+				TrackChangesClient.restoreDoc @project_id, @doc_id, @beforeVersion, @user_id, (error) =>
+					throw error if error?
+					done()
 
 	after () ->
 		MockDocUpdaterApi.setDoc.restore()
