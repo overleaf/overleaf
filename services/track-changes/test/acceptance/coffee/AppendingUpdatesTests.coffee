@@ -6,8 +6,6 @@ mongojs = require "../../../app/js/mongojs"
 ObjectId = mongojs.ObjectId
 Settings = require "settings-sharelatex"
 request = require "request"
-console.log "hiiiiis"
-console.log Settings.redis.history
 rclient = require("redis").createClient(Settings.redis.history) # Only works locally for now
 
 TrackChangesApp = require "./helpers/TrackChangesApp"
@@ -87,7 +85,6 @@ describe "Appending doc ops to the history", ->
 
 		describe "when the updates are recent and from the same user", ->
 			beforeEach (done) ->
-				console.log 1
 				TrackChangesClient.pushRawUpdates @project_id, @doc_id, [{
 					op: [{ i: "b", p: 6 }]
 					meta: { ts: Date.now(), user_id: @user_id }
@@ -101,13 +98,9 @@ describe "Appending doc ops to the history", ->
 					meta: { ts: Date.now(), user_id: @user_id }
 					v: 8
 				}], (error) =>
-					console.log 2, error
 					throw error if error?
-					console.log 3
 					TrackChangesClient.flushAndGetCompressedUpdates @project_id, @doc_id, (error, @updates) =>
-						console.log 4, error
 						throw error if error?
-						console.log 5
 						done()
 
 			it "should combine all the updates into one pack", ->
