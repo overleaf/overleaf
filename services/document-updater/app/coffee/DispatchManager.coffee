@@ -10,7 +10,7 @@ RateLimitManager = require('./RateLimitManager')
 
 module.exports = DispatchManager =
 	createDispatcher: (RateLimiter) ->
-		client = redis.createClient(Settings.redis.documentupdater)
+		client = redis.createClient(Settings.redis.realtime)
 		worker = {
 			client: client
 			_waitForUpdateThenDispatchWorker: (callback = (error) ->) ->

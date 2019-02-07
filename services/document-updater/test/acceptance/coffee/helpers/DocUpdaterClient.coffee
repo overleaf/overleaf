@@ -1,10 +1,10 @@
 Settings = require('settings-sharelatex')
-rclient = require("redis-sharelatex").createClient(Settings.redis.documentupdater)
-keys = Settings.redis.documentupdater.key_schema
+rclient = require("redis-sharelatex").createClient(Settings.redis.realtime)
+keys = Settings.redis.realtime.key_schema
 request = require("request").defaults(jar: false)
 async = require "async"
 
-rclient_sub = require("redis-sharelatex").createClient(Settings.redis.documentupdater)
+rclient_sub = require("redis-sharelatex").createClient(Settings.redis.realtime)
 rclient_sub.subscribe "applied-ops"
 rclient_sub.setMaxListeners(0)
 	
