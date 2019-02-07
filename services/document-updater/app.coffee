@@ -71,16 +71,16 @@ app.get '/status', (req, res)->
 	else
 		res.send('document updater is alive')
 
-
-docUpdaterRedisClient = require("redis-sharelatex").createClient(Settings.redis.documentupdater)
+webRedisClient = require("redis-sharelatex").createClient(Settings.redis.realtime)
 app.get "/health_check/redis", (req, res, next) ->
-	docUpdaterRedisClient.healthCheck (error) ->
+	webRedisClient.healthCheck (error) ->
 		if error?
 			logger.err {err: error}, "failed redis health check"
 			res.send 500
 		else
 			res.send 200
-
+			
+docUpdaterRedisClient = require("redis-sharelatex").createClient(Settings.redis.documentupdater)
 app.get "/health_check/redis_cluster", (req, res, next) ->
 	docUpdaterRedisClient.healthCheck (error) ->
 		if error?
