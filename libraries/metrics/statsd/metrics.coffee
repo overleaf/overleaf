@@ -56,6 +56,11 @@ module.exports = Metrics =
 
 	timeAsyncMethod: require('./timeAsyncMethod')
 
+	injectMetricsRoute: (app) ->
+		app.get('/metrics', (req, res) -> 
+			res.send("not implemented in statsd")
+		)
+
 	close: () ->
 		for func in destructors
 			func()
