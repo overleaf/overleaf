@@ -103,11 +103,17 @@ forceDrain = ->
 		DrainManager.startDrain(io, 4)
 	, Settings.forceDrainMsDelay
 
+shutDownInProgress = false
 if Settings.forceDrainMsDelay?
 	Settings.forceDrainMsDelay = parseInt(Settings.forceDrainMsDelay, 10)
 	logger.log forceDrainMsDelay: Settings.forceDrainMsDelay,"forceDrainMsDelay enabled"
 	for signal in ['SIGINT', 'SIGHUP', 'SIGQUIT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM', 'SIGABRT']
 		process.on signal, ->
-			logger.log signal: signal, "received interrupt, cleaning up"
-			shutdownCleanly(signal)
-			forceDrain()
+			if shutDownInProgress
+				logger.log signal: signal, "shutdown already in progress, ignoring signal"
+				return
+			else
+				shutDownInProgress = true
+				logger.log signal: signal, "received interrupt, cleaning up"
+				shutdownCleanly(signal)
+				forceDrain()
