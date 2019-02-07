@@ -79,7 +79,7 @@ module.exports = HttpController =
 		logger.log {project_id, doc_id, from, to}, "getting diff"
 		DiffManager.getDiff project_id, doc_id, from, to, (error, diff) ->
 			return next(error) if error?
-			res.send JSON.stringify(diff: diff)
+			res.json {diff: diff}
 
 	getUpdates: (req, res, next = (error) ->) ->
 		project_id = req.params.project_id
@@ -91,9 +91,10 @@ module.exports = HttpController =
 
 		UpdatesManager.getSummarizedProjectUpdates project_id, before: before, min_count: min_count, (error, updates, nextBeforeTimestamp) ->
 			return next(error) if error?
-			res.send JSON.stringify
+			res.json {
 				updates: updates
 				nextBeforeTimestamp: nextBeforeTimestamp
+			}
 
 	restore: (req, res, next = (error) ->) ->
 		{doc_id, project_id, version} = req.params
