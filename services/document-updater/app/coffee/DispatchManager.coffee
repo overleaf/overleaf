@@ -16,6 +16,7 @@ module.exports = DispatchManager =
 			_waitForUpdateThenDispatchWorker: (callback = (error) ->) ->
 				timer = new Metrics.Timer "worker.waiting"
 				worker.client.blpop "pending-updates-list", 0, (error, result) ->
+					logger.log("getting pending-updates-list", error, result)
 					timer.done()
 					return callback(error) if error?
 					return callback() if !result?
