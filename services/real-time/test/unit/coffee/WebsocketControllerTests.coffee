@@ -426,7 +426,7 @@ describe 'WebsocketController', ->
 					doc_id: @doc_id
 				}).should.equal true
 				done()
-				
+
 			it "should increment the update-client-position metric at 0.1 frequency", ->
 				@metrics.inc.calledWith("editor.update-client-position", 0.1).should.equal true
 
@@ -509,6 +509,30 @@ describe 'WebsocketController', ->
 
 			it "should increment the update-client-position metric at 0.1 frequency", ->
 				@metrics.inc.calledWith("editor.update-client-position", 0.1).should.equal true
+		describe "with a logged in user who has no names set", ->
+			beforeEach ->
+				@clientParams = {
+					project_id: @project_id
+					first_name: undefined
+					last_name: undefined
+					email: @email = "joe@example.com"
+					user_id: @user_id = "user-id-123"
+				}
+				@client.get = (param, callback) => callback null, @clientParams[param]
+				@WebsocketController.updateClientPosition @client, @update
+
+			it "should send the update to the project name with no name", ->
+				@WebsocketLoadBalancer.emitToRoom
+					.calledWith(@project_id, "clientTracking.clientUpdated", {
+						doc_id: @doc_id,
+						id: @client.id,
+						user_id: @user_id,
+						name: "",
+						row: @row,
+						column: @column,
+						email: @email
+					})
+					.should.equal true
 
 
 		describe "with an anonymous user", ->
@@ -519,20 +543,16 @@ describe 'WebsocketController', ->
 				@client.get = (param, callback) => callback null, @clientParams[param]
 				@WebsocketController.updateClientPosition @client, @update
 
-			it "should send the update to the project room with an anonymous name", ->
+			it "should send the update to the project room with no name", ->
 				@WebsocketLoadBalancer.emitToRoom
 					.calledWith(@project_id, "clientTracking.clientUpdated", {
 						doc_id: @doc_id,
 						id: @client.id
-						name: "Anonymous"
+						name: ""
 						row: @row
 						column: @column
 					})
 					.should.equal true
-				
-			it "should not send cursor data to the connected user manager", (done)->
-				@ConnectedUsersManager.updateUserPosition.called.should.equal false
-				done()
 
 	describe "applyOtUpdate", ->
 		beforeEach ->

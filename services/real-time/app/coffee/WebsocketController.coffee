@@ -145,26 +145,24 @@ module.exports = WebsocketController =
 				cursorData.id      = client.id
 				cursorData.user_id = user_id if user_id?
 				cursorData.email   = email   if email?
-				if first_name or last_name
-					cursorData.name = if first_name && last_name
-						"#{first_name} #{last_name}"
-					else if first_name
-						first_name
-					else if last_name
-						last_name
-					ConnectedUsersManager.updateUserPosition(project_id, client.id, {
-						first_name: first_name,
-						last_name:  last_name,
-						email:      email,
-						_id:        user_id
-					}, {
-						row:    cursorData.row,
-						column: cursorData.column,
-						doc_id: cursorData.doc_id
-					}, callback)
+				cursorData.name = if first_name && last_name
+					"#{first_name} #{last_name}"
+				else if first_name
+					first_name
+				else if last_name
+					last_name
 				else
-					cursorData.name = "Anonymous"
-					callback()
+					""
+				ConnectedUsersManager.updateUserPosition(project_id, client.id, {
+					first_name: first_name,
+					last_name:  last_name,
+					email:      email,
+					_id:        user_id
+				}, {
+					row:    cursorData.row,
+					column: cursorData.column,
+					doc_id: cursorData.doc_id
+				}, callback)
 				WebsocketLoadBalancer.emitToRoom(project_id, "clientTracking.clientUpdated", cursorData)
 
 	getConnectedUsers: (client, callback = (error, users) ->) ->
