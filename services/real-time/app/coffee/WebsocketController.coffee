@@ -129,7 +129,6 @@ module.exports = WebsocketController =
 			# after the initial joinDoc since we know they are already authorised.
 			## AuthorizationManager.removeAccessToDoc client, doc_id
 			callback()
-		
 	updateClientPosition: (client, cursorData, callback = (error) ->) ->
 		metrics.inc "editor.update-client-position", 0.1
 		Utils.getClientAttributes client, [
@@ -145,24 +144,26 @@ module.exports = WebsocketController =
 				cursorData.id      = client.id
 				cursorData.user_id = user_id if user_id?
 				cursorData.email   = email   if email?
-				cursorData.name = if first_name && last_name
-					"#{first_name} #{last_name}"
-				else if first_name
-					first_name
-				else if last_name
-					last_name
+				if first_name or last_name
+					cursorData.name = if first_name && last_name
+						"#{first_name} #{last_name}"
+					else if first_name
+						first_name
+					else if last_name
+						last_name
+					ConnectedUsersManager.updateUserPosition(project_id, client.id, {
+						first_name: first_name,
+						last_name:  last_name,
+						email:      email,
+						_id:        user_id
+					}, {
+						row:    cursorData.row,
+						column: cursorData.column,
+						doc_id: cursorData.doc_id
+					}, callback)
 				else
-					""
-				ConnectedUsersManager.updateUserPosition(project_id, client.id, {
-					first_name: first_name,
-					last_name:  last_name,
-					email:      email,
-					_id:        user_id
-				}, {
-					row:    cursorData.row,
-					column: cursorData.column,
-					doc_id: cursorData.doc_id
-				}, callback)
+					cursorData.name = ""
+					callback()
 				WebsocketLoadBalancer.emitToRoom(project_id, "clientTracking.clientUpdated", cursorData)
 
 	getConnectedUsers: (client, callback = (error, users) ->) ->
