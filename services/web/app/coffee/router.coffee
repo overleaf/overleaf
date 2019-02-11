@@ -470,13 +470,6 @@ module.exports = class Router
 				else
 					sendRes 500, "Compiler returned failure #{status}"
 
-		webRouter.get "/ip", (req, res, next) ->
-			res.send({
-				ip: req.ip
-				ips: req.ips
-				headers: req.headers
-			})
-
 		webRouter.get "/no-cache", (req, res, next)->
 			res.header("Cache-Control", "max-age=0")
 			res.sendStatus(404)
