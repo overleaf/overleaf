@@ -75,6 +75,7 @@ module.exports = AuthenticationController =
 		)(req, res, next)
 
 	finishLogin: (user, req, res, next) ->
+		return res.redirect('/login') if user == false # OAuth2 'state' mismatch
 		redir = AuthenticationController._getRedirectFromSession(req) || "/project"
 		AuthenticationController._loginAsyncHandlers(req, user)
 		AuthenticationController.afterLoginSessionSetup req, user, (err) ->
