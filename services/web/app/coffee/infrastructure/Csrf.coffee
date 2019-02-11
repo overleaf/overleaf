@@ -42,3 +42,15 @@ module.exports = class Csrf
 		# run a dummy csrf check to see if it returns an error
 		csrf req, null, (err) ->
 			cb(!err?)
+
+	@validateToken: (token, session, cb = (valid)->) ->
+		return cb(false) unless token?
+		# run a dummy csrf check to see if it returns an error
+		# use this to simulate a csrf check regardless of req method, headers &c.
+		req =
+			body:
+				_csrf: token
+			headers: {}
+			method: 'POST'
+			session: session
+		Csrf.validateRequest(req, cb)

@@ -89,3 +89,26 @@ describe "Csrf", ->
 				@cb = sinon.stub()
 				@Csrf.validateRequest(@req, @cb)
 				expect(@cb.calledWith(true)).to.equal true
+
+	describe 'validateToken', ->
+		describe 'when the request is invalid', ->
+			it 'calls the callback with `false`', ->
+				@cb = sinon.stub()
+				@Csrf.validateToken('token', {}, @cb)
+				expect(@cb.calledWith(false)).to.equal true
+
+		describe 'when the request is valid', ->
+			it 'calls the callback with `true`', ->
+				@Csrf = SandboxedModule.require modulePath, requires:
+					csurf: @csurf = sinon.stub().returns(@csurf_csrf = sinon.stub().callsArg(2))
+				@cb = sinon.stub()
+				@Csrf.validateToken('goodtoken', {}, @cb)
+				expect(@cb.calledWith(true)).to.equal true
+
+		describe 'when there is no token', ->
+			it 'calls the callback with `false`', ->
+				@Csrf = SandboxedModule.require modulePath, requires:
+					csurf: @csurf = sinon.stub().returns(@csurf_csrf = sinon.stub().callsArg(2))
+				@cb = sinon.stub()
+				@Csrf.validateToken(null, {}, @cb)
+				expect(@cb.calledWith(false)).to.equal true
