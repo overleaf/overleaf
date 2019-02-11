@@ -38,13 +38,13 @@ block content
 						-if (v1SubscriptionStatus)
 							include ./dashboard/_v1_subscription_status
 
-						-if (hasSubscription && !hasDisplayedSubscription)
-							-hasDisplayedSubscription = true
-							p You're on an #{settings.appName} Paid plan. Contact 
-								a(href="mailto:support@overleaf.com") support@overleaf.com
-								|  to find out more. 
-
-						-if (!hasSubscription)
-							p You're on the #{settings.appName} Free plan.
-							|
-							a(href="/user/subscription/plans").btn.btn-primary Upgrade now
+						-if (!hasDisplayedSubscription)
+							-if (hasSubscription)
+								-hasDisplayedSubscription = true
+								p You're on an #{settings.appName} Paid plan. Contact
+									a(href="mailto:support@overleaf.com") support@overleaf.com
+									|  to find out more.
+							-else
+								p You're on the #{settings.appName} Free plan.
+								|
+								a(href="/user/subscription/plans").btn.btn-primary Upgrade now
