@@ -11,6 +11,7 @@ ProjectTokenGenerator = require('./ProjectTokenGenerator')
 ProjectHelper = require('./ProjectHelper')
 settings = require('settings-sharelatex')
 
+
 module.exports = ProjectDetailsHandler =
 	getDetails: (project_id, callback)->
 		ProjectGetter.getProject project_id, {name:true, description:true, compiler:true, features:true, owner_ref:true, overleaf:true}, (err, project)->
@@ -130,11 +131,21 @@ module.exports = ProjectDetailsHandler =
 					has_readOnly: project?.tokens?.readOnly?,
 					has_readAndWrite: project?.tokens?.readAndWrite?
 				}, "generating tokens for project"
-				tokens = project.tokens || {}
-				if !tokens.readOnly?
-					tokens.readOnly = ProjectTokenGenerator.readOnlyToken()
-				if !tokens.readAndWrite?
-					tokens.readAndWrite = ProjectTokenGenerator.readAndWriteToken()
-				Project.update {_id: project_id}, {$set: {tokens: tokens}}, (err) ->
+				ProjectDetailsHandler._generateTokens project, (err) ->
 					return callback(err) if err?
-					callback(null, tokens)
+					Project.update {_id: project_id}, {$set: {tokens: project.tokens}}, (err) ->
+						return callback(err) if err?
+						callback(null, project.tokens)
+
+	_generateTokens: (project, callback=(err)->) ->
+		project.tokens ||= {}
+		tokens = project.tokens
+		if !tokens.readAndWrite?
+			tokens.readAndWrite = ProjectTokenGenerator.readAndWriteToken()
+		if !tokens.readOnly?
+			ProjectTokenGenerator.generateUniqueReadOnlyToken (err, token) ->
+				return callback(err) if err?
+				tokens.readOnly = token
+				callback()
+		else
+			callback()

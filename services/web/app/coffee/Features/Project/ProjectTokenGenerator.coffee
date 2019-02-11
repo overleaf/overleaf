@@ -1,4 +1,8 @@
 crypto = require 'crypto'
+V1Api = require('../V1/V1Api')
+Async = require('async')
+logger = require('logger-sharelatex')
+
 
 # This module mirrors the token generation in Overleaf (`random_token.rb`),
 # for the purposes of implementing token-based project access, like the
@@ -41,3 +45,22 @@ module.exports = ProjectTokenGenerator =
 		)
 		fullToken = "#{numerics}#{token}"
 		return fullToken
+
+	generateUniqueReadOnlyToken: (callback=(err, token)->) ->
+		Async.retry 10
+			, (cb) ->
+				token = ProjectTokenGenerator.readOnlyToken()
+				logger.log {token}, "Generated read-only token"
+				V1Api.request {
+					url: "/api/v1/sharelatex/docs/read_token/#{token}/exists",
+					json: true
+				}, (err, response, body) ->
+					return cb(err) if err?
+					if response.statusCode != 200
+						return cb(new Error("non-200 response from v1 read-token-exists api: #{response.statusCode}"))
+					if body.exists == true
+						cb(new Error("token already exists in v1: #{token}"))
+					else
+						logger.log {token}, "Read-only token does not exist in v1, good to use"
+						cb(null, token)
+			, callback

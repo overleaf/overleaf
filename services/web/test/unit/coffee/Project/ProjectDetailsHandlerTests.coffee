@@ -317,7 +317,7 @@ describe 'ProjectDetailsHandler', ->
 					.callsArgWith(2, null, @project)
 				@readOnlyToken = 'abc'
 				@readAndWriteToken = '42def'
-				@ProjectTokenGenerator.readOnlyToken = sinon.stub().returns(@readOnlyToken)
+				@ProjectTokenGenerator.generateUniqueReadOnlyToken = sinon.stub().callsArgWith(0, null, @readOnlyToken)
 				@ProjectTokenGenerator.readAndWriteToken = sinon.stub().returns(@readAndWriteToken)
 				@ProjectModel.update = sinon.stub()
 					.callsArgWith(2, null)
@@ -331,7 +331,7 @@ describe 'ProjectDetailsHandler', ->
 
 			it 'should update the project with new tokens', (done) ->
 				@handler.ensureTokensArePresent @project_id, (err, tokens) =>
-					expect(@ProjectTokenGenerator.readOnlyToken.callCount)
+					expect(@ProjectTokenGenerator.generateUniqueReadOnlyToken.callCount)
 						.to.equal 1
 					expect(@ProjectTokenGenerator.readAndWriteToken.callCount)
 						.to.equal 1

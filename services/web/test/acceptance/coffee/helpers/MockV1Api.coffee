@@ -162,6 +162,9 @@ module.exports = MockV1Api =
 			return res.json @doc_exported[req.params.token] if @doc_exported[req.params.token]?
 			res.json { exporting: false, exported: false }
 
+		app.get '/api/v1/sharelatex/docs/read_token/:token/exists', (req, res, next) =>
+			res.json { exists: false }
+
 		app.listen 5000, (error) ->
 			throw error if error?
 		.on "error", (error) ->
