@@ -90,12 +90,12 @@ mixin linkPrintNewTab(linkText, linkClass, icon, track)
 			| &nbsp;
 		| #{linkText ? linkText : 'print'}
 
-mixin linkSignIn(linkText, linkClass)
-	a(href="/login" class=linkClass ? linkClass : '')
+mixin linkSignIn(linkText, linkClass, redirect)
+	a(href=`/login${redirect ? '?redir=' + redirect : ''}` class=linkClass ? linkClass : '')
 		| #{linkText ? linkText : 'sign in'}
 
-mixin linkSignUp(linkText, linkClass)
-	a(href="/register" class=linkClass ? linkClass : '')
+mixin linkSignUp(linkText, linkClass, redirect)
+	a(href=`/register${redirect ? '?redir=' + redirect : ''}` class=linkClass ? linkClass : '')
 		| #{linkText ? linkText : 'sign up'}
 
 mixin linkTweet(linkText, linkClass, tweetText, track)
