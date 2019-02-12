@@ -554,6 +554,10 @@ describe 'WebsocketController', ->
 					})
 					.should.equal true
 
+			it "should not send cursor data to the connected user manager", (done)->
+				@ConnectedUsersManager.updateUserPosition.called.should.equal false
+				done()
+
 	describe "applyOtUpdate", ->
 		beforeEach ->
 			@update = {op: {p: 12, t: "foo"}}
