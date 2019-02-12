@@ -1,5 +1,5 @@
 Metrics = require "metrics-sharelatex"
-Metrics.initialize("document-updater")
+Metrics.initialize("doc-updater")
 
 express = require('express')
 http = require("http")
