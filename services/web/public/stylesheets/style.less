@@ -1,11 +1,26 @@
-@import url(https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700);
+@import url(https://fonts.googleapis.com/css?family=Lato:300,400,700&subset=latin-ext);
 @import url(https://fonts.googleapis.com/css?family=Merriweather:400,400i,700,700i);
 
-
-@is-overleaf       : false;
+@is-overleaf       : true;
 @is-overleaf-light : false;
-@show-rich-text    : false;
+@show-rich-text    : true;
 
 // Core variables and mixins
-@import "core/variables.less";
+@import "core/ol-variables.less";
+@import "app/ol-style-guide.less";
 @import "_style_includes.less";
+@import "_ol_style_includes.less";
+@import "components/embed-responsive.less";
+@import "components/icons.less";
+@import "components/images.less";
+@import "components/navs-ol.less";
+@import "components/pagination.less";
+@import "components/tabs.less";
+
+// Pages
+@import "app/about.less";
+@import "app/blog-posts.less";
+@import "app/cms-page.less";
+@import "app/content_page.less";
+@import "app/plans-ol.less";
+@import "app/portals.less";

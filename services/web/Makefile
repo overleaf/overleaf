@@ -26,14 +26,14 @@ LESS_FILES := $(shell find public/stylesheets -name '*.less')
 LESSC_COMMON_FLAGS := --source-map --autoprefix="last 2 versions, ie >= 10"
 CLEANCSS_FLAGS := --s0 --source-map
 
-LESS_SL_FILE := public/stylesheets/style.less
-CSS_SL_FILE := public/stylesheets/style.css
-LESS_OL_FILE := public/stylesheets/ol-style.less
-CSS_OL_FILE := public/stylesheets/ol-style.css
-LESS_OL_LIGHT_FILE := public/stylesheets/ol-light-style.less
-CSS_OL_LIGHT_FILE := public/stylesheets/ol-light-style.css
-LESS_OL_IEEE_FILE := public/stylesheets/ol-ieee-style.less
-CSS_OL_IEEE_FILE := public/stylesheets/ol-ieee-style.css
+LESS_SL_FILE := public/stylesheets/sl-style.less
+CSS_SL_FILE := public/stylesheets/sl-style.css
+LESS_OL_FILE := public/stylesheets/style.less
+CSS_OL_FILE := public/stylesheets/style.css
+LESS_OL_LIGHT_FILE := public/stylesheets/light-style.less
+CSS_OL_LIGHT_FILE := public/stylesheets/light-style.css
+LESS_OL_IEEE_FILE := public/stylesheets/ieee-style.less
+CSS_OL_IEEE_FILE := public/stylesheets/ieee-style.css
 
 CSS_FILES := $(CSS_SL_FILE) $(CSS_OL_FILE) $(CSS_OL_LIGHT_FILE) $(CSS_OL_IEEE_FILE)
 

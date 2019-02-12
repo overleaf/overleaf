@@ -65,9 +65,9 @@ public/js/services/
 public/js/utils/
 
 public/stylesheets/style*.css
-public/stylesheets/ol-style*.css
-public/stylesheets/ol-light-style*.css
-public/stylesheets/ol-ieee-style*.css
+public/stylesheets/sl-style*.css
+public/stylesheets/light-style*.css
+public/stylesheets/ieee-style*.css
 public/stylesheets/*.map
 public/minjs/
 

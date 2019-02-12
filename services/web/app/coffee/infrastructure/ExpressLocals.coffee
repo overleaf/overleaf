@@ -342,21 +342,21 @@ module.exports = (app, webRouter, privateApiRouter, publicApiRouter)->
 		next()
 
 	webRouter.use (req, res, next) ->
-		isOl = (Settings.brandPrefix == 'ol-')
+		isSl = (Settings.brandPrefix == 'sl-')
 		res.locals.uiConfig =
-			defaultResizerSizeOpen     : if isOl then 7 else 24
-			defaultResizerSizeClosed   : if isOl then 7 else 24
-			eastResizerCursor          : if isOl then "ew-resize" else null
-			westResizerCursor          : if isOl then "ew-resize" else null
-			chatResizerSizeOpen        : if isOl then 7 else 12
+			defaultResizerSizeOpen     : if isSl then 24 else 7
+			defaultResizerSizeClosed   : if isSl then 24 else 7
+			eastResizerCursor          : if isSl then null else "ew-resize"
+			westResizerCursor          : if isSl then null else "ew-resize"
+			chatResizerSizeOpen        : if isSl then 12 else 7
 			chatResizerSizeClosed      : 0
-			chatMessageBorderSaturation: if isOl then "85%" else "70%"
-			chatMessageBorderLightness : if isOl then "40%" else "70%"
-			chatMessageBgSaturation    : if isOl then "85%" else "60%"
-			chatMessageBgLightness     : if isOl then "40%" else "97%"
-			defaultFontFamily          : if isOl then 'lucida' else 'monaco'
-			defaultLineHeight          : if isOl then 'normal' else 'compact'
-			renderAnnouncements        : !isOl
+			chatMessageBorderSaturation: if isSl then "70%" else "85%"
+			chatMessageBorderLightness : if isSl then "70%" else "40%"
+			chatMessageBgSaturation    : if isSl then "60%" else "85%"
+			chatMessageBgLightness     : if isSl then "97%" else "40%"
+			defaultFontFamily          : if isSl then 'monaco' else 'lucida'
+			defaultLineHeight          : if isSl then 'compact' else 'normal'
+			renderAnnouncements        : isSl
 		next()
 
 	webRouter.use (req, res, next) ->
