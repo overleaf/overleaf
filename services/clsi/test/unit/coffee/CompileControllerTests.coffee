@@ -144,7 +144,7 @@ describe "CompileController", ->
 				file: @file
 				line: @line.toString()
 				column: @column.toString()
-			@res.send = sinon.stub()
+			@res.json = sinon.stub()
 
 			@CompileManager.syncFromCode = sinon.stub().callsArgWith(5, null, @pdfPositions = ["mock-positions"])
 			@CompileController.syncFromCode @req, @res, @next
@@ -155,8 +155,8 @@ describe "CompileController", ->
 				.should.equal true
 
 		it "should return the positions", ->
-			@res.send
-				.calledWith(JSON.stringify
+			@res.json
+				.calledWith(
 					pdf: @pdfPositions
 				)
 				.should.equal true
@@ -173,7 +173,7 @@ describe "CompileController", ->
 				page: @page.toString()
 				h: @h.toString()
 				v: @v.toString()
-			@res.send = sinon.stub()
+			@res.json = sinon.stub()
 
 			@CompileManager.syncFromPdf = sinon.stub().callsArgWith(5, null, @codePositions = ["mock-positions"])
 			@CompileController.syncFromPdf @req, @res, @next
@@ -184,8 +184,8 @@ describe "CompileController", ->
 				.should.equal true
 
 		it "should return the positions", ->
-			@res.send
-				.calledWith(JSON.stringify
+			@res.json
+				.calledWith(
 					code: @codePositions
 				)
 				.should.equal true
@@ -199,7 +199,7 @@ describe "CompileController", ->
 			@req.query =
 				file: @file
 				image: @image = "example.com/image"
-			@res.send = sinon.stub()
+			@res.json = sinon.stub()
 
 			@CompileManager.wordcount = sinon.stub().callsArgWith(4, null, @texcount = ["mock-texcount"])
 			@CompileController.wordcount @req, @res, @next
@@ -210,8 +210,8 @@ describe "CompileController", ->
 				.should.equal true
 
 		it "should return the texcount info", ->
-			@res.send
-				.calledWith(JSON.stringify
+			@res.json
+				.calledWith(
 					texcount: @texcount
 				)
 				.should.equal true
