@@ -15,6 +15,7 @@ NotificationsBuilder = require("../Notifications/NotificationsBuilder")
 SudoModeHandler = require '../SudoMode/SudoModeHandler'
 V1Api = require "../V1/V1Api"
 {User} = require "../../models/User"
+{ URL } = require('url')
 
 module.exports = AuthenticationController =
 
@@ -225,7 +226,8 @@ module.exports = AuthenticationController =
 				!/^\/(socket.io|js|stylesheets|img)\/.*$/.test(value) &&
 				!/^.*\.(png|jpeg|svg)$/.test(value)
 		)
-			req.session.postLoginRedirect = value
+			safePath = AuthenticationController._getSafeRedirectPath(value)
+			req.session.postLoginRedirect = safePath
 
 	_redirectToLoginOrRegisterPage: (req, res)->
 		if (req.query.zipUrl? or req.query.project_name? or req.path == '/user/subscription/new')
@@ -261,8 +263,17 @@ module.exports = AuthenticationController =
 		callback()
 
 	_getRedirectFromSession: (req) ->
-		return req?.session?.postLoginRedirect || null
+		value = req?.session?.postLoginRedirect
+		safePath = AuthenticationController._getSafeRedirectPath(value) if value
+		return safePath || null
 
 	_clearRedirectFromSession: (req) ->
 		if req.session?
 			delete req.session.postLoginRedirect
+
+	_getSafeRedirectPath: (value) ->
+		baseURL = Settings.siteUrl # base URL is required to construct URL from path
+		url = new URL(value, baseURL)
+		safePath = "#{url.pathname}#{url.search}#{url.hash}"
+		safePath = undefined if safePath == '/'
+		safePath

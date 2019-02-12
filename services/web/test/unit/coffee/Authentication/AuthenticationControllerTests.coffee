@@ -24,7 +24,7 @@ describe "AuthenticationController", ->
 			"../User/UserHandler": @UserHandler = {setupLoginData:sinon.stub()}
 			"../Analytics/AnalyticsManager": @AnalyticsManager = { recordEvent: sinon.stub() }
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub(), err: sinon.stub() }
-			"settings-sharelatex": {}
+			"settings-sharelatex": { siteUrl:  'http://www.foo.bar' }
 			"passport": @passport =
 				authenticate: sinon.stub().returns(sinon.stub())
 			"../User/UserSessionsManager": @UserSessionsManager =
@@ -654,6 +654,10 @@ describe "AuthenticationController", ->
 			@AuthenticationController.setRedirectInSession(@req, '/somewhere/specific')
 			expect(@req.session.postLoginRedirect).to.equal "/somewhere/specific"
 
+		it 'should not allow open redirects', ->
+			@AuthenticationController.setRedirectInSession(@req, 'https://evil.com')
+			expect(@req.session.postLoginRedirect).to.be.undefined
+
 		describe 'with a png', ->
 			beforeEach ->
 				@req = {session: {}}
@@ -672,11 +676,43 @@ describe "AuthenticationController", ->
 				expect(@req.session.postLoginRedirect).to.equal undefined
 
 	describe '_getRedirectFromSession', ->
-		beforeEach ->
-			@req = {session: {postLoginRedirect: "/a?b=c"}}
-
 		it 'should get redirect property from session', ->
+			@req = session: { postLoginRedirect: '/a?b=c' }
 			expect(@AuthenticationController._getRedirectFromSession(@req)).to.equal "/a?b=c"
+
+		it 'should not allow open redirects', ->
+			@req = session: { postLoginRedirect: 'https://evil.com' }
+			expect(@AuthenticationController._getRedirectFromSession(@req)).to.be.null
+
+		it 'handle null values', ->
+			@req = session: {}
+			expect(@AuthenticationController._getRedirectFromSession(@req)).to.be.null
+
+	describe '_getSafeRedirectPath', ->
+		it 'sanitize redirect path to prevent open redirects', ->
+			expect(
+				@AuthenticationController._getSafeRedirectPath('https://evil.com')
+			).to.be.undefined
+
+			expect(
+				@AuthenticationController._getSafeRedirectPath('//evil.com')
+			).to.be.undefined
+
+			expect(
+				@AuthenticationController._getSafeRedirectPath('//ol.com/evil')
+			).to.equal '/evil'
+
+			expect(
+				@AuthenticationController._getSafeRedirectPath('////evil.com')
+			).to.be.undefined
+
+			expect(
+				@AuthenticationController._getSafeRedirectPath('%2F%2Fevil.com')
+			).to.equal '/%2F%2Fevil.com'
+
+			expect(
+				@AuthenticationController._getSafeRedirectPath('.evil.com')
+			).to.equal '/.evil.com'
 
 	describe '_clearRedirectFromSession', ->
 		beforeEach ->
