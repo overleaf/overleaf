@@ -22,6 +22,7 @@ describe "HttpController", ->
 		@next = sinon.stub()
 		@res =
 			send: sinon.stub()
+			json: sinon.stub()
 	
 	describe "getDoc", ->
 		beforeEach ->
@@ -47,15 +48,15 @@ describe "HttpController", ->
 					.should.equal true
 
 			it "should return the doc as JSON", ->
-				@res.send
-					.calledWith(JSON.stringify({
+				@res.json
+					.calledWith({
 						id: @doc_id
 						lines: @lines
 						version: @version
 						ops: []
 						ranges: @ranges
 						pathname: @pathname
-					}))
+					})
 					.should.equal true
 
 			it "should log the request", ->
@@ -68,7 +69,7 @@ describe "HttpController", ->
 
 		describe "when recent ops are requested", ->
 			beforeEach ->
-				@DocumentManager.getDocAndRecentOpsWithLock = sinon.stub().callsArgWith(3, null, @lines, @version, @ops)
+				@DocumentManager.getDocAndRecentOpsWithLock = sinon.stub().callsArgWith(3, null, @lines, @version, @ops, @ranges, @pathname)
 				@req.query = fromVersion: "#{@fromVersion}"
 				@HttpController.getDoc(@req, @res, @next)
 
@@ -78,13 +79,15 @@ describe "HttpController", ->
 					.should.equal true
 
 			it "should return the doc as JSON", ->
-				@res.send
-					.calledWith(JSON.stringify({
+				@res.json
+					.calledWith({
 						id: @doc_id
 						lines: @lines
 						version: @version
 						ops: @ops
-					}))
+						ranges: @ranges
+						pathname: @pathname
+					})
 					.should.equal true
 
 			it "should log the request", ->

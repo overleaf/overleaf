@@ -25,7 +25,7 @@ module.exports = HttpController =
 			logger.log project_id: project_id, doc_id: doc_id, "got doc via http"
 			if !lines? or !version?
 				return next(new Errors.NotFoundError("document not found"))
-			res.send JSON.stringify
+			res.json
 				id: doc_id
 				lines: lines
 				version: version
