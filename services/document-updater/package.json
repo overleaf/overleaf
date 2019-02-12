@@ -7,7 +7,7 @@
     "url": "https://github.com/sharelatex/document-updater-sharelatex.git"
   },
   "scripts": {
-    "compile:app": "([ -e app/coffee ] && coffee $COFFEE_OPTIONS -o app/js -c app/coffee || echo 'No CoffeeScript folder to compile') && ( [ -e app.coffee ] && coffee $COFFEE_OPTIONS -c app.coffee || echo 'No CoffeeScript app to compile')",
+    "compile:app": "([ -e app/coffee ] && coffee -m $COFFEE_OPTIONS -o app/js -c app/coffee || echo 'No CoffeeScript folder to compile') && ( [ -e app.coffee ] && coffee -m $COFFEE_OPTIONS -c app.coffee || echo 'No CoffeeScript app to compile')",
     "start": "npm run compile:app && node $NODE_APP_OPTIONS app.js",
     "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 30000 --exit $@ test/acceptance/js",
     "test:acceptance": "npm run compile:app && npm run compile:acceptance_tests && npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
@@ -23,14 +23,14 @@
     "async": "^2.5.0",
     "coffee-script": "~1.7.0",
     "express": "3.3.4",
-    "logger-sharelatex": "git+https://github.com/sharelatex/logger-sharelatex.git#v1.5.6",
+    "logger-sharelatex": "^1.6.0",
     "lynx": "0.0.11",
-    "metrics-sharelatex": "git+https://github.com/sharelatex/metrics-sharelatex.git#v1.5.0",
-    "redis-sharelatex": "git+https://github.com/sharelatex/redis-sharelatex.git#v1.0.4",
+    "metrics-sharelatex": "^2.1.1",
+    "redis-sharelatex": "^1.0.5",
     "request": "2.25.0",
     "requestretry": "^1.12.0",
     "sandboxed-module": "~0.2.0",
-    "settings-sharelatex": "git+https://github.com/sharelatex/settings-sharelatex.git#v1.0.0",
+    "settings-sharelatex": "^1.1.0",
     "sinon": "~1.5.2",
     "underscore": "1.2.2"
   },

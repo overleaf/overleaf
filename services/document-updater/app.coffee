@@ -1,8 +1,11 @@
+Metrics = require "metrics-sharelatex"
+Metrics.initialize("doc-updater")
+
 express = require('express')
 http = require("http")
 Settings = require('settings-sharelatex')
 logger = require('logger-sharelatex')
-logger.initialize("documentupdater")
+logger.initialize("document-updater")
 logger.logger.serializers.docs = require("./app/js/LoggerSerializers").docs
 logger.logger.serializers.files = require("./app/js/LoggerSerializers").files
 if Settings.sentry?.dsn?
@@ -14,8 +17,7 @@ Errors = require "./app/js/Errors"
 HttpController = require "./app/js/HttpController"
 
 Path = require "path"
-Metrics = require "metrics-sharelatex"
-Metrics.initialize("doc-updater")
+
 Metrics.mongodb.monitor(Path.resolve(__dirname + "/node_modules/mongojs/node_modules/mongodb"), logger)
 Metrics.event_loop.monitor(logger, 100)
 
@@ -24,6 +26,7 @@ app.configure ->
 	app.use(Metrics.http.monitor(logger));
 	app.use express.bodyParser()
 	app.use app.router
+Metrics.injectMetricsRoute(app)
 
 DispatchManager.createAndStartDispatchers(Settings.dispatcherCount || 10)
 
@@ -76,7 +79,7 @@ app.get "/health_check/redis", (req, res, next) ->
 			res.send 500
 		else
 			res.send 200
-
+			
 docUpdaterRedisClient = require("redis-sharelatex").createClient(Settings.redis.documentupdater)
 app.get "/health_check/redis_cluster", (req, res, next) ->
 	docUpdaterRedisClient.healthCheck (error) ->
