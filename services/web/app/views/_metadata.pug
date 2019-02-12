@@ -73,24 +73,24 @@ meta(name="twitter:card", content=metadata && metadata.twitterCardType ? metadat
 //- Open Graph
 //- to do - add og:url
 -if (settings.social && settings.social.facebook && settings.social.facebook.appId)
-	meta(name="fb:app_id", content=settings.social.facebook.appId)
+	meta(property="fb:app_id", content=settings.social.facebook.appId)
 -if (metadata && metadata.openGraphDescription)
-	meta(name="og:description", content=metadata.openGraphDescription)
+	meta(property="og:description", content=metadata.openGraphDescription)
 -else
-	meta(name="og:description", content=translate("site_description"))
+	meta(property="og:description", content=translate("site_description"))
 -if (metadata && metadata.openGraphImage)
 	//- from the CMS
-	meta(name="og:image", content=metadata.openGraphImage.fields.file.url)
+	meta(property="og:image", content=metadata.openGraphImage.fields.file.url)
 -else if (settings.overleaf)
 	//- the default image for Overleaf
-	meta(name="og:image", content=buildImgPath('ol-brand/overleaf_og_logo.png'))
+	meta(property="og:image", content=buildImgPath('ol-brand/overleaf_og_logo.png'))
 -else
 	//- the default image for ShareLaTeX
-	meta(name="og:image", content='/touch-icon-192x192.png')
+	meta(property="og:image", content='/touch-icon-192x192.png')
 -if (metadata && metadata.openGraphType)
-	meta(name="og:type", metadata.openGraphType)
+	meta(property="og:type", metadata.openGraphType)
 -else
-	meta(name="og:type", content="website")
+	meta(property="og:type", content="website")
 
 //- Viewport
 if metadata && metadata.viewport
