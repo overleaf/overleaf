@@ -130,7 +130,7 @@ define(['base'], function(App) {
       $scope.cancel = () => $modalInstance.dismiss('cancel')
       $scope.create = () => $scope.$broadcast('create')
       return $scope.$on('done', (e, opts = {}) => {
-        isBibFile = opts.name && opts.name.match(/^.*\.bib$$/)
+        isBibFile = opts.name && /^.*\.bib$/.test(opts.name)
         if (opts.shouldReindexReferences || isBibFile) {
           ide.$scope.$emit('references:should-reindex', {})
         }
