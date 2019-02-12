@@ -137,7 +137,7 @@ module.exports = WebsocketController =
 		], (error, {project_id, first_name, last_name, email, user_id}) ->
 			return callback(error) if error?
 			logger.log {user_id, project_id, client_id: client.id, cursorData: cursorData}, "updating client position"
-					
+
 			AuthorizationManager.assertClientCanViewProjectAndDoc client, cursorData.doc_id, (error) ->
 				if error?
 					logger.warn {err: error, client_id: client.id, project_id, user_id}, "silently ignoring unauthorized updateClientPosition. Client likely hasn't called joinProject yet."
@@ -145,10 +145,11 @@ module.exports = WebsocketController =
 				cursorData.id      = client.id
 				cursorData.user_id = user_id if user_id?
 				cursorData.email   = email   if email?
+				# Don't store anonymous users in redis to avoid influx
 				if !user_id or user_id == 'anonymous-user'
 					cursorData.name = ""
 					callback()
-				else 
+				else
 					cursorData.name = if first_name && last_name
 						"#{first_name} #{last_name}"
 					else if first_name
@@ -166,7 +167,7 @@ module.exports = WebsocketController =
 						row:    cursorData.row,
 						column: cursorData.column,
 						doc_id: cursorData.doc_id
-					}, callback)					
+					}, callback)
 				WebsocketLoadBalancer.emitToRoom(project_id, "clientTracking.clientUpdated", cursorData)
 
 	getConnectedUsers: (client, callback = (error, users) ->) ->
