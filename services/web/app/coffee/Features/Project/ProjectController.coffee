@@ -275,6 +275,10 @@ module.exports = ProjectController =
 		project_id = req.params.Project_id
 		logger.log project_id:project_id, anonymous:anonymous, user_id:user_id, "loading editor"
 
+		# record failures to load the custom websocket
+		if req.query?.ws is 'fallback'
+			metrics.inc "load-editor-ws-fallback"
+
 		async.auto {
 			project: (cb)->
 				ProjectGetter.getProject(

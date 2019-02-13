@@ -185,7 +185,13 @@ define([
 
     ide.validFileRegex = '^[^*/]*$' // Don't allow * and /
 
-    ide.wsUrl = window.sharelatex.wsUrl || null // websocket url (if defined)
+    let useFallbackWebsocket =
+      window.location &&
+      window.location.search &&
+      window.location.search.match(/ws=fallback/)
+    // if we previously failed to load the websocket fall back to null (the siteUrl)
+    ide.wsUrl = useFallbackWebsocket ? null : window.sharelatex.wsUrl || null // websocket url (if defined)
+
     ide.project_id = $scope.project_id = window.project_id
     ide.$scope = $scope
 

@@ -103,6 +103,23 @@ define([], function() {
           }
         )
 
+        // handle network-level websocket errors (e.g. failed dns lookups)
+
+        this.ide.socket.on('error', err => {
+          sl_console.log('socket.io error', err)
+          if (this.wsUrl && !window.location.href.match(/ws=fallback/)) {
+            // if we tried to load a custom websocket location and failed
+            // try reloading and falling back to the siteUrl
+            window.location = window.location.href + '?ws=fallback'
+          } else {
+            this.connected = false
+            return this.$scope.$apply(() => {
+              return (this.$scope.state.error =
+                "Unable to connect, please view the <u><a href='/learn/Kb/Connection_problems'>connection problems guide</a></u> to fix the issue.")
+            })
+          }
+        })
+
         // The "connect" event is the first event we get back. It only
         // indicates that the websocket is connected, we still need to
         // pass authentication to join a project.
