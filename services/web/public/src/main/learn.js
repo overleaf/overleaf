@@ -43,7 +43,7 @@ define(['base', 'directives/mathjax', 'services/algolia-search'], function(
 
     const buildHitViewModel = function(hit) {
       const pagePath = hit.kb ? 'how-to/' : 'latex/'
-      const pageSlug = hit.pageName.replace(/\s/g, '_').replace(/\?/g, '%3F')
+      const pageSlug = encodeURIComponent(hit.pageName.replace(/\s/g, '_'))
       let section_underscored = ''
       if (hit.sectionName && hit.sectionName !== '') {
         section_underscored = '#' + hit.sectionName.replace(/\s/g, '_')
