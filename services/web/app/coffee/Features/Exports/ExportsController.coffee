@@ -27,7 +27,8 @@ module.exports =
 			if err?
 				if err.forwardResponse?
 					logger.log {responseError: err.forwardResponse}, "forwarding response"
-					return res.send err.forwardResponse
+					statusCode = err.forwardResponse.status || 500
+					return res.status(statusCode).json err.forwardResponse
 				else
 					return next(err)
 			logger.log
@@ -36,7 +37,7 @@ module.exports =
 				brand_variation_id:brand_variation_id
 				export_v1_id:export_data.v1_id
 				"exported project"
-			res.send export_v1_id: export_data.v1_id
+			res.json export_v1_id: export_data.v1_id
 
 	exportStatus: (req, res) ->
 		{export_id} = req.params
@@ -46,7 +47,7 @@ module.exports =
 					status_summary: 'failed',
 					status_detail: err.toString,
 				}
-				res.send export_json: json
+				res.json export_json: json
 				return err
 			parsed_export = JSON.parse(export_json)
 			json = {
@@ -59,7 +60,7 @@ module.exports =
 				title: parsed_export.title,
 				token: parsed_export.token
 			}
-			res.send export_json: json
+			res.json export_json: json
 
 	exportDownload: (req, res, next) ->
 		{type, export_id} = req.params
