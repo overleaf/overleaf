@@ -4,6 +4,7 @@
   including About and Blog
 */
 .cms-page {
+  padding-bottom: 0;
   img {
     height: auto;
     max-width: 100%;
@@ -12,8 +13,11 @@
     margin-right: @margin-sm;
   }
 
+  /*
+    Tabs
+  */
   .tab-content {
-    float: left;
+    padding: 0;
     width: 100%;
   }
 
@@ -41,14 +45,6 @@
     }
   }
 
-  /*
-    All content from CMS is in .row-spaced.
-    Margin below is to fix extra whitespace for first rows
-  */
-  .container > .row:nth-child(2), .content-container > .row:first-child {
-    //- .container first child is page header, don't correct margin
-    margin-top: 0;
-  }
   .tab-pane {
     .row:first-child {
       margin-top: 0;
@@ -59,6 +55,7 @@
     quotes
   */
   blockquote {
+    margin: 0;
     /*
       type.less sets <p> inline, so that quotation mark is inline
       but sometimes we have multiple <p>,
