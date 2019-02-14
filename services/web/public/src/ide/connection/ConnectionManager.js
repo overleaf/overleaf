@@ -105,7 +105,7 @@ define([], function() {
 
         // handle network-level websocket errors (e.g. failed dns lookups)
 
-        this.ide.socket.on('error', err => {
+        let connectionErrorHandler = err => {
           sl_console.log('socket.io error', err)
           if (this.wsUrl && !window.location.href.match(/ws=fallback/)) {
             // if we tried to load a custom websocket location and failed
@@ -118,13 +118,16 @@ define([], function() {
                 "Unable to connect, please view the <u><a href='/learn/Kb/Connection_problems'>connection problems guide</a></u> to fix the issue.")
             })
           }
-        })
+        }
+        this.ide.socket.on('error', connectionErrorHandler)
 
         // The "connect" event is the first event we get back. It only
         // indicates that the websocket is connected, we still need to
         // pass authentication to join a project.
 
         this.ide.socket.on('connect', () => {
+          // remove connection error handler when connected, avoid unwanted fallbacks
+          this.ide.socket.removeListener('error', connectionErrorHandler)
           return sl_console.log('[socket.io connect] Connected')
         })
 
