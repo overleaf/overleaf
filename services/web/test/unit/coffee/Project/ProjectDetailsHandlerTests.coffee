@@ -287,6 +287,7 @@ describe 'ProjectDetailsHandler', ->
 					tokens:
 						readOnly: 'aaa'
 						readAndWrite: '42bbb'
+						readAndWritePrefix: '42'
 				@ProjectGetter.getProject = sinon.stub()
 					.callsArgWith(2, null, @project)
 				@ProjectModel.update = sinon.stub()
@@ -317,8 +318,12 @@ describe 'ProjectDetailsHandler', ->
 					.callsArgWith(2, null, @project)
 				@readOnlyToken = 'abc'
 				@readAndWriteToken = '42def'
+				@readAndWriteTokenPrefix = '42'
 				@ProjectTokenGenerator.generateUniqueReadOnlyToken = sinon.stub().callsArgWith(0, null, @readOnlyToken)
-				@ProjectTokenGenerator.readAndWriteToken = sinon.stub().returns(@readAndWriteToken)
+				@ProjectTokenGenerator.readAndWriteToken = sinon.stub().returns({
+					token: @readAndWriteToken
+					numericPrefix:  @readAndWriteTokenPrefix
+				})
 				@ProjectModel.update = sinon.stub()
 					.callsArgWith(2, null)
 
@@ -338,7 +343,15 @@ describe 'ProjectDetailsHandler', ->
 					expect(@ProjectModel.update.callCount).to.equal 1
 					expect(@ProjectModel.update.calledWith(
 						{_id: @project_id},
-						{$set: {tokens: {readOnly: @readOnlyToken, readAndWrite: @readAndWriteToken}}}
+						{
+							$set: {
+								tokens: {
+									readOnly: @readOnlyToken,
+									readAndWrite: @readAndWriteToken,
+									readAndWritePrefix: @readAndWriteTokenPrefix
+								}
+							}
+						}
 					)).to.equal true
 					done()
 
@@ -347,6 +360,7 @@ describe 'ProjectDetailsHandler', ->
 					expect(err).to.not.exist
 					expect(tokens).to.deep.equal {
 						readOnly: @readOnlyToken,
-						readAndWrite: @readAndWriteToken
+						readAndWrite: @readAndWriteToken,
+						readAndWritePrefix: @readAndWriteTokenPrefix
 					}
 					done()

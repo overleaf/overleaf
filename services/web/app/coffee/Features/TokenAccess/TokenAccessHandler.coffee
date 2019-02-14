@@ -6,16 +6,48 @@ UserGetter = require '../User/UserGetter'
 ObjectId = require("mongojs").ObjectId
 Settings = require('settings-sharelatex')
 V1Api = require "../V1/V1Api"
+crypto = require 'crypto'
 
 module.exports = TokenAccessHandler =
 
 	ANONYMOUS_READ_AND_WRITE_ENABLED:
 		Settings.allowAnonymousReadAndWriteSharing == true
 
-	findProjectWithReadOnlyToken: (token, callback=(err, project, projectExists)->) ->
+	_extractNumericPrefix: (token) ->
+		token.match(/^(\d+)\w+/)
+
+	_getProjectByReadOnlyToken: (token, callback=(err, project)->) ->
 		Project.findOne {
 			'tokens.readOnly': token
-		}, {_id: 1, publicAccesLevel: 1, owner_ref: 1}, (err, project) ->
+		}, {_id: 1, tokens: 1, publicAccesLevel: 1, owner_ref: 1}, callback
+
+	_getProjectByEitherToken: (token, callback=(err, project)->) ->
+		TokenAccessHandler._getProjectByReadOnlyToken token, (err, project) ->
+			return callback(err) if err?
+			if project?
+				return callback(null, project)
+			TokenAccessHandler._getProjectByReadAndWriteToken token, (err, project) ->
+				return callback(err) if err?
+				callback(null, project)
+
+	_getProjectByReadAndWriteToken: (token, callback=(err, project)->) ->
+		numericPrefixMatch = TokenAccessHandler._extractNumericPrefix(token)
+		if !numericPrefixMatch
+			return callback(null, null)
+		numerics = numericPrefixMatch[1]
+		Project.findOne {
+			'tokens.readAndWritePrefix': numerics
+		}, {_id: 1, tokens: 1, publicAccesLevel: 1, owner_ref: 1}, (err, project) ->
+			return callback(err) if err?
+			if !project?
+				return callback(null, null)
+			if !crypto.timingSafeEqual(new Buffer(token), new Buffer(project.tokens.readAndWrite))
+				logger.err {token}, "read-and-write token match on numeric section, but not on full token"
+				return callback(null, null)
+			callback(null, project)
+
+	findProjectWithReadOnlyToken: (token, callback=(err, project, projectExists)->) ->
+		TokenAccessHandler._getProjectByReadOnlyToken token, (err, project) ->
 			if err?
 				return callback(err)
 			if !project?
@@ -25,32 +57,26 @@ module.exports = TokenAccessHandler =
 			return callback(null, project, true)
 
 	findProjectWithReadAndWriteToken: (token, callback=(err, project, projectExists)->) ->
-		Project.findOne {
-			'tokens.readAndWrite': token
-		}, {_id: 1, publicAccesLevel: 1, owner_ref: 1}, (err, project) ->
+		TokenAccessHandler._getProjectByReadAndWriteToken token, (err, project) ->
 			if err?
 				return callback(err)
 			if !project?
 				return callback(null, null, false) # Project doesn't exist, so we handle differently
 			if project.publicAccesLevel != PublicAccessLevels.TOKEN_BASED
-				return callback(null, null, true) # Project does exist, but it isn't token based
+					return callback(null, null, true) # Project does exist, but it isn't token based
 			return callback(null, project, true)
 
+	_userIsMember: (userId, projectId, callback=(err, isMember)->) ->
+		CollaboratorsHandler.isUserInvitedMemberOfProject userId, projectId, callback
+
 	findProjectWithHigherAccess: (token, userId, callback=(err, project)->) ->
-		Project.findOne {
-			$or: [
-				{'tokens.readAndWrite': token},
-				{'tokens.readOnly': token}
-			]
-		}, {_id: 1}, (err, project) ->
-			if err?
-				return callback(err)
+		TokenAccessHandler._getProjectByEitherToken token, (err, project) ->
+			return callback(err) if err?
 			if !project?
 				return callback(null, null)
 			projectId = project._id
-			CollaboratorsHandler.isUserInvitedMemberOfProject userId, projectId, (err, isMember) ->
-				if err?
-					return callback(err)
+			TokenAccessHandler._userIsMember userId, projectId, (err, isMember) ->
+				return callback(err) if err?
 				callback(
 					null,
 					if isMember == true then project else null

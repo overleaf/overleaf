@@ -44,7 +44,7 @@ module.exports = ProjectTokenGenerator =
 			ProjectTokenGenerator.TOKEN_ALPHA
 		)
 		fullToken = "#{numerics}#{token}"
-		return fullToken
+		return { token: fullToken, numericPrefix: numerics }
 
 	generateUniqueReadOnlyToken: (callback=(err, token)->) ->
 		Async.retry 10

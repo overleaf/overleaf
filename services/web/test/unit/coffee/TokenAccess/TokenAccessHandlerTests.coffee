@@ -94,13 +94,20 @@ describe "TokenAccessHandler", ->
 
 	describe 'findProjectWithReadAndWriteToken', ->
 		beforeEach ->
+			@token = '1234bcdf'
+			@tokenPrefix = '1234'
+			@project.tokens = {
+				readOnly: 'atntntn'
+				readAndWrite: @token,
+				readAndWritePrefix: @tokenPrefix
+			}
 			@Project.findOne = sinon.stub().callsArgWith(2, null, @project)
 
 		it 'should call Project.findOne', (done) ->
 			@TokenAccessHandler.findProjectWithReadAndWriteToken @token, (err, project) =>
 				expect(@Project.findOne.callCount).to.equal 1
 				expect(@Project.findOne.calledWith({
-					'tokens.readAndWrite': @token
+					'tokens.readAndWritePrefix': @tokenPrefix
 				})).to.equal true
 				done()
 
@@ -154,10 +161,9 @@ describe "TokenAccessHandler", ->
 			it 'should call Project.findOne', (done) ->
 				@TokenAccessHandler.findProjectWithHigherAccess @token, @userId, (err, project) =>
 					expect(@Project.findOne.callCount).to.equal 1
-					expect(@Project.findOne.calledWith($or: [
-						{'tokens.readAndWrite': @token},
-						{'tokens.readOnly': @token}
-					])).to.equal true
+					expect(@Project.findOne.calledWith({
+						'tokens.readOnly': @token
+					})).to.equal true
 					done()
 
 			it 'should call isUserInvitedMemberOfProject', (done) ->
@@ -185,10 +191,9 @@ describe "TokenAccessHandler", ->
 			it 'should call Project.findOne', (done) ->
 				@TokenAccessHandler.findProjectWithHigherAccess @token, @userId, (err, project) =>
 					expect(@Project.findOne.callCount).to.equal 1
-					expect(@Project.findOne.calledWith($or: [
-						{'tokens.readAndWrite': @token},
-						{'tokens.readOnly': @token}
-					])).to.equal true
+					expect(@Project.findOne.calledWith({
+						'tokens.readOnly': @token
+					})).to.equal true
 					done()
 
 			it 'should call isUserInvitedMemberOfProject', (done) ->

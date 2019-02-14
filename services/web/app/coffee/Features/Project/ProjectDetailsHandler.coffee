@@ -141,7 +141,9 @@ module.exports = ProjectDetailsHandler =
 		project.tokens ||= {}
 		tokens = project.tokens
 		if !tokens.readAndWrite?
-			tokens.readAndWrite = ProjectTokenGenerator.readAndWriteToken()
+			{ token, numericPrefix } = ProjectTokenGenerator.readAndWriteToken()
+			tokens.readAndWrite = token
+			tokens.readAndWritePrefix = numericPrefix
 		if !tokens.readOnly?
 			ProjectTokenGenerator.generateUniqueReadOnlyToken (err, token) ->
 				return callback(err) if err?

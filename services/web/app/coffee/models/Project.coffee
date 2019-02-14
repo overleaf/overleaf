@@ -53,6 +53,13 @@ ProjectSchema = new Schema
 				partialFilterExpression: {'tokens.readAndWrite': {$exists: true}}
 			}
 		}
+		readAndWritePrefix: {
+			type: String,
+			index: {
+				unique: true,
+				partialFilterExpression: {'tokens.readAndWritePrefix': {$exists: true}}
+			}
+		}
 	tokenAccessReadOnly_refs         : [ type:ObjectId, ref:'User' ]
 	tokenAccessReadAndWrite_refs     : [ type:ObjectId, ref:'User' ]
 	fromV1TemplateId: { type: Number }
