@@ -101,8 +101,14 @@ define([
             user.doc = this.ide.fileTreeManager.findEntityById(user.doc_id)
           }
 
-          if ((user.name != null ? user.name.trim().length : undefined) === 0) {
-            user.name = user.email.trim()
+          // If the user's name is empty use their email as display name
+          // Otherwise they're probably an anonymous user
+          if (user.name === null || user.name.trim().length === 0) {
+            if (user.email) {
+              user.name = user.email.trim()
+            } else if (user.user_id === 'anonymous-user') {
+              user.name = 'Anonymous'
+            }
           }
 
           user.initial = user.name != null ? user.name[0] : undefined
