@@ -13,7 +13,7 @@ header.toolbar.toolbar-header.toolbar-with-labels(
 			ng-if="::(cobranding.isProjectCobranded && cobranding.logoImgUrl)"
 			ng-href="{{ ::cobranding.brandVariationHomeUrl }}"
 			target="_blank"
-			rel="noopener"
+			rel="noreferrer noopener"
 		)
 			img.header-cobranding-logo(
 				ng-src="{{ ::cobranding.logoImgUrl }}"
