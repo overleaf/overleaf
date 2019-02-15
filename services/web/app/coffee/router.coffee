@@ -403,7 +403,11 @@ module.exports = class Router
 			),
 			AuthenticationController.httpAuth,
 			CompileController.getFileFromClsiWithoutUser
-		publicApiRouter.post '/api/institutions/confirm_university_domain', AuthenticationController.httpAuth, InstitutionsController.confirmDomain
+		publicApiRouter.post '/api/institutions/confirm_university_domain', RateLimiterMiddlewear.rateLimit({
+			endpointName: 'confirm-university-domain',
+			maxRequests: 1,
+			timeInterval: 60
+		}), AuthenticationController.httpAuth, InstitutionsController.confirmDomain
 
 		webRouter.get '/chrome', (req, res, next) ->
 			# Match v1 behaviour - this is used for a Chrome web app
