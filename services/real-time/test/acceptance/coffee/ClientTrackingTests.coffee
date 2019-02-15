@@ -141,6 +141,6 @@ describe "clientTracking", ->
 					doc_id: @doc_id
 					id: @anonymous.socket.sessionid
 					user_id: "anonymous-user"
-					name: "Anonymous"
+					name: ""
 				}
 			]
