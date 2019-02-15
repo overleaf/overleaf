@@ -8,7 +8,8 @@ div(ng-controller="GroupMembershipController")
 					+teamName(groupSubscription)
 				- if (groupSubscription.teamNotice && groupSubscription.teamNotice != '')
 					p
-						em= groupSubscription.teamNotice
+						//- Team notice is sanitized in SubscriptionViewModelBuilder
+						em !{groupSubscription.teamNotice}
 				span 
 					button.btn.btn-danger.text-capitalise(ng-click="removeSelfFromGroup('"+groupSubscription.admin_id._id+"')") #{translate("leave_group")}
 			hr

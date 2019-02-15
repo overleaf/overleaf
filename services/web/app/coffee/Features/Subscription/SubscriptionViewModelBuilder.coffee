@@ -7,6 +7,7 @@ SubscriptionLocator = require("./SubscriptionLocator")
 V1SubscriptionManager = require("./V1SubscriptionManager")
 InstitutionsGetter = require("../Institutions/InstitutionsGetter")
 PublishersGetter = require("../Publishers/PublishersGetter")
+sanitizeHtml = require 'sanitize-html'
 logger = require('logger-sharelatex')
 _ = require("underscore")
 async = require('async')
@@ -93,6 +94,9 @@ module.exports =
 					trialEndsAtFormatted: SubscriptionFormatters.formatDate(recurlySubscription?.trial_ends_at)
 					trial_ends_at: recurlySubscription.trial_ends_at
 				}
+
+			for memberGroupSubscription in memberGroupSubscriptions
+				memberGroupSubscription.teamNotice = sanitizeHtml(memberGroupSubscription.teamNotice)
 
 			callback null, {
 				personalSubscription,
