@@ -504,16 +504,22 @@ define(['base'], function(App) {
       })
     }
 
-    $scope.openArchiveProjectsModal = function() {
-      const modalInstance = $modal.open({
+    $scope.createArchiveProjectsModal = function(projects) {
+      return $modal.open({
         templateUrl: 'deleteProjectsModalTemplate',
         controller: 'DeleteProjectsModalController',
         resolve: {
           projects() {
-            return $scope.getSelectedProjects()
+            return projects
           }
         }
       })
+    }
+
+    $scope.openArchiveProjectsModal = function() {
+      const modalInstance = $scope.createArchiveProjectsModal(
+        $scope.getSelectedProjects()
+      )
       event_tracking.send(
         'project-list-page-interaction',
         'project action',
@@ -529,29 +535,32 @@ define(['base'], function(App) {
 
     $scope.archiveOrLeaveProjects = function(projects) {
       for (let project of projects) {
-        if (project.accessLevel === 'owner') {
-          project.archived = true
-          queuedHttp({
-            method: 'DELETE',
-            url: `/project/${project.id}`,
-            headers: {
-              'X-CSRF-Token': window.csrfToken
-            }
-          })
-        } else {
-          $scope._removeProjectFromList(project)
-
-          queuedHttp({
-            method: 'POST',
-            url: `/project/${project.id}/leave`,
-            headers: {
-              'X-CSRF-Token': window.csrfToken
-            }
-          })
-        }
+        $scope.archiveOrLeaveProject(project)
       }
+      $scope.updateVisibleProjects()
+    }
 
-      return $scope.updateVisibleProjects()
+    $scope.archiveOrLeaveProject = function(project) {
+      if (project.accessLevel === 'owner') {
+        project.archived = true
+        queuedHttp({
+          method: 'DELETE',
+          url: `/project/${project.id}`,
+          headers: {
+            'X-CSRF-Token': window.csrfToken
+          }
+        })
+      } else {
+        $scope._removeProjectFromList(project)
+
+        queuedHttp({
+          method: 'POST',
+          url: `/project/${project.id}/leave`,
+          headers: {
+            'X-CSRF-Token': window.csrfToken
+          }
+        })
+      }
     }
 
     $scope.openDeleteProjectsModal = function() {
@@ -750,7 +759,10 @@ define(['base'], function(App) {
 
     $scope.archiveOrLeave = function(e) {
       e.stopPropagation()
-      return $scope.archiveOrLeaveProjects([$scope.project])
+      $scope.createArchiveProjectsModal([$scope.project]).result.then(() => {
+        $scope.archiveOrLeaveProject($scope.project)
+        $scope.updateVisibleProjects()
+      })
     }
 
     $scope.restore = function(e) {
