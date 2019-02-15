@@ -28,7 +28,7 @@ module.exports =
 			redisOptions:	
 				keepAlive: 100
 			key_schema:	
-				pendingUpdates: ({doc_id}) -> "PendingUpdates:#{doc_id}"
+				pendingUpdates: ({doc_id}) -> "PendingUpdates:{#{doc_id}}"
 				
 		history:
 			port: process.env["HISTORY_REDIS_PORT"] or process.env["REDIS_PORT"] or "6379"
