@@ -398,7 +398,7 @@ module.exports = settings =
 	appName: "ShareLaTeX (Community Edition)"
 	adminEmail: "placeholder@example.com"
 
-	brandPrefix: "sl-"
+	brandPrefix: process.env['BRAND_PREFIX'] || "sl-"
 
 	nav:
 		title: "ShareLaTeX Community Edition"
