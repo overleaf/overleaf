@@ -64,7 +64,7 @@ describe "DocumentController", ->
 						.should.equal true
 
 				it "should return the document data to the client as JSON", ->
-					@res.type.should.equal "json"
+					@res.type.should.equal "application/json"
 					@res.body.should.equal JSON.stringify
 						lines: @doc_lines
 						version: @version
@@ -91,7 +91,7 @@ describe "DocumentController", ->
 				@DocumentController.getDocument(@req, @res, @next)
 
 			it "should return the history id to the client as JSON", ->
-				@res.type.should.equal "json"
+				@res.type.should.equal "application/json"
 				@res.body.should.equal JSON.stringify
 					lines: @doc_lines
 					version: @version

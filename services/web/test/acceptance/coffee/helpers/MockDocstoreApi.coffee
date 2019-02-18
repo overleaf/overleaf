@@ -21,7 +21,7 @@ module.exports = MockDocStoreApi =
 		
 		app.get "/project/:project_id/doc", (req, res, next) =>
 			docs = (doc for doc_id, doc of @docs[req.params.project_id])
-			res.send JSON.stringify docs
+			res.json docs
 
 		app.get "/project/:project_id/doc/:doc_id", (req, res, next) =>
 			{project_id, doc_id} = req.params
@@ -29,7 +29,7 @@ module.exports = MockDocStoreApi =
 			if !doc? or (doc.deleted and !req.query.include_deleted)
 				res.sendStatus 404
 			else
-				res.send JSON.stringify doc
+				res.json doc
 
 		app.delete "/project/:project_id/doc/:doc_id", (req, res, next) =>
 			{project_id, doc_id} = req.params

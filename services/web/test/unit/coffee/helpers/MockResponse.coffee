@@ -56,11 +56,12 @@ class MockResponse
 				status = 200
 		@statusCode = status
 		@returned = true
+		@type = 'application/json'
 		if 200 <= status < 300
 			@success = true
 		else
 			@success = false
-		@body = body if body
+		@body = JSON.stringify(body) if body
 		@callback() if @callback?
 
 	status: (@statusCode)->

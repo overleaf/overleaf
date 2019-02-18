@@ -37,7 +37,7 @@ module.exports = UserController =
 
 	sendFormattedPersonalInfo: (user, res, next = (error) ->) ->
 		info = UserController.formatPersonalInfo(user)
-		res.send JSON.stringify(info)
+		res.json info
 
 	formatPersonalInfo: (user, callback = (error, info) ->) ->
 		if !user?

@@ -27,8 +27,7 @@ module.exports =
 
 					else
 						projectHistoryId = project?.overleaf?.history?.id
-						res.type "json"
-						res.send JSON.stringify {
+						res.json {
 							lines: lines
 							version: version
 							ranges: ranges
