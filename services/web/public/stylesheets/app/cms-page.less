@@ -88,6 +88,27 @@
   }
 
   /*
+    Tables
+  */
+  .table-styled {
+    overflow: hidden;
+    overflow-x: auto;
+    table {
+      background: white;
+      max-width: none;
+      th, td {
+        border: 1px solid @gray-lighter;
+        padding: @padding-sm;
+        text-align: center;
+        word-break: normal;
+      }
+    }
+    .fa-check-square {
+      color: @ol-green;
+    }
+  }
+
+  /*
     universities page
   */
   #universities-container {
