@@ -233,7 +233,13 @@ module.exports = ProjectEntityUpdateHandler = self =
 					url: fileStoreUrl
 				]
 				projectHistoryId = project.overleaf?.history?.id
-				TpdsUpdateSender.addFile {project_id:project._id, file_id:newFileRef._id, path:path.fileSystem, rev:newFileRef.rev+1, project_name:project.name}, (err) ->
+				# Increment the rev for an in-place update (with the same path) so the third-party-datastore
+				# knows this is a new file.
+				# Ideally we would get this from ProjectEntityMongoUpdateHandler.replaceFileWithNew
+				# but it returns the original oldFileRef (after incrementing the rev value in mongo),
+				# so we add 1 to the rev from that. This isn't atomic and relies on the lock 
+				# but it is acceptable for now.
+				TpdsUpdateSender.addFile {project_id:project._id, file_id:newFileRef._id, path:path.fileSystem, rev:oldFileRef.rev + 1, project_name:project.name}, (err) ->
 					return callback(err) if err?
 					DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, {oldFiles, newFiles}, callback
 

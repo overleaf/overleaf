@@ -391,7 +391,7 @@ describe 'ProjectEntityUpdateHandler', ->
 			@FileStoreHandler.uploadFileFromDisk = sinon.stub().yields(null, @newFileUrl)
 
 			@newFile = _id: new_file_id, name: "dummy-upload-filename", rev: 0, linkedFileData: @linkedFileData
-			@oldFile = _id: file_id
+			@oldFile = _id: file_id, rev: 3
 			@path = "/path/to/file"
 			@ProjectEntityMongoUpdateHandler._insertDeletedFileReference = sinon.stub().yields()
 			@ProjectEntityMongoUpdateHandler.replaceFileWithNew = sinon.stub().yields(null, @oldFile, @project, fileSystem: @path)
@@ -413,7 +413,7 @@ describe 'ProjectEntityUpdateHandler', ->
 					project_id: project_id
 					project_name: @project.name
 					file_id: new_file_id
-					rev: @newFile.rev + 1
+					rev: @oldFile.rev + 1
 					path: @path
 				})
 				.should.equal true

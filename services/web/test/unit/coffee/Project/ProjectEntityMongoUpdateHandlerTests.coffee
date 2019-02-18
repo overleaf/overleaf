@@ -135,8 +135,8 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 				.calledWith(
 					{ _id: project_id },
 					{
-						'$inc': { 'version': 1 }
-						'$set': { 'file.png._id': @newFile._id, 'file.png.created': new Date(), 'file.png.linkedFileData': @linkedFileData, 'file.png.rev': 1 }
+						'$inc': { 'version': 1, 'file.png.rev': 1 }
+						'$set': { 'file.png._id': @newFile._id, 'file.png.created': new Date(), 'file.png.linkedFileData': @linkedFileData }
 					}
 					{}
 				)
