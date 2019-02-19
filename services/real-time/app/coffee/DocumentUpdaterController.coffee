@@ -24,6 +24,8 @@ module.exports = DocumentUpdaterController =
 				DocumentUpdaterController._applyUpdateFromDocumentUpdater(io, message.doc_id, message.op)
 			else if message.error?
 				DocumentUpdaterController._processErrorFromDocumentUpdater(io, message.doc_id, message.error, message)
+			else if message.health_check?
+				logger.debug {message}, "got health check message in applied ops channel"
 
 	_applyUpdateFromDocumentUpdater: (io, doc_id, update) ->
 		for client in io.sockets.clients(doc_id)

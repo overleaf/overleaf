@@ -37,4 +37,6 @@ module.exports = WebsocketLoadBalancer =
 				io.sockets.emit(message.message, message.payload...)
 			else if message.room_id?
 				io.sockets.in(message.room_id).emit(message.message, message.payload...)
+			else if message.health_check?
+				logger.debug {message}, "got health check message in editor events channel"
 		

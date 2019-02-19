@@ -44,6 +44,8 @@ settings =
 
 	forceDrainMsDelay: process.env['FORCE_DRAIN_MS_DELAY'] or false
 
+	continualPubsubTraffic: process.env['CONTINUAL_PUBSUB_TRAFFIC'] or false
+
 	
 # console.log settings.redis
 module.exports = settings

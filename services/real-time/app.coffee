@@ -1,6 +1,7 @@
 Metrics = require("metrics-sharelatex")
 Settings = require "settings-sharelatex"
 Metrics.initialize(Settings.appName or "real-time")
+async = require("async")
 
 logger = require "logger-sharelatex"
 logger.initialize("real-time")
@@ -115,3 +116,27 @@ if Settings.forceDrainMsDelay?
 				logger.log signal: signal, "received interrupt, cleaning up"
 				shutdownCleanly(signal)
 				forceDrain()
+
+
+
+if Settings.continualPubsubTraffic
+	console.log "continualPubsubTraffic enabled"
+
+	pubSubClient = redis.createClient(Settings.redis.documentupdater)
+
+	publishJob = (channel, cb)->
+		json = JSON.stringify({health_check:true, date: new Date().toString()})
+		logger.debug {channel:channel}, "sending pub to keep connection alive"
+		pubSubClient.publish channel, json, (err)->
+			if err?
+				logger.err {err, channel}, "error publishing pubsub traffic to redis"
+			cb(err)
+
+	runPubSubTraffic = ->
+		async.map ["applied-ops", "editor-events"], publishJob, (err)->
+			setTimeout(runPubSubTraffic, 1000 * 60)
+
+	runPubSubTraffic()
+
+
+
