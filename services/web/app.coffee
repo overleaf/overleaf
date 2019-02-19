@@ -38,3 +38,4 @@ if !module.parent # Called directly
 			logger.info "Running as group: #{argv.group}"
 
 module.exports = Server.server
+
