@@ -10,6 +10,8 @@ port = Settings.web?.web_router_port or ownPort # send requests to web router if
 cookeFilePath = "/tmp/smoke-test-cookie-#{ownPort}-to-#{port}.txt"
 buildUrl = (path) -> " -b #{cookeFilePath} --resolve 'smoke#{Settings.cookieDomain}:#{port}:127.0.0.1' http://smoke#{Settings.cookieDomain}:#{port}/#{path}?setLng=en"
 logger = require "logger-sharelatex"
+LoginRateLimiter = require("../../../app/js/Features/Security/LoginRateLimiter.js")
+RateLimiter = require("../../../app/js/infrastructure/RateLimiter.js")
 
 # Change cookie to be non secure so curl will send it
 convertCookieFile = (callback) ->
@@ -27,41 +29,63 @@ describe "Opening", ->
 
 	before (done) ->
 		logger.log "smoke test: setup"
-		require("../../../app/js/Features/Security/LoginRateLimiter.js").recordSuccessfulLogin Settings.smokeTest.user, (err)->
+		LoginRateLimiter.recordSuccessfulLogin Settings.smokeTest.user, (err)->
 			if err?
 				logger.err err:err, "smoke test: error recoring successful login"
 				return done(err)
-			logger.log "smoke test: clearing rate limit "
-			require("../../../app/js/infrastructure/RateLimiter.js").clearRateLimit "open-project", "#{Settings.smokeTest.projectId}:#{Settings.smokeTest.userId}", ->
-				logger.log "smoke test: hitting dev/csrf"
-				command =  """
-					curl -H  "X-Forwarded-Proto: https" -c #{cookeFilePath} #{buildUrl('dev/csrf')}
+			RateLimiter.clearRateLimit "open-project", "#{Settings.smokeTest.projectId}:#{Settings.smokeTest.userId}", (err)->
+				if err?
+					logger.err err:err, "smoke test: error clearing open-project rate limit"
+					return done(err)
+				RateLimiter.clearRateLimit "overleaf-login", Settings.smokeTest.rateLimitSubject, (err)->
+					if err?
+						logger.err err:err, "smoke test: error clearing overleaf-login rate limit"
+						return done(err)
+					done()
+		return
+
+	before (done) ->
+		logger.log "smoke test: hitting dev/csrf"
+		command =  """
+			curl -H  "X-Forwarded-Proto: https" -c #{cookeFilePath} #{buildUrl('dev/csrf')}
+		"""
+		child.exec command, (err, stdout, stderr)->
+			if err? then done(err)
+			csrf = stdout
+			logger.log "smoke test: converting cookie file 1"
+			convertCookieFile (err) ->
+				return done(err) if err?
+				logger.log "smoke test: hitting /login with csrf"
+				command = """
+					curl -c #{cookeFilePath} -H "Content-Type: application/json" -H "X-Forwarded-Proto: https" -d '{"_csrf":"#{csrf}", "email":"#{Settings.smokeTest.user}", "password":"#{Settings.smokeTest.password}"}' #{buildUrl('login')}
 				"""
-				child.exec command, (err, stdout, stderr)->
-					if err? then done(err)
-					csrf = stdout
-					logger.log "smoke test: converting cookie file 1"
-					convertCookieFile (err) ->
-						return done(err) if err?
-						logger.log "smoke test: hitting /login with csrf"
-						command = """
-							curl -c #{cookeFilePath} -H "Content-Type: application/json" -H "X-Forwarded-Proto: https" -d '{"_csrf":"#{csrf}", "email":"#{Settings.smokeTest.user}", "password":"#{Settings.smokeTest.password}"}' #{buildUrl('login')}
-						"""
-						child.exec command, (err) ->
-							return done(err) if err?
-							logger.log "smoke test: finishing setup"
-							convertCookieFile done
+				child.exec command, (err) ->
+					return done(err) if err?
+					logger.log "smoke test: finishing setup"
+					convertCookieFile done
 		return
 
 	after (done)->
-		logger.log "smoke test: cleaning up"
-		command =  """
-			curl -H  "X-Forwarded-Proto: https" -c #{cookeFilePath} #{buildUrl('logout')}
-		"""
-		child.exec command, (err, stdout, stderr)->
-			if err?
-				return done(err)
-			fs.unlink cookeFilePath, done
+		logger.log "smoke test: converting cookie file 2"
+		convertCookieFile (err) ->
+			return done(err) if err?
+			logger.log "smoke test: cleaning up"
+			command =  """
+				curl -H  "X-Forwarded-Proto: https" -c #{cookeFilePath} #{buildUrl('dev/csrf')}
+			"""
+			child.exec command, (err, stdout, stderr)->
+				if err? then done(err)
+				csrf = stdout
+				logger.log "smoke test: converting cookie file 3"
+				convertCookieFile (err) ->
+					return done(err) if err?
+					command =  """
+						curl -H "Content-Type: application/json" -H "X-Forwarded-Proto: https" -d '{"_csrf":"#{csrf}"}' -c #{cookeFilePath} #{buildUrl('logout')}
+					"""
+					child.exec command, (err, stdout, stderr)->
+						if err?
+							return done(err)
+						fs.unlink cookeFilePath, done
 		return
 
 	it "a project", (done) ->

@@ -390,15 +390,17 @@ module.exports = settings =
 	# Provide log in credentials and a project to be able to run
 	# some basic smoke tests to check the core functionality.
 	#
-	# smokeTest:
-	# 	user: ""
-	# 	password: ""
-	# 	projectId: ""
+	smokeTest:
+		user: process.env['SMOKE_TEST_USER']
+		userId: process.env['SMOKE_TEST_USER_ID']
+		password: process.env['SMOKE_TEST_PASSWORD']
+		projectId: process.env['SMOKE_TEST_PROJECT_ID']
+		rateLimitSubject: process.env['SMOKE_TEST_RATE_LIMIT_SUBJECT'] or "127.0.0.1"
 
-	appName: "ShareLaTeX (Community Edition)"
-	adminEmail: "placeholder@example.com"
+	appName: process.env['APP_NAME'] or "ShareLaTeX (Community Edition)"
+	adminEmail: process.env['ADMIN_EMAIL'] or "placeholder@example.com"
 
-	brandPrefix: process.env['BRAND_PREFIX'] || "sl-"
+	brandPrefix: process.env['BRAND_PREFIX'] or "sl-" # Set to 'ol-' for overleaf styles
 
 	nav:
 		title: "ShareLaTeX Community Edition"
