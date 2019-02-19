@@ -8,17 +8,17 @@ minutes = 60 * seconds
 
 # These credentials are used for authenticating api requests
 # between services that may need to go over public channels
-httpAuthUser = "sharelatex"
-httpAuthPass = "password"
+httpAuthUser = process.env['WEB_API_USER'] or "sharelatex"
+httpAuthPass = process.env['WEB_API_PASSWORD'] or "password"
 httpAuthUsers = {}
 httpAuthUsers[httpAuthUser] = httpAuthPass
 
-sessionSecret = "secret-please-change"
+sessionSecret = process.env['SESSION_SECRET'] or "secret-please-change"
 
 v1Api =
-	url: "http://#{process.env['V1_HOST'] or 'localhost'}:5000"
-	user: 'overleaf'
-	pass: 'password'
+	url: process.env['V1_API_URL'] or "http://#{process.env['V1_HOST'] or 'localhost'}:5000"
+	user: process.env['V1_API_USER'] or 'overleaf'
+	pass: process.env['V1_API_PASSWORD'] or 'password'
 
 module.exports = settings =
 
@@ -40,13 +40,13 @@ module.exports = settings =
 	# Databases
 	# ---------
 	mongo:
-		url : process.env['MONGO_URL'] || "mongodb://#{process.env['MONGO_HOST'] or '127.0.0.1'}/sharelatex"
+		url : process.env['MONGO_CONNECTION_STRING'] || process.env['MONGO_URL'] || "mongodb://#{process.env['MONGO_HOST'] or '127.0.0.1'}/sharelatex"
 
 	redis:
 		web:
 			host: process.env['REDIS_HOST'] || "localhost"
 			port: process.env['REDIS_PORT'] || "6379"
-			password: ""
+			password: process.env["REDIS_PASSWORD"] or ""
 
 		# websessions:
 		# 	cluster: [
@@ -81,7 +81,7 @@ module.exports = settings =
 		api:
 			host: process.env['REDIS_HOST'] || "localhost"
 			port: process.env['REDIS_PORT'] || "6379"
-			password: ""
+			password: process.env["REDIS_PASSWORD"] or ""
 
 	# Service locations
 	# -----------------
@@ -103,14 +103,15 @@ module.exports = settings =
 	# options incase you want to run some services on remote hosts.
 	apis:
 		web:
-			url: "http://#{process.env['WEB_HOST'] or 'localhost'}:#{webPort}"
+			url: "http://#{process.env['WEB_API_HOST'] or process.env['WEB_HOST'] or "localhost"}:#{process.env['WEB_API_PORT'] or process.env['WEB_PORT'] or 3000}"
 			user: httpAuthUser
 			pass: httpAuthPass
 		documentupdater:
-			url : "http://#{process.env['DOCUPDATER_HOST'] or 'localhost'}:#{docUpdaterPort}"
+			url : "http://#{process.env['DOCUPDATER_HOST'] or process.env['DOCUMENT_UPDATER_HOST'] or 'localhost'}:#{docUpdaterPort}"
 		thirdPartyDataStore:
 			url : "http://#{process.env['TPDS_HOST'] or 'localhost'}:3002"
 			emptyProjectFlushDelayMiliseconds: 5 * seconds
+			dropboxApp: process.env['TPDS_DROPBOX_APP']
 		tags:
 			url :"http://#{process.env['TAGS_HOST'] or 'localhost'}:3012"
 		spelling:
@@ -144,11 +145,12 @@ module.exports = settings =
 		githubSync:
 			url: "http://#{process.env['GITHUB_SYNC_HOST'] or 'localhost'}:3022"
 		recurly:
-			privateKey: ""
-			apiKey: ""
-			subdomain: ""
+			privateKey: process.env['RECURLY_PRIVATE_KEY'] or ''
+			apiKey: process.env['RECURLY_API_KEY'] or ''
+			subdomain: process.env['RECURLY_SUBDOMAIN'] or ''
+			publicKey: process.env['RECURLY_PUBLIC_KEY'] or ''
 		geoIpLookup:
-			url: "http://#{process.env['GEOIP_HOST'] or 'localhost'}:8080/json/"
+			url: "http://#{process.env['GEOIP_HOST'] or process.env['FREEGEOIP_HOST'] or  'localhost'}:8080/json/"
 		realTime:
 			url: "http://#{process.env['REALTIME_HOST'] or 'localhost'}:3026"
 		contacts:
@@ -188,14 +190,18 @@ module.exports = settings =
 	# that are sent out, generated links, etc.
 	siteUrl : siteUrl = process.env['PUBLIC_URL'] or 'http://localhost:3000'
 
+
+	# Used to close the editor off to users
+	editorIsOpen: process.env['EDITOR_IS_OPEN'] or true
+	
 	# Optional separate location for websocket connections, if unset defaults to siteUrl.
 	wsUrl: process.env['WEBSOCKET_URL']
 
 	# cookie domain
 	# use full domain for cookies to only be accessible from that domain,
 	# replace subdomain with dot to have them accessible on all subdomains
-	# cookieDomain: ".sharelatex.dev"
-	cookieName: "sharelatex.sid"
+	cookieDomain: process.env['COOKIE_DOMAIN']
+	cookieName: process.env['COOKIE_NAME'] or "sharelatex.sid"
 
 	# this is only used if cookies are used for clsi backend
 	#clsiCookieKey: "clsiserver"
@@ -350,6 +356,8 @@ module.exports = settings =
 	# public projects, /learn, /templates, about pages, etc.
 	allowPublicAccess: if process.env["SHARELATEX_ALLOW_PUBLIC_ACCESS"] == 'true' then true else false
 
+	enableHomepage: process.env["HOME_PAGE_ENABLED"] == 'true'
+
 	# editor should be open by default
 	editorIsOpen: if process.env["EDITOR_OPEN"] == 'false' then false else true
 
@@ -361,7 +369,7 @@ module.exports = settings =
 	# disablePerUserCompiles: true
 
 	# Domain the client (pdfjs) should download the compiled pdf from
-	# pdfDownloadDomain: "http://clsi-lb:3014"
+	pdfDownloadDomain: process.env["PDF_DOWNLOAD_DOMAIN"]  #"http://clsi-lb:3014"
 
 	# Maximum size of text documents in the real-time editing system.
 	max_doc_length: 2 * 1024 * 1024 # 2mb
@@ -372,8 +380,8 @@ module.exports = settings =
 		# If we ever need to write something to disk (e.g. incoming requests
 		# that need processing but may be too big for memory, then write
 		# them to disk here).
-		dumpFolder: Path.resolve __dirname + "/../data/dumpFolder"
-		uploadFolder: Path.resolve __dirname + "/../data/uploads"
+		dumpFolder: "/data/dumpFolder"
+		uploadFolder: "/data/uploads"
 
 	# Automatic Snapshots
 	# -------------------
@@ -398,6 +406,7 @@ module.exports = settings =
 		rateLimitSubject: process.env['SMOKE_TEST_RATE_LIMIT_SUBJECT'] or "127.0.0.1"
 
 	appName: process.env['APP_NAME'] or "ShareLaTeX (Community Edition)"
+
 	adminEmail: process.env['ADMIN_EMAIL'] or "placeholder@example.com"
 
 	brandPrefix: process.env['BRAND_PREFIX'] or "sl-" # Set to 'ol-' for overleaf styles

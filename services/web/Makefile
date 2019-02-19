@@ -1,11 +1,20 @@
 DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
+
+
 BUILD_NUMBER ?= local
 BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
-GIT_SHA ?= $(shell git rev-parse HEAD)
 PROJECT_NAME = web
+
+DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
+	BRANCH_NAME=$(BRANCH_NAME) \
+	PROJECT_NAME=$(PROJECT_NAME) \
+	MOCHA_GREP=${MOCHA_GREP} \
+	docker-compose ${DOCKER_COMPOSE_FLAGS}
 
 MODULE_DIRS := $(shell find modules -mindepth 1 -maxdepth 1 -type d -not -name '.git' )
 MODULE_MAKEFILES := $(MODULE_DIRS:=/Makefile)
+
+COFFEE := node_modules/.bin/coffee -m $(COFFEE_OPTIONS)
 COFFEE := node_modules/.bin/coffee $(COFFEE_OPTIONS)
 BABEL := node_modules/.bin/babel
 GRUNT := node_modules/.bin/grunt
@@ -36,8 +45,6 @@ LESS_OL_IEEE_FILE := public/stylesheets/ieee-style.less
 CSS_OL_IEEE_FILE := public/stylesheets/ieee-style.css
 
 CSS_FILES := $(CSS_SL_FILE) $(CSS_OL_FILE) $(CSS_OL_LIGHT_FILE) $(CSS_OL_IEEE_FILE)
-
-SENTRY_TEMPLATE := app/views/sentry.pug
 
 # The automatic variable $(@D) is the target directory name
 app.js: app.coffee
@@ -119,7 +126,9 @@ minify_css: $(CSS_FILES)
 minify_es:
 	npm -q run webpack:production
 
-compile: $(JS_FILES) $(OUTPUT_SRC_FILES) css public/js/main.js public/js/ide.js
+compile: compile_app $(OUTPUT_SRC_FILES) css public/js/main.js public/js/ide.js
+
+compile_app: $(JS_FILES)
 	@$(MAKE) compile_modules
 
 compile_full:
@@ -198,19 +207,20 @@ clean_css:
 	rm -f public/stylesheets/*.css*
 
 clean_ci:
-	docker-compose down -v -t 0
+	$(DOCKER_COMPOSE) down -v -t 0
 
 test: test_unit test_frontend test_acceptance
 
 test_unit:
-	npm -q run test:unit -- ${MOCHA_ARGS}
+	@[ ! -d test/unit ] && echo "web has no unit tests" || $(DOCKER_COMPOSE) run --rm test_unit
 
 test_unit_app:
 	npm -q run test:unit:app -- ${MOCHA_ARGS}
 
-test_frontend: test_clean # stop service
-	$(MAKE) compile
-	docker-compose ${DOCKER_COMPOSE_FLAGS} up --exit-code-from test_frontend --abort-on-container-exit test_frontend
+test_frontend: test_clean compile test_frontend_run
+
+test_frontend_run:
+	$(DOCKER_COMPOSE) up test_frontend
 
 test_acceptance: compile test_acceptance_app_run test_acceptance_modules_run
 
@@ -218,9 +228,10 @@ test_acceptance_app: compile test_acceptance_app_run
 
 test_acceptance_module: compile test_acceptance_module_run
 
+test_acceptance_run: test_acceptance_app_run test_acceptance_modules_run
+
 test_acceptance_app_run: test_clean
-	@set -e; \
-	docker-compose ${DOCKER_COMPOSE_FLAGS} run --rm test_acceptance npm -q run test:acceptance:run_dir -- ${MOCHA_ARGS} test/acceptance/js
+	$(DOCKER_COMPOSE) run --rm test_acceptance npm -q run test:acceptance:run_dir -- ${MOCHA_ARGS} test/acceptance/js
 
 test_acceptance_modules_run:
 	@set -e; \
@@ -237,7 +248,7 @@ test_acceptance_module_run: $(MODULE_MAKEFILES) test_clean
 	fi
 
 test_clean:
-	docker-compose ${DOCKER_COMPOSE_FLAGS} down -v -t 0
+	$(DOCKER_COMPOSE) down -v -t 0
 
 ci:
 	MOCHA_ARGS="--reporter tap" \
@@ -252,10 +263,17 @@ format_fix:
 lint:
 	npm -q run lint
 
-version:
-	sed -i.original -e "s/@@COMMIT@@/${GIT_SHA}/g" $(SENTRY_TEMPLATE)
-	sed -i.original -e "s/@@RELEASE@@/${BUILD_NUMBER}/g" $(SENTRY_TEMPLATE)
-	rm $(SENTRY_TEMPLATE).original
+	
+build:
+	docker build --pull --tag ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
+		--tag gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
+		.
+
+publish:
+	docker push $(DOCKER_REPO)/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
+
+tar:
+	$(DOCKER_COMPOSE) up tar
 
 .PHONY:
 	all add install update test test_unit test_frontend test_acceptance \

@@ -5,10 +5,17 @@ RateLimiterMiddlewear = require('../Security/RateLimiterMiddlewear')
 Settings = require('settings-sharelatex')
 multer = require('multer')
 
-upload = multer(
-	dest: Settings.path.uploadFolder
-	limits: fileSize: Settings.maxUploadSize
-)
+try 
+	upload = multer(
+		dest: Settings.path.uploadFolder
+		limits: fileSize: Settings.maxUploadSize
+	)
+catch err
+	if err.message == "EEXIST"
+		logger.log uploadFolder:Settings.path.uploadFolder, "dir already exists, continuing"
+	else
+		logger.err err:err, "caught error from multer in uploads router"
+
 
 module.exports =
 	apply: (webRouter, apiRouter) ->

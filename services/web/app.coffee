@@ -1,6 +1,8 @@
+metrics = require("metrics-sharelatex")
+metrics.initialize(process.env['METRICS_APP_NAME'] or "web")
 Settings = require('settings-sharelatex')
 logger = require 'logger-sharelatex'
-logger.initialize("web-sharelatex")
+logger.initialize("web")
 logger.logger.serializers.user = require("./app/js/infrastructure/LoggerSerializers").user
 logger.logger.serializers.docs = require("./app/js/infrastructure/LoggerSerializers").docs
 logger.logger.serializers.files = require("./app/js/infrastructure/LoggerSerializers").files
@@ -8,8 +10,6 @@ logger.logger.serializers.project = require("./app/js/infrastructure/LoggerSeria
 if Settings.sentry?.dsn?
 	logger.initializeErrorReporting(Settings.sentry.dsn)
 
-metrics = require("metrics-sharelatex")
-metrics.initialize("web")
 metrics.memory.monitor(logger)
 Server = require("./app/js/infrastructure/Server")
 

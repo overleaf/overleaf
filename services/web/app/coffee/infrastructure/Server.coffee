@@ -7,7 +7,6 @@ crawlerLogger = require('./CrawlerLogger')
 expressLocals = require('./ExpressLocals')
 Router = require('../router')
 helmet = require "helmet"
-metrics.inc("startup")
 UserSessionsRedis = require('../Features/User/UserSessionsRedis')
 Csrf = require('./Csrf')
 
@@ -196,6 +195,8 @@ if enableWebRouter or notDefined(enableWebRouter)
 	app.use(ErrorController.handleApiError)
 	app.use(webRouter)
 	app.use(ErrorController.handleError)
+
+metrics.injectMetricsRoute(webRouter)
 
 router = new Router(webRouter, privateApiRouter, publicApiRouter)
 
