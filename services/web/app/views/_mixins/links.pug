@@ -18,16 +18,16 @@ mixin linkAdvisors(linkText, linkClass, track)
 		| #{linkText ? linkText : 'advisor programme'}
 
 mixin linkBenefits(linkText, linkClass)
-	a(href="/for/authors" class=linkClass ? linkClass : '')
+	a(href=(settings.siteUrl ? settings.siteUrl : '') + "/for/authors" class=linkClass ? linkClass : '')
 		| #{linkText ? linkText : 'benefits'}
 		
 mixin linkBlog(linkText, linkClass, slug)
 	if slug
-		a(href="/blog/#{slug}" class=linkClass ? linkClass : '')
+		a(href=(settings.siteUrl ? settings.siteUrl : '') + "/blog/" + slug class=linkClass ? linkClass : '')
 			| #{linkText ? linkText : 'blog'}
 
 mixin linkContact(linkText, linkClass)
-	a(href="/contact" class=linkClass ? linkClass : '')
+	a(href=(settings.siteUrl ? settings.siteUrl : '') + "/contact" class=linkClass ? linkClass : '')
 		| #{linkText ? linkText : 'contact'}
 
 mixin linkDash(linkText, linkClass)
@@ -35,13 +35,12 @@ mixin linkDash(linkText, linkClass)
 		| #{linkText ? linkText : 'project dashboard'}
 
 mixin linkEducation(linkText, linkClass)
-	a(href="/for/edu" class=linkClass ? linkClass : '')
+	a(href=(settings.siteUrl ? settings.siteUrl : '') + "/for/edu" class=linkClass ? linkClass : '')
 		| #{linkText ? linkText : 'teaching toolkit'}
 
 mixin linkEmail(linkText, linkClass, email)
-	//- To Do: env var?
-	- var emailDomain = 'overleaf.com'
-	a(href="mailto:#{email ? email : 'contact'}@#{emailDomain}" class=linkClass ? linkClass : '')
+	- var emailAddress = email ? email : 'contact'
+	a(href="mailto:" + emailAddress + "@overleaf.com" class=linkClass ? linkClass : '')
 		| #{linkText ? linkText : 'email'}
 
 mixin linkInvite(linkText, linkClass, track)
@@ -118,5 +117,5 @@ mixin linkTweet(linkText, linkClass, tweetText, track)
 	) #{linkText ? linkText : 'tweet'}
 
 mixin linkUniversities(linkText, linkClass)
-	a(href="/for/universities" class=linkClass ? linkClass : '')
+	a(href=(settings.siteUrl ? settings.siteUrl : '') + "/for/universities" class=linkClass ? linkClass : '')
 		| #{linkText ? linkText : 'universities'}

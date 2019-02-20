@@ -98,9 +98,32 @@
     Begin Print
   */
   .print {
+    .basic-metrics {
+      margin-bottom: 50px; /* get Departments header on next page */
+    }
+    .container {
+      width: auto;
+    }
+    .custom-donut-container svg {
+      max-width: 570px; /* safe width for printing */
+    }
     .hidden-print {
       display: none;
     }
+    .portal-col {
+      /* for firefox */
+      margin: 0;
+      width: 100%;
+    }
+    .portal-name {
+      padding: 0;
+    }
+    .visible-print {
+      display: block !important;
+    }
+  }
+  @media print and (color) {
+    &:extend(.print);
   }
   // End Print
 
