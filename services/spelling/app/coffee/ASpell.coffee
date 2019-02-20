@@ -6,8 +6,9 @@ fs = require 'fs'
 settings = require("settings-sharelatex")
 Path = require("path")
 
-cache = LRU(10000)
 OneMinute = 60 * 1000
+opts = {max:10000, maxAge: OneMinute * 60 * 10}
+cache = LRU(opts)
 
 cacheFsPath = Path.resolve(settings.cacheDir, "spell.cache")
 cacheFsPathTmp = cacheFsPath + ".tmp"
@@ -63,7 +64,7 @@ class ASpellRunner
 			for k, v of addToCache
 				cache.set(k, v)
 
-			logger.log hits: hits, total: words.length, hitrate: (hits/words.length).toFixed(2), "cache hit rate"
+			logger.info hits: hits, total: words.length, hitrate: (hits/words.length).toFixed(2), "cache hit rate"
 			callback null, results
 
 	getSuggestions: (language, output) ->

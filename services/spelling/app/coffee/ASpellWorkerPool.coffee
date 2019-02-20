@@ -24,7 +24,7 @@ class ASpellWorkerPool
 			if worker.idleTimer?
 				clearTimeout worker.idleTimer
 				worker.idleTimer = null
-			logger.log process: worker.pipe.pid, lang: language, "removing aspell worker from pool"
+			logger.info process: worker.pipe.pid, lang: language, "removing aspell worker from pool"
 			@cleanup()
 		@PROCESS_POOL.push(worker)
 		metrics.gauge 'aspellWorkerPool-size', @PROCESS_POOL.length

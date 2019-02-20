@@ -17,10 +17,10 @@ module.exports = LearnedWordsManager =
 	getLearnedWords: (user_token, callback = (error, words)->) ->
 		mongoCachedWords = mongoCache.get(user_token)
 		if mongoCachedWords?
-			metrics.inc "mongoCache-hit", 0.1
+			metrics.inc "mongoCache", 0.1, {status: "hit"}
 			return callback(null, mongoCachedWords)
 
-		metrics.inc "mongoCache-miss", 0.1
+		metrics.inc "mongoCache", 0.1, {status: "miss"}
 		logger.info user_token:user_token, "mongoCache miss"
 		
 		db.spellingPreferences.findOne token: user_token, (error, preferences) ->
