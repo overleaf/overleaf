@@ -37,10 +37,17 @@ module.exports =
 			SubscriptionLocator.getUsersSubscription userId, (err, personalSubscription) ->
 				return next(err) if err?
 
+				hasIndividualRecurlySubscription =
+					personalSubscription? &&
+					!personalSubscription.planCode.match(/(free|trial)/)? &&
+					personalSubscription.groupPlan == false &&
+					personalSubscription.recurlySubscription_id? &&
+					personalSubscription.recurlySubscription_id != ""
+
 				res.render "subscriptions/team/invite",
 					inviterName: invite.inviterName
 					inviteToken: invite.token
-					hasPersonalSubscription: personalSubscription?
+					hasIndividualRecurlySubscription: hasIndividualRecurlySubscription
 					appName: settings.appName
 
 	acceptInvite: (req, res, next) ->
