@@ -1,6 +1,6 @@
 spelling
 --language=coffeescript
---node-version=6.9.5
+--node-version=6.16.0
 --acceptance-creds=None
 --dependencies=mongo,redis
 --docker-repos=gcr.io/overleaf-ops
