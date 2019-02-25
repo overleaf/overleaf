@@ -12,7 +12,7 @@ InstitutionsFeatures = require '../Institutions/InstitutionsFeatures'
 oneMonthInSeconds = 60 * 60 * 24 * 30
 
 module.exports = FeaturesUpdater =
-	refreshFeatures: (user_id, notifyV1 = true, callback = () ->)->
+	refreshFeatures: (user_id, notifyV1 = true, callback = (error, features, featuresChanged) ->)->
 		if typeof notifyV1 == 'function'
 			callback = notifyV1
 			notifyV1 = true

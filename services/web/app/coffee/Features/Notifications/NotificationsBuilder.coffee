@@ -4,8 +4,26 @@ request = require "request"
 settings = require "settings-sharelatex"
 
 module.exports =
+# Note: notification keys should be url-safe
 
-	# Note: notification keys should be url-safe
+	featuresUpgradedByAffiliation: (affiliation, user) ->
+		key: "features-updated-by=#{affiliation.institutionId}"
+		create: (callback=()->) ->
+			messageOpts =
+				institutionName: affiliation.institutionName
+			NotificationsHandler.createNotification user._id, @key, "notification_features_upgraded_by_affiliation", messageOpts, null, false, callback
+		read: (callback=()->) ->
+			NotificationsHandler.markAsRead @key, callback
+
+	redundantPersonalSubscription: (affiliation, user) ->
+		key: "redundant-personal-subscription-#{affiliation.institutionId}"
+		create: (callback=()->) ->
+			messageOpts =
+				institutionName: affiliation.institutionName
+			NotificationsHandler.createNotification user._id, @key, "notification_personal_subscription_not_required_due_to_affiliation", messageOpts, null, false, callback
+		read: (callback=()->) ->
+			NotificationsHandler.markAsRead @key, callback
+
 	projectInvite: (invite, project, sendingUser, user) ->
 		key: "project-invite-#{invite._id}"
 		create: (callback=()->) ->
