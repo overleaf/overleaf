@@ -82,7 +82,8 @@ mixin linkPrintNewTab(linkText, linkClass, icon, track)
 		event-tracking-trigger=trigger
 		event-tracking-mb=mb
 		event-segmentation=mbSegmentation
-		target="_BLANK"
+		target="_BLANK",
+		rel="noopener noreferrer"
 	)
 		if icon
 			i(class="fa fa-print")
@@ -113,7 +114,8 @@ mixin linkTweet(linkText, linkClass, tweetText, track)
 		event-tracking-mb=mb
 		event-segmentation=mbSegmentation
 		href="https://twitter.com/intent/tweet?text=" + tweetText
-		target="_BLANK"
+		target="_BLANK",
+		rel="noopener noreferrer"
 	) #{linkText ? linkText : 'tweet'}
 
 mixin linkUniversities(linkText, linkClass)
