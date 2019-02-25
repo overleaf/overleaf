@@ -14,8 +14,8 @@ define(['base'], App =>
   App.controller('TeamInviteController', function($scope, $http) {
     $scope.inflight = false
 
-    if (hasPersonalSubscription) {
-      $scope.view = 'personalSubscription'
+    if (hasIndividualRecurlySubscription) {
+      $scope.view = 'hasIndividualRecurlySubscription'
     } else {
       $scope.view = 'teamInvite'
     }
