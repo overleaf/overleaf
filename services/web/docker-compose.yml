@@ -18,7 +18,7 @@ services:
   test_acceptance:
     image: node:6.15.1
     volumes:
-      - .:/app:ro
+      - .:/app
     working_dir: /app
     environment:
       REDIS_HOST: redis

@@ -4,6 +4,7 @@ DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
 BUILD_NUMBER ?= local
 BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
 PROJECT_NAME = web
+BUILD_DIR_NAME = $(shell pwd | xargs basename | tr -cd '[a-zA-Z0-9_.\-]')
 
 DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 	BRANCH_NAME=$(BRANCH_NAME) \
@@ -212,15 +213,19 @@ clean_ci:
 test: test_unit test_frontend test_acceptance
 
 test_unit:
-	@[ ! -d test/unit ] && echo "web has no unit tests" || $(DOCKER_COMPOSE) run --rm test_unit
+	@[ ! -d test/unit ] && echo "web has no unit tests" || COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --name unit_test_$(BUILD_DIR_NAME) --rm test_unit
 
 test_unit_app:
 	npm -q run test:unit:app -- ${MOCHA_ARGS}
 
-test_frontend: test_clean compile test_frontend_run
+test_frontend: compile build_test_frontend test_frontend_run
 
 test_frontend_run:
-	$(DOCKER_COMPOSE) up test_frontend
+	COMPOSE_PROJECT_NAME=frontend_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+	COMPOSE_PROJECT_NAME=frontend_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_frontend
+	COMPOSE_PROJECT_NAME=frontend_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+
+test_frontend_build_run: build_test_frontend test_frontend_run
 
 test_acceptance: compile test_acceptance_app_run test_acceptance_modules_run
 
@@ -230,8 +235,10 @@ test_acceptance_module: compile test_acceptance_module_run
 
 test_acceptance_run: test_acceptance_app_run test_acceptance_modules_run
 
-test_acceptance_app_run: test_clean
-	$(DOCKER_COMPOSE) run --rm test_acceptance npm -q run test:acceptance:run_dir -- ${MOCHA_ARGS} test/acceptance/js
+test_acceptance_app_run:
+	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_acceptance npm -q run test:acceptance:run_dir test/acceptance/js
+	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
 test_acceptance_modules_run:
 	@set -e; \
@@ -242,13 +249,12 @@ test_acceptance_modules_run:
 		fi; \
 	done
 
-test_acceptance_module_run: $(MODULE_MAKEFILES) test_clean
+test_acceptance_module_run: $(MODULE_MAKEFILES)
 	@if [ -e $(MODULE)/test/acceptance ]; then \
-		cd $(MODULE) && $(MAKE) test_acceptance; \
+		COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE) $(DOCKER_COMPOSE) down -v -t 0; \
+		cd $(MODULE) && COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE) $(MAKE) test_acceptance; \
+		cd $(CURDIR) && COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE) $(DOCKER_COMPOSE) down -v -t 0; \
 	fi
-
-test_clean:
-	$(DOCKER_COMPOSE) down -v -t 0
 
 ci:
 	MOCHA_ARGS="--reporter tap" \
@@ -262,18 +268,21 @@ format_fix:
 
 lint:
 	npm -q run lint
-
 	
 build:
 	docker build --pull --tag ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
 		--tag gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
 		.
 
+build_test_frontend:
+	COMPOSE_PROJECT_NAME=frontend_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) build test_frontend
+
 publish:
 	docker push $(DOCKER_REPO)/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 
 tar:
-	$(DOCKER_COMPOSE) up tar
+	COMPOSE_PROJECT_NAME=tar_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm tar
+	COMPOSE_PROJECT_NAME=tar_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
 .PHONY:
 	all add install update test test_unit test_frontend test_acceptance \

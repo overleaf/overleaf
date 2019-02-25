@@ -28,16 +28,18 @@ services:
     depends_on:
       - redis
       - mongo
-    command: npm run test:acceptance:app
 
   test_frontend:
     build:
       context: .
-      dockerfile: Dockerfile.frontend
-    volumes:
-      - .:/app
+      dockerfile: Dockerfile.frontend.ci
+      args:
+        PROJECT_NAME: $PROJECT_NAME
+        BRANCH_NAME: $BRANCH_NAME
+        BUILD_NUMBER: $BUILD_NUMBER
     working_dir: /app
     command: npm run test:frontend -- --single-run
+    user: node
 
   tar:
     build: .
@@ -52,4 +54,3 @@ services:
 
   mongo:
     image: mongo:3.4.6
-    container_name: mongo-ci-$BUILD_NUMBER
