@@ -9,7 +9,7 @@ services:
     build: .
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
     user: node
-    command: npm run test:unit
+    command: npm run test:unit:ci
 
   test_acceptance:
     build: .
