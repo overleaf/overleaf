@@ -26,17 +26,6 @@ module.exports = settings =
 		process.env['SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING'] == 'true'
 
 
-	# File storage
-	# ------------
-	#
-	# ShareLaTeX stores binary files like images in S3.
-	# Fill in your Amazon S3 credential below.
-	s3:
-		key: ""
-		secret: ""
-		bucketName : ""
-
-
 	# Databases
 	# ---------
 	mongo:
@@ -116,6 +105,7 @@ module.exports = settings =
 			url :"http://#{process.env['TAGS_HOST'] or 'localhost'}:3012"
 		spelling:
 			url : "http://#{process.env['SPELLING_HOST'] or 'localhost'}:3005"
+			host: process.env['SPELLING_HOST']
 		trackchanges:
 			url : "http://#{process.env['TRACK_CHANGES_HOST'] or 'localhost'}:3015"
 		project_history:
@@ -173,8 +163,8 @@ module.exports = settings =
 			pass: v1Api.pass
 		v1_history:
 			url: "http://#{process.env['V1_HISTORY_HOST'] or "localhost"}:3100/api"
-			user: 'staging'
-			pass: 'password'
+			user: process.env['V1_HISTORY_USER'] or 'staging'
+			pass: process.env['V1_HISTORY_PASSWORD'] or 'password'
 
 	templates:
 		user_id: process.env.TEMPLATES_USER_ID or "5395eb7aad1f29a88756c7f2"
@@ -207,10 +197,12 @@ module.exports = settings =
 	#clsiCookieKey: "clsiserver"
 
 	# Same, but with http auth credentials.
-	httpAuthSiteUrl: 'http://#{httpAuthUser}:#{httpAuthPass}@#{siteUrl}'
+	httpAuthSiteUrl: "http://#{httpAuthUser}:#{httpAuthPass}@#{siteUrl}"
 
 
 	maxEntitiesPerProject: 2000
+	
+	maxUploadSize: 50 * 1024 * 1024 # 50 MB
 
 	# Security
 	# --------
@@ -503,8 +495,8 @@ module.exports = settings =
 
 	rateLimits:
 		autoCompile:
-			everyone: 100
-			standard: 25
+			everyone: process.env['RATE_LIMIT_AUTO_COMPILE_EVERYONE'] or 100
+			standard: process.env['RATE_LIMIT_AUTO_COMPILE_STANDARD'] or 25
 
 	# currentImage: "texlive-full:2017.1"
 	# imageRoot: "<DOCKER REPOSITORY ROOT>" # without any trailing slash
