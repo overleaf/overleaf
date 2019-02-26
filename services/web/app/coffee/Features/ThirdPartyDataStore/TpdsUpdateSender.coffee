@@ -20,6 +20,12 @@ tpdsworkerEnabled = -> settings.apis.tpdsworker?.url?
 if !tpdsworkerEnabled()
 	logger.log "tpdsworker is not enabled, request will not be sent to it"
 
+
+if settings.apis.thirdPartyDataStore.linode_url?
+	tpdsUrl = settings.apis.thirdPartyDataStore.linode_url
+else
+	tpdsUrl = settings.apis.thirdPartyDataStore.url
+
 module.exports = TpdsUpdateSender =
 
 	_enqueue: (group, method, job, callback)->
@@ -53,7 +59,7 @@ module.exports = TpdsUpdateSender =
 					sl_entity_rev:options.rev
 					sl_project_id:options.project_id
 					sl_all_user_ids:JSON.stringify(allUserIds)
-				uri : "#{settings.apis.thirdPartyDataStore.url}#{buildPath(user_id, options.project_name, options.path)}" 
+				uri : "#{tpdsUrl}#{buildPath(user_id, options.project_name, options.path)}" 
 				title: "addFile"
 				streamOrigin : options.streamOrigin
 			TpdsUpdateSender._enqueue options.project_id, "pipeStreamFrom", postOptions, (err)->
@@ -65,12 +71,12 @@ module.exports = TpdsUpdateSender =
 	
 	addFile : (options, callback = (err)->)->
 		metrics.inc("tpds.add-file")
-		options.streamOrigin = settings.apis.filestore.url + path.join("/project/#{options.project_id}/file/","#{options.file_id}")
+		options.streamOrigin = (settings.apis.filestore.linode_url or settings.apis.filestore.url) + path.join("/project/#{options.project_id}/file/","#{options.file_id}")
 		@_addEntity(options, callback)
 
 	addDoc : (options, callback = (err)->)->
 		metrics.inc("tpds.add-doc")
-		options.streamOrigin = settings.apis.docstore.pubUrl + path.join("/project/#{options.project_id}/doc/","#{options.doc_id}/raw")
+		options.streamOrigin = (settings.apis.docstore.linode_url or settings.apis.docstore.pubUrl) + path.join("/project/#{options.project_id}/doc/","#{options.doc_id}/raw")
 		@_addEntity(options, callback)
   
 
@@ -87,7 +93,7 @@ module.exports = TpdsUpdateSender =
 			moveOptions =
 				method : "put"
 				title:"moveEntity"
-				uri : "#{settings.apis.thirdPartyDataStore.url}/user/#{user_id}/entity"
+				uri : "#{tpdsUrl}/user/#{user_id}/entity"
 				headers: 
 					sl_project_id:options.project_id, 
 					sl_entity_rev:options.rev
@@ -107,7 +113,7 @@ module.exports = TpdsUpdateSender =
 				headers:
 					sl_project_id:options.project_id
 					sl_all_user_ids:JSON.stringify(allUserIds)
-				uri : "#{settings.apis.thirdPartyDataStore.url}#{buildPath(user_id, options.project_name, options.path)}"
+				uri : "#{tpdsUrl}#{buildPath(user_id, options.project_name, options.path)}"
 				title:"deleteEntity"
 				sl_all_user_ids:JSON.stringify(allUserIds)
 			TpdsUpdateSender._enqueue options.project_id, "standardHttpRequest", deleteOptions, callback
@@ -117,7 +123,7 @@ module.exports = TpdsUpdateSender =
 		logger.log user_id: user_id, "polling dropbox for user"
 		options =
 			method: "POST"
-			uri:"#{settings.apis.thirdPartyDataStore.url}/user/poll"
+			uri:"#{tpdsUrl}/user/poll"
 			json:
 				user_ids: [user_id]
 		TpdsUpdateSender._enqueue "poll-dropbox:#{user_id}", "standardHttpRequest", options, callback
