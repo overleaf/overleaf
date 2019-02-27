@@ -5,7 +5,7 @@
 		ng-if="!!history.selection.diff && !history.selection.diff.loading && !history.selection.diff.error",
 		ng-class="{ 'diff-binary': history.selection.diff.binary }"
 	)
-		.diff-editor.hide-ace-cursor(
+		.diff-editor-v2.hide-ace-cursor(
 			ng-if="!history.selection.diff.binary"
 			ace-editor="history",
 			theme="settings.editorTheme",

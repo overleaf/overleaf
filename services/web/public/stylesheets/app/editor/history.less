@@ -8,6 +8,8 @@
 @range-bar-color: @link-color;
 @range-bar-selected-offset: 14px;
 
+@history-toolbar-height: 32px;
+
 #history {
 	.upgrade-prompt {
 		position: absolute;
@@ -50,17 +52,21 @@
 		.full-size;
 		.toolbar {
 			padding: 3px;
-			height: 32px;
+			height: @history-toolbar-height;
 			.name {
+				color: #FFF;
 				float: left;
 				padding: 3px @line-height-computed / 4;
 				display: inline-block;
 			}
 		}
-		.diff-editor {
+		.diff-editor-v2 {
 			.full-size;
 		}
-
+		.diff-editor {
+			.full-size;
+			top: @history-toolbar-height;
+		}
 		.diff-deleted {
 			padding: @line-height-computed;
 		}
