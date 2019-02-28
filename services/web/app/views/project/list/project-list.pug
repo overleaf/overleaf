@@ -21,6 +21,7 @@
 					aria-hidden="true"
 				)
 				button.sr-only(
+					type="button"
 					ng-click="clearSearchText()"
 					ng-show="searchText.value.length > 0"
 				) #{translate('clear_search')}
