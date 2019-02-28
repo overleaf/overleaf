@@ -340,9 +340,10 @@
       "resolved": "https://registry.npmjs.org/accepts/-/accepts-1.2.13.tgz"
     },
     "acorn": {
-      "version": "3.3.0",
-      "from": "acorn@>=3.1.0 <4.0.0",
-      "resolved": "https://registry.npmjs.org/acorn/-/acorn-3.3.0.tgz"
+      "version": "6.1.0",
+      "from": "acorn@6.1.0",
+      "resolved": "https://registry.npmjs.org/acorn/-/acorn-6.1.0.tgz",
+      "dev": true
     },
     "acorn-dynamic-import": {
       "version": "2.0.2",
@@ -374,6 +375,20 @@
       "version": "3.0.1",
       "from": "acorn-jsx@>=3.0.0 <4.0.0",
       "resolved": "https://registry.npmjs.org/acorn-jsx/-/acorn-jsx-3.0.1.tgz",
+      "dev": true,
+      "dependencies": {
+        "acorn": {
+          "version": "3.3.0",
+          "from": "acorn@>=3.0.4 <4.0.0",
+          "resolved": "https://registry.npmjs.org/acorn/-/acorn-3.3.0.tgz",
+          "dev": true
+        }
+      }
+    },
+    "acorn-walk": {
+      "version": "6.1.1",
+      "from": "acorn-walk@6.1.1",
+      "resolved": "https://registry.npmjs.org/acorn-walk/-/acorn-walk-6.1.1.tgz",
       "dev": true
     },
     "after": {
@@ -3925,6 +3940,18 @@
       "from": "file-utils@>=0.1.5 <0.2.0",
       "resolved": "https://registry.npmjs.org/file-utils/-/file-utils-0.1.5.tgz",
       "dependencies": {
+        "glob": {
+          "version": "3.2.11",
+          "from": "glob@>=3.2.6 <3.3.0",
+          "resolved": "https://registry.npmjs.org/glob/-/glob-3.2.11.tgz",
+          "dependencies": {
+            "minimatch": {
+              "version": "0.3.0",
+              "from": "minimatch@>=0.3.0 <0.4.0",
+              "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-0.3.0.tgz"
+            }
+          }
+        },
         "lodash": {
           "version": "2.1.0",
           "from": "lodash@>=2.1.0 <2.2.0",
@@ -3983,10 +4010,20 @@
       "from": "findup-sync@>=0.1.2 <0.2.0",
       "resolved": "https://registry.npmjs.org/findup-sync/-/findup-sync-0.1.3.tgz",
       "dependencies": {
+        "glob": {
+          "version": "3.2.11",
+          "from": "glob@>=3.2.9 <3.3.0",
+          "resolved": "https://registry.npmjs.org/glob/-/glob-3.2.11.tgz"
+        },
         "lodash": {
           "version": "2.4.2",
           "from": "lodash@>=2.4.1 <2.5.0",
           "resolved": "https://registry.npmjs.org/lodash/-/lodash-2.4.2.tgz"
+        },
+        "minimatch": {
+          "version": "0.3.0",
+          "from": "minimatch@>=0.3.0 <0.4.0",
+          "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-0.3.0.tgz"
         }
       }
     },
@@ -4280,14 +4317,16 @@
       "resolved": "https://registry.npmjs.org/getpass/-/getpass-0.1.7.tgz"
     },
     "glob": {
-      "version": "3.2.11",
-      "from": "glob@>=3.2.6 <3.3.0",
-      "resolved": "https://registry.npmjs.org/glob/-/glob-3.2.11.tgz",
+      "version": "7.1.3",
+      "from": "glob@7.1.3",
+      "resolved": "https://registry.npmjs.org/glob/-/glob-7.1.3.tgz",
+      "dev": true,
       "dependencies": {
         "minimatch": {
-          "version": "0.3.0",
-          "from": "minimatch@>=0.3.0 <0.4.0",
-          "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-0.3.0.tgz"
+          "version": "3.0.4",
+          "from": "minimatch@>=3.0.4 <4.0.0",
+          "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-3.0.4.tgz",
+          "dev": true
         }
       }
     },
@@ -5396,7 +5435,14 @@
     "is-expression": {
       "version": "2.1.0",
       "from": "is-expression@>=2.0.1 <3.0.0",
-      "resolved": "https://registry.npmjs.org/is-expression/-/is-expression-2.1.0.tgz"
+      "resolved": "https://registry.npmjs.org/is-expression/-/is-expression-2.1.0.tgz",
+      "dependencies": {
+        "acorn": {
+          "version": "3.3.0",
+          "from": "acorn@>=3.3.0 <3.4.0",
+          "resolved": "https://registry.npmjs.org/acorn/-/acorn-3.3.0.tgz"
+        }
+      }
     },
     "is-extendable": {
       "version": "0.1.1",
@@ -9267,7 +9313,14 @@
         "constantinople": {
           "version": "3.1.0",
           "from": "constantinople@>=3.0.1 <4.0.0",
-          "resolved": "https://registry.npmjs.org/constantinople/-/constantinople-3.1.0.tgz"
+          "resolved": "https://registry.npmjs.org/constantinople/-/constantinople-3.1.0.tgz",
+          "dependencies": {
+            "acorn": {
+              "version": "3.3.0",
+              "from": "acorn@>=3.1.0 <4.0.0",
+              "resolved": "https://registry.npmjs.org/acorn/-/acorn-3.3.0.tgz"
+            }
+          }
         }
       }
     },
@@ -9279,12 +9332,26 @@
         "constantinople": {
           "version": "3.1.0",
           "from": "constantinople@>=3.0.1 <4.0.0",
-          "resolved": "https://registry.npmjs.org/constantinople/-/constantinople-3.1.0.tgz"
+          "resolved": "https://registry.npmjs.org/constantinople/-/constantinople-3.1.0.tgz",
+          "dependencies": {
+            "acorn": {
+              "version": "3.3.0",
+              "from": "acorn@>=3.1.0 <4.0.0",
+              "resolved": "https://registry.npmjs.org/acorn/-/acorn-3.3.0.tgz"
+            }
+          }
         },
         "with": {
           "version": "5.1.1",
           "from": "with@>=5.0.0 <6.0.0",
-          "resolved": "https://registry.npmjs.org/with/-/with-5.1.1.tgz"
+          "resolved": "https://registry.npmjs.org/with/-/with-5.1.1.tgz",
+          "dependencies": {
+            "acorn": {
+              "version": "3.3.0",
+              "from": "acorn@>=3.1.0 <4.0.0",
+              "resolved": "https://registry.npmjs.org/acorn/-/acorn-3.3.0.tgz"
+            }
+          }
         }
       }
     },
@@ -9301,7 +9368,14 @@
         "constantinople": {
           "version": "3.1.0",
           "from": "constantinople@>=3.0.1 <4.0.0",
-          "resolved": "https://registry.npmjs.org/constantinople/-/constantinople-3.1.0.tgz"
+          "resolved": "https://registry.npmjs.org/constantinople/-/constantinople-3.1.0.tgz",
+          "dependencies": {
+            "acorn": {
+              "version": "3.3.0",
+              "from": "acorn@>=3.1.0 <4.0.0",
+              "resolved": "https://registry.npmjs.org/acorn/-/acorn-3.3.0.tgz"
+            }
+          }
         },
         "source-map": {
           "version": "0.5.7",

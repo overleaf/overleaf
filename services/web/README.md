@@ -83,6 +83,12 @@ Unit test status
 
 [![Unit test status](https://travis-ci.org/sharelatex/web-sharelatex.png?branch=master)](https://travis-ci.org/sharelatex/web-sharelatex)
 
+Routes
+------
+
+Run `bin/routes` to print out all routes in the project.
+
+
 License and Credits
 -------------------
 
