@@ -42,6 +42,3 @@ We use the [Phusion base-image](https://github.com/phusion/baseimage-docker)
 in which to run the sharelatex services. Baseimage uses the `runit` service
 manager to manage services, and we add our init-scripts from the `./runit`
 folder.
-
-Overall, this is very like how the services would run in production, it just
-happens to be all inside one docker container instead of being on one VM.
