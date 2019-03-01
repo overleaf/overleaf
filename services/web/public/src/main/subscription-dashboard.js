@@ -23,6 +23,40 @@ define(['base'], function(App) {
     recurly.configure(window.recurlyApiKey)
   })
 
+  App.controller('MetricsEmailController', function($scope, $http) {
+    $scope.institutionEmailSubscription = function(institutionId) {
+      var inst = _.find(window.managedInstitutions, function(institution) {
+        return institution.v1Id === parseInt(institutionId)
+      })
+      if (inst.metricsEmail.optedOutUserIds.includes(window.user_id)) {
+        return 'Subscribe'
+      } else {
+        return 'Unsubscribe'
+      }
+    }
+
+    $scope.changeInstitutionalEmailSubscription = function(institutionId) {
+      $scope.subscriptionChanging = true
+      return $http({
+        method: 'POST',
+        url: `/institutions/${institutionId}/emailSubscription`,
+        headers: {
+          'X-CSRF-Token': window.csrfToken
+        }
+      }).then(function successCallback(response) {
+        window.managedInstitutions = _.map(window.managedInstitutions, function(
+          institution
+        ) {
+          if (institution.v1Id === parseInt(institutionId)) {
+            institution.metricsEmail.optedOutUserIds = response.data
+          }
+          return institution
+        })
+        $scope.subscriptionChanging = false
+      })
+    }
+  })
+
   App.factory('RecurlyPricing', function($q, MultiCurrencyPricing) {
     return {
       loadDisplayPriceWithTax: function(planCode, currency, taxRate) {

@@ -1,3 +1,6 @@
+script(type='text/javascript').
+	window.managedInstitutions = !{JSON.stringify(managedInstitutions)}
+
 each institution in managedInstitutions
 	p
 		| You are a manager of
@@ -18,4 +21,10 @@ each institution in managedInstitutions
 			i.fa.fa-fw.fa-users
 			| &nbsp;
 			| Manage institution managers
+	div(ng-controller="MetricsEmailController", ng-cloak)
+		p
+			span Monthly metrics emails: 
+				a(ng-bind-html="institutionEmailSubscription('"+institution.v1Id+"')" ng-show="!subscriptionChanging" ng-click="changeInstitutionalEmailSubscription('"+institution.v1Id+"')")
+				span(ng-show="subscriptionChanging")
+					i.fa.fa-spin.fa-refresh(aria-hidden="true")
 	hr

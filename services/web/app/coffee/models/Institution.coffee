@@ -8,6 +8,10 @@ request = require 'request'
 InstitutionSchema = new Schema
 	v1Id: { type: Number, required: true }
 	managerIds: [ type:ObjectId, ref:'User' ]
+	metricsEmail: {
+		optedOutUserIds: [ type:ObjectId, ref:'User' ]
+		lastSent: { type : Date }
+	}
 
 # fetch institution's data from v1 API. Errors are ignored
 InstitutionSchema.method 'fetchV1Data', (callback = (error, institution)->) ->
