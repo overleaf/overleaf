@@ -69,8 +69,8 @@ module.exports =
 
 		# create new entitites
 		webRouter.get "/entities/:name/create/:id",
-			AuthorizationMiddlewear.ensureUserIsSiteAdmin,
+			UserMembershipAuthorization.requirePublisherManagementAccess,
 			UserMembershipController.new
 		webRouter.post "/entities/:name/create/:id",
-			AuthorizationMiddlewear.ensureUserIsSiteAdmin,
+			UserMembershipAuthorization.requirePublisherManagementAccess,
 			UserMembershipController.create
