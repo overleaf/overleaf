@@ -1,6 +1,7 @@
 _ = require('underscore')
 settings = require("settings-sharelatex")
 marked = require('marked')
+StringHelper = require "../Helpers/StringHelper"
 
 PersonalEmailLayout = require("./Layouts/PersonalEmailLayout")
 NotificationEmailLayout = require("./Layouts/NotificationEmailLayout")
@@ -35,6 +36,7 @@ The #{settings.appName} Team - #{settings.siteUrl}
 				ctaText: content.ctaText(opts)
 				ctaURL: content.ctaURL(opts)
 				gmailGoToAction: content.gmailGoToAction?(opts)
+				StringHelper: StringHelper
 			})
 	}
 
@@ -58,7 +60,7 @@ templates.accountMergeToSharelatexAddress = templates.accountMergeToOverleafAddr
 templates.registered = CTAEmailTemplate({
 	subject: () -> "Activate your #{settings.appName} Account"
 	message: (opts) -> """
-Congratulations, you've just had an account created for you on #{settings.appName} with the email address '#{opts.to}'.
+Congratulations, you've just had an account created for you on #{settings.appName} with the email address '#{_.escape(opts.to)}'.
 
 Click here to set your password and log in:
 """
@@ -99,20 +101,20 @@ templates.confirmEmail = CTAEmailTemplate({
 })
 
 templates.projectInvite = CTAEmailTemplate({
-	subject: (opts) -> "#{opts.project.name} - shared by #{opts.owner.email}"
-	title: (opts) -> "#{ opts.project.name } - shared by #{ opts.owner.email }"
-	message: (opts) -> "#{ opts.owner.email } wants to share '#{ opts.project.name }' with you."
+	subject: (opts) -> "#{ _.escape(opts.project.name) } - shared by #{ _.escape(opts.owner.email) }"
+	title: (opts) -> "#{ _.escape(opts.project.name) } - shared by #{ _.escape(opts.owner.email) }"
+	message: (opts) -> "#{ _.escape(opts.owner.email) } wants to share '#{ _.escape(opts.project.name) }' with you."
 	ctaText: () -> "View project"
 	ctaURL: (opts) -> opts.inviteUrl
 	gmailGoToAction: (opts) ->
 		target: opts.inviteUrl
 		name: "View project"
-		description: "Join #{ opts.project.name } at #{ settings.appName }"
+		description: "Join #{ _.escape(opts.project.name) } at #{ settings.appName }"
 })
 
 templates.verifyEmailToJoinTeam = CTAEmailTemplate({
-	subject: (opts) -> "#{ opts.inviterName } has invited you to join a team on #{settings.appName}"
-	title: (opts) -> "#{opts.inviterName} has invited you to join a team on #{settings.appName}"
+	subject: (opts) -> "#{ _.escape(opts.inviterName) } has invited you to join a team on #{ settings.appName }"
+	title: (opts) -> "#{ _.escape(opts.inviterName) } has invited you to join a team on #{ settings.appName }"
 	message: (opts) -> "Please click the button below to join the team and enjoy the benefits of an upgraded #{ settings.appName } account."
 	ctaText: (opts) -> "Join now"
 	ctaURL: (opts) -> opts.acceptInviteUrl

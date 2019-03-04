@@ -42,17 +42,19 @@ module.exports = _.template """
 </tr></tbody></table>
 <% if (gmailGoToAction) { %>
 	<script type="application/ld+json">
-		{
-			"@context": "http://schema.org",
-			"@type": "EmailMessage",
-			"potentialAction": {
-				"@type": "ViewAction",
-				"target": "<%= gmailGoToAction.target %>",
-				"url": "<%= gmailGoToAction.target %>",
-				"name": "<%= gmailGoToAction.name %>"
-			},
-			"description": "<%= gmailGoToAction.description %>"
-		}
+		<%=
+			StringHelper.stringifyJsonForScript({
+				"@context": "http://schema.org",
+				"@type": "EmailMessage",
+				"potentialAction": {
+					"@type": "ViewAction",
+					"target": gmailGoToAction.target,
+					"url": gmailGoToAction.target,
+					"name": gmailGoToAction.name
+				},
+				"description": gmailGoToAction.description
+			})
+    %>
 	</script>
 <% } %>
 """

@@ -31,12 +31,24 @@ describe "EmailBuilder", ->
 				project:
 					url:"http://www.project.com"
 					name:"standard project"
-			@email = @EmailBuilder.buildEmail("projectInvite", @opts)
 
-		it 'should have html and text properties', ->
-			expect(@email.html?).to.equal true
-			expect(@email.text?).to.equal true
+		describe "when sending a normal email", ->
+			beforeEach ->
+				@email = @EmailBuilder.buildEmail("projectInvite", @opts)
 
-		it "should not have undefined in it", ->
-			@email.html.indexOf("undefined").should.equal -1
-			@email.subject.indexOf("undefined").should.equal -1
+			it 'should have html and text properties', ->
+				expect(@email.html?).to.equal true
+				expect(@email.text?).to.equal true
+
+			it "should not have undefined in it", ->
+				@email.html.indexOf("undefined").should.equal -1
+				@email.subject.indexOf("undefined").should.equal -1
+
+		describe "when someone is up to no good", ->
+			beforeEach ->
+				@opts.project.name = "<img src='http://evilsite.com/evil.php'>"
+				@email = @EmailBuilder.buildEmail("projectInvite", @opts)
+
+			it 'should not contain unescaped html in the html part', ->
+				expect(@email.html).to.contain "&lt;img"
+
