@@ -236,6 +236,12 @@ define([
           if (this._ignoreExternalUpdates) {
             return
           }
+          if (
+            _.property(['meta', 'type'])(update) === 'external' &&
+            _.property(['meta', 'source'])(update) === 'git-bridge'
+          ) {
+            return
+          }
           return this.ide.showGenericMessageModal(
             'Document Updated Externally',
             'This document was just updated externally. Any recent changes you have made may have been overwritten. To see previous versions please look in the history.'
