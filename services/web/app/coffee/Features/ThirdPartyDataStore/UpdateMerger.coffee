@@ -24,10 +24,10 @@ module.exports = UpdateMerger =
 				return callback(null, "existing-file")
 			if _.some(docs, (d) -> d.path is path)
 				return callback(null, "existing-doc") 
-			# existing file not found in project, fall back to extension check
-			FileTypeManager.isBinary path, fsPath, (err, isFile)->
+			# existing file not found in project, so check the file type to determine if doc
+			FileTypeManager.getType path, fsPath, (err, isBinary)->
 				return callback(err) if err?
-				if isFile
+				if isBinary
 					callback(null, "new-file") # extension was not text
 				else
 					callback(null, "new-doc")

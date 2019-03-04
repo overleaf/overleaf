@@ -50,12 +50,12 @@ describe 'UpdateMerger :', ->
 		describe "doc updates for a new doc", ->
 
 			beforeEach ->
-				@FileTypeManager.isBinary = sinon.stub().yields(null, false)
+				@FileTypeManager.getType = sinon.stub().yields(null, false)
 				@updateMerger.p.processDoc = sinon.stub().yields()
 				@updateMerger.mergeUpdate @user_id, @project_id, @docPath, @updateRequest, @source, @callback
 
 			it 'should look at the file contents', ->
-				@FileTypeManager.isBinary.called.should.equal true
+				@FileTypeManager.getType.called.should.equal true
 
 			it 'should process update as doc', ->
 				@updateMerger.p.processDoc
@@ -67,12 +67,12 @@ describe 'UpdateMerger :', ->
 
 		describe "file updates for a new file ", ->
 			beforeEach ->
-				@FileTypeManager.isBinary = sinon.stub().yields(null, true)
+				@FileTypeManager.getType = sinon.stub().yields(null, true)
 				@updateMerger.p.processFile = sinon.stub().yields()
 				@updateMerger.mergeUpdate @user_id, @project_id, @filePath, @updateRequest, @source, @callback
 
 			it 'should look at the file contents', ->
-				@FileTypeManager.isBinary.called.should.equal true
+				@FileTypeManager.getType.called.should.equal true
 
 			it 'should process update as file', ->
 				@updateMerger.p.processFile
@@ -84,12 +84,12 @@ describe 'UpdateMerger :', ->
 
 		describe "doc updates for an existing doc", ->
 			beforeEach ->
-				@FileTypeManager.isBinary = sinon.stub()
+				@FileTypeManager.getType = sinon.stub()
 				@updateMerger.p.processDoc = sinon.stub().yields()
 				@updateMerger.mergeUpdate @user_id, @project_id, @existingDocPath, @updateRequest, @source, @callback
 
 			it 'should not look at the file contents', ->
-				@FileTypeManager.isBinary.called.should.equal false
+				@FileTypeManager.getType.called.should.equal false
 
 			it 'should process update as doc', ->
 				@updateMerger.p.processDoc
@@ -101,12 +101,12 @@ describe 'UpdateMerger :', ->
 
 		describe "file updates for an existing file", ->
 			beforeEach ->
-				@FileTypeManager.isBinary = sinon.stub()
+				@FileTypeManager.getType = sinon.stub()
 				@updateMerger.p.processFile = sinon.stub().yields()
 				@updateMerger.mergeUpdate @user_id, @project_id, @existingFilePath, @updateRequest, @source, @callback
 
 			it 'should not look at the file contents', ->
-				@FileTypeManager.isBinary.called.should.equal false
+				@FileTypeManager.getType.called.should.equal false
 
 			it 'should process update as file', ->
 				@updateMerger.p.processFile

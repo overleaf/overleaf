@@ -13,11 +13,15 @@ describe "FileSystemImportManager", ->
 		@replace = "replace-boolean-flag-mock"
 		@user_id = "mock-user-123"
 		@callback = sinon.stub()
+		@encoding = "latin1"
+		@DocumentHelper =
+			convertTexEncodingsToUtf8: sinon.stub().returnsArg(0)
 		@FileSystemImportManager = SandboxedModule.require modulePath, requires:
 			"fs" : @fs = {}
 			"../Editor/EditorController": @EditorController = {}
 			"./FileTypeManager": @FileTypeManager = {}
 			"../Project/ProjectLocator": @ProjectLocator = {}
+			"../Documents/DocumentHelper": @DocumentHelper
 			"logger-sharelatex":
 				log:->
 				err:->
@@ -34,7 +38,7 @@ describe "FileSystemImportManager", ->
 			beforeEach ->
 				@FileSystemImportManager._isSafeOnFileSystem = sinon.stub().callsArgWith(1, null, false)
 				@EditorController.addDoc = sinon.stub()
-				@FileSystemImportManager.addDoc @user_id, @project_id, @folder_id, @name, @path_on_disk, false, @callback
+				@FileSystemImportManager.addDoc @user_id, @project_id, @folder_id, @name, @path_on_disk, @encoding, false, @callback
 
 			it "should not read the file from disk", ->
 				@fs.readFile.called.should.equal false
@@ -45,10 +49,10 @@ describe "FileSystemImportManager", ->
 		describe "with replace set to false", ->
 			beforeEach ->
 				@EditorController.addDoc = sinon.stub().callsArg(6)
-				@FileSystemImportManager.addDoc @user_id, @project_id, @folder_id, @name, @path_on_disk, false, @callback
+				@FileSystemImportManager.addDoc @user_id, @project_id, @folder_id, @name, @path_on_disk, @encoding, false, @callback
 
 			it "should read the file from disk", ->
-				@fs.readFile.calledWith(@path_on_disk, "utf8").should.equal true
+				@fs.readFile.calledWith(@path_on_disk).should.equal true
 
 			it "should insert the doc", ->
 				@EditorController.addDoc.calledWith(@project_id, @folder_id, @name, @docLines, "upload", @user_id)
@@ -60,21 +64,36 @@ describe "FileSystemImportManager", ->
 				@docLines = ["one", "two", "three"]
 				@fs.readFile = sinon.stub().callsArgWith(2, null, @docContent)
 				@EditorController.addDoc = sinon.stub().callsArg(6)
-				@FileSystemImportManager.addDoc @user_id, @project_id, @folder_id, @name, @path_on_disk, false, @callback
+				@FileSystemImportManager.addDoc @user_id, @project_id, @folder_id, @name, @path_on_disk, @encoding, false, @callback
 
 			it "should strip the \\r characters before adding", ->
+				@EditorController.addDoc.calledWith(@project_id, @folder_id, @name, @docLines, "upload", @user_id)
+					.should.equal true
+
+		describe "with \r line endings", ->
+			beforeEach ->
+				@docContent = "one\rtwo\rthree"
+				@docLines = ["one", "two", "three"]
+				@fs.readFile = sinon.stub().callsArgWith(2, null, @docContent)
+				@EditorController.addDoc = sinon.stub().callsArg(6)
+				@FileSystemImportManager.addDoc @user_id, @project_id, @folder_id, @name, @path_on_disk, @encoding, false, @callback
+
+			it "should treat the \\r characters as newlines", ->
 				@EditorController.addDoc.calledWith(@project_id, @folder_id, @name, @docLines, "upload", @user_id)
 					.should.equal true
 		
 		describe "with replace set to true", ->
 			beforeEach ->
 				@EditorController.upsertDoc = sinon.stub().yields()
-				@FileSystemImportManager.addDoc @user_id, @project_id, @folder_id, @name, @path_on_disk, true, @callback
+				@FileSystemImportManager.addDoc @user_id, @project_id, @folder_id, @name, @path_on_disk, @encoding, true, @callback
 
 			it "should upsert the doc", ->
 				@EditorController.upsertDoc
 					.calledWith(@project_id, @folder_id, @name, @docLines, "upload", @user_id)
 					.should.equal true
+
+			it "should read the file with the correct encoding", ->
+				sinon.assert.calledWith(@fs.readFile, @path_on_disk, @encoding)
 
 	describe "addFile with replace set to false", ->
 		beforeEach ->
@@ -176,7 +195,7 @@ describe "FileSystemImportManager", ->
 		describe "with binary file", ->
 			beforeEach ->
 				@FileTypeManager.isDirectory = sinon.stub().callsArgWith(1, null, false)
-				@FileTypeManager.isBinary = sinon.stub().callsArgWith(2, null, true)
+				@FileTypeManager.getType = sinon.stub().callsArgWith(2, null, true)
 				@FileSystemImportManager._isSafeOnFileSystem = sinon.stub().callsArgWith(1, null, true)
 				@FileSystemImportManager.addFile = sinon.stub().callsArg(6)
 				@FileSystemImportManager.addEntity @user_id, @project_id, @folder_id, @name, @path_on_disk, @replace, @callback
@@ -188,13 +207,10 @@ describe "FileSystemImportManager", ->
 		describe "with text file", ->
 			beforeEach ->
 				@FileTypeManager.isDirectory = sinon.stub().callsArgWith(1, null, false)
-				@FileTypeManager.isBinary = sinon.stub().callsArgWith(2, null, false)
-				@FileSystemImportManager.addDoc = sinon.stub().callsArg(6)
+				@FileTypeManager.getType = sinon.stub().callsArgWith(2, null, false, 'latin1')
+				@FileSystemImportManager.addDoc = sinon.stub().callsArg(7)
 				@FileSystemImportManager._isSafeOnFileSystem = sinon.stub().callsArgWith(1, null, true)
 				@FileSystemImportManager.addEntity @user_id, @project_id, @folder_id, @name, @path_on_disk, @replace, @callback
 
 			it "should call addFile", ->
-				@FileSystemImportManager.addDoc.calledWith(@user_id, @project_id, @folder_id, @name, @path_on_disk, @replace)
-					.should.equal true
-
-
+				sinon.assert.calledWith(@FileSystemImportManager.addDoc, @user_id, @project_id, @folder_id, @name, @path_on_disk, "latin1", @replace)

@@ -6,14 +6,14 @@ EditorController = require "../Editor/EditorController"
 logger = require("logger-sharelatex")
 
 module.exports = FileSystemImportManager =
-	addDoc: (user_id, project_id, folder_id, name, path, replace, callback = (error, doc)-> )->
+	addDoc: (user_id, project_id, folder_id, name, path, charset, replace, callback = (error, doc)-> )->
 		FileSystemImportManager._isSafeOnFileSystem path, (err, isSafe)->
 			if !isSafe
 				logger.log user_id:user_id, project_id:project_id, folder_id:folder_id, name:name, path:path, "add doc is from symlink, stopping process"
 				return callback("path is symlink")
-			fs.readFile path, "utf8", (error, content = "") ->
+			fs.readFile path, charset, (error, content) ->
 				return callback(error) if error?
-				content = content.replace(/\r/g, "")
+				content = content.replace(/\r\n?/g, "\n") # convert Windows line endings to unix. very old macs also created \r-separated lines
 				lines = content.split("\n")
 				if replace
 					EditorController.upsertDoc project_id, folder_id, name, lines, "upload", user_id, callback
@@ -72,14 +72,14 @@ module.exports = FileSystemImportManager =
 				if isDirectory
 					FileSystemImportManager.addFolder user_id, project_id, folder_id, name, path, replace, callback
 				else
-					FileTypeManager.isBinary name, path, (error, isBinary) =>
+					FileTypeManager.getType name, path, (error, isBinary, charset) =>
 						return callback(error) if error?
 						if isBinary
 							FileSystemImportManager.addFile user_id, project_id, folder_id, name, path, replace, (err, entity) ->
 								entity?.type = 'file'
 								callback(err, entity)
 						else
-							FileSystemImportManager.addDoc user_id, project_id, folder_id, name, path, replace, (err, entity) ->
+							FileSystemImportManager.addDoc user_id, project_id, folder_id, name, path, charset, replace, (err, entity) ->
 								entity?.type = 'doc'
 								callback(err, entity)
 

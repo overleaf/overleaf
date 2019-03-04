@@ -1,6 +1,8 @@
 async = require "async"
 expect = require("chai").expect
 _ = require 'underscore'
+fs = require 'fs'
+Path = require 'path'
 
 ProjectGetter = require "../../../app/js/Features/Project/ProjectGetter.js"
 
@@ -83,7 +85,8 @@ describe "RestoringFiles", ->
 
 		describe "restoring a binary file", ->
 			beforeEach (done) ->
-				MockProjectHistoryApi.addOldFile(@project_id, 42, "image.png", "Mock image.png content")
+				@pngData = fs.readFileSync(Path.resolve(__dirname, '../files/1pixel.png'), 'binary')
+				MockProjectHistoryApi.addOldFile(@project_id, 42, "image.png", @pngData)
 				@owner.request {
 					method: "POST",
 					url: "/project/#{@project_id}/restore_file",
@@ -101,7 +104,7 @@ describe "RestoringFiles", ->
 					file = _.find project.rootFolder[0].fileRefs, (file) ->
 						file.name == 'image.png'
 					file = MockFileStoreApi.files[@project_id][file._id]
-					expect(file.content).to.equal "Mock image.png content"
+					expect(file.content).to.equal @pngData
 					done()
 
 		describe "restoring to a directory that exists", ->

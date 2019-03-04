@@ -252,6 +252,47 @@ describe "ProjectStructureChanges", ->
 				expect(project.rootFolder[0].folders[0].docs[0].name).to.equal('ao.sty')
 				done()
 
+	describe "uploading a project with files in different encodings", ->
+		before (done) ->
+			MockDocUpdaterApi.clearProjectStructureUpdates()
+
+			zip_file = fs.createReadStream(Path.resolve(__dirname + '/../files/charsets/charsets.zip'))
+
+			@owner.request.post {
+				uri: "project/new/upload",
+				formData:
+					qqfile: zip_file
+			}, (error, res, body) =>
+				throw error if error?
+				if res.statusCode < 200 || res.statusCode >= 300
+					throw new Error("failed to upload project #{res.statusCode}")
+				@uploaded_project_id = JSON.parse(body).project_id
+				done()
+
+		it "should correctly parse windows-1252", ->
+			{docUpdates: updates} = MockDocUpdaterApi.getProjectStructureUpdates(@uploaded_project_id)
+			update = _.find updates, (update) ->
+				update.pathname == '/test-german-windows-1252.tex'
+			expect(update.docLines).to.contain("Der schnelle braune Fuchs sprang träge über den Hund.")
+
+		it "should correctly parse German utf8", ->
+			{docUpdates: updates} = MockDocUpdaterApi.getProjectStructureUpdates(@uploaded_project_id)
+			update = _.find updates, (update) ->
+				update.pathname == '/test-german-utf8x.tex'
+			expect(update.docLines).to.contain("Der schnelle braune Fuchs sprang träge über den Hund.")
+
+		it "should correctly parse little-endian utf16", ->
+			{docUpdates: updates} = MockDocUpdaterApi.getProjectStructureUpdates(@uploaded_project_id)
+			update = _.find updates, (update) ->
+				update.pathname == '/test-greek-utf16-le-bom.tex'
+			expect(update.docLines).to.contain("Η γρήγορη καστανή αλεπού πήδηξε χαλαρά πάνω από το σκυλί.")
+
+		it "should correctly parse Greek utf8", ->
+			{docUpdates: updates} = MockDocUpdaterApi.getProjectStructureUpdates(@uploaded_project_id)
+			update = _.find updates, (update) ->
+				update.pathname == '/test-greek-utf8x.tex'
+			expect(update.docLines).to.contain("Η γρήγορη καστανή αλεπού πήδηξε χαλαρά πάνω από το σκυλί.")
+
 	describe "uploading a file", ->
 		beforeEach (done) ->
 			MockDocUpdaterApi.clearProjectStructureUpdates()
@@ -260,7 +301,7 @@ describe "ProjectStructureChanges", ->
 				@root_folder_id = project.rootFolder[0]._id.toString()
 				@project_0 = project
 				done()
-				
+
 		it "should version a newly uploaded file", (done) ->
 			image_file = fs.createReadStream(Path.resolve(__dirname + '/../files/1pixel.png'))
 
@@ -740,3 +781,65 @@ describe "ProjectStructureChanges", ->
 					expect(@project_1.version).to.equal(@project_0.version + 1)
 					done()
 
+
+	describe "uploading a document", ->
+		beforeEach (done) ->
+			MockDocUpdaterApi.clearProjectStructureUpdates()
+			ProjectGetter.getProject example_project_id, (error, project) =>
+				throw error if error?
+				@root_folder_id = project.rootFolder[0]._id.toString()
+				@project_0 = project
+				done()
+
+		describe "with an unusual character set", ->
+			it "should correctly handle utf16-le data", (done) ->
+				document_file = fs.createReadStream(Path.resolve(__dirname + '/../files/charsets/test-greek-utf16-le-bom.tex'))
+
+				req = @owner.request.post {
+					uri: "project/#{example_project_id}/upload",
+					qs:
+						folder_id: @root_folder_id
+					formData:
+						qqfile:
+							value: document_file
+							options:
+								filename: 'test-greek-utf16-le-bom.tex',
+								contentType: 'text/x-tex'
+				}, (error, res, body) =>
+					throw error if error?
+					if res.statusCode < 200 || res.statusCode >= 300
+						throw new Error("failed to upload file #{res.statusCode}")
+
+					example_file_id = JSON.parse(body).entity_id
+
+					{docUpdates:updates} = MockDocUpdaterApi.getProjectStructureUpdates(example_project_id)
+					update = updates[0]
+					expect(update.pathname).to.equal('/test-greek-utf16-le-bom.tex')
+					expect(update.docLines).to.contain("Η γρήγορη καστανή αλεπού πήδηξε χαλαρά πάνω από το σκυλί.")
+					done()
+
+			it "should correctly handle windows1252/iso-8859-1/latin1 data", (done) ->
+				document_file = fs.createReadStream(Path.resolve(__dirname + '/../files/charsets/test-german-windows-1252.tex'))
+
+				req = @owner.request.post {
+					uri: "project/#{example_project_id}/upload",
+					qs:
+						folder_id: @root_folder_id
+					formData:
+						qqfile:
+							value: document_file
+							options:
+								filename: 'test-german-windows-1252.tex',
+								contentType: 'text/x-tex'
+				}, (error, res, body) =>
+					throw error if error?
+					if res.statusCode < 200 || res.statusCode >= 300
+						throw new Error("failed to upload file #{res.statusCode}")
+
+					example_file_id = JSON.parse(body).entity_id
+
+					{docUpdates:updates} = MockDocUpdaterApi.getProjectStructureUpdates(example_project_id)
+					update = updates[0]
+					expect(update.pathname).to.equal('/test-german-windows-1252.tex')
+					expect(update.docLines).to.contain("Der schnelle braune Fuchs sprang träge über den Hund.")
+					done()
