@@ -33,7 +33,7 @@ block content
 												a(
 													ng-click="changeCurrency(currency)",
 												) {{currency}} ({{value['symbol']}}) 
-							.row(ng-if="planCode == 'student-annual' || planCode == 'student-monthly'")
+							.row(ng-if="planCode == 'student-annual' || planCode == 'student-monthly' || planCode == 'student_free_trial_7_days'")
 								.col-xs-12
 									p.student-disclaimer #{translate('student_disclaimer')}
 
