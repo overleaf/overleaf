@@ -1,5 +1,5 @@
 AuthenticationController = require('../Authentication/AuthenticationController')
-AuthorizationMiddlewear = require('../Authorization/AuthorizationMiddlewear')
+AuthorizationMiddleware = require('../Authorization/AuthorizationMiddleware')
 UserMembershipHandler = require('./UserMembershipHandler')
 EntityConfigs = require('./UserMembershipEntityConfigs')
 Errors = require('../Errors/Errors')
@@ -63,7 +63,7 @@ module.exports = UserMembershipAuthorization =
 				req.params.id = body.brand.slug
 				UserMembershipAuthorization.requirePublisherMetricsAccess(req, res, next)
 			else
-				AuthorizationMiddlewear.ensureUserIsSiteAdmin(req, res, next)
+				AuthorizationMiddleware.ensureUserIsSiteAdmin(req, res, next)
 
 	requireGraphAccess: (req, res, next) ->
 		req.params.id = req.query.resource_id
@@ -80,7 +80,7 @@ module.exports = UserMembershipAuthorization =
 requireAccessToEntity = (entityName, entityId, req, res, next, requiredStaffAccess=null) ->
 	loggedInUser = AuthenticationController.getSessionUser(req)
 	unless loggedInUser
-		return AuthorizationMiddlewear.redirectToRestricted req, res, next
+		return AuthorizationMiddleware.redirectToRestricted req, res, next
 
 	getEntity entityName, entityId, loggedInUser, requiredStaffAccess, (error, entity, entityConfig, entityExists) ->
 		return next(error) if error?
@@ -91,7 +91,7 @@ requireAccessToEntity = (entityName, entityId, req, res, next, requiredStaffAcce
 			return next()
 
 		if entityExists # user doesn't have access to entity
-			return AuthorizationMiddlewear.redirectToRestricted(req, res, next)
+			return AuthorizationMiddleware.redirectToRestricted(req, res, next)
 
 		if loggedInUser.isAdmin and entityConfig.canCreate
 			# entity doesn't exists, admin can create it

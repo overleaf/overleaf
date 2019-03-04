@@ -3,10 +3,10 @@ assert = require('assert')
 require('chai').should()
 expect = require('chai').expect
 sinon = require('sinon')
-modulePath = require('path').join __dirname, '../../../../app/js/Features/SudoMode/SudoModeMiddlewear'
+modulePath = require('path').join __dirname, '../../../../app/js/Features/SudoMode/SudoModeMiddleware'
 
 
-describe 'SudoModeMiddlewear', ->
+describe 'SudoModeMiddleware', ->
 	beforeEach ->
 		@userId = 'some_user_id'
 		@SudoModeHandler =
@@ -14,7 +14,7 @@ describe 'SudoModeMiddlewear', ->
 		@AuthenticationController =
 			getLoggedInUserId: sinon.stub().returns(@userId)
 			setRedirectInSession: sinon.stub()
-		@SudoModeMiddlewear = SandboxedModule.require modulePath, requires:
+		@SudoModeMiddleware = SandboxedModule.require modulePath, requires:
 			'./SudoModeHandler': @SudoModeHandler
 			'../Authentication/AuthenticationController': @AuthenticationController
 			'logger-sharelatex': {log: sinon.stub(), err: sinon.stub()}
@@ -27,7 +27,7 @@ describe 'SudoModeMiddlewear', ->
 				@req = {externalAuthenticationSystemUsed: sinon.stub().returns(@externalAuth)}
 				@res = {redirect: sinon.stub()}
 				@next = sinon.stub()
-				@SudoModeMiddlewear.protectPage @req, @res, @next
+				@SudoModeMiddleware.protectPage @req, @res, @next
 				cb()
 
 		describe 'when sudo mode is active', ->
@@ -110,7 +110,7 @@ describe 'SudoModeMiddlewear', ->
 					@req = {externalAuthenticationSystemUsed: sinon.stub().returns(@externalAuth)}
 					@res = {redirect: sinon.stub()}
 					@next = sinon.stub()
-					@SudoModeMiddlewear.protectPage @req, @res, @next
+					@SudoModeMiddleware.protectPage @req, @res, @next
 					cb()
 
 			it 'should immediately return next with no args', (done) ->

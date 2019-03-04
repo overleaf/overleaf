@@ -2,7 +2,7 @@ CooldownManager = require('./CooldownManager')
 logger = require('logger-sharelatex')
 
 
-module.exports = CooldownMiddlewear =
+module.exports = CooldownMiddleware =
 
 	freezeProject: (req, res, next) ->
 			projectId = req.params.Project_id

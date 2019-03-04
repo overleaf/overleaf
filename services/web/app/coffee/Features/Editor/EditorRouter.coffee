@@ -1,31 +1,31 @@
 EditorHttpController = require('./EditorHttpController')
 AuthenticationController = require "../Authentication/AuthenticationController"
-AuthorizationMiddlewear = require('../Authorization/AuthorizationMiddlewear')
-RateLimiterMiddlewear = require('../Security/RateLimiterMiddlewear')
+AuthorizationMiddleware = require('../Authorization/AuthorizationMiddleware')
+RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
 
 module.exports =
 	apply: (webRouter, apiRouter) ->
-		webRouter.post   '/project/:Project_id/doc', AuthorizationMiddlewear.ensureUserCanWriteProjectContent,
-			RateLimiterMiddlewear.rateLimit({
+		webRouter.post   '/project/:Project_id/doc', AuthorizationMiddleware.ensureUserCanWriteProjectContent,
+			RateLimiterMiddleware.rateLimit({
 				endpointName: "add-doc-to-project"
 				params: ["Project_id"]
 				maxRequests: 30
 				timeInterval: 60
 			}), EditorHttpController.addDoc
-		webRouter.post   '/project/:Project_id/folder', AuthorizationMiddlewear.ensureUserCanWriteProjectContent,
-			RateLimiterMiddlewear.rateLimit({
+		webRouter.post   '/project/:Project_id/folder', AuthorizationMiddleware.ensureUserCanWriteProjectContent,
+			RateLimiterMiddleware.rateLimit({
 				endpointName: "add-folder-to-project"
 				params: ["Project_id"]
 				maxRequests: 60
 				timeInterval: 60
 			}), EditorHttpController.addFolder
 
-		webRouter.post   '/project/:Project_id/:entity_type/:entity_id/rename', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, EditorHttpController.renameEntity
-		webRouter.post   '/project/:Project_id/:entity_type/:entity_id/move', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, EditorHttpController.moveEntity
+		webRouter.post   '/project/:Project_id/:entity_type/:entity_id/rename', AuthorizationMiddleware.ensureUserCanWriteProjectContent, EditorHttpController.renameEntity
+		webRouter.post   '/project/:Project_id/:entity_type/:entity_id/move', AuthorizationMiddleware.ensureUserCanWriteProjectContent, EditorHttpController.moveEntity
 
-		webRouter.delete '/project/:Project_id/file/:entity_id', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, EditorHttpController.deleteFile
-		webRouter.delete '/project/:Project_id/doc/:entity_id', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, EditorHttpController.deleteDoc
-		webRouter.delete '/project/:Project_id/folder/:entity_id', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, EditorHttpController.deleteFolder
+		webRouter.delete '/project/:Project_id/file/:entity_id', AuthorizationMiddleware.ensureUserCanWriteProjectContent, EditorHttpController.deleteFile
+		webRouter.delete '/project/:Project_id/doc/:entity_id', AuthorizationMiddleware.ensureUserCanWriteProjectContent, EditorHttpController.deleteDoc
+		webRouter.delete '/project/:Project_id/folder/:entity_id', AuthorizationMiddleware.ensureUserCanWriteProjectContent, EditorHttpController.deleteFolder
 
 		# Called by the real-time API to load up the current project state.
 		# This is a post request because it's more than just a getting of data. We take actions

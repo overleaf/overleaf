@@ -2,15 +2,15 @@ SandboxedModule = require('sandboxed-module')
 sinon = require('sinon')
 require('chai').should()
 expect = require('chai').expect
-modulePath = require('path').join __dirname, '../../../../app/js/Features/Cooldown/CooldownMiddlewear'
+modulePath = require('path').join __dirname, '../../../../app/js/Features/Cooldown/CooldownMiddleware'
 
 
-describe "CooldownMiddlewear", ->
+describe "CooldownMiddleware", ->
 
 	beforeEach ->
 		@CooldownManager =
 			isProjectOnCooldown: sinon.stub()
-		@CooldownMiddlewear = SandboxedModule.require modulePath, requires:
+		@CooldownMiddleware = SandboxedModule.require modulePath, requires:
 			'./CooldownManager': @CooldownManager
 			'logger-sharelatex': {log: sinon.stub()}
 
@@ -24,16 +24,16 @@ describe "CooldownMiddlewear", ->
 				@next = sinon.stub()
 
 			it 'should call CooldownManager.isProjectOnCooldown', ->
-				@CooldownMiddlewear.freezeProject @req, @res, @next
+				@CooldownMiddleware.freezeProject @req, @res, @next
 				@CooldownManager.isProjectOnCooldown.callCount.should.equal 1
 				@CooldownManager.isProjectOnCooldown.calledWith('abc').should.equal true
 
 			it 'should not produce an error', ->
-				@CooldownMiddlewear.freezeProject @req, @res, @next
+				@CooldownMiddleware.freezeProject @req, @res, @next
 				@next.callCount.should.equal 0
 
 			it 'should send a 429 status', ->
-				@CooldownMiddlewear.freezeProject @req, @res, @next
+				@CooldownMiddleware.freezeProject @req, @res, @next
 				@res.sendStatus.callCount.should.equal 1
 				@res.sendStatus.calledWith(429).should.equal true
 
@@ -45,12 +45,12 @@ describe "CooldownMiddlewear", ->
 				@next = sinon.stub()
 
 			it 'should call CooldownManager.isProjectOnCooldown', ->
-				@CooldownMiddlewear.freezeProject @req, @res, @next
+				@CooldownMiddleware.freezeProject @req, @res, @next
 				@CooldownManager.isProjectOnCooldown.callCount.should.equal 1
 				@CooldownManager.isProjectOnCooldown.calledWith('abc').should.equal true
 
 			it 'call next with no arguments', ->
-				@CooldownMiddlewear.freezeProject @req, @res, @next
+				@CooldownMiddleware.freezeProject @req, @res, @next
 				@next.callCount.should.equal 1
 				expect(@next.lastCall.args.length).to.equal 0
 
@@ -62,12 +62,12 @@ describe "CooldownMiddlewear", ->
 				@next = sinon.stub()
 
 			it 'should call CooldownManager.isProjectOnCooldown', ->
-				@CooldownMiddlewear.freezeProject @req, @res, @next
+				@CooldownMiddleware.freezeProject @req, @res, @next
 				@CooldownManager.isProjectOnCooldown.callCount.should.equal 1
 				@CooldownManager.isProjectOnCooldown.calledWith('abc').should.equal true
 
 			it 'call next with an error', ->
-				@CooldownMiddlewear.freezeProject @req, @res, @next
+				@CooldownMiddleware.freezeProject @req, @res, @next
 				@next.callCount.should.equal 1
 				expect(@next.lastCall.args[0]).to.be.instanceof Error
 
@@ -79,10 +79,10 @@ describe "CooldownMiddlewear", ->
 				@next = sinon.stub()
 
 			it 'call next with an error', ->
-				@CooldownMiddlewear.freezeProject @req, @res, @next
+				@CooldownMiddleware.freezeProject @req, @res, @next
 				@next.callCount.should.equal 1
 				expect(@next.lastCall.args[0]).to.be.instanceof Error
 
 			it 'should not call CooldownManager.isProjectOnCooldown', ->
-				@CooldownMiddlewear.freezeProject @req, @res, @next
+				@CooldownMiddleware.freezeProject @req, @res, @next
 				@CooldownManager.isProjectOnCooldown.callCount.should.equal 0

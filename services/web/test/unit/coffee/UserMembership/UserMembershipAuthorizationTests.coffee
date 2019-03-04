@@ -19,12 +19,12 @@ describe "UserMembershipAuthorization", ->
 		@UserMembershipHandler =
 			getEntity: sinon.stub().yields(null, @subscription)
 			getEntityWithoutAuthorizationCheck: sinon.stub().yields(null, @subscription)
-		@AuthorizationMiddlewear =
+		@AuthorizationMiddleware =
 			redirectToRestricted: sinon.stub().yields()
 			ensureUserIsSiteAdmin: sinon.stub().yields()
 		@UserMembershipAuthorization = SandboxedModule.require modulePath, requires:
 			'../Authentication/AuthenticationController': @AuthenticationController
-			'../Authorization/AuthorizationMiddlewear': @AuthorizationMiddlewear
+			'../Authorization/AuthorizationMiddleware': @AuthorizationMiddleware
 			'./UserMembershipHandler': @UserMembershipHandler
 			'./EntityConfigs': EntityConfigs
 			'../Errors/Errors': Errors
@@ -80,14 +80,14 @@ describe "UserMembershipAuthorization", ->
 		it 'handle entity no access', (done) ->
 			@UserMembershipHandler.getEntity.yields(null, null)
 			@UserMembershipAuthorization.requireGroupMetricsAccess @req, null, (error) =>
-				sinon.assert.called(@AuthorizationMiddlewear.redirectToRestricted)
+				sinon.assert.called(@AuthorizationMiddleware.redirectToRestricted)
 				done()
 
 		it 'handle anonymous user', (done) ->
 			@AuthenticationController.getSessionUser.returns(null)
 			@UserMembershipAuthorization.requireGroupMetricsAccess @req, null, (error) =>
 				expect(error).to.extist
-				sinon.assert.called(@AuthorizationMiddlewear.redirectToRestricted)
+				sinon.assert.called(@AuthorizationMiddleware.redirectToRestricted)
 				sinon.assert.notCalled(@UserMembershipHandler.getEntity)
 				expect(@req.entity).to.not.exist
 				done()
@@ -157,14 +157,14 @@ describe "UserMembershipAuthorization", ->
 			@UserMembershipAuthorization.requireTemplateMetricsAccess @req, null, (error) =>
 				expect(error).to.not.extist
 				sinon.assert.notCalled(@UserMembershipHandler.getEntity)
-				sinon.assert.calledOnce(@AuthorizationMiddlewear.ensureUserIsSiteAdmin)
+				sinon.assert.calledOnce(@AuthorizationMiddleware.ensureUserIsSiteAdmin)
 				done()
 
 		it 'handle graph access', (done) ->
 			@req.query.resource_id = 'mock-resource-id'
 			@req.query.resource_type = 'institution'
-			middlewear = @UserMembershipAuthorization.requireGraphAccess
-			middlewear @req, null, (error) =>
+			middleware = @UserMembershipAuthorization.requireGraphAccess
+			middleware @req, null, (error) =>
 				expect(error).to.not.extist
 				sinon.assert.calledWithMatch(
 					@UserMembershipHandler.getEntity,

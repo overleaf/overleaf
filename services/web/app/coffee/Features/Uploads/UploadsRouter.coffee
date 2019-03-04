@@ -1,7 +1,7 @@
-AuthorizationMiddlewear = require('../Authorization/AuthorizationMiddlewear')
+AuthorizationMiddleware = require('../Authorization/AuthorizationMiddleware')
 AuthenticationController = require('../Authentication/AuthenticationController')
 ProjectUploadController = require "./ProjectUploadController"
-RateLimiterMiddlewear = require('../Security/RateLimiterMiddlewear')
+RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
 Settings = require('settings-sharelatex')
 multer = require('multer')
 
@@ -21,7 +21,7 @@ module.exports =
 	apply: (webRouter, apiRouter) ->
 		webRouter.post '/project/new/upload',
 			AuthenticationController.requireLogin(),
-			RateLimiterMiddlewear.rateLimit({
+			RateLimiterMiddleware.rateLimit({
 				endpointName: "project-upload"
 				maxRequests: 20
 				timeInterval: 60
@@ -30,13 +30,13 @@ module.exports =
 			ProjectUploadController.uploadProject
 
 		webRouter.post '/Project/:Project_id/upload',
-			RateLimiterMiddlewear.rateLimit({
+			RateLimiterMiddleware.rateLimit({
 				endpointName: "file-upload"
 				params: ["Project_id"]
 				maxRequests: 200
 				timeInterval: 60 * 30
 			}),
 			AuthenticationController.requireLogin(),
-			AuthorizationMiddlewear.ensureUserCanWriteProjectContent,
+			AuthorizationMiddleware.ensureUserCanWriteProjectContent,
 			upload.single('qqfile'),
 			ProjectUploadController.uploadFile

@@ -6,10 +6,10 @@ Errors = require "../Errors/Errors"
 AuthenticationController = require "../Authentication/AuthenticationController"
 TokenAccessHandler = require '../TokenAccess/TokenAccessHandler'
 
-module.exports = AuthorizationMiddlewear =
+module.exports = AuthorizationMiddleware =
 	ensureUserCanReadMultipleProjects: (req, res, next) ->
 		project_ids = (req.query.project_ids or "").split(",")
-		AuthorizationMiddlewear._getUserId req, (error, user_id) ->
+		AuthorizationMiddleware._getUserId req, (error, user_id) ->
 			return next(error) if error?
 			# Remove the projects we have access to. Note rejectSeries doesn't use
 			# errors in callbacks
@@ -20,12 +20,12 @@ module.exports = AuthorizationMiddlewear =
 					cb(canRead)
 			, (unauthorized_project_ids) ->
 				if unauthorized_project_ids.length > 0
-					AuthorizationMiddlewear.redirectToRestricted req, res, next
+					AuthorizationMiddleware.redirectToRestricted req, res, next
 				else
 					next()
 
 	ensureUserCanReadProject: (req, res, next) ->
-		AuthorizationMiddlewear._getUserAndProjectId req, (error, user_id, project_id) ->
+		AuthorizationMiddleware._getUserAndProjectId req, (error, user_id, project_id) ->
 			return next(error) if error?
 			token = TokenAccessHandler.getRequestToken(req, project_id)
 			AuthorizationManager.canUserReadProject user_id, project_id, token, (error, canRead) ->
@@ -38,10 +38,10 @@ module.exports = AuthorizationMiddlewear =
 					if req.headers?['accept']?.match(/^application\/json.*$/)
 						res.sendStatus(403)
 					else
-						AuthorizationMiddlewear.redirectToRestricted req, res, next
+						AuthorizationMiddleware.redirectToRestricted req, res, next
 
 	ensureUserCanWriteProjectSettings: (req, res, next) ->
-		AuthorizationMiddlewear._getUserAndProjectId req, (error, user_id, project_id) ->
+		AuthorizationMiddleware._getUserAndProjectId req, (error, user_id, project_id) ->
 			return next(error) if error?
 			token = TokenAccessHandler.getRequestToken(req, project_id)
 			AuthorizationManager.canUserWriteProjectSettings user_id, project_id, token, (error, canWrite) ->
@@ -51,10 +51,10 @@ module.exports = AuthorizationMiddlewear =
 					next()
 				else
 					logger.log {user_id, project_id}, "denying user write access to project settings"
-					AuthorizationMiddlewear.redirectToRestricted req, res, next
+					AuthorizationMiddleware.redirectToRestricted req, res, next
 
 	ensureUserCanWriteProjectContent: (req, res, next) ->
-		AuthorizationMiddlewear._getUserAndProjectId req, (error, user_id, project_id) ->
+		AuthorizationMiddleware._getUserAndProjectId req, (error, user_id, project_id) ->
 			return next(error) if error?
 			token = TokenAccessHandler.getRequestToken(req, project_id)
 			AuthorizationManager.canUserWriteProjectContent user_id, project_id, token, (error, canWrite) ->
@@ -64,10 +64,10 @@ module.exports = AuthorizationMiddlewear =
 					next()
 				else
 					logger.log {user_id, project_id}, "denying user write access to project settings"
-					AuthorizationMiddlewear.redirectToRestricted req, res, next
+					AuthorizationMiddleware.redirectToRestricted req, res, next
 
 	ensureUserCanAdminProject: (req, res, next) ->
-		AuthorizationMiddlewear._getUserAndProjectId req, (error, user_id, project_id) ->
+		AuthorizationMiddleware._getUserAndProjectId req, (error, user_id, project_id) ->
 			return next(error) if error?
 			token = TokenAccessHandler.getRequestToken(req, project_id)
 			AuthorizationManager.canUserAdminProject user_id, project_id, token, (error, canAdmin) ->
@@ -77,10 +77,10 @@ module.exports = AuthorizationMiddlewear =
 					next()
 				else
 					logger.log {user_id, project_id}, "denying user admin access to project"
-					AuthorizationMiddlewear.redirectToRestricted req, res, next
+					AuthorizationMiddleware.redirectToRestricted req, res, next
 
 	ensureUserIsSiteAdmin: (req, res, next) ->
-		AuthorizationMiddlewear._getUserId req, (error, user_id) ->
+		AuthorizationMiddleware._getUserId req, (error, user_id) ->
 			return next(error) if error?
 			AuthorizationManager.isUserSiteAdmin user_id, (error, isAdmin) ->
 				return next(error) if error?
@@ -89,7 +89,7 @@ module.exports = AuthorizationMiddlewear =
 					next()
 				else
 					logger.log {user_id}, "denying user admin access to site"
-					AuthorizationMiddlewear.redirectToRestricted req, res, next
+					AuthorizationMiddleware.redirectToRestricted req, res, next
 
 	_getUserAndProjectId: (req, callback = (error, user_id, project_id) ->) ->
 		project_id = req.params?.project_id or req.params?.Project_id
@@ -97,7 +97,7 @@ module.exports = AuthorizationMiddlewear =
 			return callback(new Error("Expected project_id in request parameters"))
 		if !ObjectId.isValid(project_id)
 			return callback(new Errors.NotFoundError("invalid project_id: #{project_id}"))
-		AuthorizationMiddlewear._getUserId req, (error, user_id) ->
+		AuthorizationMiddleware._getUserId req, (error, user_id) ->
 			return callback(error) if error?
 			callback(null, user_id, project_id)
 

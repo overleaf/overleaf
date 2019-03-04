@@ -1,33 +1,33 @@
 CollaboratorsController = require('./CollaboratorsController')
 AuthenticationController = require('../Authentication/AuthenticationController')
-AuthorizationMiddlewear = require('../Authorization/AuthorizationMiddlewear')
+AuthorizationMiddleware = require('../Authorization/AuthorizationMiddleware')
 CollaboratorsInviteController = require('./CollaboratorsInviteController')
-RateLimiterMiddlewear = require('../Security/RateLimiterMiddlewear')
+RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
 CaptchaMiddleware = require '../Captcha/CaptchaMiddleware'
 
 module.exports =
 	apply: (webRouter, apiRouter) ->
 		webRouter.post '/project/:Project_id/leave', AuthenticationController.requireLogin(), CollaboratorsController.removeSelfFromProject
 
-		webRouter.delete '/project/:Project_id/users/:user_id', AuthorizationMiddlewear.ensureUserCanAdminProject, CollaboratorsController.removeUserFromProject
+		webRouter.delete '/project/:Project_id/users/:user_id', AuthorizationMiddleware.ensureUserCanAdminProject, CollaboratorsController.removeUserFromProject
 
 		webRouter.get(
 			'/project/:Project_id/members',
 			AuthenticationController.requireLogin(),
-			AuthorizationMiddlewear.ensureUserCanAdminProject,
+			AuthorizationMiddleware.ensureUserCanAdminProject,
 			CollaboratorsController.getAllMembers
 		)
 
 		# invites
 		webRouter.post(
 			'/project/:Project_id/invite',
-			RateLimiterMiddlewear.rateLimit({
+			RateLimiterMiddleware.rateLimit({
 				endpointName: "invite-to-project-by-project-id"
 				params: ["Project_id"]
 				maxRequests: 100
 				timeInterval: 60 * 10
 			}),
-			RateLimiterMiddlewear.rateLimit({
+			RateLimiterMiddleware.rateLimit({
 				endpointName: "invite-to-project-by-ip"
 				ipOnly:true
 				maxRequests: 100
@@ -35,34 +35,34 @@ module.exports =
 			}),
 			CaptchaMiddleware.validateCaptcha,
 			AuthenticationController.requireLogin(),
-			AuthorizationMiddlewear.ensureUserCanAdminProject,
+			AuthorizationMiddleware.ensureUserCanAdminProject,
 			CollaboratorsInviteController.inviteToProject
 		)
 
 		webRouter.get(
 			'/project/:Project_id/invites',
 			AuthenticationController.requireLogin(),
-			AuthorizationMiddlewear.ensureUserCanAdminProject,
+			AuthorizationMiddleware.ensureUserCanAdminProject,
 			CollaboratorsInviteController.getAllInvites
 		)
 
 		webRouter.delete(
 			'/project/:Project_id/invite/:invite_id',
 			AuthenticationController.requireLogin(),
-			AuthorizationMiddlewear.ensureUserCanAdminProject,
+			AuthorizationMiddleware.ensureUserCanAdminProject,
 			CollaboratorsInviteController.revokeInvite
 		)
 
 		webRouter.post(
 			'/project/:Project_id/invite/:invite_id/resend',
-			RateLimiterMiddlewear.rateLimit({
+			RateLimiterMiddleware.rateLimit({
 				endpointName: "resend-invite"
 				params: ["Project_id"]
 				maxRequests: 200
 				timeInterval: 60 * 10
 			}),
 			AuthenticationController.requireLogin(),
-			AuthorizationMiddlewear.ensureUserCanAdminProject,
+			AuthorizationMiddleware.ensureUserCanAdminProject,
 			CollaboratorsInviteController.resendInvite
 		)
 

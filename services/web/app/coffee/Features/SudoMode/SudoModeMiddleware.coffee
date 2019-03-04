@@ -4,7 +4,7 @@ AuthenticationController = require '../Authentication/AuthenticationController'
 Settings = require 'settings-sharelatex'
 
 
-module.exports = SudoModeMiddlewear =
+module.exports = SudoModeMiddleware =
 
 	protectPage: (req, res, next) ->
 		if req.externalAuthenticationSystemUsed() and !Settings.overleaf?

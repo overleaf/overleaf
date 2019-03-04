@@ -2,7 +2,7 @@ AuthenticationController = require('../Authentication/AuthenticationController')
 SubscriptionController = require('./SubscriptionController')
 SubscriptionGroupController = require './SubscriptionGroupController'
 TeamInvitesController = require './TeamInvitesController'
-RateLimiterMiddlewear = require('../Security/RateLimiterMiddlewear')
+RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
 Settings = require "settings-sharelatex"
 
 module.exports =
@@ -26,7 +26,7 @@ module.exports =
 			TeamInvitesController.viewInvite
 		webRouter.put '/subscription/invites/:token/',
 			AuthenticationController.requireLogin(),
-			RateLimiterMiddlewear.rateLimit({
+			RateLimiterMiddleware.rateLimit({
 				endpointName: 'team-invite',
 				maxRequests: 10
 				timeInterval: 60

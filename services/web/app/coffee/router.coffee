@@ -33,16 +33,16 @@ StaticPagesRouter = require("./Features/StaticPages/StaticPagesRouter")
 ChatController = require("./Features/Chat/ChatController")
 BlogController = require("./Features/Blog/BlogController")
 Modules = require "./infrastructure/Modules"
-RateLimiterMiddlewear = require('./Features/Security/RateLimiterMiddlewear')
-CooldownMiddlewear = require('./Features/Cooldown/CooldownMiddlewear')
+RateLimiterMiddleware = require('./Features/Security/RateLimiterMiddleware')
+CooldownMiddleware = require('./Features/Cooldown/CooldownMiddleware')
 RealTimeProxyRouter = require('./Features/RealTimeProxy/RealTimeProxyRouter')
 InactiveProjectController = require("./Features/InactiveData/InactiveProjectController")
 ContactRouter = require("./Features/Contacts/ContactRouter")
 ReferencesController = require('./Features/References/ReferencesController')
-AuthorizationMiddlewear = require('./Features/Authorization/AuthorizationMiddlewear')
+AuthorizationMiddleware = require('./Features/Authorization/AuthorizationMiddleware')
 BetaProgramController = require('./Features/BetaProgram/BetaProgramController')
 SudoModeController = require('./Features/SudoMode/SudoModeController')
-SudoModeMiddlewear = require('./Features/SudoMode/SudoModeMiddlewear')
+SudoModeMiddleware = require('./Features/SudoMode/SudoModeMiddleware')
 AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 AnnouncementsController = require("./Features/Announcements/AnnouncementsController")
 MetaController = require('./Features/Metadata/MetaController')
@@ -70,7 +70,7 @@ module.exports = class Router
 		webRouter.get  '/logout', UserPagesController.logoutPage
 		webRouter.post '/logout', UserController.logout
 
-		webRouter.get  '/restricted', AuthorizationMiddlewear.restricted
+		webRouter.get  '/restricted', AuthorizationMiddleware.restricted
 
 
 		if Features.hasFeature('registration')
@@ -104,12 +104,12 @@ module.exports = class Router
 
 		webRouter.get  '/user/settings',
 			AuthenticationController.requireLogin(),
-			SudoModeMiddlewear.protectPage,
+			SudoModeMiddleware.protectPage,
 			UserPagesController.settingsPage
 		webRouter.post '/user/settings', AuthenticationController.requireLogin(), UserController.updateUserSettings
 		webRouter.post '/user/password/update',
 			AuthenticationController.requireLogin(),
-			RateLimiterMiddlewear.rateLimit({
+			RateLimiterMiddleware.rateLimit({
 				endpointName: "change-password"
 				maxRequests: 10
 				timeInterval: 60
@@ -121,7 +121,7 @@ module.exports = class Router
 		webRouter.get '/user/emails/confirm',
 			UserEmailsController.showConfirm
 		webRouter.post '/user/emails/confirm',
-			RateLimiterMiddlewear.rateLimit({
+			RateLimiterMiddleware.rateLimit({
 				endpointName: "confirm-email"
 				maxRequests: 10
 				timeInterval: 60
@@ -129,7 +129,7 @@ module.exports = class Router
 			UserEmailsController.confirm
 		webRouter.post '/user/emails/resend_confirmation',
 			AuthenticationController.requireLogin(),
-			RateLimiterMiddlewear.rateLimit({
+			RateLimiterMiddleware.rateLimit({
 				endpointName: "resend-confirmation"
 				maxRequests: 10
 				timeInterval: 60
@@ -139,7 +139,7 @@ module.exports = class Router
 		if Features.hasFeature 'affiliations'
 			webRouter.post '/user/emails',
 				AuthenticationController.requireLogin(),
-				RateLimiterMiddlewear.rateLimit({
+				RateLimiterMiddleware.rateLimit({
 					endpointName: 'add-email',
 					maxRequests: 10
 					timeInterval: 60
@@ -147,7 +147,7 @@ module.exports = class Router
 				UserEmailsController.add
 			webRouter.post '/user/emails/delete',
 				AuthenticationController.requireLogin(),
-				RateLimiterMiddlewear.rateLimit({
+				RateLimiterMiddleware.rateLimit({
 					endpointName: 'delete-email',
 					maxRequests: 10
 					timeInterval: 60
@@ -158,7 +158,7 @@ module.exports = class Router
 				UserEmailsController.setDefault
 			webRouter.post '/user/emails/endorse',
 				AuthenticationController.requireLogin(),
-				RateLimiterMiddlewear.rateLimit({
+				RateLimiterMiddleware.rateLimit({
 					endpointName: "endorse-email"
 					maxRequests: 30
 					timeInterval: 60
@@ -168,7 +168,7 @@ module.exports = class Router
 
 		webRouter.get  '/user/sessions',
 			AuthenticationController.requireLogin(),
-			SudoModeMiddlewear.protectPage,
+			SudoModeMiddleware.protectPage,
 			UserPagesController.sessionsPage
 		webRouter.post '/user/sessions/clear', AuthenticationController.requireLogin(), UserController.clearSessions
 
@@ -180,37 +180,37 @@ module.exports = class Router
 
 		webRouter.get  '/user/projects', AuthenticationController.requireLogin(), ProjectController.userProjectsJson
 		webRouter.get  '/project/:Project_id/entities', AuthenticationController.requireLogin(),
-			AuthorizationMiddlewear.ensureUserCanReadProject,
+			AuthorizationMiddleware.ensureUserCanReadProject,
 			ProjectController.projectEntitiesJson
 
 		webRouter.get  '/project', AuthenticationController.requireLogin(), ProjectController.projectListPage
-		webRouter.post '/project/new', AuthenticationController.requireLogin(), RateLimiterMiddlewear.rateLimit({
+		webRouter.post '/project/new', AuthenticationController.requireLogin(), RateLimiterMiddleware.rateLimit({
 			endpointName: "create-project"
 			maxRequests: 20
 			timeInterval: 60
 		}), ProjectController.newProject
 
-		webRouter.get  '/Project/:Project_id', RateLimiterMiddlewear.rateLimit({
+		webRouter.get  '/Project/:Project_id', RateLimiterMiddleware.rateLimit({
 			endpointName: "open-project"
 			params: ["Project_id"]
 			maxRequests: 15
 			timeInterval: 60
-		}), AuthorizationMiddlewear.ensureUserCanReadProject, ProjectController.loadEditor
-		webRouter.get  '/Project/:Project_id/file/:File_id', AuthorizationMiddlewear.ensureUserCanReadProject, FileStoreController.getFile
-		webRouter.post '/project/:Project_id/settings', AuthorizationMiddlewear.ensureUserCanWriteProjectSettings, ProjectController.updateProjectSettings
-		webRouter.post '/project/:Project_id/settings/admin', AuthorizationMiddlewear.ensureUserCanAdminProject, ProjectController.updateProjectAdminSettings
+		}), AuthorizationMiddleware.ensureUserCanReadProject, ProjectController.loadEditor
+		webRouter.get  '/Project/:Project_id/file/:File_id', AuthorizationMiddleware.ensureUserCanReadProject, FileStoreController.getFile
+		webRouter.post '/project/:Project_id/settings', AuthorizationMiddleware.ensureUserCanWriteProjectSettings, ProjectController.updateProjectSettings
+		webRouter.post '/project/:Project_id/settings/admin', AuthorizationMiddleware.ensureUserCanAdminProject, ProjectController.updateProjectAdminSettings
 
-		webRouter.post '/project/:Project_id/compile', RateLimiterMiddlewear.rateLimit({
+		webRouter.post '/project/:Project_id/compile', RateLimiterMiddleware.rateLimit({
 			endpointName: "compile-project-http"
 			params: ["Project_id"]
 			maxRequests: 800
 			timeInterval: 60 * 60
-		}), AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.compile
+		}), AuthorizationMiddleware.ensureUserCanReadProject, CompileController.compile
 
-		webRouter.post '/project/:Project_id/compile/stop', AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.stopCompile
+		webRouter.post '/project/:Project_id/compile/stop', AuthorizationMiddleware.ensureUserCanReadProject, CompileController.stopCompile
 
 		# Used by the web download buttons, adds filename header
-		webRouter.get  '/project/:Project_id/output/output.pdf', AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.downloadPdf
+		webRouter.get  '/project/:Project_id/output/output.pdf', AuthorizationMiddleware.ensureUserCanReadProject, CompileController.downloadPdf
 		# Used by the pdf viewers
 		webRouter.get  /^\/project\/([^\/]*)\/output\/(.*)$/,
 			((req, res, next) ->
@@ -219,7 +219,7 @@ module.exports = class Router
 					"file":       req.params[1]
 				req.params = params
 				next()
-			), AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.getFileFromClsi
+			), AuthorizationMiddleware.ensureUserCanReadProject, CompileController.getFileFromClsi
 		# direct url access to output files for a specific build (query string not required)
 		webRouter.get  /^\/project\/([^\/]*)\/build\/([0-9a-f-]+)\/output\/(.*)$/,
 			((req, res, next) ->
@@ -229,7 +229,7 @@ module.exports = class Router
 					"file":       req.params[2]
 				req.params = params
 				next()
-			), AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.getFileFromClsi
+			), AuthorizationMiddleware.ensureUserCanReadProject, CompileController.getFileFromClsi
 
 		# direct url access to output files for user but no build, to retrieve files when build fails
 		webRouter.get  /^\/project\/([^\/]*)\/user\/([0-9a-f-]+)\/output\/(.*)$/,
@@ -240,7 +240,7 @@ module.exports = class Router
 					"file":       req.params[2]
 				req.params = params
 				next()
-			), AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.getFileFromClsi
+			), AuthorizationMiddleware.ensureUserCanReadProject, CompileController.getFileFromClsi
 
 		# direct url access to output files for a specific user and build (query string not required)
 		webRouter.get  /^\/project\/([^\/]*)\/user\/([0-9a-f]+)\/build\/([0-9a-f-]+)\/output\/(.*)$/,
@@ -252,67 +252,67 @@ module.exports = class Router
 					"file":       req.params[3]
 				req.params = params
 				next()
-			), AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.getFileFromClsi
+			), AuthorizationMiddleware.ensureUserCanReadProject, CompileController.getFileFromClsi
 
 
-		webRouter.delete "/project/:Project_id/output", AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.deleteAuxFiles
-		webRouter.get "/project/:Project_id/sync/code", AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.proxySyncCode
-		webRouter.get "/project/:Project_id/sync/pdf", AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.proxySyncPdf
-		webRouter.get "/project/:Project_id/wordcount", AuthorizationMiddlewear.ensureUserCanReadProject, CompileController.wordCount
+		webRouter.delete "/project/:Project_id/output", AuthorizationMiddleware.ensureUserCanReadProject, CompileController.deleteAuxFiles
+		webRouter.get "/project/:Project_id/sync/code", AuthorizationMiddleware.ensureUserCanReadProject, CompileController.proxySyncCode
+		webRouter.get "/project/:Project_id/sync/pdf", AuthorizationMiddleware.ensureUserCanReadProject, CompileController.proxySyncPdf
+		webRouter.get "/project/:Project_id/wordcount", AuthorizationMiddleware.ensureUserCanReadProject, CompileController.wordCount
 
-		webRouter.delete '/Project/:Project_id', AuthorizationMiddlewear.ensureUserCanAdminProject, ProjectController.deleteProject
-		webRouter.post '/Project/:Project_id/restore', AuthorizationMiddlewear.ensureUserCanAdminProject, ProjectController.restoreProject
-		webRouter.post '/Project/:Project_id/clone', AuthorizationMiddlewear.ensureUserCanReadProject, ProjectController.cloneProject
+		webRouter.delete '/Project/:Project_id', AuthorizationMiddleware.ensureUserCanAdminProject, ProjectController.deleteProject
+		webRouter.post '/Project/:Project_id/restore', AuthorizationMiddleware.ensureUserCanAdminProject, ProjectController.restoreProject
+		webRouter.post '/Project/:Project_id/clone', AuthorizationMiddleware.ensureUserCanReadProject, ProjectController.cloneProject
 
-		webRouter.post '/project/:Project_id/rename', AuthorizationMiddlewear.ensureUserCanAdminProject, ProjectController.renameProject
+		webRouter.post '/project/:Project_id/rename', AuthorizationMiddleware.ensureUserCanAdminProject, ProjectController.renameProject
 
-		webRouter.get  "/project/:Project_id/updates", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApiAndInjectUserDetails
-		webRouter.get  "/project/:Project_id/doc/:doc_id/diff", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApi
-		webRouter.get  "/project/:Project_id/diff", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApiAndInjectUserDetails
-		webRouter.get  "/project/:Project_id/filetree/diff", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApi
-		webRouter.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApi
-		webRouter.post '/project/:project_id/doc/:doc_id/restore', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, HistoryController.restoreDocFromDeletedDoc
-		webRouter.post "/project/:project_id/restore_file", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, HistoryController.restoreFileFromV2
-		webRouter.get  "/project/:project_id/version/:version/zip", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.downloadZipOfVersion
+		webRouter.get  "/project/:Project_id/updates", AuthorizationMiddleware.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApiAndInjectUserDetails
+		webRouter.get  "/project/:Project_id/doc/:doc_id/diff", AuthorizationMiddleware.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApi
+		webRouter.get  "/project/:Project_id/diff", AuthorizationMiddleware.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApiAndInjectUserDetails
+		webRouter.get  "/project/:Project_id/filetree/diff", AuthorizationMiddleware.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApi
+		webRouter.post "/project/:Project_id/doc/:doc_id/version/:version_id/restore", AuthorizationMiddleware.ensureUserCanWriteProjectContent, HistoryController.selectHistoryApi, HistoryController.proxyToHistoryApi
+		webRouter.post '/project/:project_id/doc/:doc_id/restore', AuthorizationMiddleware.ensureUserCanWriteProjectContent, HistoryController.restoreDocFromDeletedDoc
+		webRouter.post "/project/:project_id/restore_file", AuthorizationMiddleware.ensureUserCanWriteProjectContent, HistoryController.restoreFileFromV2
+		webRouter.get  "/project/:project_id/version/:version/zip", AuthorizationMiddleware.ensureUserCanReadProject, HistoryController.downloadZipOfVersion
 		privateApiRouter.post "/project/:Project_id/history/resync", AuthenticationController.httpAuth, HistoryController.resyncProjectHistory
 
-		webRouter.get "/project/:Project_id/labels", AuthorizationMiddlewear.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.ensureProjectHistoryEnabled, HistoryController.getLabels
-		webRouter.post "/project/:Project_id/labels", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, HistoryController.selectHistoryApi, HistoryController.ensureProjectHistoryEnabled, HistoryController.createLabel
-		webRouter.delete "/project/:Project_id/labels/:label_id", AuthorizationMiddlewear.ensureUserCanWriteProjectContent, HistoryController.selectHistoryApi, HistoryController.ensureProjectHistoryEnabled, HistoryController.deleteLabel
+		webRouter.get "/project/:Project_id/labels", AuthorizationMiddleware.ensureUserCanReadProject, HistoryController.selectHistoryApi, HistoryController.ensureProjectHistoryEnabled, HistoryController.getLabels
+		webRouter.post "/project/:Project_id/labels", AuthorizationMiddleware.ensureUserCanWriteProjectContent, HistoryController.selectHistoryApi, HistoryController.ensureProjectHistoryEnabled, HistoryController.createLabel
+		webRouter.delete "/project/:Project_id/labels/:label_id", AuthorizationMiddleware.ensureUserCanWriteProjectContent, HistoryController.selectHistoryApi, HistoryController.ensureProjectHistoryEnabled, HistoryController.deleteLabel
 
-		webRouter.post '/project/:project_id/export/:brand_variation_id', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, ExportsController.exportProject
-		webRouter.get '/project/:project_id/export/:export_id', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, ExportsController.exportStatus
-		webRouter.get '/project/:project_id/export/:export_id/:type', AuthorizationMiddlewear.ensureUserCanWriteProjectContent, ExportsController.exportDownload
+		webRouter.post '/project/:project_id/export/:brand_variation_id', AuthorizationMiddleware.ensureUserCanWriteProjectContent, ExportsController.exportProject
+		webRouter.get '/project/:project_id/export/:export_id', AuthorizationMiddleware.ensureUserCanWriteProjectContent, ExportsController.exportStatus
+		webRouter.get '/project/:project_id/export/:export_id/:type', AuthorizationMiddleware.ensureUserCanWriteProjectContent, ExportsController.exportDownload
 
-		webRouter.get  '/Project/:Project_id/download/zip', AuthorizationMiddlewear.ensureUserCanReadProject, ProjectDownloadsController.downloadProject
-		webRouter.get  '/project/download/zip', AuthorizationMiddlewear.ensureUserCanReadMultipleProjects, ProjectDownloadsController.downloadMultipleProjects
+		webRouter.get  '/Project/:Project_id/download/zip', AuthorizationMiddleware.ensureUserCanReadProject, ProjectDownloadsController.downloadProject
+		webRouter.get  '/project/download/zip', AuthorizationMiddleware.ensureUserCanReadMultipleProjects, ProjectDownloadsController.downloadMultipleProjects
 
-		webRouter.get '/project/:project_id/metadata', AuthorizationMiddlewear.ensureUserCanReadProject, AuthenticationController.requireLogin(), MetaController.getMetadata
-		webRouter.post '/project/:project_id/doc/:doc_id/metadata', AuthorizationMiddlewear.ensureUserCanReadProject, AuthenticationController.requireLogin(), MetaController.broadcastMetadataForDoc
+		webRouter.get '/project/:project_id/metadata', AuthorizationMiddleware.ensureUserCanReadProject, AuthenticationController.requireLogin(), MetaController.getMetadata
+		webRouter.post '/project/:project_id/doc/:doc_id/metadata', AuthorizationMiddleware.ensureUserCanReadProject, AuthenticationController.requireLogin(), MetaController.broadcastMetadataForDoc
 
 
 		webRouter.get    '/tag', AuthenticationController.requireLogin(), TagsController.getAllTags
-		webRouter.post   '/tag', AuthenticationController.requireLogin(), RateLimiterMiddlewear.rateLimit({
+		webRouter.post   '/tag', AuthenticationController.requireLogin(), RateLimiterMiddleware.rateLimit({
 			endpointName: "create-tag"
 			maxRequests: 30
 			timeInterval: 60
 		}), TagsController.createTag
-		webRouter.post   '/tag/:tag_id/rename', AuthenticationController.requireLogin(), RateLimiterMiddlewear.rateLimit({
+		webRouter.post   '/tag/:tag_id/rename', AuthenticationController.requireLogin(), RateLimiterMiddleware.rateLimit({
 			endpointName: "rename-tag"
 			maxRequests: 30
 			timeInterval: 60
 		}), TagsController.renameTag
-		webRouter.delete '/tag/:tag_id', AuthenticationController.requireLogin(), RateLimiterMiddlewear.rateLimit({
+		webRouter.delete '/tag/:tag_id', AuthenticationController.requireLogin(), RateLimiterMiddleware.rateLimit({
 			endpointName: "delete-tag"
 			maxRequests: 30
 			timeInterval: 60
 		}), TagsController.deleteTag
-		webRouter.post   '/tag/:tag_id/project/:project_id', AuthenticationController.requireLogin(), RateLimiterMiddlewear.rateLimit({
+		webRouter.post   '/tag/:tag_id/project/:project_id', AuthenticationController.requireLogin(), RateLimiterMiddleware.rateLimit({
 			endpointName: "add-project-to-tag"
 			maxRequests: 30
 			timeInterval: 60
 		}), TagsController.addProjectToTag
-		webRouter.delete '/tag/:tag_id/project/:project_id', AuthenticationController.requireLogin(), RateLimiterMiddlewear.rateLimit({
+		webRouter.delete '/tag/:tag_id/project/:project_id', AuthenticationController.requireLogin(), RateLimiterMiddleware.rateLimit({
 			endpointName: "remove-project-from-tag"
 			maxRequests: 30
 			timeInterval: 60
@@ -356,19 +356,19 @@ module.exports = class Router
 		webRouter.post "/spelling/check", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
 		webRouter.post "/spelling/learn", AuthenticationController.requireLogin(), SpellingController.proxyRequestToSpellingApi
 
-		webRouter.get  "/project/:project_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, ChatController.getMessages
-		webRouter.post "/project/:project_id/messages", AuthorizationMiddlewear.ensureUserCanReadProject, RateLimiterMiddlewear.rateLimit({
+		webRouter.get  "/project/:project_id/messages", AuthorizationMiddleware.ensureUserCanReadProject, ChatController.getMessages
+		webRouter.post "/project/:project_id/messages", AuthorizationMiddleware.ensureUserCanReadProject, RateLimiterMiddleware.rateLimit({
 			endpointName: "send-chat-message"
 			maxRequests: 100
 			timeInterval: 60
 		}), ChatController.sendMessage
 
-		webRouter.post "/project/:Project_id/references/index", AuthorizationMiddlewear.ensureUserCanReadProject, RateLimiterMiddlewear.rateLimit({
+		webRouter.post "/project/:Project_id/references/index", AuthorizationMiddleware.ensureUserCanReadProject, RateLimiterMiddleware.rateLimit({
 			endpointName: "index-project-references"
 			maxRequests: 30
 			timeInterval: 60
 		}), ReferencesController.index
-		webRouter.post "/project/:Project_id/references/indexAll", AuthorizationMiddlewear.ensureUserCanReadProject, RateLimiterMiddlewear.rateLimit({
+		webRouter.post "/project/:Project_id/references/indexAll", AuthorizationMiddleware.ensureUserCanReadProject, RateLimiterMiddleware.rateLimit({
 			endpointName: "index-all-project-references"
 			maxRequests: 30
 			timeInterval: 60
@@ -381,7 +381,7 @@ module.exports = class Router
 		webRouter.get "/confirm-password", AuthenticationController.requireLogin(), SudoModeController.sudoModePrompt
 		webRouter.post "/confirm-password",
 			AuthenticationController.requireLogin(),
-			RateLimiterMiddlewear.rateLimit({
+			RateLimiterMiddleware.rateLimit({
 				endpointName: "confirm-password"
 				maxRequests: 10
 				timeInterval: 60
@@ -403,7 +403,7 @@ module.exports = class Router
 			),
 			AuthenticationController.httpAuth,
 			CompileController.getFileFromClsiWithoutUser
-		publicApiRouter.post '/api/institutions/confirm_university_domain', RateLimiterMiddlewear.rateLimit({
+		publicApiRouter.post '/api/institutions/confirm_university_domain', RateLimiterMiddleware.rateLimit({
 			endpointName: 'confirm-university-domain',
 			maxRequests: 1,
 			timeInterval: 60
@@ -417,17 +417,17 @@ module.exports = class Router
 				res.redirect('/register')
 
 		#Admin Stuff
-		webRouter.get  '/admin', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.index
-		webRouter.get  '/admin/user', AuthorizationMiddlewear.ensureUserIsSiteAdmin, (req, res)-> res.redirect("/admin/register") #this gets removed by admin-panel addon
-		webRouter.get  '/admin/register', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.registerNewUser
-		webRouter.post '/admin/register', AuthorizationMiddlewear.ensureUserIsSiteAdmin, UserController.register
-		webRouter.post '/admin/closeEditor', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.closeEditor
-		webRouter.post '/admin/dissconectAllUsers', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.dissconectAllUsers
-		webRouter.post '/admin/syncUserToSubscription', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.syncUserToSubscription
-		webRouter.post '/admin/flushProjectToTpds', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.flushProjectToTpds
-		webRouter.post '/admin/pollDropboxForUser', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.pollDropboxForUser
-		webRouter.post '/admin/messages', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.createMessage
-		webRouter.post '/admin/messages/clear', AuthorizationMiddlewear.ensureUserIsSiteAdmin, AdminController.clearMessages
+		webRouter.get  '/admin', AuthorizationMiddleware.ensureUserIsSiteAdmin, AdminController.index
+		webRouter.get  '/admin/user', AuthorizationMiddleware.ensureUserIsSiteAdmin, (req, res)-> res.redirect("/admin/register") #this gets removed by admin-panel addon
+		webRouter.get  '/admin/register', AuthorizationMiddleware.ensureUserIsSiteAdmin, AdminController.registerNewUser
+		webRouter.post '/admin/register', AuthorizationMiddleware.ensureUserIsSiteAdmin, UserController.register
+		webRouter.post '/admin/closeEditor', AuthorizationMiddleware.ensureUserIsSiteAdmin, AdminController.closeEditor
+		webRouter.post '/admin/dissconectAllUsers', AuthorizationMiddleware.ensureUserIsSiteAdmin, AdminController.dissconectAllUsers
+		webRouter.post '/admin/syncUserToSubscription', AuthorizationMiddleware.ensureUserIsSiteAdmin, AdminController.syncUserToSubscription
+		webRouter.post '/admin/flushProjectToTpds', AuthorizationMiddleware.ensureUserIsSiteAdmin, AdminController.flushProjectToTpds
+		webRouter.post '/admin/pollDropboxForUser', AuthorizationMiddleware.ensureUserIsSiteAdmin, AdminController.pollDropboxForUser
+		webRouter.post '/admin/messages', AuthorizationMiddleware.ensureUserIsSiteAdmin, AdminController.createMessage
+		webRouter.post '/admin/messages/clear', AuthorizationMiddleware.ensureUserIsSiteAdmin, AdminController.clearMessages
 
 		privateApiRouter.post '/disconnectAllUsers', AdminController.dissconectAllUsers
 
@@ -451,7 +451,7 @@ module.exports = class Router
 		publicApiRouter.get '/health_check/mongo', HealthCheckController.checkMongo
 		privateApiRouter.get '/health_check/mongo', HealthCheckController.checkMongo
 
-		webRouter.get "/status/compiler/:Project_id", AuthorizationMiddlewear.ensureUserCanReadProject, (req, res) ->
+		webRouter.get "/status/compiler/:Project_id", AuthorizationMiddleware.ensureUserCanReadProject, (req, res) ->
 			project_id = req.params.Project_id
 			sendRes = _.once (statusCode, message)->
 				res.status statusCode
@@ -495,7 +495,7 @@ module.exports = class Router
 
 
 		webRouter.get '/read/:read_only_token([a-z]+)',
-			RateLimiterMiddlewear.rateLimit({
+			RateLimiterMiddleware.rateLimit({
 				endpointName: 'read-only-token',
 				maxRequests: 15,
 				timeInterval: 60
@@ -503,7 +503,7 @@ module.exports = class Router
 			TokenAccessController.readOnlyToken
 
 		webRouter.get '/:read_and_write_token([0-9]+[a-z]+)',
-			RateLimiterMiddlewear.rateLimit({
+			RateLimiterMiddleware.rateLimit({
 				endpointName: 'read-and-write-token',
 				maxRequests: 15,
 				timeInterval: 60

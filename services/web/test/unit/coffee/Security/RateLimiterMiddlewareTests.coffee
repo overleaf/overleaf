@@ -1,14 +1,14 @@
 SandboxedModule = require('sandboxed-module')
 sinon = require('sinon')
 require('chai').should()
-modulePath = require('path').join __dirname, '../../../../app/js/Features/Security/RateLimiterMiddlewear'
+modulePath = require('path').join __dirname, '../../../../app/js/Features/Security/RateLimiterMiddleware'
 
-describe "RateLimiterMiddlewear", ->
+describe "RateLimiterMiddleware", ->
 	beforeEach ->
 		@AuthenticationController =
 			getLoggedInUserId: () =>
 				@req?.session?.user?._id
-		@RateLimiterMiddlewear = SandboxedModule.require modulePath, requires:
+		@RateLimiterMiddleware = SandboxedModule.require modulePath, requires:
 			'../../infrastructure/RateLimiter' : @RateLimiter = {}
 			"logger-sharelatex": @logger = {warn: sinon.stub()}
 			'../Authentication/AuthenticationController': @AuthenticationController
@@ -22,7 +22,7 @@ describe "RateLimiterMiddlewear", ->
 
 	describe "rateLimit", ->
 		beforeEach ->
-			@rateLimiter = @RateLimiterMiddlewear.rateLimit({
+			@rateLimiter = @RateLimiterMiddleware.rateLimit({
 				endpointName: "test-endpoint"
 				params: ["project_id", "doc_id"]
 				timeInterval: 42

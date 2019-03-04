@@ -2,13 +2,13 @@ RateLimiter = require "../../infrastructure/RateLimiter"
 logger = require "logger-sharelatex"
 AuthenticationController = require('../Authentication/AuthenticationController')
 
-module.exports = RateLimiterMiddlewear =
+module.exports = RateLimiterMiddleware =
 	###
 	Do not allow more than opts.maxRequests from a single client in
 	opts.timeInterval. Pass an array of opts.params to segment this based on
 	parameters in the request URL, e.g.:
 
-	    app.get "/project/:project_id", RateLimiterMiddlewear.rateLimit(endpointName: "open-editor", params: ["project_id"])
+	    app.get "/project/:project_id", RateLimiterMiddleware.rateLimit(endpointName: "open-editor", params: ["project_id"])
 
 	will rate limit each project_id separately.
 
