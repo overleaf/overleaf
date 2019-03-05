@@ -18,7 +18,7 @@ block content
 						p.letter-from-founders
 							p #{translate("thanks_for_subscribing_you_help_sl", {planName:subscription.plan.name})}
 							p #{translate("need_anything_contact_us_at")} 
-								a(href='mailto:support@sharelatex.com') #{settings.adminEmail}
+								a(href=`mailto:${settings.adminEmail}`) #{settings.adminEmail}
 								| .
 							p #{translate("regards")},
 								br
