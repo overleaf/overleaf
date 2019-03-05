@@ -88,3 +88,6 @@ module.exports =
 
 	mongo:
 		url: "mongodb://#{process.env["MONGO_HOST"] or "localhost"}/sharelatex"
+
+	sentry:
+		dsn: process.env.SENTRY_DSN
