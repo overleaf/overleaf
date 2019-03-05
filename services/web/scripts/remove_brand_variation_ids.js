@@ -17,6 +17,7 @@ const minimist = require('minimist')
 const argv = minimist(process.argv.slice(2))
 const bvId = argv._[0]
 const commit = argv.commit !== undefined
+const maxParallel = 4
 
 console.log(
   (commit ? 'Remove' : 'Dry run for remove') +
@@ -35,8 +36,9 @@ db.projects.find(
 
 function processRemovals(err, projects) {
   if (err) throw err
-  async.mapSeries(
+  async.eachLimit(
     projects,
+    maxParallel,
     function(project, cb) {
       count += 1
       console.log(
@@ -54,7 +56,7 @@ function processRemovals(err, projects) {
           cb
         )
       } else {
-        cb()
+        async.setImmediate(cb)
       }
     },
     function(err) {
