@@ -11,7 +11,7 @@ settings = require "settings-sharelatex"
 uuid = require "uuid"
 
 module.exports = TemplatesManager =
-	createProjectFromV1Template: (brandVariationId, compiler, mainFile, templateId, templateName, templateVersionId, user_id, callback) ->
+	createProjectFromV1Template: (brandVariationId, compiler, mainFile, templateId, templateName, templateVersionId, user_id, imageName, callback) ->
 		zipUrl = "#{settings.apis.v1.url}/api/v1/sharelatex/templates/#{templateVersionId}"
 		zipReq = request zipUrl, {
 			auth:
@@ -34,7 +34,7 @@ module.exports = TemplatesManager =
 					return callback err
 				async.series [
 					(cb) -> TemplatesManager._setCompiler project._id, compiler, cb
-					(cb) -> TemplatesManager._setImage project._id, "wl_texlive:2018.1", cb
+					(cb) -> TemplatesManager._setImage project._id, imageName, cb
 					(cb) -> TemplatesManager._setMainFile project._id, mainFile, cb
 					(cb) -> TemplatesManager._setBrandVariationId project._id, brandVariationId, cb
 				], (err) ->
@@ -54,7 +54,7 @@ module.exports = TemplatesManager =
 		ProjectOptionsHandler.setCompiler project_id, compiler, callback
 
 	_setImage: (project_id, imageName, callback) ->
-		return callback() unless imageName?
+		imageName ||= "wl_texlive:2018.1"
 		ProjectOptionsHandler.setImageName project_id, imageName, callback
 
 	_setMainFile: (project_id, mainFile, callback) ->

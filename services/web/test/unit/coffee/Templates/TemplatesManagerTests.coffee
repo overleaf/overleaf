@@ -15,6 +15,7 @@ describe 'TemplatesManager', ->
 		@project_id = "project-id"
 		@brandVariationId = "brand-variation-id"
 		@compiler = "pdflatex"
+		@imageName = "TL2017"
 		@mainFile = "main.tex"
 		@templateId = "template-id"
 		@templateName = "template name"
@@ -78,7 +79,7 @@ describe 'TemplatesManager', ->
 
 		describe "when all options passed", ->
 			beforeEach ->
-				@TemplatesManager.createProjectFromV1Template @brandVariationId, @compiler, @mainFile, @templateId, @templateName, @templateVersionId, @user_id, @callback
+				@TemplatesManager.createProjectFromV1Template @brandVariationId, @compiler, @mainFile, @templateId, @templateName, @templateVersionId, @user_id, @imageName, @callback
 
 			it "should fetch zip from v1 based on template id", ->
 				@request.should.have.been.calledWith "#{@v1Url}/api/v1/sharelatex/templates/#{@templateVersionId}"
@@ -94,7 +95,7 @@ describe 'TemplatesManager', ->
 
 			it "should set project options when passed", ->
 				@ProjectOptionsHandler.setCompiler.should.have.been.calledWithMatch @project_id, @compiler
-				@ProjectOptionsHandler.setImageName.should.have.been.calledWithMatch @project_id, "wl_texlive:2018.1"
+				@ProjectOptionsHandler.setImageName.should.have.been.calledWithMatch @project_id, @imageName
 				@ProjectRootDocManager.setRootDocFromName.should.have.been.calledWithMatch @project_id, @mainFile
 				@ProjectOptionsHandler.setBrandVariationId.should.have.been.calledWithMatch @project_id, @brandVariationId
 
@@ -103,9 +104,10 @@ describe 'TemplatesManager', ->
 
 		describe "when some options not set", ->
 			beforeEach ->
-				@TemplatesManager.createProjectFromV1Template null, null, null, @templateId, @templateName, @templateVersionId, @user_id, @callback
+				@TemplatesManager.createProjectFromV1Template null, null, null, @templateId, @templateName, @templateVersionId, @user_id, null, @callback
 
 			it "should not set missing project options", ->
 				@ProjectOptionsHandler.setCompiler.called.should.equal false
 				@ProjectRootDocManager.setRootDocFromName.called.should.equal false
 				@ProjectOptionsHandler.setBrandVariationId.called.should.equal false
+				@ProjectOptionsHandler.setImageName.should.have.been.calledWithMatch @project_id, "wl_texlive:2018.1"
