@@ -161,11 +161,11 @@ block content
 													name="country"
 													ng-change="updateCountry()"
 													required,
-													ng-options="country.code as country.name for country in countries",
 													ng-selected="{{country.code == data.country}}"
 												)
 													option(value='', disabled, selected) #{translate("country")}
 													option(value='-') --------------
+													option(ng-repeat="country in countries" ng-bind-html="country.name" value="{{country.code}}")
 												span.input-feedback-message {{ simpleCCForm.country.$error.required ? 'This field is required' : '' }}
 
 											if (showVatField)
