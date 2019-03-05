@@ -18,6 +18,7 @@ import uk.ac.ic.wlgitbridge.util.Util;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Optional;
 
 /**
@@ -82,6 +83,23 @@ public class WLRepositoryResolver
              ServiceNotAuthorizedException,
              ServiceMayNotContinueException {
         Log.info("[{}] Request to open git repo", name);
+        // Reject v1 ids, the request will be rejected by v1 anyway
+        if (name.matches("^[0-9]+[bcdfghjklmnpqrstvwxyz]{6,12}$") && !name.matches("^[0-9a-f]{24}$")) {
+            Log.info("[{}] Request for v1 project, refusing", name);
+            throw new ServiceMayNotContinueException(
+                String.join("\n", Arrays.asList(
+                    "This project has not yet been moved into the new version",
+                    "of Overleaf. You will need to move it in order to continue working on it.",
+                    "Please visit this project online on www.overleaf.com to do this.",
+                    "",
+                    "You can find the new git remote url by selecting \"Git\" from",
+                    "the left sidebar in the project view.",
+                    "",
+                    "If this is unexpected, please contact us at support@overleaf.com, or",
+                    "see https://www.overleaf.com/help/342 for more information."
+                ))
+            );
+        }
         Optional<Credential> oauth2 = Optional.ofNullable(
                 (Credential) httpServletRequest.getAttribute(
                         Oauth2Filter.ATTRIBUTE_KEY));
