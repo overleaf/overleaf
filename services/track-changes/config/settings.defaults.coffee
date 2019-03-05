@@ -43,3 +43,6 @@ module.exports =
 			
 	path:
 		dumpFolder:   Path.join(TMP_DIR, "dumpFolder")
+
+	sentry:
+		dsn: process.env.SENTRY_DSN
