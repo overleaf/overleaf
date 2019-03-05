@@ -52,6 +52,9 @@ settings =
 
 	enableConversions: if process.env['ENABLE_CONVERSIONS'] == 'true' then true else false
 
+	sentry:
+		dsn: process.env.SENTRY_DSN
+		
 # Filestore health check
 # ----------------------
 # Project and file details to check in persistor when calling /health_check
