@@ -44,9 +44,9 @@ pathList = [
 	"#{jsPath}main.js"
 	"#{jsPath}libraries.js"
 	"/stylesheets/style.css"
-	"/stylesheets/ol-style.css"
-	"/stylesheets/ol-light-style.css"
-	"/stylesheets/ol-ieee-style.css"
+	"/stylesheets/light-style.css"
+	"/stylesheets/ieee-style.css"
+	"/stylesheets/sl-style.css"
 ].concat(Modules.moduleAssetFiles(jsPath))
 
 if !Settings.useMinifiedJs
