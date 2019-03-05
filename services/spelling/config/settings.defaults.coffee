@@ -13,3 +13,6 @@ module.exports = Settings =
 
 
 	healthCheckUserId: "53c64d2fd68c8d000010bb5f"
+
+	sentry:
+		dsn: process.env.SENTRY_DSN
