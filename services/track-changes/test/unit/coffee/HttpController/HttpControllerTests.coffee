@@ -71,7 +71,7 @@ describe "HttpController", ->
 					from: @from.toString()
 					to: @to.toString()
 			@res =
-				send: sinon.stub()
+				json: sinon.stub()
 			@diff = [ u: "mock-diff" ]
 			@DiffManager.getDiff = sinon.stub().callsArgWith(4, null, @diff)
 			@HttpController.getDiff @req, @res, @next
@@ -82,7 +82,7 @@ describe "HttpController", ->
 				.should.equal true
 
 		it "should return the diff", ->
-			@res.send.calledWith(JSON.stringify(diff: @diff)).should.equal true
+			@res.json.calledWith({diff: @diff}).should.equal true
 
 	describe "getUpdates", ->
 		beforeEach ->
@@ -96,7 +96,7 @@ describe "HttpController", ->
 					before:    @before.toString()
 					min_count: @min_count.toString()
 			@res =
-				send: sinon.stub()
+				json: sinon.stub()
 			@updates = ["mock-summarized-updates"]
 			@UpdatesManager.getSummarizedProjectUpdates = sinon.stub().callsArgWith(2, null, @updates, @nextBeforeTimestamp)
 			@HttpController.getUpdates @req, @res, @next
@@ -107,7 +107,7 @@ describe "HttpController", ->
 				.should.equal true
 
 		it "should return the formatted updates", ->
-			@res.send.calledWith(JSON.stringify(updates: @updates, nextBeforeTimestamp: @nextBeforeTimestamp)).should.equal true
+			@res.json.calledWith({updates: @updates, nextBeforeTimestamp: @nextBeforeTimestamp}).should.equal true
 
 	describe "RestoreManager", ->
 		beforeEach ->
