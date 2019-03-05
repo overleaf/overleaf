@@ -46,6 +46,8 @@ settings =
 
 	continualPubsubTraffic: process.env['CONTINUAL_PUBSUB_TRAFFIC'] or false
 
+	sentry:
+		dsn: process.env.SENTRY_DSN
 	
 # console.log settings.redis
 module.exports = settings
