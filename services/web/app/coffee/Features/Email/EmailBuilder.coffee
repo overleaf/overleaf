@@ -6,6 +6,7 @@ StringHelper = require "../Helpers/StringHelper"
 PersonalEmailLayout = require("./Layouts/PersonalEmailLayout")
 NotificationEmailLayout = require("./Layouts/NotificationEmailLayout")
 BaseWithHeaderEmailLayout = require("./Layouts/" + settings.brandPrefix + "BaseWithHeaderEmailLayout")
+SpamSafe = require("./SpamSafe")
 
 SingleCTAEmailBody = require("./Bodies/" + settings.brandPrefix + "SingleCTAEmailBody")
 
@@ -101,20 +102,20 @@ templates.confirmEmail = CTAEmailTemplate({
 })
 
 templates.projectInvite = CTAEmailTemplate({
-	subject: (opts) -> "#{ _.escape(opts.project.name) } - shared by #{ _.escape(opts.owner.email) }"
-	title: (opts) -> "#{ _.escape(opts.project.name) } - shared by #{ _.escape(opts.owner.email) }"
-	message: (opts) -> "#{ _.escape(opts.owner.email) } wants to share '#{ _.escape(opts.project.name) }' with you."
+	subject: (opts) -> "#{ _.escape(SpamSafe.safeProjectName(opts.project.name, "New Project")) } - shared by #{ _.escape(SpamSafe.safeEmail(opts.owner.email, "a collaborator")) }"
+	title: (opts) -> "#{ _.escape(SpamSafe.safeProjectName(opts.project.name, "New Project")) } - shared by #{ _.escape(SpamSafe.safeEmail(opts.owner.email, "a collaborator")) }"
+	message: (opts) -> "#{ _.escape(SpamSafe.safeEmail(opts.owner.email, "a collaborator")) } wants to share '#{ _.escape(SpamSafe.safeProjectName(opts.project.name, "a new Project")) }' with you."
 	ctaText: () -> "View project"
 	ctaURL: (opts) -> opts.inviteUrl
 	gmailGoToAction: (opts) ->
 		target: opts.inviteUrl
 		name: "View project"
-		description: "Join #{ _.escape(opts.project.name) } at #{ settings.appName }"
+		description: "Join #{ _.escape(SpamSafe.safeProjectName(opts.project.name, "Project")) } at #{ settings.appName }"
 })
 
 templates.verifyEmailToJoinTeam = CTAEmailTemplate({
-	subject: (opts) -> "#{ _.escape(opts.inviterName) } has invited you to join a team on #{ settings.appName }"
-	title: (opts) -> "#{ _.escape(opts.inviterName) } has invited you to join a team on #{ settings.appName }"
+	subject: (opts) -> "#{ _.escape(SpamSafe.safeUserName(opts.inviterName, "A collaborator")) } has invited you to join a team on #{ settings.appName }"
+	title: (opts) -> "#{ _.escape(SpamSafe.safeUserName(opts.inviterName, "A collaborator")) } has invited you to join a team on #{ settings.appName }"
 	message: (opts) -> "Please click the button below to join the team and enjoy the benefits of an upgraded #{ settings.appName } account."
 	ctaText: (opts) -> "Join now"
 	ctaURL: (opts) -> opts.acceptInviteUrl

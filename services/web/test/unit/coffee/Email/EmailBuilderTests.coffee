@@ -50,5 +50,25 @@ describe "EmailBuilder", ->
 				@email = @EmailBuilder.buildEmail("projectInvite", @opts)
 
 			it 'should not contain unescaped html in the html part', ->
-				expect(@email.html).to.contain "&lt;img"
+				expect(@email.html).to.contain "New Project"
 
+			it "should not have undefined in it", ->
+				@email.html.indexOf("undefined").should.equal -1
+				@email.subject.indexOf("undefined").should.equal -1
+	
+	describe "SpamSafe", ->
+		beforeEach ->
+			@opts =
+				to:"bob@joe.com"
+				first_name:"bob"
+				owner:
+					email:"sally@hally.com"
+				inviteUrl: "http://example.com/invite"
+				project:
+					url:"http://www.project.com"
+					name:"come buy my product at http://notascam.com"
+			@email = @EmailBuilder.buildEmail("projectInvite", @opts)
+
+		it "should replace spammy project name", ->
+			@email.html.indexOf("a new Project").should.not.equal -1
+			@email.subject.indexOf("New Project").should.not.equal -1
