@@ -311,7 +311,7 @@ describe 'ProjectEntityUpdateHandler', ->
 					docLines: @docLines.join('\n')
 				]
 				@DocumentUpdaterHandler.updateProjectStructure
-					.calledWith(project_id, projectHistoryId, userId, {newDocs})
+					.calledWith(project_id, projectHistoryId, userId, {newDocs, newProject: @project})
 					.should.equal true
 
 		describe 'adding a doc with an invalid name', ->
@@ -367,7 +367,7 @@ describe 'ProjectEntityUpdateHandler', ->
 					url: @fileUrl
 				]
 				@DocumentUpdaterHandler.updateProjectStructure
-					.calledWith(project_id, projectHistoryId, userId, {newFiles})
+					.calledWith(project_id, projectHistoryId, userId, {newFiles, newProject: @project})
 					.should.equal true
 
 		describe 'adding a file with an invalid name', ->
@@ -393,8 +393,9 @@ describe 'ProjectEntityUpdateHandler', ->
 			@newFile = _id: new_file_id, name: "dummy-upload-filename", rev: 0, linkedFileData: @linkedFileData
 			@oldFile = _id: file_id, rev: 3
 			@path = "/path/to/file"
+			@newProject = "new project"
 			@ProjectEntityMongoUpdateHandler._insertDeletedFileReference = sinon.stub().yields()
-			@ProjectEntityMongoUpdateHandler.replaceFileWithNew = sinon.stub().yields(null, @oldFile, @project, fileSystem: @path)
+			@ProjectEntityMongoUpdateHandler.replaceFileWithNew = sinon.stub().yields(null, @oldFile, @project, fileSystem: @path, @newProject)
 			@ProjectEntityUpdateHandler.replaceFile project_id, file_id, @fileSystemPath, @linkedFileData, userId, @callback
 
 		it 'uploads a new version of the file', ->
@@ -429,7 +430,7 @@ describe 'ProjectEntityUpdateHandler', ->
 				url: @newFileUrl
 			]
 			@DocumentUpdaterHandler.updateProjectStructure
-				.calledWith(project_id, projectHistoryId, userId, {oldFiles, newFiles})
+				.calledWith(project_id, projectHistoryId, userId, {oldFiles, newFiles, newProject: @newProject})
 				.should.equal true
 
 	describe 'upsertDoc', ->
@@ -712,7 +713,8 @@ describe 'ProjectEntityUpdateHandler', ->
 			@path = '/path/to/doc.tex'
 			@doc = _id: doc_id
 			@projectBeforeDeletion = _id: project_id, name: 'project'
-			@ProjectEntityMongoUpdateHandler.deleteEntity = sinon.stub().yields(null, @doc, {fileSystem: @path}, @projectBeforeDeletion)
+			@newProject = "new-project"
+			@ProjectEntityMongoUpdateHandler.deleteEntity = sinon.stub().yields(null, @doc, {fileSystem: @path}, @projectBeforeDeletion, @newProject)
 			@ProjectEntityUpdateHandler._cleanUpEntity = sinon.stub().yields()
 			@TpdsUpdateSender.deleteEntity = sinon.stub().yields()
 
@@ -725,7 +727,7 @@ describe 'ProjectEntityUpdateHandler', ->
 
 		it 'cleans up the doc in the docstore', ->
 			@ProjectEntityUpdateHandler._cleanUpEntity
-				.calledWith(@projectBeforeDeletion, @doc, 'doc', @path, userId)
+				.calledWith(@projectBeforeDeletion, @newProject, @doc, 'doc', @path, userId)
 				.should.equal true
 
 		it 'it notifies the tpds', ->
@@ -974,7 +976,8 @@ describe 'ProjectEntityUpdateHandler', ->
 			beforeEach (done) ->
 				@path = "/file/system/path.png"
 				@entity = _id: @entity_id
-				@ProjectEntityUpdateHandler._cleanUpEntity @project, @entity, 'file', @path, userId, done
+				@newProject = "new-project"
+				@ProjectEntityUpdateHandler._cleanUpEntity @project, @newProject, @entity, 'file', @path, userId, done
 
 			it "should insert the file into the deletedFiles array", ->
 				@ProjectEntityMongoUpdateHandler._insertDeletedFileReference
@@ -990,7 +993,7 @@ describe 'ProjectEntityUpdateHandler', ->
 			it "should should send the update to the doc updater", ->
 				oldFiles = [ file: @entity, path: @path ]
 				@DocumentUpdaterHandler.updateProjectStructure
-					.calledWith(project_id, projectHistoryId, userId, {oldFiles})
+					.calledWith(project_id, projectHistoryId, userId, {oldFiles, newProject: @newProject})
 					.should.equal true
 
 		describe "a doc", ->
@@ -998,7 +1001,8 @@ describe 'ProjectEntityUpdateHandler', ->
 				@path = "/file/system/path.tex"
 				@ProjectEntityUpdateHandler._cleanUpDoc = sinon.stub().yields()
 				@entity = {_id: @entity_id}
-				@ProjectEntityUpdateHandler._cleanUpEntity @project, @entity, 'doc', @path, userId, done
+				@newProject = "new-project"
+				@ProjectEntityUpdateHandler._cleanUpEntity @project, @newProject, @entity, 'doc', @path, userId, done
 
 			it "should clean up the doc", ->
 				@ProjectEntityUpdateHandler._cleanUpDoc
@@ -1008,7 +1012,7 @@ describe 'ProjectEntityUpdateHandler', ->
 			it "should should send the update to the doc updater", ->
 				oldDocs = [ doc: @entity, path: @path ]
 				@DocumentUpdaterHandler.updateProjectStructure
-					.calledWith(project_id, projectHistoryId, userId, {oldDocs})
+					.calledWith(project_id, projectHistoryId, userId, {oldDocs, newProject: @newProject})
 					.should.equal true
 
 		describe "a folder", ->
@@ -1026,7 +1030,8 @@ describe 'ProjectEntityUpdateHandler', ->
 				@ProjectEntityUpdateHandler._cleanUpDoc = sinon.stub().yields()
 				@ProjectEntityUpdateHandler._cleanUpFile = sinon.stub().yields()
 				path = "/folder"
-				@ProjectEntityUpdateHandler._cleanUpEntity @project, @folder, "folder", path, userId, done
+				@newProject = "new-project"
+				@ProjectEntityUpdateHandler._cleanUpEntity @project, @newProject, @folder, "folder", path, userId, done
 
 			it "should clean up all sub files", ->
 				@ProjectEntityUpdateHandler._cleanUpFile
@@ -1048,7 +1053,7 @@ describe 'ProjectEntityUpdateHandler', ->
 				oldFiles = [ {file: @file2, path: "/folder/file-name-2"}, {file: @file1, path: "/folder/subfolder/file-name-1"} ]
 				oldDocs = [ {doc: @doc2, path: "/folder/doc-name-2"}, { doc: @doc1, path: "/folder/subfolder/doc-name-1"} ]
 				@DocumentUpdaterHandler.updateProjectStructure
-					.calledWith(project_id, projectHistoryId, userId, {oldFiles, oldDocs})
+					.calledWith(project_id, projectHistoryId, userId, {oldFiles, oldDocs, newProject: @newProject})
 					.should.equal true
 
 	describe "_cleanUpDoc", ->

@@ -99,7 +99,9 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 			@path = mongo: 'file.png'
 			@newFile = _id: 'new-file-id'
 			@newFile.linkedFileData = @linkedFileData = {provider: 'url'}
+			@newProject = "new-project"
 			@ProjectLocator.findElement = sinon.stub().yields(null, @file, @path)
+			@ProjectModel.findOneAndUpdate = sinon.stub().yields(null, @newProject)
 			@ProjectModel.update = sinon.stub().yields()
 
 			@subject.replaceFileWithNew project_id, file_id, @newFile, @callback
@@ -131,19 +133,19 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 				.should.equal true
 
 		it 'increments the project version and sets the rev and created_at', ->
-			@ProjectModel.update
+			@ProjectModel.findOneAndUpdate
 				.calledWith(
 					{ _id: project_id },
 					{
 						'$inc': { 'version': 1, 'file.png.rev': 1 }
 						'$set': { 'file.png._id': @newFile._id, 'file.png.created': new Date(), 'file.png.linkedFileData': @linkedFileData }
-					}
-					{}
+					},
+					{new: true}
 				)
 				.should.equal true
 
 		it 'calls the callback', ->
-			@callback.calledWith(null, @file, @project, @path).should.equal true
+			@callback.calledWith(null, @file, @project, @path, @newProject).should.equal true
 
 	describe 'mkdirp', ->
 		beforeEach ->
@@ -243,6 +245,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 			@doc = {lines:["1234","312343d"], rev: "1234"}
 			@path = { mongo:"folders[0]", fileSystem:"/old_folder/somewhere.txt" }
+			@newProject = "new-project"
 			@ProjectLocator.findElement = sinon.stub()
 				.withArgs({@project, element_id: @docId, type: 'docs'})
 				.yields(null, @doc, @path)
@@ -250,7 +253,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 			@subject._checkValidMove = sinon.stub().yields()
 
 			@subject._removeElementFromMongoArray = sinon.stub().yields(null, @project)
-			@subject._putElement = sinon.stub().yields(null, path: @pathAfterMove)
+			@subject._putElement = sinon.stub().yields(null, path: @pathAfterMove, @newProject)
 
 			@subject.moveEntity project_id, doc_id, folder_id, "docs", @callback
 
@@ -280,7 +283,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 				.should.equal true
 
 		it "calls the callback", ->
-			changes = { @oldDocs, @newDocs, @oldFiles, @newFiles }
+			changes = { @oldDocs, @newDocs, @oldFiles, @newFiles, @newProject }
 			@callback.calledWith(
 				null, @project, @path.fileSystem, @pathAfterMove.fileSystem, @doc.rev, changes
 			).should.equal true
@@ -321,6 +324,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 				rootFolder: [_id:ObjectId()]
 			@doc = _id: doc_id, name: "old.tex", rev: 1
 			@folder = _id: folder_id
+			@newProject = "new-project"
 
 			@ProjectGetter.getProjectWithoutLock = sinon.stub().yields(null, @project)
 
@@ -334,7 +338,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 			@ProjectLocator.findElement = sinon.stub().yields(null, @doc, @path, @folder)
 			@subject._checkValidElementName = sinon.stub().yields()
-			@ProjectModel.findOneAndUpdate = sinon.stub().callsArgWith(3, null, @project)
+			@ProjectModel.findOneAndUpdate = sinon.stub().callsArgWith(3, null, @newProject)
 
 			@subject.renameEntity project_id, doc_id, 'doc', @newName, @callback
 
@@ -362,7 +366,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 				).should.equal true
 
 		it 'calls the callback', ->
-			changes = { @oldDocs, @newDocs, @oldFiles, @newFiles }
+			changes = { @oldDocs, @newDocs, @oldFiles, @newFiles, @newProject }
 			@callback.calledWith(
 				null, @project, '/old.tex', '/new.tex', @doc.rev, changes
 			).should.equal true

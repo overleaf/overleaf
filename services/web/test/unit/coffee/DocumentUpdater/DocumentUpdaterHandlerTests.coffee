@@ -33,7 +33,7 @@ describe 'DocumentUpdaterHandler', ->
 		@handler = SandboxedModule.require modulePath, requires:
 			'request': defaults:=> return @request
 			'settings-sharelatex':@settings
-			'logger-sharelatex':{log:(->), error:(->)}
+			'logger-sharelatex':{log:(->), error:(->), warn:(->)}
 			'../Project/ProjectEntityHandler':@projectEntityHandler
 			"../../models/Project": Project: @Project={}
 			'../../Features/Project/ProjectLocator':{}

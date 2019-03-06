@@ -67,9 +67,15 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 					update =
 						"$inc": inc
 						"$set": set
-					Project.update conditions, update, {}, (err) ->
+					# Note: Mongoose uses new:true to return the modified document
+					# https://mongoosejs.com/docs/api.html#model_Model.findOneAndUpdate
+					# but Mongo uses returnNewDocument:true instead
+					# https://docs.mongodb.com/manual/reference/method/db.collection.findOneAndUpdate/
+					# We are using Mongoose here, but if we ever switch to a direct mongo call
+					# the next line will need to be updated.
+					Project.findOneAndUpdate conditions, update, {new:true}, (err, newProject) ->
 						return callback(err) if err?
-						callback null, fileRef, project, path
+						callback null, fileRef, project, path, newProject
 
 	mkdirp: wrapWithLock (project_id, path, options, callback) ->
 		# defaults to case insensitive paths, use options {exactCaseMatch:true}
@@ -128,7 +134,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 									return callback(err) if err?
 									startPath = entityPath.fileSystem
 									endPath = result.path.fileSystem
-									changes = {oldDocs, newDocs, oldFiles, newFiles}
+									changes = {oldDocs, newDocs, oldFiles, newFiles, newProject}
 									callback null, project, startPath, endPath, entity.rev, changes, callback
 
 	deleteEntity: wrapWithLock (project_id, entity_id, entityType, callback) ->
@@ -136,9 +142,9 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 			return callback(error) if error?
 			ProjectLocator.findElement {project: project, element_id: entity_id, type: entityType}, (error, entity, path) ->
 				return callback(error) if error?
-				self._removeElementFromMongoArray Project, project_id, path.mongo, (error) ->
+				self._removeElementFromMongoArray Project, project_id, path.mongo, (error, newProject) ->
 					return callback(error) if error?
-					callback null, entity, path, project
+					callback null, entity, path, project, newProject
 
 	renameEntity: wrapWithLock (project_id, entity_id, entityType, newName, callback) ->
 		ProjectGetter.getProjectWithoutLock project_id, {rootFolder:true, name:true, overleaf:true}, (error, project)=>
@@ -162,7 +168,7 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 							ProjectEntityHandler.getAllEntitiesFromProject newProject, (error, newDocs, newFiles) =>
 								return callback(error) if error?
 								startPath = entPath.fileSystem
-								changes = {oldDocs, newDocs, oldFiles, newFiles}
+								changes = {oldDocs, newDocs, oldFiles, newFiles, newProject}
 								callback null, project, startPath, endPath, entity.rev, changes, callback
 
 	addFolder: wrapWithLock (project_id, parentFolder_id, folderName, callback) ->
@@ -262,6 +268,8 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 				# we need to increment the project version number for any structure change
 				update["$inc"]["version"] = 1 # increment project version number
 				logger.log project_id: project._id, element_id: element._id, fileType: type, folder_id: folder_id, mongopath:mongopath, "adding element to project"
+				# We are using Mongoose here, but if we ever switch to a direct mongo call
+				# the next line will need to be updated to {returnNewDocument:true}
 				Project.findOneAndUpdate conditions, update, {"new": true}, (err, newProject)->
 					if err?
 						logger.err err: err, project_id: project._id, 'error saving in putElement project'

@@ -162,7 +162,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 					path: docPath
 					docLines: docLines.join('\n')
 				]
-				DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, {newDocs}, (error) ->
+				DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, {newDocs, newProject: project}, (error) ->
 					return callback(error) if error?
 					callback null, doc, folder_id
 
@@ -205,7 +205,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 					path: result?.path?.fileSystem
 					url: fileStoreUrl
 				]
-				DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, {newFiles}, (error) ->
+				DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, {newFiles, newProject: project}, (error) ->
 					return callback(error) if error?
 					callback(null, fileRef, folder_id)
 
@@ -221,7 +221,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 					return callback(err) if err?
 					next project_id, file_id, fsPath, linkedFileData, userId, fileRef, fileStoreUrl, callback
 		withLock: (project_id, file_id, fsPath, linkedFileData, userId, newFileRef, fileStoreUrl, callback)->
-			ProjectEntityMongoUpdateHandler.replaceFileWithNew project_id, file_id, newFileRef, (err, oldFileRef, project, path) ->
+			ProjectEntityMongoUpdateHandler.replaceFileWithNew project_id, file_id, newFileRef, (err, oldFileRef, project, path, newProject) ->
 				return callback(err) if err?
 				oldFiles = [
 					file: oldFileRef
@@ -241,7 +241,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 				# but it is acceptable for now.
 				TpdsUpdateSender.addFile {project_id:project._id, file_id:newFileRef._id, path:path.fileSystem, rev:oldFileRef.rev + 1, project_name:project.name}, (err) ->
 					return callback(err) if err?
-					DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, {oldFiles, newFiles}, callback
+					DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, {oldFiles, newFiles, newProject}, callback
 
 	upsertDoc: wrapWithLock (project_id, folder_id, docName, docLines, source, userId, callback = (err, doc, folder_id, isNewDoc)->)->
 		if not SafePath.isCleanFilename docName
@@ -338,9 +338,9 @@ module.exports = ProjectEntityUpdateHandler = self =
 			logger.err err: "No entityType set", project_id: project_id, entity_id: entity_id
 			return callback("No entityType set")
 		entityType = entityType.toLowerCase()
-		ProjectEntityMongoUpdateHandler.deleteEntity project_id, entity_id, entityType, (error, entity, path, projectBeforeDeletion) ->
+		ProjectEntityMongoUpdateHandler.deleteEntity project_id, entity_id, entityType, (error, entity, path, projectBeforeDeletion, newProject) ->
 			return callback(error) if error?
-			self._cleanUpEntity projectBeforeDeletion, entity, entityType, path.fileSystem, userId, (error) ->
+			self._cleanUpEntity projectBeforeDeletion, newProject, entity, entityType, path.fileSystem, userId, (error) ->
 				return callback(error) if error?
 				TpdsUpdateSender.deleteEntity project_id:project_id, path:path.fileSystem, project_name:projectBeforeDeletion.name, (error) ->
 					return callback(error) if error?
@@ -421,8 +421,8 @@ module.exports = ProjectEntityUpdateHandler = self =
 
 				DocumentUpdaterHandler.resyncProjectHistory project_id, projectHistoryId, docs, files, callback
 
-	_cleanUpEntity: (project, entity, entityType, path, userId, callback = (error) ->) ->
-		self._updateProjectStructureWithDeletedEntity project, entity, entityType, path, userId, (error) ->
+	_cleanUpEntity: (project, newProject, entity, entityType, path, userId, callback = (error) ->) ->
+		self._updateProjectStructureWithDeletedEntity project, newProject, entity, entityType, path, userId, (error) ->
 			return callback(error) if error?
 			if(entityType.indexOf("file") != -1)
 				self._cleanUpFile project, entity, path, userId, callback
@@ -437,7 +437,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 	# methods both need to recursively iterate over the entities in folder.
 	# These are currently using separate implementations of the recursion. In
 	# future, these could be simplified using a common project entity iterator.
-	_updateProjectStructureWithDeletedEntity: (project, entity, entityType, entityPath, userId, callback = (error) ->) ->
+	_updateProjectStructureWithDeletedEntity: (project, newProject, entity, entityType, entityPath, userId, callback = (error) ->) ->
 		# compute the changes to the project structure
 		if(entityType.indexOf("file") != -1)
 			changes = oldFiles: [ {file: entity, path: entityPath} ]
@@ -454,6 +454,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 					_recurseFolder(childFolder, path.join(folderPath, childFolder.name))
 			_recurseFolder entity, entityPath
 		# now send the project structure changes to the docupdater
+		changes.newProject = newProject
 		project_id = project._id.toString()
 		projectHistoryId = project.overleaf?.history?.id
 		DocumentUpdaterHandler.updateProjectStructure project_id, projectHistoryId, userId, changes, callback

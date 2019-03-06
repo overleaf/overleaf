@@ -138,8 +138,20 @@ module.exports = DocumentUpdaterHandler =
 
 			docUpdates = DocumentUpdaterHandler._getUpdates('doc', changes.oldDocs, changes.newDocs)
 			fileUpdates = DocumentUpdaterHandler._getUpdates('file', changes.oldFiles, changes.newFiles)
+			projectVersion = changes?.newProject?.version
 
 			return callback() if (docUpdates.length + fileUpdates.length) < 1
+
+			# FIXME: remove this check and the request to get the project structure version above
+			# when we are confident in the use of $inc to increment the project structure version
+			# in all cases.
+			if projectVersion? && currentProject.version == projectVersion
+				logger.log {project_id, projectVersion}, "got project version in changes"
+			else if projectVersion? && currentProject.version != projectVersion
+				logger.error {project_id, changes, projectVersion, currentProject: currentProject.version}, "project version from db was different from changes (broken lock?)"
+			else
+				projectVersion = currentProject.version
+				logger.warn {project_id, changes, projectVersion}, "did not receive project version in changes"
 
 			logger.log {project_id}, "updating project structure in doc updater"
 			DocumentUpdaterHandler._makeRequest {
@@ -148,7 +160,7 @@ module.exports = DocumentUpdaterHandler =
 					docUpdates,
 					fileUpdates,
 					userId,
-					version: currentProject.version
+					version: projectVersion
 					projectHistoryId
 				}
 				method: "POST"
