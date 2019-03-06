@@ -126,6 +126,9 @@ public class WLGitBridgeIntegrationTest {
         put("canCloneAMigratedRepositoryWithoutChanges", new HashMap<String, SnapshotAPIState>() {{
             put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/canCloneAMigratedRepositoryWithoutChanges/state/state.json")).build());
         }});
+        put("rejectV1Repository", new HashMap<String, SnapshotAPIState>() {{
+            put("state", new SnapshotAPIStateBuilder(getResourceAsStream("/rejectV1Repository/state/state.json")).build());
+        }});
     }};
 
     @Rule
@@ -847,6 +850,22 @@ public class WLGitBridgeIntegrationTest {
         File testprojDir = gitClone("testproj_no_change", gitBridgePort, dir);
         wlgb.stop();
         assertTrue(FileUtil.gitDirectoriesAreEqual(getResource("/canCloneAMigratedRepositoryWithoutChanges/state/testproj_no_change"), testprojDir.toPath()));
+    }
+
+    @Test
+    public void rejectV1Repository() throws IOException, GitAPIException, InterruptedException {
+        int gitBridgePort = 33884;
+        int mockServerPort = 3884;
+        MockSnapshotServer server = new MockSnapshotServer(mockServerPort, getResource("/rejectV1Repository").toFile());
+        server.start();
+        server.setState(states.get("rejectV1Repository").get("state"));
+        GitBridgeApp wlgb = new GitBridgeApp(new String[] {
+                makeConfigFile(gitBridgePort, mockServerPort)
+        });
+        wlgb.run();
+        Process gitProcess = runtime.exec("git clone http://127.0.0.1:" + gitBridgePort + "/1234bbccddff.git", null, dir);
+        wlgb.stop();
+        assertNotEquals(0, gitProcess.waitFor());
     }
 
     private String makeConfigFile(
