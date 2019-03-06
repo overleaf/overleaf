@@ -8,18 +8,17 @@
   },
   "version": "1.6.0",
   "scripts": {
-    "test": "mocha --require coffee-script/register test/**/*.coffee"
+    "test": "mocha test/**/*.js"
   },
   "dependencies": {
     "bunyan": "1.5.1",
-    "coffee-script": "1.12.4",
     "raven": "^1.1.3",
     "request": "^2.88.0"
   },
   "devDependencies": {
     "chai": "^4.2.0",
     "mocha": "^5.2.0",
-    "sandboxed-module": "0.2.0",
+    "sandboxed-module": "2.0.3",
     "sinon": "^7.2.3",
     "sinon-chai": "^3.3.0"
   }
