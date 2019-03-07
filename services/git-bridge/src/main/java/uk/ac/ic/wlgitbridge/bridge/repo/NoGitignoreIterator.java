@@ -51,11 +51,6 @@ public class NoGitignoreIterator extends FileTreeIterator {
         super(root, fs, options, fileModeStrategy);
     }
 
-    @Deprecated
-    protected NoGitignoreIterator(WorkingTreeIterator p, File root, FS fs) {
-        super(p, root, fs);
-    }
-
     protected NoGitignoreIterator(FileTreeIterator p, File root, FS fs) {
         super(p, root, fs);
     }

@@ -17,7 +17,7 @@ clean:
 	mvn clean
 
 
-package:
+package: clean
 	mvn package
 
 
