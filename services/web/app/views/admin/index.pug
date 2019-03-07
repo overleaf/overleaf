@@ -13,14 +13,14 @@ block content
 								each message in systemMessages
 									.alert.alert-info.row-spaced #{message.content}
 								hr
-								form(enctype='multipart/form-data', method='post', action='/admin/messages')
+								form(method='post', action='/admin/messages')
 									input(name="_csrf", type="hidden", value=csrfToken)
 									.form-group
 										label(for="content")
 										input.form-control(name="content", type="text", placeholder="Message...", required)
 									button.btn.btn-primary(type="submit") Post Message
 								hr
-								form(enctype='multipart/form-data', method='post', action='/admin/messages/clear')
+								form(method='post', action='/admin/messages/clear')
 									input(name="_csrf", type="hidden", value=csrfToken)
 									button.btn.btn-danger(type="submit") Clear all messages
 
@@ -36,13 +36,13 @@ block content
 
 							tab(heading="Close Editor")
 								.row-spaced
-									form(enctype='multipart/form-data', method='post',action='/admin/closeEditor')
+									form(method='post',action='/admin/closeEditor')
 										input(name="_csrf", type="hidden", value=csrfToken)
 										button.btn.btn-danger(type="submit") Close Editor
 									p.small Will stop anyone opening the editor. Will NOT disconnect already connected users.
 									
 								.row-spaced
-									form(enctype='multipart/form-data', method='post',action='/admin/dissconectAllUsers')
+									form(method='post',action='/admin/dissconectAllUsers')
 										input(name="_csrf", type="hidden", value=csrfToken)
 										button.btn.btn-danger(type="submit") Disconnect all users
 									p.small Will force disconnect all users with the editor open. Make sure to close the editor first to avoid them reconnecting.
@@ -50,7 +50,7 @@ block content
 							tab(heading="Subscriptions")
 								h3 Link Recurly subscription to user
 								.row
-									form.form.col-xs-6(enctype='multipart/form-data', method='post',action='/admin/syncUserToSubscription')
+									form.form.col-xs-6(method='post',action='/admin/syncUserToSubscription')
 										input(name="_csrf", type="hidden", value=csrfToken)
 										.form-group
 											label(for='subscription_id') subscription_id (in Recurly)
@@ -64,7 +64,7 @@ block content
 							tab(heading="TPDS/Dropbox Management")
 								h3 Flush project to TPDS
 								.row
-									form.col-xs-6(enctype='multipart/form-data', method='post',action='/admin/flushProjectToTpds')
+									form.col-xs-6(method='post',action='/admin/flushProjectToTpds')
 										input(name="_csrf", type="hidden", value=csrfToken)
 										.form-group
 											label(for='project_id') project_id 
@@ -74,7 +74,7 @@ block content
 								hr
 								h3 Poll Dropbox for user
 								.row
-									form.col-xs-6(enctype='multipart/form-data', method='post',action='/admin/pollDropboxForUser')
+									form.col-xs-6(method='post',action='/admin/pollDropboxForUser')
 										input(name="_csrf", type="hidden", value=csrfToken)
 										.form-group
 											label(for='user_id') user_id 
