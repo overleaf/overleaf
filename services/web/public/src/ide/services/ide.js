@@ -37,7 +37,7 @@ define(['base'], function(App) {
           meta = {}
         }
         this.recentEvents.push({ type, meta, date: new Date() })
-        if (this.recentEvents.length > 40) {
+        if (this.recentEvents.length > 100) {
           return this.recentEvents.shift()
         }
       }
