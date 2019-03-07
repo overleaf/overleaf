@@ -14,6 +14,7 @@
     "chai-friendly"
   ],
   "env": {
+    "browser": true,
     "mocha": true
   },
   "globals": {

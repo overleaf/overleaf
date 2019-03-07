@@ -75,6 +75,7 @@ define([
       trackChangesOnForEveryone: false,
       trackChangesOnForGuests: false,
       trackChangesForGuestsAvailable: false,
+      richTextTrackChangesEnabled: window.richTextTrackChangesEnabled,
       entries: {},
       resolvedComments: {},
       hasEntries: false,

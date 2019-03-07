@@ -924,21 +924,34 @@
 }
 
 .cm-editor-wrapper {
+	@rp-yellow-for-cm: fade(@rp-yellow, 40%); // Get the RGBA colour with transparency
+	@rp-green-for-cm: fade(@rp-green, 40%); // Get the RGBA colour with transparency
+
 	.track-changes-marker {
 		border-radius: 0;
 	}
 
 	.track-changes-added-marker {
 		// Uses rgba so not to affect the opacity of the text - doesn't layer like ace
-		background-color: rgba(44, 142, 48, 0.3);
+		background-color: @rp-green-for-cm;
 		color: black;
 	}
 
 	.track-changes-deleted-marker-callout {
 		// Commented out styles for callout to be reimplemented later
 		// border-bottom: 1px dashed #c5060b;
-		border-left: 3px dotted #c5060b;
+		border-left: 2px dotted #c5060b;
 		// width: 100%;
+	}
+
+	.track-changes-comment-marker {
+		// Uses rgba so not to affect the opacity of the text - doesn't layer like ace
+		background-color: @rp-yellow-for-cm;
+		color: black;
+	}
+
+	.track-changes-added-marker.track-changes-comment-marker {
+		background-color: mix(@rp-yellow-for-cm, @rp-green-for-cm);
 	}
 }
 
