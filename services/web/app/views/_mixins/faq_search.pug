@@ -15,6 +15,7 @@ mixin faq_search(headerText, headerClass)
 							aria-hidden="true"
 						)
 						button.sr-only(
+							type="button"
 							ng-click="clearSearchText()",
 							ng-show="searchQueryText.length > 0"
 						) #{translate('clear_search')}
