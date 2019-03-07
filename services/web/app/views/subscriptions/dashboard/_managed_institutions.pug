@@ -24,7 +24,7 @@ each institution in managedInstitutions
 	div(ng-controller="MetricsEmailController", ng-cloak)
 		p
 			span Monthly metrics emails: 
-				a(ng-bind-html="institutionEmailSubscription('"+institution.v1Id+"')" ng-show="!subscriptionChanging" ng-click="changeInstitutionalEmailSubscription('"+institution.v1Id+"')")
+				a(href ng-bind-html="institutionEmailSubscription('"+institution.v1Id+"')" ng-show="!subscriptionChanging" ng-click="changeInstitutionalEmailSubscription('"+institution.v1Id+"')")
 				span(ng-show="subscriptionChanging")
 					i.fa.fa-spin.fa-refresh(aria-hidden="true")
 	hr
