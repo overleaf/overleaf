@@ -1,1 +1,1 @@
-module.exports = require('./logging-manager.js');
+module.exports = require("./logging-manager.js");
