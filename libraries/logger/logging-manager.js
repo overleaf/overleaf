@@ -1,7 +1,7 @@
 const bunyan = require('bunyan')
 const request = require('request')
 
-Logger = module.exports = {
+const Logger = module.exports = {
   initialize(name) {
     this.isProduction =
       (process.env['NODE_ENV'] || '').toLowerCase() === 'production'
@@ -50,6 +50,9 @@ Logger = module.exports = {
       }-setLogLevelEndTime`
     }
     request(options, (err, response, body) => {
+      if (err) {
+        return
+      }
       if (parseInt(body) > Date.now()) {
         this.logger.level('trace')
       } else {
