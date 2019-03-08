@@ -19,8 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.Optional;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  * Created by winston on 25/10/15.
@@ -62,6 +61,30 @@ public class Oauth2Filter implements Filter {
                 ((Request) servletRequest).getRequestURI().split("/")[1],
                 ".git"
         );
+        // Reject v1 ids, the request will be rejected by v1 anyway
+        if (project.matches("^[0-9]+[bcdfghjklmnpqrstvwxyz]{6,12}$") && !project.matches("^[0-9a-f]{24}$")) {
+            Log.info("[{}] Request for v1 project, refusing", project);
+            HttpServletResponse response = ((HttpServletResponse) servletResponse);
+            response.setContentType("text/plain");
+            response.setStatus(404);
+            PrintWriter w = response.getWriter();
+            List<String> l = Arrays.asList(
+                    "This project has not yet been moved into the new version",
+                    "of Overleaf. You will need to move it in order to continue working on it.",
+                    "Please visit this project online on www.overleaf.com to do this.",
+                    "",
+                    "You can find the new git remote url by selecting \"Git\" from",
+                    "the left sidebar in the project view.",
+                    "",
+                    "If this is unexpected, please contact us at support@overleaf.com, or",
+                    "see https://www.overleaf.com/help/342 for more information."
+            );
+            for (String line : l) {
+                w.println(line);
+            }
+            w.close();
+            return;
+        }
         Log.info("[{}] Checking if auth needed", project);
         GetDocRequest doc = new GetDocRequest(project);
         doc.request();
