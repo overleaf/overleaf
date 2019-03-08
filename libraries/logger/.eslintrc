@@ -1,0 +1,75 @@
+{
+  "extends": [
+    "standard",
+    "standard-react",
+    "prettier",
+    "prettier/react",
+    "prettier/standard",
+    "plugin:jsx-a11y/recommended"
+  ],
+  "plugins": [
+    "jsx-a11y",
+    "mocha",
+    "chai-expect",
+    "chai-friendly"
+  ],
+  "env": {
+    "mocha": true
+  },
+  "globals": {
+    "expect": true,
+    "define": true,
+    "$": true,
+    "angular": true,
+    // Injected in layout.pug
+    "user_id": true,
+    "ace": true
+  },
+  "settings": {
+    // Tell eslint-plugin-react to detect which version of React we are using
+    "react": {
+      "version": "detect"
+    }
+  },
+  "rules": {
+    "max-len": ["error", {
+      "ignoreUrls": true,
+      // Ignore long describe/it test blocks, long import/require statements
+      "ignorePattern": "(^\\s*(it|describe)\\s*\\(['\"]|^import\\s*.*\\s*from\\s*['\"]|^.*\\s*=\\s*require\\(['\"])"
+    }],
+
+    // Fix conflict between prettier & standard by overriding to prefer
+    // double quotes
+    "jsx-quotes": ["error", "prefer-double"],
+
+    // Override weird behaviour of jsx-a11y label-has-for (says labels must be
+    // nested *and* have for/id attributes)
+    "jsx-a11y/label-has-for": [
+      "error",
+      {
+        "required": {
+          "some": [
+            "nesting",
+            "id"
+          ]
+        }
+      }
+    ],
+
+    // Add some mocha specific rules
+    "mocha/handle-done-callback": "error",
+    "mocha/no-exclusive-tests": "error",
+    "mocha/no-global-tests": "error",
+    "mocha/no-identical-title": "error",
+    "mocha/no-nested-tests": "error",
+    "mocha/no-pending-tests": "error",
+    "mocha/no-skipped-tests": "error",
+
+    // Add some chai specific rules
+    "chai-expect/missing-assertion": "error",
+    "chai-expect/terminating-properties": "error",
+    // Swap the no-unused-expressions rule with a more chai-friendly one
+    "no-unused-expressions": 0,
+    "chai-friendly/no-unused-expressions": "error"
+  }
+}

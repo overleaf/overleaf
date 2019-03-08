@@ -8,7 +8,9 @@
   },
   "version": "1.7.0",
   "scripts": {
-    "test": "mocha test/**/*.js"
+    "test": "mocha test/**/*.js",
+    "format": "prettier-eslint '**/*.js' --list-different",
+    "format:fix": "prettier-eslint '**/*.js' --write"
   },
   "dependencies": {
     "bunyan": "1.8.12",
