@@ -338,16 +338,16 @@ describe('LoggingManager', function() {
       ]
     })
 
-    describe('in production', function() {
+    describe('when ring buffer size is positive', function() {
       beforeEach(function() {
-        process.env['NODE_ENV'] = 'production'
+        process.env['LOG_RING_BUFFER_SIZE'] = '20'
         this.logger = this.LoggingManager.initialize(this.loggerName)
         this.logger.ringBuffer.records = this.logBufferMock
         this.logger.error({}, 'error')
       })
 
       afterEach(function() {
-        process.env['NODE_ENV'] = undefined
+        process.env['LOG_RING_BUFFER_SIZE'] = undefined
       })
 
       it('should include buffered logs in error log', function() {
@@ -357,11 +357,15 @@ describe('LoggingManager', function() {
       })
     })
 
-    describe('not in production', function() {
+    describe('when ring buffer size is zero', function() {
       beforeEach(function() {
+        process.env['LOG_RING_BUFFER_SIZE'] = '0'
         this.logger = this.LoggingManager.initialize(this.loggerName)
-        this.logger.ringBuffer.records = this.logBufferMock
         this.logger.error({}, 'error')
+      })
+
+      afterEach(function() {
+        process.env['LOG_RING_BUFFER_SIZE'] = undefined
       })
 
       it('should not include buffered logs in error log', function() {

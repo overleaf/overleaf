@@ -8,23 +8,28 @@ const Logger = module.exports = {
     this.defaultLevel =
       process.env['LOG_LEVEL'] || (this.isProduction ? 'warn' : 'debug')
     this.loggerName = name
-    this.ringBuffer = new bunyan.RingBuffer({
-      limit: process.env['LOG_RING_BUFFER_SIZE'] || 30
-    })
+    this.ringBufferSize = parseInt(process.env['LOG_RING_BUFFER_SIZE']) || 0
+    const loggerStreams = [
+      {
+        level: this.defaultLevel,
+        stream: process.stdout
+      }
+    ]
+    if (this.ringBufferSize > 0) {
+      this.ringBuffer = new bunyan.RingBuffer({limit: this.ringBufferSize})
+      loggerStreams.push({
+        level: 'trace',
+        type: 'raw',
+        stream: this.ringBuffer
+      })
+    }
+    else {
+      this.ringBuffer = null
+    }
     this.logger = bunyan.createLogger({
       name,
       serializers: bunyan.stdSerializers,
-      streams: [
-        {
-          level: this.defaultLevel,
-          stream: process.stdout
-        },
-        {
-          level: 'trace',
-          type: 'raw',
-          stream: this.ringBuffer
-        }
-      ]
+      streams: loggerStreams
     })
     if (this.isProduction) {
       // clear interval if already set
@@ -51,6 +56,7 @@ const Logger = module.exports = {
     }
     request(options, (err, response, body) => {
       if (err) {
+        this.logger.level(this.defaultLevel)
         return
       }
       if (parseInt(body) > Date.now()) {
@@ -165,7 +171,7 @@ const Logger = module.exports = {
   },
 
   error(attributes, message, ...args) {
-    if (this.isProduction) {
+    if (this.ringBuffer !== null) {
       attributes.logBuffer = this.ringBuffer.records
     }
     this.logger.error(attributes, message, ...Array.from(args))
