@@ -75,7 +75,7 @@ module.exports = FileStoreHandler =
 				opts.headers['range'] = "bytes=#{query['range']}"
 		readStream = request(opts)
 		readStream.on "error", (err) ->
-			logger.err {err, project_id, file_id, query}, "error in file stream"
+			logger.err {err, project_id, file_id, query, opts}, "error in file stream"
 		callback(null, readStream)
 
 	deleteFile: (project_id, file_id, callback)->
