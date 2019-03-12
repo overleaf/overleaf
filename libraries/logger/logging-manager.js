@@ -171,8 +171,10 @@ const Logger = module.exports = {
   },
 
   error(attributes, message, ...args) {
-    if (this.ringBuffer !== null) {
-      attributes.logBuffer = this.ringBuffer.records
+    if (this.ringBuffer !== null && Array.isArray(this.ringBuffer.records)) {
+      attributes.logBuffer = this.ringBuffer.records.filter(function (record) {
+        return record.level !== 50
+      })
     }
     this.logger.error(attributes, message, ...Array.from(args))
     if (this.raven != null) {

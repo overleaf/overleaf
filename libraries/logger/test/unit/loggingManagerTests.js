@@ -334,6 +334,10 @@ describe('LoggingManager', function() {
         },
         {
           msg: 'log 2'
+        },
+        {
+          level: 50,
+          msg: 'error'
         }
       ]
     })
@@ -350,10 +354,15 @@ describe('LoggingManager', function() {
         process.env['LOG_RING_BUFFER_SIZE'] = undefined
       })
 
-      it('should include buffered logs in error log', function() {
-        this.mockBunyanLogger.error.lastCall.args[0].logBuffer.should.equal(
-          this.logBufferMock
-        )
+      it('should include buffered logs in error log and filter out error logs in buffer', function() {
+        this.mockBunyanLogger.error.lastCall.args[0].logBuffer.should.deep.equal([
+          {
+            msg: 'log 1'
+          },
+          {
+            msg: 'log 2'
+          },
+        ])
       })
     })
 
