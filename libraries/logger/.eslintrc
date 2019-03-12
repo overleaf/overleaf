@@ -1,0 +1,44 @@
+{
+  "extends": [
+    "standard",
+    "prettier",
+    "prettier/standard"
+  ],
+  "plugins": [
+    "mocha",
+    "chai-expect",
+    "chai-friendly"
+  ],
+  "env": {
+    "mocha": true
+  },
+  "globals": {
+    "expect": true,
+    "define": true,
+  },
+  "settings": {
+  },
+  "rules": {
+    "max-len": ["error", {
+      "ignoreUrls": true,
+      // Ignore long describe/it test blocks, long import/require statements
+      "ignorePattern": "(^\\s*(it|describe)\\s*\\(['\"]|^import\\s*.*\\s*from\\s*['\"]|^.*\\s*=\\s*require\\(['\"])"
+    }],
+
+    // Add some mocha specific rules
+    "mocha/handle-done-callback": "error",
+    "mocha/no-exclusive-tests": "error",
+    "mocha/no-global-tests": "error",
+    "mocha/no-identical-title": "error",
+    "mocha/no-nested-tests": "error",
+    "mocha/no-pending-tests": "error",
+    "mocha/no-skipped-tests": "error",
+
+    // Add some chai specific rules
+    "chai-expect/missing-assertion": "error",
+    "chai-expect/terminating-properties": "error",
+    // Swap the no-unused-expressions rule with a more chai-friendly one
+    "no-unused-expressions": 0,
+    "chai-friendly/no-unused-expressions": "error"
+  }
+}
