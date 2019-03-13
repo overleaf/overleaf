@@ -63,17 +63,18 @@ describe 'SafePath', ->
 			result = @SafePath.isCleanFilename 'foo\uD800\uDFFFbar'
 			result.should.equal false
 
-		it 'should not accept javascript property names', ->
+		it 'should accept javascript property names', ->
 			result = @SafePath.isCleanFilename 'prototype'
-			result.should.equal false
+			result.should.equal true
 
-		it 'should not accept javascript property names in the prototype', ->
+		it 'should accept javascript property names in the prototype', ->
 			result = @SafePath.isCleanFilename 'hasOwnProperty'
-			result.should.equal false
+			result.should.equal true
 
-		it 'should not accept javascript property names resulting from substitutions', ->
-			result = @SafePath.isCleanFilename '  proto  '
-			result.should.equal false
+		# this test never worked correctly because the spaces are not replaced by underscores in isCleanFilename
+		# it 'should not accept javascript property names resulting from substitutions', ->
+		# 	result = @SafePath.isCleanFilename '  proto  '
+		# 	result.should.equal false
 
 		# it 'should not accept a trailing .', ->
 		# 	result = @SafePath.isCleanFilename 'hello.'
@@ -134,6 +135,18 @@ describe 'SafePath', ->
 
 		it 'should not accept a problematic path with an empty element', ->
 			result = @SafePath.isCleanPath 'foo//*/bar'
+			result.should.equal false
+
+		it 'should not accept javascript property names', ->
+			result = @SafePath.isCleanPath 'prototype'
+			result.should.equal false
+
+		it 'should not accept javascript property names in the prototype', ->
+			result = @SafePath.isCleanPath 'hasOwnProperty'
+			result.should.equal false
+
+		it 'should not accept javascript property names resulting from substitutions', ->
+			result = @SafePath.isCleanPath '  proto  '
 			result.should.equal false
 
 	describe 'isAllowedLength', ->

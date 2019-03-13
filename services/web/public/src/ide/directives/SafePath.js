@@ -87,8 +87,7 @@ prototype\
       return (
         SafePath.isAllowedLength(filename) &&
         !BADCHAR_RX.test(filename) &&
-        !BADFILE_RX.test(filename) &&
-        !BLOCKEDFILE_RX.test(filename)
+        !BADFILE_RX.test(filename)
       )
     },
 

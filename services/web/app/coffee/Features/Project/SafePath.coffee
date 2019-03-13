@@ -19,7 +19,7 @@ load = () ->
 
 	BADFILE_RX = ///
 		(^\.$)      # reject . as a filename
-		|	(^\.\.$)  # reject .. as a filename
+		| (^\.\.$)  # reject .. as a filename
 		| (^\s+)    # reject leading space
 		| (\s+$)    # reject trailing space
 		///g
@@ -67,8 +67,10 @@ load = () ->
 		isCleanFilename: (filename) ->
 			return SafePath.isAllowedLength(filename) &&
 				!BADCHAR_RX.test(filename) &&
-				!BADFILE_RX.test(filename) &&
-				!BLOCKEDFILE_RX.test(filename)
+				!BADFILE_RX.test(filename)
+
+		isBlockedFilename: (filename) ->
+			return BLOCKEDFILE_RX.test(filename)
 
 		# returns whether a full path is 'clean' - e.g. is a full or relative path
 		# that points to a file, and each element passes the rules in 'isCleanFilename'
@@ -80,6 +82,9 @@ load = () ->
 
 			for element in elements
 				return false if element.length > 0 && !SafePath.isCleanFilename element
+
+			# check for a top-level reserved name
+			return false if BLOCKEDFILE_RX.test(path.replace(/^\/?/,''))  # remove leading slash if present
 
 			return true
 

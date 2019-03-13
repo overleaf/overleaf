@@ -168,16 +168,18 @@ define([
     }
 
     getMultiSelectedEntityChildNodes() {
+      // use pathnames with a leading slash to avoid
+      // problems with reserved Object properties
       const entities = this.getMultiSelectedEntities()
       const paths = {}
       for (var entity of Array.from(entities)) {
-        paths[this.getEntityPath(entity)] = entity
+        paths["/" + this.getEntityPath(entity)] = entity
       }
       const prefixes = {}
       for (var path in paths) {
         entity = paths[path]
         const parts = path.split('/')
-        if (parts.length <= 1) {
+        if (parts.length <= 2) {
           continue
         } else {
           // Record prefixes a/b/c.tex -> 'a' and 'a/b'
@@ -186,7 +188,7 @@ define([
             asc ? i <= end : i >= end;
             asc ? i++ : i--
           ) {
-            prefixes[parts.slice(0, i).join('/')] = true
+            prefixes["/" + parts.slice(0, i).join('/')] = true
           }
         }
       }
