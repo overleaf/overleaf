@@ -2,7 +2,7 @@ metrics = require("metrics-sharelatex")
 metrics.initialize(process.env['METRICS_APP_NAME'] or "web")
 Settings = require('settings-sharelatex')
 logger = require 'logger-sharelatex'
-logger.initialize("web")
+logger.initialize(process.env['METRICS_APP_NAME'] or "web")
 logger.logger.serializers.user = require("./app/js/infrastructure/LoggerSerializers").user
 logger.logger.serializers.docs = require("./app/js/infrastructure/LoggerSerializers").docs
 logger.logger.serializers.files = require("./app/js/infrastructure/LoggerSerializers").files
