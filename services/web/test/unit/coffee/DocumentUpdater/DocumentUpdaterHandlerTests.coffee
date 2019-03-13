@@ -405,7 +405,6 @@ describe 'DocumentUpdaterHandler', ->
 		beforeEach ->
 			@user_id = 1234
 			@version = 999
-			@Project.findOne = sinon.stub().callsArgWith(2,null, {_id: @project_id, version:@version})
 
 		describe "with project history disabled", ->
 			beforeEach ->
@@ -438,6 +437,7 @@ describe 'DocumentUpdaterHandler', ->
 							{ path: '/old_a', doc: _id: new ObjectId(@docIdA.toString()) }
 							{ path: '/new_b', doc: _id: new ObjectId(@docIdB.toString()) }
 						]
+						newProject: {version: @version}
 					}
 
 					docUpdates = [
@@ -458,9 +458,12 @@ describe 'DocumentUpdaterHandler', ->
 			describe "when a doc has been added", ->
 				it 'should send the structure update to the document updater', (done) ->
 					@docId = new ObjectId()
-					@changes = newDocs: [
-						{ path: '/foo', docLines: 'a\nb', doc: _id: @docId }
-					]
+					@changes = {
+						newDocs: [
+							{ path: '/foo', docLines: 'a\nb', doc: _id: @docId }
+						]
+						newProject: {version: @version}
+					}
 
 					docUpdates = [
 						id: @docId.toString(),
@@ -480,9 +483,12 @@ describe 'DocumentUpdaterHandler', ->
 			describe "when a file has been added", ->
 				it 'should send the structure update to the document updater', (done) ->
 					@fileId = new ObjectId()
-					@changes = newFiles: [
-						{ path: '/bar', url: 'filestore.example.com/file', file: _id: @fileId }
-					]
+					@changes = {
+						newFiles: [
+							{ path: '/bar', url: 'filestore.example.com/file', file: _id: @fileId }
+						]
+						newProject: {version: @version}
+					}
 
 					fileUpdates = [
 						id: @fileId.toString(),
@@ -502,9 +508,12 @@ describe 'DocumentUpdaterHandler', ->
 			describe "when an entity has been deleted", ->
 				it 'should end the structure update to the document updater', (done) ->
 					@docId = new ObjectId()
-					@changes = oldDocs: [
-						{ path: '/foo', docLines: 'a\nb', doc: _id: @docId }
-					]
+					@changes = {
+						oldDocs: [
+							{ path: '/foo', docLines: 'a\nb', doc: _id: @docId }
+						]
+						newProject: {version: @version}
+					}
 
 					docUpdates = [
 						id: @docId.toString(),
@@ -519,3 +528,24 @@ describe 'DocumentUpdaterHandler', ->
 							json: {docUpdates, fileUpdates: [], userId: @user_id, @version, @projectHistoryId}
 						).should.equal true
 						done()
+
+			describe "when the project version is missing", ->
+				it 'should call the callback with an error', () ->
+					@docId = new ObjectId()
+					@changes = {
+						oldDocs: [
+							{ path: '/foo', docLines: 'a\nb', doc: _id: @docId }
+						]
+					}
+
+					docUpdates = [
+						id: @docId.toString(),
+						pathname: '/foo',
+						newPathname: ''
+					]
+
+					@handler.updateProjectStructure @project_id, @projectHistoryId, @user_id, @changes, @callback
+					
+					@callback.calledWith(new Error()).should.equal true
+					firstCallArgs = @callback.args[0]
+					firstCallArgs[0].message.should.equal "did not receive project version in changes"
