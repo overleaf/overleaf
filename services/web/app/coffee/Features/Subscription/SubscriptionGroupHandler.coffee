@@ -35,6 +35,10 @@ module.exports = SubscriptionGroupHandler =
 			logger.log user_id:user_id, subscription_id:subscription_id, partOfGroup:partOfGroup, "checking if user is part of a group"
 			callback(err, partOfGroup)
 
+	getTotalConfirmedUsersInGroup: (subscription_id, callback=(err, totalUsers)->)->
+		SubscriptionLocator.getSubscription subscription_id, (err, subscription)->
+			callback(err, subscription?.member_ids?.length)
+
 replaceInArray = (model, property, oldValue, newValue, callback) ->
 	logger.log "Replacing #{oldValue} with #{newValue} in #{property} of #{model}"
 

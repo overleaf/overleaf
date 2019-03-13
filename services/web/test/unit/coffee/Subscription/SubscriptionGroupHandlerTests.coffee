@@ -23,13 +23,14 @@ describe "SubscriptionGroupHandler", ->
 		@SubscriptionLocator =
 			getUsersSubscription: sinon.stub()
 			getSubscriptionByMemberIdAndId: sinon.stub()
-			getSubscription: sinon.stub()
+			getSubscription: sinon.stub().callsArgWith(1, null, @subscription)
 
 		@UserCreator =
 			getUserOrCreateHoldingAccount: sinon.stub().callsArgWith(1, null, @user)
 
 		@SubscriptionUpdater =
 			removeUserFromGroup: sinon.stub().callsArgWith(2)
+			getSubscription: sinon.stub().callsArgWith(2)
 
 		@TeamInvitesHandler =
 			createInvite: sinon.stub().callsArgWith(2)
@@ -50,6 +51,7 @@ describe "SubscriptionGroupHandler", ->
 
 		@Subscription =
 			update: sinon.stub().yields()
+			findOne: sinon.stub().yields()
 
 		@settings =
 			siteUrl:"http://www.sharelatex.com"
@@ -135,3 +137,18 @@ describe "SubscriptionGroupHandler", ->
 			@Handler.isUserPartOfGroup @user_id, @subscription_id, (err, partOfGroup)->
 				partOfGroup.should.equal false
 				done()
+
+	describe "getTotalConfirmedUsersInGroup", ->
+		describe "for existing subscriptions", ->
+			beforeEach ->
+				@subscription.member_ids = ["12321", "3121321"]
+			it "should call the subscription locator and return 2 users", (done)->
+				@Handler.getTotalConfirmedUsersInGroup @subscription_id, (err, count)=>
+					@SubscriptionLocator.getSubscription.calledWith(@subscription_id).should.equal true
+					count.should.equal 2
+					done()
+		describe "for nonexistent subscriptions", ->
+			it "should return undefined", (done)->
+				@Handler.getTotalConfirmedUsersInGroup "fake-id", (err, count)=>
+					should.not.exist(count)
+					done()
