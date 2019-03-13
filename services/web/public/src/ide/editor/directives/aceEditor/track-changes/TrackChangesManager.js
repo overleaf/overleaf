@@ -20,7 +20,6 @@ define([
       this.onPaste = this.onPaste.bind(this)
       this.onResize = this.onResize.bind(this)
       this.tearDown = this.tearDown.bind(this)
-      this.onDisplayUpdate = this.onDisplayUpdate.bind(this)
 
       this.$scope = $scope
       this.editor = editor
@@ -424,10 +423,6 @@ define([
         comments: [],
         docId: null
       })
-    }
-
-    onDisplayUpdate() {
-      requestAnimationFrame(this.adapter.changeMarkerPositions)
     }
 
     onCut() {
