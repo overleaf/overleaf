@@ -104,13 +104,13 @@ templates.confirmEmail = CTAEmailTemplate({
 templates.projectInvite = CTAEmailTemplate({
 	subject: (opts) -> "#{ _.escape(SpamSafe.safeProjectName(opts.project.name, "New Project")) } - shared by #{ _.escape(SpamSafe.safeEmail(opts.owner.email, "a collaborator")) }"
 	title: (opts) -> "#{ _.escape(SpamSafe.safeProjectName(opts.project.name, "New Project")) } - shared by #{ _.escape(SpamSafe.safeEmail(opts.owner.email, "a collaborator")) }"
-	message: (opts) -> "#{ _.escape(SpamSafe.safeEmail(opts.owner.email, "a collaborator")) } wants to share '#{ _.escape(SpamSafe.safeProjectName(opts.project.name, "a new Project")) }' with you."
+	message: (opts) -> "#{ _.escape(SpamSafe.safeEmail(opts.owner.email, "a collaborator")) } wants to share #{ _.escape(SpamSafe.safeProjectName(opts.project.name, "a new project")) } with you."
 	ctaText: () -> "View project"
 	ctaURL: (opts) -> opts.inviteUrl
 	gmailGoToAction: (opts) ->
 		target: opts.inviteUrl
 		name: "View project"
-		description: "Join #{ _.escape(SpamSafe.safeProjectName(opts.project.name, "Project")) } at #{ settings.appName }"
+		description: "Join #{ _.escape(SpamSafe.safeProjectName(opts.project.name, "project")) } at #{ settings.appName }"
 })
 
 templates.verifyEmailToJoinTeam = CTAEmailTemplate({

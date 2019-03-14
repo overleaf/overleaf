@@ -70,5 +70,5 @@ describe "EmailBuilder", ->
 			@email = @EmailBuilder.buildEmail("projectInvite", @opts)
 
 		it "should replace spammy project name", ->
-			@email.html.indexOf("a new Project").should.not.equal -1
+			@email.html.indexOf("a new project").should.not.equal -1
 			@email.subject.indexOf("New Project").should.not.equal -1
