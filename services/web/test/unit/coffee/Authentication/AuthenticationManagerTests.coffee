@@ -23,6 +23,66 @@ describe "AuthenticationManager", ->
 			"../User/UserGetter": @UserGetter = {}
 		@callback = sinon.stub()
 
+	describe "with real bcrypt", ->
+		beforeEach ->
+			bcrypt = require('bcrypt')
+			@bcrypt.compare = bcrypt.compare
+			@bcrypt.getRounds = bcrypt.getRounds
+			@bcrypt.genSalt = bcrypt.genSalt
+			@bcrypt.hash = bcrypt.hash
+			# Hash of 'testpassword'
+			@testPassword = '$2a$12$zhtThy3R5tLtw5sCwr5XD.zhPENGn4ecjeMcP87oYSYrIICFqBpei'
+
+		describe "authenticate", ->
+			beforeEach ->
+				@user =
+					_id: "user-id"
+					email: @email = "USER@sharelatex.com"
+				@User.findOne = sinon.stub().callsArgWith(1, null, @user)
+
+			describe "when the hashed password matches", ->
+				beforeEach (done) ->
+					@unencryptedPassword = "testpassword"
+					@user.hashedPassword = @testPassword
+					@AuthenticationManager.authenticate email: @email, @unencryptedPassword, (error, user) =>
+						@callback(error, user)
+						done()
+
+				it "should look up the correct user in the database", ->
+					@User.findOne.calledWith(email: @email).should.equal true
+
+				it "should return the user", ->
+					@callback.calledWith(null, @user).should.equal true
+
+			describe "when the encrypted passwords do not match", ->
+				beforeEach ->
+					@AuthenticationManager.authenticate(email: @email, "notthecorrectpassword", @callback)
+
+				it "should not return the user", ->
+					@callback.calledWith(null, null).should.equal true
+
+		describe "setUserPasswordInV2", ->
+			beforeEach ->
+				@user =
+					_id: "5c8791477192a80b5e76ca7e"
+					email: @email = "USER@sharelatex.com"
+				@db.users.update = sinon.stub().callsArgWith(2, null, {nModified: 1})
+
+			it "should not produce an error", (done) ->
+				@AuthenticationManager.setUserPasswordInV2 @user._id, "testpassword", (err, updated) =>
+					expect(err).to.not.exist
+					expect(updated).to.equal true
+					done()
+
+			it "should set the hashed password", (done) ->
+				@AuthenticationManager.setUserPasswordInV2 @user._id, "testpassword", (err, updated) =>
+					expect(err).to.not.exist
+					hashedPassword = @db.users.update.lastCall.args[1].$set.hashedPassword
+					expect(hashedPassword).to.exist
+					expect(hashedPassword.length).to.equal 60
+					expect(hashedPassword).to.match /^\$2a\$12\$[a-zA-Z0-9\/.]{53}$/
+					done()
+
 	describe "authenticate", ->
 		describe "when the user exists in the database", ->
 			beforeEach ->
@@ -54,7 +114,6 @@ describe "AuthenticationManager", ->
 
 			describe "when the encrypted passwords do not match", ->
 				beforeEach ->
-					@AuthenticationManager._encryptPassword = sinon.stub().returns("Not the encrypted password")
 					@AuthenticationManager.authenticate(email: @email, @unencryptedPassword, @callback)
 
 				it "should not return the user", ->
