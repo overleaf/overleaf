@@ -77,6 +77,12 @@ module.exports = UserMembershipAuthorization =
 			return UserMembershipAuthorization.requireTeamMetricsAccess(req, res, next)
 		requireAccessToEntity(req.query.resource_type, req.query.resource_id, req, res, next)
 
+	requireEntityCreationAccess: (req, res, next) ->
+		loggedInUser = AuthenticationController.getSessionUser(req)
+		unless loggedInUser and hasEntityCreationAccess(loggedInUser)
+			return AuthorizationMiddlewear.redirectToRestricted req, res, next
+		next()
+
 requireAccessToEntity = (entityName, entityId, req, res, next, requiredStaffAccess=null) ->
 	loggedInUser = AuthenticationController.getSessionUser(req)
 	unless loggedInUser
@@ -93,7 +99,7 @@ requireAccessToEntity = (entityName, entityId, req, res, next, requiredStaffAcce
 		if entityExists # user doesn't have access to entity
 			return AuthorizationMiddleware.redirectToRestricted(req, res, next)
 
-		if loggedInUser.isAdmin and entityConfig.canCreate
+		if hasEntityCreationAccess(loggedInUser) and entityConfig.canCreate
 			# entity doesn't exists, admin can create it
 			return res.redirect "/entities/#{entityName}/create/#{entityId}"
 
@@ -112,3 +118,8 @@ getEntity = (entityName, entityId, user, requiredStaffAccess, callback = (error,
 		UserMembershipHandler.getEntityWithoutAuthorizationCheck entityId, entityConfig, (error, entity)->
 			return callback(error) if error?
 			callback(null, null, entityConfig, entity?)
+
+hasEntityCreationAccess = (user) ->
+	user.isAdmin or
+		user.staffAccess?['institutionManagement'] or
+		user.staffAccess?['publisherManagement']

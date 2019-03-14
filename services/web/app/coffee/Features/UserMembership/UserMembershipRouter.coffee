@@ -2,7 +2,6 @@ UserMembershipAuthorization = require './UserMembershipAuthorization'
 UserMembershipController = require './UserMembershipController'
 SubscriptionGroupController = require '../Subscription/SubscriptionGroupController'
 TeamInvitesController = require '../Subscription/TeamInvitesController'
-AuthorizationMiddleware = require('../Authorization/AuthorizationMiddleware')
 RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
 
 module.exports =
@@ -69,8 +68,8 @@ module.exports =
 
 		# create new entitites
 		webRouter.get "/entities/:name/create/:id",
-			UserMembershipAuthorization.requirePublisherManagementAccess,
+			UserMembershipAuthorization.requireEntityCreationAccess,
 			UserMembershipController.new
 		webRouter.post "/entities/:name/create/:id",
-			UserMembershipAuthorization.requirePublisherManagementAccess,
+			UserMembershipAuthorization.requireEntityCreationAccess,
 			UserMembershipController.create

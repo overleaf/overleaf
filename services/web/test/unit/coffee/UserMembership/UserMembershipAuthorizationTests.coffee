@@ -67,6 +67,15 @@ describe "UserMembershipAuthorization", ->
 				expect(path).to.match /create/
 				done()
 
+		it 'handle entity not found a non-admin can create', (done) ->
+			@user.staffAccess = { institutionManagement: true }
+			@UserMembershipHandler.getEntity.yields(null, null)
+			@UserMembershipHandler.getEntityWithoutAuthorizationCheck.yields(null, null)
+			@UserMembershipAuthorization.requirePublisherMetricsAccess @req, redirect: (path) =>
+				expect(path).to.extist
+				expect(path).to.match /create/
+				done()
+
 		it 'handle entity not found an admin cannot create', (done) ->
 			@user.isAdmin = true
 			@UserMembershipHandler.getEntity.yields(null, null)
