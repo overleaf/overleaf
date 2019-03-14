@@ -129,7 +129,7 @@ div.full-size.pdf(ng-controller="PdfController")
 
 	// logs view
 	.pdf-logs(ng-show="shouldShowLogs")
-		.alert.alert-success(ng-show="pdf.logEntries.all.length == 0")
+		.alert.alert-success(ng-show="pdf.logEntries.all.length == 0 && !pdf.failure")
 			| #{translate("no_errors_good_job")}
 
 		.alert.alert-danger(ng-show="pdf.failure")
