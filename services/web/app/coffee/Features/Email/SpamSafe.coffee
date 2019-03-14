@@ -8,8 +8,8 @@ XRegExp = require('xregexp')
 # https://www.regular-expressions.info/unicode.html#prop is a good resource for
 # more obscure regex features. standard RegExp does not support these
 
-SAFE_REGEX = XRegExp("^[\\p{L}\\p{N}\\s\\-_!&\\(\\)]+$")
-EMAIL_REGEX = XRegExp("^[\\p{L}\\p{N}.+_-]+@[\\w.]+$")
+SAFE_REGEX = XRegExp("^[\\p{L}\\p{N}\\s\\-_!'&\\(\\)]+$")
+EMAIL_REGEX = XRegExp("^[\\p{L}\\p{N}.+_-]+@[\\w.-]+$")
 
 SpamSafe = 
 	isSafeUserName: (name) ->

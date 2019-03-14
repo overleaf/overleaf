@@ -13,8 +13,9 @@ describe "SpamSafe", ->
 		expect(SpamSafe.isSafeUserName('加美汝VX：hihi661，金沙2001005com the first deposit will be _100%_')).to.equal false
 		expect(SpamSafe.isSafeProjectName('Neural Networks: good for your health and will solve all your problems')).to.equal false
 		expect(SpamSafe.isSafeProjectName("An analysis of the questions of the universe!")).to.equal true
+		expect(SpamSafe.isSafeProjectName("A'p'o's't'r'o'p'h'e gallore")).to.equal true
 		expect(SpamSafe.isSafeProjectName('come buy this => http://www.dopeproduct.com/search/?q=user123')).to.equal false
-		expect(SpamSafe.isSafeEmail("realistic-email+1@domain.sub.com")).to.equal true
+		expect(SpamSafe.isSafeEmail("realistic-email+1@domain.sub-hyphen.com")).to.equal true
 		expect(SpamSafe.isSafeEmail("notquiteRight\@evil$.com")).to.equal false
 
 		expect(SpamSafe.safeUserName("Tammy Weinstįen", "A User")).to.equal "Tammy Weinstįen"
