@@ -252,7 +252,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 			@subject._checkValidMove = sinon.stub().yields()
 
-			@subject._removeElementFromMongoArray = sinon.stub().yields(null, @project)
+			@subject._removeElementFromMongoArray = sinon.stub().yields(null, @newProject)
 			@subject._putElement = sinon.stub().yields(null, path: @pathAfterMove, @newProject)
 
 			@subject.moveEntity project_id, doc_id, folder_id, "docs", @callback
@@ -272,20 +272,74 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 				.calledWith(@project, 'docs', @doc, @path, folder_id)
 				.should.equal true
 
+		it "should put the element in the new folder", ->
+			@subject._putElement
+				.calledWith(@project, folder_id, @doc, "docs")
+				.should.equal true
+
 		it 'should remove the element from its current position', ->
 			@subject._removeElementFromMongoArray
 				.calledWith(@ProjectModel, project_id, @path.mongo)
 				.should.equal true
 
-		it "should put the element back in the new folder", ->
-			@subject._putElement
-				.calledWith(@project, folder_id, @doc, "docs")
+		it 'should remove the element from its current position after putting the element in the new folder', ->
+			@subject._removeElementFromMongoArray
+				.calledAfter(@subject._putElement)
 				.should.equal true
 
 		it "calls the callback", ->
 			changes = { @oldDocs, @newDocs, @oldFiles, @newFiles, @newProject }
 			@callback.calledWith(
 				null, @project, @path.fileSystem, @pathAfterMove.fileSystem, @doc.rev, changes
+			).should.equal true
+
+	describe 'moveEntity must refuse to move the folder to a subfolder of itself', ->
+		beforeEach ->
+			@pathAfterMove = {
+				fileSystem: "/somewhere/else.txt"
+			}
+
+			@doc = {lines:["1234","312343d"], rev: "1234"}
+			@path = { mongo:"folders[0]", fileSystem:"/old_folder/somewhere.txt" }
+			@newProject = "new-project"
+			@ProjectLocator.findElement = sinon.stub()
+				.withArgs({@project, element_id: @docId, type: 'docs'})
+				.yields(null, @doc, @path)
+
+			# return an error when moving a folder to a subfolder of itself
+			@subject._checkValidMove = sinon.stub().yields(new Error())
+
+			@subject._removeElementFromMongoArray = sinon.stub().yields(null, @project)
+			@subject._putElement = sinon.stub().yields(null, path: @pathAfterMove, @newProject)
+
+			@subject.moveEntity project_id, doc_id, folder_id, "docs", @callback
+
+		it 'should get the project', ->
+			@ProjectGetter.getProjectWithoutLock
+				.calledWith(project_id, {rootFolder:true, name:true, overleaf:true})
+				.should.equal true
+
+		it 'should find the doc to move', ->
+			@ProjectLocator.findElement
+				.calledWith({element_id: doc_id, type: "docs", project: @project })
+				.should.equal true
+
+		it 'should check this is an invalid move', ->
+			@subject._checkValidMove
+				.calledWith(@project, 'docs', @doc, @path, folder_id)
+				.should.equal true
+
+		it "should not put the element in the new folder", ->
+			@subject._putElement.called
+				.should.equal false
+
+		it 'should not remove the element from its current position', ->
+			@subject._removeElementFromMongoArray.called
+				.should.equal false
+
+		it "calls the callback with an error", ->
+			@callback.calledWith(
+				new Error()
 			).should.equal true
 
 	describe 'deleteEntity', ->

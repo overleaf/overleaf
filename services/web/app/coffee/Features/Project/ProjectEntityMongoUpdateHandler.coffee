@@ -129,15 +129,41 @@ module.exports = ProjectEntityMongoUpdateHandler = self =
 					return callback(error) if error?
 					ProjectEntityHandler.getAllEntitiesFromProject project, (error, oldDocs, oldFiles) ->
 						return callback(error) if error?
-						self._removeElementFromMongoArray Project, project_id, entityPath.mongo, (err, newProject)->
+						# For safety, insert the entity in the destination
+						# location first, and then remove the original.  If
+						# there is an error the entity may appear twice. This
+						# will cause some breakage but is better than being
+						# lost, which is what happens if this is done in the
+						# opposite order.
+						self._putElement project, destFolderId, entity, entityType, (err, result)->
 							return callback(err) if err?
-							self._putElement newProject, destFolderId, entity, entityType, (err, result, newProject)->
+							# Note: putElement always pushes onto the end of an
+							# array so it will never change an existing mongo
+							# path. Therefore it is safe to remove an element
+							# from the project with an existing path after
+							# calling putElement. But we must be sure that we
+							# have not moved a folder subfolder of itself (which
+							# is done by _checkValidMove above) because that
+							# would lead to it being deleted.
+							self._removeElementFromMongoArray Project, project_id, entityPath.mongo, (err, newProject)->
 								return callback(err) if err?
 								ProjectEntityHandler.getAllEntitiesFromProject newProject, (err, newDocs, newFiles) ->
 									return callback(err) if err?
 									startPath = entityPath.fileSystem
 									endPath = result.path.fileSystem
 									changes = {oldDocs, newDocs, oldFiles, newFiles, newProject}
+									# check that no files have been lost (or duplicated)
+									if (oldFiles.length != newFiles.length) or (oldDocs.length != newDocs.length)
+										logger.err {
+											project_id: project_id
+											oldDocs: oldDocs.length
+											newDocs: newDocs.length
+											oldFiles:oldFiles.length
+											newFiles: newFiles.length
+											origProject: project
+											newProject: newProject
+										}, "project corrupted moving files - shouldn't happen"
+										return callback(new Error("unexpected change in project structure"))
 									callback null, project, startPath, endPath, entity.rev, changes, callback
 
 	deleteEntity: wrapWithLock (project_id, entity_id, entityType, callback) ->
