@@ -27,14 +27,22 @@ define(['base', 'directives/creditCards', 'libs/recurly-4.8.5'], App =>
       event_tracking.sendMB('subscription-form-switch-to-student', {
         plan: window.plan_code
       })
-      event_tracking.send('subscription-funnel', 'subscription-form-switch-to-student', window.plan_code)
+      event_tracking.send(
+        'subscription-funnel',
+        'subscription-form-switch-to-student',
+        window.plan_code
+      )
       window.location = `/user/subscription/new?planCode=${planCode}&currency=${
         $scope.currencyCode
       }&cc=${$scope.data.coupon}`
     }
 
     event_tracking.sendMB('subscription-form', { plan: window.plan_code })
-    event_tracking.send('subscription-funnel', 'subscription-form-viewed', window.plan_code)
+    event_tracking.send(
+      'subscription-funnel',
+      'subscription-form-viewed',
+      window.plan_code
+    )
 
     $scope.paymentMethod = { value: 'credit_card' }
 
@@ -203,13 +211,21 @@ define(['base', 'directives/creditCards', 'libs/recurly-4.8.5'], App =>
           coupon_code: postData.subscriptionDetails.coupon_code,
           isPaypal: postData.subscriptionDetails.isPaypal
         })
-        event_tracking.send('subscription-funnel', 'subscription-form-submitted',  postData.subscriptionDetails.plan_code)
+        event_tracking.send(
+          'subscription-funnel',
+          'subscription-form-submitted',
+          postData.subscriptionDetails.plan_code
+        )
 
         return $http
           .post('/user/subscription/create', postData)
           .then(function() {
             event_tracking.sendMB('subscription-submission-success')
-            event_tracking.send('subscription-funnel', 'subscription-submission-success', postData.subscriptionDetails.plan_code)
+            event_tracking.send(
+              'subscription-funnel',
+              'subscription-submission-success',
+              postData.subscriptionDetails.plan_code
+            )
             window.location.href = '/user/subscription/thank-you'
           })
           .catch(function() {

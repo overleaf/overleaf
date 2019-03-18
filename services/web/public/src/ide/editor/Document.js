@@ -396,7 +396,7 @@ define([
           remote_doc_id: update != null ? update.doc : undefined,
           wantToBeJoined: this.wantToBeJoined,
           update,
-          hasDoc: (this.doc != null)
+          hasDoc: this.doc != null
         })
 
         if (
