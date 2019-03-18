@@ -17,5 +17,5 @@ html.full-height(itemscope, itemtype='http://schema.org/Product')
 						)
 					.error-details
 						p.error-status Something went wrong, sorry.
-						p.error-description Our staff are probably looking into this, but if it continues, please contact us at #{settings.adminEmail}
+						p.error-description(ng-non-bindable) Our staff are probably looking into this, but if it continues, please contact us at #{settings.adminEmail}
 						a.error-btn(href="/") Home

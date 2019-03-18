@@ -50,7 +50,8 @@
 			p
 				| #{translate("generic_history_error")} 
 				a(
-					ng-href="mailto:#{settings.adminEmail}?Subject=Error%20loading%20history%20for%project%20{{ project_id }}"
+					ng-href="mailto:#{settings.adminEmail}?Subject=Error%20loading%20history%20for%project%20{{ project_id }}",
+					ng-non-bindable
 				) #{settings.adminEmail}
 			p.clearfix
 				a.alert-link-as-btn.pull-right(

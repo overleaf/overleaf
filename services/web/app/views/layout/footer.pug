@@ -37,7 +37,7 @@ footer.site-footer
 			ul.col-md-3.text-right
 
 				each item in nav.right_footer
-					li
+					li(ng-non-bindable)
 						if item.url
 							a(href=item.url, class=item.class, aria-label=item.label) !{item.text}
 						else

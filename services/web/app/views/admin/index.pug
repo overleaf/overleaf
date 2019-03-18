@@ -11,7 +11,7 @@ block content
 						tabset(ng-cloak)
 							tab(heading="System Messages")
 								each message in systemMessages
-									.alert.alert-info.row-spaced #{message.content}
+									.alert.alert-info.row-spaced(ng-non-bindable) #{message.content}
 								hr
 								form(method='post', action='/admin/messages')
 									input(name="_csrf", type="hidden", value=csrfToken)
@@ -29,10 +29,10 @@ block content
 								.row-spaced
 									ul
 										each agents, url in openSockets
-											li #{url} - total : #{agents.length}
+											li(ng-non-bindable) #{url} - total : #{agents.length}
 												ul
 													each agent in agents
-														li #{agent}
+														li(ng-non-bindable) #{agent}
 
 							tab(heading="Close Editor")
 								.row-spaced

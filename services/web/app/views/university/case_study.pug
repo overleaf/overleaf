@@ -5,7 +5,7 @@ block content
 		.container
 			.row
 				.col-md-12
-					h1  !{viewData.title}
+					h1(ng-non-bindable)  !{viewData.title}
 			.row.row-spaced
 
 	.pattern-container
@@ -14,6 +14,6 @@ block content
 				.row
 					.col-md-10.col-md-offset-1
 						.card
-							.row
+							.row(ng-non-bindable)
 								| !{viewData.html}
 

@@ -9,12 +9,12 @@ block content
 						.page-header.text-centered
 							h1  #{translate("user_wants_you_to_see_project", {username:owner.first_name, projectname:""})}
 								em
-									span.project-name #{project.name} 
+									span.project-name(ng-non-bindable) #{project.name} 
 						.row.text-center
 							.col-md-12
 								p
 									| #{translate("accepting_invite_as")}&nbsp;
-									em #{user.email}
+									em(ng-non-bindable) #{user.email}
 						.row
 							.col-md-12
 								form.form(

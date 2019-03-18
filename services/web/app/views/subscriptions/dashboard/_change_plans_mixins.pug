@@ -2,7 +2,7 @@ mixin printPlan(plan)
 	-if (!plan.hideFromUsers)
 		tr(ng-controller="ChangePlanFormController", ng-init="plan="+JSON.stringify(plan))
 			td
-				strong #{plan.name}
+				strong(ng-non-bindable) #{plan.name}
 			td
 				-if (plan.annual)
 					| {{price}} / #{translate("year")}

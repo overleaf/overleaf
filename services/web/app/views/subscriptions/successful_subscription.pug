@@ -18,10 +18,10 @@ block content
 						p.letter-from-founders
 							p #{translate("thanks_for_subscribing_you_help_sl", {planName:subscription.plan.name})}
 							p #{translate("need_anything_contact_us_at")} 
-								a(href=`mailto:${settings.adminEmail}`) #{settings.adminEmail}
+								a(href=`mailto:${settings.adminEmail}`, ng-non-bindable) #{settings.adminEmail}
 								| .
 							p #{translate("regards")},
-								br
+								br(ng-non-bindable)
 								| The #{settings.appName} Team
 						p
 							a.btn.btn-primary(href="/project") &lt; #{translate("back_to_your_projects")}

@@ -7,7 +7,7 @@ block content
 				.registration_message
 					if sharedProjectData.user_first_name !== undefined
 						h1  #{translate("user_wants_you_to_see_project", {username:sharedProjectData.user_first_name, projectname:""})}
-							em #{sharedProjectData.project_name}
+							em(ng-non-bindable) #{sharedProjectData.project_name}
 						div
 							| #{translate("join_sl_to_view_project")}.
 						div
@@ -26,5 +26,5 @@ block content
 							h1 #{translate("register")}
 						p
 							| Please contact 
-							strong #{settings.adminEmail} 
+							strong(ng-non-bindable) #{settings.adminEmail} 
 							| to create an account.

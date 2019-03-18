@@ -28,7 +28,7 @@ mixin table_premium
 					else
 						| #{translate(feature.feature)}
 				for plan in feature.plans
-					td
+					td(ng-non-bindable)
 						if feature.value == 'str'
 							| #{plan}
 						else if plan
@@ -86,7 +86,7 @@ mixin table_student
 						span(tooltip=translate(feature.info)) #{translate(feature.feature)}
 					else
 						| #{translate(feature.feature)}
-				td
+				td(ng-non-bindable)
 					if feature.value == 'str'
 						| #{feature.plans.free}
 					else if feature.plans.free
@@ -95,9 +95,9 @@ mixin table_student
 					else
 						i.fa.fa-times(aria-hidden="true")
 						span.sr-only Feature included
-				td
+				td(ng-non-bindable)
 					+table_cell_student(feature)
-				td
+				td(ng-non-bindable)
 					+table_cell_student(feature)
 
 		tr

@@ -5,11 +5,14 @@ block content
 		.container
 			.row
 				.col-md-10.col-md-offset-1
-					h3 #{entityName} "#{entityId}" does not exists in v2
+					h3(ng-non-bindable) #{entityName} "#{entityId}" does not exists in v2
 					form(
 						enctype='application/json',
 						method='post',
 						action=''
 					)
 						input(name="_csrf", type="hidden", value=csrfToken)
-						button.btn.btn-primary.text-capitalize(type="submit") Create #{entityName} in v2
+						button.btn.btn-primary.text-capitalize(
+							type="submit",
+							ng-non-bindable
+						) Create #{entityName} in v2

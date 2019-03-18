@@ -33,7 +33,10 @@
 			li.dropdown-header #{translate("institution")} #{translate("templates")}
 			for portal in portalTemplates
 				li
-					a.menu-indent(href=portal.url + "#templates") #{portal.name}
+					a.menu-indent(
+						href=portal.url + "#templates",
+						ng-non-bindable
+					) #{portal.name}
 
 
 

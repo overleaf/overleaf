@@ -5,7 +5,7 @@ block content
 		.container
 			.row
 				.col-md-10.col-md-offset-1
-					h1 #{name || translate(translations.title)}
+					h1(ng-non-bindable) #{name || translate(translations.title)}
 					.card(ng-controller="UserMembershipController")
 						.page-header
 							.pull-right(ng-cloak)
