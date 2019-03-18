@@ -41,6 +41,7 @@ aside.chat(
 							.message-content
 								p(
 									mathjax,
+									mathjax-allow-html="true",
 									ng-repeat="content in message.contents track by $index"
 								)
 									span(ng-bind-html="content | linky:'_blank':{rel: 'noreferrer noopener'}")

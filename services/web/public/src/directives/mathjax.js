@@ -1,15 +1,19 @@
 /* global MathJax, _ */
 
 define(['base'], function(App) {
-  return App.directive('mathjax', function($compile) {
+  return App.directive('mathjax', function($compile, $parse) {
     return {
       link(scope, element, attrs) {
         if (!(MathJax && MathJax.Hub)) return
 
-        const mathJaxContents = element.html()
-        const nonBindableEl = $compile('<span ng-non-bindable></span>')({})
-        element.html('').append(nonBindableEl)
-        nonBindableEl.html(mathJaxContents)
+        // Allowing HTML can be unsafe unless using something like
+        // `ng-bind-html` because of potential Angular XSS via {{/}}
+        if (!$parse(attrs.mathjaxAllowHtml)(scope)) {
+          const mathJaxContents = element.html()
+          const nonBindableEl = $compile('<span ng-non-bindable></span>')({})
+          element.html('').append(nonBindableEl)
+          nonBindableEl.html(mathJaxContents)
+        }
 
         if (attrs.delimiter !== 'no-single-dollar') {
           const inlineMathConfig =
