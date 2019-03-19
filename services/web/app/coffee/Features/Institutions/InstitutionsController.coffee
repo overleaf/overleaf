@@ -1,23 +1,15 @@
 logger = require("logger-sharelatex")
 UserGetter = require("../User/UserGetter")
 { addAffiliation } = require("../Institutions/InstitutionsAPI")
-Institution = require('../../models/Institution').Institution
 FeaturesUpdater = require('../Subscription/FeaturesUpdater')
 async = require('async')
 
 module.exports = InstitutionsController =
 	confirmDomain: (req, res, next) ->
 		hostname = req.body.hostname
-		institutionId = req.body.institution_id
-		createInstitution institutionId, (error) ->
+		affiliateUsers hostname, (error) ->
 			return next(error) if error?
-			affiliateUsers hostname, (error) ->
-				return next(error) if error?
-				res.sendStatus 200
-
-createInstitution = (institutionId, callback = (error)->) ->
-	data = v1Id: institutionId
-	Institution.findOneAndUpdate data, data, { upsert: true }, callback
+			res.sendStatus 200
 
 affiliateUsers = (hostname, callback = (error)->) ->
 	reversedHostname = hostname.trim().split('').reverse().join('')

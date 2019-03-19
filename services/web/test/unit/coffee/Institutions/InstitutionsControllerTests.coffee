@@ -37,8 +37,6 @@ describe "InstitutionsController", ->
 				getUsersByHostname: @getUsersByHostname
 			'../Institutions/InstitutionsAPI':
 				addAffiliation: @addAffiliation
-			'../../models/Institution': Institution: @Institution =
-				findOneAndUpdate: sinon.stub().yields()
 			'../Subscription/FeaturesUpdater':
 				refreshFeatures: @refreshFeatures
 
@@ -69,19 +67,5 @@ describe "InstitutionsController", ->
 			@next = (error) =>
 				expect(error).to.exist
 				@getUsersByHostname.calledOnce.should.equal true
-				done()
-			@InstitutionsController.confirmDomain @req, @res, @next
-
-	describe 'createInstitution', ->
-		it 'should create new institution', (done)->
-			@req.body.institution_id = 123
-			expectedData = v1Id: 123
-			@res.sendStatus = (code) =>
-				sinon.assert.calledWith(
-					@Institution.findOneAndUpdate,
-					expectedData,
-					expectedData,
-					{ upsert: true }
-				)
 				done()
 			@InstitutionsController.confirmDomain @req, @res, @next
