@@ -12,6 +12,7 @@ describe "WebsocketLoadBalancer", ->
 			"logger-sharelatex": @logger = { log: sinon.stub(), error: sinon.stub() }
 			"./SafeJsonParse": @SafeJsonParse =
 				parse: (data, cb) => cb null, JSON.parse(data)
+			"./EventLogger": {checkEventOrder: sinon.stub()}
 		@io = {}
 		@WebsocketLoadBalancer.rclientPub = publish: sinon.stub()
 		@WebsocketLoadBalancer.rclientSub =
