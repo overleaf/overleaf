@@ -117,7 +117,7 @@ beginShutdown = () ->
 			process.exit 1
 		, 120*1000
 		killTimer.unref?() # prevent timer from keeping process alive
-		app.close () ->
+		server.close () ->
 			logger.log "closed all connections"
 			Metrics.close()
 			process.disconnect?()
@@ -128,7 +128,7 @@ port = settings.internal.filestore.port or 3009
 host = "0.0.0.0"
 
 if !module.parent # Called directly
-	app.listen port, host, (error) ->
+	server = app.listen port, host, (error) ->
 		logger.info "Filestore starting up, listening on #{host}:#{port}"
 
 
