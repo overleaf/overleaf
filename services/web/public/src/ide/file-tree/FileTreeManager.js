@@ -173,7 +173,7 @@ define([
       const entities = this.getMultiSelectedEntities()
       const paths = {}
       for (var entity of Array.from(entities)) {
-        paths["/" + this.getEntityPath(entity)] = entity
+        paths['/' + this.getEntityPath(entity)] = entity
       }
       const prefixes = {}
       for (var path in paths) {
@@ -188,7 +188,7 @@ define([
             asc ? i <= end : i >= end;
             asc ? i++ : i--
           ) {
-            prefixes["/" + parts.slice(0, i).join('/')] = true
+            prefixes['/' + parts.slice(0, i).join('/')] = true
           }
         }
       }
