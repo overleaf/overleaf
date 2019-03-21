@@ -23,7 +23,7 @@ module.exports = DocumentUpdaterController =
 				return
 			if message.op?
 				if message._id?
-					EventLogger.checkEventOrder(message._id, message)
+					EventLogger.checkEventOrder("applied-ops", message._id, message)
 				DocumentUpdaterController._applyUpdateFromDocumentUpdater(io, message.doc_id, message.op)
 			else if message.error?
 				DocumentUpdaterController._processErrorFromDocumentUpdater(io, message.doc_id, message.error, message)

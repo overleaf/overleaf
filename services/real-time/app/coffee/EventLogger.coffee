@@ -1,4 +1,5 @@
 logger = require 'logger-sharelatex'
+metrics = require 'metrics-sharelatex'
 
 # keep track of message counters to detect duplicate and out of order events
 # messsage ids have the format "UNIQUEHOSTKEY-COUNTER"
@@ -11,7 +12,7 @@ module.exports = EventLogger =
 
 	MAX_STALE_TIME_IN_MS: 3600 * 1000
 
-	checkEventOrder: (message_id, message) ->
+	checkEventOrder: (channel, message_id, message) ->
 		return if typeof(message_id) isnt 'string'
 		[key, count] = message_id.split("-", 2)
 		count = parseInt(count, 10)
@@ -20,12 +21,15 @@ module.exports = EventLogger =
 		# store the last count in a hash for each host
 		previous = EventLogger._storeEventCount(key, count)
 		if !previous? || count == (previous + 1)
+			metrics.inc "event.#{channel}.valid"
 			return # order is ok
 		if (count == previous)
-			logger.error {key:key, previous: previous, count:count, message:message}, "duplicate event"
+			metrics.inc "event.#{channel}.duplicate"
+			# logger.error {key:key, previous: previous, count:count, message:message}, "duplicate event"
 			return "duplicate"
 		else
-			logger.error {key:key, previous: previous, count:count, message:message}, "events out of order"
+			metrics.inc "event.#{channel}.out-of-order"
+			# logger.error {key:key, previous: previous, count:count, message:message}, "events out of order"
 			return # out of order
 
 	_storeEventCount: (key, count) ->
