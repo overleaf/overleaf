@@ -232,7 +232,7 @@ describe "Applying updates to a doc", ->
 			@messageCallback.called.should.equal true
 			[channel, message] = @messageCallback.args[0]
 			channel.should.equal "applied-ops"
-			JSON.parse(message).should.deep.equal {
+			JSON.parse(message).should.deep.include {
 				project_id: @project_id,
 				doc_id: @doc_id,
 				error:'Delete component \'not the correct content\' does not match deleted text \'one\ntwo\nthree\''
