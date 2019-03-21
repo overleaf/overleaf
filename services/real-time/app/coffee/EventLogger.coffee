@@ -5,11 +5,10 @@ logger = require 'logger-sharelatex'
 
 EVENT_LOG_COUNTER = {}
 EVENT_LOG_TIMESTAMP = {}
-EVENT_COUNT = 0
+EVENT_LAST_CLEAN_TIMESTAMP = 0
 
 module.exports = EventLogger =
 
-	MAX_EVENTS_BEFORE_CLEAN: 100000
 	MAX_STALE_TIME_IN_MS: 3600 * 1000
 
 	checkEventOrder: (message_id, message) ->
@@ -35,8 +34,9 @@ module.exports = EventLogger =
 		EVENT_LOG_COUNTER[key] = count
 		EVENT_LOG_TIMESTAMP[key] = now
 		# periodically remove old counts
-		if (++EVENT_COUNT % EventLogger.MAX_EVENTS_BEFORE_CLEAN) == 0
+		if (now - EVENT_LAST_CLEAN_TIMESTAMP) > EventLogger.MAX_STALE_TIME_IN_MS
 			EventLogger._cleanEventStream(now)
+			EVENT_LAST_CLEAN_TIMESTAMP = now
 		return previous
 
 	_cleanEventStream: (now) ->
