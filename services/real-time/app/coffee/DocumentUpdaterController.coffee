@@ -3,6 +3,7 @@ settings = require 'settings-sharelatex'
 redis = require("redis-sharelatex")
 rclient = redis.createClient(settings.redis.documentupdater)
 SafeJsonParse = require "./SafeJsonParse"
+EventLogger = require "./EventLogger"
 
 MESSAGE_SIZE_LOG_LIMIT = 1024 * 1024 # 1Mb
 
@@ -21,6 +22,8 @@ module.exports = DocumentUpdaterController =
 				logger.error {err: error, channel}, "error parsing JSON"
 				return
 			if message.op?
+				if message._id?
+					EventLogger.checkEventOrder(message._id, message)
 				DocumentUpdaterController._applyUpdateFromDocumentUpdater(io, message.doc_id, message.op)
 			else if message.error?
 				DocumentUpdaterController._processErrorFromDocumentUpdater(io, message.doc_id, message.error, message)
