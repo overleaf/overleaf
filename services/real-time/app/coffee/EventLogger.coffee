@@ -15,7 +15,7 @@ module.exports = EventLogger =
 		return if typeof(message_id) isnt 'string'
 		[key, count] = message_id.split("-", 2)
 		count = parseInt(count, 10)
-		if !count # ignore checks if counter is not present
+		if !(count >= 0)# ignore checks if counter is not present
 			return
 		# store the last count in a hash for each host
 		previous = EventLogger._storeEventCount(key, count)
