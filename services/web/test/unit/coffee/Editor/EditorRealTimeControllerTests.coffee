@@ -12,6 +12,8 @@ describe "EditorRealTimeController", ->
 				client: () => @rclient
 			"../../infrastructure/Server" : io: @io = {}
 			"settings-sharelatex":{redis:{}}
+			"crypto": @crypto = { randomBytes: sinon.stub().withArgs(4).returns(Buffer.from([0x1, 0x2, 0x3, 0x4])) }
+			"os": @os = {hostname: sinon.stub().returns("somehost")}
 
 		@room_id = "room-id"
 		@message = "message-to-editor"
@@ -19,6 +21,7 @@ describe "EditorRealTimeController", ->
 
 	describe "emitToRoom", ->
 		beforeEach ->
+			@message_id = "web:somehost:01020304-0"
 			@EditorRealTimeController.emitToRoom(@room_id, @message, @payload...)
 
 		it "should publish the message to redis", ->
@@ -27,6 +30,7 @@ describe "EditorRealTimeController", ->
 					room_id: @room_id,
 					message: @message
 					payload: @payload
+					_id: @message_id
 				))
 				.should.equal true
 
