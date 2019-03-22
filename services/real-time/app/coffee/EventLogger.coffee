@@ -31,7 +31,7 @@ module.exports = EventLogger =
 		else
 			metrics.inc "event.#{channel}.out-of-order"
 			# logger.error {key:key, previous: previous, count:count, message:message}, "events out of order"
-			return # out of order
+			return "out-of-order"
 
 	_storeEventCount: (key, count) ->
 		previous = EVENT_LOG_COUNTER[key]
