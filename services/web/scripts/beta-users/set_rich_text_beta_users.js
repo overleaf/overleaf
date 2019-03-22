@@ -1,11 +1,12 @@
 const fs = require('fs')
+const path = require('path')
 const mongojs = require('../../app/js/infrastructure/mongojs')
 const { db, ObjectId } = mongojs
 const async = require('async')
 
 console.log('Finding users for ids specified')
 
-const text = fs.readFileSync(__dirname + '/beta-users.txt')
+const text = fs.readFileSync(path.join(__dirname, 'beta-users.txt'))
 const textByLine = text
   .toString()
   .split('\n')
