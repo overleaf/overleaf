@@ -215,7 +215,8 @@ module.exports = CollaboratorsHandler =
 			else
 				return callback(new Error("unknown privilegeLevel: #{privilegeLevel}"))
 
-			ContactManager.addContact adding_user_id, user_id
+			if adding_user_id
+				ContactManager.addContact adding_user_id, user_id
 
 			Project.update { _id: project_id }, { $addToSet: level }, (error) ->
 				return callback(error) if error?

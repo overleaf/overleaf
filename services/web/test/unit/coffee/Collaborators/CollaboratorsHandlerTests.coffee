@@ -322,6 +322,13 @@ describe "CollaboratorsHandler", ->
 			it "should not add the user again", ->
 				@Project.update.called.should.equal false
 
+		describe "with null adding_user_id", ->
+			beforeEach ->
+				@CollaboratorHandler.addUserIdToProject @project_id, null, @user_id, "readAndWrite", @callback
+
+			it "should not add the adding user as a contact", ->
+				@ContactManager.addContact.called.should.equal(false)
+
 	describe "removeUserFromAllProjects", ->
 		beforeEach (done) ->
 			@CollaboratorHandler.getProjectsUserIsMemberOf = sinon.stub()
