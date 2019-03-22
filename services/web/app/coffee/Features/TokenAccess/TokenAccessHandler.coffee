@@ -134,6 +134,7 @@ module.exports = TokenAccessHandler =
 				return
 			if privilegeLevel != PrivilegeLevels.READ_AND_WRITE
 				project.tokens.readAndWrite = ''
+				project.tokens.readAndWritePrefix = ''
 			if privilegeLevel != PrivilegeLevels.READ_ONLY
 				project.tokens.readOnly = ''
 

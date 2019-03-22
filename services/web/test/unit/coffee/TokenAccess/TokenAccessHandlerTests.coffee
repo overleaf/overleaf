@@ -480,11 +480,12 @@ describe "TokenAccessHandler", ->
 
 	describe 'protectTokens', ->
 		beforeEach ->
-			@project = {tokens: {readAndWrite: 'rw', readOnly: 'ro'}}
+			@project = {tokens: {readAndWrite: 'rw', readOnly: 'ro', readAndWritePrefix: 'pre'}}
 
 		it 'should hide write token from read-only user', ->
 			@TokenAccessHandler.protectTokens(@project, 'readOnly')
 			expect(@project.tokens.readAndWrite).to.equal ''
+			expect(@project.tokens.readAndWritePrefix).to.equal ''
 			expect(@project.tokens.readOnly).to.equal 'ro'
 
 		it 'should hide read token from read-write user', ->
