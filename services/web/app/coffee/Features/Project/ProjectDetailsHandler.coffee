@@ -8,6 +8,7 @@ _ = require("underscore")
 PublicAccessLevels = require("../Authorization/PublicAccessLevels")
 Errors = require("../Errors/Errors")
 ProjectTokenGenerator = require('./ProjectTokenGenerator')
+ProjectEntityHandler = require('./ProjectEntityHandler')
 ProjectHelper = require('./ProjectHelper')
 settings = require('settings-sharelatex')
 
@@ -45,6 +46,26 @@ module.exports = ProjectDetailsHandler =
 			if err?
 				logger.err err:err, "something went wrong setting project description"
 			callback(err)
+
+	transferOwnership: (project_id, user_id, callback)->
+		ProjectGetter.getProject project_id, {owner_ref: true}, (err, project)->
+			return callback(err) if err?
+			return callback(new Errors.NotFoundError("project not found")) unless project?
+			return callback() if project.owner_ref == user_id
+
+			UserGetter.getUser user_id, (err, user) ->
+				return callback(err) if err?
+				return callback(new Errors.NotFoundError("user not found")) unless user?
+
+				Project.update {_id: project_id},
+					{$set: {owner_ref: user_id}, $pull: {
+						readOnly_refs: user_id,
+						collaberator_refs: user_id,
+						tokenAccessReadAndWrite_refs: user_id,
+						tokenAccessReadOnly_refs: user_id
+					}}, (err) ->
+						return callback(err) if err?
+						ProjectEntityHandler.flushProjectToThirdPartyDataStore project_id, callback
 
 	renameProject: (project_id, newName, callback = ->)->
 		ProjectDetailsHandler.validateProjectName newName, (error) ->

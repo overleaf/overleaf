@@ -30,11 +30,14 @@ describe 'ProjectDetailsHandler', ->
 			getUser: sinon.stub().callsArgWith(1, null, @user)
 		@tpdsUpdateSender =
 			moveEntity:sinon.stub().callsArgWith 1
+		@ProjectEntityHandler =
+			flushProjectToThirdPartyDataStore: sinon.stub().callsArg(1)
 		@handler = SandboxedModule.require modulePath, requires:
 			"./ProjectGetter":@ProjectGetter
 			'../../models/Project': Project:@ProjectModel
 			"../User/UserGetter": @UserGetter
 			'../ThirdPartyDataStore/TpdsUpdateSender':@tpdsUpdateSender
+			"./ProjectEntityHandler": @ProjectEntityHandler
 			'logger-sharelatex':
 				log:->
 				err:->
@@ -79,6 +82,34 @@ describe 'ProjectDetailsHandler', ->
 			@handler.getDetails @project_id, (err)=>
 				err.should.equal error
 				done()
+
+	describe "transferOwnership", ->
+		it "should return a not found error if the project can't be found", (done) ->
+			@ProjectGetter.getProject.callsArgWith(2)
+			@handler.transferOwnership 'abc', '123', (err) ->
+				err.should.exist
+				err.name.should.equal "NotFoundError"
+				done()
+
+		it "should return a not found error if the user can't be found", (done) ->
+			@ProjectGetter.getProject.callsArgWith(2)
+			@handler.transferOwnership 'abc', '123', (err) ->
+				err.should.exist
+				err.name.should.equal "NotFoundError"
+				done()
+
+		it "should transfer ownership of the project", (done) ->
+			@ProjectModel.update.callsArgWith(2)
+			@handler.transferOwnership 'abc', '123', () =>
+				sinon.assert.calledWith(@ProjectModel.update, {_id: 'abc'})
+				done()
+
+		it "should flush the project to tpds", (done) ->
+			@ProjectModel.update.callsArgWith(2)
+			@handler.transferOwnership 'abc', '123', () =>
+				sinon.assert.calledWith(@ProjectEntityHandler.flushProjectToThirdPartyDataStore, 'abc')
+				done()
+
 
 	describe "getProjectDescription", ->
 
