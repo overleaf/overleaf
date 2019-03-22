@@ -14,8 +14,9 @@ module.exports = EventLogger =
 
 	checkEventOrder: (channel, message_id, message) ->
 		return if typeof(message_id) isnt 'string'
-		[key, count] = message_id.split("-", 2)
-		count = parseInt(count, 10)
+		return if !(result = message_id.match(/^(.*)-(\d+)$/))
+		key = result[1]
+		count = parseInt(result[2], 0)
 		if !(count >= 0)# ignore checks if counter is not present
 			return
 		# store the last count in a hash for each host
