@@ -14,14 +14,15 @@ module.exports = EventLogger =
 
 	checkEventOrder: (channel, message_id, message) ->
 		return if typeof(message_id) isnt 'string'
-		[key, count] = message_id.split("-", 2)
-		count = parseInt(count, 10)
+		return if !(result = message_id.match(/^(.*)-(\d+)$/))
+		key = result[1]
+		count = parseInt(result[2], 0)
 		if !(count >= 0)# ignore checks if counter is not present
 			return
 		# store the last count in a hash for each host
 		previous = EventLogger._storeEventCount(key, count)
 		if !previous? || count == (previous + 1)
-			metrics.inc "event.#{channel}.valid", 0.001
+			metrics.inc "event.#{channel}.valid", 0.001 # downsample high rate docupdater events
 			return # order is ok
 		if (count == previous)
 			metrics.inc "event.#{channel}.duplicate"
@@ -30,7 +31,7 @@ module.exports = EventLogger =
 		else
 			metrics.inc "event.#{channel}.out-of-order"
 			# logger.error {key:key, previous: previous, count:count, message:message}, "events out of order"
-			return # out of order
+			return "out-of-order"
 
 	_storeEventCount: (key, count) ->
 		previous = EVENT_LOG_COUNTER[key]
