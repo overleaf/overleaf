@@ -22,6 +22,7 @@ describe "DocumentUpdaterController", ->
 					@rclient = {}
 			"./SafeJsonParse": @SafeJsonParse =
 				parse: (data, cb) => cb null, JSON.parse(data)
+			"./EventLogger": @EventLogger = {checkEventOrder: sinon.stub()}
 
 	describe "listenForUpdatesFromDocumentUpdater", ->
 		beforeEach ->
