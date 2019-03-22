@@ -22,7 +22,7 @@ module.exports = EventLogger =
 		# store the last count in a hash for each host
 		previous = EventLogger._storeEventCount(key, count)
 		if !previous? || count == (previous + 1)
-			metrics.inc "event.#{channel}.valid", 0.001
+			metrics.inc "event.#{channel}.valid", 0.001 # downsample high rate docupdater events
 			return # order is ok
 		if (count == previous)
 			metrics.inc "event.#{channel}.duplicate"
