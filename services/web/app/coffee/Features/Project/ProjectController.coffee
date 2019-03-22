@@ -391,7 +391,7 @@ module.exports = ProjectController =
 					editorThemes: THEME_LIST
 					maxDocLength: Settings.max_doc_length
 					useV2History: !!project.overleaf?.history?.display
-					richTextTrackChangesEnabled: req.query?.rttc == 'true'
+					richTextTrackChangesEnabled: req.query?.rttc == 'true' || user.betaProgram
 					showTestControls: req.query?.tc == 'true' || user.isAdmin
 					brandVariation: brandVariation
 					allowedImageNames: Settings.allowedImageNames || []

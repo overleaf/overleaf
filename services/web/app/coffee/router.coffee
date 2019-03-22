@@ -382,9 +382,9 @@ module.exports = class Router
 		}), ReferencesController.indexAll
 
 		# disable beta program while v2 is in beta
-		# webRouter.get "/beta/participate",  AuthenticationController.requireLogin(), BetaProgramController.optInPage
-		# webRouter.post "/beta/opt-in", AuthenticationController.requireLogin(), BetaProgramController.optIn
-		# webRouter.post "/beta/opt-out", AuthenticationController.requireLogin(), BetaProgramController.optOut
+		webRouter.get "/beta/participate",  AuthenticationController.requireLogin(), BetaProgramController.optInPage
+		webRouter.post "/beta/opt-in", AuthenticationController.requireLogin(), BetaProgramController.optIn
+		webRouter.post "/beta/opt-out", AuthenticationController.requireLogin(), BetaProgramController.optOut
 		webRouter.get "/confirm-password", AuthenticationController.requireLogin(), SudoModeController.sudoModePrompt
 		webRouter.post "/confirm-password",
 			AuthenticationController.requireLogin(),
