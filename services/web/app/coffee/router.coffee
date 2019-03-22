@@ -173,7 +173,14 @@ module.exports = class Router
 		webRouter.post '/user/sessions/clear', AuthenticationController.requireLogin(), UserController.clearSessions
 
 		webRouter.delete '/user/newsletter/unsubscribe', AuthenticationController.requireLogin(), UserController.unsubscribe
-		webRouter.post '/user/delete', AuthenticationController.requireLogin(), UserController.tryDeleteUser
+		webRouter.post '/user/delete',
+			RateLimiterMiddleware.rateLimit({
+				endpointName: "delete-user"
+				maxRequests: 10
+				timeInterval: 60
+			}),
+			AuthenticationController.requireLogin(),
+			UserController.tryDeleteUser
 
 		webRouter.get  '/user/personal_info', AuthenticationController.requireLogin(), UserInfoController.getLoggedInUsersPersonalInfo
 		privateApiRouter.get  '/user/:user_id/personal_info', AuthenticationController.httpAuth, UserInfoController.getPersonalInfo
