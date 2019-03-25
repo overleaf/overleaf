@@ -18,12 +18,6 @@ html(
 		-if (typeof(gaExperiments) != "undefined")
 			|!{gaExperiments}
 
-		//- Icons
-		link(rel="icon", href="/" + settings.brandPrefix + "favicon.ico")
-		link(rel="icon", sizes="192x192", href="/" + settings.brandPrefix + "touch-icon-192x192.png")
-		link(rel="apple-touch-icon-precomposed", href="/" + settings.brandPrefix + "apple-touch-icon-precomposed.png")
-		link(rel="mask-icon", href="/" + settings.brandPrefix + "mask-favicon.svg", color=settings.brandPrefix === 'ol-' ? "#4f9c45" : "#a93529")
-
 		//- Stylesheet
 		link(rel='stylesheet', href=buildCssPath(getCssThemeModifier(userSettings, brandVariation), { hashedPath: true }), id="main-stylesheet")
 
