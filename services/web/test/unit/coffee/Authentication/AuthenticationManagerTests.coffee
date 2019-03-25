@@ -258,7 +258,7 @@ describe "AuthenticationManager", ->
 			@password = "banana"
 			@hashedPassword = "asdkjfa;osiuvandf"
 			@salt = "saltaasdfasdfasdf"
-			@bcrypt.genSalt = sinon.stub().callsArgWith(1, null, @salt)
+			@bcrypt.genSalt = sinon.stub().callsArgWith(2, null, @salt)
 			@bcrypt.hash = sinon.stub().callsArgWith(2, null, @hashedPassword)
 			@db.users.update = sinon.stub().callsArg(2)
 

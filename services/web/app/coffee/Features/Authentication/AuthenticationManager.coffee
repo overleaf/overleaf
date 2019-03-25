@@ -96,8 +96,8 @@ module.exports = AuthenticationManager =
 	setUserPasswordInV2: (user_id, password, callback) ->
 		validation = @validatePassword(password)
 		return callback(validation.message) if validation?
-
-		bcrypt.genSalt BCRYPT_ROUNDS, (error, salt) ->
+		minorVersion = 'a'
+		bcrypt.genSalt BCRYPT_ROUNDS, minorVersion, (error, salt) ->
 			return callback(error) if error?
 			bcrypt.hash password, salt, (error, hash) ->
 				return callback(error) if error?
