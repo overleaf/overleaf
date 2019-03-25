@@ -64,26 +64,19 @@ module.exports = SubscriptionController =
 							return next(err) if err?
 							if recomendedCurrency? and !currency?
 								currency = recomendedCurrency
-							RecurlyWrapper.sign {
-								subscription:
-									plan_code : req.query.planCode
+							res.render "subscriptions/new",
+								title      : "subscribe"
+								plan_code: req.query.planCode
+								currency: currency
+								countryCode:countryCode
+								plan:plan
+								showStudentPlan: req.query.ssp
+								recurlyConfig: JSON.stringify
 									currency: currency
-								account_code: user._id
-							}, (error, signature) ->
-								return next(error) if error?
-								res.render "subscriptions/new",
-									title      : "subscribe"
-									plan_code: req.query.planCode
-									currency: currency
-									countryCode:countryCode
-									plan:plan
-									showStudentPlan: req.query.ssp
-									recurlyConfig: JSON.stringify
-										currency: currency
-										subdomain: Settings.apis.recurly.subdomain
-									showCouponField: req.query.scf
-									showVatField: req.query.svf
-									couponCode:      req.query.cc or ""
+									subdomain: Settings.apis.recurly.subdomain
+								showCouponField: req.query.scf
+								showVatField: req.query.svf
+								couponCode:      req.query.cc or ""
 
 
 

@@ -248,36 +248,6 @@ module.exports = RecurlyWrapper =
 				logger.log {url: options.url, method: options.method}, "got 404 response from recurly, expected as valid response"
 			callback(error, response, body)
 
-	sign : (parameters, callback) ->
-		nestAttributesForQueryString = (attributes, base) ->
-			newAttributes = {}
-			for key, value of attributes
-				if base?
-					newKey = "#{base}[#{key}]"
-				else
-					newKey = key
-
-				if typeof value == "object"
-					for key, value of nestAttributesForQueryString(value, newKey)
-						newAttributes[key] = value
-				else
-					newAttributes[newKey] = value
-
-			return newAttributes
-
-		crypto.randomBytes 32, (error, buffer) ->
-			return callback error if error?
-			parameters.nonce = buffer.toString "base64"
-			parameters.timestamp = Math.round((new Date()).getTime() / 1000)
-
-			unsignedQuery = querystring.stringify nestAttributesForQueryString(parameters)
-
-			signed = crypto.createHmac("sha1", Settings.apis.recurly.privateKey).update(unsignedQuery).digest("hex")
-			signature = "#{signed}|#{unsignedQuery}"
-
-			callback null, signature
-
-
 	getSubscriptions: (accountId, callback)->
 		RecurlyWrapper.apiRequest({
 			url: "accounts/#{accountId}/subscriptions"

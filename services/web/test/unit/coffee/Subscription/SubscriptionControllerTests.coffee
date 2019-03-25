@@ -123,7 +123,6 @@ describe "SubscriptionController", ->
 	describe "paymentPage", ->
 		beforeEach ->
 			@req.headers = {}
-			@RecurlyWrapper.sign = sinon.stub().yields(null, @signature = "signature")
 			@SubscriptionHandler.validateNoSubscriptionInRecurly = sinon.stub().yields(null, true)
 			@GeoIpLookup.getCurrencyCode.callsArgWith(1, null, @stubbedCurrencyCode)
 

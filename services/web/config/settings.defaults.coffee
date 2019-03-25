@@ -135,7 +135,6 @@ module.exports = settings =
 		githubSync:
 			url: "http://#{process.env['GITHUB_SYNC_HOST'] or 'localhost'}:3022"
 		recurly:
-			privateKey: process.env['RECURLY_PRIVATE_KEY'] or ''
 			apiKey: process.env['RECURLY_API_KEY'] or ''
 			subdomain: process.env['RECURLY_SUBDOMAIN'] or ''
 			publicKey: process.env['RECURLY_PUBLIC_KEY'] or ''
