@@ -18,6 +18,12 @@ Errors = require "../Errors/Errors"
 module.exports = UserController =
 
 	tryDeleteUser: (req, res, next) ->
+		UserController._tryDeleteUser(UserDeleter.deleteUser, req, res, next)
+
+	trySoftDeleteUser: (req, res, next) ->
+		UserController._tryDeleteUser(UserDeleter.softDeleteUser, req, res, next)
+
+	_tryDeleteUser: (deleteMethod, req, res, next) ->
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		password = req.body.password
 		logger.log {user_id}, "trying to delete user account"
@@ -31,7 +37,7 @@ module.exports = UserController =
 			if !user
 				logger.err {user_id}, 'auth failed during attempt to delete account'
 				return res.sendStatus(403)
-			UserDeleter.deleteUser user_id, (err) ->
+			deleteMethod user_id, (err) ->
 				if err?
 					logger.err {user_id}, "error while deleting user account"
 					return next(err)

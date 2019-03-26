@@ -14,11 +14,20 @@ describe 'ProjectDeleter', ->
 			collaberator_refs:["collab1", "collab2"]
 			readOnly_refs:["readOnly1", "readOnly2"]
 			owner_ref:"owner ref here"
+			remove: sinon.stub().callsArg(0)
+
+		@user_id = 1234
+
+		@mongojs =
+			db:
+				deletedProjects:
+					insert: sinon.stub().callsArg(1)
 	
 		@Project = 
 			update: sinon.stub().callsArgWith(3)
 			remove: sinon.stub().callsArgWith(1)
-			findById: sinon.stub().callsArgWith(1, null, @project)
+			findOne: sinon.stub().callsArgWith(1, null, @project)
+			find: sinon.stub().callsArgWith(1, null, [@project])
 			applyToAllFilesRecursivly: sinon.stub()
 		@documentUpdaterHandler = 
 			flushProjectToMongoAndDelete:sinon.stub().callsArgWith(1)
@@ -27,6 +36,7 @@ describe 'ProjectDeleter', ->
 			removeProjectFromAllTags: sinon.stub().callsArgWith(2)
 		@CollaboratorsHandler =
 			removeUserFromAllProjets: sinon.stub().yields()
+			getMemberIds: sinon.stub().withArgs(@project_id).yields(null, ["member-id-1", "member-id-2"])
 		@deleter = SandboxedModule.require modulePath, requires:
 			"../Editor/EditorController": @editorController
 			'../../models/Project':{Project:@Project}
@@ -34,6 +44,7 @@ describe 'ProjectDeleter', ->
 			"../Tags/TagsHandler":@TagsHandler
 			"../FileStore/FileStoreHandler": @FileStoreHandler = {}
 			"../Collaborators/CollaboratorsHandler": @CollaboratorsHandler
+			"../../infrastructure/mongojs": @mongojs
 			'logger-sharelatex':
 				log:->
 
@@ -66,24 +77,66 @@ describe 'ProjectDeleter', ->
 				.should.equal true
 
 	describe "deleteUsersProjects", ->
+		beforeEach ->
+			@deleter.deleteProject = sinon.stub().callsArg(1)
 
-		it "should remove all the projects owned by the user_id", (done)->
-			user_id = 1234
-			@deleter.deleteUsersProjects user_id, =>
-				@Project.remove.calledWith(owner_ref:user_id).should.equal true
+		it "should find all the projects owned by the user_id", (done)->
+			@deleter.deleteUsersProjects @user_id, =>
+				sinon.assert.calledWith(@Project.find, owner_ref: @user_id)
+				done()
+
+		it "should call deleteProject on the found projects", (done)->
+			@deleter.deleteUsersProjects @user_id, =>
+				sinon.assert.calledWith(@deleter.deleteProject, @project._id)
+				done()
+
+		it "should call deleteProject once for each project", (done)->
+			@Project.find.callsArgWith(1, null, [
+				{_id: 'potato'}, {_id: 'wombat'}
+			])
+			@deleter.deleteUsersProjects @user_id, =>
+				sinon.assert.calledTwice(@deleter.deleteProject)
+				sinon.assert.calledWith(@deleter.deleteProject, 'wombat')
+				sinon.assert.calledWith(@deleter.deleteProject, 'potato')
 				done()
 
 		it "should remove all the projects the user is a collaborator of", (done)->
-			user_id = 1234
-			@deleter.deleteUsersProjects user_id, =>
-				@CollaboratorsHandler.removeUserFromAllProjets.calledWith(user_id).should.equal true
+			@deleter.deleteUsersProjects @user_id, =>
+				@CollaboratorsHandler.removeUserFromAllProjets.calledWith(@user_id).should.equal true
+				done()
+
+	describe "softDeleteUsersProjects", ->
+		beforeEach ->
+			@deleter.softDeleteProject = sinon.stub().callsArg(1)
+
+		it "should find all the projects owned by the user_id", (done)->
+			@deleter.softDeleteUsersProjects @user_id, =>
+				@Project.find.calledWith(owner_ref: @user_id).should.equal true
+				done()
+
+		it "should call deleteProject on the found projects", (done)->
+			@deleter.softDeleteUsersProjects @user_id, =>
+				sinon.assert.calledWith(@deleter.softDeleteProject, @project._id)
+				done()
+
+		it "should call deleteProject once for each project", (done)->
+			@Project.find.callsArgWith(1, null, [
+				{_id: 'potato'}, {_id: 'wombat'}
+			])
+			@deleter.softDeleteUsersProjects @user_id, =>
+				sinon.assert.calledTwice(@deleter.softDeleteProject)
+				sinon.assert.calledWith(@deleter.softDeleteProject, 'wombat')
+				sinon.assert.calledWith(@deleter.softDeleteProject, 'potato')
+				done()
+
+		it "should remove all the projects the user is a collaborator of", (done)->
+			@deleter.softDeleteUsersProjects @user_id, =>
+				@CollaboratorsHandler.removeUserFromAllProjets.calledWith(@user_id).should.equal true
 				done()
 
 	describe "deleteProject", ->
 		beforeEach (done) ->
 			@project_id = "mock-project-id-123"
-			@CollaboratorsHandler.getMemberIds = sinon.stub()
-			@CollaboratorsHandler.getMemberIds.withArgs(@project_id).yields(null, ["member-id-1", "member-id-2"])
 			@Project.remove.callsArgWith(1)
 			done()
 
@@ -103,6 +156,25 @@ describe 'ProjectDeleter', ->
 				@Project.remove.calledWith({
 					_id: @project_id
 				}).should.equal true
+				done()
+
+	describe "softDeleteProject", ->
+		beforeEach ->
+			@deleter.deleteProject = sinon.stub().callsArg(1)
+
+		it "should set the deletedAt time", (done)->
+			@deleter.softDeleteProject @project_id, =>
+				@project.deletedAt.should.exist
+				done()
+
+		it "should insert the project into the deleted projects collection", (done)->
+			@deleter.softDeleteProject @project_id, =>
+				sinon.assert.calledWith(@mongojs.db.deletedProjects.insert, @project)
+				done()
+
+		it "should delete the project", (done)->
+			@deleter.softDeleteProject @project_id, =>
+				sinon.assert.calledWith(@deleter.deleteProject, @project_id)
 				done()
 
 	describe "archiveProject", ->

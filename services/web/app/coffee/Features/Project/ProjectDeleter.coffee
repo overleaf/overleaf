@@ -5,6 +5,7 @@ tagsHandler = require("../Tags/TagsHandler")
 async = require("async")
 FileStoreHandler = require("../FileStore/FileStoreHandler")
 CollaboratorsHandler = require("../Collaborators/CollaboratorsHandler")
+{db, ObjectId} = require("../../infrastructure/mongojs")
 
 module.exports = ProjectDeleter =
 
@@ -25,9 +26,36 @@ module.exports = ProjectDeleter =
 
 	deleteUsersProjects: (user_id, callback)->
 		logger.log {user_id}, "deleting users projects"
-		Project.remove owner_ref:user_id, (error) ->
+		ProjectDeleter._deleteUsersProjectWithMethod user_id, ProjectDeleter.deleteProject, callback
+
+	softDeleteUsersProjects: (user_id, callback)->
+		logger.log {user_id}, "soft-deleting users projects"
+		ProjectDeleter._deleteUsersProjectWithMethod user_id, ProjectDeleter.softDeleteProject, callback
+
+	_deleteUsersProjectWithMethod: (user_id, deleteMethod, callback) ->
+		Project.find {owner_ref: user_id}, (error, projects) ->
 			return callback(error) if error?
-			CollaboratorsHandler.removeUserFromAllProjets user_id, callback
+			async.each(
+				projects,
+				(project, cb) ->
+					deleteMethod project._id, cb
+				(err) ->
+					return callback(err) if err?
+					CollaboratorsHandler.removeUserFromAllProjets user_id, callback
+			)
+
+	softDeleteProject: (project_id, callback) ->
+		logger.log project_id: project_id, "soft-deleting project"
+		async.waterfall [
+			(cb) ->
+				Project.findOne {_id: project_id}, (err, project) -> cb(err, project)
+			(project, cb) ->
+				return callback(new Errors.NotFoundError("project not found")) unless project?
+				project.deletedAt = new Date()
+				db.deletedProjects.insert project, (err) -> cb(err)
+			(cb) ->
+				ProjectDeleter.deleteProject project_id, cb
+		], callback
 
 	deleteProject: (project_id, callback = (error) ->) ->
 		logger.log project_id: project_id, "deleting project"
