@@ -424,7 +424,8 @@ define([
           this.ide.pushEvent('received-update:processing', {
             update
           })
-          this.doc.processUpdateFromServer(update)
+          // FIXME: change this back to processUpdateFromServer when redis fixed
+          this.doc.processUpdateFromServerInOrder(update)
 
           if (!this.wantToBeJoined) {
             return this.leave()
