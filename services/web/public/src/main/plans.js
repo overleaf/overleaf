@@ -255,11 +255,8 @@ define(['base', 'libs/recurly-4.8.5'], function(App, recurly) {
     }
 
     $scope.openGroupPlanModal = function() {
-      history.replaceState(
-        null,
-        document.title,
-        window.location.pathname + '#groups'
-      )
+      const path = `${window.location.pathname}${window.location.search}`
+      history.replaceState(null, document.title, path + '#groups')
       $modal
         .open({
           templateUrl: 'groupPlanModalPurchaseTemplate',
@@ -287,7 +284,11 @@ define(['base', 'libs/recurly-4.8.5'], function(App, recurly) {
     }
   })
 
-  App.controller('GroupPlansModalPurchaseController', function($scope, $modal) {
+  App.controller('GroupPlansModalPurchaseController', function(
+    $scope,
+    $modal,
+    $location
+  ) {
     $scope.options = {
       plan_codes: [
         {
@@ -338,11 +339,49 @@ define(['base', 'libs/recurly-4.8.5'], function(App, recurly) {
       currency = window.recomendedCurrency
     }
 
+    // default selected
     $scope.selected = {
       plan_code: 'collaborator',
       currency,
       size: '10',
       usage: 'educational'
+    }
+    // selected via query
+    if ($location.search()) {
+      // usage
+      if ($location.search().usage) {
+        $scope.options.usages.forEach(usage => {
+          if (usage.code === $location.search().usage) {
+            $scope.selected.usage = usage.code
+          }
+        })
+      }
+      // plan
+      if ($location.search().plan) {
+        $scope.options.plan_codes.forEach(plan => {
+          if (plan.code === $location.search().plan) {
+            $scope.selected.plan_code = plan.code
+          }
+        })
+      }
+      // number
+      if ($location.search().number) {
+        // $location.search().number is a string,
+        // but $scope.options.sizes are numbers
+        // and $scope.selected.size is a string
+        const groupCount = parseInt($location.search().number, 10)
+        if ($scope.options.sizes.indexOf(groupCount) !== -1) {
+          $scope.selected.size = $location.search().number
+        }
+      }
+      // currency
+      if ($location.search().currency) {
+        $scope.options.currencies.forEach(currency => {
+          if (currency.code === $location.search().currency) {
+            $scope.selected.currency = currency.code
+          }
+        })
+      }
     }
 
     $scope.recalculatePrice = function() {
