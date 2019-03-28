@@ -5,6 +5,7 @@ Path    = require "path"
 fse     = require "fs-extra"
 yauzl   = require "yauzl"
 Settings = require "settings-sharelatex"
+Errors = require "../Errors/Errors"
 _ = require("underscore")
 
 ONE_MEG = 1024 * 1024
@@ -16,7 +17,7 @@ module.exports = ArchiveManager =
 
 		totalSizeInBytes = null
 		yauzl.open source, {lazyEntries: true}, (err, zipfile) ->
-			return callback(err) if err?
+			return callback(new Errors.InvalidError("invalid_zip_file")) if err?
 
 			if Settings.maxEntitiesPerProject? and zipfile.entryCount > Settings.maxEntitiesPerProject
 				return callback(null, true) # too many files in zip file
@@ -113,7 +114,7 @@ module.exports = ArchiveManager =
 				return callback(err)
 
 			if isTooLarge
-				return callback(new Error("zip_too_large"))
+				return callback(new Errors.InvalidError("zip_contents_too_large"))
 
 			timer = new metrics.Timer("unzipDirectory")
 			logger.log source: source, destination: destination, "unzipping file"

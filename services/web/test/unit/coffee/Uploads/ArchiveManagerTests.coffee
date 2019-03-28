@@ -3,6 +3,7 @@ expect = require("chai").expect
 chai = require('chai')
 should = chai.should()
 modulePath = "../../../../app/js/Features/Uploads/ArchiveManager.js"
+Errors = require("../../../../app/js/Features/Errors/Errors")
 SandboxedModule = require('sandboxed-module')
 events = require "events"
 
@@ -50,13 +51,13 @@ describe "ArchiveManager", ->
 
 		describe "with an error in the zip file header", ->
 			beforeEach (done) ->
-				@yauzl.open = sinon.stub().callsArgWith(2, new Error("Something went wrong"))
+				@yauzl.open = sinon.stub().callsArgWith(2, new Errors.InvalidError("invalid_zip_file"))
 				@ArchiveManager.extractZipArchive @source, @destination, (error) =>
 					@callback(error)
 					done()
 
 			it "should return the callback with an error", ->
-				@callback.calledWithExactly(new Error("Something went wrong")).should.equal true
+				sinon.assert.calledWithExactly(@callback, new Errors.InvalidError("invalid_zip_file"))
 
 			it "should log out the error", ->
 				@logger.error.called.should.equal true
@@ -69,7 +70,7 @@ describe "ArchiveManager", ->
 					done()
 
 			it "should return the callback with an error", ->
-				@callback.calledWithExactly(new Error("zip_too_large")).should.equal true
+				sinon.assert.calledWithExactly(@callback, new Errors.InvalidError("zip_contents_too_large"))
 
 			it "should not call yauzl.open", ->
 				@yauzl.open.called.should.equal false

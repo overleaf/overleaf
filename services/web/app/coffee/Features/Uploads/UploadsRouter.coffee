@@ -3,19 +3,6 @@ AuthenticationController = require('../Authentication/AuthenticationController')
 ProjectUploadController = require "./ProjectUploadController"
 RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
 Settings = require('settings-sharelatex')
-multer = require('multer')
-
-try 
-	upload = multer(
-		dest: Settings.path.uploadFolder
-		limits: fileSize: Settings.maxUploadSize
-	)
-catch err
-	if err.message == "EEXIST"
-		logger.log uploadFolder:Settings.path.uploadFolder, "dir already exists, continuing"
-	else
-		logger.err err:err, "caught error from multer in uploads router"
-
 
 module.exports =
 	apply: (webRouter, apiRouter) ->
@@ -26,7 +13,7 @@ module.exports =
 				maxRequests: 20
 				timeInterval: 60
 			}),
-			upload.single('qqfile'),
+			ProjectUploadController.multerMiddleware,
 			ProjectUploadController.uploadProject
 
 		webRouter.post '/Project/:Project_id/upload',
@@ -38,5 +25,5 @@ module.exports =
 			}),
 			AuthenticationController.requireLogin(),
 			AuthorizationMiddleware.ensureUserCanWriteProjectContent,
-			upload.single('qqfile'),
+			ProjectUploadController.multerMiddleware,
 			ProjectUploadController.uploadFile

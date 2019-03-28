@@ -256,6 +256,7 @@ script(type="text/ng-template", id="uploadProjectModalTemplate")
 		endpoint="/project/new/upload"
 		template-id="qq-project-uploader-template"
 		multiple="false"
+		size-limit=zipFileSizeLimit
 		allowed-extensions="['zip']"
 		on-complete-callback="onComplete"
 	)

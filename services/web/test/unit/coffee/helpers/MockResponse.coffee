@@ -53,7 +53,7 @@ class MockResponse
 		if arguments.length < 2
 			if typeof status != "number"
 				body = status
-				status = 200
+				status = @statusCode || 200
 		@statusCode = status
 		@returned = true
 		@type = 'application/json'
@@ -64,7 +64,8 @@ class MockResponse
 		@body = JSON.stringify(body) if body
 		@callback() if @callback?
 
-	status: (@statusCode)->
+	status: (status)->
+		@statusCode = status
 		return @
 
 

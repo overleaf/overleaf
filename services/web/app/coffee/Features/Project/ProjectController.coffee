@@ -239,6 +239,7 @@ module.exports = ProjectController =
 						hasSubscription: results.hasSubscription
 						isShowingV1Projects: results.v1Projects?
 						warnings: warnings
+						zipFileSizeLimit: Settings.maxUploadSize
 					}
 
 					if Settings?.algolia?.app_id? and Settings?.algolia?.read_only_api_key?

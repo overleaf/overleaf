@@ -6,6 +6,7 @@ modulePath = "../../../../app/js/Features/Uploads/ProjectUploadController.js"
 SandboxedModule = require('sandboxed-module')
 MockRequest = require "../helpers/MockRequest"
 MockResponse = require "../helpers/MockResponse"
+Errors = require("../../../../app/js/Features/Errors/Errors")
 
 describe "ProjectUploadController", ->
 	beforeEach ->
@@ -88,8 +89,24 @@ describe "ProjectUploadController", ->
 				@ProjectUploadController.uploadProject @req, @res
 
 			it "should return a failed response to the FileUploader client", ->
-				expect(@res.body).to.deep.equal
-					success: false
+				expect(@res.body).to.deep.equal JSON.stringify({ success: false, error: "upload_failed" })
+
+			it "should output an error log line", ->
+				@logger.error
+					.calledWith(sinon.match.any, "error uploading project")
+					.should.equal true
+
+		describe "when ProjectUploadManager.createProjectFromZipArchive reports the file as invalid", ->
+			beforeEach ->
+				@ProjectUploadManager.createProjectFromZipArchive =
+					sinon.stub().callsArgWith(3, new Errors.InvalidError("zip_contents_too_large"), @project)
+				@ProjectUploadController.uploadProject @req, @res
+
+			it "should return the reported error to the FileUploader client", ->
+				expect(@res.body).to.deep.equal JSON.stringify({ success: false, error: "zip_contents_too_large" })
+
+			it "should return an 'unprocessable entity' status code", ->
+				expect(@res.statusCode).to.equal 422
 
 			it "should output an error log line", ->
 				@logger.error

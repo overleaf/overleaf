@@ -8,7 +8,7 @@ class MockRequest
 	body: {}
 	_parsedUrl:{}
 	i18n:
-		translate:->
+		translate: (str)-> str
 	route:
 		path: ''
 

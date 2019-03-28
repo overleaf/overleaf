@@ -15,6 +15,7 @@ define(['base', 'fineuploader'], (App, qq) =>
       multiple: '=',
       endpoint: '@',
       templateId: '@',
+      sizeLimit: '@',
       allowedExtensions: '=',
       onCompleteCallback: '=',
       onUploadCallback: '=',
@@ -35,6 +36,9 @@ define(['base', 'fineuploader'], (App, qq) =>
         validation = { allowedExtensions: scope.allowedExtensions }
       } else {
         validation = {}
+      }
+      if (scope.sizeLimit) {
+        validation.sizeLimit = scope.sizeLimit
       }
       const maxConnections = scope.maxConnections || 1
       const onComplete = scope.onCompleteCallback || function() {}
@@ -72,7 +76,11 @@ define(['base', 'fineuploader'], (App, qq) =>
           onSubmit,
           onCancel
         },
-        template: templateId
+        template: templateId,
+        failedUploadTextDisplay: {
+          mode: 'custom',
+          responseProperty: 'error'
+        }
       })
       window.q = q
       if (scope.control != null) {
