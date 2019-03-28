@@ -179,7 +179,7 @@ define(['utils/EventEmitter', 'libs/sharejs'], function(EventEmitter, ShareJs) {
             )
             this.processUpdateFromServerInOrder(this.queuedMessages.shift())
             break
-          } else if (nextAvailableVersion <= this._doc.version) {
+          } else if (nextAvailableVersion < this._doc.version) {
             // discard old updates if they are in the queue (since we are only
             // putting updates ahead of the current version in the queue this
             // shouldn't happen, but we handle it anyway for safety.)
