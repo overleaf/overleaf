@@ -1,6 +1,6 @@
 --script-version=1.1.11
 clsi
---node-version=6.15.1
+--node-version=10.15.0
 --acceptance-creds=None
 --language=coffeescript
 --dependencies=mongo,redis
