@@ -174,7 +174,7 @@ privateApiRouter.get "/profile", (req, res) ->
 		res.json(profile)
 	, time
 
-app.get "/heapdump", (req, res)->
+privateApiRouter.get "/heapdump", (req, res)->
 	require('heapdump').writeSnapshot '/tmp/' + Date.now() + '.web.heapsnapshot', (err, filename)->
 		res.send filename
 
