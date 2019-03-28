@@ -187,25 +187,41 @@ module.exports = AuthenticationController =
 		return doRequest
 
 	requireOauth: () ->
+		# require this here because module may not be included in some versions
+		Oauth2Server = require "../../../../modules/oauth2-server/app/js/Oauth2Server"
 		return (req, res, next = (error) ->) ->
-			return res.status(401).send() unless req.token?
-			options =
-				expectedStatusCodes: [401]
-				json: token: req.token
-				method: "POST"
-				uri: "/api/v1/sharelatex/oauth_authorize"
-			V1Api.request options, (error, response, body) ->
+			request = new Oauth2Server.Request(req)
+			response = new Oauth2Server.Response(res)
+			Oauth2Server.server.authenticate request, response, {}, (err, token) ->
+				if err?
+					# fall back to v1 on invalid token
+					return AuthenticationController._requireOauthV1Fallback req, res, next if err.code == 401
+					# bubble up all other errors
+					return next(err)
+				req.oauth =
+					access_token: token.accessToken
+				req.oauth_token = token
+				req.oauth_user = token.user
+				return next()
+
+	_requireOauthV1Fallback: (req, res, next) ->
+		return res.sendStatus 401 unless req.token?
+		options =
+			expectedStatusCodes: [401]
+			json: token: req.token
+			method: "POST"
+			uri: "/api/v1/sharelatex/oauth_authorize"
+		V1Api.request options, (error, response, body) ->
+			return next(error) if error?
+			return res.status(401).json({error: "invalid_token"}) unless body?.user_profile?.id
+			User.findOne { "overleaf.id": body.user_profile.id }, (error, user) ->
 				return next(error) if error?
-				return res.status(401).json({error: "invalid_token"}) unless body?.user_profile?.id
-				User.findOne { "overleaf.id": body.user_profile.id }, (error, user) ->
-					return next(error) if error?
-					return res.status(401).send({error: "invalid_token"}) unless user?
-					req.oauth =
-						access_token: body.access_token
-						collabratec_customer_id: body.collabratec_customer_id
-						user_profile: body.user_profile
-					req.oauth_user = user
-					next()
+				return res.status(401).json({error: "invalid_token"}) unless user?
+				req.oauth =
+					access_token: body.access_token
+				user.collabratec_id = body.collabratec_customer_id unless user.collabratec_id?
+				req.oauth_user = user
+				next()
 
 	_globalLoginWhitelist: []
 	addEndpointToLoginWhitelist: (endpoint) ->
