@@ -382,6 +382,20 @@ define([
                         )
                       }
                     }
+                    const inArgument = lineBeyondCursor.match(
+                      /^([\w._-]+)\}(.*)/
+                    )
+                    if (inArgument) {
+                      const argumentRightOfCursor = inArgument[1]
+                      const afterArgument = inArgument[2]
+                      if (afterArgument) {
+                        rightRange.end.column =
+                          rightRange.start.column +
+                          argumentRightOfCursor.length +
+                          1
+                      }
+                      editor.session.remove(rightRange)
+                    }
                   }
                 }
                 // finally, insert the match
