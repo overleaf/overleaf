@@ -1689,9 +1689,6 @@ define(['ace/ace'], function () {
       suppress = true;
       // All the primitives we need are already in CM's API.
       editor.replaceRange(text, editor.posFromIndex(pos));
-      // Clear CM's undo/redo history on remote edit. This prevents issues where
-      // a user can accidentally remove another user's edits
-      editor.clearHistory();
       suppress = false;
       return check();
     };
@@ -1701,9 +1698,6 @@ define(['ace/ace'], function () {
       var from = editor.posFromIndex(pos);
       var to = editor.posFromIndex(pos + text.length);
       editor.replaceRange('', from, to);
-      // Clear CM's undo/redo history on remote edit. This prevents issues where
-      // a user can accidentally remove another user's edits
-      editor.clearHistory()
       suppress = false;
       return check();
     };
