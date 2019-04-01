@@ -30,48 +30,48 @@ This repository does not contain any code. It acts a wrapper and toolkit for man
 
 The different services are:
 
-### [web](https://github.com/sharelatex/web-sharelatex) [![Build Status](https://travis-ci.org/sharelatex/web-sharelatex.svg?branch=master)](https://travis-ci.org/sharelatex/web-sharelatex)
+### [web](https://github.com/sharelatex/web-sharelatex)
 
 The front facing web server that serves all the HTML pages, CSS and JavaScript
 to the client. Also contains a lot of logic around creating and editing
 projects, and account management.
 
-### [document-updater](https://github.com/sharelatex/document-updater-sharelatex) [![Build Status](https://travis-ci.org/sharelatex/document-updater-sharelatex.svg?branch=master)](https://travis-ci.org/sharelatex/document-updater-sharelatex)
+### [document-updater](https://github.com/sharelatex/document-updater-sharelatex)
 
 Processes updates that come in from the editor when users modify documents. Ensures that
 the updates are applied in the right order, and that only one operation is modifying
 the document at a time. Also caches the documents in redis for very fast but persistent
 modifications.
 
-### [CLSI](https://github.com/sharelatex/clsi-sharelatex) [![Build Status](https://travis-ci.org/sharelatex/clsi-sharelatex.svg?branch=master)](https://travis-ci.org/sharelatex/clsi-sharelatex)
+### [CLSI](https://github.com/sharelatex/clsi-sharelatex)
 
 The Common LaTeX Service Interface (CLSI) which provides an API for compiling LaTeX 
 documents.
 
-### [docstore](https://github.com/sharelatex/docstore-sharelatex) [![Build Status](https://travis-ci.org/sharelatex/docstore-sharelatex.svg?branch=master)](https://travis-ci.org/sharelatex/docstore-sharelatex)
+### [docstore](https://github.com/sharelatex/docstore-sharelatex)
 
 An API for performing CRUD (Create, Read, Update and Delete) operations on text files
 stored in ShareLaTeX.
 
-### [realtime](https://github.com/sharelatex/real-time-sharelatex) [![Build Status](https://travis-ci.org/sharelatex/real-time-sharelatex.svg?branch=master)](https://travis-ci.org/sharelatex/real-time-sharelatex)
+### [realtime](https://github.com/sharelatex/real-time-sharelatex)
 
 The websocket process clients connect to
 
-### [filestore](https://github.com/sharelatex/filestore-sharelatex) [![Build Status](https://travis-ci.org/sharelatex/filestore-sharelatex.svg?branch=master)](https://travis-ci.org/sharelatex/filestore-sharelatex)
+### [filestore](https://github.com/sharelatex/filestore-sharelatex)
 
 An API for performing CRUD (Create, Read, Update and Delete) operations on binary files
 (like images) stored in ShareLaTeX.
 
-### [track-changes](https://github.com/sharelatex/track-changes-sharelatex) [![Build Status](https://travis-ci.org/sharelatex/track-changes-sharelatex.svg?branch=master)](https://travis-ci.org/sharelatex/track-changes-sharelatex)
+### [track-changes](https://github.com/sharelatex/track-changes-sharelatex)
 
 An API for compressing and storing the updates applied to a document, and then rendering a diff of the changes
 between any two time points.
 
-### [chat](https://github.com/sharelatex/chat-sharelatex) [![Build Status](https://travis-ci.org/sharelatex/chat-sharelatex.svg?branch=master)](https://travis-ci.org/sharelatex/chat-sharelatex)
+### [chat](https://github.com/sharelatex/chat-sharelatex)
 
 The backend API for storing and fetching chat messages.
 
-### [tags](https://github.com/sharelatex/tags-sharelatex) [![Build Status](https://travis-ci.org/sharelatex/tags-sharelatex.svg?branch=master)](https://travis-ci.org/sharelatex/tags-sharelatex)
+### [tags](https://github.com/sharelatex/tags-sharelatex)
 
 The backend API for managing project tags (folders).
 
