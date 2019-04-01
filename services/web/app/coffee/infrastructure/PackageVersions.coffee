@@ -1,5 +1,5 @@
 version = {
-	"pdfjs": "1.7.225"
+	"pdfjs": "2.0.943"
 	"moment": "2.9.0"
 	"ace": "1.2.9" # Upgrade instructions: https://github.com/overleaf/write_latex/wiki/Upgrading-Ace
 	"fineuploader": "5.15.4"

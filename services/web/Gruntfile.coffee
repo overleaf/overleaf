@@ -27,9 +27,6 @@ module.exports = (grunt) ->
 						"pdfjs-dist/build/pdf": "libs/#{PackageVersions.lib('pdfjs')}/pdf"
 						"ace": "#{PackageVersions.lib('ace')}"
 						"fineuploader": "libs/#{PackageVersions.lib('fineuploader')}"
-					shim:
-						"pdfjs-dist/build/pdf":
-							deps: ["libs/#{PackageVersions.lib('pdfjs')}/compatibility"]
 
 					skipDirOptimize: true
 					modules: [

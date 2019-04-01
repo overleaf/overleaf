@@ -84,7 +84,7 @@ define([
             return $scope.$emit('loaded')
           },
           errorCallback(error) {
-            __guardMethod__(Raven, 'captureMessage', o =>
+            __guardMethod__(window.Raven, 'captureMessage', o =>
               o.captureMessage(`pdfng error ${error}`)
             )
             return $scope.$emit('pdf:error', error)
@@ -519,7 +519,7 @@ define([
         )
 
         scope.$on('pdf:error', function(event, error) {
-          if (error === 'cancelled') {
+          if (error.name === 'RenderingCancelledException') {
             return
           }
           // check if too many retries or file is missing

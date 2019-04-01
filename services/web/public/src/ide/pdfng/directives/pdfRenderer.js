@@ -43,28 +43,37 @@ define(['base', 'pdfjs-dist/build/pdf'], (App, PDFJS) =>
             // set up external character mappings - needed for Japanese etc
             this.url = url
             this.options = options
-            window.PDFJS.cMapUrl = window.pdfCMapsPath // injected in editor.pug
-            window.PDFJS.cMapPacked = true
 
+            this.scale = this.options.scale || 1
+
+            let disableFontFace
             if (
               __guard__(
                 window.location != null ? window.location.search : undefined,
                 x => x.indexOf('disable-font-face=true')
               ) >= 0
             ) {
-              window.PDFJS.disableFontFace = true
+              disableFontFace = true
             } else {
-              window.PDFJS.disableFontFace = false
+              disableFontFace = false
             }
-            if (this.options.disableAutoFetch) {
-              window.PDFJS.disableAutoFetch = true // prevent loading whole file
-            }
-            // PDFJS.disableStream
-            // PDFJS.disableRange
-            this.scale = this.options.scale || 1
             this.pdfjs = PDFJS.getDocument({
               url: this.url,
-              rangeChunkSize: 2 * 65536
+              cMapUrl: window.pdfCMapsPath,
+              cMapPacked: true,
+              disableFontFace,
+              // Enable fetching with Range headers to restrict individual
+              // requests to 128kb.
+              // To do this correctly we must:
+              // a) disable auto-fetching of the whole file upfront
+              // b) disable streaming (which in this context means streaming of
+              // the response into memory). This isn't supported when using
+              // Range headers, but shouldn't be a problem since we are already
+              // limiting individual response size through chunked range
+              // requests
+              rangeChunkSize: 128 * 1024,
+              disableAutoFetch: !!this.options.disableAutoFetch,
+              disableStream: !!this.options.disableAutoFetch
             })
             this.pdfjs.onProgress = this.options.progressCallback
             this.document = $q.when(this.pdfjs)
@@ -331,7 +340,7 @@ define(['base', 'pdfjs-dist/build/pdf'], (App, PDFJS) =>
               if (loadTask.cancelled) {
                 return
               } // return from cancelled page load
-              __guardMethod__(Raven, 'captureMessage', o =>
+              __guardMethod__(window.Raven, 'captureMessage', o =>
                 o.captureMessage(
                   `pdfng page load timed out after ${this.PAGE_LOAD_TIMEOUT}ms`
                 )
@@ -492,7 +501,7 @@ define(['base', 'pdfjs-dist/build/pdf'], (App, PDFJS) =>
               })
               .catch(function(error) {
                 // page render failed
-                if (error === 'cancelled') {
+                if (error.name === 'RenderingCancelledException') {
                   // do nothing when cancelled
                 } else {
                   return typeof self.errorCallback === 'function'
