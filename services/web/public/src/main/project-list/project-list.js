@@ -403,8 +403,14 @@ define(['base'], function(App) {
       })
 
       return modalInstance.result.then(function(tag) {
-        $scope.tags.push(tag)
-        return $scope.addSelectedProjectsToTag(tag)
+        const tagIsDuplicate = $scope.tags.find(function(existingTag) {
+          return tag.name === existingTag.name
+        })
+
+        if (!tagIsDuplicate) {
+          $scope.tags.push(tag)
+          return $scope.addSelectedProjectsToTag(tag)
+        }
       })
     }
 
