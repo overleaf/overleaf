@@ -33,7 +33,7 @@ module.exports =
 				maxRequests: 100
 				timeInterval: 60 * 10
 			}),
-			CaptchaMiddleware.validateCaptcha,
+			CaptchaMiddleware.validateCaptcha('invite'),
 			AuthenticationController.requireLogin(),
 			AuthorizationMiddleware.ensureUserCanAdminProject,
 			CollaboratorsInviteController.inviteToProject

@@ -164,74 +164,77 @@ define(['base'], App =>
           // do v3 captcha to collect data only
           validateCaptchaV3('invite')
           // do v2 captcha
-          return validateCaptcha(function(response) {
-            let inviteId, request
-            $scope.grecaptchaResponse = response
-            if (
-              Array.from(currentInviteEmails).includes(email) &&
-              (inviteId = __guard__(
-                _.find(
-                  $scope.project.invites || [],
-                  invite => invite.email === email
-                ),
-                x => x._id
-              ))
-            ) {
-              request = projectInvites.resendInvite(inviteId)
-            } else {
-              request = projectInvites.sendInvite(
-                email,
-                $scope.inputs.privileges,
-                $scope.grecaptchaResponse
-              )
-            }
-
-            return request
-              .then(function(response) {
-                const { data } = response
-                if (data.error) {
-                  $scope.state.error = true
-                  $scope.state.errorReason = `${data.error}`
-                  $scope.state.inflight = false
-                } else {
-                  if (data.invite) {
-                    const { invite } = data
-                    $scope.project.invites.push(invite)
-                  } else {
-                    let users
-                    if (data.users != null) {
-                      ;({ users } = data)
-                    } else if (data.user != null) {
-                      users = [data.user]
-                    } else {
-                      users = []
-                    }
-                    $scope.project.members.push(...Array.from(users || []))
-                  }
-                }
-
-                return setTimeout(
-                  () =>
-                    // Give $scope a chance to update $scope.canAddCollaborators
-                    // with new collaborator information.
-                    addNextMember(),
-
-                  0
+          const ExposedSettings = window.ExposedSettings
+          if (!ExposedSettings.recaptchaDisabled.invite) {
+            return validateCaptcha(function(response) {
+              let inviteId, request
+              $scope.grecaptchaResponse = response
+              if (
+                Array.from(currentInviteEmails).includes(email) &&
+                (inviteId = __guard__(
+                  _.find(
+                    $scope.project.invites || [],
+                    invite => invite.email === email
+                  ),
+                  x => x._id
+                ))
+              ) {
+                request = projectInvites.resendInvite(inviteId)
+              } else {
+                request = projectInvites.sendInvite(
+                  email,
+                  $scope.inputs.privileges,
+                  $scope.grecaptchaResponse
                 )
-              })
-              .catch(function(httpResponse) {
-                const { data, status, headers, config } = httpResponse
-                $scope.state.inflight = false
-                $scope.state.error = true
+              }
 
-                if ((data != null ? data.errorReason : undefined) != null) {
-                  return ($scope.state.errorReason =
-                    data != null ? data.errorReason : undefined)
-                } else {
-                  return ($scope.state.errorReason = null)
-                }
-              })
-          })
+              return request
+                .then(function(response) {
+                  const { data } = response
+                  if (data.error) {
+                    $scope.state.error = true
+                    $scope.state.errorReason = `${data.error}`
+                    $scope.state.inflight = false
+                  } else {
+                    if (data.invite) {
+                      const { invite } = data
+                      $scope.project.invites.push(invite)
+                    } else {
+                      let users
+                      if (data.users != null) {
+                        ;({ users } = data)
+                      } else if (data.user != null) {
+                        users = [data.user]
+                      } else {
+                        users = []
+                      }
+                      $scope.project.members.push(...Array.from(users || []))
+                    }
+                  }
+
+                  return setTimeout(
+                    () =>
+                      // Give $scope a chance to update $scope.canAddCollaborators
+                      // with new collaborator information.
+                      addNextMember(),
+
+                    0
+                  )
+                })
+                .catch(function(httpResponse) {
+                  const { data, status, headers, config } = httpResponse
+                  $scope.state.inflight = false
+                  $scope.state.error = true
+
+                  if ((data != null ? data.errorReason : undefined) != null) {
+                    return ($scope.state.errorReason =
+                      data != null ? data.errorReason : undefined)
+                  } else {
+                    return ($scope.state.errorReason = null)
+                  }
+                })
+            })
+          }
         })()
       }
 
