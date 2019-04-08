@@ -1,29 +1,50 @@
 Errors = require "../Errors/Errors"
 User = require("../../models/User").User
+UserStub = require("../../models/UserStub").UserStub
 UserUpdater = require "./UserUpdater"
 _ = require "lodash"
 
 module.exports = ThirdPartyIdentityManager =
 	login: (providerId, externalUserId, externalData, callback) ->
 		return callback(new Error "invalid arguments") unless providerId? and externalUserId?
+		query = ThirdPartyIdentityManager._loginQuery providerId, externalUserId
+		User.findOne query, (err, user) ->
+			return callback err if err?
+			return callback(new Errors.ThirdPartyUserNotFoundError()) unless user
+			return callback(null, user) unless externalData
+			update = ThirdPartyIdentityManager._loginUpdate user, providerId, externalUserId, externalData
+			User.findOneAndUpdate query, update, {new: true}, callback
+
+	# attempt to login normally but check for user stub if user not found
+	loginUserStub: (providerId, externalUserId, externalData, callback) ->
+		ThirdPartyIdentityManager.login providerId, externalUserId, externalData, (err, user) ->
+			return callback null, user unless err?
+			return callback err unless err.name == "ThirdPartyUserNotFoundError"
+			query = ThirdPartyIdentityManager._loginQuery providerId, externalUserId
+			UserStub.findOne query, (err, userStub) ->
+				return callback err if err?
+				return callback(new Errors.ThirdPartyUserNotFoundError()) unless userStub
+				return callback(null, userStub) unless externalData
+				update = ThirdPartyIdentityManager._loginUpdate userStub, providerId, externalUserId, externalData
+				UserStub.findOneAndUpdate query, update, {new: true}, callback
+
+	_loginQuery: (providerId, externalUserId) ->
 		externalUserId = externalUserId.toString()
 		providerId = providerId.toString()
 		query =
 			"thirdPartyIdentifiers.externalUserId": externalUserId
 			"thirdPartyIdentifiers.providerId": providerId
-		User.findOne query, (err, user) ->
-			return callback err if err?
-			return callback(new Errors.ThirdPartyUserNotFoundError()) unless user
-			# skip updating data unless passed
-			return callback(null, user) unless externalData
-			# get third party identifier object from array
-			thirdPartyIdentifier = user.thirdPartyIdentifiers.find (tpi) ->
-				tpi.externalUserId == externalUserId and tpi.providerId == providerId
-			# do recursive merge of new data over existing data
-			_.merge(thirdPartyIdentifier.externalData, externalData)
-			# update user
-			update = "thirdPartyIdentifiers.$": thirdPartyIdentifier
-			User.findOneAndUpdate query, update, {new: true}, callback
+		return query
+
+	_loginUpdate: (user, providerId, externalUserId, externalData) ->
+		providerId = providerId.toString()
+		# get third party identifier object from array
+		thirdPartyIdentifier = user.thirdPartyIdentifiers.find (tpi) ->
+			tpi.externalUserId == externalUserId and tpi.providerId == providerId
+		# do recursive merge of new data over existing data
+		_.merge(thirdPartyIdentifier.externalData, externalData)
+		update = "thirdPartyIdentifiers.$": thirdPartyIdentifier
+		return update
 
 	# register: () ->
 		# this should be implemented once we move to having v2 as the master
