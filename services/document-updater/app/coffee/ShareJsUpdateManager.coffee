@@ -6,6 +6,7 @@ Keys = require "./UpdateKeys"
 {EventEmitter} = require "events"
 util = require "util"
 RealTimeRedisManager = require "./RealTimeRedisManager"
+crypto = require "crypto"
 
 ShareJsModel:: = {}
 util.inherits ShareJsModel, EventEmitter
@@ -42,6 +43,10 @@ module.exports = ShareJsUpdateManager =
 			logger.log project_id: project_id, doc_id: doc_id, error: error, "applied update"
 			model.getSnapshot doc_key, (error, data) =>
 				return callback(error) if error?
+				# only check hash when present and no other updates have been applied 
+				if update.hash? and update.v == version
+					ourHash = ShareJsUpdateManager._computeHash(data.snapshot)
+					return callback(new Error("Invalid hash")) if ourHash != update.hash
 				docLines = data.snapshot.split(/\r\n|\n|\r/)
 				callback(null, docLines, data.v, model.db.appliedOps[doc_key] or [])
 
@@ -52,4 +57,10 @@ module.exports = ShareJsUpdateManager =
 	
 	_sendOp: (project_id, doc_id, op) ->
 		RealTimeRedisManager.sendData {project_id, doc_id, op}
+
+	_computeHash: (content) ->
+		return crypto.createHash('sha1')
+			.update("blob " + content.length + "\x00")
+			.update(content, 'utf8')
+			.digest('hex')
 
