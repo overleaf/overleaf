@@ -96,7 +96,7 @@ if settings.overleaf
 			)
 				i.icon.fa.fa-sign-out(aria-hidden="true")
 			button.btn.btn-link.action-btn(
-				ng-if="project.archived"
+				ng-if="project.archived && isOwner()"
 				aria-label=translate('unarchive'),
 				tooltip=translate('unarchive'),
 				tooltip-placement="top",
