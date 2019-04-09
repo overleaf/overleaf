@@ -69,6 +69,10 @@
 	color: @history-base-color;
 	height: 100%;
 	background-color: @history-base-bg;
+	position: relative;
+	&.history-entries-dragging {
+		cursor: row-resize;
+	}
 }
 
 .history-entry-day {
@@ -79,18 +83,82 @@
 	line-height: 1;
 }
 
+.history-entry-toV-handle,
+.history-entry-fromV-handle {
+	position: absolute;
+	background-color: @history-entry-handle-bg;
+	height: @history-entry-handle-height;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 2;
+	cursor: row-resize;
+
+	&.ui-draggable-dragging {
+		opacity: 0;
+	}
+
+	&::after {
+		content: '\00b7\00b7\00b7\00b7';
+		position: absolute;
+		text-align: center;
+		-webkit-font-smoothing: antialiased;
+		width: 100%;
+		font-size: 20px;
+		color: #FFF;
+		height: @history-entry-handle-height;
+		line-height: @history-entry-handle-height / 2;
+	}
+}
+
+.history-entry-fromV-handle {
+	top: auto;
+	bottom: 0;
+}
+
 .history-entry-details {
+	position: relative;
 	background-color: #FFF;
-	margin-bottom: 2px;
+	border-bottom: solid 2px @history-base-bg;
 	padding: 5px 10px;
 	cursor: pointer;
+}
 
-	.history-entry-selected &,
-	.history-entry-label-selected & {
+.history-version-with-label {
+	.history-entry-details;
+	padding: 7px 10px;
+}
+
+	.history-entry-selected .history-entry-details,
+	.history-version-with-label-selected & {
 		background-color: @history-entry-selected-bg;
 		color: #FFF;
 	}
-}
+
+	.history-entry-hover-selected .history-entry-details,
+	.history-entry-hover-selected.history-entry-selected .history-entry-details, 
+	.history-version-with-label-hover-selected &,
+	.history-version-with-label-hover-selected.history-entry-selected &, {
+		background-color: tint(@history-entry-selected-bg, 20%);
+		color: #FFF;
+	}
+
+	.history-entry-selected-to .history-entry-details,
+	.history-entry-hover-selected-to .history-entry-details,
+	.history-version-with-label-selected-to &,
+	.history-version-with-label-hover-selected-to & {
+		padding-top: @history-entry-handle-height + 5px;
+	}
+
+	.history-entry-selected-from .history-entry-details,
+	.history-entry-hover-selected-from .history-entry-details,
+	.history-version-with-label-selected-from &,
+	.history-version-with-label-hover-selected-from &  {
+		padding-bottom: @history-entry-handle-height + 5px;
+	}
+
+
+
 	.history-label {
 		display: inline-block;
 		color: @history-entry-label-color;
@@ -99,12 +167,16 @@
 		margin-right: 10px;
 		white-space: nowrap;
 		.history-entry-selected &,
-		.history-entry-label-selected & {
+		.history-entry-hover-selected &,
+		.history-version-with-label-selected &,
+		.history-version-with-label-hover-selected & {
 			color: @history-entry-selected-label-color;
 		}
 		&.history-label-pseudo-current-state {
 			.history-entry-selected &,
-			.history-entry-label-selected & {
+			.history-entry-hover-selected &,
+			.history-version-with-label-selected &,
+			.history-version-with-label-hover-selected & {
 				color: @history-entry-selected-pseudo-label-color;
 			}
 		}
@@ -119,7 +191,9 @@
 
 			}
 			.history-entry-selected &,
-			.history-entry-label-selected & {
+			.history-entry-hover-selected &,
+			.history-version-with-label-selected &,
+			.history-version-with-label-hover-selected & {
 				background-color: @history-entry-selected-label-bg-color;
 			}
 		}
@@ -142,7 +216,9 @@
 			&:hover {
 				background-color: darken(@history-entry-label-bg-color, 8%);
 				.history-entry-selected &,
-				.history-entry-label-selected & {
+				.history-entry-hover-selected &,
+				.history-version-with-label-selected &,
+				.history-version-with-label-hover-selected & {
 					background-color: darken(@history-entry-selected-label-bg-color, 8%);
 				}
 			}
@@ -181,7 +257,8 @@
 				font-weight: bold;
 				word-break: break-all;
 				.history-entry-selected &,
-				.history-entry-label-selected & {
+				.history-entry-hover-selected &,
+				.history-version-with-label-selected & {
 					color: #FFF;
 				}
 			}
@@ -223,14 +300,6 @@
 .history-labels-list-compare {
 	background-color: transparent;
 }
-	.history-entry-label {
-		.history-entry-details;
-		padding: 7px 10px;
-		&.history-entry-label-selected {
-			background-color: @history-entry-selected-bg;
-			color: #FFF;
-		}
-	}
 
 .history-file-tree-inner {
 	.full-size;

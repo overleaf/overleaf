@@ -21,6 +21,9 @@ define(['base'], App =>
     ($scope, $modal, ide, event_tracking, waitFor) => {
       let openEntity
 
+      $scope.currentUpdate = null
+      $scope.currentLabel = null
+
       $scope.restoreState = {
         inflight: false,
         error: false
@@ -47,6 +50,22 @@ define(['base'], App =>
           } else {
             ide.historyManager.showAllUpdates()
           }
+        }
+      })
+
+      $scope.$watch('history.viewMode', (newVal, oldVal) => {
+        if (newVal != null && newVal !== oldVal) {
+          $scope.currentUpdate = ide.historyManager.getUpdateForVersion(newVal)
+        }
+      })
+
+      $scope.$watch('history.selection.range.toV', (newVal, oldVal) => {
+        if (
+          newVal != null &&
+          newVal !== oldVal &&
+          $scope.history.viewMode === $scope.HistoryViewModes.POINT_IN_TIME
+        ) {
+          $scope.currentUpdate = ide.historyManager.getUpdateForVersion(newVal)
         }
       })
 

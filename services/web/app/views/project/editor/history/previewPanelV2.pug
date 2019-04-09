@@ -2,7 +2,7 @@
 	ng-if="history.isV2 && history.viewMode === HistoryViewModes.COMPARE"
 )
 	.diff(
-		ng-if="!!history.selection.diff && !history.selection.diff.loading && !history.selection.diff.error",
+		ng-if="!!history.selection.diff && !isHistoryLoading() && !history.selection.diff.error",
 		ng-class="{ 'diff-binary': history.selection.diff.binary }"
 	)
 		.diff-editor-v2.hide-ace-cursor(
@@ -19,10 +19,10 @@
 		.alert.alert-info(ng-if="history.selection.diff.binary")
 			| We're still working on showing image and binary changes, sorry. Stay tuned!
 
-	.loading-panel(ng-show="history.selection.diff.loading")
+	.loading-panel(ng-show="isHistoryLoading()")
 		i.fa.fa-spin.fa-refresh
 		| &nbsp;&nbsp;#{translate("loading")}...
-	.error-panel(ng-show="history.selection.diff.error")
+	.error-panel(ng-show="history.selection.diff.error && !isHistoryLoading()")
 		.alert.alert-danger #{translate("generic_something_went_wrong")}
 
 .point-in-time-panel.full-size(
@@ -42,7 +42,7 @@
 		)
 		.alert.alert-info(ng-if="history.selection.file.binary")
 			| We're still working on showing image and binary changes, sorry. Stay tuned!
-	.loading-panel(ng-show="history.selection.file.loading")
+	.loading-panel(ng-show="isHistoryLoading()")
 		i.fa.fa-spin.fa-refresh
 		| &nbsp;&nbsp;#{translate("loading")}...
 	.error-panel(ng-show="history.error")

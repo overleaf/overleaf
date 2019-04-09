@@ -34,8 +34,6 @@ define(['ide/history/HistoryV2Manager'], HistoryV2Manager =>
           },
           diff: null,
           files: [],
-          update: null,
-          label: null,
           file: null
         },
         error: null,

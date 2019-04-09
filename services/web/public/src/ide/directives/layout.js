@@ -13,7 +13,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base', 'libs/jquery-layout'], App =>
+define(['base', 'libs/jquery-layout', 'libs/jquery.ui.touch-punch'], App =>
   App.directive('layout', [
     '$parse',
     '$compile',

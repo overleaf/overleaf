@@ -43,17 +43,67 @@ define([
         (user != null ? user._id : undefined) ||
         (user != null ? user.id : undefined)
       const hue = ColorManager.getHueForUserId(curUserId) || 100
-      if (ctrl.entry.toV === ctrl.selectedHistoryVersion) {
+      if (ctrl.isEntrySelected() || ctrl.isEntryHoverSelected()) {
         return { color: '#FFF' }
       } else {
         return { color: `hsl(${hue}, 70%, 50%)` }
       }
     }
-    ctrl.$onInit = () =>
-      ctrl.historyEntriesList.onEntryLinked(
-        ctrl.entry,
-        $element.find('> .history-entry')
+    ctrl.isEntrySelected = function() {
+      if (ctrl.rangeSelectionEnabled) {
+        return (
+          ctrl.entry.toV <= ctrl.selectedHistoryRange.toV &&
+          ctrl.entry.fromV >= ctrl.selectedHistoryRange.fromV
+        )
+      } else {
+        return ctrl.entry.toV === ctrl.selectedHistoryVersion
+      }
+    }
+
+    ctrl.isEntryHoverSelected = function() {
+      return (
+        ctrl.rangeSelectionEnabled &&
+        ctrl.entry.toV <= ctrl.hoveredHistoryRange.toV &&
+        ctrl.entry.fromV >= ctrl.hoveredHistoryRange.fromV
       )
+    }
+
+    ctrl.onDraggingStart = () => {
+      ctrl.historyEntriesList.onDraggingStart()
+    }
+    ctrl.onDraggingStop = (isValidDrop, boundary) =>
+      ctrl.historyEntriesList.onDraggingStop(isValidDrop, boundary)
+
+    ctrl.onDrop = boundary => {
+      if (boundary === 'toV') {
+        $scope.$applyAsync(() =>
+          ctrl.historyEntriesList.setRangeToV(ctrl.entry.toV)
+        )
+      } else if (boundary === 'fromV') {
+        $scope.$applyAsync(() =>
+          ctrl.historyEntriesList.setRangeFromV(ctrl.entry.fromV)
+        )
+      }
+    }
+    ctrl.onOver = boundary => {
+      if (boundary === 'toV') {
+        $scope.$applyAsync(() =>
+          ctrl.historyEntriesList.setHoveredRangeToV(ctrl.entry.toV)
+        )
+      } else if (boundary === 'fromV') {
+        $scope.$applyAsync(() =>
+          ctrl.historyEntriesList.setHoveredRangeFromV(ctrl.entry.fromV)
+        )
+      }
+    }
+
+    ctrl.$onInit = () => {
+      ctrl.$entryEl = $element.find('> .history-entry')
+      ctrl.$entryDetailsEl = $element.find('.history-entry-details')
+      ctrl.$toVHandleEl = $element.find('.history-entry-toV-handle')
+      ctrl.$fromVHandleEl = $element.find('.history-entry-fromV-handle')
+      ctrl.historyEntriesList.onEntryLinked(ctrl.entry, ctrl.$entryEl)
+    }
   }
 
   return App.component('historyEntry', {
@@ -61,7 +111,11 @@ define([
       entry: '<',
       currentUser: '<',
       users: '<',
-      selectedHistoryVersion: '<',
+      rangeSelectionEnabled: '<',
+      isDragging: '<',
+      selectedHistoryVersion: '<?',
+      selectedHistoryRange: '<?',
+      hoveredHistoryRange: '<?',
       onSelect: '&',
       onLabelDelete: '&'
     },

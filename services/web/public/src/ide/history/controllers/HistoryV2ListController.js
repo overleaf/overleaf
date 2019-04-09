@@ -35,11 +35,18 @@ define(['base', 'ide/history/util/displayNameForUser'], (
         return ide.historyManager.fetchNextBatchOfUpdates()
       }
 
-      $scope.handleEntrySelect = entry =>
-        ide.historyManager.selectVersionForPointInTime(entry.toV)
+      $scope.handleVersionSelect = version =>
+        $scope.$applyAsync(() =>
+          ide.historyManager.selectVersionForPointInTime(version)
+        )
 
-      $scope.handleLabelSelect = label =>
-        ide.historyManager.selectLabelForPointInTime(label)
+      $scope.handleRangeSelect = (selectedToV, selectedFromV) =>
+        $scope.$applyAsync(() =>
+          ide.historyManager.selectVersionsForCompare(
+            selectedToV,
+            selectedFromV
+          )
+        )
 
       return ($scope.handleLabelDelete = labelDetails =>
         $modal.open({

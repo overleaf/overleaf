@@ -28,6 +28,8 @@ define([
   'ide/history/controllers/HistoryV2AddLabelModalController',
   'ide/history/controllers/HistoryV2DeleteLabelModalController',
   'ide/history/directives/infiniteScroll',
+  'ide/history/directives/historyDraggableBoundary',
+  'ide/history/directives/historyDroppableArea',
   'ide/history/components/historyEntriesList',
   'ide/history/components/historyEntry',
   'ide/history/components/historyLabelsList',
@@ -57,6 +59,7 @@ define([
           $scope.project_id
         }`
         this._previouslySelectedPathname = null
+        this._loadFileTreeRequestCanceller = null
         this.hardReset()
 
         this.$scope.toggleHistory = () => {
@@ -71,23 +74,18 @@ define([
           }, 0)
         }
 
-        this.$scope.$watchGroup(
-          ['history.selection.range.toV', 'history.selection.range.fromV'],
-          (newRange, prevRange) => {
-            if (this.$scope.history.viewMode === HistoryViewModes.COMPARE) {
-              let [newTo, newFrom] = newRange
-              let [prevTo, prevFrom] = prevRange
-              if (
-                newTo != null &&
-                newFrom != null &&
-                newTo !== prevTo &&
-                newFrom !== prevFrom
-              ) {
-                this.loadFileTreeDiff(newTo, newFrom)
-              }
-            }
-          }
-        )
+        this.$scope.isHistoryLoading = () => {
+          let selection = this.$scope.history.selection
+          return (
+            this.$scope.history.loadingFileTree ||
+            (this.$scope.history.viewMode === HistoryViewModes.POINT_IN_TIME &&
+              selection.file &&
+              selection.file.loading) ||
+            (this.$scope.history.viewMode === HistoryViewModes.COMPARE &&
+              selection.diff &&
+              selection.diff.loading)
+          )
+        }
       }
 
       show() {
@@ -151,8 +149,6 @@ define([
             },
             diff: null,
             files: [],
-            update: null,
-            label: null,
             file: null
           },
           error: null,
@@ -186,8 +182,6 @@ define([
           },
           diff: null, // When history.viewMode == HistoryViewModes.COMPARE
           files: [], // When history.viewMode == HistoryViewModes.COMPARE
-          update: null, // When history.viewMode == HistoryViewModes.POINT_IN_TIME
-          label: null, // When history.viewMode == HistoryViewModes.POINT_IN_TIME
           file: null
         }
         this.$scope.history.error = null
@@ -221,9 +215,9 @@ define([
         } else {
           // Point-in-time mode
           if (this.$scope.history.showOnlyLabels) {
-            this.selectLabelFromUpdatesSelection()
+            this.autoSelectLabelForPointInTime()
           } else {
-            this.autoSelectLastVersionForPointInTime()
+            this.autoSelectVersionForPointInTime()
           }
         }
       }
@@ -288,14 +282,23 @@ define([
         let selection = this.$scope.history.selection
         const query = [`from=${fromV}`, `to=${toV}`]
         url += `?${query.join('&')}`
-        this.$scope.history.loadingFileTree = true
+
+        this.$scope.$applyAsync(
+          () => (this.$scope.history.loadingFileTree = true)
+        )
+
         selection.file = null
         selection.pathname = null
-        if (selection.diff) {
-          selection.diff.loading = true
+
+        // If `this._loadFileTreeRequestCanceller` is not null, then we have a request inflight
+        if (this._loadFileTreeRequestCanceller != null) {
+          // Resolving it will cancel the inflight request (or, rather, ignore its result)
+          this._loadFileTreeRequestCanceller.resolve()
         }
+        this._loadFileTreeRequestCanceller = this.ide.$q.defer()
+
         return this.ide.$http
-          .get(url)
+          .get(url, { timeout: this._loadFileTreeRequestCanceller.promise })
           .then(response => {
             this.$scope.history.selection.files = response.data.diff
             for (let file of this.$scope.history.selection.files) {
@@ -305,15 +308,15 @@ define([
                 delete file.newPathname
               }
             }
+            this._loadFileTreeRequestCanceller = null
+            this.$scope.history.loadingFileTree = false
             this.autoSelectFile()
           })
           .catch(err => {
-            console.error(err)
-          })
-          .finally(() => {
-            this.$scope.history.loadingFileTree = false
-            if (selection.diff) {
-              selection.diff.loading = true
+            if (err.status !== -1) {
+              this._loadFileTreeRequestCanceller = null
+            } else {
+              this.$scope.history.loadingFileTree = false
             }
           })
       }
@@ -380,7 +383,8 @@ define([
           return
         }
 
-        this.$scope.history.selection.range.toV = this.$scope.history.updates[0].toV
+        let toV = this.$scope.history.updates[0].toV
+        let fromV = null
 
         let indexOfLastUpdateNotByMe = 0
         for (let i = 0; i < this.$scope.history.updates.length; i++) {
@@ -394,19 +398,24 @@ define([
           indexOfLastUpdateNotByMe = i
         }
 
-        this.$scope.history.selection.range.fromV = this.$scope.history.updates[
-          indexOfLastUpdateNotByMe
-        ].fromV
+        fromV = this.$scope.history.updates[indexOfLastUpdateNotByMe].fromV
+        this.selectVersionsForCompare(toV, fromV)
       }
 
-      autoSelectLastVersionForPointInTime() {
-        this.$scope.history.selection.label = null
+      autoSelectVersionForPointInTime() {
         if (this.$scope.history.updates.length === 0) {
           return
         }
-        return this.selectVersionForPointInTime(
-          this.$scope.history.updates[0].toV
-        )
+        let versionToSelect = this.$scope.history.updates[0].toV
+        let range = this.$scope.history.selection.range
+        if (
+          range.toV != null &&
+          range.fromV != null &&
+          range.toV === range.fromV
+        ) {
+          versionToSelect = range.toV
+        }
+        this.selectVersionForPointInTime(versionToSelect)
       }
 
       autoSelectLastLabel() {
@@ -429,14 +438,27 @@ define([
 
       selectVersionForPointInTime(version) {
         let selection = this.$scope.history.selection
-        selection.range.toV = version
-        selection.range.fromV = version
-        selection.update = this._getUpdateForVersion(version)
-        this.loadFileTreeForVersion(version)
+        if (
+          selection.range.toV !== version &&
+          selection.range.fromV !== version
+        ) {
+          selection.range.toV = version
+          selection.range.fromV = version
+          this.loadFileTreeForVersion(version)
+        }
       }
 
-      selectLabelFromUpdatesSelection() {
-        const selectedUpdate = this._getUpdateForVersion(
+      selectVersionsForCompare(toV, fromV) {
+        let range = this.$scope.history.selection.range
+        if (range.toV !== toV || range.fromV !== fromV) {
+          range.toV = toV
+          range.fromV = fromV
+          this.loadFileTreeDiff(toV, fromV)
+        }
+      }
+
+      autoSelectLabelForPointInTime() {
+        const selectedUpdate = this.getUpdateForVersion(
           this.$scope.history.selection.range.toV
         )
         let nSelectedLabels = 0
@@ -450,9 +472,7 @@ define([
           this.autoSelectLastLabel()
           // If the update has one label, select it
         } else if (nSelectedLabels === 1) {
-          this.selectLabelForPointInTime(
-            this.$scope.history.selection.update.labels[0]
-          )
+          this.selectLabelForPointInTime(selectedUpdate.labels[0])
           // If there are multiple labels for the update, select the latest
         } else if (nSelectedLabels > 1) {
           const sortedLabels = this.ide.$filter('orderBy')(
@@ -479,19 +499,17 @@ define([
           }
         }
 
-        this.$scope.history.selection.label = labelToSelect
         if (updateToSelect != null) {
           this.selectVersionForPointInTime(updateToSelect.toV)
         } else {
           let selection = this.$scope.history.selection
           selection.range.toV = labelToSelect.version
           selection.range.fromV = labelToSelect.version
-          selection.update = null
           this.loadFileTreeForVersion(labelToSelect.version)
         }
       }
 
-      _getUpdateForVersion(version) {
+      getUpdateForVersion(version) {
         for (let update of this.$scope.history.updates) {
           if (update.toV === version) {
             return update
@@ -501,17 +519,16 @@ define([
 
       autoSelectLabelsForComparison() {
         let labels = this.$scope.history.labels
-        let selection = this.$scope.history.selection
         let nLabels = 0
         if (Array.isArray(labels)) {
           nLabels = labels.length
         }
-        if (nLabels === 1) {
-          selection.range.toV = labels[0].version
-          selection.range.fromV = labels[0].version
+        if (nLabels === 0) {
+          // TODO better handling
+        } else if (nLabels === 1) {
+          this.selectVersionsForCompare(labels[0].version, labels[0].version)
         } else if (nLabels > 1) {
-          selection.range.toV = labels[0].version
-          selection.range.fromV = labels[1].version
+          this.selectVersionsForCompare(labels[0].version, labels[1].version)
         }
       }
 
@@ -573,26 +590,27 @@ define([
 
       _loadLabels(labels, lastUpdateToV) {
         let sortedLabels = this._sortLabelsByVersionAndDate(labels)
+        let nLabels = sortedLabels.length
         let hasPseudoCurrentStateLabel = false
         let needsPseudoCurrentStateLabel = false
-        if (sortedLabels.length > 0 && lastUpdateToV) {
-          hasPseudoCurrentStateLabel = sortedLabels[0].isPseudoCurrentStateLabel
+        if (lastUpdateToV) {
+          hasPseudoCurrentStateLabel =
+            nLabels > 0 ? sortedLabels[0].isPseudoCurrentStateLabel : false
           if (hasPseudoCurrentStateLabel) {
             needsPseudoCurrentStateLabel =
-              sortedLabels.length > 1
-                ? sortedLabels[1].version !== lastUpdateToV
-                : false
+              nLabels > 1 ? sortedLabels[1].version !== lastUpdateToV : false
           } else {
             needsPseudoCurrentStateLabel =
-              sortedLabels[0].version !== lastUpdateToV
+              nLabels > 0 ? sortedLabels[0].version !== lastUpdateToV : true
           }
           if (needsPseudoCurrentStateLabel && !hasPseudoCurrentStateLabel) {
-            sortedLabels.unshift({
+            let pseudoCurrentStateLabel = {
               id: '1',
               isPseudoCurrentStateLabel: true,
               version: lastUpdateToV,
               created_at: new Date().toISOString()
-            })
+            }
+            sortedLabels.unshift(pseudoCurrentStateLabel)
           } else if (
             !needsPseudoCurrentStateLabel &&
             hasPseudoCurrentStateLabel
@@ -638,8 +656,6 @@ define([
 
       reloadDiff() {
         let { diff } = this.$scope.history.selection
-        // const { updates } = this.$scope.history.selection
-        // const { fromV, toV, pathname } = this._calculateDiffDataFromSelection()
         const { range, pathname } = this.$scope.history.selection
         const { fromV, toV } = range
 
@@ -654,7 +670,7 @@ define([
           diff.fromV === fromV &&
           diff.toV === toV
         ) {
-          return this.ide.$q.when(true)
+          return
         }
 
         this.$scope.history.selection.diff = diff = {
@@ -732,8 +748,11 @@ define([
       }
 
       _isLabelSelected(label) {
-        if (this.$scope.history.selection.label) {
-          return label.id === this.$scope.history.selection.label.id
+        if (label) {
+          return (
+            label.version <= this.$scope.history.selection.range.toV &&
+            label.version >= this.$scope.history.selection.range.fromV
+          )
         } else {
           return false
         }

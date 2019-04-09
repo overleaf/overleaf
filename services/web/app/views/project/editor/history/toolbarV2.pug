@@ -2,28 +2,32 @@
 	ng-controller="HistoryV2ToolbarController"
 	ng-if="ui.view == 'history' && history.isV2"
 )
-	span.history-toolbar-selected-version(ng-show="history.loadingFileTree || history.selection.diff.loading")
+	span.history-toolbar-selected-version(ng-show="history.loadingFileTree")
 		i.fa.fa-spin.fa-refresh
 		| &nbsp;&nbsp; #{translate("loading")}...
 
 	//- point-in-time mode info
 	span.history-toolbar-selected-version(
-		ng-show="!history.loadingFileTree && !history.showOnlyLabels && history.selection.update && !history.error"
+		ng-show="!history.loadingFileTree && history.viewMode === HistoryViewModes.POINT_IN_TIME && !history.showOnlyLabels && currentUpdate && !history.error"
 	) #{translate("browsing_project_as_of")}&nbsp;
-		time.history-toolbar-time {{ history.selection.update.meta.end_ts | formatDate:'Do MMM YYYY, h:mm a' }}
+		time.history-toolbar-time {{ currentUpdate.meta.end_ts | formatDate:'Do MMM YYYY, h:mm a' }}
 	span.history-toolbar-selected-version(
-		ng-show="!history.loadingFileTree && history.showOnlyLabels && history.selection.label && !history.error"
+		ng-show="!history.loadingFileTree && history.viewMode === HistoryViewModes.POINT_IN_TIME && history.showOnlyLabels && currentUpdate && !history.error"
 	) 
-		span(ng-if="history.selection.label.comment && !history.selection.label.isPseudoCurrentStateLabel") 
+		span(ng-if="currentUpdate.labels.length > 0") 
 			| #{translate("browsing_project_labelled")}&nbsp;
-			span.history-toolbar-selected-label "{{ history.selection.label.comment }}"
-		span.history-toolbar-selected-label(ng-if="history.selection.label.isPseudoCurrentStateLabel") 
+			span.history-toolbar-selected-label(
+				ng-repeat="label in currentUpdate.labels"
+			) 
+				| {{ label.comment }}
+				span(ng-if="!$last") , 
+		span.history-toolbar-selected-label(ng-if="currentUpdate.labels.length === 0 && history.labels[0].isPseudoCurrentStateLabel && currentUpdate.toV === history.labels[0].version")
 			| #{translate("browsing_project_latest_for_pseudo_label")}
 
 
 
 	//- compare mode info
-	span.history-toolbar-selected-version(ng-show="history.viewMode === HistoryViewModes.COMPARE && history.selection.diff && !history.selection.diff.binary && !history.selection.diff.loading && !history.selection.diff.error && !history.loadingFileTree")
+	span.history-toolbar-selected-version(ng-if="history.viewMode === HistoryViewModes.COMPARE && history.selection.diff && !history.selection.diff.binary && !history.selection.diff.loading && !history.selection.diff.error && !history.loadingFileTree")
 		| <strong>{{history.selection.diff.highlights.length}} </strong>
 		ng-pluralize(
 			count="history.selection.diff.highlights.length",
@@ -41,13 +45,13 @@
 		button.history-toolbar-btn(
 			ng-click="showAddLabelDialog();"
 			ng-if="!history.showOnlyLabels"
-			ng-disabled="history.loadingFileTree || history.selection.range.toV == null || history.selection.range.fromV == null"
+			ng-disabled="isHistoryLoading() || history.selection.range.toV == null || history.selection.range.fromV == null"
 		) 
 			i.fa.fa-tag
 			| &nbsp;#{translate("history_label_this_version")}
 		button.history-toolbar-btn(
 			ng-click="toggleHistoryViewMode();"
-			ng-disabled="history.loadingFileTree"
+			ng-disabled="isHistoryLoading()"
 		) 
 			i.fa.fa-exchange
 			| &nbsp;#{translate("compare_to_another_version")}
@@ -68,6 +72,7 @@
 	)
 		button.history-toolbar-btn(
 			ng-click="toggleHistoryViewMode();"
+			ng-disabled="isHistoryLoading()"
 		) 
 			i.fa
 			| #{translate("view_single_version")}
