@@ -23,7 +23,8 @@ module.exports = ShareJsUpdateManager =
 	applyUpdate: (project_id, doc_id, update, lines, version, callback = (error, updatedDocLines) ->) ->
 		logger.log project_id: project_id, doc_id: doc_id, update: update, "applying sharejs updates"
 		jobs = []
-
+		# record the update version before it is modified
+		incomingUpdateVersion = update.version
 		# We could use a global model for all docs, but we're hitting issues with the
 		# internal state of ShareJS not being accessible for clearing caches, and
 		# getting stuck due to queued callbacks (line 260 of sharejs/server/model.coffee)
@@ -44,7 +45,7 @@ module.exports = ShareJsUpdateManager =
 			model.getSnapshot doc_key, (error, data) =>
 				return callback(error) if error?
 				# only check hash when present and no other updates have been applied 
-				if update.hash? and update.v == version
+				if update.hash? and incomingUpdateVersion == version
 					ourHash = ShareJsUpdateManager._computeHash(data.snapshot)
 					return callback(new Error("Invalid hash")) if ourHash != update.hash
 				docLines = data.snapshot.split(/\r\n|\n|\r/)
