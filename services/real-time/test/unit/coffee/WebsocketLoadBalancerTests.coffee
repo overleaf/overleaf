@@ -73,18 +73,24 @@ describe "WebsocketLoadBalancer", ->
 		describe "with a designated room", ->
 			beforeEach ->
 				@io.sockets =
-					in: sinon.stub().returns(emit: @emit = sinon.stub())
+					clients: sinon.stub().returns([
+						{id: 'client-id-1', emit: @emit1 = sinon.stub()}
+						{id: 'client-id-2', emit: @emit2 = sinon.stub()}
+						{id: 'client-id-1', emit: @emit3 = sinon.stub()} # duplicate client
+					])
 				data = JSON.stringify
 					room_id: @room_id
 					message: @message
 					payload: @payload
 				@WebsocketLoadBalancer._processEditorEvent(@io, "editor-events", data)
 
-			it "should send the message to all clients in the room", ->
-				@io.sockets.in
+			it "should send the message to all (unique) clients in the room", ->
+				@io.sockets.clients
 					.calledWith(@room_id)
 					.should.equal true
-				@emit.calledWith(@message, @payload...).should.equal true
+				@emit1.calledWith(@message, @payload...).should.equal true
+				@emit2.calledWith(@message, @payload...).should.equal true
+				@emit3.called.should.equal false # duplicate client should be ignored
 
 		describe "when emitting to all", ->
 			beforeEach ->
