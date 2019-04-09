@@ -170,33 +170,23 @@ define(['utils/EventEmitter', 'libs/sharejs'], function(EventEmitter, ShareJs) {
       }
 
       _processQueue() {
-        while (this.queuedMessages.length > 0) {
+        if (this.queuedMessages.length > 0) {
           nextAvailableVersion = this.queuedMessages[0].v
-          if (nextAvailableVersion === this._doc.version) {
-            // if the right version is on the queue, apply it
+          if (nextAvailableVersion > this._doc.version) {
+            // there are updates we still can't apply yet
+          } else {
+            // there's a version we can accept on the queue, apply it
             sl_console.log(
               `[processUpdate] taken from queue ${nextAvailableVersion}`
             )
             this.processUpdateFromServerInOrder(this.queuedMessages.shift())
-            break
-          } else if (nextAvailableVersion < this._doc.version) {
-            // discard old updates if they are in the queue (since we are only
-            // putting updates ahead of the current version in the queue this
-            // shouldn't happen, but we handle it anyway for safety.)
-            sl_console.log(
-              `[processUpdate] discarded from queue ${nextAvailableVersion}`
-            )
-            this.queuedMessages.shift()
-          } else {
-            // there are updates we still can't apply yet
-            break
+            // clear the pending timer if the queue has now been cleared
+            if (this.queuedMessages.length === 0 && this.queuedMessageTimer) {
+              sl_console.log('[processUpdate] queue is empty, cleared timeout')
+              clearTimeout(this.queuedMessageTimer)
+              this.queuedMessageTimer = null
+            }
           }
-        }
-        // clear the pending timer if the queue has now been cleared
-        if (this.queuedMessages.length === 0 && this.queuedMessageTimer) {
-          sl_console.log('[processUpdate] queue is empty, cleared timeout')
-          clearTimeout(this.queuedMessageTimer)
-          this.queuedMessageTimer = null
         }
       }
 
