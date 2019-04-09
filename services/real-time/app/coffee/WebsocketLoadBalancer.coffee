@@ -39,7 +39,12 @@ module.exports = WebsocketLoadBalancer =
 			else if message.room_id?
 				if message._id?
 					EventLogger.checkEventOrder("editor-events", message._id, message)
-				io.sockets.in(message.room_id).emit(message.message, message.payload...)
+				# send messages only to unique clients (due to duplicate entries in io.sockets.clients)
+				clientList = io.sockets.clients(message.room_id)
+				seen = {}
+				for client in clientList when not seen[client.id]
+					seen[client.id] = true
+					client.emit(message.message, message.payload...)
 			else if message.health_check?
 				logger.debug {message}, "got health check message in editor events channel"
 		

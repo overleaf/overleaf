@@ -23,6 +23,7 @@ describe "DocumentUpdaterController", ->
 			"./SafeJsonParse": @SafeJsonParse =
 				parse: (data, cb) => cb null, JSON.parse(data)
 			"./EventLogger": @EventLogger = {checkEventOrder: sinon.stub()}
+			"metrics-sharelatex": @metrics = {inc: sinon.stub()}
 
 	describe "listenForUpdatesFromDocumentUpdater", ->
 		beforeEach ->
@@ -81,7 +82,7 @@ describe "DocumentUpdaterController", ->
 				v: @version = 42
 				doc: @doc_id
 			@io.sockets =
-				clients: sinon.stub().returns([@sourceClient, @otherClients...])
+				clients: sinon.stub().returns([@sourceClient, @otherClients..., @sourceClient]) # include a duplicate client
 		
 		describe "normally", ->
 			beforeEach ->
@@ -91,6 +92,7 @@ describe "DocumentUpdaterController", ->
 				@sourceClient.emit
 					.calledWith("otUpdateApplied", v: @version, doc: @doc_id)
 					.should.equal true
+				@sourceClient.emit.calledOnce.should.equal true
 
 			it "should get the clients connected to the document", ->
 				@io.sockets.clients
