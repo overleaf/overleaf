@@ -24,7 +24,7 @@
 			| ({{ reviewPanel.nVisibleSelectedChanges }})
 		a.rp-add-comment-btn(
 			href
-			ng-if="reviewPanel.entries[editor.open_doc_id]['add-comment'] != null"
+			ng-if="reviewPanel.entries[editor.open_doc_id]['add-comment'] != null && permissions.comment"
 			ng-click="addNewComment();"
 		) 
 			i.fa.fa-comment
