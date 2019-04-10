@@ -87,7 +87,7 @@ if settings.overleaf
 			)
 				i.icon.fa.fa-inbox(aria-hidden="true")
 			button.btn.btn-link.action-btn(
-				ng-if="!project.archived && !isOwner()"
+				ng-if="!isOwner()"
 				aria-label=translate('leave'),
 				tooltip=translate('leave'),
 				tooltip-placement="top",
