@@ -26,11 +26,11 @@ module.exports = EventLogger =
 			return # order is ok
 		if (count == previous)
 			metrics.inc "event.#{channel}.duplicate"
-			# logger.error {key:key, previous: previous, count:count, message:message}, "duplicate event"
+			logger.warn {channel:channel, message_id:message_id}, "duplicate event"
 			return "duplicate"
 		else
 			metrics.inc "event.#{channel}.out-of-order"
-			# logger.error {key:key, previous: previous, count:count, message:message}, "events out of order"
+			logger.warn {channel:channel, message_id:message_id, key:key, previous: previous, count:count}, "out of order event"
 			return "out-of-order"
 
 	_storeEventCount: (key, count) ->

@@ -24,7 +24,9 @@ module.exports = DocumentUpdaterController =
 				return
 			if message.op?
 				if message._id?
-					EventLogger.checkEventOrder("applied-ops", message._id, message)
+					status = EventLogger.checkEventOrder("applied-ops", message._id, message)
+					if status is 'duplicate'
+						return # skip duplicate events
 				DocumentUpdaterController._applyUpdateFromDocumentUpdater(io, message.doc_id, message.op)
 			else if message.error?
 				DocumentUpdaterController._processErrorFromDocumentUpdater(io, message.doc_id, message.error, message)
@@ -33,6 +35,11 @@ module.exports = DocumentUpdaterController =
 
 	_applyUpdateFromDocumentUpdater: (io, doc_id, update) ->
 		clientList = io.sockets.clients(doc_id)
+		# avoid unnecessary work if no clients are connected
+		if clientList.length is 0
+			return
+		# send updates to clients
+		logger.log doc_id: doc_id, version: update.v, source: update.meta?.source, socketIoClients: (client.id for client in clientList), "distributing updates to clients"
 		seen = {}
 		# send messages only to unique clients (due to duplicate entries in io.sockets.clients)
 		for client in clientList when not seen[client.id]
