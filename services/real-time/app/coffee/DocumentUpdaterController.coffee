@@ -15,6 +15,7 @@ module.exports = DocumentUpdaterController =
 	listenForUpdatesFromDocumentUpdater: (io) ->
 		rclient.subscribe "applied-ops"
 		rclient.on "message", (channel, message) ->
+			metrics.inc "rclient", 0.001 # global event rate metric
 			EventLogger.debugEvent(channel, message) if settings.debugEvents > 0
 			DocumentUpdaterController._processMessageFromDocumentUpdater(io, channel, message)
 		
