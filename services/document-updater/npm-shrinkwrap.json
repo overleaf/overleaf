@@ -831,7 +831,7 @@
     },
     "lodash": {
       "version": "4.17.4",
-      "from": "https://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz",
+      "from": "lodash@4.17.4",
       "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz"
     },
     "lodash.defaults": {
@@ -1142,7 +1142,7 @@
     },
     "mongojs": {
       "version": "2.6.0",
-      "from": "https://registry.npmjs.org/mongojs/-/mongojs-2.6.0.tgz",
+      "from": "mongojs@2.6.0",
       "resolved": "https://registry.npmjs.org/mongojs/-/mongojs-2.6.0.tgz"
     },
     "ms": {
