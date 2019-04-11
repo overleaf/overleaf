@@ -488,9 +488,9 @@
       "optional": true
     },
     "denque": {
-      "version": "1.4.0",
+      "version": "1.4.1",
       "from": "denque@>=1.1.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/denque/-/denque-1.4.0.tgz"
+      "resolved": "https://registry.npmjs.org/denque/-/denque-1.4.1.tgz"
     },
     "depd": {
       "version": "1.1.2",
@@ -868,9 +868,9 @@
       "resolved": "https://registry.npmjs.org/inherits/-/inherits-2.0.3.tgz"
     },
     "ioredis": {
-      "version": "4.6.0",
-      "from": "ioredis@4.6.0",
-      "resolved": "https://registry.npmjs.org/ioredis/-/ioredis-4.6.0.tgz",
+      "version": "4.6.3",
+      "from": "ioredis@>=4.6.0 <4.7.0",
+      "resolved": "https://registry.npmjs.org/ioredis/-/ioredis-4.6.3.tgz",
       "dependencies": {
         "debug": {
           "version": "3.2.6",
@@ -1443,14 +1443,14 @@
       }
     },
     "redis-sharelatex": {
-      "version": "1.0.5",
-      "from": "https://registry.npmjs.org/redis-sharelatex/-/redis-sharelatex-1.0.5.tgz",
-      "resolved": "https://registry.npmjs.org/redis-sharelatex/-/redis-sharelatex-1.0.5.tgz",
+      "version": "1.0.6",
+      "from": "git+https://github.com/sharelatex/redis-sharelatex.git#v1.0.6",
+      "resolved": "git+https://github.com/sharelatex/redis-sharelatex.git#0992345e17d204066654260ad718170bbd1018d6",
       "dependencies": {
         "async": {
-          "version": "2.6.1",
+          "version": "2.6.2",
           "from": "async@>=2.5.0 <3.0.0",
-          "resolved": "https://registry.npmjs.org/async/-/async-2.6.1.tgz"
+          "resolved": "https://registry.npmjs.org/async/-/async-2.6.2.tgz"
         },
         "coffee-script": {
           "version": "1.8.0",
@@ -1665,9 +1665,9 @@
       "resolved": "https://registry.npmjs.org/stack-trace/-/stack-trace-0.0.9.tgz"
     },
     "standard-as-callback": {
-      "version": "1.0.1",
+      "version": "1.0.2",
       "from": "standard-as-callback@>=1.0.0 <2.0.0",
-      "resolved": "https://registry.npmjs.org/standard-as-callback/-/standard-as-callback-1.0.1.tgz"
+      "resolved": "https://registry.npmjs.org/standard-as-callback/-/standard-as-callback-1.0.2.tgz"
     },
     "statsd-parser": {
       "version": "0.0.4",

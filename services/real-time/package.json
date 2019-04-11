@@ -30,7 +30,7 @@
     "express-session": "^1.9.1",
     "logger-sharelatex": "^1.6.0",
     "metrics-sharelatex": "^2.1.1",
-    "redis-sharelatex": "https://registry.npmjs.org/redis-sharelatex/-/redis-sharelatex-1.0.5.tgz",
+    "redis-sharelatex": "git+https://github.com/sharelatex/redis-sharelatex.git#v1.0.6",
     "request": "~2.34.0",
     "session.socket.io": "^0.1.6",
     "settings-sharelatex": "^1.1.0",
