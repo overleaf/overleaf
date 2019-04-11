@@ -23,16 +23,17 @@
     "async": "^2.5.0",
     "coffee-script": "~1.7.0",
     "express": "3.3.4",
+    "lodash": "https://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz",
     "logger-sharelatex": "^1.6.0",
     "lynx": "0.0.11",
     "metrics-sharelatex": "^2.1.1",
+    "mongojs": "https://registry.npmjs.org/mongojs/-/mongojs-2.6.0.tgz",
     "redis-sharelatex": "^1.0.5",
     "request": "2.25.0",
     "requestretry": "^1.12.0",
     "sandboxed-module": "~0.2.0",
     "settings-sharelatex": "^1.1.0",
-    "sinon": "~1.5.2",
-    "underscore": "1.2.2"
+    "sinon": "~1.5.2"
   },
   "devDependencies": {
     "bunyan": "~0.22.1",
