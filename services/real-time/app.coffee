@@ -53,6 +53,11 @@ app.get "/", (req, res, next) ->
 app.get "/status", (req, res, next) ->
 	res.send "real-time-sharelatex is alive"
 
+app.get "/debug/events", (req, res, next) ->
+	Settings.debugEvents = parseInt(req.query?.count,10) || 20
+	logger.log {count: Settings.debugEvents}, "starting debug mode"
+	res.send "debug mode will log next #{Settings.debugEvents} events"
+
 rclient = require("redis-sharelatex").createClient(Settings.redis.realtime)
 app.get "/health_check/redis", (req, res, next) ->
 	rclient.healthCheck (error) ->

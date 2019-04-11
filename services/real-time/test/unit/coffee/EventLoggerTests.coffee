@@ -10,7 +10,7 @@ describe 'EventLogger', ->
 		@start = Date.now()
 		tk.freeze(new Date(@start))
 		@EventLogger = SandboxedModule.require modulePath, requires:
-			"logger-sharelatex": @logger = {error: sinon.stub()}
+			"logger-sharelatex": @logger = {error: sinon.stub(), warn: sinon.stub()}
 			"metrics-sharelatex": @metrics = {inc: sinon.stub()}
 		@channel = "applied-ops"
 		@id_1 = "random-hostname:abc-1"
