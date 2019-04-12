@@ -16,7 +16,7 @@ form.row(
 					ng-repeat="userEmail in userEmails"
 				)
 					td
-						| {{ userEmail.email + (userEmail.default ? ' (default)' : '') }}
+						| {{ userEmail.email + (userEmail.default ? ' (primary)' : '') }}
 						div(ng-if="!userEmail.confirmedAt").small
 							strong #{translate('unconfirmed')}.
 							|
@@ -76,11 +76,12 @@ form.row(
 						)
 							button.btn.btn-sm.btn-success.affiliations-table-inline-action(
 								disabled
-							) #{translate("make_default")}
+							) #{translate("make_primary")}
 						button.btn.btn-sm.btn-success.affiliations-table-inline-action(
+							tooltip=translate("make_email_primary_description")
 							ng-if="!userEmail.default && (userEmail.confirmedAt && !ui.isMakingRequest)"
 							ng-click="setDefaultUserEmail(userEmail)"
-						) #{translate("make_default")}
+						) #{translate("make_primary")}
 						| &nbsp;
 						button.btn.btn-sm.btn-danger.affiliations-table-inline-action(
 							ng-if="!userEmail.default"
