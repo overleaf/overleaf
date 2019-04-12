@@ -30,4 +30,10 @@ module.exports =
 		# Called by the real-time API to load up the current project state.
 		# This is a post request because it's more than just a getting of data. We take actions
 		# whenever a user joins a project, like updating the deleted status.
-		apiRouter.post '/project/:Project_id/join', AuthenticationController.httpAuth, EditorHttpController.joinProject
+		apiRouter.post '/project/:Project_id/join', AuthenticationController.httpAuth,
+			RateLimiterMiddleware.rateLimit({
+				endpointName: "join-project"
+				params: ["Project_id"]
+				maxRequests: 30
+				timeInterval: 60
+			}), EditorHttpController.joinProject
