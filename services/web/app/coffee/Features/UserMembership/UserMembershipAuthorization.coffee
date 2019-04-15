@@ -80,7 +80,7 @@ module.exports = UserMembershipAuthorization =
 	requireEntityCreationAccess: (req, res, next) ->
 		loggedInUser = AuthenticationController.getSessionUser(req)
 		unless loggedInUser and hasEntityCreationAccess(loggedInUser)
-			return AuthorizationMiddlewear.redirectToRestricted req, res, next
+			return AuthorizationMiddleware.redirectToRestricted req, res, next
 		next()
 
 requireAccessToEntity = (entityName, entityId, req, res, next, requiredStaffAccess=null) ->
