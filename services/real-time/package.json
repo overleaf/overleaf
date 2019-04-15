@@ -31,7 +31,7 @@
     "logger-sharelatex": "^1.6.0",
     "metrics-sharelatex": "^2.1.1",
     "redis-sharelatex": "git+https://github.com/sharelatex/redis-sharelatex.git#v1.0.6",
-    "request": "~2.34.0",
+    "request": "^2.88.0",
     "session.socket.io": "^0.1.6",
     "settings-sharelatex": "^1.1.0",
     "socket.io": "0.9.16",
