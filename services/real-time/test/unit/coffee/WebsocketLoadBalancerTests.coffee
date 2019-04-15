@@ -13,6 +13,7 @@ describe "WebsocketLoadBalancer", ->
 			"./SafeJsonParse": @SafeJsonParse =
 				parse: (data, cb) => cb null, JSON.parse(data)
 			"./EventLogger": {checkEventOrder: sinon.stub()}
+			"./HealthCheckManager": {check: sinon.stub()}
 		@io = {}
 		@WebsocketLoadBalancer.rclientPub = publish: sinon.stub()
 		@WebsocketLoadBalancer.rclientSub =
