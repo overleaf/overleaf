@@ -23,6 +23,7 @@ describe "DocumentUpdaterController", ->
 			"./SafeJsonParse": @SafeJsonParse =
 				parse: (data, cb) => cb null, JSON.parse(data)
 			"./EventLogger": @EventLogger = {checkEventOrder: sinon.stub()}
+			"./HealthCheckManager": {check: sinon.stub()}
 			"metrics-sharelatex": @metrics = {inc: sinon.stub()}
 
 	describe "listenForUpdatesFromDocumentUpdater", ->

@@ -4,6 +4,7 @@ redis = require("redis-sharelatex")
 rclient = redis.createClient(settings.redis.documentupdater)
 SafeJsonParse = require "./SafeJsonParse"
 EventLogger = require "./EventLogger"
+HealthCheckManager = require "./HealthCheckManager"
 metrics = require "metrics-sharelatex"
 
 MESSAGE_SIZE_LOG_LIMIT = 1024 * 1024 # 1Mb
@@ -34,6 +35,7 @@ module.exports = DocumentUpdaterController =
 				DocumentUpdaterController._processErrorFromDocumentUpdater(io, message.doc_id, message.error, message)
 			else if message.health_check?
 				logger.debug {message}, "got health check message in applied ops channel"
+				HealthCheckManager.check channel, message.key
 
 	_applyUpdateFromDocumentUpdater: (io, doc_id, update) ->
 		clientList = io.sockets.clients(doc_id)

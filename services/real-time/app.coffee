@@ -20,6 +20,7 @@ SessionSockets = require('session.socket.io')
 CookieParser = require("cookie-parser")
 
 DrainManager = require("./app/js/DrainManager")
+HealthCheckManager = require("./app/js/HealthCheckManager")
 
 # Set up socket.io server
 app = express()
@@ -63,6 +64,10 @@ app.get "/health_check/redis", (req, res, next) ->
 	rclient.healthCheck (error) ->
 		if error?
 			logger.err {err: error}, "failed redis health check"
+			res.sendStatus 500
+		else if HealthCheckManager.isFailing()
+			status = HealthCheckManager.status()
+			logger.err {pubSubErrors: status}, "failed pubsub health check"
 			res.sendStatus 500
 		else
 			res.sendStatus 200
@@ -130,8 +135,9 @@ if Settings.continualPubsubTraffic
 	pubSubClient = redis.createClient(Settings.redis.documentupdater)
 
 	publishJob = (channel, cb)->
-		json = JSON.stringify({health_check:true, date: new Date().toString()})
+		checker = new HealthCheckManager(channel)
 		logger.debug {channel:channel}, "sending pub to keep connection alive"
+		json = JSON.stringify({health_check:true, key: checker.id, date: new Date().toString()})
 		pubSubClient.publish channel, json, (err)->
 			if err?
 				logger.err {err, channel}, "error publishing pubsub traffic to redis"
@@ -139,7 +145,7 @@ if Settings.continualPubsubTraffic
 
 	runPubSubTraffic = ->
 		async.map ["applied-ops", "editor-events"], publishJob, (err)->
-			setTimeout(runPubSubTraffic, 1000 * 60)
+			setTimeout(runPubSubTraffic, 1000 * 20)
 
 	runPubSubTraffic()
 

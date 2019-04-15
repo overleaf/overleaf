@@ -5,6 +5,7 @@ SafeJsonParse = require "./SafeJsonParse"
 rclientPub = redis.createClient(Settings.redis.realtime)
 rclientSub = redis.createClient(Settings.redis.realtime)
 EventLogger = require "./EventLogger"
+HealthCheckManager = require "./HealthCheckManager"
 
 module.exports = WebsocketLoadBalancer =
 	rclientPub: rclientPub
@@ -53,4 +54,5 @@ module.exports = WebsocketLoadBalancer =
 					client.emit(message.message, message.payload...)
 			else if message.health_check?
 				logger.debug {message}, "got health check message in editor events channel"
+				HealthCheckManager.check channel, message.key
 		
