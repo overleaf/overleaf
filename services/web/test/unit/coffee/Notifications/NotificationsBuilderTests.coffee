@@ -25,15 +25,14 @@ describe 'NotificationsBuilder', ->
 
 	it 'should call v1 and create affiliation notifications', (done)->
 		ip = '192.168.0.1'
-		@controller.ipMatcherAffiliation(user_id, ip).create (callback)=>
+		@controller.ipMatcherAffiliation(user_id).create ip, (callback)=>
 			@request.calledOnce.should.equal true
 			expectedOpts =
-				university_id: @body.id
 				university_name: @body.name
 				content: @body.enrolment_ad_html
 			@handler.createNotification.calledWith(
 				user_id,
-				 "ip-matched-affiliation-#{ip}",
+				 "ip-matched-affiliation-#{@body.id}",
 				 "notification_ip_matched_affiliation",
 				 expectedOpts
 			).should.equal true

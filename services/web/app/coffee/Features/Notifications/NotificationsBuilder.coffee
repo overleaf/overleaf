@@ -37,11 +37,9 @@ module.exports =
 		read:  (callback=()->) ->
 			NotificationsHandler.markAsReadByKeyOnly @key, callback
 
-	ipMatcherAffiliation: (userId, ip) ->
-		key: "ip-matched-affiliation-#{ip}"
-		create: (callback=()->) ->
+	ipMatcherAffiliation: (userId) ->
+		create: (ip, callback=()->) ->
 			return null unless settings?.apis?.v1?.url # service is not configured
-			_key = @key
 			request {
 				method: 'GET'
 				url: "#{settings.apis.v1.url}/api/v2/users/#{userId}/ip_matcher"
@@ -53,12 +51,13 @@ module.exports =
 				return error if error?
 				return null unless response.statusCode == 200
 
+				key = "ip-matched-affiliation-#{body.id}"
 				messageOpts =
-					university_id: body.id
 					university_name: body.name
 					content: body.enrolment_ad_html
-				logger.log user_id:userId, key:_key, "creating notification key for user"
-				NotificationsHandler.createNotification userId, _key, "notification_ip_matched_affiliation", messageOpts, null, false, callback
+				logger.log user_id:userId, key:key, "creating notification key for user"
+				NotificationsHandler.createNotification userId, key, "notification_ip_matched_affiliation", messageOpts, null, false, callback
 
-		read: (callback = ->)->
-			NotificationsHandler.markAsReadWithKey userId, @key, callback
+		read: (university_id, callback = ->)->
+			key = "ip-matched-affiliation-#{university_id}"
+			NotificationsHandler.markAsReadWithKey userId, key, callback

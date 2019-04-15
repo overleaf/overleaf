@@ -13,11 +13,14 @@ describe "InstitutionsAPI", ->
 		@logger = err: sinon.stub(), log: ->
 		@settings = apis: { v1: { url: 'v1.url', user: '', pass: '' } }
 		@request = sinon.stub()
+		@ipMatcherNotification = read: @markAsReadIpMatcher = sinon.stub().callsArgWith(1, null)
 		@InstitutionsAPI = SandboxedModule.require modulePath, requires:
 			"logger-sharelatex": @logger
 			"metrics-sharelatex": timeAsyncMethod: sinon.stub()
 			'settings-sharelatex': @settings
 			'request': @request
+			"../Notifications/NotificationsBuilder":
+				 ipMatcherAffiliation: sinon.stub().returns(@ipMatcherNotification)
 
 		@stubbedUser = 
 			_id: "3131231"
@@ -126,6 +129,7 @@ describe "InstitutionsAPI", ->
 				body.department.should.equal affiliationOptions.department
 				body.role.should.equal affiliationOptions.role
 				body.confirmedAt.should.equal affiliationOptions.confirmedAt
+				@markAsReadIpMatcher.calledOnce.should.equal true
 				done()
 
 		it 'handle error', (done)->

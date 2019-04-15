@@ -2,6 +2,7 @@ logger = require("logger-sharelatex")
 metrics = require("metrics-sharelatex")
 settings = require "settings-sharelatex"
 request = require "request"
+NotificationsBuilder = require("../Notifications/NotificationsBuilder")
 
 module.exports = InstitutionsAPI =
 	getInstitutionAffiliations: (institutionId, callback = (error, body) ->) ->
@@ -26,7 +27,6 @@ module.exports = InstitutionsAPI =
 			defaultErrorMessage: "Couldn't get user affiliations"
 		}, (error, body) -> callback(error, body or [])
 
-
 	addAffiliation: (userId, email, affiliationOptions, callback) ->
 		unless callback? # affiliationOptions is optional
 			callback = affiliationOptions
@@ -38,8 +38,15 @@ module.exports = InstitutionsAPI =
 			path: "/api/v2/users/#{userId.toString()}/affiliations"
 			body: { email, university, department, role, confirmedAt }
 			defaultErrorMessage: "Couldn't create affiliation"
-		}, callback
-
+		}, (error, body) ->
+			if error
+				return callback(error, body)
+			# have notifications delete any ip matcher notifications for this university
+			logger.log university
+			NotificationsBuilder.ipMatcherAffiliation(userId).read university?.id, (err) ->
+				if err
+					logger.err err:err, "Something went wrong marking ip notifications read"
+				callback(error, body)
 
 	removeAffiliation: (userId, email, callback = (error) ->) ->
 		makeAffiliationRequest {
