@@ -252,6 +252,7 @@ describe "UpdateManager", ->
 						@project_id,
 						@doc_id,
 						@version,
+						@pathname,
 						@lines,
 						@ranges
 					)

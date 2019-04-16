@@ -85,17 +85,24 @@ module.exports = UpdateManager =
 					UpdateManager._addProjectHistoryMetadataToOps(appliedOps, pathname, projectHistoryId, lines)
 					profile.log("RangesManager.applyUpdate")
 					return callback(error) if error?
-					if ranges_were_collapsed
-						logger.log {project_id, doc_id, previousVersion, lines, ranges, update}, "update collapsed some ranges, snapshotting previous content"
-						SnapshotManager.recordSnapshot project_id, doc_id, previousVersion, lines, ranges, (error) ->
-							if error?
-								logger.error {err: error, project_id, doc_id, version, lines, ranges}, "error recording snapshot"
 					RedisManager.updateDocument project_id, doc_id, updatedDocLines, version, appliedOps, new_ranges, (error, doc_ops_length, project_ops_length) ->
 						profile.log("RedisManager.updateDocument")
 						return callback(error) if error?
 						HistoryManager.recordAndFlushHistoryOps project_id, doc_id, appliedOps, doc_ops_length, project_ops_length, (error) ->
 							profile.log("recordAndFlushHistoryOps")
-							callback(error)
+							return callback(error) if error?
+							if ranges_were_collapsed
+								logger.log {project_id, doc_id, previousVersion, lines, ranges, update}, "update collapsed some ranges, snapshotting previous content"
+								# Do this last, since it's a mongo call, and so potentially longest running
+								# If it overruns the lock, it's ok, since all of our redis work is done
+								SnapshotManager.recordSnapshot project_id, doc_id, previousVersion, pathname, lines, ranges, (error) ->
+									if error?
+										logger.error {err: error, project_id, doc_id, version, lines, ranges}, "error recording snapshot"
+										return callback(error)
+									else
+										callback()
+							else
+								callback()
 
 	lockUpdatesAndDo: (method, project_id, doc_id, args..., callback) ->
 		profile = new Profiler("lockUpdatesAndDo", {project_id, doc_id})

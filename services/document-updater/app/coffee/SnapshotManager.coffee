@@ -1,17 +1,20 @@
 {db, ObjectId} = require "./mongojs"
 
 module.exports = SnapshotManager =
-  recordSnapshot: (project_id, doc_id, version, lines, ranges, callback) ->
+  recordSnapshot: (project_id, doc_id, version, pathname, lines, ranges, callback) ->
     try
       project_id = ObjectId(project_id)
       doc_id = ObjectId(doc_id)
     catch error
       return callback(error)
     db.docSnapshots.insert {
-      project_id, doc_id, version, lines
+      project_id, doc_id, version, lines, pathname,
       ranges: SnapshotManager.jsonRangesToMongo(ranges),
       ts: new Date()
     }, callback
+    # Suggested indexes:
+    #   db.docSnapshots.createIndex({project_id:1, doc_id:1})
+    #   db.docSnapshots.createIndex({ts:1},{expiresAfterSeconds: 30*24*3600)) # expires after 30 days
 
   jsonRangesToMongo: (ranges) ->
     return null if !ranges?

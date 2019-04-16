@@ -311,7 +311,7 @@ describe "Ranges", ->
 				expect(ranges.changes).to.be.undefined
 				done()
 
-	describe.only "deleting text surrounding a comment", ->
+	describe "deleting text surrounding a comment", ->
 		before (done) ->
 			@project_id = DocUpdaterClient.randomId()
 			@user_id = DocUpdaterClient.randomId()
