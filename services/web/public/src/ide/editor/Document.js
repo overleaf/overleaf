@@ -665,6 +665,10 @@ define([
         }
         meta.doc_id = this.doc_id
         sl_console.log('ShareJS error', error, meta)
+        if (error.message === 'no project_id found on client') {
+          sl_console.log('ignoring error, will wait to join project')
+          return
+        }
         if (typeof ga === 'function') {
           ga(
             'send',
