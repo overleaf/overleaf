@@ -1311,7 +1311,7 @@ define(['ace/ace','libs/sha1'], function () {
         // console.log "SENDING OP TO SERVER", @inflightOp, @version
         var lastVersion = this.__lastVersion;
         this.__lastVersion = this.version;
-        return this.connection.send({ doc: this.name, op: this.inflightOp, v: this.version, lastV: lastVersion, hash: this.inflightOp.sha1});
+        return this.connection.send({ doc: this.name, op: this.inflightOp, v: this.version, lastV: lastVersion, hash: sha1});
       }
 
       // Submit an op to the server. The op maybe held for a little while before being sent, as only one
