@@ -26,7 +26,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['ace/ace'], function () {
+define(['ace/ace','libs/sha1'], function () {
   var append = void 0,
       bootstrapTransform = void 0,
       exports = void 0,
@@ -1303,10 +1303,15 @@ define(['ace/ace'], function () {
 
         this.emit('flipped_pending_to_inflight');
 
+        if (window.sl_debugging) {
+          // send git hash of current snapshot when debugging
+          var sha1 = CryptoJS.SHA1("blob " + this.snapshot.length + "\x00" + this.snapshot).toString()
+        }
+
         // console.log "SENDING OP TO SERVER", @inflightOp, @version
         var lastVersion = this.__lastVersion;
         this.__lastVersion = this.version;
-        return this.connection.send({ doc: this.name, op: this.inflightOp, v: this.version, lastV: lastVersion});
+        return this.connection.send({ doc: this.name, op: this.inflightOp, v: this.version, lastV: lastVersion, hash: this.inflightOp.sha1});
       }
 
       // Submit an op to the server. The op maybe held for a little while before being sent, as only one

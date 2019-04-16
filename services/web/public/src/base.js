@@ -99,6 +99,7 @@ define([
       x.match(/debug=true/)
     ) != null
   var sl_console_last_log = null
+  window.sl_debugging = sl_debugging // make a global flag for debugging code
   window.sl_console = {
     log(...args) {
       if (sl_debugging) {
