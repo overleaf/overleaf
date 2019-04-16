@@ -37,7 +37,6 @@ define(['base'], App =>
         } else {
           element.addClass('no-animate')
         }
-        sl_console.log('LAYOUT')
         if (scope.ui.reviewPanelOpen) {
           PADDING = 8
           TOOLBAR_HEIGHT = 38

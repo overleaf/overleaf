@@ -98,9 +98,17 @@ define([
     __guard__(window.location != null ? window.location.search : undefined, x =>
       x.match(/debug=true/)
     ) != null
+  var sl_console_last_log = null
   window.sl_console = {
     log(...args) {
       if (sl_debugging) {
+        sl_console_last_log = null
+        return console.log(...Array.from(args || []))
+      }
+    },
+    logOnce(...args) {
+      if (sl_debugging && args[0] !== sl_console_last_log) {
+        sl_console_last_log = args[0]
         return console.log(...Array.from(args || []))
       }
     }

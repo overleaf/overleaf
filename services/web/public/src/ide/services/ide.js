@@ -36,6 +36,7 @@ define(['base'], function(App) {
         if (meta == null) {
           meta = {}
         }
+        sl_console.log('event', type, meta)
         this.recentEvents.push({ type, meta, date: new Date() })
         if (this.recentEvents.length > 100) {
           return this.recentEvents.shift()
