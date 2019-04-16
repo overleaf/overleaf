@@ -164,6 +164,7 @@ define(['base'], App =>
           // do v3 captcha to collect data only
           validateCaptchaV3('invite')
           // do v2 captcha
+          const ExposedSettings = window.ExposedSettings
           return validateCaptcha(function(response) {
             let inviteId, request
             $scope.grecaptchaResponse = response
@@ -231,7 +232,7 @@ define(['base'], App =>
                   return ($scope.state.errorReason = null)
                 }
               })
-          })
+          }, ExposedSettings.recaptchaDisabled.invite)
         })()
       }
 
