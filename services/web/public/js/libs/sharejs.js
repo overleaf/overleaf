@@ -1304,7 +1304,9 @@ define(['ace/ace'], function () {
         this.emit('flipped_pending_to_inflight');
 
         // console.log "SENDING OP TO SERVER", @inflightOp, @version
-        return this.connection.send({ doc: this.name, op: this.inflightOp, v: this.version });
+        var lastVersion = this.__lastVersion;
+        this.__lastVersion = this.version;
+        return this.connection.send({ doc: this.name, op: this.inflightOp, v: this.version, lastV: lastVersion});
       }
 
       // Submit an op to the server. The op maybe held for a little while before being sent, as only one
