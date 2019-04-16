@@ -3,7 +3,7 @@ chai = require('chai')
 should = chai.should()
 modulePath = "../../../../app/js/ProjectManager.js"
 SandboxedModule = require('sandboxed-module')
-_ = require('underscore')
+_ = require('lodash')
 
 describe "ProjectManager", ->
 	beforeEach ->

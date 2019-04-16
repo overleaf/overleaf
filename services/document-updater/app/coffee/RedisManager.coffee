@@ -1,6 +1,5 @@
 Settings = require('settings-sharelatex')
 rclient = require("redis-sharelatex").createClient(Settings.redis.documentupdater)
-_ = require('underscore')
 logger = require('logger-sharelatex')
 metrics = require('./Metrics')
 Errors = require "./Errors"

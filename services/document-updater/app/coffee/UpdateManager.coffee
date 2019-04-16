@@ -4,13 +4,14 @@ RealTimeRedisManager = require "./RealTimeRedisManager"
 ShareJsUpdateManager = require "./ShareJsUpdateManager"
 HistoryManager = require "./HistoryManager"
 Settings = require('settings-sharelatex')
-_ = require("underscore")
+_ = require("lodash")
 async = require("async")
 logger = require('logger-sharelatex')
 Metrics = require "./Metrics"
 Errors = require "./Errors"
 DocumentManager = require "./DocumentManager"
 RangesManager = require "./RangesManager"
+SnapshotManager = require "./SnapshotManager"
 Profiler = require "./Profiler"
 
 module.exports = UpdateManager =
@@ -76,10 +77,11 @@ module.exports = UpdateManager =
 			return callback(error) if error?
 			if !lines? or !version?
 				return callback(new Errors.NotFoundError("document not found: #{doc_id}"))
+			previousVersion = version
 			ShareJsUpdateManager.applyUpdate project_id, doc_id, update, lines, version, (error, updatedDocLines, version, appliedOps) ->
 				profile.log("sharejs.applyUpdate")
 				return callback(error) if error?
-				RangesManager.applyUpdate project_id, doc_id, ranges, appliedOps, updatedDocLines, (error, new_ranges) ->
+				RangesManager.applyUpdate project_id, doc_id, ranges, appliedOps, updatedDocLines, (error, new_ranges, ranges_were_collapsed) ->
 					UpdateManager._addProjectHistoryMetadataToOps(appliedOps, pathname, projectHistoryId, lines)
 					profile.log("RangesManager.applyUpdate")
 					return callback(error) if error?
@@ -88,7 +90,19 @@ module.exports = UpdateManager =
 						return callback(error) if error?
 						HistoryManager.recordAndFlushHistoryOps project_id, doc_id, appliedOps, doc_ops_length, project_ops_length, (error) ->
 							profile.log("recordAndFlushHistoryOps")
-							callback(error)
+							return callback(error) if error?
+							if ranges_were_collapsed
+								logger.log {project_id, doc_id, previousVersion, lines, ranges, update}, "update collapsed some ranges, snapshotting previous content"
+								# Do this last, since it's a mongo call, and so potentially longest running
+								# If it overruns the lock, it's ok, since all of our redis work is done
+								SnapshotManager.recordSnapshot project_id, doc_id, previousVersion, pathname, lines, ranges, (error) ->
+									if error?
+										logger.error {err: error, project_id, doc_id, version, lines, ranges}, "error recording snapshot"
+										return callback(error)
+									else
+										callback()
+							else
+								callback()
 
 	lockUpdatesAndDo: (method, project_id, doc_id, args..., callback) ->
 		profile = new Profiler("lockUpdatesAndDo", {project_id, doc_id})

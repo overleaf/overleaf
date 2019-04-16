@@ -4,11 +4,15 @@ chai.should()
 expect = chai.expect
 async = require "async"
 
+{db, ObjectId} = require "../../../app/js/mongojs"
 MockWebApi = require "./helpers/MockWebApi"
 DocUpdaterClient = require "./helpers/DocUpdaterClient"
 DocUpdaterApp = require "./helpers/DocUpdaterApp"
 
 describe "Ranges", ->
+	before (done) ->
+		DocUpdaterApp.ensureRunning done
+
 	describe "tracking changes from ops", ->
 		before (done) ->
 			@project_id = DocUpdaterClient.randomId()
@@ -306,3 +310,63 @@ describe "Ranges", ->
 				ranges = data.ranges
 				expect(ranges.changes).to.be.undefined
 				done()
+
+	describe "deleting text surrounding a comment", ->
+		before (done) ->
+			@project_id = DocUpdaterClient.randomId()
+			@user_id = DocUpdaterClient.randomId()
+			@doc_id = DocUpdaterClient.randomId()
+			MockWebApi.insertDoc @project_id, @doc_id, {
+				lines: ["foo bar baz"]
+				version: 0
+				ranges: {
+					comments: [{
+						op: { c: "a", p: 5, tid: @tid = DocUpdaterClient.randomId() }
+						metadata:
+							user_id: @user_id
+							ts: new Date()
+					}]
+				}
+			}
+			@updates = [{
+				doc: @doc_id
+				op: [{ d: "foo ", p: 0 }]
+				v: 0
+				meta: { user_id: @user_id }
+			}, {
+				doc: @doc_id
+				op: [{ d: "bar ", p: 0 }]
+				v: 1
+				meta: { user_id: @user_id }
+			}]
+			jobs = []
+			for update in @updates
+				do (update) =>
+					jobs.push (callback) => DocUpdaterClient.sendUpdate @project_id, @doc_id, update, callback
+			DocUpdaterClient.preloadDoc @project_id, @doc_id, (error) =>
+				throw error if error?
+				async.series jobs, (error) ->
+					throw error if error?
+					setTimeout () =>
+						DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, data) =>
+							throw error if error?
+							done()
+					, 200
+		
+		it "should write a snapshot from before the destructive change", (done) ->
+			DocUpdaterClient.getDoc @project_id, @doc_id, (error, res, data) =>
+				return done(error) if error?
+				db.docSnapshots.find {
+					project_id: ObjectId(@project_id),
+					doc_id: ObjectId(@doc_id)
+				}, (error, docSnapshots) =>
+					return done(error) if error?
+					expect(docSnapshots.length).to.equal 1
+					expect(docSnapshots[0].version).to.equal 1
+					expect(docSnapshots[0].lines).to.deep.equal ["bar baz"]
+					expect(docSnapshots[0].ranges.comments[0].op).to.deep.equal {
+						c: "a",
+						p: 1,
+						tid: @tid
+					}
+					done()

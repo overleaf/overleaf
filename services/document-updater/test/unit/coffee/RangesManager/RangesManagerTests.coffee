@@ -50,8 +50,9 @@ describe "RangesManager", ->
 			
 			it "should return the modified the comments and changes", ->
 				@callback.called.should.equal true
-				[error, entries] = @callback.args[0]
+				[error, entries, ranges_were_collapsed] = @callback.args[0]
 				expect(error).to.be.null
+				expect(ranges_were_collapsed).to.equal false
 				entries.comments[0].op.should.deep.equal {
 					c: "three "
 					p: 8
@@ -179,6 +180,36 @@ describe "RangesManager", ->
 				[error, entries] = @callback.args[0]
 				expect(error).to.not.be.null
 				expect(error.message).to.equal("Change ({\"op\":{\"i\":\"five\",\"p\":15},\"metadata\":{\"user_id\":\"user-id-123\"}}) doesn't match text (\"our \")")
+
+
+		describe "with an update that collapses a range", ->
+			beforeEach ->
+				@updates = [{
+					meta:
+						user_id: @user_id
+					op: [{
+						d: "one"
+						p: 0
+						t: "thread-id-1"
+					}]
+				}]
+				@entries = {
+					comments: [{
+						op:
+							c: "n"
+							p: 1
+							t: "thread-id-2"
+						metadata:
+							user_id: @user_id
+					}]
+					changes: []
+				}
+				@RangesManager.applyUpdate @project_id, @doc_id, @entries, @updates, @newDocLines, @callback
+
+			it "should return ranges_were_collapsed == true", ->
+				@callback.called.should.equal true
+				[error, entries, ranges_were_collapsed] = @callback.args[0]
+				expect(ranges_were_collapsed).to.equal true
 
 	describe "acceptChanges", ->
 		beforeEach ->
