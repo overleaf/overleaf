@@ -12,50 +12,6 @@
 	padding-right: 15px;
 }
 
-.project-list-sidebar-survey {
-	position: relative;
-	font-size: @font-size-small;
-	background-color: @v2-dash-pane-bg;
-	color: @v2-dash-pane-subdued-color;
-	padding: @folders-menu-item-v-padding 20px @folders-menu-item-v-padding @folders-menu-item-h-padding;
-	&::before {
-		content: '';
-		display: block;
-		height: 15px;
-		background-image: linear-gradient(to top, rgba(0, 0, 0, 0.1), transparent);
-		position: absolute;
-		bottom: 100%;
-		width: 100%;
-		left: 0;
-	}
-}
-	.project-list-sidebar-survey-link {
-		color: @v2-dash-pane-color;
-		font-weight: bold;
-		&:hover,
-		&:active,
-		&:focus {
-			text-decoration: none;
-			color: @v2-dash-pane-color;
-		}
-	}
-
-	.project-list-sidebar-survey-dismiss {
-		.btn-inline-link;
-		position: absolute;
-		top: @folders-menu-item-v-padding;
-		right: @folders-menu-item-v-padding;
-		font-size: @font-size-base;
-		line-height: 1;
-		color: @v2-dash-pane-color;
-		&:hover,
-		&:active,
-		&:focus {
-			text-decoration: none;
-			color: @v2-dash-pane-color;
-		}
-	}
-
 .project-list-sidebar-v2-pane {
 	flex-grow: 0;
 	flex-shrink: 0;

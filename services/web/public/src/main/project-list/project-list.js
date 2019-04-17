@@ -39,36 +39,6 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
       $scope.comparator =
         newValue === 'ownerName' ? ownerNameComparator : defaultComparator
     })
-    $scope.shouldShowSurveyLink = false
-
-    const surveyStartDate = new Date(2019, 3, 2)
-
-    if (
-      localStorage('dismissed-survey') === true ||
-      new Date() < surveyStartDate
-    ) {
-      $scope.shouldShowSurveyLink = false
-    } else {
-      const _v2LaunchDate = new Date(2019, 0, 8)
-      let _nRecentProjects = 0
-
-      for (let project of $scope.projects) {
-        if (
-          project.accessLevel === 'owner' &&
-          new Date(project.lastUpdated) > _v2LaunchDate
-        ) {
-          if (++_nRecentProjects > 1) {
-            $scope.shouldShowSurveyLink = true
-            break
-          }
-        }
-      }
-    }
-
-    $scope.dismissSurvey = () => {
-      localStorage('dismissed-survey', true)
-      $scope.shouldShowSurveyLink = false
-    }
 
     $timeout(() => recalculateProjectListHeight(), 10)
 

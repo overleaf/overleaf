@@ -87,24 +87,6 @@ block content
 						aside.project-list-sidebar
 							include ./list/side-bar
 
-						.project-list-sidebar-survey(
-							ng-if="shouldShowSurveyLink"
-						)
-							| Let us know what you think about the new Overleaf by 
-							a.project-list-sidebar-survey-link(
-								href="https://digitalscienceta.qualtrics.com/jfe/form/SV_3sMm9UAnx7ptpjL?source=dashboard"
-								target="_blank"
-								rel="noreferrer noopener"
-							) taking our survey
-							| .
-							button.project-list-sidebar-survey-dismiss(
-								type="button"
-								title="Dismiss survey notice"
-								ng-click="dismissSurvey()"
-							)
-								span(
-									aria-hidden="true"
-								) &times;
 						if hasFeature('v1-return-message')
 							.project-list-sidebar-v2-pane(ng-controller="OverleafV1NotificationController")
 								div
