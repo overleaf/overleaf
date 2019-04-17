@@ -2,7 +2,7 @@
 	ng-if="history.isV2 && history.viewMode === HistoryViewModes.COMPARE"
 )
 	.diff(
-		ng-if="!!history.selection.diff && !isHistoryLoading() && !history.selection.diff.error",
+		ng-show="!!history.selection.diff && !isHistoryLoading() && !history.selection.diff.error",
 		ng-class="{ 'diff-binary': history.selection.diff.binary }"
 	)
 		.diff-editor-v2.hide-ace-cursor(

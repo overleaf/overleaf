@@ -103,7 +103,7 @@
     margin: 0;
     background-color: @navbar-default-bg;
     border-bottom: solid 1px @navbar-default-border;
-    padding: 0 @navbar-default-padding-h;
+    padding: 0;
 
     @media (min-width: @grid-float-breakpoint) {
       // Get back to regular layout mode as soon as the menu items are 
@@ -217,8 +217,6 @@
 .navbar-toggle {
   position: relative;
   float: right;
-  margin-right: @navbar-padding-horizontal;
-  //.navbar-vertical-align(34px);
   background-color: transparent;
   background-image: none; // Reset unusual Firefox-on-Android default style; see https://github.com/necolas/normalize.css/issues/214
   border: 2px solid @navbar-default-link-color;
@@ -251,6 +249,7 @@
   }
 
   @media (max-width: @grid-float-breakpoint-max) {
+    margin: (@navbar-padding-vertical / 2) 0;
     // Dropdowns get custom display when collapsed
     .open .dropdown-menu {
       position: static;
@@ -261,15 +260,22 @@
       border: 0;
       box-shadow: none;
       > li > a,
+      > li > div.subdued,
+      > li > form > button,
       .dropdown-header {
         padding: 5px 15px 5px 25px;
       }
-      > li > a {
+      > li > a,
+      > li > form > button {
         line-height: @line-height-computed;
         &:hover,
         &:focus {
           background-image: none;
         }
+      }
+      > li > div.subdued {
+        line-height: @line-height-computed;
+
       }
     }
   }
@@ -431,12 +437,15 @@
     > li > a {
       color: @navbar-default-link-color;
       border: 2px solid transparent;
-      border-radius: @navbar-btn-border-radius;
       font-size: @navbar-btn-font-size;
       font-weight: @navbar-btn-font-weight;
       line-height: @navbar-btn-line-height;
-      padding: @navbar-btn-padding;
       background-color: @navbar-default-link-bg;
+
+      @media (min-width: @grid-float-breakpoint) {
+        border-radius: @navbar-btn-border-radius;
+        padding: @navbar-btn-padding;
+      }
 
       &:hover,
       &:focus {
@@ -465,7 +474,6 @@
     > li.subdued > a {
       border: 0;
       color: @navbar-subdued-color;
-      padding: @navbar-subdued-padding;
       margin-left: 0;
       background-color: transparent;
       &:hover,
@@ -475,6 +483,9 @@
       }
       &:focus {
         .tab-focus()
+      }
+      @media (min-width: @grid-float-breakpoint) {
+        padding: @navbar-subdued-padding;
       }
     }
 
@@ -502,6 +513,9 @@
     border-color: @navbar-default-border;
   }
 
+  .navbar-collapse.in {
+    box-shadow: 0 10px 15px rgba(0, 0, 0, .25);
+  }
   // Dropdown menu items
   .navbar-nav {
     // Remove background color from open dropdown
@@ -526,12 +540,13 @@
     @media (max-width: @grid-float-breakpoint-max) {
       // Dropdowns get custom display when collapsed
       .open .dropdown-menu {
-        > li > a {
-          border-radius: @border-radius-base;
-          font-size: @font-size-base * .8;
-          font-weight: 700;
-          line-height: 1;
-          padding: 12px 12px 13px 30px;
+        background-color: lighten(@navbar-default-bg, 10%);
+        > li > div.subdued {
+          color: mix(@navbar-default-link-color, @navbar-default-bg);
+        }
+        > li > a,
+        > li > form > button {
+          // padding: 12px 12px 13px 30px;
           color: @navbar-default-link-color;
           &:hover,
           &:focus {
@@ -539,7 +554,8 @@
             background-color: @navbar-default-link-hover-bg;
           }
         }
-        > .active > a {
+        > .active > a,
+        > .active > form > button {
           &,
           &:hover,
           &:focus {
@@ -547,7 +563,8 @@
             background-color: @navbar-default-link-active-bg;
           }
         }
-        > .disabled > a {
+        > .disabled > a,
+        > .disabled > form > button {
           &,
           &:hover,
           &:focus {

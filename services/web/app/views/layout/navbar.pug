@@ -77,19 +77,19 @@ nav.navbar.navbar-default.navbar-main
 					li
 						a(href="/project") #{translate('Projects')}
 					li.dropdown(dropdown)
-						a.dropbodw-toggle(href, dropdown-toggle)
+						a.dropdown-toggle(href, dropdown-toggle)
 							| #{translate('Account')}
 							b.caret
 						ul.dropdown-menu
 							li
 								div.subdued(ng-non-bindable) #{getUserEmail()}
-							li.divider
+							li.divider.hidden-xs.hidden-sm
 							li
 								a(href="/user/settings") #{translate('Account Settings')}
 							if nav.showSubscriptionLink
 								li
 									a(href="/user/subscription") #{translate('subscription')}
-							li.divider
+							li.divider.hidden-xs.hidden-sm
 							li
 								form(method="POST" action="/logout")
 									input(name='_csrf', type='hidden', value=csrfToken)
