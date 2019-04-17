@@ -1,8 +1,5 @@
 .row
 	.col-xs-12(ng-cloak)
-
-
-
 		form.project-search.form-horizontal(role="form")
 			.form-group.has-feedback.has-feedback-left.col-md-7.col-xs-12
 				input.form-control.col-md-7.col-xs-12(
@@ -154,18 +151,18 @@
 								i.tablesort.fa(ng-class="getSortIconClass('name')" aria-hidden="true")
 							button.sr-only(ng-click="changePredicate('name')") Sort by #{translate("title")}
 						.col-xs-2
-							span.header.clickable(ng-click="changePredicate('accessLevel')") #{translate("owner")}
-								i.tablesort.fa(ng-class="getSortIconClass('accessLevel')" aria-hidden="true")
-							button.sr-only(ng-click="changePredicate('accessLevel')") Sort by #{translate("owner")}
+							span.header.clickable(ng-click="changePredicate('ownerName')") #{translate("owner")}
+								i.tablesort.fa(ng-class="getSortIconClass('ownerName')" aria-hidden="true")
+							button.sr-only(ng-click="changePredicate('ownerName')") Sort by #{translate("owner")}
 						div(class=lastUpdatedClasses)
 							span.header.clickable(ng-click="changePredicate('lastUpdated')") #{translate("last_modified")}
 								i.tablesort.fa(ng-class="getSortIconClass('lastUpdated')" aria-hidden="true")
-							button.sr-only(ng-click="changePredicate('accessLevel')") Sort by #{translate("last_modified")}
+							button.sr-only(ng-click="changePredicate('lastUpdated')") Sort by #{translate("last_modified")}
 						if settings.overleaf
 							.hidden-xs.col-sm-3.col-md-2.action-btn-row-header
 								span.header #{translate("actions")}
 				li.project_entry.container-fluid(
-					ng-repeat="project in visibleProjects | orderBy:predicate:reverse",
+					ng-repeat="project in visibleProjects | orderBy:getValueForCurrentPredicate:reverse:comparator",
 					ng-controller="ProjectListItemController"
 				)
 					.row(

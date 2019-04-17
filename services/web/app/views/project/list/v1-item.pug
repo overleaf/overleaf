@@ -22,7 +22,7 @@
 				) {{project.name}}
 
 .col-xs-2
-	span.owner {{ownerName()}}
+	span.owner {{ownerName(project)}}
 
 .col-xs-4.col-sm-3.col-md-2
 	span.last-modified(tooltip="{{project.lastUpdated | formatDate}}") {{project.lastUpdated | fromNowDate}}

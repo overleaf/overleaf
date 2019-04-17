@@ -32,7 +32,7 @@ div(class=titleClasses)
 				) &times;
 
 .col-xs-2
-	span.owner {{ownerName()}}
+	span.owner {{getOwnerName(project)}}
 		| &nbsp;
 		i.fa.fa-question-circle.small(
 			ng-if="hasGenericOwnerName()"

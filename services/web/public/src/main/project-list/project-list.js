@@ -12,7 +12,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base'], function(App) {
+define(['base', 'main/project-list/services/project-list'], function(App) {
   App.controller('ProjectPageController', function(
     $scope,
     $modal,
@@ -21,7 +21,8 @@ define(['base'], function(App) {
     queuedHttp,
     event_tracking,
     $timeout,
-    localStorage
+    localStorage,
+    ProjectListService
   ) {
     $scope.projects = window.data.projects
     $scope.tags = window.data.tags
@@ -34,6 +35,10 @@ define(['base'], function(App) {
     $scope.nUntagged = 0
     $scope.reverse = true
     $scope.searchText = { value: '' }
+    $scope.$watch('predicate', function(newValue) {
+      $scope.comparator =
+        newValue === 'ownerName' ? ownerNameComparator : defaultComparator
+    })
     $scope.shouldShowSurveyLink = false
 
     const surveyStartDate = new Date(2019, 3, 2)
@@ -87,6 +92,67 @@ define(['base'], function(App) {
       const height =
         $window.innerHeight - topOffset - bottomOffset - cardPadding
       return ($scope.projectListHeight = height)
+    }
+
+    function defaultComparator(v1, v2) {
+      var result = 0
+      var type1 = v1.type
+      var type2 = v2.type
+
+      if ($scope.predicate === 'ownerName') {
+        return
+      }
+
+      if (type1 === type2) {
+        var value1 = v1.value
+        var value2 = v2.value
+
+        if (type1 === 'string') {
+          // Compare strings case-insensitively
+          value1 = value1.toLowerCase()
+          value2 = value2.toLowerCase()
+        } else if (type1 === 'object') {
+          // For basic objects, use the position of the object
+          // in the collection instead of the value
+          if (angular.isObject(value1)) value1 = v1.index
+          if (angular.isObject(value2)) value2 = v2.index
+        }
+
+        if (value1 !== value2) {
+          result = value1 < value2 ? -1 : 1
+        }
+      } else {
+        result = type1 < type2 ? -1 : 1
+      }
+
+      return result
+    }
+
+    function ownerNameComparator(v1, v2) {
+      if ($scope.predicate !== 'ownerName') {
+        return
+      }
+      if (v1.value === 'You') {
+        if (v2.value === 'You') {
+          return v1.index < v2.index ? -1 : 1
+        } else {
+          return 1
+        }
+      } else if (v1.value === 'An Overleaf v1 User' || v1.value === 'None') {
+        if (v2.value === 'An Overleaf v1 User' || v2.value === 'None') {
+          return v1.index < v2.index ? -1 : 1
+        } else {
+          return -1
+        }
+      } else {
+        if (v2.value === 'You') {
+          return -1
+        } else if (v2.value === 'An Overleaf v1 User' || v2.value === 'None') {
+          return 1
+        } else {
+          return v1.value > v2.value ? -1 : 1
+        }
+      }
     }
 
     angular.element($window).bind('resize', function() {
@@ -599,6 +665,14 @@ define(['base'], function(App) {
       }
     }
 
+    $scope.getValueForCurrentPredicate = function(project) {
+      if ($scope.predicate === 'ownerName') {
+        return ProjectListService.getOwnerName(project)
+      } else {
+        return project[$scope.predicate]
+      }
+    }
+
     $scope.openDeleteProjectsModal = function() {
       const modalInstance = $modal.open({
         templateUrl: 'deleteProjectsModalTemplate',
@@ -713,7 +787,8 @@ define(['base'], function(App) {
   return App.controller('ProjectListItemController', function(
     $scope,
     $modal,
-    queuedHttp
+    queuedHttp,
+    ProjectListService
   ) {
     $scope.shouldDisableCheckbox = project =>
       $scope.filter === 'archived' && project.accessLevel !== 'owner'
@@ -741,22 +816,7 @@ define(['base'], function(App) {
       return !first_name && !last_name && !email
     }
 
-    $scope.ownerName = function() {
-      if ($scope.project.accessLevel === 'owner') {
-        return 'You'
-      } else if ($scope.project.owner != null) {
-        const { first_name, last_name, email } = $scope.project.owner
-        if (first_name || last_name) {
-          return [first_name, last_name].filter(n => n != null).join(' ')
-        } else if (email) {
-          return email
-        } else {
-          return 'An Overleaf v1 User'
-        }
-      } else {
-        return 'None'
-      }
-    }
+    $scope.getOwnerName = ProjectListService.getOwnerName
 
     $scope.isOwner = () => window.user_id === $scope.project.owner._id
 
