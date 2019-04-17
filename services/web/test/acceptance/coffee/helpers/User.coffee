@@ -273,6 +273,16 @@ class User
 					return callback(error) if error?
 					callback()
 
+	reconfirmAccountRequest: (user_email, callback = (error) ->) ->
+		@getCsrfToken (error) =>
+			return callback(error) if error?
+			@request.post {
+				url: "/user/reconfirm"
+				json:
+					email: user_email
+			}, (error, response, body) =>
+				callback(error, response)
+					
 	getUserSettingsPage: (callback = (error, statusCode) ->) ->
 		@getCsrfToken (error) =>
 			return callback(error) if error?

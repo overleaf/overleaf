@@ -185,6 +185,9 @@ module.exports = class Router
 		webRouter.get  '/user/personal_info', AuthenticationController.requireLogin(), UserInfoController.getLoggedInUsersPersonalInfo
 		privateApiRouter.get  '/user/:user_id/personal_info', AuthenticationController.httpAuth, UserInfoController.getPersonalInfo
 
+		webRouter.get '/user/reconfirm', UserPagesController.renderReconfirmAccountPage
+		# for /user/reconfirm POST, see password router
+
 		webRouter.get  '/user/projects', AuthenticationController.requireLogin(), ProjectController.userProjectsJson
 		webRouter.get  '/project/:Project_id/entities', AuthenticationController.requireLogin(),
 			AuthorizationMiddleware.ensureUserCanReadProject,

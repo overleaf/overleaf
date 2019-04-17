@@ -3,6 +3,7 @@ RateLimiter = require("../../infrastructure/RateLimiter")
 AuthenticationController = require("../Authentication/AuthenticationController")
 AuthenticationManager = require("../Authentication/AuthenticationManager")
 UserGetter = require("../User/UserGetter")
+UserUpdater = require("../User/UserUpdater")
 UserSessionsManager = require("../User/UserSessionsManager")
 logger = require "logger-sharelatex"
 
@@ -26,10 +27,8 @@ module.exports =
 			PasswordResetHandler.generateAndEmailResetToken email, (err, exists)->
 				if err?
 					res.send 500, {message:err?.message}
-				else if exists
-					res.sendStatus 200
 				else
-					res.send 404, {message: req.i18n.translate("cant_find_email")}
+					res.send 200, {message: {text: req.i18n.translate("if_registered_email_sent")}}
 
 	renderSetPasswordForm: (req, res)->
 		if req.query.passwordResetToken?
@@ -61,15 +60,17 @@ module.exports =
 				return res.sendStatus 200 if !user_id? # will not exist for v1-only users
 				UserSessionsManager.revokeAllUserSessions {_id: user_id}, [], (err) ->
 					return next(err) if err?
-					if req.body.login_after
-						UserGetter.getUser user_id, {email: 1}, (err, user) ->
-							return next(err) if err?
-							AuthenticationController.afterLoginSessionSetup req, user, (err) ->
-								if err?
-									logger.err {err, email: user.email}, "Error setting up session after setting password"
-									return next(err)
-								res.json {redir: AuthenticationController._getRedirectFromSession(req) || "/project"}
-					else
-						res.sendStatus 200
+					UserUpdater.removeReconfirmFlag user_id, (err) ->
+						return next(err) if err?
+						if req.body.login_after
+							UserGetter.getUser user_id, {email: 1}, (err, user) ->
+								return next(err) if err?
+								AuthenticationController.afterLoginSessionSetup req, user, (err) ->
+									if err?
+										logger.err {err, email: user.email}, "Error setting up session after setting password"
+										return next(err)
+									res.json {redir: AuthenticationController._getRedirectFromSession(req) || "/project"}
+						else
+							res.sendStatus 200
 			else
 				res.sendStatus 404

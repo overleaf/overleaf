@@ -734,6 +734,7 @@ describe "AuthenticationController", ->
 			@AuthenticationController._loginAsyncHandlers = sinon.stub()
 			@AuthenticationController.afterLoginSessionSetup = sinon.stub().callsArgWith(2, null)
 			@AuthenticationController._clearRedirectFromSession = sinon.stub()
+			@AuthenticationController._redirectToReconfirmPage = sinon.stub()
 			@req.headers = {accept: 'application/json, whatever'}
 			@res.json = sinon.stub()
 			@res.redirect = sinon.stub()
@@ -775,3 +776,11 @@ describe "AuthenticationController", ->
 				expect(@res.json.callCount).to.equal 0
 				expect(@res.redirect.callCount).to.equal 1
 				expect(@res.redirect.calledWith('/some/page')).to.equal true
+
+		describe "when user is flagged to reconfirm", ->
+			beforeEach ->
+				@req.session = {}
+				@user.must_reconfirm = true
+			it "should redirect to reconfirm page", () ->
+				@AuthenticationController.finishLogin(@user, @req, @res, @next)
+				expect(@AuthenticationController._redirectToReconfirmPage.calledWith(@req)).to.equal true

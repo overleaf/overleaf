@@ -186,11 +186,18 @@ module.exports = UserUpdater =
 					return callback(new Errors.NotFoundError('user id and email do no match'))
 				FeaturesUpdater.refreshFeatures userId, true, callback
 
+	removeReconfirmFlag: (user_id, callback) -> 
+		UserUpdater.updateUser user_id.toString(), {
+			$set: { "must_reconfirm": false }
+		}, (error) ->
+			callback(error)
+
 [
 	'updateUser'
 	'changeEmailAddress'
 	'setDefaultEmailAddress'
 	'addEmailAddress'
 	'removeEmailAddress'
+	'removeReconfirmFlag'
 ].map (method) ->
 	metrics.timeAsyncMethod(UserUpdater, method, 'mongo.UserUpdater', logger)

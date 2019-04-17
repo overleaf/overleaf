@@ -21,6 +21,8 @@ describe "PasswordResetController", ->
 			revokeAllUserSessions: sinon.stub().callsArgWith(2, null)
 		@AuthenticationManager =
 			validatePassword: sinon.stub()
+		@UserUpdater =
+			removeReconfirmFlag: sinon.stub().callsArgWith(1, null)
 		@PasswordResetController = SandboxedModule.require modulePath, requires:
 			"settings-sharelatex":@settings
 			"./PasswordResetHandler":@PasswordResetHandler
@@ -30,6 +32,7 @@ describe "PasswordResetController", ->
 			"../Authentication/AuthenticationManager": @AuthenticationManager
 			"../User/UserGetter": @UserGetter = {}
 			"../User/UserSessionsManager": @UserSessionsManager
+			"../User/UserUpdater": 	@UserUpdater
 
 		@email = "bob@bob.com "
 		@user_id = 'mock-user-id'
@@ -63,7 +66,7 @@ describe "PasswordResetController", ->
 		it "should tell the handler to process that email", (done)->
 			@RateLimiter.addCount.callsArgWith(1, null, true)
 			@PasswordResetHandler.generateAndEmailResetToken.callsArgWith(1, null, true)
-			@res.sendStatus = (code)=>
+			@res.send = (code)=>
 				code.should.equal 200
 				@PasswordResetHandler.generateAndEmailResetToken.calledWith(@email.trim()).should.equal true
 				done()
@@ -77,11 +80,12 @@ describe "PasswordResetController", ->
 				done()
 			@PasswordResetController.requestReset @req, @res
 
-		it "should send a 404 if the email doesn't exist", (done)->
+		it "should send a 200 if the email doesn't exist", (done)->
+			# we do not send a 404 so that we do not leak account info
 			@RateLimiter.addCount.callsArgWith(1, null, true)
 			@PasswordResetHandler.generateAndEmailResetToken.callsArgWith(1, null, false)
 			@res.send = (code)=>
-				code.should.equal 404
+				code.should.equal 200
 				done()
 			@PasswordResetController.requestReset @req, @res
 
@@ -90,7 +94,7 @@ describe "PasswordResetController", ->
 			@req.body.email = @email
 			@RateLimiter.addCount.callsArgWith(1, null, true)
 			@PasswordResetHandler.generateAndEmailResetToken.callsArgWith(1, null, true)
-			@res.sendStatus = (code)=>
+			@res.send = (code)=>
 				code.should.equal 200
 				@PasswordResetHandler.generateAndEmailResetToken.calledWith(@email.toLowerCase()).should.equal true
 				done()
@@ -156,6 +160,13 @@ describe "PasswordResetController", ->
 			@PasswordResetHandler.setNewUserPassword.callsArgWith(2, null, true, @user_id)
 			@res.sendStatus = (code)=>
 				@UserSessionsManager.revokeAllUserSessions.callCount.should.equal 1
+				done()
+			@PasswordResetController.setNewUserPassword @req, @res
+
+		it 'should call removeReconfirmFlag', (done) ->
+			@PasswordResetHandler.setNewUserPassword.callsArgWith(2, null, true, @user_id)
+			@res.sendStatus = (code)=>
+				@UserUpdater.removeReconfirmFlag.callCount.should.equal 1
 				done()
 			@PasswordResetController.setNewUserPassword @req, @res
 

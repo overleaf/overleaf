@@ -64,6 +64,7 @@ UserSchema = new Schema
 		zotero:           { type:Boolean, default: Settings.defaultFeatures.zotero }
 		referencesSearch: { type:Boolean, default: Settings.defaultFeatures.referencesSearch }
 	}
+	must_reconfirm:{ type:Boolean, default: false }
 	referal_id : {type:String, default:() -> uuid.v4().split("-")[0]}
 	refered_users: [ type:ObjectId, ref:'User' ]
 	refered_user_count: { type:Number, default: 0 }

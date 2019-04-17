@@ -30,6 +30,7 @@ module.exports = AuthenticationController =
 			referal_id: user.referal_id
 			session_created: (new Date()).toISOString()
 			ip_address: user._login_req_ip
+			must_reconfirm: user.must_reconfirm
 		callback(null, lightUser)
 
 	deserializeUser: (user, cb) ->
@@ -77,19 +78,22 @@ module.exports = AuthenticationController =
 
 	finishLogin: (user, req, res, next) ->
 		return res.redirect('/login') if user == false # OAuth2 'state' mismatch
-		redir = AuthenticationController._getRedirectFromSession(req) || "/project"
-		AuthenticationController._loginAsyncHandlers(req, user)
-		AuthenticationController.afterLoginSessionSetup req, user, (err) ->
-			if err?
-				return next(err)
-			SudoModeHandler.activateSudoMode user._id, (err) ->
+		if user.must_reconfirm
+			AuthenticationController._redirectToReconfirmPage req, res, user
+		else
+			redir = AuthenticationController._getRedirectFromSession(req) || "/project"
+			AuthenticationController._loginAsyncHandlers(req, user)
+			AuthenticationController.afterLoginSessionSetup req, user, (err) ->
 				if err?
-					logger.err {err, user_id: user._id}, "Error activating Sudo Mode on login, continuing"
-				AuthenticationController._clearRedirectFromSession(req)
-				if req.headers?['accept']?.match(/^application\/json.*$/)
-					res.json {redir: redir}
-				else
-					res.redirect(redir)
+					return next(err)
+				SudoModeHandler.activateSudoMode user._id, (err) ->
+					if err?
+						logger.err {err, user_id: user._id}, "Error activating Sudo Mode on login, continuing"
+					AuthenticationController._clearRedirectFromSession(req)
+					if req.headers?['accept']?.match(/^application\/json.*$/)
+						res.json {redir: redir}
+					else
+						res.redirect(redir)
 
 	doPassportLogin: (req, username, password, done) ->
 		email = username.toLowerCase()
@@ -241,6 +245,15 @@ module.exports = AuthenticationController =
 		url = "/login?#{querystring.stringify(req.query)}"
 		res.redirect url
 		Metrics.inc "security.login-redirect"
+
+	_redirectToReconfirmPage: (req, res, user) ->
+		logger.log url: req.url, "user needs to reconfirm so redirecting to reconfirm page"
+		req.session.reconfirm_email = user?.email
+		redir = "/user/reconfirm"
+		if req.headers?['accept']?.match(/^application\/json.*$/)
+			res.json {redir: redir}
+		else
+			res.redirect redir
 
 	_redirectToRegisterPage: (req, res) ->
 		logger.log url: req.url, "user not logged in so redirecting to register page"

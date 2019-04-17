@@ -59,6 +59,13 @@ module.exports =
 	logoutPage: (req, res) ->
 		res.render 'user/logout'
 
+	renderReconfirmAccountPage: (req, res) ->
+		page_data = {
+			reconfirm_email: req?.session?.reconfirm_email
+		}
+		# when a user must reconfirm their account
+		res.render 'user/reconfirm', page_data
+
 	settingsPage : (req, res, next)->
 		user_id = AuthenticationController.getLoggedInUserId(req)
 		logger.log user: user_id, "loading settings page"

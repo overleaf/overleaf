@@ -1,0 +1,44 @@
+extends ../layout
+
+block content
+	- var email = reconfirm_email ? reconfirm_email : ""
+	.content.content-alt
+		.container
+			.row
+				.col-sm-12.col-md-6.col-md-offset-3
+					.card
+						h1.card-header.text-capitalize #{translate("reconfirm")} #{translate("Account")}
+						p #{translate('reconfirm_explained')}&nbsp;
+							a(href=`mailto:${settings.adminEmail}`, ng-non-bindable) #{settings.adminEmail}
+							| .
+						form(
+							async-form="reconfirm-account-request",
+							name="reconfirmAccountForm"
+							action="/user/reconfirm",
+							method="POST",
+							ng-cloak
+							ng-init="email='"+email+"'"
+							aria-label=translate('request_reconfirmation_email')
+						)
+							input(type="hidden", name="_csrf", value=csrfToken)
+							form-messages(for="reconfirmAccountForm" role="alert")
+							.form-group
+								label(for='email') #{translate("please_enter_email")}
+								input.form-control(
+									aria-label="email"
+									type='email',
+									name='email',
+									placeholder='email@example.com',
+									required,
+									ng-model="email",
+									autofocus
+								)
+								span.small.text-primary(
+									ng-show="reconfirmAccountForm.email.$invalid && reconfirmAccountForm.email.$dirty"
+								) #{translate("must_be_email_address")}
+							.actions
+								button.btn.btn-primary(
+									type='submit',
+									ng-disabled="reconfirmAccountForm.$invalid"
+									aria-label=translate('request_reconfirmation_email')
+								) #{translate('request_reconfirmation_email')}
