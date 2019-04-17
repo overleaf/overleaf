@@ -69,9 +69,10 @@
 					tooltip-popup-delay="1000"
 				) !{translate("tc_everyone")}
 				review-panel-toggle(
+					description="Track changes for everyone"
 					ng-model="reviewPanel.trackChangesOnForEveryone"
 					on-toggle="toggleTrackChangesForEveryone(isOn);"
-					disabled="!project.features.trackChanges || !permissions.write"
+					is-disabled="!project.features.trackChanges || !permissions.write"
 				)
 			li.rp-tc-state-item(
 				ng-repeat="member in reviewPanel.formattedProjectMembers"
@@ -85,9 +86,10 @@
 					tooltip-popup-delay="1000"
 				) {{ member.name }}
 				review-panel-toggle(
+					description="Track changes for {{ member.name }}"
 					ng-model="reviewPanel.trackChangesState[member.id].value"
 					on-toggle="toggleTrackChangesForUser(isOn, member.id);"
-					disabled="reviewPanel.trackChangesOnForEveryone || !project.features.trackChanges || !permissions.write"
+					is-disabled="reviewPanel.trackChangesOnForEveryone || !project.features.trackChanges || !permissions.write"
 				)
 
 			li.rp-tc-state-separator
@@ -100,9 +102,10 @@
 					tooltip-popup-delay="1000"
 				) !{translate("tc_guests")}
 				review-panel-toggle(
+					description="Track changes for guests"
 					ng-model="reviewPanel.trackChangesOnForGuests"
 					on-toggle="toggleTrackChangesForGuests(isOn);"
-					disabled="reviewPanel.trackChangesOnForEveryone || !project.features.trackChanges || !permissions.write || !reviewPanel.trackChangesForGuestsAvailable"
+					is-disabled="reviewPanel.trackChangesOnForEveryone || !project.features.trackChanges || !permissions.write || !reviewPanel.trackChangesForGuestsAvailable"
 				)
 
 	.rp-entry-list(

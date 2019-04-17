@@ -18,8 +18,9 @@ define(['base'], App =>
       onToggle: '&',
       ngModel: '=',
       valWhenUndefined: '=?',
-      disabled: '=?',
-      onDisabledClick: '&?'
+      isDisabled: '=?',
+      onDisabledClick: '&?',
+      description: '@'
     },
     link(scope) {
       if (scope.disabled == null) {
@@ -41,9 +42,10 @@ define(['base'], App =>
     },
 
     template: `\
-<div class="rp-toggle" ng-click="handleClick();">
-		<input id="rp-toggle-{{$id}}" ng-disabled="disabled" type="checkbox" class="rp-toggle-hidden-input" ng-model="localModel" ng-change="onChange()" />
-		<label for="rp-toggle-{{$id}}" class="rp-toggle-btn"></label>
-	</div>\
+<fieldset class="rp-toggle" ng-click="handleClick();">
+  <legend class="sr-only">{{description}}</legend>
+  <input id="rp-toggle-{{$id}}" ng-disabled="isDisabled" type="checkbox" class="rp-toggle-hidden-input" ng-model="localModel" ng-change="onChange()" />
+  <label for="rp-toggle-{{$id}}" class="rp-toggle-btn"></label>
+</fieldset>\
 `
   })))
