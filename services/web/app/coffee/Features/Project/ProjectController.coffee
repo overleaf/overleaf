@@ -124,7 +124,7 @@ module.exports = ProjectController =
 			if err?
 				logger.error err:err, project_id: project_id, user_id: currentUser._id, "error cloning project"
 				return next(err)
-			res.send(project_id:project._id)
+			res.send({name:project.name, project_id:project._id, owner_ref:project.owner_ref})
 
 
 	newProject: (req, res, next)->

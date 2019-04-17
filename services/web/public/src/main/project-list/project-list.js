@@ -575,11 +575,11 @@ define(['base', 'main/project-list/services/project-list'], function(App) {
         .then(function(response) {
           const { data } = response
           $scope.projects.push({
-            name: cloneName,
+            name: data.name,
             id: data.project_id,
             accessLevel: 'owner',
             owner: {
-              _id: user_id
+              _id: data.owner_ref
             }
             // TODO: Check access level if correct after adding it in
             // to the rest of the app
