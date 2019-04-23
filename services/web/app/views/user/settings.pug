@@ -9,9 +9,10 @@ block content
 						.page-header
 							h1  #{translate("account_settings")}
 						.account-settings(ng-controller="AccountSettingsController", ng-cloak)
+
 							if hasFeature('affiliations')
 								include settings/user-affiliations
-								
+
 							form-messages(for="settingsForm")
 								.alert.alert-success(ng-show="settingsForm.response.success")
 									|  #{translate("thanks_settings_updated")}
@@ -145,7 +146,7 @@ block content
 
 							| !{moduleIncludes("userSettings", locals)}
 							hr
-							
+
 							h3
 								| #{translate("sharelatex_beta_program")}
 							
@@ -164,13 +165,16 @@ block content
 							div
 								a(id="sessions-link", href="/user/sessions") #{translate("manage_sessions")}
 
-							if settings.overleaf
+							if settings.overleaf && !hasFeature('oauth')
 								hr
 								p
 									| To manage your account's connection to Google, Twitter, ORCID and IEEE, please
 									|
 									a(href="/sign_in_to_v1?return_to=/users/edit#linked-accounts") click here
 									| .
+							else if hasFeature('oauth')
+								hr
+								include settings/user-oauth
 
 							hr
 

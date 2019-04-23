@@ -20,12 +20,14 @@ define(['base'], function(App) {
     '$modal',
     'event_tracking',
     'UserAffiliationsDataService',
+    'UserOauthDataService',
     function(
       $scope,
       $http,
       $modal,
       event_tracking,
-      UserAffiliationsDataService
+      UserAffiliationsDataService,
+      UserOauthDataService
     ) {
       $scope.subscribed = true
 

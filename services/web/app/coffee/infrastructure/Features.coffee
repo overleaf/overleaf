@@ -18,6 +18,8 @@ module.exports = Features =
 				return Settings.accountMerge? and Settings.overleaf? and !Settings.forceImportToV2
 			when 'custom-togglers'
 				return Settings.overleaf?
+			when 'oauth'
+				return Settings.oauth?
 			when 'publish-templates'
 				return true
 			when 'view-templates'

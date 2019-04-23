@@ -31,6 +31,7 @@ module.exports = AuthenticationController =
 			session_created: (new Date()).toISOString()
 			ip_address: user._login_req_ip
 			must_reconfirm: user.must_reconfirm
+			v1_id: user.overleaf?.id
 		callback(null, lightUser)
 
 	deserializeUser: (user, cb) ->
@@ -157,6 +158,13 @@ module.exports = AuthenticationController =
 		user = AuthenticationController.getSessionUser(req)
 		if user
 			return user._id
+		else
+			return null
+
+	getLoggedInUserV1Id: (req) ->
+		user = AuthenticationController.getSessionUser(req)
+		if user?.v1_id?
+			return user.v1_id
 		else
 			return null
 
