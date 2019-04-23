@@ -185,6 +185,9 @@ describe "SubscriptionHandler", ->
 			it "should redirect to the subscription dashboard", ->
 				@RecurlyWrapper.reactivateSubscription.called.should.equal false
 
+			it "should not send a notification email", ->
+				sinon.assert.notCalled(@EmailHandler.sendEmail)
+
 		describe "with a user with a subscription", ->
 			beforeEach (done)  ->
 				@LimitationsManager.userHasV2Subscription.callsArgWith(1, null, true, @subscription)
@@ -194,6 +197,8 @@ describe "SubscriptionHandler", ->
 				@RecurlyWrapper.reactivateSubscription.called.should.equal true
 				@RecurlyWrapper.reactivateSubscription.calledWith(@subscription.recurlySubscription_id).should.equal true
 
+			it "should send a notification email", ->
+				sinon.assert.calledWith(@EmailHandler.sendEmail, 'reactivatedSubscription')
 
 	describe "recurlyCallback", ->
 		describe "with an actionable request", ->

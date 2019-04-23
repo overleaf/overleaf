@@ -80,6 +80,15 @@ I'm sorry to see you cancelled your #{settings.appName} premium account. Would y
 	ctaURL: (opts) -> "https://docs.google.com/forms/d/e/1FAIpQLScqU6Je1r4Afz6ul6oY0RAfN7RabdWv_oL1u7Rj1YBmXS4fiQ/viewform?usp=sf_link"
 })
 
+templates.reactivatedSubscription = CTAEmailTemplate({
+	subject: () -> "Subscription Reactivated - #{settings.appName}"
+	message: (opts) -> """
+Your subscription was reactivated successfully.
+"""
+	ctaText: () -> "View Subscription Dashboard"
+	ctaURL: (opts) -> "#{settings.siteUrl}/user/subscription"
+})
+
 templates.passwordResetRequested = CTAEmailTemplate({
 	subject: () -> "Password Reset - #{settings.appName}"
 	title: () -> "Password Reset"

@@ -77,6 +77,8 @@ module.exports =
 			if hasSubscription
 				RecurlyWrapper.reactivateSubscription subscription.recurlySubscription_id, (error) ->
 					return callback(error) if error?
+					EmailHandler.sendEmail "reactivatedSubscription", to: user.email
+					Analytics.recordEvent user._id, "subscription-reactivated"
 					callback()
 			else
 				callback()
