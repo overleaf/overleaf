@@ -3,6 +3,8 @@ NewsletterManager = require "../Newsletter/NewsletterManager"
 ProjectDeleter = require("../Project/ProjectDeleter")
 logger = require("logger-sharelatex")
 SubscriptionHandler = require("../Subscription/SubscriptionHandler")
+SubscriptionUpdater = require("../Subscription/SubscriptionUpdater")
+UserMembershipsHandler = require("../UserMembership/UserMembershipsHandler")
 async = require("async")
 InstitutionsAPI = require("../Institutions/InstitutionsAPI")
 Errors = require("../Errors/Errors")
@@ -58,4 +60,8 @@ module.exports = UserDeleter =
 				SubscriptionHandler.cancelSubscription user, cb
 			(cb)->
 				InstitutionsAPI.deleteAffiliations user._id, cb
+			(cb)->
+				SubscriptionUpdater.removeUserFromAllGroups user._id, cb
+			(cb)->
+				UserMembershipsHandler.removeUserFromAllEntities user._id, cb
 		], callback)

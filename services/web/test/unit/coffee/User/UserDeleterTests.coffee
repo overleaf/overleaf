@@ -25,6 +25,12 @@ describe "UserDeleter", ->
 		@SubscriptionHandler = 
 			cancelSubscription: sinon.stub().callsArgWith(1)
 
+		@SubscriptionUpdater =
+			removeUserFromAllGroups: sinon.stub().callsArgWith(1)
+
+		@UserMembershipsHandler =
+			removeUserFromAllEntities: sinon.stub().callsArgWith(1)
+
 		@deleteAffiliations = sinon.stub().callsArgWith(1)
 
 		@mongojs =
@@ -36,6 +42,8 @@ describe "UserDeleter", ->
 			"../../models/User": User: @User
 			"../Newsletter/NewsletterManager":  @NewsletterManager
 			"../Subscription/SubscriptionHandler": @SubscriptionHandler
+			"../Subscription/SubscriptionUpdater": @SubscriptionUpdater
+			"../UserMembership/UserMembershipsHandler": @UserMembershipsHandler
 			"../Project/ProjectDeleter": @ProjectDeleter
 			"../Institutions/InstitutionsAPI":
 				deleteAffiliations: @deleteAffiliations
@@ -80,6 +88,11 @@ describe "UserDeleter", ->
 				@ProjectDeleter.softDeleteUsersProjects.calledWith(@user._id).should.equal true
 				done()
 
+		it "should remove user memberships", (done)->
+			@UserDeleter.softDeleteUser @user._id, (err)=>
+				@UserMembershipsHandler.removeUserFromAllEntities.calledWith(@user._id).should.equal true
+				done()
+
 	describe "deleteUser", ->
 
 		it "should delete the user in mongo", (done)->
@@ -106,4 +119,14 @@ describe "UserDeleter", ->
 		it "should delete user affiliations", (done)->
 			@UserDeleter.deleteUser @user._id, (err)=>
 				@deleteAffiliations.calledWith(@user._id).should.equal true
+				done()
+
+		it "should remove user from group subscriptions", (done)->
+			@UserDeleter.deleteUser @user._id, (err)=>
+				@SubscriptionUpdater.removeUserFromAllGroups.calledWith(@user._id).should.equal true
+				done()
+
+		it "should remove user memberships", (done)->
+			@UserDeleter.deleteUser @user._id, (err)=>
+				@UserMembershipsHandler.removeUserFromAllEntities.calledWith(@user._id).should.equal true
 				done()

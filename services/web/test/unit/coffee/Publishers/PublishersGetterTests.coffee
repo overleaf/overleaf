@@ -13,7 +13,7 @@ describe 'PublishersGetter', ->
 
 		@PublishersGetter = SandboxedModule.require modulePath, requires:
 			'../User/UserGetter': @UserGetter
-			"../UserMembership/UserMembershipHandler": @UserMembershipHandler = {
+			"../UserMembership/UserMembershipsHandler": @UserMembershipsHandler = {
 				getEntitiesByUser: sinon.stub().callsArgWith(2, null, [@publisher])
 			}
 			"../UserMembership/UserMembershipEntityConfigs": @UserMembershipEntityConfigs = {

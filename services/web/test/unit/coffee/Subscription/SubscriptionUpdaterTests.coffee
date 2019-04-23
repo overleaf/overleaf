@@ -37,6 +37,7 @@ describe "SubscriptionUpdater", ->
 
 
 		@updateStub = sinon.stub().callsArgWith(2, null)
+		@updateManyStub = sinon.stub().callsArgWith(2, null)
 		@findAndModifyStub = sinon.stub().callsArgWith(2, null, @subscription)
 		@SubscriptionModel = class
 			constructor: (opts)->
@@ -45,11 +46,13 @@ describe "SubscriptionUpdater", ->
 				return subscription
 			@remove: sinon.stub().yields()
 		@SubscriptionModel.update = @updateStub
+		@SubscriptionModel.updateMany = @updateManyStub
 		@SubscriptionModel.findAndModify = @findAndModifyStub
 
 		@SubscriptionLocator =
 			getUsersSubscription: sinon.stub()
 			getGroupSubscriptionMemberOf:sinon.stub()
+			getMemberSubscriptions: sinon.stub().yields(null, [])
 
 		@Settings =
 			defaultPlanCode: "personal"
@@ -181,10 +184,12 @@ describe "SubscriptionUpdater", ->
 				@FeaturesUpdater.refreshFeatures.calledWith(@otherUserId).should.equal true
 				done()
 
-	describe "removeUserFromGroup", ->
+	describe "removeUserFromGroups", ->
 		beforeEach ->
 			@FeaturesUpdater.refreshFeatures = sinon.stub().callsArgWith(1)
 			@UserGetter.getUserOrUserStubById.yields(null, {}, false)
+			@fakeSubscriptions = [{ _id: 'fake-id-1' }, { _id: 'fake-id-2' }]
+			@SubscriptionLocator.getMemberSubscriptions.yields(null, @fakeSubscriptions)
 
 		it "should pull the users id from the group", (done)->
 			@SubscriptionUpdater.removeUserFromGroup @subscription._id, @otherUserId, =>
@@ -192,7 +197,16 @@ describe "SubscriptionUpdater", ->
 					_id: @subscription._id
 				removeOperation =
 					"$pull": {member_ids:@otherUserId}
-				@updateStub.calledWith(searchOps, removeOperation).should.equal true
+				@updateManyStub.calledWith(searchOps, removeOperation).should.equal true
+				done()
+
+		it "should pull the users id from all groups", (done)->
+			@SubscriptionUpdater.removeUserFromAllGroups @otherUserId, =>
+				filter =
+					_id: ['fake-id-1', 'fake-id-2']
+				removeOperation =
+					"$pull": {member_ids:@otherUserId}
+				sinon.assert.calledWith(@updateManyStub, filter, removeOperation)
 				done()
 
 		it "should update the users features", (done)->

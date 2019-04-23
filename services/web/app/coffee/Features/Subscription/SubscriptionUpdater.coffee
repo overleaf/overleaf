@@ -48,19 +48,27 @@ module.exports = SubscriptionUpdater =
 
 		Subscription.findAndModify searchOps, insertOperation, callback
 
-	removeUserFromGroup: (subscriptionId, user_id, callback)->
-		searchOps =
-			_id: subscriptionId
+	removeUserFromGroups: (filter, user_id, callback)->
 		removeOperation =
 			"$pull": {member_ids:user_id}
-		Subscription.update searchOps, removeOperation, (err)->
+		Subscription.updateMany filter, removeOperation, (err)->
 			if err?
-				logger.err err:err, searchOps:searchOps, removeOperation:removeOperation, "error removing user from group"
+				logger.err err:err, searchOps:searchOps, removeOperation:removeOperation, "error removing user from groups"
 				return callback(err)
 			UserGetter.getUserOrUserStubById user_id, {}, (error, user, isStub) ->
 				return callback(error) if error
 				return callback() if isStub
 				FeaturesUpdater.refreshFeatures user_id, callback
+
+	removeUserFromGroup: (subscriptionId, user_id, callback)->
+		SubscriptionUpdater.removeUserFromGroups { _id: subscriptionId }, user_id, callback
+
+	removeUserFromAllGroups: (user_id, callback) ->
+		SubscriptionLocator.getMemberSubscriptions user_id, (error, subscriptions) ->
+			return callback(error) if error
+			return callback() unless subscriptions
+			subscriptionIds = subscriptions.map (sub) -> sub._id
+			SubscriptionUpdater.removeUserFromGroups { _id: subscriptionIds }, user_id, callback
 
 	deleteWithV1Id: (v1TeamId, callback)->
 		Subscription.deleteOne { "overleaf.id": v1TeamId }, callback
