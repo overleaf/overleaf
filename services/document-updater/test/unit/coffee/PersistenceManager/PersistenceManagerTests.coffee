@@ -24,6 +24,8 @@ describe "PersistenceManager", ->
 		@callback = sinon.stub()
 		@ranges = { comments: "mock", entries: "mock" }
 		@pathname = '/a/b/c.tex'
+		@lastUpdatedAt = Date.now()
+		@lastUpdatedBy = 'last-author-id'
 		@Settings.apis =
 			web:
 				url: @url = "www.example.com"
@@ -133,7 +135,7 @@ describe "PersistenceManager", ->
 		describe "with a successful response from the web api", ->
 			beforeEach ->
 				@request.callsArgWith(1, null, {statusCode: 200})
-				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @ranges, @callback)
+				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @ranges, @lastUpdatedAt, @lastUpdatedBy, @callback)
 
 			it "should call the web api", ->
 				@request
@@ -143,6 +145,8 @@ describe "PersistenceManager", ->
 							lines: @lines
 							version: @version
 							ranges: @ranges
+							lastUpdatedAt: @lastUpdatedAt
+							lastUpdatedBy: @lastUpdatedBy
 						method: "POST"
 						auth:
 							user: @user
@@ -162,7 +166,7 @@ describe "PersistenceManager", ->
 		describe "when request returns an error", ->
 			beforeEach ->
 				@request.callsArgWith(1, @error = new Error("oops"), null, null)
-				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @ranges, @callback)
+				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @ranges, @lastUpdatedAt, @lastUpdatedBy, @callback)
 
 			it "should return the error", ->
 				@callback.calledWith(@error).should.equal true
@@ -173,7 +177,7 @@ describe "PersistenceManager", ->
 		describe "when the request returns 404", ->
 			beforeEach ->
 				@request.callsArgWith(1, null, {statusCode: 404}, "")
-				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @ranges, @callback)
+				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @ranges, @lastUpdatedAt, @lastUpdatedBy, @callback)
 
 			it "should return a NotFoundError", ->
 				@callback.calledWith(new Errors.NotFoundError("not found")).should.equal true
@@ -184,7 +188,7 @@ describe "PersistenceManager", ->
 		describe "when the request returns an error status code", ->
 			beforeEach ->
 				@request.callsArgWith(1, null, {statusCode: 500}, "")
-				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @ranges, @callback)
+				@PersistenceManager.setDoc(@project_id, @doc_id, @lines, @version, @ranges, @lastUpdatedAt, @lastUpdatedBy, @callback)
 
 			it "should return an error", ->
 				@callback.calledWith(new Error("web api error")).should.equal true

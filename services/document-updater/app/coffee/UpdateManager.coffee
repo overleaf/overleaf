@@ -85,7 +85,7 @@ module.exports = UpdateManager =
 					UpdateManager._addProjectHistoryMetadataToOps(appliedOps, pathname, projectHistoryId, lines)
 					profile.log("RangesManager.applyUpdate")
 					return callback(error) if error?
-					RedisManager.updateDocument project_id, doc_id, updatedDocLines, version, appliedOps, new_ranges, (error, doc_ops_length, project_ops_length) ->
+					RedisManager.updateDocument project_id, doc_id, updatedDocLines, version, appliedOps, new_ranges, update.meta, (error, doc_ops_length, project_ops_length) ->
 						profile.log("RedisManager.updateDocument")
 						return callback(error) if error?
 						HistoryManager.recordAndFlushHistoryOps project_id, doc_id, appliedOps, doc_ops_length, project_ops_length, (error) ->

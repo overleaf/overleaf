@@ -102,14 +102,14 @@ module.exports = DocumentManager =
 		callback = (args...) ->
 			timer.done()
 			_callback(args...)
-		RedisManager.getDoc project_id, doc_id, (error, lines, version, ranges) ->
+		RedisManager.getDoc project_id, doc_id, (error, lines, version, ranges, pathname, projectHistoryId, unflushedTime, lastUpdatedAt, lastUpdatedBy) ->
 			return callback(error) if error?
 			if !lines? or !version?
 				logger.log project_id: project_id, doc_id: doc_id, "doc is not loaded so not flushing"
 				callback null  # TODO: return a flag to bail out, as we go on to remove doc from memory?
 			else
 				logger.log project_id: project_id, doc_id: doc_id, version: version, "flushing doc"
-				PersistenceManager.setDoc project_id, doc_id, lines, version, ranges, (error) ->
+				PersistenceManager.setDoc project_id, doc_id, lines, version, ranges, lastUpdatedAt, lastUpdatedBy, (error) ->
 					return callback(error) if error?
 					RedisManager.clearUnflushedTime doc_id, callback
 
@@ -141,7 +141,7 @@ module.exports = DocumentManager =
 				return callback(new Errors.NotFoundError("document not found: #{doc_id}"))
 			RangesManager.acceptChanges change_ids, ranges, (error, new_ranges) ->
 				return callback(error) if error?
-				RedisManager.updateDocument project_id, doc_id, lines, version, [], new_ranges, (error) ->
+				RedisManager.updateDocument project_id, doc_id, lines, version, [], new_ranges, {}, (error) ->
 					return callback(error) if error?
 					callback()
 
@@ -157,7 +157,7 @@ module.exports = DocumentManager =
 				return callback(new Errors.NotFoundError("document not found: #{doc_id}"))
 			RangesManager.deleteComment comment_id, ranges, (error, new_ranges) ->
 				return callback(error) if error?
-				RedisManager.updateDocument project_id, doc_id, lines, version, [], new_ranges, (error) ->
+				RedisManager.updateDocument project_id, doc_id, lines, version, [], new_ranges, {}, (error) ->
 					return callback(error) if error?
 					callback()
 

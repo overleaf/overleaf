@@ -14,6 +14,7 @@ describe "Flushing a doc to Mongo", ->
 		@version = 42
 		@update =
 			doc: @doc_id
+			meta: { user_id: 'last-author-fake-id' }
 			op: [{
 				i: "one and a half\n"
 				p: 4
@@ -42,6 +43,13 @@ describe "Flushing a doc to Mongo", ->
 				.calledWith(@project_id, @doc_id, @result, @version + 1)
 				.should.equal true
 
+		it "should flush the last update author and time to the web api", ->
+			lastUpdatedAt = MockWebApi.setDocument.lastCall.args[5]
+			parseInt(lastUpdatedAt).should.be.closeTo((new Date()).getTime(), 30000)
+
+			lastUpdatedBy = MockWebApi.setDocument.lastCall.args[6]
+			lastUpdatedBy.should.equal 'last-author-fake-id'
+
 	describe "when the doc does not exist in the doc updater", ->
 		before (done) ->
 			[@project_id, @doc_id] = [DocUpdaterClient.randomId(), DocUpdaterClient.randomId()]
@@ -65,7 +73,7 @@ describe "Flushing a doc to Mongo", ->
 				version: @version
 			}
 			t = 30000
-			sinon.stub MockWebApi, "setDocument", (project_id, doc_id, lines, version, ranges, callback = (error) ->) ->
+			sinon.stub MockWebApi, "setDocument", (project_id, doc_id, lines, version, ranges, lastUpdatedAt, lastUpdatedBy, callback = (error) ->) ->
 				setTimeout callback, t
 				t = 0
 			DocUpdaterClient.preloadDoc @project_id, @doc_id, done
