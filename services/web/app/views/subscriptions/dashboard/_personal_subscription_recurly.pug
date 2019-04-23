@@ -45,7 +45,7 @@ div(ng-controller="RecurlySubscriptionController")
 
 	.div(ng-controller="RecurlyCancellationController", ng-show="showCancellation").text-center
 		p
-			strong Are you sure you want to cancel?
+			strong #{translate("sure_you_want_to_cancel")}
 
 		div(ng-show="showExtendFreeTrial")
 			p !{translate("have_more_days_to_try", {days:14})}
@@ -63,7 +63,6 @@ div(ng-controller="RecurlySubscriptionController")
 					a(href, ng-click="cancelSubscription()", ng-disabled='inflight')  #{translate("no_thanks_cancel_now")}
 
 		div(ng-show="showBasicCancel")
-			p #{translate("sure_you_want_to_cancel")}
 			p
 				a(href, ng-click="switchToDefaultView()").btn.btn-info #{translate("i_want_to_stay")}
 			p
