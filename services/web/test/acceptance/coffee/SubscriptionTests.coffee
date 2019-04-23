@@ -42,6 +42,11 @@ describe 'Subscriptions', ->
 					account_id: 'mock-account-id',
 					trial_ends_at: new Date(2018, 6, 7)
 				}
+				MockRecurlyApi.coupons = @coupons = {
+					'test-coupon-1': { description: 'Test Coupon 1' }
+					'test-coupon-2': { description: 'Test Coupon 2' }
+					'test-coupon-3': { name: 'TestCoupon3' }
+				}
 				Subscription.create {
 					admin_id: @user._id,
 					manager_ids: [@user._id],
@@ -57,6 +62,8 @@ describe 'Subscriptions', ->
 			after (done) ->
 				MockRecurlyApi.accounts = {}
 				MockRecurlyApi.subscriptions = {}
+				MockRecurlyApi.coupons = {}
+				MockRecurlyApi.redemptions = {}
 				Subscription.remove {
 					admin_id: @user._id
 				}, done
@@ -68,6 +75,7 @@ describe 'Subscriptions', ->
 				expect(subscription.planCode).to.equal 'collaborator'
 				expect(subscription.recurly).to.exist
 				expect(subscription.recurly).to.deep.equal {
+					"activeCoupons": []
 					"billingDetailsLink": "https://test.recurly.com/account/billing_info/edit?ht=mock-login-token"
 					"currency": "GBP"
 					"nextPaymentDueAt": "5th May 2018"
@@ -81,6 +89,30 @@ describe 'Subscriptions', ->
 
 			it 'should return no memberGroupSubscriptions', ->
 				expect(@data.memberGroupSubscriptions).to.deep.equal []
+
+			it 'should include redeemed coupons', (done) ->
+				MockRecurlyApi.redemptions['mock-account-id'] = [
+					{ state: 'active', coupon_code: 'test-coupon-1' }
+					{ state: 'inactive', coupon_code: 'test-coupon-2' }
+					{ state: 'active', coupon_code: 'test-coupon-3' }
+				]
+
+				# rebuild the view model with the redemptions
+				SubscriptionViewModelBuilder.buildUsersSubscriptionViewModel @user, (error, data) ->
+					expect(error).to.not.exist
+					expect(data.personalSubscription.recurly.activeCoupons).to.deep.equal [
+						{
+							coupon_code: 'test-coupon-1',
+							name: '',
+							description: 'Test Coupon 1'
+						}
+						{
+							coupon_code: 'test-coupon-3',
+							name: 'TestCoupon3',
+							description: ''
+						}
+					]
+					done()
 
 		describe 'when the user has a subscription without recurly', ->
 			before (done) ->

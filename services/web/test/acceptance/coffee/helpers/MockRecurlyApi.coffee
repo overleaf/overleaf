@@ -9,6 +9,10 @@ module.exports = MockRecurlyApi =
 
 	accounts: {}
 
+	redemptions: {}
+
+	coupons: {}
+
 	run: () ->
 		app.get '/subscriptions/:id', (req, res, next) =>
 			subscription = @subscriptions[req.params.id]
@@ -36,9 +40,40 @@ module.exports = MockRecurlyApi =
 			else
 				res.send """
 				<account>
+					<account_code>#{req.params.id}</account_code>
 					<hosted_login_token>#{account.hosted_login_token}</hosted_login_token>
 				</account>
 				"""
+
+		app.get '/coupons/:code', (req, res, next) =>
+			coupon = @coupons[req.params.code]
+			if !coupon?
+				res.status(404).end()
+			else
+				res.send """
+				<coupon>
+					<coupon_code>#{req.params.code}</coupon_code>
+					<name>#{coupon.name or ''}</name>
+					<description>#{coupon.description or ''}</description>
+				</coupon>
+				"""
+
+		app.get '/accounts/:id/redemptions', (req, res, next) =>
+			redemptions = @redemptions[req.params.id] or []
+			redemptionsListXml = ''
+			for redemption in redemptions
+				redemptionsListXml += """
+				<redemption>
+					<state>#{redemption.state}</state>
+					<coupon_code>#{redemption.coupon_code}</coupon_code>
+				</redemption>
+				"""
+
+			res.send """
+			<redemptions type="array">
+				#{redemptionsListXml}
+			</redemptions>
+			"""
 
 		app.listen 6034, (error) ->
 			throw error if error?

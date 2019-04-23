@@ -321,6 +321,27 @@ module.exports = RecurlyWrapper =
 			RecurlyWrapper._parseAccountXml body, callback
 		)
 
+	getAccountActiveCoupons: (accountId, callback) ->
+		RecurlyWrapper.apiRequest({
+			url: "accounts/#{accountId}/redemptions"
+		}, (error, response, body) =>
+			return callback(error) if error?
+			RecurlyWrapper._parseRedemptionsXml body, (error, redemptions) ->
+				return callback(error) if error?
+				activeRedemptions = redemptions.filter (redemption) ->
+					redemption.state == 'active'
+				couponCodes = activeRedemptions.map (redemption) ->
+					redemption.coupon_code
+				Async.map couponCodes, RecurlyWrapper.getCoupon, (error, coupons) ->
+					return callback(error) if error?
+					callback(null, coupons)
+		)
+
+	getCoupon: (couponCode, callback) ->
+		opts = { url: "coupons/#{couponCode}" }
+		RecurlyWrapper.apiRequest opts, (error, response, body) ->
+			RecurlyWrapper._parseCouponXml body, callback
+
 	getBillingInfo: (accountId, callback)->
 		RecurlyWrapper.apiRequest({
 			url: "accounts/#{accountId}/billing_info"
@@ -465,6 +486,12 @@ module.exports = RecurlyWrapper =
 	_parseBillingInfoXml: (xml, callback) ->
 		RecurlyWrapper._parseXmlAndGetAttribute xml, "billing_info", callback
 
+	_parseRedemptionsXml: (xml, callback) ->
+		RecurlyWrapper._parseXmlAndGetAttribute xml, "redemptions", callback
+
+	_parseCouponXml: (xml, callback) ->
+		RecurlyWrapper._parseXmlAndGetAttribute xml, "coupon", callback
+
 	_parseXmlAndGetAttribute: (xml, attribute, callback) ->
 		RecurlyWrapper._parseXml xml, (error, data) ->
 			return callback(error) if error?
@@ -505,6 +532,7 @@ module.exports = RecurlyWrapper =
 		parser = new xml2js.Parser(
 			explicitRoot : true
 			explicitArray : false
+			emptyTag: ''
 		)
 		parser.parseString xml, (error, data) ->
 			return callback(error) if error?

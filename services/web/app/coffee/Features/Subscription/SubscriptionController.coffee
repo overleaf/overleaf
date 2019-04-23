@@ -150,7 +150,7 @@ module.exports = SubscriptionController =
 				return res.redirect '/user/subscription/plans'
 			res.render "subscriptions/successful_subscription",
 				title: "thank_you"
-				subscription:personalSubscription
+				personalSubscription: personalSubscription
 
 	cancelSubscription: (req, res, next) ->
 		user = AuthenticationController.getSessionUser(req)

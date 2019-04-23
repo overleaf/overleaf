@@ -34,6 +34,11 @@ module.exports =
 					return cb(null, null) 
 				RecurlyWrapper.getSubscription personalSubscription.recurlySubscription_id, includeAccount: true, cb
 			]
+			recurlyCoupons: ['recurlySubscription', (cb, {recurlySubscription}) ->
+				return cb(null, null) if !recurlySubscription
+				accountId = recurlySubscription.account.account_code
+				RecurlyWrapper.getAccountActiveCoupons accountId, cb
+			]
 			plan: ['personalSubscription', (cb, {personalSubscription}) ->
 				return cb() if !personalSubscription?
 				plan = PlansLocator.findLocalPlanInSettings(personalSubscription.planCode)
@@ -65,6 +70,7 @@ module.exports =
 				managedPublishers,
 				v1SubscriptionStatus,
 				recurlySubscription,
+				recurlyCoupons,
 				plan
 			} = results
 			memberGroupSubscriptions ?= []
@@ -72,6 +78,7 @@ module.exports =
 			confirmedMemberInstitutions ?= []
 			managedInstitutions ?= []
 			v1SubscriptionStatus ?= {}
+			recurlyCoupons ?= []
 
 
 			if personalSubscription?.toObject?
@@ -93,6 +100,7 @@ module.exports =
 					state: recurlySubscription.state
 					trialEndsAtFormatted: SubscriptionFormatters.formatDate(recurlySubscription?.trial_ends_at)
 					trial_ends_at: recurlySubscription.trial_ends_at
+					activeCoupons: recurlyCoupons
 				}
 
 			for memberGroupSubscription in memberGroupSubscriptions

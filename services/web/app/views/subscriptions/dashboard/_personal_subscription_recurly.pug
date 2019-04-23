@@ -13,6 +13,7 @@ div(ng-controller="RecurlySubscriptionController")
 				-if (personalSubscription.recurly.trialEndsAtFormatted && personalSubscription.recurly.trial_ends_at > Date.now())
 					p You're on a free trial which ends on <strong ng-non-bindable>#{personalSubscription.recurly.trialEndsAtFormatted}</strong>
 				p !{translate("next_payment_of_x_collectected_on_y", {paymentAmmount:"<strong>" + personalSubscription.recurly.price + "</strong>", collectionDate:"<strong>" + personalSubscription.recurly.nextPaymentDueAt + "</strong>"})}
+				include ./../_price_exceptions
 				p.pull-right
 				p
 					a(href=personalSubscription.recurly.billingDetailsLink, target="_blank").btn.btn-info #{translate("update_your_billing_details")}
