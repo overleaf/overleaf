@@ -96,7 +96,8 @@ module.exports =
 				}
 
 			for memberGroupSubscription in memberGroupSubscriptions
-				memberGroupSubscription.teamNotice = sanitizeHtml(memberGroupSubscription.teamNotice)
+				if memberGroupSubscription.teamNotice
+					memberGroupSubscription.teamNotice = sanitizeHtml(memberGroupSubscription.teamNotice)
 
 			callback null, {
 				personalSubscription,
