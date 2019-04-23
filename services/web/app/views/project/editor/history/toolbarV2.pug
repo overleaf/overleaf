@@ -44,7 +44,7 @@
 	)
 		button.history-toolbar-btn(
 			ng-click="showAddLabelDialog();"
-			ng-if="!history.showOnlyLabels"
+			ng-if="!history.showOnlyLabels && permissions.write"
 			ng-disabled="isHistoryLoading() || history.selection.range.toV == null || history.selection.range.fromV == null"
 		) 
 			i.fa.fa-tag
