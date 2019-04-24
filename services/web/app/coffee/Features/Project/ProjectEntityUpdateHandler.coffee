@@ -141,18 +141,21 @@ module.exports = ProjectEntityUpdateHandler = self =
 				return callback(err) if err?
 				callback(null, result, project)
 
-	addDoc: wrapWithLock
+	addDoc: (project_id, folder_id, docName, docLines, userId, callback) ->
+		self.addDocWithRanges(project_id, folder_id, docName, docLines, {}, userId, callback)
+
+	addDocWithRanges: wrapWithLock
 		beforeLock: (next) ->
-			(project_id, folder_id, docName, docLines, userId, callback = (error, doc, folder_id) ->) ->
+			(project_id, folder_id, docName, docLines, ranges, userId, callback = (error, doc, folder_id) ->) ->
 				if not SafePath.isCleanFilename docName
 					return callback new Errors.InvalidNameError("invalid element name")
 				# Put doc in docstore first, so that if it errors, we don't have a doc_id in the project
 				# which hasn't been created in docstore.
 				doc = new Doc name: docName
-				DocstoreManager.updateDoc project_id.toString(), doc._id.toString(), docLines, 0, {}, (err, modified, rev) ->
+				DocstoreManager.updateDoc project_id.toString(), doc._id.toString(), docLines, 0, ranges, (err, modified, rev) ->
 					return callback(err) if err?
-					next(project_id, folder_id, doc, docName, docLines, userId, callback)
-		withLock: (project_id, folder_id, doc, docName, docLines, userId, callback = (error, doc, folder_id) ->) ->
+					next(project_id, folder_id, doc, docName, docLines, ranges, userId, callback)
+		withLock: (project_id, folder_id, doc, docName, docLines, ranges, userId, callback = (error, doc, folder_id) ->) ->
 			ProjectEntityUpdateHandler._addDocAndSendToTpds project_id, folder_id, doc, (err, result, project) ->
 				return callback(err) if err?
 				docPath = result?.path?.fileSystem
@@ -261,7 +264,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 						return callback(err) if err?
 						callback null, existingDoc, !existingDoc?
 			else
-				self.addDoc.withoutLock project_id, folder_id, docName, docLines, userId, (err, doc) ->
+				self.addDocWithRanges.withoutLock project_id, folder_id, docName, docLines, {}, userId, (err, doc) ->
 					return callback(err) if err?
 					callback null, doc, !existingDoc?
 

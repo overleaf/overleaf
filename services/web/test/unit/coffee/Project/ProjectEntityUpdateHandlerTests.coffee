@@ -477,7 +477,7 @@ describe 'ProjectEntityUpdateHandler', ->
 				@folder = _id: folder_id, docs: []
 				@newDoc = _id: doc_id
 				@ProjectLocator.findElement = sinon.stub().yields(null, @folder)
-				@ProjectEntityUpdateHandler.addDoc = withoutLock: sinon.stub().yields(null, @newDoc)
+				@ProjectEntityUpdateHandler.addDocWithRanges = withoutLock: sinon.stub().yields(null, @newDoc)
 
 				@ProjectEntityUpdateHandler.upsertDoc project_id, folder_id, @docName, @docLines, @source, userId, @callback
 
@@ -487,8 +487,8 @@ describe 'ProjectEntityUpdateHandler', ->
 					.should.equal true
 
 			it 'adds the doc', ->
-				@ProjectEntityUpdateHandler.addDoc.withoutLock
-					.calledWith(project_id, folder_id, @docName, @docLines, userId)
+				@ProjectEntityUpdateHandler.addDocWithRanges.withoutLock
+					.calledWith(project_id, folder_id, @docName, @docLines, {}, userId)
 					.should.equal true
 
 			it 'returns the doc', ->
@@ -499,7 +499,7 @@ describe 'ProjectEntityUpdateHandler', ->
 				@folder = _id: folder_id, docs: []
 				@newDoc = _id: doc_id
 				@ProjectLocator.findElement = sinon.stub().yields(null, @folder)
-				@ProjectEntityUpdateHandler.addDoc = withoutLock: sinon.stub().yields(null, @newDoc)
+				@ProjectEntityUpdateHandler.addDocWithRanges = withoutLock: sinon.stub().yields(null, @newDoc)
 
 				@ProjectEntityUpdateHandler.upsertDoc project_id, folder_id, "*" + @docName, @docLines, @source, userId, @callback
 

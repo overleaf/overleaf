@@ -13,10 +13,13 @@ _ = require('underscore')
 
 module.exports = EditorController =
 	addDoc: (project_id, folder_id, docName, docLines, source, user_id, callback = (error, doc)->)->
+		EditorController.addDocWithRanges(project_id, folder_id, docName, docLines, {}, source, user_id, callback)
+
+	addDocWithRanges: (project_id, folder_id, docName, docLines, docRanges, source, user_id, callback = (error, doc)->)->
 		docName = docName.trim()
 		logger.log {project_id, folder_id, docName, source}, "sending new doc to project"
 		Metrics.inc "editor.add-doc"
-		ProjectEntityUpdateHandler.addDoc project_id, folder_id, docName, docLines, user_id, (err, doc, folder_id)=>
+		ProjectEntityUpdateHandler.addDocWithRanges project_id, folder_id, docName, docLines, docRanges, user_id, (err, doc, folder_id)=>
 			if err?
 				logger.err err:err, project_id:project_id, docName:docName, "error adding doc without lock"
 				return callback(err)

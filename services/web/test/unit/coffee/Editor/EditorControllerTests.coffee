@@ -51,12 +51,12 @@ describe "EditorController", ->
 
 	describe 'addDoc', ->
 		beforeEach ->
-			@ProjectEntityUpdateHandler.addDoc = sinon.stub().yields(null, @doc, @folder_id)
+			@ProjectEntityUpdateHandler.addDocWithRanges = sinon.stub().yields(null, @doc, @folder_id)
 			@EditorController.addDoc @project_id, @folder_id, @docName, @docLines, @source, @user_id, @callback
 
 		it 'should add the doc using the project entity handler', ->
-			@ProjectEntityUpdateHandler.addDoc
-				.calledWith(@project_id, @folder_id, @docName, @docLines)
+			@ProjectEntityUpdateHandler.addDocWithRanges
+				.calledWith(@project_id, @folder_id, @docName, @docLines, {})
 				.should.equal true
 
 		it 'should send the update out to the users in the project', ->
