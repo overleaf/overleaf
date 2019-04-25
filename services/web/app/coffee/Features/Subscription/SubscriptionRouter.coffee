@@ -17,6 +17,8 @@ module.exports =
 
 		webRouter.get  '/user/subscription/thank-you', AuthenticationController.requireLogin(), SubscriptionController.successful_subscription
 
+		webRouter.get  '/user/subscription/canceled', AuthenticationController.requireLogin(), SubscriptionController.canceledSubscription
+
 
 		webRouter.get '/subscription/group', AuthenticationController.requireLogin(), SubscriptionGroupController.redirectToSubscriptionGroupAdminPage
 		webRouter.delete '/subscription/group/user', AuthenticationController.requireLogin(), SubscriptionGroupController.removeSelfFromGroup

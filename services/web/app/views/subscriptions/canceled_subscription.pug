@@ -1,0 +1,15 @@
+extends ../layout
+
+block content
+	.content.content-alt
+		.container
+			.row
+				.col-md-8.col-md-offset-2
+					.card(ng-cloak)
+						.page-header
+							h2 #{translate("subscription_canceled")}
+						.alert.alert-info
+							p #{translate("to_modify_your_subscription_go_to")} 
+								a(href="/user/subscription") #{translate("manage_subscription")}.
+						p
+							a.btn.btn-primary(href="/project") &lt; #{translate("back_to_your_projects")}

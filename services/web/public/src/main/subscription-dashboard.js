@@ -231,7 +231,7 @@ define(['base'], function(App) {
       $scope.inflight = true
       return $http
         .post('/user/subscription/cancel', body)
-        .then(() => location.reload())
+        .then(() => (location.href = '/user/subscription/canceled'))
         .catch(() => console.log('something went wrong changing plan'))
     }
 

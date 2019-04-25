@@ -293,7 +293,7 @@ describe "SubscriptionController", ->
 			done()
 
 		it "should redurect to the subscription page", (done)->
-			@res.redirect.calledWith("/user/subscription").should.equal true
+			@res.redirect.calledWith("/user/subscription/canceled").should.equal true
 			done()
 
 	describe "recurly callback", ->
