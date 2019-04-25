@@ -10,7 +10,13 @@ describe "UserPagesController", ->
 
 	beforeEach ->
 
-		@settings = {}
+		@settings = {
+			apis:
+				v1:
+						url: 'some.host'
+						user: 'one'
+						pass: 'two'
+		}
 		@user =
 			_id: @user_id = "kwjewkl"
 			features:{}
@@ -39,6 +45,7 @@ describe "UserPagesController", ->
 			"../Errors/ErrorController": @ErrorController
 			'../Dropbox/DropboxHandler': @DropboxHandler
 			'../Authentication/AuthenticationController': @AuthenticationController
+			'request': @request = sinon.stub()
 		@req =
 			query:{}
 			session:
@@ -133,6 +140,7 @@ describe "UserPagesController", ->
 
 	describe "settingsPage", ->
 		beforeEach ->
+			@request.get = sinon.stub().callsArgWith(1, null, {statusCode: 200}, {has_password: true})
 			@UserGetter.getUser = sinon.stub().callsArgWith(1, null, @user)
 
 		it "should render user/settings", (done)->

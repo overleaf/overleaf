@@ -3,10 +3,11 @@ UserSessionsManager = require("./UserSessionsManager")
 ErrorController = require("../Errors/ErrorController")
 logger = require("logger-sharelatex")
 Settings = require("settings-sharelatex")
+request = require 'request'
 fs = require('fs')
 AuthenticationController = require('../Authentication/AuthenticationController')
 
-module.exports =
+module.exports = UserPagesController =
 
 	registerPage : (req, res)->
 		sharedProjectData =
@@ -72,12 +73,17 @@ module.exports =
 		shouldAllowEditingDetails = !(Settings?.ldap?.updateUserDetailsOnLogin) and !(Settings?.saml?.updateUserDetailsOnLogin)
 		UserGetter.getUser user_id, (err, user)->
 			return next(err) if err?
-			res.render 'user/settings',
-				title:'account_settings'
-				user: user,
-				shouldAllowEditingDetails: shouldAllowEditingDetails
-				languages: Settings.languages,
-				accountSettingsTabActive: true
+
+			UserPagesController._hasPassword user, (err, passwordPresent) ->
+				if err
+					logger.err {err}, "error getting password status from v1"
+				res.render 'user/settings',
+					title:'account_settings'
+					user: user,
+					hasPassword: passwordPresent,
+					shouldAllowEditingDetails: shouldAllowEditingDetails
+					languages: Settings.languages,
+					accountSettingsTabActive: true
 
 	sessionsPage: (req, res, next) ->
 		user = AuthenticationController.getSessionUser(req)
@@ -89,3 +95,19 @@ module.exports =
 			res.render 'user/sessions',
 				title: "sessions"
 				sessions: sessions
+
+	_hasPassword: (user, callback) ->
+		request.get {
+			url: "#{Settings.apis.v1.url}/api/v1/sharelatex/has_password"
+			auth: { user: Settings.apis.v1.user, pass: Settings.apis.v1.pass }
+			body: { user_id: user?.overleaf?.id }
+			timeout: 20 * 1000
+			json: true
+		}, (err, response, body) ->
+			if err
+				# for errors assume password and show password setting form
+				return callback(err, true)
+			else if body?.has_password
+				return callback(err, true)
+			return callback(err, false)
+     

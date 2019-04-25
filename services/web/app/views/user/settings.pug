@@ -88,6 +88,9 @@ block content
 									if externalAuthenticationSystemUsed() && !settings.overleaf
 										p
 											Password settings are managed externally
+									else if !hasPassword
+										p
+											| #[a(href="/user/password/reset", target='_blank') #{translate("no_existing_password")}]
 									else
 										- var submitAction
 										if settings.overleaf
