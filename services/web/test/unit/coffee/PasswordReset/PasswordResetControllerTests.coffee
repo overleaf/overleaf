@@ -80,12 +80,11 @@ describe "PasswordResetController", ->
 				done()
 			@PasswordResetController.requestReset @req, @res
 
-		it "should send a 200 if the email doesn't exist", (done)->
-			# we do not send a 404 so that we do not leak account info
+		it "should send a 404 if the email doesn't exist", (done)->
 			@RateLimiter.addCount.callsArgWith(1, null, true)
 			@PasswordResetHandler.generateAndEmailResetToken.callsArgWith(1, null, false)
 			@res.send = (code)=>
-				code.should.equal 200
+				code.should.equal 404
 				done()
 			@PasswordResetController.requestReset @req, @res
 

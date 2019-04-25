@@ -26,9 +26,8 @@ describe 'User Must Reconfirm', ->
 				expect(response.statusCode).to.equal 200
 				done()
 
-		it 'should return a success to client for non-existent account', (done) ->
-			# we return success so that we do not leak account info
+		it 'should return a 404 to client for non-existent account', (done) ->
 			@user.reconfirmAccountRequest 'fake@overleaf.com', (err, response) =>
 				expect(err?).to.equal false
-				expect(response.statusCode).to.equal 200
+				expect(response.statusCode).to.equal 404
 				done()

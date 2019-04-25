@@ -27,8 +27,10 @@ module.exports =
 			PasswordResetHandler.generateAndEmailResetToken email, (err, exists)->
 				if err?
 					res.send 500, {message:err?.message}
+				else if exists
+					res.send 200, {message: {text: req.i18n.translate("password_reset_email_sent")}}
 				else
-					res.send 200, {message: {text: req.i18n.translate("if_registered_email_sent")}}
+					res.send 404, {message: req.i18n.translate("cant_find_email")}
 
 	renderSetPasswordForm: (req, res)->
 		if req.query.passwordResetToken?
