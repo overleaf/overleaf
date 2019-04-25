@@ -907,8 +907,17 @@ define([
         return ($scope.reviewPanel.fullTCStateCollapsed = !$scope.reviewPanel
           .fullTCStateCollapsed)
       } else {
+        _sendAnalytics()
         return $scope.openTrackChangesUpgradeModal()
       }
+    }
+
+    const _sendAnalytics = () => {
+      event_tracking.send(
+        'subscription-funnel',
+        'editor-click-feature',
+        'real-time-track-changes'
+      )
     }
 
     const _setUserTCState = function(userId, newValue, isLocal) {
