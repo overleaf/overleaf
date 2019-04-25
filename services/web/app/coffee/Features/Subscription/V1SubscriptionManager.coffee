@@ -2,7 +2,7 @@ UserGetter = require "../User/UserGetter"
 request = require "request"
 settings = require "settings-sharelatex"
 logger = require "logger-sharelatex"
-{ V1ConnectionError } = require "../Errors/Errors"
+{ V1ConnectionError, NotFoundError } = require "../Errors/Errors"
 
 module.exports = V1SubscriptionManager =
 	# Returned planCode = 'v1_pro' | 'v1_pro_plus' | 'v1_student' | 'v1_free' | null
@@ -97,4 +97,7 @@ module.exports = V1SubscriptionManager =
 				if 200 <= response.statusCode < 300
 					return callback null, body, v1Id
 				else
-					return callback new Error("non-success code from v1: #{response.statusCode}")
+					if response.statusCode == 404
+						return callback new NotFoundError("v1 user not found: #{userId}")
+					else
+						return callback new Error("non-success code from v1: #{response.statusCode}")

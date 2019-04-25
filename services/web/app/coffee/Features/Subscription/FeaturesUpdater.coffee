@@ -54,6 +54,7 @@ module.exports = FeaturesUpdater =
 	_getV1Features: (user_id, callback = (error, features = {}) ->) ->
 		V1SubscriptionManager.getPlanCodeFromV1 user_id, (err, planCode, v1Id) ->
 			if err?
+				return callback(null, []) if err?.name == 'NotFoundError'
 				return callback(err)
 
 			callback(err, FeaturesUpdater._mergeFeatures(

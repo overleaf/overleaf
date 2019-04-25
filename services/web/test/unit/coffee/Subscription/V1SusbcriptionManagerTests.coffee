@@ -179,6 +179,20 @@ describe 'V1SubscriptionManager', ->
 					expect(err).to.exist
 					done()
 
+		describe 'when the call returns an http not-found status code', ->
+			beforeEach ->
+				@V1SubscriptionManager.v1IdForUser = sinon.stub()
+					.yields(null, @v1UserId)
+				@request.yields(null, { statusCode: 404 }, "{}")
+				@call = (cb) =>
+					@V1SubscriptionManager._v1Request @user_id, { url: () -> '/foo' }, cb
+
+			it 'should produce an not-found error', (done) ->
+				@call (err, body, v1Id) =>
+					expect(err).to.exist
+					expect(err.name).to.equal 'NotFoundError'
+					done()
+
 	describe 'v1IdForUser', ->
 		beforeEach ->
 			@UserGetter.getUser = sinon.stub()
