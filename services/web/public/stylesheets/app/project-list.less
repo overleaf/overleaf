@@ -343,26 +343,30 @@ ul.project-list {
 			.tag-label-name,
 			.tag-label-remove {
 				display: inline-block;
-				padding-top: 0.3em;
-				color: #FFF;
+				padding: 3px 4px;
 				border-radius: @tag-border-radius;
 				background-color: @tag-bg-color;
+				color: @tag-color;
 				vertical-align: text-bottom;
 				&:hover,
 				&:focus {
+					color: @tag-color;
 					background-color: @tag-bg-hover-color;
 				}
 			}
 			.tag-label-name {
-				padding-right: 0.3em;
+				padding-right: 2px;
 				border-top-right-radius: 0;
 				border-bottom-right-radius: 0;
 				max-width: @tag-max-width;
 				overflow: hidden;
 				text-overflow: ellipsis;
+				> .fa {
+					margin-right: 0.3em;
+				}
 			}
 			.tag-label-remove {
-				padding-left: 0.3em;
+				padding-left: 2px;
 				border-top-left-radius: 0;
 				border-bottom-left-radius: 0;
 			}

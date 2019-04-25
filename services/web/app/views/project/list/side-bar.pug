@@ -78,9 +78,10 @@
 			a.tag-name(href)
 				i.icon.fa.fa-fw(
 					ng-class="{\
-						'fa-folder-open-o': tag.selected,\
-						'fa-folder-o': !tag.selected\
+						'fa-folder-open': tag.selected,\
+						'fa-folder': !tag.selected\
 					}"
+					ng-style="{ 'color': 'hsl({{ getHueForTagId(tag._id) }}, 70%, 45%)' }"
 					aria-hidden="true"
 				)
 				span.name {{tag.name}} 

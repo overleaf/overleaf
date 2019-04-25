@@ -13,7 +13,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-define(['base'], function(App) {
+define(['base', 'ide/colors/ColorManager'], function(App, ColorManager) {
   App.controller('TagListController', function($scope, $modal) {
     $scope.filterProjects = function(filter) {
       if (filter == null) {
@@ -35,6 +35,10 @@ define(['base'], function(App) {
     $scope.selectUntagged = function() {
       $scope._clearTags()
       return $scope.setFilter('untagged')
+    }
+
+    $scope.getHueForTagId = tag_id => {
+      return ColorManager.getHueForTagId(tag_id)
     }
 
     $scope.deleteTag = function(tag) {

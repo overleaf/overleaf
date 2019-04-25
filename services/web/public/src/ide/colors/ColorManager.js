@@ -59,12 +59,21 @@ define([], function() {
         return this.OWN_HUE
       }
 
-      const hash = CryptoJS.MD5(user_id)
-      let hue = parseInt(hash.toString().slice(0, 8), 16) % 320
+      hue = this.getHueForId(user_id)
       // Avoid 20 degrees either side of the personal hue
       if (hue > this.OWNER_HUE - 20) {
         hue = hue + 40
       }
+      return hue
+    },
+
+    getHueForTagId(tag_id) {
+      return this.getHueForId(tag_id)
+    },
+
+    getHueForId(id) {
+      const hash = CryptoJS.MD5(id)
+      let hue = parseInt(hash.toString().slice(0, 8), 16) % 320
       return hue
     }
   })
