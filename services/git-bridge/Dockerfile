@@ -25,6 +25,12 @@ RUN mvn clean package \
 
 FROM openjdk:8-jre
 
+RUN apt-get update \
+ && apt-get install --no-install-recommends -y \
+      git \
+ && rm -rf \
+      /var/lib/apt/lists/*
+
 USER www-data
 
 ENTRYPOINT ["java", "-jar", "/git-bridge.jar"]
