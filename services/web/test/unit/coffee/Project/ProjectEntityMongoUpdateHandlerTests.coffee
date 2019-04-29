@@ -279,7 +279,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it 'should remove the element from its current position', ->
 			@subject._removeElementFromMongoArray
-				.calledWith(@ProjectModel, project_id, @path.mongo)
+				.calledWith(@ProjectModel, project_id, @path.mongo, doc_id)
 				.should.equal true
 
 		it 'should remove the element from its current position after putting the element in the new folder', ->
@@ -362,7 +362,7 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 
 		it "should remove the element from the database", ->
 			@subject._removeElementFromMongoArray
-				.calledWith(@ProjectModel, project_id, @path.mongo)
+				.calledWith(@ProjectModel, project_id, @path.mongo, @doc._id)
 				.should.equal true
 
 		it "calls the callbck", ->
@@ -462,20 +462,14 @@ describe 'ProjectEntityMongoUpdateHandler', ->
 		beforeEach ->
 			@mongoPath = "folders[0].folders[5]"
 			@id = "12344"
+			@entityId = "5678"
 			@ProjectModel.update = sinon.stub().yields()
 			@ProjectModel.findOneAndUpdate = sinon.stub().yields(null, @project)
-			@subject._removeElementFromMongoArray @ProjectModel, @id, @mongoPath, @callback
-
-		it 'should unset', ->
-			update = { '$unset': { } }
-			update['$unset'][@mongoPath] = 1
-			@ProjectModel.update
-				.calledWith({ _id: @id }, update, {})
-				.should.equal true
+			@subject._removeElementFromMongoArray @ProjectModel, @id, @mongoPath, @entityId, @callback
 
 		it 'should pull', ->
 			@ProjectModel.findOneAndUpdate
-				.calledWith({ _id: @id }, { '$pull': { 'folders[0]': null }, '$inc': {'version': 1} }, {'new': true})
+				.calledWith({ _id: @id }, { '$pull': { 'folders[0]': {_id: @entityId } }, '$inc': {'version': 1} }, {'new': true})
 				.should.equal true
 
 		it 'should call the callback', ->
