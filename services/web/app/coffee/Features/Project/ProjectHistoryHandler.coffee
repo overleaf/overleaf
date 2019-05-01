@@ -21,6 +21,20 @@ module.exports = ProjectHistoryHandler =
 			return callback(err) if err? # n.b. getDetails returns an error if the project doesn't exist
 			callback(null, project?.overleaf?.history?.id)
 
+	upgradeHistory: (project_id, callback = (err, result) ->) ->
+		# project must have an overleaf.history.id before allowing display of new history 
+		Project.update {_id: project_id, "overleaf.history.id": {$exists:true}}, {"overleaf.history.display":true, "overleaf.history.upgradedAt": new Date()}, (err, result)->
+			return callback(err) if err?
+			# return an error if overleaf.history.id wasn't present
+			return callback(new Error("history not upgraded")) if result?.n == 0
+			callback()
+
+	downgradeHistory: (project_id, callback = (err, result) ->) ->
+		Project.update {_id: project_id, "overleaf.history.upgradedAt": {$exists:true}}, {"overleaf.history.display":false, $unset:{"overleaf.history.upgradedAt":1}}, (err, result)->
+			return callback(err) if err?
+			return callback(new Error("history not downgraded")) if result?.n == 0
+			callback()
+
 	ensureHistoryExistsForProject: (project_id, callback = (err) ->) ->
 		# We can only set a history id for a project that doesn't have one. The
 		# history id is cached in the project history service, and changing an

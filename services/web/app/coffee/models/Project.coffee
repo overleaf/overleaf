@@ -72,6 +72,7 @@ ProjectSchema = new Schema
 		history         :
 			id            : { type: Number }
 			display       : { type: Boolean }
+			upgradedAt    : { type: Date }
 	collabratecUsers	: [
 		{
 			user_id						: { type: ObjectId, ref:'User' }
