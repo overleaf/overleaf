@@ -48,12 +48,15 @@ describe 'TemplatesManager', ->
 			fixProjectName: sinon.stub().returns(@templateName)
 		@Project =
 			update: sinon.stub().callsArgWith(3, null)
+		@FileWriter =
+			ensureDumpFolderExists: sinon.stub().callsArg(0)
 		@TemplatesManager = SandboxedModule.require modulePath, requires:
 			'../../../js/Features/Uploads/ProjectUploadManager':@ProjectUploadManager
 			'../../../js/Features/Project/ProjectOptionsHandler':@ProjectOptionsHandler
 			'../../../js/Features/Project/ProjectRootDocManager':@ProjectRootDocManager
 			'../../../js/Features/Project/ProjectDetailsHandler':@ProjectDetailsHandler
 			'../../../js/Features/Authentication/AuthenticationController': @AuthenticationController = {getLoggedInUserId: sinon.stub()}
+			'../../infrastructure/FileWriter': @FileWriter
 			'./TemplatesPublisher':@TemplatesPublisher
 			"logger-sharelatex":
 				log:->
@@ -101,6 +104,9 @@ describe 'TemplatesManager', ->
 
 			it "should update project", ->
 				@Project.update.should.have.been.calledWithMatch { _id: @project_id }, { fromV1TemplateId: @templateId, fromV1TemplateVersionId: @templateVersionId }
+
+			it "should ensure that the dump folder exists", ->
+				sinon.assert.called(@FileWriter.ensureDumpFolderExists)
 
 		describe "when some options not set", ->
 			beforeEach ->

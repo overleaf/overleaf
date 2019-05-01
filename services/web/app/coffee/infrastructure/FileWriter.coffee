@@ -7,7 +7,7 @@ request = require 'request'
 
 module.exports = FileWriter =
 
-	_ensureDumpFolderExists: (callback=(error)->) ->
+	ensureDumpFolderExists: (callback=(error)->) ->
 		fs.mkdir Settings.path.dumpFolder, (error) ->
 			if error? and error.code != 'EEXIST'
 				# Ignore error about already existing
@@ -20,7 +20,7 @@ module.exports = FileWriter =
 	writeContentToDisk: (identifier, content, callback = (error, fsPath)->) ->
 		callback = _.once(callback)
 		fsPath = "#{Settings.path.dumpFolder}/#{identifier}_#{uuid.v4()}"
-		FileWriter._ensureDumpFolderExists (error) ->
+		FileWriter.ensureDumpFolderExists (error) ->
 			return callback(error) if error?
 			fs.writeFile fsPath, content, (error) ->
 				return callback(error) if error?
@@ -31,7 +31,7 @@ module.exports = FileWriter =
 		fsPath = "#{Settings.path.dumpFolder}/#{identifier}_#{uuid.v4()}"
 
 		stream.pause()
-		FileWriter._ensureDumpFolderExists (error) ->
+		FileWriter.ensureDumpFolderExists (error) ->
 			return callback(error) if error?
 			stream.resume()
 

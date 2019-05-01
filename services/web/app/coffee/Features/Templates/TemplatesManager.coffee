@@ -3,6 +3,7 @@ ProjectDetailsHandler = require "../../../js/Features/Project/ProjectDetailsHand
 ProjectOptionsHandler = require "../../../js/Features/Project/ProjectOptionsHandler"
 ProjectRootDocManager = require "../../../js/Features/Project/ProjectRootDocManager"
 ProjectUploadManager = require "../../../js/Features/Uploads/ProjectUploadManager"
+FileWriter = require "../../infrastructure/FileWriter"
 async = require "async"
 fs = require "fs"
 logger = require "logger-sharelatex"
@@ -21,33 +22,36 @@ module.exports = TemplatesManager =
 		zipReq.on "error", (err) ->
 			logger.error { err }, "error getting zip from template API"
 			callback err
-		projectName = ProjectDetailsHandler.fixProjectName templateName
-		dumpPath = "#{settings.path.dumpFolder}/#{uuid.v4()}"
-		writeStream = fs.createWriteStream dumpPath
-		writeStream.on "close", ->
-			if zipReq.response.statusCode != 200
-				logger.err { uri: zipUrl, statusCode: zipReq.response.statusCode }, "non-success code getting zip from template API"
-				return callback new Error("get zip failed")
-			ProjectUploadManager.createProjectFromZipArchiveWithName user_id, projectName, dumpPath, (err, project) ->
-				if err?
-					logger.err { err, zipReq }, "problem building project from zip"
-					return callback err
-				async.series [
-					(cb) -> TemplatesManager._setCompiler project._id, compiler, cb
-					(cb) -> TemplatesManager._setImage project._id, imageName, cb
-					(cb) -> TemplatesManager._setMainFile project._id, mainFile, cb
-					(cb) -> TemplatesManager._setBrandVariationId project._id, brandVariationId, cb
-				], (err) ->
-					return callback err if err?
-					fs.unlink dumpPath, (err) ->
-						logger.err {err}, "error unlinking template zip" if err?
-					update =
-						fromV1TemplateId: templateId,
-						fromV1TemplateVersionId: templateVersionId
-					Project.update { _id: project._id }, update, {}, (err) ->
+		FileWriter.ensureDumpFolderExists (err) ->
+			return callback(err) if err?
+
+			projectName = ProjectDetailsHandler.fixProjectName templateName
+			dumpPath = "#{settings.path.dumpFolder}/#{uuid.v4()}"
+			writeStream = fs.createWriteStream dumpPath
+			writeStream.on "close", ->
+				if zipReq.response.statusCode != 200
+					logger.err { uri: zipUrl, statusCode: zipReq.response.statusCode }, "non-success code getting zip from template API"
+					return callback new Error("get zip failed")
+				ProjectUploadManager.createProjectFromZipArchiveWithName user_id, projectName, dumpPath, (err, project) ->
+					if err?
+						logger.err { err, zipReq }, "problem building project from zip"
+						return callback err
+					async.series [
+						(cb) -> TemplatesManager._setCompiler project._id, compiler, cb
+						(cb) -> TemplatesManager._setImage project._id, imageName, cb
+						(cb) -> TemplatesManager._setMainFile project._id, mainFile, cb
+						(cb) -> TemplatesManager._setBrandVariationId project._id, brandVariationId, cb
+					], (err) ->
 						return callback err if err?
-						callback null, project
-		zipReq.pipe(writeStream)
+						fs.unlink dumpPath, (err) ->
+							logger.err {err}, "error unlinking template zip" if err?
+						update =
+							fromV1TemplateId: templateId,
+							fromV1TemplateVersionId: templateVersionId
+						Project.update { _id: project._id }, update, {}, (err) ->
+							return callback err if err?
+							callback null, project
+			zipReq.pipe(writeStream)
 
 	_setCompiler: (project_id, compiler, callback) ->
 		return callback() unless compiler?
