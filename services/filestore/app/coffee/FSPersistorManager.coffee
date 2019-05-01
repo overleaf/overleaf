@@ -36,7 +36,7 @@ module.exports =
       if err?
         logger.err  location:location, target:target, fsPath:fsPath, err:err, "something went wrong writing stream to disk"
         return callback err
-      @sendFile location, target, fsPath, (err) ->
+      @sendFile location, target, fsPath, (err) -> 
         # delete the temporary file created above and return the original error
         LocalFileWriter.deleteFile fsPath, () ->
           callback(err)
