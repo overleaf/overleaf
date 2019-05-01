@@ -12,7 +12,7 @@ describe "ChatController", ->
 		@settings = {}
 		@ChatApiHandler = {}
 		@EditorRealTimeController =
-			emitToRoom:sinon.stub().callsArgWith(3)
+			emitToRoom:sinon.stub()
 		@AuthenticationController =
 			getLoggedInUserId: sinon.stub().returns(@user_id)
 		@ChatController = SandboxedModule.require modulePath, requires:
