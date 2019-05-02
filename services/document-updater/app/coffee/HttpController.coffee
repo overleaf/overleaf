@@ -4,6 +4,8 @@ ProjectManager = require "./ProjectManager"
 Errors = require "./Errors"
 logger = require "logger-sharelatex"
 Metrics = require "./Metrics"
+ProjectFlusher = require("./ProjectFlusher")
+
 
 TWO_MEGABYTES = 2 * 1024 * 1024
 
@@ -179,3 +181,16 @@ module.exports = HttpController =
 			return next(error) if error?
 			logger.log {project_id}, "queued project history resync via http"
 			res.send 204
+
+	flushAllProjects: (req, res, next = (error)-> )->
+		res.setTimeout(5 * 60 * 1000)
+		limit = req.query.limit || 1000
+		concurrency = req.query.concurrency || 5
+		ProjectFlusher.flushAllProjects limit, concurrency, (err, project_ids)->
+			if err?
+				logger.err err:err, "error bulk flushing projects"
+				res.send 500
+			else
+				res.send project_ids
+
+
