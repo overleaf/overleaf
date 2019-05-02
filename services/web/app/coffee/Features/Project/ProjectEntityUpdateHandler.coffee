@@ -81,7 +81,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 						return callback(error) if error?
 						callback null, fileRef, folder_id
 
-	updateDocLines: (project_id, doc_id, lines, version, ranges, callback = (error) ->)->
+	updateDocLines: (project_id, doc_id, lines, version, ranges, lastUpdatedAt, lastUpdatedBy, callback = (error) ->)->
 		ProjectGetter.getProjectWithoutDocLines project_id, (err, project)->
 			return callback(err) if err?
 			return callback(new Errors.NotFoundError("project not found")) if !project?
@@ -113,7 +113,7 @@ module.exports = ProjectEntityUpdateHandler = self =
 					# path will only be present if the doc is not deleted
 					if modified && !isDeletedDoc
 						# Don't need to block for marking as updated
-						ProjectUpdateHandler.markAsUpdated project_id
+						ProjectUpdateHandler.markAsUpdated project_id, lastUpdatedAt, lastUpdatedBy
 						TpdsUpdateSender.addDoc {project_id:project_id, path:path.fileSystem, doc_id:doc_id, project_name:project.name, rev:rev}, callback
 					else
 						callback()

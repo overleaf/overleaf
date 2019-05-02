@@ -19,6 +19,7 @@ DeletedFileSchema = new Schema
 ProjectSchema = new Schema
 	name              :   {type:String, default:'new project'}
 	lastUpdated       :   {type:Date, default: () -> new Date()}
+	lastUpdatedBy     :   {type:ObjectId, ref: 'User'}
 	lastOpened        :   {type:Date}
 	active            :   { type: Boolean,  default: true }
 	owner_ref         :   {type:ObjectId, ref:'User'}

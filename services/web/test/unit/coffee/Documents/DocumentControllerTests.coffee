@@ -28,6 +28,8 @@ describe "DocumentController", ->
 		@version = 42
 		@ranges = {"mock": "ranges"}
 		@pathname = '/a/b/c/file.tex'
+		@lastUpdatedAt = (new Date()).getTime()
+		@lastUpdatedBy = 'fake-last-updater-id'
 		@rev = 5
 
 	describe "getDocument", ->
@@ -120,12 +122,21 @@ describe "DocumentController", ->
 					lines: @doc_lines
 					version: @version
 					ranges: @ranges
+					lastUpdatedAt: @lastUpdatedAt
+					lastUpdatedBy: @lastUpdatedBy
 				@DocumentController.setDocument(@req, @res, @next)
 
 			it "should update the document in Mongo", ->
-				@ProjectEntityUpdateHandler.updateDocLines
-					.calledWith(@project_id, @doc_id, @doc_lines, @version, @ranges)
-					.should.equal true
+				sinon.assert.calledWith(
+					@ProjectEntityUpdateHandler.updateDocLines,
+					@project_id,
+					@doc_id,
+					@doc_lines,
+					@version,
+					@ranges,
+					@lastUpdatedAt,
+					@lastUpdatedBy
+				)
 
 			it "should return a successful response", ->
 				@res.success.should.equal true

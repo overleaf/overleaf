@@ -6,6 +6,10 @@ SandboxedModule = require('sandboxed-module')
 describe 'ProjectUpdateHandler', ->
 
 
+	before ->
+		@fakeTime = new Date()
+		@clock = sinon.useFakeTimers(@fakeTime.getTime())
+
 	beforeEach ->
 		@ProjectModel = class Project
 		@ProjectModel.update = sinon.stub().callsArg(3)
@@ -13,15 +17,43 @@ describe 'ProjectUpdateHandler', ->
 			'../../models/Project':{Project:@ProjectModel}
 			'logger-sharelatex' : { log: sinon.stub() }
 
+	after ->
+		@clock.restore()
+
 	describe 'marking a project as recently updated', ->
+		beforeEach ->
+			@project_id = "project_id"
+			@lastUpdatedAt = 987654321
+			@lastUpdatedBy = 'fake-last-updater-id'
+
 		it 'should send an update to mongo', (done)->
-			project_id = "project_id"
-			@handler.markAsUpdated project_id, (err)=>
-				args = @ProjectModel.update.args[0]
-				args[0]._id.should.equal project_id
-				date = args[1].lastUpdated+""
-				now = Date.now()+""
-				date.substring(0,5).should.equal now.substring(0,5)
+			@handler.markAsUpdated @project_id, @lastUpdatedAt, @lastUpdatedBy, (err) =>
+				sinon.assert.calledWith(
+					@ProjectModel.update,
+					{
+						_id: @project_id,
+						lastUpdated: { $lt: @lastUpdatedAt }
+					},
+					{
+						lastUpdated: @lastUpdatedAt,
+						lastUpdatedBy: @lastUpdatedBy
+					}
+				)
+				done()
+
+		it 'should set smart fallbacks', (done)->
+			@handler.markAsUpdated @project_id, null, null, (err) =>
+				sinon.assert.calledWithMatch(
+					@ProjectModel.update,
+					{
+						_id: @project_id,
+						lastUpdated: { $lt: @fakeTime }
+					},
+					{
+						lastUpdated: @fakeTime
+						lastUpdatedBy: null
+					}
+				)
 				done()
 
 	describe "markAsOpened", ->

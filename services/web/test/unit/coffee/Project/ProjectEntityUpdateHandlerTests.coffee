@@ -160,6 +160,8 @@ describe 'ProjectEntityUpdateHandler', ->
 			}
 			@version = 42
 			@ranges = {"mock":"ranges"}
+			@lastUpdatedAt = (new Date()).getTime()
+			@lastUpdatedBy = 'fake-last-updater-id'
 			@ProjectGetter.getProjectWithoutDocLines = sinon.stub().yields(null, @project)
 			@ProjectLocator.findElement = sinon.stub().yields(null, @doc, {fileSystem: @path})
 			@TpdsUpdateSender.addDoc = sinon.stub().yields()
@@ -169,7 +171,7 @@ describe 'ProjectEntityUpdateHandler', ->
 		describe "when the doc has been modified", ->
 			beforeEach ->
 				@DocstoreManager.updateDoc = sinon.stub().yields(null, true, @rev = 5)
-				@ProjectEntityUpdateHandler.updateDocLines project_id, doc_id, @docLines, @version, @ranges, @callback
+				@ProjectEntityUpdateHandler.updateDocLines project_id, doc_id, @docLines, @version, @ranges, @lastUpdatedAt, @lastUpdatedBy, @callback
 
 			it "should get the project without doc lines", ->
 				@ProjectGetter.getProjectWithoutDocLines
@@ -191,9 +193,12 @@ describe 'ProjectEntityUpdateHandler', ->
 					.should.equal true
 
 			it "should mark the project as updated", ->
-				@ProjectUpdater.markAsUpdated
-					.calledWith(project_id)
-					.should.equal true
+				sinon.assert.calledWith(
+					@ProjectUpdater.markAsUpdated,
+					project_id,
+					@lastUpdatedAt,
+					@lastUpdatedBy
+				)
 
 			it "should send the doc the to the TPDS", ->
 				@TpdsUpdateSender.addDoc
@@ -212,7 +217,7 @@ describe 'ProjectEntityUpdateHandler', ->
 		describe "when the doc has not been modified", ->
 			beforeEach ->
 				@DocstoreManager.updateDoc = sinon.stub().yields(null, false, @rev = 5)
-				@ProjectEntityUpdateHandler.updateDocLines project_id, doc_id, @docLines, @version, @ranges, @callback
+				@ProjectEntityUpdateHandler.updateDocLines project_id, doc_id, @docLines, @version, @ranges, @lastUpdatedAt, @lastUpdatedBy, @callback
 
 			it "should not mark the project as updated", ->
 				@ProjectUpdater.markAsUpdated.called.should.equal false
@@ -229,7 +234,7 @@ describe 'ProjectEntityUpdateHandler', ->
 				@ProjectGetter.getProjectWithoutDocLines = sinon.stub().yields(null, @project)
 				@ProjectLocator.findElement = sinon.stub().yields(new Errors.NotFoundError)
 				@DocstoreManager.updateDoc = sinon.stub().yields()
-				@ProjectEntityUpdateHandler.updateDocLines project_id, doc_id, @docLines, @version, @ranges, @callback
+				@ProjectEntityUpdateHandler.updateDocLines project_id, doc_id, @docLines, @version, @ranges, @lastUpdatedAt, @lastUpdatedBy, @callback
 
 			it "should update the doc in the docstore", ->
 				@DocstoreManager.updateDoc
@@ -248,7 +253,7 @@ describe 'ProjectEntityUpdateHandler', ->
 		describe "when the doc is not related to the project", ->
 			beforeEach ->
 				@ProjectLocator.findElement = sinon.stub().yields()
-				@ProjectEntityUpdateHandler.updateDocLines project_id, doc_id, @docLines, @version, @ranges, @callback
+				@ProjectEntityUpdateHandler.updateDocLines project_id, doc_id, @docLines, @version, @ranges, @lastUpdatedAt, @lastUpdatedBy, @callback
 
 			it "should log out the error", ->
 				@logger.error
@@ -266,7 +271,7 @@ describe 'ProjectEntityUpdateHandler', ->
 		describe "when the project is not found", ->
 			beforeEach ->
 				@ProjectGetter.getProjectWithoutDocLines = sinon.stub().yields()
-				@ProjectEntityUpdateHandler.updateDocLines project_id, doc_id, @docLines, @version, @ranges, @callback
+				@ProjectEntityUpdateHandler.updateDocLines project_id, doc_id, @docLines, @version, @ranges, @lastUpdatedAt, @lastUpdatedBy, @callback
 
 			it "should return a not found error", ->
 				@callback.calledWith(new Errors.NotFoundError()).should.equal true
