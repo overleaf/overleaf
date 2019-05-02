@@ -425,7 +425,7 @@ module.exports = settings =
 	recaptcha:
 		disabled:
 			invite: true
-			register: false
+			register: true
 
 	customisation: {}
 
